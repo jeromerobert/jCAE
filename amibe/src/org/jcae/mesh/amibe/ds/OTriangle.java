@@ -218,6 +218,13 @@ public class OTriangle
 		tri.adjPos |= ((attributes & 0xff) << (8*(1+orientation)));
 	}
 	
+	public static final void copyOTri(OTriangle o, OTriangle that)
+	{
+		that.tri = o.tri;
+		that.orientation = o.orientation;
+		that.attributes = o.attributes;
+	}
+	
 	//  These geometrical primitives have 2 signatures:
 	//      fct(this, that)   applies fct to 'this' and stores result
 	//                        in an already allocated object 'that'.
@@ -514,11 +521,9 @@ public class OTriangle
 	{
 		//  As CheckAndSwap modifies its arguments, 'this'
 		//  must be protected.
-		//  Huh, there should be a copy operator
 		OTriangle ot1 = new OTriangle();
 		OTriangle ot2 = new OTriangle();
-		nextOTri(this, ot1);
-		ot1.prevOTri();
+		copyOTri(this, ot1);
 		return CheckAndSwap(ot1, ot2, true);
 	}
 	
