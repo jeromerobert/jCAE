@@ -27,7 +27,7 @@ import org.apache.log4j.Logger;
 import org.jcae.mesh.mesher.algos1d.UniformLength;
 import org.jcae.mesh.mesher.algos1d.UniformLengthDeflection;
 import org.jcae.mesh.mesher.ds.*;
-import org.jcae.mesh.mesher.InitialTriangulationException;
+import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.jcae.mesh.amibe.metrics.*;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.algos2d.*;
