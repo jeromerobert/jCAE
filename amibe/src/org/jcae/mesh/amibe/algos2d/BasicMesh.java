@@ -102,7 +102,7 @@ public class BasicMesh
 		else
 			vmax *= 0.99;
 		mesh.initQuadTree(umin, umax, vmin, vmax);
-		mesh.pushCompGeom(3);
+		mesh.pushCompGeom(2);
 		Vertex firstOnWire = null;
 		{
 			//  Initializes mesh
@@ -145,8 +145,6 @@ public class BasicMesh
 				}
 			}
 		}
-		mesh.popCompGeom(3);
-		mesh.pushCompGeom(2);
 		logger.debug(" Rebuild boundary edges");
 		ArrayList saveList = new ArrayList();
 		firstOnWire = null;
