@@ -26,8 +26,8 @@ import java.net.URI;
 import org.apache.log4j.Logger;
 import org.jcae.mesh.mesher.algos1d.UniformLength;
 import org.jcae.mesh.mesher.ds.*;
-import org.jcae.mesh.mesher.metrics.*;
 import org.jcae.mesh.mesher.InitialTriangulationException;
+import org.jcae.mesh.amibe.metrics.*;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.algos2d.BasicMesh;
 import org.jcae.mesh.xmldata.*;
@@ -54,11 +54,9 @@ public class Mesher
 	{
 		//  Declare all variables here
 		MMesh3D mesh3D = new MMesh3D();
-		Metric3D.setLength(discr);
 		Metric2D.setLength(discr);
-		org.jcae.mesh.amibe.metrics.Metric3D.setLength(discr);
-		org.jcae.mesh.amibe.metrics.Metric2D.setLength(discr);
-		org.jcae.mesh.amibe.metrics.Metric3D.setDeflection(defl);
+		Metric3D.setLength(discr);
+		Metric3D.setDeflection(defl);
 		MMesh1D mesh1D;
 		//  xmlDir:      absolute path name where XML files are stored
 		//  xmlFile:     basename of the main XML file
