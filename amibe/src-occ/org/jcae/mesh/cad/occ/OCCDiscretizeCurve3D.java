@@ -198,50 +198,53 @@ public class OCCDiscretizeCurve3D
 		if (defl <= 0.0 || defl >= 1.0)
 			return;
 		int nsegments = 10;
-		double [] xyz;
-		double [] outer = new double[3];
 		while (true)
 		{
 			nsegments *= 10;
 			a = new double[nsegments+1];
-			xyz = new double[3*(nsegments+1)];
-			double [] oldXYZ = curve.value(start);
-			double [] newXYZ;
+			double delta = (end - start) / ((double) nsegments);
+			double [] xyz = new double[3*(nsegments+1)];
+			for (int i = 0; i < nsegments; i++)
+				xyz[3*i] = start + ((double) i) * delta;
+			//  Avoid rounding errors
+			xyz[3*nsegments] = end;
+			curve.arrayValues(nsegments + 1, xyz);
+			
 			double oldAbscissa, newAbscissa;
 			double dist, arcLength;
 			nr = 1;
 			a[0] = start;
 			arcLength   = 0.0;
-			for (int i = 0; i < 3; i++)
-				xyz[i] = oldXYZ[i];
 			oldAbscissa = start;
-			double delta = (end - start) / ((double) nsegments);
-			for (int ns = 0; ns < nsegments - 1; ns++)
+			for (int ns = 1; ns < nsegments; ns++)
 			{
-				newAbscissa = start + (ns+1) * delta;
-				newXYZ = curve.value(newAbscissa);
+				newAbscissa = start + ((double) ns) * delta;
 				dist = Math.sqrt(
-				  (oldXYZ[0] - newXYZ[0]) * (oldXYZ[0] - newXYZ[0]) +
-				  (oldXYZ[1] - newXYZ[1]) * (oldXYZ[1] - newXYZ[1]) +
-				  (oldXYZ[2] - newXYZ[2]) * (oldXYZ[2] - newXYZ[2]));
+				  (xyz[3*nr-3] - xyz[3*ns  ]) * (xyz[3*nr-3] - xyz[3*ns  ]) +
+				  (xyz[3*nr-2] - xyz[3*ns+1]) * (xyz[3*nr-2] - xyz[3*ns+1]) +
+				  (xyz[3*nr-1] - xyz[3*ns+2]) * (xyz[3*nr-1] - xyz[3*ns+2]));
 				arcLength += length(oldAbscissa, newAbscissa, 20);
 				oldAbscissa = newAbscissa;
 				if (arcLength - dist > defl * defl * arcLength)
 				{
 					a[nr] = newAbscissa;
-					oldXYZ = newXYZ;
 					arcLength   = 0.0;
-					xyz[3*nr]   = oldXYZ[0];
-					xyz[3*nr+1] = oldXYZ[1];
-					xyz[3*nr+2] = oldXYZ[2];
+					if (nr < ns)
+					{
+						xyz[3*nr]   = xyz[3*ns];
+						xyz[3*nr+1] = xyz[3*ns+1];
+						xyz[3*nr+2] = xyz[3*ns+2];
+					}
 					nr++;
 				}
 			}
 			a[nr] = end;
-			oldXYZ = curve.value(end);
-			xyz[3*nr]   = oldXYZ[0];
-			xyz[3*nr+1] = oldXYZ[1];
-			xyz[3*nr+2] = oldXYZ[2];
+			if (nr < nsegments)
+			{
+				xyz[3*nr]   = xyz[3*nsegments];
+				xyz[3*nr+1] = xyz[3*nsegments+1];
+				xyz[3*nr+2] = xyz[3*nsegments+2];
+			}
 			nr++;
 			//  Stop when there are at least 10 points per segments
 			if (nr * 10 < nsegments)
