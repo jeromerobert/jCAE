@@ -1,6 +1,6 @@
 Tue Mar  1 12:52:15 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
-	* src/org/jcae/mesh/amibe/algos2d/CheckDelaunay.java:  New algorithm to enforce edges being Delaunay compliant.
+	* src/org/jcae/mesh/amibe/algos2d/CheckDelaunay.java:  New algorithm to enforce edges to be Delaunay compliant.
 	* src/org/jcae/mesh/amibe/algos2d/BasicMesh.java: Fix IndexOutOfBoundsException.
 	* src/org/jcae/mesh/mesher/InitialTriangulationException.java:  Rename into...
 	* src/org/jcae/mesh/amibe/InitialTriangulationException.java:
@@ -13,7 +13,10 @@ Tue Mar  1 12:52:15 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 	  src/org/jcae/mesh/mesher/ds/MFace2D.java
 	  src/org/jcae/mesh/mesher/ds/MNode2D.java
 	  src/org/jcae/mesh/mesher/ds/SubMesh2D.java
-	  src/org/jcae/mesh/xmldata/SubMesh2DReader.java: Remove more stuff from org.jcae.mesh.mesher about 2D meshing.
+	  src/org/jcae/mesh/xmldata/SubMesh2DReader.java: Remove more stuff from org.jcae.mesh.mesher about 2D meshing.  MEdge2D is removed and MFace2D now contains an array of vertices.  With former classes, triangle orientation was lost in SubMesh2DReader.  This is now fixed and all triangles of a patch should have a coherent orientation in the 3D mesh.
+	* src/org/jcae/mesh/Mesher.java
+	  src/org/jcae/mesh/xmldata/MeshWriter.java: Write an empty group when a face cannot be meshed, so that GUI can highlight these groups.
+	* src/org/jcae/mesh/amibe/metrics/Metric3D.java (curvIso): Fix detection of infinite curvature.
 
 Mon Feb 28 16:00:09 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
