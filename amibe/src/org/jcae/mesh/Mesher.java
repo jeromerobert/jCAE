@@ -77,98 +77,110 @@ public class Mesher
 		CADShapeBuilder factory = CADShapeBuilder.factory;
 		CADShape shape = factory.newShape(brepfilename);
 		CADExplorer expF = factory.newExplorer();
-		
-		//  Step 1: Compute 1D mesh
-		mesh1D = new MMesh1D(shape);
-		mesh1D.setMaxLength(discr);
-		new UniformLength(mesh1D).compute();
-		//  Store the 1D mesh onto disk
-		MMesh1DWriter.writeObject(mesh1D, xmlDir, xmlFile, xmlBrepDir, brepFile);
-		
-		//  Step 2: Read the 1D mesh and compute 2D meshes
-		mesh1D = MMesh1DReader.readObject(xmlDir, xmlFile);
-		shape = mesh1D.getGeometry();
-		mesh1D.setMaxLength(discr);
-
-		//  Prepare 2D discretization
-		mesh1D.duplicateEdges();
-		//  Compute node labels shared by all 2D and 3D meshes
-		mesh1D.updateNodeLabels();
-		
-		int nTryMax = 20;
-		for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
-		{
-			CADFace F = (CADFace) expF.current();
-			iFace++;
-			logger.info("Meshing face " + iFace);
-			SubMesh2D submesh = new SubMesh2D(F);
-			int nTry = 0;
-			while (nTry < nTryMax)
-			{
-				try
-				{
-					submesh.pushCompGeom(2);
-					submesh.pushCompGeom(3);
-					submesh.init(mesh1D);
-					submesh.popCompGeom(3);
-					submesh.popCompGeom(2);
-					
-					submesh.pushCompGeom(3);
-					//  When Insertion is called from RefineFace1,
-					//  TargetSize must not be called.
-					//new TargetSize(submesh).compute();				
-					//new SmoothNodes(submesh, 20).compute();
-					xmlFile = "jcae2d."+iFace;
-					SubMesh2DWriter.writeObject(submesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
-					submesh.popCompGeom(3);
-				}
-				catch(Exception ex)
-				{
-					if (ex instanceof InitialTriangulationException)
-					{
-						logger.warn("Face "+iFace+" cannot be triangulated, trying again with a larger tolerance...");
-						submesh = new SubMesh2D(F);
-						submesh.scaleTolerance(10.);
-						nTry++;
-						continue;
-					}
-					logger.warn(ex.getMessage());
-					ex.printStackTrace();
-				}
-				break;
-			}
-			if (nTry == nTryMax)
-				logger.error("Face "+iFace+" cannot be triangulated, skipping...");
+		if (System.getProperty("org.jcae.mesh.Mesher.mesh1d", "true").equals("true")) {
+			//  Step 1: Compute 1D mesh
+			mesh1D = new MMesh1D(shape);
+			mesh1D.setMaxLength(discr);
+			new UniformLength(mesh1D).compute();
+			//  Store the 1D mesh onto disk
+			MMesh1DWriter.writeObject(mesh1D, xmlDir, xmlFile, xmlBrepDir, brepFile);
 		}
-
-		// Step 3: Read 2D meshes and compute 3D mesh
-		try
-		{
-			iFace = 0;
+		if (System.getProperty("org.jcae.mesh.Mesher.mesh2d", "true").equals("true")) {
+			//  Step 2: Read the 1D mesh and compute 2D meshes
+			mesh1D = MMesh1DReader.readObject(xmlDir, xmlFile);
+			shape = mesh1D.getGeometry();
+			mesh1D.setMaxLength(discr);
+	
+			//  Prepare 2D discretization
+			mesh1D.duplicateEdges();
+			//  Compute node labels shared by all 2D and 3D meshes
+			mesh1D.updateNodeLabels();
+			
+			int nTryMax = 20;
+			int numFace = Integer.parseInt(System.getProperty("org.jcae.mesh.Mesher.meshFace", "0"));
 			for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
 			{
 				CADFace F = (CADFace) expF.current();
 				iFace++;
-				xmlFile = "jcae2d."+iFace;
-				SubMesh2D submesh = SubMesh2DReader.readObject(xmlDir, xmlFile, F);
-				if (null != submesh)
+				if (numFace != 0 && iFace != numFace)
+					continue;
+				logger.info("Meshing face " + iFace);
+// F.writeNative("face."+iFace+".brep");
+				SubMesh2D submesh = new SubMesh2D(F);
+				int nTry = 0;
+				while (nTry < nTryMax)
 				{
-					logger.info("Importing face "+iFace);
-					submesh.pushCompGeom(3);
-					mesh3D.addSubMesh2D(submesh, true);
-					submesh.popCompGeom(3);					
+					try
+					{
+						submesh.pushCompGeom(2);
+						submesh.pushCompGeom(3);
+						submesh.init(mesh1D);
+// submesh.writeUNV("2d.unv.gz");
+						submesh.popCompGeom(3);
+						submesh.popCompGeom(2);
+						
+						submesh.pushCompGeom(3);
+						//  When Insertion is called from RefineFace1,
+						//  TargetSize must not be called.
+						//new TargetSize(submesh).compute();				
+						//new SmoothNodes(submesh, 20).compute();
+						xmlFile = "jcae2d."+iFace;
+						SubMesh2DWriter.writeObject(submesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
+						submesh.popCompGeom(3);
+					}
+					catch(Exception ex)
+					{
+						if (ex instanceof InitialTriangulationException)
+						{
+							logger.warn("Face "+iFace+" cannot be triangulated, trying again with a larger tolerance...");
+							submesh = new SubMesh2D(F);
+							submesh.scaleTolerance(10.);
+							nTry++;
+							continue;
+						}
+						logger.warn(ex.getMessage());
+						ex.printStackTrace();
+					}
+					break;
 				}
+				if (nTry == nTryMax)
+					logger.error("Face "+iFace+" cannot be triangulated, skipping...");
 			}
-			mesh3D.printInfos();
 		}
-		catch(Exception ex)
-		{
-			logger.warn(ex.getMessage());
-			ex.printStackTrace();
+
+		if (System.getProperty("org.jcae.mesh.Mesher.mesh3d", "true").equals("true")) {
+			// Step 3: Read 2D meshes and compute 3D mesh
+			try
+			{
+				iFace = 0;
+				int numFace = Integer.parseInt(System.getProperty("org.jcae.mesh.Mesher.meshFace", "0"));
+				for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
+				{
+					CADFace F = (CADFace) expF.current();
+					iFace++;
+					if (numFace != 0 && iFace != numFace)
+						continue;
+					xmlFile = "jcae2d."+iFace;
+					SubMesh2D submesh = SubMesh2DReader.readObject(xmlDir, xmlFile, F);
+					if (null != submesh)
+					{
+						logger.info("Importing face "+iFace);
+						submesh.pushCompGeom(3);
+						mesh3D.addSubMesh2D(submesh, true);
+						submesh.popCompGeom(3);					
+					}
+				}
+				mesh3D.printInfos();
+			}
+			catch(Exception ex)
+			{
+				logger.warn(ex.getMessage());
+				ex.printStackTrace();
+			}
+			
+			xmlFile = "jcae3d";
+			MMesh3DWriter.writeObject(mesh3D, xmlDir, xmlFile, xmlBrepDir);
 		}
-		
-		xmlFile = "jcae3d";
-		MMesh3DWriter.writeObject(mesh3D, xmlDir, xmlFile, xmlBrepDir);
 		return mesh3D;
 	}
 
@@ -196,7 +208,8 @@ public class Mesher
 		Double discr=new Double(args[2]);
 		Double defl=new Double(args[3]);
 		MMesh3D mesh3D = mesh(filename, xmlDir, discr.doubleValue(), defl.doubleValue());	
+		logger.info("Exporting UNV");
 		mesh3D.writeUNV(unvName);
-		
+		logger.info("End mesh");
 	}
 }
