@@ -35,6 +35,9 @@ public class Insertion
 	private static Logger logger=Logger.getLogger(Insertion.class);
 	private Mesh mesh;
 	
+	static public double minlen = 1.0 / Math.sqrt(2.);
+	static public double maxlen = 1.0 * Math.sqrt(2.);
+	
 	/**
 	 * Creates a <code>Insertion</code> instance.
 	 *
@@ -53,8 +56,6 @@ public class Insertion
 	 */
 	public void compute()
 	{
-		double minlen = 1.0 / Math.sqrt(2.);
-		double maxlen = 1.0 * Math.sqrt(2.);
 		int maxNodes = 0;
 		logger.debug(" Insert inner nodes");
 		while (true)
