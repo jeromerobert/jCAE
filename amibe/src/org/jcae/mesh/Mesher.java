@@ -222,7 +222,7 @@ public class Mesher
 		}
 		String filename=args[0];
 		String unvName=filename.substring(0, filename.lastIndexOf('.'))+".unv";
-		if (filename.endsWith(".step") || filename.endsWith(".igs"))
+		if (filename.endsWith(".step") || filename.endsWith(".stp") || filename.endsWith(".igs"))
 		{
 			CADShape shape = CADShapeBuilder.factory.newShape(filename);
 			filename = filename.substring(0, filename.lastIndexOf('.')) + ".tmp.brep";
@@ -234,7 +234,7 @@ public class Mesher
 		Double tolerance=new Double(System.getProperty("org.jcae.mesh.tolerance", "-1.0"));
 		mesh(filename, xmlDir, discr.doubleValue(), defl.doubleValue(), tolerance.doubleValue());
 		logger.info("Exporting UNV");
-
+		
 		if(Boolean.getBoolean("org.jcae.mesh.unv.nogz"))
 			new UNVConverter(xmlDir).writeUNV(unvName);
 		else
