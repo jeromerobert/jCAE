@@ -83,56 +83,82 @@ public class OCCDiscretizeCurve3D
 	{
 		curve = myCurve;
 		nr = n;
-		int nsegments = 10 * n;
-		double [] p = new double[nsegments+1];
-		MNode3D [] v = new MNode3D[nsegments+1];
-		for (int ns = 0; ns <= nsegments; ns++)
-		{
-			p[ns] = start + ns * (end - start) / ((double) nsegments);
-			double [] xyz = myCurve.value(p[ns]);
-			v[ns] = new MNode3D(xyz, -1);
-		}
-		double length = 0.0;
-		for (int ns = 1; ns <= nsegments; ns++)
-			length += v[ns].distance(v[ns-1]);
-		double lmax = 2.0 * length / ((double) nr);
-		double lmin = 0.0;
-		double maxlen;
+		int nsegments = n;
+		double [] xyz;
 		ArrayList abscissa = new ArrayList(nsegments);
 		while (true)
 		{
-			maxlen = 0.5 * (lmin + lmax);
-			int lastIndex = 0;
-			abscissa.clear();
-			nr = 1;
-			abscissa.add(new Integer(0));
-			for (int ns = 1; ns < nsegments; ns++)
+			nsegments *= 10;
+			a = new double[nsegments+1];
+			xyz = new double[3*(nsegments+1)];
+			double [] oldXYZ = curve.value(start);
+			double [] newXYZ;
+			a[0] = start;
+			for (int i = 0; i < 3; i++)
+				xyz[i] = oldXYZ[i];
+			double deltap = (end - start) / ((double) nsegments);
+			//  Compute length, a[] and xyz[]
+			double length = 0.0;
+			for (int ns = 1; ns <= nsegments; ns++)
 			{
-				if (v[lastIndex].distance(v[ns]) > maxlen)
-				{
-					lastIndex = ns;
-					nr++;
-					abscissa.add(new Integer(ns));
-				}
+				a[ns] = start + ns * deltap;
+				newXYZ = curve.value(a[ns]);
+				length += Math.sqrt(
+				  (oldXYZ[0] - newXYZ[0]) * (oldXYZ[0] - newXYZ[0]) +
+				  (oldXYZ[1] - newXYZ[1]) * (oldXYZ[1] - newXYZ[1]) +
+				  (oldXYZ[2] - newXYZ[2]) * (oldXYZ[2] - newXYZ[2]));
+				oldXYZ = newXYZ;
+				xyz[3*ns]   = oldXYZ[0];
+				xyz[3*ns+1] = oldXYZ[1];
+				xyz[3*ns+2] = oldXYZ[2];
 			}
-			nr++;
-			abscissa.add(new Integer(nsegments));
+			double lmax = 2.0 * length / ((double) nr);
+			double lmin = 0.0;
+			double maxlen, dist;
+			while (true)
+			{
+				if (lmax - lmin < 0.5 * deltap)
+					break;
+				maxlen = 0.5 * (lmin + lmax);
+				int lastIndex = 0;
+				abscissa.clear();
+				abscissa.add(new Integer(0));
+				nr = 1;
+				for (int ns = 1; ns < nsegments; ns++)
+				{
+					dist = Math.sqrt(
+				  		(xyz[3*ns] - xyz[3*lastIndex]) * (xyz[3*ns] - xyz[3*lastIndex]) +
+				  		(xyz[3*ns+1] - xyz[3*lastIndex+1]) * (xyz[3*ns+1] - xyz[3*lastIndex+1]) +
+				  		(xyz[3*ns+2] - xyz[3*lastIndex+2]) * (xyz[3*ns+2] - xyz[3*lastIndex+2]));
+					if (dist > maxlen)
+					{
+						lastIndex = ns;
+						nr++;
+						abscissa.add(new Integer(ns));
+					}
+				}
+				nr++;
+				abscissa.add(new Integer(nsegments));
+				if (n == nr)
+					break;
+				else if (nr < n)
+					lmax = lmax - 0.5 * (lmax - lmin);
+				else
+					lmin = lmin + 0.5 * (lmax - lmin);
+			}
 			if (n == nr)
 				break;
-			else if (nr < n)
-				lmax = lmax - 0.5 * (lmax - lmin);
-			else
-				lmin = lmin + 0.5 * (lmax - lmin);
 		}
-		a = new double[nr];
-		double [] xyz = new double[3*nr];
 		for (int i = 0; i < nr; i++)
 		{
-			a[i] = p[((Integer) abscissa.get(i)).intValue()];
-			double [] newXYZ = curve.value(a[i]);
-			xyz[3*i]   = newXYZ[0];
-			xyz[3*i+1] = newXYZ[1];
-			xyz[3*i+2] = newXYZ[2];
+			int ind = ((Integer) abscissa.get(i)).intValue();
+			if (ind != i)
+			{
+				a[i] = a[ind];
+				xyz[3*i]   = xyz[3*ind];
+				xyz[3*i+1] = xyz[3*ind+1];
+				xyz[3*i+2] = xyz[3*ind+2];
+			}
 		}
 		length = -1.0;
 		adjustAbscissas(xyz);
