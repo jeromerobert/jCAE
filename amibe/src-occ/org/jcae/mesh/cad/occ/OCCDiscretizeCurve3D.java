@@ -157,7 +157,7 @@ public class OCCDiscretizeCurve3D
 			if (n == nr)
 				break;
 		}
-		for (int i = 0; i < nr; i++)
+		for (int i = 0; i < abscissa.size(); i++)
 		{
 			int ind = ((Integer) abscissa.get(i)).intValue();
 			if (ind != i)
