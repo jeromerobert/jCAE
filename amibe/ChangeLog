@@ -1,3 +1,15 @@
+Wed Apr  6 08:52:58 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos2d/BasicMesh.java: Raise an exception if the bounding box has no volume.
+	* src/org/jcae/mesh/mesher/algos1d/UniformLengthDeflection.java: GCPnts_UniformAbscissa is no more used, so checks of parameters can be dropped.
+	* src-occ/org/jcae/mesh/cad/occ/OCCDiscretizeCurve3D.java
+	  src-occ/org/jcae/mesh/cad/occ/OCCGeomCurve3D.java
+	  src/org/jcae/mesh/cad/CADGeomCurve3D.java: New splitSubsegment() method, to refine an existing discretization.
+	* src/org/jcae/mesh/amibe/metrics/Metric2D.java: Call curvIso() and not relDeflection() by default.
+	* src/org/jcae/mesh/mesher/ds/MMesh1D.java: New getAdjacentFaces() method to retrieve the list of faces connected to a given edge.
+	* src/org/jcae/mesh/mesher/algos1d/Compat1D2D.java: New algorithm.
+	* src/org/jcae/mesh/Mesher.java: Call Compat1D2D() when a deflection parameter is specified.
+
 Mon Apr  4 10:19:34 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Vertex.java (inCircleTest3): When circumcenters cannot be computed, try to find circumcenters after flipping edge.  This improves some cases, flat triangles were not flipped.
