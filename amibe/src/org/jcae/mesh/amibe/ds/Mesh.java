@@ -74,6 +74,7 @@ public class Mesh
 	public Mesh(QuadTree q)
 	{
 		quadtree = q;
+		quadtree.bindMesh(this);
 		Vertex.mesh = this;
 		Triangle.outer = new Triangle();
 		double [] p = q.center();
@@ -353,6 +354,107 @@ public class Mesh
 				out.println("");
 			}
 			out.println("    -1");
+			out.close();
+		} catch (FileNotFoundException e)
+		{
+			logger.fatal(e.toString());
+			e.printStackTrace();
+		} catch (Exception e)
+		{
+			logger.fatal(e.toString());
+			e.printStackTrace();
+		}
+	}
+	
+	public void writeMESH(String file)
+	{
+		String cr=System.getProperty("line.separator");
+		PrintWriter out;
+		try {
+			if (file.endsWith(".gz") || file.endsWith(".GZ"))
+				out = new PrintWriter(new java.util.zip.GZIPOutputStream(new FileOutputStream(file)));
+			else
+				out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(file)));
+			HashSet nodeset = new HashSet();
+			int nrt = 0;
+			OTriangle ot = new OTriangle();
+			for(Iterator it=triangleList.iterator();it.hasNext();)
+			{
+				Triangle t = (Triangle) it.next();
+				ot.bind(t);
+				if (ot.hasAttributes(OTriangle.OUTER))
+					continue;
+				for (int i = 0; i < 3; i++)
+					nodeset.add(t.vertex[i]);
+				nrt++;
+			}
+			out.println("MeshVersionFormatted 1\n");
+			out.println("Dimension\n2\n");
+			out.println("Vertices\n"+nodeset.size());
+			HashMap labels = new HashMap(nodeset.size());
+			int count = 0;
+			for(Iterator it=nodeset.iterator();it.hasNext();)
+			{
+				Vertex node = (Vertex) it.next();
+				double [] p = node.getUV();
+				out.println(""+p[0]+" "+p[1]+" 0");
+				count++;
+				Integer label = new Integer(count);
+				labels.put(node, label);
+			}
+			out.println("Triangles\n"+nrt);
+			for(Iterator it=triangleList.iterator();it.hasNext();)
+			{
+				Triangle t = (Triangle) it.next();
+				ot.bind(t);
+				if (ot.hasAttributes(OTriangle.OUTER))
+					continue;
+				for (int i = 0; i < 3; i++)
+				{
+					Integer nodelabel =  (Integer) labels.get(t.vertex[i]);
+					out.print(nodelabel.intValue()+" ");
+				}
+				out.println("0");
+			}
+			out.println("End");
+			out.close();
+		} catch (FileNotFoundException e)
+		{
+			logger.fatal(e.toString());
+			e.printStackTrace();
+		} catch (Exception e)
+		{
+			logger.fatal(e.toString());
+			e.printStackTrace();
+		}
+	}
+	
+	public void writeBB(String file)
+	{
+		String cr=System.getProperty("line.separator");
+		PrintWriter out;
+		try {
+			if (file.endsWith(".gz") || file.endsWith(".GZ"))
+				out = new PrintWriter(new java.util.zip.GZIPOutputStream(new FileOutputStream(file)));
+			else
+				out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(file)));
+			HashSet nodeset = new HashSet();
+			OTriangle ot = new OTriangle();
+			for(Iterator it=triangleList.iterator();it.hasNext();)
+			{
+				Triangle t = (Triangle) it.next();
+				ot.bind(t);
+				if (ot.hasAttributes(OTriangle.OUTER))
+					continue;
+				for (int i = 0; i < 3; i++)
+					nodeset.add(t.vertex[i]);
+			}
+			out.println("2 3 "+nodeset.size()+" 2");
+			for(Iterator it=nodeset.iterator();it.hasNext();)
+			{
+				Vertex node = (Vertex) it.next();
+				out.println(""+node.getMetrics(surface).stringCoefs());
+			}
 			out.close();
 		} catch (FileNotFoundException e)
 		{
