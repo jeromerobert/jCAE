@@ -392,6 +392,59 @@ public class QuadTree
 		return ret;
 	}
 	
+	private final class getNearestVertexDebugProcedure implements QuadTreeProcedure
+	{
+		private final int [] ij = new int[2];;
+		private double dist;
+		public Vertex fromVertex, nearestVertex;
+		public int searchedCells = 0;
+		public getNearestVertexDebugProcedure(Vertex from, Vertex v)
+		{
+			double2int(from.getUV(), ij);
+			nearestVertex = v;
+			fromVertex = from;
+			dist = mesh.compGeom().distance(fromVertex, v);
+		}
+		public final int action(Object o, int s, int i0, int j0)
+		{
+			QuadTreeCell self = (QuadTreeCell) o;
+			searchedCells++;
+			if (self.nItems > 0)
+			{
+				for (int i = 0; i < self.nItems; i++)
+				{
+					Vertex vtest = (Vertex) self.subQuad[i];
+					double retdist = mesh.compGeom().distance(fromVertex, vtest);
+					if (retdist < dist)
+					{
+						dist = retdist;
+						nearestVertex = vtest;
+					}
+				}
+			}
+			return 0;
+		}
+	}
+	
+	public Vertex getNearestVertexDebug(Vertex v)
+	{
+		QuadTreeCell current = root;
+		Vertex ret = getNearVertex(v);
+		assert ret != null;
+		if (logger.isDebugEnabled())
+			logger.debug("(debug) Nearest point of "+v);
+		
+		getNearestVertexDebugProcedure gproc = new getNearestVertexDebugProcedure(v, ret);
+		walk(gproc);
+		ret = gproc.nearestVertex;
+		if (logger.isDebugEnabled())
+		{
+			logger.debug("  search in "+gproc.searchedCells+"/"+nCells+" cells");
+			logger.debug("  result: "+ret);
+		}
+		return ret;
+	}
+	
 	public boolean walk(QuadTreeProcedure proc)
 	{
 		int s = gridSize;
