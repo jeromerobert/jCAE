@@ -73,6 +73,16 @@ public class MMesh3D
 	}
 	
 	/**
+	 * Returns the number of nodes.
+	 *
+	 * @return the number of nodes.
+	 */
+	public int getNumberOfNodes()
+	{
+		return nodelist.size();
+	}
+	
+	/**
 	 * Returns an iterator over the set of faces.
 	 *
 	 * @return an iterator over the set of faces.
@@ -83,6 +93,16 @@ public class MMesh3D
 	}
 	
 	/**
+	 * Returns the number of faces.
+	 *
+	 * @return the number of faces.
+	 */
+	public int getNumberOfFaces()
+	{
+		return facelist.size();
+	}
+	
+	/**
 	 * Returns an iterator over the set of groups.
 	 *
 	 * @return an iterator over the set of groups.
@@ -90,6 +110,16 @@ public class MMesh3D
 	public Iterator getGroupsIterator()
 	{
 		return grouplist.iterator();
+	}
+	
+	/**
+	 * Returns the number of groups.
+	 *
+	 * @return the number of groups.
+	 */
+	public int getNumberOfGroups()
+	{
+		return grouplist.size();
 	}
 	
 	public void addGroup(MGroup3D g)
