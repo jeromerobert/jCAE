@@ -203,7 +203,12 @@ public class Mesher
 		Double tolerance=new Double(System.getProperty("org.jcae.mesh.tolerance", "-1.0"));
 		MMesh3D mesh3D = mesh(filename, xmlDir, discr.doubleValue(), defl.doubleValue(), tolerance.doubleValue());
 		logger.info("Exporting UNV");
-		mesh3D.writeUNV(unvName+".gz");
+
+		if(Boolean.getBoolean("org.jcae.mesh.unv.nogz"))
+			mesh3D.writeUNV(unvName);
+		else
+			mesh3D.writeUNV(unvName+".gz");
+
 		logger.info("End mesh");
 	}
 }
