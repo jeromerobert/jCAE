@@ -1,3 +1,11 @@
+Mon Dec  6 11:58:12 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/cad/occ/OCCShapeBuilder.java:  Read .step files.
+
+Fri Nov 26 15:45:37 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos2d/Insertion.java:  Curve length do not have to be very precise, so compute less intermediate nodes.
+
 Fri Nov 26 15:34:32 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/tools/Calculus3D.java:  In distance(), do not subdivide into smaller segments.  This was very time consuming, and for unknow reasons gave worse meshes.

@@ -23,6 +23,7 @@ import org.jcae.mesh.cad.*;
 import org.jcae.opencascade.jni.BRep_Builder;
 import org.jcae.opencascade.jni.BRepTools;
 import org.jcae.opencascade.jni.IGESControl_Reader;
+import org.jcae.opencascade.jni.STEPControl_Reader;
 import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
 import org.apache.log4j.Logger;
@@ -69,7 +70,15 @@ public class OCCShapeBuilder extends CADShapeBuilder
 	public CADShape newShape (String fileName)
 	{
 		TopoDS_Shape brepShape;
-		if (fileName.endsWith(".igs"))
+		if (fileName.endsWith(".step"))
+		{
+			STEPControl_Reader aReader = new STEPControl_Reader();
+			aReader.readFile(fileName);
+			aReader.nbRootsForTransfer();
+			aReader.transferRoots();
+			brepShape = aReader.oneShape();
+		}
+		else if (fileName.endsWith(".igs"))
 		{
 			IGESControl_Reader aReader = new IGESControl_Reader();
 			aReader.readFile(fileName);
