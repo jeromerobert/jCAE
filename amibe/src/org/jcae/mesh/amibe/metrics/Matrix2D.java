@@ -49,7 +49,7 @@ public class Matrix2D
 	{
 		double detA = det();
 		if (Math.abs(detA) < 1.e-40)
-			throw new RuntimeException("Singular matrice: "+this);
+			throw new RuntimeException("Singular matrix: "+this);
 		Matrix2D ret = new Matrix2D(data[1][1], -data[0][1], -data[1][0], data[0][0]);
 		ret.scale(1.0 / detA);
 		return ret;
@@ -118,9 +118,14 @@ public class Matrix2D
 		}
 		t1 = (data[0][0]-l2) * (data[0][0]-l2);
 		t2 = data[0][1] * data[0][1];
-		t4 = data[1][0] * data[1][0];
+		t3 = data[1][0] * data[1][0];
 		t4 = (data[1][1]-l2) * (data[1][1]-l2);
-		if (t1 + t2 < t3 + t4)
+		if (l1 == l2)
+		{
+			ret.data[0][1] = - ret.data[1][0];
+			ret.data[1][1] = ret.data[0][0];
+		}
+		else if (t1 + t2 < t3 + t4)
 		{
 			double invnorm = 1.0 / Math.sqrt(t3 + t4);
 			ret.data[0][1] = (l2-data[1][1]) * invnorm;
