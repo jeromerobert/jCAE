@@ -123,6 +123,9 @@ public class QuadTree
 		double2int(v.getUV(), ij);
 		while (current.nItems < 0)
 		{
+			//  nItems is negative means that this cell only
+			//  contains subcells, and its opposite is the
+			//  total number of nodes found in subcells.
 			current.nItems--;
 			s >>= 1;
 			assert s > 0;
@@ -351,8 +354,8 @@ public class QuadTree
 		}
 		public final int action(Object o, int s, int i0, int j0)
 		{
-			boolean valid = (i0 - ij[0] <= idist && ij[0] - i0 <= (s + idist) &&
-			                 j0 - ij[1] <= idist && ij[1] - j0 <= (s + idist));
+			boolean valid = (ij[0] >= i0 - idist) && (ij[0] <= i0 + s + idist) &&
+			                (ij[1] >= j0 - idist) && (ij[1] <= j0 + s + idist);
 			if (!valid)
 				return 1;
 			QuadTreeCell self = (QuadTreeCell) o;
