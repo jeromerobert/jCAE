@@ -20,7 +20,6 @@
 
 package org.jcae.mesh.mesher.ds;
 
-import org.jcae.mesh.mesher.ds.MMesh1D;
 import org.jcae.mesh.cad.*;
 import java.util.Iterator;
 import java.util.HashMap;
@@ -49,9 +48,6 @@ public class SubMesh2D
 	//  Set of faces
 	private HashSet faceset = new HashSet();
 	
-	//  Set of edges
-	private HashSet edgeset = new HashSet();
-	
 	//  Set of nodes
 	private HashSet nodeset = new HashSet();
 	
@@ -69,21 +65,6 @@ public class SubMesh2D
 	{
 		face = F;
 		surface = face.getGeomSurface();
-	}
-	
-	/**
-	 * Update node labels.
-	 */
-	public void updateNodeLabels()
-	{
-		for (Iterator itn = nodeset.iterator(); itn.hasNext(); )
-		{
-			MNode2D n = (MNode2D) itn.next();
-			if (null == n.getRef())
-				n.setLabel(-1);
-			else
-				n.setLabel(n.getRef().getLabel());
-		}
 	}
 	
 	/**
@@ -117,16 +98,6 @@ public class SubMesh2D
 	}
 	
 	/**
-	 * Returns the set of edges.
-	 *
-	 * @return the set of edges.
-	 */
-	public HashSet getEdges()
-	{
-		return edgeset;
-	}
-	
-	/**
 	 * Returns the set of nodes.
 	 *
 	 * @return the set of nodes.
@@ -147,16 +118,6 @@ public class SubMesh2D
 	}
 	
 	/**
-	 * Returns an iterator over the set of edges.
-	 *
-	 * @return an iterator over the set of edges.
-	 */
-	public Iterator getEdgesIterator()
-	{
-		return edgeset.iterator();
-	}
-	
-	/**
 	 * Returns an iterator over the set of nodes.
 	 *
 	 * @return an iterator over the set of nodes.
@@ -164,100 +125,6 @@ public class SubMesh2D
 	public Iterator getNodesIterator()
 	{
 		return nodeset.iterator();
-	}
-	
-	/**
-	 * Adds a face to the mesh, and returns it.
-	 *
-	 * @return the face being added.
-	 */
-	public MFace2D addFace(MFace2D f)
-	{
-		faceset.add(f);
-		return f;
-	}
-	
-	/**
-	 * Adds an edge to the mesh, and returns it.
-	 *
-	 * @return the edge being added.
-	 */
-	public MEdge2D addEdge(MEdge2D e)
-	{
-		edgeset.add(e);
-		return e;
-	}
-	
-	/**
-	 * Adds a node to the mesh, and returns it.
-	 *
-	 * @return the edge being added.
-	 */
-	public MNode2D addNode(MNode2D n)
-	{
-		nodeset.add(n);
-		return n;
-	}
-	
-	/**
-	 * Returns the edge defined bu its end points, or <code>null</code>
-	 * if there is no such edge.
-	 *
-	 * @param  n1  start node,
-	 * @param  n2  end node,
-	 * @return the edge defined by these 2 nodes.
-	 */
-	public static MEdge2D getEdgeDefinedByNodes(MNode2D n1, MNode2D n2)
-	{
-		for(Iterator it=n1.getEdgesIterator(); it.hasNext();)
-		{
-			MEdge2D e = (MEdge2D) it.next();
-			if (e.getNodes1() == n2 || e.getNodes2() == n2)
-				return e;
-		}
-		return null;
-	}
-	
-	/**
-	 * Adds an edge defined by its two end points if it was not already defined.
-	 *
-	 * @return the edge being added.
-	 */
-	public MEdge2D addEdgeIfNotDefined(MNode2D pt1, MNode2D pt2)
-	{
-		MEdge2D e = getEdgeDefinedByNodes(pt1, pt2);
-		if (null == e)
-			e = new MEdge2D(pt1, pt2);
-		edgeset.add(e);
-		return e;
-	}
-	
-	/**
-	 * Remove a face from the <code>Submesh2D</code>.
-	 *
-	 * @param face  the face to remove
-	 */
-	public void rmFace(MFace2D face)
-	{
-		faceset.remove(face);
-		HashSet nodes = new HashSet(face.getNodes());
-		for(Iterator itn=nodes.iterator(); itn.hasNext();)
-		{
-			MNode2D n = (MNode2D) itn.next();
-			n.unlink(face);
-		}
-		for(Iterator ite=face.getEdgesIterator(); ite.hasNext();)
-		{
-			MEdge2D e = (MEdge2D) ite.next();
-			if (e.canDestroy())
-				edgeset.remove(e);
-		}
-		for(Iterator itn=nodes.iterator(); itn.hasNext();)
-		{
-			MNode2D n = (MNode2D) itn.next();
-			if (n.canDestroy())
-				nodeset.remove(n);
-		}
 	}
 	
 	/**
@@ -273,12 +140,8 @@ public class SubMesh2D
 		nodeset.add(n1);
 		nodeset.add(n2);
 		nodeset.add(n3);
-		MEdge2D e1 = addEdgeIfNotDefined(n1, n2);
-		MEdge2D e2 = addEdgeIfNotDefined(n2, n3);
-		MEdge2D e3 = addEdgeIfNotDefined(n3, n1);
-		MFace2D f = new MFace2D(e1, e2, e3);
+		MFace2D f = new MFace2D(n1, n2, n3);
 		faceset.add(f);
-		f.link();
 		return f;
 	}
 	
@@ -287,90 +150,6 @@ public class SubMesh2D
 	 */
 	public void removeDegeneratedEdges()
 	{
-		HashSet oldedges = new HashSet(edgeset);
-		for (Iterator ite = oldedges.iterator(); ite.hasNext(); )
-		{
-			MEdge2D e = (MEdge2D) ite.next();
-			if (!edgeset.contains(e))
-				//  This edge has been removed by a previous call
-				//  to collapseDegeneratedEdge()
-				continue;
-			MNode2D pt1 = e.getNodes1();
-			MNode2D pt2 = e.getNodes2();
-			MNode1D ref1 = pt1.getRef();
-			MNode1D ref2 = pt2.getRef();
-			int l1 = pt1.getLabel();
-			int l2 = pt2.getLabel();
-			if (l1 != -1 || l2 != -1)
-			{
-				if (l1 != l2)
-					continue;
-			}
-			else
-			{
-				if (null == ref1 || null == ref2)
-					continue;
-				if (null == ref1.getRef() || null == ref2.getRef())
-					continue;
-				if (!ref1.getRef().isSame(ref2.getRef()))
-					continue;
-			}
-			logger.debug("Removing "+e);
-			collapse(e);
-		}
-	}
-	
-	/**
-	 * Collapse an edge.
-	 *
-	 * @param  edge the edge to collapse
-	 */
-	private void collapse(MEdge2D edge)
-	{
-		HashSet faces = edge.getFaces();
-		assert 1 == faces.size() : edge;
-		
-		MNode2D pt1 = edge.getNodes1();
-		MNode2D pt2 = edge.getNodes2();
-		MFace2D face = (MFace2D) faces.iterator().next();
-		MNode2D apex = face.apex(edge);
-		MEdge2D e1 = getEdgeDefinedByNodes(pt1, apex);
-		assert null != e1 : "null expected, "+e1+" found";
-		MEdge2D e2 = getEdgeDefinedByNodes(pt2, apex);
-		assert null != e2 : "null expected, "+e2+" found";
-		assert e1.isMutable() || e2.isMutable() : "e1 or e2 is mutable";
-		if (!e1.isMutable())
-		{
-			MEdge2D temp = e1;
-			e1 = e2;
-			e2 = temp;
-		}
-		//  Now e1 is mutable and will be replaced by e2 later
-		Iterator neighboursIterator = e1.getFacesIterator();
-		MFace2D nf = (MFace2D) neighboursIterator.next();
-		if (nf == face)
-			nf = (MFace2D) neighboursIterator.next();
-		
-		//  Replace pt1 by pt2 everywhere
-		for (Iterator ite = pt1.getEdgesIterator(); ite.hasNext(); )
-		{
-			MEdge2D e = (MEdge2D) ite.next();
-			e.substNode(pt1, pt2);
-		}
-		//  Replace e1 by e2 in nf
-		nf.substEdge(e1, e2);
-		
-		//  Re-link elements
-		for (Iterator itf = pt1.getElements2DIterator(); itf.hasNext(); )
-		{
-			MFace2D f = (MFace2D) itf.next();
-			pt1.unlink(f);
-			pt2.link(f);
-		}
-		rmFace(face);
-		edgeset.remove(e1);
-		edgeset.remove(edge);
-		nodeset.remove(pt1);
 	}
 	
 	/**
@@ -495,11 +274,6 @@ public class SubMesh2D
 		{
 			MNode2D node=(MNode2D)itn.next();
 			r+=node+cr;
-		}
-		for(Iterator ite=edgeset.iterator();ite.hasNext();)
-		{
-			MEdge2D edge=(MEdge2D)ite.next();
-			r+=edge+cr;
 		}
 		for(Iterator itf=faceset.iterator();itf.hasNext();)
 		{

@@ -90,7 +90,6 @@ public class SubMesh2DReader extends JCAEXMLData
 				double u = nodesIn.readDouble();
 				double v = nodesIn.readDouble();
 				nodelist[i] = new MNode2D(u, v);
-				submesh.addNode(nodelist[i]);
 				if (i < numberOfNodes - numberOfReferences)
 					nodelist[i].setLabel(-1);
 				else
@@ -118,20 +117,8 @@ public class SubMesh2DReader extends JCAEXMLData
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
-		assert setFreeEdgesFrozen(submesh);
 		return submesh;
 	}
 	
-	private static boolean setFreeEdgesFrozen(SubMesh2D submesh)
-	{
-		for (Iterator ite = submesh.getEdgesIterator(); ite.hasNext(); )
-		{
-			MEdge2D e = (MEdge2D) ite.next();
-			//  This is needed so that submesh.isValid() does not complain.
-			if (e.getFaces().size() < 2)
-				e.setFrozen(true);
-		}
-		return true;
-	}
 }
 
