@@ -209,8 +209,8 @@ public class Mesher
 		{
 			IGESControl_Reader aReader = new IGESControl_Reader();
 			aReader.readFile(name);
-			aReader.clear();
-			aReader.transferRoots(false);
+			aReader.nbRootsForTransfer();
+			aReader.transferRoots();
 			shape = aReader.oneShape();
 			outputName=name.substring(0, name.length()-".igs".length())+".brep";
 		}
