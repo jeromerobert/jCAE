@@ -306,6 +306,7 @@ public class Mesh
 			compGeomStack.push(new Calculus3D(this));
 		else
 			throw new java.lang.IllegalArgumentException("pushCompGeom argument must be either 2 or 3, current value is: "+i);
+		quadtree.clearAllMetrics();
 	}
 	
 	public void pushCompGeom(String type)
@@ -316,16 +317,24 @@ public class Mesh
 			compGeomStack.push(new Calculus3D(this));
 		else
 			throw new java.lang.IllegalArgumentException("pushCompGeom argument must be either 2 or 3, current value is: "+type);
+		quadtree.clearAllMetrics();
 	}
 	
 	public Calculus popCompGeom()
 	{
-		return (Calculus) compGeomStack.pop();
+		//  Metrics are always reset by pushCompGeom.
+		//  Only reset them here when there is a change.
+		Object ret = compGeomStack.pop();
+		if (compGeomStack.size() > 0 && !ret.getClass().equals(compGeomStack.peek().getClass()))
+			quadtree.clearAllMetrics();
+		return (Calculus) ret;
 	}
 	
 	public Calculus popCompGeom(int i)
 	{
 		Object ret = compGeomStack.pop();
+		if (compGeomStack.size() > 0 && !ret.getClass().equals(compGeomStack.peek().getClass()))
+			quadtree.clearAllMetrics();
 		if (i == 2)
 		{
 			if (!(ret instanceof Calculus2D))

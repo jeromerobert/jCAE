@@ -431,6 +431,11 @@ public class Vertex
 		return m2;
 	}
 	
+	public void clearMetrics()
+	{
+		m2 = null;
+	}
+	
 	public String toString ()
 	{
 		if (this == Vertex.outer)

@@ -496,6 +496,30 @@ public class QuadTree
 		return gproc.nodelist;
 	}
 	
+	private final class clearAllMetricsProcedure implements QuadTreeProcedure
+	{
+		public clearAllMetricsProcedure()
+		{
+		}
+		public final int action(Object o, int s, int i0, int j0)
+		{
+			QuadTreeCell self = (QuadTreeCell) o;
+			if (self.nItems > 0)
+			{
+				for (int i = 0; i < self.nItems; i++)
+					((Vertex) self.subQuad[i]).clearMetrics();
+			}
+			return 0;
+		}
+	}
+	
+	public void clearAllMetrics()
+	{
+		QuadTreeCell current = root;
+		clearAllMetricsProcedure gproc = new clearAllMetricsProcedure();
+		deambulate(gproc);
+	}
+	
 	//  Similar to walk() but do not maintain i0,j0
 	public boolean deambulate(QuadTreeProcedure proc)
 	{
