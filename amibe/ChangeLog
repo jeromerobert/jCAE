@@ -1,3 +1,11 @@
+Fri Feb 25 09:56:03 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Mesh.java: New writeMESH() and writeBB() methods to write data files for the medit visualization tool.
+	* src/org/jcae/mesh/mesher/ds/MMesh3D.java: New writeMESH() method to write data files for the medit visualization tool.
+	* src/org/jcae/mesh/amibe/metrics/Metric2D.java:  New stringCoefs() method, needed by Mesh.writeBB.
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java (CheckAndSwap):  When loop around a vertex is over, make another loop if swaps had been performed.  Sometimes a single loop is not enough.
+	* src/org/jcae/mesh/amibe/ds/Vertex.java (circumcenter):  Fix again test far circumcenters, otherwise s3ic.brep generate flat triangles with an edge length of 10.
+
 Wed Feb 23 13:49:03 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/util/Octree.java:  New getMaxLevel() method.
