@@ -142,7 +142,7 @@ public class Matrix2D
 	{
 		Matrix2D AinvB = inv().multR(B);
 		double delta = (AinvB.data[0][0] - AinvB.data[1][1]) * (AinvB.data[0][0] - AinvB.data[1][1]) + 4.0 * AinvB.data[0][1] * AinvB.data[1][0];
-		if (delta < 1.e-20)
+		if (delta < 1.e-20 * (AinvB.data[0][0] * AinvB.data[0][0] + AinvB.data[0][1] * AinvB.data[0][1] + AinvB.data[1][0] * AinvB.data[1][0] + AinvB.data[1][1] * AinvB.data[1][1]))
 			//  Matrices are similar.  Return eigenvectors of A
 			return eigenvectors();
 		
