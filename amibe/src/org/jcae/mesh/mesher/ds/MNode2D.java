@@ -21,7 +21,6 @@
 package org.jcae.mesh.mesher.ds;
 
 import org.jcae.mesh.mesher.ds.MNode1D;
-import org.jcae.mesh.mesher.metrics.Metric2D;
 import org.jcae.mesh.cad.*;
 import org.jcae.mesh.util.Predicates;
 
@@ -43,9 +42,6 @@ public class MNode2D
 
 	//  The natural coordinates of the node
 	private double[] param = new double[2];
-	
-	//  Metrics at this location
-	private Metric2D m2;
 	
 	//  Link to the geometrical node, if any
 	private MNode1D ref1d;
@@ -167,16 +163,6 @@ public class MNode2D
 	{
 		param[0] = u;
 		param[1] = v;
-		//  Deletes previous metrics so that it gets computed again
-		//  if needed.
-		m2 = null;
-	}
-	
-	public Metric2D getMetrics(CADGeomSurface surf)
-	{
-		if (null == m2)
-			m2 = new Metric2D(surf, this);
-		return m2;
 	}
 	
 	/**
@@ -428,37 +414,6 @@ public class MNode2D
 	}
 	
 	/**
-	 * Checks whether points are counterclockwise oriented.
-	 *
-	 * @param n1  first node,
-	 * @param n2  secnd node.
-	 * @return a positive value if current instance, <code>n1</code> and
-	 * <code>n2</code> occur in counterclockwise order, zero if they are
-	 * collinear, and a negative value otherwise.
-	 * @see Predicates#orient2d
-	 */
-	public double orient2d(MNode2D n1, MNode2D n2, CADGeomSurface surf)
-	{
-		double [] pa = new double[2];
-		double [] pb = new double[2];
-		double [] pc = new double[2];
-		pa[0] = getU(); 
-		pa[1] = getV(); 
-		pb[0] = n1.getU(); 
-		pb[1] = n1.getV(); 
-		pc[0] = n2.getU(); 
-		pc[1] = n2.getV(); 
-		double xpc = (pa[0]+pb[0]+pc[0])/3.0;
-		double ypc = (pa[1]+pb[1]+pc[1])/3.0;
-		MNode2D centroid = new MNode2D(xpc, ypc);
-		Metric2D m2d = centroid.getMetrics(surf);
-		double [] tp1 = m2d.apply(pa[0]-xpc, pa[1]-ypc);
-		double [] tp2 = m2d.apply(pb[0]-xpc, pb[1]-ypc);
-		double [] tp3 = m2d.apply(pc[0]-xpc, pc[1]-ypc);
-		return pred.orient2d(tp1, tp2, tp3);
-	}
-	
-	/**
 	 * Checks whether a point is inside or outside a triangle.
 	 * It calls Predicates.orient2d() and not orient2d() for accuracy.
 	 *
@@ -518,38 +473,6 @@ public class MNode2D
 		else if (pr1 < 0.0 && pr2 < 0.0 && pr3 < 0.0)
 			ret = 0;
 		return ret;
-	}
-	
-	/**
-	 * Checks whether a point is inside or outside a triangle.
-	 * It calls Predicates.orient2d() and not orient2d() for efficiency.
-	 *
-	 * @param face  the triangle being checked.
-	 * @return <code>true</code> if the node is interior, 
-	 */
-	public boolean inCircle(MNode2D P1, MNode2D P2, MNode2D P3, CADGeomSurface surf)
-	{
-		double [] pa = new double[2];
-		double [] pb = new double[2];
-		double [] pc = new double[2];
-		double [] pd = new double[2];
-		pa[0] = getU(); 
-		pa[1] = getV(); 
-		pb[0] = P1.getU(); 
-		pb[1] = P1.getV(); 
-		pc[0] = P2.getU(); 
-		pc[1] = P2.getV(); 
-		pd[0] = P3.getU(); 
-		pd[1] = P3.getV(); 
-		double xpc = (pa[0]+pb[0]+pc[0]+pd[0])/4.0;
-		double ypc = (pa[1]+pb[1]+pc[1]+pd[1])/4.0;
-		MNode2D centroid = new MNode2D(xpc, ypc);
-		Metric2D m2d = centroid.getMetrics(surf);
-		double [] tp1 = m2d.apply(pa[0]-xpc, pa[1]-ypc);
-		double [] tp2 = m2d.apply(pb[0]-xpc, pb[1]-ypc);
-		double [] tp3 = m2d.apply(pc[0]-xpc, pc[1]-ypc);
-		double [] tp4 = m2d.apply(pd[0]-xpc, pd[1]-ypc);
-		return pred.incircle(tp1, tp2, tp3, tp4) * pred.orient2d(tp1, tp2, tp3) > 0.0;
 	}
 	
 	public String toString()

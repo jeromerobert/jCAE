@@ -22,7 +22,6 @@ package org.jcae.mesh.mesher.ds;
 
 import gnu.trove.THashSet;
 
-import org.jcae.mesh.mesher.metrics.Metric2D;
 import org.jcae.mesh.cad.CADGeomSurface;
 import java.util.Collection;
 import java.util.Iterator;
@@ -208,49 +207,6 @@ public class MFace2D
 		if (1 != triangleNodes.size())
 			throw new NoSuchElementException("MEdge2D : "+edge);
 		return (MNode2D)triangleNodes.iterator().next();
-	}
-	
-	public MNode2D centroid()
-	{
-		double [] uv = new double[2];
-		int n = 0;
-		for (Iterator itn = getNodesIterator(); itn.hasNext(); )
-		{
-			double [] p = ((MNode2D) itn.next()).getUV();
-			uv[0] += p[0];
-			uv[1] += p[1];
-			n++;
-		}
-		return new MNode2D(uv[0]/n, uv[1]/n);
-	}
-	
-	public MNode2D circumcenter(CADGeomSurface surf)
-	{
-		Iterator itn = getNodesIterator();
-		double [] p1 = ((MNode2D) itn.next()).getUV();
-		double [] p2 = ((MNode2D) itn.next()).getUV();
-		double [] p3 = ((MNode2D) itn.next()).getUV();
-		double xpc = (p1[0]+p2[0]+p3[0])/3.0;
-		double ypc = (p1[1]+p2[1]+p3[1])/3.0;
-		MNode2D centroid = new MNode2D(xpc, ypc);
-		Metric2D m2d = centroid.getMetrics(surf);
-		double [] tp1 = m2d.apply(p1[0]-xpc, p1[1]-ypc);
-		double [] tp2 = m2d.apply(p2[0]-xpc, p2[1]-ypc);
-		double [] tp3 = m2d.apply(p3[0]-xpc, p3[1]-ypc);
-		double denominator = 0.5 / MNode2D.pred.counterclockwise(tp2, tp3, tp1);
-		double xao = tp3[0] - tp1[0];
-		double yao = tp3[1] - tp1[1];
-		double xdo = tp2[0] - tp1[0];
-		double ydo = tp2[1] - tp1[1];
-		double dodist = xdo * xdo + ydo * ydo;
-		double aodist = xao * xao + yao * yao;
-
-		double [] xres = new double[2];
-		xres[0] = tp1[0] - (ydo * aodist - yao * dodist) * denominator;
-		xres[1] = tp1[1] + (xdo * aodist - xao * dodist) * denominator;
-		//  Now come back to parameter space
-		double [] res = m2d.applyInv(xres[0], xres[1]);
-		return new MNode2D(res[0]+xpc, res[1]+ypc);
 	}
 	
 	/**
