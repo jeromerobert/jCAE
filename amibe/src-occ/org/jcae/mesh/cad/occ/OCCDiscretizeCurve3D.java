@@ -195,7 +195,7 @@ public class OCCDiscretizeCurve3D
 	
 	public void discretizeMaxDeflection(double defl)
 	{
-		if (defl <= 0.0 || defl >= 1.0)
+		if (defl <= 0.0)
 			return;
 		int nsegments = 10;
 		double [] xyz;
@@ -226,7 +226,7 @@ public class OCCDiscretizeCurve3D
 				  (xyz[3*nr-1] - xyz[3*ns+2]) * (xyz[3*nr-1] - xyz[3*ns+2]));
 				arcLength += length(oldAbscissa, newAbscissa, 20);
 				oldAbscissa = newAbscissa;
-				if (arcLength - dist > defl * defl * arcLength)
+				if (arcLength - dist > defl * arcLength)
 				{
 					a[nr] = newAbscissa;
 					arcLength   = 0.0;
