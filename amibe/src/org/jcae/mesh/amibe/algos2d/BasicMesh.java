@@ -317,6 +317,7 @@ public class BasicMesh
 		{
 			MNode1D p1 = null;
 			Vertex p20 = null, p2 = null;
+			mesh.initSmallEdges();
 			for (wexp.init((CADWire) expW.current(), face); wexp.more(); wexp.next())
 			{
 				CADEdge te = wexp.current();

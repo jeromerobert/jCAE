@@ -58,6 +58,9 @@ public class Mesh
 	//  Ninimal topological edge length
 	private double epsilon = 1.;
 	
+	private boolean accumulateEpsilon = false;
+	private double accumulatedLength = 0.0;
+	
 	//  Stack of methods to compute geometrical values
 	private Stack compGeomStack = new Stack();
 	
@@ -99,14 +102,17 @@ public class Mesh
 		face = (CADFace) f;
 		surface = face.getGeomSurface();
 		double [] bb = face.boundingBox();
+		double diagonal = Math.sqrt(
+                                (bb[0] - bb[3]) * (bb[0] - bb[3]) +
+                                (bb[1] - bb[4]) * (bb[1] - bb[4]) +
+                                (bb[2] - bb[5]) * (bb[2] - bb[5]));
 		Double absEpsilon = new Double(System.getProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon", "-1.0"));
 		epsilon = absEpsilon.doubleValue();
 		if (epsilon < 0)
-			epsilon = Math.max(Math.sqrt(
-				(bb[0] - bb[3]) * (bb[0] - bb[3]) +
-				(bb[1] - bb[4]) * (bb[1] - bb[4]) +
-				(bb[2] - bb[5]) * (bb[2] - bb[5])
-			) / 1000.0, Metric2D.getLength() / 100.0);
+			epsilon = Math.max(diagonal/1000.0, Metric2D.getLength() / 100.0);
+		accumulateEpsilon = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon", "false").equals("true");
+		logger.debug("Bounding box diagonal: "+diagonal);
+		logger.debug("Epsilon: "+epsilon);
 	}
 	
 	/**
@@ -614,6 +620,11 @@ public class Mesh
 		return (Calculus) compGeomStack.peek();
 	}
 	
+	public void initSmallEdges()
+	{
+		accumulatedLength = 0.0;
+	}
+	
 	/**
 	 * Checks whether a topological edge is too small to be considered.
 	 *
@@ -630,15 +641,20 @@ public class Mesh
 			throw new java.lang.RuntimeException("Curve not defined on edge, but this edge is not degenrerated.  Something must be wrong.");
 		double range [] = c3d.getRange();
 		
-		//  There seems to be a bug woth OpenCascade, we had a tiny
+		//  There seems to be a bug with OpenCascade, we had a tiny
 		//  edge whose length was miscomputed, so try a workaround.
 		if (Math.abs(range[1] - range[0]) < 1.e-7 * Math.max(1.0, Math.max(Math.abs(range[0]), Math.abs(range[1]))))
 			return true;
 		
 		double edgelen = c3d.length();
-		if (edgelen > epsilon)
+		if (edgelen + accumulatedLength > epsilon)
+		{
+			accumulatedLength = 0.0;
 			return false;
+		}
 		logger.info("Edge "+te+" is ignored because its length is too small: "+edgelen+" <= "+epsilon);
+		if (accumulateEpsilon)
+			accumulatedLength += edgelen;
 		return true;
 	}
 	
