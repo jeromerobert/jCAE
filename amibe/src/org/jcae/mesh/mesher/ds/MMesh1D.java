@@ -42,6 +42,7 @@ public class MMesh1D extends MMesh0D
 	
 	//  Length criterion.
 	private static double maxLength;
+	private static double maxDeflection = 0.0;
 	
 	//  Edge map.
 	private HashMap mapTEdgeToSubMesh1D;
@@ -229,6 +230,11 @@ public class MMesh1D extends MMesh0D
 		return maxLength;
 	}
 	
+	public double getMaxDeflection()
+	{
+		return maxDeflection;
+	}
+	
 	/**
 	 * Sets the maximal desired length.
 	 *
@@ -237,6 +243,11 @@ public class MMesh1D extends MMesh0D
 	public void setMaxLength(double length)
 	{
 		maxLength = length;
+	}
+	
+	public void setMaxDeflection(double deflection)
+	{
+		maxDeflection = deflection;
 	}
 	
 	/**

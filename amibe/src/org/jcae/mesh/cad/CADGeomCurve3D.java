@@ -44,6 +44,12 @@ public interface CADGeomCurve3D
 	public void discretize(double maxlen);
     /**
      * Discretize this curve
+     * @param maxlen Maximum length of created arc
+     * @param deflection Maximum deflection
+     */    
+	public void discretize(double maxlen, double deflection);
+    /**
+     * Discretize this curve
      * @param n Number of arc to create
      */    
 	public void discretize(int n);

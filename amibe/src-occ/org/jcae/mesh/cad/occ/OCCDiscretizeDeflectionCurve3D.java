@@ -23,19 +23,23 @@ import org.jcae.opencascade.jni.Adaptor3d_Curve;
 import org.apache.log4j.Logger;
 import java.util.ArrayList;
 
-public class OCCDiscretizeCurve3D
+public class OCCDiscretizeDeflectionCurve3D extends OCCDiscretizeCurve3D
 {
-	private static Logger logger=Logger.getLogger(OCCDiscretizeCurve3D.class);
-	protected Adaptor3d_Curve curve = null;
-	protected int nr = 0;
-	protected double length = -1.0;
-	protected double [] a;
+	private static Logger logger=Logger.getLogger(OCCDiscretizeDeflectionCurve3D.class);
 	
-	public void initialize(Adaptor3d_Curve myCurve, double len, double start, double end)
+	public void initialize(Adaptor3d_Curve myCurve, double len, double defl, double start, double end)
 	{
+		if (defl <= 0.0 || defl >= 1.0)
+		{
+			initialize(myCurve, len, start, end);
+			return;
+		}
 		curve = myCurve;
 		int nsegments = 10;
 		double [] xyz;
+		double [] outer = new double[3];
+		double len2 = len * len;
+		double defl2 = defl * defl;
 		while (true)
 		{
 			nsegments *= 10;
@@ -43,7 +47,7 @@ public class OCCDiscretizeCurve3D
 			xyz = new double[3*(nsegments+1)];
 			double [] oldXYZ = curve.value(start);
 			double [] newXYZ;
-			double abscissa, dist;
+			double abscissa, dist2;
 			nr = 1;
 			a[0] = start;
 			for (int i = 0; i < 3; i++)
@@ -52,11 +56,26 @@ public class OCCDiscretizeCurve3D
 			{
 				abscissa = start + ns * (end - start) / ((double) nsegments);
 				newXYZ = curve.value(abscissa);
-				dist = Math.sqrt(
+				dist2 = 
 				  (oldXYZ[0] - newXYZ[0]) * (oldXYZ[0] - newXYZ[0]) +
 				  (oldXYZ[1] - newXYZ[1]) * (oldXYZ[1] - newXYZ[1]) +
-				  (oldXYZ[2] - newXYZ[2]) * (oldXYZ[2] - newXYZ[2]));
-				if (dist > len)
+				  (oldXYZ[2] - newXYZ[2]) * (oldXYZ[2] - newXYZ[2]);
+				if (dist2 <= len2)
+				{
+					double [] midcurve = curve.value(0.5*(abscissa + a[nr-1]));
+					outer[0] = (midcurve[1] - oldXYZ[1]) * (newXYZ[2] - oldXYZ[2]) - (midcurve[2] - oldXYZ[2]) * (newXYZ[1] - oldXYZ[1]);
+					outer[1] = (midcurve[2] - oldXYZ[2]) * (newXYZ[0] - oldXYZ[0]) - (midcurve[0] - oldXYZ[0]) * (newXYZ[2] - oldXYZ[2]);
+					outer[2] = (midcurve[0] - oldXYZ[0]) * (newXYZ[1] - oldXYZ[1]) - (midcurve[1] - oldXYZ[1]) * (newXYZ[0] - oldXYZ[0]);
+					double outerNorm2 = outer[0] * outer[0] + outer[1] * outer[1] + outer[2] * outer[2];
+					double middist2 = 
+					  (oldXYZ[0] - midcurve[0]) * (oldXYZ[0] - midcurve[0]) +
+					  (oldXYZ[1] - midcurve[1]) * (oldXYZ[1] - midcurve[1]) +
+					  (oldXYZ[2] - midcurve[2]) * (oldXYZ[2] - midcurve[2]);
+					if (outerNorm2 > middist2 * dist2 * defl2)
+						dist2 = 2.0 * len2 + 1.0;
+				}
+				
+				if (dist2 > len2)
 				{
 					a[nr] = abscissa;
 					oldXYZ = newXYZ;
@@ -78,98 +97,7 @@ public class OCCDiscretizeCurve3D
 		}
 		logger.debug("Number of ponts: "+nr);
 		length = -1.0;
-		adjustAbscissas(xyz);
-	}
-	
-	//  Placeholder
-	public void initialize(Adaptor3d_Curve myCurve, double len, double defl, double start, double end)
-	{
-		initialize(myCurve, len, start, end);
-	}
-	
-	public void initialize(Adaptor3d_Curve myCurve, int n, double start, double end)
-	{
-		curve = myCurve;
-		nr = n;
-		int nsegments = n;
-		double [] xyz;
-		ArrayList abscissa = new ArrayList(nsegments);
-		while (true)
-		{
-			nsegments *= 10;
-			a = new double[nsegments+1];
-			xyz = new double[3*(nsegments+1)];
-			double [] oldXYZ = curve.value(start);
-			double [] newXYZ;
-			a[0] = start;
-			for (int i = 0; i < 3; i++)
-				xyz[i] = oldXYZ[i];
-			double deltap = (end - start) / ((double) nsegments);
-			//  Compute length, a[] and xyz[]
-			double length = 0.0;
-			for (int ns = 1; ns <= nsegments; ns++)
-			{
-				a[ns] = start + ns * deltap;
-				newXYZ = curve.value(a[ns]);
-				length += Math.sqrt(
-				  (oldXYZ[0] - newXYZ[0]) * (oldXYZ[0] - newXYZ[0]) +
-				  (oldXYZ[1] - newXYZ[1]) * (oldXYZ[1] - newXYZ[1]) +
-				  (oldXYZ[2] - newXYZ[2]) * (oldXYZ[2] - newXYZ[2]));
-				oldXYZ = newXYZ;
-				xyz[3*ns]   = oldXYZ[0];
-				xyz[3*ns+1] = oldXYZ[1];
-				xyz[3*ns+2] = oldXYZ[2];
-			}
-			double lmax = 2.0 * length / ((double) nr);
-			double lmin = 0.0;
-			double maxlen, dist;
-			while (true)
-			{
-				if (lmax - lmin < 0.5 * deltap)
-					break;
-				maxlen = 0.5 * (lmin + lmax);
-				int lastIndex = 0;
-				abscissa.clear();
-				abscissa.add(new Integer(0));
-				nr = 1;
-				for (int ns = 1; ns < nsegments; ns++)
-				{
-					dist = Math.sqrt(
-				  		(xyz[3*ns] - xyz[3*lastIndex]) * (xyz[3*ns] - xyz[3*lastIndex]) +
-				  		(xyz[3*ns+1] - xyz[3*lastIndex+1]) * (xyz[3*ns+1] - xyz[3*lastIndex+1]) +
-				  		(xyz[3*ns+2] - xyz[3*lastIndex+2]) * (xyz[3*ns+2] - xyz[3*lastIndex+2]));
-					if (dist > maxlen)
-					{
-						lastIndex = ns;
-						nr++;
-						abscissa.add(new Integer(ns));
-					}
-				}
-				nr++;
-				abscissa.add(new Integer(nsegments));
-				if (n == nr)
-					break;
-				else if (nr < n)
-					lmax = lmax - 0.5 * (lmax - lmin);
-				else
-					lmin = lmin + 0.5 * (lmax - lmin);
-			}
-			if (n == nr)
-				break;
-		}
-		for (int i = 0; i < nr; i++)
-		{
-			int ind = ((Integer) abscissa.get(i)).intValue();
-			if (ind != i)
-			{
-				a[i] = a[ind];
-				xyz[3*i]   = xyz[3*ind];
-				xyz[3*i+1] = xyz[3*ind+1];
-				xyz[3*i+2] = xyz[3*ind+2];
-			}
-		}
-		length = -1.0;
-		adjustAbscissas(xyz);
+		//adjustAbscissas(xyz);
 	}
 	
 	private void adjustAbscissas(double [] xyz)
@@ -248,34 +176,4 @@ public class OCCDiscretizeCurve3D
 		}
 	}
 	
-	public int nbPoints()
-	{
-		return nr;
-	}
-	
-	public double parameter(int index)
-	{
-		return a[index-1];
-	}
-	
-	public double length()
-	{
-		if (length >= 0.0)
-			return length;
-		
-		assert nr > 0;
-		double [] oldXYZ;
-		double [] newXYZ = curve.value(a[0]);
-		length = 0.0;
-		for (int i = 1; i < nr; i++)
-		{
-			oldXYZ = newXYZ;
-			newXYZ = curve.value(a[i]);
-			length += Math.sqrt(
-			  (oldXYZ[0] - newXYZ[0]) * (oldXYZ[0] - newXYZ[0]) +
-			  (oldXYZ[1] - newXYZ[1]) * (oldXYZ[1] - newXYZ[1]) +
-			  (oldXYZ[2] - newXYZ[2]) * (oldXYZ[2] - newXYZ[2]));
-		}
-		return length;
-	}
 }

@@ -54,6 +54,13 @@ public class OCCGeomCurve3D implements CADGeomCurve3D
 		return range;
 	}
 	
+	public void discretize(double maxlen, double deflection)
+	{
+		if (discret == null)
+			discret = new OCCDiscretizeDeflectionCurve3D();
+		discret.initialize((Adaptor3d_Curve) myCurve, maxlen, deflection, range[0], range[1]);
+	}
+	
 	public void discretize(double maxlen)
 	{
 		if (discret == null)
