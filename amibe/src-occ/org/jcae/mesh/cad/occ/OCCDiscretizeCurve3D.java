@@ -33,6 +33,7 @@ public class OCCDiscretizeCurve3D
 	
 	public void initialize(Adaptor3d_Curve myCurve, double len, double start, double end)
 	{
+		logger.debug("Initialize curve: "+len+" "+start+" "+end);
 		curve = myCurve;
 		int nsegments = 10;
 		double [] xyz;
@@ -76,7 +77,7 @@ public class OCCDiscretizeCurve3D
 			if (nr * 10 < nsegments)
 				break;
 		}
-		logger.debug("Number of ponts: "+nr);
+		logger.debug("Number of points: "+nr);
 		length = -1.0;
 		adjustAbscissas(xyz);
 	}

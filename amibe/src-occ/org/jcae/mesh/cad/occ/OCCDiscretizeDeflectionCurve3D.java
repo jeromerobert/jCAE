@@ -29,6 +29,7 @@ public class OCCDiscretizeDeflectionCurve3D extends OCCDiscretizeCurve3D
 	
 	public void initialize(Adaptor3d_Curve myCurve, double len, double defl, double start, double end)
 	{
+		logger.debug("Initialize curve: "+len+" "+defl+" "+start+" "+end);
 		if (defl <= 0.0 || defl >= 1.0)
 		{
 			initialize(myCurve, len, start, end);
