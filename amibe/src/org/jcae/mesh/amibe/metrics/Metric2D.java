@@ -270,6 +270,11 @@ public class Metric2D
 		return ""+E+" "+F+" "+G;
 	}
 	
+	public String stringCoefs(double scaleX, double scaleY)
+	{
+		return ""+(E/scaleX/scaleX)+" "+(F/scaleX/scaleY)+" "+(G/scaleY/scaleY);
+	}
+	
 	public String toString()
 	{
 		return "Metric2D: E="+E+" F="+F+" G="+G;

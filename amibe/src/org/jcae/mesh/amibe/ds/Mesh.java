@@ -42,6 +42,10 @@ public class Mesh
 	private static Logger logger=Logger.getLogger(Mesh.class);
 	private ArrayList triangleList = new ArrayList();
 	public QuadTree quadtree = null;
+
+	//  Utilities to help debugging meshes with writeMESH
+	private static final double scaleX = 1.0;
+	private static final double scaleY = 1.0;
 	
 	//  Topological face on which mesh is applied
 	private CADFace face;
@@ -398,7 +402,7 @@ public class Mesh
 			{
 				Vertex node = (Vertex) it.next();
 				double [] p = node.getUV();
-				out.println(""+p[0]+" "+p[1]+" 0");
+				out.println(""+(scaleX*p[0])+" "+(scaleY*p[1])+" 0");
 				count++;
 				Integer label = new Integer(count);
 				labels.put(node, label);
@@ -454,7 +458,7 @@ public class Mesh
 			for(Iterator it=nodeset.iterator();it.hasNext();)
 			{
 				Vertex node = (Vertex) it.next();
-				out.println(""+node.getMetrics(surface).stringCoefs());
+				out.println(""+node.getMetrics(surface).stringCoefs(scaleX, scaleY));
 			}
 			out.close();
 		} catch (FileNotFoundException e)
