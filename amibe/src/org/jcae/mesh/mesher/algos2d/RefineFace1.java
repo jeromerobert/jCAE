@@ -280,10 +280,10 @@ public class RefineFace1
 		}
 
 /*
+*/
 m.pushCompGeom(3);
 new Insertion(m).compute();
 m.popCompGeom(3);
-*/
 		logger.debug(" Transfer into submesh2d");
 		for (Iterator it = m.getTriangles().iterator(); it.hasNext(); )
 		{

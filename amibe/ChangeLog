@@ -1,3 +1,8 @@
+Fri Nov 19 18:04:51 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/Mesher.java
+	  src/org/jcae/mesh/mesher/algos2d/RefineFace1.java: Call org.jcae.mesh.amibe.algos2d.Insertion instead of TargetSize, which means that all 2d algos now belong to amibe.
+
 Fri Nov 19 16:51:29 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
 	* Add this ChangeLog, build.properties and build.xml

@@ -108,15 +108,13 @@ public class Mesher
 				{
 					submesh.pushCompGeom(2);
 					submesh.init(mesh1D);
-				
-					//  Those calls to InnerRefine are only needed for spheres:
-					//new InnerRefine(submesh).compute();
-					//new InnerRefine(submesh).compute();
 					submesh.popCompGeom(2);
 					
 					submesh.pushCompGeom(3);
-					new TargetSize(submesh).compute();				
-					new SmoothNodes(submesh, 20).compute();
+					//  When Insertion is called from RefineFace1,
+					//  TargetSize must not be called.
+					//new TargetSize(submesh).compute();				
+					//new SmoothNodes(submesh, 20).compute();
 					if (testWrite2D)
 					{
 						xmlFile = "jcae2d."+iFace;
