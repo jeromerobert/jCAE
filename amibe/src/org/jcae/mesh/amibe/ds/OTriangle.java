@@ -517,6 +517,11 @@ public class OTriangle
 		return true;
 	}
 	
+	public int checkAndSwap()
+	{
+		return CheckAndSwap(this, work[0]);
+	}
+	
 	private int CheckAndSwap(OTriangle newLeft, OTriangle newRight)
 	{
 		int nrSwap = 0;
