@@ -47,7 +47,7 @@
 	
 	<target name="javadoc" description="Javadoc for my API." depends="init">
 		<mkdir dir="${javadoc.dir}"/>
-		<javadoc destdir="${javadoc.dir}" packagenames="*">
+		<javadoc destdir="${javadoc.dir}" packagenames="*" source="1.4">
 			<classpath>
 				<pathelement location="${jcae.jar}"/>
 			</classpath>
