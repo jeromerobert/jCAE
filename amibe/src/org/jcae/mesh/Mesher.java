@@ -30,6 +30,7 @@ import org.jcae.mesh.mesher.InitialTriangulationException;
 import org.jcae.mesh.amibe.metrics.*;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.algos2d.BasicMesh;
+import org.jcae.mesh.mesher.algos3d.Fuse;
 import org.jcae.mesh.xmldata.*;
 import org.jcae.mesh.cad.*;
 
@@ -50,7 +51,7 @@ public class Mesher
 	 * @param brepfilename  the filename of the brep file	 
 	 * @param discr  the value of the meshing constraint
 	 */
-	private static MMesh3D mesh(String brepfilename, String xmlDir, double discr, double defl)
+	private static MMesh3D mesh(String brepfilename, String xmlDir, double discr, double defl, double tolerance)
 	{
 		//  Declare all variables here
 		MMesh3D mesh3D = new MMesh3D();
@@ -162,6 +163,8 @@ public class Mesher
 				ex.printStackTrace();
 			}
 			
+			if (tolerance >= 0.0)
+				new Fuse(mesh3D, tolerance).compute();
 			xmlFile = "jcae3d";
 			MMesh3DWriter.writeObject(mesh3D, xmlDir, xmlFile, xmlBrepDir);
 		}
@@ -183,7 +186,7 @@ public class Mesher
 	{
 		if (args.length < 2 || args.length > 4)
 		{
-			System.out.println("Usage : MeshGen filename output_directory edge_length deflection");
+			System.out.println("Usage : Mesher filename output_directory edge_length deflection");
 			System.exit(0);
 		}
 		String filename=args[0];
@@ -197,7 +200,8 @@ public class Mesher
 		String xmlDir = args[1];
 		Double discr=new Double(args[2]);
 		Double defl=new Double(args[3]);
-		MMesh3D mesh3D = mesh(filename, xmlDir, discr.doubleValue(), defl.doubleValue());	
+		Double tolerance=new Double(System.getProperty("org.jcae.mesh.tolerance", "-1.0"));
+		MMesh3D mesh3D = mesh(filename, xmlDir, discr.doubleValue(), defl.doubleValue(), tolerance.doubleValue());
 		logger.info("Exporting UNV");
 		mesh3D.writeUNV(unvName+".gz");
 		logger.info("End mesh");
