@@ -22,7 +22,6 @@ package org.jcae.mesh.amibe.metrics;
 
 import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.util.Calculs;
 import org.apache.log4j.Logger;
 
 /**
@@ -107,16 +106,16 @@ public class Metric2D
 		cacheSurf.setParameter(uv[0], uv[1]);
 		double d1U[] = cacheSurf.d1U();
 		double d1V[] = cacheSurf.d1V();
-		double nd1U = Calculs.norm(d1U);
-		double nd1V = Calculs.norm(d1V);
+		double nd1U = Metric3D.norm(d1U);
+		double nd1V = Metric3D.norm(d1V);
 		if (nd1U * nd1V == 0.0)
 		{
 			logger.debug("unable to compute tangent plane");
 			return new Matrix2D(1.0, 0.0, 0.0, 1.0);
 		}
-		double unitNorm[] = Calculs.prodVect3D(d1U, d1V);
-		double nnorm = Calculs.norm(unitNorm);
-		double ct = Calculs.prodSca(d1U, d1V) / nd1U / nd1V;
+		double unitNorm[] = Metric3D.prodVect3D(d1U, d1V);
+		double nnorm = Metric3D.norm(unitNorm);
+		double ct = Metric3D.prodSca(d1U, d1V) / nd1U / nd1V;
 		double st = nnorm / nd1U / nd1V;
 		return (new Matrix2D(nd1U, nd1V * ct, 0, nd1V * st));
 	}

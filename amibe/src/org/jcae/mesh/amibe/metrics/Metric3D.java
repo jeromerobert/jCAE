@@ -22,7 +22,6 @@ package org.jcae.mesh.amibe.metrics;
 
 import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.util.Calculs;
 import org.apache.log4j.Logger;
 
 /**
@@ -77,6 +76,27 @@ public class Metric3D extends Matrix
 		}
 	}
 	
+	public static double prodSca(double [] A, double [] B) {
+		return ((A[0]*B[0])+(A[1]*B[1])+(A[2]*B[2]));
+	}
+	
+	public static double norm(double [] A) {
+		return Math.sqrt((A[0]*A[0])+(A[1]*A[1])+(A[2]*A[2]));
+	}
+	
+	public static double norm2(double [] A) {
+		return (A[0]*A[0])+(A[1]*A[1])+(A[2]*A[2]);
+	}
+	
+	public static double [] prodVect3D(double [] v1, double [] v2)
+	{
+		double [] ret = new double[3];
+		ret[0] = v1[1] * v2[2] - v1[2] * v2[1];
+		ret[1] = v1[2] * v2[0] - v1[0] * v2[2];
+		ret[2] = v1[0] * v2[1] - v1[1] * v2[0];
+		return ret;			
+	}
+	
 	public boolean iso()
 	{
 		for (int i = 0; i < 3; i++)
@@ -110,7 +130,7 @@ public class Metric3D extends Matrix
 			System.arraycopy(dcurv, 0, dcurvmin, 0, 3);
 			System.arraycopy(dcurv, 3, dcurvmax, 0, 3);
 		}
-		Metric3D A = new Metric3D(dcurvmax, dcurvmin, Calculs.prodVect3D(dcurvmax, dcurvmin));
+		Metric3D A = new Metric3D(dcurvmax, dcurvmin, prodVect3D(dcurvmax, dcurvmin));
 		double epsilon = defl;
 		data[0][0] = cmax*cmax / (4.0 * epsilon * (2.0 - epsilon));
 		if (vmax > 0.0)
@@ -153,7 +173,7 @@ public class Metric3D extends Matrix
 			System.arraycopy(dcurv, 0, dcurvmin, 0, 3);
 			System.arraycopy(dcurv, 3, dcurvmax, 0, 3);
 		}
-		Metric3D A = new Metric3D(dcurvmax, dcurvmin, Calculs.prodVect3D(dcurvmax, dcurvmin));
+		Metric3D A = new Metric3D(dcurvmax, dcurvmin, prodVect3D(dcurvmax, dcurvmin));
 		double epsilon = defl;
 		data[0][0] = cmax*cmax / (4.0 * epsilon * (2.0 - epsilon));
 		data[1][1] = data[0][0];
@@ -171,8 +191,8 @@ public class Metric3D extends Matrix
 		double d2U[] = cacheSurf.d2U();
 		double d2V[] = cacheSurf.d2V();
 		double dUV[] = cacheSurf.dUV();
-		double unitNorm[] = Calculs.prodVect3D(d1U, d1V);
-		double nnorm = Calculs.norm(unitNorm);
+		double unitNorm[] = prodVect3D(d1U, d1V);
+		double nnorm = norm(unitNorm);
 		if (nnorm > 0.0)
 		{
 			nnorm = 1.0 / nnorm;
@@ -182,9 +202,9 @@ public class Metric3D extends Matrix
 		}
 		else
 			return;
-		data[0][0] = - Calculs.prodSca(unitNorm, d2U);
-		data[1][1] = - Calculs.prodSca(unitNorm, dUV);
-		data[2][2] = - Calculs.prodSca(unitNorm, d2V);
+		data[0][0] = - prodSca(unitNorm, d2U);
+		data[1][1] = - prodSca(unitNorm, dUV);
+		data[2][2] = - prodSca(unitNorm, d2V);
 //System.out.println("Norm: "+unitNorm[0]+" "+unitNorm[1]+" "+unitNorm[2]);
 //System.out.println("d2U: "+d2U[0]+" "+d2U[1]+" "+d2U[2]);
 //System.out.println("d2V: "+d2V[0]+" "+d2V[1]+" "+d2V[2]);
@@ -254,8 +274,8 @@ public class Metric3D extends Matrix
 	{
 		double d1U[] = cacheSurf.d1U();
 		double d1V[] = cacheSurf.d1V();
-		double unitNorm[] = Calculs.prodVect3D(d1U, d1V);
-		double nnorm = Calculs.norm(unitNorm);
+		double unitNorm[] = prodVect3D(d1U, d1V);
+		double nnorm = norm(unitNorm);
 		if (nnorm > 0.0)
 		{
 			nnorm = 1.0 / nnorm;
