@@ -616,9 +616,7 @@ public class OTriangle
 		assert Vertex.outer != apex();
 		if (apex2 == Vertex.outer)
 			return true;
-		if (apex2.inCircleTest3(this))
-			return false;
-		return true;
+		return !apex2.inCircleTest3(this);
 	}
 	
 	public final long get2Area()
