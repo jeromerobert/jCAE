@@ -227,6 +227,8 @@ public class Mesher
 			new UNVConverter(xmlDir).writeUNV(unvName);
 		else
 			new UNVConverter(xmlDir).writeUNV(unvName+".gz");
+		logger.info("Exporting MESH");
+		mesh3D.writeMESH(filename.substring(0, filename.lastIndexOf('.'))+".mesh");
 
 		logger.info("End mesh");
 	}
