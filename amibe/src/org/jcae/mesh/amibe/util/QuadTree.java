@@ -346,7 +346,10 @@ public class QuadTree
 			double2int(from.getUV(), ij);
 			nearestVertex = v;
 			fromVertex = from;
-			i2d = x0[2] * (mesh.compGeom().radius2d(fromVertex));
+			// FIXME: a factor of 1.005 is added to take rounding
+			// errors into account, a better approximation should
+			// be used.
+			i2d = 1.005 * x0[2] * (mesh.compGeom().radius2d(fromVertex));
 			dist = mesh.compGeom().distance(fromVertex, v);
 			idist = (int) (dist * i2d);
 			if (idist > Integer.MAX_VALUE/2)
