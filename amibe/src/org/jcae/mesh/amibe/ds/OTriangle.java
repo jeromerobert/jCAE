@@ -619,6 +619,16 @@ public class OTriangle
 		return !apex2.inCircleTest3(this);
 	}
 	
+	private final boolean isDelaunay_anisotropic2(Vertex apex2)
+	{
+		assert Vertex.outer != origin();
+		assert Vertex.outer != destination();
+		assert Vertex.outer != apex();
+		if (apex2 == Vertex.outer)
+			return true;
+		return apex2.isSmallerDiagonale(this);
+ 	}
+ 	
 	public final long get2Area()
 	{
 		return tri.vertex[0].onLeft(tri.vertex[1], tri.vertex[2]);
