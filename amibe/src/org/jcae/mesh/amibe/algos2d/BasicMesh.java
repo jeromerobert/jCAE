@@ -86,6 +86,8 @@ public class BasicMesh
 			if (uv[1] < vmin)
 				vmin = uv[1];
 		}
+		if (umax <= umin || vmax <= vmin)
+			throw new InvalidFaceException();
 		mesh.initQuadTree(umin, umax, vmin, vmax);
 		//  Initial point insertion sometimes fail on 2D,
 		//  this needs to be investigated.
