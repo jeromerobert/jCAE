@@ -1,3 +1,34 @@
+Wed Dec 22 14:35:01 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Vertex.java:  Fix a bogus test in inCircleTest3(), some triangles were not Delaunay.
+
+Wed Dec 22 12:13:46 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/Mesher.java
+	  src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/amibe/ds/Vertex.java
+	  src/org/jcae/mesh/amibe/util/QuadTree.java
+	  src/org/jcae/mesh/amibe/algos2d/BasicMesh.java
+	  src/org/jcae/mesh/mesher/ds/SubMesh2D.java
+	  src/org/jcae/mesh/xmldata/MeshWriter.java:  Previously Mesh structures were transformed into SubMesh2D after meshing; this is no more the case, we can now take full advantage of Mesh structures.
+	* src/org/jcae/mesh/mesher/algos2d/RefineFace1.java
+	  src/org/jcae/mesh/mesher/ds/tools/Edge2DSwapper.java
+	  src/org/jcae/mesh/mesher/ds/tools/FindEdge2DCutter.java
+	  src/org/jcae/mesh/mesher/ds/tools/HoleFiller.java: Obsolete classes.
+
+Thu Dec 16 15:11:38 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/algos2d/CollapseEdges.java
+	  src/org/jcae/mesh/mesher/algos2d/CutEdges.java
+	  src/org/jcae/mesh/mesher/algos2d/ImproveDeflection.java
+	  src/org/jcae/mesh/mesher/algos2d/InnerRefine.java
+	  src/org/jcae/mesh/mesher/algos2d/InsertSink.java
+	  src/org/jcae/mesh/mesher/algos2d/RefineFace0.java
+	  src/org/jcae/mesh/mesher/algos2d/SmoothAngles.java
+	  src/org/jcae/mesh/mesher/algos2d/SmoothNodes.java
+	  src/org/jcae/mesh/mesher/algos2d/SmoothNodes3D.java
+	  src/org/jcae/mesh/mesher/algos2d/TargetSize.java:  Remove these routines, they are useless in jCAE-mesher and are still available under jcae/jCAE.
+
 Wed Dec 15 15:22:07 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/Mesher.java:  Write compressed UNV.
