@@ -1,3 +1,19 @@
+Thu Mar  3 17:46:20 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/UNVConverter.java: Add methods to write files in the MESH format.
+	* src/org/jcae/mesh/Mesher.java: The MMesh3D instance is no more needed, UNVConverter can convert our 3D mesh to UNV or MESH format without having to map the whole mesh into memory.
+
+Thu Mar  3 14:37:33 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/MesherBig.java
+	  src/org/jcae/mesh/xmldata/MeshToMMesh3DConvert.java: Synchronize with Mesher.java and fix bugs in MeshToMMesh3DConvert.
+	* src/org/jcae/mesh/xmldata/jcae.dtd
+	  src/org/jcae/mesh/xmldata/JCAEXMLData.java
+	  src/org/jcae/mesh/xmldata/MMesh3DReader.java
+	  src/org/jcae/mesh/xmldata/MeshToMMesh3DConvert.java: Write normals into jcae3d.
+	* src/org/jcae/mesh/MesherBig.java: Renamed into ...
+	* src/org/jcae/mesh/Mesher.java: The 3D Fuse algorithm is disabled for now, it needs to be adjusted so that it can be applied out of core.
+
 Wed Mar  2 10:37:03 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src-occ/org/jcae/mesh/cad/occ/OCCGeomSurface.java: New normal() method.  Requires an up-to-date libOccJava.
