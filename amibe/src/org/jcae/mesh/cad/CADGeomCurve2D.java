@@ -30,4 +30,10 @@ public interface CADGeomCurve2D
      * @return an array {u, v}
      */    
 	public double [] value(double p);
+	
+    /**
+     * Return the range of the parametrization of this curve
+     * @return an array {pMin, pMax}
+     */    
+	public double [] getRange();
 }

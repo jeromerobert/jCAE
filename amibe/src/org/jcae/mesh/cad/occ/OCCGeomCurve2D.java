@@ -51,4 +51,9 @@ public class OCCGeomCurve2D implements CADGeomCurve2D
 		return myCurve.value((float) p);
 	}
 	
+	public double [] getRange()
+	{
+		return range;
+	}
+	
 }
