@@ -386,6 +386,22 @@ public class Vertex
 		}
 		catch (RuntimeException ex)
 		{
+		}
+		try {
+			// Test the swapped edge
+			// this -> vc2   vc1 -> this   vc2 -> va3  va3 -> vc1
+			Vertex C3 = vc1.circumcenter(this, va3, vc1);
+			double ret =
+				mesh.compGeom().distance(C3, vc2, vc1) /
+				mesh.compGeom().distance(C3, vc1, vc1);
+			Vertex C0 = circumcenter(this, va3, vc1);
+			ret +=
+				mesh.compGeom().distance(C0, vc2, vc2) /
+				mesh.compGeom().distance(C0, vc1, vc2);
+			return (ret > 2.0);
+		}
+		catch (RuntimeException ex)
+		{
 			return inCircleTest2(ot);
 		}
 	}
