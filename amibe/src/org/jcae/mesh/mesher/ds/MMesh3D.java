@@ -147,15 +147,9 @@ public class MMesh3D
 	 */
 	public void addSubMesh2D(SubMesh2D submesh, boolean hasLabels)
 	{
-		assert (submesh.isValid());
 		CADFace F = (CADFace) submesh.getGeometry();
 		logger.debug("Removing degenerated edges from SubMesh2D...");
 		submesh.removeDegeneratedEdges();
-		if (logger.isDebugEnabled())
-		{
-			//  The test above is added to prevent computation of submesh.quality()
-			logger.debug("2D quality (deg.): "+submesh.quality() * 180.0 / Math.PI);
-		}
 		HashMap mapNode2DToNode3D = new HashMap();
 		Iterator itn = submesh.getNodesIterator();
 		while (itn.hasNext())

@@ -153,9 +153,7 @@ public class Mesher
 					if (null != submesh)
 					{
 						logger.info("Importing face "+iFace);
-						submesh.pushCompGeom(3);
 						mesh3D.addSubMesh2D(submesh, true);
-						submesh.popCompGeom(3);					
 					}
 				}
 				mesh3D.printInfos();

@@ -21,16 +21,10 @@
 package org.jcae.mesh.mesher.ds;
 
 import org.jcae.mesh.mesher.ds.MMesh1D;
-import org.jcae.mesh.mesher.ds.tools.*;
-import org.jcae.mesh.mesher.metrics.Metric2D;
 import org.jcae.mesh.cad.*;
-import org.jcae.mesh.util.Calculs;
 import java.util.Iterator;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.ArrayList;
-import java.util.Stack;
 import java.io.*;
 import org.apache.log4j.Logger;
 
@@ -51,9 +45,6 @@ public class SubMesh2D
 	//  The geometrical surface describing the topological face, stored for
 	//  efficiebcy reason
 	private CADGeomSurface surface;
-	
-	//  Stack of methods to compute geometrical values
-	private Stack compGeomStack;
 	
 	//  Set of faces
 	private HashSet faceset = new HashSet();
@@ -78,55 +69,6 @@ public class SubMesh2D
 	{
 		face = F;
 		surface = face.getGeomSurface();
-		compGeomStack = new Stack();
-	}
-	
-	public void pushCompGeom(int i)
-	{
-		if (i == 2)
-			compGeomStack.push(new Calculus2D(this));
-		else if (i == 3)
-			compGeomStack.push(new Calculus3D(this));
-		else
-			throw new java.lang.IllegalArgumentException("pushCompGeom argument must be either 2 or 3, current value is: "+i);
-	}
-	
-	public void pushCompGeom(String type)
-	{
-		if (type.equals("2"))
-			compGeomStack.push(new Calculus2D(this));
-		else if (type.equals("3"))
-			compGeomStack.push(new Calculus3D(this));
-		else
-			throw new java.lang.IllegalArgumentException("pushCompGeom argument must be either 2 or 3, current value is: "+type);
-	}
-	
-	public Calculus popCompGeom()
-	{
-		return (Calculus) compGeomStack.pop();
-	}
-	
-	public Calculus popCompGeom(int i)
-	{
-		Object ret = compGeomStack.pop();
-		if (i == 2)
-		{
-			if (!(ret instanceof Calculus2D))
-				throw new java.lang.RuntimeException("Internal error.  Expected value: 2, found: 3");
-		}
-		else if (i == 3)
-		{
-			if (!(ret instanceof Calculus3D))
-				throw new java.lang.RuntimeException("Internal error.  Expected value: 3, found: 2");
-		}
-		else
-			throw new java.lang.IllegalArgumentException("pushCompGeom argument must be either 2 or 3, current value is: "+i);
-		return (Calculus) ret;
-	}
-	
-	public Calculus compGeom()
-	{
-		return (Calculus) compGeomStack.peek();
 	}
 	
 	/**
@@ -376,7 +318,6 @@ public class SubMesh2D
 			logger.debug("Removing "+e);
 			collapse(e);
 		}
-		assert isValid() : "Invalid 2D mesh";
 	}
 	
 	/**
@@ -430,30 +371,6 @@ public class SubMesh2D
 		edgeset.remove(e1);
 		edgeset.remove(edge);
 		nodeset.remove(pt1);
-	}
-	
-	/**
-	 * Computes mesh quality.
-	 *
-	 * @return mesh quality.
-	 */
-	public double quality()
-	{
-		double q = Float.MAX_VALUE;
-		double q2;
-		for(Iterator it=faceset.iterator();it.hasNext();)
-		{
-			MFace2D f= (MFace2D) it.next();
-			Iterator itn = f.getNodesIterator();
-			MNode2D n1 = (MNode2D) itn.next();
-			MNode2D n2 = (MNode2D) itn.next();
-			MNode2D n3 = (MNode2D) itn.next();
-
-			q2 = compGeom().qualityAniso(n1, n2, n3);
-			if (q2 < q)
-				q = q2;
-		}
-		return q;
 	}
 	
 	/**
@@ -566,101 +483,6 @@ public class SubMesh2D
 			logger.fatal(e.toString());
 			e.printStackTrace();
 		}
-	}
-	
-	/**
-	 * Checks the validity of a 2D discretization.
-	 * This method is called within assertions, this is why it returns a
-	 * <code>boolean</code>.
-	 *
-	 * @return <code>true</code> if all checks pass.
-	 * @throws AssertException if a check fails.
-	 */
-	public boolean isValid()
-	{
-		HashSet tempset = new HashSet(nodeset);
-		for (Iterator ite = edgeset.iterator(); ite.hasNext(); )
-		{
-			MEdge2D e = (MEdge2D) ite.next();
-			assert nodeset.contains(e.getNodes1()) : e;
-			assert nodeset.contains(e.getNodes2()) : e;
-			if (checkInvertedTriangles)
-				assert (!e.isMutable() && e.getFaces().size() == 1) ||
-			        	(e.isMutable() && e.getFaces().size() == 2) : e+" has "+e.getFaces().size()+" face(s) ";
-			assert e == getEdgeDefinedByNodes(e.getNodes1(), e.getNodes2()) : e+" is not equal to "+getEdgeDefinedByNodes(e.getNodes1(), e.getNodes2());
-			tempset.remove(e.getNodes1());
-			tempset.remove(e.getNodes2());
-		}
-		assert tempset.isEmpty() : tempset;
-		
-		tempset.clear();
-		tempset = new HashSet(edgeset);
-		for (Iterator itf = faceset.iterator(); itf.hasNext(); )
-		{
-			MFace2D f = (MFace2D) itf.next();
-			assert f.isValid() : f;
-			for(Iterator ite=f.getEdgesIterator(); ite.hasNext();)
-			{
-				MEdge2D e = (MEdge2D) ite.next();
-				assert edgeset.contains(e) : f+" does not contain "+e;
-				tempset.remove(e);
-			}
-			for(Iterator itn=f.getNodesIterator(); itn.hasNext();)
-			{
-				MNode2D n = (MNode2D) itn.next();
-				assert n.getElements2D().contains(f) : n+" is not linked to "+f;
-			}
-		}
-		assert tempset.isEmpty() : tempset;
-		if (checkInvertedTriangles)
-			for (Iterator ite = edgeset.iterator(); ite.hasNext(); )
-			{
-				MEdge2D e = (MEdge2D) ite.next();
-				assert isEdgeValid(e) : e + " " + e.getNodes1() + " " + e.getNodes2();
-			}
-		return true;
-	}
-	
-	public boolean isEdgeValid(MEdge2D e)
-	{
-		if (!e.isMutable())
-			return true;
-		MNode2D pt1 = e.getNodes1();
-		MNode2D pt2 = e.getNodes2();
-		if (!pt1.isMutable() && !pt2.isMutable())
-			return true;
-		Iterator itf = e.getFacesIterator();
-		MFace2D f1 = (MFace2D) itf.next();
-		MFace2D f2 = (MFace2D) itf.next();
-		MNode2D apex1 = f1.apex(e);
-		MNode2D apex2 = f2.apex(e);
-		
-		MNode3D pt1_3 = new MNode3D(pt1, surface);
-		MNode3D pt2_3 = new MNode3D(pt2, surface);
-		MNode3D apex1_3 = new MNode3D(apex1, surface);
-		MNode3D apex2_3 = new MNode3D(apex2, surface);
-		double [] x1 = pt1_3.getXYZ();
-		double [] x2 = pt2_3.getXYZ();
-		double [] xa1 = apex1_3.getXYZ();
-		double [] xa2 = apex2_3.getXYZ();
-		double [] v1 = new double[3];
-		double [] v2 = new double[3];
-		double [] v3 = new double[3];
-		for (int i = 0; i < 3; i++)
-		{
-			v1[i] = x2[i] - x1[i];
-			v2[i] = xa1[i] - x1[i];
-			v3[i] = xa2[i] - x1[i];
-		}
-		/*
-		 *   n1 = v1 wedge v2 / || v1 wedge v2 ||
-		 *   n2 = v3 wedge v1 / || v3 wedge v1 ||
-		 *   n1.n2 = ((v1.v2)(v1.v3) - (v1.v1)(v2.v3))/ || v1 wedge v2 || / || v1 wedge v3 ||
-		 */
-		return Calculs.prodSca(v1, v2) * Calculs.prodSca(v1, v3)
-		       - Calculs.prodSca(v1, v1) * Calculs.prodSca(v2, v3)
-			>= - 0.8 * Calculs.norm(Calculs.prodVect3D(v1, v2)) *
-		              Calculs.norm(Calculs.prodVect3D(v1, v3));
 	}
 	
 	public String toString()
