@@ -52,12 +52,15 @@ public class Mesher
 	 * @param brepfilename  the filename of the brep file	 
 	 * @param discr  the value of the meshing constraint
 	 */
-	public static void load(String brepfilename, double discr, String xmlDir)
+	public static void load(String brepfilename, String xmlDir, double discr, double defl)
 	{
 		//  Declare all variables here
 		MMesh3D mesh3D = new MMesh3D();
 		Metric3D.setLength(discr);
 		Metric2D.setLength(discr);
+		org.jcae.mesh.amibe.metrics.Metric3D.setLength(discr);
+		org.jcae.mesh.amibe.metrics.Metric2D.setLength(discr);
+		org.jcae.mesh.amibe.metrics.Metric3D.setDeflection(defl);
 		MMesh1D mesh1D;
 		//     xmlDir:      absolute path name where XML files are stored
 		//     xmlFile:     basename of the main XML file
@@ -107,7 +110,9 @@ public class Mesher
 				try
 				{
 					submesh.pushCompGeom(2);
+					submesh.pushCompGeom(3);
 					submesh.init(mesh1D);
+					submesh.popCompGeom(3);
 					submesh.popCompGeom(2);
 					
 					submesh.pushCompGeom(3);
@@ -222,9 +227,9 @@ public class Mesher
 	 */
 	public static void main(String args[])
 	{
-		if (args.length!=2&&args.length!=3)
+		if (args.length < 2 || args.length > 4)
 		{
-			System.out.println("Usage : MeshGen filename size [output directory]");
+			System.out.println("Usage : MeshGen filename output_directory edge_length deflection");
 			System.exit(0);
 		}
 		else
@@ -232,23 +237,10 @@ public class Mesher
 			String filename=args[0];
 			if (filename.endsWith(".step") || filename.endsWith(".igs"))
 				filename=convertToBRep(filename);
-			Double discr=new Double(args[1]);
-			String xmlDir;
-			if(args.length==3)
-			{
-				xmlDir=args[2];
-			}
-			else
-			{
-				File tmpDir=new File("/tmp");
-				if(!tmpDir.exists())
-				{
-					tmpDir=new File(System.getProperty("user.home"), ".jcae.tmp");			
-					if(!tmpDir.exists()) tmpDir.mkdirs();
-				}
-				xmlDir = (new File(tmpDir, filename+".jcae")).getAbsolutePath();
-			}
-			load(filename, discr.doubleValue(), xmlDir);	
+			String xmlDir = args[1];
+			Double discr=new Double(args[2]);
+			Double defl=new Double(args[3]);
+			load(filename, xmlDir, discr.doubleValue(), defl.doubleValue());	
 		}
 	}
 }
