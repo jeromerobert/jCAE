@@ -1,3 +1,8 @@
+Wed Feb 23 13:49:03 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/util/Octree.java:  New getMaxLevel() method.
+	* src/org/jcae/mesh/amibe/util/Octree.java:  Fix deambulate(), this method could enter an infinite loop.  It was not used until now, but is called by getMaxLevel().
+
 Tue Feb 22 16:27:31 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src-occ/org/jcae/mesh/cad/occ/OCCDiscretizeCurve3D.java:  An exception was raised when a small circular edge was discretized.

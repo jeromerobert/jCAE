@@ -322,6 +322,48 @@ public class Octree
 		return ret;
 	}
 	
+	private final class getMinSizeProcedure implements OctreeProcedure
+	{
+		public int searchedCells = 0;
+		public int minSize = gridSize;
+		public getMinSizeProcedure()
+		{
+		}
+		public final int action(Object o, int s, int i0, int j0, int k0)
+		{
+			OctreeCell self = (OctreeCell) o;
+			searchedCells++;
+			if (s < minSize)
+				minSize = s;
+			return 0;
+		}
+	}
+	
+	public final int getMinSize()
+	{
+		OctreeCell current = root;
+		getMinSizeProcedure gproc = new getMinSizeProcedure();
+		deambulate(gproc);
+		int ret = gproc.minSize;
+		if (logger.isDebugEnabled())
+		{
+			logger.debug("  search in "+gproc.searchedCells+"/"+nCells+" cells");
+			logger.debug("  result: "+ret);
+		}
+		return ret;
+	}
+	public final int getMaxLevel()
+	{
+		int size = getMinSize();
+		int ret = 1;
+		while (size < gridSize)
+		{
+			size <<= 1;
+			ret++;
+		}
+		return ret;
+	}
+	
 	private final class getNearestVertexProcedure implements OctreeProcedure
 	{
 		private final int [] ijk = new int[3];;
@@ -505,20 +547,26 @@ public class Octree
 			}
 			else
 			{
-				while (null == octreeStack[l-1].subOctree[posStack[l]])
+				while (l > 0)
 				{
 					posStack[l]++;
 					if (posStack[l] == OctreeCell.SUBOCTREES)
 					{
 						s <<= 1;
 						l--;
-						if (l == 0)
-							return true;
+					}
+					else
+					{
+						if (null != octreeStack[l-1].subOctree[posStack[l]])
+							break;
 					}
 				}
+				if (l == 0)
+					break;
 				octreeStack[l] = (OctreeCell) octreeStack[l-1].subOctree[posStack[l]];
 			}
 		}
+		return true;
 	}
 	
 }
