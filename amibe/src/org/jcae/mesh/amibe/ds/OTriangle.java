@@ -488,8 +488,8 @@ public class OTriangle
 		Triangle newTri1 = newLeft.tri;
 		Triangle newTri2 = newRight.tri;
 		if (force)
-			CheckAndSwap(newLeft, oldRight);
-		else if (0 == CheckAndSwap(newLeft, oldRight))
+			CheckAndSwap(newLeft, oldRight, false);
+		else if (0 == CheckAndSwap(newLeft, oldRight, false))
 		{
 			//  v has been inserted and no edges are swapped,
 			//  thus global quality has been decreased.
@@ -509,6 +509,7 @@ public class OTriangle
 		return true;
 	}
 	
+	//  Called from BasicMesh to improve initial mesh
 	public int checkAndSwap()
 	{
 		//  As CheckAndSwap modifies its arguments, 'this'
@@ -518,10 +519,10 @@ public class OTriangle
 		OTriangle ot2 = new OTriangle();
 		nextOTri(this, ot1);
 		ot1.prevOTri();
-		return CheckAndSwap(ot1, ot2);
+		return CheckAndSwap(ot1, ot2, true);
 	}
 	
-	private int CheckAndSwap(OTriangle newLeft, OTriangle newRight)
+	private int CheckAndSwap(OTriangle newLeft, OTriangle newRight, boolean smallerDiag)
 	{
 		int nrSwap = 0;
 		Vertex v = newLeft.apex();
@@ -547,9 +548,13 @@ public class OTriangle
 				swap = (v.onLeft(a, o) < 0L);
 			else if (a == Vertex.outer)
 				swap = (v.onLeft(o, d) == 0L);
-			else
-				swap = newLeft.isMutable() && !newLeft.isDelaunay(a);
-			
+			else if (newLeft.isMutable())
+			{
+				if (!smallerDiag)
+					swap = !newLeft.isDelaunay(a);
+				else
+					swap = !a.isSmallerDiagonale(newLeft);
+			}
 			if (swap)
 			{
 				newLeft.swapOTriangle(v, a);
@@ -619,16 +624,6 @@ public class OTriangle
 		return !apex2.inCircleTest3(this);
 	}
 	
-	private final boolean isDelaunay_anisotropic2(Vertex apex2)
-	{
-		assert Vertex.outer != origin();
-		assert Vertex.outer != destination();
-		assert Vertex.outer != apex();
-		if (apex2 == Vertex.outer)
-			return true;
-		return apex2.isSmallerDiagonale(this);
- 	}
- 	
 	public final long get2Area()
 	{
 		return tri.vertex[0].onLeft(tri.vertex[1], tri.vertex[2]);
