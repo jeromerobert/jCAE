@@ -93,11 +93,6 @@ public class Metric2D
 		
 		/**
 		 *  Computes the simultaneous reduction of 2 metrics
-		 *  Returns a double cosT such that V1(cosT,sinT) satisfies
-		 *     A V1 = lambda1 V1,  B V1 = mu1 V1
-		 *     A V2 = lambda2 V2,  B V2 = mu2 V2
-		 *  where V2(-sinT,cosT)
-		 *  Note: sinT = sart(1-cosT^2)
 		 */
 		private Matrix2D simultaneousReduction (Matrix2D B)
 		{
@@ -110,10 +105,23 @@ public class Metric2D
 			double b = data[0][0]*B.data[1][1] + data[1][1]*B.data[0][0] - 2.0 * data[1][0]*B.data[1][0];
 			double c = det();
 			double delta = b*b - 4.0 * a * c;
-			if (delta < 1.e-4 * Math.abs(a*b) || a < 1.e-10 * b)
+			if (a < 1.e-10 * b)
 			{
 				ret.data[0][0] = ret.data[1][1] = 1.0;
 				ret.data[0][1] = ret.data[1][0] = 0.0;
+				return ret;
+			}
+			else if (delta < 1.e-4 * Math.abs(a*b))
+			{
+				//  B is similar to A.  Search for eigenvectors of A
+				delta = (data[0][0] - data[1][1]) * (data[0][0] - data[1][1]) + 4.0 * data[0][1] * data[0][1];
+				double l1 = 0.5 * (data[0][0] + data[1][1] + Math.sqrt(delta));
+				double l2 = 0.5 * (data[0][0] + data[1][1] - Math.sqrt(delta));
+				double invnorm1 = 1.0 / Math.sqrt((data[0][0]-l1) * (data[0][0]-l1) + data[1][0] * data[1][0]);
+				ret.data[0][0] = -data[1][0] * invnorm1;
+				ret.data[1][0] = (data[0][0]-l1) * invnorm1;
+				ret.data[0][1] = -ret.data[1][0];
+				ret.data[1][1] = ret.data[0][0];
 				return ret;
 			}
 			
@@ -134,27 +142,34 @@ public class Metric2D
 			{
 				double invnorm = 1.0 / Math.sqrt(t2 + t3);
 				ret.data[0][0] = (data[1][1]-l1*B.data[1][1]) * invnorm;
-				ret.data[0][1] = (-data[1][0]+l1*B.data[1][0]) * invnorm;
+				ret.data[1][0] = (-data[1][0]+l1*B.data[1][0]) * invnorm;
 			}
 			else
 			{
 				double invnorm = 1.0 / Math.sqrt(t2 + t1);
 				ret.data[0][0] = (data[1][0]-l1*B.data[1][0]) * invnorm;
-				ret.data[0][1] = (-data[0][0]+l1*B.data[0][0]) * invnorm;
+				ret.data[1][0] = (-data[0][0]+l1*B.data[0][0]) * invnorm;
 			}
+			if (delta == 0.0)
+			{
+				ret.data[0][1] = - ret.data[1][0];
+				ret.data[1][1] = ret.data[0][0];
+				return ret;
+			}
+			
 			t1 = (data[0][0]-l2*B.data[0][0]) * (data[0][0]-l2*B.data[0][0]);
 			t2 = (data[1][0]-l2*B.data[1][0]) * (data[1][0]-l2*B.data[1][0]);
 			t3 = (data[1][1]-l2*B.data[1][1]) * (data[1][1]-l2*B.data[1][1]);
 			if (t1 < t3)
 			{
 				double invnorm = 1.0 / Math.sqrt(t2 + t3);
-				ret.data[1][0] = (data[1][1]-l2*B.data[1][1]) * invnorm;
+				ret.data[0][1] = (data[1][1]-l2*B.data[1][1]) * invnorm;
 				ret.data[1][1] = (-data[1][0]+l2*B.data[1][0]) * invnorm;
 			}
 			else
 			{
 				double invnorm = 1.0 / Math.sqrt(t2 + t1);
-				ret.data[1][0] = (data[1][0]-l2*B.data[1][0]) * invnorm;
+				ret.data[0][1] = (data[1][0]-l2*B.data[1][0]) * invnorm;
 				ret.data[1][1] = (-data[0][0]+l2*B.data[0][0]) * invnorm;
 			}
 			return ret;
@@ -175,10 +190,15 @@ public class Metric2D
 				norm2(res.data[0][1], res.data[1][1]),
 				B.norm2(res.data[0][1], res.data[1][1])
 			);
+			Matrix2D D = new Matrix2D(ev1, 0.0, 0.0, ev2);
 			double a11 = ev1 * resInv.data[0][0] * resInv.data[0][0] + ev2 * resInv.data[1][0] * resInv.data[1][0];
 			double a21 = ev1 * resInv.data[0][0] * resInv.data[0][1] + ev2 * resInv.data[1][0] * resInv.data[1][1];
 			double a22 = ev1 * resInv.data[0][1] * resInv.data[0][1] + ev2 * resInv.data[1][1] * resInv.data[1][1];
 			return new Matrix2D(a11, a21, a21, a22);
+		}
+		public String toString()
+		{
+			return "Matric2D: ("+data[0][0]+", "+data[0][1]+", "+data[1][0]+", "+data[1][1]+")";
 		}
 	}
 	
@@ -196,26 +216,32 @@ public class Metric2D
 			surf.dinit(2);
 			cacheSurf = surf;
 		}
-		Metric3D m3d = new Metric3D(surf, pt, "iso");
+		Metric3D m3d = new Metric3D(surf, pt);
+		m3d.iso();
 		//  For efficiency reasons, restrict2D returns a static array
 		double [][] temp = m3d.restrict2D();
+		double sym = 0.5 * (temp[0][1] + temp[1][0]);
 		if (Metric3D.hasDeflection())
 		{
-			Matrix2D m2d0 = new Matrix2D(temp[0][0], temp[0][1], temp[0][1], temp[1][1]);
-			Metric3D m3dbis = new Metric3D(surf, pt, "curviso");
-			temp = m3dbis.restrict2D();
-			Matrix2D m2d1 = new Matrix2D(temp[0][0], temp[0][1], temp[0][1], temp[1][1]);
-			Matrix2D res = m2d0.intersection(m2d1);
-			E = res.data[0][0];
-			F = 0.5 * (res.data[1][0] + res.data[0][1]);
-			G = res.data[1][1];
+			Metric3D m3dbis = new Metric3D(surf, pt);
+			if (m3dbis.curvIso())
+			{
+				//  The curvature metrics is defined, so we can compute
+				//  its intersection with m3d.
+				Matrix2D m2d0 = new Matrix2D(temp[0][0], sym, sym, temp[1][1]);
+				temp = m3dbis.restrict2D();
+				sym = 0.5 * (temp[0][1] + temp[1][0]);
+				Matrix2D m2d1 = new Matrix2D(temp[0][0], sym, sym, temp[1][1]);
+				Matrix2D res = m2d0.intersection(m2d1);
+				temp[0][0] = res.data[0][0];
+				temp[1][1] = res.data[1][1];
+				//  FIXME:  Why is -1 needed?
+				sym = -0.5 * (res.data[0][1] + res.data[1][0]);
+			}
 		}
-		else
-		{
-			E = temp[0][0];
-			F = temp[0][1];
-			G = temp[1][1];
-		}
+		E = temp[0][0];
+		F = sym;
+		G = temp[1][1];
 	}
 	
 	public Matrix2D param2tangent()

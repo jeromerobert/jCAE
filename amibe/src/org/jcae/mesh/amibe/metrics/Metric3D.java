@@ -46,7 +46,7 @@ public class Metric3D extends Matrix
 	 * @param surf  geometrical surface
 	 * @param pt  node where metrics is computed.
 	 */
-	public Metric3D(CADGeomSurface surf, Vertex pt, String type)
+	public Metric3D(CADGeomSurface surf, Vertex pt)
 	{
 		rank = 3;
 		data = new double[rank][rank];
@@ -63,10 +63,6 @@ public class Metric3D extends Matrix
 		}
 		double uv[] = pt.getUV();
 		cacheSurf.setParameter(uv[0], uv[1]);
-		if (type.equals("iso"))
-			computeMetric3DIso();
-		else
-			computeMetric3DCurvIso();
 	}
 	
 	public Metric3D(double [] e1, double [] e2, double [] e3)
@@ -81,20 +77,25 @@ public class Metric3D extends Matrix
 		}
 	}
 	
-	private void computeMetric3DIso()
+	public boolean iso()
 	{
-		scale(1.0/discr/discr);
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+				data[i][j] = 0.0;
+			data[i][i] = 1.0/discr/discr;
+		}
+		return true;
 	}
 	
-	private void computeMetric3DCurv(double defl, double vmax)
+	public boolean curv(double vmax)
 	{
 		double cmin = Math.abs(cacheSurf.minCurvature());
 		double cmax = Math.abs(cacheSurf.maxCurvature());
-		if (cmin == Double.NaN || cmax == Double.NaN)
+		if (cmin == Double.NaN || cmin == 0.0 || cmax == Double.NaN || cmax == 0.0)
 		{
 			logger.debug("Infinite curvature");
-			scale(100.0/discr/discr);
-			return;
+			return false;
 		}
 		double [] dcurv = cacheSurf.curvatureDirections();
 		double [] dcurvmax = new double[3];
@@ -127,17 +128,17 @@ public class Metric3D extends Matrix
 		data[2][2] = 1.0/discr/discr;
 		Matrix res = (this.multL(A.transp())).multR(A);
 		data = res.data;
+		return true;
 	}
 	
-	private void computeMetric3DCurvIso()
+	public boolean curvIso()
 	{
 		double cmin = Math.abs(cacheSurf.minCurvature());
 		double cmax = Math.abs(cacheSurf.maxCurvature());
-		if (cmin == Double.NaN || cmax == Double.NaN)
+		if (cmin == Double.NaN || cmin == 0.0 || cmax == Double.NaN || cmax == 0.0)
 		{
 			logger.debug("Infinite curvature");
-			scale(100.0/discr/discr);
-			return;
+			return false;
 		}
 		double [] dcurv = cacheSurf.curvatureDirections();
 		double [] dcurvmax = new double[3];
@@ -159,10 +160,11 @@ public class Metric3D extends Matrix
 		data[2][2] = data[0][0];
 		Matrix res = (this.multL(A.transp())).multR(A);
 		data = res.data;
+		return true;
 	}
 	
 /*
-	private void computeMetric3DCurv2()
+	public void curv2()
 	{
 		double d1U[] = cacheSurf.d1U();
 		double d1V[] = cacheSurf.d1V();
