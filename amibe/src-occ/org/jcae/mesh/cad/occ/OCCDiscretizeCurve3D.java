@@ -263,68 +263,53 @@ public class OCCDiscretizeCurve3D
 			if (backward)
 			{
 				for (int i = nr - 2; i > 0; i--)
-				{
-					double l1 = Math.sqrt(
-					  (xyz[3*i  ] - xyz[3*i-3]) * (xyz[3*i  ] - xyz[3*i-3]) +
-					  (xyz[3*i+1] - xyz[3*i-2]) * (xyz[3*i+1] - xyz[3*i-2]) +
-					  (xyz[3*i+2] - xyz[3*i-1]) * (xyz[3*i+2] - xyz[3*i-1]));
-					double l2 = Math.sqrt(
-					  (xyz[3*i  ] - xyz[3*i+3]) * (xyz[3*i  ] - xyz[3*i+3]) +
-					  (xyz[3*i+1] - xyz[3*i+4]) * (xyz[3*i+1] - xyz[3*i+4]) +
-					  (xyz[3*i+2] - xyz[3*i+5]) * (xyz[3*i+2] - xyz[3*i+5]));
-					double delta = Math.abs(l2 - l1) / (l1+l2);
-					if (delta > 0.01 * 0.5)
-					{
-						redo = true;
-						double newA = a[i] + 0.8 * (a[i+1] - a[i-1]) * (l2 - l1) / (l1 + l2);
-						double [] newXYZ = curve.value(a[i]);
-
-						double newl1 = Math.sqrt(
-						  (newXYZ[0] - xyz[3*i-3]) * (newXYZ[0] - xyz[3*i-3]) +
-						  (newXYZ[1] - xyz[3*i-2]) * (newXYZ[1] - xyz[3*i-2]) +
-						  (newXYZ[2] - xyz[3*i-1]) * (newXYZ[2] - xyz[3*i-1]));
-						double newl2 = Math.sqrt(
-						  (newXYZ[0] - xyz[3*i+3]) * (newXYZ[0] - xyz[3*i+3]) +
-						  (newXYZ[1] - xyz[3*i+4]) * (newXYZ[1] - xyz[3*i+4]) +
-						  (newXYZ[2] - xyz[3*i+5]) * (newXYZ[2] - xyz[3*i+5]));
-						if (Math.abs(newl2 - newl1)/(newl1+newl2) < delta)
-						{
-							a[i] = newA;
-							xyz[3*i]   = newXYZ[0];
-							xyz[3*i+1] = newXYZ[1];
-							xyz[3*i+2] = newXYZ[2];
-						}
-					}
-				}
+					redo |= enforceDeflection(i, xyz);
 			}
 			else
 			{
 				for (int i = 1; i < nr - 1; i++)
-				{
-					double l1 = Math.sqrt(
-					  (xyz[3*i  ] - xyz[3*i-3]) * (xyz[3*i  ] - xyz[3*i-3]) +
-					  (xyz[3*i+1] - xyz[3*i-2]) * (xyz[3*i+1] - xyz[3*i-2]) +
-					  (xyz[3*i+2] - xyz[3*i-1]) * (xyz[3*i+2] - xyz[3*i-1]));
-					double l2 = Math.sqrt(
-					  (xyz[3*i  ] - xyz[3*i+3]) * (xyz[3*i  ] - xyz[3*i+3]) +
-					  (xyz[3*i+1] - xyz[3*i+4]) * (xyz[3*i+1] - xyz[3*i+4]) +
-					  (xyz[3*i+2] - xyz[3*i+5]) * (xyz[3*i+2] - xyz[3*i+5]));
-					if (Math.abs(l2 - l1) > 0.01 * 0.5 * (l1+l2))
-					{
-						redo = true;
-						double newA = a[i] + 0.8 * (a[i+1] - a[i-1]) * (l2 - l1) / (l1 + l2);
-						if (newA > a[i-1] && newA < a[i+1])
-							a[i] = newA;
-						double [] newXYZ = curve.value(a[i]);
-						xyz[3*i]   = newXYZ[0];
-						xyz[3*i+1] = newXYZ[1];
-						xyz[3*i+2] = newXYZ[2];
-					}
-				}
+					redo |= enforceDeflection(i, xyz);
 			}
 			if (!redo)
 				break;
 		}
+	}
+	
+	private final boolean enforceDeflection(int i, double [] xyz)
+	{
+		boolean ret = false;
+		double l1 = Math.sqrt(
+		  (xyz[3*i  ] - xyz[3*i-3]) * (xyz[3*i  ] - xyz[3*i-3]) +
+		  (xyz[3*i+1] - xyz[3*i-2]) * (xyz[3*i+1] - xyz[3*i-2]) +
+		  (xyz[3*i+2] - xyz[3*i-1]) * (xyz[3*i+2] - xyz[3*i-1]));
+		double l2 = Math.sqrt(
+		  (xyz[3*i  ] - xyz[3*i+3]) * (xyz[3*i  ] - xyz[3*i+3]) +
+		  (xyz[3*i+1] - xyz[3*i+4]) * (xyz[3*i+1] - xyz[3*i+4]) +
+		  (xyz[3*i+2] - xyz[3*i+5]) * (xyz[3*i+2] - xyz[3*i+5]));
+		double delta = Math.abs(l2 - l1) / (l1+l2);
+		if (delta > 0.01 * 0.5)
+		{
+			double newA = a[i] + 0.8 * (a[i+1] - a[i-1]) * (l2 - l1) / (l1 + l2);
+			double [] newXYZ = curve.value(a[i]);
+			
+			double newl1 = Math.sqrt(
+			  (newXYZ[0] - xyz[3*i-3]) * (newXYZ[0] - xyz[3*i-3]) +
+			  (newXYZ[1] - xyz[3*i-2]) * (newXYZ[1] - xyz[3*i-2]) +
+			  (newXYZ[2] - xyz[3*i-1]) * (newXYZ[2] - xyz[3*i-1]));
+			double newl2 = Math.sqrt(
+			  (newXYZ[0] - xyz[3*i+3]) * (newXYZ[0] - xyz[3*i+3]) +
+			  (newXYZ[1] - xyz[3*i+4]) * (newXYZ[1] - xyz[3*i+4]) +
+			  (newXYZ[2] - xyz[3*i+5]) * (newXYZ[2] - xyz[3*i+5]));
+			if (Math.abs(newl2 - newl1)/(newl1+newl2) < delta)
+			{
+				ret = true;
+				a[i] = newA;
+				xyz[3*i]   = newXYZ[0];
+				xyz[3*i+1] = newXYZ[1];
+				xyz[3*i+2] = newXYZ[2];
+			}
+		}
+		return ret;
 	}
 	
 	public int nbPoints()
