@@ -37,6 +37,7 @@ public class Metric3D extends Matrix
 	private static CADGeomSurface cacheSurf = null;
 	
 	private static double discr = 1.0;
+	private static double defl = 0.0;
 	private static double [][] temp32 = new double[3][2];
 	private static double [][] temp22 = new double[2][2];
 	
@@ -63,9 +64,11 @@ public class Metric3D extends Matrix
 		}
 		double uv[] = pt.getUV();
 		cacheSurf.setParameter(uv[0], uv[1]);
-		//computeMetric3DCurvIso(1.0/discr/discr);
-		//computeMetric3DCurv(0.0);
-		computeMetric3DIso();
+		//computeMetric3DCurv(defl, 0.0);
+		if (defl > 0.0 && defl <= 1.0)
+			computeMetric3DCurvIso(defl, 1.0/discr/discr);
+		else
+			computeMetric3DIso();
 	}
 	public Metric3D(double [] e1, double [] e2, double [] e3)
 	{
@@ -79,35 +82,12 @@ public class Metric3D extends Matrix
 		}
 	}
 	
-	/**
-	 * Creates a <code>Metric3D</code> instance at a given point.
-	 *
-	 * @param surf  geometrical surface
-	 * @param pt  node where metrics is computed.
-	 */
-	public Metric3D(CADGeomSurface surf, Vertex pt, String crit)
-	{
-		if (!surf.equals(cacheSurf))
-		{
-			surf.dinit(2);
-			cacheSurf = surf;
-		}
-		double uv[] = pt.getUV();
-		cacheSurf.setParameter(uv[0], uv[1]);
-		if (crit.equals("geom"))
-			computeMetric3DCurv(0.0);
-		else if (crit.equals("iso"))
-			computeMetric3DIso();
-		else
-			computeMetric3DCurv(1.0/discr/discr);
-	}
-	
 	private void computeMetric3DIso()
 	{
 		scale(1.0/discr/discr);
 	}
 	
-	private void computeMetric3DCurv(double vmax)
+	private void computeMetric3DCurv(double defl, double vmax)
 	{
 		double cmin = Math.abs(cacheSurf.minCurvature());
 		double cmax = Math.abs(cacheSurf.maxCurvature());
@@ -130,7 +110,7 @@ public class Metric3D extends Matrix
 			System.arraycopy(dcurv, 3, dcurvmax, 0, 3);
 		}
 		Metric3D A = new Metric3D(dcurvmax, dcurvmin, Calculs.prodVect3D(dcurvmax, dcurvmin));
-		double epsilon = 0.02;
+		double epsilon = defl;
 		data[0][0] = cmax*cmax / (4.0 * epsilon * (2.0 - epsilon));
 		if (vmax > 0.0)
 		{
@@ -149,7 +129,7 @@ public class Metric3D extends Matrix
 		data = res.data;
 	}
 	
-	private void computeMetric3DCurvIso(double vmax)
+	private void computeMetric3DCurvIso(double defl, double vmax)
 	{
 		double cmin = Math.abs(cacheSurf.minCurvature());
 		double cmax = Math.abs(cacheSurf.maxCurvature());
@@ -172,7 +152,7 @@ public class Metric3D extends Matrix
 			System.arraycopy(dcurv, 3, dcurvmax, 0, 3);
 		}
 		Metric3D A = new Metric3D(dcurvmax, dcurvmin, Calculs.prodVect3D(dcurvmax, dcurvmin));
-		double epsilon = 0.02;
+		double epsilon = defl;
 		data[0][0] = cmax*cmax / (4.0 * epsilon * (2.0 - epsilon));
 		if (vmax > 0.0)
 		{
@@ -228,6 +208,23 @@ public class Metric3D extends Matrix
 	public static double getLength()
 	{
 		return discr;
+	}
+	
+	/**
+	 * Set the desired edge length.
+	 */
+	public static void setDeflection(double l)
+	{
+		if (defl >= 0.0 && defl <= 1.0)
+			defl = l;
+	}
+	
+	/**
+	 * Get the desired edge length.
+	 */
+	public static double getDeflection()
+	{
+		return defl;
 	}
 	
 	/**
