@@ -318,6 +318,7 @@ public class BasicMesh
 			MNode1D p1 = null;
 			Vertex p20 = null, p2 = null;
 			mesh.initSmallEdges();
+			ArrayList nodesWire = new ArrayList(roughSize);
 			for (wexp.init((CADWire) expW.current(), face); wexp.more(); wexp.next())
 			{
 				CADEdge te = wexp.current();
@@ -353,18 +354,21 @@ public class BasicMesh
 				if (null == p20)
 				{
 					p20 = new Vertex(p1, c2d, face);
-					result.add(p20);
+					nodesWire.add(p20);
 				}
 				while (itn.hasNext())
 				{
 					p1 = (MNode1D) itn.next();
 					p2 = new Vertex(p1, c2d, face);
-					result.add(p2);
+					nodesWire.add(p2);
 				}
 			}
-			//  Overwrite the last value to close the wire
-			if (result.size() > 0)
-				result.set(result.size()-1, p20);
+			if (nodesWire.size() > 2)
+			{
+				//  Overwrite the last value to close the wire
+				nodesWire.set(nodesWire.size()-1, p20);
+				result.addAll(nodesWire);
+			}
 		}
 		
 		return (Vertex []) result.toArray(new Vertex[result.size()]);
