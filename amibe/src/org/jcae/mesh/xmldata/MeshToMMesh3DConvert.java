@@ -25,7 +25,6 @@ import org.jcae.mesh.cad.*;
 import java.io.*;
 import java.util.Iterator;
 import gnu.trove.TIntIntHashMap;
-import gnu.trove.TObjectIntHashMap;
 import org.w3c.dom.*;
 import org.w3c.dom.traversal.NodeIterator;
 import org.apache.xpath.CachedXPathAPI;
