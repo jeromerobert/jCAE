@@ -87,6 +87,12 @@ public class Vertex
 		mesh.quadtree.add(this);
 	}
 	
+	public void removeFromQuadTree()
+	{
+		logger.debug("Point removed: "+this);
+		mesh.quadtree.remove(this);
+	}
+	
 	/**
 	 * Returns a triangle containing this point.
 	 *
