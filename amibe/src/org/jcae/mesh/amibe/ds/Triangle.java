@@ -55,6 +55,17 @@ public class Triangle
 		m.add(this);
 	}
 	
+	public Vertex centroid()
+	{
+		double [] p1 = vertex[0].getUV();
+		double [] p2 = vertex[1].getUV();
+		double [] p3 = vertex[2].getUV();
+		return new Vertex(
+			(p1[0]+p2[0]+p3[0])/3.0,
+			(p1[1]+p2[1]+p3[1])/3.0
+		);
+	}
+	
 	public String toString()
 	{
 		String r = "Vertices:";
