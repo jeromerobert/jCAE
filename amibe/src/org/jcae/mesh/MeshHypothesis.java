@@ -22,8 +22,7 @@
 
 package org.jcae.mesh;
 
-//import java.util.HashSet;
-import org.jcae.mesh.util.HashSet;
+import java.util.HashSet;
 
 public class MeshHypothesis {
     public final static int CONSTRAINT=0;
