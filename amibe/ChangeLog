@@ -1,3 +1,20 @@
+Tue Mar  1 12:52:15 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos2d/CheckDelaunay.java:  New algorithm to enforce edges being Delaunay compliant.
+	* src/org/jcae/mesh/amibe/algos2d/BasicMesh.java: Fix IndexOutOfBoundsException.
+	* src/org/jcae/mesh/mesher/InitialTriangulationException.java:  Rename into...
+	* src/org/jcae/mesh/amibe/InitialTriangulationException.java:
+	* src/org/jcae/mesh/amibe/InvalidFaceException.java: New file.
+	* src/org/jcae/mesh/Mesher.java
+	  src/org/jcae/mesh/amibe/ds/Mesh.java: Degenerated edges are taken into account again, this is the only way to have nice meshes for cones. They are removed before Mesh is written onto disk by a new removeDegeneratedEdges() method.
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java: New collapse() method, currently only used by Mesh.removeDegeneratedEdges.
+	* src/org/jcae/mesh/amibe/ds/Vertex.java: New removeFromQuadTree() method.
+	* src/org/jcae/mesh/mesher/ds/MEdge2D.java
+	  src/org/jcae/mesh/mesher/ds/MFace2D.java
+	  src/org/jcae/mesh/mesher/ds/MNode2D.java
+	  src/org/jcae/mesh/mesher/ds/SubMesh2D.java
+	  src/org/jcae/mesh/xmldata/SubMesh2DReader.java: Remove more stuff from org.jcae.mesh.mesher about 2D meshing.
+
 Mon Feb 28 16:00:09 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/metrics/Matrix2D.java (simultaneousReduction):  Fix test to detect similar matrices, an exception could be raised because singular matrices were wrongly reported.
