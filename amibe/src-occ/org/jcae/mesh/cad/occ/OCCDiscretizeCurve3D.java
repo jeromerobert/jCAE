@@ -125,8 +125,6 @@ public class OCCDiscretizeCurve3D
 			double maxlen, dist;
 			while (true)
 			{
-				if (lmax - lmin < 0.5 * deltap)
-					break;
 				maxlen = 0.5 * (lmin + lmax);
 				int lastIndex = 0;
 				abscissa.clear();
@@ -153,11 +151,13 @@ public class OCCDiscretizeCurve3D
 					lmax = lmax - 0.5 * (lmax - lmin);
 				else
 					lmin = lmin + 0.5 * (lmax - lmin);
+				if (lmax - lmin < 0.5 * deltap)
+					break;
 			}
 			if (n == nr)
 				break;
 		}
-		for (int i = 0; i < abscissa.size(); i++)
+		for (int i = 0; i < nr; i++)
 		{
 			int ind = ((Integer) abscissa.get(i)).intValue();
 			if (ind != i)
