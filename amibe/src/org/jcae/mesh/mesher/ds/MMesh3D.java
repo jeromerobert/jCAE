@@ -349,7 +349,8 @@ public class MMesh3D
 				normalOffset[count] = normalCount;
 				count++;
 				double [] normal = node.getNormal();
-				normalCount += normal.length / 3;
+				if (normal != null)
+					normalCount += normal.length / 3;
 			}
 			out.println("\nTriangles\n"+facelist.size());
 			count =  0;
@@ -373,8 +374,9 @@ public class MMesh3D
 			{
 				MNode3D node=(MNode3D) it.next();
 				double [] normal = node.getNormal();
-				for (int i = 0; i < normal.length/3; i++)
-					out.println(normal[3*i]+" "+normal[3*i+1]+" "+normal[3*i+2]);
+				if (normal != null)
+					for (int i = 0; i < normal.length/3; i++)
+						out.println(normal[3*i]+" "+normal[3*i+1]+" "+normal[3*i+2]);
 			}
 			out.println("\nNormalAtTriangleVertices\n"+(3*facelist.size()));
 			count =  0;
