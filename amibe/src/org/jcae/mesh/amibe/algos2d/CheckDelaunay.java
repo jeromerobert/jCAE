@@ -66,22 +66,22 @@ public class CheckDelaunay
 
 		boolean redo = false;
 		int niter = mesh.getTriangles().size();
+		for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
+		{
+			t = (Triangle) it.next();
+			ot.bind(t);
+			for (int i = 0; i < 3; i++)
+			{
+				ot.nextOTri();
+				ot.clearAttributes(OTriangle.SWAPPED);
+			}
+		}
 		do {
 			redo = false;
 			cnt = 0;
+			ArrayList toSwap = new ArrayList();
 			niter--;
 			
-			ArrayList toSwap = new ArrayList();
-			for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
-			{
-				t = (Triangle) it.next();
-				ot.bind(t);
-				for (int i = 0; i < 3; i++)
-				{
-					ot.nextOTri();
-					ot.clearAttributes(OTriangle.SWAPPED);
-				}
-			}
 			for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
 				t = (Triangle) it.next();
@@ -93,6 +93,7 @@ public class CheckDelaunay
 					if (ot.hasAttributes(OTriangle.SWAPPED) || sym.hasAttributes(OTriangle.SWAPPED) || !ot.isMutable())
 						continue;
 					ot.setAttributes(OTriangle.SWAPPED);
+					sym.setAttributes(OTriangle.SWAPPED);
 					v = sym.apex();
 					if (!ot.isDelaunay(v))
 					{
@@ -111,7 +112,6 @@ public class CheckDelaunay
 				for (int i = 0; i < orient; i++)
 					ot.nextOTri();
 				OTriangle.symOTri(ot, sym);
-				v = sym.apex();
 				if (ot.hasAttributes(OTriangle.SWAPPED))
 				{
 					ot.swapOTriangle(ot.apex(), sym.apex());
