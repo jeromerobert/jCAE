@@ -379,14 +379,26 @@ public class Mesh
 	
 	public boolean isValid()
 	{
+		return isValid(true);
+	}
+	
+	public boolean isValid(boolean constrained)
+	{
+		OTriangle ot = new OTriangle();
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
 		{
 			Triangle t = (Triangle) it.next();
 			if (t.vertex[0] == t.vertex[1] || t.vertex[1] == t.vertex[2] || t.vertex[2] == t.vertex[0])
 				return false;
 			if (t.vertex[0] == Vertex.outer || t.vertex[1] == Vertex.outer || t.vertex[2] == Vertex.outer)
-				continue;
-			if (t.vertex[0].onLeft(t.vertex[1], t.vertex[2]) < 0L)
+			{
+				if (!constrained)
+					continue;
+				ot.bind(t);
+				if (!ot.hasAttributes(OTriangle.OUTER))
+					return false;
+			}
+			else if (t.vertex[0].onLeft(t.vertex[1], t.vertex[2]) <= 0L)
 				return false;
 		}
 		return true;
