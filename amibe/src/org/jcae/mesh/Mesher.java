@@ -128,6 +128,7 @@ public class Mesher
 					{
 						new BasicMesh(mesh, mesh1D).compute();
 						new CheckDelaunay(mesh).compute();
+						// new CheckAbsDeflection(mesh).compute();
 						mesh.removeDegeneratedEdges();
 						xmlFile = "jcae2d."+iFace;
 						MeshWriter.writeObject(mesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
@@ -148,10 +149,10 @@ public class Mesher
 							mesh = new Mesh(F); 
 							xmlFile = "jcae2d."+iFace;
 							MeshWriter.writeObject(mesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
-							badTriangles.add(iFace+1);
+							badTriangles.add(iFace);
 							break;
 						}
-						badTriangles.add(iFace+1);
+						badTriangles.add(iFace);
 						logger.warn(ex.getMessage());
 						ex.printStackTrace();
 					}
@@ -160,7 +161,7 @@ public class Mesher
 				if (nTry == nTryMax)
 				{
 					logger.error("Face "+iFace+" cannot be triangulated, skipping...");
-					badTriangles.add(iFace+1);
+					badTriangles.add(iFace);
 					mesh = new Mesh(F); 
 					xmlFile = "jcae2d."+iFace;
 					MeshWriter.writeObject(mesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
