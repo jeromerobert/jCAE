@@ -85,22 +85,6 @@ public class BasicMesh
 			if (uv[1] < vmin)
 				vmin = uv[1];
 		}
-		if (umin > 0.0)
-			umin *= 0.99;
-		else
-			umin *= 1.01;
-		if (umax > 0.0)
-			umax *= 1.01;
-		else
-			umax *= 0.99;
-		if (vmin > 0.0)
-			vmin *= 0.99;
-		else
-			vmin *= 1.01;
-		if (vmax > 0.0)
-			vmax *= 1.01;
-		else
-			vmax *= 0.99;
 		mesh.initQuadTree(umin, umax, vmin, vmax);
 		//  Initial point insertion sometimes fail on 2D,
 		//  this needs to be investigated.

@@ -58,8 +58,8 @@ public class QuadTree
 	
 	public QuadTree(double umin, double umax, double vmin, double vmax)
 	{
-		double deltaU = Math.abs(umin - umax);
-		double deltaV = Math.abs(vmin - vmax);
+		double deltaU = 1.01 * Math.abs(umin - umax);
+		double deltaV = 1.01 * Math.abs(vmin - vmax);
 		assert deltaU > 0.0 && deltaV > 0.0;
 		x0[0] = umin;
 		x0[1] = vmin;
