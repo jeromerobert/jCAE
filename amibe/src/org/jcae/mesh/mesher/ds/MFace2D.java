@@ -39,7 +39,7 @@ public class MFace2D
 	static private Logger logger=Logger.getLogger(MFace2D.class);
 	
 	/** The list of edges bounding the face. */
-	protected MEdge2D[] edgelist=new MEdge2D[0];
+	protected MEdge2D[] edgelist=new MEdge2D[3];
 	
 	//  ID used for debugging purpose.
 	private static int id = 0;
@@ -56,7 +56,6 @@ public class MFace2D
 	 */
 	public MFace2D(MEdge2D e1, MEdge2D e2, MEdge2D e3)
 	{
-		edgelist=new MEdge2D[3];		
 		edgelist[0]=e1;
 		edgelist[1]=e2;
 		edgelist[2]=e3;		
