@@ -348,7 +348,7 @@ public class Vertex
 		//     distance(C, middle(v1, v2)) < 1000 * distance(v1, v2)
 		//     <=> |num/den| trans(po) M po < 1000 * trans(v12) M v12
 		//     <=> num * num * det(M) < 1000000 * den * den
-		if (num * num * m2d.det() < 1000000.0 * den * den)
+		if (den != 0.0 && num * num * m2d.det() < 1000000.0 * den * den)
 		{
 			circumcenter.param[0] = 0.5*(p1[0]+p2[0]) + po[0] * num / den;
 			circumcenter.param[1] = 0.5*(p1[1]+p2[1]) + po[1] * num / den;
