@@ -122,7 +122,7 @@ public class SubMesh2DWriter
 			File nodesFile=new File(dir, JCAEXMLData.nodes2dFilename);
 			File refFile = new File(dir, JCAEXMLData.ref1dFilename);
 			File trianglesFile=new File(dir, JCAEXMLData.triangles2dFilename);
-			TObjectIntHashMap nodeIndex=new TObjectIntHashMap();
+			TObjectIntHashMap nodeIndex=new TObjectIntHashMap(submesh.getNodes().size());
 			
 			// Create and fill the DOM
 			Document document=JCAEXMLWriter.createJcaeDocument();
