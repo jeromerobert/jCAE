@@ -34,6 +34,7 @@ import org.jcae.mesh.amibe.algos2d.*;
 import org.jcae.mesh.mesher.algos3d.Fuse;
 import org.jcae.mesh.xmldata.*;
 import org.jcae.mesh.cad.*;
+import gnu.trove.TIntArrayList;
 
 /**
  * This class Mesher allows to load a file, construct the mesh structure and read mesh hypothesis.
@@ -63,6 +64,7 @@ public class Mesher
 		String brepFile = (new File(brepfilename)).getName();		
 		String xmlFile = "jcae1d";
 		MMesh1D mesh1D;
+		TIntArrayList badTriangles = new TIntArrayList();
 		
 		URI brepURI=new File(brepfilename).getAbsoluteFile().getParentFile().toURI();
 		URI brepDirURI=new File(xmlDir, "dummy").toURI().relativize(brepURI);
@@ -146,8 +148,10 @@ public class Mesher
 							mesh = new Mesh(F); 
 							xmlFile = "jcae2d."+iFace;
 							MeshWriter.writeObject(mesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
+							badTriangles.add(iFace+1);
 							break;
 						}
+						badTriangles.add(iFace+1);
 						logger.warn(ex.getMessage());
 						ex.printStackTrace();
 					}
@@ -156,6 +160,7 @@ public class Mesher
 				if (nTry == nTryMax)
 				{
 					logger.error("Face "+iFace+" cannot be triangulated, skipping...");
+					badTriangles.add(iFace+1);
 					mesh = new Mesh(F); 
 					xmlFile = "jcae2d."+iFace;
 					MeshWriter.writeObject(mesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
@@ -206,6 +211,11 @@ public class Mesher
 			xmlFile = "jcae3d";
 			MMesh3DWriter.writeObject(mesh3D, xmlDir, xmlFile, xmlBrepDir);
 */
+		}
+		if (badTriangles.size() > 0)
+		{
+			logger.info("Number of faces which cannot be meshed: "+badTriangles.size());
+			logger.info(""+badTriangles);
 		}
 	}
 
