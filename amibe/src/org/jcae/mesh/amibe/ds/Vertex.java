@@ -374,8 +374,6 @@ public class Vertex
 			t3 = t4;
 			t4 = temp;
 		}
-		if (t2 * 1000 < t1 && t3 * 1000 > t4)
-			return true;
 		
 		try {
 			Vertex C3 = va3.circumcenter(vc1, vc2, va3);
