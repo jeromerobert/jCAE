@@ -136,7 +136,7 @@ public class Mesher
 					ex.printStackTrace();
 				}
 				break;
- 			}
+			}
 			if (nTry == nTryMax)
 				logger.error("Face "+iFace+" cannot be triangulated, skipping...");
 		}
@@ -189,10 +189,10 @@ public class Mesher
 		else
 		{
 			String filename=args[0];
- 			if (filename.endsWith(".step") || filename.endsWith(".igs"))
+			if (filename.endsWith(".step") || filename.endsWith(".igs"))
 			{
 				CADShape shape = CADShapeBuilder.factory.newShape(filename);
- 				filename = filename.substring(0, filename.lastIndexOf('.')) + ".brep";
+				filename = filename.substring(0, filename.lastIndexOf('.')) + ".brep";
 				shape.writeNative(filename);
 			}
 			String xmlDir = args[1];
