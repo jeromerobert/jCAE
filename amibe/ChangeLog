@@ -1,3 +1,7 @@
+Wed Feb  9 15:20:54 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/util/QuadTree.java (getNearestVertexProcedure):  Add a factor of 1.005 to take rounding errors into account when computing i2d.  A better approximation for this factor should be investigated.
+
 Tue Feb  8 15:19:49 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/MeshWriter.java
