@@ -209,7 +209,7 @@ public class Mesher
 		Double defl=new Double(args[3]);
 		MMesh3D mesh3D = mesh(filename, xmlDir, discr.doubleValue(), defl.doubleValue());	
 		logger.info("Exporting UNV");
-		mesh3D.writeUNV(unvName);
+		mesh3D.writeUNV(unvName+".gz");
 		logger.info("End mesh");
 	}
 }
