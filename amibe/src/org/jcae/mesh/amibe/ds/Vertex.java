@@ -396,6 +396,32 @@ public class Vertex
 		}
 	}
 	
+	public final boolean isSmallerDiagonale(OTriangle ot)
+	{
+		//  vcX: vertices of current edge
+		//  vaX: apices
+		assert this != Vertex.outer;
+		Vertex vc1 = ot.origin();
+		Vertex vc2 = ot.destination();
+		Vertex va3 = ot.apex();
+		// va0 = this
+		assert vc1 != Vertex.outer;
+		assert vc2 != Vertex.outer;
+		assert va3 != Vertex.outer;
+		// Do not swap if triangles are reversed in 2d space
+		if (vc1.onLeft(va3, this) >= 0L || vc2.onLeft(va3, this) <= 0L)
+			return true;
+		
+		return (mesh.compGeom().distance(va3, this, vc1) +
+		        mesh.compGeom().distance(va3, this, vc2) +
+		        mesh.compGeom().distance(va3, this, va3) +
+		        mesh.compGeom().distance(va3, this, this) >
+		        mesh.compGeom().distance(vc1, vc2, vc1) +
+		        mesh.compGeom().distance(vc1, vc2, vc2) +
+		        mesh.compGeom().distance(vc1, vc2, va3) +
+		        mesh.compGeom().distance(vc1, vc2, this));
+	}
+	
 	public boolean isPseudoIsotropic()
 	{
 		Metric2D m2d = getMetrics(mesh.getGeomSurface());
