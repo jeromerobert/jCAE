@@ -331,10 +331,10 @@ public class Vertex
 		double den = 2.0 * m2d.dot(po[0], po[1], x31, y31);
 		//  Flat triangles cannot be computed accurately, we
 		//  consider arbitrarily that C is returned if
-		//     distance(C, middle(v1, v2)) < 10 * distance(v1, v2)
-		//     <=> |num/den| trans(po) M po < 10 * trans(v12) M v12
-		//     <=> num * num * det(M) < 100 * den * den
-		if (num * num * m2d.det() < 100.0 * den * den)
+		//     distance(C, middle(v1, v2)) < 1000 * distance(v1, v2)
+		//     <=> |num/den| trans(po) M po < 1000 * trans(v12) M v12
+		//     <=> num * num * det(M) < 1000000 * den * den
+		if (num * num * m2d.det() < 1000000.0 * den * den)
 		{
 			return new Vertex(
 				0.5*(p1[0]+p2[0]) + po[0] * num / den,
