@@ -25,7 +25,6 @@ import org.jcae.opencascade.jni.Adaptor3d_Curve;
 import org.jcae.opencascade.jni.BRep_Tool;
 import org.jcae.opencascade.jni.Geom_Curve;
 import org.jcae.opencascade.jni.GeomAdaptor_Curve;
-import org.jcae.opencascade.jni.GCPnts_UniformAbscissa;
 import org.jcae.opencascade.jni.TopoDS_Edge;
 import org.jcae.opencascade.jni.GCPnts_AbscissaPoint;
 
@@ -33,7 +32,7 @@ public class OCCGeomCurve3D implements CADGeomCurve3D
 {
 	protected GeomAdaptor_Curve myCurve = null;
 	protected double [] range = new double[2];
-	protected GCPnts_UniformAbscissa discret = null;
+	private OCCDiscretizeCurve3D discret = null;
 	
 	public OCCGeomCurve3D(CADEdge E)
 	{
@@ -58,14 +57,14 @@ public class OCCGeomCurve3D implements CADGeomCurve3D
 	public void discretize(double maxlen)
 	{
 		if (discret == null)
-			discret = new GCPnts_UniformAbscissa();
+			discret = new OCCDiscretizeCurve3D();
 		discret.initialize((Adaptor3d_Curve) myCurve, maxlen, range[0], range[1]);
 	}
 	
 	public void discretize(int n)
 	{
 		if (discret == null)
-			discret = new GCPnts_UniformAbscissa();
+			discret = new OCCDiscretizeCurve3D();
 		discret.initialize((Adaptor3d_Curve) myCurve, n, range[0], range[1]);
 	}
 	
