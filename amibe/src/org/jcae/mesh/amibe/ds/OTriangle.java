@@ -402,6 +402,47 @@ public class OTriangle
 		sym.tri.adjPos |= (orientation << (2*sym.orientation));
 	}
 	
+	/**
+	 * Collapse an edge and update adjacency relations.
+	 */
+	public final void collapse()
+	{
+		Vertex o = origin();
+		Vertex d = destination();
+		assert o.getRef() != null && d.getRef() != null && o.getRef().getMaster() ==  d.getRef().getMaster();
+		
+		//  Replace o by d in all triangles
+		copyOTri(this, work[0]);
+		work[0].nextOTriOrigin();
+		for ( ; work[0].destination() != d; work[0].nextOTriOrigin())
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				if (work[0].tri.vertex[i] == o)
+				{
+					work[0].tri.vertex[i] = d;
+					break;
+				}
+			}
+		}
+		o.removeFromQuadTree();
+		
+		//  Glue triangles
+		nextOTri(this, work[0]);
+		work[0].symOTri();
+		prevOTri(this, work[1]);
+		work[1].symOTri();
+		work[0].glue(work[1]);
+		//  Glue symmetric triangles
+		symOTri(this, work[0]);
+		work[0].nextOTri();
+		work[0].symOTri();
+		symOTri(this, work[1]);
+		work[1].prevOTri();
+		work[1].symOTri();
+		work[0].glue(work[1]);
+	}
+	
 	/*
 	 *                         a
 	 *                         ,
