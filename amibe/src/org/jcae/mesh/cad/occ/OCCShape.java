@@ -22,6 +22,7 @@ package org.jcae.mesh.cad.occ;
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.opencascade.jni.BRep_Tool;
+import org.jcae.opencascade.jni.BRepTools;
 import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.jcae.opencascade.jni.TopoDS_Face;
 import org.jcae.opencascade.jni.TopAbs_Orientation;
@@ -79,6 +80,11 @@ public class OCCShape implements CADShape
 	{
 		OCCShape that = (OCCShape) o;
 		return myShape.isSame(that.myShape);
+	}
+	
+	public void writeNative(String filename)
+	{
+  		BRepTools.write(myShape, filename);
 	}
 	
 	public int hashCode()

@@ -37,6 +37,8 @@ public interface CADShape
 	public boolean equals(Object o);
 	/** Return true if o have same geometry as this object */
 	public boolean isSame(Object o);
+	/** Write shape into the native format */
+	public void writeNative(String filename);
 	/** Return a hash code matching the equals method */
 	public int hashCode();
 }
