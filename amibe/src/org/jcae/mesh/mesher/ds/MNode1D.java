@@ -21,7 +21,6 @@
 package org.jcae.mesh.mesher.ds;
 
 import org.jcae.mesh.cad.CADVertex;
-import org.jcae.mesh.cad.occ.OCCVertex;
 import java.util.HashMap;
 import org.apache.log4j.Logger;
 

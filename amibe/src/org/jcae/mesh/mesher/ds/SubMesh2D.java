@@ -24,7 +24,6 @@ import org.jcae.mesh.mesher.ds.MMesh1D;
 import org.jcae.mesh.mesher.ds.tools.*;
 import org.jcae.mesh.mesher.metrics.Metric2D;
 import org.jcae.mesh.cad.*;
-import org.jcae.mesh.cad.occ.OCCEdge;
 import org.jcae.mesh.util.Calculs;
 import java.util.Iterator;
 import java.util.Collection;
