@@ -21,6 +21,7 @@
 package org.jcae.mesh.xmldata;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.*;
 import org.apache.log4j.Logger;
 import org.xml.sax.*;
@@ -45,7 +46,13 @@ public class ClassPathEntityResolver implements EntityResolver
 				path=path.substring(1);
 				logger.debug("resolve "+systemId+" from CLASSPATH at "+path);
 				InputStream in= ClassLoader.getSystemResourceAsStream(path);
-				return new InputSource(in);
+				if(in==null)
+				{
+					System.err.println("WARNING: "+systemId+" not found");
+					return new InputSource(new StringReader(""));
+				}
+				else
+					return new InputSource(in);				
 			}
 			else return null;
 		}
