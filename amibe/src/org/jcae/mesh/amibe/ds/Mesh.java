@@ -416,9 +416,9 @@ public class Mesh
 					nodeset.add(t.vertex[i]);
 				nrt++;
 			}
-			out.println("MeshVersionFormatted 1\n");
-			out.println("Dimension\n2\n");
-			out.println("Vertices\n"+nodeset.size());
+			out.println("\nMeshVersionFormatted 1");
+			out.println("\nDimension\n2");
+			out.println("\nVertices\n"+nodeset.size());
 			HashMap labels = new HashMap(nodeset.size());
 			int count = 0;
 			for(Iterator it=nodeset.iterator();it.hasNext();)
@@ -430,7 +430,7 @@ public class Mesh
 				Integer label = new Integer(count);
 				labels.put(node, label);
 			}
-			out.println("Triangles\n"+nrt);
+			out.println("\nTriangles\n"+nrt);
 			for(Iterator it=triangleList.iterator();it.hasNext();)
 			{
 				Triangle t = (Triangle) it.next();
@@ -444,7 +444,7 @@ public class Mesh
 				}
 				out.println("0");
 			}
-			out.println("End");
+			out.println("\nEnd");
 			out.close();
 		} catch (FileNotFoundException e)
 		{
