@@ -346,6 +346,8 @@ public class QuadTree
 			i2d = x0[2] * (mesh.compGeom().radius2d(fromVertex));
 			dist = mesh.compGeom().distance(fromVertex, v);
 			idist = (int) (dist * i2d);
+			if (idist > Integer.MAX_VALUE/2)
+				idist = Integer.MAX_VALUE/2;
 		}
 		public final int action(Object o, int s, int i0, int j0)
 		{
@@ -366,6 +368,8 @@ public class QuadTree
 						dist = retdist;
 						nearestVertex = vtest;
 						idist = (int) (dist * i2d);
+						if (idist > Integer.MAX_VALUE/2)
+							idist = Integer.MAX_VALUE/2;
 					}
 				}
 			}
