@@ -128,29 +128,46 @@ public class Insertion
 				}
 				if (nrTriNodes > maxNodes)
 					maxNodes = nrTriNodes;
-				if (triNodes.size() == 0)
-					continue;
-				//  Process in pseudo-random order
-				int prime = gnu.trove.PrimeFinder.nextPrime(nrTriNodes);
-				int imax = triNodes.size();
-				while (imax % prime == 0)
-					prime = gnu.trove.PrimeFinder.nextPrime(prime+1);
-				if (prime >= imax)
-					prime = 1;
-				int index = imax / 2;
-				for (int i = 0; i < imax; i++)
+				if (triNodes.size() > 0)
 				{
-					Vertex v = (Vertex) triNodes.get(index);
-					Vertex n = mesh.getQuadTree().getNearestVertex(v);
-					assert n == mesh.getQuadTree().getNearestVertexDebug(v);
-					if (mesh.compGeom().distance(v, n) > minlen)
+					//  Process in pseudo-random order
+					int prime = gnu.trove.PrimeFinder.nextPrime(nrTriNodes);
+					int imax = triNodes.size();
+					while (imax % prime == 0)
+						prime = gnu.trove.PrimeFinder.nextPrime(prime+1);
+					if (prime >= imax)
+						prime = 1;
+					int index = imax / 2;
+					for (int i = 0; i < imax; i++)
 					{
-						mesh.getQuadTree().add(v);
-						nodes.add(v);
+						Vertex v = (Vertex) triNodes.get(index);
+						Vertex n = mesh.getQuadTree().getNearestVertex(v);
+						assert n == mesh.getQuadTree().getNearestVertexDebug(v);
+						if (mesh.compGeom().distance(v, n) > minlen)
+						{
+							mesh.getQuadTree().add(v);
+							nodes.add(v);
+						}
+						index += prime;
+						if (index >= imax)
+							index -= imax;
 					}
-					index += prime;
-					if (index >= imax)
-						index -= imax;
+				}
+			}
+			//  Try to insert triangle centroid after all other points.
+			for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
+			{
+				Triangle t = (Triangle) it.next();
+				ot.bind(t);
+				if (ot.hasAttributes(OTriangle.OUTER))
+					continue;
+				Vertex v = t.centroid();
+				Vertex n = mesh.getQuadTree().getNearestVertex(v);
+				assert n == mesh.getQuadTree().getNearestVertexDebug(v);
+				if (mesh.compGeom().distance(v, n) > minlen)
+				{
+					mesh.getQuadTree().add(v);
+					nodes.add(v);
 				}
 			}
 			for (Iterator it = nodes.iterator(); it.hasNext(); )
