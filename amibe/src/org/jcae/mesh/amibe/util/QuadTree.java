@@ -341,6 +341,7 @@ public class QuadTree
 		private double dist, i2d;
 		public Vertex fromVertex, nearestVertex;
 		public int searchedCells = 0;
+		private final Calculus comp = mesh.compGeom();
 		public getNearestVertexProcedure(Vertex from, Vertex v)
 		{
 			double2int(from.getUV(), ij);
@@ -349,8 +350,8 @@ public class QuadTree
 			// FIXME: a factor of 1.005 is added to take rounding
 			// errors into account, a better approximation should
 			// be used.
-			i2d = 1.005 * x0[2] * (mesh.compGeom().radius2d(fromVertex));
-			dist = mesh.compGeom().distance(fromVertex, v, fromVertex);
+			i2d = 1.005 * x0[2] * (comp.radius2d(fromVertex));
+			dist = comp.distance(fromVertex, v, fromVertex);
 			idist = (int) (dist * i2d);
 			if (idist > Integer.MAX_VALUE/2)
 				idist = Integer.MAX_VALUE/2;
@@ -368,7 +369,7 @@ public class QuadTree
 				for (int i = 0; i < self.nItems; i++)
 				{
 					Vertex vtest = (Vertex) self.subQuad[i];
-					double retdist = mesh.compGeom().distance(fromVertex, vtest, fromVertex);
+					double retdist = comp.distance(fromVertex, vtest, fromVertex);
 					if (retdist < dist)
 					{
 						dist = retdist;
@@ -455,7 +456,7 @@ public class QuadTree
 		return ret;
 	}
 	
-	public boolean walk(QuadTreeProcedure proc)
+	public final boolean walk(QuadTreeProcedure proc)
 	{
 		int s = gridSize;
 		int l = 0;
