@@ -197,12 +197,12 @@ public class Metric2D
 	
 	public double minEV()
 	{
-		return 0.5 * (E+G - Math.sqrt(det()));
+		return 0.5 * (E+G - Math.sqrt((E-G)*(E-G)+4.0*F*F));
 	}
 	
 	public double maxEV()
 	{
-		return 0.5 * (E+G + Math.sqrt(det()));
+		return 0.5 * (E+G + Math.sqrt((E-G)*(E-G)+4.0*F*F));
 	}
 	
 	public double dot(double x0, double y0, double x1, double y1)
