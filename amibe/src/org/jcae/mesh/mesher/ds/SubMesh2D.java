@@ -55,9 +55,6 @@ public class SubMesh2D
 	//  Stack of methods to compute geometrical values
 	private Stack compGeomStack;
 	
-	//  Ninimal topological edge length
-	protected double epsilon = 1.;
-	
 	//  Set of faces
 	private HashSet faceset = new HashSet();
 	
@@ -81,46 +78,7 @@ public class SubMesh2D
 	{
 		face = F;
 		surface = face.getGeomSurface();
-		
-		double [] bb = face.boundingBox();
-		epsilon = Math.max(Math.sqrt(
-			(bb[0] - bb[3]) * (bb[0] - bb[3]) +
-			(bb[1] - bb[4]) * (bb[1] - bb[4]) +
-			(bb[2] - bb[5]) * (bb[2] - bb[5])
-		) / 1000.0, Metric2D.getLength() / 100.0);
 		compGeomStack = new Stack();
-	}
-	
-	public void scaleTolerance(double scale)
-	{
-		epsilon *= scale;
-	}
-	
-	/**
-	 * Computes an initial mesh given a 1D boundary mesh.
-	 * Topological edges of the whole geometry was first discretized in 1D and
-	 * stored in a <code>MMesh1D</code> instance.  This routine retrieves the
-	 * topological edges bounding current face and transports edge
-	 * discretization into the 2D space.  A first triangulation is then
-	 * computed, by linking boundary nodes together.
-	 * This method must be called before any meshing is performed.
-	 *
-	 * @param m1d   the 1D mesh containing 
-	 */
-	public void init(MMesh1D m1d)
-	{
-		//  Project MMesh1D instance onto each faces
-		assert m1d.isValid() : "Invalid 1D mesh";
-		convertMMesh1DToSubMesh2D(m1d);
-		new org.jcae.mesh.mesher.algos2d.RefineFace1(this).compute();
-		checkInvertedTriangles = true;
-		assert isValid() : "Invalid 2D mesh";
-		//  Do not call pushCompGeom here
-	}
-	public void init1D(MMesh1D m1d)
-	{
-		assert m1d.isValid() : "Invalid 1D mesh";
-		convertMMesh1DToSubMesh2D(m1d);
 	}
 	
 	public void pushCompGeom(int i)
@@ -184,131 +142,6 @@ public class SubMesh2D
 			else
 				n.setLabel(n.getRef().getLabel());
 		}
-	}
-	
-	/**
-	 * Transforms a <code>MMesh1D</code> instance to a discretization of current face in the 2D space.
-	 * It retrieves from a <code>MMesh1D</code> instance the 1D mesh of
-	 * topological edges bounding current face, and projects this
-	 * discretization into 2D space.
-	 *
-	 * @param m1d   the underlying 1D mesh.
-	 */
-	private void convertMMesh1DToSubMesh2D(MMesh1D m1d)
-	{
-		HashMap mapNode1DToNode2D = new HashMap(m1d.maximalNumberOfNodes());
-		CADExplorer expW = CADShapeBuilder.factory.newExplorer();
-		CADWireExplorer wexp = CADShapeBuilder.factory.newWireExplorer();
-		for (expW.init(face, CADExplorer.WIRE); expW.more(); expW.next())
-		{
-			MNode1D p1 = null;
-			MNode2D p20 = null, p2 = null;
-			boolean first = true;
-			for (wexp.init((CADWire) expW.current(), face); wexp.more(); wexp.next())
-			{
-				CADEdge te = wexp.current();
-				if (tooSmall(te))
-					continue;
-
-				double range[] = new double[2];
-				CADGeomCurve2D c2d = CADShapeBuilder.factory.newCurve2D(te, face);
-
-				Iterator itn = m1d.getNodelistFromMap(te).iterator();
-				ArrayList nodes1 = new ArrayList();
-				while (itn.hasNext())
-				{
-					p1 = (MNode1D) itn.next();
-					nodes1.add(p1);
-				}
-				if (!te.isOrientationForward())
-				{
-					//  Sort in reverse order
-					int size = nodes1.size();
-					for (int i = 0; i < size/2; i++)
-					{
-						Object o = nodes1.get(i);
-						nodes1.set(i, nodes1.get(size - i - 1));
-						nodes1.set(size - i - 1, o);
-					}
-				}
-				itn = nodes1.iterator();
-				p1 = (MNode1D) itn.next();
-				if (null != p2)
-				{
-					//  Except for the very first edge, the first
-					//  vertex is constrained to be the last one
-					//  of the previous edge.
-					mapNode1DToNode2D.put(p1, p2);
-					p1 = (MNode1D) itn.next();
-				}
-				while (itn.hasNext())
-				{
-					p2 = new MNode2D(p1, c2d, face);
-					mapNode1DToNode2D.put(p1, p2);
-					if (first)
-					{
-						p20 = p2;
-						first = false;
-					}
-					p1 = (MNode1D) itn.next();
-				}
-				p2 = new MNode2D(p1, c2d, face);
-				mapNode1DToNode2D.put(p1, p2);
-			}
-			//  Overwrite the last value to close the wire
-			mapNode1DToNode2D.put(p1, p20);
-		}
-		
-		CADExplorer expE = CADShapeBuilder.factory.newExplorer();
-		for (expE.init(face, CADExplorer.EDGE); expE.more(); expE.next())
-		{
-			CADEdge te = (CADEdge) expE.current();
-			if (tooSmall(te))
-				continue;
-			Iterator ite = m1d.getEdgelistFromMap(te).iterator();
-			while (ite.hasNext())
-			{
-				MEdge1D e1 = (MEdge1D) ite.next();
-				MNode2D Ps = (MNode2D) mapNode1DToNode2D.get(e1.getNodes1());
-				MNode2D Pe = (MNode2D) mapNode1DToNode2D.get(e1.getNodes2());
-				MEdge2D e2 = new MEdge2D(Ps, Pe, e1);
-				nodeset.add(Ps);
-				nodeset.add(Pe);
-				edgeset.add(e2);
-			}
-		}
-		mapNode1DToNode2D.clear();
-	}
-	
-	/**
-	 * Checks whether a topological edge is too small to be considered.
-	 *
-	 * @param te   the topological edge to measure.
-	 * @return <code>true</code> if this edge is too small to be considered,
-	 *         <code>false</code> otherwise.
-	 */
-	private boolean tooSmall(CADEdge te)
-	{
-		if (te.isDegenerated())
-		{
-			CADVertex [] v = te.vertices();
-			return (v[0] != v[1]);
-		}
-		CADGeomCurve3D c3d = CADShapeBuilder.factory.newCurve3D(te);
-		if (c3d == null)
-			throw new java.lang.RuntimeException("Curve not defined on edge, but this edge is not degenrerated.  Something must be wrong.");
-		double range [] = c3d.getRange();
-		
-		//  There seems to be a bug woth OpenCascade, we had a tiny
-		//  edge whose length was miscomputed, so try a workaround.
-		if (Math.abs(range[1] - range[0]) < 1.e-7 * Math.max(1.0, Math.max(Math.abs(range[0]), Math.abs(range[1]))))
-			return true;
-		
-		double edgelen = c3d.length();
-		if (edgelen > epsilon)
-			return false;
-		logger.info("Edge "+te+" is ignored because its length is too small: "+edgelen+" <= "+epsilon);
-		return true;
 	}
 	
 	/**
@@ -414,20 +247,6 @@ public class SubMesh2D
 	}
 	
 	/**
-	 * Adds an edge defined by its two end points if it was not already defined.
-	 *
-	 * @return the edge being added.
-	 */
-	public MEdge2D addEdgeIfNotDefined(MNode2D pt1, MNode2D pt2)
-	{
-		MEdge2D e = getEdgeDefinedByNodes(pt1, pt2);
-		if (null == e)
-			e = new MEdge2D(pt1, pt2);
-		edgeset.add(e);
-		return e;
-	}
-	
-	/**
 	 * Adds a node to the mesh, and returns it.
 	 *
 	 * @return the edge being added.
@@ -458,23 +277,17 @@ public class SubMesh2D
 	}
 	
 	/**
-	 * Returns the face defined bu threee nodes, or <code>null</code>
-	 * if there is no such face.
+	 * Adds an edge defined by its two end points if it was not already defined.
 	 *
-	 * @param  n1  first node,
-	 * @param  n2  second node,
-	 * @param  n3  last node,
-	 * @return the face containing these 3 nodes.
+	 * @return the edge being added.
 	 */
-	public MFace2D getFaceDefinedByNodes(MNode2D n1, MNode2D n2, MNode2D n3)
+	public MEdge2D addEdgeIfNotDefined(MNode2D pt1, MNode2D pt2)
 	{
-		HashSet res = new HashSet(n1.getElements2D());
-		res.retainAll(n2.getElements2D());
-		res.retainAll(n3.getElements2D());
-		if (res.isEmpty())
-			return null;
-		assert 1 == res.size() : "Several values returned by getFaceDefinedByNodes";
-		return (MFace2D) res.iterator().next();
+		MEdge2D e = getEdgeDefinedByNodes(pt1, pt2);
+		if (null == e)
+			e = new MEdge2D(pt1, pt2);
+		edgeset.add(e);
+		return e;
 	}
 	
 	/**
@@ -502,20 +315,6 @@ public class SubMesh2D
 			MNode2D n = (MNode2D) itn.next();
 			if (n.canDestroy())
 				nodeset.remove(n);
-		}
-	}
-	
-	/**
-	 * Remove a set of faces from the <code>Submesh2D</code>.
-	 *
-	 * @param set  the set of faces to remove
-	 */
-	public void rmFaces(HashSet set)
-	{
-		for(Iterator itf=set.iterator(); itf.hasNext();)
-		{
-			MFace2D face = (MFace2D) itf.next();
-			rmFace(face);
 		}
 	}
 	
@@ -718,139 +517,6 @@ public class SubMesh2D
 
 		MFace2D f = addTriangle(n1, n2, n3);
 		return f;
-	}
-	
-	/**
-	 * Returns the list of created triangles.
-	 * The <code>explodeTriangle</code> method adds a point to the
-	 * triangulation.  If it is interior to the triangle,
-	 * 3 new triangles are created and returned.  This is
-	 * the more common case, and it also handles the
-	 * following degenerated cases:
-	 * <ul>
-	 *   <li>If the inserted point is an existing vertex,
-	 *       null is returned.</li>
-	 *   <li>If the inserted point lies on an edge, both
-	 *       triangles are split into 2 smaller triangles,
-	 *       which gives 4 new triangles.  But we need to
-	 *       know which other triangle has been split, so
-	 *       it is returned as the 5th argument.</li>
-	 * </ul>
-	 *
-	 * @param  f   the previous triangle containing the node <code>pt</code>
-	 * @param  pt  the point being inserted,
-	 * @return an array of ewly created faces.
-	 */
-	public MFace2D [] explodeTriangle(MFace2D f, MNode2D pt)
-	{
-		Iterator node_it = f.getNodesIterator();
-		MNode2D v1 = (MNode2D) node_it.next();
-		MNode2D v2 = (MNode2D) node_it.next();
-		MNode2D v3 = (MNode2D) node_it.next();
-		if (v1 == pt || v2 == pt || v3 == pt)
-			return null;
-		MNode2D [] nodesT1 = new MNode2D[4];
-		int intri = pt.inTriangle(f, surface);
-		assert intri >= 0;
-		if (intri == 1)
-		{
-			nodesT1[0] = v3;
-			nodesT1[1] = v1;
-			nodesT1[2] = v2;
-		}
-		else if (intri == 2)
-		{
-			nodesT1[0] = v1;
-			nodesT1[1] = v2;
-			nodesT1[2] = v3;
-		}
-		else if (intri == 3)
-		{
-			nodesT1[0] = v2;
-			nodesT1[1] = v3;
-			nodesT1[2] = v1;
-		}
-		else
-		{
-			MFace2D [] toReturn = new MFace2D[3];
-			toReturn[0] = addTriangle(pt, v1, v2);
-			toReturn[1] = addTriangle(pt, v2, v3);
-			toReturn[2] = addTriangle(pt, v3, v1);
-			return toReturn;
-		}
-		MEdge2D e = getEdgeDefinedByNodes(nodesT1[1], nodesT1[2]);
-		Iterator itf = e.getFacesIterator();
-		MFace2D adj_tri = (MFace2D) itf.next();
-		if (f == adj_tri)
-			adj_tri = (MFace2D) itf.next();
-		nodesT1[3] = adj_tri.apex(e);
-		
-		MFace2D [] toReturn = new MFace2D[5];
-		toReturn[0] = addTriangle(pt, nodesT1[0], nodesT1[1]);
-		toReturn[1] = addTriangle(pt, nodesT1[0], nodesT1[2]);
-		toReturn[2] = addTriangle(pt, nodesT1[3], nodesT1[1]);
-		toReturn[3] = addTriangle(pt, nodesT1[3], nodesT1[2]);
-		toReturn[4] = adj_tri;
-		return toReturn;
-	}
-	
-	/**
-	 * Flips an edge if it locally improves mesh quality.
-	 *
-	 * @param  e          the edge to flip,
-	 * @param  oldT       n array containing old triangles,
-	 * @param  forceFlip  <code>true</code> if edge is always flipped,
-	 *         <code>false</code> if it is flipped only when triangles have
-	 *         better qualities.
-	 * @return the two triangles bounding this edge.
-	 * @deprecated
-	 */
-	public MFace2D [] flipEdge(MEdge2D e, MFace2D [] oldT, boolean forceFlip)
-	{
-		Edge2DSwapper es = new Edge2DSwapper(this);
-		return es.swap(e, oldT, forceFlip);
-	}
-	
-	/**
-	 * Flips an edge if it locally improves mesh quality.
-	 *
-	 * @param  e          the edge to flip,
-	 * @return <code>true</code> if edge was successfully flipped,
-	 *         <code>false</code>  othersie.
-	 * @deprecated
-	 */
-	public boolean flipEdge(MEdge2D e)
-	{
-		Edge2DSwapper es = new Edge2DSwapper(this);
-		return es.swap(e);
-	}
-	
-	/**
-	 * Recursibelu flips a set of edges.  Whenever an edge is flipped,
-	 * its neighbours are also checked to see if they can be flipped too.
-	 *
-	 * @param  edges      the set of edge to flip,
-	 * @return the number of flipped edges.
-	 * @deprecated
-	 */
-	public int flipEdges(HashSet edges)
-	{
-		Edge2DSwapper es = new Edge2DSwapper(this);
-		return es.swapAll(edges);
-	}
-	
-	/**
-	 * Constructs a set of edges cutting the segment n1-n2
-	 *
-	 * @param n1   an end point,
-	 * @param n2   the other end point,
-	 * @return a set of edges cutting the segment n1-n2
-	 * @deprecated
-	 */
-	public Collection findEdgesCuttingEndpoints(MNode2D n1, MNode2D n2)
-	{
-		FindEdge2DCutter fec = new FindEdge2DCutter(this);
-		return fec.getCuttingEdges(n1,n2);
 	}
 	
 	/**
@@ -1082,83 +748,6 @@ public class SubMesh2D
 		       - Calculs.prodSca(v1, v1) * Calculs.prodSca(v2, v3)
 			>= - 0.8 * Calculs.norm(Calculs.prodVect3D(v1, v2)) *
 		              Calculs.norm(Calculs.prodVect3D(v1, v3));
-	}
-	
-	/**
-	 * Ensures that the 2D mesh is Delaunay.
-	 *
-	 * @return <code>true</code> if mesh is Delaunay, <code>false</code> otherwise.
-	 */
-	public MEdge2D checkDelaunay()
-	{
-		logger.debug("Checking whether this mesh is Delaunay...");
-		//  Check edges only once
-		HashSet save = new HashSet(edgeset);
-		for (Iterator ite = save.iterator(); ite.hasNext(); )
-		{
-			MEdge2D e = (MEdge2D) ite.next();
-			if (!e.isMutable())
-				continue;
-			MNode2D e_p1 = e.getNodes1();
-			MNode2D e_p2 = e.getNodes2();
-			Iterator itf = e.getFacesIterator();
-			MFace2D f1 = (MFace2D) itf.next();
-			MFace2D f2 = (MFace2D) itf.next();
-			MNode2D apex1 = f1.apex(e);
-			MNode2D apex2 = f2.apex(e);
-			if (apex2.inCircle(e_p1, e_p2, apex1, surface))
-				return e;
-		}
-		return null;
-	}
-	
-	/**
-	 * Ensures that the 2D mesh is Delaunay.
-	 *
-	 * @return <code>true</code> if mesh is Delaunay, <code>false</code> otherwise.
-	 */
-	public HashSet checkAndSwapDelaunay()
-	{
-		return checkAndSwapDelaunay(edgeset);
-	}
-	public HashSet checkAndSwapDelaunay(HashSet edges)
-	{
-		HashSet newFaces = null;
-		boolean redo;
-		do {
-			redo = false;
-			HashSet save = new HashSet(edgeset);
-			for (Iterator ite = save.iterator(); ite.hasNext(); )
-			{
-				MEdge2D e = (MEdge2D) ite.next();
-				if (!e.isMutable())
-					continue;
-				MNode2D e_p1 = e.getNodes1();
-				MNode2D e_p2 = e.getNodes2();
-				Iterator itf = e.getFacesIterator();
-				MFace2D f1 = (MFace2D) itf.next();
-				MFace2D f2 = (MFace2D) itf.next();
-				MNode2D apex1 = f1.apex(e);
-				MNode2D apex2 = f2.apex(e);
-				if (apex2.inCircle(e_p1, e_p2, apex1, surface))
-				{
-					logger.debug("Swap "+e+" to "+apex1+" "+apex2);
-					MFace2D [] oldT = new MFace2D[2];
-					oldT[0] = f1;
-					oldT[1] = f2;
-					Edge2DSwapper es = new Edge2DSwapper(this);
-					MFace2D [] newT = es.swap(e, oldT, true);
-					if (null == newT)
-						continue;
-					if (null == newFaces)
-						newFaces = new HashSet();
-					for (int i = 0; i < newT.length; i++)
-						newFaces.add(newT[i]);
-					redo = true;
-				}
-			}
-		} while (redo);
-		return newFaces;
 	}
 	
 	public String toString()
