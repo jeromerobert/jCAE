@@ -1,3 +1,17 @@
+Wed Mar  2 10:37:03 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src-occ/org/jcae/mesh/cad/occ/OCCGeomSurface.java: New normal() method.  Requires an up-to-date libOccJava.
+	* src/org/jcae/mesh/amibe/ds/Vertex.java: New getNormal() method.
+	* src/org/jcae/mesh/amibe/ds/Mesh.java (writeUNV3D): Write surface normal at nodes into a 2414 UNV data field.
+	* src/org/jcae/mesh/mesher/ds/MMesh3D.java
+	  src/org/jcae/mesh/mesher/ds/SubMesh2D.java
+	  src/org/jcae/mesh/xmldata/SubMesh2DReader.java
+	  src/org/jcae/mesh/xmldata/SubMesh2DWriter.java: Remove more stuff from org.jcae.mesh.mesher about 2D meshing.
+	* src/org/jcae/mesh/amibe/ds/Vertex.java: circumcenter() is private.  For efficiency reasons, circumcenter() now returns a static Vertex.
+	* src/org/jcae/mesh/mesher/ds/MNode3D.java
+	  src/org/jcae/mesh/mesher/ds/MMesh3D.java: Store normals to surfaces into MNode3D instances in MMesh3D.addSubMesh2D(), and write these normals in MMesh3D.writeMESH().
+	* src/org/jcae/mesh/Mesher.java: Call writeMESH() for now to perform tests.
+
 Tue Mar  1 12:52:15 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos2d/CheckDelaunay.java:  New algorithm to enforce edges to be Delaunay compliant.
