@@ -108,7 +108,12 @@ public class Metric3D extends Matrix
 	{
 		double cmin = Math.abs(cacheSurf.minCurvature());
 		double cmax = Math.abs(cacheSurf.maxCurvature());
-		if (cmin == Double.NaN || cmin == 0.0 || cmax == Double.NaN || cmax == 0.0)
+		if (Double.isNaN(cmin) || Double.isNaN(cmax))
+		{
+			logger.debug("Undefined curvature");
+			return false;
+		}
+		if (cmin == 0.0 && cmax == 0.0)
 		{
 			logger.debug("Infinite curvature");
 			return false;
@@ -128,14 +133,16 @@ public class Metric3D extends Matrix
 		}
 		Metric3D A = new Metric3D(dcurvmax, dcurvmin, prodVect3D(dcurvmax, dcurvmin));
 		double epsilon = defl;
-		data[0][0] = cmax*cmax / (4.0 * epsilon * (2.0 - epsilon));
+		double alpha2 = 4.0 * epsilon * (2.0 - epsilon);
+		data[0][0] = cmax*cmax / alpha2 / alpha2;
 		if (vmax > 0.0)
 		{
 			data[0][0] = Math.max(vmax, data[0][0]);
 			data[0][0] = Math.min(vmax*100.0, data[0][0]);
 		}
-		double epsilon2 = epsilon * cmax / cmin;
-		data[1][1] = cmin*cmin / (4.0 * epsilon2 * (2.0 - epsilon2));
+		epsilon *= cmax / cmin;
+		alpha2 = 4.0 * epsilon * (2.0 - epsilon);
+		data[1][1] = cmin*cmin / alpha2 / alpha2;
 		if (vmax > 0.0)
 		{
 			data[1][1] = Math.max(vmax, data[1][1]);
