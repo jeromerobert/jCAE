@@ -53,7 +53,7 @@ public class Calculus3D implements Calculus
 	 **/
 	public double distance(Vertex start, Vertex end)
 	{
-		return 0.5 * (distance(start, end, start) + distance(start, end, end));
+		return Math.max(distance(start, end, start), distance(start, end, end));
 	}
 	
 	public double distance(Vertex start, Vertex end, Vertex vm)
