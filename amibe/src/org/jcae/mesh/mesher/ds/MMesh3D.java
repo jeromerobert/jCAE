@@ -123,7 +123,7 @@ public class MMesh3D
 		submesh.removeDegeneratedEdges();
 		if (logger.isDebugEnabled())
 		{
-			logger.debug("Importing SubMesh2D into MMesh3D...");
+			//  The test above is added to prevent computation of submesh.quality()
 			logger.debug("2D quality (deg.): "+submesh.quality() * 180.0 / Math.PI);
 		}
 		HashMap mapNode2DToNode3D = new HashMap();
