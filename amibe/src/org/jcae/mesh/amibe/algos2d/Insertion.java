@@ -143,6 +143,7 @@ public class Insertion
 				{
 					Vertex v = (Vertex) triNodes.get(index);
 					Vertex n = mesh.getQuadTree().getNearestVertex(v);
+					assert n == mesh.getQuadTree().getNearestVertexDebug(v);
 					if (mesh.compGeom().distance(v, n) > minlen)
 					{
 						mesh.getQuadTree().add(v);
