@@ -1,3 +1,17 @@
+Tue Mar  8 11:06:00 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/Mesher.java: Display the total number of faces.
+	* src/org/jcae/mesh/Mesher.java
+	  src/org/jcae/mesh/xmldata/MeshToMMesh3DConvert.java: Write normals only if org.jcae.mesh.Mesher.writeNormals property is set to true. The normals file is really huge with large meshes, thus we need to disable this writing until some filtering is performed.
+	* src/org/jcae/mesh/Mesher.java
+	  src-occ/org/jcae/mesh/cad/occ/OCCGeomCurve3D.java
+	  src-occ/org/jcae/mesh/cad/occ/OCCDiscretizeCurve3D.java
+	  src-occ/org/jcae/mesh/cad/occ/OCCDiscretizeDeflectionCurve3D.java: Rewrite 1D discretization stuff. OCCDiscretizeDeflectionCurve3D is removed and incorporated into OCCDiscretizeCurve3D. GCPnts_QuasiUniformDeflection is replaced by a home brewed algorithm.
+
+Fri Mar  4 16:06:30 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src-occ/org/jcae/mesh/cad/occ/OCCDiscretizeDeflectionCurve3D.java:  Temporarily uses GCPnts_QuasiUniformDeflection to perform 1D discretization with deflection.
+
 Thu Mar  3 17:46:20 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/UNVConverter.java: Add methods to write files in the MESH format.
