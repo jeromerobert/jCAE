@@ -167,11 +167,11 @@ public class Mesher
 					if (numFace != 0 && iFace != numFace)
 						continue;
 					xmlFile = "jcae2d."+iFace;
-					SubMesh2D submesh = SubMesh2DReader.readObject(xmlDir, xmlFile, F);
+					SubMesh2D submesh = SubMesh2DReader.readObject(xmlDir, xmlFile);
 					if (null != submesh)
 					{
 						logger.info("Importing face "+iFace);
-						mesh3D.addSubMesh2D(submesh, true);
+						mesh3D.addSubMesh2D(submesh, F, true);
 					}
 				}
 				mesh3D.printInfos();
