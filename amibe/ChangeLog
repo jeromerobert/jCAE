@@ -1,8 +1,9 @@
 Fri Nov 19 16:51:29 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
 	* Add this ChangeLog, build.properties and build.xml
-	* Remove a bunch of useless files, mostlu related to old UI
+	* Remove a bunch of useless files, mostly related to old UI
 	  and Corba.
+	* Remove org.jcae.mesh.algos and org.jcae.mesh.ds
 
 Fri Nov 19 16:49:50 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
