@@ -329,7 +329,12 @@ public class Vertex
 		double num = m2d.dot(x23, y23, x31, y31);
 		double [] po = m2d.orth(x12, y12);
 		double den = 2.0 * m2d.dot(po[0], po[1], x31, y31);
-		if (m2.det() * den * den > 1.e-4 * num * num)
+		//  Flat triangles cannot be computed accurately, we
+		//  consider arbitrarily that C is returned if
+		//     distance(C, middle(v1, v2)) < 10 * distance(v1, v2)
+		//     <=> |num/den| trans(po) M po < 10 * trans(v12) M v12
+		//     <=> num * num * det(M) < 100 * den * den
+		if (num * num * m2d.det() < 100.0 * den * den)
 		{
 			return new Vertex(
 				0.5*(p1[0]+p2[0]) + po[0] * num / den,
@@ -379,10 +384,10 @@ public class Vertex
 			Vertex C3 = va3.circumcenter(vc1, vc2, va3);
 			Vertex C0 = circumcenter(vc1, vc2, va3);
 			double ret =
-		        	mesh.compGeom().distance(C3, this, va3) /
-		        	mesh.compGeom().distance(C3, va3, va3) +
-		        	mesh.compGeom().distance(C0, this, this) /
-		        	mesh.compGeom().distance(C0, va3, this);
+				mesh.compGeom().distance(C3, this, va3) /
+				mesh.compGeom().distance(C3, va3, va3) +
+				mesh.compGeom().distance(C0, this, this) /
+				mesh.compGeom().distance(C0, va3, this);
 			return (ret < 2.0);
 		}
 		catch (RuntimeException ex)
