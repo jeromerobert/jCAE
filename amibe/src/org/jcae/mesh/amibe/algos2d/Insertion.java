@@ -35,8 +35,8 @@ public class Insertion
 	private static Logger logger=Logger.getLogger(Insertion.class);
 	private Mesh mesh;
 	
-	static public double minlen = 1.0 / Math.sqrt(2.);
-	static public double maxlen = 1.0 * Math.sqrt(2.);
+	static public final double minlen = 1.0 / Math.sqrt(2.);
+	static public final double maxlen = 1.0 * Math.sqrt(2.);
 	
 	/**
 	 * Creates a <code>Insertion</code> instance.
