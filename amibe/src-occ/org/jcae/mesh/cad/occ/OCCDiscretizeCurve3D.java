@@ -299,11 +299,11 @@ public class OCCDiscretizeCurve3D
 				for (int i = 1; i < nr - 1; i++)
 				{
 					double l1 = Math.sqrt(
-					  (xyz[3*i] - xyz[3*i-3]) * (xyz[3*i] - xyz[3*i-3]) +
+					  (xyz[3*i  ] - xyz[3*i-3]) * (xyz[3*i  ] - xyz[3*i-3]) +
 					  (xyz[3*i+1] - xyz[3*i-2]) * (xyz[3*i+1] - xyz[3*i-2]) +
 					  (xyz[3*i+2] - xyz[3*i-1]) * (xyz[3*i+2] - xyz[3*i-1]));
 					double l2 = Math.sqrt(
-					  (xyz[3*i] - xyz[3*i+3]) * (xyz[3*i] - xyz[3*i+3]) +
+					  (xyz[3*i  ] - xyz[3*i+3]) * (xyz[3*i  ] - xyz[3*i+3]) +
 					  (xyz[3*i+1] - xyz[3*i+4]) * (xyz[3*i+1] - xyz[3*i+4]) +
 					  (xyz[3*i+2] - xyz[3*i+5]) * (xyz[3*i+2] - xyz[3*i+5]));
 					if (Math.abs(l2 - l1) > 0.01 * 0.5 * (l1+l2))
@@ -337,18 +337,21 @@ public class OCCDiscretizeCurve3D
 	private double length(double start, double end, int nrsub)
 	{
 		assert nr > 0;
-		double [] oldXYZ;
-		double [] newXYZ = curve.value(start);
 		double delta = (end - start) / ((double) nrsub);
 		double l = 0.0;
+		double [] xyz = new double[3*(nrsub+1)];
 		for (int i = 0; i < nrsub; i++)
+			xyz[3*i] = start + ((double) i) * delta;
+		//  Avoid rounding errors
+		xyz[3*nrsub] = end;
+		curve.arrayValues(nrsub + 1, xyz);
+		
+		for (int i = 0; i < 3 * nrsub; i+=3)
 		{
-			oldXYZ = newXYZ;
-			newXYZ = curve.value(start + (i+1) * delta);
 			l += Math.sqrt(
-			  (oldXYZ[0] - newXYZ[0]) * (oldXYZ[0] - newXYZ[0]) +
-			  (oldXYZ[1] - newXYZ[1]) * (oldXYZ[1] - newXYZ[1]) +
-			  (oldXYZ[2] - newXYZ[2]) * (oldXYZ[2] - newXYZ[2]));
+			  (xyz[i+3] - xyz[i  ]) * (xyz[i+3] - xyz[i  ]) +
+			  (xyz[i+4] - xyz[i+1]) * (xyz[i+4] - xyz[i+1]) +
+			  (xyz[i+5] - xyz[i+2]) * (xyz[i+5] - xyz[i+2]));
 		}
 		return l;
 	}
@@ -359,18 +362,17 @@ public class OCCDiscretizeCurve3D
 			return length;
 		
 		assert nr > 0;
-		double [] oldXYZ;
-		double [] newXYZ = curve.value(a[0]);
+		double [] xyz = new double[3*nr];
+		for (int i = 0; i < nr; i++)
+			xyz[3*i] = a[i];
+		curve.arrayValues(nr, xyz);
+		
 		length = 0.0;
-		for (int i = 1; i < nr; i++)
-		{
-			oldXYZ = newXYZ;
-			newXYZ = curve.value(a[i]);
+		for (int i = 3; i < 3*nr; i+=3)
 			length += Math.sqrt(
-			  (oldXYZ[0] - newXYZ[0]) * (oldXYZ[0] - newXYZ[0]) +
-			  (oldXYZ[1] - newXYZ[1]) * (oldXYZ[1] - newXYZ[1]) +
-			  (oldXYZ[2] - newXYZ[2]) * (oldXYZ[2] - newXYZ[2]));
-		}
+			  (xyz[i-3] - xyz[i  ]) * (xyz[i-3] - xyz[i  ]) +
+			  (xyz[i-2] - xyz[i+1]) * (xyz[i-2] - xyz[i+1]) +
+			  (xyz[i-1] - xyz[i+2]) * (xyz[i-1] - xyz[i+2]));
 		return length;
 	}
 }
