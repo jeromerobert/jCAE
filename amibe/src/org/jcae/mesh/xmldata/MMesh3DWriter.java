@@ -23,7 +23,7 @@ package org.jcae.mesh.xmldata;
 import org.jcae.mesh.mesher.ds.*;
 import gnu.trove.TObjectIntHashMap;
 import java.io.*;
-import java.util.*;
+import java.util.Iterator;
 import org.w3c.dom.*;
 import org.apache.log4j.Logger;
 
@@ -162,8 +162,8 @@ public class MMesh3DWriter
 			File refFile = new File(dir, JCAEXMLData.ref1dFilename);
 			File trianglesFile=new File(dir, JCAEXMLData.triangles3dFilename);
 			File groupsFile=new File(dir, JCAEXMLData.groupsFilename);
-			TObjectIntHashMap nodeIndex=new TObjectIntHashMap();
-			TObjectIntHashMap faceIndex=new TObjectIntHashMap();
+			TObjectIntHashMap nodeIndex=new TObjectIntHashMap(mesh3d.getNumberOfNodes());
+			TObjectIntHashMap faceIndex=new TObjectIntHashMap(mesh3d.getNumberOfFaces());
 			// Create and fill the DOM
 			Document document=JCAEXMLWriter.createJcaeDocument();
 			
