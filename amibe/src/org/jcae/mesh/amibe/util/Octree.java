@@ -24,9 +24,9 @@ import org.jcae.mesh.mesher.ds.MNode3D;
 
 public class Octree
 {
+	private static int BUCKETSIZE = 10;
 	protected class OctreeCell
 	{
-		public static final int BUCKETSIZE = 10;
 		public static final int SUBOCTREES = 8;
 		//  nItems can either store the number of items in the current cell,
 		//  or the total number of vertices below this cell.
@@ -61,6 +61,11 @@ public class Octree
 		x0[3] = ((double) gridSize) / deltaX;
 		root = new OctreeCell();
 		nCells++;
+	}
+	
+	public final void setBucketSize(int n)
+	{
+		BUCKETSIZE = n;
 	}
 	
 	public final void double2int(double [] p, int [] ijk)
@@ -116,13 +121,13 @@ public class Octree
 		}
 		
 		//  If current box is full, split it into SUBOCTREES suboctrees
-		while (current.nItems == OctreeCell.BUCKETSIZE)
+		while (current.nItems == BUCKETSIZE)
 		{
 			s >>= 1;
 			assert s > 0;
 			OctreeCell [] newSubOctrees = new OctreeCell[OctreeCell.SUBOCTREES];
 			//  Move points to their respective suboctrees.
-			for (int i = 0; i < OctreeCell.BUCKETSIZE; i++)
+			for (int i = 0; i < BUCKETSIZE; i++)
 			{
 				MNode3D p = (MNode3D) current.subOctree[i];
 				double2int(p.getXYZ(), oldijk);
@@ -131,7 +136,7 @@ public class Octree
 				{
 					newSubOctrees[ind] = new OctreeCell();
 					nCells++;
-					newSubOctrees[ind].subOctree = new MNode3D[OctreeCell.BUCKETSIZE];
+					newSubOctrees[ind].subOctree = new MNode3D[BUCKETSIZE];
 				}
 				OctreeCell target = newSubOctrees[ind];
 				target.subOctree[target.nItems] = current.subOctree[i];
@@ -139,7 +144,7 @@ public class Octree
 			}
 			current.subOctree = newSubOctrees;
 			//  current will point to another cell, adjust it now.
-			current.nItems = - OctreeCell.BUCKETSIZE - 1;
+			current.nItems = - BUCKETSIZE - 1;
 			int ind = indexSubOctree(ijk, s);
 			if (null == current.subOctree[ind])
 			{
@@ -150,7 +155,7 @@ public class Octree
 		}
 		//  Eventually insert the new point
 		if (current.nItems == 0)
-			current.subOctree = new MNode3D[OctreeCell.BUCKETSIZE];
+			current.subOctree = new MNode3D[BUCKETSIZE];
 		current.subOctree[current.nItems] = v;
 		current.nItems++;
 	}
