@@ -1,3 +1,7 @@
+Wed Mar 23 11:07:43 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/metrics/Matrix2D.java (eigenvectors): If matrix is similar to identity, both eigenvectors were equal which caused failures about singular matrices.
+
 Mon Mar 21 16:29:08 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/mesher/ds/MMesh0D.java: This class was inefficient when handling meshes with many vertices.
