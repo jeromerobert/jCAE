@@ -103,8 +103,7 @@ public class Insertion
 					Vertex end = ot.destination();
 					double [] xs = start.getUV();
 					double [] xe = end.getUV();
-					//int segments = (int) (4.0*l/lcrit) + 1;
-					int segments = (int) (2.0*l) + 10;
+					int segments = (int) (2.0*l/lcrit) + 10;
 					Vertex [] np = new Vertex[segments-1];
 					for (int ns = 1; ns < segments; ns++)
 						np[ns-1] = new Vertex(xs[0]+ns*(xe[0]-xs[0])/segments, xs[1]+ns*(xe[1]-xs[1])/segments);
