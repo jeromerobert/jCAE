@@ -363,6 +363,57 @@ public class Mesh
 		}
 	}
 	
+	public void writeGeom(String file)
+	{
+		String cr=System.getProperty("line.separator");
+		PrintWriter out;
+		try {
+			if (file.endsWith(".gz") || file.endsWith(".GZ"))
+				out = new PrintWriter(new java.util.zip.GZIPOutputStream(new FileOutputStream(file)));
+			else
+				out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(file)));
+			HashSet nodeset = new HashSet();
+			double [] p;
+			double [] p3;
+			for(Iterator it=triangleList.iterator();it.hasNext();)
+			{
+				Triangle t = (Triangle) it.next();
+				for (int i = 0; i < 3; i++)
+					nodeset.add(t.vertex[i]);
+			}
+			for(Iterator it=nodeset.iterator();it.hasNext();)
+			{
+				Vertex node = (Vertex) it.next();
+				if (node == Vertex.outer)
+					continue;
+				p = node.getUV();
+				out.println("UV "+p[0]+" "+p[1]);
+				p3 = surface.value(p[0], p[1]);
+				surface.setParameter(p[0], p[1]);
+				out.println("d0 "+p3[0]+" "+p3[1]+" "+p3[2]);
+				p3 = surface.d1U();
+				out.println("d1U "+p3[0]+" "+p3[1]+" "+p3[2]);
+				p3 = surface.d1V();
+				out.println("d1V "+p3[0]+" "+p3[1]+" "+p3[2]);
+				p3 = surface.d2U();
+				out.println("d2U "+p3[0]+" "+p3[1]+" "+p3[2]);
+				p3 = surface.d2V();
+				out.println("d2V "+p3[0]+" "+p3[1]+" "+p3[2]);
+				p3 = surface.dUV();
+				out.println("d2UV "+p3[0]+" "+p3[1]+" "+p3[2]);
+			}
+			out.close();
+		} catch (FileNotFoundException e)
+		{
+			logger.fatal(e.toString());
+			e.printStackTrace();
+		} catch (Exception e)
+		{
+			logger.fatal(e.toString());
+			e.printStackTrace();
+		}
+	}
+	
 	public void pushCompGeom(int i)
 	{
 		if (i == 2)
