@@ -1,6 +1,6 @@
 /*
  * Project Info:  http://jcae.sourceforge.net
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
  * Software Foundation; either version 2.1 of the License, or (at your option)
@@ -50,9 +50,9 @@ import org.xml.sax.SAXException;
  */
 public class UNVConverter
 {
-		
+	
 	public static class FormatD25_16 extends DecimalFormat
-	{		
+	{
 		private static String PATERN="0.0000000000000000E00";
 		public FormatD25_16()
 		{
@@ -89,7 +89,7 @@ public class UNVConverter
 				sb.insert(0, c);
 			}
 			return sb;
-		}		
+		}
 	}
 	
 	public static class FormatI10 extends NumberFormat
@@ -107,7 +107,7 @@ public class UNVConverter
 		 * @see java.text.NumberFormat#format(long, java.lang.StringBuffer, java.text.FieldPosition)
 		 */
 		public StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos)
-		{			
+		{
 			StringBuffer s=new StringBuffer();
 			s.append(number);
 			int n=10-s.length();
@@ -119,7 +119,7 @@ public class UNVConverter
 				toAppendTo.append(s);
 			}
 			return toAppendTo;
-		}		
+		}
 		/* (non-Javadoc)
 		 * @see java.text.NumberFormat#parse(java.lang.String, java.text.ParsePosition)
 		 */
@@ -129,41 +129,41 @@ public class UNVConverter
 		}
 	}
 	
-	private final static String CR=System.getProperty("line.separator");	
-	private final static NumberFormat FORMAT_D25_16=new FormatD25_16();	
+	private final static String CR=System.getProperty("line.separator");
+	private final static NumberFormat FORMAT_D25_16=new FormatD25_16();
 	private final static NumberFormat FORMAT_I10=new FormatI10();
 	
 	/** workaround for Bug ID4724038, see
-	 * http://bugs.sun.com/bugdatabase/view_bug.do;:YfiG?bug_id=4724038 
+	 * http://bugs.sun.com/bugdatabase/view_bug.do;:YfiG?bug_id=4724038
 	 */
 	public static void clean(final MappedByteBuffer buffer)
 	{
 		AccessController.doPrivileged(new PrivilegedAction()
-        {
-            public Object run()
-            {
-            	try
-				{
-            		Method getCleanerMethod = buffer.getClass().getMethod("cleaner", new Class[0]);
-            		getCleanerMethod.setAccessible(true);
-            		sun.misc.Cleaner cleaner = (sun.misc.Cleaner)getCleanerMethod.invoke(buffer,new Object[0]);
-            		if(cleaner!=null)
-            			cleaner.clean();
-				}
-            	catch(Exception e)
-				{
-            		e.printStackTrace();
-				}
-            	return null;
-            }
-        });
+		{
+			public Object run()
+			{
+				try
+							{
+					Method getCleanerMethod = buffer.getClass().getMethod("cleaner", new Class[0]);
+					getCleanerMethod.setAccessible(true);
+					sun.misc.Cleaner cleaner = (sun.misc.Cleaner)getCleanerMethod.invoke(buffer,new Object[0]);
+					if(cleaner!=null)
+						cleaner.clean();
+							}
+				catch(Exception e)
+							{
+					e.printStackTrace();
+							}
+				return null;
+			}
+		});
 	}
 	/**
 	 * A main method for debugging
 	 * @param args
 	 */
 	public static void main(String[] args)
-	{		
+	{
 		System.out.println(FORMAT_D25_16.format(1E-24));
 		System.out.println(FORMAT_D25_16.format(15E24));
 		System.out.println(FORMAT_D25_16.format(Double.POSITIVE_INFINITY));
@@ -179,10 +179,8 @@ public class UNVConverter
 				ids[i]=i;
 			}
 			new UNVConverter(new File("/home/usr/local2/home/jerome/"), ids).
-				writeUNV(new PrintStream(new BufferedOutputStream(new FileOutputStream(new File("/tmp/blub.unv")))));	
+				writeUNV(new PrintStream(new BufferedOutputStream(new FileOutputStream(new File("/tmp/blub.unv")))));
 			//	writeUNV(System.out);
-			
-			
 		} catch (ParserConfigurationException e)
 		{
 			e.printStackTrace();
@@ -209,7 +207,7 @@ public class UNVConverter
 	public UNVConverter(File directory, int[] groupIds)
 	{
 		this.directory=directory;
-		this.groupIds=groupIds;		
+		this.groupIds=groupIds;
 	}
 
 	/**
@@ -233,7 +231,7 @@ public class UNVConverter
 		}
 		return toReturn;
 	}
-
+	
 	private File getNodeFile()
 	{
 		Element xmlNodes = (Element) document.getElementsByTagName(
@@ -288,7 +286,7 @@ public class UNVConverter
 		{
 			return null;
 		}
-	}	
+	}
 	
 	private void readGroups()
 	{
@@ -308,22 +306,22 @@ public class UNVConverter
 			int number=Integer.parseInt(v);
 			groups[i]=new int[number];
 			numberOfTriangles+=number;
-			if(number==0) continue;
-				
-				
+			if(number==0)
+				continue;
+			
 			String groupFileN=((Element)e.getElementsByTagName("file").item(0)).getAttribute("location");
 			String os=((Element)e.getElementsByTagName("file").item(0)).getAttribute("offset");
-			File groupFile=new File(directory, groupFileN);		
+			File groupFile=new File(directory, groupFileN);
 			long offset=Long.parseLong(os);
 			
 			try
 			{
 				// Open the file and then get a channel from the stream
-		        FileInputStream fisG = new FileInputStream(groupFile);
-		        FileChannel fcG = fisG.getChannel();
-		 
-		        // Get the file's size and then map it into memory
-		        MappedByteBuffer bbG = fcG.map(FileChannel.MapMode.READ_ONLY, offset*4, number*4);		
+				FileInputStream fisG = new FileInputStream(groupFile);
+				FileChannel fcG = fisG.getChannel();
+				
+				// Get the file's size and then map it into memory
+				MappedByteBuffer bbG = fcG.map(FileChannel.MapMode.READ_ONLY, offset*4, number*4);
 				IntBuffer groupsBuffer = bbG.asIntBuffer();
 				
 				groupsBuffer.get(groups[i]);
@@ -334,33 +332,33 @@ public class UNVConverter
 			{
 				ex.printStackTrace();
 			}
-		}				
+		}
 	}
 	
 	private int[] readTriangles() throws IOException
-	{				
+	{
 		File f=getTriaFile();
 		// Open the file and then get a channel from the stream
-        FileInputStream fis = new FileInputStream(f);
-        FileChannel fc = fis.getChannel();
- 
-        // Get the file's size and then map it into memory
-        MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
-        IntBuffer trias=bb.asIntBuffer();
-        
-        int[] ns=new int[3];
-        int[] toReturn=new int[numberOfTriangles*3];
-        int count=0;
-        for(int i=0; i<groups.length; i++)
-        {
-        	for(int j=0; j<groups[i].length; j++)
-        	{
-        		trias.position(groups[i][j]*3);
-        		trias.get(toReturn, count, 3);
-        		count+=3;
-        	}
-        }
-        return toReturn;        
+		FileInputStream fis = new FileInputStream(f);
+		FileChannel fc = fis.getChannel();
+		
+		// Get the file's size and then map it into memory
+		MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
+		IntBuffer trias=bb.asIntBuffer();
+		
+		int[] ns=new int[3];
+		int[] toReturn=new int[numberOfTriangles*3];
+		int count=0;
+		for(int i=0; i<groups.length; i++)
+		{
+			for(int j=0; j<groups[i].length; j++)
+			{
+				trias.position(groups[i][j]*3);
+				trias.get(toReturn, count, 3);
+				count+=3;
+			}
+		}
+		return toReturn;
 	}
 	
 	public void writeUNV(PrintStream out) throws ParserConfigurationException, SAXException, IOException
@@ -370,7 +368,7 @@ public class UNVConverter
 			groupIds=getAllGroupIDs();
 		readGroups();
 		int[] triangle=readTriangles();
-		TIntIntHashMap amibeNodeToUNVNode=new TIntIntHashMap();		
+		TIntIntHashMap amibeNodeToUNVNode=new TIntIntHashMap();
 		writeUNVNodes(out, new TIntHashSet(triangle).toArray(), amibeNodeToUNVNode);
 		/*System.out.println(new TIntArrayList(triangle).toString());
 		System.out.println(new TIntArrayList(amibeNodeToUNVNode.keys()).toString());
@@ -431,13 +429,13 @@ public class UNVConverter
 		out.println("    -1"+CR+"  2430");
 		int count =  0;
 		for(int i=0;i<groups.length; i++)
-		{			
+		{
 			count++;
 			out.println("1      0         0         0         0         0         0      "+groups[i].length);
 			out.println(names[i]);
 			int countg=0;
 			for(int j=0; j<groups[i].length; j++)
-			{				
+			{
 				out.print("         8"+FORMAT_I10.format(amibeTriaToUNVTria.get(groups[i][j])));
 				countg++;
 				if ((countg % 4) == 0)
@@ -449,18 +447,18 @@ public class UNVConverter
 		out.println("    -1");
 
 	}
-
+	
 	private void writeUNVNodes(PrintStream out, int[] nodesID, TIntIntHashMap amibeToUNV) throws IOException
 	{
 		File f=getNodeFile();
 		// Open the file and then get a channel from the stream
-        FileInputStream fis = new FileInputStream(f);
-        FileChannel fc = fis.getChannel();
- 
-        // Get the file's size and then map it into memory
-        int sz = (int)fc.size();
-        MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
-        DoubleBuffer nodesBuffer=bb.asDoubleBuffer();        
+		FileInputStream fis = new FileInputStream(f);
+		FileChannel fc = fis.getChannel();
+	
+		// Get the file's size and then map it into memory
+		int sz = (int)fc.size();
+		MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
+		DoubleBuffer nodesBuffer=bb.asDoubleBuffer();
 		
 		out.println("    -1"+CR+"  2411");
 		int count =  0;
@@ -470,16 +468,16 @@ public class UNVConverter
 			int iid=nodesID[i]*3;
 			x=nodesBuffer.get(iid);
 			y=nodesBuffer.get(iid+1);
-			z=nodesBuffer.get(iid+2);			
+			z=nodesBuffer.get(iid+2);
 			count++;
 			amibeToUNV.put(nodesID[i], count);
 			out.println(FORMAT_I10.format(count)+"         1         1         1");
-			out.println(FORMAT_D25_16.format(x)+FORMAT_D25_16.format(y)+FORMAT_D25_16.format(z));			
+			out.println(FORMAT_D25_16.format(x)+FORMAT_D25_16.format(y)+FORMAT_D25_16.format(z));
 		}
-		out.println("    -1");		
+		out.println("    -1");
 		fc.close();
 		fis.close();
-		clean(bb);		
+		clean(bb);
 	}
 	
 	/**
@@ -504,7 +502,7 @@ public class UNVConverter
 					FORMAT_I10.format(amibeNodeToUNVNode.get(triangles[triaIndex++]))+
 					FORMAT_I10.format(amibeNodeToUNVNode.get(triangles[triaIndex++])));
 			}
-		}		
+		}
 		out.println("    -1");
 	}
 }
