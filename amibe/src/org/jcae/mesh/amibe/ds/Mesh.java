@@ -98,11 +98,14 @@ public class Mesh
 		face = (CADFace) f;
 		surface = face.getGeomSurface();
 		double [] bb = face.boundingBox();
-		epsilon = Math.max(Math.sqrt(
-			(bb[0] - bb[3]) * (bb[0] - bb[3]) +
-			(bb[1] - bb[4]) * (bb[1] - bb[4]) +
-			(bb[2] - bb[5]) * (bb[2] - bb[5])
-		) / 1000.0, Metric2D.getLength() / 100.0);
+		Double absEpsilon = new Double(System.getProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon", "-1.0"));
+		epsilon = absEpsilon.doubleValue();
+		if (epsilon < 0)
+			epsilon = Math.max(Math.sqrt(
+				(bb[0] - bb[3]) * (bb[0] - bb[3]) +
+				(bb[1] - bb[4]) * (bb[1] - bb[4]) +
+				(bb[2] - bb[5]) * (bb[2] - bb[5])
+			) / 1000.0, Metric2D.getLength() / 100.0);
 	}
 	
 	/**
