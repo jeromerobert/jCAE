@@ -40,8 +40,8 @@ public class SubMesh2DWriter
 	{
 		//save nodes
 		logger.debug("begin writing "+nodesFile);
-		DataOutputStream out=new DataOutputStream(new FileOutputStream(nodesFile));
-		DataOutputStream refout=new DataOutputStream(new FileOutputStream(refFile));
+		DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile)));
+		DataOutputStream refout=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile)));
 		int i=0, nref=0;
 		while(nodesIterator.hasNext())
 		{
@@ -81,7 +81,7 @@ public class SubMesh2DWriter
 	{
 		//save triangles
 		logger.debug("begin writing "+trianglesFile);
-		DataOutputStream out=new DataOutputStream(new FileOutputStream(trianglesFile));
+		DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(trianglesFile)));
 		int i=0;
 		while(facesIterator.hasNext())
 		{

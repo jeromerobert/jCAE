@@ -65,17 +65,17 @@ public class MMesh1DReader
 				"/jcae/mesh/submesh/nodes/file/@location").getNodeValue();
 			if (nodesFile.charAt(0) != File.separatorChar)
 				nodesFile = xmlDir+File.separator+nodesFile;
-			DataInputStream nodesIn=new DataInputStream(new FileInputStream(nodesFile));
+			DataInputStream nodesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(nodesFile)));
 			String refFile = xpath.selectSingleNode(document,
 				"/jcae/mesh/submesh/nodes/references/file/@location").getNodeValue();
 			if (refFile.charAt(0) != File.separatorChar)
 				refFile = xmlDir+File.separator+refFile;
-			DataInputStream refsIn=new DataInputStream(new FileInputStream(refFile));
+			DataInputStream refsIn=new DataInputStream(new BufferedInputStream(new FileInputStream(refFile)));
 			String edgesFile = xpath.selectSingleNode(document,
 				"/jcae/mesh/submesh/beams/file/@location").getNodeValue();
 			if (edgesFile.charAt(0) != File.separatorChar)
 				edgesFile = xmlDir+File.separator+edgesFile;
-			DataInputStream edgesIn=new DataInputStream(new FileInputStream(edgesFile));
+			DataInputStream edgesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(edgesFile)));
 
 			NodeList submeshList = xpath.selectNodeList(
 				document.getDocumentElement(),

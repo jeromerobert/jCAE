@@ -57,16 +57,16 @@ public class MMesh3DReader
 				"references/file/@location").getNodeValue();
 			if (refFile.charAt(0) != File.separatorChar)
 				refFile = xmlDir+File.separator+refFile;
-			DataInputStream refsIn=new DataInputStream(new FileInputStream(refFile));
+			DataInputStream refsIn=new DataInputStream(new BufferedInputStream(new FileInputStream(refFile)));
 			String nodesFile = xpath.selectSingleNode(submeshNodes, "file/@location").getNodeValue();
 			if (nodesFile.charAt(0) != File.separatorChar)
 				nodesFile = xmlDir+File.separator+nodesFile;
-			DataInputStream nodesIn=new DataInputStream(new FileInputStream(nodesFile));
+			DataInputStream nodesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(nodesFile)));
 			String trianglesFile = xpath.selectSingleNode(document,
 				"/jcae/mesh/submesh/triangles/file/@location").getNodeValue();
 			if (trianglesFile.charAt(0) != File.separatorChar)
 				trianglesFile = xmlDir+File.separator+trianglesFile;
-			DataInputStream trianglesIn=new DataInputStream(new FileInputStream(trianglesFile));
+			DataInputStream trianglesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(trianglesFile)));
 
 			int numberOfReferences = Integer.parseInt(
 				xpath.selectSingleNode(submeshNodes, "references/number/text()").getNodeValue());
@@ -111,7 +111,7 @@ public class MMesh3DReader
 			String groupsFile = xpath.selectSingleNode(groupsList.item(0), "file/@location").getNodeValue();
 			if (groupsFile.charAt(0) != File.separatorChar)
 				groupsFile = xmlDir+File.separator+groupsFile;
-			DataInputStream groupsIn=new DataInputStream(new FileInputStream(groupsFile));
+			DataInputStream groupsIn=new DataInputStream(new BufferedInputStream(new FileInputStream(groupsFile)));
 			for (i=0; i < numberOfGroups; i++)
 			{
 				Node groupNode = groupsList.item(i);

@@ -41,8 +41,8 @@ public class MMesh1DWriter
 	{
 		//save nodes
 		logger.debug("begin writing "+nodesFile);
-		DataOutputStream out=new DataOutputStream(new FileOutputStream(nodesFile, true));
-		DataOutputStream refout=new DataOutputStream(new FileOutputStream(reffile, true));
+		DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile, true)));
+		DataOutputStream refout=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(reffile, true)));
 		long offsetNodes = nodesFile.length();
 		long offsetRefNodes = reffile.length();
 		int i=0, nref=0;
@@ -103,7 +103,7 @@ public class MMesh1DWriter
 	{
 		//save beams
 		logger.debug("begin writing "+beamsFile);
-		DataOutputStream out=new DataOutputStream(new FileOutputStream(beamsFile, true));
+		DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(beamsFile, true)));
 		long offsetBeams = beamsFile.length();
 		int i=0;
 		while(edgesIterator.hasNext())
