@@ -329,6 +329,29 @@ public class Vertex
 		// Do not swap if triangles are reversed in 2d space
 		if (vc1.onLeft(va3, this) >= 0L || vc2.onLeft(va3, this) <= 0L)
 			return false;
+		
+		//  If a triangle is too flat, swap edge even if
+		//  triangles are then not Delaunay, it is worth
+		//  avoiding flat triangles in 2D space.
+		long t1 = Math.abs(va3.onLeft(vc1, vc2));
+		long t2 = Math.abs(this.onLeft(vc1, vc2));
+		if (t1 < t2)
+		{
+			long temp = t1;
+			t1 = t2;
+			t2 = temp;
+		}
+		long t3 = Math.abs(vc1.onLeft(va3, this));
+		long t4 = Math.abs(vc2.onLeft(va3, this));
+		if (t3 < t4)
+		{
+			long temp = t3;
+			t3 = t4;
+			t4 = temp;
+		}
+		if (t2 * 1000 < t1 && t3 * 1000 > t4)
+			return true;
+		
 		try {
 			Vertex C3 = va3.circumcenter(vc1, vc2, va3);
 			Vertex C0 = circumcenter(vc1, vc2, va3);
