@@ -419,7 +419,13 @@ public class UNVConverter
 		proc.writeNodes(out, new TIntHashSet(triangle).toArray(), amibeNodeToUNVNode);
 		TIntIntHashMap amibeTriaToUNVTria=new TIntIntHashMap();
 		proc.writeTriangles(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
-		proc.writeNormals(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
+		try
+		{
+			proc.writeNormals(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
+		}
+		catch (Exception e)
+		{
+		}
 		triangle=null;
 		amibeNodeToUNVNode=null;
 		proc.writeGroups(out, amibeTriaToUNVTria);
@@ -646,16 +652,17 @@ public class UNVConverter
 		public void writeNormals(PrintStream out, int[] triangles,
 			TIntIntHashMap amibeNodeToUNVNode, TIntIntHashMap amibeTriaToUNVTria) throws IOException
 		{
+			//  Open the input file first so that an exception is
+			//  raised if it is not found.
+			File f=getNormalFile();
+			FileInputStream fis = new FileInputStream(f);
+			FileChannel fc = fis.getChannel();
+			
 			int count=0;
 			for(int i=0; i<groups.length; i++)
 				count += groups[i].length;
 			
 			out.println("\nNormals\n"+(3*count));
-			
-			File f=getNormalFile();
-			// Open the file and then get a channel from the stream
-			FileInputStream fis = new FileInputStream(f);
-			FileChannel fc = fis.getChannel();
 			
 			// Get the file's size and then map it into memory
 			int sz = (int)fc.size();
