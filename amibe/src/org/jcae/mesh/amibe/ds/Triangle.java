@@ -66,6 +66,11 @@ public class Triangle
 		);
 	}
 	
+	public boolean isOuter()
+	{
+		return (adjPos & (OTriangle.OUTER << 8 | OTriangle.OUTER << 16 | OTriangle.OUTER << 24)) != 0;
+	}
+	
 	public String toString()
 	{
 		String r = "Vertices:";
