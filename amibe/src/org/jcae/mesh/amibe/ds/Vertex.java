@@ -33,9 +33,14 @@ public class Vertex
 	//  Set by Mesh.init
 	public static Vertex outer = null;
 	public static Mesh mesh = null;
-	
 	private static final Random rand = new Random(139L);
-	public double [] param;
+	private static Vertex circumcenter = new Vertex(0.0, 0.0);
+	
+	//  These 2 integer arrays are temporary workspaces
+	private static final int [] i0 = new int[2];
+	private static final int [] i1 = new int[2];
+	
+	public double [] param = null;
 	public Triangle tri;
 	
 	//  Metrics at this location
@@ -43,10 +48,6 @@ public class Vertex
 	
 	//  Link to the geometrical node, if any
 	private MNode1D ref1d = null;
-	
-	//  These 2 integer arrays are temporary workspaces
-	private static final int [] i0 = new int[2];
-	private static final int [] i1 = new int[2];
 	
 	public Vertex(double u, double v)
 	{
@@ -324,7 +325,7 @@ public class Vertex
 	     ==> x orth(M,V12) - y orth(M,V13) = 0.5 V23
 	         x = <V23, V13> / (2 <orth(M,V12), V13>)
 	*/
-	public Vertex circumcenter(Vertex v1, Vertex v2, Vertex v3)
+	private Vertex circumcenter(Vertex v1, Vertex v2, Vertex v3)
 		throws RuntimeException
 	{
 		double [] p1 = v1.getUV();
@@ -349,10 +350,9 @@ public class Vertex
 		//     <=> num * num * det(M) < 1000000 * den * den
 		if (num * num * m2d.det() < 1000000.0 * den * den)
 		{
-			return new Vertex(
-				0.5*(p1[0]+p2[0]) + po[0] * num / den,
-				0.5*(p1[1]+p2[1]) + po[1] * num / den
-			);
+			circumcenter.param[0] = 0.5*(p1[0]+p2[0]) + po[0] * num / den;
+			circumcenter.param[1] = 0.5*(p1[1]+p2[1]) + po[1] * num / den;
+			return circumcenter;
 		}
 		throw new RuntimeException("Circumcenter cannot be computed");
 	}
@@ -375,10 +375,11 @@ public class Vertex
 		
 		try {
 			Vertex C3 = va3.circumcenter(vc1, vc2, va3);
-			Vertex C0 = circumcenter(vc1, vc2, va3);
 			double ret =
 				mesh.compGeom().distance(C3, this, va3) /
-				mesh.compGeom().distance(C3, va3, va3) +
+				mesh.compGeom().distance(C3, va3, va3);
+			Vertex C0 = circumcenter(vc1, vc2, va3);
+			ret +=
 				mesh.compGeom().distance(C0, this, this) /
 				mesh.compGeom().distance(C0, va3, this);
 			return (ret < 2.0);
