@@ -48,7 +48,7 @@ public class Matrix2D
 	public Matrix2D inv()
 	{
 		double detA = det();
-		if (Math.abs(detA) < 1.e-10)
+		if (Math.abs(detA) < 1.e-40)
 			throw new RuntimeException("Singular matrice: "+this);
 		Matrix2D ret = new Matrix2D(data[1][1], -data[0][1], -data[1][0], data[0][0]);
 		ret.scale(1.0 / detA);
