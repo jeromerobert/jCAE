@@ -134,6 +134,22 @@ public class BasicMesh
 		mesh.popCompGeom(2);
 		mesh.pushCompGeom(2);
 		logger.debug(" Rebuild boundary edges");
+		//  Boundary edges are first built, then they are collected.
+		//  This cannot be performed in a single loop because
+		//  triangles are modified within this loop.
+		firstOnWire = null;
+		for (int i = 0; i < bNodes.length; i++)
+		{
+			if (firstOnWire == null)
+				firstOnWire = bNodes[i];
+			else
+			{
+				mesh.forceBoundaryEdge(bNodes[i-1], bNodes[i]);
+				if (firstOnWire == bNodes[i])
+					firstOnWire = null;
+			}
+		}
+		assert firstOnWire == null;
 		ArrayList saveList = new ArrayList();
 		firstOnWire = null;
 		for (int i = 0; i < bNodes.length; i++)
@@ -142,8 +158,7 @@ public class BasicMesh
 				firstOnWire = bNodes[i];
 			else
 			{
-				OTriangle s = mesh.forceBoundaryEdge(bNodes[i-1], bNodes[i]);
-				saveList.add(s);
+				saveList.add(mesh.forceBoundaryEdge(bNodes[i-1], bNodes[i]));
 				if (firstOnWire == bNodes[i])
 					firstOnWire = null;
 			}
@@ -195,6 +210,8 @@ public class BasicMesh
 		mesh.popCompGeom(3);
 		
 		logger.debug(" Mark outer elements");
+		ArrayList pool = new ArrayList(mesh.getTriangles().size());
+		ot = new OTriangle();
 		t = Vertex.outer.tri;
 		ot = new OTriangle(t, 0);
 		if (ot.origin() == Vertex.outer)
@@ -203,9 +220,7 @@ public class BasicMesh
 				ot.prevOTri();
 		assert ot.apex() == Vertex.outer : ot;
 		
-		ArrayList pool = new ArrayList(mesh.getTriangles().size());
 		Vertex first = ot.origin();
-		OTriangle sym = new OTriangle();
 		do
 		{
 			for (int i = 0; i < 3; i++)
@@ -218,6 +233,7 @@ public class BasicMesh
 		}
 		while (ot.origin() != first);
 		logger.debug(" Mark holes");
+		OTriangle sym = new OTriangle();
 		for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
 		{
 			t = (Triangle) it.next();
@@ -245,7 +261,7 @@ public class BasicMesh
 					OTriangle.symOTri(ot, sym);
 					newPool.add(sym.getTri());
 					if (ot.hasAttributes(OTriangle.BOUNDARY))
-					{	
+					{
 						if (!outer)
 						{
 							sym.setAttributes(OTriangle.OUTER);
@@ -259,7 +275,7 @@ public class BasicMesh
 								throw new InitialTriangulationException();
 					}
 					else
-					{	
+					{
 						if (outer)
 						{
 							sym.setAttributes(OTriangle.OUTER);
@@ -277,7 +293,7 @@ public class BasicMesh
 			pool = newPool;
 		}
 		assert (mesh.isValid());
-
+		
 		mesh.pushCompGeom(3);
 		new Insertion(mesh).compute();
 		mesh.popCompGeom(3);
