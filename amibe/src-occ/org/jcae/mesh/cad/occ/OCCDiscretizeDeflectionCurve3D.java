@@ -43,17 +43,16 @@ public class OCCDiscretizeDeflectionCurve3D extends OCCDiscretizeCurve3D
 		//  Now make sure that edge length is no more than len.
 		double [] oldXYZ = curve.value(a[0]);
 		double [] newXYZ;
-		double dist2, len2;
-		len2 = len * len;
+		double dist;
 		int ns = 1;
 		while (ns < nr)
 		{
 			newXYZ = curve.value(a[ns]);
-			dist2 =
+			dist = Math.sqrt(
 			  (oldXYZ[0] - newXYZ[0]) * (oldXYZ[0] - newXYZ[0]) +
 			  (oldXYZ[1] - newXYZ[1]) * (oldXYZ[1] - newXYZ[1]) +
-			  (oldXYZ[2] - newXYZ[2]) * (oldXYZ[2] - newXYZ[2]);
-			if (dist2 > len2)
+			  (oldXYZ[2] - newXYZ[2]) * (oldXYZ[2] - newXYZ[2]));
+			if (dist > len)
 			{
 				OCCDiscretizeCurve3D refine = new OCCDiscretizeCurve3D();
 				refine.initialize(myCurve, len, a[ns-1], a[ns]);
