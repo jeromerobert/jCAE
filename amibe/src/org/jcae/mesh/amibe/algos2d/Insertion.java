@@ -158,8 +158,7 @@ public class Insertion
 			for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
 				Triangle t = (Triangle) it.next();
-				ot.bind(t);
-				if (ot.hasAttributes(OTriangle.OUTER))
+				if (t.isOuter())
 					continue;
 				Vertex v = t.centroid();
 				Vertex n = mesh.getQuadTree().getNearestVertex(v);

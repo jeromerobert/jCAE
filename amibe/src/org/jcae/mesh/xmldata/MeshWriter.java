@@ -108,20 +108,12 @@ public class MeshWriter
 		logger.debug("begin writing "+trianglesFile);
 		DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(trianglesFile)));
 		int i=0;
-		OTriangle ot = new OTriangle();
 		while(facesIterator.hasNext())
 		{
 			Triangle f = (Triangle) facesIterator.next();
 			if (f.vertex[0] == Vertex.outer || f.vertex[1] == Vertex.outer || f.vertex[2] == Vertex.outer)
 				continue;
-			ot.bind(f);
-			if (ot.hasAttributes(OTriangle.OUTER))
-				continue;
-			ot.nextOTri();
-			if (ot.hasAttributes(OTriangle.OUTER))
-				continue;
-			ot.nextOTri();
-			if (ot.hasAttributes(OTriangle.OUTER))
+			if (f.isOuter())
 				continue;
 			i++;
 			for (int j = 0; j < 3; j++)

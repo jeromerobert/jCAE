@@ -369,12 +369,10 @@ public class Mesh
 			out.println("    -1");
 			out.println("    -1"+cr+"  2412");
 			count =  0;
-			OTriangle ot = new OTriangle();
 			for(Iterator it=triangleList.iterator();it.hasNext();)
 			{
 				Triangle t = (Triangle)it.next();
-				ot.bind(t);
-				if (ot.hasAttributes(OTriangle.OUTER))
+				if (t.isOuter())
 					continue;
 				count++;
 				out.println(""+count+"        91         1         1         1         3");
@@ -448,12 +446,10 @@ public class Mesh
 				out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(file)));
 			HashSet nodeset = new HashSet();
 			int nrt = 0;
-			OTriangle ot = new OTriangle();
 			for(Iterator it=triangleList.iterator();it.hasNext();)
 			{
 				Triangle t = (Triangle) it.next();
-				ot.bind(t);
-				if (ot.hasAttributes(OTriangle.OUTER))
+				if (t.isOuter())
 					continue;
 				for (int i = 0; i < 3; i++)
 					nodeset.add(t.vertex[i]);
@@ -477,8 +473,7 @@ public class Mesh
 			for(Iterator it=triangleList.iterator();it.hasNext();)
 			{
 				Triangle t = (Triangle) it.next();
-				ot.bind(t);
-				if (ot.hasAttributes(OTriangle.OUTER))
+				if (t.isOuter())
 					continue;
 				for (int i = 0; i < 3; i++)
 				{
@@ -510,12 +505,10 @@ public class Mesh
 			else
 				out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(file)));
 			HashSet nodeset = new HashSet();
-			OTriangle ot = new OTriangle();
 			for(Iterator it=triangleList.iterator();it.hasNext();)
 			{
 				Triangle t = (Triangle) it.next();
-				ot.bind(t);
-				if (ot.hasAttributes(OTriangle.OUTER))
+				if (t.isOuter())
 					continue;
 				for (int i = 0; i < 3; i++)
 					nodeset.add(t.vertex[i]);
@@ -730,7 +723,6 @@ public class Mesh
 	
 	public boolean isValid(boolean constrained)
 	{
-		OTriangle ot = new OTriangle();
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
 		{
 			Triangle t = (Triangle) it.next();
@@ -738,10 +730,7 @@ public class Mesh
 				return false;
 			if (t.vertex[0] == Vertex.outer || t.vertex[1] == Vertex.outer || t.vertex[2] == Vertex.outer)
 			{
-				if (!constrained)
-					continue;
-				ot.bind(t);
-				if (!ot.hasAttributes(OTriangle.OUTER))
+				if (constrained && !t.isOuter())
 					return false;
 			}
 			else if (t.vertex[0].onLeft(t.vertex[1], t.vertex[2]) <= 0L)
