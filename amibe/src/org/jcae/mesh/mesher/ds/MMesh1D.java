@@ -46,6 +46,7 @@ public class MMesh1D extends MMesh0D
 	
 	//  Edge map.
 	private HashMap mapTEdgeToSubMesh1D;
+	private HashMap mapTEdgeToFaces;;
 	
 	//  Edge list.
 	private ArrayList listTEdge;
@@ -87,6 +88,27 @@ public class MMesh1D extends MMesh0D
 			mapTEdgeToSubMesh1D.put(E, submesh1d);
 			listTEdge.add(E);
 		}
+		mapTEdgeToFaces = new HashMap(edges);
+		for (Iterator it = listTEdge.iterator(); it.hasNext(); )
+		{
+			CADEdge E = (CADEdge) it.next();
+			mapTEdgeToFaces.put(E, new HashSet());
+		}
+		CADExplorer expF = CADShapeBuilder.factory.newExplorer();
+		for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
+		{
+			CADFace F = (CADFace) expF.current();
+			HashSet set;
+			for (expE.init(F, CADExplorer.EDGE); expE.more(); expE.next())
+			{
+				CADEdge E = (CADEdge) expE.current();
+				if (mapTEdgeToSubMesh1D.containsKey(E))
+					set = (HashSet) mapTEdgeToFaces.get(E);
+				else
+					set = (HashSet) mapTEdgeToFaces.get(E.reversed());
+				set.add(F);
+			}
+		}
 		assert(isValid());
 	}
 	
@@ -98,6 +120,20 @@ public class MMesh1D extends MMesh0D
 	public CADShape getGeometry()
 	{
 		return shape;
+	}
+	
+	/**
+	 * Returns the set of faces containing this topological edge.
+	 *
+	 * @return the set of faces containing this topological edge.
+	 */
+	public HashSet getAdjacentFaces(CADEdge E)
+	{
+		HashSet ret = (HashSet) mapTEdgeToFaces.get(E);
+		if (ret == null)
+			ret = (HashSet) mapTEdgeToFaces.get(E.reversed());
+		assert ret != null;
+		return ret;
 	}
 	
 	/**
