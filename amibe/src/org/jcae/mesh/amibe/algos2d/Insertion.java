@@ -96,11 +96,15 @@ public class Insertion
 					double l = mesh.compGeom().length(ot);
 					if (l < maxlen)
 						continue;
-					//  Long edges are discretized
+					//  Long edges are discretized, but do not create more than 4 subsegments
+					double lcrit = 1.0;
+					if (l > 4.0)
+						lcrit = l / 4.0;
 					Vertex start = ot.origin();
 					Vertex end = ot.destination();
 					double [] xs = start.getUV();
 					double [] xe = end.getUV();
+					//int segments = (int) (4.0*l/lcrit) + 1;
 					int segments = (int) (2.0*l) + 10;
 					Vertex [] np = new Vertex[segments-1];
 					for (int ns = 1; ns < segments; ns++)
@@ -108,10 +112,7 @@ public class Insertion
 					
 					Vertex last = start;
 					int nrNodes = 0;
-					double lcrit = 1.0;
-					if (l > 4.0)
-						lcrit = l / 4.0;
-						
+					
 					l = 0.0;
 					for (int ns = 0; ns < segments-1; ns++)
 					{
