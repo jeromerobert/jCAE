@@ -216,16 +216,19 @@ public class Mesh
 	
 	public boolean checkInvertedTriangles()
 	{
+		int ncount = 0;
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
 		{
 			Triangle t = (Triangle) it.next();
 			if (t.vertex[0] == Vertex.outer || t.vertex[1] == Vertex.outer || t.vertex[2] == Vertex.outer)
 				continue;
 			OTriangle ot = new OTriangle(t, 0);
-			if (ot.get2Area() < 0L)
-				return false;
+			if (ot.get2Area() <= 40L)
+				ncount++;
 		}
-		return true;
+		if (ncount > 0)
+			System.out.println("Nr inverted triangles: "+ncount);
+		return (ncount == 0);
 	}
 	
 	public void writeUNV(String file)
