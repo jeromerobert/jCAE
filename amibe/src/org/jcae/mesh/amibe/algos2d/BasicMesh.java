@@ -175,6 +175,18 @@ public class BasicMesh
 		}
 		mesh.popCompGeom(2);
 
+		logger.debug(" Ensure 3D Delaunay criterion");
+		mesh.pushCompGeom(3);
+		for (Iterator it = saveList.iterator(); it.hasNext(); )
+		{
+			OTriangle s = (OTriangle) it.next();
+			Vertex ap = s.apex();
+			if (ap == Vertex.outer)
+				s.symOTri();
+			s.checkAndSwap();
+		}
+		mesh.popCompGeom(3);
+		
 		logger.debug(" Mark outer elements");
 		t = Vertex.outer.tri;
 		ot = new OTriangle(t, 0);
