@@ -31,6 +31,7 @@ public class JCAEXMLData
 	protected final static String triangles2dFilename = "triangles2d.bin";
 	
 	protected final static String nodes3dFilename = "nodes3d.bin";
+	protected final static String normals3dFilename = "normals3d.bin";
 	protected final static String triangles3dFilename = "triangles3d.bin";
 	protected final static String groupsFilename = "groups.bin";
 }

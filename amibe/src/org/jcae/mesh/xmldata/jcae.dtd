@@ -55,7 +55,10 @@ They are read from an "integerstream" file as {n1_1, n1_2, n2_1, n2_2...}
 <!ELEMENT beams (number,file,labels?)>
 
 <!-- The 3 nodes triangles of the submesh -->
-<!ELEMENT triangles (number,file,labels?)>
+<!ELEMENT triangles (number,file,normals?,labels?)>
+
+<!-- The normals at nodes -->
+<!ELEMENT normals (file)>
 
 <!ELEMENT result (file)>
 <!ATTLIST result id CDATA #IMPLIED>

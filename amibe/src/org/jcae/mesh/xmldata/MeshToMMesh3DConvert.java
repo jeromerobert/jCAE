@@ -36,17 +36,16 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 {
 	private static Logger logger=Logger.getLogger(MeshToMMesh3DConvert.class);
 	private int nrRefs = 0;
-	private int nrNodes = 0;
+	private int nrIntNodes = 0;
 	private int nrTriangles = 0;
 	private int offsetBnd = 0;
 	private int nodeOffset = 0;
-	private int [] ind = new int[3];
 	private TIntIntHashMap xrefs = null;
 	private double [] coordRefs = null;
-	private DataOutputStream nodesOut, refsOut, trianglesOut, groupsOut;
+	private DataOutputStream nodesOut, refsOut, normalsOut, trianglesOut, groupsOut;
 	private String xmlDir;
 	private File xmlFile;
-	private File nodesFile, refFile, trianglesFile, groupsFile;
+	private File nodesFile, refFile, normalsFile, trianglesFile, groupsFile;
 	private Document documentOut;
 	private Element groupsElement;
 	
@@ -83,7 +82,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			nrRefs += numberOfReferences;
 			int numberOfNodes = Integer.parseInt(
 				xpath.selectSingleNode(submeshNodes, "number/text()").getNodeValue());
-			nrNodes += numberOfNodes;
+			nrIntNodes += numberOfNodes - numberOfReferences;
 		}
 		catch(Exception ex)
 		{
@@ -104,8 +103,9 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 		if(!dir.exists())
 			dir.mkdirs();
 		
-		nodesFile=new File(dir, JCAEXMLData.nodes3dFilename);
+		nodesFile = new File(dir, JCAEXMLData.nodes3dFilename);
 		refFile = new File(dir, JCAEXMLData.ref1dFilename);
+		normalsFile = new File(dir, JCAEXMLData.normals3dFilename);
 		trianglesFile = new File(dir, JCAEXMLData.triangles3dFilename);
 		groupsFile = new File(dir, JCAEXMLData.groupsFilename);
 		
@@ -116,6 +116,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 		
 			nodesOut = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile)));
 			refsOut = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile, true)));
+			normalsOut = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(normalsFile)));
 			trianglesOut = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(trianglesFile)));
 			groupsOut = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(groupsFile)));
 		}
@@ -129,12 +130,13 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 		}
 	}
 	
-	public void finalize()
+	public void finish()
 	{
 		//  Stores coordinates of boundary nodes
 		//  Set nrRefs to its final value after elimination
 		//  of duplicates
 		nrRefs = offsetBnd;
+		int nrNodes = nrIntNodes + nrRefs;
 		logger.debug("Append coordinates of "+nrRefs+" nodes");
 		try
 		{
@@ -142,6 +144,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				nodesOut.writeDouble(coordRefs[i]);
 			nodesOut.close();
 			refsOut.close();
+			normalsOut.close();
 			trianglesOut.close();
 			groupsOut.close();
 			
@@ -163,6 +166,9 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				"<triangles>"+
 				"<number>"+nrTriangles+"</number>"+
 				"<file format=\"integerstream\" location=\""+XMLHelper.canonicalize(xmlDir, trianglesFile.toString())+"\"/>"+
+				"<normals>"+
+				"<file format=\"doublestream\" location=\""+XMLHelper.canonicalize(xmlDir, normalsFile.toString())+"\"/>"+
+				"</normals>"+
 				"</triangles>");
 			subMeshElement.appendChild(trianglesElement);
 			subMeshElement.appendChild(groupsElement);
@@ -202,6 +208,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 		int i;
 		CachedXPathAPI xpath = new CachedXPathAPI();
 		CADGeomSurface surface = F.getGeomSurface();
+		surface.dinit(1);
 		try
 		{
 			String nodesFile = xpath.selectSingleNode(documentIn,
@@ -225,6 +232,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			int numberOfNodes = Integer.parseInt(
 				xpath.selectSingleNode(submeshNodes, "number/text()").getNodeValue());
 			logger.debug("Reading "+numberOfNodes+" nodes");
+			double [] normals = new double[3*numberOfNodes];
 			//  Interior nodes
 			for (i = 0; i < numberOfNodes - numberOfReferences; i++)
 			{
@@ -233,6 +241,10 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				double [] p3 = surface.value(u, v);
 				for (int j = 0; j < 3; j++)
 					nodesOut.writeDouble(p3[j]);
+				surface.setParameter(u, v);
+				p3 = surface.normal();
+				for (int j = 0; j < 3; j++)
+					normals[3*i+j] = p3[j];
 			}
 			//  Boundary nodes
 			for (i = 0; i < numberOfReferences; i++)
@@ -241,9 +253,13 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			{
 				double u = nodesIn.readDouble();
 				double v = nodesIn.readDouble();
+				surface.setParameter(u, v);
+				double [] p3 = surface.normal();
+				for (int j = 0; j < 3; j++)
+					normals[3*(i+numberOfNodes-numberOfReferences)+j] = p3[j];
 				if (!xrefs.contains(refs[i]))
 				{
-					double [] p3 = surface.value(u, v);
+					p3 = surface.value(u, v);
 					xrefs.put(refs[i], offsetBnd);
 					for (int j = 0; j < 3; j++)
 						coordRefs[3*offsetBnd+j] = p3[j];
@@ -258,20 +274,23 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			logger.debug("Reading "+numberOfFaces+" faces");
 			for (i=0; i < numberOfFaces; i++)
 			{
-				ind[0] = trianglesIn.readInt();
-				ind[1] = trianglesIn.readInt();
-				ind[2] = trianglesIn.readInt();
 				for (int j = 0; j < 3; j++)
 				{
-					if (ind[j] < numberOfNodes - numberOfReferences)
-						ind[j] += nodeOffset;
+					// Local node number for this group
+					int ind = trianglesIn.readInt();
+					for (int k = 0; k < 3; k++)
+						normalsOut.writeDouble(normals[3*ind+k]);
+					if (ind < numberOfNodes - numberOfReferences)
+						ind += nodeOffset;
 					else
-						ind[j] = xrefs.get(refs[ind[j] - numberOfNodes + numberOfReferences]);
-					trianglesOut.writeInt(ind[j]);
+						ind = xrefs.get(refs[ind - numberOfNodes + numberOfReferences]) + nrIntNodes;
+					trianglesOut.writeInt(ind);
 				}
 			}
 			logger.debug("End reading");
 			
+			for (i=0; i < numberOfFaces; i++)
+				groupsOut.writeInt(i+nrTriangles);
 			groupsElement.appendChild(XMLHelper.parseXMLString(documentOut,
 				"<group id=\""+(groupId-1)+"\">"+
 				"<name>"+groupId+"</name>"+

@@ -25,12 +25,13 @@ import java.net.URI;
 
 import org.apache.log4j.Logger;
 import org.jcae.mesh.mesher.algos1d.UniformLength;
-import org.jcae.mesh.mesher.algos1d.UniformLengthDeflection;
 import org.jcae.mesh.mesher.ds.*;
 import org.jcae.mesh.amibe.InitialTriangulationException;
+import org.jcae.mesh.amibe.InvalidFaceException;
 import org.jcae.mesh.amibe.metrics.*;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.algos2d.*;
+import org.jcae.mesh.mesher.algos3d.Fuse;
 import org.jcae.mesh.xmldata.*;
 import org.jcae.mesh.cad.*;
 
@@ -51,7 +52,7 @@ public class MesherBig
 	 * @param brepfilename  the filename of the brep file	 
 	 * @param discr  the value of the meshing constraint
 	 */
-	private static MMesh3D mesh(String brepfilename, String xmlDir, double discr, double defl)
+	private static MMesh3D mesh(String brepfilename, String xmlDir, double discr, double defl, double tolerance)
 	{
 		//  Declare all variables here
 		MMesh3D mesh3D = new MMesh3D();
@@ -66,7 +67,10 @@ public class MesherBig
 		
 		String brepFile = (new File(brepfilename)).getName();		
 		String xmlFile = "jcae1d";
-		URI brepDirURI=new File(xmlDir, "dummy").toURI().relativize(new File(brepfilename).getParentFile().toURI());
+		
+		URI brepURI=new File(brepfilename).getAbsoluteFile().getParentFile().toURI();
+		URI brepDirURI=new File(xmlDir, "dummy").toURI().relativize(brepURI);
+		
 		String xmlBrepDir = new File(brepDirURI).getPath();
 		
 		int iFace = 0;
@@ -80,12 +84,9 @@ public class MesherBig
 			logger.info("1D mesh");
 			mesh1D = new MMesh1D(shape);
 			mesh1D.setMaxLength(discr);
-			mesh1D.setMaxDeflection(defl);
 			new UniformLength(mesh1D).compute();
-			//new UniformLengthDeflection(mesh1D).compute();
 			//  Store the 1D mesh onto disk
 			MMesh1DWriter.writeObject(mesh1D, xmlDir, xmlFile, xmlBrepDir, brepFile);
-//System.out.println(""+mesh1D);
 		}
 		if (System.getProperty("org.jcae.mesh.Mesher.mesh2d", "true").equals("true")) {
 			//  Step 2: Read the 1D mesh and compute 2D meshes
@@ -107,7 +108,7 @@ public class MesherBig
 				if (numFace != 0 && iFace != numFace)
 					continue;
 				logger.info("Meshing face " + iFace);
-F.writeNative("face."+iFace+".brep");
+// F.writeNative("face."+iFace+".brep");
 				Mesh mesh = new Mesh(F); 
 				int nTry = 0;
 				while (nTry < nTryMax)
@@ -115,9 +116,9 @@ F.writeNative("face."+iFace+".brep");
 					try
 					{
 						new BasicMesh(mesh, mesh1D).compute();
-//new CheckDelaunay(mesh).compute();
+						new CheckDelaunay(mesh).compute();
+						mesh.removeDegeneratedEdges();
 						xmlFile = "jcae2d."+iFace;
-//mesh.writeUNV("2d.unv.gz");
 						MeshWriter.writeObject(mesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
 					}
 					catch(Exception ex)
@@ -128,8 +129,15 @@ F.writeNative("face."+iFace+".brep");
 							mesh = new Mesh(F);
 							mesh.scaleTolerance(10.);
 							nTry++;
-							//continue;
-System.exit(1);
+							continue;
+						}
+						else if (ex instanceof InvalidFaceException)
+						{
+							logger.warn("Face "+iFace+" is invalid, skipping...");
+							mesh = new Mesh(F); 
+							xmlFile = "jcae2d."+iFace;
+							MeshWriter.writeObject(mesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
+							break;
 						}
 						logger.warn(ex.getMessage());
 						ex.printStackTrace();
@@ -137,7 +145,12 @@ System.exit(1);
 					break;
 				}
 				if (nTry == nTryMax)
+				{
 					logger.error("Face "+iFace+" cannot be triangulated, skipping...");
+					mesh = new Mesh(F); 
+					xmlFile = "jcae2d."+iFace;
+					MeshWriter.writeObject(mesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
+				}
 			}
 		}
 
@@ -170,20 +183,24 @@ System.exit(1);
 					logger.info("Importing face "+iFace);
 					m2dTo3D.convert(xmlFile, iFace, F);
 				}
-				m2dTo3D.finalize();
+				m2dTo3D.finish();
 			}
 			catch(Exception ex)
 			{
 				logger.warn(ex.getMessage());
 				ex.printStackTrace();
 			}
-		}
-		else
-		{
-			logger.info("Reading 3D mesh");
+			
+/*
+			if (tolerance >= 0.0)
+				new Fuse(mesh3D, tolerance).compute();
 			xmlFile = "jcae3d";
-			mesh3D = MMesh3DReader.readObject(xmlDir, xmlFile);
+			MMesh3DWriter.writeObject(mesh3D, xmlDir, xmlFile, xmlBrepDir);
+*/
 		}
+		logger.info("Reading 3D mesh");
+		xmlFile = "jcae3d";
+		mesh3D = MMesh3DReader.readObject(xmlDir, xmlFile);
 		return mesh3D;
 	}
 
@@ -196,7 +213,7 @@ System.exit(1);
 	{
 		if (args.length < 2 || args.length > 4)
 		{
-			System.out.println("Usage : MeshGen filename output_directory edge_length deflection");
+			System.out.println("Usage : MesherBig filename output_directory edge_length deflection");
 			System.exit(0);
 		}
 		String filename=args[0];
@@ -210,9 +227,17 @@ System.exit(1);
 		String xmlDir = args[1];
 		Double discr=new Double(args[2]);
 		Double defl=new Double(args[3]);
-		MMesh3D mesh3D = mesh(filename, xmlDir, discr.doubleValue(), defl.doubleValue());	
-		//logger.info("Exporting UNV");
-		//mesh3D.writeUNV(unvName+".gz");
+		Double tolerance=new Double(System.getProperty("org.jcae.mesh.tolerance", "-1.0"));
+		MMesh3D mesh3D = mesh(filename, xmlDir, discr.doubleValue(), defl.doubleValue(), tolerance.doubleValue());
+		logger.info("Exporting UNV");
+
+		if(Boolean.getBoolean("org.jcae.mesh.unv.nogz"))
+			new UNVConverter(xmlDir).writeUNV(unvName);
+		else
+			new UNVConverter(xmlDir).writeUNV(unvName+".gz");
+		logger.info("Exporting MESH");
+		mesh3D.writeMESH(filename.substring(0, filename.lastIndexOf('.'))+".mesh");
+
 		logger.info("End mesh");
 	}
 }

@@ -62,14 +62,23 @@ public class MMesh3DReader
 			if (nodesFile.charAt(0) != File.separatorChar)
 				nodesFile = xmlDir+File.separator+nodesFile;
 			DataInputStream nodesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(nodesFile)));
-			String trianglesFile = xpath.selectSingleNode(document,
-				"/jcae/mesh/submesh/triangles/file/@location").getNodeValue();
+			
+			Node submeshTriangles = xpath.selectSingleNode(submeshElement, "triangles");
+			String trianglesFile = xpath.selectSingleNode(submeshTriangles,
+				"file/@location").getNodeValue();
 			if (trianglesFile.charAt(0) != File.separatorChar)
 				trianglesFile = xmlDir+File.separator+trianglesFile;
 			DataInputStream trianglesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(trianglesFile)));
 
+			Node submeshNormals = xpath.selectSingleNode(submeshTriangles, "normals");
+			String normalsFile = xpath.selectSingleNode(submeshNormals, "file/@location").getNodeValue();
+			if (normalsFile.charAt(0) != File.separatorChar)
+				normalsFile = xmlDir+File.separator+normalsFile;
+			DataInputStream normalsIn=new DataInputStream(new BufferedInputStream(new FileInputStream(normalsFile)));
+			
 			int numberOfReferences = Integer.parseInt(
 				xpath.selectSingleNode(submeshNodes, "references/number/text()").getNodeValue());
+			logger.debug("Reading "+numberOfReferences+" references");
 			int [] refs = new int[numberOfReferences];
 			for (i=0; i < numberOfReferences; i++)
 				refs[i] = refsIn.readInt();
@@ -79,6 +88,7 @@ public class MMesh3DReader
 			MNode3D [] nodelist = new MNode3D[numberOfNodes];
 			int label;
 			double [] coord = new double[3];
+			logger.debug("Reading "+numberOfNodes+" nodes");
 			for (i=0; i < numberOfNodes; i++)
 			{
 				if (i < numberOfNodes - numberOfReferences)
@@ -92,13 +102,24 @@ public class MMesh3DReader
 			}
 			
 			int numberOfTriangles = Integer.parseInt(
-				xpath.selectSingleNode(submeshElement, "triangles/number/text()").getNodeValue());
+				xpath.selectSingleNode(submeshTriangles, "number/text()").getNodeValue());
+			logger.debug("Reading "+numberOfTriangles+" elements");
 			MFace3D [] facelist = new MFace3D[numberOfTriangles];
+			double [] n = new double[3];
 			for (i=0; i < numberOfTriangles; i++)
 			{
 				MNode3D pt1 = nodelist[trianglesIn.readInt()];
+				for (int j = 0; j < 3; j++)
+					n[j] = normalsIn.readDouble();
+				pt1.addNormal(n);
 				MNode3D pt2 = nodelist[trianglesIn.readInt()];
+				for (int j = 0; j < 3; j++)
+					n[j] = normalsIn.readDouble();
+				pt2.addNormal(n);
 				MNode3D pt3 = nodelist[trianglesIn.readInt()];
+				for (int j = 0; j < 3; j++)
+					n[j] = normalsIn.readDouble();
+				pt3.addNormal(n);
 				facelist[i] = new MFace3D(pt1, pt2, pt3);
 				m3d.addFace(facelist[i]);
 			}
@@ -122,6 +143,7 @@ public class MMesh3DReader
 				
 				String name=
 					xpath.selectSingleNode(groupNode, "name/text()").getNodeValue();
+				logger.debug("Group "+name+": reading "+numberOfTriangles+" elements");
 								
 				Collection newfacelist = new ArrayList(numberOfElements);
 				for (int j=0; j < numberOfElements; j++)
