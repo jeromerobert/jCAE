@@ -265,6 +265,11 @@ public class Metric2D
 	}
 */
 	
+	public String stringCoefs()
+	{
+		return ""+E+" "+F+" "+G;
+	}
+	
 	public String toString()
 	{
 		return "Metric2D: E="+E+" F="+F+" G="+G;
