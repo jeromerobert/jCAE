@@ -144,7 +144,7 @@ public class BasicMesh
 				firstOnWire = bNodes[i];
 			else
 			{
-				mesh.forceBoundaryEdge(bNodes[i-1], bNodes[i]);
+				mesh.forceBoundaryEdge(bNodes[i-1], bNodes[i], bNodes.length);
 				if (firstOnWire == bNodes[i])
 					firstOnWire = null;
 			}
@@ -158,7 +158,7 @@ public class BasicMesh
 				firstOnWire = bNodes[i];
 			else
 			{
-				saveList.add(mesh.forceBoundaryEdge(bNodes[i-1], bNodes[i]));
+				saveList.add(mesh.forceBoundaryEdge(bNodes[i-1], bNodes[i], bNodes.length));
 				if (firstOnWire == bNodes[i])
 					firstOnWire = null;
 			}

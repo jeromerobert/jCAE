@@ -203,7 +203,7 @@ public class Mesh
 		return quadtree;
 	}
 	
-	public static OTriangle forceBoundaryEdge(Vertex start, Vertex end)
+	public static OTriangle forceBoundaryEdge(Vertex start, Vertex end, int maxIter)
 	{
 		assert (start != end);
 		Triangle t = start.tri;
@@ -214,6 +214,7 @@ public class Mesh
 			s.nextOTri();
 		assert s.origin() == start : ""+start+" does not belong to "+t;
 		Vertex dest = s.destination();
+		int i = 0;
 		while (true)
 		{
 			Vertex d = s.destination();
@@ -222,11 +223,13 @@ public class Mesh
 			else if (d != Vertex.outer && start.onLeft(end, d) > 0L)
 				break;
 			s.nextOTriOrigin();
-			if (s.destination() == dest)
+			i++;
+			if (s.destination() == dest || i > maxIter)
 				throw new InitialTriangulationException();
 		}
 		s.prevOTriOrigin();
 		dest = s.destination();
+		i = 0;
 		while (true)
 		{
 			Vertex d = s.destination();
@@ -235,12 +238,14 @@ public class Mesh
 			else if (d != Vertex.outer && start.onLeft(end, d) < 0L)
 				break;
 			s.prevOTriOrigin();
-			if (s.destination() == dest)
+			i++;
+			if (s.destination() == dest || i > maxIter)
 				throw new InitialTriangulationException();
 		}
 		//  s has 'start' as its origin point, its destination point
 		//  is to the right side of (start,end) and its apex is to the
 		//  left side.
+		i = 0;
 		while (true)
 		{
 			int inter = s.forceBoundaryEdge(end);
@@ -252,6 +257,9 @@ public class Mesh
 			//  exchanging 'start' and 'end', it is known to finish.
 			if (s.destination() == start)
 				return s;
+			i++;
+			if (i > maxIter)
+				throw new InitialTriangulationException();
 			Vertex temp = start;
 			start = end;
 			end = temp;
