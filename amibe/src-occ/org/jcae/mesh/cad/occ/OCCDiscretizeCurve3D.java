@@ -48,37 +48,43 @@ public class OCCDiscretizeCurve3D
 		{
 			nsegments *= 10;
 			a = new double[nsegments+1];
+			double delta = (end - start) / ((double) nsegments);
 			xyz = new double[3*(nsegments+1)];
-			double [] oldXYZ = curve.value(start);
-			double [] newXYZ;
+			for (int i = 0; i < nsegments; i++)
+				xyz[3*i] = start + ((double) i) * delta;
+			//  Avoid rounding errors
+			xyz[3*nsegments] = end;
+			curve.arrayValues(nsegments + 1, xyz);
+			
 			double abscissa, dist;
 			nr = 1;
 			a[0] = start;
-			for (int i = 0; i < 3; i++)
-				xyz[i] = oldXYZ[i];
-			for (int ns = 0; ns < nsegments - 1; ns++)
+			for (int ns = 1; ns < nsegments; ns++)
 			{
-				abscissa = start + (ns+1) * (end - start) / ((double) nsegments);
-				newXYZ = curve.value(abscissa);
+				abscissa = start + ((double) ns) * delta;
 				dist = Math.sqrt(
-				  (oldXYZ[0] - newXYZ[0]) * (oldXYZ[0] - newXYZ[0]) +
-				  (oldXYZ[1] - newXYZ[1]) * (oldXYZ[1] - newXYZ[1]) +
-				  (oldXYZ[2] - newXYZ[2]) * (oldXYZ[2] - newXYZ[2]));
+				  (xyz[3*ns-3] - xyz[3*ns  ]) * (xyz[3*ns-3] - xyz[3*ns  ]) +
+				  (xyz[3*ns-2] - xyz[3*ns+1]) * (xyz[3*ns-2] - xyz[3*ns+1]) +
+				  (xyz[3*ns-1] - xyz[3*ns+2]) * (xyz[3*ns-1] - xyz[3*ns+2]));
 				if (dist > len)
 				{
 					a[nr] = abscissa;
-					oldXYZ = newXYZ;
-					xyz[3*nr]   = oldXYZ[0];
-					xyz[3*nr+1] = oldXYZ[1];
-					xyz[3*nr+2] = oldXYZ[2];
+					if (nr < ns)
+					{
+						xyz[3*nr]   = xyz[3*ns];
+						xyz[3*nr+1] = xyz[3*ns+1];
+						xyz[3*nr+2] = xyz[3*ns+2];
+					}
 					nr++;
 				}
 			}
 			a[nr] = end;
-			oldXYZ = curve.value(end);
-			xyz[3*nr]   = oldXYZ[0];
-			xyz[3*nr+1] = oldXYZ[1];
-			xyz[3*nr+2] = oldXYZ[2];
+			if (nr < nsegments)
+			{
+				xyz[3*nr]   = xyz[3*nsegments];
+				xyz[3*nr+1] = xyz[3*nsegments+1];
+				xyz[3*nr+2] = xyz[3*nsegments+2];
+			}
 			nr++;
 			//  Stop when there are at least 10 points per segments
 			if (nr * 10 < nsegments)
@@ -116,27 +122,24 @@ public class OCCDiscretizeCurve3D
 		{
 			nsegments *= 10;
 			a = new double[nsegments+1];
+			double delta = (end - start) / ((double) nsegments);
 			xyz = new double[3*(nsegments+1)];
-			double [] oldXYZ = curve.value(start);
-			double [] newXYZ;
+			for (int i = 0; i < nsegments; i++)
+				xyz[3*i] = start + ((double) i) * delta;
+			//  Avoid rounding errors
+			xyz[3*nsegments] = end;
+			curve.arrayValues(nsegments + 1, xyz);
+			
 			a[0] = start;
-			for (int i = 0; i < 3; i++)
-				xyz[i] = oldXYZ[i];
-			double deltap = (end - start) / ((double) nsegments);
 			//  Compute length, a[] and xyz[]
 			double length = 0.0;
 			for (int ns = 1; ns <= nsegments; ns++)
 			{
-				a[ns] = start + ns * deltap;
-				newXYZ = curve.value(a[ns]);
+				a[ns] = start + ns * delta;
 				length += Math.sqrt(
-				  (oldXYZ[0] - newXYZ[0]) * (oldXYZ[0] - newXYZ[0]) +
-				  (oldXYZ[1] - newXYZ[1]) * (oldXYZ[1] - newXYZ[1]) +
-				  (oldXYZ[2] - newXYZ[2]) * (oldXYZ[2] - newXYZ[2]));
-				oldXYZ = newXYZ;
-				xyz[3*ns]   = oldXYZ[0];
-				xyz[3*ns+1] = oldXYZ[1];
-				xyz[3*ns+2] = oldXYZ[2];
+				  (xyz[3*ns-3] - xyz[3*ns  ]) * (xyz[3*ns-3] - xyz[3*ns  ]) +
+				  (xyz[3*ns-2] - xyz[3*ns+1]) * (xyz[3*ns-2] - xyz[3*ns+1]) +
+				  (xyz[3*ns-1] - xyz[3*ns+2]) * (xyz[3*ns-1] - xyz[3*ns+2]));
 			}
 			double lmax = 2.0 * length / ((double) nr);
 			double lmin = 0.0;
@@ -151,7 +154,7 @@ public class OCCDiscretizeCurve3D
 				for (int ns = 1; ns < nsegments; ns++)
 				{
 					dist = Math.sqrt(
-				  		(xyz[3*ns] - xyz[3*lastIndex]) * (xyz[3*ns] - xyz[3*lastIndex]) +
+				  		(xyz[3*ns  ] - xyz[3*lastIndex  ]) * (xyz[3*ns  ] - xyz[3*lastIndex  ]) +
 				  		(xyz[3*ns+1] - xyz[3*lastIndex+1]) * (xyz[3*ns+1] - xyz[3*lastIndex+1]) +
 				  		(xyz[3*ns+2] - xyz[3*lastIndex+2]) * (xyz[3*ns+2] - xyz[3*lastIndex+2]));
 					if (dist > maxlen)
@@ -169,7 +172,7 @@ public class OCCDiscretizeCurve3D
 					lmax = lmax - 0.5 * (lmax - lmin);
 				else
 					lmin = lmin + 0.5 * (lmax - lmin);
-				if (lmax - lmin < 0.5 * deltap)
+				if (lmax - lmin < 0.5 * delta)
 					break;
 			}
 			if (n == nr)
