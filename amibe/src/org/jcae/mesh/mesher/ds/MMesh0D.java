@@ -23,6 +23,7 @@ package org.jcae.mesh.mesher.ds;
 import org.jcae.mesh.cad.*;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import gnu.trove.TObjectIntHashMap;
 import org.apache.log4j.Logger;
 
 /**
@@ -38,6 +39,8 @@ public class MMesh0D
 
 	//  Array of distinct geometric nodes
 	private CADVertex[] vnodelist;
+	private int vnodesize;
+	private TObjectIntHashMap vnodeset;
 	
 	/**
 	 * Creates a <code>MMesh0D</code> instance by merging all topological
@@ -53,7 +56,9 @@ public class MMesh0D
 			nodes++;
 
 		//  Merge topological vertices found at the same geometrical point
+		vnodesize = 0;
 		vnodelist = new CADVertex[nodes];
+		vnodeset = new TObjectIntHashMap(nodes);
 		for (expV.init(shape, CADExplorer.VERTEX); expV.more(); expV.next())
 			addGeometricalVertex((CADVertex) expV.current());
 	}
@@ -61,13 +66,11 @@ public class MMesh0D
 	//  Add a geometrical vertex.
 	private void addGeometricalVertex(CADVertex V)
 	{
-		int i = 0;
-		for (; i < vnodelist.length && null != vnodelist[i]; i++)
-		{
-			if (V.isSame(vnodelist[i]))
-				return;  //  Vertex already exists in vnodelist
-		}
-		vnodelist[i] = V;
+		if (vnodeset.contains(V))
+			return;
+		vnodeset.put(V, vnodesize);
+		vnodelist[vnodesize] = V;
+		vnodesize++;
 	}
 	
 	/**
@@ -80,12 +83,9 @@ public class MMesh0D
 	 */
 	public CADVertex getGeometricalVertex(CADVertex V)
 	{
-		for (int i = 0; i < vnodelist.length && null != vnodelist[i]; i++)
-		{
-			if (V.isSame(vnodelist[i]))
-				return vnodelist[i];
-		}
-		throw new NoSuchElementException("TVertex : "+V);
+		if (!vnodeset.contains(V))
+			throw new NoSuchElementException("TVertex : "+V);
+		return vnodelist[vnodeset.get(V)];
 	}
 	
 	/**
@@ -96,12 +96,9 @@ public class MMesh0D
 	 */
 	public int getIndexGeometricalVertex(CADVertex V)
 	{
-		for (int i = 0; i < vnodelist.length && null != vnodelist[i]; i++)
-		{
-			if (V.isSame(vnodelist[i]))
-				return i;
-		}
-		return -1;
+		if (!vnodeset.contains(V))
+			return -1;
+		return vnodeset.get(V);
 	}
 	
 	/**
@@ -113,34 +110,5 @@ public class MMesh0D
 	public CADVertex getGeometricalVertex(int index)
 	{
 		return vnodelist[index];
-	}
-	
-	/**
-	 * Returns an iterator over unique vertices.
-	 *
-	 * @return an iterator over unique vertices.
-	 */
-	public Iterator getVerticesIterator()
-	{
-		return new Iterator()
-		{
-			private int pos = -1;
-			public boolean hasNext()
-			{
-				return (pos+1 < vnodelist.length && null != vnodelist[pos+1]);
-			}
-			
-			public Object next()
-			{
-				pos++;
-				if (pos >= vnodelist.length || null == vnodelist[pos])
-					return new NoSuchElementException();
-				return vnodelist[pos];
-			}
-			public void remove()
-			{
-				//  Not needed
-			}
-		};
 	}
 }
