@@ -273,23 +273,41 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			int numberOfFaces = Integer.parseInt(
 					xpath.selectSingleNode(submeshFaces, "number/text()").getNodeValue());
 			logger.debug("Reading "+numberOfFaces+" faces");
+			int ind [] = new int[3];
 			for (i=0; i < numberOfFaces; i++)
 			{
 				for (int j = 0; j < 3; j++)
 				{
 					// Local node number for this group
-					int ind = trianglesIn.readInt();
+					int indLoc = trianglesIn.readInt();
+					// Write normals
 					if (normalsOut != null)
 					{
-						for (int k = 0; k < 3; k++)
-							normalsOut.writeDouble(normals[3*ind+k]);
+						if (F.isOrientationForward())
+						{
+							for (int k = 0; k < 3; k++)
+								normalsOut.writeDouble(normals[3*indLoc+k]);
+						}
+						else
+						{
+							for (int k = 0; k < 3; k++)
+								normalsOut.writeDouble(- normals[3*indLoc+k]);
+						}
 					}
-					if (ind < numberOfNodes - numberOfReferences)
-						ind += nodeOffset;
+					// Global node number
+					if (indLoc < numberOfNodes - numberOfReferences)
+						ind[j] = indLoc + nodeOffset;
 					else
-						ind = xrefs.get(refs[ind - numberOfNodes + numberOfReferences]) + nrIntNodes;
-					trianglesOut.writeInt(ind);
+						ind[j] = xrefs.get(refs[indLoc - numberOfNodes + numberOfReferences]) + nrIntNodes;
 				}
+				if (F.isOrientationForward())
+				{
+					int temp = ind[0];
+					ind[0] = ind[2];
+					ind[2] = temp;
+				}
+				for (int j = 0; j < 3; j++)
+					trianglesOut.writeInt(ind[j]);
 			}
 			logger.debug("End reading");
 			

@@ -368,10 +368,21 @@ public class Mesh
 					continue;
 				count++;
 				out.println(""+count+"        91         1         1         1         3");
-				for (int i = 0; i < 3; i++)
+				if (face.isOrientationForward())
 				{
-					Integer nodelabel =  (Integer) labels.get(t.vertex[i]);
-					out.print(" "+nodelabel.intValue());
+					for (int i = 0; i < 3; i++)
+					{
+						Integer nodelabel =  (Integer) labels.get(t.vertex[i]);
+						out.print(" "+nodelabel.intValue());
+					}
+				}
+				else
+				{
+					for (int i = 2; i >= 0; i--)
+					{
+						Integer nodelabel =  (Integer) labels.get(t.vertex[i]);
+						out.print(" "+nodelabel.intValue());
+					}
 				}
 				out.println("");
 			}
@@ -395,6 +406,11 @@ public class Mesh
 				p3 = node.getNormal();
 				if (p3[0] == 0.0 && p3[1] == 0.0 && p3[2] == 0.0)
 					continue;
+				if (!face.isOrientationForward())
+				{
+					for (int i = 0; i < 3; i++)
+						p3[i] = - p3[i];
+				}
 				Integer nodelabel =  (Integer) labels.get(node);
 				out.println(nodelabel.intValue()+" "+p3[0]+" "+p3[1]+" "+p3[2]);
 			}
