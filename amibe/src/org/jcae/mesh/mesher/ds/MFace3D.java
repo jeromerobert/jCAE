@@ -37,7 +37,7 @@ public class MFace3D
 	static private Logger logger=Logger.getLogger(MFace3D.class);
 	
 	//  The list of nodes composing the triangle
-	private MNode3D[] nodelist;
+	private MNode3D[] nodelist = new MNode3D[3];		
 	
 	//  ID used for debugging purpose
 	private static int id = 0;
@@ -54,7 +54,6 @@ public class MFace3D
 	 */
 	public MFace3D(MNode3D n1, MNode3D n2, MNode3D n3)
 	{
-		nodelist=new MNode3D[3];		
 		nodelist[0]=n1;
 		nodelist[1]=n2;
 		nodelist[2]=n3;		
