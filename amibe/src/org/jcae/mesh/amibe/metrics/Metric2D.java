@@ -20,7 +20,6 @@
 
 package org.jcae.mesh.amibe.metrics;
 
-import org.jcae.mesh.mesher.metrics.Matrix;
 import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.util.Calculs;
