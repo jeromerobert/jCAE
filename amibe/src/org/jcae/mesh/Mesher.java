@@ -160,6 +160,8 @@ public class Mesher
 			{
 				iFace = 0;
 				int numFace = Integer.parseInt(System.getProperty("org.jcae.mesh.Mesher.meshFace", "0"));
+				MeshToMMesh3DConvert m2dTo3D = new MeshToMMesh3DConvert(xmlDir);
+				logger.info("Read informations on boundary nodes");
 				for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
 				{
 					CADFace F = (CADFace) expF.current();
@@ -167,14 +169,21 @@ public class Mesher
 					if (numFace != 0 && iFace != numFace)
 						continue;
 					xmlFile = "jcae2d."+iFace;
-					SubMesh2D submesh = SubMesh2DReader.readObject(xmlDir, xmlFile);
-					if (null != submesh)
-					{
-						logger.info("Importing face "+iFace);
-						mesh3D.addSubMesh2D(submesh, F, true);
-					}
+					m2dTo3D.computeRefs(xmlFile);
 				}
-				mesh3D.printInfos();
+				m2dTo3D.initialize("jcae3d");
+				iFace = 0;
+				for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
+				{
+					CADFace F = (CADFace) expF.current();
+					iFace++;
+					if (numFace != 0 && iFace != numFace)
+						continue;
+					xmlFile = "jcae2d."+iFace;
+					logger.info("Importing face "+iFace);
+					m2dTo3D.convert(xmlFile, iFace, F);
+				}
+				m2dTo3D.finish();
 			}
 			catch(Exception ex)
 			{
@@ -182,17 +191,16 @@ public class Mesher
 				ex.printStackTrace();
 			}
 			
+/*
 			if (tolerance >= 0.0)
 				new Fuse(mesh3D, tolerance).compute();
 			xmlFile = "jcae3d";
 			MMesh3DWriter.writeObject(mesh3D, xmlDir, xmlFile, xmlBrepDir);
+*/
 		}
-		else
-		{
-			logger.info("Reading 3D mesh");
-			xmlFile = "jcae3d";
-			mesh3D = MMesh3DReader.readObject(xmlDir, xmlFile);
-		}
+		logger.info("Reading 3D mesh");
+		xmlFile = "jcae3d";
+		mesh3D = MMesh3DReader.readObject(xmlDir, xmlFile);
 		return mesh3D;
 	}
 
