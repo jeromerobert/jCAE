@@ -392,10 +392,12 @@ public class Vertex
 		if (vc1.onLeft(va3, this) >= 0L || vc2.onLeft(va3, this) <= 0L)
 			return true;
 		
+		//  Add a 0.5 factor so that edges are swapped only if
+		//  there is a significant gain.
 		return (mesh.compGeom().distance(va3, this, vc1) +
-		        mesh.compGeom().distance(va3, this, vc2) >
+		        mesh.compGeom().distance(va3, this, vc2) > 0.5 * (
 		        mesh.compGeom().distance(vc1, vc2, va3) +
-		        mesh.compGeom().distance(vc1, vc2, this));
+		        mesh.compGeom().distance(vc1, vc2, this)));
 	}
 	
 	public boolean isPseudoIsotropic()
