@@ -72,7 +72,6 @@ public class Mesher
 		
 		String xmlBrepDir = new File(brepDirURI).getPath();
 		
-		int iFace = 0;
 		logger.info("Loading " + brepfilename);
 		
 		CADShapeBuilder factory = CADShapeBuilder.factory;
@@ -98,15 +97,19 @@ public class Mesher
 			//  Compute node labels shared by all 2D and 3D meshes
 			mesh1D.updateNodeLabels();
 			
+			int iFace = 0;
 			int nTryMax = 20;
 			int numFace = Integer.parseInt(System.getProperty("org.jcae.mesh.Mesher.meshFace", "0"));
+			int nrFaces = 0;
+			for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
+				nrFaces++;
 			for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
 			{
 				CADFace F = (CADFace) expF.current();
 				iFace++;
 				if (numFace != 0 && iFace != numFace)
 					continue;
-				logger.info("Meshing face " + iFace);
+				logger.info("Meshing face " + iFace+"/"+nrFaces);
 // F.writeNative("face."+iFace+".brep");
 				Mesh mesh = new Mesh(F); 
 				int nTry = 0;
@@ -157,7 +160,7 @@ public class Mesher
 			// Step 3: Read 2D meshes and compute 3D mesh
 			try
 			{
-				iFace = 0;
+				int iFace = 0;
 				int numFace = Integer.parseInt(System.getProperty("org.jcae.mesh.Mesher.meshFace", "0"));
 				MeshToMMesh3DConvert m2dTo3D = new MeshToMMesh3DConvert(xmlDir);
 				logger.info("Read informations on boundary nodes");
