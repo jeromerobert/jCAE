@@ -29,7 +29,7 @@ import org.jcae.mesh.mesher.ds.*;
 import org.jcae.mesh.mesher.InitialTriangulationException;
 import org.jcae.mesh.amibe.metrics.*;
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.algos2d.BasicMesh;
+import org.jcae.mesh.amibe.algos2d.*;
 import org.jcae.mesh.mesher.algos3d.Fuse;
 import org.jcae.mesh.xmldata.*;
 import org.jcae.mesh.cad.*;
@@ -115,6 +115,7 @@ public class Mesher
 					try
 					{
 						new BasicMesh(mesh, mesh1D).compute();
+						new CheckDelaunay(mesh).compute();
 						xmlFile = "jcae2d."+iFace;
 						MeshWriter.writeObject(mesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
 					}
