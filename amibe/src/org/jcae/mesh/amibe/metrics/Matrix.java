@@ -152,4 +152,15 @@ public class Matrix
 		return ret;
 	}
 	
+	public String toString()
+	{
+		if (rank <= 0)
+			throw new IllegalArgumentException("Uninitialized matrix");
+		String ret = "";
+		for (int i = 0; i < rank; i++)
+			for (int j = 0; j < rank; j++)
+				ret += " "+data[i][j];
+		return ret;
+	}
+	
 }
