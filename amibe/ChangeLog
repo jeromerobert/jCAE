@@ -1,3 +1,9 @@
+Mon Feb 28 16:00:09 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/metrics/Matrix2D.java (simultaneousReduction):  Fix test to detect similar matrices, an exception could be raised because singular matrices were wrongly reported.
+	* src/org/jcae/mesh/amibe/util/QuadTree.java:  When searching for near vertex, all distances are computed with the metrics at the target point.  Otherwise getNearestVertexProcedure() could be wrong.
+	* src/org/jcae/mesh/amibe/ds/tools/Calculus3D.java (distance): Set distance(a,b)=max(distance(a,b,a),distance(a,b,b)) instead of half-sum, this seems to give better results.
+
 Fri Feb 25 15:00:00 CET 2005 Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/UNVConverter.java: Make the
