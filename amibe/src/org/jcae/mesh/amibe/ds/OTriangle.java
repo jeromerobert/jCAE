@@ -683,28 +683,36 @@ public class OTriangle
 		 */
 		// this = (oda)
 		symOTri(this, work[0]);         // (don)
-		//  Clear SWAPPED flag
+		//  Clear SWAPPED flag for all edges of the 2 triangles
 		clearAttributes(SWAPPED);
 		work[0].clearAttributes(SWAPPED);
 		
 		nextOTri(this, work[1]);        // (dao)
+		work[1].clearAttributes(SWAPPED);
 		int attr1 = work[1].attributes;
 		work[1].symOTri();              // a1 = (ad*)
+		work[1].clearAttributes(SWAPPED);
 		prevOTri(this, work[2]);        // (aod)
+		work[2].clearAttributes(SWAPPED);
 		int attr2 = work[2].attributes;
 		work[2].symOTri();              // a2 = (oa*)
+		work[2].clearAttributes(SWAPPED);
 		nextOTri();                     // (dao)
 		work[2].glue(this);    // a2 and (dao)
 		nextOTri(work[0], work[2]);     // (ond)
+		work[2].clearAttributes(SWAPPED);
 		int attr3 = work[2].attributes;
 		work[2].symOTri();              // a3 = (no*)
+		work[2].clearAttributes(SWAPPED);
 		nextOTri();                     // (aod)
 		work[2].glue(this);    // a3 and (aod)
 		//  Reset 'this' to (oda)
 		nextOTri();                     // (oda)
 		prevOTri(work[0], work[2]);     // (ndo)
+		work[2].clearAttributes(SWAPPED);
 		int attr4 = work[2].attributes;
 		work[2].symOTri();              // a4 = (dn*)
+		work[2].clearAttributes(SWAPPED);
 		work[0].nextOTri();             // (ond)
 		work[2].glue(work[0]); // a4 and (ond)
 		work[0].nextOTri();             // (ndo)
