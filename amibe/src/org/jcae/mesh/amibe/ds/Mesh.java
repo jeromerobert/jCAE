@@ -68,7 +68,7 @@ public class Mesh
 		Triangle.outer = new Triangle();
 		Vertex.outer = null;
 		face = f;
-		surface = face.getGeomSurface();
+		setGeometry(f);
 	}
 	
 	public Mesh(QuadTree q)
