@@ -36,6 +36,9 @@ public class MNode3D
 	//  The natural coordinates of the node
 	private double[] param = new double[3];
 	
+	//  Normal to the surface
+	private double[] normal = null;
+	
 	//  Link to the geometrical node, if any
 	private int ref1d;
 	
@@ -238,6 +241,28 @@ public class MNode3D
 	public void clearRef()
 	{
 		ref1d = -1;
+	}
+	
+	public void addNormal(double [] n)
+	{
+		if (normal == null)
+		{
+			normal = new double[3];
+			for (int i = 0; i < 3; i++)
+				normal[i] = n[i];
+		}
+		else
+		{
+			double [] n2 = new double[normal.length+3];
+			System.arraycopy(normal, 0, n2, 0, normal.length);
+			for (int i = 0; i < 3; i++)
+				n2[normal.length+i] = n[i];
+			normal = n2;
+		}
+	}
+	public double [] getNormal()
+	{
+		return normal;
 	}
 	
 	public String toString()

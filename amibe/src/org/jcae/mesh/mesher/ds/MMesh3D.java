@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.zip.GZIPOutputStream;
 import org.apache.log4j.Logger;
 import org.jcae.mesh.cad.CADFace;
+import org.jcae.mesh.cad.CADGeomSurface;
 
 
 /**
@@ -148,11 +149,17 @@ public class MMesh3D
 	public void addSubMesh2D(SubMesh2D submesh, CADFace F, boolean hasLabels)
 	{
 		HashMap mapNode2DToNode3D = new HashMap();
+		CADGeomSurface surface = F.getGeomSurface();
+		//  First derivative is needed to compute normals
+		surface.dinit(1);
+		double [] p;
 		Iterator itn = submesh.getNodesIterator();
 		while (itn.hasNext())
 		{
 			MNode2D n2 = (MNode2D) itn.next();
 			assert (!mapNode2DToNode3D.containsKey(n2));
+			p = n2.getUV();
+			surface.setParameter(p[0], p[1]);
 			if (hasLabels)
 			{
 				int label = n2.getLabel();
@@ -162,6 +169,7 @@ public class MMesh3D
 					//  unique.  Otherwise, if mapNode1DToNode3D does not already
 					//  contain n1, this 1D node is inserted for the first time.
 					MNode3D n3 = new MNode3D(n2, F);
+					n3.addNormal(surface.normal());
 					mapNode2DToNode3D.put(n2, n3);
 					nodelist.add(n3);
 					if (-1 != label)
@@ -176,7 +184,10 @@ public class MMesh3D
 					}
 				}
 				else
+				{
 					mapNode2DToNode3D.put(n2, arrayLabelToNode3D[label]);
+					arrayLabelToNode3D[label].addNormal(surface.normal());
+				}
 			}
 			else
 			{
@@ -187,13 +198,19 @@ public class MMesh3D
 					//  unique.  Otherwise, if mapNode1DToNode3D does not already
 					//  contain n1, this 1D node is inserted for the first time.
 					MNode3D n3 = new MNode3D(n2, F);
+					n3.addNormal(surface.normal());
 					mapNode2DToNode3D.put(n2, n3);
 					nodelist.add(n3);
 					if (null != n1)
 						mapNode1DToNode3D.put(n1, n3);
 				}
 				else
-					mapNode2DToNode3D.put(n2, mapNode1DToNode3D.get(n1));
+				{
+					MNode3D n3 = (MNode3D) mapNode1DToNode3D.get(n1);
+					n3.addNormal(surface.normal());
+
+					mapNode2DToNode3D.put(n2, n3);
+				}
 			}
 		}
 		
@@ -310,20 +327,31 @@ public class MMesh3D
 				out = new PrintWriter(new GZIPOutputStream(new FileOutputStream(file)));
 			else
 				out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(file)));
-			out.println("MeshVersionFormatted 1\n");
-			out.println("Dimension\n3\n");
-			out.println("Vertices\n"+nodelist.size());
+			out.println("\nMeshVersionFormatted 1");
+			out.println("\nDimension\n3");
+			out.println("\nVertices\n"+nodelist.size());
 
 			TObjectIntHashMap labelsN = new TObjectIntHashMap(nodelist.size());
 			int count =  0;
 			for(Iterator it=nodelist.iterator();it.hasNext();)
 			{
-				MNode3D node=(MNode3D) it.next();
+				MNode3D node = (MNode3D) it.next();
 				count++;
 				labelsN.put(node, count);
 				out.println(""+node.getX()+" "+node.getY()+" "+node.getZ()+" 0");
 			}
-			out.println("Triangles\n"+facelist.size());
+			int normalCount =  0;
+			int [] normalOffset = new int[nodelist.size()];
+			count =  0;
+			for(Iterator it=nodelist.iterator();it.hasNext();)
+			{
+				MNode3D node = (MNode3D) it.next();
+				normalOffset[count] = normalCount;
+				count++;
+				double [] normal = node.getNormal();
+				normalCount += normal.length / 3;
+			}
+			out.println("\nTriangles\n"+facelist.size());
 			count =  0;
 			for(Iterator it=grouplist.iterator();it.hasNext();)
 			{
@@ -340,41 +368,38 @@ public class MMesh3D
 					out.println(" "+count);
 				}
 			}
-/*
-			out.println("Normals\n"+facelist.size());
-			double [] v1 = new double[3];
-			double [] v2 = new double[3];
-			double [] v3 = new double[3];
+			out.println("\nNormals\n"+normalCount);
+			for(Iterator it=nodelist.iterator();it.hasNext();)
+			{
+				MNode3D node=(MNode3D) it.next();
+				double [] normal = node.getNormal();
+				for (int i = 0; i < normal.length/3; i++)
+					out.println(normal[3*i]+" "+normal[3*i+1]+" "+normal[3*i+2]);
+			}
+			out.println("\nNormalAtTriangleVertices\n"+(3*facelist.size()));
+			count =  0;
 			for(Iterator it=grouplist.iterator();it.hasNext();)
 			{
 				MGroup3D group=(MGroup3D)it.next();
-				count++;
+				HashSet nodeSet = new HashSet(nodelist.size());
 				for(Iterator itf=group.getFacesIterator();itf.hasNext();)
 				{
 					MFace3D face=(MFace3D) itf.next();
+					count++;
 					Iterator itn = face.getNodesIterator();
-					MNode3D n1 = (MNode3D) itn.next();       
-					MNode3D n2 = (MNode3D) itn.next();       
-					MNode3D n3 = (MNode3D) itn.next();       
-					double [] x1 = n1.getXYZ();
-					double [] x2 = n2.getXYZ();
-					double [] x3 = n3.getXYZ();
 					for (int i = 0; i < 3; i++)
 					{
-						v1[i] = x2[i] - x1[i];
-						v2[i] = x3[i] - x1[i];
+						MNode3D node = (MNode3D) itn.next();       
+						if (!nodeSet.contains(node))
+						{
+							normalOffset[labelsN.get(node)-1] += 3;
+							nodeSet.add(node);
+						}
+						out.println(""+count+" "+(i+1)+" "+(normalOffset[labelsN.get(node)-1] - 2));
 					}
-					v3[0] = v1[1] * v2[2] - v1[2] * v2[1];
-					v3[1] = v1[2] * v2[0] - v1[0] * v2[2];
-					v3[2] = v1[0] * v2[1] - v1[1] * v2[0];
-					double norm = Math.sqrt(v3[0]*v3[0] + v3[1]*v3[1] + v3[2]*v3[2]);
-					for (int i = 0; i < 3; i++)
-						v3[i] /= norm;
-					out.println(""+v3[0]+" "+v3[1]+" "+v3[2]);
 				}
 			}
-*/
-			out.println("End");
+			out.println("\nEnd");
 			out.close();
 		} catch (FileNotFoundException e)
 		{
