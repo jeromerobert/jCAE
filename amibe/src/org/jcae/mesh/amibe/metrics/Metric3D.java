@@ -237,7 +237,7 @@ public class Metric3D extends Matrix
 	
 	public static boolean hasDeflection()
 	{
-		return (defl > 0.0 && defl < 1.0);
+		return (defl > 0.0);
 	}
 	
 	public static boolean hasLength()
