@@ -92,7 +92,7 @@ public class OCCDiscretizeCurve3D
 		}
 		logger.debug("(length) Number of points: "+nr);
 		length = -1.0;
-		adjustAbscissas(xyz);
+		adjustAbscissas(xyz, new checkRatioLength());
 	}
 	
 	public void discretizeSubsegmentMaxLength(int numseg, double len)
@@ -190,7 +190,7 @@ public class OCCDiscretizeCurve3D
 			}
 		}
 		length = -1.0;
-		adjustAbscissas(xyz);
+		adjustAbscissas(xyz, new checkRatioLength());
 	}
 	
 	public void discretizeMaxDeflection(double defl)
@@ -198,12 +198,13 @@ public class OCCDiscretizeCurve3D
 		if (defl <= 0.0 || defl >= 1.0)
 			return;
 		int nsegments = 10;
+		double [] xyz;
 		while (true)
 		{
 			nsegments *= 10;
 			a = new double[nsegments+1];
 			double delta = (end - start) / ((double) nsegments);
-			double [] xyz = new double[3*(nsegments+1)];
+			xyz = new double[3*(nsegments+1)];
 			for (int i = 0; i < nsegments; i++)
 				xyz[3*i] = start + ((double) i) * delta;
 			//  Avoid rounding errors
@@ -252,9 +253,10 @@ public class OCCDiscretizeCurve3D
 		}
 		logger.debug("(deflection) Number of points: "+nr);
 		length = -1.0;
+		adjustAbscissas(xyz, new checkRatioDeflection());
 	}
 	
-	private void adjustAbscissas(double [] xyz)
+	private void adjustAbscissas(double [] xyz, checkRatio func)
 	{
 		boolean backward = false;
 		int niter = 2*nr;
@@ -266,53 +268,110 @@ public class OCCDiscretizeCurve3D
 			if (backward)
 			{
 				for (int i = nr - 2; i > 0; i--)
-					redo |= enforceDeflection(i, xyz);
+					redo |= func.move(i, xyz);
 			}
 			else
 			{
 				for (int i = 1; i < nr - 1; i++)
-					redo |= enforceDeflection(i, xyz);
+					redo |= func.move(i, xyz);
 			}
 			if (!redo)
 				break;
 		}
 	}
 	
-	private final boolean enforceDeflection(int i, double [] xyz)
+	private interface checkRatio
 	{
-		boolean ret = false;
-		double l1 = Math.sqrt(
-		  (xyz[3*i  ] - xyz[3*i-3]) * (xyz[3*i  ] - xyz[3*i-3]) +
-		  (xyz[3*i+1] - xyz[3*i-2]) * (xyz[3*i+1] - xyz[3*i-2]) +
-		  (xyz[3*i+2] - xyz[3*i-1]) * (xyz[3*i+2] - xyz[3*i-1]));
-		double l2 = Math.sqrt(
-		  (xyz[3*i  ] - xyz[3*i+3]) * (xyz[3*i  ] - xyz[3*i+3]) +
-		  (xyz[3*i+1] - xyz[3*i+4]) * (xyz[3*i+1] - xyz[3*i+4]) +
-		  (xyz[3*i+2] - xyz[3*i+5]) * (xyz[3*i+2] - xyz[3*i+5]));
-		double delta = Math.abs(l2 - l1) / (l1+l2);
-		if (delta > 0.01 * 0.5)
+		boolean move(int i, double [] xyz);
+	}
+	
+	private class checkRatioLength implements checkRatio
+	{
+		public boolean move(int i, double [] xyz)
 		{
-			double newA = a[i] + 0.8 * (a[i+1] - a[i-1]) * (l2 - l1) / (l1 + l2);
-			double [] newXYZ = curve.value(a[i]);
-			
-			double newl1 = Math.sqrt(
-			  (newXYZ[0] - xyz[3*i-3]) * (newXYZ[0] - xyz[3*i-3]) +
-			  (newXYZ[1] - xyz[3*i-2]) * (newXYZ[1] - xyz[3*i-2]) +
-			  (newXYZ[2] - xyz[3*i-1]) * (newXYZ[2] - xyz[3*i-1]));
-			double newl2 = Math.sqrt(
-			  (newXYZ[0] - xyz[3*i+3]) * (newXYZ[0] - xyz[3*i+3]) +
-			  (newXYZ[1] - xyz[3*i+4]) * (newXYZ[1] - xyz[3*i+4]) +
-			  (newXYZ[2] - xyz[3*i+5]) * (newXYZ[2] - xyz[3*i+5]));
-			if (Math.abs(newl2 - newl1)/(newl1+newl2) < delta)
+			boolean ret = false;
+			double l1 = Math.sqrt(
+			  (xyz[3*i  ] - xyz[3*i-3]) * (xyz[3*i  ] - xyz[3*i-3]) +
+			  (xyz[3*i+1] - xyz[3*i-2]) * (xyz[3*i+1] - xyz[3*i-2]) +
+			  (xyz[3*i+2] - xyz[3*i-1]) * (xyz[3*i+2] - xyz[3*i-1]));
+			double l2 = Math.sqrt(
+			  (xyz[3*i  ] - xyz[3*i+3]) * (xyz[3*i  ] - xyz[3*i+3]) +
+			  (xyz[3*i+1] - xyz[3*i+4]) * (xyz[3*i+1] - xyz[3*i+4]) +
+			  (xyz[3*i+2] - xyz[3*i+5]) * (xyz[3*i+2] - xyz[3*i+5]));
+			double delta = Math.abs(l2 - l1);
+			if (delta > 0.05 * (l1+l2))
 			{
-				ret = true;
-				a[i] = newA;
-				xyz[3*i]   = newXYZ[0];
-				xyz[3*i+1] = newXYZ[1];
-				xyz[3*i+2] = newXYZ[2];
+				double newA = a[i] + 0.8 * (a[i+1] - a[i-1]) * (l2 - l1) / (l1 + l2);
+				double [] newXYZ = curve.value(newA);
+				
+				double newl1 = Math.sqrt(
+				  (newXYZ[0] - xyz[3*i-3]) * (newXYZ[0] - xyz[3*i-3]) +
+				  (newXYZ[1] - xyz[3*i-2]) * (newXYZ[1] - xyz[3*i-2]) +
+				  (newXYZ[2] - xyz[3*i-1]) * (newXYZ[2] - xyz[3*i-1]));
+				double newl2 = Math.sqrt(
+				  (newXYZ[0] - xyz[3*i+3]) * (newXYZ[0] - xyz[3*i+3]) +
+				  (newXYZ[1] - xyz[3*i+4]) * (newXYZ[1] - xyz[3*i+4]) +
+				  (newXYZ[2] - xyz[3*i+5]) * (newXYZ[2] - xyz[3*i+5]));
+				if (Math.abs(newl2 - newl1) < delta)
+				{
+					ret = true;
+					a[i] = newA;
+					xyz[3*i]   = newXYZ[0];
+					xyz[3*i+1] = newXYZ[1];
+					xyz[3*i+2] = newXYZ[2];
+				}
 			}
+			return ret;
 		}
-		return ret;
+	}
+	
+	private class checkRatioDeflection implements checkRatio
+	{
+		public boolean move(int i, double [] xyz)
+		{
+			boolean ret = false;
+			double l1 = Math.sqrt(
+			  (xyz[3*i  ] - xyz[3*i-3]) * (xyz[3*i  ] - xyz[3*i-3]) +
+			  (xyz[3*i+1] - xyz[3*i-2]) * (xyz[3*i+1] - xyz[3*i-2]) +
+			  (xyz[3*i+2] - xyz[3*i-1]) * (xyz[3*i+2] - xyz[3*i-1]));
+			double l2 = Math.sqrt(
+			  (xyz[3*i  ] - xyz[3*i+3]) * (xyz[3*i  ] - xyz[3*i+3]) +
+			  (xyz[3*i+1] - xyz[3*i+4]) * (xyz[3*i+1] - xyz[3*i+4]) +
+			  (xyz[3*i+2] - xyz[3*i+5]) * (xyz[3*i+2] - xyz[3*i+5]));
+			double a1 = length(a[i-1], a[i], 20);
+			double a2 = length(a[i], a[i+1], 20);
+			double d1 = (a1 - l1) / a1;
+			double d2 = (a2 - l2) / a2;
+			double d3 = (a1 + a2 - l1 - l2) / (a1 + a2);
+			double delta = Math.abs(d2 - d1);
+			if (delta > 0.05 * d3)
+			{
+				double newA = a[i] + 0.8 * (a[i+1] - a[i-1]) * (l2 - l1) / (l1 + l2);
+				double [] newXYZ = curve.value(newA);
+				
+				l1 = Math.sqrt(
+				  (newXYZ[0] - xyz[3*i-3]) * (newXYZ[0] - xyz[3*i-3]) +
+				  (newXYZ[1] - xyz[3*i-2]) * (newXYZ[1] - xyz[3*i-2]) +
+				  (newXYZ[2] - xyz[3*i-1]) * (newXYZ[2] - xyz[3*i-1]));
+				l2 = Math.sqrt(
+				  (newXYZ[0] - xyz[3*i+3]) * (newXYZ[0] - xyz[3*i+3]) +
+				  (newXYZ[1] - xyz[3*i+4]) * (newXYZ[1] - xyz[3*i+4]) +
+				  (newXYZ[2] - xyz[3*i+5]) * (newXYZ[2] - xyz[3*i+5]));
+				a1 = length(a[i-1], newA, 20);
+				a2 = length(newA, a[i+1], 20);
+				d1 = (a1 - l1) / a1;
+				d2 = (a2 - l2) / a2;
+				if (Math.abs(d2 - d1) < delta)
+				{
+					ret = true;
+					a[i] = newA;
+					xyz[3*i]   = newXYZ[0];
+					xyz[3*i+1] = newXYZ[1];
+					xyz[3*i+2] = newXYZ[2];
+				}
+			}
+			return ret;
+		}
 	}
 	
 	public int nbPoints()
