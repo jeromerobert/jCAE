@@ -123,6 +123,12 @@ public class SubMesh2DReader extends JCAEXMLData
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
+		assert setFreeEdgesFrozen(submesh);
+		return submesh;
+	}
+	
+	private static boolean setFreeEdgesFrozen(SubMesh2D submesh)
+	{
 		for (Iterator ite = submesh.getEdgesIterator(); ite.hasNext(); )
 		{
 			MEdge2D e = (MEdge2D) ite.next();
@@ -130,7 +136,7 @@ public class SubMesh2DReader extends JCAEXMLData
 			if (e.getFaces().size() < 2)
 				e.setFrozen(true);
 		}
-		return submesh;
+		return true;
 	}
 }
 
