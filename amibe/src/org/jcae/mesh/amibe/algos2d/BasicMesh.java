@@ -174,8 +174,8 @@ public class BasicMesh
 			s.setAttributes(OTriangle.BOUNDARY);
 		}
 		mesh.popCompGeom(2);
-
-		logger.debug(" Ensure 3D Delaunay criterion");
+		
+		logger.debug(" Select 3D smaller diagonals");
 		mesh.pushCompGeom(3);
 		ot = new OTriangle();
 		for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
@@ -191,10 +191,12 @@ public class BasicMesh
 		boolean redo = true;
 		//  With riemanian metrics, there may be infinite loops,
 		//  make sure to exit this loop.
-		int niter = 10;
-		do {
+		int niter = bNodes.length;
+
+		while (redo && niter > 0)
+		{
 			redo = false;
-			niter --;
+			--niter;
 			for (Iterator it = saveList.iterator(); it.hasNext(); )
 			{
 				OTriangle s = (OTriangle) it.next();
@@ -207,7 +209,6 @@ public class BasicMesh
 					redo = true;
 			}
 		}
-		while (redo && niter > 0);
 		mesh.popCompGeom(3);
 		
 		logger.debug(" Mark outer elements");
