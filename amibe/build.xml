@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="all" name="jcae">
+
+	<target name="init">
+		<tstamp/>
+		<property name="version" value="${DSTAMP}"/>	
+		<property file="build.properties"/>
+	</target>
+	
+	<target name="compile" depends="init">
+		<mkdir dir="${classes.dir}"/>
+		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}">
+			<compilerarg line="${compiler.arg}"/>
+			<classpath>
+				<pathelement location="${occjava.jar}"/>
+				<pathelement location="${log4j.jar}"/>
+				<pathelement location="${trove.jar}"/>
+				<pathelement location="${jcae.jar}"/>
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile" description="jar">
+		<mkdir dir="lib"/>
+		<jar basedir="${classes.dir}" compress="true" jarfile="${jar}">
+			<manifest>
+				<attribute name="Main-Class" value="jiraph.test.Main"/>
+				<attribute name="Class-Path" value="${jar.dependencies}"/>
+			</manifest>
+			<fileset dir="${src.dir}" includes="**/*.properties"/>
+			<fileset dir="${src.dir}" includes="**/*.dtd"/>
+		</jar>
+	</target>
+	
+	<target name="all" depends="dist-bin" description="Build everything."/>
+	
+	<target name="javadoc" description="Javadoc for my API." depends="init">
+		<mkdir dir="${javadoc.dir}"/>
+		<javadoc destdir="${javadoc.dir}" packagenames="*">
+			<classpath>
+				<pathelement location="${jcae.jar}"/>
+			</classpath>
+			<sourcepath>
+				<pathelement location="${src.dir}"/>
+			</sourcepath>
+		</javadoc>
+	</target>
+	
+	<target name="clean" description="Clean all build products." depends="init">
+		<delete dir="${classes.dir}"/>
+		<delete dir="${javadoc.dir}"/>
+		<delete file="${jar}"/>
+	</target>
+	
+	<target name="dist" depends="init" description="build a tar.bz2 archive to distribute sources">
+		<tar destfile="${project.name}-src-${version}.tar">
+			<tarfileset dir="." prefix="${project.name}-${version}" username="jcae" group="jcae">
+				<include name="build.properties" />
+				<include name="build.xml" />
+				<include name="src/**"/>
+				<include name="INSTALL"/>
+				<include name="ChangeLog"/>
+				<include name="doc/*"/>
+			</tarfileset>
+		</tar>
+		<bzip2 src="${project.name}-src-${version}.tar" zipfile="${project.name}-src-${version}.tar.bz2"/>
+		<delete file="${project.name}-src-${version}.tar"/>
+	</target>
+
+	<target name="dist-bin" description="build a zip to distribute binaries" depends="jar">
+		<zip destfile="${project.name}-${version}.zip">
+			<zipfileset prefix="${project.name}-${version}" dir="lib"/>
+		</zip>
+	</target>
+	<target name="dist-doc" description="build a zip to distribute doc" depends="javadoc">
+		<zip destfile="${project.name}-doc-${version}.zip">
+			<zipfileset prefix="${project.name}-${version}/doc" dir="doc"/>
+		</zip>
+	</target>
+	<target name="test" description="test" depends="jar">
+		<java jar="${jar}" fork="yes">
+			<jvmarg value="${test.jvmarg}"/>
+		</java>
+	</target>
+
+	<target name="debug-netbeans" depends="jar" if="netbeans.home">
+		<nbjpdastart name="${project.name}" addressproperty="jpda.address" transport="dt_socket"/>
+	</target>
+
+	<target name="debug" depends="jar, debug-netbeans" description="Debug Project">
+		<java fork="true" jar="${jar}">
+			<jvmarg value="-Xdebug"/>
+			<jvmarg value="-Xnoagent"/>
+			<jvmarg value="-Djava.compiler=none"/>
+			<jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address},server=y,suspend=n"/>
+		</java>
+	</target>
+</project>
