@@ -53,7 +53,7 @@ public class Calculus3D implements Calculus
 	 **/
 	public double distance(Vertex start, Vertex end)
 	{
-		return distance(start, end, start);
+		return 0.5 * (distance(start, end, start) + distance(start, end, end));
 	}
 	
 	public double distance(Vertex start, Vertex end, Vertex vm)
@@ -61,22 +61,6 @@ public class Calculus3D implements Calculus
 		double ret;
 		Metric2D m = vm.getMetrics(mesh.getGeomSurface());
 		ret = m.distance(start.getUV(), end.getUV());
-/*
-		if (ret > 0.5)
-		{
-			double [] xs = start.getUV();
-			double [] xe = end.getUV();
-			int segments = (int) (2.0*ret) + 10;
-			segments = 1;
-			Vertex [] np = new Vertex[segments+1];
-			for (int i = 0; i <= segments; i++)
-				np[i] = new Vertex(xs[0]+i*(xe[0]-xs[0])/segments, xs[1]+i*(xe[1]-xs[1])/segments);
-
-			ret = 0;
-			for (int i = 0; i < segments; i++)
-				ret += np[i].getMetrics(mesh.getGeomSurface()).distance(np[i].getUV(), np[i+1].getUV());
-		}
-*/
 		return ret;
 	}
 	
@@ -88,10 +72,7 @@ public class Calculus3D implements Calculus
 	
 	public double length(OTriangle ot)
 	{
-		Vertex pt1 = ot.origin();
-		Vertex pt2 = ot.destination();
-		double l= 0.5*(distance(pt1, pt2) + distance(pt2, pt1));
-        	return l;
+		return distance(ot.origin(), ot.destination());
 	}
 	
 }
