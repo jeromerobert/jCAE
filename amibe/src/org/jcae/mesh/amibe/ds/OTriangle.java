@@ -62,13 +62,11 @@ public class OTriangle
 	private static final int [] next3 = { 1, 2, 0 };
 	private static final int [] prev3 = { 2, 0, 1 };
 	private static final int [] bitmaskclear = {  0xffffff3c,  0xffffff33,  0xffffff0f };
-	// private static final int [] bitmaskclear = {  60,  51,  15 };
-	private static final int [] bitmaskclearAttr = {  0xffff00ff,  0xff00ffff,  0x00ffffff };
 	
-	public static final int BOUNDARY = 1;
-	public static final int OUTER = BOUNDARY << 1;
-	public static final int MARKED = OUTER << 1;
-	public static final int SWAPPED = MARKED << 1;
+	public static final int BOUNDARY = 1 << 0;
+	public static final int OUTER    = 1 << 1;
+	public static final int SWAPPED  = 1 << 2;
+	public static final int MARKED   = 1 << 3;
 	
 	//  Complex algorithms require several OTriangle, they are
 	//  allocated here to prevent allocation/deallocation overhead.
@@ -130,7 +128,7 @@ public class OTriangle
 		tri = new Triangle(v0, v1, v2);
 		//  By default, edge is (v0, v1)
 		orientation = 2;
-		attributes = (tri.adjPos >> 24) & 0xff;
+		attributes = 0;
 		//  v0.tri and the like are not updated, because
 		//  vertices may be Vertex.outer.
 	}
@@ -216,7 +214,7 @@ public class OTriangle
 	
 	private final void updateAttributes()
 	{
-		tri.adjPos &= bitmaskclearAttr[orientation];
+		tri.adjPos &= ~(0xff << (8*(1+orientation)));
 		tri.adjPos |= ((attributes & 0xff) << (8*(1+orientation)));
 	}
 	
@@ -390,17 +388,11 @@ public class OTriangle
 		tri.adj[orientation] = sym.tri;
 		sym.tri.adj[sym.orientation] = tri;
 		//  Clear previous adjacent position ...
-		tri.adjPos &= bitmaskclear[orientation];
+		tri.adjPos &= ~(3 << (2*orientation));
+		sym.tri.adjPos &= ~(3 << (2*sym.orientation));
 		//  ... and set it right
 		tri.adjPos |= (sym.orientation << (2*orientation));
-		sym.tri.adjPos &= bitmaskclear[sym.orientation];
 		sym.tri.adjPos |= (orientation << (2*sym.orientation));
-	}
-	
-	public final void dissolve()
-	{
-		tri.adj[orientation] = null;
-		tri.adjPos &= bitmaskclear[orientation];
 	}
 	
 	/*
