@@ -20,6 +20,7 @@
 
 package org.jcae.mesh.xmldata;
 
+import gnu.trove.TIntArrayList;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntIntHashMap;
 import java.io.*;
@@ -84,8 +85,11 @@ public class UNVConverter
 	
 		try
 		{
-			new UNVConverter(new File("/home/jerome/Project_1/Default mesh18716.brep.jcae/"), new int[]{0,2}).
-				writeUNV(new PrintStream(new FileOutputStream(new File("/tmp/prout.unv"))));
+			new UNVConverter(new File("/home/jerome/Project/mesh33035.brep.jcae"), new int[]{0}).
+				writeUNV(new PrintStream(new FileOutputStream(new File("/tmp/blub.unv"))));	
+			//	writeUNV(System.out);
+			
+			
 		} catch (ParserConfigurationException e)
 		{
 			// TODO Auto-generated catch block
@@ -261,6 +265,9 @@ public class UNVConverter
 		int[] triangle=readTriangles();
 		TIntIntHashMap amibeNodeToUNVNode=new TIntIntHashMap();		
 		writeUNVNodes(out, new TIntHashSet(triangle).toArray(), amibeNodeToUNVNode);
+		/*System.out.println(new TIntArrayList(triangle).toString());
+		System.out.println(new TIntArrayList(amibeNodeToUNVNode.keys()).toString());
+		System.out.println(new TIntArrayList(amibeNodeToUNVNode.getValues()).toString());*/
 		TIntIntHashMap amibeTriaToUNVTria=new TIntIntHashMap();
 		writeUNVTriangles(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
 		triangle=null;
@@ -337,6 +344,7 @@ public class UNVConverter
 	{
 		out.println("    -1"+cr+"  2412");
 		int count=0;
+		int triaIndex=0;
 		for(int i=0; i<groups.length; i++)
 		{
 			for(int j=0; j<groups[i].length; j++)
@@ -344,9 +352,9 @@ public class UNVConverter
 				count++;
 				amibeTriaToUNVTria.put(groups[i][j], count);
 				out.println(""+count+"        91         1         1         1         3");
-				out.println(""+amibeNodeToUNVNode.get(triangles[count-1])+" "
-					+amibeNodeToUNVNode.get(triangles[count])+" "
-					+amibeNodeToUNVNode.get(triangles[count+1]));
+				out.println(""+amibeNodeToUNVNode.get(triangles[triaIndex++])+" "
+					+amibeNodeToUNVNode.get(triangles[triaIndex++])+" "
+					+amibeNodeToUNVNode.get(triangles[triaIndex++]));
 			}
 		}		
 		out.println("    -1");
