@@ -68,7 +68,7 @@ public class Metric2D
 		{
 			double detA = det();
 			if (Math.abs(detA) < 1.e-10)
-				throw new RuntimeException("Syngular matrice: "+this);
+				throw new RuntimeException("Singular matrice: "+this);
 			Matrix2D ret = new Matrix2D(data[1][1], -data[0][1], -data[1][0], data[0][0]);
 			ret.scale(1.0 / detA);
 			return ret;
@@ -119,7 +119,10 @@ public class Metric2D
 		double nd1U = Calculs.norm(d1U);
 		double nd1V = Calculs.norm(d1V);
 		if (nd1U * nd1V == 0.0)
+		{
+			logger.debug("unable to compute tangent plane");
 			return new Matrix2D(1.0, 0.0, 0.0, 1.0);
+		}
 		double unitNorm[] = Calculs.prodVect3D(d1U, d1V);
 		double nnorm = Calculs.norm(unitNorm);
 		double ct = Calculs.prodSca(d1U, d1V) / nd1U / nd1V;
@@ -191,7 +194,10 @@ public class Metric2D
 		//  is positive, but there may be rounding errors.
 		double ret = E * G - F * F;
 		if (ret < 0.0)
+		{
+			logger.debug("Singular matrix");
 			ret = 0.0;
+		}
 		return ret;
 	}
 	

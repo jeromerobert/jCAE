@@ -92,6 +92,7 @@ public class Metric3D extends Matrix
 		double cmax = Math.abs(cacheSurf.maxCurvature());
 		if (cmin == Double.NaN || cmax == Double.NaN)
 		{
+			logger.debug("Infinite curvature");
 			scale(100.0/discr/discr);
 			return;
 		}
@@ -134,6 +135,7 @@ public class Metric3D extends Matrix
 		double cmax = Math.abs(cacheSurf.maxCurvature());
 		if (cmin == Double.NaN || cmax == Double.NaN)
 		{
+			logger.debug("Infinite curvature");
 			scale(100.0/discr/discr);
 			return;
 		}
@@ -256,6 +258,7 @@ public class Metric3D extends Matrix
 		}
 		else
 		{
+			logger.debug("Unable to compute normal vector");
 			unitNorm[0] = 0.0;
 			unitNorm[1] = 0.0;
 			unitNorm[2] = 0.0;
