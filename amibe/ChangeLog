@@ -1,3 +1,23 @@
+Tue Feb  8 15:19:49 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/MeshWriter.java
+	  src/org/jcae/mesh/xmldata/SubMesh2DReader.java:  Change the structure of jcae2d files; boundary nodes are written at the bottom of nodes2d.bin, and refs1d.bin then contains the unique 1d label for all such nodes.
+	* src/org/jcae/mesh/xmldata/MMesh3DWriter.java
+	  src/org/jcae/mesh/xmldata/MMesh3DReader.java:  Change the structure of jcae3d files; boundary nodes are written at the bottom of nodes3d.bin, and refs1d.bin then contains the unique 1d label for all such nodes.
+	* src/org/jcae/mesh/MesherBig.java
+	  src/org/jcae/mesh/xmldata/MeshToMMesh3DConvert.java:  MesherBig is a replacement for Mesher; its main feature is to convert all 2D meshes to a 3D mesh without having to store the whole mesh in memory.  The Fuse 3d algorithm can no more be used, which is why a new MesherBig class was added until a new fuse can deal with this new data structure.
+
+Tue Feb  8 10:58:49 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos2d/BasicMesh.java
+	  src/org/jcae/mesh/amibe/util/QuadTree.java:  Fix bounding box computation in 2D space, a vertex located at the right or the top edge could be inserted into the wrong QuadTreeCell.
+	* src/org/jcae/mesh/amibe/algos2d/BasicMesh.java:  If the initial mesh is not valid, something went wrong, so raise an exception so that it can get caught.
+	* src/org/jcae/mesh/amibe/ds/Mesh.java (writeUNV3D):  Holes were not filtered out.
+
+Mon Feb  7 15:04:44 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/Mesher.java:  A tolerance can be defined through org.jcae.mesh.tolerance property to call org.jcae.mesh.mesher.algos3d.Fuse algorithm.
+
 Fri Feb  4 16:09:52 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/cad/CADGeomSurface.java
