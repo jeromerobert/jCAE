@@ -61,6 +61,7 @@ public class Calculus3D implements Calculus
 		double ret;
 		Metric2D m = vm.getMetrics(mesh.getGeomSurface());
 		ret = m.distance(start.getUV(), end.getUV());
+/*
 		if (ret > 0.5)
 		{
 			double [] xs = start.getUV();
@@ -75,6 +76,7 @@ public class Calculus3D implements Calculus
 			for (int i = 0; i < segments; i++)
 				ret += np[i].getMetrics(mesh.getGeomSurface()).distance(np[i].getUV(), np[i+1].getUV());
 		}
+*/
 		return ret;
 	}
 	

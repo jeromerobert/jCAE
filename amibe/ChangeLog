@@ -1,3 +1,7 @@
+Fri Nov 26 15:34:32 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/tools/Calculus3D.java:  In distance(), do not subdivide into smaller segments.  This was very time consuming, and for unknow reasons gave worse meshes.
+
 Fri Nov 26 10:35:22 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos2d/Insertion.java:  Do not insert more than 3 nodes on long edges, in order to prevent flat triangles.
