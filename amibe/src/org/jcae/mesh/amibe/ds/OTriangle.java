@@ -672,6 +672,10 @@ public class OTriangle
 		 */
 		// this = (oda)
 		symOTri(this, work[0]);         // (don)
+		//  Clear SWAPPED flag
+		clearAttributes(SWAPPED);
+		work[0].clearAttributes(SWAPPED);
+		
 		nextOTri(this, work[1]);        // (dao)
 		int attr1 = work[1].attributes;
 		work[1].symOTri();              // a1 = (ad*)
@@ -714,6 +718,10 @@ public class OTriangle
 		work[0].tri.adjPos &= 0xff;
 		work[0].tri.adjPos |= ((attr4 & 0xff) << (8*(1+next3[work[0].orientation])));
 		work[0].tri.adjPos |= ((attr1 & 0xff) << (8*(1+prev3[work[0].orientation])));
+		//  Mark new edge
+		setAttributes(SWAPPED);
+		work[0].setAttributes(SWAPPED);
+
 		//  Eventually change 'this' to (ona) to ease moving around o.
 		prevOTri();                     // (ona)
 		return this;
