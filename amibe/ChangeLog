@@ -1,7 +1,16 @@
+Thu Mar 17 14:27:23 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/metrics/Metric3D.java
+	  src-occ/org/jcae/mesh/cad/occ/OCCDiscretizeCurve3D.java: For yet unknown reasons it seems that replacing deflection factor by its square gives much better results.
+	* src/org/jcae/mesh/amibe/algos2d/Insertion.java (compute): Make sure that the 'segments' variable is bounded.
+
 Wed Mar 16 11:26:01 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/util
 	  src/org/jcae/mesh/util: Remove several unused classes.
+	* src/org/jcae/mesh/amibe/metrics/Metric2D.java
+	  src/org/jcae/mesh/amibe/metrics/Metric3D.java
+	  src/org/jcae/mesh/util/Calculs.java: Move 3D linear algebra operations from Calculs to Metric3D, and remove Calculs.java.
 
 Wed Mar  9 10:32:43 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
