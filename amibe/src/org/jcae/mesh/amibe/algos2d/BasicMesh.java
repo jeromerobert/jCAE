@@ -126,12 +126,13 @@ public class BasicMesh
 					ot = v.getSurroundingOTriangle();
 					ot.split3(v, true); 
 					v.addToQuadTree();
-					assert (mesh.isValid(false));
 					if (firstOnWire == null)
 						firstOnWire = v;
 				}
 			}
 		}
+		if (!mesh.isValid(false))
+			throw new InitialTriangulationException();
 		mesh.popCompGeom(2);
 		mesh.pushCompGeom(2);
 		logger.debug(" Rebuild boundary edges");
