@@ -59,8 +59,6 @@ public class SubMesh2DReader extends JCAEXMLData
 		CachedXPathAPI xpath = new CachedXPathAPI();
 		try
 		{
-			submesh = new SubMesh2D(F);
-			
 			String nodesFile = xpath.selectSingleNode(document,
 				"/jcae/mesh/submesh/nodes/file/@location").getNodeValue();
 			DataInputStream nodesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(xmlDir+File.separator+nodesFile)));
@@ -78,35 +76,31 @@ public class SubMesh2DReader extends JCAEXMLData
 			submesh = new SubMesh2D(F);
 			int numberOfReferences = Integer.parseInt(
 				xpath.selectSingleNode(submeshNodes, "references/number/text()").getNodeValue());
-			int [] refs = new int[2*numberOfReferences];
-			for (i=0; i < 2*numberOfReferences; i+=2)
-			{
-				refs[i]= refsIn.readInt();
-				refs[i+1] = refsIn.readInt();
-			}
+			int [] refs = new int[numberOfReferences];
+			logger.debug("Reading "+numberOfReferences+" references");
+			for (i=0; i < numberOfReferences; i++)
+				refs[i] = refsIn.readInt();
 			
 			int numberOfNodes = Integer.parseInt(
 				xpath.selectSingleNode(submeshNodes, "number/text()").getNodeValue());
+			logger.debug("Reading "+numberOfNodes+" nodes");
 			MNode2D [] nodelist = new MNode2D[numberOfNodes];
-			int iref = 0;
 			for (i=0; i < numberOfNodes; i++)
 			{
 				double u = nodesIn.readDouble();
 				double v = nodesIn.readDouble();
 				nodelist[i] = new MNode2D(u, v);
 				submesh.addNode(nodelist[i]);
-				if (iref < 2*numberOfReferences && refs[iref] == i)
-				{
-					nodelist[i].setLabel(refs[iref+1]);
-					iref += 2;
-				}
-				else
+				if (i < numberOfNodes - numberOfReferences)
 					nodelist[i].setLabel(-1);
+				else
+					nodelist[i].setLabel(refs[i+numberOfReferences-numberOfNodes]);
 			}
 			
 			Node submeshFaces = xpath.selectSingleNode(submeshElement, "triangles");
 			int numberOfFaces = Integer.parseInt(
 					xpath.selectSingleNode(submeshFaces, "number/text()").getNodeValue());
+			logger.debug("Reading "+numberOfFaces+" faces");
 			for (i=0; i < numberOfFaces; i++)
 			{
 				MNode2D pt1 = nodelist[trianglesIn.readInt()];
@@ -114,6 +108,7 @@ public class SubMesh2DReader extends JCAEXMLData
 				MNode2D pt3 = nodelist[trianglesIn.readInt()];
 				submesh.addTriangle(pt1, pt2, pt3);
 			}
+			logger.debug("End reading");
 			nodesIn.close();
 			trianglesIn.close();
 			refsIn.close();

@@ -37,31 +37,51 @@ public class MeshWriter
 	/**
 	 * Used by {@link writeObject}
 	 */
-	private static Element writeObjectNodes(Document document, Iterator nodesIterator, File nodesFile, File refFile, String baseDir, TObjectIntHashMap nodeIndex)
+	private static Element writeObjectNodes(Document document, ArrayList nodelist, File nodesFile, File refFile, String baseDir, TObjectIntHashMap nodeIndex)
 		throws IOException
 	{
 		//save nodes
 		logger.debug("begin writing "+nodesFile);
-		DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile)));
-		DataOutputStream refout=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile)));
-		int i=0, nref=0;
-		while(nodesIterator.hasNext())
+		DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile)));
+		DataOutputStream refout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile)));
+		Iterator nodesIterator = nodelist.iterator();
+		//  Write interior nodes first
+		int i = 0;
+		while (nodesIterator.hasNext())
 		{
 			Vertex n = (Vertex) nodesIterator.next();
 			if (n == Vertex.outer)
 				continue;
-			nodeIndex.put(n, i);
-			double [] p = n.getUV();
-			out.writeDouble(p[0]);
-			out.writeDouble(p[1]);
+			MNode1D ref1d = n.getRef();
+			if (null == ref1d)
+			{
+				double [] p = n.getUV();
+				out.writeDouble(p[0]);
+				out.writeDouble(p[1]);
+				nodeIndex.put(n, i);
+				i++;
+			}
+		}
+		
+		//  Write boundary nodes and 1D references
+		nodesIterator = nodelist.iterator();
+		int nref = 0;
+		while (nodesIterator.hasNext())
+		{
+			Vertex n = (Vertex) nodesIterator.next();
+			if (n == Vertex.outer)
+				continue;
 			MNode1D ref1d = n.getRef();
 			if (null != ref1d)
 			{
-				refout.writeInt(i);
+				double [] p = n.getUV();
+				out.writeDouble(p[0]);
+				out.writeDouble(p[1]);
 				refout.writeInt(ref1d.getLabel());
+				nodeIndex.put(n, i);
+				i++;
 				nref++;
 			}
-			i++;
 		}
 		out.close();
 		refout.close();
@@ -162,7 +182,7 @@ public class MeshWriter
 			dimensionElement.appendChild(document.createTextNode("2"));
 			subMeshElement.appendChild(dimensionElement);
 			
-			subMeshElement.appendChild(writeObjectNodes(document, nodelist.iterator(), nodesFile, refFile, xmlDir, nodeIndex));
+			subMeshElement.appendChild(writeObjectNodes(document, nodelist, nodesFile, refFile, xmlDir, nodeIndex));
 			subMeshElement.appendChild(writeObjectTriangles(document, trianglelist.iterator(), trianglesFile, xmlDir, nodeIndex));
 			meshElement.appendChild(subMeshElement);
 			jcaeElement.appendChild(meshElement);
