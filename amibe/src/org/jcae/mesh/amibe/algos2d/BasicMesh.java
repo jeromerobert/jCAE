@@ -348,7 +348,8 @@ public class BasicMesh
 				}
 			}
 			//  Overwrite the last value to close the wire
-			result.set(result.size()-1, p20);
+			if (result.size() > 0)
+				result.set(result.size()-1, p20);
 		}
 		
 		return (Vertex []) result.toArray(new Vertex[result.size()]);
