@@ -359,6 +359,29 @@ public class Mesh
 				out.println("");
 			}
 			out.println("    -1");
+			out.println("    -1");
+			out.println("  2414");
+			out.println("         1");
+			out.println("Normals");
+			out.println("         1");
+			out.println("NONE\nNONE\nNONE\nNONE\nNONE");
+			out.println("         1         1         2        95         4         3");
+			out.println("         1");
+			out.println("         1");
+			out.println("          0.0");
+			out.println("          0.0");
+			for(Iterator it=nodeset.iterator();it.hasNext();)
+			{
+				Vertex node = (Vertex) it.next();
+				if (node == Vertex.outer)
+					continue;
+				p3 = node.getNormal();
+				if (p3[0] == 0.0 && p3[1] == 0.0 && p3[2] == 0.0)
+					continue;
+				Integer nodelabel =  (Integer) labels.get(node);
+				out.println(nodelabel.intValue()+" "+p3[0]+" "+p3[1]+" "+p3[2]);
+			}
+			out.println("    -1");
 			out.close();
 		} catch (FileNotFoundException e)
 		{
