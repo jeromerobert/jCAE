@@ -265,11 +265,11 @@ public class OCCDiscretizeCurve3D
 				for (int i = nr - 2; i > 0; i--)
 				{
 					double l1 = Math.sqrt(
-					  (xyz[3*i] - xyz[3*i-3]) * (xyz[3*i] - xyz[3*i-3]) +
+					  (xyz[3*i  ] - xyz[3*i-3]) * (xyz[3*i  ] - xyz[3*i-3]) +
 					  (xyz[3*i+1] - xyz[3*i-2]) * (xyz[3*i+1] - xyz[3*i-2]) +
 					  (xyz[3*i+2] - xyz[3*i-1]) * (xyz[3*i+2] - xyz[3*i-1]));
 					double l2 = Math.sqrt(
-					  (xyz[3*i] - xyz[3*i+3]) * (xyz[3*i] - xyz[3*i+3]) +
+					  (xyz[3*i  ] - xyz[3*i+3]) * (xyz[3*i  ] - xyz[3*i+3]) +
 					  (xyz[3*i+1] - xyz[3*i+4]) * (xyz[3*i+1] - xyz[3*i+4]) +
 					  (xyz[3*i+2] - xyz[3*i+5]) * (xyz[3*i+2] - xyz[3*i+5]));
 					double delta = Math.abs(l2 - l1) / (l1+l2);
