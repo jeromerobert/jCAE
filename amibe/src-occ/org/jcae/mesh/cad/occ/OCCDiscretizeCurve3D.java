@@ -102,6 +102,8 @@ public class OCCDiscretizeCurve3D
 			System.arraycopy(ref.a, 0, newA, numseg, ref.nr);
 		if (nr-numseg-2 > 0)
 			System.arraycopy(a, numseg+2, newA, numseg+ref.nr, nr-numseg-2);
+		a = newA;
+		nr += ref.nr - 2;
 	}
 	
 	public void discretizeNrPoints(int n)
