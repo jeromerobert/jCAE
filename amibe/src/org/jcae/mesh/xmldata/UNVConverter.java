@@ -40,6 +40,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import org.apache.log4j.Logger;
 
 /**
  * Extract groups from the full mesh and write them to a UNV file.
@@ -51,6 +52,7 @@ import org.xml.sax.SAXException;
  */
 public class UNVConverter
 {
+	private static Logger logger=Logger.getLogger(UNVConverter.class);
 	
 	public static class FormatD25_16 extends DecimalFormat
 	{
@@ -358,7 +360,7 @@ public class UNVConverter
 			}
 		}
 	}
-		
+	
 	private int[] readTriangles() throws IOException
 	{
 		File f = getTriaFile();
@@ -528,6 +530,7 @@ public class UNVConverter
 			fc.close();
 			fis.close();
 			clean(bb);
+			logger.info("Total number of nodes: "+count);
 		}
 		
 		/**
@@ -554,6 +557,7 @@ public class UNVConverter
 				}
 			}
 			out.println("    -1");
+			logger.info("Total number of triangles: "+count);
 		}
 		
 		/**
