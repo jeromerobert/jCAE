@@ -393,11 +393,7 @@ public class Vertex
 			return true;
 		
 		return (mesh.compGeom().distance(va3, this, vc1) +
-		        mesh.compGeom().distance(va3, this, vc2) +
-		        mesh.compGeom().distance(va3, this, va3) +
-		        mesh.compGeom().distance(va3, this, this) >
-		        mesh.compGeom().distance(vc1, vc2, vc1) +
-		        mesh.compGeom().distance(vc1, vc2, vc2) +
+		        mesh.compGeom().distance(va3, this, vc2) >
 		        mesh.compGeom().distance(vc1, vc2, va3) +
 		        mesh.compGeom().distance(vc1, vc2, this));
 	}
