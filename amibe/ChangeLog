@@ -1,3 +1,22 @@
+Thu Dec  9 13:53:44 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Vertex.java (inCircleTest3):  If a triangle is too flat, swap edge even if triangles are then not Delaunay, it is worth avoiding flat triangles in 2D space.
+
+	* src/org/jcae/mesh/Mesher.java:  Each 1d, 2d and 3d mesh generation can be called individually through -Dorg.jcae.mesh.Mesher.mesh{1,2,3}d command line flags.  The -Dorg.jcae.mesh.Mesher.meshFace flag specifies a unique surface number to be meshed.
+
+	* src/org/jcae/mesh/mesher/ds/MMesh3D.java:  New getNumberOfNodes(), getNumberOfFaces() and getNumberOfGroups() methods.
+
+	* src/org/jcae/mesh/xmldata/MMesh3DWriter.java
+	  src/org/jcae/mesh/xmldata/SubMesh2DWriter.java:  Initialize hashes to their final size in order to prevent costful rehashing.
+
+Tue Dec  7 13:58:20 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/ds/MFace3D.java:  Static allocation of node arrays.
+
+	* src/org/jcae/mesh/xmldata/SubMesh2DReader.java:  By default do not look for free edges in this routine because this is time consuming on large meshes, and is only used with assertions.
+
+	* src/org/jcae/mesh/xmldata:  Buffered I/O are much faster than unbuffered ones.
+
 Mon Dec  6 14:58:01 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/Mesher.java:  When reading .igs or .step files, a .brep file is first written so that only brep files are considered later.  Previously this converted file had a .brep extension, it is replaced by .tmp.brep to minimize name clashes.
