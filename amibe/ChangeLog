@@ -1,3 +1,9 @@
+Fri Feb  4 16:09:52 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/cad/CADGeomSurface.java
+	  src-occ/org/jcae/mesh/cad/occ/OCCGeomSurface.java:  New d2U(), d2V() and dUV() methods.  Requires an up-to-date libOccJava.
+	* src/org/jcae/mesh/amibe/ds/Mesh.java:  New writeGeom() method.
+
 Mon Jan 31 11:53:03 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/metrics/Matrix2D.java:  Change bound value for testing singular matrix from 1.e-10 to 1.e-40.  This value should certainly be modified again and depend upon discretization length.
