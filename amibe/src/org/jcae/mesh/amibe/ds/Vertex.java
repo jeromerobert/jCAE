@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.util.LongLong;
 import org.jcae.mesh.amibe.ds.tools.*;
 import org.jcae.mesh.amibe.metrics.Metric2D;
+import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.cad.*;
 import java.util.Random;
 
@@ -40,6 +41,9 @@ public class Vertex
 	//  Metrics at this location
 	private Metric2D m2 = null;
 	
+	//  Link to the geometrical node, if any
+	private MNode1D ref1d = null;
+	
 	//  These 2 integer arrays are temporary workspaces
 	private static final int [] i0 = new int[2];
 	private static final int [] i1 = new int[2];
@@ -51,9 +55,30 @@ public class Vertex
 		param[1] = v;
 	}
 	
+	public Vertex(MNode1D pt, CADGeomCurve2D C2d, CADFace F)
+	{
+		ref1d = pt;
+		if (null != C2d)
+			param = C2d.value(pt.getParameter());
+		else
+		{
+			CADVertex V = pt.getRef();
+			if (null == V)
+				throw new java.lang.RuntimeException("Error in Vertex()");
+			param = V.parameters(F);
+		}
+	}
+	
 	public double [] getUV ()
 	{
 		return param;
+	}
+	
+	public MNode1D getRef()
+	{
+		if (null == ref1d)
+			return null;
+		return ref1d.getMaster();
 	}
 	
 	public void addToQuadTree()
@@ -406,7 +431,10 @@ public class Vertex
 	{
 		if (this == Vertex.outer)
 			return "outer";
-		return "UV: "+param[0]+" "+param[1];
+		String r = "UV: "+param[0]+" "+param[1];
+		if (ref1d != null)
+			r += " ref1d: "+ref1d;
+		return r;
 	}
 	
 }

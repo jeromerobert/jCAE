@@ -21,6 +21,7 @@ package org.jcae.mesh.amibe.ds;
 
 import org.jcae.mesh.amibe.util.QuadTree;
 import org.jcae.mesh.amibe.ds.tools.*;
+import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.cad.*;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -39,7 +40,7 @@ public class Mesh
 {
 	private static Logger logger=Logger.getLogger(Mesh.class);
 	private ArrayList triangleList = new ArrayList();
-	public QuadTree quadtree;
+	public QuadTree quadtree = null;
 	
 	//  Topological face on which mesh is applied
 	private CADFace face;
@@ -48,16 +49,26 @@ public class Mesh
 	//  efficiebcy reason
 	private CADGeomSurface surface;
 	
+	//  Ninimal topological edge length
+	private double epsilon = 1.;
+	
 	//  Stack of methods to compute geometrical values
-	private Stack compGeomStack;
+	private Stack compGeomStack = new Stack();
 	
 	public Mesh()
 	{
-		quadtree = null;
 		Vertex.mesh = this;
 		Triangle.outer = new Triangle();
 		Vertex.outer = null;
-		compGeomStack = new Stack();
+	}
+	
+	public Mesh(CADFace f)
+	{
+		Vertex.mesh = this;
+		Triangle.outer = new Triangle();
+		Vertex.outer = null;
+		face = f;
+		surface = face.getGeomSurface();
 	}
 	
 	public Mesh(QuadTree q)
@@ -67,7 +78,6 @@ public class Mesh
 		Triangle.outer = new Triangle();
 		double [] p = q.center();
 		Vertex.outer = new Vertex(p[0], p[1]);
-		compGeomStack = new Stack();
 	}
 	
 	public void initQuadTree(double umin, double umax, double vmin, double vmax)
@@ -81,6 +91,12 @@ public class Mesh
 	{
 		face = (CADFace) f;
 		surface = face.getGeomSurface();
+		double [] bb = face.boundingBox();
+		epsilon = Math.max(Math.sqrt(
+			(bb[0] - bb[3]) * (bb[0] - bb[3]) +
+			(bb[1] - bb[4]) * (bb[1] - bb[4]) +
+			(bb[2] - bb[5]) * (bb[2] - bb[5])
+		) / 1000.0, Metric2D.getLength() / 100.0);
 	}
 	
 	/**
@@ -101,6 +117,11 @@ public class Mesh
 	public CADGeomSurface getGeomSurface()
 	{
 		return surface;
+	}
+	
+	public void scaleTolerance(double scale)
+	{
+		epsilon *= scale;
 	}
 	
 	public OTriangle bootstrap(Vertex v0, Vertex v1, Vertex v2)
@@ -214,23 +235,6 @@ public class Mesh
 		}
 	}
 	
-	public boolean checkInvertedTriangles()
-	{
-		int ncount = 0;
-		for (Iterator it = triangleList.iterator(); it.hasNext(); )
-		{
-			Triangle t = (Triangle) it.next();
-			if (t.vertex[0] == Vertex.outer || t.vertex[1] == Vertex.outer || t.vertex[2] == Vertex.outer)
-				continue;
-			OTriangle ot = new OTriangle(t, 0);
-			if (ot.get2Area() <= 40L)
-				ncount++;
-		}
-		if (ncount > 0)
-			System.out.println("Nr inverted triangles: "+ncount);
-		return (ncount == 0);
-	}
-	
 	public void writeUNV(String file)
 	{
 		String cr=System.getProperty("line.separator");
@@ -340,6 +344,52 @@ public class Mesh
 	public Calculus compGeom()
 	{
 		return (Calculus) compGeomStack.peek();
+	}
+	
+	/**
+	 * Checks whether a topological edge is too small to be considered.
+	 *
+	 * @param te   the topological edge to measure.
+	 * @return <code>true</code> if this edge is too small to be considered,
+	 *         <code>false</code> otherwise.
+	 */
+	public boolean tooSmall(CADEdge te)
+	{
+		if (te.isDegenerated())
+		{
+			CADVertex [] v = te.vertices();
+			return (v[0] != v[1]);
+		}
+		CADGeomCurve3D c3d = CADShapeBuilder.factory.newCurve3D(te);
+		if (c3d == null)
+			throw new java.lang.RuntimeException("Curve not defined on edge, but this edge is not degenrerated.  Something must be wrong.");
+		double range [] = c3d.getRange();
+		
+		//  There seems to be a bug woth OpenCascade, we had a tiny
+		//  edge whose length was miscomputed, so try a workaround.
+		if (Math.abs(range[1] - range[0]) < 1.e-7 * Math.max(1.0, Math.max(Math.abs(range[0]), Math.abs(range[1]))))
+			return true;
+		
+		double edgelen = c3d.length();
+		if (edgelen > epsilon)
+			return false;
+		logger.info("Edge "+te+" is ignored because its length is too small: "+edgelen+" <= "+epsilon);
+		return true;
+	}
+	
+	public boolean isValid()
+	{
+		for (Iterator it = triangleList.iterator(); it.hasNext(); )
+		{
+			Triangle t = (Triangle) it.next();
+			if (t.vertex[0] == t.vertex[1] || t.vertex[1] == t.vertex[2] || t.vertex[2] == t.vertex[0])
+				return false;
+			if (t.vertex[0] == Vertex.outer || t.vertex[1] == Vertex.outer || t.vertex[2] == Vertex.outer)
+				continue;
+			if (t.vertex[0].onLeft(t.vertex[1], t.vertex[2]) < 0L)
+				return false;
+		}
+		return true;
 	}
 	
 }

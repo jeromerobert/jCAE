@@ -28,6 +28,8 @@ import org.jcae.mesh.mesher.algos1d.UniformLength;
 import org.jcae.mesh.mesher.ds.*;
 import org.jcae.mesh.mesher.metrics.*;
 import org.jcae.mesh.mesher.InitialTriangulationException;
+import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.algos2d.BasicMesh;
 import org.jcae.mesh.xmldata.*;
 import org.jcae.mesh.cad.*;
 
@@ -104,31 +106,23 @@ public class Mesher
 					continue;
 				logger.info("Meshing face " + iFace);
 // F.writeNative("face."+iFace+".brep");
-				SubMesh2D submesh = new SubMesh2D(F);
+				Mesh mesh = new Mesh(F); 
 				int nTry = 0;
 				while (nTry < nTryMax)
 				{
 					try
 					{
-						submesh.pushCompGeom(2);
-						submesh.pushCompGeom(3);
-						submesh.init(mesh1D);
-// submesh.writeUNV("2d.unv.gz");
-						submesh.popCompGeom(3);
-						submesh.popCompGeom(2);
-						
-						submesh.pushCompGeom(3);
+						new BasicMesh(mesh, mesh1D).compute();
 						xmlFile = "jcae2d."+iFace;
-						SubMesh2DWriter.writeObject(submesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
-						submesh.popCompGeom(3);
+						MeshWriter.writeObject(mesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
 					}
 					catch(Exception ex)
 					{
 						if (ex instanceof InitialTriangulationException)
 						{
 							logger.warn("Face "+iFace+" cannot be triangulated, trying again with a larger tolerance...");
-							submesh = new SubMesh2D(F);
-							submesh.scaleTolerance(10.);
+							mesh = new Mesh(F);
+							mesh.scaleTolerance(10.);
 							nTry++;
 							continue;
 						}

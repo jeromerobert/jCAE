@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.tools.*;
+import java.util.ArrayList;
 
 /**
  * Quadtree structure to make 2D algorithms more efficient.
@@ -468,6 +469,33 @@ public class QuadTree
 		return true;
 	}
 	
+	private final class getAllVerticesProcedure implements QuadTreeProcedure
+	{
+		public ArrayList nodelist = null;
+		public getAllVerticesProcedure(int capacity)
+		{
+			nodelist = new ArrayList(capacity);
+		}
+		public final int action(Object o, int s, int i0, int j0)
+		{
+			QuadTreeCell self = (QuadTreeCell) o;
+			if (self.nItems > 0)
+			{
+				for (int i = 0; i < self.nItems; i++)
+					nodelist.add(self.subQuad[i]);
+			}
+			return 0;
+		}
+	}
+	
+	public ArrayList getAllVertices(int capacity)
+	{
+		QuadTreeCell current = root;
+		getAllVerticesProcedure gproc = new getAllVerticesProcedure(capacity);
+		deambulate(gproc);
+		return gproc.nodelist;
+	}
+	
 	//  Similar to walk() but do not maintain i0,j0
 	public boolean deambulate(QuadTreeProcedure proc)
 	{
@@ -500,20 +528,23 @@ public class QuadTree
 			}
 			else
 			{
-				while (null == quadStack[l-1].subQuad[posStack[l]])
+				while (l > 0)
 				{
 					posStack[l]++;
 					if (posStack[l] == 4)
 					{
 						s <<= 1;
 						l--;
-						if (l == 0)
-							return true;
 					}
+					else if (null != quadStack[l-1].subQuad[posStack[l]])
+							break;
 				}
+				if (l == 0)
+					break;
 				quadStack[l] = (QuadTreeCell) quadStack[l-1].subQuad[posStack[l]];
 			}
 		}
+		return true;
 	}
 	
 }
