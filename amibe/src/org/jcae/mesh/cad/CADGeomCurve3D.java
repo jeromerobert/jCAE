@@ -24,49 +24,54 @@ package org.jcae.mesh.cad;
  */
 public interface CADGeomCurve3D
 {
-    /**
-     * Return a point on this curve
-     * @param p The paramater
-     * @return an array {x, y, z}
-     */    
+	/**
+	 * Return a point on this curve
+	 * @param p The paramater
+	 * @return an array {x, y, z}
+	 */
 	public double [] value(double p);
-    /**
-     * Return the range of the parametrization of this edge
-     * @return an array {pMin, pMax}
-     */    
+	
+	/**
+	 * Return the range of the parametrization of this edge
+	 * @return an array {pMin, pMax}
+	 */
 	public double [] getRange();
-    
-    
-    /**
-     * Discretize this curve
-     * @param maxlen Maximum length of created arc
-     */    
+	 
+	/**
+	 * Discretize this curve
+	 * @param maxlen Maximum length of created arc
+	 */
 	public void discretize(double maxlen);
-    /**
-     * Discretize this curve
-     * @param maxlen Maximum length of created arc
-     * @param deflection Maximum deflection
-     */    
+	
+	/**
+	 * Discretize this curve
+	 * @param maxlen Maximum length of created arc
+	 * @param deflection Maximum deflection
+	 */
 	public void discretize(double maxlen, double deflection);
-    /**
-     * Discretize this curve
-     * @param n Number of arc to create
-     */    
+	
+	/**
+	 * Discretize this curve
+	 * @param n Number of arc to create
+	 */
 	public void discretize(int n);
-    /**
-     * Return the number of arc created after discretization
-     * @return Number of arc created after discretization
-     */    
+	
+	/**
+	 * Return the number of arc created after discretization
+	 * @return Number of arc created after discretization
+	 */
 	public int nbPoints();
-    /**
-     * Return the parameter of the created point after discretization
-     * @return The parameter matching this point
-     * @param index Point ID
-     */    
+	
+	/**
+	 * Return the parameter of the created point after discretization
+	 * @return The parameter matching this point
+	 * @param index Point ID
+	 */
 	public double parameter(int index);
-    /**
-     * Return the length of this curve
-     * @return the length of this curve
-     */    
+	
+	/**
+	 * Return the length of this curve
+	 * @return the length of this curve
+	 */
 	public double length();
 }
