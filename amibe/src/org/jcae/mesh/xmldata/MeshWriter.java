@@ -159,7 +159,11 @@ public class MeshWriter
 			File refFile = new File(dir, JCAEXMLData.ref1dFilename);
 			File trianglesFile=new File(dir, JCAEXMLData.triangles2dFilename);
 			ArrayList trianglelist = submesh.getTriangles();
-			ArrayList nodelist = submesh.quadtree.getAllVertices(trianglelist.size() / 2);
+			ArrayList nodelist;
+			if (submesh.quadtree != null)
+				nodelist = submesh.quadtree.getAllVertices(trianglelist.size() / 2);
+			else
+				nodelist = new ArrayList();
 			TObjectIntHashMap nodeIndex=new TObjectIntHashMap(nodelist.size());
 			
 			// Create and fill the DOM

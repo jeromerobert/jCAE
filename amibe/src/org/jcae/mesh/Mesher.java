@@ -134,6 +134,9 @@ public class Mesher
 						else if (ex instanceof InvalidFaceException)
 						{
 							logger.warn("Face "+iFace+" is invalid, skipping...");
+							mesh = new Mesh(F); 
+							xmlFile = "jcae2d."+iFace;
+							MeshWriter.writeObject(mesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
 							break;
 						}
 						logger.warn(ex.getMessage());
@@ -142,7 +145,12 @@ public class Mesher
 					break;
 				}
 				if (nTry == nTryMax)
+				{
 					logger.error("Face "+iFace+" cannot be triangulated, skipping...");
+					mesh = new Mesh(F); 
+					xmlFile = "jcae2d."+iFace;
+					MeshWriter.writeObject(mesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
+				}
 			}
 		}
 
