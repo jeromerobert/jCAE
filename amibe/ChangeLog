@@ -1,9 +1,20 @@
+Mon Dec  6 14:06:25 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/cad/occ:  Move to src-occ/org/jcae/mesh/cad/occ
+	  These routines are put into a new jcae-mesherocc.jar archive.
+
 Mon Dec  6 11:58:12 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/cad/occ/OCCShapeBuilder.java:  Read .step files.
 
 	* src/org/jcae/mesh/cad/CADGeomCurve2D.java
 	  src/org/jcae/mesh/cad/occ/OCCGeomCurve2D.java:  New getRange() method.
+
+	* src/org/jcae/mesh/cad/CADShape.java
+	  src/org/jcae/mesh/cad/occ/OCCShape.java:  New writeNative() method to save shape into the native format.
+
+	* src/org/jcae/mesh/Mesher.java
+	  src/org/jcae/mesh/TestMetrics.java:  Replace all references to org.jcae.opencascade.jni routines by generic org.jcae.mesh.cad ones.
 
 Fri Nov 26 15:45:37 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
