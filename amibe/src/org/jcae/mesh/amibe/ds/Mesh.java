@@ -336,10 +336,12 @@ public class Mesh
 			out.println("    -1");
 			out.println("    -1"+cr+"  2412");
 			count =  0;
+			OTriangle ot = new OTriangle();
 			for(Iterator it=triangleList.iterator();it.hasNext();)
 			{
 				Triangle t = (Triangle)it.next();
-				if (t.vertex[0] == Vertex.outer || t.vertex[1] == Vertex.outer || t.vertex[2] == Vertex.outer)
+				ot.bind(t);
+				if (ot.hasAttributes(OTriangle.OUTER))
 					continue;
 				count++;
 				out.println(""+count+"        91         1         1         1         3");
