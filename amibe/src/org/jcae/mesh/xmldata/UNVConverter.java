@@ -129,35 +129,6 @@ public class UNVConverter
 		}
 	}
 	
-	private final static String CR=System.getProperty("line.separator");
-	private final static NumberFormat FORMAT_D25_16=new FormatD25_16();
-	private final static NumberFormat FORMAT_I10=new FormatI10();
-	
-	/** workaround for Bug ID4724038, see
-	 * http://bugs.sun.com/bugdatabase/view_bug.do;:YfiG?bug_id=4724038
-	 */
-	public static void clean(final MappedByteBuffer buffer)
-	{
-		AccessController.doPrivileged(new PrivilegedAction()
-		{
-			public Object run()
-			{
-				try
-							{
-					Method getCleanerMethod = buffer.getClass().getMethod("cleaner", new Class[0]);
-					getCleanerMethod.setAccessible(true);
-					sun.misc.Cleaner cleaner = (sun.misc.Cleaner)getCleanerMethod.invoke(buffer,new Object[0]);
-					if(cleaner!=null)
-						cleaner.clean();
-							}
-				catch(Exception e)
-							{
-					e.printStackTrace();
-							}
-				return null;
-			}
-		});
-	}
 	/**
 	 * A main method for debugging
 	 * @param args
@@ -193,12 +164,42 @@ public class UNVConverter
 		}
 	}
 	
+	private final static String CR=System.getProperty("line.separator");
+	private final static NumberFormat FORMAT_D25_16=new FormatD25_16();
+	private final static NumberFormat FORMAT_I10=new FormatI10();
+	
 	private File directory;
 	private Document document;
 	private int[] groupIds;
 	private int[][] groups;
 	private String[] names;
 	private int numberOfTriangles;
+	
+	/** workaround for Bug ID4724038, see
+	 * http://bugs.sun.com/bugdatabase/view_bug.do;:YfiG?bug_id=4724038
+	 */
+	public static void clean(final MappedByteBuffer buffer)
+	{
+		AccessController.doPrivileged(new PrivilegedAction()
+		{
+			public Object run()
+			{
+				try
+							{
+					Method getCleanerMethod = buffer.getClass().getMethod("cleaner", new Class[0]);
+					getCleanerMethod.setAccessible(true);
+					sun.misc.Cleaner cleaner = (sun.misc.Cleaner)getCleanerMethod.invoke(buffer,new Object[0]);
+					if(cleaner!=null)
+						cleaner.clean();
+							}
+				catch(Exception e)
+							{
+					e.printStackTrace();
+							}
+				return null;
+			}
+		});
+	}
 	
 	/**
 	 * @param directory The directory which contain the jcae3d file
