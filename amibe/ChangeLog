@@ -1,3 +1,8 @@
+Mon Dec  6 14:58:01 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/Mesher.java:  When reading .igs or .step files, a .brep file is first written so that only brep files are considered later.  Previously this converted file had a .brep extension, it is replaced by .tmp.brep to minimize name clashes.
+	* src/org/jcae/mesh/Mesher.java:  Rename load() method into mesh(), make it private and change its signature.
+
 Mon Dec  6 14:06:25 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/cad/occ:  Move to src-occ/org/jcae/mesh/cad/occ

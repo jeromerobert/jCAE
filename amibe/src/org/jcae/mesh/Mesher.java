@@ -35,7 +35,7 @@ import org.jcae.mesh.xmldata.*;
 import org.jcae.mesh.cad.*;
 
 /**
- * This class MeshGen allows to load a file, construct the mesh structure and read mesh hypothesis.
+ * This class Mesher allows to load a file, construct the mesh structure and read mesh hypothesis.
  * Then starts meshing operation.
  * This class allows to set all explicit constraints desired by the user, and to set all implicit constraints linked to 
  * mesher requirement.
@@ -51,7 +51,7 @@ public class Mesher
 	 * @param brepfilename  the filename of the brep file	 
 	 * @param discr  the value of the meshing constraint
 	 */
-	public static void load(String brepfilename, String xmlDir, double discr, double defl)
+	private static MMesh3D mesh(String brepfilename, String xmlDir, double discr, double defl)
 	{
 		//  Declare all variables here
 		MMesh3D mesh3D = new MMesh3D();
@@ -61,10 +61,10 @@ public class Mesher
 		org.jcae.mesh.amibe.metrics.Metric2D.setLength(discr);
 		org.jcae.mesh.amibe.metrics.Metric3D.setDeflection(defl);
 		MMesh1D mesh1D;
-		//     xmlDir:      absolute path name where XML files are stored
-		//     xmlFile:     basename of the main XML file
-		//     xmlBrepDir:  path to brep file, relative to xmlDir
-		//     brepFile:    basename of the brep file
+		//  xmlDir:      absolute path name where XML files are stored
+		//  xmlFile:     basename of the main XML file
+		//  xmlBrepDir:  path to brep file, relative to xmlDir
+		//  brepFile:    basename of the brep file
 		
 		String brepFile = (new File(brepfilename)).getName();		
 		String xmlFile = "jcae1d";
@@ -169,15 +169,13 @@ public class Mesher
 		
 		xmlFile = "jcae3d";
 		MMesh3DWriter.writeObject(mesh3D, xmlDir, xmlFile, xmlBrepDir);
-		String unvName=brepfilename.substring(0, brepfilename.lastIndexOf('.'))+".unv";
-		mesh3D.writeUNV(unvName);
-		
+		return mesh3D;
 	}
 
 	/**
-	 * main method, reads 2 arguments and calls mesh.MeshGen.load() method
+	 * main method, reads 2 arguments and calls mesh() method
 	 * @param args  an array of String, filename, algorithm type and constraint value
-	 * @see #load
+	 * @see #mesh
 	 */
 	public static void main(String args[])
 	{
@@ -186,19 +184,19 @@ public class Mesher
 			System.out.println("Usage : MeshGen filename output_directory edge_length deflection");
 			System.exit(0);
 		}
-		else
+		String filename=args[0];
+		String unvName=filename.substring(0, filename.lastIndexOf('.'))+".unv";
+		if (filename.endsWith(".step") || filename.endsWith(".igs"))
 		{
-			String filename=args[0];
-			if (filename.endsWith(".step") || filename.endsWith(".igs"))
-			{
-				CADShape shape = CADShapeBuilder.factory.newShape(filename);
-				filename = filename.substring(0, filename.lastIndexOf('.')) + ".brep";
-				shape.writeNative(filename);
-			}
-			String xmlDir = args[1];
-			Double discr=new Double(args[2]);
-			Double defl=new Double(args[3]);
-			load(filename, xmlDir, discr.doubleValue(), defl.doubleValue());	
+			CADShape shape = CADShapeBuilder.factory.newShape(filename);
+			filename = filename.substring(0, filename.lastIndexOf('.')) + ".tmp.brep";
+			shape.writeNative(filename);
 		}
+		String xmlDir = args[1];
+		Double discr=new Double(args[2]);
+		Double defl=new Double(args[3]);
+		MMesh3D mesh3D = mesh(filename, xmlDir, discr.doubleValue(), defl.doubleValue());	
+		mesh3D.writeUNV(unvName);
+		
 	}
 }
