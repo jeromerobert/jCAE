@@ -304,6 +304,92 @@ public class MMesh3D
 		}
 	}
 	
+	public void writeMESH(String file)
+	{
+		String cr=System.getProperty("line.separator");
+		PrintWriter out;
+		try {
+			if (file.endsWith(".gz") || file.endsWith(".GZ"))
+				out = new PrintWriter(new GZIPOutputStream(new FileOutputStream(file)));
+			else
+				out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(file)));
+			out.println("MeshVersionFormatted 1\n");
+			out.println("Dimension\n3\n");
+			out.println("Vertices\n"+nodelist.size());
+
+			TObjectIntHashMap labelsN = new TObjectIntHashMap(nodelist.size());
+			int count =  0;
+			for(Iterator it=nodelist.iterator();it.hasNext();)
+			{
+				MNode3D node=(MNode3D) it.next();
+				count++;
+				labelsN.put(node, count);
+				out.println(""+node.getX()+" "+node.getY()+" "+node.getZ()+" 0");
+			}
+			out.println("Triangles\n"+facelist.size());
+			count =  0;
+			for(Iterator it=grouplist.iterator();it.hasNext();)
+			{
+				MGroup3D group=(MGroup3D)it.next();
+				count++;
+				for(Iterator itf=group.getFacesIterator();itf.hasNext();)
+				{
+					MFace3D face=(MFace3D) itf.next();
+					for(Iterator itn=face.getNodesIterator();itn.hasNext();)
+					{
+						MNode3D node=(MNode3D) itn.next();
+						out.print(labelsN.get(node)+" ");
+					}
+					out.println(" "+count);
+				}
+			}
+/*
+			out.println("Normals\n"+facelist.size());
+			double [] v1 = new double[3];
+			double [] v2 = new double[3];
+			double [] v3 = new double[3];
+			for(Iterator it=grouplist.iterator();it.hasNext();)
+			{
+				MGroup3D group=(MGroup3D)it.next();
+				count++;
+				for(Iterator itf=group.getFacesIterator();itf.hasNext();)
+				{
+					MFace3D face=(MFace3D) itf.next();
+					Iterator itn = face.getNodesIterator();
+					MNode3D n1 = (MNode3D) itn.next();       
+					MNode3D n2 = (MNode3D) itn.next();       
+					MNode3D n3 = (MNode3D) itn.next();       
+					double [] x1 = n1.getXYZ();
+					double [] x2 = n2.getXYZ();
+					double [] x3 = n3.getXYZ();
+					for (int i = 0; i < 3; i++)
+					{
+						v1[i] = x2[i] - x1[i];
+						v2[i] = x3[i] - x1[i];
+					}
+					v3[0] = v1[1] * v2[2] - v1[2] * v2[1];
+					v3[1] = v1[2] * v2[0] - v1[0] * v2[2];
+					v3[2] = v1[0] * v2[1] - v1[1] * v2[0];
+					double norm = Math.sqrt(v3[0]*v3[0] + v3[1]*v3[1] + v3[2]*v3[2]);
+					for (int i = 0; i < 3; i++)
+						v3[i] /= norm;
+					out.println(""+v3[0]+" "+v3[1]+" "+v3[2]);
+				}
+			}
+*/
+			out.println("End");
+			out.close();
+		} catch (FileNotFoundException e)
+		{
+			logger.fatal(e.toString());
+			e.printStackTrace();
+		} catch (IOException e)
+		{
+			logger.fatal(e.toString());
+			e.printStackTrace();
+		}
+	}
+	
 	public void removeNode(MNode3D n)
 	{
 		nodelist.remove(n);
