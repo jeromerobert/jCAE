@@ -57,22 +57,24 @@ public class OCCGeomCurve3D implements CADGeomCurve3D
 	public void discretize(double maxlen, double deflection)
 	{
 		if (discret == null)
-			discret = new OCCDiscretizeDeflectionCurve3D();
-		discret.initialize((Adaptor3d_Curve) myCurve, maxlen, deflection, range[0], range[1]);
+			discret = new OCCDiscretizeCurve3D((Adaptor3d_Curve) myCurve, range[0], range[1]);
+		discret.discretizeMaxDeflection(deflection);
+		for (int i = 0; i < discret.nbPoints()-1; i++)
+			discret.discretizeSubsegmentMaxLength(i, maxlen);
 	}
 	
 	public void discretize(double maxlen)
 	{
 		if (discret == null)
-			discret = new OCCDiscretizeCurve3D();
-		discret.initialize((Adaptor3d_Curve) myCurve, maxlen, range[0], range[1]);
+			discret = new OCCDiscretizeCurve3D((Adaptor3d_Curve) myCurve, range[0], range[1]);
+		discret.discretizeMaxLength(maxlen);
 	}
 	
 	public void discretize(int n)
 	{
 		if (discret == null)
-			discret = new OCCDiscretizeCurve3D();
-		discret.initialize((Adaptor3d_Curve) myCurve, n, range[0], range[1]);
+			discret = new OCCDiscretizeCurve3D((Adaptor3d_Curve) myCurve, range[0], range[1]);
+		discret.discretizeNrPoints(n);
 	}
 	
 	public int nbPoints()

@@ -24,12 +24,12 @@ import java.io.File;
 import java.net.URI;
 
 import org.apache.log4j.Logger;
-import org.jcae.mesh.mesher.algos1d.UniformLength;
 import org.jcae.mesh.mesher.ds.*;
 import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.jcae.mesh.amibe.InvalidFaceException;
 import org.jcae.mesh.amibe.metrics.*;
 import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.mesher.algos1d.*;
 import org.jcae.mesh.amibe.algos2d.*;
 import org.jcae.mesh.mesher.algos3d.Fuse;
 import org.jcae.mesh.xmldata.*;
@@ -82,7 +82,13 @@ public class Mesher
 			logger.info("1D mesh");
 			mesh1D = new MMesh1D(shape);
 			mesh1D.setMaxLength(discr);
-			new UniformLength(mesh1D).compute();
+			if (defl <= 0.0)
+				new UniformLength(mesh1D).compute();
+			else
+			{
+				mesh1D.setMaxDeflection(defl);
+				new UniformLengthDeflection(mesh1D).compute();
+			}
 			//  Store the 1D mesh onto disk
 			MMesh1DWriter.writeObject(mesh1D, xmlDir, xmlFile, xmlBrepDir, brepFile);
 		}

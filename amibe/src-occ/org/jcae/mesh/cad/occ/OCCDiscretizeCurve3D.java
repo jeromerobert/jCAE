@@ -30,11 +30,18 @@ public class OCCDiscretizeCurve3D
 	protected int nr = 0;
 	protected double length = -1.0;
 	protected double [] a;
+	protected double start, end;
 	
-	public void initialize(Adaptor3d_Curve myCurve, double len, double start, double end)
+	public OCCDiscretizeCurve3D(Adaptor3d_Curve myCurve, double s, double e)
 	{
-		logger.debug("Initialize curve: "+len+" "+start+" "+end);
 		curve = myCurve;
+		start = s;
+		end = e;
+	}
+	
+	public void discretizeMaxLength(double len)
+	{
+		logger.debug("Discretize with max length: "+len);
 		int nsegments = 10;
 		double [] xyz;
 		while (true)
@@ -77,20 +84,28 @@ public class OCCDiscretizeCurve3D
 			if (nr * 10 < nsegments)
 				break;
 		}
-		logger.debug("Number of points: "+nr);
+		logger.debug("(length) Number of points: "+nr);
 		length = -1.0;
 		adjustAbscissas(xyz);
 	}
 	
-	//  Placeholder
-	public void initialize(Adaptor3d_Curve myCurve, double len, double defl, double start, double end)
+	public void discretizeSubsegmentMaxLength(int numseg, double len)
 	{
-		initialize(myCurve, len, start, end);
+		if (numseg < 0 || numseg >= nr)
+			return;
+		OCCDiscretizeCurve3D ref = new OCCDiscretizeCurve3D(curve, a[numseg], a[numseg+1]);
+		ref.discretizeMaxLength(len);
+		double [] newA = new double[nr+ref.nr-2];
+		if (numseg > 0)
+			System.arraycopy(a, 0, newA, 0, numseg);
+		if (ref.nr > 0)
+			System.arraycopy(ref.a, 0, newA, numseg, ref.nr);
+		if (nr-numseg-2 > 0)
+			System.arraycopy(a, numseg+2, newA, numseg+ref.nr, nr-numseg-2);
 	}
 	
-	public void initialize(Adaptor3d_Curve myCurve, int n, double start, double end)
+	public void discretizeNrPoints(int n)
 	{
-		curve = myCurve;
 		nr = n;
 		int nsegments = n;
 		double [] xyz;
@@ -171,6 +186,67 @@ public class OCCDiscretizeCurve3D
 		}
 		length = -1.0;
 		adjustAbscissas(xyz);
+	}
+	
+	public void discretizeMaxDeflection(double defl)
+	{
+		if (defl <= 0.0 || defl >= 1.0)
+			return;
+		int nsegments = 10;
+		double [] xyz;
+		double [] outer = new double[3];
+		double defl2 = defl * defl;
+		while (true)
+		{
+			nsegments *= 10;
+			a = new double[nsegments+1];
+			xyz = new double[3*(nsegments+1)];
+			double [] oldXYZ = curve.value(start);
+			double [] newXYZ;
+			double abscissa, dist2;
+			nr = 1;
+			a[0] = start;
+			for (int i = 0; i < 3; i++)
+				xyz[i] = oldXYZ[i];
+			for (int ns = 1; ns < nsegments; ns++)
+			{
+				abscissa = start + ns * (end - start) / ((double) nsegments);
+				newXYZ = curve.value(abscissa);
+				dist2 = 
+				  (oldXYZ[0] - newXYZ[0]) * (oldXYZ[0] - newXYZ[0]) +
+				  (oldXYZ[1] - newXYZ[1]) * (oldXYZ[1] - newXYZ[1]) +
+				  (oldXYZ[2] - newXYZ[2]) * (oldXYZ[2] - newXYZ[2]);
+				double [] midcurve = curve.value(0.5*(abscissa + a[nr-1]));
+				outer[0] = (midcurve[1] - oldXYZ[1]) * (newXYZ[2] - oldXYZ[2]) - (midcurve[2] - oldXYZ[2]) * (newXYZ[1] - oldXYZ[1]);
+				outer[1] = (midcurve[2] - oldXYZ[2]) * (newXYZ[0] - oldXYZ[0]) - (midcurve[0] - oldXYZ[0]) * (newXYZ[2] - oldXYZ[2]);
+				outer[2] = (midcurve[0] - oldXYZ[0]) * (newXYZ[1] - oldXYZ[1]) - (midcurve[1] - oldXYZ[1]) * (newXYZ[0] - oldXYZ[0]);
+				double outerNorm2 = outer[0] * outer[0] + outer[1] * outer[1] + outer[2] * outer[2];
+				double middist2 = 
+				  (oldXYZ[0] - midcurve[0]) * (oldXYZ[0] - midcurve[0]) +
+				  (oldXYZ[1] - midcurve[1]) * (oldXYZ[1] - midcurve[1]) +
+				  (oldXYZ[2] - midcurve[2]) * (oldXYZ[2] - midcurve[2]);
+				if (outerNorm2 > middist2 * dist2 * defl2)
+				{
+					a[nr] = abscissa;
+					oldXYZ = newXYZ;
+					xyz[3*nr]   = oldXYZ[0];
+					xyz[3*nr+1] = oldXYZ[1];
+					xyz[3*nr+2] = oldXYZ[2];
+					nr++;
+				}
+			}
+			a[nr] = end;
+			oldXYZ = curve.value(end);
+			xyz[3*nr]   = oldXYZ[0];
+			xyz[3*nr+1] = oldXYZ[1];
+			xyz[3*nr+2] = oldXYZ[2];
+			nr++;
+			//  Stop when there are at least 10 points per segments
+			if (nr * 10 < nsegments)
+				break;
+		}
+		logger.debug("(deflection) Number of points: "+nr);
+		length = -1.0;
 	}
 	
 	private void adjustAbscissas(double [] xyz)
