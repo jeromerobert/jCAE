@@ -643,7 +643,7 @@ public class OTriangle
 	 * @return a handle to (ona) oriented triangle.
 	 * otherwise.
 	 */
-	private final OTriangle swapOTriangle(Vertex a, Vertex n)
+	public final OTriangle swapOTriangle(Vertex a, Vertex n)
 	{
 		Vertex o = origin();
 		Vertex d = destination();
