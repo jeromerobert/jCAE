@@ -74,6 +74,13 @@ public class Vertex
 		return param;
 	}
 	
+	public double [] getNormal ()
+	{
+		CADGeomSurface surface = mesh.getGeomSurface();
+		surface.setParameter(param[0], param[1]);
+		return surface.normal();
+	}
+	
 	public MNode1D getRef()
 	{
 		if (null == ref1d)
