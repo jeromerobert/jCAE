@@ -1,3 +1,8 @@
+Thu Mar 24 10:27:49 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/xmldata/MeshToMMesh3DConvert.java: If a shape is reversed, invert triangles and normals when writing 3D files.
+
 Wed Mar 23 11:07:43 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/metrics/Matrix2D.java (eigenvectors): If matrix is similar to identity, both eigenvectors were equal which caused failures about singular matrices.
