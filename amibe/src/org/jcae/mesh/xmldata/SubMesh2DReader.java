@@ -38,7 +38,7 @@ public class SubMesh2DReader extends JCAEXMLData
 	 * Reads a SubMesh2D instance from a file.
 	 * @param file The name of the XML file
 	 */
-	public static SubMesh2D readObject(String xmlDir, String xmlFile, CADFace F)
+	public static SubMesh2D readObject(String xmlDir, String xmlFile)
 	{
 		SubMesh2D submesh = null;
 		Document document;
@@ -73,7 +73,7 @@ public class SubMesh2DReader extends JCAEXMLData
 				"/jcae/mesh/submesh");
 			Node submeshNodes = xpath.selectSingleNode(submeshElement, "nodes");
 			
-			submesh = new SubMesh2D(F);
+			submesh = new SubMesh2D();
 			int numberOfReferences = Integer.parseInt(
 				xpath.selectSingleNode(submeshNodes, "references/number/text()").getNodeValue());
 			int [] refs = new int[numberOfReferences];

@@ -145,11 +145,8 @@ public class MMesh3D
 	 *
 	 * @param submesh  the <code>SubMesh2D</code> instance to insert.
 	 */
-	public void addSubMesh2D(SubMesh2D submesh, boolean hasLabels)
+	public void addSubMesh2D(SubMesh2D submesh, CADFace F, boolean hasLabels)
 	{
-		CADFace F = (CADFace) submesh.getGeometry();
-		logger.debug("Removing degenerated edges from SubMesh2D...");
-		submesh.removeDegeneratedEdges();
 		HashMap mapNode2DToNode3D = new HashMap();
 		Iterator itn = submesh.getNodesIterator();
 		while (itn.hasNext())

@@ -20,11 +20,8 @@
 
 package org.jcae.mesh.mesher.ds;
 
-import org.jcae.mesh.cad.*;
 import java.util.Iterator;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.io.*;
 import org.apache.log4j.Logger;
 
 /**
@@ -38,74 +35,11 @@ public class SubMesh2D
 {
 	private static Logger logger=Logger.getLogger(SubMesh2D.class);	
 
-	//  Topological face on which mesh is applied
-	private CADFace face;
-	
-	//  The geometrical surface describing the topological face, stored for
-	//  efficiebcy reason
-	private CADGeomSurface surface;
-	
 	//  Set of faces
 	private HashSet faceset = new HashSet();
 	
 	//  Set of nodes
 	private HashSet nodeset = new HashSet();
-	
-	//  Set to false when outer elements are removed
-	public boolean checkInvertedTriangles = false;
-	
-	/**
-	 * Creates an empty mesh bounded to the topological surface.
-	 * Also sets <code>epsilon</code> to the bounding box diagonal 
-	 * over 1000.
-	 *
-	 * @param  F   the topological face to mesh.
-	 */
-	public SubMesh2D(CADFace F)
-	{
-		face = F;
-		surface = face.getGeomSurface();
-	}
-	
-	/**
-	 * Returns the topological face.
-	 *
-	 * @return the topological face.
-	 */
-	public CADShape getGeometry()
-	{
-		return face;
-	}
-	
-	/**
-	 * Returns the geometrical surface.
-	 *
-	 * @return the geometrical surface.
-	 */
-	public CADGeomSurface getGeomSurface()
-	{
-		return surface;
-	}
-	
-	/**
-	 * Returns the set of faces.
-	 *
-	 * @return the set of faces.
-	 */
-	public HashSet getFaces()
-	{
-		return faceset;
-	}
-	
-	/**
-	 * Returns the set of nodes.
-	 *
-	 * @return the set of nodes.
-	 */
-	public HashSet getNodes()
-	{
-		return nodeset;
-	}
 	
 	/**
 	 * Returns an iterator over the set of faces.
@@ -143,125 +77,6 @@ public class SubMesh2D
 		MFace2D f = new MFace2D(n1, n2, n3);
 		faceset.add(f);
 		return f;
-	}
-	
-	/**
-	 * Remove degenerted edges.
-	 */
-	public void removeDegeneratedEdges()
-	{
-	}
-	
-	/**
-	 * Writes current mesh to an UNV file
-	 *
-	 * @param file   UNV file name.
-	 */
-	public void writeUNV(String file)
-	{
-		String cr=System.getProperty("line.separator");
-		PrintWriter out;
-		try {
-			if (file.endsWith(".gz") || file.endsWith(".GZ"))
-				out = new PrintWriter(new java.util.zip.GZIPOutputStream(new FileOutputStream(file)));
-			else
-				out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(file)));
-			out.println("    -1"+cr+"  2411");
-			HashMap labels = new HashMap(nodeset.size());
-			int count =  0;
-			for(Iterator it=nodeset.iterator();it.hasNext();)
-			{
-				MNode2D node=(MNode2D) it.next();
-				count++;
-				Integer label = new Integer(node.getID());
-				labels.put(node, label);
-				out.println(label+"         1         1         1");
-				out.println(""+node.getU()+" "+node.getV()+" 0.0");
-			}
-			out.println("    -1");
-			out.println("    -1"+cr+"  2412");
-			count =  0;
-			for(Iterator it=faceset.iterator();it.hasNext();)
-			{
-				MFace2D face=(MFace2D)it.next();
-				count++;
-				out.println(""+count+"        91         1         1         1         3");
-				for(Iterator itn=face.getNodesIterator();itn.hasNext();)
-				{
-					MNode2D node=(MNode2D) itn.next();
-					Integer nodelabel =  (Integer) labels.get(node);
-					out.print(" "+nodelabel.intValue());
-				}
-				out.println("");
-			}
-			out.println("    -1");
-			out.close();
-		} catch (FileNotFoundException e)
-		{
-			logger.fatal(e.toString());
-			e.printStackTrace();
-		} catch (IOException e)
-		{
-			logger.fatal(e.toString());
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * Writes current mesh to an UNV file
-	 *
-	 * @param file   UNV file name.
-	 */
-	public void writeUNV3D(String file)
-	{
-		String cr=System.getProperty("line.separator");
-		PrintWriter out;
-		try {
-			if (file.endsWith(".gz") || file.endsWith(".GZ"))
-				out = new PrintWriter(new java.util.zip.GZIPOutputStream(new FileOutputStream(file)));
-			else
-				out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(file)));
-			out.println("    -1"+cr+"  2411");
-			HashMap labels = new HashMap(nodeset.size());
-			int count =  0;
-			for(Iterator it=nodeset.iterator();it.hasNext();)
-			{
-				MNode2D node=(MNode2D) it.next();
-				MNode3D n3=new MNode3D(node, surface);
-				count++;
-				//Integer label = new Integer(count);
-				Integer label = new Integer(node.getID());
-				labels.put(node, label);
-				out.println(label+"         1         1         1");
-				out.println(""+n3.getX()+" "+n3.getY()+" "+n3.getZ());
-			}
-			out.println("    -1");
-			out.println("    -1"+cr+"  2412");
-			count =  0;
-			for(Iterator it=faceset.iterator();it.hasNext();)
-			{
-				MFace2D face=(MFace2D)it.next();
-				count++;
-				out.println(""+count+"        91         1         1         1         3");
-				for(Iterator itn=face.getNodesIterator();itn.hasNext();)
-				{
-					MNode2D node=(MNode2D) itn.next();
-					Integer nodelabel =  (Integer) labels.get(node);
-					out.print(" "+nodelabel.intValue());
-				}
-				out.println("");
-			}
-			out.println("    -1");
-			out.close();
-		} catch (FileNotFoundException e)
-		{
-			logger.fatal(e.toString());
-			e.printStackTrace();
-		} catch (IOException e)
-		{
-			logger.fatal(e.toString());
-			e.printStackTrace();
-		}
 	}
 	
 	public String toString()
