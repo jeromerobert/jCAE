@@ -63,9 +63,9 @@ public class OCCDiscretizeCurve3D
 			{
 				abscissa = start + ((double) ns) * delta;
 				dist = Math.sqrt(
-				  (xyz[3*ns-3] - xyz[3*ns  ]) * (xyz[3*ns-3] - xyz[3*ns  ]) +
-				  (xyz[3*ns-2] - xyz[3*ns+1]) * (xyz[3*ns-2] - xyz[3*ns+1]) +
-				  (xyz[3*ns-1] - xyz[3*ns+2]) * (xyz[3*ns-1] - xyz[3*ns+2]));
+				  (xyz[3*nr-3] - xyz[3*ns  ]) * (xyz[3*nr-3] - xyz[3*ns  ]) +
+				  (xyz[3*nr-2] - xyz[3*ns+1]) * (xyz[3*nr-2] - xyz[3*ns+1]) +
+				  (xyz[3*nr-1] - xyz[3*ns+2]) * (xyz[3*nr-1] - xyz[3*ns+2]));
 				if (dist > len)
 				{
 					a[nr] = abscissa;
