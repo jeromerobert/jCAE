@@ -27,6 +27,7 @@ public class OCCDiscretizeCurve3D
 {
 	private static Logger logger=Logger.getLogger(OCCDiscretizeCurve3D.class);
 	protected Adaptor3d_Curve curve = null;
+	// Number of points
 	protected int nr = 0;
 	protected double length = -1.0;
 	protected double [] a;
@@ -93,6 +94,45 @@ public class OCCDiscretizeCurve3D
 		logger.debug("(length) Number of points: "+nr);
 		length = -1.0;
 		adjustAbscissas(xyz, new checkRatioLength());
+	}
+	
+	public void setDiscretization(double [] param)
+	{
+		nr = param.length;
+		a = new double[nr];
+		for (int i = 0; i < nr; i++)
+			a[i] = param[i];
+		length = -1.0;
+	}
+	
+	private void split(int n)
+	{
+		nr = n + 1;
+		a = new double[nr];
+		double delta = (end - start) / ((double) n);
+		for (int i = 0; i < n; i++)
+			a[i] = start + ((double) i) * delta;
+		
+		//  Avoid rounding errors
+		a[n] = end;
+		length = -1.0;
+	}
+	
+	public void splitSubsegment(int numseg, int nrsub)
+	{
+		if (numseg < 0 || numseg >= nr)
+			return;
+		OCCDiscretizeCurve3D ref = new OCCDiscretizeCurve3D(curve, a[numseg], a[numseg+1]);
+		ref.split(nrsub);
+		double [] newA = new double[nr+ref.nr-2];
+		if (numseg > 0)
+			System.arraycopy(a, 0, newA, 0, numseg);
+		if (ref.nr > 0)
+			System.arraycopy(ref.a, 0, newA, numseg, ref.nr);
+		if (nr-numseg-2 > 0)
+			System.arraycopy(a, numseg+2, newA, numseg+ref.nr, nr-numseg-2);
+		a = newA;
+		nr += ref.nr - 2;
 	}
 	
 	public void discretizeSubsegmentMaxLength(int numseg, double len)

@@ -50,11 +50,19 @@ public interface CADGeomCurve3D
 	 */
 	public void discretize(double maxlen, double deflection);
 	
+	public void splitSubsegment(int numseg, int nrsub);
+	
 	/**
 	 * Discretize this curve
-	 * @param n Number of arc to create
+	 * @param n Number of arcs to create
 	 */
 	public void discretize(int n);
+	
+	/**
+	 * Set a discretization
+	 * @param param 1D parameters
+	 */
+	public void setDiscretization(double [] param);
 	
 	/**
 	 * Return the number of arc created after discretization

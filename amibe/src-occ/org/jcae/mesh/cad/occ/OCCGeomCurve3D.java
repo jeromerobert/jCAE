@@ -80,6 +80,20 @@ public class OCCGeomCurve3D implements CADGeomCurve3D
 		discret.discretizeNrPoints(n);
 	}
 	
+	public void splitSubsegment(int numseg, int nrsub)
+	{
+		if (discret == null)
+			discret = new OCCDiscretizeCurve3D((Adaptor3d_Curve) myCurve, range[0], range[1]);
+		discret.splitSubsegment(numseg, nrsub);
+	}
+	
+	public void setDiscretization(double [] param)
+	{
+		if (discret == null)
+			discret = new OCCDiscretizeCurve3D((Adaptor3d_Curve) myCurve, range[0], range[1]);
+		discret.setDiscretization(param);
+	}
+	
 	public int nbPoints()
 	{
 		assert discret != null;
