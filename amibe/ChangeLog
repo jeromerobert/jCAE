@@ -1,3 +1,13 @@
+Mon Jan 10 13:57:24 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java (isDelaunay_isotropic):  Fix test to detect edges which cannot be swapped for geometrical reasons.
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java:  Remove constant bitmaskclear and bitmaskclearAttr arrays.
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java (CheckAndSwap):  Set SWAPPED attribute when swapping an edge.
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java (checkAndSwap):  Do not modify current class instance.
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java
+	  src/org/jcae/mesh/amibe/algos2d/BasicMesh.java:  Test on SWAPPED attribute is moved from OTriangle to BasicMesh.
+	* src/org/jcae/mesh/amibe/algos2d/BasicMesh.java:  Tests for 3D edge swapping were performed onto wrong edges, initial mesh is now much better.
+
 Fri Jan  7 09:50:55 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/metrics/Metric2D.java:  Replace the constructor Metric2D(double,double,double) by a constructor without arguments which returns an identity matrix.
