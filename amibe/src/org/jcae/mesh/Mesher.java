@@ -55,10 +55,6 @@ public class Mesher
 	private static void mesh(String brepfilename, String xmlDir, double discr, double defl, double tolerance)
 	{
 		//  Declare all variables here
-		Metric2D.setLength(discr);
-		Metric3D.setLength(discr);
-		Metric3D.setDeflection(defl);
-		MMesh1D mesh1D;
 		//  xmlDir:      absolute path name where XML files are stored
 		//  xmlFile:     basename of the main XML file
 		//  xmlBrepDir:  path to brep file, relative to xmlDir
@@ -66,6 +62,7 @@ public class Mesher
 		
 		String brepFile = (new File(brepfilename)).getName();		
 		String xmlFile = "jcae1d";
+		MMesh1D mesh1D;
 		
 		URI brepURI=new File(brepfilename).getAbsoluteFile().getParentFile().toURI();
 		URI brepDirURI=new File(xmlDir, "dummy").toURI().relativize(brepURI);
@@ -97,6 +94,8 @@ public class Mesher
 			mesh1D = MMesh1DReader.readObject(xmlDir, xmlFile);
 			shape = mesh1D.getGeometry();
 			mesh1D.setMaxLength(discr);
+			Metric3D.setLength(discr);
+			Metric3D.setDeflection(defl);
 	
 			//  Prepare 2D discretization
 			mesh1D.duplicateEdges();
@@ -116,6 +115,8 @@ public class Mesher
 				if (numFace != 0 && iFace != numFace)
 					continue;
 				logger.info("Meshing face " + iFace+"/"+nrFaces);
+				//  This variable can be modified, thus reset it
+				Metric2D.setLength(discr);
 // F.writeNative("face."+iFace+".brep");
 				Mesh mesh = new Mesh(F); 
 				int nTry = 0;

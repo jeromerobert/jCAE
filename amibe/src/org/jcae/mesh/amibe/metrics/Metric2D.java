@@ -55,13 +55,12 @@ public class Metric2D
 		}
 		double [][] temp = { { 0.0, 0.0 }, { 0.0, 0.0 } };
 		double sym = 0.0;
-		Metric3D m3d = null;
 		Metric3D m3dbis = null;
+		Metric3D m3d = new Metric3D(surf, pt);
 		if (Metric3D.hasLength())
-		{
-			m3d = new Metric3D(surf, pt);
 			m3d.iso();
-		}
+		else
+			m3d.scale(1.0/discr/discr);
 		if (Metric3D.hasDeflection())
 		{
 			m3dbis = new Metric3D(surf, pt);
