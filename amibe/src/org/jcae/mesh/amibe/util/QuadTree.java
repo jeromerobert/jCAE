@@ -251,11 +251,11 @@ public class QuadTree
 		
 		Vertex vQ = (Vertex) current.subQuad[0];
 		Vertex ret = vQ;
-		double retdist = mesh.compGeom().distance(v, vQ);
+		double retdist = mesh.compGeom().distance(v, vQ, v);
 		for (int i = 1; i < current.nItems; i++)
 		{
 			vQ = (Vertex) current.subQuad[i];
-			double d = mesh.compGeom().distance(v, vQ);
+			double d = mesh.compGeom().distance(v, vQ, v);
 			if (d < retdist)
 			{
 				retdist = d;
@@ -302,7 +302,7 @@ public class QuadTree
 				for (int i = 0; i < quadStack[l].nItems; i++)
 				{
 					Vertex vQ = (Vertex) quadStack[l].subQuad[i];
-					double d = mesh.compGeom().distance(v, vQ);
+					double d = mesh.compGeom().distance(v, vQ, v);
 					if (d < dist || dist < 0.0)
 					{
 						dist = d;
@@ -350,7 +350,7 @@ public class QuadTree
 			// errors into account, a better approximation should
 			// be used.
 			i2d = 1.005 * x0[2] * (mesh.compGeom().radius2d(fromVertex));
-			dist = mesh.compGeom().distance(fromVertex, v);
+			dist = mesh.compGeom().distance(fromVertex, v, fromVertex);
 			idist = (int) (dist * i2d);
 			if (idist > Integer.MAX_VALUE/2)
 				idist = Integer.MAX_VALUE/2;
@@ -368,7 +368,7 @@ public class QuadTree
 				for (int i = 0; i < self.nItems; i++)
 				{
 					Vertex vtest = (Vertex) self.subQuad[i];
-					double retdist = mesh.compGeom().distance(fromVertex, vtest);
+					double retdist = mesh.compGeom().distance(fromVertex, vtest, fromVertex);
 					if (retdist < dist)
 					{
 						dist = retdist;
@@ -413,7 +413,7 @@ public class QuadTree
 			double2int(from.getUV(), ij);
 			nearestVertex = v;
 			fromVertex = from;
-			dist = mesh.compGeom().distance(fromVertex, v);
+			dist = mesh.compGeom().distance(fromVertex, v, fromVertex);
 		}
 		public final int action(Object o, int s, int i0, int j0)
 		{
@@ -424,7 +424,7 @@ public class QuadTree
 				for (int i = 0; i < self.nItems; i++)
 				{
 					Vertex vtest = (Vertex) self.subQuad[i];
-					double retdist = mesh.compGeom().distance(fromVertex, vtest);
+					double retdist = mesh.compGeom().distance(fromVertex, vtest, fromVertex);
 					if (retdist < dist)
 					{
 						dist = retdist;
