@@ -104,7 +104,7 @@ public class BasicMesh
 		mesh.initQuadTree(umin, umax, vmin, vmax);
 		//  Initial point insertion sometimes fail on 2D,
 		//  this needs to be investigated.
-		mesh.pushCompGeom(3);
+		mesh.pushCompGeom(2);
 		Vertex firstOnWire = null;
 		{
 			//  Initializes mesh
@@ -148,7 +148,7 @@ public class BasicMesh
 				}
 			}
 		}
-		mesh.popCompGeom(3);
+		mesh.popCompGeom(2);
 		mesh.pushCompGeom(2);
 		logger.debug(" Rebuild boundary edges");
 		ArrayList saveList = new ArrayList();
