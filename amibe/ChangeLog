@@ -1,7 +1,18 @@
+Wed Mar 16 11:26:01 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/util
+	  src/org/jcae/mesh/util: Remove several unused classes.
+
 Wed Mar  9 10:32:43 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/UNVConverter.java: Fix .mesh file output when normals are not written.
 	* src-occ/org/jcae/mesh/cad/occ/OCCDiscretizeCurve3D.java: The deflection factor now really bounds the relative error between segment and arc lengths.
+	* src-occ/org/jcae/mesh/cad/occ/OCCDiscretizeCurve3D.java: Fix discretizeMaxDeflection().
+	* src/org/jcae/mesh/amibe/metrics/Metric2D.java
+	  src/org/jcae/mesh/amibe/metrics/Metric3D.java
+	  src-occ/org/jcae/mesh/cad/occ/OCCGeomCurve3D.java: Allow the length parameter to be null, metrics do then only depend on deflection.
+	* src/org/jcae/mesh/amibe/ds/Mesh.java: If org.jcae.mesh.amibe.ds.Mesh.epsilon property is set, it overrides epsilon definition.
+	* src/org/jcae/mesh/xmldata/UNVConverter.java: Display the number of nodes and triangles when exporting UNV file.
 
 Tue Mar  8 13:42:15 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
