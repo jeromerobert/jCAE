@@ -421,7 +421,13 @@ public class Vertex
 	public Metric2D getMetrics(CADGeomSurface surf)
 	{
 		if (null == m2)
-			m2 = new Metric2D(surf, this);
+		{
+			Calculus curr = mesh.compGeom();
+			if (curr instanceof Calculus2D)
+				m2 = new Metric2D();
+			else
+				m2 = new Metric2D(surf, this);
+		}
 		return m2;
 	}
 	
