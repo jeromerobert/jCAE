@@ -221,40 +221,100 @@ public class Mesher
 		}
 	}
 
+	static public boolean deleteDirectory(File path, File avoid)
+	{
+		if (path.exists())
+		{
+			File[] files = path.listFiles();
+			for (int i = 0; i < files.length; i++)
+			{
+				if (files[i].isDirectory())
+				{
+					deleteDirectory(files[i], avoid);
+				} else
+				{
+					if(!files[i].equals(avoid))
+						files[i].delete();
+				}
+			}
+		}
+		return (path.delete());
+	}
 	/**
 	 * main method, reads 2 arguments and calls mesh() method
-	 * @param args  an array of String, filename, algorithm type and constraint value
+	 * @param args an array of String, filename, algorithm type and constraint
+	 * value
 	 * @see #mesh
 	 */
 	public static void main(String args[])
 	{
-		if (args.length < 2 || args.length > 4)
+		try
 		{
-			System.out.println("Usage : Mesher filename output_directory edge_length deflection");
-			System.exit(0);
+			if (args.length < 2 || args.length > 4)
+			{
+				System.out.println("Usage : Mesher filename output_directory edge_length deflection");
+				System.exit(0);
+			}
+			String filename=args[0];
+			String unvName=System.getProperty("org.jcae.mesh.unv.name");
+			
+			if(unvName==null)
+				unvName=filename.substring(0, filename.lastIndexOf('.'))+".unv";
+			
+			if (filename.endsWith(".step") || filename.endsWith(".stp") || filename.endsWith(".igs"))
+			{
+				CADShape shape = CADShapeBuilder.factory.newShape(filename);
+				filename = filename.substring(0, filename.lastIndexOf('.')) + ".tmp.brep";
+				shape.writeNative(filename);
+			}
+			
+			//Init xmlDir
+			String xmlDir;
+			if(Boolean.getBoolean("org.jcae.mesh.tmpDir.auto"))
+			{
+				File f=File.createTempFile("jcae","");
+				f.delete();
+				f.mkdirs();
+				xmlDir=f.getPath();
+			}
+			else
+			{
+				xmlDir = args[1];
+			}
+			
+			//Do some checks on xmlDir
+			File xmlDirF=new File(xmlDir);
+			xmlDirF.mkdirs();
+			if(!xmlDirF.exists() || !xmlDirF.isDirectory())
+			{
+				System.out.println("Cannot write to "+xmlDir);
+				return;
+			}
+			
+			Double discr=new Double(args[2]);
+			Double defl=new Double(args[3]);
+			Double tolerance=new Double(System.getProperty("org.jcae.mesh.tolerance", "-1.0"));
+			mesh(filename, xmlDir, discr.doubleValue(), defl.doubleValue(), tolerance.doubleValue());
+			logger.info("Exporting UNV");
+			
+			if(Boolean.getBoolean("org.jcae.mesh.unv.nogz"))
+				new UNVConverter(xmlDir).writeUNV(unvName);
+			else
+				new UNVConverter(xmlDir).writeUNV(unvName+".gz");
+			logger.info("Exporting MESH");
+			String MESHName=filename.substring(0, filename.lastIndexOf('.'))+".mesh";
+			new UNVConverter(xmlDir).writeMESH(MESHName);
+			
+			if(Boolean.getBoolean("org.jcae.mesh.tmpDir.delete"))
+			{
+				deleteDirectory(new File(xmlDir), new File(unvName));
+			}
+			
+			logger.info("End mesh");
 		}
-		String filename=args[0];
-		String unvName=filename.substring(0, filename.lastIndexOf('.'))+".unv";
-		if (filename.endsWith(".step") || filename.endsWith(".stp") || filename.endsWith(".igs"))
+		catch(Exception ex)
 		{
-			CADShape shape = CADShapeBuilder.factory.newShape(filename);
-			filename = filename.substring(0, filename.lastIndexOf('.')) + ".tmp.brep";
-			shape.writeNative(filename);
+			ex.printStackTrace();
 		}
-		String xmlDir = args[1];
-		Double discr=new Double(args[2]);
-		Double defl=new Double(args[3]);
-		Double tolerance=new Double(System.getProperty("org.jcae.mesh.tolerance", "-1.0"));
-		mesh(filename, xmlDir, discr.doubleValue(), defl.doubleValue(), tolerance.doubleValue());
-		logger.info("Exporting UNV");
-		
-		if(Boolean.getBoolean("org.jcae.mesh.unv.nogz"))
-			new UNVConverter(xmlDir).writeUNV(unvName);
-		else
-			new UNVConverter(xmlDir).writeUNV(unvName+".gz");
-		logger.info("Exporting MESH");
-		String MESHName=filename.substring(0, filename.lastIndexOf('.'))+".mesh";
-		new UNVConverter(xmlDir).writeMESH(MESHName);
-		logger.info("End mesh");
 	}
 }
