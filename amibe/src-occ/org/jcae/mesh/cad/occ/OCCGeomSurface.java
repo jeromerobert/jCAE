@@ -89,6 +89,12 @@ public class OCCGeomSurface implements CADGeomSurface
 		return myLprop.dUV();
 	}
 	
+	public double [] normal()
+	{
+		assert null != myLprop;
+		return myLprop.normal();
+	}
+	
 	public double minCurvature()
 	{
 		assert null != myLprop;
