@@ -22,6 +22,7 @@ package org.jcae.mesh.amibe.ds;
 import org.jcae.mesh.amibe.util.QuadTree;
 import org.jcae.mesh.amibe.ds.tools.*;
 import org.jcae.mesh.amibe.metrics.Metric2D;
+import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.cad.*;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -585,10 +586,7 @@ public class Mesh
 	public boolean tooSmall(CADEdge te)
 	{
 		if (te.isDegenerated())
-		{
-			CADVertex [] v = te.vertices();
-			return (v[0] != v[1]);
-		}
+			return false;
 		CADGeomCurve3D c3d = CADShapeBuilder.factory.newCurve3D(te);
 		if (c3d == null)
 			throw new java.lang.RuntimeException("Curve not defined on edge, but this edge is not degenrerated.  Something must be wrong.");
@@ -604,6 +602,45 @@ public class Mesh
 			return false;
 		logger.info("Edge "+te+" is ignored because its length is too small: "+edgelen+" <= "+epsilon);
 		return true;
+	}
+	
+	/**
+	 * Remove degenerted edges.
+	 */
+	public void removeDegeneratedEdges()
+	{
+		logger.debug("Removing degenerated edges");
+		OTriangle ot = new OTriangle();
+		HashSet removedTriangles = new HashSet();
+		for (Iterator it = triangleList.iterator(); it.hasNext(); )
+		{
+			Triangle t = (Triangle) it.next();
+			if (removedTriangles.contains(t))
+				continue;
+			ot.bind(t);
+			for (int i = 0; i < 3; i++)
+			{
+				ot.nextOTri();
+				if (!ot.hasAttributes(OTriangle.BOUNDARY))
+					continue;
+				MNode1D ref1 = ot.origin().getRef();
+				MNode1D ref2 = ot.destination().getRef();
+				if (ref1 != null && ref2 != null && ref1.getMaster() == ref2.getMaster())
+				{
+					logger.debug("  Collapsing "+ot);
+					removedTriangles.add(ot.getTri());
+					ot.symOTri();
+					removedTriangles.add(ot.getTri());
+					ot.collapse();
+					break;
+				}
+			}
+		}
+		for (Iterator it = removedTriangles.iterator(); it.hasNext(); )
+		{
+			Triangle t = (Triangle) it.next();
+			triangleList.remove(t);
+		}
 	}
 	
 	public boolean isValid()

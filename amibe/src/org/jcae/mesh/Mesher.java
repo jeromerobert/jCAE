@@ -117,6 +117,7 @@ public class Mesher
 					{
 						new BasicMesh(mesh, mesh1D).compute();
 						new CheckDelaunay(mesh).compute();
+						mesh.removeDegeneratedEdges();
 						xmlFile = "jcae2d."+iFace;
 						MeshWriter.writeObject(mesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
 					}
