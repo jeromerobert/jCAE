@@ -20,22 +20,53 @@
 
 package org.jcae.mesh.xmldata;
 
-import org.jcae.mesh.mesher.ds.*;
-import org.jcae.mesh.cad.*;
-import java.io.*;
-import java.util.Iterator;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.HashSet;
-import org.w3c.dom.*;
-import org.w3c.dom.traversal.NodeIterator;
-import org.apache.xpath.CachedXPathAPI;
 import org.apache.log4j.Logger;
+import org.apache.xpath.CachedXPathAPI;
+import org.jcae.mesh.cad.*;
+import org.jcae.mesh.mesher.ds.MEdge1D;
+import org.jcae.mesh.mesher.ds.MMesh1D;
+import org.jcae.mesh.mesher.ds.MNode1D;
+import org.jcae.mesh.mesher.ds.SubMesh1D;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 
 public class MMesh1DReader
 {
 	private static Logger logger=Logger.getLogger(MMesh1DReader.class);
 	
+	/** Return the first child element of with the given tag name */
+	private static Node getChild(Node e, String tagName)
+	{
+		Node n=e.getFirstChild();
+		while(n!=null)
+		{
+			if(n instanceof Element)
+			{
+				if(tagName.equals(n.getNodeName()))
+				{
+					return n;
+				}
+			}			
+			n=n.getNextSibling();
+		}		
+		return null;
+	}
+	
+	private static int getReferenceNumber(Node nodeElement)
+	{
+		Node ref=getChild(nodeElement, "references");
+		Node num=getChild(ref, "number");
+		return Integer.parseInt(num.getFirstChild().getNodeValue());
+	}
 	/**
 	 * Write the current object to a XML file and binary files. The XML file
 	 * have links to the binary files.
@@ -97,10 +128,8 @@ public class MMesh1DReader
 				submesh.getNodes().clear();
 				submesh.getEdges().clear();
 				Node submeshElement = submeshList.item(iEdge-1);
-				Node submeshNodes = xpath.selectSingleNode(submeshElement, "nodes");
-				
-				int numberOfReferences = Integer.parseInt(
-					xpath.selectSingleNode(submeshNodes, "references/number/text()").getNodeValue());
+				Node submeshNodes = getChild(submeshElement, "nodes");				
+				int numberOfReferences =  getReferenceNumber(submeshNodes);
 				int [] refs = new int[2*numberOfReferences];
 				for (i=0; i < 2*numberOfReferences; i+=2)
 				{
@@ -109,7 +138,7 @@ public class MMesh1DReader
 				}
 				
 				int numberOfNodes = Integer.parseInt(
-					xpath.selectSingleNode(submeshNodes, "number/text()").getNodeValue());
+					getChild(submeshNodes, "number").getFirstChild().getNodeValue());
 				MNode1D [] nodelist = new MNode1D[numberOfNodes];
 				int iref = 0;
 				for (i=0; i < numberOfNodes; i++)
@@ -130,9 +159,10 @@ public class MMesh1DReader
 					submesh.getNodes().add(nodelist[i]);
 				}
 				
-				Node submeshEdges = xpath.selectSingleNode(submeshElement, "beams");
+				Node submeshEdges = getChild(submeshElement, "beams"); 
 				int numberOfEdges = Integer.parseInt(
-					xpath.selectSingleNode(submeshEdges, "number/text()").getNodeValue());
+					getChild(submeshEdges, "number").getFirstChild().getNodeValue());
+					
 				MEdge1D [] edgelist = new MEdge1D[numberOfEdges];
 				for (i=0; i < numberOfEdges; i++)
 				{
