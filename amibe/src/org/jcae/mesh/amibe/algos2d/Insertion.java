@@ -107,12 +107,16 @@ public class Insertion
 					
 					Vertex last = start;
 					int nrNodes = 0;
+					double lcrit = 1.0;
+					if (l > 4.0)
+						lcrit = l / 4.0;
+						
 					l = 0.0;
 					for (int ns = 0; ns < segments-1; ns++)
 					{
 						l += mesh.compGeom().distance(last, np[ns]);
 						last = np[ns];
-						if (l > 1.0)
+						if (l > lcrit)
 						{
 							triNodes.add(last);
 							l = 0.0;

@@ -1,3 +1,7 @@
+Fri Nov 26 10:35:22 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos2d/Insertion.java:  Do not insert more than 3 nodes on long edges, in order to prevent flat triangles.
+
 Thu Nov 25 15:24:00 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/java3d:  Put back this simple viewer.
