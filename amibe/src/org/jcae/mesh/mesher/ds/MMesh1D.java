@@ -25,7 +25,6 @@ import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.NoSuchElementException;
 import org.apache.log4j.Logger;
 
@@ -46,6 +45,9 @@ public class MMesh1D extends MMesh0D
 	
 	//  Edge map.
 	private HashMap mapTEdgeToSubMesh1D;
+	
+	//  Edge list.
+	private ArrayList listTEdge;
 	
 	/**
 	 * Creates a <code>MMesh1D</code> instance by discretizing all edges
@@ -68,7 +70,8 @@ public class MMesh1D extends MMesh0D
 		if (edges == 0)
 			return;
 		mapTEdgeToSubMesh1D = new HashMap(edges);
-
+		listTEdge = new ArrayList(edges);
+		
 		for (expE.init(shape, CADExplorer.EDGE); expE.more(); expE.next())
 		{
 			CADEdge E = (CADEdge) expE.current();
@@ -81,6 +84,7 @@ public class MMesh1D extends MMesh0D
 			//  By convention, a null value means that E.reversed()
 			//  has already been stored.
 			mapTEdgeToSubMesh1D.put(E, submesh1d);
+			listTEdge.add(E);
 		}
 		assert(isValid());
 	}
@@ -100,7 +104,7 @@ public class MMesh1D extends MMesh0D
 	 */
 	public void updateNodeLabels()
 	{
-		//  Resets all lables
+		//  Resets all labels
 		CADExplorer expE = CADShapeBuilder.factory.newExplorer();
 		HashSet setSeenEdges = new HashSet();
 		for (expE.init(shape, CADExplorer.EDGE); expE.more(); expE.next())
@@ -236,13 +240,13 @@ public class MMesh1D extends MMesh0D
 	}
 	
 	/**
-	 * Returns the set of topological edges.
+	 * Returns the list of topological edges.
 	 *
-	 * @return the set of topological edges.
+	 * @return the list of topological edges.
 	 */
-	public Set getTEdgeSet()
+	public ArrayList getTEdgeList()
 	{
-		return mapTEdgeToSubMesh1D.keySet();
+		return listTEdge;
 	}
 	
 	/**
@@ -286,31 +290,6 @@ public class MMesh1D extends MMesh0D
 	}
 	
 	/**
-	 * Returns an iterator over topological vertices.
-	 *
-	 * @return an iterator over topological vertices.
-	 */
-	public Iterator getRefIterator()
-	{
-		HashSet set = new HashSet();
-		Iterator ite = mapTEdgeToSubMesh1D.values().iterator();
-		while (ite.hasNext())
-		{
-			SubMesh1D submesh1d = (SubMesh1D) ite.next();
-			if (null == submesh1d)
-				continue;
-			Iterator itn = submesh1d.getNodesIterator();
-			while (itn.hasNext())
-			{
-				MNode1D pt = (MNode1D) itn.next();
-				if (null != pt.getRef())
-					set.add(pt.getRef());
-			}
-		}
-		return set.iterator();
-	}
-	
-	/**
 	 * Returns the list of nodes which are linked to a given vertex.
 	 *
 	 * @param V  a topological vertex
@@ -319,7 +298,7 @@ public class MMesh1D extends MMesh0D
 	 */
 	public MNode1D[] getArrayHasRef(CADVertex V)
 	{
-		HashSet set = new HashSet();
+		ArrayList list = new ArrayList();
 		Iterator ite = mapTEdgeToSubMesh1D.values().iterator();
 		while (ite.hasNext())
 		{
@@ -331,11 +310,11 @@ public class MMesh1D extends MMesh0D
 			{
 				MNode1D pt = (MNode1D) itn.next();
 				if (null != pt.getRef() && V.isSame(pt.getRef()))
-					set.add(pt);
+					list.add(pt);
 			}
 		}
-		MNode1D [] toreturn = new MNode1D[set.size()];
-		System.arraycopy(set.toArray(), 0, toreturn, 0, toreturn.length);
+		MNode1D [] toreturn = new MNode1D[list.size()];
+		System.arraycopy(list.toArray(), 0, toreturn, 0, toreturn.length);
 		return toreturn;
 	}
 	

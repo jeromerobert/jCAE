@@ -69,7 +69,7 @@ public class Refine
 			throw new java.lang.IllegalArgumentException("Division number must be > 1");
 
 		/* Explore the shape for each edge */
-		Iterator ite = mesh1d.getTEdgeSet().iterator();
+		Iterator ite = mesh1d.getTEdgeList().iterator();
 		while (ite.hasNext())
 		{
 			CADEdge E = (CADEdge) ite.next();

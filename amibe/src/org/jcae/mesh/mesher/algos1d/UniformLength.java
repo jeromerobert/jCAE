@@ -56,7 +56,7 @@ public class UniformLength
 	{
 		int nbTEdges = 0, nbNodes = 0, nbEdges = 0;
 		/* Explore the shape for each edge */
-		Iterator ite = mesh1d.getTEdgeSet().iterator();
+		Iterator ite = mesh1d.getTEdgeList().iterator();
 		/*  First compute current nbNodes and nbEdges  */
 		while (ite.hasNext())
 		{
@@ -67,7 +67,7 @@ public class UniformLength
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
 		}
-		ite = mesh1d.getTEdgeSet().iterator();
+		ite = mesh1d.getTEdgeList().iterator();
 		while (ite.hasNext())
 		{
 			CADEdge E = (CADEdge) ite.next();
