@@ -250,6 +250,14 @@ public class UNVConverter
 		return new File(directory, a);
 	}
 	
+	private File getNormalFile()
+	{
+		Element xmlNormals = (Element) document.getElementsByTagName(
+			"normals").item(0);
+		String a=((Element)xmlNormals.getElementsByTagName("file").item(0)).getAttribute("location");
+		return new File(directory, a);
+	}
+	
 	/**
 	 * @param the xml element of DOM tree corresponding to the tag "groups".
 	 * @param a group.
@@ -362,7 +370,27 @@ public class UNVConverter
 		return toReturn;
 	}
 	
+	public void writeUNV(String fileName)
+	{
+		writeMesh(fileName, "UNV");
+	}
+	
 	public void writeUNV(PrintStream out) throws ParserConfigurationException, SAXException, IOException
+	{
+		writeMesh(out, "UNV");
+	}
+	
+	public void writeMESH(String fileName)
+	{
+		writeMesh(fileName, "MESH");
+	}
+	
+	public void writeMESH(PrintStream out) throws ParserConfigurationException, SAXException, IOException
+	{
+		writeMesh(out, "MESH");
+	}
+	
+	private void writeMesh(PrintStream out, String meshType) throws ParserConfigurationException, SAXException, IOException
 	{
 		document=XMLHelper.parseXML(new File(directory,"jcae3d"));
 		if(groupIds==null)
@@ -370,15 +398,20 @@ public class UNVConverter
 		readGroups();
 		int[] triangle=readTriangles();
 		TIntIntHashMap amibeNodeToUNVNode=new TIntIntHashMap();
-		writeUNVNodes(out, new TIntHashSet(triangle).toArray(), amibeNodeToUNVNode);
-		/*System.out.println(new TIntArrayList(triangle).toString());
-		System.out.println(new TIntArrayList(amibeNodeToUNVNode.keys()).toString());
-		System.out.println(new TIntArrayList(amibeNodeToUNVNode.getValues()).toString());*/
+		WriteMeshProcedures proc;
+		if (meshType.equals("UNV"))
+			proc = new WriteMeshUNV();
+		else
+			proc = new WriteMeshMESH();
+		proc.writeInit(out);
+		proc.writeNodes(out, new TIntHashSet(triangle).toArray(), amibeNodeToUNVNode);
 		TIntIntHashMap amibeTriaToUNVTria=new TIntIntHashMap();
-		writeUNVTriangles(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
+		proc.writeTriangles(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
+		proc.writeNormals(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
 		triangle=null;
 		amibeNodeToUNVNode=null;
-		writeUNVGroups(out, amibeTriaToUNVTria);
+		proc.writeGroups(out, amibeTriaToUNVTria);
+		proc.writeFinish(out);
 	}
 	
 	/**
@@ -388,7 +421,7 @@ public class UNVConverter
 	 * @throws SAXException
 	 * @throws ParserConfigurationException
 	 */
-	public void writeUNV(String fileName)
+	private void writeMesh(String fileName, String meshType)
 	{
 		try
 		{
@@ -401,7 +434,7 @@ public class UNVConverter
 			else
 				pstream=new PrintStream(bos);
 
-			writeUNV(pstream);
+			writeMesh(pstream, meshType);
 			pstream.close();
 		}
 		catch(IOException e)
@@ -421,89 +454,232 @@ public class UNVConverter
 		}
 	}
 	
-	/**
-	 * @param out
-	 * @param amibeTriaToUNVTria
-	 */
-	private void writeUNVGroups(PrintStream out, TIntIntHashMap amibeTriaToUNVTria)
+	private abstract class WriteMeshProcedures
 	{
-		out.println("    -1"+CR+"  2430");
-		int count =  0;
-		for(int i=0;i<groups.length; i++)
+		public abstract void writeNodes(PrintStream out, int[] nodesID,
+			TIntIntHashMap amibeToUNV) throws IOException;
+		public abstract void writeTriangles(PrintStream out, int[] triangles,
+			TIntIntHashMap amibeNodeToUNVNode,
+			TIntIntHashMap amibeTriaToUNVTria);
+		public void writeInit(PrintStream out)
 		{
-			count++;
-			out.println("1      0         0         0         0         0         0      "+groups[i].length);
-			out.println(names[i]);
-			int countg=0;
-			for(int j=0; j<groups[i].length; j++)
-			{
-				out.print("         8"+FORMAT_I10.format(amibeTriaToUNVTria.get(groups[i][j])));
-				countg++;
-				if ((countg % 4) == 0)
-					out.println("");
-			}
-			if ((countg % 4) !=0 )
-				out.println();
 		}
-		out.println("    -1");
-
+		public void writeFinish(PrintStream out)
+		{
+		}
+		public void writeNormals(PrintStream out, int[] triangles,
+			TIntIntHashMap amibeNodeToUNVNode,
+			TIntIntHashMap amibeTriaToUNVTria) throws IOException
+		{
+		}
+		public void writeGroups(PrintStream out,
+			TIntIntHashMap amibeTriaToUNVTria)
+		{
+		}
 	}
 	
-	private void writeUNVNodes(PrintStream out, int[] nodesID, TIntIntHashMap amibeToUNV) throws IOException
+	private class WriteMeshUNV extends WriteMeshProcedures
 	{
-		File f=getNodeFile();
-		// Open the file and then get a channel from the stream
-		FileInputStream fis = new FileInputStream(f);
-		FileChannel fc = fis.getChannel();
-	
-		// Get the file's size and then map it into memory
-		int sz = (int)fc.size();
-		MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
-		DoubleBuffer nodesBuffer=bb.asDoubleBuffer();
+		public void writeNodes(PrintStream out, int[] nodesID, TIntIntHashMap amibeToUNV) throws IOException
+		{
+			File f=getNodeFile();
+			// Open the file and then get a channel from the stream
+			FileInputStream fis = new FileInputStream(f);
+			FileChannel fc = fis.getChannel();
 		
-		out.println("    -1"+CR+"  2411");
-		int count =  0;
-		double x,y,z;
-		for(int i=0; i<nodesID.length; i++)
-		{
-			int iid=nodesID[i]*3;
-			x=nodesBuffer.get(iid);
-			y=nodesBuffer.get(iid+1);
-			z=nodesBuffer.get(iid+2);
-			count++;
-			amibeToUNV.put(nodesID[i], count);
-			out.println(FORMAT_I10.format(count)+"         1         1         1");
-			out.println(FORMAT_D25_16.format(x)+FORMAT_D25_16.format(y)+FORMAT_D25_16.format(z));
+			// Get the file's size and then map it into memory
+			int sz = (int)fc.size();
+			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
+			DoubleBuffer nodesBuffer=bb.asDoubleBuffer();
+			
+			out.println("    -1"+CR+"  2411");
+			int count =  0;
+			double x,y,z;
+			for(int i=0; i<nodesID.length; i++)
+			{
+				int iid=nodesID[i]*3;
+				x=nodesBuffer.get(iid);
+				y=nodesBuffer.get(iid+1);
+				z=nodesBuffer.get(iid+2);
+				count++;
+				amibeToUNV.put(nodesID[i], count);
+				out.println(FORMAT_I10.format(count)+"         1         1         1");
+				out.println(FORMAT_D25_16.format(x)+FORMAT_D25_16.format(y)+FORMAT_D25_16.format(z));
+			}
+			out.println("    -1");
+			fc.close();
+			fis.close();
+			clean(bb);
 		}
-		out.println("    -1");
-		fc.close();
-		fis.close();
-		clean(bb);
-	}
-	
-	/**
-	 * @param out
-	 * @param amibeNodeToUNVNode
-	 */
-	private void writeUNVTriangles(PrintStream out, int[] triangles,
-		TIntIntHashMap amibeNodeToUNVNode, TIntIntHashMap amibeTriaToUNVTria)
-	{
-		out.println("    -1"+CR+"  2412");
-		int count=0;
-		int triaIndex=0;
-		for(int i=0; i<groups.length; i++)
+		
+		/**
+		 * @param out
+		 * @param amibeNodeToUNVNode
+		 */
+		public void writeTriangles(PrintStream out, int[] triangles,
+			TIntIntHashMap amibeNodeToUNVNode, TIntIntHashMap amibeTriaToUNVTria)
 		{
-			for(int j=0; j<groups[i].length; j++)
+			out.println("    -1"+CR+"  2412");
+			int count=0;
+			int triaIndex=0;
+			for(int i=0; i<groups.length; i++)
+			{
+				for(int j=0; j<groups[i].length; j++)
+				{
+					count++;
+					amibeTriaToUNVTria.put(groups[i][j], count);
+					out.println(FORMAT_I10.format(count)+"        91         1         1         1         3");
+					out.println(
+						FORMAT_I10.format(amibeNodeToUNVNode.get(triangles[triaIndex++]))+
+						FORMAT_I10.format(amibeNodeToUNVNode.get(triangles[triaIndex++]))+
+						FORMAT_I10.format(amibeNodeToUNVNode.get(triangles[triaIndex++])));
+				}
+			}
+			out.println("    -1");
+		}
+		
+		/**
+		 * @param out
+		 * @param amibeTriaToUNVTria
+		 */
+		public void writeGroups(PrintStream out, TIntIntHashMap amibeTriaToUNVTria)
+		{
+			out.println("    -1"+CR+"  2430");
+			int count =  0;
+			for(int i=0;i<groups.length; i++)
 			{
 				count++;
-				amibeTriaToUNVTria.put(groups[i][j], count);
-				out.println(FORMAT_I10.format(count)+"        91         1         1         1         3");
-				out.println(
-					FORMAT_I10.format(amibeNodeToUNVNode.get(triangles[triaIndex++]))+
-					FORMAT_I10.format(amibeNodeToUNVNode.get(triangles[triaIndex++]))+
-					FORMAT_I10.format(amibeNodeToUNVNode.get(triangles[triaIndex++])));
+				out.println("1      0         0         0         0         0         0      "+groups[i].length);
+				out.println(names[i]);
+				int countg=0;
+				for(int j=0; j<groups[i].length; j++)
+				{
+					out.print("         8"+FORMAT_I10.format(amibeTriaToUNVTria.get(groups[i][j])));
+					countg++;
+					if ((countg % 4) == 0)
+						out.println("");
+				}
+				if ((countg % 4) !=0 )
+					out.println();
+			}
+			out.println("    -1");
+		}
+	}
+	
+	private class WriteMeshMESH extends WriteMeshProcedures
+	{
+		public void writeInit(PrintStream out)
+		{
+			out.println("\nMeshVersionFormatted 1\n\nDimension\n3");
+		}
+		public void writeFinish(PrintStream out)
+		{
+			out.println("\nEnd");
+		}
+		public void writeNodes(PrintStream out, int[] nodesID, TIntIntHashMap amibeToUNV) throws IOException
+		{
+			File f=getNodeFile();
+			// Open the file and then get a channel from the stream
+			FileInputStream fis = new FileInputStream(f);
+			FileChannel fc = fis.getChannel();
+			
+			// Get the file's size and then map it into memory
+			int sz = (int)fc.size();
+			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
+			DoubleBuffer nodesBuffer=bb.asDoubleBuffer();
+			
+			int count =  0;
+			double x,y,z;
+			out.println("\nVertices\n"+nodesID.length);
+			for(int i=0; i<nodesID.length; i++)
+			{
+				int iid=nodesID[i]*3;
+				x=nodesBuffer.get(iid);
+				y=nodesBuffer.get(iid+1);
+				z=nodesBuffer.get(iid+2);
+				count++;
+				amibeToUNV.put(nodesID[i], count);
+				out.println(x+" "+y+" "+z+" 0");
+			}
+			fc.close();
+			fis.close();
+			clean(bb);
+		}
+		
+		/**
+		 * @param out
+		 * @param amibeNodeToUNVNode
+		 */
+		public void writeTriangles(PrintStream out, int[] triangles,
+			TIntIntHashMap amibeNodeToUNVNode, TIntIntHashMap amibeTriaToUNVTria)
+		{
+			int count=0;
+			for(int i=0; i<groups.length; i++)
+				count += groups[i].length;
+			
+			out.println("\nTriangles\n"+count);
+			int triaIndex=0;
+			count=0;
+			for(int i=0; i<groups.length; i++)
+			{
+				for(int j=0; j<groups[i].length; j++)
+				{
+					count++;
+					amibeTriaToUNVTria.put(groups[i][j], count);
+					out.println(amibeNodeToUNVNode.get(triangles[triaIndex++])+" "+amibeNodeToUNVNode.get(triangles[triaIndex++])+" "+amibeNodeToUNVNode.get(triangles[triaIndex++])+" "+(i+1));
+				}
 			}
 		}
-		out.println("    -1");
+		
+		public void writeNormals(PrintStream out, int[] triangles,
+			TIntIntHashMap amibeNodeToUNVNode, TIntIntHashMap amibeTriaToUNVTria) throws IOException
+		{
+			int count=0;
+			for(int i=0; i<groups.length; i++)
+				count += groups[i].length;
+			
+			out.println("\nNormals\n"+(3*count));
+			
+			File f=getNormalFile();
+			// Open the file and then get a channel from the stream
+			FileInputStream fis = new FileInputStream(f);
+			FileChannel fc = fis.getChannel();
+			
+			// Get the file's size and then map it into memory
+			int sz = (int)fc.size();
+			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
+			DoubleBuffer normalsBuffer=bb.asDoubleBuffer();
+			
+			double x,y,z;
+			for(int i=0; i<groups.length; i++)
+			{
+				for(int j=0; j<groups[i].length; j++)
+				{
+					int iid = (amibeTriaToUNVTria.get(groups[i][j]) - 1)* 9;
+					for (int k = 0; k < 3; k++)
+					{
+						x=normalsBuffer.get(iid);
+						y=normalsBuffer.get(iid+1);
+						z=normalsBuffer.get(iid+2);
+						out.println(x+" "+y+" "+z);
+						iid += 3;
+					}
+				}
+			}
+			fc.close();
+			fis.close();
+			clean(bb);
+			out.println("\nNormalAtTriangleVertices\n"+(3*count));
+			for(int i=0; i<groups.length; i++)
+			{
+				for(int j=0; j<groups[i].length; j++)
+				{
+					int nT = amibeTriaToUNVTria.get(groups[i][j]);
+					out.println(nT+" 1 "+(3*nT-2));
+					out.println(nT+" 2 "+(3*nT-1));
+					out.println(nT+" 3 "+(3*nT));
+				}
+			}
+		}
 	}
 }
