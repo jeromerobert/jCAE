@@ -148,31 +148,6 @@ public class UniformLengthDeflection
 			range = curve.getRange();
 			curve.discretize(maxlen, deflection);
 			nbPoints = curve.nbPoints();
-			int saveNbPoints =  nbPoints;
-			if (nbPoints <= 2 && !isCircular)
-			{
-				//  Compute the deflection
-				double mid1[], pnt1[], pnt2[];
-
-				mid1 = curve.value((range[0] + range[1])/2.0);
-				pnt1 = V[0].pnt();
-				pnt2 = V[1].pnt();
-				if (Math.pow(mid1[0] - 0.5*(pnt1[0]+pnt2[0]), 2) +
-				    Math.pow(mid1[1] - 0.5*(pnt1[1]+pnt2[1]), 2) +
-				    Math.pow(mid1[2] - 0.5*(pnt1[2]+pnt2[2]), 2) > 0.01 *
-				   (Math.pow(pnt1[0] - pnt2[0], 2) +
-				    Math.pow(pnt1[1] - pnt2[1], 2) +
-				    Math.pow(pnt1[2] - pnt2[2], 2))) {
-					nbPoints=4;
-				} else {
-					nbPoints=2;
-				}
-			}
-			else if (nbPoints <= 3 && isCircular)
-				nbPoints=4;
-
-			if (saveNbPoints != nbPoints)
-				curve.discretize(nbPoints);
 			paramOnEdge = new double[nbPoints];
 			// GCPnts_UniformAbscissa is not very accurate, force paramOnEdge
 			// to be in ascending order.
