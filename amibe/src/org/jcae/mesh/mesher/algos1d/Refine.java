@@ -24,7 +24,6 @@ import org.jcae.mesh.mesher.ds.*;
 import org.jcae.mesh.cad.*;
 import org.jcae.mesh.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
 

@@ -23,7 +23,6 @@ package org.jcae.mesh.amibe.algos2d;
 import org.jcae.mesh.amibe.ds.*;
 import java.util.Iterator;
 import java.util.ArrayList;
-import java.util.HashSet;
 import gnu.trove.PrimeFinder;
 import org.apache.log4j.Logger;
 

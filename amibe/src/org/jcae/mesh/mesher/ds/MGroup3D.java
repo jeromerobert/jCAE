@@ -20,10 +20,9 @@
 
 package org.jcae.mesh.mesher.ds;
 
-import gnu.trove.TObjectIntHashMap;
-import java.io.*;
-import java.util.*;
-import java.util.zip.GZIPOutputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Collection;
 import org.apache.log4j.Logger;
 
 

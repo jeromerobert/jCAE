@@ -21,7 +21,6 @@
 package org.jcae.mesh.mesher.ds;
 
 import org.jcae.mesh.mesher.ds.MNode1D;
-import java.util.HashSet;
 import java.util.HashMap;
 import org.apache.log4j.Logger;
 

@@ -26,7 +26,6 @@ import org.jcae.mesh.amibe.util.*;
 import org.jcae.mesh.mesher.InitialTriangulationException;
 import org.jcae.mesh.cad.*;
 import java.util.Iterator;
-import java.util.HashMap;
 import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
