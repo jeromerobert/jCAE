@@ -56,9 +56,9 @@ public class OCCDiscretizeCurve3D
 			a[0] = start;
 			for (int i = 0; i < 3; i++)
 				xyz[i] = oldXYZ[i];
-			for (int ns = 1; ns < nsegments; ns++)
+			for (int ns = 0; ns < nsegments - 1; ns++)
 			{
-				abscissa = start + ns * (end - start) / ((double) nsegments);
+				abscissa = start + (ns+1) * (end - start) / ((double) nsegments);
 				newXYZ = curve.value(abscissa);
 				dist = Math.sqrt(
 				  (oldXYZ[0] - newXYZ[0]) * (oldXYZ[0] - newXYZ[0]) +
@@ -197,7 +197,6 @@ public class OCCDiscretizeCurve3D
 		int nsegments = 10;
 		double [] xyz;
 		double [] outer = new double[3];
-		double defl2 = defl * defl;
 		while (true)
 		{
 			nsegments *= 10;
@@ -211,11 +210,11 @@ public class OCCDiscretizeCurve3D
 			a[0] = start;
 			for (int i = 0; i < 3; i++)
 				xyz[i] = oldXYZ[i];
-			newAbscissa = start;
-			for (int ns = 1; ns < nsegments; ns++)
+			oldAbscissa = start;
+			double delta = (end - start) / ((double) nsegments);
+			for (int ns = 0; ns < nsegments - 1; ns++)
 			{
-				oldAbscissa = newAbscissa;
-				newAbscissa = start + ns * (end - start) / ((double) nsegments);
+				newAbscissa = start + (ns+1) * delta;
 				newXYZ = curve.value(newAbscissa);
 				dist = Math.sqrt(
 				  (oldXYZ[0] - newXYZ[0]) * (oldXYZ[0] - newXYZ[0]) +
@@ -226,6 +225,7 @@ public class OCCDiscretizeCurve3D
 				{
 					a[nr] = newAbscissa;
 					oldXYZ = newXYZ;
+					oldAbscissa = newAbscissa;
 					xyz[3*nr]   = oldXYZ[0];
 					xyz[3*nr+1] = oldXYZ[1];
 					xyz[3*nr+2] = oldXYZ[2];
