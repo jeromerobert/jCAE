@@ -70,7 +70,7 @@ public class OCCShapeBuilder extends CADShapeBuilder
 	public CADShape newShape (String fileName)
 	{
 		TopoDS_Shape brepShape;
-		if (fileName.endsWith(".step"))
+		if (fileName.endsWith(".step") || fileName.endsWith(".stp"))
 		{
 			STEPControl_Reader aReader = new STEPControl_Reader();
 			aReader.readFile(fileName);
