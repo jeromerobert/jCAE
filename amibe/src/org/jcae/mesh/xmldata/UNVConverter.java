@@ -286,7 +286,8 @@ public class UNVConverter
 		Element elt = null;
 		int i = 0;
 		boolean found = false;
-		while (!found && i < list.getLength())
+		int length=list.getLength();
+		while (!found && i < length)
 		{
 			elt = (Element) list.item(i);
 			int aId = -1;
