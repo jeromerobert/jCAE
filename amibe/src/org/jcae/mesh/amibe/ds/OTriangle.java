@@ -511,13 +511,21 @@ public class OTriangle
 	
 	public int checkAndSwap()
 	{
-		return CheckAndSwap(this, work[0]);
+		//  As CheckAndSwap modifies its arguments, 'this'
+		//  must be protected.
+		//  Huh, there should be a copy operator
+		OTriangle ot1 = new OTriangle();
+		OTriangle ot2 = new OTriangle();
+		nextOTri(this, ot1);
+		ot1.prevOTri();
+		return CheckAndSwap(ot1, ot2);
 	}
 	
 	private int CheckAndSwap(OTriangle newLeft, OTriangle newRight)
 	{
 		int nrSwap = 0;
 		Vertex v = newLeft.apex();
+		assert v != Vertex.outer;
 		Vertex firstVertex = newLeft.origin();
 		while (firstVertex == Vertex.outer)
 		{
