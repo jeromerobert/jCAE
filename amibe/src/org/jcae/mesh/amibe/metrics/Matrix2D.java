@@ -110,22 +110,29 @@ public class Matrix2D
 			ret.data[0][0] = (l1-data[1][1]) * invnorm;
 			ret.data[1][0] = data[1][0] * invnorm;
 		}
+		else if (t1 + t2 == 0.0)
+		{
+			ret.data[0][0] = 1.0;
+			ret.data[1][0] = 0.0;
+		}
 		else
 		{
 			double invnorm = 1.0 / Math.sqrt(t1 + t2);
 			ret.data[0][0] = data[0][1] * invnorm;
 			ret.data[1][0] = (l1-data[0][0]) * invnorm;
 		}
+		if (Math.abs(l1 - l2) < 1.e-10 * (Math.abs(l1) + Math.abs(l2)))
+		{
+			ret.data[0][1] = - ret.data[1][0];
+			ret.data[1][1] = ret.data[0][0];
+			return ret;
+		}
+
 		t1 = (data[0][0]-l2) * (data[0][0]-l2);
 		t2 = data[0][1] * data[0][1];
 		t3 = data[1][0] * data[1][0];
 		t4 = (data[1][1]-l2) * (data[1][1]-l2);
-		if (l1 == l2)
-		{
-			ret.data[0][1] = - ret.data[1][0];
-			ret.data[1][1] = ret.data[0][0];
-		}
-		else if (t1 + t2 < t3 + t4)
+		if (t1 + t2 < t3 + t4)
 		{
 			double invnorm = 1.0 / Math.sqrt(t3 + t4);
 			ret.data[0][1] = (l2-data[1][1]) * invnorm;
