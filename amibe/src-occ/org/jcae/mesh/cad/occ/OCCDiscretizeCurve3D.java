@@ -205,31 +205,26 @@ public class OCCDiscretizeCurve3D
 			xyz = new double[3*(nsegments+1)];
 			double [] oldXYZ = curve.value(start);
 			double [] newXYZ;
-			double abscissa, dist2;
+			double oldAbscissa, newAbscissa;
+			double dist, arcLength;
 			nr = 1;
 			a[0] = start;
 			for (int i = 0; i < 3; i++)
 				xyz[i] = oldXYZ[i];
+			newAbscissa = start;
 			for (int ns = 1; ns < nsegments; ns++)
 			{
-				abscissa = start + ns * (end - start) / ((double) nsegments);
-				newXYZ = curve.value(abscissa);
-				dist2 = 
+				oldAbscissa = newAbscissa;
+				newAbscissa = start + ns * (end - start) / ((double) nsegments);
+				newXYZ = curve.value(newAbscissa);
+				dist = Math.sqrt(
 				  (oldXYZ[0] - newXYZ[0]) * (oldXYZ[0] - newXYZ[0]) +
 				  (oldXYZ[1] - newXYZ[1]) * (oldXYZ[1] - newXYZ[1]) +
-				  (oldXYZ[2] - newXYZ[2]) * (oldXYZ[2] - newXYZ[2]);
-				double [] midcurve = curve.value(0.5*(abscissa + a[nr-1]));
-				outer[0] = (midcurve[1] - oldXYZ[1]) * (newXYZ[2] - oldXYZ[2]) - (midcurve[2] - oldXYZ[2]) * (newXYZ[1] - oldXYZ[1]);
-				outer[1] = (midcurve[2] - oldXYZ[2]) * (newXYZ[0] - oldXYZ[0]) - (midcurve[0] - oldXYZ[0]) * (newXYZ[2] - oldXYZ[2]);
-				outer[2] = (midcurve[0] - oldXYZ[0]) * (newXYZ[1] - oldXYZ[1]) - (midcurve[1] - oldXYZ[1]) * (newXYZ[0] - oldXYZ[0]);
-				double outerNorm2 = outer[0] * outer[0] + outer[1] * outer[1] + outer[2] * outer[2];
-				double middist2 = 
-				  (oldXYZ[0] - midcurve[0]) * (oldXYZ[0] - midcurve[0]) +
-				  (oldXYZ[1] - midcurve[1]) * (oldXYZ[1] - midcurve[1]) +
-				  (oldXYZ[2] - midcurve[2]) * (oldXYZ[2] - midcurve[2]);
-				if (outerNorm2 > middist2 * dist2 * defl2)
+				  (oldXYZ[2] - newXYZ[2]) * (oldXYZ[2] - newXYZ[2]));
+				arcLength = length(oldAbscissa, newAbscissa, 20);
+				if (arcLength - dist > defl * arcLength)
 				{
-					a[nr] = abscissa;
+					a[nr] = newAbscissa;
 					oldXYZ = newXYZ;
 					xyz[3*nr]   = oldXYZ[0];
 					xyz[3*nr+1] = oldXYZ[1];
@@ -335,6 +330,25 @@ public class OCCDiscretizeCurve3D
 	public double parameter(int index)
 	{
 		return a[index-1];
+	}
+	
+	private double length(double start, double end, int nrsub)
+	{
+		assert nr > 0;
+		double [] oldXYZ;
+		double [] newXYZ = curve.value(start);
+		double delta = (end - start) / ((double) nrsub);
+		double l = 0.0;
+		for (int i = 0; i < nrsub; i++)
+		{
+			oldXYZ = newXYZ;
+			newXYZ = curve.value(start + (i+1) * delta);
+			l += Math.sqrt(
+			  (oldXYZ[0] - newXYZ[0]) * (oldXYZ[0] - newXYZ[0]) +
+			  (oldXYZ[1] - newXYZ[1]) * (oldXYZ[1] - newXYZ[1]) +
+			  (oldXYZ[2] - newXYZ[2]) * (oldXYZ[2] - newXYZ[2]));
+		}
+		return l;
 	}
 	
 	public double length()
