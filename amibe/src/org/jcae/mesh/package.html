@@ -1,0 +1,88 @@
+<body>
+<p>This the list of Java environement variables used in the mesher.</p>
+<table BORDER="1">
+  <tbody>
+    <tr>
+      <td><strong>variable <strong></td>
+      <td><strong>default value<strong></td>
+      <td><strong>description<strong></td>
+    </tr>
+    <tr>
+      <td>org.jcae.mesh.Mesher.mesh1d </td>
+      <td>true</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>org.jcae.mesh.Mesher.mesh2d </td>
+      <td>true</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>org.jcae.mesh.Mesher.mesh3d </td>
+      <td>true</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>org.jcae.mesh.Mesher.meshFace </td>
+      <td>0</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>org.jcae.mesh.Mesher.writeNormals </td>
+      <td>false</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>org.jcae.mesh.tolerance </td>
+      <td>-1</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>org.jcae.mesh.amibe.ds.Mesh.epsilon </td>
+      <td>-1.0</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon </td>
+      <td>false</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>org.jcae.mesh.cad </td>
+      <td>org.jcae.mesh.cad.occ.OCCShapeBuilder</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>javax.media.j3d.zFactorAbs </td>
+      <td>20.0f</td>
+      <td>Set polygonOffset for java3d visualisation. See javax.media.j3d.PolygonAttributes javadoc.</td>
+    </tr>
+    <tr>
+      <td>javax.media.j3d.zFactorRel </td>
+      <td>2.0f</td>
+      <td>Set polygonOffsetFactor for java3d visualisation. See javax.media.j3d.PolygonAttributes javadoc.</td>
+    </tr>
+    <tr>
+      <td>org.jcae.mesh.tmpDir.delete </td>
+      <td>false</td>
+      <td>Delete the directory which contain the mesh at the end (never delete the UNV file)</td>
+    </tr>
+    <tr>
+      <td>org.jcae.mesh.tmpDir.auto </td>
+      <td>false</td>
+      <td>Ignore the specified tmp dir and create one with File.createTemp</td>
+    </tr>
+    <tr>
+      <td>org.jcae.mesh.unv.name </td>
+      <td>&lt;brep name&gt;.unv </td>
+      <td>Force the name of the UNV file </td>
+    </tr>
+	<tr>
+		<td>org.jcae.mesh.unv.nogz</td>
+		<td>false</td>
+		<td>If true, the unv file is not gzipped.</td>
+	</tr>
+  </tbody>
+</table>
+<p>The JVM -ea flag can be used to enable or disable runtime assertions. See Java Runtime documentation.</p>
+</body>
