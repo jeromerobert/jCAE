@@ -25,9 +25,6 @@ import java.net.URI;
 
 import org.apache.log4j.Logger;
 import org.jcae.mesh.mesher.algos1d.UniformLength;
-import org.jcae.mesh.mesher.algos2d.InnerRefine;
-import org.jcae.mesh.mesher.algos2d.TargetSize;
-import org.jcae.mesh.mesher.algos2d.SmoothNodes;
 import org.jcae.mesh.mesher.ds.*;
 import org.jcae.mesh.mesher.metrics.*;
 import org.jcae.mesh.mesher.InitialTriangulationException;
@@ -121,10 +118,6 @@ public class Mesher
 						submesh.popCompGeom(2);
 						
 						submesh.pushCompGeom(3);
-						//  When Insertion is called from RefineFace1,
-						//  TargetSize must not be called.
-						//new TargetSize(submesh).compute();				
-						//new SmoothNodes(submesh, 20).compute();
 						xmlFile = "jcae2d."+iFace;
 						SubMesh2DWriter.writeObject(submesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
 						submesh.popCompGeom(3);
