@@ -1,3 +1,19 @@
+Mon Mar 21 16:29:08 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/ds/MMesh0D.java: This class was inefficient when handling meshes with many vertices.
+	* src-occ/org/jcae/mesh/cad/occ/OCCDiscretizeCurve3D.java: Call Adaptor3d_Curve.arrayValues to minimize jni calls.  This requires an up-to-date libOccJava.
+	* src/org/jcae/mesh/mesher/ds/MMesh1D.java: duplicateEdges() had a quadratic complexity with respect to vertex number, it is now linear.
+	* src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/amibe/algos2d/BasicMesh.java: Add a new property org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon.  If set to true, small boundary edges are cumulated to form longer edges.  This is not enabled by default because this breaks structured meshing.
+
+Fri Mar 18 16:06:34 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos2d/BasicMesh.java:  Fix constrained Delaunay meshing, a bug could prevent some faces to be meshed.
+	* src/org/jcae/mesh/amibe/ds/Triangle.java: New centroid() method.
+	* src/org/jcae/mesh/amibe/algos2d/Insertion.java: Try also to insert triangle centroid.
+	* src/org/jcae/mesh/amibe/ds/Mesh.java (forceBoundaryEdge): Prevent endless loop.
+	* src/org/jcae/mesh/amibe/metrics/Metric3D.java (curvIso): Metrics can be computed if only one of the min and max curvatures is null (e.g. on cylinders).  Previously it was not computed and the deflection criterion was not fulfilled.
+
 Thu Mar 17 14:27:23 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/metrics/Metric3D.java
