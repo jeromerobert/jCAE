@@ -135,7 +135,7 @@ public class Metric3D extends Matrix
 	{
 		double cmin = Math.abs(cacheSurf.minCurvature());
 		double cmax = Math.abs(cacheSurf.maxCurvature());
-		if (cmin == Double.NaN || cmin == 0.0 || cmax == Double.NaN || cmax == 0.0)
+		if (Double.isNaN(cmin) || cmin == 0.0 || Double.isNaN(cmax) || cmax == 0.0)
 		{
 			logger.debug("Infinite curvature");
 			return false;
