@@ -890,7 +890,7 @@ public class SubMesh2D
 			if (file.endsWith(".gz") || file.endsWith(".GZ"))
 				out = new PrintWriter(new java.util.zip.GZIPOutputStream(new FileOutputStream(file)));
 			else
-				out = new PrintWriter(new FileOutputStream(file));
+				out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(file)));
 			out.println("    -1"+cr+"  2411");
 			HashMap labels = new HashMap(nodeset.size());
 			int count =  0;
@@ -945,7 +945,7 @@ public class SubMesh2D
 			if (file.endsWith(".gz") || file.endsWith(".GZ"))
 				out = new PrintWriter(new java.util.zip.GZIPOutputStream(new FileOutputStream(file)));
 			else
-				out = new PrintWriter(new FileOutputStream(file));
+				out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(file)));
 			out.println("    -1"+cr+"  2411");
 			HashMap labels = new HashMap(nodeset.size());
 			int count =  0;

@@ -1,3 +1,12 @@
+Fri Dec 10 09:59:05 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/java3d/ComputeEdgesConnectivity.java
+	  src/org/jcae/mesh/java3d/XMLBranchGroup.java
+	  src/org/jcae/mesh/mesher/ds/MMesh3D.java
+	  src/org/jcae/mesh/mesher/ds/SubMesh2D.java
+	  src/org/jcae/mesh/xmldata/XMLHelper.java:  More buffered I/O.
+
 Thu Dec  9 13:53:44 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Vertex.java (inCircleTest3):  If a triangle is too flat, swap edge even if triangles are then not Delaunay, it is worth avoiding flat triangles in 2D space.

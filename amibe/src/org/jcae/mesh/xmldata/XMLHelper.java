@@ -77,7 +77,7 @@ public class XMLHelper
 		throws FileNotFoundException, TransformerConfigurationException, TransformerException
 	{
 		// save the DOM to file
-		StreamResult result = new StreamResult(new FileOutputStream(file));
+		StreamResult result = new StreamResult(new BufferedOutputStream(new FileOutputStream(file)));
 		TransformerFactory transFactory = TransformerFactory.newInstance();
 		Transformer transformer = transFactory.newTransformer();
 		transformer.setOutputProperty("indent", "yes");

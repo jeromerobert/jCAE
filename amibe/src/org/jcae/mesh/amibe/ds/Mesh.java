@@ -27,11 +27,11 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Stack;
+import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.FileOutputStream;
 import java.util.zip.GZIPOutputStream;
 import org.apache.log4j.Logger;
 
@@ -239,7 +239,7 @@ public class Mesh
 			if (file.endsWith(".gz") || file.endsWith(".GZ"))
 				out = new PrintWriter(new java.util.zip.GZIPOutputStream(new FileOutputStream(file)));
 			else
-				out = new PrintWriter(new FileOutputStream(file));
+				out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(file)));
 			out.println("    -1"+cr+"  2411");
 			HashSet nodeset = new HashSet();
 			for(Iterator it=triangleList.iterator();it.hasNext();)

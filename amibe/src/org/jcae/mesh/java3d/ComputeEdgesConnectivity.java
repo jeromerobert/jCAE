@@ -114,7 +114,7 @@ public class ComputeEdgesConnectivity
 		File multiEdgesFile=new File(subDir, "multiEdges.bin");
 		
 		TObjectIntHashMap edges=new TObjectIntHashMap();
-		DataInputStream in = new DataInputStream(new FileInputStream(trianglesFile));	
+		DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(trianglesFile)));
 		Edge e1, e2, e3;
 		int n1, n2, n3;
 		for(int i=0; i<numberOfTriangles; i++)
@@ -134,8 +134,8 @@ public class ComputeEdgesConnectivity
 		in.close();
 		
 		TObjectIntIterator it=edges.iterator();		
-		DataOutputStream outFree=new DataOutputStream(new FileOutputStream(freeEdgesFile));
-		DataOutputStream outMulti=new DataOutputStream(new FileOutputStream(multiEdgesFile));
+		DataOutputStream outFree=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(freeEdgesFile)));
+		DataOutputStream outMulti=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(multiEdgesFile)));
 		DataOutputStream current;
 		
 		while(it.hasNext())

@@ -116,7 +116,7 @@ public class XMLBranchGroup
 		float[] result=new float[number];
 		logger.debug("reading "+number+" double from "+filename);
 		File file=new File(xmlFile.getParent(), filename);
-		DataInputStream in = new DataInputStream(new FileInputStream(file));
+		DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
 		
 		for(int i=0; i<number; i++) 		
 			result[i]=(float)in.readDouble();			
@@ -129,7 +129,7 @@ public class XMLBranchGroup
 		int[] result=new int[number];
 		logger.debug("reading "+number+" int from "+filename);
 		File file=new File(xmlFile.getParent(), filename);
-		DataInputStream in = new DataInputStream(new FileInputStream(file));
+		DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
 		for(int i=0; i<number; i++)
 		{
 			result[i]=in.readInt();

@@ -247,7 +247,7 @@ public class MMesh3D
 			if (file.endsWith(".gz") || file.endsWith(".GZ"))
 				out = new PrintWriter(new GZIPOutputStream(new FileOutputStream(file)));
 			else
-				out = new PrintWriter(new FileOutputStream(file));
+				out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(file)));
 			out.println("    -1"+cr+"  2411");
 			TObjectIntHashMap labelsN = new TObjectIntHashMap(nodelist.size());
 			int count =  0;
