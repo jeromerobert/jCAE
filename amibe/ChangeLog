@@ -1,3 +1,14 @@
+Mon Jan 31 11:53:03 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/metrics/Matrix2D.java:  Change bound value for testing singular matrix from 1.e-10 to 1.e-40.  This value should certainly be modified again and depend upon discretization length.
+	* src/org/jcae/mesh/mesher/algos1d/UniformLengthDeflection.java
+	  src-occ/org/jcae/mesh/cad/occ/OCCDiscretizeDeflectionCurve3D.java:  New files...
+	* src/org/jcae/mesh/cad/CADGeomCurve3D.java
+	  src/org/jcae/mesh/mesher/ds/MMesh1D.java
+	  src-occ/org/jcae/mesh/cad/occ/OCCDiscretizeCurve3D.java
+	  src-occ/org/jcae/mesh/cad/occ/OCCGeomCurve3D.java: ... to implement a naive 1D discretization based on curve deflection.  It is only used to perform tests and is not enabled.
+	* src-occ/org/jcae/mesh/cad/occ/OCCDiscretizeCurve3D.java (adjustAbscissas):  Move points only if their distribution gets improved.
+
 Fri Jan 28 11:13:06 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/metrics/Metric2D.java
