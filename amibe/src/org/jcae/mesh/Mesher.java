@@ -66,7 +66,10 @@ public class Mesher
 		
 		String brepFile = (new File(brepfilename)).getName();		
 		String xmlFile = "jcae1d";
-		URI brepDirURI=new File(xmlDir, "dummy").toURI().relativize(new File(brepfilename).getParentFile().toURI());
+		
+		URI brepURI=new File(brepfilename).getAbsoluteFile().getParentFile().toURI();
+		URI brepDirURI=new File(xmlDir, "dummy").toURI().relativize(brepURI);
+		
 		String xmlBrepDir = new File(brepDirURI).getPath();
 		
 		int iFace = 0;
@@ -205,9 +208,9 @@ public class Mesher
 		logger.info("Exporting UNV");
 
 		if(Boolean.getBoolean("org.jcae.mesh.unv.nogz"))
-			mesh3D.writeUNV(unvName);
+			new UNVConverter(xmlDir).writeUNV(unvName);
 		else
-			mesh3D.writeUNV(unvName+".gz");
+			new UNVConverter(xmlDir).writeUNV(unvName+".gz");
 
 		logger.info("End mesh");
 	}

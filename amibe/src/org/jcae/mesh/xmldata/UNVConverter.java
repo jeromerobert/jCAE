@@ -32,6 +32,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.text.*;
 import java.util.Arrays;
+import java.util.zip.GZIPOutputStream;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -49,33 +50,6 @@ import org.xml.sax.SAXException;
  */
 public class UNVConverter
 {
-	private final static String cr=System.getProperty("line.separator");
-	
-	/** workaround for Bug ID4724038, see
-	 * http://bugs.sun.com/bugdatabase/view_bug.do;:YfiG?bug_id=4724038 
-	 */
-	public static void clean(final MappedByteBuffer buffer)
-	{
-		AccessController.doPrivileged(new PrivilegedAction()
-        {
-            public Object run()
-            {
-            	try
-				{
-            		Method getCleanerMethod = buffer.getClass().getMethod("cleaner", new Class[0]);
-            		getCleanerMethod.setAccessible(true);
-            		sun.misc.Cleaner cleaner = (sun.misc.Cleaner)getCleanerMethod.invoke(buffer,new Object[0]);
-            		if(cleaner!=null)
-            			cleaner.clean();
-				}
-            	catch(Exception e)
-				{
-            		e.printStackTrace();
-				}
-            	return null;
-            }
-        });
-	}
 		
 	public static class FormatD25_16 extends DecimalFormat
 	{		
@@ -120,14 +94,6 @@ public class UNVConverter
 	
 	public static class FormatI10 extends NumberFormat
 	{
-		/* (non-Javadoc)
-		 * @see java.text.NumberFormat#parse(java.lang.String, java.text.ParsePosition)
-		 */
-		public Number parse(String source, ParsePosition parsePosition)
-		{
-			// TODO Auto-generated method stub
-			throw new UnsupportedOperationException();
-		}
 
 		/* (non-Javadoc)
 		 * @see java.text.NumberFormat#format(double, java.lang.StringBuffer, java.text.FieldPosition)
@@ -154,10 +120,44 @@ public class UNVConverter
 			}
 			return toAppendTo;
 		}		
+		/* (non-Javadoc)
+		 * @see java.text.NumberFormat#parse(java.lang.String, java.text.ParsePosition)
+		 */
+		public Number parse(String source, ParsePosition parsePosition)
+		{
+			throw new UnsupportedOperationException();
+		}
 	}
 	
-	final private static NumberFormat FORMAT_D25_16=new FormatD25_16();	
-	final private static NumberFormat FORMAT_I10=new FormatI10();
+	private final static String CR=System.getProperty("line.separator");	
+	private final static NumberFormat FORMAT_D25_16=new FormatD25_16();	
+	private final static NumberFormat FORMAT_I10=new FormatI10();
+	
+	/** workaround for Bug ID4724038, see
+	 * http://bugs.sun.com/bugdatabase/view_bug.do;:YfiG?bug_id=4724038 
+	 */
+	public static void clean(final MappedByteBuffer buffer)
+	{
+		AccessController.doPrivileged(new PrivilegedAction()
+        {
+            public Object run()
+            {
+            	try
+				{
+            		Method getCleanerMethod = buffer.getClass().getMethod("cleaner", new Class[0]);
+            		getCleanerMethod.setAccessible(true);
+            		sun.misc.Cleaner cleaner = (sun.misc.Cleaner)getCleanerMethod.invoke(buffer,new Object[0]);
+            		if(cleaner!=null)
+            			cleaner.clean();
+				}
+            	catch(Exception e)
+				{
+            		e.printStackTrace();
+				}
+            	return null;
+            }
+        });
+	}
 	/**
 	 * A main method for debugging
 	 * @param args
@@ -185,31 +185,53 @@ public class UNVConverter
 			
 		} catch (ParserConfigurationException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SAXException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+	
 	private File directory;
 	private Document document;
 	private int[] groupIds;
 	private int[][] groups;
 	private String[] names;
 	private int numberOfTriangles;
+	
 	/**
-	 * 
+	 * @param directory The directory which contain the jcae3d file
+	 * @param groupIds The list of ids of groups to convert
 	 */
 	public UNVConverter(File directory, int[] groupIds)
 	{
 		this.directory=directory;
 		this.groupIds=groupIds;		
+	}
+
+	/**
+	 * Convert all groups to UNV
+	 * @param directory The directory which contain the jcae3d file
+	 */
+	public UNVConverter(String directory)
+	{
+		this.directory=new File(directory);
+	}
+	
+	private int[] getAllGroupIDs()
+	{
+		Element xmlGroups=(Element) document.getElementsByTagName("groups").item(0);
+		NodeList nl=xmlGroups.getElementsByTagName("group");
+		int[] toReturn=new int[nl.getLength()];
+		for(int i=0; i<toReturn.length; i++)
+		{
+			Element e=(Element) nl.item(i);
+			toReturn[i]=Integer.parseInt(e.getAttribute("id"));
+		}
+		return toReturn;
 	}
 
 	private File getNodeFile()
@@ -344,6 +366,8 @@ public class UNVConverter
 	public void writeUNV(PrintStream out) throws ParserConfigurationException, SAXException, IOException
 	{
 		document=XMLHelper.parseXML(new File(directory,"jcae3d"));
+		if(groupIds==null)
+			groupIds=getAllGroupIDs();
 		readGroups();
 		int[] triangle=readTriangles();
 		TIntIntHashMap amibeNodeToUNVNode=new TIntIntHashMap();		
@@ -359,12 +383,52 @@ public class UNVConverter
 	}
 	
 	/**
+	 * @param fileName The UNV filename. If the name ends with ".gz" it will
+	 * be zlib compressed.
+	 * @throws IOException
+	 * @throws SAXException
+	 * @throws ParserConfigurationException
+	 */
+	public void writeUNV(String fileName)
+	{
+		try
+		{
+			FileOutputStream fos=new FileOutputStream(fileName);
+			BufferedOutputStream bos=new BufferedOutputStream(fos);
+			PrintStream pstream;
+
+			if(fileName.endsWith(".gz"))
+				pstream=new PrintStream(new GZIPOutputStream(bos));
+			else
+				pstream=new PrintStream(bos);
+
+			writeUNV(pstream);
+			pstream.close();
+		}
+		catch(IOException e)
+		{
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+		catch (ParserConfigurationException e)
+		{
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+		catch (SAXException e)
+		{
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+	}
+	
+	/**
 	 * @param out
 	 * @param amibeTriaToUNVTria
 	 */
 	private void writeUNVGroups(PrintStream out, TIntIntHashMap amibeTriaToUNVTria)
 	{
-		out.println("    -1"+cr+"  2430");
+		out.println("    -1"+CR+"  2430");
 		int count =  0;
 		for(int i=0;i<groups.length; i++)
 		{			
@@ -398,7 +462,7 @@ public class UNVConverter
         MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
         DoubleBuffer nodesBuffer=bb.asDoubleBuffer();        
 		
-		out.println("    -1"+cr+"  2411");
+		out.println("    -1"+CR+"  2411");
 		int count =  0;
 		double x,y,z;
 		for(int i=0; i<nodesID.length; i++)
@@ -425,7 +489,7 @@ public class UNVConverter
 	private void writeUNVTriangles(PrintStream out, int[] triangles,
 		TIntIntHashMap amibeNodeToUNVNode, TIntIntHashMap amibeTriaToUNVTria)
 	{
-		out.println("    -1"+cr+"  2412");
+		out.println("    -1"+CR+"  2412");
 		int count=0;
 		int triaIndex=0;
 		for(int i=0; i<groups.length; i++)
