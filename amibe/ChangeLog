@@ -1,3 +1,13 @@
+Thu Jan  6 16:52:33 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/util/LongLong.java:  Fix the add() method, hi part was not incremented if lo became too high; as a consequence, results were not accurate around 0.
+
+Tue Jan  4 11:18:25 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/algos1d/Refine.java
+	  src/org/jcae/mesh/mesher/algos1d/UniformLength.java
+	  src/org/jcae/mesh/mesher/ds/MMesh1D.java:  Replace getTEdgeSet() by getTEdgeList() so that 1D mesh is reproducible.
+
 Wed Dec 22 14:35:01 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Vertex.java:  Fix a bogus test in inCircleTest3(), some triangles were not Delaunay.

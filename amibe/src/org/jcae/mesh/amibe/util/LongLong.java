@@ -64,23 +64,28 @@ public class LongLong
 		if (lo >= (1L << 62))
 		{
 			hi++;
-			lo -= 1L << 62;
+			lo &= pow62m1;
 		}
 		if (minus)
 		{
-			hi = - hi  - 1L;
-			lo = (- lo) & pow62m1;
+			hi = - hi;
+			if (lo > 0L)
+			{
+				hi--;
+				lo = (- lo) & pow62m1;
+			}
 		}
+		assert (lo >= 0L && lo < (1L << 62)) : lo;
 	}
 	
 	public void add(LongLong that)
 	{
 		hi += that.hi;
 		lo += that.lo;
-		if (lo <= 0L)
+		if (lo >= (1L << 62))
 		{
 			hi++;
-			lo = lo & pow62m1;
+			lo &= pow62m1;
 		}
 	}
 	
