@@ -197,6 +197,11 @@ public class Metric3D extends Matrix
 		return (defl > 0.0 && defl < 1.0);
 	}
 	
+	public static boolean hasLength()
+	{
+		return (discr > 0.0);
+	}
+	
 	/**
 	 * Set the desired edge length.
 	 */

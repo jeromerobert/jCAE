@@ -54,15 +54,27 @@ public class Metric2D
 			surf.dinit(2);
 			cacheSurf = surf;
 		}
-		Metric3D m3d = new Metric3D(surf, pt);
-		m3d.iso();
-		//  For efficiency reasons, restrict2D returns a static array
-		double [][] temp = m3d.restrict2D();
-		double sym = 0.5 * (temp[0][1] + temp[1][0]);
+		double [][] temp = { { 0.0, 0.0 }, { 0.0, 0.0 } };
+		double sym = 0.0;
+		Metric3D m3d = null;
+		Metric3D m3dbis = null;
+		if (Metric3D.hasLength())
+		{
+			m3d = new Metric3D(surf, pt);
+			m3d.iso();
+		}
 		if (Metric3D.hasDeflection())
 		{
-			Metric3D m3dbis = new Metric3D(surf, pt);
-			if (m3dbis.curvIso())
+			m3dbis = new Metric3D(surf, pt);
+			if (!m3dbis.curvIso())
+				m3dbis = null;
+		}
+		if (m3d != null)
+		{
+			//  For efficiency reasons, restrict2D returns a static array
+			temp = m3d.restrict2D();
+			sym = 0.5 * (temp[0][1] + temp[1][0]);
+ 			if (m3dbis != null)
 			{
 				//  The curvature metrics is defined, so we can compute
 				//  its intersection with m3d.
@@ -74,6 +86,14 @@ public class Metric2D
 				temp[0][0] = res.data[0][0];
 				temp[1][1] = res.data[1][1];
 				sym = 0.5 * (res.data[0][1] + res.data[1][0]);
+			}
+		}
+		else
+		{
+ 			if (m3dbis != null)
+			{
+				temp = m3dbis.restrict2D();
+				sym = 0.5 * (temp[0][1] + temp[1][0]);
 			}
 		}
 		E = temp[0][0];
