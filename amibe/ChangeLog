@@ -1,3 +1,9 @@
+Thu Nov 25 15:24:00 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/java3d:  Put back this simple viewer.
+
+	* src/org/jcae/mesh/MeshView.java:  A main entry to display jcae3d meshes.
+
 Thu Nov 25 12:30:12 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/cad/occ/OCCShapeBuilder.java
