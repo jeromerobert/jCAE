@@ -601,9 +601,9 @@ public class OTriangle
 		long tp4 = v1.onLeft(vA, apex2);
 		if (Math.abs(tp3) + Math.abs(tp4) < Math.abs(tp1)+Math.abs(tp2) )
 			return true;
-		if (tp1 > 0L && tp4 > 0L)
+		if (tp1 > 0L && tp2 > 0L)
 		{
-			if (tp1 <= 0L || tp2 <= 0L)
+			if (tp3 <= 0L || tp4 <= 0L)
 				return true;
 		}
 		return !apex2.inCircleTest2(this);
