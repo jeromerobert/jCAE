@@ -64,7 +64,7 @@ public class Metric2D
 		if (Metric3D.hasDeflection())
 		{
 			m3dbis = new Metric3D(surf, pt);
-			if (!m3dbis.curv())
+			if (!m3dbis.relDeflection())
 				m3dbis = null;
 		}
 		if (m3d != null)
