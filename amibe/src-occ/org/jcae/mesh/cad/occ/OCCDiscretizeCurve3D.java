@@ -19,12 +19,13 @@
 
 package org.jcae.mesh.cad.occ;
 
-import org.jcae.mesh.mesher.ds.MNode3D;
 import org.jcae.opencascade.jni.Adaptor3d_Curve;
+import org.apache.log4j.Logger;
 import java.util.ArrayList;
 
 public class OCCDiscretizeCurve3D
 {
+	private static Logger logger=Logger.getLogger(OCCDiscretizeCurve3D.class);
 	private Adaptor3d_Curve curve = null;
 	private int nr = 0;
 	private double length = -1.0;
@@ -75,6 +76,7 @@ public class OCCDiscretizeCurve3D
 			if (nr * 10 < nsegments)
 				break;
 		}
+		logger.debug("Number of ponts: "+nr);
 		length = -1.0;
 		adjustAbscissas(xyz);
 	}
@@ -185,17 +187,28 @@ public class OCCDiscretizeCurve3D
 					  (xyz[3*i] - xyz[3*i+3]) * (xyz[3*i] - xyz[3*i+3]) +
 					  (xyz[3*i+1] - xyz[3*i+4]) * (xyz[3*i+1] - xyz[3*i+4]) +
 					  (xyz[3*i+2] - xyz[3*i+5]) * (xyz[3*i+2] - xyz[3*i+5]));
-					if (Math.abs(l2 - l1) > 0.01 * 0.5 * (l1+l2))
+					double delta = Math.abs(l2 - l1) / (l1+l2);
+					if (delta > 0.01 * 0.5)
 					{
 						redo = true;
 						double newA = a[i] + 0.8 * (a[i+1] - a[i-1]) * (l2 - l1) / (l1 + l2);
-						if (newA > a[i-1] && newA < a[i+1])
-							a[i] = newA;
-						
 						double [] newXYZ = curve.value(a[i]);
-						xyz[3*i]   = newXYZ[0];
-						xyz[3*i+1] = newXYZ[1];
-						xyz[3*i+2] = newXYZ[2];
+
+						double newl1 = Math.sqrt(
+						  (newXYZ[0] - xyz[3*i-3]) * (newXYZ[0] - xyz[3*i-3]) +
+						  (newXYZ[1] - xyz[3*i-2]) * (newXYZ[1] - xyz[3*i-2]) +
+						  (newXYZ[2] - xyz[3*i-1]) * (newXYZ[2] - xyz[3*i-1]));
+						double newl2 = Math.sqrt(
+						  (newXYZ[0] - xyz[3*i+3]) * (newXYZ[0] - xyz[3*i+3]) +
+						  (newXYZ[1] - xyz[3*i+4]) * (newXYZ[1] - xyz[3*i+4]) +
+						  (newXYZ[2] - xyz[3*i+5]) * (newXYZ[2] - xyz[3*i+5]));
+						if (Math.abs(newl2 - newl1)/(newl1+newl2) < delta)
+						{
+							a[i] = newA;
+							xyz[3*i]   = newXYZ[0];
+							xyz[3*i+1] = newXYZ[1];
+							xyz[3*i+2] = newXYZ[2];
+						}
 					}
 				}
 			}
