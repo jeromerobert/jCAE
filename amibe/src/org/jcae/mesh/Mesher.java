@@ -74,7 +74,6 @@ public class Mesher
 		
 		int iFace = 0;
 		logger.info("Loading " + brepfilename);
-		boolean testWrite2D = true;
 		
 		CADShapeBuilder factory = CADShapeBuilder.factory;
 		CADShape shape = factory.newShape(brepfilename);
@@ -120,16 +119,8 @@ public class Mesher
 					//  TargetSize must not be called.
 					//new TargetSize(submesh).compute();				
 					//new SmoothNodes(submesh, 20).compute();
-					if (testWrite2D)
-					{
-						xmlFile = "jcae2d."+iFace;
-						SubMesh2DWriter.writeObject(submesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
-					}
-					else
-					{
-						mesh3D.addSubMesh2D(submesh, false);
-						mesh3D.printInfos();
-					}
+					xmlFile = "jcae2d."+iFace;
+					SubMesh2DWriter.writeObject(submesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
 					submesh.popCompGeom(3);
 				}
 				catch(Exception ex)
@@ -152,32 +143,29 @@ public class Mesher
 		}
 
 		// Step 3: Read 2D meshes and compute 3D mesh
-		if (testWrite2D)
+		try
 		{
-			try
+			iFace = 0;
+			for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
 			{
-				iFace = 0;
-				for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
+				CADFace F = (CADFace) expF.current();
+				iFace++;
+				xmlFile = "jcae2d."+iFace;
+				SubMesh2D submesh = SubMesh2DReader.readObject(xmlDir, xmlFile, F);
+				if (null != submesh)
 				{
-					CADFace F = (CADFace) expF.current();
-					iFace++;
-					xmlFile = "jcae2d."+iFace;
-					SubMesh2D submesh = SubMesh2DReader.readObject(xmlDir, xmlFile, F);
-					if (null != submesh)
-					{
-						logger.debug("Loading face "+iFace);
-						submesh.pushCompGeom(3);
-						mesh3D.addSubMesh2D(submesh, true);
-						submesh.popCompGeom(3);					
-					}
+					logger.info("Importing face "+iFace);
+					submesh.pushCompGeom(3);
+					mesh3D.addSubMesh2D(submesh, true);
+					submesh.popCompGeom(3);					
 				}
-				mesh3D.printInfos();
 			}
-			catch(Exception ex)
-			{
-				logger.warn(ex.getMessage());
-				ex.printStackTrace();
-			}
+			mesh3D.printInfos();
+		}
+		catch(Exception ex)
+		{
+			logger.warn(ex.getMessage());
+			ex.printStackTrace();
 		}
 		
 		xmlFile = "jcae3d";
