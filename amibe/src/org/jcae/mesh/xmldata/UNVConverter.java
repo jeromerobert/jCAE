@@ -20,7 +20,6 @@
 
 package org.jcae.mesh.xmldata;
 
-import gnu.trove.TIntArrayList;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntIntHashMap;
 import java.io.*;
@@ -31,6 +30,8 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.text.*;
+import java.util.Arrays;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -74,19 +75,111 @@ public class UNVConverter
             	return null;
             }
         });
-	}	
+	}
+		
+	public static class FormatD25_16 extends DecimalFormat
+	{		
+		private static String PATERN="0.0000000000000000E00";
+		public FormatD25_16()
+		{
+			super(PATERN);
+			DecimalFormatSymbols dfs=getDecimalFormatSymbols();
+			dfs.setDecimalSeparator('.');
+			setDecimalFormatSymbols(dfs);
+		}
+		
+		/* (non-Javadoc)
+		 * @see java.text.NumberFormat#format(double, java.lang.StringBuffer, java.text.FieldPosition)
+		 */
+		public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos)
+		{
+			StringBuffer sb=super.format(number, toAppendTo, pos);
+			int n=sb.length()-3;
+			if(n>0)
+			{
+				if(sb.charAt(n)=='E')
+				{
+					sb.setCharAt(n, 'D');
+					sb.insert(n+1, '+');
+				}
+				else if(sb.charAt(n)=='-')
+				{
+					sb.setCharAt(n-1, 'D');
+				}
+			}
+			n=25-sb.length();
+			if(n>0)
+			{
+				char[] c=new char[n];
+				Arrays.fill(c, ' ');
+				sb.insert(0, c);
+			}
+			return sb;
+		}		
+	}
 	
+	public static class FormatI10 extends NumberFormat
+	{
+		/* (non-Javadoc)
+		 * @see java.text.NumberFormat#parse(java.lang.String, java.text.ParsePosition)
+		 */
+		public Number parse(String source, ParsePosition parsePosition)
+		{
+			// TODO Auto-generated method stub
+			throw new UnsupportedOperationException();
+		}
+
+		/* (non-Javadoc)
+		 * @see java.text.NumberFormat#format(double, java.lang.StringBuffer, java.text.FieldPosition)
+		 */
+		public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos)
+		{
+			return format((long)number, toAppendTo, pos);
+		}
+
+		/* (non-Javadoc)
+		 * @see java.text.NumberFormat#format(long, java.lang.StringBuffer, java.text.FieldPosition)
+		 */
+		public StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos)
+		{			
+			StringBuffer s=new StringBuffer();
+			s.append(number);
+			int n=10-s.length();
+			if(n>0)
+			{
+				char[] c=new char[n];
+				Arrays.fill(c, ' ');
+				toAppendTo.append(c);
+				toAppendTo.append(s);
+			}
+			return toAppendTo;
+		}		
+	}
+	
+	final private static NumberFormat FORMAT_D25_16=new FormatD25_16();	
+	final private static NumberFormat FORMAT_I10=new FormatI10();
 	/**
 	 * A main method for debugging
 	 * @param args
 	 */
 	public static void main(String[] args)
-	{
-	
+	{		
+		System.out.println(FORMAT_D25_16.format(1E-24));
+		System.out.println(FORMAT_D25_16.format(15E24));
+		System.out.println(FORMAT_D25_16.format(Double.POSITIVE_INFINITY));
+		System.out.println(FORMAT_D25_16.format(Double.NEGATIVE_INFINITY));
+		System.out.println(FORMAT_D25_16.format(Double.MAX_VALUE));
+		System.out.println(FORMAT_D25_16.format(Double.MIN_VALUE));
+		System.out.println(FORMAT_D25_16.format(Double.NaN));
 		try
 		{
-			new UNVConverter(new File("/home/jerome/Project/mesh33035.brep.jcae"), new int[]{0}).
-				writeUNV(new PrintStream(new FileOutputStream(new File("/tmp/blub.unv"))));	
+			int[] ids=new int[83];
+			for(int i=0; i<ids.length; i++)
+			{
+				ids[i]=i;
+			}
+			new UNVConverter(new File("/home/usr/local2/home/jerome/"), ids).
+				writeUNV(new PrintStream(new BufferedOutputStream(new FileOutputStream(new File("/tmp/blub.unv")))));	
 			//	writeUNV(System.out);
 			
 			
@@ -247,16 +340,6 @@ public class UNVConverter
         }
         return toReturn;        
 	}
-
-	/** Add spaces before a string to make it 10 characters */
-	private String spaces(String s)
-	{
-		int n = 10 - s.length();
-		char[] c = new char[n];
-		for (int i=0; i<n; i++)
-			c[i]=' ';
-		return (new String(c))+s;
-	}	
 	
 	public void writeUNV(PrintStream out) throws ParserConfigurationException, SAXException, IOException
 	{
@@ -291,13 +374,13 @@ public class UNVConverter
 			int countg=0;
 			for(int j=0; j<groups[i].length; j++)
 			{				
-				out.print("         8"+spaces(""+amibeTriaToUNVTria.get(groups[i][j])));
+				out.print("         8"+FORMAT_I10.format(amibeTriaToUNVTria.get(groups[i][j])));
 				countg++;
 				if ((countg % 4) == 0)
 					out.println("");
 			}
 			if ((countg % 4) !=0 )
-				out.println("");
+				out.println();
 		}
 		out.println("    -1");
 
@@ -326,8 +409,8 @@ public class UNVConverter
 			z=nodesBuffer.get(iid+2);			
 			count++;
 			amibeToUNV.put(nodesID[i], count);
-			out.println(count+"         1         1         1");
-			out.println(x+" "+y+" "+z);			
+			out.println(FORMAT_I10.format(count)+"         1         1         1");
+			out.println(FORMAT_D25_16.format(x)+FORMAT_D25_16.format(y)+FORMAT_D25_16.format(z));			
 		}
 		out.println("    -1");		
 		fc.close();
@@ -351,10 +434,11 @@ public class UNVConverter
 			{
 				count++;
 				amibeTriaToUNVTria.put(groups[i][j], count);
-				out.println(""+count+"        91         1         1         1         3");
-				out.println(""+amibeNodeToUNVNode.get(triangles[triaIndex++])+" "
-					+amibeNodeToUNVNode.get(triangles[triaIndex++])+" "
-					+amibeNodeToUNVNode.get(triangles[triaIndex++]));
+				out.println(FORMAT_I10.format(count)+"        91         1         1         1         3");
+				out.println(
+					FORMAT_I10.format(amibeNodeToUNVNode.get(triangles[triaIndex++]))+
+					FORMAT_I10.format(amibeNodeToUNVNode.get(triangles[triaIndex++]))+
+					FORMAT_I10.format(amibeNodeToUNVNode.get(triangles[triaIndex++])));
 			}
 		}		
 		out.println("    -1");
