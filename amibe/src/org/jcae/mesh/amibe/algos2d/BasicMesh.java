@@ -205,7 +205,7 @@ public class BasicMesh
 				s.nextOTri();
 				if (s.hasAttributes(OTriangle.SWAPPED))
 					continue;
-				if (s.checkAndSwap() != 0)
+				if (s.checkSmallerAndSwap() != 0)
 					redo = true;
 			}
 		}

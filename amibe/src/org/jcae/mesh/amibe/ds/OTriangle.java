@@ -510,7 +510,7 @@ public class OTriangle
 	}
 	
 	//  Called from BasicMesh to improve initial mesh
-	public int checkAndSwap()
+	public int checkSmallerAndSwap()
 	{
 		//  As CheckAndSwap modifies its arguments, 'this'
 		//  must be protected.
