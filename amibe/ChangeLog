@@ -3,6 +3,11 @@ Fri Jan  7 09:50:55 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/amibe/metrics/Metric2D.java:  Replace the constructor Metric2D(double,double,double) by a constructor without arguments which returns an identity matrix.
 	* src/org/jcae/mesh/amibe/ds/Vertex.java:  In getMetrics(), return an identity matrix after mesh.pushCompGeom(2) because calculus are then performed in 2D euclidian space.
 	* src/org/jcae/mesh/amibe/algos2d/BasicMesh.java:  Initial point insertion can now be performed in 2D euclidian space.
+	* src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/amibe/util/QuadTree.java
+	  src/org/jcae/mesh/amibe/ds/Vertex.java:  Reset metrics of all vertices when Mesh.pushCompGeom() is called, and also when Mesh.popCompGeom() is called if this changes the class of top-level element.
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java:  Add a new checkAndSwap() method.
+	* src/org/jcae/mesh/amibe/algos2d/BasicMesh.java:  After boundary is rebuilt, all edges are checked to see if they are 3D-Delaunay.  As this criterion is checked only when points are inserted, some edges were wrong when few points are inserted.
 
 Thu Jan  6 16:52:33 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
