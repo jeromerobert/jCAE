@@ -48,6 +48,9 @@ public interface CADGeomSurface
      * @return the v first derivative
      */    
 	public double [] d1V();
+	public double [] d2U();
+	public double [] d2V();
+	public double [] dUV();
     
 	/**
      * Get 3D coordinates from (u, v) coordinates
