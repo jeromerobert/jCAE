@@ -105,6 +105,7 @@ public class MMesh1D extends MMesh0D
 	 */
 	public void updateNodeLabels()
 	{
+		logger.debug("Update node labels");
 		//  Resets all labels
 		CADExplorer expE = CADShapeBuilder.factory.newExplorer();
 		HashSet setSeenEdges = new HashSet();
@@ -150,6 +151,7 @@ public class MMesh1D extends MMesh0D
 	 */
 	public void duplicateEdges()
 	{
+		logger.debug("Compute vertex references");
 		HashSet seen = new HashSet();
 		CADExplorer expV = CADShapeBuilder.factory.newExplorer();
 		//  For each topological vertex, compute the list of
