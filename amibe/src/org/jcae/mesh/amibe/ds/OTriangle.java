@@ -525,6 +525,7 @@ public class OTriangle
 	private int CheckAndSwap(OTriangle newLeft, OTriangle newRight, boolean smallerDiag)
 	{
 		int nrSwap = 0;
+		int totNrSwap = 0;
 		Vertex v = newLeft.apex();
 		assert v != Vertex.outer;
 		Vertex firstVertex = newLeft.origin();
@@ -559,15 +560,20 @@ public class OTriangle
 			{
 				newLeft.swapOTriangle(v, a);
 				nrSwap++;
+				totNrSwap++;
 			}
 			else
 			{
 				newLeft.nextOTriApex();
 				if (newLeft.origin() == firstVertex)
-					break;
+				{
+					if (nrSwap == 0)
+						break;
+					nrSwap = 0;
+				}
 			}
 		}
-		return nrSwap;
+		return totNrSwap;
 	}
 	
 	public final boolean isMutable()
