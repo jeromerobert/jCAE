@@ -33,7 +33,6 @@ import org.jcae.mesh.mesher.metrics.*;
 import org.jcae.mesh.mesher.InitialTriangulationException;
 import org.jcae.mesh.xmldata.*;
 import org.jcae.mesh.cad.*;
-import org.jcae.opencascade.jni.*;
 
 /**
  * This class MeshGen allows to load a file, construct the mesh structure and read mesh hypothesis.
@@ -176,39 +175,6 @@ public class Mesher
 	}
 
 	/**
-	 * Convert a step or an IGES file to a brep file
-	 * @param brepname the name of the input file
-	 * @return the name of the created brep file
-	 */
-	public static String convertToBRep(String name)
-	{
-		TopoDS_Shape shape;
-		String outputName;
-		if (name.endsWith(".step"))
-		{
-			STEPControl_Reader aReader = new STEPControl_Reader();
-			aReader.readFile(name);
-			aReader.nbRootsForTransfer();
-			aReader.transferRoots();
-			shape = aReader.oneShape();
-			outputName=name.substring(0, name.length()-".step".length())+".brep";
-		}
-		else if (name.endsWith(".igs"))
-		{
-			IGESControl_Reader aReader = new IGESControl_Reader();
-			aReader.readFile(name);
-			aReader.nbRootsForTransfer();
-			aReader.transferRoots();
-			shape = aReader.oneShape();
-			outputName=name.substring(0, name.length()-".igs".length())+".brep";
-		}
-		else
-			throw new IllegalArgumentException("Cannot get the type of file from is name");
-		BRepTools.write(shape, outputName);	
-		return outputName;
-	}
-		
-	/**
 	 * main method, reads 2 arguments and calls mesh.MeshGen.load() method
 	 * @param args  an array of String, filename, algorithm type and constraint value
 	 * @see #load
@@ -223,8 +189,12 @@ public class Mesher
 		else
 		{
 			String filename=args[0];
-			if (filename.endsWith(".step") || filename.endsWith(".igs"))
-				filename=convertToBRep(filename);
+ 			if (filename.endsWith(".step") || filename.endsWith(".igs"))
+			{
+				CADShape shape = CADShapeBuilder.factory.newShape(filename);
+ 				filename = filename.substring(0, filename.lastIndexOf('.')) + ".brep";
+				shape.writeNative(filename);
+			}
 			String xmlDir = args[1];
 			Double discr=new Double(args[2]);
 			Double defl=new Double(args[3]);

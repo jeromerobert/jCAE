@@ -2,9 +2,6 @@ package org.jcae.mesh;
 
 import org.jcae.mesh.mesher.ds.*;
 import org.jcae.mesh.cad.*;
-import org.jcae.mesh.cad.occ.OCCEdge;
-import org.jcae.mesh.cad.occ.OCCFace;
-import org.jcae.opencascade.jni.*;
 
 public class TestMetrics
 {
@@ -15,28 +12,24 @@ public class TestMetrics
 		CADShape shape = factory.newShape(filename);
 		CADExplorer expF = factory.newExplorer();
 		CADExplorer expW = factory.newExplorer();
-		CADExplorer expE = factory.newExplorer();
+		CADWireExplorer wexp = factory.newWireExplorer();
 		
 		for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
 		{
-			OCCFace face = (OCCFace) expF.current();
-			TopoDS_Face fface = (TopoDS_Face) face.getShape();
+			CADFace face = (CADFace) expF.current();
 			CADGeomSurface surface = face.getGeomSurface();
 			for (expW.init(face, CADExplorer.WIRE); expW.more(); expW.next())
 			{
-				TopoDS_Wire W = (TopoDS_Wire) ((OCCEdge)expW.current()).getShape();
-				BRepTools_WireExplorer wexp = new BRepTools_WireExplorer();
 				double p2[], p3[];
-				for (wexp.init(W, fface); wexp.more(); wexp.next())
+				for (wexp.init((CADWire) expW.current(), face); wexp.more(); wexp.next())
 				{
-					TopoDS_Edge E = wexp.current();
-					double range[] = new double[2];
-					Geom2d_Curve curve = BRep_Tool.curveOnSurface(E, fface, range);
-					Geom2dAdaptor_Curve C2d = new Geom2dAdaptor_Curve(curve);
-					p2 = C2d.value((float)range[0]);
+					CADEdge te = wexp.current();
+					CADGeomCurve2D c2d = CADShapeBuilder.factory.newCurve2D(te, face);
+					double range[] = c2d.getRange();
+					p2 = c2d.value((float)range[0]);
 					p3 = surface.value(p2[0], p2[1]);
 					System.out.println(p2[0]+" "+p2[1]+" -- "+p3[0]+" "+p3[1]+" "+p3[2]);
-					p2 = C2d.value((float)range[1]);
+					p2 = c2d.value((float)range[1]);
 					p3 = surface.value(p2[0], p2[1]);
 					System.out.println(p2[0]+" "+p2[1]+" -- "+p3[0]+" "+p3[1]+" "+p3[2]);
 				}
