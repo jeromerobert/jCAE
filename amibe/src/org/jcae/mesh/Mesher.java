@@ -52,10 +52,9 @@ public class Mesher
 	 * @param brepfilename  the filename of the brep file	 
 	 * @param discr  the value of the meshing constraint
 	 */
-	private static MMesh3D mesh(String brepfilename, String xmlDir, double discr, double defl, double tolerance)
+	private static void mesh(String brepfilename, String xmlDir, double discr, double defl, double tolerance)
 	{
 		//  Declare all variables here
-		MMesh3D mesh3D = new MMesh3D();
 		Metric2D.setLength(discr);
 		Metric3D.setLength(discr);
 		Metric3D.setDeflection(defl);
@@ -198,10 +197,6 @@ public class Mesher
 			MMesh3DWriter.writeObject(mesh3D, xmlDir, xmlFile, xmlBrepDir);
 */
 		}
-		logger.info("Reading 3D mesh");
-		xmlFile = "jcae3d";
-		mesh3D = MMesh3DReader.readObject(xmlDir, xmlFile);
-		return mesh3D;
 	}
 
 	/**
@@ -228,7 +223,7 @@ public class Mesher
 		Double discr=new Double(args[2]);
 		Double defl=new Double(args[3]);
 		Double tolerance=new Double(System.getProperty("org.jcae.mesh.tolerance", "-1.0"));
-		MMesh3D mesh3D = mesh(filename, xmlDir, discr.doubleValue(), defl.doubleValue(), tolerance.doubleValue());
+		mesh(filename, xmlDir, discr.doubleValue(), defl.doubleValue(), tolerance.doubleValue());
 		logger.info("Exporting UNV");
 
 		if(Boolean.getBoolean("org.jcae.mesh.unv.nogz"))
@@ -236,8 +231,8 @@ public class Mesher
 		else
 			new UNVConverter(xmlDir).writeUNV(unvName+".gz");
 		logger.info("Exporting MESH");
-		mesh3D.writeMESH(filename.substring(0, filename.lastIndexOf('.'))+".mesh");
-
+		String MESHName=filename.substring(0, filename.lastIndexOf('.'))+".mesh";
+		new UNVConverter(xmlDir).writeMESH(MESHName);
 		logger.info("End mesh");
 	}
 }
