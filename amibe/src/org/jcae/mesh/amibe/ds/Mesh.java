@@ -21,6 +21,7 @@ package org.jcae.mesh.amibe.ds;
 
 import org.jcae.mesh.amibe.util.QuadTree;
 import org.jcae.mesh.amibe.ds.tools.*;
+import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.cad.*;
@@ -206,6 +207,7 @@ public class Mesh
 		if (s.origin() != start)
 			s.nextOTri();
 		assert s.origin() == start : ""+start+" does not belong to "+t;
+		Vertex dest = s.destination();
 		while (true)
 		{
 			Vertex d = s.destination();
@@ -214,15 +216,21 @@ public class Mesh
 			else if (d != Vertex.outer && start.onLeft(end, d) > 0L)
 				break;
 			s.nextOTriOrigin();
+			if (s.destination() == dest)
+				throw new InitialTriangulationException();
 		}
+		s.prevOTriOrigin();
+		dest = s.destination();
 		while (true)
 		{
-			s.prevOTriOrigin();
 			Vertex d = s.destination();
 			if (d == end)
 				return s;
 			else if (d != Vertex.outer && start.onLeft(end, d) < 0L)
 				break;
+			s.prevOTriOrigin();
+			if (s.destination() == dest)
+				throw new InitialTriangulationException();
 		}
 		//  s has 'start' as its origin point, its destination point
 		//  is to the right side of (start,end) and its apex is to the
