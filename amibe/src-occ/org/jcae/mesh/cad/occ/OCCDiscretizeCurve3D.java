@@ -208,6 +208,7 @@ public class OCCDiscretizeCurve3D
 			double dist, arcLength;
 			nr = 1;
 			a[0] = start;
+			arcLength   = 0.0;
 			for (int i = 0; i < 3; i++)
 				xyz[i] = oldXYZ[i];
 			oldAbscissa = start;
@@ -220,12 +221,13 @@ public class OCCDiscretizeCurve3D
 				  (oldXYZ[0] - newXYZ[0]) * (oldXYZ[0] - newXYZ[0]) +
 				  (oldXYZ[1] - newXYZ[1]) * (oldXYZ[1] - newXYZ[1]) +
 				  (oldXYZ[2] - newXYZ[2]) * (oldXYZ[2] - newXYZ[2]));
-				arcLength = length(oldAbscissa, newAbscissa, 20);
-				if (arcLength - dist > defl * arcLength)
+				arcLength += length(oldAbscissa, newAbscissa, 20);
+				oldAbscissa = newAbscissa;
+				if (arcLength - dist > defl * defl * arcLength)
 				{
 					a[nr] = newAbscissa;
 					oldXYZ = newXYZ;
-					oldAbscissa = newAbscissa;
+					arcLength   = 0.0;
 					xyz[3*nr]   = oldXYZ[0];
 					xyz[3*nr+1] = oldXYZ[1];
 					xyz[3*nr+2] = oldXYZ[2];

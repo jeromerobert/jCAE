@@ -84,10 +84,6 @@ public class Metric3D extends Matrix
 		return Math.sqrt((A[0]*A[0])+(A[1]*A[1])+(A[2]*A[2]));
 	}
 	
-	public static double norm2(double [] A) {
-		return (A[0]*A[0])+(A[1]*A[1])+(A[2]*A[2]);
-	}
-	
 	public static double [] prodVect3D(double [] v1, double [] v2)
 	{
 		double [] ret = new double[3];
@@ -175,7 +171,14 @@ public class Metric3D extends Matrix
 		}
 		Metric3D A = new Metric3D(dcurvmax, dcurvmin, prodVect3D(dcurvmax, dcurvmin));
 		double epsilon = defl;
-		data[0][0] = cmax*cmax / (4.0 * epsilon * (2.0 - epsilon));
+		double alpha2 = 4.0 * epsilon * (2.0 - epsilon);
+/*
+		double lratio = Math.abs(cmin/cmax);
+		double lratio = Math.max(Math.abs(cmin/cmax), 0.1);
+		double rho2 = cmin / Math.sqrt(1.0 - (1.0 - lratio) * (1.0 - lratio));
+		data[1][1] = rho2*rho2 / alpha2 / alpha2;
+*/
+		data[0][0] = cmax*cmax / alpha2 / alpha2;
 		data[1][1] = data[0][0];
 		data[2][2] = data[0][0];
 		Matrix res = (this.multL(A.transp())).multR(A);
