@@ -48,39 +48,44 @@ public abstract class CADShapeBuilder
 	{
 	}
 	
-    /**
-     * Create a new CADShape wrapping an object of the underlying implementation
-     * @param o An object of the underlying implementation
-     * @return The created CADShape
-     */    
+	/**
+	 * Create a new CADShape wrapping an object of the underlying implementation
+	 * @param o An object of the underlying implementation
+	 * @return The created CADShape
+	 */
 	public abstract CADShape newShape (Object o);
-    /**
-     * Create a new CADShape by loading it from a file
-     * @param fileName The file to read
-     * @return The created CADShape
-     */    
+	
+	/**
+	 * Create a new CADShape by loading it from a file
+	 * @param fileName The file to read
+	 * @return The created CADShape
+	 */
 	public abstract CADShape newShape (String fileName);
-    /**
-     * Create a new CADExplorer
-     * @return The created CADExplorer
-     */    
+	
+	/**
+	 * Create a new CADExplorer
+	 * @return The created CADExplorer
+	 */
 	public abstract CADExplorer newExplorer ();
-    /**
-     * Create a new CADWireExplorer
-     * @return The created CADWireExplorer
-     */    
+	
+	/**
+	 * Create a new CADWireExplorer
+	 * @return The created CADWireExplorer
+	 */
 	public abstract CADWireExplorer newWireExplorer ();
-    /**
-     * Create a new CADGeomCurve2D
-     * @param oe The edge owning the curve
-     * @param of The face owning the curve
-     * @return The created CADGeomCurve2D
-     */    
+	
+	/**
+	 * Create a new CADGeomCurve2D
+	 * @param oe The edge owning the curve
+	 * @param of The face owning the curve
+	 * @return The created CADGeomCurve2D
+	 */
 	public abstract CADGeomCurve2D newCurve2D(Object oe, Object of);
-    /**
-     * Create a new CADGeomCurve3D
-     * @param o The edge owning this curve
-     * @return The created CADGeomCurve3D
-     */    
+	
+	/**
+	 * Create a new CADGeomCurve3D
+	 * @param o The edge owning this curve
+	 * @return The created CADGeomCurve3D
+	 */
 	public abstract CADGeomCurve3D newCurve3D(Object o);
 }
