@@ -73,8 +73,8 @@ public class OCCShapeBuilder extends CADShapeBuilder
 		{
 			IGESControl_Reader aReader = new IGESControl_Reader();
 			aReader.readFile(fileName);
-			aReader.clear();
-			aReader.transferRoots(false);
+			aReader.nbRootsForTransfer();
+			aReader.transferRoots();
 			brepShape = aReader.oneShape();
 		}
 		else

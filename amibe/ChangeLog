@@ -1,6 +1,7 @@
 Thu Nov 25 12:30:12 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
-	* src/org/jcae/mesh/Mesher.java:  IGESControl_Reader in occjava.jar changed its interface.
+	* src/org/jcae/mesh/cad/occ/OCCShapeBuilder.java
+	  src/org/jcae/mesh/Mesher.java:  Interface of IGESControl_Reader in occjava.jar has changed.
 
 Wed Nov 24 15:39:03 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
