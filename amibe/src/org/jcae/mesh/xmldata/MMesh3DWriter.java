@@ -34,29 +34,45 @@ public class MMesh3DWriter
 	/**
 	 * Used by {@link writeObject}
 	 */
-	private static Element writeObjectNodes(Document document, Iterator nodesIterator, File nodesFile, File refFile, String baseDir, TObjectIntHashMap nodeIndex)
+	private static Element writeObjectNodes(Document document, MMesh3D mesh3d, File nodesFile, File refFile, String baseDir, TObjectIntHashMap nodeIndex)
 		throws IOException
 	{
 		//save nodes
 		logger.debug("begin writing "+nodesFile);
 		DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile)));
 		DataOutputStream refout=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile, true)));
-		int i=0, nref=0;
+		int i = 0;
+		//  Write interior nodes first
+		Iterator nodesIterator = mesh3d.getNodesIterator();
 		while(nodesIterator.hasNext())
 		{
 			MNode3D n=(MNode3D)nodesIterator.next();
-			nodeIndex.put(n, i);
-			out.writeDouble(n.getX());
-			out.writeDouble(n.getY());
-			out.writeDouble(n.getZ());
+			int ref1d = n.getRef();
+			if (-1 == ref1d)
+			{
+				out.writeDouble(n.getX());
+				out.writeDouble(n.getY());
+				out.writeDouble(n.getZ());
+				nodeIndex.put(n, i);
+				i++;
+			}
+		}
+		int nref = 0;
+		nodesIterator = mesh3d.getNodesIterator();
+		while(nodesIterator.hasNext())
+		{
+			MNode3D n=(MNode3D)nodesIterator.next();
 			int ref1d = n.getRef();
 			if (-1 != ref1d)
 			{
-				refout.writeInt(i);
+				out.writeDouble(n.getX());
+				out.writeDouble(n.getY());
+				out.writeDouble(n.getZ());
 				refout.writeInt(ref1d);
+				nodeIndex.put(n, i);
 				nref++;
+				i++;
 			}
-			i++;
 		}
 		out.close();
 		refout.close();
@@ -170,7 +186,7 @@ public class MMesh3DWriter
 			Element jcaeElement=document.getDocumentElement();
 			Element meshElement=document.createElement("mesh");
 			Element subMeshElement=document.createElement("submesh");
-			subMeshElement.appendChild(writeObjectNodes(document, mesh3d.getNodesIterator(), nodesFile, refFile, xmlDir, nodeIndex));
+			subMeshElement.appendChild(writeObjectNodes(document, mesh3d, nodesFile, refFile, xmlDir, nodeIndex));
 			subMeshElement.appendChild(writeObjectTriangles(document, mesh3d.getFacesIterator(), trianglesFile, xmlDir, nodeIndex, faceIndex));
 			nodeIndex=null;
 			subMeshElement.appendChild(writeObjectGroups(document, mesh3d.getGroupsIterator(), groupsFile, xmlDir, faceIndex));

@@ -70,14 +70,9 @@ public class MMesh3DReader
 
 			int numberOfReferences = Integer.parseInt(
 				xpath.selectSingleNode(submeshNodes, "references/number/text()").getNodeValue());
-			int [] refs = new int[2*numberOfReferences];
-			TIntIntHashMap xrefs = new TIntIntHashMap(numberOfReferences);
+			int [] refs = new int[numberOfReferences];
 			for (i=0; i < numberOfReferences; i++)
-			{
-				int from = refsIn.readInt();
-				int to   = refsIn.readInt();
-				xrefs.put(from, to+1);
-			}
+				refs[i] = refsIn.readInt();
 			
 			int numberOfNodes = Integer.parseInt(
 				xpath.selectSingleNode(submeshNodes, "number/text()").getNodeValue());
@@ -86,7 +81,10 @@ public class MMesh3DReader
 			double [] coord = new double[3];
 			for (i=0; i < numberOfNodes; i++)
 			{
-				label = xrefs.get(i) - 1;
+				if (i < numberOfNodes - numberOfReferences)
+					label = -1;
+				else
+					label = refs[i+numberOfReferences-numberOfNodes];
 				for (int j = 0; j < 3; j++)
 					coord[j] = nodesIn.readDouble();
 				nodelist[i] = new MNode3D(coord, label);
