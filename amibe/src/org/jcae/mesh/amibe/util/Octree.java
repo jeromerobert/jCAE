@@ -91,6 +91,8 @@ public class Octree
 	public static final int indexSubOctree(int [] ijk, int size)
 	{
 		int ret = 0;
+		if (size == 0)
+			throw new RuntimeException("Exceeded maximal number of levels for octrees... Aborting");
 		for (int i = 0; i < 3; i++)
 		{
 			if ((ijk[i] & size) != 0)
