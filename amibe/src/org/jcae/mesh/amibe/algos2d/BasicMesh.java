@@ -177,14 +177,37 @@ public class BasicMesh
 
 		logger.debug(" Ensure 3D Delaunay criterion");
 		mesh.pushCompGeom(3);
-		for (Iterator it = saveList.iterator(); it.hasNext(); )
+		ot = new OTriangle();
+		for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
 		{
-			OTriangle s = (OTriangle) it.next();
-			Vertex ap = s.apex();
-			if (ap == Vertex.outer)
-				s.symOTri();
-			s.checkAndSwap();
+			t = (Triangle) it.next();
+			ot.bind(t);
+			for (int i = 0; i < 3; i++)
+			{
+				ot.nextOTri();
+				ot.clearAttributes(OTriangle.SWAPPED);
+			}
 		}
+		boolean redo = true;
+		//  With riemanian metrics, there may be infinite loops,
+		//  make sure to exit this loop.
+		int niter = 10;
+		do {
+			redo = false;
+			niter --;
+			for (Iterator it = saveList.iterator(); it.hasNext(); )
+			{
+				OTriangle s = (OTriangle) it.next();
+				if (s.apex() == Vertex.outer)
+					s.symOTri();
+				s.nextOTri();
+				if (s.hasAttributes(OTriangle.SWAPPED))
+					continue;
+				if (s.checkAndSwap() != 0)
+					redo = true;
+			}
+		}
+		while (redo && niter > 0);
 		mesh.popCompGeom(3);
 		
 		logger.debug(" Mark outer elements");
@@ -211,6 +234,16 @@ public class BasicMesh
 		}
 		while (ot.origin() != first);
 		logger.debug(" Mark holes");
+		for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
+		{
+			t = (Triangle) it.next();
+			ot.bind(t);
+			for (int i = 0; i < 3; i++)
+			{
+				ot.nextOTri();
+				ot.clearAttributes(OTriangle.MARKED);
+			}
+		}
 		while (!pool.isEmpty())
 		{
 			ArrayList newPool = new ArrayList(mesh.getTriangles().size());

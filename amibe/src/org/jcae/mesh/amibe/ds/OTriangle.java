@@ -616,13 +616,8 @@ public class OTriangle
 		assert Vertex.outer != apex();
 		if (apex2 == Vertex.outer)
 			return true;
-		if (hasAttributes(SWAPPED))
-			return true;
 		if (apex2.inCircleTest3(this))
-		{
-			setAttributes(SWAPPED);
 			return false;
-		}
 		return true;
 	}
 	
