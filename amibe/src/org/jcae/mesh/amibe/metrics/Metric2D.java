@@ -128,11 +128,11 @@ public class Metric2D
 		return (new Matrix2D(nd1U, nd1V * ct, 0, nd1V * st));
 	}
 	
-	public Metric2D(double xE, double xF, double xG)
+	public Metric2D()
 	{
-		E = xE;
-		F = xF;
-		G = xG;
+		E = 1.0;
+		F = 0.0;
+		G = 1.0;
 	}
 	
 	public Metric2D(CADGeomSurface surf, Vertex pt, double theta, double p1, double p2)
@@ -172,7 +172,11 @@ public class Metric2D
 	
 	public Metric2D add(Metric2D B)
 	{
-		return new Metric2D(E + B.E, F + B.F, G + B.G);
+		Metric2D ret = new Metric2D();
+		ret.E = E + B.E;
+		ret.F = F + B.F;
+		ret.G = G + B.G;
+		return ret;
 	}
 	
 	public void scale(double f)
