@@ -63,13 +63,13 @@ public class SubMesh2DReader extends JCAEXMLData
 			
 			String nodesFile = xpath.selectSingleNode(document,
 				"/jcae/mesh/submesh/nodes/file/@location").getNodeValue();
-			DataInputStream nodesIn=new DataInputStream(new FileInputStream(xmlDir+File.separator+nodesFile));
+			DataInputStream nodesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(xmlDir+File.separator+nodesFile)));
 			String refFile = xpath.selectSingleNode(document,
 				"/jcae/mesh/submesh/nodes/references/file/@location").getNodeValue();
-			DataInputStream refsIn=new DataInputStream(new FileInputStream(xmlDir+File.separator+refFile));
+			DataInputStream refsIn=new DataInputStream(new BufferedInputStream(new FileInputStream(xmlDir+File.separator+refFile)));
 			String trianglesFile = xpath.selectSingleNode(document,
 				"/jcae/mesh/submesh/triangles/file/@location").getNodeValue();
-			DataInputStream trianglesIn=new DataInputStream(new FileInputStream(xmlDir+File.separator+trianglesFile));
+			DataInputStream trianglesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(xmlDir+File.separator+trianglesFile)));
 			
 			Node submeshElement = xpath.selectSingleNode(document,
 				"/jcae/mesh/submesh");

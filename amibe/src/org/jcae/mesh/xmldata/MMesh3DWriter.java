@@ -39,8 +39,8 @@ public class MMesh3DWriter
 	{
 		//save nodes
 		logger.debug("begin writing "+nodesFile);
-		DataOutputStream out=new DataOutputStream(new FileOutputStream(nodesFile));
-		DataOutputStream refout=new DataOutputStream(new FileOutputStream(refFile, true));
+		DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile)));
+		DataOutputStream refout=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile, true)));
 		int i=0, nref=0;
 		while(nodesIterator.hasNext())
 		{
@@ -83,7 +83,7 @@ public class MMesh3DWriter
 	{
 		//save triangles
 		logger.debug("begin writing "+trianglesFile);
-		DataOutputStream out=new DataOutputStream(new FileOutputStream(trianglesFile));
+		DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(trianglesFile)));
 		int i=0;
 		while(facesIterator.hasNext())
 		{
@@ -119,7 +119,7 @@ public class MMesh3DWriter
 	{
 		// write binary datas
 		Element groups=document.createElement("groups");
-		DataOutputStream out=new DataOutputStream(new FileOutputStream(groupsFile));
+		DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(groupsFile)));
 		int i=0;
 		while(groupsIterator.hasNext())
 		{
