@@ -1,3 +1,18 @@
+Wed Jan 19 12:06:50 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/util/QuadTree.java:  Fix an integer overflow, sometimes getNearestVertex() did not return the nearest vertex, and thus near points could be inserted.
+	* src/org/jcae/mesh/amibe/ds/Vertex.java (isSmallerDiagonale):  It seems that using metrics on two points is enough, no need for all four points.
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java (swapOTriangle):  When an edge is swapped, all edges for both triangles must have their SWAPPED attribute cleared out.
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java (CheckAndSwap):  Add a new attribute to distinguish between initial triangulation and site insertion.  In the former case, isSmallerDiagonale() is called instead of isDelaunay();
+
+Fri Jan 14 14:09:42 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/tools/Calculus3D.java:  distance(a,b) is computed by using both metrics on a and b, this gives better results on same faces.
+
+Wed Jan 12 10:48:28 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Vertex.java (circumcenter):  Fix test to detect far circumcenters.
+
 Mon Jan 10 13:57:24 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/OTriangle.java (isDelaunay_isotropic):  Fix test to detect edges which cannot be swapped for geometrical reasons.
