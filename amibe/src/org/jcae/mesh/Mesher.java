@@ -79,6 +79,7 @@ public class Mesher
 		CADExplorer expF = factory.newExplorer();
 		if (System.getProperty("org.jcae.mesh.Mesher.mesh1d", "true").equals("true")) {
 			//  Step 1: Compute 1D mesh
+			logger.info("1D mesh");
 			mesh1D = new MMesh1D(shape);
 			mesh1D.setMaxLength(discr);
 			new UniformLength(mesh1D).compute();
@@ -180,6 +181,12 @@ public class Mesher
 			
 			xmlFile = "jcae3d";
 			MMesh3DWriter.writeObject(mesh3D, xmlDir, xmlFile, xmlBrepDir);
+		}
+		else
+		{
+			logger.info("Reading 3D mesh");
+			xmlFile = "jcae3d";
+			mesh3D = MMesh3DReader.readObject(xmlDir, xmlFile);
 		}
 		return mesh3D;
 	}
