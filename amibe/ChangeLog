@@ -3,7 +3,13 @@ Fri Nov 19 16:51:29 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 	* Add this ChangeLog, build.properties and build.xml
 	* Remove a bunch of useless files, mostly related to old UI
 	  and Corba.
-	* Remove org.jcae.mesh.algos and org.jcae.mesh.ds
+	* Remove:
+	     org.jcae.mesh.algos
+	     org.jcae.mesh.ds
+	     org.jcae.mesh.mesher.algos2d.RefineFaceOld
+	     org.jcae.mesh.util.Pair
+	     org.jcae.mesh.Algo
+	* src/org/jcae/mesh/util/Calculs.java: Remove unused methods.
 
 Fri Nov 19 16:49:50 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
