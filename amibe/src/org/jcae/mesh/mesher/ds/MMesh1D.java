@@ -152,20 +152,47 @@ public class MMesh1D extends MMesh0D
 	{
 		HashSet seen = new HashSet();
 		CADExplorer expV = CADShapeBuilder.factory.newExplorer();
+		//  For each topological vertex, compute the list of
+		//  MNode1D objects which are bound to this vertex.
+		int nVertex = 0;
+		for (expV.init(shape, CADExplorer.VERTEX); expV.more(); expV.next())
+			nVertex++;
+		HashMap vertex2Ref = new HashMap(nVertex);
+		for (expV.init(shape, CADExplorer.VERTEX); expV.more(); expV.next())
+			vertex2Ref.put(expV.current(), new ArrayList());
+		
+		Iterator ite = mapTEdgeToSubMesh1D.values().iterator();
+		while (ite.hasNext())
+		{
+			SubMesh1D submesh1d = (SubMesh1D) ite.next();
+			if (null == submesh1d)
+				continue;
+			Iterator itn = submesh1d.getNodesIterator();
+			while (itn.hasNext())
+			{
+				MNode1D pt = (MNode1D) itn.next();
+				if (null != pt.getRef())
+					((ArrayList) vertex2Ref.get(pt.getRef())).add(pt);
+			}
+		}
+		
 		for (expV.init(shape, CADExplorer.VERTEX); expV.more(); expV.next())
 		{
 			CADVertex V = (CADVertex) expV.current();
-			MNode1D[] vnodelist = getArrayHasRef(V);
-			if (vnodelist.length <= 1)
+			if (seen.contains(V))
 				continue;
-			if (seen.contains(vnodelist[0]))
+			seen.add(V);
+			ArrayList vnodelist = (ArrayList) vertex2Ref.get(V);
+			if (vnodelist.size() <= 1)
 				continue;
-			seen.add(vnodelist[0]);
-			vnodelist[0].setMaster(null);
-			for (int i = 1; i<vnodelist.length; i++)
-				vnodelist[i].setMaster(vnodelist[0]);
+			// Make sure that all MNode1D objects share the same master.
+			MNode1D master = (MNode1D) vnodelist.get(0);
+			master.setMaster(null);
+			for (int i = 1; i<vnodelist.size(); i++)
+				((MNode1D) vnodelist.get(i)).setMaster(master);
 		}
 		seen.clear();
+		vertex2Ref.clear();
 		CADExplorer expF = CADShapeBuilder.factory.newExplorer();
 		for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
 		{
@@ -298,35 +325,6 @@ public class MMesh1D extends MMesh0D
 		if (mapTEdgeToSubMesh1D.containsKey(E.reversed()))
 			return null;
 		throw new NoSuchElementException("TEdge : "+E);
-	}
-	
-	/**
-	 * Returns the list of nodes which are linked to a given vertex.
-	 *
-	 * @param V  a topological vertex
-	 * @return an array of <code>MNode1D</code> instances which are
-	 * bounded to <code>V</code>.
-	 */
-	public MNode1D[] getArrayHasRef(CADVertex V)
-	{
-		ArrayList list = new ArrayList();
-		Iterator ite = mapTEdgeToSubMesh1D.values().iterator();
-		while (ite.hasNext())
-		{
-			SubMesh1D submesh1d = (SubMesh1D) ite.next();
-			if (null == submesh1d)
-				continue;
-			Iterator itn = submesh1d.getNodesIterator();
-			while (itn.hasNext())
-			{
-				MNode1D pt = (MNode1D) itn.next();
-				if (null != pt.getRef() && V.isSame(pt.getRef()))
-					list.add(pt);
-			}
-		}
-		MNode1D [] toreturn = new MNode1D[list.size()];
-		System.arraycopy(list.toArray(), 0, toreturn, 0, toreturn.length);
-		return toreturn;
 	}
 	
 	/** 
