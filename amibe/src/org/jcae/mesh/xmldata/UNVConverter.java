@@ -24,6 +24,7 @@ import gnu.trove.TIntHashSet;
 import gnu.trove.TIntIntHashMap;
 import java.io.*;
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
@@ -134,7 +135,7 @@ public class UNVConverter
 	 * @param args
 	 */
 	public static void main(String[] args)
-	{
+	{		
 		System.out.println(FORMAT_D25_16.format(1E-24));
 		System.out.println(FORMAT_D25_16.format(15E24));
 		System.out.println(FORMAT_D25_16.format(Double.POSITIVE_INFINITY));
@@ -149,9 +150,23 @@ public class UNVConverter
 			{
 				ids[i]=i;
 			}
+			
+			PrintStream p=new PrintStream(new BufferedOutputStream(new FileOutputStream(new File("/tmp/blub.unv"))));
 			new UNVConverter(new File("/home/usr/local2/home/jerome/"), ids).
-				writeUNV(new PrintStream(new BufferedOutputStream(new FileOutputStream(new File("/tmp/blub.unv")))));
+				writeUNV(p);
+			p.close();
 			//	writeUNV(System.out);
+			
+			/*int[] ids=new int[2];
+			for(int i=0; i<ids.length; i++)
+			{
+				ids[i]=i;
+			}
+			new UNVConverter(new File("/home/usr/local2/home/jerome/enorme.2/"), ids).
+				writeUNV(new PrintStream(new BufferedOutputStream(new FileOutputStream(new File("/tmp/blub.unv")))));	
+			*/
+			
+			
 		} catch (ParserConfigurationException e)
 		{
 			e.printStackTrace();
@@ -343,32 +358,29 @@ public class UNVConverter
 			}
 		}
 	}
-	
+		
 	private int[] readTriangles() throws IOException
 	{
-		File f=getTriaFile();
+		File f = getTriaFile();
 		// Open the file and then get a channel from the stream
 		FileInputStream fis = new FileInputStream(f);
 		FileChannel fc = fis.getChannel();
-		
-		// Get the file's size and then map it into memory
-		MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
-		IntBuffer trias=bb.asIntBuffer();
-		
-		int[] ns=new int[3];
-		int[] toReturn=new int[numberOfTriangles*3];
-		int count=0;
-		for(int i=0; i<groups.length; i++)
+		int[] toReturn = new int[numberOfTriangles * 3];
+		int count = 0;
+		ByteBuffer bb = ByteBuffer.allocateDirect(3 * 4);
+		IntBuffer tria = bb.asIntBuffer();
+		for (int i = 0; i < groups.length; i++)
 		{
-			for(int j=0; j<groups[i].length; j++)
+			for (int j = 0; j < groups[i].length; j++)
 			{
-				trias.position(groups[i][j]*3);
-				trias.get(toReturn, count, 3);
-				count+=3;
+				fc.read(bb, groups[i][j] * 3 * 4);
+				bb.rewind();
+				bb.asIntBuffer().get(toReturn, count, 3);
+				count += 3;
 			}
 		}
 		return toReturn;
-	}
+	}	
 	
 	public void writeUNV(String fileName)
 	{
