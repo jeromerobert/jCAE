@@ -151,7 +151,12 @@ public class Metric3D extends Matrix
 	{
 		double cmin = Math.abs(cacheSurf.minCurvature());
 		double cmax = Math.abs(cacheSurf.maxCurvature());
-		if (Double.isNaN(cmin) || cmin == 0.0 || Double.isNaN(cmax) || cmax == 0.0)
+		if (Double.isNaN(cmin) || Double.isNaN(cmax))
+		{
+			logger.debug("Undefined curvature");
+			return false;
+		}
+		if (cmin == 0.0 && cmax == 0.0)
 		{
 			logger.debug("Infinite curvature");
 			return false;
@@ -185,35 +190,6 @@ public class Metric3D extends Matrix
 		data = res.data;
 		return true;
 	}
-	
-/*
-	public void curv2()
-	{
-		double d1U[] = cacheSurf.d1U();
-		double d1V[] = cacheSurf.d1V();
-		double d2U[] = cacheSurf.d2U();
-		double d2V[] = cacheSurf.d2V();
-		double dUV[] = cacheSurf.dUV();
-		double unitNorm[] = prodVect3D(d1U, d1V);
-		double nnorm = norm(unitNorm);
-		if (nnorm > 0.0)
-		{
-			nnorm = 1.0 / nnorm;
-			unitNorm[0] *= nnorm;
-			unitNorm[1] *= nnorm;
-			unitNorm[2] *= nnorm;
-		}
-		else
-			return;
-		data[0][0] = - prodSca(unitNorm, d2U);
-		data[1][1] = - prodSca(unitNorm, dUV);
-		data[2][2] = - prodSca(unitNorm, d2V);
-//System.out.println("Norm: "+unitNorm[0]+" "+unitNorm[1]+" "+unitNorm[2]);
-//System.out.println("d2U: "+d2U[0]+" "+d2U[1]+" "+d2U[2]);
-//System.out.println("d2V: "+d2V[0]+" "+d2V[1]+" "+d2V[2]);
-//System.out.println("dUV: "+dUV[0]+" "+dUV[1]+" "+dUV[2]);
-	}
-*/
 	
 	public static boolean hasDeflection()
 	{
@@ -256,18 +232,6 @@ public class Metric3D extends Matrix
 	public static double getDeflection()
 	{
 		return defl;
-	}
-	
-	/**
-	 * Sets the desired edge length.
-	 */
-	public double distance(double []p1, double []p2)
-	{
-		return Math.sqrt(
-			(p1[0] - p2[0]) * (p1[0] - p2[0]) +
-			(p1[1] - p2[1]) * (p1[1] - p2[1]) +
-			(p1[2] - p2[2]) * (p1[2] - p2[2])
-		)/discr;
 	}
 	
 	/**
