@@ -26,7 +26,8 @@ import java.net.URI;
 import org.apache.log4j.Logger;
 import org.jcae.mesh.mesher.algos1d.UniformLength;
 import org.jcae.mesh.mesher.ds.*;
-import org.jcae.mesh.mesher.InitialTriangulationException;
+import org.jcae.mesh.amibe.InitialTriangulationException;
+import org.jcae.mesh.amibe.InvalidFaceException;
 import org.jcae.mesh.amibe.metrics.*;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.algos2d.*;
@@ -128,6 +129,11 @@ public class Mesher
 							mesh.scaleTolerance(10.);
 							nTry++;
 							continue;
+						}
+						else if (ex instanceof InvalidFaceException)
+						{
+							logger.warn("Face "+iFace+" is invalid, skipping...");
+							break;
 						}
 						logger.warn(ex.getMessage());
 						ex.printStackTrace();

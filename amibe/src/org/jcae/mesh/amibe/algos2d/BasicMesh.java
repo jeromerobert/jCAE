@@ -23,7 +23,8 @@ package org.jcae.mesh.amibe.algos2d;
 import org.jcae.mesh.mesher.ds.*;
 import org.jcae.mesh.amibe.ds.*;
 import org.jcae.mesh.amibe.util.*;
-import org.jcae.mesh.mesher.InitialTriangulationException;
+import org.jcae.mesh.amibe.InvalidFaceException;
+import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.jcae.mesh.cad.*;
 import java.util.Iterator;
 import java.util.ArrayList;
@@ -66,7 +67,7 @@ public class BasicMesh
 		if (bNodes.length < 3)
 		{
 			logger.warn("Boundary face contains less than 3 points, it is skipped...");
-			return;
+			throw new InvalidFaceException();
 		}
 		logger.debug(" Unconstrained Delaunay triangulation");
 		double umin = Double.MAX_VALUE;
@@ -104,10 +105,7 @@ public class BasicMesh
 			{
 				v3 = bNodes[i];
 				if (firstOnWire == v3)
-				{
-					logger.warn("Weird wire, face is skipped...");
-					return;
-				}
+					throw new InitialTriangulationException();
 				if (v3.onLeft(v1, v2) != 0L)
 					break;
 			}
