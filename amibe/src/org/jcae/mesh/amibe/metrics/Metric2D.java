@@ -69,7 +69,7 @@ public class Metric2D
 			double detA = det();
 			if (Math.abs(detA) < 1.e-10)
 				throw new RuntimeException("Singular matrice: "+this);
-			Matrix2D ret = new Matrix2D(data[1][1], -data[0][1], -data[1][0], data[0][0]);
+			Matrix2D ret = new Matrix2D(data[1][1], -data[1][0], -data[0][1], data[0][0]);
 			ret.scale(1.0 / detA);
 			return ret;
 		}
@@ -85,6 +85,100 @@ public class Metric2D
 			out[0] = data[0][0] * in[0] + data[0][1] * in[1];
 			out[1] = data[1][0] * in[0] + data[1][1] * in[1];
 			return out;
+		}
+		public double norm2(double vx, double vy)
+		{
+			return data[0][0] * vx * vx + (data[1][0] + data[0][1]) * vx * vy + data[1][1] * vy * vy;
+		}
+		
+		/**
+		 *  Computes the simultaneous reduction of 2 metrics
+		 *  Returns a double cosT such that V1(cosT,sinT) satisfies
+		 *     A V1 = lambda1 V1,  B V1 = mu1 V1
+		 *     A V2 = lambda2 V2,  B V2 = mu2 V2
+		 *  where V2(-sinT,cosT)
+		 *  Note: sinT = sart(1-cosT^2)
+		 */
+		private Matrix2D simultaneousReduction (Matrix2D B)
+		{
+			Matrix2D ret = new Matrix2D();
+			// det(A - l B) = (a11 - l b11)*(a22 - l b22) - (a21 - l b21)^2
+			//  = detB l^2 - l (a11*b22+a22*b11-2*a21*b21) + detA
+			//  = a l^2 - b l + c
+			// Delta = (a11*b22+a22*b11-2*a21*b21)^2 - 4 detA detB
+			double a = B.det();
+			double b = data[0][0]*B.data[1][1] + data[1][1]*B.data[0][0] - 2.0 * data[1][0]*B.data[1][0];
+			double c = det();
+			double delta = b*b - 4.0 * a * c;
+			if (delta < 1.e-4 * Math.abs(a*b) || a < 1.e-10 * b)
+			{
+				ret.data[0][0] = ret.data[1][1] = 1.0;
+				ret.data[0][1] = ret.data[1][0] = 0.0;
+				return ret;
+			}
+			
+			double l1 = 0.5 * (b + Math.sqrt(delta)) / a;
+			double l2 = 0.5 * (b - Math.sqrt(delta)) / a;
+			/*  Now solve
+			 *   (A -l1 B) V1 = 0
+			 *  An eigenvector is colinear to
+			 *    ( a21-l1*B.a21, -a11+l1 B.a11) and
+			 *    ( a22-l1*B.a22, -a21+l1*B.a21)
+			 *  and the other one is orthogonal.
+			 */
+	
+			double t1 = (data[0][0]-l1*B.data[0][0]) * (data[0][0]-l1*B.data[0][0]);
+			double t2 = (data[1][0]-l1*B.data[1][0]) * (data[1][0]-l1*B.data[1][0]);
+			double t3 = (data[1][1]-l1*B.data[1][1]) * (data[1][1]-l1*B.data[1][1]);
+			if (t1 < t3)
+			{
+				double invnorm = 1.0 / Math.sqrt(t2 + t3);
+				ret.data[0][0] = (data[1][1]-l1*B.data[1][1]) * invnorm;
+				ret.data[0][1] = (-data[1][0]+l1*B.data[1][0]) * invnorm;
+			}
+			else
+			{
+				double invnorm = 1.0 / Math.sqrt(t2 + t1);
+				ret.data[0][0] = (data[1][0]-l1*B.data[1][0]) * invnorm;
+				ret.data[0][1] = (-data[0][0]+l1*B.data[0][0]) * invnorm;
+			}
+			t1 = (data[0][0]-l2*B.data[0][0]) * (data[0][0]-l2*B.data[0][0]);
+			t2 = (data[1][0]-l2*B.data[1][0]) * (data[1][0]-l2*B.data[1][0]);
+			t3 = (data[1][1]-l2*B.data[1][1]) * (data[1][1]-l2*B.data[1][1]);
+			if (t1 < t3)
+			{
+				double invnorm = 1.0 / Math.sqrt(t2 + t3);
+				ret.data[1][0] = (data[1][1]-l2*B.data[1][1]) * invnorm;
+				ret.data[1][1] = (-data[1][0]+l2*B.data[1][0]) * invnorm;
+			}
+			else
+			{
+				double invnorm = 1.0 / Math.sqrt(t2 + t1);
+				ret.data[1][0] = (data[1][0]-l2*B.data[1][0]) * invnorm;
+				ret.data[1][1] = (-data[0][0]+l2*B.data[0][0]) * invnorm;
+			}
+			return ret;
+		}
+		
+		/**
+		 *  Computes the intersection of 2 metrics.
+		 */
+		public Matrix2D intersection (Matrix2D B)
+		{
+			Matrix2D res = simultaneousReduction(B);
+			Matrix2D resInv = res.inv();
+			double ev1 = Math.max(
+				norm2(res.data[0][0], res.data[1][0]),
+				B.norm2(res.data[0][0], res.data[1][0])
+			);
+			double ev2 = Math.max(
+				norm2(res.data[0][1], res.data[1][1]),
+				B.norm2(res.data[0][1], res.data[1][1])
+			);
+			double a11 = ev1 * resInv.data[0][0] * resInv.data[0][0] + ev2 * resInv.data[1][0] * resInv.data[1][0];
+			double a21 = ev1 * resInv.data[0][0] * resInv.data[0][1] + ev2 * resInv.data[1][0] * resInv.data[1][1];
+			double a22 = ev1 * resInv.data[0][1] * resInv.data[0][1] + ev2 * resInv.data[1][1] * resInv.data[1][1];
+			return new Matrix2D(a11, a21, a21, a22);
 		}
 	}
 	
@@ -102,12 +196,26 @@ public class Metric2D
 			surf.dinit(2);
 			cacheSurf = surf;
 		}
-		Metric3D m3d = new Metric3D(surf, pt);
+		Metric3D m3d = new Metric3D(surf, pt, "iso");
 		//  For efficiency reasons, restrict2D returns a static array
 		double [][] temp = m3d.restrict2D();
-		E = temp[0][0];
-		F = temp[0][1];
-		G = temp[1][1];
+		if (Metric3D.hasDeflection())
+		{
+			Matrix2D m2d0 = new Matrix2D(temp[0][0], temp[0][1], temp[0][1], temp[1][1]);
+			Metric3D m3dbis = new Metric3D(surf, pt, "curviso");
+			temp = m3dbis.restrict2D();
+			Matrix2D m2d1 = new Matrix2D(temp[0][0], temp[0][1], temp[0][1], temp[1][1]);
+			Matrix2D res = m2d0.intersection(m2d1);
+			E = res.data[0][0];
+			F = 0.5 * (res.data[1][0] + res.data[0][1]);
+			G = res.data[1][1];
+		}
+		else
+		{
+			E = temp[0][0];
+			F = temp[0][1];
+			G = temp[1][1];
+		}
 	}
 	
 	public Matrix2D param2tangent()
@@ -270,6 +378,29 @@ public class Metric2D
 		toReturn[2] = G;
 		return toReturn;
 	}
+	
+	/**
+	 *  Computes the intersection of 2 metrics, but preserves the
+	 *  principal directions of active metric
+	 */
+/*
+	public Metric2D intersectionPreserve (Metric2D B)
+	{
+		double V1x = simultaneousReduction(B);
+		double V1y = Math.sqrt(1. - sqr(V1x));
+
+		//  Eigenvalues of A
+		double evA1 = data[0][0]*sqr(V1x) + 2.*data[1][0]*V1x*V1y + data[1][1]*sqr(V1y);
+		double evA2 = data[0][0]*sqr(V1y) - 2.*data[1][0]*V1x*V1y + data[1][1]*sqr(V1x);
+		//  Eigenvalues of B
+		double evB1 = B.data[0][0]*sqr(V1x) + 2.*B.data[1][0]*V1x*V1y + B.data[1][1]*sqr(V1y);
+		double evB2 = B.data[0][0]*sqr(V1y) - 2.*B.data[1][0]*V1x*V1y + B.data[1][1]*sqr(V1x);
+
+		double omega = Math.max(evB1/evA1, evB2/evA2);
+		omega = Math.max(omega, 1.);
+		return new Metric2D(omega*data[0][0], omega*data[1][0], omega*data[1][1]);
+	}
+*/
 	
 	public String toString()
 	{

@@ -46,7 +46,7 @@ public class Metric3D extends Matrix
 	 * @param surf  geometrical surface
 	 * @param pt  node where metrics is computed.
 	 */
-	public Metric3D(CADGeomSurface surf, Vertex pt)
+	public Metric3D(CADGeomSurface surf, Vertex pt, String type)
 	{
 		rank = 3;
 		data = new double[rank][rank];
@@ -63,12 +63,12 @@ public class Metric3D extends Matrix
 		}
 		double uv[] = pt.getUV();
 		cacheSurf.setParameter(uv[0], uv[1]);
-		//computeMetric3DCurv(defl, 0.0);
-		if (defl > 0.0 && defl <= 1.0)
-			computeMetric3DCurvIso(defl, 1.0/discr/discr);
-		else
+		if (type.equals("iso"))
 			computeMetric3DIso();
+		else
+			computeMetric3DCurvIso();
 	}
+	
 	public Metric3D(double [] e1, double [] e2, double [] e3)
 	{
 		rank = 3;
@@ -129,7 +129,7 @@ public class Metric3D extends Matrix
 		data = res.data;
 	}
 	
-	private void computeMetric3DCurvIso(double defl, double vmax)
+	private void computeMetric3DCurvIso()
 	{
 		double cmin = Math.abs(cacheSurf.minCurvature());
 		double cmax = Math.abs(cacheSurf.maxCurvature());
@@ -155,11 +155,6 @@ public class Metric3D extends Matrix
 		Metric3D A = new Metric3D(dcurvmax, dcurvmin, Calculs.prodVect3D(dcurvmax, dcurvmin));
 		double epsilon = defl;
 		data[0][0] = cmax*cmax / (4.0 * epsilon * (2.0 - epsilon));
-		if (vmax > 0.0)
-		{
-			data[0][0] = Math.max(vmax, data[0][0]);
-			data[0][0] = Math.min(vmax*100.0, data[0][0]);
-		}
 		data[1][1] = data[0][0];
 		data[2][2] = data[0][0];
 		Matrix res = (this.multL(A.transp())).multR(A);
@@ -194,6 +189,11 @@ public class Metric3D extends Matrix
 //System.out.println("dUV: "+dUV[0]+" "+dUV[1]+" "+dUV[2]);
 	}
 */
+	
+	public static boolean hasDeflection()
+	{
+		return (defl > 0.0 && defl < 1.0);
+	}
 	
 	/**
 	 * Set the desired edge length.
