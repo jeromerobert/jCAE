@@ -206,7 +206,7 @@ public class MNode3D
 			((normPn1-normPn2)+normPn3)*mu/
 				((normPn1+(normPn2+normPn3))*((normPn1-normPn3)+normPn2))
 		));
-        return alpha;
+        	return alpha;
 	}
 	
 	/**
