@@ -304,7 +304,7 @@ public class Vertex
 		double num = m2d.dot(x23, y23, x31, y31);
 		double [] po = m2d.orth(x12, y12);
 		double den = 2.0 * m2d.dot(po[0], po[1], x31, y31);
-		if (Math.abs(den) > 1.e-10 * Math.abs(num))
+		if (m2.det() * den * den > 1.e-4 * num * num)
 		{
 			return new Vertex(
 				0.5*(p1[0]+p2[0]) + po[0] * num / den,

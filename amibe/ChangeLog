@@ -1,3 +1,7 @@
+Wed Nov 24 15:39:03 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Vertex.java:  Fix test for flat troamgles in circumcenter().
+
 Tue Nov 23 10:19:22 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/Mesher.java:  Change argument order, and accept a new argument for deflection.  This needs to be synchronized with jcae-netbeans-mesh.
