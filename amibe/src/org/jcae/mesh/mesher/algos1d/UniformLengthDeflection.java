@@ -149,29 +149,8 @@ public class UniformLengthDeflection
 			curve.discretize(maxlen, deflection);
 			nbPoints = curve.nbPoints();
 			paramOnEdge = new double[nbPoints];
-			// GCPnts_UniformAbscissa is not very accurate, force paramOnEdge
-			// to be in ascending order.
-			int offset = 0;
-			paramOnEdge[0] = curve.parameter(1);
-			if (range[0] < range[1])
-			{
-				for (int i = 1; i < nbPoints; i++)
-				{
-					paramOnEdge[i-offset] = curve.parameter(i+1);
-					if (paramOnEdge[i-offset] <= paramOnEdge[i-offset-1])
-						offset++;
-				}
-			}
-			else
-			{
-				for (int i = 1; i < nbPoints; i++)
-				{
-					paramOnEdge[i-offset] = curve.parameter(i+1);
-					if (paramOnEdge[i-offset] >= paramOnEdge[i-offset-1])
-						offset++;
-				}
-			}
-			nbPoints -= offset;
+			for (int i = 0; i < nbPoints; i++)
+				paramOnEdge[i] = curve.parameter(i+1);
 		}
 
 		MNode1D n1, n2;
