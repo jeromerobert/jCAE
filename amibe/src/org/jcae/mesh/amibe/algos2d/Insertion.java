@@ -115,10 +115,10 @@ public class Insertion
 					l = 0.0;
 					for (int ns = 0; ns < segments-1; ns++)
 					{
-						l += mesh.compGeom().distance(last, np[ns]);
-						last = np[ns];
+						l = mesh.compGeom().distance(last, np[ns]);
 						if (l > lcrit)
 						{
+							last = np[ns];
 							triNodes.add(last);
 							l = 0.0;
 							nrNodes++;
