@@ -1,0 +1,713 @@
+Thu Nov 18 15:24:26 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos2d/Insertion.java: When inserting new nodes, process in pseudo-random order to improve mesh quality.
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java: The split3() method accepts a new optional argument, to tell whether the vertex has to be inserted (e.g. if it is a boundary vertex).  It may be desirable to not insert nodes if they degrade mesh quality.
+	  Fix a long standing limitation with the isDelaunay() method, it worked only in the 2d parametrized space.
+	* src/org/jcae/mesh/amibe/util/QuadTree.java
+	  src/org/jcae/mesh/amibe/ds/Mesh.java:  Distances were computed into the 2d parametrized space, metrics are now used.
+	* src/org/jcae/mesh/amibe/ds/Vertex.java: Add new circumcenter(), inCircleTest3() and isPseudoIsotropic() methods, needed by OTriangle.isDelaunay().
+	* src/org/jcae/mesh/amibe/metrics/Metric2D.java: Add new methods to compute dot products and orthogonal vectors with riemannian metrics.
+
+Wed Nov 10 16:17:56 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/ds/SubMesh2D.java:  Revert the change from 09/27/2004, it breaks self-joining shapes (like cylinders).
+
+Tue Sep 28 11:24:06 CEST 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/ds/SubMesh2D.java:  We are hit by an OpenCascade bug, the length of a tiny edge computed by GCPnts_AbscissaPoint().length(C) returns a large value.  Add a workaround to discard edges when rangemax-rangemin < epsilon*rangemax.
+
+Mon Sep 27 16:26:28 CEST 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/ds/SubMesh2D.java:  In convertMMesh1DToSubMesh2D method, ensure that all MNode2D nodes bounded to the same MNode1D node have the same 2D coordinates.
+
+Wed Aug  4 13:52:26 CEST 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/ds/SubMesh2D.java:  Having epsilon lower than Metric2D.getLength()/100.0 is troublesome, it produces very flat triangles on small faces.
+
+Tue Aug  3 10:50:14 CEST 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/cad:  Add a wrapper layer to provide generic CAD functions.
+
+Tue Jul 27 10:18:13 CEST 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/algos/ComputeEdgesConnectivity.java:  Multiple edges and free edges were written onto the same file, and thus visualization was messed up.
+	* src/org/jcae/mesh/MeshGen.java
+	  src/org/jcae/mesh/algos/ComputeEdgesConnectivity.java
+	  src/org/jcae/view3d/XMLBranchGroup.java:  Display multiple edges.
+
+Tue Jul 20 12:11:24 CEST 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Mesh.java:  forceBoundaryEdge() now returns an OTriangle instance.
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java:  Finish handling of attributes.
+
+Mon Jul 19 09:26:06 CEST 2004
+
+	* src/org/jcae/mesh/mesher/algos1d/UniformLength.java:  Due to numerical errors in GCPnts_UniformAbscissa, this algorithm may create two 1D points with the same 2D coordinates, which is of course troublesome when meshing this face.
+	* src/org/jcae/mesh/mesher/ds/tools/Calculus3D.java:  Accurate computation of distances was disabled for large lengths, it is enabled again.
+	* src/org/jcae/mesh/mesher/ds/SubMesh2D.java:  Initial triangulation is performed with the new amibe mesher by calling RefineFace1.
+	* src/org/jcae/mesh/amube:  New mesher.
+
+Fri Jul  2 12:10:01 CEST 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/ds/MMesh1D.java
+	  src/org/jcae/mesh/xmldata/MMesh1DReader.java
+	  src/org/jcae/mesh/xmldata/MMesh1DWriter.java:  When exploring data structure with TopExp_Explorer, duplicated entries can be returned by OCC.  This caused problems when edges are linked to more than 2 surfaces, and is fixed now.
+
+Wed Jun 16 09:10:06 CEST 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/metrics/Matrice2D.java
+	  src/org/jcae/mesh/mesher/metrics/Matrix.java
+	  src/org/jcae/mesh/mesher/metrics/Metric2D.java
+	  src/org/jcae/mesh/mesher/metrics/Metric3D.java:  Replace Matrice2D by a generic Matrix class, and let Metric2D and Metric3D extend this class for 2D and 3D calculus.
+	* src/org/jcae/mesh/mesher/metrics/Metric3D.java:  Fix computeMetric3DCurv() and computeMetric3DCurvIso(); requires the latest libOccJava to get access to org.jcae.opencascade.jni.GeomLProp_SLProps.curvatureDirections.
+
+Thu Jun 10 18:16:10 CEST 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/ds/SubMesh2D.java (removeDegeneratedEdges):  Degenerated edges were not removed when 2D mesh is read from XML files.
+
+Fri May  7 14:13:39 CEST 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/ds/MMesh1D.java
+	  src/org/jcae/mesh/mesher/ds/MMesh3D.java
+	  src/org/jcae/mesh/mesher/ds/MNode1D.java
+	  src/org/jcae/mesh/xmldata/MMesh1DReader.java
+	  src/org/jcae/mesh/xmldata/SubMesh2DReader.java:  Fix references to 1D nodes.
+	  
+Fri Apr 30 12:15:52 CEST 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/ds/MFace2D.java
+	  src/org/jcae/mesh/util/Predicates.java:  Add circumcenter computation.
+
+Tue Apr 27 11:09:13 CEST 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/algos1d/UniformLength.java (computeEdge)
+	  src/org/jcae/mesh/mesher/ds/SubMesh2D.java (tooSmall):  Do not discretize degenerated edges.
+	* src/org/jcae/mesh/mesher/metrics/Metric2D.java
+	  src/org/jcae/mesh/mesher/metrics/Metric3D.java:  Rewrite to use Matrice2D.java, and computations are now performed on tangent plane.
+	* src/org/jcae/mesh/mesher/algos2d/CollapseEdges.java
+	  src/org/jcae/mesh/mesher/algos2d/RefineFace0.java
+	  src/org/jcae/mesh/mesher/algos2d/SmoothAngles.java
+	  src/org/jcae/mesh/mesher/algos2d/SmoothNodes3D.java
+	  src/org/jcae/mesh/mesher/algos2d/SmoothNodes3D.java
+	  src/org/jcae/mesh/mesher/ds/tools/Edge2DSwapper.java
+	  src/org/jcae/mesh/mesher/ds/tools/FindEdge2DCutter.java
+	  src/org/jcae/mesh/mesher/ds/tools/HoleFiller.java
+	  src/org/jcae/mesh/mesher/ds/MNode2D.java:  In MNode2D, add a new argument to orient2d().  Add a new inCircle() method.  Coordinates in orient2d() are transformed so that inCircle() can be applied on anisotropic meshing.
+	* src/org/jcae/mesh/mesher/ds/SubMesh2D.java:  New methods: writeUNV3D(), isEdgeValid(), checkDelaunay(), checkAndSwapDelaunay().  The hasOuterElements attribute is renamed into checkInvertedTriangles, and is temporarily made public.
+
+Mon Apr 26 17:37:03 CEST 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/algos2d/InsertSink.java:  New algo
+	* src/org/jcae/mesh/xmldata/jcae.dtd
+	  src/org/jcae/mesh/xmldata/SubMesh2DWriter.java
+	  src/org/jcae/view3d/XMLBranchGroup.java:  Add a <dimension> element to <submesh> because node coordinates have 2 values in 2D and 3 in 3D.
+
+Sat Mar 27 16:02:54 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+    * src/src/org/jcae/opencascade/jni/GCPnts_UniformDeflection.java: New file
+
+Fri Mar  5 13:55:41 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/algos2d/CollapseEdges.java
+	  src/org/jcae/mesh/mesher/algos2d/TargetSize.java
+	  src/org/jcae/mesh/mesher/ds/tools/HoleFiller.java:  Adds a 2nd argument to CollapseEdges.computeFace()
+
+	* src/org/jcae/mesh/mesher/ds/tools/HoleFiller.java:  Remeshes even when the removed edge does not preserve topology.
+
+	* src/org/jcae/mesh/MeshGen.java
+	  src/org/jcae/mesh/algos/NewMesher.java
+	  src/org/jcae/mesh/mesher/algos2d/CollapseEdges.java
+	  src/org/jcae/mesh/mesher/algos2d/CutEdges.java
+	  src/org/jcae/mesh/mesher/algos2d/SmoothAngles.java
+	  src/org/jcae/mesh/mesher/algos2d/TargetSize.java
+	  src/org/jcae/mesh/mesher/ds/SubMesh2D.java
+	  src/org/jcae/mesh/mesher/ds/tools/Edge2DSwapper.java
+	  src/org/jcae/mesh/mesher/ds/tools/HoleFiller.java
+	  src/org/jcae/mesh/mesher/ds/tools/Calculus.java
+	  src/org/jcae/mesh/mesher/ds/tools/Calculus2D.java
+	  src/org/jcae/mesh/mesher/ds/tools/Calculus3D.java:  Calculus is now an abstract class, instanciated by Calculus2D and Calculus3D.  Computation space is changed with SubMesh2D.pushCompGeom() and SubMesh2D.popCompGeom().
+	* src/org/jcae/mesh/mesher/algos2d/CollapseEdges.java:  compute() now returns a boolean to tell whether edges were collapsed or not.
+
+Thu Mar  4 16:43:21 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/algos2d/CollapseEdges.java
+	  src/org/jcae/mesh/mesher/algos2d/CutEdges.java
+	  src/org/jcae/mesh/mesher/algos2d/SmoothAngles.java
+	  src/org/jcae/mesh/mesher/algos2d/TargetSize.java
+	  src/org/jcae/mesh/mesher/ds/MEdge2D.java
+	  src/org/jcae/mesh/mesher/ds/MFace2D.java
+	  src/org/jcae/mesh/mesher/ds/MNode2D.java
+	  src/org/jcae/mesh/mesher/ds/SubMesh2D.java
+	  src/org/jcae/mesh/mesher/ds/tools/Edge2DSwapper.java
+	  src/org/jcae/mesh/mesher/ds/tools/HoleFiller.java
+	  src/org/jcae/mesh/mesher/ds/tools/Calculus.java: In the future, geometrical computations will be applied with 2D or 3D metrics depending on a SubMesh2D member.  Thus they are moved from MNMode2D to a new Calculus class. 
+
+Wed Mar  3 12:39:07 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/ds/SubMesh2D.java:  Add a new hasOuterElements private attribute so that isValid() can be called before outer elements are removed.
+
+Thu Feb 26 11:38:26 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/ds/SubMesh2D.java
+	  src/org/jcae/mesh/mesher/ds/tools/Edge2DSwapper.java
+	  src/org/jcae/mesh/mesher/ds/tools/FindEdge2DCutter.java:  Move some methods from SubMesh2D to new classes.
+
+Thu Feb 19 12:36:11 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/ds/MGroup3D.java
+	  src/org/jcae/mesh/mesher/ds/MMesh3D.java:  New MGroup3D class to handle groups.  Currently a patch is a group.
+
+Tue Feb 17 17:07:11 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/MeshGen.java
+	  src/org/jcae/mesh/algos/ComputeEdgesConnectivity.java
+	  src/org/jcae/mesh/xmldata/MMesh1DReader.java
+	  src/org/jcae/mesh/xmldata/MMesh1DWriter.java
+	  src/org/jcae/mesh/xmldata/MMesh3DWriter.java
+	  src/org/jcae/mesh/xmldata/SubMesh2DWriter.java
+	  src/org/jcae/mesh/xmldata/XMLHelper.java:  Make sure file names are relative to XML files.
+	* src/org/jcae/mesh/MeshGen.java
+	  src/org/jcae/mesh/xmldata/MMesh1DReader.java:  Accept .igs file on input.
+
+Tue Feb 10 12:25:16 CST 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/ds/MNode2D.java: Current quality() and quality3D() methods are based on an angle criterion.  This cannot easily be extended to non-euclidian metrics, so new qualityAniso() and qualityAniso3D() methods are added, their critewrion is the ratio between radii of inner and outer circles.
+	* src/org/jcae/mesh/mesher/ds/SubMesh2D.java:  Replace calls to quality() by qualityAniso() and qualityAniso3D().  This solves problems found with cylinders.
+
+Wed Feb  4 16:20:27 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/opencascade/jni/BRepAlgoAPI_Common.java
+	  src/org/jcae/opencascade/jni/BRepAlgoAPI_BooleanOperation.java
+	  src/org/jcae/cad/GeomEngineImpl.java: Replace BRepAlgoAPI_Common by BRepAlgoAPI_BooleanOperation.  This requires the latest libOccJava.
+
+	* src/org/jcae/CAD.idl src/org/jcae/cad/GeomEngineImpl.java:  The makeFuse() method is now part of BRepAlgoAPI_BooleanOperation.
+
+	* xul/cad/commands.xml xul/cad/icons.xml xul/cad/local_en.dtd
+	  xul/cad/menu.xml xul/cad/toolbar.xml
+	  script/initCAD.bsh script/initCADGui.bsh:  Add a 'Fuse' method
+
+Fri Jan 30 12:58:15 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/MMesh1DReader.java
+	  src/org/jcae/mesh/xmldata/SubMesh2DReader.java:  XML documents are not modified when read, so replace XPathAPI by the much faster CachedXPathAPI.
+	* src/org/jcae/mesh/MeshGen.java
+	  src/org/jcae/mesh/algos/ComputeEdgesConnectivity.java
+	  src/org/jcae/mesh/algos/NewMesher.java
+	  src/org/jcae/mesh/xmldata/MMesh1DWriter.java
+	  src/org/jcae/mesh/xmldata/MMesh3DWriter.java
+	  src/org/jcae/mesh/xmldata/MMesh1DReader.java
+	  src/org/jcae/mesh/xmldata/SubMesh2DReader.java
+	  src/org/jcae/mesh/xmldata/SubMesh2DWriter.java
+	  src/org/jcae/view3d/XMLBranchGroup.java:  Paths are now relative to the XML files.
+
+Mon Jan 26 10:16:32 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/algos/ComputeEdgesConnectivity.java
+	  src/org/jcae/mesh/xmldata/MMesh3DWriter.java
+	  src/org/jcae/view3d/XMLBranchGroup.java:  Replace uri XML attribute by location.
+
+	* src/org/jcae/mesh/MeshGen.java
+	  src/org/jcae/mesh/xmldata/JCAEXMLData.java
+	  src/org/jcae/mesh/xmldata/MMesh1DReader.java
+	  src/org/jcae/mesh/xmldata/MMesh1DWriter.java
+	  src/org/jcae/mesh/xmldata/SubMesh2DWriter.java
+	  src/org/jcae/mesh/xmldata/XMLHelper.java
+	  src/org/jcae/mesh/xmldata/SubMesh2DReader.java:  First working implementation of XML import/export.
+
+Thu Jan  8 09:57:56 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/metrics/Metric2D.java
+	  src/org/jcae/mesh/mesher/metrics/Metric3D.java:  New files to compute distances based on non-cartesian metrics.
+	* src/org/jcae/mesh/mesher/ds/MNode2D.java:  distance3D() now calls Metric2D.distance().
+	* src/org/jcae/mesh/algos/NewMesher.java
+	  src/org/jcae/mesh/mesher/ds/SubMesh2D.java:  The desired edge length is now intrinsically part of metrics and removed from SubMesh2D.
+	* src/org/jcae/mesh/mesher/algos2d/CollapseEdges.java
+	  src/org/jcae/mesh/mesher/algos2d/TargetSize.java:  Metrics are set so that desired edge length is 1.
+
+Tue Dec 16 19:45:36 CET 2003  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcaeNs.bat: Change a shell comment to a batch comment
+	* jcaeGui, jcaeGui.bat: Change bsh-1.3b2 to bsh-1.3.0
+	* build.xml: Make target dist-bin depends on target jar
+	
+Tue Dec 16 16:02:17 CET 2003  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae.bat, jcaeGui.bat, jcaeNs.bat, jcaeSrv.bat: Add batch script for Windows.
+	* build.xml:
+	Remove assert warning when running the javadoc target.
+	Fix execution rights on jcae* scripts.
+	Include base directory in tar file.
+	Add the documentation to the dist-bin target.
+	
+Tue Dec 16 11:18:28 CET 2003  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* INSTALL: Deprecated. Installation instructions are in doc/manual.html
+	* README: Move everythings to the user manual
+	* jcaeNs: Allow to run from other directories
+	* cvs-tags: Add a cvs-tags file to register tags and branch created on the cvs.
+
+Mon Dec 15 17:20:30 CET 2003  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcaeSrv: Allow to run with Opencascade 5.1.1
+
+Mon Dec  8 16:37:32 CET 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/algos2d/TargetSize.java:  Full checking of edges is too time consuming, so only checks the newly generated edges.
+	* src/org/jcae/mesh/mesher/ds/SubMesh2D.java:  Call the new RefineFace0 algorithm, which means that the old data structure is no more used when meshing.
+
+Fri Dec  5 17:30:29 CET 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/algos2d/CollapseEdges.java (collapse):  Do not collapse an edge if its star is not convex.  A better approach is to triangulate it, but care must be taken when it is not convex.
+
+Thu Dec  4 09:39:05 CET 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/algos2d/CollapseEdges.java:  Do not build a triangle which will become immutable.
+	* src/org/jcae/mesh/mesher/ds/SubMesh2D.java (flipEdge):  Fix the detection of non-convexity
+
+Wed Dec  3 15:17:31 CET 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/algos2d/RefineFace0.java:  Throws a RuntimeException() when a surface seems not being closed.
+	* src/org/jcae/mesh/algos/NewMesher.java:  Catches this exception and displays its error message.
+	* src/org/jcae/opencascade/jni/BRepBndLib.java
+	  src/org/jcae/opencascade/jni/Bnd_Box.java:  New classes to compute TopoDS_Shape boundary boxes.
+	* src/org/jcae/mesh/mesher/ds/SubMesh2D.java:  epsilon is no more static and is computed on each face by epsilon = diag(BBox)/1000.
+	* src/org/jcae/mesh/mesher/ds/SubMesh2D.java:  Rename findEdgeCuttingSegment into findEdgeCuttingEndpoints to have method names distinct from Mesh2D.
+	* src/org/jcae/mesh/mesher/ds/SubMesh2D.java:  New quality(), flipEdge() and flipEdges() methods.
+	* src/org/jcae/mesh/mesher/algos2d/TargetSize.java:  When edges are collapsed or refined, check and flip their neighbors.
+
+Tue Dec  2 17:19:37 CET 2003  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/mesh/: MeshGroupGUI.java, MeshObjectGUI.java: Highlight triangles whose quality (smallest angle) is less than 0.2 rad.
+	* src/org/jcae/mesh/sd/MeshGroup.java: It was assumed that a MeshGroup include the underlying elements of its finit elements (ex: the nodes of faces). It's false. getRawMesh, getFreeEdges and getTEdges are now fix according to this remark. It's now slower (and event deadly slow).
+	
+Tue Dec  2 12:03:35 CET 2003  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/mesh/MeshModuleGUI.java: Make "unv" the default filter for open command.
+	* src/org/jcae/mesh/MeshGroupImpl.java: Do not let the viewer3D crash when trying to display empty groups.
+	* src/org/jcae/mesh/drivers/UNVReader.java: Display a warning message when duplicated nodes have been merged
+	* src/org/jcae/mesh/algos/NewMesher.java: Keep meshing even if the mesing of a patch raise an exception. Name the temporary unv file with createTempFile() instead of "$.unv".
+	* script/initCADGui.bsh: Replace AWT FileDialog by Swing JFileChooser
+	* script/initMesh.bsh: Add meshWithMonitoring function. Remove runRefine and runSmoothing from mesh().
+
+Tue Dec  2 10:16:20 CET 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/ds/MEdge2D.java:  Add a new length attribute to compute edge length only once.
+
+	* src/org/jcae/mesh/mesher/algos2d/RefineFace0.java
+	  src/org/jcae/mesh/mesher/ds/SubMesh2D.java:  Change the prototype of flipEdge() so that it can be called both when determining best quality triangles and when flipping edges to rebuild constrained edges.
+
+	* src/org/jcae/mesh/mesher/ds/MNode2D.java (angle):  Better handling of degenerated triangles.
+
+	* src/org/jcae/mesh/mesher/ds/MEdge2D.java
+	  src/org/jcae/mesh/mesher/ds/MNode2D.java:  Revert previous change, all computations are now done in 2D space to perform initial Delaunay triangulation.
+
+Mon Dec  1 10:39:01 CET 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/ds/MNode2D.java (distance, angle, quality)
+	  src/org/jcae/mesh/mesher/ds/MFace2D.java (quality)
+	  src/org/jcae/mesh/mesher/algos2d/CutEdges.java
+	  src/org/jcae/mesh/mesher/ds/SubMesh2D.java:  In MNode2D.java, pass the current TopoDS_Face in arguments.  This enables computing distance between 2D nodes based on their 3D coordinates.  As edge lengths are already computed by using 3D coordinates, this change only improves triangle quality accuracy.
+
+Wed Nov 26 16:52:00 CET 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/algos/Mesh2D.java (checkAndSwap):  Change this recursive function to be iterative.
+
+Tue Nov 25 15:01:38 CET 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/algos/Mesh2D.java (updateMesh2D):  When a triangle is divided into 2 smaller triangles by cutting an edge, some nodes may become exterior and must be reassigned to the right triangle.  They are now put into the triangle sharing the discretized edge, but it may be wrong if nodes are very near to vertices, which should hopefully not happen.
+	* src/org/jcae/mesh/algos/MeshNode2D.java (orient2D):  Use org.jcae.mesh.util.Predicates.orient2d.
+	* src/org/jcae/mesh/mesher/algos1d/UniformLength.java (computeEdge):  When an edge is longer than discretization step, but has a large deflection, it is arbitrarily cut into 3 pieces.
+	* src/org/jcae/mesh/mesher/algos1d/UniformLength.java (computeEdge)
+	  src/org/jcae/mesh/mesher/ds/SubMesh2D.java (tooSmall):  Do not discretize degenerated edges.
+	* src/org/jcae/mesh/mesher/ds/SubMesh2D.java:  Set epsilon to 1.0, but it should be adjusted to mesh dimension.
+	* src/org/jcae/mesh/sd/MeshFace.java (computeArea):  Change area comutation
+	* src/org/jcae/mesh/sd/MeshNode.java
+	  src/org/jcae/mesh/MeshObjectImpl.java:  Change scale to 1000000.
+	  
+Fri Nov 21 17:53:19 CET 2003  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* log4j.properties: Add a sample showing how to log to a file
+	* src/org/jcae/opencascade/jni/Native.java: Enable and log finalize of Opencascade classes
+	* src/org/jcae/mesh/drivers/UNVReader.java: Allow display of unv files, even if the data structure is corrupted
+
+Tue Nov 18 11:06:00 CET 2003 Denis Barbier <barbier@users.sourceforge.net
+
+	* src/org/jcae/mesh/mesher/ds/MEdge3D.java
+	  src/org/jcae/mesh/mesher/ds/MNode3D.java
+	  src/org/jcae/mesh/mesher/ds/MFace3D.java
+	  src/org/jcae/mesh/mesher/ds/MMesh3D.java:  Oversimplify 3D data structure to minimize memory requirements.
+
+Mon Nov 17 10:04:30 CET 2003  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* script/initCAD.bsh: Fix an ArrayIndexOutOfBound exception in saveIGES
+
+Fri Nov 14 12:12:54 CET 2003  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcaeSrv: Disable Opencascade memory managment
+
+Tue Nov  4 17:52:02 CET 2003 Denis Barbier <barbier@users.sourceforge.net
+
+	* src/org/jcae/mesh/MeshObjectImpl.java:  Rename runBasicMesh() into runOldBasicMesh(), and add a new runBasicMesh() method which calls NewMesher.
+
+Mon Oct 13 12:51:49 CEST 2003 Denis Barbier <barbier@users.sourceforge.net
+
+	* src/org/jcae/mesh/sd/MeshMesh.java:  Put deleteInternalEdge method back, it is needed to prevent duplicated edges.
+
+Tue Oct  7 17:36:25 CEST 2003  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/mesh/util/: IteratorOfIterator.java, SingletonIterator.java: Add some iterator classes.
+	* build.xml: Enable compilation of assert keyword. Do some work for compilation with gcj.
+
+Tue Oct  7 17:07:19 CEST 2003  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/mesh/: MeshGroupImpl.java, ViewableMeshImpl.java,
+	algos/CleanMesh.java, algos/Mesh2D.java, algos/MiscAlgos.java,
+	algos/RefineFace.java, algos/Smoothing.java, algos/Triangle2D.java,
+	drivers/MSHReader.java, drivers/SFMReader.java,
+	drivers/UNVReader.java, drivers/UNVWriter.java,
+	drivers/XMLWriter.java, sd/MeshEdge.java, sd/MeshElement.java,
+	sd/MeshFace.java, sd/MeshGroup.java, sd/MeshMesh.java,
+	sd/MeshNode.java, sd/MeshOfCAD.java, sd/MeshVolume.java: Remove direct access to MeshMesh hashsets. They are replaced by iterators.
+	Remove direct access to MeshFace constructor. Replaced by MeshMesh.addTriangle.
+	Remove getEdges, getFaces... from elements. Replaced by getEdgesIterator...
+
+Thu Oct  2 18:29:47 CEST 2003  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/mesh/sd/: MeshOfCADCompound.java, MeshOfCADEntity.java: Replaced by MeshOfCAD
+	* src/org/jcae/mesh/: Algo.java, MeshGen.java, MeshObjectImpl.java, algos/BasicMesh.java, algos/BasicMesh2.java, algos/CleanMesh.java, algos/Mesh2D.java, algos/MiscAlgos.java, algos/RefineEdge.java, algos/RefineFace.java, algos/RefineFace2.java, algos/Smoothing.java, sd/MeshMesh.java, sd/MeshOfCAD.java:
+	Transform MeshOfCAD struture to a tree (it was flat). Nodes of the tree are all MeshOfCAD. MeshOfCADCompound and MeshOfCADEntity are deprecated.
+
+Wed Oct  1 16:39:23 CEST 2003  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/mesh/sd/MeshOfCADCompound.java: Define numberOfNodes, numberOfEdges, numberOfFaces. Using those of MeshMesh is wrong.
+	* script/initMesh.bsh: Replace runSmoothing by runFaceSmoothing
+	* src/org/jcae/mesh/: algos/MiscAlgos.java, MeshObjectImpl.java,
+	algos/Smoothing.java, sd/MeshNode.java: Move smoothing methods to a new  class (Smoothing)
+
+Wed Oct  1 09:06:06 CEST 2003 Denis Barbier <barbier@users.sourceforge.net
+
+	* src/org/jcae/mesh/MeshObjectImpl.java (runTargetSizeConvergence):  New method
+	* src/org/jcae/mesh/sd/MeshOfCADCompound.java (initMeshWire):  Whether an edge has to be put once (e.g. a boundary between 2 faces) or twice (as with cylinders) in the data structure does not depend on its vertex classification, so the test is changed.
+
+Tue Sep 30 17:15:14 CEST 2003  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/mesh/: Algo.java, MeshGen.java, MeshObjectImpl.java, ViewableMeshImpl.java, algos/BasicMesh.java, algos/BasicMesh2.java, algos/Mesh2D.java, algos/MiscAlgos.java, algos/RefineEdge.java, algos/RefineFace.java, algos/RefineFace2.java, algos/TopoHelper.java, drivers/MSHReader.java, drivers/SFMReader.java, drivers/UNVWriter.java, drivers/XMLWriter.java, sd/MeshEntMesh.java, sd/MeshMesh.java, sd/MeshOfCAD.java, sd/MeshOfCADCompound.java, sd/MeshOfCADEntity.java:
+	Refactoring of MeshMesh : Flat structure, iterator instead of HashSet...
+
+Mon Sep 29 09:47:02 CEST 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/sd/MeshMesh.java:  New checkValidity() method.
+
+	* src/org/jcae/mesh/algos/BasicMesh.java (compute)
+	  src/org/jcae/mesh/algos/BasicMesh2.java (compute)
+	  src/org/jcae/mesh/algos/RefineEdge.java (compute)
+	  src/org/jcae/mesh/algos/RefineFace.java (compute)
+	  src/org/jcae/mesh/algos/RefineFace2.java (compute):
+	  The compute() method now works on the full mesh, there is no more need to loop on submeshes.
+	* src/org/jcae/mesh/sd/MeshMesh.java: Rename printMesh() into print().
+
+Fri Sep 26 12:46:56 CEST 2003  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/mesh/: MeshGen.java, MeshObjectImpl.java, ViewableMeshImpl.java, algos/BasicMesh2.java, algos/MiscAlgos.java, algos/RefineEdge.java, algos/TopoHelper.java, sd/MeshEntMesh.java, sd/MeshMesh.java:
+	Move all algorithmic methods from MeshMesh to MiscAlgos. Move topological methods from MeshEntMesh to TopoHelper
+
+Fri Sep 26 10:09:59 CEST 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/sd/MeshMesh.java: New methods: setTypeAlgo, setDiscretisation and printMesh.
+	* src/org/jcae/mesh/sd/MeshMesh.java
+	  src/org/jcae/mesh/MesgGen.hava:: Change runMesh() interface, setTypeAlgo() and setDiscretisation() must now be called before runMesh() and meshing alggorithm is a new argument.
+
+Thu Sep 25 17:08:10 CEST 2003  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/mesh/sd/: MeshEntMesh.java, MeshMesh.java: Remove some getEdgesOfSubMesh. Replace by getEdgesIterator
+	* src/org/jcae/mesh/drivers/UNVWriter.java: use MeshMesh.getNodesIterator instead of MeshMesh.getNodesOfSubMesh
+	
+Thu Sep 25 16:34:21 CEST 2003  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/mesh/: algos/Mesh2D.java, drivers/XMLWriter.java, sd/MeshFace.java, sd/MeshNode.java,MeshGen.java, algos/BasicMesh.java, algos/BasicMesh2.java, algos/RefineEdge.java,
+	algos/RefineFace.java, algos/RefineFace2.java, sd/MeshMesh.java: Remove all MeshMesh.loggerMeshSd
+	
+Thu Sep 25 14:06:57 CEST 2003  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* build.xml: Remove runXXX targets
+	* jcaeSrv: Add profiling command line parameters. Change max memory of the VM. Some other minor changes
+	* jcaeGui: Echo a tips message for the -runScript command line option
+	* script/initMesh.bsh: Update tree view after newMesh
+	
+Wed Sep 24 12:15:17 CEST 2003  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* script/initFDMesh.bsh: Add an other test
+	* script/initFDMesh.bsh: Init the FDMesh module in beanshell
+
+Thu Sep  4 12:37:17 CEST 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/util/HashSet.java: New HashSet(int) constructor
+	* src/org/jcae/mesh/algos/Mesh2D.java (addMesh): Move calls to getEdgesOfSubMesh() and getNodesOfSubMesh() outside of the while loop.
+	* src/org/jcae/mesh/sd/MeshEdge.java: Cache hashCode computations for performance reasons
+	* src/org/jcae/mesh/sd/MeshGroup.java (getRawMesh): Storing nodes ID in a HashMap seems too be time-consuing, use an array instead.
+	* src/org/jcae/mesh/sd/MeshMesh.java (getAsGroup): Use iterators and addFast() to build element lists.
+
+Fri Aug  8 12:46:27 CEST 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/sd/MeshNode.java: Move orient2D() definition...
+	* src/org/jcae/mesh/algos/MeshNode2D.java: ... here.
+	* src/org/jcae/mesh/util/Calculs.java: Remove prodVect2D().
+
+Thu Aug  7 12:04:47 CEST 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/sd/Triangle2D.java: Move computeArea() definition...
+	* src/org/jcae/mesh/sd/MeshFace.java: ... here.
+	* src/org/jcae/mesh/sd/MeshMesh.java: Move addMesh() definition...
+	* src/org/jcae/mesh/sd/Mesh2D.java: ... here and change its interface.
+	* src/org/jcae/mesh/BasicMesh.java
+	  src/org/jcae/mesh/RefineEdge.java
+	  src/org/jcae/mesh/RefineFace.java
+	  src/org/jcae/mesh/sd/Mesh2D.java
+	  src/org/jcae/mesh/sd/MeshNode2D.java
+	  src/org/jcae/mesh/sd/Triangle2D.java:
+	  These classes implement the initial 2D meshing, and are put
+	  into a separate directory org.jcae.mesh.algos; they will be
+	  relocated again when policy about third-party meshers is up.
+	* src/org/jcae/mesh/util/Calculs.java: With these changes, angleVect() should return more accurate results in degenerated cases.
+	* src/org/jcae/mesh/MeshObjectImpl.java
+	  src/org/jcae/mesh/algos/BasicMesh2.java
+	  src/org/jcae/mesh/algos/RefineFace2.java:
+	  A slightly modified BasicMesh version.
+
+Wed Aug  6 12:22:56 CEST 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/sd/Mesh2D.java (refine2D): Remove useless isFrozen() checks.
+
+Tue Jul 29 10:18:24 CEST 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* script/initCAD.bsh script/initCADGui.bsh 
+	  src/org/jcae/cad/GeomEngineImpl.java
+	  src/org/jcae/opencascade/jni/BRepPrimAPI_MakeCone.java
+	  xul/cad/commands.xml xul/cad/dialogMakeCone.xml xul/cad/icons.xml
+	  xul/cad/images/cone.png xul/cad/local_en.dtd xul/cad/menu.xml
+	  xul/cad/toolbar.xml:
+	  Add support for cone meshing.
+
+Thu Jul 24 09:56:03 CEST 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/sd/MeshEdge.java (canDestroy):  Returns false
+	  when isWire or isFrozen.
+	* src/org/jcae/mesh/sd/MeshMesh.java (deleteInternalNode):  Remove sanity checks. They must be performed by canDestroy() if needed, but I am pretty sure that they are useless.  This dramatically speeds up mesh operations involving element deletion.
+	* src/org/jcae/mesh/sd/MeshMesh.java: Rearrange deleteInternal* methods.
+
+Thu Jul 10 17:30:58 CEST 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh.idl
+	  src/org/jcae/mesh/
+		drivers/MSHReader.java MeshModuleGUI.java 
+		MeshModuleImpl.java MeshObjectImpl.java:
+	  Read the 3D MESH format defined by INRIA.
+
+Thu Jul 10 14:37:00 CEST 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jCAE/doc/manual.texi: Add doc for mesh module
+	* jCAE/src/org/jcae/mesh/MeshObjectGUI.java: Add a display action
+	* jCAE/src/org/jcae/mesh/MeshObjectGUI.java: Add a display action
+	* jCAE/src/org/jcae/mesh/util/Calculs.java: Change angleVect() computation.  Node coordinates are stored internally as integers, which seems to cause trouble here.
+
+Wed Jul 9 18:40:00 CEST 2003 Marie-Helene Garat <mhgarat@users.sourceforge.net>
+
+	* jCAE/src/org/jcae/mesh/sd/MeshNode.java: -add getFreeEdges method - correct setCoord3D to take into account nodes on PST_3DPosition
+	* jCAE/src/org/jcae/mesh/sd/MeshMesh.java: - prepareEdgesToRefine: add a test in order to take into account meshes without topology - createMidPt: add the case PST_3DPosition -getFreeContour: improve code to treat contour with "eyes" 
+
+Wed Jul 9 12:23:00 CEST 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jCAE/src/org/jcae/mesh/MeshModuleGUI.java: Display groups in the tree as soon as they are loaded.
+	* jCAE/src/org/jcae/gui/Application.java: Fix bug : badly sized or refreshed window
+	* jCAE/script/init.bsh: Removed dirname and sourceRelative.  Beanshell 1.3 is now  required.  Remove piggy refresh. Fixed in org.jcae.gui.Application
+	* jCAE/src/org/jcae/mesh/MeshGroupGUI.java: Add a merge action.
+
+Tue Jul 8 17:46:00 CEST 2003 Marie-Helene Garat <mhgarat@users.sourceforge.net>
+
+	* jCAE/src/org/jcae/mesh/sd/MeshMesh.java: correction in addMesh method
+
+Tue Jul 8 16:20:00 CEST 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jCAE/src/org/jcae/mesh/ViewableMeshImpl.java: Remove temporary write to UNV. Prepare to disable picking
+	* jCAE/src/org/jcae/mesh/drivers/SFMReader.java: Add messages of
+	memory occupation
+	* jCAE/src/org/jcae/util/SortedVector.java: Not longer needed
+	* jCAE/src/org/jcae/opencascade/jni/: Remove french characters (accents) in comments (gcj do not like it)
+	* jCAE/src/org/jcae/opencascade/jni/: IGESControlStd_Reader.java, IGESControlStd_Writer.java: Use IGESControl_XXX in place of IGESControlStd.
+
+Tue Jul 8 11:55:00 CEST 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* CVSROOT/loginfo: commit list is active. Remove barbier.
+	* CVSROOT/loginfo: Add log redirection to mailing list
+
+Mon Jul 7 17:06:00 CEST 2003 Marie-Helene Garat <mhgarat@users.sourceforge.net>
+
+	* jCAE/src/org/jcae/mesh/sd/MeshMesh.java: Correct createMidPt Add refineSubMesh method
+	  
+Mon Jul  7 10:11:24 CEST 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/opencascade/jni/GCPnts_AbscissaPoint.java:  New file.
+	* src/org/jcae/opencascade/jni/GCPnts_UniformAbscissa.java
+	  (initialize):  Fix polymorphic calls; needs an up-to-date libOccJava.
+	* src/org/jcae/opencascade/jni/GeomLProp_CLProps.java
+	  (curvature):  New method.
+
+Fri Jul  4 09:58:25 CEST 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/sd/MeshMesh.java (refine):  This function did nothing if current mesh is not at top level.
+
+Thu Jul  3 13:05:00 CEST 2003 Marie-Helene Garat <mhgarat@users.sourceforge.net>
+
+	* jCAE/src/org/jcae/mesh/sd/MeshMesh.java: Add getNode(float[]) method Correction in fillContour method: add a test before face creation
+
+Wed Jul  2 16:28:43 CEST 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/RefineEdge.java (buildPointsOnEdge):  The previous patch was wrong, so revert it and call GCPnts_UniformAbscissa.initialize by giving the desired number of points.  A new function initializeNb is added in libOccJava.
+
+Tue Jul  1 14:29:25 CEST 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/RefineEdge.java (buildPointsOnEdge):  The GCPnts_UniformAbscissa algorithm returns fixed length segments, but the last one may be very small.  It is now used to compute the number of points, after what they are equally distributed along the edge.
+	* src/org/jcae/mesh/RefineEdge.java: Remove paramMin and paramMax members, and the arrondi() method.
+
+Tue Jul  1 13:10:00 CEST 2003 Marie-Helene Garat <mhgarat@users.sourceforge.net>
+
+	* jCAE/src/org/jcae/mesh/sd/MeshMesh.java: - replace addAll method by addAllEdges method - add getFreeContour method - correct an indice error in fillContour method
+	* jCAE/src/org/jcae/mesh/drivers/: UNVWriter.java, XMLWriter.java: writeMesh method: add a test to not record useless node
+
+Fri Jun 27 15:20:29 CEST 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/RefineEdge.java: Add a new argument to buildPointsOnEdge() and remove the myElmSize member.
+	* src/org/jcae/mesh/RefineEdge.java (compute): Do not divide discretization parameter by 4.
+	* src/org/jcae/mesh/sd/MeshMesh.java (targetSizeConvergence): Change method arguments, and add a check against edges to ensure that they were not previously collapsed.
+
+Fri Jun 27 13:38:00 CEST 2003 Marie-Helene Garat <mhgarat@users.sourceforge.net>
+
+	* jCAE/src/org/jcae/mesh.idl: Add pick method
+	* jCAE/src/org/jcae/mesh/: MeshSceneImpl.java, ViewableMeshImpl.java: Add pick method
+	* jCAE/src/org/jcae/mesh/sd/MeshNode.java: Correct equals method Correct setPosition method Implement another distance method
+	* jCAE/src/org/jcae/mesh/sd/MeshMesh.java: Add getEdgesIterator() method
+	* jCAE/src/org/jcae/mesh/sd/MeshFace.java: Add getClosestEdge method Displacement of ptInTriangle method
+	* jCAE/src/org/jcae/mesh/drivers/SFMReader.java: Use PST_3DPosition to construct MeshNode read
+
+Thu Jun 26 10:17:00 CEST 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jCAE/src/org/jcae/mesh/sd/: MeshFace.java, MeshMesh.java, Triangle2D.java: Reduce the memory size of MeshFace by changing edgelist to an array
+
+Wed Jun 25 17:51:00 CEST 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jCAE/src/org/jcae/mesh/MeshGroupGUI.java: fix bug: link the ViewableMesh to a scene in ActionDisplay
+	* jCAE/src/org/jcae/mesh/sd/MeshNode.java: change elementlist to array, to reduce memory size of MeshNode
+	* jCAE/src/org/jcae/mesh/drivers/SFMReader.java: Read node with IDs not equal to "-1"
+	* jCAE/src/org/jcae/view3d/viewer/ViewPanel.java: canvas_mouseClicked : warn if the object is not linked to any scene
+	* jCAE/: src/org/jcae/module.idl, build.xml, src/org/jcae/util/JCAEModuleImpl.java: Some preparations to allow destruction of CORBA objects
+
+Tue Jun 24 17:22:59 CEST 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/sd/MeshMesh.java (collapse): Literature tells us that edge contraction must not be performed when topology is not preserved, so the algorithm described in specs is not robust; here is another algorithm.
+	* src/org/jcae/mesh/sd/MeshEdge.java (canContract):  New method to check whether an edge contraction preserves topology.
+	* src/org/jcae/mesh/sd/MeshElement.java (getTopologicContour): Fix several errors introduced when making it generic
+	* src/org/jcae/mesh/sd/MeshNode.java (getNeighboursNodes): Removes current node from the neighbours list.
+
+Fri Jun 20 15:34:46 CEST 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/utils/Calculs.java (prodVect2D):  New method to compute the 2D outer product.
+	* src/org/jcae/mesh/sd/MeshNode.java (distance) (angle) (orient2D):  Call Calculs methods instead of duplicating code.
+	* src/org/jcae/mesh/sd/MeshNode2D.java (ptOnEdge):  This method is called to test if a point is interior to a triangle or on one if its edges, so we only have to test if the 3 points are aligned.
+	* src/org/jcae/mesh/sd/MeshEdge.java (getTopologicContour)
+	  src/org/jcae/mesh/sd/MeshFace.java (getTopologicContour)
+	  src/org/jcae/mesh/sd/MeshNode.java (getTopologicContour): Move method...
+	* src/org/jcae/mesh/sd/MeshElement.java (getTopologicContour): ... here.
+
+Thu Jun 19 18:08:00 CEST 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jCAE/src/org/jcae/mesh/: MeshModuleGUI.java, MeshObjectGUI.java: make UNV the default format
+	* jCAE/src/org/jcae/mesh/drivers/UNVWriter.java: Renumber faces before writing them
+
+Thu Jun 19 16:42:00 CEST 2003 Marie-Helene Garat <mhgarat@users.sourceforge.net>
+
+	* jCAE/src/org/jcae/mesh/drivers/UNVReader.java: add 2 hashmaps (private member) in order to improve readFace and readGroup methods
+
+Thu Jun 19 16:16:25 CEST 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* Add the delete MeshGroup feature
+
+Thu Jun 19 08:40:28 EDT 2003 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/sd/MeshMesh.java (runCollapse):  Loops until no edge is collapsed.
+	* src/org/jcae/mesh/sd/MeshNode2D.java (ptOnEdge):  Fix this test, it produced wrong result.
+
+Wed Jun 18 16:39:25 CEST 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* use the new BasicMesh class in runBasicMesh
+	* Move saveXXX from MeshGroup to MeshObject
+	* Allow to copy a group from a mesh to an other mesh
+
+Tue Jun 17 12:39:25 CEST 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* Explode groups whenever there is no groups in a mesh
+	* Move importXXX from MeshObject to MeshModule
+
+Mon Jun 16 20:33:25 CEST 2003 Marie-Helene Garat <mhgarat@users.sourceforge.net>
+
+	* Move runBasicMesh to a class named BasicMesh which inherit the Algo class
+	* Create the PST_3DPosition class
+	* Create the UNVReader and add group support to UNVWriter
+
+Fri Jun 13 18:38:25 CEST 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* Change title of view windows
+	* Display mesh groups with differents colors
+	* Display file name of a MeshOject, in the NamingServiceTree
+	* Add a "Explode groups" action for MeshGroup
+	* Add display action and refresh tree after actions
+
+Tue Jun 10 12:33:25 CEST 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* Allow to save a mesh from the GUI
+
+Fri Jun 6 19:28:25 CEST 2003 Marie-Helene Garat <mhgarat@users.sourceforge.net>
+
+	* Add some mesh improvement methods in the mesher
+	* adjustment of discretisation length for TRIA3 meshing in RefineEdge.java
+
+Wed Jun 4 17:03:25 CEST 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* Add rename feature on MeshGroups
+	* Add NamingServiceTree widget in the main GUI
+
+Tue May 27 18:43:25 CEST 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* Add bad triangles detection
+	* some speed improvement in the mesher
+	* Add a zoomTo sphere method in the 3D viewer
+
+Mon May 26 15:34:25 CEST 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* Added support for group management in the mesh module
+
+Fri May 23 15:02:25 CEST 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+    
+	* Add XML and UNV writers
+	* Remove _type field in PST_Position and create PST_UNDEFINED
+
+Fri May 16 16:18:39 EDT 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* Added the importSFM function in the MeshObject classe
+
+Tue May 13 16:19:29 EDT 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+	
+	* Added free and multiedge detection (see showFreeEdges, showTEdges, showMesh in MeshScene).
+
+Tue Apr 29 18:08:27 EDT 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* Added a doc directory with a texinfo file 
+
+Tue Mar 25 11:25:26 EST 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* Added Sewing support (see makeSewing in script/initCAD.bsh and BRepOffsetAPI_Sewing in opencascade.idl)
+	* Use IGESControl instead of IGESControlStd
+	* Create classes directory before compilation
+
+Mon Mar  3 13:55:46 EST 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* Freshly created ChangeLog.

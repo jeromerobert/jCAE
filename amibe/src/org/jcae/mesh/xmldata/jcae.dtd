@@ -1,0 +1,28 @@
+<!ELEMENT jcae (mesh)+>
+<!ELEMENT mesh (shape?,submesh+)>
+<!ATTLIST mesh id CDATA #IMPLIED>
+<!ELEMENT shape (file)>
+<!ELEMENT file EMPTY>
+<!ATTLIST file format CDATA #REQUIRED
+               location CDATA #REQUIRED
+               offset CDATA "0">
+<!ELEMENT submesh (flag*,description?,subshape?,dimension?,nodes?,beams?,triangles?,result*,groups?)>
+<!ATTLIST submesh id CDATA #IMPLIED>
+<!ELEMENT description (#PCDATA)>
+<!ELEMENT flag EMPTY>
+<!ATTLIST flag value CDATA #REQUIRED>
+<!ELEMENT subshape (#PCDATA)>
+<!ELEMENT dimension (#PCDATA)>
+<!ELEMENT nodes (number,file,references?,labels?)>
+<!ELEMENT number (#PCDATA)>
+<!ELEMENT references (number,file)>
+<!ELEMENT labels (file)>
+<!ELEMENT beams (number,file,labels?)>
+<!ELEMENT triangles (number,file,labels?)>
+<!ELEMENT result (file)>
+<!ATTLIST result id CDATA #IMPLIED>
+<!ELEMENT groups (group+)>
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT group (name, number, file)>
+<!ATTLIST group id CDATA #IMPLIED>
+

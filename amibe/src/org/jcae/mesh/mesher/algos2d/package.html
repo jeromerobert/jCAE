@@ -1,0 +1,27 @@
+<body>
+Algorithms for 2D meshing.
+
+<p>
+These classes implement algorithms for 2D meshing.  They have all a
+roughly similar layout, but it has not been finalized yet, which is
+why there is no well-defined interface.
+</p>
+
+<p>
+All algorithms apply on {@link org.jcae.mesh.mesher.ds.SubMesh2D} instances,
+so this instance is passed as an argument of constructors.  Some algorithms
+may also accept optional arguments, but a better option would be to have
+another method for changing default parameters.  Meshing is performed by
+calling the <code>compute()</code> method.
+</p>
+
+<p>
+Sometimes algorithms may be called from other algos (like
+{@link org.jcae.mesh.mesher.algos2d.CutEdges} and
+{@link org.jcae.mesh.mesher.algos2d.CollapseEdges} which are invoked by
+{@link org.jcae.mesh.mesher.algos2d.TargetSize}).  For convenience,
+a <code>computeFace(org.jcae.mesh.mesher.ds.SubMesh2D submesh2d)</code>
+static method is then defined.
+</p>
+
+</body>

@@ -1,0 +1,95 @@
+<body>
+Data structures for meshing.
+
+<p>
+These classes are the data structures used when meshing a topological shape.
+They can be combined into three groups:
+</p>
+<dl>
+  <dt>{@link org.jcae.mesh.mesher.ds.MNode1D},
+      {@link org.jcae.mesh.mesher.ds.MNode2D},
+      {@link org.jcae.mesh.mesher.ds.MNode3D},
+      {@link org.jcae.mesh.mesher.ds.MEdge1D},
+      {@link org.jcae.mesh.mesher.ds.MEdge2D},
+      {@link org.jcae.mesh.mesher.ds.MFace2D} and
+      {@link org.jcae.mesh.mesher.ds.MFace3D}.</dt>
+    <dd>Mesh entities.</dd>
+  <dt>{@link org.jcae.mesh.mesher.ds.SubMesh1D} and
+      {@link org.jcae.mesh.mesher.ds.SubMesh2D}.</dt>
+    <dd>Portions of meshes associated with a given topological element
+      (edges in 1D, surfaces in 2D).</dd>
+  <dt>{@link org.jcae.mesh.mesher.ds.MMesh0D},
+      {@link org.jcae.mesh.mesher.ds.MMesh1D} and
+      {@link org.jcae.mesh.mesher.ds.MMesh3D}.</dt>
+    <dd>Meshes of the whole geometry.</dd>
+</dl>
+
+<p>
+When designing these classes two main goals were taken into account:
+</p>
+<ol>
+  <li>To compute very large meshes (containing several million faces).</li>
+  <li>To allow distributed meshing.</li>
+</ol>
+
+<p>
+Some classes do not exist (like <code>MMesh2D</code>) because processing can be
+performed more efficiently without these classes.
+</p>
+
+<p>
+{@link org.jcae.mesh.mesher.ds.MMesh0D} is a set of <code>TopoDS_Vertex</code>,
+it contains all the geometrical vertices of the geometry.  Uniqueness of 3D
+nodes is guaranteed at this stage, a surjective map is defined between
+topological vertices and geometrical vertices.
+</p>
+
+<p>
+{@link org.jcae.mesh.mesher.ds.MMesh1D} is a 1D discretization of the whole
+geometry.  It is implemented via a map which binds <code>TopoDS_Edge</code>
+instances to {@link org.jcae.mesh.mesher.ds.SubMesh1D}.
+</p>
+
+<p>
+{@link org.jcae.mesh.mesher.ds.SubMesh1D} is a 1D discretization of a given
+topological edge, and end points are taken into a {@link
+org.jcae.mesh.mesher.ds.MMesh0D} instance to guarantee node uniqueness.
+Typically 1D discretization is very fast, but as shared points belong to
+a unique {@link org.jcae.mesh.mesher.ds.MMesh0D} instance, this step
+can be distributed if it is worth.
+This class contains a set of {@link org.jcae.mesh.mesher.ds.MNode1D} and
+{@link org.jcae.mesh.mesher.ds.MEdge1D} instances.
+</p>
+
+<p>
+{@link org.jcae.mesh.mesher.ds.MMesh3D} is a 3D discretization of the whole
+geometry.  This is by far the largest structure, so all elements which were
+not absolutely necessary have been removed, and it now mostly contains a
+set of {@link org.jcae.mesh.mesher.ds.MFace3D} instances and a set of
+{@link org.jcae.mesh.mesher.ds.MNode3D} instances.  Edges are not stored
+to save space.
+3D elements are built by projecting {@link
+org.jcae.mesh.mesher.ds.SubMesh2D} instances into 3D space.  Nodes
+coordinates are computed from their 2D coordinates, triangle topology is
+preserved, and nodes uniqueness on boundaries is guaranteed because all
+{@link org.jcae.mesh.mesher.ds.SubMesh2D} instances are bound to the same
+{@link org.jcae.mesh.mesher.ds.MMesh1D} instance.
+</p>
+
+<p>
+{@link org.jcae.mesh.mesher.ds.MNode3D} and 
+{@link org.jcae.mesh.mesher.ds.MFace3D} classes are very simple, the former
+carry out 3D coordinates and the latter is defined by its three vertices.
+</p>
+
+<p>
+Since most of the time is spent meshing 2D surfaces, great care must be
+taken of {@link org.jcae.mesh.mesher.ds.SubMesh2D} class.  Topological
+faces are meshed independently, so there is no memory requirements here,
+and everything needed to speed up processing is kept.  This class currently
+contains a set of {@link org.jcae.mesh.mesher.ds.MNode2D} instances, a set of
+{@link org.jcae.mesh.mesher.ds.MEdge2D} instances and a set of
+{@link org.jcae.mesh.mesher.ds.MFace2D} instances.
+</p>
+
+</body>
