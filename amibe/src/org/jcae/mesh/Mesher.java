@@ -173,7 +173,7 @@ public class Mesher
 					xmlFile = "jcae2d."+iFace;
 					m2dTo3D.computeRefs(xmlFile);
 				}
-				m2dTo3D.initialize("jcae3d");
+				m2dTo3D.initialize("jcae3d", System.getProperty("org.jcae.mesh.Mesher.writeNormals", "false").equals("true"));
 				iFace = 0;
 				for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
 				{

@@ -92,7 +92,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 		logger.debug("Total: "+nrRefs+" references");
 	}
 	
-	public void initialize(String xmlOutFile)
+	public void initialize(String xmlOutFile, boolean writeNormal)
 	{
 		coordRefs = new double[3*nrRefs];
 		xrefs = new TIntIntHashMap(nrRefs);
@@ -116,7 +116,8 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 		
 			nodesOut = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile)));
 			refsOut = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile, true)));
-			normalsOut = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(normalsFile)));
+			if (writeNormal)
+				normalsOut = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(normalsFile)));
 			trianglesOut = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(trianglesFile)));
 			groupsOut = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(groupsFile)));
 		}
@@ -144,7 +145,8 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				nodesOut.writeDouble(coordRefs[i]);
 			nodesOut.close();
 			refsOut.close();
-			normalsOut.close();
+			if (normalsOut != null)
+				normalsOut.close();
 			trianglesOut.close();
 			groupsOut.close();
 			
@@ -278,8 +280,11 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				{
 					// Local node number for this group
 					int ind = trianglesIn.readInt();
-					for (int k = 0; k < 3; k++)
-						normalsOut.writeDouble(normals[3*ind+k]);
+					if (normalsOut != null)
+					{
+						for (int k = 0; k < 3; k++)
+							normalsOut.writeDouble(normals[3*ind+k]);
+					}
 					if (ind < numberOfNodes - numberOfReferences)
 						ind += nodeOffset;
 					else
