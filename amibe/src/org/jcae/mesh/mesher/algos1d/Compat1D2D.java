@@ -112,11 +112,7 @@ public class Compat1D2D
 				if (Double.isNaN(cmin) || Double.isNaN(cmax))
 					continue;
 				if (cmin > cmax)
-				{
-					double temp = cmin;
-					cmin = cmax;
-					cmax = temp;
-				}
+					cmax = cmin;
 				curvmax[i] = Math.max(curvmax[i], cmax);
 			}
 		}
