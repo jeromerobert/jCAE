@@ -239,6 +239,9 @@ public class OCCDiscretizeCurve3D
 			return;
 		int nsegments = 10;
 		double [] xyz;
+		//  See org.jcae.mesh.amibe.metrics.Metric3D for an
+		//  explanation about this sqrt(2).
+		defl *= Math.sqrt(2);
 		while (true)
 		{
 			nsegments *= 10;
