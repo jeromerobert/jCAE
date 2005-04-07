@@ -135,7 +135,10 @@ public class Metric3D extends Matrix
 		double epsilon = defl * cmax;
 		if (epsilon >= 1.0)
 			epsilon = 1.0;
-		double alpha2 = 4.0 * epsilon * (2.0 - epsilon);
+		//  In org.jcae.mesh.amibe.algos2d.Insertion, mean lengths are
+		//  targeted, and there is a sqrt(2) factor.  Division bt 2
+		//  provides a maximal deflection, 
+		double alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
 		data[0][0] = cmax*cmax / alpha2;
 		if (isotropic)
 			data[1][1] = data[0][0];
@@ -146,7 +149,7 @@ public class Metric3D extends Matrix
 				epsilon *= cmin / cmax;
 				if (epsilon >= 1.0)
 					epsilon = 1.0;
-				alpha2 = 4.0 * epsilon * (2.0 - epsilon);
+				alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
 			}
 			data[1][1] = cmin*cmin / alpha2;
 		}
@@ -187,7 +190,10 @@ public class Metric3D extends Matrix
 		double epsilon = defl;
 		if (epsilon > 1.0)
 			epsilon = 1.0;
-		double alpha2 = 4.0 * epsilon * (2.0 - epsilon);
+		//  In org.jcae.mesh.amibe.algos2d.Insertion, mean lengths are
+		//  targeted, and there is a sqrt(2) factor.  Division bt 2
+		//  provides a maximal deflection, 
+		double alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
 		data[0][0] = cmax*cmax / alpha2;
 		if (isotropic)
 		{
@@ -199,7 +205,7 @@ public class Metric3D extends Matrix
 			epsilon *= cmax / cmin;
 			if (epsilon > 1.0)
 				epsilon = 1.0;
-			alpha2 = 4.0 * epsilon * (2.0 - epsilon);
+			alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
 			data[1][1] = cmin*cmin / alpha2;
 			data[2][2] = 1.0/discr/discr;
 		}
