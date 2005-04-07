@@ -47,8 +47,9 @@ public interface CADGeomCurve3D
 	 * Discretize this curve
 	 * @param maxlen Maximum length of created arc
 	 * @param deflection Maximum deflection
+	 * @param relDefl set to true if deflective is relative
 	 */
-	public void discretize(double maxlen, double deflection);
+	public void discretize(double maxlen, double deflection, boolean relDefl);
 	
 	public void splitSubsegment(int numseg, int nrsub);
 	

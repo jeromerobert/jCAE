@@ -52,7 +52,7 @@ public class UniformLengthDeflection
 	/**
 	 * Explores each edge of the mesh and calls the discretisation method.
 	 */
-	public void compute()
+	public void compute(boolean relDefl)
 	{
 		int nbTEdges = 0, nbNodes = 0, nbEdges = 0;
 		/* Explore the shape for each edge */
@@ -76,7 +76,7 @@ public class UniformLengthDeflection
 				continue;
 			nbNodes -= submesh1d.getNodes().size();
 			nbEdges -= submesh1d.getEdges().size();
-			if (computeEdge(mesh1d.getMaxLength(), mesh1d.getMaxDeflection(), submesh1d))
+			if (computeEdge(mesh1d.getMaxLength(), mesh1d.getMaxDeflection(), relDefl, submesh1d))
 				nbTEdges++;
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
@@ -99,7 +99,7 @@ public class UniformLengthDeflection
 	 * @return <code>true</code> if this edge was successfully discrtetized,
 	 * <code>false</code> otherwise.
 	 */
-	private boolean computeEdge(double maxlen, double deflection, SubMesh1D submesh1d)
+	private boolean computeEdge(double maxlen, double deflection, boolean relDefl, SubMesh1D submesh1d)
 	{
 		int nbPoints;
 		boolean isCircular = false;
@@ -146,7 +146,7 @@ public class UniformLengthDeflection
 		else
 		{
 			range = curve.getRange();
-			curve.discretize(maxlen, deflection);
+			curve.discretize(maxlen, deflection, relDefl);
 			nbPoints = curve.nbPoints();
 			paramOnEdge = new double[nbPoints];
 			for (int i = 0; i < nbPoints; i++)

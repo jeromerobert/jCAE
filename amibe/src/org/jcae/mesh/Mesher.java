@@ -76,6 +76,7 @@ public class Mesher
 		CADShapeBuilder factory = CADShapeBuilder.factory;
 		CADShape shape = factory.newShape(brepfilename);
 		CADExplorer expF = factory.newExplorer();
+		boolean relDefl = System.getProperty("org.jcae.mesh.amibe.ds.Metric3D.relativeDeflection", "true").equals("true");
 		if (System.getProperty("org.jcae.mesh.Mesher.mesh1d", "true").equals("true")) {
 			//  Step 1: Compute 1D mesh
 			logger.info("1D mesh");
@@ -86,7 +87,7 @@ public class Mesher
 			else
 			{
 				mesh1D.setMaxDeflection(defl);
-				new UniformLengthDeflection(mesh1D).compute();
+				new UniformLengthDeflection(mesh1D).compute(relDefl);
 				new Compat1D2D(mesh1D).compute();
 			}
 			//  Store the 1D mesh onto disk
@@ -99,7 +100,6 @@ public class Mesher
 			mesh1D.setMaxLength(discr);
 			Metric3D.setLength(discr);
 			Metric3D.setDeflection(defl);
-			boolean relDefl = System.getProperty("org.jcae.mesh.amibe.ds.Metric3D.relativeDeflection", "true").equals("true");
 			Metric3D.setRelativeDeflection(relDefl);
 	
 			//  Prepare 2D discretization

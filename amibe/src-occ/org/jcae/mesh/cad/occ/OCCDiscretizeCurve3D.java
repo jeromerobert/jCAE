@@ -233,7 +233,7 @@ public class OCCDiscretizeCurve3D
 		adjustAbscissas(xyz, new checkRatioLength());
 	}
 	
-	public void discretizeMaxDeflection(double defl)
+	public void discretizeMaxDeflection(double defl, boolean relDefl)
 	{
 		if (defl <= 0.0)
 			return;
