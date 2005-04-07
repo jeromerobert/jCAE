@@ -88,7 +88,7 @@ public class Mesher
 			{
 				mesh1D.setMaxDeflection(defl);
 				new UniformLengthDeflection(mesh1D).compute(relDefl);
-				new Compat1D2D(mesh1D).compute();
+				new Compat1D2D(mesh1D).compute(relDefl);
 			}
 			//  Store the 1D mesh onto disk
 			MMesh1DWriter.writeObject(mesh1D, xmlDir, xmlFile, xmlBrepDir, brepFile);
@@ -131,7 +131,7 @@ public class Mesher
 					{
 						new BasicMesh(mesh, mesh1D).compute();
 						new CheckDelaunay(mesh).compute();
-						if (!relDefl)
+						if (defl > 0.0 && !relDefl)
 							new EnforceAbsDeflection(mesh).compute();
 						mesh.removeDegeneratedEdges();
 						xmlFile = "jcae2d."+iFace;

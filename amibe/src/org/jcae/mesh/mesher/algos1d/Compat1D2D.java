@@ -46,7 +46,7 @@ public class Compat1D2D
 	/**
 	 * Explores each edge of the mesh and calls the discretisation method.
 	 */
-	public void compute()
+	public void compute(boolean relDefl)
 	{
 		int nbTEdges = 0, nbNodes = 0, nbEdges = 0;
 		/* Explore the shape for each edge */
@@ -58,7 +58,7 @@ public class Compat1D2D
 			if (null == submesh1d)
 				continue;
 			HashSet faceset = mesh1d.getAdjacentFaces(E);
-			if (null != faceset && computeEdge(submesh1d, faceset, mesh1d.getMaxDeflection()))
+			if (null != faceset && computeEdge(submesh1d, faceset, mesh1d.getMaxDeflection(), relDefl))
 				nbTEdges++;
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
@@ -69,7 +69,7 @@ public class Compat1D2D
 		assert(mesh1d.isValid());
 	}
 
-	private boolean computeEdge(SubMesh1D submesh1d, HashSet faceset, double deflection)
+	private boolean computeEdge(SubMesh1D submesh1d, HashSet faceset, double deflection, boolean relDefl)
 	{
 		ArrayList edgelist = submesh1d.getEdges();
 		ArrayList nodelist = submesh1d.getNodes();
@@ -94,8 +94,6 @@ public class Compat1D2D
 		}
 		curve3d.setDiscretization(paramOnEdge);
 		
-		double epsilon = deflection;
-		double alpha2 = 4.0 * epsilon * (2.0 - epsilon);
 		for (Iterator itf = faceset.iterator(); itf.hasNext(); )
 		{
 			CADFace F = (CADFace) itf.next();
@@ -129,9 +127,17 @@ public class Compat1D2D
 				(coord[3*i]   - coord[3*i+3]) * (coord[3*i]   - coord[3*i+3]) +
 				(coord[3*i+1] - coord[3*i+4]) * (coord[3*i+1] - coord[3*i+4]) +
 				(coord[3*i+2] - coord[3*i+5]) * (coord[3*i+2] - coord[3*i+5]);
+			double epsilon = deflection;
+			if (!relDefl)
+				epsilon *= curvmax[i];
+			if (deflection > 1.0)
+				epsilon = 1.0;
+			double alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
 			if (dist2 * curvmax[i] * curvmax[i] > 4.0 * alpha2)
 			{
 				int nrsub = (int) (Math.sqrt(dist2 * curvmax[i] * curvmax[i] / alpha2) + 0.5);
+				if (nrsub > 100)
+					nrsub = 100;
 				curve3d.splitSubsegment(i+offset, nrsub);
 				offset += nrsub - 1;
 			}
