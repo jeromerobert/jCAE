@@ -110,7 +110,10 @@ public class Compat1D2D
 				double cmin = Math.abs(surface.minCurvature());
 				double cmax = Math.abs(surface.maxCurvature());
 				if (Double.isNaN(cmin) || Double.isNaN(cmax))
+				{
+					logger.debug("Undefined curvature");
 					continue;
+				}
 				if (cmin > cmax)
 					cmax = cmin;
 				curvmax[i] = Math.max(curvmax[i], cmax);
@@ -119,19 +122,20 @@ public class Compat1D2D
 		int offset = 0;
 		for (int i = 0; i < curvmax.length - 1; i++)
 		{
+			double meanCurv = Math.max(curvmax[i], curvmax[i+1]);
 			double dist2 =
 				(coord[3*i]   - coord[3*i+3]) * (coord[3*i]   - coord[3*i+3]) +
 				(coord[3*i+1] - coord[3*i+4]) * (coord[3*i+1] - coord[3*i+4]) +
 				(coord[3*i+2] - coord[3*i+5]) * (coord[3*i+2] - coord[3*i+5]);
 			double epsilon = deflection;
 			if (!relDefl)
-				epsilon *= curvmax[i];
+				epsilon *= meanCurv;
 			if (epsilon > 1.0)
 				epsilon = 1.0;
 			double alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
-			if (dist2 * curvmax[i] * curvmax[i] > 4.0 * alpha2)
+			if (dist2 * meanCurv * meanCurv > 4.0 * alpha2)
 			{
-				int nrsub = (int) (Math.sqrt(dist2 * curvmax[i] * curvmax[i] / alpha2) + 0.5);
+				int nrsub = (int) (Math.sqrt(dist2 * meanCurv * meanCurv / alpha2) + 0.5);
 				if (nrsub > 100)
 					nrsub = 100;
 				curve3d.splitSubsegment(i+offset, nrsub);
