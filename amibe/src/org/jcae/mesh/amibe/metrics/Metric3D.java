@@ -104,7 +104,7 @@ public class Metric3D extends Matrix
 		return true;
 	}
 	
-	public boolean absDeflection()
+	public boolean absDeflection(boolean isotropic)
 	{
 		double cmin = Math.abs(cacheSurf.minCurvature());
 		double cmax = Math.abs(cacheSurf.maxCurvature());
@@ -137,99 +137,72 @@ public class Metric3D extends Matrix
 			epsilon = 1.0;
 		double alpha2 = 4.0 * epsilon * (2.0 - epsilon);
 		data[0][0] = cmax*cmax / alpha2;
-		if (cmin > 0.0)
+		if (isotropic)
+			data[1][1] = data[0][0];
+		else
 		{
-			epsilon *= cmin / cmax;
-			if (epsilon >= 1.0)
+			if (cmin > 0.0)
+			{
+				epsilon *= cmin / cmax;
+				if (epsilon >= 1.0)
+					epsilon = 1.0;
+				alpha2 = 4.0 * epsilon * (2.0 - epsilon);
+			}
+			data[1][1] = cmin*cmin / alpha2;
+		}
+		data[2][2] = data[0][0];
+		Matrix res = (this.multL(A.transp())).multR(A);
+		data = res.data;
+		return true;
+	}
+	
+	public boolean relDeflection(boolean isotropic)
+	{
+		double cmin = Math.abs(cacheSurf.minCurvature());
+		double cmax = Math.abs(cacheSurf.maxCurvature());
+		if (Double.isNaN(cmin) || Double.isNaN(cmax))
+		{
+			logger.debug("Undefined curvature");
+			return false;
+		}
+		if (cmin == 0.0 && cmax == 0.0)
+		{
+			logger.debug("Infinite curvature");
+			return false;
+		}
+		double [] dcurv = cacheSurf.curvatureDirections();
+		double [] dcurvmax = new double[3];
+		double [] dcurvmin = new double[3];
+		System.arraycopy(dcurv, 0, dcurvmax, 0, 3);
+		System.arraycopy(dcurv, 3, dcurvmin, 0, 3);
+		if (cmin > cmax)
+		{
+			double temp = cmin;
+			cmin = cmax;
+			cmax = temp;
+			System.arraycopy(dcurv, 0, dcurvmin, 0, 3);
+			System.arraycopy(dcurv, 3, dcurvmax, 0, 3);
+		}
+		Metric3D A = new Metric3D(dcurvmax, dcurvmin, prodVect3D(dcurvmax, dcurvmin));
+		double epsilon = defl;
+		if (epsilon > 1.0)
+			epsilon = 1.0;
+		double alpha2 = 4.0 * epsilon * (2.0 - epsilon);
+		data[0][0] = cmax*cmax / alpha2;
+		if (isotropic)
+		{
+			data[1][1] = data[0][0];
+			data[2][2] = data[0][0];
+		}
+		else
+		{
+			epsilon *= cmax / cmin;
+			if (epsilon > 1.0)
 				epsilon = 1.0;
 			alpha2 = 4.0 * epsilon * (2.0 - epsilon);
+			data[1][1] = cmin*cmin / alpha2;
+			data[2][2] = 1.0/discr/discr;
 		}
-		data[1][1] = cmin*cmin / alpha2;
-		data[2][2] = data[0][0];
-		Matrix res = (this.multL(A.transp())).multR(A);
-		data = res.data;
-		return true;
-	}
-	
-	public boolean relDeflection()
-	{
-		double cmin = Math.abs(cacheSurf.minCurvature());
-		double cmax = Math.abs(cacheSurf.maxCurvature());
-		if (Double.isNaN(cmin) || Double.isNaN(cmax))
-		{
-			logger.debug("Undefined curvature");
-			return false;
-		}
-		if (cmin == 0.0 && cmax == 0.0)
-		{
-			logger.debug("Infinite curvature");
-			return false;
-		}
-		double [] dcurv = cacheSurf.curvatureDirections();
-		double [] dcurvmax = new double[3];
-		double [] dcurvmin = new double[3];
-		System.arraycopy(dcurv, 0, dcurvmax, 0, 3);
-		System.arraycopy(dcurv, 3, dcurvmin, 0, 3);
-		if (cmin > cmax)
-		{
-			double temp = cmin;
-			cmin = cmax;
-			cmax = temp;
-			System.arraycopy(dcurv, 0, dcurvmin, 0, 3);
-			System.arraycopy(dcurv, 3, dcurvmax, 0, 3);
-		}
-		Metric3D A = new Metric3D(dcurvmax, dcurvmin, prodVect3D(dcurvmax, dcurvmin));
-		double epsilon = defl;
-		if (epsilon > 1.0)
-			epsilon = 1.0;
-		double alpha2 = 4.0 * epsilon * (2.0 - epsilon);
-		data[0][0] = cmax*cmax / alpha2;
-		epsilon *= cmax / cmin;
-		if (epsilon > 1.0)
-			epsilon = 1.0;
-		alpha2 = 4.0 * epsilon * (2.0 - epsilon);
-		data[1][1] = cmin*cmin / alpha2;
-		data[2][2] = 1.0/discr/discr;
-		Matrix res = (this.multL(A.transp())).multR(A);
-		data = res.data;
-		return true;
-	}
-	
-	public boolean curvIso()
-	{
-		double cmin = Math.abs(cacheSurf.minCurvature());
-		double cmax = Math.abs(cacheSurf.maxCurvature());
-		if (Double.isNaN(cmin) || Double.isNaN(cmax))
-		{
-			logger.debug("Undefined curvature");
-			return false;
-		}
-		if (cmin == 0.0 && cmax == 0.0)
-		{
-			logger.debug("Infinite curvature");
-			return false;
-		}
-		double [] dcurv = cacheSurf.curvatureDirections();
-		double [] dcurvmax = new double[3];
-		double [] dcurvmin = new double[3];
-		System.arraycopy(dcurv, 0, dcurvmax, 0, 3);
-		System.arraycopy(dcurv, 3, dcurvmin, 0, 3);
-		if (cmin > cmax)
-		{
-			double temp = cmin;
-			cmin = cmax;
-			cmax = temp;
-			System.arraycopy(dcurv, 0, dcurvmin, 0, 3);
-			System.arraycopy(dcurv, 3, dcurvmax, 0, 3);
-		}
-		Metric3D A = new Metric3D(dcurvmax, dcurvmin, prodVect3D(dcurvmax, dcurvmin));
-		double epsilon = defl;
-		if (epsilon > 1.0)
-			epsilon = 1.0;
-		double alpha2 = 4.0 * epsilon * (2.0 - epsilon);
-		data[0][0] = cmax*cmax / alpha2;
-		data[1][1] = data[0][0];
-		data[2][2] = data[0][0];
 		Matrix res = (this.multL(A.transp())).multR(A);
 		data = res.data;
 		return true;
