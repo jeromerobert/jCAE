@@ -266,7 +266,10 @@ public class OCCDiscretizeCurve3D
 				  (xyz[3*nr-1] - xyz[3*ns+2]) * (xyz[3*nr-1] - xyz[3*ns+2]));
 				arcLength += length(oldAbscissa, newAbscissa, 20);
 				oldAbscissa = newAbscissa;
-				if (arcLength - dist > defl * arcLength)
+				double dmax = defl;
+				if (relDefl)
+					dmax *= arcLength;
+				if (arcLength - dist > dmax)
 				{
 					a[nr] = newAbscissa;
 					arcLength   = 0.0;
