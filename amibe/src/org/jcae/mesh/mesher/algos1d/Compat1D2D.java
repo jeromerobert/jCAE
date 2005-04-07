@@ -130,7 +130,7 @@ public class Compat1D2D
 			double epsilon = deflection;
 			if (!relDefl)
 				epsilon *= curvmax[i];
-			if (deflection > 1.0)
+			if (epsilon > 1.0)
 				epsilon = 1.0;
 			double alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
 			if (dist2 * curvmax[i] * curvmax[i] > 4.0 * alpha2)
