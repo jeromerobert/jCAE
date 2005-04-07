@@ -36,6 +36,7 @@ public class Metric3D extends Matrix
 	
 	private static double discr = 1.0;
 	private static double defl = 0.0;
+	private static boolean relDefl = true;
 	private static double [][] temp32 = new double[3][2];
 	private static double [][] temp22 = new double[2][2];
 	
@@ -217,6 +218,16 @@ public class Metric3D extends Matrix
 	public static boolean hasDeflection()
 	{
 		return (defl > 0.0);
+	}
+	
+	public static boolean hasRelativeDeflection()
+	{
+		return relDefl;
+	}
+	
+	public static void setRelativeDeflection(boolean b)
+	{
+		relDefl = b;
 	}
 	
 	public static boolean hasLength()

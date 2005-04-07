@@ -99,6 +99,8 @@ public class Mesher
 			mesh1D.setMaxLength(discr);
 			Metric3D.setLength(discr);
 			Metric3D.setDeflection(defl);
+			boolean relDefl = System.getProperty("org.jcae.mesh.amibe.ds.Metric3D.relativeDeflection", "true").equals("true");
+			Metric3D.setRelativeDeflection(relDefl);
 	
 			//  Prepare 2D discretization
 			mesh1D.duplicateEdges();
@@ -129,7 +131,8 @@ public class Mesher
 					{
 						new BasicMesh(mesh, mesh1D).compute();
 						new CheckDelaunay(mesh).compute();
-						// new CheckAbsDeflection(mesh).compute();
+						if (!relDefl)
+							new EnforceAbsDeflection(mesh).compute();
 						mesh.removeDegeneratedEdges();
 						xmlFile = "jcae2d."+iFace;
 						MeshWriter.writeObject(mesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
