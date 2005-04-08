@@ -2,12 +2,14 @@ Thu Apr  7 11:15:49 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/metrics/Metric2D.java
 	  src/org/jcae/mesh/amibe/metrics/Metric3D.java: Add a new boolean argument to absDeflection() and relDeflection() to select isotropic or anisotropic metrics.  The curvIso() method is then dropped and replaced by relDeflection(true).
-	* src/org/jcae/mesh/amibe/metrics/Metric3D.java: In org.jcae.mesh.amibe.algos2d.Insertion, mean lengths are targeted, and there is a sqrt(2) factor between mean and maximal lengths.  Metrics computed by relDeflection() and absDeflection() want to take maximal deflection into account, so a factor of 2 has to be introduced.
+	* src-occ/org/jcae/mesh/cad/occ/OCCDiscretizeCurve3D.java
+	  src/org/jcae/mesh/amibe/metrics/Metric3D.java: In org.jcae.mesh.amibe.algos2d.Insertion, mean lengths are targeted, and there is a sqrt(2) factor between mean and maximal lengths.  Metrics computed by relDeflection() and absDeflection() want to take maximal deflection into account, so a factor of 2 has to be introduced.
 	* src/org/jcae/mesh/amibe/algos2d/EnforceAbsDeflection.java: New algorithm, to enforce absolute deflection.
 	* src/org/jcae/mesh/Mesher.java
 	  src/org/jcae/mesh/amibe/metrics/Metric2D.java
 	  src/org/jcae/mesh/amibe/metrics/Metric3D.java: Add a new org.jcae.mesh.amibe.ds.Metric3D.relativeDeflection property. It is true by default. If set to false, the deflection parameter is absolute.
 	* src/org/jcae/mesh/Mesher.java
+	  src/org/jcae/mesh/mesher/algos1d/Compat1D2D.java
 	  src/org/jcae/mesh/mesher/algos1d/UniformLengthDeflection.java
 	  src/org/jcae/mesh/cad/CADGeomCurve3D.java
 	  src-occ/org/jcae/mesh/cad/occ/OCCDiscretizeCurve3D.java
