@@ -74,8 +74,6 @@ public class Refine
 		{
 			CADEdge E = (CADEdge) ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(E);
-			if (null == submesh1d)
-				continue;
 			nbNodes -= submesh1d.getNodes().size();
 			nbEdges -= submesh1d.getEdges().size();
 			if (computeEdge(divisions, submesh1d))
@@ -107,9 +105,6 @@ public class Refine
 		CADEdge E = submesh1d.getGeometry();
 		if (E.isDegenerated())
 			//  Do noi refine degenerated edges
-			return false;
-		if (null == submesh1d)
-			//  E.reversed() must be computed instead
 			return false;
 		
 		ArrayList edgelist = submesh1d.getEdges();
