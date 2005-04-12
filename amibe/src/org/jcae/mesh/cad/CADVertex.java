@@ -25,12 +25,6 @@ package org.jcae.mesh.cad;
 public interface CADVertex extends CADShape
 {
     /**
-     *
-     * @param that
-     * @return
-     */    
-	public boolean isSame(CADVertex that);
-    /**
      * Return the 2D coordinates (u, v) of this vertex on a face
      * @return An array: {u, v}
      * @param that The face
