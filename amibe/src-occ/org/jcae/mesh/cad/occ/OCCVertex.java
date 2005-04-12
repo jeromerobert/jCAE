@@ -27,14 +27,6 @@ import org.jcae.opencascade.jni.BRep_Tool;
 
 public class OCCVertex extends OCCShape implements CADVertex
 {
-	public boolean isSame(CADVertex o)
-	{
-		OCCVertex that = (OCCVertex) o;
-		TopoDS_Vertex Vthis = (TopoDS_Vertex) myShape;
-		TopoDS_Vertex Vthat = (TopoDS_Vertex) that.myShape;
-		return Vthis.isSame(Vthat);
-	}
-	
 	public double [] parameters(CADFace o)
 	{
 		TopoDS_Vertex V = (TopoDS_Vertex) myShape;
