@@ -1,3 +1,10 @@
+Tue Apr 12 16:52:17 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/algos1d/Refine.java
+	  src/org/jcae/mesh/mesher/algos1d/UniformLength.java
+	  src/org/jcae/mesh/mesher/algos1d/UniformLengthDeflection.java
+	  src/org/jcae/mesh/mesher/ds/MMesh1D.java: isSame() and equals() methods have been revisited in libOccJava.  Edges are now treated like other topological objedts, their orientation is not considered in equals() method.
+
 Thu Apr  7 11:15:49 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/metrics/Metric2D.java
