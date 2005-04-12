@@ -134,18 +134,6 @@ public class OTriangle
 	}
 	
 	/**
-	 * Checks whether oriented triangles are identical.
-	 *
-	 * @param that  the triangle to compare with.
-	 * @return <code>true</code> if both objects represent the same
-	 * oriented triangle, <code>false</code> otherwise.
-	 */
-	public final boolean isSame(OTriangle that)
-	{
-		return (tri == that.tri && orientation == that.orientation);
-	}
-	
-	/**
 	 * Returns the triangle tied to this object.
 	 *
 	 * @return the triangle tied to this object.

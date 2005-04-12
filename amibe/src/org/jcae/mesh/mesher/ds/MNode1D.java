@@ -214,20 +214,6 @@ public class MNode1D
 		return d;
 	}
 	
-	/**
-	 * Returns <code>true</code> if both nodes refer to the same
-	 * <code>CADVertex</code>.
-	 *
-	 * @return <code>true</code> if both nodes refer to the same
-	 * <code>CADVertex</code>.
-	 */
-	public boolean isSameVertex(MNode1D pt)
-	{
-		if (null == vertex || null == pt.vertex)
-			return false;
-		return (vertex.isSame(pt.vertex));
-	}
-	
 	public String toString()
 	{
 		String r = "MNode1D: id="+getID()+" "+param;
