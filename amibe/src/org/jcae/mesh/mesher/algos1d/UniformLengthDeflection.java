@@ -62,8 +62,6 @@ public class UniformLengthDeflection
 		{
 			CADEdge E = (CADEdge) ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(E);
-			if (null == submesh1d)
-				continue;
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
 		}
@@ -72,8 +70,6 @@ public class UniformLengthDeflection
 		{
 			CADEdge E = (CADEdge) ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(E);
-			if (null == submesh1d)
-				continue;
 			nbNodes -= submesh1d.getNodes().size();
 			nbEdges -= submesh1d.getEdges().size();
 			if (computeEdge(mesh1d.getMaxLength(), mesh1d.getMaxDeflection(), relDefl, submesh1d))
@@ -112,9 +108,6 @@ public class UniformLengthDeflection
 		//if (BRep_Tool.degenerated(E))
 		//	return false;
 		
-		if (null == submesh1d)
-			//  E.reversed() must be computed instead
-			return false;
 		ArrayList edgelist = submesh1d.getEdges();
 		ArrayList nodelist = submesh1d.getNodes();
 		if (edgelist.size() != 1 || nodelist.size() != 2)

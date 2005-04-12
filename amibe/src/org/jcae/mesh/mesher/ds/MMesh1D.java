@@ -77,14 +77,10 @@ public class MMesh1D extends MMesh0D
 		for (expE.init(shape, CADExplorer.EDGE); expE.more(); expE.next())
 		{
 			CADEdge E = (CADEdge) expE.current();
-			//  Edges may get connected to more than 2 faces
+			//  Edges may get connected to several faces
 			if (mapTEdgeToSubMesh1D.containsKey(E))
 				continue;
-			SubMesh1D submesh1d = null;
-			if (!mapTEdgeToSubMesh1D.containsKey(E.reversed()))
-				submesh1d = new SubMesh1D(E, (MMesh0D) this);
-			//  By convention, a null value means that E.reversed()
-			//  has already been stored.
+			SubMesh1D submesh1d = new SubMesh1D(E, (MMesh0D) this);
 			mapTEdgeToSubMesh1D.put(E, submesh1d);
 			listTEdge.add(E);
 		}
@@ -102,10 +98,7 @@ public class MMesh1D extends MMesh0D
 			for (expE.init(F, CADExplorer.EDGE); expE.more(); expE.next())
 			{
 				CADEdge E = (CADEdge) expE.current();
-				if (mapTEdgeToSubMesh1D.containsKey(E))
-					set = (HashSet) mapTEdgeToFaces.get(E);
-				else
-					set = (HashSet) mapTEdgeToFaces.get(E.reversed());
+				set = (HashSet) mapTEdgeToFaces.get(E);
 				set.add(F);
 			}
 		}
@@ -130,8 +123,6 @@ public class MMesh1D extends MMesh0D
 	public HashSet getAdjacentFaces(CADEdge E)
 	{
 		HashSet ret = (HashSet) mapTEdgeToFaces.get(E);
-		if (ret == null)
-			ret = (HashSet) mapTEdgeToFaces.get(E.reversed());
 		assert ret != null;
 		return ret;
 	}
@@ -144,14 +135,10 @@ public class MMesh1D extends MMesh0D
 		logger.debug("Update node labels");
 		//  Resets all labels
 		CADExplorer expE = CADShapeBuilder.factory.newExplorer();
-		HashSet setSeenEdges = new HashSet();
 		for (expE.init(shape, CADExplorer.EDGE); expE.more(); expE.next())
 		{
 			CADEdge E = (CADEdge) expE.current();
 			SubMesh1D submesh1d = (SubMesh1D) mapTEdgeToSubMesh1D.get(E);
-			if (null == submesh1d || setSeenEdges.contains(E))
-				continue;
-			setSeenEdges.add(E);
 			for (Iterator it = submesh1d.getNodesIterator(); it.hasNext(); )
 			{
 				MNode1D n = (MNode1D) it.next();
@@ -159,14 +146,10 @@ public class MMesh1D extends MMesh0D
 			}
 		}
 		int i = 0;
-		setSeenEdges.clear();
 		for (expE.init(shape, CADExplorer.EDGE); expE.more(); expE.next())
 		{
 			CADEdge E = (CADEdge) expE.current();
 			SubMesh1D submesh1d = (SubMesh1D) mapTEdgeToSubMesh1D.get(E);
-			if (null == submesh1d || setSeenEdges.contains(E))
-				continue;
-			setSeenEdges.add(E);
 			for (Iterator it = submesh1d.getNodesIterator(); it.hasNext(); )
 			{
 				MNode1D n = (MNode1D) it.next();
@@ -188,7 +171,6 @@ public class MMesh1D extends MMesh0D
 	public void duplicateEdges()
 	{
 		logger.debug("Compute vertex references");
-		HashSet seen = new HashSet();
 		CADExplorer expV = CADShapeBuilder.factory.newExplorer();
 		//  For each topological vertex, compute the list of
 		//  MNode1D objects which are bound to this vertex.
@@ -203,8 +185,6 @@ public class MMesh1D extends MMesh0D
 		while (ite.hasNext())
 		{
 			SubMesh1D submesh1d = (SubMesh1D) ite.next();
-			if (null == submesh1d)
-				continue;
 			Iterator itn = submesh1d.getNodesIterator();
 			while (itn.hasNext())
 			{
@@ -214,6 +194,7 @@ public class MMesh1D extends MMesh0D
 			}
 		}
 		
+		HashSet seen = new HashSet();
 		for (expV.init(shape, CADExplorer.VERTEX); expV.more(); expV.next())
 		{
 			CADVertex V = (CADVertex) expV.current();
@@ -228,59 +209,6 @@ public class MMesh1D extends MMesh0D
 			master.setMaster(null);
 			for (int i = 1; i<vnodelist.size(); i++)
 				((MNode1D) vnodelist.get(i)).setMaster(master);
-		}
-		seen.clear();
-		vertex2Ref.clear();
-		CADExplorer expF = CADShapeBuilder.factory.newExplorer();
-		for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
-		{
-			CADShape F = (CADShape) expF.current();
-			buildFaceBoundary(F);
-		}
-		assert(isValid());
-	}
-	
-	//  Build a mesh bound to a face.
-	private void buildFaceBoundary(CADShape F)
-	{
-		CADExplorer expE = CADShapeBuilder.factory.newExplorer();
-		for (expE.init(F, CADExplorer.EDGE); expE.more(); expE.next())
-		{
-			CADEdge E = (CADEdge) expE.current();
-			SubMesh1D submesh1d = (SubMesh1D) mapTEdgeToSubMesh1D.get(E);
-			if (null != submesh1d)
-				continue;
-			
-			SubMesh1D submeshbis = (SubMesh1D) mapTEdgeToSubMesh1D.get(E.reversed());
-			assert(null != submeshbis);
-			ArrayList oldnodelist = submeshbis.getNodes();
-			ArrayList oldedgelist = submeshbis.getEdges();
-			
-			submesh1d = new SubMesh1D(E);
-			ArrayList nodelist = submesh1d.getNodes();
-			ArrayList edgelist = submesh1d.getEdges();
-			HashMap map = new HashMap(oldnodelist.size());
-			for (Iterator it = oldnodelist.iterator(); it.hasNext(); )
-			{
-				MNode1D p1 = (MNode1D) it.next();
-				MNode1D p2 = new MNode1D(p1);
-				nodelist.add(p2);
-				map.put(p1, p2);
-			}
-			for (Iterator it = oldedgelist.iterator(); it.hasNext(); )
-			{
-				MEdge1D e1 = (MEdge1D) it.next();
-				MNode1D p1 = (MNode1D) map.get(e1.getNodes1());
-				MNode1D p2 = (MNode1D) map.get(e1.getNodes2());
-				MEdge1D e2 = new MEdge1D(p1, p2, e1, false);
-				edgelist.add(e2);
-			}
-			mapTEdgeToSubMesh1D.put(E, submesh1d);
-		}
-		for (expE.init(F, CADExplorer.EDGE); expE.more(); expE.next())
-		{
-			CADEdge E = (CADEdge) expE.current();
-			assert (null != mapTEdgeToSubMesh1D.get(E));
 		}
 		assert(isValid());
 	}
@@ -329,40 +257,30 @@ public class MMesh1D extends MMesh0D
 	 * Returns the list of nodes inserted on a given topological edge.
 	 *
 	 * @param E  a topological edge.
-	 * @return the list of nodes inserted on this edge, or <code>null</code>
-	 * if <code>E.reversed()</code> is already discretized.
-	 * @throws NoSuchElementException if <code>E</code> and
-	 * <code>E.reversed()</code> are unknown edges.
+	 * @return the list of nodes inserted on this edge.
 	 */
 	public ArrayList getNodelistFromMap(CADEdge E)
            throws NoSuchElementException
 	{
 		SubMesh1D submesh1d = (SubMesh1D) mapTEdgeToSubMesh1D.get(E);
-		if (null != submesh1d)
-			return submesh1d.getNodes();
-		if (mapTEdgeToSubMesh1D.containsKey(E.reversed()))
-			return null;
-		throw new NoSuchElementException("TEdge : "+E);
+		if (null == submesh1d)
+			throw new NoSuchElementException("TEdge : "+E);
+		return submesh1d.getNodes();
 	}
 	
 	/**
 	 * Returns the list of edges inserted on a given topological edge.
 	 *
 	 * @param E  a topological edge.
-	 * @return the list of edges inserted on this edge, or <code>null</code>
-	 * if <code>E.reversed()</code> is already discretized.
-	 * @throws NoSuchElementException if <code>E</code> and
-	 * <code>E.reversed()</code> are unknown edges.
+	 * @return the list of edges inserted on this edge.
 	 */
 	public ArrayList getEdgelistFromMap(CADEdge E)
 	       throws NoSuchElementException
 	{
 		SubMesh1D submesh1d = (SubMesh1D) mapTEdgeToSubMesh1D.get(E);
-		if (null != submesh1d)
-			return submesh1d.getEdges();
-		if (mapTEdgeToSubMesh1D.containsKey(E.reversed()))
-			return null;
-		throw new NoSuchElementException("TEdge : "+E);
+		if (null == submesh1d)
+			throw new NoSuchElementException("TEdge : "+E);
+		return submesh1d.getEdges();
 	}
 	
 	/** 
