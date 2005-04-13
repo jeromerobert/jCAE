@@ -57,10 +57,7 @@ public class Metric2D
 		double sym = 0.0;
 		Metric3D m3dbis = null;
 		Metric3D m3d = new Metric3D(surf, pt);
-		if (Metric3D.hasLength())
-			m3d.iso();
-		else
-			m3d.scale(1.0/discr/discr);
+		m3d.iso(discr);
 		if (Metric3D.hasDeflection())
 		{
 			m3dbis = new Metric3D(surf, pt);

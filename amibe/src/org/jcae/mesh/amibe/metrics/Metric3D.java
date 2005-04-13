@@ -94,13 +94,15 @@ public class Metric3D extends Matrix
 		return ret;			
 	}
 	
-	public boolean iso()
+	public boolean iso(double l)
 	{
+		if (l <= 0)
+			return false;
 		for (int i = 0; i < 3; i++)
 		{
 			for (int j = 0; j < 3; j++)
 				data[i][j] = 0.0;
-			data[i][i] = 1.0/discr/discr;
+			data[i][i] = 1.0/l/l;
 		}
 		return true;
 	}
