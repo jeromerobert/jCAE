@@ -256,8 +256,7 @@ public class Metric3D extends Matrix
 	 */
 	public static void setDeflection(double l)
 	{
-		if (defl >= 0.0 && defl <= 1.0)
-			defl = l;
+		defl = l;
 	}
 	
 	/**
