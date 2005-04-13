@@ -107,82 +107,11 @@ public class Metric2D
 		G = temp[1][1];
 	}
 	
-	public Matrix2D param2tangent()
-	{
-		double uv[] = loc.getUV();
-		cacheSurf.setParameter(uv[0], uv[1]);
-		double d1U[] = cacheSurf.d1U();
-		double d1V[] = cacheSurf.d1V();
-		double nd1U = Metric3D.norm(d1U);
-		double nd1V = Metric3D.norm(d1V);
-		if (nd1U * nd1V == 0.0)
-		{
-			logger.debug("unable to compute tangent plane");
-			return new Matrix2D(1.0, 0.0, 0.0, 1.0);
-		}
-		double unitNorm[] = Metric3D.prodVect3D(d1U, d1V);
-		double nnorm = Metric3D.norm(unitNorm);
-		double ct = Metric3D.prodSca(d1U, d1V) / nd1U / nd1V;
-		double st = nnorm / nd1U / nd1V;
-		return (new Matrix2D(nd1U, nd1V * ct, 0, nd1V * st));
-	}
-	
 	public Metric2D()
 	{
 		E = 1.0;
 		F = 0.0;
 		G = 1.0;
-	}
-	
-	public Metric2D(CADGeomSurface surf, Vertex pt, double theta, double p1, double p2)
-	{
-		loc = pt;
-		double ct = Math.cos(theta);
-		double st = Math.sin(theta);
-		double l1 = 1.0/p1/p1;
-		double l2 = 1.0/p2/p2;
-		E = l1 * ct * ct + l2 * st * st;
-		F = (l1 - l2) * ct * st;
-		G = l1 * st * st + l2 * ct * ct;
-	}
-	
-	public Matrix2D toMatrix2D()
-	{
-		return new Matrix2D(E, F, F, G);
-	}
-	
-	public double [] apply(double x1, double y1)
-	{
-		Matrix2D m = param2tangent();
-		double [] in = new double[2];
-		in[0] = x1;
-		in[1] = y1;
-		return m.apply(in);
-	}
-	
-	public double [] applyInv(double x1, double y1)
-	{
-		Matrix2D m = param2tangent();
-		double [] in = new double[2];
-		in[0] = x1;
-		in[1] = y1;
-		return m.inv().apply(in);
-	}
-	
-	public Metric2D add(Metric2D B)
-	{
-		Metric2D ret = new Metric2D();
-		ret.E = E + B.E;
-		ret.F = F + B.F;
-		ret.G = G + B.G;
-		return ret;
-	}
-	
-	public void scale(double f)
-	{
-		E *= f;
-		F *= f;
-		G *= f;
 	}
 	
 	public double det()
@@ -267,29 +196,6 @@ public class Metric2D
 		toReturn[2] = G;
 		return toReturn;
 	}
-	
-	/**
-	 *  Computes the intersection of 2 metrics, but preserves the
-	 *  principal directions of active metric
-	 */
-/*
-	public Metric2D intersectionPreserve (Metric2D B)
-	{
-		double V1x = simultaneousReduction(B);
-		double V1y = Math.sqrt(1. - sqr(V1x));
-
-		//  Eigenvalues of A
-		double evA1 = data[0][0]*sqr(V1x) + 2.*data[1][0]*V1x*V1y + data[1][1]*sqr(V1y);
-		double evA2 = data[0][0]*sqr(V1y) - 2.*data[1][0]*V1x*V1y + data[1][1]*sqr(V1x);
-		//  Eigenvalues of B
-		double evB1 = B.data[0][0]*sqr(V1x) + 2.*B.data[1][0]*V1x*V1y + B.data[1][1]*sqr(V1y);
-		double evB2 = B.data[0][0]*sqr(V1y) - 2.*B.data[1][0]*V1x*V1y + B.data[1][1]*sqr(V1x);
-
-		double omega = Math.max(evB1/evA1, evB2/evA2);
-		omega = Math.max(omega, 1.);
-		return new Metric2D(omega*data[0][0], omega*data[1][0], omega*data[1][1]);
-	}
-*/
 	
 	public String stringCoefs()
 	{
