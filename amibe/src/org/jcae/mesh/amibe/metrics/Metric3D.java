@@ -118,15 +118,24 @@ public class Metric3D extends Matrix
 		}
 		if (cmin == 0.0 && cmax == 0.0)
 		{
-			logger.debug("Infinite curvature");
+			logger.debug("Null curvature");
 			return false;
+		}
+		if (defl * cmax >= 1.0 || defl * cmin >= 1.0)
+		{
+			logger.debug("Curvature too large");
+			iso(defl);
+			return true;
 		}
 		double [] dcurv = cacheSurf.curvatureDirections();
 		double [] dcurvmax = new double[3];
 		double [] dcurvmin = new double[3];
-		System.arraycopy(dcurv, 0, dcurvmax, 0, 3);
-		System.arraycopy(dcurv, 3, dcurvmin, 0, 3);
-		if (cmin > cmax)
+		if (cmin < cmax)
+		{
+			System.arraycopy(dcurv, 0, dcurvmax, 0, 3);
+			System.arraycopy(dcurv, 3, dcurvmin, 0, 3);
+		}
+		else
 		{
 			double temp = cmin;
 			cmin = cmax;
@@ -136,8 +145,6 @@ public class Metric3D extends Matrix
 		}
 		Metric3D A = new Metric3D(dcurvmax, dcurvmin, prodVect3D(dcurvmax, dcurvmin));
 		double epsilon = defl * cmax;
-		if (epsilon >= 1.0)
-			epsilon = 1.0;
 		//  In org.jcae.mesh.amibe.algos2d.Insertion, mean lengths are
 		//  targeted, and there is a sqrt(2) factor.  Division bt 2
 		//  provides a maximal deflection, 
@@ -179,9 +186,12 @@ public class Metric3D extends Matrix
 		double [] dcurv = cacheSurf.curvatureDirections();
 		double [] dcurvmax = new double[3];
 		double [] dcurvmin = new double[3];
-		System.arraycopy(dcurv, 0, dcurvmax, 0, 3);
-		System.arraycopy(dcurv, 3, dcurvmin, 0, 3);
-		if (cmin > cmax)
+		if (cmin < cmax)
+		{
+			System.arraycopy(dcurv, 0, dcurvmax, 0, 3);
+			System.arraycopy(dcurv, 3, dcurvmin, 0, 3);
+		}
+		else
 		{
 			double temp = cmin;
 			cmin = cmax;
