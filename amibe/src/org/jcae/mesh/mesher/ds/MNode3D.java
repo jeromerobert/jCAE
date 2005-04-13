@@ -20,7 +20,6 @@
 
 package org.jcae.mesh.mesher.ds;
 
-import org.jcae.mesh.mesher.ds.MNode2D;
 import org.jcae.mesh.cad.CADFace;
 import org.jcae.mesh.cad.CADGeomSurface;
 import java.util.HashMap;
@@ -59,36 +58,6 @@ public class MNode3D
 		for (int i = 0; i < 3; i++)
 			param[i] = p[i];
 		ref1d = label;
-		assert(setID());
-	}
-	
-	/**
-	 * Creates a <code>MNode3D</code> instance by computing 3D coordinates of a
-	 * <code>MNode2D</code> node.
-	 *
-	 * @param pt  the <code>MNode2D</code> being projected.
-	 * @param F  topological face on which <code>pt</code> is lying.
-	 */
-	public MNode3D(MNode2D pt, CADFace F)
-	{
-		double uv[] = pt.getUV();
-		param = F.getGeomSurface().value(uv[0], uv[1]);
-		ref1d = pt.getLabel();
-		assert(setID());
-	}
-	
-	/**
-	 * Creates a <code>MNode3D</code> instance by computing 3D coordinates of a
-	 * <code>MNode2D</code> node.
-	 *
-	 * @param pt  the <code>MNode2D</code> being projected.
-	 * @param Surf  geometrical surface.
-	 */
-	public MNode3D(MNode2D pt, CADGeomSurface Surf)
-	{
-		double uv[] = pt.getUV();
-		param = Surf.value(uv[0], uv[1]);
-		ref1d = pt.getLabel();
 		assert(setID());
 	}
 	

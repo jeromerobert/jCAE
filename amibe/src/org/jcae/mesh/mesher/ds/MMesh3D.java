@@ -168,7 +168,7 @@ public class MMesh3D
 					//  If null == n1, the point is not on a boundary and is thus
 					//  unique.  Otherwise, if mapNode1DToNode3D does not already
 					//  contain n1, this 1D node is inserted for the first time.
-					MNode3D n3 = new MNode3D(n2, F);
+					MNode3D n3 = new MNode3D(surface.value(p[0], p[1]), label);
 					n3.addNormal(surface.normal());
 					mapNode2DToNode3D.put(n2, n3);
 					nodelist.add(n3);
@@ -197,7 +197,7 @@ public class MMesh3D
 					//  If null == n1, the point is not on a boundary and is thus
 					//  unique.  Otherwise, if mapNode1DToNode3D does not already
 					//  contain n1, this 1D node is inserted for the first time.
-					MNode3D n3 = new MNode3D(n2, F);
+					MNode3D n3 = new MNode3D(surface.value(p[0], p[1]), n2.getLabel());
 					n3.addNormal(surface.normal());
 					mapNode2DToNode3D.put(n2, n3);
 					nodelist.add(n3);
