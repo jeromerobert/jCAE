@@ -1,3 +1,10 @@
+Wed Apr 13 11:19:36 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/metrics/Metric3D.java: Fix setDeflection(), it was not taken into account with a deflection > 1.0.
+	* src/org/jcae/mesh/amibe/metrics/Metric2D.java
+	  src/org/jcae/mesh/amibe/metrics/Metric3D.java: Change iso() signature in Metric3D.
+	* src/org/jcae/mesh/amibe/metrics/Metric3D.java (absDeflection): When deflection is larger than curvature, absDeflection() is replaced by a length criterion because curvature based computations do not make sense.
+
 Tue Apr 12 16:52:17 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/mesher/algos1d/Refine.java
