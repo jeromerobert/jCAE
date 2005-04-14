@@ -698,7 +698,7 @@ public class Mesh
 					continue;
 				MNode1D ref1 = ot.origin().getRef();
 				MNode1D ref2 = ot.destination().getRef();
-				if (ref1 != null && ref2 != null && ref1.getMaster() == ref2.getMaster())
+				if (ref1 != null && ref2 != null && ref1 == ref2)
 				{
 					logger.debug("  Collapsing "+ot);
 					removedTriangles.add(ot.getTri());

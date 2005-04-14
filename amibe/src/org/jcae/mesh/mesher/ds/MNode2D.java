@@ -76,7 +76,7 @@ public class MNode2D
 	 */
 	public MNode2D(MNode1D pt, CADGeomCurve2D C2d, CADFace F)
 	{
-		ref1d = pt;
+		ref1d = pt.getMaster();
 		if (null != C2d)
 			param = C2d.value(pt.getParameter());
 		else
@@ -181,9 +181,7 @@ public class MNode2D
 	 **/
 	public MNode1D getRef()
 	{
-		if (null == ref1d)
-			return null;
-		return ref1d.getMaster();
+		return ref1d;
 	}
 	
 	/**
@@ -201,7 +199,7 @@ public class MNode2D
 		String r="MNode2D: id="+getID()+
 			" "+param[0]+" "+param[1];
 		if (null != ref1d)
-			r+=" ref1d="+ref1d.getMaster().getID();
+			r+=" ref1d="+ref1d.getID();
 		if (-1 != label)
 			r+=" label="+label;
 		return r;

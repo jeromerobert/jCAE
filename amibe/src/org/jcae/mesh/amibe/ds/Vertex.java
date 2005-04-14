@@ -58,7 +58,7 @@ public class Vertex
 	
 	public Vertex(MNode1D pt, CADGeomCurve2D C2d, CADFace F)
 	{
-		ref1d = pt;
+		ref1d = pt.getMaster();
 		if (null != C2d)
 			param = C2d.value(pt.getParameter());
 		else
@@ -84,9 +84,7 @@ public class Vertex
 	
 	public MNode1D getRef()
 	{
-		if (null == ref1d)
-			return null;
-		return ref1d.getMaster();
+		return ref1d;
 	}
 	
 	public void addToQuadTree()
