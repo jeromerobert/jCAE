@@ -20,13 +20,21 @@
 
 package org.jcae.mesh.xmldata;
 
-import org.jcae.mesh.amibe.ds.*;
+import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.mesher.ds.MNode1D;
 import gnu.trove.TObjectIntHashMap;
-import java.io.*;
+import java.io.IOException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
 import java.util.Iterator;
 import java.util.ArrayList;
-import org.w3c.dom.*;
+import org.w3c.dom.Element;
+import org.w3c.dom.Document;
 import org.apache.log4j.Logger;
 
 

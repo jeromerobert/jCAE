@@ -20,14 +20,20 @@
 
 package org.jcae.mesh.xmldata;
 
-import org.jcae.mesh.mesher.ds.*;
-import org.jcae.mesh.amibe.ds.*;
-import java.io.*;
-import gnu.trove.TIntIntHashMap;
+import org.jcae.mesh.amibe.ds.MGroup3D;
+import org.jcae.mesh.amibe.ds.MMesh3D;
+import org.jcae.mesh.amibe.ds.MFace3D;
+import org.jcae.mesh.amibe.ds.MNode3D;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collection;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.apache.xpath.CachedXPathAPI;
 import org.apache.log4j.Logger;
 

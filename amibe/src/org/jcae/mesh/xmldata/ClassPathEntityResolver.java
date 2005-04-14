@@ -22,10 +22,14 @@ package org.jcae.mesh.xmldata;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.*;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import org.xml.sax.InputSource;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.SAXException;
 import org.apache.log4j.Logger;
-import org.xml.sax.*;
-import java.io.*;
+
 /**
  * @author Jerome Robert
  */

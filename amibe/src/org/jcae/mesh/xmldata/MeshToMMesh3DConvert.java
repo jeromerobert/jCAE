@@ -20,14 +20,20 @@
 
 package org.jcae.mesh.xmldata;
 
-import org.jcae.mesh.mesher.ds.*;
-import org.jcae.mesh.amibe.ds.*;
-import org.jcae.mesh.cad.*;
-import java.io.*;
-import java.util.Iterator;
+import org.jcae.mesh.cad.CADGeomSurface;
+import org.jcae.mesh.cad.CADFace;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.FileNotFoundException;
 import gnu.trove.TIntIntHashMap;
-import org.w3c.dom.*;
-import org.w3c.dom.traversal.NodeIterator;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.apache.xpath.CachedXPathAPI;
 import org.apache.log4j.Logger;
 

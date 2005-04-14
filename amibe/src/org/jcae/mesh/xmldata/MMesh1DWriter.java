@@ -20,12 +20,23 @@
 
 package org.jcae.mesh.xmldata;
 
-import org.jcae.mesh.mesher.ds.*;
-import org.jcae.mesh.cad.*;
-import java.io.*;
+import org.jcae.mesh.mesher.ds.MMesh1D;
+import org.jcae.mesh.mesher.ds.SubMesh1D;
+import org.jcae.mesh.mesher.ds.MEdge1D;
+import org.jcae.mesh.mesher.ds.MNode1D;
+import org.jcae.mesh.cad.CADShape;
+import org.jcae.mesh.cad.CADShapeBuilder;
+import org.jcae.mesh.cad.CADEdge;
+import org.jcae.mesh.cad.CADExplorer;
+import java.io.IOException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.util.Iterator;
 import java.util.HashSet;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.apache.log4j.Logger;
 
 

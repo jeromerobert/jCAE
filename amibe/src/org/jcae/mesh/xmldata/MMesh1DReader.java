@@ -20,15 +20,18 @@
 
 package org.jcae.mesh.xmldata;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.util.HashMap;
 import java.util.HashSet;
-import org.apache.log4j.Logger;
 import org.apache.xpath.CachedXPathAPI;
-import org.jcae.mesh.cad.*;
+import org.jcae.mesh.cad.CADEdge;
+import org.jcae.mesh.cad.CADVertex;
+import org.jcae.mesh.cad.CADShape;
+import org.jcae.mesh.cad.CADShapeBuilder;
+import org.jcae.mesh.cad.CADExplorer;
 import org.jcae.mesh.mesher.ds.MEdge1D;
 import org.jcae.mesh.mesher.ds.MMesh1D;
 import org.jcae.mesh.mesher.ds.MNode1D;
@@ -37,6 +40,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.apache.log4j.Logger;
 
 
 public class MMesh1DReader

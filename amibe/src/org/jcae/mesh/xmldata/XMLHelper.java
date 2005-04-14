@@ -19,9 +19,19 @@
 
 package org.jcae.mesh.xmldata;
 
-import java.io.*;
-import javax.xml.parsers.*;
-import javax.xml.transform.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.File;
+import java.io.StringReader;
+import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.Transformer;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
@@ -83,7 +93,7 @@ public class XMLHelper
 		transformer.setOutputProperty("indent", "yes");
 		// hack from http://java.sun.com/xml/jaxp/dist/1.1/docs/tutorial/xslt/2_write.html
 		// to keep DOCTYPE field			
-		transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, document.getDoctype().getSystemId());
+		transformer.setOutputProperty(javax.xml.transform.OutputKeys.DOCTYPE_SYSTEM, document.getDoctype().getSystemId());
 		transformer.transform(new DOMSource(document), result);
 	}
 	

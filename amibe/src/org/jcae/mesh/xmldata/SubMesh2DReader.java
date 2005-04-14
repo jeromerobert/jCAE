@@ -20,12 +20,16 @@
 
 package org.jcae.mesh.xmldata;
 
-import org.jcae.mesh.mesher.ds.*;
-import org.jcae.mesh.cad.*;
-import java.io.*;
+import org.jcae.mesh.mesher.ds.SubMesh2D;
+import org.jcae.mesh.mesher.ds.MNode2D;
+import java.io.FileNotFoundException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.util.Iterator;
-import org.w3c.dom.*;
-import org.w3c.dom.traversal.NodeIterator;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.apache.xpath.CachedXPathAPI;
 import org.apache.log4j.Logger;
 
