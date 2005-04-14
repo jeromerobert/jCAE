@@ -22,7 +22,7 @@ package org.jcae.mesh.amibe.util;
 import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.ds.tools.*;
+import org.jcae.mesh.amibe.ds.tools.Calculus;
 import java.util.ArrayList;
 
 /**
