@@ -42,11 +42,6 @@ public class MEdge1D
 	//  Not used yet.
 	private boolean isFE;
 	
-	//  In order to mesh surfaces in 2D space, some boundaries may need
-	//  to be duplicated.  This member keeps track of these duplicates
-	//  so that they can be removed when transported into 3D space.
-	private MEdge1D master;
-	
 	private static int id = 0;
 	private static HashMap mapHashcodeToID;
 	//  Initialize mapHashcodeToID
@@ -64,24 +59,6 @@ public class MEdge1D
 	{
 		pt1 = begin;
 		pt2 = end;
-		isFE = isFiniteElement;
-		assert(setID());
-	}
-	
-	/**
-	 * Creates an edge bounded by two <code>MNode1D</code> instances.
-	 *
-	 * @param  begin   first end point,
-	 * @param  end     second end point,
-	 * @param  ref     a master <code>MEdge1D</code> instance,
-	 * @param  isFiniteElement  <code>true</code> if this edge is a 1D finite
-	 * element.
-	 */
-	public MEdge1D(MNode1D begin, MNode1D end, MEdge1D ref, boolean isFiniteElement)
-	{
-		pt1 = begin;
-		pt2 = end;
-		master = ref;
 		isFE = isFiniteElement;
 		assert(setID());
 	}
@@ -126,37 +103,10 @@ public class MEdge1D
 		return pt2;
 	}
 	
-	/**
-	 * Sets the first <code>MNode1D</code> instance.
-	 *
-	 * @param pt  the new <code>MNode1D<code> instance for the first point.
-	 * @return pt
-	 */
-	public MNode1D setNodes1(MNode1D pt)
-	{
-		pt1 = pt;
-		return pt1;
-	}
-	
-	/**
-	 * Returns the master edge if it does exist, otherwise current edge.
-	 * Return value is a valid object, it cannot be null.
-	 *
-	 * @return the master edge if it does exist, otherwise current edge.
-	 */
-	public MEdge1D getMaster()
-	{
-		if (null != master)
-			return master;
-		return this;
-	}
-	
 	public String toString()
 	{
 		String r = "MEdge1D: id="+getID()+
 			" n1="+pt1.getID()+" n2="+pt2.getID();
-		if (null != master)
-			r += "  master -> " + master;
 		return r;
 	}
 	
