@@ -20,12 +20,21 @@
 
 package org.jcae.mesh.amibe.algos2d;
 
-import org.jcae.mesh.mesher.ds.*;
-import org.jcae.mesh.amibe.ds.*;
-import org.jcae.mesh.amibe.util.*;
+import org.jcae.mesh.mesher.ds.MMesh1D;
+import org.jcae.mesh.mesher.ds.MNode1D;
+import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.InvalidFaceException;
 import org.jcae.mesh.amibe.InitialTriangulationException;
-import org.jcae.mesh.cad.*;
+import org.jcae.mesh.cad.CADShapeBuilder;
+import org.jcae.mesh.cad.CADFace;
+import org.jcae.mesh.cad.CADEdge;
+import org.jcae.mesh.cad.CADWire;
+import org.jcae.mesh.cad.CADWireExplorer;
+import org.jcae.mesh.cad.CADExplorer;
+import org.jcae.mesh.cad.CADGeomCurve2D;
 import java.util.Iterator;
 import java.util.ArrayList;
 import org.apache.log4j.Logger;

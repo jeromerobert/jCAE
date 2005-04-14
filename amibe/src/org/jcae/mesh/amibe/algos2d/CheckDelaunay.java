@@ -20,10 +20,10 @@
 
 package org.jcae.mesh.amibe.algos2d;
 
-import org.jcae.mesh.mesher.ds.*;
-import org.jcae.mesh.amibe.ds.*;
-import org.jcae.mesh.amibe.util.*;
-import org.jcae.mesh.cad.*;
+import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.Vertex;
 import java.util.Iterator;
 import java.util.ArrayList;
 import org.apache.log4j.Logger;
