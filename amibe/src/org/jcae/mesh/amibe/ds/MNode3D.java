@@ -136,20 +136,6 @@ public class MNode3D
 	}
 	
 	/**
-	 * Creates a <code>MNode3D</code> node at a mid distance to a given point.
-	 *
-	 * @param end  end node.
-	 * @return the newly created middle point.
-	 **/
-	public MNode3D midPoint(MNode3D end)
-	{
-		double [] p = new double[3];
-		for (int i = 0; i < 3; i++)
-			p[i] = (param[i] + end.param[i]) / 2.0;
-		return new MNode3D(p, -1);
-	}
-	
-	/**
 	 * Returns the angle at which a segment is seen.
 	 *
 	 * @param n1  first node
