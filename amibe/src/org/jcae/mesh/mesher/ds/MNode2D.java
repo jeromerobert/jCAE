@@ -36,8 +36,8 @@ public class MNode2D
 	//  The natural coordinates of the node
 	private double[] param = new double[2];
 	
-	//  Link to the geometrical node, if any
-	private MNode1D ref1d;
+	//  Label of the geometrical node, if any
+	private int ref1d = -1;
 	
 	//  Node label
 	private int label = -1;
@@ -76,7 +76,7 @@ public class MNode2D
 	 */
 	public MNode2D(MNode1D pt, CADGeomCurve2D C2d, CADFace F)
 	{
-		ref1d = pt.getMaster();
+		ref1d = pt.getMaster().getLabel();
 		if (null != C2d)
 			param = C2d.value(pt.getParameter());
 		else
@@ -179,7 +179,7 @@ public class MNode2D
 	 *
 	 * @return a reference to a <code>MNode1D</code> object.
 	 **/
-	public MNode1D getRef()
+	public int getRef()
 	{
 		return ref1d;
 	}
@@ -191,15 +191,15 @@ public class MNode2D
 	 **/
 	public boolean isMutable()
 	{
-		return (null == ref1d && label == -1);
+		return (-1 == ref1d && label == -1);
 	}
 	
 	public String toString()
 	{
 		String r="MNode2D: id="+getID()+
 			" "+param[0]+" "+param[1];
-		if (null != ref1d)
-			r+=" ref1d="+ref1d.getID();
+		if (-1 != ref1d)
+			r+=" ref1d="+ref1d;
 		if (-1 != label)
 			r+=" label="+label;
 		return r;

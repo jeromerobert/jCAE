@@ -47,7 +47,7 @@ public class Vertex
 	private Metric2D m2 = null;
 	
 	//  Link to the geometrical node, if any
-	private MNode1D ref1d = null;
+	private int ref1d = -1;
 	
 	public Vertex(double u, double v)
 	{
@@ -58,7 +58,7 @@ public class Vertex
 	
 	public Vertex(MNode1D pt, CADGeomCurve2D C2d, CADFace F)
 	{
-		ref1d = pt.getMaster();
+		ref1d = pt.getMaster().getLabel();
 		if (null != C2d)
 			param = C2d.value(pt.getParameter());
 		else
@@ -82,7 +82,7 @@ public class Vertex
 		return surface.normal();
 	}
 	
-	public MNode1D getRef()
+	public int getRef()
 	{
 		return ref1d;
 	}
@@ -478,7 +478,7 @@ public class Vertex
 		if (this == Vertex.outer)
 			return "outer";
 		String r = "UV: "+param[0]+" "+param[1];
-		if (ref1d != null)
+		if (ref1d != -1)
 			r += " ref1d: "+ref1d;
 		return r;
 	}
