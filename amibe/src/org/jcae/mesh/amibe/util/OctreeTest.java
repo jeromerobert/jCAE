@@ -20,7 +20,7 @@
 package org.jcae.mesh.amibe.util;
 
 import org.apache.log4j.Logger;
-import org.jcae.mesh.mesher.ds.MNode3D;
+import org.jcae.mesh.amibe.ds.MNode3D;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.FileNotFoundException;

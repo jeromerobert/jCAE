@@ -20,7 +20,6 @@
 
 package org.jcae.mesh.amibe.algos2d;
 
-import org.jcae.mesh.mesher.ds.MNode3D;
 import org.jcae.mesh.amibe.ds.*;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import java.util.ArrayList;

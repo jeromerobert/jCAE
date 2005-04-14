@@ -21,6 +21,7 @@
 package org.jcae.mesh.xmldata;
 
 import org.jcae.mesh.mesher.ds.*;
+import org.jcae.mesh.amibe.ds.*;
 import gnu.trove.TObjectIntHashMap;
 import java.io.*;
 import java.util.Iterator;

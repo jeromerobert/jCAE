@@ -21,7 +21,7 @@ package org.jcae.mesh.amibe.util.tests;
 
 import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.util.OctreeTest;
-import org.jcae.mesh.mesher.ds.MNode3D;
+import org.jcae.mesh.amibe.ds.MNode3D;
 import java.io.*;
 import java.util.StringTokenizer;
 import org.jcae.mesh.java3d.Viewer;

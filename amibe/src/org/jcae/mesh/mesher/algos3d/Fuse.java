@@ -20,9 +20,9 @@
 
 package org.jcae.mesh.mesher.algos3d;
 
-import org.jcae.mesh.mesher.ds.MMesh3D;
-import org.jcae.mesh.mesher.ds.MFace3D;
-import org.jcae.mesh.mesher.ds.MNode3D;
+import org.jcae.mesh.amibe.ds.MMesh3D;
+import org.jcae.mesh.amibe.ds.MFace3D;
+import org.jcae.mesh.amibe.ds.MNode3D;
 import org.jcae.mesh.amibe.util.Octree;
 import java.util.Iterator;
 import java.util.HashMap;
