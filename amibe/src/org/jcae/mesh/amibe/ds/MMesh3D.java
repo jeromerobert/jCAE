@@ -22,9 +22,9 @@ package org.jcae.mesh.amibe.ds;
 
 import org.jcae.mesh.mesher.ds.MFace2D;
 import org.jcae.mesh.mesher.ds.MNode2D;
-import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.mesher.ds.SubMesh2D;
 import gnu.trove.TObjectIntHashMap;
+import gnu.trove.TIntObjectHashMap;
 import java.io.*;
 import java.util.*;
 import java.util.zip.GZIPOutputStream;
@@ -64,7 +64,7 @@ public class MMesh3D
 	//  because it is shared between all topological surfaces.
 	//  TODO: In particular this implies that addSubMesh2D has to be
 	//  synchronized.
-	private Map mapNode1DToNode3D = new HashMap();
+	private TIntObjectHashMap mapNode1DToNode3D = new TIntObjectHashMap();
 	private MNode3D [] arrayLabelToNode3D = new MNode3D[10];
 	
 	/**
@@ -195,8 +195,8 @@ public class MMesh3D
 			}
 			else
 			{
-				MNode1D n1 = n2.getRef();
-				if (null == n1 || !mapNode1DToNode3D.containsKey(n1))
+				int n1 = n2.getRef();
+				if (-1 == n1 || !mapNode1DToNode3D.containsKey(n1))
 				{
 					//  If null == n1, the point is not on a boundary and is thus
 					//  unique.  Otherwise, if mapNode1DToNode3D does not already
@@ -205,7 +205,7 @@ public class MMesh3D
 					n3.addNormal(surface.normal());
 					mapNode2DToNode3D.put(n2, n3);
 					nodelist.add(n3);
-					if (null != n1)
+					if (-1 != n1)
 						mapNode1DToNode3D.put(n1, n3);
 				}
 				else

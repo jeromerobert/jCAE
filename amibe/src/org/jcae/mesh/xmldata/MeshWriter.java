@@ -23,7 +23,6 @@ package org.jcae.mesh.xmldata;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.mesher.ds.MNode1D;
 import gnu.trove.TObjectIntHashMap;
 import java.io.IOException;
 import java.io.File;
@@ -60,8 +59,8 @@ public class MeshWriter
 			Vertex n = (Vertex) nodesIterator.next();
 			if (n == Vertex.outer)
 				continue;
-			MNode1D ref1d = n.getRef();
-			if (null == ref1d)
+			int ref1d = n.getRef();
+			if (-1 == ref1d)
 			{
 				double [] p = n.getUV();
 				out.writeDouble(p[0]);
@@ -79,13 +78,13 @@ public class MeshWriter
 			Vertex n = (Vertex) nodesIterator.next();
 			if (n == Vertex.outer)
 				continue;
-			MNode1D ref1d = n.getRef();
-			if (null != ref1d)
+			int ref1d = n.getRef();
+			if (-1 != ref1d)
 			{
 				double [] p = n.getUV();
 				out.writeDouble(p[0]);
 				out.writeDouble(p[1]);
-				refout.writeInt(ref1d.getLabel());
+				refout.writeInt(ref1d);
 				nodeIndex.put(n, i);
 				i++;
 				nref++;

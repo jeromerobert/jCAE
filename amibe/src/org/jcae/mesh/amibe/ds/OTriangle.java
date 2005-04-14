@@ -397,7 +397,7 @@ public class OTriangle
 	{
 		Vertex o = origin();
 		Vertex d = destination();
-		assert o.getRef() != null && d.getRef() != null && o.getRef() ==  d.getRef();
+		assert o.getRef() != -1 && d.getRef() != -1 && o.getRef() ==  d.getRef();
 		
 		//  Replace o by d in all triangles
 		copyOTri(this, work[0]);

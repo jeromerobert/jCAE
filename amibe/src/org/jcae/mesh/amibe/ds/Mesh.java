@@ -23,7 +23,6 @@ import org.jcae.mesh.amibe.util.QuadTree;
 import org.jcae.mesh.amibe.ds.tools.*;
 import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.jcae.mesh.amibe.metrics.Metric2D;
-import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.cad.*;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -696,9 +695,9 @@ public class Mesh
 				ot.nextOTri();
 				if (!ot.hasAttributes(OTriangle.BOUNDARY))
 					continue;
-				MNode1D ref1 = ot.origin().getRef();
-				MNode1D ref2 = ot.destination().getRef();
-				if (ref1 != null && ref2 != null && ref1 == ref2)
+				int ref1 = ot.origin().getRef();
+				int ref2 = ot.destination().getRef();
+				if (ref1 != -1 && ref2 != -1 && ref1 == ref2)
 				{
 					logger.debug("  Collapsing "+ot);
 					removedTriangles.add(ot.getTri());
