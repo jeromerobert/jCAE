@@ -189,8 +189,8 @@ public class MMesh1D extends MMesh0D
 			while (itn.hasNext())
 			{
 				MNode1D pt = (MNode1D) itn.next();
-				if (null != pt.getRef())
-					((ArrayList) vertex2Ref.get(pt.getRef())).add(pt);
+				if (null != pt.getCADVertex())
+					((ArrayList) vertex2Ref.get(pt.getCADVertex())).add(pt);
 			}
 		}
 		

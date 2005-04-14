@@ -61,10 +61,10 @@ public class MMesh1DWriter
 		{
 			MNode1D n=(MNode1D)nodesIterator.next();
 			out.writeDouble(n.getParameter());
-			if (null != n.getRef())
+			if (null != n.getCADVertex())
 			{
 				refout.writeInt(n.getLabel());
-				refout.writeInt(m1d.getIndexGeometricalVertex(n.getRef()));
+				refout.writeInt(m1d.getIndexGeometricalVertex(n.getCADVertex()));
 				nref++;
 			}
 			i++;

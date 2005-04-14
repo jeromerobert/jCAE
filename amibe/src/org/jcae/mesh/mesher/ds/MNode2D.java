@@ -81,7 +81,7 @@ public class MNode2D
 			param = C2d.value(pt.getParameter());
 		else
 		{
-			CADVertex V = pt.getRef();
+			CADVertex V = pt.getCADVertex();
 			if (null == V)
 				throw new java.lang.RuntimeException("Error in MNode2D()");
 			param = V.parameters(F);

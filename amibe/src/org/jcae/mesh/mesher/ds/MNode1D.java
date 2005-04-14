@@ -129,7 +129,7 @@ public class MNode1D
 	 *
 	 * @return the topological vertex sharing the same location.
 	 */
-	public CADVertex getRef()
+	public CADVertex getCADVertex()
 	{
 		if (null != master)
 			return master.vertex;

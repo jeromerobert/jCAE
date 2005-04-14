@@ -63,7 +63,7 @@ public class Vertex
 			param = C2d.value(pt.getParameter());
 		else
 		{
-			CADVertex V = pt.getRef();
+			CADVertex V = pt.getCADVertex();
 			if (null == V)
 				throw new java.lang.RuntimeException("Error in Vertex()");
 			param = V.parameters(F);
