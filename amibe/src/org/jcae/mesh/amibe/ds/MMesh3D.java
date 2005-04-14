@@ -26,16 +26,7 @@ import org.apache.log4j.Logger;
 
 /**
  * 3D discretization of the whole shape.
- * This class contains the 3D mesh of the whole shape.  Here is the typical
- * lifecycle of these instances:
- * <ol>
- *   <li>A geometry file is read and a 1D mesh is generated.</li>
- *   <li>A <code>MMesh3D</code> instance is created.</li>
- *   <li>For all topological surfaces of this shape, computes its 2D meshing
- *       (the 1D mesh is identical for all surfaces) and imports all meshes
- *       into the 3D space by calling {@link #addSubMesh2D}.</li>
- *   <li>Write the 3D mesh onto disk and deletes this instance.</li>
- * </ol>
+ * This class contains the 3D mesh of the whole shape.
  */
 
 public class MMesh3D

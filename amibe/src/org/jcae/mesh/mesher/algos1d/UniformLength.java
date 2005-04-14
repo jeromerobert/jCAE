@@ -104,7 +104,7 @@ public class UniformLength
 		double range[];
 		CADEdge E = submesh1d.getGeometry();
 		
-		//  See also org.jcae.mesh.mesher.ds.SubMesh2D.tooSmall()
+		//  See also org.jcae.mesh.amibe.ds.Mesh.tooSmall()
 		//if (BRep_Tool.degenerated(E))
 		//	return false;
 		

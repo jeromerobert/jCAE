@@ -40,7 +40,7 @@ public class Insertion
 	/**
 	 * Creates a <code>Insertion</code> instance.
 	 *
-	 * @param m  the <code>SubMesh2D</code> instance to refine.
+	 * @param m  the <code>Mesh</code> instance to refine.
 	 */
 	public Insertion(Mesh m)
 	{

@@ -194,8 +194,10 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 	}
 	
 	/**
-	 * Reads a SubMesh2D instance from a file.
-	 * @param file The name of the XML file
+	 * Convert 2D files to 3D files.
+	 * @param xmlInFile The name of the XML file
+	 * @param groupId Group number of this 2D mesh
+	 * @param F Topological face
 	 */
 	public void convert(String xmlInFile, int groupId, CADFace F)
 	{
