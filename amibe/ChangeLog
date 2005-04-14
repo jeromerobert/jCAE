@@ -1,3 +1,38 @@
+Thu Apr 14 09:29:10 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/masher/ds: Move 3D classes into...
+	* src/org/jcae/mesh/amibe/ds: ... amibe...
+	* src/org/jcae/mesh/amibe/algos2d/EnforceAbsDeflection.java
+	  src/org/jcae/mesh/amibe/util/Octree.java
+	  src/org/jcae/mesh/amibe/util/OctreeTest.java
+	  src/org/jcae/mesh/amibe/util/tests/OctreeTestDisplayPLY.java
+	  src/org/jcae/mesh/amibe/util/tests/OctreeTestRemove.java
+	  src/org/jcae/mesh/mesher/algos3d/Fuse.java
+	  src/org/jcae/mesh/xmldata/MMesh3DReader.java
+	  src/org/jcae/mesh/xmldata/MMesh3DWriter.java
+	  src/org/jcae/mesh/xmldata/MeshToMMesh3DConvert.java: ... and adapt other classes.
+	* src/org/jcae/mesh/mesher/algos3d/Fuse.java: Move into...
+	* src/org/jcae/mesh/amibe/algos3d/Fuse.java: ... amibe.
+	* src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/amibe/ds/OTriangle.java
+	  src/org/jcae/mesh/amibe/ds/Vertex.java
+	  src/org/jcae/mesh/mesher/ds/MNode2D.java: Store master MNode1D in Vertex.ref1d and MNode2D.ref1d so that some calls to getMaster() can be dropped.
+	* src/org/jcae/mesh/mesher/ds/MNode1D.java: Rename getRef() into getCADVertex()...
+	* src/org/jcae/mesh/xmldata/MMesh1DWriter.java
+	  src/org/jcae/mesh/mesher/ds/MNode2D.java
+	  src/org/jcae/mesh/mesher/ds/MMesh1D.java
+	  src/org/jcae/mesh/amibe/ds/Vertex.java:  ... and adapt other classes.
+	* src/org/jcae/mesh/amibe/ds/Vertex.java
+	  src/org/jcae/mesh/mesher/ds/MNode2D.java: ref1d member is no more a MNode1D instance, but an int.  In 2D and 3D meshing, we do not need MNode1D objects but only unique identifiers to detect nodes sharing the same location.
+	* src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/amibe/ds/OTriangle.java
+	  src/org/jcae/mesh/amibe/ds/MMesh3D.java
+	  src/org/jcae/mesh/xmldata/MeshWriter.java: Adapt other classes to this change.
+	* src/org/jcae/mesh/xmldata/SubMesh2DReader.java
+	  src/org/jcae/mesh/mesher/ds/SubMesh2D.java
+	  src/org/jcae/mesh/mesher/ds/MFace2D.java
+	  src/org/jcae/mesh/mesher/ds/MNode2D.java:  Remove these classes, they are no more used.
+
 Wed Apr 13 11:19:36 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/metrics/Metric3D.java: Fix setDeflection(), it was not taken into account with a deflection > 1.0.
