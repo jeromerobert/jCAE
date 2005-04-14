@@ -74,20 +74,6 @@ public class MNode1D
 		assert(setID());
 	}
 	
-	/**
-	 * Clones a <code>MNode1D</code> instance.
-	 *
-	 * @param that  the <code>MNode1D</code> instance to clone.
-	 */
-	public MNode1D(MNode1D that)
-	{
-		param = that.param;
-		vertex = that.vertex;
-		master = that.getMaster();
-		isDegenerated = that.isDegenerated();
-		assert(setID());
-	}
-	
 	private boolean setID()
 	{
 		id++;
