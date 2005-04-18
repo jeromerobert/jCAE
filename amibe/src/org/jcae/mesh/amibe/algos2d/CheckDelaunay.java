@@ -51,8 +51,6 @@ public class CheckDelaunay
 	
 	/**
 	 * Launch method to mesh a surface.
-	 *
-	 * @see #computeFace
 	 */
 	public void compute()
 	{

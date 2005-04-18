@@ -49,10 +49,7 @@ public class Insertion
 	}
 	
 	/**
-	 * Iteratively collapses and refines edges.
-	 *
-	 * @see CollapseEdges
-	 * @see CutEdges
+	 * Iteratively insert inner nodes.
 	 */
 	public void compute()
 	{
