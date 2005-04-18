@@ -1,88 +1,129 @@
 <body>
-<p>This the list of Java environement variables used in the mesher.</p>
-<table BORDER="1">
-  <tbody>
-    <tr>
-      <td><strong>variable <strong></td>
-      <td><strong>default value<strong></td>
-      <td><strong>description<strong></td>
-    </tr>
-    <tr>
-      <td>org.jcae.mesh.Mesher.mesh1d </td>
-      <td>true</td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>org.jcae.mesh.Mesher.mesh2d </td>
-      <td>true</td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>org.jcae.mesh.Mesher.mesh3d </td>
-      <td>true</td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>org.jcae.mesh.Mesher.meshFace </td>
-      <td>0</td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>org.jcae.mesh.Mesher.writeNormals </td>
-      <td>false</td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>org.jcae.mesh.tolerance </td>
-      <td>-1</td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>org.jcae.mesh.amibe.ds.Mesh.epsilon </td>
-      <td>-1.0</td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon </td>
-      <td>false</td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>org.jcae.mesh.cad </td>
-      <td>org.jcae.mesh.cad.occ.OCCShapeBuilder</td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>javax.media.j3d.zFactorAbs </td>
-      <td>20.0f</td>
-      <td>Set polygonOffset for java3d visualisation. See javax.media.j3d.PolygonAttributes javadoc.</td>
-    </tr>
-    <tr>
-      <td>javax.media.j3d.zFactorRel </td>
-      <td>2.0f</td>
-      <td>Set polygonOffsetFactor for java3d visualisation. See javax.media.j3d.PolygonAttributes javadoc.</td>
-    </tr>
-    <tr>
-      <td>org.jcae.mesh.tmpDir.delete </td>
-      <td>false</td>
-      <td>Delete the directory which contain the mesh at the end (never delete the UNV file)</td>
-    </tr>
-    <tr>
-      <td>org.jcae.mesh.tmpDir.auto </td>
-      <td>false</td>
-      <td>Ignore the specified tmp dir and create one with File.createTemp</td>
-    </tr>
-    <tr>
-      <td>org.jcae.mesh.unv.name </td>
-      <td>&lt;brep name&gt;.unv </td>
-      <td>Force the name of the UNV file </td>
-    </tr>
-	<tr>
-		<td>org.jcae.mesh.unv.nogz</td>
-		<td>false</td>
-		<td>If true, the unv file is not gzipped.</td>
-	</tr>
-  </tbody>
-</table>
-<p>The JVM -ea flag can be used to enable or disable runtime assertions. See Java Runtime documentation.</p>
+<p>Here is the list of Java environement variables used in the mesher.</p>
+<h2>Input parameters</h2>
+<dl>
+  <dt><tt>org.jcae.mesh.Mesher.mesh1d</tt></dt>
+  <dd>
+    If set to <tt>true</tt>, edge discretization is computed, otherwise
+    it is retrieved from existing files.
+    <br />Default: <b>true</b>
+  </dd>
+
+  <dt><tt>org.jcae.mesh.Mesher.mesh2d</tt></dt>
+  <dd>
+    If set to <tt>true</tt>, surface discretization is computed, otherwise
+    it is retrieved from existing files.
+    <br />Default: <b>true</b>
+  </dd>
+
+  <dt><tt>org.jcae.mesh.Mesher.mesh3d</tt></dt>
+  <dd>
+    If set to <tt>true</tt>, assembling of 2D meshes into a final 3D mesh
+    is computed, otherwise it is retrieved from existing files.
+    <br />Default: <b>true</b>
+  </dd>
+
+  <dt><tt>org.jcae.mesh.Mesher.meshFace</tt></dt>
+  <dd>
+    If set to a non-null value, only the face with this index number is
+    meshed.  This is useful for debugging purposes.
+    <br />Default: <b>0</b>
+  </dd>
+
+  <dt><tt>org.jcae.mesh.tolerance</tt></dt>
+  <dd>
+    If set to a positive value, boundary nodes which are closer than this
+    value are fused. <b>Warning: This setting is currently disabled.</b>
+    <br />Default: <b>-1</b>
+  </dd>
+
+  <dt><tt>org.jcae.mesh.amibe.ds.Mesh.epsilon</tt></dt>
+  <dd>
+    Edges smaller than this value are not taken into account.
+    If it is set to zero, all edges are considered even if they are small.
+    If it is set to a negative value, epsilon is computed for each CAD
+    face by taking the maximum between <code>len/100.0</code> and
+    <code>diag/1000.0</code>, where <tt>len</tt> is the length criterion
+    and <tt>diag</tt> the bounding box diagonal length.
+    If epsilon is set to a positive value, this value is used when eliminating
+    small edges.
+    <br />Default: <b>-1.0</b>
+  </dd>
+
+  <dt><tt>org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon</tt></dt>
+  <dd>
+    If set to <tt>true</tt>, edge lengths are cumulated when removing small
+    edges.  Thus many small edges can be combined into a meshed edge.
+    <br />Default: <b>false</b>
+  </dd>
+</dl>
+
+<h2>Output files</h2>
+<dl>
+  <dt><tt>org.jcae.mesh.tmpDir.delete</tt></dt>
+  <dd>
+    Delete the directory which contains the mesh at the end.
+    Note: UNV file is never deleted.
+    <br />Default: <b>false</b>
+  </dd>
+
+  <dt><tt>org.jcae.mesh.tmpDir.auto</tt></dt>
+  <dd>
+    Ignore the specified tmp dir and create one with File.createTemp
+    <br />Default: <b>false</b>
+  </dd>
+
+  <dt><tt>org.jcae.mesh.unv.name</tt></dt>
+  <dd>
+    Force the name of the UNV file
+    <br />Default: <b><i>&lt;brep name&gt;</i>.unv</b>
+  </dd>
+
+  <dt><tt>org.jcae.mesh.unv.nogz</tt></dt>
+  <dd>
+    If <tt>true</tt>, UNV file is not gzipped.
+    <br />Default: <b>false</b>
+  </dd>
+
+  <dt><tt>org.jcae.mesh.Mesher.writeNormals</tt></dt>
+  <dd>
+    If set to <tt>true</tt>, surface normals are written into output
+    files.  This can drastically increase output file size, so use with
+    caution.
+    <br />Default: <b>false</b>
+  </dd>
+</dl>
+
+<h2>CAD</h2>
+<dl>
+  <dt><tt>org.jcae.mesh.cad</tt></dt>
+  <dd>
+    This variable can select an alternate CAD engine.  As of now, the only
+    supported CAD engine is OCC.
+    <br />Default: <b>org.jcae.mesh.cad.occ.OCCShapeBuilder</b>
+  </dd>
+</dl>
+
+<h2>Visualisation</h2>
+<dl>
+  <dt><tt>javax.media.j3d.zFactorAbs</tt></dt>
+  <dd>
+    Set polygonOffset for java3d visualisation.
+    See javax.media.j3d.PolygonAttributes javadoc.
+    <br />Default: <b>20.0f</b>
+  </dd>
+
+  <dt><tt>javax.media.j3d.zFactorRel</tt></dt>
+  <dd>
+    Set polygonOffsetFactor for java3d visualisation.
+    See javax.media.j3d.PolygonAttributes javadoc.
+    <br />Default: <b>2.0f</b>
+  </dd>
+</dl>
+
+<p>
+The JVM <code>-ea</code> flag can be used to enable or disable runtime
+assertions.  See Java Runtime documentation.
+</p>
+
 </body>
