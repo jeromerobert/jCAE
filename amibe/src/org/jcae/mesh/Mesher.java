@@ -38,21 +38,31 @@ import org.jcae.mesh.cad.*;
 import gnu.trove.TIntArrayList;
 
 /**
- * This class Mesher allows to load a file, construct the mesh structure and read mesh hypothesis.
- * Then starts meshing operation.
- * This class allows to set all explicit constraints desired by the user, and to set all implicit constraints linked to 
- * mesher requirement.
- * The main idea of mesh generation is to sub-structure the mesh linked to the geometric shape into several sub-meshes 
- * according to specifications and geometry decomposition (see mesh.MeshMesh.initMesh()).
+ * Main class to mesh a surface.
+ * This Mesher class takes as input a file name containing the CAD
+ * surface, mesh hypothesis (length and deflection), computes a mesh
+ * according to these hypothesis and store it onto disk.
+ *
+ * This class allows to set all explicit constraints desired by the
+ * user, and to set all implicit constraints linked to mesher
+ * requirement.  The main idea of mesh generation is to sub-structure
+ * the mesh linked to the geometric shape into several sub-meshes
+ * according to specifications and geometry decomposition (see
+ * mesh.MeshMesh.initMesh()).
  */
 public class Mesher
 {
 	private static Logger logger=Logger.getLogger(Mesher.class);
 
 	/** 
-	 * Reads the file, the algorithm type and the constraint value for meshing
+	 * Mesh a CAD surface.
+	 *
 	 * @param brepfilename  the filename of the brep file	 
-	 * @param discr  the value of the meshing constraint
+	 * @param xmlDir  directory where output files are stored
+	 * @param discr  length constraint
+	 * @param defl   deflection constraint
+	 * @param tolerance  unused for now.
+	 *        See {@link org.jcae.mesh.amibe.algos3d.Fuse}
 	 */
 	private static void mesh(String brepfilename, String xmlDir, double discr, double defl, double tolerance)
 	{
@@ -296,7 +306,7 @@ public class Mesher
 			
 			Double discr=new Double(args[2]);
 			Double defl=new Double(args[3]);
-			Double tolerance=new Double(System.getProperty("org.jcae.mesh.tolerance", "-1.0"));
+			Double tolerance=new Double(System.getProperty("org.jcae.mesh.Mesher.tolerance", "-1.0"));
 			mesh(filename, xmlDir, discr.doubleValue(), defl.doubleValue(), tolerance.doubleValue());
 			logger.info("Exporting UNV");
 			
