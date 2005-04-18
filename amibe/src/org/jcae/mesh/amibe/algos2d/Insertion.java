@@ -193,7 +193,7 @@ public class Insertion
 			{
 				Vertex v = (Vertex) nodes.get(index);
 				OTriangle vt = v.getSurroundingOTriangle();
-				if (vt.split3(v))
+				if (vt.split3(v, false))
 					mesh.getQuadTree().add(v);
 				else
 					skippedNodes++;

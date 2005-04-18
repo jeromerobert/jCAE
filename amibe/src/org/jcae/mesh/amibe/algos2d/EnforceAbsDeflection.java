@@ -111,7 +111,7 @@ public class EnforceAbsDeflection
 				double uv[] = t.centroid().getUV();
 				Vertex v = new Vertex(uv[0], uv[1]);
 				OTriangle vt = v.getSurroundingOTriangle();
-				if (vt.split3(v))
+				if (vt.split3(v, false))
 				{
 					mesh.getQuadTree().add(v);
 					redo = true;
