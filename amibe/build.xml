@@ -48,8 +48,11 @@
 	<target name="javadoc" description="Javadoc for my API." depends="init">
 		<mkdir dir="${javadoc.dir}"/>
 		<javadoc destdir="${javadoc.dir}" packagenames="*" source="1.4">
+			<tag name="todo" scope="all" description="To do:" />
 			<classpath>
 				<pathelement location="${jcae.jar}"/>
+				<pathelement location="${log4j.jar}"/>
+				<pathelement location="${trove.jar}"/>
 			</classpath>
 			<sourcepath>
 				<pathelement location="${src.dir}"/>
