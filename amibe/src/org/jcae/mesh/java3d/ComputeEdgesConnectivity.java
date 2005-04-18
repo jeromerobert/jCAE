@@ -36,7 +36,7 @@ import org.w3c.dom.*;
 /**
  *
  * @author Jerome Robert
- * @todo handle multiple submesh and <label> element.
+ * @todo handle multiple submesh and &lt;label&gt; element.
  */
 
 public class ComputeEdgesConnectivity

@@ -201,8 +201,9 @@ public class UNVConverter
 	private String[] names;
 	private int numberOfTriangles;
 	
-	/** workaround for Bug ID4724038, see
-	 * http://bugs.sun.com/bugdatabase/view_bug.do;:YfiG?bug_id=4724038
+	/**
+	 * Workaround for Bug ID4724038.
+	 * see http://bugs.sun.com/bugdatabase/view_bug.do;:YfiG?bug_id=4724038
 	 */
 	public static void clean(final MappedByteBuffer buffer)
 	{

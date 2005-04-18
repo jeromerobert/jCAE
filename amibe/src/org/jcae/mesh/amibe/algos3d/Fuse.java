@@ -62,9 +62,7 @@ public class Fuse
 	}
 	
 	/**
-	 * Moves all nodes until all iterations are done.
-	 *
-	 * @see #computeFace
+	 * Fuse boundary nodes which are closer than a given bound.
 	 */
 	public void compute()
 	{

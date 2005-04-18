@@ -247,7 +247,6 @@ public class Mesher
 	 * main method, reads 2 arguments and calls mesh() method
 	 * @param args an array of String, filename, algorithm type and constraint
 	 * value
-	 * @see #mesh
 	 */
 	public static void main(String args[])
 	{

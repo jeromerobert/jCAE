@@ -44,19 +44,27 @@ public class Calculus3D implements Calculus
 	}
 
 	/**
-	 * Returns the 3D-euclidian distance to another <code>Vertex</code> node.
-	 * For both points, 3D coordinates are computed and the euclidian
-	 * distance is returned.
+	 * Returns the riemannian distance between nodes.
+	 * This distance is computed with metrics on start and end points,
+	 * and the maximal distance is returned.
 	 *
-	 * @param surf  the geometrical surface
-	 * @param end  the node to which distance is computed.
-	 * @return the distance to <code>end</code>.
+	 * @param start  the start node
+	 * @param end  the end node
+	 * @return the distance between nodes
 	 **/
 	public double distance(Vertex start, Vertex end)
 	{
 		return Math.max(distance(start, end, start), distance(start, end, end));
 	}
 	
+	/**
+	 * Returns the riemannian distance between nodes.
+	 *
+	 * @param start  the start node
+	 * @param end  the end node
+	 * @param vm  the vertex on which metrics is used
+	 * @return the distance between nodes
+	 **/
 	public double distance(Vertex start, Vertex end, Vertex vm)
 	{
 		double ret;
