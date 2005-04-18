@@ -1,7 +1,8 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finit element mesher, Plugin architecture.
 
-    Copyright (C) 2004 Jerome Robert <jeromerobert@users.sourceforge.net>
+    Copyright (C) 2004,2005
+                  Jerome Robert <jeromerobert@users.sourceforge.net>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
