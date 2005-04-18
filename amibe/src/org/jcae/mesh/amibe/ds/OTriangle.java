@@ -41,7 +41,7 @@ import org.apache.log4j.Logger;
  *       http://www-rocq1.inria.fr/gamma/cdrom/www/bamg/eng.htm
  */
 /**
- * This class is a handle to {@linkorg.jcae.mesh.amibe.ds.Triangle}.
+ * This class is a handle to {@link org.jcae.mesh.amibe.ds.Triangle}.
  *
  * Jonathan Richard Shewchuk explains in
  *       http://www.cs.cmu.edu/~quake/triangle.html
@@ -54,7 +54,7 @@ import org.apache.log4j.Logger;
  * between 0 and 2 can represent an edge.  This <code>OTriangle</code>
  * class plays this role, it defines an <em>oriented triangle</em>, or
  * in other words an oriented edge.  Instances of this class are tied to
- * their underlying {@linkorg.jcae.mesh.amibe.ds.Triangle} instances, so
+ * their underlying {@link org.jcae.mesh.amibe.ds.Triangle} instances, so
  * modifications are not local to this class!
  */
 public class OTriangle
@@ -62,7 +62,6 @@ public class OTriangle
 	private static Logger logger = Logger.getLogger(OTriangle.class);
 	private static final int [] next3 = { 1, 2, 0 };
 	private static final int [] prev3 = { 2, 0, 1 };
-	private static final int [] bitmaskclear = {  0xffffff3c,  0xffffff33,  0xffffff0f };
 	
 	public static final int BOUNDARY = 1 << 0;
 	public static final int OUTER    = 1 << 1;
@@ -167,8 +166,7 @@ public class OTriangle
 	}
 	
 	/**
-	 * Returns the oattributes of this oriented triangle.
-	 * Attributes are a bit field.
+	 * Checks if attribute of this oriented triangle are set.
 	 *
 	 * @param attr  the attributes to check
 	 * @return <code>true</code> if this OTriangle has all these
@@ -180,7 +178,7 @@ public class OTriangle
 	}
 	
 	/**
-	 * Sets the oattributes of this oriented triangle.
+	 * Sets attributes of this oriented triangle.
 	 *
 	 * @param attr  the attribute of this oriented triangle.
 	 */
@@ -191,9 +189,9 @@ public class OTriangle
 	}
 	
 	/**
-	 * Returns the oattributes of this oriented triangle.
+	 * Resets attributes of this oriented triangle.
 	 *
-	 * @return the attributes of this oriented triangle.
+	 * @param attr   the attributes of this oriented triangle to clear out.
 	 */
 	public final void clearAttributes(int attr)
 	{
@@ -201,17 +199,24 @@ public class OTriangle
 		updateAttributes();
 	}
 	
+	// Adjust tri.adjPos after attributes is modified.
 	private final void updateAttributes()
 	{
 		tri.adjPos &= ~(0xff << (8*(1+orientation)));
 		tri.adjPos |= ((attributes & 0xff) << (8*(1+orientation)));
 	}
 	
-	public static final void copyOTri(OTriangle o, OTriangle that)
+	/**
+	 * Copy an <code>OTriangle</code> into another <code>OTriangle</code>.
+	 *
+	 * @param src  <code>OTriangle</code> being duplicated
+	 * @param dest  already allocated <code>OTriangle</code> where data are copied
+	 */
+	public static final void copyOTri(OTriangle src, OTriangle dest)
 	{
-		that.tri = o.tri;
-		that.orientation = o.orientation;
-		that.attributes = o.attributes;
+		dest.tri = src.tri;
+		dest.orientation = src.orientation;
+		dest.attributes = src.attributes;
 	}
 	
 	//  These geometrical primitives have 2 signatures:
@@ -339,16 +344,31 @@ public class OTriangle
 		prevOTri();
 	}
 	
+	/**
+	 * Returns the start vertex of this edge.
+	 *
+	 * @return the start vertex of this edge.
+	 */
 	public final Vertex origin()
 	{
 		return tri.vertex[next3[orientation]];
 	}
 	
+	/**
+	 * Returns the end vertex of this edge.
+	 *
+	 * @return the end vertex of this edge.
+	 */
 	public final Vertex destination()
 	{
 		return tri.vertex[prev3[orientation]];
 	}
 	
+	/**
+	 * Returns the apex of this edge.
+	 *
+	 * @return the apex of this edge.
+	 */
 	public final Vertex apex()
 	{
 		return tri.vertex[orientation];
@@ -356,22 +376,34 @@ public class OTriangle
 	
 	//  The following 3 methods change the underlying triangle.
 	//  So they also modify all OTriangle bound to this one.
-	public final Vertex setOrigin(Vertex v)
+	/**
+	 * Sets the start vertex of this edge.
+	 *
+	 * @param v  the start vertex of this edge.
+	 */
+	public final void setOrigin(Vertex v)
 	{
 		tri.vertex[next3[orientation]] = v;
-		return v;
 	}
 	
-	public final Vertex setDestination(Vertex v)
+	/**
+	 * Sets the end vertex of this edge.
+	 *
+	 * @param v  the end vertex of this edge.
+	 */
+	public final void setDestination(Vertex v)
 	{
 		tri.vertex[prev3[orientation]] = v;
-		return v;
 	}
 	
-	public final Vertex setApex(Vertex v)
+	/**
+	 * Sets the apex of this edge.
+	 *
+	 * @param v  the apex of this edge.
+	 */
+	public final void setApex(Vertex v)
 	{
 		tri.vertex[orientation] = v;
-		return v;
 	}
 	
 	/**
@@ -393,6 +425,7 @@ public class OTriangle
 	
 	/**
 	 * Collapse an edge and update adjacency relations.
+	 * Its start and end points must have the same location.
 	 */
 	public final void collapse()
 	{
@@ -453,18 +486,21 @@ public class OTriangle
 	 * ensure that the vertex being inserted is contained by this
 	 * triangle.  Once triangles are created, edges are swapped if
 	 * they are not Delaunay.
+	 *
+	 * If edges are not swapped after vertex is inserted, the quality of
+	 * newly created triangles has decreased, and the vertex is eventually
+	 * not inserted unless the <code>force</code> argument is set to
+	 * <code>true</code>.
+	 *
 	 * Origin and destination points must not be at infinite, which
 	 * is the case when current triangle is returned by
 	 * getSurroundingTriangle().  If apex is Vertex.outer, then
 	 * getSurroundingTriangle() ensures that v.onLeft(o,d) &gt; 0.
 	 *
 	 * @param v  the vertex being inserted.
+	 * @param force  if <code>false</code>, the vertex is inserted only if some edges were swapped after its insertion.  If <code>true</code>, the vertex is unconditionnally inserted.
+	 * @return <code>true</code> if vertex was successfully added, <code>false</code> otherwise.
 	 */
-	public final boolean split3(Vertex v)
-	{
-		return split3(v, false);
-	}
-	
 	public final boolean split3(Vertex v, boolean force)
 	{
 		// Aliases
@@ -611,6 +647,12 @@ public class OTriangle
 		return totNrSwap;
 	}
 	
+	/**
+	 * Checks whether an edge can be swapped.
+	 *
+	 * @return <code>false</code> if edge is a boundary or outside the mesh,
+	 * <code>true</code> otherwise.
+	 */
 	public final boolean isMutable()
 	{
 		return !(hasAttributes(BOUNDARY) || hasAttributes(OUTER));
@@ -665,19 +707,14 @@ public class OTriangle
 		return !apex2.inCircleTest3(this);
 	}
 	
-	public final long get2Area()
-	{
-		return tri.vertex[0].onLeft(tri.vertex[1], tri.vertex[2]);
-	}
-	
-	/*
+	/**
 	 * Swaps an edge.
 	 *
 	 * This routine swaps an edge (od) to (na), updates
 	 * adjacency relations and backward links between vertices and
 	 * triangles.  Current object is transformed from (oda) to (ona)
 	 * and not (nao), because this helps turning around o, e.g.
-	 * at the end of split3.
+	 * at the end of {@link #split3}.
 	 *
 	 * @param a  apex of the current edge
 	 * @param n  apex of the symmetric edge
