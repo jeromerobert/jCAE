@@ -88,6 +88,11 @@ public class Vertex
 		return ref1d;
 	}
 	
+	public void setRef(int l)
+	{
+		ref1d = l;
+	}
+	
 	public void addToQuadTree()
 	{
 		logger.debug("Inserted point: "+this);
