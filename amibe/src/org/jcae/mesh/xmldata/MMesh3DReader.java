@@ -26,6 +26,7 @@ import org.jcae.mesh.amibe.ds.MMesh3D;
 import org.jcae.mesh.amibe.ds.MFace3D;
 import org.jcae.mesh.amibe.ds.MNode3D;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileInputStream;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -82,7 +83,14 @@ public class MMesh3DReader
 			String normalsFile = xpath.selectSingleNode(submeshNormals, "file/@location").getNodeValue();
 			if (normalsFile.charAt(0) != File.separatorChar)
 				normalsFile = xmlDir+File.separator+normalsFile;
-			DataInputStream normalsIn=new DataInputStream(new BufferedInputStream(new FileInputStream(normalsFile)));
+			DataInputStream normalsIn = null;
+			try
+			{
+				normalsIn = new DataInputStream(new BufferedInputStream(new FileInputStream(normalsFile)));
+			}
+			catch (FileNotFoundException ex)
+			{
+			}
 			
 			int numberOfReferences = Integer.parseInt(
 				xpath.selectSingleNode(submeshNodes, "references/number/text()").getNodeValue());
@@ -117,17 +125,26 @@ public class MMesh3DReader
 			for (i=0; i < numberOfTriangles; i++)
 			{
 				MNode3D pt1 = nodelist[trianglesIn.readInt()];
-				for (int j = 0; j < 3; j++)
-					n[j] = normalsIn.readDouble();
-				pt1.addNormal(n);
+				if (normalsIn != null)
+				{
+					for (int j = 0; j < 3; j++)
+						n[j] = normalsIn.readDouble();
+					pt1.addNormal(n);
+				}
 				MNode3D pt2 = nodelist[trianglesIn.readInt()];
-				for (int j = 0; j < 3; j++)
-					n[j] = normalsIn.readDouble();
-				pt2.addNormal(n);
+				if (normalsIn != null)
+				{
+					for (int j = 0; j < 3; j++)
+						n[j] = normalsIn.readDouble();
+					pt2.addNormal(n);
+				}
 				MNode3D pt3 = nodelist[trianglesIn.readInt()];
-				for (int j = 0; j < 3; j++)
-					n[j] = normalsIn.readDouble();
-				pt3.addNormal(n);
+				if (normalsIn != null)
+				{
+					for (int j = 0; j < 3; j++)
+						n[j] = normalsIn.readDouble();
+					pt3.addNormal(n);
+				}
 				facelist[i] = new MFace3D(pt1, pt2, pt3);
 				m3d.addFace(facelist[i]);
 			}
