@@ -109,24 +109,37 @@ public class MeshWriter
 	/**
 	 * Used by {@link writeObject}
 	 */
-	private static Element writeObjectTriangles(Document document, Iterator facesIterator, File trianglesFile, String baseDir, TObjectIntHashMap nodeIndex)
+	private static Element writeObjectTriangles(Document document, ArrayList trianglelist, File trianglesFile, String baseDir, TObjectIntHashMap nodeIndex)
 		throws IOException
 	{
 		//save triangles
+		Iterator facesIterator = trianglelist.iterator();
 		logger.debug("begin writing "+trianglesFile);
 		DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(trianglesFile)));
+		TObjectIntHashMap faceIndex=new TObjectIntHashMap(trianglelist.size());
 		int i=0;
 		while(facesIterator.hasNext())
 		{
 			Triangle f = (Triangle) facesIterator.next();
-			if (f.vertex[0] == Vertex.outer || f.vertex[1] == Vertex.outer || f.vertex[2] == Vertex.outer)
-				continue;
 			if (f.isOuter())
 				continue;
-			i++;
 			for (int j = 0; j < 3; j++)
 				out.writeInt(nodeIndex.get(f.vertex[j]));
+			faceIndex.put(f, i);
+			i++;
 		}
+		//  Now write adjacency relations
+		facesIterator = trianglelist.iterator();
+		while(facesIterator.hasNext())
+		{
+			Triangle f = (Triangle) facesIterator.next();
+			if (f.isOuter())
+				continue;
+			for (int j = 0; j < 3; j++)
+				out.writeInt(faceIndex.get(f.adj[j]));
+			out.writeInt(f.adjPos);
+		}
+
 		out.close();
 		logger.debug("end writing "+trianglesFile);
 		
@@ -187,7 +200,7 @@ public class MeshWriter
 			subMeshElement.appendChild(dimensionElement);
 			
 			subMeshElement.appendChild(writeObjectNodes(document, nodelist, nodesFile, refFile, xmlDir, nodeIndex));
-			subMeshElement.appendChild(writeObjectTriangles(document, trianglelist.iterator(), trianglesFile, xmlDir, nodeIndex));
+			subMeshElement.appendChild(writeObjectTriangles(document, trianglelist, trianglesFile, xmlDir, nodeIndex));
 			meshElement.appendChild(subMeshElement);
 			jcaeElement.appendChild(meshElement);
 

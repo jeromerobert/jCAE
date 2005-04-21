@@ -115,7 +115,6 @@ public class MeshReader
 				xpath.selectSingleNode(submeshTriangles, "number/text()").getNodeValue());
 			logger.debug("Reading "+numberOfTriangles+" elements");
 			Triangle [] facelist = new Triangle[numberOfTriangles];
-			double [] n = new double[3];
 			for (int i=0; i < numberOfTriangles; i++)
 			{
 				Vertex pt1 = nodelist[trianglesIn.readInt()];
@@ -123,6 +122,16 @@ public class MeshReader
 				Vertex pt3 = nodelist[trianglesIn.readInt()];
 				facelist[i] = new Triangle(pt1, pt2, pt3);
 				mesh.add(facelist[i]);
+				pt1.tri = facelist[i];
+				pt2.tri = facelist[i];
+				pt3.tri = facelist[i];
+			}
+			// Now read adjacency relations
+			for (int i=0; i < numberOfTriangles; i++)
+			{
+				for (int j=0; j < 3; j++)
+					facelist[i].adj[j] = facelist[trianglesIn.readInt()];
+				facelist[i].adjPos = trianglesIn.readInt();
 			}
 			
 			trianglesIn.close();
