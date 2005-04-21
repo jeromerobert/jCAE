@@ -136,24 +136,6 @@ public class MFace3D
 		}
 		throw new NoSuchElementException("MNode3D : "+node);
 	}
-	/**
-	 * Returns the triangle quality.
-	 *
-	 * @return the triangle quality.
-	 */
-	public double quality()
-	{
-		double Q = 2.0 * Math.PI;
-		double a0, a1, a2;
-		
-		a1 = Math.abs(nodelist[0].angle(nodelist[1], nodelist[2]));
-		a2 = Math.abs(nodelist[1].angle(nodelist[2], nodelist[0]));
-		a0 = Math.abs(nodelist[2].angle(nodelist[0], nodelist[1]));
-		// compute the triangle quality
-		Q = Math.min(a0, a1);
-		Q = Math.min(a2, Q);
-		return Q;
-	}
 	
 	public String toString()
 	{		
