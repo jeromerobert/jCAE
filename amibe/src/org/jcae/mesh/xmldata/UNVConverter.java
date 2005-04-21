@@ -21,6 +21,7 @@
 package org.jcae.mesh.xmldata;
 
 import gnu.trove.TIntHashSet;
+import gnu.trove.TIntArrayList;
 import gnu.trove.TIntIntHashMap;
 import java.io.IOException;
 import java.io.File;
@@ -429,7 +430,10 @@ public class UNVConverter
 		else
 			proc = new WriteMeshMESH();
 		proc.writeInit(out);
-		proc.writeNodes(out, new TIntHashSet(triangle).toArray(), amibeNodeToUNVNode);
+		TIntHashSet nodeset = new TIntHashSet(triangle);
+		TIntArrayList nodelist = new TIntArrayList(nodeset.toArray());
+		nodelist.sort();
+		proc.writeNodes(out, nodelist.toNativeArray(), amibeNodeToUNVNode);
 		TIntIntHashMap amibeTriaToUNVTria=new TIntIntHashMap();
 		proc.writeTriangles(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
 		try
