@@ -1,0 +1,74 @@
+/* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
+   modeler, Finit element mesher, Plugin architecture.
+
+    Copyright (C) 2005
+                  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
+
+package org.jcae.mesh.amibe.validation;
+
+import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.Vertex;
+
+public class NodeConnectivity2D extends QualityProcedure
+{
+	public double quality(Object o)
+	{
+		double ret;
+		assert (o instanceof Vertex);
+		Vertex n = (Vertex) o;
+		OTriangle start = new OTriangle(n.tri, 0);
+		if (n == start.destination())
+			start.nextOTri();
+		else if (n == start.apex())
+			start.prevOTri();
+		if (!start.isMutable())
+			return 1.0;
+		Vertex d = start.destination();
+		//  Loop around n
+		int count = 0;
+System.out.println(""+start.origin());
+System.out.println(""+start.destination());
+		while (true)
+		{
+			count++;
+			if (count >= 12)
+				return 0.0;
+			start.prevOTri();
+			//  Do not consider boundary nodes
+			if (start == null || !start.isMutable())
+				return 1.0;
+			start.symOTri();
+			if (start.destination() == d)
+				break;
+System.out.println(""+start);
+		}
+System.out.println(""+count);
+		
+		if (count <= 6)
+			return (((double) count) / 6.0);
+		else if (count <= 11)
+			return (2.0 - ((double) count) / 6.0);
+		else
+			return 0.0;
+	}
+	
+	public int getType()
+	{
+		return 2;
+	}
+	
+}
