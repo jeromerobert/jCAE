@@ -41,13 +41,14 @@ public class MeshValid3D
 		String xmlFile = "jcae3d";
 		MMesh3D mesh3D = MMesh3DReader.readObject(xmlDir, xmlFile);
 		QualityFloat data = new QualityFloat(1000);
-		MinAngleFace qproc = new MinAngleFace();
+		NodeConnectivity3D qproc = new NodeConnectivity3D(mesh3D);
 		data.setQualityProcedure(qproc);
 		for (Iterator itf = mesh3D.getFacesIterator(); itf.hasNext();)
 		{
 			MFace3D f= (MFace3D) itf.next();
 			data.compute(f);
 		}
+		data.finish();
 		data.split(10);
 		data.printLayers();
 		String bbfile = brepfilename.substring(0, brepfilename.lastIndexOf('.'))+".bb";
@@ -57,7 +58,6 @@ public class MeshValid3D
 	/**
 	 * main method, reads 2 arguments and calls mesh() method
 	 * @param args  an array of String, filename, algorithm type and constraint value
-	 * @see #mesh
 	 */
 	public static void main(String args[])
 	{
