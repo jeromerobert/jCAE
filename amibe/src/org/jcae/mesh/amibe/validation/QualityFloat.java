@@ -44,6 +44,7 @@ public class QualityFloat
 	public void setQualityProcedure(QualityProcedure q)
 	{
 		qproc = q;
+		qproc.bindResult(data);
 	}
 	
 	public void compute(Object x)
@@ -59,12 +60,27 @@ public class QualityFloat
 	
 	public void finish()
 	{
-		qproc.finish(data);
+		qproc.finish();
 	}
 	
 	public int size()
 	{
 		return data.size();
+	}
+	
+	public void setTarget(float factor)
+	{
+		int nrTotal = data.size();
+		if (factor == 0.0f)
+			return;
+		else
+			factor = 1.0f/factor;
+		for (int i = 0; i < nrTotal; i++)
+		{
+			float val = data.get(i);
+			val *= factor;
+			data.set(i, val);
+		}
 	}
 	
 	public void split(int n)

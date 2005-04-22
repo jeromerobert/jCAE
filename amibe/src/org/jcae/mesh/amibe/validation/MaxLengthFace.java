@@ -24,6 +24,14 @@ import org.jcae.mesh.amibe.ds.MFace3D;
 import org.jcae.mesh.amibe.ds.MNode3D;
 import java.util.Iterator;
 
+/**
+ * Compute maximal edge length by triangle.
+ *
+ * This class implements the
+ * {@link org.jcae.mesh.amibe.validation.QualityProcedure#quality}
+ * method to compute maximal edge length of triangles.
+ */
+
 public class MaxLengthFace extends QualityProcedure
 {
 	public MaxLengthFace()

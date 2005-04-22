@@ -45,8 +45,6 @@ public class NodeConnectivity2D extends QualityProcedure
 		Vertex d = start.destination();
 		//  Loop around n
 		int count = 0;
-System.out.println(""+start.origin());
-System.out.println(""+start.destination());
 		while (true)
 		{
 			count++;
@@ -59,9 +57,7 @@ System.out.println(""+start.destination());
 			start.symOTri();
 			if (start.destination() == d)
 				break;
-System.out.println(""+start);
 		}
-System.out.println(""+count);
 		
 		if (count <= 6)
 			return (((float) count) / 6.0f);

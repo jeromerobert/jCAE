@@ -24,6 +24,14 @@ import org.jcae.mesh.amibe.ds.MFace3D;
 import org.jcae.mesh.amibe.ds.MNode3D;
 import java.util.Iterator;
 
+/**
+ * Compute maximal angle by triangle.
+ *
+ * This class implements the
+ * {@link org.jcae.mesh.amibe.validation.QualityProcedure#quality}
+ * method to compute maximal angles of triangles.
+ */
+
 public class MaxAngleFace extends QualityProcedure
 {
 	public MaxAngleFace()

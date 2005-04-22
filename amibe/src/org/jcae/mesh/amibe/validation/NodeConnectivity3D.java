@@ -27,13 +27,32 @@ import org.jcae.mesh.amibe.ds.MFace3D;
 import org.jcae.mesh.amibe.ds.MNode3D;
 import java.util.Iterator;
 
+/**
+ * Compute node connectivity of 3D nodes.
+ *
+ * This class implements the
+ * {@link org.jcae.mesh.amibe.validation.QualityProcedure#quality}
+ * method to compute node connectivity of 3D meshes.  As 3D meshes
+ * have a simplistic data structure, computing node neighbours would
+ * be very extensive.  Thus instead <code>quality</code> is called
+ * with a {@link org.jcae.mesh.amibe.ds.MFace3D} argument, this method
+ * increments counters on its three vertices.  The {@link #finish}
+ * method has to be called after looping on all faces.
+ */
+
 public class NodeConnectivity3D extends QualityProcedure
 {
 	private TObjectIntHashMap nodeMap = new TObjectIntHashMap();
-	private TFloatArrayList result = new TFloatArrayList();
+	private MMesh3D mesh3D;
 	
 	public NodeConnectivity3D()
 	{
+		throw new RuntimeException("NodeConnectivity3D constructor must be called with a MMesh3D argument!");
+	}
+	
+	public NodeConnectivity3D(MMesh3D m)
+	{
+		mesh3D = m;
 		setType(QualityProcedure.NODE);
 	}
 	
@@ -52,26 +71,25 @@ public class NodeConnectivity3D extends QualityProcedure
 		return 0.0f;
 	}
 	
-	public void finish(TFloatArrayList data)
+	/**
+	 * Finish quality computations.  When all faces have been processed
+	 * by {@link #quality}, this method rearrange result values to have
+	 * the same node order as in mesh output.
+	 */
+	public void finish()
 	{
 		data.clear();
-		data.add(result.toNativeArray());
-	}
-	
-	public void postProcess3D(MMesh3D mesh3D)
-	{
-		result.clear();
 		for (Iterator itn = mesh3D.getNodesIterator(); itn.hasNext(); )
 		{
 			MNode3D n = (MNode3D) itn.next();
 			int cnt = nodeMap.get(n);
 			float q = ((float) cnt) / 6.0f;
 			if (cnt <= 6)
-				result.add(q);
+				data.add(q);
 			else if (cnt <= 12)
-				result.add(2.0f - q);
+				data.add(2.0f - q);
 			else
-				result.add(0.0f);
+				data.add(0.0f);
 		}
 	}
 	
