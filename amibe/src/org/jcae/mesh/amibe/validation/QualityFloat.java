@@ -27,6 +27,28 @@ import java.io.BufferedOutputStream;
 import java.io.PrintStream;
 import org.apache.log4j.Logger;
 
+/**
+ * Class to handle quality results.
+ *
+ * This class allows easy computation of mesh quality.  A criterion
+ * factor can be selected, then quality is computed and results are
+ * printed on screen or in files.
+ *
+ * Example:
+ * <pre>
+ *    QualityFloat data = new QualityFloat();
+ *    data.setQualityProcedure(new MinAngleFace());
+ *    for (Iterator itf = mesh3D.getFacesIterator(); itf.hasNext(); )
+ *        data.compute(itf.next());
+ *    //  Print all results in the BB mesh format.
+ *    data.printMeshBB("foo.bb");
+ *    //  Gather results into 10 blocks...
+ *    data.split(10);
+ *    //  ... and display them on screen.
+ *    data.printLayers();
+ * </pre>
+ */
+
 public class QualityFloat
 {
 	private static Logger logger=Logger.getLogger(QualityFloat.class);
@@ -36,6 +58,11 @@ public class QualityFloat
 	private int layers = 0;
 	private float vmin, vmax;
 
+	public QualityFloat()
+	{
+		data = new TFloatArrayList();
+	}
+	
 	public QualityFloat(int n)
 	{
 		data = new TFloatArrayList(n);
