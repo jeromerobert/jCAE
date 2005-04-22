@@ -30,9 +30,15 @@ public class Area extends QualityProcedure
 	public static double [] v1 = new double[3];
 	public static double [] v2 = new double[3];
 	
-	public double quality(Object o)
+	public Area()
 	{
-		assert (o instanceof MFace3D);
+		setType(QualityProcedure.FACE);
+	}
+	
+	public float quality(Object o)
+	{
+		if (!(o instanceof MFace3D))
+			throw new IllegalArgumentException();
 		MFace3D f = (MFace3D) o;
 		Iterator itn = f.getNodesIterator();
 		MNode3D n1 = (MNode3D) itn.next();
@@ -47,6 +53,6 @@ public class Area extends QualityProcedure
 			v2[i] = p3[i] - p1[i];
 		}
 		double [] v3 = Metric3D.prodVect3D(v1, v2);
-		return 0.5 * Metric3D.norm(v3);
+		return (float) (0.5 * Metric3D.norm(v3));
 	}
 }

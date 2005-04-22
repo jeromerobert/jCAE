@@ -26,10 +26,17 @@ import java.util.Iterator;
 
 public class MaxLengthFace extends QualityProcedure
 {
-	public double quality(Object o)
+	public MaxLengthFace()
 	{
+		setType(QualityProcedure.FACE);
+	}
+	
+	public float quality(Object o)
+	{
+		if (!(o instanceof MFace3D))
+			throw new IllegalArgumentException();
+		
 		double l1, l2, l3;
-		assert (o instanceof MFace3D);
 		MFace3D f = (MFace3D) o;
 		Iterator itn = f.getNodesIterator();
 		MNode3D n1 = (MNode3D) itn.next();
@@ -42,7 +49,7 @@ public class MaxLengthFace extends QualityProcedure
 		l3 = n3.distance(n1);
 		if (l3 > l1)
 			l1 = l3;
-		return l1;
+		return (float) l1;
 	}
 	
 }

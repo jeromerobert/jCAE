@@ -26,9 +26,15 @@ import java.util.Iterator;
 
 public class MaxAngleFace extends QualityProcedure
 {
-	public double quality(Object o)
+	public MaxAngleFace()
 	{
-		assert (o instanceof MFace3D);
+		setType(QualityProcedure.FACE);
+	}
+	
+	public float quality(Object o)
+	{
+		if (!(o instanceof MFace3D))
+			throw new IllegalArgumentException();
 		MFace3D f = (MFace3D) o;
 		
 		Iterator itn = f.getNodesIterator();
@@ -42,7 +48,7 @@ public class MaxAngleFace extends QualityProcedure
 			a1 = a2;
 		if (a3 > a1)
 			a1 = a3;
-		return a1;
+		return (float) a1;
 	}
 	
 }

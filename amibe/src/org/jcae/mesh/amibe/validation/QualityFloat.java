@@ -20,25 +20,25 @@
 
 package org.jcae.mesh.amibe.validation;
 
-import gnu.trove.TDoubleArrayList;
+import gnu.trove.TFloatArrayList;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.PrintStream;
 import org.apache.log4j.Logger;
 
-public class QualityDouble
+public class QualityFloat
 {
-	private static Logger logger=Logger.getLogger(QualityDouble.class);
-	private TDoubleArrayList data;
+	private static Logger logger=Logger.getLogger(QualityFloat.class);
+	private TFloatArrayList data;
 	private QualityProcedure qproc;
 	private int [] sorted;
 	private int layers = 0;
-	private double vmin, vmax;
+	private float vmin, vmax;
 
-	public QualityDouble(int n)
+	public QualityFloat(int n)
 	{
-		data = new TDoubleArrayList(n);
+		data = new TFloatArrayList(n);
 	}
 	
 	public void setQualityProcedure(QualityProcedure q)
@@ -52,7 +52,7 @@ public class QualityDouble
 		data.add(qproc.quality(x));
 	}
 	
-	public void add(double x)
+	public void add(float x)
 	{
 		data.add(x);
 	}
@@ -67,7 +67,6 @@ public class QualityDouble
 		return data.size();
 	}
 	
-	//  TDoubleArrayList already extends min() and max()
 	public void split(int n)
 	{
 		layers = n;
@@ -75,17 +74,17 @@ public class QualityDouble
 			return;
 		int nrTotal = data.size();
 		//  min() and max() methods are buggy in trove 1.0.2
-		vmin = Double.MAX_VALUE;
-		vmax = Double.MIN_VALUE;
+		vmin = Float.MAX_VALUE;
+		vmax = Float.MIN_VALUE;
 		for (int i = 0; i < nrTotal; i++)
 		{
-			double val = data.get(i);
+			float val = data.get(i);
 			if (vmin > val)
 				vmin = val;
 			if (vmax < val)
 				vmax = val;
 		}
-		double delta = (vmax - vmin) / ((double) layers);
+		float delta = (vmax - vmin) / ((float) layers);
 		sorted = new int[layers];
 		for (int i = 0; i < layers; i++)
 			sorted[i] = 0;
@@ -100,7 +99,7 @@ public class QualityDouble
 		}
 	}
 	
-	public void split(double v1, double v2, int n)
+	public void split(float v1, float v2, int n)
 	{
 		layers = n;
 		vmin = v1;
@@ -108,7 +107,7 @@ public class QualityDouble
 		if (layers <= 0)
 			return;
 		int nrTotal = data.size();
-		double delta = (vmax - vmin) / ((double) layers);
+		float delta = (vmax - vmin) / ((float) layers);
 		sorted = new int[layers];
 		for (int i = 0; i < layers; i++)
 			sorted[i] = 0;
@@ -128,7 +127,7 @@ public class QualityDouble
 		if (layers <= 0)
 			return;
 		int nrTotal = data.size();
-		double delta = (vmax - vmin) / ((double) layers);
+		float delta = (vmax - vmin) / ((float) layers);
 		for (int i = 0; i < layers; i++)
 		{
 			System.out.println(""+(vmin+i*delta)+" ; "+(vmin+(i+1)*delta)+" "+sorted[i]+" ("+(((float) 100.0 * sorted[i])/((float) nrTotal))+"%)");

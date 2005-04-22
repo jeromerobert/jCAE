@@ -25,10 +25,15 @@ import org.jcae.mesh.amibe.ds.Vertex;
 
 public class NodeConnectivity2D extends QualityProcedure
 {
-	public double quality(Object o)
+	public NodeConnectivity2D()
 	{
-		double ret;
-		assert (o instanceof Vertex);
+		setType(QualityProcedure.NODE);
+	}
+	
+	public float quality(Object o)
+	{
+		if (!(o instanceof Vertex))
+			throw new IllegalArgumentException();
 		Vertex n = (Vertex) o;
 		OTriangle start = new OTriangle(n.tri, 0);
 		if (n == start.destination())
@@ -36,7 +41,7 @@ public class NodeConnectivity2D extends QualityProcedure
 		else if (n == start.apex())
 			start.prevOTri();
 		if (!start.isMutable())
-			return 1.0;
+			return 1.0f;
 		Vertex d = start.destination();
 		//  Loop around n
 		int count = 0;
@@ -46,11 +51,11 @@ System.out.println(""+start.destination());
 		{
 			count++;
 			if (count >= 12)
-				return 0.0;
+				return 0.0f;
 			start.prevOTri();
 			//  Do not consider boundary nodes
 			if (start == null || !start.isMutable())
-				return 1.0;
+				return 1.0f;
 			start.symOTri();
 			if (start.destination() == d)
 				break;
@@ -59,16 +64,11 @@ System.out.println(""+start);
 System.out.println(""+count);
 		
 		if (count <= 6)
-			return (((double) count) / 6.0);
+			return (((float) count) / 6.0f);
 		else if (count <= 11)
-			return (2.0 - ((double) count) / 6.0);
+			return (2.0f - ((float) count) / 6.0f);
 		else
-			return 0.0;
-	}
-	
-	public int getType()
-	{
-		return 2;
+			return 0.0f;
 	}
 	
 }

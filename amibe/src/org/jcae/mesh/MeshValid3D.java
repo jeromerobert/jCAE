@@ -40,7 +40,7 @@ public class MeshValid3D
 		logger.info("Reading 3D mesh");
 		String xmlFile = "jcae3d";
 		MMesh3D mesh3D = MMesh3DReader.readObject(xmlDir, xmlFile);
-		QualityDouble data = new QualityDouble(1000);
+		QualityFloat data = new QualityFloat(1000);
 		MinAngleFace qproc = new MinAngleFace();
 		data.setQualityProcedure(qproc);
 		for (Iterator itf = mesh3D.getFacesIterator(); itf.hasNext();)

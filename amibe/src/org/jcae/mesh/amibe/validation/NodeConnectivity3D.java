@@ -21,7 +21,7 @@
 package org.jcae.mesh.amibe.validation;
 
 import gnu.trove.TObjectIntHashMap;
-import gnu.trove.TDoubleArrayList;
+import gnu.trove.TFloatArrayList;
 import org.jcae.mesh.amibe.ds.MMesh3D;
 import org.jcae.mesh.amibe.ds.MFace3D;
 import org.jcae.mesh.amibe.ds.MNode3D;
@@ -30,11 +30,17 @@ import java.util.Iterator;
 public class NodeConnectivity3D extends QualityProcedure
 {
 	private TObjectIntHashMap nodeMap = new TObjectIntHashMap();
-	private TDoubleArrayList result = new TDoubleArrayList();
+	private TFloatArrayList result = new TFloatArrayList();
 	
-	public double quality(Object o)
+	public NodeConnectivity3D()
 	{
-		assert (o instanceof MFace3D);
+		setType(QualityProcedure.NODE);
+	}
+	
+	public float quality(Object o)
+	{
+		if (!(o instanceof MFace3D))
+			throw new IllegalArgumentException();
 		MFace3D f = (MFace3D) o;
 		Iterator itn = f.getNodesIterator();
 		for (int i = 0; i < 3; i++)
@@ -43,10 +49,10 @@ public class NodeConnectivity3D extends QualityProcedure
 			if (!nodeMap.increment(n))
 				nodeMap.put(n, 1);
 		}
-		return 0.0;
+		return 0.0f;
 	}
 	
-	public void finish(TDoubleArrayList data)
+	public void finish(TFloatArrayList data)
 	{
 		data.clear();
 		data.add(result.toNativeArray());
@@ -59,19 +65,14 @@ public class NodeConnectivity3D extends QualityProcedure
 		{
 			MNode3D n = (MNode3D) itn.next();
 			int cnt = nodeMap.get(n);
-			double q = ((double) cnt) / 6.0;
+			float q = ((float) cnt) / 6.0f;
 			if (cnt <= 6)
 				result.add(q);
 			else if (cnt <= 12)
-				result.add(2.0 - q);
+				result.add(2.0f - q);
 			else
-				result.add(0.0);
+				result.add(0.0f);
 		}
-	}
-	
-	public int getType()
-	{
-		return 2;
 	}
 	
 }

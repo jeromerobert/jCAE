@@ -20,18 +20,58 @@
 
 package org.jcae.mesh.amibe.validation;
 
-import gnu.trove.TDoubleArrayList;
+import gnu.trove.TFloatArrayList;
+
+/**
+ * Abstract class for to compute quality criteria.
+ * All functions implementing quality criteria have to inherit from
+ * this class.  These functions can compute values either on elements
+ * or nodes, and can work either on 2D or 3D meshes.
+ *
+ * For these reasons, <code>quality</code> method's argument is an
+ * <code>Object</code>, and caller is responsible for passing the
+ * right argument.
+ */
 
 public abstract class QualityProcedure
 {
-	public abstract double quality(Object o);
-	//  Do nothing by default
-	public void finish(TDoubleArrayList data)
+	protected static final int FACE = 1;
+	protected static final int NODE = 2;
+	
+	private int type = FACE;
+	
+	/**
+	 * Return the quality factor for a given object.
+	 * @param o  entity at which quality is computed
+	 * Returns quality factor.
+	 */
+	public abstract float quality(Object o);
+	
+	/**
+	 * Transform data values after all elements have been processed.
+	 * This method do nothing by default.
+	 */
+	public void finish(TFloatArrayList data)
 	{
 	}
-	public int getType()
+	
+	/**
+	 * Return element type.
+	 *
+	 * @return element type.
+	 */
+	protected int getType()
 	{
-		//  By default, data are computed by faces.
-		return 1;
+		return type;
+	}
+	
+	/**
+	 * Set the element type.
+	 *
+	 * @param t  the element type.
+	 */
+	protected void setType(int t)
+	{
+		type = t;
 	}
 }

@@ -26,11 +26,16 @@ import java.util.Iterator;
 
 public class MinAngleFace extends QualityProcedure
 {
-	public double quality(Object o)
+	public MinAngleFace()
 	{
-		assert (o instanceof MFace3D);
+		setType(QualityProcedure.FACE);
+	}
+	
+	public float quality(Object o)
+	{
+		if (!(o instanceof MFace3D))
+			throw new IllegalArgumentException();
 		MFace3D f = (MFace3D) o;
-		
 		Iterator itn = f.getNodesIterator();
 		MNode3D n1 = (MNode3D) itn.next();
 		MNode3D n2 = (MNode3D) itn.next();
@@ -42,7 +47,7 @@ public class MinAngleFace extends QualityProcedure
 			a1 = a2;
 		if (a3 < a1)
 			a1 = a3;
-		return a1;
+		return (float) a1;
 	}
 	
 }
