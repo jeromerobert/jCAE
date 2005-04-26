@@ -113,7 +113,16 @@ public class Compat1D2D
 				if (Double.isNaN(cmin) || Double.isNaN(cmax))
 				{
 					logger.debug("Undefined curvature");
-					continue;
+					//  Try with a near point
+					if (i == 0)
+						uv = curve2d.value(paramOnEdge[0] + 0.01 * (paramOnEdge[1] - paramOnEdge[0]));
+					else
+						uv = curve2d.value(paramOnEdge[i] + 0.01 * (paramOnEdge[i-1] - paramOnEdge[i]));
+					surface.setParameter(uv[0], uv[1]);
+					cmin = Math.abs(surface.minCurvature());
+					cmax = Math.abs(surface.maxCurvature());
+					if (Double.isNaN(cmin) || Double.isNaN(cmax))
+						continue;
 				}
 				if (cmin > cmax)
 					cmax = cmin;
@@ -131,16 +140,17 @@ public class Compat1D2D
 			double epsilon = deflection;
 			if (!relDefl)
 				epsilon *= meanCurv;
-			if (epsilon > 1.0)
-				epsilon = 1.0;
-			double alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
-			if (dist2 * meanCurv * meanCurv > 4.0 * alpha2)
+			if (epsilon < 1.0)
 			{
-				int nrsub = (int) (Math.sqrt(dist2 * meanCurv * meanCurv / alpha2) + 0.5);
-				if (nrsub > 100)
-					nrsub = 100;
-				curve3d.splitSubsegment(i+offset, nrsub);
-				offset += nrsub - 1;
+				double alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
+				if (dist2 * meanCurv * meanCurv > 4.0 * alpha2)
+				{
+					int nrsub = (int) (Math.sqrt(dist2 * meanCurv * meanCurv / alpha2) + 0.5);
+					if (nrsub > 100)
+						nrsub = 100;
+					curve3d.splitSubsegment(i+offset, nrsub);
+					offset += nrsub - 1;
+				}
 			}
 		}
 		
