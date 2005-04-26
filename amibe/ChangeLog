@@ -1,3 +1,19 @@
+Tue Apr 26 16:02:23 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/algos1d/Compat1D2D.java: If curvature is very large and an absolute deflection is requested, there is no need to discretize because deflection will be small anyway.  This is similar to the fix in Metric3D at 2005-04-13.
+	* src/org/jcae/mesh/mesher/algos1d/Compat1D2D.java: If a curvature is not defined, try with a near point.
+
+Thu Apr 21 15:26:27 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/UNVConverter.java: Write nodes in the same order as in binary files.
+	* src/org/jcae/mesh/xmldata/MeshReader.java
+	  src/org/jcae/mesh/xmldata/MeshWriter.java: Write adjacency relations into binary files.
+
+Wed Apr 20 14:00:45 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/validation: New classes to check generated meshes.
+	* src/org/jcae/mesh/xmldata/MMesh3DReader.java: Do not abort if the normals file was not generated.
+
 Thu Apr 14 09:29:10 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/masher/ds: Move 3D classes into...
