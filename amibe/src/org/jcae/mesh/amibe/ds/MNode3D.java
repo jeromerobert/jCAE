@@ -21,8 +21,6 @@
 
 package org.jcae.mesh.amibe.ds;
 
-import org.jcae.mesh.cad.CADFace;
-import org.jcae.mesh.cad.CADGeomSurface;
 import java.util.HashMap;
 import org.apache.log4j.Logger;
 
