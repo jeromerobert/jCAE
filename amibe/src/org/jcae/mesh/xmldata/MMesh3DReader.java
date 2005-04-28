@@ -168,7 +168,7 @@ public class MMesh3DReader
 				
 				String name=
 					xpath.selectSingleNode(groupNode, "name/text()").getNodeValue();
-				logger.debug("Group "+name+": reading "+numberOfTriangles+" elements");
+				logger.debug("Group "+name+": reading "+numberOfElements+" elements");
 								
 				Collection newfacelist = new ArrayList(numberOfElements);
 				for (int j=0; j < numberOfElements; j++)
