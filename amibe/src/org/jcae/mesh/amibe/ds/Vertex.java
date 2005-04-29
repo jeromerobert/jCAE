@@ -374,6 +374,14 @@ public class Vertex
 		assert vc2 != Vertex.outer;
 		assert va3 != Vertex.outer;
 		// Do not swap if triangles are reversed in 2d space
+		if (va3.onLeft(vc1, vc2) == 0L)
+		{
+			if (onLeft(vc1, vc2) == 0L)
+			{
+				long l1 = vc1.distance2(vc2);
+				return (distance2(vc1) < l1 && distance2(vc2) < l1 && va3.distance2(vc1) < l1 && va3.distance2(vc2) < l1);
+			}
+		}
 		if (vc1.onLeft(va3, this) >= 0L || vc2.onLeft(va3, this) <= 0L)
 			return false;
 		
