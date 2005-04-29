@@ -1,3 +1,8 @@
+Fri Apr 29 12:32:07 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/MMesh3DReader.java: Modify reader so that itworks also when groups are deleted from jcae3d.
+	* src/org/jcae/mesh/amibe/ds/Vertex.java (inCircleTest3): Suppress flat triangles.  TODO: investigate why these flat triangles appear in algos2d.Insertion.
+
 Tue Apr 26 16:02:23 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/mesher/algos1d/Compat1D2D.java: If curvature is very large and an absolute deflection is requested, there is no need to discretize because deflection will be small anyway.  This is similar to the fix in Metric3D at 2005-04-13.
