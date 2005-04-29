@@ -156,12 +156,15 @@ public class MMesh3DReader
 			if (groupsFile.charAt(0) != File.separatorChar)
 				groupsFile = xmlDir+File.separator+groupsFile;
 			DataInputStream groupsIn=new DataInputStream(new BufferedInputStream(new FileInputStream(groupsFile)));
+			int groupOffset = 0;
 			for (i=0; i < numberOfGroups; i++)
 			{
 				Node groupNode = groupsList.item(i);
 				
 				int numberOfElements = Integer.parseInt(
 					xpath.selectSingleNode(groupNode, "number/text()").getNodeValue());
+				int fileOffset = Integer.parseInt(
+					xpath.selectSingleNode(groupNode, "file/@offset").getNodeValue());
 				
 				//int id=Integer.parseInt(
 				//	xpath.selectSingleNode(groupNode, "@id").getNodeValue());
@@ -171,10 +174,11 @@ public class MMesh3DReader
 				logger.debug("Group "+name+": reading "+numberOfElements+" elements");
 								
 				Collection newfacelist = new ArrayList(numberOfElements);
+				for (; groupOffset < fileOffset; groupOffset++)
+					groupsIn.readInt();
+				groupOffset += numberOfElements;
 				for (int j=0; j < numberOfElements; j++)
-				{
 					newfacelist.add(facelist[groupsIn.readInt()]);
-				}
 				MGroup3D g = new MGroup3D(name, newfacelist);
 				m3d.addGroup(g);
 			}
