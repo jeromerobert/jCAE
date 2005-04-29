@@ -36,7 +36,6 @@ public class Metric2D
 	private double E, F, G;
 	private static CADGeomSurface cacheSurf = null;
 	private static double discr = 1.0;
-	private Vertex loc;
 	// Static array to speed up orth() method
 	private static double [] orthRes = new double[2];
 
@@ -48,7 +47,6 @@ public class Metric2D
 	 */
 	public Metric2D(CADGeomSurface surf, Vertex pt)
 	{
-		loc = pt;
 		if (!surf.equals(cacheSurf))
 		{
 			surf.dinit(2);
@@ -62,16 +60,8 @@ public class Metric2D
 		if (Metric3D.hasDeflection())
 		{
 			m3dbis = new Metric3D(surf, pt);
-			if (Metric3D.hasRelativeDeflection())
-			{
-				if (!m3dbis.relDeflection(true))
-					m3dbis = null;
-			}
-			else
-			{
-				if (!m3dbis.absDeflection(true))
-					m3dbis = null;
-			}
+			if (!m3dbis.deflection(true))
+				m3dbis = null;
 		}
 		if (m3d != null)
 		{

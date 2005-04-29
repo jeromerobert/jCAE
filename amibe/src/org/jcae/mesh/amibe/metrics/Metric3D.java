@@ -108,7 +108,15 @@ public class Metric3D extends Matrix
 		return true;
 	}
 	
-	public boolean absDeflection(boolean isotropic)
+	public boolean deflection(boolean isotropic)
+	{
+		if (relDefl)
+			return relDeflection(isotropic);
+		else
+			return absDeflection(isotropic);
+	}
+	
+	private boolean absDeflection(boolean isotropic)
 	{
 		double cmin = Math.abs(cacheSurf.minCurvature());
 		double cmax = Math.abs(cacheSurf.maxCurvature());
@@ -170,7 +178,7 @@ public class Metric3D extends Matrix
 		return true;
 	}
 	
-	public boolean relDeflection(boolean isotropic)
+	private boolean relDeflection(boolean isotropic)
 	{
 		double cmin = Math.abs(cacheSurf.minCurvature());
 		double cmax = Math.abs(cacheSurf.maxCurvature());
