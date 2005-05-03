@@ -131,6 +131,9 @@ public class Mesh
 	//  Stack of methods to compute geometrical values
 	private Stack compGeomStack = new Stack();
 	
+	/**
+	 * Creates an empty mesh.
+	 */
 	public Mesh()
 	{
 		Vertex.mesh = this;
@@ -138,35 +141,23 @@ public class Mesh
 		Vertex.outer = null;
 	}
 	
+	/**
+	 * Creates an empty mesh bounded to the topological surface.
+	 * This constructor also initializes tolerance values.  If length
+	 * criterion is null, {@link Metric2D#setLength} is called with
+	 * the diagonal length of face bounding box as argument.
+	 * If property <code>org.jcae.mesh.amibe.ds.Mesh.epsilon</code> is
+	 * not set, epsilon is computed as being the maximal value between
+	 * length criterion by 100 and diagonal length by 1000.
+	 *
+	 * @param f   topological surface
+	 */
 	public Mesh(CADFace f)
 	{
 		Vertex.mesh = this;
 		Triangle.outer = new Triangle();
 		Vertex.outer = null;
 		face = f;
-		setGeometry(f);
-	}
-	
-	public Mesh(QuadTree q)
-	{
-		quadtree = q;
-		quadtree.bindMesh(this);
-		Vertex.mesh = this;
-		Triangle.outer = new Triangle();
-		double [] p = q.center();
-		Vertex.outer = new Vertex(p[0], p[1]);
-	}
-	
-	public void initQuadTree(double umin, double umax, double vmin, double vmax)
-	{
-		quadtree = new QuadTree(umin, umax, vmin, vmax);
-		quadtree.bindMesh(this);
-		Vertex.outer = new Vertex((umin+umax)*0.5, (vmin+vmax)*0.5);
-	}
-	
-	public void setGeometry(CADShape f)
-	{
-		face = (CADFace) f;
 		surface = face.getGeomSurface();
 		double [] bb = face.boundingBox();
 		double diagonal = Math.sqrt(
@@ -204,12 +195,45 @@ public class Mesh
 		return surface;
 	}
 	
+	/**
+	 * Initialize a QuadTree with a given bounding box.
+	 * @param umin  bottom-left U coordinate.
+	 * @param umax  top-right U coordinate.
+	 * @param vmin  bottom-left V coordinate.
+	 * @param vmax  top-right V coordinate.
+	 */
+	public void initQuadTree(double umin, double umax, double vmin, double vmax)
+	{
+		quadtree = new QuadTree(umin, umax, vmin, vmax);
+		quadtree.bindMesh(this);
+		Vertex.outer = new Vertex((umin+umax)*0.5, (vmin+vmax)*0.5);
+	}
+	
+	/**
+	 * Returns the quadtree associated with this mesh.
+	 *
+	 * @return the quadtree associated with this mesh.
+	 */
+	public QuadTree getQuadTree()
+	{
+		return quadtree;
+	}
+	
 	public void scaleTolerance(double scale)
 	{
 		epsilon *= scale;
 	}
 	
-	public OTriangle bootstrap(Vertex v0, Vertex v1, Vertex v2)
+	/**
+	 * Bootstraps node instertion by creating the first triangle.
+	 * This initial triangle is counter-clockwise oriented, and
+	 * outer triangles are constructed.
+	 *
+	 * @param v0  first vertex.
+	 * @param v1  second vertex.
+	 * @param v2  third vertex.
+	 */
+	public void bootstrap(Vertex v0, Vertex v1, Vertex v2)
 	{
 		assert quadtree != null;
 		assert v0.onLeft(v1, v2) != 0L;
@@ -220,6 +244,8 @@ public class Mesh
 			v1 = temp;
 		}
 		Triangle first = new Triangle(v0, v1, v2);
+		if (Vertex.outer == null)
+			Vertex.outer = new Vertex(0.0, 0.0);
 		Triangle adj0 = new Triangle(Vertex.outer, v2, v1);
 		Triangle adj1 = new Triangle(Vertex.outer, v0, v2);
 		Triangle adj2 = new Triangle(Vertex.outer, v1, v0);
@@ -254,25 +280,46 @@ public class Mesh
 		quadtree.add(v0);
 		quadtree.add(v1);
 		quadtree.add(v2);
-		return ot;
 	}
 	
+	/**
+	 * Adds an existing triangle to triangle list.
+	 * This routine is useful when meshes are read from disk but not
+	 * computed by node insertion.
+	 *
+	 * @param t  triangle being added.
+	 */
 	public void add(Triangle t)
 	{
 		triangleList.add(t);
 	}
 	
+	/**
+	 * Returns triangle list.
+	 *
+	 * @return triangle list.
+	 */
 	public ArrayList getTriangles()
 	{
 		return triangleList;
 	}
 	
-	public QuadTree getQuadTree()
-	{
-		return quadtree;
-	}
-	
+	/**
+	 * Enforces an edge between tow points.
+	 * This routine is used to build constrained Delaunay meshes.
+	 * Intersections between existing mesh segments and the new
+	 * segment are computed, then edges are swapped so that the
+	 * new edge is part of the mesh.
+	 *
+	 * @param start    start point.
+	 * @param end      end point.
+	 * @param maxIter  maximal number of iterations.
+	 * @return a handle to the newly created edge.
+	 * @throws InitialTriangulationException  if the boundary edge cannot
+	 *         be enforced.
+	 */
 	public static OTriangle forceBoundaryEdge(Vertex start, Vertex end, int maxIter)
+		throws InitialTriangulationException
 	{
 		assert (start != end);
 		Triangle t = start.tri;
@@ -335,6 +382,17 @@ public class Mesh
 		}
 	}
 	
+	/**
+	 * Sets metrics dimension.
+	 * Metrics operations can be performed either on 2D or 3D Euclidien
+	 * spaces.  The latter is the normal case, but the former can
+	 * also be used, e.g. when retrieving boundary edges of a
+	 * constrained mesh.  Argument is either 2 or 3, other values
+	 *
+	 * @param i  metrics dimension.
+	 * @throws IllegalArgumentException  If argument is neither 2 nor 3,
+	 *         this exception is raised.
+	 */
 	public void pushCompGeom(int i)
 	{
 		if (i == 2)
@@ -346,17 +404,13 @@ public class Mesh
 		quadtree.clearAllMetrics();
 	}
 	
-	public void pushCompGeom(String type)
-	{
-		if (type.equals("2"))
-			compGeomStack.push(new Calculus2D(this));
-		else if (type.equals("3"))
-			compGeomStack.push(new Calculus3D(this));
-		else
-			throw new java.lang.IllegalArgumentException("pushCompGeom argument must be either 2 or 3, current value is: "+type);
-		quadtree.clearAllMetrics();
-	}
-	
+	/**
+	 * Resets metrics dimension.
+	 *
+	 * @return metrics dimension.
+	 * @throws IllegalArgumentException  If argument is neither 2 nor 3,
+	 *         this exception is raised.
+	 */
 	public Calculus popCompGeom()
 	{
 		//  Metrics are always reset by pushCompGeom.
@@ -367,7 +421,18 @@ public class Mesh
 		return (Calculus) ret;
 	}
 	
+	/**
+	 * Resets metrics dimension.
+	 * Checks that the found metrics dimension is identical to the one
+	 * expected.
+	 *
+	 * @param i  expected metrics dimension.
+	 * @return metrics dimension.
+	 * @throws RuntimeException  If argument is different from
+	 *         metrics dimension.
+	 */
 	public Calculus popCompGeom(int i)
+		throws RuntimeException
 	{
 		Object ret = compGeomStack.pop();
 		if (compGeomStack.size() > 0 && !ret.getClass().equals(compGeomStack.peek().getClass()))
@@ -387,14 +452,14 @@ public class Mesh
 		return (Calculus) ret;
 	}
 	
+	/**
+	 * Returns metrics dimension.
+	 *
+	 * @return metrics dimension.
+	 */
 	public Calculus compGeom()
 	{
 		return (Calculus) compGeomStack.peek();
-	}
-	
-	public void initSmallEdges()
-	{
-		accumulatedLength = 0.0;
 	}
 	
 	/**
@@ -431,7 +496,22 @@ public class Mesh
 	}
 	
 	/**
+	 * Resets accumulated length.
+	 * When <code>org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon</code>
+	 * property is set to <code>true</code>, small edges can be
+	 * joined to form a larger edge which is not removed.  This routine
+	 * has to be called at the beginning of wire exploration.
+	 */
+	public void resetAccumulatedLength()
+	{
+		accumulatedLength = 0.0;
+	}
+	
+	/**
 	 * Remove degenerted edges.
+	 * Degenerated wdges are present in 2D mesh, and have to be
+	 * removed in the 2D -&gt; 3D transformation.  Triangles and
+	 * vertices must then be updated too.
 	 */
 	public void removeDegeneratedEdges()
 	{
@@ -469,11 +549,23 @@ public class Mesh
 		}
 	}
 	
+	/**
+	 * Checks whether this mesh is valid.
+	 * Without argument, 
+	 */
 	public boolean isValid()
 	{
 		return isValid(true);
 	}
 	
+	/**
+	 * Checks whether this mesh is valid.
+	 * This routine can be called at any stage, even before boundary
+	 * edges have been enforced.  In this case, some tests must be
+	 * removed because they do not make sense.
+	 *
+	 * @param constrained  <code>true</code> if mesh is constrained.
+	 */
 	public boolean isValid(boolean constrained)
 	{
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
