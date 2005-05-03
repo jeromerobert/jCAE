@@ -43,7 +43,8 @@ public class QuadTreeTestNearest extends QuadTreeTest
 		boolean visu = true;
 		Random rand = new Random(113L);
 		final QuadTreeTest r = new QuadTreeTest(0.0, 1.0, 0.0, 1.0);
-		Mesh m = new Mesh(r);
+		Mesh m = new Mesh();
+		r.bindMesh(m);
 		m.pushCompGeom(2);
 		logger.debug("Start insertion");
 		for (int i = 0; i < 5000; i++)

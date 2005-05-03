@@ -72,6 +72,7 @@ public class QuadTree
 	public void bindMesh(Mesh m)
 	{
 		mesh = m;
+		m.quadtree = this;
 	}
 	
 	public void double2int(double [] p, int [] i)
