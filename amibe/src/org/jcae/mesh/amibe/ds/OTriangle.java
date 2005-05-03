@@ -37,14 +37,15 @@ import org.apache.log4j.Logger;
  * Shewchuk since data structures are almost equivalent and there
  * are few ways to achieve the same operations.
  *
- * Main algorithms are taken from Bamg, written by Frederic Hecht
+ * Other ideas come from Bamg, written by Frederic Hecht
  *       http://www-rocq1.inria.fr/gamma/cdrom/www/bamg/eng.htm
  */
+
 /**
- * This class is a handle to {@link org.jcae.mesh.amibe.ds.Triangle}.
+ * A handle to {@link Triangle} objects.
  *
- * Jonathan Richard Shewchuk explains in
- *       http://www.cs.cmu.edu/~quake/triangle.html
+ * Jonathan Richard Shewchuk
+ * <a href="http://www.cs.cmu.edu/~quake/triangle.html">explains</a>
  * why triangle-based data structures are more efficient than their
  * edge-based counterparts.  But mesh operations make heavy use of edges,
  * and informations about adges are not stored in this data structure in
@@ -54,18 +55,43 @@ import org.apache.log4j.Logger;
  * between 0 and 2 can represent an edge.  This <code>OTriangle</code>
  * class plays this role, it defines an <em>oriented triangle</em>, or
  * in other words an oriented edge.  Instances of this class are tied to
- * their underlying {@link org.jcae.mesh.amibe.ds.Triangle} instances, so
- * modifications are not local to this class!
+ * their underlying {@link Triangle} instances, so modifications are not
+ * local to this class!
  */
 public class OTriangle
 {
 	private static Logger logger = Logger.getLogger(OTriangle.class);
+	
 	private static final int [] next3 = { 1, 2, 0 };
 	private static final int [] prev3 = { 2, 0, 1 };
 	
+	/**
+	 * Numeric constants for edge attributes.  Set if edge is on
+	 * boundary.
+	 * @see #setAttributes
+	 * @see #hasAttributes
+	 */
 	public static final int BOUNDARY = 1 << 0;
+	/**
+	 * Numeric constants for edge attributes.  Set if edge is outer.
+	 * (Ie. one of its end point is {@link Vertex#outer})
+	 * @see #setAttributes
+	 * @see #hasAttributes
+	 */
 	public static final int OUTER    = 1 << 1;
+	/**
+	 * Numeric constants for edge attributes.  Set if edge had been
+	 * swapped.
+	 * @see #setAttributes
+	 * @see #hasAttributes
+	 */
 	public static final int SWAPPED  = 1 << 2;
+	/**
+	 * Numeric constants for edge attributes.  Set if edge had been
+	 * marked (for any operation).
+	 * @see #setAttributes
+	 * @see #hasAttributes
+	 */
 	public static final int MARKED   = 1 << 3;
 	
 	//  Complex algorithms require several OTriangle, they are
@@ -91,7 +117,7 @@ public class OTriangle
 	private int attributes;
 	
 	/**
-	 * Dummy constructor.
+	 * Sole constructor.
 	 */
 	public OTriangle()
 	{
@@ -111,26 +137,6 @@ public class OTriangle
 		tri = t;
 		orientation = o;
 		attributes = (tri.adjPos >> (8*(1+orientation))) & 0xff;
-	}
-	
-	/**
-	 * Creates a standalone triangle defined by three vertices.
-	 *
-	 * The triangle is created, and a handle on it is returned.
-	 * No adjacency relations are defined.
-	 *
-	 * @param v0  first vertex.
-	 * @param v1  second vertex.
-	 * @param v2  third vertex.
-	 */
-	public OTriangle(Vertex v0, Vertex v1, Vertex v2)
-	{
-		tri = new Triangle(v0, v1, v2);
-		//  By default, edge is (v0, v1)
-		orientation = 2;
-		attributes = 0;
-		//  v0.tri and the like are not updated, because
-		//  vertices may be Vertex.outer.
 	}
 	
 	/**
@@ -520,8 +526,8 @@ public class OTriangle
 		assert d != Vertex.outer;
 		Vertex a = apex();
 		
-		OTriangle newLeft  = new OTriangle(a, o, v);
-		OTriangle newRight = new OTriangle(d, a, v);
+		OTriangle newLeft  = new OTriangle(new Triangle(a, o, v), 2);
+		OTriangle newRight = new OTriangle(new Triangle(d, a, v), 2);
 		if (oldLeft.attributes != 0)
 		{
 			newLeft.attributes = oldLeft.attributes;
