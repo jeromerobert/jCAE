@@ -38,6 +38,73 @@ import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
 import org.apache.log4j.Logger;
 
+/**
+ * Mesh data structure.
+ * A mesh is composed of triangles, edges and vertices.  There are
+ * many data structures for representing meshes, and we focused on
+ * the following constraints:
+ * <ul>
+ *   <li>Memory usage must be minimal in order to perform very large
+ *       meshes.</li>
+ *   <li>Mesh traversal must be cheap.</li>
+ *   <li>To find a triangle surrounding a given point must also be cheap.</li>
+ * </ul>
+ * The selected data structure is as follows:
+ * <ul>
+ *   <li>A mesh is composed of a quadtree and a list of {@link Triangle}.</li>
+ *   <li>The quadtree ibject is described in {@link QuadTree}.</li>
+ *   <li>A triangle is composed of three {@link Vertex}, pointers to
+ *       adjacent triangles, and an integer which is explained below.</li>
+ *   <li>A vertex contains a pointer to one of the triangles it is connected
+ *       to.</li>
+ * </ul>
+ * Example:
+ * <pre>
+ *
+ *                         W1
+ *                      V0 ,_______________, W0
+ *                        / \      2      /
+ *                       /   \           /
+ *                 t2   /     \    t1   /
+ *                     / 2   1 \ 0    1/
+ *                    /    t    \     /
+ *                   /           \   /
+ *                  /      0      \ /
+ *              V1 '---------------` W2
+ *                        t0      V2
+ * </pre>
+ * <p>
+ *   The <code>t</code> {@link Triangle} has the following members:
+ * </p>
+ * <pre>
+ *       Vertex [] vertex = { V0, V1, V2 };
+ *       Triangle [] adj  = { t0, t1, t2 };
+ *       byte [] adjPosEdge = { ??, 0, ?? };
+ * </pre>
+ * <p>
+ *   By convention, edges are numbered so that edge <em>i</em> is the opposite 
+ *   side of vertex <em>i</em>.  An edge is then fully characterized by a
+ *   triangle and a local number between 0 and 2 inclusive.  Here, edge
+ *   between <tt>V0</tt> and <tt>V2</tt> can be defined by <em>(t,1)</em> or
+ *   <em>(t1,0)</em>.  The <code>adjPosEdge</code> member stores local
+ *   numbers for adjacent edges, so that mesh traversal becomes very cheap. 
+ * </p>
+ * <p>
+ *   <b>Note:</b>  <code>adjPosEdge</code> contains values between 0 and 2,
+ *   it can then be stored with 2 bits, and in practice the three values of
+ *   a triangle are stored inside a single byte, which is part of an
+ *   <code>int</code>.  (Remaining three bytes are used to store data on edges)
+ * </p>
+ * 
+ * <p>
+ *   With the {@link QuadTree} structure, it is easy to find the nearest
+ *   {@link Vertex} <code>V</code> from any given point <code>V0</code>.
+ *   This gives a {@link Triangle} having <code>V</code> in its vertices,
+ *   and we can loop around <code>V</code> to find the {@link Triangle}
+ *   containing <code>V0</code>.
+ * </p>
+ */
+
 public class Mesh
 {
 	private static Logger logger=Logger.getLogger(Mesh.class);
@@ -265,320 +332,6 @@ public class Mesh
 			Vertex temp = start;
 			start = end;
 			end = temp;
-		}
-	}
-	
-	public void writeUNV(String file)
-	{
-		String cr=System.getProperty("line.separator");
-		PrintWriter out;
-		try {
-			if (file.endsWith(".gz") || file.endsWith(".GZ"))
-				out = new PrintWriter(new java.util.zip.GZIPOutputStream(new FileOutputStream(file)));
-			else
-				out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(file)));
-			out.println("    -1"+cr+"  2411");
-			HashSet nodeset = new HashSet();
-			for(Iterator it=triangleList.iterator();it.hasNext();)
-			{
-				Triangle t = (Triangle) it.next();
-				for (int i = 0; i < 3; i++)
-					nodeset.add(t.vertex[i]);
-			}
-			
-			HashMap labels = new HashMap(nodeset.size());
-			double [] p;
-			int count =  0;
-			for(Iterator it=nodeset.iterator();it.hasNext();)
-			{
-				Vertex node = (Vertex) it.next();
-				if (node == Vertex.outer)
-					continue;
-				count++;
-				Integer label = new Integer(count);
-				labels.put(node, label);
-				out.println(label+"         1         1         1");
-				p = node.getUV();
-				out.println(""+p[0]+" "+p[1]+" 0.0");
-			}
-			out.println("    -1");
-			out.println("    -1"+cr+"  2412");
-			count =  0;
-			for(Iterator it=triangleList.iterator();it.hasNext();)
-			{
-				Triangle t = (Triangle)it.next();
-				if (t.vertex[0] == Vertex.outer || t.vertex[1] == Vertex.outer || t.vertex[2] == Vertex.outer)
-					continue;
-				count++;
-				out.println(""+count+"        91         1         1         1         3");
-				for (int i = 0; i < 3; i++)
-				{
-					Integer nodelabel =  (Integer) labels.get(t.vertex[i]);
-					out.print(" "+nodelabel.intValue());
-				}
-				out.println("");
-			}
-			out.println("    -1");
-			out.close();
-		} catch (FileNotFoundException e)
-		{
-			logger.fatal(e.toString());
-			e.printStackTrace();
-		} catch (Exception e)
-		{
-			logger.fatal(e.toString());
-			e.printStackTrace();
-		}
-	}
-	
-	public void writeUNV3D(String file)
-	{
-		String cr=System.getProperty("line.separator");
-		PrintWriter out;
-		try {
-			if (file.endsWith(".gz") || file.endsWith(".GZ"))
-				out = new PrintWriter(new java.util.zip.GZIPOutputStream(new FileOutputStream(file)));
-			else
-				out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(file)));
-			out.println("    -1"+cr+"  2411");
-			HashSet nodeset = new HashSet();
-			for(Iterator it=triangleList.iterator();it.hasNext();)
-			{
-				Triangle t = (Triangle) it.next();
-				for (int i = 0; i < 3; i++)
-					nodeset.add(t.vertex[i]);
-			}
-			
-			HashMap labels = new HashMap(nodeset.size());
-			double [] p;
-			double [] p3;
-			int count =  0;
-			for(Iterator it=nodeset.iterator();it.hasNext();)
-			{
-				Vertex node = (Vertex) it.next();
-				if (node == Vertex.outer)
-					continue;
-				count++;
-				Integer label = new Integer(count);
-				labels.put(node, label);
-				out.println(label+"         1         1         1");
-				p = node.getUV();
-				p3 = surface.value(p[0], p[1]);
-				out.println(""+p3[0]+" "+p3[1]+" "+p3[2]);
-			}
-			out.println("    -1");
-			out.println("    -1"+cr+"  2412");
-			count =  0;
-			for(Iterator it=triangleList.iterator();it.hasNext();)
-			{
-				Triangle t = (Triangle)it.next();
-				if (t.isOuter())
-					continue;
-				count++;
-				out.println(""+count+"        91         1         1         1         3");
-				if (face.isOrientationForward())
-				{
-					for (int i = 0; i < 3; i++)
-					{
-						Integer nodelabel =  (Integer) labels.get(t.vertex[i]);
-						out.print(" "+nodelabel.intValue());
-					}
-				}
-				else
-				{
-					for (int i = 2; i >= 0; i--)
-					{
-						Integer nodelabel =  (Integer) labels.get(t.vertex[i]);
-						out.print(" "+nodelabel.intValue());
-					}
-				}
-				out.println("");
-			}
-			out.println("    -1");
-			out.println("    -1");
-			out.println("  2414");
-			out.println("         1");
-			out.println("Normals");
-			out.println("         1");
-			out.println("NONE\nNONE\nNONE\nNONE\nNONE");
-			out.println("         1         1         2        95         4         3");
-			out.println("         1");
-			out.println("         1");
-			out.println("          0.0");
-			out.println("          0.0");
-			for(Iterator it=nodeset.iterator();it.hasNext();)
-			{
-				Vertex node = (Vertex) it.next();
-				if (node == Vertex.outer)
-					continue;
-				p3 = node.getNormal();
-				if (p3[0] == 0.0 && p3[1] == 0.0 && p3[2] == 0.0)
-					continue;
-				if (!face.isOrientationForward())
-				{
-					for (int i = 0; i < 3; i++)
-						p3[i] = - p3[i];
-				}
-				Integer nodelabel =  (Integer) labels.get(node);
-				out.println(nodelabel.intValue()+" "+p3[0]+" "+p3[1]+" "+p3[2]);
-			}
-			out.println("    -1");
-			out.close();
-		} catch (FileNotFoundException e)
-		{
-			logger.fatal(e.toString());
-			e.printStackTrace();
-		} catch (Exception e)
-		{
-			logger.fatal(e.toString());
-			e.printStackTrace();
-		}
-	}
-	
-	public void writeMESH(String file)
-	{
-		String cr=System.getProperty("line.separator");
-		PrintWriter out;
-		try {
-			if (file.endsWith(".gz") || file.endsWith(".GZ"))
-				out = new PrintWriter(new java.util.zip.GZIPOutputStream(new FileOutputStream(file)));
-			else
-				out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(file)));
-			HashSet nodeset = new HashSet();
-			int nrt = 0;
-			for(Iterator it=triangleList.iterator();it.hasNext();)
-			{
-				Triangle t = (Triangle) it.next();
-				if (t.isOuter())
-					continue;
-				for (int i = 0; i < 3; i++)
-					nodeset.add(t.vertex[i]);
-				nrt++;
-			}
-			out.println("\nMeshVersionFormatted 1");
-			out.println("\nDimension\n2");
-			out.println("\nVertices\n"+nodeset.size());
-			HashMap labels = new HashMap(nodeset.size());
-			int count = 0;
-			for(Iterator it=nodeset.iterator();it.hasNext();)
-			{
-				Vertex node = (Vertex) it.next();
-				double [] p = node.getUV();
-				out.println(""+(scaleX*p[0])+" "+(scaleY*p[1])+" 0");
-				count++;
-				Integer label = new Integer(count);
-				labels.put(node, label);
-			}
-			out.println("\nTriangles\n"+nrt);
-			for(Iterator it=triangleList.iterator();it.hasNext();)
-			{
-				Triangle t = (Triangle) it.next();
-				if (t.isOuter())
-					continue;
-				for (int i = 0; i < 3; i++)
-				{
-					Integer nodelabel =  (Integer) labels.get(t.vertex[i]);
-					out.print(nodelabel.intValue()+" ");
-				}
-				out.println("0");
-			}
-			out.println("\nEnd");
-			out.close();
-		} catch (FileNotFoundException e)
-		{
-			logger.fatal(e.toString());
-			e.printStackTrace();
-		} catch (Exception e)
-		{
-			logger.fatal(e.toString());
-			e.printStackTrace();
-		}
-	}
-	
-	public void writeBB(String file)
-	{
-		String cr=System.getProperty("line.separator");
-		PrintWriter out;
-		try {
-			if (file.endsWith(".gz") || file.endsWith(".GZ"))
-				out = new PrintWriter(new java.util.zip.GZIPOutputStream(new FileOutputStream(file)));
-			else
-				out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(file)));
-			HashSet nodeset = new HashSet();
-			for(Iterator it=triangleList.iterator();it.hasNext();)
-			{
-				Triangle t = (Triangle) it.next();
-				if (t.isOuter())
-					continue;
-				for (int i = 0; i < 3; i++)
-					nodeset.add(t.vertex[i]);
-			}
-			out.println("2 3 "+nodeset.size()+" 2");
-			for(Iterator it=nodeset.iterator();it.hasNext();)
-			{
-				Vertex node = (Vertex) it.next();
-				out.println(""+node.getMetrics(surface).stringCoefs(scaleX, scaleY));
-			}
-			out.close();
-		} catch (FileNotFoundException e)
-		{
-			logger.fatal(e.toString());
-			e.printStackTrace();
-		} catch (Exception e)
-		{
-			logger.fatal(e.toString());
-			e.printStackTrace();
-		}
-	}
-	
-	public void writeGeom(String file)
-	{
-		String cr=System.getProperty("line.separator");
-		PrintWriter out;
-		try {
-			if (file.endsWith(".gz") || file.endsWith(".GZ"))
-				out = new PrintWriter(new java.util.zip.GZIPOutputStream(new FileOutputStream(file)));
-			else
-				out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(file)));
-			HashSet nodeset = new HashSet();
-			double [] p;
-			double [] p3;
-			for(Iterator it=triangleList.iterator();it.hasNext();)
-			{
-				Triangle t = (Triangle) it.next();
-				for (int i = 0; i < 3; i++)
-					nodeset.add(t.vertex[i]);
-			}
-			for(Iterator it=nodeset.iterator();it.hasNext();)
-			{
-				Vertex node = (Vertex) it.next();
-				if (node == Vertex.outer)
-					continue;
-				p = node.getUV();
-				out.println("UV "+p[0]+" "+p[1]);
-				p3 = surface.value(p[0], p[1]);
-				surface.setParameter(p[0], p[1]);
-				out.println("d0 "+p3[0]+" "+p3[1]+" "+p3[2]);
-				p3 = surface.d1U();
-				out.println("d1U "+p3[0]+" "+p3[1]+" "+p3[2]);
-				p3 = surface.d1V();
-				out.println("d1V "+p3[0]+" "+p3[1]+" "+p3[2]);
-				p3 = surface.d2U();
-				out.println("d2U "+p3[0]+" "+p3[1]+" "+p3[2]);
-				p3 = surface.d2V();
-				out.println("d2V "+p3[0]+" "+p3[1]+" "+p3[2]);
-				p3 = surface.dUV();
-				out.println("d2UV "+p3[0]+" "+p3[1]+" "+p3[2]);
-			}
-			out.close();
-		} catch (FileNotFoundException e)
-		{
-			logger.fatal(e.toString());
-			e.printStackTrace();
-		} catch (Exception e)
-		{
-			logger.fatal(e.toString());
-			e.printStackTrace();
 		}
 	}
 	
