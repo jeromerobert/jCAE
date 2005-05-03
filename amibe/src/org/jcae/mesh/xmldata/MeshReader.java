@@ -24,6 +24,7 @@ package org.jcae.mesh.xmldata;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.cad.CADFace;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.BufferedInputStream;
@@ -43,10 +44,11 @@ public class MeshReader
 	 * Create a Mesh instance from an XML file.
 	 * @param xmlDir       directory containing XML files
 	 * @param xmlFile      basename of the main XML file
+	 * @param F            yopological surface
 	 */
-	public static Mesh readObject(String xmlDir, String xmlFile)
+	public static Mesh readObject(String xmlDir, String xmlFile, CADFace F)
 	{
-		Mesh mesh = new Mesh();
+		Mesh mesh = new Mesh(F);
 		logger.debug("begin reading "+xmlDir+File.separator+xmlFile);
 		CachedXPathAPI xpath = new CachedXPathAPI();
 		try

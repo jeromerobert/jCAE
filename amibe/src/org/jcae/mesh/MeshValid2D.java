@@ -69,13 +69,12 @@ public class MeshValid2D
 				if (numFace != 0 && iFace != numFace)
 					continue;
 				String xmlFile = "jcae2d."+iFace;
-				Mesh mesh = MeshReader.readObject(xmlDir, xmlFile);
+				Mesh mesh = MeshReader.readObject(xmlDir, xmlFile, F);
 				if (null == mesh)
 				{
 					logger.info("Face "+iFace+" ***");
 					continue;
 				}
-				mesh.setGeometry(F);
 				QualityProcedure qproc = new AbsoluteDeflection2D(mesh);
 				data.setQualityProcedure(qproc);
 				for(Iterator it=mesh.getTriangles().iterator();it.hasNext();)
