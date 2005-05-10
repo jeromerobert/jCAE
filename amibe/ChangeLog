@@ -1,6 +1,14 @@
+Tue May 10 11:55:08 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos2d/CheckDelaunay.java:  Replace a call to OTriangle.getOrientation() which has been removed.  Adjust the niter variable to break infinite loops earlier.
+
+Tue May  3 08:42:05 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Mesh.java: Remove export methods, they are now handled by UNVConverter.
+
 Fri Apr 29 12:32:07 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
-	* src/org/jcae/mesh/xmldata/MMesh3DReader.java: Modify reader so that itworks also when groups are deleted from jcae3d.
+	* src/org/jcae/mesh/xmldata/MMesh3DReader.java: Modify reader so that it works also when groups are deleted from jcae3d.
 	* src/org/jcae/mesh/amibe/ds/Vertex.java (inCircleTest3): Suppress flat triangles.  TODO: investigate why these flat triangles appear in algos2d.Insertion.
 
 Tue Apr 26 16:02:23 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
