@@ -85,6 +85,7 @@ public class CheckDelaunay
 			{
 				t = (Triangle) it.next();
 				ot.bind(t);
+				ot.prevOTri();
 				for (int i = 0; i < 3; i++)
 				{
 					ot.nextOTri();
@@ -98,7 +99,7 @@ public class CheckDelaunay
 					{
 						cnt++;
 						toSwap.add(t);
-						toSwap.add(new Integer(ot.getOrientation()));
+						toSwap.add(new Integer(i));
 					}
 				}
 			}
@@ -117,6 +118,11 @@ public class CheckDelaunay
 					redo = true;
 				}
 			}
+			//  The niter variable is introduced to prevent loops.
+			//  With large meshes. its initial value may be too large,
+			//  so we lower it now.
+			if (niter > 10 * cnt)
+				niter = 10 * cnt;
 		} while (redo && niter > 0);
 		mesh.popCompGeom(3);
 	}
