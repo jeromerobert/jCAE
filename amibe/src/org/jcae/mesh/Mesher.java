@@ -64,7 +64,7 @@ public class Mesher
 	 * @param tolerance  unused for now.
 	 *        See {@link org.jcae.mesh.amibe.algos3d.Fuse}
 	 */
-	private static void mesh(String brepfilename, String xmlDir, double discr, double defl, double tolerance)
+	private static void mesh(String brepfilename, String unvName, String xmlDir, double discr, double defl, double tolerance)
 	{
 		//  Declare all variables here
 		//  xmlDir:      absolute path name where XML files are stored
@@ -220,6 +220,22 @@ public class Mesher
 				logger.warn(ex.getMessage());
 				ex.printStackTrace();
 			}
+			if (System.getProperty("org.jcae.mesh.exportUNV", "true").equals("true"))
+			{
+				logger.info("Exporting UNV");
+				
+				if(Boolean.getBoolean("org.jcae.mesh.unv.nogz"))
+					new UNVConverter(xmlDir).writeUNV(unvName);
+				else
+					new UNVConverter(xmlDir).writeUNV(unvName+".gz");
+			}
+			if (System.getProperty("org.jcae.mesh.exportMESH", "true").equals("true"))
+			{
+				logger.info("Exporting MESH");
+				String MESHName=brepfilename.substring(0, brepfilename.lastIndexOf('.'))+".mesh";
+				new UNVConverter(xmlDir).writeMESH(MESHName);
+			}
+			
 			
 /*
 			if (tolerance >= 0.0)
@@ -307,17 +323,7 @@ public class Mesher
 			Double discr=new Double(args[2]);
 			Double defl=new Double(args[3]);
 			Double tolerance=new Double(System.getProperty("org.jcae.mesh.Mesher.tolerance", "-1.0"));
-			mesh(filename, xmlDir, discr.doubleValue(), defl.doubleValue(), tolerance.doubleValue());
-			logger.info("Exporting UNV");
-			
-			if(Boolean.getBoolean("org.jcae.mesh.unv.nogz"))
-				new UNVConverter(xmlDir).writeUNV(unvName);
-			else
-				new UNVConverter(xmlDir).writeUNV(unvName+".gz");
-			logger.info("Exporting MESH");
-			String MESHName=filename.substring(0, filename.lastIndexOf('.'))+".mesh";
-			new UNVConverter(xmlDir).writeMESH(MESHName);
-			
+			mesh(filename, unvName, xmlDir, discr.doubleValue(), defl.doubleValue(), tolerance.doubleValue());
 			if(Boolean.getBoolean("org.jcae.mesh.tmpDir.delete"))
 			{
 				deleteDirectory(new File(xmlDir), new File(unvName));
