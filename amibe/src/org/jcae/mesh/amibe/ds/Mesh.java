@@ -108,13 +108,10 @@ import org.apache.log4j.Logger;
 public class Mesh
 {
 	private static Logger logger=Logger.getLogger(Mesh.class);
-	private ArrayList triangleList = new ArrayList();
-	public QuadTree quadtree = null;
-
-	//  Utilities to help debugging meshes with writeMESH
-	private static final double scaleX = 1.0;
-	private static final double scaleY = 1.0;
 	
+	//  Triangle list
+	private ArrayList triangleList = new ArrayList();
+
 	//  Topological face on which mesh is applied
 	private CADFace face;
 	
@@ -128,8 +125,17 @@ public class Mesh
 	private boolean accumulateEpsilon = false;
 	private double accumulatedLength = 0.0;
 	
+	//  Utilities to help debugging meshes with writeMESH
+	private static final double scaleX = 1.0;
+	private static final double scaleY = 1.0;
+	
 	//  Stack of methods to compute geometrical values
 	private Stack compGeomStack = new Stack();
+	
+	/**
+	 * Structure to fasten search of nearest vertices.
+	 */
+	public QuadTree quadtree = null;
 	
 	/**
 	 * Creates an empty mesh.
@@ -551,7 +557,9 @@ public class Mesh
 	
 	/**
 	 * Checks whether this mesh is valid.
-	 * Without argument, 
+	 * This routine returns <code>isValid(true)</code>.
+	 *
+	 * @see #isValid(boolean)
 	 */
 	public boolean isValid()
 	{

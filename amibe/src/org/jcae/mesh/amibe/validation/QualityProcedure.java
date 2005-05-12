@@ -83,7 +83,7 @@ public abstract class QualityProcedure
 	 * Make output array visible by the {@link #finish} method.
 	 * @see QualityFloat#setQualityProcedure
 	 *
-	 * @param data  array containing output values
+	 * @param d  array containing output values
 	 */
 	public final void bindResult(TFloatArrayList d)
 	{

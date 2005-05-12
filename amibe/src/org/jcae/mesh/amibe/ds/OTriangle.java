@@ -25,7 +25,7 @@ import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.apache.log4j.Logger;
 
 /*
- * This class is derived from Jonathan Richard Shewchuk's work
+ * This class is derived from Jonathan R. Shewchuk's work
  * on Triangle, see
  *       http://www.cs.cmu.edu/~quake/triangle.html
  * His data structure is very compact, and similar ideas were
@@ -44,19 +44,58 @@ import org.apache.log4j.Logger;
 /**
  * A handle to {@link Triangle} objects.
  *
- * Jonathan Richard Shewchuk
- * <a href="http://www.cs.cmu.edu/~quake/triangle.html">explains</a>
- * why triangle-based data structures are more efficient than their
- * edge-based counterparts.  But mesh operations make heavy use of edges,
- * and informations about adges are not stored in this data structure in
- * order to be compact.
+ * <p>
+ *   Jonathan Richard Shewchuk
+ *   <a href="http://www.cs.cmu.edu/~quake/triangle.html">explains</a>
+ *   why triangle-based data structures are more efficient than their
+ *   edge-based counterparts.  But mesh operations make heavy use of edges,
+ *   and informations about adges are not stored in this data structure in
+ *   order to be compact.
+ * </p>
  *
- * A triangle is composed of three edges, so a triangle and a number
- * between 0 and 2 can represent an edge.  This <code>OTriangle</code>
- * class plays this role, it defines an <em>oriented triangle</em>, or
- * in other words an oriented edge.  Instances of this class are tied to
- * their underlying {@link Triangle} instances, so modifications are not
- * local to this class!
+ * <p>
+ *   A triangle is composed of three edges, so a triangle and a number
+ *   between 0 and 2 can represent an edge.  This <code>OTriangle</code>
+ *   class plays this role, it defines an <em>oriented triangle</em>, or
+ *   in other words an oriented edge.  Instances of this class are tied to
+ *   their underlying {@link Triangle} instances, so modifications are not
+ *   local to this class!
+ * </p>
+ *
+ * <p>
+ *   The main goal of this class is to ease mesh traversal.
+ *   Consider the <code>ot</code> {@link OTriangle} with a null orientation of
+ *   {@link Triangle} <code>t</code>below.
+ * </p>
+ * <pre>
+ *                        V2
+ *     V5 _________________,________________, V3
+ *        \    &lt;----      / \     &lt;----     /
+ *         \     1       /   \      1      /
+ *          \   t3    -.//  /\\\   t0   _,/
+ *           \      0 ///1   0\\\2    0 //   t.vertex = { V0, V1, V2 }
+ *            \      //V   t   \\V     //   t0.vertex = { V2, V1, V3 }
+ *             \     /           \     /    t2.vertex = { V0, V4, V1 }
+ *              \   /      2      \   /     t3.vertex = { V5, V0, V2 }
+ *               \ /     ----&gt;     \ /
+ *             V0 +-----------------+ V1
+ *                 \     &lt;----     /
+ *                  \      1      /
+ *                   \    t2   _,/
+ *                    \       0//
+ * </pre>
+ * The following methods can be applied to <code>ot</code>:
+ * <pre>
+ *    ot.nextOTri();        // Moves (t,0) to (t,1)
+ *    ot.prevOTri();        // Moves (t,0) to (t,2)
+ *    ot.symOTri();         // Moves (t,0) to (t0,2)
+ *    ot.nextOTriOrigin();  // Moves (t,0) to (t2,1)
+ *    ot.prevOTriOrigin();  // Moves (t,0) to (t0,0)
+ *    ot.nextOTriDest();    // Moves (t,0) to (t0,1)
+ *    ot.prevOTriDest();    // Moves (t,0) to (t3,0)
+ *    ot.nextOTriApex();    // Moves (t,0) to (t3,1)
+ *    ot.prevOTriApex();    // Moves (t,0) to (t2,0)
+ * </pre>
  */
 public class OTriangle
 {
@@ -127,7 +166,7 @@ public class OTriangle
 	}
 	
 	/**
-	 * Creates an object to handle data about a triangle.
+	 * Create an object to handle data about a triangle.
 	 *
 	 * @param t  geometrical triangle.
 	 * @param o  a number between 0 and 2 determining an edge.
@@ -140,7 +179,7 @@ public class OTriangle
 	}
 	
 	/**
-	 * Returns the triangle tied to this object.
+	 * Return the triangle tied to this object.
 	 *
 	 * @return the triangle tied to this object.
 	 */
@@ -150,7 +189,7 @@ public class OTriangle
 	}
 	
 	/**
-	 * Sets the triangle tied to this object, and resets orientation.
+	 * Set the triangle tied to this object, and resets orientation.
 	 *
 	 * @param t  the triangle tied to this object.
 	 */
@@ -162,17 +201,7 @@ public class OTriangle
 	}
 	
 	/**
-	 * Returns the orientation of this oriented triangle.
-	 *
-	 * @return the orientation of this oriented triangle.
-	 */
-	public final int getOrientation()
-	{
-		return orientation;
-	}
-	
-	/**
-	 * Checks if attribute of this oriented triangle are set.
+	 * Check if some attributes of this oriented triangle are set.
 	 *
 	 * @param attr  the attributes to check
 	 * @return <code>true</code> if this OTriangle has all these
@@ -184,7 +213,7 @@ public class OTriangle
 	}
 	
 	/**
-	 * Sets attributes of this oriented triangle.
+	 * Set attributes of this oriented triangle.
 	 *
 	 * @param attr  the attribute of this oriented triangle.
 	 */
@@ -195,7 +224,7 @@ public class OTriangle
 	}
 	
 	/**
-	 * Resets attributes of this oriented triangle.
+	 * Reset attributes of this oriented triangle.
 	 *
 	 * @param attr   the attributes of this oriented triangle to clear out.
 	 */
@@ -215,8 +244,9 @@ public class OTriangle
 	/**
 	 * Copy an <code>OTriangle</code> into another <code>OTriangle</code>.
 	 *
-	 * @param src  <code>OTriangle</code> being duplicated
-	 * @param dest  already allocated <code>OTriangle</code> where data are copied
+	 * @param src   <code>OTriangle</code> being duplicated
+	 * @param dest  already allocated <code>OTriangle</code> where data are
+	 *              copied
 	 */
 	public static final void copyOTri(OTriangle src, OTriangle dest)
 	{
@@ -233,6 +263,14 @@ public class OTriangle
 	//  efficient by preventing useless memory allocations.
 	//  They do not return any value to make clear that calling
 	//  these routines requires extra care.
+	
+	/**
+	 * Copy an <code>OTriangle</code> and move to its symmetric edge.
+	 *
+	 * @param o     source <code>OTriangle</code>
+	 * @param that  already allocated <code>OTriangle</code> where data are
+	 *              copied
+	 */
 	public static final void symOTri(OTriangle o, OTriangle that)
 	{
 		that.tri = o.tri.adj[o.orientation];
@@ -240,6 +278,9 @@ public class OTriangle
 		that.attributes = (that.tri.adjPos >> (8*(1+that.orientation))) & 0xff;
 	}
 	
+	/**
+	 * Move to the symmetric edge.
+	 */
 	public final void symOTri()
 	{
 		int neworient = ((tri.adjPos >> (2*orientation)) & 3);
@@ -248,6 +289,14 @@ public class OTriangle
 		attributes = (tri.adjPos >> (8*(1+orientation))) & 0xff;
 	}
 	
+	/**
+	 * Copy an <code>OTriangle</code> and move it to the counterclockwaise
+	 * following edge.
+	 *
+	 * @param o     source <code>OTriangle</code>
+	 * @param that  already allocated <code>OTriangle</code> where data are
+	 *              copied
+	 */
 	public static final void nextOTri(OTriangle o, OTriangle that)
 	{
 		that.tri = o.tri;
@@ -255,12 +304,23 @@ public class OTriangle
 		that.attributes = (that.tri.adjPos >> (8*(1+that.orientation))) & 0xff;
 	}
 	
+	/**
+	 * Move to the counterclockwaise following edge.
+	 */
 	public final void nextOTri()
 	{
 		orientation = next3[orientation];
 		attributes = (tri.adjPos >> (8*(1+orientation))) & 0xff;
 	}
 	
+	/**
+	 * Copy an <code>OTriangle</code> and move it to the counterclockwaise
+	 * previous edge.
+	 *
+	 * @param o     source <code>OTriangle</code>
+	 * @param that  already allocated <code>OTriangle</code> where data are
+	 *              copied
+	 */
 	public static final void prevOTri(OTriangle o, OTriangle that)
 	{
 		that.tri = o.tri;
@@ -268,60 +328,117 @@ public class OTriangle
 		that.attributes = (that.tri.adjPos >> (8*(1+that.orientation))) & 0xff;
 	}
 	
+	/**
+	 * Move to the counterclockwaise previous edge.
+	 */
 	public final void prevOTri()
 	{
 		orientation = prev3[orientation];
 		attributes = (tri.adjPos >> (8*(1+orientation))) & 0xff;
 	}
-
+	
+	/**
+	 * Copy an <code>OTriangle</code> and move it to the counterclockwaise
+	 * following edge which has the same origin.
+	 *
+	 * @param o     source <code>OTriangle</code>
+	 * @param that  already allocated <code>OTriangle</code> where data are
+	 *              copied
+	 */
 	public static final void nextOTriOrigin(OTriangle o, OTriangle that)
 	{
 		prevOTri(o, that);
 		that.symOTri();
 	}
 	
+	/**
+	 * Move counterclockwaise to the following edge with the same origin.
+	 */
 	public final void nextOTriOrigin()
 	{
 		prevOTri();
 		symOTri();
 	}
 	
+	/**
+	 * Copy an <code>OTriangle</code> and move it to the counterclockwaise
+	 * previous edge which has the same origin.
+	 *
+	 * @param o     source <code>OTriangle</code>
+	 * @param that  already allocated <code>OTriangle</code> where data are
+	 *              copied
+	 */
 	public static final void prevOTriOrigin(OTriangle o, OTriangle that)
 	{
 		symOTri(o, that);
 		that.nextOTri();
 	}
 	
+	/**
+	 * Move counterclockwaise to the previous edge with the same origin.
+	 */
 	public final void prevOTriOrigin()
 	{
 		symOTri();
 		nextOTri();
 	}
 	
+	/**
+	 * Copy an <code>OTriangle</code> and move it to the counterclockwaise
+	 * following edge which has the same destination.
+	 *
+	 * @param o     source <code>OTriangle</code>
+	 * @param that  already allocated <code>OTriangle</code> where data are
+	 *              copied
+	 */
 	public static final void nextOTriDest(OTriangle o, OTriangle that)
 	{
 		symOTri(o, that);
 		that.prevOTri();
 	}
 	
+	/**
+	 * Move counterclockwaise to the following edge with the same
+	 * destination.
+	 */
 	public final void nextOTriDest()
 	{
 		symOTri();
 		prevOTri();
 	}
 	
+	/**
+	 * Copy an <code>OTriangle</code> and move it to the counterclockwaise
+	 * previous edge which has the same destination.
+	 *
+	 * @param o     source <code>OTriangle</code>
+	 * @param that  already allocated <code>OTriangle</code> where data are
+	 *              copied
+	 */
 	public static final void prevOTriDest(OTriangle o, OTriangle that)
 	{
 		nextOTri(o, that);
 		that.symOTri();
 	}
 	
+	/**
+	 * Move counterclockwaise to the previous edge with the same
+	 * destination.
+	 */
 	public final void prevOTriDest()
 	{
 		nextOTri();
 		symOTri();
 	}
 	
+	/**
+	 * Copy an <code>OTriangle</code> and move it to the counterclockwaise
+	 * following edge which has the same apex.
+	 *
+	 * @param o     source <code>OTriangle</code>
+	 * @param that  already allocated <code>OTriangle</code> where data are
+	 *              copied
+	 */
 	public static final void nextOTriApex(OTriangle o, OTriangle that)
 	{
 		nextOTri(o, that);
@@ -329,6 +446,9 @@ public class OTriangle
 		that.nextOTri();
 	}
 	
+	/**
+	 * Move counterclockwaise to the following edge with the same apex.
+	 */
 	public final void nextOTriApex()
 	{
 		nextOTri();
@@ -336,6 +456,14 @@ public class OTriangle
 		nextOTri();
 	}
 	
+	/**
+	 * Copy an <code>OTriangle</code> and move it to the counterclockwaise
+	 * previous edge which has the same apex.
+	 *
+	 * @param o     source <code>OTriangle</code>
+	 * @param that  already allocated <code>OTriangle</code> where data are
+	 *              copied
+	 */
 	public static final void prevOTriApex(OTriangle o, OTriangle that)
 	{
 		prevOTri(o, that);
@@ -343,6 +471,9 @@ public class OTriangle
 		that.prevOTri();
 	}
 	
+	/**
+	 * Move counterclockwaise to the previous edge with the same apex.
+	 */
 	public final void prevOTriApex()
 	{
 		prevOTri();
