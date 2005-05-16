@@ -373,7 +373,8 @@ public class BasicMesh
 					nodesWire.add(p2);
 				}
 			}
-			if (nodesWire.size() > 2)
+			//  If a wire has less than 3 points, it is discarded
+			if (nodesWire.size() > 3)
 			{
 				//  Overwrite the last value to close the wire
 				nodesWire.set(nodesWire.size()-1, p20);
