@@ -21,7 +21,15 @@
 package org.jcae.mesh.cad.occ;
 
 import org.jcae.mesh.cad.CADWire;
+import org.jcae.opencascade.jni.GProp_GProps;
+import org.jcae.opencascade.jni.BRepGProp;
 
 public class OCCWire extends OCCShape implements CADWire
 {
+	public double length()
+	{
+		GProp_GProps myProps = new GProp_GProps();
+		BRepGProp.linearProperties (myShape, myProps);
+		return myProps.mass();
+	}
 }

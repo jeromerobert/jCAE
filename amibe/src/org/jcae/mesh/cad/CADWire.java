@@ -25,4 +25,5 @@ package org.jcae.mesh.cad;
  */
 public interface CADWire extends CADShape
 {
+	public double length();
 }
