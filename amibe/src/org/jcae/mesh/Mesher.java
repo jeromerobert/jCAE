@@ -133,7 +133,8 @@ public class Mesher
 				logger.info("Meshing face " + iFace+"/"+nrFaces);
 				//  This variable can be modified, thus reset it
 				Metric2D.setLength(discr);
-// F.writeNative("face."+iFace+".brep");
+				if(Boolean.getBoolean("org.jcae.mesh.Mesher.explodeBrep"))
+					F.writeNative("face."+iFace+".brep");
 				Mesh mesh = new Mesh(F); 
 				int nTry = 0;
 				while (nTry < nTryMax)
