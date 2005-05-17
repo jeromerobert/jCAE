@@ -22,7 +22,7 @@
 package org.jcae.mesh;
 
 import java.io.File;
-import java.net.URI;
+import java.util.Stack;
 
 import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.InitialTriangulationException;
@@ -76,11 +76,9 @@ public class Mesher
 		String xmlFile = "jcae1d";
 		MMesh1D mesh1D;
 		TIntArrayList badTriangles = new TIntArrayList();
-		
-		URI brepURI=new File(brepfilename).getAbsoluteFile().getParentFile().toURI();
-		URI brepDirURI=new File(xmlDir, "dummy").toURI().relativize(brepURI);
-		
-		String xmlBrepDir = new File(brepDirURI).getPath();
+				
+		String xmlBrepDir = relativize(new File(brepfilename).getParentFile(),
+			new File(xmlDir)).getPath();
 		
 		logger.info("Loading " + brepfilename);
 		
@@ -123,7 +121,7 @@ public class Mesher
 			int numFace = Integer.parseInt(System.getProperty("org.jcae.mesh.Mesher.meshFace", "0"));
 			int nrFaces = 0;
 			for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
-				nrFaces++;
+				nrFaces++;			
 			for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
 			{
 				CADFace F = (CADFace) expF.current();
@@ -249,6 +247,32 @@ public class Mesher
 		{
 			logger.info("Number of faces which cannot be meshed: "+badTriangles.size());
 			logger.info(""+badTriangles);
+		}
+	}
+
+	private static File relativize(File file, File reference)
+	{
+		if(!reference.isDirectory())
+			throw new IllegalArgumentException("reference must be a directory");
+		File current=file;
+		Stack l=new Stack();
+		while(current!=null && !current.equals(reference))
+		{
+			l.push(current.getName());
+			current=current.getParentFile();
+		}
+		if(l.isEmpty())
+			return new File(".");
+		else if(current==null)
+			return file;
+		else
+		{
+			current=new File(l.pop().toString());
+			while(!l.isEmpty())
+			{
+				current=new File(current, l.pop().toString());
+			}
+			return current;
 		}
 	}
 
