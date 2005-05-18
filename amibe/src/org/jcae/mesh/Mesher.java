@@ -76,9 +76,9 @@ public class Mesher
 		String xmlFile = "jcae1d";
 		MMesh1D mesh1D;
 		TIntArrayList badTriangles = new TIntArrayList();
-				
-		String xmlBrepDir = relativize(new File(brepfilename).getParentFile(),
-			new File(xmlDir)).getPath();
+						
+		String xmlBrepDir = relativize(new File(brepfilename).getAbsoluteFile().getParentFile(),
+			new File(xmlDir).getAbsoluteFile()).getPath();
 		
 		logger.info("Loading " + brepfilename);
 		
@@ -252,8 +252,6 @@ public class Mesher
 
 	private static File relativize(File file, File reference)
 	{
-		if(!reference.isDirectory())
-			throw new IllegalArgumentException("reference must be a directory");
 		File current=file;
 		Stack l=new Stack();
 		while(current!=null && !current.equals(reference))
