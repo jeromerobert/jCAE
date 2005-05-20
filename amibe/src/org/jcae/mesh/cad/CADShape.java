@@ -28,6 +28,11 @@ package org.jcae.mesh.cad;
  */
 public interface CADShape
 {
+    	/**
+    	 * Return the bounding box of this shape in an array like {Xmin, Ymin, Zmin, Xmax,
+    	 * Ymax, Zmax}.
+    	 */    
+	public double [] boundingBox();
 	/** Return a reversed instance of this shape */
 	public CADShape reversed();
 	/** Return the orientation of the shape */

@@ -27,6 +27,8 @@ import org.jcae.opencascade.jni.BRepTools;
 import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.jcae.opencascade.jni.TopoDS_Face;
 import org.jcae.opencascade.jni.TopAbs_Orientation;
+import org.jcae.opencascade.jni.Bnd_Box;
+import org.jcae.opencascade.jni.BRepBndLib;
 
 public class OCCShape implements CADShape
 {
@@ -52,6 +54,13 @@ public class OCCShape implements CADShape
 		OCCGeomSurface surface = new OCCGeomSurface();
 		surface.setSurface(BRep_Tool.surface((TopoDS_Face) myShape));
 		return (CADGeomSurface) surface;
+	}
+	
+	public double [] boundingBox()
+	{
+		Bnd_Box box = new Bnd_Box();
+		BRepBndLib.add(myShape, box);
+		return box.get();
 	}
 	
 	public CADShape reversed()
