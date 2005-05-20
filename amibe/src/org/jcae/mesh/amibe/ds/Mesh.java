@@ -123,7 +123,6 @@ public class Mesh
 	private double epsilon = 1.;
 	
 	private boolean accumulateEpsilon = false;
-	private double accumulatedLength = 0.0;
 	
 	//  Utilities to help debugging meshes with writeMESH
 	private static final double scaleX = 1.0;
@@ -469,48 +468,17 @@ public class Mesh
 	}
 	
 	/**
-	 * Checks whether a topological edge is too small to be considered.
+	 * Checks whether a length is llower than a threshold.
 	 *
-	 * @param te   the topological edge to measure.
-	 * @return <code>true</code> if this edge is too small to be considered,
+	 * @param len   the length to be checked.
+	 * @return <code>true</code> if this length is too small to be considered,
 	 *         <code>false</code> otherwise.
 	 */
-	public boolean tooSmall(CADEdge te)
+	public boolean tooSmall(double len, double accumulatedLength)
 	{
-		if (te.isDegenerated())
-			return false;
-		CADGeomCurve3D c3d = CADShapeBuilder.factory.newCurve3D(te);
-		if (c3d == null)
-			throw new java.lang.RuntimeException("Curve not defined on edge, but this edge is not degenrerated.  Something must be wrong.");
-		double range [] = c3d.getRange();
-		
-		//  There seems to be a bug with OpenCascade, we had a tiny
-		//  edge whose length was miscomputed, so try a workaround.
-		if (Math.abs(range[1] - range[0]) < 1.e-7 * Math.max(1.0, Math.max(Math.abs(range[0]), Math.abs(range[1]))))
-			return true;
-		
-		double edgelen = c3d.length();
-		if (edgelen + accumulatedLength > epsilon)
-		{
-			accumulatedLength = 0.0;
-			return false;
-		}
-		logger.info("Edge "+te+" is ignored because its length is too small: "+edgelen+" <= "+epsilon);
 		if (accumulateEpsilon)
-			accumulatedLength += edgelen;
-		return true;
-	}
-	
-	/**
-	 * Resets accumulated length.
-	 * When <code>org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon</code>
-	 * property is set to <code>true</code>, small edges can be
-	 * joined to form a larger edge which is not removed.  This routine
-	 * has to be called at the beginning of wire exploration.
-	 */
-	public void resetAccumulatedLength()
-	{
-		accumulatedLength = 0.0;
+			len += accumulatedLength;
+		return (len < epsilon);
 	}
 	
 	/**

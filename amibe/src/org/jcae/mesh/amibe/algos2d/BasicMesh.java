@@ -27,6 +27,7 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.OTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.InvalidFaceException;
 import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.jcae.mesh.cad.CADShapeBuilder;
@@ -36,6 +37,7 @@ import org.jcae.mesh.cad.CADWire;
 import org.jcae.mesh.cad.CADWireExplorer;
 import org.jcae.mesh.cad.CADExplorer;
 import org.jcae.mesh.cad.CADGeomCurve2D;
+import org.jcae.mesh.cad.CADGeomCurve3D;
 import java.util.Iterator;
 import java.util.ArrayList;
 import org.apache.log4j.Logger;
@@ -323,54 +325,97 @@ public class BasicMesh
 		CADFace face = (CADFace) mesh.getGeometry();
 		CADExplorer expW = CADShapeBuilder.factory.newExplorer();
 		CADWireExplorer wexp = CADShapeBuilder.factory.newWireExplorer();
+		
 		for (expW.init(face, CADExplorer.WIRE); expW.more(); expW.next())
 		{
 			MNode1D p1 = null;
-			Vertex p20 = null, p2 = null;
-			mesh.resetAccumulatedLength();
+			Vertex p20 = null, p2 = null, lastPoint = null;;
+			double accumulatedLength = 0.0;
 			ArrayList nodesWire = new ArrayList(roughSize);
 			for (wexp.init((CADWire) expW.current(), face); wexp.more(); wexp.next())
 			{
 				CADEdge te = wexp.current();
-				if (mesh.tooSmall(te))
-					continue;
-
 				double range[] = new double[2];
 				CADGeomCurve2D c2d = CADShapeBuilder.factory.newCurve2D(te, face);
+				CADGeomCurve3D c3d = CADShapeBuilder.factory.newCurve3D(te);
 
-				Iterator itn = mesh1d.getNodelistFromMap(te).iterator();
-				ArrayList nodes1 = new ArrayList();
+				ArrayList nodelist = mesh1d.getNodelistFromMap(te);
+				Iterator itn = nodelist.iterator();
+				ArrayList saveList = new ArrayList();
 				while (itn.hasNext())
 				{
 					p1 = (MNode1D) itn.next();
-					nodes1.add(p1);
+					saveList.add(p1);
 				}
 				if (!te.isOrientationForward())
 				{
 					//  Sort in reverse order
-					int size = nodes1.size();
+					int size = saveList.size();
 					for (int i = 0; i < size/2; i++)
 					{
-						Object o = nodes1.get(i);
-						nodes1.set(i, nodes1.get(size - i - 1));
-						nodes1.set(size - i - 1, o);
+						Object o = saveList.get(i);
+						saveList.set(i, saveList.get(size - i - 1));
+						saveList.set(size - i - 1, o);
 					}
 				}
-				itn = nodes1.iterator();
+				itn = saveList.iterator();
 				//  Except for the very first edge, the first
 				//  vertex is constrained to be the last one
 				//  of the previous edge.
 				p1 = (MNode1D) itn.next();
-				if (null == p20)
+				if (null == p2)
 				{
-					p20 = new Vertex(p1, c2d, face);
-					nodesWire.add(p20);
+					p2 = new Vertex(p1, c2d, face);
+					nodesWire.add(p2);
+					p20 = p2;
+					lastPoint = p2;
 				}
+				ArrayList newNodes = new ArrayList(saveList.size());
 				while (itn.hasNext())
 				{
 					p1 = (MNode1D) itn.next();
 					p2 = new Vertex(p1, c2d, face);
-					nodesWire.add(p2);
+					newNodes.add(p2);
+				}
+				// An edge is skipped if all the following conditions
+				// are met:
+				//   1.  It is not degenerated
+				//   2.  It has not been discretized in 1D
+				//   3.  Edge length is smaller than epsilon
+				//   4.  Accumulated points form a curve with a deflection
+				//       which meets its criterion
+				boolean canSkip = false;
+				if (nodelist.size() == 2 && !te.isDegenerated())
+				{
+					//   3.  Edge length is smaller than epsilon
+					double edgelen = c3d.length();
+					canSkip = mesh.tooSmall(edgelen, accumulatedLength);;
+					if (canSkip)
+						accumulatedLength += edgelen;
+					// 4.  Check whether deflection is valid.
+					if (canSkip && Metric3D.hasDeflection())
+					{
+						double [] uv = lastPoint.getUV();
+						double [] start = mesh.getGeomSurface().value(uv[0], uv[1]);
+						uv = p2.getUV();
+						double [] end = mesh.getGeomSurface().value(uv[0], uv[1]);
+						double dist = Math.sqrt(
+						  (start[0] - end[0]) * (start[0] - end[0]) +
+						  (start[1] - end[1]) * (start[1] - end[1]) +
+						  (start[2] - end[2]) * (start[2] - end[2]));
+                                		double dmax = Metric3D.getDeflection();
+						if (Metric3D.hasRelativeDeflection())
+							dmax *= accumulatedLength;
+						if (accumulatedLength - dist > dmax)
+							canSkip = false;
+					}
+				}
+
+				if (!canSkip)
+				{
+					nodesWire.addAll(newNodes);
+					accumulatedLength = 0.0;
+					lastPoint = p2;
 				}
 			}
 			//  If a wire has less than 3 points, it is discarded
