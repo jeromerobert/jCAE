@@ -1,3 +1,15 @@
+Fri May 20 14:15:32 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos2d/BasicMesh.java
+	  src/org/jcae/mesh/amibe/ds/Mesh.java:  Fix the detection of tiny edges, deflection criterion is now taken intoo account.
+	* src-occ/org/jcae/mesh/cad/occ/OCCShape.java
+	  src/org/jcae/mesh/cad/CADShape.java:  New boundingBox() method.
+	* src-occ/org/jcae/mesh/cad/occ/OCCGeomCurve3D.java:  Change length computation, it now uses GProp_GProps.
+
+Mon May 16 15:23:46 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos2d/BasicMesh.java: Discretized wires are discarded if they contain less than 3 points.
+
 Thu May 12 11:19:29 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/Mesher.java: Export meshes only if org.jcae.mesh.Mesher.mesh3d property is true.  Add new org.jcae.mesh.exportMESH and org.jcae.mesh.exportUNV properties to be able to not export meshes.
