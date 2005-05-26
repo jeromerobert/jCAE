@@ -40,7 +40,7 @@ import javax.media.j3d.BranchGroup;
 import javax.media.j3d.PolygonAttributes;
 import javax.media.j3d.ColoringAttributes;
 
-/*^
+/**
  * Converts a raw OEMM (Octree External Memory Mesh, out-of-core mesg)
  * into an indexed OEMM.
  *
@@ -58,25 +58,40 @@ public class RawOEMM
 	private String rawFile;
 	private int nr_levels;
 	private int gridSize;
+	private int minCellSize;
 	private double [] x0 = new double[4];
 	
 	private class RawOEMMCell
 	{
-		//  Current level
-		private int level;
+		//  Integer coordinates of the lower-left corner
+		private int i0, j0, k0;
+		//  Cell size (= 1 << (MAXLEVEL - level))
+		private int size;
 		//  Number of triangles
 		public int tn = 0;
-		//  Global offest
+		//  Global offest on file
 		private long offset = 0L;
 		//  Child list
 		private RawOEMMCell[] child = new RawOEMMCell[8];
+		//  Parent node
+		private RawOEMMCell parent;
 		//  Is this node a leaf?
 		private boolean isLeaf = true;
-		public final static int INTERMEDIATE_HEADER_SIZE = 16;
+		public final static int INTERMEDIATE_HEADER_SIZE = 2*8 + 4*4;
 		
-		public RawOEMMCell(int l)
+		public RawOEMMCell(int s, int ii, int jj, int kk)
 		{
-			level = l;
+			size = s;
+			i0 = ii;
+			j0 = jj;
+			k0 = kk;
+		}
+		public RawOEMMCell(int s, int [] ijk)
+		{
+			size = s;
+			i0 = ijk[0] & (~(s-1));
+			j0 = ijk[1] & (~(s-1));
+			k0 = ijk[2] & (~(s-1));
 		}
 		public void add(FileChannel fc, int [] ijk)
 			throws java.io.IOException
@@ -88,7 +103,12 @@ public class RawOEMM
 				ByteBuffer buf2 = ByteBuffer.allocate(INTERMEDIATE_HEADER_SIZE);
 				long blockSize = 36L * (long) tn;
 				buf2.putLong(blockSize);
-				//  Exact number of triangles
+				buf2.putInt(size);
+				buf2.putInt(i0);
+				buf2.putInt(j0);
+				buf2.putInt(k0);
+				//  Exact number of triangles, this must be the
+				//  last item of block header
 				buf2.putLong(0L);
 				buf2.rewind();
 				fc.position(offset);
@@ -105,6 +125,10 @@ public class RawOEMM
 			fc.write(buf, offset);
 			offset += 36L;
 			tn++;
+		}
+		public String toString()
+		{
+			return "" + size+" "+i0+" "+j0+" "+k0;
 		}
 	}
 	
@@ -140,35 +164,45 @@ public class RawOEMM
 		//    SKIPCHILD: skip current cell (ie do not process its children)
 		//    SKIPWALK: node was skipped, process normally
 		//    OK: process normally
-		public abstract int action(RawOEMMCell c, int s, int i, int j, int k, int visit);
+		public abstract int action(RawOEMMCell c, int visit);
 		
-		public int preorder(RawOEMMCell c, int s, int i0, int j0, int k0)
+		public int preorder(RawOEMMCell c)
 		{
 			int res = 0;
 			nrNodes++;
 			if (c.isLeaf)
 			{
 				nrLeaves++;
-				logger.debug("Found LEAF: "+s+" "+i0+" "+j0+" "+k0);
-				res = action(c, s, i0, j0, k0, LEAF);
+				logger.debug("Found LEAF: "+c);
+				res = action(c, LEAF);
 			}
 			else
 			{
-				logger.debug("Found PREORDER: "+s+" "+i0+" "+j0+" "+k0);
-				res = action(c, s, i0, j0, k0, PREORDER);
+				logger.debug("Found PREORDER: "+c);
+				res = action(c, PREORDER);
 			}
 			logger.debug("  Res; "+res);
 			return res;
 		}
-		public int postorder(RawOEMMCell c, int s, int i0, int j0, int k0)
+		public int postorder(RawOEMMCell c)
 		{
-			logger.debug("Found POSTORDER: "+s+" "+i0+" "+j0+" "+k0);
-			int res = action(c, s, i0, j0, k0, POSTORDER);
+			logger.debug("Found POSTORDER: "+c);
+			int res = action(c, POSTORDER);
 			logger.debug("  Res; "+res);
 			return res;
 		}
 	}
 	
+	//  Dummy constructor
+	public RawOEMM()
+	{
+		nr_levels = MAXLEVEL;
+		gridSize = 1 << MAXLEVEL;
+		root = new RawOEMMCell(gridSize, 0, 0, 0);
+		x0[0] = x0[1] = x0[2] = 0.0;
+		x0[3] = 1.0;
+
+	}
 	//  Initialize octree
 	public RawOEMM(String file, int lmax, double [] umin, double [] umax)
 	{
@@ -180,6 +214,7 @@ public class RawOEMM
 			nr_levels = MAXLEVEL;
 		}
 		gridSize = 1 << MAXLEVEL;
+		minCellSize = 1 << nr_levels;
 		double deltaX = Math.abs(umin[0] - umax[0]);
 		double deltaY = Math.abs(umin[1] - umax[1]);
 		double deltaZ = Math.abs(umin[2] - umax[2]);
@@ -188,7 +223,26 @@ public class RawOEMM
 		for (int i = 0; i < 3; i++)
 			x0[i] = umin[i];
 		x0[3] = ((double) gridSize) / deltaX;
-		root = new RawOEMMCell(0);
+		root = new RawOEMMCell(gridSize, 0, 0, 0);
+	}
+	public void buildCell(int size, int [] ijk)
+	{
+		RawOEMMCell current = root;
+		int s = gridSize;
+		while (s > size)
+		{
+			s >>= 1;
+			assert s > 0;
+			int ind = indexSubOctree(s, ijk);
+			if (null == current.child[ind])
+			{
+				current.child[ind] = new RawOEMMCell(s, ijk);
+				current.child[ind].parent = current;
+				current.isLeaf = false;
+				nCells++;
+			}
+			current = current.child[ind];
+		}
 	}
 	
 	//  Read input file and count for each leaf how many triangles may be stored
@@ -257,7 +311,7 @@ public class RawOEMM
 	 *      `-------'    `-------'
 	 *          i          
 	 */
-	public static final int indexSubOctree(int [] ijk, int size)
+	public static final int indexSubOctree(int size, int [] ijk)
 	{
 		int ret = 0;
 		if (size == 0)
@@ -280,10 +334,11 @@ public class RawOEMM
 			l++;
 			s >>= 1;
 			assert s > 0;
-			int ind = indexSubOctree(ijk, s);
+			int ind = indexSubOctree(s, ijk);
 			if (null == current.child[ind])
 			{
-				current.child[ind] = new RawOEMMCell(l);
+				current.child[ind] = new RawOEMMCell(s, ijk);
+				current.child[ind].parent = current;
 				current.isLeaf = false;
 				nCells++;
 			}
@@ -304,7 +359,7 @@ public class RawOEMM
 			assert s > 0;
 			if (current.isLeaf)
 				return current;
-			int ind = indexSubOctree(ijk, s);
+			int ind = indexSubOctree(s, ijk);
 			current = current.child[ind];
 			if (null == current)
 				throw new RuntimeException("Element not found... Aborting");
@@ -332,7 +387,7 @@ public class RawOEMM
 		proc.init();
 		while (true)
 		{
-			int res = proc.preorder(octreeStack[l], s, i0, j0, k0);
+			int res = proc.preorder(octreeStack[l]);
 			if (res == RawOEMMProcedure.ABORT)
 				return false;
 			if (!octreeStack[l].isLeaf && (res == RawOEMMProcedure.OK || res == RawOEMMProcedure.SKIPWALK))
@@ -385,7 +440,7 @@ public class RawOEMM
 						s <<= 1;
 						l--;
 						logger.debug("Found POSTORDER: "+s+" "+i0+" "+j0+" "+k0);
-						res = proc.postorder(octreeStack[l], s, i0, j0, k0);
+						res = proc.postorder(octreeStack[l]);
 						logger.debug("  Res; "+res);
 					}
 					else
@@ -501,7 +556,7 @@ public class RawOEMM
 	
 	private final class SumTrianglesProcedure extends RawOEMMProcedure
 	{
-		public final int action(RawOEMMCell current, int s, int i0, int j0, int k0, int visit)
+		public final int action(RawOEMMCell current, int visit)
 		{
 			if (visit != POSTORDER)
 				return SKIPWALK;
@@ -518,7 +573,7 @@ public class RawOEMM
 	}
 	private final class ClearTrianglesProcedure extends RawOEMMProcedure
 	{
-		public final int action(RawOEMMCell current, int s, int i0, int j0, int k0, int visit)
+		public final int action(RawOEMMCell current, int visit)
 		{
 			if (visit != PREORDER)
 				return SKIPWALK;
@@ -534,15 +589,15 @@ public class RawOEMM
 		public AggregateProcedure(int m, int d)
 		{
 			max_triangles = m;
-			delta = d;
+			delta = 1 << d;
 		}
-		public final int action(RawOEMMCell current, int s, int i0, int j0, int k0, int visit)
+		public final int action(RawOEMMCell current, int visit)
 		{
 			if (visit != PREORDER)
 				return SKIPWALK;
-			if (current.tn > max_triangles || current.level + delta < nr_levels)
+			if (current.tn > max_triangles || current.size > delta * minCellSize)
 				return OK;
-			logger.debug("Aggregate node "+s+" "+i0+" "+j0+" "+k0+"   NrT="+current.tn);
+			logger.debug("Aggregate node "+current+"   NrT="+current.tn);
 			for (int i = 0; i < 8; i++)
 				current.child[i] = null;
 			current.isLeaf = true;
@@ -555,7 +610,7 @@ public class RawOEMM
 	private final class ComputeOffsetprocedure extends RawOEMMProcedure
 	{
 		private long offset = 0L;
-		public final int action(RawOEMMCell current, int s, int i0, int j0, int k0, int visit)
+		public final int action(RawOEMMCell current, int visit)
 		{
 			if (visit != LEAF)
 				return SKIPWALK;
@@ -584,10 +639,11 @@ public class RawOEMM
 		{
 			channel = fc;
 		}
-		public final int action(RawOEMMCell current, int s, int i0, int j0, int k0, int visit)
+		public final int action(RawOEMMCell current, int visit)
 		{
 			if (visit != LEAF)
 				return SKIPWALK;
+			// The number of triangles is the last item of block header
 			long offset = current.offset - 36L * (long) current.tn - 8L;
 			buf.putLong(0, current.tn);
 			buf.rewind();
@@ -618,10 +674,14 @@ public class RawOEMM
 			{
 				iBlock++;
 				long blockSize = bufIn.readLong();
+				int size = bufIn.readInt();
+				int i0 = bufIn.readInt();
+				int j0 = bufIn.readInt();
+				int k0 = bufIn.readInt();
 				long nr = bufIn.readLong();
 				logger.debug("block "+iBlock+": triangles="+nr+"  block size= "+blockSize);
 				bufIn.skipBytes((int) blockSize);
-				pos += 16L + blockSize;
+				pos += RawOEMMCell.INTERMEDIATE_HEADER_SIZE + blockSize;
 				total += (long) nr;
 			}
 			logger.debug("Total number of triangles: "+total);
@@ -637,6 +697,42 @@ public class RawOEMM
 		}
 	}
 	
+	public static RawOEMM loadIntermediate(String file)
+	{
+		RawOEMM ret = new RawOEMM();
+		try
+		{
+			RandomAccessFile raf = new RandomAccessFile(file, "r");
+			FileInputStream fs = new FileInputStream(file);
+			DataInputStream bufIn = new DataInputStream(new BufferedInputStream(fs));
+			long len = fs.getChannel().size();
+			long pos = 0L;
+			int [] ijk = new int[3];
+			while (pos < len)
+			{
+				long blockSize = bufIn.readLong();
+				int size = bufIn.readInt();
+				ijk[0] = bufIn.readInt();
+				ijk[1] = bufIn.readInt();
+				ijk[2] = bufIn.readInt();
+				long nr = bufIn.readLong();
+				bufIn.skipBytes((int) blockSize);
+				pos += RawOEMMCell.INTERMEDIATE_HEADER_SIZE + blockSize;
+				ret.buildCell(size, ijk);
+			}
+			bufIn.close();
+		}
+		catch (FileNotFoundException ex)
+		{
+			logger.error("File "+file+" not found");
+		}
+		catch (IOException ex)
+		{
+			logger.error("I/O error when reading file "+file);
+		}
+		return ret;
+	}
+	
 	private final class CoordProcedure extends RawOEMMProcedure
 	{
 		public final double [] coord;
@@ -647,17 +743,17 @@ public class RawOEMM
 			onlyLeaves = b;
 			coord = new double[72*n];
 		}
-		public final int action(RawOEMMCell current, int s, int i0, int j0, int k0, int visit)
+		public final int action(RawOEMMCell current, int visit)
 		{
 			if (visit != PREORDER && visit != LEAF)
 				return SKIPWALK;
 			if (onlyLeaves && !current.isLeaf)
 				return OK;
-			int [] ii = { i0, j0, k0 };
+			int [] ii = { current.i0, current.j0, current.k0 };
 			double [] p = new double[3];
 			double [] p2 = new double[3];
 			int2double(ii, p);
-			ii[0] += s;
+			ii[0] += current.size;
 			int2double(ii, p2);
 			double ds = p2[0] - p[0];
 			double offset = 0.0;
