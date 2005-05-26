@@ -23,8 +23,14 @@ package org.jcae.mesh.oemm;
 import java.io.DataInputStream;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.RandomAccessFile;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.EOFException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import org.apache.log4j.Logger;
 
 import javax.media.j3d.Appearance;
@@ -46,7 +52,7 @@ public class RawOEMM
 {
 	private static Logger logger=Logger.getLogger(RawOEMM.class);	
 	
-	public static final int MAXLEVEL = 31;
+	public static final int MAXLEVEL = 30;
 	private RawOEMMCell root;
 	private int nCells = 1;
 	private String rawFile;
@@ -59,17 +65,46 @@ public class RawOEMM
 		//  Current level
 		private int level;
 		//  Number of triangles
-		private int tn = 0;
+		public int tn = 0;
 		//  Global offest
-		private int offset = 0;
+		private long offset = 0L;
 		//  Child list
 		private RawOEMMCell[] child = new RawOEMMCell[8];
 		//  Is this node a leaf?
 		private boolean isLeaf = true;
+		public final static int INTERMEDIATE_HEADER_SIZE = 16;
 		
 		public RawOEMMCell(int l)
 		{
 			level = l;
+		}
+		public void add(FileChannel fc, int [] ijk)
+			throws java.io.IOException
+		{
+			assert offset <= fc.size();
+			if (offset <= 0L)
+			{
+				offset = -offset;
+				ByteBuffer buf2 = ByteBuffer.allocate(INTERMEDIATE_HEADER_SIZE);
+				long blockSize = 36L * (long) tn;
+				buf2.putLong(blockSize);
+				//  Exact number of triangles
+				buf2.putLong(0L);
+				buf2.rewind();
+				fc.position(offset);
+				fc.write(buf2);
+				fc.force(false);
+				offset += (long) INTERMEDIATE_HEADER_SIZE;
+				//  The number of triangles really added is stored in tn
+				tn = 0;
+			}
+			ByteBuffer buf = ByteBuffer.allocate(36);
+			for (int i = 0; i < 9; i++)
+				buf.putInt(ijk[i]);
+			buf.rewind();
+			fc.write(buf, offset);
+			offset += 36L;
+			tn++;
 		}
 	}
 	
@@ -160,14 +195,16 @@ public class RawOEMM
 	//  within this leaf.
 	public void countTriangles()
 	{
-		int tcount = 0;
+		long tcount = 0;
 		try
 		{
 			int [] ijk = new int[3];
 			double [] xyz = new double[3];
 			RawOEMMCell [] cells = new RawOEMMCell[3];
-			DataInputStream coordsIn = new DataInputStream(new BufferedInputStream(new FileInputStream(rawFile)));
-			while (true)
+			FileInputStream fs = new FileInputStream(rawFile);
+			DataInputStream coordsIn = new DataInputStream(new BufferedInputStream(fs));
+			long size = fs.getChannel().size();
+			for(long nr = 0L; nr < size; nr += 72L)
 			{
 				for (int i = 0; i < 3; i++)
 				{
@@ -184,6 +221,7 @@ public class RawOEMM
 					cells[2].tn++;
 				tcount++;
 			}
+			coordsIn.close();
 		}
 		catch (FileNotFoundException ex)
 		{
@@ -191,6 +229,7 @@ public class RawOEMM
 		}
 		catch (IOException ex)
 		{
+			logger.error("I/O error when reading file "+rawFile);
 		}
 		logger.info("Number of triangles: "+tcount);
 		logger.info("Number of octrees: "+nCells);
@@ -249,6 +288,26 @@ public class RawOEMM
 				nCells++;
 			}
 			current = current.child[ind];
+		}
+		return current;
+	}
+	
+	public final RawOEMMCell findCell(int [] ijk)
+	{
+		RawOEMMCell current = root;
+		int s = gridSize;
+		int l = 0;
+		while (l < nr_levels)
+		{
+			l++;
+			s >>= 1;
+			assert s > 0;
+			if (current.isLeaf)
+				return current;
+			int ind = indexSubOctree(ijk, s);
+			current = current.child[ind];
+			if (null == current)
+				throw new RuntimeException("Element not found... Aborting");
 		}
 		return current;
 	}
@@ -350,6 +409,8 @@ public class RawOEMM
 	
 	public void aggregate(int max, int delta)
 	{
+		// Disabled for now
+		if (true) return;
 		SumTrianglesProcedure proc = new SumTrianglesProcedure();
 		walk(proc);
 		logger.info("Nr triangles: "+root.tn);
@@ -363,11 +424,79 @@ public class RawOEMM
 		proc.printStats();
 	}
 	
-	public void computeOffset()
+	public void dispatch(String file)
 	{
+		//  First compute offset in output file for each octant
 		ComputeOffsetprocedure proc = new ComputeOffsetprocedure();
 		walk(proc);
-		logger.info("Offset: "+proc.offset);
+		
+		//  TODO: Output must be buffered
+		try
+		{
+			int [] ijk = new int[9];
+			double [] xyz = new double[3];
+			RawOEMMCell [] cells = new RawOEMMCell[3];
+			FileInputStream fs = new FileInputStream(rawFile);
+			DataInputStream coordsIn = new DataInputStream(new BufferedInputStream(fs));
+			long size = fs.getChannel().size();
+			RandomAccessFile raf = new RandomAccessFile(file, "rw");
+			FileChannel fc = raf.getChannel();
+			raf.setLength(proc.getOffset());
+			for(long nr = 0L; nr < size; nr += 72L)
+			{
+				for (int i = 0; i < 3; i++)
+				{
+					xyz[0] = coordsIn.readDouble();
+					xyz[1] = coordsIn.readDouble();
+					xyz[2] = coordsIn.readDouble();
+					double2int(xyz, ijk);
+					cells[i] = findCell(ijk);
+					if (i < 2)
+					{
+						for (int j = 0; j < 3; j++)
+							ijk[6-3*i+j] = ijk[j];
+					}
+				}
+				cells[0].add(fc, ijk);
+				if (cells[0] != cells[1])
+					cells[1].add(fc, ijk);
+				if (cells[2] != cells[0] && cells[2] != cells[1])
+					cells[2].add(fc, ijk);
+			}
+			coordsIn.close();
+			//  Adjust block size
+			StoreBlockSizeProcedure sproc = new StoreBlockSizeProcedure(fc);
+			walk(sproc);
+			raf.close();
+		}
+		catch (FileNotFoundException ex)
+		{
+			logger.error("File "+rawFile+" not found");
+		}
+		catch (IOException ex)
+		{
+			logger.error("I/O error when reading file  "+rawFile);
+		}
+	}
+	
+	public BranchGroup bgOctree(boolean onlyLeaves)
+	{
+		BranchGroup bg=new BranchGroup();
+		
+		CoordProcedure proc = new CoordProcedure(onlyLeaves, nCells);
+		walk(proc);
+		QuadArray quad = new QuadArray(24*nCells, QuadArray.COORDINATES);
+		quad.setCapability(QuadArray.ALLOW_FORMAT_READ);
+		quad.setCapability(QuadArray.ALLOW_COUNT_READ);
+		quad.setCapability(QuadArray.ALLOW_COORDINATE_READ);
+		quad.setCoordinates(0, proc.coord);
+		Appearance quadApp = new Appearance();
+		quadApp.setPolygonAttributes(new PolygonAttributes(PolygonAttributes.POLYGON_LINE, PolygonAttributes.CULL_NONE, 0));
+		quadApp.setColoringAttributes(new ColoringAttributes(0,1,0,ColoringAttributes.SHADE_GOURAUD));
+		Shape3D shapeQuad=new Shape3D(quad, quadApp);
+		shapeQuad.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
+		bg.addChild(shapeQuad);
+		return bg;
 	}
 	
 	private final class SumTrianglesProcedure extends RawOEMMProcedure
@@ -421,16 +550,90 @@ public class RawOEMM
 		}
 	}
 	
+	//  By convention, offsets are negative when block headers have not been
+	//  written onto file.
 	private final class ComputeOffsetprocedure extends RawOEMMProcedure
 	{
-		public int offset = 0;
+		private long offset = 0L;
 		public final int action(RawOEMMCell current, int s, int i0, int j0, int k0, int visit)
 		{
 			if (visit != LEAF)
 				return SKIPWALK;
-			current.offset = offset;
-			offset += current.tn;
+			current.offset = -offset;
+			offset += 36L * (long) current.tn + (long) RawOEMMCell.INTERMEDIATE_HEADER_SIZE;
 			return OK;
+		}
+		public long getOffset()
+		{
+			return offset;
+		}
+		public void init()
+		{
+			super.init();
+			offset = 0L;
+		}
+	}
+	
+	//  By convention, offsets are negative when block headers have not been
+	//  written onto file.
+	private final class StoreBlockSizeProcedure extends RawOEMMProcedure
+	{
+		private FileChannel channel;
+		private ByteBuffer buf = ByteBuffer.allocate(8);
+		public StoreBlockSizeProcedure(FileChannel fc)
+		{
+			channel = fc;
+		}
+		public final int action(RawOEMMCell current, int s, int i0, int j0, int k0, int visit)
+		{
+			if (visit != LEAF)
+				return SKIPWALK;
+			long offset = current.offset - 36L * (long) current.tn - 8L;
+			buf.putLong(0, current.tn);
+			buf.rewind();
+			try
+			{
+				channel.write(buf, offset);
+			}
+			catch (IOException ex)
+			{
+				logger.error("I/O error when writing intermediate raw OEMM");
+			}
+			return OK;
+		}
+	}
+	
+	public void showIntermediateStorage(String file)
+	{
+		try
+		{
+			RandomAccessFile raf = new RandomAccessFile(file, "r");
+			FileInputStream fs = new FileInputStream(file);
+			DataInputStream bufIn = new DataInputStream(new BufferedInputStream(fs));
+			long len = fs.getChannel().size();
+			long pos = 0L;
+			int iBlock = 0;
+			long total = 0L;
+			while (pos < len)
+			{
+				iBlock++;
+				long blockSize = bufIn.readLong();
+				long nr = bufIn.readLong();
+				logger.debug("block "+iBlock+": triangles="+nr+"  block size= "+blockSize);
+				bufIn.skipBytes((int) blockSize);
+				pos += 16L + blockSize;
+				total += (long) nr;
+			}
+			logger.debug("Total number of triangles: "+total);
+			bufIn.close();
+		}
+		catch (FileNotFoundException ex)
+		{
+			logger.error("File "+file+" not found");
+		}
+		catch (IOException ex)
+		{
+			logger.error("I/O error when reading file "+file);
 		}
 	}
 	
@@ -515,26 +718,6 @@ public class RawOEMM
 			}
 			return OK;
 		}
-	}
-	
-	public BranchGroup bgOctree(boolean onlyLeaves)
-	{
-		BranchGroup bg=new BranchGroup();
-		
-		CoordProcedure proc = new CoordProcedure(onlyLeaves, nCells);
-		walk(proc);
-		QuadArray quad = new QuadArray(24*nCells, QuadArray.COORDINATES);
-		quad.setCapability(QuadArray.ALLOW_FORMAT_READ);
-		quad.setCapability(QuadArray.ALLOW_COUNT_READ);
-		quad.setCapability(QuadArray.ALLOW_COORDINATE_READ);
-		quad.setCoordinates(0, proc.coord);
-		Appearance quadApp = new Appearance();
-		quadApp.setPolygonAttributes(new PolygonAttributes(PolygonAttributes.POLYGON_LINE, PolygonAttributes.CULL_NONE, 0));
-		quadApp.setColoringAttributes(new ColoringAttributes(0,1,0,ColoringAttributes.SHADE_GOURAUD));
-		Shape3D shapeQuad=new Shape3D(quad, quadApp);
-		shapeQuad.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-		bg.addChild(shapeQuad);
-		return bg;
 	}
 	
 }
