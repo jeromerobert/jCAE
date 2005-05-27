@@ -21,21 +21,11 @@
 
 package org.jcae.mesh;
 
-import org.jcae.mesh.oemm.RawOEMM;
+import org.jcae.mesh.oemm.raw.*;
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADShapeBuilder;
 import org.apache.log4j.Logger;
 import org.jcae.mesh.java3d.Viewer;
-
-import javax.media.j3d.Appearance;
-import javax.media.j3d.QuadArray;
-import javax.media.j3d.LineArray;
-import javax.media.j3d.PointArray;
-import javax.media.j3d.Shape3D;
-import javax.media.j3d.BranchGroup;
-import javax.media.j3d.PolygonAttributes;
-import javax.media.j3d.ColoringAttributes;
-import javax.media.j3d.PointAttributes;
 
 /**
  * This class illustrates how to perform quality checks.
@@ -54,11 +44,11 @@ public class MeshOEMM
 		for (int i = 0; i < 3; i++)
 			umax[i] = bbox[i+3];
 		final RawOEMM oemm = new RawOEMM("rawMesh", lmax, bbox, umax);
-		oemm.countTriangles();
+		Storage.countTriangles(oemm);
 		oemm.aggregate(triangles_max, 3);
-		oemm.dispatch("dispatched");
+		Storage.dispatch(oemm, "dispatched");
 		final Viewer view=new Viewer();
-		view.addBranchGroup(RawOEMM.loadIntermediate("dispatched").bgOctree(onlyLeaves));
+		view.addBranchGroup(Storage.loadIntermediate("dispatched").bgOctree(onlyLeaves));
 		//view.addBranchGroup(oemm.bgOctree(onlyLeaves));
 		view.zoomTo(); 
 		view.show();
