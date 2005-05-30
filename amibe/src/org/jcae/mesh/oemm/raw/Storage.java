@@ -36,7 +36,8 @@ import org.apache.log4j.Logger;
 public class Storage
 {
 	private static Logger logger=Logger.getLogger(Storage.class);	
-	private final static int INTERMEDIATE_HEADER_SIZE = 2*8 + 4*4;
+	private final static int INTERMEDIATE_HEADER_SIZE = 8 + 5*4;
+	private final static long INTERMEDIATE_HEADER_OFFSET_NT = 4L;
 	
 	/**
 	 * Build a raw OEMM and count the number of triangles which have to be assigned
@@ -56,6 +57,7 @@ public class Storage
 			logger.error("The RawOEMM must first be initialized by calling RawOEMM(String file, int lmax, double [] umin, double [] umax)");
 			return;
 		}
+		logger.debug("Reading "+tree.getFileName()+" and count triangles");
 		long tcount = 0;
 		try
 		{
@@ -105,7 +107,7 @@ public class Storage
 	 * written onto disk as a linear octree.  Each block is composed of a header containing:
 	 * <ol>
 	 * <li>Block size.</li>
-	 * <li>Cwll size (in integer coordinates).</li>
+	 * <li>Cell size (in integer coordinates).</li>
 	 * <li>Integer coordinates of its lower-left corner.</li>
 	 * <li>Exact number of triangles stored in this leaf.</li>
 	 * </ol>
@@ -121,10 +123,12 @@ public class Storage
 			logger.error("The RawOEMM must first be initialized by calling countTriangles()");
 			return;
 		}
+		logger.debug("Raw OEMM: computing global offset for raw file");
 		//  First compute offset in output file for each octant
 		ComputeOffset proc = new ComputeOffset();
 		tree.walk(proc);
 		
+		logger.debug("Raw OEMM: dispatch triangles into raw OEMM");
 		//  TODO: Output must be buffered
 		try
 		{
@@ -182,6 +186,7 @@ public class Storage
 	 */
 	public static RawOEMM loadIntermediate(String file)
 	{
+		logger.debug("Loading intermediate raw OEMM from "+file);
 		RawOEMM ret = new RawOEMM();
 		try
 		{
@@ -198,7 +203,7 @@ public class Storage
 				ijk[0] = bufIn.readInt();
 				ijk[1] = bufIn.readInt();
 				ijk[2] = bufIn.readInt();
-				long nr = bufIn.readLong();
+				int nr = bufIn.readInt();
 				bufIn.skipBytes((int) blockSize);
 				pos += INTERMEDIATE_HEADER_SIZE + blockSize;
 				RawOEMM.search(ret, size, ijk, true);
@@ -214,6 +219,30 @@ public class Storage
 			logger.error("I/O error when reading file "+file);
 		}
 		ret.status = RawOEMM.OEMM_INITIALIZED;
+		return ret;
+	}
+	
+	public static RawNode readBlockHeader(DataInputStream bufIn)
+	{
+		RawNode ret = null;
+		try
+		{
+			int [] ijk = new int[3];
+			long blockSize = bufIn.readLong();
+			int size = bufIn.readInt();
+			ijk[0] = bufIn.readInt();
+			ijk[1] = bufIn.readInt();
+			ijk[2] = bufIn.readInt();
+			ret = new RawNode(size, ijk);
+			ret.tn = bufIn.readInt();
+			//  This is ugly!  The number of trailing bytes is stored
+			//  in this member which is now unused.
+			ret.offset = blockSize - 36L * (long) ret.tn;
+		}
+		catch (IOException ex)
+		{
+			logger.error("I/O error when reading file "+bufIn);
+		}
 		return ret;
 	}
 	
@@ -241,7 +270,7 @@ public class Storage
 				int i0 = bufIn.readInt();
 				int j0 = bufIn.readInt();
 				int k0 = bufIn.readInt();
-				long nr = bufIn.readLong();
+				int nr = bufIn.readInt();
 				logger.debug("block "+iBlock+": triangles="+nr+"  block size= "+blockSize);
 				bufIn.skipBytes((int) blockSize);
 				pos += INTERMEDIATE_HEADER_SIZE + blockSize;
@@ -276,7 +305,7 @@ public class Storage
 			buf2.putInt(current.k0);
 			//  Exact number of triangles, this must be the
 			//  last item of block header
-			buf2.putLong(0L);
+			buf2.putInt(0);
 			buf2.rewind();
 			fc.position(current.offset);
 			fc.write(buf2);
@@ -331,8 +360,8 @@ public class Storage
 			if (visit != LEAF)
 				return SKIPWALK;
 			// The number of triangles is the last item of block header
-			long offset = current.offset - 36L * (long) current.tn - 8L;
-			buf.putLong(0, current.tn);
+			long offset = current.offset - 36L * (long) current.tn - INTERMEDIATE_HEADER_OFFSET_NT;
+			buf.putInt(0, current.tn);
 			buf.rewind();
 			try
 			{
