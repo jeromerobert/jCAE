@@ -44,11 +44,11 @@ public class MeshOEMM
 		for (int i = 0; i < 3; i++)
 			umax[i] = bbox[i+3];
 		final RawOEMM oemm = new RawOEMM("rawMesh", lmax, bbox, umax);
-		Storage.countTriangles(oemm);
+		RawStorage.countTriangles(oemm);
 		oemm.aggregate(triangles_max, 3);
-		Storage.dispatch(oemm, "dispatched");
+		RawStorage.dispatch(oemm, "dispatched");
 		final Viewer view=new Viewer();
-		view.addBranchGroup(Storage.loadIntermediate("dispatched").bgOctree(onlyLeaves));
+		view.addBranchGroup(RawStorage.loadIntermediate("dispatched").bgOctree(onlyLeaves));
 		//view.addBranchGroup(oemm.bgOctree(onlyLeaves));
 		view.zoomTo(); 
 		view.show();

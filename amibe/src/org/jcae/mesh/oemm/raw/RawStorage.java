@@ -33,9 +33,9 @@ import org.apache.log4j.Logger;
 /**
  * This class implements out-of-core storage of raw OEMM structures.
  */
-public class Storage
+public class RawStorage
 {
-	private static Logger logger=Logger.getLogger(Storage.class);	
+	private static Logger logger=Logger.getLogger(RawStorage.class);	
 	private final static int INTERMEDIATE_HEADER_SIZE = 8 + 5*4;
 	private final static long INTERMEDIATE_HEADER_OFFSET_NT = 4L;
 	
@@ -251,7 +251,7 @@ public class Storage
 	 *
 	 * @param  file  file containing the intermediate OEMM.
 	 */
-	public static void showIntermediateStorage(String file)
+	public static void showIntermediateRawStorage(String file)
 	{
 		try
 		{
