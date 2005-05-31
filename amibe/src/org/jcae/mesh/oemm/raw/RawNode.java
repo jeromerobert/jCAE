@@ -79,6 +79,6 @@ public class RawNode
 	
 	public String toString()
 	{
-		return "" + size+" "+i0+" "+j0+" "+k0;
+		return "" +Integer.toHexString(size)+" "+Integer.toHexString(i0)+" "+Integer.toHexString(j0)+" "+Integer.toHexString(k0);
 	}
 }
