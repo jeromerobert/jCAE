@@ -22,7 +22,7 @@ package org.jcae.mesh.oemm.indexed;
 
 import org.jcae.mesh.oemm.raw.RawNode;
 import org.jcae.mesh.oemm.raw.RawStorage;
-import org.jcae.mesh.oemm.BTree;
+import org.jcae.mesh.oemm.BinaryTree;
 import java.io.DataInputStream;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -63,8 +63,8 @@ public class IndexedStorage
 	{
 		RawNode rawNode = RawStorage.readBlockHeader(bufIn);
 		logger.debug("Node cell: "+rawNode);
-		BTree inner = new BTree();
-		BTree outer = new BTree();
+		BinaryTree inner = new BinaryTree();
+		BinaryTree outer = new BinaryTree();
 		int nrExternal = 0;
 		int nrDuplicates = 0;
 		long index = 0L;

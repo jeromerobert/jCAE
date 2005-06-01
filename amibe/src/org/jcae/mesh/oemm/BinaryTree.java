@@ -25,20 +25,20 @@ import org.apache.log4j.Logger;
 /**
  * Implementation of B-Trees to store locational codes.
  */
-public class BTree
+public class BinaryTree
 {
-	private static Logger logger=Logger.getLogger(BTree.class);	
+	private static Logger logger=Logger.getLogger(BinaryTree.class);	
 	//  A (x,y,z) triplet is stored in an int array of size nrInt.
 	private static final int nrInt = 3;
 	
-	private BTreeNode root;
+	private BinaryTreeNode root;
 	
-	private class BTreeNode
+	private class BinaryTreeNode
 	{
 		private int [] key = new int[nrInt];
 		private long value;
-		private BTreeNode left, right;
-		public BTreeNode(int [] ijk, long v)
+		private BinaryTreeNode left, right;
+		public BinaryTreeNode(int [] ijk, long v)
 		{
 			mortonCode(ijk, key);
 			value = v;
@@ -96,7 +96,7 @@ public class BTree
 	 */
 	public final boolean insert(int [] ijk, long value)
 	{
-		BTreeNode node = new BTreeNode(ijk, value);
+		BinaryTreeNode node = new BinaryTreeNode(ijk, value);
 		if (logger.isDebugEnabled())
 			logger.debug("insertion of key: "+keyString(node.key));
 		if (root == null)
@@ -104,8 +104,8 @@ public class BTree
 			root = node;
 			return true;
 		}
-		BTreeNode parent = null;
-		BTreeNode current = root;
+		BinaryTreeNode parent = null;
+		BinaryTreeNode current = root;
 		boolean left = false;
 		while (current != null)
 		{
@@ -146,7 +146,7 @@ public class BTree
 	{
 		if (root == null)
 			return -1;
-		BTreeNode current = root;
+		BinaryTreeNode current = root;
 		while (current != null)
 		{
 			int result = compare(current.key, key);
