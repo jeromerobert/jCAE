@@ -235,9 +235,9 @@ public class RawStorage
 			ijk[2] = bufIn.readInt();
 			ret = new RawNode(size, ijk);
 			ret.tn = bufIn.readInt();
-			//  This is ugly!  The number of trailing bytes is stored
+			//  The number of trailing bytes is stored
 			//  in this member which is now unused.
-			ret.offset = blockSize - 36L * (long) ret.tn;
+			ret.counter = blockSize - 36L * (long) ret.tn;
 		}
 		catch (IOException ex)
 		{
@@ -292,10 +292,10 @@ public class RawStorage
 	private static void addToCell(FileChannel fc, RawNode current, int [] ijk)
 		throws java.io.IOException
 	{
-		assert current.offset <= fc.size();
-		if (current.offset <= 0L)
+		assert current.counter <= fc.size();
+		if (current.counter <= 0L)
 		{
-			current.offset = -current.offset;
+			current.counter = -current.counter;
 			ByteBuffer buf2 = ByteBuffer.allocate(INTERMEDIATE_HEADER_SIZE);
 			long blockSize = 36L * (long) current.tn;
 			buf2.putLong(blockSize);
@@ -307,10 +307,10 @@ public class RawStorage
 			//  last item of block header
 			buf2.putInt(0);
 			buf2.rewind();
-			fc.position(current.offset);
+			fc.position(current.counter);
 			fc.write(buf2);
 			fc.force(false);
-			current.offset += (long) INTERMEDIATE_HEADER_SIZE;
+			current.counter += (long) INTERMEDIATE_HEADER_SIZE;
 			//  The number of triangles really added is stored in tn
 			current.tn = 0;
 		}
@@ -318,8 +318,8 @@ public class RawStorage
 		for (int i = 0; i < 9; i++)
 			buf.putInt(ijk[i]);
 		buf.rewind();
-		fc.write(buf, current.offset);
-		current.offset += 36L;
+		fc.write(buf, current.counter);
+		current.counter += 36L;
 		current.tn++;
 	}
 	
@@ -330,7 +330,7 @@ public class RawStorage
 		{
 			if (visit != LEAF)
 				return SKIPWALK;
-			current.offset = -offset;
+			current.counter = -offset;
 			offset += 36L * (long) current.tn + (long) INTERMEDIATE_HEADER_SIZE;
 			return OK;
 		}
@@ -360,7 +360,7 @@ public class RawStorage
 			if (visit != LEAF)
 				return SKIPWALK;
 			// The number of triangles is the last item of block header
-			long offset = current.offset - 36L * (long) current.tn - INTERMEDIATE_HEADER_OFFSET_NT;
+			long offset = current.counter - 36L * (long) current.tn - INTERMEDIATE_HEADER_OFFSET_NT;
 			buf.putInt(0, current.tn);
 			buf.rewind();
 			try

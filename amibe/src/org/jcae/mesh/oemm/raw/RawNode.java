@@ -20,20 +20,20 @@
 
 package org.jcae.mesh.oemm.raw;
 
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import org.apache.log4j.Logger;
 
 /**
  * This class represents octants of a raw OEMM.
  *
- * A raw OEMM is a pointer-based octree, but cells do not contain any data.  Only
- * its spatial structure is considered, and it is assumed that the whole tree can
- * reside in memory.
+ * A raw OEMM is a pointer-based octree, but cells do not contain any data.
+ * Only its spatial structure is considered, and it is assumed that the whole
+ * tree can reside in memory.
  */
 public class RawNode
 {
 	//  Integer coordinates of the lower-left corner
+	//  These coordiantes are only used in RawOEMM.CoordProcedure
+	//  and thus only useful for debugging purposes.
 	public int i0, j0, k0;
 	//  Cell size (= 1 << (MAXLEVEL - level))
 	public int size;
@@ -41,12 +41,25 @@ public class RawNode
 	public int tn = 0;
 	//  Child list
 	public RawNode[] child = new RawNode[8];
+	//  Neighbor list
+	//      0-5 : face neighbors
+	//     6-17 : edge neighbors
+	//    18-25 : vertex neighbors
+	//  This arrangement is made so that shared data are first searched
+	//  into face neighbors, which should normally contain most shared
+	//  data, then edge neighbors and vertex neighbors.
+	//  TODO: leaves need neighbor list whereas non-leaves
+	//        need child list, so the latter could be stored
+	//        within the latter to save memory space
+	public RawNode[] neighbor = new RawNode[26];
 	//  Parent node
+	//  TODO: The parent pointer can be replaced by a stack
+	//        if more room is needed.
 	public RawNode parent;
 	//  Is this node a leaf?
 	public boolean isLeaf = true;
-	//  Global offest on file
-	public long offset = 0L;
+	//  Private counter
+	public long counter = 0L;
 	
 	/**
 	 * Create a new leaf.
