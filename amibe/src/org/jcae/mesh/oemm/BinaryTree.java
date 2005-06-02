@@ -27,9 +27,10 @@ import org.apache.log4j.Logger;
  */
 public class BinaryTree
 {
-	private static Logger logger=Logger.getLogger(BinaryTree.class);	
+	private static Logger logger = Logger.getLogger(BinaryTree.class);	
 	//  A (x,y,z) triplet is stored in an int array of size nrInt.
-	private static final int nrInt = 3;
+	//  It is 4 if coordinates are int, 8 if long.
+	public static final int nrInt = 4;
 	
 	private BinaryTreeNode root;
 	
@@ -64,24 +65,40 @@ public class BinaryTree
 	 * etc.  This has many advantages, e.g. if an octant is split,
 	 * nodes can be dispatched very efficiently.
 	 */
-	private static void mortonCode(int [] ijk, int [] hash)
+	public static void mortonCode(int [] ijk, int [] hash)
 	{
 		int i0 = ijk[0];
 		int j0 = ijk[1];
 		int k0 = ijk[2];
-		for (int ind = 0; ind < nrInt; ind++)
+		for (int ind = nrInt - 1; ind >= 0; ind--)
 		{
-			hash[ind] = (dilate4(k0 & 0xff) << 2) | (dilate4(j0 & 0xff) << 1) | dilate4(i0 & 0xff);
+			hash[ind] = (dilate4(k0) << 2) | (dilate4(j0) << 1) | dilate4(i0);
 			i0 >>= 8;
 			j0 >>= 8;
 			k0 >>= 8;
+		}
+	}
+	//  Inverse operation
+	public static void mortonCodeInv(int [] hash, int [] ijk)
+	{
+		ijk[0] = 0;
+		ijk[1] = 0;
+		ijk[2] = 0;
+		for (int ind = 0; ind < nrInt; ind++)
+		{
+			ijk[0] <<= 8;
+			ijk[1] <<= 8;
+			ijk[2] <<= 8;
+			ijk[0] |= contract4(hash[ind]);
+			ijk[1] |= contract4(hash[ind] >> 1);
+			ijk[2] |= contract4(hash[ind] >> 2);
 		}
 	}
 	
 	private final static String keyString(int [] key)
 	{
 		String ret = "";
-		for (int i = nrInt - 1; i >= 0; i--)
+		for (int i = 0; i < nrInt; i++)
 			ret += " 0x"+Integer.toHexString(key[i]);
 		return ret;
 	}
@@ -106,7 +123,7 @@ public class BinaryTree
 		}
 		BinaryTreeNode parent = null;
 		BinaryTreeNode current = root;
-		boolean left = false;
+		boolean isLeft = false;
 		while (current != null)
 		{
 			int result = compare(current.key, node.key);
@@ -116,20 +133,20 @@ public class BinaryTree
 			{
 				parent = current;
 				current = current.left;
-				left = true;
+				isLeft = true;
 			}
 			else if (result < 0)
 			{
 				parent = current;
 				current = current.right;
-				left = false;
+				isLeft = false;
 			}
 			else
 				//  This entry is already inserted
 				return false;
 		}
 		// TODO: balance tree
-		if (left)
+		if (isLeft)
 			parent.left = node;
 		else
 			parent.right = node;
@@ -163,7 +180,7 @@ public class BinaryTree
 	private static final int compare(int [] key1, int [] key2)
 	{
 		int ret = 0;
-		for (int i = nrInt - 1; i >= 0; i--)
+		for (int i = 0; i < nrInt; i++)
 		{
 			ret = key1[i] - key2[i];
 			if (ret != 0)
@@ -175,6 +192,7 @@ public class BinaryTree
 	private final static int dilate4 (int b)
 	{
 		//  byte b = b7b6b5b4b3b2b1b0
+		b &= 0xff;
 		//  u = 00000000 0000b7b6b5b4 00000000 0000b3b2b1b0
 		int u = ((b & 0x000000f0) << 12) | (b & 0x0000000f);
 		//  v = 000000b7b6 000000b5b4 000000b3b2 000000b1b0
@@ -182,6 +200,20 @@ public class BinaryTree
 		//  w = 000b7000b6 000b5000b4 000b3000b2 000b1000b0
 		int w = ((v & 0x02020202) << 3) | (v & 0x01010101);
 		return w;
+	}
+	private final static int contract4 (int w)
+	{
+		//  Clear unwanted bits
+		//  w = 000b7000b6 000b5000b4 000b3000b2 000b1000b0
+		w &= 0x11111111;
+		//  v = 000000b7b6 000000b5b4 000000b3b2 000000b1b0
+		int v = ((w & 0x10101010) >> 3) | (w & 0x01010101);
+		//  u = 00000000 0000b7b6b5b4 00000000 0000b3b2b1b0
+		int u = ((v & 0x03000300) >> 6) | (v & 0x00030003);
+		//  b = b7b6b5b4b3b2b1b0
+		int b = ((u & 0x000f0000) >> 12) | (u & 0x0000000f);
+		assert b >= 0 && b <= 0xff;
+		return b;
 	}
 	
 }
