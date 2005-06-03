@@ -21,7 +21,9 @@
 
 package org.jcae.mesh;
 
+import org.jcae.mesh.oemm.OEMMViewer;
 import org.jcae.mesh.oemm.raw.*;
+import org.jcae.mesh.oemm.indexed.*;
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADShapeBuilder;
 import org.apache.log4j.Logger;
@@ -45,13 +47,16 @@ public class MeshOEMM
 			umax[i] = bbox[i+3];
 		final RawOEMM oemm = new RawOEMM("rawMesh", lmax, bbox, umax);
 		RawStorage.countTriangles(oemm);
-		oemm.aggregate(triangles_max, 3);
+		oemm.aggregate(triangles_max);
 		RawStorage.dispatch(oemm, "dispatched");
+		//IndexedStorage.indexInternalVertices("dispatched", "indexed");
 		final Viewer view=new Viewer();
-		view.addBranchGroup(RawStorage.loadIntermediate("dispatched").bgOctree(onlyLeaves));
-		//view.addBranchGroup(oemm.bgOctree(onlyLeaves));
+		//view.addBranchGroup(RawStorage.loadIntermediate("dispatched").bgOctree(onlyLeaves));
+		view.addBranchGroup(OEMMViewer.bgRawOEMM(oemm, onlyLeaves));
 		view.zoomTo(); 
 		view.show();
+/*
+*/
 	}
 	
 	/**

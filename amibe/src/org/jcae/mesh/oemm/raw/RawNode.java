@@ -41,17 +41,8 @@ public class RawNode
 	public int tn = 0;
 	//  Child list
 	public RawNode[] child = new RawNode[8];
-	//  Neighbor list
-	//      0-5 : face neighbors
-	//     6-17 : edge neighbors
-	//    18-25 : vertex neighbors
-	//  This arrangement is made so that shared data are first searched
-	//  into face neighbors, which should normally contain most shared
-	//  data, then edge neighbors and vertex neighbors.
-	//  TODO: leaves need neighbor list whereas non-leaves
-	//        need child list, so the latter could be stored
-	//        within the latter to save memory space
-	public RawNode[] neighbor = new RawNode[26];
+	//  Linked list of nodes at the same level
+	public RawNode next;
 	//  Parent node
 	//  TODO: The parent pointer can be replaced by a stack
 	//        if more room is needed.
@@ -84,11 +75,11 @@ public class RawNode
 	public RawNode(int s, int [] ijk)
 	{
 		size = s;
-		i0 = ijk[0] & (~(s-1));
-		j0 = ijk[1] & (~(s-1));
-		k0 = ijk[2] & (~(s-1));
+		int mask = ~(s - 1);
+		i0 = ijk[0] & mask;
+		j0 = ijk[1] & mask;
+		k0 = ijk[2] & mask;
 	}
-	
 	
 	public String toString()
 	{

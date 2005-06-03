@@ -30,7 +30,7 @@ public class BinaryTree
 	private static Logger logger = Logger.getLogger(BinaryTree.class);	
 	//  A (x,y,z) triplet is stored in an int array of size nrInt.
 	//  It is 4 if coordinates are int, 8 if long.
-	public static final int nrInt = 4;
+	private static final int nrInt = 4;
 	
 	private BinaryTreeNode root;
 	

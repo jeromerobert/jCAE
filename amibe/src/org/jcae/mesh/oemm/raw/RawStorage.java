@@ -75,7 +75,7 @@ public class RawStorage
 					xyz[1] = coordsIn.readDouble();
 					xyz[2] = coordsIn.readDouble();
 					tree.double2int(xyz, ijk);
-					cells[i] = RawOEMM.search(tree, 0, ijk, true);
+					cells[i] = tree.search(0, ijk, true);
 				}
 				cells[0].tn++;
 				if (cells[1] != cells[0])
@@ -118,7 +118,7 @@ public class RawStorage
 	 */
 	public static final void dispatch(RawOEMM tree, String file)
 	{
-		if (tree.status != RawOEMM.OEMM_INITIALIZED)
+		if (tree.status < RawOEMM.OEMM_INITIALIZED)
 		{
 			logger.error("The RawOEMM must first be initialized by calling countTriangles()");
 			return;
@@ -149,7 +149,7 @@ public class RawStorage
 					xyz[1] = coordsIn.readDouble();
 					xyz[2] = coordsIn.readDouble();
 					tree.double2int(xyz, ijk);
-					cells[i] = RawOEMM.search(tree, 0, ijk, false);
+					cells[i] = tree.search(0, ijk, false);
 					if (i < 2)
 					{
 						for (int j = 0; j < 3; j++)
@@ -206,7 +206,7 @@ public class RawStorage
 				int nr = bufIn.readInt();
 				bufIn.skipBytes((int) blockSize);
 				pos += INTERMEDIATE_HEADER_SIZE + blockSize;
-				RawOEMM.search(ret, size, ijk, true);
+				ret.search(size, ijk, true);
 			}
 			bufIn.close();
 		}

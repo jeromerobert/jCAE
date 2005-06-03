@@ -26,6 +26,9 @@ import org.jcae.mesh.oemm.BinaryTree;
 import java.io.DataInputStream;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
+import java.io.DataOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
@@ -37,29 +40,33 @@ public class IndexedStorage
 	
 	/**
 	 */
-	public static void indexInternalVertices(String file)
+	public static void indexInternalVertices(String inFile, String outFile)
 	{
+		//IndexedOEMM ret = new IndexedOEMM();
 		try
 		{
-			FileInputStream fs = new FileInputStream(file);
-			DataInputStream rawIn = new DataInputStream(new BufferedInputStream(fs));
-			FileChannel fc = fs.getChannel();
+			FileInputStream fis = new FileInputStream(inFile);
+			DataInputStream rawIn = new DataInputStream(new BufferedInputStream(fis));
+			FileChannel fc = fis.getChannel();
+			DataOutputStream indOut = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(outFile)));
 			long size = fc.size();
 			while(fc.position() < size)
-				indexInternalVertices(null, rawIn);
+				indexInternalVertices(null, rawIn, indOut);
 			rawIn.close();
+			indOut.close();
 		}
 		catch (FileNotFoundException ex)
 		{
-			logger.error("File "+file+" not found");
+			logger.error("File "+inFile+" not found");
 		}
 		catch (IOException ex)
 		{
-			logger.error("I/O error when reading file  "+file);
+			logger.error("I/O error when reading inFile  "+inFile);
 		}
+		//return ret;
 	}
 	
-	public static void indexInternalVertices(Object node, DataInputStream bufIn)
+	public static void indexInternalVertices(IndexedOEMM oemm, DataInputStream bufIn, DataOutputStream bufOut)
 	{
 		RawNode rawNode = RawStorage.readBlockHeader(bufIn);
 		logger.debug("Node cell: "+rawNode);

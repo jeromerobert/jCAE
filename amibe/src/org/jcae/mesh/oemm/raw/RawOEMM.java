@@ -20,32 +20,93 @@
 
 package org.jcae.mesh.oemm.raw;
 
+import org.jcae.mesh.oemm.BinaryTree;
 import org.apache.log4j.Logger;
-import javax.media.j3d.Appearance;
-import javax.media.j3d.QuadArray;
-import javax.media.j3d.Shape3D;
-import javax.media.j3d.BranchGroup;
-import javax.media.j3d.PolygonAttributes;
-import javax.media.j3d.ColoringAttributes;
 
 /**
  * This class represents an empty raw OEMM.
  * 
- * A raw OEMM is a pointer-based octree, but cells do not contain any data.  Only
- * its spatial structure is considered, and it is assumed that the whole tree can
- * reside in memory.  This class defines the octree structure and how to traverse it.
+ * A raw OEMM is a pointer-based octree, but cells do not contain any data.
+ * Only its spatial structure is considered, and it is assumed that the whole
+ * tree can reside in memory.  This class defines the octree structure and
+ * how to traverse it.
  */
 public class RawOEMM
 {
-	private static Logger logger=Logger.getLogger(RawOEMM.class);	
+	private static Logger logger = Logger.getLogger(RawOEMM.class);	
 	
 	public static final int MAXLEVEL = 30;
+	
 	public static final int OEMM_DUMMY = 0;
 	public static final int OEMM_CREATED = 1;
 	public static final int OEMM_INITIALIZED = 2;
-	private RawNode root;
+	
+	private static int [] neighborOffset = {
+		//  Face neighbors
+		 1,  0,  0,
+		 0,  1,  0,
+		 0,  0,  1,
+		//     Symmetry
+		-1,  0,  0,
+		 0, -1,  0,
+		 0,  0, -1,
+		//  Edge neighbors
+		 1,  1,  0,
+		 1,  0,  1,
+		 0,  1,  1,
+		 1, -1,  0,
+		 1,  0, -1,
+		 0,  1, -1,
+		//     Symmetry
+		-1, -1,  0,
+		-1,  0, -1,
+		 0, -1, -1,
+		-1,  1,  0,
+		-1,  0,  1,
+		 0, -1,  1,
+		//  Vertex neighbors
+		 1,  1,  1,
+		 1,  1, -1,
+		 1, -1,  1,
+		-1,  1,  1,
+		//     Symmetry
+		-1, -1, -1,
+		-1, -1,  1,
+		-1,  1, -1,
+		 1, -1, -1
+	};
+	//  Initialize other neighbor-finding related arrays
+	private static int [] neighborMask = new int[26];
+	private static int [] neighborValue = new int[26];
+	static {
+		for (int i = 0; i < neighborOffset.length/3; i++)
+		{
+			neighborMask[i] = 0;
+			neighborValue[i] = 0;
+			for (int b = 2; b >= 0; b--)
+			{
+				neighborMask[i] <<= 1;
+				neighborValue[i] <<= 1;
+				if (neighborOffset[3*i+b] == 1)
+				{
+					neighborMask[i]++;
+					neighborValue[i]++;
+				}
+				else if (neighborOffset[3*i+b] == -1)
+					neighborMask[i]++;
+			}
+		}
+	}
+	private static final int SIZE_DELTA = 4;
+	private RawNode [] candidates = new RawNode[SIZE_DELTA*SIZE_DELTA];
+
+	private int [] ijk = new int[3];
+	
+	private RawNode [] head = new RawNode[MAXLEVEL];
+	private RawNode [] tail = new RawNode[MAXLEVEL];
+	
 	public int status;
-	private int nCells = 1;
+	private int nCells;
 	private String rawFile;
 	private int nr_levels;
 	private int gridSize;
@@ -61,7 +122,9 @@ public class RawOEMM
 		nr_levels = MAXLEVEL;
 		gridSize = 1 << MAXLEVEL;
 		minCellSize = 1;
-		root = new RawNode(gridSize, 0, 0, 0);
+		head[0] = new RawNode(gridSize, 0, 0, 0);
+		tail[0] = head[0];
+		nCells = 1;
 		x0[0] = x0[1] = x0[2] = 0.0;
 		x0[3] = 1.0;
 
@@ -94,7 +157,9 @@ public class RawOEMM
 		for (int i = 0; i < 3; i++)
 			x0[i] = umin[i];
 		x0[3] = ((double) gridSize) / deltaX;
-		root = new RawNode(gridSize, 0, 0, 0);
+		head[0] = new RawNode(gridSize, 0, 0, 0);
+		tail[0] = head[0];
+		nCells = 1;
 	}
 	
 	
@@ -144,7 +209,6 @@ public class RawOEMM
 	/**
 	 * Return the octant of an OEMM structure containing a given point.
 	 *
-	 * @param oemm    main OEMM structure
 	 * @param size    the returned octant must have this size.  If this value is 0,
 	 *                the deepest octant is returned.
 	 * @param ijk     integer coordinates of an interior node
@@ -152,17 +216,38 @@ public class RawOEMM
 	 *                the desired octant must exist.
 	 * @return  the octant of the desired size containing this point.
 	 */
-	public static final RawNode search(RawOEMM oemm, int size, int [] ijk, boolean create)
+	public final RawNode search(int size, int [] ijk, boolean create)
 	{
-		RawNode current = oemm.root;
-		int s = current.size;
+		RawNode current = head[0];
 		if (size == 0)
-			size = oemm.minCellSize;
+			size = minCellSize;
+		return search(current, this, 0, size, ijk, create);
+	}
+	
+	/**
+	 * Return the octant of an OEMM structure containing a given point.
+	 *
+	 * @param fromNode start node
+	 * @param oemm     main OEMM structure
+	 * @param level    level of start node in oemm
+	 * @param size     the returned octant must have this size.  If this value is 0,
+	 *                 the deepest octant is returned.
+	 * @param ijk      integer coordinates of an interior node
+	 * @param create   if set to <code>true</code>, cells are created if needed.  Otherwise
+	 *                 the desired octant must exist.
+	 * @return  the octant of the desired size containing this point.
+	 */
+	private static final RawNode search(RawNode fromNode, RawOEMM oemm, int level, int size, int [] ijk, boolean create)
+	{
+		assert size > 0;
+		RawNode current = fromNode;
+		int s = current.size;
 		while (s > size)
 		{
 			if (current.isLeaf && !create)
 				return current;
 			s >>= 1;
+			level++;
 			assert s > 0;
 			int ind = indexSubOctree(s, ijk);
 			if (null == current.child[ind])
@@ -171,12 +256,71 @@ public class RawOEMM
 					throw new RuntimeException("Element not found... Aborting");
 				current.child[ind] = new RawNode(s, ijk);
 				current.child[ind].parent = current;
+				if (oemm.head[level] != null)
+				{
+					oemm.tail[level].next = current.child[ind];
+					oemm.tail[level] = oemm.tail[level].next;
+				}
+				else
+				{
+					oemm.head[level] = current.child[ind];
+					oemm.tail[level] = oemm.head[level];
+				}
 				current.isLeaf = false;
 				oemm.nCells++;
 			}
 			current = current.child[ind];
 		}
 		return current;
+	}
+	
+	/**
+	 * Return the octant of an OEMM structure containing a given point
+	 *        with a size at least equal to those of start node.
+	 *
+	 * @param fromNode start node
+	 * @param ijk      integer coordinates of an interior node
+	 * @return  the octant of the desired size containing this point.
+	 */
+	private RawNode search(RawNode fromNode, int [] ijk)
+	{
+		int i1 = ijk[0];
+		if (i1 < 0 || i1 > gridSize)
+			return null;
+		int j1 = ijk[1];
+		if (j1 < 0 || j1 > gridSize)
+			return null;
+		int k1 = ijk[2];
+		if (k1 < 0 || k1 > gridSize)
+			return null;
+		//  Neighbor octant is within OEMM bounds
+		//  First climb tree until an octant enclosing this
+		//  point is encountered.
+		RawNode ret = fromNode;
+		int i2, j2, k2;
+		do
+		{
+			if (null == ret.parent)
+				break;
+			ret = ret.parent;
+			int mask = ~(ret.size - 1);
+			i2 = i1 & mask;
+			j2 = j1 & mask;
+			k2 = k1 & mask;
+		}
+		while (i2 != ret.i0 || j2 != ret.j0 || k2 != ret.k0);
+		//  Now find the deepest matching octant.
+		int s = ret.size;
+		while (s > fromNode.size && !ret.isLeaf)
+		{
+			s >>= 1;
+			assert s > 0;
+			int ind = indexSubOctree(s, ijk);
+			if (null == ret.child[ind])
+				break;
+			ret = ret.child[ind];
+		}
+		return ret;
 	}
 	
 	public void printInfos()
@@ -200,7 +344,7 @@ public class RawOEMM
 	public final boolean walk(TraversalProcedure proc)
 	{
 		logger.debug("walk: init "+proc.getClass().getName());
-		if (status != OEMM_INITIALIZED)
+		if (status < OEMM_INITIALIZED)
 		{
 			logger.error("The raw OEMM must be filled in first!... Aborting");
 			return false;
@@ -213,7 +357,7 @@ public class RawOEMM
 		int [] posStack = new int[nr_levels+1];
 		posStack[l] = 0;
 		RawNode [] octreeStack = new RawNode[nr_levels+1];
-		octreeStack[l] = root;
+		octreeStack[l] = head[0];
 		proc.init();
 		while (true)
 		{
@@ -292,57 +436,93 @@ public class RawOEMM
 		return true;
 	}
 	
-	public void aggregate(int max, int delta)
+	public void aggregate(int max)
 	{
-		// Disabled for now
-		if (true) return;
-		SumTrianglesProcedure proc = new SumTrianglesProcedure();
-		walk(proc);
-		logger.info("Nr triangles: "+root.tn);
-		proc.printStats();
-		AggregateProcedure aproc = new AggregateProcedure(max, delta);
-		walk(aproc);
-		ClearTrianglesProcedure cproc = new ClearTrianglesProcedure();
-		walk(cproc);
-		walk(proc);
-		logger.info("Nr triangles: "+root.tn);
-		proc.printStats();
+		SumTrianglesProcedure st_proc = new SumTrianglesProcedure();
+		walk(st_proc);
+		logger.debug("Nr triangles: "+head[0].tn);
+		st_proc.printStats();
+		for (int level = nr_levels - 1; level > 0; level--)
+		{
+			int merged = 0;
+			logger.debug(" Checking neighbors at level "+level);
+			for (RawNode current = head[level]; current != null; current = current.next)
+			{
+				if (current.isLeaf || current.tn > max)
+					continue;
+				//  This node is not a leaf and its children
+				//  can be merged if neighbors have a difference
+				//  level lower than SIZE_DELTA
+				if (current.size <= SIZE_DELTA * minCellSize ||  checkLevelNeighbors(current))
+				//if (checkLevelNeighbors(current))
+				{
+					//  Note: Do not yet delete children
+					current.isLeaf = true;
+					merged++;
+				}
+			}
+			logger.debug(" Merged nodes: "+merged);
+		}
+		//  Disoplay stats again to see if they change
+		walk(st_proc);
+		st_proc.printStats();
+		logger.debug("Nr triangles: "+head[0].tn);
 	}
 	
-	/**
-	 * Returns a BranchGroup to be displayed by java3d.
-	 *
-	 * @param onlyLeaves   if set to <code>true</code>, only leaves are taken into
-	 *                     account, otherwise all nodes are considered.
-	 */
-	public BranchGroup bgOctree(boolean onlyLeaves)
+	private boolean checkLevelNeighbors(RawNode current)
 	{
-		BranchGroup bg=new BranchGroup();
-		
+		int minSize = current.size / SIZE_DELTA;
+		int pos = 0;
+		for (int i = 0; i < neighborOffset.length/3; i++)
+		{
+			ijk[0] = current.i0 + neighborOffset[3*i]   * current.size;
+			ijk[1] = current.j0 + neighborOffset[3*i+1] * current.size;
+			ijk[2] = current.k0 + neighborOffset[3*i+2] * current.size;
+			RawNode n = search(current, ijk);
+			if (n == null || n.isLeaf || n.size > current.size)
+				continue;
+			//  Check if children are not too deep in the tree.
+			pos = 0;
+			candidates[pos] = n;
+			while (pos >= 0)
+			{
+				RawNode c = candidates[pos];
+				pos--;
+				if (c.size < minSize || SIZE_DELTA <= 1)
+					return false;
+				if (c.isLeaf)
+					continue;
+				for (int ind = 0; ind < 8; ind++)
+				{
+					if (c.child[ind] != null && (ind & neighborMask[i]) == neighborValue[i])
+					{
+						pos++;
+						candidates[pos] = c.child[ind];
+					}
+				}
+			}
+		}
+		return true;
+	}
+	
+	public double [] getCoords(boolean onlyLeaves)
+	{
 		CoordProcedure proc = new CoordProcedure(onlyLeaves, nCells);
 		walk(proc);
-		QuadArray quad = new QuadArray(24*nCells, QuadArray.COORDINATES);
-		quad.setCapability(QuadArray.ALLOW_FORMAT_READ);
-		quad.setCapability(QuadArray.ALLOW_COUNT_READ);
-		quad.setCapability(QuadArray.ALLOW_COORDINATE_READ);
-		quad.setCoordinates(0, proc.coord);
-		Appearance quadApp = new Appearance();
-		quadApp.setPolygonAttributes(new PolygonAttributes(PolygonAttributes.POLYGON_LINE, PolygonAttributes.CULL_NONE, 0));
-		quadApp.setColoringAttributes(new ColoringAttributes(0,1,0,ColoringAttributes.SHADE_GOURAUD));
-		Shape3D shapeQuad=new Shape3D(quad, quadApp);
-		shapeQuad.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-		bg.addChild(shapeQuad);
-		return bg;
+		return proc.coord;
 	}
 	
 	private final class SumTrianglesProcedure extends TraversalProcedure
 	{
 		public final int action(RawNode current, int visit)
 		{
-			if (visit != POSTORDER)
-				return SKIPWALK;
 			if (current.isLeaf)
 				return OK;
+			if (visit != POSTORDER)
+			{
+				current.tn = 0;
+				return SKIPWALK;
+			}
 			for (int i = 0; i < 8; i++)
 			{
 				if (current.child[i] == null)
@@ -353,41 +533,7 @@ public class RawOEMM
 		}
 	}
 	
-	private final class ClearTrianglesProcedure extends TraversalProcedure
-	{
-		public final int action(RawNode current, int visit)
-		{
-			if (visit != PREORDER)
-				return SKIPWALK;
-			current.tn = 0;
-			return OK;
-		}
-	}
-	
-	private final class AggregateProcedure extends TraversalProcedure
-	{
-		private int max_triangles;
-		private int delta;
-		public AggregateProcedure(int m, int d)
-		{
-			max_triangles = m;
-			delta = 1 << d;
-		}
-		public final int action(RawNode current, int visit)
-		{
-			if (visit != PREORDER)
-				return SKIPWALK;
-			if (current.tn > max_triangles || current.size > delta * minCellSize)
-				return OK;
-			logger.debug("Aggregate node "+current+"   NrT="+current.tn);
-			for (int i = 0; i < 8; i++)
-				current.child[i] = null;
-			current.isLeaf = true;
-			return SKIPCHILD;
-		}
-	}
-	
-	private final class CoordProcedure extends TraversalProcedure
+	public final class CoordProcedure extends TraversalProcedure
 	{
 		public final double [] coord;
 		private int index;
