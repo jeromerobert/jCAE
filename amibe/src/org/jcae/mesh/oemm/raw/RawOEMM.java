@@ -88,12 +88,12 @@ public class RawOEMM
 				neighborMask[i] <<= 1;
 				neighborValue[i] <<= 1;
 				if (neighborOffset[3*i+b] == 1)
+					neighborMask[i]++;
+				else if (neighborOffset[3*i+b] == -1)
 				{
 					neighborMask[i]++;
 					neighborValue[i]++;
 				}
-				else if (neighborOffset[3*i+b] == -1)
-					neighborMask[i]++;
 			}
 		}
 	}
@@ -473,6 +473,7 @@ public class RawOEMM
 	{
 		int minSize = current.size / SIZE_DELTA;
 		int pos = 0;
+		logger.debug("Checking neighbors of "+current);
 		for (int i = 0; i < neighborOffset.length/3; i++)
 		{
 			ijk[0] = current.i0 + neighborOffset[3*i]   * current.size;
@@ -481,6 +482,8 @@ public class RawOEMM
 			RawNode n = search(current, ijk);
 			if (n == null || n.isLeaf || n.size > current.size)
 				continue;
+			assert n.size == current.size;
+			logger.debug("Node "+n+" contains "+Integer.toHexString(ijk[0])+" "+Integer.toHexString(ijk[1])+" " +Integer.toHexString(ijk[2]));
 			//  Check if children are not too deep in the tree.
 			pos = 0;
 			candidates[pos] = n;
@@ -488,10 +491,17 @@ public class RawOEMM
 			{
 				RawNode c = candidates[pos];
 				pos--;
-				if (c.size < minSize || SIZE_DELTA <= 1)
-					return false;
-				if (c.isLeaf)
+				if (c.tn == 0)
 					continue;
+				if (c.isLeaf)
+				{
+					if (c.size <= minSize || SIZE_DELTA <= 1)
+					{
+						logger.debug("Found too deep neighbor: "+c+"    "+c.tn);
+						return false;
+					}
+					continue;
+				}
 				for (int ind = 0; ind < 8; ind++)
 				{
 					if (c.child[ind] != null && (ind & neighborMask[i]) == neighborValue[i])
