@@ -208,25 +208,46 @@ public class UNVConverter
 	 */
 	public static void clean(final MappedByteBuffer buffer)
 	{
-		AccessController.doPrivileged(new PrivilegedAction()
+		try
 		{
-			public Object run()
+			Class cleanerClass=Class.forName("sun.misc.Cleaner");
+			final Method cleanMethod=cleanerClass.getMethod("clean", null);
+			AccessController.doPrivileged(new PrivilegedAction()
 			{
-				try
-							{
-					Method getCleanerMethod = buffer.getClass().getMethod("cleaner", new Class[0]);
-					getCleanerMethod.setAccessible(true);
-					sun.misc.Cleaner cleaner = (sun.misc.Cleaner)getCleanerMethod.invoke(buffer,new Object[0]);
-					if(cleaner!=null)
-						cleaner.clean();
-							}
-				catch(Exception e)
-							{
-					e.printStackTrace();
-							}
-				return null;
-			}
-		});
+				public Object run()
+				{
+					try
+					{
+						Method getCleanerMethod = buffer.getClass().getMethod(
+							"cleaner", new Class[0]);
+						
+						getCleanerMethod.setAccessible(true);
+						Object cleaner = getCleanerMethod.invoke(buffer,new Object[0]);
+						if(cleaner!=null)
+						{
+							cleanMethod.invoke(cleaner, null);
+						}
+					}
+					catch(Exception e)
+					{
+						e.printStackTrace();
+					}
+					return null;
+				}
+			});
+		}		
+		catch(ClassNotFoundException ex)
+		{
+			//Not a Sun JVM so we exit.
+		}
+		catch (SecurityException e)
+		{
+			e.printStackTrace();
+		}
+		catch (NoSuchMethodException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	/**
