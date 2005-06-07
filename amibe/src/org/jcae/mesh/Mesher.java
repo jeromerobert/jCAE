@@ -119,6 +119,13 @@ public class Mesher
 			int iFace = 0;
 			int nTryMax = 20;
 			int numFace = Integer.parseInt(System.getProperty("org.jcae.mesh.Mesher.meshFace", "0"));
+			int minFace = Integer.parseInt(System.getProperty("org.jcae.mesh.Mesher.minFace", "0"));
+			int maxFace = Integer.parseInt(System.getProperty("org.jcae.mesh.Mesher.maxFace", "0"));
+			if (minFace != 0 || maxFace != 0)
+			    numFace=0;
+			logger.debug("org.jcae.mesh.Mesher.minFace="+minFace);
+			logger.debug("org.jcae.mesh.Mesher.maxFace="+maxFace);
+			logger.debug("org.jcae.mesh.Mesher.meshFace="+numFace);
 			int nrFaces = 0;
 			for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
 				nrFaces++;			
@@ -128,6 +135,9 @@ public class Mesher
 				iFace++;
 				if (numFace != 0 && iFace != numFace)
 					continue;
+				if ((minFace != 0 || maxFace != 0) && !(iFace >= minFace && iFace <= maxFace))
+				    continue;
+				
 				logger.info("Meshing face " + iFace+"/"+nrFaces);
 				//  This variable can be modified, thus reset it
 				Metric2D.setLength(discr);
@@ -293,6 +303,20 @@ public class Mesher
 		}
 		return (path.delete());
 	}
+    
+    static private int countFaces(String brepfilename)
+    {
+	//count faces in the brep File 
+	CADShapeBuilder factory = CADShapeBuilder.factory;
+	CADShape shape = factory.newShape(brepfilename);
+	CADExplorer expF = factory.newExplorer();
+	int nrFaces = 0;
+	for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
+	    nrFaces++;
+	return nrFaces;
+    }
+    
+
 	/**
 	 * main method, reads 2 arguments and calls mesh() method
 	 * @param args an array of String, filename, algorithm type and constraint
@@ -320,6 +344,12 @@ public class Mesher
 				shape.writeNative(filename);
 			}
 			
+			// if what we want is just the mesh count, print it and exit
+			if(Boolean.getBoolean("org.jcae.mesh.countFaces"))
+			{
+			    System.exit(countFaces(filename));
+			}
+
 			//Init xmlDir
 			String xmlDir;
 			if(Boolean.getBoolean("org.jcae.mesh.tmpDir.auto"))
