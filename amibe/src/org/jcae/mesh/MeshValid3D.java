@@ -22,9 +22,11 @@
 package org.jcae.mesh;
 
 import java.util.Iterator;
+import org.jcae.mesh.amibe.ds.MGroup3D;
 import org.jcae.mesh.amibe.ds.MFace3D;
 import org.jcae.mesh.amibe.ds.MMesh3D;
 import org.jcae.mesh.xmldata.MMesh3DReader;
+import org.jcae.mesh.xmldata.UNVConverter;
 import org.jcae.mesh.amibe.validation.*;
 import org.apache.log4j.Logger;
 
@@ -35,13 +37,14 @@ public class MeshValid3D
 {
 	private static Logger logger=Logger.getLogger(MeshValid3D.class);
 
-	private static void check(String brepfilename, String xmlDir)
+	private static void check(String brepfilename, String xmlDir, float discr, float defl)
 	{
 		logger.info("Reading 3D mesh");
 		String xmlFile = "jcae3d";
 		MMesh3D mesh3D = MMesh3DReader.readObject(xmlDir, xmlFile);
+		//MinLengthFace qproc = new MinLengthFace();
+		MinAngleFace qproc = new MinAngleFace();
 		QualityFloat data = new QualityFloat(1000);
-		NodeConnectivity3D qproc = new NodeConnectivity3D(mesh3D);
 		data.setQualityProcedure(qproc);
 		for (Iterator itf = mesh3D.getFacesIterator(); itf.hasNext();)
 		{
@@ -49,7 +52,10 @@ public class MeshValid3D
 			data.compute(f);
 		}
 		data.finish();
-		data.split(10);
+		data.setTarget((float) Math.PI/3.0f);
+		//data.setTarget((float) discr);
+		//data.split(10);
+		data.split(0.0f, 1.0f, 10);
 		data.printLayers();
 		String bbfile = brepfilename.substring(0, brepfilename.lastIndexOf('.'))+".bb";
 		data.printMeshBB(bbfile);
@@ -68,6 +74,10 @@ public class MeshValid3D
 		}
 		String filename=args[0];
 		String xmlDir = args[1];
-		check(filename, xmlDir);
+		Float discr = new Float(args[2]);
+		Float defl = new Float(args[3]);
+		check(filename, xmlDir, discr.floatValue(), defl.floatValue());
+		String MESHName=filename.substring(0, filename.lastIndexOf('.'))+".mesh";
+		new UNVConverter(xmlDir).writeMESH(MESHName);
 	}
 }
