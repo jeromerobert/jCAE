@@ -185,7 +185,7 @@ public class QualityFloat
 			logger.error("split() method must be called before printLayers()");
 			return;
 		}
-		int nrTotal = data.size() - 2;
+		int nrTotal = data.size();
 		float delta = (vmax - vmin) / ((float) layers);
 		if (sorted[0] > 0)
 			System.out.println(" < "+vmin+" "+sorted[0]+" ("+(((float) 100.0 * sorted[0])/((float) nrTotal))+"%)");
