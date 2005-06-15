@@ -18,8 +18,9 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-package org.jcae.mesh.oemm.raw;
+package org.jcae.mesh.oemm;
 
+import gnu.trove.TIntArrayList;
 import org.apache.log4j.Logger;
 
 /**
@@ -29,7 +30,7 @@ import org.apache.log4j.Logger;
  * Only its spatial structure is considered, and it is assumed that the whole
  * tree can reside in memory.
  */
-public class RawNode
+public class OEMMNode
 {
 	//  Integer coordinates of the lower-left corner
 	//  These coordiantes are only used in RawOEMM.CoordProcedure
@@ -39,18 +40,40 @@ public class RawNode
 	public int size;
 	//  Number of triangles
 	public int tn = 0;
+	//  Number of vertices
+	public int vn = 0;
 	//  Child list
-	public RawNode[] child = new RawNode[8];
+	public OEMMNode[] child = new OEMMNode[8];
 	//  Linked list of nodes at the same level
-	public RawNode next;
+	public OEMMNode next;
 	//  Parent node
 	//  TODO: The parent pointer can be replaced by a stack
 	//        if more room is needed.
-	public RawNode parent;
+	public OEMMNode parent;
 	//  Is this node a leaf?
 	public boolean isLeaf = true;
-	//  Private counter
+	//  File containing vertices and triangles
+	public String file;
+	//  Counter
 	public long counter = 0L;
+	
+	//  Index for leaves
+	public int leafIndex = -1;
+	//  Nodes are either
+	//    a. leaves and contain
+	//         1. vertices with global indices between minIndex and maxIndex
+	//         2. a list of adjacent leaves with shared data
+	//         3. a leaf index
+	//  or
+	//    b. non-leaves and internal leaves have an index between minIndex
+	//       and maxIndex.
+	//  As described in Cignoni's paper, having maxIndex > minIndex + vn
+	//  for leaves gives room to add vertices without having to reindex
+	//  all nodes.
+	public int minIndex = 0;
+	public int maxIndex = 0;
+	//  List of adjacent leaves with shared data
+	public TIntArrayList adjLeaves;
 	
 	/**
 	 * Create a new leaf.
@@ -59,7 +82,7 @@ public class RawNode
 	 * @param jj  2nd coordinate of its lower-left corner
 	 * @param kk  3rd coordinate of its lower-left corner
 	 */
-	public RawNode(int s, int ii, int jj, int kk)
+	public OEMMNode(int s, int ii, int jj, int kk)
 	{
 		size = s;
 		i0 = ii;
@@ -72,7 +95,7 @@ public class RawNode
 	 * @param s   cell size
 	 * @param ijk  coordinates of an interior point
 	 */
-	public RawNode(int s, int [] ijk)
+	public OEMMNode(int s, int [] ijk)
 	{
 		size = s;
 		int mask = ~(s - 1);
@@ -81,8 +104,22 @@ public class RawNode
 		k0 = ijk[2] & mask;
 	}
 	
+	public OEMMNode(String f)
+	{
+		file = f;
+		IndexedStorage.readHeaderOEMMNode(this);
+	}
+	
 	public String toString()
 	{
-		return "" +Integer.toHexString(size)+" "+Integer.toHexString(i0)+" "+Integer.toHexString(j0)+" "+Integer.toHexString(k0);
+		return "Leaf?: "+isLeaf+
+		       " Size=" +Integer.toHexString(size)+
+		       " IJK "+Integer.toHexString(i0)+" "+Integer.toHexString(j0)+" "+Integer.toHexString(k0)+
+		       " NrV="+vn+
+		       " NrT="+tn+
+		       " index="+leafIndex+
+		       " min="+minIndex+
+		       " max="+maxIndex+
+		       " file="+file;
 	}
 }

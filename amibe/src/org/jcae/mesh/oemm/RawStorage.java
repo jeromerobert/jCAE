@@ -18,12 +18,15 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-package org.jcae.mesh.oemm.raw;
+package org.jcae.mesh.oemm;
 
 import java.io.DataInputStream;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.RandomAccessFile;
+import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -35,9 +38,7 @@ import org.apache.log4j.Logger;
  */
 public class RawStorage
 {
-	private static Logger logger=Logger.getLogger(RawStorage.class);	
-	private final static int INTERMEDIATE_HEADER_SIZE = 8 + 5*4;
-	private final static long INTERMEDIATE_HEADER_OFFSET_NT = 4L;
+	private static Logger logger = Logger.getLogger(RawStorage.class);	
 	
 	/**
 	 * Build a raw OEMM and count the number of triangles which have to be assigned
@@ -63,7 +64,7 @@ public class RawStorage
 		{
 			int [] ijk = new int[3];
 			double [] xyz = new double[3];
-			RawNode [] cells = new RawNode[3];
+			OEMMNode [] cells = new OEMMNode[3];
 			FileInputStream fs = new FileInputStream(tree.getFileName());
 			DataInputStream coordsIn = new DataInputStream(new BufferedInputStream(fs));
 			long size = fs.getChannel().size();
@@ -75,7 +76,7 @@ public class RawStorage
 					xyz[1] = coordsIn.readDouble();
 					xyz[2] = coordsIn.readDouble();
 					tree.double2int(xyz, ijk);
-					cells[i] = tree.search(0, ijk, true);
+					cells[i] = tree.build(0, ijk);
 				}
 				cells[0].tn++;
 				if (cells[1] != cells[0])
@@ -116,7 +117,7 @@ public class RawStorage
 	 * @param  tree  a raw OEMM
 	 * @param  file  the output file
 	 */
-	public static final void dispatch(RawOEMM tree, String file)
+	public static final void dispatch(RawOEMM tree, String structFile, String dataFile)
 	{
 		if (tree.status < RawOEMM.OEMM_INITIALIZED)
 		{
@@ -124,9 +125,12 @@ public class RawStorage
 			return;
 		}
 		logger.debug("Raw OEMM: computing global offset for raw file");
-		//  First compute offset in output file for each octant
-		ComputeOffset proc = new ComputeOffset();
+		//  For each octant, compute its index and its offset in output file.
+		ComputeOffsetProcedure proc = new ComputeOffsetProcedure();
 		tree.walk(proc);
+		long outputFileSize = proc.getOffset();
+		ComputeMinMaxIndicesProcedure cmmi_proc = new ComputeMinMaxIndicesProcedure();
+		tree.walk(cmmi_proc);
 		
 		logger.debug("Raw OEMM: dispatch triangles into raw OEMM");
 		//  TODO: Output must be buffered
@@ -134,13 +138,13 @@ public class RawStorage
 		{
 			int [] ijk = new int[9];
 			double [] xyz = new double[3];
-			RawNode [] cells = new RawNode[3];
+			OEMMNode [] cells = new OEMMNode[3];
 			FileInputStream fs = new FileInputStream(tree.getFileName());
 			DataInputStream coordsIn = new DataInputStream(new BufferedInputStream(fs));
 			long size = fs.getChannel().size();
-			RandomAccessFile raf = new RandomAccessFile(file, "rw");
+			RandomAccessFile raf = new RandomAccessFile(dataFile, "rw");
 			FileChannel fc = raf.getChannel();
-			raf.setLength(proc.getOffset());
+			raf.setLength(outputFileSize);
 			for(long nr = 0L; nr < size; nr += 72L)
 			{
 				for (int i = 0; i < 3; i++)
@@ -149,7 +153,7 @@ public class RawStorage
 					xyz[1] = coordsIn.readDouble();
 					xyz[2] = coordsIn.readDouble();
 					tree.double2int(xyz, ijk);
-					cells[i] = tree.search(0, ijk, false);
+					cells[i] = tree.search(ijk);
 					if (i < 2)
 					{
 						for (int j = 0; j < 3; j++)
@@ -157,16 +161,18 @@ public class RawStorage
 					}
 				}
 				addToCell(fc, cells[0], ijk);
-				if (cells[0] != cells[1])
+				if (cells[1] != cells[0])
 					addToCell(fc, cells[1], ijk);
 				if (cells[2] != cells[0] && cells[2] != cells[1])
 					addToCell(fc, cells[2], ijk);
 			}
 			coordsIn.close();
-			//  Adjust block size
-			StoreBlockSizeProcedure sproc = new StoreBlockSizeProcedure(fc);
-			tree.walk(sproc);
 			raf.close();
+			//  Write octree data structure onto disk
+			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(structFile)));
+			WriteStructureProcedure wh_proc = new WriteStructureProcedure(out, dataFile, tree.nr_leaves, tree.x0);
+			tree.walk(wh_proc);
+			out.close();
 		}
 		catch (FileNotFoundException ex)
 		{
@@ -184,29 +190,41 @@ public class RawStorage
 	 * @param  file  file containing the intermediate OEMM.
 	 * @return RawOEMM a raw OEMM.
 	 */
-	public static RawOEMM loadIntermediate(String file)
+	public static OEMM loadIntermediate(String file)
 	{
 		logger.debug("Loading intermediate raw OEMM from "+file);
-		RawOEMM ret = new RawOEMM();
+		OEMM ret = new OEMM("(null)");
 		try
 		{
-			RandomAccessFile raf = new RandomAccessFile(file, "r");
-			FileInputStream fs = new FileInputStream(file);
-			DataInputStream bufIn = new DataInputStream(new BufferedInputStream(fs));
-			long len = fs.getChannel().size();
-			long pos = 0L;
+			DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
 			int [] ijk = new int[3];
-			while (pos < len)
+			int version = bufIn.readInt();
+			assert version == 1;
+			int nrleaves = bufIn.readInt();
+			int nrbytes = bufIn.readInt();
+			byte [] name = new byte[nrbytes+1];
+			bufIn.read(name, 0, nrbytes);
+			ret = new OEMM(new String(name));
+			ret.leaves = new OEMMNode[nrleaves];
+			for (int i = 0; i < 4; i++)
+				ret.x0[i] = bufIn.readDouble();
+			//  ret.nr_leaves will be set by this loop in ret.build()
+			for (int i = 0; i < nrleaves; i++)
 			{
-				long blockSize = bufIn.readLong();
+				long position = bufIn.readLong();
+				int nr = bufIn.readInt();
 				int size = bufIn.readInt();
 				ijk[0] = bufIn.readInt();
 				ijk[1] = bufIn.readInt();
 				ijk[2] = bufIn.readInt();
-				int nr = bufIn.readInt();
-				bufIn.skipBytes((int) blockSize);
-				pos += INTERMEDIATE_HEADER_SIZE + blockSize;
-				ret.search(size, ijk, true);
+				OEMMNode n = ret.build(size, ijk);
+				n.counter = position;
+				n.tn = nr;
+				n.leafIndex = i;
+				n.isLeaf = true;
+				ret.leaves[i] = n;
+				if (!ret.head[0].isLeaf)
+					ret.head[0].tn += n.tn;
 			}
 			bufIn.close();
 		}
@@ -219,101 +237,16 @@ public class RawStorage
 			logger.error("I/O error when reading file "+file);
 		}
 		ret.status = RawOEMM.OEMM_INITIALIZED;
+		//  Adjust minIndex and maxIndex values
+		ComputeMinMaxIndicesProcedure cmmi_proc = new ComputeMinMaxIndicesProcedure();
+		ret.walk(cmmi_proc);
 		return ret;
 	}
 	
-	public static RawNode readBlockHeader(DataInputStream bufIn)
-	{
-		RawNode ret = null;
-		try
-		{
-			int [] ijk = new int[3];
-			long blockSize = bufIn.readLong();
-			int size = bufIn.readInt();
-			ijk[0] = bufIn.readInt();
-			ijk[1] = bufIn.readInt();
-			ijk[2] = bufIn.readInt();
-			ret = new RawNode(size, ijk);
-			ret.tn = bufIn.readInt();
-			//  The number of trailing bytes is stored
-			//  in this member which is now unused.
-			ret.counter = blockSize - 36L * (long) ret.tn;
-		}
-		catch (IOException ex)
-		{
-			logger.error("I/O error when reading file "+bufIn);
-		}
-		return ret;
-	}
-	
-	/**
-	 * Display debugging information about an intermediate OEMM.
-	 *
-	 * @param  file  file containing the intermediate OEMM.
-	 */
-	public static void showIntermediateRawStorage(String file)
-	{
-		try
-		{
-			RandomAccessFile raf = new RandomAccessFile(file, "r");
-			FileInputStream fs = new FileInputStream(file);
-			DataInputStream bufIn = new DataInputStream(new BufferedInputStream(fs));
-			long len = fs.getChannel().size();
-			long pos = 0L;
-			int iBlock = 0;
-			long total = 0L;
-			while (pos < len)
-			{
-				iBlock++;
-				long blockSize = bufIn.readLong();
-				int size = bufIn.readInt();
-				int i0 = bufIn.readInt();
-				int j0 = bufIn.readInt();
-				int k0 = bufIn.readInt();
-				int nr = bufIn.readInt();
-				logger.debug("block "+iBlock+": triangles="+nr+"  block size= "+blockSize);
-				bufIn.skipBytes((int) blockSize);
-				pos += INTERMEDIATE_HEADER_SIZE + blockSize;
-				total += (long) nr;
-			}
-			logger.debug("Total number of triangles: "+total);
-			bufIn.close();
-		}
-		catch (FileNotFoundException ex)
-		{
-			logger.error("File "+file+" not found");
-		}
-		catch (IOException ex)
-		{
-			logger.error("I/O error when reading file "+file);
-		}
-	}
-	
-	private static void addToCell(FileChannel fc, RawNode current, int [] ijk)
+	private static void addToCell(FileChannel fc, OEMMNode current, int [] ijk)
 		throws java.io.IOException
 	{
 		assert current.counter <= fc.size();
-		if (current.counter <= 0L)
-		{
-			current.counter = -current.counter;
-			ByteBuffer buf2 = ByteBuffer.allocate(INTERMEDIATE_HEADER_SIZE);
-			long blockSize = 36L * (long) current.tn;
-			buf2.putLong(blockSize);
-			buf2.putInt(current.size);
-			buf2.putInt(current.i0);
-			buf2.putInt(current.j0);
-			buf2.putInt(current.k0);
-			//  Exact number of triangles, this must be the
-			//  last item of block header
-			buf2.putInt(0);
-			buf2.rewind();
-			fc.position(current.counter);
-			fc.write(buf2);
-			fc.force(false);
-			current.counter += (long) INTERMEDIATE_HEADER_SIZE;
-			//  The number of triangles really added is stored in tn
-			current.tn = 0;
-		}
 		ByteBuffer buf = ByteBuffer.allocate(36);
 		for (int i = 0; i < 9; i++)
 			buf.putInt(ijk[i]);
@@ -323,15 +256,17 @@ public class RawStorage
 		current.tn++;
 	}
 	
-	private static class ComputeOffset extends TraversalProcedure
+	private static class ComputeOffsetProcedure extends TraversalProcedure
 	{
 		private long offset = 0L;
-		public final int action(RawNode current, int visit)
+		public final int action(OEMMNode current, int octant, int visit)
 		{
 			if (visit != LEAF)
 				return SKIPWALK;
-			current.counter = -offset;
-			offset += 36L * (long) current.tn + (long) INTERMEDIATE_HEADER_SIZE;
+			current.counter = offset;
+			offset += 36L * (long) current.tn;
+			//  Reinitialize this counter for further processing
+			current.tn = 0;
 			return OK;
 		}
 		public long getOffset()
@@ -345,27 +280,61 @@ public class RawStorage
 		}
 	}
 	
-	//  By convention, offsets are negative when block headers have not been
-	//  written onto file.
-	private final static class StoreBlockSizeProcedure extends TraversalProcedure
+	private static class ComputeMinMaxIndicesProcedure extends TraversalProcedure
 	{
-		private FileChannel channel;
-		private ByteBuffer buf = ByteBuffer.allocate(8);
-		public StoreBlockSizeProcedure(FileChannel fc)
+		private int nrLeaves = 0;
+		public final int action(OEMMNode current, int octant, int visit)
 		{
-			channel = fc;
+			if (visit == PREORDER)
+				current.minIndex = nrLeaves;
+			else if (visit == POSTORDER)
+				current.maxIndex = nrLeaves;
+			else if (visit == LEAF)
+			{
+				current.leafIndex = nrLeaves;
+				nrLeaves++;
+			}
+			return OK;
 		}
-		public final int action(RawNode current, int visit)
+	}
+	
+	private static class WriteStructureProcedure extends TraversalProcedure
+	{
+		private DataOutputStream out;
+		public WriteStructureProcedure(DataOutputStream outStream, String dataFile, int l, double [] x0)
+			throws IOException
+		{
+			out = outStream;
+			//  Format version
+			out.writeInt(1);
+			//  Number of leaves
+			out.writeInt(l);
+			//  Number of bytes in data file name
+			out.writeInt(dataFile.length());
+			//  Data file
+			out.writeBytes(dataFile);
+			//  Integer <--> double coordinates
+			for (int i = 0; i < 4; i++)
+				out.writeDouble(x0[i]);
+		}
+		public final int action(OEMMNode current, int octant, int visit)
 		{
 			if (visit != LEAF)
 				return SKIPWALK;
-			// The number of triangles is the last item of block header
-			long offset = current.counter - 36L * (long) current.tn - INTERMEDIATE_HEADER_OFFSET_NT;
-			buf.putInt(0, current.tn);
-			buf.rewind();
 			try
 			{
-				channel.write(buf, offset);
+				//  Offset in data file
+				//  This offset had been shifted when writing triangles
+				current.counter -= 36L * current.tn;
+				out.writeLong(current.counter);
+				//  Number of triangles really found
+				out.writeInt(current.tn);
+				//  Edge size
+				out.writeInt(current.size);
+				//  Lower-left corner
+				out.writeInt(current.i0);
+				out.writeInt(current.j0);
+				out.writeInt(current.k0);
 			}
 			catch (IOException ex)
 			{

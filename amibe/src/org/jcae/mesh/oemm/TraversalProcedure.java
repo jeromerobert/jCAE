@@ -18,7 +18,7 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-package org.jcae.mesh.oemm.raw;
+package org.jcae.mesh.oemm;
 
 import org.apache.log4j.Logger;
 
@@ -29,7 +29,7 @@ import org.apache.log4j.Logger;
  */
 public abstract class TraversalProcedure
 {
-	private static Logger logger=Logger.getLogger(TraversalProcedure.class);	
+	private static Logger logger = Logger.getLogger(TraversalProcedure.class);	
 	
 	protected static final int PREORDER  = 1;
 	protected static final int POSTORDER = 2;
@@ -53,17 +53,25 @@ public abstract class TraversalProcedure
 	}
 	
 	/**
+	 * Method called after traversing the OEMM.
+	 */
+	public void finish()
+	{
+	}
+	
+	/**
 	 * Display statistics about this traversal.
 	 */
 	public void printStats()
 	{
-		logger.debug("Leaves: "+nrLeaves+"   Octants: "+nrNodes);
+		logger.info("Leaves: "+nrLeaves+"   Octants: "+nrNodes);
 	}
 	
 	/**
 	 * Abstract class which has to be overridden by subclasses.
 	 * 
 	 * @param  c       the current node of the OEMM structure
+	 * @param  octant  the octant number in parent node
 	 * @param  visit   this parameter is set to <code>LEAF</code> if the current
 	 *                 node is a leaf, <code>PREORDER</code> if children have not
 	 *                 yet been traversed, and <code>POSTOREDER</code> otherwise.
@@ -72,14 +80,14 @@ public abstract class TraversalProcedure
 	 *          SKIPWALK   node was skipped, process normally
 	 *          OK         process normally
 	 */
-	public abstract int action(RawNode c, int visit);
+	public abstract int action(OEMMNode c, int octant, int visit);
 	
 	/**
 	 * This method is called when descending the tree.
 	 * 
 	 * @param  c   the current node of the OEMM structure
 	 */
-	public int preorder(RawNode c)
+	public int preorder(OEMMNode c, int octant)
 	{
 		int res = 0;
 		nrNodes++;
@@ -87,12 +95,12 @@ public abstract class TraversalProcedure
 		{
 			nrLeaves++;
 			logger.debug("Found LEAF: "+c);
-			res = action(c, LEAF);
+			res = action(c, octant, LEAF);
 		}
 		else
 		{
 			logger.debug("Found PREORDER: "+c);
-			res = action(c, PREORDER);
+			res = action(c, octant, PREORDER);
 		}
 		logger.debug("  Res; "+res);
 		return res;
@@ -104,10 +112,10 @@ public abstract class TraversalProcedure
 	 * 
 	 * @param  c   the current node of the OEMM structure
 	 */
-	public int postorder(RawNode c)
+	public int postorder(OEMMNode c, int octant)
 	{
 		logger.debug("Found POSTORDER: "+c);
-		int res = action(c, POSTORDER);
+		int res = action(c, octant, POSTORDER);
 		logger.debug("  Res; "+res);
 		return res;
 	}
