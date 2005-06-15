@@ -407,7 +407,7 @@ public class IndexedStorage
 		return ret;
 	}
 	
-	private static OEMM buildOEMMStructure(String dir)
+	public static OEMM buildOEMMStructure(String dir)
 	{
 		OEMM ret = new OEMM(dir+File.separator+"files");
 		try
@@ -448,12 +448,6 @@ public class IndexedStorage
 			throw new RuntimeException(ex);
 		}
 		return ret;
-	}
-	
-	public static double [] getMeshOEMMCoords(String dir, TIntHashSet leaves)
-	{
-		OEMM oemm = buildOEMMStructure(dir);
-		return getMeshOEMMCoords(oemm, leaves);
 	}
 	
 	public static double [] getMeshOEMMCoords(OEMM oemm, TIntHashSet leaves)

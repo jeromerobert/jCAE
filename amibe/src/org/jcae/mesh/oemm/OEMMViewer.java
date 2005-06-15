@@ -74,10 +74,25 @@ public class OEMMViewer
 		return bg;
 	}
 	
+	public static BranchGroup meshOEMM(String dir)
+	{
+		OEMM oemm = IndexedStorage.buildOEMMStructure(dir);
+		TIntHashSet leaves = new TIntHashSet();
+		for (int i = 0; i < oemm.nr_leaves; i++)
+			leaves.add(i);
+		return meshOEMM(oemm, leaves);
+	}
+	
 	public static BranchGroup meshOEMM(String dir, TIntHashSet leaves)
 	{
+		OEMM oemm = IndexedStorage.buildOEMMStructure(dir);
+		return meshOEMM(oemm, leaves);
+	}
+
+	public static BranchGroup meshOEMM(OEMM oemm, TIntHashSet leaves)
+	{
 		BranchGroup bg = new BranchGroup();
-		double [] coord = IndexedStorage.getMeshOEMMCoords(dir, leaves);
+		double [] coord = IndexedStorage.getMeshOEMMCoords(oemm, leaves);
 		TriangleArray tri = new TriangleArray(coord.length/3, TriangleArray.COORDINATES);
 		tri.setCapability(TriangleArray.ALLOW_COUNT_READ);
 		tri.setCapability(TriangleArray.ALLOW_FORMAT_READ);
@@ -102,21 +117,6 @@ public class OEMMViewer
 		shapeLine.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 		bg.addChild(shapeLine);
 		return bg;
-	}
-	
-	private static IndexedTriangleArray getGeomForTriangles(float[] nodes, int [] triangles)
-	{
-		IndexedTriangleArray geom = new IndexedTriangleArray(
-			nodes.length/3,
-			TriangleArray.COORDINATES|TriangleArray.BY_REFERENCE,
-			triangles.length);
-		geom.setCoordinateIndices(0, triangles);
-		geom.setCapability(IndexedTriangleArray.ALLOW_COUNT_READ);
-		geom.setCapability(IndexedTriangleArray.ALLOW_FORMAT_READ);
-		geom.setCapability(IndexedTriangleArray.ALLOW_REF_DATA_READ);
-		geom.setCapability(IndexedTriangleArray.ALLOW_COORDINATE_INDEX_READ);
-		geom.setCoordRefFloat(nodes);		
-		return geom;
 	}
 	
 }
