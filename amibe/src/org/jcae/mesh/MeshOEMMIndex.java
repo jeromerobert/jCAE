@@ -25,16 +25,15 @@ import org.jcae.mesh.oemm.*;
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADShapeBuilder;
 import org.apache.log4j.Logger;
-import org.jcae.mesh.java3d.Viewer;
 
 /**
  * This class illustrates how to perform quality checks.
  */
-public class MeshOEMM
+public class MeshOEMMIndex
 {
-	private static Logger logger=Logger.getLogger(MeshOEMM.class);
+	private static Logger logger=Logger.getLogger(MeshOEMMIndex.class);
 
-	private static void check(String brepfilename, int lmax, int triangles_max, boolean onlyLeaves)
+	private static void check(String brepfilename, int lmax, int triangles_max, boolean onlyLeaves, String outDir)
 	{
 		logger.info("Reading "+brepfilename);
 		CADShapeBuilder factory = CADShapeBuilder.factory;
@@ -47,13 +46,7 @@ public class MeshOEMM
 		RawStorage.countTriangles(oemm);
 		oemm.aggregate(triangles_max);
 		RawStorage.dispatch(oemm, "dispatched", "dispatched.data");
-		IndexedStorage.indexOEMM("dispatched", "indexed");
-		final Viewer view=new Viewer();
-		view.addBranchGroup(OEMMViewer.bgOEMM(RawStorage.loadIntermediate("dispatched"), onlyLeaves));
-		//view.addBranchGroup(OEMMViewer.bgRawOEMM(oemm, onlyLeaves));
-		view.addBranchGroup(OEMMViewer.meshOEMM("indexed"));
-		view.zoomTo(); 
-		view.show();
+		IndexedStorage.indexOEMM("dispatched", outDir);
 	}
 	
 	/**
@@ -62,14 +55,15 @@ public class MeshOEMM
 	 */
 	public static void main(String args[])
 	{
-		if (args.length < 2)
+		if (args.length < 3)
 		{
-			System.out.println("Usage : MeshOEMM lmax brep");
+			System.out.println("Usage: MeshOEMMIndex level_max tri_max outDir brep");
 			System.exit(0);
 		}
 		Integer lmax = new Integer(args[0]);
 		Integer triangles_max = new Integer(args[1]);
-		String filename=args[2];
-		check(filename, lmax.intValue(), triangles_max.intValue(), true);
+		String outDir=args[2];
+		String filename=args[3];
+		check(filename, lmax.intValue(), triangles_max.intValue(), true, outDir);
 	}
 }
