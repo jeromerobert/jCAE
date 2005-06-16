@@ -132,7 +132,7 @@ public class RawOEMM extends OEMM
 		{
 			int merged = 0;
 			logger.debug(" Checking neighbors at level "+level);
-			for (OEMMNode current = head[level]; current != null; current = current.next)
+			for (OEMMNode current = head[level]; current != null; current = (OEMMNode) current.extra)
 			{
 				if (current.isLeaf || current.tn > max)
 					continue;
