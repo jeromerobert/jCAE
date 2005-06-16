@@ -409,6 +409,7 @@ public class IndexedStorage
 	
 	public static OEMM buildOEMMStructure(String dir)
 	{
+		logger.info("Building an OEMM from "+dir+File.separator+"files");
 		OEMM ret = new OEMM(dir+File.separator+"files");
 		try
 		{
@@ -452,6 +453,7 @@ public class IndexedStorage
 	
 	public static double [] getMeshOEMMCoords(OEMM oemm, TIntHashSet leaves)
 	{
+		logger.info("Creation of a mesh from reading selected nodes from an OEMM");
 		TIntObjectHashMap vertMap = new TIntObjectHashMap();
 		ArrayList triList = new ArrayList();
 		ReadVerticesProcedure rv_proc = new ReadVerticesProcedure(vertMap, leaves);
