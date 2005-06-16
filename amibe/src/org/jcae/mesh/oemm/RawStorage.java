@@ -30,7 +30,9 @@ import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
+import gnu.trove.TIntArrayList;
 import org.apache.log4j.Logger;
 
 /**
@@ -133,7 +135,6 @@ public class RawStorage
 		tree.walk(cmmi_proc);
 		
 		logger.debug("Raw OEMM: dispatch triangles into raw OEMM");
-		//  TODO: Output must be buffered
 		try
 		{
 			int [] ijk = new int[9];
@@ -167,7 +168,11 @@ public class RawStorage
 					addToCell(fc, cells[2], ijk);
 			}
 			coordsIn.close();
+			logger.debug("Raw OEMM: flush buffers");
+			FlushBuffersProcedure fb_proc = new FlushBuffersProcedure(fc);
+			tree.walk(fb_proc);
 			raf.close();
+			
 			//  Write octree data structure onto disk
 			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(structFile)));
 			WriteStructureProcedure wh_proc = new WriteStructureProcedure(out, dataFile, tree.nr_leaves, tree.x0);
@@ -247,12 +252,27 @@ public class RawStorage
 		throws java.io.IOException
 	{
 		assert current.counter <= fc.size();
-		ByteBuffer buf = ByteBuffer.allocate(36);
-		for (int i = 0; i < 9; i++)
-			buf.putInt(ijk[i]);
-		buf.rewind();
-		fc.write(buf, current.counter);
-		current.counter += 36L;
+		//  With 20 millions of triangles, unbuffered output took 420s
+		//  and buffered output 180s (4K buffer cache)
+		TIntArrayList list = (TIntArrayList) current.extra;
+		if (current.extra == null)
+		{
+			current.extra = new TIntArrayList(4096+9);
+			list = (TIntArrayList) current.extra;
+		}
+		else if (list.size() >= 4095)  // 4095 = 9*455
+		{
+			// Flush buffer
+			int size = list.size();
+			ByteBuffer buf = ByteBuffer.allocate(4*size);
+			IntBuffer bufInt = buf.asIntBuffer();
+			bufInt.put(list.toNativeArray());
+			buf.rewind();
+			fc.write(buf, current.counter);
+			current.counter += 4*size;
+			list.clear();
+		}
+		list.add(ijk);
 		current.tn++;
 	}
 	
@@ -267,6 +287,7 @@ public class RawStorage
 			offset += 36L * (long) current.tn;
 			//  Reinitialize this counter for further processing
 			current.tn = 0;
+			current.extra = null;
 			return OK;
 		}
 		public long getOffset()
@@ -294,6 +315,40 @@ public class RawStorage
 				current.leafIndex = nrLeaves;
 				nrLeaves++;
 			}
+			return OK;
+		}
+	}
+	
+	private static class FlushBuffersProcedure extends TraversalProcedure
+	{
+		private FileChannel fc;
+		public FlushBuffersProcedure(FileChannel channel)
+		{
+			fc = channel;
+		}
+		public final int action(OEMMNode current, int octant, int visit)
+		{
+			if (visit != LEAF || current.extra == null)
+				return SKIPWALK;
+			TIntArrayList list = (TIntArrayList) current.extra;
+			if (list.isEmpty())
+				return OK;
+			// Flush buffer
+			int size = list.size();
+			ByteBuffer buf = ByteBuffer.allocate(4*size);
+			IntBuffer bufInt = buf.asIntBuffer();
+			bufInt.put(list.toNativeArray());
+			buf.rewind();
+			try
+			{
+				assert current.counter <= fc.size();
+				fc.write(buf, current.counter);
+			}
+			catch (IOException ex)
+			{
+				logger.error("I/O error when writing file");
+			}
+			current.counter += 4*size;
 			return OK;
 		}
 	}

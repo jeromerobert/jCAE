@@ -45,7 +45,7 @@ public class OEMMNode
 	//  Child list
 	public OEMMNode[] child = new OEMMNode[8];
 	//  Linked list of nodes at the same level
-	public OEMMNode next;
+	public Object extra;
 	//  Parent node
 	//  TODO: The parent pointer can be replaced by a stack
 	//        if more room is needed.

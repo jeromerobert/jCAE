@@ -291,8 +291,8 @@ public class OEMM
 				current.child[ind].parent = current;
 				if (head[level] != null)
 				{
-					tail[level].next = current.child[ind];
-					tail[level] = tail[level].next;
+					tail[level].extra = current.child[ind];
+					tail[level] = (OEMMNode) tail[level].extra;
 				}
 				else
 				{
