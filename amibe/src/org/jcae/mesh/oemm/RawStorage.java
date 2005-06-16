@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
-import gnu.trove.TIntArrayList;
 import org.apache.log4j.Logger;
 
 /**
@@ -254,19 +253,19 @@ public class RawStorage
 		assert current.counter <= fc.size();
 		//  With 20 millions of triangles, unbuffered output took 420s
 		//  and buffered output 180s (4K buffer cache)
-		TIntArrayList list = (TIntArrayList) current.extra;
+		Int9Array list = (Int9Array) current.extra;
 		if (current.extra == null)
 		{
-			current.extra = new TIntArrayList(4096+9);
-			list = (TIntArrayList) current.extra;
+			current.extra = new Int9Array();
+			list = (Int9Array) current.extra;
 		}
-		else if (list.size() >= 4095)  // 4095 = 9*455
+		else if (list.isFull())
 		{
 			// Flush buffer
 			int size = list.size();
 			ByteBuffer buf = ByteBuffer.allocate(4*size);
 			IntBuffer bufInt = buf.asIntBuffer();
-			bufInt.put(list.toNativeArray());
+			bufInt.put(list.toNativeArray(), 0, size);
 			buf.rewind();
 			fc.write(buf, current.counter);
 			current.counter += 4*size;
@@ -330,14 +329,14 @@ public class RawStorage
 		{
 			if (visit != LEAF || current.extra == null)
 				return SKIPWALK;
-			TIntArrayList list = (TIntArrayList) current.extra;
+			Int9Array list = (Int9Array) current.extra;
 			if (list.isEmpty())
 				return OK;
 			// Flush buffer
 			int size = list.size();
 			ByteBuffer buf = ByteBuffer.allocate(4*size);
 			IntBuffer bufInt = buf.asIntBuffer();
-			bufInt.put(list.toNativeArray());
+			bufInt.put(list.toNativeArray(), 0, size);
 			buf.rewind();
 			try
 			{
@@ -399,4 +398,37 @@ public class RawStorage
 		}
 	}
 	
+	//  With 20 millions of triangles, writing dispatched file took 230s with
+	//  TIntArrayList and 180s with Int9Array
+	private static class Int9Array
+	{
+		private static final int capacity = 4095;  // Must be a multiple of 9!
+		private int [] data = new int[capacity];
+		private int offset = 0;
+		public int size()
+		{
+			return offset;
+		}
+		public boolean isEmpty()
+		{
+			return (offset == 0);
+		}
+		public boolean isFull()
+		{
+			return (offset >= capacity);
+		}
+		public void add(int [] src)
+		{
+			System.arraycopy(src, 0, data, offset, src.length);
+			offset += src.length;
+		}
+		public int [] toNativeArray()
+		{
+			return data;
+		}
+		public void clear()
+		{
+			offset = 0;
+		}
+	}
 }
