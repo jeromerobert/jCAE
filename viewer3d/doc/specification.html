@@ -1,0 +1,417 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+	<meta content="text/html; charset=iso-8859-15" http-equiv="CONTENT-TYPE">
+	<title>Specification de jcae-viewer3d</title>
+	<style type="text/css">@import "default.css"; </style>
+	<script src="summary.js" type="text/javascript"></script>
+</head>
+	<h2>Description du besoin</h2>
+	<ul>
+		<li>Une architecture logiciel et un API specialisée pour la visualisation 3D scientifique (maillage, preprocessing, postprocessing)</li>
+		<li>Une implementation de cette API avec des technologies portables et eprouvées</li>
+		<li>Des specialisations des cette API pour la CAO, les maillages differences et elements finis</li>
+	</ul>
+	<h2>Architecture</h2>
+	<p>L'outils sera decoupé en 9 modules:</p>
+	<table>
+		<tr>
+			<td><strong>Nom de paquet java</strong></td>
+			<td><strong>Fonction</strong></td>
+			<td><strong>Dependences</strong></td>
+		</tr>
+		<tr>
+			<td>jcae.viewer3d</td>
+			<td>Contient le composant AWT permettant la visualisation et les classes abstraites represantant les objets a visualiser</td>
+			<td>Java3D</td>
+		</tr>
+		<tr>
+			<td>jcae.viewer3d.fd</td>
+			<td>Contient les classes pour la visualisation de maillage differences finies et les interfaces permettant de les decrire</td>
+			<td>Java3D</td>
+		</tr>
+		<tr>
+			<td>jcae.viewer3d.fd.piaf</td>
+			<td>Permet l'interfacage de jcae-viewer3d avec PIAF FD</td>
+			<td>PIAF FD</td>
+		</tr>
+		<tr>
+			<td>jcae.viewer3d.fd.pl02</td>
+			<td>Permet de visualiser les fichiers pl02, wi02, ... de AserisFD dans jcae-viewer3d</td>
+			<td>-</td>
+		</tr>
+		<tr>
+			<td>jcae.viewer3d.fe</td>
+			<td>Contient les classes pour la visualisation de maillage elements finis et les interfaces permettant de les decrire</td>
+			<td>Java3D</td>
+	</tr>
+		<tr>
+			<td>jcae.viewer3d.fe.amibe</td>
+			<td>Permet de visualiser les fichiers de maillage issues du mailleur Amibe</td>
+			<td>-</td>
+		</tr>
+		<tr>
+			<td>jcae.viewer3d.fe.unv</td>
+			<td>Permet de visualiser des fichiers de maillage au format UNV (IDEAS)</td>
+			<td>-</td>
+		</tr>
+		<tr>
+			<td>jcae.viewer3d.cad</td>
+			<td>Contient les classes pour la visualisation de CAOs et les interfaces permettant de les decrire</td>
+			<td>Java3D</td>
+		</tr>
+		<tr>
+			<td>jcae.viewer3d.cad.occ</td>
+			<td>Permet de visualiser des CAOs (TopoDS_Shape, BRep, IGES, STEP) a travers Opencascade</td>
+			<td>libOccJava</td>
+		</tr>
+	</table>
+	<h3>Les fonctionnalités de jcae-viewer3d-core</h3>
+	<ul>
+		<li>Visualisation de plusieur fichier/source de donnée dans la meme vue pour comparer leur taille et leur position.</li>
+		<li>Veiller a ce que la scene en soit pas coupé sur par les plans z=Z_front=0 et z=Z_back.</li>
+	</ul>
+	<h2>Packaging</h2>
+	La configuration, la compilation, la construction et le packaging du
+	jcae-viewer3d sera basé sur Ant (
+	<a href="http://ant.apache.org"/>http://ant.apache.org</a>).
+	L'arborescance fichier attendue est la suivante:
+	<pre>
+&lt;package name&gt;
+|
++- build.xml
++- build.properties
++- classes
++- lib
++- doc
++- src
+|
++-jcae
+ |
+ +-viewer3d
+   |
+   +...
+	</pre>
+	<table>
+		<tr>
+			<td><strong>Fichier/repertoire</strong></td>
+			<td><strong>Description</strong></td>
+		</tr>
+		<tr>
+			<td>build.xml</td>
+			<td>script de compilation Ant</td>
+		</tr>
+		<tr>
+			<td>build.properties</td>
+			<td>parametres et dependances du packages</td>
+		</tr>
+		<tr>
+			<td>class</td>
+			<td>repertoire temporaire contenant les fichiers .class</td>
+		</tr>
+		<tr>
+			<td>lib</td>
+			<td>repertoire contenant les fichiers .jar</td>
+		</tr>
+		<tr>
+			<td>src</td>
+			<td>repertoire contenant les sources</td>
+		</tr>
+	</table>
+	<p>Les cibles attendues dans le script Ant sont les suivantes:</p>
+	<table>
+		<tr>
+			<td><strong>nom</strong></td>
+			<td><strong>description</strong></td>
+		</tr>
+		<tr>
+			<td>compile</td>
+			<td>Compile les sources (creation du repertoire class)</td>
+		</tr>
+		<tr>
+			<td>jar-viewer3d</td>
+			<td>Creation de jcae-viewer3d.jar</td>
+		</tr>
+		<tr>
+			<td>jar-occ</td>
+			<td>Creation de jcae-viewer3d-occ.jar</td>
+		</tr>
+		<tr>
+			<td>jar-piaffd</td>
+			<td>Creation de jcae-viewer3d-piaffd.jar</td>
+		</tr>
+		<tr>
+			<td>jar</td>
+			<td>Creation des 3 jar</td>
+		</tr>
+		<tr>
+			<td>javadoc</td>
+			<td>Creation de la javadoc dans le repertoire doc/</td>
+		</tr>
+		<tr>
+			<td>dist</td>
+			<td>Creation d'une archive tar.bz2 contenant les sources et les fichier build.*.</td>
+		</tr>
+		<tr>
+			<td>dist-bin</td>
+			<td>Creation d'une archive contenant la javadoc et les jar.</td>
+		</tr>
+	</table>
+	<p>Les jar attendus a l'issu de la construction sont:</p>
+	<table>
+		<tr>
+			<td><strong>Nom du fichier</strong></td>
+			<td><strong>Paquets Java</strong></td>
+		</tr>
+		<tr>
+			<td>jcae-viewer3d.jar</td>
+			<td><ul>
+				<li>jcae.viewer3d</li>
+				<li>jcae.viewer3d.fd</li>
+				<li>jcae.viewer3d.fd.pl02</li>
+				<li>jcae.viewer3d.fe</li>
+				<li>jcae.viewer3d.fe.amibe</li>
+				<li>jcae.viewer3d.fe.unv</li>
+				<li>jcae.viewer3d.cad</li>
+			</ul></td>
+		</tr>
+		<tr>
+			<td>jcae-viewer3d-piaffd.jar</td>
+			<td>jcae.viewer3d.fd.piaf</td>
+		</tr>
+		<tr>
+			<td>jcae-viewer3d-occ.jar</td>
+			<td>jcae.viewer3d.cad.occ</td>
+		</tr>
+	</table>
+
+	<h2>Performances</h2>
+	memoire/temps/fps pour syn3d-pl02, jcae-fdmesh, jcae-netbeans-mesh, j3dbean, viewer de jcae-mesher.
+	temps de reponse au picking.
+	<h3>Definition</h3>
+	Occupation memoire:
+	<pre>
+	System.gc();
+	usedMemory=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
+	</pre>
+	
+	<h3>Mesure du FPS</h3>
+	<pre>
+    <font color="#2e8b57"><b>public</b></font> <font color="#2e8b57"><b>class</b></font> FrameBehavior <font color="#2e8b57"><b>extends</b></font> Behavior
+    {
+        <font color="#2e8b57"><b>final</b></font> <font color="#2e8b57"><b>int</b></font> frameIncr = <font color="#ff00ff">100</font>;
+        <font color="#2e8b57"><b>int</b></font> frameCount = <font color="#ff00ff">0</font>;
+        WakeupCriterion frames = <font color="#a52a2a"><b>new</b></font> WakeupOnElapsedFrames(frameIncr);
+        <font color="#2e8b57"><b>long</b></font> lastMS = <font color="#ff00ff">0</font>;
+
+        FrameBehavior()
+        {
+            <font color="#2e8b57"><b>super</b></font>();
+        }
+
+        <font color="#0000ff">// Sets timer to zero and registers the wakeup condition.</font>
+        <font color="#2e8b57"><b>public</b></font> <font color="#2e8b57"><b>void</b></font> initialize()
+        {
+            lastMS = System.currentTimeMillis();
+            wakeupOn(frames);
+        }
+
+        <font color="#0000ff">// Print frame rate and re-register wakeup condition.</font>
+        <font color="#2e8b57"><b>public</b></font> <font color="#2e8b57"><b>void</b></font> processStimulus(Enumeration criteria)
+        {
+            frameCount += frameIncr;
+            <font color="#2e8b57"><b>long</b></font> et = System.currentTimeMillis() - lastMS;
+            System.out.println(<font color="#ff00ff">&quot;fps: &quot;</font> + (<font color="#2e8b57"><b>double</b></font>) frameIncr * <font color="#ff00ff">1000.d</font>
+                / (<font color="#2e8b57"><b>double</b></font>) et);
+            lastMS = System.currentTimeMillis();
+            wakeupOn(frames);
+        }
+    }
+	</pre>
+	<h3>Description de la plateforme de test</h3>
+	<table>
+		<tr>
+			<td><strong>CPU</strong></td>
+			<td>Bi-Athlon MP 2200+</td>
+		</tr>
+		<tr>
+			<td><strong>RAM</strong></td>
+			<td>2Go</td>
+		</tr>
+		<tr>
+			<td><strong>Chipset Video</strong></td>
+			<td>GeForce4 Ti 4600</td>
+		</tr>
+		<tr>
+			<td><strong>Memoire video</strong></td>
+			<td>128Mo</td>
+		</tr>
+		<tr>
+			<td><strong>Environement logiciel</strong></td>
+			<td>Linux, XFree 4.3 avec driver NVIDIA-Linux-x86-1.0-6629</td>
+		</tr>
+	</table>
+	<h3>Maillage FD</h3>
+	<ul>
+		<li>Taille memoire maximale: 300 octets/plaques</li>
+		<li>Temp maximal pour charger et afficher un pl02 de 150000 plaques: 20 secondes</li>
+		<li>Frame rate pour 150000 plaques: 20 FPS</li>
+		<li>Temps de reponse au picking dans une scene de 150000 plaques (detection et mise en evidence de l'element cliqué): 100ms</li>
+	</ul>
+	<h3>Maillage FE</h3>
+	<ul>
+		<li>Chargement d'un maillage de 700000 elements en moins de 10 secondes</li>
+		<li>Occupation memoire: pas plus de 30 octets/triangles</li>
+		<li>2 FPS</li>
+	</ul>
+	<h3>Maillage FE avec post-pro</h3>
+	<ul>
+		<li>360000 triangles, 30s de chargement a partir d'un UNV, 200Mo, 10 FPS</li>
+	</ul>
+	<h2>Question</h2>
+	<ul>
+		<li>Quid des mapping de bitmap</li>
+		<li>La visualisation de resultats fe doit-elle etre dans le meme module que la visu pre-pro</li>
+		<li>Faut-il un ViewManager dans ce paquet.
+		<ul><li>Non, ca ira au niveau de jcae-netbeans-viewer3d.</li></ul></li>
+		<li>Comment mesurer le FPS avec Java3D</li>
+		<li>Comment inclure des images 2D dans une scene 3D avec Java3D
+		<ul><li>Utiliser la classe javax.j3d...Raster</li></ul></li>
+		<li>Comment mesurer la memoire
+		<ul><li>Utiliser Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()</li></ul>
+		<li>Comment mesurer le temps de picking
+		<ul><li>System.currentTimeMillis()</li></ul>
+		<li>Comment mesurer le FPS en Java3D
+		<ul><li>???</li></ul>
+	</ul>
+	<h2>Specification du format de fichier Amibe</h2>
+	TODO: Inclure la DTD documentée.
+	<h2>Chiffrages</h2>
+	<table>
+		<tr>
+			<td><strong>Tache</strong></td>
+			<td><strong>Durée</strong></td>
+			<td><strong>A faire (G.A. 09/02/2005)</strong></td>
+			<td><strong>status 22/02/2005</strong></td>
+		</tr>
+		<tr> <td> <strong> jcae.viewer3d </strong></td> </tr>
+		<tr>
+			<td>visualiseur simple</td>
+			<td>5j</td>
+			<td>X</td>
+			<td>Termine</td>
+		</tr>
+		<tr>
+			<td>View.getPosition, View.setPosition</td>
+			<td>5j</td>
+			<td>X</td>
+			<td>Termine</td>
+		</tr>
+		<tr>
+			<td>Axe de taille fixe</td>
+			<td>4j</td>
+			<td>X</td>
+			<td>Termine</td>
+		</tr>
+		<tr>
+			<td>Axe flotant</td>
+			<td>1j si Axe de taille fixe</td>
+			<td>X</td>
+			<td>Bug</td>
+		</tr>
+		<tr>
+			<td>Snapshot</td>
+			<td>0.5j</td>
+			<td>X</td>
+			<td>Termine</td>
+		</tr>
+		<tr>
+			<td>Lien navigation entre vues</td>
+			<td>0.5j si View.getPosition et View.setPosition</td>
+			<td>X</td>
+			<td>Termine</td>
+		</tr>
+		<tr>
+			<td>Rectangle elastique</td>
+			<td>4j</td>
+			<td><br/></td>
+		</tr>
+		<tr>
+			<td>Selection par polygones</td>
+			<td>5j</td>
+			<td><br/></td>
+		</tr>
+		<tr> <td> <strong> jcae.viewer3d.fd </strong></td> </tr>
+		<tr>
+			<td>module visu FD (jcae.viewer3d.fd)</td>
+			<td>20j</td>
+			<td><br/></td>
+		</tr>
+		<tr>
+			<td>source de données PIAFFD (jcae.viewer3d.fd.piaffd)</td>
+			<td>10j (7j si a partir du proto a faire pour fin Fevrier)</td>
+			<td><br/></td>
+		</tr>
+		<tr>
+			<td>source de données pl02... (jcae.viewer3d.fd.pl02)</td>
+			<td>7j</td>
+			<td><br/></td>
+		</tr>
+		<tr> <td> <strong> jcae.viewer3d.cad </strong></td> </tr>
+		<tr>
+			<td>module de visu CAO avec selection face, edge, vertex monomodale (jcae.viewer3d.cad)</td>
+			<td>2j</td>
+			<td>X</td>
+			<td>Selection face uniquement</td>
+		</tr>
+		<tr>
+			<td>selection de groupes et multimodale dans la visu CAO</td>
+			<td>4j</td>
+			<td>X</td>
+		</tr>
+		<tr>
+			<td>source de données Opencascade pour le module CAO</td>
+			<td>2j</td>
+			<td>X</td>
+			<td>Termine</td>
+		</tr>
+		<tr> <td> <strong> jcae.viewer3d.fe </strong></td> </tr>
+		<tr>
+			<td>module visu FE avec triangle, groupe, picking sur groupes, bords libres</td>
+			<td>3j</td>
+			<td>X</td>
+			<td>Bords libre pas fait</td>
+		</tr>
+		<tr>
+			<td>source de donnée Amibe pour le module visu FE</td>
+			<td>1j</td>
+			<td>X</td>
+			<td>Termine</td>
+		</tr>
+		</tr>
+		<tr>
+			<td>Visualisation de resultats sur triangles</td>
+			<td>4j</td>
+			<td>X</td>
+		</tr>
+		<tr>
+			<td>Visualisation et picking de tout type d'elements</td>
+			<td>80j</td>
+			<td><br/></td>
+		</tr>
+		<tr>
+			<td>Source de donnée UNV avec triangle et groupes</td>
+			<td>0.5j</td>
+			<td>X</td>
+		</tr>
+		<tr>
+			<td>Source de donnée UNV avec tous les type d'elements supporté par jcae.viewer3d.fe</td>
+			<td>20j</td>
+			<td><br/></td>
+		</tr>
+		<tr>
+			<td><strong>Total</strong></td>
+			<td><br/></td>
+			<td>32j</td>
+		</tr>
+	</table>

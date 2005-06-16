@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="jar-viewer3d" name="jcae-viewer3d">
+
+	<target name="init">
+		<property file="build.properties"/>
+		<tstamp/>
+		<property name="version" value="${DSTAMP}"/>
+	</target>
+	
+	<target name="compile" depends="init">
+		<mkdir dir="${classes.dir}"/>
+		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}">
+			<compilerarg line="${compiler.arg}"/>
+			<classpath>
+				<pathelement location="${occjava.jar}"/>
+				<pathelement location="${log4j.jar}"/>
+				<pathelement location="${trove.jar}"/>
+			</classpath>
+			<exclude name="jdistfs/cache/protocol/ssh/**"/>
+		</javac>
+	</target>
+	
+	<target name="jar-viewer3d" depends="compile" description="Create the core jar">
+		<mkdir dir="${jar.dir}"/>
+		<jar compress="true" jarfile="${jar.dir}/${jcae-viewer3d.jar}">
+			<manifest>
+				<attribute name="Main-Class" value="org.jcae.viewer3d.test.Main"/>
+				<attribute name="Class-Path" value="trove.jar occjava.jar"/>
+			</manifest>
+			<fileset dir="${classes.dir}" includes="org/jcae/viewer3d/**"/>
+			<fileset dir="${classes.dir}" includes="org/jdesktop/j3d/utils/behaviors/vp/**"/>
+		</jar>
+	</target>
+
+	<target name="jar-cache" depends="compile" description="Create the cache server jar">
+		<mkdir dir="${jar.dir}"/>
+		<jar compress="true" jarfile="${jar.dir}/${cache.jar}">
+			<manifest>
+				<attribute name="Main-Class" value="jdistfs.cache.Main"/>
+				<attribute name="Class-Path" value="${dependencies.cache.jar}"/>
+			</manifest>
+			<fileset dir="${classes.dir}" includes="jdistfs/cache/**"/>
+			<fileset dir="${classes.dir}" includes="jdistfs/*"/>
+			<fileset dir="${src.dir}" includes="jdistfs/cache/*.txt"/>
+			<fileset dir="${src.dir}" includes="jdistfs/cache/*.properties"/>
+			<fileset dir="." includes="log4j.properties"/>
+		</jar>
+	</target>
+
+	<target name="jar-test" depends="compile" description="Create the test jar">
+		<mkdir dir="${jar.dir}"/>
+		<jar compress="true" jarfile="${jar.dir}/${test.jar}">
+			<manifest>
+				<attribute name="Main-Class" value="jdistfs.test.Main"/>
+				<attribute name="Class-Path" value="${dependencies.test.jar}"/>
+			</manifest>
+			<fileset dir="${classes.dir}" includes="jdistfs/test/**"/>
+			<fileset dir="${src.dir}" includes="jdistfs/test/*.txt"/>
+			<fileset dir="${classes.dir}" includes="jdistfs/*"/>
+			<fileset dir="." includes="log4j.properties"/>
+		</jar>
+	</target>
+
+	<target name="jar-directory" depends="compile" description="Create the directory jar">
+		<mkdir dir="${jar.dir}"/>
+		<jar compress="true" jarfile="${jar.dir}/${directory.jar}">
+			<manifest>
+				<attribute name="Class-Path" value="${dependencies.directory.jar}"/>
+			</manifest>
+			<fileset dir="${classes.dir}" includes="jdistfs/directory/**"/>
+			<fileset dir="${classes.dir}" includes="jdistfs/*"/>
+			<fileset dir="${src.dir}" includes="jdistfs/directory/*.properties"/>
+			<fileset dir="." includes="log4j.properties"/>
+		</jar>
+	</target>
+
+	<target name="jar" depends="jar-viewer3d" description="Create all jars"/>
+
+	<target name="all" depends="dist-bin" description="Build everything."/>
+	
+	<target name="javadoc" description="Javadoc for my API." depends="init">
+		<mkdir dir="${javadoc.dir}"/>
+		<javadoc destdir="${javadoc.dir}" packagenames="jcae.*">
+			<sourcepath>
+				<pathelement location="${src.dir}"/>
+			</sourcepath>
+		</javadoc>
+	</target>
+	
+	<target name="clean" description="Clean all build products." depends="init">
+		<delete dir="${classes.dir}"/>
+		<delete dir="${javadoc.dir}"/>
+		<delete file="${jar.dir}/${cache.jar}"/>
+		<delete file="${jar.dir}/${client.jar}"/>
+		<delete file="${jar.dir}/${test.jar}"/>
+		<delete file="${jar.dir}/${directory.jar}"/>
+	</target>
+	
+	<target name="dist" description="build a tar.bz2 archive to distribute sources" depends="init">
+		<tar destfile="${project.name}-src-${version}.tar">
+			<tarfileset dir="." prefix="${project.name}-${version}" username="jdistfs" group="jdistfs">
+				<include name="*.jsp" />
+				<include name="*.xml" />
+				<include name="src/**"/>
+				<include name="INSTALL"/>
+				<include name="ChangeLog"/>
+				<include name="doc/*.svg"/>
+				<include name="doc/index.html"/>
+			</tarfileset>
+		</tar>
+		<bzip2 src="${project.name}-src-${version}.tar" zipfile="${project.name}-src-${version}.tar.bz2"/>
+		<delete file="${project.name}-src-${version}.tar"/>
+	</target>
+
+	<target name="dist-bin" description="build a zip to distribute binaries" depends="jar">
+		<zip destfile="${project.name}-bin-${version}.zip">
+			<zipfileset prefix="${project.name}-${version}" file="${jar.dir}/${test.jar}"/>
+			<zipfileset prefix="${project.name}-${version}" file="${jar.dir}/${client.jar}"/>
+			<zipfileset prefix="${project.name}-${version}" file="${jar.dir}/${cache.jar}"/>
+			<zipfileset prefix="${project.name}-${version}" file="${ftpserver.jar}"/>
+			<zipfileset prefix="${project.name}-${version}" file="${commons-net.jar}"/>
+			<zipfileset prefix="${project.name}-${version}" file="${log4j.jar}"/>
+			<zipfileset prefix="${project.name}-${version}" file="${war}"/>
+			<zipfileset prefix="${project.name}-${version}" file="${xmlrpc.jar}"/>
+		</zip>
+	</target>
+
+	<target name="random-test" description="random test" depends="jar">
+		<java classname="jdistfs.RandomTest" fork="yes">
+			<classpath>
+				<pathelement location="lib/jdistfs.jar"/>
+			</classpath>
+			<jvmarg value="${test.jvmarg}"/>
+		</java>
+	</target>
+	<target name="test" description="test" depends="jar">
+		<java jar="${jar}" fork="yes">
+			<jvmarg value="${test.jvmarg}"/>
+		</java>
+	</target>
+</project>
