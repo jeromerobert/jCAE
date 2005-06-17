@@ -33,7 +33,10 @@ public abstract class CADShapeBuilder
 	{
 		String cadType = System.getProperty("org.jcae.mesh.cad");
 		if (cadType == null)
+		{
 			cadType = "org.jcae.mesh.cad.occ.OCCShapeBuilder";
+			System.setProperty("org.jcae.mesh.cad", cadType);
+		}
 		try
 		{
 			factory = (CADShapeBuilder) Class.forName(cadType).newInstance();

@@ -171,11 +171,23 @@ public class Mesh
                                 (bb[2] - bb[5]) * (bb[2] - bb[5]));
 		if (Metric2D.getLength() == 0.0)
 			Metric2D.setLength(diagonal);
-		Double absEpsilon = new Double(System.getProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon", "-1.0"));
+		String absEpsilonProp = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon");
+		if (absEpsilonProp == null)
+		{
+			absEpsilonProp = "-1.0";
+			System.setProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon", absEpsilonProp);
+		}
+		Double absEpsilon = new Double(absEpsilonProp);
 		epsilon = absEpsilon.doubleValue();
 		if (epsilon < 0)
 			epsilon = Math.max(diagonal/1000.0, Metric2D.getLength() / 100.0);
-		accumulateEpsilon = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon", "false").equals("true");
+		String accumulateEpsilonProp = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon");
+		if (accumulateEpsilonProp == null)
+		{
+			accumulateEpsilonProp = "false";
+			System.setProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon", accumulateEpsilonProp);
+		}
+		accumulateEpsilon = accumulateEpsilonProp.equals("true");
 		logger.debug("Bounding box diagonal: "+diagonal);
 		logger.debug("Epsilon: "+epsilon);
 	}

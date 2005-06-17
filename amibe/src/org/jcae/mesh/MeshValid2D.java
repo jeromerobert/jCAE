@@ -58,7 +58,13 @@ public class MeshValid2D
 		try
 		{
 			int iFace = 0;
-			int numFace = Integer.parseInt(System.getProperty("org.jcae.mesh.Mesher.meshFace", "0"));
+			String numFaceProp = System.getProperty("org.jcae.mesh.Mesher.meshFace");
+			if (numFaceProp == null)
+			{
+				numFaceProp = "0";
+				System.setProperty("org.jcae.mesh.Mesher.meshFace", numFaceProp);
+			}
+			int numFace = Integer.parseInt(numFaceProp);
 			CADExplorer expF = CADShapeBuilder.factory.newExplorer();
 			TIntHashSet indBnd = new TIntHashSet();
 			QualityFloat data = new QualityFloat(1000);
