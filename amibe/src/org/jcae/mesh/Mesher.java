@@ -113,6 +113,12 @@ public class Mesher
 			processMesh3dProp = "true";
 			System.setProperty("org.jcae.mesh.Mesher.mesh3d", processMesh3dProp);
 		}
+		String processTriangleSoupProp = System.getProperty("org.jcae.mesh.Mesher.triangleSoup");
+		if (processTriangleSoupProp == null)
+		{
+			processTriangleSoupProp = "false";
+			System.setProperty("org.jcae.mesh.Mesher.triangleSoup", processTriangleSoupProp);
+		}
 		String writeNormalsProp = System.getProperty("org.jcae.mesh.Mesher.writeNormals");
 		if (writeNormalsProp == null)
 		{
@@ -308,6 +314,32 @@ public class Mesher
 				logger.info("Exporting MESH");
 				String MESHName=brepfilename.substring(0, brepfilename.lastIndexOf('.'))+".mesh";
 				new UNVConverter(xmlDir).writeMESH(MESHName);
+			}
+		}
+		if (processTriangleSoupProp.equals("true")) {
+			// Step 3: Read 2D meshes and compute raw 3D mesh
+			try
+			{
+				int iFace = 0;
+				MeshToSoupConvert m2dTo3D = new MeshToSoupConvert(xmlDir);
+				m2dTo3D.initialize("soup", false);
+				iFace = 0;
+				for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
+				{
+					CADFace F = (CADFace) expF.current();
+					iFace++;
+					if (numFace != 0 && iFace != numFace)
+						continue;
+					xmlFile = "jcae2d."+iFace;
+					logger.info("Importing face "+iFace);
+					m2dTo3D.convert(xmlFile, iFace, F);
+				}
+				m2dTo3D.finish();
+			}
+			catch(Exception ex)
+			{
+				logger.warn(ex.getMessage());
+				ex.printStackTrace();
 			}
 		}
 		if (badGroups.size() > 0)
