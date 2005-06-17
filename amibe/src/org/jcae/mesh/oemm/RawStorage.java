@@ -40,6 +40,11 @@ import org.apache.log4j.Logger;
 public class RawStorage
 {
 	private static Logger logger = Logger.getLogger(RawStorage.class);	
+
+	//  In the raw file, a triangle has 9 double coordinates and an int.
+	private static final long TRIANGLE_SIZE_RAW = 76L;
+	//  In the dispatched file, a triangle has 9 int coordinates and an int.
+	private static final long TRIANGLE_SIZE_DISPATCHED = 40L;
 	
 	/**
 	 * Build a raw OEMM and count the number of triangles which have to be assigned
@@ -69,7 +74,7 @@ public class RawStorage
 			FileInputStream fs = new FileInputStream(tree.getFileName());
 			DataInputStream coordsIn = new DataInputStream(new BufferedInputStream(fs));
 			long size = fs.getChannel().size();
-			for(long nr = 0L; nr < size; nr += 72L)
+			for(long nr = 0L; nr < size; nr += TRIANGLE_SIZE_RAW)
 			{
 				for (int i = 0; i < 3; i++)
 				{
@@ -79,6 +84,7 @@ public class RawStorage
 					tree.double2int(xyz, ijk);
 					cells[i] = tree.build(0, ijk);
 				}
+				coordsIn.readInt();
 				cells[0].tn++;
 				if (cells[1] != cells[0])
 					cells[1].tn++;
@@ -145,7 +151,7 @@ public class RawStorage
 			RandomAccessFile raf = new RandomAccessFile(dataFile, "rw");
 			FileChannel fc = raf.getChannel();
 			raf.setLength(outputFileSize);
-			for(long nr = 0L; nr < size; nr += 72L)
+			for(long nr = 0L; nr < size; nr += TRIANGLE_SIZE_RAW)
 			{
 				for (int i = 0; i < 3; i++)
 				{
@@ -160,11 +166,12 @@ public class RawStorage
 							ijk[6-3*i+j] = ijk[j];
 					}
 				}
-				addToCell(fc, cells[0], ijk);
+				int attribute = coordsIn.readInt();
+				addToCell(fc, cells[0], ijk, attribute);
 				if (cells[1] != cells[0])
-					addToCell(fc, cells[1], ijk);
+					addToCell(fc, cells[1], ijk, attribute);
 				if (cells[2] != cells[0] && cells[2] != cells[1])
-					addToCell(fc, cells[2], ijk);
+					addToCell(fc, cells[2], ijk, attribute);
 			}
 			coordsIn.close();
 			logger.debug("Raw OEMM: flush buffers");
@@ -247,17 +254,17 @@ public class RawStorage
 		return ret;
 	}
 	
-	private static void addToCell(FileChannel fc, OEMMNode current, int [] ijk)
+	private static void addToCell(FileChannel fc, OEMMNode current, int [] ijk, int attribute)
 		throws java.io.IOException
 	{
 		assert current.counter <= fc.size();
 		//  With 20 millions of triangles, unbuffered output took 420s
 		//  and buffered output 180s (4K buffer cache)
-		Int9Array list = (Int9Array) current.extra;
+		Int10Array list = (Int10Array) current.extra;
 		if (current.extra == null)
 		{
-			current.extra = new Int9Array();
-			list = (Int9Array) current.extra;
+			current.extra = new Int10Array();
+			list = (Int10Array) current.extra;
 		}
 		else if (list.isFull())
 		{
@@ -272,6 +279,7 @@ public class RawStorage
 			list.clear();
 		}
 		list.add(ijk);
+		list.add(attribute);
 		current.tn++;
 	}
 	
@@ -283,7 +291,7 @@ public class RawStorage
 			if (visit != LEAF)
 				return SKIPWALK;
 			current.counter = offset;
-			offset += 36L * (long) current.tn;
+			offset += TRIANGLE_SIZE_DISPATCHED * (long) current.tn;
 			//  Reinitialize this counter for further processing
 			current.tn = 0;
 			current.extra = null;
@@ -329,7 +337,7 @@ public class RawStorage
 		{
 			if (visit != LEAF || current.extra == null)
 				return SKIPWALK;
-			Int9Array list = (Int9Array) current.extra;
+			Int10Array list = (Int10Array) current.extra;
 			if (list.isEmpty())
 				return OK;
 			// Flush buffer
@@ -379,7 +387,7 @@ public class RawStorage
 			{
 				//  Offset in data file
 				//  This offset had been shifted when writing triangles
-				current.counter -= 36L * current.tn;
+				current.counter -= TRIANGLE_SIZE_DISPATCHED * current.tn;
 				out.writeLong(current.counter);
 				//  Number of triangles really found
 				out.writeInt(current.tn);
@@ -399,10 +407,10 @@ public class RawStorage
 	}
 	
 	//  With 20 millions of triangles, writing dispatched file took 230s with
-	//  TIntArrayList and 180s with Int9Array
-	private static class Int9Array
+	//  TIntArrayList and 180s with Int10Array
+	private static class Int10Array
 	{
-		private static final int capacity = 4095;  // Must be a multiple of 9!
+		private static final int capacity = 4090;  // Must be a multiple of 10!
 		private int [] data = new int[capacity];
 		private int offset = 0;
 		public int size()
@@ -421,6 +429,11 @@ public class RawStorage
 		{
 			System.arraycopy(src, 0, data, offset, src.length);
 			offset += src.length;
+		}
+		public void add(int val)
+		{
+			data[offset] = val;
+			offset++;
 		}
 		public int [] toNativeArray()
 		{

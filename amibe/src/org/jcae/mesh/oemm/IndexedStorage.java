@@ -183,6 +183,8 @@ public class IndexedStorage
 							}
 						}
 					}
+					//  Group number
+					bufIn.readInt();
 					for (int i = 0; i < 3; i++)
 					{
 						if (leaf[i] != current.leafIndex)
@@ -238,6 +240,14 @@ public class IndexedStorage
 				output.writeInt(current.vn);
 				//  Number of triangles
 				output.writeInt(tCount);
+				//  These two integers are not used during normal
+				//  processing, but they are needed to recover
+				//  from a crash in IndexExternalVerticesProcedure
+				//  without having to run IndexInternalVerticesProcedure
+				//  again
+				output.writeLong(current.counter);
+				output.writeInt(current.tn);
+				
 				output.close();
 				
 				DataOutputStream outVert = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(current.file+"v")));
@@ -292,10 +302,19 @@ public class IndexedStorage
 			if (current.parent == null || visit != LEAF)
 				return SKIPWALK;
 			logger.debug("Indexing external vertices of node "+(current.leafIndex+1)+"/"+oemm.nr_leaves);
+			//  TODO:  Add a better memory management system
+			System.gc();
+			if (Runtime.getRuntime().freeMemory() < 100000000L)
+			{
+				logger.debug("Purging cached vertices to release memory");
+				for (int i = 0; i < vertices.length; i++)
+					vertices[i] = null;
+			}
+			
 			//  Load inner vertices...
-			vertices[current.leafIndex] = loadVerticesInAVLTreeDup(current);
+			if (vertices[current.leafIndex] == null)
+				vertices[current.leafIndex] = loadVerticesInAVLTreeDup(current);
 			//  ... and adjacent ones.
-			//  TODO:  Add memory management to release memory when needed.
 			for (int i = 0; i < current.adjLeaves.size(); i++)
 			{
 				int ind = current.adjLeaves.get(i);
@@ -322,6 +341,7 @@ public class IndexedStorage
 						leaf[i] = oemm.search(ijk).leafIndex;
 						pointIndex[i] = vertices[leaf[i]].get(ijk);
 					}
+					int groupNumber = bufIn.readInt();
 					if (leaf[0] >= current.leafIndex && leaf[1] >= current.leafIndex && leaf[2] >= current.leafIndex)
 					{
 						for (int i = 0; i < 3; i++)
@@ -329,6 +349,7 @@ public class IndexedStorage
 							output.writeInt(leaf[i]);
 							output.writeInt(pointIndex[i]);
 						}
+						output.writeInt(groupNumber);
 					}
 				}
 				output.close();
@@ -358,8 +379,9 @@ public class IndexedStorage
 			current.k0 = bufIn.readInt();
 			//  Number of neighboring nodes sharing data
 			int nr = bufIn.readInt();
+			current.adjLeaves = new TIntArrayList(nr);
 			for (int i = 0; i < nr; i++)
-				bufIn.readInt();
+				current.adjLeaves.add(bufIn.readInt());
 			//  First global index
 			current.minIndex = bufIn.readInt();
 			//  Last available global index
@@ -368,6 +390,12 @@ public class IndexedStorage
 			current.vn = bufIn.readInt();
 			//  Number of triangles
 			current.tn = bufIn.readInt();
+			//  When IndexExternalVerticesProcedure is called
+			//  whereas IndexInternalVerticesProcedure was not
+			//  (e.g. after a crash to not reindex internal
+			//  vertices), uncomment the folllowing 2 lines
+			//current.counter = bufIn.readLong();
+			//current.tn = bufIn.readInt();
 			bufIn.close();
 		}
 		catch (IOException ex)
@@ -573,6 +601,7 @@ public class IndexedStorage
 						else
 							readable = false;
 					}
+					int groupNumber = bufIn.readInt();
 					if (readable)
 					{
 						Triangle3d t = new Triangle3d(vert[0], vert[1], vert[2]);
