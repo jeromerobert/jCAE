@@ -25,6 +25,7 @@ import org.jcae.mesh.oemm.*;
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADShapeBuilder;
 import org.apache.log4j.Logger;
+import java.io.File;
 
 /**
  * This class illustrates how to perform quality checks.
@@ -33,7 +34,7 @@ public class MeshOEMMIndex
 {
 	private static Logger logger=Logger.getLogger(MeshOEMMIndex.class);
 
-	private static void check(String brepfilename, int lmax, int triangles_max, String rawMesh, String outDir)
+	private static void check(String brepfilename, int lmax, int triangles_max, String soupDir, String outDir)
 	{
 		logger.info("Reading "+brepfilename);
 		CADShapeBuilder factory = CADShapeBuilder.factory;
@@ -42,6 +43,7 @@ public class MeshOEMMIndex
 		double [] umax = new double[3];
 		for (int i = 0; i < 3; i++)
 			umax[i] = bbox[i+3];
+		String rawMesh = soupDir+File.separator+"soup";
 		final RawOEMM oemm = new RawOEMM(rawMesh, lmax, bbox, umax);
 		RawStorage.countTriangles(oemm);
 		oemm.aggregate(triangles_max);
@@ -57,14 +59,14 @@ public class MeshOEMMIndex
 	{
 		if (args.length < 4)
 		{
-			System.out.println("Usage: MeshOEMMIndex level_max tri_max rawMesh outDir brep");
+			System.out.println("Usage: MeshOEMMIndex level_max tri_max outDir brep soupDir");
 			System.exit(0);
 		}
 		Integer lmax = new Integer(args[0]);
 		Integer triangles_max = new Integer(args[1]);
-		String rawMesh=args[2];
-		String outDir=args[3];
-		String filename=args[4];
-		check(filename, lmax.intValue(), triangles_max.intValue(), rawMesh, outDir);
+		String outDir=args[2];
+		String filename=args[3];
+		String soupDir=args[4];
+		check(filename, lmax.intValue(), triangles_max.intValue(), soupDir, outDir);
 	}
 }
