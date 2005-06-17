@@ -27,6 +27,8 @@ import java.io.PrintStream;
 import java.io.File;
 import java.util.Properties;
 import java.util.Stack;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 
 import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.InitialTriangulationException;
@@ -91,7 +93,7 @@ public class Mesher
 		if (maxFaceProp == null)
 		{
 			maxFaceProp = "0";
-			System.setProperty("org.jcae.mesh.Mesher.minFace", maxFaceProp);
+			System.setProperty("org.jcae.mesh.Mesher.maxFace", maxFaceProp);
 		}
 		String processMesh1dProp = System.getProperty("org.jcae.mesh.Mesher.mesh1d");
 		if (processMesh1dProp == null)
@@ -316,8 +318,10 @@ public class Mesher
 		return badGroups;
 	}
 	
-	private static void report(String brepfilename, TIntArrayList badGroups, String xmlDir, double discr, double defl)
+	private static void report(String brepfilename, TIntArrayList badGroups, String xmlDir, double discr, double defl, String startDate)
 	{
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String endDate = sdf.format(new Date());
 		String outfile = System.getProperty("org.jcae.mesh.Mesher.reportFile");
 		if (outfile == null)
 			return;
@@ -327,10 +331,12 @@ public class Mesher
 			InputStream in = Mesher.class.getResourceAsStream("/timestamp.properties");
 			Properties prop = new Properties();
 			prop.load(in);
-			String date = prop.getProperty("build.time");
+			String buildDate = prop.getProperty("build.time");
 			int [] res = MMesh3DReader.getInfos(xmlDir, "jcae3d");
 			out.println("MESH REPORT");
 			out.println("===========");
+			out.println("Start date: "+startDate);
+			out.println("End date: "+endDate);
 			out.println("Geometry: "+brepfilename);
 			out.println("Edge length criterion: "+discr);
 			out.println("Deflection criterion: "+defl);
@@ -340,7 +346,7 @@ public class Mesher
 			out.println("Number of groups which cannot be meshed: "+badGroups.size());
 			if (badGroups.size() > 0)
 				out.println(""+badGroups);
-			out.println("jcae.jar build time: "+date);
+			out.println("jcae.jar build time: "+buildDate);
 			Properties sys = System.getProperties();
 			sys.list(out);
 			out.close();
@@ -414,6 +420,8 @@ public class Mesher
 	 */
 	public static void main(String args[])
 	{
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String startDate = sdf.format(new Date());
 		try
 		{
 			if (args.length < 2 || args.length > 4)
@@ -466,7 +474,7 @@ public class Mesher
 			Double discr=new Double(args[2]);
 			Double defl=new Double(args[3]);
 			TIntArrayList badGroups = mesh(filename, unvName, xmlDir, discr.doubleValue(), defl.doubleValue());
-			report(args[0], badGroups, xmlDir, discr.doubleValue(), defl.doubleValue());
+			report(args[0], badGroups, xmlDir, discr.doubleValue(), defl.doubleValue(), startDate);
 			if(Boolean.getBoolean("org.jcae.mesh.tmpDir.delete"))
 			{
 				deleteDirectory(new File(xmlDir), new File(unvName));
