@@ -212,7 +212,7 @@ public class IndexedStorage
 				globalIndex += index + room;
 				
 				//  Now store data structure onto disk
-				DataOutputStream output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(current.file)));
+				DataOutputStream output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(current.file+"h")));
 				//  Leaf index
 				output.writeInt(current.leafIndex);
 				//  Cell size
@@ -368,7 +368,7 @@ public class IndexedStorage
 	{
 		try
 		{
-			DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(current.file)));
+			DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(current.file+"h")));
 			// Leaf index
 			current.leafIndex = bufIn.readInt();
 			// Cell size
@@ -400,7 +400,7 @@ public class IndexedStorage
 		}
 		catch (IOException ex)
 		{
-			logger.error("I/O error when reading indexed file "+current.file);
+			logger.error("I/O error when reading indexed file "+current.file+"h");
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
@@ -427,7 +427,7 @@ public class IndexedStorage
 		}
 		catch (IOException ex)
 		{
-			logger.error("I/O error when reading indexed file "+current.file);
+			logger.error("I/O error when reading indexed file "+current.file+"v");
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
@@ -613,7 +613,7 @@ public class IndexedStorage
 			}
 			catch (IOException ex)
 			{
-				logger.error("I/O error when reading indexed file "+current.file+"t"+" "+current.tn);
+				logger.error("I/O error when reading indexed file "+current.file+"t");
 				ex.printStackTrace();
 				throw new RuntimeException(ex);
 			}
