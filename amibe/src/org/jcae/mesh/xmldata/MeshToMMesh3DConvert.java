@@ -186,6 +186,8 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			jcaeElement.appendChild(meshElement);
 
 			XMLHelper.writeXML(documentOut, xmlFile);
+			logger.info("Total number of nodes: "+nrNodes);
+			logger.info("Total number of triangles: "+nrTriangles);
 		}
 		catch(Exception ex)
 		{
