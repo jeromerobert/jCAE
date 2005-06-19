@@ -30,6 +30,11 @@ import org.apache.log4j.Logger;
  * Only its spatial structure is considered, and it is assumed that the whole
  * tree can reside in memory.  This class defines the octree structure and
  * how to traverse it.
+ *
+ * References:
+ * External Memory Management and Simplification of Huge Meshes
+ * P. Cignoni, C. Montani, C. Rocchini, R. Scopigno
+ * http://vcg.isti.cnr.it/publications/papers/oemm_tvcg.pdf
  */
 public class OEMM
 {

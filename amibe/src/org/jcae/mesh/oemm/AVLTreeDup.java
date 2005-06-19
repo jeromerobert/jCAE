@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
  * Implementation of AVL binary trees to store locational codes.
  * It is based on excellent Ben Pfaff's GNU libavl, and customized to efficiently
  * find unique vertices from a triangle soup.
+ * http://adtinfo.org/
  */
 public class AVLTreeDup
 {
