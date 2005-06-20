@@ -1,0 +1,109 @@
+<body>
+<h1>Octree-based External Memory Mesh</h1>
+<p>
+ P. Cignoni, C. Montani, C. Rocchini and R. Scopigno described in their paper
+ <a href="http://vcg.isti.cnr.it/publications/papers/oemm_tvcg.pdf">External
+ Memory Management and Simplification of Huge Meshes</a>
+ a data structure for out-of-core processing of huge meshes.  The
+ <code>org.jcae.mesh.oemm</code> package is a Java implementation of these
+ ideas.  Algorithms to build and use this data structure are detailed below.
+</p>
+<h2>Building an OEMM</h2>
+<p>
+ Input is a non-indexed mesh, also known as a triangle soup.  We have a
+ list of triangles, each triangle being represented by the coordinates of
+ its three vertices.  We cannot work with indexed triangles because storing
+ indices in memory would require lots of RAM.
+</p>
+<h3 name="structure">Determination of the octree structure</h3>
+<p>
+ An empty {@link org.jcae.mesh.oemm.RawOEMM} is first created with three
+ parameters: the maximul depth <code>dmax</code> of this octree, a number
+ of triangles <code>tmax</code> and geometrical bounding box.
+ The latter is needed to transform double coordinates into integers (and
+ also the other way around), see {@link org.jcae.mesh.oemm.OEMM#double2int}
+ and {@link org.jcae.mesh.oemm.OEMM#int2double}.
+</p>
+<p>
+ The triangle soup is read a first time by
+ {@link org.jcae.mesh.oemm.RawStorage#countTriangles}; for each triangle,
+ vertices are located in the smallest octant (i.e. with the depth
+ <code>dmax</code> specified when creating this octree), and a counter is
+ incremented for all octants containing at least one vertex.  At the end
+ of this first pass, we know how many triangles will be collected by each
+ octant.
+</p>
+<p>
+ An optimization is then performed by
+ {@link org.jcae.mesh.oemm.RawOEMM#aggregate} on this
+ {@link org.jcae.mesh.oemm.RawOEMM} structure: octants are recursively
+ merged with their siblings if
+</p>
+<ol>
+  <li>The total number of triangles is less than <code>tmax</code></li>
+  <li>Neighbors in the final octree have a depth difference not
+      greater than 2.</li>
+</ol>
+<p>
+ During this phase, links to neighbors are computed and stored in the
+ data structure.  This information is needed by future passes, so it
+ is written onto disk.
+</p>
+<p>
+ The optimized octree has fewer leaves than the original, and the number
+ of neighbors is bounded by a small constant.  This property is important
+ so that loading a node and all its neighbors can be performed in constant
+ time.  It is also important to understand that there will be trouble if
+ an edge is so long that its vertices belong to non-adjacent leaves.
+ At the moment, this situation is not detected, so <code>dmax</code> must
+ be chosen high enough in order to avoid this problem.
+</p>
+
+<h3 name="dispatch">Dispatching triangles into octants</h3>
+<p>
+ Triangles can then be gathered by octants in
+ {@link org.jcae.mesh.oemm.RawStorage#dispatch}.
+ The previous step counted the number of triangles which will be assigned
+ to each octant. so dispatched file offset for each octant can be computed,
+ Triangles are read a second time from the triangle soup and copied into
+ the right block.  This dispatched file is similar to the triangle soup,
+ but triangles have been rearranged by octant.
+</p>
+
+<h3>Indexing internal vertices</h3>
+<p>
+ The final data structure for each octant is composed of its interior
+ vertices and a list of indexed triangles.  A preorder traversal of
+ the octree is performed, and vertices are read from the dispatched
+ file.  As triangles have been rearranged by octants, a global index
+ can be assigned so that all indices of the first leaf are lower than
+ those of the second leaf, etc.  Or in other words, each leaf has an
+ index range which has been already computed, and global indices are
+ equal to the sum of the minimal index
+ {@link org.jcae.mesh.oemm.OEMMNode#minIndex} and a local index.
+ The task performed during this traversal is thus to identify unique
+ interior vertices.  This is done by using
+ {@link org.jcae.mesh.oemm.AVLTreeDup} class, which is an implementation
+ of AVL trees based on Ben Pfaff's
+ <a href="http://adtinfo.org/">GNU libavl</a>.
+</p>
+<p>
+ For each leaf, a list of neighbor leaves was computed during the
+ <a href="structure">initial step</a>.
+ The maximal depth difference between neighbor leaves is 2, so a leaf 
+ has at most 6*16+12*4+8=152 neighbors, and information about neighbors
+ for vertices can be packed in a byte array.
+ If a triangle contains interior and outer vertices, outer ones are located
+ inside those neighbor leaves, and the index within this list is associated
+ with interior vertices.
+</p>
+
+<h3>Indexing external vertices</h3>
+<p>
+ The dispatched file is read another time to build a list of indexed triangles.
+ For each octant, interior vertices for itself and all its neighbors are
+ loaded into memory.  Triangles are then read again from the dispatched file,
+ and vertices are replaced by their global index (or more precisely by its
+ leaf and local indices).
+</p>
+</body>
