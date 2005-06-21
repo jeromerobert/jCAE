@@ -122,7 +122,8 @@ public class RawStorage
 	 * It is followed by the integer coordinates of triangle vertices.
 	 * 
 	 * @param  tree  a raw OEMM
-	 * @param  file  the output file
+	 * @param  structFile  output file containing octree data structure
+	 * @param  dataFile  dispatched data file
 	 */
 	public static final void dispatch(RawOEMM tree, String structFile, String dataFile)
 	{
