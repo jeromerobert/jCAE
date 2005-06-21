@@ -302,25 +302,25 @@ public class AVLTreeDup
 				// Left rotation
 				topNode.child[1] = newRoot.child[0];
 				newRoot.child[0] = topNode;
-			}
-			if (newRoot.balanceFactor == 1)
-			{
-				// T2 == null
-				topNode.balanceFactor = -1;
-				right.balanceFactor = 0;
-				newRoot.balanceFactor = 0;
-			}
-			else if (newRoot.balanceFactor == -1)
-			{
-				// T3 == null
-				topNode.balanceFactor = 0;
-				right.balanceFactor = 1;
-				newRoot.balanceFactor = 0;
-			}
-			else
-			{
-				topNode.balanceFactor = 0;
-				right.balanceFactor = 0;
+				if (newRoot.balanceFactor == 1)
+				{
+					// T2 == null
+					topNode.balanceFactor = -1;
+					right.balanceFactor = 0;
+					newRoot.balanceFactor = 0;
+				}
+				else if (newRoot.balanceFactor == -1)
+				{
+					// T3 == null
+					topNode.balanceFactor = 0;
+					right.balanceFactor = 1;
+					newRoot.balanceFactor = 0;
+				}
+				else
+				{
+					topNode.balanceFactor = 0;
+					right.balanceFactor = 0;
+				}
 			}
 		}
 		else
