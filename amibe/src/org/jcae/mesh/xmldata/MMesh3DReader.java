@@ -195,5 +195,31 @@ public class MMesh3DReader
 		logger.debug("end reading "+xmlFile);
 		 return m3d;
 	}
+	
+	public static int [] getInfos(String xmlDir, String xmlFile)
+	{
+		int [] ret = new int[3];
+		CachedXPathAPI xpath = new CachedXPathAPI();
+		try
+		{
+			Document document = XMLHelper.parseXML(new File(xmlDir, xmlFile));
+			Node submeshElement = xpath.selectSingleNode(document, "/jcae/mesh/submesh");
+			Node submeshNodes = xpath.selectSingleNode(submeshElement, "nodes");
+			ret[0] = Integer.parseInt(
+				xpath.selectSingleNode(submeshNodes, "number/text()").getNodeValue());
+			Node submeshTriangles = xpath.selectSingleNode(submeshElement, "triangles");
+			ret[1] = Integer.parseInt(
+				xpath.selectSingleNode(submeshTriangles, "number/text()").getNodeValue());
+			Node groupsElement = xpath.selectSingleNode(submeshElement, "groups");
+			NodeList groupsList = xpath.selectNodeList(groupsElement, "group");
+			ret[2] = groupsList.getLength();
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+		return ret;
+	}
 }
 
