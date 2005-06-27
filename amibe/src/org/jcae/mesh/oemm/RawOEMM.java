@@ -111,6 +111,12 @@ public class RawOEMM extends OEMM
 			logger.error("Max. level too high");
 			nr_levels = MAXLEVEL;
 		}
+		else if (nr_levels <= 1)
+		{
+			nr_levels = 1;
+			//  In this case, the root cell is a leaf
+			nr_leaves = 1;
+		}
 		double deltaX = Math.abs(umin[0] - umax[0]);
 		double deltaY = Math.abs(umin[1] - umax[1]);
 		double deltaZ = Math.abs(umin[2] - umax[2]);

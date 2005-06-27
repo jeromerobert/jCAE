@@ -221,6 +221,7 @@ public class RawStorage
 			for (int i = 0; i < 4; i++)
 				ret.x0[i] = bufIn.readDouble();
 			//  ret.nr_leaves will be set by this loop in ret.build()
+			//  unless nrleaves == 1
 			for (int i = 0; i < nrleaves; i++)
 			{
 				long position = bufIn.readLong();
@@ -238,6 +239,8 @@ public class RawStorage
 				if (!ret.head[0].isLeaf)
 					ret.head[0].tn += n.tn;
 			}
+			if (nrleaves <= 1)
+				ret.nr_leaves = 1;
 			bufIn.close();
 		}
 		catch (FileNotFoundException ex)
