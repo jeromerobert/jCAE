@@ -119,7 +119,7 @@ public class Mesh
 	//  efficiebcy reason
 	private CADGeomSurface surface;
 	
-	//  Ninimal topological edge length
+	//  Minimal topological edge length
 	private double epsilon = 1.;
 	
 	private boolean accumulateEpsilon = false;
@@ -532,6 +532,68 @@ public class Mesh
 		{
 			Triangle t = (Triangle) it.next();
 			triangleList.remove(t);
+		}
+	}
+	
+	public void writeUNV2D(String file)
+	{
+		String cr=System.getProperty("line.separator");
+		PrintWriter out;
+		try {
+			if (file.endsWith(".gz") || file.endsWith(".GZ"))
+				out = new PrintWriter(new java.util.zip.GZIPOutputStream(new FileOutputStream(file)));
+			else
+				out = new PrintWriter(new FileOutputStream(file));
+			out.println("    -1"+cr+"  2411");
+			HashSet nodeset = new HashSet();
+			for(Iterator it=triangleList.iterator();it.hasNext();)
+			{
+				Triangle t = (Triangle) it.next();
+				if (t.isOuter())
+					continue;
+				nodeset.add(t.vertex[0]);
+				nodeset.add(t.vertex[1]);
+				nodeset.add(t.vertex[2]);
+			}
+			int count =  0;
+			HashMap labels = new HashMap(nodeset.size());
+			for(Iterator it=nodeset.iterator();it.hasNext();)
+			{
+				Vertex node = (Vertex) it.next();
+				count++;
+				Integer label = new Integer(count);
+				labels.put(node, label);
+				double [] uv = node.getUV();
+				out.println(label+"         1         1         1");
+				out.println(""+uv[0]+" "+uv[1]+" 0.0");
+			}
+			out.println("    -1");
+			out.println("    -1"+cr+"  2412");
+			count =  0;
+			for(Iterator it=triangleList.iterator();it.hasNext();)
+			{
+				Triangle t = (Triangle)it.next();
+				if (t.isOuter())
+					continue;
+				count++;
+				out.println(""+count+"        91         1         1         1         3");
+				for(int i = 0; i < 3; i++)
+				{
+					Integer nodelabel =  (Integer) labels.get(t.vertex[i]);
+					out.print(" "+nodelabel.intValue());
+				}
+				out.println("");
+			}
+			out.println("    -1");
+			out.close();
+		} catch (FileNotFoundException e)
+		{
+			logger.fatal(e.toString());
+			e.printStackTrace();
+		} catch (IOException e)
+		{
+			logger.fatal(e.toString());
+			e.printStackTrace();
 		}
 	}
 	
