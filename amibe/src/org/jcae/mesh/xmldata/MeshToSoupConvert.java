@@ -55,6 +55,7 @@ public class MeshToSoupConvert extends JCAEXMLData
 	public void initialize(String xmlOutFile, boolean writeNormal)
 	{
 		rawFile = new File(xmlDir, xmlOutFile);
+		rawFile.delete();
 	}
 	
 	public void finish()
