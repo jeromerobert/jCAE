@@ -72,6 +72,11 @@ public class Triangle
 		return (adjPos & (OTriangle.OUTER << 8 | OTriangle.OUTER << 16 | OTriangle.OUTER << 24)) != 0;
 	}
 	
+	public boolean isQuadrangle()
+	{
+		return (adjPos & (OTriangle.QUAD << 8 | OTriangle.QUAD << 16 | OTriangle.QUAD << 24)) != 0;
+	}
+	
 	public String toString()
 	{
 		String r = "Vertices:";

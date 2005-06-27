@@ -132,6 +132,13 @@ public class OTriangle
 	 * @see #hasAttributes
 	 */
 	public static final int MARKED   = 1 << 3;
+	/**
+	 * Numeric constants for edge attributes.  Set if edge is the inner
+	 * edge of a quadrangle.
+	 * @see #setAttributes
+	 * @see #hasAttributes
+	 */
+	public static final int QUAD     = 1 << 4;
 	
 	//  Complex algorithms require several OTriangle, they are
 	//  allocated here to prevent allocation/deallocation overhead.
