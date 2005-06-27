@@ -27,6 +27,7 @@ import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.cad.*;
 import java.util.Random;
+import java.util.HashSet;
 
 public class Vertex
 {
@@ -71,9 +72,23 @@ public class Vertex
 		}
 	}
 	
+	public Vertex(Vertex pt1, Vertex pt2)
+	{
+		param = new double[2];
+		param[0] = 0.5 * (pt1.param[0] + pt2.param[0]);
+		param[1] = 0.5 * (pt1.param[1] + pt2.param[1]);
+	}
+	
 	public double [] getUV ()
 	{
 		return param;
+	}
+	
+	public void moveTo(double u, double v)
+	{
+		param[0] = u;
+		param[1] = v;
+		m2 = null;
 	}
 	
 	public double [] getNormal ()
@@ -202,6 +217,28 @@ public class Vertex
 		}
 		logger.debug("Found: "+current);
 		return current;
+	}
+	
+	public HashSet getNeighboursNodes()
+	{
+		OTriangle ot = new OTriangle(tri, 0);
+		HashSet ret = new HashSet(10);
+		if (ot.origin() != this)
+			ot.nextOTri();
+		if (ot.origin() != this)
+			ot.nextOTri();
+		assert ot.origin() == this;
+		Vertex first = ot.destination();
+		while (true)
+		{
+			Vertex d = ot.destination();
+			if (d != Vertex.outer)
+				ret.add(d);
+			ot.nextOTriOrigin();
+			if (ot.destination() == first)
+				break;
+		}
+		return ret;
 	}
 	
 	private long onLeft_isotropic(Vertex v1, Vertex v2)
@@ -485,6 +522,11 @@ public class Vertex
 	public void clearMetrics()
 	{
 		m2 = null;
+	}
+	
+	public boolean isMutable()
+	{
+		return ref1d == -1;
 	}
 	
 	public String toString ()
