@@ -239,17 +239,14 @@ public class AVLTreeDup
 				// Right rotation
 				topNode.child[0] = newRoot.child[1];
 				newRoot.child[1] = topNode;
-				//  Note: T2 and T3 cannot be both null
 				if (newRoot.balanceFactor == -1)
 				{
-					//  T3 == null
 					left.balanceFactor = 0;
 					topNode.balanceFactor = 1;
 					newRoot.balanceFactor = 0;
 				}
 				else if (newRoot.balanceFactor == +1)
 				{
-					//  T2 == null
 					left.balanceFactor = -1;
 					topNode.balanceFactor = 0;
 					newRoot.balanceFactor = 0;
@@ -304,14 +301,12 @@ public class AVLTreeDup
 				newRoot.child[0] = topNode;
 				if (newRoot.balanceFactor == 1)
 				{
-					// T2 == null
 					topNode.balanceFactor = -1;
 					right.balanceFactor = 0;
 					newRoot.balanceFactor = 0;
 				}
 				else if (newRoot.balanceFactor == -1)
 				{
-					// T3 == null
 					topNode.balanceFactor = 0;
 					right.balanceFactor = 1;
 					newRoot.balanceFactor = 0;
