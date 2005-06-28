@@ -1,7 +1,32 @@
+Tue Jun 28 12:32:12 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/tools/Calculus3D.java: If the org.jcae.mesh.amibe.ds.tools.Calculus3D.accurateDistance property is set to true, metrics on end points are compared and if they are very different, the segment is divided in order to have more accurate results.  This property is set to false by default because it is not clear whether this gives better results.
+
+Mon Jun 27 13:50:34 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Vertex.java: New moveTo() and getNeighboursNodes() methods, will be used by smoothing algorithms.
+	* src/org/jcae/mesh/xmldata/MeshToSoupConvert.java: The soup file must be removed before processing, otherwise data are appended to previous runs.
+
+Fri Jun 17 11:51:19 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/MeshToMMesh3DConvert.java:  Display mesh information at the end of 3d generation.
+	* src/org/jcae/mesh/xmldata/MeshToSoupConvert.java
+	  src/org/jcae/mesh/Mesher.java:  Add a new org.jcae.mesh.Mesher.triangleSoup property to write a raw triangle soup which can be processed by oemm.  It is set to false by default.
+
+	* src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/cad/CADShapeBuilder.java
+	  src/org/jcae/mesh/MeshValid2D.java
+	  src/org/jcae/mesh/Mesher.java:  Properties with default values are currently not written into report file, thus always set these properties to have them written there.
+	* src/org/jcae/mesh/Mesher.java: If the org.jcae.mesh.Mesher.reportFile property is set, a log report is printed into this file with details about meshing process.
+
+Wed Jun  8 09:24:12 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/validation/QualityFloat.java:  Fix data number.
+
 Fri May 20 14:15:32 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos2d/BasicMesh.java
-	  src/org/jcae/mesh/amibe/ds/Mesh.java:  Fix the detection of tiny edges, deflection criterion is now taken intoo account.
+	  src/org/jcae/mesh/amibe/ds/Mesh.java:  Fix the detection of tiny edges, deflection criterion is now taken into account.
 	* src-occ/org/jcae/mesh/cad/occ/OCCShape.java
 	  src/org/jcae/mesh/cad/CADShape.java:  New boundingBox() method.
 	* src-occ/org/jcae/mesh/cad/occ/OCCGeomCurve3D.java:  Change length computation, it now uses GProp_GProps.
