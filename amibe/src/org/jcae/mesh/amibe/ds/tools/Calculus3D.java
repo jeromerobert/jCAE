@@ -24,6 +24,7 @@ package org.jcae.mesh.amibe.ds.tools;
 import org.jcae.mesh.amibe.ds.*;
 import org.jcae.mesh.amibe.metrics.Metric2D;
 import java.util.Iterator;
+import java.util.Stack;
 import org.apache.log4j.Logger;
 
 public class Calculus3D implements Calculus
@@ -32,6 +33,23 @@ public class Calculus3D implements Calculus
 
 	//  The Mesh instance on which methods are applied
 	protected Mesh mesh;
+	
+	private static final int level_max = 10;
+	private static final double delta_max = 0.5;
+	private static Integer [] intArray = new Integer[level_max+1];
+	private static boolean accurateDistance = false;
+
+	static {
+		String accurateDistanceProp = System.getProperty("org.jcae.mesh.amibe.ds.tools.Calculus3D.accurateDistance");
+		if (accurateDistanceProp == null)
+		{
+			accurateDistanceProp = "false";
+			System.setProperty("org.jcae.mesh.amibe.ds.tools.Calculus3D.accurateDistance", accurateDistanceProp);
+		}
+		accurateDistance = accurateDistanceProp.equals("true");
+		for (int i = 0; i <= level_max; i++)
+			intArray[i] = new Integer(i);
+	};
 	
 	/**
 	 * Constructor.
@@ -54,7 +72,45 @@ public class Calculus3D implements Calculus
 	 **/
 	public double distance(Vertex start, Vertex end)
 	{
-		return Math.max(distance(start, end, start), distance(start, end, end));
+		double l1 = distance(start, end, start);
+		double l2 = distance(start, end, end);
+		double lmax = Math.max(l1, l2);
+		if (!accurateDistance || Math.abs(l1 - l2) < delta_max * lmax)
+			return lmax;
+		
+		Stack v = new Stack();
+		Vertex mid = new Vertex(start, end);
+		v.push(intArray[level_max]);
+		v.push(end);
+		v.push(mid);
+		v.push(intArray[level_max]);
+		v.push(mid);
+		v.push(start);
+		double ret = 0.0;
+		int level = level_max;
+		while (v.size() > 0)
+		{
+			Vertex pt1 = (Vertex) v.pop();
+			Vertex pt2 = (Vertex) v.pop();
+			level = ((Integer) v.pop()).intValue();
+			l1 = distance(pt1, pt2, pt1);
+			l2 = distance(pt1, pt2, pt2);
+			lmax = Math.max(l1, l2);
+			if (Math.abs(l1 - l2) < delta_max * lmax || level == 0)
+				ret += lmax;
+			else
+			{
+				level--;
+				mid = new Vertex(pt1, pt2);
+				v.push(intArray[level]);
+				v.push(pt2);
+				v.push(mid);
+				v.push(intArray[level]);
+				v.push(mid);
+				v.push(pt1);
+			}
+		}
+		return ret;
 	}
 	
 	/**
