@@ -100,7 +100,7 @@ public class IndexedStorage
 			oemm = o;
 			fis = in;
 			outDir = dir;
-			AVLTreeDup [] vertices = new AVLTreeDup[oemm.nr_leaves];
+			PAVLTreeIntArrayDup [] vertices = new PAVLTreeIntArrayDup[oemm.nr_leaves];
 			room = ((1 << 31) - 3*oemm.head[0].tn) / oemm.nr_leaves;
 		}
 		public final int action(OEMMNode current, int octant, int visit)
@@ -128,8 +128,8 @@ public class IndexedStorage
 			File d = new File(dir);
 			d.mkdirs();
 			current.file = dir + File.separator + octant;
-			AVLTreeDup inner = new AVLTreeDup();
-			AVLTreeDup outer = new AVLTreeDup();
+			PAVLTreeIntArrayDup inner = new PAVLTreeIntArrayDup();
+			PAVLTreeIntArrayDup outer = new PAVLTreeIntArrayDup();
 			int nrExternal = 0;
 			int nrDuplicates = 0;
 			int index = 0;
@@ -289,13 +289,13 @@ public class IndexedStorage
 		private FileInputStream fis;
 		private String outDir;
 		private int [] ijk = new int[3];
-		private AVLTreeDup [] vertices;
+		private PAVLTreeIntArrayDup [] vertices;
 		public IndexExternalVerticesProcedure(OEMM o, FileInputStream in, String dir)
 		{
 			oemm = o;
 			fis = in;
 			outDir = dir;
-			vertices = new AVLTreeDup[oemm.nr_leaves];
+			vertices = new PAVLTreeIntArrayDup[oemm.nr_leaves];
 		}
 		public final int action(OEMMNode current, int octant, int visit)
 		{
@@ -406,9 +406,9 @@ public class IndexedStorage
 		}
 	}
 	
-	private static AVLTreeDup loadVerticesInAVLTreeDup(OEMMNode current)
+	private static PAVLTreeIntArrayDup loadVerticesInAVLTreeDup(OEMMNode current)
 	{
-		AVLTreeDup ret = new AVLTreeDup();
+		PAVLTreeIntArrayDup ret = new PAVLTreeIntArrayDup();
 		int [] ijk = new int[3];
 		try
 		{
