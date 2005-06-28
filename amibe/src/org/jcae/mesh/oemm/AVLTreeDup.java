@@ -406,9 +406,11 @@ public class AVLTreeDup
 			System.exit(1);
 		}
 		int [] ijk = new int[3];
-		AVLTreeDup tree = new AVLTreeDup();
 		for (int i = 0; i < 3; i++)
 			ijk[i] = 0;
+		AVLTreeDup tree;
+/*
+		tree = new AVLTreeDup();
 		for (int i = 1; i < 6; i++)
 		{
 			ijk[0] = i;
@@ -416,6 +418,16 @@ public class AVLTreeDup
 			System.out.println("New tree:");
 			tree.root.show();
 		}
+*/
+		tree = new AVLTreeDup();
+		int dup = 0;
+		for (int i = 0; i < 2000000; i++)
+		{
+			ijk[0] = i / 6;
+			if (tree.insert(ijk, i) != i)
+				dup++;
+		}
+		System.out.println("Number of duplicates: "+dup);
 	}
 		
 }
