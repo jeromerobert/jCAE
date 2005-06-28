@@ -45,7 +45,7 @@ public class PAVLTreeIntArrayDup
 	private static final int POS_CHILD = POS_BALANCE + 1;
 	private static final int POS_PARENT = POS_CHILD + 2;
 	private static final int TOTAL_SIZE = POS_PARENT + 1;
-	private static final int allocNodes = 1000000;
+	private static final int allocNodes = 100000;
 	private int [] work = new int[allocNodes*TOTAL_SIZE];
 	
 	// Root tree
