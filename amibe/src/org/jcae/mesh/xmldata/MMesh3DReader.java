@@ -80,16 +80,19 @@ public class MMesh3DReader
 			DataInputStream trianglesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(trianglesFile)));
 
 			Node submeshNormals = xpath.selectSingleNode(submeshTriangles, "normals");
-			String normalsFile = xpath.selectSingleNode(submeshNormals, "file/@location").getNodeValue();
-			if (normalsFile.charAt(0) != File.separatorChar)
-				normalsFile = xmlDir+File.separator+normalsFile;
 			DataInputStream normalsIn = null;
-			try
+			if (submeshNormals != null)
 			{
-				normalsIn = new DataInputStream(new BufferedInputStream(new FileInputStream(normalsFile)));
-			}
-			catch (FileNotFoundException ex)
-			{
+				String normalsFile = xpath.selectSingleNode(submeshNormals, "file/@location").getNodeValue();
+				if (normalsFile.charAt(0) != File.separatorChar)
+					normalsFile = xmlDir+File.separator+normalsFile;
+				try
+				{
+					normalsIn = new DataInputStream(new BufferedInputStream(new FileInputStream(normalsFile)));
+				}
+				catch (FileNotFoundException ex)
+				{
+				}
 			}
 			
 			int numberOfReferences = Integer.parseInt(
@@ -213,6 +216,10 @@ public class MMesh3DReader
 			Node groupsElement = xpath.selectSingleNode(submeshElement, "groups");
 			NodeList groupsList = xpath.selectNodeList(groupsElement, "group");
 			ret[2] = groupsList.getLength();
+		}
+		catch(FileNotFoundException ex)
+		{
+			//  Do nothing if 3d was not processed
 		}
 		catch(Exception ex)
 		{
