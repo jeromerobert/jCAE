@@ -113,11 +113,11 @@ public class Mesher
 			processMesh3dProp = "true";
 			System.setProperty("org.jcae.mesh.Mesher.mesh3d", processMesh3dProp);
 		}
-		String processTriangleSoupProp = System.getProperty("org.jcae.mesh.Mesher.triangleSoup");
-		if (processTriangleSoupProp == null)
+		String exportRriangleSoupProp = System.getProperty("org.jcae.mesh.Mesher.triangleSoup");
+		if (exportRriangleSoupProp == null)
 		{
-			processTriangleSoupProp = "false";
-			System.setProperty("org.jcae.mesh.Mesher.triangleSoup", processTriangleSoupProp);
+			exportRriangleSoupProp = "false";
+			System.setProperty("org.jcae.mesh.Mesher.triangleSoup", exportRriangleSoupProp);
 		}
 		String writeNormalsProp = System.getProperty("org.jcae.mesh.Mesher.writeNormals");
 		if (writeNormalsProp == null)
@@ -136,6 +136,12 @@ public class Mesher
 		{
 			exportMESHProp = "false";
 			System.setProperty("org.jcae.mesh.exportMESH", exportMESHProp);
+		}
+		String quadranglesProp = System.getProperty("org.jcae.mesh.Mesher.quadrangles");
+		if (quadranglesProp == null)
+		{
+			quadranglesProp = "false";
+			System.setProperty("org.jcae.mesh.Mesher.quadrangles", quadranglesProp);
 		}
 
 		//  Declare all variables here
@@ -163,6 +169,10 @@ public class Mesher
 		int maxFace = Integer.parseInt(maxFaceProp);
 		if (minFace != 0 || maxFace != 0)
 			numFace=0;
+		if (quadranglesProp.equals("true")) {
+			discr *= 2.0;
+			//defl *= 2.0;
+		}
 		if (processMesh1dProp.equals("true")) {
 			//  Step 1: Compute 1D mesh
 			logger.info("1D mesh");
@@ -315,31 +325,31 @@ public class Mesher
 				String MESHName=brepfilename.substring(0, brepfilename.lastIndexOf('.'))+".mesh";
 				new UNVConverter(xmlDir).writeMESH(MESHName);
 			}
-		}
-		if (processTriangleSoupProp.equals("true")) {
-			// Step 3: Read 2D meshes and compute raw 3D mesh
-			try
-			{
-				int iFace = 0;
-				MeshToSoupConvert m2dTo3D = new MeshToSoupConvert(xmlDir);
-				m2dTo3D.initialize("soup", false);
-				iFace = 0;
-				for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
+			if (exportRriangleSoupProp.equals("true")) {
+				// Step 3: Read 2D meshes and compute raw 3D mesh
+				try
 				{
-					CADFace F = (CADFace) expF.current();
-					iFace++;
-					if (numFace != 0 && iFace != numFace)
-						continue;
-					xmlFile = "jcae2d."+iFace;
-					logger.info("Importing face "+iFace);
-					m2dTo3D.convert(xmlFile, iFace, F);
+					int iFace = 0;
+					MeshToSoupConvert m2dTo3D = new MeshToSoupConvert(xmlDir);
+					m2dTo3D.initialize("soup", false);
+					iFace = 0;
+					for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
+					{
+						CADFace F = (CADFace) expF.current();
+						iFace++;
+						if (numFace != 0 && iFace != numFace)
+							continue;
+						xmlFile = "jcae2d."+iFace;
+						logger.info("Importing face "+iFace);
+						m2dTo3D.convert(xmlFile, iFace, F);
+					}
+					m2dTo3D.finish();
 				}
-				m2dTo3D.finish();
-			}
-			catch(Exception ex)
-			{
-				logger.warn(ex.getMessage());
-				ex.printStackTrace();
+				catch(Exception ex)
+				{
+					logger.warn(ex.getMessage());
+					ex.printStackTrace();
+				}
 			}
 		}
 		if (badGroups.size() > 0)
