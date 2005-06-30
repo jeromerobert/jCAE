@@ -22,22 +22,21 @@ package org.jcae.mesh.oemm;
 
 import org.apache.log4j.Logger;
 
-public class Triangle3d
+public class OEMMTriangle
 {
-	private static Logger logger=Logger.getLogger(Triangle3d.class);	
+	private static Logger logger=Logger.getLogger(OEMMTriangle.class);	
+	public OEMMVertex [] vertex = new OEMMVertex[3];
 	
-	// Integer coordinates
-	public Vertex3d [] v = new Vertex3d[3];
 	private boolean readable = false;
 	private boolean writable = false;
 	private boolean modified = false;
 	private boolean deleted = false;
 	
-	public Triangle3d(Vertex3d v0, Vertex3d v1, Vertex3d v2)
+	public OEMMTriangle(OEMMVertex v0, OEMMVertex v1, OEMMVertex v2)
 	{
-		v[0] = v0;
-		v[1] = v1;
-		v[2] = v2;
+		vertex[0] = v0;
+		vertex[1] = v1;
+		vertex[2] = v2;
 	}
 	
 	public void setReadable(boolean r)

@@ -482,28 +482,42 @@ public class IndexedStorage
 	public static double [] getMeshOEMMCoords(OEMM oemm, TIntHashSet leaves)
 	{
 		logger.info("Creation of a mesh from reading selected nodes from an OEMM");
-		TIntObjectHashMap vertMap = new TIntObjectHashMap();
-		ArrayList triList = new ArrayList();
-		ReadVerticesProcedure rv_proc = new ReadVerticesProcedure(vertMap, leaves);
-		oemm.walk(rv_proc);
-		ReadTrianglesProcedure rt_proc = new ReadTrianglesProcedure(oemm, vertMap, leaves, triList);
-		oemm.walk(rt_proc);
+		OEMMMesh mesh = loadNodes(oemm, leaves);
+		ArrayList triList = mesh.getTriangles();
 		int nrt = triList.size();
 		logger.info("Number of triangles for this selection: "+nrt);
 		double [] coord = new double[9*nrt];
 		double [] c_tmp = new double[3];
 		for (int i = 0; i < nrt; i++)
 		{
-			Triangle3d t = (Triangle3d) triList.get(i);
+			OEMMTriangle t = (OEMMTriangle) triList.get(i);
 			for (int j = 0; j < 3; j++)
 			{
-				oemm.int2double(t.v[j].ijk, c_tmp);
+				oemm.int2double(t.vertex[j].ijk, c_tmp);
 				coord[9*i+3*j]   = c_tmp[0];
 				coord[9*i+3*j+1] = c_tmp[1];
 				coord[9*i+3*j+2] = c_tmp[2];
 			}
 		}
 		return coord;
+	}
+	
+	public static OEMMMesh loadNodes(OEMM oemm, TIntHashSet leaves)
+	{
+		logger.info("Loading nodes");
+		OEMMMesh ret = new OEMMMesh();
+		TIntObjectHashMap vertMap = new TIntObjectHashMap();
+		ReadVerticesProcedure rv_proc = new ReadVerticesProcedure(vertMap, leaves);
+		oemm.walk(rv_proc);
+		ReadTrianglesProcedure rt_proc = new ReadTrianglesProcedure(oemm, vertMap, leaves, ret);
+		oemm.walk(rt_proc);
+		/*
+		Object [] oArray = vertMap.getValues();
+		OEMMVertex [] vertices = new OEMMVertex[oArray.length];
+		System.arraycopy(oArray, 0, vertices, 0, oArray.length);
+		ret.buildAdjacency(vertices);
+		*/
+		return ret;
 	}
 	
 	private static class ReadVerticesProcedure extends TraversalProcedure
@@ -523,7 +537,7 @@ public class IndexedStorage
 			{
 				logger.debug("Reading vertices from "+current.file+"v");
 				DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(current.file+"v")));
-				Vertex3d [] vert = new Vertex3d[current.vn];
+				OEMMVertex [] vert = new OEMMVertex[current.vn];
 				int [] ijk = new int[3];
 				//  Read coordinates
 				for (int i = 0; i < current.vn; i++)
@@ -531,7 +545,7 @@ public class IndexedStorage
 					ijk[0] = bufIn.readInt();
 					ijk[1] = bufIn.readInt();
 					ijk[2] = bufIn.readInt();
-					vert[i] = new Vertex3d(ijk, current.minIndex + i);
+					vert[i] = new OEMMVertex(ijk, current.minIndex + i);
 					int n = bufIn.readInt();
 					//  Read neighbors
 					boolean writable = true;
@@ -565,13 +579,13 @@ public class IndexedStorage
 		private OEMM oemm;
 		private TIntObjectHashMap vertMap;
 		private TIntHashSet leaves;
-		private ArrayList triList;
-		public ReadTrianglesProcedure(OEMM o, TIntObjectHashMap map, TIntHashSet set, ArrayList list)
+		private OEMMMesh mesh;
+		public ReadTrianglesProcedure(OEMM o, TIntObjectHashMap map, TIntHashSet set, OEMMMesh m)
 		{
 			oemm = o;
 			vertMap = map;
 			leaves = set;
-			triList = list;
+			mesh = m;
 		}
 		public final int action(OEMMNode current, int octant, int visit)
 		{
@@ -581,7 +595,7 @@ public class IndexedStorage
 			{
 				logger.debug("Reading triangles from "+current.file+"t");
 				DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(current.file+"t")));
-				Vertex3d [] vert = new Vertex3d[3];
+				OEMMVertex [] vert = new OEMMVertex[3];
 				for (int i = 0; i < current.tn; i++)
 				{
 					boolean readable = true;
@@ -593,7 +607,7 @@ public class IndexedStorage
 						int globalIndex = oemm.leaves[leaf].minIndex + localIndex;
 						if (leaves.contains(leaf))
 						{
-							vert[j] = (Vertex3d) vertMap.get(globalIndex);
+							vert[j] = (OEMMVertex) vertMap.get(globalIndex);
 							assert vert[j] != null;
 							if (!vert[j].isWritable())
 								writable = false;
@@ -604,9 +618,9 @@ public class IndexedStorage
 					int groupNumber = bufIn.readInt();
 					if (readable)
 					{
-						Triangle3d t = new Triangle3d(vert[0], vert[1], vert[2]);
+						OEMMTriangle t = new OEMMTriangle(vert[0], vert[1], vert[2]);
 						t.setWritable(writable);
-						triList.add(t);
+						mesh.add(t);
 					}
 				}
 				bufIn.close();

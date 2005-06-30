@@ -22,9 +22,9 @@ package org.jcae.mesh.oemm;
 
 import org.apache.log4j.Logger;
 
-public class Vertex3d
+public class OEMMVertex
 {
-	private static Logger logger=Logger.getLogger(Vertex3d.class);	
+	private static Logger logger=Logger.getLogger(OEMMVertex.class);	
 	
 	// Integer coordinates
 	public int[] ijk = new int[3];
@@ -34,7 +34,7 @@ public class Vertex3d
 	private boolean modified = false;
 	private boolean deleted = false;
 	
-	public Vertex3d(int [] coord, int index)
+	public OEMMVertex(int [] coord, int index)
 	{
 		System.arraycopy(coord, 0, ijk, 0, 3);
 		OEMMVertIndex = index;
