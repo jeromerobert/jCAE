@@ -535,6 +535,108 @@ public class Mesh
 		}
 	}
 	
+	/**
+	 * Build adjacency relations between triangles
+	 */
+	public void buildAdjacency(Vertex [] vertices)
+	{
+		//  1. For each vertex, build the list of triangles
+		//     connected to this vertex.
+		HashMap tVertList = new HashMap(vertices.length);
+		for (int i = 0; i < vertices.length; i++)
+			tVertList.put(vertices[i], new ArrayList(10));
+		for (Iterator it = triangleList.iterator(); it.hasNext(); )
+		{
+			Triangle t = (Triangle) it.next();
+			for (int i = 0; i < 3; i++)
+			{
+				ArrayList list = (ArrayList) tVertList.get(t.vertex[i]);
+				list.add(t);
+			}
+		}
+		ArrayList outerTriangles = new ArrayList();
+		for (int i = 0; i < vertices.length; i++)
+			checkNeighbours(vertices[i], tVertList, outerTriangles);
+		
+		//  Now build external triangles
+		tVertList.put(Vertex.outer, outerTriangles);
+		checkNeighbours(Vertex.outer, tVertList, null);
+		logger.debug("Boundary edges: "+outerTriangles.size());
+	}
+	
+	private static final void checkNeighbours(Vertex v, HashMap tVertList, ArrayList outerTriangles)
+	{
+		OTriangle ot = new OTriangle();
+		OTriangle sym = new OTriangle();
+		ArrayList newTriangles = new ArrayList();
+		//  Mark adjacent triangles
+		ArrayList list = (ArrayList) tVertList.get(v);
+		for (Iterator it = list.iterator(); it.hasNext(); )
+		{
+			Triangle t = (Triangle) it.next();
+			t.mark();
+		}
+		//  Find all adjacent triangles
+		for (Iterator it = list.iterator(); it.hasNext(); )
+		{
+			Triangle t = (Triangle) it.next();
+			ot.bind(t);
+			if (ot.destination() == v)
+				ot.nextOTri();
+			else if (ot.apex() == v)
+				ot.prevOTri();
+			assert ot.origin() == v;
+			Vertex v2 = ot.destination();
+			ArrayList list2 = (ArrayList) tVertList.get(v2);
+			int cnt = 0;
+			for (Iterator it2 = list2.iterator(); it2.hasNext(); )
+			{
+				Triangle t2 = (Triangle) it2.next();
+				if (t == t2)
+					continue;
+				if (t2.isMarked())
+				{
+					if (cnt == 0)
+					{
+						sym.bind(t2);
+						if (sym.origin() == v)
+							sym.prevOTri();
+						else if (sym.apex() == v)
+							sym.nextOTri();
+						assert sym.destination() == v;
+						ot.glue(sym);
+					}
+					else
+					{
+						System.out.println("Non-manifold");
+					}
+					cnt++;
+				}
+			}
+			if (cnt == 0)
+			{
+				assert outerTriangles != null : t ;
+				ot.setAttributes(OTriangle.BOUNDARY);
+				Triangle t2 = new Triangle(Vertex.outer, v2, v);
+				sym.bind(t2);
+				sym.setAttributes(OTriangle.BOUNDARY);
+				ot.glue(sym);
+				newTriangles.add(t2);
+				list2.add(t2);
+			}
+		}
+		//  Unmark adjacent triangles
+		for (Iterator it = list.iterator(); it.hasNext(); )
+		{
+			Triangle t = (Triangle) it.next();
+			t.unmark();
+		}
+		//  Update triangle list, if new triangles have been added
+		list.addAll(newTriangles);
+		if (outerTriangles != null)
+			outerTriangles.addAll(newTriangles);
+	}
+	
 	public void writeUNV2D(String file)
 	{
 		String cr=System.getProperty("line.separator");

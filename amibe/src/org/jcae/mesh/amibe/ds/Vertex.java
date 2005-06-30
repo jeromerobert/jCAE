@@ -58,6 +58,14 @@ public class Vertex
 		param[1] = v;
 	}
 	
+	public Vertex(double x, double y, double z)
+	{
+		param = new double[3];
+		param[0] = x;
+		param[1] = y;
+		param[2] = z;
+	}
+	
 	public Vertex(MNode1D pt, CADGeomCurve2D C2d, CADFace F)
 	{
 		ref1d = pt.getMaster().getLabel();
@@ -88,6 +96,14 @@ public class Vertex
 	{
 		param[0] = u;
 		param[1] = v;
+		m2 = null;
+	}
+	
+	public void moveTo(double x, double y, double z)
+	{
+		param[0] = x;
+		param[1] = y;
+		param[2] = z;
 		m2 = null;
 	}
 	

@@ -33,6 +33,7 @@ import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.HashSet;
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 import org.apache.log4j.Logger;
@@ -64,8 +65,8 @@ public class MeshWriter
 			if (-1 == ref1d)
 			{
 				double [] p = n.getUV();
-				out.writeDouble(p[0]);
-				out.writeDouble(p[1]);
+				for (int d = 0; d < p.length; d++)
+					out.writeDouble(p[d]);
 				nodeIndex.put(n, i);
 				i++;
 			}
@@ -83,8 +84,8 @@ public class MeshWriter
 			if (-1 != ref1d)
 			{
 				double [] p = n.getUV();
-				out.writeDouble(p[0]);
-				out.writeDouble(p[1]);
+				for (int d = 0; d < p.length; d++)
+					out.writeDouble(p[d]);
 				refout.writeInt(ref1d);
 				nodeIndex.put(n, i);
 				i++;
@@ -128,18 +129,6 @@ public class MeshWriter
 			faceIndex.put(f, i);
 			i++;
 		}
-		//  Now write adjacency relations
-		facesIterator = trianglelist.iterator();
-		while(facesIterator.hasNext())
-		{
-			Triangle f = (Triangle) facesIterator.next();
-			if (f.isOuter())
-				continue;
-			for (int j = 0; j < 3; j++)
-				out.writeInt(faceIndex.get(f.adj[j]));
-			out.writeInt(f.adjPos);
-		}
-
 		out.close();
 		logger.debug("end writing "+trianglesFile);
 		
@@ -176,7 +165,22 @@ public class MeshWriter
 			if (submesh.quadtree != null)
 				nodelist = submesh.quadtree.getAllVertices(trianglelist.size() / 2);
 			else
+			{
+				HashSet nodeset = new HashSet();
 				nodelist = new ArrayList();
+				for (Iterator itf = trianglelist.iterator(); itf.hasNext(); )
+				{
+					Triangle t = (Triangle) itf.next();
+					for (int j = 0; j < 3; j++)
+					{
+						if (!nodeset.contains(t.vertex[j]))
+						{
+							nodeset.add(t.vertex[j]);
+							nodelist.add(t.vertex[j]);
+						}
+					}
+				}
+			}
 			TObjectIntHashMap nodeIndex=new TObjectIntHashMap(nodelist.size());
 			
 			// Create and fill the DOM
@@ -201,6 +205,108 @@ public class MeshWriter
 			
 			subMeshElement.appendChild(writeObjectNodes(document, nodelist, nodesFile, refFile, xmlDir, nodeIndex));
 			subMeshElement.appendChild(writeObjectTriangles(document, trianglelist, trianglesFile, xmlDir, nodeIndex));
+			meshElement.appendChild(subMeshElement);
+			jcaeElement.appendChild(meshElement);
+
+			// save the DOM to file
+			XMLHelper.writeXML(document, file);
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+	
+	private static Element writeObjectGroups(Document document, ArrayList trianglelist, File groupsFile, String baseDir)
+		throws IOException
+	{
+		logger.debug("begin writing "+groupsFile);
+		DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(groupsFile)));
+		int i=0;
+		Iterator facesIterator = trianglelist.iterator();
+		while(facesIterator.hasNext())
+		{
+			Triangle f = (Triangle) facesIterator.next();
+			if (f.isOuter())
+				continue;
+			out.writeInt(i);
+			i++;
+		}
+		out.close();
+		logger.debug("end writing "+groupsFile);
+		
+		int groupId = 1;
+		return XMLHelper.parseXMLString(document,
+				"<groups>"+
+				"<group id=\""+(groupId-1)+"\">"+
+				"<name>"+groupId+"</name>"+
+				"<number>"+i+"</number>"+ 
+				"<file format=\"integerstream\" location=\""+
+				XMLHelper.canonicalize(baseDir, groupsFile.toString())+"\""+
+				" offset=\"0\"/></group></groups>");
+	}
+	
+	public static void writeObject3D(Mesh submesh, String xmlDir, String xmlFile, String brepDir, String brepFile, int index)
+	{
+		try
+		{
+			File file = new File(xmlDir, xmlFile);
+			File dir = new File(xmlDir, xmlFile+".files");
+			
+			//create the directory if it does not exist
+			if(!dir.exists())
+				dir.mkdirs();
+
+			File nodesFile=new File(dir, JCAEXMLData.nodes2dFilename);
+			File refFile = new File(dir, JCAEXMLData.ref1dFilename);
+			File trianglesFile=new File(dir, JCAEXMLData.triangles2dFilename);
+			File groupsFile = new File(dir, JCAEXMLData.groupsFilename);
+			ArrayList trianglelist = submesh.getTriangles();
+			ArrayList nodelist;
+			if (submesh.quadtree != null)
+				nodelist = submesh.quadtree.getAllVertices(trianglelist.size() / 2);
+			else
+			{
+				HashSet nodeset = new HashSet();
+				nodelist = new ArrayList();
+				for (Iterator itf = trianglelist.iterator(); itf.hasNext(); )
+				{
+					Triangle t = (Triangle) itf.next();
+					for (int j = 0; j < 3; j++)
+					{
+						if (!nodeset.contains(t.vertex[j]))
+						{
+							nodeset.add(t.vertex[j]);
+							nodelist.add(t.vertex[j]);
+						}
+					}
+				}
+			}
+			TObjectIntHashMap nodeIndex=new TObjectIntHashMap(nodelist.size());
+			
+			// Create and fill the DOM
+			Document document=JCAEXMLWriter.createJcaeDocument();
+			
+			Element groupsElement = document.createElement("groups");
+			Element jcaeElement=document.getDocumentElement();
+			Element meshElement=document.createElement("mesh");
+			Element shapeElement=XMLHelper.parseXMLString(document, "<shape>"+
+				"<file format=\"brep\" location=\""+brepDir+File.separator+brepFile+"\"/>"+"</shape>");
+			meshElement.appendChild(shapeElement);
+			Element subMeshElement=document.createElement("submesh");
+			// Create <subshape> element
+			Element subshapeElement=document.createElement("subshape");
+			subshapeElement.appendChild(document.createTextNode(""+index));
+			subMeshElement.appendChild(subshapeElement);
+			
+			// Create <dimension> element
+			Element dimensionElement=document.createElement("dimension");
+			dimensionElement.appendChild(document.createTextNode("2"));
+			subMeshElement.appendChild(dimensionElement);
+			
+			subMeshElement.appendChild(writeObjectNodes(document, nodelist, nodesFile, refFile, xmlDir, nodeIndex));
+			subMeshElement.appendChild(writeObjectTriangles(document, trianglelist, trianglesFile, xmlDir, nodeIndex));
+			subMeshElement.appendChild(writeObjectGroups(document, trianglelist, groupsFile, xmlDir));
 			meshElement.appendChild(subMeshElement);
 			jcaeElement.appendChild(meshElement);
 

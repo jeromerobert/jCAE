@@ -128,17 +128,108 @@ public class MeshReader
 				pt2.tri = facelist[i];
 				pt3.tri = facelist[i];
 			}
-			// Now read adjacency relations
-			for (int i=0; i < numberOfTriangles; i++)
-			{
-				for (int j=0; j < 3; j++)
-					facelist[i].adj[j] = facelist[trianglesIn.readInt()];
-				facelist[i].adjPos = trianglesIn.readInt();
-			}
-			
 			trianglesIn.close();
 			nodesIn.close();
 			refsIn.close();
+			//  Build adjacency relations
+			mesh.buildAdjacency(nodelist);
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+		logger.debug("end reading "+xmlFile);
+		return mesh;
+	}
+	
+	public static Mesh readObject3D(String xmlDir, String xmlFile)
+	{
+		Mesh mesh = new Mesh();
+		logger.debug("begin reading "+xmlDir+File.separator+xmlFile);
+		CachedXPathAPI xpath = new CachedXPathAPI();
+		try
+		{
+			Document document = XMLHelper.parseXML(new File(xmlDir, xmlFile));
+			Node submeshElement = xpath.selectSingleNode(document, "/jcae/mesh/submesh");
+			Node submeshNodes = xpath.selectSingleNode(submeshElement, "nodes");
+			String refFile = xpath.selectSingleNode(submeshNodes,
+				"references/file/@location").getNodeValue();
+			if (refFile.charAt(0) != File.separatorChar)
+				refFile = xmlDir+File.separator+refFile;
+			DataInputStream refsIn=new DataInputStream(new BufferedInputStream(new FileInputStream(refFile)));
+			String nodesFile = xpath.selectSingleNode(submeshNodes, "file/@location").getNodeValue();
+			if (nodesFile.charAt(0) != File.separatorChar)
+				nodesFile = xmlDir+File.separator+nodesFile;
+			DataInputStream nodesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(nodesFile)));
+			
+			Node submeshTriangles = xpath.selectSingleNode(submeshElement, "triangles");
+			String trianglesFile = xpath.selectSingleNode(submeshTriangles,
+				"file/@location").getNodeValue();
+			if (trianglesFile.charAt(0) != File.separatorChar)
+				trianglesFile = xmlDir+File.separator+trianglesFile;
+			DataInputStream trianglesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(trianglesFile)));
+
+			int numberOfReferences = Integer.parseInt(
+				xpath.selectSingleNode(submeshNodes, "references/number/text()").getNodeValue());
+			logger.debug("Reading "+numberOfReferences+" references");
+			int [] refs = new int[numberOfReferences];
+			for (int i=0; i < numberOfReferences; i++)
+				refs[i] = refsIn.readInt();
+			
+			int numberOfNodes = Integer.parseInt(
+				xpath.selectSingleNode(submeshNodes, "number/text()").getNodeValue());
+			Vertex [] nodelist = new Vertex[numberOfNodes];
+			int label;
+			double [] coord = new double[3];
+			logger.debug("Reading "+numberOfNodes+" nodes");
+			double [] bbmin = new double[3];
+			double [] bbmax = new double[3];
+			for (int j = 0; j < 3; j++)
+			{
+				bbmin[j] = Double.MAX_VALUE;
+				bbmax[j] = Double.MIN_VALUE;
+			}
+			for (int i=0; i < numberOfNodes; i++)
+			{
+				coord[0] = nodesIn.readDouble();
+				coord[1] = nodesIn.readDouble();
+				coord[2] = nodesIn.readDouble();
+				nodelist[i] = new Vertex(coord[0], coord[1], coord[2]);
+				if (i < numberOfNodes - numberOfReferences)
+					label = -1;
+				else
+					label = refs[i+numberOfReferences-numberOfNodes];
+				nodelist[i].setRef(label);
+				for (int j = 0; j < 3; j++)
+				{
+					if (coord[j] > bbmax[j])
+						bbmax[j] = coord[j];
+					if (coord[j] < bbmin[j])
+						bbmin[j] = coord[j];
+				}
+			}
+			
+			int numberOfTriangles = Integer.parseInt(
+				xpath.selectSingleNode(submeshTriangles, "number/text()").getNodeValue());
+			logger.debug("Reading "+numberOfTriangles+" elements");
+			Triangle [] facelist = new Triangle[numberOfTriangles];
+			for (int i=0; i < numberOfTriangles; i++)
+			{
+				Vertex pt1 = nodelist[trianglesIn.readInt()];
+				Vertex pt2 = nodelist[trianglesIn.readInt()];
+				Vertex pt3 = nodelist[trianglesIn.readInt()];
+				facelist[i] = new Triangle(pt1, pt2, pt3);
+				mesh.add(facelist[i]);
+				pt1.tri = facelist[i];
+				pt2.tri = facelist[i];
+				pt3.tri = facelist[i];
+			}
+			trianglesIn.close();
+			nodesIn.close();
+			refsIn.close();
+			//  Build adjacency relations
+			mesh.buildAdjacency(nodelist);
 		}
 		catch(Exception ex)
 		{
