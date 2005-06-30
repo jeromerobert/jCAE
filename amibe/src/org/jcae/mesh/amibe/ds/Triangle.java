@@ -77,6 +77,21 @@ public class Triangle
 		return (adjPos & (OTriangle.QUAD << 8 | OTriangle.QUAD << 16 | OTriangle.QUAD << 24)) != 0;
 	}
 	
+	public void mark()
+	{
+		adjPos |= (OTriangle.MARKED << 8 | OTriangle.MARKED << 16 | OTriangle.MARKED << 24);
+	}
+	
+	public void unmark()
+	{
+		adjPos &= ~(OTriangle.MARKED << 8 | OTriangle.MARKED << 16 | OTriangle.MARKED << 24);
+	}
+	
+	public boolean isMarked()
+	{
+		return (adjPos & (OTriangle.MARKED << 8 | OTriangle.MARKED << 16 | OTriangle.MARKED << 24)) != 0;
+	}
+	
 	public String toString()
 	{
 		String r = "Vertices:";
