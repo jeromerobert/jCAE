@@ -597,7 +597,9 @@ public class Vertex
 	{
 		if (this == Vertex.outer)
 			return "outer";
-		String r = "UV: "+param[0]+" "+param[1];
+		String r = "UV:";
+		for (int i = 0; i < param.length; i++)
+			r += " "+param[i];
 		if (ref1d != -1)
 			r += " ref1d: "+ref1d;
 		return r;
