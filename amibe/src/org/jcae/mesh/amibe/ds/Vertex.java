@@ -42,6 +42,8 @@ public class Vertex
 	private static final int [] i0 = new int[2];
 	private static final int [] i1 = new int[2];
 	
+	private static final double [] temp3d = new double[3];
+	
 	public double [] param = null;
 	public Triangle tri;
 	
@@ -275,6 +277,52 @@ public class Vertex
 	public long onLeft(Vertex v1, Vertex v2)
 	{
 		return onLeft_isotropic(v1, v2);
+	}
+	
+	/**
+	 * Returns the distance in 3D space.
+	 *
+	 * @param end  the node to which distance is computed.
+	 * @return the distance to <code>end</code>.
+	 **/
+	public double distance3D(Vertex end)
+	{
+		double x = param[0] - end.param[0];
+		double y = param[1] - end.param[1];
+		double z = param[2] - end.param[2];
+		return Math.sqrt(x*x+y*y+z*z);
+	}
+	
+	/**
+	 * Returns the angle at which a segment is seen.
+	 *
+	 * @param n1  first node
+	 * @param n2  second node
+	 * @return the angle at which the segment is seen.
+	 **/
+	public double angle3D(Vertex n1, Vertex n2)
+	{
+		double normPn1 = distance3D(n1);
+		double normPn2 = distance3D(n2);
+		if ((normPn1 == 0.0) || (normPn2 == 0.0))
+			return 0.0;
+		double normPn3 = n1.distance3D(n2);
+		double mu, alpha;
+		if (normPn1 < normPn2)
+		{
+			double temp = normPn1;
+			normPn1 = normPn2;
+			normPn2 = temp;
+		}
+		if (normPn2 < normPn3)
+			mu = normPn2 - (normPn1 - normPn3);
+		else
+			mu = normPn3 - (normPn1 - normPn2);
+		alpha = 2.0 * Math.atan(Math.sqrt(
+			((normPn1-normPn2)+normPn3)*mu/
+				((normPn1+(normPn2+normPn3))*((normPn1-normPn3)+normPn2))
+		));
+        	return alpha;
 	}
 	
 	public long dot3(Vertex v1, Vertex v2)
