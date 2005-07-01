@@ -69,7 +69,7 @@ public class PAVLSortedTree
 		*/
 		public PAVLSortedTreeNode rotateL()
 		{
-			logger.debug("Single left rotation");
+			//logger.debug("Single left rotation");
 			PAVLSortedTreeNode right = child[1];
 			assert right.balanceFactor >= 0;
 			child[1] = right.child[0];
@@ -94,7 +94,7 @@ public class PAVLSortedTree
 		*/
 		public PAVLSortedTreeNode rotateR()
 		{
-			logger.debug("Single right rotation");
+			//logger.debug("Single right rotation");
 			PAVLSortedTreeNode left = child[0];
 			assert left.balanceFactor <= 0;
 			child[0] = left.child[1];
@@ -117,7 +117,7 @@ public class PAVLSortedTree
 		*/
 		public PAVLSortedTreeNode rotateRL()
 		{
-			logger.debug("Right+left rotation");
+			//logger.debug("Right+left rotation");
 			assert balanceFactor == 2;
 			PAVLSortedTreeNode right = child[1];
 			assert right.balanceFactor == -1;
@@ -167,7 +167,7 @@ public class PAVLSortedTree
 		*/
 		public PAVLSortedTreeNode rotateLR()
 		{
-			logger.debug("Left+right rotation");
+			//logger.debug("Left+right rotation");
 			assert balanceFactor == -2;
 			PAVLSortedTreeNode left = child[0];
 			assert left.balanceFactor == 1;
@@ -351,9 +351,8 @@ public class PAVLSortedTree
 	 */
 	public final synchronized void update(Object o, double value)
 	{
-		PAVLSortedTreeNode node = (PAVLSortedTreeNode) map.get(o);
-		assert node != null;
-		remove(node);
+		logger.debug("Update "+o+" to "+value);
+		remove(o);
 		insert(o, value);
 	}
 	
@@ -364,6 +363,7 @@ public class PAVLSortedTree
 	public final synchronized void remove(Object o)
 	{
 		PAVLSortedTreeNode p = (PAVLSortedTreeNode) map.get(o);
+		logger.debug("Remove "+p+" "+o);
 		assert p != null;
 		int lastDir = 0;
 		PAVLSortedTreeNode q = p.parent;
