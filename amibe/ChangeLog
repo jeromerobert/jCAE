@@ -1,3 +1,38 @@
+Mon Jul  4 15:06:39 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos2d/EnforceAbsDeflection.java
+	  src/org/jcae/mesh/amibe/ds/MNode3D.java
+	  src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/amibe/ds/OTriangle.java
+	  src/org/jcae/mesh/amibe/ds/Vertex.java
+	  src/org/jcae/mesh/amibe/util/tests/OctreeTestDisplayPLY.java
+	  src/org/jcae/mesh/amibe/util/tests/OctreeTestRemove.java
+	  src/org/jcae/mesh/amibe/validation/AbsoluteDeflection2D.java
+	  src/org/jcae/mesh/mesher/ds/MMesh1D.java
+	  src/org/jcae/mesh/mesher/ds/MNode1D.java
+	  src/org/jcae/mesh/xmldata/MMesh1DReader.java
+	  src/org/jcae/mesh/xmldata/MMesh3DReader.java
+	  src/org/jcae/mesh/xmldata/MMesh3DWriter.java
+	  src/org/jcae/mesh/xmldata/MeshReader.java
+	  src/org/jcae/mesh/xmldata/MeshWriter.java: Change policy about labels.  Previously labels were numbered from 0, and -1 meant an inner vertex.  But with 3D meshes we have to distinguish artificial boundaries from real mesh boundaries.  For this reason, 0 means now an inner vertex, positive values are for vertices on boundary mesh, and negative values are for vertices on artificial patch boundaries.
+
+	* src/org/jcae/mesh/amibe/ds/Mesh.java (buildAdjacency): Change label sign for vertices on inner boundaries.
+
+Fri Jul  1 16:40:03 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/util/PAVLSortedTree.java: Utility class to traverse mesh entities (vertices, edges, faces) according to some quality factor.
+	* src/org/jcae/mesh/amibe/ds/Vertex.java: New distance3D() and angle3D() to perform computations in 3D space.
+
+Thu Jun 30 16:06:45 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/MMesh3DReader.java: Do not abort if the <normals> node is not present in jcae3d.
+	* src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/xmldata/MeshReader.java
+	  src/org/jcae/mesh/xmldata/MeshWriter.java: Build adjacency relations when reading Mesh.  They are no more written onto disk.
+	* src/org/jcae/mesh/amibe/ds/Vertex.java
+	  src/org/jcae/mesh/xmldata/MeshReader.java
+	  src/org/jcae/mesh/xmldata/MeshWriter.java: Vertex class can also be used to store 3D nodes, 
+
 Tue Jun 28 12:32:12 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/tools/Calculus3D.java: If the org.jcae.mesh.amibe.ds.tools.Calculus3D.accurateDistance property is set to true, metrics on end points are compared and if they are very different, the segment is divided in order to have more accurate results.  This property is set to false by default because it is not clear whether this gives better results.
