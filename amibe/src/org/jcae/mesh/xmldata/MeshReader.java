@@ -96,7 +96,7 @@ public class MeshReader
 				coord[1] = nodesIn.readDouble();
 				nodelist[i] = new Vertex(coord[0], coord[1]);
 				if (i < numberOfNodes - numberOfReferences)
-					label = -1;
+					label = 0;
 				else
 					label = refs[i+numberOfReferences-numberOfNodes];
 				nodelist[i].setRef(label);
@@ -197,7 +197,7 @@ public class MeshReader
 				coord[2] = nodesIn.readDouble();
 				nodelist[i] = new Vertex(coord[0], coord[1], coord[2]);
 				if (i < numberOfNodes - numberOfReferences)
-					label = -1;
+					label = 0;
 				else
 					label = refs[i+numberOfReferences-numberOfNodes];
 				nodelist[i].setRef(label);

@@ -50,8 +50,11 @@ public class Vertex
 	//  Metrics at this location
 	private Metric2D m2 = null;
 	
-	//  Link to the geometrical node, if any
-	private int ref1d = -1;
+	//  ref1d > 0: link to the geometrical node
+	//  ref1d = 0: inner node
+	//  ref1d < 0: node on an inner boundary
+	//  
+	private int ref1d = 0;
 	
 	public Vertex(double u, double v)
 	{
@@ -590,7 +593,7 @@ public class Vertex
 	
 	public boolean isMutable()
 	{
-		return ref1d == -1;
+		return ref1d <= 0;
 	}
 	
 	public String toString ()
@@ -600,7 +603,7 @@ public class Vertex
 		String r = "UV:";
 		for (int i = 0; i < param.length; i++)
 			r += " "+param[i];
-		if (ref1d != -1)
+		if (ref1d != 0)
 			r += " ref1d: "+ref1d;
 		return r;
 	}

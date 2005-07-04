@@ -58,7 +58,7 @@ public class OctreeTestRemove extends OctreeTest
 			xyz[0] = rand.nextDouble();
 			xyz[1] = rand.nextDouble();
 			xyz[2] = rand.nextDouble();
-			r.add(new MNode3D(xyz, -1));
+			r.add(new MNode3D(xyz, 0));
 		}
 		//CheckCoordProcedure checkproc = new CheckCoordProcedure();
 		//r.walk(checkproc);
@@ -75,7 +75,7 @@ public class OctreeTestRemove extends OctreeTest
 					double [] xyz = view.getLastClick();
 					if (null != xyz)
 					{
-						MNode3D vt = r.getNearVertex(new MNode3D(xyz, -1));
+						MNode3D vt = r.getNearVertex(new MNode3D(xyz, 0));
 						r.remove(vt);
 						view.removeAllBranchGroup();
 						display(view, r);

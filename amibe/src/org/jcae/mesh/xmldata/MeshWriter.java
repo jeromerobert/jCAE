@@ -62,7 +62,7 @@ public class MeshWriter
 			if (n == Vertex.outer)
 				continue;
 			int ref1d = n.getRef();
-			if (-1 == ref1d)
+			if (0 == ref1d)
 			{
 				double [] p = n.getUV();
 				for (int d = 0; d < p.length; d++)
@@ -81,7 +81,7 @@ public class MeshWriter
 			if (n == Vertex.outer)
 				continue;
 			int ref1d = n.getRef();
-			if (-1 != ref1d)
+			if (0 != ref1d)
 			{
 				double [] p = n.getUV();
 				for (int d = 0; d < p.length; d++)

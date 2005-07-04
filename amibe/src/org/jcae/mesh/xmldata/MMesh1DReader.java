@@ -118,7 +118,9 @@ public class MMesh1DReader
 				"/jcae/mesh/submesh");
 
 			int iEdge = 0;
-			int offset = 0;
+			//  References are counted from 1; 0 means an inner
+			//  vertex.  Offset is thus set to 1.
+			int offset = 1;
 			HashSet setSeenEdges = new HashSet();
 			CADExplorer expE = CADShapeBuilder.factory.newExplorer();
 			for (expE.init(shape, CADExplorer.EDGE); expE.more(); expE.next())

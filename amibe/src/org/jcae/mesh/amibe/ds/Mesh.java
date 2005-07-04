@@ -517,7 +517,7 @@ public class Mesh
 					continue;
 				int ref1 = ot.origin().getRef();
 				int ref2 = ot.destination().getRef();
-				if (ref1 != -1 && ref2 != -1 && ref1 == ref2)
+				if (ref1 != 0 && ref2 != 0 && ref1 == ref2)
 				{
 					logger.debug("  Collapsing "+ot);
 					removedTriangles.add(ot.getTri());
@@ -562,6 +562,23 @@ public class Mesh
 		tVertList.put(Vertex.outer, outerTriangles);
 		checkNeighbours(Vertex.outer, tVertList, null);
 		logger.debug("Boundary edges: "+outerTriangles.size());
+		
+		//  Find the list of vertices which are on mesh boundary
+		HashSet bndNodes = new HashSet();
+		for (Iterator it = outerTriangles.iterator(); it.hasNext(); )
+		{
+			Triangle t = (Triangle) it.next();
+			bndNodes.add(t.vertex[0]);
+			bndNodes.add(t.vertex[1]);
+			bndNodes.add(t.vertex[2]);
+		}
+		for (int i = 0; i < vertices.length; i++)
+		{
+			int label = vertices[i].getRef();
+			if (0 != label && !bndNodes.contains(vertices[i]))
+				//  Vertex on an inner boundary
+				vertices[i].setRef(-label);
+		}
 	}
 	
 	private static final void checkNeighbours(Vertex v, HashMap tVertList, ArrayList outerTriangles)

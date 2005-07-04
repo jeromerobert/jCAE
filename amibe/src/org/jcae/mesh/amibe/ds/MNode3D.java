@@ -50,7 +50,7 @@ public class MNode3D
 	 * Creates a <code>MNode3D</code> instance by specifying its 3D coordinates and its label.
 	 *
 	 * @param p  a <code>double[3]</code> array containing 3D coordinates.
-	 * @param label  a unique label if this node is on a boundary, <code>-1</code> otherwise.
+	 * @param label  a unique label if this node is on a boundary, <code>0</code> otherwise.
 	 */
 	public MNode3D(double [] p, int label)
 	{
@@ -173,7 +173,7 @@ public class MNode3D
 	 **/
 	public boolean isMutable()
 	{
-		return (-1 == ref1d);
+		return (ref1d <= 0);
 	}
 	
 	/**
@@ -194,7 +194,7 @@ public class MNode3D
 	 **/
 	public void clearRef()
 	{
-		ref1d = -1;
+		ref1d = 0;
 	}
 	
 	public void addNormal(double [] n)
@@ -223,7 +223,7 @@ public class MNode3D
 	{
 		String r="MNode3D: id="+getID()+
 			" "+param[0]+" "+param[1]+" "+param[2];
-		if (-1 != ref1d)
+		if (0 != ref1d)
 			r+=" ref1d="+ref1d;
 		return r;
 	}

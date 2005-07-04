@@ -111,7 +111,7 @@ public class MMesh3DReader
 			for (i=0; i < numberOfNodes; i++)
 			{
 				if (i < numberOfNodes - numberOfReferences)
-					label = -1;
+					label = 0;
 				else
 					label = refs[i+numberOfReferences-numberOfNodes];
 				for (int j = 0; j < 3; j++)

@@ -44,7 +44,7 @@ public class MNode1D
 	private CADVertex vertex;
 	
 	//  Label used when exchanging data
-	private int label = -1;
+	private int label = 0;
 	
 	//  Several MNode1D instances may share the same location.
 	//  One of them is called the master, and all others have

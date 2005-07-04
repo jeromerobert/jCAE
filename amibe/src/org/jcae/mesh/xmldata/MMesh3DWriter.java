@@ -58,7 +58,7 @@ public class MMesh3DWriter
 		{
 			MNode3D n=(MNode3D)nodesIterator.next();
 			int ref1d = n.getRef();
-			if (-1 == ref1d)
+			if (0 == ref1d)
 			{
 				out.writeDouble(n.getX());
 				out.writeDouble(n.getY());
@@ -73,7 +73,7 @@ public class MMesh3DWriter
 		{
 			MNode3D n=(MNode3D)nodesIterator.next();
 			int ref1d = n.getRef();
-			if (-1 != ref1d)
+			if (0 != ref1d)
 			{
 				out.writeDouble(n.getX());
 				out.writeDouble(n.getY());

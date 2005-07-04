@@ -143,7 +143,7 @@ public class MMesh1D extends MMesh0D
 			for (Iterator it = submesh1d.getNodesIterator(); it.hasNext(); )
 			{
 				MNode1D n = (MNode1D) it.next();
-				n.setLabel(-1);
+				n.setLabel(0);
 			}
 		}
 		int i = 0;
@@ -154,10 +154,10 @@ public class MMesh1D extends MMesh0D
 			for (Iterator it = submesh1d.getNodesIterator(); it.hasNext(); )
 			{
 				MNode1D n = (MNode1D) it.next();
-				if (-1 == n.getMaster().getLabel())
+				if (0 == n.getMaster().getLabel())
 				{
-					n.getMaster().setLabel(i);
 					i++;
+					n.getMaster().setLabel(i);
 				}
 			}
 		}

@@ -116,7 +116,7 @@ public class OctreeTestDisplayPLY extends OctreeTest
 		for (int i = 0; i < nrNodes - nrDuplicates; i++)
 		{
 			System.arraycopy(coord, 3*i, xyz, 0, 3);
-			r.add(new MNode3D(xyz, -1));
+			r.add(new MNode3D(xyz, 0));
 		}
 		logger.info("Max level ");
 		logger.info("Max level: "+r.getMaxLevel());
@@ -136,7 +136,7 @@ public class OctreeTestDisplayPLY extends OctreeTest
 					double [] xyz = view.getLastClick();
 					if (null != xyz)
 					{
-						MNode3D vt = r.getNearVertex(new MNode3D(xyz, -1));
+						MNode3D vt = r.getNearVertex(new MNode3D(xyz, 0));
 						r.remove(vt);
 						view.removeAllBranchGroup();
 						display(view, r);
