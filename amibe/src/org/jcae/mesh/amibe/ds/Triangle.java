@@ -20,6 +20,7 @@
 
 package org.jcae.mesh.amibe.ds;
 
+import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.apache.log4j.Logger;
 import java.util.Random;
 
@@ -65,6 +66,30 @@ public class Triangle
 			(p1[0]+p2[0]+p3[0])/3.0,
 			(p1[1]+p2[1]+p3[1])/3.0
 		);
+	}
+	
+	public double [] normal3D()
+	{
+		double [] vect1 = new double[3];
+		double [] vect2 = new double[3];
+		double [] p0 = vertex[0].getUV();
+		double [] p1 = vertex[1].getUV();
+		double [] p2 = vertex[2].getUV();
+		vect1[0] = p1[0] - p0[0];
+		vect1[1] = p1[1] - p0[1];
+		vect1[2] = p1[2] - p0[2];
+		vect2[0] = p2[0] - p0[0];
+		vect2[1] = p2[1] - p0[1];
+		vect2[2] = p2[2] - p0[2];
+		double [] ret = Metric3D.prodVect3D(vect1, vect2);
+		double norm = Metric3D.norm(ret);
+		if (norm != 0.0)
+		{
+			ret[0] /= norm;
+			ret[1] /= norm;
+			ret[2] /= norm;
+		}
+		return ret;
 	}
 	
 	public boolean isOuter()

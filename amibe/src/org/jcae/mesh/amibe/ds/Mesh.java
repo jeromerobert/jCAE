@@ -24,6 +24,7 @@ import org.jcae.mesh.amibe.util.QuadTree;
 import org.jcae.mesh.amibe.ds.tools.*;
 import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.jcae.mesh.amibe.metrics.Metric2D;
+import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.cad.*;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -538,7 +539,7 @@ public class Mesh
 	/**
 	 * Build adjacency relations between triangles
 	 */
-	public void buildAdjacency(Vertex [] vertices)
+	public void buildAdjacency(Vertex [] vertices, double minAngle)
 	{
 		//  1. For each vertex, build the list of triangles
 		//     connected to this vertex.
@@ -572,12 +573,18 @@ public class Mesh
 			bndNodes.add(t.vertex[1]);
 			bndNodes.add(t.vertex[2]);
 		}
+		OTriangle ot = new OTriangle();
+		double cosMinAngle = Math.cos(minAngle);
 		for (int i = 0; i < vertices.length; i++)
 		{
 			int label = vertices[i].getRef();
 			if (0 != label && !bndNodes.contains(vertices[i]))
-				//  Vertex on an inner boundary
-				vertices[i].setRef(-label);
+			{
+				//  Check for ridges
+				ot.bind(vertices[i].tri);
+				if (minAngle < 0.0 || checkRidges(vertices[i], cosMinAngle, ot))
+					vertices[i].setRef(-label);
+			}
 		}
 	}
 	
@@ -652,6 +659,34 @@ public class Mesh
 		list.addAll(newTriangles);
 		if (outerTriangles != null)
 			outerTriangles.addAll(newTriangles);
+	}
+	
+	private static final boolean checkRidges(Vertex v, double cosMinAngle, OTriangle ot)
+	{
+		if (ot.origin() != v)
+			ot.nextOTri();
+		if (ot.origin() != v)
+			ot.nextOTri();
+		assert ot.origin() == v;
+		Vertex first = ot.destination();
+		while (true)
+		{
+			Vertex d = ot.destination();
+			if (d != Vertex.outer && 0 != d.getRef())
+			{
+				double [] n1 = ot.getTri().normal3D();
+				ot.symOTri();
+				double [] n2 = ot.getTri().normal3D();
+				ot.symOTri();
+				double angle = Metric3D.prodSca(n1, n2);
+				if (angle < cosMinAngle)
+					return false;
+			}
+			ot.nextOTriOrigin();
+			if (ot.destination() == first)
+				break;
+		}
+		return true;
 	}
 	
 	public void writeUNV2D(String file)

@@ -132,7 +132,7 @@ public class MeshReader
 			nodesIn.close();
 			refsIn.close();
 			//  Build adjacency relations
-			mesh.buildAdjacency(nodelist);
+			mesh.buildAdjacency(nodelist, -1.0);
 		}
 		catch(Exception ex)
 		{
@@ -229,7 +229,14 @@ public class MeshReader
 			nodesIn.close();
 			refsIn.close();
 			//  Build adjacency relations
-			mesh.buildAdjacency(nodelist);
+			String ridgeAngleProp = System.getProperty("org.jcae.mesh.xmldata.MeshReader.ridgeAngleDegre");
+			if (ridgeAngleProp == null)
+			{
+				ridgeAngleProp = "10.0";
+				System.setProperty("h.xmldata.MeshReader.ridgeAngleDegre", ridgeAngleProp);
+			}
+			double ridgeAngle = Double.parseDouble(ridgeAngleProp) * Math.PI/180.0;
+			mesh.buildAdjacency(nodelist, ridgeAngle);
 		}
 		catch(Exception ex)
 		{
