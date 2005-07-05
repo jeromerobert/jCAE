@@ -555,30 +555,57 @@ public class Mesh
 				list.add(t);
 			}
 		}
+		//  2. For each pair of vertices, count adjacent triangles.
+		//     If there is only one adjacent triangle, a new outer
+		//     triangle is created and added to outerTriangles.
+		//     If there are 2 adjacent triangles, they are connected
+		//     together.
 		ArrayList outerTriangles = new ArrayList();
 		for (int i = 0; i < vertices.length; i++)
 			checkNeighbours(vertices[i], tVertList, outerTriangles);
 		
-		//  Now build external triangles
+		//  3. Connect external triangles
 		tVertList.put(Vertex.outer, outerTriangles);
 		checkNeighbours(Vertex.outer, tVertList, null);
 		logger.debug("Boundary edges: "+outerTriangles.size());
+		//  Mesh is now fully connected, and usual traversal methods
+		//  can be used.
 		
-		//  Find the list of vertices which are on mesh boundary
+		//  4. Find the list of vertices which are on mesh boundary
 		HashSet bndNodes = new HashSet();
+		int maxLabel = 0;
 		for (Iterator it = outerTriangles.iterator(); it.hasNext(); )
 		{
 			Triangle t = (Triangle) it.next();
-			bndNodes.add(t.vertex[0]);
-			bndNodes.add(t.vertex[1]);
-			bndNodes.add(t.vertex[2]);
+			for (int i = 0; i < 3; i++)
+			{
+				bndNodes.add(t.vertex[i]);
+				maxLabel = Math.max(maxLabel, t.vertex[i].getRef());
+			}
 		}
 		OTriangle ot = new OTriangle();
+		//  5. If vertices are on inner boundaries and there is
+		//     no ridge, change their label.
+		int nrJunctionPoints = 0;
 		double cosMinAngle = Math.cos(minAngle);
 		for (int i = 0; i < vertices.length; i++)
 		{
+			if (bndNodes.contains(vertices[i]))
+				continue;
 			int label = vertices[i].getRef();
-			if (0 != label && !bndNodes.contains(vertices[i]))
+			int nrVertNeigh = vertices[i].getNeighboursNodes().size();
+			int nrTriNeigh= ((ArrayList) tVertList.get(vertices[i])).size();
+			if (nrVertNeigh != nrTriNeigh)
+			{
+				nrJunctionPoints++;
+				if (label == 0)
+				{
+					maxLabel++;
+					vertices[i].setRef(maxLabel);
+				}
+				continue;
+			}
+			if (0 != label)
 			{
 				//  Check for ridges
 				ot.bind(vertices[i].tri);
@@ -586,6 +613,8 @@ public class Mesh
 					vertices[i].setRef(-label);
 			}
 		}
+		if (nrJunctionPoints > 0)
+			logger.info("Found "+nrJunctionPoints+" saddle points");
 	}
 	
 	private static final void checkNeighbours(Vertex v, HashMap tVertList, ArrayList outerTriangles)
