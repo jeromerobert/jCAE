@@ -40,6 +40,7 @@ public class PAVLSortedTree
 	private PAVLSortedTreeNode travNode;
 	// Mapping between objects and tree nodes
 	private HashMap map = new HashMap();
+	private int count = 0;
 	
 	private class PAVLSortedTreeNode
 	{
@@ -281,6 +282,7 @@ public class PAVLSortedTree
 			node.parent = root;
 			return;
 		}
+		count++;
 		PAVLSortedTreeNode current = root.child[0];
 		PAVLSortedTreeNode parent = root;
 		PAVLSortedTreeNode topNode = current;
@@ -365,6 +367,8 @@ public class PAVLSortedTree
 		PAVLSortedTreeNode p = (PAVLSortedTreeNode) map.get(o);
 		logger.debug("Remove "+p+" "+o);
 		assert p != null;
+		map.remove(o);
+		count--;
 		int lastDir = 0;
 		PAVLSortedTreeNode q = p.parent;
 		if (q.child[1] == p)
@@ -515,6 +519,15 @@ public class PAVLSortedTree
 		}
 		if (root.child[0] == null)
 			root = null;
+	}
+	
+	/**
+	 * Return the object with the lowest quality factor.
+	 * @return the object with the lowest quality factor.
+	 */
+	public final int size()
+	{
+		return map.size();
 	}
 	
 	/**
