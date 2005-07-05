@@ -1,3 +1,7 @@
+Tue Jul  5 15:52:47 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Mesh.java (buildAdjacency): Detect tangent points between surfaces.  These points must be immutable, even if they are interior to these surfaces.
+
 Mon Jul  4 15:06:39 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos2d/EnforceAbsDeflection.java
@@ -16,8 +20,9 @@ Mon Jul  4 15:06:39 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 	  src/org/jcae/mesh/xmldata/MeshReader.java
 	  src/org/jcae/mesh/xmldata/MeshWriter.java: Change policy about labels.  Previously labels were numbered from 0, and -1 meant an inner vertex.  But with 3D meshes we have to distinguish artificial boundaries from real mesh boundaries.  For this reason, 0 means now an inner vertex, positive values are for vertices on boundary mesh, and negative values are for vertices on artificial patch boundaries.
 
-	* src/org/jcae/mesh/amibe/ds/Mesh.java (buildAdjacency): Change label sign for vertices on inner boundaries.
-
+	* src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/amibe/ds/Triangle.java
+	  src/org/jcae/mesh/xmldata/MeshReader.java: Change label sign for vertices on inner boundaries, if angle between triangles is lower than a limit which can be changed via the org.jcae.mesh.xmldata.MeshReader.ridgeAngleDegre property.
 Fri Jul  1 16:40:03 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/util/PAVLSortedTree.java: Utility class to traverse mesh entities (vertices, edges, faces) according to some quality factor.
