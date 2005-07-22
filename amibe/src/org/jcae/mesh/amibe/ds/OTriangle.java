@@ -21,7 +21,8 @@
 package org.jcae.mesh.amibe.ds;
 
 import java.util.Random;
-import org.jcae.mesh.amibe.metrics.Metric2D;
+import java.util.HashSet;
+import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.apache.log4j.Logger;
 
 /*
@@ -97,7 +98,7 @@ import org.apache.log4j.Logger;
  *    ot.prevOTriApex();    // Moves (t,0) to (t2,0)
  * </pre>
  */
-public class OTriangle
+public class OTriangle implements Cloneable
 {
 	private static Logger logger = Logger.getLogger(OTriangle.class);
 	
@@ -149,6 +150,7 @@ public class OTriangle
 	}
 	
 	private static final Random rand = new Random(139L);
+	private static final Triangle dummy = new Triangle();
 	
 	/*
 	 * Vertices can be accessed through
@@ -227,7 +229,7 @@ public class OTriangle
 	public final void setAttributes(int attr)
 	{
 		attributes |= attr;
-		updateAttributes();
+		pushAttributes();
 	}
 	
 	/**
@@ -238,14 +240,20 @@ public class OTriangle
 	public final void clearAttributes(int attr)
 	{
 		attributes &= ~attr;
-		updateAttributes();
+		pushAttributes();
 	}
 	
 	// Adjust tri.adjPos after attributes is modified.
-	private final void updateAttributes()
+	public final void pushAttributes()
 	{
 		tri.adjPos &= ~(0xff << (8*(1+orientation)));
 		tri.adjPos |= ((attributes & 0xff) << (8*(1+orientation)));
+	}
+	
+	// Adjust attributes after tri.adjPos is modified.
+	public final void pullAttributes()
+	{
+		attributes = (tri.adjPos >> (8*(1+orientation))) & 0xff;
 	}
 	
 	/**
@@ -260,6 +268,18 @@ public class OTriangle
 		dest.tri = src.tri;
 		dest.orientation = src.orientation;
 		dest.attributes = src.attributes;
+	}
+	
+	public final Object clone()
+	{
+		Object ret = null;
+		try
+		{
+			ret = super.clone();
+		}
+		catch (java.lang.CloneNotSupportedException ex)
+		{}
+		return ret;
 	}
 	
 	//  These geometrical primitives have 2 signatures:
@@ -669,16 +689,16 @@ public class OTriangle
 		if (oldLeft.attributes != 0)
 		{
 			newLeft.attributes = oldLeft.attributes;
-			newLeft.updateAttributes();
+			newLeft.pushAttributes();
 			oldLeft.attributes = 0;
-			oldLeft.updateAttributes();
+			oldLeft.pushAttributes();
 		}
 		if (oldRight.attributes != 0)
 		{
 			newRight.attributes = oldRight.attributes;
-			newRight.updateAttributes();
+			newRight.pushAttributes();
 			oldRight.attributes = 0;
-			oldRight.updateAttributes();
+			oldRight.pushAttributes();
 		}
 		Triangle iniTri = tri;
 		v.tri = tri;
@@ -1061,9 +1081,149 @@ public class OTriangle
 		return count;
 	}
 	
+	/**
+	 * Check whether an edge can be contracted.
+	 * @return <code>true</code> if this edge can be contracted, <code>flase</code> otherwise.
+	 */
+	public final boolean canContract()
+	{
+		if (!isMutable())
+			return false;
+		HashSet link = origin().getNeighboursNodes();
+		link.retainAll(destination().getNeighboursNodes());
+		return link.size() == 2;
+	}
+	
+	private final boolean checkNormalsContract(Vertex n)
+	{
+		Vertex o = origin();
+		Vertex d = destination();
+		symOTri(this, work[1]);
+		double [] n3d = tri.normal3D();
+		//  Loop around o to check that triangles will not be inverted
+		copyOTri(this, work[0]);
+		work[0].nextOTri();
+		work[0].prevOTriApex();
+		dummy.vertex[2] = n;
+		do
+		{
+			work[0].nextOTriApex();
+			dummy.vertex[0] = work[0].origin();
+			dummy.vertex[1] = work[0].destination();
+			if (work[0].tri != tri && work[0].tri != work[1].tri && dummy.vertex[0] != Vertex.outer && dummy.vertex[1] != Vertex.outer)
+			{
+				double [] newN3d = dummy.normal3D();
+				if (Metric3D.prodSca(n3d, newN3d) < 0.3)
+					return false;
+			}
+		}
+		while (work[0].destination() != d);
+		//  Loop around d to check that triangles will not be inverted
+		copyOTri(this, work[0]);
+		work[0].prevOTri();
+		do
+		{
+			work[0].nextOTriApex();
+			dummy.vertex[0] = work[0].origin();
+			dummy.vertex[1] = work[0].destination();
+			if (work[0].tri != tri && work[0].tri != work[1].tri && dummy.vertex[0] != Vertex.outer && dummy.vertex[1] != Vertex.outer)
+			{
+				double [] newN3d = dummy.normal3D();
+				if (Metric3D.prodSca(n3d, newN3d) < 0.3)
+					return false;
+			}
+		}
+		while (work[0].destination() != o);
+		return true;
+	}
+	
+	/**
+	 * Contract an edge.
+	 * TODO: Attributes are not checked.
+	 * @param n the resulting vertex
+	 */
+	public final boolean contract(Vertex n)
+	{
+		Vertex o = origin();
+		Vertex d = destination();
+		if (o.mesh.dim == 3)
+		{
+			if (!checkNormalsContract(n))
+				return false;
+		}
+		
+		/*
+		 *           V1                       V1
+		 *  V3._______._______. V4   V3 .______.______. V4
+		 *     \ t3  / \ t4  /           \  t3 | t4  / 
+		 *      \   /   \   /              \   |   /
+		 *       \ / t1  \ /                 \ | /  
+		 *      o +-------+ d   ------>      n +
+		 *       / \ t2  / \                 / | \
+		 *      /   \   /   \              /   |   \
+		 *     / t5  \ / t6  \           /  t5 | t6  \
+		 *    +-------'-------+         +------+------+
+		 *  V5        V2       V6     V5       V2      V6
+		 */
+		// this = (odV1)
+		
+		//  Replace o by n in all incident triangles
+		copyOTri(this, work[0]);
+		work[0].setDestination(n);
+		while (true)
+		{
+			work[0].setOrigin(n);
+			work[0].nextOTriOrigin();
+			if (work[0].destination() == n)
+				break;
+		}
+		//  Replace d by n in all incident triangles
+		symOTri(this, work[0]);        // (doV2)
+		work[0].setDestination(n);
+		while (true)
+		{
+			work[0].setOrigin(n);
+			work[0].nextOTriOrigin();
+			//  Warning: o has been replaced by n above!
+			if (work[0].destination() == n)
+				break;
+		}
+		//  Update adjacency links.  For clarity, o and d are
+		//  written instead of n.
+		nextOTri();                     // (dV1o)
+		symOTri(this, work[0]);         // (V1dV4)
+		nextOTri();                     // (V1od)
+		symOTri(this, work[1]);         // (oV1V3)
+		work[0].glue(work[1]);
+		Triangle t3 = work[1].tri;
+		Vertex V1 = work[1].destination();
+		nextOTri();                     // (odV1)
+		symOTri();                      // (doV2)
+		nextOTri();                     // (oV2d)
+		symOTri(this, work[0]);         // (V2oV5)
+		nextOTri();                     // (V2do)
+		symOTri(this, work[1]);         // (dV2V6)
+		work[0].glue(work[1]);
+		Triangle t5 = work[0].tri;
+		Vertex V2 = work[0].origin();
+		//  Fix links to triangles
+		V1.tri = t3;
+		V2.tri = t5;
+		n.tri = t5;
+		//  Restore 'this' to its initial value
+		nextOTri();                     // (doV2)
+		clearAttributes(MARKED);
+		pushAttributes();
+		symOTri();                      // (odV1)
+		clearAttributes(MARKED);
+		pushAttributes();
+		return true;
+	}
+	
 	public final String toString()
 	{
 		String r = "Orientation: "+orientation+"\n";
+		r += "HashCode Tri: "+tri.hashCode()+"\n";
 		r += "Attributes: "+attributes+" "+Integer.toHexString(tri.adjPos >> 8)+"\n";
 		r += "Vertices:\n";
 		r += "  Origin: "+origin()+"\n";
