@@ -362,11 +362,14 @@ public class PAVLSortedTree
 	 * Remove the node associated to an object from the tree.
 	 * @param o      object being removed
 	 */
-	public final synchronized void remove(Object o)
+	public final synchronized double remove(Object o)
 	{
 		PAVLSortedTreeNode p = (PAVLSortedTreeNode) map.get(o);
 		logger.debug("Remove "+p+" "+o);
+		if (p == null)
+			return -1.0;
 		assert p != null;
+		double ret = p.value;
 		map.remove(o);
 		count--;
 		int lastDir = 0;
@@ -519,6 +522,7 @@ public class PAVLSortedTree
 		}
 		if (root.child[0] == null)
 			root = null;
+		return ret;
 	}
 	
 	/**
