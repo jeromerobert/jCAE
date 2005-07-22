@@ -1,3 +1,9 @@
+Fri Jul 22 11:40:38 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Mesh.java: Add a new 'dim' attribute to distinguish between 2D and 3D meshes.
+	* src/org/jcae/mesh/amibe/ds/Vertex.java: Add clone() and findOTriangle() methods.
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java: Rename updateAttributes() into pushAttributes(), and add a symmetric pullAttributes() method.  Add a contract() method.
+
 Tue Jul  5 15:52:47 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Mesh.java (buildAdjacency): Detect tangent points between surfaces.  These points must be immutable, even if they are interior to these surfaces.
