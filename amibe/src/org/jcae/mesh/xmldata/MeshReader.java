@@ -146,6 +146,7 @@ public class MeshReader
 	public static Mesh readObject3D(String xmlDir, String xmlFile)
 	{
 		Mesh mesh = new Mesh();
+		mesh.dim = 3;
 		logger.debug("begin reading "+xmlDir+File.separator+xmlFile);
 		CachedXPathAPI xpath = new CachedXPathAPI();
 		try
@@ -233,7 +234,7 @@ public class MeshReader
 			if (ridgeAngleProp == null)
 			{
 				ridgeAngleProp = "10.0";
-				System.setProperty("h.xmldata.MeshReader.ridgeAngleDegre", ridgeAngleProp);
+				System.setProperty("org.jcae.mesh.xmldata.MeshReader.ridgeAngleDegre", ridgeAngleProp);
 			}
 			double ridgeAngle = Double.parseDouble(ridgeAngleProp) * Math.PI/180.0;
 			mesh.buildAdjacency(nodelist, ridgeAngle);
