@@ -132,6 +132,9 @@ public class Mesh
 	//  Stack of methods to compute geometrical values
 	private Stack compGeomStack = new Stack();
 	
+	//  2D/3D
+	public int dim = 2;
+	
 	/**
 	 * Structure to fasten search of nearest vertices.
 	 */
@@ -144,7 +147,7 @@ public class Mesh
 	{
 		Vertex.mesh = this;
 		Triangle.outer = new Triangle();
-		Vertex.outer = null;
+		Vertex.outer = new Vertex(0.0, 0.0);
 	}
 	
 	/**
@@ -310,6 +313,16 @@ public class Mesh
 	public void add(Triangle t)
 	{
 		triangleList.add(t);
+	}
+	
+	/**
+	 * Removes a triangle from triangle list.
+	 *
+	 * @param t  triangle being removed.
+	 */
+	public void remove(Triangle t)
+	{
+		triangleList.remove(t);
 	}
 	
 	/**
@@ -811,7 +824,7 @@ public class Mesh
 				if (constrained && !t.isOuter())
 					return false;
 			}
-			else if (t.vertex[0].onLeft(t.vertex[1], t.vertex[2]) <= 0L)
+			else if (dim == 2 && t.vertex[0].onLeft(t.vertex[1], t.vertex[2]) <= 0L)
 				return false;
 		}
 		return true;
