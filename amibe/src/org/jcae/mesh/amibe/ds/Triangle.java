@@ -122,7 +122,8 @@ public class Triangle
 		String r = "Vertices:";
 		for (int i = 0; i < 3; i++)
 			r += "\n  "+vertex[i];
-		r += "\nEdge attributes:";;
+		r += "\nhashcode: "+hashCode();
+		r += "\nEdge attributes:";
 		for (int i = 0; i < 3; i++)
 			r += " "+((adjPos >> (8*(1+i))) & 0xff);
 		return r;
