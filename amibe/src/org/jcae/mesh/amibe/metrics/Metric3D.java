@@ -66,6 +66,12 @@ public class Metric3D extends Matrix
 		cacheSurf.setParameter(uv[0], uv[1]);
 	}
 	
+	public Metric3D()
+	{
+		rank = 3;
+		data = new double[rank][rank];
+	}
+	
 	public Metric3D(double [] e1, double [] e2, double [] e3)
 	{
 		rank = 3;
