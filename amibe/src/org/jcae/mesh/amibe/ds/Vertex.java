@@ -29,7 +29,7 @@ import org.jcae.mesh.cad.*;
 import java.util.Random;
 import java.util.HashSet;
 
-public class Vertex
+public class Vertex implements Cloneable
 {
 	private static Logger logger = Logger.getLogger(Vertex.class);
 	//  Set by Mesh.init
@@ -90,6 +90,22 @@ public class Vertex
 		param = new double[2];
 		param[0] = 0.5 * (pt1.param[0] + pt2.param[0]);
 		param[1] = 0.5 * (pt1.param[1] + pt2.param[1]);
+	}
+	
+	public final Object clone()
+	{
+		Object ret = null;
+		try
+		{
+			ret = super.clone();
+			Vertex that = (Vertex) ret;
+			that.param = new double[param.length];
+			for (int i = 0; i < param.length; i++)
+				that.param[i] = param[i];
+		}
+		catch (java.lang.CloneNotSupportedException ex)
+		{}
+		return ret;
 	}
 	
 	public double [] getUV ()
@@ -242,13 +258,14 @@ public class Vertex
 	
 	public HashSet getNeighboursNodes()
 	{
+		assert tri.vertex[0] == this || tri.vertex[1] == this || tri.vertex[2] == this;
 		OTriangle ot = new OTriangle(tri, 0);
 		HashSet ret = new HashSet(10);
 		if (ot.origin() != this)
 			ot.nextOTri();
 		if (ot.origin() != this)
 			ot.nextOTri();
-		assert ot.origin() == this;
+		assert ot.origin() == this : this+" not in "+ot;
 		Vertex first = ot.destination();
 		while (true)
 		{
@@ -594,6 +611,26 @@ public class Vertex
 	public boolean isMutable()
 	{
 		return ref1d <= 0;
+	}
+	
+	public OTriangle findOTriangle(Vertex v2)
+	{
+		OTriangle ot = new OTriangle(tri, 0);
+		if (ot.origin() != this)
+			ot.nextOTri();
+		if (ot.origin() != this)
+			ot.nextOTri();
+		assert ot.origin() == this : ot+" not in "+tri+"\n"+this;
+		Vertex first = ot.destination();
+		while (true)
+		{
+			if (ot.destination() == v2)
+				return ot;
+			ot.nextOTriOrigin();
+			if (ot.destination() == first)
+				break;
+		}
+		return null;
 	}
 	
 	public String toString ()
