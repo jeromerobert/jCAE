@@ -86,7 +86,7 @@ public class MeshWriter
 				double [] p = n.getUV();
 				for (int d = 0; d < p.length; d++)
 					out.writeDouble(p[d]);
-				refout.writeInt(ref1d);
+				refout.writeInt(Math.abs(ref1d));
 				nodeIndex.put(n, i);
 				i++;
 				nref++;

@@ -1087,7 +1087,7 @@ public class OTriangle implements Cloneable
 	 */
 	public final boolean canContract()
 	{
-		if (!isMutable())
+		if (hasAttributes(OUTER))
 			return false;
 		HashSet link = origin().getNeighboursNodes();
 		link.retainAll(destination().getNeighboursNodes());
@@ -1113,7 +1113,8 @@ public class OTriangle implements Cloneable
 			if (work[0].tri != tri && work[0].tri != work[1].tri && dummy.vertex[0] != Vertex.outer && dummy.vertex[1] != Vertex.outer)
 			{
 				double [] newN3d = dummy.normal3D();
-				if (Metric3D.prodSca(n3d, newN3d) < 0.3)
+				double angle = Metric3D.prodSca(n3d, newN3d);
+				if (angle < -0.3)
 					return false;
 			}
 		}
@@ -1129,7 +1130,8 @@ public class OTriangle implements Cloneable
 			if (work[0].tri != tri && work[0].tri != work[1].tri && dummy.vertex[0] != Vertex.outer && dummy.vertex[1] != Vertex.outer)
 			{
 				double [] newN3d = dummy.normal3D();
-				if (Metric3D.prodSca(n3d, newN3d) < 0.3)
+				double angle = Metric3D.prodSca(n3d, newN3d);
+				if (angle < -0.3)
 					return false;
 			}
 		}

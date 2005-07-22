@@ -600,7 +600,9 @@ public class Mesh
 		//  5. If vertices are on inner boundaries and there is
 		//     no ridge, change their label.
 		int nrJunctionPoints = 0;
-		double cosMinAngle = Math.cos(minAngle);
+		double cosMinAngle = Math.cos(Math.PI*minAngle/180.0);
+		if (minAngle < 0.0)
+			cosMinAngle = -2.0;
 		for (int i = 0; i < vertices.length; i++)
 		{
 			if (bndNodes.contains(vertices[i]))
@@ -721,7 +723,7 @@ public class Mesh
 				double [] n2 = ot.getTri().normal3D();
 				ot.symOTri();
 				double angle = Metric3D.prodSca(n1, n2);
-				if (angle < cosMinAngle)
+				if (angle > -cosMinAngle)
 					return false;
 			}
 			ot.nextOTriOrigin();

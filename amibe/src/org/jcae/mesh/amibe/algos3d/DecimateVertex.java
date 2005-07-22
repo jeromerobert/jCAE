@@ -93,7 +93,10 @@ public class DecimateVertex
 		{
 			Triangle f = (Triangle) itf.next();
 			if (f.isOuter())
+			{
+				f.unmark();
 				continue;
+			}
 			ot.bind(f);
 			for (int i = 0; i < 3; i++)
 			{
@@ -141,8 +144,6 @@ public class DecimateVertex
 				ot.setAttributes(OTriangle.MARKED);
 				OTriangle.symOTri(ot, sym);
 				sym.setAttributes(OTriangle.MARKED);
-				if (ot.hasAttributes(OTriangle.BOUNDARY))
-					continue;
 				Vertex v1 = ot.origin();
 				Vertex v2 = ot.destination();
 				Quadric q1 = (Quadric) quadricMap.get(v1);
@@ -208,10 +209,11 @@ public class DecimateVertex
 				v2 = apex1;
 				ot = v3.findOTriangle(v2);
 				assert ot != null : ""+edge+"\n"+apex1+"\n"+v3+"\n"+v2;
+				ot.setAttributes(OTriangle.MARKED);
 				q1 = (Quadric) quadricMap.get(v3);
 				assert q1 != null : v3;
 				q2 = (Quadric) quadricMap.get(v2);
-				assert q1 != null : v2;
+				assert q2 != null : v2;
 				cost = 
 				  q1.value(v3.getUV()) + q1.value(v2.getUV()) +
 				  q2.value(v3.getUV()) + q2.value(v2.getUV());
@@ -222,10 +224,11 @@ public class DecimateVertex
 				v2 = apex2;
 				ot = v3.findOTriangle(v2);
 				assert ot != null : ""+edge+"\n"+apex1+"\n"+v3+"\n"+v2;
+				ot.setAttributes(OTriangle.MARKED);
 				q1 = (Quadric) quadricMap.get(v3);
 				assert q1 != null : v3;
 				q2 = (Quadric) quadricMap.get(v2);
-				assert q1 != null : v2;
+				assert q2 != null : v2;
 				cost = 
 				  q1.value(v3.getUV()) + q1.value(v2.getUV()) +
 				  q2.value(v3.getUV()) + q2.value(v2.getUV());
