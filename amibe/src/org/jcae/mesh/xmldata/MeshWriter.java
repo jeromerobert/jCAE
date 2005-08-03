@@ -257,9 +257,9 @@ public class MeshWriter
 			if(!dir.exists())
 				dir.mkdirs();
 
-			File nodesFile=new File(dir, JCAEXMLData.nodes2dFilename);
+			File nodesFile=new File(dir, JCAEXMLData.nodes3dFilename);
 			File refFile = new File(dir, JCAEXMLData.ref1dFilename);
-			File trianglesFile=new File(dir, JCAEXMLData.triangles2dFilename);
+			File trianglesFile=new File(dir, JCAEXMLData.triangles3dFilename);
 			File groupsFile = new File(dir, JCAEXMLData.groupsFilename);
 			ArrayList trianglelist = submesh.getTriangles();
 			ArrayList nodelist;
@@ -294,16 +294,6 @@ public class MeshWriter
 				"<file format=\"brep\" location=\""+brepDir+File.separator+brepFile+"\"/>"+"</shape>");
 			meshElement.appendChild(shapeElement);
 			Element subMeshElement=document.createElement("submesh");
-			// Create <subshape> element
-			Element subshapeElement=document.createElement("subshape");
-			subshapeElement.appendChild(document.createTextNode(""+index));
-			subMeshElement.appendChild(subshapeElement);
-			
-			// Create <dimension> element
-			Element dimensionElement=document.createElement("dimension");
-			dimensionElement.appendChild(document.createTextNode("2"));
-			subMeshElement.appendChild(dimensionElement);
-			
 			subMeshElement.appendChild(writeObjectNodes(document, nodelist, nodesFile, refFile, xmlDir, nodeIndex));
 			subMeshElement.appendChild(writeObjectTriangles(document, trianglelist, trianglesFile, xmlDir, nodeIndex));
 			subMeshElement.appendChild(writeObjectGroups(document, trianglelist, groupsFile, xmlDir));
