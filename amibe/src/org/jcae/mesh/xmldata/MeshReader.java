@@ -236,7 +236,7 @@ public class MeshReader
 				ridgeAngleProp = "10.0";
 				System.setProperty("org.jcae.mesh.xmldata.MeshReader.ridgeAngleDegre", ridgeAngleProp);
 			}
-			double ridgeAngle = Double.parseDouble(ridgeAngleProp) * Math.PI/180.0;
+			double ridgeAngle = Double.parseDouble(ridgeAngleProp);
 			mesh.buildAdjacency(nodelist, ridgeAngle);
 		}
 		catch(Exception ex)
