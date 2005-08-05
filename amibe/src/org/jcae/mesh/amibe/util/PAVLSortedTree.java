@@ -246,6 +246,9 @@ public class PAVLSortedTree
 		}
 	}
 	
+	/**
+	 * Pretty-print this tree.
+	 */
 	public void showValues()
 	{
 		if (root == null)
@@ -253,7 +256,33 @@ public class PAVLSortedTree
 			System.out.println("Empty tree");
 			return;
 		}
-		System.out.println("Sorted values:");
+		System.out.println("Tree:");
+		showNodeValues(root.child[0]);
+	}
+	
+	private static void showNodeValues(PAVLSortedTreeNode node)
+	{
+		System.out.println("Key: "+node.value+"  Obj. "+node.data);
+		if (node.child[0] != null)
+		{
+			assert node.child[0].parent == node;
+			showNodeValues(node.child[0]);
+		}
+		if (node.child[1] != null)
+		{
+			assert node.child[1].parent == node;
+			showNodeValues(node.child[1]);
+		}
+	}
+	
+	public void showKeys()
+	{
+		if (root == null)
+		{
+			System.out.println("Empty tree");
+			return;
+		}
+		System.out.println("Sorted keys:");
 		for (Object current = last(); current != null; current = prev())
 		{
 			PAVLSortedTreeNode node = (PAVLSortedTreeNode) map.get(current);
@@ -271,6 +300,7 @@ public class PAVLSortedTree
 	public final synchronized void insert(Object o, double value)
 	{
 		PAVLSortedTreeNode node = new PAVLSortedTreeNode(o, value);
+		logger.debug("insert "+node+" "+o);
 		map.put(o, node);
 		if (root == null)
 		{
@@ -359,6 +389,15 @@ public class PAVLSortedTree
 	}
 	
 	/**
+	 * Checks whether an object exist is the tree
+	 * @param o      object being checked
+	 */
+	public final boolean containsValue(Object o)
+	{
+		return map.containsKey(o);
+	}
+	
+	/**
 	 * Remove the node associated to an object from the tree.
 	 * @param o      object being removed
 	 */
@@ -370,6 +409,7 @@ public class PAVLSortedTree
 			return -1.0;
 		assert p != null;
 		double ret = p.value;
+		logger.debug("Value: "+ret);
 		map.remove(o);
 		count--;
 		int lastDir = 0;
