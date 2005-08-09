@@ -98,7 +98,7 @@ import org.apache.log4j.Logger;
  *    ot.prevOTriApex();    // Moves (t,0) to (t2,0)
  * </pre>
  */
-public class OTriangle implements Cloneable
+public class OTriangle
 {
 	private static Logger logger = Logger.getLogger(OTriangle.class);
 	
@@ -150,7 +150,6 @@ public class OTriangle implements Cloneable
 	}
 	
 	private static final Random rand = new Random(139L);
-	private static final Triangle dummy = new Triangle();
 	
 	/*
 	 * Vertices can be accessed through
@@ -160,9 +159,9 @@ public class OTriangle implements Cloneable
 	 * Adjacent triangle is tri.adj[orientation].tri and its orientation
 	 * is ((tri.adjPos >> (2*orientation)) & 3)
 	 */
-	private Triangle tri;
-	private int orientation;
-	private int attributes;
+	protected Triangle tri;
+	protected int orientation;
+	protected int attributes;
 	
 	/**
 	 * Sole constructor.
@@ -268,18 +267,6 @@ public class OTriangle implements Cloneable
 		dest.tri = src.tri;
 		dest.orientation = src.orientation;
 		dest.attributes = src.attributes;
-	}
-	
-	public final Object clone()
-	{
-		Object ret = null;
-		try
-		{
-			ret = super.clone();
-		}
-		catch (java.lang.CloneNotSupportedException ex)
-		{}
-		return ret;
 	}
 	
 	//  These geometrical primitives have 2 signatures:
@@ -1085,53 +1072,65 @@ public class OTriangle implements Cloneable
 	 * Check whether an edge can be contracted.
 	 * @return <code>true</code> if this edge can be contracted, <code>flase</code> otherwise.
 	 */
-	public final boolean canContract()
+	public final boolean canContract(Vertex n)
 	{
 		if (hasAttributes(OUTER))
 			return false;
+		if (n.mesh.dim == 3 && !checkInversion(n))
+				return false;
+		
+		//  Check topology
 		HashSet link = origin().getNeighboursNodes();
 		link.retainAll(destination().getNeighboursNodes());
 		return link.size() == 2;
 	}
 	
-	private final boolean checkNormalsContract(Vertex n)
+	private final boolean checkInversion(Vertex n)
 	{
 		Vertex o = origin();
 		Vertex d = destination();
 		symOTri(this, work[1]);
-		double [] n3d = tri.normal3D();
 		//  Loop around o to check that triangles will not be inverted
 		copyOTri(this, work[0]);
 		work[0].nextOTri();
 		work[0].prevOTriApex();
-		dummy.vertex[2] = n;
+		double [] v1 = new double[3];
+		double [] v2 = new double[3];
+		double [] xn = n.getUV();
+		double [] xo = o.getUV();
 		do
 		{
 			work[0].nextOTriApex();
-			dummy.vertex[0] = work[0].origin();
-			dummy.vertex[1] = work[0].destination();
-			if (work[0].tri != tri && work[0].tri != work[1].tri && dummy.vertex[0] != Vertex.outer && dummy.vertex[1] != Vertex.outer)
+			if (work[0].tri != tri && work[0].tri != work[1].tri && !work[0].hasAttributes(OUTER))
 			{
-				double [] newN3d = dummy.normal3D();
-				double angle = Metric3D.prodSca(n3d, newN3d);
-				if (angle < -0.3)
+				double [] nu = work[0].normal3DT();
+				double [] x1 = work[0].origin().getUV();
+				for (int i = 0; i < 3; i++)
+				{
+					v1[i] = xn[i] - x1[i];
+					v2[i] = xo[i] - x1[i];
+				}
+				if (Metric3D.prodSca(v1, v2) <= 0.0)
 					return false;
 			}
 		}
 		while (work[0].destination() != d);
 		//  Loop around d to check that triangles will not be inverted
-		copyOTri(this, work[0]);
 		work[0].prevOTri();
+		xo = d.getUV();
 		do
 		{
 			work[0].nextOTriApex();
-			dummy.vertex[0] = work[0].origin();
-			dummy.vertex[1] = work[0].destination();
-			if (work[0].tri != tri && work[0].tri != work[1].tri && dummy.vertex[0] != Vertex.outer && dummy.vertex[1] != Vertex.outer)
+			if (work[0].tri != tri && work[0].tri != work[1].tri && !work[0].hasAttributes(OUTER))
 			{
-				double [] newN3d = dummy.normal3D();
-				double angle = Metric3D.prodSca(n3d, newN3d);
-				if (angle < -0.3)
+				double [] nu = work[0].normal3DT();
+				double [] x1 = work[0].origin().getUV();
+				for (int i = 0; i < 3; i++)
+				{
+					v1[i] = xn[i] - x1[i];
+					v2[i] = xo[i] - x1[i];
+				}
+				if (Metric3D.prodSca(v1, v2) <= 0.0)
 					return false;
 			}
 		}
@@ -1139,21 +1138,28 @@ public class OTriangle implements Cloneable
 		return true;
 	}
 	
+	public double [] normal3DT()
+	{
+		double [] n = tri.normal3D();
+		double [] tau = new double[3];
+		double [] p0 = origin().getUV();
+		double [] p1 = destination().getUV();
+		tau[0] = p1[0] - p0[0];
+		tau[1] = p1[1] - p0[1];
+		tau[2] = p1[2] - p0[2];
+		// It does not need to be normalized
+		return Metric3D.prodVect3D(tau, n);
+	}
+	
 	/**
 	 * Contract an edge.
 	 * TODO: Attributes are not checked.
 	 * @param n the resulting vertex
 	 */
-	public final boolean contract(Vertex n)
+	public final void contract(Vertex n)
 	{
 		Vertex o = origin();
 		Vertex d = destination();
-		if (o.mesh.dim == 3)
-		{
-			if (!checkNormalsContract(n))
-				return false;
-		}
-		
 		/*
 		 *           V1                       V1
 		 *  V3._______._______. V4   V3 .______.______. V4
@@ -1199,6 +1205,11 @@ public class OTriangle implements Cloneable
 		work[0].glue(work[1]);
 		Triangle t3 = work[1].tri;
 		Vertex V1 = work[1].destination();
+		if (V1 == Vertex.outer)
+		{
+			work[0].setAttributes(OUTER);
+			work[1].setAttributes(OUTER);
+		}
 		nextOTri();                     // (odV1)
 		symOTri();                      // (doV2)
 		nextOTri();                     // (oV2d)
@@ -1208,6 +1219,11 @@ public class OTriangle implements Cloneable
 		work[0].glue(work[1]);
 		Triangle t5 = work[0].tri;
 		Vertex V2 = work[0].origin();
+		if (V2 == Vertex.outer)
+		{
+			work[0].setAttributes(OUTER);
+			work[1].setAttributes(OUTER);
+		}
 		//  Fix links to triangles
 		V1.tri = t3;
 		V2.tri = t5;
@@ -1219,7 +1235,6 @@ public class OTriangle implements Cloneable
 		symOTri();                      // (odV1)
 		clearAttributes(MARKED);
 		pushAttributes();
-		return true;
 	}
 	
 	public final String toString()
@@ -1230,7 +1245,7 @@ public class OTriangle implements Cloneable
 		r += "Vertices:\n";
 		r += "  Origin: "+origin()+"\n";
 		r += "  Destination: "+destination()+"\n";
-		r += "  Apex: "+apex()+"\n";
+		r += "  Apex: "+apex();
 		return r;
 	}
 
