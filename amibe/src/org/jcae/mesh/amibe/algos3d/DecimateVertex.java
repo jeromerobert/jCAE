@@ -22,6 +22,7 @@ package org.jcae.mesh.amibe.algos3d;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.NotOrientedEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Metric3D;
@@ -62,6 +63,12 @@ public class DecimateVertex
 					ret += A.data[i][j] * vect[i] * vect[j];
 			return ret;
 		}
+		public String toString()
+		{
+			return "A: "+A+"\n"+
+			       " b: "+b[0]+" "+b[1]+" "+b[2]+"\n"+
+			       " c: "+c;
+		}
 	}
 	
 	/**
@@ -87,8 +94,7 @@ public class DecimateVertex
 		int roughNrNodes = mesh.getTriangles().size()/2;
 		HashSet nodeset = new HashSet(roughNrNodes);
 		HashMap quadricMap = new HashMap(roughNrNodes);
-		OTriangle ot = new OTriangle();
-		OTriangle sym = new OTriangle();
+		NotOrientedEdge noe = new NotOrientedEdge();
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
@@ -97,107 +103,166 @@ public class DecimateVertex
 				f.unmark();
 				continue;
 			}
-			ot.bind(f);
+			noe.bind(f);
 			for (int i = 0; i < 3; i++)
 			{
 				Vertex n = f.vertex[i];
 				nodeset.add(n);
 				quadricMap.put(n, new Quadric());
-				ot.nextOTri();
-				ot.clearAttributes(OTriangle.MARKED);
+				noe.nextOTri();
+				noe.clearAttributes(OTriangle.MARKED);
 			}
 		}
 		// Compute quadrics
 		PAVLSortedTree tree = new PAVLSortedTree();
 		double [] b = new double[3];
+		double [] vect1 = new double[3];
+		double [] vect2 = new double[3];
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
 			if (f.isOuter())
 				continue;
 			double [] normal = f.normal3D();
+			double [] p0 = f.vertex[0].getUV();
+			double [] p1 = f.vertex[1].getUV();
+			double [] p2 = f.vertex[2].getUV();
+			vect1[0] = p1[0] - p0[0];
+			vect1[1] = p1[1] - p0[1];
+			vect1[2] = p1[2] - p0[2];
+			vect2[0] = p2[0] - p0[0];
+			vect2[1] = p2[1] - p0[1];
+			vect2[2] = p2[2] - p0[2];
+			// This is in fact 2*area, but that does not matter
+			double area = Metric3D.norm(Metric3D.prodVect3D(vect1, vect2));
 			double d = - Metric3D.prodSca(normal, f.vertex[0].getUV());
 			for (int i = 0; i < 3; i++)
 			{
 				Quadric q = (Quadric) quadricMap.get(f.vertex[i]);
 				for (int k = 0; k < 3; k++)
 				{
-					q.b[k] += d * normal[k];
+					q.b[k] += area * d * normal[k];
 					for (int l = 0; l < 3; l++)
-						q.A.data[k][l] += normal[k]*normal[l];
+						q.A.data[k][l] += area * normal[k]*normal[l];
 				}
-				q.c += d*d;
+				q.c += area * d*d;
+			}
+			noe.bind(f);
+			for (int i = 0; i < 3; i++)
+			{
+				noe.nextOTri();
+				if (noe.hasAttributes(OTriangle.BOUNDARY))
+				{
+					//  Add a virtual plane
+					double [] x1 = noe.origin().getUV();
+					double [] x2 = noe.destination().getUV();
+					area = 1000.0 * (
+					  (x1[0] - x2[0]) * (x1[0] - x2[0]) +
+					  (x1[1] - x2[1]) * (x1[1] - x2[1]) +
+					  (x1[2] - x2[2]) * (x1[2] - x2[2]));
+					double [] nu = noe.normal3DT();
+					d = - Metric3D.prodSca(nu, noe.origin().getUV());
+					Quadric q1 = (Quadric) quadricMap.get(noe.origin());
+					Quadric q2 = (Quadric) quadricMap.get(noe.destination());
+					for (int k = 0; k < 3; k++)
+					{
+						q1.b[k] += area * d * nu[k];
+						q2.b[k] += area * d * nu[k];
+						for (int l = 0; l < 3; l++)
+						{
+							double delta = area * nu[k]*nu[l];
+							q1.A.data[k][l] += delta;
+							q2.A.data[k][l] += delta;
+						}
+					}
+					q2.c += area * d*d;
+				}
 			}
 		}
+		computeTree(tree, quadricMap);
+		contractAllVertices(tree, quadricMap);
+	}
+	
+	private void computeTree(PAVLSortedTree tree, HashMap quadricMap)
+	{
+		NotOrientedEdge noe = new NotOrientedEdge();
+		NotOrientedEdge sym = new NotOrientedEdge();
 		//  Compute edge cost
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
 			if (f.isOuter())
 				continue;
-			ot.bind(f);
+			noe.bind(f);
 			for (int i = 0; i < 3; i++)
 			{
-				ot.nextOTri();
-				if (ot.hasAttributes(OTriangle.MARKED))
+				noe.nextOTri();
+				if (noe.hasAttributes(OTriangle.MARKED))
 					continue;
-				ot.setAttributes(OTriangle.MARKED);
-				OTriangle.symOTri(ot, sym);
+				noe.setAttributes(OTriangle.MARKED);
+				OTriangle.symOTri(noe, sym);
 				sym.setAttributes(OTriangle.MARKED);
-				Vertex v1 = ot.origin();
-				Vertex v2 = ot.destination();
-				Quadric q1 = (Quadric) quadricMap.get(v1);
-				Quadric q2 = (Quadric) quadricMap.get(v2);
-				double cost = 
-				  q1.value(v1.getUV()) + q1.value(v2.getUV()) +
-				  q2.value(v1.getUV()) + q2.value(v2.getUV());
-				tree.insert(ot.clone(), cost);
+				Vertex v1 = noe.origin();
+				Vertex v2 = noe.destination();
+				tree.insert(new NotOrientedEdge(noe), cost(v1, v2, quadricMap));
 			}
 		}
-		
+	}
+	
+	private boolean contractAllVertices(PAVLSortedTree tree, HashMap quadricMap)
+	{
 		int contracted = 0;
+		HashSet trash = new HashSet();
+		OTriangle ot = new OTriangle();
+		NotOrientedEdge sym = new NotOrientedEdge();
 		while (tree.size() > 0)
 		{
-			OTriangle edge = (OTriangle) tree.first();
+			NotOrientedEdge edge = (NotOrientedEdge) tree.first();
 			double cost = tree.remove(edge);
+			assert !tree.containsValue(edge);
 			if (cost > tolerance)
 				break;
+			trash.add(edge);
 			edge.pullAttributes();
 			if (!edge.hasAttributes(OTriangle.MARKED))
-				continue;
-			if (!edge.canContract())
 				continue;
 			Vertex v1 = edge.origin();
 			Vertex v2 = edge.destination();
 			Quadric q1 = (Quadric) quadricMap.get(v1);
 			Quadric q2 = (Quadric) quadricMap.get(v2);
-			boolean contractV2 = (
-				q1.value(v1.getUV()) + q2.value(v1.getUV()) >
-				q1.value(v2.getUV()) + q2.value(v2.getUV())
-			);
-			if ((!v2.isMutable() && !contractV2) ||
-			    (!v1.isMutable() && contractV2))
-				continue;
-			//  Update quadrics first
-			Triangle t1 = edge.getTri();
-			OTriangle.symOTri(edge, sym);
-			Triangle t2 = sym.getTri();
-			Vertex apex1 = edge.apex();
-			Vertex apex2 = sym.apex();
 			//  TODO: Move v1 and v2 to an optimal point
 			Vertex v3;
-			if (contractV2)
+			if (q1.value(v2.getUV()) + q2.value(v2.getUV()) < q1.value(v1.getUV()) + q2.value(v1.getUV()))
 				v3 = (Vertex) v2.clone();
 			else
 				v3 = (Vertex) v1.clone();
+			if (!edge.canContract(v3))
+				continue;
+			//  Keep track of triangles deleted when contracting
+			Triangle t1 = edge.getTri();
+			OTriangle.symOTri(edge, sym);
+			Triangle t2 = sym.getTri();
+			// Remove all edges of t1 and t2 from tree
+			for (int i = 0; i < 3; i++)
+			{
+				edge.nextOTri();
+				tree.remove(edge);
+				assert !tree.containsValue(edge);
+			}
+			for (int i = 0; i < 3; i++)
+			{
+				sym.nextOTri();
+				tree.remove(sym);
+				assert !tree.containsValue(sym);
+			}
+			Vertex apex1 = edge.apex();
+			Vertex apex2 = sym.apex();
+			//  Compute quadrics
 			Quadric q3 = new Quadric();
 			q3.add(q1);
 			q3.add(q2);
-			if (!edge.contract(v3))
-				continue;
+			edge.contract(v3);
 			contracted++;
-			t1.unmark();
-			t2.unmark();
 			mesh.remove(t1);
 			mesh.remove(t2);
 			// Update edge costs
@@ -205,36 +270,58 @@ public class DecimateVertex
 			quadricMap.remove(v2);
 			quadricMap.put(v3, q3);
 			if (apex1 != Vertex.outer)
+				ot = v3.findOTriangle(apex1);
+			else
+				ot = v3.findOTriangle(apex2);
+			assert ot != null : ""+edge+"\n"+apex1+"\n"+v3+"\n"+apex1+"\n"+v3.tri;
+			Vertex first = ot.destination();
+			if (first == Vertex.outer)
 			{
-				v2 = apex1;
-				ot = v3.findOTriangle(v2);
-				assert ot != null : ""+edge+"\n"+apex1+"\n"+v3+"\n"+v2;
-				ot.setAttributes(OTriangle.MARKED);
-				q1 = (Quadric) quadricMap.get(v3);
-				assert q1 != null : v3;
-				q2 = (Quadric) quadricMap.get(v2);
-				assert q2 != null : v2;
-				cost = 
-				  q1.value(v3.getUV()) + q1.value(v2.getUV()) +
-				  q2.value(v3.getUV()) + q2.value(v2.getUV());
-				tree.insert(ot.clone(), cost);
+				ot.nextOTriOrigin();
+				first = ot.destination();
 			}
-			if (apex2 != Vertex.outer)
+			assert first != Vertex.outer;
+			while (true)
 			{
-				v2 = apex2;
-				ot = v3.findOTriangle(v2);
-				assert ot != null : ""+edge+"\n"+apex1+"\n"+v3+"\n"+v2;
+				tree.update(new NotOrientedEdge(ot), cost(ot.destination(), v3, quadricMap));
 				ot.setAttributes(OTriangle.MARKED);
-				q1 = (Quadric) quadricMap.get(v3);
-				assert q1 != null : v3;
-				q2 = (Quadric) quadricMap.get(v2);
-				assert q2 != null : v2;
-				cost = 
-				  q1.value(v3.getUV()) + q1.value(v2.getUV()) +
-				  q2.value(v3.getUV()) + q2.value(v2.getUV());
-				tree.insert(ot.clone(), cost);
+				ot.nextOTriOrigin();
+				if (ot.destination() == first)
+					break;
 			}
+
 		}
 		logger.info("Number of contracted edges: "+contracted);
+		return contracted > 0;
+	}
+	
+	private double cost(Vertex v1, Vertex v2, HashMap quadricMap)
+	{
+		Quadric q1 = (Quadric) quadricMap.get(v1);
+		assert q1 != null : v1;
+		Quadric q2 = (Quadric) quadricMap.get(v2);
+		assert q2 != null : v2;
+		return Math.min(
+		  q1.value(v1.getUV()) + q2.value(v1.getUV()),
+		  q1.value(v2.getUV()) + q2.value(v2.getUV()));
+	}
+	
+	private static boolean checkTree(Mesh mesh, HashSet trash, PAVLSortedTree tree)
+	{
+		NotOrientedEdge noe = new NotOrientedEdge();
+		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
+		{
+			Triangle f = (Triangle) itf.next();
+			if (f.isOuter())
+				continue;
+			noe.bind(f);
+			for (int i = 0; i < 3; i++)
+			{
+				noe.nextOTri();
+				if (!trash.contains(noe) && !tree.containsValue(noe))
+					return false;
+			}
+		}
+		return true;
 	}
 }
