@@ -580,6 +580,7 @@ public class Mesh
 		//  3. Connect external triangles
 		tVertList.put(Vertex.outer, outerTriangles);
 		checkNeighbours(Vertex.outer, tVertList, null);
+		triangleList.addAll(outerTriangles);
 		logger.debug("Boundary edges: "+outerTriangles.size());
 		//  Mesh is now fully connected, and usual traversal methods
 		//  can be used.
@@ -686,6 +687,8 @@ public class Mesh
 				assert outerTriangles != null : t ;
 				ot.setAttributes(OTriangle.BOUNDARY);
 				Triangle t2 = new Triangle(Vertex.outer, v2, v);
+				//  This is an outer triangle
+				t2.adjPos |= (OTriangle.OUTER << 8 | OTriangle.OUTER << 16 | OTriangle.OUTER << 24);
 				sym.bind(t2);
 				sym.setAttributes(OTriangle.BOUNDARY);
 				ot.glue(sym);
