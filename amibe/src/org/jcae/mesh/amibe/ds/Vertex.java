@@ -622,6 +622,12 @@ public class Vertex implements Cloneable
 			ot.nextOTri();
 		assert ot.origin() == this : ot+" not in "+tri+"\n"+this;
 		Vertex first = ot.destination();
+		if (first == Vertex.outer)
+		{
+			ot.nextOTriOrigin();
+			first = ot.destination();
+		}
+		assert first != Vertex.outer;
 		while (true)
 		{
 			if (ot.destination() == v2)
