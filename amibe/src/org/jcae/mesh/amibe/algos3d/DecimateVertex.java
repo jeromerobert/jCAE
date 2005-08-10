@@ -98,19 +98,11 @@ public class DecimateVertex
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
-			if (f.isOuter())
-			{
-				f.unmark();
-				continue;
-			}
-			noe.bind(f);
 			for (int i = 0; i < 3; i++)
 			{
 				Vertex n = f.vertex[i];
 				nodeset.add(n);
 				quadricMap.put(n, new Quadric());
-				noe.nextOTri();
-				noe.clearAttributes(OTriangle.MARKED);
 			}
 		}
 		// Compute quadrics
@@ -176,8 +168,30 @@ public class DecimateVertex
 				}
 			}
 		}
-		computeTree(tree, quadricMap);
-		contractAllVertices(tree, quadricMap);
+		do {
+			unmarkEdges();
+			computeTree(tree, quadricMap);
+		} while(contractAllVertices(tree, quadricMap));
+	}
+	
+	private void unmarkEdges()
+	{
+		NotOrientedEdge noe = new NotOrientedEdge();
+		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
+		{
+			Triangle f = (Triangle) itf.next();
+			if (f.isOuter())
+			{
+				f.unmark();
+				continue;
+			}
+			noe.bind(f);
+			for (int i = 0; i < 3; i++)
+			{
+				noe.nextOTri();
+				noe.clearAttributes(OTriangle.MARKED);
+			}
+		}
 	}
 	
 	private void computeTree(PAVLSortedTree tree, HashMap quadricMap)
