@@ -1082,13 +1082,7 @@ public class OTriangle
 			return false;
 		if (n.mesh.dim == 3 && !checkInversion(n))
 				return false;
-		
-		//  Check topology
-		HashSet link = origin().getNeighboursNodes();
-		link.retainAll(destination().getNeighboursNodes());
-		link.remove(Vertex.outer);
-		return link.size() < 3;
-		//return true;
+		return true;
 	}
 	
 	public double [] getTempVector()
