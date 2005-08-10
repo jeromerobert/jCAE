@@ -336,6 +336,16 @@ public class Mesh
 	}
 	
 	/**
+	 * Sets triangle list.
+	 *
+	 * @return triangle list.
+	 */
+	public void setTrianglesList(ArrayList l)
+	{
+		triangleList = l;
+	}
+	
+	/**
 	 * Enforces an edge between tow points.
 	 * This routine is used to build constrained Delaunay meshes.
 	 * Intersections between existing mesh segments and the new
