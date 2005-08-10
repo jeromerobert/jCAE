@@ -300,7 +300,8 @@ public class PAVLSortedTree
 	public final synchronized void insert(Object o, double value)
 	{
 		PAVLSortedTreeNode node = new PAVLSortedTreeNode(o, value);
-		logger.debug("insert "+node+" "+" value: "+value+" "+o);
+		if (logger.isDebugEnabled())
+			logger.debug("insert "+node+" "+" value: "+value+" "+o);
 		map.put(o, node);
 		if (root == null)
 		{
@@ -383,7 +384,8 @@ public class PAVLSortedTree
 	 */
 	public final synchronized void update(Object o, double value)
 	{
-		logger.debug("Update "+o+" to "+value);
+		if (logger.isDebugEnabled())
+			logger.debug("Update "+o+" to "+value);
 		remove(o);
 		insert(o, value);
 	}
@@ -404,12 +406,14 @@ public class PAVLSortedTree
 	public final synchronized double remove(Object o)
 	{
 		PAVLSortedTreeNode p = (PAVLSortedTreeNode) map.get(o);
-		logger.debug("Remove "+p+" "+o);
+		if (logger.isDebugEnabled())
+			logger.debug("Remove "+p+" "+o);
 		if (p == null)
 			return -1.0;
 		assert p != null;
 		double ret = p.value;
-		logger.debug("Value: "+ret);
+		if (logger.isDebugEnabled())
+			logger.debug("Value: "+ret);
 		map.remove(o);
 		count--;
 		int lastDir = 0;
