@@ -154,13 +154,9 @@ public class DecimateVertex
 				if (noe.hasAttributes(OTriangle.BOUNDARY))
 				{
 					//  Add a virtual plane
-					double [] x1 = noe.origin().getUV();
-					double [] x2 = noe.destination().getUV();
-					area = 1000.0 * (
-					  (x1[0] - x2[0]) * (x1[0] - x2[0]) +
-					  (x1[1] - x2[1]) * (x1[1] - x2[1]) +
-					  (x1[2] - x2[2]) * (x1[2] - x2[2]));
+					//  This vector has the same length as noe
 					double [] nu = noe.normal3DT();
+					area = 1000.0;
 					d = - Metric3D.prodSca(nu, noe.origin().getUV());
 					Quadric q1 = (Quadric) quadricMap.get(noe.origin());
 					Quadric q2 = (Quadric) quadricMap.get(noe.destination());
@@ -175,6 +171,7 @@ public class DecimateVertex
 							q2.A.data[k][l] += delta;
 						}
 					}
+					q1.c += area * d*d;
 					q2.c += area * d*d;
 				}
 			}
@@ -237,7 +234,11 @@ public class DecimateVertex
 			else
 				v3 = (Vertex) v1.clone();
 			if (!edge.canContract(v3))
+			{
+				logger.debug("Edge not contracted: "+edge);
 				continue;
+			}
+			logger.debug("Contract edge: "+edge);
 			//  Keep track of triangles deleted when contracting
 			Triangle t1 = edge.getTri();
 			OTriangle.symOTri(edge, sym);
@@ -283,27 +284,29 @@ public class DecimateVertex
 			assert first != Vertex.outer;
 			while (true)
 			{
-				tree.update(new NotOrientedEdge(ot), cost(ot.destination(), v3, quadricMap));
+				if (ot.destination() != Vertex.outer)
+					tree.update(new NotOrientedEdge(ot), cost(ot.destination(), v3, quadricMap));
 				ot.setAttributes(OTriangle.MARKED);
 				ot.nextOTriOrigin();
 				if (ot.destination() == first)
 					break;
 			}
-
 		}
 		logger.info("Number of contracted edges: "+contracted);
 		return contracted > 0;
 	}
 	
-	private double cost(Vertex v1, Vertex v2, HashMap quadricMap)
+	private static double cost(Vertex v1, Vertex v2, HashMap quadricMap)
 	{
 		Quadric q1 = (Quadric) quadricMap.get(v1);
 		assert q1 != null : v1;
 		Quadric q2 = (Quadric) quadricMap.get(v2);
 		assert q2 != null : v2;
-		return Math.min(
+		double ret = Math.min(
 		  q1.value(v1.getUV()) + q2.value(v1.getUV()),
 		  q1.value(v2.getUV()) + q2.value(v2.getUV()));
+		assert ret >= -1.e-2 : q1+"\n"+q2+"\n"+ret;
+		return ret;
 	}
 	
 	private static boolean checkTree(Mesh mesh, HashSet trash, PAVLSortedTree tree)
