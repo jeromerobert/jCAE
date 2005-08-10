@@ -300,7 +300,7 @@ public class PAVLSortedTree
 	public final synchronized void insert(Object o, double value)
 	{
 		PAVLSortedTreeNode node = new PAVLSortedTreeNode(o, value);
-		logger.debug("insert "+node+" "+o);
+		logger.debug("insert "+node+" "+" value: "+value+" "+o);
 		map.put(o, node);
 		if (root == null)
 		{
