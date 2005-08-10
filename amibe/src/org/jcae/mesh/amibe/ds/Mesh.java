@@ -720,6 +720,7 @@ public class Mesh
 	
 	private static final boolean checkRidges(Vertex v, double cosMinAngle, OTriangle ot)
 	{
+		OTriangle sym = new OTriangle();
 		if (ot.origin() != v)
 			ot.nextOTri();
 		if (ot.origin() != v)
@@ -731,10 +732,11 @@ public class Mesh
 			Vertex d = ot.destination();
 			if (d != Vertex.outer && 0 != d.getRef())
 			{
-				double [] n1 = ot.getTri().normal3D();
-				ot.symOTri();
-				double [] n2 = ot.getTri().normal3D();
-				ot.symOTri();
+				ot.computeNormal3D();
+				double [] n1 = ot.getTempVector();
+				OTriangle.symOTri(ot, sym);
+				sym.computeNormal3D();
+				double [] n2 = sym.getTempVector();
 				double angle = Metric3D.prodSca(n1, n2);
 				if (angle > -cosMinAngle)
 					return false;

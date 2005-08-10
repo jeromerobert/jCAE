@@ -104,6 +104,9 @@ public class OTriangle
 	
 	private static final int [] next3 = { 1, 2, 0 };
 	private static final int [] prev3 = { 2, 0, 1 };
+	private double [] tempD = new double[3];
+	private double [] tempD1 = new double[3];
+	private double [] tempD2 = new double[3];
 	
 	/**
 	 * Numeric constants for edge attributes.  Set if edge is on
@@ -1077,7 +1080,6 @@ public class OTriangle
 	{
 		if (hasAttributes(OUTER))
 			return false;
-//assert checkInversion(n) == checkNormalsContract(n) : ""+checkInversion(n)+" "+checkNormalsContract(n);
 		if (n.mesh.dim == 3 && !checkInversion(n))
 				return false;
 		
@@ -1087,6 +1089,11 @@ public class OTriangle
 		link.remove(Vertex.outer);
 		return link.size() < 3;
 		//return true;
+	}
+	
+	public double [] getTempVector()
+	{
+		return tempD;
 	}
 	
 	private final boolean checkInversion(Vertex n)
@@ -1106,7 +1113,8 @@ public class OTriangle
 			work[0].nextOTriApex();
 			if (work[0].tri != tri && work[0].tri != work[1].tri && !work[0].hasAttributes(OUTER))
 			{
-				double [] nu = work[0].normal3DT();
+				work[0].computeNormal3DT();
+				double [] nu = work[0].getTempVector();
 				double [] x1 = work[0].origin().getUV();
 				for (int i = 0; i < 3; i++)
 					v1[i] = xn[i] - x1[i];
@@ -1123,7 +1131,8 @@ public class OTriangle
 			work[0].nextOTriApex();
 			if (work[0].tri != tri && work[0].tri != work[1].tri && !work[0].hasAttributes(OUTER))
 			{
-				double [] nu = work[0].normal3DT();
+				work[0].computeNormal3DT();
+				double [] nu = work[0].getTempVector();
 				double [] x1 = work[0].origin().getUV();
 				for (int i = 0; i < 3; i++)
 					v1[i] = xn[i] - x1[i];
@@ -1135,63 +1144,49 @@ public class OTriangle
 		return true;
 	}
 	
-	private final boolean checkNormalsContract(Vertex n)
-	{
-		Vertex o = origin();
-		Vertex d = destination();
-		symOTri(this, work[1]);
-		double [] n3d = tri.normal3D();
-		//  Loop around o to check that triangles will not be inverted
-		copyOTri(this, work[0]);
-		work[0].nextOTri();
-		work[0].prevOTriApex();
-		dummy.vertex[2] = n;
-		do
-		{
-			work[0].nextOTriApex();
-			dummy.vertex[0] = work[0].origin();
-			dummy.vertex[1] = work[0].destination();
-			if (work[0].tri != tri && work[0].tri != work[1].tri && dummy.vertex[0] != Vertex.outer && dummy.vertex[1] != Vertex.outer)
-			{
-				double [] newN3d = dummy.normal3D();
-				double angle = Metric3D.prodSca(n3d, newN3d);
-				if (angle < -0.3)
-					return false;
-			}
-		}
-		while (work[0].destination() != d);
-		//  Loop around d to check that triangles will not be inverted
-		copyOTri(this, work[0]);
-		work[0].prevOTri();
-		do
-		{
-			work[0].nextOTriApex();
-			dummy.vertex[0] = work[0].origin();
-			dummy.vertex[1] = work[0].destination();
-			if (work[0].tri != tri && work[0].tri != work[1].tri && dummy.vertex[0] != Vertex.outer && dummy.vertex[1] != Vertex.outer)
-			{
-				double [] newN3d = dummy.normal3D();
-				double angle = Metric3D.prodSca(n3d, newN3d);
-				if (angle < -0.3)
-					return false;
-			}
-		}
-		while (work[0].destination() != o);
-		return true;
-	}
-	
 	// Warning: this vectore is not normalized, it has the same length as
 	// this.
-	public double [] normal3DT()
+	public void computeNormal3DT()
 	{
-		double [] n = tri.normal3D();
-		double [] tau = new double[3];
 		double [] p0 = origin().getUV();
 		double [] p1 = destination().getUV();
-		tau[0] = p1[0] - p0[0];
-		tau[1] = p1[1] - p0[1];
-		tau[2] = p1[2] - p0[2];
-		return Metric3D.prodVect3D(tau, n);
+		double [] p2 = apex().getUV();
+		tempD1[0] = p1[0] - p0[0];
+		tempD1[1] = p1[1] - p0[1];
+		tempD1[2] = p1[2] - p0[2];
+		tempD[0] = p2[0] - p0[0];
+		tempD[1] = p2[1] - p0[1];
+		tempD[2] = p2[2] - p0[2];
+		Metric3D.prodVect3D(tempD1, tempD, tempD2);
+		double norm = Metric3D.norm(tempD2);
+		if (norm != 0.0)
+		{
+			tempD2[0] /= norm;
+			tempD2[1] /= norm;
+			tempD2[2] /= norm;
+		}
+		Metric3D.prodVect3D(tempD1, tempD2, tempD);
+	}
+	
+	public void computeNormal3D()
+	{
+		double [] p0 = origin().getUV();
+		double [] p1 = destination().getUV();
+		double [] p2 = apex().getUV();
+		tempD1[0] = p1[0] - p0[0];
+		tempD1[1] = p1[1] - p0[1];
+		tempD1[2] = p1[2] - p0[2];
+		tempD2[0] = p2[0] - p0[0];
+		tempD2[1] = p2[1] - p0[1];
+		tempD2[2] = p2[2] - p0[2];
+		Metric3D.prodVect3D(tempD1, tempD2, tempD);
+		double norm = Metric3D.norm(tempD);
+		if (norm != 0.0)
+		{
+			tempD[0] /= norm;
+			tempD[1] /= norm;
+			tempD[2] /= norm;
+		}
 	}
 	
 	/**

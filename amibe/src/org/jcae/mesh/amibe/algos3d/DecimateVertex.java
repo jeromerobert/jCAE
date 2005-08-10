@@ -116,7 +116,9 @@ public class DecimateVertex
 			Triangle f = (Triangle) itf.next();
 			if (f.isOuter())
 				continue;
-			double [] normal = f.normal3D();
+			noe.bind(f);
+			noe.computeNormal3D();
+			double [] normal = noe.getTempVector();
 			double [] p0 = f.vertex[0].getUV();
 			double [] p1 = f.vertex[1].getUV();
 			double [] p2 = f.vertex[2].getUV();
@@ -140,7 +142,6 @@ public class DecimateVertex
 				}
 				q.c += area * d*d;
 			}
-			noe.bind(f);
 			for (int i = 0; i < 3; i++)
 			{
 				noe.nextOTri();
@@ -148,7 +149,8 @@ public class DecimateVertex
 				{
 					//  Add a virtual plane
 					//  This vector has the same length as noe
-					double [] nu = noe.normal3DT();
+					noe.computeNormal3DT();
+					double [] nu = noe.getTempVector();
 					area = 1000.0;
 					d = - Metric3D.prodSca(nu, noe.origin().getUV());
 					Quadric q1 = (Quadric) quadricMap.get(noe.origin());
