@@ -1,3 +1,22 @@
+Wed Aug 10 15:48:30 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/metrics/Metric3D.java: new prodVect3D() method, works on an already allocated array.
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java
+	  src/org/jcae/mesh/amibe/ds/Triangle.java
+	  src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java: Triangle.normal3D() and OTriangle.normal3DT() return a newly allocated array.  These routines are replaced by methods which work on private OTriangle arrays.
+
+Tue Aug  9 13:45:32 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Mesh.java (buildAdjacency): Add outer triangles to the mesh.
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java: Do not implement Cloneable, it is no mire needed by DecimateVertex.  Fix contraction.  New normal3DT() method to return the normal to an edge in the triangle plane.  Use a better check to detect inverted triangles when contracting.
+	* src/org/jcae/mesh/amibe/ds/NotOrientedEdge.java: New class, to handle edges when orientation is not needed.
+	* src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java: Unbreak this algorithm.
+
+Wed Aug  3 14:05:07 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/MeshWriter.java (writeObject3D): Fix jcae3d when writing 3D mesh.
+
 Fri Jul 22 11:40:38 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Mesh.java: Add a new 'dim' attribute to distinguish between 2D and 3D meshes.
