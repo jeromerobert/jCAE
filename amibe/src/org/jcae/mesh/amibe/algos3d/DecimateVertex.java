@@ -30,6 +30,7 @@ import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 /**
@@ -233,7 +234,6 @@ public class DecimateVertex
 			assert !tree.containsValue(edge);
 			if (cost > tolerance)
 				break;
-			trash.add(edge);
 			edge.pullAttributes();
 			if (!edge.hasAttributes(OTriangle.MARKED))
 				continue;
@@ -249,10 +249,12 @@ public class DecimateVertex
 				v3 = (Vertex) v1.clone();
 			if (!edge.canContract(v3))
 			{
-				logger.debug("Edge not contracted: "+edge);
+				if (logger.isDebugEnabled())
+					logger.debug("Edge not contracted: "+edge);
 				continue;
 			}
-			logger.debug("Contract edge: "+edge);
+			if (logger.isDebugEnabled())
+				logger.debug("Contract edge: "+edge);
 			//  Keep track of triangles deleted when contracting
 			Triangle t1 = edge.getTri();
 			OTriangle.symOTri(edge, sym);
@@ -278,8 +280,8 @@ public class DecimateVertex
 			q3.add(q2);
 			edge.contract(v3);
 			contracted++;
-			mesh.remove(t1);
-			mesh.remove(t2);
+			trash.add(t1);
+			trash.add(t2);
 			// Update edge costs
 			quadricMap.remove(v1);
 			quadricMap.remove(v2);
@@ -306,6 +308,14 @@ public class DecimateVertex
 					break;
 			}
 		}
+		ArrayList newlist = new ArrayList();
+		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
+		{
+			Triangle f = (Triangle) itf.next();
+			if (!trash.contains(f))
+				newlist.add(f);
+		}
+		mesh.setTrianglesList(newlist);
 		logger.info("Number of contracted edges: "+contracted);
 		return contracted > 0;
 	}
@@ -323,22 +333,4 @@ public class DecimateVertex
 		return ret;
 	}
 	
-	private static boolean checkTree(Mesh mesh, HashSet trash, PAVLSortedTree tree)
-	{
-		NotOrientedEdge noe = new NotOrientedEdge();
-		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
-		{
-			Triangle f = (Triangle) itf.next();
-			if (f.isOuter())
-				continue;
-			noe.bind(f);
-			for (int i = 0; i < 3; i++)
-			{
-				noe.nextOTri();
-				if (!trash.contains(noe) && !tree.containsValue(noe))
-					return false;
-			}
-		}
-		return true;
-	}
 }
