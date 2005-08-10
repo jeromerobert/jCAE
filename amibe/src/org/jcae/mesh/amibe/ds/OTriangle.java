@@ -150,6 +150,7 @@ public class OTriangle
 	}
 	
 	private static final Random rand = new Random(139L);
+	private static final Triangle dummy = new Triangle();
 	
 	/*
 	 * Vertices can be accessed through
@@ -1076,13 +1077,16 @@ public class OTriangle
 	{
 		if (hasAttributes(OUTER))
 			return false;
+//assert checkInversion(n) == checkNormalsContract(n) : ""+checkInversion(n)+" "+checkNormalsContract(n);
 		if (n.mesh.dim == 3 && !checkInversion(n))
 				return false;
 		
 		//  Check topology
 		HashSet link = origin().getNeighboursNodes();
 		link.retainAll(destination().getNeighboursNodes());
-		return link.size() == 2;
+		link.remove(Vertex.outer);
+		return link.size() < 3;
+		//return true;
 	}
 	
 	private final boolean checkInversion(Vertex n)
@@ -1095,7 +1099,6 @@ public class OTriangle
 		work[0].nextOTri();
 		work[0].prevOTriApex();
 		double [] v1 = new double[3];
-		double [] v2 = new double[3];
 		double [] xn = n.getUV();
 		double [] xo = o.getUV();
 		do
@@ -1106,11 +1109,8 @@ public class OTriangle
 				double [] nu = work[0].normal3DT();
 				double [] x1 = work[0].origin().getUV();
 				for (int i = 0; i < 3; i++)
-				{
 					v1[i] = xn[i] - x1[i];
-					v2[i] = xo[i] - x1[i];
-				}
-				if (Metric3D.prodSca(v1, v2) <= 0.0)
+				if (Metric3D.prodSca(v1, nu) >= 0.0)
 					return false;
 			}
 		}
@@ -1126,11 +1126,8 @@ public class OTriangle
 				double [] nu = work[0].normal3DT();
 				double [] x1 = work[0].origin().getUV();
 				for (int i = 0; i < 3; i++)
-				{
 					v1[i] = xn[i] - x1[i];
-					v2[i] = xo[i] - x1[i];
-				}
-				if (Metric3D.prodSca(v1, v2) <= 0.0)
+				if (Metric3D.prodSca(v1, nu) >= 0.0)
 					return false;
 			}
 		}
@@ -1138,6 +1135,53 @@ public class OTriangle
 		return true;
 	}
 	
+	private final boolean checkNormalsContract(Vertex n)
+	{
+		Vertex o = origin();
+		Vertex d = destination();
+		symOTri(this, work[1]);
+		double [] n3d = tri.normal3D();
+		//  Loop around o to check that triangles will not be inverted
+		copyOTri(this, work[0]);
+		work[0].nextOTri();
+		work[0].prevOTriApex();
+		dummy.vertex[2] = n;
+		do
+		{
+			work[0].nextOTriApex();
+			dummy.vertex[0] = work[0].origin();
+			dummy.vertex[1] = work[0].destination();
+			if (work[0].tri != tri && work[0].tri != work[1].tri && dummy.vertex[0] != Vertex.outer && dummy.vertex[1] != Vertex.outer)
+			{
+				double [] newN3d = dummy.normal3D();
+				double angle = Metric3D.prodSca(n3d, newN3d);
+				if (angle < -0.3)
+					return false;
+			}
+		}
+		while (work[0].destination() != d);
+		//  Loop around d to check that triangles will not be inverted
+		copyOTri(this, work[0]);
+		work[0].prevOTri();
+		do
+		{
+			work[0].nextOTriApex();
+			dummy.vertex[0] = work[0].origin();
+			dummy.vertex[1] = work[0].destination();
+			if (work[0].tri != tri && work[0].tri != work[1].tri && dummy.vertex[0] != Vertex.outer && dummy.vertex[1] != Vertex.outer)
+			{
+				double [] newN3d = dummy.normal3D();
+				double angle = Metric3D.prodSca(n3d, newN3d);
+				if (angle < -0.3)
+					return false;
+			}
+		}
+		while (work[0].destination() != o);
+		return true;
+	}
+	
+	// Warning: this vectore is not normalized, it has the same length as
+	// this.
 	public double [] normal3DT()
 	{
 		double [] n = tri.normal3D();
@@ -1147,7 +1191,6 @@ public class OTriangle
 		tau[0] = p1[0] - p0[0];
 		tau[1] = p1[1] - p0[1];
 		tau[2] = p1[2] - p0[2];
-		// It does not need to be normalized
 		return Metric3D.prodVect3D(tau, n);
 	}
 	
