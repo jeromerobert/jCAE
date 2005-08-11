@@ -48,6 +48,13 @@ public class DecimateVertex
 		public Metric3D A = new Metric3D();
 		public double [] b = new double[3];
 		public double c;
+		public void reset()
+		{
+			A.reset();
+			for (int i = 0; i < b.length; i++)
+				b[i] = 0.0;
+			c = 0.0;
+		}
 		public void add(Quadric that)
 		{
 			A.add(that.A);
@@ -235,6 +242,7 @@ public class DecimateVertex
 			double cost = tree.getKey(edge);
 			Vertex v1 = null, v2 = null, v3 = null;
 			Quadric q1 = null, q2 = null;
+			Quadric q3 = new Quadric();
 			do {
 				if (cost > tolerance)
 					break;
@@ -243,11 +251,10 @@ public class DecimateVertex
 				v2 = edge.destination();
 				q1 = (Quadric) quadricMap.get(v1);
 				q2 = (Quadric) quadricMap.get(v2);
-				//  TODO: Move v1 and v2 to an optimal point
-				if (q1.value(v2.getUV()) + q2.value(v2.getUV()) < q1.value(v1.getUV()) + q2.value(v1.getUV()))
-					v3 = (Vertex) v2.clone();
-				else
-					v3 = (Vertex) v1.clone();
+				q3.reset();
+				q3.add(q1);
+				q3.add(q2);
+				v3 = optimalPlacement(v1, v2, q1, q2, q3);
 				if (edge.canContract(v3))
 					break;
 				if (logger.isDebugEnabled())
@@ -280,9 +287,6 @@ public class DecimateVertex
 			Vertex apex1 = edge.apex();
 			Vertex apex2 = sym.apex();
 			//  Compute quadrics
-			Quadric q3 = new Quadric();
-			q3.add(q1);
-			q3.add(q2);
 			edge.contract(v3);
 			contracted++;
 			trash.add(t1);
@@ -349,4 +353,23 @@ public class DecimateVertex
 		return ret;
 	}
 	
+	private static Vertex optimalPlacement(Vertex v1, Vertex v2, Quadric q1, Quadric q2, Quadric q3)
+	{
+		Vertex ret;
+		Metric3D Qinv = q3.A.inv();
+		if (Qinv != null)
+		{
+			ret = (Vertex) v1.clone();
+			double [] dx = Qinv.apply(q3.b);
+			ret.moveTo(-dx[0], -dx[1], -dx[2]);
+		}
+		else
+		{
+			if (q1.value(v2.getUV()) + q2.value(v2.getUV()) < q1.value(v1.getUV()) + q2.value(v1.getUV()))
+				ret = (Vertex) v2.clone();
+			else
+				ret = (Vertex) v1.clone();
+		}
+		return ret;
+	}
 }
