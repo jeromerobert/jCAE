@@ -28,7 +28,7 @@ import org.apache.log4j.Logger;
 /**
  * 3D metrics.
  */
-public class Metric3D extends Matrix
+public class Metric3D extends Matrix3D
 {
 	private static Logger logger=Logger.getLogger(Metric3D.class);
 	
@@ -84,11 +84,44 @@ public class Metric3D extends Matrix
 		}
 	}
 	
-	public static double prodSca(double [] A, double [] B) {
+	public void reset()
+	{
+		for (int i = 0; i < 3; i++)
+			for (int j = 0; j < 3; j++)
+				data[i][j] = 0.0;
+	}
+	
+	private final void swap(int i, int j)
+	{
+		double temp = data[i][j];
+		data[i][j] = data[j][i];
+		data[j][i] = temp;
+	}
+	
+	public final Metric3D inv()
+	{
+		// adjoint matrix
+		double [] e0 = prodVect3D(data[1], data[2]);
+		double [] e1 = prodVect3D(data[2], data[0]);
+		double [] e2 = prodVect3D(data[0], data[1]);
+		Metric3D adj = new Metric3D(e0, e1, e2);
+		double det = prodSca(data[0], adj.data[0]);
+		if (Math.abs(det) < 1.e-20)
+			return null;
+		adj.swap(0, 1);
+		adj.swap(0, 2);
+		adj.swap(1, 2);
+		adj.scale(1.0 / det);
+		return adj;
+	}
+	
+	public static double prodSca(double [] A, double [] B)
+	{
 		return ((A[0]*B[0])+(A[1]*B[1])+(A[2]*B[2]));
 	}
 	
-	public static double norm(double [] A) {
+	public static double norm(double [] A)
+	{
 		return Math.sqrt((A[0]*A[0])+(A[1]*A[1])+(A[2]*A[2]));
 	}
 	
