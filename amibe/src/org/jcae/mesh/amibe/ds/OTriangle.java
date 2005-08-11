@@ -1080,7 +1080,15 @@ public class OTriangle
 	{
 		if (n.mesh.dim == 3 && !checkInversion(n))
 				return false;
-		return true;
+		
+		//  Topology check
+		//  TODO: normally this check could be removed, but the
+		//        following test triggers an error:
+		//    * mesh Scie_shell.brep with deflexion=0.2 aboslute
+		//    * decimate with length=6
+		HashSet link = origin().getNeighboursNodes();
+		link.retainAll(destination().getNeighboursNodes());
+		return link.size() < 3;
 	}
 	
 	public double [] getTempVector()
