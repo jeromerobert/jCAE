@@ -400,6 +400,18 @@ public class PAVLSortedTree
 	}
 	
 	/**
+	 * Gets the quallity factor of an object.
+	 * @param o      object
+	 */
+	public final synchronized double getKey(Object o)
+	{
+		PAVLSortedTreeNode p = (PAVLSortedTreeNode) map.get(o);
+		if (p == null)
+			return -1.0;
+		return p.value;
+	}
+	
+	/**
 	 * Remove the node associated to an object from the tree.
 	 * @param o      object being removed
 	 */
