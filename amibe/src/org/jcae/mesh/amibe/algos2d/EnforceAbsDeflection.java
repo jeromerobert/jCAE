@@ -104,7 +104,7 @@ public class EnforceAbsDeflection
 			for (Iterator it = badTriangles.iterator(); it.hasNext(); )
 			{
 				t = (Triangle) it.next();
-				if (!mesh.getTriangles().contains(t))
+				if (!mesh.getTriangles().contains(t) || t.isBoundary())
 					continue;
 				double uv[] = t.centroid().getUV();
 				Vertex v = new Vertex(uv[0], uv[1]);
