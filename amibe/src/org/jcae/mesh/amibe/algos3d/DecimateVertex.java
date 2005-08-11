@@ -117,8 +117,6 @@ public class DecimateVertex
 			if (f.isOuter())
 				continue;
 			noe.bind(f);
-			noe.computeNormal3D();
-			double [] normal = noe.getTempVector();
 			double [] p0 = f.vertex[0].getUV();
 			double [] p1 = f.vertex[1].getUV();
 			double [] p2 = f.vertex[2].getUV();
@@ -129,7 +127,10 @@ public class DecimateVertex
 			vect2[1] = p2[1] - p0[1];
 			vect2[2] = p2[2] - p0[2];
 			// This is in fact 2*area, but that does not matter
-			double area = Metric3D.norm(Metric3D.prodVect3D(vect1, vect2));
+			Metric3D.prodVect3D(vect1, vect2, noe.getTempVector());
+			double area = Metric3D.norm(noe.getTempVector());
+			noe.computeNormal3D();
+			double [] normal = noe.getTempVector();
 			double d = - Metric3D.prodSca(normal, f.vertex[0].getUV());
 			for (int i = 0; i < 3; i++)
 			{
@@ -171,10 +172,9 @@ public class DecimateVertex
 				}
 			}
 		}
-		do {
-			unmarkEdges();
-			computeTree(tree, quadricMap);
-		} while(contractAllVertices(tree, quadricMap));
+		unmarkEdges();
+		computeTree(tree, quadricMap);
+		contractAllVertices(tree, quadricMap);
 	}
 	
 	private void unmarkEdges()
@@ -232,29 +232,32 @@ public class DecimateVertex
 		while (tree.size() > 0)
 		{
 			NotOrientedEdge edge = (NotOrientedEdge) tree.first();
-			double cost = tree.remove(edge);
-			assert !tree.containsValue(edge);
+			double cost = tree.getKey(edge);
+			Vertex v1 = null, v2 = null, v3 = null;
+			Quadric q1 = null, q2 = null;
+			do {
+				if (cost > tolerance)
+					break;
+				edge.pullAttributes();
+				v1 = edge.origin();
+				v2 = edge.destination();
+				q1 = (Quadric) quadricMap.get(v1);
+				q2 = (Quadric) quadricMap.get(v2);
+				//  TODO: Move v1 and v2 to an optimal point
+				if (q1.value(v2.getUV()) + q2.value(v2.getUV()) < q1.value(v1.getUV()) + q2.value(v1.getUV()))
+					v3 = (Vertex) v2.clone();
+				else
+					v3 = (Vertex) v1.clone();
+				if (edge.canContract(v3))
+					break;
+				if (logger.isDebugEnabled())
+					logger.info("Edge not contracted: "+edge);
+				edge = (NotOrientedEdge) tree.next();
+				cost = tree.getKey(edge);
+			} while (edge != null && cost <= tolerance);
 			if (cost > tolerance)
 				break;
-			edge.pullAttributes();
-			if (!edge.hasAttributes(OTriangle.MARKED))
-				continue;
-			Vertex v1 = edge.origin();
-			Vertex v2 = edge.destination();
-			Quadric q1 = (Quadric) quadricMap.get(v1);
-			Quadric q2 = (Quadric) quadricMap.get(v2);
-			//  TODO: Move v1 and v2 to an optimal point
-			Vertex v3;
-			if (q1.value(v2.getUV()) + q2.value(v2.getUV()) < q1.value(v1.getUV()) + q2.value(v1.getUV()))
-				v3 = (Vertex) v2.clone();
-			else
-				v3 = (Vertex) v1.clone();
-			if (!edge.canContract(v3))
-			{
-				if (logger.isDebugEnabled())
-					logger.debug("Edge not contracted: "+edge);
-				continue;
-			}
+			tree.remove(edge);
 			if (logger.isDebugEnabled())
 				logger.debug("Contract edge: "+edge);
 			//  Keep track of triangles deleted when contracting
@@ -319,6 +322,17 @@ public class DecimateVertex
 		}
 		mesh.setTrianglesList(newlist);
 		logger.info("Number of contracted edges: "+contracted);
+		int cnt = 0;
+		NotOrientedEdge edge = (NotOrientedEdge) tree.first();
+		while (edge != null)
+		{
+			if (tree.getKey(edge) > tolerance)
+				break;
+			cnt++;
+			edge = (NotOrientedEdge) tree.next();
+		}
+		logger.info("Number of edges which could have been contracted: "+cnt);
+		logger.info("Number of other edges not contracted: "+(tree.size() - cnt));
 		return contracted > 0;
 	}
 	
