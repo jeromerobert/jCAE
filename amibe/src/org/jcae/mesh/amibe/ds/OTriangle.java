@@ -1078,8 +1078,6 @@ public class OTriangle
 	 */
 	public final boolean canContract(Vertex n)
 	{
-		if (hasAttributes(OUTER))
-			return false;
 		if (n.mesh.dim == 3 && !checkInversion(n))
 				return false;
 		return true;
