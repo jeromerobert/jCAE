@@ -23,8 +23,10 @@ package org.jcae.mesh.xmldata;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
+import java.nio.DoubleBuffer;
+import java.nio.IntBuffer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.HashMap;
 import java.util.HashSet;
 import org.apache.xpath.CachedXPathAPI;
@@ -101,17 +103,23 @@ public class MMesh1DReader
 				"/jcae/mesh/submesh/nodes/file/@location").getNodeValue();
 			if (nodesFile.charAt(0) != File.separatorChar)
 				nodesFile = xmlDir+File.separator+nodesFile;
-			DataInputStream nodesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(nodesFile)));
+			FileChannel fcN = new FileInputStream(nodesFile).getChannel();
+			MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
+			DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
 			String refFile = xpath.selectSingleNode(document,
 				"/jcae/mesh/submesh/nodes/references/file/@location").getNodeValue();
 			if (refFile.charAt(0) != File.separatorChar)
 				refFile = xmlDir+File.separator+refFile;
-			DataInputStream refsIn=new DataInputStream(new BufferedInputStream(new FileInputStream(refFile)));
+			FileChannel fcR = new FileInputStream(refFile).getChannel();
+			MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L, fcR.size());
+			IntBuffer refsBuffer = bbR.asIntBuffer();
 			String edgesFile = xpath.selectSingleNode(document,
 				"/jcae/mesh/submesh/beams/file/@location").getNodeValue();
 			if (edgesFile.charAt(0) != File.separatorChar)
 				edgesFile = xmlDir+File.separator+edgesFile;
-			DataInputStream edgesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(edgesFile)));
+			FileChannel fcE = new FileInputStream(edgesFile).getChannel();
+			MappedByteBuffer bbE = fcE.map(FileChannel.MapMode.READ_ONLY, 0L, fcE.size());
+			IntBuffer edgesBuffer = bbE.asIntBuffer();
 
 			NodeList submeshList = xpath.selectNodeList(
 				document.getDocumentElement(),
@@ -138,11 +146,9 @@ public class MMesh1DReader
 				Node submeshNodes = getChild(submeshElement, "nodes");				
 				int numberOfReferences =  getReferenceNumber(submeshNodes);
 				int [] refs = new int[2*numberOfReferences];
-				for (i=0; i < 2*numberOfReferences; i+=2)
-				{
-					refs[i]= refsIn.readInt() - offset;
-					refs[i+1] = refsIn.readInt();
-				}
+				refsBuffer.get(refs);
+				for (i=0; i < numberOfReferences; i++)
+					refs[2*i] -= offset;
 				
 				int numberOfNodes = Integer.parseInt(
 					getChild(submeshNodes, "number").getFirstChild().getNodeValue());
@@ -153,7 +159,7 @@ public class MMesh1DReader
 					if (iref < 2*numberOfReferences && refs[iref] == i)
 					{
 						CADVertex V = m1d.getGeometricalVertex(refs[iref+1]);
-						nodelist[i] = new MNode1D(nodesIn.readDouble(), V);
+						nodelist[i] = new MNode1D(nodesBuffer.get(), V);
 						MNode1D master = (MNode1D) map1DToMaster.get(V);
 						if (null == master)
 							map1DToMaster.put(V, nodelist[i]);
@@ -162,7 +168,7 @@ public class MMesh1DReader
 						iref += 2;
 					}
 					else
-						nodelist[i] = new MNode1D(nodesIn.readDouble(), null);
+						nodelist[i] = new MNode1D(nodesBuffer.get(), null);
 					submesh.getNodes().add(nodelist[i]);
 				}
 				
@@ -173,16 +179,19 @@ public class MMesh1DReader
 				MEdge1D [] edgelist = new MEdge1D[numberOfEdges];
 				for (i=0; i < numberOfEdges; i++)
 				{
-					MNode1D pt1 = nodelist[edgesIn.readInt() - offset];
-					MNode1D pt2 = nodelist[edgesIn.readInt() - offset];
+					MNode1D pt1 = nodelist[edgesBuffer.get() - offset];
+					MNode1D pt2 = nodelist[edgesBuffer.get() - offset];
 					MEdge1D e = new MEdge1D(pt1, pt2, false);
 					submesh.getEdges().add(e);
 				}
 				offset += numberOfNodes;
 			}
-			nodesIn.close();
-			edgesIn.close();
-			refsIn.close();
+			fcE.close();
+			UNVConverter.clean(bbE);
+			fcN.close();
+			UNVConverter.clean(bbN);
+			fcR.close();
+			UNVConverter.clean(bbR);
 		}
 		catch(Exception ex)
 		{
