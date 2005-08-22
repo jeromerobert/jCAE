@@ -25,12 +25,14 @@ import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.mesh.cad.CADFace;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
+import java.nio.DoubleBuffer;
+import java.nio.IntBuffer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import gnu.trove.TIntIntHashMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -88,10 +90,14 @@ public class MeshToSoupConvert extends JCAEXMLData
 		{
 			String nodesFile = xpath.selectSingleNode(documentIn,
 				"/jcae/mesh/submesh/nodes/file/@location").getNodeValue();
-			DataInputStream nodesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(xmlDir+File.separator+nodesFile)));
+			FileChannel fcN = new FileInputStream(xmlDir+File.separator+nodesFile).getChannel();
+			MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
+			DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
 			String trianglesFile = xpath.selectSingleNode(documentIn,
 				"/jcae/mesh/submesh/triangles/file/@location").getNodeValue();
-			DataInputStream trianglesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(xmlDir+File.separator+trianglesFile)));
+			FileChannel fcT = new FileInputStream(xmlDir+File.separator+trianglesFile).getChannel();
+			MappedByteBuffer bbT = fcT.map(FileChannel.MapMode.READ_ONLY, 0L, fcT.size());
+			IntBuffer trianglesBuffer = bbT.asIntBuffer();
 			
 			Node submeshElement = xpath.selectSingleNode(documentIn,
 				"/jcae/mesh/submesh");
@@ -103,8 +109,8 @@ public class MeshToSoupConvert extends JCAEXMLData
 			double [] coord = new double[3*numberOfNodes];
 			for (i = 0; i < numberOfNodes; i++)
 			{
-				double u = nodesIn.readDouble();
-				double v = nodesIn.readDouble();
+				double u = nodesBuffer.get();
+				double v = nodesBuffer.get();
 				double [] p3 = surface.value(u, v);
 				for (int j = 0; j < 3; j++)
 					coord[3*i+j] = p3[j];
@@ -122,7 +128,7 @@ public class MeshToSoupConvert extends JCAEXMLData
 				for (int j = 0; j < 3; j++)
 				{
 					// Local node number for this group
-					int indLoc = trianglesIn.readInt();
+					int indLoc = trianglesBuffer.get();
 					for (int k = 0; k < 3; k++)
 						c[3*j+k] = coord[3*indLoc+k];
 				}
@@ -144,8 +150,10 @@ public class MeshToSoupConvert extends JCAEXMLData
 			nrNodes += numberOfNodes;
 			nrTriangles += numberOfFaces;
 			
-			nodesIn.close();
-			trianglesIn.close();
+			fcT.close();
+			UNVConverter.clean(bbT);
+			fcN.close();
+			UNVConverter.clean(bbN);
 			rawOut.close();
 		}
 		catch(Exception ex)
