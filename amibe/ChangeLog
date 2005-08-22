@@ -1,3 +1,12 @@
+Thu Aug 11 12:35:45 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java (canContract): Allow outer edges to be contracted, since boundary edges may be contracted.
+	* src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java: When an edge cannot be contracted, it is not removed from the tree, but the next item is looked at.  This way, better candidates are always removed first.
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java (canContract): Readd topology checks, it seems that they are needed.  This requires further investigation.
+	* src/org/jcae/mesh/amibe/ds/Triangle.java: New isBoundary() method, to check whether a triangle has an edge on a boundary.
+	* src/org/jcae/mesh/amibe/algos2d/EnforceAbsDeflection.java: Do not split triangles which are on boundary patch, they give would worse quality triangles.
+	* src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java: When contracting an edge, choose the optimal placement for the new point.
+
 Wed Aug 10 15:48:30 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/metrics/Metric3D.java: new prodVect3D() method, works on an already allocated array.
@@ -5,6 +14,7 @@ Wed Aug 10 15:48:30 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 	  src/org/jcae/mesh/amibe/ds/Triangle.java
 	  src/org/jcae/mesh/amibe/ds/Mesh.java
 	  src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java: Triangle.normal3D() and OTriangle.normal3DT() return a newly allocated array.  These routines are replaced by methods which work on private OTriangle arrays.
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java (canContract): The last fixes made topology checks redundant, so remove them.
 
 Tue Aug  9 13:45:32 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
