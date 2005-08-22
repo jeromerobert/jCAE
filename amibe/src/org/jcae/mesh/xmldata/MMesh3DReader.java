@@ -28,8 +28,10 @@ import org.jcae.mesh.amibe.ds.MNode3D;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileInputStream;
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
+import java.nio.DoubleBuffer;
+import java.nio.IntBuffer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -66,21 +68,29 @@ public class MMesh3DReader
 				"references/file/@location").getNodeValue();
 			if (refFile.charAt(0) != File.separatorChar)
 				refFile = xmlDir+File.separator+refFile;
-			DataInputStream refsIn=new DataInputStream(new BufferedInputStream(new FileInputStream(refFile)));
+			FileChannel fcR = new FileInputStream(refFile).getChannel();
+			MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L, fcR.size());
+			IntBuffer refsBuffer = bbR.asIntBuffer();
 			String nodesFile = xpath.selectSingleNode(submeshNodes, "file/@location").getNodeValue();
 			if (nodesFile.charAt(0) != File.separatorChar)
 				nodesFile = xmlDir+File.separator+nodesFile;
-			DataInputStream nodesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(nodesFile)));
+			FileChannel fcN = new FileInputStream(nodesFile).getChannel();
+			MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
+			DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
 			
 			Node submeshTriangles = xpath.selectSingleNode(submeshElement, "triangles");
 			String trianglesFile = xpath.selectSingleNode(submeshTriangles,
 				"file/@location").getNodeValue();
 			if (trianglesFile.charAt(0) != File.separatorChar)
 				trianglesFile = xmlDir+File.separator+trianglesFile;
-			DataInputStream trianglesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(trianglesFile)));
+			FileChannel fcT = new FileInputStream(trianglesFile).getChannel();
+			MappedByteBuffer bbT = fcT.map(FileChannel.MapMode.READ_ONLY, 0L, fcT.size());
+			IntBuffer trianglesBuffer = bbT.asIntBuffer();
 
 			Node submeshNormals = xpath.selectSingleNode(submeshTriangles, "normals");
-			DataInputStream normalsIn = null;
+			FileChannel fcNormals = null;
+			MappedByteBuffer bbNormals = null;
+			DoubleBuffer normalsBuffer = null;
 			if (submeshNormals != null)
 			{
 				String normalsFile = xpath.selectSingleNode(submeshNormals, "file/@location").getNodeValue();
@@ -88,19 +98,19 @@ public class MMesh3DReader
 					normalsFile = xmlDir+File.separator+normalsFile;
 				try
 				{
-					normalsIn = new DataInputStream(new BufferedInputStream(new FileInputStream(normalsFile)));
+					fcNormals = new FileInputStream(normalsFile).getChannel();
+					bbNormals = fcNormals.map(FileChannel.MapMode.READ_ONLY, 0L, fcNormals.size());
+					normalsBuffer = bbNormals.asDoubleBuffer();
 				}
 				catch (FileNotFoundException ex)
 				{
 				}
 			}
-			
 			int numberOfReferences = Integer.parseInt(
 				xpath.selectSingleNode(submeshNodes, "references/number/text()").getNodeValue());
 			logger.debug("Reading "+numberOfReferences+" references");
 			int [] refs = new int[numberOfReferences];
-			for (i=0; i < numberOfReferences; i++)
-				refs[i] = refsIn.readInt();
+			refsBuffer.get(refs);
 			
 			int numberOfNodes = Integer.parseInt(
 				xpath.selectSingleNode(submeshNodes, "number/text()").getNodeValue());
@@ -114,8 +124,7 @@ public class MMesh3DReader
 					label = 0;
 				else
 					label = refs[i+numberOfReferences-numberOfNodes];
-				for (int j = 0; j < 3; j++)
-					coord[j] = nodesIn.readDouble();
+				nodesBuffer.get(coord);
 				nodelist[i] = new MNode3D(coord, label);
 				m3d.addNode(nodelist[i]);
 			}
@@ -127,25 +136,22 @@ public class MMesh3DReader
 			double [] n = new double[3];
 			for (i=0; i < numberOfTriangles; i++)
 			{
-				MNode3D pt1 = nodelist[trianglesIn.readInt()];
-				if (normalsIn != null)
+				MNode3D pt1 = nodelist[trianglesBuffer.get()];
+				if (fcNormals != null)
 				{
-					for (int j = 0; j < 3; j++)
-						n[j] = normalsIn.readDouble();
+					normalsBuffer.get(n);
 					pt1.addNormal(n);
 				}
-				MNode3D pt2 = nodelist[trianglesIn.readInt()];
-				if (normalsIn != null)
+				MNode3D pt2 = nodelist[trianglesBuffer.get()];
+				if (fcNormals != null)
 				{
-					for (int j = 0; j < 3; j++)
-						n[j] = normalsIn.readDouble();
+					normalsBuffer.get(n);
 					pt2.addNormal(n);
 				}
-				MNode3D pt3 = nodelist[trianglesIn.readInt()];
-				if (normalsIn != null)
+				MNode3D pt3 = nodelist[trianglesBuffer.get()];
+				if (fcNormals != null)
 				{
-					for (int j = 0; j < 3; j++)
-						n[j] = normalsIn.readDouble();
+					normalsBuffer.get(n);
 					pt3.addNormal(n);
 				}
 				facelist[i] = new MFace3D(pt1, pt2, pt3);
@@ -158,8 +164,9 @@ public class MMesh3DReader
 			String groupsFile = xpath.selectSingleNode(groupsList.item(0), "file/@location").getNodeValue();
 			if (groupsFile.charAt(0) != File.separatorChar)
 				groupsFile = xmlDir+File.separator+groupsFile;
-			DataInputStream groupsIn=new DataInputStream(new BufferedInputStream(new FileInputStream(groupsFile)));
-			int groupOffset = 0;
+			FileChannel fcG = new FileInputStream(groupsFile).getChannel();
+			MappedByteBuffer bbG = fcG.map(FileChannel.MapMode.READ_ONLY, 0L, fcG.size());
+			IntBuffer groupsBuffer = bbG.asIntBuffer();
 			for (i=0; i < numberOfGroups; i++)
 			{
 				Node groupNode = groupsList.item(i);
@@ -177,18 +184,24 @@ public class MMesh3DReader
 				logger.debug("Group "+name+": reading "+numberOfElements+" elements");
 								
 				Collection newfacelist = new ArrayList(numberOfElements);
-				for (; groupOffset < fileOffset; groupOffset++)
-					groupsIn.readInt();
-				groupOffset += numberOfElements;
 				for (int j=0; j < numberOfElements; j++)
-					newfacelist.add(facelist[groupsIn.readInt()]);
+					newfacelist.add(facelist[groupsBuffer.get(fileOffset+j)]);
 				MGroup3D g = new MGroup3D(name, newfacelist);
 				m3d.addGroup(g);
 			}
-			groupsIn.close();
-			trianglesIn.close();
-			nodesIn.close();
-			refsIn.close();
+			fcG.close();
+			UNVConverter.clean(bbG);
+			fcT.close();
+			UNVConverter.clean(bbT);
+			fcN.close();
+			UNVConverter.clean(bbN);
+			fcR.close();
+			UNVConverter.clean(bbR);
+			if (fcNormals != null)
+			{
+				fcNormals.close();
+				UNVConverter.clean(bbNormals);
+			}
 		}
 		catch(Exception ex)
 		{
@@ -196,7 +209,7 @@ public class MMesh3DReader
 			throw new RuntimeException(ex);
 		}
 		logger.debug("end reading "+xmlFile);
-		 return m3d;
+		return m3d;
 	}
 	
 	public static int [] getInfos(String xmlDir, String xmlFile)
