@@ -25,12 +25,14 @@ import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.mesh.cad.CADFace;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
+import java.nio.DoubleBuffer;
+import java.nio.IntBuffer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import gnu.trove.TIntIntHashMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -226,13 +228,19 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 		{
 			String nodesFile = xpath.selectSingleNode(documentIn,
 				"/jcae/mesh/submesh/nodes/file/@location").getNodeValue();
-			DataInputStream nodesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(xmlDir+File.separator+nodesFile)));
+			FileChannel fcN = new FileInputStream(xmlDir+File.separator+nodesFile).getChannel();
+			MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
+			DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
 			String refFile = xpath.selectSingleNode(documentIn,
 				"/jcae/mesh/submesh/nodes/references/file/@location").getNodeValue();
-			DataInputStream refsIn=new DataInputStream(new BufferedInputStream(new FileInputStream(xmlDir+File.separator+refFile)));
+			FileChannel fcR = new FileInputStream(xmlDir+File.separator+refFile).getChannel();
+			MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L, fcR.size());
+			IntBuffer refsBuffer = bbR.asIntBuffer();
 			String trianglesFile = xpath.selectSingleNode(documentIn,
 				"/jcae/mesh/submesh/triangles/file/@location").getNodeValue();
-			DataInputStream trianglesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(xmlDir+File.separator+trianglesFile)));
+			FileChannel fcT = new FileInputStream(xmlDir+File.separator+trianglesFile).getChannel();
+			MappedByteBuffer bbT = fcT.map(FileChannel.MapMode.READ_ONLY, 0L, fcT.size());
+			IntBuffer trianglesBuffer = bbT.asIntBuffer();
 			
 			Node submeshElement = xpath.selectSingleNode(documentIn,
 				"/jcae/mesh/submesh");
@@ -249,8 +257,8 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			//  Interior nodes
 			for (i = 0; i < numberOfNodes - numberOfReferences; i++)
 			{
-				double u = nodesIn.readDouble();
-				double v = nodesIn.readDouble();
+				double u = nodesBuffer.get();
+				double v = nodesBuffer.get();
 				double [] p3 = surface.value(u, v);
 				for (int j = 0; j < 3; j++)
 					nodesOut.writeDouble(p3[j]);
@@ -260,12 +268,11 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 					normals[3*i+j] = p3[j];
 			}
 			//  Boundary nodes
-			for (i = 0; i < numberOfReferences; i++)
-				refs[i] = refsIn.readInt();
+			refsBuffer.get(refs);
 			for (i = 0; i < numberOfReferences; i++)
 			{
-				double u = nodesIn.readDouble();
-				double v = nodesIn.readDouble();
+				double u = nodesBuffer.get();
+				double v = nodesBuffer.get();
 				surface.setParameter(u, v);
 				double [] p3 = surface.normal();
 				for (int j = 0; j < 3; j++)
@@ -291,7 +298,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				for (int j = 0; j < 3; j++)
 				{
 					// Local node number for this group
-					int indLoc = trianglesIn.readInt();
+					int indLoc = trianglesBuffer.get();
 					// Write normals
 					if (normalsOut != null)
 					{
@@ -335,9 +342,12 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			
 			nodeOffset += numberOfNodes - numberOfReferences;
 			nrTriangles += numberOfFaces;
-			nodesIn.close();
-			trianglesIn.close();
-			refsIn.close();
+			fcT.close();
+			UNVConverter.clean(bbT);
+			fcN.close();
+			UNVConverter.clean(bbN);
+			fcR.close();
+			UNVConverter.clean(bbR);
 			
 		}
 		catch(Exception ex)
