@@ -27,8 +27,10 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.cad.CADFace;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
+import java.nio.DoubleBuffer;
+import java.nio.IntBuffer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -60,25 +62,30 @@ public class MeshReader
 				"references/file/@location").getNodeValue();
 			if (refFile.charAt(0) != File.separatorChar)
 				refFile = xmlDir+File.separator+refFile;
-			DataInputStream refsIn=new DataInputStream(new BufferedInputStream(new FileInputStream(refFile)));
+			FileChannel fcR = new FileInputStream(refFile).getChannel();
+			MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L, fcR.size());
+			IntBuffer refsBuffer = bbR.asIntBuffer();
 			String nodesFile = xpath.selectSingleNode(submeshNodes, "file/@location").getNodeValue();
 			if (nodesFile.charAt(0) != File.separatorChar)
 				nodesFile = xmlDir+File.separator+nodesFile;
-			DataInputStream nodesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(nodesFile)));
+			FileChannel fcN = new FileInputStream(nodesFile).getChannel();
+			MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
+			DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
 			
 			Node submeshTriangles = xpath.selectSingleNode(submeshElement, "triangles");
 			String trianglesFile = xpath.selectSingleNode(submeshTriangles,
 				"file/@location").getNodeValue();
 			if (trianglesFile.charAt(0) != File.separatorChar)
 				trianglesFile = xmlDir+File.separator+trianglesFile;
-			DataInputStream trianglesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(trianglesFile)));
+			FileChannel fcT = new FileInputStream(trianglesFile).getChannel();
+			MappedByteBuffer bbT = fcT.map(FileChannel.MapMode.READ_ONLY, 0L, fcT.size());
+			IntBuffer trianglesBuffer = bbT.asIntBuffer();
 
 			int numberOfReferences = Integer.parseInt(
 				xpath.selectSingleNode(submeshNodes, "references/number/text()").getNodeValue());
 			logger.debug("Reading "+numberOfReferences+" references");
 			int [] refs = new int[numberOfReferences];
-			for (int i=0; i < numberOfReferences; i++)
-				refs[i] = refsIn.readInt();
+			refsBuffer.get(refs);
 			
 			int numberOfNodes = Integer.parseInt(
 				xpath.selectSingleNode(submeshNodes, "number/text()").getNodeValue());
@@ -92,8 +99,7 @@ public class MeshReader
 			double vmax = Double.MIN_VALUE;
 			for (int i=0; i < numberOfNodes; i++)
 			{
-				coord[0] = nodesIn.readDouble();
-				coord[1] = nodesIn.readDouble();
+				nodesBuffer.get(coord);
 				nodelist[i] = new Vertex(coord[0], coord[1]);
 				if (i < numberOfNodes - numberOfReferences)
 					label = 0;
@@ -119,18 +125,21 @@ public class MeshReader
 			Triangle [] facelist = new Triangle[numberOfTriangles];
 			for (int i=0; i < numberOfTriangles; i++)
 			{
-				Vertex pt1 = nodelist[trianglesIn.readInt()];
-				Vertex pt2 = nodelist[trianglesIn.readInt()];
-				Vertex pt3 = nodelist[trianglesIn.readInt()];
+				Vertex pt1 = nodelist[trianglesBuffer.get()];
+				Vertex pt2 = nodelist[trianglesBuffer.get()];
+				Vertex pt3 = nodelist[trianglesBuffer.get()];
 				facelist[i] = new Triangle(pt1, pt2, pt3);
 				mesh.add(facelist[i]);
 				pt1.tri = facelist[i];
 				pt2.tri = facelist[i];
 				pt3.tri = facelist[i];
 			}
-			trianglesIn.close();
-			nodesIn.close();
-			refsIn.close();
+			fcT.close();
+			UNVConverter.clean(bbT);
+			fcN.close();
+			UNVConverter.clean(bbN);
+			fcR.close();
+			UNVConverter.clean(bbR);
 			//  Build adjacency relations
 			mesh.buildAdjacency(nodelist, -1.0);
 		}
@@ -158,25 +167,30 @@ public class MeshReader
 				"references/file/@location").getNodeValue();
 			if (refFile.charAt(0) != File.separatorChar)
 				refFile = xmlDir+File.separator+refFile;
-			DataInputStream refsIn=new DataInputStream(new BufferedInputStream(new FileInputStream(refFile)));
+			FileChannel fcR = new FileInputStream(refFile).getChannel();
+			MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L, fcR.size());
+			IntBuffer refsBuffer = bbR.asIntBuffer();
 			String nodesFile = xpath.selectSingleNode(submeshNodes, "file/@location").getNodeValue();
 			if (nodesFile.charAt(0) != File.separatorChar)
 				nodesFile = xmlDir+File.separator+nodesFile;
-			DataInputStream nodesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(nodesFile)));
+			FileChannel fcN = new FileInputStream(nodesFile).getChannel();
+			MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
+			DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
 			
 			Node submeshTriangles = xpath.selectSingleNode(submeshElement, "triangles");
 			String trianglesFile = xpath.selectSingleNode(submeshTriangles,
 				"file/@location").getNodeValue();
 			if (trianglesFile.charAt(0) != File.separatorChar)
 				trianglesFile = xmlDir+File.separator+trianglesFile;
-			DataInputStream trianglesIn=new DataInputStream(new BufferedInputStream(new FileInputStream(trianglesFile)));
+			FileChannel fcT = new FileInputStream(trianglesFile).getChannel();
+			MappedByteBuffer bbT = fcT.map(FileChannel.MapMode.READ_ONLY, 0L, fcT.size());
+			IntBuffer trianglesBuffer = bbT.asIntBuffer();
 
 			int numberOfReferences = Integer.parseInt(
 				xpath.selectSingleNode(submeshNodes, "references/number/text()").getNodeValue());
 			logger.debug("Reading "+numberOfReferences+" references");
 			int [] refs = new int[numberOfReferences];
-			for (int i=0; i < numberOfReferences; i++)
-				refs[i] = refsIn.readInt();
+			refsBuffer.get(refs);
 			
 			int numberOfNodes = Integer.parseInt(
 				xpath.selectSingleNode(submeshNodes, "number/text()").getNodeValue());
@@ -193,9 +207,7 @@ public class MeshReader
 			}
 			for (int i=0; i < numberOfNodes; i++)
 			{
-				coord[0] = nodesIn.readDouble();
-				coord[1] = nodesIn.readDouble();
-				coord[2] = nodesIn.readDouble();
+				nodesBuffer.get(coord);
 				nodelist[i] = new Vertex(coord[0], coord[1], coord[2]);
 				if (i < numberOfNodes - numberOfReferences)
 					label = 0;
@@ -217,18 +229,21 @@ public class MeshReader
 			Triangle [] facelist = new Triangle[numberOfTriangles];
 			for (int i=0; i < numberOfTriangles; i++)
 			{
-				Vertex pt1 = nodelist[trianglesIn.readInt()];
-				Vertex pt2 = nodelist[trianglesIn.readInt()];
-				Vertex pt3 = nodelist[trianglesIn.readInt()];
+				Vertex pt1 = nodelist[trianglesBuffer.get()];
+				Vertex pt2 = nodelist[trianglesBuffer.get()];
+				Vertex pt3 = nodelist[trianglesBuffer.get()];
 				facelist[i] = new Triangle(pt1, pt2, pt3);
 				mesh.add(facelist[i]);
 				pt1.tri = facelist[i];
 				pt2.tri = facelist[i];
 				pt3.tri = facelist[i];
 			}
-			trianglesIn.close();
-			nodesIn.close();
-			refsIn.close();
+			fcT.close();
+			UNVConverter.clean(bbT);
+			fcN.close();
+			UNVConverter.clean(bbN);
+			fcR.close();
+			UNVConverter.clean(bbR);
 			//  Build adjacency relations
 			String ridgeAngleProp = System.getProperty("org.jcae.mesh.xmldata.MeshReader.ridgeAngleDegre");
 			if (ridgeAngleProp == null)
