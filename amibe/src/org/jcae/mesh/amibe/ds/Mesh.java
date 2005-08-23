@@ -687,7 +687,7 @@ public class Mesh
 					}
 					else
 					{
-						System.out.println("Non-manifold");
+						System.out.println("Non-manifold "+t+"\n"+t2);
 					}
 					cnt++;
 				}
