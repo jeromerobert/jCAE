@@ -145,6 +145,8 @@ public class IndexedStorage
 				FileChannel fc = fis.getChannel();
 				fc.position(current.counter);
 				DataInputStream bufIn = new DataInputStream(new BufferedInputStream(fis));
+				long pos = bufIn.readLong();
+				assert pos == current.counter : ""+pos+" != "+current.counter;
 				int tCount = 0;
 				for(int nr = 0; nr < current.tn; nr ++)
 				{
@@ -329,6 +331,8 @@ public class IndexedStorage
 				FileChannel fc = fis.getChannel();
 				fc.position(current.counter);
 				DataInputStream bufIn = new DataInputStream(new BufferedInputStream(fis));
+				long pos = bufIn.readLong();
+				assert pos == current.counter : ""+pos+" != "+current.counter;
 				DataOutputStream output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(current.file+"t")));
 				OEMMNode [] cell = new OEMMNode[3];
 				for(int nr = 0; nr < current.tn; nr ++)

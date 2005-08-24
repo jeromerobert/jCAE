@@ -30,7 +30,6 @@ import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 import org.apache.log4j.Logger;
 
@@ -42,9 +41,10 @@ public class RawStorage
 	private static Logger logger = Logger.getLogger(RawStorage.class);	
 
 	//  In the raw file, a triangle has 9 double coordinates and an int.
-	private static final long TRIANGLE_SIZE_RAW = 76L;
+	private static final int TRIANGLE_SIZE_RAW = 76;
 	//  In the dispatched file, a triangle has 9 int coordinates and an int.
-	private static final long TRIANGLE_SIZE_DISPATCHED = 40L;
+	private static final int TRIANGLE_SIZE_DISPATCHED = 40;
+	private static final int bufferSize = (TRIANGLE_SIZE_RAW * TRIANGLE_SIZE_DISPATCHED) << 4;
 	
 	/**
 	 * Build a raw OEMM and count the number of triangles which have to be assigned
@@ -72,28 +72,35 @@ public class RawStorage
 			double [] xyz = new double[3];
 			OEMMNode [] cells = new OEMMNode[3];
 			FileInputStream fs = new FileInputStream(tree.getFileName());
-			DataInputStream coordsIn = new DataInputStream(new BufferedInputStream(fs));
-			long size = fs.getChannel().size();
-			for(long nr = 0L; nr < size; nr += TRIANGLE_SIZE_RAW)
+			ByteBuffer bb = ByteBuffer.allocate(bufferSize);
+			boolean hasNext = true;
+			while (hasNext)
 			{
-				for (int i = 0; i < 3; i++)
+				bb.rewind();
+				int nr = fs.read(bb.array());
+				if (nr < bufferSize)
+					hasNext = false;
+				for(; nr > 0; nr -= TRIANGLE_SIZE_RAW)
 				{
-					xyz[0] = coordsIn.readDouble();
-					xyz[1] = coordsIn.readDouble();
-					xyz[2] = coordsIn.readDouble();
-					tree.double2int(xyz, ijk);
-					cells[i] = tree.build(0, ijk);
+					for (int i = 0; i < 3; i++)
+					{
+						xyz[0] = bb.getDouble();
+						xyz[1] = bb.getDouble();
+						xyz[2] = bb.getDouble();
+						tree.double2int(xyz, ijk);
+						cells[i] = tree.build(0, ijk);
+					}
+					bb.getInt();
+					cells[0].tn++;
+					if (cells[1] != cells[0])
+						cells[1].tn++;
+					if (cells[2] != cells[0] && cells[2] != cells[1])
+						cells[2].tn++;
+					tcount++;
 				}
-				coordsIn.readInt();
-				cells[0].tn++;
-				if (cells[1] != cells[0])
-					cells[1].tn++;
-				if (cells[2] != cells[0] && cells[2] != cells[1])
-					cells[2].tn++;
-				tcount++;
 			}
-			coordsIn.close();
-		}
+			fs.close();
+}
 		catch (FileNotFoundException ex)
 		{
 			logger.error("File "+tree.getFileName()+" not found");
@@ -264,26 +271,29 @@ public class RawStorage
 		assert current.counter <= fc.size();
 		//  With 20 millions of triangles, unbuffered output took 420s
 		//  and buffered output 180s (4K buffer cache)
-		Int10Array list = (Int10Array) current.extra;
-		if (current.extra == null)
+		ByteBuffer list = (ByteBuffer) current.extra;
+		if (list == null)
 		{
-			current.extra = new Int10Array();
-			list = (Int10Array) current.extra;
-		}
-		else if (list.isFull())
-		{
-			// Flush buffer
-			int size = list.size();
-			ByteBuffer buf = ByteBuffer.allocate(4*size);
-			IntBuffer bufInt = buf.asIntBuffer();
-			bufInt.put(list.toNativeArray(), 0, size);
-			buf.rewind();
-			fc.write(buf, current.counter);
-			current.counter += 4*size;
+			//  Must be a multiple of 10!
+			current.extra = ByteBuffer.allocate(4000);
+			list = (ByteBuffer) current.extra;
+			list.putLong(current.counter);
+			list.flip();
+			fc.write(list, current.counter);
+			current.counter += list.limit();
 			list.clear();
 		}
-		list.add(ijk);
-		list.add(attribute);
+		else if (!list.hasRemaining())
+		{
+			// Flush buffer
+			list.flip();
+			fc.write(list, current.counter);
+			current.counter += list.limit();
+			list.clear();
+		}
+		for (int i = 0; i < ijk.length; i++)
+			list.putInt(ijk[i]);
+		list.putInt(attribute);
 		current.tn++;
 	}
 	
@@ -295,7 +305,7 @@ public class RawStorage
 			if (visit != LEAF)
 				return SKIPWALK;
 			current.counter = offset;
-			offset += TRIANGLE_SIZE_DISPATCHED * (long) current.tn;
+			offset += 8L + TRIANGLE_SIZE_DISPATCHED * (long) current.tn;
 			//  Reinitialize this counter for further processing
 			current.tn = 0;
 			current.extra = null;
@@ -339,27 +349,37 @@ public class RawStorage
 		}
 		public final int action(OEMMNode current, int octant, int visit)
 		{
-			if (visit != LEAF || current.extra == null)
+			if (visit != LEAF)
 				return SKIPWALK;
-			Int10Array list = (Int10Array) current.extra;
-			if (list.isEmpty())
+			ByteBuffer list = (ByteBuffer) current.extra;
+			if (list == null)
+			{
+				list = ByteBuffer.allocate(8);
+				list.putLong(current.counter);
+				list.rewind();
+				try
+				{
+					assert current.counter <= fc.size();
+					fc.write(list, current.counter);
+				}
+				catch (IOException ex)
+				{
+					logger.error("I/O error when writing file");
+				}
 				return OK;
+			}
 			// Flush buffer
-			int size = list.size();
-			ByteBuffer buf = ByteBuffer.allocate(4*size);
-			IntBuffer bufInt = buf.asIntBuffer();
-			bufInt.put(list.toNativeArray(), 0, size);
-			buf.rewind();
 			try
 			{
 				assert current.counter <= fc.size();
-				fc.write(buf, current.counter);
+				list.flip();
+				fc.write(list, current.counter);
+				current.counter += list.limit();
 			}
 			catch (IOException ex)
 			{
 				logger.error("I/O error when writing file");
 			}
-			current.counter += 4*size;
 			return OK;
 		}
 	}
@@ -391,7 +411,7 @@ public class RawStorage
 			{
 				//  Offset in data file
 				//  This offset had been shifted when writing triangles
-				current.counter -= TRIANGLE_SIZE_DISPATCHED * current.tn;
+				current.counter -= 8L + TRIANGLE_SIZE_DISPATCHED * current.tn;
 				out.writeLong(current.counter);
 				//  Number of triangles really found
 				out.writeInt(current.tn);
@@ -410,42 +430,4 @@ public class RawStorage
 		}
 	}
 	
-	//  With 20 millions of triangles, writing dispatched file took 230s with
-	//  TIntArrayList and 180s with Int10Array
-	private static class Int10Array
-	{
-		private static final int capacity = 4090;  // Must be a multiple of 10!
-		private int [] data = new int[capacity];
-		private int offset = 0;
-		public int size()
-		{
-			return offset;
-		}
-		public boolean isEmpty()
-		{
-			return (offset == 0);
-		}
-		public boolean isFull()
-		{
-			return (offset >= capacity);
-		}
-		public void add(int [] src)
-		{
-			System.arraycopy(src, 0, data, offset, src.length);
-			offset += src.length;
-		}
-		public void add(int val)
-		{
-			data[offset] = val;
-			offset++;
-		}
-		public int [] toNativeArray()
-		{
-			return data;
-		}
-		public void clear()
-		{
-			offset = 0;
-		}
-	}
 }
