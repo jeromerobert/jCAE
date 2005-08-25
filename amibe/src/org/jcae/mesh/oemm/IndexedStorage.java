@@ -48,7 +48,8 @@ public class IndexedStorage
 	private static Logger logger = Logger.getLogger(IndexedStorage.class);	
 	
 	private static final int TRIANGLE_SIZE_DISPATCHED = 40;
-	private static final int bufferSize = TRIANGLE_SIZE_DISPATCHED << 10;
+	private static final int VERTEX_SIZE_INDEXED = 16;
+	private static final int bufferSize = TRIANGLE_SIZE_DISPATCHED * VERTEX_SIZE_INDEXED << 6;
 	
 	private static ByteBuffer bb = ByteBuffer.allocate(bufferSize);
 	private static IntBuffer bbI = bb.asIntBuffer();
@@ -272,6 +273,7 @@ public class IndexedStorage
 				output.close();
 				
 				DataOutputStream outVert = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(current.file+"v")));
+				DataOutputStream outAdj = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(current.file+"a")));
 				//  Inner vertices of this node
 				for(int i = 0; i < index; i++)
 				{
@@ -285,11 +287,12 @@ public class IndexedStorage
 					for (TIntIterator it = c.adj.iterator(); it.hasNext();)
 					{
 						int ind = it.next();
-						outVert.writeByte((byte) map.get(ind));
+						outAdj.writeByte((byte) map.get(ind));
 					}
 				}
 				//  Triangles will be written during 2nd pass
 				outVert.close();
+				outAdj.close();
 			}
 			catch (IOException ex)
 			{
@@ -449,18 +452,27 @@ public class IndexedStorage
 		int [] ijk = new int[3];
 		try
 		{
-			DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(current.file+"v")));
-			for (int index = 0; index < current.vn; index++)
+			FileChannel fc = new FileInputStream(current.file+"v").getChannel();
+			int remaining = current.vn;
+			int index = 0;
+			for (int nblock = (current.vn * VERTEX_SIZE_INDEXED) / bufferSize; nblock >= 0; --nblock)
 			{
-				ijk[0] = bufIn.readInt();
-				ijk[1] = bufIn.readInt();
-				ijk[2] = bufIn.readInt();
-				ret.insert(ijk, index);
-				int n = bufIn.readInt();
-				for (int j = 0; j < n; j++)
-					bufIn.readByte();
+				bb.rewind();
+				fc.read(bb);
+				bbI.rewind();
+				int nf = bufferSize / VERTEX_SIZE_INDEXED;
+				if (remaining < nf)
+					nf = remaining;
+				remaining -= nf;
+				for(int nr = 0; nr < nf; nr ++)
+				{
+					bbI.get(ijk);
+					ret.insert(ijk, index);
+					bbI.get();
+					index++;
+				}
 			}
-			bufIn.close();
+			fc.close();
 		}
 		catch (IOException ex)
 		{
@@ -573,33 +585,44 @@ public class IndexedStorage
 			try
 			{
 				logger.debug("Reading vertices from "+current.file+"v");
-				DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(current.file+"v")));
 				OEMMVertex [] vert = new OEMMVertex[current.vn];
 				int [] ijk = new int[3];
-				//  Read coordinates
-				for (int i = 0; i < current.vn; i++)
+				FileChannel fc = new FileInputStream(current.file+"v").getChannel();
+				DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(current.file+"a")));
+				int remaining = current.vn;
+				int index = 0;
+				for (int nblock = (current.vn * VERTEX_SIZE_INDEXED) / bufferSize; nblock >= 0; --nblock)
 				{
-					ijk[0] = bufIn.readInt();
-					ijk[1] = bufIn.readInt();
-					ijk[2] = bufIn.readInt();
-					vert[i] = new OEMMVertex(ijk, current.minIndex + i);
-					int n = bufIn.readInt();
-					//  Read neighbors
-					boolean writable = true;
-					for (int j = 0; j < n; j++)
+					bb.rewind();
+					fc.read(bb);
+					bbI.rewind();
+					int nf = bufferSize / VERTEX_SIZE_INDEXED;
+					if (remaining < nf)
+						nf = remaining;
+					remaining -= nf;
+					for(int nr = 0; nr < nf; nr ++)
 					{
-						int num = (int) bufIn.readByte();
-						if (!leaves.contains(num))
+						bbI.get(ijk);
+						vert[index] = new OEMMVertex(ijk, current.minIndex + index);
+						int n = bb.getInt();
+						//  Read neighbors
+						boolean writable = true;
+						for (int j = 0; j < n; j++)
 						{
-							writable = false;
-							for (j++; j < n; j++)
-								bufIn.readByte();
+							int num = (int) bufIn.readByte();
+							if (!leaves.contains(num))
+							{
+								writable = false;
+								for (j++; j < n; j++)
+									bufIn.readByte();
+							}
 						}
+						vert[index].setWritable(writable);
+						vertMap.put(current.minIndex + index, vert[index]);
+						index++;
 					}
-					vert[i].setWritable(writable);
-					vertMap.put(current.minIndex + i, vert[i]);
 				}
-				bufIn.close();
+				fc.close();
 			}
 			catch (IOException ex)
 			{
