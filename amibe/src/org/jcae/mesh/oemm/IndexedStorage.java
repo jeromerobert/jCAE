@@ -49,10 +49,13 @@ public class IndexedStorage
 	
 	private static final int TRIANGLE_SIZE_DISPATCHED = 40;
 	private static final int VERTEX_SIZE_INDEXED = 16;
-	private static final int bufferSize = TRIANGLE_SIZE_DISPATCHED * VERTEX_SIZE_INDEXED << 6;
+	private static final int TRIANGLE_SIZE_INDEXED = 28;
+	private static final int bufferSize = TRIANGLE_SIZE_DISPATCHED * VERTEX_SIZE_INDEXED * TRIANGLE_SIZE_INDEXED;
 	
 	private static ByteBuffer bb = ByteBuffer.allocate(bufferSize);
 	private static IntBuffer bbI = bb.asIntBuffer();
+	private static ByteBuffer bbt = ByteBuffer.allocate(bufferSize);
+	private static IntBuffer bbtI = bbt.asIntBuffer();
 	private static ByteBuffer bbpos = ByteBuffer.allocate(8);
 	
 	/**
@@ -158,9 +161,11 @@ public class IndexedStorage
 				bbpos.flip();
 				long pos = bbpos.getLong();
 				assert pos == current.counter : ""+pos+" != "+current.counter;
+				bb.clear();
+				bbI.clear();
 				int tCount = 0;
 				int remaining = current.tn;
-				for (int nblock = (current.tn * TRIANGLE_SIZE_DISPATCHED) / bufferSize; nblock >= 0; --nblock)
+				for (int nblock = (remaining * TRIANGLE_SIZE_DISPATCHED) / bufferSize; nblock >= 0; --nblock)
 				{
 					bb.rewind();
 					fc.read(bb);
@@ -272,26 +277,40 @@ public class IndexedStorage
 				
 				output.close();
 				
-				DataOutputStream outVert = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(current.file+"v")));
+				FileChannel fcv = new FileOutputStream(current.file+"v").getChannel();
 				DataOutputStream outAdj = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(current.file+"a")));
 				//  Inner vertices of this node
-				for(int i = 0; i < index; i++)
+				bb.clear();
+				bbI.clear();
+				remaining = index;
+				int i = 0;
+				for (int nblock = (remaining * VERTEX_SIZE_INDEXED) / bufferSize; nblock >= 0; --nblock)
 				{
-					IndexedVertex c = innerVertices[i];
-					//     Coordinates
-					outVert.writeInt(c.ijk[0]);
-					outVert.writeInt(c.ijk[1]);
-					outVert.writeInt(c.ijk[2]);
-					//     Adjacent leaves
-					outVert.writeInt(c.adj.size());
-					for (TIntIterator it = c.adj.iterator(); it.hasNext();)
+					int nf = bufferSize / VERTEX_SIZE_INDEXED;
+					if (remaining < nf)
+						nf = remaining;
+					remaining -= nf;
+					bbI.rewind();
+					for(int nr = 0; nr < nf; nr ++)
 					{
-						int ind = it.next();
-						outAdj.writeByte((byte) map.get(ind));
+						IndexedVertex c = innerVertices[i];
+						//     Coordinates
+						bbI.put(c.ijk);
+						//     Adjacent leaves
+						bbI.put(c.adj.size());
+						for (TIntIterator it = c.adj.iterator(); it.hasNext();)
+						{
+							int ind = it.next();
+							outAdj.writeByte((byte) map.get(ind));
+						}
+						i++;
 					}
+					bb.position(4*bbI.position());
+					bb.flip();
+					fcv.write(bb);
 				}
 				//  Triangles will be written during 2nd pass
-				outVert.close();
+				fcv.close();
 				outAdj.close();
 			}
 			catch (IOException ex)
@@ -360,10 +379,14 @@ public class IndexedStorage
 				bbpos.flip();
 				long pos = bbpos.getLong();
 				assert pos == current.counter : ""+pos+" != "+current.counter;
-				DataOutputStream output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(current.file+"t")));
+				FileChannel fct = new FileOutputStream(current.file+"t").getChannel();
 				OEMMNode [] cell = new OEMMNode[3];
+				bb.clear();
+				bbI.clear();
+				bbt.clear();
+				bbtI.clear();
 				int remaining = current.tn;
-				for (int nblock = (current.tn * TRIANGLE_SIZE_DISPATCHED) / bufferSize; nblock >= 0; --nblock)
+				for (int nblock = (remaining * TRIANGLE_SIZE_DISPATCHED) / bufferSize; nblock >= 0; --nblock)
 				{
 					bb.rewind();
 					fc.read(bb);
@@ -383,16 +406,25 @@ public class IndexedStorage
 						int groupNumber = bbI.get();
 						if (leaf[0] >= current.leafIndex && leaf[1] >= current.leafIndex && leaf[2] >= current.leafIndex)
 						{
-							for (int i = 0; i < 3; i++)
+							bbtI.put(leaf);
+							bbtI.put(pointIndex);
+							bbtI.put(groupNumber);
+							if (!bbtI.hasRemaining())
 							{
-								output.writeInt(leaf[i]);
-								output.writeInt(pointIndex[i]);
+								bbt.clear();
+								fct.write(bbt);
+								bbtI.rewind();
 							}
-							output.writeInt(groupNumber);
 						}
 					}
 				}
-				output.close();
+				if (bbtI.position() > 0)
+				{
+					bbt.position(4*bbtI.position());
+					bbt.flip();
+					fct.write(bbt);
+				}
+				fct.close();
 			}
 			catch (IOException ex)
 			{
@@ -453,9 +485,11 @@ public class IndexedStorage
 		try
 		{
 			FileChannel fc = new FileInputStream(current.file+"v").getChannel();
-			int remaining = current.vn;
 			int index = 0;
-			for (int nblock = (current.vn * VERTEX_SIZE_INDEXED) / bufferSize; nblock >= 0; --nblock)
+			bb.clear();
+			bbI.clear();
+			int remaining = current.vn;
+			for (int nblock = (remaining * VERTEX_SIZE_INDEXED) / bufferSize; nblock >= 0; --nblock)
 			{
 				bb.rewind();
 				fc.read(bb);
@@ -589,9 +623,11 @@ public class IndexedStorage
 				int [] ijk = new int[3];
 				FileChannel fc = new FileInputStream(current.file+"v").getChannel();
 				DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(current.file+"a")));
+				bb.clear();
+				bbI.clear();
 				int remaining = current.vn;
 				int index = 0;
-				for (int nblock = (current.vn * VERTEX_SIZE_INDEXED) / bufferSize; nblock >= 0; --nblock)
+				for (int nblock = (remaining * VERTEX_SIZE_INDEXED) / bufferSize; nblock >= 0; --nblock)
 				{
 					bb.rewind();
 					fc.read(bb);
@@ -655,35 +691,51 @@ public class IndexedStorage
 			{
 				logger.debug("Reading triangles from "+current.file+"t");
 				DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(current.file+"t")));
+				FileChannel fc = new FileInputStream(current.file+"t").getChannel();
 				OEMMVertex [] vert = new OEMMVertex[3];
-				for (int i = 0; i < current.tn; i++)
+				int [] leaf = new int[3];
+				int [] pointIndex = new int[3];
+				int remaining = current.tn;
+				bb.clear();
+				bbI.clear();
+				for (int nblock = (remaining * VERTEX_SIZE_INDEXED) / bufferSize; nblock >= 0; --nblock)
 				{
-					boolean readable = true;
-					boolean writable = true;
-					for (int j = 0; j < 3; j++)
+					bb.rewind();
+					fc.read(bb);
+					bbI.rewind();
+					int nf = bufferSize / VERTEX_SIZE_INDEXED;
+					if (remaining < nf)
+						nf = remaining;
+					remaining -= nf;
+					for(int nr = 0; nr < nf; nr ++)
 					{
-						int leaf = bufIn.readInt();
-						int localIndex = bufIn.readInt();
-						int globalIndex = oemm.leaves[leaf].minIndex + localIndex;
-						if (leaves.contains(leaf))
+						boolean readable = true;
+						boolean writable = true;
+						bbI.get(leaf);
+						bbI.get(pointIndex);
+						for (int j = 0; j < 3; j++)
 						{
-							vert[j] = (OEMMVertex) vertMap.get(globalIndex);
-							assert vert[j] != null;
-							if (!vert[j].isWritable())
-								writable = false;
+							int globalIndex = oemm.leaves[leaf[j]].minIndex + pointIndex[j];
+							if (leaves.contains(leaf[j]))
+							{
+								vert[j] = (OEMMVertex) vertMap.get(globalIndex);
+								assert vert[j] != null;
+								if (!vert[j].isWritable())
+									writable = false;
+							}
+							else
+								readable = false;
 						}
-						else
-							readable = false;
-					}
-					int groupNumber = bufIn.readInt();
-					if (readable)
-					{
-						OEMMTriangle t = new OEMMTriangle(vert[0], vert[1], vert[2]);
-						t.setWritable(writable);
-						mesh.add(t);
+						int groupNumber = bbI.get();
+						if (readable)
+						{
+							OEMMTriangle t = new OEMMTriangle(vert[0], vert[1], vert[2]);
+							t.setWritable(writable);
+							mesh.add(t);
+						}
 					}
 				}
-				bufIn.close();
+				fc.close();
 			}
 			catch (IOException ex)
 			{
