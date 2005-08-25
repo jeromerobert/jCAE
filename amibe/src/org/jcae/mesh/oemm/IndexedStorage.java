@@ -50,6 +50,10 @@ public class IndexedStorage
 	private static final int TRIANGLE_SIZE_DISPATCHED = 40;
 	private static final int bufferSize = TRIANGLE_SIZE_DISPATCHED << 10;
 	
+	private static ByteBuffer bb = ByteBuffer.allocate(bufferSize);
+	private static IntBuffer bbI = bb.asIntBuffer();
+	private static ByteBuffer bbpos = ByteBuffer.allocate(8);
+	
 	/**
 	 */
 	public static OEMM indexOEMM(String inFile, String outDir)
@@ -95,9 +99,6 @@ public class IndexedStorage
 	{
 		private OEMM oemm;
 		private FileChannel fc;
-		private static ByteBuffer bb = ByteBuffer.allocate(bufferSize);
-		private static IntBuffer bbI = bb.asIntBuffer();
-		private static ByteBuffer bbpos = ByteBuffer.allocate(8);
 		private String outDir;
 		private int globalIndex = 0;
 		private ArrayList path = new ArrayList();
@@ -306,14 +307,14 @@ public class IndexedStorage
 	private static class IndexExternalVerticesProcedure extends TraversalProcedure
 	{
 		private OEMM oemm;
-		private FileInputStream fis;
+		private FileChannel fc;
 		private String outDir;
 		private int [] ijk = new int[3];
 		private PAVLTreeIntArrayDup [] vertices;
 		public IndexExternalVerticesProcedure(OEMM o, FileInputStream in, String dir)
 		{
 			oemm = o;
-			fis = in;
+			fc = in.getChannel();
 			outDir = dir;
 			vertices = new PAVLTreeIntArrayDup[oemm.nr_leaves];
 		}
@@ -322,6 +323,7 @@ public class IndexedStorage
 			if (current.parent == null || visit != LEAF)
 				return SKIPWALK;
 			logger.debug("Indexing external vertices of node "+(current.leafIndex+1)+"/"+oemm.nr_leaves);
+/*
 			//  TODO:  Add a better memory management system
 			System.gc();
 			if (Runtime.getRuntime().freeMemory() < 100000000L)
@@ -330,6 +332,9 @@ public class IndexedStorage
 				for (int i = 0; i < vertices.length; i++)
 					vertices[i] = null;
 			}
+*/
+			for (int i = 0; i < vertices.length; i++)
+				vertices[i] = null;
 			
 			//  Load inner vertices...
 			if (vertices[current.leafIndex] == null)
@@ -346,32 +351,42 @@ public class IndexedStorage
 			{
 				int [] leaf = new int[3];
 				int [] pointIndex = new int[3];
-				FileChannel fc = fis.getChannel();
 				fc.position(current.counter);
-				DataInputStream bufIn = new DataInputStream(new BufferedInputStream(fis));
-				long pos = bufIn.readLong();
+				bbpos.rewind();
+				fc.read(bbpos);
+				bbpos.flip();
+				long pos = bbpos.getLong();
 				assert pos == current.counter : ""+pos+" != "+current.counter;
 				DataOutputStream output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(current.file+"t")));
 				OEMMNode [] cell = new OEMMNode[3];
-				for(int nr = 0; nr < current.tn; nr ++)
+				int remaining = current.tn;
+				for (int nblock = (current.tn * TRIANGLE_SIZE_DISPATCHED) / bufferSize; nblock >= 0; --nblock)
 				{
-					for (int i = 0; i < 3; i++)
-					{
-						ijk[0] = bufIn.readInt();
-						ijk[1] = bufIn.readInt();
-						ijk[2] = bufIn.readInt();
-						leaf[i] = oemm.search(ijk).leafIndex;
-						pointIndex[i] = vertices[leaf[i]].get(ijk);
-					}
-					int groupNumber = bufIn.readInt();
-					if (leaf[0] >= current.leafIndex && leaf[1] >= current.leafIndex && leaf[2] >= current.leafIndex)
+					bb.rewind();
+					fc.read(bb);
+					bbI.rewind();
+					int nf = bufferSize / TRIANGLE_SIZE_DISPATCHED;
+					if (remaining < nf)
+						nf = remaining;
+					remaining -= nf;
+					for(int nr = 0; nr < nf; nr ++)
 					{
 						for (int i = 0; i < 3; i++)
 						{
-							output.writeInt(leaf[i]);
-							output.writeInt(pointIndex[i]);
+							bbI.get(ijk);
+							leaf[i] = oemm.search(ijk).leafIndex;
+							pointIndex[i] = vertices[leaf[i]].get(ijk);
 						}
-						output.writeInt(groupNumber);
+						int groupNumber = bbI.get();
+						if (leaf[0] >= current.leafIndex && leaf[1] >= current.leafIndex && leaf[2] >= current.leafIndex)
+						{
+							for (int i = 0; i < 3; i++)
+							{
+								output.writeInt(leaf[i]);
+								output.writeInt(pointIndex[i]);
+							}
+							output.writeInt(groupNumber);
+						}
 					}
 				}
 				output.close();
