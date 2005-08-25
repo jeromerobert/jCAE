@@ -30,6 +30,8 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.IntBuffer;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -44,6 +46,9 @@ import org.apache.log4j.Logger;
 public class IndexedStorage
 {
 	private static Logger logger = Logger.getLogger(IndexedStorage.class);	
+	
+	private static final int TRIANGLE_SIZE_DISPATCHED = 40;
+	private static final int bufferSize = TRIANGLE_SIZE_DISPATCHED << 10;
 	
 	/**
 	 */
@@ -89,7 +94,10 @@ public class IndexedStorage
 	private static class IndexInternalVerticesProcedure extends TraversalProcedure
 	{
 		private OEMM oemm;
-		private FileInputStream fis;
+		private FileChannel fc;
+		private static ByteBuffer bb = ByteBuffer.allocate(bufferSize);
+		private static IntBuffer bbI = bb.asIntBuffer();
+		private static ByteBuffer bbpos = ByteBuffer.allocate(8);
 		private String outDir;
 		private int globalIndex = 0;
 		private ArrayList path = new ArrayList();
@@ -98,7 +106,7 @@ public class IndexedStorage
 		public IndexInternalVerticesProcedure(OEMM o, FileInputStream in, String dir)
 		{
 			oemm = o;
-			fis = in;
+			fc = in.getChannel();
 			outDir = dir;
 			PAVLTreeIntArrayDup [] vertices = new PAVLTreeIntArrayDup[oemm.nr_leaves];
 			room = ((1 << 31) - 3*oemm.head[0].tn) / oemm.nr_leaves;
@@ -142,70 +150,80 @@ public class IndexedStorage
 			{
 				int [] leaf = new int[3];
 				int [] pointIndex = new int[3];
-				FileChannel fc = fis.getChannel();
 				fc.position(current.counter);
-				DataInputStream bufIn = new DataInputStream(new BufferedInputStream(fis));
-				long pos = bufIn.readLong();
+				bbpos.rewind();
+				fc.read(bbpos);
+				bbpos.flip();
+				long pos = bbpos.getLong();
 				assert pos == current.counter : ""+pos+" != "+current.counter;
 				int tCount = 0;
-				for(int nr = 0; nr < current.tn; nr ++)
+				int remaining = current.tn;
+				for (int nblock = (current.tn * TRIANGLE_SIZE_DISPATCHED) / bufferSize; nblock >= 0; --nblock)
 				{
-					for (int i = 0; i < 3; i++)
+					bb.rewind();
+					fc.read(bb);
+					bbI.rewind();
+					int nf = bufferSize / TRIANGLE_SIZE_DISPATCHED;
+					if (remaining < nf)
+						nf = remaining;
+					remaining -= nf;
+					for(int nr = 0; nr < nf; nr ++)
 					{
-						ijk[0] = bufIn.readInt();
-						ijk[1] = bufIn.readInt();
-						ijk[2] = bufIn.readInt();
-						if (ijk[0] < current.i0 || ijk[0] >= current.i0 + current.size ||
-						    ijk[1] < current.j0 || ijk[1] >= current.j0 + current.size ||
-						    ijk[2] < current.k0 || ijk[2] >= current.k0 + current.size)
+						for (int i = 0; i < 3; i++)
 						{
-							// Find its bounding node to update
-							// adjacency relations.
-							OEMMNode node = oemm.search(ijk);
-							leaf[i] = node.leafIndex;
-							fakeIndex--;
-							pointIndex[i] = outer.insert(ijk, fakeIndex);
-							if (pointIndex[i] == fakeIndex)
-								nrExternal++;
-							else
-								nrDuplicates++;
-						}
-						else
-						{
-							leaf[i] = current.leafIndex;
-							pointIndex[i] = inner.insert(ijk, index);
-							if (pointIndex[i] == index)
+							bbI.get(ijk);
+							if (ijk[0] < current.i0 || ijk[0] >= current.i0 + current.size ||
+							    ijk[1] < current.j0 || ijk[1] >= current.j0 + current.size ||
+							    ijk[2] < current.k0 || ijk[2] >= current.k0 + current.size)
 							{
-								innerVertices[index] = new IndexedVertex(ijk);
-								index++;
+								// Find its bounding node to update
+								// adjacency relations.
+								OEMMNode node = oemm.search(ijk);
+								leaf[i] = node.leafIndex;
+								fakeIndex--;
+								pointIndex[i] = outer.insert(ijk, fakeIndex);
+								if (pointIndex[i] == fakeIndex)
+									nrExternal++;
+								else
+									nrDuplicates++;
 							}
 							else
 							{
-								nrDuplicates++;
+								leaf[i] = current.leafIndex;
+								pointIndex[i] = inner.insert(ijk, index);
+								if (pointIndex[i] == index)
+								{
+									innerVertices[index] = new IndexedVertex(ijk);
+									index++;
+								}
+								else
+								{
+									nrDuplicates++;
+								}
 							}
 						}
-					}
-					//  Group number
-					bufIn.readInt();
-					for (int i = 0; i < 3; i++)
-					{
-						if (leaf[i] != current.leafIndex)
-							continue;
-						for (int j = 0; j < 3; j++)
+						//  Group number
+						bbI.get();
+						for (int i = 0; i < 3; i++)
 						{
-							if (i == j || leaf[j] == current.leafIndex)
+							if (leaf[i] != current.leafIndex)
 								continue;
-							if (!set.contains(leaf[j]))
+							for (int j = 0; j < 3; j++)
 							{
-								set.add(leaf[j]);
-								current.adjLeaves.add(leaf[j]);
+								if (i == j || leaf[j] == current.leafIndex)
+									continue;
+								if (!set.contains(leaf[j]))
+								{
+									set.add(leaf[j]);
+									current.adjLeaves.add(leaf[j]);
+								}
+								innerVertices[pointIndex[i]].adj.add(leaf[j]);
 							}
-							innerVertices[pointIndex[i]].adj.add(leaf[j]);
 						}
+						//  Triangles are stored in the node with lowest leafIndex
+						if (leaf[0] >= current.leafIndex && leaf[1] >= current.leafIndex && leaf[2] >= current.leafIndex )
+							tCount++;
 					}
-					//  Triangles are stored in the node with lowest leafIndex
-					if (leaf[0] >= current.leafIndex && leaf[1] >= current.leafIndex && leaf[2] >= current.leafIndex )
-						tCount++;
 				}
 				//  Adjust data information
 				current.vn = index;
