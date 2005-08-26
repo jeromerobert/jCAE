@@ -137,20 +137,14 @@ public class MMesh3DReader
 			for (i=0; i < numberOfTriangles; i++)
 			{
 				MNode3D pt1 = nodelist[trianglesBuffer.get()];
+				MNode3D pt2 = nodelist[trianglesBuffer.get()];
+				MNode3D pt3 = nodelist[trianglesBuffer.get()];
 				if (fcNormals != null)
 				{
 					normalsBuffer.get(n);
 					pt1.addNormal(n);
-				}
-				MNode3D pt2 = nodelist[trianglesBuffer.get()];
-				if (fcNormals != null)
-				{
 					normalsBuffer.get(n);
 					pt2.addNormal(n);
-				}
-				MNode3D pt3 = nodelist[trianglesBuffer.get()];
-				if (fcNormals != null)
-				{
 					normalsBuffer.get(n);
 					pt3.addNormal(n);
 				}
