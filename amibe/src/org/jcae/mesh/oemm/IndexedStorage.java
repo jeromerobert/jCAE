@@ -640,7 +640,7 @@ public class IndexedStorage
 					{
 						bbI.get(ijk);
 						vert[index] = new OEMMVertex(ijk, current.minIndex + index);
-						int n = bb.getInt();
+						int n = bbI.get();
 						//  Read neighbors
 						boolean writable = true;
 						for (int j = 0; j < n; j++)
@@ -651,6 +651,7 @@ public class IndexedStorage
 								writable = false;
 								for (j++; j < n; j++)
 									bufIn.readByte();
+								break;
 							}
 						}
 						vert[index].setWritable(writable);
@@ -662,7 +663,7 @@ public class IndexedStorage
 			}
 			catch (IOException ex)
 			{
-				logger.error("I/O error when reading intermediate file");
+				logger.error("I/O error when reading file "+current.file+"v");
 				ex.printStackTrace();
 				throw new RuntimeException(ex);
 			}
@@ -690,7 +691,6 @@ public class IndexedStorage
 			try
 			{
 				logger.debug("Reading triangles from "+current.file+"t");
-				DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(current.file+"t")));
 				FileChannel fc = new FileInputStream(current.file+"t").getChannel();
 				OEMMVertex [] vert = new OEMMVertex[3];
 				int [] leaf = new int[3];
@@ -698,12 +698,12 @@ public class IndexedStorage
 				int remaining = current.tn;
 				bb.clear();
 				bbI.clear();
-				for (int nblock = (remaining * VERTEX_SIZE_INDEXED) / bufferSize; nblock >= 0; --nblock)
+				for (int nblock = (remaining * TRIANGLE_SIZE_INDEXED) / bufferSize; nblock >= 0; --nblock)
 				{
 					bb.rewind();
 					fc.read(bb);
 					bbI.rewind();
-					int nf = bufferSize / VERTEX_SIZE_INDEXED;
+					int nf = bufferSize / TRIANGLE_SIZE_INDEXED;
 					if (remaining < nf)
 						nf = remaining;
 					remaining -= nf;
