@@ -31,7 +31,7 @@ import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
-import java.nio.MappedByteBuffer;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import gnu.trove.TIntIntHashMap;
 import org.w3c.dom.Document;
@@ -48,6 +48,11 @@ public class MeshToSoupConvert extends JCAEXMLData
 	private int nrNodes = 0;
 	private String xmlDir;
 	private File rawFile;
+	// Must be a multiple of 8*2, 4*3 and 8*10
+	private static final int bufferSize = 15 << 12;
+	private ByteBuffer bb = ByteBuffer.allocate(bufferSize);
+	private IntBuffer bbI = bb.asIntBuffer();
+	private DoubleBuffer bbD = bb.asDoubleBuffer();
 	
 	public MeshToSoupConvert (String dir)
 	{
@@ -88,75 +93,104 @@ public class MeshToSoupConvert extends JCAEXMLData
 		surface.dinit(0);
 		try
 		{
-			String nodesFile = xpath.selectSingleNode(documentIn,
-				"/jcae/mesh/submesh/nodes/file/@location").getNodeValue();
-			FileChannel fcN = new FileInputStream(xmlDir+File.separator+nodesFile).getChannel();
-			MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
-			DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
-			String trianglesFile = xpath.selectSingleNode(documentIn,
-				"/jcae/mesh/submesh/triangles/file/@location").getNodeValue();
-			FileChannel fcT = new FileInputStream(xmlDir+File.separator+trianglesFile).getChannel();
-			MappedByteBuffer bbT = fcT.map(FileChannel.MapMode.READ_ONLY, 0L, fcT.size());
-			IntBuffer trianglesBuffer = bbT.asIntBuffer();
-			
 			Node submeshElement = xpath.selectSingleNode(documentIn,
 				"/jcae/mesh/submesh");
 			Node submeshNodes = xpath.selectSingleNode(submeshElement, "nodes");
+			Node submeshFaces = xpath.selectSingleNode(submeshElement, "triangles");
 			
 			int numberOfNodes = Integer.parseInt(
 				xpath.selectSingleNode(submeshNodes, "number/text()").getNodeValue());
 			logger.debug("Reading "+numberOfNodes+" nodes");
+			String nodesFile = xpath.selectSingleNode(submeshNodes,
+				"file/@location").getNodeValue();
+			FileChannel fcN = new FileInputStream(xmlDir+File.separator+nodesFile).getChannel();
 			double [] coord = new double[3*numberOfNodes];
-			for (i = 0; i < numberOfNodes; i++)
+			bb.clear();
+			bbD.clear();
+			int index = 0;
+			int remaining = numberOfNodes;
+			int nf = bufferSize >> 5;
+			for (int nblock = (remaining << 5) / bufferSize; nblock >= 0; --nblock)
 			{
-				double u = nodesBuffer.get();
-				double v = nodesBuffer.get();
-				double [] p3 = surface.value(u, v);
-				for (int j = 0; j < 3; j++)
-					coord[3*i+j] = p3[j];
+				if (remaining <= 0)
+					break;
+				else if (remaining < nf)
+					nf = remaining;
+				remaining -= nf;
+				bb.rewind();
+				fcN.read(bb);
+				bbD.rewind();
+				for(int nr = 0; nr < nf; nr ++)
+				{
+					double u = bbD.get();
+					double v = bbD.get();
+					double [] p3 = surface.value(u, v);
+					for (int j = 0; j < 3; j++)
+						coord[3*index+j] = p3[j];
+					index++;
+				}
 			}
+			assert index == numberOfNodes;
+			fcN.close();
 			
-			Node submeshFaces = xpath.selectSingleNode(submeshElement, "triangles");
 			int numberOfFaces = Integer.parseInt(
 					xpath.selectSingleNode(submeshFaces, "number/text()").getNodeValue());
 			logger.debug("Reading "+numberOfFaces+" faces");
+			String trianglesFile = xpath.selectSingleNode(submeshFaces,
+				"file/@location").getNodeValue();
+			FileChannel fcT = new FileInputStream(xmlDir+File.separator+trianglesFile).getChannel();
+			bb.clear();
+			bbI.clear();
+			FileChannel fcO = new FileOutputStream(rawFile, true).getChannel();
+			ByteBuffer bbo = ByteBuffer.allocate(bufferSize * 80 / 12);
+			DoubleBuffer bboD = bbo.asDoubleBuffer();
 			int ind [] = new int[3];
 			double [] c = new double[9];
-			DataOutputStream rawOut = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(rawFile, true)));
-			for (i=0; i < numberOfFaces; i++)
+			remaining = numberOfFaces;
+			nf = bufferSize / 12;
+			for (int nblock = (remaining * 12) / bufferSize; nblock >= 0; --nblock)
 			{
-				for (int j = 0; j < 3; j++)
+				if (remaining <= 0)
+					break;
+				else if (remaining < nf)
+					nf = remaining;
+				remaining -= nf;
+				bb.rewind();
+				fcT.read(bb);
+				bbI.rewind();
+				bboD.rewind();
+				for(int nr = 0; nr < nf; nr ++)
 				{
-					// Local node number for this group
-					int indLoc = trianglesBuffer.get();
-					for (int k = 0; k < 3; k++)
-						c[3*j+k] = coord[3*indLoc+k];
-				}
-				if (F.isOrientationForward())
-				{
+					bbI.get(ind);
 					for (int j = 0; j < 3; j++)
 						for (int k = 0; k < 3; k++)
-							rawOut.writeDouble(c[3*j+k]);
+							c[3*j+k] = coord[3*ind[j]+k];
+					if (F.isOrientationForward())
+					{
+						for (int j = 0; j < 3; j++)
+							for (int k = 0; k < 3; k++)
+								bboD.put(c[3*j+k]);
+					}
+					else
+					{
+						for (int j = 2; j >= 0; j--)
+							for (int k = 0; k < 3; k++)
+								bboD.put(c[3*j+k]);
+					}
+					//  Align om 64bit
+					bbo.position(8*bboD.position());
+					bbo.putInt(groupId);
+					bbo.putInt(0);
+					bboD.position(1+bboD.position());
 				}
-				else
-				{
-					for (int j = 2; j >= 0; j--)
-						for (int k = 0; k < 3; k++)
-							rawOut.writeDouble(c[3*j+k]);
-				}
-				rawOut.writeInt(groupId);
-				//  Align om 64bit
-				rawOut.writeInt(0);
+				bbo.rewind();
+				fcO.write(bbo);
 			}
+			fcT.close();
+			fcO.close();
 			logger.debug("End reading");
 			nrNodes += numberOfNodes;
 			nrTriangles += numberOfFaces;
-			
-			fcT.close();
-			UNVConverter.clean(bbT);
-			fcN.close();
-			UNVConverter.clean(bbN);
-			rawOut.close();
 		}
 		catch(Exception ex)
 		{
