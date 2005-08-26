@@ -109,8 +109,8 @@ public class MeshToSoupConvert extends JCAEXMLData
 			bbD.clear();
 			int index = 0;
 			int remaining = numberOfNodes;
-			int nf = bufferSize >> 5;
-			for (int nblock = (remaining << 5) / bufferSize; nblock >= 0; --nblock)
+			int nf = bufferSize / 16;
+			for (int nblock = (remaining * 16) / bufferSize; nblock >= 0; --nblock)
 			{
 				if (remaining <= 0)
 					break;
@@ -183,7 +183,7 @@ public class MeshToSoupConvert extends JCAEXMLData
 					bbo.putInt(0);
 					bboD.position(1+bboD.position());
 				}
-				bbo.rewind();
+				bbo.flip();
 				fcO.write(bbo);
 			}
 			fcT.close();
