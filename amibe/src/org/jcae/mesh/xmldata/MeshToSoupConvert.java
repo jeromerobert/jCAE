@@ -145,6 +145,8 @@ public class MeshToSoupConvert extends JCAEXMLData
 							rawOut.writeDouble(c[3*j+k]);
 				}
 				rawOut.writeInt(groupId);
+				//  Align om 64bit
+				rawOut.writeInt(0);
 			}
 			logger.debug("End reading");
 			nrNodes += numberOfNodes;

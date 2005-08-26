@@ -30,6 +30,7 @@ import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
 import java.nio.channels.FileChannel;
 import org.apache.log4j.Logger;
 
@@ -40,8 +41,8 @@ public class RawStorage
 {
 	private static Logger logger = Logger.getLogger(RawStorage.class);	
 
-	//  In the raw file, a triangle has 9 double coordinates and an int.
-	private static final int TRIANGLE_SIZE_RAW = 76;
+	//  In the raw file, a triangle has 9 double coordinates and two ints.
+	private static final int TRIANGLE_SIZE_RAW = 80;
 	//  In the dispatched file, a triangle has 9 int coordinates and an int.
 	private static final int TRIANGLE_SIZE_DISPATCHED = 40;
 	private static final int bufferSize = (TRIANGLE_SIZE_RAW * TRIANGLE_SIZE_DISPATCHED) << 4;
@@ -71,26 +72,26 @@ public class RawStorage
 			int [] ijk = new int[3];
 			double [] xyz = new double[3];
 			OEMMNode [] cells = new OEMMNode[3];
-			FileInputStream fs = new FileInputStream(tree.getFileName());
+			FileChannel fc = new FileInputStream(tree.getFileName()).getChannel();
 			ByteBuffer bb = ByteBuffer.allocate(bufferSize);
+			DoubleBuffer bbD = bb.asDoubleBuffer();
 			boolean hasNext = true;
 			while (hasNext)
 			{
 				bb.rewind();
-				int nr = fs.read(bb.array());
+				int nr = fc.read(bb);
 				if (nr < bufferSize)
 					hasNext = false;
+				bbD.rewind();
 				for(; nr > 0; nr -= TRIANGLE_SIZE_RAW)
 				{
 					for (int i = 0; i < 3; i++)
 					{
-						xyz[0] = bb.getDouble();
-						xyz[1] = bb.getDouble();
-						xyz[2] = bb.getDouble();
+						bbD.get(xyz);
 						tree.double2int(xyz, ijk);
 						cells[i] = tree.build(0, ijk);
 					}
-					bb.getInt();
+					bbD.get();
 					cells[0].tn++;
 					if (cells[1] != cells[0])
 						cells[1].tn++;
@@ -99,7 +100,7 @@ public class RawStorage
 					tcount++;
 				}
 			}
-			fs.close();
+			fc.close();
 }
 		catch (FileNotFoundException ex)
 		{
@@ -175,6 +176,7 @@ public class RawStorage
 					}
 				}
 				int attribute = coordsIn.readInt();
+				coordsIn.readInt();
 				addToCell(fc, cells[0], ijk, attribute);
 				if (cells[1] != cells[0])
 					addToCell(fc, cells[1], ijk, attribute);
