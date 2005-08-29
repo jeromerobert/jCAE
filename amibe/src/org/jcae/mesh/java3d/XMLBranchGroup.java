@@ -40,6 +40,8 @@ import org.apache.xpath.XPathAPI;
 import org.w3c.dom.*;
 import org.jcae.mesh.xmldata.*;
 import org.apache.log4j.*;
+import com.sun.j3d.utils.geometry.GeometryInfo;
+import com.sun.j3d.utils.geometry.Stripifier;
 
 /** Allow a XML jcae mesh file to be display with Java3D. It create a
  * javax.media.j3D.BranchGroup from a jcae mesh XML file.
@@ -193,7 +195,7 @@ public class XMLBranchGroup
 			}
 			if(trianglesDOM!=null)
 			{
-				IndexedTriangleArray geom = getGeomForTriangles(trianglesDOM, nodes);
+				Geometry geom = getGeomForTriangles(trianglesDOM, nodes);
 				Shape3D shapeFill=new Shape3D(geom, new AppearanceBlackFace());
 				shapeFill.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 				branchGroup.addChild(shapeFill);
@@ -226,10 +228,11 @@ public class XMLBranchGroup
 				}
 			}
 		}
+		branchGroup.setCapability(javax.media.j3d.Node.ALLOW_BOUNDS_READ);
 		return branchGroup;		
 	}
 	
-	private IndexedTriangleArray getGeomForTriangles(Node trianglesDOM, float[] nodes)
+	private Geometry getGeomForTriangles(Node trianglesDOM, float[] nodes)
 		throws TransformerException, IOException
 	{
 		String triasFile = XPathAPI.selectSingleNode(trianglesDOM,
@@ -241,7 +244,7 @@ public class XMLBranchGroup
 		int[] trias=readInteger(triasFile, numberOfTrias*3);				
 		IndexedTriangleArray geom = new IndexedTriangleArray(
 			nodes.length/3,
-			TriangleArray.COORDINATES|TriangleArray.BY_REFERENCE,
+			TriangleArray.COORDINATES,
 			trias.length);
 		geom.setCoordinateIndices(0, trias);
 		geom.setCapability(IndexedTriangleArray.ALLOW_COUNT_READ);
@@ -249,8 +252,20 @@ public class XMLBranchGroup
 		geom.setCapability(IndexedTriangleArray.ALLOW_REF_DATA_READ);
 		geom.setCapability(IndexedTriangleArray.ALLOW_COORDINATE_INDEX_READ);
 		trias=null;
-		geom.setCoordRefFloat(nodes);		
-		return geom;
+		geom.setCoordinates(0,nodes);
+		if(Boolean.getBoolean("org.jcae.mesh.java3d.stripify"))
+		{
+			GeometryInfo gi=new GeometryInfo(geom);			
+			Stripifier s=new Stripifier(Stripifier.COLLECT_STATS );
+			s.stripify(gi);
+			logger.info(s.getStripifierStats());
+			Geometry toReturn=gi.getGeometryArray();
+			return toReturn;
+		}
+		else
+		{
+			return geom;
+		}
 	}
 	
 	private IndexedLineArray getGeomForWires(Node beamsDOM, float[] nodes)
