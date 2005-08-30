@@ -281,6 +281,7 @@ public class Mesher
 			{
 				int iFace = 0;
 				MeshToMMesh3DConvert m2dTo3D = new MeshToMMesh3DConvert(xmlDir);
+				m2dTo3D.exportUNV(exportUNVProp.equals("true"), unvName);
 				logger.info("Read informations on boundary nodes");
 				for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
 				{

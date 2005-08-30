@@ -57,10 +57,17 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 	private File nodesFile, refFile, normalsFile, trianglesFile, groupsFile;
 	private Document documentOut;
 	private Element groupsElement;
+	private MeshToUNVConvert unv = null;
 	
 	public MeshToMMesh3DConvert (String dir)
 	{
 		xmlDir = dir;
+	}
+	
+	public void exportUNV(boolean b, String unvName)
+	{
+		if (b)
+			unv = new MeshToUNVConvert(unvName);
 	}
 	
 	public void computeRefs(String xmlInFile)
@@ -158,6 +165,8 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				normalsOut.close();
 			trianglesOut.close();
 			groupsOut.close();
+			if (unv != null)
+				unv.finish(nrRefs, nrIntNodes, nrTriangles, coordRefs);
 			
 			// Write jcae3d
 			Element jcaeElement = documentOut.getDocumentElement();
@@ -262,6 +271,8 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				double [] p3 = surface.value(u, v);
 				for (int j = 0; j < 3; j++)
 					nodesOut.writeDouble(p3[j]);
+				if (unv != null)
+					unv.writeNode(i+nodeOffset, p3);
 				surface.setParameter(u, v);
 				p3 = surface.normal();
 				for (int j = 0; j < 3; j++)
@@ -327,11 +338,15 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				}
 				for (int j = 0; j < 3; j++)
 					trianglesOut.writeInt(ind[j]);
+				if (unv != null)
+					unv.writeTriangle(i+nrTriangles, ind);
 			}
 			logger.debug("End reading");
 			
 			for (i=0; i < numberOfFaces; i++)
 				groupsOut.writeInt(i+nrTriangles);
+			if (unv != null)
+				unv.writeGroup(""+groupId, nrTriangles, numberOfFaces);
 			groupsElement.appendChild(XMLHelper.parseXMLString(documentOut,
 				"<group id=\""+(groupId-1)+"\">"+
 				"<name>"+groupId+"</name>"+

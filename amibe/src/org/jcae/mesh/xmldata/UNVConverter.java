@@ -534,6 +534,37 @@ public class UNVConverter
 		}
 	}
 	
+	public static void writeSingleNodeUNV(PrintStream out, int count, double x, double y, double z)
+	{
+		out.println(FORMAT_I10.format(count)+"         1         1         1");
+		out.println(FORMAT_D25_16.format(x)+FORMAT_D25_16.format(y)+FORMAT_D25_16.format(z));
+	}
+	
+	public static void writeSingleTriangleUNV(PrintStream out, int count, int n0, int n1, int n2)
+	{
+		out.println(FORMAT_I10.format(count)+"        91         1         1         1         3");
+		out.println(FORMAT_I10.format(n0)+FORMAT_I10.format(n1)+FORMAT_I10.format(n2));
+	}
+	
+	public static void writeSingleGroupUNV(PrintStream out, String name, int first, int count)
+	{
+		out.println("1      0         0         0         0         0         0      "+count);
+		out.println(name);
+		int countg=0;
+		for(int j=0; j<count; j++)
+		{
+			out.print("         8"+FORMAT_I10.format(j+first));
+			countg++;
+			if (countg == 4)
+			{
+				out.println("");
+				countg = 0;
+			}
+		}
+		if (countg != 0)
+			out.println();
+	}
+	
 	private class WriteMeshUNV extends WriteMeshProcedures
 	{
 		public void writeNodes(PrintStream out, int[] nodesID, TIntIntHashMap amibeToUNV) throws IOException
@@ -559,8 +590,7 @@ public class UNVConverter
 				z=nodesBuffer.get(iid+2);
 				count++;
 				amibeToUNV.put(nodesID[i], count);
-				out.println(FORMAT_I10.format(count)+"         1         1         1");
-				out.println(FORMAT_D25_16.format(x)+FORMAT_D25_16.format(y)+FORMAT_D25_16.format(z));
+				writeSingleNodeUNV(out, count, x, y, z);
 			}
 			out.println("    -1");
 			fc.close();
@@ -585,11 +615,10 @@ public class UNVConverter
 				{
 					count++;
 					amibeTriaToUNVTria.put(groups[i][j], count);
-					out.println(FORMAT_I10.format(count)+"        91         1         1         1         3");
-					out.println(
-						FORMAT_I10.format(amibeNodeToUNVNode.get(triangles[triaIndex++]))+
-						FORMAT_I10.format(amibeNodeToUNVNode.get(triangles[triaIndex++]))+
-						FORMAT_I10.format(amibeNodeToUNVNode.get(triangles[triaIndex++])));
+					writeSingleTriangleUNV(out, count,
+						amibeNodeToUNVNode.get(triangles[triaIndex++]),
+						amibeNodeToUNVNode.get(triangles[triaIndex++]),
+						amibeNodeToUNVNode.get(triangles[triaIndex++]));
 				}
 			}
 			out.println("    -1");
