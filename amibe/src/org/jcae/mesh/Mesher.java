@@ -113,11 +113,11 @@ public class Mesher
 			processMesh3dProp = "true";
 			System.setProperty("org.jcae.mesh.Mesher.mesh3d", processMesh3dProp);
 		}
-		String exportRriangleSoupProp = System.getProperty("org.jcae.mesh.Mesher.triangleSoup");
-		if (exportRriangleSoupProp == null)
+		String exportTriangleSoupProp = System.getProperty("org.jcae.mesh.Mesher.triangleSoup");
+		if (exportTriangleSoupProp == null)
 		{
-			exportRriangleSoupProp = "false";
-			System.setProperty("org.jcae.mesh.Mesher.triangleSoup", exportRriangleSoupProp);
+			exportTriangleSoupProp = "false";
+			System.setProperty("org.jcae.mesh.Mesher.triangleSoup", exportTriangleSoupProp);
 		}
 		String writeNormalsProp = System.getProperty("org.jcae.mesh.Mesher.writeNormals");
 		if (writeNormalsProp == null)
@@ -325,7 +325,7 @@ public class Mesher
 				String MESHName=brepfilename.substring(0, brepfilename.lastIndexOf('.'))+".mesh";
 				new UNVConverter(xmlDir).writeMESH(MESHName);
 			}
-			if (exportRriangleSoupProp.equals("true")) {
+			if (exportTriangleSoupProp.equals("true")) {
 				// Step 3: Read 2D meshes and compute raw 3D mesh
 				try
 				{
