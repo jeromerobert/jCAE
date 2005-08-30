@@ -48,7 +48,7 @@ public class IndexedStorage
 	private static Logger logger = Logger.getLogger(IndexedStorage.class);	
 	
 	private static final int TRIANGLE_SIZE_DISPATCHED = 40;
-	private static final int VERTEX_SIZE_INDEXED = 16;
+	private static final int VERTEX_SIZE_INDEXED = 12;
 	private static final int TRIANGLE_SIZE_INDEXED = 28;
 	private static final int bufferSize = TRIANGLE_SIZE_DISPATCHED * VERTEX_SIZE_INDEXED * TRIANGLE_SIZE_INDEXED;
 	
@@ -297,7 +297,7 @@ public class IndexedStorage
 						//     Coordinates
 						bbI.put(c.ijk);
 						//     Adjacent leaves
-						bbI.put(c.adj.size());
+						outAdj.writeInt(c.adj.size());
 						for (TIntIterator it = c.adj.iterator(); it.hasNext();)
 						{
 							int ind = it.next();
@@ -502,7 +502,6 @@ public class IndexedStorage
 				{
 					bbI.get(ijk);
 					ret.insert(ijk, index);
-					bbI.get();
 					index++;
 				}
 			}
@@ -603,6 +602,13 @@ public class IndexedStorage
 		return ret;
 	}
 	
+	public static OEMMMesh loadNodesNeighbours(OEMM oemm, int leaf)
+	{
+		TIntHashSet leaves = new TIntHashSet(oemm.leaves[leaf].adjLeaves.toNativeArray());
+		leaves.add(leaf);
+		return loadNodes(oemm, leaves);
+	}
+	
 	private static class ReadVerticesProcedure extends TraversalProcedure
 	{
 		private TIntObjectHashMap vertMap;
@@ -640,7 +646,7 @@ public class IndexedStorage
 					{
 						bbI.get(ijk);
 						vert[index] = new OEMMVertex(ijk, current.minIndex + index);
-						int n = bbI.get();
+						int n = bufIn.readInt();
 						//  Read neighbors
 						boolean writable = true;
 						for (int j = 0; j < n; j++)
