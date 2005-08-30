@@ -217,8 +217,8 @@ public class Mesher
 				iFace++;
 				if (numFace != 0 && iFace != numFace)
 					continue;
-				if ((minFace != 0 || maxFace != 0) && !(iFace >= minFace && iFace <= maxFace))
-				    continue;
+				if ((minFace != 0 || maxFace != 0) && (iFace < minFace || iFace > maxFace))
+					continue;
 				
 				logger.info("Meshing face " + iFace+"/"+nrFaces);
 				//  This variable can be modified, thus reset it
@@ -288,6 +288,8 @@ public class Mesher
 					iFace++;
 					if (numFace != 0 && iFace != numFace)
 						continue;
+					if ((minFace != 0 || maxFace != 0) && (iFace < minFace || iFace > maxFace))
+						continue;
 					xmlFile = "jcae2d."+iFace;
 					m2dTo3D.computeRefs(xmlFile);
 				}
@@ -299,6 +301,8 @@ public class Mesher
 					iFace++;
 					if (numFace != 0 && iFace != numFace)
 						continue;
+					if ((minFace != 0 || maxFace != 0) && (iFace < minFace || iFace > maxFace))
+						continue;
 					xmlFile = "jcae2d."+iFace;
 					logger.info("Importing face "+iFace);
 					m2dTo3D.convert(xmlFile, iFace, F);
@@ -309,15 +313,6 @@ public class Mesher
 			{
 				logger.warn(ex.getMessage());
 				ex.printStackTrace();
-			}
-			if (exportUNVProp.equals("true"))
-			{
-				logger.info("Exporting UNV");
-				
-				if(Boolean.getBoolean("org.jcae.mesh.unv.nogz"))
-					new UNVConverter(xmlDir).writeUNV(unvName);
-				else
-					new UNVConverter(xmlDir).writeUNV(unvName+".gz");
 			}
 			if (exportMESHProp.equals("true"))
 			{
@@ -338,6 +333,8 @@ public class Mesher
 						CADFace F = (CADFace) expF.current();
 						iFace++;
 						if (numFace != 0 && iFace != numFace)
+							continue;
+						if ((minFace != 0 || maxFace != 0) && !(iFace >= minFace && iFace <= maxFace))
 							continue;
 						xmlFile = "jcae2d."+iFace;
 						logger.info("Importing face "+iFace);
@@ -441,20 +438,19 @@ public class Mesher
 		}
 		return (path.delete());
 	}
-    
-    static private int countFaces(String brepfilename)
-    {
-	//count faces in the brep File 
-	CADShapeBuilder factory = CADShapeBuilder.factory;
-	CADShape shape = factory.newShape(brepfilename);
-	CADExplorer expF = factory.newExplorer();
-	int nrFaces = 0;
-	for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
-	    nrFaces++;
-	return nrFaces;
-    }
-    
-
+	
+	static private int countFaces(String brepfilename)
+	{
+		//count faces in the brep File 
+		CADShapeBuilder factory = CADShapeBuilder.factory;
+		CADShape shape = factory.newShape(brepfilename);
+		CADExplorer expF = factory.newExplorer();
+		int nrFaces = 0;
+		for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
+			nrFaces++;
+		return nrFaces;
+	}
+	
 	/**
 	 * main method, reads 2 arguments and calls mesh() method
 	 * @param args an array of String, filename, algorithm type and constraint
@@ -475,7 +471,11 @@ public class Mesher
 			String unvName=System.getProperty("org.jcae.mesh.unv.name");
 			
 			if(unvName==null)
+			{
 				unvName=filename.substring(0, filename.lastIndexOf('.'))+".unv";
+				if(!Boolean.getBoolean("org.jcae.mesh.unv.nogz"))
+					unvName += ".gz";
+			}
 			
 			if (filename.endsWith(".step") || filename.endsWith(".stp") || filename.endsWith(".igs"))
 			{
@@ -486,10 +486,8 @@ public class Mesher
 			
 			// if what we want is just the mesh count, print it and exit
 			if(Boolean.getBoolean("org.jcae.mesh.countFaces"))
-			{
-			    System.exit(countFaces(filename));
-			}
-
+				System.exit(countFaces(filename));
+			
 			//Init xmlDir
 			String xmlDir;
 			if(Boolean.getBoolean("org.jcae.mesh.tmpDir.auto"))
