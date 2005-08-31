@@ -1,3 +1,27 @@
+Wed Aug 31 18:01:29 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/oemm/IndexedStorage.java
+	  src/org/jcae/mesh/oemm/OEMMVertex.java: Convert vertex coordinates into doubles after OEMM is created.
+
+Tue Aug 30 15:58:05 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/Mesher.java
+	  src/org/jcae/mesh/xmldata/MeshToMMesh3DConvert.java
+	  src/org/jcae/mesh/xmldata/UNVConverter.java
+	  src/org/jcae/mesh/xmldata/MeshToUNVConvert.java: New MeshToUNVConvert class to output UNV files as is done with jcae3d, ie. patch by patch.
+
+Wed Aug 24 17:45:18 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/oemm/RawStorage.java: Remove Int10Array private class, it can be achieved with ByteBuffer.
+
+Mon Aug 22 16:26:38 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/MeshReader.java
+	  src/org/jcae/mesh/xmldata/MeshToMMesh3DConvert.java
+	  src/org/jcae/mesh/xmldata/MeshToSoupConvert.java
+	  src/org/jcae/mesh/xmldata/MMesh1DReader.java
+	  src/org/jcae/mesh/xmldata/MMesh3DReader.java: Replace java.io by java.nio classes.
+
 Thu Aug 11 12:35:45 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/OTriangle.java (canContract): Allow outer edges to be contracted, since boundary edges may be contracted.
