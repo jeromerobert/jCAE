@@ -26,17 +26,17 @@ public class OEMMVertex
 {
 	private static Logger logger=Logger.getLogger(OEMMVertex.class);	
 	
-	// Integer coordinates
-	public int[] ijk = new int[3];
+	// Coordinates
+	public double[] xyz = new double[3];
 	private int OEMMVertIndex;
 	private boolean readable = false;
 	private boolean writable = false;
 	private boolean modified = false;
 	private boolean deleted = false;
 	
-	public OEMMVertex(int [] coord, int index)
+	public OEMMVertex(double [] coord, int index)
 	{
-		System.arraycopy(coord, 0, ijk, 0, 3);
+		System.arraycopy(coord, 0, xyz, 0, 3);
 		OEMMVertIndex = index;
 	}
 	

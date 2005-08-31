@@ -30,6 +30,7 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -50,12 +51,11 @@ public class IndexedStorage
 	private static final int TRIANGLE_SIZE_DISPATCHED = 40;
 	private static final int VERTEX_SIZE_INDEXED = 12;
 	private static final int TRIANGLE_SIZE_INDEXED = 28;
+	private static final int VERTEX_SIZE = 24;
 	private static final int bufferSize = TRIANGLE_SIZE_DISPATCHED * VERTEX_SIZE_INDEXED * TRIANGLE_SIZE_INDEXED;
 	
 	private static ByteBuffer bb = ByteBuffer.allocate(bufferSize);
-	private static IntBuffer bbI = bb.asIntBuffer();
 	private static ByteBuffer bbt = ByteBuffer.allocate(bufferSize);
-	private static IntBuffer bbtI = bbt.asIntBuffer();
 	private static ByteBuffer bbpos = ByteBuffer.allocate(8);
 	
 	/**
@@ -84,6 +84,11 @@ public class IndexedStorage
 			IndexExternalVerticesProcedure iev_proc = new IndexExternalVerticesProcedure(ret, fis, outDir);
 			ret.walk(iev_proc);
 			fis.close();
+			
+			//  Transform vertex coordinates into doubles
+			logger.debug("Transform vertex coordinates into doubles");
+			ConvertVertexCoordinatesProcedure cvc_proc = new ConvertVertexCoordinatesProcedure(ret);
+			ret.walk(cvc_proc);
 			
 			//ShowIndexedNodesProcedure debug = new ShowIndexedNodesProcedure();
 			//ret.walk(debug);
@@ -162,7 +167,7 @@ public class IndexedStorage
 				long pos = bbpos.getLong();
 				assert pos == current.counter : ""+pos+" != "+current.counter;
 				bb.clear();
-				bbI.clear();
+				IntBuffer bbI = bb.asIntBuffer();
 				int tCount = 0;
 				int remaining = current.tn;
 				for (int nblock = (remaining * TRIANGLE_SIZE_DISPATCHED) / bufferSize; nblock >= 0; --nblock)
@@ -277,7 +282,7 @@ public class IndexedStorage
 				
 				output.close();
 				
-				FileChannel fcv = new FileOutputStream(current.file+"v").getChannel();
+				FileChannel fcv = new FileOutputStream(current.file+"i").getChannel();
 				DataOutputStream outAdj = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(current.file+"a")));
 				//  Inner vertices of this node
 				bb.clear();
@@ -382,9 +387,9 @@ public class IndexedStorage
 				FileChannel fct = new FileOutputStream(current.file+"t").getChannel();
 				OEMMNode [] cell = new OEMMNode[3];
 				bb.clear();
-				bbI.clear();
+				IntBuffer bbI = bb.asIntBuffer();
 				bbt.clear();
-				bbtI.clear();
+				IntBuffer bbtI = bbt.asIntBuffer();
 				int remaining = current.tn;
 				for (int nblock = (remaining * TRIANGLE_SIZE_DISPATCHED) / bufferSize; nblock >= 0; --nblock)
 				{
@@ -429,6 +434,67 @@ public class IndexedStorage
 			catch (IOException ex)
 			{
 				logger.error("I/O error when reading intermediate file");
+				ex.printStackTrace();
+				throw new RuntimeException(ex);
+			}
+			return OK;
+		}
+	}
+	
+	private static class ConvertVertexCoordinatesProcedure extends TraversalProcedure
+	{
+		private OEMM oemm;
+		private FileChannel fc;
+		private int [] ijk = new int[3];
+		private double [] xyz = new double[3];
+		public ConvertVertexCoordinatesProcedure(OEMM o)
+		{
+			oemm = o;
+		}
+		public final int action(OEMMNode current, int octant, int visit)
+		{
+			if (current.parent == null || visit != LEAF)
+				return SKIPWALK;
+			logger.debug("Converting coordinates of node "+(current.leafIndex+1)+"/"+oemm.nr_leaves);
+			
+			try
+			{
+				FileChannel fci = new FileInputStream(current.file+"i").getChannel();
+				FileChannel fco = new FileOutputStream(current.file+"v").getChannel();
+				bb.clear();
+				IntBuffer bbI = bb.asIntBuffer();
+				bbt.clear();
+				DoubleBuffer bbtD = bbt.asDoubleBuffer();
+				bb.limit(bb.capacity() / 2);
+				int remaining = current.vn;
+				for (int nblock = (remaining * 2 * VERTEX_SIZE_INDEXED) / bufferSize; nblock >= 0; --nblock)
+				{
+					bb.rewind();
+					fci.read(bb);
+					bbI.rewind();
+					bbtD.rewind();
+					int nf = bufferSize / VERTEX_SIZE_INDEXED / 2;
+					if (remaining < nf)
+						nf = remaining;
+					remaining -= nf;
+					for(int nr = 0; nr < nf; nr ++)
+					{
+						bbI.get(ijk);
+						oemm.int2double(ijk, xyz);
+						bbtD.put(xyz);
+					}
+					bbt.position(8*bbtD.position());
+					bbt.flip();
+					fco.write(bbt);
+					
+				}
+				fci.close();
+				fco.close();
+				new File(current.file+"i").delete();
+			}
+			catch (IOException ex)
+			{
+				logger.error("I/O error when converting coordinates file");
 				ex.printStackTrace();
 				throw new RuntimeException(ex);
 			}
@@ -484,10 +550,10 @@ public class IndexedStorage
 		int [] ijk = new int[3];
 		try
 		{
-			FileChannel fc = new FileInputStream(current.file+"v").getChannel();
+			FileChannel fc = new FileInputStream(current.file+"i").getChannel();
 			int index = 0;
 			bb.clear();
-			bbI.clear();
+			IntBuffer bbI = bb.asIntBuffer();
 			int remaining = current.vn;
 			for (int nblock = (remaining * VERTEX_SIZE_INDEXED) / bufferSize; nblock >= 0; --nblock)
 			{
@@ -509,7 +575,7 @@ public class IndexedStorage
 		}
 		catch (IOException ex)
 		{
-			logger.error("I/O error when reading indexed file "+current.file+"v");
+			logger.error("I/O error when reading indexed file "+current.file+"i");
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
@@ -569,17 +635,12 @@ public class IndexedStorage
 		int nrt = triList.size();
 		logger.info("Number of triangles for this selection: "+nrt);
 		double [] coord = new double[9*nrt];
-		double [] c_tmp = new double[3];
 		for (int i = 0; i < nrt; i++)
 		{
 			OEMMTriangle t = (OEMMTriangle) triList.get(i);
 			for (int j = 0; j < 3; j++)
-			{
-				oemm.int2double(t.vertex[j].ijk, c_tmp);
-				coord[9*i+3*j]   = c_tmp[0];
-				coord[9*i+3*j+1] = c_tmp[1];
-				coord[9*i+3*j+2] = c_tmp[2];
-			}
+				for (int k = 0; k < 3; k++)
+					coord[9*i+3*j+k] = t.vertex[j].xyz[k];
 		}
 		return coord;
 	}
@@ -626,26 +687,26 @@ public class IndexedStorage
 			{
 				logger.debug("Reading vertices from "+current.file+"v");
 				OEMMVertex [] vert = new OEMMVertex[current.vn];
-				int [] ijk = new int[3];
+				double [] xyz = new double[3];
 				FileChannel fc = new FileInputStream(current.file+"v").getChannel();
 				DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(current.file+"a")));
 				bb.clear();
-				bbI.clear();
+				DoubleBuffer bbD = bb.asDoubleBuffer();
 				int remaining = current.vn;
 				int index = 0;
-				for (int nblock = (remaining * VERTEX_SIZE_INDEXED) / bufferSize; nblock >= 0; --nblock)
+				for (int nblock = (remaining * VERTEX_SIZE) / bufferSize; nblock >= 0; --nblock)
 				{
 					bb.rewind();
 					fc.read(bb);
-					bbI.rewind();
-					int nf = bufferSize / VERTEX_SIZE_INDEXED;
+					bbD.rewind();
+					int nf = bufferSize / VERTEX_SIZE;
 					if (remaining < nf)
 						nf = remaining;
 					remaining -= nf;
 					for(int nr = 0; nr < nf; nr ++)
 					{
-						bbI.get(ijk);
-						vert[index] = new OEMMVertex(ijk, current.minIndex + index);
+						bbD.get(xyz);
+						vert[index] = new OEMMVertex(xyz, current.minIndex + index);
 						int n = bufIn.readInt();
 						//  Read neighbors
 						boolean writable = true;
@@ -669,7 +730,7 @@ public class IndexedStorage
 			}
 			catch (IOException ex)
 			{
-				logger.error("I/O error when reading file "+current.file+"v");
+				logger.error("I/O error when reading file "+current.file+"i");
 				ex.printStackTrace();
 				throw new RuntimeException(ex);
 			}
@@ -703,7 +764,7 @@ public class IndexedStorage
 				int [] pointIndex = new int[3];
 				int remaining = current.tn;
 				bb.clear();
-				bbI.clear();
+				IntBuffer bbI = bb.asIntBuffer();
 				for (int nblock = (remaining * TRIANGLE_SIZE_INDEXED) / bufferSize; nblock >= 0; --nblock)
 				{
 					bb.rewind();
