@@ -23,6 +23,7 @@ package org.jcae.viewer3d.test;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,9 +39,12 @@ import org.jcae.viewer3d.cad.ViewableCAD;
 import org.jcae.viewer3d.cad.occ.OCCProvider;
 import org.jcae.viewer3d.fd.DefaultFDProvider;
 import org.jcae.viewer3d.fd.FDSelection;
+import org.jcae.viewer3d.fd.Utils;
 import org.jcae.viewer3d.fd.ViewableFD;
 import org.jcae.viewer3d.fe.FESelectionListener;
 import org.jcae.viewer3d.fe.ViewableFE;
+import org.jcae.viewer3d.fe.amibe.AmibeNodeSelection;
+import org.jcae.viewer3d.fe.amibe.AmibeOverlayProvider;
 import org.jcae.viewer3d.fe.amibe.AmibeProvider;
 
 /**
@@ -69,7 +73,7 @@ public class Main
 			
 			//ViewableCAD fcad=new ViewableCAD(new OCCProvider("/home/jerome/Project/geometry39489.brep"));
 			//ViewableCAD fcad=new ViewableCAD(new OCCProvider("/home/jerome/cao_fouga_joined.igs"));
-			ViewableCAD fcad=new ViewableCAD(new OCCProvider("/home/jerome/cube_oriented.brep"));
+			ViewableCAD fcad=new ViewableCAD(new OCCProvider("/home/jerome/Models/F1.brep"));
 			cadView.add(fcad);
 			cadView.fitAll();
 			cadFrame.getContentPane().add(cadView);
@@ -89,36 +93,49 @@ public class Main
 
 			
 			//Test FE visu in 1 view
-			/*JFrame feFrame=new JFrame("jcae-viewer3d-fe demo");			
+			JFrame feFrame=new JFrame("jcae-viewer3d-fe demo");			
 			feFrame.setSize(800,600);
 			feFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 			View feView=new View();			
-			ViewableFE fev=new ViewableFE(new AmibeProvider(new File("/home/usr/local2/home/jerome/")));			
+			final AmibeProvider ap=new AmibeProvider(new File("/var/tmp/mesh"));
+			final ViewableFE fev=new ViewableFE(ap);			
+			ViewableFE ffe=new ViewableFE(new AmibeOverlayProvider(new File("/var/tmp/mesh"), AmibeOverlayProvider.FREE_EDGE));
 			//ViewableFE fev=new ViewableFE(new AmibeProvider(new File("/tmp")));
-			feView.add(fev);
+			feView.add(ffe);
+			feView.add(fev);			
 			feView.fitAll();
+			fev.setPickingMode(ViewableFE.PICK_NODE);
 			feFrame.getContentPane().add(feView);
 			feFrame.setVisible(true);
 			feView.setOriginAxisVisible(true);
-			fev.addSelectionListener(new FESelectionListener()
+			feView.setCurrentViewable(fev);
+			fev.addSelectionListener(new SelectionListener()
 			{
-				public void elementsSelected(Map selection)
+				public void selectionChanged()
 				{
-					System.out.println(selection.keySet());
+					try
+					{
+						System.out.println(new AmibeNodeSelection(ap, fev.getSelectedNodes()));
+					} catch (IOException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
-			});*/
+			});
 			
 			
 			//Test offscreen screenshot
-			View feView2=new View(true);			
-			ViewableFE fev2=new ViewableFE(new AmibeProvider(new File("/home/jerome/home3")));			
+			/*View feView2=new View(true);			
+			ViewableFE fev2=new ViewableFE(new AmibeProvider(new File("/var/tmp/mesh")));			
 			//ViewableFE fev=new ViewableFE(new AmibeProvider(new File("/tmp")));
 			feView2.add(fev2);
 			feView2.fitAll();
 			feView2.setOriginAxisVisible(true);
-			ImageIO.write(feView2.takeSnapshot(2000,1500), "png",
+			ImageIO.write(feView2.takeSnapshot(4096,4096), "png",
 				File.createTempFile("jcae-viewer3d-snap",".png"));
-
+			System.exit(0);*/
+			
 			/*JFrame f=new JFrame("jcae-viewer3d-fd demo");
 			JSplitPane splitPane=new JSplitPane();
 			f.setSize(800,600);

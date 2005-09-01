@@ -29,6 +29,7 @@ import org.jcae.viewer3d.Domain;
 import org.jcae.viewer3d.Palette;
 import org.jcae.viewer3d.fe.FEDomainAdapter;
 import org.jcae.viewer3d.fe.FEProvider;
+import org.jcae.viewer3d.fe.NodeSelection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -121,5 +122,15 @@ public class AmibeProvider implements FEProvider
 			e.printStackTrace();
 			return new FEDomainAdapter();
 		}
+	}
+	
+	public Document getDocument()
+	{
+		return document;
+	}
+	
+	public File getDirectory()
+	{
+		return directory;
 	}
 }

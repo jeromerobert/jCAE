@@ -36,6 +36,7 @@ import java.util.Map;
  * example: The first provided elements for type FE_TRIA3 has the 0 id and the
  * last one have the (FEDomain.getNumberOfTria3()-1) id.
  * @author Jerome Robert
+ * @deprecated
  */
 public interface FESelectionListener
 {

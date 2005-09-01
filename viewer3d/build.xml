@@ -98,14 +98,12 @@
 	
 	<target name="dist" description="build a tar.bz2 archive to distribute sources" depends="init">
 		<tar destfile="${project.name}-src-${version}.tar">
-			<tarfileset dir="." prefix="${project.name}-${version}" username="jdistfs" group="jdistfs">
-				<include name="*.jsp" />
+			<tarfileset dir="." prefix="${project.name}-${version}" username="jcae" group="jcae">
 				<include name="*.xml" />
 				<include name="src/**"/>
 				<include name="INSTALL"/>
 				<include name="ChangeLog"/>
-				<include name="doc/*.svg"/>
-				<include name="doc/index.html"/>
+				<include name="doc/*.*"/>
 			</tarfileset>
 		</tar>
 		<bzip2 src="${project.name}-src-${version}.tar" zipfile="${project.name}-src-${version}.tar.bz2"/>

@@ -174,7 +174,7 @@ public class AmibeDomain extends FEDomainAdapter
 	 * @param a group.
 	 * @return the xml element of DOM tree corresponding to the group.
 	 */
-	private Element getXmlGroup(Element xmlGroups)
+	public static Element getXmlGroup(Element xmlGroups, int groupID)
 	{
 		NodeList list = xmlGroups.getElementsByTagName("group");
 		int length=list.getLength();
@@ -192,7 +192,7 @@ public class AmibeDomain extends FEDomainAdapter
 			{
 				e.printStackTrace(System.out);
 			}
-			if (id == aId)
+			if (groupID == aId)
 			{
 				found = true;
 			} else
@@ -231,7 +231,6 @@ public class AmibeDomain extends FEDomainAdapter
         FileChannel fc = fis.getChannel();
  
         // Get the file's size and then map it into memory
-        int sz = (int)fc.size();
         MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
         DoubleBuffer nodesBuffer=bb.asDoubleBuffer();        
 		float[] toReturn=new float[nodesID.length*3];		
@@ -253,7 +252,7 @@ public class AmibeDomain extends FEDomainAdapter
 	
 	private int[] readTria3() throws IOException
 	{
-		Element e=getXmlGroup((Element) document.getElementsByTagName("groups").item(0));
+		Element e=getXmlGroup((Element) document.getElementsByTagName("groups").item(0), id);
 		Element numberNode=(Element)e.getElementsByTagName("number").item(0);
 		String v=numberNode.getChildNodes().item(0).getNodeValue();
 		int number=Integer.parseInt(v);
@@ -311,30 +310,52 @@ public class AmibeDomain extends FEDomainAdapter
 		}
 	}
 
-	/** workaround for Bug ID4724038, see
-	 * http://bugs.sun.com/bugdatabase/view_bug.do;:YfiG?bug_id=4724038 
+	/**
+	 * Workaround for Bug ID4724038.
+	 * see http://bugs.sun.com/bugdatabase/view_bug.do;:YfiG?bug_id=4724038
 	 */
 	public static void clean(final MappedByteBuffer buffer)
 	{
-		AccessController.doPrivileged(new PrivilegedAction()
-        {
-            public Object run()
-            {
-            	try
+		try
+		{
+			Class cleanerClass=Class.forName("sun.misc.Cleaner");
+			final Method cleanMethod=cleanerClass.getMethod("clean", null);
+			AccessController.doPrivileged(new PrivilegedAction()
+			{
+				public Object run()
 				{
-            		Method getCleanerMethod = buffer.getClass().getMethod("cleaner", new Class[0]);
-            		getCleanerMethod.setAccessible(true);
-            		sun.misc.Cleaner cleaner = (sun.misc.Cleaner)getCleanerMethod.invoke(buffer,new Object[0]);
-            		if(cleaner!=null)
-            			cleaner.clean();
+					try
+					{
+						Method getCleanerMethod = buffer.getClass().getMethod(
+							"cleaner", new Class[0]);
+						
+						getCleanerMethod.setAccessible(true);
+						Object cleaner = getCleanerMethod.invoke(buffer,new Object[0]);
+						if(cleaner!=null)
+						{
+							cleanMethod.invoke(cleaner, null);
+						}
+					}
+					catch(Exception e)
+					{
+						e.printStackTrace();
+					}
+					return null;
 				}
-            	catch(Exception e)
-				{
-            		e.printStackTrace();
-				}
-            	return null;
-            }
-        });
+			});
+		}		
+		catch(ClassNotFoundException ex)
+		{
+			//Not a Sun JVM so we exit.
+		}
+		catch (SecurityException e)
+		{
+			e.printStackTrace();
+		}
+		catch (NoSuchMethodException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	/* (non-Javadoc)

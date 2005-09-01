@@ -133,8 +133,7 @@ public class FEDomainAdapter implements FEDomain
 	 */
 	public int getNumberOfBeam2()
 	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		return 0;
 	}
 
 	/* (non-Javadoc)
@@ -699,5 +698,15 @@ public class FEDomainAdapter implements FEDomain
 	public int getID()
 	{
 		return 0;
+	}
+
+	public float[] getNodes()
+	{
+		return new float[0];
+	}
+
+	public int[] getBeam2Indices()
+	{
+		return new int[0];
 	}
 }

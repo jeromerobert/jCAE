@@ -39,6 +39,9 @@ public interface FEDomain extends MarkDomain, ColoredDomain
 	/** Return an iterator on a Collection of float[3] */ 
 	Iterator getNodesIterator();
 	
+	/** getNumberOfNodes and getNodesIterator are deprecated... Iterators sucks !*/
+	float[] getNodes();
+	
 	/** Return the number of result component.
 	 * <ul>
 	 * <li>0 mean no result. In this case the viewer will display a color from getColor</li>
@@ -57,9 +60,9 @@ public interface FEDomain extends MarkDomain, ColoredDomain
 	Iterator getVerticesIterator();
 	int getNumberOfVerticesComp();
 	Iterator getNumberOfVerticesRes();
-	
-	int getNumberOfBeam2();	
-	Iterator getBeam2Iterator();
+			
+	int[] getBeam2Indices();
+	int getNumberOfBeam2();
 	int getNumberOfBeam2Comp();
 	Iterator getBeam2Res();
 

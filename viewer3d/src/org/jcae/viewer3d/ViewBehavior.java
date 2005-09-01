@@ -89,8 +89,9 @@ class ViewBehavior extends OrbitBehavior
 		long time2 = System.currentTimeMillis();
 		Logger.global.finest("picked viewable is " + cv + " in "
 			+ (time2 - time) + " ms");
-		System.out.println(result);
-		if (result != null) cv.pick(result, true);
+		
+		if (result != null)
+			cv.pick(result, true);
 	}
 
 	protected void startRectangleSelection(MouseEvent evt)

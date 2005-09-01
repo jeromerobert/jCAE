@@ -6,6 +6,7 @@
 	<style type="text/css">@import "default.css"; </style>
 	<script src="summary.js" type="text/javascript"></script>
 </head>
+<body>
 	<h2>Description du besoin</h2>
 	<ul>
 		<li>Une architecture logiciel et un API specialisée pour la visualisation 3D scientifique (maillage, preprocessing, postprocessing)</li>
@@ -74,7 +75,7 @@
 	<h2>Packaging</h2>
 	La configuration, la compilation, la construction et le packaging du
 	jcae-viewer3d sera basé sur Ant (
-	<a href="http://ant.apache.org"/>http://ant.apache.org</a>).
+	<a href="http://ant.apache.org">http://ant.apache.org</a>).
 	L'arborescance fichier attendue est la suivante:
 	<pre>
 &lt;package name&gt;
@@ -289,10 +290,10 @@
 	<h2>Chiffrages</h2>
 	<table>
 		<tr>
-			<td><strong>Tache</strong></td>
-			<td><strong>Durée</strong></td>
-			<td><strong>A faire (G.A. 09/02/2005)</strong></td>
-			<td><strong>status 22/02/2005</strong></td>
+			<th>Tache</th>
+			<th>Durée</th>
+			<th>A faire (G.A. 09/02/2005)</th>
+			<th>status 22/02/2005</th>
 		</tr>
 		<tr> <td> <strong> jcae.viewer3d </strong></td> </tr>
 		<tr>
@@ -388,7 +389,6 @@
 			<td>X</td>
 			<td>Termine</td>
 		</tr>
-		</tr>
 		<tr>
 			<td>Visualisation de resultats sur triangles</td>
 			<td>4j</td>
@@ -415,3 +415,24 @@
 			<td>32j</td>
 		</tr>
 	</table>
+	<h2>Travaux Juillet 2005</h2>
+	<ul>
+		<li>Visualisation des beams, pour visualiser les bords libres et autres edges specifiques.</li>
+		<li>Picking sur les vertex</li>
+	</ul>
+	<h3>Picking sur les vertices</h3>
+	<ul>
+		<li>La donnée necessaire pour la geodesique, est un numero de triangle et un numero de noeaud dans le triangle (des 0 a 2).</li>
+		<li>On change l'API de picking du ViewableFE pour la rapprocher de celle de ViewableFD.</li>
+		<li>Creation d'un objet VertexSelection avec un tableau d'entier contenan les numero des triangles et un tableau de short contenant les numero des noeauds dans les triangles.</li>
+		<li>Ajout d'une methode dans le AmibeProvider pour convertir un VertexSelection avec numerotation groupé en numerotation globale (exploitable par des algorithms externe)</li>
+		<li>Ajout d'une methode getSelection au ViewableFE</li>
+		<li>Adaptation de jcae-netbean-mesh en concequence (Modification de l'API du picking sur les groupes).</li>
+	</ul>
+	<h3>Visualisation des beams</h3>
+	<ul>
+		<li>Creation d'un AmibeBeamDomain qui prendra en entré 2 fichiers binaire (id et nodes)</li>
+		<li>Creation d'un AmibeOverlayProvider pour extraire les bords libre et multiple</li>
+	</ul>
+</body>
+</html>
