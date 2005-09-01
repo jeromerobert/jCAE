@@ -1,3 +1,8 @@
+2005-09-01 15:05  Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/bg/ViewableBG.java: New class to display
+	  BranchGroup.
+
 2005-08-25 13:43  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/post/: DefaultColorMapper.java,
