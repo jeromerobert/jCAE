@@ -43,7 +43,7 @@ public class MGroup3D
 	 * @param n  group name.
 	 * @param faces  set of faces.
 	 */
-	public MGroup3D(String  n, Collection faces)
+	public MGroup3D(String n, Collection faces)
 	{
 		name = n;
 		facelist = new ArrayList(faces);
