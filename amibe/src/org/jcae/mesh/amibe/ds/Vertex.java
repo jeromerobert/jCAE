@@ -55,6 +55,12 @@ public class Vertex implements Cloneable
 	//  ref1d < 0: node on an inner boundary
 	//  
 	private int ref1d = 0;
+	// Used in OEMM
+	private int label = 0;
+	private boolean readable = false;
+	private boolean writable = false;
+	private boolean modified = false;
+	private boolean deleted = false;
 	
 	public Vertex(double u, double v)
 	{
@@ -143,6 +149,36 @@ public class Vertex implements Cloneable
 	public void setRef(int l)
 	{
 		ref1d = l;
+	}
+	
+	public int getLabel()
+	{
+		return label;
+	}
+	
+	public void setLabel(int l)
+	{
+		label = l;
+	}
+	
+	public void setReadable(boolean r)
+	{
+		readable = r;
+	}
+	
+	public void setWritable(boolean w)
+	{
+		writable = w;
+	}
+	
+	public boolean isReadable()
+	{
+		return readable;
+	}
+	
+	public boolean isWritable()
+	{
+		return writable;
 	}
 	
 	public void addToQuadTree()

@@ -34,6 +34,9 @@ public class Triangle
 	//     bits 0-1: adj[0]
 	//     bits 2-3: adj[1]
 	//     bits 4-5: adj[2]
+	//  Other attributes:
+	//     bit 6:  readable?
+	//     bit 7:  writable?
 	//  Bytes 1, 2 and 3 carry up attributes for edges 0, 1 and 2.
 	public int adjPos = 0;
 	
@@ -101,6 +104,32 @@ public class Triangle
 	public boolean isMarked()
 	{
 		return (adjPos & (OTriangle.MARKED << 8 | OTriangle.MARKED << 16 | OTriangle.MARKED << 24)) != 0;
+	}
+	
+	public boolean isReadable()
+	{
+		return (adjPos & 0x40000000) != 0;
+	}
+	
+	public boolean isWritable()
+	{
+		return (adjPos & 0x80000000) != 0;
+	}
+	
+	public void setReadable(boolean b)
+	{
+		if (b)
+			adjPos |= 0x40000000;
+		else
+			adjPos &= ~0x40000000;
+	}
+	
+	public void setWritable(boolean b)
+	{
+		if (b)
+			adjPos |= 0x80000000;
+		else
+			adjPos &= ~0x80000000;
 	}
 	
 	public String toString()
