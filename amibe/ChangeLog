@@ -1,3 +1,12 @@
+Mon Sep 12 11:16:23 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/amibe/ds/OTriangle.java
+	  src/org/jcae/mesh/xmldata/MeshReader.java: Out-of-core meshes will also use the Mesh class, so Mesh.dim is replaced by a Mesh.type attribute.
+	* src/org/jcae/mesh/oemm/IndexedStorage.java: Out-of-core meshes use the same Mesh class instead of OEMMMesh.
+	* src/org/jcae/mesh/amibe/ds/Triangle.java
+	  src/org/jcae/mesh/amibe/ds/Vertex.java: Add initial support for OEMM meshes.
+
 Wed Aug 31 18:01:29 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/oemm/IndexedStorage.java
