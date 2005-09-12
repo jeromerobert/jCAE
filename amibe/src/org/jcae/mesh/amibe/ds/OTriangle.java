@@ -1078,7 +1078,7 @@ public class OTriangle
 	 */
 	public final boolean canContract(Vertex n)
 	{
-		if (n.mesh.dim == 3 && !checkInversion(n))
+		if (n.mesh.getType() == Mesh.MESH_3D && !checkInversion(n))
 				return false;
 		
 		//  Topology check

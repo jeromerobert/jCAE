@@ -133,7 +133,10 @@ public class Mesh
 	private Stack compGeomStack = new Stack();
 	
 	//  2D/3D
-	public int dim = 2;
+	public static final int MESH_2D = 2;
+	public static final int MESH_3D = 3;
+	public static final int MESH_OEMM = 4;
+	private int type = MESH_2D;
 	
 	/**
 	 * Structure to fasten search of nearest vertices.
@@ -214,6 +217,26 @@ public class Mesh
 	public CADGeomSurface getGeomSurface()
 	{
 		return surface;
+	}
+	
+	/**
+	 * Returns the mesh type.
+	 *
+	 * @return the mesh type.
+	 */
+	public int getType()
+	{
+		return type;
+	}
+	
+	/**
+	 * Sets the mesh type.
+	 *
+	 * @param t mesh type
+	 */
+	public void setType(int t)
+	{
+		type = t;
 	}
 	
 	/**
@@ -338,7 +361,7 @@ public class Mesh
 	/**
 	 * Sets triangle list.
 	 *
-	 * @return triangle list.
+	 * @param l triangle list
 	 */
 	public void setTrianglesList(ArrayList l)
 	{
@@ -566,6 +589,7 @@ public class Mesh
 	{
 		//  1. For each vertex, build the list of triangles
 		//     connected to this vertex.
+		logger.debug("Build the list of triangles connected to each vertex");
 		HashMap tVertList = new HashMap(vertices.length);
 		for (int i = 0; i < vertices.length; i++)
 			tVertList.put(vertices[i], new ArrayList(10));
@@ -583,11 +607,13 @@ public class Mesh
 		//     triangle is created and added to outerTriangles.
 		//     If there are 2 adjacent triangles, they are connected
 		//     together.
+		logger.debug("Connect inner triangles and add outer triangles");
 		ArrayList outerTriangles = new ArrayList();
 		for (int i = 0; i < vertices.length; i++)
 			checkNeighbours(vertices[i], tVertList, outerTriangles);
 		
 		//  3. Connect external triangles
+		logger.debug("Connect outer triangles");
 		tVertList.put(Vertex.outer, outerTriangles);
 		checkNeighbours(Vertex.outer, tVertList, null);
 		triangleList.addAll(outerTriangles);
@@ -596,6 +622,7 @@ public class Mesh
 		//  can be used.
 		
 		//  4. Find the list of vertices which are on mesh boundary
+		logger.debug("Build the list of boundary nodes");
 		HashSet bndNodes = new HashSet();
 		int maxLabel = 0;
 		for (Iterator it = outerTriangles.iterator(); it.hasNext(); )
@@ -610,6 +637,7 @@ public class Mesh
 		OTriangle ot = new OTriangle();
 		//  5. If vertices are on inner boundaries and there is
 		//     no ridge, change their label.
+		logger.debug("Set interior nodes mutable");
 		int nrJunctionPoints = 0;
 		double cosMinAngle = Math.cos(Math.PI*minAngle/180.0);
 		if (minAngle < 0.0)
@@ -620,7 +648,7 @@ public class Mesh
 				continue;
 			int label = vertices[i].getRef();
 			int nrVertNeigh = vertices[i].getNeighboursNodes().size();
-			int nrTriNeigh= ((ArrayList) tVertList.get(vertices[i])).size();
+			int nrTriNeigh = ((ArrayList) tVertList.get(vertices[i])).size();
 			if (nrVertNeigh != nrTriNeigh)
 			{
 				nrJunctionPoints++;
@@ -687,7 +715,7 @@ public class Mesh
 					}
 					else
 					{
-						System.out.println("Non-manifold "+t+"\n"+t2);
+						System.out.println("Non-manifold: "+v+"\n"+t+"\n"+t2);
 					}
 					cnt++;
 				}
@@ -841,7 +869,7 @@ public class Mesh
 				if (constrained && !t.isOuter())
 					return false;
 			}
-			else if (dim == 2 && t.vertex[0].onLeft(t.vertex[1], t.vertex[2]) <= 0L)
+			else if (type == MESH_2D && t.vertex[0].onLeft(t.vertex[1], t.vertex[2]) <= 0L)
 				return false;
 		}
 		return true;

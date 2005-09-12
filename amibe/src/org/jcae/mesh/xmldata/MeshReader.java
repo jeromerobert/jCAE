@@ -154,8 +154,18 @@ public class MeshReader
 	
 	public static Mesh readObject3D(String xmlDir, String xmlFile)
 	{
+		return readObject3D(xmlDir, xmlFile, 0.0, false);
+	}
+	
+	public static Mesh readObject3D(String xmlDir, String xmlFile, double ridgeAngle)
+	{
+		return readObject3D(xmlDir, xmlFile, ridgeAngle, true);
+	}
+	
+	private static Mesh readObject3D(String xmlDir, String xmlFile, double ridgeAngle, boolean buildAdj)
+	{
 		Mesh mesh = new Mesh();
-		mesh.dim = 3;
+		mesh.setType(Mesh.MESH_3D);
 		logger.debug("begin reading "+xmlDir+File.separator+xmlFile);
 		CachedXPathAPI xpath = new CachedXPathAPI();
 		try
@@ -245,14 +255,8 @@ public class MeshReader
 			fcR.close();
 			UNVConverter.clean(bbR);
 			//  Build adjacency relations
-			String ridgeAngleProp = System.getProperty("org.jcae.mesh.xmldata.MeshReader.ridgeAngleDegre");
-			if (ridgeAngleProp == null)
-			{
-				ridgeAngleProp = "10.0";
-				System.setProperty("org.jcae.mesh.xmldata.MeshReader.ridgeAngleDegre", ridgeAngleProp);
-			}
-			double ridgeAngle = Double.parseDouble(ridgeAngleProp);
-			mesh.buildAdjacency(nodelist, ridgeAngle);
+			if (buildAdj)
+				mesh.buildAdjacency(nodelist, ridgeAngle);
 		}
 		catch(Exception ex)
 		{
