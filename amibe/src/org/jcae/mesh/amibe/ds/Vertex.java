@@ -258,6 +258,7 @@ public class Vertex implements Cloneable
 	
 	public HashSet getNeighboursNodes()
 	{
+		assert tri != null : this;
 		assert tri.vertex[0] == this || tri.vertex[1] == this || tri.vertex[2] == this;
 		OTriangle ot = new OTriangle(tri, 0);
 		HashSet ret = new HashSet(10);
@@ -494,7 +495,7 @@ public class Vertex implements Cloneable
 		assert vc1 != Vertex.outer;
 		assert vc2 != Vertex.outer;
 		assert va3 != Vertex.outer;
-		// Do not swap if triangles are reversed in 2d space
+		// Special case when vc1, vc2 and va3 are aligned
 		if (va3.onLeft(vc1, vc2) == 0L)
 		{
 			if (onLeft(vc1, vc2) == 0L)
@@ -502,7 +503,12 @@ public class Vertex implements Cloneable
 				long l1 = vc1.distance2(vc2);
 				return (distance2(vc1) < l1 && distance2(vc2) < l1 && va3.distance2(vc1) < l1 && va3.distance2(vc2) < l1);
 			}
+			if (vc1.onLeft(va3, this) >= 0L || vc2.onLeft(va3, this) <= 0L)
+				return false;
+			long l1 = vc1.distance2(vc2);
+			return (va3.distance2(vc1) < l1 && va3.distance2(vc2) < l1);
 		}
+		// Do not swap if triangles are inverted in 2d space
 		if (vc1.onLeft(va3, this) >= 0L || vc2.onLeft(va3, this) <= 0L)
 			return false;
 		
