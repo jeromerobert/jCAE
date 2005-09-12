@@ -37,11 +37,15 @@ import java.nio.channels.FileChannel;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import gnu.trove.TIntIterator;
 import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TIntArrayList;
 import gnu.trove.TIntHashSet;
+import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.apache.log4j.Logger;
 
 public class IndexedStorage
@@ -630,40 +634,64 @@ public class IndexedStorage
 	public static double [] getMeshOEMMCoords(OEMM oemm, TIntHashSet leaves)
 	{
 		logger.info("Creation of a mesh from reading selected nodes from an OEMM");
-		OEMMMesh mesh = loadNodes(oemm, leaves);
+		Mesh mesh = loadNodes(oemm, leaves);
 		ArrayList triList = mesh.getTriangles();
-		int nrt = triList.size();
+		int nrt = 0;
+		for (Iterator it = triList.iterator(); it.hasNext(); )
+		{
+			Triangle t = (Triangle) it.next();
+			if (!t.isOuter())
+				nrt++;
+		}
 		logger.info("Number of triangles for this selection: "+nrt);
 		double [] coord = new double[9*nrt];
 		for (int i = 0; i < nrt; i++)
 		{
-			OEMMTriangle t = (OEMMTriangle) triList.get(i);
+			Triangle t = (Triangle) triList.get(i);
+			if (t.isOuter())
+				continue;
 			for (int j = 0; j < 3; j++)
 				for (int k = 0; k < 3; k++)
-					coord[9*i+3*j+k] = t.vertex[j].xyz[k];
+					coord[9*i+3*j+k] = t.vertex[j].param[k];
 		}
 		return coord;
 	}
 	
-	public static OEMMMesh loadNodes(OEMM oemm, TIntHashSet leaves)
+	public static Mesh loadNodes(OEMM oemm, TIntHashSet leaves)
 	{
 		logger.info("Loading nodes");
-		OEMMMesh ret = new OEMMMesh();
+		Mesh ret = new Mesh();
+		ret.setType(Mesh.MESH_OEMM);
 		TIntObjectHashMap vertMap = new TIntObjectHashMap();
 		ReadVerticesProcedure rv_proc = new ReadVerticesProcedure(vertMap, leaves);
 		oemm.walk(rv_proc);
 		ReadTrianglesProcedure rt_proc = new ReadTrianglesProcedure(oemm, vertMap, leaves, ret);
 		oemm.walk(rt_proc);
-		/*
+		
 		Object [] oArray = vertMap.getValues();
-		OEMMVertex [] vertices = new OEMMVertex[oArray.length];
-		System.arraycopy(oArray, 0, vertices, 0, oArray.length);
-		ret.buildAdjacency(vertices);
-		*/
+		int nrv = 0;
+		for (int i = 0; i < oArray.length; i++)
+		{
+			Vertex v = (Vertex) oArray[i];
+			if (v.tri != null)
+				nrv++;
+		}
+		Vertex [] vertices = new Vertex[nrv];
+		nrv = 0;
+		for (int i = 0; i < oArray.length; i++)
+		{
+			Vertex v = (Vertex) oArray[i];
+			if (v.tri != null)
+			{
+				vertices[nrv] = v;
+				nrv++;
+			}
+		}
+		ret.buildAdjacency(vertices, -1.0);
 		return ret;
 	}
 	
-	public static OEMMMesh loadNodesNeighbours(OEMM oemm, int leaf)
+	public static Mesh loadNodesNeighbours(OEMM oemm, int leaf)
 	{
 		TIntHashSet leaves = new TIntHashSet(oemm.leaves[leaf].adjLeaves.toNativeArray());
 		leaves.add(leaf);
@@ -686,7 +714,7 @@ public class IndexedStorage
 			try
 			{
 				logger.debug("Reading vertices from "+current.file+"v");
-				OEMMVertex [] vert = new OEMMVertex[current.vn];
+				Vertex [] vert = new Vertex[current.vn];
 				double [] xyz = new double[3];
 				FileChannel fc = new FileInputStream(current.file+"v").getChannel();
 				DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(current.file+"a")));
@@ -706,7 +734,9 @@ public class IndexedStorage
 					for(int nr = 0; nr < nf; nr ++)
 					{
 						bbD.get(xyz);
-						vert[index] = new OEMMVertex(xyz, current.minIndex + index);
+						vert[index] = new Vertex(xyz[0], xyz[1], xyz[2]);
+						vert[index].setLabel(current.minIndex + index);
+						vert[index].setReadable(true);
 						int n = bufIn.readInt();
 						//  Read neighbors
 						boolean writable = true;
@@ -743,8 +773,8 @@ public class IndexedStorage
 		private OEMM oemm;
 		private TIntObjectHashMap vertMap;
 		private TIntHashSet leaves;
-		private OEMMMesh mesh;
-		public ReadTrianglesProcedure(OEMM o, TIntObjectHashMap map, TIntHashSet set, OEMMMesh m)
+		private Mesh mesh;
+		public ReadTrianglesProcedure(OEMM o, TIntObjectHashMap map, TIntHashSet set, Mesh m)
 		{
 			oemm = o;
 			vertMap = map;
@@ -759,7 +789,7 @@ public class IndexedStorage
 			{
 				logger.debug("Reading triangles from "+current.file+"t");
 				FileChannel fc = new FileInputStream(current.file+"t").getChannel();
-				OEMMVertex [] vert = new OEMMVertex[3];
+				Vertex [] vert = new Vertex[3];
 				int [] leaf = new int[3];
 				int [] pointIndex = new int[3];
 				int remaining = current.tn;
@@ -785,7 +815,7 @@ public class IndexedStorage
 							int globalIndex = oemm.leaves[leaf[j]].minIndex + pointIndex[j];
 							if (leaves.contains(leaf[j]))
 							{
-								vert[j] = (OEMMVertex) vertMap.get(globalIndex);
+								vert[j] = (Vertex) vertMap.get(globalIndex);
 								assert vert[j] != null;
 								if (!vert[j].isWritable())
 									writable = false;
@@ -796,7 +826,12 @@ public class IndexedStorage
 						int groupNumber = bbI.get();
 						if (readable)
 						{
-							OEMMTriangle t = new OEMMTriangle(vert[0], vert[1], vert[2]);
+							Triangle t = new Triangle(vert[0], vert[1], vert[2]);
+							vert[0].tri = t;
+							vert[1].tri = t;
+							vert[2].tri = t;
+							if (vert[0] == Vertex.outer || vert[1] == Vertex.outer || vert[2] == Vertex.outer)
+								t.setOuter();
 							t.setWritable(writable);
 							mesh.add(t);
 						}
