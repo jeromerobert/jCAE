@@ -63,7 +63,18 @@ public class Mesher3D
 		String brepFile = (new File(brepfilename)).getName();		
 		String xmlBrepDir = relativize(new File(brepfilename).getAbsoluteFile().getParentFile(),
 			new File(xmlDir).getAbsoluteFile()).getPath();
-		Mesh mesh = MeshReader.readObject3D(xmlDir, "jcae3d");
+		Mesh mesh = null;
+		String ridgeAngleProp = System.getProperty("org.jcae.mesh.xmldata.MeshReader.ridgeAngleDegre");
+		if (ridgeAngleProp == null)
+		{
+			ridgeAngleProp = "-1.0";
+			System.setProperty("org.jcae.mesh.xmldata.MeshReader.ridgeAngleDegre", ridgeAngleProp);
+		}
+		double ridgeAngle = Double.parseDouble(ridgeAngleProp);
+		if (brepFile.endsWith(".unv"))
+			mesh = org.jcae.mesh.amibe.util.UNVReader.readMesh(brepFile, ridgeAngle);
+		else
+			mesh = MeshReader.readObject3D(xmlDir, "jcae3d", ridgeAngle);
 		try
 		{
 			new SmoothNodes3D(mesh, 10).compute();
