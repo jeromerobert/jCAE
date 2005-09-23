@@ -14,6 +14,7 @@
 			<classpath>
 				<pathelement location="${log4j.jar}"/>
 				<pathelement location="${trove.jar}"/>
+				<pathelement location="${xalan.jar}"/>
 			</classpath>
 		</javac>
 		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.mesherocc.dir}">
