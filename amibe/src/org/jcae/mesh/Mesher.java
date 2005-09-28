@@ -258,6 +258,11 @@ public class Mesher
 							badGroups.add(iFace);
 							break;
 						}
+						else
+						{
+							ex.printStackTrace();
+							System.exit(-1);
+						}
 						badGroups.add(iFace);
 						logger.warn(ex.getMessage());
 						ex.printStackTrace();
