@@ -299,7 +299,7 @@ public class DecimateVertex
 				ot = v3.findOTriangle(apex1);
 			else
 				ot = v3.findOTriangle(apex2);
-			assert ot != null : ""+edge+"\n"+apex1+"\n"+v3+"\n"+apex1+"\n"+v3.tri;
+			assert ot != null : ""+edge+"\n"+apex1+"\n"+v3+"\n"+apex1;
 			Vertex first = ot.destination();
 			if (first == Vertex.outer)
 			{
