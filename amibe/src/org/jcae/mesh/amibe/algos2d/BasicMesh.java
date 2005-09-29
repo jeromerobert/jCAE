@@ -26,6 +26,7 @@ import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.OTriangle2D;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.InvalidFaceException;
@@ -70,7 +71,7 @@ public class BasicMesh
 	public void compute()
 	{
 		Triangle t;
-		OTriangle ot;
+		OTriangle2D ot;
 		Vertex v;
 		
 		Vertex [] bNodes = boundaryNodes();
@@ -178,54 +179,17 @@ public class BasicMesh
 		assert firstOnWire == null;
 		for (Iterator it = saveList.iterator(); it.hasNext(); )
 		{
-			OTriangle s = (OTriangle) it.next();
+			OTriangle2D s = (OTriangle2D) it.next();
 			s.setAttributes(OTriangle.BOUNDARY);
 			s.symOTri();
 			s.setAttributes(OTriangle.BOUNDARY);
 		}
 		mesh.popCompGeom(2);
 		
-		logger.debug(" Select 3D smaller diagonals");
-		mesh.pushCompGeom(3);
-		ot = new OTriangle();
-		for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
-		{
-			t = (Triangle) it.next();
-			ot.bind(t);
-			for (int i = 0; i < 3; i++)
-			{
-				ot.nextOTri();
-				ot.clearAttributes(OTriangle.SWAPPED);
-			}
-		}
-		boolean redo = true;
-		//  With riemanian metrics, there may be infinite loops,
-		//  make sure to exit this loop.
-		int niter = bNodes.length;
-
-		while (redo && niter > 0)
-		{
-			redo = false;
-			--niter;
-			for (Iterator it = saveList.iterator(); it.hasNext(); )
-			{
-				OTriangle s = (OTriangle) it.next();
-				if (s.apex() == Vertex.outer)
-					s.symOTri();
-				s.nextOTri();
-				if (s.hasAttributes(OTriangle.SWAPPED))
-					continue;
-				if (s.checkSmallerAndSwap() != 0)
-					redo = true;
-			}
-		}
-		mesh.popCompGeom(3);
-		
 		logger.debug(" Mark outer elements");
 		ArrayList pool = new ArrayList(mesh.getTriangles().size());
-		ot = new OTriangle();
-		t = Vertex.outer.tri;
-		ot = new OTriangle(t, 0);
+		t = (Triangle) Vertex.outer.getLink();
+		ot = new OTriangle2D(t, 0);
 		if (ot.origin() == Vertex.outer)
 				ot.nextOTri();
 		else if (ot.destination() == Vertex.outer)
@@ -245,16 +209,11 @@ public class BasicMesh
 		}
 		while (ot.origin() != first);
 		logger.debug(" Mark holes");
-		OTriangle sym = new OTriangle();
+		OTriangle2D sym = new OTriangle2D();
 		for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
 		{
 			t = (Triangle) it.next();
-			ot.bind(t);
-			for (int i = 0; i < 3; i++)
-			{
-				ot.nextOTri();
-				ot.clearAttributes(OTriangle.MARKED);
-			}
+			t.unmark();
 		}
 		while (!pool.isEmpty())
 		{
@@ -305,6 +264,65 @@ public class BasicMesh
 			pool = newPool;
 		}
 		assert (mesh.isValid());
+		logger.debug(" Remove outer triangles");
+		pool = new ArrayList(mesh.getTriangles().size());
+		OTriangle2D otVoid = new OTriangle2D();
+		for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
+		{
+			t = (Triangle) it.next();
+			if (!t.isOuter())
+			{
+				pool.add(t);
+				continue;
+			}
+			ot.bind(t);
+			for (int i = 0; i < 3; i++)
+			{
+				ot.nextOTri();
+				if (ot.hasAttributes(OTriangle.BOUNDARY))
+				{
+					// Delete adjacency relations
+					OTriangle.symOTri(ot, sym);
+					sym.glue1(otVoid);
+				}
+			}
+		}
+		mesh.setTrianglesList(pool);
+		
+		logger.debug(" Select 3D smaller diagonals");
+		mesh.pushCompGeom(3);
+		ot = new OTriangle2D();
+		for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
+		{
+			t = (Triangle) it.next();
+			ot.bind(t);
+			for (int i = 0; i < 3; i++)
+			{
+				ot.nextOTri();
+				ot.clearAttributes(OTriangle.SWAPPED);
+			}
+		}
+		boolean redo = true;
+		//  With riemannian metrics, there may be infinite loops,
+		//  make sure to exit this loop.
+		int niter = bNodes.length;
+		while (redo && niter > 0)
+		{
+			redo = false;
+			--niter;
+			for (Iterator it = saveList.iterator(); it.hasNext(); )
+			{
+				OTriangle2D s = (OTriangle2D) it.next();
+				if (s.apex() == Vertex.outer)
+					s.symOTri();
+				s.nextOTri();
+				if (s.hasAttributes(OTriangle.SWAPPED))
+					continue;
+				if (s.checkSmallerAndSwap() != 0)
+					redo = true;
+			}
+		}
+		mesh.popCompGeom(3);
 		
 		mesh.pushCompGeom(3);
 		new Insertion(mesh).compute();
