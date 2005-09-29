@@ -21,7 +21,9 @@
 package org.jcae.mesh.amibe.ds;
 
 import java.util.Random;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.apache.log4j.Logger;
 
@@ -107,6 +109,7 @@ public class OTriangle
 	private double [] tempD = new double[3];
 	private double [] tempD1 = new double[3];
 	private double [] tempD2 = new double[3];
+	private static final OTriangle otVoid = new OTriangle();
 	
 	/**
 	 * Numeric constants for edge attributes.  Set if edge is on
@@ -143,6 +146,13 @@ public class OTriangle
 	 * @see #hasAttributes
 	 */
 	public static final int QUAD     = 1 << 4;
+	/**
+	 * Numeric constants for edge attributes.  Set if edge is non
+	 * manifold.
+	 * @see #setAttributes
+	 * @see #hasAttributes
+	 */
+	public static final int NONMANIFOLD = 1 << 5;
 	
 	//  Complex algorithms require several OTriangle, they are
 	//  allocated here to prevent allocation/deallocation overhead.
@@ -152,7 +162,6 @@ public class OTriangle
 			work[i] = new OTriangle();
 	}
 	
-	private static final Random rand = new Random(139L);
 	private static final Triangle dummy = new Triangle();
 	
 	/*
@@ -291,7 +300,7 @@ public class OTriangle
 	 */
 	public static final void symOTri(OTriangle o, OTriangle that)
 	{
-		that.tri = o.tri.adj[o.orientation];
+		that.tri = (Triangle) o.tri.getAdj(o.orientation);
 		that.orientation = ((o.tri.adjPos >> (2*o.orientation)) & 3);
 		that.attributes = (that.tri.adjPos >> (8*(1+that.orientation))) & 0xff;
 	}
@@ -302,7 +311,7 @@ public class OTriangle
 	public final void symOTri()
 	{
 		int neworient = ((tri.adjPos >> (2*orientation)) & 3);
-		tri = tri.adj[orientation];
+		tri = (Triangle) tri.getAdj(orientation);
 		orientation = neworient;
 		attributes = (tri.adjPos >> (8*(1+orientation))) & 0xff;
 	}
@@ -568,238 +577,90 @@ public class OTriangle
 	 */
 	public final void glue(OTriangle sym)
 	{
-		tri.adj[orientation] = sym.tri;
-		sym.tri.adj[sym.orientation] = tri;
-		//  Clear previous adjacent position ...
-		tri.adjPos &= ~(3 << (2*orientation));
-		sym.tri.adjPos &= ~(3 << (2*sym.orientation));
-		//  ... and set it right
-		tri.adjPos |= (sym.orientation << (2*orientation));
-		sym.tri.adjPos |= (orientation << (2*sym.orientation));
+		assert !(hasAttributes(NONMANIFOLD) || sym.hasAttributes(NONMANIFOLD)) : this+"\n"+sym;
+		tri.glue1(orientation, sym.tri, sym.orientation);
+		sym.tri.glue1(sym.orientation, tri, orientation);
+	}
+	public final void glue1(OTriangle sym)
+	{
+		tri.glue1(orientation, sym.tri, sym.orientation);
 	}
 	
+	
 	/**
-	 * Collapse an edge and update adjacency relations.
-	 * Its start and end points must have the same location.
+	 * Sets adjacency relation for a triangle.
+	 *
+	 * @param link  the triangle bond to this one of this edge is manifold, or an Object otherwise.
 	 */
-	public final void collapse()
+	public final Object getAdj()
 	{
-		Vertex o = origin();
-		Vertex d = destination();
-		assert o.getRef() != 0 && d.getRef() != 0 && o.getRef() ==  d.getRef();
-		
-		//  Replace o by d in all triangles
-		copyOTri(this, work[0]);
-		work[0].nextOTriOrigin();
-		for ( ; work[0].destination() != d; work[0].nextOTriOrigin())
+		return tri.getAdj(orientation);
+	}
+	
+	public final void setAdj(Object link)
+	{
+		tri.setAdj(orientation, link);
+	}
+	
+	protected Iterator getOTriangleAroundApexIterator()
+	{
+		final OTriangle ot = this;
+		return new Iterator()
 		{
-			for (int i = 0; i < 3; i++)
+			private Vertex first = ot.origin();
+			private boolean precomputed = false;
+			private boolean init = true;
+			private boolean loop = false;
+			public boolean hasNext()
 			{
-				if (work[0].tri.vertex[i] == o)
+				if (!precomputed)
 				{
-					work[0].tri.vertex[i] = d;
-					break;
+					next();
+					precomputed = true;
 				}
+				return !(loop && ot.origin() == first);
 			}
-		}
-		o.removeFromQuadTree();
-		
-		//  Glue triangles
-		nextOTri(this, work[0]);
-		work[0].symOTri();
-		prevOTri(this, work[1]);
-		work[1].symOTri();
-		work[0].glue(work[1]);
-		//  Glue symmetric triangles
-		symOTri(this, work[0]);
-		work[0].nextOTri();
-		work[0].symOTri();
-		symOTri(this, work[1]);
-		work[1].prevOTri();
-		work[1].symOTri();
-		work[0].glue(work[1]);
-	}
-	
-	/*
-	 *                         a
-	 *                         ,
-	 *                        /|\
-	 *                       / | \
-	 *              oldLeft /  |  \ oldRight
-	 *                     /  v+   \
-	 *                    /   / \   \
-	 *                   /  /     \  \
-	 *                  / /         \ \
-	 *               o '---------------` d
-	 *                       (this)
-	 */
-	/**
-	 * Splits a triangle into three new triangles by inserting a vertex.
-	 *
-	 * Two new triangles have to be created, the last one is
-	 * updated.  For efficiency reasons, no checks are performed to
-	 * ensure that the vertex being inserted is contained by this
-	 * triangle.  Once triangles are created, edges are swapped if
-	 * they are not Delaunay.
-	 *
-	 * If edges are not swapped after vertex is inserted, the quality of
-	 * newly created triangles has decreased, and the vertex is eventually
-	 * not inserted unless the <code>force</code> argument is set to
-	 * <code>true</code>.
-	 *
-	 * Origin and destination points must not be at infinite, which
-	 * is the case when current triangle is returned by
-	 * getSurroundingTriangle().  If apex is Vertex.outer, then
-	 * getSurroundingTriangle() ensures that v.onLeft(o,d) &gt; 0.
-	 *
-	 * @param v  the vertex being inserted.
-	 * @param force  if <code>false</code>, the vertex is inserted only if some edges were swapped after its insertion.  If <code>true</code>, the vertex is unconditionnally inserted.
-	 * @return <code>true</code> if vertex was successfully added, <code>false</code> otherwise.
-	 */
-	public final boolean split3(Vertex v, boolean force)
-	{
-		// Aliases
-		OTriangle oldLeft = work[0];
-		OTriangle oldRight = work[1];
-		OTriangle oldSymLeft = work[2];
-		OTriangle oldSymRight = work[3];
-		
-		prevOTri(this, oldLeft);         // = (aod)
-		nextOTri(this, oldRight);        // = (dao)
-		symOTri(oldLeft, oldSymLeft);    // = (oa*)
-		symOTri(oldRight, oldSymRight);  // = (ad*)
-		//  Set vertices of newly created and current triangles
-		Vertex o = origin();
-		assert o != Vertex.outer;
-		Vertex d = destination();
-		assert d != Vertex.outer;
-		Vertex a = apex();
-		
-		OTriangle newLeft  = new OTriangle(new Triangle(a, o, v), 2);
-		OTriangle newRight = new OTriangle(new Triangle(d, a, v), 2);
-		if (oldLeft.attributes != 0)
-		{
-			newLeft.attributes = oldLeft.attributes;
-			newLeft.pushAttributes();
-			oldLeft.attributes = 0;
-			oldLeft.pushAttributes();
-		}
-		if (oldRight.attributes != 0)
-		{
-			newRight.attributes = oldRight.attributes;
-			newRight.pushAttributes();
-			oldRight.attributes = 0;
-			oldRight.pushAttributes();
-		}
-		Triangle iniTri = tri;
-		v.tri = tri;
-		a.tri = newLeft.tri;
-		//  Move apex of current OTriangle.  As a consequence,
-		//  oldLeft is now (vod) and oldRight is changed to (dvo).
-		setApex(v);
-		
-		newLeft.glue(oldSymLeft);
-		newRight.glue(oldSymRight);
-		
-		//  Creates 3 inner links
-		newLeft.nextOTri();              // = (ova)
-		newLeft.glue(oldLeft);
-		newRight.prevOTri();             // = (vda)
-		newRight.glue(oldRight);
-		newLeft.nextOTri();              // = (vao)
-		newRight.prevOTri();             // = (avd)
-		newLeft.glue(newRight);
-		
-		//  Data structures have been created, search now for non-Delaunay
-		//  edges.  Re-use newLeft to walk through new vertex ring.
-		newLeft.nextOTri();              // = (aov)
-		Triangle newTri1 = newLeft.tri;
-		Triangle newTri2 = newRight.tri;
-		if (force)
-			CheckAndSwap(newLeft, oldRight, false);
-		else if (0 == CheckAndSwap(newLeft, oldRight, false))
-		{
-			//  v has been inserted and no edges are swapped,
-			//  thus global quality has been decreased.
-			//  Remove v in such cases.
-			o.tri = iniTri;
-			d.tri = iniTri;
-			a.tri = iniTri;
-			setApex(a);
-			nextOTri(this, oldLeft);         // = (oad)
-			oldLeft.glue(oldSymRight);
-			oldLeft.nextOTri();              // = (ado)
-			oldLeft.glue(oldSymLeft);
-			return false;
-		}
-		newTri1.addToMesh();
-		newTri2.addToMesh();
-		return true;
-	}
-	
-	//  Called from BasicMesh to improve initial mesh
-	public int checkSmallerAndSwap()
-	{
-		//  As CheckAndSwap modifies its arguments, 'this'
-		//  must be protected.
-		OTriangle ot1 = new OTriangle();
-		OTriangle ot2 = new OTriangle();
-		copyOTri(this, ot1);
-		return CheckAndSwap(ot1, ot2, true);
-	}
-	
-	private int CheckAndSwap(OTriangle newLeft, OTriangle newRight, boolean smallerDiag)
-	{
-		int nrSwap = 0;
-		int totNrSwap = 0;
-		Vertex v = newLeft.apex();
-		assert v != Vertex.outer;
-		Vertex firstVertex = newLeft.origin();
-		while (firstVertex == Vertex.outer)
-		{
-			newLeft.nextOTriApex();
-			firstVertex = newLeft.origin();
-		}
-		//  Loops around v
-		Vertex a, o, d;
-		while (true)
-		{
-			boolean swap = false;
-			symOTri(newLeft, newRight);
-			o = newLeft.origin();
-			d = newLeft.destination();
-			a = newRight.apex();
-			if (o == Vertex.outer)
-				swap = (v.onLeft(d, a) < 0L);
-			else if (d == Vertex.outer)
-				swap = (v.onLeft(a, o) < 0L);
-			else if (a == Vertex.outer)
-				swap = (v.onLeft(o, d) == 0L);
-			else if (newLeft.isMutable())
+			public Object next()
 			{
-				if (!smallerDiag)
-					swap = !newLeft.isDelaunay(a);
+				if (precomputed)
+				{
+					precomputed = false;
+					return ot;
+				}
+				if (init)
+				{
+					init = false;
+					return ot;
+				}
+				precomputed = false;
+				loop = true;
+				ot.nextOTri();
+				if (ot.hasAttributes(BOUNDARY))
+				{
+					// Loop clockwise to another boundary
+					// and start again from there.
+					ot.prevOTri();
+					while (true)
+					{
+						ot.prevOTri();
+						if (ot.hasAttributes(BOUNDARY))
+							break;
+						ot.symOTri();
+						ot.prevOTri();
+					}
+					ot.nextOTri();
+				}
 				else
-					swap = !a.isSmallerDiagonale(newLeft);
-			}
-			if (swap)
-			{
-				newLeft.swapOTriangle(v, a);
-				nrSwap++;
-				totNrSwap++;
-			}
-			else
-			{
-				newLeft.nextOTriApex();
-				if (newLeft.origin() == firstVertex)
 				{
-					if (nrSwap == 0)
-						break;
-					nrSwap = 0;
+					ot.symOTri();
+					ot.nextOTri();
 				}
+				return ot;
 			}
-		}
-		return totNrSwap;
+			public void remove()
+			{
+			}
+		};
 	}
 	
 	/**
@@ -863,6 +724,25 @@ public class OTriangle
 	}
 	
 	/**
+	 * Check whether an edge can be contracted.
+	 * @return <code>true</code> if this edge can be contracted, <code>flase</code> otherwise.
+	 */
+	public final boolean canContract(Vertex n)
+	{
+		if (n.mesh.getType() == Mesh.MESH_3D && !checkInversion(n))
+				return false;
+		
+		//  Topology check
+		//  TODO: normally this check could be removed, but the
+		//        following test triggers an error:
+		//    * mesh Scie_shell.brep with deflexion=0.2 aboslute
+		//    * decimate with length=6
+		ArrayList link = origin().getNeighboursNodes();
+		link.retainAll(destination().getNeighboursNodes());
+		return link.size() < 3;
+	}
+	
+	/**
 	 * Swaps an edge.
 	 *
 	 * This routine swaps an edge (od) to (na), updates
@@ -893,9 +773,9 @@ public class OTriangle
 		 *            '                    '
 		 *            o                    o
 		 *                                 .
-		 *            |                   /|\
-		 *            |                    |
-		 *           \|/                   |
+		 *            | switch            /|\
+		 *            |   adj              |  switch
+		 *           \|/                   | vertices
 		 *            '
 		 *            d                    n
 		 *            .                    .
@@ -911,6 +791,10 @@ public class OTriangle
 		 */
 		// this = (oda)
 		symOTri(this, work[0]);         // (don)
+		assert hasAttributes(BOUNDARY) == (tri.getAdj(orientation) == null) : this;
+		assert work[0].hasAttributes(BOUNDARY) == (work[0].tri.getAdj(work[0].orientation) == null) : this;
+		assert (tri.getAdj(0) == null || tri.getAdj(0) != tri.getAdj(1)) && (tri.getAdj(1) == null || tri.getAdj(1) != tri.getAdj(2)) && (tri.getAdj(2) == null || tri.getAdj(2) != tri.getAdj(0)) : this;
+		assert (work[0].tri.getAdj(0) == null || work[0].tri.getAdj(0) != work[0].tri.getAdj(1)) && (work[0].tri.getAdj(1) == null || work[0].tri.getAdj(1) != work[0].tri.getAdj(2)) && (work[0].tri.getAdj(2) == null || work[0].tri.getAdj(2) != work[0].tri.getAdj(0)) : work[0];
 		//  Clear SWAPPED flag for all edges of the 2 triangles
 		clearAttributes(SWAPPED);
 		work[0].clearAttributes(SWAPPED);
@@ -918,33 +802,54 @@ public class OTriangle
 		nextOTri(this, work[1]);        // (dao)
 		work[1].clearAttributes(SWAPPED);
 		int attr1 = work[1].attributes;
-		work[1].symOTri();              // a1 = (ad*)
-		work[1].clearAttributes(SWAPPED);
+		if (!work[1].hasAttributes(BOUNDARY))
+		{
+			work[1].symOTri();      // a1 = (ad*)
+			work[1].clearAttributes(SWAPPED);
+		}
 		prevOTri(this, work[2]);        // (aod)
 		work[2].clearAttributes(SWAPPED);
 		int attr2 = work[2].attributes;
-		work[2].symOTri();              // a2 = (oa*)
-		work[2].clearAttributes(SWAPPED);
 		nextOTri();                     // (dao)
-		work[2].glue(this);    // a2 and (dao)
+		if (!work[2].hasAttributes(BOUNDARY))
+		{
+			work[2].symOTri();      // a2 = (oa*)
+			work[2].clearAttributes(SWAPPED);
+			glue(work[2]);          // a2 and (dao)
+		}
+		else
+			glue1(otVoid);
 		nextOTri(work[0], work[2]);     // (ond)
+		nextOTri();                     // (aod)
 		work[2].clearAttributes(SWAPPED);
 		int attr3 = work[2].attributes;
-		work[2].symOTri();              // a3 = (no*)
-		work[2].clearAttributes(SWAPPED);
-		nextOTri();                     // (aod)
-		work[2].glue(this);    // a3 and (aod)
+		if (!work[2].hasAttributes(BOUNDARY))
+		{
+			work[2].symOTri();     // a3 = (no*)
+			work[2].clearAttributes(SWAPPED);
+			work[2].glue(this);    // a3 and (aod)
+		}
+		else
+			glue1(otVoid);
 		//  Reset 'this' to (oda)
 		nextOTri();                     // (oda)
 		prevOTri(work[0], work[2]);     // (ndo)
 		work[2].clearAttributes(SWAPPED);
 		int attr4 = work[2].attributes;
-		work[2].symOTri();              // a4 = (dn*)
-		work[2].clearAttributes(SWAPPED);
 		work[0].nextOTri();             // (ond)
-		work[2].glue(work[0]); // a4 and (ond)
+		if (!work[2].hasAttributes(BOUNDARY))
+		{
+			work[2].symOTri();      // a4 = (dn*)
+			work[2].clearAttributes(SWAPPED);
+			work[2].glue(work[0]);  // a4 and (ond)
+		}
+		else
+			work[0].glue1(otVoid);
 		work[0].nextOTri();             // (ndo)
-		work[1].glue(work[0]); // a1 and (ndo)
+		if (!work[1].hasAttributes(BOUNDARY))
+			work[0].glue(work[1]);  // a1 and (ndo)
+		else
+			work[0].glue1(otVoid);
 		work[0].nextOTri();             // (don)
 		//  Adjust vertices
 		setOrigin(n);
@@ -954,10 +859,10 @@ public class OTriangle
 		work[0].setDestination(n);
 		work[0].setApex(d);
 		//  Fix links to triangles
-		n.tri = tri;
-		a.tri = tri;
-		o.tri = tri;
-		d.tri = work[0].tri;
+		n.setLink(tri);
+		a.setLink(tri);
+		o.setLink(tri);
+		d.setLink(work[0].tri);
 		//  Fix attributes
 		tri.adjPos &= 0xff;
 		tri.adjPos |= ((attr2 & 0xff) << (8*(1+next3[orientation])));
@@ -971,124 +876,11 @@ public class OTriangle
 
 		//  Eventually change 'this' to (ona) to ease moving around o.
 		prevOTri();                     // (ona)
+		assert hasAttributes(BOUNDARY) == (tri.getAdj(orientation) == null) : this;
+		assert work[0].hasAttributes(BOUNDARY) == (work[0].tri.getAdj(work[0].orientation) == null) : work[0];
+		assert (tri.getAdj(0) == null || tri.getAdj(0) != tri.getAdj(1)) && (tri.getAdj(1) == null || tri.getAdj(1) != tri.getAdj(2)) && (tri.getAdj(2) == null || tri.getAdj(2) != tri.getAdj(0)) : this;
+		assert (work[0].tri.getAdj(0) == null || work[0].tri.getAdj(0) != work[0].tri.getAdj(1)) && (work[0].tri.getAdj(1) == null || work[0].tri.getAdj(1) != work[0].tri.getAdj(2)) && (work[0].tri.getAdj(2) == null || work[0].tri.getAdj(2) != work[0].tri.getAdj(0)) : work[0];
 		return this;
-	}
-	
-	/**
-	 * Tries to rebuild a boundary edge by swapping edges.
-	 *
-	 * This routine is applied to an oriented triangle, its origin
-	 * is an end point of the boundary edge to rebuild.  The other end
-	 * point is passed as an argument.  Current oriented triangle has
-	 * been set up by calling routine so that it is the leftmost edge
-	 * standing to the right of the boundary edge.
-	 * A traversal between end points is performed, and intersected
-	 * edges are swapped if possible.  At exit, current oriented
-	 * triangle has <code>end</code> as its origin, and is the
-	 * rightmost edge standing to the left of the inverted edge.
-	 * This algorithm can then be called iteratively back and forth,
-	 * and it is known that it is guaranteed to finish.
-	 *
-	 * @param end  end point of the boundary edge.
-	 * @return the number of intersected edges.
-	 */
-	public final int forceBoundaryEdge(Vertex end)
-	{
-		long newl, oldl;
-		int count = 0;
-		
-		Vertex start = origin();
-
-		nextOTri();
-		while (true)
-		{
-			count++;
-			Vertex o = origin();
-			Vertex d = destination();
-			Vertex a = apex();
-			symOTri(this, work[0]);
-			work[0].nextOTri();
-			Vertex n = work[0].destination();
-			newl = n.onLeft(start, end);
-			oldl = a.onLeft(start, end);
-			boolean canSwap = (n != Vertex.outer) && (a.onLeft(n, d) > 0L) && (a.onLeft(o, n) > 0L) && !hasAttributes(BOUNDARY);
-			if (newl > 0L)
-			{
-				//  o stands to the right of (start,end), d and n to the left.
-				if (!canSwap)
-					prevOTriOrigin();    // = (ond)
-				else if (oldl >= 0L)
-				{
-					//  a stands to the left of (start,end).
-					swapOTriangle(a, n); // = (ona)
-				}
-				else if (rand.nextBoolean())
-					swapOTriangle(a, n); // = (ona)
-				else
-					prevOTriOrigin();    // = (ond)
-			}
-			else if (newl < 0L)
-			{
-				//  o and n stand to the right of (start,end), d to the left.
-				if (!canSwap)
-					nextOTriDest();      // = (ndo)
-				else if (oldl <= 0L)
-				{
-					//  a stands to the right of (start,end).
-					swapOTriangle(a, n); // = (ona)
-					nextOTri();          // = (nao)
-					prevOTriOrigin();    // = (nda)
-				}
-				else if (rand.nextBoolean())
-				{
-					swapOTriangle(a, n); // = (ona)
-					nextOTri();          // = (nao)
-					prevOTriOrigin();    // = (nda)
-				}
-				else
-					nextOTriDest();      // = (ndo)
-			}
-			else
-			{
-				//  n is the end point.
-				if (!canSwap)
-					nextOTriDest();      // = (ndo)
-				else
-				{
-					swapOTriangle(a, n); // = (ona)
-					nextOTri();          // = (nao)
-					if (oldl < 0L)
-						prevOTriOrigin();// = (nda)
-				}
-				break;
-			}
-		}
-		if (origin() != end)
-		{
-			//  A midpoint is aligned with start and end, this should
-			//  never happen.
-			throw new RuntimeException("Point "+origin()+" is aligned with "+start+" and "+end);
-		}
-		return count;
-	}
-	
-	/**
-	 * Check whether an edge can be contracted.
-	 * @return <code>true</code> if this edge can be contracted, <code>flase</code> otherwise.
-	 */
-	public final boolean canContract(Vertex n)
-	{
-		if (n.mesh.getType() == Mesh.MESH_3D && !checkInversion(n))
-				return false;
-		
-		//  Topology check
-		//  TODO: normally this check could be removed, but the
-		//        following test triggers an error:
-		//    * mesh Scie_shell.brep with deflexion=0.2 aboslute
-		//    * decimate with length=6
-		HashSet link = origin().getNeighboursNodes();
-		link.retainAll(destination().getNeighboursNodes());
-		return link.size() < 3;
 	}
 	
 	public double [] getTempVector()
@@ -1263,9 +1055,9 @@ public class OTriangle
 			work[1].setAttributes(OUTER);
 		}
 		//  Fix links to triangles
-		V1.tri = t3;
-		V2.tri = t5;
-		n.tri = t5;
+		V1.setLink(t3);
+		V2.setLink(t5);
+		n.setLink(t5);
 		//  Restore 'this' to its initial value
 		nextOTri();                     // (doV2)
 		clearAttributes(MARKED);
@@ -1275,11 +1067,60 @@ public class OTriangle
 		pushAttributes();
 	}
 	
+	public boolean cycleTrianglesAroundOrigin(ArrayList triangles, HashSet triSet, boolean clockwise)
+	{
+		if (!triSet.contains(tri))
+		{
+			triangles.add(tri);
+			triSet.add(tri);
+		}
+		Vertex first = destination();
+		while (true)
+		{
+			if (clockwise)
+			{
+				if (hasAttributes(NONMANIFOLD) || hasAttributes(BOUNDARY))
+					return false;
+				symOTri();
+				nextOTri();
+			}
+			else
+			{
+				prevOTri();
+				if (hasAttributes(NONMANIFOLD) || hasAttributes(BOUNDARY))
+					return false;
+				symOTri();
+			}
+			if (!triSet.contains(tri))
+			{
+				triangles.add(tri);
+				triSet.add(tri);
+			}
+			if (destination() == first)
+				break;
+		}
+		return true;
+	}
+	
+	private final String showAdj(int num)
+	{
+		String r = "";
+		Triangle t = (Triangle) tri.getAdj(num);
+		if (t == null)
+			r+= " null";
+		else
+		{
+			r+= t.hashCode()+"["+(((tri.adjPos & (3 << (2*num))) >> (2*num)) & 3)+"]";
+		}
+		return r;
+	}
+	
 	public final String toString()
 	{
 		String r = "Orientation: "+orientation+"\n";
 		r += "HashCode Tri: "+tri.hashCode()+"\n";
-		r += "Attributes: "+attributes+" "+Integer.toHexString(tri.adjPos >> 8)+"\n";
+		r += "Adjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2)+"\n";
+		r += "Attributes: "+Integer.toHexString((tri.adjPos >> 8) & 0xff)+" "+Integer.toHexString((tri.adjPos >> 16) & 0xff)+" "+Integer.toHexString((tri.adjPos >> 24) & 0xff)+" => "+Integer.toHexString(attributes)+"\n";
 		r += "Vertices:\n";
 		r += "  Origin: "+origin()+"\n";
 		r += "  Destination: "+destination()+"\n";
