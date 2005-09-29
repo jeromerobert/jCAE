@@ -59,16 +59,17 @@ public class Insertion
 		{
 			maxNodes = 0;
 			ArrayList nodes = new ArrayList();
-			OTriangle sym = new OTriangle();
-			OTriangle ot = new OTriangle();
+			OTriangle2D sym = new OTriangle2D();
+			OTriangle2D ot = new OTriangle2D();
 			for(Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
 				Triangle t = (Triangle) it.next();
+				assert !t.isOuter();
 				ot.bind(t);
 				for (int i = 0; i < 3; i++)
 				{
 					ot.nextOTri();
-					if (ot.hasAttributes(OTriangle.BOUNDARY) || ot.hasAttributes(OTriangle.OUTER))
+					if (ot.hasAttributes(OTriangle.BOUNDARY))
 						ot.setAttributes(OTriangle.MARKED);
 					else
 						ot.clearAttributes(OTriangle.MARKED);
@@ -189,7 +190,7 @@ public class Insertion
 			for (int i = 0; i < imax; i++)
 			{
 				Vertex v = (Vertex) nodes.get(index);
-				OTriangle vt = v.getSurroundingOTriangle();
+				OTriangle2D vt = v.getSurroundingOTriangle();
 				if (vt.split3(v, false))
 					mesh.getQuadTree().add(v);
 				else
@@ -208,7 +209,7 @@ public class Insertion
 	private int countSpecialTriangles ()
 	{
 			int res = 0;
-			OTriangle ot = new OTriangle();
+			OTriangle2D ot = new OTriangle2D();
 			for(Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
 				Triangle t = (Triangle) it.next();

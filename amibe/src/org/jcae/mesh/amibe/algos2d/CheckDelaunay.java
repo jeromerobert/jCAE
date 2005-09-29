@@ -24,6 +24,7 @@ package org.jcae.mesh.amibe.algos2d;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.OTriangle2D;
 import org.jcae.mesh.amibe.ds.Vertex;
 import java.util.Iterator;
 import java.util.ArrayList;
@@ -55,13 +56,13 @@ public class CheckDelaunay
 	public void compute()
 	{
 		Triangle t;
-		OTriangle ot, sym;
+		OTriangle2D ot, sym;
 		Vertex v;
 		int cnt = 0;
 		mesh.pushCompGeom(3);
 		logger.debug(" Checking Delaunay criterion");
-		ot = new OTriangle();
-		sym = new OTriangle();
+		ot = new OTriangle2D();
+		sym = new OTriangle2D();
 
 		boolean redo = false;
 		int niter = mesh.getTriangles().size();
@@ -89,8 +90,10 @@ public class CheckDelaunay
 				for (int i = 0; i < 3; i++)
 				{
 					ot.nextOTri();
+					if (!ot.isMutable())
+						continue;
 					OTriangle.symOTri(ot, sym);
-					if (ot.hasAttributes(OTriangle.SWAPPED) || sym.hasAttributes(OTriangle.SWAPPED) || !ot.isMutable())
+					if (ot.hasAttributes(OTriangle.SWAPPED) || sym.hasAttributes(OTriangle.SWAPPED))
 						continue;
 					ot.setAttributes(OTriangle.SWAPPED);
 					sym.setAttributes(OTriangle.SWAPPED);
@@ -111,9 +114,9 @@ public class CheckDelaunay
 				ot.bind(t);
 				for (int i = 0; i < orient; i++)
 					ot.nextOTri();
-				OTriangle.symOTri(ot, sym);
 				if (ot.hasAttributes(OTriangle.SWAPPED))
 				{
+					OTriangle.symOTri(ot, sym);
 					ot.swapOTriangle(ot.apex(), sym.apex());
 					redo = true;
 				}
