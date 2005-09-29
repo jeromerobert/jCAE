@@ -29,7 +29,7 @@ public class Triangle
 	private static Logger logger = Logger.getLogger(Triangle.class);
 	public static Triangle outer = null;
 	public Vertex [] vertex = new Vertex[3];
-	public Triangle [] adj = new Triangle[3];
+	private Object [] adj = new Triangle[3];
 	//  Byte 0 represents orientation of adjacent triangles:
 	//     bits 0-1: adj[0]
 	//     bits 2-3: adj[1]
@@ -58,6 +58,25 @@ public class Triangle
 			m = vertex[1].mesh;
 		assert null != m;
 		m.add(this);
+	}
+	
+	public void glue1(int num, Triangle that, int thatnum)
+	{
+		adj[num] = that;
+		//  Clear previous adjacent position ...
+		adjPos &= ~(3 << (2*num));
+		//  ... and set it right
+		adjPos |= (thatnum << (2*num));
+	}
+	
+	public Object getAdj(int num)
+	{
+		return adj[num];
+	}
+	
+	public void setAdj(int num, Object link)
+	{
+		adj[num] = link;
 	}
 	
 	public Vertex centroid()
