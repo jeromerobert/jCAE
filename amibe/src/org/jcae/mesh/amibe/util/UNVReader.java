@@ -236,9 +236,9 @@ public class UNVReader
 				Vertex n3 = (Vertex) nodesmap.get(p3);
 				Triangle f = new Triangle(n1, n2, n3);
 				mesh.add(f);
-				n1.tri = f;
-				n2.tri = f;
-				n3.tri = f;
+				n1.setLink(f);
+				n2.setLink(f);
+				n3.setLink(f);
 				// fill the map of faces
 				facesmap.put(ind, f);
 			}

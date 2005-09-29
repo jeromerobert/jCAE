@@ -130,9 +130,9 @@ public class MeshReader
 				Vertex pt3 = nodelist[trianglesBuffer.get()];
 				facelist[i] = new Triangle(pt1, pt2, pt3);
 				mesh.add(facelist[i]);
-				pt1.tri = facelist[i];
-				pt2.tri = facelist[i];
-				pt3.tri = facelist[i];
+				pt1.setLink(facelist[i]);
+				pt2.setLink(facelist[i]);
+				pt3.setLink(facelist[i]);
 			}
 			fcT.close();
 			UNVConverter.clean(bbT);
@@ -244,9 +244,9 @@ public class MeshReader
 				Vertex pt3 = nodelist[trianglesBuffer.get()];
 				facelist[i] = new Triangle(pt1, pt2, pt3);
 				mesh.add(facelist[i]);
-				pt1.tri = facelist[i];
-				pt2.tri = facelist[i];
-				pt3.tri = facelist[i];
+				pt1.setLink(facelist[i]);
+				pt2.setLink(facelist[i]);
+				pt3.setLink(facelist[i]);
 			}
 			fcT.close();
 			UNVConverter.clean(bbT);

@@ -673,7 +673,7 @@ public class IndexedStorage
 		for (int i = 0; i < oArray.length; i++)
 		{
 			Vertex v = (Vertex) oArray[i];
-			if (v.tri != null)
+			if (v.getLink() != null)
 				nrv++;
 		}
 		Vertex [] vertices = new Vertex[nrv];
@@ -681,7 +681,7 @@ public class IndexedStorage
 		for (int i = 0; i < oArray.length; i++)
 		{
 			Vertex v = (Vertex) oArray[i];
-			if (v.tri != null)
+			if (v.getLink() != null)
 			{
 				vertices[nrv] = v;
 				nrv++;
@@ -827,9 +827,9 @@ public class IndexedStorage
 						if (readable)
 						{
 							Triangle t = new Triangle(vert[0], vert[1], vert[2]);
-							vert[0].tri = t;
-							vert[1].tri = t;
-							vert[2].tri = t;
+							vert[0].setLink(t);
+							vert[1].setLink(t);
+							vert[2].setLink(t);
 							if (vert[0] == Vertex.outer || vert[1] == Vertex.outer || vert[2] == Vertex.outer)
 								t.setOuter();
 							t.setWritable(writable);

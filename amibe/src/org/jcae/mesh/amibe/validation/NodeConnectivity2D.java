@@ -21,6 +21,7 @@
 package org.jcae.mesh.amibe.validation;
 
 import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 
 public class NodeConnectivity2D extends QualityProcedure
@@ -35,7 +36,7 @@ public class NodeConnectivity2D extends QualityProcedure
 		if (!(o instanceof Vertex))
 			throw new IllegalArgumentException();
 		Vertex n = (Vertex) o;
-		OTriangle start = new OTriangle(n.tri, 0);
+		OTriangle start = new OTriangle((Triangle) n.getLink(), 0);
 		if (n == start.destination())
 			start.nextOTri();
 		else if (n == start.apex())
