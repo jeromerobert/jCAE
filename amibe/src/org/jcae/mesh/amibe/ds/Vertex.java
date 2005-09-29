@@ -28,6 +28,8 @@ import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.cad.*;
 import java.util.Random;
 import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class Vertex implements Cloneable
 {
@@ -45,7 +47,12 @@ public class Vertex implements Cloneable
 	private static final double [] temp3d = new double[3];
 	
 	public double [] param = null;
-	public Triangle tri;
+	//  link can be either:
+	//    1. a Triangle, for manifold vertices
+	//    2. an Object[2] array, zhere
+	//         0: list of head triangles
+	//         1: list of incident wires
+	private Object link;
 	
 	//  Metrics at this location
 	private Metric2D m2 = null;
@@ -161,6 +168,16 @@ public class Vertex implements Cloneable
 		label = l;
 	}
 	
+	public Object getLink()
+	{
+		return link;
+	}
+	
+	public void setLink(Object o)
+	{
+		link = o;
+	}
+	
 	public void setReadable(boolean r)
 	{
 		readable = r;
@@ -209,12 +226,12 @@ public class Vertex implements Cloneable
 	 * @return a triangle containing this point.
 	 * @see OTriangle#split3
 	 */
-	public OTriangle getSurroundingOTriangle()
+	public OTriangle2D getSurroundingOTriangle()
 	{
 		logger.debug("Searching for the triangle surrounding "+this);
-		Triangle t = mesh.quadtree.getNearestVertex(this).tri;
-		OTriangle start = new OTriangle(t, 0);
-		OTriangle current = start;
+		Triangle t = (Triangle) mesh.quadtree.getNearestVertex(this).link;
+		OTriangle2D start = new OTriangle2D(t, 0);
+		OTriangle2D current = start;
 		boolean redo = false;
 		Vertex o = current.origin();
 		Vertex d = current.destination();
@@ -263,7 +280,7 @@ public class Vertex implements Cloneable
 		{
 			assert o != Vertex.outer;
 			assert d != Vertex.outer;
-			assert onLeft(o, d) >= 0L;
+			assert current.hasAttributes(OTriangle.BOUNDARY) == (current.tri.getAdj(current.orientation) == null);
 			if (a == Vertex.outer)
 				break;
 			long d1 = onLeft(d, a);
@@ -277,9 +294,9 @@ public class Vertex implements Cloneable
 				else
 					current.nextOTriOrigin();   // (oa*)
 			}
-			else if (d1 < 0L && d2 >= 0L)
+			else if (d1 < 0L)
 				current.prevOTriDest();         // (ad*)
-			else if (d2 < 0L && d1 >= 0L)
+			else if (d2 < 0L)
 				current.nextOTriOrigin();       // (oa*)
 			else
 				//  d1 >= 0 && d2 >= 0.  
@@ -292,28 +309,79 @@ public class Vertex implements Cloneable
 		return current;
 	}
 	
-	public HashSet getNeighboursNodes()
+	public ArrayList getNeighboursNodes()
 	{
-		assert tri != null : this;
+		ArrayList ret = new ArrayList();
+		HashSet nodes = new HashSet();
+		OTriangle ot = new OTriangle();
+		for (Iterator it = getNeighboursTriangles().iterator(); it.hasNext(); )
+		{
+			Triangle t = (Triangle) it.next();
+			ot.bind(t);
+			if (ot.origin() != this)
+				ot.nextOTri();
+			if (ot.origin() != this)
+				ot.nextOTri();
+			assert ot.origin() == this : this+" not in "+ot;
+			Vertex d = ot.destination();
+			if (!nodes.contains(d))
+			{
+				nodes.add(d);
+				ret.add(d);
+			}
+			Vertex a = ot.apex();
+			if (!nodes.contains(a))
+			{
+				nodes.add(a);
+				ret.add(a);
+			}
+		}
+		return ret;
+	}
+	
+	public ArrayList getNeighboursTriangles()
+	{
+		ArrayList tri = new ArrayList();
+		HashSet triSet = new HashSet();
+		assert link != null : this;
+		if (link instanceof Triangle)
+			appendNeighboursTri((Triangle) link, tri, triSet);
+		else
+		{
+			// Non-manifold vertex
+			Triangle [] t = (Triangle []) link;
+			for (int i = 0; i < t.length; i++)
+				appendNeighboursTri(t[i], tri, triSet);
+		}
+		return tri;
+	}
+	
+	private void appendNeighboursTri(Triangle tri, ArrayList ret, HashSet triSet)
+	{
 		assert tri.vertex[0] == this || tri.vertex[1] == this || tri.vertex[2] == this;
 		OTriangle ot = new OTriangle(tri, 0);
-		HashSet ret = new HashSet(10);
 		if (ot.origin() != this)
 			ot.nextOTri();
 		if (ot.origin() != this)
 			ot.nextOTri();
 		assert ot.origin() == this : this+" not in "+ot;
-		Vertex first = ot.destination();
-		while (true)
-		{
-			Vertex d = ot.destination();
-			if (d != Vertex.outer)
-				ret.add(d);
-			ot.nextOTriOrigin();
-			if (ot.destination() == first)
-				break;
-		}
-		return ret;
+		//  Collect triangles in counterclockwise order.
+		//  Warning: ot is modified
+		if (ot.cycleTrianglesAroundOrigin(ret, triSet, false))
+			return;
+		//  A boundary or non-manifold edge is encountered.
+		//  Loop in the opposite direction.
+		ot.bind(tri);
+		if (ot.origin() != this)
+			ot.nextOTri();
+		if (ot.origin() != this)
+			ot.nextOTri();
+		assert ot.origin() == this : this+" not in "+ot;
+		//  Store triangles in reverse order
+		ArrayList cw = new ArrayList();
+		ot.cycleTrianglesAroundOrigin(cw, triSet, true);
+		for (int i = cw.size() - 1; i >= 0; i++)
+			ret.add(cw.get(i));
 	}
 	
 	private long onLeft_isotropic(Vertex v1, Vertex v2)
@@ -657,6 +725,7 @@ public class Vertex implements Cloneable
 	
 	public OTriangle findOTriangle(Vertex v2)
 	{
+		Triangle tri = (Triangle) link;
 		OTriangle ot = new OTriangle(tri, 0);
 		if (ot.origin() != this)
 			ot.nextOTri();
