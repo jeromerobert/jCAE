@@ -339,7 +339,7 @@ public class Vertex implements Cloneable
 		return ret;
 	}
 	
-	public ArrayList getNeighboursTriangles()
+	private ArrayList getNeighboursTriangles()
 	{
 		ArrayList tri = new ArrayList();
 		HashSet triSet = new HashSet();
@@ -380,8 +380,12 @@ public class Vertex implements Cloneable
 		//  Store triangles in reverse order
 		ArrayList cw = new ArrayList();
 		ot.cycleTrianglesAroundOrigin(cw, triSet, true);
-		for (int i = cw.size() - 1; i >= 0; i++)
-			ret.add(cw.get(i));
+		for (int i = cw.size() - 1; i >= 0; i--)
+		{
+			Triangle t = (Triangle) cw.get(i);
+			assert t.vertex[0] == this || t.vertex[1] == this || t.vertex[2] == this : this+"\n"+t;
+			ret.add(t);
+		}
 	}
 	
 	private long onLeft_isotropic(Vertex v1, Vertex v2)

@@ -609,9 +609,20 @@ public class Mesh
 		logger.debug("Connect triangles");
 		for (int i = 0; i < vertices.length; i++)
 			checkNeighbours(vertices[i], tVertList);
+		OTriangle ot = new OTriangle();
+		for (Iterator it = triangleList.iterator(); it.hasNext(); )
+		{
+			Triangle t = (Triangle) it.next();
+			ot.bind(t);
+			for (int i = 0; i < 3; i++)
+			{
+				ot.nextOTri();
+				if (ot.getAdj() == null)
+					ot.setAttributes(OTriangle.BOUNDARY);
+			}
+		}
 		
 		//  3. Find the list of vertices which are on mesh boundary
-		OTriangle ot = new OTriangle();
 		logger.debug("Build the list of boundary nodes");
 		HashSet bndNodes = new HashSet();
 		int maxLabel = 0;
@@ -642,7 +653,7 @@ public class Mesh
 				}
 			}
 		}
-		//  4. Build links from non-manifold vertices
+		//  4. Build links for non-manifold vertices
 		logger.debug("Compute links for non-manifold vertices");
 		Vertex [] v = new Vertex[2];
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
@@ -652,17 +663,29 @@ public class Mesh
 			for (int i = 0; i < 3; i++)
 			{
 				ot.nextOTri();
-				if (ot.hasAttributes(OTriangle.BOUNDARY))
+				if (ot.hasAttributes(OTriangle.NONMANIFOLD))
 				{
 					v[0] = ot.origin();
 					v[1] = ot.destination();
 					for (int j = 0; j < 2; j++)
 					{
-						//if (v[j].getLink() instanceof Triangle)
-						//{
-						//	Triangle [] adj = ot.getAdj();
-						//}
+						if (v[j].getLink() instanceof Triangle)
+						{
+							ArrayList link = new ArrayList();
+							link.add(v[j].getLink());
+							v[j].setLink(link);
+						}
 					}
+					Triangle first = ot.tri;
+					do
+					{
+						ot.symOTri();
+						for (int j = 0; j < 2; j++)
+						{
+							ArrayList link = (ArrayList) v[j].getLink();
+							link.add(ot.tri);
+						}
+					} while (ot.tri != first);
 				}
 			}
 			found[0] |= found[3];
@@ -676,7 +699,39 @@ public class Mesh
 				}
 			}
 		}
-		//  4. If vertices are on inner boundaries and there is
+		// Replace ArrayList by Triangle[]
+		int nrNM = 0;
+		int nrFE = 0;
+		for (Iterator it = triangleList.iterator(); it.hasNext(); )
+		{
+			Triangle t = (Triangle) it.next();
+			ot.bind(t);
+			for (int i = 0; i < 3; i++)
+			{
+				if (t.vertex[i].getLink() instanceof ArrayList)
+				{
+					nrNM++;
+					ArrayList link = (ArrayList) t.vertex[i].getLink();
+					Triangle [] list = new Triangle[link.size()];
+					int ind = 0;
+					for (Iterator it2 = link.iterator(); it2.hasNext(); )
+					{
+						list[ind] = (Triangle) it2.next();
+						ind++;
+					}
+					t.vertex[i].setLink(list);
+				}
+				ot.nextOTri();
+				assert ot.hasAttributes(OTriangle.BOUNDARY) == (ot.getAdj() == null) : ot;
+				if (ot.hasAttributes(OTriangle.BOUNDARY))
+					nrFE++;
+			}
+		}
+		if (nrNM > 0)
+			logger.debug("Found "+nrNM+" non manifold edges");
+		if (nrFE > 0)
+			logger.debug("Found "+nrFE+" free edges");
+		//  5. If vertices are on inner boundaries and there is
 		//     no ridge, change their label.
 		logger.debug("Set interior nodes mutable");
 		int nrJunctionPoints = 0;
@@ -709,7 +764,7 @@ public class Mesh
 			}
 		}
 		if (nrJunctionPoints > 0)
-			logger.info("Found "+nrJunctionPoints+" saddle points");
+			logger.info("Found "+nrJunctionPoints+" non-manifold vertices");
 	}
 	
 	private static final void checkNeighbours(Vertex v, HashMap tVertList)
@@ -717,7 +772,6 @@ public class Mesh
 		OTriangle ot = new OTriangle();
 		OTriangle sym = new OTriangle();
 		OTriangle ot2 = new OTriangle();
-		ArrayList newTriangles = new ArrayList();
 		boolean nonManifold = false;
 		//  Mark adjacent triangles
 		ArrayList list = (ArrayList) tVertList.get(v);
@@ -756,8 +810,12 @@ public class Mesh
 					if (ot2.destination() != v)
 					{
 						ot2.prevOTri();
-						assert ot2.origin() == v;
-						assert ot2.destination() == v2;
+						if (cnt == 0)
+						{
+							// Invert orientation of t2
+							// and all its neighbours
+							ot2.invertOrientationFace(true);
+						}
 					}
 					if (cnt == 0)
 					{
@@ -769,12 +827,14 @@ public class Mesh
 						//  being v and v2.
 						//  Collect all adjacent triangles into an ArrayList.
 						ArrayList adj = null;
-						if (cnt == 1)
+						if (ot.getAdj() instanceof Triangle)
 						{
 							OTriangle.symOTri(ot, sym);
 							adj = new ArrayList();
 							adj.add(t);
+							adj.add(new Integer(ot.orientation));
 							adj.add(sym.tri);
+							adj.add(new Integer(sym.orientation));
 							ot.setAttributes(OTriangle.NONMANIFOLD);
 							sym.setAttributes(OTriangle.NONMANIFOLD);
 							ot.setAdj(adj);
@@ -783,49 +843,31 @@ public class Mesh
 						else
 							adj = (ArrayList) ot.getAdj();
 						adj.add(t2);
+						adj.add(new Integer(ot2.orientation));
 						ot2.setAdj(adj);
 						ot2.setAttributes(OTriangle.NONMANIFOLD);
-						System.out.println("Non-manifold: "+v+"\n"+ot+"\n"+ot2);
+						logger.debug("Non-manifold: "+v+" "+v2);
 					}
 					cnt++;
 				}
 			}
-			if (cnt == 0)
-			{
-				ot.setAttributes(OTriangle.BOUNDARY);
-				Triangle t2 = new Triangle(Vertex.outer, v2, v);
-				//  This is an outer triangle
-				t2.setOuter();
-				sym.bind(t2);
-				assert sym.origin() == v2 && sym.destination() == v;
-				sym.setAttributes(OTriangle.BOUNDARY);
-				ot.glue(sym);
-				newTriangles.add(t2);
-				list2.add(t2);
-			}
-			else if (cnt > 1)
+			if (cnt > 1)
 			{
 				// Non manifold edge.
-				// Incident triangles must be properly sorted,
-				// then adjacent relations can be updated.
+				// Update links
 				ArrayList adj = (ArrayList) ot.getAdj();
-				adj.add(adj.get(0));
-				adj.add(adj.get(1));
-				for (int i = adj.size() - 2; i > 0; i--)
+				for (int i = 0; i < 2; i++)
+					adj.add(adj.get(i));
+				Iterator it2 = adj.iterator();
+				Triangle t2 = (Triangle) it2.next();
+				Integer i2 = (Integer) it2.next();
+				while(it2.hasNext())
 				{
-					Triangle t2 = (Triangle) adj.get(i);
-					Triangle tprev = (Triangle) adj.get(i-1);
-					Triangle tnext = (Triangle) adj.get(i+1);
-					ot2.bind(t2);
-					if (ot2.getAdj() != adj)
-						ot2.nextOTri();
-					if (ot2.getAdj() != adj)
-						ot2.nextOTri();
-					assert ot2.getAdj() == adj;
-					Triangle [] newAdj = new Triangle[2];
-					newAdj[0] = tnext;
-					newAdj[1] = tprev;
-					ot2.setAdj(newAdj);
+					Triangle told = t2;
+					Integer iold = i2;
+					t2 = (Triangle) it2.next();
+					i2 = (Integer) it2.next();
+					told.glue1(iold.intValue(), t2, i2.intValue());
 				}
 			}
 		}
@@ -835,8 +877,6 @@ public class Mesh
 			Triangle t = (Triangle) it.next();
 			t.unmark();
 		}
-		//  Update triangle list, if new triangles have been added
-		list.addAll(newTriangles);
 	}
 	
 	private static final boolean checkRidges(Vertex v, double cosMinAngle, OTriangle ot)
@@ -970,6 +1010,16 @@ public class Mesh
 				return false;
 		}
 		return true;
+	}
+	
+	public void printMesh()
+	{
+		System.out.println("Mesh:");
+		for (Iterator it = triangleList.iterator(); it.hasNext(); )
+		{
+			Triangle t = (Triangle) it.next();
+			System.out.println(""+t);
+		}
 	}
 	
 }

@@ -23,13 +23,15 @@ package org.jcae.mesh.amibe.ds;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.apache.log4j.Logger;
 import java.util.Random;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class Triangle
 {
 	private static Logger logger = Logger.getLogger(Triangle.class);
 	public static Triangle outer = null;
 	public Vertex [] vertex = new Vertex[3];
-	private Object [] adj = new Triangle[3];
+	private Object [] adj = new Object[3];
 	//  Byte 0 represents orientation of adjacent triangles:
 	//     bits 0-1: adj[0]
 	//     bits 2-3: adj[1]
@@ -120,6 +122,13 @@ public class Triangle
 		adjPos &= ~(OTriangle.MARKED << 8 | OTriangle.MARKED << 16 | OTriangle.MARKED << 24);
 	}
 	
+	public void swapAttributes12()
+	{
+		int byte0 = adjPos & 0xff;
+		int byte0sw = (byte0 & 195) | ((byte0 & 12) << 2) | ((byte0 & 48) >> 2);
+		adjPos = byte0sw | (adjPos & 0x0000ff00) | ((adjPos & 0x00ff0000) << 8) | ((adjPos & 0xff000000) >> 8);
+	}
+	
 	public boolean isMarked()
 	{
 		return (adjPos & (OTriangle.MARKED << 8 | OTriangle.MARKED << 16 | OTriangle.MARKED << 24)) != 0;
@@ -151,15 +160,49 @@ public class Triangle
 			adjPos &= ~0x80000000;
 	}
 	
+	private final String showAdj(int num)
+	{
+		String r = "";
+		if (adj[num] == null)
+			return "N/A";
+		else if (adj[num] instanceof Triangle)
+		{
+			Triangle t = (Triangle) adj[num];
+			if (t == null)
+				r+= "null";
+			else
+				r+= t.hashCode()+"["+(((t.adjPos & (3 << (2*num))) >> (2*num)) & 3)+"]";
+		}
+		else
+		{
+			r+= "(";
+			ArrayList a = (ArrayList) adj[num];
+			boolean first = true;
+			for (Iterator it = a.iterator(); it.hasNext(); )
+			{
+				Triangle t = (Triangle) it.next();
+				Integer i = (Integer) it.next();
+				if (!first)
+					r+= ",";
+				r+= t.hashCode()+"["+i+"]";
+				first = false;
+			}
+			r+= ")";
+		}
+		return r;
+	}
+	
 	public String toString()
 	{
-		String r = "Vertices:";
+		String r = "";
+		r += "hashcode: "+hashCode();
+		r += "\nVertices:";
 		for (int i = 0; i < 3; i++)
 			r += "\n  "+vertex[i];
-		r += "\nhashcode: "+hashCode();
+		r += "\nAdjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2);
 		r += "\nEdge attributes:";
 		for (int i = 0; i < 3; i++)
-			r += " "+((adjPos >> (8*(1+i))) & 0xff);
+			r += " "+Integer.toHexString((adjPos >> (8*(1+i))) & 0xff);
 		return r;
 	}
 

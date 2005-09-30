@@ -24,6 +24,7 @@ import java.util.Random;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Stack;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.apache.log4j.Logger;
 
@@ -219,6 +220,13 @@ public class OTriangle
 		tri = t;
 		orientation = 0;
 		attributes = (tri.adjPos >> 8) & 0xff;
+	}
+	
+	public final void bind(Triangle t, int o)
+	{
+		tri = t;
+		orientation = o;
+		pullAttributes();
 	}
 	
 	/**
@@ -1069,8 +1077,10 @@ public class OTriangle
 	
 	public boolean cycleTrianglesAroundOrigin(ArrayList triangles, HashSet triSet, boolean clockwise)
 	{
+		Vertex o = origin();
 		if (!triSet.contains(tri))
 		{
+			assert tri.vertex[0] == o || tri.vertex[1] == o || tri.vertex[2] == o : o+"\n"+tri;
 			triangles.add(tri);
 			triSet.add(tri);
 		}
@@ -1091,6 +1101,7 @@ public class OTriangle
 					return false;
 				symOTri();
 			}
+			assert tri.vertex[0] == o || tri.vertex[1] == o || tri.vertex[2] == o : o+"\n"+tri;
 			if (!triSet.contains(tri))
 			{
 				triangles.add(tri);
@@ -1102,29 +1113,80 @@ public class OTriangle
 		return true;
 	}
 	
+	public void invertOrientationFace(boolean markLocked)
+	{
+		assert markLocked == true;
+		// Swap origin and destination, update adjacency relations and process
+		// neighbours
+		Vertex o = origin();
+		Vertex d = destination();
+		Stack todo = new Stack();
+		HashSet seen = new HashSet();
+		todo.push(tri);
+		swapVertices(seen, todo);
+		if (origin() != d)
+			nextOTri();
+		if (origin() != d)
+			nextOTri();
+		assert o == destination() : o+" "+d+" "+this;
+	}
+	
+	private static void swapVertices(HashSet seen, Stack todo)
+	{
+		OTriangle ot = new OTriangle();
+		OTriangle sym = new OTriangle();
+		while (todo.size() > 0)
+		{
+			Triangle t = (Triangle) todo.pop();
+			if (seen.contains(t))
+				continue;
+			seen.add(t);
+			Vertex temp = t.vertex[2];
+			t.vertex[2] = t.vertex[1];
+			t.vertex[1] = temp;
+			Object a = t.getAdj(2);
+			t.setAdj(2, t.getAdj(1));
+			t.setAdj(1, a);
+			// Swap attributes for edges 1 and 2
+			t.swapAttributes12();
+			// Fix adjacent triangles
+			ot.bind(t);
+			for (int i = 0; i < 3; i++)
+			{
+				ot.nextOTri();
+				if (ot.getAdj() != null)
+				{
+					OTriangle.symOTri(ot, sym);
+					sym.glue1(ot);
+					todo.push(sym.tri);
+				}
+			}
+		}
+	}
+	
 	private final String showAdj(int num)
 	{
+		if (!(tri.getAdj(num) instanceof Triangle))
+			return "N/A";
 		String r = "";
 		Triangle t = (Triangle) tri.getAdj(num);
 		if (t == null)
-			r+= " null";
+			r+= "null";
 		else
-		{
 			r+= t.hashCode()+"["+(((tri.adjPos & (3 << (2*num))) >> (2*num)) & 3)+"]";
-		}
 		return r;
 	}
 	
 	public final String toString()
 	{
-		String r = "Orientation: "+orientation+"\n";
-		r += "HashCode Tri: "+tri.hashCode()+"\n";
-		r += "Adjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2)+"\n";
-		r += "Attributes: "+Integer.toHexString((tri.adjPos >> 8) & 0xff)+" "+Integer.toHexString((tri.adjPos >> 16) & 0xff)+" "+Integer.toHexString((tri.adjPos >> 24) & 0xff)+" => "+Integer.toHexString(attributes)+"\n";
-		r += "Vertices:\n";
-		r += "  Origin: "+origin()+"\n";
-		r += "  Destination: "+destination()+"\n";
-		r += "  Apex: "+apex();
+		String r = "Orientation: "+orientation;
+		r += "\nHashCode Tri: "+tri.hashCode();
+		r += "\nAdjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2);
+		r += "\nAttributes: "+Integer.toHexString((tri.adjPos >> 8) & 0xff)+" "+Integer.toHexString((tri.adjPos >> 16) & 0xff)+" "+Integer.toHexString((tri.adjPos >> 24) & 0xff)+" => "+Integer.toHexString(attributes);
+		r += "\nVertices:";
+		r += "\n  Origin: "+origin();
+		r += "\n  Destination: "+destination();
+		r += "\n  Apex: "+apex();
 		return r;
 	}
 
