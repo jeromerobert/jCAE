@@ -125,8 +125,20 @@ public class Triangle
 	public void swapAttributes12()
 	{
 		int byte0 = adjPos & 0xff;
-		int byte0sw = (byte0 & 195) | ((byte0 & 12) << 2) | ((byte0 & 48) >> 2);
+		int byte0sw = (byte0 & 0xc3) | ((byte0 & 0x0c) << 2) | ((byte0 & 0x30) >> 2);
 		adjPos = byte0sw | (adjPos & 0x0000ff00) | ((adjPos & 0x00ff0000) << 8) | ((adjPos & 0xff000000) >> 8);
+	}
+	public void swapAttributes01()
+	{
+		int byte0 = adjPos & 0xff;
+		int byte0sw = (byte0 & 0xf0) | ((byte0 & 0x03) << 2) | ((byte0 & 0x0c) >> 2);
+		adjPos = byte0sw | (adjPos & 0xff000000) | ((adjPos & 0x0000ff00) << 8) | ((adjPos & 0x00ff0000) >> 8);
+	}
+	public void swapAttributes02()
+	{
+		int byte0 = adjPos & 0xff;
+		int byte0sw = (byte0 & 0xcc) | ((byte0 & 0x03) << 4) | ((byte0 & 0x30) >> 4);
+		adjPos = byte0sw | (adjPos & 0x00ff0000) | ((adjPos & 0x0000ff00) << 16) | ((adjPos & 0xff000000) >> 16);
 	}
 	
 	public boolean isMarked()

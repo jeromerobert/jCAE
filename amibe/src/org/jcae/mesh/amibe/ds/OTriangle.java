@@ -1123,11 +1123,8 @@ public class OTriangle
 		Stack todo = new Stack();
 		HashSet seen = new HashSet();
 		todo.push(tri);
+		todo.push(new Integer(orientation));
 		swapVertices(seen, todo);
-		if (origin() != d)
-			nextOTri();
-		if (origin() != d)
-			nextOTri();
 		assert o == destination() : o+" "+d+" "+this;
 	}
 	
@@ -1137,18 +1134,24 @@ public class OTriangle
 		OTriangle sym = new OTriangle();
 		while (todo.size() > 0)
 		{
+			int o = ((Integer) todo.pop()).intValue();
 			Triangle t = (Triangle) todo.pop();
 			if (seen.contains(t))
 				continue;
 			seen.add(t);
-			Vertex temp = t.vertex[2];
-			t.vertex[2] = t.vertex[1];
-			t.vertex[1] = temp;
-			Object a = t.getAdj(2);
-			t.setAdj(2, t.getAdj(1));
-			t.setAdj(1, a);
-			// Swap attributes for edges 1 and 2
-			t.swapAttributes12();
+			Vertex temp = t.vertex[next3[o]];
+			t.vertex[next3[o]] = t.vertex[prev3[o]];
+			t.vertex[prev3[o]] = temp;
+			Object a = t.getAdj(next3[o]);
+			t.setAdj(next3[o], t.getAdj(prev3[o]));
+			t.setAdj(prev3[o], a);
+			// Swap attributes for edges
+			if (o == 0)
+				t.swapAttributes12();
+			else if (o == 1)
+				t.swapAttributes02();
+			else
+				t.swapAttributes01();
 			// Fix adjacent triangles
 			ot.bind(t);
 			for (int i = 0; i < 3; i++)
@@ -1156,9 +1159,13 @@ public class OTriangle
 				ot.nextOTri();
 				if (ot.getAdj() != null)
 				{
-					OTriangle.symOTri(ot, sym);
-					sym.glue1(ot);
-					todo.push(sym.tri);
+					if (!ot.hasAttributes(NONMANIFOLD))
+					{
+						OTriangle.symOTri(ot, sym);
+						todo.push(sym.tri);
+						todo.push(new Integer(sym.orientation));
+						sym.glue1(ot);
+					}
 				}
 			}
 		}

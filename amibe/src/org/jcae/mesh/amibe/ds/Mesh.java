@@ -680,6 +680,7 @@ public class Mesh
 					do
 					{
 						ot.symOTri();
+						assert ot.hasAttributes(OTriangle.NONMANIFOLD);
 						for (int j = 0; j < 2; j++)
 						{
 							ArrayList link = (ArrayList) v[j].getLink();
@@ -817,7 +818,7 @@ public class Mesh
 							ot2.invertOrientationFace(true);
 						}
 					}
-					if (cnt == 0)
+					if (cnt == 0 && (!ot2.hasAttributes(OTriangle.NONMANIFOLD)))
 					{
 						ot.glue(ot2);
 					}
