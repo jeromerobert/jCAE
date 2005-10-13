@@ -20,25 +20,24 @@
 
 package org.jcae.viewer3d.fe.unv;
 
+import java.io.*;
 import org.jcae.viewer3d.Domain;
-import org.jcae.viewer3d.fe.FEDomainAdapter;
+import org.jcae.viewer3d.Palette;
 import org.jcae.viewer3d.fe.FEProvider;
 
-/**
- * A FEProvider which get data from an IDEAS UNV file.
- * @author Jerome Robert
- * @todo implements, add constructors...
- */
 public class UNVProvider implements FEProvider
 {
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.DomainProvider#getDomainIDs()
-	 */
-	public int[] getDomainIDs()
+	private static Palette palette = new Palette(Integer.MAX_VALUE);
+	private UNVParser parser=new UNVParser();
+	
+	public UNVProvider()
 	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		//empty
+	}
+	
+	public UNVProvider(File file) throws IOException
+	{
+		load(new BufferedReader(new FileReader(file)));
 	}
 
 	/* (non-Javadoc)
@@ -46,7 +45,30 @@ public class UNVProvider implements FEProvider
 	 */
 	public Domain getDomain(int id)
 	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		return new UNVDomain(parser, id, palette.getColor(id));
+	}
+	
+	/* (non-Javadoc)
+	 * @see jcae.viewer3d.DomainProvider#getDomainIDs()
+	 */
+	public int[] getDomainIDs()
+	{		
+		int l=parser.getTria3GroupNames().length;
+		int[] toReturn=new int[l];
+		for(int i=0; i<l; i++)
+		{
+			toReturn[i]=i;
+		}
+		return toReturn;
+	}
+
+	public void load(BufferedReader stream) throws IOException
+	{
+		parser.parse(stream);
+	}
+	
+	public void load(InputStream stream) throws IOException	
+	{
+		parser.parse(new BufferedReader(new InputStreamReader(stream)));
 	}
 }

@@ -72,9 +72,11 @@ public interface FDDomain extends ColoredDomain, MarkDomain
 	Iterator getZWireIterator();
 	
 	/**
-	 * Return an iterator on {i1, i2, j, k} arrays, describing XY and XZ slots<br>	
-	 * Return an iterator on {j1, j2, i, k} arrays, describing YX and YZ slots<br>	
-	 * Return an iterator on {k1, k2, i, j} arrays, describing ZY and ZX slots */	 
+	 * Return an iterator on int[]{i1, i2, j, k}, describing XY and XZ slots<br>	
+	 * Return an iterator on int[]{j1, j2, i, k}, describing YX and YZ slots<br>	
+	 * Return an iterator on int[]{k1, k2, i, j}, describing ZY and ZX slots or<br>
+	 * float[]{x0, y0, z0, z1, y1, z1}
+	 */	 
 	Iterator getSlotIterator(byte type);
 	
 	/** Return an iteraotr on {i1, j1, k1, i2, j2, k2} arrays, describing volumes*/

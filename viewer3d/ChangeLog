@@ -1,3 +1,89 @@
+2005-10-13 12:12  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/help,
+	  src/org/jcae/viewer3d/help/navigation.html:
+	  Add 3D navigation help
+	* src/org/jcae/viewer3d/fe/ViewableFE.java:
+	  Allow to display triangles without white line
+
+2005-10-12 15:06  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/fd/ViewableFD.java:
+	  Fix a bug in mark picking
+	* src/org/jcae/viewer3d/MarkUtils.java:
+	  Allow to use RenderedImage as marks
+	* src/org/jcae/viewer3d/post/:
+	  Make ImageViewable faster
+
+2005-10-07 12:49  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/fd/:
+	  Start implementation of wire and slot cell selection
+	* build.xml: Always compile for java 1.4
+	* src/org/jcae/viewer3d/post/ImageViewable.java:
+	  Allow to work with Image object in ImageViewable
+	* src/org/jcae/viewer3d/fe/unv/UNVProvider.java:
+	  Make the UNVProvider more user friendly
+
+2005-10-06 08:26  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/fe/ViewableFE.java:
+	  Allow to do not use Iterator to return nodes
+
+2005-10-05 15:38  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/fe/unv/UNVDomain.java,
+	  src/org/jcae/viewer3d/fe/unv/UNVParser.java,
+	  src/org/jcae/viewer3d/fe/unv/UNVProvider.java:
+	  Add UNVProvider
+
+2005-10-04 07:59  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/cad/ViewableCAD.java,
+	  src/org/jcae/viewer3d/cad/occ/OCCEdgeDomain.java,
+	  src/org/jcae/viewer3d/cad/occ/OCCProvider.java:
+	  Allow to change color and width of geom edges
+
+2005-10-03 12:03  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/ViewBehavior.java:
+	  Workaround for bug
+	  http://java3d.dev.java.net/issues/show_bug.cgi?id=179
+
+2005-09-28 08:20  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/View.java,
+	  src/org/jcae/viewer3d/ViewBehavior.java,
+	  src/org/jcae/viewer3d/post/ImageViewable.java,
+	  src/org/jcae/viewer3d/post/QuadPostViewable.java:
+	  Allow to set the rotation center by picking
+
+2005-09-27 16:47  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/fd/FDDomain.java,
+	  src/org/jcae/viewer3d/fd/ViewableFD.java:
+	  Allow to specify slot with float coordinates
+	* src/org/jcae/viewer3d/View.java: Allow
+	  to set and get the rotation center programmaticaly
+
+2005-09-26 10:47  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/post/Legend.java:
+	  Fix a repaint bug in the legend
+
+2005-09-19 13:38  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/post/ImageViewable.java:
+	  Fix CapabilityNotSetException on ImageViewable (bug reported
+	  by Erwan Feat).
+
+2005-09-07 15:18  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/post/ImageViewable.java:
+	  Use bigger texture to ensure power 2 resize is not too visible
+	* src/org/jcae/viewer3d/post/ImageViewable.java:
+	  Allow to disable interpolation
+
 2005-09-01 15:05  Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/bg/ViewableBG.java: New class to display

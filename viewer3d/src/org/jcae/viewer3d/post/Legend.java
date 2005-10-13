@@ -67,7 +67,7 @@ public class Legend extends JPanel
 		if(min>max)
 			return;
 		
-		Rectangle bnd = g.getClipBounds();
+		Rectangle bnd = getBounds();
 		int margin=g.getFontMetrics().getHeight();		
 		double d;		
 		

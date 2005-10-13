@@ -76,6 +76,48 @@ public class DefaultColorMapper implements ColorMapper
 		return Color.getHSBColor((1f-v)*2f/3f, 1f, 1f);
 	}
 	
+	public void mapColor(float value, int[] dst, int index)
+	{
+		if (value == Float.NEGATIVE_INFINITY) value = minInf;
+		float v = (value - minInf) / (max - minInf);
+		if (v < 0f) v = 0f;
+		if (v > 1f) v = 1f;
+		float hue = (1f - v) * 2f / 3f;
+		int r = 0, g = 0, b = 0;
+		float h = (hue - (float) Math.floor(hue)) * 6.0f;
+		float f = h - (float) java.lang.Math.floor(h);
+		float q = (1.0f - f);
+		float t = f;
+		switch ((int) h)
+		{
+			case 0 :
+				r = 255;
+				g = (int) (t * 255.0f + 0.5f);
+				break;
+			case 1 :
+				r = (int) (q * 255.0f + 0.5f);
+				g = 255;
+				break;
+			case 2 :
+				g = 255;
+				b = (int) (t * 255.0f + 0.5f);
+				break;
+			case 3 :
+				g = (int) (q * 255.0f + 0.5f);
+				b = 255;
+				break;
+			case 4 :
+				r = (int) (t * 255.0f + 0.5f);
+				b = 255;
+				break;
+			case 5 :
+				r = 255;
+				b = (int) (q * 255.0f + 0.5f);
+				break;
+		}
+		dst[index] = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
+	}
+	
 	public void setMin(float min)
 	{
 		this.min=min;

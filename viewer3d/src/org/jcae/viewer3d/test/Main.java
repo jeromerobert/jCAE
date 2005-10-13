@@ -23,6 +23,7 @@ package org.jcae.viewer3d.test;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ import org.jcae.viewer3d.fe.ViewableFE;
 import org.jcae.viewer3d.fe.amibe.AmibeNodeSelection;
 import org.jcae.viewer3d.fe.amibe.AmibeOverlayProvider;
 import org.jcae.viewer3d.fe.amibe.AmibeProvider;
+import org.jcae.viewer3d.fe.unv.UNVProvider;
 
 /**
  * @author Jerome Robert
@@ -93,14 +95,14 @@ public class Main
 
 			
 			//Test FE visu in 1 view
-			JFrame feFrame=new JFrame("jcae-viewer3d-fe demo");			
+			/*JFrame feFrame=new JFrame("jcae-viewer3d-fe demo");			
 			feFrame.setSize(800,600);
 			feFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 			View feView=new View();			
 			final AmibeProvider ap=new AmibeProvider(new File("/var/tmp/mesh"));
 			final ViewableFE fev=new ViewableFE(ap);			
-			ViewableFE ffe=new ViewableFE(new AmibeOverlayProvider(new File("/var/tmp/mesh"), AmibeOverlayProvider.FREE_EDGE));
-			//ViewableFE fev=new ViewableFE(new AmibeProvider(new File("/tmp")));
+			ViewableFE ffe=new ViewableFE(new AmibeOverlayProvider(new File("/var/tmp/mesh"), AmibeOverlayProvider.FREE_EDGE));			
+			
 			feView.add(ffe);
 			feView.add(fev);			
 			feView.fitAll();
@@ -122,8 +124,27 @@ public class Main
 						e.printStackTrace();
 					}
 				}
-			});
+			});*/
+
+			//Test UNV Loader
+			JFrame feFrame=new JFrame();			
+			feFrame.setSize(800,600);
+			feFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+			View feView=new View();
+			UNVProvider unvProvider=new UNVProvider();
+			unvProvider.load(new FileInputStream("/home/jerome/cassiope/maill_surf.unv"));
+			UNVProvider unvProviderSol=new UNVProvider();
+			//unvProviderSol.load(new FileInputStream("/home/jerome/cassiope/maill_vol.unv"));
+			//unvProviderSol.load(new FileInputStream("/home/jerome/Models/unv/flight_solid.unv"));
+			unvProviderSol.load(new FileInputStream("/tmp/cube.unv"));
 			
+			/*ViewableFE fev=new ViewableFE(unvProvider);
+			feView.add(fev);*/
+			feView.add(new ViewableFE(unvProviderSol));
+			feView.fitAll();
+			feFrame.getContentPane().add(feView);
+			feFrame.setVisible(true);
+			feView.setOriginAxisVisible(true);
 			
 			//Test offscreen screenshot
 			/*View feView2=new View(true);			

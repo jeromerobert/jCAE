@@ -20,17 +20,19 @@
 
 package org.jcae.viewer3d.cad.occ;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import org.jcae.opencascade.jni.*;
+import org.jcae.viewer3d.ColoredDomain;
 import org.jcae.viewer3d.cad.CADDomainAdapator;
 
 /**
  * @author Jerome Robert
  *
  */
-public class OCCEdgeDomain extends CADDomainAdapator
+public class OCCEdgeDomain extends CADDomainAdapator implements ColoredDomain
 {
 	static class MyEdge extends TopoDS_Edge
 	{
@@ -59,6 +61,7 @@ public class OCCEdgeDomain extends CADDomainAdapator
 	
 	private TopoDS_Shape shape;
 	private ArrayList edges=new ArrayList();
+	private Color color=Color.WHITE;
 	
 	/***
 	 * Not used. Just here to keep it somewhere.
@@ -179,5 +182,15 @@ public class OCCEdgeDomain extends CADDomainAdapator
 	public Iterator getEdgeIterator()
 	{
 		return edges.iterator();
+	}
+	
+	public Color getColor()
+	{
+		return color;
+	}
+	
+	public void setColor(Color color)
+	{
+		this.color=color;
 	}
 }

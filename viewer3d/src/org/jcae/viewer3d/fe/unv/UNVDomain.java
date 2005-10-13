@@ -19,14 +19,155 @@
  */
 
 package org.jcae.viewer3d.fe.unv;
-
+import gnu.trove.TIntHashSet;
+import gnu.trove.TIntIntHashMap;
+import java.awt.Color;
+import java.util.Iterator;
 import org.jcae.viewer3d.fe.FEDomainAdapter;
 
-/**
- * A FEDomain which get data from a IDEAS UNV file
- * @author Jerome Robert
- * @todo implement
- */
 public class UNVDomain extends FEDomainAdapter
 {
+	private Color color;
+	private int id;
+	private float[] nodes;
+	private int[] tria3;
+
+	public UNVDomain(UNVParser parser, int id, Color color)
+	{
+		this.id=id;
+		this.color=color;
+		this.color=color;
+		tria3=readTria3(parser);
+		int[] nodesID=makeNodeIDArray(tria3);
+		nodes=readNodes(nodesID, parser.getNodesCoordinates());
+		renumberArray(tria3, nodesID);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getColor()
+	 */
+	public Color getColor(){
+		return color;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getID()
+	 */
+	public int getID(){
+		return id;
+	}
+	
+	public float[] getNodes()
+	{
+		return nodes;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getNumberOfNodes()
+	 */
+	public int getNumberOfNodes(){
+		return nodes.length/3;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getNumberOfTria3()
+	 */
+	public int getNumberOfTria3(){
+		return tria3.length/3;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getTria3Iterator()
+	 */
+	public Iterator getTria3Iterator()
+	{
+		return new Iterator()
+		{
+			private int index=0;
+			public boolean hasNext()
+			{
+				return index<tria3.length;
+			}
+
+			public Object next()
+			{
+				int[] toReturn=new int[3];
+				System.arraycopy(tria3, index, toReturn, 0, 3);
+				index+=3;
+				return toReturn;
+			}
+
+			public void remove()
+			{
+				// TODO Auto-generated method stub
+				throw new UnsupportedOperationException();
+			}
+		};
+	}
+	
+	/**
+	 * Create the list of needed nodes for a triangle array
+	 * @param trias the triangles which require nodes
+	 * @return the nodes id
+	 */
+	private int[] makeNodeIDArray(int[] trias)
+	{		
+		TIntHashSet set=new TIntHashSet(trias.length/2);
+		for(int i=0; i<trias.length; i++)
+		{
+			set.add(trias[i]);
+		}
+		return set.toArray();
+	}
+	
+	private float[] readNodes(int[] nodesID, float[] allNodes)
+	{
+		float[] toReturn=new float[nodesID.length*3];		
+		
+		for(int i=0; i<nodesID.length; i++)
+		{
+			int ii=i*3;
+			int iid=nodesID[i]*3;
+			toReturn[ii]=allNodes[iid];
+			toReturn[ii+1]=allNodes[iid+1];
+			toReturn[ii+2]=allNodes[iid+2];
+		}
+		
+		return toReturn;
+	}
+	
+	private int[] readTria3(UNVParser parser)
+	{
+		int[] elids=parser.getTria3Groups()[id];
+		int[] toReturn=new int[elids.length*3];
+		int[] tri=parser.getTria3Indices();
+		for(int i=0; i<elids.length; i++)
+		{
+			int ii=i*3;
+			int iid=elids[i]*3;
+			toReturn[ii++]=tri[iid++];
+			toReturn[ii++]=tri[iid++];
+			toReturn[ii++]=tri[iid++];
+		}
+		
+		return toReturn;
+	}
+	
+	private void renumberArray(int[] arrayToRenumber, int[] newIndices)
+	{
+		TIntIntHashMap map=new TIntIntHashMap(newIndices.length);
+		for(int i=0; i<newIndices.length; i++)
+		{
+			map.put(newIndices[i], i);
+		}
+		for(int i=0; i<arrayToRenumber.length; i++)
+		{
+			arrayToRenumber[i]=map.get(arrayToRenumber[i]);
+		}
+	}		
+
 }
+

@@ -19,9 +19,6 @@
  */
 
 package org.jcae.viewer3d.fd;
-
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -33,7 +30,9 @@ import java.util.Map;
 public class FDSelection
 {
 	private int domainID;
-
+	private int[][] slotCells=new int[6][];
+	private int[] xWireCells, yWireCells, zWireCells;
+	
 	public FDSelection(int domainID)
 	{
 		this.domainID=domainID;
@@ -226,4 +225,45 @@ public class FDSelection
 			"Y plates: "+Utils.intArrayToCollection(getYPlates())+CR+
 			"Z plates: "+Utils.intArrayToCollection(getZPlates())+CR;
 	}
+
+	void setSlotCells(byte type, int[] cells)
+	{
+		slotCells[type]=cells;
+	}
+	
+	public int[] getSlotCells(byte type)
+	{
+		return slotCells[type];
+	}
+
+	public int[] getXWireCells()
+	{
+		return xWireCells;
+	}
+
+	void setXWireCells(int[] wireCells)
+	{
+		xWireCells = wireCells;
+	}
+
+	public int[] getYWireCells()
+	{
+		return yWireCells;
+	}
+
+	void setYWireCells(int[] wireCells)
+	{
+		yWireCells = wireCells;
+	}
+
+	public int[] getZWireCells()
+	{
+		return zWireCells;
+	}
+
+	void setZWireCells(int[] wireCells)
+	{
+		zWireCells = wireCells;
+	} 
+
 }

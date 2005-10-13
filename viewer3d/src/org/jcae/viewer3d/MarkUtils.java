@@ -1,3 +1,23 @@
+/*
+ * Project Info:  http://jcae.sourceforge.net
+ * 
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * (C) Copyright 2005, by EADS CRC
+ */
+
 package org.jcae.viewer3d;
 
 import java.awt.Color;
@@ -6,6 +26,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import javax.media.j3d.*;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3f;
@@ -73,7 +94,7 @@ public class MarkUtils
 			Shape3D s3d;
 			if(marks[i] instanceof PointAttributes)
 			{
-				PointArray pa=new PointArray(coords.length/3, PointArray.COORDINATES);
+				PointArray pa=new PointArray(coords.length/3, GeometryArray.COORDINATES);
 				pa.setCoordinates(0, coords);
 				Appearance a=new Appearance();
 				a.setPointAttributes((PointAttributes) marks[i]);
@@ -85,7 +106,7 @@ public class MarkUtils
 				s3d.setPickable(false);
 				toReturn.addChild(s3d);
 
-				PointArray pa=new PointArray(coords.length/3, PointArray.COORDINATES);
+				PointArray pa=new PointArray(coords.length/3, GeometryArray.COORDINATES);
 				pa.setCoordinates(0, coords);
 				Appearance a=new Appearance();
 				a.setColoringAttributes(new ColoringAttributes(
@@ -112,7 +133,19 @@ public class MarkUtils
 	static protected Shape3D createLabelShape(Object object, float[] coords)
 	{
 		Shape3D toReturn=new Shape3D();
-		ImageComponent2D img=createImageComponent2D(object.toString(), null, null, null);
+		ImageComponent2D img;
+		
+		if(object instanceof BufferedImage)
+		{
+			img=new ImageComponent2D(ImageComponent.FORMAT_RGBA, (BufferedImage) object);
+		}
+		else if(object instanceof RenderedImage)
+		{
+			img=new ImageComponent2D(ImageComponent.FORMAT_RGBA, (RenderedImage) object);
+		}
+		else
+			img=createImageComponent2D(object.toString(), null, null, null);
+		
 		toReturn.setAppearance(LABEL_APPEARANCE);
 		for(int i=0; i<coords.length; i+=3)
 		{
@@ -176,7 +209,7 @@ public class MarkUtils
 		}
 		graphics.dispose();
 		ImageComponent2D img_comp = new ImageComponent2D(
-			ImageComponent2D.FORMAT_RGBA, tmp_img);
+			ImageComponent.FORMAT_RGBA, tmp_img);
 		return img_comp;
 	}
 

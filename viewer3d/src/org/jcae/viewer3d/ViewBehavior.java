@@ -3,6 +3,7 @@ package org.jcae.viewer3d;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.logging.Logger;
 import javax.media.j3d.BoundingPolytope;
@@ -15,23 +16,68 @@ import com.sun.j3d.utils.picking.PickTool;
 
 class ViewBehavior extends OrbitBehavior
 {
+	// dirty warkaround for bug
+	// https://java3d.dev.java.net/issues/show_bug.cgi?id=179
+	// because xtrans, ytrans and ztrans should be protected not private
+	private final static Field FIELD_XTRANS;
+	private final static Field FIELD_YTRANS;
+	private final static Field FIELD_ZTRANS;
+	private final static Field FIELD_ROTATETRANSFORM;
+	static
+	{
+		Field xtrans=null, ytrans=null, ztrans=null, rotateTransform=null;
+		try
+		{
+			xtrans = OrbitBehavior.class.getDeclaredField("xtrans");
+			ytrans = OrbitBehavior.class.getDeclaredField("ytrans");
+			ztrans = OrbitBehavior.class.getDeclaredField("ztrans");
+			rotateTransform = OrbitBehavior.class.getDeclaredField("rotateTransform");
+			xtrans.setAccessible(true);
+			ytrans.setAccessible(true);
+			ztrans.setAccessible(true);
+			rotateTransform.setAccessible(true);
+		}
+		catch (SecurityException e)
+		{			
+			e.printStackTrace();
+		}
+		catch (NoSuchFieldException e)
+		{		
+			e.printStackTrace();
+		}
+		FIELD_XTRANS=xtrans;
+		FIELD_YTRANS=ytrans;
+		FIELD_ZTRANS=ztrans;
+		FIELD_ROTATETRANSFORM=rotateTransform;
+	}
+	
 	private Point anchor;
 	private BufferedImage image;
 	private View view;
 	private Rectangle selectionRectangle;
-
+	private boolean changeRotationCenter;
+	
 	public ViewBehavior(View view)
 	{
 		super(view, OrbitBehavior.REVERSE_ALL);
 		this.view = view;
 	}
 
+	public void setChangeRotationCenter(boolean status)
+	{
+		view.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+		changeRotationCenter=status;
+	}
+	
 	protected void processMouseEvent(MouseEvent evt)
 	{	
 		if (evt.getID() == MouseEvent.MOUSE_CLICKED
 			&& evt.getButton() == MouseEvent.BUTTON1)
 		{
-			pickPoint(evt);
+			if(changeRotationCenter)
+				changeRotationCenter(evt);
+			else
+				pickPoint(evt);
 		}
 		// TODO
 		// The picking on rectangle is currently disabled because it
@@ -66,15 +112,94 @@ class ViewBehavior extends OrbitBehavior
 			fixOriginAxis(t3d);
 			//notify slave view to change their position
 			view.firePositionChanged();
-			//TODO Center the behaviour on the center of the intersection between
-			// frustrum and scene bounds.
 		}
 	}
+	
+	private Tuple3d getTranslation()
+	{
+		Vector3d toReturn=null;
+		try
+		{
+			toReturn = new Vector3d(
+				FIELD_XTRANS.getDouble(this),
+				FIELD_YTRANS.getDouble(this),
+				FIELD_ZTRANS.getDouble(this)
+			);
+		}
+		catch (IllegalArgumentException e)
+		{
+			e.printStackTrace();
+		}
+		catch (IllegalAccessException e)
+		{		
+			e.printStackTrace();
+		}		
+		return toReturn;
+	}
 
-	protected void pickPoint(MouseEvent evt)
+	private void setTranslation(Tuple3d vector)
+	{
+		try
+		{
+			FIELD_XTRANS.setDouble(this, vector.x);
+			FIELD_YTRANS.setDouble(this, vector.y);
+			FIELD_ZTRANS.setDouble(this, vector.z);
+		}
+		catch (IllegalArgumentException e)
+		{
+			e.printStackTrace();
+		}
+		catch (IllegalAccessException e)
+		{		
+			e.printStackTrace();
+		}
+	}
+	
+	private Transform3D getRotateTransform()
+	{
+		try
+		{
+			return (Transform3D) FIELD_ROTATETRANSFORM.get(this);
+		}
+		catch (IllegalArgumentException e)
+		{	
+			e.printStackTrace();
+		}
+		catch (IllegalAccessException e)
+		{		
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	private void changeRotationCenter(MouseEvent evt)
+	{
+		PickResult result=basicPickPoint(evt);
+		if(result!=null && result.numIntersections()>0)
+		{
+			
+			Point3d newCenter=result.getIntersection(0).getPointCoordinates();			
+			Point3d oldCenter=new Point3d();
+			getRotationCenter(oldCenter);
+			Tuple3d trans = getTranslation();						
+			Point3d centerDelta=new Point3d();			
+			centerDelta.sub(oldCenter, newCenter);
+			Transform3D invRot=new Transform3D(getRotateTransform());
+			invRot.invert();
+			invRot.transform(centerDelta);
+			trans.add(centerDelta);
+			setTranslation(trans);
+			setRotationCenter(newCenter);
+		}
+		changeRotationCenter=false;
+		view.setCursor(Cursor.getDefaultCursor());
+	}
+
+	protected PickResult basicPickPoint(MouseEvent evt)
 	{
 		Viewable cv = view.getCurrentViewable();
-		if (cv == null) return;
+		if (cv == null)
+			return null;
 		if (!evt.isControlDown())
 		{
 			Logger.global.finest("Ctrl is up so everything is unselected");
@@ -89,9 +214,14 @@ class ViewBehavior extends OrbitBehavior
 		long time2 = System.currentTimeMillis();
 		Logger.global.finest("picked viewable is " + cv + " in "
 			+ (time2 - time) + " ms");
-		
+		return result;
+	}
+	
+	protected void pickPoint(MouseEvent evt)
+	{
+		PickResult result = basicPickPoint(evt);
 		if (result != null)
-			cv.pick(result, true);
+			view.getCurrentViewable().pick(result, true);
 	}
 
 	protected void startRectangleSelection(MouseEvent evt)
@@ -133,8 +263,7 @@ class ViewBehavior extends OrbitBehavior
 		PickResult result = pickCanvas.pickClosest();
 		long time2 = System.currentTimeMillis();
 		Logger.global.finest("picked viewable is " + cv + " in "
-			+ (time2 - time) + " ms");
-		System.out.println(Arrays.asList(pickCanvas.pickAll()));		
+			+ (time2 - time) + " ms");		
 		if (result != null) cv.pick(result, true);
 	}
 

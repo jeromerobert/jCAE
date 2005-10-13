@@ -20,12 +20,9 @@
 
 package org.jcae.viewer3d.cad.occ;
 
+import java.awt.Color;
 import java.util.NoSuchElementException;
 import org.jcae.opencascade.jni.*;
-import org.jcae.opencascade.jni.BRepTools;
-import org.jcae.opencascade.jni.IGESControl_Reader;
-import org.jcae.opencascade.jni.STEPControl_Reader;
-import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.jcae.viewer3d.Domain;
 import org.jcae.viewer3d.cad.CADProvider;
 
@@ -39,6 +36,7 @@ public class OCCProvider implements CADProvider
 	public static final int FACE_DOMAIN=1;
 	public static final int VERTEX_DOMAIN=2;
 	private TopoDS_Shape shape;
+	private Color edgeColor=Color.WHITE;
 
 	/**
 	 * Create an OCCProvider from a TopoDS_Shape object
@@ -96,10 +94,24 @@ public class OCCProvider implements CADProvider
 	{
 		switch(id)
 		{
-			case EDGE_DOMAIN: return new OCCEdgeDomain(shape);
+			case EDGE_DOMAIN:
+			{	OCCEdgeDomain oed=new OCCEdgeDomain(shape);
+				oed.setColor(edgeColor);
+				return oed;
+			}
 			case FACE_DOMAIN: return new OCCFaceDomain(shape);
 			case VERTEX_DOMAIN: return new OCCVertexDomain(shape);
 			default: throw new NoSuchElementException();
 		}
+	}
+
+	public Color getEdgeColor()
+	{
+		return edgeColor;
+	}
+
+	public void setEdgeColor(Color edgeColor)
+	{
+		this.edgeColor = edgeColor;
 	}
 }

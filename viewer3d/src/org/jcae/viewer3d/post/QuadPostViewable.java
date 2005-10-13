@@ -8,6 +8,7 @@ import org.jcae.viewer3d.Viewable;
 import org.jcae.viewer3d.post.ColorMapper;
 import org.jcae.viewer3d.post.DefaultColorMapper;
 import com.sun.j3d.utils.picking.PickResult;
+import com.sun.j3d.utils.picking.PickTool;
 
 public class QuadPostViewable implements Viewable
 {
@@ -42,7 +43,7 @@ public class QuadPostViewable implements Viewable
 		quadArray.setCapability(GeometryArray.ALLOW_COLOR_WRITE);
 		quadArray.setCapability(IndexedGeometryArray.ALLOW_COLOR_INDEX_WRITE);
 		Shape3D s=new Shape3D(quadArray, APPEARANCE);
-		s.setPickable(false);
+		PickTool.setCapabilities(s, PickTool.INTERSECT_COORD);
 		branchGroup.addChild(s);
 	}
 

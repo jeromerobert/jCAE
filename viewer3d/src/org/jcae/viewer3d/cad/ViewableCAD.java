@@ -22,13 +22,10 @@ package org.jcae.viewer3d.cad;
 
 import java.awt.Color;
 import java.util.*;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 import javax.media.j3d.*;
 import javax.vecmath.Color3f;
+import org.jcae.viewer3d.ColoredDomain;
 import org.jcae.viewer3d.DomainProvider;
 import org.jcae.viewer3d.SelectionListener;
 import org.jcae.viewer3d.Viewable;
@@ -74,6 +71,7 @@ public class ViewableCAD implements Viewable
 	private Map facesInfo;
 	private Collection selectedFaces=new HashSet();
 	private String name;
+	private LineAttributes lineAttributes=new LineAttributes();
 	/**
 	 * 
 	 */
@@ -235,9 +233,13 @@ public class ViewableCAD implements Viewable
 			lsa.setCoordinates(0, coordinates);
 			Shape3D shape3d=new Shape3D(lsa);
 			Appearance a=new Appearance();
-			LineAttributes la=new LineAttributes();
 			ColoringAttributes ca=new ColoringAttributes();
-			a.setLineAttributes(la);
+			if(domain instanceof ColoredDomain)
+			{
+				ColoredDomain d=(ColoredDomain)domain;
+				ca.setColor(new Color3f(d.getColor()));
+			}
+			a.setLineAttributes(lineAttributes);
 			a.setColoringAttributes(ca);
 			shape3d.setAppearance(a);
 			toReturn.addChild(shape3d);
@@ -391,5 +393,10 @@ public class ViewableCAD implements Viewable
 	{
 		// TODO Implement this method and remove the other addSelectionListener method
 		throw new UnsupportedOperationException();
+	}
+
+	public void setLineWidth(float lineWidth)
+	{
+		lineAttributes.setLineWidth(lineWidth);
 	}
 }

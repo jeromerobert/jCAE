@@ -33,6 +33,8 @@ import org.jcae.viewer3d.DomainProvider;
 import org.jcae.viewer3d.SelectionListener;
 import org.jcae.viewer3d.Viewable;
 import org.jcae.viewer3d.fd.Utils;
+import com.sun.j3d.utils.geometry.GeometryInfo;
+import com.sun.j3d.utils.geometry.NormalGenerator;
 import com.sun.j3d.utils.picking.PickIntersection;
 import com.sun.j3d.utils.picking.PickResult;
 
@@ -54,6 +56,15 @@ public class ViewableFE implements Viewable
 	private String name;
 	private Collection listeners=Collections.synchronizedCollection(new ArrayList());
 	private short pickingMode=PICK_DOMAIN;
+	private boolean showShapeLine=true;
+	private static final float zFactorAbs=Float.parseFloat(System.getProperty(
+		"javax.media.j3d.zFactorAbs", "20.0f"));
+	private static final float zFactorRel=Float.parseFloat(System.getProperty(
+		"javax.media.j3d.zFactorAbs", "2.0f"));
+
+	final private static PolygonAttributes FILL_POLYGON_ATTR=new PolygonAttributes(
+		PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE,
+		2.0f * zFactorAbs, true, zFactorRel);
 	/**
 	 * 
 	 */
@@ -306,35 +317,57 @@ public class ViewableFE implements Viewable
 		if(domain.getNumberOfNodes()==0 || domain.getNumberOfTria3()==0)
 			return null;
 		int[] tria3=new int[domain.getNumberOfTria3()*3];
-		float[] nodes=new float[domain.getNumberOfNodes()*3]; 
-		Iterator it=domain.getNodesIterator();
-		int i=0;
-		while(it.hasNext())
-		{
-			float[] f=(float[]) it.next();
-			System.arraycopy(f, 0, nodes, i, 3);
-			i+=3;
-		}
+		float[] nodes=domain.getNodes();
+		if(nodes==null)
+			nodes=iteratorToArray(domain.getNodesIterator(), domain.getNumberOfNodes());
 		
-		i=0;
-		it=domain.getTria3Iterator();
+		int i=0;
+		Iterator it=domain.getTria3Iterator();
 		while(it.hasNext())
 		{
 			int[] f=(int[]) it.next();
 			System.arraycopy(f, 0, tria3, i, 3);
 			i+=3;
 		}
-			
-		IndexedTriangleArray geom = new IndexedTriangleArray(nodes.length / 3,
-			TriangleArray.COORDINATES, tria3.length);
-		geom.setCoordinateIndices(0, tria3);
-		geom.setCapability(IndexedTriangleArray.ALLOW_COUNT_READ);
-		geom.setCapability(IndexedTriangleArray.ALLOW_FORMAT_READ);
-		geom.setCapability(IndexedTriangleArray.ALLOW_COORDINATE_READ);
-		geom.setCapability(IndexedTriangleArray.ALLOW_COORDINATE_INDEX_READ);
-		geom.setCoordinates(0, nodes);
+		
+		IndexedTriangleArray geom;
+		if(showShapeLine)
+		{
+			geom = new IndexedTriangleArray(nodes.length / 3,
+				GeometryArray.COORDINATES, tria3.length);
+			geom.setCoordinateIndices(0, tria3);
+			geom.setCoordinates(0, nodes);
+		}
+		else
+		{
+			GeometryInfo gi=new GeometryInfo(GeometryInfo.TRIANGLE_ARRAY);
+			gi.setCoordinates(nodes);
+			gi.setCoordinateIndices(tria3);
+			NormalGenerator ng=new NormalGenerator(0);
+			ng.generateNormals(gi);
+			geom=(IndexedTriangleArray) gi.getIndexedGeometryArray();
+		}				
+		
+		geom.setCapability(GeometryArray.ALLOW_COUNT_READ);
+		geom.setCapability(GeometryArray.ALLOW_FORMAT_READ);
+		geom.setCapability(GeometryArray.ALLOW_COORDINATE_READ);
+		geom.setCapability(IndexedGeometryArray.ALLOW_COORDINATE_INDEX_READ);
+		
 		geom.setUserData(new Integer(domain.getID()));
 		return geom;
+	}
+
+	private float[] iteratorToArray(Iterator it, int numberOfNodes)
+	{
+		float[] toReturn = new float[numberOfNodes*3]; 
+		int i=0;
+		while(it.hasNext())
+		{
+			float[] f=(float[]) it.next();
+			System.arraycopy(f, 0, toReturn, i, 3);
+			i+=3;
+		}
+		return toReturn;
 	}
 
 	/**
@@ -350,30 +383,42 @@ public class ViewableFE implements Viewable
 			return branchGroup;
 		}
 		Appearance shapeFillAppearance = new Appearance();
-		shapeFillAppearance.setPolygonAttributes(new PolygonAttributes(
-			PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE,
-			2.0f * Float.parseFloat(System.getProperty(
-				"javax.media.j3d.zFactorAbs", "20.0f")), false, Float
-				.parseFloat(System.getProperty("javax.media.j3d.zFactorRel",
-					"2.0f"))));
-		shapeFillAppearance.setColoringAttributes(new ColoringAttributes(
-			new Color3f(domain.getColor().darker()), ColoringAttributes.FASTEST));
-		Shape3D shapeFill = new Shape3D(geom, shapeFillAppearance);		
+		shapeFillAppearance.setPolygonAttributes(FILL_POLYGON_ATTR);
+		Shape3D shapeFill = new Shape3D(geom, shapeFillAppearance);
+		
+		if(showShapeLine)
+		{
+			shapeFillAppearance.setColoringAttributes(new ColoringAttributes(
+				new Color3f(domain.getColor().darker()), ColoringAttributes.FASTEST));
+		}
+		else
+		{
+			Material m=new Material();
+			m.setAmbientColor(new Color3f(domain.getColor()));
+			shapeFillAppearance.setMaterial(m);
+			shapeFill.setCapability(Shape3D.ALLOW_APPEARANCE_READ);
+			shapeFillAppearance.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_READ);
+		}
+						
 		shapeFill.setCapability(Shape3D.ALLOW_GEOMETRY_READ);		
 		branchGroup.addChild(shapeFill);
-		Appearance shapeLineAppearance = new Appearance();
-		shapeLineAppearance.setPolygonAttributes(new PolygonAttributes(
-			PolygonAttributes.POLYGON_LINE, PolygonAttributes.CULL_NONE, Float
-				.parseFloat(System.getProperty("javax.media.j3d.zFactorAbs",
-					"20.0f"))));
-		ColoringAttributes ca = new ColoringAttributes(new Color3f(Color.WHITE), ColoringAttributes.FASTEST);
-		ca.setCapability(ColoringAttributes.ALLOW_COLOR_WRITE);
-		shapeLineAppearance.setColoringAttributes(ca);
-		Shape3D shapeLine = new Shape3D(geom, shapeLineAppearance);
-		shapeLine.setPickable(false);
-		shapeLine.setCapability(Shape3D.ALLOW_APPEARANCE_READ);
-		shapeLineAppearance.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_READ);		
-		branchGroup.addChild(shapeLine);
+		
+		if(showShapeLine)
+		{
+			Appearance shapeLineAppearance = new Appearance();
+			shapeLineAppearance.setPolygonAttributes(new PolygonAttributes(
+				PolygonAttributes.POLYGON_LINE, PolygonAttributes.CULL_NONE, Float
+					.parseFloat(System.getProperty("javax.media.j3d.zFactorAbs",
+						"20.0f"))));
+			ColoringAttributes ca = new ColoringAttributes(new Color3f(Color.WHITE), ColoringAttributes.FASTEST);
+			ca.setCapability(ColoringAttributes.ALLOW_COLOR_WRITE);
+			shapeLineAppearance.setColoringAttributes(ca);
+			Shape3D shapeLine = new Shape3D(geom, shapeLineAppearance);
+			shapeLine.setPickable(false);
+			shapeLine.setCapability(Shape3D.ALLOW_APPEARANCE_READ);
+			shapeLineAppearance.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_READ);		
+			branchGroup.addChild(shapeLine);
+		}
 		branchGroup.setCapability(Group.ALLOW_CHILDREN_READ);
 		branchGroup.setCapability(BranchGroup.ALLOW_DETACH);
 		domainIDToBranchGroup.put(new Integer(domain.getID()), branchGroup);
@@ -469,5 +514,10 @@ public class ViewableFE implements Viewable
 			toReturn[i++]=(NodeSelection) ((NodeSelectionImpl)it.next()).clone();
 		}
 		return toReturn;
+	}
+
+	public void setShowShapeLine(boolean showShapeLine)
+	{
+		this.showShapeLine = showShapeLine;
 	}
 }

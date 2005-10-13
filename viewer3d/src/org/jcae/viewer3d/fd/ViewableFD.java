@@ -20,6 +20,7 @@
 
 package org.jcae.viewer3d.fd;
 
+import gnu.trove.TIntArrayList;
 import java.awt.Color;
 import java.util.*;
 import java.util.logging.Logger;
@@ -28,7 +29,6 @@ import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import org.jcae.viewer3d.*;
-import org.jcae.viewer3d.DomainProvider;
 import com.sun.j3d.utils.geometry.GeometryInfo;
 import com.sun.j3d.utils.picking.PickIntersection;
 import com.sun.j3d.utils.picking.PickResult;
@@ -173,7 +173,6 @@ public class ViewableFD implements Viewable
 	
 	protected FDProvider provider;
 	protected BranchGroup parentBranchGroup=new BranchGroup();
-	private Collection pickHistory=new HashSet();
 	private Collection listeners=Collections.synchronizedCollection(new ArrayList());
 	private Shape3D selectedPlates;
 	private Shape3D selectedWires, selectedJunctions;
@@ -189,6 +188,9 @@ public class ViewableFD implements Viewable
 	private boolean wirePickable;
 	private boolean slotPickable;
 	private boolean markPickable;
+
+	private boolean cellPicking;
+	private CellManager cellManager;
 	
 	/**
 	 * 
@@ -197,6 +199,7 @@ public class ViewableFD implements Viewable
 	{
 		this.provider=provider;
 		selectionManager=new SelectionManager(provider);
+		cellManager=new CellManager(provider);
 		parentBranchGroup.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 		parentBranchGroup.setCapability(Group.ALLOW_CHILDREN_READ);
 		parentBranchGroup.setCapability(Group.ALLOW_CHILDREN_WRITE);
@@ -241,7 +244,7 @@ public class ViewableFD implements Viewable
 		float[] coordinates=createQuadArray(domain);
 		if(coordinates.length<3)
 			return;
-		QuadArray qa=new QuadArray(coordinates.length/3, QuadArray.COORDINATES);
+		QuadArray qa=new QuadArray(coordinates.length/3, GeometryArray.COORDINATES);
 		qa.setCoordinates(0, coordinates);			
 		coordinates=null;
 		GeometryInfo gi=new GeometryInfo(qa);
@@ -269,7 +272,7 @@ public class ViewableFD implements Viewable
 		a.setPolygonAttributes(PLATE_POLYGON_ATTRIBUTE);
 		Shape3D s3d=new Shape3D(geom, a);
 		s3d.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-		s3d.setCapability(Shape3D.ALLOW_PICKABLE_WRITE);
+		s3d.setCapability(Node.ALLOW_PICKABLE_WRITE);
 		s3d.setUserData(PLATE_IDENTIFIER);
 		plates.add(s3d);
 		platesBg.addChild(s3d);
@@ -306,7 +309,7 @@ public class ViewableFD implements Viewable
 		a.setColoringAttributes(ca);
 		s3d.setAppearance(a);
 		s3d.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-		s3d.setCapability(Shape3D.ALLOW_PICKABLE_WRITE);
+		s3d.setCapability(Node.ALLOW_PICKABLE_WRITE);
 		s3d.setUserData(new WireDomainID(iDomainId.intValue()));
 		Logger.global.finest("Wires bounds="+s3d.getBounds());
 		platesBg.addChild(s3d);
@@ -334,7 +337,7 @@ public class ViewableFD implements Viewable
 		a.setLineAttributes(SLOT_ATTRIBUTE);
 		s3d.setAppearance(a);
 		s3d.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-		s3d.setCapability(Shape3D.ALLOW_PICKABLE_WRITE);
+		s3d.setCapability(Node.ALLOW_PICKABLE_WRITE);
 		s3d.setUserData(new SlotDomainID(iDomainId.intValue()));
 		s3d.setCapability(Node.ALLOW_PICKABLE_READ);
 		platesBg.addChild(s3d);
@@ -432,141 +435,141 @@ public class ViewableFD implements Viewable
 		indices[ii+22]=index+6;
 		indices[ii+23]=index+5;		
 	}
-	/**
-	 * @param domain
-	 * @return
-	 */
-	//TODO a bit of factorization... this method is an ugly demo of copy/paste
-	private LineArray[] createSlotArray(FDDomain domain)
+
+	private interface CoordinatesComputer
 	{
-		
-		Collection toReturn=new ArrayList();
-		int k=0;
-		Iterator it=domain.getSlotIterator(FDDomain.XZ_SLOT);
-		while(it.hasNext())
+		void compute(int[] indices, float[] out);
+	}
+	
+	private class CoordinatesComputerXZ implements CoordinatesComputer
+	{
+		public void compute(int[] wire, float[] coordinates)
 		{
-			int[] wire=(int[])it.next();
-			float[] coordinates=new float[6];
 			coordinates[0]=(float) provider.getXGrid(wire[0]);			
 			coordinates[1]=(float) (provider.getYGrid(wire[2])+provider.getYGrid(wire[2]+1))/2;
 			coordinates[2]=(float) provider.getZGrid(wire[3]);
 			coordinates[3]=(float) provider.getXGrid(wire[1]);
 			coordinates[4]=coordinates[1];
 			coordinates[5]=coordinates[2];
-			//printFloatDebug(coordinates);
-			LineArray la=new LineArray(6, LineArray.COORDINATES);
-			setGeometryCapabilities(la);
-			la.setCoordinates(0, coordinates);
-			la.setUserData(new SlotID(k, FDDomain.XZ_SLOT));
-			toReturn.add(la);
-			k++;
 		}
-
-		k=0;
-		it=domain.getSlotIterator(FDDomain.XY_SLOT);
-		while(it.hasNext())
+	}
+	
+	private class CoordinatesComputerXY implements CoordinatesComputer
+	{
+		public void compute(int[] wire, float[] coordinates)
 		{
-			int[] wire=(int[])it.next();
-			float[] coordinates=new float[6];
 			coordinates[0]=(float) provider.getXGrid(wire[0]);
 			coordinates[1]=(float) provider.getYGrid(wire[2]);
 			coordinates[2]=(float) (provider.getZGrid(wire[3])+provider.getZGrid(wire[3]+1))/2;			
 			coordinates[3]=(float) provider.getXGrid(wire[1]);
 			coordinates[4]=coordinates[1];
 			coordinates[5]=coordinates[2];
-			//printFloatDebug(coordinates);
-			LineArray la=new LineArray(6, LineArray.COORDINATES);
-			setGeometryCapabilities(la);
-			la.setCoordinates(0, coordinates);
-			la.setUserData(new SlotID(k, FDDomain.XY_SLOT));
-			toReturn.add(la);
-			k++;
 		}
-		
-		k=0;
-		it=domain.getSlotIterator(FDDomain.YZ_SLOT);		
-		while(it.hasNext())
-		{			
-			int[] wire=(int[])it.next();
-			float[] coordinates=new float[6];
+	}
+	
+	private class CoordinatesComputerYZ implements CoordinatesComputer
+	{
+		public void compute(int[] wire, float[] coordinates)
+		{
 			coordinates[0]=(float) (provider.getXGrid(wire[2])+provider.getXGrid(wire[2]+1))/2;			
 			coordinates[1]=(float) provider.getYGrid(wire[0]);
 			coordinates[2]=(float) provider.getZGrid(wire[3]);
 			coordinates[3]=coordinates[0];
 			coordinates[4]=(float) provider.getYGrid(wire[1]);
 			coordinates[5]=coordinates[2];
-			//printFloatDebug(coordinates);
-			LineArray la=new LineArray(6, LineArray.COORDINATES);
-			setGeometryCapabilities(la);
-			la.setCoordinates(0, coordinates);
-			la.setUserData(new SlotID(k, FDDomain.YZ_SLOT));
-			toReturn.add(la);
-			k++;
 		}
-
-		k=0;
-		it=domain.getSlotIterator(FDDomain.YX_SLOT);		
-		while(it.hasNext())
-		{			
-			int[] wire=(int[])it.next();
-			float[] coordinates=new float[6];
+	}
+	
+	private class CoordinatesComputerYX implements CoordinatesComputer
+	{
+		public void compute(int[] wire, float[] coordinates)
+		{
 			coordinates[0]=(float) provider.getXGrid(wire[2]);
 			coordinates[1]=(float) provider.getYGrid(wire[0]);
 			coordinates[2]=(float) (provider.getZGrid(wire[3])+provider.getZGrid(wire[3]+1))/2;			
 			coordinates[3]=coordinates[0];
 			coordinates[4]=(float) provider.getYGrid(wire[1]);
 			coordinates[5]=coordinates[2];
-			//printFloatDebug(coordinates);
-			LineArray la=new LineArray(6, LineArray.COORDINATES);
-			setGeometryCapabilities(la);
-			la.setCoordinates(0, coordinates);
-			la.setUserData(new SlotID(k, FDDomain.YX_SLOT));
-			toReturn.add(la);
-			k++;
 		}
-				
-		k=0;
-		it=domain.getSlotIterator(FDDomain.ZY_SLOT);
-		while(it.hasNext())
+	}
+	
+	private class CoordinatesComputerZY implements CoordinatesComputer
+	{
+		public void compute(int[] wire, float[] coordinates)
 		{
-			int[] wire=(int[])it.next();
-			float[] coordinates=new float[6];
 			coordinates[0]=(float) (provider.getXGrid(wire[2])+provider.getXGrid(wire[2]+1))/2;			
 			coordinates[1]=(float) provider.getYGrid(wire[3]);
 			coordinates[2]=(float) provider.getZGrid(wire[0]);
 			coordinates[3]=coordinates[0];
 			coordinates[4]=coordinates[1];
 			coordinates[5]=(float) provider.getZGrid(wire[1]);
-			//printFloatDebug(coordinates);
-			LineArray la=new LineArray(6, LineArray.COORDINATES);
-			setGeometryCapabilities(la);
-			la.setCoordinates(0, coordinates);
-			la.setUserData(new SlotID(k, FDDomain.ZY_SLOT));
-			toReturn.add(la);
-			k++;
 		}
-		
-		k=0;
-		it=domain.getSlotIterator(FDDomain.ZX_SLOT);
-		while(it.hasNext())
+	}
+	
+	private class CoordinatesComputerZX implements CoordinatesComputer
+	{
+		public void compute(int[] wire, float[] coordinates)
 		{
-			int[] wire=(int[])it.next();
-			float[] coordinates=new float[6];
 			coordinates[0]=(float) provider.getXGrid(wire[2]);
 			coordinates[1]=(float) (provider.getYGrid(wire[3])+provider.getYGrid(wire[3]+1))/2;
 			coordinates[2]=(float) provider.getZGrid(wire[0]);
 			coordinates[3]=coordinates[0];
 			coordinates[4]=coordinates[1];
 			coordinates[5]=(float) provider.getZGrid(wire[1]);
+		}
+	}	
+
+	/** 
+	 * @param domain
+	 * @param toReturn a collection to add LineArray
+	 * @param type FDDomain.XZ_SLOT
+	 * @param coordinatesComputer
+	 */
+	private void createSlotArray(
+		FDDomain domain,
+		Collection toReturn,
+		byte type,
+		CoordinatesComputer coordinatesComputer)
+	{
+		int k=0;
+		Iterator it=domain.getSlotIterator(type);
+		while(it.hasNext())
+		{
+			Object o=it.next();
+			float[] coordinates;
+			if(o instanceof int[])
+			{
+				int[] wire=(int[])o;
+				coordinates=new float[6];
+				coordinatesComputer.compute(wire, coordinates);
+			}
+			else
+			{
+				coordinates=(float[]) o;
+			}
 			//printFloatDebug(coordinates);
-			LineArray la=new LineArray(6, LineArray.COORDINATES);
+			LineArray la=new LineArray(6, GeometryArray.COORDINATES);
 			setGeometryCapabilities(la);
 			la.setCoordinates(0, coordinates);
-			la.setUserData(new SlotID(k, FDDomain.ZX_SLOT));
+			la.setUserData(new SlotID(k, type));
 			toReturn.add(la);
 			k++;
 		}
-		
+	}
+	
+	/**
+	 * @param domain
+	 * @return
+	 */
+	private LineArray[] createSlotArray(FDDomain domain)
+	{		
+		Collection toReturn=new ArrayList();
+		createSlotArray(domain, toReturn, FDDomain.XZ_SLOT, new CoordinatesComputerXZ());
+		createSlotArray(domain, toReturn, FDDomain.XY_SLOT, new CoordinatesComputerXY());
+		createSlotArray(domain, toReturn, FDDomain.YZ_SLOT, new CoordinatesComputerYZ());
+		createSlotArray(domain, toReturn, FDDomain.YX_SLOT, new CoordinatesComputerYX());
+		createSlotArray(domain, toReturn, FDDomain.ZY_SLOT, new CoordinatesComputerZY());
+		createSlotArray(domain, toReturn, FDDomain.ZX_SLOT, new CoordinatesComputerZX());		
 		return (LineArray[]) toReturn.toArray(new LineArray[toReturn.size()]);
 	}
 
@@ -638,12 +641,10 @@ public class ViewableFD implements Viewable
 			createWires(iDomainId, domainBg, domain);
 			createSlots(iDomainId, domainBg, domain);
 			createSolids(iDomainId, domainBg, domain);
-			if(domain instanceof MarkDomain)
-			{				
-				Node m=MarkUtils.createMarkNode(domain, iDomainId.intValue());
-				marks.add(m);
-				domainBg.addChild(m);				
-			}
+
+			Node m=MarkUtils.createMarkNode(domain, iDomainId.intValue());
+			marks.add(m);
+			domainBg.addChild(m);				
 				
 			parentBranchGroup.addChild(domainBg);
 			domainToBranchGroup.put(iDomainId, domainBg);
@@ -705,7 +706,7 @@ public class ViewableFD implements Viewable
 		a.setPolygonAttributes(PLATE_POLYGON_ATTRIBUTE);
 		Shape3D s3d=new Shape3D(geom, a);
 		s3d.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-		s3d.setCapability(Shape3D.ALLOW_PICKABLE_WRITE);
+		s3d.setCapability(Node.ALLOW_PICKABLE_WRITE);
 		s3d.setUserData(SOLID_IDENTIFIER);
 		solids.add(s3d);
 		domainBg.addChild(s3d);
@@ -838,17 +839,91 @@ public class ViewableFD implements Viewable
 		}
 		else if(result.getObject().getUserData() instanceof WireDomainID)
 		{
-			pickWire(result, selected);
+			if(cellPicking)
+				pickWireCell(result, selected);
+			else
+				pickWire(result, selected);
 		}
 		else if(result.getObject().getUserData() instanceof SlotDomainID)
 		{
-			pickSlot(result, selected);
+			if(cellPicking)
+				pickSlotCell(result, selected);
+			else
+				pickSlot(result, selected);
 		}
 		else if(result.getObject().getUserData() instanceof MarkUtils.MarkID)
 		{
 			pickJunction(result, selected);
 		}
 		fireSelectionChanged();
+	}
+
+	private void pickSlotCell(PickResult result, boolean selected)
+	{
+		result.setFirstIntersectOnly(true);
+		int domainId=((SlotDomainID)result.getObject().getUserData()).getValue();
+		PickIntersection pi = result.getIntersection(0);
+		SlotID o=(SlotID)pi.getGeometryArray().getUserData();
+		
+		Point3d[] cds=pi.getPrimitiveCoordinates();
+		Point3d point=pi.getPointCoordinates();
+		LineArray la=null;
+		if(selected)
+		{						
+			la=cellManager.selectSlot(o.getType(), domainId, o.getValue(), cds, point);
+			selectedWires.addGeometry(la);
+		}
+		else
+		{
+			la=cellManager.unselectSlot(o.getType(), domainId, o.getValue(), cds, point);
+			selectedWires.removeGeometry(la);
+		}
+	}
+
+	private void pickWireCell(PickResult result, boolean selected)
+	{
+		result.setFirstIntersectOnly(true);
+		int domainId=((WireDomainID)result.getObject().getUserData()).getValue();
+		PickIntersection pi = result.getIntersection(0);
+		IntegerUserData o=(IntegerUserData)pi.getGeometryArray().getUserData();
+
+		Point3d[] cds=pi.getPrimitiveCoordinates();
+		Point3d point=pi.getPointCoordinates();
+		Geometry la=null;
+		
+		if(selected)
+		{			
+			if(o instanceof XLineID)
+			{				
+				la=cellManager.selectXWire(domainId, o.getValue(), cds, point);
+			}
+			else if(o instanceof YLineID)
+			{
+				la=cellManager.selectYWire(domainId, o.getValue(), cds, point);
+			}
+			else if(o instanceof ZLineID)
+			{
+				la=cellManager.selectZWire(domainId, o.getValue(), cds, point);
+			}			
+			selectedWires.addGeometry(la);
+
+		}
+		else
+		{
+			if(o instanceof XLineID)
+			{
+				la=cellManager.unselectXWire(domainId, o.getValue(), cds, point);
+			}
+			else if(o instanceof YLineID)
+			{
+				la=cellManager.unselectYWire(domainId, o.getValue(), cds, point);
+			}
+			else if(o instanceof ZLineID)
+			{
+				la=cellManager.unselectZWire(domainId, o.getValue(), cds, point);
+			}
+			selectedWires.removeGeometry(la);
+		}
 	}
 
 	private void pickJunction(PickResult result, boolean selected)
@@ -859,12 +934,12 @@ public class ViewableFD implements Viewable
 		int typeId=((MarkUtils.MarkID)result.getObject().getUserData()).getTypeID();
 
 		int[] idx = pi.getPrimitiveVertexIndices();
-		int markID=idx[0]/3;
-
+		int markID=idx[0];		
+		
 		if(selected)
 		{
 			Point3d[] cds=pi.getPrimitiveCoordinates();
-			PointArray pa=new PointArray(cds.length, PointArray.COORDINATES);
+			PointArray pa=new PointArray(cds.length, GeometryArray.COORDINATES);
 			pa.setCoordinates(0, cds);
 			selectedJunctions.addGeometry(pa);
 			selectionManager.selectMark(domainId, typeId, markID, pa);
@@ -886,7 +961,7 @@ public class ViewableFD implements Viewable
 		if(selected)
 		{
 			Point3d[] cds=pi.getPrimitiveCoordinates();
-			LineArray la=new LineArray(cds.length, LineArray.COORDINATES);
+			LineArray la=new LineArray(cds.length, GeometryArray.COORDINATES);
 			la.setCoordinates(0, cds);
 			selectedWires.addGeometry(la);
 			if(o instanceof XLineID)
@@ -936,7 +1011,7 @@ public class ViewableFD implements Viewable
 		if(selected)
 		{
 			Point3d[] cds=pi.getPrimitiveCoordinates();
-			LineArray la=new LineArray(cds.length, LineArray.COORDINATES);
+			LineArray la=new LineArray(cds.length, GeometryArray.COORDINATES);
 			la.setCoordinates(0, cds);
 			selectedWires.addGeometry(la);
 			selectionManager.selectSlot(o.getType(), domainId, o.getValue(), la);
@@ -962,20 +1037,21 @@ public class ViewableFD implements Viewable
 		int[] idx = pi.getPrimitiveVertexIndices();
 		int plateID=idx[0]/4;
 		int domainID=((Integer)pi.getGeometryArray().getUserData()).intValue();
+
 		if(selected)
 		{
 			Point3d[] pc=pi.getPrimitiveCoordinates();
 			Logger.global.finest("domainID: "+domainID);		
 			Logger.global.finest("coordinates: "+Arrays.asList(pc));
 			
-			QuadArray qa=new QuadArray(4, QuadArray.COORDINATES);
+			QuadArray qa=new QuadArray(4, GeometryArray.COORDINATES);
 			qa.setCoordinates(0, pi.getPrimitiveCoordinates());
-			((Shape3D)selectedPlates).addGeometry(qa);
+			selectedPlates.addGeometry(qa);
 			selectionManager.selectPlate(plateID, domainID, qa);
 		}
 		else
 		{
-			((Shape3D)selectedPlates).removeGeometry(
+			selectedPlates.removeGeometry(
 				selectionManager.getGeometryForPlate(domainID, plateID));
 			selectionManager.unselectPlate(plateID, domainID);
 		}
@@ -995,7 +1071,6 @@ public class ViewableFD implements Viewable
 		int domainID=((Integer)pi.getGeometryArray().getUserData()).intValue();
 		if(selected)
 		{
-			Point3d[] pc=pi.getPrimitiveCoordinates();			
 			Logger.global.finest("cellid= "+idx[0]/24);
 			Logger.global.finest("domainID: "+domainID);					
 			IndexedGeometryArray iga=(IndexedGeometryArray)pi.getGeometryArray();
@@ -1010,14 +1085,14 @@ public class ViewableFD implements Viewable
 				coordinates[j++]=p.y;
 				coordinates[j++]=p.z;
 			}
-			QuadArray qa=new QuadArray(24, QuadArray.COORDINATES);
+			QuadArray qa=new QuadArray(24, GeometryArray.COORDINATES);
 			qa.setCoordinates(0, coordinates);
-			((Shape3D)selectedPlates).addGeometry(qa);
+			selectedPlates.addGeometry(qa);
 			selectionManager.selectSolid(solidID, domainID, qa);
 		}
 		else
 		{
-			((Shape3D)selectedPlates).removeGeometry(
+			selectedPlates.removeGeometry(
 				selectionManager.getGeometryForSolid(domainID, solidID));
 			selectionManager.unselectSolid(solidID, domainID);
 		}
@@ -1060,7 +1135,7 @@ public class ViewableFD implements Viewable
 			coordinates[4]=coordinates[1];
 			coordinates[5]=coordinates[2];
 			//printFloatDebug(coordinates);
-			LineArray la=new LineArray(6, LineArray.COORDINATES);
+			LineArray la=new LineArray(6, GeometryArray.COORDINATES);
 			setGeometryCapabilities(la);
 			la.setCoordinates(0, coordinates);
 			la.setUserData(new XLineID(k));
@@ -1081,7 +1156,7 @@ public class ViewableFD implements Viewable
 			coordinates[4]=(float) provider.getYGrid(wire[3]);
 			coordinates[5]=coordinates[2];
 			//printFloatDebug(coordinates);
-			LineArray la=new LineArray(6, LineArray.COORDINATES);
+			LineArray la=new LineArray(6, GeometryArray.COORDINATES);
 			setGeometryCapabilities(la);
 			la.setCoordinates(0, coordinates);
 			la.setUserData(new YLineID(k));
@@ -1102,7 +1177,7 @@ public class ViewableFD implements Viewable
 			coordinates[4]=coordinates[1];
 			coordinates[5]=(float) provider.getZGrid(wire[3]);
 			//printFloatDebug(coordinates);
-			LineArray la=new LineArray(6, LineArray.COORDINATES);
+			LineArray la=new LineArray(6, GeometryArray.COORDINATES);
 			setGeometryCapabilities(la);
 			la.setCoordinates(0, coordinates);
 			la.setUserData(new ZLineID(k));
@@ -1223,7 +1298,10 @@ public class ViewableFD implements Viewable
 	/** Return the current selection */
 	public FDSelection[] getSelection()
 	{
-		return selectionManager.getSelection();
+		if(cellPicking)
+			return cellManager.getSelection();
+		else
+			return selectionManager.getSelection();
 	}
 
 	/* (non-Javadoc)
@@ -1250,5 +1328,13 @@ public class ViewableFD implements Viewable
 			SelectionListener s = (SelectionListener) it.next();
 			s.selectionChanged();
 		}
+	}
+
+	/**
+	 * Tell the viewer to select wire and slot by elementary element
+	 */
+	public void setCellPicking(boolean b)
+	{
+		this.cellPicking=b;
 	}
 }

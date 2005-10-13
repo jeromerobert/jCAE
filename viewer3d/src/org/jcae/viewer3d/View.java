@@ -151,7 +151,7 @@ public class View extends Canvas3D implements PositionListener
 			}
 		});
 
-		zoomTo(0,0,0,1.0f);		
+		zoomTo(0,0,0,1.0f);
     }		
 	
 	/* (non-Javadoc)
@@ -605,7 +605,7 @@ public class View extends Canvas3D implements PositionListener
 	/**
 	 * Take a snapshot of the current view
 	 * Do not use this for offscreen rendering. See "On-screen Rendering vs. Off-screen Rendering" in
-	 * Canvas3D javadoc.
+	 * Canvas3D javadoc. This method should be wrapped in a SwingUtilities.invokeXXXX statements.
 	 * @return
 	 */
 	public BufferedImage takeSnapshot()
@@ -683,6 +683,25 @@ public class View extends Canvas3D implements PositionListener
 		t3d.setTranslation(correction);		
 		viewingPlatform.getViewPlatformTransform().setTransform(t3d);
 		//orbit.setViewingPlatform(viewingPlatform);
+	}
+	
+	public double[] getRotationCenter()
+	{
+		Point3d p3d=new Point3d();
+		orbit.getRotationCenter(p3d);
+		double[] toReturn=new double[3];
+		p3d.get(toReturn);
+		return toReturn;
+	}
+	
+	public void setRotationCenter(double x, double y, double z)
+	{
+		orbit.setRotationCenter(new Point3d(x, y, z));
+	}
+	
+	public void setChangeRotationCenter(boolean status)
+	{
+		((ViewBehavior)orbit).setChangeRotationCenter(true);
 	}
 	
 	public final static byte TOP	=0;
