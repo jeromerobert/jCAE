@@ -1,0 +1,18 @@
+1 - Required Jar files
+release/modules/ext/jcae-viewer3d.jar
+release/modules/ext/jcae.jar
+release/modules/ext/jcae-mesherocc.jar
+release/modules/ext/trove.jar
+release/modules/ext/log4j-1.2.8.jar
+release/modules/ext/xalan.jar
+release/modules/ext/serializer.jar
+
+2 - Required modules in the target Netbeans Platform
+org-netbeans-api-xml.nbm
+org-netbeans-modules-projectapi.nbm
+org-netbeans-modules-projectuiapi.nbm
+org-netbeans-modules-projectui.nbm
+org-netbeans-modules-xml-catalog.nbm
+org-netbeans-modules-xml-core.nbm
+org-netbeans-spi-navigator.nbm
+org-openidex-util.nbm

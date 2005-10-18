@@ -1,0 +1,172 @@
+package org.jcae.netbeans.cad;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Set;
+import javax.swing.Action;
+import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
+import org.openide.ErrorManager;
+import org.openide.actions.*;
+import org.openide.loaders.DataNode;
+import org.openide.loaders.DataObject;
+import org.openide.loaders.FileEntry;
+import org.openide.nodes.Node;
+import org.openide.util.actions.SystemAction;
+import org.openide.util.datatransfer.NewType;
+
+public class BrepNode extends DataNode implements Node.Cookie
+{		
+	private MetaNode metaNode;
+
+	public BrepNode(DataObject arg0)
+	{
+		super(arg0, new ShapeChildren());
+		getCookieSet().add(this);
+		getCookieSet().add(new ShapePool());		
+		getCookieSet().add(new ShapeOperationCookie(this));
+		getCookieSet().add((Cookie) getChildren());
+		updateChildren();
+		
+	}
+
+	public void updateChildren()
+	{
+		DataObject dob=getDataObject();
+		if(dob instanceof BrepDataObject)
+		{
+			BrepDataObject mob = (BrepDataObject)dob;
+			Set entries=mob.secondaryEntries();
+			if(entries.size()>0 && metaNode==null)
+			{
+				FileEntry fe=(FileEntry) entries.toArray()[0];
+				Node[] ns=getChildren().getNodes();
+				getChildren().remove(ns);
+				metaNode=new MetaNode(mob, fe.getFile());
+				Node[] ns2=new Node[ns.length+1];
+				System.arraycopy(ns, 0, ns2, 1, ns.length);
+				ns2[0]=metaNode;
+				getChildren().add(ns2);
+			}
+			else if(entries.size()==0 && metaNode!=null)
+			{
+				Node[] toRemove=new Node[]{getChildren().getNodes()[0]};
+				getChildren().remove(toRemove);
+			}
+		}
+	}
+	
+	public Action[] getActions(boolean arg0)
+	{
+		ArrayList l=new ArrayList();
+		l.add(SystemAction.get(ExplodeAction.class));
+		l.add(SystemAction.get(ViewAction.class));
+		l.add(SystemAction.get(NewAction.class));
+		l.add(SystemAction.get(BooleanAction.AllActions.class));
+		l.add(SystemAction.get(TransformAction.AllActions.class));
+		l.add(SystemAction.get(SewAction.class));
+		l.add(SystemAction.get(FreeBoundsAction.class));
+		l.add(SystemAction.get(BoundingBoxAction.class));
+		
+		if(GeomUtils.getShape(this).shapeType()==TopAbs_ShapeEnum.FACE)
+		{
+			l.add(SystemAction.get(GroupFaceAction.class));
+			l.add(SystemAction.get(ReverseAction.class));
+		}
+		l.add(null);
+		l.add(SystemAction.get(RenameAction.class));
+		l.add(SystemAction.get(CutAction.class));
+		l.add(SystemAction.get(CopyAction.class));
+		l.add(SystemAction.get(DeleteAction.class));
+		return (Action[]) l.toArray(new Action[l.size()]);
+	}
+
+
+	public NewType[] getNewTypes()
+	{
+		return PrimitiveNewType.getNewType(this);
+	}
+	
+	public boolean canRename()
+	{
+		return true;
+	}
+	
+	public boolean canCopy()
+	{
+		return true;
+	}
+	
+	public boolean canDestroy()
+	{
+		return true;
+	}
+
+
+	public void setName(String arg0)
+	{	
+		try
+		{
+			String o=getName();
+			getDataObject().rename(arg0+".brep");
+			fireDisplayNameChange(o, arg0);
+			fireNameChange(o, arg0);
+		}
+		catch (IOException e)
+		{
+			ErrorManager.getDefault().notify(e);
+		}
+	}
+	
+	public String getName()
+	{
+		return getDataObject().getPrimaryFile().getName();
+	}
+	
+	public String getDisplayName()
+	{
+		return getDataObject().getPrimaryFile().getName();
+	}
+
+	public MetaNode getMetaNode() {
+		return metaNode;
+	}
+
+	/*public Transferable clipboardCopy() throws IOException
+	{
+		Multi toReturn = new Multi(new Transferable[]{super.clipboardCopy(), createStringTransferable()});
+		System.out.println(toReturn);
+		return toReturn;
+	}
+	
+	public Transferable drag() throws IOException
+	{
+		return new ExTransferable.Multi(new Transferable[]{super.drag(), createStringTransferable()});
+	}
+	
+	public final static DataFlavor OPENCASCADE_DATAFLAVOR;
+	
+	static
+	{
+		DataFlavor tmp=null;
+		try
+		{
+			tmp=new DataFlavor("application/x-opencascade;class=java.lang.String");
+		}
+		catch (ClassNotFoundException e)
+		{
+			ErrorManager.getDefault().notify(e);
+		}
+		OPENCASCADE_DATAFLAVOR=tmp;
+	}
+	
+	private Transferable createStringTransferable()
+	{
+		return new ExTransferable.Single(OPENCASCADE_DATAFLAVOR)
+		{
+			protected Object getData() throws IOException, UnsupportedFlavorException
+			{
+				return  getDataObject().getPrimaryFile().getNameExt();
+			}
+		};
+	}*/
+}

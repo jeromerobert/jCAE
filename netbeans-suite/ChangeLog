@@ -1,0 +1,155 @@
+2005-10-04 16:03  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/cad/BoundingBoxAction.java,
+	  jcae-netbeans/src/org/jcae/netbeans/cad/BrepNode.java,
+	  jcae-netbeans/src/org/jcae/netbeans/cad/ShapeNode.java:
+	  Add bounding box action
+
+2005-10-04 15:32  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/GroupNode.java,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/ViewGroupAction.java:
+	  Fix view group action so it can display more than one group
+
+2005-10-04 08:20  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/layer.xml:
+	  Make "advanced option" the default option panel
+
+2005-10-04 08:01  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/cad/BrepNode.java,
+	  jcae-netbeans/src/org/jcae/netbeans/cad/FreeBoundsAction.java,
+	  jcae-netbeans/src/org/jcae/netbeans/cad/ShapeNode.java:
+	  Add "show free edges" action.
+
+2005-10-04 05:55  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/ProjectWizardIterator.java,
+	  jcae-netbeans/src/org/jcae/netbeans/ProjectWizardPanel.java,
+	  jcae-netbeans/src/org/jcae/netbeans/ProjectWizardPanelVisual.java,
+	  jcae-netbeans/src/org/jcae/netbeans/layer.xml:
+	  Make project wizard more user friendly
+
+2005-09-30 16:04  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* BUGS,
+	  jcae-netbeans/src/org/jcae/netbeans/layer.xml:
+	  Remove uneeded menu entries
+
+2005-09-30 15:45  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* BUGS,
+	  jcae-netbeans/src/org/jcae/netbeans/cad/BrepNode.java,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/ComputeMeshAction.java,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/MeshNode.java:
+	  Clean actions in mesh menu, fix rename of mesh
+
+2005-09-30 15:32  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/MeshNode.java:
+	  Allow to drag/drop a geom on a mesh
+
+2005-09-30 15:17  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* BUGS,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/ComputeMeshAction.java,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/MeshNode.java:
+	  Save all files before running the mesher. Display de
+	  geometry as a node in the mesh object
+
+2005-09-30 13:07  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* BUGS,
+	  jcae-netbeans/nbproject/genfiles.properties,
+	  jcae-netbeans/nbproject/private/private.xml,
+	  jcae-netbeans/nbproject/project.xml,
+	  jcae-netbeans/src/org/jcae/netbeans/ShowMainFSAction.java,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/ComputeMeshAction.java,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/JCAEMesher.java,
+	  nbproject/platform.properties,
+	  nbproject/private/platform-private.properties,
+	  nbproject/project.properties: Use
+	  the Progress API to display the mesher state
+
+2005-09-28 12:31  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* branding/: Add branding
+
+2005-09-27 12:13  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/Settings.java:
+	  Fix "Unable to access jarfile
+	  /C:/jcae-0.9/jcae/modules/ext/jcae.jar" error.
+
+2005-09-27 12:00  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/ComputeMeshAction.java:
+	  Force a the OutputWindow to be displayed when running a mesh
+
+2005-09-26 13:29  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/INSTALL,
+	  jcae-netbeans/manifest.mf,
+	  jcae-netbeans/nbproject/project.xml,
+	  jcae-netbeans/src/org/jcae/netbeans/ShowMainFSAction.java,
+	  jcae-netbeans/src/org/jcae/netbeans/layer.xml:
+	  Fix some menus
+
+2005-09-26 09:55  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/nbproject/,
+	  jcae-netbeans/src/org/jcae/netbeans/cad/,
+	  jcae-netbeans/src/org/jcae/netbeans/layer.xml,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/MeshNode.java:
+	  A bit more of geom face groups. Package Xalan for the mesher.
+
+2005-09-23 07:45  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/release/etc,
+	  jcae-netbeans/release/etc/log4j.properties:
+	  Add log4j configuration file for the mesher
+
+2005-09-23 05:02  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* BUGS, jcae-netbeans/:
+	  implements mesh node and start implementing group of geom
+	  faces
+
+2005-09-08 09:24  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* BUGS, jcae-netbeans, jcae-netbeans-branding/ jcae-netbeans-common/
+	  nbproject/ : Add new module
+
+2005-08-31 06:55  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* BUGS,
+	  jcae-netbeans-common/src/org/jcae/netbeans/layer.xml,
+	  jcae-netbeans-mesh/nbproject/genfiles.properties:
+	  Fix menu and toolbars
+
+2005-08-30 17:03  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans-common/, jcae-netbeans-mesh/:
+	  Allow to use Node wich are not BeanNode. ProjectNode is no
+	  longer a BeanNode but an AbstractNode.
+
+2005-08-30 14:17  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* BUGS, jcae-netbeans-cad/, jcae-netbeans-common/,
+	  jcae-netbeans-mesh/: Fix many bugs
+
+2005-08-30 05:19  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans-cad, jcae-netbeans-common/, nbproject/:
+	  Start porting to netbeans 4.2
+
+2005-08-30 05:16  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* occjava: Create a netbeans module to wrap occjava
+
+2005-08-30 05:13  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans-mesh/: New netbeans 4.2 mesh module
+
+

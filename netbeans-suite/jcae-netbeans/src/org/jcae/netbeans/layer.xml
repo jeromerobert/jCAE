@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.1//EN" "http://www.netbeans.org/dtds/filesystem-1_1.dtd">
+<filesystem>
+	<folder name="Actions">
+		<folder name="jCAE">
+			<file name="org-jcae-netbeans-cad-ExplodeAction.instance" />
+			<file name="org-jcae-netbeans-cad-ImportAction.instance" />
+			<file name="org-jcae-netbeans-cad-ReverseAction.instance" />
+			<file name="org-jcae-netbeans-mesh-ComputeMeshAction.instance" />
+			<file name="org-jcae-netbeans-viewer3d-ActionFitAll.instance" />
+			<file name="org-jcae-netbeans-viewer3d-ActionAxis.instance" />
+			<file name="org-jcae-netbeans-viewer3d-Action3DView.instance" />
+			<file name="org-jcae-netbeans-viewer3d-ActionRemove.instance" />
+			<file
+				name="org-jcae-netbeans-viewer3d-SelectViewableAction.instance" />
+		</folder>
+	</folder>
+
+	<folder name="Toolbars">
+		<folder name="Build_hidden" />
+		<folder name="View">
+			<file name="org-jcae-netbeans-viewer3d-Action3DView.shadow">
+				<attr name="originalFile"
+					stringvalue="Actions/jCAE/org-jcae-netbeans-viewer3d-Action3DView.instance" />
+			</file>
+			<file name="org-jcae-netbeans-viewer3d-ActionFitAll.shadow">
+				<attr name="originalFile"
+					stringvalue="Actions/jCAE/org-jcae-netbeans-viewer3d-ActionFitAll.instance" />
+			</file>
+
+			<file name="org-jcae-netbeans-viewer3d-ActionAxis.shadow">
+				<attr name="originalFile"
+					stringvalue="Actions/jCAE/org-jcae-netbeans-viewer3d-ActionAxis.instance" />
+			</file>
+
+			<file
+				name="org-jcae-netbeans-viewer3d-SelectViewableAction.shadow">
+				<attr name="originalFile"
+					stringvalue="Actions/jCAE/org-jcae-netbeans-viewer3d-SelectViewableAction.instance" />
+			</file>
+
+			<file name="org-jcae-netbeans-viewer3d-ActionRemove.shadow">
+				<attr name="originalFile"
+					stringvalue="Actions/jCAE/org-jcae-netbeans-viewer3d-ActionRemove.instance" />
+			</file>
+
+			<file name="org-jcae-netbeans-cad-ReverseAction.shadow">
+				<attr name="originalFile"
+					stringvalue="Actions/jCAE/org-jcae-netbeans-cad-ReverseAction.instance" />
+			</file>
+		</folder>
+	</folder>
+
+	<folder name="Menu">
+		<folder name="View">
+			<file name="Separator1.instance_hidden" />
+			<file
+				name="org-netbeans-core-actions-HTMLViewAction.instance_hidden" />
+			<file name="org-jcae-netbeans-viewer3d-Action3DView.shadow">
+				<attr name="originalFile"
+					stringvalue="Actions/jCAE/org-jcae-netbeans-viewer3d-Action3DView.instance" />
+			</file>
+		</folder>
+		<folder name="BuildProject_hidden" />
+		<folder name="RunProject_hidden" />
+
+		<folder name="File">
+			<file name="org-openide-actions-PageSetupAction.instance_hidden" />
+			<file name="org-openide-actions-PrintAction.instance_hidden" />
+			<attr
+				name="Separator3.instance/org-jcae-netbeans-cad-ImportAction.shadow"
+				boolvalue="true" />
+			<file name="org-jcae-netbeans-cad-ImportAction.shadow">
+				<attr name="originalFile"
+					stringvalue="Actions/jCAE/org-jcae-netbeans-cad-ImportAction.instance" />
+			</file>
+			<attr
+				name="org-jcae-netbeans-cad-ImportAction.shadow/Separator4.instance"
+				boolvalue="true" />
+		</folder>
+
+		<folder name="Window">
+			<file name="org-netbeans-core-actions-OptionsAction.instance" />
+			<!--file name="org-netbeans-modules-options-OptionsWindowAction.shadow">
+				<attr name="originalFile" stringvalue="Actions/Window/org-netbeans-modules-options-OptionsWindowAction.instance"/>
+				</file-->
+			<file name="org-jcae-netbeans-ShowMainFSAction.instance" />
+			<file
+				name="org-netbeans-modules-navigator-ShowNavigatorAction.instance_hidden" />
+			<file name="ViewRuntimeTabAction.shadow_hidden" />
+		</folder>
+		<folder name="Tools_hidden" />
+		<folder name="GoTo_hidden" />
+	</folder>
+
+	<folder name="Templates">
+		<folder name="Project">
+			<folder name="jCAE">
+				<file name="JCAE Project" url="templates/">
+					<attr name="template" boolvalue="true" />
+					<attr name="instantiatingIterator"
+						methodvalue="org.jcae.netbeans.ProjectWizardIterator.createIterator" />
+				</file>
+			</folder>
+		</folder>
+		<folder name="Brep">
+			<!-- URL is a pointer to the content for the file -->
+			<file name="Empty.brep" url="templates/empty.brep">
+				<attr name="SystemFileSystem.localizingBundle"
+					stringvalue="org.jcae.netbeans.Bundle" />
+				<attr name="template" boolvalue="true" />
+
+				<!-- URL to a text description to show in the new wizard -->
+				<!--attr name="instantiatingWizardURL" 
+					urlvalue="nbresloc:/org/netbeans/modules/povproject/resources/emptypov.html"/-->
+
+				<!-- Icon to use for the file -->
+				<!--attr name="SystemFileSystem.icon" 
+					urlvalue="nbresloc:org/netbeans/modules/povproject/resources/povicon.gif"/-->
+
+				<!-- A programmatic category -->
+				<attr name="templateCategory" stringvalue="brep-types" />
+
+			</file>
+		</folder>
+	</folder>
+
+	<folder name="Services">
+		<file name="org-jcae-netbeans-mesh-Settings.settings"
+			url="mesh/Settings.settings">
+			<attr name="SystemFileSystem.icon"
+				urlvalue="nbresloc:/org/jcae/netbeans/resources/BeanIconColor16x16.gif" />
+		</file>
+	</folder>
+
+	<folder name="UI">
+		<folder name="Services">
+			<folder name="jCAE">
+				<file name="org-jcae-netbeans-mesh-Settings.shadow">
+					<attr name="originalFile"
+						stringvalue="Services/org-jcae-netbeans-mesh-Settings.settings" />
+				</file>
+			</folder>
+		</folder>
+	</folder>
+
+	<folder name="Windows2">
+		<folder name="Modes">
+			<folder name="navigator">
+				<file name="navigatorTC.wstcref_hidden" />
+			</folder>
+			<folder name="explorer">
+				<file name="runtime.wstcref_hidden" />
+				<file name="projectTab_tc.wstcref_hidden" />
+			</folder>
+		</folder>
+	</folder>
+</filesystem>
+

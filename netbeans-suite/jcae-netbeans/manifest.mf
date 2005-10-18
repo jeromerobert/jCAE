@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+OpenIDE-Module: org.jcae.netbeans
+OpenIDE-Module-Layer: org/jcae/netbeans/layer.xml
+OpenIDE-Module-Localizing-Bundle: org/jcae/netbeans/Bundle.properties
+
+Name: org/jcae/netbeans/cad/BrepDataLoader.class
+OpenIDE-Module-Class: Loader
+Install-Before: org.openide.loaders.XMLDataObject, org.netbeans.modules.xml.core.XMLDataObject
