@@ -15,13 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2004, by EADS CRC
- */
-
-/*
- * PanelView.java
- *
- * Created on August 31, 2004, 9:56 AM
+ * (C) Copyright 2005, by EADS CRC
  */
 
 package org.jcae.netbeans.mesh;

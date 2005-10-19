@@ -15,13 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2004, by EADS CRC
- */
-
-/*
- * PanelFuse.java
- *
- * Created on August 16, 2004, 4:54 PM
+ * (C) Copyright 2005, by EADS CRC
  */
 
 package org.jcae.netbeans.mesh;
