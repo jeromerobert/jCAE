@@ -55,15 +55,4 @@ public class OCCEdge extends OCCShape implements CADEdge
 		return V;
 	}
 	
-	public boolean equals(Object o)
-	{
-		OCCEdge that = (OCCEdge) o;
-		return myShape.equals(that.myShape);
-	}
-	
-	public int hashCode()
-	{
-		return myShape.hashCode();
-	}
-	
 }
