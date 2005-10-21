@@ -1,3 +1,16 @@
+2005-10-21 12:27  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/manifest.mf,
+	  jcae-netbeans/src/org/jcae/netbeans/Settings.java,
+	  jcae-netbeans/src/org/jcae/netbeans/Settings.settings,
+	  jcae-netbeans/src/org/jcae/netbeans/layer.xml:
+	  Add viewer 3d settings (still buggy)
+
+2005-10-21 12:26  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/ProjectWizardIterator.java:
+	  Fix a bug: no jcae.xml file in created project
+
 2005-10-04 16:03  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* jcae-netbeans/src/org/jcae/netbeans/cad/BoundingBoxAction.java,

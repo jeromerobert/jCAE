@@ -80,7 +80,7 @@ public class ProjectWizardIterator
 		//String name = (String) wiz.getProperty("name");
 		FileObject template = Templates.getTemplate(wiz);
 		FileObject dir = FileUtil.toFileObject(dirF);
-		template.copy(dir, template.getName(), template.getExt());
+		template.copy(dir, "jcae", "xml");
 		// Always open top dir as a project:
 		resultSet.add(dir);
 		// Look for nested projects to open as well:

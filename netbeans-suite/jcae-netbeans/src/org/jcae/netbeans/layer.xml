@@ -147,16 +147,16 @@
 	</folder>
 
 	<folder name="Services">
-		<file name="org-jcae-netbeans-mesh-Settings.settings"
-			url="mesh/Settings.settings">
-			<attr name="SystemFileSystem.icon"
-				urlvalue="nbresloc:/org/jcae/netbeans/resources/BeanIconColor16x16.gif" />
-		</file>
+		<file name="org-jcae-netbeans-mesh-Settings.settings" url="mesh/Settings.settings" />
+		<file name="org-jcae-netbeans-Settings.settings" url="Settings.settings"/>
 	</folder>
 
 	<folder name="UI">
 		<folder name="Services">
 			<folder name="jCAE">
+				<file name="org-jcae-netbeans-Settings.shadow">
+					<attr name="originalFile" stringvalue="Services/org-jcae-netbeans-Settings.settings"/>
+				</file>
 				<file name="org-jcae-netbeans-mesh-Settings.shadow">
 					<attr name="originalFile"
 						stringvalue="Services/org-jcae-netbeans-mesh-Settings.settings" />
