@@ -2,6 +2,10 @@ Tue Oct 25 13:31:08 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Triangle.java: Add a new linkNext member to allow creation of single linked lists of Triangle.
 	* src/org/jcae/mesh/amibe/ds/Vertex.java (getSurroundingOTriangle): Outer triangles have been removed from the mesh, which is thus no more convex.  The previous algorithm to check for an OTriangle containing the desired vertex may fail.
+	* src/org/jcae/mesh/amibe/algos2d/BasicMesh.java
+	  src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/amibe/ds/Triangle.java
+	  src/org/jcae/mesh/amibe/ds/Vertex.java: When possible, replace ArrayList by Triangle linked list.
 
 Fri Oct  7 17:34:43 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
