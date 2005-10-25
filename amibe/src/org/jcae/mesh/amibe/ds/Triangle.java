@@ -24,6 +24,8 @@ import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.apache.log4j.Logger;
 import java.util.Random;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
+import java.util.NoSuchElementException;
 import java.util.Iterator;
 
 public class Triangle
@@ -41,6 +43,13 @@ public class Triangle
 	//     bit 7:  writable?
 	//  Bytes 1, 2 and 3 carry up attributes for edges 0, 1 and 2.
 	public int adjPos = 0;
+	
+	// We need to process lists of triangles, and sometimes make sure
+	// that triangles are processed only once.  This can be achieved
+	// efficiently with a linked list.
+	private static final Triangle triangleHead = new Triangle();
+	private static Triangle listHead = null;
+	private Triangle listNext = null;
 	
 	public Triangle()
 	{
@@ -170,6 +179,79 @@ public class Triangle
 			adjPos |= 0x80000000;
 		else
 			adjPos &= ~0x80000000;
+	}
+	
+	/**
+	 * Initialize the triangle linked list.  There can be only one
+	 * active linked list.
+	 */
+	public static void listLock()
+	{
+		if (listHead != null)
+			throw new ConcurrentModificationException();
+		listHead = triangleHead;
+	}
+	
+	/**
+	 * Release the triangle linked list.  This method has to be called
+	 * before creating a new list.
+	 */
+	public static void listRelease()
+	{
+		if (listHead == null)
+			throw new NoSuchElementException();
+		Triangle start = listHead;
+		Triangle next;
+		while (listHead != null)
+		{
+			next = listHead.listNext;
+			listHead.listNext = null;
+			listHead = next;
+		}
+	}
+	
+	/**
+	 * Add the current triangle to the beginning of the list.
+	 */
+	public void listCollect()
+	{
+		assert listHead != null;
+		assert listNext == null;
+		listNext = listHead;
+		listHead = this;
+	}
+	
+	/**
+	 * Check whether this ellement is linked.
+	 */
+	public boolean IsListed()
+	{
+		return listNext != null;
+	}
+	
+	public static Iterator getTriangleListIterator()
+	{
+		if (listHead == null)
+			throw new NoSuchElementException();
+		return new Iterator()
+		{
+			private Triangle curr = listHead;
+			public boolean hasNext()
+			{
+				return curr != triangleHead && curr.listNext != triangleHead;
+			}
+			
+			public Object next()
+			{
+				curr = curr.listNext;
+				if (triangleHead == curr)
+					return new NoSuchElementException();
+				return curr;
+			}
+			public void remove()
+			{
+			}
+		};
 	}
 	
 	private final String showAdj(int num)

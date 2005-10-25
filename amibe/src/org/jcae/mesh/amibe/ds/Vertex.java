@@ -229,9 +229,53 @@ public class Vertex implements Cloneable
 	public OTriangle2D getSurroundingOTriangle()
 	{
 		logger.debug("Searching for the triangle surrounding "+this);
+		Triangle.listLock();
 		Triangle t = (Triangle) mesh.quadtree.getNearestVertex(this).link;
 		OTriangle2D start = new OTriangle2D(t, 0);
-		OTriangle2D current = start;
+		OTriangle2D current = getSurroundingOTriangleStart(start);
+		if (current == null)
+		{
+			// First, try with neighbours
+			for (Iterator it = Triangle.getTriangleListIterator(); it.hasNext(); )
+			{
+				t = (Triangle) it.next();
+				start.bind(t);
+				current = null;
+				for (int i = 0; i < 3; i++)
+				{
+					start.nextOTri();
+					if (null != start.getAdj())
+					{
+						start.symOTri();
+						current = getSurroundingOTriangleStart(start);
+						if (current != null)
+							break;
+						start.symOTri();
+					}
+				}
+				if (current != null)
+					break;
+			}
+		}
+		if (current == null)
+		{
+			// As a last resort, check with all triangles
+			for (Iterator it = mesh.getTriangles().iterator(); it.hasNext();)
+			{
+				t = (Triangle) it.next();
+				start.bind(t);
+				current = getSurroundingOTriangleStart(start);
+				if (current != null)
+					break;
+			}
+		}
+		Triangle.listRelease();
+		assert current != null;
+		return current;
+	}
+	
+	public OTriangle2D getSurroundingOTriangleStart(OTriangle2D current)
+	{
 		boolean redo = false;
 		Vertex o = current.origin();
 		Vertex d = current.destination();
@@ -249,17 +293,23 @@ public class Vertex implements Cloneable
 		if (o == Vertex.outer)
 		{
 			current.nextOTri();
+			if (null == current.getAdj())
+				return null;
 			current.symOTri();
 			redo = true;
 		}
 		else if (d == Vertex.outer)
 		{
 			current.prevOTri();
+			if (null == current.getAdj())
+				return null;
 			current.symOTri();
 			redo = true;
 		}
 		else if (a == Vertex.outer)
 		{
+			if (null == current.getAdj())
+				return null;
 			current.symOTri();
 			redo = true;
 		}
@@ -267,6 +317,8 @@ public class Vertex implements Cloneable
 		//  be Vertex.outer again, but this is case 3 above.
 		if (onLeft(current.origin(), current.destination()) < 0L)
 		{
+			if (null == current.getAdj())
+				return null;
 			current.symOTri();
 			redo = true;
 		}
@@ -283,6 +335,9 @@ public class Vertex implements Cloneable
 			assert current.hasAttributes(OTriangle.BOUNDARY) == (current.tri.getAdj(current.orientation) == null);
 			if (a == Vertex.outer)
 				break;
+			if (current.tri.IsListed())
+				return null;
+			current.tri.listCollect();
 			long d1 = onLeft(d, a);
 			long d2 = onLeft(a, o);
 			//  Note that for all cases, new origin and destination
