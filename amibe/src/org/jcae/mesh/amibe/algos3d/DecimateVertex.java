@@ -190,11 +190,6 @@ public class DecimateVertex
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
-			if (f.isOuter())
-			{
-				f.unmark();
-				continue;
-			}
 			noe.bind(f);
 			for (int i = 0; i < 3; i++)
 			{
