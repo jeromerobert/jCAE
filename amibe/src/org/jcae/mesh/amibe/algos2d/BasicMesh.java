@@ -187,15 +187,15 @@ public class BasicMesh
 		mesh.popCompGeom(2);
 		
 		logger.debug(" Mark outer elements");
-		ArrayList pool = new ArrayList(mesh.getTriangles().size());
 		t = (Triangle) Vertex.outer.getLink();
 		ot = new OTriangle2D(t, 0);
 		if (ot.origin() == Vertex.outer)
-				ot.nextOTri();
+			ot.nextOTri();
 		else if (ot.destination() == Vertex.outer)
-				ot.prevOTri();
+			ot.prevOTri();
 		assert ot.apex() == Vertex.outer : ot;
 		
+		Triangle.listLock();
 		Vertex first = ot.origin();
 		do
 		{
@@ -204,68 +204,56 @@ public class BasicMesh
 				ot.setAttributes(OTriangle.OUTER);
 				ot.nextOTri();
 			}
-			pool.add(ot.getTri());
+			ot.getTri().listCollect();
 			ot.nextOTriApex();
 		}
 		while (ot.origin() != first);
+		
 		logger.debug(" Mark holes");
 		OTriangle2D sym = new OTriangle2D();
-		for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
+		// Dummy value to enter the loop
+		Triangle oldHead = t;
+		Triangle newHead = null;
+		while (oldHead != newHead)
 		{
-			t = (Triangle) it.next();
-			t.unmark();
-		}
-		while (!pool.isEmpty())
-		{
-			ArrayList newPool = new ArrayList(mesh.getTriangles().size());
-			for (Iterator it = pool.iterator(); it.hasNext(); )
+			oldHead = newHead;
+			for (Iterator it = Triangle.getTriangleListIterator(); it.hasNext(); )
 			{
 				t = (Triangle) it.next();
+				if (t == oldHead)
+					break;
 				ot.bind(t);
 				boolean outer = ot.hasAttributes(OTriangle.OUTER);
 				for (int i = 0; i < 3; i++)
 				{
 					ot.nextOTri();
-					if (ot.hasAttributes(OTriangle.MARKED))
-						continue;
-					ot.setAttributes(OTriangle.MARKED);
 					OTriangle.symOTri(ot, sym);
-					newPool.add(sym.getTri());
+					if (sym.getTri().isListed())
+						continue;
+					newHead = sym.getTri();
+					newHead.listCollect();
 					if (ot.hasAttributes(OTriangle.BOUNDARY))
 					{
 						if (!outer)
-						{
-							sym.setAttributes(OTriangle.OUTER);
-							sym.nextOTri();
-							sym.setAttributes(OTriangle.OUTER);
-							sym.nextOTri();
-							sym.setAttributes(OTriangle.OUTER);
-							sym.nextOTri();
-						}
+							newHead.setOuter();
 						else if (sym.hasAttributes(OTriangle.OUTER))
 								throw new InitialTriangulationException();
 					}
 					else
 					{
 						if (outer)
-						{
-							sym.setAttributes(OTriangle.OUTER);
-							sym.nextOTri();
-							sym.setAttributes(OTriangle.OUTER);
-							sym.nextOTri();
-							sym.setAttributes(OTriangle.OUTER);
-							sym.nextOTri();
-						}
+							newHead.setOuter();
 						else if (sym.hasAttributes(OTriangle.OUTER))
 								throw new InitialTriangulationException();
 					}
 				}
 			}
-			pool = newPool;
 		}
+		Triangle.listRelease();
 		assert (mesh.isValid());
+		
 		logger.debug(" Remove outer triangles");
-		pool = new ArrayList(mesh.getTriangles().size());
+		ArrayList pool = new ArrayList(mesh.getTriangles().size());
 		OTriangle2D otVoid = new OTriangle2D();
 		for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
 		{

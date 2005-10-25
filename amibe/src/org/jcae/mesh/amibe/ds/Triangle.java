@@ -49,6 +49,7 @@ public class Triangle
 	// efficiently with a linked list.
 	private static final Triangle triangleHead = new Triangle();
 	private static Triangle listHead = null;
+	private static int listSize = 0;
 	private Triangle listNext = null;
 	
 	public Triangle()
@@ -121,16 +122,6 @@ public class Triangle
 		return (adjPos & (OTriangle.QUAD << 8 | OTriangle.QUAD << 16 | OTriangle.QUAD << 24)) != 0;
 	}
 	
-	public void mark()
-	{
-		adjPos |= (OTriangle.MARKED << 8 | OTriangle.MARKED << 16 | OTriangle.MARKED << 24);
-	}
-	
-	public void unmark()
-	{
-		adjPos &= ~(OTriangle.MARKED << 8 | OTriangle.MARKED << 16 | OTriangle.MARKED << 24);
-	}
-	
 	public void swapAttributes12()
 	{
 		int byte0 = adjPos & 0xff;
@@ -148,11 +139,6 @@ public class Triangle
 		int byte0 = adjPos & 0xff;
 		int byte0sw = (byte0 & 0xcc) | ((byte0 & 0x03) << 4) | ((byte0 & 0x30) >> 4);
 		adjPos = byte0sw | (adjPos & 0x00ff0000) | ((adjPos & 0x0000ff00) << 16) | ((adjPos & 0xff000000) >> 16);
-	}
-	
-	public boolean isMarked()
-	{
-		return (adjPos & (OTriangle.MARKED << 8 | OTriangle.MARKED << 16 | OTriangle.MARKED << 24)) != 0;
 	}
 	
 	public boolean isReadable()
@@ -190,6 +176,7 @@ public class Triangle
 		if (listHead != null)
 			throw new ConcurrentModificationException();
 		listHead = triangleHead;
+		listSize = 0;
 	}
 	
 	/**
@@ -207,7 +194,10 @@ public class Triangle
 			next = listHead.listNext;
 			listHead.listNext = null;
 			listHead = next;
+			listSize--;
 		}
+		listSize++;
+		assert listSize == 0;
 	}
 	
 	/**
@@ -219,12 +209,13 @@ public class Triangle
 		assert listNext == null;
 		listNext = listHead;
 		listHead = this;
+		listSize++;
 	}
 	
 	/**
 	 * Check whether this ellement is linked.
 	 */
-	public boolean IsListed()
+	public boolean isListed()
 	{
 		return listNext != null;
 	}
@@ -297,6 +288,8 @@ public class Triangle
 		r += "\nEdge attributes:";
 		for (int i = 0; i < 3; i++)
 			r += " "+Integer.toHexString((adjPos >> (8*(1+i))) & 0xff);
+		if (listNext != null)
+			r += "\nLink next: "+listNext.hashCode();
 		return r;
 	}
 

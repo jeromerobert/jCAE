@@ -335,7 +335,7 @@ public class Vertex implements Cloneable
 			assert current.hasAttributes(OTriangle.BOUNDARY) == (current.tri.getAdj(current.orientation) == null);
 			if (a == Vertex.outer)
 				break;
-			if (current.tri.IsListed())
+			if (current.tri.isListed())
 				return null;
 			current.tri.listCollect();
 			long d1 = onLeft(d, a);
