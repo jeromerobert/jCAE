@@ -116,7 +116,8 @@ public class EnforceAbsDeflection
 				}
 			}
 			niter--;
-			logger.debug(" Found "+badTriangles.size()+" non-conforming triangles");
+			if (logger.isDebugEnabled())
+				logger.debug(" Found "+badTriangles.size()+" non-conforming triangles");
 		} while (redo && niter > 0);
 		mesh.popCompGeom(3);
 	}

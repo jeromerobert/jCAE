@@ -566,7 +566,8 @@ public class Mesh
 				int ref2 = ot.destination().getRef();
 				if (ref1 != 0 && ref2 != 0 && ref1 == ref2)
 				{
-					logger.debug("  Collapsing "+ot);
+					if (logger.isDebugEnabled())
+						logger.debug("  Collapsing "+ot);
 					removedTriangles.add(ot.getTri());
 					ot.removeDegenerated();
 					break;
@@ -848,7 +849,8 @@ public class Mesh
 						adj.add(new Integer(ot2.orientation));
 						ot2.setAdj(adj);
 						ot2.setAttributes(OTriangle.NONMANIFOLD);
-						logger.debug("Non-manifold: "+v+" "+v2);
+						if (logger.isDebugEnabled())
+							logger.debug("Non-manifold: "+v+" "+v2);
 					}
 					cnt++;
 				}

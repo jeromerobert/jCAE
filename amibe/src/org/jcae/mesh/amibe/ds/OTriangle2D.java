@@ -139,7 +139,8 @@ public class OTriangle2D extends OTriangle
 	 */
 	public final boolean split3(Vertex v, boolean force)
 	{
-		logger.debug("Split OTriangle2D "+this+"\nat Vertex "+v);
+		if (logger.isDebugEnabled())
+			logger.debug("Split OTriangle2D "+this+"\nat Vertex "+v);
 		int savedAdjPos = tri.adjPos;
 		// Aliases
 		OTriangle2D oldLeft = work[0];
@@ -212,7 +213,8 @@ public class OTriangle2D extends OTriangle
 		newLeft.nextOTri();              // = (aov)
 		Triangle newTri1 = newLeft.tri;
 		Triangle newTri2 = newRight.tri;
-		logger.debug("New triangles:\n"+this+"\n"+newRight+"\n"+newLeft);
+		if (logger.isDebugEnabled())
+			logger.debug("New triangles:\n"+this+"\n"+newRight+"\n"+newLeft);
 		if (force)
 			CheckAndSwap(newLeft, oldRight, false);
 		else if (0 == CheckAndSwap(newLeft, oldRight, false))

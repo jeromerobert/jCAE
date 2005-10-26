@@ -200,13 +200,15 @@ public class Vertex implements Cloneable
 	
 	public void addToQuadTree()
 	{
-		logger.debug("Inserted point: "+this);
+		if (logger.isDebugEnabled())
+			logger.debug("Inserted point: "+this);
 		mesh.quadtree.add(this);
 	}
 	
 	public void removeFromQuadTree()
 	{
-		logger.debug("Point removed: "+this);
+		if (logger.isDebugEnabled())
+			logger.debug("Point removed: "+this);
 		mesh.quadtree.remove(this);
 	}
 	
@@ -228,7 +230,8 @@ public class Vertex implements Cloneable
 	 */
 	public OTriangle2D getSurroundingOTriangle()
 	{
-		logger.debug("Searching for the triangle surrounding "+this);
+		if (logger.isDebugEnabled())
+			logger.debug("Searching for the triangle surrounding "+this);
 		Triangle.listLock();
 		Triangle t = (Triangle) mesh.quadtree.getNearestVertex(this).link;
 		OTriangle2D start = new OTriangle2D(t, 0);
@@ -360,7 +363,8 @@ public class Vertex implements Cloneable
 			d = current.destination();
 			a = current.apex();
 		}
-		logger.debug("Found: "+current);
+		if (logger.isDebugEnabled())
+			logger.debug("Found: "+current);
 		return current;
 	}
 	

@@ -127,7 +127,8 @@ public class MMesh3D
 	{
 		String cr=System.getProperty("line.separator");
 		String r="MMesh3D";
-		logger.debug("Printing "+r+"...");
+		if (logger.isDebugEnabled())
+			logger.debug("Printing "+r+"...");
 		r+=cr;
 		for(Iterator it=nodelist.iterator();it.hasNext();)
 		{
