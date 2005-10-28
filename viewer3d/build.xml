@@ -71,14 +71,10 @@
 
 	<target name="dist-bin" description="build a zip to distribute binaries" depends="jar">
 		<zip destfile="${project.name}-bin-${version}.zip">
-			<zipfileset prefix="${project.name}-${version}" file="${jar.dir}/${test.jar}"/>
-			<zipfileset prefix="${project.name}-${version}" file="${jar.dir}/${client.jar}"/>
-			<zipfileset prefix="${project.name}-${version}" file="${jar.dir}/${cache.jar}"/>
-			<zipfileset prefix="${project.name}-${version}" file="${ftpserver.jar}"/>
-			<zipfileset prefix="${project.name}-${version}" file="${commons-net.jar}"/>
+			<zipfileset prefix="${project.name}-${version}" file="${jar.dir}/${jcae-viewer3d.jar}"/>
+			<zipfileset prefix="${project.name}-${version}" file="${occjava.jar}"/>
 			<zipfileset prefix="${project.name}-${version}" file="${log4j.jar}"/>
-			<zipfileset prefix="${project.name}-${version}" file="${war}"/>
-			<zipfileset prefix="${project.name}-${version}" file="${xmlrpc.jar}"/>
+			<zipfileset prefix="${project.name}-${version}" file="${trove.jar}"/>
 		</zip>
 	</target>
 
