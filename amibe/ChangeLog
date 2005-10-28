@@ -1,3 +1,13 @@
+Fri Oct 28 10:48:10 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java: New getOTriangleAroundOriginIterator() method to loop around a vertex.
+	* src/org/jcae/mesh/amibe/algos2d/BasicMesh.java
+	  src/org/jcae/mesh/amibe/algos2d/Insertion.java
+	  src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java
+	  src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/amibe/ds/OTriangle2D.java
+	  src/org/jcae/mesh/amibe/ds/Vertex.java: Outer triangles are readded into the mesh so that this loop can reach all edges.  But contrary to the previous implementation, outer triangles are not connected together, but only to their inner neighbour.
+
 Tue Oct 25 13:31:08 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Triangle.java: Add a new linkNext member to allow creation of single linked lists of Triangle.
