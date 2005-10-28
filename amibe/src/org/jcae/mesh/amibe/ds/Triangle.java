@@ -61,6 +61,7 @@ public class Triangle
 		vertex[0] = a;
 		vertex[1] = b;
 		vertex[2] = c;
+		assert a != b && b != c && c != a : this;
 	}
 	
 	public void addToMesh()
@@ -206,7 +207,7 @@ public class Triangle
 	public void listCollect()
 	{
 		assert listHead != null;
-		assert listNext == null;
+		assert listNext == null : this;
 		listNext = listHead;
 		listHead = this;
 		listSize++;
@@ -256,7 +257,7 @@ public class Triangle
 			if (t == null)
 				r+= "null";
 			else
-				r+= t.hashCode()+"["+(((t.adjPos & (3 << (2*num))) >> (2*num)) & 3)+"]";
+				r+= t.hashCode()+"["+(((adjPos & (3 << (2*num))) >> (2*num)) & 3)+"]";
 		}
 		else
 		{
