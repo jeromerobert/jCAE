@@ -60,11 +60,12 @@ public class ViewableFE implements Viewable
 	private static final float zFactorAbs=Float.parseFloat(System.getProperty(
 		"javax.media.j3d.zFactorAbs", "20.0f"));
 	private static final float zFactorRel=Float.parseFloat(System.getProperty(
-		"javax.media.j3d.zFactorAbs", "2.0f"));
+		"javax.media.j3d.zFactorRel", "2.0f"));
 
 	final private static PolygonAttributes FILL_POLYGON_ATTR=new PolygonAttributes(
 		PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE,
 		2.0f * zFactorAbs, true, zFactorRel);
+	
 	/**
 	 * 
 	 */
