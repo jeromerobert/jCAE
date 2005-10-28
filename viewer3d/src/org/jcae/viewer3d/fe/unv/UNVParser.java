@@ -14,7 +14,8 @@ public class UNVParser
 	private TIntIntHashMap nodesIndicesMap;
 	private int[] tetra4Indices;
 	private TIntIntHashMap tetra4IndicesMap;
-	
+	private int[] hexa8Indices;
+	private TIntIntHashMap hexa8IndicesMap;	
 	private ArrayList tria3GroupNames=new ArrayList();
 	private ArrayList tria3Groups=new ArrayList();
 	private TIntArrayList tria3Indices=new TIntArrayList();
@@ -94,11 +95,14 @@ public class UNVParser
 		tria3IndicesMap=null;
 		tetra4IndicesMap=null;
 		tetra4Indices=null;
+		hexa8Indices=null;
+		hexa8IndicesMap=null;
 	}
 	
 	private void readFace(BufferedReader rd) throws IOException
 	{			
 		TIntArrayList tetra4=new TIntArrayList();
+		TIntArrayList hexa8=new TIntArrayList();
 		
 		String line;
 
@@ -126,9 +130,17 @@ public class UNVParser
 				for(int i=0; i<4; i++)
 					tetra4.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken())));   
 			}
+			else if (type.equals("115"))
+			{
+				st = new StringTokenizer(line);	
+				hexa8IndicesMap.put(ind, hexa8.size()/8);
+				for(int i=0; i<4; i++)
+					hexa8.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken())));   
+			}			
 		}
 		
 		tetra4Indices=tetra4.toNativeArray();
+		hexa8Indices=hexa8.toNativeArray();
 	}
 
 	private void readGroup(BufferedReader rd) throws IOException
