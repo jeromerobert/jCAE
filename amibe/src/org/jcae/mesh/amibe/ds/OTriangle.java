@@ -850,6 +850,8 @@ public class OTriangle
 		 */
 		// this = (oda)
 		symOTri(this, work[0]);         // (don)
+		assert !this.hasAttributes(OUTER | BOUNDARY);
+		assert !work[0].hasAttributes(OUTER | BOUNDARY);
 		//  Clear SWAPPED flag for all edges of the 2 triangles
 		clearAttributes(SWAPPED);
 		work[0].clearAttributes(SWAPPED);

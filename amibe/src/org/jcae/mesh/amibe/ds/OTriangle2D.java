@@ -226,14 +226,13 @@ public class OTriangle2D extends OTriangle
 		int totNrSwap = 0;
 		Vertex v = newLeft.apex();
 		assert v != Vertex.outer;
-		Vertex firstVertex = newLeft.origin();
 		//  Loops around v
 		Vertex a, o, d;
 		while (true)
 		{
 			for (Iterator it = newLeft.getOTriangleAroundApexIterator(); it.hasNext(); )
 			{
-				if (newLeft.hasAttributes(BOUNDARY) || newLeft.hasAttributes(NONMANIFOLD))
+				if (newLeft.hasAttributes(BOUNDARY) || newLeft.hasAttributes(NONMANIFOLD) || newLeft.hasAttributes(OUTER))
 				{
 					it.next();
 					continue;

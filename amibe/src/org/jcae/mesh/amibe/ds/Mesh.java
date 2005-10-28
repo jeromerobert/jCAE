@@ -1011,14 +1011,27 @@ public class Mesh
 		{
 			Triangle t = (Triangle) it.next();
 			if (t.vertex[0] == t.vertex[1] || t.vertex[1] == t.vertex[2] || t.vertex[2] == t.vertex[0])
+			{
+				logger.debug("Duplicate vertices: "+t);
 				return false;
+			}
 			if (t.vertex[0] == Vertex.outer || t.vertex[1] == Vertex.outer || t.vertex[2] == Vertex.outer)
 			{
 				if (constrained && !t.isOuter())
+				{
+					logger.debug("Triangle should be outer: "+t);
 					return false;
+				}
 			}
-			else if (type == MESH_2D && t.vertex[0].onLeft(t.vertex[1], t.vertex[2]) <= 0L)
-				return false;
+			else if (type == MESH_2D)
+			{
+				double l = t.vertex[0].onLeft(t.vertex[1], t.vertex[2]);
+				if (l <= 0L)
+				{
+					logger.debug("Wrong orientation: "+t);
+					return false;
+				}
+			}
 			for (int i = 0; i < 3; i++)
 			{
 				Vertex v = t.vertex[i];
