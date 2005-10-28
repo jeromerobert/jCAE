@@ -106,6 +106,8 @@ public class DecimateVertex
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
+			if (f.isOuter())
+				continue;
 			for (int i = 0; i < 3; i++)
 			{
 				Vertex n = f.vertex[i];
@@ -190,6 +192,8 @@ public class DecimateVertex
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
+			if (f.isOuter())
+				continue;
 			noe.bind(f);
 			for (int i = 0; i < 3; i++)
 			{
@@ -270,17 +274,23 @@ public class DecimateVertex
 			OTriangle.symOTri(edge, sym);
 			Triangle t2 = sym.getTri();
 			// Remove all edges of t1 and t2 from tree
-			for (int i = 0; i < 3; i++)
+			if (!t1.isOuter())
 			{
-				edge.nextOTri();
-				tree.remove(edge);
-				assert !tree.containsValue(edge);
+				for (int i = 0; i < 3; i++)
+				{
+					edge.nextOTri();
+					tree.remove(edge);
+					assert !tree.containsValue(edge);
+				}
 			}
-			for (int i = 0; i < 3; i++)
+			if (!t2.isOuter())
 			{
-				sym.nextOTri();
-				tree.remove(sym);
-				assert !tree.containsValue(sym);
+				for (int i = 0; i < 3; i++)
+				{
+					sym.nextOTri();
+					tree.remove(sym);
+					assert !tree.containsValue(sym);
+				}
 			}
 			Vertex apex1 = edge.apex();
 			Vertex apex2 = sym.apex();
