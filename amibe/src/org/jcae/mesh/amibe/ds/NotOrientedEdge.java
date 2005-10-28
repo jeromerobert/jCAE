@@ -48,4 +48,9 @@ public class NotOrientedEdge extends OTriangle
 		return (that.tri == tri && that.orientation == orientation) ||
 		       (that.tri == (Triangle) tri.getAdj(orientation) && that.orientation == ((tri.adjPos >> (2*orientation)) & 3));
 	}
+	
+	public final String toString()
+	{
+		return "Vertices: "+origin()+"\n"+destination();
+	}
 }
