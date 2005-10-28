@@ -252,40 +252,18 @@ public class BasicMesh
 		Triangle.listRelease();
 		assert (mesh.isValid());
 		
-		logger.debug(" Select 3D smaller diagonals");
-		mesh.pushCompGeom(3);
-		ot = new OTriangle2D();
+		logger.debug(" Remove links to outer triangles");
 		for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
 		{
 			t = (Triangle) it.next();
-			ot.bind(t);
+			if (t.isOuter())
+				continue;
 			for (int i = 0; i < 3; i++)
 			{
-				ot.nextOTri();
-				ot.clearAttributes(OTriangle.SWAPPED);
+				if (t.vertex[i].getLink() instanceof Triangle)
+					t.vertex[i].setLink(t);
 			}
 		}
-		boolean redo = true;
-		//  With riemannian metrics, there may be infinite loops,
-		//  make sure to exit this loop.
-		int niter = bNodes.length;
-		while (redo && niter > 0)
-		{
-			redo = false;
-			--niter;
-			for (Iterator it = saveList.iterator(); it.hasNext(); )
-			{
-				OTriangle2D s = (OTriangle2D) it.next();
-				if (s.apex() == Vertex.outer)
-					s.symOTri();
-				s.nextOTri();
-				if (s.hasAttributes(OTriangle.SWAPPED))
-					continue;
-				if (s.checkSmallerAndSwap() != 0)
-					redo = true;
-			}
-		}
-		mesh.popCompGeom(3);
 		
 		mesh.pushCompGeom(3);
 		new Insertion(mesh).compute();
