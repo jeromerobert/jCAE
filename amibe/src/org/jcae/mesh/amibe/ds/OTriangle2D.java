@@ -62,8 +62,7 @@ public class OTriangle2D extends OTriangle
 		
 		//  Replace o by d in all triangles
 		copyOTri(this, work[0]);
-		work[0].nextOTri();
-		for (Iterator it = work[0].getOTriangleAroundApexIterator(); it.hasNext(); )
+		for (Iterator it = work[0].getOTriangleAroundOriginIterator(); it.hasNext(); )
 		{
 			work[0] = (OTriangle2D) it.next();
 			for (int i = 0; i < 3; i++)
@@ -80,25 +79,9 @@ public class OTriangle2D extends OTriangle
 		//  Glue triangles
 		nextOTri(this, work[0]);
 		prevOTri(this, work[1]);
-		if (!work[0].hasAttributes(BOUNDARY))
-		{
-			work[0].symOTri();
-			if (!work[1].hasAttributes(BOUNDARY))
-			{
-				work[1].symOTri();
-				work[0].glue(work[1]);
-			}
-			else
-				work[0].glue1(otVoid);
-		}
-		else
-		{
-			if (!work[1].hasAttributes(BOUNDARY))
-			{
-				work[1].symOTri();
-				work[1].glue1(otVoid);
-			}
-		}
+		work[0].symOTri();
+		work[1].symOTri();
+		work[0].glue(work[1]);
 	}
 	
 	/*
@@ -150,16 +133,10 @@ public class OTriangle2D extends OTriangle
 		
 		prevOTri(this, oldLeft);         // = (aod)
 		nextOTri(this, oldRight);        // = (dao)
-		if (!oldLeft.hasAttributes(BOUNDARY))
-		{
-			oldSymLeft = work[2];
-			symOTri(oldLeft, oldSymLeft);    // = (oa*)
-		}
-		if (!oldRight.hasAttributes(BOUNDARY))
-		{
-			oldSymRight = work[3];
-			symOTri(oldRight, oldSymRight);  // = (ad*)
-		}
+		oldSymLeft = work[2];
+		symOTri(oldLeft, oldSymLeft);    // = (oa*)
+		oldSymRight = work[3];
+		symOTri(oldRight, oldSymRight);  // = (ad*)
 		//  Set vertices of newly created and current triangles
 		Vertex o = origin();
 		assert o != Vertex.outer;
@@ -190,14 +167,8 @@ public class OTriangle2D extends OTriangle
 		//  oldLeft is now (vod) and oldRight is changed to (dvo).
 		setApex(v);
 		
-		if (newLeft.hasAttributes(BOUNDARY))
-			newLeft.glue1(otVoid);
-		else
-			newLeft.glue(oldSymLeft);
-		if (newRight.hasAttributes(BOUNDARY))
-			newRight.glue1(otVoid);
-		else
-			newRight.glue(oldSymRight);
+		newLeft.glue(oldSymLeft);
+		newRight.glue(oldSymRight);
 		
 		//  Creates 3 inner links
 		newLeft.nextOTri();              // = (ova)
@@ -228,15 +199,9 @@ public class OTriangle2D extends OTriangle
 			setApex(a);
 			tri.adjPos = savedAdjPos;
 			nextOTri(this, oldLeft);         // = (dao)
-			if (oldSymRight == null)
-				oldLeft.glue1(otVoid);
-			else
-				oldLeft.glue(oldSymRight);
+			oldLeft.glue(oldSymRight);
 			oldLeft.nextOTri();              // = (aod)
-			if (oldSymLeft == null)
-				oldLeft.glue1(otVoid);
-			else
-				oldLeft.glue(oldSymLeft);
+			oldLeft.glue(oldSymLeft);
 			return false;
 		}
 		newTri1.addToMesh();

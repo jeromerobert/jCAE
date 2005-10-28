@@ -295,23 +295,15 @@ public class DecimateVertex
 			else
 				ot = v3.findOTriangle(apex2);
 			assert ot != null : ""+edge+"\n"+apex1+"\n"+v3+"\n"+apex1;
-			Vertex first = ot.destination();
-			if (first == Vertex.outer)
+			for (Iterator it = ot.getOTriangleAroundOriginIterator(); it.hasNext(); )
 			{
-				ot.nextOTriOrigin();
-				first = ot.destination();
-			}
-			assert first != Vertex.outer;
-			while (true)
-			{
-				if (ot.destination() != Vertex.outer)
+				ot = (OTriangle) it.next();
+				if (!ot.hasAttributes(OTriangle.OUTER))
 					tree.update(new NotOrientedEdge(ot), cost(ot.destination(), v3, quadricMap));
 				ot.setAttributes(OTriangle.MARKED);
-				ot.nextOTriOrigin();
-				if (ot.destination() == first)
-					break;
 			}
 		}
+		// Remove deleted triangles from the list
 		ArrayList newlist = new ArrayList();
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
@@ -320,6 +312,7 @@ public class DecimateVertex
 				newlist.add(f);
 		}
 		mesh.setTrianglesList(newlist);
+		assert mesh.isValid();
 		logger.info("Number of contracted edges: "+contracted);
 		int cnt = 0;
 		NotOrientedEdge edge = (NotOrientedEdge) tree.first();
@@ -354,7 +347,11 @@ public class DecimateVertex
 		Metric3D Qinv = q3.A.inv();
 		if (Qinv != null)
 		{
-			ret = (Vertex) v1.clone();
+			// Keep a reference if there is one
+			if (v1.getRef() != 0)
+				ret = (Vertex) v1.clone();
+			else
+				ret = (Vertex) v2.clone();
 			double [] dx = Qinv.apply(q3.b);
 			ret.moveTo(-dx[0], -dx[1], -dx[2]);
 		}

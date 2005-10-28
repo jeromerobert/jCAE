@@ -247,7 +247,7 @@ public class Vertex implements Cloneable
 				for (int i = 0; i < 3; i++)
 				{
 					start.nextOTri();
-					if (null != start.getAdj())
+					if (!start.hasAttributes(OTriangle.BOUNDARY))
 					{
 						start.symOTri();
 						current = getSurroundingOTriangleStart(start);
@@ -296,7 +296,7 @@ public class Vertex implements Cloneable
 		if (o == Vertex.outer)
 		{
 			current.nextOTri();
-			if (null == current.getAdj())
+			if (current.hasAttributes(OTriangle.BOUNDARY))
 				return null;
 			current.symOTri();
 			redo = true;
@@ -304,14 +304,14 @@ public class Vertex implements Cloneable
 		else if (d == Vertex.outer)
 		{
 			current.prevOTri();
-			if (null == current.getAdj())
+			if (current.hasAttributes(OTriangle.BOUNDARY))
 				return null;
 			current.symOTri();
 			redo = true;
 		}
 		else if (a == Vertex.outer)
 		{
-			if (null == current.getAdj())
+			if (current.hasAttributes(OTriangle.BOUNDARY))
 				return null;
 			current.symOTri();
 			redo = true;
@@ -320,7 +320,7 @@ public class Vertex implements Cloneable
 		//  be Vertex.outer again, but this is case 3 above.
 		if (onLeft(current.origin(), current.destination()) < 0L)
 		{
-			if (null == current.getAdj())
+			if (current.hasAttributes(OTriangle.BOUNDARY))
 				return null;
 			current.symOTri();
 			redo = true;
@@ -335,10 +335,9 @@ public class Vertex implements Cloneable
 		{
 			assert o != Vertex.outer;
 			assert d != Vertex.outer;
-			assert current.hasAttributes(OTriangle.BOUNDARY) == (current.tri.getAdj(current.orientation) == null);
 			if (a == Vertex.outer)
 				break;
-			if (current.tri.isListed())
+			if (current.tri.isListed() || current.hasAttributes(OTriangle.BOUNDARY))
 				return null;
 			current.tri.listCollect();
 			long d1 = onLeft(d, a);
@@ -424,26 +423,12 @@ public class Vertex implements Cloneable
 		if (ot.origin() != this)
 			ot.nextOTri();
 		assert ot.origin() == this : this+" not in "+ot;
-		//  Collect triangles in counterclockwise order.
-		//  Warning: ot is modified
-		if (ot.cycleTrianglesAroundOrigin(ret, triSet, false))
-			return;
-		//  A boundary or non-manifold edge is encountered.
-		//  Loop in the opposite direction.
-		ot.bind(tri);
-		if (ot.origin() != this)
-			ot.nextOTri();
-		if (ot.origin() != this)
-			ot.nextOTri();
-		assert ot.origin() == this : this+" not in "+ot;
-		//  Store triangles in reverse order
-		ArrayList cw = new ArrayList();
-		ot.cycleTrianglesAroundOrigin(cw, triSet, true);
-		for (int i = cw.size() - 1; i >= 0; i--)
+		for (Iterator it = ot.getOTriangleAroundOriginIterator(); it.hasNext(); )
 		{
-			Triangle t = (Triangle) cw.get(i);
-			assert t.vertex[0] == this || t.vertex[1] == this || t.vertex[2] == this : this+"\n"+t;
-			ret.add(t);
+			ot = (OTriangle) it.next();
+			Triangle t = ot.getTri();
+			if (!t.isOuter())
+				ret.add(t);
 		}
 	}
 	
@@ -786,29 +771,22 @@ public class Vertex implements Cloneable
 		return ref1d <= 0;
 	}
 	
+	// Return the OTriangle from this to v2
 	public OTriangle findOTriangle(Vertex v2)
 	{
 		Triangle tri = (Triangle) link;
+		assert tri.vertex[0] == this || tri.vertex[1] == this || tri.vertex[2] == this;
 		OTriangle ot = new OTriangle(tri, 0);
 		if (ot.origin() != this)
 			ot.nextOTri();
 		if (ot.origin() != this)
 			ot.nextOTri();
-		assert ot.origin() == this : ot+" not in "+tri+"\n"+this;
-		Vertex first = ot.destination();
-		if (first == Vertex.outer)
+		assert ot.origin() == this : this+" not in "+ot;
+		for (Iterator it = ot.getOTriangleAroundOriginIterator(); it.hasNext(); )
 		{
-			ot.nextOTriOrigin();
-			first = ot.destination();
-		}
-		assert first != Vertex.outer;
-		while (true)
-		{
+			ot = (OTriangle) it.next();
 			if (ot.destination() == v2)
 				return ot;
-			ot.nextOTriOrigin();
-			if (ot.destination() == first)
-				break;
 		}
 		return null;
 	}
@@ -822,6 +800,9 @@ public class Vertex implements Cloneable
 			r += " "+param[i];
 		if (ref1d != 0)
 			r += " ref1d: "+ref1d;
+		r += " hash: "+hashCode();
+		if (link != null)
+			r += " link: "+link.hashCode();
 		return r;
 	}
 	

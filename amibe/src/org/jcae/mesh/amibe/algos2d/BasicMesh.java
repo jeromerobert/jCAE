@@ -252,31 +252,6 @@ public class BasicMesh
 		Triangle.listRelease();
 		assert (mesh.isValid());
 		
-		logger.debug(" Remove outer triangles");
-		ArrayList pool = new ArrayList(mesh.getTriangles().size());
-		OTriangle2D otVoid = new OTriangle2D();
-		for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
-		{
-			t = (Triangle) it.next();
-			if (!t.isOuter())
-			{
-				pool.add(t);
-				continue;
-			}
-			ot.bind(t);
-			for (int i = 0; i < 3; i++)
-			{
-				ot.nextOTri();
-				if (ot.hasAttributes(OTriangle.BOUNDARY))
-				{
-					// Delete adjacency relations
-					OTriangle.symOTri(ot, sym);
-					sym.glue1(otVoid);
-				}
-			}
-		}
-		mesh.setTrianglesList(pool);
-		
 		logger.debug(" Select 3D smaller diagonals");
 		mesh.pushCompGeom(3);
 		ot = new OTriangle2D();

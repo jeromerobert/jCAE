@@ -556,6 +556,8 @@ public class Mesh
 			Triangle t = (Triangle) it.next();
 			if (removedTriangles.contains(t))
 				continue;
+			if (t.isOuter())
+				continue;
 			ot.bind(t);
 			for (int i = 0; i < 3; i++)
 			{
@@ -611,6 +613,7 @@ public class Mesh
 		for (int i = 0; i < vertices.length; i++)
 			checkNeighbours(vertices[i], tVertList);
 		OTriangle ot = new OTriangle();
+		OTriangle sym = new OTriangle();
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
 		{
 			Triangle t = (Triangle) it.next();
@@ -619,7 +622,14 @@ public class Mesh
 			{
 				ot.nextOTri();
 				if (ot.getAdj() == null)
+				{
 					ot.setAttributes(OTriangle.BOUNDARY);
+					Triangle adj = new Triangle(Vertex.outer, ot.destination(), ot.origin());
+					adj.setOuter();
+					sym.bind(adj);
+					sym.setAttributes(OTriangle.BOUNDARY);
+					ot.glue(sym);
+				}
 			}
 		}
 		
@@ -724,7 +734,6 @@ public class Mesh
 					t.vertex[i].setLink(list);
 				}
 				ot.nextOTri();
-				assert ot.hasAttributes(OTriangle.BOUNDARY) == (ot.getAdj() == null) : ot;
 				if (ot.hasAttributes(OTriangle.BOUNDARY))
 					nrFE++;
 			}
@@ -996,6 +1005,8 @@ public class Mesh
 	 */
 	public boolean isValid(boolean constrained)
 	{
+		OTriangle ot = new OTriangle();
+		Vertex v1, v2;
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
 		{
 			Triangle t = (Triangle) it.next();
@@ -1008,6 +1019,36 @@ public class Mesh
 			}
 			else if (type == MESH_2D && t.vertex[0].onLeft(t.vertex[1], t.vertex[2]) <= 0L)
 				return false;
+			for (int i = 0; i < 3; i++)
+			{
+				Vertex v = t.vertex[i];
+				if (v.getLink() == null)
+					continue;
+				if (v.getLink() instanceof Triangle)
+				{
+					Triangle t2 = (Triangle) v.getLink();
+					if (t2.vertex[0] != v && t2.vertex[1] != v && t2.vertex[2] != v)
+						return false;
+				}
+			}
+			ot.bind(t);
+			for (int i = 0; i < 3; i++)
+			{
+				ot.nextOTri();
+				if (ot.getAdj() != null)
+				{
+					v1 = ot.origin();
+					v2 = ot.destination();
+					ot.symOTri();
+					if (ot.origin() != v2 || ot.destination() != v1)
+						return false;
+					ot.symOTri();
+					if (ot.origin() != v1 || ot.destination() != v2)
+						return false;
+					if (ot.getTri() != t)
+						return false;
+				}
+			}
 		}
 		return true;
 	}

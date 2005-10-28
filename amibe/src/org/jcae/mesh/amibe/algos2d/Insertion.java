@@ -64,7 +64,8 @@ public class Insertion
 			for(Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
 				Triangle t = (Triangle) it.next();
-				assert !t.isOuter();
+				if (t.isOuter())
+					continue;
 				ot.bind(t);
 				for (int i = 0; i < 3; i++)
 				{
@@ -78,6 +79,8 @@ public class Insertion
 			for(Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
 				Triangle t = (Triangle) it.next();
+				if (t.isOuter())
+					continue;
 				ot.bind(t);
 				ArrayList triNodes = new ArrayList();
 				int nrTriNodes = 0;
