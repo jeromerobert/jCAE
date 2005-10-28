@@ -589,11 +589,6 @@ public class OTriangle
 		tri.glue1(orientation, sym.tri, sym.orientation);
 		sym.tri.glue1(sym.orientation, tri, orientation);
 	}
-	public final void glue1(OTriangle sym)
-	{
-		tri.glue1(orientation, sym.tri, sym.orientation);
-	}
-	
 	
 	/**
 	 * Sets adjacency relation for a triangle.
@@ -616,23 +611,23 @@ public class OTriangle
 		return new Iterator()
 		{
 			private Vertex first = ot.origin();
-			private boolean precomputed = false;
+			private boolean lookAhead = false;
 			private boolean init = true;
 			private boolean loop = false;
 			public boolean hasNext()
 			{
-				if (!precomputed)
+				if (!lookAhead)
 				{
 					next();
-					precomputed = true;
+					lookAhead = true;
 				}
 				return !(loop && ot.origin() == first);
 			}
 			public Object next()
 			{
-				if (precomputed)
+				if (lookAhead)
 				{
-					precomputed = false;
+					lookAhead = false;
 					return ot;
 				}
 				if (init)
@@ -640,28 +635,84 @@ public class OTriangle
 					init = false;
 					return ot;
 				}
-				precomputed = false;
+				lookAhead = false;
 				loop = true;
-				ot.nextOTri();
-				if (ot.hasAttributes(BOUNDARY))
+				if (ot.hasAttributes(OUTER))
 				{
 					// Loop clockwise to another boundary
 					// and start again from there.
 					ot.prevOTri();
+					ot.nextOTriDest();
 					while (true)
 					{
 						ot.prevOTri();
 						if (ot.hasAttributes(BOUNDARY))
 							break;
-						ot.symOTri();
-						ot.prevOTri();
+						ot.nextOTriDest();
 					}
-					ot.nextOTri();
+				}
+				else
+					ot.prevOTriDest();
+				ot.nextOTri();
+				return ot;
+			}
+			public void remove()
+			{
+			}
+		};
+	}
+	
+	public Iterator getOTriangleAroundOriginIterator()
+	{
+		final OTriangle ot = this;
+		return new Iterator()
+		{
+			private Vertex first = ot.destination();
+			private boolean lookAhead = false;
+			private boolean init = true;
+			private int state = 0;
+			public boolean hasNext()
+			{
+				if (init)
+					return true;
+				if (!lookAhead)
+				{
+					next();
+					lookAhead = true;
+				}
+				return !(state > 0 && ot.destination() == first);
+			}
+			public Object next()
+			{
+				if (init)
+				{
+					init = false;
+					return ot;
+				}
+				if (lookAhead)
+				{
+					lookAhead = false;
+					return ot;
+				}
+				lookAhead = false;
+				if (state == 0)
+					state = 1;
+				if (ot.hasAttributes(OUTER) && state == 1)
+				{
+					// Loop clockwise to another boundary
+					// and start again from there.
+					state = 2;
+					ot.prevOTriOrigin();
+					while (true)
+					{
+						if (ot.hasAttributes(OUTER))
+							break;
+						ot.prevOTriOrigin();
+					}
 				}
 				else
 				{
-					ot.symOTri();
-					ot.nextOTri();
+					ot.nextOTriOrigin();
 				}
 				return ot;
 			}
@@ -799,10 +850,6 @@ public class OTriangle
 		 */
 		// this = (oda)
 		symOTri(this, work[0]);         // (don)
-		assert hasAttributes(BOUNDARY) == (tri.getAdj(orientation) == null) : this;
-		assert work[0].hasAttributes(BOUNDARY) == (work[0].tri.getAdj(work[0].orientation) == null) : this;
-		assert (tri.getAdj(0) == null || tri.getAdj(0) != tri.getAdj(1)) && (tri.getAdj(1) == null || tri.getAdj(1) != tri.getAdj(2)) && (tri.getAdj(2) == null || tri.getAdj(2) != tri.getAdj(0)) : this;
-		assert (work[0].tri.getAdj(0) == null || work[0].tri.getAdj(0) != work[0].tri.getAdj(1)) && (work[0].tri.getAdj(1) == null || work[0].tri.getAdj(1) != work[0].tri.getAdj(2)) && (work[0].tri.getAdj(2) == null || work[0].tri.getAdj(2) != work[0].tri.getAdj(0)) : work[0];
 		//  Clear SWAPPED flag for all edges of the 2 triangles
 		clearAttributes(SWAPPED);
 		work[0].clearAttributes(SWAPPED);
@@ -810,54 +857,33 @@ public class OTriangle
 		nextOTri(this, work[1]);        // (dao)
 		work[1].clearAttributes(SWAPPED);
 		int attr1 = work[1].attributes;
-		if (!work[1].hasAttributes(BOUNDARY))
-		{
-			work[1].symOTri();      // a1 = (ad*)
-			work[1].clearAttributes(SWAPPED);
-		}
+		work[1].symOTri();              // a1 = (ad*)
+		work[1].clearAttributes(SWAPPED);
 		prevOTri(this, work[2]);        // (aod)
 		work[2].clearAttributes(SWAPPED);
 		int attr2 = work[2].attributes;
 		nextOTri();                     // (dao)
-		if (!work[2].hasAttributes(BOUNDARY))
-		{
-			work[2].symOTri();      // a2 = (oa*)
-			work[2].clearAttributes(SWAPPED);
-			glue(work[2]);          // a2 and (dao)
-		}
-		else
-			glue1(otVoid);
+		work[2].symOTri();              // a2 = (oa*)
+		work[2].clearAttributes(SWAPPED);
+		glue(work[2]);                  // a2 and (dao)
 		nextOTri(work[0], work[2]);     // (ond)
 		nextOTri();                     // (aod)
 		work[2].clearAttributes(SWAPPED);
 		int attr3 = work[2].attributes;
-		if (!work[2].hasAttributes(BOUNDARY))
-		{
-			work[2].symOTri();     // a3 = (no*)
-			work[2].clearAttributes(SWAPPED);
-			work[2].glue(this);    // a3 and (aod)
-		}
-		else
-			glue1(otVoid);
+		work[2].symOTri();             // a3 = (no*)
+		work[2].clearAttributes(SWAPPED);
+		work[2].glue(this);            // a3 and (aod)
 		//  Reset 'this' to (oda)
 		nextOTri();                     // (oda)
 		prevOTri(work[0], work[2]);     // (ndo)
 		work[2].clearAttributes(SWAPPED);
 		int attr4 = work[2].attributes;
 		work[0].nextOTri();             // (ond)
-		if (!work[2].hasAttributes(BOUNDARY))
-		{
-			work[2].symOTri();      // a4 = (dn*)
-			work[2].clearAttributes(SWAPPED);
-			work[2].glue(work[0]);  // a4 and (ond)
-		}
-		else
-			work[0].glue1(otVoid);
+		work[2].symOTri();              // a4 = (dn*)
+		work[2].clearAttributes(SWAPPED);
+		work[2].glue(work[0]);          // a4 and (ond)
 		work[0].nextOTri();             // (ndo)
-		if (!work[1].hasAttributes(BOUNDARY))
-			work[0].glue(work[1]);  // a1 and (ndo)
-		else
-			work[0].glue1(otVoid);
+		work[0].glue(work[1]);          // a1 and (ndo)
 		work[0].nextOTri();             // (don)
 		//  Adjust vertices
 		setOrigin(n);
@@ -884,10 +910,6 @@ public class OTriangle
 
 		//  Eventually change 'this' to (ona) to ease moving around o.
 		prevOTri();                     // (ona)
-		assert hasAttributes(BOUNDARY) == (tri.getAdj(orientation) == null) : this;
-		assert work[0].hasAttributes(BOUNDARY) == (work[0].tri.getAdj(work[0].orientation) == null) : work[0];
-		assert (tri.getAdj(0) == null || tri.getAdj(0) != tri.getAdj(1)) && (tri.getAdj(1) == null || tri.getAdj(1) != tri.getAdj(2)) && (tri.getAdj(2) == null || tri.getAdj(2) != tri.getAdj(0)) : this;
-		assert (work[0].tri.getAdj(0) == null || work[0].tri.getAdj(0) != work[0].tri.getAdj(1)) && (work[0].tri.getAdj(1) == null || work[0].tri.getAdj(1) != work[0].tri.getAdj(2)) && (work[0].tri.getAdj(2) == null || work[0].tri.getAdj(2) != work[0].tri.getAdj(0)) : work[0];
 		return this;
 	}
 	
@@ -900,11 +922,20 @@ public class OTriangle
 	{
 		Vertex o = origin();
 		Vertex d = destination();
+		nextOTri(this, work[0]);
+		prevOTri(this, work[1]);
+		//  If both adjacent edges are on a boundary, do not contract
+		if (work[0].hasAttributes(BOUNDARY) && work[1].hasAttributes(BOUNDARY))
+				return false;
 		symOTri(this, work[1]);
+		symOTri(this, work[0]);
+		work[0].prevOTri();
+		work[1].nextOTri();
+		if (work[0].hasAttributes(BOUNDARY) && work[1].hasAttributes(BOUNDARY))
+				return false;
 		//  Loop around o to check that triangles will not be inverted
-		copyOTri(this, work[0]);
-		work[0].nextOTri();
-		work[0].prevOTriApex();
+		nextOTri(this, work[0]);
+		symOTri(this, work[1]);
 		double [] v1 = new double[3];
 		double [] xn = n.getUV();
 		double [] xo = o.getUV();
@@ -998,9 +1029,10 @@ public class OTriangle
 	{
 		Vertex o = origin();
 		Vertex d = destination();
+		logger.debug("contract ("+o+" "+d+")\ninto "+n);
 		/*
 		 *           V1                       V1
-		 *  V3._______._______. V4   V3 .______.______. V4
+		 *  V3+-------+-------+ V4   V3 +------+------+ V4
 		 *     \ t3  / \ t4  /           \  t3 | t4  / 
 		 *      \   /   \   /              \   |   /
 		 *       \ / t1  \ /                 \ | /  
@@ -1008,109 +1040,84 @@ public class OTriangle
 		 *       / \ t2  / \                 / | \
 		 *      /   \   /   \              /   |   \
 		 *     / t5  \ / t6  \           /  t5 | t6  \
-		 *    +-------'-------+         +------+------+
+		 *    +-------+-------+         +------+------+
 		 *  V5        V2       V6     V5       V2      V6
 		 */
 		// this = (odV1)
 		
 		//  Replace o by n in all incident triangles
+		//  NOTE: if t5 is outer, it will not be updated by this loop
 		copyOTri(this, work[0]);
-		work[0].setDestination(n);
-		while (true)
+		for (Iterator it = work[0].getOTriangleAroundOriginIterator(); it.hasNext(); )
 		{
+			work[0] = (OTriangle) it.next();
 			work[0].setOrigin(n);
 			work[0].nextOTriOrigin();
 			if (work[0].destination() == n)
 				break;
 		}
 		//  Replace d by n in all incident triangles
-		symOTri(this, work[0]);        // (doV2)
-		work[0].setDestination(n);
-		while (true)
+		//  NOTE: if t4 is outer, it will not be updated by this loop
+		symOTri(this, work[0]);
+		for (Iterator it = work[0].getOTriangleAroundOriginIterator(); it.hasNext(); )
 		{
+			work[0] = (OTriangle) it.next();
 			work[0].setOrigin(n);
-			work[0].nextOTriOrigin();
-			//  Warning: o has been replaced by n above!
-			if (work[0].destination() == n)
-				break;
 		}
 		//  Update adjacency links.  For clarity, o and d are
 		//  written instead of n.
-		nextOTri();                     // (dV1o)
-		symOTri(this, work[0]);         // (V1dV4)
-		nextOTri();                     // (V1od)
-		symOTri(this, work[1]);         // (oV1V3)
-		work[0].glue(work[1]);
-		Triangle t3 = work[1].tri;
-		Vertex V1 = work[1].destination();
-		if (V1 == Vertex.outer)
+		if (!hasAttributes(OUTER))
 		{
-			work[0].setAttributes(OUTER);
-			work[1].setAttributes(OUTER);
+			nextOTri();             // (dV1o)
+			int attr4 = attributes;
+			symOTri(this, work[0]); // (V1dV4)
+			//  See NOTE above
+			work[0].setDestination(n);
+			nextOTri();             // (V1od)
+			int attr3 = attributes;
+			symOTri(this, work[1]); // (oV1V3)
+			work[0].glue(work[1]);
+			work[0].attributes |= attr3;
+			work[1].attributes |= attr4;
+			work[0].pushAttributes();
+			work[1].pushAttributes();
+			Triangle t34 = work[1].tri;
+			if (t34.isOuter())
+				t34 = work[0].tri;
+			assert !t34.isOuter() : work[0]+"\n"+work[1];
+			work[1].destination().setLink(t34);
+			n.setLink(t34);
+			nextOTri();             // (odV1)
 		}
-		nextOTri();                     // (odV1)
 		symOTri();                      // (doV2)
-		nextOTri();                     // (oV2d)
-		symOTri(this, work[0]);         // (V2oV5)
-		nextOTri();                     // (V2do)
-		symOTri(this, work[1]);         // (dV2V6)
-		work[0].glue(work[1]);
-		Triangle t5 = work[0].tri;
-		Vertex V2 = work[0].origin();
-		if (V2 == Vertex.outer)
+		if (!hasAttributes(OUTER))
 		{
-			work[0].setAttributes(OUTER);
-			work[1].setAttributes(OUTER);
+			nextOTri();             // (oV2d)
+			int attr5 = attributes;
+			symOTri(this, work[0]); // (V2oV5)
+			//  See NOTE above
+			work[0].setDestination(n);
+			nextOTri();             // (V2do)
+			int attr6 = attributes;
+			symOTri(this, work[1]); // (dV2V6)
+			work[0].glue(work[1]);
+			work[0].attributes |= attr6;
+			work[1].attributes |= attr5;
+			work[0].pushAttributes();
+			work[1].pushAttributes();
+			Triangle t56 = work[0].tri;
+			if (t56.isOuter())
+				t56 = work[1].tri;
+			assert !t56.isOuter();
+			work[0].origin().setLink(t56);
+			n.setLink(t56);
+			nextOTri();             // (doV2)
 		}
-		//  Fix links to triangles
-		V1.setLink(t3);
-		V2.setLink(t5);
-		n.setLink(t5);
-		//  Restore 'this' to its initial value
-		nextOTri();                     // (doV2)
 		clearAttributes(MARKED);
 		pushAttributes();
-		symOTri();                      // (odV1)
+		symOTri();
 		clearAttributes(MARKED);
 		pushAttributes();
-	}
-	
-	public boolean cycleTrianglesAroundOrigin(ArrayList triangles, HashSet triSet, boolean clockwise)
-	{
-		Vertex o = origin();
-		if (!triSet.contains(tri))
-		{
-			assert tri.vertex[0] == o || tri.vertex[1] == o || tri.vertex[2] == o : o+"\n"+tri;
-			triangles.add(tri);
-			triSet.add(tri);
-		}
-		Vertex first = destination();
-		while (true)
-		{
-			if (clockwise)
-			{
-				if (hasAttributes(NONMANIFOLD) || hasAttributes(BOUNDARY))
-					return false;
-				symOTri();
-				nextOTri();
-			}
-			else
-			{
-				prevOTri();
-				if (hasAttributes(NONMANIFOLD) || hasAttributes(BOUNDARY))
-					return false;
-				symOTri();
-			}
-			assert tri.vertex[0] == o || tri.vertex[1] == o || tri.vertex[2] == o : o+"\n"+tri;
-			if (!triSet.contains(tri))
-			{
-				triangles.add(tri);
-				triSet.add(tri);
-			}
-			if (destination() == first)
-				break;
-		}
-		return true;
 	}
 	
 	public void invertOrientationFace(boolean markLocked)
@@ -1157,14 +1164,14 @@ public class OTriangle
 			for (int i = 0; i < 3; i++)
 			{
 				ot.nextOTri();
-				if (ot.getAdj() != null)
+				if (!ot.hasAttributes(BOUNDARY))
 				{
 					if (!ot.hasAttributes(NONMANIFOLD))
 					{
 						OTriangle.symOTri(ot, sym);
 						todo.push(sym.tri);
 						todo.push(new Integer(sym.orientation));
-						sym.glue1(ot);
+						sym.tri.glue1(sym.orientation, ot.tri, ot.orientation);
 					}
 				}
 			}
@@ -1184,10 +1191,10 @@ public class OTriangle
 		return r;
 	}
 	
-	public final String toString()
+	public String toString()
 	{
 		String r = "Orientation: "+orientation;
-		r += "\nHashCode Tri: "+tri.hashCode();
+		r += "\nTri hashcode: "+tri.hashCode();
 		r += "\nAdjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2);
 		r += "\nAttributes: "+Integer.toHexString((tri.adjPos >> 8) & 0xff)+" "+Integer.toHexString((tri.adjPos >> 16) & 0xff)+" "+Integer.toHexString((tri.adjPos >> 24) & 0xff)+" => "+Integer.toHexString(attributes);
 		r += "\nVertices:";
