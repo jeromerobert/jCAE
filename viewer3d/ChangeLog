@@ -1,3 +1,12 @@
+2005-10-28 10:56  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/fe/ViewableFE.java: Fix a bug:
+	  javax.media.j3d.zFactorRel was ignored
+	* src/org/jcae/viewer3d/fe/amibe/AmibeDomain.java: Implement
+	  getNodes instead of getNodesIterator (faster)
+	* src/org/jcae/viewer3d/fe/unv/UNVParser.java: Read hexa8
+	* build.xml: Fix dist-bin target
+
 2005-10-13 12:12  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/help,
