@@ -82,36 +82,10 @@ public class AmibeDomain extends FEDomainAdapter
 		return new File(directory, a);
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getNodesIterator()
-	 */
-	public Iterator getNodesIterator()
+	public float[] getNodes()
 	{
-		return new Iterator()
-		{
-			private int index=0;
-			public void remove()
-			{
-				// TODO Auto-generated method stub
-				throw new UnsupportedOperationException();
-			}
-
-			public boolean hasNext()
-			{
-				return index<nodes.length;
-			}
-
-			public Object next()
-			{
-				float[] toReturn=new float[3];
-				System.arraycopy(nodes, index, toReturn, 0, 3);
-				index+=3;
-				return toReturn;
-			}
-		};
+		return nodes;
 	}
-	
 	/*
 	 * (non-Javadoc)
 	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getNumberOfNodes()
