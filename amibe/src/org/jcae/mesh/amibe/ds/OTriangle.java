@@ -939,9 +939,9 @@ public class OTriangle
 		double [] v1 = new double[3];
 		double [] xn = n.getUV();
 		double [] xo = o.getUV();
-		do
+		for (Iterator it = work[0].getOTriangleAroundApexIterator(); it.hasNext(); )
 		{
-			work[0].nextOTriApex();
+			work[0] = (OTriangle) it.next();
 			if (work[0].tri != tri && work[0].tri != work[1].tri && !work[0].hasAttributes(OUTER))
 			{
 				work[0].computeNormal3DT();
@@ -953,13 +953,13 @@ public class OTriangle
 					return false;
 			}
 		}
-		while (work[0].destination() != d);
 		//  Loop around d to check that triangles will not be inverted
+		copyOTri(this, work[0]);
 		work[0].prevOTri();
 		xo = d.getUV();
-		do
+		for (Iterator it = work[0].getOTriangleAroundApexIterator(); it.hasNext(); )
 		{
-			work[0].nextOTriApex();
+			work[0] = (OTriangle) it.next();
 			if (work[0].tri != tri && work[0].tri != work[1].tri && !work[0].hasAttributes(OUTER))
 			{
 				work[0].computeNormal3DT();
@@ -971,7 +971,6 @@ public class OTriangle
 					return false;
 			}
 		}
-		while (work[0].destination() != o);
 		return true;
 	}
 	
@@ -1052,9 +1051,6 @@ public class OTriangle
 		{
 			work[0] = (OTriangle) it.next();
 			work[0].setOrigin(n);
-			work[0].nextOTriOrigin();
-			if (work[0].destination() == n)
-				break;
 		}
 		//  Replace d by n in all incident triangles
 		//  NOTE: if t4 is outer, it will not be updated by this loop

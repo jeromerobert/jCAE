@@ -216,8 +216,11 @@ public class DecimateVertex
 				if (noe.hasAttributes(OTriangle.MARKED))
 					continue;
 				noe.setAttributes(OTriangle.MARKED);
-				OTriangle.symOTri(noe, sym);
-				sym.setAttributes(OTriangle.MARKED);
+				if (!noe.hasAttributes(OTriangle.BOUNDARY))
+				{
+					OTriangle.symOTri(noe, sym);
+					sym.setAttributes(OTriangle.MARKED);
+				}
 				Vertex v1 = noe.origin();
 				Vertex v2 = noe.destination();
 				tree.insert(new NotOrientedEdge(noe), cost(v1, v2, quadricMap));
