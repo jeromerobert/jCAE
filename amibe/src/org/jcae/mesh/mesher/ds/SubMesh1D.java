@@ -178,9 +178,9 @@ public class SubMesh1D
 			double []pt1 = c3d.value(e.getNodes1().getParameter());
 			double []pt2 = c3d.value(e.getNodes2().getParameter());
 			double len = Math.sqrt(
-				Math.pow(pt1[0] - pt2[0], 2) +
-				Math.pow(pt1[1] - pt2[1], 2) +
-				Math.pow(pt1[2] - pt2[2], 2)
+				(pt1[0] - pt2[0]) * (pt1[0] - pt2[0]) +
+				(pt1[1] - pt2[1]) * (pt1[1] - pt2[1]) +
+				(pt1[2] - pt2[2]) * (pt1[2] - pt2[2])
 			);
 			if (minlen >= 0.0)
 				minlen = Math.min(minlen, len);
