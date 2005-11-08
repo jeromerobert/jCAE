@@ -76,6 +76,16 @@ public interface CADGeomSurface
 	 */    
 	public double maxCurvature();
 	/**
+	 * Return the Gaussian curvature at the current point
+	 * @return The Gaussian curvature at the current point
+	 */    
+	public double gaussianCurvature();
+	/**
+	 * Return the mean curvature at the current point
+	 * @return The mean curvature at the current point
+	 */    
+	public double meanCurvature();
+	/**
 	 * Return the direction of maximum and minimum curvature at the current point
 	 * @return An array: {Xmax, Ymax, Zmax, Xmin, Ymin, Zmin}
 	 */    

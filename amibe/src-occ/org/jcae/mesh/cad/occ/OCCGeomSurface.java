@@ -108,6 +108,18 @@ public class OCCGeomSurface implements CADGeomSurface
 		return myLprop.maxCurvature();
 	}
 	
+	public double meanCurvature()
+	{
+		assert null != myLprop;
+		return myLprop.meanCurvature();
+	}
+	
+	public double gaussianCurvature()
+	{
+		assert null != myLprop;
+		return myLprop.gaussianCurvature();
+	}
+	
 	public double [] curvatureDirections()
 	{
 		assert null != myLprop;
