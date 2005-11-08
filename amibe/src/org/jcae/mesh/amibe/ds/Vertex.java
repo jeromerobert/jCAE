@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.util.LongLong;
 import org.jcae.mesh.amibe.ds.tools.*;
 import org.jcae.mesh.amibe.metrics.Metric2D;
+import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.cad.*;
 import java.util.Random;
@@ -495,7 +496,7 @@ public class Vertex implements Cloneable
 			((normPn1-normPn2)+normPn3)*mu/
 				((normPn1+(normPn2+normPn3))*((normPn1-normPn3)+normPn2))
 		));
-        	return alpha;
+		return alpha;
 	}
 	
 	public long dot3(Vertex v1, Vertex v2)
@@ -789,6 +790,73 @@ public class Vertex implements Cloneable
 				return ot;
 		}
 		return null;
+	}
+	
+	/**
+	 * Returns the discrete Gaussian curvature and the mean normal.
+         * These discrete operators are described in "Discrete
+         * Differential-Geometry Operators for Triangulated
+         * 2-Manifolds", Mark Meyer, Mathieu Desbrun, Peter Schröder,
+         * and Alan H. Barr.
+         *   http://www.cs.caltech.edu/~mmeyer/Publications/diffGeomOps.pdf
+	 */
+	public double discreteCurvatures(double [] meanNormal)
+	{
+		for (int i = 0; i < 3; i++)
+			meanNormal[i] = 0.0;
+		assert link instanceof Triangle;
+		OTriangle ot = new OTriangle((Triangle) link, 0);
+		if (ot.origin() != this)
+			ot.nextOTri();
+		if (ot.origin() != this)
+			ot.nextOTri();
+		assert ot.origin() == this;
+		double [] vect1 = new double[3];
+		double [] vect2 = new double[3];
+		double [] vect3 = new double[3];
+		double [] p0 = param;
+		double mixed = 0.0;
+		double gauss = 0.0;
+		for (Iterator it = ot.getOTriangleAroundOriginIterator(); it.hasNext(); )
+		{
+			ot = (OTriangle) it.next();
+			if (ot.hasAttributes(OTriangle.OUTER))
+				continue;
+			double [] p1 = ot.destination().getUV();
+			double [] p2 = ot.apex().getUV();
+			vect1[0] = p1[0] - p0[0];
+			vect1[1] = p1[1] - p0[1];
+			vect1[2] = p1[2] - p0[2];
+			vect2[0] = p2[0] - p1[0];
+			vect2[1] = p2[1] - p1[1];
+			vect2[2] = p2[2] - p1[2];
+			vect3[0] = p0[0] - p2[0];
+			vect3[1] = p0[1] - p2[1];
+			vect3[2] = p0[2] - p2[2];
+			double c12 = Metric3D.prodSca(vect1, vect2);
+			double c23 = Metric3D.prodSca(vect2, vect3);
+			double c31 = Metric3D.prodSca(vect3, vect1);
+			// Override vect2
+			Metric3D.prodVect3D(vect1, vect3, vect2);
+			double area = 0.5 * Metric3D.norm(vect2);
+			if (c31 > 0.0)
+				mixed += 0.5 * area;
+			else if (c12 > 0.0 || c23 > 0.0)
+				mixed += 0.25 * area;
+			else
+			{
+				// Non-obtuse triangle
+				if (area > 0.0 && area > - 1.e-6 * (c12+c23))
+					mixed -= 0.125 * 0.5 * (c12 * Metric3D.prodSca(vect3, vect3) + c23 * Metric3D.prodSca(vect1, vect1)) / area;
+			}
+			gauss += Math.abs(Math.atan2(2.0 * area, -c31));
+			for (int i = 0; i < 3; i++)
+				meanNormal[i] += 0.5 * (c12 * vect3[i] - c23 * vect1[i]) / area;
+		}
+		for (int i = 0; i < 3; i++)
+			meanNormal[i] /= 2.0 * mixed;
+		// Discrete gaussian curvature
+		return (2.0 * Math.PI - gauss) / mixed;
 	}
 	
 	public String toString ()
