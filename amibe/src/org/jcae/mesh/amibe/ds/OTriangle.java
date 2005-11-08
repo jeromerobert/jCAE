@@ -68,7 +68,7 @@ import org.apache.log4j.Logger;
  *
  * <p>
  *   The main goal of this class is to ease mesh traversal.
- *   Consider the <code>ot</code> {@link OTriangle} with a null orientation of
+ *   Consider the <code>ot</code> {@link OTriangle} with a null localNumber of
  *   {@link Triangle} <code>t</code>below.
  * </p>
  * <pre>
@@ -167,14 +167,14 @@ public class OTriangle
 	
 	/*
 	 * Vertices can be accessed through
-	 *        origin = tri.vertex[next3[orientation]]
-	 *   destination = tri.vertex[prev3[orientation]]
-	 *          apex = tri.vertex[orientation]
-	 * Adjacent triangle is tri.adj[orientation].tri and its orientation
-	 * is ((tri.adjPos >> (2*orientation)) & 3)
+	 *        origin = tri.vertex[next3[localNumber]]
+	 *   destination = tri.vertex[prev3[localNumber]]
+	 *          apex = tri.vertex[localNumber]
+	 * Adjacent triangle is tri.adj[localNumber].tri and its localNumber
+	 * is ((tri.adjPos >> (2*localNumber)) & 3)
 	 */
 	protected Triangle tri;
-	protected int orientation;
+	protected int localNumber;
 	protected int attributes;
 	
 	/**
@@ -183,7 +183,7 @@ public class OTriangle
 	public OTriangle()
 	{
 		tri = null;
-		orientation = 0;
+		localNumber = 0;
 		attributes = 0;
 	}
 	
@@ -196,8 +196,8 @@ public class OTriangle
 	public OTriangle(Triangle t, int o)
 	{
 		tri = t;
-		orientation = o;
-		attributes = (tri.adjPos >> (8*(1+orientation))) & 0xff;
+		localNumber = o;
+		attributes = (tri.adjPos >> (8*(1+localNumber))) & 0xff;
 	}
 	
 	/**
@@ -210,22 +210,27 @@ public class OTriangle
 		return tri;
 	}
 	
+	public final int getLocalNumber()
+	{
+		return localNumber;
+	}
+	
 	/**
-	 * Set the triangle tied to this object, and resets orientation.
+	 * Set the triangle tied to this object, and resets localNumber.
 	 *
 	 * @param t  the triangle tied to this object.
 	 */
 	public final void bind(Triangle t)
 	{
 		tri = t;
-		orientation = 0;
+		localNumber = 0;
 		attributes = (tri.adjPos >> 8) & 0xff;
 	}
 	
 	public final void bind(Triangle t, int o)
 	{
 		tri = t;
-		orientation = o;
+		localNumber = o;
 		pullAttributes();
 	}
 	
@@ -266,14 +271,14 @@ public class OTriangle
 	// Adjust tri.adjPos after attributes is modified.
 	public final void pushAttributes()
 	{
-		tri.adjPos &= ~(0xff << (8*(1+orientation)));
-		tri.adjPos |= ((attributes & 0xff) << (8*(1+orientation)));
+		tri.adjPos &= ~(0xff << (8*(1+localNumber)));
+		tri.adjPos |= ((attributes & 0xff) << (8*(1+localNumber)));
 	}
 	
 	// Adjust attributes after tri.adjPos is modified.
 	public final void pullAttributes()
 	{
-		attributes = (tri.adjPos >> (8*(1+orientation))) & 0xff;
+		attributes = (tri.adjPos >> (8*(1+localNumber))) & 0xff;
 	}
 	
 	/**
@@ -286,7 +291,7 @@ public class OTriangle
 	public static final void copyOTri(OTriangle src, OTriangle dest)
 	{
 		dest.tri = src.tri;
-		dest.orientation = src.orientation;
+		dest.localNumber = src.localNumber;
 		dest.attributes = src.attributes;
 	}
 	
@@ -308,9 +313,9 @@ public class OTriangle
 	 */
 	public static final void symOTri(OTriangle o, OTriangle that)
 	{
-		that.tri = (Triangle) o.tri.getAdj(o.orientation);
-		that.orientation = ((o.tri.adjPos >> (2*o.orientation)) & 3);
-		that.attributes = (that.tri.adjPos >> (8*(1+that.orientation))) & 0xff;
+		that.tri = (Triangle) o.tri.getAdj(o.localNumber);
+		that.localNumber = ((o.tri.adjPos >> (2*o.localNumber)) & 3);
+		that.attributes = (that.tri.adjPos >> (8*(1+that.localNumber))) & 0xff;
 	}
 	
 	/**
@@ -318,10 +323,10 @@ public class OTriangle
 	 */
 	public final void symOTri()
 	{
-		int neworient = ((tri.adjPos >> (2*orientation)) & 3);
-		tri = (Triangle) tri.getAdj(orientation);
-		orientation = neworient;
-		attributes = (tri.adjPos >> (8*(1+orientation))) & 0xff;
+		int neworient = ((tri.adjPos >> (2*localNumber)) & 3);
+		tri = (Triangle) tri.getAdj(localNumber);
+		localNumber = neworient;
+		attributes = (tri.adjPos >> (8*(1+localNumber))) & 0xff;
 	}
 	
 	/**
@@ -335,8 +340,8 @@ public class OTriangle
 	public static final void nextOTri(OTriangle o, OTriangle that)
 	{
 		that.tri = o.tri;
-		that.orientation = next3[o.orientation];
-		that.attributes = (that.tri.adjPos >> (8*(1+that.orientation))) & 0xff;
+		that.localNumber = next3[o.localNumber];
+		that.attributes = (that.tri.adjPos >> (8*(1+that.localNumber))) & 0xff;
 	}
 	
 	/**
@@ -344,8 +349,8 @@ public class OTriangle
 	 */
 	public final void nextOTri()
 	{
-		orientation = next3[orientation];
-		attributes = (tri.adjPos >> (8*(1+orientation))) & 0xff;
+		localNumber = next3[localNumber];
+		attributes = (tri.adjPos >> (8*(1+localNumber))) & 0xff;
 	}
 	
 	/**
@@ -359,8 +364,8 @@ public class OTriangle
 	public static final void prevOTri(OTriangle o, OTriangle that)
 	{
 		that.tri = o.tri;
-		that.orientation = prev3[o.orientation];
-		that.attributes = (that.tri.adjPos >> (8*(1+that.orientation))) & 0xff;
+		that.localNumber = prev3[o.localNumber];
+		that.attributes = (that.tri.adjPos >> (8*(1+that.localNumber))) & 0xff;
 	}
 	
 	/**
@@ -368,8 +373,8 @@ public class OTriangle
 	 */
 	public final void prevOTri()
 	{
-		orientation = prev3[orientation];
-		attributes = (tri.adjPos >> (8*(1+orientation))) & 0xff;
+		localNumber = prev3[localNumber];
+		attributes = (tri.adjPos >> (8*(1+localNumber))) & 0xff;
 	}
 	
 	/**
@@ -523,7 +528,7 @@ public class OTriangle
 	 */
 	public final Vertex origin()
 	{
-		return tri.vertex[next3[orientation]];
+		return tri.vertex[next3[localNumber]];
 	}
 	
 	/**
@@ -533,7 +538,7 @@ public class OTriangle
 	 */
 	public final Vertex destination()
 	{
-		return tri.vertex[prev3[orientation]];
+		return tri.vertex[prev3[localNumber]];
 	}
 	
 	/**
@@ -543,7 +548,7 @@ public class OTriangle
 	 */
 	public final Vertex apex()
 	{
-		return tri.vertex[orientation];
+		return tri.vertex[localNumber];
 	}
 	
 	//  The following 3 methods change the underlying triangle.
@@ -555,7 +560,7 @@ public class OTriangle
 	 */
 	public final void setOrigin(Vertex v)
 	{
-		tri.vertex[next3[orientation]] = v;
+		tri.vertex[next3[localNumber]] = v;
 	}
 	
 	/**
@@ -565,7 +570,7 @@ public class OTriangle
 	 */
 	public final void setDestination(Vertex v)
 	{
-		tri.vertex[prev3[orientation]] = v;
+		tri.vertex[prev3[localNumber]] = v;
 	}
 	
 	/**
@@ -575,7 +580,7 @@ public class OTriangle
 	 */
 	public final void setApex(Vertex v)
 	{
-		tri.vertex[orientation] = v;
+		tri.vertex[localNumber] = v;
 	}
 	
 	/**
@@ -586,8 +591,8 @@ public class OTriangle
 	public final void glue(OTriangle sym)
 	{
 		assert !(hasAttributes(NONMANIFOLD) || sym.hasAttributes(NONMANIFOLD)) : this+"\n"+sym;
-		tri.glue1(orientation, sym.tri, sym.orientation);
-		sym.tri.glue1(sym.orientation, tri, orientation);
+		tri.glue1(localNumber, sym.tri, sym.localNumber);
+		sym.tri.glue1(sym.localNumber, tri, localNumber);
 	}
 	
 	/**
@@ -597,12 +602,12 @@ public class OTriangle
 	 */
 	public final Object getAdj()
 	{
-		return tri.getAdj(orientation);
+		return tri.getAdj(localNumber);
 	}
 	
 	public final void setAdj(Object link)
 	{
-		tri.setAdj(orientation, link);
+		tri.setAdj(localNumber, link);
 	}
 	
 	protected Iterator getOTriangleAroundApexIterator()
@@ -901,11 +906,11 @@ public class OTriangle
 		d.setLink(work[0].tri);
 		//  Fix attributes
 		tri.adjPos &= 0xff;
-		tri.adjPos |= ((attr2 & 0xff) << (8*(1+next3[orientation])));
-		tri.adjPos |= ((attr3 & 0xff) << (8*(1+prev3[orientation])));
+		tri.adjPos |= ((attr2 & 0xff) << (8*(1+next3[localNumber])));
+		tri.adjPos |= ((attr3 & 0xff) << (8*(1+prev3[localNumber])));
 		work[0].tri.adjPos &= 0xff;
-		work[0].tri.adjPos |= ((attr4 & 0xff) << (8*(1+next3[work[0].orientation])));
-		work[0].tri.adjPos |= ((attr1 & 0xff) << (8*(1+prev3[work[0].orientation])));
+		work[0].tri.adjPos |= ((attr4 & 0xff) << (8*(1+next3[work[0].localNumber])));
+		work[0].tri.adjPos |= ((attr1 & 0xff) << (8*(1+prev3[work[0].localNumber])));
 		//  Mark new edge
 		setAttributes(SWAPPED);
 		work[0].setAttributes(SWAPPED);
@@ -1128,7 +1133,7 @@ public class OTriangle
 		Stack todo = new Stack();
 		HashSet seen = new HashSet();
 		todo.push(tri);
-		todo.push(new Integer(orientation));
+		todo.push(new Integer(localNumber));
 		swapVertices(seen, todo);
 		assert o == destination() : o+" "+d+" "+this;
 	}
@@ -1168,8 +1173,8 @@ public class OTriangle
 					{
 						OTriangle.symOTri(ot, sym);
 						todo.push(sym.tri);
-						todo.push(new Integer(sym.orientation));
-						sym.tri.glue1(sym.orientation, ot.tri, ot.orientation);
+						todo.push(new Integer(sym.localNumber));
+						sym.tri.glue1(sym.localNumber, ot.tri, ot.localNumber);
 					}
 				}
 			}
@@ -1191,7 +1196,7 @@ public class OTriangle
 	
 	public String toString()
 	{
-		String r = "Orientation: "+orientation;
+		String r = "Local number: "+localNumber;
 		r += "\nTri hashcode: "+tri.hashCode();
 		r += "\nAdjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2);
 		r += "\nAttributes: "+Integer.toHexString((tri.adjPos >> 8) & 0xff)+" "+Integer.toHexString((tri.adjPos >> 16) & 0xff)+" "+Integer.toHexString((tri.adjPos >> 24) & 0xff)+" => "+Integer.toHexString(attributes);

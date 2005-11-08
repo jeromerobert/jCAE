@@ -844,9 +844,9 @@ public class Mesh
 							OTriangle.symOTri(ot, sym);
 							adj = new ArrayList();
 							adj.add(t);
-							adj.add(new Integer(ot.orientation));
+							adj.add(new Integer(ot.getLocalNumber()));
 							adj.add(sym.tri);
-							adj.add(new Integer(sym.orientation));
+							adj.add(new Integer(sym.getLocalNumber()));
 							ot.setAttributes(OTriangle.NONMANIFOLD);
 							sym.setAttributes(OTriangle.NONMANIFOLD);
 							ot.setAdj(adj);
@@ -855,7 +855,7 @@ public class Mesh
 						else
 							adj = (ArrayList) ot.getAdj();
 						adj.add(t2);
-						adj.add(new Integer(ot2.orientation));
+						adj.add(new Integer(ot2.getLocalNumber()));
 						ot2.setAdj(adj);
 						ot2.setAttributes(OTriangle.NONMANIFOLD);
 						if (logger.isDebugEnabled())

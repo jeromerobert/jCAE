@@ -30,13 +30,13 @@ public class NotOrientedEdge extends OTriangle
 	public NotOrientedEdge(OTriangle ot)
 	{
 		tri = (Triangle) ot.tri;
-		orientation = ot.orientation;
-		attributes = (tri.adjPos >> (8*(1+orientation))) & 0xff;
+		localNumber = ot.localNumber;
+		attributes = (tri.adjPos >> (8*(1+localNumber))) & 0xff;
 	}
 
 	public final int hashCode()
 	{
-		Triangle sym = (Triangle) tri.getAdj(orientation);
+		Triangle sym = (Triangle) tri.getAdj(localNumber);
 		return tri.hashCode() + sym.hashCode();
 	}
 	
@@ -45,8 +45,8 @@ public class NotOrientedEdge extends OTriangle
 		if (o == null)
 			return false;
 		NotOrientedEdge that = (NotOrientedEdge) o;
-		return (that.tri == tri && that.orientation == orientation) ||
-		       (that.tri == (Triangle) tri.getAdj(orientation) && that.orientation == ((tri.adjPos >> (2*orientation)) & 3));
+		return (that.tri == tri && that.localNumber == localNumber) ||
+		       (that.tri == (Triangle) tri.getAdj(localNumber) && that.localNumber == ((tri.adjPos >> (2*localNumber)) & 3));
 	}
 	
 	public final String toString()
