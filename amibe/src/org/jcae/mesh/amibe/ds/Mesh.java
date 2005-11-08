@@ -918,7 +918,8 @@ public class Mesh
 		return true;
 	}
 	
-	public void writeUNV2D(String file)
+	// Useful for debugging
+	public void writeUNV(String file)
 	{
 		String cr=System.getProperty("line.separator");
 		PrintWriter out;
@@ -950,7 +951,10 @@ public class Mesh
 				labels.put(node, label);
 				double [] uv = node.getUV();
 				out.println(label+"         1         1         1");
-				out.println(""+uv[0]+" "+uv[1]+" 0.0");
+				if (uv.length == 2)
+					out.println(""+uv[0]+" "+uv[1]+" 0.0");
+				else
+					out.println(""+uv[0]+" "+uv[1]+" "+uv[2]);
 			}
 			out.println("    -1");
 			out.println("    -1"+cr+"  2412");
@@ -972,6 +976,84 @@ public class Mesh
 				out.println("");
 			}
 			out.println("    -1");
+			out.close();
+		} catch (FileNotFoundException e)
+		{
+			logger.fatal(e.toString());
+			e.printStackTrace();
+		} catch (IOException e)
+		{
+			logger.fatal(e.toString());
+			e.printStackTrace();
+		}
+	}
+	
+	// Useful for debugging
+	public void writeMesh(String file)
+	{
+		String cr=System.getProperty("line.separator");
+		PrintWriter out;
+		try {
+			if (file.endsWith(".gz") || file.endsWith(".GZ"))
+				out = new PrintWriter(new java.util.zip.GZIPOutputStream(new FileOutputStream(file)));
+			else
+				out = new PrintWriter(new FileOutputStream(file));
+			out.println("MeshVersionFormatted 1"+cr+"Dimension"+cr+"3");
+			HashSet nodeset = new HashSet();
+			for(Iterator it=triangleList.iterator();it.hasNext();)
+			{
+				Triangle t = (Triangle) it.next();
+				if (t.isOuter())
+					continue;
+				if (t.vertex[0] == Vertex.outer || t.vertex[1] == Vertex.outer || t.vertex[2] == Vertex.outer)
+					continue;
+				nodeset.add(t.vertex[0]);
+				nodeset.add(t.vertex[1]);
+				nodeset.add(t.vertex[2]);
+			}
+			int count =  0;
+			HashMap labels = new HashMap(nodeset.size());
+			out.println("Vertices"+cr+nodeset.size());
+			for(Iterator it=nodeset.iterator();it.hasNext();)
+			{
+				Vertex node = (Vertex) it.next();
+				count++;
+				Integer label = new Integer(count);
+				labels.put(node, label);
+				double [] uv = node.getUV();
+				if (uv.length == 2)
+					out.println(""+uv[0]+" "+uv[1]+" 0.0 0");
+				else
+					out.println(""+uv[0]+" "+uv[1]+" "+uv[2]+" 0");
+			}
+			count =  0;
+			for(Iterator it=triangleList.iterator();it.hasNext();)
+			{
+				Triangle t = (Triangle)it.next();
+				if (t.isOuter())
+					continue;
+				if (t.vertex[0] == Vertex.outer || t.vertex[1] == Vertex.outer || t.vertex[2] == Vertex.outer)
+					continue;
+				count++;
+			}
+			out.println(cr+"Triangles"+cr+count);
+			count =  0;
+			for(Iterator it=triangleList.iterator();it.hasNext();)
+			{
+				Triangle t = (Triangle)it.next();
+				if (t.isOuter())
+					continue;
+				if (t.vertex[0] == Vertex.outer || t.vertex[1] == Vertex.outer || t.vertex[2] == Vertex.outer)
+					continue;
+				count++;
+				for(int i = 0; i < 3; i++)
+				{
+					Integer nodelabel =  (Integer) labels.get(t.vertex[i]);
+					out.print(nodelabel.intValue()+" ");
+				}
+				out.println("1");
+			}
+			out.println(cr+"End");
 			out.close();
 		} catch (FileNotFoundException e)
 		{
