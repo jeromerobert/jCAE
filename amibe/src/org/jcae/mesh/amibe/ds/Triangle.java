@@ -64,6 +64,19 @@ public class Triangle
 		assert a != b && b != c && c != a : this;
 	}
 	
+	/**
+	 * Clone an existing triangle.
+	 */
+	public Triangle(Triangle that)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			vertex[i] = that.vertex[i];
+			adj[i] = that.adj[i];
+		}
+		adjPos = that.adjPos;
+	}
+	
 	public void addToMesh()
 	{
 		Mesh m = vertex[0].mesh;
