@@ -1088,6 +1088,7 @@ public class Mesh
 	public boolean isValid(boolean constrained)
 	{
 		OTriangle ot = new OTriangle();
+		OTriangle sym = new OTriangle();
 		Vertex v1, v2;
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
 		{
@@ -1123,7 +1124,10 @@ public class Mesh
 				{
 					Triangle t2 = (Triangle) v.getLink();
 					if (t2.vertex[0] != v && t2.vertex[1] != v && t2.vertex[2] != v)
+					{
+						logger.debug("Vertex "+v+" linked to "+t2);
 						return false;
+					}
 				}
 			}
 			ot.bind(t);
@@ -1134,14 +1138,27 @@ public class Mesh
 				{
 					v1 = ot.origin();
 					v2 = ot.destination();
-					ot.symOTri();
-					if (ot.origin() != v2 || ot.destination() != v1)
+					OTriangle.symOTri(ot, sym);
+					if (sym.origin() != v2 || sym.destination() != v1)
+					{
+						logger.debug("Wrong adjacency relation: ");
+						logger.debug(" "+ot);
+						logger.debug(" "+sym);
 						return false;
-					ot.symOTri();
-					if (ot.origin() != v1 || ot.destination() != v2)
+					}
+					sym.symOTri();
+					if (sym.origin() != v1 || sym.destination() != v2)
+					{
+						logger.debug("Wrong adjacency relation");
+						logger.debug(" "+ot);
+						logger.debug(" "+sym);
 						return false;
+					}
 					if (ot.getTri() != t)
+					{
+						logger.debug("Wrong adjacency relation");
 						return false;
+					}
 				}
 			}
 		}
