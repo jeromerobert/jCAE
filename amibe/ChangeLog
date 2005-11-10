@@ -1,3 +1,11 @@
+Thu Nov 10 17:53:16 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java: New split() method.
+
+Mon Nov  7 17:18:32 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/algos1d/UniformLength.java: Skip the deflection check on tiny edges.
+
 Fri Oct 28 10:48:10 CEST 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/OTriangle.java: New getOTriangleAroundOriginIterator() method to loop around a vertex.
