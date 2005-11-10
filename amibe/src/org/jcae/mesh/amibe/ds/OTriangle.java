@@ -1123,6 +1123,82 @@ public class OTriangle
 		pushAttributes();
 	}
 	
+	/**
+	 * Split an edge.  This is the opposite of contract.
+	 * @param n the resulting vertex
+	 * @return the newly created edge
+	 */
+	public final void split(Vertex n)
+	{
+		/*
+		 *         V1                       V1        
+		 *          +                       /|\
+		 *         / \                    /  |  \        
+		 *        /   \                 / t1 | t3 \       
+		 *       / t1  \              /      |      \      
+		 *    o +-------+ d  --->  o +-------+-------+ d   
+		 *       \ t2  /              \     n|      /      
+		 *        \   /                 \ t2 | t4 /       
+		 *         \ /                    \  |  /        
+		 *          +                       \|/
+		 *         V2                       V2
+		 */
+		// this = (odV1)
+		Triangle t1 = tri;
+		Triangle t2 = (Triangle) tri.getAdj(localNumber);
+		Triangle t3 = new Triangle(t1);
+		Triangle t4 = new Triangle(t2);
+		t3.addToMesh();
+		t4.addToMesh();
+		copyOTri(this, work[1]);        // (odV1)
+		// Update vertices
+		setDestination(n);
+		work[1].tri = t3;
+		work[1].setOrigin(n);           // (ndV1)
+		if (t1.isOuter())
+		{
+			n.setLink(t2);
+			work[1].destination().setLink(t4);
+		}
+		else
+		{
+			n.setLink(t1);
+			work[1].destination().setLink(t3);
+		}
+		
+		nextOTri(this, work[0]);        // (nV1o)
+		work[1].nextOTri();             // (dV1n)
+		if (work[0].getAdj() != null)
+		{
+			work[0].symOTri();      // (V1d*)
+			work[1].glue(work[0]);
+			nextOTri(this, work[0]);// (nV1o)
+		}
+		work[1].nextOTri();             // (V1nd)
+		work[1].glue(work[0]);
+		work[0].clearAttributes(BOUNDARY);
+		work[1].clearAttributes(BOUNDARY);
+		work[1].nextOTri();             // (ndV1)
+		
+		nextOTriDest(this, work[0]);    // (V2do)
+		copyOTri(work[0], work[2]);     // (V2do)
+		work[0].setDestination(n);      // (V2no)
+		work[2].tri = t4;
+		work[2].setApex(n);             // (V2dn)
+		if (work[0].getAdj() != null)
+		{
+			work[0].symOTri();      // (dV2*)
+			work[2].glue(work[0]);
+			nextOTriDest(this, work[0]);    // (V2no)
+		}
+		work[2].prevOTri();             // (nV2d)
+		work[2].glue(work[0]);
+		work[0].clearAttributes(BOUNDARY | MARKED);
+		work[2].clearAttributes(BOUNDARY | MARKED);
+		work[2].prevOTri();             // (dnV2)
+		work[2].glue(work[1]);
+	}
+	
 	public void invertOrientationFace(boolean markLocked)
 	{
 		assert markLocked == true;
