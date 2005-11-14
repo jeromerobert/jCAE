@@ -1056,7 +1056,6 @@ public class Vertex implements Cloneable
 	
 	public boolean discreteProject(Vertex pt)
 	{
-//System.out.println("Avant: "+Metric3D.norm(pt.param));
 		double [] normal = new double[3];
 		discreteCurvatures(normal);
 		double n = Metric3D.norm(normal);
@@ -1070,8 +1069,6 @@ public class Vertex implements Cloneable
 			for (int i = 0; i < 3; i++)
 				normal[i] /= n;
 		}
-//System.out.println("normal: "+normal[0]+" "+normal[1]+" "+normal[2]);
-//System.out.println("in: "+Metric3D.prodSca(param, normal));
 		// We search for the quadric
 		//   F(x,y) = a x^2 + b xy + c y^2 - z
 		// which fits best for all neighbour vertices.
@@ -1095,12 +1092,6 @@ public class Vertex implements Cloneable
 		// Transformation matrix
 		Matrix3D Pinv = new Matrix3D(t1, t2, normal);
 		Matrix3D P = Pinv.transpose();
-//System.out.println(""+P);
-//System.out.println("t1: "+t1[0]+" "+t1[1]+" "+t1[2]);
-//System.out.println("t2: "+t2[0]+" "+t2[1]+" "+t2[2]);
-//System.out.println("n: "+normal[0]+" "+normal[1]+" "+normal[2]);
-//System.out.println("sca: "+Metric3D.prodSca(t1, t2)+" "+Metric3D.prodSca(normal, t2)+" "+Metric3D.prodSca(t1, normal));
-//System.out.println("norm2: "+Metric3D.prodSca(t1, t1)+" "+Metric3D.prodSca(t2, t2)+" "+Metric3D.prodSca(normal, normal));
 		OTriangle ot = new OTriangle((Triangle) link, 0);
 		if (ot.origin() != this)
 			ot.nextOTri();
@@ -1117,16 +1108,11 @@ public class Vertex implements Cloneable
 		for (Iterator it = ot.getOTriangleAroundOriginIterator(); it.hasNext(); )
 		{
 			ot = (OTriangle) it.next();
-			if (ot.hasAttributes(OTriangle.OUTER))
-				continue;
 			double [] p1 = ot.destination().getUV();
 			for (int i = 0; i < 3; i++)
 				vect1[i] = p1[i] - param[i];
 			// Find coordinates in the local frame (t1,t2,n)
 			double [] loc = P.apply(vect1);
-//System.out.println("glob: "+vect1[0]+" "+vect1[1]+" "+vect1[2]);
-//System.out.println("loc: "+loc[0]+" "+loc[1]+" "+loc[2]);
-//System.out.println("vdotn: "+Metric3D.prodSca(loc, normal));
 			h[0] += loc[2] * loc[0] * loc[0];
 			h[1] += loc[2] * loc[0] * loc[1];
 			h[2] += loc[2] * loc[1] * loc[1];
@@ -1145,17 +1131,15 @@ public class Vertex implements Cloneable
 		if (Ginv == null)
 			return false;
 		double [] abc = Ginv.apply(h);
-//System.out.println("abc: "+abc[0]+" "+abc[1]+" "+abc[2]);
 		// Now project pt onto this quadric
 		for (int i = 0; i < 3; i++)
 			vect1[i] = pt.param[i] - param[i];
 		double [] loc = P.apply(vect1);
-		loc[2] = abc[0] * loc[0] * loc[0] + abc[1] * loc[0] * loc[1] + abc[2] * loc[2] * loc[2];
+		loc[2] = abc[0] * loc[0] * loc[0] + abc[1] * loc[0] * loc[1] + abc[2] * loc[1] * loc[1];
 		if (Pinv == null)
 			return false;
 		double [] glob = Pinv.apply(loc);
 		pt.moveTo(param[0] + glob[0], param[1] + glob[1], param[2] + glob[2]);
-//System.out.println("Apres: "+Metric3D.norm(pt.param));
 		return true;
 	}
 	
