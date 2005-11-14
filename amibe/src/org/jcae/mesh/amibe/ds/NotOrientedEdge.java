@@ -37,7 +37,8 @@ public class NotOrientedEdge extends OTriangle
 	public final int hashCode()
 	{
 		Triangle sym = (Triangle) tri.getAdj(localNumber);
-		return tri.hashCode() + sym.hashCode();
+		int h = tri.hashCode() + sym.hashCode();
+		return h;
 	}
 	
 	public final boolean equals(Object o)
@@ -51,6 +52,6 @@ public class NotOrientedEdge extends OTriangle
 	
 	public final String toString()
 	{
-		return "Vertices: "+origin()+"\n"+destination();
+		return "hashCode="+hashCode()+" vertices:\n  "+origin()+"\n  "+destination();
 	}
 }

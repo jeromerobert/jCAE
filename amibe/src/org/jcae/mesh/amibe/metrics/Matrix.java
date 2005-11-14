@@ -159,8 +159,13 @@ public class Matrix
 			throw new IllegalArgumentException("Uninitialized matrix");
 		String ret = "";
 		for (int i = 0; i < rank; i++)
+		{
+			ret += "data|"+i+"][] ";
 			for (int j = 0; j < rank; j++)
 				ret += " "+data[i][j];
+			if (i < rank - 1)
+				ret += "\n";
+		}
 		return ret;
 	}
 	
