@@ -28,6 +28,24 @@ import org.apache.log4j.Logger;
  */
 public class Matrix3D extends Matrix
 {
+	public Matrix3D()
+	{
+		rank = 3;
+		data = new double[rank][rank];
+	}
+	
+	public Matrix3D(double [] e1, double [] e2, double [] e3)
+	{
+		rank = 3;
+		data = new double[rank][rank];
+		for (int i = 0; i < rank; i++)
+		{
+			data[i][0] = e1[i];
+			data[i][1] = e2[i];
+			data[i][2] = e3[i];
+		}
+	}
+	
 	public double [] apply(double [] in)
 	{
 		double [] out = new double[3];
@@ -36,4 +54,16 @@ public class Matrix3D extends Matrix
 		out[2] = data[2][0] * in[0] + data[2][1] * in[1] + data[2][2] * in[2];
 		return out;
 	}
+	
+	public Matrix3D transpose()
+	{
+		if (rank <= 0)
+			throw new IllegalArgumentException("Uninitialized matrix");
+		Matrix3D ret = new Matrix3D();
+		for (int i = 0; i < rank; i++)
+			for (int j = 0; j < rank; j++)
+				ret.data[i][j] = data[j][i];
+		return ret;
+	}
+	
 }
