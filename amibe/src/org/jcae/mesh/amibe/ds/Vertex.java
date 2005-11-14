@@ -25,6 +25,7 @@ import org.jcae.mesh.amibe.util.LongLong;
 import org.jcae.mesh.amibe.ds.tools.*;
 import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
+import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.cad.*;
 import java.util.Random;
@@ -799,6 +800,9 @@ public class Vertex implements Cloneable
          * 2-Manifolds", Mark Meyer, Mathieu Desbrun, Peter Schröder,
          * and Alan H. Barr.
          *   http://www.cs.caltech.edu/~mmeyer/Publications/diffGeomOps.pdf
+         *   http://www.cs.caltech.edu/~mmeyer/Publications/diffGeomOps.pdf
+         * Note: on a sphere, the Gaussian curvature is very accurate,
+         *       but not the mean mean curvature.
 	 */
 	public double discreteCurvatures(double [] meanNormal)
 	{
@@ -857,6 +861,302 @@ public class Vertex implements Cloneable
 			meanNormal[i] /= 2.0 * mixed;
 		// Discrete gaussian curvature
 		return (2.0 * Math.PI - gauss) / mixed;
+	}
+	
+	/**
+	 * Compute the discrete local frame at this vertex.
+         * These discrete operators are described in "Discrete
+         * Differential-Geometry Operators for Triangulated
+         * 2-Manifolds", Mark Meyer, Mathieu Desbrun, Peter Schröder,
+         * and Alan H. Barr.
+         *   http://www.cs.caltech.edu/~mmeyer/Publications/diffGeomOps.pdf
+	 */
+	public boolean discreteCurvatureDirections(double [] normal, double[] t1, double [] t2)
+	{
+		double Kg = discreteCurvatures(normal);
+		double n = Metric3D.norm(normal);
+		double Kh = 0.5 * n;
+		if (n < 1.e-6)
+		{
+			// Either this is a saddle point, or surface is
+			// planar at this point.  Compute surface normal
+			// by averaging triangle normals.
+			if (!discreteAverageNormal(normal))
+				return false;
+			Kh = 0.0;
+		}
+		else
+		{
+			for (int i = 0; i < 3; i++)
+				normal[i] /= n;
+		}
+		// We are looking for eigenvectors of the curvature
+		// matrix B(a b; b c).  
+		// Firstly set (t1,t2) to be an arbitrary map of the
+		// tangent plane.
+		for (int i = 0; i < 3; i++)
+			t2[i] = 0.0;
+		if (Math.abs(normal[0]) < Math.abs(normal[1]))
+			t2[0] = 1.0;
+		else
+			t2[1] = 1.0;
+		Metric3D.prodVect3D(normal, t2, t1);
+		n = Metric3D.norm(t1);
+		if (n < 1.e-6)
+			return false;
+		for (int i = 0; i < 3; i++)
+			t1[i] /= n;
+		Metric3D.prodVect3D(normal, t1, t2);
+		// To compute B eigenvectors, we search for the minimum of
+		//   E(a,b,c) = sum omega_ij (T(d_ij) B d_ij - kappa_ij)^2
+		// d_ij is the unit direction of the edge ij in the tangent
+		// plane, so it can be written in the (t1,t2) basis:
+		//   d_ij = d1_ij t1 + d2_ij t2
+		// Then
+		//   T(d_ij) B d_ij = a d1_ij^2 + 2b d1_ij d2_ij + c d2_ij^2
+		// We solve grad E = 0
+		//   dE/da = 2 d1_ij^2 (a d1_ij^2 + 2b d1_ij d2_ij + c d2_ij^2 - kappa_ij)
+		//   dE/db = 4 d1_ij d2_ij (a d1_ij^2 + 2b d1_ij d2_ij + c d2_ij^2 - kappa_ij)
+		//   dE/dc = 2 d2_ij^2 (a d1_ij^2 + 2b d1_ij d2_ij + c d2_ij^2 - kappa_ij)
+		// We may decrease the dimension by using a+c=Kh identity,
+		// but we found that Kh is much less accurate than Kg on
+		// a sphere, so we do not use this identity.
+		//   (1/2) grad E = G (a b c) - H
+		OTriangle ot = new OTriangle((Triangle) link, 0);
+		if (ot.origin() != this)
+			ot.nextOTri();
+		if (ot.origin() != this)
+			ot.nextOTri();
+		assert ot.origin() == this;
+		double [] vect1 = new double[3];
+		double [] vect2 = new double[3];
+		double [] vect3 = new double[3];
+		double [] g0 = new double[3];
+		double [] g1 = new double[3];
+		double [] g2 = new double[3];
+		double [] h = new double[3];
+		for (int i = 0; i < 3; i++)
+			g0[i] = g1[i] = g2[i] = h[i] = 0.0;
+		for (Iterator it = ot.getOTriangleAroundOriginIterator(); it.hasNext(); )
+		{
+			ot = (OTriangle) it.next();
+			if (ot.hasAttributes(OTriangle.OUTER))
+				continue;
+			double [] p1 = ot.destination().getUV();
+			double [] p2 = ot.apex().getUV();
+			for (int i = 0; i < 3; i++)
+			{
+				vect1[i] = p1[i] - param[i];
+				vect2[i] = p2[i] - p1[i];
+				vect3[i] = param[i] - p2[i];
+			}
+			double c12 = Metric3D.prodSca(vect1, vect2);
+			double c23 = Metric3D.prodSca(vect2, vect3);
+			double c31 = Metric3D.prodSca(vect3, vect1);
+			// Override vect2
+			Metric3D.prodVect3D(vect1, vect3, vect2);
+			double area = 0.5 * Metric3D.norm(vect2);
+			double len2 = Metric3D.prodSca(vect1, vect1);
+			if (len2 < 1.e-12)
+				continue;
+			double kappa = 2.0 * Metric3D.prodSca(vect1, normal) / len2;
+			double d1 = Metric3D.prodSca(vect1, t1);
+			double d2 = Metric3D.prodSca(vect1, t2);
+			n = Math.sqrt(d1*d1 + d2*d2);
+			if (n < 1.e-6)
+				continue;
+			d1 /= n;
+			d2 /= n;
+			double omega = 0.5 * (c12 * Metric3D.prodSca(vect3, vect3) + c23 * Metric3D.prodSca(vect1, vect1)) / area;
+			g0[0] += omega * d1 * d1 * d1 * d1;
+			g0[1] += omega * 2.0 * d1 * d1 * d1 * d2;
+			g0[2] += omega * d1 * d1 * d2 * d2;
+			g1[1] += omega * 4.0 * d1 * d1 * d2 * d2;
+			g1[2] += omega * 2.0 * d1 * d2 * d2 * d2;
+			g2[2] += omega * d2 * d2 * d2 * d2;
+			h[0] += omega * kappa * d1 * d1;
+			h[1] += omega * kappa * 2.0 * d1 * d2;
+			h[2] += omega * kappa * d2 * d2;
+		}
+		g1[0] = g0[1];
+		g2[0] = g0[2];
+		g2[1] = g1[2];
+		Metric3D G = new Metric3D(g0, g1, g2);
+		Metric3D Ginv = G.inv();
+		if (Ginv == null)
+			return false;
+		double [] abc = Ginv.apply(h);
+		// We can eventually compute eigenvectors of B(a b; b c).  
+		// Let first compute the eigenvector associated to K1
+		double e1, e2;
+		if (Math.abs(abc[1]) < 1.e-10)
+		{
+			if (Math.abs(abc[0]) < Math.abs(abc[2]))
+			{
+				e1 = 0.0;
+				e2 = 1.0;
+			}
+			else
+			{
+				e1 = 1.0;
+				e2 = 0.0;
+			}
+		}
+		else
+		{
+			e2 = 1.0;
+			double delta = Math.sqrt((abc[0]-abc[2])*(abc[0]-abc[2]) + 4.0*abc[1]*abc[1]);
+			double K1;
+			if (abc[0] + abc[2] < 0.0)
+				K1 = 0.5 * (abc[0] + abc[2] - delta);
+			else
+				K1 = 0.5 * (abc[0] + abc[2] + delta);
+			e1 = (K1 - abc[0]) / abc[1];
+			n = Math.sqrt(e1 * e1 + e2 * e2);
+			e1 /= n;
+			e2 /= n;
+		}
+		for (int i = 0; i < 3; i++)
+		{
+			double temp = e1 * t1[i] + e2 * t2[i];
+			t2[i] = - e2 * t1[i] + e1 * t2[i];
+			t1[i] = temp;
+		}
+		return true;
+	}
+	
+	private boolean discreteAverageNormal(double [] normal)
+	{
+		for (int i = 0; i < 3; i++)
+			normal[i] = 0.0;
+		assert link instanceof Triangle;
+		OTriangle ot = new OTriangle((Triangle) link, 0);
+		if (ot.origin() != this)
+			ot.nextOTri();
+		if (ot.origin() != this)
+			ot.nextOTri();
+		assert ot.origin() == this;
+		for (Iterator it = ot.getOTriangleAroundOriginIterator(); it.hasNext(); )
+		{
+			ot = (OTriangle) it.next();
+			if (ot.hasAttributes(OTriangle.OUTER))
+				continue;
+			ot.computeNormal3D();
+			double [] nu = ot.getTempVector();
+			for (int i = 0; i < 3; i++)
+				normal[i] += nu[i];
+		}
+		double n = Metric3D.norm(normal);
+		if (n < 1.e-6)
+			return false;
+		for (int i = 0; i < 3; i++)
+			normal[i] /= n;
+		return true;
+	}
+	
+	public boolean discreteProject(Vertex pt)
+	{
+//System.out.println("Avant: "+Metric3D.norm(pt.param));
+		double [] normal = new double[3];
+		discreteCurvatures(normal);
+		double n = Metric3D.norm(normal);
+		if (n < 1.e-6)
+		{
+			if (!discreteAverageNormal(normal))
+				return false;
+		}
+		else
+		{
+			for (int i = 0; i < 3; i++)
+				normal[i] /= n;
+		}
+//System.out.println("normal: "+normal[0]+" "+normal[1]+" "+normal[2]);
+//System.out.println("in: "+Metric3D.prodSca(param, normal));
+		// We search for the quadric
+		//   F(x,y) = a x^2 + b xy + c y^2 - z
+		// which fits best for all neighbour vertices.
+		// Firstly set (t1,t2) to be an arbitrary map of the
+		// tangent plane.
+		double [] t1 = new double[3];
+		double [] t2 = new double[3];
+		for (int i = 0; i < 3; i++)
+			t2[i] = 0.0;
+		if (Math.abs(normal[0]) < Math.abs(normal[1]))
+			t2[0] = 1.0;
+		else
+			t2[1] = 1.0;
+		Metric3D.prodVect3D(normal, t2, t1);
+		n = Metric3D.norm(t1);
+		if (n < 1.e-6)
+			return false;
+		for (int i = 0; i < 3; i++)
+			t1[i] /= n;
+		Metric3D.prodVect3D(normal, t1, t2);
+		// Transformation matrix
+		Matrix3D Pinv = new Matrix3D(t1, t2, normal);
+		Matrix3D P = Pinv.transpose();
+//System.out.println(""+P);
+//System.out.println("t1: "+t1[0]+" "+t1[1]+" "+t1[2]);
+//System.out.println("t2: "+t2[0]+" "+t2[1]+" "+t2[2]);
+//System.out.println("n: "+normal[0]+" "+normal[1]+" "+normal[2]);
+//System.out.println("sca: "+Metric3D.prodSca(t1, t2)+" "+Metric3D.prodSca(normal, t2)+" "+Metric3D.prodSca(t1, normal));
+//System.out.println("norm2: "+Metric3D.prodSca(t1, t1)+" "+Metric3D.prodSca(t2, t2)+" "+Metric3D.prodSca(normal, normal));
+		OTriangle ot = new OTriangle((Triangle) link, 0);
+		if (ot.origin() != this)
+			ot.nextOTri();
+		if (ot.origin() != this)
+			ot.nextOTri();
+		assert ot.origin() == this;
+		double [] vect1 = new double[3];
+		double [] g0 = new double[3];
+		double [] g1 = new double[3];
+		double [] g2 = new double[3];
+		double [] h = new double[3];
+		for (int i = 0; i < 3; i++)
+			g0[i] = g1[i] = g2[i] = h[i] = 0.0;
+		for (Iterator it = ot.getOTriangleAroundOriginIterator(); it.hasNext(); )
+		{
+			ot = (OTriangle) it.next();
+			if (ot.hasAttributes(OTriangle.OUTER))
+				continue;
+			double [] p1 = ot.destination().getUV();
+			for (int i = 0; i < 3; i++)
+				vect1[i] = p1[i] - param[i];
+			// Find coordinates in the local frame (t1,t2,n)
+			double [] loc = P.apply(vect1);
+//System.out.println("glob: "+vect1[0]+" "+vect1[1]+" "+vect1[2]);
+//System.out.println("loc: "+loc[0]+" "+loc[1]+" "+loc[2]);
+//System.out.println("vdotn: "+Metric3D.prodSca(loc, normal));
+			h[0] += loc[2] * loc[0] * loc[0];
+			h[1] += loc[2] * loc[0] * loc[1];
+			h[2] += loc[2] * loc[1] * loc[1];
+			g0[0] += loc[0] * loc[0] * loc[0] * loc[0];
+			g0[1] += loc[0] * loc[0] * loc[0] * loc[1];
+			g0[2] += loc[0] * loc[0] * loc[1] * loc[1];
+			g1[2] += loc[0] * loc[1] * loc[1] * loc[1];
+			g2[2] += loc[1] * loc[1] * loc[1] * loc[1];
+		}
+		g1[1] = g0[2];
+		g1[0] = g0[1];
+		g2[0] = g0[2];
+		g2[1] = g1[2];
+		Metric3D G = new Metric3D(g0, g1, g2);
+		Metric3D Ginv = G.inv();
+		if (Ginv == null)
+			return false;
+		double [] abc = Ginv.apply(h);
+//System.out.println("abc: "+abc[0]+" "+abc[1]+" "+abc[2]);
+		// Now project pt onto this quadric
+		for (int i = 0; i < 3; i++)
+			vect1[i] = pt.param[i] - param[i];
+		double [] loc = P.apply(vect1);
+		loc[2] = abc[0] * loc[0] * loc[0] + abc[1] * loc[0] * loc[1] + abc[2] * loc[2] * loc[2];
+		if (Pinv == null)
+			return false;
+		double [] glob = Pinv.apply(loc);
+		pt.moveTo(param[0] + glob[0], param[1] + glob[1], param[2] + glob[2]);
+//System.out.println("Apres: "+Metric3D.norm(pt.param));
+		return true;
 	}
 	
 	public String toString ()
