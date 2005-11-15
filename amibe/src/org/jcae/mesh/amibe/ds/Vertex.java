@@ -500,6 +500,25 @@ public class Vertex implements Cloneable
 		return alpha;
 	}
 	
+	/**
+	 * Returns the area of a triangle given by 3 vertices.
+	 *
+	 * @param n1  first node
+	 * @param n2  second node
+	 * @return the area of the triangle
+	 **/
+	public double area3D(Vertex n1, Vertex n2)
+	{
+		double [] vect1 = new double[3];
+		double [] vect2 = new double[3];
+		for (int i = 0; i < 3; i++)
+		{
+			vect1[i] = n1.param[i] - param[i];
+			vect2[i] = n2.param[i] - param[i];
+		}
+		return 0.5 * Metric3D.norm(Metric3D.prodVect3D(vect1, vect2));
+	}
+	
 	public long dot3(Vertex v1, Vertex v2)
 	{
 		mesh.quadtree.double2int(param, i0);
@@ -1108,6 +1127,8 @@ public class Vertex implements Cloneable
 		for (Iterator it = ot.getOTriangleAroundOriginIterator(); it.hasNext(); )
 		{
 			ot = (OTriangle) it.next();
+			if (ot.destination() == Vertex.outer)
+				continue;
 			double [] p1 = ot.destination().getUV();
 			for (int i = 0; i < 3; i++)
 				vect1[i] = p1[i] - param[i];
