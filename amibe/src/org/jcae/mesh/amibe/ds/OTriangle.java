@@ -1407,7 +1407,7 @@ public class OTriangle
 			cnt++;
 		}
 		// At exit, ot1 has its initial value if it is not modified within this loop
-		assert ot1.destination() == d : "Failed test: LoopApex ot modified: "+o+" "+d;
+		assert ot1.destination() == d : "Failed test: LoopApex ot modified: "+o+" "+d+" "+ot1;
 		assert cnt == 4 : "Failed test: LoopApex cnt != 4: "+o+" "+d;
 	}
 	
@@ -1427,8 +1427,50 @@ public class OTriangle
 			cnt++;
 		}
 		// At exit, ot1 has its initial value if it is not modified within this loop
-		assert ot1.origin() == o : "Failed test: LoopApex ot modified: "+a+" "+o;
+		assert ot1.origin() == o : "Failed test: LoopApex ot modified: "+a+" "+o+" "+ot1;
 		assert cnt == 4 : "Failed test: LoopApex cnt != 4: "+a+" "+o;
+	}
+	
+	private static void unitTestCheckQuality(Mesh m, Vertex o, Vertex d)
+	{
+		OTriangle ot2 = o.findOTriangle(d);
+		assert ot2 != null;
+		OTriangle ot1 = new OTriangle();
+		OTriangle sym = new OTriangle();
+		nextOTri(ot2, ot1);
+		System.out.println("Improve triangle quality around origin: "+o);
+		System.out.println(" first destination: "+d);
+		int cnt = 0;
+		for (Iterator it = ot1.getOTriangleAroundApexIterator(); it.hasNext(); )
+		{
+			ot1 = (OTriangle) it.next();
+			if (ot1.hasAttributes(OTriangle.OUTER) || ot1.hasAttributes(OTriangle.BOUNDARY) || ot1.getAdj() == null)
+				continue;
+			OTriangle.symOTri(ot1, sym);
+			Vertex a = sym.apex();
+			double p1 = ot1.origin().distance3D(ot1.destination()) + ot1.destination().distance3D(ot1.apex()) + ot1.apex().distance3D(ot1.origin());
+			double s1 = ot1.computeArea();
+			double p2 = sym.origin().distance3D(sym.destination()) + sym.destination().distance3D(sym.apex()) + sym.apex().distance3D(sym.origin());
+			double s2 = sym.computeArea();
+			double Qbefore = 3.0 * Math.sqrt(3.0) * Math.min(s1/p1/p1, s2/p2/p2);
+			
+			double p3 = ot1.origin().distance3D(sym.apex()) + sym.apex().distance3D(ot1.apex()) + ot1.apex().distance3D(ot1.origin());
+			double s3 = ot1.origin().area3D(sym.apex(), ot1.apex());
+			double p4 = sym.origin().distance3D(ot1.apex()) + ot1.apex().distance3D(sym.apex()) + sym.apex().distance3D(sym.origin());
+			double s4 = sym.origin().area3D(ot1.apex(), sym.apex());
+			double Qafter = 3.0 * Math.sqrt(3.0) * Math.min(s3/p3/p3, s4/p4/p4);
+			if (Qbefore < Qafter)
+			{
+				// Swap edge
+				System.out.println("  Before: "+Qbefore+"  After: "+Qafter);
+				ot1.swapOTriangle(ot1.apex(), sym.apex());
+				cnt++;
+			}
+		}
+		ot1.prevOTri();
+		// At exit, ot1 has its initial value if it is not modified within this loop
+		assert ot1.destination() == d : "Failed test: QualityOrigin ot modified: "+o+" "+d+" "+ot1;
+		assert cnt == 2 : "Failed test: QualityOrigin cnt != 2: "+o+" "+d;
 	}
 	
 	public static void main(String args[])
@@ -1450,5 +1492,17 @@ public class OTriangle
 		unitTestCheckLoopApex(m, v[3], v[4]);
 		unitTestCheckLoopApex(m, v[3], v[2]);
 		unitTestCheckLoopApex(m, v[3], Vertex.outer);
+		// Degrade triangle quality and swap edges
+		v[1].moveTo(1.0, 0.5, 0.0);
+		v[5].moveTo(-1.0, 0.5, 0.0);
+		m = new Mesh();
+		unitTestBuildMesh(m, v);
+		unitTestCheckQuality(m, v[3], v[4]);
+		m = new Mesh();
+		unitTestBuildMesh(m, v);
+		unitTestCheckQuality(m, v[3], v[2]);
+		m = new Mesh();
+		unitTestBuildMesh(m, v);
+		unitTestCheckQuality(m, v[3], Vertex.outer);
 	}
 }
