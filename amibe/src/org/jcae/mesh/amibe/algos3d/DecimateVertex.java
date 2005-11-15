@@ -53,12 +53,14 @@ public class DecimateVertex
 		public Metric3D A = new Metric3D();
 		public double [] b = new double[3];
 		public double c;
+		public double area;
 		public void reset()
 		{
 			A.reset();
 			for (int i = 0; i < b.length; i++)
 				b[i] = 0.0;
 			c = 0.0;
+			area = 0.0;
 		}
 		public void add(Quadric that)
 		{
@@ -66,6 +68,7 @@ public class DecimateVertex
 			for (int i = 0; i < b.length; i++)
 				b[i] += that.b[i];
 			c += that.c;
+			area += that.area;
 		}
 		public double value(double [] vect)
 		{
@@ -74,7 +77,7 @@ public class DecimateVertex
 			for (int i = 0; i < b.length; i++)
 				for (int j = 0; j < b.length; j++)
 					ret += A.data[i][j] * vect[i] * vect[j];
-			return ret;
+			return ret / area;
 		}
 		public String toString()
 		{
@@ -93,7 +96,7 @@ public class DecimateVertex
 	public DecimateVertex(Mesh m, double tol)
 	{
 		mesh = m;
-		tolerance = tol;
+		tolerance = tol * tol;
 		placement = POS_EDGE;
 	}
 	
@@ -107,7 +110,7 @@ public class DecimateVertex
 	public DecimateVertex(Mesh m, double tol, int p)
 	{
 		mesh = m;
-		tolerance = tol;
+		tolerance = tol * tol;
 		placement = p;
 	}
 	
@@ -157,7 +160,7 @@ public class DecimateVertex
 			vect2[2] = p2[2] - p0[2];
 			// This is in fact 2*area, but that does not matter
 			Metric3D.prodVect3D(vect1, vect2, noe.getTempVector());
-			double area = Metric3D.norm(noe.getTempVector());
+			double area = Metric3D.norm(noe.getTempVector()) / tolerance;
 			noe.computeNormal3D();
 			double [] normal = noe.getTempVector();
 			double d = - Metric3D.prodSca(normal, f.vertex[0].getUV());
@@ -171,7 +174,9 @@ public class DecimateVertex
 						q.A.data[k][l] += area * normal[k]*normal[l];
 				}
 				q.c += area * d*d;
+				q.area += area;
 			}
+			// Penalty for boundary triangles
 			for (int i = 0; i < 3; i++)
 			{
 				noe.nextOTri();
@@ -181,23 +186,22 @@ public class DecimateVertex
 					//  This vector has the same length as noe
 					noe.computeNormal3DT();
 					double [] nu = noe.getTempVector();
-					area = 1000.0;
 					d = - Metric3D.prodSca(nu, noe.origin().getUV());
 					Quadric q1 = (Quadric) quadricMap.get(noe.origin());
 					Quadric q2 = (Quadric) quadricMap.get(noe.destination());
 					for (int k = 0; k < 3; k++)
 					{
-						q1.b[k] += area * d * nu[k];
-						q2.b[k] += area * d * nu[k];
+						q1.b[k] += d * nu[k];
+						q2.b[k] += d * nu[k];
 						for (int l = 0; l < 3; l++)
 						{
-							double delta = area * nu[k]*nu[l];
+							double delta = nu[k]*nu[l];
 							q1.A.data[k][l] += delta;
 							q2.A.data[k][l] += delta;
 						}
 					}
-					q1.c += area * d*d;
-					q2.c += area * d*d;
+					q1.c += d*d;
+					q2.c += d*d;
 				}
 			}
 		}
