@@ -271,16 +271,19 @@ public class DecimateVertex
 				edge.pullAttributes();
 				v1 = edge.origin();
 				v2 = edge.destination();
-				q1 = (Quadric) quadricMap.get(v1);
-				q2 = (Quadric) quadricMap.get(v2);
-				q3.reset();
-				q3.add(q1);
-				q3.add(q2);
-				v3 = optimalPlacement(v1, v2, q1, q2, q3);
-				if (edge.isMutable() && edge.canContract(v3))
-					break;
-				if (logger.isDebugEnabled())
-					logger.info("Edge not contracted: "+edge);
+				if (v1.isMutable() || v2.isMutable())
+				{
+					q1 = (Quadric) quadricMap.get(v1);
+					q2 = (Quadric) quadricMap.get(v2);
+					q3.reset();
+					q3.add(q1);
+					q3.add(q2);
+					v3 = optimalPlacement(v1, v2, q1, q2, q3);
+					if (edge.canContract(v3))
+						break;
+					if (logger.isDebugEnabled())
+						logger.info("Edge not contracted: "+edge);
+				}
 				edge = (NotOrientedEdge) tree.next();
 				cost = tree.getKey(edge);
 			} while (edge != null && cost <= tolerance);
@@ -379,6 +382,18 @@ public class DecimateVertex
 		Vertex ret;
 		assert v1 != Vertex.outer;
 		assert v2 != Vertex.outer;
+		if (!v1.isMutable())
+		{
+			assert v2.isMutable();
+			ret = (Vertex) v1.clone();
+			return ret;
+		}
+		else if (!v2.isMutable())
+		{
+			assert v1.isMutable();
+			ret = (Vertex) v2.clone();
+			return ret;
+		}
 		if (placement == POS_VERTEX)
 		{
 			if (q1.value(v2.getUV()) + q2.value(v2.getUV()) < q1.value(v1.getUV()) + q2.value(v1.getUV()))
