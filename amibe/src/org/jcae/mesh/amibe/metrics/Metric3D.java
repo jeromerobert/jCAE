@@ -104,10 +104,11 @@ public class Metric3D extends Matrix3D
 		double [] e0 = prodVect3D(data[1], data[2]);
 		double [] e1 = prodVect3D(data[2], data[0]);
 		double [] e2 = prodVect3D(data[0], data[1]);
-		Metric3D adj = new Metric3D(e0, e1, e2);
-		double det = prodSca(data[0], adj.data[0]);
-		if (Math.abs(det) < 1.e-20)
+		double det = prodSca(data[0], e0);
+		double l2 = prodSca(data[0], data[0]) + prodSca(data[1], data[1]) + prodSca(data[2], data[2]);
+		if (det * det < 1.e-12 * l2 * l2 * l2)
 			return null;
+		Metric3D adj = new Metric3D(e0, e1, e2);
 		adj.swap(0, 1);
 		adj.swap(0, 2);
 		adj.swap(1, 2);
