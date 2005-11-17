@@ -1111,7 +1111,7 @@ public class Mesh
 				double l = t.vertex[0].onLeft(t.vertex[1], t.vertex[2]);
 				if (l <= 0L)
 				{
-					logger.debug("Wrong orientation: "+t);
+					logger.debug("Wrong orientation: "+l+" "+t);
 					return false;
 				}
 			}
