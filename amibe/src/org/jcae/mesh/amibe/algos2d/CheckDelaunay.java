@@ -116,8 +116,7 @@ public class CheckDelaunay
 					ot.nextOTri();
 				if (ot.hasAttributes(OTriangle.SWAPPED))
 				{
-					OTriangle.symOTri(ot, sym);
-					ot.swapOTriangle(ot.apex(), sym.apex());
+					ot.swap();
 					redo = true;
 				}
 			}

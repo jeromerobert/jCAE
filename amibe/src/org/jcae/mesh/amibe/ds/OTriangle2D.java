@@ -258,7 +258,7 @@ public class OTriangle2D extends OTriangle
 				}
 				if (swap)
 				{
-					current.swapOTriangle(v, a);
+					current.swap();
 					nrSwap++;
 					totNrSwap++;
 				}
@@ -325,10 +325,10 @@ public class OTriangle2D extends OTriangle
 				else if (oldl >= 0L)
 				{
 					//  a stands to the left of (start,end).
-					swapOTriangle(a, n); // = (ona)
+					swap();              // = (ona)
 				}
 				else if (rand.nextBoolean())
-					swapOTriangle(a, n); // = (ona)
+					swap();              // = (ona)
 				else
 					prevOTriOrigin();    // = (ond)
 			}
@@ -340,13 +340,13 @@ public class OTriangle2D extends OTriangle
 				else if (oldl <= 0L)
 				{
 					//  a stands to the right of (start,end).
-					swapOTriangle(a, n); // = (ona)
+					swap();              // = (ona)
 					nextOTri();          // = (nao)
 					prevOTriOrigin();    // = (nda)
 				}
 				else if (rand.nextBoolean())
 				{
-					swapOTriangle(a, n); // = (ona)
+					swap();              // = (ona)
 					nextOTri();          // = (nao)
 					prevOTriOrigin();    // = (nda)
 				}
@@ -360,7 +360,7 @@ public class OTriangle2D extends OTriangle
 					nextOTriDest();      // = (ndo)
 				else
 				{
-					swapOTriangle(a, n); // = (ona)
+					swap();              // = (ona)
 					nextOTri();          // = (nao)
 					if (oldl < 0L)
 						prevOTriOrigin();// = (nda)

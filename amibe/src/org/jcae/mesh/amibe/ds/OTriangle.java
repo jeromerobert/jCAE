@@ -843,10 +843,11 @@ public class OTriangle implements Cloneable
 	 * @return a handle to (ona) oriented triangle.
 	 * otherwise.
 	 */
-	public final OTriangle swapOTriangle(Vertex a, Vertex n)
+	public final OTriangle swap()
 	{
 		Vertex o = origin();
 		Vertex d = destination();
+		Vertex a = apex();
 		/*
 		 *            d                    d
 		 *            .                    .
@@ -866,6 +867,7 @@ public class OTriangle implements Cloneable
 		copyOTri(this, work[0]);        // (oda)
 		symOTri(this, work[1]);         // (don)
 		symOTri(this, work[2]);         // (don)
+		Vertex n = work[1].apex();
 		//  Clear SWAPPED flag for all edges of the 2 triangles
 		for (int i = 0; i < 3; i++)
 		{
@@ -1336,7 +1338,7 @@ public class OTriangle implements Cloneable
 		ot2.split(v[3]); // (v2,v3,v1)
 		assert m.isValid();
 		ot2.nextOTri();  // (v3,v1,v2)
-		ot2.swapOTriangle(v[2], v[0]); // (v3,v0,v2)
+		ot2.swap();      // (v3,v0,v2)
 		assert m.isValid();
 		/*
 		 *            v3        v2
@@ -1351,7 +1353,7 @@ public class OTriangle implements Cloneable
 		ot2.split(v[5]); // (v3,v5,v2)
 		assert m.isValid();
 		ot2.nextOTri();  // (v5,v2,v3)
-		ot2.swapOTriangle(v[3], v[0]); // (v5,v0,v3)
+		ot2.swap();      // (v5,v0,v3)
 		assert m.isValid();
 		/*
 		 *            v3        v2
@@ -1443,7 +1445,7 @@ public class OTriangle implements Cloneable
 			if (Qbefore < Qafter)
 			{
 				// Swap edge
-				ot.swapOTriangle(ot.apex(), sym.apex());
+				ot.swap();
 				cnt++;
 			}
 		}
