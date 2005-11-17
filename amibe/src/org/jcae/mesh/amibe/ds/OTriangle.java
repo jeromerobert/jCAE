@@ -101,16 +101,17 @@ import org.apache.log4j.Logger;
  *    ot.prevOTriApex();    // Moves (t,0) to (t2,0)
  * </pre>
  */
-public class OTriangle
+public class OTriangle implements Cloneable
 {
 	private static Logger logger = Logger.getLogger(OTriangle.class);
 	
 	private static final int [] next3 = { 1, 2, 0 };
 	private static final int [] prev3 = { 2, 0, 1 };
+	private static final OTriangle otVoid = new OTriangle();
+	
 	private double [] tempD = new double[3];
 	private double [] tempD1 = new double[3];
 	private double [] tempD2 = new double[3];
-	private static final OTriangle otVoid = new OTriangle();
 	
 	/**
 	 * Numeric constants for edge attributes.  Set if edge is on
@@ -173,18 +174,15 @@ public class OTriangle
 	 * Adjacent triangle is tri.adj[localNumber].tri and its localNumber
 	 * is ((tri.adjPos >> (2*localNumber)) & 3)
 	 */
-	protected Triangle tri;
-	protected int localNumber;
-	protected int attributes;
+	protected Triangle tri = null;
+	protected int localNumber = 0;
+	protected int attributes = 0;
 	
 	/**
 	 * Sole constructor.
 	 */
 	public OTriangle()
 	{
-		tri = null;
-		localNumber = 0;
-		attributes = 0;
 	}
 	
 	/**
@@ -200,6 +198,23 @@ public class OTriangle
 		attributes = (tri.adjPos >> (8*(1+localNumber))) & 0xff;
 	}
 	
+	public final Object clone()
+	{
+		Object ret = null;
+		try
+		{
+			ret = super.clone();
+			// No swallow copy for private arrays
+			OTriangle that = (OTriangle) ret;
+			that.tempD = new double[3];
+			that.tempD1 = new double[3];
+			that.tempD2 = new double[3];
+		}
+		catch (java.lang.CloneNotSupportedException ex)
+		{
+		}
+		return ret;
+	}
 	/**
 	 * Return the triangle tied to this object.
 	 *
@@ -1328,17 +1343,22 @@ public class OTriangle
 		 *   +---------+---------+
 		 *   v5        v0       v1
 		 */
+		m.setType(Mesh.MESH_3D);
 		System.out.println("Building mesh...");
 		Triangle T = new Triangle(v[0], v[1], v[2]);
 		T.addToMesh();
+		assert m.isValid();
 		// Outer triangles
 		Triangle [] O = new Triangle[3];
+		O[0] = new Triangle(Vertex.outer, v[1], v[0]);
+		O[1] = new Triangle(Vertex.outer, v[2], v[1]);
+		O[2] = new Triangle(Vertex.outer, v[0], v[2]);
 		for (int i = 0; i < 3; i++)
 		{
-			O[i] = new Triangle(Vertex.outer, v[i+1], v[i]);
 			O[i].setOuter();
 			O[i].addToMesh();
 		}
+		assert m.isValid();
 		OTriangle ot1 = new OTriangle();
 		OTriangle ot2 = new OTriangle(T, 2);
 		for (int i = 0; i < 3; i++)
@@ -1350,10 +1370,14 @@ public class OTriangle
 			ot2.nextOTri();
 		}
 		assert ot2.origin() == v[0];
+// m.printMesh();
+		assert m.isValid();
 		ot2.prevOTri();  // (v2,v0,v1)
 		ot2.split(v[3]); // (v2,v3,v1)
+		assert m.isValid();
 		ot2.nextOTri();  // (v3,v1,v2)
 		ot2.swapOTriangle(v[2], v[0]); // (v3,v0,v2)
+		assert m.isValid();
 		/*
 		 *            v3        v2
 		 *             +---------+
@@ -1365,8 +1389,10 @@ public class OTriangle
 		 *             v0       v1
 		 */
 		ot2.split(v[5]); // (v3,v5,v2)
+		assert m.isValid();
 		ot2.nextOTri();  // (v5,v2,v3)
 		ot2.swapOTriangle(v[3], v[0]); // (v5,v0,v3)
+		assert m.isValid();
 		/*
 		 *            v3        v2
 		 *             +---------+
@@ -1379,6 +1405,7 @@ public class OTriangle
 		 */
 		ot2.prevOTri();  // (v3,v5,v0)
 		ot2.split(v[4]); // (v3,v4,v0)
+		assert m.isValid();
 		/*
 		 *  v4        v3        v2
 		 *   +---------+---------+
@@ -1403,12 +1430,9 @@ public class OTriangle
 		for (Iterator it = ot1.getOTriangleAroundOriginIterator(); it.hasNext(); )
 		{
 			ot1 = (OTriangle) it.next();
-			System.out.println(""+ot1);
 			cnt++;
 		}
-		// At exit, ot1 has its initial value if it is not modified within this loop
-		assert ot1.destination() == d : "Failed test: LoopApex ot modified: "+o+" "+d+" "+ot1;
-		assert cnt == 4 : "Failed test: LoopApex cnt != 4: "+o+" "+d;
+		assert cnt == 4 : "Failed test: LoopOrigin cnt != 4: "+o+" "+d;
 	}
 	
 	private static void unitTestCheckLoopApex(Mesh m, Vertex a, Vertex o)
@@ -1423,15 +1447,12 @@ public class OTriangle
 		for (Iterator it = ot1.getOTriangleAroundApexIterator(); it.hasNext(); )
 		{
 			ot1 = (OTriangle) it.next();
-			System.out.println(""+ot1);
 			cnt++;
 		}
-		// At exit, ot1 has its initial value if it is not modified within this loop
-		assert ot1.origin() == o : "Failed test: LoopApex ot modified: "+a+" "+o+" "+ot1;
 		assert cnt == 4 : "Failed test: LoopApex cnt != 4: "+a+" "+o;
 	}
 	
-	private static void unitTestCheckQuality(Mesh m, Vertex o, Vertex d)
+	private static void unitTestCheckQuality(Mesh m, Vertex o, Vertex d, int expected)
 	{
 		OTriangle ot2 = o.findOTriangle(d);
 		assert ot2 != null;
@@ -1443,34 +1464,30 @@ public class OTriangle
 		int cnt = 0;
 		for (Iterator it = ot1.getOTriangleAroundApexIterator(); it.hasNext(); )
 		{
-			ot1 = (OTriangle) it.next();
-			if (ot1.hasAttributes(OTriangle.OUTER) || ot1.hasAttributes(OTriangle.BOUNDARY) || ot1.getAdj() == null)
+			OTriangle ot = (OTriangle) it.next();
+			if (ot.hasAttributes(OTriangle.OUTER) || ot.hasAttributes(OTriangle.BOUNDARY) || ot.getAdj() == null)
 				continue;
-			OTriangle.symOTri(ot1, sym);
+			OTriangle.symOTri(ot, sym);
 			Vertex a = sym.apex();
-			double p1 = ot1.origin().distance3D(ot1.destination()) + ot1.destination().distance3D(ot1.apex()) + ot1.apex().distance3D(ot1.origin());
-			double s1 = ot1.computeArea();
+			double p1 = ot.origin().distance3D(ot.destination()) + ot.destination().distance3D(ot.apex()) + ot.apex().distance3D(ot.origin());
+			double s1 = ot.computeArea();
 			double p2 = sym.origin().distance3D(sym.destination()) + sym.destination().distance3D(sym.apex()) + sym.apex().distance3D(sym.origin());
 			double s2 = sym.computeArea();
-			double Qbefore = 3.0 * Math.sqrt(3.0) * Math.min(s1/p1/p1, s2/p2/p2);
+			double Qbefore = 12.0 * Math.sqrt(3.0) * Math.min(s1/p1/p1, s2/p2/p2);
 			
-			double p3 = ot1.origin().distance3D(sym.apex()) + sym.apex().distance3D(ot1.apex()) + ot1.apex().distance3D(ot1.origin());
-			double s3 = ot1.origin().area3D(sym.apex(), ot1.apex());
-			double p4 = sym.origin().distance3D(ot1.apex()) + ot1.apex().distance3D(sym.apex()) + sym.apex().distance3D(sym.origin());
-			double s4 = sym.origin().area3D(ot1.apex(), sym.apex());
-			double Qafter = 3.0 * Math.sqrt(3.0) * Math.min(s3/p3/p3, s4/p4/p4);
+			double p3 = ot.origin().distance3D(sym.apex()) + sym.apex().distance3D(ot.apex()) + ot.apex().distance3D(ot.origin());
+			double s3 = ot.origin().area3D(sym.apex(), ot.apex());
+			double p4 = sym.origin().distance3D(ot.apex()) + ot.apex().distance3D(sym.apex()) + sym.apex().distance3D(sym.origin());
+			double s4 = sym.origin().area3D(ot.apex(), sym.apex());
+			double Qafter = 12.0 * Math.sqrt(3.0) * Math.min(s3/p3/p3, s4/p4/p4);
 			if (Qbefore < Qafter)
 			{
 				// Swap edge
-				System.out.println("  Before: "+Qbefore+"  After: "+Qafter);
-				ot1.swapOTriangle(ot1.apex(), sym.apex());
+				ot.swapOTriangle(ot.apex(), sym.apex());
 				cnt++;
 			}
 		}
-		ot1.prevOTri();
-		// At exit, ot1 has its initial value if it is not modified within this loop
-		assert ot1.destination() == d : "Failed test: QualityOrigin ot modified: "+o+" "+d+" "+ot1;
-		assert cnt == 2 : "Failed test: QualityOrigin cnt != 2: "+o+" "+d;
+		assert cnt == expected : "Failed test: QualityOrigin cnt != "+expected+": "+o+" "+d;
 	}
 	
 	public static void main(String args[])
@@ -1484,7 +1501,7 @@ public class OTriangle
 		v[4] = new Vertex(-1.0, 1.0, 0.0);
 		v[5] = new Vertex(-1.0, 0.0, 0.0);
 		unitTestBuildMesh(m, v);
-	  	// m.printMesh();
+		assert m.isValid();
 		System.out.println("Checking loops...");
 		unitTestCheckLoopOrigin(m, v[3], v[4]);
 		unitTestCheckLoopOrigin(m, v[3], v[2]);
@@ -1497,12 +1514,19 @@ public class OTriangle
 		v[5].moveTo(-1.0, 0.5, 0.0);
 		m = new Mesh();
 		unitTestBuildMesh(m, v);
-		unitTestCheckQuality(m, v[3], v[4]);
+		assert m.isValid();
+		unitTestCheckQuality(m, v[3], v[4], 2);
+		unitTestCheckQuality(m, v[3], v[4], 0);
+		assert m.isValid();
 		m = new Mesh();
 		unitTestBuildMesh(m, v);
-		unitTestCheckQuality(m, v[3], v[2]);
+		unitTestCheckQuality(m, v[3], v[2], 2);
+		unitTestCheckQuality(m, v[3], v[2], 0);
+		assert m.isValid();
 		m = new Mesh();
 		unitTestBuildMesh(m, v);
-		unitTestCheckQuality(m, v[3], Vertex.outer);
+		unitTestCheckQuality(m, v[3], Vertex.outer, 2);
+		unitTestCheckQuality(m, v[3], Vertex.outer, 0);
+		assert m.isValid();
 	}
 }
