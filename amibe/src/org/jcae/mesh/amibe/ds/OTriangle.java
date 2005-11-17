@@ -853,94 +853,54 @@ public class OTriangle implements Cloneable
 		 *           /|\                  / \
 		 *       a1 / | \ a4         a1  /   \ a4
 		 *         /  |  \              /     \
-		 *      a +   |   + n        a +-------+ n
+		 *      a +   |   + n  --->  a +-------+ n
 		 *         \  |  /              \     /
 		 *       a2 \ | / a3         a2  \   / a3
 		 *           \|/                  \ /
 		 *            '                    '
 		 *            o                    o
-		 *                                 .
-		 *            | switch            /|\
-		 *            |   adj              |  switch
-		 *           \|/                   | vertices
-		 *            '
-		 *            d                    n
-		 *            .                    .
-		 *           /|\                  / \
-		 *       a2 / | \ a1         a1  /   \ a4
-		 *         /  |  \              /     \
-		 *      a +   |   + n   is   d +-------+ o
-		 *         \  |  /              \     /
-		 *       a3 \ | / a4         a2  \   / a3
-		 *           \|/                  \ /
-		 *            '                    '
-		 *            o                    a
 		 */
-		// this = (oda)
-		symOTri(this, work[0]);         // (don)
+		// T1 = (oda)  --> (ona)
+		// T2 = (don)  --> (dan)
 		assert !this.hasAttributes(OUTER | BOUNDARY);
-		assert !work[0].hasAttributes(OUTER | BOUNDARY);
+		copyOTri(this, work[0]);        // (oda)
+		symOTri(this, work[1]);         // (don)
+		symOTri(this, work[2]);         // (don)
 		//  Clear SWAPPED flag for all edges of the 2 triangles
-		clearAttributes(SWAPPED);
-		work[0].clearAttributes(SWAPPED);
-		
-		nextOTri(this, work[1]);        // (dao)
-		work[1].clearAttributes(SWAPPED);
+		for (int i = 0; i < 3; i++)
+		{
+			work[0].clearAttributes(SWAPPED);
+			work[1].clearAttributes(SWAPPED);
+			work[0].nextOTri();
+			work[1].nextOTri();
+		}
+		work[1].nextOTri();             // (ond)
+		int attr3 = work[1].attributes;
+		work[1].symOTri();              // a3 = (no*)
+		work[1].glue(work[0]);
+		work[0].attributes = attr3;
+		work[0].pushAttributes();
+		work[0].nextOTri();             // (dao)
+		copyOTri(work[0], work[1]);     // (dao)
 		int attr1 = work[1].attributes;
-		work[1].symOTri();              // a1 = (ad*)
-		work[1].clearAttributes(SWAPPED);
-		prevOTri(this, work[2]);        // (aod)
-		work[2].clearAttributes(SWAPPED);
-		int attr2 = work[2].attributes;
-		nextOTri();                     // (dao)
-		work[2].symOTri();              // a2 = (oa*)
-		work[2].clearAttributes(SWAPPED);
-		glue(work[2]);                  // a2 and (dao)
-		nextOTri(work[0], work[2]);     // (ond)
-		nextOTri();                     // (aod)
-		work[2].clearAttributes(SWAPPED);
-		int attr3 = work[2].attributes;
-		work[2].symOTri();             // a3 = (no*)
-		work[2].clearAttributes(SWAPPED);
-		work[2].glue(this);            // a3 and (aod)
-		//  Reset 'this' to (oda)
-		nextOTri();                     // (oda)
-		prevOTri(work[0], work[2]);     // (ndo)
-		work[2].clearAttributes(SWAPPED);
-		int attr4 = work[2].attributes;
-		work[0].nextOTri();             // (ond)
-		work[2].symOTri();              // a4 = (dn*)
-		work[2].clearAttributes(SWAPPED);
-		work[2].glue(work[0]);          // a4 and (ond)
-		work[0].nextOTri();             // (ndo)
-		work[0].glue(work[1]);          // a1 and (ndo)
-		work[0].nextOTri();             // (don)
-		//  Adjust vertices
-		setOrigin(n);
-		setDestination(a);
-		setApex(o);
-		work[0].setOrigin(a);
-		work[0].setDestination(n);
-		work[0].setApex(d);
-		//  Fix links to triangles
-		n.setLink(tri);
-		a.setLink(tri);
-		o.setLink(tri);
-		d.setLink(work[0].tri);
-		//  Fix attributes
-		tri.adjPos &= 0xff;
-		tri.adjPos |= ((attr2 & 0xff) << (8*(1+next3[localNumber])));
-		tri.adjPos |= ((attr3 & 0xff) << (8*(1+prev3[localNumber])));
-		work[0].tri.adjPos &= 0xff;
-		work[0].tri.adjPos |= ((attr4 & 0xff) << (8*(1+next3[work[0].localNumber])));
-		work[0].tri.adjPos |= ((attr1 & 0xff) << (8*(1+prev3[work[0].localNumber])));
+		work[0].symOTri();              // a1 = (ad*)
+		work[2].glue(work[0]);
+		work[2].attributes = attr1;
+		work[2].pushAttributes();
+		work[2].nextOTri();             // (ond)
+		work[2].glue(work[1]);
 		//  Mark new edge
-		setAttributes(SWAPPED);
-		work[0].setAttributes(SWAPPED);
-
-		//  Eventually change 'this' to (ona) to ease moving around o.
-		prevOTri();                     // (ona)
-		return this;
+		work[1].attributes = 0;
+		work[2].attributes = 0;
+		work[1].setAttributes(SWAPPED);
+		work[2].setAttributes(SWAPPED);
+		//  Adjust vertices
+		work[2].setOrigin(a);           // (and)
+		work[1].setOrigin(n);           // (nao)
+		//  Fix links to triangles
+		o.setLink(tri);
+		d.setLink(work[2].tri);
+		return this;  // (ona)
 	}
 	
 	public double [] getTempVector()
