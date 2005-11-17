@@ -64,12 +64,12 @@ public class OTriangle2D extends OTriangle
 		copyOTri(this, work[0]);
 		for (Iterator it = work[0].getOTriangleAroundOriginIterator(); it.hasNext(); )
 		{
-			work[0] = (OTriangle2D) it.next();
+			OTriangle2D current = (OTriangle2D) it.next();
 			for (int i = 0; i < 3; i++)
 			{
-				if (work[0].tri.vertex[i] == o)
+				if (current.tri.vertex[i] == o)
 				{
-					work[0].tri.vertex[i] = d;
+					current.tri.vertex[i] = d;
 					break;
 				}
 			}
@@ -230,17 +230,18 @@ public class OTriangle2D extends OTriangle
 		Vertex a, o, d;
 		while (true)
 		{
+			OTriangle2D current = newLeft;
 			for (Iterator it = newLeft.getOTriangleAroundApexIterator(); it.hasNext(); )
 			{
-				if (newLeft.hasAttributes(BOUNDARY) || newLeft.hasAttributes(NONMANIFOLD) || newLeft.hasAttributes(OUTER))
+				if (current.hasAttributes(BOUNDARY) || current.hasAttributes(NONMANIFOLD) || current.hasAttributes(OUTER))
 				{
-					it.next();
+					current = (OTriangle2D) it.next();
 					continue;
 				}
 				boolean swap = false;
-				symOTri(newLeft, newRight);
-				o = newLeft.origin();
-				d = newLeft.destination();
+				symOTri(current, newRight);
+				o = current.origin();
+				d = current.destination();
 				a = newRight.apex();
 				if (o == Vertex.outer)
 					swap = (v.onLeft(d, a) < 0L);
@@ -248,22 +249,25 @@ public class OTriangle2D extends OTriangle
 					swap = (v.onLeft(a, o) < 0L);
 				else if (a == Vertex.outer)
 					swap = (v.onLeft(o, d) == 0L);
-				else if (newLeft.isMutable())
+				else if (current.isMutable())
 				{
 					if (!smallerDiag)
-						swap = !newLeft.isDelaunay(a);
+						swap = !current.isDelaunay(a);
 					else
-						swap = !a.isSmallerDiagonale(newLeft);
+						swap = !a.isSmallerDiagonale(current);
 				}
 				if (swap)
 				{
-					newLeft.swapOTriangle(v, a);
+					current.swapOTriangle(v, a);
 					nrSwap++;
 					totNrSwap++;
 				}
 				else
-					newLeft = (OTriangle2D) it.next();
+					current = (OTriangle2D) it.next();
 			}
+			// newLeft may have been swapped, it needs to be
+			// updated.
+			newLeft = current;
 			if (nrSwap == 0)
 				break;
 			nrSwap = 0;
@@ -295,6 +299,8 @@ public class OTriangle2D extends OTriangle
 		int count = 0;
 		
 		Vertex start = origin();
+		assert start != Vertex.outer;
+		assert end != Vertex.outer;
 
 		nextOTri();
 		while (true)
@@ -303,9 +309,11 @@ public class OTriangle2D extends OTriangle
 			Vertex o = origin();
 			Vertex d = destination();
 			Vertex a = apex();
+			assert a != Vertex.outer : ""+this;
 			symOTri(this, work[0]);
 			work[0].nextOTri();
 			Vertex n = work[0].destination();
+			assert n != Vertex.outer : ""+work[0];
 			newl = n.onLeft(start, end);
 			oldl = a.onLeft(start, end);
 			boolean canSwap = (n != Vertex.outer) && (a.onLeft(n, d) > 0L) && (a.onLeft(o, n) > 0L) && !hasAttributes(BOUNDARY);

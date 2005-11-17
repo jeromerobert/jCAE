@@ -58,10 +58,13 @@ public class Triangle
 
 	public Triangle(Vertex a, Vertex b, Vertex c)
 	{
-		vertex[0] = a;
-		vertex[1] = b;
-		vertex[2] = c;
 		assert a != b && b != c && c != a : this;
+ 		vertex[0] = a;
+ 		vertex[1] = b;
+ 		vertex[2] = c;
+		vertex[0].setLink(this);
+		vertex[1].setLink(this);
+		vertex[2].setLink(this);
 	}
 	
 	/**
