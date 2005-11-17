@@ -29,7 +29,7 @@ public class NotOrientedEdge extends OTriangle
 	
 	public NotOrientedEdge(OTriangle ot)
 	{
-		tri = (Triangle) ot.tri;
+		tri = ot.tri;
 		localNumber = ot.localNumber;
 		attributes = (tri.adjPos >> (8*(1+localNumber))) & 0xff;
 	}
