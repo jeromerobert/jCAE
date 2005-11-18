@@ -145,6 +145,7 @@ public class BasicMesh
 		if (!mesh.isValid(false))
 			throw new InitialTriangulationException();
 		mesh.popCompGeom(2);
+		
 		mesh.pushCompGeom(2);
 		logger.debug(" Rebuild boundary edges");
 		//  Boundary edges are first built, then they are collected.
@@ -264,6 +265,31 @@ public class BasicMesh
 					t.vertex[i].setLink(t);
 			}
 		}
+		
+		logger.debug(" Select 3D smaller diagonals");
+		mesh.pushCompGeom(3);
+		ot = new OTriangle2D();
+		boolean redo = true;
+		//  With riemannian metrics, there may be infinite loops,
+		//  make sure to exit this loop.
+		int niter = bNodes.length;
+		while (redo && niter > 0)
+		{
+			redo = false;
+			--niter;
+			for (Iterator it = saveList.iterator(); it.hasNext(); )
+			{
+				OTriangle2D s = (OTriangle2D) it.next();
+				if (s.apex() == Vertex.outer)
+					s.symOTri();
+				s.nextOTri();
+				if (s.hasAttributes(OTriangle.SWAPPED))
+					continue;
+				if (s.checkSmallerAndSwap() != 0)
+					redo = true;
+ 			}
+ 		}
+		mesh.popCompGeom(3);
 		
 		mesh.pushCompGeom(3);
 		new Insertion(mesh).compute();
