@@ -714,7 +714,7 @@ public class OTriangle implements Cloneable
 	 * @return a handle to (ona) oriented triangle.
 	 * otherwise.
 	 */
-	public final OTriangle swap()
+	public final void swap()
 	{
 		Vertex o = origin();
 		Vertex d = destination();
@@ -774,7 +774,6 @@ public class OTriangle implements Cloneable
 		o.setLink(tri);
 		d.setLink(work[2].tri);
 		pullAttributes();
-		return this;  // (ona)
 	}
 	
 	public double [] getTempVector()
