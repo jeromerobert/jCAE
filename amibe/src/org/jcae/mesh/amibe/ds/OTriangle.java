@@ -20,10 +20,8 @@
 
 package org.jcae.mesh.amibe.ds;
 
-import java.util.Random;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Stack;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.apache.log4j.Logger;
@@ -681,55 +679,6 @@ public class OTriangle implements Cloneable
 	public final boolean isMutable()
 	{
 		return !(hasAttributes(BOUNDARY) || hasAttributes(OUTER));
-	}
-	
-	/**
-	 * Checks whether an edge is Delaunay.
-	 *
-	 * As apical vertices are already computed by calling routines,
-	 * they are passed as parameters for efficiency reasons.
-	 *
-	 * @param apex2  apex of the symmetric edge
-	 * @return <code>true</code> if edge is Delaunay, <code>false</code>
-	 * otherwise.
-	 */
-	public final boolean isDelaunay(Vertex apex2)
-	{
-		if (apex2.isPseudoIsotropic())
-			return isDelaunay_isotropic(apex2);
-		return isDelaunay_anisotropic(apex2);
-	}
-	
-	private final boolean isDelaunay_isotropic(Vertex apex2)
-	{
-		assert Vertex.outer != origin();
-		assert Vertex.outer != destination();
-		assert Vertex.outer != apex();
-		Vertex vA = origin();
-		Vertex vB = destination();
-		Vertex v1 = apex();
-		long tp1 = vA.onLeft(vB, v1);
-		long tp2 = vB.onLeft(vA, apex2);
-		long tp3 = apex2.onLeft(vB, v1);
-		long tp4 = v1.onLeft(vA, apex2);
-		if (Math.abs(tp3) + Math.abs(tp4) < Math.abs(tp1)+Math.abs(tp2) )
-			return true;
-		if (tp1 > 0L && tp2 > 0L)
-		{
-			if (tp3 <= 0L || tp4 <= 0L)
-				return true;
-		}
-		return !apex2.inCircleTest2(this);
-	}
-	
-	private final boolean isDelaunay_anisotropic(Vertex apex2)
-	{
-		assert Vertex.outer != origin();
-		assert Vertex.outer != destination();
-		assert Vertex.outer != apex();
-		if (apex2 == Vertex.outer)
-			return true;
-		return !apex2.inCircleTest3(this);
 	}
 	
 	/**
