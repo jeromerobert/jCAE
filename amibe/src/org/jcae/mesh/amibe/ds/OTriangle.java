@@ -537,6 +537,30 @@ public class OTriangle implements Cloneable
 	}
 	
 	/**
+	 * Move counterclockwaise to the next edge of the apex ring.
+	 * If 
+	 */
+	public final void nextOTriRingLoop()
+	{
+		if (destination() == Vertex.outer)
+		{
+			// Loop clockwise to another boundary
+			// and start again from there.
+			do
+			{
+				prevOTri();
+				nextOTriDest();
+			}
+			while (origin() != Vertex.outer);
+		}
+		else
+		{
+			prevOTriDest();
+			nextOTri();
+		}
+	}
+	
+	/**
 	 * Returns the start vertex of this edge.
 	 *
 	 * @return the start vertex of this edge.
@@ -623,71 +647,6 @@ public class OTriangle implements Cloneable
 	public final void setAdj(Object link)
 	{
 		tri.setAdj(localNumber, link);
-	}
-	
-	public Iterator getOTriangleAroundApexIterator()
-	{
-		final OTriangle ot = this;
-		return new Iterator()
-		{
-			private Vertex first = ot.origin();
-			private boolean lookAhead = false;
-			private boolean init = true;
-			private int state = 0;
-			public boolean hasNext()
-			{
-				if (init)
-					return true;
-				if (!lookAhead)
-				{
-					next();
-					lookAhead = true;
-				}
-				return !(state > 0 && ot.origin() == first);
-			}
-			public Object next()
-			{
-				if (init)
-				{
-					init = false;
-					if (ot.origin() == Vertex.outer)
-						state = 2;
-					return ot;
-				}
-				if (lookAhead)
-				{
-					lookAhead = false;
-					return ot;
-				}
-				lookAhead = false;
-				if (state == 0)
-					state = 1;
-				if (ot.hasAttributes(OUTER) && state == 1)
-				{
-					// Loop clockwise to another boundary
-					// and start again from there.
-					state = 2;
-					ot.prevOTri();
-					ot.nextOTriDest();
-					while (true)
-					{
-						if (ot.hasAttributes(OUTER))
-							break;
-						ot.prevOTri();
-						ot.nextOTriDest();
-					}
-				}
-				else
-				{
-					ot.prevOTriDest();
-					ot.nextOTri();
-				}
-				return ot;
-			}
-			public void remove()
-			{
-			}
-		};
 	}
 	
 	public Iterator getOTriangleAroundOriginIterator()
@@ -915,6 +874,7 @@ public class OTriangle implements Cloneable
 	{
 		Vertex o = origin();
 		Vertex d = destination();
+		Vertex a = apex();
 		nextOTri(this, work[0]);
 		prevOTri(this, work[1]);
 		//  If both adjacent edges are on a boundary, do not contract
@@ -932,9 +892,8 @@ public class OTriangle implements Cloneable
 		double [] v1 = new double[3];
 		double [] xn = n.getUV();
 		double [] xo = o.getUV();
-		for (Iterator it = work[0].getOTriangleAroundApexIterator(); it.hasNext(); )
+		do
 		{
-			work[0] = (OTriangle) it.next();
 			if (work[0].tri != tri && work[0].tri != work[1].tri && !work[0].hasAttributes(OUTER))
 			{
 				work[0].computeNormal3DT();
@@ -945,14 +904,15 @@ public class OTriangle implements Cloneable
 				if (Metric3D.prodSca(v1, nu) >= 0.0)
 					return false;
 			}
+			work[0].nextOTriRingLoop();
 		}
+		while (work[0].origin() != d);
 		//  Loop around d to check that triangles will not be inverted
 		copyOTri(this, work[0]);
 		work[0].prevOTri();
 		xo = d.getUV();
-		for (Iterator it = work[0].getOTriangleAroundApexIterator(); it.hasNext(); )
+		do
 		{
-			work[0] = (OTriangle) it.next();
 			if (work[0].tri != tri && work[0].tri != work[1].tri && !work[0].hasAttributes(OUTER))
 			{
 				work[0].computeNormal3DT();
@@ -963,7 +923,9 @@ public class OTriangle implements Cloneable
 				if (Metric3D.prodSca(v1, nu) >= 0.0)
 					return false;
 			}
+			work[0].nextOTriRingLoop();
 		}
+		while (work[0].origin() != a);
 		return true;
 	}
 	
@@ -1407,11 +1369,12 @@ public class OTriangle implements Cloneable
 		System.out.println("Loop around apex: "+a);
 		System.out.println(" first origin: "+o);
 		int cnt = 0;
-		for (Iterator it = ot1.getOTriangleAroundApexIterator(); it.hasNext(); )
+		do
 		{
-			ot1 = (OTriangle) it.next();
 			cnt++;
+			ot1.nextOTriRingLoop();
 		}
+		while (ot1.origin() != o);
 		assert cnt == 4 : "Failed test: LoopApex cnt != 4: "+a+" "+o;
 	}
 	
@@ -1425,32 +1388,44 @@ public class OTriangle implements Cloneable
 		System.out.println("Improve triangle quality around origin: "+o);
 		System.out.println(" first destination: "+d);
 		int cnt = 0;
-		for (Iterator it = ot1.getOTriangleAroundApexIterator(); it.hasNext(); )
+		while(true)
 		{
-			OTriangle ot = (OTriangle) it.next();
-			if (ot.hasAttributes(OTriangle.OUTER) || ot.hasAttributes(OTriangle.BOUNDARY) || ot.getAdj() == null)
-				continue;
-			OTriangle.symOTri(ot, sym);
-			Vertex a = sym.apex();
-			double p1 = ot.origin().distance3D(ot.destination()) + ot.destination().distance3D(ot.apex()) + ot.apex().distance3D(ot.origin());
-			double s1 = ot.computeArea();
-			double p2 = sym.origin().distance3D(sym.destination()) + sym.destination().distance3D(sym.apex()) + sym.apex().distance3D(sym.origin());
-			double s2 = sym.computeArea();
-			double Qbefore = 12.0 * Math.sqrt(3.0) * Math.min(s1/p1/p1, s2/p2/p2);
-			
-			double p3 = ot.origin().distance3D(sym.apex()) + sym.apex().distance3D(ot.apex()) + ot.apex().distance3D(ot.origin());
-			double s3 = ot.origin().area3D(sym.apex(), ot.apex());
-			double p4 = sym.origin().distance3D(ot.apex()) + ot.apex().distance3D(sym.apex()) + sym.apex().distance3D(sym.origin());
-			double s4 = sym.origin().area3D(ot.apex(), sym.apex());
-			double Qafter = 12.0 * Math.sqrt(3.0) * Math.min(s3/p3/p3, s4/p4/p4);
-			if (Qbefore < Qafter)
+			if (ot1.hasAttributes(OTriangle.OUTER) || ot1.hasAttributes(OTriangle.BOUNDARY) || ot1.getAdj() == null)
 			{
-				// Swap edge
-				ot.swap();
-				cnt++;
+				ot1.nextOTriRingLoop();
+				if (ot1.origin() == d)
+					break;
+			}
+			else
+			{
+				OTriangle.symOTri(ot1, sym);
+				Vertex a = sym.apex();
+				double p1 = ot1.origin().distance3D(ot1.destination()) + ot1.destination().distance3D(ot1.apex()) + ot1.apex().distance3D(ot1.origin());
+				double s1 = ot1.computeArea();
+				double p2 = sym.origin().distance3D(sym.destination()) + sym.destination().distance3D(sym.apex()) + sym.apex().distance3D(sym.origin());
+				double s2 = sym.computeArea();
+				double Qbefore = 12.0 * Math.sqrt(3.0) * Math.min(s1/p1/p1, s2/p2/p2);
+				
+				double p3 = ot1.origin().distance3D(sym.apex()) + sym.apex().distance3D(ot1.apex()) + ot1.apex().distance3D(ot1.origin());
+				double s3 = ot1.origin().area3D(sym.apex(), ot1.apex());
+				double p4 = sym.origin().distance3D(ot1.apex()) + ot1.apex().distance3D(sym.apex()) + sym.apex().distance3D(sym.origin());
+				double s4 = sym.origin().area3D(ot1.apex(), sym.apex());
+				double Qafter = 12.0 * Math.sqrt(3.0) * Math.min(s3/p3/p3, s4/p4/p4);
+				if (Qbefore < Qafter)
+				{
+					// Swap edge
+					ot1.swap();
+					cnt++;
+				}
+				else
+				{
+					ot1.nextOTriRingLoop();
+					if (ot1.origin() == d)
+						break;
+				}
 			}
 		}
-		assert cnt == expected : "Failed test: QualityOrigin cnt != "+expected+": "+o+" "+d;
+		assert cnt == expected : "Failed test: QualityOrigin "+cnt+" != "+expected+": "+o+" "+d;
 	}
 	
 	public static void main(String args[])

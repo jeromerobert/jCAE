@@ -227,16 +227,22 @@ public class OTriangle2D extends OTriangle
 		Vertex v = newLeft.apex();
 		assert v != Vertex.outer;
 		//  Loops around v
+		Vertex first = newLeft.origin();
 		Vertex a, o, d;
 		while (true)
 		{
-			for (Iterator it = newLeft.getOTriangleAroundApexIterator(); it.hasNext(); )
+			if (newLeft.hasAttributes(BOUNDARY) || newLeft.hasAttributes(NONMANIFOLD) || newLeft.hasAttributes(OUTER))
 			{
-				if (newLeft.hasAttributes(BOUNDARY) || newLeft.hasAttributes(NONMANIFOLD) || newLeft.hasAttributes(OUTER))
+				newLeft.nextOTriRingLoop();
+				if (newLeft.origin() == first)
 				{
-					it.next();
-					continue;
+					if (nrSwap == 0)
+						break;
+					nrSwap = 0;
 				}
+			}
+			else
+			{
 				boolean swap = false;
 				symOTri(newLeft, newRight);
 				o = newLeft.origin();
@@ -262,11 +268,16 @@ public class OTriangle2D extends OTriangle
 					totNrSwap++;
 				}
 				else
-					newLeft = (OTriangle2D) it.next();
+				{
+					newLeft.nextOTriRingLoop();
+					if (newLeft.origin() == first)
+					{
+						if (nrSwap == 0)
+							break;
+						nrSwap = 0;
+					}
+				}
 			}
-			if (nrSwap == 0)
-				break;
-			nrSwap = 0;
 		}
 		return totNrSwap;
 	}
