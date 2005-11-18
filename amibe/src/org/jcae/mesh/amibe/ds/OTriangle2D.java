@@ -62,9 +62,9 @@ public class OTriangle2D extends OTriangle
 		
 		//  Replace o by d in all triangles
 		copyOTri(this, work[0]);
-		for (Iterator it = work[0].getOTriangleAroundOriginIterator(); it.hasNext(); )
+		do
 		{
-			work[0] = (OTriangle2D) it.next();
+			work[0].nextOTriOriginLoop();
 			for (int i = 0; i < 3; i++)
 			{
 				if (work[0].tri.vertex[i] == o)
@@ -74,6 +74,7 @@ public class OTriangle2D extends OTriangle
 				}
 			}
 		}
+		while (work[0].destination() != d);
 		o.removeFromQuadTree();
 		
 		//  Glue triangles

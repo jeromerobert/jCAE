@@ -335,13 +335,15 @@ public class DecimateVertex
 			else
 				ot = v3.findOTriangle(apex2);
 			assert ot != null : ""+edge+"\n"+apex1+"\n"+v3+"\n"+apex1;
-			for (Iterator it = ot.getOTriangleAroundOriginIterator(); it.hasNext(); )
-			{
-				ot = (OTriangle) it.next();
-				if (!ot.hasAttributes(OTriangle.OUTER))
-					tree.update(new NotOrientedEdge(ot), cost(ot.destination(), v3, quadricMap));
-				ot.setAttributes(OTriangle.MARKED);
-			}
+			Vertex d = ot.destination();
+			do
+ 			{
+				ot.nextOTriOriginLoop();
+				if (ot.destination() != Vertex.outer)
+ 					tree.update(new NotOrientedEdge(ot), cost(ot.destination(), v3, quadricMap));
+ 				ot.setAttributes(OTriangle.MARKED);
+ 			}
+			while (ot.destination() != d);
 		}
 		// Remove deleted triangles from the list
 		ArrayList newlist = new ArrayList();

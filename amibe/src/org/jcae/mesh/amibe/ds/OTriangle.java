@@ -558,6 +558,32 @@ public class OTriangle implements Cloneable
 	}
 	
 	/**
+	 * Move counterclockwaise to the following edge with the same origin.
+	 * If a boundary is reached, loop backward until another
+	 * boundary is found and start again from there.
+	 */
+	public final void nextOTriOriginLoop()
+	{
+		/*
+		nextOTri();
+		nextOTriApexLoop();
+		prevOTri();
+		*/
+		if (apex() == Vertex.outer)
+		{
+			// Loop clockwise to another boundary
+			// and start again from there.
+			do
+			{
+				prevOTriOrigin();
+			}
+			while (destination() != Vertex.outer);
+		}
+		else
+			nextOTriOrigin();
+	}
+	
+	/**
 	 * Returns the start vertex of this edge.
 	 *
 	 * @return the start vertex of this edge.
@@ -644,66 +670,6 @@ public class OTriangle implements Cloneable
 	public final void setAdj(Object link)
 	{
 		tri.setAdj(localNumber, link);
-	}
-	
-	public Iterator getOTriangleAroundOriginIterator()
-	{
-		final OTriangle ot = this;
-		return new Iterator()
-		{
-			private Vertex first = ot.destination();
-			private boolean lookAhead = false;
-			private boolean init = true;
-			private int state = 0;
-			public boolean hasNext()
-			{
-				if (init)
-					return true;
-				if (!lookAhead)
-				{
-					next();
-					lookAhead = true;
-				}
-				return !(state > 0 && ot.destination() == first);
-			}
-			public Object next()
-			{
-				if (init)
-				{
-					init = false;
-					if (ot.destination() == Vertex.outer)
-						state = 2;
-					return ot;
-				}
-				if (lookAhead)
-				{
-					lookAhead = false;
-					return ot;
-				}
-				lookAhead = false;
-				if (state == 0)
-					state = 1;
-				if (ot.hasAttributes(OUTER) && state == 1)
-				{
-					// Loop clockwise to another boundary
-					// and start again from there.
-					state = 2;
-					ot.prevOTriOrigin();
-					while (true)
-					{
-						if (ot.hasAttributes(OUTER))
-							break;
-						ot.prevOTriOrigin();
-					}
-				}
-				else
-					ot.nextOTriOrigin();
-				return ot;
-			}
-			public void remove()
-			{
-			}
-		};
 	}
 	
 	/**
@@ -1012,21 +978,21 @@ public class OTriangle implements Cloneable
 		// this = (odV1)
 		
 		//  Replace o by n in all incident triangles
-		//  NOTE: if t5 is outer, it will not be updated by this loop
 		copyOTri(this, work[0]);
-		for (Iterator it = work[0].getOTriangleAroundOriginIterator(); it.hasNext(); )
+		do
 		{
-			work[0] = (OTriangle) it.next();
 			work[0].setOrigin(n);
+			work[0].nextOTriOriginLoop();
 		}
+		while (work[0].destination() != d);
 		//  Replace d by n in all incident triangles
-		//  NOTE: if t4 is outer, it will not be updated by this loop
 		symOTri(this, work[0]);
-		for (Iterator it = work[0].getOTriangleAroundOriginIterator(); it.hasNext(); )
+		do
 		{
-			work[0] = (OTriangle) it.next();
 			work[0].setOrigin(n);
+			work[0].nextOTriOriginLoop();
 		}
+		while (work[0].destination() != n);
 		//  Update adjacency links.  For clarity, o and d are
 		//  written instead of n.
 		if (!hasAttributes(OUTER))
@@ -1034,8 +1000,6 @@ public class OTriangle implements Cloneable
 			nextOTri();             // (dV1o)
 			int attr4 = attributes;
 			symOTri(this, work[0]); // (V1dV4)
-			//  See NOTE above
-			work[0].setDestination(n);
 			nextOTri();             // (V1od)
 			int attr3 = attributes;
 			symOTri(this, work[1]); // (oV1V3)
@@ -1058,8 +1022,6 @@ public class OTriangle implements Cloneable
 			nextOTri();             // (oV2d)
 			int attr5 = attributes;
 			symOTri(this, work[0]); // (V2oV5)
-			//  See NOTE above
-			work[0].setDestination(n);
 			nextOTri();             // (V2do)
 			int attr6 = attributes;
 			symOTri(this, work[1]); // (dV2V6)
@@ -1349,11 +1311,12 @@ public class OTriangle implements Cloneable
 		System.out.println("Loop around origin: "+o);
 		System.out.println(" first destination: "+d);
 		int cnt = 0;
-		for (Iterator it = ot1.getOTriangleAroundOriginIterator(); it.hasNext(); )
+		do
 		{
-			ot1 = (OTriangle) it.next();
+			ot1.nextOTriOriginLoop();
 			cnt++;
 		}
+		while (ot1.destination() != d);
 		assert cnt == 4 : "Failed test: LoopOrigin cnt != 4: "+o+" "+d;
 	}
 	

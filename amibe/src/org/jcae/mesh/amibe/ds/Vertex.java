@@ -425,13 +425,15 @@ public class Vertex implements Cloneable
 		if (ot.origin() != this)
 			ot.nextOTri();
 		assert ot.origin() == this : this+" not in "+ot;
-		for (Iterator it = ot.getOTriangleAroundOriginIterator(); it.hasNext(); )
+		Vertex d = ot.destination();
+		do
 		{
-			ot = (OTriangle) it.next();
+			ot.nextOTriOriginLoop();
 			Triangle t = ot.getTri();
 			if (!t.isOuter())
 				ret.add(t);
 		}
+		while (ot.destination() != d);
 	}
 	
 	private long onLeft_isotropic(Vertex v1, Vertex v2)
@@ -803,12 +805,14 @@ public class Vertex implements Cloneable
 		if (ot.origin() != this)
 			ot.nextOTri();
 		assert ot.origin() == this : this+" not in "+ot;
-		for (Iterator it = ot.getOTriangleAroundOriginIterator(); it.hasNext(); )
+		Vertex d = ot.destination();
+		do
 		{
-			ot = (OTriangle) it.next();
+			ot.nextOTriOriginLoop();
 			if (ot.destination() == v2)
 				return ot;
 		}
+		while (ot.destination() != d);
 		return null;
 	}
 	
@@ -840,9 +844,10 @@ public class Vertex implements Cloneable
 		double [] p0 = param;
 		double mixed = 0.0;
 		double gauss = 0.0;
-		for (Iterator it = ot.getOTriangleAroundOriginIterator(); it.hasNext(); )
+		Vertex d = ot.destination();
+		do
 		{
-			ot = (OTriangle) it.next();
+			ot.nextOTriOriginLoop();
 			if (ot.hasAttributes(OTriangle.OUTER))
 				continue;
 			double [] p1 = ot.destination().getUV();
@@ -876,6 +881,7 @@ public class Vertex implements Cloneable
 			for (int i = 0; i < 3; i++)
 				meanNormal[i] += 0.5 * (c12 * vect3[i] - c23 * vect1[i]) / area;
 		}
+		while (ot.destination() != d);
 		for (int i = 0; i < 3; i++)
 			meanNormal[i] /= 2.0 * mixed;
 		// Discrete gaussian curvature
@@ -956,9 +962,10 @@ public class Vertex implements Cloneable
 		double [] h = new double[3];
 		for (int i = 0; i < 3; i++)
 			g0[i] = g1[i] = g2[i] = h[i] = 0.0;
-		for (Iterator it = ot.getOTriangleAroundOriginIterator(); it.hasNext(); )
+		Vertex d = ot.destination();
+		do
 		{
-			ot = (OTriangle) it.next();
+			ot.nextOTriOriginLoop();
 			if (ot.hasAttributes(OTriangle.OUTER))
 				continue;
 			double [] p1 = ot.destination().getUV();
@@ -997,6 +1004,7 @@ public class Vertex implements Cloneable
 			h[1] += omega * kappa * 2.0 * d1 * d2;
 			h[2] += omega * kappa * d2 * d2;
 		}
+		while (ot.destination() != d);
 		g1[0] = g0[1];
 		g2[0] = g0[2];
 		g2[1] = g1[2];
@@ -1055,9 +1063,10 @@ public class Vertex implements Cloneable
 		if (ot.origin() != this)
 			ot.nextOTri();
 		assert ot.origin() == this;
-		for (Iterator it = ot.getOTriangleAroundOriginIterator(); it.hasNext(); )
+		Vertex d = ot.destination();
+		do
 		{
-			ot = (OTriangle) it.next();
+			ot.nextOTriOriginLoop();
 			if (ot.hasAttributes(OTriangle.OUTER))
 				continue;
 			ot.computeNormal3D();
@@ -1065,6 +1074,7 @@ public class Vertex implements Cloneable
 			for (int i = 0; i < 3; i++)
 				normal[i] += nu[i];
 		}
+		while (ot.destination() != d);
 		double n = Metric3D.norm(normal);
 		if (n < 1.e-6)
 			return false;
@@ -1124,9 +1134,10 @@ public class Vertex implements Cloneable
 		double [] h = new double[3];
 		for (int i = 0; i < 3; i++)
 			g0[i] = g1[i] = g2[i] = h[i] = 0.0;
-		for (Iterator it = ot.getOTriangleAroundOriginIterator(); it.hasNext(); )
+		Vertex d = ot.destination();
+		do
 		{
-			ot = (OTriangle) it.next();
+			ot.nextOTriOriginLoop();
 			if (ot.destination() == Vertex.outer)
 				continue;
 			double [] p1 = ot.destination().getUV();
@@ -1143,6 +1154,7 @@ public class Vertex implements Cloneable
 			g1[2] += loc[0] * loc[1] * loc[1] * loc[1];
 			g2[2] += loc[1] * loc[1] * loc[1] * loc[1];
 		}
+		while (ot.destination() != d);
 		g1[1] = g0[2];
 		g1[0] = g0[1];
 		g2[0] = g0[2];
