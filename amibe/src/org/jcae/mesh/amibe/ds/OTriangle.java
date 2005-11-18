@@ -512,7 +512,7 @@ public class OTriangle implements Cloneable
 	}
 	
 	/**
-	 * Copy an <code>OTriangle</code> and move it to the counterclockwaise
+	 * Copy an <code>OTriangle</code> and move it to the clockwaise
 	 * previous edge which has the same apex.
 	 *
 	 * @param o     source <code>OTriangle</code>
@@ -527,7 +527,7 @@ public class OTriangle implements Cloneable
 	}
 	
 	/**
-	 * Move counterclockwaise to the previous edge with the same apex.
+	 * Move clockwaise to the previous edge with the same apex.
 	 */
 	public final void prevOTriApex()
 	{
@@ -1492,4 +1492,5 @@ public class OTriangle implements Cloneable
 		unitTestCheckQuality(m, v[3], Vertex.outer, 0);
 		assert m.isValid();
 	}
+	
 }
