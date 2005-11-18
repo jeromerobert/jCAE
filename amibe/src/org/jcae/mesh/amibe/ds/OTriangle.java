@@ -537,10 +537,11 @@ public class OTriangle implements Cloneable
 	}
 	
 	/**
-	 * Move counterclockwaise to the next edge of the apex ring.
-	 * If 
+	 * Move counterclockwaise to the following edge with the same apex.
+	 * If a boundary is reached, loop backward until another
+	 * boundary is found and start again from there.
 	 */
-	public final void nextOTriRingLoop()
+	public final void nextOTriApexLoop()
 	{
 		if (destination() == Vertex.outer)
 		{
@@ -548,16 +549,12 @@ public class OTriangle implements Cloneable
 			// and start again from there.
 			do
 			{
-				prevOTri();
-				nextOTriDest();
+				prevOTriApex();
 			}
 			while (origin() != Vertex.outer);
 		}
 		else
-		{
-			prevOTriDest();
-			nextOTri();
-		}
+			nextOTriApex();
 	}
 	
 	/**
@@ -904,7 +901,7 @@ public class OTriangle implements Cloneable
 				if (Metric3D.prodSca(v1, nu) >= 0.0)
 					return false;
 			}
-			work[0].nextOTriRingLoop();
+			work[0].nextOTriApexLoop();
 		}
 		while (work[0].origin() != d);
 		//  Loop around d to check that triangles will not be inverted
@@ -923,7 +920,7 @@ public class OTriangle implements Cloneable
 				if (Metric3D.prodSca(v1, nu) >= 0.0)
 					return false;
 			}
-			work[0].nextOTriRingLoop();
+			work[0].nextOTriApexLoop();
 		}
 		while (work[0].origin() != a);
 		return true;
@@ -1372,7 +1369,7 @@ public class OTriangle implements Cloneable
 		do
 		{
 			cnt++;
-			ot1.nextOTriRingLoop();
+			ot1.nextOTriApexLoop();
 		}
 		while (ot1.origin() != o);
 		assert cnt == 4 : "Failed test: LoopApex cnt != 4: "+a+" "+o;
@@ -1392,7 +1389,7 @@ public class OTriangle implements Cloneable
 		{
 			if (ot1.hasAttributes(OTriangle.OUTER) || ot1.hasAttributes(OTriangle.BOUNDARY) || ot1.getAdj() == null)
 			{
-				ot1.nextOTriRingLoop();
+				ot1.nextOTriApexLoop();
 				if (ot1.origin() == d)
 					break;
 			}
@@ -1419,7 +1416,7 @@ public class OTriangle implements Cloneable
 				}
 				else
 				{
-					ot1.nextOTriRingLoop();
+					ot1.nextOTriApexLoop();
 					if (ot1.origin() == d)
 						break;
 				}

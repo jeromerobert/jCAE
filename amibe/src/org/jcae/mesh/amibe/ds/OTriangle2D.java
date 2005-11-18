@@ -233,7 +233,7 @@ public class OTriangle2D extends OTriangle
 		{
 			if (newLeft.hasAttributes(BOUNDARY) || newLeft.hasAttributes(NONMANIFOLD) || newLeft.hasAttributes(OUTER))
 			{
-				newLeft.nextOTriRingLoop();
+				newLeft.nextOTriApexLoop();
 				if (newLeft.origin() == first)
 				{
 					if (nrSwap == 0)
@@ -269,7 +269,7 @@ public class OTriangle2D extends OTriangle
 				}
 				else
 				{
-					newLeft.nextOTriRingLoop();
+					newLeft.nextOTriApexLoop();
 					if (newLeft.origin() == first)
 					{
 						if (nrSwap == 0)
