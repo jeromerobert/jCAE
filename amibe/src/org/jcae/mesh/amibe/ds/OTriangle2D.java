@@ -64,12 +64,12 @@ public class OTriangle2D extends OTriangle
 		copyOTri(this, work[0]);
 		for (Iterator it = work[0].getOTriangleAroundOriginIterator(); it.hasNext(); )
 		{
-			OTriangle2D current = (OTriangle2D) it.next();
+			work[0] = (OTriangle2D) it.next();
 			for (int i = 0; i < 3; i++)
 			{
-				if (current.tri.vertex[i] == o)
+				if (work[0].tri.vertex[i] == o)
 				{
-					current.tri.vertex[i] = d;
+					work[0].tri.vertex[i] = d;
 					break;
 				}
 			}
@@ -230,18 +230,17 @@ public class OTriangle2D extends OTriangle
 		Vertex a, o, d;
 		while (true)
 		{
-			OTriangle2D current = newLeft;
 			for (Iterator it = newLeft.getOTriangleAroundApexIterator(); it.hasNext(); )
 			{
-				if (current.hasAttributes(BOUNDARY) || current.hasAttributes(NONMANIFOLD) || current.hasAttributes(OUTER))
+				if (newLeft.hasAttributes(BOUNDARY) || newLeft.hasAttributes(NONMANIFOLD) || newLeft.hasAttributes(OUTER))
 				{
-					current = (OTriangle2D) it.next();
+					it.next();
 					continue;
 				}
 				boolean swap = false;
-				symOTri(current, newRight);
-				o = current.origin();
-				d = current.destination();
+				symOTri(newLeft, newRight);
+				o = newLeft.origin();
+				d = newLeft.destination();
 				a = newRight.apex();
 				if (o == Vertex.outer)
 					swap = (v.onLeft(d, a) < 0L);
@@ -249,25 +248,22 @@ public class OTriangle2D extends OTriangle
 					swap = (v.onLeft(a, o) < 0L);
 				else if (a == Vertex.outer)
 					swap = (v.onLeft(o, d) == 0L);
-				else if (current.isMutable())
+				else if (newLeft.isMutable())
 				{
 					if (!smallerDiag)
-						swap = !current.isDelaunay(a);
+						swap = !newLeft.isDelaunay(a);
 					else
-						swap = !a.isSmallerDiagonale(current);
+						swap = !a.isSmallerDiagonale(newLeft);
 				}
 				if (swap)
 				{
-					current.swap();
+					newLeft.swap();
 					nrSwap++;
 					totNrSwap++;
 				}
 				else
-					current = (OTriangle2D) it.next();
+					newLeft = (OTriangle2D) it.next();
 			}
-			// newLeft may have been swapped, it needs to be
-			// updated.
-			newLeft = current;
 			if (nrSwap == 0)
 				break;
 			nrSwap = 0;
