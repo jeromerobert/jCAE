@@ -188,8 +188,8 @@ public class OTriangle2D extends OTriangle
 		if (logger.isDebugEnabled())
 			logger.debug("New triangles:\n"+this+"\n"+newRight+"\n"+newLeft);
 		if (force)
-			CheckAndSwap(newLeft, oldRight, false);
-		else if (0 == CheckAndSwap(newLeft, oldRight, false))
+			newLeft.CheckAndSwap(false);
+		else if (0 == newLeft.CheckAndSwap(false))
 		{
 			//  v has been inserted and no edges are swapped,
 			//  thus global quality has been decreased.
@@ -216,26 +216,25 @@ public class OTriangle2D extends OTriangle
 		//  As CheckAndSwap modifies its arguments, 'this'
 		//  must be protected.
 		OTriangle2D ot1 = new OTriangle2D();
-		OTriangle2D ot2 = new OTriangle2D();
 		copyOTri(this, ot1);
-		return CheckAndSwap(ot1, ot2, true);
+		return ot1.CheckAndSwap(true);
 	}
 	
-	private int CheckAndSwap(OTriangle2D newLeft, OTriangle2D newRight, boolean smallerDiag)
+	private int CheckAndSwap(boolean smallerDiag)
 	{
 		int nrSwap = 0;
 		int totNrSwap = 0;
-		Vertex v = newLeft.apex();
+		Vertex v = apex();
 		assert v != Vertex.outer;
+		OTriangle2D sym = new OTriangle2D();
 		//  Loops around v
-		Vertex first = newLeft.origin();
-		Vertex a, o, d;
+		Vertex first = origin();
 		while (true)
 		{
-			if (newLeft.hasAttributes(BOUNDARY) || newLeft.hasAttributes(NONMANIFOLD) || newLeft.hasAttributes(OUTER))
+			if (hasAttributes(BOUNDARY) || hasAttributes(NONMANIFOLD) || hasAttributes(OUTER))
 			{
-				newLeft.nextOTriApexLoop();
-				if (newLeft.origin() == first)
+				nextOTriApexLoop();
+				if (origin() == first)
 				{
 					if (nrSwap == 0)
 						break;
@@ -244,34 +243,34 @@ public class OTriangle2D extends OTriangle
 			}
 			else
 			{
-				boolean swap = false;
-				symOTri(newLeft, newRight);
-				o = newLeft.origin();
-				d = newLeft.destination();
-				a = newRight.apex();
+				Vertex o = origin();
+				Vertex d = destination();
+				symOTri(this, sym);
+				Vertex a = sym.apex();
+				boolean toSwap = false;
 				if (o == Vertex.outer)
-					swap = (v.onLeft(d, a) < 0L);
+					toSwap = (v.onLeft(d, a) < 0L);
 				else if (d == Vertex.outer)
-					swap = (v.onLeft(a, o) < 0L);
+					toSwap = (v.onLeft(a, o) < 0L);
 				else if (a == Vertex.outer)
-					swap = (v.onLeft(o, d) == 0L);
-				else if (newLeft.isMutable())
+					toSwap = (v.onLeft(o, d) == 0L);
+				else if (isMutable())
 				{
 					if (!smallerDiag)
-						swap = !newLeft.isDelaunay(a);
+						toSwap = !isDelaunay(a);
 					else
-						swap = !a.isSmallerDiagonale(newLeft);
+						toSwap = !a.isSmallerDiagonale(this);
 				}
-				if (swap)
+				if (toSwap)
 				{
-					newLeft.swap();
+					swap();
 					nrSwap++;
 					totNrSwap++;
 				}
 				else
 				{
-					newLeft.nextOTriApexLoop();
-					if (newLeft.origin() == first)
+					nextOTriApexLoop();
+					if (origin() == first)
 					{
 						if (nrSwap == 0)
 							break;
@@ -324,11 +323,11 @@ public class OTriangle2D extends OTriangle
 			assert n != Vertex.outer : ""+work[0];
 			newl = n.onLeft(start, end);
 			oldl = a.onLeft(start, end);
-			boolean canSwap = (n != Vertex.outer) && (a.onLeft(n, d) > 0L) && (a.onLeft(o, n) > 0L) && !hasAttributes(BOUNDARY);
+			boolean toSwap = (n != Vertex.outer) && (a.onLeft(n, d) > 0L) && (a.onLeft(o, n) > 0L) && !hasAttributes(BOUNDARY);
 			if (newl > 0L)
 			{
 				//  o stands to the right of (start,end), d and n to the left.
-				if (!canSwap)
+				if (!toSwap)
 					prevOTriOrigin();    // = (ond)
 				else if (oldl >= 0L)
 				{
@@ -343,7 +342,7 @@ public class OTriangle2D extends OTriangle
 			else if (newl < 0L)
 			{
 				//  o and n stand to the right of (start,end), d to the left.
-				if (!canSwap)
+				if (!toSwap)
 					nextOTriDest();      // = (ndo)
 				else if (oldl <= 0L)
 				{
@@ -364,7 +363,7 @@ public class OTriangle2D extends OTriangle
 			else
 			{
 				//  n is the end point.
-				if (!canSwap)
+				if (!toSwap)
 					nextOTriDest();      // = (ndo)
 				else
 				{
