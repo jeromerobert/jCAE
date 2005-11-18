@@ -863,7 +863,7 @@ public class OTriangle implements Cloneable
 		 */
 		// T1 = (oda)  --> (ona)
 		// T2 = (don)  --> (dan)
-		assert !this.hasAttributes(OUTER | BOUNDARY);
+		assert !(hasAttributes(OUTER) || hasAttributes(BOUNDARY));
 		copyOTri(this, work[0]);        // (oda)
 		symOTri(this, work[1]);         // (don)
 		symOTri(this, work[2]);         // (don)
@@ -902,6 +902,7 @@ public class OTriangle implements Cloneable
 		//  Fix links to triangles
 		o.setLink(tri);
 		d.setLink(work[2].tri);
+		pullAttributes();
 		return this;  // (ona)
 	}
 	
