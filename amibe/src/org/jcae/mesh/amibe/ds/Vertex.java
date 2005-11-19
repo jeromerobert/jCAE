@@ -798,7 +798,7 @@ public class Vertex implements Cloneable
 	public OTriangle findOTriangle(Vertex v2)
 	{
 		Triangle tri = (Triangle) link;
-		assert tri.vertex[0] == this || tri.vertex[1] == this || tri.vertex[2] == this;
+		assert tri.vertex[0] == this || tri.vertex[1] == this || tri.vertex[2] == this : this+" "+tri;
 		OTriangle ot = new OTriangle(tri, 0);
 		if (ot.origin() != this)
 			ot.nextOTri();

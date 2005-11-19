@@ -52,6 +52,6 @@ public class NotOrientedEdge extends OTriangle
 	
 	public final String toString()
 	{
-		return "hashCode="+hashCode()+" vertices:\n  "+origin()+"\n  "+destination();
+		return "Edge hashCode="+hashCode()+"\n"+super.toString();
 	}
 }
