@@ -711,8 +711,6 @@ public class OTriangle implements Cloneable
 	 *
 	 * @param a  apex of the current edge
 	 * @param n  apex of the symmetric edge
-	 * @return a handle to (ona) oriented triangle.
-	 * otherwise.
 	 */
 	public final void swap()
 	{
@@ -898,6 +896,39 @@ public class OTriangle implements Cloneable
 		tempD2[2] = p2[2] - p0[2];
 		Metric3D.prodVect3D(tempD1, tempD2, tempD);
 		return 0.5 * Metric3D.norm(tempD);
+	}
+	
+	public final boolean checkSwap3D(double minCos)
+	{
+		// Check if there is an adjacent edge
+		if (hasAttributes(OUTER) || hasAttributes(BOUNDARY) || getAdj() == null)
+			return false;
+		// Check for coplanarity
+		symOTri(this, work[0]);
+		computeNormal3D();
+		double [] n1 = getTempVector();
+		work[0].computeNormal3D();
+		double [] n2 = work[0].getTempVector();
+		if (Metric3D.prodSca(n1, n2) < minCos)
+			return false;
+		// Check for quality improvement
+		Vertex o = origin();
+		Vertex d = destination();
+		Vertex a = apex();
+		Vertex n = work[0].apex();
+		double p1 = o.distance3D(d) + d.distance3D(a) + a.distance3D(o);
+		double s1 = computeArea();
+		double p2 = d.distance3D(o) + o.distance3D(n) + n.distance3D(d);
+		double s2 = work[0].computeArea();
+		// No need to multiply by 12.0 * Math.sqrt(3.0)
+		double Qbefore = Math.min(s1/p1/p1, s2/p2/p2);
+		
+		double p3 = o.distance3D(n) + n.distance3D(a) + a.distance3D(o);
+		double s3 = o.area3D(n, a);
+		double p4 = d.distance3D(a) + a.distance3D(n) + n.distance3D(d);
+		double s4 = d.area3D(a, n);
+		double Qafter = Math.min(s3/p3/p3, s4/p4/p4);
+		return (Qafter > Qbefore);
 	}
 	
 	/**
@@ -1291,46 +1322,23 @@ public class OTriangle implements Cloneable
 		OTriangle ot2 = o.findOTriangle(d);
 		assert ot2 != null;
 		OTriangle ot1 = new OTriangle();
-		OTriangle sym = new OTriangle();
 		nextOTri(ot2, ot1);
 		System.out.println("Improve triangle quality around origin: "+o);
 		System.out.println(" first destination: "+d);
 		int cnt = 0;
 		while(true)
 		{
-			if (ot1.hasAttributes(OTriangle.OUTER) || ot1.hasAttributes(OTriangle.BOUNDARY) || ot1.getAdj() == null)
+			if (ot1.checkSwap3D(0.95))
+			{
+				// Swap edge
+				ot1.swap();
+				cnt++;
+			}
+			else
 			{
 				ot1.nextOTriApexLoop();
 				if (ot1.origin() == d)
 					break;
-			}
-			else
-			{
-				OTriangle.symOTri(ot1, sym);
-				Vertex a = sym.apex();
-				double p1 = ot1.origin().distance3D(ot1.destination()) + ot1.destination().distance3D(ot1.apex()) + ot1.apex().distance3D(ot1.origin());
-				double s1 = ot1.computeArea();
-				double p2 = sym.origin().distance3D(sym.destination()) + sym.destination().distance3D(sym.apex()) + sym.apex().distance3D(sym.origin());
-				double s2 = sym.computeArea();
-				double Qbefore = 12.0 * Math.sqrt(3.0) * Math.min(s1/p1/p1, s2/p2/p2);
-				
-				double p3 = ot1.origin().distance3D(sym.apex()) + sym.apex().distance3D(ot1.apex()) + ot1.apex().distance3D(ot1.origin());
-				double s3 = ot1.origin().area3D(sym.apex(), ot1.apex());
-				double p4 = sym.origin().distance3D(ot1.apex()) + ot1.apex().distance3D(sym.apex()) + sym.apex().distance3D(sym.origin());
-				double s4 = sym.origin().area3D(ot1.apex(), sym.apex());
-				double Qafter = 12.0 * Math.sqrt(3.0) * Math.min(s3/p3/p3, s4/p4/p4);
-				if (Qbefore < Qafter)
-				{
-					// Swap edge
-					ot1.swap();
-					cnt++;
-				}
-				else
-				{
-					ot1.nextOTriApexLoop();
-					if (ot1.origin() == d)
-						break;
-				}
 			}
 		}
 		assert cnt == expected : "Failed test: QualityOrigin "+cnt+" != "+expected+": "+o+" "+d;
