@@ -1,3 +1,21 @@
+Mon Nov 21 16:37:50 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/jcae.dtd 
+	  src/org/jcae/mesh/amibe/ds/MGroup3D.java
+	  src/org/jcae/mesh/xmldata/MMesh3DReader.java: Add support for merging groups.
+	* src/org/jcae/mesh/FuseGroups.java: New main program to fuse groups.
+
+Fri Nov 18 11:40:33 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java: Remove getOTriangleAroundApexIterator().  This method was used to spin around a vertex to swap edges, and thus modifies edge connectivity while looping, which may be troublesome if caller is not careful enough.  The new nextOTriApexLoop() method has to be used instead.
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java
+	  src/org/jcae/mesh/amibe/ds/OTriangle2D.java
+	  src/org/jcae/mesh/amibe/ds/Vertex.java
+	  src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java:
+	  Replace OTriangle.getOTriangleAroundOriginIterator() by OTriangle.nextOTriOriginLoop().
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java
+	* src/org/jcae/mesh/amibe/ds/OTriangle2d.java: Move isDelaunay() into OTriangle2d.
+
 Thu Nov 17 17:42:59 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/OTriangle.java (swapOTriangle): This routine is modified to minimize adjacency changes.
