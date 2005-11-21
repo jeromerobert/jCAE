@@ -77,3 +77,13 @@ It is read from an integerstream containing the id of triangles.
 <!-- An integer identifying the group -->
 <!ATTLIST group id CDATA #IMPLIED>
 
+<!-- Definition for merged groups -->
+<!ELEMENT mergegroups (newgroup*)>
+
+<!-- A new group is defined by its name and a list of group ids -->
+<!ELEMENT newgroup (name, oldgroup+)>
+
+<!-- An integer identifying the group -->
+<!ELEMENT oldgroup EMPTY>
+<!ATTLIST oldgroup id CDATA #IMPLIED>
+

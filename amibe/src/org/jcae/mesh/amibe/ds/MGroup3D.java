@@ -34,6 +34,9 @@ public class MGroup3D
 	//  Group name
 	private String name;
 	
+	//  Group id
+	private int id;
+	
 	//  Face list.
 	private Collection facelist = new ArrayList();
 	
@@ -49,6 +52,13 @@ public class MGroup3D
 		facelist = new ArrayList(faces);
 	}
 	
+	public MGroup3D(int i, String n, Collection faces)
+	{
+		id = i;
+		name = n;
+		facelist = new ArrayList(faces);
+	}
+	
 	/**
 	 * Returns the group name.
 	 *
@@ -57,6 +67,16 @@ public class MGroup3D
 	public String getName()
 	{
 		return name;
+	}
+	
+	/**
+	 * Returns the group id.
+	 *
+	 * @return the group id.
+	 */
+	public int getId()
+	{
+		return id;
 	}
 	
 	/**
@@ -77,6 +97,18 @@ public class MGroup3D
 	public int numberOfFaces()
 	{
 		return facelist.size();
+	}
+	
+	/**
+	 * Merges a group to this one
+	 *
+	 * @return the merged group.
+	 */
+	public MGroup3D merge(MGroup3D that)
+	{
+		facelist.addAll(that.facelist);
+		that.facelist.clear();
+		return this;
 	}
 	
 }

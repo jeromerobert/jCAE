@@ -28,14 +28,20 @@ import org.jcae.mesh.amibe.ds.MNode3D;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileInputStream;
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
 import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Iterator;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collection;
+import gnu.trove.TIntIntHashMap;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.apache.xpath.CachedXPathAPI;
@@ -234,6 +240,115 @@ public class MMesh3DReader
 			throw new RuntimeException(ex);
 		}
 		return ret;
+	}
+	
+	public static void mergeGroups(String xmlDir, String xmlInFile, String xmlGroupsFile)
+	{
+		CachedXPathAPI xpath = new CachedXPathAPI();
+		try
+		{
+			File oldXmlFile = new File(xmlDir, xmlInFile);
+			Document document = XMLHelper.parseXML(oldXmlFile);
+			Node submeshElement = xpath.selectSingleNode(document, "/jcae/mesh/submesh");
+			Node groupsElement = xpath.selectSingleNode(submeshElement, "groups");
+			NodeList groupsList = xpath.selectNodeList(groupsElement, "group");
+			int numberOfGroups = groupsList.getLength();
+			String groupsFileName = xpath.selectSingleNode(groupsList.item(0), "file/@location").getNodeValue();
+			String groupsFileDir = null;
+			if (groupsFileName.charAt(0) != File.separatorChar)
+				groupsFileDir = xmlDir;
+			File oldGroupsFile = new File(groupsFileDir, groupsFileName);
+			FileChannel fcG = new FileInputStream(oldGroupsFile).getChannel();
+			MappedByteBuffer bbG = fcG.map(FileChannel.MapMode.READ_ONLY, 0L, fcG.size());
+			IntBuffer groupsBuffer = bbG.asIntBuffer();
+			int maxId = -1;
+			MGroup3D [] groups = new MGroup3D[numberOfGroups];
+			TIntIntHashMap numGroups = new TIntIntHashMap(numberOfGroups);
+			for (int i=0; i < numberOfGroups; i++)
+			{
+				Node groupNode = groupsList.item(i);
+				
+				int numberOfElements = Integer.parseInt(
+					xpath.selectSingleNode(groupNode, "number/text()").getNodeValue());
+				int fileOffset = Integer.parseInt(
+					xpath.selectSingleNode(groupNode, "file/@offset").getNodeValue());
+				int id = Integer.parseInt(xpath.selectSingleNode(groupNode, "@id").getNodeValue());
+				numGroups.put(id, i);
+				String name = xpath.selectSingleNode(groupNode, "name/text()").getNodeValue();
+				logger.debug("Group "+name+": reading "+numberOfElements+" elements");
+				maxId = Math.max(maxId, id);
+				Collection newfacelist = new ArrayList(numberOfElements);
+				for (int j=0; j < numberOfElements; j++)
+					newfacelist.add(new Integer(groupsBuffer.get(fileOffset+j)));
+				groups[i] = new MGroup3D(id, name, newfacelist);
+			}
+			fcG.close();
+			UNVConverter.clean(bbG);
+			// Now merge groups
+			Document documentGroup = XMLHelper.parseXML(new File(xmlDir, xmlGroupsFile));
+			Node newGroupsElement = xpath.selectSingleNode(documentGroup, "/mergegroups");
+			NodeList newGroupsList = xpath.selectNodeList(newGroupsElement, "newgroup");
+			int numberOfNewGroups = newGroupsList.getLength();
+			MGroup3D [] tmpgroups = new MGroup3D[numberOfGroups+numberOfNewGroups];
+			System.arraycopy(groups, 0, tmpgroups, 0, groups.length);
+			groups = tmpgroups;
+
+			for (int i=0; i < numberOfNewGroups; i++)
+			{
+				Node newGroupNode = newGroupsList.item(i);
+				maxId++;
+				String name = xpath.selectSingleNode(newGroupNode, "name/text()").getNodeValue();
+				groups[numberOfGroups+i] = new MGroup3D(maxId, name, new ArrayList());
+				numGroups.put(maxId, numberOfGroups+i);
+				NodeList oldGroupsList = xpath.selectNodeList(newGroupNode, "oldgroup");
+				int numberOfOldGroups = oldGroupsList.getLength();
+				logger.debug("Group "+name+": merging "+numberOfOldGroups+" groups");
+				for (int j=0; j < numberOfOldGroups; j++)
+				{
+					Node oldGroupNode = oldGroupsList.item(j);
+					int id = Integer.parseInt(xpath.selectSingleNode(oldGroupNode, "@id").getNodeValue());
+					int k = numGroups.get(id);
+					if (k < 0 || k >= groups.length || groups[k] == null)
+						throw new RuntimeException("Group id "+id+" does not exist. Aborting.");
+					groups[numberOfGroups+i].merge(groups[k]);
+					groups[k] = null;
+				}
+			}
+			// Now write merged groups onto file
+			File newGroupsFile = new File(groupsFileDir, groupsFileName+"-tmp");
+			DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(newGroupsFile)));
+			Element newGroups=document.createElement("groups");
+			for (int i=0; i < groups.length; i++)
+			{
+				if (groups[i] == null)
+					continue;
+				newGroups.appendChild(
+					XMLHelper.parseXMLString(document, "<group id=\""+groups[i].getId()+"\">"+
+					"<name>"+groups[i].getName()+"</name>"+
+					"<number>"+groups[i].numberOfFaces()+"</number>"+					
+					"<file format=\"integerstream\" location=\""+
+					XMLHelper.canonicalize(xmlDir, oldGroupsFile.toString())+"\""+
+					" offset=\""+out.size()/4+"\"/></group>"));
+				Iterator it = groups[i].getFacesIterator();
+				while(it.hasNext())
+					out.writeInt(((Integer) it.next()).intValue());
+			}
+			out.close();
+			// Replace <groups> element
+			submeshElement.replaceChild(newGroups, groupsElement);
+			File newXmlFile = new File(xmlDir, xmlInFile+"-tmp");
+			XMLHelper.writeXML(document, newXmlFile);
+			if (!newXmlFile.renameTo(oldXmlFile))
+				throw new RuntimeException("Cannot rename "+newXmlFile+" into "+oldXmlFile);
+			if (!newGroupsFile.renameTo(oldGroupsFile))
+				throw new RuntimeException("Cannot rename "+newGroupsFile+" into "+oldGroupsFile);
+
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
 	}
 }
 
