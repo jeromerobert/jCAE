@@ -66,10 +66,10 @@ public class UNVConverter
 	
 	public static class FormatD25_16 extends DecimalFormat
 	{
-		private static String PATERN="0.0000000000000000E00";
+		private static String PATTERN="0.0000000000000000E00";
 		public FormatD25_16()
 		{
-			super(PATERN);
+			super(PATTERN);
 			DecimalFormatSymbols dfs=getDecimalFormatSymbols();
 			dfs.setDecimalSeparator('.');
 			setDecimalFormatSymbols(dfs);
