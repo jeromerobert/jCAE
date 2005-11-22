@@ -180,27 +180,20 @@ public class MeshReader
 			FileChannel fcR = new FileInputStream(refFile).getChannel();
 			MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L, fcR.size());
 			IntBuffer refsBuffer = bbR.asIntBuffer();
+			int numberOfReferences = Integer.parseInt(
+				xpath.selectSingleNode(submeshNodes, "references/number/text()").getNodeValue());
+			logger.debug("Reading "+numberOfReferences+" references");
+			int [] refs = new int[numberOfReferences];
+			refsBuffer.get(refs);
+			fcR.close();
+			UNVConverter.clean(bbR);
+			
 			String nodesFile = xpath.selectSingleNode(submeshNodes, "file/@location").getNodeValue();
 			if (nodesFile.charAt(0) != File.separatorChar)
 				nodesFile = xmlDir+File.separator+nodesFile;
 			FileChannel fcN = new FileInputStream(nodesFile).getChannel();
 			MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
 			DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
-			
-			Node submeshTriangles = xpath.selectSingleNode(submeshElement, "triangles");
-			String trianglesFile = xpath.selectSingleNode(submeshTriangles,
-				"file/@location").getNodeValue();
-			if (trianglesFile.charAt(0) != File.separatorChar)
-				trianglesFile = xmlDir+File.separator+trianglesFile;
-			FileChannel fcT = new FileInputStream(trianglesFile).getChannel();
-			MappedByteBuffer bbT = fcT.map(FileChannel.MapMode.READ_ONLY, 0L, fcT.size());
-			IntBuffer trianglesBuffer = bbT.asIntBuffer();
-
-			int numberOfReferences = Integer.parseInt(
-				xpath.selectSingleNode(submeshNodes, "references/number/text()").getNodeValue());
-			logger.debug("Reading "+numberOfReferences+" references");
-			int [] refs = new int[numberOfReferences];
-			refsBuffer.get(refs);
 			
 			int numberOfNodes = Integer.parseInt(
 				xpath.selectSingleNode(submeshNodes, "number/text()").getNodeValue());
@@ -231,8 +224,18 @@ public class MeshReader
 					if (coord[j] < bbmin[j])
 						bbmin[j] = coord[j];
 				}
-			}
+			} 
+			fcN.close();
+			UNVConverter.clean(bbN);
 			
+			Node submeshTriangles = xpath.selectSingleNode(submeshElement, "triangles");
+			String trianglesFile = xpath.selectSingleNode(submeshTriangles,
+				"file/@location").getNodeValue();
+			if (trianglesFile.charAt(0) != File.separatorChar)
+				trianglesFile = xmlDir+File.separator+trianglesFile;
+			FileChannel fcT = new FileInputStream(trianglesFile).getChannel();
+			MappedByteBuffer bbT = fcT.map(FileChannel.MapMode.READ_ONLY, 0L, fcT.size());
+			IntBuffer trianglesBuffer = bbT.asIntBuffer();
 			int numberOfTriangles = Integer.parseInt(
 				xpath.selectSingleNode(submeshTriangles, "number/text()").getNodeValue());
 			logger.debug("Reading "+numberOfTriangles+" elements");
@@ -250,10 +253,34 @@ public class MeshReader
 			}
 			fcT.close();
 			UNVConverter.clean(bbT);
-			fcN.close();
-			UNVConverter.clean(bbN);
-			fcR.close();
-			UNVConverter.clean(bbR);
+			
+			Node groupsElement = xpath.selectSingleNode(submeshElement, "groups");
+			NodeList groupsList = xpath.selectNodeList(groupsElement, "group");
+			int numberOfGroups = groupsList.getLength();
+			String groupsFile = xpath.selectSingleNode(groupsList.item(0), "file/@location").getNodeValue();
+			if (groupsFile.charAt(0) != File.separatorChar)
+				groupsFile = xmlDir+File.separator+groupsFile;
+			FileChannel fcG = new FileInputStream(groupsFile).getChannel();
+			MappedByteBuffer bbG = fcG.map(FileChannel.MapMode.READ_ONLY, 0L, fcG.size());
+			IntBuffer groupsBuffer = bbG.asIntBuffer();
+			for (int i=0; i < numberOfGroups; i++)
+			{
+				Node groupNode = groupsList.item(i);
+				
+				int numberOfElements = Integer.parseInt(
+					xpath.selectSingleNode(groupNode, "number/text()").getNodeValue());
+				int fileOffset = Integer.parseInt(
+					xpath.selectSingleNode(groupNode, "file/@offset").getNodeValue());
+				
+				int id=Integer.parseInt(
+					xpath.selectSingleNode(groupNode, "@id").getNodeValue());
+				logger.debug("Group "+id+": reading "+numberOfElements+" elements");
+								
+				for (int j=0; j < numberOfElements; j++)
+					facelist[groupsBuffer.get(fileOffset+j)].setGroupId(id);
+			}
+			fcG.close();
+			UNVConverter.clean(bbG);
 			//  Build adjacency relations
 			if (buildAdj)
 				mesh.buildAdjacency(nodelist, ridgeAngle);

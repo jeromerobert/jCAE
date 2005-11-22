@@ -770,7 +770,7 @@ public class Mesh
 			{
 				//  Check for ridges
 				ot.bind((Triangle) vertices[i].getLink());
-				if (minAngle < 0.0 || checkRidges(vertices[i], cosMinAngle, ot))
+				if (checkRidges(vertices[i], cosMinAngle, ot))
 					vertices[i].setRef(-label);
 			}
 		}
@@ -897,14 +897,34 @@ public class Mesh
 			ot.nextOTri();
 		assert ot.origin() == v;
 		Vertex first = ot.destination();
+		int id = ot.getTri().getGroupId();
+		// First check that all triangles belong to the same group
 		while (true)
 		{
 			Vertex d = ot.destination();
 			if (d != Vertex.outer && 0 != d.getRef())
 			{
+				if (id != ot.getTri().getGroupId())
+					return false;
+				OTriangle.symOTri(ot, sym);
+				if (id != sym.getTri().getGroupId())
+					return false;
+			}
+			ot.nextOTriOrigin();
+			if (ot.destination() == first)
+				break;
+		}
+		// Now check for coplanarity
+		if (cosMinAngle < -1.0)
+			return true;
+		while (true)
+		{
+			Vertex d = ot.destination();
+			if (d != Vertex.outer && 0 != d.getRef())
+			{
+				OTriangle.symOTri(ot, sym);
 				ot.computeNormal3D();
 				double [] n1 = ot.getTempVector();
-				OTriangle.symOTri(ot, sym);
 				sym.computeNormal3D();
 				double [] n2 = sym.getTempVector();
 				double angle = Metric3D.prodSca(n1, n2);
