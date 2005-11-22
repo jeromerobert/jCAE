@@ -43,6 +43,7 @@ public class Triangle
 	//     bit 7:  writable?
 	//  Bytes 1, 2 and 3 carry up attributes for edges 0, 1 and 2.
 	public int adjPos = 0;
+	private int groupId = -1;
 	
 	// We need to process lists of triangles, and sometimes make sure
 	// that triangles are processed only once.  This can be achieved
@@ -78,6 +79,16 @@ public class Triangle
 			adj[i] = that.adj[i];
 		}
 		adjPos = that.adjPos;
+	}
+	
+	public int getGroupId()
+	{
+		return groupId;
+	}
+	
+	public void setGroupId(int g)
+	{
+		groupId = g;
 	}
 	
 	public void addToMesh()
