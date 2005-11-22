@@ -57,6 +57,7 @@ public class QualityFloat
 	private int [] sorted;
 	private int layers = 0;
 	private float vmin, vmax;
+	private float qmin, qmax, qavg;
 
 	public QualityFloat()
 	{
@@ -119,14 +120,18 @@ public class QualityFloat
 		//  min() and max() methods are buggy in trove 1.0.2
 		vmin = Float.MAX_VALUE;
 		vmax = Float.MIN_VALUE;
+		qavg = 0.0f;
 		for (int i = 0; i < nrTotal; i++)
 		{
 			float val = data.get(i);
+			qavg += val / nrTotal;
 			if (vmin > val)
 				vmin = val;
 			if (vmax < val)
 				vmax = val;
 		}
+		qmin = vmin;
+		qmax = vmax;
 		float delta = (vmax - vmin) / ((float) layers);
 		// sorted[0]: number of points with value < vmin
 		// sorted[layers+1]: number of points with value > vmax
@@ -135,12 +140,13 @@ public class QualityFloat
 			sorted[i] = 0;
 		for (int i = 0; i < nrTotal; i++)
 		{
-			int cell = (int) ((data.get(i) - vmin) / delta + 1.001);
+			float val = data.get(i);
+			int cell = (int) ((val - vmin) / delta + 1.001);
 			if (cell < 0)
 				cell = 0;
 			else if (cell >= layers + 1)
 			{
-				if (data.get(i) > vmax)
+				if (val > vmax)
 					cell = layers + 1;
 				else
 					cell = layers;
@@ -154,6 +160,9 @@ public class QualityFloat
 		layers = n;
 		vmin = v1;
 		vmax = v2;
+		qavg = 0.0f;
+		qmin = Float.MAX_VALUE;
+		qmax = Float.MIN_VALUE;
 		if (layers <= 0)
 			return;
 		int nrTotal = data.size();
@@ -164,12 +173,18 @@ public class QualityFloat
 			sorted[i] = 0;
 		for (int i = 0; i < nrTotal; i++)
 		{
-			int cell = (int) ((data.get(i) - vmin) / delta + 1.001);
+			float val = data.get(i);
+			if (qmin > val)
+				qmin = val;
+			if (qmax < val)
+				qmax = val;
+			qavg += data.get(i) / nrTotal;
+			int cell = (int) ((val - vmin) / delta + 1.001);
 			if (cell < 0)
 				cell = 0;
 			else if (cell >= layers + 1)
 			{
-				if (data.get(i) > vmax)
+				if (val > vmax)
 					cell = layers + 1;
 				else
 					cell = layers;
@@ -196,6 +211,9 @@ public class QualityFloat
 		if (sorted[layers+1] > 0)
 			System.out.println(" > "+vmax+" "+sorted[layers+1]+" ("+(((float) 100.0 * sorted[layers+1])/((float) nrTotal))+"%)");
 		System.out.println("total: "+nrTotal);
+		System.out.println("qmin: "+qmin);
+		System.out.println("qmax: "+qmax);
+		System.out.println("qavg: "+qavg);
 	}
 	
 	public void printMeshBB(String file)
