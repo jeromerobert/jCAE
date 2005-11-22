@@ -614,6 +614,7 @@ public class Mesh
 			checkNeighbours(vertices[i], tVertList);
 		OTriangle ot = new OTriangle();
 		OTriangle sym = new OTriangle();
+		ArrayList newTri = new ArrayList();
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
 		{
 			Triangle t = (Triangle) it.next();
@@ -625,6 +626,7 @@ public class Mesh
 				{
 					ot.setAttributes(OTriangle.BOUNDARY);
 					Triangle adj = new Triangle(Vertex.outer, ot.destination(), ot.origin());
+					newTri.add(adj);
 					adj.setOuter();
 					sym.bind(adj);
 					sym.setAttributes(OTriangle.BOUNDARY);
@@ -776,6 +778,8 @@ public class Mesh
 		}
 		if (nrJunctionPoints > 0)
 			logger.info("Found "+nrJunctionPoints+" non-manifold vertices");
+		// Add outer triangles
+		triangleList.addAll(newTri);
 	}
 	
 	private static final void checkNeighbours(Vertex v, HashMap tVertList)
@@ -1151,9 +1155,15 @@ public class Mesh
 				}
 			}
 			ot.bind(t);
+			boolean isOuter = ot.hasAttributes(OTriangle.OUTER);
 			for (int i = 0; i < 3; i++)
 			{
 				ot.nextOTri();
+				if (isOuter != ot.hasAttributes(OTriangle.OUTER))
+				{
+					logger.debug("Inconsistent outer state: "+ot);
+					return false;
+				}
 				if (ot.getAdj() != null)
 				{
 					v1 = ot.origin();
