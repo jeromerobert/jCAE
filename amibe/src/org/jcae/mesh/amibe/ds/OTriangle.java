@@ -805,12 +805,15 @@ public class OTriangle implements Cloneable
 		{
 			if (work[0].tri != tri && work[0].tri != work[1].tri && !work[0].hasAttributes(OUTER))
 			{
-				work[0].computeNormal3DT();
+				double area2 = work[0].computeNormal3DT();
 				double [] nu = work[0].getTempVector();
 				double [] x1 = work[0].origin().getUV();
 				for (int i = 0; i < 3; i++)
 					v1[i] = xn[i] - x1[i];
-				if (Metric3D.prodSca(v1, nu) >= 0.0)
+				// Two triangles are removed when an edge is contracted.
+				// So normally triangle areas should increase.  If they
+				// decrease significantly, there may be a problem.
+				if (Metric3D.prodSca(v1, nu) >= - area2 / 2.0)
 					return false;
 			}
 			work[0].nextOTriApexLoop();
@@ -824,12 +827,12 @@ public class OTriangle implements Cloneable
 		{
 			if (work[0].tri != tri && work[0].tri != work[1].tri && !work[0].hasAttributes(OUTER))
 			{
-				work[0].computeNormal3DT();
+				double area2 = work[0].computeNormal3DT();
 				double [] nu = work[0].getTempVector();
 				double [] x1 = work[0].origin().getUV();
 				for (int i = 0; i < 3; i++)
 					v1[i] = xn[i] - x1[i];
-				if (Metric3D.prodSca(v1, nu) >= 0.0)
+				if (Metric3D.prodSca(v1, nu) >= - area2 / 2.0)
 					return false;
 			}
 			work[0].nextOTriApexLoop();
@@ -840,7 +843,7 @@ public class OTriangle implements Cloneable
 	
 	// Warning: this vectore is not normalized, it has the same length as
 	// this.
-	public void computeNormal3DT()
+	public double computeNormal3DT()
 	{
 		double [] p0 = origin().getUV();
 		double [] p1 = destination().getUV();
@@ -860,9 +863,10 @@ public class OTriangle implements Cloneable
 			tempD2[2] /= norm;
 		}
 		Metric3D.prodVect3D(tempD1, tempD2, tempD);
+		return norm;
 	}
 	
-	public void computeNormal3D()
+	public double computeNormal3D()
 	{
 		double [] p0 = origin().getUV();
 		double [] p1 = destination().getUV();
@@ -881,6 +885,7 @@ public class OTriangle implements Cloneable
 			tempD[1] /= norm;
 			tempD[2] /= norm;
 		}
+		return norm;
 	}
 	
 	public double computeArea()
@@ -916,6 +921,13 @@ public class OTriangle implements Cloneable
 		Vertex d = destination();
 		Vertex a = apex();
 		Vertex n = work[0].apex();
+		// Check for inverted triangles
+		double s3 = o.area3D(n, a, n1);
+		if (s3 <= 0.0)
+			return false;
+		double s4 = d.area3D(a, n, n1);
+		if (s4 <= 0.0)
+			return false;
 		double p1 = o.distance3D(d) + d.distance3D(a) + a.distance3D(o);
 		double s1 = computeArea();
 		double p2 = d.distance3D(o) + o.distance3D(n) + n.distance3D(d);
@@ -924,9 +936,7 @@ public class OTriangle implements Cloneable
 		double Qbefore = Math.min(s1/p1/p1, s2/p2/p2);
 		
 		double p3 = o.distance3D(n) + n.distance3D(a) + a.distance3D(o);
-		double s3 = o.area3D(n, a);
 		double p4 = d.distance3D(a) + a.distance3D(n) + n.distance3D(d);
-		double s4 = d.area3D(a, n);
 		double Qafter = Math.min(s3/p3/p3, s4/p4/p4);
 		return (Qafter > Qbefore);
 	}

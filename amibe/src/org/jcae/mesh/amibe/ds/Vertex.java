@@ -509,7 +509,7 @@ public class Vertex implements Cloneable
 	 * @param n2  second node
 	 * @return the area of the triangle
 	 **/
-	public double area3D(Vertex n1, Vertex n2)
+	public double area3D(Vertex n1, Vertex n2, double [] n)
 	{
 		double [] vect1 = new double[3];
 		double [] vect2 = new double[3];
@@ -518,7 +518,7 @@ public class Vertex implements Cloneable
 			vect1[i] = n1.param[i] - param[i];
 			vect2[i] = n2.param[i] - param[i];
 		}
-		return 0.5 * Metric3D.norm(Metric3D.prodVect3D(vect1, vect2));
+		return 0.5 * Metric3D.prodSca(Metric3D.prodVect3D(vect1, vect2), n);
 	}
 	
 	public long dot3(Vertex v1, Vertex v2)
