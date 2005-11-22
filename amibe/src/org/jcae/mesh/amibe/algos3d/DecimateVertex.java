@@ -183,8 +183,11 @@ public class DecimateVertex
 				if (noe.hasAttributes(OTriangle.BOUNDARY))
 				{
 					//  Add a virtual plane
-					//  This vector has the same length as noe
+					//  In his dissertation, Garland suggests to
+					//  add a weight proportional to squared edge
+					//  length.
 					noe.computeNormal3DT();
+					//  length(nu) == length(noe)
 					double [] nu = noe.getTempVector();
 					d = - Metric3D.prodSca(nu, noe.origin().getUV());
 					Quadric q1 = (Quadric) quadricMap.get(noe.origin());
@@ -262,6 +265,11 @@ public class DecimateVertex
 		HashSet trash = new HashSet();
 		OTriangle ot = new OTriangle();
 		NotOrientedEdge sym = new NotOrientedEdge();
+		double [] vect1 = new double[3];
+		double [] vect2 = new double[3];
+		double [] vect3 = new double[3];
+		boolean noSwap = false;
+		int cnt = 0;
 		while (tree.size() > 0)
 		{
 			NotOrientedEdge edge = (NotOrientedEdge) tree.first();
@@ -275,10 +283,13 @@ public class DecimateVertex
 				edge.pullAttributes();
 				v1 = edge.origin();
 				v2 = edge.destination();
+				assert v1 != v2 : edge;
 				if (v1.isMutable() || v2.isMutable())
 				{
 					q1 = (Quadric) quadricMap.get(v1);
 					q2 = (Quadric) quadricMap.get(v2);
+					assert q1 != null : v1;
+					assert q2 != null : v2;
 					q3.reset();
 					q3.add(q1);
 					q3.add(q2);
@@ -286,7 +297,7 @@ public class DecimateVertex
 					if (edge.canContract(v3))
 						break;
 					if (logger.isDebugEnabled())
-						logger.info("Edge not contracted: "+edge);
+						logger.debug("Edge not contracted: "+edge);
 				}
 				edge = (NotOrientedEdge) tree.next();
 				cost = tree.getKey(edge);
@@ -326,6 +337,7 @@ public class DecimateVertex
 			contracted++;
 			trash.add(t1);
 			trash.add(t2);
+			trashBin(trash);
 			// Update edge costs
 			quadricMap.remove(v1);
 			quadricMap.remove(v2);
@@ -334,29 +346,71 @@ public class DecimateVertex
 				ot = v3.findOTriangle(apex1);
 			else
 				ot = v3.findOTriangle(apex2);
-			assert ot != null : ""+edge+"\n"+apex1+"\n"+v3+"\n"+apex1;
+			assert ot != null : ""+edge+"\n"+apex1+"\n"+v3+"\n"+apex2;
 			Vertex d = ot.destination();
 			do
- 			{
+			{
 				ot.nextOTriOriginLoop();
 				if (ot.destination() != Vertex.outer)
- 					tree.update(new NotOrientedEdge(ot), cost(ot.destination(), v3, quadricMap));
- 				ot.setAttributes(OTriangle.MARKED);
- 			}
+					tree.update(new NotOrientedEdge(ot), cost(ot.destination(), v3, quadricMap));
+				ot.setAttributes(OTriangle.MARKED);
+			}
 			while (ot.destination() != d);
+			if (noSwap)
+				continue;
+			
+			ot.nextOTri();
+			assert ot.apex() == v3;
+			// Check if edges can be swapped
+			while(true)
+			{
+				if (ot.checkSwap3D(0.95))
+				{
+					// Swap edge
+					edge = new NotOrientedEdge(ot);
+					for (int i = 0; i < 3; i++)
+					{
+						edge.nextOTri();
+						tree.remove(edge);
+						assert !tree.containsValue(edge);
+					}
+					edge.symOTri();
+					for (int i = 0; i < 3; i++)
+					{
+						edge.nextOTri();
+						tree.remove(edge);
+						assert !tree.containsValue(edge);
+					}
+					ot.swap();
+					assert edge.destination() == ot.apex() : ot+" "+edge;
+					for (int i = 0; i < 3; i++)
+					{
+						edge.nextOTri();
+						tree.insert(new NotOrientedEdge(edge), cost(edge.origin(), edge.destination(), quadricMap));
+					}
+					edge.nextOTri();
+					assert edge.origin() == ot.apex() : ot+" "+edge;
+					assert edge.destination() == ot.destination() : ot+" "+edge;
+					edge.symOTri();
+					for (int i = 0; i < 2; i++)
+					{
+						edge.nextOTri();
+						tree.insert(new NotOrientedEdge(edge), cost(edge.origin(), edge.destination(), quadricMap));
+					}
+				}
+				else
+				{
+					ot.nextOTriApexLoop();
+					if (ot.origin() == d)
+						break;
+				}
+assert mesh.isValid();
+			}
 		}
 		// Remove deleted triangles from the list
-		ArrayList newlist = new ArrayList();
-		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
-		{
-			Triangle f = (Triangle) itf.next();
-			if (!trash.contains(f))
-				newlist.add(f);
-		}
-		mesh.setTrianglesList(newlist);
-		assert mesh.isValid();
+		trashBin(trash);
 		logger.info("Number of contracted edges: "+contracted);
-		int cnt = 0;
+		cnt = 0;
 		NotOrientedEdge edge = (NotOrientedEdge) tree.first();
 		while (edge != null)
 		{
@@ -466,5 +520,20 @@ public class DecimateVertex
 			}
 		}
 		return ret;
+	}
+	
+	private void trashBin(HashSet trash)
+	{
+		// Remove deleted triangles from the list
+		ArrayList newlist = new ArrayList();
+		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
+		{
+			Triangle f = (Triangle) itf.next();
+			if (!trash.contains(f))
+				newlist.add(f);
+		}
+		mesh.setTrianglesList(newlist);
+		trash.clear();
+		assert mesh.isValid();
 	}
 }
