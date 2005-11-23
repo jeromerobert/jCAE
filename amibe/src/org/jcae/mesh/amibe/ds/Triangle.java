@@ -140,6 +140,21 @@ public class Triangle
 		adjPos |= (OTriangle.OUTER << 8 | OTriangle.OUTER << 16 | OTriangle.OUTER << 24);
 	}
 	
+	public boolean isMarked()
+	{
+		return (adjPos & (OTriangle.MARKED << 8 | OTriangle.MARKED << 16 | OTriangle.MARKED << 24)) != 0;
+	}
+	
+	public void setMarked()
+	{
+		adjPos |= (OTriangle.MARKED << 8 | OTriangle.MARKED << 16 | OTriangle.MARKED << 24);
+	}
+	
+	public void unsetMarked()
+	{
+		adjPos &= ~(OTriangle.MARKED << 8 | OTriangle.MARKED << 16 | OTriangle.MARKED << 24);
+	}
+	
 	public boolean isBoundary()
 	{
 		return (adjPos & (OTriangle.BOUNDARY << 8 | OTriangle.BOUNDARY << 16 | OTriangle.BOUNDARY << 24)) != 0;
