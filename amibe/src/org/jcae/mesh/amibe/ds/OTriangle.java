@@ -800,7 +800,6 @@ public class OTriangle implements Cloneable
 		symOTri(this, work[1]);
 		double [] v1 = new double[3];
 		double [] xn = n.getUV();
-		double [] xo = o.getUV();
 		do
 		{
 			if (work[0].tri != tri && work[0].tri != work[1].tri && !work[0].hasAttributes(OUTER))
@@ -822,7 +821,6 @@ public class OTriangle implements Cloneable
 		//  Loop around d to check that triangles will not be inverted
 		copyOTri(this, work[0]);
 		work[0].prevOTri();
-		xo = d.getUV();
 		do
 		{
 			if (work[0].tri != tri && work[0].tri != work[1].tri && !work[0].hasAttributes(OUTER))
@@ -903,11 +901,12 @@ public class OTriangle implements Cloneable
 		return 0.5 * Metric3D.norm(tempD);
 	}
 	
-	public final boolean checkSwap3D(double minCos)
+	public final double checkSwap3D(double minCos)
 	{
+		double invalid = -1.0;
 		// Check if there is an adjacent edge
 		if (hasAttributes(OUTER) || hasAttributes(BOUNDARY) || getAdj() == null)
-			return false;
+			return invalid;
 		// Check for coplanarity
 		symOTri(this, work[0]);
 		computeNormal3D();
@@ -915,7 +914,7 @@ public class OTriangle implements Cloneable
 		work[0].computeNormal3D();
 		double [] n2 = work[0].getTempVector();
 		if (Metric3D.prodSca(n1, n2) < minCos)
-			return false;
+			return invalid;
 		// Check for quality improvement
 		Vertex o = origin();
 		Vertex d = destination();
@@ -924,10 +923,10 @@ public class OTriangle implements Cloneable
 		// Check for inverted triangles
 		double s3 = o.area3D(n, a, n1);
 		if (s3 <= 0.0)
-			return false;
+			return invalid;
 		double s4 = d.area3D(a, n, n1);
 		if (s4 <= 0.0)
-			return false;
+			return invalid;
 		double p1 = o.distance3D(d) + d.distance3D(a) + a.distance3D(o);
 		double s1 = computeArea();
 		double p2 = d.distance3D(o) + o.distance3D(n) + n.distance3D(d);
@@ -938,7 +937,9 @@ public class OTriangle implements Cloneable
 		double p3 = o.distance3D(n) + n.distance3D(a) + a.distance3D(o);
 		double p4 = d.distance3D(a) + a.distance3D(n) + n.distance3D(d);
 		double Qafter = Math.min(s3/p3/p3, s4/p4/p4);
-		return (Qafter > Qbefore);
+		if (Qafter > Qbefore)
+			return Qafter;
+		return invalid;
 	}
 	
 	/**
@@ -1338,7 +1339,7 @@ public class OTriangle implements Cloneable
 		int cnt = 0;
 		while(true)
 		{
-			if (ot1.checkSwap3D(0.95))
+			if (ot1.checkSwap3D(0.95) >= 0.0)
 			{
 				// Swap edge
 				ot1.swap();

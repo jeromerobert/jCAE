@@ -364,7 +364,7 @@ public class DecimateVertex
 			// Check if edges can be swapped
 			while(true)
 			{
-				if (ot.checkSwap3D(0.95))
+				if (ot.checkSwap3D(0.95) >= 0.0)
 				{
 					// Swap edge
 					edge = new NotOrientedEdge(ot);
