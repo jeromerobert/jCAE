@@ -839,6 +839,27 @@ public class OTriangle implements Cloneable
 		return true;
 	}
 	
+	public final boolean checkNewRingNormals(double [] newpt)
+	{
+		//  Loop around apex to check that triangles will not be inverted
+		Vertex d = destination();
+		nextOTri(this, work[0]);
+		double [] v1 = new double[3];
+		do
+		{
+			double area2 = work[0].computeNormal3DT();
+			double [] nu = work[0].getTempVector();
+			double [] x1 = work[0].origin().getUV();
+			for (int i = 0; i < 3; i++)
+				v1[i] = newpt[i] - x1[i];
+			if (Metric3D.prodSca(v1, nu) >= - area2 / 2.0)
+				return false;
+			work[0].nextOTriApexLoop();
+		}
+		while (work[0].origin() != d);
+		return true;
+	}
+	
 	// Warning: this vectore is not normalized, it has the same length as
 	// this.
 	public double computeNormal3DT()
