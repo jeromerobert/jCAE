@@ -23,6 +23,7 @@ package org.jcae.mesh.amibe.algos3d;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.OTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import java.util.HashSet;
@@ -37,7 +38,10 @@ public class SmoothNodes3D
 {
 	private static Logger logger=Logger.getLogger(SmoothNodes3D.class);
 	private Mesh mesh;
+	private double sizeTarget = -1.0;
 	private int nloop = 10;
+	private static OTriangle temp = new OTriangle();
+	private static double speed = 0.1;
 	
 	/**
 	 * Creates a <code>SmoothNodes3D</code> instance.
@@ -53,11 +57,37 @@ public class SmoothNodes3D
 	 * Creates a <code>SmoothNodes3D</code> instance.
 	 *
 	 * @param m  the <code>Mesh</code> instance to refine.
+	 * @param s  the size target.
+	 */
+	public SmoothNodes3D(Mesh m, double s)
+	{
+		mesh = m;
+		sizeTarget = s;
+	}
+	
+	/**
+	 * Creates a <code>SmoothNodes3D</code> instance.
+	 *
+	 * @param m  the <code>Mesh</code> instance to refine.
 	 * @param n  the number of iterations.
 	 */
 	public SmoothNodes3D(Mesh m, int n)
 	{
 		mesh = m;
+		nloop = n;
+	}
+	
+	/**
+	 * Creates a <code>SmoothNodes3D</code> instance.
+	 *
+	 * @param m  the <code>Mesh</code> instance to refine.
+	 * @param s  the size target.
+	 * @param n  the number of iterations.
+	 */
+	public SmoothNodes3D(Mesh m, double s, int n)
+	{
+		mesh = m;
+		sizeTarget = s;
 		nloop = n;
 	}
 	
@@ -70,13 +100,13 @@ public class SmoothNodes3D
 	{
 		logger.debug("Running SmoothNodes3D");
 		for (int i = 0; i < nloop; i++)
-			computeMesh(mesh);
+			computeMesh(mesh, sizeTarget);
 	}
 	
 	/*
 	 * Moves all nodes using a laplacian smoothing.
 	 */
-	private static void computeMesh(Mesh mesh)
+	private static void computeMesh(Mesh mesh, double sizeTarget)
 	{
 		HashSet nodeset = new HashSet(2*mesh.getTriangles().size());
 		// First compute triangle quality
@@ -86,29 +116,34 @@ public class SmoothNodes3D
 			Triangle f = (Triangle) itf.next();
 			if (f.isOuter())
 				continue;
-			double alpha0 = f.vertex[0].angle3D(f.vertex[1], f.vertex[2]);
-			double alpha1 = f.vertex[1].angle3D(f.vertex[2], f.vertex[0]);
-			double alpha2 = f.vertex[2].angle3D(f.vertex[0], f.vertex[1]);
-			tree.insert(f, Math.min(alpha0, Math.min(alpha1, alpha2)));
+			tree.insert(f, cost(f));
 		}
+		OTriangle ot = new OTriangle();
+		int cnt = 0;
 		for (Object o = tree.first(); o != null; o = tree.next())
 		{
 			Triangle f = (Triangle) o;
+			ot.bind(f);
 			for (int i = 0; i < 3; i++)
 			{
-				Vertex n = f.vertex[i];
+				ot.nextOTri();
+				Vertex n = ot.origin();
 				if (nodeset.contains(n))
 					continue;
 				nodeset.add(n);
 				if (!n.isMutable())
 					continue;
-				smoothNode(mesh, n);
+				if (smoothNode(mesh, ot, sizeTarget))
+					cnt++;
 			}
 		}
+		if (logger.isDebugEnabled())
+			logger.debug("Number of moved points: "+cnt);
 	}
 			
-	private static void smoothNode(Mesh mesh, Vertex n)
+	private static boolean smoothNode(Mesh mesh, OTriangle ot, double sizeTarget)
 	{
+		Vertex n = ot.origin();
 		double[] oldp3 = n.getUV();
 		
 		//  Compute 3D coordinates centroid
@@ -119,15 +154,52 @@ public class SmoothNodes3D
 		for (Iterator itn=n.getNeighboursNodes().iterator(); itn.hasNext(); )
 		{
 			nn++;
-			double[] newp3 = ((Vertex) itn.next()).getUV();
-			centroid3[0] += newp3[0];
-			centroid3[1] += newp3[1];
-			centroid3[2] += newp3[2];
+			Vertex v = ((Vertex) itn.next());
+			double[] newp3 = v.getUV();
+			if (sizeTarget > 0.0)
+			{
+				// Find the point on this edge which has the
+				// desirted length
+				double l = n.distance3D(v);
+				if (l <= 0.0)
+				{
+					nn--;
+					continue;
+				}
+				l = sizeTarget / l;
+				if (l > 2.0)
+					l = 2.0;
+				else if (l < 0.5)
+					l = 0.5;
+				for (int i = 0; i < 3; i++)
+					centroid3[i] += newp3[i] + l * (oldp3[i] - newp3[i]);
+			}
+			else
+			{
+				for (int i = 0; i < 3; i++)
+					centroid3[i] += newp3[i];
+			}
 		}
 		assert (nn > 0);
 		for (int i = 0; i < 3; i++)
 			centroid3[i] /= nn;
-		if (n.discreteProject(c))
+		for (int i = 0; i < 3; i++)
+			centroid3[i] = oldp3[i] + speed * (centroid3[i] - oldp3[i]);
+		if (!ot.checkNewRingNormals(centroid3))
+			return false;
+		boolean ret = n.discreteProject(c);
+		if (ret)
 			n.moveTo(centroid3[0], centroid3[1], centroid3[2]);
+		return ret;
+	}
+	
+	private static double cost(Triangle f)
+	{
+		temp.bind(f);
+		assert f.vertex[0] != Vertex.outer && f.vertex[1] != Vertex.outer && f.vertex[2] != Vertex.outer : f;
+		double p = f.vertex[0].distance3D(f.vertex[1]) + f.vertex[1].distance3D(f.vertex[2]) + f.vertex[2].distance3D(f.vertex[0]);
+		double area = temp.computeArea();
+		// No need to multiply by 12.0 * Math.sqrt(3.0)
+		return area/p/p;
 	}
 }
