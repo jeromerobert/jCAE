@@ -1,7 +1,8 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finit element mesher, Plugin architecture.
 
-    Copyright (C) 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+    Copyright (C) 2003, 2005
+                  Jerome Robert <jeromerobert@users.sourceforge.net>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -111,8 +112,9 @@ public class SmoothNodes3D
 		double[] oldp3 = n.getUV();
 		
 		//  Compute 3D coordinates centroid
+		Vertex c = new Vertex(0.0, 0.0, 0.0);
 		int nn = 0;
-		double[] centroid3 = new double[3];
+		double[] centroid3 = c.getUV();
 		centroid3[0] = centroid3[1] = centroid3[2] = 0.;
 		for (Iterator itn=n.getNeighboursNodes().iterator(); itn.hasNext(); )
 		{
@@ -123,9 +125,9 @@ public class SmoothNodes3D
 			centroid3[2] += newp3[2];
 		}
 		assert (nn > 0);
-		centroid3[0] /= nn;
-		centroid3[1] /= nn;
-		centroid3[2] /= nn;
-		n.moveTo(centroid3[0], centroid3[1], centroid3[2]);
+		for (int i = 0; i < 3; i++)
+			centroid3[i] /= nn;
+		if (n.discreteProject(c))
+			n.moveTo(centroid3[0], centroid3[1], centroid3[2]);
 	}
 }
