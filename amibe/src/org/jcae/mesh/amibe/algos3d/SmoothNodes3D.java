@@ -99,15 +99,18 @@ public class SmoothNodes3D
 	public void compute()
 	{
 		logger.debug("Running SmoothNodes3D");
+		int cnt = 0;
 		for (int i = 0; i < nloop; i++)
-			computeMesh(mesh, sizeTarget);
+			cnt += computeMesh(mesh, sizeTarget);
+		logger.info("Number of moved points: "+cnt);
 	}
 	
 	/*
 	 * Moves all nodes using a laplacian smoothing.
 	 */
-	private static void computeMesh(Mesh mesh, double sizeTarget)
+	private static int computeMesh(Mesh mesh, double sizeTarget)
 	{
+		int ret = 0;
 		HashSet nodeset = new HashSet(2*mesh.getTriangles().size());
 		// First compute triangle quality
 		PAVLSortedTree tree = new PAVLSortedTree();
@@ -119,7 +122,6 @@ public class SmoothNodes3D
 			tree.insert(f, cost(f));
 		}
 		OTriangle ot = new OTriangle();
-		int cnt = 0;
 		for (Object o = tree.first(); o != null; o = tree.next())
 		{
 			Triangle f = (Triangle) o;
@@ -134,11 +136,10 @@ public class SmoothNodes3D
 				if (!n.isMutable())
 					continue;
 				if (smoothNode(mesh, ot, sizeTarget))
-					cnt++;
+					ret++;
 			}
 		}
-		if (logger.isDebugEnabled())
-			logger.debug("Number of moved points: "+cnt);
+		return ret;
 	}
 			
 	private static boolean smoothNode(Mesh mesh, OTriangle ot, double sizeTarget)
