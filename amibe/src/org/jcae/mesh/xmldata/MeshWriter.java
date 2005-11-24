@@ -25,6 +25,9 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import gnu.trove.TObjectIntHashMap;
+import gnu.trove.TIntObjectHashMap;
+import gnu.trove.TIntObjectProcedure;
+import gnu.trove.TIntArrayList;
 import java.io.IOException;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -117,8 +120,7 @@ public class MeshWriter
 		Iterator facesIterator = trianglelist.iterator();
 		logger.debug("begin writing "+trianglesFile);
 		DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(trianglesFile)));
-		TObjectIntHashMap faceIndex=new TObjectIntHashMap(trianglelist.size());
-		int i=0;
+		int nrTriangles=0;
 		while(facesIterator.hasNext())
 		{
 			Triangle f = (Triangle) facesIterator.next();
@@ -126,18 +128,91 @@ public class MeshWriter
 				continue;
 			for (int j = 0; j < 3; j++)
 				out.writeInt(nodeIndex.get(f.vertex[j]));
-			faceIndex.put(f, i);
-			i++;
+			nrTriangles++;
 		}
 		out.close();
 		logger.debug("end writing "+trianglesFile);
 		
 		return XMLHelper.parseXMLString(document, "<triangles>"+
-			"<number>"+i+"</number>"+
+			"<number>"+nrTriangles+"</number>"+
 			"<file format=\"integerstream\" location=\""+XMLHelper.canonicalize(baseDir, trianglesFile.toString())+"\"/>"+
 			"</triangles>");
 	}
 
+	private static Element writeObjectGroups(Document document, ArrayList trianglelist, File groupsFile, String baseDir)
+		throws IOException
+	{
+		logger.debug("begin writing "+groupsFile);
+		int i=0;
+		TIntObjectHashMap groupMap = new TIntObjectHashMap();
+		for(Iterator facesIterator = trianglelist.iterator(); facesIterator.hasNext(); )
+		{
+			Triangle f = (Triangle) facesIterator.next();
+			if (f.isOuter())
+				continue;
+			int id = f.getGroupId();
+			TIntArrayList list = (TIntArrayList) groupMap.get(id);
+			if (list == null)
+			{
+				list = new TIntArrayList(100);
+				groupMap.put(id, list);
+			}
+			list.add(i);
+			i++;
+		}
+		// FIXME: sort group ids
+		DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(groupsFile)));
+		WriteGroupProcedure wgp = new WriteGroupProcedure(out, document, XMLHelper.canonicalize(baseDir, groupsFile.toString()));
+		groupMap.forEachEntry(wgp);
+		out.close();
+		logger.debug("end writing "+groupsFile);
+		
+		return wgp.getGroupsElement();
+	}
+	
+	private static final class WriteGroupProcedure implements TIntObjectProcedure {
+		private DataOutputStream out;
+		private Document document;
+		private Element groups;
+		private String filename;
+		private int offset = 0;
+		public WriteGroupProcedure(DataOutputStream out, Document document, String filename)
+		{
+			this.out = out;
+			this.document = document;
+			this.filename = filename;
+			groups = document.createElement("groups");
+		}
+		public final Element getGroupsElement()
+		{
+			return groups;
+		}
+		public final boolean execute(int key, Object value) {
+			TIntArrayList list = (TIntArrayList) value;
+			int nrTriangles = 0;
+			try
+			{
+				for(int i = 0; i < list.size(); i++)
+				{
+					out.writeInt(list.get(i));
+					nrTriangles++;
+				}
+			}
+			catch(IOException ex)
+			{
+				ex.printStackTrace();
+			}
+			groups.appendChild(
+				XMLHelper.parseXMLString(document, "<group id=\""+key+"\">"+
+					"<name>"+(key+1)+"</name>"+
+					"<number>"+nrTriangles+"</number>"+					
+					"<file format=\"integerstream\" location=\""+filename+"\""+
+					" offset=\""+offset+"\"/></group>"));
+			offset += nrTriangles;
+			return true;
+		}
+	}
+	
 	/**
 	 * Write the current object to a XML file and binary files. The XML file
 	 * have links to the binary files.
@@ -215,35 +290,6 @@ public class MeshWriter
 		{
 			ex.printStackTrace();
 		}
-	}
-	
-	private static Element writeObjectGroups(Document document, ArrayList trianglelist, File groupsFile, String baseDir)
-		throws IOException
-	{
-		logger.debug("begin writing "+groupsFile);
-		DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(groupsFile)));
-		int i=0;
-		Iterator facesIterator = trianglelist.iterator();
-		while(facesIterator.hasNext())
-		{
-			Triangle f = (Triangle) facesIterator.next();
-			if (f.isOuter())
-				continue;
-			out.writeInt(i);
-			i++;
-		}
-		out.close();
-		logger.debug("end writing "+groupsFile);
-		
-		int groupId = 1;
-		return XMLHelper.parseXMLString(document,
-				"<groups>"+
-				"<group id=\""+(groupId-1)+"\">"+
-				"<name>"+groupId+"</name>"+
-				"<number>"+i+"</number>"+ 
-				"<file format=\"integerstream\" location=\""+
-				XMLHelper.canonicalize(baseDir, groupsFile.toString())+"\""+
-				" offset=\"0\"/></group></groups>");
 	}
 	
 	public static void writeObject3D(Mesh submesh, String xmlDir, String xmlFile, String brepDir, String brepFile, int index)
