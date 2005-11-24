@@ -409,6 +409,7 @@ public class Vertex implements Cloneable
 		else
 		{
 			// Non-manifold vertex
+			logger.debug("Non-manifold vertex: "+this);
 			Triangle [] t = (Triangle []) link;
 			for (int i = 0; i < t.length; i++)
 				appendNeighboursTri(t[i], tri, triSet);
@@ -429,6 +430,7 @@ public class Vertex implements Cloneable
 		do
 		{
 			ot.nextOTriOriginLoop();
+			assert ot.origin() == this : ot+" should originate from "+this;
 			Triangle t = ot.getTri();
 			if (!t.isOuter())
 				ret.add(t);
@@ -1132,6 +1134,7 @@ public class Vertex implements Cloneable
 		double [] g1 = new double[3];
 		double [] g2 = new double[3];
 		double [] h = new double[3];
+		double dmin = Double.MAX_VALUE;
 		for (int i = 0; i < 3; i++)
 			g0[i] = g1[i] = g2[i] = h[i] = 0.0;
 		Vertex d = ot.destination();
@@ -1143,6 +1146,7 @@ public class Vertex implements Cloneable
 			double [] p1 = ot.destination().getUV();
 			for (int i = 0; i < 3; i++)
 				vect1[i] = p1[i] - param[i];
+			dmin = Math.min(dmin, Metric3D.norm(vect1));
 			// Find coordinates in the local frame (t1,t2,n)
 			double [] loc = P.apply(vect1);
 			h[0] += loc[2] * loc[0] * loc[0];
@@ -1169,9 +1173,9 @@ public class Vertex implements Cloneable
 			vect1[i] = pt.param[i] - param[i];
 		double [] loc = P.apply(vect1);
 		loc[2] = abc[0] * loc[0] * loc[0] + abc[1] * loc[0] * loc[1] + abc[2] * loc[1] * loc[1];
-		if (Pinv == null)
-			return false;
 		double [] glob = Pinv.apply(loc);
+		if (Metric3D.norm(glob) > dmin)
+			return false;
 		pt.moveTo(param[0] + glob[0], param[1] + glob[1], param[2] + glob[2]);
 		return true;
 	}
