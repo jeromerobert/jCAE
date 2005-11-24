@@ -141,7 +141,7 @@ public class QualityFloat
 		for (int i = 0; i < nrTotal; i++)
 		{
 			float val = data.get(i);
-			int cell = (int) ((val - vmin) / delta + 1.001);
+			int cell = (int) ((val - vmin) / delta + 1.001f);
 			if (cell < 0)
 				cell = 0;
 			else if (cell >= layers + 1)
@@ -167,7 +167,7 @@ public class QualityFloat
 			return;
 		int nrTotal = data.size();
 		//  The last cell is for v >= vmax
-		float delta = (vmax - vmin) / ((float) layers - 1.0f);
+		float delta = (vmax - vmin) / ((float) layers);
 		sorted = new int[layers+2];
 		for (int i = 0; i < layers+2; i++)
 			sorted[i] = 0;
@@ -179,7 +179,7 @@ public class QualityFloat
 			if (qmax < val)
 				qmax = val;
 			qavg += data.get(i) / nrTotal;
-			int cell = (int) ((val - vmin) / delta + 1.001);
+			int cell = (int) ((val - vmin) / delta + 1.001f);
 			if (cell < 0)
 				cell = 0;
 			else if (cell >= layers + 1)
