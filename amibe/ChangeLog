@@ -1,3 +1,22 @@
+Thu Nov 24 10:25:17 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/validation/QualityFloat.java: Fix quality status reports.
+	* src/org/jcae/mesh/amibe/algos2d/ConstraintNormal3D.java: New algo to fix inverted triangles.
+	* src/org/jcae/mesh/amibe/algos2d/Insertion.java: Add a new argument to select the target length.
+	* src/org/jcae/mesh/amibe/algos2d/BasicMesh.java: Call Insertion() with 16, 4 and 1 length factor in order to discretize large edges first. Call ConstraintNormal3D() to fix broken triangles.
+	* src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java: Decimate boundary edges.  An option to select this behaviour or the previous one will be added later.
+
+Wed Nov 23 12:47:56 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos3d/SmoothNodes3D.java: Project the new vertex location onto the quadrics.
+
+Tue Nov 22 14:42:06 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Triangle.java: Add a new groupId attribute.
+	* src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/xmldata/MeshReader.java: When reading 3D meshes, boundary nodes are preserved if they are contained in more than one group.
+	* src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java: Swap edges when decimating.
+
 Mon Nov 21 16:37:50 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/jcae.dtd 
