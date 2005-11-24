@@ -284,7 +284,7 @@ public class DecimateVertex
 				v1 = edge.origin();
 				v2 = edge.destination();
 				assert v1 != v2 : edge;
-				if (v1.isMutable() || v2.isMutable())
+				/* FIXME: add an option so that boundary nodes may be frozen. */
 				{
 					q1 = (Quadric) quadricMap.get(v1);
 					q2 = (Quadric) quadricMap.get(v2);
@@ -404,7 +404,6 @@ public class DecimateVertex
 					if (ot.origin() == d)
 						break;
 				}
-assert mesh.isValid();
 			}
 		}
 		// Remove deleted triangles from the list
@@ -442,6 +441,7 @@ assert mesh.isValid();
 		Vertex ret;
 		assert v1 != Vertex.outer;
 		assert v2 != Vertex.outer;
+		/* FIXME: add an option so that boundary nodes may be frozen.
 		if (!v1.isMutable())
 		{
 			assert v2.isMutable();
@@ -454,6 +454,7 @@ assert mesh.isValid();
 			ret = (Vertex) v2.clone();
 			return ret;
 		}
+		*/
 		if (placement == POS_VERTEX)
 		{
 			if (q1.value(v2.getUV()) + q2.value(v2.getUV()) < q1.value(v1.getUV()) + q2.value(v1.getUV()))
