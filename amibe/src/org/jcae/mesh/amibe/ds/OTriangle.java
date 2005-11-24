@@ -847,6 +847,11 @@ public class OTriangle implements Cloneable
 		double [] v1 = new double[3];
 		do
 		{
+			if (work[0].hasAttributes(OUTER))
+			{
+				work[0].nextOTriApexLoop();
+				continue;
+			}
 			double area2 = work[0].computeNormal3DT();
 			double [] nu = work[0].getTempVector();
 			double [] x1 = work[0].origin().getUV();
