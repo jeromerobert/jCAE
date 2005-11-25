@@ -5,6 +5,7 @@ Thu Nov 24 10:25:17 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/amibe/algos2d/Insertion.java: Add a new argument to select the target length.
 	* src/org/jcae/mesh/amibe/algos2d/BasicMesh.java: Call Insertion() with 16, 4 and 1 length factor in order to discretize large edges first. Call ConstraintNormal3D() to fix broken triangles.
 	* src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java: Decimate boundary edges.  An option to select this behaviour or the previous one will be added later.
+	* src/org/jcae/mesh/xmldata/MeshWriter.java: Write <groups> tag.
 
 Wed Nov 23 12:47:56 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
