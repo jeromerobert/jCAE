@@ -58,10 +58,24 @@ public class SplitEdge
 	public void compute()
 	{
 		logger.debug("Running SplitEdge");
+		// FIXME: there is a but in splitAllEdges, some edges
+		//   are not correctly removed from the tree.  As a
+		//   workaround, this loop had been introduced.
+		boolean redo = false;
+		do
+		{
+			unmarkEdges();
+			PAVLSortedTree tree = computeTree();
+			redo = splitAllEdges(tree);
+		}
+		while (redo);
+	}
+	
+	private PAVLSortedTree computeTree()
+	{
+		PAVLSortedTree tree = new PAVLSortedTree();
 		NotOrientedEdge noe = new NotOrientedEdge();
 		NotOrientedEdge sym = new NotOrientedEdge();
-		PAVLSortedTree tree = new PAVLSortedTree();
-		unmarkEdges();
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
@@ -84,12 +98,11 @@ public class SplitEdge
 				addToTree(noe, tree);
 			}
 		}
-		splitAllEdges(tree);
+		return tree;
 	}
-	
 	private void addToTree(NotOrientedEdge noe, PAVLSortedTree tree)
 	{
-		if (!noe.isMutable())
+		if (noe.hasAttributes(OTriangle.OUTER))
 			return;
 		double [] p0 = noe.origin().getUV();
 		double [] p1 = noe.destination().getUV();
@@ -107,67 +120,61 @@ public class SplitEdge
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
-			if (f.isOuter())
-				continue;
-			noe.bind(f);
-			for (int i = 0; i < 3; i++)
-			{
-				noe.nextOTri();
-				noe.clearAttributes(OTriangle.MARKED);
-			}
+			f.unsetMarked();
 		}
 	}
 	
 	private boolean splitAllEdges(PAVLSortedTree tree)
 	{
 		int splitted = 0;
-//int niter = 1000;
-		OTriangle ot = new OTriangle();
 		NotOrientedEdge sym = new NotOrientedEdge();
 		double [] newXYZ = new double[3];
 		double sinMin = Math.sin(Math.PI / 36.0);
 		while (tree.size() > 0)
 		{
-//niter--; if (niter == 0) break;
 			NotOrientedEdge edge = (NotOrientedEdge) tree.last();
 			double cost = tree.getKey(edge);
+			tree.remove(edge);
 			if (logger.isDebugEnabled())
 				logger.debug("Split edge: "+cost+" "+edge);
 			// New point
 			double [] p0 = edge.origin().getUV();
 			double [] p1 = edge.destination().getUV();
-			// FIXME
 			for (int i = 0; i < 3; i++)
 				newXYZ[i] = 0.5*(p0[i]+p1[i]);
 			Vertex v = new Vertex(newXYZ[0], newXYZ[1], newXYZ[2]);
-			edge.origin().discreteProject(v);
+			if (edge.hasAttributes(OTriangle.BOUNDARY))
+			{
+				// FIXME: Check deflection
+				mesh.setRefVertexOnboundary(v);
+			}
+			else if (!edge.origin().discreteProject(v))
+				continue;
 			// Do not build degenerate triangles.
 			if (Math.abs(Math.sin(v.angle3D(edge.origin(), edge.apex()))) < sinMin ||
-			    Math.abs(Math.sin(v.angle3D(edge.destination(), edge.apex()))) < sinMin)
-			{
-				tree.remove(edge);
+			    Math.abs(Math.sin(v.angle3D(edge.destination(), edge.apex()))) < sinMin ||
+			    Math.abs(Math.sin(edge.apex().angle3D(edge.origin(), v))) < sinMin ||
+			    Math.abs(Math.sin(edge.apex().angle3D(edge.destination(), v))) < sinMin)
 				continue;
-			}
-			if (edge.getAdj() != null)
+			if (!edge.hasAttributes(OTriangle.BOUNDARY))
 			{
 				OTriangle.symOTri(edge, sym);
 				if (Math.abs(Math.sin(v.angle3D(sym.origin(), sym.apex()))) < sinMin ||
-				    Math.abs(Math.sin(v.angle3D(sym.destination(), sym.apex()))) < sinMin)
-				{
-					tree.remove(edge);
+				    Math.abs(Math.sin(v.angle3D(sym.destination(), sym.apex()))) < sinMin ||
+				    Math.abs(Math.sin(sym.apex().angle3D(sym.origin(), v))) < sinMin ||
+				    Math.abs(Math.sin(sym.apex().angle3D(sym.destination(), v))) < sinMin)
 					continue;
-				}
 			}
-			// 2 triangles aill be modified.  All their edges
+			// 2 triangles will be modified.  All their edges
 			// have to be removed from tree because their
 			// hashCode will change.
 			for (int i = 0; i < 3; i++)
 			{
 				edge.nextOTri();
 				tree.remove(edge);
-				assert !tree.containsValue(edge);
+				assert !tree.containsValue(edge) : edge;
 			}
-			if (edge.getAdj() != null)
+			if (!edge.hasAttributes(OTriangle.BOUNDARY))
 			{
 				OTriangle.symOTri(edge, sym);
 				for (int i = 0; i < 2; i++)
@@ -178,6 +185,7 @@ public class SplitEdge
 				}
 			}
 			edge.split(v);
+			assert edge.destination() == v : v+" "+edge;
 			splitted++;
 			// Update edge length
 			for (int i = 0; i < 3; i++)
@@ -186,6 +194,7 @@ public class SplitEdge
 				edge.prevOTri();
 			}
 			edge.prevOTriDest();
+			assert edge.destination() == v : v+" "+edge;
 			for (int i = 0; i < 2; i++)
 			{
 				edge.prevOTri();
@@ -193,7 +202,11 @@ public class SplitEdge
 			}
 			if (edge.getAdj() != null)
 			{
+				/* FIXME: that does not work!
 				edge.symOTri();
+tree.rehash();
+				assert !edge.hasAttributes(OTriangle.OUTER) : edge;
+				assert edge.destination() == v : v+" "+edge;
 				for (int i = 0; i < 2; i++)
 				{
 					edge.prevOTri();
@@ -202,6 +215,7 @@ public class SplitEdge
 				edge.symOTri();
 				edge.prevOTri();
 				addToTree(edge, tree);
+				*/
 			}
 		}
 		assert mesh.isValid();
