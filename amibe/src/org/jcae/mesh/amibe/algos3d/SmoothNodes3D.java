@@ -198,10 +198,10 @@ public class SmoothNodes3D
 			centroid3[i] = oldp3[i] + speed * l * (centroid3[i] - oldp3[i]);
 		if (!ot.checkNewRingNormals(centroid3))
 			return false;
-		boolean ret = n.discreteProject(c);
-		if (ret)
-			n.moveTo(centroid3[0], centroid3[1], centroid3[2]);
-		return ret;
+		if (!n.discreteProject(c))
+			return false;
+		n.moveTo(centroid3[0], centroid3[1], centroid3[2]);
+		return true;
 	}
 	
 	private static double cost(Triangle f)
