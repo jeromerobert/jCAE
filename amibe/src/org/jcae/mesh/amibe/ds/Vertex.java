@@ -827,7 +827,7 @@ public class Vertex implements Cloneable
          *   http://www.cs.caltech.edu/~mmeyer/Publications/diffGeomOps.pdf
          *   http://www.cs.caltech.edu/~mmeyer/Publications/diffGeomOps.pdf
          * Note: on a sphere, the Gaussian curvature is very accurate,
-         *       but not the mean mean curvature.
+         *       but not the mean curvature.
 	 */
 	public double discreteCurvatures(double [] meanNormal)
 	{
@@ -850,6 +850,15 @@ public class Vertex implements Cloneable
 		do
 		{
 			ot.nextOTriOriginLoop();
+			if (ot.hasAttributes(OTriangle.BOUNDARY))
+			{
+				// FIXME: what to do when a boundary
+				// is encountered?  For now, return
+				// a null vector.
+				for (int i = 0; i < 3; i++)
+					meanNormal[i] = 0.0;
+				return 0.0;
+			}
 			if (ot.hasAttributes(OTriangle.OUTER))
 				continue;
 			double [] p1 = ot.destination().getUV();
