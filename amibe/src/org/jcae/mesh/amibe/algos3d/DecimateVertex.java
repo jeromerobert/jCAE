@@ -265,9 +265,7 @@ public class DecimateVertex
 		HashSet trash = new HashSet();
 		OTriangle ot = new OTriangle();
 		NotOrientedEdge sym = new NotOrientedEdge();
-		double [] vect1 = new double[3];
-		double [] vect2 = new double[3];
-		double [] vect3 = new double[3];
+		double [] temp = new double[3];
 		boolean noSwap = false;
 		int cnt = 0;
 		while (tree.size() > 0)
@@ -293,7 +291,7 @@ public class DecimateVertex
 					q3.reset();
 					q3.add(q1);
 					q3.add(q2);
-					v3 = optimalPlacement(v1, v2, q1, q2, q3);
+					v3 = optimalPlacement(v1, v2, q1, q2, q3, temp);
 					if (edge.canContract(v3))
 						break;
 					if (logger.isDebugEnabled())
@@ -436,7 +434,7 @@ public class DecimateVertex
 		return ret;
 	}
 	
-	private Vertex optimalPlacement(Vertex v1, Vertex v2, Quadric q1, Quadric q2, Quadric q3)
+	private Vertex optimalPlacement(Vertex v1, Vertex v2, Quadric q1, Quadric q2, Quadric q3, double [] temp)
 	{
 		Vertex ret;
 		assert v1 != Vertex.outer;
@@ -476,41 +474,47 @@ public class DecimateVertex
 		else
 		{
 			// POS_EDGE and POS_OPTIMAL
-			Metric3D Qinv = q3.A.inv();
-			if (Qinv != null)
+			// Keep a reference if there is one
+			if (v1.getRef() != 0)
+				ret = (Vertex) v1.clone();
+			else
+				ret = (Vertex) v2.clone();
+			if (placement == POS_OPTIMAL)
 			{
-				// Keep a reference if there is one
-				if (v1.getRef() != 0)
-					ret = (Vertex) v1.clone();
-				else
-					ret = (Vertex) v2.clone();
-				double [] dx = Qinv.apply(q3.b);
-				if (placement == POS_OPTIMAL)
-					ret.moveTo(-dx[0], -dx[1], -dx[2]);
-				else
+				Metric3D Qinv = q3.A.inv();
+				if (Qinv != null)
 				{
-					assert placement == POS_EDGE;
-					// Project ret onto [v1;v2]
-					double [] vect1 = new double[3];
-					double [] vect2 = new double[3];
-					double [] p1 = v1.getUV();
-					double [] p2 = v2.getUV();
-					for (int i = 0; i < 3; i++)
-					{
-						vect1[i] = p2[i] - p1[i];
-						vect2[i] = -dx[i] - p1[i];
-					}
-					double l = Metric3D.norm(vect1);
-					if (l > 1.e-20)
-						for (int i = 0; i < 3; i++)
-							vect1[i] /= l;
-					double s = Metric3D.prodSca(vect1, vect2);
-					if (s < 0.0)
-						s = 0.0;
-					else if (s > l)
-						s = l;
-					ret.moveTo(p1[0]+s*vect1[0]/l, p1[1]+s*vect1[1]/l, p1[2]+s*vect1[2]/l);
+					double [] dx = Qinv.apply(q3.b);
+					ret.moveTo(-dx[0], -dx[1], -dx[2]);
+					return ret;
 				}
+			}
+			// Find M = v1 + s(v2-v1) which minimizes
+			//   q3(M) = s^2 (v2-v1)A(v2-v1) + s(v1A(v2-v1)+(v2-v1)Av1+2b(v2-v1))+cte
+			//   q3'(M) = 2 s (v2-v1)A(v2-v1) + 2(v1A(v2-v1)+b(v2-v1))
+			double [] p1 = v1.getUV();
+			double [] p2 = v2.getUV();
+			for (int i = 0; i < 3; i++)
+				temp[i] = p2[i] - p1[i];
+			double den = 0.0;
+			double num = Metric3D.prodSca(q3.b, temp);
+			for (int i = 0; i < 3; i++)
+			{
+				for (int j = 0; j < 3; j++)
+				{
+					den += q3.A.data[i][j] * temp[i] * temp[j];
+					num += q3.A.data[i][j] * temp[i] * p1[j];
+				}
+			}
+			double s = 0.0;
+			if (den > 1.0e-20 * Math.abs(num))
+			{
+				s = - num / den;
+				if (s < 0.0)
+					s = 0.0;
+				else if (s > 1.0)
+					s = 1.0;
+				ret.moveTo(p1[0]+s*temp[0], p1[1]+s*temp[1], p1[2]+s*temp[2]);
 			}
 			else
 			{
