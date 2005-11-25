@@ -112,13 +112,15 @@ public class Mesh
 	
 	//  Triangle list
 	private ArrayList triangleList = new ArrayList();
-
+	
 	//  Topological face on which mesh is applied
 	private CADFace face;
 	
 	//  The geometrical surface describing the topological face, stored for
 	//  efficiebcy reason
 	private CADGeomSurface surface;
+	
+	private int maxLabel = 0;
 	
 	//  Minimal topological edge length
 	private double epsilon = 1.;
@@ -638,7 +640,7 @@ public class Mesh
 		//  3. Find the list of vertices which are on mesh boundary
 		logger.debug("Build the list of boundary nodes");
 		HashSet bndNodes = new HashSet();
-		int maxLabel = 0;
+		maxLabel = 0;
 		boolean [] found = new boolean[4];
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
 		{
@@ -940,6 +942,15 @@ public class Mesh
 				break;
 		}
 		return true;
+	}
+	
+	/**
+	 * Sets an unused boundary reference on a vertex.
+	 */
+	public void setRefVertexOnboundary(Vertex v)
+	{
+		maxLabel++;
+		v.setRef(maxLabel);
 	}
 	
 	// Useful for debugging
