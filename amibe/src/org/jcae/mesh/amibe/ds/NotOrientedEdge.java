@@ -20,6 +20,9 @@
 
 package org.jcae.mesh.amibe.ds;
 
+/**
+ * This class implements unique edges, without considering their orientation.
+ */
 public class NotOrientedEdge extends OTriangle
 {
 	public NotOrientedEdge()
@@ -27,6 +30,11 @@ public class NotOrientedEdge extends OTriangle
 		super();
 	}
 	
+	/**
+	 * Copy an OTriangle into a new NotOrientedEdge instance.
+	 *
+	 * @param ot  source OTriangle.
+	 */
 	public NotOrientedEdge(OTriangle ot)
 	{
 		tri = ot.tri;
@@ -34,6 +42,10 @@ public class NotOrientedEdge extends OTriangle
 		attributes = (tri.adjPos >> (8*(1+localNumber))) & 0xff;
 	}
 
+	/**
+	 * Return the hash code value of this object.  This hash code value is
+	 * the sum of the hash code values of the two adjacent triangles.
+	 */
 	public final int hashCode()
 	{
 		Triangle sym = (Triangle) tri.getAdj(localNumber);
@@ -41,6 +53,9 @@ public class NotOrientedEdge extends OTriangle
 		return h;
 	}
 	
+	/**
+	 * Test whether two objects are equal.
+	 */
 	public final boolean equals(Object o)
 	{
 		if (o == null)

@@ -44,7 +44,7 @@ import org.apache.log4j.Logger;
  */
 
 /**
- * A handle to {@link Triangle} objects.
+ * A handle to abstract edge instances.
  *
  * <p>
  *   Jonathan Richard Shewchuk
@@ -116,6 +116,7 @@ public class OTriangle implements Cloneable
 	 * boundary.
 	 * @see #setAttributes
 	 * @see #hasAttributes
+	 * @see #clearAttributes
 	 */
 	public static final int BOUNDARY = 1 << 0;
 	/**
@@ -123,6 +124,7 @@ public class OTriangle implements Cloneable
 	 * (Ie. one of its end point is {@link Vertex#outer})
 	 * @see #setAttributes
 	 * @see #hasAttributes
+	 * @see #clearAttributes
 	 */
 	public static final int OUTER    = 1 << 1;
 	/**
@@ -130,6 +132,7 @@ public class OTriangle implements Cloneable
 	 * swapped.
 	 * @see #setAttributes
 	 * @see #hasAttributes
+	 * @see #clearAttributes
 	 */
 	public static final int SWAPPED  = 1 << 2;
 	/**
@@ -137,6 +140,7 @@ public class OTriangle implements Cloneable
 	 * marked (for any operation).
 	 * @see #setAttributes
 	 * @see #hasAttributes
+	 * @see #clearAttributes
 	 */
 	public static final int MARKED   = 1 << 3;
 	/**
@@ -144,6 +148,7 @@ public class OTriangle implements Cloneable
 	 * edge of a quadrangle.
 	 * @see #setAttributes
 	 * @see #hasAttributes
+	 * @see #clearAttributes
 	 */
 	public static final int QUAD     = 1 << 4;
 	/**
@@ -151,6 +156,7 @@ public class OTriangle implements Cloneable
 	 * manifold.
 	 * @see #setAttributes
 	 * @see #hasAttributes
+	 * @see #clearAttributes
 	 */
 	public static final int NONMANIFOLD = 1 << 5;
 	
@@ -161,8 +167,6 @@ public class OTriangle implements Cloneable
 		for (int i = 0; i < 4; i++)
 			work[i] = new OTriangle();
 	}
-	
-	private static final Triangle dummy = new Triangle();
 	
 	/*
 	 * Vertices can be accessed through
@@ -175,6 +179,8 @@ public class OTriangle implements Cloneable
 	protected Triangle tri = null;
 	protected int localNumber = 0;
 	protected int attributes = 0;
+	
+	// Section: constructors
 	
 	/**
 	 * Sole constructor.
@@ -196,13 +202,16 @@ public class OTriangle implements Cloneable
 		attributes = (tri.adjPos >> (8*(1+localNumber))) & 0xff;
 	}
 	
+	/**
+	 * Clones an object.
+	 */
 	public final Object clone()
 	{
 		Object ret = null;
 		try
 		{
 			ret = super.clone();
-			// No swallow copy for private arrays
+			// No shallow copy for private arrays
 			OTriangle that = (OTriangle) ret;
 			that.tempD = new double[3];
 			that.tempD1 = new double[3];
@@ -213,6 +222,9 @@ public class OTriangle implements Cloneable
 		}
 		return ret;
 	}
+	
+	// Section: accessors
+	
 	/**
 	 * Return the triangle tied to this object.
 	 *
@@ -223,6 +235,11 @@ public class OTriangle implements Cloneable
 		return tri;
 	}
 	
+	/**
+	 * Return the edge local number.
+	 *
+	 * @return the edge local number.
+	 */
 	public final int getLocalNumber()
 	{
 		return localNumber;
@@ -237,15 +254,23 @@ public class OTriangle implements Cloneable
 	{
 		tri = t;
 		localNumber = 0;
-		attributes = (tri.adjPos >> 8) & 0xff;
+		pullAttributes();
 	}
 	
+	/**
+	 * Set the triangle tied to this object, and the localNumber.
+	 *
+	 * @param t  the triangle tied to this object.
+	 * @param o  the local number.
+	 */
 	public final void bind(Triangle t, int o)
 	{
 		tri = t;
 		localNumber = o;
 		pullAttributes();
 	}
+	
+	// Section: attributes handling
 	
 	/**
 	 * Check if some attributes of this oriented triangle are set.
@@ -293,6 +318,19 @@ public class OTriangle implements Cloneable
 	{
 		attributes = (tri.adjPos >> (8*(1+localNumber))) & 0xff;
 	}
+	
+	/**
+	 * Checks whether an edge can be modified.
+	 *
+	 * @return <code>false</code> if edge is a boundary or outside the mesh,
+	 * <code>true</code> otherwise.
+	 */
+	public final boolean isMutable()
+	{
+		return !(hasAttributes(BOUNDARY) || hasAttributes(OUTER));
+	}
+	
+	// Section: geometrical primitives
 	
 	/**
 	 * Copy an <code>OTriangle</code> into another <code>OTriangle</code>.
@@ -581,6 +619,8 @@ public class OTriangle implements Cloneable
 			nextOTriOrigin();
 	}
 	
+	// Section: vertex handling
+	
 	/**
 	 * Returns the start vertex of this edge.
 	 *
@@ -643,6 +683,8 @@ public class OTriangle implements Cloneable
 		tri.vertex[localNumber] = v;
 	}
 	
+	// Section: adjacency
+	
 	/**
 	 * Sets adjacency relations between two triangles.
 	 *
@@ -656,48 +698,165 @@ public class OTriangle implements Cloneable
 	}
 	
 	/**
-	 * Sets adjacency relation for a triangle.
+	 * Gets adjacency relation for an edge
 	 *
-	 * @param link  the triangle bond to this one of this edge is manifold, or an Object otherwise.
+	 * @return the triangle bond to this one if this edge is manifold, or an Object otherwise.
 	 */
 	public final Object getAdj()
 	{
 		return tri.getAdj(localNumber);
 	}
 	
+	/**
+	 * Sets adjacency relation for an edge
+	 *
+	 * @param link  the triangle bond to this one if this edge is manifold, or an Object otherwise.
+	 */
 	public final void setAdj(Object link)
 	{
 		tri.setAdj(localNumber, link);
 	}
 	
+	// Section: 3D geometrical routines
+	
 	/**
-	 * Checks whether an edge can be swapped.
-	 *
-	 * @return <code>false</code> if edge is a boundary or outside the mesh,
-	 * <code>true</code> otherwise.
+	 * Compute the normal of an edge, in the triangle plane.
+	 * This vector is not normalized, it has the same length as
+	 * this edge.  The result is stored in the tempD temporary array.
+	 * @see #getTempVector
+	 * @return the area of this triangle.
+	 * Warning: this method uses tempD, tempD1 and tempD2 temporary arrays.
 	 */
-	public final boolean isMutable()
+	public double computeNormal3DT()
 	{
-		return !(hasAttributes(BOUNDARY) || hasAttributes(OUTER));
+		double [] p0 = origin().getUV();
+		double [] p1 = destination().getUV();
+		double [] p2 = apex().getUV();
+		tempD1[0] = p1[0] - p0[0];
+		tempD1[1] = p1[1] - p0[1];
+		tempD1[2] = p1[2] - p0[2];
+		tempD[0] = p2[0] - p0[0];
+		tempD[1] = p2[1] - p0[1];
+		tempD[2] = p2[2] - p0[2];
+		Metric3D.prodVect3D(tempD1, tempD, tempD2);
+		double norm = Metric3D.norm(tempD2);
+		if (norm != 0.0)
+		{
+			tempD2[0] /= norm;
+			tempD2[1] /= norm;
+			tempD2[2] /= norm;
+		}
+		Metric3D.prodVect3D(tempD1, tempD2, tempD);
+		return norm;
 	}
 	
 	/**
-	 * Check whether an edge can be contracted.
-	 * @return <code>true</code> if this edge can be contracted, <code>flase</code> otherwise.
+	 * Compute the normal of this triangle.  The result is stored in
+	 * the tempD temporary array.
+	 * @see #getTempVector
+	 * @return the area of this triangle.
+	 * Warning: this method uses tempD, tempD1 and tempD2 temporary arrays.
 	 */
-	public final boolean canContract(Vertex n)
+	public double computeNormal3D()
 	{
-		if (n.mesh.getType() == Mesh.MESH_3D && !checkInversion(n))
-				return false;
+		double [] p0 = origin().getUV();
+		double [] p1 = destination().getUV();
+		double [] p2 = apex().getUV();
+		tempD1[0] = p1[0] - p0[0];
+		tempD1[1] = p1[1] - p0[1];
+		tempD1[2] = p1[2] - p0[2];
+		tempD2[0] = p2[0] - p0[0];
+		tempD2[1] = p2[1] - p0[1];
+		tempD2[2] = p2[2] - p0[2];
+		Metric3D.prodVect3D(tempD1, tempD2, tempD);
+		double norm = Metric3D.norm(tempD);
+		if (norm != 0.0)
+		{
+			tempD[0] /= norm;
+			tempD[1] /= norm;
+			tempD[2] /= norm;
+		}
+		return norm;
+	}
+	
+	/**
+	 * Return the area of this triangle.
+	 * @return the area of this triangle.
+	 * Warning: this method uses tempD, tempD1 and tempD2 temporary arrays.
+	 */
+	public double computeArea()
+	{
+		double [] p0 = origin().getUV();
+		double [] p1 = destination().getUV();
+		double [] p2 = apex().getUV();
+		tempD1[0] = p1[0] - p0[0];
+		tempD1[1] = p1[1] - p0[1];
+		tempD1[2] = p1[2] - p0[2];
+		tempD2[0] = p2[0] - p0[0];
+		tempD2[1] = p2[1] - p0[1];
+		tempD2[2] = p2[2] - p0[2];
+		Metric3D.prodVect3D(tempD1, tempD2, tempD);
+		return 0.5 * Metric3D.norm(tempD);
+	}
+	
+	/**
+	 * Return the temporary array TempD.
+	 */
+	public double [] getTempVector()
+	{
+		return tempD;
+	}
+	
+	// Section: algorithms
+	
+	/**
+	 * Checks the dihedral angle of an edge.
+	 *
+	 * @param minCos  if the dot product of the normals to adjacent
+	 *    triangles is lower than monCos, then <code>-1.0</code> is
+	 *    returned.
+	 * @return the minimum quality of the two trianglles generated
+	 *    by swapping this edge.
+	 */
+	public final double checkSwap3D(double minCos)
+	{
+		double invalid = -1.0;
+		// Check if there is an adjacent edge
+		if (hasAttributes(OUTER) || hasAttributes(BOUNDARY) || getAdj() == null)
+			return invalid;
+		// Check for coplanarity
+		symOTri(this, work[0]);
+		computeNormal3D();
+		double [] n1 = getTempVector();
+		work[0].computeNormal3D();
+		double [] n2 = work[0].getTempVector();
+		if (Metric3D.prodSca(n1, n2) < minCos)
+			return invalid;
+		// Check for quality improvement
+		Vertex o = origin();
+		Vertex d = destination();
+		Vertex a = apex();
+		Vertex n = work[0].apex();
+		// Check for inverted triangles
+		double s3 = o.area3D(n, a, n1);
+		if (s3 <= 0.0)
+			return invalid;
+		double s4 = d.area3D(a, n, n1);
+		if (s4 <= 0.0)
+			return invalid;
+		double p1 = o.distance3D(d) + d.distance3D(a) + a.distance3D(o);
+		double s1 = computeArea();
+		double p2 = d.distance3D(o) + o.distance3D(n) + n.distance3D(d);
+		double s2 = work[0].computeArea();
+		// No need to multiply by 12.0 * Math.sqrt(3.0)
+		double Qbefore = Math.min(s1/p1/p1, s2/p2/p2);
 		
-		//  Topology check
-		//  TODO: normally this check could be removed, but the
-		//        following test triggers an error:
-		//    * mesh Scie_shell.brep with deflexion=0.2 aboslute
-		//    * decimate with length=6
-		ArrayList link = origin().getNeighboursNodes();
-		link.retainAll(destination().getNeighboursNodes());
-		return link.size() < 3;
+		double p3 = o.distance3D(n) + n.distance3D(a) + a.distance3D(o);
+		double p4 = d.distance3D(a) + a.distance3D(n) + n.distance3D(d);
+		double Qafter = Math.min(s3/p3/p3, s4/p4/p4);
+		if (Qafter > Qbefore)
+			return Qafter;
+		return invalid;
 	}
 	
 	/**
@@ -706,11 +865,20 @@ public class OTriangle implements Cloneable
 	 * This routine swaps an edge (od) to (na), updates
 	 * adjacency relations and backward links between vertices and
 	 * triangles.  Current object is transformed from (oda) to (ona)
-	 * and not (nao), because this helps turning around o, e.g.
-	 * at the end of {@link #split3}.
-	 *
-	 * @param a  apex of the current edge
-	 * @param n  apex of the symmetric edge
+	 * and not (nao), because this helps turning around o, eg.
+	 * at the end of {@link OTriangle2D#split3}.
+	 *        
+	 *          d                    d
+	 *          .                    .
+	 *         /|\                  / \
+	 *        / | \                /   \   
+	 *       /  |  \              /     \
+	 *    a +   |   + n  ---&gt;  a +-------+ n
+	 *       \  |  /              \     /
+	 *        \ | /                \   /
+	 *         \|/                  \ /
+         *          '                    '
+	 *          o                    o
 	 */
 	public final void swap()
 	{
@@ -774,9 +942,59 @@ public class OTriangle implements Cloneable
 		pullAttributes();
 	}
 	
-	public double [] getTempVector()
+	/**
+	 * Checks that triangles are not inverted if this edge is contracted.
+	 *
+	 * @param newpt  the point which will become the contraction of
+	 *    this edge.
+	 * @return <code>false</code> if this edge contraction produces
+	 *    an inverted triangle, <code>true</code> otherwise.
+	 */
+	public final boolean checkNewRingNormals(double [] newpt)
 	{
-		return tempD;
+		//  Loop around apex to check that triangles will not be inverted
+		Vertex d = destination();
+		nextOTri(this, work[0]);
+		double [] v1 = new double[3];
+		do
+		{
+			if (work[0].hasAttributes(OUTER))
+			{
+				work[0].nextOTriApexLoop();
+				continue;
+			}
+			double area2 = work[0].computeNormal3DT();
+			double [] nu = work[0].getTempVector();
+			double [] x1 = work[0].origin().getUV();
+			for (int i = 0; i < 3; i++)
+				v1[i] = newpt[i] - x1[i];
+			if (Metric3D.prodSca(v1, nu) >= - area2 / 2.0)
+				return false;
+			work[0].nextOTriApexLoop();
+		}
+		while (work[0].origin() != d);
+		return true;
+	}
+	
+	/**
+	 * Check whether an edge can be contracted.
+	 *
+	 * @param n the resulting vertex
+	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise.
+	 */
+	public final boolean canContract(Vertex n)
+	{
+		if (n.mesh.getType() == Mesh.MESH_3D && !checkInversion(n))
+				return false;
+		
+		//  Topology check
+		//  TODO: normally this check could be removed, but the
+		//        following test triggers an error:
+		//    * mesh Scie_shell.brep with deflexion=0.2 aboslute
+		//    * decimate with length=6
+		ArrayList link = origin().getNeighboursNodes();
+		link.retainAll(destination().getNeighboursNodes());
+		return link.size() < 3;
 	}
 	
 	private final boolean checkInversion(Vertex n)
@@ -837,135 +1055,6 @@ public class OTriangle implements Cloneable
 		}
 		while (work[0].origin() != a);
 		return true;
-	}
-	
-	public final boolean checkNewRingNormals(double [] newpt)
-	{
-		//  Loop around apex to check that triangles will not be inverted
-		Vertex d = destination();
-		nextOTri(this, work[0]);
-		double [] v1 = new double[3];
-		do
-		{
-			if (work[0].hasAttributes(OUTER))
-			{
-				work[0].nextOTriApexLoop();
-				continue;
-			}
-			double area2 = work[0].computeNormal3DT();
-			double [] nu = work[0].getTempVector();
-			double [] x1 = work[0].origin().getUV();
-			for (int i = 0; i < 3; i++)
-				v1[i] = newpt[i] - x1[i];
-			if (Metric3D.prodSca(v1, nu) >= - area2 / 2.0)
-				return false;
-			work[0].nextOTriApexLoop();
-		}
-		while (work[0].origin() != d);
-		return true;
-	}
-	
-	// Warning: this vectore is not normalized, it has the same length as
-	// this.
-	public double computeNormal3DT()
-	{
-		double [] p0 = origin().getUV();
-		double [] p1 = destination().getUV();
-		double [] p2 = apex().getUV();
-		tempD1[0] = p1[0] - p0[0];
-		tempD1[1] = p1[1] - p0[1];
-		tempD1[2] = p1[2] - p0[2];
-		tempD[0] = p2[0] - p0[0];
-		tempD[1] = p2[1] - p0[1];
-		tempD[2] = p2[2] - p0[2];
-		Metric3D.prodVect3D(tempD1, tempD, tempD2);
-		double norm = Metric3D.norm(tempD2);
-		if (norm != 0.0)
-		{
-			tempD2[0] /= norm;
-			tempD2[1] /= norm;
-			tempD2[2] /= norm;
-		}
-		Metric3D.prodVect3D(tempD1, tempD2, tempD);
-		return norm;
-	}
-	
-	public double computeNormal3D()
-	{
-		double [] p0 = origin().getUV();
-		double [] p1 = destination().getUV();
-		double [] p2 = apex().getUV();
-		tempD1[0] = p1[0] - p0[0];
-		tempD1[1] = p1[1] - p0[1];
-		tempD1[2] = p1[2] - p0[2];
-		tempD2[0] = p2[0] - p0[0];
-		tempD2[1] = p2[1] - p0[1];
-		tempD2[2] = p2[2] - p0[2];
-		Metric3D.prodVect3D(tempD1, tempD2, tempD);
-		double norm = Metric3D.norm(tempD);
-		if (norm != 0.0)
-		{
-			tempD[0] /= norm;
-			tempD[1] /= norm;
-			tempD[2] /= norm;
-		}
-		return norm;
-	}
-	
-	public double computeArea()
-	{
-		double [] p0 = origin().getUV();
-		double [] p1 = destination().getUV();
-		double [] p2 = apex().getUV();
-		tempD1[0] = p1[0] - p0[0];
-		tempD1[1] = p1[1] - p0[1];
-		tempD1[2] = p1[2] - p0[2];
-		tempD2[0] = p2[0] - p0[0];
-		tempD2[1] = p2[1] - p0[1];
-		tempD2[2] = p2[2] - p0[2];
-		Metric3D.prodVect3D(tempD1, tempD2, tempD);
-		return 0.5 * Metric3D.norm(tempD);
-	}
-	
-	public final double checkSwap3D(double minCos)
-	{
-		double invalid = -1.0;
-		// Check if there is an adjacent edge
-		if (hasAttributes(OUTER) || hasAttributes(BOUNDARY) || getAdj() == null)
-			return invalid;
-		// Check for coplanarity
-		symOTri(this, work[0]);
-		computeNormal3D();
-		double [] n1 = getTempVector();
-		work[0].computeNormal3D();
-		double [] n2 = work[0].getTempVector();
-		if (Metric3D.prodSca(n1, n2) < minCos)
-			return invalid;
-		// Check for quality improvement
-		Vertex o = origin();
-		Vertex d = destination();
-		Vertex a = apex();
-		Vertex n = work[0].apex();
-		// Check for inverted triangles
-		double s3 = o.area3D(n, a, n1);
-		if (s3 <= 0.0)
-			return invalid;
-		double s4 = d.area3D(a, n, n1);
-		if (s4 <= 0.0)
-			return invalid;
-		double p1 = o.distance3D(d) + d.distance3D(a) + a.distance3D(o);
-		double s1 = computeArea();
-		double p2 = d.distance3D(o) + o.distance3D(n) + n.distance3D(d);
-		double s2 = work[0].computeArea();
-		// No need to multiply by 12.0 * Math.sqrt(3.0)
-		double Qbefore = Math.min(s1/p1/p1, s2/p2/p2);
-		
-		double p3 = o.distance3D(n) + n.distance3D(a) + a.distance3D(o);
-		double p4 = d.distance3D(a) + a.distance3D(n) + n.distance3D(d);
-		double Qafter = Math.min(s3/p3/p3, s4/p4/p4);
-		if (Qafter > Qbefore)
-			return Qafter;
-		return invalid;
 	}
 	
 	/**
@@ -1063,8 +1152,8 @@ public class OTriangle implements Cloneable
 	
 	/**
 	 * Split an edge.  This is the opposite of contract.
+	 *
 	 * @param n the resulting vertex
-	 * @return the newly created edge
 	 */
 	public final void split(Vertex n)
 	{

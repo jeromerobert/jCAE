@@ -46,8 +46,6 @@ public class Vertex implements Cloneable
 	private static final int [] i0 = new int[2];
 	private static final int [] i1 = new int[2];
 	
-	private static final double [] temp3d = new double[3];
-	
 	public double [] param = null;
 	//  link can be either:
 	//    1. a Triangle, for manifold vertices
@@ -71,6 +69,12 @@ public class Vertex implements Cloneable
 	private boolean modified = false;
 	private boolean deleted = false;
 	
+	/**
+	 * Create an interior Vertex for a 2D mesh.
+	 *
+	 * @param u  first coordinate.
+	 * @param v  second coordinate.
+	 */
 	public Vertex(double u, double v)
 	{
 		param = new double[2];
@@ -78,6 +82,13 @@ public class Vertex implements Cloneable
 		param[1] = v;
 	}
 	
+	/**
+	 * Create an interior Vertex for a 3D mesh.
+	 *
+	 * @param x  first coordinate.
+	 * @param y  second coordinate.
+	 * @param z  third coordinate.
+	 */
 	public Vertex(double x, double y, double z)
 	{
 		param = new double[3];
@@ -86,6 +97,13 @@ public class Vertex implements Cloneable
 		param[2] = z;
 	}
 	
+	/**
+	 * Create a Vertex from a boundary node.
+	 *
+	 * @param pt  node on a boundary edge.
+	 * @param C2d 2D curve on the face.
+	 * @param F   topological face.
+	 */
 	public Vertex(MNode1D pt, CADGeomCurve2D C2d, CADFace F)
 	{
 		ref1d = pt.getMaster().getLabel();
@@ -100,6 +118,12 @@ public class Vertex implements Cloneable
 		}
 	}
 	
+	/**
+	 * Create a Vertex in the middle of two 2D Vertex.
+	 *
+	 * @param pt1  first node.
+	 * @param pt2  second node.
+	 */
 	public Vertex(Vertex pt1, Vertex pt2)
 	{
 		param = new double[2];
@@ -107,6 +131,11 @@ public class Vertex implements Cloneable
 		param[1] = 0.5 * (pt1.param[1] + pt2.param[1]);
 	}
 	
+	/**
+	 * Copy the current Vertex into another one.
+	 *
+	 * @return a new Vertex with the same attributes.
+	 */
 	public final Object clone()
 	{
 		Object ret = null;
@@ -123,11 +152,21 @@ public class Vertex implements Cloneable
 		return ret;
 	}
 	
+	/**
+	 * Get the coordinates of this Vertex.
+	 *
+	 * @return the coordinates of this Vertex.
+	 */
 	public double [] getUV ()
 	{
 		return param;
 	}
 	
+	/**
+	 * Set the coordinates of this Vertex (2D).
+	 *
+	 * @return the coordinates of this Vertex.
+	 */
 	public void moveTo(double u, double v)
 	{
 		param[0] = u;
@@ -135,6 +174,11 @@ public class Vertex implements Cloneable
 		m2 = null;
 	}
 	
+	/**
+	 * Set the coordinates of this Vertex (3D).
+	 *
+	 * @return the coordinates of this Vertex.
+	 */
 	public void moveTo(double x, double y, double z)
 	{
 		param[0] = x;
@@ -143,6 +187,11 @@ public class Vertex implements Cloneable
 		m2 = null;
 	}
 	
+	/**
+	 * Get the normal to the surface at this location.
+	 *
+	 * @return the normal to the surface at this location.
+	 */
 	public double [] getNormal ()
 	{
 		CADGeomSurface surface = mesh.getGeomSurface();
@@ -150,11 +199,21 @@ public class Vertex implements Cloneable
 		return surface.normal();
 	}
 	
+	/**
+	 * Get the 1D reference of this node.
+	 *
+	 * @return the 1D reference of this node.
+	 */
 	public int getRef()
 	{
 		return ref1d;
 	}
 	
+	/**
+	 * Set the 1D reference of this node.
+	 *
+	 * @param l  the 1D reference of this node.
+	 */
 	public void setRef(int l)
 	{
 		ref1d = l;
@@ -200,6 +259,9 @@ public class Vertex implements Cloneable
 		return writable;
 	}
 	
+	/**
+	 * Add this Vertex to the quadtree.
+	 */
 	public void addToQuadTree()
 	{
 		if (logger.isDebugEnabled())
@@ -207,6 +269,9 @@ public class Vertex implements Cloneable
 		mesh.quadtree.add(this);
 	}
 	
+	/**
+	 * Remove this Vertex from the quadtree.
+	 */
 	public void removeFromQuadTree()
 	{
 		if (logger.isDebugEnabled())
@@ -215,7 +280,7 @@ public class Vertex implements Cloneable
 	}
 	
 	/**
-	 * Returns a triangle containing this point.
+	 * Return a triangle containing this point.
 	 *
 	 * The returned oriented triangle T is noted (oda), and this
 	 * algorithm makes sure that there are only three possible
@@ -228,7 +293,7 @@ public class Vertex implements Cloneable
 	 * Origin and destination points are always different from Vertex.outer.
 	 *
 	 * @return a triangle containing this point.
-	 * @see OTriangle#split3
+	 * @see OTriangle2D#split3
 	 */
 	public OTriangle2D getSurroundingOTriangle()
 	{
@@ -279,7 +344,7 @@ public class Vertex implements Cloneable
 		return current;
 	}
 	
-	public OTriangle2D getSurroundingOTriangleStart(OTriangle2D current)
+	private OTriangle2D getSurroundingOTriangleStart(OTriangle2D current)
 	{
 		boolean redo = false;
 		Vertex o = current.origin();
@@ -369,6 +434,11 @@ public class Vertex implements Cloneable
 		return current;
 	}
 	
+	/**
+	 * Get the list of adjacent vertices.
+	 *
+	 * @return the list of adjacent vertices.
+	 */
 	public ArrayList getNeighboursNodes()
 	{
 		ArrayList ret = new ArrayList();
@@ -509,6 +579,7 @@ public class Vertex implements Cloneable
 	 *
 	 * @param n1  first node
 	 * @param n2  second node
+	 * @param n   normal
 	 * @return the area of the triangle
 	 **/
 	public double area3D(Vertex n1, Vertex n2, double [] n)

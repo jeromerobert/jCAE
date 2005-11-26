@@ -116,8 +116,6 @@ public class DecimateVertex
 	
 	/**
 	 * Moves all nodes until all iterations are done.
-	 *
-	 * @see #computeFace
 	 */
 	public void compute()
 	{

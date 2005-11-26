@@ -26,8 +26,41 @@ import org.jcae.mesh.amibe.ds.Vertex;
 
 public interface Calculus
 {
+	/**
+	 * Returns the length of an edge.
+	 */
 	public double length(OTriangle ot);
+	
+	/**
+	 * Returns the distance between two points.
+	 * Metrics on both points is used to interpolate this length.
+	 *
+	 * @param start  the start node
+	 * @param end  the end node
+	 * @return the distance between these two points.
+	 */
 	public double distance(Vertex start, Vertex end);
+	
+	/**
+	 * Returns the distance between two points.
+	 * This distance is evaluated by using metrics at a given point.
+	 *
+	 * @param start  the start node
+	 * @param end  the end node
+	 * @param vm  the vertex on which metrics is evaluated
+	 * @return the distance between these two points.
+	 */
 	public double distance(Vertex start, Vertex end, Vertex vm);
+	
+	/**
+	 * Returns the 2D radius of the unit ball centered at a point.
+	 * This routine returns a radius such that the 2D circle centered
+	 * at a given vertex will have a distance lower than 1 in the
+	 * desired 2D or 3D space.  This method is used by
+	 * {@link org.jcae.mesh.amibe.util.QuadTree#getNearestVertex}
+	 *
+	 * @param vm  the vertex on which metrics is evaluated
+	 * @return the radius in 2D space.
+	 */
 	public double radius2d(Vertex vm);
 }

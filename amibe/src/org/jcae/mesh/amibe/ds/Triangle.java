@@ -57,6 +57,13 @@ public class Triangle
 	{
 	}
 
+	/**
+	 * Create a triangle with three vertices.
+	 *
+	 * @param a  first vertex.
+	 * @param b  second vertex.
+	 * @param c  third vertex.
+	 */
 	public Triangle(Vertex a, Vertex b, Vertex c)
 	{
 		assert a != b && b != c && c != a : this;
@@ -81,16 +88,29 @@ public class Triangle
 		adjPos = that.adjPos;
 	}
 	
+	/**
+	 * Return the group identifier of this triangle.
+	 *
+	 * @return the group identifier of this triangle.
+	 */
 	public int getGroupId()
 	{
 		return groupId;
 	}
 	
+	/**
+	 * Set the group identifier of this triangle.
+	 *
+	 * @param g  the group identifier of this triangle.
+	 */
 	public void setGroupId(int g)
 	{
 		groupId = g;
 	}
 	
+	/**
+	 * Add this triangle to the global mesh.
+	 */
 	public void addToMesh()
 	{
 		Mesh m = vertex[0].mesh;
@@ -100,6 +120,16 @@ public class Triangle
 		m.add(this);
 	}
 	
+	/**
+	 * Change the adjacency relation of an edge.
+	 * Only one relation is modified.  If both sides have to be modified,
+	 * then {@link OTriangle#glue} should be used instead.
+	 *
+	 * @param num the local number of the edge on this Triangle.
+	 * @param that the Triangle attached to this edge.
+	 * @param thatnum the local number of the edge on the symmetric
+	 *        triangle.
+	 */
 	public void glue1(int num, Triangle that, int thatnum)
 	{
 		adj[num] = that;
@@ -109,16 +139,39 @@ public class Triangle
 		adjPos |= (thatnum << (2*num));
 	}
 	
+	/**
+	 * Return the adjacent Triangle.
+	 * Note: this routine is not very helpful, caller can only check
+	 * whether the returned object is null or if its type is Triangle.
+	 * This can be performed by checking {@link OTriangle#BOUNDARY}
+	 * and {@link OTriangle#NONMANIFOLD} attributes.
+	 *
+	 * @param num  the local number of this edge.
+	 * @return the adjacent Triangle.
+	 */
 	public Object getAdj(int num)
 	{
 		return adj[num];
 	}
 	
+	/**
+	 * Set the Triangle adjacent to an edge.
+	 * Note: this routine could certainly be replaced by {@link #glue1}.
+	 *
+	 * @param num  the local number of this edge.
+	 * @param link  the object 
+	 * @return the adjacent Triangle.
+	 */
 	public void setAdj(int num, Object link)
 	{
 		adj[num] = link;
 	}
 	
+	/**
+	 * Return the 2D centroid of this triangle.
+	 *
+	 * @return the 2D centroid of this triangle.
+	 */
 	public Vertex centroid()
 	{
 		double [] p1 = vertex[0].getUV();
@@ -130,54 +183,77 @@ public class Triangle
 		);
 	}
 	
+	/**
+	 * Return the {@link OTriangle#OUTER} attribute of its edges.
+	 *
+	 * @return <code>true</code> if the triangle is outer,
+	 * <code>false</code> otherwise.
+	 */
 	public boolean isOuter()
 	{
 		return (adjPos & (OTriangle.OUTER << 8 | OTriangle.OUTER << 16 | OTriangle.OUTER << 24)) != 0;
 	}
 	
+	/**
+	 * Set the {@link OTriangle#OUTER} attribute of its three edges.
+	 */
 	public void setOuter()
 	{
 		adjPos |= (OTriangle.OUTER << 8 | OTriangle.OUTER << 16 | OTriangle.OUTER << 24);
 	}
 	
+	/**
+	 * Return the {@link OTriangle#MARKED} attribute of its edges.
+	 *
+	 * @return <code>true</code> if an edge of this triangle has its
+	 * {@link OTriangle#MARKED} attribute set, <code>false</code> otherwise.
+	 */
 	public boolean isMarked()
 	{
 		return (adjPos & (OTriangle.MARKED << 8 | OTriangle.MARKED << 16 | OTriangle.MARKED << 24)) != 0;
 	}
 	
+	/**
+	 * Set the {@link OTriangle#MARKED} attribute of its three edges.
+	 */
 	public void setMarked()
 	{
 		adjPos |= (OTriangle.MARKED << 8 | OTriangle.MARKED << 16 | OTriangle.MARKED << 24);
 	}
 	
+	/**
+	 * Clear the {@link OTriangle#MARKED} attribute of its three edges.
+	 */
 	public void unsetMarked()
 	{
 		adjPos &= ~(OTriangle.MARKED << 8 | OTriangle.MARKED << 16 | OTriangle.MARKED << 24);
 	}
 	
+	/**
+	 * Return the {@link OTriangle#BOUNDARY} attribute of its edges.
+	 *
+	 * @return <code>true</code> if an edge of this triangle has its
+	 * {@link OTriangle#BOUNDARY} attribute set, <code>false</code>
+	 * otherwise.
+	 */
 	public boolean isBoundary()
 	{
 		return (adjPos & (OTriangle.BOUNDARY << 8 | OTriangle.BOUNDARY << 16 | OTriangle.BOUNDARY << 24)) != 0;
 	}
 	
-	public boolean isQuadrangle()
-	{
-		return (adjPos & (OTriangle.QUAD << 8 | OTriangle.QUAD << 16 | OTriangle.QUAD << 24)) != 0;
-	}
-	
-	public void swapAttributes12()
+	protected void swapAttributes12()
 	{
 		int byte0 = adjPos & 0xff;
 		int byte0sw = (byte0 & 0xc3) | ((byte0 & 0x0c) << 2) | ((byte0 & 0x30) >> 2);
 		adjPos = byte0sw | (adjPos & 0x0000ff00) | ((adjPos & 0x00ff0000) << 8) | ((adjPos & 0xff000000) >> 8);
 	}
-	public void swapAttributes01()
+	protected void swapAttributes01()
 	{
 		int byte0 = adjPos & 0xff;
 		int byte0sw = (byte0 & 0xf0) | ((byte0 & 0x03) << 2) | ((byte0 & 0x0c) >> 2);
 		adjPos = byte0sw | (adjPos & 0xff000000) | ((adjPos & 0x0000ff00) << 8) | ((adjPos & 0x00ff0000) >> 8);
 	}
-	public void swapAttributes02()
+	protected void swapAttributes02()
 	{
 		int byte0 = adjPos & 0xff;
 		int byte0sw = (byte0 & 0xcc) | ((byte0 & 0x03) << 4) | ((byte0 & 0x30) >> 4);
@@ -213,6 +289,9 @@ public class Triangle
 	/**
 	 * Initialize the triangle linked list.  There can be only one
 	 * active linked list.
+	 *
+	 * @throws ConcurrentModificationException if this list has not
+	 * been released.
 	 */
 	public static void listLock()
 	{
@@ -256,13 +335,18 @@ public class Triangle
 	}
 	
 	/**
-	 * Check whether this ellement is linked.
+	 * Check whether this element is linked.
 	 */
 	public boolean isListed()
 	{
 		return listNext != null;
 	}
 	
+	/**
+	 * Create an iterator over linked triangles.
+	 *
+	 * @throws NoSuchElementException if no list has been created.
+	 */
 	public static Iterator getTriangleListIterator()
 	{
 		if (listHead == null)

@@ -21,12 +21,16 @@
 
 package org.jcae.mesh.amibe.ds.tools;
 
-import org.jcae.mesh.amibe.ds.*;
+import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Metric2D;
-import java.util.Iterator;
 import java.util.Stack;
 import org.apache.log4j.Logger;
 
+/**
+ * Distance computations in 2D parameter space by using 3D metrics.
+ */
 public class Calculus3D implements Calculus
 {
 	private static Logger logger=Logger.getLogger(Calculus3D.class);	
@@ -118,7 +122,7 @@ public class Calculus3D implements Calculus
 	 *
 	 * @param start  the start node
 	 * @param end  the end node
-	 * @param vm  the vertex on which metrics is used
+	 * @param vm  the vertex on which metrics is evaluated
 	 * @return the distance between nodes
 	 **/
 	public double distance(Vertex start, Vertex end, Vertex vm)
@@ -129,12 +133,28 @@ public class Calculus3D implements Calculus
 		return ret;
 	}
 	
+	/**
+	 * Returns the 2D radius of the 3D unit ball centered at a point.
+	 * This routine returns a radius such that the 2D circle centered
+	 * at a given vertex will have a distance lower than 1 in 3D.
+	 * This method is used by
+	 * {@link org.jcae.mesh.amibe.util.QuadTree#getNearestVertex}
+	 *
+	 * @param vm  the vertex on which metrics is evaluated
+	 * @return the radius in 2D space.
+	 */
 	public double radius2d(Vertex vm)
 	{
 		Metric2D m = vm.getMetrics(mesh.getGeomSurface());
 		return 1.0 / Math.sqrt(m.minEV());
 	}
 	
+	/**
+	 * Returns the length of an edge.
+	 *
+	 * @param ot  the edge being evaluated
+	 * @return the distance between its two endpoints.
+	 */
 	public double length(OTriangle ot)
 	{
 		return distance(ot.origin(), ot.destination());

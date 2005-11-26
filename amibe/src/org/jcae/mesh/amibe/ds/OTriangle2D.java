@@ -27,6 +27,14 @@ import java.util.Iterator;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.apache.log4j.Logger;
 
+/**
+ * A handle to abstract edge objects for initial 2D mesh.
+ * This class implements some features which are only relevant
+ * to the initial 2D mesh.  In particular, boundary edges have
+ * not yet been rebuilt, so we cannot check whether the OUTER
+ * attribute is set but need to test if vertices are equal to
+ * the infinite point instead.
+ */
 public class OTriangle2D extends OTriangle
 {
 	private static Logger logger = Logger.getLogger(OTriangle2D.class);
@@ -45,6 +53,13 @@ public class OTriangle2D extends OTriangle
 	{
 		super();
 	}
+	
+	/**
+	 * Create an object to handle data about a triangle.
+	 *
+	 * @param t  geometrical triangle.
+	 * @param o  a number between 0 and 2 determining an edge.
+	 */
 	public OTriangle2D(Triangle t, int o)
 	{
 		super(t, o);
@@ -386,9 +401,6 @@ public class OTriangle2D extends OTriangle
 	
 	/**
 	 * Checks whether an edge is Delaunay.
-	 *
-	 * As apical vertices are already computed by calling routines,
-	 * they are passed as parameters for efficiency reasons.
 	 *
 	 * @param apex2  apex of the symmetric edge
 	 * @return <code>true</code> if edge is Delaunay, <code>false</code>

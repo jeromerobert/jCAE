@@ -93,8 +93,6 @@ public class SmoothNodes3D
 	
 	/**
 	 * Moves all nodes until all iterations are done.
-	 *
-	 * @see #computeFace
 	 */
 	public void compute()
 	{

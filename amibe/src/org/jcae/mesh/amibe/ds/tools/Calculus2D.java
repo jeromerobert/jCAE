@@ -21,10 +21,16 @@
 
 package org.jcae.mesh.amibe.ds.tools;
 
-import org.jcae.mesh.amibe.ds.*;
-import java.util.Iterator;
+import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.apache.log4j.Logger;
 
+/**
+ * Distance computations in 2D euclidian space.
+ * This class is called from {@link org.jcae.mesh.amibe.algos2d.BasicMesh}
+ * but may also be used if amibe is extended to mesh 2D surfaces.
+ */
 public class Calculus2D implements Calculus
 {
 	private static Logger logger=Logger.getLogger(Calculus2D.class);	
@@ -43,20 +49,25 @@ public class Calculus2D implements Calculus
 	}
 
 	/**
-	 * Returns the distance to another <code>Vertex</code> instance.
-	 * Currently this routine returns the euclidian distance, but in
-	 * a near future it has to be replaced by a metrics depending on
-	 * local variations of <code>F</code>.
+	 * Returns the 2D distance to another <code>Vertex</code> instance.
 	 *
 	 * @param start  the first node
 	 * @param end  the node to which distance is computed.
-	 * @return the distance to between the two nodes.
-	 **/
+	 * @param vm  the node at which metrics is evaluated (unused)
+	 * @return the distance between the two nodes.
+	 */
 	public double distance(Vertex start, Vertex end, Vertex vm)
 	{
 		return distance(start, end);
 	}
 	
+	/**
+	 * Returns the 2D distance to another <code>Vertex</code> instance.
+	 *
+	 * @param start  the first node
+	 * @param end  the node to which distance is computed.
+	 * @return the distance between the two nodes.
+	 */
 	public double distance(Vertex start, Vertex end)
 	{
 		double [] x0 = start.getUV();
@@ -66,11 +77,23 @@ public class Calculus2D implements Calculus
 		return Math.sqrt(dx*dx + dy*dy);
 	}
 	
+	/**
+	 * Returns the 2D length of an edge.
+	 *
+	 * @param ot  the edge being evaluated
+	 * @return the distance between its two endpoints.
+	 */
 	public double length(OTriangle ot)
 	{
         	return distance(ot.origin(), ot.destination());
 	}
 	
+	/**
+	 * Returns the radius of unit ball in 2D.
+	 *
+	 * @param vm  the node at which metrics is evaluated (unused)
+	 * @return this routine always returns 1.0.
+	 */
 	public double radius2d(Vertex vm)
 	{
 		return 1.0;
