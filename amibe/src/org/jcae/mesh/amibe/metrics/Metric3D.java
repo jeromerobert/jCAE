@@ -214,7 +214,7 @@ public class Metric3D extends Matrix3D
 			data[1][1] = cmin*cmin / alpha2;
 		}
 		data[2][2] = data[0][0];
-		Matrix res = (this.multL(A.transp())).multR(A);
+		Matrix3D res = (this.multL(A.transp())).multR(A);
 		data = res.data;
 		return true;
 	}
@@ -272,7 +272,7 @@ public class Metric3D extends Matrix3D
 			data[1][1] = cmin*cmin / alpha2;
 			data[2][2] = 1.0/discr/discr;
 		}
-		Matrix res = (this.multL(A.transp())).multR(A);
+		Matrix3D res = (this.multL(A.transp())).multR(A);
 		data = res.data;
 		return true;
 	}
@@ -336,6 +336,7 @@ public class Metric3D extends Matrix3D
 	{
 		double d1U[] = cacheSurf.d1U();
 		double d1V[] = cacheSurf.d1V();
+		// Check whether there is a tangent plane
 		double unitNorm[] = prodVect3D(d1U, d1V);
 		double nnorm = norm(unitNorm);
 		if (nnorm > 0.0)
