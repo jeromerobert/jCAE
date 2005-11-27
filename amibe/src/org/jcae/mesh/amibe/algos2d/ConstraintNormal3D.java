@@ -30,10 +30,9 @@ import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 /**
- * Performs an initial surface triangulation.
- * The value of discretisation is provided by the constraint hypothesis.
+ * Swap edges if the normals to its adjacent triangles are too different
+ * from the normal computed by the CAD engine.
  */
-
 public class ConstraintNormal3D
 {
 	private static Logger logger=Logger.getLogger(ConstraintNormal3D.class);
@@ -50,7 +49,7 @@ public class ConstraintNormal3D
 	}
 	
 	/**
-	 * Launch method to mesh a surface.
+	 * Check all edges.
 	 */
 	public void compute()
 	{

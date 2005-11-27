@@ -31,10 +31,9 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 /**
- * Performs an initial surface triangulation.
- * The value of discretisation is provided by the constraint hypothesis.
+ * Swap edges which are not Delaunay.  There is no sort, edges are processed
+ * in turn.
  */
-
 public class CheckDelaunay
 {
 	private static Logger logger=Logger.getLogger(CheckDelaunay.class);
@@ -51,7 +50,7 @@ public class CheckDelaunay
 	}
 	
 	/**
-	 * Launch method to mesh a surface.
+	 * Swap edges which are not Delaunay.
 	 */
 	public void compute()
 	{

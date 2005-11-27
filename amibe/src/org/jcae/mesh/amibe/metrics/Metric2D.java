@@ -30,7 +30,7 @@ import org.apache.log4j.Logger;
  * A {@link Metric3D} is computed and projected onto the tangent plane.
  * This metrics is then attached to the {@link Vertex} at which it is
  * computed, and is used to compute distance to other vertices in
- * {@link Calculus3D}.
+ * {@link org.jcae.mesh.amibe.ds.tools.Calculus3D}.
  */
 public class Metric2D
 {

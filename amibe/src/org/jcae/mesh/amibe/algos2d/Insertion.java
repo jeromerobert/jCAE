@@ -28,8 +28,14 @@ import gnu.trove.PrimeFinder;
 import org.apache.log4j.Logger;
 
 /**
+ * Insert nodes to produce a unit mesh.  If an edge is longer than sqrt(2),
+ * candidate vertices are added to a bucket.  When all edges are processed,
+ * vertices from the bucket are processed randomly.  If the closest vertex in
+ * the existing mesh has a distance lower than 1/sqrt(2), this vertex is
+ * discarded, otherwise it is inserted into the mesh and adjacent edges are
+ * swapped if they are not Delaunay.  This process is repeated until no new
+ * vertex is added.
  */
-
 public class Insertion
 {
 	private static Logger logger=Logger.getLogger(Insertion.class);

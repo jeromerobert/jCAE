@@ -28,7 +28,6 @@ package org.jcae.mesh.amibe.util;
  * added, they must be of opposite sign so that this range is not
  * bypassed.
  */
-
 public class LongLong
 {
 	private long hi, lo;

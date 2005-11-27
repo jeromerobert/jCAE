@@ -28,10 +28,8 @@ import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 /**
- * Performs an initial surface triangulation.
- * The value of discretisation is provided by the constraint hypothesis.
+ * Split triangles with a too large absolute deflection.
  */
-
 public class EnforceAbsDeflection
 {
 	private static Logger logger=Logger.getLogger(EnforceAbsDeflection.class);
@@ -48,7 +46,7 @@ public class EnforceAbsDeflection
 	}
 	
 	/**
-	 * Launch method to mesh a surface.
+	 * Check all triangles.
 	 */
 	public void compute()
 	{

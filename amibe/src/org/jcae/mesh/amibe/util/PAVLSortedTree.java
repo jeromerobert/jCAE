@@ -28,8 +28,8 @@ import org.apache.log4j.Logger;
  * It is based on excellent Ben Pfaff's GNU libavl http://adtinfo.org/
  * These trees are used to sort vertices, edges, or triangles according
  * to their quality factors.  They are traversed according to quality
- * factors, and duplicate values are allowed.
- * For these reasons, this class needed some customization.
+ * factors, and duplicate values are allowed.  See examples in
+ * algorithms from {@link org.jcae.mesh.amibe.algos3d}.
  */
 public class PAVLSortedTree
 {
@@ -292,7 +292,7 @@ public class PAVLSortedTree
 	}
 	
 	/**
-	 * Insert a node to the tree.  Tree is soorted according to
+	 * Insert a node to the tree.  Tree is sorted according to
 	 * <code>value</code>, and duplicates are not checked.
 	 * @param o      object
 	 * @param value  quality factor
@@ -391,8 +391,10 @@ public class PAVLSortedTree
 	}
 	
 	/**
-	 * Checks whether an object exist is the tree
+	 * Checks whether an object exist is the tree.
 	 * @param o      object being checked
+	 * @return <code>true</code> if this tree contains this object,
+	 *   <code>false</code> otherwise.
 	 */
 	public final boolean containsValue(Object o)
 	{
@@ -401,7 +403,8 @@ public class PAVLSortedTree
 	
 	/**
 	 * Gets the quallity factor of an object.
-	 * @param o      object
+	 * @param o      object.
+	 * @return  the quality factor associated to this object.
 	 */
 	public final synchronized double getKey(Object o)
 	{
@@ -414,6 +417,7 @@ public class PAVLSortedTree
 	/**
 	 * Remove the node associated to an object from the tree.
 	 * @param o      object being removed
+	 * @return  the quality factor associated to this object.
 	 */
 	public final synchronized double remove(Object o)
 	{
