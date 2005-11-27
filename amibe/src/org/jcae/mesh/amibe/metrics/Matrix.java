@@ -24,40 +24,47 @@ package org.jcae.mesh.amibe.metrics;
 import org.apache.log4j.Logger;
 
 /**
- * 2D metrics.
+ * Common operations on squared matrices.
  */
-public class Matrix
+public class Matrix implements Cloneable
 {
 	private static Logger logger=Logger.getLogger(Matrix.class);
 	
 	protected int rank = 0;
 	public double data[][];
 	
-	public void clone(Matrix A)
+	/**
+	 * Create a <code>Matrix</code> instance with the same coefficients.
+	 */
+	protected final Object clone()
 	{
-		if (rank != A.rank || rank <= 0)
-			throw new IllegalArgumentException(rank+" is different from "+A.rank);
-		for (int i = 0; i < rank; i++)
-			for (int j = 0; j < rank; j++)
-				data[i][j] = A.data[i][j];
-	}
-	
-	public Matrix dup()
-	{
-		if (rank <= 0)
-			throw new IllegalArgumentException("Uninitialized matrix");
-		Matrix ret = new Matrix();
-		ret.rank = rank;
-		ret.data = new double[rank][rank];
-		ret.clone(this);
+		Object ret = null;
+		try
+		{
+			ret = super.clone();
+			Matrix that = (Matrix) ret;
+			that.data = new double[rank][rank];
+			for (int i = 0; i < rank; i++)
+				for (int j = 0; j < rank; j++)
+					that.data[i][j] = data[i][j];
+		}
+		catch (java.lang.CloneNotSupportedException ex)
+		{
+		}
 		return ret;
 	}
 	
+	/**
+	 * Create a <code>Matrix</code> instance containing the transposition
+	 * of this one.
+	 *
+	 * @return a new Matrix containing the transposition of this one.
+	 */
 	public Matrix transp()
 	{
 		if (rank <= 0)
 			throw new IllegalArgumentException("Uninitialized matrix");
-		Matrix ret = dup();
+		Matrix ret = (Matrix) clone();
 		double temp;
 		for (int i = 0; i < rank; i++)
 			for (int j = i+1; j < rank; j++)
@@ -69,38 +76,31 @@ public class Matrix
 		return ret;
 	}
 	
-	public double tr()
-	{
-		if (rank <= 0)
-			throw new IllegalArgumentException("Uninitialized matrix");
-		double ret = 0.0;
-		for (int i = 0; i < rank; i++)
-			ret += data[i][i];
-		return ret;
-	}
-	
-	public Matrix neg()
-	{
-		if (rank <= 0)
-			throw new IllegalArgumentException("Uninitialized matrix");
-		Matrix ret = dup();
-		for (int i = 0; i < rank; i++)
-			for (int j = 0; j < rank; j++)
-				data[i][j] = - data[i][j];
-		return ret;
-	}
-	
+	/**
+	 * Create a <code>Matrix</code> instance containing the sum of this and
+	 * another <code>Matrix</code>.
+	 *
+	 * @param A  matrix to add to the current one
+	 * @return a new Matrix containing the sum of the two matrices.
+	 */
 	public Matrix add(Matrix A)
 	{
 		if (rank != A.rank || rank <= 0)
 			throw new IllegalArgumentException(rank+" is different from "+A.rank);
-		Matrix ret = dup();
+		Matrix ret = (Matrix) clone();
 		for (int i = 0; i < rank; i++)
 			for (int j = 0; j < rank; j++)
 				data[i][j] += A.data[i][j];
 		return ret;
 	}
 	
+	/**
+	 * Create a <code>Matrix</code> instance containing the multiplication
+	 * of this <code>Matrix</code> instance by another one.
+	 *
+	 * @param A  another Matrix
+	 * @return a new Matrix containing the multiplication this*A
+	 */
 	public Matrix multR(Matrix A)
 	{
 		if (rank != A.rank || rank <= 0)
@@ -118,6 +118,13 @@ public class Matrix
 		return ret;
 	}
 	
+	/**
+	 * Create a <code>Matrix</code> instance containing the multiplication
+	 * of another <code>Matrix</code> instance by this one.
+	 *
+	 * @param A  another Matrix
+	 * @return a new Matrix containing the multiplication A*this
+	 */
 	public Matrix multL(Matrix A)
 	{
 		if (rank != A.rank || rank <= 0)
@@ -135,22 +142,38 @@ public class Matrix
 		return ret;
 	}
 	
-	public void scale(double f)
+	/**
+	 * Return the multiplication of this <code>Matrix</code> by a vector.
+	 *
+	 * @param in  input vector.
+	 * @return a new vector containing the multiplication this*in.
+	 */
+	public double [] apply(double [] in)
+	{
+		if (rank != in.length || rank <= 0)
+			throw new IllegalArgumentException(rank+" is different from "+in.length);
+		double [] out = new double[rank];
+		for (int i = 0; i < rank; i++)
+		{
+			out[i] = 0.0;
+			for (int j = 0; j < rank; j++)
+				out[i] += data[i][j] * in[j];
+		}
+		return out;
+	}
+	
+	/**
+	 * Multiply all matrix coefficients by a factor.
+	 *
+	 * @param f  scale factor
+	 */
+	protected void scale(double f)
 	{
 		if (rank <= 0)
 			throw new IllegalArgumentException("Uninitialized matrix");
 		for (int i = 0; i < rank; i++)
 			for (int j = 0; j < rank; j++)
 				data[i][j] *= f;
-	}
-	
-	public Matrix factor(double f)
-	{
-		if (rank <= 0)
-			throw new IllegalArgumentException("Uninitialized matrix");
-		Matrix ret = dup();
-		ret.scale(f);
-		return ret;
 	}
 	
 	public String toString()

@@ -20,6 +20,9 @@
 
 package org.jcae.mesh.amibe.util;
 
+/**
+ * Procedure to apply on all octree elements.
+ */
 public interface OctreeProcedure
 {
 	//  This method is called by OcTree.walk, it is then applied to

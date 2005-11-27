@@ -20,9 +20,9 @@
 
 package org.jcae.mesh.amibe.util;
 
-/*
+/**
  * This class implements a 'long long' type for exact geometrical
- * computations.  As java has no unsigned types, this is quite tricky,
+ * computations.  As Java has no unsigned types, this is quite tricky,
  * but fortunately integer coordinates are in the range [0;2^30] and
  * atomic long values are in [-2^60;2^60].  When LongLong have to be
  * added, they must be of opposite sign so that this range is not

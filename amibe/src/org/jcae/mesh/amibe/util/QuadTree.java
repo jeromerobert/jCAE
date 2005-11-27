@@ -27,7 +27,11 @@ import org.jcae.mesh.amibe.ds.tools.Calculus;
 import java.util.ArrayList;
 
 /**
- * Quadtree structure to make 2D algorithms more efficient.
+ * Quadtree structure to store 2D vertices.  Integer coordinates are used
+ * for two reasons: a better control on accuracy of geometrical operations,
+ * and simpler operations on vertex location because cells have power of two
+ * side length and bitwise operators can be used instead of floating point
+ * operations.
  */
 public class QuadTree
 {
@@ -47,12 +51,23 @@ public class QuadTree
 	
 	private static Logger logger=Logger.getLogger(QuadTree.class);	
 	
-	public QuadTreeCell root;
-	public int nCells = 1;
 	// Integer coordinates (like gridSize) must be long if MAXLEVEL > 30
 	public static final int MAXLEVEL = 30;
 	public static final int gridSize = 1 << MAXLEVEL;
-	// Convcrsion between double and integer coordinates
+	
+	/**
+	 * Root of the quadtree.
+	 */
+	public QuadTreeCell root;
+	
+	/**
+	 * Number of cells.
+	 */
+	public int nCells = 1;
+	
+	/**
+	 * Conversion between double and integer coordinates.
+	 */
 	public final double [] x0 = new double[3];
 	
 	private Mesh mesh;
@@ -75,18 +90,28 @@ public class QuadTree
 		m.quadtree = this;
 	}
 	
+	/**
+	 * Transform double coordinates into integer coordinates.
+	 */
 	public void double2int(double [] p, int [] i)
 	{
 		i[0] = (int) ((p[0] - x0[0]) * x0[2]);
 		i[1] = (int) ((p[1] - x0[1]) * x0[2]);
 	}
 	
+	/**
+	 * Transform integer coordinates into double coordinates.
+	 */
 	public void int2double(int [] i, double [] p)
 	{
 		p[0] = x0[0] + i[0] / x0[2];
 		p[1] = x0[1] + i[1] / x0[2];
 	}
 	
+	/**
+	 * Return the coordinates of the center of the grid.
+	 * @return the coordinates of the center of the grid.
+	 */
 	public double [] center()
 	{
 		double [] p = new double[2];

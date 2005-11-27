@@ -24,16 +24,29 @@ package org.jcae.mesh.amibe.metrics;
 import org.apache.log4j.Logger;
 
 /**
- * 2D metrics.
+ * 3D matrix.
  */
 public class Matrix3D extends Matrix
 {
+	/**
+	 * Create a <code>Matrix3D</code> instance and set it to the identity
+	 * matrix.
+	 */
 	public Matrix3D()
 	{
 		rank = 3;
 		data = new double[rank][rank];
+		for (int i = 0; i < rank; i++)
+			data[i][i] = 1.0;
 	}
 	
+	/**
+	 * Create a <code>Matrix3D</code> instance from three column vectors.
+	 *
+	 * @param e1  first column.
+	 * @param e2  second column.
+	 * @param e3  third column.
+	 */
 	public Matrix3D(double [] e1, double [] e2, double [] e3)
 	{
 		rank = 3;
@@ -44,26 +57,6 @@ public class Matrix3D extends Matrix
 			data[i][1] = e2[i];
 			data[i][2] = e3[i];
 		}
-	}
-	
-	public double [] apply(double [] in)
-	{
-		double [] out = new double[3];
-		out[0] = data[0][0] * in[0] + data[0][1] * in[1] + data[0][2] * in[2];
-		out[1] = data[1][0] * in[0] + data[1][1] * in[1] + data[1][2] * in[2];
-		out[2] = data[2][0] * in[0] + data[2][1] * in[1] + data[2][2] * in[2];
-		return out;
-	}
-	
-	public Matrix3D transpose()
-	{
-		if (rank <= 0)
-			throw new IllegalArgumentException("Uninitialized matrix");
-		Matrix3D ret = new Matrix3D();
-		for (int i = 0; i < rank; i++)
-			for (int j = 0; j < rank; j++)
-				ret.data[i][j] = data[j][i];
-		return ret;
 	}
 	
 }

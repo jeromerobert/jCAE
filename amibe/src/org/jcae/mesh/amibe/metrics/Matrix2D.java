@@ -23,11 +23,18 @@ package org.jcae.mesh.amibe.metrics;
 
 import org.apache.log4j.Logger;
 
+/**
+ * 2D matrix.
+ */
 public class Matrix2D
 {
 	private static Logger logger=Logger.getLogger(Matrix2D.class);
 	public double[][] data = new double[2][2];
 	
+	/**
+	 * Create a <code>Matrix2D</code> instance and set it to the identity
+	 * matrix.
+	 */
 	public Matrix2D()
 	{
 		data[0][0] = 1.0;
@@ -35,6 +42,15 @@ public class Matrix2D
 		data[1][0] = 0.0;
 		data[1][1] = 1.0;
 	}
+	
+	/**
+	 * Create a <code>Matrix2D</code> instance with the given coefficients.
+	 *
+	 * @param Axx  Axx coefficient
+	 * @param Axy  Axy coefficient
+	 * @param Ayx  Ayx coefficient
+	 * @param Ayy  Ayy coefficient
+	 */
 	public Matrix2D(double Axx, double Axy, double Ayx, double Ayy)
 	{
 		data[0][0] = Axx;
@@ -42,11 +58,25 @@ public class Matrix2D
 		data[1][0] = Ayx;
 		data[1][1] = Ayy;
 	}
+	
+	/**
+	 * Return the determinant of this matrix.
+	 *
+	 * @return the determinant of this matrix.
+	 */
 	public double det()
 	{
 		return data[0][0] * data[1][1] - data[0][1] * data[1][0];
 	}
-	public Matrix2D inv()
+	
+	/**
+	 * Create a <code>Matrix2D</code> instance containing the inverse
+	 * matrix.
+	 * If the matrix is singular, a null object is returned.
+	 *
+	 * @return a new Matrix2D containing the inverse matrix.
+	 */
+	protected Matrix2D inv()
 	{
 		double detA = det();
 		if (Math.abs(detA) < 1.e-40)
@@ -55,13 +85,45 @@ public class Matrix2D
 		ret.scale(1.0 / detA);
 		return ret;
 	}
+	
+	/**
+	 *  Computes the intersection of 2 metrics.
+	 */
+	protected Matrix2D intersection(Matrix2D B)
+	{
+		Matrix2D res = simultaneousReduction(B);
+		Matrix2D resInv = res.inv();
+		double ev1 = Math.max(
+			norm2(res.data[0][0], res.data[1][0]),
+			B.norm2(res.data[0][0], res.data[1][0])
+		);
+		double ev2 = Math.max(
+			norm2(res.data[0][1], res.data[1][1]),
+			B.norm2(res.data[0][1], res.data[1][1])
+		);
+		Matrix2D D = new Matrix2D(ev1, 0.0, 0.0, ev2);
+		double a11 = ev1 * resInv.data[0][0] * resInv.data[0][0] + ev2 * resInv.data[1][0] * resInv.data[1][0];
+		double a21 = ev1 * resInv.data[0][0] * resInv.data[0][1] + ev2 * resInv.data[1][0] * resInv.data[1][1];
+		double a22 = ev1 * resInv.data[0][1] * resInv.data[0][1] + ev2 * resInv.data[1][1] * resInv.data[1][1];
+		return new Matrix2D(a11, a21, a21, a22);
+	}
+	/* Currently unused
 	public Matrix2D rotation(double theta)
 	{
 		double ct = Math.cos(theta);
 		double st = Math.sin(theta);
 		return new Matrix2D(ct, -st, st, ct);
 	}
-	public Matrix2D multR(Matrix2D A)
+	public double [] apply(double [] in)
+	{
+		double [] out = new double[2];
+		out[0] = data[0][0] * in[0] + data[0][1] * in[1];
+		out[1] = data[1][0] * in[0] + data[1][1] * in[1];
+		return out;
+	}
+	*/
+	
+	private Matrix2D multR(Matrix2D A)
 	{
 		Matrix2D ret = new Matrix2D();
 		for (int i = 0; i < 2; i++)
@@ -73,24 +135,16 @@ public class Matrix2D
 			}
 		return ret;
 	}
-	public double [] apply(double [] in)
-	{
-		double [] out = new double[2];
-		out[0] = data[0][0] * in[0] + data[0][1] * in[1];
-		out[1] = data[1][0] * in[0] + data[1][1] * in[1];
-		return out;
-	}
-	public double norm2(double vx, double vy)
+	private double norm2(double vx, double vy)
 	{
 		return data[0][0] * vx * vx + (data[1][0] + data[0][1]) * vx * vy + data[1][1] * vy * vy;
 	}
-	public void scale(double f)
+	private void scale(double f)
 	{
 		for (int i = 0; i < 2; i++)
 			for (int j = 0; j < 2; j++)
 				data[i][j] *= f;
 	}
-	
 	
 	/**
 	 *  Compute eigenvectors of a positive matrix
@@ -148,7 +202,7 @@ public class Matrix2D
 		return ret;
 	}
 	
-	/**
+	/*
 	 *  Computes the simultaneous reduction of 2 metrics
 	 */
 	private Matrix2D simultaneousReduction (Matrix2D B)
@@ -162,27 +216,6 @@ public class Matrix2D
 		return AinvB.eigenvectors();
 	}
 	
-	/**
-	 *  Computes the intersection of 2 metrics.
-	 */
-	public Matrix2D intersection (Matrix2D B)
-	{
-		Matrix2D res = simultaneousReduction(B);
-		Matrix2D resInv = res.inv();
-		double ev1 = Math.max(
-			norm2(res.data[0][0], res.data[1][0]),
-			B.norm2(res.data[0][0], res.data[1][0])
-		);
-		double ev2 = Math.max(
-			norm2(res.data[0][1], res.data[1][1]),
-			B.norm2(res.data[0][1], res.data[1][1])
-		);
-		Matrix2D D = new Matrix2D(ev1, 0.0, 0.0, ev2);
-		double a11 = ev1 * resInv.data[0][0] * resInv.data[0][0] + ev2 * resInv.data[1][0] * resInv.data[1][0];
-		double a21 = ev1 * resInv.data[0][0] * resInv.data[0][1] + ev2 * resInv.data[1][0] * resInv.data[1][1];
-		double a22 = ev1 * resInv.data[0][1] * resInv.data[0][1] + ev2 * resInv.data[1][1] * resInv.data[1][1];
-		return new Matrix2D(a11, a21, a21, a22);
-	}
 	public String toString()
 	{
 		return "Matrix2D: ("+data[0][0]+", "+data[0][1]+", "+data[1][0]+", "+data[1][1]+")";

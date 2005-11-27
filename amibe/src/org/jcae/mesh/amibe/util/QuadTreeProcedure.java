@@ -20,6 +20,9 @@
 
 package org.jcae.mesh.amibe.util;
 
+/**
+ * Procedure to apply on all quadtree elements.
+ */
 public interface QuadTreeProcedure
 {
 	//  This method is called by QuadTree.walk, it is then applied to

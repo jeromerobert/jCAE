@@ -102,9 +102,14 @@ public class Metric2D
 		G = 1.0;
 	}
 	
+	/**
+	 * Return the determinant of this matrix.
+	 *
+	 * @return the determinant of this matrix.
+	 */
 	public double det()
 	{
-		//  As this matric is a metric, its determinant
+		//  As this matrix is a metric, its determinant
 		//  is positive, but there may be rounding errors.
 		double ret = E * G - F * F;
 		if (ret < 0.0)
@@ -115,21 +120,52 @@ public class Metric2D
 		return ret;
 	}
 	
+	/**
+	 * Return the smallest eigenvalue.
+	 *
+	 * @return the smallest eigenvalue.
+	 */
 	public double minEV()
 	{
 		return 0.5 * (E+G - Math.sqrt((E-G)*(E-G)+4.0*F*F));
 	}
 	
+	/**
+	 * Return the largest eigenvalue.
+	 *
+	 * @return the largest eigenvalue.
+	 */
 	public double maxEV()
 	{
 		return 0.5 * (E+G + Math.sqrt((E-G)*(E-G)+4.0*F*F));
 	}
 	
+	/**
+	 * Return the dot product of two vectors in this riemannian metrics.
+	 *
+	 * @param x0 first coordinate of the first vector.
+	 * @param y0 second coordinate of the first vector.
+	 * @param x1 first coordinate of the second vector.
+	 * @param y1 second coordinate of the second vector.
+	 * @return the dot product of two vectors in this riemannian metrics.
+	 */
 	public double dot(double x0, double y0, double x1, double y1)
 	{
 		return E * x0 * x1 + F * (x0 * y1 + x1 * y0) + G * y0 * y1;
 	}
 	
+	/**
+	 * Return an orthogonal vector in this metrics.
+	 * This vector O is such that
+	 *   dot(transp(O), O) = 0.
+	 *   dot(transp(O), transp(O)) = det(M) dot(V, V).
+	 * Warning: for efficiency reasons, the returned array is a static
+	 * class variable.
+	 *
+	 * @param x0 first coordinate
+	 * @param y0 second coordinate
+	 * @return a static array containing the orthogal vector.
+	 */
 	public double [] orth(double x0, double y0)
 	{
 		orthRes[0] = - F * x0 - G * y0;
@@ -137,6 +173,12 @@ public class Metric2D
 		return orthRes;
 	}
 	
+	/**
+	 * Test whether this matrics is euclidian.
+	 *
+	 * @return <code>true</code> if this metrics is quasi-euclidian,
+	 * <code>false</code> otherwise.
+	 */
 	public boolean isPseudoIsotropic()
 	{
 		double epsilon = 0.001;
@@ -145,6 +187,8 @@ public class Metric2D
 	
 	/**
 	 * Set the desired edge length.
+	 *
+	 * @param l  edge length
 	 */
 	public static void setLength(double l)
 	{
@@ -153,6 +197,8 @@ public class Metric2D
 	
 	/**
 	 * Get the desired edge length.
+	 *
+	 * @return  edge length
 	 */
 	public static double getLength()
 	{
@@ -171,12 +217,12 @@ public class Metric2D
 		double u = p2[0] - p1[0];
 		double v = p2[1] - p1[1];
 		double temp = E * u * u + 2.0 * F * u * v + G * v * v;
-		if (temp > 0.0)
-			return Math.sqrt(temp);
-		return 0.0;
+		if (temp < 0.0)
+			temp = 0.0;
+		return Math.sqrt(temp);
 	}
 	
-	public double [] getCoefs()
+	private double [] getCoefs()
 	{
 		double [] toReturn = new double[3];
 		toReturn[0] = E;

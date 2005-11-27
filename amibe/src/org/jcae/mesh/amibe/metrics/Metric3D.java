@@ -42,21 +42,14 @@ public class Metric3D extends Matrix3D
 	private static double [][] temp22 = new double[2][2];
 	
 	/**
-	 * Creates a <code>Metric3D</code> instance at a given point.
+	 * Create a <code>Metric3D</code> instance at a given point.
 	 *
 	 * @param surf  geometrical surface
 	 * @param pt  node where metrics is computed.
 	 */
 	public Metric3D(CADGeomSurface surf, Vertex pt)
 	{
-		rank = 3;
-		data = new double[rank][rank];
-		for (int i = 0; i < rank; i++)
-		{
-			for (int j = 0; j < rank; j++)
-				data[i][j] = 0.0;
-			data[i][i] = 1.0;
-		}
+		super();
 		if (!surf.equals(cacheSurf))
 		{
 			surf.dinit(2);
@@ -66,22 +59,25 @@ public class Metric3D extends Matrix3D
 		cacheSurf.setParameter(uv[0], uv[1]);
 	}
 	
+	/**
+	 * Create a <code>Metric3D</code> instance and set it to the identity
+	 * matrix.
+	 */
 	public Metric3D()
 	{
-		rank = 3;
-		data = new double[rank][rank];
+		super();
 	}
 	
+	/**
+	 * Create a <code>Metric3D</code> instance from three column vectors.
+	 *
+	 * @param e1  first column.
+	 * @param e2  second column.
+	 * @param e3  third column.
+	 */
 	public Metric3D(double [] e1, double [] e2, double [] e3)
 	{
-		rank = 3;
-		data = new double[rank][rank];
-		for (int i = 0; i < rank; i++)
-		{
-			data[i][0] = e1[i];
-			data[i][1] = e2[i];
-			data[i][2] = e3[i];
-		}
+		super(e1, e2, e3);
 	}
 	
 	public void reset()

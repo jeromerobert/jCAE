@@ -1202,7 +1202,7 @@ public class Vertex implements Cloneable
 		Metric3D.prodVect3D(normal, t1, t2);
 		// Transformation matrix
 		Matrix3D Pinv = new Matrix3D(t1, t2, normal);
-		Matrix3D P = Pinv.transpose();
+		Matrix3D P = (Matrix3D) Pinv.transp();
 		OTriangle ot = new OTriangle((Triangle) link, 0);
 		if (ot.origin() != this)
 			ot.nextOTri();
