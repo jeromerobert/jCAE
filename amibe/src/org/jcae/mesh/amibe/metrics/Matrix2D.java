@@ -24,7 +24,7 @@ package org.jcae.mesh.amibe.metrics;
 import org.apache.log4j.Logger;
 
 /**
- * 2D matrix.
+ * General 2D matrix.
  */
 public class Matrix2D
 {

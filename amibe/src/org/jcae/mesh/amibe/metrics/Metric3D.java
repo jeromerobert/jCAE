@@ -26,7 +26,9 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.apache.log4j.Logger;
 
 /**
- * 3D metrics.
+ * Metrics computed on a CAD surface.  This class provides 3D metrics at a
+ * point to have a unit mesh with respect to edge length and deflection
+ * criteria.
  */
 public class Metric3D extends Matrix3D
 {
@@ -80,6 +82,90 @@ public class Metric3D extends Matrix3D
 		super(e1, e2, e3);
 	}
 	
+	/**
+	 * Check whether deflection is requested.
+	 *
+	 * @return <code>true</code> if deflection is requested,
+	 * <code>false</code> otherwise.
+	 */
+	public static boolean hasDeflection()
+	{
+		return (defl > 0.0);
+	}
+	
+	/**
+	 * Check whether deflection is relative or absolute.
+	 *
+	 * @return <code>true</code> if deflection is relative,
+	 * <code>false</code> otherwise.
+	 */
+	public static boolean hasRelativeDeflection()
+	{
+		return relDefl;
+	}
+	
+	/**
+	 * Select relative or absolute deflection.
+	 *
+	 * @param b if <code>true</code>, deflection is relative,
+	 * otherwise it is absolute.
+	 */
+	public static void setRelativeDeflection(boolean b)
+	{
+		relDefl = b;
+	}
+	
+	/**
+	 * Check whether a length criterion is requested.
+	 *
+	 * @return <code>true</code> if a length criterion is requested,
+	 * <code>false</code> otherwise.
+	 */
+	public static boolean hasLength()
+	{
+		return (discr > 0.0);
+	}
+	
+	/**
+	 * Set the desired edge length.
+	 *
+	 * @param l  the desired edge length.
+	 */
+	public static void setLength(double l)
+	{
+		discr = l;
+	}
+	
+	/**
+	 * Get the desired edge length.
+	 *
+	 * @return  the desired edge length.
+	 */
+	public static double getLength()
+	{
+		return discr;
+	}
+	
+	/**
+	 * Set the desired deflection.
+	 *
+	 * @param l  the desired deflection.
+	 */
+	public static void setDeflection(double l)
+	{
+		defl = l;
+	}
+	
+	/**
+	 * Get the desired deflection.
+	 *
+	 * @return  the desired deflection.
+	 */
+	public static double getDeflection()
+	{
+		return defl;
+	}
+	
 	public void reset()
 	{
 		for (int i = 0; i < 3; i++)
@@ -94,6 +180,12 @@ public class Metric3D extends Matrix3D
 		data[j][i] = temp;
 	}
 	
+	/**
+	 * Compute the inverse metrics.
+	 *
+	 * @return the inverse metrics if it is not singular, <code>null</code>
+	 * otherwise.
+	 */
 	public final Metric3D inv()
 	{
 		// adjoint matrix
@@ -112,30 +204,14 @@ public class Metric3D extends Matrix3D
 		return adj;
 	}
 	
-	public static double prodSca(double [] A, double [] B)
-	{
-		return ((A[0]*B[0])+(A[1]*B[1])+(A[2]*B[2]));
-	}
-	
-	public static double norm(double [] A)
-	{
-		return Math.sqrt((A[0]*A[0])+(A[1]*A[1])+(A[2]*A[2]));
-	}
-	
-	public static double [] prodVect3D(double [] v1, double [] v2)
-	{
-		double [] ret = new double[3];
-		prodVect3D(v1, v2, ret);
-		return ret;			
-	}
-	
-	public static void prodVect3D(double [] v1, double [] v2, double [] ret)
-	{
-		ret[0] = v1[1] * v2[2] - v1[2] * v2[1];
-		ret[1] = v1[2] * v2[0] - v1[0] * v2[2];
-		ret[2] = v1[0] * v2[1] - v1[1] * v2[0];
-	}
-	
+	/**
+	 * Set the current metrics to be governed by an edge length.
+	 * It is thus Id/l^2.
+	 *
+	 * @param l  the desired edge length.
+	 * @return <code>true</code> if this metrics has been successfully
+	 * computed, <code>false</code> otherwise.
+	 */
 	public boolean iso(double l)
 	{
 		if (l <= 0)
@@ -149,6 +225,16 @@ public class Metric3D extends Matrix3D
 		return true;
 	}
 	
+	/**
+	 * Set the current metrics to be governed by surface deflection.
+	 * Deflection is relative or absolute depending on the
+	 * <code>relDefl</code> member.
+	 *
+	 * @param isotropic  if <code>true</code>, an isotropic metrics is
+	 *   returned.
+	 * @return <code>true</code> if this metrics has been successfully
+	 * computed, <code>false</code> otherwise.
+	 */
 	public boolean deflection(boolean isotropic)
 	{
 		if (relDefl)
@@ -277,60 +363,8 @@ public class Metric3D extends Matrix3D
 		return true;
 	}
 	
-	public static boolean hasDeflection()
-	{
-		return (defl > 0.0);
-	}
-	
-	public static boolean hasRelativeDeflection()
-	{
-		return relDefl;
-	}
-	
-	public static void setRelativeDeflection(boolean b)
-	{
-		relDefl = b;
-	}
-	
-	public static boolean hasLength()
-	{
-		return (discr > 0.0);
-	}
-	
 	/**
-	 * Set the desired edge length.
-	 */
-	public static void setLength(double l)
-	{
-		discr = l;
-	}
-	
-	/**
-	 * Get the desired edge length.
-	 */
-	public static double getLength()
-	{
-		return discr;
-	}
-	
-	/**
-	 * Set the desired edge length.
-	 */
-	public static void setDeflection(double l)
-	{
-		defl = l;
-	}
-	
-	/**
-	 * Get the desired edge length.
-	 */
-	public static double getDeflection()
-	{
-		return defl;
-	}
-	
-	/**
-	 * Computes the matrics restriction to its tangent plan.
+	 * Compute the matrics restriction to its tangent plan.
 	 */
 	public double[][] restrict2D()
 	{
