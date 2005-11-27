@@ -1,3 +1,10 @@
+Sun Nov 27 12:55:46 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/metrics/Matrix.java
+	  src/org/jcae/mesh/amibe/metrics/Matrix3D.java: Matrix was only used by Matrix3D, so merge it there.
+	* src/org/jcae/mesh/amibe/metrics/Metric3D.java: Move prodSca(), norm() and prodVect3D() methods...
+	* src/org/jcae/mesh/amibe/metrics/Matrix3D.java: ... here.
+
 Thu Nov 24 10:25:17 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/validation/QualityFloat.java: Fix quality status reports.
