@@ -26,7 +26,7 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.apache.log4j.Logger;
 
 /**
- * Metrics computed on a CAD surface.  This class provides 3D metrics at a
+ * 3D metrics computed on a CAD surface.  This class provides 3D metrics at a
  * point to have a unit mesh with respect to edge length and deflection
  * criteria.
  */
