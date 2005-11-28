@@ -27,6 +27,9 @@ import java.util.Collection;
 import org.apache.log4j.Logger;
 
 
+/**
+ * Group of triangles in the 3D mesh.
+ */
 public class MGroup3D
 {
 	private static Logger logger=Logger.getLogger(MGroup3D.class);
