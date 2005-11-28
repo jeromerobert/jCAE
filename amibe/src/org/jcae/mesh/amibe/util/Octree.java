@@ -24,7 +24,7 @@ import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.ds.MNode3D;
 
 /**
- * Octree to store {@;ink MNode3D} vertices.
+ * Octree to store {@link MNode3D} vertices.
  * This class is very similar to {@link QuadTree}, it is useful to find
  * near vertices.  It was needed by {@link org.jcae.mesh.amibe.algos3d.Fuse}
  * to fuse near vertices, but now that 3D meshes are also handled by the
@@ -135,8 +135,8 @@ public class Octree
 	 *      ┌───┬───┐    ┌───┬───┐
 	 *  &lt;>0 │ 2 │ 3 │    │ 6 │ 7 │   with I = ijk[0] &amp; size
 	 *      ├───┼───┤    ├───┼───┤        J = ijk[1] &amp; size
-	 *    0 │ 0 │ 1 │    │ 4 │ 5 │        K = ijk[2] &amp; size
-	 *    J └───┴───┘    └───┴───┘
+	 *  J=0 │ 0 │ 1 │    │ 4 │ 5 │        K = ijk[2] &amp; size
+	 *      └───┴───┘    └───┴───┘
 	 *      I=0  &lt;>0       0  &lt;>0
 	 * </pre>
 	 *

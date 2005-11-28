@@ -149,8 +149,8 @@ public class QuadTree
 	 *      ┌───┬───┐
 	 *  &lt;>0 │ 2 │ 3 │   with I = i &amp; size
 	 *      ├───┼───┤    J = j &amp; size
-	 *    0 │ 0 │ 1 │ 
-	 *    J └───┴───┘ 
+	 *  J=0 │ 0 │ 1 │ 
+	 *      └───┴───┘ 
 	 *      I=0  &lt;>0
 	 * </pre>
 	 */
@@ -509,7 +509,7 @@ public class QuadTree
 	}
 	
 	/**
-	 * Slow implementation of {@link #getNearestVertexProcedure}.
+	 * Slow implementation of {@link #getNearestVertex}.
 	 * This method should be called only for debugging purpose.
 	 *
 	 * @param v  the node to check.
