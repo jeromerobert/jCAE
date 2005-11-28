@@ -94,9 +94,8 @@ import java.util.Iterator;
  *   Triangle.releaseLock();
  *   </pre>
  * <p>
- * FIXME: New elements are added to the beginning of the list, so they are not
- * seen by {@link getTriangleListIterator}.  They could be added to the end
- * instead.
+ * New elements are added at the end of the list so that {@link #listCollect} can
+ * be called while {@link #getTriangleListIterator} is in action.
  * </p>
  */
 public class Triangle
@@ -129,8 +128,9 @@ public class Triangle
 	// We need to process lists of triangles, and sometimes make sure
 	// that triangles are processed only once.  This can be achieved
 	// efficiently with a linked list.
-	private static final Triangle sentinel = new Triangle();
-	private static Triangle listHead = null;
+	private static final Triangle listHead = new Triangle();
+	private static final Triangle listSentinel = new Triangle();
+	private static Triangle listTail = null;
 	private static int listSize = 0;
 	private Triangle listNext = null;
 	
@@ -168,10 +168,7 @@ public class Triangle
 		}
 		adjPos = that.adjPos;
 		if (that.listNext != null)
-		{
-			listNext = that.listNext;
-			that.listNext = this;
-		}
+			listCollect();
 	}
 	
 	/**
@@ -381,42 +378,48 @@ public class Triangle
 	 */
 	public static void listLock()
 	{
-		if (listHead != null)
+		if (listTail != null)
 			throw new ConcurrentModificationException();
-		listHead = sentinel;
+		listTail = listHead;
+		listTail.listNext = listSentinel;
 		listSize = 0;
 	}
 	
 	/**
 	 * Release the triangle linked list.  This method has to be called
 	 * before creating a new list.
+	 * @throws NoSuchElementException if no list has been created.
 	 */
 	public static void listRelease()
 	{
-		if (listHead == null)
+		if (listTail == null)
 			throw new NoSuchElementException();
-		Triangle start = listHead;
 		Triangle next;
-		while (listHead != null)
+		for (Triangle start = listHead; start != listSentinel; start = next)
 		{
-			next = listHead.listNext;
-			listHead.listNext = null;
-			listHead = next;
+			next = start.listNext;
+			start.listNext = null;
 			listSize--;
 		}
 		listSize++;
 		assert listSize == 0;
+		listTail = null;
 	}
 	
 	/**
-	 * Add the current triangle to the beginning of the list.
+	 * Add the current triangle to the end of the list.
+	 * @throws ConcurrentModificationException if this element is
+	 * already linked.
 	 */
 	public void listCollect()
 	{
-		assert listHead != null;
-		assert listNext == null : this;
-		listNext = listHead;
-		listHead = this;
+		assert listTail != null;
+		assert listTail.listNext == listSentinel : listTail;
+		if (listNext != null)
+			throw new ConcurrentModificationException();
+		listTail.listNext = this;
+		listTail = this;
+		listNext = listSentinel;
 		listSize++;
 	}
 	
@@ -435,21 +438,19 @@ public class Triangle
 	 */
 	public static Iterator getTriangleListIterator()
 	{
-		if (listHead == null)
+		if (listTail == null)
 			throw new NoSuchElementException();
 		return new Iterator()
 		{
 			private Triangle curr = listHead;
 			public boolean hasNext()
 			{
-				return curr != sentinel && curr.listNext != sentinel;
+				return curr.listNext != listSentinel;
 			}
 			
 			public Object next()
 			{
 				curr = curr.listNext;
-				if (sentinel == curr)
-					return new NoSuchElementException();
 				return curr;
 			}
 			public void remove()
