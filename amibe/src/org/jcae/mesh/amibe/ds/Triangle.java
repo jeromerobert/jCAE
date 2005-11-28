@@ -28,27 +28,108 @@ import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 import java.util.Iterator;
 
+/**
+ * A triangular element of the mesh.  Instances of this class carry up all topological
+ * information required for adjacency relations.  Their vertices are contained in
+ * {@link Vertex} {@link #vertex} member, and by convention the local number
+ * of an edge is the index of its oppositee vertex.  A <code>Triangle</code> instance
+ * has a pointer to its three neighbours through its edges, and the local number of
+ * opposite edges in their respective triangles.
+ *
+ * <pre>
+ *                        V2
+ *     V5 _________________,________________, V3
+ *        \    &lt;----      / \     &lt;----     /
+ *         \     0       /   \      1      /
+ *          \   t0    -.//  /\\\   t1   _ /
+ *           \      2 ///1   0\\\2    0 //   t.vertex = { V0, V1, V2 }
+ *            \      //V   t   \\V     //       t.adj = { t1, t0, t2 }
+ *             \     /           \     /    opposite edge local number:
+ *              \   /      2      \   /         { 2, 2, 1}
+ *               \ /     ----&gt;     \ /
+ *             V0 +-----------------+ V1
+ *                 \     &lt;----     /
+ *                  \      1      /
+ *                   \    t2   _,/
+ *                    \       0//
+ * </pre>
+ *
+ * <p>
+ * As local numbers are integers between 0 and 2, a packed representation
+ * is wanted to save space.
+ * In his <a href="http://www.cs.cmu.edu/~quake/triangle.html">Triangle</a>
+ * program, Jonathan R. Shewchuk uses word alignment of pointers to pack
+ * this information into pointers themselves: they are respectively shifted
+ * by 0, 1 or 2 bytes for edges 0, 1 and 2.  This very efficient trick
+ * cqn not be performed with Java, and the three numbers are packed into
+ * a single byte instead.  As attributes on edges are also needed, all
+ * edge data are packed into a single {@link #adjPos} integer member.
+ * </p>
+ *
+ * <p>
+ * Algorithms do often need to compute lists of triangles.  In order to
+ * avoid allocation of these lists, a linked list is provided by this
+ * class.  It uses static members, so only one list can be active at
+ * a time.  Here is an example:
+ * </p>
+ *   <pre>
+ *   //  Begin a new list
+ *   Triangle.listLock();
+ *   ...
+ *   //  In a loop, add triangles to this list.
+ *     tri.listCollect();
+ *   //  Check whether a triangle is contained in this list.
+ *   //  This is very fast because it tests if its link pointer
+ *   //  is <code>null</code> or not.
+ *     if (tri.isListed()) {
+ *        ...
+ *     }
+ *   //  Loop over collected triangles.
+ *     for (Iterator it = Triangle.getTriangleListIterator(); it.hasNext(); )
+ *     {
+ *        Triangle t = (Triangle) it.next();
+ *        ...
+ *     }
+ *   //  When finished, remove all links between triangles
+ *   Triangle.releaseLock();
+ *   </pre>
+ * <p>
+ * FIXME: New elements are added to the beginning of the list, so they are not
+ * seen by {@link getTriangleListIterator}.  They could be added to the end
+ * instead.
+ * </p>
+ */
 public class Triangle
 {
 	private static Logger logger = Logger.getLogger(Triangle.class);
-	public static Triangle outer = null;
+	/**
+	 * Three vertices.
+	 */
 	public Vertex [] vertex = new Vertex[3];
+	
+	/**
+	 * Pointers to adjacent elements through edges.
+	 */
 	private Object [] adj = new Object[3];
-	//  Byte 0 represents orientation of adjacent triangles:
-	//     bits 0-1: adj[0]
-	//     bits 2-3: adj[1]
-	//     bits 4-5: adj[2]
-	//  Other attributes:
-	//     bit 6:  readable?
-	//     bit 7:  writable?
-	//  Bytes 1, 2 and 3 carry up attributes for edges 0, 1 and 2.
+	
+	/**
+	 * Edge packed data.
+	 * Byte 0 contains the local number of opposite edges in
+	 * their respective triangles:
+	 * <ul>
+	 *     <li>bits 0-1: local number for matte edge 0</li>
+	 *     <li>bits 2-3: local number for matte edge 1</li>
+	 *     <li>bits 4-5: local number for matte edge 2</li>
+	 * </ul>
+	 *  Bytes 1, 2 and 3 carry up bitfield attributes for edges 0, 1 and 2.
+	*/
 	public int adjPos = 0;
 	private int groupId = -1;
 	
 	// We need to process lists of triangles, and sometimes make sure
 	// that triangles are processed only once.  This can be achieved
 	// efficiently with a linked list.
-	private static final Triangle triangleHead = new Triangle();
+	private static final Triangle sentinel = new Triangle();
 	private static Triangle listHead = null;
 	private static int listSize = 0;
 	private Triangle listNext = null;
@@ -86,6 +167,11 @@ public class Triangle
 			adj[i] = that.adj[i];
 		}
 		adjPos = that.adjPos;
+		if (that.listNext != null)
+		{
+			listNext = that.listNext;
+			that.listNext = this;
+		}
 	}
 	
 	/**
@@ -287,17 +373,17 @@ public class Triangle
 	}
 	
 	/**
-	 * Initialize the triangle linked list.  There can be only one
+	 * Initialize a triangle linked list.  There can be only one
 	 * active linked list.
 	 *
-	 * @throws ConcurrentModificationException if this list has not
-	 * been released.
+	 * @throws ConcurrentModificationException if this method is
+	 * called again before this list has been released.
 	 */
 	public static void listLock()
 	{
 		if (listHead != null)
 			throw new ConcurrentModificationException();
-		listHead = triangleHead;
+		listHead = sentinel;
 		listSize = 0;
 	}
 	
@@ -356,13 +442,13 @@ public class Triangle
 			private Triangle curr = listHead;
 			public boolean hasNext()
 			{
-				return curr != triangleHead && curr.listNext != triangleHead;
+				return curr != sentinel && curr.listNext != sentinel;
 			}
 			
 			public Object next()
 			{
 				curr = curr.listNext;
-				if (triangleHead == curr)
+				if (sentinel == curr)
 					return new NoSuchElementException();
 				return curr;
 			}
