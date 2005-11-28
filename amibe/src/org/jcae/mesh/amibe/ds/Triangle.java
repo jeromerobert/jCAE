@@ -31,27 +31,27 @@ import java.util.Iterator;
 /**
  * A triangular element of the mesh.  Instances of this class carry up all topological
  * information required for adjacency relations.  Their vertices are contained in
- * {@link Vertex} {@link #vertex} member, and by convention the local number
- * of an edge is the index of its oppositee vertex.  A <code>Triangle</code> instance
- * has a pointer to its three neighbours through its edges, and the local number of
- * opposite edges in their respective triangles.
+ * a {@link Vertex} array, and by convention the local number of an edge is
+ * the index of its oppositee vertex.  A <code>Triangle</code> instance has a
+ * pointer to its three neighbours through its edges, and knows the local
+ * number of opposite edges in their respective triangles.
  *
  * <pre>
  *                        V2
  *     V5 _________________,________________, V3
  *        \    &lt;----      / \     &lt;----     /
- *         \     0       /   \      1      /
- *          \   t0    -.//  /\\\   t1   _ /
- *           \      2 ///1   0\\\2    0 //   t.vertex = { V0, V1, V2 }
- *            \      //V   t   \\V     //       t.adj = { t1, t0, t2 }
+ *         \     0     _ /   \      1    _ /
+ *          \\  t0     ///  /\\\   t1    //
+ *           \\1     2///1   0\\\2     0//   t.vertex = { V0, V1, V2 }
+ *            \V     //V   t   \\V     //       t.adj = { t1, t0, t2 }
  *             \     /           \     /    opposite edge local number:
  *              \   /      2      \   /         { 2, 2, 1}
  *               \ /     ----&gt;     \ /
  *             V0 +-----------------+ V1
  *                 \     &lt;----     /
- *                  \      1      /
- *                   \    t2   _,/
- *                    \       0//
+ *                  \      1    _ /
+ *                   \\   t2    //
+ *                    \\2     0//
  * </pre>
  *
  * <p>
@@ -61,37 +61,37 @@ import java.util.Iterator;
  * program, Jonathan R. Shewchuk uses word alignment of pointers to pack
  * this information into pointers themselves: they are respectively shifted
  * by 0, 1 or 2 bytes for edges 0, 1 and 2.  This very efficient trick
- * cqn not be performed with Java, and the three numbers are packed into
+ * can not be performed with Java, and the three numbers are packed into
  * a single byte instead.  As attributes on edges are also needed, all
  * edge data are packed into a single {@link #adjPos} integer member.
  * </p>
  *
  * <p>
  * Algorithms do often need to compute lists of triangles.  In order to
- * avoid allocation of these lists, a linked list is provided by this
+ * avoid allocation of these lists, a singly linked list is provided by this
  * class.  It uses static members, so only one list can be active at
- * a time.  Here is an example:
+ * any time.  Here is an example:
  * </p>
  *   <pre>
  *   //  Begin a new list
- *   Triangle.listLock();
+ *   Triangle.{@link #listLock};
  *   ...
  *   //  In a loop, add triangles to this list.
- *     tri.listCollect();
+ *     tri.{@link #listCollect};
  *   //  Check whether a triangle is contained in this list.
  *   //  This is very fast because it tests if its link pointer
  *   //  is <code>null</code> or not.
- *     if (tri.isListed()) {
+ *     if (tri.{@link #isListed}) {
  *        ...
  *     }
  *   //  Loop over collected triangles.
- *     for (Iterator it = Triangle.getTriangleListIterator(); it.hasNext(); )
- *     {
- *        Triangle t = (Triangle) it.next();
- *        ...
- *     }
+ *   for (Iterator it = Triangle.{@link #getTriangleListIterator}; it.hasNext(); )
+ *   {
+ *     Triangle t = (Triangle) it.next();
+ *     ...
+ *   }
  *   //  When finished, remove all links between triangles
- *   Triangle.releaseLock();
+ *   Triangle.{@link #listRelease};
  *   </pre>
  * <p>
  * New elements are added at the end of the list so that {@link #listCollect} can
@@ -124,15 +124,20 @@ public class Triangle
 	*/
 	public int adjPos = 0;
 	private int groupId = -1;
+	// Reference to the next element in the singly linked list.
+	private Triangle listNext = null;
 	
 	// We need to process lists of triangles, and sometimes make sure
 	// that triangles are processed only once.  This can be achieved
-	// efficiently with a linked list.
+	// efficiently with a singly linked list.
+	//   Head of the list.  Triangles are linked from this instance.
 	private static final Triangle listHead = new Triangle();
+	//   Sentinel.  This triangle is always the last triangle of the list.
 	private static final Triangle listSentinel = new Triangle();
+	//   Reference to the last collected triangle.
 	private static Triangle listTail = null;
+	//   Number of collected items (for debugging purpose, can be removed).
 	private static int listSize = 0;
-	private Triangle listNext = null;
 	
 	public Triangle()
 	{
@@ -324,18 +329,32 @@ public class Triangle
 		return (adjPos & (OTriangle.BOUNDARY << 8 | OTriangle.BOUNDARY << 16 | OTriangle.BOUNDARY << 24)) != 0;
 	}
 	
+	/**
+	 * Swap attributes for edges 1 and 2.
+	 * @see OTriangle#invertOrientationFace
+	 */
 	protected void swapAttributes12()
 	{
 		int byte0 = adjPos & 0xff;
 		int byte0sw = (byte0 & 0xc3) | ((byte0 & 0x0c) << 2) | ((byte0 & 0x30) >> 2);
 		adjPos = byte0sw | (adjPos & 0x0000ff00) | ((adjPos & 0x00ff0000) << 8) | ((adjPos & 0xff000000) >> 8);
 	}
+	
+	/**
+	 * Swap attributes for edges 0 and 1.
+	 * @see OTriangle#invertOrientationFace
+	 */
 	protected void swapAttributes01()
 	{
 		int byte0 = adjPos & 0xff;
 		int byte0sw = (byte0 & 0xf0) | ((byte0 & 0x03) << 2) | ((byte0 & 0x0c) >> 2);
 		adjPos = byte0sw | (adjPos & 0xff000000) | ((adjPos & 0x0000ff00) << 8) | ((adjPos & 0x00ff0000) >> 8);
 	}
+	
+	/**
+	 * Swap attributes for edges 0 and 2.
+	 * @see OTriangle#invertOrientationFace
+	 */
 	protected void swapAttributes02()
 	{
 		int byte0 = adjPos & 0xff;

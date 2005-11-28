@@ -32,6 +32,9 @@ import java.util.ArrayList;
  * and simpler operations on vertex location because cells have power of two
  * side length and bitwise operators can be used instead of floating point
  * operations.
+ * The downside is that the conversion between double and integer coordinates
+ * must be known by advance, which is why constructor needs a bounding box
+ * as argument.
  */
 public class QuadTree
 {
@@ -72,6 +75,14 @@ public class QuadTree
 	
 	private Mesh mesh;
 	
+	/**
+	 * Create a new <code>QuadTree</code> of the desired size.
+	 *
+	 * @param umin  U-coordinate of the leftmost bottom vertex
+	 * @param umax  U-coordinate of the rightmost top vertex
+	 * @param vmin  V-coordinate of the leftmost bottom vertex
+	 * @param vmax  V-coordinate of the rightmost top vertex
+	 */
 	public QuadTree(double umin, double umax, double vmin, double vmax)
 	{
 		double deltaU = 1.01 * Math.abs(umin - umax);
@@ -84,6 +95,11 @@ public class QuadTree
 		nCells++;
 	}
 	
+	/**
+	 * Bind a {@link Mesh} instance to this quadtree.
+	 *
+	 * @param m  mesh
+	 */
 	public void bindMesh(Mesh m)
 	{
 		mesh = m;
@@ -92,6 +108,8 @@ public class QuadTree
 	
 	/**
 	 * Transform double coordinates into integer coordinates.
+	 * @param p  double coordinates
+	 * @param i  integer coordinates
 	 */
 	public void double2int(double [] p, int [] i)
 	{
@@ -101,6 +119,8 @@ public class QuadTree
 	
 	/**
 	 * Transform integer coordinates into double coordinates.
+	 * @param i  integer coordinates
+	 * @param p  double coordinates
 	 */
 	public void int2double(int [] i, double [] p)
 	{
@@ -120,15 +140,21 @@ public class QuadTree
 		return p;
 	}
 	
-	/*
-	 *      .-------.
-	 *      | 2 | 3 |
-	 *   j  |---+---|
-	 *      | 0 | 1 |
-	 *      `-------'
-	 *          i
+	/**
+	 * Return the index of the child node containing a given point.
+	 * A quadtree node contains at most 4 children.  Cell size is a power of
+	 * two, so locating a vertex can be performed by bitwise operators, as
+	 * shown below.
+	 * <pre>
+	 *      ┌───┬───┐
+	 *  &lt;>0 │ 2 │ 3 │   with I = i &amp; size
+	 *      ├───┼───┤    J = j &amp; size
+	 *    0 │ 0 │ 1 │ 
+	 *    J └───┴───┘ 
+	 *      I=0  &lt;>0
+	 * </pre>
 	 */
-	public static int indexSubQuad(int i, int j, int size)
+	protected static int indexSubQuad(int i, int j, int size)
 	{
 		int ret = ((j & size) == 0) ? 0 : 2;
 		if ((i & size) != 0)
@@ -137,7 +163,7 @@ public class QuadTree
 	}
 	
 	/**
-	 * Adds a vertex to the quadtree.
+	 * Add a vertex to the quadtree.
 	 *
 	 * @param v  the vertex being added.
 	 */
@@ -206,7 +232,7 @@ public class QuadTree
 	}
 	
 	/**
-	 * Removes a vertex from the quadtree.
+	 * Remove a vertex from the quadtree.
 	 *
 	 * @param v  the vertex being removed.
 	 */
@@ -254,6 +280,18 @@ public class QuadTree
 			last.subQuad[lastPos] = null;
 	}
 	
+	/**
+	 * Return a stored element of the <code>QuadTree</code> which is
+	 * near from a given vertex.  The algorithm is simplistic: the leaf which
+	 * would contains this node is retrieved.  If it contains vertices, the
+	 * nearest one is returned (vertices in other leaves may of course be
+	 * nearer).  Otherwise the nearest vertex from sibling children is
+	 * returned.  The returned vertex is a good starting point for
+	 * {@link #getNearestVertex}.
+	 *
+	 * @param v  the node to check.
+	 * @return a near vertex.
+	 */
 	public Vertex getNearVertex(Vertex v)
 	{
 		QuadTreeCell current = root;
@@ -411,6 +449,12 @@ public class QuadTree
 		}
 	}
 	
+	/**
+	 * Return the nearest vertex stored in this <code>QuadTree</code>.
+	 *
+	 * @param v  the node to check.
+	 * @return the nearest vertex.
+	 */
 	public Vertex getNearestVertex(Vertex v)
 	{
 		QuadTreeCell current = root;
@@ -464,6 +508,13 @@ public class QuadTree
 		}
 	}
 	
+	/**
+	 * Slow implementation of {@link #getNearestVertexProcedure}.
+	 * This method should be called only for debugging purpose.
+	 *
+	 * @param v  the node to check.
+	 * @return the nearest vertex.
+	 */
 	public Vertex getNearestVertexDebug(Vertex v)
 	{
 		QuadTreeCell current = root;
@@ -481,6 +532,66 @@ public class QuadTree
 			logger.debug("  result: "+ret);
 		}
 		return ret;
+	}
+	
+	private final class getAllVerticesProcedure implements QuadTreeProcedure
+	{
+		public ArrayList nodelist = null;
+		public getAllVerticesProcedure(int capacity)
+		{
+			nodelist = new ArrayList(capacity);
+		}
+		public final int action(Object o, int s, int i0, int j0)
+		{
+			QuadTreeCell self = (QuadTreeCell) o;
+			if (self.nItems > 0)
+			{
+				for (int i = 0; i < self.nItems; i++)
+					nodelist.add(self.subQuad[i]);
+			}
+			return 0;
+		}
+	}
+	
+	/**
+	 * Return a list of all vertices.
+	 *
+	 * @param capacity  initial capacity of the <code>ArrayList</code>.
+	 * @return a list containing all vertices.
+	 */
+	public ArrayList getAllVertices(int capacity)
+	{
+		QuadTreeCell current = root;
+		getAllVerticesProcedure gproc = new getAllVerticesProcedure(capacity);
+		deambulate(gproc);
+		return gproc.nodelist;
+	}
+	
+	private final class clearAllMetricsProcedure implements QuadTreeProcedure
+	{
+		public clearAllMetricsProcedure()
+		{
+		}
+		public final int action(Object o, int s, int i0, int j0)
+		{
+			QuadTreeCell self = (QuadTreeCell) o;
+			if (self.nItems > 0)
+			{
+				for (int i = 0; i < self.nItems; i++)
+					((Vertex) self.subQuad[i]).clearMetrics();
+			}
+			return 0;
+		}
+	}
+	
+	/**
+	 * Remove all metrics of vertices stored in this <code>QuadTree</code>.
+	 */
+	public void clearAllMetrics()
+	{
+		QuadTreeCell current = root;
+		clearAllMetricsProcedure gproc = new clearAllMetricsProcedure();
+		deambulate(gproc);
 	}
 	
 	public final boolean walk(QuadTreeProcedure proc)
@@ -558,57 +669,6 @@ public class QuadTree
 		assert i0 == 0;
 		assert j0 == 0;
 		return true;
-	}
-	
-	private final class getAllVerticesProcedure implements QuadTreeProcedure
-	{
-		public ArrayList nodelist = null;
-		public getAllVerticesProcedure(int capacity)
-		{
-			nodelist = new ArrayList(capacity);
-		}
-		public final int action(Object o, int s, int i0, int j0)
-		{
-			QuadTreeCell self = (QuadTreeCell) o;
-			if (self.nItems > 0)
-			{
-				for (int i = 0; i < self.nItems; i++)
-					nodelist.add(self.subQuad[i]);
-			}
-			return 0;
-		}
-	}
-	
-	public ArrayList getAllVertices(int capacity)
-	{
-		QuadTreeCell current = root;
-		getAllVerticesProcedure gproc = new getAllVerticesProcedure(capacity);
-		deambulate(gproc);
-		return gproc.nodelist;
-	}
-	
-	private final class clearAllMetricsProcedure implements QuadTreeProcedure
-	{
-		public clearAllMetricsProcedure()
-		{
-		}
-		public final int action(Object o, int s, int i0, int j0)
-		{
-			QuadTreeCell self = (QuadTreeCell) o;
-			if (self.nItems > 0)
-			{
-				for (int i = 0; i < self.nItems; i++)
-					((Vertex) self.subQuad[i]).clearMetrics();
-			}
-			return 0;
-		}
-	}
-	
-	public void clearAllMetrics()
-	{
-		QuadTreeCell current = root;
-		clearAllMetricsProcedure gproc = new clearAllMetricsProcedure();
-		deambulate(gproc);
 	}
 	
 	//  Similar to walk() but do not maintain i0,j0

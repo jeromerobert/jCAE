@@ -33,6 +33,20 @@ import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+/**
+ * Vertex of a mesh.
+ * When meshing a CAD surface, a vertex has two parameters and a metrics in its
+ * tangent plane is computed so that a unit mesh in this metrics comply with
+ * user constraints.
+ * When the underlying surface is defined by the 3D mesh itself, a vertex has
+ * three parameters and the surface is locally interpolated by a quadrics
+ * computed from vertex neighbours.
+ *
+ * <p>
+ * There is a special vertex, {@link #outer}, which represents a vertex at
+ * infinite.  It is used to create exterior triangles.
+ * </p>
+ */
 public class Vertex implements Cloneable
 {
 	private static Logger logger = Logger.getLogger(Vertex.class);
@@ -594,6 +608,7 @@ public class Vertex implements Cloneable
 		return 0.5 * Metric3D.prodSca(Metric3D.prodVect3D(vect1, vect2), n);
 	}
 	
+	/* Unused
 	public long dot3(Vertex v1, Vertex v2)
 	{
 		mesh.quadtree.double2int(param, i0);
@@ -655,6 +670,7 @@ public class Vertex implements Cloneable
 		}
 		return l2.isNegative();
 	}
+	*/
 	
 	//  Current vertex is symmetric apical vertex
 	public final boolean inCircleTest2(OTriangle ot)

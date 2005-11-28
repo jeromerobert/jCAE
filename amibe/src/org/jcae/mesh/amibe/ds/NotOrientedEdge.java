@@ -21,7 +21,7 @@
 package org.jcae.mesh.amibe.ds;
 
 /**
- * This class implements unique edges, without considering their orientation.
+ * Unique edges, without considering their orientation.
  */
 public class NotOrientedEdge extends OTriangle
 {

@@ -23,6 +23,24 @@ package org.jcae.mesh.amibe.util;
 import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.ds.MNode3D;
 
+/**
+ * Octree to store {@;ink MNode3D} vertices.
+ * This class is very similar to {@link QuadTree}, it is useful to find
+ * near vertices.  It was needed by {@link org.jcae.mesh.amibe.algos3d.Fuse}
+ * to fuse near vertices, but now that 3D meshes are also handled by the
+ * {@link org.jcae.mesh.amibe.ds.Mesh} class, it became oobsolete because
+ * adjacency relations between vertices are provided by
+ * {@link org.jcae.mesh.amibe.ds.Mesh}.
+ * Anyway this implementation has not yet been removed.
+ *
+ * Internally integer coordinates are used for two reasons: a better control on
+ * accuracy of geometrical operations, and simpler operations on vertex
+ * location because cells have power of two side length and bitwise operators
+ * can be used instead of floating point operations.
+ * The downside is that the conversion between double and integer coordinates
+ * must be known by advance, which is why constructor needs a bounding box
+ * as argument.
+ */
 public class Octree
 {
 	private static int BUCKETSIZE = 10;
@@ -42,14 +60,30 @@ public class Octree
 	
 	private static Logger logger=Logger.getLogger(Octree.class);	
 	
-	public OctreeCell root;
-	public int nCells = 1;
 	// Integer coordinates (like gridSize) must be long if MAXLEVEL > 30
 	public static final int MAXLEVEL = 30;
 	public static final int gridSize = 1 << MAXLEVEL;
-	// Convcrsion between double and integer coordinates
+	
+	/**
+	 * Root of the octree.
+	 */
+	public OctreeCell root;
+	
+	/**
+	 * Number of cells.
+	 */
+	public int nCells = 1;
+	
+	/**
+	 * Conversion between double and integer coordinates.
+	 */
 	public final double [] x0 = new double[4];
 	
+	/**
+	 * Create a new <code>Octree</code> of the desired size.
+	 * @param umin  3D coordinates of the leftmost bottom vertex
+	 * @param umax  3D coordinates of the rightmost top vertex
+	 */
 	public Octree(double [] umin, double [] umax)
 	{
 		double deltaX = Math.abs(umin[0] - umax[0]);
@@ -69,27 +103,47 @@ public class Octree
 		BUCKETSIZE = n;
 	}
 	
+	/**
+	 * Transform double coordinates into integer coordinates.
+	 * @param p  double coordinates
+	 * @param ijk  converted integer coordinates
+	 */
 	public final void double2int(double [] p, int [] ijk)
 	{
 		for (int i = 0; i < 3; i++)
 			ijk[i] = (int) ((p[i] - x0[i]) * x0[3]);
 	}
 	
+	/**
+	 * Transform integer coordinates into double coordinates.
+	 * @param ijk  integer coordinates
+	 * @param p  converted double coordinates
+	 */
 	public final void int2double(int [] ijk, double [] p)
 	{
 		for (int i = 0; i < 3; i++)
 			p[i] = x0[i] + ijk[i] / x0[3];
 	}
 	
-	/*         k=0          k=1
-	 *      .-------.    .-------.
-	 *      | 2 | 3 |    | 6 | 7 |
-	 *   j  |---+---|    |---+---|
-	 *      | 0 | 1 |    | 4 | 5 |
-	 *      `-------'    `-------'
-	 *          i          
+	/**
+	 * Return the index of the child node containing a given point.
+	 * An octree node contains at most 8 children.  Cell size is a power of
+	 * two, so locating a vertex can be performed by bitwise operators, as
+	 * shown below.
+	 * <pre>
+	 *         K=0          &lt;>0
+	 *      ┌───┬───┐    ┌───┬───┐
+	 *  &lt;>0 │ 2 │ 3 │    │ 6 │ 7 │   with I = ijk[0] &amp; size
+	 *      ├───┼───┤    ├───┼───┤        J = ijk[1] &amp; size
+	 *    0 │ 0 │ 1 │    │ 4 │ 5 │        K = ijk[2] &amp; size
+	 *    J └───┴───┘    └───┴───┘
+	 *      I=0  &lt;>0       0  &lt;>0
+	 * </pre>
+	 *
+	 * @param ijk   vertex location
+	 * @param size  cell size of children nodes.
 	 */
-	public static final int indexSubOctree(int [] ijk, int size)
+	protected static final int indexSubOctree(int [] ijk, int size)
 	{
 		int ret = 0;
 		if (size == 0)
@@ -102,6 +156,10 @@ public class Octree
 		return ret;
 	}
 	
+	/**
+	 * Add a {@link MNode3D} to the octree.
+	 * @param v  the node to add.
+	 */
 	public final void add(MNode3D v)
 	{
 		OctreeCell current = root;
@@ -163,6 +221,10 @@ public class Octree
 		current.nItems++;
 	}
 	
+	/**
+	 * Remove a {@link MNode3D} from the octree.
+	 * @param v  the node to remove.
+	 */
 	public final void remove(MNode3D v)
 	{
 		OctreeCell current = root;
@@ -207,6 +269,18 @@ public class Octree
 			last.subOctree[lastPos] = null;
 	}
 	
+	/**
+	 * Return a stored element of the <code>Octree</code> which is
+	 * near from a given vertex.  The algorithm is simplistic: the leaf which
+	 * would contains this node is retrieved.  If it contains vertices, the
+	 * nearest one is returned (vertices in other leaves may of course be
+	 * nearer).  Otherwise the nearest vertex from sibling children is
+	 * returned.  The returned vertex is a good starting point for
+	 * {@link #getNearestVertex}.
+	 *
+	 * @param v  the node to check.
+	 * @return a near vertex.
+	 */
 	public final MNode3D getNearVertex(MNode3D v)
 	{
 		OctreeCell current = root;
@@ -347,7 +421,7 @@ public class Octree
 		}
 	}
 	
-	public final int getMinSize()
+	private final int getMinSize()
 	{
 		OctreeCell current = root;
 		getMinSizeProcedure gproc = new getMinSizeProcedure();
@@ -360,6 +434,7 @@ public class Octree
 		}
 		return ret;
 	}
+	
 	public final int getMaxLevel()
 	{
 		int size = getMinSize();
@@ -422,6 +497,12 @@ public class Octree
 		}
 	}
 	
+	/**
+	 * Return the nearest vertex stored in this <code>Octree</code>.
+	 *
+	 * @param v  the node to check.
+	 * @return the nearest vertex.
+	 */
 	public final MNode3D getNearestVertex(MNode3D v)
 	{
 		OctreeCell current = root;

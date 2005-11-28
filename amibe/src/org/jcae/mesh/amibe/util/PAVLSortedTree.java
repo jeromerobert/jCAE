@@ -24,12 +24,12 @@ import java.util.HashMap;
 import org.apache.log4j.Logger;
 
 /**
- * Implementation of PAVL binary trees to store quality factors.
- * It is based on excellent Ben Pfaff's GNU libavl http://adtinfo.org/
+ * PAVL binary trees to store quality factors.
+ * Main ideas come from Ben Pfaff's <a href="http://adtinfo.org/">GNU libavl</a>.
  * These trees are used to sort vertices, edges, or triangles according
- * to their quality factors.  They are traversed according to quality
- * factors, and duplicate values are allowed.  See examples in
- * algorithms from {@link org.jcae.mesh.amibe.algos3d}.
+ * to their quality factors, and to process them in increasing or decreasing
+ * order after they have been sorted.  See examples in algorithms from
+ * {@link org.jcae.mesh.amibe.algos3d}.
  */
 public class PAVLSortedTree
 {
