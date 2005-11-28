@@ -148,8 +148,17 @@ public class SplitEdge
 				// FIXME: Check deflection
 				mesh.setRefVertexOnboundary(v);
 			}
-			else if (!edge.origin().discreteProject(v))
-				continue;
+			else
+			{
+				// Discrete differential operators, and thus
+				// discreteProject, does not work on boundary
+				// nodes.
+				Vertex vm = edge.origin();
+				if (!vm.isMutable())
+					vm = edge.destination();
+				if (!vm.discreteProject(v))
+					continue;
+			}
 			// Do not build degenerate triangles.
 			if (Math.abs(Math.sin(v.angle3D(edge.origin(), edge.apex()))) < sinMin ||
 			    Math.abs(Math.sin(v.angle3D(edge.destination(), edge.apex()))) < sinMin ||
