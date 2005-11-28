@@ -151,7 +151,6 @@ public class Mesh
 	public Mesh()
 	{
 		Vertex.mesh = this;
-		Triangle.outer = new Triangle();
 		Vertex.outer = new Vertex(0.0, 0.0);
 	}
 	
@@ -169,7 +168,6 @@ public class Mesh
 	public Mesh(CADFace f)
 	{
 		Vertex.mesh = this;
-		Triangle.outer = new Triangle();
 		Vertex.outer = null;
 		face = f;
 		surface = face.getGeomSurface();
