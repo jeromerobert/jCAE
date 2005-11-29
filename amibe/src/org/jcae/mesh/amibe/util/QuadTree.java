@@ -472,6 +472,13 @@ public class QuadTree
 	
 	/**
 	 * Return the nearest vertex stored in this <code>QuadTree</code>.
+	 * Computing distance to all vertices in the quadtree would be very
+	 * time consuming.  To speed up processing, whole quadtree cells are
+	 * ignored if their distance to the vertex is greater than the current
+	 * minimum.  The {@link getNearVertex} method is used to find the
+	 * initial minimum.  It is very fast and provides a good candidate,
+	 * so that the ratio of quadtree cells visited over the number of
+	 * quadtree cells is very low.
 	 *
 	 * @param v  the vertex to check.
 	 * @return the nearest vertex.
