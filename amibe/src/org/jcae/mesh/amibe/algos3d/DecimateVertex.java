@@ -54,21 +54,28 @@ public class DecimateVertex
 		public double [] b = new double[3];
 		public double c;
 		public double area;
-		public void reset()
+		public Quadric()
 		{
+			// By default, A is initialized to the identity matrix
 			A.reset();
-			for (int i = 0; i < b.length; i++)
-				b[i] = 0.0;
-			c = 0.0;
-			area = 0.0;
 		}
-		public void add(Quadric that)
+		// Define a new quadrics by addition of 2 quadrics
+		public Quadric(Quadric q1, Quadric q2)
 		{
-			A.add(that.A);
-			for (int i = 0; i < b.length; i++)
-				b[i] += that.b[i];
-			c += that.c;
-			area += that.area;
+			assert q1.area > 0.0 : q1;
+			assert q2.area > 0.0 : q2;
+			double l1 = q1.area / (q1.area + q2.area);
+			double l2 = q2.area / (q1.area + q2.area);
+			for (int i = 0; i < 3; i++)
+				for (int j = 0; j < 3; j++)
+					A.data[i][j] = l1 * q1.A.data[i][j] + l2 * q2.A.data[i][j];
+			for (int i = 0; i < 3; i++)
+				b[i] = l1 * q1.b[i] + l2 * q2.b[i];
+			c = l1 * q1.c + l2 * q2.c;
+			area = q1.area + q2.area;
+		}
+		public void add(Quadric q1, Quadric q2)
+		{
 		}
 		public double value(double [] vect)
 		{
@@ -77,7 +84,7 @@ public class DecimateVertex
 			for (int i = 0; i < b.length; i++)
 				for (int j = 0; j < b.length; j++)
 					ret += A.data[i][j] * vect[i] * vect[j];
-			return ret / area;
+			return ret;
 		}
 		public String toString()
 		{
@@ -167,11 +174,11 @@ public class DecimateVertex
 				Quadric q = (Quadric) quadricMap.get(f.vertex[i]);
 				for (int k = 0; k < 3; k++)
 				{
-					q.b[k] += area * d * normal[k];
+					q.b[k] += d * normal[k];
 					for (int l = 0; l < 3; l++)
-						q.A.data[k][l] += area * normal[k]*normal[l];
+						q.A.data[k][l] += normal[k]*normal[l];
 				}
-				q.c += area * d*d;
+				q.c += d*d;
 				q.area += area;
 			}
 			// Penalty for boundary triangles
@@ -271,8 +278,7 @@ public class DecimateVertex
 			NotOrientedEdge edge = (NotOrientedEdge) tree.first();
 			double cost = tree.getKey(edge);
 			Vertex v1 = null, v2 = null, v3 = null;
-			Quadric q1 = null, q2 = null;
-			Quadric q3 = new Quadric();
+			Quadric q1 = null, q2 = null, q3 = null;
 			do {
 				if (cost > tolerance)
 					break;
@@ -286,9 +292,7 @@ public class DecimateVertex
 					q2 = (Quadric) quadricMap.get(v2);
 					assert q1 != null : v1;
 					assert q2 != null : v2;
-					q3.reset();
-					q3.add(q1);
-					q3.add(q2);
+					q3 = new Quadric(q1, q2);
 					v3 = optimalPlacement(v1, v2, q1, q2, q3, temp);
 					if (edge.canContract(v3))
 						break;
