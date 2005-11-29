@@ -1,3 +1,9 @@
+Tue Nov 29 17:47:22 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Vertex.java (discreteAverageNormal): Use area weighting.
+	* src/org/jcae/mesh/amibe/ds/Vertex.java (discreteProject): Get mean normal from discreteAverageNormal() instead of discreteCurvatures(), it seems too be much more reliable.
+	* src/org/jcae/mesh/amibe/algos3d/SplitEdge.java: Use a new implementation of AVL binary trees.
+
 Tue Nov 29 12:22:39 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java: Call A.reset() in the constructor, because metrics are now initialized to the identity matrix.
