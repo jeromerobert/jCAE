@@ -73,22 +73,6 @@ public class Matrix3D
 	}
 	
 	/**
-	 * Create a <code>Matrix3D</code> instance containing the sum of this and
-	 * another <code>Matrix3D</code>.
-	 *
-	 * @param A  matrix to add to the current one
-	 * @return a new Matrix3D containing the sum of the two matrices.
-	 */
-	public Matrix3D add(Matrix3D A)
-	{
-		Matrix3D ret = new Matrix3D();
-		for (int i = 0; i < 3; i++)
-			for (int j = 0; j < 3; j++)
-				ret.data[i][j] = data[i][j] + A.data[i][j];
-		return ret;
-	}
-	
-	/**
 	 * Create a <code>Matrix3D</code> instance containing the multiplication
 	 * of this <code>Matrix3D</code> instance by another one.
 	 *
