@@ -29,20 +29,32 @@ import java.util.ArrayList;
 /**
  * Quadtree structure to store 2D vertices.  When adjacent relations have not
  * yet been set, a quadtree is an efficient way to locate a point among a set
- * of points and triangles.  Integer coordinates are used for two reasons: a
- * better control on accuracy of geometrical operations, and simpler operations
- * on vertex location because cells have power of two side length and bitwise
- * operators can be used instead of floating point operations.
- * The downside is that the conversion between double and integer coordinates
- * must be known by advance, which is why constructor needs a bounding box
- * as argument.
+ * of points and triangles.
  *
+ * <p>
+ * Integer coordinates are used for two reasons: a better control on accuracy
+ * of geometrical operations, and simpler operations on vertex location because
+ * cells have power of two side length and bitwise operators can be used
+ * instead of floating point operations.  The downside is that the conversion
+ * between double and integer coordinates must be known in advance, which is
+ * why constructor needs a bounding box as argument.
+ * </p>
+ *
+ * <p>
  * Each cell of a <code>QuadTree</code> contains either vertices or four
  * children nodes (some of them may be <code>null</code>).  A cell can contain
  * at most <code>BUCKETSIZE</code> vertices (default is 10).  When this number
  * is exceeded, the cell is splitted and vertices are stored in these children.
  * On the contrary, when all vertices are removed from a cell, it is deleted.
  * And when all children of a cell are null, this cell is removed.
+ * </p>
+ * 
+ * <p>
+ * Quadtree cells are very compact, they do not contain any locational
+ * information.  It is instead passed to the {@link QuadTreeProcedure#action}
+ * method.  This design had been chosen for performance reasons on large
+ * meshes, and in practice it works very very well.
+ * </p>
  */
 public class QuadTree
 {
@@ -291,14 +303,15 @@ public class QuadTree
 	
 	/**
 	 * Return a stored element of the <code>QuadTree</code> which is
-	 * near from a given vertex.  The algorithm is simplistic: the leaf which
-	 * would contains this node is retrieved.  If it contains vertices, the
-	 * nearest one is returned (vertices in other leaves may of course be
-	 * nearer).  Otherwise the nearest vertex from sibling children is
-	 * returned.  The returned vertex is a good starting point for
+	 * near from a given vertex.  The algorithm is simplistic: the leaf
+	 * which would contains this vertex is retrieved.  If it contains
+	 * vertices, the nearest one is returned (vertices in other leaves may
+	 * of course be nearer).  Otherwise the nearest vertex from sibling
+	 * children is returned.  The returned vertex is a good starting point
+	 * for
 	 * {@link #getNearestVertex}.
 	 *
-	 * @param v  the node to check.
+	 * @param v  the vertex to check.
 	 * @return a near vertex.
 	 */
 	public Vertex getNearVertex(Vertex v)
@@ -460,7 +473,7 @@ public class QuadTree
 	/**
 	 * Return the nearest vertex stored in this <code>QuadTree</code>.
 	 *
-	 * @param v  the node to check.
+	 * @param v  the vertex to check.
 	 * @return the nearest vertex.
 	 */
 	public Vertex getNearestVertex(Vertex v)
@@ -520,7 +533,7 @@ public class QuadTree
 	 * Slow implementation of {@link #getNearestVertex}.
 	 * This method should be called only for debugging purpose.
 	 *
-	 * @param v  the node to check.
+	 * @param v  the vertex to check.
 	 * @return the nearest vertex.
 	 */
 	public Vertex getNearestVertexDebug(Vertex v)
@@ -577,9 +590,6 @@ public class QuadTree
 	
 	private final class clearAllMetricsProcedure implements QuadTreeProcedure
 	{
-		public clearAllMetricsProcedure()
-		{
-		}
 		public final int action(Object o, int s, int i0, int j0)
 		{
 			QuadTreeCell self = (QuadTreeCell) o;
@@ -602,6 +612,18 @@ public class QuadTree
 		walk(gproc);
 	}
 	
+	/**
+	 * Perform an action on all cells in prefix order.
+	 * @see QuadTreeProcedure
+	 *
+	 * The procedure is applied to the root cell, then recursively to
+	 * its children.  If it returns <code>-1</code>, processing aborts
+	 * immediately and <code>false</code> is returned.  If the
+	 * procedure returns <code>1</code>, cell children are not processed.
+	 *
+	 * @param proc  procedure to apply on each cell.
+	 * @return <code>true</code> if all cells have been traversed, <code>false</code> otherwise.
+	 */
 	public final boolean walk(QuadTreeProcedure proc)
 	{
 		int s = gridSize;

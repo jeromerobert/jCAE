@@ -25,10 +25,18 @@ package org.jcae.mesh.amibe.util;
  */
 public interface QuadTreeProcedure
 {
-	//  This method is called by QuadTree.walk, it is then applied to
-	//  the whole quadtree.  Its return status may change processing:
-	//    -1: exit from walk() immediately
-	//     1: skip current cell (ie do not process its children)
-	//     0: process normally
+	/**
+	 * Perform an action on the given quadtree cell.
+	 * This method is called by {@link QuadTree#walk} on all cells
+	 * of the quadtree recursively.
+	 *
+	 * @param o  quadtree cell.
+	 * @param s  cell size.
+	 * @param i  first coordinate of the bottom left corner of this cell.
+	 * @param j  second coordinate of the bottom left corner of this cell.
+	 * @return <code>-1</code> if {@link QuadTree#walk} processing must
+	 * abort now, <code>1</code> if node chikldren have to be ignored, and
+	 * <code>0</code> to process node children recursively.
+	 */
 	public int action(Object o, int s, int i, int j);
 }
