@@ -1,3 +1,14 @@
+Tue Nov 29 12:22:39 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java: Call A.reset() in the constructor, because metrics are now initialized to the identity matrix.
+	* src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java: Do not multiply quadrics by region area: this causes problems in Matrix3D.inv() to detect singular matrices.  Area is instead taken into account when adding quadrics.
+	* src/org/jcae/mesh/amibe/metrics/Metric3D.java (inv):  Revert the change introduced on 2005-11-15, a better fix has been applied to DecimateVertex, see above.
+
+Mon Nov 28 10:05:46 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos3d/SplitEdge.java: Discrete differential operators are not defined on boundary nodes, thus consider only quadrics on interior nodes.
+	* src/org/jcae/mesh/amibe/ds/Triangle.java (listCollect): Add element at the end of the linked list so that listCollect() can be called while iterating over existing elements.  A check is added to avoid circular loops.
+
 Sun Nov 27 12:55:46 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/metrics/Matrix.java
