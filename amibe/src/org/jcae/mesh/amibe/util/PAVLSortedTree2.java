@@ -81,10 +81,9 @@ public class PAVLSortedTree2
 	}
 	
 	/**
-	 * Insert a node to the tree.  Tree is sorted according to
-	 * <code>value</code>, and duplicates are not checked.
-	 * @param o      object
-	 * @param value  quality factor
+	 * Insert a node into the tree.
+	 *
+	 * @param node      node to insert.
 	 */
 	public final synchronized void insert(PAVLNode node)
 	{
@@ -106,7 +105,7 @@ public class PAVLSortedTree2
 	
 	/**
 	 * Update the quality factor of an object.
-	 * @param o      object being updated.
+	 * @param node   node being updated.
 	 * @param value  new quality factor.
 	 * @return the old value.
 	 */
@@ -122,18 +121,18 @@ public class PAVLSortedTree2
 	
 	/**
 	 * Remove the node associated to an object from the tree.
-	 * @param o      object being removed
+	 * @param node      node being removed
 	 * @return  the quality factor associated to this object.
 	 */
-	public final synchronized double remove(PAVLNode p)
+	public final synchronized double remove(PAVLNode node)
 	{
 		if (logger.isDebugEnabled())
-			logger.debug("Remove "+p);
-		double ret = p.getKey();
+			logger.debug("Remove "+node);
+		double ret = node.getKey();
 		if (logger.isDebugEnabled())
 			logger.debug("Value: "+ret);
 		count--;
-		root.remove(p);
+		root.remove(node);
 		if (root.child[0] == null)
 			root = null;
 		return ret;
