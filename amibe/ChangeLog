@@ -3,6 +3,8 @@ Tue Nov 29 17:47:22 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/amibe/ds/Vertex.java (discreteAverageNormal): Use area weighting.
 	* src/org/jcae/mesh/amibe/ds/Vertex.java (discreteProject): Get mean normal from discreteAverageNormal() instead of discreteCurvatures(), it seems too be much more reliable.
 	* src/org/jcae/mesh/amibe/algos3d/SplitEdge.java: Use a new implementation of AVL binary trees.
+	* src/org/jcae/mesh/amibe/util/QuadTree.java
+	* src/org/jcae/mesh/amibe/ds/Mesh.java:  Remove the mesh attribute from QuadTree, and replace it by a Calculus instance, which is all that is needed to compute distances between vertices.
 
 Tue Nov 29 12:22:39 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
