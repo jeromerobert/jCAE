@@ -21,17 +21,18 @@
 package org.jcae.mesh.amibe.util;
 
 import org.apache.log4j.Logger;
-import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.tools.Calculus;
+import org.jcae.mesh.amibe.ds.tools.Calculus2D;
 import java.util.ArrayList;
 
 /**
- * Quadtree structure to store 2D vertices.  Integer coordinates are used
- * for two reasons: a better control on accuracy of geometrical operations,
- * and simpler operations on vertex location because cells have power of two
- * side length and bitwise operators can be used instead of floating point
- * operations.
+ * Quadtree structure to store 2D vertices.  When adjacent relations have not
+ * yet been set, a quadtree is an efficient way to locate a point among a set
+ * of points and triangles.  Integer coordinates are used for two reasons: a
+ * better control on accuracy of geometrical operations, and simpler operations
+ * on vertex location because cells have power of two side length and bitwise
+ * operators can be used instead of floating point operations.
  * The downside is that the conversion between double and integer coordinates
  * must be known by advance, which is why constructor needs a bounding box
  * as argument.
@@ -73,7 +74,8 @@ public class QuadTree
 	 */
 	public final double [] x0 = new double[3];
 	
-	private Mesh mesh;
+	// Functions to compute distance between vertices
+	private Calculus compGeom;
 	
 	/**
 	 * Create a new <code>QuadTree</code> of the desired size.
@@ -92,18 +94,18 @@ public class QuadTree
 		x0[1] = vmin;
 		x0[2] = ((double) gridSize) / Math.max(deltaU, deltaV);
 		root = new QuadTreeCell();
+		compGeom = new Calculus2D(null);
 		nCells++;
 	}
 	
 	/**
-	 * Bind a {@link Mesh} instance to this quadtree.
+	 * Set functions to compute distances between vertices.
 	 *
-	 * @param m  mesh
+	 * @param c   instance of {@link Calculus} to compute distances between vertices.
 	 */
-	public void bindMesh(Mesh m)
+	public void setCompGeom(Calculus c)
 	{
-		mesh = m;
-		m.quadtree = this;
+		compGeom = c;
 	}
 	
 	/**
@@ -316,11 +318,11 @@ public class QuadTree
 		
 		Vertex vQ = (Vertex) current.subQuad[0];
 		Vertex ret = vQ;
-		double retdist = mesh.compGeom().distance(v, vQ, v);
+		double retdist = compGeom.distance(v, vQ, v);
 		for (int i = 1; i < current.nItems; i++)
 		{
 			vQ = (Vertex) current.subQuad[i];
-			double d = mesh.compGeom().distance(v, vQ, v);
+			double d = compGeom.distance(v, vQ, v);
 			if (d < retdist)
 			{
 				retdist = d;
@@ -367,7 +369,7 @@ public class QuadTree
 				for (int i = 0; i < quadStack[l].nItems; i++)
 				{
 					Vertex vQ = (Vertex) quadStack[l].subQuad[i];
-					double d = mesh.compGeom().distance(v, vQ, v);
+					double d = compGeom.distance(v, vQ, v);
 					if (d < dist || dist < 0.0)
 					{
 						dist = d;
@@ -406,7 +408,6 @@ public class QuadTree
 		private double dist, i2d;
 		public Vertex fromVertex, nearestVertex;
 		public int searchedCells = 0;
-		private final Calculus comp = mesh.compGeom();
 		public getNearestVertexProcedure(Vertex from, Vertex v)
 		{
 			double2int(from.getUV(), ij);
@@ -415,8 +416,8 @@ public class QuadTree
 			// FIXME: a factor of 1.005 is added to take rounding
 			// errors into account, a better approximation should
 			// be used.
-			i2d = 1.005 * x0[2] * (comp.radius2d(fromVertex));
-			dist = comp.distance(fromVertex, v, fromVertex);
+			i2d = 1.005 * x0[2] * (compGeom.radius2d(fromVertex));
+			dist = compGeom.distance(fromVertex, v, fromVertex);
 			idist = (int) (dist * i2d);
 			if (idist > Integer.MAX_VALUE/2)
 				idist = Integer.MAX_VALUE/2;
@@ -434,7 +435,7 @@ public class QuadTree
 				for (int i = 0; i < self.nItems; i++)
 				{
 					Vertex vtest = (Vertex) self.subQuad[i];
-					double retdist = comp.distance(fromVertex, vtest, fromVertex);
+					double retdist = compGeom.distance(fromVertex, vtest, fromVertex);
 					if (retdist < dist)
 					{
 						dist = retdist;
@@ -485,7 +486,7 @@ public class QuadTree
 			double2int(from.getUV(), ij);
 			nearestVertex = v;
 			fromVertex = from;
-			dist = mesh.compGeom().distance(fromVertex, v, fromVertex);
+			dist = compGeom.distance(fromVertex, v, fromVertex);
 		}
 		public final int action(Object o, int s, int i0, int j0)
 		{
@@ -496,7 +497,7 @@ public class QuadTree
 				for (int i = 0; i < self.nItems; i++)
 				{
 					Vertex vtest = (Vertex) self.subQuad[i];
-					double retdist = mesh.compGeom().distance(fromVertex, vtest, fromVertex);
+					double retdist = compGeom.distance(fromVertex, vtest, fromVertex);
 					if (retdist < dist)
 					{
 						dist = retdist;

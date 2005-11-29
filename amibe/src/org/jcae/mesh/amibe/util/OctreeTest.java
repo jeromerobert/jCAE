@@ -38,6 +38,9 @@ import javax.media.j3d.PolygonAttributes;
 import javax.media.j3d.ColoringAttributes;
 import javax.media.j3d.PointAttributes;
 
+/**
+ * Utility class to write unit tests for the Octree class.
+ */
 public class OctreeTest extends Octree
 {
 	private static Logger logger=Logger.getLogger(OctreeTest.class);	

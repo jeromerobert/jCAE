@@ -249,7 +249,7 @@ public class Mesh
 	public void initQuadTree(double umin, double umax, double vmin, double vmax)
 	{
 		quadtree = new QuadTree(umin, umax, vmin, vmax);
-		quadtree.bindMesh(this);
+		quadtree.setCompGeom(compGeom());
 		Vertex.outer = new Vertex((umin+umax)*0.5, (vmin+vmax)*0.5);
 	}
 	
@@ -261,6 +261,17 @@ public class Mesh
 	public QuadTree getQuadTree()
 	{
 		return quadtree;
+	}
+	
+	/**
+	 * Sets the quadtree associated with this mesh.
+	 *
+	 * @param q  the quadtree associated with this mesh.
+	 */
+	public void setQuadTree(QuadTree q)
+	{
+		quadtree = q;
+		quadtree.setCompGeom(compGeom());
 	}
 	
 	public void scaleTolerance(double scale)
@@ -465,7 +476,8 @@ public class Mesh
 			compGeomStack.push(new Calculus3D(this));
 		else
 			throw new java.lang.IllegalArgumentException("pushCompGeom argument must be either 2 or 3, current value is: "+i);
-		quadtree.clearAllMetrics();
+		if (quadtree != null)
+			quadtree.clearAllMetrics();
 	}
 	
 	/**
@@ -480,7 +492,7 @@ public class Mesh
 		//  Metrics are always reset by pushCompGeom.
 		//  Only reset them here when there is a change.
 		Object ret = compGeomStack.pop();
-		if (compGeomStack.size() > 0 && !ret.getClass().equals(compGeomStack.peek().getClass()))
+		if (compGeomStack.size() > 0 && !ret.getClass().equals(compGeomStack.peek().getClass()) && quadtree != null)
 			quadtree.clearAllMetrics();
 		return (Calculus) ret;
 	}
@@ -499,7 +511,7 @@ public class Mesh
 		throws RuntimeException
 	{
 		Object ret = compGeomStack.pop();
-		if (compGeomStack.size() > 0 && !ret.getClass().equals(compGeomStack.peek().getClass()))
+		if (compGeomStack.size() > 0 && !ret.getClass().equals(compGeomStack.peek().getClass()) && quadtree != null)
 			quadtree.clearAllMetrics();
 		if (i == 2)
 		{
