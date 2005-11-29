@@ -33,26 +33,42 @@ import org.jcae.mesh.amibe.ds.MNode3D;
  * {@link org.jcae.mesh.amibe.ds.Mesh}.
  * Anyway this implementation has not yet been removed.
  *
- * Internally integer coordinates are used for two reasons: a better control on
- * accuracy of geometrical operations, and simpler operations on vertex
- * location because cells have power of two side length and bitwise operators
- * can be used instead of floating point operations.
- * The downside is that the conversion between double and integer coordinates
- * must be known by advance, which is why constructor needs a bounding box
- * as argument.
+ * <p>
+ * Integer coordinates are used for two reasons: a better control on accuracy
+ * of geometrical operations, and simpler operations on vertex location because
+ * cells have power of two side length and bitwise operators can be used
+ * instead of floating point operations.  The downside is that the conversion
+ * between double and integer coordinates must be known in advance, which is
+ * why constructor needs a bounding box as argument.
+ * </p>
+ *
+ * <p>
+ * Each cell of an <code>Octree</code> contains either vertices or eight
+ * children nodes (some of them may be <code>null</code>).  A cell can contain
+ * at most <code>BUCKETSIZE</code> vertices (default is 10).  When this number
+ * is exceeded, the cell is splitted and vertices are stored in these children.
+ * On the contrary, when all vertices are removed from a cell, it is deleted.
+ * And when all children of a cell are null, this cell is removed.
+ * </p>
+ * 
+ * <p>
+ * Octree cells are very compact, they do not contain any locational
+ * information.  It is instead passed to the {@link OctreeProcedure#action}
+ * method.  This design had been chosen for performance reasons on large
+ * meshes, and in practice it works very very well.
+ * </p>
  */
 public class Octree
 {
 	private static int BUCKETSIZE = 10;
 	protected class OctreeCell
 	{
-		public static final int SUBOCTREES = 8;
 		//  nItems can either store the number of items in the current cell,
 		//  or the total number of vertices below this cell.
 		//  In the latter case, nItems can be of type byte
 		//  (if BUCKETSIZE < 128) or short.
 		protected int nItems = 0;
-		//  subOctree contains either SUBOCTREES suboctrees or up to
+		//  subOctree contains either 8 suboctrees or up to
 		//  BUCKETSIZE vertices.  This compact storage is needed to
 		//  reduce memory usage.
 		protected Object [] subOctree = null;
@@ -61,8 +77,8 @@ public class Octree
 	private static Logger logger=Logger.getLogger(Octree.class);	
 	
 	// Integer coordinates (like gridSize) must be long if MAXLEVEL > 30
-	public static final int MAXLEVEL = 30;
-	public static final int gridSize = 1 << MAXLEVEL;
+	private static final int MAXLEVEL = 30;
+	private static final int gridSize = 1 << MAXLEVEL;
 	
 	/**
 	 * Root of the octree.
@@ -98,8 +114,16 @@ public class Octree
 		nCells++;
 	}
 	
+	/**
+	 * Set bucket size.  This method must be called before adding vertices
+	 * into the octree.
+	 *
+	 * @param n  the desired bucket size.
+	 */
 	public final void setBucketSize(int n)
 	{
+		if (root.nItems != 0)
+			throw new RuntimeException("setBucketSize must be called before adding items!");
 		BUCKETSIZE = n;
 	}
 	
@@ -181,12 +205,12 @@ public class Octree
 			current = (OctreeCell) current.subOctree[ind];
 		}
 		
-		//  If current box is full, split it into SUBOCTREES suboctrees
+		//  If current box is full, split it into 8 suboctrees
 		while (current.nItems == BUCKETSIZE)
 		{
 			s >>= 1;
 			assert s > 0;
-			OctreeCell [] newSubOctrees = new OctreeCell[OctreeCell.SUBOCTREES];
+			OctreeCell [] newSubOctrees = new OctreeCell[8];
 			//  Move points to their respective suboctrees.
 			for (int i = 0; i < BUCKETSIZE; i++)
 			{
@@ -271,12 +295,12 @@ public class Octree
 	
 	/**
 	 * Return a stored element of the <code>Octree</code> which is
-	 * near from a given vertex.  The algorithm is simplistic: the leaf which
-	 * would contains this node is retrieved.  If it contains vertices, the
-	 * nearest one is returned (vertices in other leaves may of course be
-	 * nearer).  Otherwise the nearest vertex from sibling children is
-	 * returned.  The returned vertex is a good starting point for
-	 * {@link #getNearestVertex}.
+	 * near from a given vertex.  The algorithm is simplistic: the leaf
+	 * which would contains this node is retrieved.  If it contains
+	 * vertices, the nearest one is returned (vertices in other leaves may
+	 * of course be nearer).  Otherwise the nearest vertex from sibling
+	 * children is returned.  The returned vertex is a good starting point
+	 * for {@link #getNearestVertex}.
 	 *
 	 * @param v  the node to check.
 	 * @return a near vertex.
@@ -353,7 +377,7 @@ public class Octree
 			{
 				l++;
 				assert l <= MAXLEVEL;
-				for (int i = 0; i < OctreeCell.SUBOCTREES; i++)
+				for (int i = 0; i < 8; i++)
 				{
 					if (null != octreeStack[l-1].subOctree[i])
 					{
@@ -389,7 +413,7 @@ public class Octree
 				while (l > 0)
 				{
 					posStack[l]++;
-					if (posStack[l] == OctreeCell.SUBOCTREES)
+					if (posStack[l] == 8)
 						l--;
 					else if (null != octreeStack[l-1].subOctree[posStack[l]])
 						break;
@@ -425,7 +449,7 @@ public class Octree
 	{
 		OctreeCell current = root;
 		getMinSizeProcedure gproc = new getMinSizeProcedure();
-		deambulate(gproc);
+		walk(gproc);
 		int ret = gproc.minSize;
 		if (logger.isDebugEnabled())
 		{
@@ -523,6 +547,18 @@ public class Octree
 		return ret;
 	}
 	
+	/**
+	 * Perform an action on all cells in prefix order.
+	 *
+	 * The procedure is applied to the root cell, then recursively to
+	 * its children.  If it returns <code>-1</code>, processing aborts
+	 * immediately and <code>false</code> is returned.  If the
+	 * procedure returns <code>1</code>, cell children are not processed.
+	 *
+	 * @param proc  procedure to apply on each cell.
+	 * @return <code>true</code> if all cells have been traversed, <code>false</code> otherwise.
+	 * @see OctreeProcedure
+	 */
 	public final boolean walk(OctreeProcedure proc)
 	{
 		int s = gridSize;
@@ -545,7 +581,7 @@ public class Octree
 				assert s > 0;
 				l++;
 				assert l <= MAXLEVEL;
-				for (int i = 0; i < OctreeCell.SUBOCTREES; i++)
+				for (int i = 0; i < 8; i++)
 				{
 					if (null != octreeStack[l-1].subOctree[i])
 					{
@@ -582,7 +618,7 @@ public class Octree
 								k0 -= s;
 						}
 					}
-					if (posStack[l] == OctreeCell.SUBOCTREES)
+					if (posStack[l] == 8)
 					{
 						s <<= 1;
 						l--;
@@ -601,60 +637,6 @@ public class Octree
 		assert i0 == 0;
 		assert j0 == 0;
 		assert k0 == 0;
-		return true;
-	}
-	
-	//  Similar to walk() but do not maintain i0,j0,k0
-	public final boolean deambulate(OctreeProcedure proc)
-	{
-		int s = gridSize;
-		int l = 0;
-		int [] posStack = new int[MAXLEVEL];
-		posStack[l] = 0;
-		OctreeCell [] octreeStack = new OctreeCell[MAXLEVEL];
-		octreeStack[l] = root;
-		while (true)
-		{
-			int res = proc.action(octreeStack[l], s, 0, 0, 0);
-			if (res == -1)
-				return false;
-			if (octreeStack[l].nItems < 0 && res == 0)
-			{
-				s >>= 1;
-				assert s > 0;
-				l++;
-				assert l <= MAXLEVEL;
-				for (int i = 0; i < OctreeCell.SUBOCTREES; i++)
-				{
-					if (null != octreeStack[l-1].subOctree[i])
-					{
-						octreeStack[l] = (OctreeCell) octreeStack[l-1].subOctree[i];
-						posStack[l] = i;
-						break;
-					}
-				}
-			}
-			else
-			{
-				while (l > 0)
-				{
-					posStack[l]++;
-					if (posStack[l] == OctreeCell.SUBOCTREES)
-					{
-						s <<= 1;
-						l--;
-					}
-					else
-					{
-						if (null != octreeStack[l-1].subOctree[posStack[l]])
-							break;
-					}
-				}
-				if (l == 0)
-					break;
-				octreeStack[l] = (OctreeCell) octreeStack[l-1].subOctree[posStack[l]];
-			}
-		}
 		return true;
 	}
 	

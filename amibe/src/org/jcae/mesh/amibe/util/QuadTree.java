@@ -475,7 +475,7 @@ public class QuadTree
 	 * Computing distance to all vertices in the quadtree would be very
 	 * time consuming.  To speed up processing, whole quadtree cells are
 	 * ignored if their distance to the vertex is greater than the current
-	 * minimum.  The {@link getNearVertex} method is used to find the
+	 * minimum.  The {@link #getNearVertex} method is used to find the
 	 * initial minimum.  It is very fast and provides a good candidate,
 	 * so that the ratio of quadtree cells visited over the number of
 	 * quadtree cells is very low.
@@ -621,7 +621,6 @@ public class QuadTree
 	
 	/**
 	 * Perform an action on all cells in prefix order.
-	 * @see QuadTreeProcedure
 	 *
 	 * The procedure is applied to the root cell, then recursively to
 	 * its children.  If it returns <code>-1</code>, processing aborts
@@ -630,6 +629,7 @@ public class QuadTree
 	 *
 	 * @param proc  procedure to apply on each cell.
 	 * @return <code>true</code> if all cells have been traversed, <code>false</code> otherwise.
+	 * @see QuadTreeProcedure
 	 */
 	public final boolean walk(QuadTreeProcedure proc)
 	{

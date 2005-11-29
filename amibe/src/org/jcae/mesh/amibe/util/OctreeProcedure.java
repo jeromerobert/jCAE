@@ -25,10 +25,19 @@ package org.jcae.mesh.amibe.util;
  */
 public interface OctreeProcedure
 {
-	//  This method is called by OcTree.walk, it is then applied to
-	//  the whole octree.  Its return status may change processing:
-	//    -1: exit from walk() immediately
-	//     1: skip current cell (ie do not process its children)
-	//     0: process normally
+	/**
+	 * Perform an action on the given octree cell.
+	 * This method is called by {@link Octree#walk} on all cells
+	 * of the octree recursively.
+	 *
+	 * @param o  octree cell.
+	 * @param s  cell size.
+	 * @param i  first coordinate of the bottom left corner of this cell.
+	 * @param j  second coordinate of the bottom left corner of this cell.
+	 * @param k  third coordinate of the bottom left corner of this cell.
+	 * @return <code>-1</code> if {@link Octree#walk} processing must
+	 * abort now, <code>1</code> if node chikldren have to be ignored, and
+	 * <code>0</code> to process node children recursively.
+	 */
 	public int action(Object o, int s, int i, int j, int k);
 }
