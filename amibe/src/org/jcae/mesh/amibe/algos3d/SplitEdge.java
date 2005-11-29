@@ -25,12 +25,13 @@ import org.jcae.mesh.amibe.ds.OTriangle;
 import org.jcae.mesh.amibe.ds.NotOrientedEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.util.PAVLSortedTree;
+import org.jcae.mesh.amibe.util.PAVLSortedTree2;
+import org.jcae.mesh.amibe.util.PAVLNodeOTriangle;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 /**
- * Laplacian smoothing.
+ * Split long edges.
  */
 
 public class SplitEdge
@@ -58,24 +59,16 @@ public class SplitEdge
 	public void compute()
 	{
 		logger.debug("Running SplitEdge");
-		// FIXME: there is a but in splitAllEdges, some edges
-		//   are not correctly removed from the tree.  As a
-		//   workaround, this loop had been introduced.
-		boolean redo = false;
-		do
-		{
-			unmarkEdges();
-			PAVLSortedTree tree = computeTree();
-			redo = splitAllEdges(tree);
-		}
-		while (redo);
+		PAVLSortedTree2 tree = computeTree();
+		splitAllEdges(tree);
 	}
 	
-	private PAVLSortedTree computeTree()
+	private PAVLSortedTree2 computeTree()
 	{
-		PAVLSortedTree tree = new PAVLSortedTree();
+		PAVLSortedTree2 tree = new PAVLSortedTree2();
 		NotOrientedEdge noe = new NotOrientedEdge();
 		NotOrientedEdge sym = new NotOrientedEdge();
+		unmarkEdges();
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
@@ -98,20 +91,26 @@ public class SplitEdge
 				addToTree(noe, tree);
 			}
 		}
+		unmarkEdges();
 		return tree;
 	}
-	private void addToTree(NotOrientedEdge noe, PAVLSortedTree tree)
+	
+	private static double cost(NotOrientedEdge noe)
+	{
+		double [] p0 = noe.origin().getUV();
+		double [] p1 = noe.destination().getUV();
+		return (p1[0] - p0[0]) * (p1[0] - p0[0]) +
+		       (p1[1] - p0[1]) * (p1[1] - p0[1]) +
+		       (p1[2] - p0[2]) * (p1[2] - p0[2]);
+	}
+	
+	private void addToTree(NotOrientedEdge noe, PAVLSortedTree2 tree)
 	{
 		if (noe.hasAttributes(OTriangle.OUTER))
 			return;
-		double [] p0 = noe.origin().getUV();
-		double [] p1 = noe.destination().getUV();
-		double l2 =
-			(p1[0] - p0[0]) * (p1[0] - p0[0]) +
-			(p1[1] - p0[1]) * (p1[1] - p0[1]) +
-			(p1[2] - p0[2]) * (p1[2] - p0[2]);
+		double l2 = cost(noe);
 		if (l2 > minlen2)
-			tree.insert(new NotOrientedEdge(noe), l2);
+			tree.insert(new PAVLNodeOTriangle(noe, l2));
 	}
 	
 	private void unmarkEdges()
@@ -124,75 +123,78 @@ public class SplitEdge
 		}
 	}
 	
-	private boolean splitAllEdges(PAVLSortedTree tree)
+	private boolean splitAllEdges(PAVLSortedTree2 tree)
 	{
 		int splitted = 0;
+		NotOrientedEdge edge = new NotOrientedEdge();
 		NotOrientedEdge sym = new NotOrientedEdge();
+		OTriangle temp = new OTriangle();
 		double [] newXYZ = new double[3];
 		double sinMin = Math.sin(Math.PI / 36.0);
 		while (tree.size() > 0)
 		{
-			NotOrientedEdge edge = (NotOrientedEdge) tree.last();
-			double cost = tree.getKey(edge);
-			tree.remove(edge);
-			if (logger.isDebugEnabled())
-				logger.debug("Split edge: "+cost+" "+edge);
-			// New point
-			double [] p0 = edge.origin().getUV();
-			double [] p1 = edge.destination().getUV();
-			for (int i = 0; i < 3; i++)
-				newXYZ[i] = 0.5*(p0[i]+p1[i]);
-			Vertex v = new Vertex(newXYZ[0], newXYZ[1], newXYZ[2]);
-			if (edge.hasAttributes(OTriangle.BOUNDARY))
+			PAVLNodeOTriangle current = (PAVLNodeOTriangle) tree.last();
+			Vertex v = null;
+			do
 			{
-				// FIXME: Check deflection
-				mesh.setRefVertexOnboundary(v);
-			}
-			else
-			{
+				edge.bind(current.getTriangle(), current.getLocalNumber());
+				double key = current.getKey();
+				if (cost(edge) != key)
+				{
+					// This edge has been modified
+					PAVLNodeOTriangle next = (PAVLNodeOTriangle) tree.prev();
+					tree.remove(current);
+					addToTree(edge, tree);
+					current = next;
+					continue;
+				}
+				// New point
+				double [] p0 = edge.origin().getUV();
+				double [] p1 = edge.destination().getUV();
+				for (int i = 0; i < 3; i++)
+					newXYZ[i] = 0.5*(p0[i]+p1[i]);
+				v = new Vertex(newXYZ[0], newXYZ[1], newXYZ[2]);
+				if (edge.hasAttributes(OTriangle.BOUNDARY))
+				{
+					// FIXME: Check deflection
+					mesh.setRefVertexOnboundary(v);
+					break;
+				}
 				// Discrete differential operators, and thus
 				// discreteProject, does not work on boundary
 				// nodes.
 				Vertex vm = edge.origin();
-				if (!vm.isMutable())
+				if (vm.getRef() != 0)
 					vm = edge.destination();
-				if (!vm.discreteProject(v))
-					continue;
-			}
-			// Do not build degenerate triangles.
-			if (Math.abs(Math.sin(v.angle3D(edge.origin(), edge.apex()))) < sinMin ||
-			    Math.abs(Math.sin(v.angle3D(edge.destination(), edge.apex()))) < sinMin ||
-			    Math.abs(Math.sin(edge.apex().angle3D(edge.origin(), v))) < sinMin ||
-			    Math.abs(Math.sin(edge.apex().angle3D(edge.destination(), v))) < sinMin)
-				continue;
-			if (!edge.hasAttributes(OTriangle.BOUNDARY))
-			{
-				OTriangle.symOTri(edge, sym);
-				if (Math.abs(Math.sin(v.angle3D(sym.origin(), sym.apex()))) < sinMin ||
-				    Math.abs(Math.sin(v.angle3D(sym.destination(), sym.apex()))) < sinMin ||
-				    Math.abs(Math.sin(sym.apex().angle3D(sym.origin(), v))) < sinMin ||
-				    Math.abs(Math.sin(sym.apex().angle3D(sym.destination(), v))) < sinMin)
-					continue;
-			}
-			// 2 triangles will be modified.  All their edges
-			// have to be removed from tree because their
-			// hashCode will change.
-			for (int i = 0; i < 3; i++)
-			{
-				edge.nextOTri();
-				tree.remove(edge);
-				assert !tree.containsValue(edge) : edge;
-			}
-			if (!edge.hasAttributes(OTriangle.BOUNDARY))
-			{
-				OTriangle.symOTri(edge, sym);
-				for (int i = 0; i < 2; i++)
+				if (vm.getRef() == 0 && !vm.discreteProject(v))
 				{
-					sym.nextOTri();
-					tree.remove(sym);
-					assert !tree.containsValue(sym);
+					PAVLNodeOTriangle next = (PAVLNodeOTriangle) tree.prev();
+					tree.remove(current);
+					current = next;
+					continue;
 				}
-			}
+				double dapex = v.distance3D(edge.apex());
+				if (!edge.hasAttributes(OTriangle.BOUNDARY))
+				{
+					OTriangle.symOTri(edge, sym);
+					dapex = Math.min(dapex, v.distance3D(sym.apex()));
+				}
+				if (dapex * dapex > minlen2 / 16.0)
+					break;
+				//  A new point would be near an existing
+				//  one.  It is likely that this is still
+				//  true when this edge is modified, so
+				//  remove it from the tree to speed up
+				//  processing.
+				PAVLNodeOTriangle next = (PAVLNodeOTriangle) tree.prev();
+				tree.remove(current);
+				current = next;
+			} while (current != null);
+			if (current == null)
+				break;
+			tree.remove(current);
+			if (logger.isDebugEnabled())
+				logger.debug("Split edge: "+edge);
 			edge.split(v);
 			assert edge.destination() == v : v+" "+edge;
 			splitted++;
@@ -211,10 +213,7 @@ public class SplitEdge
 			}
 			if (edge.getAdj() != null)
 			{
-				/* FIXME: that does not work!
 				edge.symOTri();
-tree.rehash();
-				assert !edge.hasAttributes(OTriangle.OUTER) : edge;
 				assert edge.destination() == v : v+" "+edge;
 				for (int i = 0; i < 2; i++)
 				{
@@ -224,7 +223,6 @@ tree.rehash();
 				edge.symOTri();
 				edge.prevOTri();
 				addToTree(edge, tree);
-				*/
 			}
 		}
 		assert mesh.isValid();
