@@ -1150,6 +1150,7 @@ public class Vertex implements Cloneable
 		return true;
 	}
 	
+	// Common area-weighted mean normal
 	private boolean discreteAverageNormal(double [] normal)
 	{
 		for (int i = 0; i < 3; i++)
@@ -1167,10 +1168,10 @@ public class Vertex implements Cloneable
 			ot.nextOTriOriginLoop();
 			if (ot.hasAttributes(OTriangle.OUTER))
 				continue;
-			ot.computeNormal3D();
+			double area = ot.computeNormal3D();
 			double [] nu = ot.getTempVector();
 			for (int i = 0; i < 3; i++)
-				normal[i] += nu[i];
+				normal[i] += area * nu[i];
 		}
 		while (ot.destination() != d);
 		double n = Metric3D.norm(normal);
@@ -1184,18 +1185,9 @@ public class Vertex implements Cloneable
 	public boolean discreteProject(Vertex pt)
 	{
 		double [] normal = new double[3];
-		discreteCurvatures(normal);
-		double n = Metric3D.norm(normal);
-		if (n < 1.e-6)
-		{
-			if (!discreteAverageNormal(normal))
-				return false;
-		}
-		else
-		{
-			for (int i = 0; i < 3; i++)
-				normal[i] /= n;
-		}
+		// TODO: Check why discreteCurvatures(normal) does not work well
+		if (!discreteAverageNormal(normal))
+			return false;
 		// We search for the quadric
 		//   F(x,y) = a x^2 + b xy + c y^2 - z
 		// which fits best for all neighbour vertices.
@@ -1210,7 +1202,7 @@ public class Vertex implements Cloneable
 		else
 			t2[1] = 1.0;
 		Metric3D.prodVect3D(normal, t2, t1);
-		n = Metric3D.norm(t1);
+		double n = Metric3D.norm(t1);
 		if (n < 1.e-6)
 			return false;
 		for (int i = 0; i < 3; i++)
@@ -1270,8 +1262,6 @@ public class Vertex implements Cloneable
 		double [] loc = P.apply(vect1);
 		loc[2] = abc[0] * loc[0] * loc[0] + abc[1] * loc[0] * loc[1] + abc[2] * loc[1] * loc[1];
 		double [] glob = Pinv.apply(loc);
-		if (Metric3D.norm(glob) > dmin)
-			return false;
 		pt.moveTo(param[0] + glob[0], param[1] + glob[1], param[2] + glob[2]);
 		return true;
 	}
