@@ -36,6 +36,13 @@ import java.util.ArrayList;
  * The downside is that the conversion between double and integer coordinates
  * must be known by advance, which is why constructor needs a bounding box
  * as argument.
+ *
+ * Each cell of a <code>QuadTree</code> contains either vertices or four
+ * children nodes (some of them may be <code>null</code>).  A cell can contain
+ * at most <code>BUCKETSIZE</code> vertices (default is 10).  When this number
+ * is exceeded, the cell is splitted and vertices are stored in these children.
+ * On the contrary, when all vertices are removed from a cell, it is deleted.
+ * And when all children of a cell are null, this cell is removed.
  */
 public class QuadTree
 {
@@ -56,8 +63,8 @@ public class QuadTree
 	private static Logger logger=Logger.getLogger(QuadTree.class);	
 	
 	// Integer coordinates (like gridSize) must be long if MAXLEVEL > 30
-	public static final int MAXLEVEL = 30;
-	public static final int gridSize = 1 << MAXLEVEL;
+	private static final int MAXLEVEL = 30;
+	private static final int gridSize = 1 << MAXLEVEL;
 	
 	/**
 	 * Root of the quadtree.
@@ -564,7 +571,7 @@ public class QuadTree
 	{
 		QuadTreeCell current = root;
 		getAllVerticesProcedure gproc = new getAllVerticesProcedure(capacity);
-		deambulate(gproc);
+		walk(gproc);
 		return gproc.nodelist;
 	}
 	
@@ -592,7 +599,7 @@ public class QuadTree
 	{
 		QuadTreeCell current = root;
 		clearAllMetricsProcedure gproc = new clearAllMetricsProcedure();
-		deambulate(gproc);
+		walk(gproc);
 	}
 	
 	public final boolean walk(QuadTreeProcedure proc)
@@ -669,57 +676,6 @@ public class QuadTree
 		}
 		assert i0 == 0;
 		assert j0 == 0;
-		return true;
-	}
-	
-	//  Similar to walk() but do not maintain i0,j0
-	public boolean deambulate(QuadTreeProcedure proc)
-	{
-		int s = gridSize;
-		int l = 0;
-		int [] posStack = new int[MAXLEVEL];
-		posStack[l] = 0;
-		QuadTreeCell [] quadStack = new QuadTreeCell[MAXLEVEL];
-		quadStack[l] = root;
-		while (true)
-		{
-			int res = proc.action(quadStack[l], s, 0, 0);
-			if (res == -1)
-				return false;
-			if (quadStack[l].nItems < 0 && res == 0)
-			{
-				s >>= 1;
-				assert s > 0;
-				l++;
-				assert l <= MAXLEVEL;
-				for (int i = 0; i < 4; i++)
-				{
-					if (null != quadStack[l-1].subQuad[i])
-					{
-						quadStack[l] = (QuadTreeCell) quadStack[l-1].subQuad[i];
-						posStack[l] = i;
-						break;
-					}
-				}
-			}
-			else
-			{
-				while (l > 0)
-				{
-					posStack[l]++;
-					if (posStack[l] == 4)
-					{
-						s <<= 1;
-						l--;
-					}
-					else if (null != quadStack[l-1].subQuad[posStack[l]])
-							break;
-				}
-				if (l == 0)
-					break;
-				quadStack[l] = (QuadTreeCell) quadStack[l-1].subQuad[posStack[l]];
-			}
-		}
 		return true;
 	}
 	
