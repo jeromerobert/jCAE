@@ -1,3 +1,14 @@
+Wed Nov 30 15:18:48 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/util/QuadTree.java
+	* src/org/jcae/mesh/amibe/util/QuadTreeTest.java: Rename QuadTree.QuadTreeCell into QuadTree.Cell
+	* src/org/jcae/mesh/amibe/util/Octree.java
+	* src/org/jcae/mesh/amibe/util/OctreeTest.java: Rename Octree.OctreeCell into Octree.Cell
+	* src/org/jcae/mesh/amibe/util/Octree.java
+	  src/org/jcae/mesh/amibe/util/QuadTree.java: Fix offset by one for nCells.
+	* src/org/jcae/mesh/amibe/util/Octree.java: Enlarge bounding box to make sure that all nodes are interior.
+	* src/org/jcae/mesh/amibe/util/Octree.java (getNearVertexInSubOctrees): Fix computation of initial target size.
+
 Tue Nov 29 17:47:22 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Vertex.java (discreteAverageNormal): Use area weighting.
