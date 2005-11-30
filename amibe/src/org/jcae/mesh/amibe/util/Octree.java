@@ -43,9 +43,9 @@ import org.jcae.mesh.amibe.ds.MNode3D;
  * </p>
  *
  * <p>
- * Each cell of an <code>Octree</code> contains either vertices or eight
- * children nodes (some of them may be <code>null</code>).  A cell can contain
- * at most <code>BUCKETSIZE</code> vertices (default is 10).  When this number
+ * Each {@link Cell} contains either vertices or eight children nodes
+ * (some of them may be <code>null</code>).  A cell can contain at most
+ * <code>BUCKETSIZE</code> vertices (default is 10).  When this number
  * is exceeded, the cell is splitted and vertices are stored in these children.
  * On the contrary, when all vertices are removed from a cell, it is deleted.
  * And when all children of a cell are null, this cell is removed.
@@ -53,24 +53,94 @@ import org.jcae.mesh.amibe.ds.MNode3D;
  * 
  * <p>
  * Octree cells are very compact, they do not contain any locational
- * information.  It is instead passed to the {@link OctreeProcedure#action}
- * method.  This design had been chosen for performance reasons on large
- * meshes, and in practice it works very very well.
+ * information.  It is instead passed to the
+ * {@link OctreeProcedure#action(Object, int, int, int, int)} method.
+ * This design had been chosen for performance reasons on large meshes, and in
+ * practice it works very well because octrees are used for vertex location,
+ * and no neighbourhood information is needed.
+ * </p>
+ *
+ * <p>
+ * Octree traversal is performed by the {@link #walk(OctreeProcedure)} method.
+ * Here is an example to collect all vertices in a list:
+ * </p>
+ * <pre>
+ *	public final class collectAllVerticesProcedure implements OctreeProcedure
+ *	{
+ *		public ArrayList vertexList = new ArrayList();
+ *		public final int action(Object o, int s, int i0, int j0)
+ *		{
+ *			Cell self = (Cell) o;
+ *			if (self.nItems > 0)
+ *			{
+ *				for (int i = 0; i &lt; self.nItems; i++)
+ *					nodelist.add(self.subQuad[i]);
+ *			}
+ *			return 0;
+ *		}
+ *	}
+ * </pre>
+ * <p>
+ * This procedure is applied on all cells recursively in prefix order.  If it
+ * returns <code>-1</code>, {@link #walk(OctreeProcedure)} aborts its
+ * processing immediately.  A null return value means that processing can
+ * continue normally, and a non-null return value means that children nodes are
+ * skipped.
+ * </p>
+ *
+ * <p>
+ * Below is an algorithm to find the nearest vertex in the octree of a given
+ * point <code>p</code>:
+ * </p>
+ * <ol type="1">
+ *   <li>Initializion: <code>dmin=Double.MAX_VALUE</code>, <code>result=null</code></li>
+ *   <li>Traverse all octree cells.
+ *     <ol type="a">
+ *       <li>If this cell does not intersect the sphere centered at
+ *           <code>p</code> of vertices at a distance lower than <code>dmin</code>,
+ *           then skip this cell and its children.</li>
+ *       <li>Otherwise, if this cell contains children nodes, do nothing so that
+ *           processaing continues normally on children nodes.</li>
+ *       <li>Otherwise, this cell contains vertices.  For each vertex, compute
+ *           its distance to <code>p</code> and update <code>dmin</code> and
+ *           <code>result</code> if it is nearer than the current solution.</li>
+ *     </ol></li>
+ * </ol>
+ *
+ * <p>
+ * The implementation of {@link #getNearestVertex(MNode3D)} is slightly improved:
+ * the starting point is computed by {@link #getNearVertex(MNode3D)}, so that
+ * much more cells are skipped.
  * </p>
  */
 public class Octree
 {
 	private static int BUCKETSIZE = 10;
-	protected class OctreeCell
+	/**
+	 * Cell of an {@link Octree}.  Each cell contains either eight children nodes
+	 * or up to <code>BUCKETSIZE</code> vertices.  When this number is exceeded,
+	 * the cell is splitted and vertices are moved to these children.
+	 * On the contrary, when all vertices are removed from a cell, it is deleted.
+	 * And when all children of a cell are null, this cell is removed.
+	 */
+	protected class Cell
 	{
-		//  nItems can either store the number of items in the current cell,
-		//  or the total number of vertices below this cell.
-		//  In the latter case, nItems can be of type byte
-		//  (if BUCKETSIZE < 128) or short.
+		/**
+		 * Number of vertices stored below the current cell.  If this cell
+		 * has children nodes, this value is negative and its opposite
+		 * value is the total number of vertices found in children nodes.
+		 * Otherwise, it contains the number of vertices which are stored
+		 * in the {@link #subOctree} array.
+		 */
 		protected int nItems = 0;
-		//  subOctree contains either 8 suboctrees or up to
-		//  BUCKETSIZE vertices.  This compact storage is needed to
-		//  reduce memory usage.
+		
+		/**
+		 * References to bound objects.  This variable either contains
+		 * four references to children nodes (some of which may be
+		 * <code>null</code>), or up to <code>BUCKETSIZE</code> references
+		 * yo vertices.  This compact storage is needed to reduce memory
+		 * usage.
+		 */
 		protected Object [] subOctree = null;
 	}
 	
@@ -83,12 +153,12 @@ public class Octree
 	/**
 	 * Root of the octree.
 	 */
-	public OctreeCell root;
+	public Cell root;
 	
 	/**
 	 * Number of cells.
 	 */
-	public int nCells = 1;
+	public int nCells = 0;
 	
 	/**
 	 * Conversion between double and integer coordinates.
@@ -102,15 +172,15 @@ public class Octree
 	 */
 	public Octree(double [] umin, double [] umax)
 	{
-		double deltaX = Math.abs(umin[0] - umax[0]);
-		double deltaY = Math.abs(umin[1] - umax[1]);
-		double deltaZ = Math.abs(umin[2] - umax[2]);
+		double deltaX = 1.01 * Math.abs(umin[0] - umax[0]);
+		double deltaY = 1.01 * Math.abs(umin[1] - umax[1]);
+		double deltaZ = 1.01 * Math.abs(umin[2] - umax[2]);
 		deltaX = Math.max(deltaX, deltaY);
 		deltaX = Math.max(deltaX, deltaZ);
 		for (int i = 0; i < 3; i++)
 			x0[i] = umin[i];
 		x0[3] = ((double) gridSize) / deltaX;
-		root = new OctreeCell();
+		root = new Cell();
 		nCells++;
 	}
 	
@@ -166,6 +236,7 @@ public class Octree
 	 *
 	 * @param ijk   vertex location
 	 * @param size  cell size of children nodes.
+	 * @return the index of the child node containing this vertex.
 	 */
 	protected static final int indexSubOctree(int [] ijk, int size)
 	{
@@ -186,7 +257,7 @@ public class Octree
 	 */
 	public final void add(MNode3D v)
 	{
-		OctreeCell current = root;
+		Cell current = root;
 		int s = gridSize;
 		int [] ijk = new int[3];
 		int [] oldijk = new int[3];
@@ -199,10 +270,10 @@ public class Octree
 			int ind = indexSubOctree(ijk, s);
 			if (null == current.subOctree[ind])
 			{
-				current.subOctree[ind] = new OctreeCell();
+				current.subOctree[ind] = new Cell();
 				nCells++;
 			}
-			current = (OctreeCell) current.subOctree[ind];
+			current = (Cell) current.subOctree[ind];
 		}
 		
 		//  If current box is full, split it into 8 suboctrees
@@ -210,7 +281,7 @@ public class Octree
 		{
 			s >>= 1;
 			assert s > 0;
-			OctreeCell [] newSubOctrees = new OctreeCell[8];
+			Cell [] newSubOctrees = new Cell[8];
 			//  Move points to their respective suboctrees.
 			for (int i = 0; i < BUCKETSIZE; i++)
 			{
@@ -219,11 +290,11 @@ public class Octree
 				int ind = indexSubOctree(oldijk, s);
 				if (null == newSubOctrees[ind])
 				{
-					newSubOctrees[ind] = new OctreeCell();
+					newSubOctrees[ind] = new Cell();
 					nCells++;
 					newSubOctrees[ind].subOctree = new MNode3D[BUCKETSIZE];
 				}
-				OctreeCell target = newSubOctrees[ind];
+				Cell target = newSubOctrees[ind];
 				target.subOctree[target.nItems] = current.subOctree[i];
 				target.nItems++;
 			}
@@ -233,10 +304,10 @@ public class Octree
 			int ind = indexSubOctree(ijk, s);
 			if (null == current.subOctree[ind])
 			{
-				current.subOctree[ind] = new OctreeCell();
+				current.subOctree[ind] = new Cell();
 				nCells++;
 			}
-			current = (OctreeCell) current.subOctree[ind];
+			current = (Cell) current.subOctree[ind];
 		}
 		//  Eventually insert the new point
 		if (current.nItems == 0)
@@ -251,9 +322,9 @@ public class Octree
 	 */
 	public final void remove(MNode3D v)
 	{
-		OctreeCell current = root;
-		OctreeCell last = root;
-		OctreeCell next;
+		Cell current = root;
+		Cell last = root;
+		Cell next;
 		int lastPos = 0;
 		int s = gridSize;
 		int [] ijk = new int[3];
@@ -263,11 +334,15 @@ public class Octree
 			//  nItems is negative
 			current.nItems++;
 			if (current.nItems == 0)
+			{
+				// TODO: can this happen?
 				last.subOctree[lastPos] = null;
+				nCells--;
+			}
 			s >>= 1;
 			assert s > 0;
 			int ind = indexSubOctree(ijk, s);
-			next = (OctreeCell) current.subOctree[ind];
+			next = (Cell) current.subOctree[ind];
 			if (null == next)
 				throw new RuntimeException("MNode3D "+v+" is not present and can not be deleted");
 			last = current;
@@ -284,13 +359,15 @@ public class Octree
 		}
 		if (offset == 0)
 			throw new RuntimeException("MNode3D "+v+" is not present and can not be deleted");
-		if (current.nItems > 1)
-		{
-			current.subOctree[current.nItems-1] = null;
-			current.nItems--;
-		}
+		current.nItems--;
+		if (current.nItems > 0)
+			current.subOctree[current.nItems] = null;
 		else
+		{
+			logger.debug("Last point removed, deleting node");
 			last.subOctree[lastPos] = null;
+			nCells--;
+		}
 	}
 	
 	/**
@@ -300,17 +377,17 @@ public class Octree
 	 * vertices, the nearest one is returned (vertices in other leaves may
 	 * of course be nearer).  Otherwise the nearest vertex from sibling
 	 * children is returned.  The returned vertex is a good starting point
-	 * for {@link #getNearestVertex}.
+	 * for {@link #getNearestVertex(MNode3D)}.
 	 *
 	 * @param v  the node to check.
 	 * @return a near vertex.
 	 */
 	public final MNode3D getNearVertex(MNode3D v)
 	{
-		OctreeCell current = root;
+		Cell current = root;
 		if (current.nItems == 0)
 			return null;
-		OctreeCell last = null;
+		Cell last = null;
 		int s = gridSize;
 		int [] ijk = new int[3];
 		int [] retijk = new int[3];
@@ -324,7 +401,7 @@ public class Octree
 			s >>= 1;
 			assert s > 0;
 			searchedCells++;
-			current = (OctreeCell)
+			current = (Cell)
 				current.subOctree[indexSubOctree(ijk, s)];
 		}
 		if (null == current)
@@ -356,19 +433,20 @@ public class Octree
 		return ret;
 	}
 	
-	private final MNode3D getNearVertexInSubOctrees(OctreeCell current, MNode3D v, int dist, int searchedCells)
+	private final MNode3D getNearVertexInSubOctrees(Cell current, MNode3D v, int dist, int searchedCells)
 	{
 		MNode3D ret = null;
 		int [] ijk = new int[3];
 		int [] retijk = new int[3];
 		double2int(v.getXYZ(), ijk);
-		long ldist = ((long) dist) * ((long) dist);
+		// Cell diagonal is of length sqrt(3)*dist
+		long ldist = 3L * ((long) dist) * ((long) dist);
 		if (logger.isDebugEnabled())
 			logger.debug("Near point in suboctrees: "+v);
 		int l = 0;
 		int [] posStack = new int[MAXLEVEL];
 		posStack[l] = 0;
-		OctreeCell [] octreeStack = new OctreeCell[MAXLEVEL];
+		Cell [] octreeStack = new Cell[MAXLEVEL];
 		octreeStack[l] = current;
 		while (true)
 		{
@@ -381,7 +459,7 @@ public class Octree
 				{
 					if (null != octreeStack[l-1].subOctree[i])
 					{
-						octreeStack[l] = (OctreeCell) octreeStack[l-1].subOctree[i];
+						octreeStack[l] = (Cell) octreeStack[l-1].subOctree[i];
 						posStack[l] = i;
 						break;
 					}
@@ -420,11 +498,12 @@ public class Octree
 				}
 				if (l == 0)
 					break;
-				octreeStack[l] = (OctreeCell) octreeStack[l-1].subOctree[posStack[l]];
+				octreeStack[l] = (Cell) octreeStack[l-1].subOctree[posStack[l]];
 			}
 		}
 		if (logger.isDebugEnabled())
 			logger.debug("  search in "+searchedCells+"/"+nCells+" cells");
+		assert ret != null;
 		return ret;
 	}
 	
@@ -437,7 +516,7 @@ public class Octree
 		}
 		public final int action(Object o, int s, int i0, int j0, int k0)
 		{
-			OctreeCell self = (OctreeCell) o;
+			Cell self = (Cell) o;
 			searchedCells++;
 			if (s < minSize)
 				minSize = s;
@@ -447,7 +526,7 @@ public class Octree
 	
 	private final int getMinSize()
 	{
-		OctreeCell current = root;
+		Cell current = root;
 		getMinSizeProcedure gproc = new getMinSizeProcedure();
 		walk(gproc);
 		int ret = gproc.minSize;
@@ -497,7 +576,7 @@ public class Octree
 			                 k0 - idist <= ijk[2] && ijk[2] <= k0 + s + idist);
 			if (!valid)
 				return 1;
-			OctreeCell self = (OctreeCell) o;
+			Cell self = (Cell) o;
 			searchedCells++;
 			if (self.nItems > 0)
 			{
@@ -529,7 +608,7 @@ public class Octree
 	 */
 	public final MNode3D getNearestVertex(MNode3D v)
 	{
-		OctreeCell current = root;
+		Cell current = root;
 		MNode3D ret = getNearVertex(v);
 		if (ret == null)
 			return null;
@@ -568,7 +647,7 @@ public class Octree
 		int k0 = 0;
 		int [] posStack = new int[MAXLEVEL];
 		posStack[l] = 0;
-		OctreeCell [] octreeStack = new OctreeCell[MAXLEVEL];
+		Cell [] octreeStack = new Cell[MAXLEVEL];
 		octreeStack[l] = root;
 		while (true)
 		{
@@ -585,7 +664,7 @@ public class Octree
 				{
 					if (null != octreeStack[l-1].subOctree[i])
 					{
-						octreeStack[l] = (OctreeCell) octreeStack[l-1].subOctree[i];
+						octreeStack[l] = (Cell) octreeStack[l-1].subOctree[i];
 						posStack[l] = i;
 						break;
 					}
@@ -631,7 +710,7 @@ public class Octree
 				}
 				if (l == 0)
 					break;
-				octreeStack[l] = (OctreeCell) octreeStack[l-1].subOctree[posStack[l]];
+				octreeStack[l] = (Cell) octreeStack[l-1].subOctree[posStack[l]];
 			}
 		}
 		assert i0 == 0;
