@@ -29,6 +29,39 @@ import org.apache.log4j.Logger;
  * 3D metrics computed on a CAD surface.  This class provides 3D metrics at a
  * point to have a unit mesh with respect to edge length and deflection
  * criteria.
+ *
+ * <p>
+ * A metric M is a symmetric positive matrix.  It defines a dot product
+ * <code>&lt;X, Y> = tX M Y</code>.  If metrics are constant, the length
+ * of the [PQ] segment in this metrics is <code>l(M,P,Q)=sqrt(t(PQ) M (PQ))</code>.
+ * A good presentation of mesges governed by metrics can be found in this
+ * <a href="ftp://ftp.inria.fr/INRIA/publication/publi-pdf/RR/RR-2928.pdf">technical
+ * report</a> (in French), by Houman Borouchaki and Paul-Louis George.
+ * </p>
+ *
+ * <p>
+ * The metrics associated with an edge length criterion is the 3x3 matrix
+ * <code>M=Id/(h*h)</code>, where <code>h</code> is the target size.  Indeed the
+ * relation above clearly shows that <code>l(M,P,Q)=1</code> if and only
+ * if the euclidian distance beteen <code>P</code> and <code>Q</code> is
+ * <code>h</code>.  Such a metric is computed by the {@link #iso(double)} method.
+ * </p>
+ *
+ * <p>
+ * An isotropic metric governed by a given <code>defl</code> geometric error is
+ * <code>M=Id*(Cm*Cm)/(alpha*alpha)</code>, where <code>Cm</code> is the largest
+ * curvature and <code>alpha=2 sqrt(defl*(2-defl))</code>.
+ * Of course this geometric error can be guaranteed onlyelocally, it becomes can be
+ * larger if <code>defl</code> is not small enough.
+ * An anisotropic metric can also be computed along principal curvature directions,
+ * see the technical report or these sources to find the exact computations.
+ * </p>
+ *
+ * <p>
+ * Some applications require an absolute geometric error.  A first order approximation
+ * is obtained by replacing <code>defl</code> by <code>defl*Cm</code> in the
+ * previous metrics.
+ * </p>
  */
 public class Metric3D extends Matrix3D
 {
@@ -242,6 +275,64 @@ public class Metric3D extends Matrix3D
 			return absDeflection(isotropic);
 	}
 	
+	private boolean relDeflection(boolean isotropic)
+	{
+		double cmin = Math.abs(cacheSurf.minCurvature());
+		double cmax = Math.abs(cacheSurf.maxCurvature());
+		if (Double.isNaN(cmin) || Double.isNaN(cmax))
+		{
+			logger.debug("Undefined curvature");
+			return false;
+		}
+		if (cmin == 0.0 && cmax == 0.0)
+		{
+			logger.debug("Infinite curvature");
+			return false;
+		}
+		double [] dcurv = cacheSurf.curvatureDirections();
+		double [] dcurvmax = new double[3];
+		double [] dcurvmin = new double[3];
+		if (cmin < cmax)
+		{
+			System.arraycopy(dcurv, 0, dcurvmax, 0, 3);
+			System.arraycopy(dcurv, 3, dcurvmin, 0, 3);
+		}
+		else
+		{
+			double temp = cmin;
+			cmin = cmax;
+			cmax = temp;
+			System.arraycopy(dcurv, 0, dcurvmin, 0, 3);
+			System.arraycopy(dcurv, 3, dcurvmax, 0, 3);
+		}
+		Metric3D A = new Metric3D(dcurvmax, dcurvmin, prodVect3D(dcurvmax, dcurvmin));
+		double epsilon = defl;
+		if (epsilon > 1.0)
+			epsilon = 1.0;
+		//  In org.jcae.mesh.amibe.algos2d.Insertion, mean lengths are
+		//  targeted, and there is a sqrt(2) factor.  Division bt 2
+		//  provides a maximal deflection, 
+		double alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
+		data[0][0] = cmax*cmax / alpha2;
+		if (isotropic)
+		{
+			data[1][1] = data[0][0];
+			data[2][2] = data[0][0];
+		}
+		else
+		{
+			epsilon *= cmax / cmin;
+			if (epsilon > 1.0)
+				epsilon = 1.0;
+			alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
+			data[1][1] = cmin*cmin / alpha2;
+			data[2][2] = 1.0/discr/discr;
+		}
+		Matrix3D res = (this.multL(A.transp())).multR(A);
+		data = res.data;
+		return true;
+	}
+	
 	private boolean absDeflection(boolean isotropic)
 	{
 		double cmin = Math.abs(cacheSurf.minCurvature());
@@ -299,64 +390,6 @@ public class Metric3D extends Matrix3D
 			data[1][1] = cmin*cmin / alpha2;
 		}
 		data[2][2] = data[0][0];
-		Matrix3D res = (this.multL(A.transp())).multR(A);
-		data = res.data;
-		return true;
-	}
-	
-	private boolean relDeflection(boolean isotropic)
-	{
-		double cmin = Math.abs(cacheSurf.minCurvature());
-		double cmax = Math.abs(cacheSurf.maxCurvature());
-		if (Double.isNaN(cmin) || Double.isNaN(cmax))
-		{
-			logger.debug("Undefined curvature");
-			return false;
-		}
-		if (cmin == 0.0 && cmax == 0.0)
-		{
-			logger.debug("Infinite curvature");
-			return false;
-		}
-		double [] dcurv = cacheSurf.curvatureDirections();
-		double [] dcurvmax = new double[3];
-		double [] dcurvmin = new double[3];
-		if (cmin < cmax)
-		{
-			System.arraycopy(dcurv, 0, dcurvmax, 0, 3);
-			System.arraycopy(dcurv, 3, dcurvmin, 0, 3);
-		}
-		else
-		{
-			double temp = cmin;
-			cmin = cmax;
-			cmax = temp;
-			System.arraycopy(dcurv, 0, dcurvmin, 0, 3);
-			System.arraycopy(dcurv, 3, dcurvmax, 0, 3);
-		}
-		Metric3D A = new Metric3D(dcurvmax, dcurvmin, prodVect3D(dcurvmax, dcurvmin));
-		double epsilon = defl;
-		if (epsilon > 1.0)
-			epsilon = 1.0;
-		//  In org.jcae.mesh.amibe.algos2d.Insertion, mean lengths are
-		//  targeted, and there is a sqrt(2) factor.  Division bt 2
-		//  provides a maximal deflection, 
-		double alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
-		data[0][0] = cmax*cmax / alpha2;
-		if (isotropic)
-		{
-			data[1][1] = data[0][0];
-			data[2][2] = data[0][0];
-		}
-		else
-		{
-			epsilon *= cmax / cmin;
-			if (epsilon > 1.0)
-				epsilon = 1.0;
-			alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
-			data[1][1] = cmin*cmin / alpha2;
-			data[2][2] = 1.0/discr/discr;
-		}
 		Matrix3D res = (this.multL(A.transp())).multR(A);
 		data = res.data;
 		return true;
