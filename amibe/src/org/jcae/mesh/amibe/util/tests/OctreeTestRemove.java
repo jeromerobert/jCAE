@@ -26,6 +26,15 @@ import org.jcae.mesh.amibe.ds.MNode3D;
 import java.util.Random;
 import org.jcae.mesh.java3d.Viewer;
 
+/**
+ * Unit test to check removal of vertices.
+ * Run
+ * <pre>
+ *   OctreeTestRemove
+ * </pre>
+ * to display an initial <code>Octree</code> with 200 vertices.
+ * Click to remove vertices.
+ */
 public class OctreeTestRemove extends OctreeTest
 {
 	private static Logger logger=Logger.getLogger(OctreeTestRemove.class);	

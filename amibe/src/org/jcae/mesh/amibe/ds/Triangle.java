@@ -63,13 +63,14 @@ import java.util.Iterator;
  * by 0, 1 or 2 bytes for edges 0, 1 and 2.  This very efficient trick
  * can not be performed with Java, and the three numbers are packed into
  * a single byte instead.  As attributes on edges are also needed, all
- * edge data are packed into a single {@link #adjPos} integer member.
+ * edge data are packed into a single {@link #adjPos} integer insstance
+ * variable.
  * </p>
  *
  * <p>
  * Algorithms do often need to compute lists of triangles.  In order to
  * avoid allocation of these lists, a singly linked list is provided by this
- * class.  It uses static members, so only one list can be active at
+ * class.  It uses class variables, so only one list can be active at
  * any time.  Here is an example:
  * </p>
  *   <pre>

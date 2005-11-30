@@ -27,6 +27,18 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import java.util.Random;
 import org.jcae.mesh.java3d.Viewer;
 
+/**
+ * Unit test to check {@link QuadTree#getNearestVertex(Vertex} method.
+ * Run
+ * <pre>
+ *   QuadTreeTestNearest
+ * </pre>
+ * to display an initial <code>QuadTree</code> with 500 vertices.
+ * When clicking at a point, a yellow segment is displayed between this point
+ * and the nearest point found in the same cell, returned by
+ * {@link QuadTree#getNearVertex(Vertex)}.  If {@link QuadTree#getNearestVertex(Vertex}
+ * finds a nearest point, a blue segment is displayed.
+ */
 public class QuadTreeTestNearest extends QuadTreeTest
 {
 	private static Logger logger=Logger.getLogger(QuadTreeTestNearest.class);	
@@ -47,7 +59,7 @@ public class QuadTreeTestNearest extends QuadTreeTest
 		m.pushCompGeom(2);
 		m.setQuadTree(r);
 		logger.debug("Start insertion");
-		for (int i = 0; i < 5000; i++)
+		for (int i = 0; i < 500; i++)
 		{
 			u = rand.nextDouble();
 			v = rand.nextDouble();

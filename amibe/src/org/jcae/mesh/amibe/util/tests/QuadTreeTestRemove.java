@@ -27,6 +27,15 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import java.util.Random;
 import org.jcae.mesh.java3d.Viewer;
 
+/**
+ * Unit test to check removal of vertices.
+ * Run
+ * <pre>
+ *   QuadTreeTestRemove
+ * </pre>
+ * to display an initial <code>QuadTree</code> with 500 vertices.
+ * Click to remove vertices.
+ */
 public class QuadTreeTestRemove extends QuadTreeTest
 {
 	private static Logger logger=Logger.getLogger(QuadTreeTestRemove.class);

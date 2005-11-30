@@ -227,7 +227,7 @@ public class Metric3D extends Matrix3D
 	/**
 	 * Set the current metrics to be governed by surface deflection.
 	 * Deflection is relative or absolute depending on the
-	 * <code>relDefl</code> member.
+	 * <code>relDefl</code> instance variable.
 	 *
 	 * @param isotropic  if <code>true</code>, an isotropic metrics is
 	 *   returned.

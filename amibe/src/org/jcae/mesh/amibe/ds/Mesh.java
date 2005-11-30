@@ -75,7 +75,7 @@ import org.apache.log4j.Logger;
  *                        t0      V2
  * </pre>
  * <p>
- *   The <code>t</code> {@link Triangle} has the following members:
+ *   The <code>t</code> {@link Triangle} has the following instance variables:
  * </p>
  * <pre>
  *       Vertex [] vertex = { V0, V1, V2 };
@@ -87,7 +87,7 @@ import org.apache.log4j.Logger;
  *   side of vertex <em>i</em>.  An edge is then fully characterized by a
  *   triangle and a local number between 0 and 2 inclusive.  Here, edge
  *   between <tt>V0</tt> and <tt>V2</tt> can be defined by <em>(t,1)</em> or
- *   <em>(t1,0)</em>.  The <code>adjPosEdge</code> member stores local
+ *   <em>(t1,0)</em>.  The <code>adjPosEdge</code> instance variablle stores local
  *   numbers for adjacent edges, so that mesh traversal becomes very cheap. 
  * </p>
  * <p>

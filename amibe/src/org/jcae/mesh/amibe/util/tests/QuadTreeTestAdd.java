@@ -26,6 +26,15 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import java.util.Random;
 import org.jcae.mesh.java3d.Viewer;
 
+/**
+ * Unit test to check insertion of vertices.
+ * Run
+ * <pre>
+ *   QuadTreeTestAdd
+ * </pre>
+ * to display an initial <code>QuadTree</code> with 500 vertices.
+ * Click to add vertices.
+ */
 public class QuadTreeTestAdd extends QuadTreeTest
 {
 	private static Logger logger=Logger.getLogger(QuadTreeTestAdd.class);	
