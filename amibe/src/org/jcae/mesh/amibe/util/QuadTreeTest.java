@@ -89,7 +89,7 @@ public class QuadTreeTest extends QuadTree
 	{
 		public final int action(Object o, int s, int i0, int j0)
 		{
-			QuadTreeCell self = (QuadTreeCell) o;
+			Cell self = (Cell) o;
 			if (self.nItems < 0)
 				return 0;
 			
@@ -128,7 +128,7 @@ public class QuadTreeTest extends QuadTree
 		}
 		public final int action(Object o, int s, int i0, int j0)
 		{
-			QuadTreeCell self = (QuadTreeCell) o;
+			Cell self = (Cell) o;
 			if (self.nItems < 0)
 				return 0;
 			for (int i = 0; i < self.nItems; i++)

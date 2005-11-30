@@ -41,9 +41,9 @@ import java.util.ArrayList;
  * </p>
  *
  * <p>
- * Each cell of a <code>QuadTree</code> contains either vertices or four
- * children nodes (some of them may be <code>null</code>).  A cell can contain
- * at most <code>BUCKETSIZE</code> vertices (default is 10).  When this number
+ * Each {@link Cell} contains either vertices or four children nodes
+ * (some of them may be <code>null</code>).  A cell can contain at most
+ * {@link Cell#BUCKETSIZE} vertices (default is 10).  When this number
  * is exceeded, the cell is splitted and vertices are stored in these children.
  * On the contrary, when all vertices are removed from a cell, it is deleted.
  * And when all children of a cell are null, this cell is removed.
@@ -51,24 +51,127 @@ import java.util.ArrayList;
  * 
  * <p>
  * Quadtree cells are very compact, they do not contain any locational
- * information.  It is instead passed to the {@link QuadTreeProcedure#action}
- * method.  This design had been chosen for performance reasons on large
- * meshes, and in practice it works very very well.
+ * information.  It is instead passed to the
+ * {@link QuadTreeProcedure#action(Object, int, int, int)} method.
+ * This design had been chosen for performance reasons on large meshes, and in
+ * practice it works very well because quadtrees are used for vertex location,
+ * and no neighbourhood information is needed.
  * </p>
+ *
+ * <p>
+ * Quadtree traversal is performed by the {@link #walk(QuadTreeProcedure)} method.
+ * Here is an example to collect all vertices in a list:
+ * </p>
+ * <pre>
+ *	public final class collectAllVerticesProcedure implements QuadTreeProcedure
+ *	{
+ *		public ArrayList vertexList = new ArrayList();
+ *		public final int action(Object o, int s, int i0, int j0)
+ *		{
+ *			Cell self = (Cell) o;
+ *			if (self.nItems > 0)
+ *			{
+ *				for (int i = 0; i &lt; self.nItems; i++)
+ *					nodelist.add(self.subQuad[i]);
+ *			}
+ *			return 0;
+ *		}
+ *	}
+ * </pre>
+ * <p>
+ * This procedure is applied on all cells recursively in prefix order.  If it
+ * returns <code>-1</code>, {@link #walk(QuadTreeProcedure)} aborts its
+ * processing immediately.  A null return value means that processing can
+ * continue normally, and a non-null return value means that children nodes are
+ * skipped.
+ * </p>
+ *
+ * <p>
+ * Distances between vertices can be computed either in euclidian 2D space, or
+ * with a riemannian metrics.  This is controlled by the {@link #setCompGeom(Calculus)}
+ * method.  Distances are computed in euclidian 2D space when its argument is
+ * an instance of {@link org.jcae.mesh.amibe.ds.tools.Calculus2D}, and in
+ * riemannian metrics (see {@link org.jcae.mesh.amibe.metrics.Metric2D}) when
+ * it is an instance of {@link org.jcae.mesh.amibe.ds.tools.Calculus3D}.
+ * By default, distances are computed in euclidian 2D space.
+ * </p>
+ *
+ * <p>
+ * In euclidian 2D space, vertices which have a distance to a point <code>p</code>
+ * lower than <code>d</code> are contained in a circle centered at <code>p</code>
+ * with radius <code>d</code>.  With riemannian metrics, this circle becomes
+ * an ellipsis.  This ellipsis is only determined by local properties of the
+ * surface at point <code>p</code>.
+ * If we already found a point <code>V1</code> at a distance <code>d1</code>,
+ * vertices which belong to a quadtree cell not intersecting this ellipsis
+ * do not need to be considered.
+ * </p>
+ *
+ * <p>
+ * Below is an algorithm to find the nearest vertex in the quadtree of a given
+ * point <code>p</code>:
+ * </p>
+ * <ol type="1">
+ *   <li>Initializion: <code>dmin=Double.MAX_VALUE</code>, <code>result=null</code></li>
+ *   <li>Traverse all quadtree cells.
+ *     <ol type="a">
+ *       <li>If this cell does not intersect the ellipsis centered at
+ *           <code>p</code> of vertices at a distance lower than <code>dmin</code>,
+ *           then skip this cell and its children.</li>
+ *       <li>Otherwise, if this cell contains children nodes, do nothing so that
+ *           processaing continues normally on children nodes.</li>
+ *       <li>Otherwise, this cell contains vertices.  For each vertex, compute
+ *           its distance to <code>p</code> and update <code>dmin</code> and
+ *           <code>result</code> if it is nearer than the current solution.</li>
+ *     </ol></li>
+ * </ol>
+ *
+ * <p>
+ * The implementation of {@link #getNearestVertex(Vertex)} has two differences:
+ * </p>
+ * <ul>
+ *   <li>The starting point is computed by {@link #getNearVertex(Vertex)}.  This
+ *       means that much more cells are skipped.</li>
+ *   <li>The ellipsis is replaced by a circle enclosing it, to have simpler
+ *       calculus.  Using the real ellipsis could be tested though, it should
+ *       also speed up this processing.</li>
+ * </ul>
  */
 public class QuadTree
 {
-	protected class QuadTreeCell
+	/**
+	 * Cell of a {@link QuadTree}.  Each cell contains either four children nodes
+	 * or up to <code>BUCKETSIZE</code> vertices.  When this number is exceeded,
+	 * the cell is splitted and vertices are moved to these children.
+	 * On the contrary, when all vertices are removed from a cell, it is deleted.
+	 * And when all children of a cell are null, this cell is removed.
+	 */
+	protected class Cell
 	{
-		public static final int BUCKETSIZE = 10;
-		//  nItems can either store the number of items in the current cell,
-		//  or the total number of vertices below this cell.
-		//  In the latter case, nItems can be of type byte
-		//  (if BUCKETSIZE < 128) or short.
+		/**
+		 * Maximal number of vertices which can be stored in a cell.
+		 * This number must be at least 4, because children nodes are
+		 * stored in the same place as vertices, and a cell can have at
+		 * most 4 children.  Its value is 10.
+		 */
+		protected static final int BUCKETSIZE = 10;
+		
+		/**
+		 * Number of vertices stored below the current cell.  If this cell
+		 * has children nodes, this value is negative and its opposite
+		 * value is the total number of vertices found in children nodes.
+		 * Otherwise, it contains the number of vertices which are stored
+		 * in the {@link #subQuad} array.
+		 */
 		protected int nItems = 0;
-		//  subQuad contains either 4 subquadtrees or up to BUCKETSIZE
-		//  vertices.  This compact storage is needed to reduce memory
-		//  usage.
+		
+		/**
+		 * References to bound objects.  This variable either contains
+		 * four references to children nodes (some of which may be
+		 * <code>null</code>), or up to {@link #BUCKETSIZE} references
+		 * yo vertices.  This compact storage is needed to reduce memory
+		 * usage.
+		 */
 		protected Object [] subQuad = null;
 	}
 	
@@ -81,12 +184,12 @@ public class QuadTree
 	/**
 	 * Root of the quadtree.
 	 */
-	public QuadTreeCell root;
+	public Cell root;
 	
 	/**
 	 * Number of cells.
 	 */
-	public int nCells = 1;
+	public int nCells = 0;
 	
 	/**
 	 * Conversion between double and integer coordinates.
@@ -112,7 +215,7 @@ public class QuadTree
 		x0[0] = umin;
 		x0[1] = vmin;
 		x0[2] = ((double) gridSize) / Math.max(deltaU, deltaV);
-		root = new QuadTreeCell();
+		root = new Cell();
 		compGeom = new Calculus2D(null);
 		nCells++;
 	}
@@ -163,17 +266,21 @@ public class QuadTree
 	
 	/**
 	 * Return the index of the child node containing a given point.
-	 * A quadtree node contains at most 4 children.  Cell size is a power of
+	 * A quadtree cell contains at most 4 children.  Cell size is a power of
 	 * two, so locating a vertex can be performed by bitwise operators, as
 	 * shown below.
 	 * <pre>
 	 *      ┌───┬───┐
-	 *  &lt;>0 │ 2 │ 3 │   with I = i &amp; size
-	 *      ├───┼───┤    J = j &amp; size
-	 *  J=0 │ 0 │ 1 │ 
-	 *      └───┴───┘ 
+	 *  &lt;>0 │ 2 │ 3 │   with
+	 *      ├───┼───┤    I = i &amp; size
+	 *  J=0 │ 0 │ 1 │    J = j &amp; size
+	 *      └───┴───┘
 	 *      I=0  &lt;>0
 	 * </pre>
+	 * @param i     first coordinate of a vertex.
+	 * @param j     second coordinate of a vertex.
+	 * @param size  cell size of children nodes.
+	 * @return the index of the child node containing this vertex.
 	 */
 	protected static int indexSubQuad(int i, int j, int size)
 	{
@@ -190,7 +297,7 @@ public class QuadTree
 	 */
 	public void add(Vertex v)
 	{
-		QuadTreeCell current = root;
+		Cell current = root;
 		int s = gridSize;
 		int [] ij = new int[2];
 		int [] oldij = new int[2];
@@ -206,48 +313,48 @@ public class QuadTree
 			int ind = indexSubQuad(ij[0], ij[1], s);
 			if (null == current.subQuad[ind])
 			{
-				current.subQuad[ind] = new QuadTreeCell();
+				current.subQuad[ind] = new Cell();
 				nCells++;
 			}
-			current = (QuadTreeCell) current.subQuad[ind];
+			current = (Cell) current.subQuad[ind];
 		}
 		
 		//  If current box is full, split it into 4 subquads
-		while (current.nItems == QuadTreeCell.BUCKETSIZE)
+		while (current.nItems == Cell.BUCKETSIZE)
 		{
 			s >>= 1;
 			assert s > 0;
-			QuadTreeCell [] newSubQuads = new QuadTreeCell[4];
+			Cell [] newSubQuads = new Cell[4];
 			//  Move points to their respective subquadtrees.
-			for (int i = 0; i < QuadTreeCell.BUCKETSIZE; i++)
+			for (int i = 0; i < Cell.BUCKETSIZE; i++)
 			{
 				Vertex p = (Vertex) current.subQuad[i];
 				double2int(p.getUV(), oldij);
 				int ind = indexSubQuad(oldij[0], oldij[1], s);
 				if (null == newSubQuads[ind])
 				{
-					newSubQuads[ind] = new QuadTreeCell();
+					newSubQuads[ind] = new Cell();
 					nCells++;
-					newSubQuads[ind].subQuad = new Vertex[QuadTreeCell.BUCKETSIZE];
+					newSubQuads[ind].subQuad = new Vertex[Cell.BUCKETSIZE];
 				}
-				QuadTreeCell target = newSubQuads[ind];
+				Cell target = newSubQuads[ind];
 				target.subQuad[target.nItems] = current.subQuad[i];
 				target.nItems++;
 			}
 			current.subQuad = newSubQuads;
 			//  current will point to another cell, afjust it now.
-			current.nItems = - QuadTreeCell.BUCKETSIZE - 1;
+			current.nItems = - Cell.BUCKETSIZE - 1;
 			int ind = indexSubQuad(ij[0], ij[1], s);
 			if (null == current.subQuad[ind])
 			{
-				current.subQuad[ind] = new QuadTreeCell();
+				current.subQuad[ind] = new Cell();
 				nCells++;
 			}
-			current = (QuadTreeCell) current.subQuad[ind];
+			current = (Cell) current.subQuad[ind];
 		}
 		//  Eventually insert the new point
 		if (current.nItems == 0)
-			current.subQuad = new Vertex[QuadTreeCell.BUCKETSIZE];
+			current.subQuad = new Vertex[Cell.BUCKETSIZE];
 		current.subQuad[current.nItems] = v;
 		current.nItems++;
 	}
@@ -259,9 +366,9 @@ public class QuadTree
 	 */
 	public void remove(Vertex v)
 	{
-		QuadTreeCell current = root;
-		QuadTreeCell last = root;
-		QuadTreeCell next;
+		Cell current = root;
+		Cell last = root;
+		Cell next;
 		int lastPos = 0;
 		int s = gridSize;
 		int [] ij = new int[2];
@@ -275,7 +382,7 @@ public class QuadTree
 			s >>= 1;
 			assert s > 0;
 			int ind = indexSubQuad(ij[0], ij[1], s);
-			next = (QuadTreeCell) current.subQuad[ind];
+			next = (Cell) current.subQuad[ind];
 			if (null == next)
 				throw new RuntimeException("Vertex "+v+" is not present and can not be deleted");
 			last = current;
@@ -304,20 +411,19 @@ public class QuadTree
 	/**
 	 * Return a stored element of the <code>QuadTree</code> which is
 	 * near from a given vertex.  The algorithm is simplistic: the leaf
-	 * which would contains this vertex is retrieved.  If it contains
+	 * which would contain this vertex is retrieved.  If it contains
 	 * vertices, the nearest one is returned (vertices in other leaves may
 	 * of course be nearer).  Otherwise the nearest vertex from sibling
 	 * children is returned.  The returned vertex is a good starting point
-	 * for
-	 * {@link #getNearestVertex}.
+	 * for {@link #getNearestVertex(Vertex)}.
 	 *
 	 * @param v  the vertex to check.
 	 * @return a near vertex.
 	 */
 	public Vertex getNearVertex(Vertex v)
 	{
-		QuadTreeCell current = root;
-		QuadTreeCell last = null;
+		Cell current = root;
+		Cell last = null;
 		int s = gridSize;
 		int [] ij = new int[2];
 		double2int(v.getUV(), ij);
@@ -330,7 +436,7 @@ public class QuadTree
 			s >>= 1;
 			assert s > 0;
 			searchedCells++;
-			current = (QuadTreeCell)
+			current = (Cell)
 				current.subQuad[indexSubQuad(ij[0], ij[1], s)];
 		}
 		if (null == current)
@@ -354,7 +460,7 @@ public class QuadTree
 		return ret;
 	}
 	
-	private Vertex getNearVertexInSubquads(QuadTreeCell current, Vertex v, int searchedCells)
+	private Vertex getNearVertexInSubquads(Cell current, Vertex v, int searchedCells)
 	{
 		Vertex ret = null;
 		int [] ij = new int[2];
@@ -365,7 +471,7 @@ public class QuadTree
 		int l = 0;
 		int [] posStack = new int[MAXLEVEL];
 		posStack[l] = 0;
-		QuadTreeCell [] quadStack = new QuadTreeCell[MAXLEVEL];
+		Cell [] quadStack = new Cell[MAXLEVEL];
 		quadStack[l] = current;
 		while (true)
 		{
@@ -378,7 +484,7 @@ public class QuadTree
 				{
 					if (null != quadStack[l-1].subQuad[i])
 					{
-						quadStack[l] = (QuadTreeCell) quadStack[l-1].subQuad[i];
+						quadStack[l] = (Cell) quadStack[l-1].subQuad[i];
 						posStack[l] = i;
 						break;
 					}
@@ -413,7 +519,7 @@ public class QuadTree
 				}
 				if (l == 0)
 					break;
-				quadStack[l] = (QuadTreeCell) quadStack[l-1].subQuad[posStack[l]];
+				quadStack[l] = (Cell) quadStack[l-1].subQuad[posStack[l]];
 			}
 		}
 		if (logger.isDebugEnabled())
@@ -448,7 +554,7 @@ public class QuadTree
 			                (ij[1] >= j0 - idist) && (ij[1] <= j0 + s + idist);
 			if (!valid)
 				return 1;
-			QuadTreeCell self = (QuadTreeCell) o;
+			Cell self = (Cell) o;
 			searchedCells++;
 			if (self.nItems > 0)
 			{
@@ -475,7 +581,7 @@ public class QuadTree
 	 * Computing distance to all vertices in the quadtree would be very
 	 * time consuming.  To speed up processing, whole quadtree cells are
 	 * ignored if their distance to the vertex is greater than the current
-	 * minimum.  The {@link #getNearVertex} method is used to find the
+	 * minimum.  The {@link #getNearVertex(Vertex)} method is used to find the
 	 * initial minimum.  It is very fast and provides a good candidate,
 	 * so that the ratio of quadtree cells visited over the number of
 	 * quadtree cells is very low.
@@ -485,7 +591,7 @@ public class QuadTree
 	 */
 	public Vertex getNearestVertex(Vertex v)
 	{
-		QuadTreeCell current = root;
+		Cell current = root;
 		Vertex ret = getNearVertex(v);
 		assert ret != null;
 		if (logger.isDebugEnabled())
@@ -517,7 +623,7 @@ public class QuadTree
 		}
 		public final int action(Object o, int s, int i0, int j0)
 		{
-			QuadTreeCell self = (QuadTreeCell) o;
+			Cell self = (Cell) o;
 			searchedCells++;
 			if (self.nItems > 0)
 			{
@@ -537,7 +643,7 @@ public class QuadTree
 	}
 	
 	/**
-	 * Slow implementation of {@link #getNearestVertex}.
+	 * Slow implementation of {@link #getNearestVertex(Vertex)}.
 	 * This method should be called only for debugging purpose.
 	 *
 	 * @param v  the vertex to check.
@@ -545,7 +651,7 @@ public class QuadTree
 	 */
 	public Vertex getNearestVertexDebug(Vertex v)
 	{
-		QuadTreeCell current = root;
+		Cell current = root;
 		Vertex ret = getNearVertex(v);
 		assert ret != null;
 		if (logger.isDebugEnabled())
@@ -571,7 +677,7 @@ public class QuadTree
 		}
 		public final int action(Object o, int s, int i0, int j0)
 		{
-			QuadTreeCell self = (QuadTreeCell) o;
+			Cell self = (Cell) o;
 			if (self.nItems > 0)
 			{
 				for (int i = 0; i < self.nItems; i++)
@@ -589,7 +695,7 @@ public class QuadTree
 	 */
 	public ArrayList getAllVertices(int capacity)
 	{
-		QuadTreeCell current = root;
+		Cell current = root;
 		getAllVerticesProcedure gproc = new getAllVerticesProcedure(capacity);
 		walk(gproc);
 		return gproc.nodelist;
@@ -599,7 +705,7 @@ public class QuadTree
 	{
 		public final int action(Object o, int s, int i0, int j0)
 		{
-			QuadTreeCell self = (QuadTreeCell) o;
+			Cell self = (Cell) o;
 			if (self.nItems > 0)
 			{
 				for (int i = 0; i < self.nItems; i++)
@@ -614,7 +720,7 @@ public class QuadTree
 	 */
 	public void clearAllMetrics()
 	{
-		QuadTreeCell current = root;
+		Cell current = root;
 		clearAllMetricsProcedure gproc = new clearAllMetricsProcedure();
 		walk(gproc);
 	}
@@ -639,7 +745,7 @@ public class QuadTree
 		int j0 = 0;
 		int [] posStack = new int[MAXLEVEL];
 		posStack[l] = 0;
-		QuadTreeCell [] quadStack = new QuadTreeCell[MAXLEVEL];
+		Cell [] quadStack = new Cell[MAXLEVEL];
 		quadStack[l] = root;
 		while (true)
 		{
@@ -656,7 +762,7 @@ public class QuadTree
 				{
 					if (null != quadStack[l-1].subQuad[i])
 					{
-						quadStack[l] = (QuadTreeCell) quadStack[l-1].subQuad[i];
+						quadStack[l] = (Cell) quadStack[l-1].subQuad[i];
 						posStack[l] = i;
 						break;
 					}
@@ -700,7 +806,7 @@ public class QuadTree
 				}
 				if (l == 0)
 					break;
-				quadStack[l] = (QuadTreeCell) quadStack[l-1].subQuad[posStack[l]];
+				quadStack[l] = (Cell) quadStack[l-1].subQuad[posStack[l]];
 			}
 		}
 		assert i0 == 0;
