@@ -33,34 +33,44 @@ import org.apache.log4j.Logger;
  * <p>
  * A metric M is a symmetric positive matrix.  It defines a dot product
  * <code>&lt;X, Y> = tX M Y</code>.  If metrics are constant, the length
- * of the [PQ] segment in this metrics is <code>l(M,P,Q)=sqrt(t(PQ) M (PQ))</code>.
- * A good presentation of mesges governed by metrics can be found in this
- * <a href="ftp://ftp.inria.fr/INRIA/publication/publi-pdf/RR/RR-2928.pdf">technical
- * report</a> (in French), by Houman Borouchaki and Paul-Louis George.
+ * of the <code>[PQ]</code> segment in this metrics is
+ * <code>l(M,P,Q)=sqrt(t(PQ) M (PQ))</code>.
+ * A good presentation of meshes governed by metrics can be found in
+ * <a href="ftp://ftp.inria.fr/INRIA/publication/publi-pdf/RR/RR-2928.pdf">Maillage
+ * de surfaces paramétriques</a> (in French), by Houman Borouchaki and Paul
+ * Louis George.
  * </p>
  *
  * <p>
  * The metrics associated with an edge length criterion is the 3x3 matrix
  * <code>M=Id/(h*h)</code>, where <code>h</code> is the target size.  Indeed the
  * relation above clearly shows that <code>l(M,P,Q)=1</code> if and only
- * if the euclidian distance beteen <code>P</code> and <code>Q</code> is
- * <code>h</code>.  Such a metric is computed by the {@link #iso(double)} method.
+ * if the euclidian distance between <code>P</code> and <code>Q</code> is
+ * <code>h</code>.  Such a metric is computed by the {@link #iso(double)}
+ * method.
  * </p>
  *
  * <p>
  * An isotropic metric governed by a given <code>defl</code> geometric error is
  * <code>M=Id*(Cm*Cm)/(alpha*alpha)</code>, where <code>Cm</code> is the largest
- * curvature and <code>alpha=2 sqrt(defl*(2-defl))</code>.
- * Of course this geometric error can be guaranteed onlyelocally, it becomes can be
- * larger if <code>defl</code> is not small enough.
- * An anisotropic metric can also be computed along principal curvature directions,
- * see the technical report or these sources to find the exact computations.
+ * curvature and <code>alpha=2*sqrt(defl*(2-defl))</code>.
+ * Of course this geometric error can be guaranteed onlyelocally, it becomes
+ * can be larger if <code>defl</code> is not small enough.
+ * An anisotropic metric can also be computed along principal curvature
+ * directions, see the technical report above or these sources to find the
+ * exact computations.
  * </p>
  *
  * <p>
- * Some applications require an absolute geometric error.  A first order approximation
- * is obtained by replacing <code>defl</code> by <code>defl*Cm</code> in the
- * previous metrics.
+ * Some applications require an absolute geometric error.  A first order
+ * approximation is obtained by replacing <code>defl</code> by
+ * <code>defl*Cm</code> in the previous metrics.
+ * </p>
+ *
+ * <p>
+ * When meshing parametrized surfaces, we need the 2D metric induced
+ * by these 3D metrics to the tangent plane.  This is performed by
+ * {@link #restrict2D}.
  * </p>
  */
 public class Metric3D extends Matrix3D
@@ -396,7 +406,7 @@ public class Metric3D extends Matrix3D
 	}
 	
 	/**
-	 * Compute the matrics restriction to its tangent plan.
+	 * Compute the matrics induced to the tangent plane.
 	 */
 	public double[][] restrict2D()
 	{
@@ -420,13 +430,15 @@ public class Metric3D extends Matrix3D
 			unitNorm[2] = 0.0;
 		}
 		
-		//  temp32 = M3 * (d1U,d1V,unitNorm)
+		// B = (d1U,d1V,unitNorm) is the local frame.
+		// The metrics induced by M3 on the tangent plane is tB M3 B
+		// temp32 = M3 * B
 		for (int i = 0; i < 3; i++)
 		{
 			temp32[i][0] = data[i][0] * d1U[0] + data[i][1] * d1U[1] + data[i][2] * d1U[2];
 			temp32[i][1] = data[i][0] * d1V[0] + data[i][1] * d1V[1] + data[i][2] * d1V[2];
 		}
-		//  temp22 = t(d1U,d1V,unitNorm) * temp32
+		//  temp22 = tB * temp32
 		temp22[0][0] = d1U[0] * temp32[0][0] + d1U[1] * temp32[1][0] + d1U[2] * temp32[2][0];
 		temp22[0][1] = d1U[0] * temp32[0][1] + d1U[1] * temp32[1][1] + d1U[2] * temp32[2][1];
 		temp22[1][0] = d1V[0] * temp32[0][0] + d1V[1] * temp32[1][0] + d1V[2] * temp32[2][0];

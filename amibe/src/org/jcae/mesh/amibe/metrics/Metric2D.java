@@ -26,11 +26,26 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.apache.log4j.Logger;
 
 /**
- * Metrics on tangent plane.  This class provides metrics on the tangent plane.
+ * 2D metrics.  This class provides metrics on the tangent plane.
  * A {@link Metric3D} is computed and projected onto the tangent plane.
- * This metrics is then attached to the {@link Vertex} at which it is
+ * This metric is then attached to the {@link Vertex} at which it is
  * computed, and is used to compute distance to other vertices in
  * {@link org.jcae.mesh.amibe.ds.tools.Calculus3D}.
+ * It can be shown that vertices at a distance <code>D</code> of a point
+ * lies on an ellipsis centered at <code>P</code>.
+ *
+ * <p>
+ * If multiple constraints are combined, ellipsis are intersected so that the
+ * resulting metrics fulfill all requirements.  There are several ways to
+ * perform this intersection, here is how it is done in
+ * {@link Matrix2D#intersection(Matrix2D)}.
+ * If <code>A</code> and <code>B</code> are 2D metrics, there exists
+ * a matrix <code>P</code> such that <code>A=tP d(a1,a2) P</code>
+ * and <code>B=tP d(b1,b2) P</code>, where <code>d(x,y)</code> is the
+ * diagonal matrix of coefficients <code>x</code> and <code>y</code>.
+ * Then the metric <code>C=tP d(max(a1,b1),max(a2,b2)) P</code>
+ * defines an ellipsis which is interior to both ellipsis.
+ * </p>
  */
 public class Metric2D
 {
