@@ -27,7 +27,7 @@ public interface OctreeProcedure
 {
 	/**
 	 * Perform an action on the given octree cell.
-	 * This method is called by {@link Octree#walk} on all cells
+	 * This method is called by {@link Octree#walk(OctreeProcedure)} on all cells
 	 * of the octree recursively.
 	 *
 	 * @param o  octree cell.
@@ -35,7 +35,7 @@ public interface OctreeProcedure
 	 * @param i  first coordinate of the bottom left corner of this cell.
 	 * @param j  second coordinate of the bottom left corner of this cell.
 	 * @param k  third coordinate of the bottom left corner of this cell.
-	 * @return <code>-1</code> if {@link Octree#walk} processing must
+	 * @return <code>-1</code> if <code>walk</code> processing must
 	 * abort now, <code>1</code> if node chikldren have to be ignored, and
 	 * <code>0</code> to process node children recursively.
 	 */

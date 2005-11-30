@@ -27,6 +27,13 @@ import java.io.*;
 import java.util.StringTokenizer;
 import org.jcae.mesh.java3d.Viewer;
 
+/**
+ * Unit test to check the influence of <code>BUCKETSIZE</code>.
+ * To display an octree with 100 points per cell, run
+ * <pre>
+ *   OctreeTestDisplayPLY 100 &lt; file.ply
+ * </pre>
+ */
 public class OctreeTestDisplayPLY extends OctreeTest
 {
 	private static Logger logger=Logger.getLogger(OctreeTestDisplayPLY.class);	
@@ -118,8 +125,8 @@ public class OctreeTestDisplayPLY extends OctreeTest
 			System.arraycopy(coord, 3*i, xyz, 0, 3);
 			r.add(new MNode3D(xyz, 0));
 		}
-		logger.info("Max level ");
 		logger.info("Max level: "+r.getMaxLevel());
+		logger.info("Number of cells: "+r.nCells);
 		//CheckCoordProcedure checkproc = new CheckCoordProcedure();
 		//r.walk(checkproc);
 		

@@ -27,14 +27,14 @@ public interface QuadTreeProcedure
 {
 	/**
 	 * Perform an action on the given quadtree cell.
-	 * This method is called by {@link QuadTree#walk} on all cells
-	 * of the quadtree recursively.
+	 * This method is called by {@link QuadTree#walk(QuadTreeProcedure)} on
+	 * all cells of the quadtree recursively.
 	 *
 	 * @param o  quadtree cell.
 	 * @param s  cell size.
 	 * @param i  first coordinate of the bottom left corner of this cell.
 	 * @param j  second coordinate of the bottom left corner of this cell.
-	 * @return <code>-1</code> if {@link QuadTree#walk} processing must
+	 * @return <code>-1</code> if <code>walk</code> processing must
 	 * abort now, <code>1</code> if node chikldren have to be ignored, and
 	 * <code>0</code> to process node children recursively.
 	 */
