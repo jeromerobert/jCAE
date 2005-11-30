@@ -44,10 +44,61 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 /**
- * Performs an initial surface triangulation.
- * The value of discretisation is provided by the constraint hypothesis.
+ * Performs an initial Delaunay triangulation.
+ * This algorithm is invoked to perform the initial triangulation of
+ * each CAD patch, after the discretization of edges has been performed.
+ * Wires of this patch are processed in turn.  All nodes belonging to
+ * discretization of these edges are projected onto this 2D patch
+ * and collected into a list.  These nodes are boundary nodes, and
+ * all other nodes will be inserted in the interior domain.  A bounding
+ * box enclosing all these nodes in the 2D space is computed, and
+ * a {@link org.jcae.mesh.amibe.util.QuadTree} can then be initialized by
+ * {@link Mesh#initQuadTree(double, double, double, double)}.
+ *
+ * <p>
+ * A first triangle is created by iterating over the list of boundary nodes
+ * to find three vertices which are not aligned.  The outer domain is also
+ * triangulated; {@link Vertex#outer} is a vertex at infinite, and three
+ * outer triangles are created by joining this vertex to vertices of the
+ * first triangle.  With this trick, there is no need to have special
+ * cases when vertices are inserted outside the convex hull of already inserted
+ * vertices, and triangle location always succeed.  If these outer triangles
+ * did not exist, we would have to triangulate the convex hull of nodes.
+ * </p>
+ *
+ * <p>
+ * Boundary nodes are then inserted iteratively.  For the moment, an euclidian
+ * 2D metric is used because a 3D metric will not help on a very rough
+ * triangulation.  The nearest vertex already inserted in the mesh is retrieved
+ * with {@link org.jcae.mesh.amibe.util.QuadTree#getNearestVertex(Vertex)}.
+ * It has a reference to a triangle containing this vertex.  From this starting
+ * point, we search for the {@link Triangle} containing this boundary node by
+ * looking for adjacent triangles into the right direction.  This
+ * <code>Triangle</code> is splitted into three triangles (even if the vertex
+ * is inserted on an edge), and edges are swapped if they are not Delaunay.
+ * (This criterion also applied with our euclidian 2D metric)
+ * </p>
+ *
+ * <p>
+ * When all boundary nodes are inserted, an unconstrained Delaunay mesh has
+ * been built.  The list of boundary nodes computed previously gives a list of
+ * boundary edges, which needs to be enforced.  This is performed by
+ * {@link Mesh#forceBoundaryEdge(Vertex, Vertex, int)}; the segments which
+ * intersect the enforced edge are swapped.  The {@link OTriangle#BOUNDARY}
+ * attribute is set on these edges (and on matte edges).
+ * </p>
+ *
+ * <p>
+ * We know that the {@link Triangle} bound to {@link Vertex#outer} is an
+ * outer triangle.  Triangles adjacent through a boundary edge are interior
+ * triangles, otherwise they are outer triangles.  All triangles of the
+ * mesh are visited, and outer triangles are tagged with the
+ * {@link OTriangle#OUTER} attribute.  If an inconsistency is found
+ * (for instance a boundary edge seperate two outer triangles),
+ * {@link InitialTriangulationException} is raised.  This means that boundary
+ * was invalid, eg. it was not closed.
+ * </p>
  */
-
 public class BasicMesh
 {
 	private static Logger logger=Logger.getLogger(BasicMesh.class);
@@ -57,7 +108,8 @@ public class BasicMesh
 	/**
 	 * Creates a <code>BasicMesh</code> instance.
 	 *
-	 * @param m  the <code>BasicMesh</code> instance to refine.
+	 * @param m  the data structure in which the mesh will be stored.
+	 * @param m1d  discretization of edges.
 	 */
 	public BasicMesh(Mesh m, MMesh1D m1d)
 	{

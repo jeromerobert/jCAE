@@ -306,6 +306,14 @@ public class Vertex implements Cloneable
 	 * </ol>
 	 * Origin and destination points are always different from Vertex.outer.
 	 *
+	 * Note that this algorithm had been initially written to take outer
+	 * triangles into account.  Later on, <code>BasicMesh</code> had been
+	 * rewritten to work without outer triangles, this method had then
+	 * to be adapted too, and was much heavier.  Eventually changes
+	 * in <code>BasicMesh</code> had been reverted and outer triangles
+	 * are back, but this routine has not been modified.  It should be
+	 * cleaned up.
+	 *
 	 * @return a triangle containing this point.
 	 * @see OTriangle2D#split3
 	 */
