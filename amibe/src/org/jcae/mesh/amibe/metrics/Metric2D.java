@@ -160,13 +160,13 @@ public class Metric2D
 	}
 	
 	/**
-	 * Return the dot product of two vectors in this riemannian metrics.
+	 * Return the dot product of two vectors in this Riemannian metrics.
 	 *
 	 * @param x0 first coordinate of the first vector.
 	 * @param y0 second coordinate of the first vector.
 	 * @param x1 first coordinate of the second vector.
 	 * @param y1 second coordinate of the second vector.
-	 * @return the dot product of two vectors in this riemannian metrics.
+	 * @return the dot product of two vectors in this Riemannian metrics.
 	 */
 	public double dot(double x0, double y0, double x1, double y1)
 	{
@@ -193,9 +193,9 @@ public class Metric2D
 	}
 	
 	/**
-	 * Test whether this matrics is euclidian.
+	 * Test whether this matrics is Euclidian.
 	 *
-	 * @return <code>true</code> if this metrics is quasi-euclidian,
+	 * @return <code>true</code> if this metrics is quasi-Euclidian,
 	 * <code>false</code> otherwise.
 	 */
 	public boolean isPseudoIsotropic()

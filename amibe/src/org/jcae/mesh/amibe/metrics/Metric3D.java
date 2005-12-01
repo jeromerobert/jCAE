@@ -45,7 +45,7 @@ import org.apache.log4j.Logger;
  * The metrics associated with an edge length criterion is the 3x3 matrix
  * <code>M=Id/(h*h)</code>, where <code>h</code> is the target size.  Indeed the
  * relation above clearly shows that <code>l(M,P,Q)=1</code> if and only
- * if the euclidian distance between <code>P</code> and <code>Q</code> is
+ * if the Euclidian distance between <code>P</code> and <code>Q</code> is
  * <code>h</code>.  Such a metric is computed by the {@link #iso(double)}
  * method.
  * </p>

@@ -87,19 +87,19 @@ import java.util.ArrayList;
  * </p>
  *
  * <p>
- * Distances between vertices can be computed either in euclidian 2D space, or
- * with a riemannian metrics.  This is controlled by the {@link #setCompGeom(Calculus)}
- * method.  Distances are computed in euclidian 2D space when its argument is
+ * Distances between vertices can be computed either in Euclidian 2D space, or
+ * with a Riemannian metrics.  This is controlled by the {@link #setCompGeom(Calculus)}
+ * method.  Distances are computed in Euclidian 2D space when its argument is
  * an instance of {@link org.jcae.mesh.amibe.ds.tools.Calculus2D}, and in
- * riemannian metrics (see {@link org.jcae.mesh.amibe.metrics.Metric2D}) when
+ * Riemannian metrics (see {@link org.jcae.mesh.amibe.metrics.Metric2D}) when
  * it is an instance of {@link org.jcae.mesh.amibe.ds.tools.Calculus3D}.
- * By default, distances are computed in euclidian 2D space.
+ * By default, distances are computed in Euclidian 2D space.
  * </p>
  *
  * <p>
- * In euclidian 2D space, vertices which have a distance to a point <code>p</code>
+ * In Euclidian 2D space, vertices which have a distance to a point <code>p</code>
  * lower than <code>d</code> are contained in a circle centered at <code>p</code>
- * with radius <code>d</code>.  With riemannian metrics, this circle becomes
+ * with radius <code>d</code>.  With Riemannian metrics, this circle becomes
  * an ellipsis.  This ellipsis is only determined by local properties of the
  * surface at point <code>p</code>.
  * If we already found a point <code>V1</code> at a distance <code>d1</code>,

@@ -21,14 +21,24 @@
 
 package org.jcae.mesh.amibe.algos2d;
 
-import org.jcae.mesh.amibe.ds.*;
+import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.OTriangle2D;
+import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.MNode3D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import java.util.ArrayList;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 /**
- * Split triangles with a too large absolute deflection.
+ * Split triangles with an absolute deflection greater than
+ * requirements.  As explained in {@link Metric3D}, the geometric error
+ * may exceed the desired value if triangles are too far away from local
+ * tangent planes.  This algorithm computes the deflection of triangle
+ * centroids, and if it is larger than the requested value, this
+ * centroid is inserted into the mesh and incident edges are swapped
+ * if they are not Delaunay.
  */
 public class EnforceAbsDeflection
 {

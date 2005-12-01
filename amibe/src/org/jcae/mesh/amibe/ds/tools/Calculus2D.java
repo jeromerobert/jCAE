@@ -27,7 +27,7 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.apache.log4j.Logger;
 
 /**
- * Distance computations in 2D euclidian space.
+ * Distance computations in 2D Euclidian space.
  * This class is called from {@link org.jcae.mesh.amibe.algos2d.BasicMesh}
  * but may also be used if amibe is extended to mesh 2D surfaces.
  */

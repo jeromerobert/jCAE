@@ -31,7 +31,22 @@ import org.apache.log4j.Logger;
 
 /**
  * Swap edges if the normals to its adjacent triangles are too different
- * from the normal computed by the CAD engine.
+ * from the normal computed by the CAD engine.  Triangles in the 2D
+ * parameter space must not be inverted, otherwise some methods do not
+ * work any more.  But even in this case, if the surface parametrization
+ * has large variations over a triangle, triangles may be inverted in
+ * the 3D space.  The current algorithm is quite naive.  It works well,
+ * so we did not try to find a better alternative.
+ *
+ * <p>
+ * For each non-boundary edge, we first check that this edge can be
+ * swapped without inverting triangles in 2D space.  The normal to the
+ * surface at the middle of the edge is computed by the CAD engine.
+ * Inner products between this vector and triangle normals are computed,
+ * the quelity of this edge is the minimum of the two values.  The same
+ * computations are performed on swapped triangles, and if the quality
+ * is improved, this edge is indeed swapped.
+ * </p>
  */
 public class ConstraintNormal3D
 {

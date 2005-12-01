@@ -66,7 +66,7 @@ public class Calculus3D implements Calculus
 	}
 
 	/**
-	 * Returns the riemannian distance between nodes.
+	 * Returns the Riemannian distance between nodes.
 	 * This distance is computed with metrics on start and end points,
 	 * and the maximal distance is returned.
 	 *
@@ -118,7 +118,7 @@ public class Calculus3D implements Calculus
 	}
 	
 	/**
-	 * Returns the riemannian distance between nodes.
+	 * Returns the Riemannian distance between nodes.
 	 *
 	 * @param start  the start node
 	 * @param end  the end node

@@ -31,8 +31,12 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 /**
- * Swap edges which are not Delaunay.  There is no sort, edges are processed
- * in turn.
+ * Swap edges which are not Delaunay.  In an Euclidian 2D metrics, there
+ * is a unique Delaunay mesh, so edges can be processed in any order.
+ * But with a Riemannian metrics this is no more true, edges with the
+ * poorest quality should be processed first to improve the overall
+ * quality.  This is not implemented yet, edges are currently not
+ * sorted.
  */
 public class CheckDelaunay
 {

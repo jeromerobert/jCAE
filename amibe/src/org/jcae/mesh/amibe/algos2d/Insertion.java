@@ -21,20 +21,46 @@
 
 package org.jcae.mesh.amibe.algos2d;
 
-import org.jcae.mesh.amibe.ds.*;
+import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.OTriangle2D;
+import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.Vertex;
 import java.util.Iterator;
 import java.util.ArrayList;
 import gnu.trove.PrimeFinder;
 import org.apache.log4j.Logger;
 
 /**
- * Insert nodes to produce a unit mesh.  If an edge is longer than sqrt(2),
- * candidate vertices are added to a bucket.  When all edges are processed,
- * vertices from the bucket are processed randomly.  If the closest vertex in
- * the existing mesh has a distance lower than 1/sqrt(2), this vertex is
- * discarded, otherwise it is inserted into the mesh and adjacent edges are
- * swapped if they are not Delaunay.  This process is repeated until no new
- * vertex is added.
+ * Insert nodes to produce a unit mesh.  Process all edges; if an edge
+ * is longer than sqrt(2), candidate vertices are added to a bucket
+ * to virtually provide unit length subsegments.
+ * The next step is to take vertices from the bucket in random order.
+ * For each vertex <code>v</code>, the closest vertex <code>w</code>
+ * already present in the mesh is returned by
+ * {@link org.jcae.mesh.amibe.util.QuadTree#getNearestVertex(Vertex)}
+ * If the distance between <code>v</code> and <code>w</code> is lower
+ * than 1/sqrt(2), <code>v</code> is dropped, otherwise it is inserted
+ * into the mesh.  Just after a vertex is inserted, incident edges are
+ * swapped if they are not Delaunay.
+ * The whole process is repeated until no new vertex is added.
+ *
+ * <p>
+ * If all vertices of an edge were inserted at the same time, adjacent
+ * edges may get in trouble because their candidate vertices could be
+ * too near from these points.  In order to avoid this problem, vertices
+ * are processed in a random order so that all edges have a chance to be
+ * splitted.  As we want reproducible meshes, a pseudo-random order is
+ * preferred.
+ * </p>
+ *
+ * <p>
+ * Triangle centroids are also inserted if they are not too near of
+ * existing vertices.  This was added to try to improve triangle
+ * quality, but is a bad idea.  Bad triangles should instead be sorted
+ * (with {@link org.jcae.mesh.amibe.util.PAVLSortedTree}) and their
+ * circumcenter added to the mesh if the overall quality is improved, 
+ * </p>
  */
 public class Insertion
 {
@@ -222,21 +248,4 @@ public class Insertion
 		}
 	}
 	
-	private int countSpecialTriangles ()
-	{
-			int res = 0;
-			OTriangle2D ot = new OTriangle2D();
-			for(Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
-			{
-				Triangle t = (Triangle) it.next();
-				ot.bind(t);
-				for (int i = 0; i < 3; i++)
-				{
-					ot.nextOTri();
-					if (ot.hasAttributes(OTriangle.BOUNDARY) || ot.hasAttributes(OTriangle.OUTER))
-						res++;
-				}
-			}
-			return res;
-	}
 }
