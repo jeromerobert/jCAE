@@ -59,7 +59,7 @@ public class MeshView
 			v.addBranchGroup(bg);
 			bg=xbg.getBranchGroup("MultiEdges");
 			v.addBranchGroup(bg);
-			v.show();
+			v.setVisible(true);
 			v.zoomTo();
 		}
 		catch(Exception ex)

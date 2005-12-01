@@ -46,9 +46,9 @@ public class OctreeTestDisplayPLY extends OctreeTest
 	public static void display(Viewer view, OctreeTest r)
 	{
 		view.addBranchGroup(r.bgOctree());
-		view.show();
+		view.setVisible(true);
 		view.addBranchGroup(r.bgVertices());
-		view.show();
+		view.setVisible(true);
 	}
 	
 	public static void main(String args[])

@@ -48,9 +48,9 @@ public class QuadTreeTestRemove extends QuadTreeTest
 	public static void display(Viewer view, QuadTreeTest r)
 	{
 		view.addBranchGroup(r.bgQuadTree());
-		view.show();
+		view.setVisible(true);
 		view.addBranchGroup(r.bgVertices());
-		view.show();
+		view.setVisible(true);
 	}
 	
 	public static void main(String args[])

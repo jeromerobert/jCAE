@@ -42,7 +42,7 @@ public class MeshOEMMView
 		view.addBranchGroup(OEMMViewer.bgOEMM(oemm, true));
 		view.addBranchGroup(OEMMViewer.meshOEMM(dir));
 		view.zoomTo(); 
-		view.show();
+		view.setVisible(true);
 	}
 	
 }

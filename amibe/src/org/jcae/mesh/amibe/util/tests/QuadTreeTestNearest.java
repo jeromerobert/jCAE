@@ -75,9 +75,9 @@ public class QuadTreeTestNearest extends QuadTreeTest
 		{
 			view.addBranchGroup(r.bgQuadTree());
 			view.zoomTo(); 
-			view.show();
+			view.setVisible(true);
 			view.addBranchGroup(r.bgVertices());
-			view.show();
+			view.setVisible(true);
 		}
 		
 		for (int i = 0; i < 10; i++)
@@ -88,9 +88,9 @@ public class QuadTreeTestNearest extends QuadTreeTest
 			if (visu)
 			{
 				view.addBranchGroup(r.segment(vt, r.getNearVertex(vt), 5.0f, 1, 1, 0));
-				view.show(); 
+				view.setVisible(true);
 				view.addBranchGroup(r.segment(vt, r.getNearestVertex(vt), 0.0f, 0, 1, 1));
-				view.show(); 
+				view.setVisible(true);
 			}
 			else
 			{
@@ -109,13 +109,13 @@ public class QuadTreeTestNearest extends QuadTreeTest
 					{
 						Vertex vt = new Vertex(xyz[0], xyz[1]);
 						view.addBranchGroup(r.segment(vt, r.getNearVertex(vt), 5.0f, 1, 1, 0));
-						view.show(); 
+						view.setVisible(true);
 						view.addBranchGroup(r.segment(vt, r.getNearestVertex(vt), 0.0f, 0, 1, 1));
-						view.show(); 
+						view.setVisible(true);
 					}
 				}
 			};
-			view.show(); 
+			view.setVisible(true);
 		}
 	}
 }
