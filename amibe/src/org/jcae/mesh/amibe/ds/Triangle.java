@@ -20,21 +20,20 @@
 
 package org.jcae.mesh.amibe.ds;
 
-import org.jcae.mesh.amibe.metrics.Metric3D;
-import org.apache.log4j.Logger;
-import java.util.Random;
-import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 import java.util.Iterator;
+import java.util.ArrayList;
+import org.apache.log4j.Logger;
 
 /**
- * A triangular element of the mesh.  Instances of this class carry up all topological
- * information required for adjacency relations.  Their vertices are contained in
- * a {@link Vertex} array, and by convention the local number of an edge is
- * the index of its oppositee vertex.  A <code>Triangle</code> instance has a
- * pointer to its three neighbours through its edges, and knows the local
- * number of opposite edges in their respective triangles.
+ * A triangular element of the mesh.  Instances of this class carry up
+ * all topological information required for adjacency relations.  Their
+ * vertices are contained in a {@link Vertex} array, and by convention
+ * the local number of an edge is the index of its oppositee vertex.  A
+ * <code>Triangle</code> instance has a pointer to its three neighbours
+ * through its edges, and knows the local number of opposite edges in
+ * their respective triangles.
  *
  * <pre>
  *                        V2
