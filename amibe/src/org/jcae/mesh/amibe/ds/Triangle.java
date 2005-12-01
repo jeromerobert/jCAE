@@ -248,8 +248,7 @@ public class Triangle
 	 * Note: this routine could certainly be replaced by {@link #glue1}.
 	 *
 	 * @param num  the local number of this edge.
-	 * @param link  the object 
-	 * @return the adjacent Triangle.
+	 * @param link  the adjacent Triangle.
 	 */
 	public void setAdj(int num, Object link)
 	{

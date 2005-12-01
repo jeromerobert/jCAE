@@ -178,8 +178,9 @@ public class Vertex implements Cloneable
 	
 	/**
 	 * Set the coordinates of this Vertex (2D).
-	 *
-	 * @return the coordinates of this Vertex.
+         *
+	 * @param u  first coordinate of the new position
+	 * @param v  second coordinate of the new position
 	 */
 	public void moveTo(double u, double v)
 	{
@@ -191,7 +192,9 @@ public class Vertex implements Cloneable
 	/**
 	 * Set the coordinates of this Vertex (3D).
 	 *
-	 * @return the coordinates of this Vertex.
+	 * @param x  first coordinate of the new position
+	 * @param y  second coordinate of the new position
+	 * @param z  third coordinate of the new position
 	 */
 	public void moveTo(double x, double y, double z)
 	{
