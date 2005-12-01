@@ -26,12 +26,9 @@ import java.util.Iterator;
 
 /**
  * Compute maximal angle by triangle.
- *
- * This class implements the
- * {@link org.jcae.mesh.amibe.validation.QualityProcedure#quality}
+ * This class implements the {@link QualityProcedure#quality(Object)}
  * method to compute maximal angles of triangles.
  */
-
 public class MaxAngleFace extends QualityProcedure
 {
 	public MaxAngleFace()

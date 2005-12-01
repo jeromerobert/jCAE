@@ -67,24 +67,24 @@ import org.apache.log4j.Logger;
  * <p>
  *   The main goal of this class is to ease mesh traversal.
  *   Consider the <code>ot</code> {@link OTriangle} with a null localNumber of
- *   {@link Triangle} <code>t</code>below.
+ *   {@link Triangle} <code>t</code> below.
  * </p>
  * <pre>
  *                        V2
  *     V5 _________________,________________, V3
  *        \    &lt;----      / \     &lt;----     /
- *         \     1       /   \      1      /
- *          \   t3    -.//  /\\\   t0   _,/
- *           \      0 ///1   0\\\2    0 //   t.vertex = { V0, V1, V2 }
- *            \      //V   t   \\V     //   t0.vertex = { V2, V1, V3 }
+ *         \     0     _ /   \      1    _ /
+ *          \\  t0     ///  /\\\   t1    //
+ *           \\1     2///1   0\\\2     0//   t.vertex = { V0, V1, V2 }
+ *            \V     //V   t   \\V     //   t0.vertex = { V2, V1, V3 }
  *             \     /           \     /    t2.vertex = { V0, V4, V1 }
  *              \   /      2      \   /     t3.vertex = { V5, V0, V2 }
  *               \ /     ----&gt;     \ /
  *             V0 +-----------------+ V1
  *                 \     &lt;----     /
- *                  \      1      /
- *                   \    t2   _,/
- *                    \       0//
+ *                  \      1    _ /
+ *                   \\   t2    //
+ *                    \\2     0//
  * </pre>
  * The following methods can be applied to <code>ot</code>:
  * <pre>
@@ -98,6 +98,13 @@ import org.apache.log4j.Logger;
  *    ot.nextOTriApex();    // Moves (t,0) to (t3,1)
  *    ot.prevOTriApex();    // Moves (t,0) to (t2,0)
  * </pre>
+ *
+ * <p>
+ * When an <code>OTriangle</code> is traversing the mesh, its reference
+ * is not modified, but its instance variables are updated.  In order
+ * to prevent object allocations, we try to reuse <code>OTriangle</code>
+ * objects as much as we can.
+ * </p>
  */
 public class OTriangle implements Cloneable
 {

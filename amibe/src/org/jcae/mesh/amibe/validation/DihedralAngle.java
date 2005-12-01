@@ -25,13 +25,14 @@ import org.jcae.mesh.amibe.ds.OTriangle;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 
 /**
- * Compute minimal angle by triangle.
- *
- * This class implements the
- * {@link org.jcae.mesh.amibe.validation.QualityProcedure#quality}
- * method to compute minimal angles of triangles.
+ * Compute angles between adjacent triangles.
+ * This class implements the {@link QualityProcedure#quality(Object)}
+ * method to compute angles between adjacent triangles.  The inner
+ * products between the normal to the triangle and the normal to
+ * adjacent triangles are computed, and the quality of the triangle
+ * is set to the minimal value.  This is very useful to detect
+ * inverted triangles in 3D on smooth surfaces.
  */
-
 public class DihedralAngle extends QualityProcedure
 {
 	private OTriangle ot = new OTriangle();

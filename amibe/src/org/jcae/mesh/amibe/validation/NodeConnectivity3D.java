@@ -29,9 +29,7 @@ import java.util.Iterator;
 
 /**
  * Compute node connectivity of 3D nodes.
- *
- * This class implements the
- * {@link org.jcae.mesh.amibe.validation.QualityProcedure#quality}
+ * This class implements the {@link QualityProcedure#quality(Object)}
  * method to compute node connectivity of 3D meshes.  As 3D meshes
  * have a simplistic data structure, computing node neighbours would
  * be very extensive.  Thus instead <code>quality</code> is called

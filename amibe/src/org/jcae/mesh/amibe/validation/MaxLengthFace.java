@@ -26,12 +26,9 @@ import java.util.Iterator;
 
 /**
  * Compute maximal edge length by triangle.
- *
- * This class implements the
- * {@link org.jcae.mesh.amibe.validation.QualityProcedure#quality}
+ * This class implements the {@link QualityProcedure#quality(Object)}
  * method to compute maximal edge length of triangles.
  */
-
 public class MaxLengthFace extends QualityProcedure
 {
 	public MaxLengthFace()

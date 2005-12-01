@@ -28,18 +28,22 @@ import java.io.PrintStream;
 import org.apache.log4j.Logger;
 
 /**
- * Class to handle quality results.
+ * Manage statistics for quality values.
  *
  * This class allows easy computation of mesh quality.  A criterion
  * factor can be selected, then quality is computed and results are
- * printed on screen or in files.
+ * printed on screen or in files.  Quality values are stored in a list
+ * of floats.
  *
  * Example:
  * <pre>
  *    QualityFloat data = new QualityFloat();
- *    data.setQualityProcedure(new MinAngleFace());
- *    for (Iterator itf = mesh3D.getFacesIterator(); itf.hasNext(); )
- *        data.compute(itf.next());
+ *    data.setQualityProcedure(new DihedralAngle());
+ *    for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
+ *    {
+ *        Triangle f = (Triangle) itf.next();
+ *        data.compute(f);
+ *    }
  *    //  Print all results in the BB mesh format.
  *    data.printMeshBB("foo.bb");
  *    //  Gather results into 10 blocks...
@@ -48,7 +52,6 @@ import org.apache.log4j.Logger;
  *    data.printLayers();
  * </pre>
  */
-
 public class QualityFloat
 {
 	private static Logger logger=Logger.getLogger(QualityFloat.class);
@@ -64,38 +67,73 @@ public class QualityFloat
 		data = new TFloatArrayList();
 	}
 	
+        /**
+         * Create a new <code>QualityFloat</code> instance 
+         *
+         * @param n  initial capacity of the list.
+         */
 	public QualityFloat(int n)
 	{
 		data = new TFloatArrayList(n);
 	}
 	
+        /**
+         * Define the procedure which will compute quality values.
+         *
+         * @param q  the procedure which will compute quality values.
+         */
 	public void setQualityProcedure(QualityProcedure q)
 	{
 		qproc = q;
 		qproc.bindResult(data);
 	}
 	
+        /**
+         * Compute the quality of an object and add it to the list.
+         *
+         * @param x  the object on which quality is computed.
+         */
 	public void compute(Object x)
 	{
 		assert qproc != null;
 		data.add(qproc.quality(x));
 	}
 	
+        /**
+         * Add a value to the list.
+         *
+         * @param x  the value to add to the list.
+         */
 	public void add(float x)
 	{
 		data.add(x);
 	}
 	
+        /**
+         * Call the {@link QualityProcedure#finish} procedure.
+         */
 	public void finish()
 	{
 		qproc.finish();
 	}
 	
+        /**
+         * Return the number of quality values.
+         *
+         * @return the number of quality values.
+         */
 	public int size()
 	{
 		return data.size();
 	}
 	
+        /**
+         * Normalize quality target.  This method divides all values
+         * by the given factor.  This is useful to scale quality
+         * factors so that they are in the range </code>[0..1]</code>.
+         *
+         * @param factor   the scale factor.
+         */
 	public void setTarget(float factor)
 	{
 		int nrTotal = data.size();
@@ -111,6 +149,16 @@ public class QualityFloat
 		}
 	}
 	
+        /**
+         * Split quality values into buckets.  The minimal and
+         * maximal quality values are computed, this range is divided
+         * into <code>n</code> subsegments of equal length, and 
+         * the number of quality values for each subsegment is
+         * computed.  These numbers can then be displayed by
+         * {@link #printLayers}.
+         *
+         * @param n  the desired number of subsegments.
+         */
 	public void split(int n)
 	{
 		layers = n;
@@ -133,8 +181,9 @@ public class QualityFloat
 		qmin = vmin;
 		qmax = vmax;
 		float delta = (vmax - vmin) / ((float) layers);
-		// sorted[0]: number of points with value < vmin
-		// sorted[layers+1]: number of points with value > vmax
+                // In printLayers:
+		//   sorted[0]: number of points with value < vmin
+		//   sorted[layers+1]: number of points with value > vmax
 		sorted = new int[layers+2];
 		for (int i = 0; i < layers + 2; i++)
 			sorted[i] = 0;
@@ -142,19 +191,22 @@ public class QualityFloat
 		{
 			float val = data.get(i);
 			int cell = (int) ((val - vmin) / delta + 1.001f);
-			if (cell < 0)
-				cell = 0;
-			else if (cell >= layers + 1)
-			{
-				if (val > vmax)
-					cell = layers + 1;
-				else
-					cell = layers;
-			}
+			assert cell > 0 && cell <= layers;
 			sorted[cell]++;
 		}
 	}
 	
+        /**
+         * Split quality values into buckets.  The range between minimal
+         * and maximal quality values is divided into <code>n</code>
+         * subsegments of equal length, and the number of quality values
+         * for each subsegment is computed.  These numbers can then be
+         * displayed by {@link #printLayers}.
+         *
+         * @param v1  minimal value to consider.
+         * @param v2  maximal value to consider.
+         * @param n  the desired number of subsegments.
+         */
 	public void split(float v1, float v2, int n)
 	{
 		layers = n;
@@ -193,6 +245,9 @@ public class QualityFloat
 		}
 	}
 	
+        /**
+         * Display statistics about quality values.
+         */
 	public void printLayers()
 	{
 		if (layers <= 0)
@@ -216,6 +271,14 @@ public class QualityFloat
 		System.out.println("qavg: "+qavg);
 	}
 	
+        /**
+         * Write quality values into a file.  They are stored in the
+         * BB medit format, in the same order as they have been
+         * computed.  This means that a mesh file had been written with
+         * the same order.
+         *
+         * @param file   name of the output file
+         */
 	public void printMeshBB(String file)
 	{
 		int nrTotal = data.size();

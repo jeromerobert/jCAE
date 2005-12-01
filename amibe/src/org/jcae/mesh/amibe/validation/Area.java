@@ -27,12 +27,9 @@ import java.util.Iterator;
 
 /**
  * Compute triangle area.
- *
- * This class implements the
- * {@link org.jcae.mesh.amibe.validation.QualityProcedure#quality}
- * method to computing triangle area.
+ * This class implements the {@link QualityProcedure#quality(Object)}
+ * method to compute triangle area.
  */
-
 public class Area extends QualityProcedure
 {
 	public static double [] v1 = new double[3];

@@ -32,7 +32,6 @@ import gnu.trove.TFloatArrayList;
  * <code>Object</code>, and caller is responsible for passing the
  * right argument.
  */
-
 public abstract class QualityProcedure
 {
 	protected static final int FACE = 1;
@@ -70,7 +69,11 @@ public abstract class QualityProcedure
 	}
 	
 	/**
-	 * Set the element type.
+	 * Set the element type.  Valid values are {@link #FACE} and
+         * {@link #NODE}.  By default, type is <code>FACE</code>.
+         * Quality procedures which compute values on nodes need to
+         * call this function, otherwise the data file written by
+         * {@link QualityFloat#printMeshBB(String)}
 	 *
 	 * @param t  the element type.
 	 */
