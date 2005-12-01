@@ -24,7 +24,7 @@ import org.jcae.mesh.amibe.util.QuadTree;
 import org.jcae.mesh.amibe.ds.tools.*;
 import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.jcae.mesh.amibe.metrics.Metric2D;
-import org.jcae.mesh.amibe.metrics.Metric3D;
+import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.cad.*;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -943,7 +943,7 @@ public class Mesh
 				double [] n1 = ot.getTempVector();
 				sym.computeNormal3D();
 				double [] n2 = sym.getTempVector();
-				double angle = Metric3D.prodSca(n1, n2);
+				double angle = Matrix3D.prodSca(n1, n2);
 				if (angle > -cosMinAngle)
 					return false;
 			}

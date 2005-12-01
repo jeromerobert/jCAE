@@ -23,7 +23,7 @@ package org.jcae.mesh.amibe.ds;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Stack;
-import org.jcae.mesh.amibe.metrics.Metric3D;
+import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.apache.log4j.Logger;
 
 /*
@@ -738,15 +738,15 @@ public class OTriangle implements Cloneable
 		tempD[0] = p2[0] - p0[0];
 		tempD[1] = p2[1] - p0[1];
 		tempD[2] = p2[2] - p0[2];
-		Metric3D.prodVect3D(tempD1, tempD, tempD2);
-		double norm = Metric3D.norm(tempD2);
+		Matrix3D.prodVect3D(tempD1, tempD, tempD2);
+		double norm = Matrix3D.norm(tempD2);
 		if (norm != 0.0)
 		{
 			tempD2[0] /= norm;
 			tempD2[1] /= norm;
 			tempD2[2] /= norm;
 		}
-		Metric3D.prodVect3D(tempD1, tempD2, tempD);
+		Matrix3D.prodVect3D(tempD1, tempD2, tempD);
 		return norm;
 	}
 	
@@ -768,8 +768,8 @@ public class OTriangle implements Cloneable
 		tempD2[0] = p2[0] - p0[0];
 		tempD2[1] = p2[1] - p0[1];
 		tempD2[2] = p2[2] - p0[2];
-		Metric3D.prodVect3D(tempD1, tempD2, tempD);
-		double norm = Metric3D.norm(tempD);
+		Matrix3D.prodVect3D(tempD1, tempD2, tempD);
+		double norm = Matrix3D.norm(tempD);
 		if (norm != 0.0)
 		{
 			tempD[0] /= norm;
@@ -795,8 +795,8 @@ public class OTriangle implements Cloneable
 		tempD2[0] = p2[0] - p0[0];
 		tempD2[1] = p2[1] - p0[1];
 		tempD2[2] = p2[2] - p0[2];
-		Metric3D.prodVect3D(tempD1, tempD2, tempD);
-		return 0.5 * Metric3D.norm(tempD);
+		Matrix3D.prodVect3D(tempD1, tempD2, tempD);
+		return 0.5 * Matrix3D.norm(tempD);
 	}
 	
 	/**
@@ -830,7 +830,7 @@ public class OTriangle implements Cloneable
 		double [] n1 = getTempVector();
 		work[0].computeNormal3D();
 		double [] n2 = work[0].getTempVector();
-		if (Metric3D.prodSca(n1, n2) < minCos)
+		if (Matrix3D.prodSca(n1, n2) < minCos)
 			return invalid;
 		// Check for quality improvement
 		Vertex o = origin();
@@ -968,7 +968,7 @@ public class OTriangle implements Cloneable
 			double [] x1 = work[0].origin().getUV();
 			for (int i = 0; i < 3; i++)
 				v1[i] = newpt[i] - x1[i];
-			if (Metric3D.prodSca(v1, nu) >= - area2 / 2.0)
+			if (Matrix3D.prodSca(v1, nu) >= - area2 / 2.0)
 				return false;
 			work[0].nextOTriApexLoop();
 		}
@@ -1030,7 +1030,7 @@ public class OTriangle implements Cloneable
 				// Two triangles are removed when an edge is contracted.
 				// So normally triangle areas should increase.  If they
 				// decrease significantly, there may be a problem.
-				if (Metric3D.prodSca(v1, nu) >= - area2 / 2.0)
+				if (Matrix3D.prodSca(v1, nu) >= - area2 / 2.0)
 					return false;
 			}
 			work[0].nextOTriApexLoop();
@@ -1048,7 +1048,7 @@ public class OTriangle implements Cloneable
 				double [] x1 = work[0].origin().getUV();
 				for (int i = 0; i < 3; i++)
 					v1[i] = xn[i] - x1[i];
-				if (Metric3D.prodSca(v1, nu) >= - area2 / 2.0)
+				if (Matrix3D.prodSca(v1, nu) >= - area2 / 2.0)
 					return false;
 			}
 			work[0].nextOTriApexLoop();

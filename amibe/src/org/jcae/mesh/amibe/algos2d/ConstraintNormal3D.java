@@ -25,7 +25,7 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.OTriangle;
 import org.jcae.mesh.amibe.ds.OTriangle2D;
-import org.jcae.mesh.amibe.metrics.Metric3D;
+import org.jcae.mesh.amibe.metrics.Matrix3D;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
 
@@ -132,16 +132,16 @@ public class ConstraintNormal3D
 						vect2[k] = xa[k] - xo[k];
 						vect3[k] = xn[k] - xo[k];
 					}
-					Metric3D.prodVect3D(vect1, vect2, vect4);
-					double norm = Metric3D.norm(vect4);
+					Matrix3D.prodVect3D(vect1, vect2, vect4);
+					double norm = Matrix3D.norm(vect4);
 					if (norm < 1.e-20)
 						norm = 1.0;
-					double scal1 = Metric3D.prodSca(normal, vect4) / norm;
-					Metric3D.prodVect3D(vect3, vect1, vect4);
-					norm = Metric3D.norm(vect4);
+					double scal1 = Matrix3D.prodSca(normal, vect4) / norm;
+					Matrix3D.prodVect3D(vect3, vect1, vect4);
+					norm = Matrix3D.norm(vect4);
 					if (norm < 1.e-20)
 						norm = 1.0;
-					double scal2 = Metric3D.prodSca(normal, vect4) / norm;
+					double scal2 = Matrix3D.prodSca(normal, vect4) / norm;
 					// No need to check further if triangles are good enough
 					if (scal1 > 0.4 && scal2 > 0.4)
 						continue;
@@ -152,16 +152,16 @@ public class ConstraintNormal3D
 						vect2[k] = xo[k] - xn[k];
 						vect3[k] = xd[k] - xn[k];
 					}
-					Metric3D.prodVect3D(vect1, vect2, vect4);
-					norm = Metric3D.norm(vect4);
+					Matrix3D.prodVect3D(vect1, vect2, vect4);
+					norm = Matrix3D.norm(vect4);
 					if (norm < 1.e-20)
 						norm = 1.0;
-					double scal3 = Metric3D.prodSca(normal, vect4) / norm;
-					Metric3D.prodVect3D(vect3, vect1, vect4);
-					norm = Metric3D.norm(vect4);
+					double scal3 = Matrix3D.prodSca(normal, vect4) / norm;
+					Matrix3D.prodVect3D(vect3, vect1, vect4);
+					norm = Matrix3D.norm(vect4);
 					if (norm < 1.e-20)
 						norm = 1.0;
-					double scal4 = Metric3D.prodSca(normal, vect4) / norm;
+					double scal4 = Matrix3D.prodSca(normal, vect4) / norm;
 					double res = Math.min(scal3, scal4) - Math.min(scal1, scal2);
 					if (res > best)
 					{

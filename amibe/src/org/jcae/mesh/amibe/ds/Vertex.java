@@ -616,7 +616,7 @@ public class Vertex implements Cloneable
 			vect1[i] = n1.param[i] - param[i];
 			vect2[i] = n2.param[i] - param[i];
 		}
-		return 0.5 * Metric3D.prodSca(Metric3D.prodVect3D(vect1, vect2), n);
+		return 0.5 * Matrix3D.prodSca(Matrix3D.prodVect3D(vect1, vect2), n);
 	}
 	
 	/* Unused
@@ -970,12 +970,12 @@ public class Vertex implements Cloneable
 			vect3[0] = p0[0] - p2[0];
 			vect3[1] = p0[1] - p2[1];
 			vect3[2] = p0[2] - p2[2];
-			double c12 = Metric3D.prodSca(vect1, vect2);
-			double c23 = Metric3D.prodSca(vect2, vect3);
-			double c31 = Metric3D.prodSca(vect3, vect1);
+			double c12 = Matrix3D.prodSca(vect1, vect2);
+			double c23 = Matrix3D.prodSca(vect2, vect3);
+			double c31 = Matrix3D.prodSca(vect3, vect1);
 			// Override vect2
-			Metric3D.prodVect3D(vect1, vect3, vect2);
-			double area = 0.5 * Metric3D.norm(vect2);
+			Matrix3D.prodVect3D(vect1, vect3, vect2);
+			double area = 0.5 * Matrix3D.norm(vect2);
 			if (c31 > 0.0)
 				mixed += 0.5 * area;
 			else if (c12 > 0.0 || c23 > 0.0)
@@ -984,7 +984,7 @@ public class Vertex implements Cloneable
 			{
 				// Non-obtuse triangle
 				if (area > 0.0 && area > - 1.e-6 * (c12+c23))
-					mixed -= 0.125 * 0.5 * (c12 * Metric3D.prodSca(vect3, vect3) + c23 * Metric3D.prodSca(vect1, vect1)) / area;
+					mixed -= 0.125 * 0.5 * (c12 * Matrix3D.prodSca(vect3, vect3) + c23 * Matrix3D.prodSca(vect1, vect1)) / area;
 			}
 			gauss += Math.abs(Math.atan2(2.0 * area, -c31));
 			for (int i = 0; i < 3; i++)
@@ -1008,7 +1008,7 @@ public class Vertex implements Cloneable
 	public boolean discreteCurvatureDirections(double [] normal, double[] t1, double [] t2)
 	{
 		double Kg = discreteCurvatures(normal);
-		double n = Metric3D.norm(normal);
+		double n = Matrix3D.norm(normal);
 		double Kh = 0.5 * n;
 		if (n < 1.e-6)
 		{
@@ -1034,13 +1034,13 @@ public class Vertex implements Cloneable
 			t2[0] = 1.0;
 		else
 			t2[1] = 1.0;
-		Metric3D.prodVect3D(normal, t2, t1);
-		n = Metric3D.norm(t1);
+		Matrix3D.prodVect3D(normal, t2, t1);
+		n = Matrix3D.norm(t1);
 		if (n < 1.e-6)
 			return false;
 		for (int i = 0; i < 3; i++)
 			t1[i] /= n;
-		Metric3D.prodVect3D(normal, t1, t2);
+		Matrix3D.prodVect3D(normal, t1, t2);
 		// To compute B eigenvectors, we search for the minimum of
 		//   E(a,b,c) = sum omega_ij (T(d_ij) B d_ij - kappa_ij)^2
 		// d_ij is the unit direction of the edge ij in the tangent
@@ -1085,24 +1085,24 @@ public class Vertex implements Cloneable
 				vect2[i] = p2[i] - p1[i];
 				vect3[i] = param[i] - p2[i];
 			}
-			double c12 = Metric3D.prodSca(vect1, vect2);
-			double c23 = Metric3D.prodSca(vect2, vect3);
-			double c31 = Metric3D.prodSca(vect3, vect1);
+			double c12 = Matrix3D.prodSca(vect1, vect2);
+			double c23 = Matrix3D.prodSca(vect2, vect3);
+			double c31 = Matrix3D.prodSca(vect3, vect1);
 			// Override vect2
-			Metric3D.prodVect3D(vect1, vect3, vect2);
-			double area = 0.5 * Metric3D.norm(vect2);
-			double len2 = Metric3D.prodSca(vect1, vect1);
+			Matrix3D.prodVect3D(vect1, vect3, vect2);
+			double area = 0.5 * Matrix3D.norm(vect2);
+			double len2 = Matrix3D.prodSca(vect1, vect1);
 			if (len2 < 1.e-12)
 				continue;
-			double kappa = 2.0 * Metric3D.prodSca(vect1, normal) / len2;
-			double d1 = Metric3D.prodSca(vect1, t1);
-			double d2 = Metric3D.prodSca(vect1, t2);
+			double kappa = 2.0 * Matrix3D.prodSca(vect1, normal) / len2;
+			double d1 = Matrix3D.prodSca(vect1, t1);
+			double d2 = Matrix3D.prodSca(vect1, t2);
 			n = Math.sqrt(d1*d1 + d2*d2);
 			if (n < 1.e-6)
 				continue;
 			d1 /= n;
 			d2 /= n;
-			double omega = 0.5 * (c12 * Metric3D.prodSca(vect3, vect3) + c23 * Metric3D.prodSca(vect1, vect1)) / area;
+			double omega = 0.5 * (c12 * Matrix3D.prodSca(vect3, vect3) + c23 * Matrix3D.prodSca(vect1, vect1)) / area;
 			g0[0] += omega * d1 * d1 * d1 * d1;
 			g0[1] += omega * 2.0 * d1 * d1 * d1 * d2;
 			g0[2] += omega * d1 * d1 * d2 * d2;
@@ -1185,7 +1185,7 @@ public class Vertex implements Cloneable
 				normal[i] += area * nu[i];
 		}
 		while (ot.destination() != d);
-		double n = Metric3D.norm(normal);
+		double n = Matrix3D.norm(normal);
 		if (n < 1.e-6)
 			return false;
 		for (int i = 0; i < 3; i++)
@@ -1212,13 +1212,13 @@ public class Vertex implements Cloneable
 			t2[0] = 1.0;
 		else
 			t2[1] = 1.0;
-		Metric3D.prodVect3D(normal, t2, t1);
-		double n = Metric3D.norm(t1);
+		Matrix3D.prodVect3D(normal, t2, t1);
+		double n = Matrix3D.norm(t1);
 		if (n < 1.e-6)
 			return false;
 		for (int i = 0; i < 3; i++)
 			t1[i] /= n;
-		Metric3D.prodVect3D(normal, t1, t2);
+		Matrix3D.prodVect3D(normal, t1, t2);
 		// Transformation matrix
 		Matrix3D Pinv = new Matrix3D(t1, t2, normal);
 		Matrix3D P = (Matrix3D) Pinv.transp();
@@ -1245,7 +1245,7 @@ public class Vertex implements Cloneable
 			double [] p1 = ot.destination().getUV();
 			for (int i = 0; i < 3; i++)
 				vect1[i] = p1[i] - param[i];
-			dmin = Math.min(dmin, Metric3D.norm(vect1));
+			dmin = Math.min(dmin, Matrix3D.norm(vect1));
 			// Find coordinates in the local frame (t1,t2,n)
 			double [] loc = P.apply(vect1);
 			h[0] += loc[2] * loc[0] * loc[0];

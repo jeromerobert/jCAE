@@ -22,7 +22,7 @@ package org.jcae.mesh.amibe.validation;
 
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.OTriangle;
-import org.jcae.mesh.amibe.metrics.Metric3D;
+import org.jcae.mesh.amibe.metrics.Matrix3D;
 
 /**
  * Compute minimal angle by triangle.
@@ -63,7 +63,7 @@ public class DihedralAngle extends QualityProcedure
 			double [] n1 = ot.getTempVector();
 			sym.computeNormal3D();
 			double [] n2 = sym.getTempVector();
-			float dot = (float) Metric3D.prodSca(n1, n2);
+			float dot = (float) Matrix3D.prodSca(n1, n2);
 			if (dot < ret)
 				ret = dot;
 		}

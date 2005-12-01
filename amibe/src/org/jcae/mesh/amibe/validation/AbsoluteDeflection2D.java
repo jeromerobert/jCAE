@@ -23,7 +23,7 @@ package org.jcae.mesh.amibe.validation;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.MNode3D;
-import org.jcae.mesh.amibe.metrics.Metric3D;
+import org.jcae.mesh.amibe.metrics.Matrix3D;
 
 public class AbsoluteDeflection2D extends QualityProcedure
 {
@@ -63,13 +63,13 @@ public class AbsoluteDeflection2D extends QualityProcedure
 			v2[i] = xyz2[i] - xyz0[i];
 			v3[i] = xyz3[i] - xyz0[i];
 		}
-		double [] vec = Metric3D.prodVect3D(v1, v2);
-		double norm = Metric3D.norm(vec);
+		double [] vec = Matrix3D.prodVect3D(v1, v2);
+		double norm = Matrix3D.norm(vec);
 		double dist = 0.0;
 		if (norm > 0.0)
 		{
-			dist = Math.abs(Metric3D.prodSca(vec, v3));
-			dist /= Metric3D.norm(vec);
+			dist = Math.abs(Matrix3D.prodSca(vec, v3));
+			dist /= Matrix3D.norm(vec);
 		}
 		return (float) dist;
 	}

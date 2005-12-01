@@ -26,6 +26,7 @@ import org.jcae.mesh.amibe.ds.NotOrientedEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Metric3D;
+import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import java.util.HashSet;
 import java.util.HashMap;
@@ -80,7 +81,7 @@ public class DecimateVertex
 		public double value(double [] vect)
 		{
 			double ret = c;
-			ret += 2.0 * Metric3D.prodSca(b, vect);
+			ret += 2.0 * Matrix3D.prodSca(b, vect);
 			for (int i = 0; i < b.length; i++)
 				for (int j = 0; j < b.length; j++)
 					ret += A.data[i][j] * vect[i] * vect[j];
@@ -164,11 +165,11 @@ public class DecimateVertex
 			vect2[1] = p2[1] - p0[1];
 			vect2[2] = p2[2] - p0[2];
 			// This is in fact 2*area, but that does not matter
-			Metric3D.prodVect3D(vect1, vect2, noe.getTempVector());
-			double area = Metric3D.norm(noe.getTempVector()) / tolerance;
+			Matrix3D.prodVect3D(vect1, vect2, noe.getTempVector());
+			double area = Matrix3D.norm(noe.getTempVector()) / tolerance;
 			noe.computeNormal3D();
 			double [] normal = noe.getTempVector();
-			double d = - Metric3D.prodSca(normal, f.vertex[0].getUV());
+			double d = - Matrix3D.prodSca(normal, f.vertex[0].getUV());
 			for (int i = 0; i < 3; i++)
 			{
 				Quadric q = (Quadric) quadricMap.get(f.vertex[i]);
@@ -194,7 +195,7 @@ public class DecimateVertex
 					noe.computeNormal3DT();
 					//  length(nu) == length(noe)
 					double [] nu = noe.getTempVector();
-					d = - Metric3D.prodSca(nu, noe.origin().getUV());
+					d = - Matrix3D.prodSca(nu, noe.origin().getUV());
 					Quadric q1 = (Quadric) quadricMap.get(noe.origin());
 					Quadric q2 = (Quadric) quadricMap.get(noe.destination());
 					for (int k = 0; k < 3; k++)
@@ -499,7 +500,7 @@ public class DecimateVertex
 			for (int i = 0; i < 3; i++)
 				temp[i] = p2[i] - p1[i];
 			double den = 0.0;
-			double num = Metric3D.prodSca(q3.b, temp);
+			double num = Matrix3D.prodSca(q3.b, temp);
 			for (int i = 0; i < 3; i++)
 			{
 				for (int j = 0; j < 3; j++)

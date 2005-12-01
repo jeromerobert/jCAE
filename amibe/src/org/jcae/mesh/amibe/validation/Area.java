@@ -22,7 +22,7 @@ package org.jcae.mesh.amibe.validation;
 
 import org.jcae.mesh.amibe.ds.MFace3D;
 import org.jcae.mesh.amibe.ds.MNode3D;
-import org.jcae.mesh.amibe.metrics.Metric3D;
+import org.jcae.mesh.amibe.metrics.Matrix3D;
 import java.util.Iterator;
 
 /**
@@ -60,7 +60,7 @@ public class Area extends QualityProcedure
 			v1[i] = p2[i] - p1[i];
 			v2[i] = p3[i] - p1[i];
 		}
-		double [] v3 = Metric3D.prodVect3D(v1, v2);
-		return (float) (0.5 * Metric3D.norm(v3));
+		double [] v3 = Matrix3D.prodVect3D(v1, v2);
+		return (float) (0.5 * Matrix3D.norm(v3));
 	}
 }
