@@ -22,12 +22,16 @@ package org.jcae.mesh.amibe.ds;
 
 import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.util.LongLong;
-import org.jcae.mesh.amibe.ds.tools.*;
+import org.jcae.mesh.amibe.ds.tools.Calculus;
+import org.jcae.mesh.amibe.ds.tools.Calculus2D;
 import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.mesher.ds.MNode1D;
-import org.jcae.mesh.cad.*;
+import org.jcae.mesh.cad.CADVertex;
+import org.jcae.mesh.cad.CADFace;
+import org.jcae.mesh.cad.CADGeomCurve2D;
+import org.jcae.mesh.cad.CADGeomSurface;
 import java.util.Random;
 import java.util.HashSet;
 import java.util.ArrayList;
@@ -50,8 +54,14 @@ import java.util.Iterator;
 public class Vertex implements Cloneable
 {
 	private static Logger logger = Logger.getLogger(Vertex.class);
-	//  Set by Mesh.init
+	/**
+	 * Outer vertex.
+	 */
 	public static Vertex outer = null;
+	/**
+	 * Backward reference to the mesh, to have access to the global
+	 * context.
+	 */
 	public static Mesh mesh = null;
 	private static final Random rand = new Random(139L);
 	private static Vertex circumcenter = new Vertex(0.0, 0.0);
@@ -60,6 +70,9 @@ public class Vertex implements Cloneable
 	private static final int [] i0 = new int[2];
 	private static final int [] i1 = new int[2];
 	
+	/**
+	 * 2D or 3D coordinates.
+	 */
 	public double [] param = null;
 	//  link can be either:
 	//    1. a Triangle, for manifold vertices
@@ -534,26 +547,6 @@ public class Vertex implements Cloneable
 		while (ot.destination() != d);
 	}
 	
-	private long onLeft_isotropic(Vertex v1, Vertex v2)
-	{
-		assert this != Vertex.outer;
-		assert v1 != Vertex.outer;
-		assert v2 != Vertex.outer;
-		mesh.quadtree.double2int(param, i0);
-		mesh.quadtree.double2int(v1.param, i1);
-		long x01 = i1[0] - i0[0];
-		long y01 = i1[1] - i0[1];
-		mesh.quadtree.double2int(v2.param, i1);
-		long x02 = i1[0] - i0[0];
-		long y02 = i1[1] - i0[1];
-		return x01 * y02 - x02 * y01;
-	}
-	
-	public long onLeft(Vertex v1, Vertex v2)
-	{
-		return onLeft_isotropic(v1, v2);
-	}
-	
 	/**
 	 * Returns the distance in 3D space.
 	 *
@@ -619,6 +612,36 @@ public class Vertex implements Cloneable
 			vect2[i] = n2.param[i] - param[i];
 		}
 		return Matrix3D.prodVect3D(vect1, vect2);
+	}
+	
+	/**
+	 * Test the position of this vertex with respect to a segment.
+	 * Integer coordinates are used with 2D Euclidian metric
+	 * to provide exact computations.  This is important because
+	 * this method is called by {@link #getSurroundingOTriangle}
+	 * to find the triangle enclosing a vertex, or by
+	 * {@link OTriangle2D#forceBoundaryEdge(Vertex)} to compute
+	 * segment intersection.
+	 *
+	 * @param v1   first vertex of the segment
+	 * @param v2   second vertex of the segment
+	 * @return the signed area of the triangle composed of these three
+	 * vertices. It is positive if the vertex is on the left of this
+	 * segment, and negative otherwise.
+	 */
+	public long onLeft(Vertex v1, Vertex v2)
+	{
+		assert this != Vertex.outer;
+		assert v1 != Vertex.outer;
+		assert v2 != Vertex.outer;
+		mesh.quadtree.double2int(param, i0);
+		mesh.quadtree.double2int(v1.param, i1);
+		long x01 = i1[0] - i0[0];
+		long y01 = i1[1] - i0[1];
+		mesh.quadtree.double2int(v2.param, i1);
+		long x02 = i1[0] - i0[0];
+		long y02 = i1[1] - i0[1];
+		return x01 * y02 - x02 * y01;
 	}
 	
 	/* Unused
@@ -852,11 +875,6 @@ public class Vertex implements Cloneable
 		return m2d.isPseudoIsotropic();
 	}
 	
-	public final int distance(Vertex that)
-	{
-		return (int) Math.sqrt(distance2(that));
-	}
-	
 	public final long distance2(Vertex that)
 	{
 		mesh.quadtree.double2int(param, i0);
@@ -876,7 +894,7 @@ public class Vertex implements Cloneable
 	/**
 	 * Get the 2D Riemannian metrics at this point.  This metrics
 	 * is computed and then stored into a private instance member.
-	 * This cached value can be discarded by calling {@link clearMetrics}.
+	 * This cached value can be discarded by calling {@link #clearMetrics}.
 	 *
 	 * @param surf  the geometric  surface on which the current
 	 *              point is located
@@ -1193,6 +1211,21 @@ public class Vertex implements Cloneable
 		return true;
 	}
 	
+	/**
+	 * Project a point on the approximated surface.  The surface is
+	 * approximated locally by a quadric
+	 * <code>F(x,y) = a x^2 + b xy + c y^2 - z</code>.
+	 * To that end, the local frame at the current vertex is
+	 * computed.  The <code>(x, y)</code> coordinates of neighbour
+	 * vertices are computed, and we search for the quadric which
+	 * which fits best for all neighbour vertices (in a least square
+	 * method sense).  The vertex is then projected onto this
+	 * quadric.
+	 *
+	 * @param pt   point to project on the approximated surface.
+	 * @return <code>true</code> if projection has been performed
+	 * successfully, <code>false</code> otherwise.
+	 */
 	public boolean discreteProject(Vertex pt)
 	{
 		double [] normal = new double[3];
