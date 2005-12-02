@@ -210,6 +210,37 @@ public class OTriangle implements Cloneable
 	}
 	
 	/**
+	 * Find the <code>OTriangle</code> joining two given vertices
+	 * and move to it.
+	 *
+	 * @param v1  start point of the desired <code>OTriangle</code>
+	 * @param v2  end point of the desired <code>OTriangle</code>
+	 * @return <code>true</code> if an <code>OTriangle</code> was
+	 *         found, <code>false</code> otherwise.
+	 */
+	public boolean find(Vertex v1, Vertex v2)
+	{
+		bind((Triangle) v1.getLink());
+		assert tri.vertex[0] == v1 || tri.vertex[1] == v1 || tri.vertex[2] == v1 : v1+" "+tri;
+		if (destination() == v1)
+			nextOTri();
+		else if (apex() == v1)
+			prevOTri();
+		assert origin() == v1 : v1+" not in "+this;
+		Vertex d = destination();
+		if (d == v2)
+			return true;
+		do
+		{
+			nextOTriOriginLoop();
+			if (destination() == v2)
+				return true;
+		}
+		while (destination() != d);
+		return false;
+	}
+	
+	/**
 	 * Clones an object.
 	 */
 	public final Object clone()
@@ -884,7 +915,7 @@ public class OTriangle implements Cloneable
 	 *       \  |  /              \     /
 	 *        \ | /                \   /
 	 *         \|/                  \ /
-         *          '                    '
+	 *          '                    '
 	 *          o                    o
 	 */
 	public final void swap()
@@ -1416,9 +1447,10 @@ public class OTriangle implements Cloneable
 	
 	private static void unitTestCheckLoopOrigin(Mesh m, Vertex o, Vertex d)
 	{
-		OTriangle ot2 = o.findOTriangle(d);
-		assert ot2 != null;
 		OTriangle ot1 = new OTriangle();
+		OTriangle ot2 = new OTriangle();
+		if (!ot2.find(o, d))
+		        System.exit(-1);
 		copyOTri(ot2, ot1);
 		System.out.println("Loop around origin: "+o);
 		System.out.println(" first destination: "+d);
@@ -1434,9 +1466,10 @@ public class OTriangle implements Cloneable
 	
 	private static void unitTestCheckLoopApex(Mesh m, Vertex a, Vertex o)
 	{
-		OTriangle ot2 = a.findOTriangle(o);
-		assert ot2 != null;
 		OTriangle ot1 = new OTriangle();
+		OTriangle ot2 = new OTriangle();
+		if (!ot2.find(a, o))
+		        System.exit(-1);
 		nextOTri(ot2, ot1);
 		System.out.println("Loop around apex: "+a);
 		System.out.println(" first origin: "+o);
@@ -1452,9 +1485,10 @@ public class OTriangle implements Cloneable
 	
 	private static void unitTestCheckQuality(Mesh m, Vertex o, Vertex d, int expected)
 	{
-		OTriangle ot2 = o.findOTriangle(d);
-		assert ot2 != null;
 		OTriangle ot1 = new OTriangle();
+		OTriangle ot2 = new OTriangle();
+		if (!ot2.find(o, d))
+		        System.exit(-1);
 		nextOTri(ot2, ot1);
 		System.out.println("Improve triangle quality around origin: "+o);
 		System.out.println(" first destination: "+d);

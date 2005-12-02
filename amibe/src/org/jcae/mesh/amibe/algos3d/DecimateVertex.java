@@ -331,8 +331,10 @@ public class DecimateVertex
 					assert !tree.containsValue(sym);
 				}
 			}
-			Vertex apex1 = edge.apex();
-			Vertex apex2 = sym.apex();
+			Vertex apex = edge.apex();
+			// FIXME: is this test really necessary?
+			if (apex == Vertex.outer)
+				apex = sym.apex();
 			//  Compute quadrics
 			edge.contract(v3);
 			contracted++;
@@ -343,12 +345,8 @@ public class DecimateVertex
 			quadricMap.remove(v1);
 			quadricMap.remove(v2);
 			quadricMap.put(v3, q3);
-			if (apex1 != Vertex.outer)
-				ot = v3.findOTriangle(apex1);
-			else
-				ot = v3.findOTriangle(apex2);
-			assert ot != null : ""+edge+"\n"+apex1+"\n"+v3+"\n"+apex2;
-			Vertex d = ot.destination();
+			ot.find(v3, apex);
+			assert ot.destination() == apex : ""+edge+"\n"+v3+"\n"+apex;
 			do
 			{
 				ot.nextOTriOriginLoop();
@@ -356,7 +354,7 @@ public class DecimateVertex
 					tree.update(new NotOrientedEdge(ot), cost(ot.destination(), v3, quadricMap));
 				ot.setAttributes(OTriangle.MARKED);
 			}
-			while (ot.destination() != d);
+			while (ot.destination() != apex);
 			if (noSwap)
 				continue;
 			
@@ -402,7 +400,7 @@ public class DecimateVertex
 				else
 				{
 					ot.nextOTriApexLoop();
-					if (ot.origin() == d)
+					if (ot.origin() == apex)
 						break;
 				}
 			}

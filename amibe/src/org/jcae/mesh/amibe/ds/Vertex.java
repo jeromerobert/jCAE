@@ -873,6 +873,15 @@ public class Vertex implements Cloneable
 		return dx * dx + dy * dy;
 	}
 	
+        /**
+         * Get the 2D Riemannian metrics at this point.  This metrics
+         * is computed and then stored into a private instance member.
+         * This cached value can be discarded by calling {@link clearMetrics}.
+         *
+         * @param surf  the geometric  surface on which the current
+         *              point is located
+         * @return the 2D Riemannian metrics at this point.
+         */
 	public Metric2D getMetrics(CADGeomSurface surf)
 	{
 		if (null == m2)
@@ -886,36 +895,23 @@ public class Vertex implements Cloneable
 		return m2;
 	}
 	
+        /**
+         * Clear the 2D Riemannian metrics at this point.
+         */
 	public void clearMetrics()
 	{
 		m2 = null;
 	}
 	
+        /**
+         * Check whether this vertex can be modified.
+         *
+         * @return <code>true</code> if this vertex can be modified,
+         * <code>false</otherwise>.
+         */
 	public boolean isMutable()
 	{
 		return ref1d <= 0;
-	}
-	
-	// Return the OTriangle from this to v2
-	public OTriangle findOTriangle(Vertex v2)
-	{
-		Triangle tri = (Triangle) link;
-		assert tri.vertex[0] == this || tri.vertex[1] == this || tri.vertex[2] == this : this+" "+tri;
-		OTriangle ot = new OTriangle(tri, 0);
-		if (ot.origin() != this)
-			ot.nextOTri();
-		if (ot.origin() != this)
-			ot.nextOTri();
-		assert ot.origin() == this : this+" not in "+ot;
-		Vertex d = ot.destination();
-		do
-		{
-			ot.nextOTriOriginLoop();
-			if (ot.destination() == v2)
-				return ot;
-		}
-		while (ot.destination() != d);
-		return null;
 	}
 	
 	/**
