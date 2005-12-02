@@ -31,9 +31,13 @@ import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 /**
- * 3D node smoothing.
+ * 3D node smoothing.  Triangles are sorted according to their quality,
+ * They are processed iteratively beginning with the worst triangle.
+ * Its three vertices are moved if they have not already been moved
+ * when processing a previous triangle.  A common laplacian smoothing
+ * is performed.
+ * Note: a better alternative should be implemented.
  */
-
 public class SmoothNodes3D
 {
 	private static Logger logger=Logger.getLogger(SmoothNodes3D.class);
@@ -162,7 +166,7 @@ public class SmoothNodes3D
 			if (sizeTarget > 0.0)
 			{
 				// Find the point on this edge which has the
-				// desirted length
+				// desired length
 				if (l <= 0.0)
 				{
 					nn--;

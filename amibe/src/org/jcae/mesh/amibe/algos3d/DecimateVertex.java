@@ -37,6 +37,56 @@ import org.apache.log4j.Logger;
 /**
  * Decimates a mesh.  This method is based on Michael Garland's work on
  * <a href="http://graphics.cs.uiuc.edu/~garland/research/quadrics.html">quadric error metrics</a>.
+ *
+ * <p>
+ * A plane is fully determined by its normal <code>N</code> and the signed
+ * distance <code>d</code> of the frame origin to this plane, or in other 
+ * words the equation of this plane is <code>tN V + d = 0</code>.
+ * The squared distance of a point to this plane is
+ * </p>
+ * <pre>
+ *   D*D = (tN V + d) * (tN V + d)
+ *       = tV (N tN) V + 2d tN V + d*d
+ *       = tV A V + 2 tB V + c
+ * </pre>
+ * <p>
+ * The quadric <code>Q=(A,B,c)=(N tN, dN, d*d)</code> is thus naturally
+ * defined.  Addition of these quadrics have a simple form:
+ * <code>Q1(V)+Q2(V)=(Q1+Q2)(V)</code> with
+ * <code>Q1+Q2=(A1+A2, B1+B2, c1+c2)</code>
+ * To compute the squared distance of a point to a set of planes, we can
+ * then compute this quadric for each plane and sum each element of
+ * these quadrics.  
+ * </p>
+ *
+ * <p>
+ * When an edge <code>(V1,V2)</code> is contracted into <code>V3</code>,
+ * <code>Q1(V3)+Q2(V3)</code> represents the deviation to the set of
+ * planes at <code>V1</code> and <code>V2</code>.  The cost of this
+ * contraction is thus defined as <code>Q1(V3)+Q2(V3)</code>.
+ * We want to minimize this error.  It can be shown that if <code>A</code>
+ * is non singular, the optimal placement is for <code>V3=-inv(A) B</code>.
+ * </p>
+ *
+ * <p>
+ * The algorithm is straightforward:
+ * </p>
+ * <ol>
+ *   <li>Quadrics are computed for all vertices.</li>
+ *   <li>For each edge, compute the optimal placement and its cost.
+ *   <li>Loop on edges: starting with the lowest cost, each edge is processed
+ *       until its cost is greater than the desired tolerance, and costs
+ *       of adjacent edges are updated.
+ * </ol>
+ * <p>
+ * The real implementation is slightly modified: a) Some checks must be
+ * performed to make sure that edge contraction does not modify the topology of
+ * the mesh, and b) Boundary edges have to be preserved, otherwise they will
+ * shrink.  Virtual planes are added perpendicular to triangles at boundaries
+ * so that vertices can be decimated along those edges, but edges are stuck on
+ * their boundary.  Garland's thesis dissertation contains all informations
+ * about this process.
+ * </p>
  */
 public class DecimateVertex
 {
