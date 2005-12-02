@@ -461,6 +461,7 @@ public class Vertex implements Cloneable
 	
 	/**
 	 * Get the list of adjacent vertices.
+	 * Note: this method is meant to deal with non-manifold meshes.
 	 *
 	 * @return the list of adjacent vertices.
 	 */
@@ -600,14 +601,15 @@ public class Vertex implements Cloneable
 	}
 	
 	/**
-	 * Returns the area of a triangle given by 3 vertices.
+	 * Returns the outer product of two vectors.  This method
+         * computes the outer product of two vectors starting from
+         * the current vertex.
 	 *
-	 * @param n1  first node
-	 * @param n2  second node
-	 * @param n   normal
-	 * @return the area of the triangle
+	 * @param n1  end point of the first vector
+	 * @param n2  end point of the second vector
+	 * @return the outer product of the two vectors
 	 **/
-	public double area3D(Vertex n1, Vertex n2, double [] n)
+	public double [] outer3D(Vertex n1, Vertex n2)
 	{
 		double [] vect1 = new double[3];
 		double [] vect2 = new double[3];
@@ -616,7 +618,7 @@ public class Vertex implements Cloneable
 			vect1[i] = n1.param[i] - param[i];
 			vect2[i] = n2.param[i] - param[i];
 		}
-		return 0.5 * Matrix3D.prodSca(Matrix3D.prodVect3D(vect1, vect2), n);
+		return Matrix3D.prodVect3D(vect1, vect2);
 	}
 	
 	/* Unused
@@ -926,6 +928,8 @@ public class Vertex implements Cloneable
          *   http://www.cs.caltech.edu/~mmeyer/Publications/diffGeomOps.pdf
          * Note: on a sphere, the Gaussian curvature is very accurate,
          *       but not the mean curvature.
+         *       Guoliang Xu suggests improvements in his papers
+         *           http://lsec.cc.ac.cn/~xuguo/xuguo3.htm
 	 */
 	public double discreteCurvatures(double [] meanNormal)
 	{

@@ -845,10 +845,10 @@ public class OTriangle implements Cloneable
 		Vertex a = apex();
 		Vertex n = work[0].apex();
 		// Check for inverted triangles
-		double s3 = o.area3D(n, a, n1);
+		double s3 = 0.5 * Matrix3D.prodSca(n1, o.outer3D(n, a));
 		if (s3 <= 0.0)
 			return invalid;
-		double s4 = d.area3D(a, n, n1);
+		double s4 = 0.5 * Matrix3D.prodSca(n1, d.outer3D(a, n));
 		if (s4 <= 0.0)
 			return invalid;
 		double p1 = o.distance3D(d) + d.distance3D(a) + a.distance3D(o);
