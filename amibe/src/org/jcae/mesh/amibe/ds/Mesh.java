@@ -477,7 +477,10 @@ public class Mesh
 		else
 			throw new java.lang.IllegalArgumentException("pushCompGeom argument must be either 2 or 3, current value is: "+i);
 		if (quadtree != null)
+		{
+			quadtree.setCompGeom(compGeom());
 			quadtree.clearAllMetrics();
+		}
 	}
 	
 	/**
@@ -492,8 +495,11 @@ public class Mesh
 		//  Metrics are always reset by pushCompGeom.
 		//  Only reset them here when there is a change.
 		Object ret = compGeomStack.pop();
-		if (compGeomStack.size() > 0 && !ret.getClass().equals(compGeomStack.peek().getClass()) && quadtree != null)
+		if (!compGeomStack.empty() && !ret.getClass().equals(compGeomStack.peek().getClass()) && quadtree != null)
+		{
+			quadtree.setCompGeom(compGeom());
 			quadtree.clearAllMetrics();
+		}
 		return (Calculus) ret;
 	}
 	
@@ -535,6 +541,8 @@ public class Mesh
 	 */
 	public Calculus compGeom()
 	{
+		if (compGeomStack.empty())
+			return null;
 		return (Calculus) compGeomStack.peek();
 	}
 	
