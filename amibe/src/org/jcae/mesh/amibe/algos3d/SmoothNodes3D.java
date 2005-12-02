@@ -31,7 +31,7 @@ import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 /**
- * Laplacian smoothing.
+ * 3D node smoothing.
  */
 
 public class SmoothNodes3D

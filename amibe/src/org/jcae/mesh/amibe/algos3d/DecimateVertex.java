@@ -35,9 +35,9 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 /**
- * Laplacian smoothing.
+ * Decimates a mesh.  This method is based on Michael Garland's work on
+ * <a href="http://graphics.cs.uiuc.edu/~garland/research/quadrics.html">quadric error metrics</a>.
  */
-
 public class DecimateVertex
 {
 	private static Logger logger=Logger.getLogger(DecimateVertex.class);
