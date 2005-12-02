@@ -1212,15 +1212,21 @@ public class Vertex implements Cloneable
 	}
 	
 	/**
-	 * Project a point on the approximated surface.  The surface is
-	 * approximated locally by a quadric
+	 * Project a point on the approximated surface.  This algorithm is
+	 * described by Pascal J. Frey in
+	 * <a href="http://www.lis.inpg.fr/pages_perso/attali/DEA-IVR/PAPERS/frey00.ps">About Surface Remeshing</a>.
+	 * The idea if to approximate locally the surface by a quadric
 	 * <code>F(x,y) = a x^2 + b xy + c y^2 - z</code>.
 	 * To that end, the local frame at the current vertex is
-	 * computed.  The <code>(x, y)</code> coordinates of neighbour
-	 * vertices are computed, and we search for the quadric which
-	 * which fits best for all neighbour vertices (in a least square
-	 * method sense).  The vertex is then projected onto this
-	 * quadric.
+	 * computed.  The <code>(x,y)</code> coordinates of neighbour
+	 * vertices are computed in that frame, and we search for the quadric
+	 * which fits best for all neighbour vertices (in a least squares
+	 * sense).  The vertex is then projected onto this quadric.
+	 *
+	 * Note: Several improvements exist in the litterature, see eg.
+	 * <a href="http://prism.asu.edu/research/data/publications/paper05_cestmubbp.pdf">this paper</a>
+	 * by Anshuman Razdan and MyungSoo Bae for a survey of several
+	 * methods.
 	 *
 	 * @param pt   point to project on the approximated surface.
 	 * @return <code>true</code> if projection has been performed
