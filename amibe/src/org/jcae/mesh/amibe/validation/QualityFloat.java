@@ -67,73 +67,73 @@ public class QualityFloat
 		data = new TFloatArrayList();
 	}
 	
-        /**
-         * Create a new <code>QualityFloat</code> instance 
-         *
-         * @param n  initial capacity of the list.
-         */
+	/**
+	 * Create a new <code>QualityFloat</code> instance 
+	 *
+	 * @param n  initial capacity of the list.
+	 */
 	public QualityFloat(int n)
 	{
 		data = new TFloatArrayList(n);
 	}
 	
-        /**
-         * Define the procedure which will compute quality values.
-         *
-         * @param q  the procedure which will compute quality values.
-         */
+	/**
+	 * Define the procedure which will compute quality values.
+	 *
+	 * @param q  the procedure which will compute quality values.
+	 */
 	public void setQualityProcedure(QualityProcedure q)
 	{
 		qproc = q;
 		qproc.bindResult(data);
 	}
 	
-        /**
-         * Compute the quality of an object and add it to the list.
-         *
-         * @param x  the object on which quality is computed.
-         */
+	/**
+	 * Compute the quality of an object and add it to the list.
+	 *
+	 * @param x  the object on which quality is computed.
+	 */
 	public void compute(Object x)
 	{
 		assert qproc != null;
 		data.add(qproc.quality(x));
 	}
 	
-        /**
-         * Add a value to the list.
-         *
-         * @param x  the value to add to the list.
-         */
+	/**
+	 * Add a value to the list.
+	 *
+	 * @param x  the value to add to the list.
+	 */
 	public void add(float x)
 	{
 		data.add(x);
 	}
 	
-        /**
-         * Call the {@link QualityProcedure#finish} procedure.
-         */
+	/**
+	 * Call the {@link QualityProcedure#finish} procedure.
+	 */
 	public void finish()
 	{
 		qproc.finish();
 	}
 	
-        /**
-         * Return the number of quality values.
-         *
-         * @return the number of quality values.
-         */
+	/**
+	 * Return the number of quality values.
+	 *
+	 * @return the number of quality values.
+	 */
 	public int size()
 	{
 		return data.size();
 	}
 	
-        /**
-         * Normalize quality target.  This method divides all values
-         * by the given factor.  This is useful to scale quality
-         * factors so that they are in the range </code>[0..1]</code>.
-         *
-         * @param factor   the scale factor.
-         */
+	/**
+	 * Normalize quality target.  This method divides all values
+	 * by the given factor.  This is useful to scale quality
+	 * factors so that they are in the range </code>[0..1]</code>.
+	 *
+	 * @param factor   the scale factor.
+	 */
 	public void setTarget(float factor)
 	{
 		int nrTotal = data.size();
@@ -149,16 +149,16 @@ public class QualityFloat
 		}
 	}
 	
-        /**
-         * Split quality values into buckets.  The minimal and
-         * maximal quality values are computed, this range is divided
-         * into <code>n</code> subsegments of equal length, and 
-         * the number of quality values for each subsegment is
-         * computed.  These numbers can then be displayed by
-         * {@link #printLayers}.
-         *
-         * @param n  the desired number of subsegments.
-         */
+	/**
+	 * Split quality values into buckets.  The minimal and
+	 * maximal quality values are computed, this range is divided
+	 * into <code>n</code> subsegments of equal length, and 
+	 * the number of quality values for each subsegment is
+	 * computed.  These numbers can then be displayed by
+	 * {@link #printLayers}.
+	 *
+	 * @param n  the desired number of subsegments.
+	 */
 	public void split(int n)
 	{
 		layers = n;
@@ -181,7 +181,7 @@ public class QualityFloat
 		qmin = vmin;
 		qmax = vmax;
 		float delta = (vmax - vmin) / ((float) layers);
-                // In printLayers:
+		// In printLayers:
 		//   sorted[0]: number of points with value < vmin
 		//   sorted[layers+1]: number of points with value > vmax
 		sorted = new int[layers+2];
@@ -196,17 +196,17 @@ public class QualityFloat
 		}
 	}
 	
-        /**
-         * Split quality values into buckets.  The range between minimal
-         * and maximal quality values is divided into <code>n</code>
-         * subsegments of equal length, and the number of quality values
-         * for each subsegment is computed.  These numbers can then be
-         * displayed by {@link #printLayers}.
-         *
-         * @param v1  minimal value to consider.
-         * @param v2  maximal value to consider.
-         * @param n  the desired number of subsegments.
-         */
+	/**
+	 * Split quality values into buckets.  The range between minimal
+	 * and maximal quality values is divided into <code>n</code>
+	 * subsegments of equal length, and the number of quality values
+	 * for each subsegment is computed.  These numbers can then be
+	 * displayed by {@link #printLayers}.
+	 *
+	 * @param v1  minimal value to consider.
+	 * @param v2  maximal value to consider.
+	 * @param n  the desired number of subsegments.
+	 */
 	public void split(float v1, float v2, int n)
 	{
 		layers = n;
@@ -245,9 +245,9 @@ public class QualityFloat
 		}
 	}
 	
-        /**
-         * Display statistics about quality values.
-         */
+	/**
+	 * Display statistics about quality values.
+	 */
 	public void printLayers()
 	{
 		if (layers <= 0)
@@ -271,14 +271,14 @@ public class QualityFloat
 		System.out.println("qavg: "+qavg);
 	}
 	
-        /**
-         * Write quality values into a file.  They are stored in the
-         * BB medit format, in the same order as they have been
-         * computed.  This means that a mesh file had been written with
-         * the same order.
-         *
-         * @param file   name of the output file
-         */
+	/**
+	 * Write quality values into a file.  They are stored in the
+	 * BB medit format, in the same order as they have been
+	 * computed.  This means that a mesh file had been written with
+	 * the same order.
+	 *
+	 * @param file   name of the output file
+	 */
 	public void printMeshBB(String file)
 	{
 		int nrTotal = data.size();

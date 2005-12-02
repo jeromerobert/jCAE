@@ -76,8 +76,8 @@ public class OctreeTestDisplayPLY extends OctreeTest
 		catch (IOException e)
 		{
 		}
-                double [] umin = { Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE };
-                double [] umax = { Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE };
+		double [] umin = { Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE };
+		double [] umax = { Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE };
 		logger.info("Found "+nrNodes+" nodes");
 		logger.debug("Start insertion");
 		double [] coord = new double[3*nrNodes];

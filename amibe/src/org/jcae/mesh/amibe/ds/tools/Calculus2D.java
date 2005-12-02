@@ -85,7 +85,7 @@ public class Calculus2D implements Calculus
 	 */
 	public double length(OTriangle ot)
 	{
-        	return distance(ot.origin(), ot.destination());
+		return distance(ot.origin(), ot.destination());
 	}
 	
 	/**

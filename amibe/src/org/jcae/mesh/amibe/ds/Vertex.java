@@ -178,7 +178,7 @@ public class Vertex implements Cloneable
 	
 	/**
 	 * Set the coordinates of this Vertex (2D).
-         *
+	 *
 	 * @param u  first coordinate of the new position
 	 * @param v  second coordinate of the new position
 	 */
@@ -602,8 +602,8 @@ public class Vertex implements Cloneable
 	
 	/**
 	 * Returns the outer product of two vectors.  This method
-         * computes the outer product of two vectors starting from
-         * the current vertex.
+	 * computes the outer product of two vectors starting from
+	 * the current vertex.
 	 *
 	 * @param n1  end point of the first vector
 	 * @param n2  end point of the second vector
@@ -873,15 +873,15 @@ public class Vertex implements Cloneable
 		return dx * dx + dy * dy;
 	}
 	
-        /**
-         * Get the 2D Riemannian metrics at this point.  This metrics
-         * is computed and then stored into a private instance member.
-         * This cached value can be discarded by calling {@link clearMetrics}.
-         *
-         * @param surf  the geometric  surface on which the current
-         *              point is located
-         * @return the 2D Riemannian metrics at this point.
-         */
+	/**
+	 * Get the 2D Riemannian metrics at this point.  This metrics
+	 * is computed and then stored into a private instance member.
+	 * This cached value can be discarded by calling {@link clearMetrics}.
+	 *
+	 * @param surf  the geometric  surface on which the current
+	 *              point is located
+	 * @return the 2D Riemannian metrics at this point.
+	 */
 	public Metric2D getMetrics(CADGeomSurface surf)
 	{
 		if (null == m2)
@@ -895,20 +895,20 @@ public class Vertex implements Cloneable
 		return m2;
 	}
 	
-        /**
-         * Clear the 2D Riemannian metrics at this point.
-         */
+	/**
+	 * Clear the 2D Riemannian metrics at this point.
+	 */
 	public void clearMetrics()
 	{
 		m2 = null;
 	}
 	
-        /**
-         * Check whether this vertex can be modified.
-         *
-         * @return <code>true</code> if this vertex can be modified,
-         * <code>false</otherwise>.
-         */
+	/**
+	 * Check whether this vertex can be modified.
+	 *
+	 * @return <code>true</code> if this vertex can be modified,
+	 * <code>false</otherwise>.
+	 */
 	public boolean isMutable()
 	{
 		return ref1d <= 0;
@@ -916,16 +916,16 @@ public class Vertex implements Cloneable
 	
 	/**
 	 * Returns the discrete Gaussian curvature and the mean normal.
-         * These discrete operators are described in "Discrete
-         * Differential-Geometry Operators for Triangulated
-         * 2-Manifolds", Mark Meyer, Mathieu Desbrun, Peter Schröder,
-         * and Alan H. Barr.
-         *   http://www.cs.caltech.edu/~mmeyer/Publications/diffGeomOps.pdf
-         *   http://www.cs.caltech.edu/~mmeyer/Publications/diffGeomOps.pdf
-         * Note: on a sphere, the Gaussian curvature is very accurate,
-         *       but not the mean curvature.
-         *       Guoliang Xu suggests improvements in his papers
-         *           http://lsec.cc.ac.cn/~xuguo/xuguo3.htm
+	 * These discrete operators are described in "Discrete
+	 * Differential-Geometry Operators for Triangulated
+	 * 2-Manifolds", Mark Meyer, Mathieu Desbrun, Peter Schröder,
+	 * and Alan H. Barr.
+	 *   http://www.cs.caltech.edu/~mmeyer/Publications/diffGeomOps.pdf
+	 *   http://www.cs.caltech.edu/~mmeyer/Publications/diffGeomOps.pdf
+	 * Note: on a sphere, the Gaussian curvature is very accurate,
+	 *       but not the mean curvature.
+	 *       Guoliang Xu suggests improvements in his papers
+	 *           http://lsec.cc.ac.cn/~xuguo/xuguo3.htm
 	 */
 	public double discreteCurvatures(double [] meanNormal)
 	{
@@ -999,11 +999,11 @@ public class Vertex implements Cloneable
 	
 	/**
 	 * Compute the discrete local frame at this vertex.
-         * These discrete operators are described in "Discrete
-         * Differential-Geometry Operators for Triangulated
-         * 2-Manifolds", Mark Meyer, Mathieu Desbrun, Peter Schröder,
-         * and Alan H. Barr.
-         *   http://www.cs.caltech.edu/~mmeyer/Publications/diffGeomOps.pdf
+	 * These discrete operators are described in "Discrete
+	 * Differential-Geometry Operators for Triangulated
+	 * 2-Manifolds", Mark Meyer, Mathieu Desbrun, Peter Schröder,
+	 * and Alan H. Barr.
+	 *   http://www.cs.caltech.edu/~mmeyer/Publications/diffGeomOps.pdf
 	 */
 	public boolean discreteCurvatureDirections(double [] normal, double[] t1, double [] t2)
 	{

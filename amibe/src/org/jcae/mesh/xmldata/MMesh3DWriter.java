@@ -93,7 +93,7 @@ public class MMesh3DWriter
 			"<number>"+i+"</number>"+
 			"<file format=\"doublestream\" location=\""+XMLHelper.canonicalize(baseDir, nodesFile.toString())+"\"/>"+
 			"<references>"+
-            "<number>"+nref+"</number>"+
+			"<number>"+nref+"</number>"+
 			"<file format=\"integerstream\" location=\""+XMLHelper.canonicalize(baseDir, refFile.toString())+"\"/>"+
 			"</references>"+
 			"</nodes>");

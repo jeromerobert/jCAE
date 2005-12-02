@@ -192,13 +192,13 @@ public class PAVLTreeDup
 			if (left.balanceFactor == -1)
 			{
 				/* Single right rotation
-                          C                   B
-                         / \     ------->   /   \
-                        B  T4              A     C
-                       / \                / \   / \
-                      A  T3              T1 T2 T3 T4
-                     / \
-                    T1 T2
+	                  C                   B
+	                 / \     ------->   /   \
+	                B  T4              A     C
+	               / \                / \   / \
+	              A  T3              T1 T2 T3 T4
+	             / \
+	            T1 T2
 */
 				logger.debug("Single right rotation");
 				newRoot = left;
@@ -214,13 +214,13 @@ public class PAVLTreeDup
 			else
 			{
 				/*  Left+right rotation
-                  C                    C                    B
-                 / \      ------>     / \    ------>      /   \
-                A  T4                B  T4               A     C
-               / \                  / \                 / \   / \
-              T1  B                A  T3               T1 T2 T3 T4
-                 / \              / \
-                T2 T3            T1 T2
+	          C                    C                    B
+	         / \      ------>     / \    ------>      /   \
+	        A  T4                B  T4               A     C
+	       / \                  / \                 / \   / \
+	      T1  B                A  T3               T1 T2 T3 T4
+	         / \              / \
+	        T2 T3            T1 T2
 */
 				logger.debug("Left+right rotation");
 				assert left.balanceFactor == 1;
@@ -265,13 +265,13 @@ public class PAVLTreeDup
 			if (right.balanceFactor == 1)
 			{
 				/* Single left rotation
-                            A                     B
-                           / \      ------>     /   \
-                          T1  B                A     C
-                             / \              / \   / \
-                            T2  C            T1 T2 T3 T4
-                               / \
-                              T3 T4
+	                    A                     B
+	                   / \      ------>     /   \
+	                  T1  B                A     C
+	                     / \              / \   / \
+	                    T2  C            T1 T2 T3 T4
+	                       / \
+	                      T3 T4
 */
 				logger.debug("Single left rotation");
 				newRoot = right;
@@ -287,13 +287,13 @@ public class PAVLTreeDup
 			else
 			{
 				/* Right+left rotation
-               A                      A                     B
-              / \      ------>       / \      ------>     /   \
-             T1  C                  T1  B                A     C
-                / \                    / \              / \   / \
-               B  T4                  T2  C            T1 T2 T3 T4
-              / \                        / \
-             T2 T3                      T3 T4
+	       A                      A                     B
+	      / \      ------>       / \      ------>     /   \
+	     T1  C                  T1  B                A     C
+	        / \                    / \              / \   / \
+	       B  T4                  T2  C            T1 T2 T3 T4
+	      / \                        / \
+	     T2 T3                      T3 T4
 */
 				logger.debug("Right+left rotation");
 				assert right.balanceFactor == -1;

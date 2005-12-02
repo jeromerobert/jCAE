@@ -527,7 +527,7 @@ public class BasicMesh
 						  (start[0] - end[0]) * (start[0] - end[0]) +
 						  (start[1] - end[1]) * (start[1] - end[1]) +
 						  (start[2] - end[2]) * (start[2] - end[2]));
-                                		double dmax = Metric3D.getDeflection();
+						double dmax = Metric3D.getDeflection();
 						if (Metric3D.hasRelativeDeflection())
 							dmax *= accumulatedLength;
 						if (accumulatedLength - dist > dmax)

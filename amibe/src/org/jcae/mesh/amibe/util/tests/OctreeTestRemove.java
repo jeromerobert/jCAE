@@ -57,8 +57,8 @@ public class OctreeTestRemove extends OctreeTest
 		double u, v, w;
 		boolean visu = true;
 		Random rand = new Random(113L);
-                double [] umin = { 0.0, 0.0, 0.0 };
-                double [] umax = { 1.0, 1.0, 1.0 };
+		double [] umin = { 0.0, 0.0, 0.0 };
+		double [] umax = { 1.0, 1.0, 1.0 };
 		final OctreeTest r = new OctreeTest(umin, umax);
 		logger.debug("Start insertion");
 		double [] xyz = new double[3];

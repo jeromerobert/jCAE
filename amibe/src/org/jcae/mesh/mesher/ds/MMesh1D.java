@@ -261,7 +261,7 @@ public class MMesh1D extends MMesh0D
 	 * @return the list of nodes inserted on this edge.
 	 */
 	public ArrayList getNodelistFromMap(CADEdge E)
-           throws NoSuchElementException
+		throws NoSuchElementException
 	{
 		SubMesh1D submesh1d = (SubMesh1D) mapTEdgeToSubMesh1D.get(E);
 		if (null == submesh1d)

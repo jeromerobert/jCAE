@@ -173,9 +173,9 @@ public class Mesh
 		surface = face.getGeomSurface();
 		double [] bb = face.boundingBox();
 		double diagonal = Math.sqrt(
-                                (bb[0] - bb[3]) * (bb[0] - bb[3]) +
-                                (bb[1] - bb[4]) * (bb[1] - bb[4]) +
-                                (bb[2] - bb[5]) * (bb[2] - bb[5]));
+		    (bb[0] - bb[3]) * (bb[0] - bb[3]) +
+		    (bb[1] - bb[4]) * (bb[1] - bb[4]) +
+		    (bb[2] - bb[5]) * (bb[2] - bb[5]));
 		if (Metric2D.getLength() == 0.0)
 			Metric2D.setLength(diagonal);
 		String absEpsilonProp = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon");
