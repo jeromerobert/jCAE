@@ -35,9 +35,11 @@ import org.apache.log4j.Logger;
  * They are processed iteratively beginning with the worst triangle.
  * Its three vertices are moved if they have not already been moved
  * when processing a previous triangle.  A common laplacian smoothing
- * is performed.
- * Note: a better alternative should be implemented.
+ * is performed.  If the final position do not invert triangles, the
+ * point is moved.
  */
+// Note 1: a better alternative should be implemented.
+// Note 2: the point should be moved only if triangle quality is improved.
 public class SmoothNodes3D
 {
 	private static Logger logger=Logger.getLogger(SmoothNodes3D.class);

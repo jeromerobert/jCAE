@@ -73,20 +73,31 @@ import org.apache.log4j.Logger;
  * </p>
  * <ol>
  *   <li>Quadrics are computed for all vertices.</li>
- *   <li>For each edge, compute the optimal placement and its cost.
+ *   <li>For each edge, compute the optimal placement and its cost.</li>
  *   <li>Loop on edges: starting with the lowest cost, each edge is processed
  *       until its cost is greater than the desired tolerance, and costs
- *       of adjacent edges are updated.
+ *       of adjacent edges are updated.</li>
  * </ol>
+ *
  * <p>
- * The real implementation is slightly modified: a) Some checks must be
- * performed to make sure that edge contraction does not modify the topology of
- * the mesh, and b) Boundary edges have to be preserved, otherwise they will
- * shrink.  Virtual planes are added perpendicular to triangles at boundaries
- * so that vertices can be decimated along those edges, but edges are stuck on
- * their boundary.  Garland's thesis dissertation contains all informations
- * about this process.
+ * The real implementation is slightly modified:
  * </p>
+ * <ol type='a'>
+ *   <li>Some checks must be performed to make sure that edge contraction does
+ *       not modify the topology of the mesh.</li>
+ *   <li>Optimal placement strategy can be chosen at run time among several
+ *       choices.</li>
+ *   <li>Boundary edges have to be preserved, otherwise they
+ *       will shrink.  Virtual planes are added perpendicular to triangles at
+ *       boundaries so that vertices can be decimated along those edges, but
+ *       edges are stuck on their boundary.  Garland's thesis dissertation
+ *       contains all informations about this process.</li>
+ *   <li>Weights are added to compute quadrics, as described in Garland's
+ *       dissertation.</li>
+ *   <li>Edges are swapped after being contracted to improve triangle quality,
+ *       as described by Frey in
+ *       <a href="http://www.lis.inpg.fr/pages_perso/attali/DEA-IVR/PAPERS/frey00.ps">About Surface Remeshing</a>.</li>
+ * </ol>
  */
 public class DecimateVertex
 {
@@ -94,9 +105,22 @@ public class DecimateVertex
 	private Mesh mesh;
 	private double tolerance;
 	private int placement;
+	/**
+	 * Optimal placement strategy, select the best vertex.
+	 */
 	public static final int POS_VERTEX = 0;
+	/**
+	 * Optimal placement strategy, contract an edge into its middle point.
+	 */
 	public static final int POS_MIDDLE = 1;
+	/**
+	 * Optimal placement strategy, the contracted point is on the edge.
+	 */
 	public static final int POS_EDGE = 2;
+	/**
+	 * Optimal placement strategy, the contracted point is the point which
+	 * minimizes error metric.
+	 */
 	public static final int POS_OPTIMAL = 3;
 	
 	private class Quadric
@@ -124,9 +148,6 @@ public class DecimateVertex
 				b[i] = l1 * q1.b[i] + l2 * q2.b[i];
 			c = l1 * q1.c + l2 * q2.c;
 			area = q1.area + q2.area;
-		}
-		public void add(Quadric q1, Quadric q2)
-		{
 		}
 		public double value(double [] vect)
 		{
@@ -163,7 +184,7 @@ public class DecimateVertex
 	 *
 	 * @param m  the <code>Mesh</code> instance to refine.
 	 * @param tol  maximal allowed error
-	 * @param p  placement of the new point. Legitimate values are <code>POS_VERTEX</code> (at a vertex location), <code>POS_MIDDLE</code> (at the middle of the contracted edge), <code>POS_EDGE</code> (opyimal placement on the contracted edge, this is the default) and <code>POS_OPTIMAL</code> (optimal placement).)
+	 * @param p  placement of the new point. Legitimate values are <code>POS_VERTEX</code> (at a vertex location), <code>POS_MIDDLE</code> (at the middle of the contracted edge), <code>POS_EDGE</code> (optimal placement on the contracted edge, this is the default) and <code>POS_OPTIMAL</code> (optimal placement).
 	 */
 	public DecimateVertex(Mesh m, double tol, int p)
 	{
@@ -173,7 +194,7 @@ public class DecimateVertex
 	}
 	
 	/**
-	 * Moves all nodes until all iterations are done.
+	 * Contract all edges with the given error.
 	 */
 	public void compute()
 	{

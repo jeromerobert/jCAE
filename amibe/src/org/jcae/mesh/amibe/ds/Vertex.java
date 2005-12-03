@@ -1223,10 +1223,16 @@ public class Vertex implements Cloneable
 	 * which fits best for all neighbour vertices (in a least squares
 	 * sense).  The vertex is then projected onto this quadric.
 	 *
-	 * Note: Several improvements exist in the litterature, see eg.
+	 * Note1: Several improvements exist in the litterature, see eg.
 	 * <a href="http://prism.asu.edu/research/data/publications/paper05_cestmubbp.pdf">this paper</a>
 	 * by Anshuman Razdan and MyungSoo Bae for a survey of several
 	 * methods.
+	 * Note2: According to Pascal J. Frey, the key point is to have
+	 * reliable input.  We can have good approximation of quadrics
+	 * is the normal to the surface is accurate, and normal to the
+	 * surface can be approximated accurately if the quadric is
+	 * precise.  So we should certainly read normals from a file
+	 * if they are available.
 	 *
 	 * @param pt   point to project on the approximated surface.
 	 * @return <code>true</code> if projection has been performed

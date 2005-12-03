@@ -31,9 +31,10 @@ import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 /**
- * Split long edges.
+ * Split long edges.  Edges are sorted and splitted in turn, the longest edge
+ * being processed first.
+ * TODO: edges should be swapped too to improve triangle quality.
  */
-
 public class SplitEdge
 {
 	private static Logger logger=Logger.getLogger(SplitEdge.class);
@@ -54,11 +55,13 @@ public class SplitEdge
 	
 	/**
 	 * Split all edges which are longer than minlen2*sqrt(2).
-	 * Edges are sorted and the longest edge is always split.
+	 * Edges are sorted and the longest edge is always splitted.
 	 */
 	public void compute()
 	{
 		logger.debug("Running SplitEdge");
+		// There were problems with PAVLSortedTree,
+		// try PAVLSortedTree2 instead.
 		PAVLSortedTree2 tree = computeTree();
 		splitAllEdges(tree);
 	}

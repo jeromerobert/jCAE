@@ -30,9 +30,8 @@ import java.util.HashMap;
 import org.apache.log4j.Logger;
 
 /**
- * Laplacian smoothing in the 2D space.
+ * (Obsolete) Fuse near nodes in a <code>MMesh3D</code> instance.
  */
-
 public class Fuse
 {
 	private static Logger logger=Logger.getLogger(Fuse.class);
