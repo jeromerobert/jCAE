@@ -27,7 +27,7 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.apache.log4j.Logger;
 
 /*
- * This class is derived from Jonathan R. Shewchuk's work
+ * This class is derived from Jonathan Richard Shewchuk's work
  * on Triangle, see
  *       http://www.cs.cmu.edu/~quake/triangle.html
  * His data structure is very compact, and similar ideas were
@@ -71,14 +71,14 @@ import org.apache.log4j.Logger;
  * </p>
  * <pre>
  *                        V2
- *     V5 _________________,________________, V3
+ *     V5 _________________,_________________ V3
  *        \    &lt;----      / \     &lt;----     /
  *         \     0     _ /   \      1    _ /
  *          \\  t0     ///  /\\\   t1    //
  *           \\1     2///1   0\\\2     0//   t.vertex = { V0, V1, V2 }
  *            \V     //V   t   \\V     //   t0.vertex = { V2, V1, V3 }
- *             \     /           \     /    t2.vertex = { V0, V4, V1 }
- *              \   /      2      \   /     t3.vertex = { V5, V0, V2 }
+ *             \     /           \     /    t1.vertex = { V5, V0, V2 }
+ *              \   /      2      \   /     t2.vertex = { V0, V4, V1 }
  *               \ /     ----&gt;     \ /
  *             V0 +-----------------+ V1
  *                 \     &lt;----     /
@@ -94,8 +94,8 @@ import org.apache.log4j.Logger;
  *    ot.nextOTriOrigin();  // Moves (t,0) to (t2,1)
  *    ot.prevOTriOrigin();  // Moves (t,0) to (t0,0)
  *    ot.nextOTriDest();    // Moves (t,0) to (t0,1)
- *    ot.prevOTriDest();    // Moves (t,0) to (t3,0)
- *    ot.nextOTriApex();    // Moves (t,0) to (t3,1)
+ *    ot.prevOTriDest();    // Moves (t,0) to (t1,0)
+ *    ot.nextOTriApex();    // Moves (t,0) to (t1,1)
  *    ot.prevOTriApex();    // Moves (t,0) to (t2,0)
  * </pre>
  *

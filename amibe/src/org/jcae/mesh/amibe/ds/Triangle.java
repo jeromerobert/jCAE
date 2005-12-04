@@ -30,14 +30,14 @@ import org.apache.log4j.Logger;
  * A triangular element of the mesh.  Instances of this class carry up
  * all topological information required for adjacency relations.  Their
  * vertices are contained in a {@link Vertex} array, and by convention
- * the local number of an edge is the index of its oppositee vertex.  A
+ * the local number of an edge is the index of its opposite vertex.  A
  * <code>Triangle</code> instance has a pointer to its three neighbours
  * through its edges, and knows the local number of opposite edges in
  * their respective triangles.
  *
  * <pre>
  *                        V2
- *     V5 _________________,________________, V3
+ *     V5 _________________,_________________ V3
  *        \    &lt;----      / \     &lt;----     /
  *         \     0     _ /   \      1    _ /
  *          \\  t0     ///  /\\\   t1    //
@@ -57,7 +57,7 @@ import org.apache.log4j.Logger;
  * As local numbers are integers between 0 and 2, a packed representation
  * is wanted to save space.
  * In his <a href="http://www.cs.cmu.edu/~quake/triangle.html">Triangle</a>
- * program, Jonathan R. Shewchuk uses word alignment of pointers to pack
+ * program, Jonathan Richard Shewchuk uses word alignment of pointers to pack
  * this information into pointers themselves: they are respectively shifted
  * by 0, 1 or 2 bytes for edges 0, 1 and 2.  This very efficient trick
  * can not be performed with Java, and the three numbers are packed into
