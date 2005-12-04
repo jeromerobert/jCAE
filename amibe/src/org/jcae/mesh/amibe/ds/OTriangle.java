@@ -299,12 +299,12 @@ public class OTriangle implements Cloneable
 	 * Set the triangle tied to this object, and the localNumber.
 	 *
 	 * @param t  the triangle tied to this object.
-	 * @param o  the local number.
+	 * @param l  the local number.
 	 */
-	public final void bind(Triangle t, int o)
+	public final void bind(Triangle t, int l)
 	{
 		tri = t;
-		localNumber = o;
+		localNumber = l;
 		pullAttributes();
 	}
 	
