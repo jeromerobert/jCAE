@@ -1,0 +1,1831 @@
+<?xml version = '1.0'?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd" [
+  <!-- shortcuts for OTriangle endpoints -->
+  <!ENTITY o "<varname>o</varname>">
+  <!ENTITY d "<varname>d</varname>">
+  <!ENTITY a "<varname>a</varname>">
+  <!ENTITY n "<varname>n</varname>">
+  <!-- shortcut for an OTriangle instance -->
+  <!ENTITY ot "<varname>ot</varname>">
+  <!-- shortcut for a Triangle instance -->
+  <!ENTITY t "<varname>t</varname>">
+  <!-- shortcut for a Triangle instance -->
+  <!ENTITY TRI "<classname>Triangle</classname>">
+  <!ENTITY OTRI "<classname>OTriangle</classname>">
+  <!-- shortcut for "true" and "false" constants -->
+  <!ENTITY true "<constant>true</constant>">
+  <!ENTITY false "<constant>false</constant>">
+]>
+<book>
+  <title>Amibe Development Manuel</title>
+  <bookinfo>
+  <author>
+    <firstname>Denis</firstname>
+    <surname>Barbier</surname>
+    <email>barbier@linuxfr.org</email>
+  </author>
+  <releaseinfo>
+    Based on CVS version 2005-11-30
+  </releaseinfo>
+  </bookinfo>
+  <chapter>
+    <title>Introduction</title>
+  <para>
+    What is jCAE?
+    FIXME
+  </para>
+  </chapter>
+
+  <chapter>
+    <title>Overview of Data Structures</title>
+  <para>
+We describe here some data structures commonly used in meshing programs.
+They all apply on 2-manifold objects, the case of non-manifold
+geometries will be addressed in further versions of this document.
+  </para>
+
+  <para>
+Their goal is to provide adjacency relations between elements.
+For instance one can use the following sets, as defined by
+<ulink url="http://ocw.mit.edu/NR/rdonlyres/Ocean-Engineering/13-472JComputational-GeometrySpring2003/22CDF275-157E-4067-99F3-A3224D2D0A26/0/lecnotes14_fixed.pdf">Nicholas M. Patrikalakis</ulink>
+<variablelist spacing="compact">
+  <varlistentry>
+    <term>V(F)</term>
+    <listitem><simpara>list of triangles adjacent to a vertex</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>V(E)</term>
+    <listitem><simpara>list of edges adjacent to a vertex</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>V(V)</term>
+    <listitem><simpara>list of neighbour vertices</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>E(F)</term>
+    <listitem><simpara>list of triangles adjacent to an edge (1 for a boundary
+           edge, 2 otherwise.</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>E(E)</term>
+    <listitem><simpara>list of edges adjacent to an edge (unused?)</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>E(V)</term>
+    <listitem><simpara>the two endpoints of this edge</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>F(F)</term>
+    <listitem><simpara>list of faces adjacent to a face (unused?)</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>F(E)</term>
+    <listitem><simpara>the three edges of a triangle</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>F(V)</term>
+    <listitem><simpara>the three vertices of this triangle</simpara></listitem>
+  </varlistentry>
+</variablelist>
+
+It is sometimes desirable to have ordered list, for instance to have the
+list of edges incident to a vertex in clockwise or counterclockwise
+order.
+
+Some algorithms also require the list of edges opposite to a vertex,
+which is called its ring.
+  </para>
+
+  <section>
+    <title>Edge-based Data Structures</title>
+    <para>
+    FIXME: introduction
+    FIXME: Euler-Poincaré formula  V - E + F = G
+      ==> V =~ 0.5 F  E =~ 1.5 F
+    </para>
+
+    <section>
+      <title>Winged-Edge</title>
+    <para>
+This data structure had been introduced in 1975 by Bruce G. Baumgart in:
+<ulink url="http://www.baumgart.org/winged-edge/winged-edge.html">Use of
+Polyhedra in Computer Vision</ulink>.
+    </para>
+
+    <para>
+An edge contains four pointers to adjoining edges, two pointers to
+vertices and two pointers to triangles.  Those pointers are ordered so
+that those elements are oriented.  For instance one can decide that an
+edge is oriented from its first vertex to the second one, the first face
+lies to the left of this segment, and the second one to its right.  Edge
+pointers need also to be ordered, for instance
+<structfield>cw1</structfield> (clockwise on face 1),
+<structfield>ccw1</structfield> (counterclockwise on face 1),
+<structfield>cw2</structfield> (clockwise on face 2) and
+<structfield>ccw2</structfield> (counterclockwise on face 2).
+ <programlisting>
+          /         \
+         /cw1    ccw1\
+        /             \
+       /      T1       \
+   V1 +-----------------+ V2
+       \      T2       /        
+        \             /        
+         \ccw2    cw2/        
+          \         /        
+ </programlisting>
+With these adjacency relations, we can traverse edges of a face in
+clockwise or counterclockwise order, and also traverse edges incident to
+a vertex in clockwise or counterclockwise order.
+    </para>
+
+    <para>
+Triangles and vertices contain a pointer to an incident edge.  So the
+total memory cost to store adjacency relations is 13.5F pointers.
+    </para>
+
+    <para>
+On triangular meshes, we can remove two of the four pointers to edges because
+<code>ccw1=cw1(cw1)</code> and idem for <structfield>ccw2</structfield>.
+The total memory cost is then reduced to 10.5F pointers.
+    </para>
+    </section>
+<!-- Here E = 3 F because these are half edges -->
+    <section>
+      <title>Half-Edge</title>
+    <para>
+This data structure was proposed by Chuck Eastman in 1982.
+An edge contains a pointer to the symmetric edge, a pointer to its start
+vertex, two pointers to adjoining edges, and a pointer to a triangle.
+There are two different half-edge structures, adjoined edges can either
+be linked to the same vertex or the same face.
+<programlisting>
+          /         \                      /         \
+         /cw      ccw\                    /cw      ccw\
+        /             \                  /             \
+       /  T1           \                /      T1       \
+   V1 +-------+ +-------+ V2        V1 +-----------------+
+       \           T2  /               +-----------------+ V2
+        \             /                 \      T2       /     
+         \ccw      cw/                   \             /      
+          \         /                     \ccw      cw/       
+                                           \         /        
+          Vertex-edge                       Face-edge
+</programlisting>
+    </para>
+
+    <para>
+Triangles and vertices contain a pointer to an incident edge.
+The total memory cost is then also 13.5F pointers.
+    </para>
+
+    <para>
+As with winged edges, memory requirements can be lowered on triangular
+mashes by considering only one adjoining edge instead of two.  With
+vertex-edge half-edge structure, <code>ccw=cw(cw(sym))</code> and with
+triangle-edge half-edge structure, <code>ccw=cw(cw)</code>.  So this
+operation may be tricky with vertex-edge if there are mesh boundaries.
+    </para>
+    </section>
+  </section>
+
+  <section>
+    <title>Triangle-based Data Structures</title>
+    <para>
+We describe here the data structure implemented by Jonathan Richard
+Shewchuk in
+<ulink url="http://www.cs.cmu.edu/~quake/triangle.html">Triangle</ulink>
+Each triangle contains three pointers to vertices and three pointers to
+adjoining triangles.  An edge is represented by a triangle and the local
+number (between 0 and 2) of this edge in the triangle.  This local
+number is called <emphasis>orientation</emphasis> by Jonathan Richard
+Shewchuk, and an edge is an <emphasis>oriented triangle</emphasis>.  In
+C, pointers to complex structures are aligned to four-byte boundaries.
+The orientation of an edge can then be encoded in the pointer itself, by
+shifting this pointer to the number of bytes corresponding to its
+orientation.  For instance a pointer to the memory address
+<code>0x24345471</code> represents the second edge (with an orientation
+of 1) of the triangle found at <code>0x24345470</code>.
+The total memory cost required to represent adjacency relations is 7.5F.
+    </para>
+
+    <para>
+We can see that this data structure is very space-efficient to represent
+adjacency relations.  In practice we need more data (vertex coordinates,
+attributes, etc.) so the gain is not that important.
+    </para>
+  </section>
+  </chapter>
+
+  <chapter>
+    <title>Amibe Data Structures</title>
+  <para>
+We implemented the data structure of Jonathan Richard Shewchuk in Java.
+Unfortunately we could not use the same trick about data alignment, so
+orientation needs to be encoded.  We need 6 bits per triangle to encode
+orientation of adjoining edges in a triangle, so this overhead is pretty
+low.
+
+Consider the &OTRI; &ot; below, it belongs to the &TRI; &t; and has a null
+<structfield>localNumber</structfield>.
+<programlisting>
+                        V2
+     V5 _________________,________________, V3
+        \    &lt;----      / \     &lt;----     /
+         \     0     _ /   \      1    _ /
+          \\  t0     ///  /\\\   t1    //
+           \\1     2///1   0\\\2     0//   t.vertex = { V0, V1, V2 }
+            \V     //V   t   \\V     //   t0.vertex = { V2, V1, V3 }
+             \     /           \     /    t1.vertex = { V5, V0, V2 }
+              \   /      2      \   /     t2.vertex = { V0, V4, V1 }
+               \ /     ----&gt;     \ /
+             V0 +-----------------+ V1
+                 \     &lt;----     /
+                  \      1    _ /
+                   \\   t2    //
+                    \\2     0//
+</programlisting>
+The following methods can be applied to &ot;:
+<programlisting>
+   ot.nextOTri();        // Moves (t,0) to (t,1)
+   ot.prevOTri();        // Moves (t,0) to (t,2)
+   ot.symOTri();         // Moves (t,0) to (t0,2)
+   ot.nextOTriOrigin();  // Moves (t,0) to (t2,1)
+   ot.prevOTriOrigin();  // Moves (t,0) to (t0,0)
+   ot.nextOTriDest();    // Moves (t,0) to (t0,1)
+   ot.prevOTriDest();    // Moves (t,0) to (t1,0)
+   ot.nextOTriApex();    // Moves (t,0) to (t1,1)
+   ot.prevOTriApex();    // Moves (t,0) to (t2,0)
+</programlisting>
+  </para>
+
+  <para>
+It is important to realize that data are stored on triangles, but most
+algorithms are edge-based.  Thus &OTRI; is a handle to an edge, which
+can be updated when mesh is traversed.  But there is one drawback which
+will be exposed later: there is no edge object and it is thus not easy
+to work with set of edges.
+  </para>
+
+  <section id="pkg-ds">
+    <title>Package <classname>org.jcae.mesh.amibe.ds</classname></title>
+
+    <para>
+<table border="1">
+<title>Class summary of the package <classname>org.jcae.mesh.amibe.ds</classname></title>
+<tgroup cols="2" colsep="1" rowsep="1">
+<tbody>
+<row>
+  <entry><link linkend="cls-Triangle">&TRI;</link></entry>
+  <entry>A triangular element of the mesh.</entry>
+</row>
+<row>
+<entry><link linkend="cls-OTriangle">&OTRI;</link></entry>
+  <entry>A handle to abstract edge instances.</entry>
+</row>
+<row>
+<entry><link linkend="cls-OTriangle2D"><classname>OTriangle2D</classname></link></entry>
+  <entry>A handle to abstract edge objects for initial 2D mesh.</entry>
+</row>
+<row>
+<entry><link linkend="cls-NotOrientedEdge"><classname>NotOrientedEdge</classname></link></entry>
+  <entry>Unique edges, without considering their orientation.</entry>
+</row>
+<row>
+<entry><link linkend="cls-Vertex"><classname>Vertex</classname></link></entry>
+  <entry>Vertex of a mesh.</entry>
+</row>
+<row>
+<entry><link linkend="cls-Mesh"><classname>Mesh</classname></link></entry>
+  <entry>Mesh data structure.</entry>
+</row>
+<row>
+<entry><classname>MFace3D</classname></entry>
+  <entry>(Obsolete) 3D triangle.</entry>
+</row>
+<row>
+<entry><classname>MGroup3D</classname></entry>
+  <entry>(Obsolete) Group of triangles in the 3D mesh.</entry>
+</row>
+<row>
+<entry><classname>MMesh3D</classname></entry>
+  <entry>(Obsolete) 3D discretization of the whole shape.</entry>
+</row>
+<row>
+<entry><classname>MNode3D</classname></entry>
+  <entry>(Obsolete) 3D node.</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+    </para>
+
+  <section id="cls-Triangle">
+    <title>&TRI;</title>
+
+    <para>
+This is the main class.  Its initial implementation followed the one
+presented by Jonathan Richard Shewchuk in
+<ulink url="http://www.cs.cmu.edu/~quake/triangle.html">Triangle</ulink>:
+A &TRI; instance contains references to its three vertices
+<programlisting>
+        public Vertex [] vertex = new Vertex[3];
+        private Object [] adj = new Object[3];
+        private int groupId = -1;
+</programlisting>
+A &TRI; contains three references to its vertices, and three references
+to adjacent triangles.  The <structfield>adj</structfield> instance
+variable is of type <classname>Object</classname> instead of &TRI; in
+order to handle non-manifold objects; each element then contains a list
+of triangles.
+The <structfield>groupId</structfield> instance variable contains the
+identifier of a shell.
+    </para>
+
+    <para>
+By convention the local number of an edge is the index of its opposite
+vertex, thus <code>adj|0]</code> is the triangle adjacent to the edge
+opposite of vertex 0, etc.
+<programlisting>
+                       V2
+       _________________,_________________
+       \               / \               /
+        \             /   \             /
+         \   adj[1]  //  /\\  adj[0]   /
+          \         //1   0\\         /   t.vertex = { V0, V1, V2 }
+           \       /V   t   \\       /
+            \     /           \     /
+             \   /      2      \   /
+              \ /     ----&gt;     \ /
+            V0 +-----------------+ V1
+                \               /
+                 \   adj[2]    /
+                  \           /
+                   \         /
+</programlisting>
+    </para>
+
+    <para>
+But we also need to know the local number of adjacent edges in their
+respective triangles.  Jonathan Richard Shewchuk used word-alignment to
+store this information without additional space by shifting pointers to
+a number of bytes equal to the local number of edges.  This very
+efficient trick can not be performed with Java, and the three numbers
+are packed into a single byte instead.  As attributes on edges are also
+needed, all edge data are packed into a single
+<structfield>adjPos</structfield> integer instance variable.
+<programlisting>
+        public int adjPos = 0;
+</programlisting>
+Byte 0 represents the local number of adjacent edges in their respective
+triangles:
+<itemizedlist spacing="compact">
+  <listitem><simpara>bits 0-1: <code>adj[0]</code></simpara></listitem>
+  <listitem><simpara>bits 2-3: <code>adj[1]</code></simpara></listitem>
+  <listitem><simpara>bits 4-5: <code>adj[2]</code></simpara></listitem>
+</itemizedlist>
+Bytes 1, 2 and 3 carry up attributes for edges 0, 1 and 2.
+These attributes are bitfields, so up to 8 attributes can be defined on
+edges.  See &OTRI; for the list of attributes currently defined.
+    </para>
+
+    <para>
+Typically a &TRI; is created by calling the constructor with its three
+vertices, and adjacency relations are set by
+<methodname>OTriangle.bind</methodname>.  If there are several common vertices, like
+when splitting an edge and thus its two adjacent triangles,
+<methodname>Triangle.clone</methodname> can save some work, it creates a new
+triangle with the same vertices and adjacency relations.
+As described below, a <classname>Mesh</classname> instance contains the
+list of its triangles.  When a triangle is created, it needs to be added
+to its underlying mesh; this is performed by calling the following
+method:
+<programlisting>
+        public void addToMesh()
+</programlisting>
+    </para>
+
+    <para>
+Algorithms do often need to compute lists of triangles.  In order to
+avoid allocation of these lists, a singly linked list is provided by
+this class.  It uses class variables, so only one list can be active at
+any time.  Here is an example:
+<programlisting>
+     //  Begin a new list
+     Triangle.listLock();
+     ...
+     //  In a loop, add triangles to this list.
+       tri.listCollect();
+     //  Check whether a triangle is contained in this list.
+     //  This is very fast because it tests if its link pointer
+     //  is <constant>null</constant> or not.
+       if (tri.isListed()) {
+          ...
+       }
+     //  Loop over collected triangles.
+     for (Iterator it = Triangle.getTriangleListIterator(); it.hasNext(); )
+     {
+       Triangle t = (Triangle) it.next();
+       ...
+     }
+     //  When finished, remove all links between triangles
+     Triangle.listRelease();
+</programlisting>
+   
+New elements are added at the end of the list so that
+<methodname>listCollect</methodname> can be called while
+<methodname>getTriangleListIterator</methodname> is in action.
+    </para>
+  </section>
+
+  <section id="cls-OTriangle">
+    <title>&OTRI;</title>
+
+    <para>
+An &OTRI; instance is a handle on an half-edge.
+Its instance variables are:
+<programlisting>
+        Triangle tri;
+        int localNumber;
+        int attributes;
+</programlisting>
+Once it is created, its members are updated when traversing mesh.
+Symmetric edges are retrieved through <structfield>tri.adj</structfield>
+and <structfield>tri.adjPos</structfield>.
+    </para>
+   
+    <para>
+There are accessors for the first two instance variables:
+<programlisting>
+        public final Triangle getTri()
+        public final int getLocalNumber()
+</programlisting>
+These variables cannot be set directly, but
+<programlisting>
+        public final void bind(Triangle t, int l)
+</programlisting>
+does the same thing.  The reason why there are no <methodname>setTri</methodname>
+and <methodname>setLocalNumber</methodname> methods is that <methodname>setTri</methodname>
+would almost always be followed by a call to <methodname>pullAttributes</methodname>,
+thus <methodname>bind</methodname> is a shortcut for these two calls.
+    </para>
+   
+    <para>
+The main goal of this class is to ease mesh traversal.
+Consider the &ot; &OTRI; with a null <structfield>localNumber</structfield>
+of &TRI; &t; below:
+<programlisting>
+                          V2
+       V5 _________________,________________, V3
+          \    &lt;----      / \     &lt;----     /
+           \     0     _ /   \      1    _ /
+            \\  t0     ///  /\\\   t1    //
+             \\1     2///1   0\\\2     0//   t.vertex = { V0, V1, V2 }
+              \V     //V   t   \\V     //   t0.vertex = { V2, V1, V3 }
+               \     /           \     /    t1.vertex = { V5, V0, V2 }
+                \   /      2      \   /     t2.vertex = { V0, V4, V1 }
+                 \ /     ----&gt;     \ /
+               V0 +-----------------+ V1
+                   \     &lt;----     /
+                    \      1    _ /
+                     \\   t2    //
+                      \\2     0//
+</programlisting>
+The following methods can be applied to &ot;:
+<programlisting>
+      ot.nextOTri();        // Moves (t,0) to (t,1)
+      ot.prevOTri();        // Moves (t,0) to (t,2)
+      ot.symOTri();         // Moves (t,0) to (t0,2)
+      ot.nextOTriOrigin();  // Moves (t,0) to (t2,1)
+      ot.prevOTriOrigin();  // Moves (t,0) to (t0,0)
+      ot.nextOTriDest();    // Moves (t,0) to (t0,1)
+      ot.prevOTriDest();    // Moves (t,0) to (t1,0)
+      ot.nextOTriApex();    // Moves (t,0) to (t1,1)
+      ot.prevOTriApex();    // Moves (t,0) to (t2,0)
+</programlisting>
+  
+An &OTRI; instance can also be cloned into another already allocated
+object.
+<programlisting>
+      OTriangle.copyOTri(src, dest);        // Set dest to (t,0)
+      OTriangle.nextOTri(src, dest);        // Set dest to (t,1)
+      OTriangle.prevOTri(src, dest);        // Set dest to (t,2)
+      OTriangle.symOTri(src, dest);         // Set dest to (t0,2)
+      OTriangle.nextOTriOrigin(src, dest);  // Set dest to (t2,1)
+      OTriangle.prevOTriOrigin(src, dest);  // Set dest to (t0,0)
+      OTriangle.nextOTriDest(src, dest);    // Set dest to (t0,1)
+      OTriangle.prevOTriDest(src, dest);    // Set dest to (t1,0)
+      OTriangle.nextOTriApex(src, dest);    // Set dest to (t1,1)
+      OTriangle.prevOTriApex(src, dest);    // Set dest to (t2,0)
+</programlisting>
+All these methods are cheap, because structures are not copied, only
+references are modified.
+    </para>
+   
+    <para>
+When an &OTRI; is traversing the mesh, its reference is not modified,
+but its instance variables are updated.  In order to prevent object
+allocations, we try to reuse &OTRI; objects as much as we can.
+    </para>
+   
+    <para>
+There are accessors to vertices:
+<programlisting>
+      ot.origin();          // Returns start point, V0 in example above
+      ot.destination();     // Returns destibation point, V1 in example above
+      ot.apex();            // Returns apex point, V2 in example above
+</programlisting>
+Vertices can also be modified:
+<programlisting>
+      ot.setOrigin(v);      // Replaces current origin by Vertex v
+      ot.setDestination(v); // Replaces current destination by Vertex v
+      ot.setApex(v);        // Replaces current apex by Vertex v
+</programlisting>
+These three methods modify vertices for the underlying &TRI; instance.
+    </para>
+
+    <para>
+Attributes can contain these predefined values (several attributes can
+be set simultaneously with the bitwise <code>|</code> operator):
+
+<table border="1">
+<title><classname>OTriangle</classname> Attributes</title>
+<tgroup cols="2" colsep="1" rowsep="1">
+<tbody>
+<row>
+  <entry><constant>BOUNDARY</constant></entry>
+  <entry>Edges on a boundary mesh</entry>
+</row>
+<row>
+  <entry><constant>OUTER</constant></entry>
+  <entry>Edges exterior to the mesh</entry>
+</row>
+<row>
+  <entry><constant>SWAPPED</constant></entry>
+  <entry>Set after swapping an edge, so that it is not swapped again</entry>
+</row>
+<row>
+  <entry><constant>MARKED</constant></entry>
+  <entry>Tag an edge so that it is processed only once</entry>
+</row>
+<row>
+  <entry><constant>QUAD</constant></entry>
+  <entry>This edge is the invisible boundary of a quadrangle</entry>
+</row>
+<row>
+  <entry><constant>NONMANIFOLD</constant></entry>
+  <entry>Non-manifold edge</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+The last two attributes are not fully supported and may be deprecated soon
+<remark>TODO: When the MARKED attribute is used to flag triangles, it may be
+   replaced by a linked list of Triangle instances.</remark>
+    </para>
+
+    <para>
+The methods to manipulate attributes are:
+<variablelist spacing="compact">
+  <varlistentry>
+    <term><code>hasAttributes(int attr)</code></term>
+      <listitem><simpara>Returns &true; if all specified attributes in
+      <varname>attr</varname> are set, &false;
+      otherwise.</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><code>setAttributes(int attr)</code></term>
+      <listitem><simpara>Sets these attributes</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><code>clearAttributes(int attr)</code></term>
+      <listitem><simpara>Clears the specified attributes</simpara></listitem>
+  </varlistentry>
+</variablelist>
+These three methods modify attributes for both &OTRI;
+and the underlying &TRI; instances.
+But sometimes, attributes need to be synchronized manually, so the
+following two functions are provided:
+<variablelist spacing="compact">
+  <varlistentry>
+    <term><code>pullAttributes</code></term>
+      <listitem><simpara>Synchronizes attributes from
+      &TRI;</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><code>pushAttributes</code></term>
+      <listitem><simpara>Synchronizes &TRI; attributes
+      from these ones</simpara></listitem>
+  </varlistentry>
+</variablelist>
+    </para>
+
+    <para>
+Adjacency relations are mostly modified by the
+<methodname>glue(OTriangle that)</methodname> method, which glues two half-edges together.
+
+<remark>TODO: other methods like <methodname>Triangle.setAdj</methodname> and
+   <methodname>OTriangle.setAdj</methodname> could certainly be removed.</remark>
+    </para>
+
+    <para>
+Some algorithms are provided to modify a mesh.  There is no
+preliminarty check to make sure that these algorithms do not modify
+topology, so the caller needs to perform the necessary checks.
+<programlisting>
+        public final void swap()
+
+                    d                    d
+                    .                    .
+                   /|\                  / \
+                  / | \                /   \   
+                 /  |  \              /     \
+              a +   |   + n  ---&gt;  a +-------+ n
+                 \  |  /              \     /
+                  \ | /                \   /
+                   \|/                  \ /
+                    '                    '
+                    o                    o
+</programlisting>
+This routine swaps an edge <code>(&o;&d;)</code> to <code>(&n;&a;)</code>,
+updates adjacency relations and backward links between vertices and
+triangles.  Current &OTRI; instance is transformed from
+<code>(&o;&d;&a;)</code> to <code>(&o;&n;&a;)</code> and not
+<code>(&n;&a;&o;)</code>, because this helps turning around &o;, eg. at
+the end of <methodname>OTriangle2D.split3</methodname>.
+    </para>
+
+    <para>
+<programlisting>
+        public final void contract(Vertex n)
+
+               V1                       V1
+      V3+-------+-------+ V4   V3 +------+------+ V4
+         \ t3  / \ t4  /           \  t3 | t4  / 
+          \   /   \   /              \   |   /
+           \ / t1  \ /                 \ | /  
+          o +-------+ d   ------>      n +
+           / \ t2  / \                 / | \
+          /   \   /   \              /   |   \
+         / t5  \ / t6  \           /  t5 | t6  \
+        +-------+-------+         +------+------+
+      V5        V2       V6     V5       V2      V6
+</programlisting>
+Contract an edge.  Two triangles are removed, and all adjacent
+triangles are updated to replace &o; and &d; vertices by &n;.
+The following method
+<programlisting>
+        public final boolean canContract(Vertex n)
+</programlisting>
+must be called before <methodname>contract(Vertex n)</methodname> to check that this
+contraction is valid.
+    </para>
+
+    <para>
+<programlisting>
+        public final void split(Vertex n)
+
+             V1                       V1        
+              +                       /|\
+             / \                    /  |  \        
+            /   \                 / t1 | t3 \       
+           / t1  \              /      |      \      
+        o +-------+ d  --->  o +-------+-------+ d   
+           \ t2  /              \     n|      /      
+            \   /                 \ t2 | t4 /       
+             \ /                    \  |  /        
+              +                       \|/
+             V2                       V2
+</programlisting>
+This is the opposite of contract.
+    </para>
+  </section>
+
+  <section id="cls-OTriangle2D">
+    <title><classname>OTriangle2D</classname></title>
+
+    <para>
+This class inherits from &OTRI; and is designed to perform the initial
+2D triangulation.  In particular, boundary edges have not yet been
+rebuilt, so we cannot check whether the <constant>OTriangle.OUTER</constant>
+attribute is set, but need to test if vertices are equal to the infinite
+point <structfield>Vertex.outer</structfield> instead.
+    </para>
+  </section>
+
+  <section id="cls-NotOrientedEdge">
+    <title><classname>NotOrientedEdge</classname></title>
+
+    <para>
+This class also inherits from &OTRI;, and is used in 3D algorithms
+when an half-edge and its symmetric needs to be considered as eauql.
+    </para>
+  </section>
+
+  <section id="cls-Vertex">
+    <title><classname>Vertex</classname></title>
+
+    <para>
+Its instance variables are:
+<variablelist spacing="compact">
+  <varlistentry>
+    <term><code>public double [] param = null;</code></term>
+      <listitem><simpara>array containing either 2D parameters or 3D
+      coordinates, which is why it is not allocated.</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><code>private Object link;</code></term>
+      <listitem><simpara>In the general case, this is a reference to a
+      &TRI; instance containing this vertex.  For non-manifold vertices, it
+      is a reference to a list of &TRI; instances.</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><code>private Metric2D m2 = null;</code></term>
+      <listitem><simpara>metrics computed at this vertex</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><code>private int ref1d = 0;</code></term>
+      <listitem><simpara>identifier for nodes on boundary edges</simpara></listitem>
+  </varlistentry>
+</variablelist>
+
+<remark>TODO: it is certainly a good idea to move 2D specific methods into a
+        new VertexZD class.</remark>
+<remark>TODO: the <classname>Mesh</classname> class contains the list of
+        triangles, but not the list of vertices; it needs to be computed
+        when needed.  A singly linked list may be added, like the one in
+        &TRI; class, to ease traversal of all vertices.  Or
+        alternatively a doubly-linked list may be used to always contain
+        the list of vertices.</remark>
+    </para>
+
+    <para>
+There is a special vertex, <structfield>Vertex.outer</structfield>,
+which represents a vertex at infinite.  This vertex is used to create
+exterior triangles.
+    </para>
+  </section>
+
+  <section id="cls-Mesh">
+    <title><classname>Mesh</classname></title>
+
+    <para>
+Its instance variables are:
+<variablelist spacing="compact">
+  <varlistentry>
+    <term><code>private int type = MESH_2D;</code></term>
+      <listitem><simpara>Mest type</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><code>private ArrayList triangleList = new ArrayList();</code></term>
+      <listitem><simpara>Triangle list</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><code>private CADFace face</code></term>
+      <listitem><simpara>Topological face on which mesh is applied</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><code>private CADGeomSurface surface;</code></term>
+      <listitem><simpara>The geometrical surface describing the topological
+      face, stored for efficiency reason</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><code>private double epsilon = 1.0;</code></term>
+      <listitem><simpara>Minimal topological edge length</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><code>private boolean accumulateEpsilon = false;</code></term>
+      <listitem><simpara>Switch to ignore tiny edges</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><code>private Stack compGeomStack = new Stack();</code></term>
+      <listitem><simpara>Stack of methods to compute geometrical
+      values</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><code>public QuadTree quadtree = null;</code></term>
+      <listitem><simpara>Structure to fasten search of nearest
+      vertices.</simpara></listitem>
+  </varlistentry>
+</variablelist>
+   <remark>TODO: Many variables were introduced for 2D meshing, and do
+           not make sense for 3D meshes.  Define a Mesh2D subclass to
+           handle 2D meshing specifically.</remark>
+   <remark>TODO: Add support for groups in this class.  It is currently
+           implemented in &TRI; class only, and adding support here would
+           ease some methods.</remark>
+    </para>
+  </section>
+
+  <section>
+    <title>Others</title>
+
+    <para>
+ The following classes had been implemented when 3D meshes had their own
+ classes, and are deprecated now.  For this reason, they are not detailed
+ here:
+ <itemizedlist>
+   <listitem><simpara>MMesh3D</simpara></listitem>
+   <listitem><simpara>MGroup3D</simpara></listitem>
+   <listitem><simpara>MFace3D</simpara></listitem>
+   <listitem><simpara>MNode3D</simpara></listitem>
+ </itemizedlist>
+    </para>
+  </section>
+
+  <section id="pkg-tools">
+    <title>Package <classname>org.jcae.mesh.amibe.ds.tools</classname></title>
+
+    <para>
+These classes were implemented when our data structure was only designed
+to mesh a single parametrized surface.  We then needed two different sets
+of metrics: one for the 2D Euclidian space (this is needed for the initial
+triangulation of boundary nodes, see BasicMesh), and another one to take surface geometrical
+properties into account.
+
+They implement the <classname>Calculus</classname> interface, which
+defines the following methods:
+<variablelist spacing="compact">
+  <varlistentry>
+    <term><code>public double length(OTriangle ot)</code></term>
+      <listitem><simpara>Returns the length of an edge.</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><code>public double distance(Vertex start, Vertex end)</code></term>
+      <listitem><simpara>Returns the distance between
+        <replaceable>start</replaceable> and
+        <replaceable>end</replaceable> points.  This distance is computed
+        by using metrics of both endpoints.
+      </simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><code>public double distance(Vertex start, Vertex end, Vertex vm)</code></term>
+      <listitem><simpara>Computes the distance between
+        <replaceable>start</replaceable> and
+        <replaceable>end</replaceable> points, by using the metrics
+        defined at point <replaceable>vm</replaceable>.
+      </simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><code>public double radius2d(Vertex vm)</code></term>
+      <listitem><simpara>Returns the radius of a 2D circle centered at
+        <replaceable>vm</replaceable> so that all points within this
+        circle belong to the unit ball of <replaceable>vm</replaceable>
+        is in the 3D space.  This method is used in
+        <methodname>QuadTree.getNearestVertex</methodname> to determine when
+        quadtrees do not have to be considered because they can not
+        contain close enough points.
+      </simpara></listitem>
+  </varlistentry>
+</variablelist>
+
+<table border="1">
+<title>Class summary of the package <classname>org.jcae.mesh.amibe.ds.tools</classname></title>
+<tgroup cols="2" colsep="1" rowsep="1">
+<tbody>
+<row>
+<entry><classname>Calculus2D</classname></entry>
+  <entry>Distance computations in 2D Euclidian space.</entry>
+</row>
+<row>
+  <entry><classname>Calculus3D</classname></entry>
+  <entry>Distance computations in 2D parameter space by using 3D
+  metrics.</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+<remark>TODO: Calculus3D should be renamed, and a new class be created to handle
+Vertex in 3D space.</remark>
+    </para>
+  </section>
+  </section>
+
+  <section id="pkg-metrics">
+    <title>Package <classname>org.jcae.mesh.amibe.metrics</classname></title>
+
+    <para>
+<table border="1">
+<title>Class summary of the package <classname>org.jcae.mesh.amibe.metrics</classname></title>
+<tgroup cols="2" colsep="1" rowsep="1">
+<tbody>
+<row>
+  <entry><classname>Matrix2D</classname></entry>
+  <entry>General 2D matrix.</entry>
+</row>
+<row>
+  <entry><classname>Matrix3D</classname></entry>
+  <entry>General 3D matrix.</entry>
+</row>
+<row>
+  <entry><classname>Metric2D</classname></entry>
+  <entry>Metrics on tangent plane.</entry>
+</row>
+<row>
+  <entry><classname>Metric3D</classname></entry>
+  <entry>3D metrics computed on a CAD surface.</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+<remark>TODO: prodSca() and prodVect3D() should be renamed into inner()
+        and outer() respectively in Matrix3D.</remark>
+<remark>TODO: this package should be reorganized and surely merged with
+        org.jcae.mesh.amibe.ds.tools</remark>
+      </para>
+  </section>
+
+  <section id="pkg-util">
+    <title><classname>org.jcae.mesh.amibe.util</classname></title>
+
+    <para>
+<table border="1">
+<title>Interface summary of the package <classname>org.jcae.mesh.amibe.util</classname></title>
+<tgroup cols="2" colsep="1" rowsep="1">
+<tbody>
+<row>
+  <entry><classname>OctreeProcedure</classname></entry>
+  <entry>Procedure to apply on all octree elements.</entry>
+</row>
+<row>
+  <entry><classname>QuadTreeProcedure</classname></entry>
+  <entry>Procedure to apply on all quadtree elements.</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+    </para>
+
+    <para>
+<table border="1">
+<title>Class summary of the package <classname>org.jcae.mesh.amibe.util</classname></title>
+<tgroup cols="2" colsep="1" rowsep="1">
+<tbody>
+<row>
+  <entry><link linkend="cls-LongLong"><classname>LongLong</classname></link></entry>
+  <entry><type>long long</type> type for exact geometrical computations.</entry>
+</row>
+<row>
+  <entry><link linkend="cls-Octree"><classname>Octree</classname></link></entry>
+  <entry>Octree structure to store 3D vertices.
+  </entry>
+</row>
+<row>
+  <entry><classname>OctreeTest</classname></entry>
+  <entry>Utility class to write unit tests for the
+  <classname>Octree</classname> class.</entry>
+</row>
+<row>
+  <entry><link linkend="cls-PAVLSortedTree"><classname>PAVLSortedTree</classname></link></entry>
+  <entry>PAVL binary trees to store quality factors.</entry>
+</row>
+<row>
+  <entry><link linkend="cls-QuadTree"><classname>QuadTree</classname></link></entry>
+  <entry>Quadtree structure to store 2D vertices.</entry>
+</row>
+<row>
+  <entry><classname>QuadTreeTest</classname></entry>
+  <entry>Utility class to write unit tests for the
+  <classname>QuadTree</classname> class.</entry>
+</row>
+<row>
+  <entry><classname>UNVReader</classname></entry>
+  <entry>FIXME</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+    </para>
+
+  <section id="cls-QuadTreeProcedure">
+    <title><interfacename>QuadTreeProcedure</interfacename></title>
+    <para>
+This interface is used as an argument of the
+<methodname>QuadTree.walk</methodname> method.  It defines a single method:
+<programlisting>
+    public action(Object o, int s, int i, int j)
+</programlisting>
+Its arguments are defined as follows:
+<variablelist spacing="compact" termlength="3">
+  <varlistentry>
+    <term><varname>o</varname></term>
+    <listitem><simpara>A reference to a <classname>QuadTree.Cell</classname> instance.</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><varname>s</varname></term>
+    <listitem><simpara>Cell size.</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><varname>i</varname></term>
+    <listitem><simpara>First coordinate of the bottom left corner of this cell. </simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><varname>j</varname></term>
+    <listitem><simpara>Second coordinate of the bottom left corner of this cell.</simpara></listitem>
+  </varlistentry>
+</variablelist>
+The return value of this method can alter quadtree traversal: if
+<constant>-1</constant> is returned, <code>QuadTree.walk</code>
+aborts immediately its traversal.  If another non-null value is
+returned, children nodes qre skipped.  Otherwise processing continus
+normally.
+    </para>
+  </section>
+
+  <section id="cls-OctreeProcedure">
+    <title><interfacename>OctreeProcedure</interfacename></title>
+    <para>
+This interface is used as an argument of the
+<methodname>Octree.walk</methodname> method.  It defines a single method:
+<programlisting>
+    public action(Object o, int s, int i, int j, int k)
+</programlisting>
+Its arguments are defined as follows:
+<variablelist spacing="compact">
+  <varlistentry>
+    <term><varname>o</varname></term>
+    <listitem><simpara>A reference to a <classname>QuadTree.Cell</classname> instance.</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><varname>s</varname></term>
+    <listitem><simpara>Cell size.</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><varname>i</varname></term>
+    <listitem><simpara>First coordinate of the bottom left corner of this cell. </simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><varname>j</varname></term>
+    <listitem><simpara>Second coordinate of the bottom left corner of this cell.</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><varname>k</varname></term>
+    <listitem><simpara>Third coordinate of the bottom left corner of this cell.</simpara></listitem>
+  </varlistentry>
+</variablelist>
+The return value of this method can alter octree traversal: if
+<constant>-1</constant> is returned, <code>Octree.walk</code>
+aborts immediately its traversal.  If another non-null value is
+returned, children nodes qre skipped.  Otherwise processing continus
+normally.
+    </para>
+  </section>
+
+  <section id="cls-QuadTree">
+    <title><classname>QuadTree</classname></title>
+
+    <para>
+This class implements a quadtree structure to store 2D vertices.  When
+adjacent relations have not yet been set, a quadtree is an efficient way
+to locate a point among a set of points and triangles.
+    </para>
+
+    <para>
+Integer coordinates are used for two reasons: a better control on accuracy
+of geometrical operations, and simpler operations on vertex location because
+cells have power of two side length and bitwise operators can be used
+instead of floating point operations: if the cell size is <code>2*s</code>
+then a point <code>(i,j)</code> is located in the quadrant
+<code>((i &amp; s) == 0 ? 0 : 1) + 2*(((j &amp; s) == 0) ? 0 : 1)</code>.
+<table border="1">
+<title>Quadrant index</title>
+<tgroup cols="3">
+<colspec align="right"/>
+<colspec colsep="1" rowsep="1" align="center"/>
+<colspec colsep="1" rowsep="1" align="center"/>
+<tbody>
+<row>
+  <entry><code>J&lt;>0</code></entry>
+  <entry>2</entry>
+  <entry>3</entry>
+</row>
+<row>
+  <entry><code>J=0</code></entry>
+  <entry>0</entry>
+  <entry>1</entry>
+</row>
+<row>
+  <entry> </entry>
+  <entry><code>I=0</code></entry>
+  <entry><code>I&lt;>0</code></entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+where <code>I = i &amp; s</code>, <code>J = j &amp; s</code>.
+    </para>
+
+    <para>
+The downside is that conversion between double and integer coordinates
+must be known in advance, which is why constructor needs a bounding box
+as argument.
+    </para>
+
+    <para>
+The inner class <classname>QuadTree.Cell</classname> is defined like
+this:
+<programlisting>
+    protected class Cell
+    {
+        // Maximal number of vertices which can be stored in a cell.
+        protected static final int BUCKETSIZE = 10;
+        
+        // Number of vertices stored below the current cell.
+        protected int nItems = 0;
+        
+        // References to bound objects.
+        protected Object [] subQuad = null;
+    }
+</programlisting>
+A <classname>QuadTree.Cell</classname> instance contains either vertices or four
+children nodes (some of them may be <constant>null</constant>).  A cell
+can contain at most <constant>QuadTree.Cell.BUCKETSIZE</constant> vertices
+(default is 10).  By convention, <structfield>nItems</structfield>  is
+positive if the cell contains vertices, and negative if it contains
+children nodes.  Its absolute value is always the total number of
+vertices located in this cell.
+When a cell contains vertices and becomes full, it is splitted: children
+nodes are created, vertices are stored there and the
+<structfield>subQuad</structfield> instance variable contains references
+to these children nodes.  On the contrary, when all vertices are removed
+from a cell, it is deleted.  And when all children of a cell are empty,
+this cell is removed.
+    </para>
+
+    <para>
+Quadtree cells are very compact, they do not contain any locational
+information.  It is instead passed to the
+<methodname>QuadTreeProcedure.action</methodname> method.
+This design had been chosen for performance reasons on large meshes, and
+in practice it works very well because quadtrees are used for vertex
+location, and no neighbourhood information is needed.
+    </para>
+
+    <para>
+Here is an example to collect inside a list all vertices stored in a
+<classname>QuadTree</classname> <varname>q</varname>:
+<programlisting>
+    class collectAllVerticesProcedure implements QuadTreeProcedure
+    {
+        protected ArrayList vertexList = new ArrayList();
+        public final int action(Object o, int s, int i0, int j0)
+        {
+            Cell self = (Cell) o;
+            if (self.nItems > 0)
+            {
+                for (int i = 0; i &lt; self.nItems; i++)
+                    vertexList.add(self.subQuad[i]);
+            }
+            return 0;
+        }
+    };
+    collectAllVerticesProcedure cproc = new collectAllVerticesProcedure();
+    q.walk(cproc);
+    ArrayList vlist = cproc.vertexList;
+</programlisting>
+    </para>
+
+    <para>
+The <code>proc.action</code> method is applied on all cells
+recursively in prefix order.  If it
+returns <constant>-1</constant>, <code>walk</code> aborts its
+processing immediately.  A null return value means that processing can
+continue normally, and a non-null return value means that children nodes are
+skipped.
+    </para>
+
+    <para>
+Distances between vertices can be computed either in Euclidian 2D space, or
+with a Riemannian metrics.  This is controlled by the
+<code>setCompGeom</code> method.  Distances are computed in Euclidian 2D
+space when its argument is an instance of
+<classname>org.jcae.mesh.amibe.ds.tools.Calculus2D</classname>,
+and in Riemannian metrics (see
+<classname>org.jcae.mesh.amibe.metrics.Metric2D</classname>) when
+it is an instance of
+<classname>org.jcae.mesh.amibe.ds.tools.Calculus3D</classname>.
+By default, distances are computed in Euclidian 2D space.
+<programlisting>
+    //  Compute distances in getNearVertex and getNearestVertex
+    //  with an Euclidian 2D metric
+    q.setCompGeom(new org.jcae.mesh.amibe.ds.tools.Calculus2D());
+    ...
+    //  ... with a Riemannian 2D metric
+    q.setCompGeom(new org.jcae.mesh.amibe.ds.tools.Calculus2D());
+</programlisting>
+    </para>
+
+    <para>
+In Euclidian 2D space, vertices which have a distance to a point
+<varname>p</varname> lower than <varname>d</varname> are contained in a
+circle centered at <varname>p</varname> with radius
+<varname>d</varname>.  With Riemannian metrics, this circle becomes an
+ellipsis.  This ellipsis is only determined by local properties of the
+surface at point <varname>p</varname>.  If we already found a point
+<varname>V1</varname> at a distance <varname>d1</varname>, vertices
+which belong to a quadtree cell not intersecting this ellipsis do not
+need to be considered.
+    </para>
+
+    <para>
+Below is an algorithm to find the nearest vertex in the quadtree of a given
+point <varname>p</varname>:
+<orderedlist numeration="arabic" spacing="compact">
+  <listitem><simpara>Initialization: <code>dmin=Double.MAX_VALUE</code>,
+    <code>result=null</code></simpara></listitem>
+  <listitem><para>Traverse all quadtree cells.
+  <orderedlist numeration="loweralpha" spacing="compact">
+    <listitem><simpara>If this cell does not intersect the ellipsis
+      centered at <varname>p</varname> of vertices at a distance lower
+      than <varname>dmin</varname>, then skip this cell and its
+      children.</simpara></listitem>
+    <listitem><simpara>Otherwise, if this cell contains children nodes, do
+      nothing so that processaing continues normally on children
+      nodes.</simpara></listitem>
+    <listitem><simpara>Otherwise, this cell contains vertices.  For each
+      vertex, compute its distance to <varname>p</varname> and update
+      <varname>dmin</varname> and <varname>result</varname> if it is
+      nearer than the current solution.</simpara></listitem>
+  </orderedlist></para></listitem>
+</orderedlist>
+    </para>
+
+    <para>
+The implementation of <code>getNearestVertex</code> has two differences:
+<itemizedlist>
+  <listitem><para>The starting point is computed by
+    <code>getNearVertex</code>.  This means that much more cells are
+    skipped.</para></listitem>
+  <listitem><para>The ellipsis is replaced by a circle enclosing it, to
+    have simpler calculus.  <remark>TODO: Using the real ellipsis could
+    be tested though, it should also speed up this
+    processing.</remark></para></listitem>
+</itemizedlist>
+  </para>
+  </section>
+
+  <section id="cls-Octree">
+    <title><classname>Octree</classname></title>
+
+    <para>
+This class implements an octree structure for 3D vertices.
+It is very similar to <classname>QuadTree</classname>, it is useful to
+find near vertices.  It was needed by
+<classname>org.jcae.mesh.amibe.algos3d.Fuse</classname> to fuse near
+vertices, but now that 3D meshes are also handled by the
+<classname>org.jcae.mesh.amibe.ds.Mesh</classname> class, it became
+oobsolete because adjacency relations between vertices are provided by
+<classname>org.jcae.mesh.amibe.ds.Mesh</classname>.
+Anyway this implementation has not yet been removed and may be useful
+again in a near future.
+    </para>
+
+    <para>
+Integer coordinates are used for two reasons: a better control on accuracy
+of geometrical operations, and simpler operations on vertex location because
+cells have power of two side length and bitwise operators can be used
+instead of floating point operations: if the cell size is <code>2*s</code>
+then a point <code>(i,j,k)</code> is located in the octant
+<code>(((i &amp; s) == 0 ? 0 : 1) + 2*(((j &amp; s) == 0) ? 0 : 1) + 4*(((k &amp; s) == 0) ? 0 : 1))</code>:
+<table border="1">
+<title>Octant index</title>
+<tgroup cols="6">
+<colspec colname="c1" align="right"/>
+<colspec colname="c2" colsep="1" rowsep="1" align="center"/>
+<colspec colname="c3" colsep="1" rowsep="1" align="center"/>
+<colspec colname="ruler" colsep="1" rowsep="1" align="center"/>
+<colspec colname="c4" colsep="1" rowsep="1" align="center"/>
+<colspec colname="c5" colsep="1" rowsep="1" align="center"/>
+<tbody>
+<row>
+  <entry> </entry>
+  <entry namest="c2" nameend="c3" align="center"><code>K=0</code></entry>
+  <entry> </entry>
+  <entry namest="c4" nameend="c5" align="center"><code>K&lt;>0</code></entry>
+</row>
+<row>
+  <entry><code>J&lt;>0</code></entry>
+  <entry>2</entry>
+  <entry>3</entry>
+  <entry> </entry>
+  <entry>6</entry>
+  <entry>7</entry>
+</row>
+<row>
+  <entry><code>J=0</code></entry>
+  <entry>0</entry>
+  <entry>1</entry>
+  <entry> </entry>
+  <entry>4</entry>
+  <entry>5</entry>
+</row>
+<row>
+  <entry> </entry>
+  <entry><code>I=0</code></entry>
+  <entry><code>I&lt;>0</code></entry>
+  <entry> </entry>
+  <entry><code>I=0</code></entry>
+  <entry><code>I&lt;>0</code></entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+where <code>I = i &amp; s</code>, <code>J = j &amp; s</code> and
+<code>K = k &amp; s</code>.
+    </para>
+
+    <para>
+The downside is that the conversion between double and integer
+coordinates must be known in advance, which is why constructor needs a
+bounding box as argument.
+    </para>
+
+    <para>
+The inner class <classname>Octree.Cell</classname> is defined like
+this:
+<programlisting>
+    protected class Cell
+    {
+        // Number of vertices stored below the current cell.
+        protected int nItems = 0;
+        
+        // References to bound objects.
+        protected Object [] subOctree = null;
+    }
+</programlisting>
+An <classname>Octree.Cell</classname> instance contains either vertices
+or eight children nodes (some of them may be <constant>null</constant>).
+A cell can contain at most <constant>Octree.BUCKETSIZE</constant>
+vertices (default is 10).  By convention,
+<structfield>nItems</structfield> is positive if the cell contains
+vertices, and negative if it contains children nodes.  Its absolute
+value is always the total number of vertices located in this cell.
+When a cell contains vertices and becomes full, it is splitted: children
+nodes are created, vertices are stored there and the
+<structfield>subOctree</structfield> instance variable contains references
+to these children nodes.  On the contrary, when all vertices are removed
+from a cell, it is deleted.  And when all children of a cell are empty,
+this cell is removed.
+    </para>
+
+    <para>
+Octree cells are very compact, they do not contain any locational
+information.  It is instead passed to the
+<code>OctreeProcedure.action</code> method.  This design had been chosen
+for performance reasons on large meshes, and in practice it works very
+well because octrees are used for vertex location, and no neighbourhood
+information is needed.
+    </para>
+
+    <para>
+Here is an example to collect inside a list all vertices stored in a
+<classname>Octree</classname> <varname>oct</varname>:
+<programlisting>
+    class collectAllVerticesProcedure implements OctreeProcedure
+    {
+        protected ArrayList vertexList = new ArrayList();
+        public final int action(Object o, int s, int i0, int j0)
+        {
+            Cell self = (Cell) o;
+            if (self.nItems > 0)
+            {
+                for (int i = 0; i &lt; self.nItems; i++)
+                    nodelist.add(self.subQuad[i]);
+            }
+            return 0;
+        }
+    };
+    collectAllVerticesProcedure cproc = new collectAllVerticesProcedure();
+    oct.walk(cproc);
+    ArrayList vlist = cproc.vertexList;
+</programlisting>
+    </para>
+
+    <para>
+The <code>proc.action</code> method is applied on all cells
+recursively in prefix order.  If it
+returns <constant>-1</constant>, <code>walk</code> aborts its
+processing immediately.  A null return value means that processing can
+continue normally, and a non-null return value means that children nodes are
+skipped.
+    </para>
+
+    <para>
+Below is an algorithm to find the nearest vertex in the octree of a given
+point <varname>p</varname>:
+<orderedlist numeration="arabic">
+  <listitem><simpara>Initialization: <code>dmin=Double.MAX_VALUE</code>,
+    <code>result=null</code></simpara></listitem>
+  <listitem><para>Traverse all octree cells.
+  <orderedlist numeration="loweralpha">
+    <listitem><simpara>If this cell does not intersect the sphere
+      centered at <varname>p</varname> of vertices at a distance lower
+      than <varname>dmin</varname>, then skip this cell and its
+      children.</simpara></listitem>
+    <listitem><simpara>Otherwise, if this cell contains children nodes, do
+      nothing so that processaing continues normally on children
+      nodes.</simpara></listitem>
+    <listitem><simpara>Otherwise, this cell contains vertices.  For each
+      vertex, compute its distance to <varname>p</varname> and update
+      <varname>dmin</varname> and <varname>result</varname> if it is
+      nearer than the current solution.</simpara></listitem>
+  </orderedlist></para></listitem>
+</orderedlist>
+    </para>
+
+    <para>
+The implementation of <code>getNearestVertex</code> is slightly improved:
+the starting point is computed by <code>getNearVertex</code>, so that
+much more cells are skipped.
+    </para>
+  </section>
+
+  <section id="cls-PAVLSortedTree">
+    <title><classname>PAVLSortedTree</classname></title>
+
+    <para>
+Main ideas come from Ben Pfaff's
+<ulink url="http://adtinfo.org/">GNU libavl</ulink>.
+An AVL tree is a binary tree for which each node is almost balanced, height
+of its left and right children can not differ by more than one.  The initial
+P means that each node has a backward link to his parent.  Tests have been
+performed to compare this PAVL implementation with a modified one without
+those backward links.  There was no noticeable differences, but we kept the
+PAVL structure because implementation is simpler.
+These trees are used to sort vertices, edges, or triangles according
+to their quality factors, and process them in increasing or decreasing
+order.  See examples in algorithms from
+<link linkend="pkg-algos3d"><classname>org.jcae.mesh.amibe.algos3d</classname></link>.
+Each node of the tree contains a key (which is used for sorting, this is
+of <type>double</type> value), two references to its left and right
+children, a reference to its parent and its balance factor.  A tree
+contains a mapping between the objects stored in the tree and tree nodes.
+    </para>
+
+    <para>
+Here are the most useful methods:
+<variablelist spacing="compact">
+  <varlistentry>
+    <term><code>public void insert(Object o, double value)</code></term>
+      <listitem><simpara>Inserts the object <varname>o</varname> into
+      the tree, associated to the quality factor
+      <varname>value</varname>.</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><code>public double remove(Object o)</code></term>
+      <listitem><simpara>Removes this object from the tree.  Its old
+      quality factor is returned.</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><code>public void update(Object o, double value)</code></term>
+      <listitem><simpara>Updates the quality factor of the specified
+      object to a new <varname>value</varname>.</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><code>public Object first()</code></term>
+    <term><code>public Object last()</code></term>
+      <listitem><simpara>Returns the <classname>Object</classname> with
+      the lowest and highest quality factor.</simpara></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><code>public Object prev()</code></term>
+    <term><code>public Object next()</code></term>
+      <listitem><simpara>After <code>first</code> or <code>last</code>
+      methods are called, these methods return the
+      <classname>Object</classname> immediately before or after the
+      current one in the tree.</simpara></listitem>
+  </varlistentry>
+</variablelist>
+    </para>
+
+    <para>
+Example:
+<programlisting>
+    PAVLSortedTree tree = new PAVLSortedTree();
+    OTriangle ot = new OTriangle();
+    // Insert triangle areas into the tree
+    for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
+    {
+        Triangle f = (Triangle) itf.next();
+        if (f.isOuter())
+            continue;
+        ot.bind(f);
+        tree.insert(f, ot.computeArea());
+    }
+    // Process triangles according to their area in ascending order
+    for (Object o = tree.first(); o != null; o = tree.next())
+    {
+        Triangle f = (Triangle) o;
+        ...
+    }
+</programlisting>
+    </para>
+
+    <para>
+<remark>TODO: the current implementation is suboptimal.  This map
+        can be avoided by introducing a new class public PAVLNode
+        which contains tree cells.
+        Update: This has been implemented in PAVLSortedTree2</remark>
+<remark>TODO: algos2d aqlgorithms could certainly take advantage of
+        these trees.</remark>
+    </para>
+  </section>
+
+  <section id="cls-LongLong">
+    <title><classname>LongLong</classname></title>
+
+    <para>
+This class implements a <type>long long</type> type for exact 2D
+geometrical computations.  As interpolation of metrics lead to larger
+rounding errors, this class is only useful for 2D meshes in natural
+Euclidian space.
+    </para>
+  </section>
+
+  </section>
+  </chapter>
+
+  <chapter>
+    <title>Algorithms</title>
+    <section>
+      <title>2D Algorithms</title>
+
+  <para>
+  FIXME
+  </para>
+  </section>
+
+  <section id="pkg-algos2d">
+    <title>Package <classname>org.jcae.mesh.amibe.algos2d</classname></title>
+  <para>
+<table border="1">
+<title>Class summary of the package <classname>org.jcae.mesh.amibe.algos2d</classname></title>
+<tgroup cols="2" colsep="1" rowsep="1">
+<tbody>
+<row>
+  <entry><classname>BasicMesh</classname></entry>
+  <entry>Performs an initial Delaunay triangulation.</entry>
+</row>
+<row>
+  <entry><classname>CheckDelaunay</classname></entry>
+  <entry>Swap edges which are not Delaunay.</entry>
+</row>
+<row>
+  <entry><classname>ConstraintNormal3D</classname></entry>
+  <entry>Swap edges if the normals to its adjacent triangles are too
+  different from the normal computed by the CAD engine.</entry>
+</row>
+<row>
+  <entry><classname>EnforceAbsDeflection</classname></entry>
+  <entry>Split triangles with an absolute deflection greater than
+  requirements.</entry>
+</row>
+<row>
+  <entry><classname>Insertion</classname></entry>
+  <entry>Insert nodes to produce a unit mesh.</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+  </para>
+    </section>
+
+    <section>
+      <title>3D Algorithms</title>
+  <para>
+  FIXME
+  </para>
+    </section>
+
+  <section id="pkg-algos3d">
+    <title>Package <classname>org.jcae.mesh.amibe.algos3d</classname></title>
+  <para>
+<table border="1">
+<title>Class summary of the package <classname>org.jcae.mesh.amibe.algos3d</classname></title>
+<tgroup cols="2" colsep="1" rowsep="1">
+<tbody>
+<row>
+  <entry><classname>DecimateVertex</classname></entry>
+  <entry>Decimates a mesh.</entry>
+</row>
+<row>
+  <entry><classname>Fuse</classname></entry>
+  <entry>(Obsolete) Fuse near nodes in a MMesh3D instance.</entry>
+</row>
+<row>
+  <entry><classname>SmoothNodes3D</classname></entry>
+  <entry>3D node smoothing.</entry>
+</row>
+<row>
+  <entry><classname>SplitEdge</classname></entry>
+  <entry>Split long edges.</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+  </para>
+    </section>
+  </chapter>
+
+  <chapter>
+    <title>Historical Notes</title>
+  <para>
+The previous versions described in this chapter are available at
+<ulink url="http://cvs.sf.net/viewcvs.py/jcae/jCAE/src/" />
+<itemizedlist mark="*">
+  <listitem><para><classname>org.jcae.mesh.sd</classname>:
+    This first implementation had a clean object-oriented design.
+    All simplices (<classname>MeshNode</classname>,
+    <classname>MeshEdge</classname> and <classname>MeshFace</classname>)
+    inherit from an abstract <classname>MeshElement</classname> class.
+    Subclasses implement iterators on adjacent simplices (nodes, edges
+    or faces).  Nodes can be defined either on lines (with only one
+    parameter), on faces (with two parameters) or directly in 3D space.
+    </para>
+
+    <para>Problems:
+    <itemizedlist mark="+">
+      <listitem><simpara>
+        Equality between nodes was performed by comparing coordinates, which
+        cause problems due to rounding errors.
+      </simpara></listitem>
+      <listitem><simpara>
+        Equality was implemented recursively: faces were equal if they contain
+        equal edges, and edges were equal if their end points are equal.
+      </simpara></listitem>
+      <listitem><simpara>
+        It was very slow, used lots of memory and was thus usable only on very
+        small meshes.
+      </simpara></listitem>
+    </itemizedlist>
+    This data structure was designed for general CAD software, and did not
+    seem suitable to handle very large meshes.  Profiling revealed that
+    all the time was spent in equals() methods.
+  </para></listitem>
+
+  <listitem><para><classname>org.jcae.mesh.mesher</classname>: On
+  October 2003, we modified our data structure in order to improve
+  performance, in particular the equals() method so that
+    <orderedlist space="compact">
+      <listitem><simpara>Coordinates are not evaluated when comparing
+        objects.</simpara></listitem>
+      <listitem><simpara>These methods are no more
+        recursive.</simpara></listitem>
+    </orderedlist>
+    We kept a standard hierarchy between CAD elements: a
+    <classname>MFace2D</classname> is a list of
+    three <classname>MEdge2D</classname>, a
+    <classname>MEdge2D</classname> contains two endpoints, and a
+    <classname>MNode2D</classname> contains two coordinates and the list
+    of triangles containing this vertex.
+  </para>
+
+    <para>Problems:
+    <itemizedlist mark="+">
+      <listitem><simpara>
+	Many algorithms were using <classname>HashSet</classname> and
+	<classname>HashMap</classname> structures.  As a consequence,
+	meshes depend on memory location of objects, which means that
+	some reported bugs cannot be reproduced.
+      </simpara></listitem>
+      <listitem><simpara>
+	Adjacency relations are not handy. We need to compute
+	intersections or unions of the list of triangles bound to a
+	vertex.
+      </simpara></listitem>
+      <listitem><simpara>
+	Calls to OpenCascade methods were scattered along all source
+	files, so it was very hard to change our CAD engine if we wanted
+	to do so.
+      </simpara></listitem>
+    </itemizedlist></para></listitem>
+</itemizedlist>
+  </para>
+
+  <para>
+Along with changes in data structures, it had also been decided to drop
+support of Corba, because its cost in term of development was very
+expensive.  Thus on November 2004, a new CVS module,
+<code>jCAE-mesher</code>, was created.  In this module
+<classname>org.jcae.mesh.mesher</classname> had been replaced by
+<classname>org.jcae.mesh.amibe</classname>.
+  </para>
+
+  <para>
+Our main objectives when designing amibe's data structures were:
+<itemizedlist spcacing="compact">
+  <listitem><simpara>Performance: we want to generate meshes containing
+  hundreds of million elements.</simpara></listitem>
+  <listitem><simpara>Reproducible: algorithms must not depend on object
+  location in memory.</simpara></listitem>
+</itemizedlist>
+  </para>
+
+  <para>
+We preferred performance over genericity, and decided to design our data
+structure for a very specific goal: to provide efficient algorithms for
+meshing of parametric surfaces,  Our data structure is derived from
+Jonathan Richard Shewchuk's work on
+<ulink url="http://www.cs.cmu.edu/~quake/triangle.html">Triangle</ulink>
+He explains that triangle-based data structures are more efficient than
+their edge-based counterparts.  As we were focusing on performance, we
+choose such a structure.
+  </para>
+
+  <para>
+We also had fruitful discussions with Frédéric Hecht, who wrote
+<ulink url="http://www-rocq1.inria.fr/gamma/cdrom/www/bamg/eng.htm">Bamg</ulink>
+and other meshing tools.  He explained that data structure must
+be chosen very carefully in order to be able to produce large
+meshes, and confirmed that the original one was not suitable.
+  </para>
+
+  <para>
+Our initial algorithm was:
+<orderedlist numeration="upperalpha" inheritnum="inherit">
+  <listitem><simpara>Discretization of edges</simpara></listitem>
+  <listitem id="item-faces"><para>Discretization of faces based on this boundary
+     tessellation.
+  <orderedlist numeration="arabic" inheritnum="inherit">
+    <listitem><simpara>Compute 2D nodes from edge discretization</simpara></listitem>
+    <listitem><simpara>Build an unconstrained Delaunay triangulation containing
+        only these nodes</simpara></listitem>
+    <listitem><simpara>Tag outer triangles</simpara></listitem>
+    <listitem id="item-refine"><simpara>Refine this initial mesh to have a mesh
+	compliant with given criteria.  Boundary edges are not modified during
+	this stage.</simpara></listitem>
+    <listitem><simpara>Store final mesh on disk.  Boundary nodes have a
+        reference to the corresponding edge discretization so that boundary
+        nodes are not duplicated when gathering all mesh faces
+        together.</simpara></listitem>
+  </orderedlist></para></listitem>
+  <listitem><simpara>Compute 3D coordinates and store mesh on
+     disk.</simpara></listitem>
+</orderedlist>
+  </para>
+
+  <para>
+We had many problems with <xref linkend="item-refine"/>.  Our first
+implementation was very simple: large edges were split into two edges,
+and small edges were contracted.  Sometimes degenerated triangles were
+created and could not be removed automatically by contraction or edge
+swap.  We translated Jonathan Richard Shewchuk's
+<ulink url="http://www.cs.cmu.edu/~quake/robust.html">Fast Robust
+Geometric Predicates</ulink> into Java.  Some tests worked better, but
+as meshes were dependent on memory location of objects, it was not clear
+if this was due to those routines.  Moreover some tests were still
+failing.
+  </para>
+
+  <para>
+Frédéric Hecht advised to ensure that no small edges can be created
+during this process.  His suggested algorithm was:
+<orderedlist numeration="arabic" spacing="compact">
+  <listitem><simpara>Store boundary vertices in a quadtree.</simpara></listitem>
+  <listitem><para>Loop
+  <orderedlist numeration="arabic" inheritnum="inherit">
+    <listitem><simpara>For each large edge, compute one or several nodes
+       so that all segments have a length greater than the target size,
+       and put these candidate nodes in a bucket.</simpara></listitem>
+    <listitem><simpara>When all edges are processed, walk through those
+       candidate nodes in pseudo-random order (the idea with random walk
+       is to avoid inserting all the nodes of an edge, which may prevent
+       a near edge to be discretized.  And pseudo so that meshes are
+       reproducible), locate the nearest vertex in the mesh with the
+       quadtree, and insert this new node if their distance is greater
+       than 1/sqrt(2).  The nearest node helps to find in which triangle
+       the new vertex is located.  This triangle is split into 3, and
+       all edges adjacent to the new vertex are swapped if they are not
+       Delaunay.</simpara></listitem>
+    <listitem><simpara>Stop when no new nodes can be
+       inserted.</simpara></listitem>
+  </orderedlist></para></listitem>
+</orderedlist>
+  </para>
+
+  <para>
+This algorithm works very well.  As small edges are never created, there
+is no edge contraction, which avoids many problems.  We still have trouble
+with some parametrized surfaces, when their parametrization is not C1 or
+has large variations.  These problems are due to approximation errors when
+computing edge lengths with riemannian metrics, because metrics have large
+variations over triangles.  Frédéric Hecht suggested to have more accurate
+edge length computations by checking metrics on endpoints, and if they
+differ too much to add a middle point and process recursively.  This is
+of course very costful.  This idea had been implemented in
+<classname>Calculus3D</classname>, but did not help (FIXME: maybe it is
+buggy?).  Another idea is to get more information from the CAD engine.
+For instance, in <methodname>ConstraintNormal3D</methodname>,
+the normal computed by the CAD engine on the middle of an edge is
+compared with the 3D normals of its adjacent triangles.  If they are
+inverted, this means that a foldover happens in 3D and this edge has to
+be swapped.  The <classname>org.jcae.mesh.algos.Smoothing</classname>
+algorithm (from the jCAE module, not jCAE-mesher) implemented node
+smoothing by using CAD function to project the moved node onto the
+surface.  This algorithm may surely be helpful too under these
+circumstances.
+  </para>
+  </chapter>
+
+</book>
