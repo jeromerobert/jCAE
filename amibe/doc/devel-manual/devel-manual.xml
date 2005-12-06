@@ -1896,6 +1896,7 @@ their circumcenter added to the mesh if the overall quality is improved,
 </remark>
       </para>
     </section>
+
     <section id="cls-CheckDelaunay">
       <title><classname>CheckDelaunay</classname></title>
 
@@ -1968,7 +1969,7 @@ if they are not Delaunay.
 <tgroup cols="2" colsep="1" rowsep="1">
 <tbody>
 <row>
-  <entry><classname>DecimateVertex</classname></entry>
+  <entry><link linkend="cls-DecimateVertex"><classname>DecimateVertex</classname></link></entry>
   <entry>Decimates a mesh.</entry>
 </row>
 <row>
@@ -1976,17 +1977,118 @@ if they are not Delaunay.
   <entry>(Obsolete) Fuse near nodes in a MMesh3D instance.</entry>
 </row>
 <row>
-  <entry><classname>SmoothNodes3D</classname></entry>
+  <entry><link linkend="cls-SmoothNodes3D"><classname>SmoothNodes3D</classname></link></entry>
   <entry>3D node smoothing.</entry>
 </row>
 <row>
-  <entry><classname>SplitEdge</classname></entry>
+  <entry><link linkend="cls-SplitEdge"><classname>SplitEdge</classname></link></entry>
   <entry>Split long edges.</entry>
 </row>
 </tbody>
 </tgroup>
 </table>
   </para>
+
+    <section id="cls-DecimateVertex">
+      <title><classname>DecimateVertex</classname></title>
+
+      <para>
+Decimates a mesh.  This method is based on Michael Garland's work on
+<ulink url="http://graphics.cs.uiuc.edu/~garland/research/quadrics.html">Quadric
+Error Metrics</ulink>.
+    </para>
+
+    <para>
+A plane is fully determined by its normal <varname>N</varname> and the signed
+distance <varname>d</varname> of the frame origin to this plane, or in other 
+words the equation of this plane is <code>tN V + d = 0</code>.
+The squared distance of a point to this plane is
+<literallayout>
+  D*D = (tN V + d) * (tN V + d)
+      = tV (N tN) V + 2d tN V + d*d
+      = tV A V + 2 tB V + c
+</literallayout>
+    </para>
+
+    <para>
+The quadric <code>Q=(A,B,c)=(N tN, dN, d*d)</code> is thus naturally
+defined.  Addition of these quadrics have a simple form:
+<code>Q1(V)+Q2(V)=(Q1+Q2)(V)</code> with
+<code>Q1+Q2=(A1+A2, B1+B2, c1+c2)</code>
+To compute the squared distance of a point to a set of planes, we can
+then compute this quadric for each plane and sum each element of
+these quadrics.  
+    </para>
+
+    <para>
+When an edge <code>(V1,V2)</code> is contracted into <code>V3</code>,
+<code>Q1(V3)+Q2(V3)</code> represents the deviation to the set of
+planes at <code>V1</code> and <code>V2</code>.  The cost of this
+contraction is thus defined as <code>Q1(V3)+Q2(V3)</code>.
+We want to minimize this error.  It can be shown that if <code>A</code>
+is non singular, the optimal placement is for <code>V3=-inv(A) B</code>.
+    </para>
+
+    <para>
+The algorithm is straightforward:
+<orderedlist spacing="compact">
+  <listitem><simpara>Quadrics are computed for all vertices.</simpara></listitem>
+  <listitem><simpara>For each edge, compute the optimal placement and its cost.</simpara></listitem>
+  <listitem><simpara>Loop on edges: starting with the lowest cost, each edge is
+     processed until its cost is greater than the desired tolerance, and costs
+     of adjacent edges are updated.</simpara></listitem>
+</orderedlist>
+    </para>
+
+    <para>
+The real implementation is slightly modified:
+<orderedlist numeration="upperalpha">
+  <listitem><simpara>Some checks must be performed to make sure that
+    edge contraction does not modify the topology of the
+    mesh.</simpara></listitem>
+  <listitem><simpara>Optimal placement strategy can be chosen at run
+    time among several choices.</simpara></listitem>
+  <listitem><simpara>Boundary edges have to be preserved, otherwise they
+    will shrink.  Virtual planes are added perpendicular to triangles at
+    boundaries so that vertices can be decimated along those edges, but
+    edges are stuck on their boundary.  Garland's thesis dissertation
+    contains all informations about this process.</simpara></listitem>
+  <listitem><simpara>Weights are added to compute quadrics, as described
+    in Garland's dissertation.</simpara></listitem>
+  <listitem><simpara>Edges are swapped after being contracted to improve
+    triangle quality, as described by Frey in
+    <ulink url="http://www.lis.inpg.fr/pages_perso/attali/DEA-IVR/PAPERS/frey00.ps">About Surface Remeshing</ulink>.</simpara></listitem>
+</orderedlist>
+      </para>
+    </section>
+
+    <section id="cls-SmoothNodes3D">
+      <title><classname>SmoothNodes3D</classname></title>
+
+      <para>
+3D node smoothing.  Triangles are sorted according to their quality,
+They are processed iteratively beginning with the worst triangle.
+Its three vertices are moved if they have not already been moved
+when processing a previous triangle.  A common laplacian smoothing
+is performed.  If the final position do not invert triangles, the
+point is moved.
+<remark>TODO: a better alternative should be implemented.</remark>
+<remark>TODO: the point should be moved only if triangle quality is
+improved.</remark>
+FIXME
+      </para>
+    </section>
+
+    <section id="cls-SplitEdge">
+      <title><classname>SplitEdge</classname></title>
+
+      <para>
+Edges are sorted and splitted in turn, the longest edge being processed first.
+<remark>TODO: edges should be swapped too to improve triangle quality.</remark>
+FIXME
+      </para>
+    </section>
+
     </section>
   </chapter>
 
