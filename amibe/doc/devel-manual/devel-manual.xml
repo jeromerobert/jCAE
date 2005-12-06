@@ -12,6 +12,8 @@
   <!-- shortcut for a Triangle instance -->
   <!ENTITY TRI "<classname>Triangle</classname>">
   <!ENTITY OTRI "<classname>OTriangle</classname>">
+  <!-- shortcut for a Vertex.outer field -->
+  <!ENTITY VOUTER "<classname>Vertex.</classname><structfield>outer</structfield>">
   <!-- shortcut for "true" and "false" constants -->
   <!ENTITY true "<constant>true</constant>">
   <!ENTITY false "<constant>false</constant>">
@@ -710,7 +712,7 @@ This class inherits from &OTRI; and is designed to perform the initial
 2D triangulation.  In particular, boundary edges have not yet been
 rebuilt, so we cannot check whether the <constant>OTriangle.OUTER</constant>
 attribute is set, but need to test if vertices are equal to the infinite
-point <structfield>Vertex.outer</structfield> instead.
+point &VOUTER; instead.
     </para>
   </section>
 
@@ -761,9 +763,8 @@ Its instance variables are:
     </para>
 
     <para>
-There is a special vertex, <structfield>Vertex.outer</structfield>,
-which represents a vertex at infinite.  This vertex is used to create
-exterior triangles.
+There is a special vertex, &VOUTER;, which represents a vertex at
+infinite.  This vertex is used to create exterior triangles.
     </para>
   </section>
 
@@ -841,9 +842,12 @@ Its instance variables are:
 These classes were implemented when our data structure was only designed
 to mesh a single parametrized surface.  We then needed two different sets
 of metrics: one for the 2D Euclidian space (this is needed for the initial
-triangulation of boundary nodes, see BasicMesh), and another one to take surface geometrical
-properties into account.
+triangulation of boundary nodes, see
+<link linkend="cls-BasicMesh"><classname>BasicMesh</classname></link>),
+and another one to take surface geometrical properties into account.
+    </para>
 
+    <para>
 They implement the <classname>Calculus</classname> interface, which
 defines the following methods:
 <variablelist spacing="compact">
@@ -911,29 +915,130 @@ Vertex in 3D space.</remark>
 <tgroup cols="2" colsep="1" rowsep="1">
 <tbody>
 <row>
-  <entry><classname>Matrix2D</classname></entry>
+  <entry><link linkend="cls-Matrix2D"><classname>Matrix2D</classname></link></entry>
   <entry>General 2D matrix.</entry>
 </row>
 <row>
-  <entry><classname>Matrix3D</classname></entry>
+  <entry><link linkend="cls-Matrix3D"><classname>Matrix3D</classname></link></entry>
   <entry>General 3D matrix.</entry>
 </row>
 <row>
-  <entry><classname>Metric2D</classname></entry>
+  <entry><link linkend="cls-Metric2D"><classname>Metric2D</classname></link></entry>
   <entry>Metrics on tangent plane.</entry>
 </row>
 <row>
-  <entry><classname>Metric3D</classname></entry>
+  <entry><link linkend="cls-Metric3D"><classname>Metric3D</classname></link></entry>
   <entry>3D metrics computed on a CAD surface.</entry>
 </row>
 </tbody>
 </tgroup>
 </table>
-<remark>TODO: prodSca() and prodVect3D() should be renamed into inner()
-        and outer() respectively in Matrix3D.</remark>
 <remark>TODO: this package should be reorganized and surely merged with
         org.jcae.mesh.amibe.ds.tools</remark>
       </para>
+
+    <section id="cls-Matrix2D">
+      <title><classname>Matrix2D</classname></title>
+      <para>
+This class provides basic operations for general 2x2 matrices:
+scale, determinant and inverse.
+It also provides a method to compute the intersection of two
+2D metrics, which is used by
+<link linkend="cls-Metric2D"><classname>Metric2D</classname></link>.
+<remark>TODO: This class should certainly be merged with Metric2D.</remark>
+      </para>
+    </section>
+
+    <section id="cls-Matrix3D">
+      <title><classname>Matrix3D</classname></title>
+      <para>
+This class provides basic operations for general 3x3 matrices:
+transposition, scale and multiplication by other matrices and vectors.
+It also provides static methods to compute inner and outer products, and
+vector norm.
+<remark>TODO: prodSca() and prodVect3D() should be renamed into inner()
+        and outer() respectively in Matrix3D.</remark>
+      </para>
+    </section>
+
+    <section id="cls-Metric2D">
+      <title><classname>Metric2D</classname></title>
+      <para>
+This class provides metrics on the tangent plane.
+A <link linkend="cls-Metric3D"><classname>Metric3D</classname></link>
+is computed and projected onto the tangent plane.  This metric is then
+attached to the vertex at which it is computed, and is used to compute
+distance to other vertices in <classname>Calculus3D</classname>.
+It can be shown that vertices at a distance <varname>D</varname> of a
+point lies on an ellipsis centered at <varname>P</varname>.
+      </para>
+
+      <para>
+If multiple constraints are combined, ellipsis are intersected so that
+the resulting metrics fulfill all requirements.  There are several ways
+to perform this intersection, here is how it is done in
+<code>Matrix2D.intersection</code>.
+If <varname>A</varname> and <varname>B</varname> are 2D metrics, there
+exists a matrix <varname>P</varname> such that <code>A=tP d(a1,a2)
+P</code> and <code>B=tP d(b1,b2) P</code>, where <code>d(x,y)</code> is
+the diagonal matrix of coefficients <varname>x</varname> and
+<varname>y</varname>.
+Then the metric <code>C=tP d(max(a1,b1),max(a2,b2)) P</code>
+defines an ellipsis which is interior to both ellipsis.
+      </para>
+    </section>
+
+    <section id="cls-Metric3D">
+      <title><classname>Metric3D</classname></title>
+      <para>
+3D metrics computed on a CAD surface.  This class provides 3D metrics at a
+point to have a unit mesh with respect to edge length and deflection
+criteria.
+      </para>
+
+      <para>
+A metric <varname>M</varname> is a symmetric positive matrix.  It
+defines a dot product <code>&lt;X, Y> = tX M Y</code>.  If metrics are
+constant, the length of the <code>[PQ]</code> segment in this metrics is
+<code>l(M,P,Q)=sqrt(t(PQ) M (PQ))</code>.
+A good presentation of meshes governed by metrics can be found in
+<ulink url="ftp://ftp.inria.fr/INRIA/publication/publi-pdf/RR/RR-2928.pdf">Maillage
+de surfaces paramétriques</ulink> (in French), by Houman Borouchaki and Paul
+Louis George.
+      </para>
+
+      <para>
+The metrics associated with an edge length criterion is the 3x3 matrix
+<code>M=Id/(h*h)</code>, where <varname>h</varname> is the target size.
+Indeed the relation above clearly shows that <code>l(M,P,Q)=1</code> if
+and only if the Euclidian distance between <varname>P</varname> and
+<varname>Q</varname> is <varname>h</varname>.  Such a metric is computed
+by the <methodname>iso</methodname> method.
+      </para>
+
+      <para>
+An isotropic metric governed by a given <varname>defl</varname>
+geometric error is <code>M=Id*(Cm*Cm)/(alpha*alpha)</code>, where
+<varname>Cm</varname> is the largest curvature and
+<code>alpha=2*sqrt(defl*(2-defl))</code>.  Of course this geometric
+error can be guaranteed onlyelocally, it becomes can be larger if
+<varname>defl</varname> is not small enough.  An anisotropic metric can
+also be computed along principal curvature directions, see the technical
+report above or these sources to find the exact computations.
+      </para>
+
+      <para>
+Some applications require an absolute geometric error.  A first order
+approximation is obtained by replacing <varname>defl</varname> by
+<code>defl*Cm</code> in the previous metrics.
+      </para>
+
+      <para>
+When meshing parametrized surfaces, we need the 2D metric induced
+by these 3D metrics to the tangent plane.  This is performed by
+the <methodname>restrict2D</methodname> method.
+      </para>
+    </section>
   </section>
 
   <section id="pkg-util">
@@ -945,11 +1050,11 @@ Vertex in 3D space.</remark>
 <tgroup cols="2" colsep="1" rowsep="1">
 <tbody>
 <row>
-  <entry><classname>OctreeProcedure</classname></entry>
+  <entry><link linkend="cls-OctreeProcedure"><classname>OctreeProcedure</classname></link></entry>
   <entry>Procedure to apply on all octree elements.</entry>
 </row>
 <row>
-  <entry><classname>QuadTreeProcedure</classname></entry>
+  <entry><link linkend="cls-QuadTreeProcedure"><classname>QuadTreeProcedure</classname></link></entry>
   <entry>Procedure to apply on all quadtree elements.</entry>
 </row>
 </tbody>
@@ -1564,31 +1669,288 @@ Euclidian space.
 <tgroup cols="2" colsep="1" rowsep="1">
 <tbody>
 <row>
-  <entry><classname>BasicMesh</classname></entry>
+  <entry><link linkend="cls-BasicMesh"><classname>BasicMesh</classname></link></entry>
   <entry>Performs an initial Delaunay triangulation.</entry>
 </row>
 <row>
-  <entry><classname>CheckDelaunay</classname></entry>
+  <entry><link linkend="cls-CheckDelaunay"><classname>CheckDelaunay</classname></link></entry>
   <entry>Swap edges which are not Delaunay.</entry>
 </row>
 <row>
-  <entry><classname>ConstraintNormal3D</classname></entry>
+  <entry><link linkend="cls-ConstraintNormal3D"><classname>ConstraintNormal3D</classname></link></entry>
   <entry>Swap edges if the normals to its adjacent triangles are too
   different from the normal computed by the CAD engine.</entry>
 </row>
 <row>
-  <entry><classname>EnforceAbsDeflection</classname></entry>
+  <entry><link linkend="cls-EnforceAbsDeflection"><classname>EnforceAbsDeflection</classname></link></entry>
   <entry>Split triangles with an absolute deflection greater than
   requirements.</entry>
 </row>
 <row>
-  <entry><classname>Insertion</classname></entry>
+  <entry><link linkend="cls-Insertion"><classname>Insertion</classname></link></entry>
   <entry>Insert nodes to produce a unit mesh.</entry>
 </row>
 </tbody>
 </tgroup>
 </table>
   </para>
+
+    <section id="cls-BasicMesh">
+      <title><classname>BasicMesh</classname></title>
+
+      <para>
+This algorithm is invoked to perform the initial triangulation of
+each CAD patch, after the discretization of edges has been performed.
+Wires of this patch are processed in turn.  All nodes belonging to
+discretization of these edges are projected onto this 2D patch
+and collected into a list.  These nodes are boundary nodes, and
+all other nodes will be inserted in the interior domain.  A bounding
+box enclosing all these nodes in the 2D space is computed, and
+a <link linkend="cls-QuadTree"><classname>QuadTree</classname></link>
+instance can then be initialized by the <code>Mesh.initQuadTree</code>
+method.
+      </para>
+
+      <para>
+<remark>TODO:
+Some checks have been added to remove tiny edges and make sure that
+boundary is closed.  But this is a hack, the right solution is
+to analyze the overall CAD structure and make sure that edges are well
+connected and not too small.  In particular, the tolerance on vertex
+location should be used to remove vertices which may be duplicates.
+</remark>
+      </para>
+
+      <para>
+A first triangle is created by iterating over the list of boundary nodes
+to find three vertices which are not aligned.  The outer domain is also
+triangulated;
+<link linkend="cls-Vertex">&VOUTER;</link> is a vertex at infinite, and
+three outer triangles are created by joining this vertex to vertices of
+the first triangle.  With this trick, there is no need to have special
+cases when vertices are inserted outside the convex hull of already
+inserted vertices, and triangle location always succeed.  If these outer
+triangles did not exist, we would have to triangulate the convex hull of
+nodes.
+      </para>
+
+      <para>
+Boundary nodes are then inserted iteratively.  For the moment, an Euclidian
+2D metric is used because a 3D metric will not help on a very rough
+triangulation.  The nearest vertex already inserted in the mesh is retrieved
+with <code>QuadTree.getNearestVertex</code>.
+It has a reference to a triangle containing this vertex.  From this starting
+triangle, we search for the <classname>Triangle</classname> instance
+containing this boundary node by looking for adjacent triangles into the
+right direction.  This <classname>Triangle</classname> instance is
+splitted into three triangles (even if the vertex is inserted on an
+edge), and edges are swapped if they are not Delaunay.  (This criterion
+also applied with our Euclidian 2D metric)
+      </para>
+
+      <para>
+When all boundary nodes are inserted, an unconstrained Delaunay mesh has
+been built.  The list of boundary nodes computed previously gives a list of
+boundary edges, which needs to be enforced.  This is performed by
+<code>Mesh.forceBoundaryEdge</code>; the segments which
+intersect the enforced edge are swapped.  The
+<constant>OTriangle.BOUNDARY</constant> attribute is set on these edges
+(and on matte edges).
+      </para>
+
+      <para>
+We know that the <classname>Triangle</classname> instance bound to
+&VOUTER; is an outer triangle.  Triangles adjacent through a boundary
+edge are interior triangles, and triangles adjacent through non-boundary
+edges are also outer triangles.  All triangles of the mesh are visited,
+and outer triangles are tagged with the
+<constant>OTriangle.OUTER</constant> attribute.  If an inconsistency is
+found (for instance a boundary edge seperate two outer triangles),
+<code>InitialTriangulationException</code> is
+raised.  This means that boundary was invalid, eg. it is not closed
+or intersects itself.
+<remark>TODO:
+This detection of broken boundaries could be improved by taking
+advantage of some OpenCascade features, like the detection of
+self-intersection and object tolerance.
+</remark>
+      </para>
+
+      <para>
+It is important to note that triangles in holes have their
+<constant>OUTER</constant> attribute set, but are not linked to
+&VOUTER;.  So this attribute is the only safe way to detect outer
+triangles.  As outer triangles are not removed, vertex location can
+still be performed as if the domain was convex.  All subsequent 2D
+algorithms should consider these points.
+      </para>
+
+      <para>
+This is very different when remeshing 3D meshes; in such a case,
+boundary edges are detected because they have only one incident
+face.  An outer triangle is then added by connecting end points to
+&VOUTER;, but outer triangles are not connected together.
+Mesh domain is not convex, but that does not matter because 3D
+algorithms do not require vertex location.
+      </para>
+
+      <para>
+After this initial triangulation has been performed, it is time to
+add interior vertices to fulfill user's requirements.  The Euclidian 2D
+metric is replaced by the 2D Riemannian metric
+<classname>Metric2D</classname> induced by surface local properties and
+user constraints.  But current triangles can cross the whole surface, so
+metrics of its vertices may be very different.  There are two problems:
+<itemizedlist>
+  <listitem><simpara>Length computations are not accurate.</simpara></listitem>
+  <listitem><simpara>If the parametrization of the surface has large variations,
+      triangles in 3D space may be inverted.</simpara></listitem>
+</itemizedlist>
+      </para>
+
+      <para>
+<remark>TODO:
+In order to improve accuracy, Frédéric Hecht advised to recursively
+split segments when metrics at end points are very different.  This
+is implemented in <code>Calculus3D.distance</code> but did not give good
+results.  Now that the whole process works much better, this issue could
+be investigated again.
+</remark>
+      </para>
+
+      <para>
+About inverted triangles, he also explained that we do not have to
+care if large triangles are inverted in 3D, because they will be
+fixed naturally when being splitted up.
+      </para>
+
+      <para>
+<remark>TODO:
+The current implementation begins with swapping edges (by calling
+{@link OTriangle2D#checkSmallerAndSwap}) if the opposite diagonal
+is smaller.  This method did improve some test cases, but is
+certainly useless with the current meshing process because it has
+been dramatically improved since these tests have been performed.
+</remark>
+      </para>
+
+      <para>
+The following steps are then performed:
+<orderedlist numeration="arabic">
+   <listitem><simpara>Insert interior nodes (see
+      <link linkend="cls-Insertion"><classname>Insertion</classname></link>)
+      to have a mesh with target size of 16.</simpara></listitem>
+   <listitem><simpara>Check compatibility between triangle normals
+      and normals to the surface (see
+      <link
+      linkend="cls-ConstraintNormal3D"><classname>ConstraintNormal3D</classname></link>).
+      If triangle inversion gives better result, edges are
+      swapped.</simpara></listitem>
+   <listitem><simpara>Insert interior nodes to have a mesh with target
+      size of 4.</simpara></listitem>
+   <listitem><simpara>Check compatibility between triangle normals
+      and normals to the surface.</simpara></listitem>
+   <listitem><simpara>Insert interior nodes to have a mesh with target
+      size of 1.</simpara></listitem>
+   <listitem><simpara>Check compatibility between triangle normals
+      and normals to the surface.</simpara></listitem>
+</orderedlist>
+      </para>
+    </section>
+
+    <section id="cls-Insertion">
+      <title><classname>Insertion</classname></title>
+
+      <para>
+This algorithm inserts nodes to produce a unit mesh.
+All edges are first processed; if an edge is longer than sqrt(2),
+candidate vertices are added to a bucket to virtually provide unit
+length subsegments.
+The next step is to take vertices from the bucket in random order.
+For each vertex <varname>v</varname>, the closest vertex
+<varname>w</varname> already present in the mesh is returned by
+<code>org.jcae.mesh.amibe.util.QuadTree.getNearestVertex(Vertex)</code>
+If the distance between <varname>v</varname> and <varname>w</varname>
+is lower than 1/sqrt(2), <varname>v</varname> is dropped, otherwise it
+is inserted into the mesh.  Just after a vertex is inserted, incident
+edges are swapped if they are not Delaunay.  The whole process is
+repeated until no new vertex is added.
+      </para>
+
+      <para>
+If all vertices of an edge were inserted at the same time, adjacent
+edges may get in trouble because their candidate vertices could be
+too near from these points.  In order to avoid this problem, vertices
+are processed in a random order so that all edges have a chance to be
+splitted.  As we want reproducible meshes, a pseudo-random order is
+preferred.
+      </para>
+
+      <para>
+<remark>TODO:
+Triangle centroids are also inserted if they are not too near of
+existing vertices.  This was added to try to improve triangle
+quality, but is a bad idea.  Bad triangles should instead be sorted
+(with <link linkend="cls-PAVLSortedTree">PAVLSortedTree</link>) and
+their circumcenter added to the mesh if the overall quality is improved, 
+</remark>
+      </para>
+    </section>
+    <section id="cls-CheckDelaunay">
+      <title><classname>CheckDelaunay</classname></title>
+
+      <para>
+This algorithm swaps edges which are not Delaunay.  In an Euclidian 2D
+metrics, there is a unique Delaunay mesh, so edges can be processed in
+any order.
+<remark>TODO:
+But with a Riemannian metrics this is no more true, edges
+with the poorest quality should be processed first to improve the
+overall quality.  This is not implemented yet, edges are currently not
+sorted.
+</remark>
+      </para>
+    </section>
+
+    <section id="cls-ConstraintNormal3D">
+      <title><classname>ConstraintNormal3D</classname></title>
+
+      <para>
+Swap edges if the normals to its adjacent triangles are too different
+from the normal computed by the CAD engine.  Triangles in the 2D
+parameter space must not be inverted, otherwise some methods do not
+work any more.  But even in this case, if the surface parametrization
+has large variations over a triangle, triangles may be inverted in
+the 3D space.  The current algorithm is quite naive.  It works well,
+so we did not try to find a better alternative.
+      </para>
+
+      <para>
+For each non-boundary edge, we first check that this edge can be
+swapped without inverting triangles in 2D space.  The normal to the
+surface at the middle of the edge is computed by the CAD engine.
+Inner products between this vector and triangle normals are computed,
+the quelity of this edge is the minimum of the two values.  The same
+computations are performed on swapped triangles, and if the quality
+is improved, this edge is indeed swapped.
+      </para>
+    </section>
+
+    <section id="cls-EnforceAbsDeflection">
+      <title><classname>EnforceAbsDeflection</classname></title>
+
+      <para>
+Split triangles with an absolute deflection greater than
+requirements.  As explained in
+<link linkend="cls-Metric3D">Metric3D</link>, the geometric error
+may exceed the desired value if triangles are too far away from local
+tangent planes.  This algorithm computes the deflection of triangle
+centroids, and if it is larger than the requested value, this
+centroid is inserted into the mesh and incident edges are swapped
+if they are not Delaunay.
+      </para>
+    </section>
+
     </section>
 
     <section>
@@ -1667,7 +2029,7 @@ The previous versions described in this chapter are available at
   <listitem><para><classname>org.jcae.mesh.mesher</classname>: On
   October 2003, we modified our data structure in order to improve
   performance, in particular the equals() method so that
-    <orderedlist space="compact">
+    <orderedlist spacing="compact">
       <listitem><simpara>Coordinates are not evaluated when comparing
         objects.</simpara></listitem>
       <listitem><simpara>These methods are no more
@@ -1714,7 +2076,7 @@ expensive.  Thus on November 2004, a new CVS module,
 
   <para>
 Our main objectives when designing amibe's data structures were:
-<itemizedlist spcacing="compact">
+<itemizedlist spacing="compact">
   <listitem><simpara>Performance: we want to generate meshes containing
   hundreds of million elements.</simpara></listitem>
   <listitem><simpara>Reproducible: algorithms must not depend on object
@@ -1814,8 +2176,8 @@ variations over triangles.  Frédéric Hecht suggested to have more accurate
 edge length computations by checking metrics on endpoints, and if they
 differ too much to add a middle point and process recursively.  This is
 of course very costful.  This idea had been implemented in
-<classname>Calculus3D</classname>, but did not help (FIXME: maybe it is
-buggy?).  Another idea is to get more information from the CAD engine.
+<classname>Calculus3D</classname>, but did not help (<remark>TODO: maybe it is
+buggy?</remark>).  Another idea is to get more information from the CAD engine.
 For instance, in <methodname>ConstraintNormal3D</methodname>,
 the normal computed by the CAD engine on the middle of an edge is
 compared with the 3D normals of its adjacent triangles.  If they are

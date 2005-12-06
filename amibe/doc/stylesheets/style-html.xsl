@@ -11,6 +11,9 @@
 <xsl:param name="chunker.output.indent" select="'yes'"/>
 
 <!-- Write sections into seperate pages -->
+<xsl:param name="chunk.first.sections" select="1"/>
+
+<!-- Write sections in the ToC -->
 <xsl:param name="chunk.section.depth" select="2"/>
 
 <!-- Fix section numbering -->
