@@ -632,11 +632,12 @@ public class UNVConverter
 		public void writeGroups(PrintStream out, TIntIntHashMap amibeTriaToUNVTria)
 		{
 			out.println("    -1"+CR+"  2430");
-			int count =  0;
 			for(int i=0;i<groups.length; i++)
-			{
-				count++;
-				out.println("1      0         0         0         0         0         0      "+groups[i].length);
+			{				
+				out.println(FORMAT_I10.format(i+1)+
+					"         0         0         0         0         0         0"+
+					FORMAT_I10.format(groups[i].length));
+				
 				out.println(names[i]);
 				int countg=0;
 				for(int j=0; j<groups[i].length; j++)
