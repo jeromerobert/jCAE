@@ -2069,13 +2069,38 @@ The real implementation is slightly modified:
 3D node smoothing.  Triangles are sorted according to their quality,
 They are processed iteratively beginning with the worst triangle.
 Its three vertices are moved if they have not already been moved
-when processing a previous triangle.  A common laplacian smoothing
-is performed.  If the final position do not invert triangles, the
-point is moved.
-<remark>TODO: a better alternative should be implemented.</remark>
+when processing a previous triangle.  A modified Laplacian smoothing
+is performed, as briefly explained in
+<ulink url="http://www.ann.jussieu.fr/~frey/publications/ijnme4198.pdf">Adaptive Triangular-Quadrilateral Mesh Generation</ulink>, by Houman Borouchaky and
+Pascal J. Frey.
+For each point <varname>P</varname>, its neighbours <varname>Pi</varname>
+are considered.  Instead of moving <varname>P</varname> in the direction
+of the barycenter of its neighbours (as is done with Laplacian
+smoothing), we compute the position <varname>P'i</varname> on the edge
+<code>[PPi]</code> which is at the desired length of <varname>Pi</varname>
+and on the same side as <varname>P</varname>.  The barycenter of these
+points is a point <varname>P'</varname>, and <varname>P</varname> is
+moved to <code>P + alpha PP'</code>.  The <varname>alpha</varname>
+constant is a relaxation factor, usually chosen between 0 and 1.
+If the final position do not invert triangles, the point is moved.
 <remark>TODO: the point should be moved only if triangle quality is
 improved.</remark>
-FIXME
+<remark>TODO: alternatives should be tested.</remark>
+      </para>
+
+      <para>
+Example:
+<programlisting>
+    SmoothNodes3D smooth = new SmoothNodes3D(mesh, 20);
+    smooth.compute();
+</programlisting>
+The second parameter of the constructor is a number of iterations.
+Vertex smoothing needs indeed to be processed several times; this
+algorithm usually converges slowly.  We need to adjust the number
+of iterations and the relaxation factor.
+<remark>TODO: the latter is currently hardwired to
+<constant>0.1</constant> into
+<classname>SmoothNodes3D</classname>.</remark>
       </para>
     </section>
 
@@ -2084,8 +2109,33 @@ FIXME
 
       <para>
 Edges are sorted and splitted in turn, the longest edge being processed first.
+Example:  if a mesh has already been performed with a target size
+of <varname>discr</varname>, the following commands will split edges longer
+then <varname>discr</varname>/2:
+<programlisting>
+    SplitEdge split = new SplitEdge(m, 0.5*discr);
+    split.compute();
+</programlisting>
+<remark>TODO: currently edges longer than sqrt(2)*discr/2 will be
+  splitted.</remark>
+      </para>
+
+      <para>
+When an interior edge is splitted, its midpoint is projected onto the
+surface by the <code>Vertex.discreteProject</code> method; if this
+projection fails, this edge is not splitted.  It is removed from the
+tree because there are few chances that this projection works later.
+This means in particular that an interior edge whose endpoints are both
+on boundaries cannot be splitted, because discrete projection cannot be
+performed on boundary nodes.  As for now, boundary edges are always
+splitted, and the new point is in the middle of this edge.
+      </para>
+
+      <para>
+In all cases, the distance between the newly inserted point and
+apical vertices is computed; if it is too low, the edge is not
+splitted to avoid bad triangles.
 <remark>TODO: edges should be swapped too to improve triangle quality.</remark>
-FIXME
       </para>
     </section>
 
