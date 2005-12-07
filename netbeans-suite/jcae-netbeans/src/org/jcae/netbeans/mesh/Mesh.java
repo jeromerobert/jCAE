@@ -20,6 +20,9 @@
 
 package org.jcae.netbeans.mesh;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
 
 public class Mesh 
 {
@@ -41,23 +44,49 @@ public class Mesh
 	}
 	public void setDeflection(double deflection) {
 		this.deflection = deflection;
+		propertyChangeSupport.firePropertyChange ("deflection", null, null);
 	}
 	public double getEdgeLength() {
 		return edgeLength;
 	}
 	public void setEdgeLength(double edgeLength) {
 		this.edgeLength = edgeLength;
+		propertyChangeSupport.firePropertyChange ("edgeLength", null, null);
 	}
 	public String getGeometryFile() {
 		return geometryFile;
 	}
 	public void setGeometryFile(String geometryFile) {
 		this.geometryFile = geometryFile;
+		propertyChangeSupport.firePropertyChange ("geometryFile", null, null);
 	}
 	public String getMeshFile() {
 		return meshFile;
 	}
 	public void setMeshFile(String meshFile) {
 		this.meshFile = meshFile;
+		propertyChangeSupport.firePropertyChange ("meshFile", null, null);
 	}	
+
+	private PropertyChangeSupport propertyChangeSupport =  new PropertyChangeSupport(this);
+
+	/**
+	 * Adds a PropertyChangeListener to the listener list.
+	 * @param l The listener to add.
+	 */
+	public void addPropertyChangeListener(PropertyChangeListener l)
+	{
+
+		propertyChangeSupport.addPropertyChangeListener(l);
+	}
+
+	/**
+	 * Removes a PropertyChangeListener from the listener list.
+	 * @param l The listener to remove.
+	 */
+	public void removePropertyChangeListener(PropertyChangeListener l)
+	{
+
+		propertyChangeSupport.removePropertyChangeListener(l);
+	}
 }

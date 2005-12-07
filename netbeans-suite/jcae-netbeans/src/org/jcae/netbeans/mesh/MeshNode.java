@@ -22,8 +22,6 @@ package org.jcae.netbeans.mesh;
 
 import java.awt.datatransfer.Transferable;
 import java.beans.IntrospectionException;
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,33 +34,29 @@ import org.jcae.netbeans.cad.BrepNode;
 import org.jcae.netbeans.viewer3d.View3D;
 import org.openide.ErrorManager;
 import org.openide.actions.*;
-import org.openide.cookies.SaveCookie;
 import org.openide.cookies.ViewCookie;
-import org.openide.filesystems.FileLock;
-import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataNode;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
+import org.openide.nodes.Node.Property;
+import org.openide.nodes.Node.PropertySet;
 import org.openide.nodes.NodeTransfer;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.PasteType;
 
-public class MeshNode extends DataNode implements SaveCookie, ViewCookie
+public class MeshNode extends DataNode implements ViewCookie
 {
-	private Mesh mesh;
 	private Groups groups;
 	private AbstractNode groupsNode;
 	private AbstractNode geomNode;
 	
 	public MeshNode(DataObject arg0)
 	{
-		super(arg0, new Children.Array());
-		getCookieSet().remove(getCookie(ViewCookie.class));
+		super(arg0, new Children.Array());	
 		getCookieSet().add(this);
-		mesh=initMesh(arg0);
 		updateGeomNode();
 		refreshGroups();
 	}
@@ -81,7 +75,7 @@ public class MeshNode extends DataNode implements SaveCookie, ViewCookie
 			public void destroy() throws IOException
 			{
 				super.destroy();
-				mesh.setGeometryFile(null);
+				getMesh().setGeometryFile(null);
 			}
 			
 			public Action[] getActions(boolean arg0)
@@ -96,30 +90,13 @@ public class MeshNode extends DataNode implements SaveCookie, ViewCookie
 		};
 	}
 	
-	private static Mesh initMesh(DataObject dataObject)
-	{
-		try
-		{
-			XMLDecoder decoder=new XMLDecoder(dataObject.getPrimaryFile().getInputStream());
-			return (Mesh)decoder.readObject();			
-		}
-		catch (Exception ex)
-		{
-			ErrorManager.getDefault().log(ex.getMessage());
-			String name=Utilities.getFreeName(
-				dataObject.getPrimaryFile().getParent(),
-				"amibe",".dir");
-			return new Mesh(name);
-		}
-	}
-	
 	protected Property[] getMeshProperties()
 	{
 		try
 		{
 			return new Property[]{
-				new BeanProperty(mesh, "deflection"),
-				new BeanProperty(mesh, "edgeLength"),
+				new BeanProperty(getMesh(), "deflection"),
+				new BeanProperty(getMesh(), "edgeLength"),
 			};
 		}
 		catch (NoSuchMethodException e)
@@ -138,8 +115,8 @@ public class MeshNode extends DataNode implements SaveCookie, ViewCookie
 		try
 		{
 			return new Property[]{
-				new BeanProperty(mesh, "geometryFile"),
-				new BeanProperty(mesh, "meshFile")
+				new BeanProperty(getMesh(), "geometryFile"),
+				new BeanProperty(getMesh(), "meshFile")
 			};
 		}
 		catch (NoSuchMethodException e)
@@ -187,16 +164,6 @@ public class MeshNode extends DataNode implements SaveCookie, ViewCookie
 		};
 	}
 
-	public void save() throws IOException
-	{
-		FileObject out = getDataObject().getPrimaryFile();
-		FileLock l = out.lock();
-		XMLEncoder encoder=new XMLEncoder(out.getOutputStream(l));
-		encoder.writeObject(mesh);
-		encoder.close();
-		l.releaseLock();
-	}
-
 	public void view()
 	{
 		if(groups!=null)
@@ -212,7 +179,7 @@ public class MeshNode extends DataNode implements SaveCookie, ViewCookie
 	public String getMeshDirectory()
 	{
 		String ref=FileUtil.toFile(getDataObject().getPrimaryFile().getParent()).getPath();
-		return Utilities.absoluteFileName(mesh.getMeshFile(), ref);		
+		return Utilities.absoluteFileName(getMesh().getMeshFile(), ref);		
 	}
 	/**
 	 * @return Returns the groups
@@ -241,7 +208,7 @@ public class MeshNode extends DataNode implements SaveCookie, ViewCookie
 	}
 
 	public Mesh getMesh() {
-		return mesh;
+		return ((MeshDataObject)getCookie(MeshDataObject.class)).getMesh();
 	}
 	
 	public Action[] getActions(boolean arg0)
@@ -250,7 +217,6 @@ public class MeshNode extends DataNode implements SaveCookie, ViewCookie
 		l.add(SystemAction.get(ComputeMeshAction.class));
 		l.add(SystemAction.get(PropertiesAction.class));
 		l.add(SystemAction.get(ViewAction.class));
-		l.add(SystemAction.get(SaveAction.class));
 		l.add(null);
 		l.add(SystemAction.get(DeleteAction.class));
 		l.add(SystemAction.get(RenameAction.class));
@@ -267,7 +233,7 @@ public class MeshNode extends DataNode implements SaveCookie, ViewCookie
 		try
 		{
 			String o=getName();
-			getDataObject().rename(arg0+"_mesh.xml");
+			getDataObject().rename(arg0+"_mesh");
 			fireDisplayNameChange(o, arg0);
 			fireNameChange(o, arg0);
 		}
@@ -328,7 +294,7 @@ public class MeshNode extends DataNode implements SaveCookie, ViewCookie
 			{
 				public Transferable paste()
 				{
-					mesh.setGeometryFile(n.getDataObject().getPrimaryFile().getNameExt());					
+					getMesh().setGeometryFile(n.getDataObject().getPrimaryFile().getNameExt());					
 					updateGeomNode();
 					firePropertyChange(null, null, null);
 					return null;
@@ -343,9 +309,9 @@ public class MeshNode extends DataNode implements SaveCookie, ViewCookie
 	{
 		if(geomNode!=null)
 			getChildren().remove(new Node[]{geomNode});
-		if(mesh.getGeometryFile()!=null)
+		if(getMesh().getGeometryFile()!=null)
 		{
-			geomNode=createGeomNode(mesh.getGeometryFile());
+			geomNode=createGeomNode(getMesh().getGeometryFile());
 			getChildren().add(new Node[] { geomNode } );
 		}
 			

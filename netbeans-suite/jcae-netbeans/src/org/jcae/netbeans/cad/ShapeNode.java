@@ -54,7 +54,7 @@ public class ShapeNode extends AbstractNode implements ShapeCookie
 		ArrayList toReturn=new ArrayList();		
 		toReturn.add(SystemAction.get(ExplodeAction.class));
 		toReturn.add(SystemAction.get(ViewAction.class));
-		toReturn.add(SystemAction.get(DeleteAction.class));
+		toReturn.add(SystemAction.get(RemoveAction.class));
 		toReturn.add(SystemAction.get(BooleanAction.AllActions.class));
 		toReturn.add(SystemAction.get(TransformAction.AllActions.class));
 		toReturn.add(SystemAction.get(SewAction.class));

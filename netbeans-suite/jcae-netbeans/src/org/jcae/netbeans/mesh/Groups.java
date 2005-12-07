@@ -330,17 +330,14 @@ public class Groups implements SelectionListener
 			org.jcae.mesh.xmldata.XMLHelper.writeXML(xmlDoc, f);
 		}
 		 
-		refresh3dDisplay();
+		if(viewable!=null)
+		{
+			viewable.domainsChanged(null);
+		}
+		
 		return fuseGroup;
 	}
 
-	private void refresh3dDisplay()
-	{
-		if(viewable!=null)
-		{
-			viewable.domainsChanged(viewable.getDomainProvider().getDomainIDs());
-		}		
-	}
 	/**
 	 * @return Returns the Groups
 	 */

@@ -20,65 +20,66 @@
 
 package org.jcae.netbeans.cad;
 
-import java.awt.Color;
-import org.jcae.netbeans.viewer3d.View3D;
+import java.io.IOException;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import org.jcae.opencascade.jni.BRep_Builder;
-import org.jcae.opencascade.jni.ShapeAnalysis_FreeBounds;
-import org.jcae.opencascade.jni.TopoDS_Compound;
+import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
 import org.jcae.opencascade.jni.TopoDS_Shape;
-import org.jcae.viewer3d.cad.ViewableCAD;
-import org.jcae.viewer3d.cad.occ.OCCProvider;
+import org.openide.DialogDescriptor;
+import org.openide.DialogDisplayer;
+import org.openide.ErrorManager;
+import org.openide.NotifyDescriptor;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CookieAction;
 
-public class FreeBoundsAction extends CookieAction
+public class RemoveAction extends CookieAction
 {
+	private static Class[] COOKIE_CLASSES=new Class[]{ShapeCookie.class};
 	protected int mode()
 	{
-		return CookieAction.MODE_ALL;
+		return CookieAction.MODE_ANY;
 	}
 
 	protected Class[] cookieClasses()
 	{
-		return new Class[]{ShapeCookie.class};
+		return COOKIE_CLASSES;
 	}
 
 	protected void performAction(Node[] arg0)
 	{
-		BRep_Builder bb = new BRep_Builder();
-		TopoDS_Compound tc=new TopoDS_Compound();
-		bb.makeCompound(tc);		
 		for(int i=0; i<arg0.length; i++)
 		{
-			TopoDS_Shape shape = GeomUtils.getShape(arg0[i]);
-			ShapeAnalysis_FreeBounds safb=new ShapeAnalysis_FreeBounds(shape);
-			TopoDS_Compound closedWires=safb.getClosedWires();
-			TopoDS_Compound openWires=safb.getOpenWires();
+			Node parent=arg0[i].getParentNode();
+			TopoDS_Shape parentShape=GeomUtils.getShape(parent);
+			TopoDS_Shape shape=GeomUtils.getShape(arg0[i]);
+			if(shape!=null && parentShape!=null)
+			{
+				BRep_Builder bb = new BRep_Builder();
+				bb.remove(parentShape, shape);
+			}
 			
-			if(closedWires!=null)
-				bb.add(tc, closedWires);
-			
-			if(openWires!=null)
-				bb.add(tc, openWires);
+			try
+			{
+				arg0[i].destroy();
+			}
+			catch (IOException ex)
+			{
+				ErrorManager.getDefault().notify(ex);
+			}
 		}
-		View3D v=View3D.getView3D();
-		OCCProvider occp=new OCCProvider(tc);
-		occp.setEdgeColor(Color.GREEN);
-		ViewableCAD viewable = new ViewableCAD(occp);
-		viewable.setName(arg0[0].getName()+" free edges");
-		viewable.setLineWidth(3f);
-		v.getView().add(viewable);
 	}
 
 	public String getName()
 	{
-		return "Free edges";
+		return "Remove";
 	}
 
 	public HelpCtx getHelpCtx()
 	{
-		return null;
+		return HelpCtx.DEFAULT_HELP;
 	}
 	
 	protected boolean asynchronous()

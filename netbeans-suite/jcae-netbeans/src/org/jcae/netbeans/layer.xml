@@ -26,6 +26,7 @@
 		<folder name="jCAE">
 			<file name="org-jcae-netbeans-cad-ExplodeAction.instance" />
 			<file name="org-jcae-netbeans-cad-ImportAction.instance" />
+			<file name="org-jcae-netbeans-cad-RemoveAction.instance" />
 			<file name="org-jcae-netbeans-cad-ReverseAction.instance" />
 			<file name="org-jcae-netbeans-mesh-ComputeMeshAction.instance" />
 			<file name="org-jcae-netbeans-viewer3d-ActionFitAll.instance" />

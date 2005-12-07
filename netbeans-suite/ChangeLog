@@ -1,3 +1,40 @@
+2005-12-07 10:03  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/manifest.mf,
+	  jcae-netbeans/src/org/jcae/netbeans/cad/RemoveAction.java,
+	  jcae-netbeans/src/org/jcae/netbeans/cad/ShapeNode.java,
+	  jcae-netbeans/src/org/jcae/netbeans/layer.xml:
+	  [Bug 1358976] Delete in a geometry doesn't work. This was
+	  fixed by add a "Remove" action which do the real job.
+	  "Delete" only remove the node without removing the data.
+
+	* jcae-netbeans/src/org/jcae/netbeans/cad/FreeBoundsAction.java:
+	  [Bug 1375104] Exception in "Free Edges"
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/Groups.java:
+	  [Bug 1373702] Exception after fusing groups
+
+2005-12-06 19:07  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/cad/BrepNode.java,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/:
+	  Remove the "save" action on mesh nodes and make it
+	  automatic. [Bug 1362822] Problem renaming geometry and mesh.
+	* make-dist-Linux.sh, make-dist-Win32.sh: [Bug 1359040]
+	  Forgotten MMGT_OPT
+
+2005-11-18 12:35  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* branding/, nbproject/project.properties: Change version to 0.9-RC2
+	* jcae-netbeans/INSTALL: Add nbm display name. Add 2 missing nbm.
+
+2005-10-21 13:04  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* make-dist-Linux.sh, make-dist-Win32.sh: Add scripts to
+	  build de distributions
+
+2005-10-21 12:27  tag V0_9_RC1
+
 2005-10-21 12:27  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* jcae-netbeans/manifest.mf,
@@ -5,9 +42,6 @@
 	  jcae-netbeans/src/org/jcae/netbeans/Settings.settings,
 	  jcae-netbeans/src/org/jcae/netbeans/layer.xml:
 	  Add viewer 3d settings (still buggy)
-
-2005-10-21 12:26  Jerome Robert <jeromerobert@users.sourceforge.net>
-
 	* jcae-netbeans/src/org/jcae/netbeans/ProjectWizardIterator.java:
 	  Fix a bug: no jcae.xml file in created project
 
@@ -17,9 +51,6 @@
 	  jcae-netbeans/src/org/jcae/netbeans/cad/BrepNode.java,
 	  jcae-netbeans/src/org/jcae/netbeans/cad/ShapeNode.java:
 	  Add bounding box action
-
-2005-10-04 15:32  Jerome Robert <jeromerobert@users.sourceforge.net>
-
 	* jcae-netbeans/src/org/jcae/netbeans/mesh/GroupNode.java,
 	  jcae-netbeans/src/org/jcae/netbeans/mesh/ViewGroupAction.java:
 	  Fix view group action so it can display more than one group
@@ -28,16 +59,10 @@
 
 	* jcae-netbeans/src/org/jcae/netbeans/layer.xml:
 	  Make "advanced option" the default option panel
-
-2005-10-04 08:01  Jerome Robert <jeromerobert@users.sourceforge.net>
-
 	* jcae-netbeans/src/org/jcae/netbeans/cad/BrepNode.java,
 	  jcae-netbeans/src/org/jcae/netbeans/cad/FreeBoundsAction.java,
 	  jcae-netbeans/src/org/jcae/netbeans/cad/ShapeNode.java:
 	  Add "show free edges" action.
-
-2005-10-04 05:55  Jerome Robert <jeromerobert@users.sourceforge.net>
-
 	* jcae-netbeans/src/org/jcae/netbeans/ProjectWizardIterator.java,
 	  jcae-netbeans/src/org/jcae/netbeans/ProjectWizardPanel.java,
 	  jcae-netbeans/src/org/jcae/netbeans/ProjectWizardPanelVisual.java,

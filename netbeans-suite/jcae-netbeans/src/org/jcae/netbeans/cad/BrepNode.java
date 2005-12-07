@@ -127,7 +127,7 @@ public class BrepNode extends DataNode implements Node.Cookie
 		try
 		{
 			String o=getName();
-			getDataObject().rename(arg0+".brep");
+			getDataObject().rename(arg0);
 			fireDisplayNameChange(o, arg0);
 			fireNameChange(o, arg0);
 		}

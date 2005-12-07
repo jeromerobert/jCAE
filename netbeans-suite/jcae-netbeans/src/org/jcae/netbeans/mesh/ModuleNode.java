@@ -29,6 +29,7 @@ import org.openide.actions.NewAction;
 import org.openide.filesystems.*;
 import org.openide.loaders.DataFolder;
 import org.openide.loaders.DataObject;
+import org.openide.loaders.DataObjectNotFoundException;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
@@ -49,23 +50,29 @@ public class ModuleNode extends AbstractNode
 			directory.addFileChangeListener(this);
 		}
 
+		
 		protected Node[] createNodes(Object arg0)
 		{
-			return new Node[]{new MeshNode((DataObject) arg0)};
+			return new Node[]{((DataObject) arg0).getNodeDelegate()};
 		}
 		
 		protected void addNotify()
 		{
-			DataObject[] os=DataFolder.findFolder(directory).getChildren();			
-			ArrayList l=new ArrayList();
-			for(int i=0; i<os.length; i++)
+			try
 			{
-				if(os[i].getPrimaryFile().getNameExt().endsWith("_mesh.xml"))
-					l.add(os[i]);						
+				FileObject[] os=directory.getChildren();
+				ArrayList l=new ArrayList();
+				for(int i=0; i<os.length; i++)
+				{
+					if(os[i].getNameExt().endsWith("_mesh.xml"))
+						l.add(DataObject.find(os[i]));						
+				}
+				setKeys(l);
 			}
-			System.out.println(l);
-			setKeys(l);
-		}
+			catch (DataObjectNotFoundException e) {
+				org.openide.ErrorManager.getDefault().notify(e);
+			}
+		}		
 		
 		public void fileFolderCreated(FileEvent arg0)
 		{		
