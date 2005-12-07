@@ -274,18 +274,9 @@ public class FEDomainAdapter implements FEDomain
 	 */
 	public int getNumberOfQuad4()
 	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		return 0;
 	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getQuad4Iterator()
-	 */
-	public Iterator getQuad4Iterator()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
+	
 
 	/* (non-Javadoc)
 	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfQuad4Comp()
@@ -706,6 +697,11 @@ public class FEDomainAdapter implements FEDomain
 	}
 
 	public int[] getBeam2Indices()
+	{
+		return new int[0];
+	}
+
+	public int[] getQuad4()
 	{
 		return new int[0];
 	}

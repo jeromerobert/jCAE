@@ -29,10 +29,10 @@ import javax.media.j3d.*;
 import javax.swing.JPanel;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
+import javax.vecmath.Point3f;
 import org.jcae.viewer3d.DomainProvider;
 import org.jcae.viewer3d.SelectionListener;
 import org.jcae.viewer3d.Viewable;
-import org.jcae.viewer3d.fd.Utils;
 import com.sun.j3d.utils.geometry.GeometryInfo;
 import com.sun.j3d.utils.geometry.NormalGenerator;
 import com.sun.j3d.utils.picking.PickIntersection;
@@ -116,6 +116,11 @@ public class ViewableFE implements Viewable
 				
 				//If the domain is not visible do not readd it
 				Boolean b=(Boolean) visibleDomain.get(new Integer(ids[i]));
+				if(b==null)
+				{
+					visibleDomain.put(new Integer(ids[i]), Boolean.TRUE);
+					b=Boolean.TRUE;
+				}
 				if(b.booleanValue())
 				{
 					Logger.global.finest("<Loading domain "+ids[i]+">");
@@ -132,6 +137,11 @@ public class ViewableFE implements Viewable
 			for(int i=0; i<ids.length; i++)
 			{
 				Boolean b=(Boolean) visibleDomain.get(new Integer(ids[i]));
+				if(b==null)
+				{
+					visibleDomain.put(new Integer(ids[i]), Boolean.TRUE);
+					b=Boolean.TRUE;
+				}
 				if(b.booleanValue())
 				{
 					Logger.global.finest("<Loading domain "+ids[i]+">");
@@ -146,8 +156,63 @@ public class ViewableFE implements Viewable
 	{
 		if(d.getNumberOfTria3()>0)
 			branchGroup.addChild(createTriaBranchGroup(getGeomForTrianglesGroup(d), d));
+		if(d.getNumberOfQuad4()>0)
+			branchGroup.addChild(createQuadBranchGroup(d));
 		else if(d.getNumberOfBeam2()>0)
 			branchGroup.addChild(createBeamBranchGroup(d));		
+	}
+	
+	private Node createQuadBranchGroup(FEDomain d)
+	{
+		BranchGroup bg=new BranchGroup();
+
+		GeometryInfo gi=new GeometryInfo(GeometryInfo.QUAD_ARRAY);
+		gi.setCoordinates(d.getNodes());
+		gi.setCoordinateIndices(d.getQuad4());
+		NormalGenerator ng=new NormalGenerator(0);
+		ng.generateNormals(gi);
+		IndexedQuadArray ila=(IndexedQuadArray) gi.getIndexedGeometryArray();
+
+		Appearance app = new Appearance();
+		app.setPolygonAttributes(FILL_POLYGON_ATTR);
+		Material m=new Material();
+		m.setAmbientColor(new Color3f(d.getColor()));
+		app.setMaterial(m);
+		app.setCapability(Shape3D.ALLOW_APPEARANCE_READ);
+		app.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_READ);
+				
+		Shape3D s3d=new Shape3D(ila, app);
+		s3d.setBoundsAutoCompute(false);
+		s3d.setBounds(computeBoundingBox(d.getNodes()));
+		
+		s3d.setPickable(false);
+		bg.addChild(s3d);
+
+		domainIDToBranchGroup.put(new Integer(d.getID()), bg);	
+		return bg;
+	}
+
+	/** Workaround to buggy auto bouding box of quad arrays */
+	public static BoundingBox computeBoundingBox(float[] nodes)
+	{
+		float[] min=new float[]{Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE};
+		float[] max=new float[]{-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE};
+		float x, y, z;
+		for(int i=0; i<nodes.length; i+=3)
+		{
+			for(int j=0; j<3; j++)
+			{
+				if(nodes[i+j]<min[j])
+					min[j]=nodes[i+j];
+				if(nodes[i+j]>max[j])
+					max[j]=nodes[i+j];				
+			}
+		}
+		
+		return new BoundingBox(
+			new Point3d(new Point3f(min)),
+			new Point3d(new Point3f(max)));
+		
 	}
 	
 	private Node createBeamBranchGroup(FEDomain d)
@@ -155,7 +220,7 @@ public class ViewableFE implements Viewable
 		BranchGroup bg=new BranchGroup();
 		IndexedLineArray ila=new IndexedLineArray(
 			d.getNumberOfNodes(),
-			IndexedGeometryArray.COORDINATES,
+			GeometryArray.COORDINATES,
 			d.getNumberOfBeam2()*2);
 		ila.setCoordinates(0, d.getNodes());
 		ila.setCoordinateIndices(0, d.getBeam2Indices());
@@ -236,7 +301,8 @@ public class ViewableFE implements Viewable
 	 * @see org.jcae.viewer3d.Viewable#pick(com.sun.j3d.utils.picking.PickResult)
 	 */
 	public void pick(PickResult result, boolean selected)
-	{		
+	{	
+		System.out.println("picked node="+result.getObject());
 		Logger.global.finest("result="+result);
 		Logger.global.finest("result.getGeometryArray().getUserData()="+result.getGeometryArray().getUserData());
 		Integer o=(Integer)result.getGeometryArray().getUserData();		
@@ -297,20 +363,23 @@ public class ViewableFE implements Viewable
 		if(bg==null) //test for empty groups
 			return;
 		
-		Logger.global.finest("Changing color of domain n°"+domainID+" to red. bg="+bg);
-		Color colorToSet;
-		if(selected)
+		if(showShapeLine)
 		{
-			colorToSet=Color.RED;
-			selectedDomains.add(new Integer(domainID));
+			Logger.global.finest("Changing color of domain n°"+domainID+" to red. bg="+bg);
+			Color colorToSet;
+			if(selected)
+			{
+				colorToSet=Color.RED;
+				selectedDomains.add(new Integer(domainID));
+			}
+			else
+			{
+				colorToSet=Color.WHITE;
+				selectedDomains.remove(new Integer(domainID));
+			}
+			((Shape3D)bg.getChild(bg.numChildren()-1)).getAppearance().
+				getColoringAttributes().setColor(new Color3f(colorToSet));
 		}
-		else
-		{
-			colorToSet=Color.WHITE;
-			selectedDomains.remove(new Integer(domainID));
-		}
-		((Shape3D)bg.getChild(bg.numChildren()-1)).getAppearance().
-			getColoringAttributes().setColor(new Color3f(colorToSet));		
 	}
 	
 	private IndexedTriangleArray getGeomForTrianglesGroup(FEDomain domain)

@@ -1,3 +1,49 @@
+2005-12-07 08:30  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/fe/ViewableFE.java:
+	  [Bug 1373702] Exception after fusing groups
+
+2005-12-06 19:01  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/fe/FEDomainAdapter.java:
+	  Avoid an UnsupportedOperationException when using
+	  FEDomainAdapter ancestor
+
+2005-11-22 06:55  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/fd/CellManager.java,
+	  src/org/jcae/viewer3d/fd/FDSelection.java,
+	  src/org/jcae/viewer3d/fd/GridUtil.java,
+	  src/org/jcae/viewer3d/fd/ViewableFD.java:
+	  implement finit difference cells selection (contrib Erwann
+	  Feat)
+
+2005-11-10 14:58  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/View.java: Take fieldOfView into account
+	 in fitall
+	* src/org/jcae/viewer3d/fe/ViewableFE.java:
+	  Do not launch exception when picking on non-lined triangles.
+	  Properly compute the bouding box of quad.
+
+2005-11-04 14:37  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/fe/unv/UNVParser.java:
+	  Fix numbering of face in hexa
+	* src/org/jcae/viewer3d/fe/ViewableFE.java:
+	  Disable picking on quads
+
+2005-11-04 11:54  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/fe/unv/UNVDomain.java,
+	  src/org/jcae/viewer3d/fe/unv/UNVProvider.java:
+	  Read hexa8 to quad
+	* src/org/jcae/viewer3d/fe/FEDomain.java,
+	  src/org/jcae/viewer3d/fe/FEDomainAdapter.java:
+	  Change API to use array instead of Interator
+	* src/org/jcae/viewer3d/fe/ViewableFE.java:
+	  Create 3D scene for quads.
+
 2005-10-28 10:56  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/fe/ViewableFE.java: Fix a bug:
@@ -6,6 +52,8 @@
 	  getNodes instead of getNodesIterator (faster)
 	* src/org/jcae/viewer3d/fe/unv/UNVParser.java: Read hexa8
 	* build.xml: Fix dist-bin target
+
+2005-10-13 18:13  tag V0_9_RC1
 
 2005-10-13 12:12  Jerome Robert <jeromerobert@users.sourceforge.net>
 

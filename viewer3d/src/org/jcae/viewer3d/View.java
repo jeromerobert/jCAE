@@ -150,7 +150,9 @@ public class View extends Canvas3D implements PositionListener
 				tg.setTransform(myT3d);
 			}
 		});
-
+		
+		getView().setFieldOfView(Math.PI/12);
+		
 		zoomTo(0,0,0,1.0f);
     }		
 	
@@ -379,7 +381,7 @@ public class View extends Canvas3D implements PositionListener
 	{
 		BoundingSphere bs=getBound();
 		if(bs.getRadius()<=0)
-			bs=new BoundingSphere();
+			bs=new BoundingSphere();		
 		Point3d c=new Point3d();
 		bs.getCenter(c);
 		zoomTo((float)c.x,(float)c.y,(float)c.z,(float)bs.getRadius());
@@ -393,7 +395,10 @@ public class View extends Canvas3D implements PositionListener
 		{
 			ViewSpecificGroup bg=(ViewSpecificGroup) it.next();
 			if(bg.indexOfView(getView())!=-1)
-				bounds.add(bg.getBounds());
+			{
+				Bounds b=bg.getBounds();
+				bounds.add(b);
+			}
 		}
 		
 		if(isOriginAxisVisible())			
@@ -670,12 +675,12 @@ public class View extends Canvas3D implements PositionListener
 		getView().setFrontClipDistance(0.001*radius);
 		getView().setBackClipDistance(10*radius);
 		//getView().setWindowResizePolicy(javax.media.j3d.View.VIRTUAL_WORLD);
-		getView().setFieldOfView(Math.PI/12);
-		
+				
 		Transform3D t3d = new Transform3D();
 		viewingPlatform.getViewPlatformTransform().getTransform(t3d);
 		//calculate the translation vector for a identity rotation matrix
-		Vector3f correction=new Vector3f(0, 0, 5f*radius);
+		float focal=(float) Math.tan(getView().getFieldOfView()/2);
+		Vector3f correction=new Vector3f(0f, 0f, radius/focal);
 		t3d.setTranslation(new Vector3f());	
 		//rotate the translation vector
 		t3d.transform(correction);

@@ -30,17 +30,27 @@ public class UNVDomain extends FEDomainAdapter
 	private Color color;
 	private int id;
 	private float[] nodes;
-	private int[] tria3;
+	private int[] tria3=new int[0];
+	private int[] quad4=new int[0];
 
 	public UNVDomain(UNVParser parser, int id, Color color)
 	{
 		this.id=id;
 		this.color=color;
-		this.color=color;
-		tria3=readTria3(parser);
-		int[] nodesID=makeNodeIDArray(tria3);
-		nodes=readNodes(nodesID, parser.getNodesCoordinates());
-		renumberArray(tria3, nodesID);
+		if(id<parser.getTria3GroupNames().length)
+		{
+			tria3=readTria3(parser);
+			int[] nodesID=makeNodeIDArray(tria3);
+			nodes=readNodes(nodesID, parser.getNodesCoordinates());
+			renumberArray(tria3, nodesID);
+		}
+		else
+		{
+			quad4=readQuad4(parser);
+			int[] nodesID=makeNodeIDArray(quad4);
+			nodes=readNodes(nodesID, parser.getNodesCoordinates());
+			renumberArray(quad4, nodesID);			
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -77,6 +87,14 @@ public class UNVDomain extends FEDomainAdapter
 	public int getNumberOfTria3(){
 		return tria3.length/3;
 	}
+			
+	/*
+	 * (non-Javadoc)
+	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getNumberOfTria3()
+	 */
+	public int getNumberOfQuad4(){
+		return quad4.length/3;
+	}
 	
 	/*
 	 * (non-Javadoc)
@@ -108,6 +126,11 @@ public class UNVDomain extends FEDomainAdapter
 		};
 	}
 	
+	public int[] getQuad4()
+	{
+		return quad4;
+	}
+	
 	/**
 	 * Create the list of needed nodes for a triangle array
 	 * @param trias the triangles which require nodes
@@ -134,6 +157,24 @@ public class UNVDomain extends FEDomainAdapter
 			toReturn[ii]=allNodes[iid];
 			toReturn[ii+1]=allNodes[iid+1];
 			toReturn[ii+2]=allNodes[iid+2];
+		}
+		
+		return toReturn;
+	}
+
+	private int[] readQuad4(UNVParser parser)
+	{
+		int[] elids=parser.getQuad4Groups()[id-parser.getTria3GroupNames().length];
+		int[] toReturn=new int[elids.length*4];
+		int[] tri=parser.getQuad4Indices();		
+		for(int i=0; i<elids.length; i++)
+		{
+			int ii=i*4;
+			int iid=elids[i]*4;
+			toReturn[ii++]=tri[iid++];
+			toReturn[ii++]=tri[iid++];
+			toReturn[ii++]=tri[iid++];
+			toReturn[ii++]=tri[iid++];
 		}
 		
 		return toReturn;

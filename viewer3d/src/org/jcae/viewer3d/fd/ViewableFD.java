@@ -614,10 +614,10 @@ public class ViewableFD implements Viewable
 	 * @see jcae.viewer3d.Viewable#domainsChanged(java.util.Collection)
 	 */
 	synchronized public void domainsChanged(int[] domainId)
-	{				
+	{			
 		Set ids=new HashSet(Utils.intArrayToCollection(provider.getDomainIDs()));
 		for(int d=0; d<domainId.length; d++)
-		{
+		{	
 			Integer iDomainId=new Integer(domainId[d]);
 			
 			Logger.global.finest("Create BranchGroup for domain n°"+
@@ -636,12 +636,10 @@ public class ViewableFD implements Viewable
 			domainBg.setCapability(BranchGroup.ALLOW_DETACH);
 			domainBg.setCapability(Group.ALLOW_CHILDREN_READ);
 			FDDomain domain=(FDDomain)provider.getDomain(domainId[d]);
-			
 			createPlates(iDomainId, domainBg, domain);
 			createWires(iDomainId, domainBg, domain);
 			createSlots(iDomainId, domainBg, domain);
 			createSolids(iDomainId, domainBg, domain);
-
 			Node m=MarkUtils.createMarkNode(domain, iDomainId.intValue());
 			marks.add(m);
 			domainBg.addChild(m);				
@@ -1116,6 +1114,7 @@ public class ViewableFD implements Viewable
 		selectedPlates.removeAllGeometries();
 		selectedWires.removeAllGeometries();
 		selectedJunctions.removeAllGeometries();
+		cellManager.unselectAll();
 		fireSelectionChanged();
 	}
 		
@@ -1321,7 +1320,7 @@ public class ViewableFD implements Viewable
 	}
 
 	protected void fireSelectionChanged()
-	{
+	{	
 		Iterator it = listeners.iterator();
 		while (it.hasNext())
 		{

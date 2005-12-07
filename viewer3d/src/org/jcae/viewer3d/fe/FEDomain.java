@@ -84,7 +84,7 @@ public interface FEDomain extends MarkDomain, ColoredDomain
 	Iterator getTria6Res();
 	
 	int getNumberOfQuad4();	
-	Iterator getQuad4Iterator();
+	int[] getQuad4();
 	int getNumberOfQuad4Comp();
 	Iterator getQuad4Res();
 

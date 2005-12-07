@@ -3,22 +3,27 @@ package org.jcae.viewer3d.fe.unv;
 import gnu.trove.TFloatArrayList;
 import gnu.trove.TIntArrayList;
 import gnu.trove.TIntIntHashMap;
-import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 public class UNVParser
 {
+	private static final int TETRA4_MASK = 0x20000000;
+	private static final int HEXA8_MASK = 0x40000000;
+	private static final int ELEMENT_MASK = 0x70000000;
+	
 	private float[] nodesCoordinates;
 	private TIntIntHashMap nodesIndicesMap;
 	private int[] tetra4Indices;
-	private TIntIntHashMap tetra4IndicesMap;
-	private int[] hexa8Indices;
-	private TIntIntHashMap hexa8IndicesMap;	
+	private TIntIntHashMap volumeIndicesMap;
+	private int[] hexa8Indices;	
 	private ArrayList tria3GroupNames=new ArrayList();
 	private ArrayList tria3Groups=new ArrayList();
+	private ArrayList quad4GroupNames=new ArrayList();
+	private ArrayList quad4Groups=new ArrayList();
 	private TIntArrayList tria3Indices=new TIntArrayList();
+	private TIntArrayList quad4Indices=new TIntArrayList();
 	private TIntIntHashMap tria3IndicesMap;
 
 	public float[] getNodesCoordinates()
@@ -40,6 +45,21 @@ public class UNVParser
 	{
 		return tria3Indices.toNativeArray();
 	}
+
+	public String[] getQuad4GroupNames()
+	{
+		return (String[]) quad4GroupNames.toArray(new String[0]);
+	}
+	
+	public int[][] getQuad4Groups()
+	{
+		return (int[][]) quad4Groups.toArray(new int[0][]);
+	}
+	
+	public int[] getQuad4Indices()
+	{
+		return quad4Indices.toNativeArray();
+	}
 	
 	public void parse(BufferedReader rd) throws IOException
 	{
@@ -48,7 +68,8 @@ public class UNVParser
 		
 		nodesIndicesMap=new TIntIntHashMap();
 		tria3IndicesMap=new TIntIntHashMap();
-		tetra4IndicesMap=new TIntIntHashMap();
+		volumeIndicesMap=new TIntIntHashMap();
+		
 		while ((line = rd.readLine()) != null)
 		{
 			line = rd.readLine();
@@ -93,10 +114,9 @@ public class UNVParser
 		//free indices maps.
 		nodesIndicesMap=null;
 		tria3IndicesMap=null;
-		tetra4IndicesMap=null;
+		volumeIndicesMap=null;
 		tetra4Indices=null;
 		hexa8Indices=null;
-		hexa8IndicesMap=null;
 	}
 	
 	private void readFace(BufferedReader rd) throws IOException
@@ -126,21 +146,41 @@ public class UNVParser
 			else if (type.equals("111"))
 			{
 				st = new StringTokenizer(line);	
-				tetra4IndicesMap.put(ind, tetra4.size()/4);
+				volumeIndicesMap.put(ind, TETRA4_MASK | (tetra4.size()/4) );
 				for(int i=0; i<4; i++)
 					tetra4.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken())));   
 			}
 			else if (type.equals("115"))
 			{
 				st = new StringTokenizer(line);	
-				hexa8IndicesMap.put(ind, hexa8.size()/8);
-				for(int i=0; i<4; i++)
+				volumeIndicesMap.put(ind, HEXA8_MASK | (hexa8.size()/8) );				
+				for(int i=0; i<8; i++)
 					hexa8.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken())));   
 			}			
 		}
 		
 		tetra4Indices=tetra4.toNativeArray();
 		hexa8Indices=hexa8.toNativeArray();
+		
+		/*PrintStream ps=new PrintStream(new FileOutputStream("/tmp/proutzob"));
+		System.out.println("hexa8: "+(hexa8Indices.length/8.0));
+		for(int i=0; i<hexa8Indices.length; i++)
+		{
+			ps.print(hexa8Indices[i]+" ");
+			if((i+1)%8 == 0)
+				ps.println();
+		}
+		ps.close();*/
+	}
+	
+	private boolean isTetra4(int id)
+	{
+		return (id & ELEMENT_MASK) == TETRA4_MASK;
+	}
+	
+	private boolean isHexa8(int id)
+	{
+		return (id & ELEMENT_MASK) == HEXA8_MASK;
 	}
 
 	private void readGroup(BufferedReader rd) throws IOException
@@ -176,58 +216,142 @@ public class UNVParser
 			tria3Groups.add(facelist.toNativeArray());			
 		}
 	}
+	
+	private void readTetra4LoadSet(int element, int faceId, TIntArrayList group)
+	{
+		element*=4;
+		int p1=tetra4Indices[element++];
+		int p2=tetra4Indices[element++];
+		int p3=tetra4Indices[element++];
+		int p4=tetra4Indices[element++];
+		
+		group.add(tria3Indices.size()/3);
+		switch(faceId)
+		{
+			case 1:
+				tria3Indices.add(p1);
+				tria3Indices.add(p2);
+				tria3Indices.add(p3);
+				break;
+			case 2:
+				tria3Indices.add(p1);
+				tria3Indices.add(p2);
+				tria3Indices.add(p4);
+				break;
+			case 3:
+				tria3Indices.add(p2);
+				tria3Indices.add(p3);
+				tria3Indices.add(p4);
+				break;
+			case 4:
+				tria3Indices.add(p1);
+				tria3Indices.add(p3);
+				tria3Indices.add(p4);
+				break;
+			default:
+				throw new IllegalStateException("Face ID should be 1,2,3 or 4");
+		}			
+	}
 
+	private void readHexa8LoadSet(int element, int faceId, TIntArrayList group)
+	{
+		element*=8;
+		int p1=hexa8Indices[element++];
+		int p2=hexa8Indices[element++];
+		int p3=hexa8Indices[element++];
+		int p4=hexa8Indices[element++];
+		int p5=hexa8Indices[element++];
+		int p6=hexa8Indices[element++];
+		int p7=hexa8Indices[element++];
+		int p8=hexa8Indices[element++];
+		
+		group.add(quad4Indices.size()/4);
+		switch(faceId)
+		{
+			case 1:
+				quad4Indices.add(p1);
+				quad4Indices.add(p2);
+				quad4Indices.add(p3);
+				quad4Indices.add(p4);
+				break;
+			case 2:
+				quad4Indices.add(p5);
+				quad4Indices.add(p6);
+				quad4Indices.add(p7);
+				quad4Indices.add(p8);
+				break;
+			case 3:
+				quad4Indices.add(p1);
+				quad4Indices.add(p2);
+				quad4Indices.add(p6);
+				quad4Indices.add(p5);
+				break;
+			case 4:
+				quad4Indices.add(p2);
+				quad4Indices.add(p3);
+				quad4Indices.add(p7);
+				quad4Indices.add(p6);
+				break;
+			case 5:
+				quad4Indices.add(p3);
+				quad4Indices.add(p4);
+				quad4Indices.add(p8);
+				quad4Indices.add(p7);
+				break;
+			case 6:
+				quad4Indices.add(p1);
+				quad4Indices.add(p4);
+				quad4Indices.add(p8);
+				quad4Indices.add(p5);
+				break;
+			default:
+				throw new IllegalStateException("Face ID should be 1,2,3,4,5 or 6");
+		}			
+	}
+	
 	private void readLoadSets(BufferedReader rd) throws IOException
 	{
 		rd.readLine(); //RECORD 1 (skip)
 		String name=rd.readLine(); //RECORD 2 (skip)		
-		tria3GroupNames.add(name); 
-		
+		 		
 		String line;
 		
-		TIntArrayList group=new TIntArrayList();
+		TIntArrayList groupTetra4=new TIntArrayList();
+		TIntArrayList groupHexa8=new TIntArrayList();
 		while (!(line = rd.readLine().trim()).equals("-1")) //RECORD 3 (type 2)
 		{
 			// first line: type of object
 			StringTokenizer st = new StringTokenizer(line);
 			st.nextToken(); //skip face pressure load label
-			int element=tetra4IndicesMap.get(Integer.parseInt(st.nextToken()));
-			element*=4;
-			int p1=tetra4Indices[element++];
-			int p2=tetra4Indices[element++];
-			int p3=tetra4Indices[element++];
-			int p4=tetra4Indices[element++];
+			int element=volumeIndicesMap.get(Integer.parseInt(st.nextToken()));
+
 			int faceId=Integer.parseInt(st.nextToken());
-			group.add(tria3Indices.size()/3);
-			switch(faceId)
+			if(isTetra4(element))
 			{
-				case 1:
-					tria3Indices.add(p1);
-					tria3Indices.add(p2);
-					tria3Indices.add(p3);
-					break;
-				case 2:
-					tria3Indices.add(p1);
-					tria3Indices.add(p2);
-					tria3Indices.add(p4);
-					break;
-				case 3:
-					tria3Indices.add(p2);
-					tria3Indices.add(p3);
-					tria3Indices.add(p4);
-					break;
-				case 4:
-					tria3Indices.add(p1);
-					tria3Indices.add(p3);
-					tria3Indices.add(p4);
-					break;
-				default:
-					throw new IllegalStateException("Face ID should be 1,2,3 or 4");
-			}			
+				readTetra4LoadSet(element & (~ELEMENT_MASK), faceId, groupTetra4);
+			}
+			else if(isHexa8(element))
+			{
+				//System.out.println(element+" : "+(element & (~ELEMENT_MASK)) );
+				readHexa8LoadSet(element & (~ELEMENT_MASK), faceId, groupHexa8);
+			}
+				
 			rd.readLine(); //RECORD 4
 			rd.readLine(); //RECORD 5
 		}
-		tria3Groups.add(group.toNativeArray());
+		
+		if(!groupTetra4.isEmpty())
+		{
+			tria3GroupNames.add(name);
+			tria3Groups.add(groupTetra4.toNativeArray());
+		}
+
+		if(!groupHexa8.isEmpty())
+		{
+			quad4GroupNames.add(name);
+			quad4Groups.add(groupHexa8.toNativeArray());
+		}
+		
 		return;
 	}
 
@@ -289,5 +413,23 @@ public class UNVParser
 			e.printStackTrace();
 		}
 		return unit;
-	}	
+	}
+	
+	/**
+	 * Debug
+	 * @param args
+	 */
+	public static void main(String[] args)
+	{
+		try
+		{
+			UNVParser unvp=new UNVParser();
+			unvp.parse(new BufferedReader(new FileReader("/home/jerome/cassiope/resources/example/tecplot50x50x50.unv")));
+			System.out.println(unvp.getQuad4Indices().length);			
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	}
 }

@@ -30,12 +30,15 @@ import java.util.Map;
 public class FDSelection
 {
 	private int domainID;
-	private int[][] slotCells=new int[6][];
+	private int[][] slotCells=new int[6][0];
 	private int[] xWireCells, yWireCells, zWireCells;
 	
 	public FDSelection(int domainID)
 	{
 		this.domainID=domainID;
+		xWireCells=new int[0];
+		yWireCells=new int[0];
+		zWireCells=new int[0];
 	}
 	
 	public int getDomainID()
@@ -131,89 +134,6 @@ public class FDSelection
 		return null;
 	}
 	
-	/**
-	 * Return a {i1, j1, k1, i2, j2, k2...} array containing the list of selected
-	 * elementary X wire.
-	 * @return
-	 */
-	int[] getX1DCells()
-	{
-		//TODO
-		return null;
-	}
-	
-	int[] getY1DCells()
-	{
-		//TODO
-		return null;
-	}
-	
-	int[] getZ1DCells()
-	{
-		//TODO
-		return null;
-	}
-
-	int[] getX2DCells()
-	{
-		//TODO
-		return null;
-	}
-		
-	int[] getY2DCells()
-	{
-		//TODO
-		return null;
-	}
-
-	int[] getZ2DCells()
-	{
-		//TODO
-		return null;
-	}
-	
-	int[] get3DCells()
-	{
-		//TODO
-		return null;
-	}
-
-	int[] getXYSlotCells()
-	{
-		//TODO
-		return null;
-	}
-
-	int[] getXZSlotCells()
-	{
-		//TODO
-		return null;
-	}
-
-	int[] getYXSlotCells()
-	{
-		//TODO
-		return null;
-	}
-
-	int[] getYZSlotCells()
-	{
-		//TODO
-		return null;
-	}
-
-	int[] getZXSlotCells()
-	{
-		//TODO
-		return null;
-	}
-
-	int[] getZYSlotCells()
-	{
-		//TODO
-		return null;
-	}	
-
 	final private static String CR=System.getProperty("line.separator");  
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
