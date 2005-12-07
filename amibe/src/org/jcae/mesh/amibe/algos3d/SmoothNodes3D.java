@@ -34,11 +34,13 @@ import org.apache.log4j.Logger;
  * 3D node smoothing.  Triangles are sorted according to their quality,
  * They are processed iteratively beginning with the worst triangle.
  * Its three vertices are moved if they have not already been moved
- * when processing a previous triangle.  A common laplacian smoothing
- * is performed.  If the final position do not invert triangles, the
- * point is moved.
+ * when processing a previous triangle.  A modified Laplacian smoothing
+ * is performed, as briefly explained in
+ * <a href="http://www.ann.jussieu.fr/~frey/publications/ijnme4198.pdf">Adaptive Triangular-Quadrilateral Mesh Generation</a>, by Houman Borouchaky and
+ * Pascal J. Frey.
+ * If the final position do not invert triangles, the point is moved.
  */
-// Note 1: a better alternative should be implemented.
+// Note 1: alternatives should be tested.
 // Note 2: the point should be moved only if triangle quality is improved.
 public class SmoothNodes3D
 {

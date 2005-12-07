@@ -33,6 +33,27 @@ import org.apache.log4j.Logger;
 /**
  * Split long edges.  Edges are sorted and splitted in turn, the longest edge
  * being processed first.
+ * Example:  if a mesh has already been performed with a target size
+ * of discr, the following commands will split edges longer then discr/2
+ * <pre>
+ *   SplitEdge split = new SplitEdge(m, 0.5*discr);
+ *   split.compute();
+ * </pre>
+ * TODO: currently edges longer than sqrt(2)*discr/2 will be splitted
+ *
+ * When an interior edge is splitted, its midpoint is projected onto
+ * the surface by {@link Vertex#discreteProject(Vertex)}; if this
+ * projection fails, this edge is not splitted.  It is removed from
+ * the tree because there are few chances that this projection works
+ * later.  This means in particular that an interior edge whose
+ * endpoints are both on boundaries cannot be splitted, because
+ * discrete projection cannot be performed on boundary nodes.
+ * As for now, boundary edges are always splitted, and the new point
+ * is in the middle of this edge.
+ *
+ * In all cases, the distance between the newly inserted point and
+ * apical vertices is computed; if it is too low, the edge is not
+ * splitted to avoid bad triangles.
  * TODO: edges should be swapped too to improve triangle quality.
  */
 public class SplitEdge
