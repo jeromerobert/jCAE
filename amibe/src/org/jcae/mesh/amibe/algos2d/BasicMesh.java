@@ -52,7 +52,8 @@ import org.apache.log4j.Logger;
  * and collected into a list.  These nodes are boundary nodes, and
  * all other nodes will be inserted in the interior domain.  A bounding
  * box enclosing all these nodes in the 2D space is computed, and
- * a {@link org.jcae.mesh.amibe.util.QuadTree} can then be initialized by
+ * a {@link org.jcae.mesh.amibe.util.QuadTree} instance can then be
+ * initialized by
  * {@link Mesh#initQuadTree(double, double, double, double)}.
  *
  * <p>

@@ -72,7 +72,7 @@ import java.util.ArrayList;
  *			if (self.nItems > 0)
  *			{
  *				for (int i = 0; i &lt; self.nItems; i++)
- *					nodelist.add(self.subQuad[i]);
+ *					vertexList.add(self.subQuad[i]);
  *			}
  *			return 0;
  *		}
@@ -112,7 +112,7 @@ import java.util.ArrayList;
  * point <code>p</code>:
  * </p>
  * <ol type="1">
- *   <li>Initializion: <code>dmin=Double.MAX_VALUE</code>, <code>result=null</code></li>
+ *   <li>Initialization: <code>dmin=Double.MAX_VALUE</code>, <code>result=null</code></li>
  *   <li>Traverse all quadtree cells.
  *     <ol type="a">
  *       <li>If this cell does not intersect the ellipsis centered at
