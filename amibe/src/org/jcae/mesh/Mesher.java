@@ -327,33 +327,10 @@ public class Mesher
 				new UNVConverter(xmlDir).writeMESH(MESHName);
 			}
 		}
-		if (exportTriangleSoupProp.equals("true")) {
+		if (exportTriangleSoupProp.equals("true"))
+		{
 			// Step 3bis: Read 2D meshes and compute raw 3D mesh
-			try
-			{
-				int iFace = 0;
-				MeshToSoupConvert m2dTo3D = new MeshToSoupConvert(xmlDir);
-				m2dTo3D.initialize("soup", false);
-				iFace = 0;
-				for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
-				{
-					CADFace F = (CADFace) expF.current();
-					iFace++;
-					if (numFace != 0 && iFace != numFace)
-						continue;
-					if ((minFace != 0 || maxFace != 0) && !(iFace >= minFace && iFace <= maxFace))
-						continue;
-					xmlFile = "jcae2d."+iFace;
-					logger.info("Importing face "+iFace);
-					m2dTo3D.convert(xmlFile, iFace, F);
-				}
-				m2dTo3D.finish();
-			}
-			catch(Exception ex)
-			{
-				logger.warn(ex.getMessage());
-				ex.printStackTrace();
-			}
+			MeshToSoupConvert.meshToSoup(xmlDir, shape);
 		}
 		if (badGroups.size() > 0)
 		{

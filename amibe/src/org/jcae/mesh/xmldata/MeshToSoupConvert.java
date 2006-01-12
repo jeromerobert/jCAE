@@ -21,24 +21,19 @@
 
 package org.jcae.mesh.xmldata;
 
-import org.jcae.mesh.cad.CADGeomSurface;
-import org.jcae.mesh.cad.CADFace;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
-import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import gnu.trove.TIntIntHashMap;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.apache.xpath.CachedXPathAPI;
 import org.apache.log4j.Logger;
+import org.apache.xpath.CachedXPathAPI;
+import org.jcae.mesh.cad.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 
 public class MeshToSoupConvert extends JCAEXMLData
@@ -53,6 +48,45 @@ public class MeshToSoupConvert extends JCAEXMLData
 	private ByteBuffer bb = ByteBuffer.allocate(bufferSize);
 	private IntBuffer bbI = bb.asIntBuffer();
 	private DoubleBuffer bbD = bb.asDoubleBuffer();
+	
+	/** 
+	 * @param args mesh directory, brep path
+	 */
+	public static void main(String[] args)
+	{
+		meshToSoup(args[0], CADShapeBuilder.factory.newShape(args[1]));
+	}
+	
+	/**
+	 * Compute raw 3D mesh
+	 * @param xmlDir mesh directory
+	 * @param shape
+	 */
+	public static void meshToSoup(String xmlDir, CADShape shape)
+	{
+		CADExplorer expF = CADShapeBuilder.factory.newExplorer();		
+		int numFace=Integer.getInteger("org.jcae.mesh.Mesher.meshFace", 0).intValue();
+		int minFace=Integer.getInteger("org.jcae.mesh.Mesher.minFace", 0).intValue();
+		int maxFace=Integer.getInteger("org.jcae.mesh.Mesher.maxFace", 0).intValue();
+
+		int iFace = 0;
+		MeshToSoupConvert m2dTo3D = new MeshToSoupConvert(xmlDir);
+		m2dTo3D.initialize("soup", false);
+		iFace = 0;
+		for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
+		{
+			CADFace F = (CADFace) expF.current();
+			iFace++;
+			if (numFace != 0 && iFace != numFace)
+				continue;
+			if ((minFace != 0 || maxFace != 0) && !(iFace >= minFace && iFace <= maxFace))
+				continue;
+			String xmlFile = "jcae2d."+iFace;
+			logger.info("Importing face "+iFace);
+			m2dTo3D.convert(xmlFile, iFace, F);
+		}
+		m2dTo3D.finish();
+	}
 	
 	public MeshToSoupConvert (String dir)
 	{
@@ -87,7 +121,7 @@ public class MeshToSoupConvert extends JCAEXMLData
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
-		int i;
+
 		CachedXPathAPI xpath = new CachedXPathAPI();
 		CADGeomSurface surface = F.getGeomSurface();
 		surface.dinit(0);
