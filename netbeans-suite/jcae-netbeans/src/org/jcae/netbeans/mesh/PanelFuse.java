@@ -59,7 +59,7 @@ public class PanelFuse implements ActionListener
         
         Dialog dialog = DialogDisplayer.getDefault().createDialog(descriptor);
         dialog.setSize(300,580);
-        dialog.show();
+        dialog.setVisible(true);
     }
     
     /**

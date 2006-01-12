@@ -27,6 +27,9 @@ import javax.swing.JOptionPane;
 import javax.xml.parsers.ParserConfigurationException;
 import org.jcae.mesh.xmldata.UNVConverter;
 import org.openide.ErrorManager;
+import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
+import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CookieAction;
@@ -49,12 +52,13 @@ public class ExportGroupAction extends CookieAction
 	{
 		try
 		{
-			HashSet set=new HashSet();
+			HashSet set=new HashSet();			
+			MeshNode meshNode=null;
 			for(int i=0; i<arg0.length; i++)
 			{
-				MeshNode n=(MeshNode) arg0[i].getParentNode().getParentNode()
+				meshNode=(MeshNode) arg0[i].getParentNode().getParentNode()
 					.getCookie(MeshNode.class);
-				set.add(n.getMeshDirectory());
+				set.add(meshNode.getMeshDirectory());
 			}
 			
 			if(set.size()>1)
@@ -65,8 +69,11 @@ public class ExportGroupAction extends CookieAction
 			}
 			
 			String meshDir=set.toArray()[0].toString();
+			FileObject meshDirFile=
+				meshNode.getDataObject().getPrimaryFile().getParent();
 			
 			JFileChooser jfc=new JFileChooser();
+			jfc.setCurrentDirectory(FileUtil.toFile(meshDirFile));
 			if(jfc.showSaveDialog(null)==JFileChooser.APPROVE_OPTION)
 			{
 				int[] ids=new int[arg0.length];
@@ -75,10 +82,15 @@ public class ExportGroupAction extends CookieAction
 					GroupNode n=(GroupNode) arg0[i].getCookie(GroupNode.class);
 					ids[i]=n.getGroup().getId();
 				}			
+				String unvFile=jfc.getSelectedFile().getPath();
+				
+				if(!unvFile.endsWith(".unv"))
+					unvFile+=".unv";
+				
 				PrintStream stream=new PrintStream(new BufferedOutputStream(
-					new FileOutputStream(jfc.getSelectedFile())));
+					new FileOutputStream(unvFile)));
 				new UNVConverter(new File(meshDir), ids).writeUNV(stream);
-				stream.close();
+				stream.close();				
 			}
 		}
 		catch(IOException ex)

@@ -86,6 +86,7 @@ public class MeshDataObject extends MultiDataObject implements SaveCookie, Prope
 			encoder.writeObject(mesh);
 			encoder.close();
 			l.releaseLock();
+			setModified(false);
 		}
 		catch(IOException ex)
 		{

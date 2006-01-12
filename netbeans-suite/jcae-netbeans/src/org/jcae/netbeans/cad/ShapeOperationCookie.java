@@ -27,7 +27,7 @@ import javax.swing.SwingUtilities;
 import org.jcae.netbeans.viewer3d.View3D;
 import org.jcae.opencascade.jni.*;
 import org.jcae.viewer3d.cad.CADSelection;
-import org.jcae.viewer3d.cad.CADSelectionListener;
+import org.jcae.viewer3d.SelectionListener;
 import org.jcae.viewer3d.cad.ViewableCAD;
 import org.jcae.viewer3d.cad.occ.OCCProvider;
 import org.openide.ErrorManager;
@@ -38,8 +38,63 @@ import org.openide.windows.Mode;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
-public class ShapeOperationCookie implements ViewCookie, CADSelectionListener
+public class ShapeOperationCookie implements ViewCookie
 {	
+	private class MySelectionListener implements SelectionListener
+	{
+		private ViewableCAD viewable;
+		
+		public MySelectionListener(ViewableCAD viewable)
+		{
+			this.viewable=viewable;
+		}
+		
+		public void selectionChanged()
+		{
+			ShapePool p=getPool();
+			final ArrayList nodes=new ArrayList();
+			CADSelection[] selection=viewable.getSelection();
+			for(int j=0; j<selection.length; j++)
+			{
+				int[] ids=selection[0].getFaceIDs();
+				for(int i=0; i<ids.length; i++)
+				{				
+					Node n=p.getNode(getSubFace(ids[i]));
+					if(n!=null)
+						nodes.add(n);
+				}
+			}
+
+			Runnable r=new Runnable()
+			{
+				public void run()
+				{
+					ExplorerManager[] exs=getExplorerManagers();
+					for(int i=0; i<exs.length; i++)
+					{
+						ArrayList nnodes=new ArrayList();
+						for(int j=0; j<nodes.size(); j++)
+						{
+							Node n=(Node) nodes.get(j);
+							Collection nn=GeomUtils.findNode(exs[i].getRootContext(), n);
+							nnodes.addAll(nn);
+						}
+						
+						try
+						{
+							exs[i].setSelectedNodes((Node[]) nnodes.toArray(new Node[nnodes.size()]));
+						}
+						catch (PropertyVetoException e)
+						{					
+							ErrorManager.getDefault().notify(e);
+						}
+					}
+				}
+			};
+			SwingUtilities.invokeLater(r);		
+		}
+	}
+	
 	private Node node;
 	public ShapeOperationCookie(Node node)
 	{
@@ -87,7 +142,7 @@ public class ShapeOperationCookie implements ViewCookie, CADSelectionListener
 		TopoDS_Shape shape = getShape();
 		View3D v=View3D.getView3D();
 		ViewableCAD viewable = new ViewableCAD(new OCCProvider(shape));
-		viewable.addSelectionListener(this);
+		viewable.addSelectionListener(new MySelectionListener(viewable));
 		viewable.setName(node.getName());
 		v.getView().add(viewable);
 		v.getView().fitAll();
@@ -118,49 +173,6 @@ public class ShapeOperationCookie implements ViewCookie, CADSelectionListener
 			}			
 		}
 		return (ExplorerManager[]) al.toArray(new ExplorerManager[al.size()]);
-	}
-	
-	public void selectionChanged(CADSelection[] selection)
-	{
-		ShapePool p=getPool();
-		final ArrayList nodes=new ArrayList();
-		for(int j=0; j<selection.length; j++)
-		{
-			int[] ids=selection[0].getFaceIDs();
-			for(int i=0; i<ids.length; i++)
-			{				
-				Node n=p.getNode(getSubFace(ids[i]));
-				if(n!=null)
-					nodes.add(n);
-			}
-		}
-		
-		Runnable r=new Runnable()
-		{
-			public void run()
-			{
-				ExplorerManager[] exs=getExplorerManagers();
-				for(int i=0; i<exs.length; i++)
-				{
-					ArrayList nnodes=new ArrayList();
-					for(int j=0; j<nodes.size(); j++)
-					{
-						Node n=(Node) nodes.get(j);
-						Collection nn=GeomUtils.findNode(exs[i].getRootContext(), n);
-						nnodes.addAll(nn);
-					}
-					try
-					{
-						exs[i].setSelectedNodes((Node[]) nnodes.toArray(new Node[nnodes.size()]));
-					}
-					catch (PropertyVetoException e)
-					{					
-						ErrorManager.getDefault().notify(e);
-					}
-				}
-			}
-		};
-		SwingUtilities.invokeLater(r);
 	}
 
 

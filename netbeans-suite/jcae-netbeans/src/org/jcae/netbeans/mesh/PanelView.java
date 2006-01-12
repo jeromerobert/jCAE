@@ -61,7 +61,7 @@ public class PanelView implements ActionListener
         
         Dialog dialog = DialogDisplayer.getDefault().createDialog(descriptor);
         dialog.setSize(300,680);
-        dialog.show();
+        dialog.setVisible(true);
     }
     
     /**

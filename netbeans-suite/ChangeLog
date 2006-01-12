@@ -1,3 +1,33 @@
+2006-01-12 10:23:36  Jerome Robert <jeromerobert@users.sourceforge.net>
+	* jcae-netbeans/: Create text/x-unv MIME type. Display UNV node in
+	  the root of Mesh module.
+
+2006-01-06 17:46:55  Jerome Robert <jeromerobert@users.sourceforge.net>
+	* jcae-netbeans/src/org/jcae/netbeans/layer.xml,
+	  nbproject/project.properties: Allow to install/updates module
+	  
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/ExportGroupAction.java,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/Mesh.java,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/MeshNode.java:
+	  Manage UNV files in the projecta
+	  
+	* jcae-netbeans/src/org/jcae/netbeans/JCAEProject.java
+	  jcae-netbeans/src/org/jcae/netbeans/layer.xml:
+	  Allow to add a new node type to the project using MIME typesa
+	  
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/MeshDataObject.java:
+	  Fix bug: save button always active after saving the mesh.
+	  
+	* jcae-netbeans/src/org/jcae/netbeans/Utilities.java,
+	  jcae-netbeans/src/org/jcae/netbeans/cad/ExplodeAction.java,
+	  jcae-netbeans/src/org/jcae/netbeans/cad/ShapeOperationCookie.java,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/PanelFuse.java,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/PanelView.java:
+	  Remove deprecated API call
+	  
+	* make-dist-Linux.sh make-dist-Win32.sh:
+	  Netbeans 5.0 beta 2 put application in .zip/<app> not in .zip/
+
 2005-12-07 10:03  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* jcae-netbeans/manifest.mf,

@@ -22,6 +22,8 @@ package org.jcae.netbeans.mesh;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.Arrays;
+import java.util.TreeSet;
 
 
 public class Mesh 
@@ -29,7 +31,7 @@ public class Mesh
 	private double edgeLength=1.0;
 	private double deflection=0;
 	private String meshFile;
-	private String geometryFile;
+	private String geometryFile;	
 	
 	public Mesh(String name) {
 		meshFile=name;

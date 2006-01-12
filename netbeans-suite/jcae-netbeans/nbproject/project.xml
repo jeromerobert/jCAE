@@ -1,16 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://www.netbeans.org/ns/project/1">
-	<type>org.netbeans.modules.apisupport.project</type>
-	<configuration>
-		
-	
-    
-    <data xmlns="http://www.netbeans.org/ns/nb-module-project/2">
-			<code-name-base>org.jcae.netbeans</code-name-base>
-			<suite-component/>
-			
-			
-            
+    <type>org.netbeans.modules.apisupport.project</type>
+    <configuration>
+        <data xmlns="http://www.netbeans.org/ns/nb-module-project/2">
+            <code-name-base>org.jcae.netbeans</code-name-base>
+            <suite-component/>
             <module-dependencies>
                 <dependency>
                     <code-name-base>org.jcae.opencascade.jni</code-name-base>
@@ -184,49 +178,56 @@
                         <specification-version>6.2</specification-version>
                     </run-dependency>
                 </dependency>
+                <dependency>
+                    <code-name-base>org.openide.text</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>6.8.1</specification-version>
+                    </run-dependency>
+                </dependency>
             </module-dependencies>
             <public-packages>
-				<package>org.jcae.netbeans.cad</package>
-				<package>org.jcae.viewer3d.post</package>
-				<package>org.jcae.viewer3d</package>
-				<package>org.jcae.viewer3d.test</package>
-				<package>org.jcae.viewer3d.cad</package>
-				<package>org.jcae.viewer3d.fe.unv</package>
-				<package>org.jcae.viewer3d.fd.sd</package>				
-				<package>org.jcae.viewer3d.fe</package>
-				<package>org.jcae.viewer3d.fe.amibe</package>
-				<package>org.jcae.viewer3d.fd</package>
-				<package>org.jcae.viewer3d.fd.pl02</package>
-				<package>org.jcae.viewer3d.cad.occ</package>
-				<package>org.jcae.netbeans.nodes</package>
-				<package>org.jcae.netbeans</package>
-				<package>org.jcae.netbeans.viewer3d</package>
-			</public-packages>
-
-			<class-path-extension>
-				<runtime-relative-path>ext/jcae-viewer3d.jar</runtime-relative-path>
-				<binary-origin>release/modules/ext/jcae-viewer3d.jar</binary-origin>
-			</class-path-extension>
-			<class-path-extension>
-				<runtime-relative-path>ext/jcae.jar</runtime-relative-path>
-				<binary-origin>release/modules/ext/jcae.jar</binary-origin>
-			</class-path-extension>
-			<class-path-extension>
-				<runtime-relative-path>ext/log4j-1.2.8.jar</runtime-relative-path>
-				<binary-origin>release/modules/ext/log4j-1.2.8.jar</binary-origin>
-			</class-path-extension>
-			<class-path-extension>
-				<runtime-relative-path>ext/jcae-mesherocc.jar</runtime-relative-path>
-				<binary-origin>release/modules/ext/jcae-mesherocc.jar</binary-origin>
-			</class-path-extension>
-			<class-path-extension>
-				<runtime-relative-path>ext/trove.jar</runtime-relative-path>
-				<binary-origin>release/modules/ext/trove.jar</binary-origin>
-			</class-path-extension>
-			<!--class-path-extension>
+                <package>org.jcae.netbeans.cad</package>
+                <package>org.jcae.viewer3d.post</package>
+                <package>org.jcae.viewer3d</package>
+                <package>org.jcae.viewer3d.test</package>
+                <package>org.jcae.viewer3d.cad</package>
+                <package>org.jcae.viewer3d.fe.unv</package>
+                <package>org.jcae.viewer3d.fd.sd</package>
+                <package>org.jcae.viewer3d.fe</package>
+                <package>org.jcae.viewer3d.fe.amibe</package>
+                <package>org.jcae.viewer3d.fd</package>
+                <package>org.jcae.viewer3d.fd.pl02</package>
+                <package>org.jcae.viewer3d.cad.occ</package>
+                <package>org.jcae.netbeans.nodes</package>
+                <package>org.jcae.netbeans</package>
+                <package>org.jcae.netbeans.viewer3d</package>
+            </public-packages>
+            <class-path-extension>
+                <runtime-relative-path>ext/jcae-viewer3d.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jcae-viewer3d.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/jcae.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jcae.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/log4j-1.2.8.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/log4j-1.2.8.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/jcae-mesherocc.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jcae-mesherocc.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/trove.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/trove.jar</binary-origin>
+            </class-path-extension>
+            <!--class-path-extension>
 				<runtime-relative-path>ext/xalan.jar</runtime-relative-path>
 				<binary-origin>release/modules/ext/xalan.jar</binary-origin>
 			</class-path-extension-->
-		</data>
+        </data>
     </configuration>
 </project>

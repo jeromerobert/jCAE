@@ -71,7 +71,7 @@ public class Utilities
 			PropertySheet ps=new PropertySheet();
 			ps.setNodes(new Node[]{bn});
 			DialogDescriptor dd=new DialogDescriptor(ps, bean.toString());
-			DialogDisplayer.getDefault().createDialog(dd).show();
+			DialogDisplayer.getDefault().createDialog(dd).setVisible(true);
 			return dd.getValue()==NotifyDescriptor.OK_OPTION;
 
 		} catch (IntrospectionException e)

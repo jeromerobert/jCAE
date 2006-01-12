@@ -65,7 +65,9 @@ public class ModuleNode extends AbstractNode
 				for(int i=0; i<os.length; i++)
 				{
 					if(os[i].getNameExt().endsWith("_mesh.xml"))
-						l.add(DataObject.find(os[i]));						
+						l.add(DataObject.find(os[i]));
+					else if("text/x-unv".equals(FileUtil.getMIMEType(os[i])))
+						l.add(DataObject.find(os[i]));
 				}
 				setKeys(l);
 			}

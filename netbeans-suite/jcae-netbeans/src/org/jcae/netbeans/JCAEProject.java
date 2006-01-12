@@ -20,21 +20,131 @@
 
 package org.jcae.netbeans;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import org.jcae.netbeans.cad.ModuleNode;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.project.ActionProvider;
 import org.netbeans.spi.project.ProjectState;
 import org.netbeans.spi.project.ui.LogicalViewProvider;
+import org.openide.ErrorManager;
+import org.openide.filesystems.FileAttributeEvent;
+import org.openide.filesystems.FileChangeListener;
+import org.openide.filesystems.FileEvent;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileRenameEvent;
+import org.openide.filesystems.FileUtil;
+import org.openide.filesystems.MIMEResolver;
 import org.openide.loaders.DataFolder;
+import org.openide.loaders.DataLoader;
+import org.openide.loaders.DataObject;
+import org.openide.loaders.DataObjectNotFoundException;
+import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
+import org.openide.nodes.Children.Array;
 import org.openide.nodes.FilterNode;
 import org.openide.nodes.Node;
 import org.openide.util.Lookup;
+import org.openide.util.RequestProcessor;
 import org.openide.util.lookup.Lookups;
 
 public class JCAEProject implements Project, LogicalViewProvider, ActionProvider
 {
+	private static String  MIME_UNKNOWN="content/unknown";
+	
+	private class ProjectChildren extends Children.Keys implements FileChangeListener
+	{		
+		private FileObject directory;
+		private ModuleNode cadNode=new ModuleNode(JCAEProject.this);
+		private org.jcae.netbeans.mesh.ModuleNode meshNode=
+			new org.jcae.netbeans.mesh.ModuleNode(JCAEProject.this);
+		private java.util.Map loaderToMNode=new HashMap();
+		
+		public ProjectChildren(FileObject directory)
+		{		
+			this.directory=directory;
+			directory.addFileChangeListener(this);
+		}
+		
+		protected Node[] createNodes(Object arg0)
+		{
+			return new Node[]{(Node)arg0};
+		}
+		
+		protected void addNotify()
+		{			
+			FileObject[] os=directory.getChildren();
+			HashSet l=new HashSet();
+			for(int i=0; i<os.length; i++)
+			{
+				String s=FileUtil.getMIMEType(os[i]);
+				if(s!=null && !MIME_UNKNOWN.equals(s) && !"text/x-unv".equals(s))
+				{
+					try
+					{
+						DataObject dObj = DataObject.find(os[i]);
+						DataLoader loader=dObj.getLoader();
+						Node mNode=(Node)loaderToMNode.get(loader.getClass());
+						if(mNode==null)
+						{
+							mNode=new AbstractNode(new Children.Array());
+							mNode.setDisplayName(loader.getDisplayName());
+							loaderToMNode.put(loader.getClass(), mNode);							
+						}
+						l.add(mNode);
+						mNode.getChildren().add(new Node[]{dObj.getNodeDelegate()});
+					}
+					catch (DataObjectNotFoundException ex)
+					{
+						ErrorManager.getDefault().notify(ex);
+					}					
+				}
+			}				
+			Object[] keys=new Object[2+l.size()];
+			keys[0]=cadNode;
+			keys[1]=meshNode;
+			System.arraycopy(l.toArray(), 0, keys, 2, l.size());
+			setKeys(keys);				
+		}		
+		
+		public void fileFolderCreated(FileEvent arg0)
+		{		
+			addNotify();
+		}
+
+		public void fileDataCreated(FileEvent arg0)
+		{
+			RequestProcessor.getDefault().post(new Runnable()
+			{
+				public void run()
+				{
+					addNotify();
+				}				
+			});
+		}
+
+		public void fileChanged(FileEvent arg0)
+		{		
+			addNotify();
+		}
+
+		public void fileDeleted(FileEvent arg0)
+		{
+			addNotify();
+		}
+
+		public void fileRenamed(FileRenameEvent arg0)
+		{
+			addNotify();
+		}
+
+		public void fileAttributeChanged(FileAttributeEvent arg0)
+		{
+			addNotify();
+		}		
+	}	
+	
 	private FileObject projectDirectory;
 	public JCAEProject(FileObject projectDirectory, ProjectState state)
 	{
@@ -53,10 +163,10 @@ public class JCAEProject implements Project, LogicalViewProvider, ActionProvider
 
 	public Node createLogicalView()
 	{		
-		Children c=new Children.Array();
-		c.add(new Node[]{new ModuleNode(this), new org.jcae.netbeans.mesh.ModuleNode(this)});
 		Node n=DataFolder.findFolder(getProjectDirectory()).getNodeDelegate();
-		return new FilterNode(n, c, Lookups.singleton(this));
+		return new FilterNode(n,
+			new ProjectChildren(getProjectDirectory()),
+			Lookups.singleton(this));		
 	}
 	
 	public Node findPath(Node arg0, Object arg1)

@@ -53,7 +53,7 @@ public class ExplodeAction extends CookieAction
 		panel.add(box);
 		
 		DialogDescriptor dd=new DialogDescriptor(panel, "Explode");
-		DialogDisplayer.getDefault().createDialog(dd).show();
+		DialogDisplayer.getDefault().createDialog(dd).setVisible(true);
 		
 		if(dd.getValue()==NotifyDescriptor.OK_OPTION)
 		{			
