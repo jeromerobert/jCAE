@@ -28,6 +28,7 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
+import org.jcae.mesh.xmldata.MeshReader;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -612,5 +613,15 @@ public class DecimateVertex
 		mesh.setTrianglesList(newlist);
 		trash.clear();
 		assert mesh.isValid();
+	}
+	
+	/**
+	 * 
+	 * @param args xmlDir, xmlFile, tolerance, 
+	 */
+	public static void main(String[] args)
+	{
+		Mesh mesh=MeshReader.readObject3D(args[0], args[1]);
+		new DecimateVertex(mesh, Double.parseDouble(args[2])).compute();
 	}
 }
