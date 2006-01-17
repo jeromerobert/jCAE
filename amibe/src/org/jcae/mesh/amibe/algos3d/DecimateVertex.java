@@ -29,6 +29,7 @@ import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import org.jcae.mesh.xmldata.MeshReader;
+import org.jcae.mesh.xmldata.MeshWriter;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -617,11 +618,12 @@ public class DecimateVertex
 	
 	/**
 	 * 
-	 * @param args xmlDir, xmlFile, tolerance, 
+	 * @param args xmlDir, xmlFile, tolerance, brepDir, brepFile
 	 */
 	public static void main(String[] args)
 	{
-		Mesh mesh=MeshReader.readObject3D(args[0], args[1]);
+		Mesh mesh=MeshReader.readObject3D(args[0], args[1], -1);
 		new DecimateVertex(mesh, Double.parseDouble(args[2])).compute();
+		MeshWriter.writeObject3D(mesh, args[0], args[1], args[3], args[4],1);
 	}
 }
