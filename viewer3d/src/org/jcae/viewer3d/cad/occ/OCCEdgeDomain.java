@@ -124,9 +124,11 @@ public class OCCEdgeDomain extends CADDomainAdapator implements ColoredDomain
 		    if(gc!=null)
 		    {
 			    GeomAdaptor_Curve adaptator = new GeomAdaptor_Curve(gc);
-				GCPnts_UniformDeflection deflector = new GCPnts_UniformDeflection(); 
+				GCPnts_UniformDeflection deflector = new GCPnts_UniformDeflection();
+
 				deflector.initialize(adaptator, boundingBoxDeflection, range[0], range[1]);
 				int npts = deflector.nbPoints();
+				
 				// Allocate one additional point at each end  = parametric value 0, 1
 				array = new float[(npts+2)*3];		    
 			    int j=0;
@@ -145,7 +147,7 @@ public class OCCEdgeDomain extends CADDomainAdapator implements ColoredDomain
 			    values = adaptator.value(range[1]);
 			    array[j++] = (float) values[0];
 			    array[j++] = (float) values[1];
-			    array[j++] = (float) values[2];		    
+			    array[j++] = (float) values[2];
 			    edges.add(array);
 		    }
 		    else
@@ -172,7 +174,8 @@ public class OCCEdgeDomain extends CADDomainAdapator implements ColoredDomain
 						array[j++]=(float) f[1];
 						array[j++]=(float) f[2];
 					}
-		    	}
+					edges.add(array);
+				}
 		    }
 		}		
 	}

@@ -20,6 +20,7 @@
 
 package org.jcae.viewer3d.cad.occ;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Iterator;
 import org.jcae.opencascade.jni.*;
@@ -27,37 +28,59 @@ import org.jcae.viewer3d.cad.CADDomainAdapator;
 import org.jcae.viewer3d.cad.DefaultFaceMesh;
 
 /**
+ * Meshing parameters were taken from Opencascade sources. See
+ * <ul>
+ *  <li>src/AIS/AIS_TexturedShape.cxx</li>
+ *  <li>src/AIS/AIS_Shape.cxx</li>
+ *  <li>src/Prs3d/Prs3d_Drawer.cxx</li>
+ *  <li>src/BRepMesh/BRepMesh.cxx</li>
+ *  <li>inc/BRepMesh_IncrementalMesh.hxx</li>  
+ * </ul>
  * @author Jerome Robert
  *
  */
 public class OCCFaceDomain extends CADDomainAdapator
 {
-	private TopoDS_Shape shape;
+	private static int meshIter=3;
 	private ArrayList faceMeshes;
+	private Color[] facesColors;
+	private static boolean debug=false;
 	public OCCFaceDomain(TopoDS_Shape shape)
-	{
-		this.shape=shape;
+	{	
 		TopExp_Explorer explorer = new TopExp_Explorer();
 		TopLoc_Location loc = new TopLoc_Location();
 		faceMeshes=new ArrayList();
+				
 		for (explorer.init(shape, TopAbs_ShapeEnum.FACE); explorer.more(); explorer.next())
-		{			
+		{						
 			TopoDS_Shape s = explorer.current();
 			if (!(s instanceof TopoDS_Face)) continue; // should not happen!
 			TopoDS_Face face = (TopoDS_Face)s;
 			Poly_Triangulation pt = BRep_Tool.triangulation(face,loc);
 			
-			if(pt==null)
+			float error=0.001f*getMaxBound(s)*4;
+			//float error=0.0001f;
+			int iter=0;
+			while((pt==null)&(iter<meshIter)){
+				new BRepMesh_IncrementalMesh(face,error, false);
+				//new BRepMesh_IncrementalMesh(face,error, true);
+				pt = BRep_Tool.triangulation(face,loc);				
+				error/=10;
+				iter++;
+			}
+						
+			/*if(pt==null)
 			{
 				//System.err.println("Meshing "+face);
 				//BRepMesh.mesh(face, boundingBoxDeflection);				
 				new BRepMesh_IncrementalMesh(face, 0.1, true);
 				pt = BRep_Tool.triangulation(face,loc);
-			}			
+			}	*/		
 			
 			if (pt==null)
 			{
 				System.err.println("Triangulation failed for face "+face+". Trying other mesh parameters.");
+				faceMeshes.add(new DefaultFaceMesh(new float[0], new int[0]));
 				continue;
 				/*BRepMesh_IncrementalMesh mesh = new BRepMesh_IncrementalMesh();
 				mesh.setAngle(angle);
@@ -69,6 +92,9 @@ public class OCCFaceDomain extends CADDomainAdapator
 					System.err.println("Cannot triangulate face "+face);
 					continue;
 				}*/
+			}
+			else if(debug){
+				System.out.println("Triangulation succed for face "+face);
 			}
 			
 			
@@ -99,6 +125,33 @@ public class OCCFaceDomain extends CADDomainAdapator
 			
 			faceMeshes.add(new DefaultFaceMesh(fnodes, itriangles));
 		}
+	}
+	
+	
+	
+	/**
+	 * Compute the bounding box of the shape and
+	 * return the maximum bound value
+	 * @param shape
+	 * @return
+	 */
+	private static float getMaxBound(TopoDS_Shape shape){
+		Bnd_Box box = new Bnd_Box(); 
+		BRepBndLib.add(shape,box);
+		double[] bbox = box.get();
+		double minBoundingBox=
+			Math.max(Math.max(bbox[3]-bbox[0], bbox[4]-bbox[1]), bbox[5]-bbox[2]);
+		return (float)minBoundingBox;
+	}
+	
+	/**
+	 * Create a Colored Shape
+	 * @param shape
+	 * @param facesColors
+	 */
+	public OCCFaceDomain(TopoDS_Shape shape,Color[] facesColors){
+		this(shape);
+		this.facesColors=facesColors;
 	}
 	
 	/**
@@ -183,5 +236,14 @@ public class OCCFaceDomain extends CADDomainAdapator
 	public Iterator getFaceIterator()
 	{
 		return faceMeshes.iterator();
+	}
+	/**
+	 * Return the Color of the ith Face of the iterator 
+	 * @param i
+	 * @return
+	 */
+	public Color getFaceColor(int i){
+		if(facesColors==null) return null;
+		return facesColors[i];
 	}
 }

@@ -66,41 +66,57 @@ public class View extends Canvas3D implements PositionListener
 	private Object snapShotLock=new Object();
 	private boolean takeSnapShot;
 	
-	static private SimpleUniverse universe;
+	static private SimpleUniverse sharedUniverse;
+	private SimpleUniverse universe;
 	static private Map viewableToViewSpecificGroup=Collections.synchronizedMap(new HashMap());
 	private ViewingPlatform viewingPlatform;
 	private BranchGroup axisBranchGroup=new BranchGroup();
 	private Viewable currentViewable;
 	private OrbitBehavior orbit= new ViewBehavior(this);
 	private AxisBehavior axisBehavior;
-	
-	/** The constructor */	
+		
 	public View()
 	{
-		this(false);
+		this(false, true);
 	}
 
-	/** The constructor */	
 	public View(boolean offscreen)
+	{
+		this(offscreen, true);
+	}
+		
+	public View(boolean offscreen, boolean isSharedUniverse)
 	{		
 		super(SimpleUniverse.getPreferredConfiguration(), offscreen);
-		
+
 		if(offscreen)
 		{
 			getScreen3D().setPhysicalScreenWidth(0.0254/90.0 * 1600);
 			getScreen3D().setPhysicalScreenHeight(0.0254/90.0 * 1200); 
 		}
-		
-		if(universe==null)
+
+		if(isSharedUniverse)
+		{
+			if(sharedUniverse==null)
+			{
+				sharedUniverse=new SimpleUniverse(this);
+				universe=View.sharedUniverse;
+				viewingPlatform=universe.getViewingPlatform();			
+				universe.addBranchGraph(
+					createLights(new BoundingSphere(new Point3d(),Double.MAX_VALUE)));
+			}
+			else
+			{
+				universe=View.sharedUniverse;
+				viewingPlatform=createViewingPlatform();
+				sharedUniverse.getLocale().addBranchGraph(viewingPlatform);
+			}			
+		}
+		else
 		{
 			universe=new SimpleUniverse(this);
 			viewingPlatform=universe.getViewingPlatform();			
 			universe.addBranchGraph(createLights(new BoundingSphere(new Point3d(),Double.MAX_VALUE)));
-		}
-		else
-		{
-			viewingPlatform=createViewingPlatform();
-			universe.getLocale().addBranchGraph(viewingPlatform);
 		}
 
 		orbit.setCapability(Node.ALLOW_BOUNDS_WRITE);
@@ -193,10 +209,10 @@ public class View extends Canvas3D implements PositionListener
 		{
 			Node node=viewable.getJ3DNode();
 			BranchGroup parent=new BranchGroup();
-			parent.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
+			parent.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 			parent.setCapability(BranchGroup.ALLOW_DETACH);
-			parent.setCapability(BranchGroup.ALLOW_BOUNDS_READ);
-			parent.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);			
+			parent.setCapability(Node.ALLOW_BOUNDS_READ);
+			parent.setCapability(Group.ALLOW_CHILDREN_WRITE);			
 			vsg=new ViewSpecificGroup();
 			vsg.setCapability(ViewSpecificGroup.ALLOW_VIEW_WRITE);
 			vsg.setCapability(ViewSpecificGroup.ALLOW_VIEW_READ);
@@ -249,7 +265,7 @@ public class View extends Canvas3D implements PositionListener
 			0, -0.1f, 0.9f,    0, 0, 1 // z arrow 4    
 		};
 		LineArray la = new LineArray(f.length/3,
-			LineArray.COORDINATES);
+			GeometryArray.COORDINATES);
 		la.setCoordinates(0, f);
 		Appearance a = new Appearance();
 		Color3f color=new Color3f(0.5f, 0.5f, 0.7f);
@@ -260,7 +276,6 @@ public class View extends Canvas3D implements PositionListener
 		s3d.setAppearance(a);
 		transformGroup.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		transformGroup.addChild(s3d);		
-		Font font=new JPanel().getFont();
 		transformGroup.addChild(new RasterTextLabel("x", Color.WHITE, 1.1f, 0, 0));
 		transformGroup.addChild(new RasterTextLabel("y", Color.WHITE, 0, 1.1f, 0));
 		transformGroup.addChild(new RasterTextLabel("z", Color.WHITE, 0, 0, 1.1f));
@@ -344,7 +359,7 @@ public class View extends Canvas3D implements PositionListener
 			JDialog d=new JDialog();
 			textPane=new JTextPane();
 			d.setContentPane(textPane);
-			d.show();
+			d.setVisible(true);
 		}	
 		String cr=System.getProperty("line.separator");
 		String s="scale="+transform.getScale()+cr;
@@ -426,6 +441,7 @@ public class View extends Canvas3D implements PositionListener
 	protected BranchGroup getBranchGroup(Viewable viewable)
 	{
 		ViewSpecificGroup vsp=(ViewSpecificGroup) viewableToViewSpecificGroup.get(viewable);
+		if(vsp==null) return null;
 		return (BranchGroup)vsp.getUserData();
 	}	
 	
@@ -537,6 +553,18 @@ public class View extends Canvas3D implements PositionListener
 			else
 				currentViewable=null;
 		}
+	}
+	
+	/** inform if the view contains the viewable*/
+	public boolean contains(Viewable viewable){
+		ViewSpecificGroup vsg=(ViewSpecificGroup) viewableToViewSpecificGroup.get(viewable);
+		if(vsg==null) return false;
+		
+		Enumeration e=vsg.getAllViews();
+		while(e.hasMoreElements())
+			if(e.nextElement()==this.getView()) return true;
+		
+		return false;
 	}
 	
 	/** Create a navigation link with the specified view.

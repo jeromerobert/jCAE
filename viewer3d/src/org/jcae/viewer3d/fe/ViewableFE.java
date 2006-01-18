@@ -349,11 +349,13 @@ public class ViewableFE implements Viewable
 			//TODO Implement unselect
 		}
 	}
-
-	public void hightLight(int domainID, boolean selected)
+	public void hightLight(int domainID, boolean selected){
+		 hightLight(domainID, selected, true);
+	}
+	public void hightLight(int domainID, boolean selected,boolean fireListeners)
 	{
 		setSelectedDomain(domainID, selected);
-		fireSelectionChanged();
+		if(fireListeners) fireSelectionChanged();
 	}
 		
 	private void setSelectedDomain(int domainID, boolean selected)

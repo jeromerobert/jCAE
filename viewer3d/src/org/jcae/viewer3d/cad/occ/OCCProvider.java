@@ -24,6 +24,7 @@ import java.awt.Color;
 import java.util.NoSuchElementException;
 import org.jcae.opencascade.jni.*;
 import org.jcae.viewer3d.Domain;
+import org.jcae.viewer3d.cad.CADDomainAdapator;
 import org.jcae.viewer3d.cad.CADProvider;
 
 /**
@@ -36,8 +37,18 @@ public class OCCProvider implements CADProvider
 	public static final int FACE_DOMAIN=1;
 	public static final int VERTEX_DOMAIN=2;
 	private TopoDS_Shape shape;
+	private Color[] facesColors;
 	private Color edgeColor=Color.WHITE;
+	
+	private boolean provideEdge=true;
+	private boolean provideFace=true;
+	private boolean provideVertex=true;
 
+	/**
+	 * Create an empty OCCProvider
+	 */
+	public OCCProvider(){}
+	
 	/**
 	 * Create an OCCProvider from a TopoDS_Shape object
 	 */
@@ -53,6 +64,45 @@ public class OCCProvider implements CADProvider
 	public OCCProvider(String fileName)
 	{
         this(loadShape(fileName));
+	}
+	
+	/**
+	 * Set the OCCProvider shape
+	 * @param shape
+	 */
+	public void setShape(TopoDS_Shape shape)
+	{
+		this.shape=shape;
+		facesColors=null;
+	}
+	public void setShape(TopoDS_Shape shape,Color[] facesColors)
+	{
+		this.shape=shape;
+		this.facesColors=facesColors;
+	}
+	
+	/**
+	 * Allow to provide Edge of the Shape
+	 * @param provide
+	 */
+	public void provideEdge(boolean provide){
+		provideEdge=provide;
+	}
+	
+	/**
+	 * Allow to provide Face of the Shape
+	 * @param provide
+	 */
+	public void provideFace(boolean provide){
+		provideFace=provide;
+	}
+	
+	/**
+	 * Allow to provide Vertex of the Shape
+	 * @param provide
+	 */
+	public void provideVertex(boolean provide){
+		provideVertex=provide;
 	}
 	
 	
@@ -84,7 +134,28 @@ public class OCCProvider implements CADProvider
 	 */
 	public int[] getDomainIDs()
 	{
-		return new int[]{EDGE_DOMAIN, FACE_DOMAIN, VERTEX_DOMAIN};
+		if(shape==null) return new int[0];
+		int DomainCount=0;
+		if(provideEdge) DomainCount++;
+		if(provideFace) DomainCount++;
+		if(provideVertex) DomainCount++;
+		
+		int[] toReturn=new int[DomainCount];
+		DomainCount=0;
+		if(provideEdge){
+			toReturn[DomainCount]=EDGE_DOMAIN;
+			DomainCount++;
+		} 
+		if(provideFace){
+			toReturn[DomainCount]=FACE_DOMAIN;
+			DomainCount++;
+		}  
+		if(provideVertex) {
+			toReturn[DomainCount]=VERTEX_DOMAIN;
+			DomainCount++;
+		} 
+		
+		return toReturn;
 	}
 
 	/* (non-Javadoc)
@@ -92,6 +163,7 @@ public class OCCProvider implements CADProvider
 	 */
 	public Domain getDomain(int id)
 	{
+		if(shape==null) throw new NoSuchElementException();
 		switch(id)
 		{
 			case EDGE_DOMAIN:
@@ -99,7 +171,7 @@ public class OCCProvider implements CADProvider
 				oed.setColor(edgeColor);
 				return oed;
 			}
-			case FACE_DOMAIN: return new OCCFaceDomain(shape);
+			case FACE_DOMAIN: return new OCCFaceDomain(shape,facesColors);
 			case VERTEX_DOMAIN: return new OCCVertexDomain(shape);
 			default: throw new NoSuchElementException();
 		}

@@ -1,3 +1,51 @@
+2006-01-16 11:10:34  Jerome Robert <jeromerobert@users.sourceforge.net>
+	* src/org/jcae/viewer3d/cad/occ/OCCFaceDomain.java,
+	  src/org/jcae/viewer3d/test/TestCAD.java:
+	  Fix regretition in OCCFaceDomain and add related tests
+	  
+2006-01-13 15:54:04  Jerome Robert <jeromerobert@users.sourceforge.net>
+	* src/org/jcae/viewer3d/ViewBehavior.java:
+	  Avoid high CPU load when dragging the mouse over a Canvas3D
+
+	* src/org/jcae/viewer3d/View.java:
+	  Add a constructor to allow to disable universe sharing
+
+2006-01-10 17:51:52  Erwann Feat <erwannfeat@gmail.com>
+	* src/org/jcae/viewer3d/cad/occ/OCCFaceDomain.java:
+	Use shape bounding box to compute mesh parameters
+
+2006-01-03 17:13  Erwann Feat <erwannfeat@gmail.com>
+
+	* src/org/jcae/viewer3d/View.java:
+	  Fix a NullPointerException
+	* src/org/jcae/viewer3d/fe/ViewableFE.java:
+	  Allow to hightlight a group of elements without firing events
+	* src/org/jcae/viewer3d/cad/ViewableCAD.java,
+	  src/org/jcae/viewer3d/cad/occ/OCCFaceDomain.java:
+	  Handle problems of faces triangulation
+
+2005-12-14 17:35  Erwann Feat <erwannfeat@gmail.com>
+
+	* src/org/jcae/viewer3d/cad/ViewableCAD.java:
+	  Better rendering of unselected faces
+	* src/org/jcae/viewer3d/cad/occ/OCCFaceDomain.java,
+	  src/org/jcae/viewer3d/cad/occ/OCCProvider.java:
+	  Adding color to faces
+
+2005-12-12 13:56  Erwann Feat <erwannfeat@gmail.com>
+
+	* src/org/jcae/viewer3d/cad/occ/OCCProvider.java:
+	  Adding filter of Shapes Edges and vertices
+	* src/org/jcae/viewer3d/cad/ViewableCAD.java:
+	  Adding Edge selection and SelectionListener
+	* src/org/jcae/viewer3d/cad/occ/OCCFaceDomain.java:
+	  Adding recursive triangulation
+	* src/org/jcae/viewer3d/View.java:
+	  Adding function isViewableVisible : return true if the viewable
+	  is visible in the specified view
+	* src/org/jcae/viewer3d/cad/CADSelectionListener.java:
+	  Deprecated object
+
 2005-12-07 08:30  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/fe/ViewableFE.java:

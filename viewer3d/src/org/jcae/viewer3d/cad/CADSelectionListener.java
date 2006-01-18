@@ -22,7 +22,7 @@ package org.jcae.viewer3d.cad;
 
 /**
  * @author Jerome Robert
- *
+ *@deprecated
  */
 public interface CADSelectionListener
 {

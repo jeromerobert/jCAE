@@ -132,19 +132,23 @@ public class Main
 			feFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 			View feView=new View();
 			UNVProvider unvProvider=new UNVProvider();
-			unvProvider.load(new FileInputStream("/home/jerome/cassiope/maill_surf.unv"));
+			//unvProvider.load(new FileInputStream("/home/jerome/cassiope/maill_surf.unv"));
 			UNVProvider unvProviderSol=new UNVProvider();
-			//unvProviderSol.load(new FileInputStream("/home/jerome/cassiope/maill_vol.unv"));
+			//unvProviderSol.load(new FileInputStream("/home/jerome/cassiope/resources/example/maill_vol.unv"));
 			//unvProviderSol.load(new FileInputStream("/home/jerome/Models/unv/flight_solid.unv"));
-			unvProviderSol.load(new FileInputStream("/tmp/cube.unv"));
+			unvProviderSol.load(new FileInputStream("/home/jerome/cassiope/resources/example/tecplot50x50x50.unv"));
 			
 			/*ViewableFE fev=new ViewableFE(unvProvider);
 			feView.add(fev);*/
-			feView.add(new ViewableFE(unvProviderSol));
-			feView.fitAll();
+			ViewableFE vfe=new ViewableFE(unvProviderSol);			
+			feView.add(vfe);			
 			feFrame.getContentPane().add(feView);
+			feView.setOriginAxisVisible(false);
+			feView.setFixedAxisVisible(false);
+			feView.fitAll();
 			feFrame.setVisible(true);
-			feView.setOriginAxisVisible(true);
+			/*feView.setOriginAxisVisible(true);
+			feView.setFixedAxisVisible(true);*/
 			
 			//Test offscreen screenshot
 			/*View feView2=new View(true);			

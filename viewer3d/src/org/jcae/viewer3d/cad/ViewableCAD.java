@@ -29,6 +29,9 @@ import org.jcae.viewer3d.ColoredDomain;
 import org.jcae.viewer3d.DomainProvider;
 import org.jcae.viewer3d.SelectionListener;
 import org.jcae.viewer3d.Viewable;
+import org.jcae.viewer3d.cad.occ.OCCFaceDomain;
+import org.jcae.viewer3d.fd.FDSelection;
+
 import com.sun.j3d.utils.geometry.GeometryInfo;
 import com.sun.j3d.utils.geometry.NormalGenerator;
 import com.sun.j3d.utils.geometry.Stripifier;
@@ -42,34 +45,64 @@ import com.sun.j3d.utils.picking.PickResult;
  */
 public class ViewableCAD implements Viewable 
 {
-	private static class FacePickingInfo
+	private static interface CADPickingInfo{}
+	
+	private static class FacePickingInfo implements CADPickingInfo
 	{
 		int id;
 		Material[] materials;
+		Color3f oldColor;
 		/**
 		 * @param id
 		 * @param coloringAttributes
 		 */
-		public FacePickingInfo(int id, Material[] material)
+		public FacePickingInfo(int id, Material[] material){
+			this(id,material,new Color3f(Color.WHITE));
+		}
+		public FacePickingInfo(int id, Material[] material,Color3f oldColor)
 		{
 			super();
 			this.id = id;
 			this.materials = material;
+			this.oldColor=oldColor;
+		}
+	}  
+	
+	private static class EdgePickingInfo implements CADPickingInfo
+	{
+		int id;
+		Appearance appearance;
+		ColoringAttributes coloringAttributes;
+		/**
+		 * 
+		 * @param id
+		 * @param appearance
+		 * @param coloringAttributes
+		 */
+		public EdgePickingInfo(int id,Appearance appearance,ColoringAttributes coloringAttributes)
+		{
+			super();
+			this.id = id;
+			this.appearance = appearance;
+			this.coloringAttributes = coloringAttributes;
 		}
 	}
 	
-	public static short DOMAIN_SELECTION=0;
-	public static short FACE_SELECTION=1;
-	public static short EDGE_SELECTION=2;
-	public static short VERTEX_SELECTION=3;
-	public static short MULTI_SELECTION=4;
+	public final static short NONE_SELECTION=0;
+	public final static short DOMAIN_SELECTION=1;
+	public final static short FACE_SELECTION=2;
+	public final static short EDGE_SELECTION=3;
+	public final static short VERTEX_SELECTION=4;
+	public final static short MULTI_SELECTION=5;
 	
 	private short selectionMode=FACE_SELECTION;
 	private CADProvider provider;
 	private BranchGroup branchGroup=new BranchGroup();
 	private List selectionListeners=new ArrayList();
 	private Map facesInfo;
+	private Map edgesInfo;
 	private Collection selectedFaces=new HashSet();
+	private Collection selectedEdges=new HashSet();
 	private String name;
 	private LineAttributes lineAttributes=new LineAttributes();
 	/**
@@ -81,7 +114,7 @@ public class ViewableCAD implements Viewable
 		branchGroup.setCapability(Group.ALLOW_CHILDREN_WRITE);
 		branchGroup.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 		branchGroup.setCapability(Group.ALLOW_CHILDREN_READ);
-		domainsChanged(null);
+		domainsChanged(provider.getDomainIDs());
 	}
 	
 	/* (non-Javadoc)
@@ -91,9 +124,20 @@ public class ViewableCAD implements Viewable
 	{
 		if(branchGroup.numChildren()>0)
 			branchGroup.removeAllChildren();
-		branchGroup.addChild(createEdgesNode((CADDomain) provider.getDomain(0)));
-		branchGroup.addChild(createFacesNode((CADDomain) provider.getDomain(1)));
-		branchGroup.addChild(createVerticesNode((CADDomain) provider.getDomain(2)));
+		for(int i=0;i<domainId.length;i++){
+		
+			switch(domainId[i]){
+			case 0 : //Edges
+				branchGroup.addChild(createEdgesNode((CADDomain) provider.getDomain(0)));
+				break;
+			case 1 : //Faces
+				branchGroup.addChild(createFacesNode((CADDomain) provider.getDomain(1)));
+				break;
+			case 2 : //Vertices
+				branchGroup.addChild(createVerticesNode((CADDomain) provider.getDomain(2)));
+				break;
+			}
+		}
 	}
 
 	/* (non-Javadoc)
@@ -117,17 +161,23 @@ public class ViewableCAD implements Viewable
 	 * Set the picking mode of this viewable.
 	 * Allowed values are:
 	 * <ul>
-	 * <li>0, for domain selection (see CADProvider for how CADDomain are created)</li>
-	 * <li>1, for face selection</li>
-	 * <li>2, for edge selection</li>
-	 * <li>3, for vertex selection</li>
-	 * <li>4, for multimodal (face, edge, vertex) selection</li>
+	 * <li>0, for none selection</li>
+	 * <li>1, for domain selection (see CADProvider for how CADDomain are created)</li>
+	 * <li>2, for face selection</li>
+	 * <li>3, for edge selection</li>
+	 * <li>4, for vertex selection</li>
+	 * <li>5, for multimodal (face, edge, vertex) selection</li>
 	 * </ul>
 	 * @param mode
 	 */
 	public void setSelectionMode(short mode)
 	{
 		selectionMode=mode;
+	}
+	
+	public void setSelectionMode(short mode,boolean unselectAll){
+		if(unselectAll) unselectAll();
+		setSelectionMode(mode);
 	}
 	
 	/**
@@ -159,13 +209,31 @@ public class ViewableCAD implements Viewable
 	public void pick(PickResult result, boolean selected)
 	{
 		Logger.global.finest("result.getGeometryArray().getUserData()="+result.getGeometryArray().getUserData());
-		Object o=result.getGeometryArray().getUserData();
-		if(o instanceof FacePickingInfo)
+		Object o=getPickUserData(result);
+		if((o instanceof FacePickingInfo)&(selectionMode==FACE_SELECTION))
 		{
 			FacePickingInfo fpi=(FacePickingInfo) o;
 			setFaceSelected(fpi, selected);
 			fireSelectionChanged();
 		}
+		else if((o instanceof EdgePickingInfo)&(selectionMode==EDGE_SELECTION))
+		{
+			EdgePickingInfo epi=(EdgePickingInfo) o;
+			setEdgeSelected(epi, selected);
+			fireSelectionChanged();
+		}
+	}
+	
+	
+	private static Object getPickUserData(PickResult result){
+		SceneGraphObject sgo;
+		sgo=result.getGeometryArray();
+		if(sgo!=null){
+			Object o=sgo.getUserData();
+			if(o instanceof CADPickingInfo)
+				return o;
+		}
+		return null;
 	}
 
 	static private int[] integerCollectionToArray(Collection collection)
@@ -181,58 +249,138 @@ public class ViewableCAD implements Viewable
 		}
 		return toReturn;
 	}
-	
-	public void hightLightFace(int faceID, boolean status)
+	/**
+	 * 
+	 * @param faceID
+	 * @param status
+	 */
+	public void hightLightFace(int faceID, boolean status){
+		hightLightFace(faceID, status,true);
+	}
+	/**
+	 * 
+	 * @param faceID
+	 * @param status
+	 * @param fireListeners
+	 */
+	public void hightLightFace(int faceID, boolean status,boolean fireListeners)
 	{
+		
 		FacePickingInfo fpi=(FacePickingInfo) facesInfo.get(new Integer(faceID));
 		setFaceSelected(fpi, status);
-		fireSelectionChanged();
+		if(fireListeners) fireSelectionChanged();
+		
+	}
+	
+	/**
+	 * 
+	 * @param edgeID
+	 * @param status
+	 */
+	public void hightLightEdge(int edgeID, boolean status){
+		hightLightEdge(edgeID, status, true);
+	}
+	/**
+	 * 
+	 * @param edgeID
+	 * @param status
+	 * @param fireListeners
+	 */
+	public void hightLightEdge(int edgeID, boolean status,boolean fireListeners)
+	{
+		if(selectionMode==EDGE_SELECTION){
+			EdgePickingInfo epi=(EdgePickingInfo) edgesInfo.get(new Integer(edgeID));
+			setEdgeSelected(epi, status);
+			if(fireListeners) fireSelectionChanged();
+		}
 	}
 	
 	private void setFaceSelected(FacePickingInfo fpi, boolean selected)
 	{
-		Color colorToSet;
+		Color3f colorToSet;
 		if(selected)
 		{
-			colorToSet=Color.RED;
+			colorToSet=new Color3f(Color.RED);
 			selectedFaces.add(new Integer(fpi.id));
 		}
 		else
 		{
-			colorToSet=Color.WHITE;
+			colorToSet=fpi.oldColor;
 			selectedFaces.remove(new Integer(fpi.id));
 		}
 		
 		for(int i=0; i<fpi.materials.length; i++)
 		{
-			fpi.materials[i].setDiffuseColor(new Color3f(colorToSet));
+			fpi.materials[i].setDiffuseColor(colorToSet);
 		}
+	}
+	
+	private void setEdgeSelected(EdgePickingInfo epi, boolean selected)
+	{
+		if(selected)
+		{
+			ColoringAttributes ca=new ColoringAttributes();
+			ca.setColor(new Color3f(Color.RED));
+			epi.appearance.setColoringAttributes(ca);
+			selectedEdges.add(new Integer(epi.id));
+		}
+		else
+		{
+			epi.appearance.setColoringAttributes(epi.coloringAttributes);
+			selectedEdges.remove(new Integer(epi.id));
+		}
+		
 	}
 	
 	private void fireSelectionChanged()
 	{
-		for(int i=0; i<selectionListeners.size(); i++)
-		{
-			CADSelectionListener listener=(CADSelectionListener) selectionListeners.get(i);
-			CADSelection[] cs=new CADSelection[]{new CADSelection(0,
+		
+			for(int i=0; i<selectionListeners.size(); i++)
+			{
+				Object alistener=selectionListeners.get(i);
+				if(alistener instanceof CADSelectionListener){
+					CADSelectionListener cadlistener=(CADSelectionListener) alistener;
+					CADSelection[] cs=new CADSelection[]{new CADSelection(0,
+							integerCollectionToArray(selectedFaces), new int[0], new int[0])};
+					cadlistener.selectionChanged(cs);
+				}
+				else if(alistener instanceof SelectionListener){
+					((SelectionListener)alistener).selectionChanged();
+				}
+		}
+	}
+	
+	public CADSelection[] getSelection(){
+		return new CADSelection[]{new CADSelection(0,
 				integerCollectionToArray(selectedFaces), new int[0], new int[0])};
-			listener.selectionChanged(cs);
-		}					
 	}
 	
 	private Node createEdgesNode(CADDomain domain)
 	{
 		Iterator it=domain.getEdgeIterator();
 		BranchGroup toReturn=new BranchGroup();
+		toReturn.setCapability(BranchGroup.ALLOW_DETACH);
+		org.jcae.viewer3d.MarkUtils.setPickable(toReturn,true);
+		edgesInfo=new HashMap();
+		int n=0;
+		
 		while(it.hasNext())
 		{
 			float[] coordinates=(float[])it.next();			
 			LineStripArray lsa=new LineStripArray(coordinates.length/3,
 				LineStripArray.COORDINATES,
 				new int[]{coordinates.length/3});
+			
+			lsa.setCapability(LineStripArray.ALLOW_COLOR_READ);
+			lsa.setCapability(LineStripArray.ALLOW_COLOR_WRITE);
+			lsa.setCapability(LineStripArray.ALLOW_COORDINATE_READ);
+			lsa.setCapability(LineStripArray.ALLOW_COUNT_READ);
+			lsa.setCapability(LineStripArray.ALLOW_FORMAT_READ);
+			
 			lsa.setCoordinates(0, coordinates);
 			Shape3D shape3d=new Shape3D(lsa);
 			Appearance a=new Appearance();
+			a.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_WRITE);
 			ColoringAttributes ca=new ColoringAttributes();
 			if(domain instanceof ColoredDomain)
 			{
@@ -242,10 +390,15 @@ public class ViewableCAD implements Viewable
 			a.setLineAttributes(lineAttributes);
 			a.setColoringAttributes(ca);
 			shape3d.setAppearance(a);
+			shape3d.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 			toReturn.addChild(shape3d);
+			
+			//Build Picking Data
+			EdgePickingInfo epi=new EdgePickingInfo(n,a,ca);
+			edgesInfo.put(new Integer(n), epi); 
+			lsa.setUserData(epi);
+			n++;
 		}
-		toReturn.setPickable(false);
-		toReturn.setCapability(BranchGroup.ALLOW_DETACH);
 		return toReturn;
 	}
 	
@@ -274,9 +427,22 @@ public class ViewableCAD implements Viewable
 			PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE,
 			factorAbs, false, factorRel);	
 		
+		Vector materials=new Vector();//Vector to save Face Materials
+		
 		while(it.hasNext())
 		{			
+			materials.clear();
+			
 			FaceMesh fm=(FaceMesh) it.next();
+			
+			//Case of an unmeshed face
+			if(fm.getNodes().length==0){
+				FacePickingInfo fpi = 
+					new FacePickingInfo(n,new Material[0]);
+				facesInfo.put(new Integer(n), fpi);
+				n++;
+				continue;
+			}
 			GeometryInfo gi=new GeometryInfo(GeometryInfo.TRIANGLE_ARRAY);
 			gi.setCoordinates(fm.getNodes());
 			gi.setCoordinateIndices(fm.getMesh());			
@@ -289,33 +455,71 @@ public class ViewableCAD implements Viewable
 			g.setCapability(IndexedTriangleArray.ALLOW_COUNT_READ);
 			g.setCapability(IndexedTriangleArray.ALLOW_FORMAT_READ);
 			g.setCapability(IndexedTriangleArray.ALLOW_COORDINATE_READ);
-			g.setCapability(IndexedTriangleArray.ALLOW_COORDINATE_INDEX_READ);			
+			g.setCapability(IndexedTriangleArray.ALLOW_COORDINATE_INDEX_READ);	
 			
-			Shape3D shape3d=new Shape3D(g);
-			Appearance a=new Appearance();
-			shape3d.setAppearance(a);
-			a.setPolygonAttributes(paFront);
-			Material m1=new Material();
-			m1.setAmbientColor(new Color3f(Color.BLUE));
-			m1.setCapability(Material.ALLOW_COMPONENT_WRITE);			
-			a.setMaterial(m1);			
-			shape3d.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-			toReturn.addChild(shape3d);
+			Color faceColor=null;
+			if(domain instanceof OCCFaceDomain)
+				faceColor=((OCCFaceDomain)domain).getFaceColor(n);
 			
-			shape3d=new Shape3D(g);
-			a=new Appearance();
-			shape3d.setAppearance(a);
-			a.setPolygonAttributes(paBack);
-			Material m2=new Material();
-			m2.setAmbientColor(new Color3f(Color.GREEN));
-			m2.setCapability(Material.ALLOW_COMPONENT_WRITE);			
-			a.setMaterial(m2);			
-			shape3d.setCapability(Shape3D.ALLOW_GEOMETRY_READ);						
-			toReturn.addChild(shape3d);	
-			
-			FacePickingInfo fpi = new FacePickingInfo(n, new Material[]{m1, m2});
-			facesInfo.put(new Integer(n), fpi); 
-			g.setUserData(fpi);
+			if(faceColor==null) {
+				Shape3D shape3d=new Shape3D(g);
+				Appearance a=new Appearance();
+				shape3d.setAppearance(a);
+				a.setPolygonAttributes(paFront);
+				Material m1=new Material();
+				m1.setAmbientColor(new Color3f(Color.BLUE));
+				m1.setCapability(Material.ALLOW_COMPONENT_WRITE);			
+				a.setMaterial(m1);			
+				shape3d.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
+				toReturn.addChild(shape3d);
+				materials.add(m1);
+				
+				shape3d=new Shape3D(g);
+				a=new Appearance();
+				shape3d.setAppearance(a);
+				a.setPolygonAttributes(paBack);
+				Material m2=new Material();
+				m2.setAmbientColor(new Color3f(Color.GREEN));
+				m2.setCapability(Material.ALLOW_COMPONENT_WRITE);			
+				a.setMaterial(m2);			
+				shape3d.setCapability(Shape3D.ALLOW_GEOMETRY_READ);						
+				toReturn.addChild(shape3d);	
+				materials.add(m2);
+				
+				//Build Picking Data
+				FacePickingInfo fpi = 
+					new FacePickingInfo(n,(Material[])materials.toArray(new Material[materials.size()]));
+				facesInfo.put(new Integer(n), fpi); 
+				g.setUserData(fpi);
+			}
+			else {
+				Shape3D shape3d=new Shape3D(g);
+				Appearance a=new Appearance();
+				shape3d.setAppearance(a);
+				a.setPolygonAttributes(paNone);
+				Material m1=new Material();
+				Color3f color=new Color3f(
+						((float)faceColor.getRed())/255
+						,((float)faceColor.getGreen())/255
+						,((float)faceColor.getBlue())/255);
+				
+				m1.setAmbientColor(color);
+				m1.setDiffuseColor(color);
+				m1.setSpecularColor(color);
+				
+				m1.setCapability(Material.ALLOW_COMPONENT_WRITE);			
+				a.setMaterial(m1);			
+				shape3d.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
+				toReturn.addChild(shape3d);
+				materials.add(m1);
+				
+				//Build Picking Data
+				FacePickingInfo fpi = 
+					new FacePickingInfo(n,(Material[])materials.toArray(new Material[materials.size()])
+							,color);
+				facesInfo.put(new Integer(n), fpi); 
+				g.setUserData(fpi);
+			}			
 			n++;
 		}
 		return toReturn;
@@ -364,6 +568,13 @@ public class ViewableCAD implements Viewable
 			FacePickingInfo fpi=(FacePickingInfo) facesInfo.get(new Integer(ids[i]));
 			setFaceSelected(fpi, false);
 		}
+		
+		ids=integerCollectionToArray(selectedEdges);
+		for(int i=0; i<ids.length; i++)
+		{
+			EdgePickingInfo epi=(EdgePickingInfo) edgesInfo.get(new Integer(ids[i]));
+			setEdgeSelected(epi, false);
+		}
 		fireSelectionChanged();
 	}
 	
@@ -382,8 +593,7 @@ public class ViewableCAD implements Viewable
 	 */
 	public void addSelectionListener(SelectionListener listener)
 	{
-		// TODO Implement this method and remove the other addSelectionListener method
-		throw new UnsupportedOperationException();
+		selectionListeners.add(listener);
 	}
 
 	/* (non-Javadoc)
@@ -391,8 +601,7 @@ public class ViewableCAD implements Viewable
 	 */
 	public void removeSelectionListener(SelectionListener listener)
 	{
-		// TODO Implement this method and remove the other addSelectionListener method
-		throw new UnsupportedOperationException();
+		selectionListeners.remove(listener);
 	}
 
 	public void setLineWidth(float lineWidth)

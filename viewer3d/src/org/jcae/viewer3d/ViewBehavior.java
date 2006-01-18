@@ -107,11 +107,14 @@ class ViewBehavior extends OrbitBehavior
 		}*/ else
 		{
 			super.processMouseEvent(evt);
-			Transform3D t3d = new Transform3D();
-			getViewingPlatform().getViewPlatformTransform().getTransform(t3d);
-			fixOriginAxis(t3d);
-			//notify slave view to change their position
-			view.firePositionChanged();
+			if(motion)
+			{
+				Transform3D t3d = new Transform3D();
+				getViewingPlatform().getViewPlatformTransform().getTransform(t3d);
+				fixOriginAxis(t3d);
+				//notify slave view to change their position
+				view.firePositionChanged();
+			}
 		}
 	}
 	
