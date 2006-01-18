@@ -135,17 +135,14 @@ public class Groups implements SelectionListener
 	 * @param the list of groups to display.
 	 * @param the View3D in which the Groups are displayed.
 	 */
-	public void displayGroups(Collection groupsToDisplay, View3D view)
+	public void displayGroups(String meshName, Collection groupsToDisplay,
+		View3D view)
 	{
 		try
 		{
-			if(viewable==null)
-			{
-				AmibeProvider provider = new AmibeProvider(new File(getXmlDir()));
-				viewable = new ViewableFE(provider);
-				viewable.addSelectionListener(this);
-				viewable.setName(meshName);
-			}
+			AmibeProvider provider = new AmibeProvider(new File(getXmlDir()));
+			viewable = new ViewableFE(provider);
+			viewable.addSelectionListener(this);
 						
 			Map map=new HashMap();
 			for(int i=0; i<groups.size(); i++)
@@ -155,12 +152,24 @@ public class Groups implements SelectionListener
 			}
 			
 			Iterator it=groupsToDisplay.iterator();
+			String sb="";
+			boolean full=false;
 			while(it.hasNext())
 			{
 				Group g=(Group)it.next();
 				map.put(new Integer(g.getId()), Boolean.TRUE);
+				
+				if(sb.length()<20)
+					sb=sb+" "+g.getName();
+				else
+					full=true;
 			}
-
+			
+			if(full)
+				sb=sb+"...";
+			
+			viewable.setName(meshName+" ["+sb+"]");
+			
 			viewable.setDomainVisible(map);
 			
 			if(!Arrays.asList(view.getView().getViewables()).contains(viewable))
@@ -510,21 +519,6 @@ public class Groups implements SelectionListener
 		return "Groups";
 	}
 
-	/**
-	 * Bean action which makes it possible to display groups.
-	 * It displays a dialog-box to select the groups to display, and to choose the view.
-	 */
-	public void viewGroup()
-	{
-		PanelView dialog = new PanelView(this);
-		if (!dialog.cancel())
-		{
-			this.displayGroups(dialog.getSelectedGroups(), dialog
-				.getSelectedView());
-		}
-	}
-	
-	
 	//beware JVM bug: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5056395
 	//use transferFrom, not transferTo
 	private void copyFile(File src, File dst) throws IOException

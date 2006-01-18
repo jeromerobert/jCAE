@@ -15,3 +15,7 @@ Install-Before: org.openide.loaders.XMLDataObject, org.netbeans.modules.xml.core
 Name: org/jcae/netbeans/mesh/UNVDataLoader.class
 OpenIDE-Module-Class: Loader
 
+Name: org/jcae/netbeans/mesh/MeshDataLoader.class
+Install-Before: org.openide.loaders.XMLDataObject, org.netbeans.modules.xml.core.XMLDataObject
+OpenIDE-Module-Class: Loader
+

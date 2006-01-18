@@ -78,7 +78,10 @@ public class Settings extends SystemOption
 	{
 		return "Mesher settings";
 	}
-		
+
+	/**
+	 * Return a command line to execute the mesher
+	 */
 	public String[] getCommandLine()
 	{		
 		String javaExe=new File(new File(javaVirtualMachine, "bin"), "java").getPath();
@@ -91,6 +94,23 @@ public class Settings extends SystemOption
 		toReturn.add(mesherJar);
 		return (String[])toReturn.toArray(new String[toReturn.size()]);
 	}
+
+	/**
+	 * Return a command line to execute other algo in the jcae.jar archive
+	 */
+	public String[] getCommandLineAlgo()
+	{		
+		String javaExe=new File(new File(javaVirtualMachine, "bin"), "java").getPath();
+		ArrayList toReturn=new ArrayList();
+		toReturn.add(javaExe);
+		toReturn.add("-Xmx"+maximumMemory);
+		toReturn.add("-Dlog4j.configuration="+log4jConfigurationFile);
+		toReturn.addAll(Arrays.asList(getCustomJVMParameters()));
+		toReturn.add("-classpath");
+		toReturn.add(mesherJar);
+		return (String[])toReturn.toArray(new String[toReturn.size()]);
+	}
+	
 	
 	public String getJavaVirtualMachine()
 	{

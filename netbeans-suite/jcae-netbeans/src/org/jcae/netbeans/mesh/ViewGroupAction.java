@@ -60,7 +60,9 @@ public class ViewGroupAction extends CookieAction
 		while(it.hasNext())
 		{
 			Map.Entry e=(Entry) it.next();
-			((Groups)e.getKey()).displayGroups((Collection) e.getValue(), v);
+			((Groups)e.getKey()).displayGroups(
+				arg0[0].getParentNode().getParentNode().getName(),
+				(Collection) e.getValue(), v);
 		}
 	}
 

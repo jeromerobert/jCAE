@@ -20,8 +20,11 @@
 
 package org.jcae.netbeans;
 
+import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
+import java.beans.Introspector;
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import org.netbeans.api.project.Project;
@@ -32,6 +35,7 @@ import org.openide.explorer.propertysheet.PropertySheet;
 import org.openide.filesystems.FileObject;
 import org.openide.nodes.BeanNode;
 import org.openide.nodes.Node;
+import org.openide.nodes.Sheet;
 
 public class Utilities
 {
@@ -67,10 +71,18 @@ public class Utilities
 	{
 		try
 		{
-			BeanNode bn = new BeanNode(bean);
+			BeanNode bn = new BeanNode(bean)
+			{
+				protected void createProperties(Object bean, BeanInfo info)				
+				{
+					super.createProperties(bean, info);
+					getSheet().get(Sheet.PROPERTIES).remove("class");				
+				}
+			};
 			PropertySheet ps=new PropertySheet();
 			ps.setNodes(new Node[]{bn});
-			DialogDescriptor dd=new DialogDescriptor(ps, bean.toString());
+			String title=Introspector.getBeanInfo(bean.getClass()).getBeanDescriptor().getDisplayName();
+			DialogDescriptor dd=new DialogDescriptor(ps, title);
 			DialogDisplayer.getDefault().createDialog(dd).setVisible(true);
 			return dd.getValue()==NotifyDescriptor.OK_OPTION;
 
@@ -112,5 +124,11 @@ public class Utilities
 			}
 			return res.toString ();
 		} else return s;
+	}
+
+	public static String removeExt(String fileName)
+	{
+		int i=fileName.lastIndexOf('.');
+		return fileName.substring(0, i);
 	}
 }

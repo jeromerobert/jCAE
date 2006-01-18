@@ -96,11 +96,6 @@ public class GroupNode extends AbstractNode implements Cookie
 		};
 	}
 
-	public void view()
-	{
-		groups.displayGroups(Collections.singleton(group), View3D.getView3D());
-	}
-
 	public Group getGroup()
 	{
 		return group;

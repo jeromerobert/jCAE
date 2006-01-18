@@ -1,4 +1,54 @@
-2006-01-12 10:23:36  Jerome Robert <jeromerobert@users.sourceforge.net>
+2006-01-18 10:09:57  Jerome Robert <jeromerobert@users.sourceforge.net>
+	* make-dist-Linux.sh, make-dist-Win32.sh: upgrade to j2re 1.5.0_06
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/Groups.java:
+	Always reload mesh from disk before displaying it
+
+2006-01-17 18:48:02  Jerome Robert <jeromerobert@users.sourceforge.net>
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/DecimateAction.java,
+	 jcae-netbeans/src/org/jcae/netbeans/mesh/DecimateParameter.java:
+	Implement decimate action
+
+2006-01-16 15:20:57  Jerome Robert <jeromerobert@users.sourceforge.net>
+	* jcae-netbeans/src/org/jcae/netbeans/Utilities.java,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/BuidOEMMAction.java,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/OEMMParameters.java:
+	  Add a dialog to enter OEMM parameters
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/OEMMViewAction.java:
+	  Do not decimate in OEMM view
+
+2006-01-13 19:48:32  Jerome Robert <jeromerobert@users.sourceforge.net>
+	* jcae-netbeans/src/org/jcae/netbeans/Utilities.java:
+	  Do not display "class" field in CAD transform dialogs
+
+	* jcae-netbeans/src/org/jcae/netbeans/cad/TransformAction.java:
+	  [Feature 1377237] Scale geometry
+
+	* jcae-netbeans/src/org/jcae/netbeans/Utilities.java,
+	  jcae-netbeans/src/org/jcae/netbeans/cad/ImportAction.java:
+	  Fix bug 1400446 and 1362822 : explicite name for imported geometries
+
+	* jcae-netbeans/src/org/jcae/netbeans/viewer3d/View3D.java:
+	  Fix bug: Second 3D view always frozen
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/OEMMViewAction.java:
+	  Merge the MeshOEMMViewer3d viewer from Amibe.
+
+2006-01-12 19:48:27  Jerome Robert <jeromerobert@users.sourceforge.net>
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/Groups.java
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/MeshNode.java
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/ViewGroupAction.java:
+	  Fix bug [gforge 53] visu of mesh, no name !
+
+	* jcae-netbeans/src/org/jcae/netbeans/layer.xml
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/:
+	  First light integration of OEMM viewer.
+	  
+	* jcae-netbeans/src/org/jcae/netbeans/ProcessExecutor.java:
+	  Make launch of sub process easier
+	  
+	* jcae-netbeans/: Add text/mesh+xml MIME.
+
 	* jcae-netbeans/: Create text/x-unv MIME type. Display UNV node in
 	  the root of Mesh module.
 

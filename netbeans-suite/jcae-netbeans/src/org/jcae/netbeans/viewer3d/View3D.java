@@ -21,6 +21,9 @@
 package org.jcae.netbeans.viewer3d;
 
 import java.awt.BorderLayout;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.JPopupMenu;
@@ -105,7 +108,7 @@ public class View3D extends TopComponent
 		this.canvas=new View();
 		setLayout(new BorderLayout());
 		add(canvas, BorderLayout.CENTER);
-		canvas.setOriginAxisVisible(true);		
+		canvas.setOriginAxisVisible(true);
 	}
 	
 	public int getPersistenceType()
@@ -113,7 +116,7 @@ public class View3D extends TopComponent
 		return TopComponent.PERSISTENCE_NEVER;
 	}
     
-	public void setVisible(boolean b)
+	/*public void setVisible(boolean b)
     {
         if(b)
         {
@@ -126,7 +129,7 @@ public class View3D extends TopComponent
         		this.remove(canvas);
         }
         super.setVisible(b);
-    }
+    }*/
 	
 	public View getView()
 	{

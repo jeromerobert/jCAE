@@ -20,43 +20,44 @@
 
 package org.jcae.netbeans.mesh;
 
+import java.io.IOException;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObjectExistsException;
-import org.openide.loaders.FileEntry;
 import org.openide.loaders.MultiDataObject;
-import org.openide.loaders.MultiFileLoader;
-import org.openide.loaders.MultiDataObject.Entry;
+import org.openide.loaders.UniFileLoader;
+import org.openide.util.NbBundle;
 
-public class MeshDataLoader extends MultiFileLoader
-{	
-	private final static String EXTENSION="_mesh.xml";
+public class MeshDataLoader extends UniFileLoader
+{
+	
+	public static final String REQUIRED_MIME = "text/mesh+xml";
+	
+	private static final long serialVersionUID = 1L;
 	
 	public MeshDataLoader()
 	{
-		super("org.jcae.netbeans.mesh.MeshDataLoader");
-		setDisplayName("Mesh file");
+		super("org.jcae.netbeans.mesh.MeshDataObject");
 	}
-
-	protected MultiDataObject createMultiObject(FileObject primaryFile)
-		throws DataObjectExistsException, java.io.IOException
+	
+	protected String defaultDisplayName()
+	{
+		return NbBundle.getMessage(MeshDataLoader.class, "LBL_Mesh_loader_name");
+	}
+	
+	protected void initialize()
+	{
+		super.initialize();
+		getExtensions().addMimeType(REQUIRED_MIME);
+	}
+	
+	protected MultiDataObject createMultiObject(FileObject primaryFile) throws DataObjectExistsException, IOException
 	{
 		return new MeshDataObject(primaryFile, this);
 	}
-
-
-	protected FileObject findPrimaryFile(FileObject arg0) {
-		if(arg0.getNameExt().endsWith(EXTENSION))
-			return arg0;
-		else return null;
-	}
-
-	protected Entry createPrimaryEntry(MultiDataObject arg0, FileObject arg1)
+	
+	protected String actionsContext()
 	{
-		return new FileEntry(arg0, arg1);
+		return "Loaders/" + REQUIRED_MIME + "/Actions";
 	}
-
-	protected Entry createSecondaryEntry(MultiDataObject arg0, FileObject arg1)
-	{
-		return new FileEntry(arg0, arg1);
-	}	
+	
 }

@@ -53,6 +53,8 @@ public abstract class TransformAction extends CookieAction
 				.getMenuPresenter());
 			toReturn.add(((Presenter.Menu) SystemAction.get(Rotate.class))
 				.getMenuPresenter());
+			toReturn.add(((Presenter.Menu) SystemAction.get(Scale.class))
+				.getMenuPresenter());
 			return toReturn;
 		}
 
@@ -115,8 +117,50 @@ public abstract class TransformAction extends CookieAction
 			return theTransformation;
 		}
 	}
+	
+	static public class ScaleFactor
+	{
+		double factor=1.0;
+		
+		public double getFactor()
+		{
+			return factor;
+		}
+		
+		public void setFactor(double factor)
+		{
+			this.factor=factor;
+		}		
+	}
+	
+	static public class Scale extends TransformAction
+	{
+		
+		public String getName()
+		{
+			return "Scale";
+		}
 
+		protected Object getParameters()
+		{
+			//Use the Action object as a bean to define the parameters
+			return new ScaleFactor();
+		}
 
+		protected GP_Trsf getTrsf(Object parameter)
+		{
+			ScaleFactor r=(ScaleFactor) parameter;
+			GP_Trsf theTransformation = new GP_Trsf();
+			double a=r.getFactor();
+			double[] matrix=new double[]{
+				a, 0, 0, 0,
+				0, a, 0, 0,
+				0, 0, a, 0	
+			};
+			theTransformation.setValues(matrix, 0.0, 0.0);
+			return theTransformation;
+		}
+	}	
 
 	protected Class[] cookieClasses()
 	{

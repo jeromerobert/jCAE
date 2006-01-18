@@ -24,11 +24,13 @@ import java.io.File;
 import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
+import org.jcae.netbeans.Utilities;
 import org.jcae.opencascade.jni.*;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.project.ui.support.MainProjectSensitiveActions;
 import org.netbeans.spi.project.ui.support.ProjectActionPerformer;
 import org.openide.ErrorManager;
+import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CallableSystemAction;
@@ -81,7 +83,7 @@ public class ImportAction extends CallableSystemAction
 		}
 	};   
 	
-	public void importGeometry(String output)
+	public void importGeometry(FileObject outputDir)
 	{
 		try
 		{
@@ -112,9 +114,14 @@ public class ImportAction extends CallableSystemAction
 		        }
 		        else
 		            brepShape = BRepTools.read(fileName, new BRep_Builder());
-
-		        BRepTools.write(brepShape, output);
-		        
+				
+		        String outputName=Utilities.getFreeName(
+					outputDir,
+					Utilities.removeExt(chooser.getSelectedFile().getName()),
+					".brep");
+				outputName=new File(FileUtil.toFile(outputDir), outputName).getPath();
+				
+				BRepTools.write(brepShape, outputName);
 			}
 		}
 		catch(Exception ex)
@@ -134,17 +141,9 @@ public class ImportAction extends CallableSystemAction
 
 			public void perform(Project arg0)
 			{
-				try
-				{
-					File dir=FileUtil.toFile(arg0.getProjectDirectory());
-					File f = File.createTempFile("Geometry",".brep", dir);
-					importGeometry(f.getPath());
-				}
-				catch (IOException e)
-				{
-					ErrorManager.getDefault().notify(e);
-				}				
-			}}, null, null).actionPerformed(null);
+				importGeometry(arg0.getProjectDirectory());
+			}
+		}, null, null).actionPerformed(null);
 	}
 
 	public String getName()
