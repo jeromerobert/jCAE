@@ -9,6 +9,9 @@
 	
 	<target name="compile" depends="init">
 		<mkdir dir="${classes.dir}"/>
+		<propertyfile file="${classes.dir}/timestamp.properties">
+			<entry key="build.time" type="date" pattern="yyyy-MM-dd HH:mm:ss" value="now" />
+		</propertyfile>
 		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}">
 			<compilerarg line="${compiler.arg}"/>
 			<classpath>
