@@ -105,7 +105,9 @@ public class DecimateVertex
 {
 	private static Logger logger=Logger.getLogger(DecimateVertex.class);
 	private Mesh mesh;
-	private double tolerance;
+	// 0.0 is not a valid value because it is a normalization factor.
+	private double tolerance = 1.0;
+	private int nrFinal = 0;
 	private int placement;
 	/**
 	 * Optimal placement strategy, select the best vertex.
@@ -196,6 +198,33 @@ public class DecimateVertex
 	}
 	
 	/**
+	 * Creates a <code>DecimateVertex</code> instance.
+	 *
+	 * @param m  the <code>Mesh</code> instance to refine.
+	 * @param n  the desired number of triangles
+	 */
+	public DecimateVertex(Mesh m, int n)
+	{
+		mesh = m;
+		nrFinal = n;
+		placement = POS_EDGE;
+	}
+	
+	/**
+	 * Creates a <code>DecimateVertex</code> instance.
+	 *
+	 * @param m  the <code>Mesh</code> instance to refine.
+	 * @param n  the desired number of triangles
+	 * @param p  placement of the new point. Legitimate values are <code>POS_VERTEX</code> (at a vertex location), <code>POS_MIDDLE</code> (at the middle of the contracted edge), <code>POS_EDGE</code> (optimal placement on the contracted edge, this is the default) and <code>POS_OPTIMAL</code> (optimal placement).
+	 */
+	public DecimateVertex(Mesh m, int n, int p)
+	{
+		mesh = m;
+		nrFinal = n;
+		placement = p;
+	}
+	
+	/**
 	 * Contract all edges with the given error.
 	 */
 	public void compute()
@@ -205,11 +234,13 @@ public class DecimateVertex
 		HashSet nodeset = new HashSet(roughNrNodes);
 		HashMap quadricMap = new HashMap(roughNrNodes);
 		NotOrientedEdge noe = new NotOrientedEdge();
+		int nrTriangles = 0;
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
 			if (f.isOuter())
 				continue;
+			nrTriangles++;
 			for (int i = 0; i < 3; i++)
 			{
 				Vertex n = f.vertex[i];
@@ -289,7 +320,7 @@ public class DecimateVertex
 		}
 		unmarkEdges();
 		computeTree(tree, quadricMap);
-		contractAllVertices(tree, quadricMap);
+		contractAllVertices(tree, nrTriangles, quadricMap);
 	}
 	
 	private void unmarkEdges()
@@ -338,7 +369,7 @@ public class DecimateVertex
 		}
 	}
 	
-	private boolean contractAllVertices(PAVLSortedTree tree, HashMap quadricMap)
+	private boolean contractAllVertices(PAVLSortedTree tree, int nrTriangles, HashMap quadricMap)
 	{
 		int contracted = 0;
 		HashSet trash = new HashSet();
@@ -347,10 +378,12 @@ public class DecimateVertex
 		double [] temp = new double[3];
 		boolean noSwap = false;
 		int cnt = 0;
-		while (tree.size() > 0)
+		while (tree.size() > 0 && nrTriangles > nrFinal)
 		{
 			NotOrientedEdge edge = (NotOrientedEdge) tree.first();
-			double cost = tree.getKey(edge);
+			double cost = -1.0;
+			if (nrFinal == 0)
+				cost = tree.getKey(edge);
 			Vertex v1 = null, v2 = null, v3 = null;
 			Quadric q1 = null, q2 = null, q3 = null;
 			do {
@@ -374,13 +407,16 @@ public class DecimateVertex
 						logger.debug("Edge not contracted: "+edge);
 				}
 				edge = (NotOrientedEdge) tree.next();
-				cost = tree.getKey(edge);
+				if (nrFinal == 0)
+					cost = tree.getKey(edge);
+				else
+					cost = -1.0;
 			} while (edge != null && cost <= tolerance);
 			if (cost > tolerance || edge == null)
 				break;
 			tree.remove(edge);
 			if (logger.isDebugEnabled())
-				logger.debug("Contract edge: "+edge);
+				logger.debug("Contract edge: "+edge+" into "+v3);
 			//  Keep track of triangles deleted when contracting
 			Triangle t1 = edge.getTri();
 			OTriangle.symOTri(edge, sym);
@@ -388,6 +424,7 @@ public class DecimateVertex
 			// Remove all edges of t1 and t2 from tree
 			if (!t1.isOuter())
 			{
+				nrTriangles--;
 				for (int i = 0; i < 3; i++)
 				{
 					edge.nextOTri();
@@ -397,6 +434,7 @@ public class DecimateVertex
 			}
 			if (!t2.isOuter())
 			{
+				nrTriangles--;
 				for (int i = 0; i < 3; i++)
 				{
 					sym.nextOTri();

@@ -1,3 +1,7 @@
+Thu Jan 26 12:18:29 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java: Add a new constructor, to specify the number of triangles in final mesh.
+
 Thu Dec  8 11:37:29 CET 2005 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos3d/SwapEdge.java: New algorithm to swap an edge if its adjacent faces are coplanar.
