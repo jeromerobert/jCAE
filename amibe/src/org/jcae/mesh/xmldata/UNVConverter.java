@@ -437,6 +437,16 @@ public class UNVConverter
 		writeMesh(out, "MESH");
 	}
 	
+	public void writeSTL(String fileName)
+	{
+		writeMesh(fileName, "STL");
+	}
+	
+	public void writeSTL(PrintStream out) throws ParserConfigurationException, SAXException, IOException
+	{
+		writeMesh(out, "STL");
+	}
+	
 	private void writeMesh(PrintStream out, String meshType) throws ParserConfigurationException, SAXException, IOException
 	{
 		document=XMLHelper.parseXML(new File(directory,"jcae3d"));
@@ -448,6 +458,8 @@ public class UNVConverter
 		WriteMeshProcedures proc;
 		if (meshType.equals("UNV"))
 			proc = new WriteMeshUNV();
+		else if (meshType.equals("STL"))
+			proc = new WriteMeshSTL();
 		else
 			proc = new WriteMeshMESH();
 		proc.writeInit(out);
@@ -516,7 +528,7 @@ public class UNVConverter
 			TIntIntHashMap amibeToUNV) throws IOException;
 		public abstract void writeTriangles(PrintStream out, int[] triangles,
 			TIntIntHashMap amibeNodeToUNVNode,
-			TIntIntHashMap amibeTriaToUNVTria);
+			TIntIntHashMap amibeTriaToUNVTria) throws IOException;
 		public void writeInit(PrintStream out)
 		{
 		}
@@ -529,7 +541,7 @@ public class UNVConverter
 		{
 		}
 		public void writeGroups(PrintStream out,
-			TIntIntHashMap amibeTriaToUNVTria)
+			TIntIntHashMap amibeTriaToUNVTria) throws IOException
 		{
 		}
 	}
@@ -605,6 +617,7 @@ public class UNVConverter
 		 */
 		public void writeTriangles(PrintStream out, int[] triangles,
 			TIntIntHashMap amibeNodeToUNVNode, TIntIntHashMap amibeTriaToUNVTria)
+			throws IOException
 		{
 			out.println("    -1"+CR+"  2412");
 			int count=0;
@@ -630,6 +643,7 @@ public class UNVConverter
 		 * @param amibeTriaToUNVTria
 		 */
 		public void writeGroups(PrintStream out, TIntIntHashMap amibeTriaToUNVTria)
+			throws IOException
 		{
 			out.println("    -1"+CR+"  2430");
 			for(int i=0;i<groups.length; i++)
@@ -651,6 +665,70 @@ public class UNVConverter
 					out.println();
 			}
 			out.println("    -1");
+		}
+	}
+	
+	private class WriteMeshSTL extends WriteMeshProcedures
+	{
+		public void writeNodes(PrintStream out, int[] nodesID, TIntIntHashMap amibeToUNV) throws IOException
+		{
+		}
+		
+		/**
+		 * @param out
+		 * @param amibeNodeToUNVNode
+		 */
+		public void writeTriangles(PrintStream out, int[] triangles,
+			TIntIntHashMap amibeNodeToUNVNode, TIntIntHashMap amibeTriaToUNVTria)
+			throws IOException
+		{
+			File f=getNodeFile();
+			// Open the file and then get a channel from the stream
+			FileInputStream fis = new FileInputStream(f);
+			FileChannel fc = fis.getChannel();
+		
+			// Get the file's size and then map it into memory
+			int sz = (int)fc.size();
+			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
+			DoubleBuffer nodesBuffer=bb.asDoubleBuffer();
+			
+			out.println("solid");
+			int count=0;
+			double x,y,z;
+			for(int i=0; i<groups.length; i++)
+			{
+				for(int j=0; j<groups[i].length; j++)
+				{
+					out.println("facet");
+					out.println("   outer loop");
+					for(int k=0; k < 3; k++)
+					{
+						int iid=triangles[count*3+k]*3;
+						x=nodesBuffer.get(iid);
+						y=nodesBuffer.get(iid+1);
+						z=nodesBuffer.get(iid+2);
+						out.println("     vertex "+x+" "+y+" "+z);
+					}
+					out.println("   endloop");
+					out.println("endfacet");
+					count++;
+				}
+			}
+			fc.close();
+			fis.close();
+			clean(bb);
+			logger.info("Total number of nodes: "+count);
+			out.println("endsolid");
+			logger.info("Total number of triangles: "+count);
+		}
+		
+		/**
+		 * @param out
+		 * @param amibeTriaToUNVTria
+		 */
+		public void writeGroups(PrintStream out, TIntIntHashMap amibeTriaToUNVTria)
+			throws IOException
+		{
 		}
 	}
 	
@@ -700,6 +778,7 @@ public class UNVConverter
 		 */
 		public void writeTriangles(PrintStream out, int[] triangles,
 			TIntIntHashMap amibeNodeToUNVNode, TIntIntHashMap amibeTriaToUNVTria)
+			throws IOException
 		{
 			int count=0;
 			for(int i=0; i<groups.length; i++)
