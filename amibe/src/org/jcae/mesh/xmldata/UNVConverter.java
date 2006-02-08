@@ -645,7 +645,7 @@ public class UNVConverter
 		public void writeGroups(PrintStream out, TIntIntHashMap amibeTriaToUNVTria)
 			throws IOException
 		{
-			out.println("    -1"+CR+"  2430");
+			out.println("    -1"+CR+"  2435");
 			for(int i=0;i<groups.length; i++)
 			{				
 				out.println(FORMAT_I10.format(i+1)+
@@ -656,12 +656,14 @@ public class UNVConverter
 				int countg=0;
 				for(int j=0; j<groups[i].length; j++)
 				{
-					out.print("         8"+FORMAT_I10.format(amibeTriaToUNVTria.get(groups[i][j])));
+					out.print("         8"
+						+FORMAT_I10.format(amibeTriaToUNVTria.get(groups[i][j]))
+						+"         0         0");
 					countg++;
-					if ((countg % 4) == 0)
+					if ((countg % 2) == 0)
 						out.println("");
 				}
-				if ((countg % 4) !=0 )
+				if ((countg % 2) !=0 )
 					out.println();
 			}
 			out.println("    -1");
