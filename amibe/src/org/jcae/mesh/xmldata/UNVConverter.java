@@ -579,6 +579,16 @@ public class UNVConverter
 	
 	private class WriteMeshUNV extends WriteMeshProcedures
 	{
+		public void writeInit(PrintStream arg0)
+		{
+			arg0.println("    -1");
+			arg0.println("   164");
+			arg0.println("         1Meter (newton)               2");
+			arg0.println("  1.00000000000000000D+00  1.00000000000000000D+00  1.00000000000000000D+00");
+			arg0.println("  2.73149999999999977D+02");
+			arg0.println("    -1");
+		}	
+		
 		public void writeNodes(PrintStream out, int[] nodesID, TIntIntHashMap amibeToUNV) throws IOException
 		{
 			File f=getNodeFile();
