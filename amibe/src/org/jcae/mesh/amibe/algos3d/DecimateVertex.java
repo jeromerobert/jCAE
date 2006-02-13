@@ -656,12 +656,20 @@ public class DecimateVertex
 	
 	/**
 	 * 
-	 * @param args xmlDir, xmlFile, tolerance, brepDir, brepFile
+	 * @param args xmlDir, xmlFile, <-t telerance | -n triangle>, brepDir, brepFile
 	 */
 	public static void main(String[] args)
 	{
 		Mesh mesh=MeshReader.readObject3D(args[0], args[1], -1);
-		new DecimateVertex(mesh, Double.parseDouble(args[2])).compute();
+		if(args[2].equals("-n"))
+			new DecimateVertex(mesh, Integer.parseInt(args[2])).compute();
+		else if(args[2].equals("-t"))
+			new DecimateVertex(mesh, Double.parseDouble(args[2])).compute();
+		else
+		{
+			System.out.println("<xmlDir> <xmlFile> <-t telerance | -n triangle> <brepDir> <brepFile>");
+			return;
+		}
 		MeshWriter.writeObject3D(mesh, args[0], args[1], args[3], args[4],1);
 	}
 }
