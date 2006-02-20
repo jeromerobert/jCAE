@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="all" name="occjava">
+    <target name="init">
+        <property location="classes" name="classes.dir"/>
+        <property location="src-java" name="src.dir"/>
+        <property location="doc/api" name="javadoc.dir"/>
+        <property name="project.name" value="${ant.project.name}"/>
+        <property location="lib/${project.name}.jar" name="jar"/>
+    </target>
+
+    <target depends="init" description="Compile" name="compile">
+        <mkdir dir="${classes.dir}"/>
+        <javac source="1.4" target="1.4" debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}">
+        </javac>
+    </target>
+
+    <target depends="init,compile" description="Create a jar file" name="jar">
+        <mkdir dir="lib"/>
+        <jar basedir="${classes.dir}" compress="true" jarfile="${jar}"/>
+    </target>
+
+    <target depends="init,jar" description="Build everything." name="all"/>
+
+    <target depends="init" description="Javadoc for my API." name="javadoc">
+        <mkdir dir="${javadoc.dir}"/>
+        <javadoc destdir="${javadoc.dir}" packagenames="*">
+            <sourcepath>
+                <pathelement location="${src.dir}"/>
+            </sourcepath>
+        </javadoc>
+    </target>
+
+    <target depends="init" description="Clean all build products." name="clean">
+        <delete dir="${classes.dir}"/>
+        <delete dir="${javadoc.dir}"/>
+        <delete file="${jar}"/>
+    </target>
+
+</project>
