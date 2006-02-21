@@ -27,6 +27,7 @@
 				<attribute name="Main-Class" value="org.jcae.viewer3d.test.Main"/>
 				<attribute name="Class-Path" value="trove.jar occjava.jar"/>
 			</manifest>
+			<fileset dir="${classes.dir}" includes="javax/media/**"/>
 			<fileset dir="${classes.dir}" includes="org/jcae/viewer3d/**"/>
 			<fileset dir="${classes.dir}" includes="org/jdesktop/j3d/utils/behaviors/vp/**"/>
 			<fileset dir="${src.dir}" includes="org/jcae/viewer3d/**/*.html"/>

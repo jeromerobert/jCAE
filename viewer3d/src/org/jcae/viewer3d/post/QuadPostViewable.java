@@ -3,14 +3,14 @@ package org.jcae.viewer3d.post;
 import java.util.Map;
 import javax.media.j3d.*;
 import org.jcae.viewer3d.DomainProvider;
+import org.jcae.viewer3d.PickViewable;
 import org.jcae.viewer3d.SelectionListener;
-import org.jcae.viewer3d.Viewable;
+import org.jcae.viewer3d.ViewableAdaptor;
 import org.jcae.viewer3d.post.ColorMapper;
 import org.jcae.viewer3d.post.DefaultColorMapper;
-import com.sun.j3d.utils.picking.PickResult;
 import com.sun.j3d.utils.picking.PickTool;
 
-public class QuadPostViewable implements Viewable
+public class QuadPostViewable extends ViewableAdaptor
 {
 	private final static Appearance APPEARANCE;
 	static
@@ -73,7 +73,7 @@ public class QuadPostViewable implements Viewable
 		quadArray.setColors(0, colorMapper.getPalette());
 	}
 	
-	public void domainsChanged(int[] domainId)
+	public void domainsChangedPerform(int[] domainId)
 	{
 		//nothing
 	}
@@ -94,7 +94,7 @@ public class QuadPostViewable implements Viewable
 		return branchGroup;
 	}
 
-	public void pick(PickResult result, boolean selected)
+	public void pick(PickViewable result, boolean selected)
 	{
 		//nothing
 	}

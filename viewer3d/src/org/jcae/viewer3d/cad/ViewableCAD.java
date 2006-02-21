@@ -27,15 +27,14 @@ import javax.media.j3d.*;
 import javax.vecmath.Color3f;
 import org.jcae.viewer3d.ColoredDomain;
 import org.jcae.viewer3d.DomainProvider;
+import org.jcae.viewer3d.PickViewable;
 import org.jcae.viewer3d.SelectionListener;
-import org.jcae.viewer3d.Viewable;
+import org.jcae.viewer3d.ViewableAdaptor;
 import org.jcae.viewer3d.cad.occ.OCCFaceDomain;
-import org.jcae.viewer3d.fd.FDSelection;
 
 import com.sun.j3d.utils.geometry.GeometryInfo;
 import com.sun.j3d.utils.geometry.NormalGenerator;
 import com.sun.j3d.utils.geometry.Stripifier;
-import com.sun.j3d.utils.picking.PickResult;
 
 /**
  * A Viewable specilized to display CAD scenes.
@@ -43,7 +42,7 @@ import com.sun.j3d.utils.picking.PickResult;
  * @author Jerome Robert
  * @todo all methods must be implemented.
  */
-public class ViewableCAD implements Viewable 
+public class ViewableCAD extends ViewableAdaptor 
 {
 	private static interface CADPickingInfo{}
 	
@@ -120,7 +119,7 @@ public class ViewableCAD implements Viewable
 	/* (non-Javadoc)
 	 * @see jcae.viewer3d.Viewable#domainsChanged(java.util.Collection)
 	 */
-	public void domainsChanged(int[] domainId)
+	public void domainsChangedPerform(int[] domainId)
 	{
 		if(branchGroup.numChildren()>0)
 			branchGroup.removeAllChildren();
@@ -206,7 +205,7 @@ public class ViewableCAD implements Viewable
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.Viewable#pick(com.sun.j3d.utils.picking.PickResult)
 	 */
-	public void pick(PickResult result, boolean selected)
+	public void pick(PickViewable result, boolean selected)
 	{
 		Logger.global.finest("result.getGeometryArray().getUserData()="+result.getGeometryArray().getUserData());
 		Object o=getPickUserData(result);
@@ -225,7 +224,7 @@ public class ViewableCAD implements Viewable
 	}
 	
 	
-	private static Object getPickUserData(PickResult result){
+	private static Object getPickUserData(PickViewable result){
 		SceneGraphObject sgo;
 		sgo=result.getGeometryArray();
 		if(sgo!=null){
@@ -332,7 +331,7 @@ public class ViewableCAD implements Viewable
 		
 	}
 	
-	private void fireSelectionChanged()
+	protected void fireSelectionChanged()
 	{
 		
 			for(int i=0; i<selectionListeners.size(); i++)

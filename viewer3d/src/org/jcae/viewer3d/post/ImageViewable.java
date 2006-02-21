@@ -26,13 +26,13 @@ import java.awt.image.Raster;
 import java.util.Map;
 import javax.media.j3d.*;
 import org.jcae.viewer3d.DomainProvider;
+import org.jcae.viewer3d.PickViewable;
 import org.jcae.viewer3d.SelectionListener;
-import org.jcae.viewer3d.Viewable;
+import org.jcae.viewer3d.ViewableAdaptor;
 import com.sun.j3d.utils.image.TextureLoader;
-import com.sun.j3d.utils.picking.PickResult;
 import com.sun.j3d.utils.picking.PickTool;
 
-public class ImageViewable implements Viewable
+public class ImageViewable extends ViewableAdaptor
 {
 	private final static ColorModel COLOR_MODEL_RGB = new DirectColorModel(24,
 		0x00ff0000, 0x0000ff00, 0x000000ff);
@@ -68,7 +68,7 @@ public class ImageViewable implements Viewable
 		// nothing
 	}
 
-	public void domainsChanged(int[] domainId)
+	public void domainsChangedPerform(int[] domainId)
 	{
 		// nothing
 	}
@@ -83,7 +83,7 @@ public class ImageViewable implements Viewable
 		return branchGroup;
 	}
 
-	public void pick(PickResult result, boolean selected)
+	public void pick(PickViewable result, boolean selected)
 	{
 		// nothing
 	}

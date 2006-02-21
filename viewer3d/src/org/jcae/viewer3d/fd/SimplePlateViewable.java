@@ -3,11 +3,12 @@ package org.jcae.viewer3d.fd;
 import java.util.Map;
 import javax.media.j3d.*;
 import org.jcae.viewer3d.DomainProvider;
+import org.jcae.viewer3d.PickViewable;
 import org.jcae.viewer3d.SelectionListener;
-import org.jcae.viewer3d.Viewable;
-import com.sun.j3d.utils.picking.PickResult;
+import org.jcae.viewer3d.ViewableAdaptor;
 
-public class SimplePlateViewable implements Viewable
+
+public class SimplePlateViewable extends ViewableAdaptor
 {
 	private final static Appearance APPEARANCE;
 	static
@@ -36,7 +37,7 @@ public class SimplePlateViewable implements Viewable
 		branchGroup.addChild(s);
 	}
 	
-	public void domainsChanged(int[] domainId)
+	public void domainsChangedPerform(int[] domainId)
 	{
 		//nothing
 	}
@@ -57,7 +58,7 @@ public class SimplePlateViewable implements Viewable
 		return branchGroup;
 	}
 
-	public void pick(PickResult result, boolean selected)
+	public void pick(PickViewable result, boolean selected)
 	{
 		//nothing
 	}

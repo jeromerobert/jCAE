@@ -1,25 +1,68 @@
-2006-01-16 11:10:34  Jerome Robert <jeromerobert@users.sourceforge.net>
+2006-02-08 18:09:21  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/bg/ViewableBG.java:
+	  Allow to set the name of a ViewableBG
+
+	* src/org/jcae/viewer3d/View.java:
+	  View is no longer a KeyListener. KeyListener should be implemented
+	  outside of this class.
+
+	* build.xml:
+	  Do not forget the patched Shape3DRetained class in the jar
+
+2006-02-06 17:36  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/javax/media/j3d/Shape3DRetained.java:
+	  Apply patch http://java3d.dev.java.net/issues/show_bug.cgi?id=234
+
+2006-02-01 20:25  Erwann Feat <erwannfeat@gmail.com>
+
+	* src/org/jcae/viewer3d/View.java,
+	  src/org/jcae/viewer3d/ViewBehavior.java:
+	  Adding un clip widgets
+
+	* src/org/jcae/viewer3d/*, src/org/jcae/viewer3d/ViewableAdaptor.java:
+	  Adding ViewableAdaptor : see javadoc
+
+2006-01-23 15:22  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/test/TestScreenshot.java:
+	  Add a screenshot test class
+
+	* src/org/jcae/viewer3d/ScreenshotListener.java,
+	  src/org/jcae/viewer3d/View.java:
+	  Deprecate takeSnapshot and add takeScreenshot, a more thread safe
+	  implementation
+
+2006-01-18 11:41  tag V0_10
+
+2006-01-16 11:10  Jerome Robert <jeromerobert@users.sourceforge.net>
+	
 	* src/org/jcae/viewer3d/cad/occ/OCCFaceDomain.java,
 	  src/org/jcae/viewer3d/test/TestCAD.java:
 	  Fix regretition in OCCFaceDomain and add related tests
 	  
-2006-01-13 15:54:04  Jerome Robert <jeromerobert@users.sourceforge.net>
+2006-01-13 15:54  Jerome Robert <jeromerobert@users.sourceforge.net>
+	
 	* src/org/jcae/viewer3d/ViewBehavior.java:
 	  Avoid high CPU load when dragging the mouse over a Canvas3D
 
 	* src/org/jcae/viewer3d/View.java:
 	  Add a constructor to allow to disable universe sharing
 
-2006-01-10 17:51:52  Erwann Feat <erwannfeat@gmail.com>
+2006-01-10 17:51  Erwann Feat <erwannfeat@gmail.com>
+	
 	* src/org/jcae/viewer3d/cad/occ/OCCFaceDomain.java:
-	Use shape bounding box to compute mesh parameters
+	  Use shape bounding box to compute mesh parameters
 
 2006-01-03 17:13  Erwann Feat <erwannfeat@gmail.com>
 
 	* src/org/jcae/viewer3d/View.java:
 	  Fix a NullPointerException
+	
 	* src/org/jcae/viewer3d/fe/ViewableFE.java:
 	  Allow to hightlight a group of elements without firing events
+	
 	* src/org/jcae/viewer3d/cad/ViewableCAD.java,
 	  src/org/jcae/viewer3d/cad/occ/OCCFaceDomain.java:
 	  Handle problems of faces triangulation
@@ -45,6 +88,8 @@
 	  is visible in the specified view
 	* src/org/jcae/viewer3d/cad/CADSelectionListener.java:
 	  Deprecated object
+
+2005-12-07 12:21  tag V0_9_RC2
 
 2005-12-07 08:30  Jerome Robert <jeromerobert@users.sourceforge.net>
 

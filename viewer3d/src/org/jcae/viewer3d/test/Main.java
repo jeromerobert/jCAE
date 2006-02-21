@@ -21,6 +21,7 @@
 package org.jcae.viewer3d.test;
 
 import java.awt.BorderLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileInputStream;
@@ -95,6 +96,7 @@ public class Main
 
 			
 			//Test FE visu in 1 view
+			new JDialog().setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 			/*JFrame feFrame=new JFrame("jcae-viewer3d-fe demo");			
 			feFrame.setSize(800,600);
 			feFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

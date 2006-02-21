@@ -20,7 +20,6 @@
 
 package org.jcae.viewer3d.bg;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.util.Collection;
 import java.util.Map;
@@ -28,10 +27,10 @@ import java.util.logging.Logger;
 import javax.media.j3d.*;
 import javax.swing.JPanel;
 import org.jcae.viewer3d.DomainProvider;
+import org.jcae.viewer3d.PickViewable;
 import org.jcae.viewer3d.SelectionListener;
-import org.jcae.viewer3d.Viewable;
+import org.jcae.viewer3d.ViewableAdaptor;
 import com.sun.j3d.utils.picking.PickIntersection;
-import com.sun.j3d.utils.picking.PickResult;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntObjectHashMap;
 
@@ -39,12 +38,13 @@ import gnu.trove.TIntObjectHashMap;
  * @author Jerome Robert
  * @todo implements all methods
  */
-public class ViewableBG implements Viewable
+public class ViewableBG extends ViewableAdaptor
 {
 	private BranchGroup branchGroup;
 	private TIntHashSet leaves = new TIntHashSet();
 	private TIntObjectHashMap leavesGeometry = new TIntObjectHashMap();
 	private Shape3D selectedLeaves = new Shape3D();
+	private String name;
 	
 	private final static PolygonAttributes SELECT_POLYGON_ATTRIBUTE=new PolygonAttributes(
 		PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE,
@@ -80,7 +80,7 @@ public class ViewableBG implements Viewable
 	{
 	}
 
-	public void domainsChanged(int[] ids)
+	public void domainsChangedPerform(int[] ids)
 	{
 	}
 
@@ -107,7 +107,7 @@ public class ViewableBG implements Viewable
 		return leaves;
 	}
 
-	public void pick(PickResult result, boolean selected)
+	public void pick(PickViewable result, boolean selected)
 	{		
 		if(result==null)
 			return;
@@ -115,10 +115,9 @@ public class ViewableBG implements Viewable
 		pickSolid(result, selected);
 	}
 	
-	private void pickSolid(PickResult result, boolean selected)
+	private void pickSolid(PickViewable result, boolean selected)
 	{		
-		result.setFirstIntersectOnly(true);
-		PickIntersection pi = result.getIntersection(0);
+		PickIntersection pi = result.getIntersection();
 
 		// indices of the picked quad
 		// Indices are set to vertex indices, as this is not an Index
@@ -168,7 +167,17 @@ public class ViewableBG implements Viewable
 	
 	public void setName(String name)
 	{
+		this.name=name;
 	}
+	
+	public String toString()
+	{
+		if(name==null)
+			return super.toString();
+		else
+			return name;
+	}
+	
 	public void addSelectionListener(SelectionListener listener)
 	{
 		// TODO Auto-generated method stub

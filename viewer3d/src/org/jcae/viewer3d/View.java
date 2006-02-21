@@ -26,14 +26,19 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
+import java.io.PrintWriter;
 import java.util.*;
 import java.util.Map.Entry;
 import javax.media.j3d.*;
+import javax.media.j3d.Locale;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
 import javax.vecmath.*;
+
 import org.jdesktop.j3d.utils.behaviors.vp.AxisBehavior;
 import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
 import com.sun.j3d.utils.picking.PickResult;
@@ -52,6 +57,10 @@ import com.sun.j3d.utils.universe.ViewingPlatform;
  */
 public class View extends Canvas3D implements PositionListener
 {
+
+	final public static float FrontClipDistanceFactor=0.001f;
+	final public static float BackClipDistanceFactor=10f;
+	
 	static JTextPane textPane;
 	private Switch originAxisSwitch=new Switch(Switch.CHILD_NONE);
 	private Switch fixedAxisSwitch=new Switch(Switch.CHILD_NONE);
@@ -62,9 +71,10 @@ public class View extends Canvas3D implements PositionListener
 	private View navigationMaster;
 	private List positionListeners=Collections.synchronizedList(new ArrayList());
 	
-	private BufferedImage snapShot;
-	private Object snapShotLock=new Object();
-	private boolean takeSnapShot;
+	private transient BufferedImage snapShot;
+	private transient Object snapShotLock=new Object();
+	private transient boolean takeSnapShot;
+	private transient ScreenshotListener screenshotListener;
 	
 	static private SimpleUniverse sharedUniverse;
 	private SimpleUniverse universe;
@@ -74,6 +84,12 @@ public class View extends Canvas3D implements PositionListener
 	private Viewable currentViewable;
 	private OrbitBehavior orbit= new ViewBehavior(this);
 	private AxisBehavior axisBehavior;
+	ModelClip modelClip;
+	private boolean isModelClip=false;
+	private BranchGroup widgetsBranchGroup;
+	private BranchGroup unClipWidgetsBranchGroup;
+	private ClipBox clipBox=null;
+	private PrintWriter writer=null;
 		
 	public View()
 	{
@@ -88,7 +104,6 @@ public class View extends Canvas3D implements PositionListener
 	public View(boolean offscreen, boolean isSharedUniverse)
 	{		
 		super(SimpleUniverse.getPreferredConfiguration(), offscreen);
-
 		if(offscreen)
 		{
 			getScreen3D().setPhysicalScreenWidth(0.0254/90.0 * 1600);
@@ -110,7 +125,8 @@ public class View extends Canvas3D implements PositionListener
 				universe=View.sharedUniverse;
 				viewingPlatform=createViewingPlatform();
 				sharedUniverse.getLocale().addBranchGraph(viewingPlatform);
-			}			
+			}
+			
 		}
 		else
 		{
@@ -136,6 +152,10 @@ public class View extends Canvas3D implements PositionListener
 		vsp.addChild(originAxisSwitch);
 		axisBranchGroup.addChild(vsp);
 		universe.addBranchGraph(axisBranchGroup);
+				
+		createClipBranchGroup();
+		createWidgetsBranchGroup();
+		createUnClipWidgetsBranchGroup();
 		
 		// Create the fixed axis		
 		final TransformGroup tg=new TransformGroup();
@@ -168,9 +188,76 @@ public class View extends Canvas3D implements PositionListener
 		});
 		
 		getView().setFieldOfView(Math.PI/12);
+		getView().setFrontClipPolicy(javax.media.j3d.View.VIRTUAL_SCREEN);
 		
-		zoomTo(0,0,0,1.0f);
-    }		
+		zoomTo(0,0,0,1.0f);	
+    }	
+	
+	private void createWidgetsBranchGroup(){
+		widgetsBranchGroup=new BranchGroup();
+		widgetsBranchGroup.setCapability(Group.ALLOW_CHILDREN_EXTEND);
+		widgetsBranchGroup.setCapability(Node.ALLOW_BOUNDS_READ);
+		widgetsBranchGroup.setCapability(Group.ALLOW_CHILDREN_WRITE);
+		widgetsBranchGroup.setCapability(Group.ALLOW_CHILDREN_READ);
+		
+		BranchGroup parent=new BranchGroup();
+		parent.setCapability(Group.ALLOW_CHILDREN_EXTEND);
+		parent.setCapability(BranchGroup.ALLOW_DETACH);
+		parent.setCapability(Node.ALLOW_BOUNDS_READ);
+		parent.setCapability(Group.ALLOW_CHILDREN_WRITE);			
+		ViewSpecificGroup vsg=new ViewSpecificGroup();
+		vsg.setCapability(ViewSpecificGroup.ALLOW_VIEW_WRITE);
+		vsg.setCapability(ViewSpecificGroup.ALLOW_VIEW_READ);
+		vsg.setCapability(Node.ALLOW_BOUNDS_READ);
+		vsg.setUserData(parent);
+		vsg.addChild(widgetsBranchGroup);
+		parent.addChild(vsg);
+		universe.getLocale().addBranchGraph(parent);
+		vsg.addView(getView());
+	}
+	
+	private void createUnClipWidgetsBranchGroup(){
+		unClipWidgetsBranchGroup=new BranchGroup();
+		unClipWidgetsBranchGroup.setCapability(Group.ALLOW_CHILDREN_EXTEND);
+		unClipWidgetsBranchGroup.setCapability(Node.ALLOW_BOUNDS_READ);
+		unClipWidgetsBranchGroup.setCapability(Group.ALLOW_CHILDREN_WRITE);
+		unClipWidgetsBranchGroup.setCapability(Group.ALLOW_CHILDREN_READ);
+		
+		BranchGroup parent=new BranchGroup();
+		parent.setCapability(Group.ALLOW_CHILDREN_EXTEND);
+		parent.setCapability(BranchGroup.ALLOW_DETACH);
+		parent.setCapability(Node.ALLOW_BOUNDS_READ);
+		parent.setCapability(Group.ALLOW_CHILDREN_WRITE);			
+		ViewSpecificGroup vsg=new ViewSpecificGroup();
+		vsg.setCapability(ViewSpecificGroup.ALLOW_VIEW_WRITE);
+		vsg.setCapability(ViewSpecificGroup.ALLOW_VIEW_READ);
+		vsg.setCapability(Node.ALLOW_BOUNDS_READ);
+		vsg.setUserData(parent);
+		vsg.addChild(unClipWidgetsBranchGroup);
+		parent.addChild(vsg);
+		universe.getLocale().addBranchGraph(parent);
+		vsg.addView(getView());
+	}
+	
+	private void createClipBranchGroup(){
+		BranchGroup clipBranchGroup=new BranchGroup();
+		clipBranchGroup.setCapability(Group.ALLOW_CHILDREN_EXTEND);
+		clipBranchGroup.setCapability(Node.ALLOW_BOUNDS_READ);
+		clipBranchGroup.setCapability(Group.ALLOW_CHILDREN_WRITE);
+		clipBranchGroup.setCapability(Group.ALLOW_CHILDREN_READ);
+		
+		modelClip=new ModelClip();
+		modelClip.setEnables(new boolean[]{false, false, false, false, false, false});
+		modelClip.setCapability(ModelClip.ALLOW_ENABLE_READ);
+		modelClip.setCapability(ModelClip.ALLOW_ENABLE_WRITE);
+		modelClip.setCapability(ModelClip.ALLOW_PLANE_READ);
+		modelClip.setCapability(ModelClip.ALLOW_PLANE_WRITE);
+		modelClip.setCapability(ModelClip.ALLOW_SCOPE_READ);
+		modelClip.setCapability(ModelClip.ALLOW_SCOPE_WRITE);
+		modelClip.setCapability(ModelClip.ALLOW_INFLUENCING_BOUNDS_WRITE);
+		clipBranchGroup.addChild(modelClip);
+		universe.getLocale().addBranchGraph(clipBranchGroup);
+	}
 	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#finalize()
@@ -183,8 +270,23 @@ public class View extends Canvas3D implements PositionListener
 			remove(vs[i]);
 		}
 		universe.getLocale().removeBranchGraph(axisBranchGroup);
+		modelClip.removeAllScopes();
+		universe.getLocale().removeBranchGraph((BranchGroup)modelClip.getParent());
+		BranchGroup parent=(BranchGroup)widgetsBranchGroup.getParent().getParent();
+		universe.getLocale().removeBranchGraph(parent);
+		parent=(BranchGroup)unClipWidgetsBranchGroup.getParent().getParent();
+		universe.getLocale().removeBranchGraph(parent);
 	}
 	
+	/** set a PrintWriter for the viewer messages*/
+	public void setPrintWriter(PrintWriter writer){
+		this.writer=writer;
+	}
+	/** print a line in the PrintWriter*/
+	public void println(String line){
+		if(writer!=null)
+			writer.println(line);
+	}
 	public TransformGroup getOriginAxisTransformGroup()
 	{
 		return originAxisTransformGroup;
@@ -226,6 +328,10 @@ public class View extends Canvas3D implements PositionListener
 		vsg.addView(getView());
 		if(currentViewable==null)
 			currentViewable=viewable;
+		
+		if(isModelClip){
+				modelClip.addScope(getBranchGroup(viewable));
+		}
 	}
 
 	/**
@@ -234,8 +340,125 @@ public class View extends Canvas3D implements PositionListener
 	 */
 	public void addBranchGroup(BranchGroup branchGroup)
 	{
+		branchGroup.setCapability(BranchGroup.ALLOW_DETACH);
 		universe.getLocale().addBranchGraph(branchGroup);
 	}
+
+	/**
+	 * add  a widget BranchGroup
+	 * @param branchGroup
+	 */
+	public void addWidgetBranchGroup(BranchGroup branchGroup)
+	{
+		branchGroup.setCapability(BranchGroup.ALLOW_DETACH);
+		widgetsBranchGroup.addChild(branchGroup);
+	}
+	
+	
+	/**
+	 * remove the specified widget BranchGroup
+	 * @param branchGroup
+	 */
+	public void removeWidgetBranchGroup(BranchGroup branchGroup){
+		widgetsBranchGroup.removeChild(branchGroup);
+	}
+	
+	/**
+	 * add  a widget BranchGroup not clip by the clipModel
+	 * @param branchGroup
+	 */
+	public void addUnClipWidgetBranchGroup(BranchGroup branchGroup)
+	{
+		branchGroup.setCapability(BranchGroup.ALLOW_DETACH);
+		unClipWidgetsBranchGroup.addChild(branchGroup);
+	}
+	
+	
+	/**
+	 * remove the specified widget BranchGroup not clip by the clipModel
+	 * @param branchGroup
+	 */
+	public void removeUnClipWidgetBranchGroup(BranchGroup branchGroup){
+		unClipWidgetsBranchGroup.removeChild(branchGroup);
+	}
+	
+	
+	private void setModelClip(ModelClip newModelClip){
+		removeModelClip();
+		initModelClipScope(modelClip);
+		for(int i=0;i<6;i++){
+			if(newModelClip.getEnable(i)){
+				Vector4d plane=new Vector4d();
+				newModelClip.getPlane(i,plane);
+				modelClip.setPlane(i,plane);
+				modelClip.setEnable(i,true);
+			}
+		}
+		modelClip.setInfluencingBounds(new BoundingSphere(new Point3d(),Double.MAX_VALUE));
+		isModelClip=true;
+	}
+	
+	private void initModelClipScope(ModelClip modelClip) {
+		Viewable[] viewables=getViewables();
+		for(int i=0;i<viewables.length;i++)
+			modelClip.addScope(getBranchGroup(viewables[i]));
+		
+		modelClip.addScope(widgetsBranchGroup);
+	}
+
+	/**
+	 * remove the ModelClip of the view
+	 */
+	public void removeModelClip(){
+		modelClip.setEnables(new boolean[]{false, false, false, false, false, false});
+		modelClip.removeAllScopes();
+		isModelClip=false;
+		
+		if(clipBox!=null)
+			removeUnClipWidgetBranchGroup(clipBox.getShape());
+		clipBox=null;
+	}
+	
+	/** create the modelclip with the specified planes and remove the previous modelclip
+	 * Warning : all shared viewables will be clipped in other views !!
+	 * */
+	public void setClipPlanes(Vector4d[] planes){
+		ModelClip modelClip=new ModelClip();
+		modelClip.setEnables(new boolean[]{false, false, false, false, false, false});
+		for(int ii=0;ii<planes.length;ii++){
+			modelClip.setPlane(ii,planes[ii]);
+			modelClip.setEnable(ii,true);
+		}
+	
+		modelClip.setInfluencingBounds(new BoundingSphere(new Point3d(),Double.MAX_VALUE));
+		setModelClip(modelClip);
+	}
+	
+	/** create a clip Box and remove the previous modelclip
+	 * Warning : all shared viewables will be clipped in other views !!
+	 * */
+	public void setClipBox(ClipBox box) {
+		setClipPlanes(box.getClipBoxPlanes());
+		addUnClipWidgetBranchGroup(box.getShape());
+		clipBox=box;
+	}
+	/**returns true if the point is in the modelclip*/
+	public boolean isInModelClip(Point3d pt){
+		if(!isModelClip) return true;
+		Vector4d plane=new Vector4d();
+		double[] ptValues=new double[4];
+		pt.get(ptValues);
+		ptValues[3]=1;
+		Vector4d p=new Vector4d(ptValues);
+
+		for(int i=0;i<6;i++){
+			if(!modelClip.getEnable(i)) continue;
+			modelClip.getPlane(i,plane);
+			if(plane.dot(p)>0) return false;
+		}
+		return true;
+	}
+	
 	
 	/**
 	 * @param view
@@ -402,6 +625,30 @@ public class View extends Canvas3D implements PositionListener
 		zoomTo((float)c.x,(float)c.y,(float)c.z,(float)bs.getRadius());
 	}
 	
+	/** restore the Front clip distance to see all the Viewable */
+	public void restoreFrontClipDistance(){
+		BoundingSphere bs=getBound();
+		if(bs.getRadius()<=0)
+			bs=new BoundingSphere();
+		getView().setFrontClipDistance(FrontClipDistanceFactor*(float)bs.getRadius());
+	}
+	
+	public void setFrontClipDistance(double d){
+		getView().setFrontClipDistance(d);
+	}
+	
+	public double getFrontClipDistance(){
+		return getView().getFrontClipDistance();
+	}
+	
+	public double getBackClipDistance(){
+		return getView().getBackClipDistance();
+	}
+	
+	public void setBackClipDistance(double d){
+		getView().setBackClipDistance(d);
+	}
+	
 	protected BoundingSphere getBound()
 	{
 		Iterator it=viewableToViewSpecificGroup.values().iterator();
@@ -478,7 +725,7 @@ public class View extends Canvas3D implements PositionListener
 	{
 		viewingPlatform.getViewPlatformTransform().setTransform(position);
 	}
-
+	
 	/**
 	 * Implement PositionListener.
 	 * This listener is fired when the navigation master move.
@@ -505,7 +752,11 @@ public class View extends Canvas3D implements PositionListener
 				{
 					snapShotLock.notifyAll();
 				}
+				
+				if(screenshotListener!=null)
+					screenshotListener.shot(snapShot);
 			}
+			
 		}
 		catch(Exception ex)
 		{
@@ -540,6 +791,9 @@ public class View extends Canvas3D implements PositionListener
 			vsg.removeView(getView());			
 			if(vsg.numViews()==0)
 			{				
+				if(isModelClip){
+					modelClip.removeScope(getBranchGroup(viewable));
+				}
 				universe.getLocale().removeBranchGraph(getBranchGroup(viewable));
 				viewableToViewSpecificGroup.remove(viewable);
 				vsg.removeAllChildren();
@@ -639,12 +893,16 @@ public class View extends Canvas3D implements PositionListener
 	 * Take a snapshot of the current view
 	 * Do not use this for offscreen rendering. See "On-screen Rendering vs. Off-screen Rendering" in
 	 * Canvas3D javadoc. This method should be wrapped in a SwingUtilities.invokeXXXX statements.
-	 * @return
+	 * @deprecated Use takeScreenshot Not thread safe. In some configuration a deadlock could
+	 * occure.
 	 */
+	// snapShotLock.wait(); must not be run in an AWT thread because
+	// it would block the AWT event thread. Then AWT would never notify the
+	// J3D rendering thread and snapShotLock.wait() would never return
+	
 	public BufferedImage takeSnapshot()
 	{
 		takeSnapShot=true;
-		//repaint();
 		synchronized(snapShotLock)
 		{
 			try
@@ -657,6 +915,18 @@ public class View extends Canvas3D implements PositionListener
 			}
 		}
 		return snapShot;
+	}
+
+	/**
+	 * Take a snapshot of the current view
+	 * Do not use this for offscreen rendering. See "On-screen Rendering vs. Off-screen Rendering" in
+	 * Canvas3D javadoc. 
+	 */	
+	public void takeScreenshot(ScreenshotListener listener)
+	{
+		screenshotListener=listener;
+		takeSnapShot=true;
+		getView().repaint();		
 	}
 
 	/**
@@ -700,8 +970,8 @@ public class View extends Canvas3D implements PositionListener
 		orbit.setSchedulingBounds(new BoundingSphere(c,b.getRadius()*100));
 		axisBehavior.setSchedulingBounds(orbit.getSchedulingBounds());
 		
-		getView().setFrontClipDistance(0.001*radius);
-		getView().setBackClipDistance(10*radius);
+		getView().setFrontClipDistance(FrontClipDistanceFactor*radius);
+		getView().setBackClipDistance(BackClipDistanceFactor*radius);
 		//getView().setWindowResizePolicy(javax.media.j3d.View.VIRTUAL_WORLD);
 				
 		Transform3D t3d = new Transform3D();
@@ -734,7 +1004,17 @@ public class View extends Canvas3D implements PositionListener
 	
 	public void setChangeRotationCenter(boolean status)
 	{
+		this.requestFocus();
 		((ViewBehavior)orbit).setChangeRotationCenter(true);
+	}
+	/** set the current mouse mode : see ViewBehavior*/
+	public void setMouseMode(int mode){
+		this.requestFocus();
+		((ViewBehavior)orbit).setMouseMode(mode);
+	}
+	
+	private int getMouseMode(){
+		return ((ViewBehavior)orbit).getMouseMode();
 	}
 	
 	public final static byte TOP	=0;
@@ -783,5 +1063,69 @@ public class View extends Canvas3D implements PositionListener
 		t3d.lookAt(eye, center, up);
 		t3d.invert();
 		move(t3d);
-	}	
+	}
+	
+	protected void fireViewableChanged(Viewable viewable){
+		BranchGroup bg=getBranchGroup(viewable);
+		modelClip.removeScope(bg);
+		modelClip.addScope(bg);
+	}
+	
+	public static void viewableChanged(Viewable viewable){
+		ViewSpecificGroup vsg=(ViewSpecificGroup) viewableToViewSpecificGroup.get(viewable);
+		if(vsg!=null){
+			Enumeration e=vsg.getAllViews();
+			while(e.hasMoreElements()){
+				Object o=e.nextElement();
+				if( o instanceof javax.media.j3d.View){
+					Enumeration ee=((javax.media.j3d.View)o).getAllCanvas3Ds();
+					while(ee.hasMoreElements()){
+						Object oo=ee.nextElement();
+						if( oo instanceof View){
+								((View)oo).fireViewableChanged(viewable);						
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	public static void stopRenderer(Viewable viewable){
+		ViewSpecificGroup vsg=(ViewSpecificGroup) viewableToViewSpecificGroup.get(viewable);
+		if(vsg!=null){
+			Enumeration e=vsg.getAllViews();
+			while(e.hasMoreElements()){
+				Object o=e.nextElement();
+				if( o instanceof javax.media.j3d.View){
+					Enumeration ee=((javax.media.j3d.View)o).getAllCanvas3Ds();
+					while(ee.hasMoreElements()){
+						Object oo=ee.nextElement();
+						if( oo instanceof View){
+								((View)oo).stopRenderer();						
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	public static void startRenderer(Viewable viewable){
+		ViewSpecificGroup vsg=(ViewSpecificGroup) viewableToViewSpecificGroup.get(viewable);
+		if(vsg!=null){
+			Enumeration e=vsg.getAllViews();
+			while(e.hasMoreElements()){
+				Object o=e.nextElement();
+				if( o instanceof javax.media.j3d.View){
+					Enumeration ee=((javax.media.j3d.View)o).getAllCanvas3Ds();
+					while(ee.hasMoreElements()){
+						Object oo=ee.nextElement();
+						if( oo instanceof View){
+								((View)oo).startRenderer();						
+						}
+					}
+				}
+			}
+		}
+	}
+	
 }

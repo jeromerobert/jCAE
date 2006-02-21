@@ -31,18 +31,18 @@ import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import org.jcae.viewer3d.DomainProvider;
-import org.jcae.viewer3d.SelectionListener;
-import org.jcae.viewer3d.Viewable;
+import org.jcae.viewer3d.PickViewable;
+import org.jcae.viewer3d.ViewableAdaptor;
+
 import com.sun.j3d.utils.geometry.GeometryInfo;
 import com.sun.j3d.utils.geometry.NormalGenerator;
 import com.sun.j3d.utils.picking.PickIntersection;
-import com.sun.j3d.utils.picking.PickResult;
 
 /**
  * @author Jerome Robert
  * @todo implements all methods
  */
-public class ViewableFE implements Viewable
+public class ViewableFE extends ViewableAdaptor
 {
 	public static final byte PICK_DOMAIN = 2;
 	public static final byte PICK_NODE = 1;
@@ -54,7 +54,6 @@ public class ViewableFE implements Viewable
 	private Map domainIDToBranchGroup=new HashMap();	
 	private Collection selectedDomains=new HashSet();
 	private String name;
-	private Collection listeners=Collections.synchronizedCollection(new ArrayList());
 	private short pickingMode=PICK_DOMAIN;
 	private boolean showShapeLine=true;
 	private static final float zFactorAbs=Float.parseFloat(System.getProperty(
@@ -99,7 +98,7 @@ public class ViewableFE implements Viewable
 	/* (non-Javadoc)
 	 * @see jcae.viewer3d.Viewable#domainsChanged(java.util.Collection)
 	 */
-	public void domainsChanged(int[] ids)
+	public void domainsChangedPerform(int[] ids)
 	{
 		if(ids!=null)
 		{
@@ -300,7 +299,7 @@ public class ViewableFE implements Viewable
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.Viewable#pick(com.sun.j3d.utils.picking.PickResult)
 	 */
-	public void pick(PickResult result, boolean selected)
+	public void pick(PickViewable result, boolean selected)
 	{	
 		System.out.println("picked node="+result.getObject());
 		Logger.global.finest("result="+result);
@@ -310,7 +309,7 @@ public class ViewableFE implements Viewable
 		switch(pickingMode)
 		{
 			case PICK_NODE:
-				PickIntersection pi=result.getIntersection(0);
+				PickIntersection pi=result.getIntersection();
 				
 				int[] ids=pi.getPrimitiveVertexIndices();
 				setSelectedNode(
@@ -545,31 +544,6 @@ public class ViewableFE implements Viewable
 		return name;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.jcae.viewer3d.Viewable#addSelectionListener(org.jcae.viewer3d.SelectionListener)
-	 */
-	public void addSelectionListener(SelectionListener listener)
-	{
-		listeners.add(listener);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jcae.viewer3d.Viewable#removeSelectionListener(org.jcae.viewer3d.SelectionListener)
-	 */
-	public void removeSelectionListener(SelectionListener listener)
-	{
-		listeners.add(listener);
-	}
-	
-	protected void fireSelectionChanged()
-	{
-		Iterator it = listeners.iterator();
-		while (it.hasNext())
-		{
-			SelectionListener s = (SelectionListener) it.next();
-			s.selectionChanged();
-		}
-	}
 	
 	public int[] getSelectedDomains()
 	{

@@ -20,7 +20,6 @@
 
 package org.jcae.viewer3d.fd;
 
-import gnu.trove.TIntArrayList;
 import java.awt.Color;
 import java.util.*;
 import java.util.logging.Logger;
@@ -31,7 +30,7 @@ import javax.vecmath.Point3f;
 import org.jcae.viewer3d.*;
 import com.sun.j3d.utils.geometry.GeometryInfo;
 import com.sun.j3d.utils.picking.PickIntersection;
-import com.sun.j3d.utils.picking.PickResult;
+
 
 /**
  * The J3D node of this viewable has the following structure
@@ -51,7 +50,7 @@ import com.sun.j3d.utils.picking.PickResult;
  * @author Jerome Robert
  *
  */
-public class ViewableFD implements Viewable
+public class ViewableFD extends ViewableAdaptor
 {
 	public final static byte SELECT_PLATE=1;
 	
@@ -173,7 +172,6 @@ public class ViewableFD implements Viewable
 	
 	protected FDProvider provider;
 	protected BranchGroup parentBranchGroup=new BranchGroup();
-	private Collection listeners=Collections.synchronizedCollection(new ArrayList());
 	private Shape3D selectedPlates;
 	private Shape3D selectedWires, selectedJunctions;
 	private SelectionManager selectionManager;
@@ -613,7 +611,7 @@ public class ViewableFD implements Viewable
 	/* (non-Javadoc)
 	 * @see jcae.viewer3d.Viewable#domainsChanged(java.util.Collection)
 	 */
-	synchronized public void domainsChanged(int[] domainId)
+	synchronized public void domainsChangedPerform(int[] domainId)
 	{			
 		Set ids=new HashSet(Utils.intArrayToCollection(provider.getDomainIDs()));
 		for(int d=0; d<domainId.length; d++)
@@ -822,7 +820,7 @@ public class ViewableFD implements Viewable
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.Viewable#pick(com.sun.j3d.utils.picking.PickResult)
 	 */
-	public void pick(PickResult result, boolean selected)
+	public void pick(PickViewable result, boolean selected)
 	{				
 		if(result==null)
 			return;
@@ -856,11 +854,10 @@ public class ViewableFD implements Viewable
 		fireSelectionChanged();
 	}
 
-	private void pickSlotCell(PickResult result, boolean selected)
+	private void pickSlotCell(PickViewable result, boolean selected)
 	{
-		result.setFirstIntersectOnly(true);
 		int domainId=((SlotDomainID)result.getObject().getUserData()).getValue();
-		PickIntersection pi = result.getIntersection(0);
+		PickIntersection pi = result.getIntersection();
 		SlotID o=(SlotID)pi.getGeometryArray().getUserData();
 		
 		Point3d[] cds=pi.getPrimitiveCoordinates();
@@ -878,11 +875,10 @@ public class ViewableFD implements Viewable
 		}
 	}
 
-	private void pickWireCell(PickResult result, boolean selected)
+	private void pickWireCell(PickViewable result, boolean selected)
 	{
-		result.setFirstIntersectOnly(true);
 		int domainId=((WireDomainID)result.getObject().getUserData()).getValue();
-		PickIntersection pi = result.getIntersection(0);
+		PickIntersection pi = result.getIntersection();
 		IntegerUserData o=(IntegerUserData)pi.getGeometryArray().getUserData();
 
 		Point3d[] cds=pi.getPrimitiveCoordinates();
@@ -924,11 +920,10 @@ public class ViewableFD implements Viewable
 		}
 	}
 
-	private void pickJunction(PickResult result, boolean selected)
+	private void pickJunction(PickViewable result, boolean selected)
 	{
-		result.setFirstIntersectOnly(true);
 		int domainId=((MarkUtils.MarkID)result.getObject().getUserData()).getDomainID();
-		PickIntersection pi = result.getIntersection(0);
+		PickIntersection pi = result.getIntersection();
 		int typeId=((MarkUtils.MarkID)result.getObject().getUserData()).getTypeID();
 
 		int[] idx = pi.getPrimitiveVertexIndices();
@@ -950,11 +945,10 @@ public class ViewableFD implements Viewable
 		}
 	}
 	
-	private void pickWire(PickResult result, boolean selected)
+	private void pickWire(PickViewable result, boolean selected)
 	{
-		result.setFirstIntersectOnly(true);
 		int domainId=((WireDomainID)result.getObject().getUserData()).getValue();
-		PickIntersection pi = result.getIntersection(0);
+		PickIntersection pi = result.getIntersection();
 		IntegerUserData o=(IntegerUserData)pi.getGeometryArray().getUserData();
 		if(selected)
 		{
@@ -1000,11 +994,10 @@ public class ViewableFD implements Viewable
 		}
 	}
 	
-	private void pickSlot(PickResult result, boolean selected)
+	private void pickSlot(PickViewable result, boolean selected)
 	{		
-		result.setFirstIntersectOnly(true);
 		int domainId=((SlotDomainID)result.getObject().getUserData()).getValue();
-		PickIntersection pi = result.getIntersection(0);
+		PickIntersection pi = result.getIntersection();
 		SlotID o=(SlotID)pi.getGeometryArray().getUserData();
 		if(selected)
 		{
@@ -1023,10 +1016,9 @@ public class ViewableFD implements Viewable
 		}
 	}
 	
-	private void pickPlate(PickResult result, boolean selected)
+	private void pickPlate(PickViewable result, boolean selected)
 	{		
-		result.setFirstIntersectOnly(true);
-		PickIntersection pi = result.getIntersection(0);
+		PickIntersection pi = result.getIntersection();
 
 		// indices of the picked quad
 		// Indices are set to vertex indices, as this is not an Index
@@ -1055,10 +1047,9 @@ public class ViewableFD implements Viewable
 		}
 	}
 	
-	private void pickSolid(PickResult result, boolean selected)
+	private void pickSolid(PickViewable result, boolean selected)
 	{		
-		result.setFirstIntersectOnly(true);
-		PickIntersection pi = result.getIntersection(0);
+		PickIntersection pi = result.getIntersection();
 
 		// indices of the picked quad
 		// Indices are set to vertex indices, as this is not an Index
@@ -1301,32 +1292,6 @@ public class ViewableFD implements Viewable
 			return cellManager.getSelection();
 		else
 			return selectionManager.getSelection();
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jcae.viewer3d.Viewable#addSelectionListener(org.jcae.viewer3d.SelectionListener)
-	 */
-	public void addSelectionListener(SelectionListener listener)
-	{
-		listeners.add(listener);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.jcae.viewer3d.Viewable#removeSelectionListener(org.jcae.viewer3d.SelectionListener)
-	 */
-	public void removeSelectionListener(SelectionListener listener)
-	{
-		listeners.add(listener);
-	}
-
-	protected void fireSelectionChanged()
-	{	
-		Iterator it = listeners.iterator();
-		while (it.hasNext())
-		{
-			SelectionListener s = (SelectionListener) it.next();
-			s.selectionChanged();
-		}
 	}
 
 	/**

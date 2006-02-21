@@ -48,7 +48,7 @@ public interface Viewable
 	/** Return the Java3D Node associated to this Viewable */
 	Node getJ3DNode();
 	
-	void pick(PickResult result, boolean selected);
+	void pick(PickViewable result, boolean selected);
 	
 	void unselectAll();
 	
