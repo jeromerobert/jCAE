@@ -26,6 +26,8 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.OTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
+import org.jcae.mesh.xmldata.MeshReader;
+import org.jcae.mesh.xmldata.MeshWriter;
 import java.util.HashSet;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
@@ -218,5 +220,18 @@ public class SmoothNodes3D
 		double area = temp.computeArea();
 		// No need to multiply by 12.0 * Math.sqrt(3.0)
 		return area/p/p;
+	}
+
+	/**
+	 * 
+	 * @param args xmlDir, xmlFile, element size, number of iteration, brepDir, brepFile
+	 */
+	public static void main(String[] args)
+	{
+		Mesh mesh=MeshReader.readObject3D(args[0], args[1], -1);
+		double size=Double.parseDouble(args[2]);
+		int iter=Integer.parseInt(args[3]);
+		new SmoothNodes3D(mesh, size, iter).compute();			
+		MeshWriter.writeObject3D(mesh, args[0], args[1], args[4], args[5],1);
 	}
 }
