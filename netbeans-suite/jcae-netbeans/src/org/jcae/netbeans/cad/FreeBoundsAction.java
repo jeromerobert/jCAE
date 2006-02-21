@@ -68,7 +68,7 @@ public class FreeBoundsAction extends CookieAction
 		ViewableCAD viewable = new ViewableCAD(occp);
 		viewable.setName(arg0[0].getName()+" free edges");
 		viewable.setLineWidth(3f);
-		v.getView().add(viewable);
+		v.add(viewable);
 	}
 
 	public String getName()

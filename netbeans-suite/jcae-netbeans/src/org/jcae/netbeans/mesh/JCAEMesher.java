@@ -135,14 +135,10 @@ public class JCAEMesher implements Runnable, Cancellable
 			
 			ow.close();			
 		}
-		catch(IOException ex)
+		catch(Exception ex)
 		{
 			ErrorManager.getDefault().notify(ex);
 		}
-		catch (InterruptedException ex)
-		{
-			ErrorManager.getDefault().notify(ex);
-		}	
 	}			
 	
 	public String toString()

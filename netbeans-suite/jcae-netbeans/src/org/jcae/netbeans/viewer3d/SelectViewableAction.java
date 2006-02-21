@@ -23,10 +23,13 @@ package org.jcae.netbeans.viewer3d;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
+import javax.swing.SwingUtilities;
 import org.jcae.viewer3d.View;
 import org.jcae.viewer3d.Viewable;
 import org.openide.util.HelpCtx;
@@ -99,59 +102,20 @@ public class SelectViewableAction extends CallableSystemAction
 			}
 			else return ""+index;
 		}
-	}
-	
-	
-	private class ActionRemoveCurent extends AbstractAction
-	{
-		private View view;
-		/**
-		 * @param view
-		 * 
-		 */
-		public ActionRemoveCurent(View view)
-		{
-			super("remove current");
-			this.view=view;
-		}
-		/* (non-Javadoc)
-		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-		 */
-		public void actionPerformed(ActionEvent e)
-		{
-			view.remove(view.getCurrentViewable());
+
+		public void refresh()
+		{			
+			super.fireContentsChanged(this, 0, getSize()-1);
 		}
 	}
 	
-	/**
-	 * @author Jerome Robert
-	 *
-	 */
-	private class ActionViewable extends AbstractAction
-	{
-		private View view;
-		private Viewable viewable;
-		/**
-		 * @param viewable
-		 */
-		public ActionViewable(Viewable viewable, View view)
-		{
-			super(viewable.toString());
-			this.viewable=viewable;
-			this.view=view;
-		}
-
-		/* (non-Javadoc)
-		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-		 */
-		public void actionPerformed(ActionEvent e)
-		{
-			AbstractButton button=(AbstractButton) e.getSource();
-			if(button.isSelected())
-				view.setCurrentViewable(viewable);
-		}
-	}	
-
+	// Need to be static because 2 instances of this class are created
+	// (this is probably a bug of netbeans) and we need to have the "only"
+	// comboBoxModel in refresh().
+	private static MyComboBoxModel comboBoxModel=new MyComboBoxModel();
+	
+	private JComboBox box=new JComboBox(comboBoxModel);
+	
 	/* (non-Javadoc)
 	 * @see org.openide.util.HelpCtx.Provider#getHelpCtx()
 	 */
@@ -168,12 +132,11 @@ public class SelectViewableAction extends CallableSystemAction
 		return "Select";
 	}
 
-	/* (non-Javadoc)
+	/* (non-Javadoc)see
 	 * @see org.openide.util.actions.CallableSystemAction#getToolbarPresenter()
 	 */
 	public Component getToolbarPresenter()
-	{				
-		JComboBox box=new JComboBox(new MyComboBoxModel());
+	{		
 		box.setMaximumSize(new Dimension(200, Integer.MAX_VALUE));
 		return box;
 	}
@@ -182,5 +145,10 @@ public class SelectViewableAction extends CallableSystemAction
 	 */
 	public void performAction()
 	{
+	}
+	
+	public void refresh()
+	{
+		comboBoxModel.refresh();
 	}
 }

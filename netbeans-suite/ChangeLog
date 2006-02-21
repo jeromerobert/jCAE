@@ -1,3 +1,56 @@
+2006-02-21 09:50:10  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/layer.xml,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/smooth:
+	  Add smoothing action on meshes
+
+	* jcae-netbeans/src/org/jcae/netbeans/cad/BooleanAction.java:
+	  Fix bug in boolean operations (operation where mixed) and port to occjava-swig
+
+2006-02-20 17:27:49  Jerome Robert <jeromerobert@users.sourceforge.net>
+	* occjava/manifest.mf:
+	  New version for swig version
+
+2006-02-14 18:27:50  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/layer.xml,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/Bundle.properties,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/UNVToUNVAction.java:
+	  Add UNV to UNV action, to fix possible problemes in existing UNV
+
+2006-02-09 10:38:22  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/JCAEProject.java:
+	  [bug gforge 94] many module object nodes creates for one file
+
+2006-02-08 18:34:52  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/layer.xml,
+	  jcae-netbeans/src/org/jcae/netbeans/propertiesWstcref_1.xml
+	  [Bug 1421278] Properties button
+
+	* jcae-netbeans/src/org/jcae/netbeans/cad/ImportAction.java,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/ComputeMeshAction.java,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/JCAEMesher.java:
+	  [Bug 1418451] unit convertion in "Import geometry".
+	  [Bug 1418453] mesh compute without geometry.
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/OEMMViewAction.java
+	  [Bug 1410622] TriangleArray: illegal vertexCount in OEMM viewer
+
+	* jcae-netbeans/src/org/jcae/netbeans/cad/RemoveAction.java
+	  jcae-netbeans/src/org/jcae/netbeans/viewer3d/SelectViewableAction.java:
+	  [Bug 1418455] Remove shape not working
+
+	* jcae-netbeans/src/org/jcae/netbeans/:
+	  [bug 1415280 and 1421276] View3d combo refresh
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/DecimateAction.java,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/DecimateParameter.java:
+ 	  Allow to specify a "desired number of triangle" in decimation
+
+2006-01-18 10:32  tag V0_10
+
 2006-01-18 10:09:57  Jerome Robert <jeromerobert@users.sourceforge.net>
 	* make-dist-Linux.sh, make-dist-Win32.sh: upgrade to j2re 1.5.0_06
 	* jcae-netbeans/src/org/jcae/netbeans/mesh/Groups.java:
@@ -77,6 +130,8 @@
 	  
 	* make-dist-Linux.sh make-dist-Win32.sh:
 	  Netbeans 5.0 beta 2 put application in .zip/<app> not in .zip/
+
+2005-12-07 12:00  tag V0_9_RC2
 
 2005-12-07 10:03  Jerome Robert <jeromerobert@users.sourceforge.net>
 

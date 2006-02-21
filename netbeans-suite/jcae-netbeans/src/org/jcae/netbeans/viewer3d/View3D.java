@@ -29,7 +29,11 @@ import java.util.Iterator;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
 import org.jcae.viewer3d.View;
+import org.jcae.viewer3d.Viewable;
+import org.jcae.viewer3d.cad.ViewableCAD;
+import org.jcae.viewer3d.fe.ViewableFE;
 import org.openide.ErrorManager;
+import org.openide.util.actions.SystemAction;
 import org.openide.windows.Mode;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
@@ -171,4 +175,11 @@ public class View3D extends TopComponent
 	{	
 		activated=false;
 	}	
+
+	public void add(Viewable viewable)
+	{
+		getView().add(viewable);
+		getView().setCurrentViewable(viewable);
+		((SelectViewableAction)SystemAction.get(SelectViewableAction.class)).refresh();
+	}
 }

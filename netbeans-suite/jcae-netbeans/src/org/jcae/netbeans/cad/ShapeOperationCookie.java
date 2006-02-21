@@ -144,7 +144,7 @@ public class ShapeOperationCookie implements ViewCookie
 		ViewableCAD viewable = new ViewableCAD(new OCCProvider(shape));
 		viewable.addSelectionListener(new MySelectionListener(viewable));
 		viewable.setName(node.getName());
-		v.getView().add(viewable);
+		v.add(viewable);
 		v.getView().fitAll();
 	}
 

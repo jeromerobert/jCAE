@@ -21,8 +21,8 @@
 package org.jcae.netbeans.cad;
 
 import java.io.File;
-import java.io.IOException;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 import org.jcae.netbeans.Utilities;
 import org.jcae.opencascade.jni.*;
@@ -34,6 +34,7 @@ import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CallableSystemAction;
+import org.openide.windows.WindowManager;
 
 public class ImportAction extends CallableSystemAction
 {
@@ -92,6 +93,7 @@ public class ImportAction extends CallableSystemAction
 			chooser.addChoosableFileFilter(brepFileFilter);		
 			chooser.addChoosableFileFilter(stepFileFilter);
 			int ret = chooser.showOpenDialog(null);
+			boolean warnUnit=false;
 			if (ret == JFileChooser.APPROVE_OPTION)
 			{
 				String fileName = chooser.getSelectedFile().getPath();
@@ -103,6 +105,7 @@ public class ImportAction extends CallableSystemAction
 		            aReader.nbRootsForTransfer();
 		            aReader.transferRoots();
 		            brepShape = aReader.oneShape();
+					warnUnit=true;
 		        }
 		        else if (igesFileFilter.accept(chooser.getSelectedFile()))
 		        {
@@ -111,6 +114,7 @@ public class ImportAction extends CallableSystemAction
 		            aReader.nbRootsForTransfer();
 		            aReader.transferRoots();
 		            brepShape = aReader.oneShape();
+					warnUnit=true;
 		        }
 		        else
 		            brepShape = BRepTools.read(fileName, new BRep_Builder());
@@ -122,6 +126,15 @@ public class ImportAction extends CallableSystemAction
 				outputName=new File(FileUtil.toFile(outputDir), outputName).getPath();
 				
 				BRepTools.write(brepShape, outputName);
+				if(warnUnit)
+				{
+					JOptionPane.showMessageDialog(
+						WindowManager.getDefault().getMainWindow(),
+						"The geometry has been converted to millimeter."+
+						"Use the bounding box command to know its new dimensions.",
+						"Geometry converted to mm",
+						JOptionPane.WARNING_MESSAGE);
+				}
 			}
 		}
 		catch(Exception ex)

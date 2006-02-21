@@ -22,12 +22,13 @@ package org.jcae.netbeans.mesh;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.Arrays;
 import javax.media.j3d.BranchGroup;
-import org.jcae.mesh.amibe.algos3d.DecimateVertex;
 import org.jcae.mesh.oemm.IndexedStorage;
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.OEMMViewer;
 import org.jcae.netbeans.Utilities;
+import org.jcae.netbeans.viewer3d.SelectViewableAction;
 import org.jcae.netbeans.viewer3d.View3D;
 import org.jcae.viewer3d.View;
 import org.jcae.viewer3d.bg.ViewableBG;
@@ -36,6 +37,7 @@ import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 import org.openide.util.actions.CookieAction;
+import org.openide.util.actions.SystemAction;
 
 public final class OEMMViewAction extends CookieAction
 {
@@ -55,15 +57,26 @@ public final class OEMMViewAction extends CookieAction
 		
 		public void keyPressed(KeyEvent event)
 		{
+			if(bgView.getCurrentViewable()!=fe1)
+			{			
+				if(!Arrays.asList(bgView.getViewables()).contains(fe1))
+				{
+					bgView.removeKeyListener(this);
+				}
+				return;
+			}
 			if(event.getKeyChar()=='n')
 			{
 				if (femesh != null)
 					bgView.remove(femesh);
-				BranchGroup mesh = OEMMViewer.meshOEMM(oemm, fe1.getResultSet());
-				mesh.setPickable(false);
-				femesh=new ViewableBG(mesh);
-				fe1.unselectAll();
-				bgView.add(femesh);
+				if(fe1.getResultSet().size()>0)
+				{
+					BranchGroup mesh = OEMMViewer.meshOEMM(oemm, fe1.getResultSet());
+					mesh.setPickable(false);
+					femesh=new ViewableBG(mesh);
+					fe1.unselectAll();
+					bgView.add(femesh);
+				}
 			}
 			else if(event.getKeyChar()=='d')
 			{
@@ -72,12 +85,16 @@ public final class OEMMViewAction extends CookieAction
 				org.jcae.mesh.amibe.ds.Mesh amesh =
 					IndexedStorage.loadNodes(oemm, fe1.getResultSet());
 				
-				BranchGroup mesh = OEMMViewer.meshOEMM(oemm, fe1.getResultSet());
-				mesh.setPickable(false);
-				femesh=new ViewableBG(mesh);
-				fe1.unselectAll();
-				bgView.add(femesh);
+				if(fe1.getResultSet().size()>0)
+				{
+					BranchGroup mesh = OEMMViewer.meshOEMM(oemm, fe1.getResultSet());
+					mesh.setPickable(false);
+					femesh=new ViewableBG(mesh);
+					fe1.unselectAll();
+					bgView.add(femesh);
+				}
 			}
+			((SelectViewableAction)SystemAction.get(SelectViewableAction.class)).refresh();
 		}
 		
 	}
@@ -90,18 +107,21 @@ public final class OEMMViewAction extends CookieAction
 			c.getPrimaryFile().getParent()).getPath();
 		String oemmDir=Utilities.absoluteFileName(
 			activatedNodes[0].getName()+".oemm", reference);
-		view(oemmDir);
+		view(oemmDir, activatedNodes[0].getName()+" OEMM");
 	}
 
-	public static void view(String dir)
+	public static void view(String dir, String viewableName)
 	{
 		final OEMM oemm = IndexedStorage.buildOEMMStructure(dir);
 		boolean onlyLeaves = true;
 		View bgView=View3D.getView3D().getView();
 		BranchGroup octree = OEMMViewer.bgOEMM(oemm, onlyLeaves);
 		ViewableBG fe1 = new ViewableBG(octree);
+		fe1.setName(viewableName);
 		bgView.add(fe1);
 		bgView.addKeyListener(new OEMMKeyListener(bgView, oemm, fe1));
+		bgView.setCurrentViewable(fe1);
+		((SelectViewableAction)SystemAction.get(SelectViewableAction.class)).refresh();
 	}	
 	
 	protected int mode()

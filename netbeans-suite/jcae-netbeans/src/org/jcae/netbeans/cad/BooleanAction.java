@@ -22,6 +22,10 @@ package org.jcae.netbeans.cad;
 
 import javax.swing.JMenu;
 import org.jcae.opencascade.jni.BRepAlgoAPI_BooleanOperation;
+import org.jcae.opencascade.jni.BRepAlgoAPI_Common;
+import org.jcae.opencascade.jni.BRepAlgoAPI_Cut;
+import org.jcae.opencascade.jni.BRepAlgoAPI_Fuse;
+import org.jcae.opencascade.jni.BRepAlgoAPI_Section;
 import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
@@ -43,8 +47,6 @@ public abstract class BooleanAction extends CookieAction
 				SystemAction.get(Fuse.class)).getMenuPresenter());
 			toReturn.add(((Presenter.Menu)
 				SystemAction.get(Cut.class)).getMenuPresenter());
-			toReturn.add(((Presenter.Menu)
-				SystemAction.get(ReversedCut.class)).getMenuPresenter());
 			toReturn.add(((Presenter.Menu)
 				SystemAction.get(Section.class)).getMenuPresenter());
 			return toReturn;
@@ -82,10 +84,10 @@ public abstract class BooleanAction extends CookieAction
 			return "Common";
 		}
 
-		protected short getTransformation()
+		protected BRepAlgoAPI_BooleanOperation getTransformation(TopoDS_Shape s1, TopoDS_Shape s2)
 		{
-			return 0;
-		}		
+			return new BRepAlgoAPI_Common(s1, s2);
+		}
 	}
 
 	static public class Cut extends BooleanAction
@@ -96,10 +98,10 @@ public abstract class BooleanAction extends CookieAction
 			return "Cut";
 		}
 
-		protected short getTransformation()
+		protected BRepAlgoAPI_BooleanOperation getTransformation(TopoDS_Shape s1, TopoDS_Shape s2)
 		{
-			return 2;
-		}		
+			return new BRepAlgoAPI_Cut(s1, s2);
+		}
 	}
 
 	static public class Fuse extends BooleanAction
@@ -110,24 +112,10 @@ public abstract class BooleanAction extends CookieAction
 			return "Fuse";
 		}
 
-		protected short getTransformation()
+		protected BRepAlgoAPI_BooleanOperation getTransformation(TopoDS_Shape s1, TopoDS_Shape s2)
 		{
-			return 1;
-		}		
-	}
-
-	static public class ReversedCut extends BooleanAction
-	{
-
-		public String getName()
-		{
-			return "Reversed Cut";
+			return new BRepAlgoAPI_Fuse(s1, s2);
 		}
-
-		protected short getTransformation()
-		{
-			return 3;
-		}		
 	}
 
 	static public class Section extends BooleanAction
@@ -138,10 +126,10 @@ public abstract class BooleanAction extends CookieAction
 			return "Section";
 		}
 
-		protected short getTransformation()
+		protected BRepAlgoAPI_BooleanOperation getTransformation(TopoDS_Shape s1, TopoDS_Shape s2)
 		{
-			return 4;
-		}		
+			return new BRepAlgoAPI_Section(s1, s2);
+		}
 	}
 	
 
@@ -160,7 +148,7 @@ public abstract class BooleanAction extends CookieAction
 		return null;
 	}
 	
-	abstract protected  short getTransformation();
+	abstract protected  BRepAlgoAPI_BooleanOperation getTransformation(TopoDS_Shape s1, TopoDS_Shape s2);
 
 	protected int mode()
 	{
@@ -173,7 +161,7 @@ public abstract class BooleanAction extends CookieAction
 		{
 			TopoDS_Shape shape1 = GeomUtils.getShape(arg0[0]);
 			TopoDS_Shape shape2 = GeomUtils.getShape(arg0[1]);
-			BRepAlgoAPI_BooleanOperation bt=new BRepAlgoAPI_BooleanOperation(shape1, shape2, getTransformation());			
+			BRepAlgoAPI_BooleanOperation bt=getTransformation(shape1, shape2);			
 			GeomUtils.insertShape(bt.shape(), getName(),
 				arg0[0].getParentNode());
 			GeomUtils.getParentBrep(arg0[0]).getDataObject().setModified(true);

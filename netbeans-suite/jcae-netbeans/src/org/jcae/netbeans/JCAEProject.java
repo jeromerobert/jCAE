@@ -20,9 +20,9 @@
 
 package org.jcae.netbeans;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import org.jcae.netbeans.cad.ModuleNode;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.project.ActionProvider;
@@ -35,14 +35,12 @@ import org.openide.filesystems.FileEvent;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileRenameEvent;
 import org.openide.filesystems.FileUtil;
-import org.openide.filesystems.MIMEResolver;
 import org.openide.loaders.DataFolder;
 import org.openide.loaders.DataLoader;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
-import org.openide.nodes.Children.Array;
 import org.openide.nodes.FilterNode;
 import org.openide.nodes.Node;
 import org.openide.util.Lookup;
@@ -72,21 +70,32 @@ public class JCAEProject implements Project, LogicalViewProvider, ActionProvider
 			return new Node[]{(Node)arg0};
 		}
 		
+		private void clearMNodes()
+		{
+			Iterator it=loaderToMNode.values().iterator();
+			while(it.hasNext())
+			{
+				Node n=(Node)it.next();
+				n.getChildren().remove(n.getChildren().getNodes());
+			}
+		}
+		
 		protected void addNotify()
 		{			
 			FileObject[] os=directory.getChildren();
 			HashSet l=new HashSet();
+			clearMNodes();
 			for(int i=0; i<os.length; i++)
 			{
 				String s=FileUtil.getMIMEType(os[i]);
 				if(s!=null && !MIME_UNKNOWN.equals(s) && 
 					!"text/x-unv".equals(s) && !"text/mesh+xml".equals(s))
-				{
+				{					
 					try
-					{
-						DataObject dObj = DataObject.find(os[i]);
+					{					
+						DataObject dObj = DataObject.find(os[i]);						
 						DataLoader loader=dObj.getLoader();
-						Node mNode=(Node)loaderToMNode.get(loader.getClass());
+						Node mNode=(Node)loaderToMNode.get(loader.getClass());						
 						if(mNode==null)
 						{
 							mNode=new AbstractNode(new Children.Array());

@@ -20,6 +20,7 @@
 
 package org.jcae.netbeans.mesh;
 
+import javax.swing.JOptionPane;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.LifecycleManager;
@@ -28,6 +29,7 @@ import org.openide.nodes.Node;
 import org.openide.util.Cancellable;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CookieAction;
+import org.openide.windows.WindowManager;
 
 public class ComputeMeshAction extends CookieAction
 {
@@ -68,12 +70,24 @@ public class ComputeMeshAction extends CookieAction
 		LifecycleManager.getDefault().saveAll();
 		for (int i = 0; i < arg0.length; i++)
 		{
-			MeshNode m = (MeshNode) arg0[0].getCookie(MeshNode.class);
+			MeshNode m = (MeshNode) arg0[0].getCookie(MeshNode.class);			
 			String ref = FileUtil.toFile(
 				m.getDataObject().getPrimaryFile().getParent()).getPath();
 
-			JCAEMesher r=new JCAEMesher(ref, m.getMesh());
-			new Thread(new MeshRun(r, r, m)).start();
+			if(m.getMesh().getGeometryFile()!=null)
+			{
+				JCAEMesher r=new JCAEMesher(ref, m.getMesh());
+				new Thread(new MeshRun(r, r, m)).start();
+			}
+			else
+			{
+				JOptionPane.showMessageDialog(
+					WindowManager.getDefault().getMainWindow(),
+					"This mesh have no geometry. To set a geometry in this mesh"+
+					"copy/past or drag/drop a geomtry node on it.",
+					"Undefined geometry file",
+					JOptionPane.ERROR_MESSAGE);
+			}
 		}
 	}
 

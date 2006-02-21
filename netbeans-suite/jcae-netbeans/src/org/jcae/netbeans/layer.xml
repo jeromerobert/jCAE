@@ -23,7 +23,23 @@
 -->
 <filesystem>
 	<folder name="Actions">
-		<folder name="Edit">
+        <folder name="jCAE">
+			<file name="org-jcae-netbeans-cad-ExplodeAction.instance"/>
+			<file name="org-jcae-netbeans-cad-ImportAction.instance"/>
+			<file name="org-jcae-netbeans-cad-RemoveAction.instance"/>
+			<file name="org-jcae-netbeans-cad-ReverseAction.instance"/>
+			<file name="org-jcae-netbeans-mesh-ComputeMeshAction.instance"/>
+			<file name="org-jcae-netbeans-mesh-UNVToUNVAction.instance">
+                <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.UNVToUNVAction"/>
+            </file>
+            <file name="org-jcae-netbeans-mesh-smooth-Smooth.instance">
+                <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.smooth.Smooth"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-ActionFitAll.instance"/>
+			<file name="org-jcae-netbeans-viewer3d-ActionAxis.instance"/>
+			<file name="org-jcae-netbeans-viewer3d-Action3DView.instance"/>
+			<file name="org-jcae-netbeans-viewer3d-ActionRemove.instance"/>
+			<file name="org-jcae-netbeans-viewer3d-SelectViewableAction.instance"/>
             <file name="org-jcae-netbeans-mesh-BuidOEMMAction.instance">
                 <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.BuidOEMMAction"/>
             </file>
@@ -37,18 +53,6 @@
                 <attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.OEMMViewAction"/>
             </file>
         </folder>
-        <folder name="jCAE">
-			<file name="org-jcae-netbeans-cad-ExplodeAction.instance"/>
-			<file name="org-jcae-netbeans-cad-ImportAction.instance"/>
-			<file name="org-jcae-netbeans-cad-RemoveAction.instance"/>
-			<file name="org-jcae-netbeans-cad-ReverseAction.instance"/>
-			<file name="org-jcae-netbeans-mesh-ComputeMeshAction.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-ActionFitAll.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-ActionAxis.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-Action3DView.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-ActionRemove.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-SelectViewableAction.instance"/>
-		</folder>
 	</folder>
 
 	<folder name="Loaders">
@@ -57,7 +61,10 @@
                 <folder name="Actions">
                     <file name="org-jcae-netbeans-mesh-ComputeMeshAction.instance"/>
 					<attr name="org-jcae-netbeans-mesh-ComputeMeshAction.instance/org-openide-actions-PropertiesAction.instance" boolvalue="true"/>					
-					<file name="org-openide-actions-PropertiesAction.instance"/>
+					<file name="org-jcae-netbeans-mesh-smooth-Smooth.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-smooth-Smooth.instance"/>
+                    </file>
+                    <file name="org-openide-actions-PropertiesAction.instance"/>
                     <attr name="org-openide-actions-PropertiesAction.instance/org-openide-actions-DeleteAction.instance" boolvalue="true"/>
                     <file name="org-openide-actions-DeleteAction.instance"/>
                     <attr name="org-openide-actions-DeleteAction.instance/org-openide-actions-RenameAction.instance" boolvalue="true"/>
@@ -72,14 +79,23 @@
                     <attr name="org-openide-actions-ViewAction.instance/org-openide-actions-DeleteAction.instance" boolvalue="true"/>
                     <attr name="org-openide-actions-RenameAction.instance/sep-2.instance" boolvalue="false"/>
                     <attr name="sep-2.instance/org-openide-actions-DeleteAction.instance" boolvalue="true"/>
+                    <attr name="org-jcae-netbeans-mesh-smooth-Smooth.shadow/org-jcae-netbeans-mesh-ComputeMeshAction.instance" boolvalue="false"/>
+                    <attr name="org-openide-actions-ViewAction.instance/org-jcae-netbeans-mesh-smooth-Smooth.shadow" boolvalue="true"/>
+                    <attr name="org-jcae-netbeans-mesh-smooth-Smooth.shadow/sep-2.instance" boolvalue="true"/>
                 </folder>
             </folder>
             <folder name="x-unv">
                 <folder name="Actions">
-                    <file name="org-openide-actions-OpenAction.instance"/>
+                    <file name="org-jcae-netbeans-mesh-UNVToUNVAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-UNVToUNVAction.instance"/>
+                    </file>
+                    <attr name="org-jcae-netbeans-mesh-UNVToUNVAction.shadow/org-openide-actions-OpenAction.instance" boolvalue="true"/>
                     <attr name="org-openide-actions-OpenAction.instance/org-openide-actions-FileSystemAction.instance" boolvalue="true"/>
-                    <file name="org-openide-actions-FileSystemAction.instance"/>
                     <attr name="org-openide-actions-FileSystemAction.instance/sep-1.instance" boolvalue="true"/>
+                    <attr name="sep-3.instance/org-openide-actions-SaveAsTemplateAction.instance" boolvalue="true"/>
+                    <attr name="org-openide-actions-SaveAsTemplateAction.instance/sep-4.instance" boolvalue="true"/>
+                    <attr name="org-openide-actions-ToolsAction.instance/org-openide-actions-PropertiesAction.instance" boolvalue="true"/>
+                    <attr name="org-jcae-netbeans-mesh-UNVToUNVAction.shadow/sep-1.instance" boolvalue="true"/>
                     <file name="sep-1.instance">
                         <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
                     </file>
@@ -96,18 +112,12 @@
                     <attr name="org-openide-actions-DeleteAction.instance/org-openide-actions-RenameAction.instance" boolvalue="true"/>
                     <file name="org-openide-actions-RenameAction.instance"/>
                     <attr name="org-openide-actions-RenameAction.instance/sep-3.instance" boolvalue="true"/>
-                    <file name="sep-3.instance">
-                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
-                    </file>
-                    <attr name="sep-3.instance/org-openide-actions-SaveAsTemplateAction.instance" boolvalue="true"/>
-                    <file name="org-openide-actions-SaveAsTemplateAction.instance"/>
-                    <attr name="org-openide-actions-SaveAsTemplateAction.instance/sep-4.instance" boolvalue="true"/>
+                    <attr name="org-openide-actions-RenameAction.instance/sep-4.instance" boolvalue="true"/>
                     <file name="sep-4.instance">
                         <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
                     </file>
                     <attr name="sep-4.instance/org-openide-actions-ToolsAction.instance" boolvalue="true"/>
-                    <file name="org-openide-actions-ToolsAction.instance"/>
-                    <attr name="org-openide-actions-ToolsAction.instance/org-openide-actions-PropertiesAction.instance" boolvalue="true"/>
+                    <attr name="sep-4.instance/org-openide-actions-PropertiesAction.instance" boolvalue="true"/>
                     <file name="org-openide-actions-PropertiesAction.instance"/>
                 </folder>
             </folder>
@@ -209,7 +219,7 @@
 				</file>
 			</folder>
 		</folder>
-		<folder name="jCAE">
+		<folder name="Geometry">
 			<!-- URL is a pointer to the content for the file -->
 			<file name="Empty.brep" url="templates/empty.brep">
 				<attr name="SystemFileSystem.localizingBundle" stringvalue="org.jcae.netbeans.Bundle"/>
@@ -228,7 +238,8 @@
 
 			</file>
 		</folder>
-	</folder>
+	        <file name="XML_hidden"/>
+    </folder>
 
 	<folder name="Services">
 		<folder name="MIMEResolver">
@@ -258,11 +269,15 @@
 		<folder name="Modes">
 			<folder name="navigator">
 				<file name="navigatorTC.wstcref_hidden"/>
-			</folder>
+			    <file name="properties.wstcref" url="propertiesWstcref_1.xml"/>
+            </folder>
 			<folder name="explorer">
 				<file name="runtime.wstcref_hidden"/>
 				<file name="projectTab_tc.wstcref_hidden"/>
 			</folder>
-		</folder>
+		    <folder name="properties">
+                <file name="properties.wstcref_hidden"/>
+            </folder>
+        </folder>
 	</folder>
 </filesystem>

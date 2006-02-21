@@ -61,6 +61,7 @@ public class RemoveAction extends CookieAction
 				bb.remove(parentShape, shape);
 			}
 			
+			GeomUtils.getParentBrep(arg0[i]).getDataObject().setModified(true);
 			try
 			{
 				arg0[i].destroy();
@@ -68,7 +69,7 @@ public class RemoveAction extends CookieAction
 			catch (IOException ex)
 			{
 				ErrorManager.getDefault().notify(ex);
-			}
+			}			
 		}
 	}
 

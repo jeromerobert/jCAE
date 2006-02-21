@@ -174,7 +174,7 @@ public class Groups implements SelectionListener
 			
 			if(!Arrays.asList(view.getView().getViewables()).contains(viewable))
 			{
-				view.getView().add(viewable);	
+				view.add(viewable);	
 			}
 		}
 		catch (ParserConfigurationException e)

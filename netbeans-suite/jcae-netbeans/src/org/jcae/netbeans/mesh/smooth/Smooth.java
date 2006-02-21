@@ -1,41 +1,25 @@
-/*
- * Project Info:  http://jcae.sourceforge.net
- * 
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation; either version 2.1 of the License, or (at your option)
- * any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation, Inc.,
- * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
- *
- * (C) Copyright 2006, by EADS CRC
- */
-
-package org.jcae.netbeans.mesh;
+package org.jcae.netbeans.mesh.smooth;
 
 import java.io.File;
-import org.jcae.mesh.amibe.algos3d.DecimateVertex;
 import org.jcae.netbeans.ProcessExecutor;
 import org.jcae.netbeans.Utilities;
+import org.jcae.netbeans.mesh.MeshDataObject;
+import org.jcae.netbeans.mesh.Settings;
+import org.openide.DialogDescriptor;
+import org.openide.DialogDisplayer;
+import org.openide.NotifyDescriptor;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 import org.openide.util.actions.CookieAction;
 
-public final class DecimateAction extends CookieAction
+public final class Smooth extends CookieAction
 {
 	
 	protected void performAction(Node[] activatedNodes)
 	{
-		DecimateParameter bean=new DecimateParameter();
+		SmoothParameters bean=new SmoothParameters();
 		if(Utilities.showEditBeanDialog(bean))
 		{
 			MeshDataObject c = (MeshDataObject)
@@ -50,7 +34,7 @@ public final class DecimateAction extends CookieAction
 			File brepFile=new File(Utilities.absoluteFileName(
 				c.getMesh().getGeometryFile(), reference));
 			
-			String className="org.jcae.mesh.amibe.algos3d.DecimateVertex";
+			String className="org.jcae.mesh.amibe.algos3d.SmoothNodes3D";
 			String[] cmdLinePre=Settings.getDefault().getCommandLineAlgo();
 			String[] cmdLine=new String[cmdLinePre.length+7];
 
@@ -61,16 +45,8 @@ public final class DecimateAction extends CookieAction
 			cmdLine[i++]=xmlDir;
 			cmdLine[i++]="jcae3d";
 			
-			if(bean.isUseTolerance())
-			{
-				cmdLine[i++]="-t";
-				cmdLine[i++]=Double.toString(bean.getTolerance());
-			}
-			else
-			{
-				cmdLine[i++]="-n";
-				cmdLine[i++]=Integer.toString(bean.getTriangle());
-			}
+			cmdLine[i++]=Double.toString(bean.getElementSize());
+			cmdLine[i++]=Integer.toString(bean.getIterationNumber());
 			
 			cmdLine[i++]=brepFile.getParent();
 			cmdLine[i++]=brepFile.getName();
@@ -79,8 +55,7 @@ public final class DecimateAction extends CookieAction
 			ProcessExecutor pe=new ProcessExecutor(cmdLine);
 			pe.setName("Decimate");
 			pe.start();
-		}
-
+		}		
 	}
 	
 	protected int mode()
@@ -90,7 +65,7 @@ public final class DecimateAction extends CookieAction
 	
 	public String getName()
 	{
-		return NbBundle.getMessage(DecimateAction.class, "CTL_DecimateAction");
+		return NbBundle.getMessage(Smooth.class, "CTL_Smooth");
 	}
 	
 	protected Class[] cookieClasses()
@@ -98,6 +73,13 @@ public final class DecimateAction extends CookieAction
 		return new Class[] {
 			MeshDataObject.class
 		};
+	}
+	
+	protected void initialize()
+	{
+		super.initialize();
+		// see org.openide.util.actions.SystemAction.iconResource() javadoc for more details
+		putValue("noIconInMenu", Boolean.TRUE);
 	}
 	
 	public HelpCtx getHelpCtx()

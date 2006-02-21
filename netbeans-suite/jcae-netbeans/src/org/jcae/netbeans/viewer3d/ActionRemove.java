@@ -22,6 +22,7 @@ package org.jcae.netbeans.viewer3d;
 
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CallableSystemAction;
+import org.openide.util.actions.SystemAction;
 
 /**
  * @author Jerome Robert
@@ -38,7 +39,9 @@ public class ActionRemove  extends CallableSystemAction
 		View3D v3d=View3D.getSelectedView3D();
 		if(v3d!=null)
 		{
-			v3d.getView().remove(v3d.getView().getCurrentViewable());	
+			v3d.getView().remove(v3d.getView().getCurrentViewable());
+			((SelectViewableAction)SystemAction.get(SelectViewableAction.class))
+				.refresh();
 		}		
 	}
 
@@ -61,5 +64,10 @@ public class ActionRemove  extends CallableSystemAction
 	protected String iconResource()
     {
         return "org/jcae/netbeans/viewer3d/removeViewable.gif";
-    }	
+    }
+
+	protected boolean asynchronous()
+	{
+		return false;
+	}
 }
