@@ -8,11 +8,12 @@ IFACEFILES=\
 	gp.i OccJava.i \
 	Standard.i \
 	TopAbs.i \
-	TopoDS_Shape.i \
+	TopoDS.i \
 	BRepAlgoAPI.i \
 	BRepOffsetAPI_Sewing.i \
 	Poly.i \
-	Geom.i
+	Geom.i \
+	BRepBuilderAPI.i
 
 BUILT_SOURCES = OccJava_wrap.cxx
 JAVAGENSRCDIR=$(top_srcdir)/src-java/org/jcae/opencascade/jni/

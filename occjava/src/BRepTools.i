@@ -35,7 +35,7 @@
 
 class BRepTools
 {
-	//Hide the constructor to make this class entirely statis.
+	//Hide the constructor to make this class entirely static.
 	BRepTools()=0;
 	public:
 	
@@ -51,7 +51,7 @@ class BRepTools
 /**
  * BRepTools_WireExplorer
  */
-%{#include <BRepTools_WireExplorer.hxx>%}	 
+%{#include <BRepTools_WireExplorer.hxx>%}
 class BRepTools_WireExplorer
 {
 	%rename(init) Init;
@@ -73,4 +73,29 @@ class BRepTools_WireExplorer
 	TopAbs_Orientation Orientation() const;
 	const TopoDS_Vertex& CurrentVertex() const;
 	void Clear() ;
+};
+
+%{#include <BRepTools_Sewing.hxx>%}
+class BRepTools_Sewing 
+{
+	%rename(init) Init;
+	%rename(add) Add;
+	%rename(perform) Perform;
+	%rename(sewedShape) SewedShape;
+	%rename(nbContigousEdges) NbContigousEdges;
+	%rename(contigousEdge) ContigousEdge;
+	%rename(contigousEdgeCouple) ContigousEdgeCouple;
+	
+	public:
+	BRepTools_Sewing(const Standard_Real tolerance = 1.0e-06,
+		const Standard_Boolean option1 = Standard_True,
+		const Standard_Boolean option2 = Standard_True);
+	void Init(const Standard_Real tolerance,const Standard_Boolean option1,
+		const Standard_Boolean option2) ;
+	void Add(const TopoDS_Shape& shape) ;
+	void Perform() ;
+	const TopoDS_Shape& SewedShape() const;
+	Standard_Integer NbContigousEdges() const;
+	const TopoDS_Edge& ContigousEdge(const Standard_Integer index) const;
+	const TopTools_ListOfShape& ContigousEdgeCouple(const Standard_Integer index) const;
 };

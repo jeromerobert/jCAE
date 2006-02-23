@@ -3,14 +3,20 @@ occjava-swig is a Java wrapper for a small subset of Opencascade libraries based
 This library is needed to run the CAD module of jCAE. It should be installed like this :
 - install swig
 - export CASROOT=<Opencascade/ros>
-- ./configure CPPFLAGS="-I/usr/lib/j2sdk1.5-sun/include/ -I/usr/lib/j2sdk1.5-sun/include/linux"
+- ./configure
 - make
 - make install
 - ant
 
+Note
+----
+The wrapper may not compile properly with -O2. -fno-strict-aliasing is required with -O2. See:
+http://sourceforge.net/mailarchive/forum.php?thread_id=9715058&forum_id=46758
+http://gcc.gnu.org/bugzilla/show_bug.cgi?id=21920
+
 How to add class and methods (draft)
 ----------------------------
-- Find the src/*.i file you want to modify or add a new one.
+- Find the src/*.i file you want to modify or add a new one (grep ;) ).
 - Copy method/class definition from Opencascade header
-- Change Handle(aType) by aType *
+- For Geom_Geometry and Geom2d_Geometry Change Handle(aType) to Handle_aType
 

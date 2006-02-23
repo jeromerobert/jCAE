@@ -1,0 +1,24 @@
+2006-02-23 15:06:07  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* Swig.rules, occjava-swig.vcproj:
+	  Add files to compile on Windows
+
+	* acsite.m4, configure.ac:
+	  Add autodetection of JNI and swig
+
+	* src/BRep_Tool.i, src/Geom.i, src/GeomLProp_SLProps.i, src/OccJava.i:
+	  Use Handle with Geom* objects. Looks like there is no way to avoid that.
+
+2006-02-22 14:05:18  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* doc/Example1.java, src/BRepBuilderAPI.i src/BRepPrimAPI.i
+	  src/BRepTools.i src/Makefile.am src/OccJava.i src/TopoDS.i:
+	  Add many classes and an example of BRepBuilderAPI
+
+2006-02-21 16:01:23  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/Makefile.am, src/OccJava.i, src/TopoDS.i, src/TopoDS_Shape.i:
+	  rename TopoDS_Shape.i to TopoDS.i
+
+2006-02-20 15:42  tag V0_11
+

@@ -26,55 +26,70 @@
 #include <Geom2d_Geometry.hxx>
 %}
 
-/*%rename(Geom_Geometry) Geom_Geometry;
-%rename(Geom_Curve) Geom_Curve;
-%rename(Geom_Surface) Geom_Surface;
-%rename(Geom2d_Geometry) Geom2d_Geometry;
-%rename(Geom2d_Curve) Geom2d_Curve;*/
+%rename(Geom_Geometry) Handle_Geom_Geometry;
+%rename(Geom_Curve) Handle_Geom_Curve;
+%rename(Geom_Surface) Handle_Geom_Surface;
+%rename(Geom2d_Geometry) Handle_Geom2d_Geometry;
+%rename(Geom2d_Curve) Handle_Geom2d_Curve;
 
-class Geom_Geometry
+class Handle_Geom_Geometry
 {
-	Geom_Geometry()=0;
+	Handle_Geom_Geometry()=0;
 };
 
-class Geom_Curve: public Geom_Geometry
+class Handle_Geom_Curve: public Handle_Geom_Geometry
 {
-	%rename(firstParameter) FirstParameter;
-	%rename(lastParameter) LastParameter;
-	%rename(isClosed) IsClosed;
-	%rename(isPeriodic) IsPeriodic;
-	%rename(period) Period;
-	
-	Geom_Curve()=0;	
-	public:
-	Standard_Real FirstParameter();
-	Standard_Real LastParameter();
-	Standard_Boolean IsClosed();
-	Standard_Boolean IsPeriodic();
-	Standard_Real Period();
+	Handle_Geom_Curve()=0;	
 };
 
-
-class Geom_Surface: public Geom_Geometry
+%extend Handle_Geom_Curve
 {
-	Geom_Surface()=0;
-};
-
-%extend Geom_Surface
-{
-	const gp_Pnt & value(const Standard_Real U,const Standard_Real V) const
+	Standard_Real firstParameter()
 	{
-		return (self)->Value(U, V);
+		return (*self)->FirstParameter();
+	}
+	
+	Standard_Real lastParameter()
+	{
+		return (*self)->LastParameter();
+	}
+	
+	Standard_Boolean isClosed()
+	{
+		return (*self)->IsClosed();
+	}
+	
+	Standard_Boolean isPeriodic()
+	{
+		return (*self)->IsPeriodic();
+	}
+	
+	Standard_Real period()
+	{
+		return (*self)->Period();
 	}
 }
 
-class Geom2d_Geometry
+class Handle_Geom_Surface: public Handle_Geom_Geometry
 {
-	Geom2d_Geometry()=0;
+	Handle_Geom_Surface()=0;
 };
 
-class Geom2d_Curve: public Geom2d_Geometry
+%extend Handle_Geom_Surface
 {
-	Geom2d_Curve()=0;
+	const gp_Pnt & value(const Standard_Real U,const Standard_Real V) const
+	{
+		return (*self)->Value(U, V);
+	}
+}
+
+class Handle_Geom2d_Geometry
+{
+	Handle_Geom2d_Geometry()=0;
+};
+
+class Handle_Geom2d_Curve: public Handle_Geom2d_Geometry
+{
+	Handle_Geom2d_Curve()=0;
 };
 

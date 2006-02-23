@@ -20,6 +20,7 @@
 
 %{
 #include <BRep_Tool.hxx>
+#include <Geom_Curve.hxx>
 %}
 
 %typemap(javacode) BRep_Tool
@@ -71,10 +72,10 @@ class BRep_Tool
 	static Standard_Real Tolerance(const TopoDS_Edge& E) ;
 	static Standard_Real Tolerance(const TopoDS_Vertex& V);
 	
-	/*static Geom_Curve * Curve(const TopoDS_Edge& E,
+	/*static const Handle_Geom_Curve& Curve(const TopoDS_Edge& E,
 		Standard_Real& First,Standard_Real& Last) ;
-	static Geom_Surface * Surface(const TopoDS_Face& F) ;
-	static Geom2d_Curve * CurveOnSurface(const TopoDS_Edge& E,
+	static const Handle_Geom_Surface& Surface(const TopoDS_Face& F) ;
+	static const Handle_Geom2d_Curve& CurveOnSurface(const TopoDS_Edge& E,
 		const TopoDS_Face& F,Standard_Real& First,Standard_Real& Last) ;*/
 };
 
@@ -96,33 +97,33 @@ class BRep_Tool
 		BRep_Tool::Range(E, range[0], range[1]);
 	}
 	
-	static Geom_Curve * curve(const TopoDS_Edge& E,
+	// new Handle is a little memory leak as this handle is never deleted
+	static Handle_Geom_Curve * curve(const TopoDS_Edge& E,
 		Standard_Real& First,Standard_Real& Last)
 	{
-		Handle_Geom_Curve hgc=BRep_Tool::Curve(E, First, Last);
-		if(hgc.IsNull())
+		Handle_Geom_Curve * hgc=new Handle_Geom_Curve(BRep_Tool::Curve(E, First, Last));
+		if(hgc->IsNull())		
 			return NULL;
 		else
-			return (Geom_Curve*)(Standard_Transient*)hgc;
+			return hgc;
 	}
 	
-	static Geom_Surface * surface(const TopoDS_Face& F)
+	static Handle_Geom_Surface * surface(const TopoDS_Face& F)
 	{
-		Handle_Geom_Surface hgc=BRep_Tool::Surface(F);
-		if(hgc.IsNull())
+		Handle_Geom_Surface * hgc=new Handle_Geom_Surface(BRep_Tool::Surface(F));
+		if(hgc->IsNull())
 			return NULL;
 		else
-			return (Geom_Surface*)(Standard_Transient*)hgc;
+			return hgc;
 	}
 	
-	static Geom2d_Curve * CurveOnSurface(const TopoDS_Edge& E,
+	static Handle_Geom2d_Curve * curveOnSurface(const TopoDS_Edge& E,
 		const TopoDS_Face& F,Standard_Real& First,Standard_Real& Last)
 	{
-		Handle_Geom2d_Curve hgc=BRep_Tool::CurveOnSurface(E, F, First, Last);
-		if(hgc.IsNull())
+		Handle_Geom2d_Curve * hgc=new Handle_Geom2d_Curve(BRep_Tool::CurveOnSurface(E, F, First, Last));
+		if(hgc->IsNull())
 			return NULL;
 		else
-			return (Geom2d_Curve*)(Standard_Transient*)hgc;		
+			return hgc;
 	}
-	
 };

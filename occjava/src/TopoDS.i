@@ -24,6 +24,7 @@
 #include <TopoDS_Shell.hxx>
 #include <TopoDS_Compound.hxx>
 #include <TopoDS_Wire.hxx>
+#include <TopoDS_Iterator.hxx>
 %}
 
 /** 
@@ -37,20 +38,34 @@
 
 %typemap(out) TopoDS_Shape
 {
-	TopoDS_Shape * tsp=new TopoDS_Shape();
-	tsp->TShape($1.TShape());
-	tsp->Location($1.Location());
-	tsp->Orientation($1.Orientation());
-	$result=(jlong)tsp;
+	if($1.IsNull())
+	{
+		$result=0L; //NULL
+	}
+	else
+	{
+		TopoDS_Shape * tsp=new TopoDS_Shape();
+		tsp->TShape($1.TShape());
+		tsp->Location($1.Location());
+		tsp->Orientation($1.Orientation());
+		$result=(jlong)tsp;
+	}
 }
 
 %typemap(out) const TopoDS_Shape &
 {
-	TopoDS_Shape * tsp=new TopoDS_Shape();
-	tsp->TShape($1->TShape());
-	tsp->Location($1->Location());
-	tsp->Orientation($1->Orientation());
-	$result=(jlong)tsp;
+	if($1->IsNull())
+	{
+		$result=0L; //NULL
+	}
+	else
+	{
+		TopoDS_Shape * tsp=new TopoDS_Shape();
+		tsp->TShape($1->TShape());
+		tsp->Location($1->Location());
+		tsp->Orientation($1->Orientation());
+		$result=(jlong)tsp;
+	}
 }
 %typemap(javaout) TopoDS_Shape, const TopoDS_Shape&
 {
@@ -136,6 +151,14 @@
 	{
 		return hashCode(Integer.MAX_VALUE);
 	}
+	
+	protected static long[] cArrayUnwrap(TopoDS_Shape[] arrayWrapper)
+	{
+		long[] cArray = new long[arrayWrapper.length];
+		for (int i=0; i<arrayWrapper.length; i++)
+		cArray[i] = TopoDS_Shape.getCPtr(arrayWrapper[i]);
+		return cArray;
+	}	
 %}
 
 // Note that TopoDS_Shape is no longer abstract (it was in libOccJava)
@@ -198,3 +221,21 @@ class TopoDS_Vertex: public TopoDS_Shape
 {
 };
 
+class TopoDS_Iterator
+{
+	%rename(initialize) Initialize;
+	%rename(more) More;
+	%rename(next) Next;
+	%rename(value) Value;
+	public:
+	TopoDS_Iterator();
+	TopoDS_Iterator(const TopoDS_Shape& S,
+		const Standard_Boolean cumOri = Standard_True,
+		const Standard_Boolean cumLoc = Standard_True);
+	void Initialize(const TopoDS_Shape& S,
+		const Standard_Boolean cumOri = Standard_True,
+		const Standard_Boolean cumLoc = Standard_True) ;
+	Standard_Boolean More() const;
+	void Next() ;
+	const TopoDS_Shape& Value() const;
+};

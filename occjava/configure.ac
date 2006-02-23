@@ -84,6 +84,25 @@ AC_LANG_POP
 # End of Opencascade
 #############################
 
+#############################
+# Swig
+#############################
+# http://sourceforge.net/mailarchive/forum.php?thread_id=9715058&forum_id=46758
+# http://gcc.gnu.org/bugzilla/show_bug.cgi?id=21920
+CXXFLAGS="${CXXFLAGS} -fno-strict-aliasing"
+AC_PROG_SWIG(1.3.27)
+SWIG_ENABLE_CXX
+
+########
+# JNI
+########
+AC_PROG_JAVAC
+AC_JNI_INCLUDE_DIR
+for JNI_INCLUDE_DIR in $JNI_INCLUDE_DIRS
+do
+	CPPFLAGS="$CPPFLAGS -I$JNI_INCLUDE_DIR"
+done
+
 AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT
 

@@ -25,17 +25,7 @@
 #include <BRepPrimAPI_MakeTorus.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepPrimAPI_MakeSphere.hxx>
-#include <BRep_Builder.hxx>
 %}
-
-class BRepBuilderAPI_MakeShape
-{
-	//Hide the constructor to make this class abstract
-	BRepBuilderAPI_MakeShape()=0;
-	public:
-	%rename(shape) Shape;
-	const TopoDS_Shape& Shape() const;
-};
 
 class BRepPrimAPI_MakeBox : public BRepBuilderAPI_MakeShape
 {
@@ -68,24 +58,4 @@ class BRepPrimAPI_MakeSphere : public BRepBuilderAPI_MakeShape
 {
 	public:
 	BRepPrimAPI_MakeSphere(const gp_Pnt& Center,const Standard_Real R);
-};
-
-%{#include <BRepBuilderAPI_Transform.hxx>%}
-%{#include <BRepBuilderAPI_ModifyShape.hxx>%}
-class BRepBuilderAPI_ModifyShape  : public BRepBuilderAPI_MakeShape
-{
-	BRepBuilderAPI_ModifyShape()=0;
-};
-
-class BRepBuilderAPI_Transform : public BRepBuilderAPI_ModifyShape
-{
-	%rename(perform) Perform;
-	%rename(modifiedShape) ModifiedShape;
-	public:
-	BRepBuilderAPI_Transform(const gp_Trsf& T);
-	BRepBuilderAPI_Transform(const TopoDS_Shape& S,	const gp_Trsf& T,
-		const Standard_Boolean Copy = Standard_False);
-	void Perform(const TopoDS_Shape& S,
-		const Standard_Boolean Copy = Standard_False) ;
-	virtual const TopoDS_Shape& ModifiedShape(const TopoDS_Shape& S) const;
 };

@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VisualStudioToolFile
+	Name="Swig"
+	Version="8,00"
+	>
+	<Rules>
+		<CustomBuildRule
+			Name="swig"
+			DisplayName="swig"
+			CommandLine="swig.exe [AllOptions] [inputs]"
+			Outputs="$(InputName)_wrap.cxx"
+			FileExtensions="*.i"
+			>
+			<Properties>
+				<StringProperty
+					Name="package"
+					DisplayName="Java package"
+					Switch="-package [value]"
+					DefaultValue="swig"
+				/>
+				<StringProperty
+					Name="outdir"
+					DisplayName="Output directory"
+					Switch="-outdir [value]"
+					DefaultValue="."
+				/>
+				<StringProperty
+					Name="options"
+					DisplayName="Options"
+					Switch="[value]"
+					DefaultValue="-c++ -v -Wall -java"
+				/>
+			</Properties>
+		</CustomBuildRule>
+	</Rules>
+</VisualStudioToolFile>

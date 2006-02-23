@@ -91,7 +91,7 @@ class GeomLProp_SLProps
 	Standard_Real MinCurvature() ;
 	Standard_Real MeanCurvature() ;
 	Standard_Real GaussianCurvature() ;
-	void SetSurface(const Geom_Surface * S) ;	
+	void SetSurface(const Handle_Geom_Surface & S) ;	
 };
 
 %extend GeomLProp_SLProps
