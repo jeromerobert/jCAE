@@ -21,22 +21,19 @@
 package org.jcae.netbeans.mesh;
 
 import java.awt.datatransfer.Transferable;
-import java.awt.event.ActionEvent;
 import java.beans.IntrospectionException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.Action;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 import org.jcae.netbeans.BeanProperty;
 import org.jcae.netbeans.Utilities;
 import org.jcae.netbeans.cad.BrepNode;
 import org.jcae.netbeans.viewer3d.View3D;
+import org.jcae.netbeans.viewer3d.View3DManager;
 import org.openide.ErrorManager;
 import org.openide.actions.*;
-import org.openide.awt.Mnemonics;
 import org.openide.cookies.ViewCookie;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataNode;
@@ -47,8 +44,6 @@ import org.openide.nodes.Node;
 import org.openide.nodes.Node.Property;
 import org.openide.nodes.Node.PropertySet;
 import org.openide.nodes.NodeTransfer;
-import org.openide.util.HelpCtx;
-import org.openide.util.actions.Presenter;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.PasteType;
 
@@ -173,7 +168,7 @@ public class MeshNode extends DataNode implements ViewCookie
 	{
 		if(groups!=null)
 		{
-			View3D view=View3D.getView3D();
+			View3D view=View3DManager.getDefault().getView3D();
 			groups.displayGroups(
 				getName(),
 				Arrays.asList(groups.getGroups()),

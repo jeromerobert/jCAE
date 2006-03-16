@@ -29,7 +29,7 @@ import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.OEMMViewer;
 import org.jcae.netbeans.Utilities;
 import org.jcae.netbeans.viewer3d.SelectViewableAction;
-import org.jcae.netbeans.viewer3d.View3D;
+import org.jcae.netbeans.viewer3d.View3DManager;
 import org.jcae.viewer3d.View;
 import org.jcae.viewer3d.bg.ViewableBG;
 import org.openide.filesystems.FileUtil;
@@ -114,7 +114,7 @@ public final class OEMMViewAction extends CookieAction
 	{
 		final OEMM oemm = IndexedStorage.buildOEMMStructure(dir);
 		boolean onlyLeaves = true;
-		View bgView=View3D.getView3D().getView();
+		View bgView=View3DManager.getDefault().getView3D().getView();
 		BranchGroup octree = OEMMViewer.bgOEMM(oemm, onlyLeaves);
 		ViewableBG fe1 = new ViewableBG(octree);
 		fe1.setName(viewableName);

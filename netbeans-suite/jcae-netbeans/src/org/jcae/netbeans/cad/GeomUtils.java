@@ -55,8 +55,14 @@ public class GeomUtils
 	 * which are under the node 'where'
 	 */
 	static public Collection findNode(Node where, Node n)
-	{
+	{		
 		ArrayList toReturn=new ArrayList();
+		
+		if(where.getClass().getName().equals("org.netbeans.modules.favorites.Favorites"))
+		{
+			return toReturn;
+		}
+		
 		TopoDS_Shape ws = getShape(where);
 		TopoDS_Shape nsh = getShape(n);
 		if(ws!=null && nsh!=null && ws.equals(nsh))

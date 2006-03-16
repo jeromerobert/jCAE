@@ -20,13 +20,17 @@
 
 package org.jcae.netbeans.cad;
 
+import javax.swing.Action;
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import org.jcae.opencascade.jni.BRepAlgoAPI_BooleanOperation;
 import org.jcae.opencascade.jni.BRepAlgoAPI_Common;
 import org.jcae.opencascade.jni.BRepAlgoAPI_Cut;
 import org.jcae.opencascade.jni.BRepAlgoAPI_Fuse;
 import org.jcae.opencascade.jni.BRepAlgoAPI_Section;
 import org.jcae.opencascade.jni.TopoDS_Shape;
+import org.openide.awt.Actions;
+import org.openide.awt.Mnemonics;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CookieAction;
@@ -40,16 +44,30 @@ public abstract class BooleanAction extends CookieAction
 	{
 		public javax.swing.JMenuItem getMenuPresenter() 
 		{
-			JMenu toReturn=new JMenu(getName());
-			toReturn.add(((Presenter.Menu)
-				SystemAction.get(Common.class)).getMenuPresenter());
-			toReturn.add(((Presenter.Menu)
-				SystemAction.get(Fuse.class)).getMenuPresenter());
-			toReturn.add(((Presenter.Menu)
-				SystemAction.get(Cut.class)).getMenuPresenter());
-			toReturn.add(((Presenter.Menu)
-				SystemAction.get(Section.class)).getMenuPresenter());
-			return toReturn;
+			JMenu menu = new JMenu();		
+			Mnemonics.setLocalizedText(menu, getName());		
+
+			JMenuItem item = new JMenuItem();
+			Mnemonics.setLocalizedText(item, item.getText());
+			Actions.connect(item, (Action)SystemAction.get(Common.class), true);
+			menu.add(item);
+
+			item = new JMenuItem();
+			Mnemonics.setLocalizedText(item, item.getText());
+			Actions.connect(item, (Action)SystemAction.get(Fuse.class), true);
+			menu.add(item);
+
+			item = new JMenuItem();
+			Mnemonics.setLocalizedText(item, item.getText());
+			Actions.connect(item, (Action)SystemAction.get(Cut.class), true);
+			menu.add(item);
+
+			item = new JMenuItem();
+			Mnemonics.setLocalizedText(item, item.getText());
+			Actions.connect(item, (Action)SystemAction.get(Section.class), true);
+			menu.add(item);
+
+			return menu;
 		}
 
 	    public javax.swing.JMenuItem getPopupPresenter() {

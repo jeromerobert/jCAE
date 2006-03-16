@@ -22,6 +22,7 @@ package org.jcae.netbeans.cad;
 
 import java.awt.Color;
 import org.jcae.netbeans.viewer3d.View3D;
+import org.jcae.netbeans.viewer3d.View3DManager;
 import org.jcae.opencascade.jni.BRep_Builder;
 import org.jcae.opencascade.jni.ShapeAnalysis_FreeBounds;
 import org.jcae.opencascade.jni.TopoDS_Compound;
@@ -62,7 +63,7 @@ public class FreeBoundsAction extends CookieAction
 			if(openWires!=null)
 				bb.add(tc, openWires);
 		}
-		View3D v=View3D.getView3D();
+		View3D v=View3DManager.getDefault().getView3D();
 		OCCProvider occp=new OCCProvider(tc);
 		occp.setEdgeColor(Color.GREEN);
 		ViewableCAD viewable = new ViewableCAD(occp);

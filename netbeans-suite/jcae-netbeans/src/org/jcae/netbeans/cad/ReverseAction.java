@@ -19,6 +19,7 @@
  */
 
 package org.jcae.netbeans.cad;
+import java.util.Arrays;
 import org.jcae.opencascade.jni.BRep_Builder;
 import org.jcae.opencascade.jni.TopExp_Explorer;
 import org.jcae.opencascade.jni.TopoDS_Shape;
@@ -28,7 +29,7 @@ import org.openide.util.actions.CookieAction;
 
 public class ReverseAction extends CookieAction implements Node.Cookie
 {
-	private static Class[] COOKIE_CLASSES=new Class[]{ReverseAction.class};
+	private static Class[] COOKIE_CLASSES=new Class[]{ShapeCookie.class};
 	
 	protected int mode()
 	{

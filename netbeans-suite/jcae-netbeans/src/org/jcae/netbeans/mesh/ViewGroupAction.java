@@ -23,6 +23,7 @@ package org.jcae.netbeans.mesh;
 import java.util.*;
 import java.util.Map.Entry;
 import org.jcae.netbeans.viewer3d.View3D;
+import org.jcae.netbeans.viewer3d.View3DManager;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CookieAction;
@@ -55,7 +56,7 @@ public class ViewGroupAction extends CookieAction
 			c.add(gn.getGroup());
 		}
 	
-		View3D v = View3D.getView3D();
+		View3D v = View3DManager.getDefault().getView3D();
 		Iterator it=groups2Group.entrySet().iterator();
 		while(it.hasNext())
 		{

@@ -18,9 +18,11 @@
  * (C) Copyright 2004, by EADS CRC
  */
 
-package org.jcae.netbeans.viewer3d;
+package org.jcae.netbeans.viewer3d.actions;
 
 import java.awt.event.ActionEvent;
+import org.jcae.netbeans.viewer3d.View3D;
+import org.jcae.netbeans.viewer3d.View3DManager;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.BooleanStateAction;
 
@@ -36,7 +38,7 @@ public class ActionAxis extends BooleanStateAction
 	 */
 	public void actionPerformed(ActionEvent arg0)
 	{
-    	View3D v=View3D.getSelectedView3D();
+    	View3D v=View3DManager.getDefault().getSelectedView3D();
     	if(v!=null)
     		v.getView().setOriginAxisVisible(!v.getView().isOriginAxisVisible());
 	}
@@ -61,7 +63,7 @@ public class ActionAxis extends BooleanStateAction
     
 	protected String iconResource()
     {
-        return "org/jcae/netbeans/viewer3d/hideaxis.gif";
+        return "org/jcae/netbeans/viewer3d/actions/hideaxis.gif";
     }
 	
 	/* (non-Javadoc)
@@ -69,7 +71,7 @@ public class ActionAxis extends BooleanStateAction
 	 */
 	public boolean getBooleanState()
 	{
-    	View3D v=View3D.getSelectedView3D();
+    	View3D v=View3DManager.getDefault().getSelectedView3D();
     	if(v!=null)
     		return !v.getView().isOriginAxisVisible();
     	else

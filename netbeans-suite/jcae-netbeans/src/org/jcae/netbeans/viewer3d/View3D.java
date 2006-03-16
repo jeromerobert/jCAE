@@ -21,94 +21,22 @@
 package org.jcae.netbeans.viewer3d;
 
 import java.awt.BorderLayout;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.util.ArrayList;
-import java.util.Iterator;
-import javax.swing.JPopupMenu;
-import javax.swing.ToolTipManager;
 import org.jcae.viewer3d.View;
 import org.jcae.viewer3d.Viewable;
-import org.jcae.viewer3d.cad.ViewableCAD;
-import org.jcae.viewer3d.fe.ViewableFE;
-import org.openide.ErrorManager;
 import org.openide.util.actions.SystemAction;
-import org.openide.windows.Mode;
 import org.openide.windows.TopComponent;
-import org.openide.windows.WindowManager;
 
 /**
  * @author Jerome Robert
  *
  */
 public class View3D extends TopComponent
-{
-	static
-	{
-		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-		ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
-	}
-	
-	public static View3D[] getAllView3D()
-	{
-		ArrayList v3ds=new ArrayList();
-		Iterator it=WindowManager.getDefault().getModes().iterator();
-		while(it.hasNext())
-		{		
-			Mode mode=(Mode)it.next();
-			TopComponent[] t=mode.getTopComponents();		
-			
-			for(int i=0; i<t.length; i++)
-				if(t[i] instanceof View3D) v3ds.add(t[i]);
-		}
-		
-		return (View3D[])v3ds.toArray(new View3D[0]);
-	}
-	
-	/**
-	 * If the current selected view is a 3D View return it, else return null
-	 */
-	public static View3D getSelectedView3D()
-	{
-		return activeView;
-	}
-	
-	/**
-	 * If the current selected view is a 3D View return it, else create a new
-	 * view and return it
-	 */
-	public static View3D getView3D()
-	{
-		View3D t=getSelectedView3D();			
-		if(t!=null) return t;
-		else return createView3D();
-	}
-	
-	public static View3D createView3D()
-	{
-		try
-		{
-			View3D topComponent = new View3D();
-			topComponent.setName("3D View "+counter);			
-			WindowManager.getDefault().findMode("editor").dockInto(topComponent);
-			topComponent.open();
-			topComponent.requestActive();
-			return topComponent;
-		} catch(Exception ex)
-		{
-			ErrorManager.getDefault().notify(ex);
-			return null;
-		}		
-	}
-	
-	private static int counter=0;
+{	
 	protected View canvas;
 	private boolean activated;	
-	static private View3D activeView; 
 	public View3D()
 	{
-		counter++;		
+		View3DManager.getDefault().counter++;		
 		this.canvas=new View();
 		setLayout(new BorderLayout());
 		add(canvas, BorderLayout.CENTER);
@@ -146,8 +74,9 @@ public class View3D extends TopComponent
 	protected void componentClosed()
 	{
 		canvas.setVisible(false);
-		if(activeView==this)
-			activeView=null;
+		;
+		if(View3DManager.getDefault().activeView==this)
+			View3DManager.getDefault().activeView=null;
 	    super.componentClosed();
 	}
 	
@@ -165,7 +94,7 @@ public class View3D extends TopComponent
 	protected void componentActivated()
 	{	
 		activated=true;
-		activeView=this;
+		View3DManager.getDefault().activeView=this;
 	}
 	
 	/* (non-Javadoc)

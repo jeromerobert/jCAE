@@ -20,16 +20,19 @@
 
 package org.jcae.netbeans.cad;
 
+import javax.swing.Action;
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import org.jcae.netbeans.Utilities;
 import org.jcae.opencascade.jni.BRepBuilderAPI_Transform;
 import org.jcae.opencascade.jni.GP_Trsf;
 import org.jcae.opencascade.jni.TopoDS_Shape;
+import org.openide.awt.Actions;
+import org.openide.awt.Mnemonics;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CookieAction;
 import org.openide.util.actions.NodeAction;
-import org.openide.util.actions.Presenter;
 import org.openide.util.actions.SystemAction;
 
 public abstract class TransformAction extends CookieAction
@@ -48,14 +51,25 @@ public abstract class TransformAction extends CookieAction
 
 		public javax.swing.JMenuItem getMenuPresenter()
 		{
-			JMenu toReturn = new JMenu(getName());
-			toReturn.add(((Presenter.Menu) SystemAction.get(Translate.class))
-				.getMenuPresenter());
-			toReturn.add(((Presenter.Menu) SystemAction.get(Rotate.class))
-				.getMenuPresenter());
-			toReturn.add(((Presenter.Menu) SystemAction.get(Scale.class))
-				.getMenuPresenter());
-			return toReturn;
+			JMenu menu = new JMenu();		
+			Mnemonics.setLocalizedText(menu, getName());		
+
+			JMenuItem item = new JMenuItem();
+			Mnemonics.setLocalizedText(item, item.getText());
+			Actions.connect(item, (Action)SystemAction.get(Translate.class), true);
+			menu.add(item);
+
+			item = new JMenuItem();
+			Mnemonics.setLocalizedText(item, item.getText());
+			Actions.connect(item, (Action)SystemAction.get(Rotate.class), true);
+			menu.add(item);
+
+			item = new JMenuItem();
+			Mnemonics.setLocalizedText(item, item.getText());
+			Actions.connect(item, (Action)SystemAction.get(Scale.class), true);
+			menu.add(item);
+
+			return menu;			
 		}
 
 		public String getName()

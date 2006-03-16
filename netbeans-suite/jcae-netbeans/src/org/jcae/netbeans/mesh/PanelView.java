@@ -26,6 +26,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.*;
 import org.jcae.netbeans.viewer3d.View3D;
+import org.jcae.netbeans.viewer3d.View3DManager;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
@@ -78,8 +79,8 @@ public class PanelView implements ActionListener
         scrollpane.setBounds(10,30,270,460);
         
         labelView.setBounds(10,500,200,20);
-        comboboxView = new JComboBox(View3D.getAllView3D());
-	comboboxView.setSelectedItem(View3D.getSelectedView3D());
+        comboboxView = new JComboBox(View3DManager.getDefault().getAllView3D());
+		comboboxView.setSelectedItem(View3DManager.getDefault().getSelectedView3D());
         comboboxView.setBounds(10,530,200,20);
         
 	buttonSelectAllGroups.setBounds(10,500,100,20);

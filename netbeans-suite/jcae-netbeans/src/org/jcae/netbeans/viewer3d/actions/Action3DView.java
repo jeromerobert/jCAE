@@ -18,32 +18,29 @@
  * (C) Copyright 2004, by EADS CRC
  */
 
-package org.jcae.netbeans.viewer3d;
+package org.jcae.netbeans.viewer3d.actions;
 
+import org.jcae.netbeans.viewer3d.View3DManager;
 import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
 import org.openide.util.actions.CallableSystemAction;
 
 /**
- * @author Jerome Robert
- *
+ * Action that can always be invoked and work procedurally.
+ * @author jerome
  */
-public class ActionFitAll extends CallableSystemAction 
-{    
-    public void performAction()
-    {
-    	View3D v=View3D.getSelectedView3D();
-    	if(v!=null)
-    		v.getView().fitAll();
+public class Action3DView extends CallableSystemAction {
+    
+    public void performAction() {
+    	View3DManager.getDefault().createView3D();
     }
     
-    public String getName()
-    {
-        return "Fit All";
+    public String getName() {
+        return "New 3D view";
     }
     
-    protected String iconResource()
-    {
-        return "org/jcae/netbeans/viewer3d/fitall.gif";
+    protected String iconResource() {
+        return "org/jcae/netbeans/viewer3d/actions/Action3DViewIcon.gif";
     }
     
     public HelpCtx getHelpCtx() {
@@ -56,4 +53,12 @@ public class ActionFitAll extends CallableSystemAction
         // performAction() should run in event thread
         return false;
     }
+    
+    /** Perform extra initialization of this action's singleton.
+     * PLEASE do not use constructors for this purpose!
+     * protected void initialize() {
+     * super.initialize();
+     * putProperty(Action.SHORT_DESCRIPTION, NbBundle.getMessage(MyAction.class, "HINT_Action"));
+     * }
+     */	
 }

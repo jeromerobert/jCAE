@@ -51,7 +51,7 @@ public class SelectViewableAction extends CallableSystemAction
 		 */
 		public Object getSelectedItem()
 		{
-			View3D v3d=View3D.getSelectedView3D();
+			View3D v3d=View3DManager.getDefault().getSelectedView3D();
 			if(v3d!=null)
 			{
 				return v3d.getView().getCurrentViewable();
@@ -64,7 +64,7 @@ public class SelectViewableAction extends CallableSystemAction
 		 */
 		public void setSelectedItem(Object anItem)
 		{
-			View3D v3d=View3D.getSelectedView3D();
+			View3D v3d=View3DManager.getDefault().getSelectedView3D();
 			if(v3d!=null)
 			{
 				v3d.getView().setCurrentViewable((Viewable) anItem);
@@ -76,7 +76,7 @@ public class SelectViewableAction extends CallableSystemAction
 		 */
 		public int getSize()
 		{
-			View3D v3d=View3D.getSelectedView3D();
+			View3D v3d=View3DManager.getDefault().getSelectedView3D();
 			if(v3d!=null)
 			{				
 				return v3d.getView().getViewables().length;
@@ -95,7 +95,7 @@ public class SelectViewableAction extends CallableSystemAction
 				fireContentsChanged(this, 0, getSize()-1);
 				contentChangedLock=false;
 			}
-			View3D v3d=View3D.getSelectedView3D();
+			View3D v3d=View3DManager.getDefault().getSelectedView3D();
 			if(v3d!=null)
 			{				
 				return v3d.getView().getViewables()[index];

@@ -18,56 +18,44 @@
  * (C) Copyright 2004, by EADS CRC
  */
 
-package org.jcae.netbeans.viewer3d;
+package org.jcae.netbeans.viewer3d.actions;
 
+import org.jcae.netbeans.viewer3d.View3D;
+import org.jcae.netbeans.viewer3d.View3DManager;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CallableSystemAction;
-import org.openide.util.actions.SystemAction;
 
 /**
  * @author Jerome Robert
  *
  */
-public class ActionRemove  extends CallableSystemAction
-{
-
-	/* (non-Javadoc)
-	 * @see org.openide.util.actions.CallableSystemAction#performAction()
-	 */
-	public void performAction()
-	{
-		View3D v3d=View3D.getSelectedView3D();
-		if(v3d!=null)
-		{
-			v3d.getView().remove(v3d.getView().getCurrentViewable());
-			((SelectViewableAction)SystemAction.get(SelectViewableAction.class))
-				.refresh();
-		}		
-	}
-
-	/* (non-Javadoc)
-	 * @see org.openide.util.actions.SystemAction#getName()
-	 */
-	public String getName()
-	{
-		return "remove";
-	}
-
-	/* (non-Javadoc)
-	 * @see org.openide.util.actions.SystemAction#getHelpCtx()
-	 */
-	public HelpCtx getHelpCtx()
-	{
-		return HelpCtx.DEFAULT_HELP;
-	}
-	
-	protected String iconResource()
+public class ActionFitAll extends CallableSystemAction 
+{    
+    public void performAction()
     {
-        return "org/jcae/netbeans/viewer3d/removeViewable.gif";
+    	View3D v=View3DManager.getDefault().getSelectedView3D();
+    	if(v!=null)
+    		v.getView().fitAll();
     }
-
-	protected boolean asynchronous()
-	{
-		return false;
-	}
+    
+    public String getName()
+    {
+        return "Fit All";
+    }
+    
+    protected String iconResource()
+    {
+        return "org/jcae/netbeans/viewer3d/actions/fitall.gif";
+    }
+    
+    public HelpCtx getHelpCtx() {
+        return HelpCtx.DEFAULT_HELP;
+        // If you will provide context help then use:
+        // return new HelpCtx(MyAction.class);
+    }
+    
+    protected boolean asynchronous() {
+        // performAction() should run in event thread
+        return false;
+    }
 }

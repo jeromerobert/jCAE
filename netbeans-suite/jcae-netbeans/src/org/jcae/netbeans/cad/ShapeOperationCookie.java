@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import javax.swing.SwingUtilities;
 import org.jcae.netbeans.viewer3d.View3D;
+import org.jcae.netbeans.viewer3d.View3DManager;
 import org.jcae.opencascade.jni.*;
 import org.jcae.viewer3d.cad.CADSelection;
 import org.jcae.viewer3d.SelectionListener;
@@ -82,7 +83,7 @@ public class ShapeOperationCookie implements ViewCookie
 						
 						try
 						{
-							exs[i].setSelectedNodes((Node[]) nnodes.toArray(new Node[nnodes.size()]));
+							exs[i].setSelectedNodes((Node[]) nnodes.toArray(new Node[nnodes.size()]));						
 						}
 						catch (PropertyVetoException e)
 						{					
@@ -140,7 +141,7 @@ public class ShapeOperationCookie implements ViewCookie
 	public void view()
 	{
 		TopoDS_Shape shape = getShape();
-		View3D v=View3D.getView3D();
+		View3D v=View3DManager.getDefault().getView3D();
 		ViewableCAD viewable = new ViewableCAD(new OCCProvider(shape));
 		viewable.addSelectionListener(new MySelectionListener(viewable));
 		viewable.setName(node.getName());

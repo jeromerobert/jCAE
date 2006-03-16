@@ -1,3 +1,22 @@
+2006-03-15 18:02:15  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/cad/BooleanAction.java,
+	  jcae-netbeans/src/org/jcae/netbeans/cad/TransformAction.java:
+	  Fix a bug: CAD sub menu were always disabled.
+
+2006-03-02 17:28:19  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/viewer3d/:
+	  Add many 3D navigation features (contrib Erwann Feat)
+
+2006-02-23 18:00:36  Jerome Robert <jeromerobert@users.sourceforge.net>
+	
+	* jcae-netbeans/src/org/jcae/netbeans/cad/:
+	  [Fix a part of bug 1430728 ] Picking on face freeze jcae.
+	  [Fix bug 1437468] Face reverse do not work.
+
+2006-02-21 10:52  tag V0_11
+
 2006-02-21 09:50:10  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* jcae-netbeans/src/org/jcae/netbeans/layer.xml,
@@ -8,6 +27,7 @@
 	  Fix bug in boolean operations (operation where mixed) and port to occjava-swig
 
 2006-02-20 17:27:49  Jerome Robert <jeromerobert@users.sourceforge.net>
+
 	* occjava/manifest.mf:
 	  New version for swig version
 
