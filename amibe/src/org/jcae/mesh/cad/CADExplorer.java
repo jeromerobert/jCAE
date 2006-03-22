@@ -28,6 +28,9 @@ package org.jcae.mesh.cad;
  */
 public interface CADExplorer
 {
+	public static final int COMPOUND = 0;
+	public static final int SOLID = 2;
+	public static final int SHELL = 3;
 	public static final int FACE = 4;
 	public static final int WIRE = 5;
 	public static final int EDGE = 6;
