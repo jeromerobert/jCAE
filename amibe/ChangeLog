@@ -1,3 +1,24 @@
+Wed Mar 22 09:42:45 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/metrics/Metric2D.java
+	  src/org/jcae/mesh/amibe/metrics/Metric3D.java
+	  src/org/jcae/mesh/Mesher.java: Add a new org.jcae.mesh.Mesher.isotropic property. It is true by default. If set to false, 2D mesh is anisotropic.
+
+	* src/org/jcae/mesh/Mesher.java
+	  src/org/jcae/mesh/xmldata/UNVConverter.java: New org.jcae.mesh.exportPOLY property.
+
+	* src/org/jcae/mesh/amibe/ds/Vertex.java: Fix a NullPointerException with large deflection parameters.  See http://sourceforge.net/tracker/index.php?func=detail&aid=1452490&group_id=74334&atid=540660
+
+	* src/org/jcae/mesh/mesher/algos1d/UniformLength.java: When an edge is
+	discretized with only 2 points, add 1 more point (and not 2) if the curve is not flat.
+
+	* src/org/jcae/mesh/cad/CADCompound.java
+	  src/org/jcae/mesh/cad/CADShell.java
+	  src/org/jcae/mesh/cad/CADSolid.java
+	  src-occ/org/jcae/mesh/cad/occ/OCCCompound.java
+	  src-occ/org/jcae/mesh/cad/occ/OCCShell.java
+	  src-occ/org/jcae/mesh/cad/occ/OCCSolid.java:  Add support for new geometrical shapes.
+
 Tue Mar 21 16:21:09 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos2d/BasicMesh.java
@@ -6,7 +27,7 @@ Tue Mar 21 16:21:09 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 Fri Jan 27 16:49:10 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/Mesher.java
-	  src/org/jcae/mesh/xmldata/UNVConverter.java: New exportSTL keyword.
+	  src/org/jcae/mesh/xmldata/UNVConverter.java: New org.jcae.mesh.exportSTL property.
 
 Thu Jan 26 12:18:29 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
