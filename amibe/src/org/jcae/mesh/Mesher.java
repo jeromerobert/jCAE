@@ -149,6 +149,12 @@ public class Mesher
 			exportSTLProp = "false";
 			System.setProperty("org.jcae.mesh.exportSTL", exportSTLProp);
 		}
+		String exportPOLYProp = System.getProperty("org.jcae.mesh.exportPOLY");
+		if (exportPOLYProp == null)
+		{
+			exportPOLYProp = "false";
+			System.setProperty("org.jcae.mesh.exportPOLY", exportPOLYProp);
+		}
 		String quadranglesProp = System.getProperty("org.jcae.mesh.Mesher.quadrangles");
 		if (quadranglesProp == null)
 		{
@@ -346,6 +352,12 @@ public class Mesher
 				logger.info("Exporting STL");
 				String STLName=brepfilename.substring(0, brepfilename.lastIndexOf('.'))+".stl";
 				new UNVConverter(xmlDir).writeSTL(STLName);
+			}
+			if (exportPOLYProp.equals("true"))
+			{
+				logger.info("Exporting POLY");
+				String MESHName=brepfilename.substring(0, brepfilename.lastIndexOf('.'))+".poly";
+				new UNVConverter(xmlDir).writePOLY(MESHName);
 			}
 		}
 		if (exportTriangleSoupProp.equals("true"))

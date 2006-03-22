@@ -437,6 +437,16 @@ public class UNVConverter
 		writeMesh(out, "MESH");
 	}
 	
+	public void writePOLY(String fileName)
+	{
+		writeMesh(fileName, "POLY");
+	}
+	
+	public void writePOLY(PrintStream out) throws ParserConfigurationException, SAXException, IOException
+	{
+		writeMesh(out, "POLY");
+	}
+	
 	public void writeSTL(String fileName)
 	{
 		writeMesh(fileName, "STL");
@@ -458,6 +468,8 @@ public class UNVConverter
 		WriteMeshProcedures proc;
 		if (meshType.equals("UNV"))
 			proc = new WriteMeshUNV();
+		else if (meshType.equals("POLY"))
+			proc = new WriteMeshPOLY();
 		else if (meshType.equals("STL"))
 			proc = new WriteMeshSTL();
 		else
@@ -858,6 +870,75 @@ public class UNVConverter
 					out.println(nT+" 1 "+(3*nT-2));
 					out.println(nT+" 2 "+(3*nT-1));
 					out.println(nT+" 3 "+(3*nT));
+				}
+			}
+		}
+	}
+	
+	private class WriteMeshPOLY extends WriteMeshProcedures
+	{
+		public void writeFinish(PrintStream out)
+		{
+			out.println("# Part 3 - hole list");
+			out.println("0");
+			out.println("# Part 4 - hole list");
+			out.println("0");
+		}
+		public void writeNodes(PrintStream out, int[] nodesID, TIntIntHashMap amibeToUNV) throws IOException
+		{
+			File f=getNodeFile();
+			// Open the file and then get a channel from the stream
+			FileInputStream fis = new FileInputStream(f);
+			FileChannel fc = fis.getChannel();
+			
+			// Get the file's size and then map it into memory
+			int sz = (int)fc.size();
+			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
+			DoubleBuffer nodesBuffer=bb.asDoubleBuffer();
+			
+			int count =  0;
+			double x,y,z;
+			out.println("# Part 1 - node list");
+			out.println(""+nodesID.length+" 3 0 0");
+			for(int i=0; i<nodesID.length; i++)
+			{
+				int iid=nodesID[i]*3;
+				x=nodesBuffer.get(iid);
+				y=nodesBuffer.get(iid+1);
+				z=nodesBuffer.get(iid+2);
+				count++;
+				amibeToUNV.put(nodesID[i], count);
+				out.println("   "+count+" "+x+" "+y+" "+z);
+			}
+			fc.close();
+			fis.close();
+			clean(bb);
+		}
+		
+		/**
+		 * @param out
+		 * @param amibeNodeToUNVNode
+		 */
+		public void writeTriangles(PrintStream out, int[] triangles,
+			TIntIntHashMap amibeNodeToUNVNode, TIntIntHashMap amibeTriaToUNVTria)
+		{
+			int count=0;
+			for(int i=0; i<groups.length; i++)
+				count += groups[i].length;
+			
+			out.println("# Part 2 - element list");
+			out.println(""+count+" 0");
+			int triaIndex=0;
+			count=0;
+			for(int i=0; i<groups.length; i++)
+			{
+				for(int j=0; j<groups[i].length; j++)
+				{
+					count++;
+					amibeTriaToUNVTria.put(groups[i][j], count);
+					out.println("   1 0 0");
+					out.println("   3 "+
+							amibeNodeToUNVNode.get(triangles[triaIndex++])+" "+amibeNodeToUNVNode.get(triangles[triaIndex++])+" "+amibeNodeToUNVNode.get(triangles[triaIndex++]));
 				}
 			}
 		}
