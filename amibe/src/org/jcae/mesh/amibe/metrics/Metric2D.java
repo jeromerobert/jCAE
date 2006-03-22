@@ -79,7 +79,7 @@ public class Metric2D
 		if (Metric3D.hasDeflection())
 		{
 			m3dbis = new Metric3D(surf, pt);
-			if (!m3dbis.deflection(true))
+			if (!m3dbis.deflection())
 				m3dbis = null;
 		}
 		if (m3d != null)

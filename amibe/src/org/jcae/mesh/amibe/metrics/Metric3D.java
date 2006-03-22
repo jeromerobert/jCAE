@@ -83,6 +83,7 @@ public class Metric3D extends Matrix3D
 	private static double discr = 1.0;
 	private static double defl = 0.0;
 	private static boolean relDefl = true;
+	private static boolean isotropic = true;
 	private static double [][] temp32 = new double[3][2];
 	private static double [][] temp22 = new double[2][2];
 	
@@ -156,6 +157,17 @@ public class Metric3D extends Matrix3D
 	public static void setRelativeDeflection(boolean b)
 	{
 		relDefl = b;
+	}
+	
+	/**
+	 * Select isotropic or anisotropic discretization.
+	 *
+	 * @param b if <code>true</code>, discretization is isotropic,
+	 * otherwise it is anisotropic.
+	 */
+	public static void setIsotropic(boolean b)
+	{
+		isotropic = b;
 	}
 	
 	/**
@@ -272,20 +284,18 @@ public class Metric3D extends Matrix3D
 	 * Deflection is relative or absolute depending on the
 	 * <code>relDefl</code> instance variable.
 	 *
-	 * @param isotropic  if <code>true</code>, an isotropic metrics is
-	 *   returned.
 	 * @return <code>true</code> if this metrics has been successfully
 	 * computed, <code>false</code> otherwise.
 	 */
-	public boolean deflection(boolean isotropic)
+	public boolean deflection()
 	{
 		if (relDefl)
-			return relDeflection(isotropic);
+			return relDeflection();
 		else
-			return absDeflection(isotropic);
+			return absDeflection();
 	}
 	
-	private boolean relDeflection(boolean isotropic)
+	private boolean relDeflection()
 	{
 		double cmin = Math.abs(cacheSurf.minCurvature());
 		double cmax = Math.abs(cacheSurf.maxCurvature());
@@ -343,7 +353,7 @@ public class Metric3D extends Matrix3D
 		return true;
 	}
 	
-	private boolean absDeflection(boolean isotropic)
+	private boolean absDeflection()
 	{
 		double cmin = Math.abs(cacheSurf.minCurvature());
 		double cmax = Math.abs(cacheSurf.maxCurvature());

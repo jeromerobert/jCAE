@@ -113,6 +113,12 @@ public class Mesher
 			processMesh3dProp = "true";
 			System.setProperty("org.jcae.mesh.Mesher.mesh3d", processMesh3dProp);
 		}
+		String isotropicMeshProp = System.getProperty("org.jcae.mesh.Mesher.isotropic");
+		if (isotropicMeshProp == null)
+		{
+			isotropicMeshProp = "true";
+			System.setProperty("org.jcae.mesh.Mesher.isotropic", isotropicMeshProp);
+		}
 		String exportTriangleSoupProp = System.getProperty("org.jcae.mesh.Mesher.triangleSoup");
 		if (exportTriangleSoupProp == null)
 		{
@@ -170,6 +176,7 @@ public class Mesher
 		CADShape shape = factory.newShape(brepfilename);
 		CADExplorer expF = factory.newExplorer();
 		boolean relDefl = relDeflProp.equals("true");
+		boolean isotropic = isotropicMeshProp.equals("true");
 		int numFace = Integer.parseInt(numFaceProp);
 		int minFace = Integer.parseInt(minFaceProp);
 		int maxFace = Integer.parseInt(maxFaceProp);
@@ -190,7 +197,8 @@ public class Mesher
 			{
 				mesh1D.setMaxDeflection(defl);
 				new UniformLengthDeflection(mesh1D).compute(relDefl);
-				new Compat1D2D(mesh1D).compute(relDefl);
+				if (isotropic)
+					new Compat1D2D(mesh1D).compute(relDefl);
 			}
 			//  Store the 1D mesh onto disk
 			MMesh1DWriter.writeObject(mesh1D, xmlDir, xmlFile, xmlBrepDir, brepFile);
@@ -203,6 +211,7 @@ public class Mesher
 			Metric3D.setLength(discr);
 			Metric3D.setDeflection(defl);
 			Metric3D.setRelativeDeflection(relDefl);
+			Metric3D.setIsotropic(isotropic);
 	
 			//  Prepare 2D discretization
 			mesh1D.duplicateEdges();
