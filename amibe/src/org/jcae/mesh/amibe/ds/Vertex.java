@@ -425,7 +425,7 @@ public class Vertex implements Cloneable
 		//  be Vertex.outer again, but this is case 3 above.
 		if (onLeft(current.origin(), current.destination()) < 0L)
 		{
-			if (current.hasAttributes(OTriangle.BOUNDARY))
+			if (current.hasAttributes(OTriangle.BOUNDARY) && !redo)
 				return null;
 			current.symOTri();
 			redo = true;
@@ -442,7 +442,7 @@ public class Vertex implements Cloneable
 			assert d != Vertex.outer;
 			if (a == Vertex.outer)
 				break;
-			if (current.tri.isListed() || current.hasAttributes(OTriangle.BOUNDARY))
+			if (current.tri.isListed())
 				return null;
 			current.tri.listCollect();
 			long d1 = onLeft(d, a);
@@ -466,6 +466,8 @@ public class Vertex implements Cloneable
 			o = current.origin();
 			d = current.destination();
 			a = current.apex();
+			if (current.hasAttributes(OTriangle.BOUNDARY))
+				return null;
 		}
 		if (logger.isDebugEnabled())
 			logger.debug("Found: "+current);
