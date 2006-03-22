@@ -160,7 +160,7 @@ public class UniformLength
 					(pnt1[1] - pnt2[1]) * (pnt1[1] - pnt2[1]) +
 					(pnt1[2] - pnt2[2]) * (pnt1[2] - pnt2[2]);
 				if (d1 > 0.01 * d2 && d1 > 1.e-6 * maxlen * maxlen) {
-					nbPoints=4;
+					nbPoints=3;
 				} else {
 					nbPoints=2;
 				}
