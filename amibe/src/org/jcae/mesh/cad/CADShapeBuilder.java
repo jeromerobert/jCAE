@@ -60,6 +60,15 @@ public abstract class CADShapeBuilder
 	public abstract CADShape newShape (Object o);
 	
 	/**
+	 * Create a new CADShape with boolean operation on 2 sshapes.
+	 * @param s1 First shape
+	 * @param s2 Second shape
+	 * @param op Boolean operator
+	 * @return The created CADShape
+	 */
+	public abstract CADShape newShape (CADShape s1, CADShape s2, char op);
+	
+	/**
 	 * Create a new CADShape by loading it from a file
 	 * @param fileName The file to read
 	 * @return The created CADShape
@@ -92,4 +101,5 @@ public abstract class CADShapeBuilder
 	 * @return The created CADGeomCurve3D
 	 */
 	public abstract CADGeomCurve3D newCurve3D(Object o);
+
 }

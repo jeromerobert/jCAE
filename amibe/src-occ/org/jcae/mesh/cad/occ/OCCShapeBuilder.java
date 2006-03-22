@@ -27,6 +27,10 @@ import org.jcae.opencascade.jni.IGESControl_Reader;
 import org.jcae.opencascade.jni.STEPControl_Reader;
 import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
+import org.jcae.opencascade.jni.BRepAlgoAPI_BooleanOperation;
+import org.jcae.opencascade.jni.BRepAlgoAPI_Fuse;
+import org.jcae.opencascade.jni.BRepAlgoAPI_Common;
+import org.jcae.opencascade.jni.BRepAlgoAPI_Cut;
 import org.apache.log4j.Logger;
 
 public class OCCShapeBuilder extends CADShapeBuilder
@@ -48,6 +52,15 @@ public class OCCShapeBuilder extends CADShapeBuilder
 		OCCShape shape;
 		switch (ts.shapeType())
 		{
+			case TopAbs_ShapeEnum.COMPOUND:
+				shape = new OCCCompound();
+				break;
+			case TopAbs_ShapeEnum.SOLID:
+				shape = new OCCSolid();
+				break;
+			case TopAbs_ShapeEnum.SHELL:
+				shape = new OCCShell();
+				break;
 			case TopAbs_ShapeEnum.FACE:
 				shape = new OCCFace();
 				break;
@@ -90,6 +103,46 @@ public class OCCShapeBuilder extends CADShapeBuilder
 		else
 			brepShape = BRepTools.read(fileName, new BRep_Builder());
 		return newShape(brepShape);
+	}
+	
+	/**
+	 * @param type 'u'=fuse 'n'=common '\\'=cut
+	 */
+	public CADShape newShape(CADShape o1, CADShape o2, char type)
+	{
+		CADShape res = null;
+		TopoDS_Shape s1 = (TopoDS_Shape) ((OCCShape) o1).getShape();
+		TopoDS_Shape s2 = (TopoDS_Shape) ((OCCShape) o2).getShape();
+/* With libOccJava
+		short t = -1;
+		if (type == 'u')
+			t = 0;
+		else if (type == 'n')
+			t = 1;
+		else if (type == '\\')
+			t = 2;
+		BRepAlgoAPI_BooleanOperation op = new BRepAlgoAPI_BooleanOperation(s1, s2, t);
+		TopoDS_Shape s = op.shape();
+		if (s != null)
+			res = newShape(s);
+*/
+		BRepAlgoAPI_BooleanOperation op = null;
+		try
+		{
+			if (type == 'u')
+				op = new BRepAlgoAPI_Fuse(s1, s2);
+			else if (type == 'n')
+				op = new BRepAlgoAPI_Common(s1, s2);
+			else if (type == '\\')
+				op = new BRepAlgoAPI_Cut(s1, s2);
+			TopoDS_Shape s = op.shape();
+			if (s != null)
+				res = newShape(s);
+		}
+		catch (RuntimeException ex)
+		{
+		}
+		return res;
 	}
 	
 	public CADExplorer newExplorer()
