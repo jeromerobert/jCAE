@@ -28,6 +28,8 @@ import org.jcae.mesh.amibe.ds.OTriangle2D;
 import org.jcae.mesh.amibe.ds.Vertex;
 import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Collection;
 import org.apache.log4j.Logger;
 
 /**
@@ -69,23 +71,27 @@ public class CheckDelaunay
 
 		boolean redo = false;
 		int niter = mesh.getTriangles().size();
-		for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
-		{
-			t = (Triangle) it.next();
-			ot.bind(t);
-			for (int i = 0; i < 3; i++)
-			{
-				ot.nextOTri();
-				ot.clearAttributes(OTriangle.SWAPPED);
-			}
-		}
+		Collection oldList = (Collection) mesh.getTriangles();
 		do {
 			redo = false;
 			cnt = 0;
 			ArrayList toSwap = new ArrayList();
+			HashSet newList = new HashSet();
 			niter--;
+			for (Iterator it = oldList.iterator(); it.hasNext(); )
+			{
+				t = (Triangle) it.next();
+				ot.bind(t);
+				for (int i = 0; i < 3; i++)
+				{
+					ot.nextOTri();
+					ot.clearAttributes(OTriangle.SWAPPED);
+					OTriangle.symOTri(ot, sym);
+					sym.clearAttributes(OTriangle.SWAPPED);
+				}
+			}
 			
-			for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
+			for (Iterator it = oldList.iterator(); it.hasNext(); )
 			{
 				t = (Triangle) it.next();
 				ot.bind(t);
@@ -119,6 +125,9 @@ public class CheckDelaunay
 					ot.nextOTri();
 				if (ot.hasAttributes(OTriangle.SWAPPED))
 				{
+					newList.add(ot.getTri());
+					OTriangle.symOTri(ot, sym);
+					newList.add(sym.getTri());
 					ot.swap();
 					redo = true;
 				}
@@ -128,6 +137,7 @@ public class CheckDelaunay
 			//  so we lower it now.
 			if (niter > 10 * cnt)
 				niter = 10 * cnt;
+			oldList = (Collection) newList;
 		} while (redo && niter > 0);
 		mesh.popCompGeom(3);
 	}
