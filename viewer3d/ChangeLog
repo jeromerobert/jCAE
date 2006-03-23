@@ -1,3 +1,12 @@
+2006-03-23 15:35:19  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/View.java:
+	  Fix bug 1437470:  Wrong clipping in 3D view. http://sourceforge.net/tracker/index.php?func=detail&aid=1437470&group_id=74334&atid=540660
+
+2006-03-16 10:00  tag V0_12
+
+2006-02-21 10:52  tag V0_11
+
 2006-02-08 18:09:21  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/bg/ViewableBG.java:

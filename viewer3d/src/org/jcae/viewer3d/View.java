@@ -58,8 +58,8 @@ import com.sun.j3d.utils.universe.ViewingPlatform;
 public class View extends Canvas3D implements PositionListener
 {
 
-	final public static float FrontClipDistanceFactor=0.001f;
-	final public static float BackClipDistanceFactor=10f;
+	final public static float FrontClipDistanceFactor=0.005f;
+	final public static float BackClipDistanceFactor=5f;
 	
 	static JTextPane textPane;
 	private Switch originAxisSwitch=new Switch(Switch.CHILD_NONE);
@@ -188,7 +188,7 @@ public class View extends Canvas3D implements PositionListener
 		});
 		
 		getView().setFieldOfView(Math.PI/12);
-		getView().setFrontClipPolicy(javax.media.j3d.View.VIRTUAL_SCREEN);
+		//getView().setFrontClipPolicy(javax.media.j3d.View.VIRTUAL_SCREEN);
 		
 		zoomTo(0,0,0,1.0f);	
     }	
