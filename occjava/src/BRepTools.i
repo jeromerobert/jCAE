@@ -97,5 +97,6 @@ class BRepTools_Sewing
 	const TopoDS_Shape& SewedShape() const;
 	Standard_Integer NbContigousEdges() const;
 	const TopoDS_Edge& ContigousEdge(const Standard_Integer index) const;
-	const TopTools_ListOfShape& ContigousEdgeCouple(const Standard_Integer index) const;
+	//TODO implement returning a TopTools_ListOfShape in TopTools.i
+	//const TopTools_ListOfShape& ContigousEdgeCouple(const Standard_Integer index) const;
 };

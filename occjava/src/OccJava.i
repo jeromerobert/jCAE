@@ -53,6 +53,7 @@
 %include "gp.i"
 %include "TopAbs.i"
 %include "TopoDS.i"
+%include "TopTools.i"
 %include "BRep_Tool.i"
 %include "GeomLProp_SLProps.i"
 %include "BRepTools.i"

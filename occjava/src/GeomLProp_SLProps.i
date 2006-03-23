@@ -65,8 +65,6 @@ class GeomLProp_SLProps
 	%rename(normal) Normal;
 	%rename(isCurvatureDefined) IsCurvatureDefined;
 	%rename(isUmbilic) IsUmbilic;
-	%rename(maxCurvature) MaxCurvature;
-	%rename(minCurvature) MinCurvature;
 	%rename(meanCurvature) MeanCurvature;
 	%rename(gaussianCurvature) GaussianCurvature;
 	%rename(setSurface) SetSurface;
@@ -87,8 +85,6 @@ class GeomLProp_SLProps
 	const gp_Dir& Normal() ;
 	Standard_Boolean IsCurvatureDefined() ;
 	Standard_Boolean IsUmbilic() ;
-	Standard_Real MaxCurvature() ;
-	Standard_Real MinCurvature() ;
 	Standard_Real MeanCurvature() ;
 	Standard_Real GaussianCurvature() ;
 	void SetSurface(const Handle_Geom_Surface & S) ;	
@@ -96,6 +92,22 @@ class GeomLProp_SLProps
 
 %extend GeomLProp_SLProps
 {
+	Standard_Real minCurvature()
+	{
+	    if (!self->IsCurvatureDefined())
+			return sqrt(-1.0);
+	    else
+			return self->MinCurvature ();
+	}
+
+	Standard_Real maxCurvature()
+	{
+	    if (!self->IsCurvatureDefined())
+			return sqrt(-1.0);
+	    else
+			return self->MaxCurvature ();
+	}
+	
 	void curvatureDirection(double jmax[3], double jmin[3])
 	{
 		gp_Dir max, min;
@@ -103,8 +115,8 @@ class GeomLProp_SLProps
 		jmax[0]=max.X();
 		jmax[1]=max.Y();
 		jmax[2]=max.Z();
-		jmin[3]=min.X();
-		jmin[4]=min.Y();
-		jmin[5]=min.Z();
+		jmin[0]=min.X();
+		jmin[1]=min.Y();
+		jmin[2]=min.Z();
 	}
 };

@@ -46,7 +46,7 @@ AC_CHECK_HEADERS([limits.h] [iostream])
 
 # Configuring for Opencascade
 if test -z "$CASROOT" ; then AC_MSG_FAILURE("Opencascade not found"); fi
-CPPFLAGS="${CPPFLAGS} -I${CASROOT}/inc -DLIN -DNO_CXX_EXCEPTION -DNo_exception"
+CPPFLAGS="${CPPFLAGS} -I${CASROOT}/inc -DLIN -DNO_CXX_EXCEPTION"
 LDFLAGS="${LDFLAGS} -L${CASROOT}/`uname -s`/lib -Wl,-rpath-link,${CASROOT}/`uname -s`/lib"
 LIBS="${LIBS} -lTKBRep -lTKBool -lTKG2d -lTKG3d -lTKGeomBase -lTKIGES -lTKMath -lTKOffset -lTKXSBase -lTKernel -lTKSTEP -lTKPrim -lTKTopAlgo"
 

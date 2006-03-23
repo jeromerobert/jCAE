@@ -26,6 +26,7 @@
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepBuilderAPI_MakeSolid.hxx>
 %}
 
 class BRepBuilderAPI_MakeShape
@@ -80,7 +81,7 @@ class BRepBuilderAPI_MakeWire : public BRepBuilderAPI_MakeShape
 	BRepBuilderAPI_MakeWire(const TopoDS_Wire& W,const TopoDS_Edge& E);
 	void Add(const TopoDS_Edge& E) ;
 	void Add(const TopoDS_Wire& W) ;
-	//void Add(TopoDS_Shape shapes[]);
+	void Add(const TopTools_ListOfShape & shapes);
 	Standard_Boolean IsDone() const;
 	//const TopoDS_Wire& Wire() const;
 };
@@ -106,3 +107,20 @@ class BRepBuilderAPI_MakeFace  : public BRepBuilderAPI_MakeShape
 	//const TopoDS_Face& Face() const;
 };
 
+class BRepBuilderAPI_MakeSolid: public BRepBuilderAPI_MakeShape
+{
+	%rename(add) Add;
+	%rename(isDone) IsDone;
+	%rename(isDeleted) IsDeleted;
+	public:
+	BRepBuilderAPI_MakeSolid();
+	BRepBuilderAPI_MakeSolid(const TopoDS_CompSolid& S);
+	BRepBuilderAPI_MakeSolid(const TopoDS_Shell& S);
+	BRepBuilderAPI_MakeSolid(const TopoDS_Shell& S1,const TopoDS_Shell& S2);
+	BRepBuilderAPI_MakeSolid(const TopoDS_Shell& S1,const TopoDS_Shell& S2,const TopoDS_Shell& S3);
+	BRepBuilderAPI_MakeSolid(const TopoDS_Solid& So);
+	BRepBuilderAPI_MakeSolid(const TopoDS_Solid& So,const TopoDS_Shell& S);
+	void Add(const TopoDS_Shell& S) ;
+	Standard_Boolean IsDone() const;
+	Standard_Boolean IsDeleted(const TopoDS_Shape& S) ;
+};

@@ -24,7 +24,7 @@
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
 			CharacterSet="1"
-			ManagedExtensions="1"
+			ManagedExtensions="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -39,7 +39,7 @@
 			<Tool
 				Name="swig"
 				package="org.jcae.opencascade.jni"
-				outdir="src-java"
+				outdir="src-java/org/jcae/opencascade/jni"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -54,7 +54,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				PreprocessorDefinitions="WNT"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
@@ -109,7 +109,7 @@
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
 			CharacterSet="1"
-			ManagedExtensions="1"
+			ManagedExtensions="0"
 			WholeProgramOptimization="1"
 			>
 			<Tool
@@ -121,7 +121,7 @@
 			<Tool
 				Name="swig"
 				package="org.jcae.opencascade.jni"
-				outdir="src-java"
+				outdir="src-java/org/jcae/opencascade/jni"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -135,7 +135,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				PreprocessorDefinitions="WNT"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
@@ -155,8 +155,9 @@
 				AdditionalDependencies="&quot;TKBO.lib TKShHealing.lib TKGeomAlgo.lib TKBRep.lib TKBool.lib TKG2d.lib TKG3d.lib TKGeomBase.lib TKIGES.lib TKSTEP.lib TKMath.lib TKOffset.lib TKXSBase.lib TKernel.lib TKPrim.lib TKTopAlgo.lib $(NOINHERIT)"
 				OutputFile="$(OutDir)\OccJava.dll"
 				LinkIncremental="1"
+				GenerateManifest="false"
 				GenerateDebugInformation="true"
-				TargetMachine="1"
+				TargetMachine="0"
 			/>
 			<Tool
 				Name="VCALinkTool"
