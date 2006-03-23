@@ -1,3 +1,7 @@
+Thu Mar 23 15:36:46 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/algos1d/UniformLengthDeflection.java: Apply the same change as in UniformLength.
+
 Wed Mar 22 09:42:45 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/metrics/Metric2D.java
@@ -9,15 +13,19 @@ Wed Mar 22 09:42:45 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Vertex.java: Fix a NullPointerException with large deflection parameters.  See http://sourceforge.net/tracker/index.php?func=detail&aid=1452490&group_id=74334&atid=540660
 
-	* src/org/jcae/mesh/mesher/algos1d/UniformLength.java: When an edge is
-	discretized with only 2 points, add 1 more point (and not 2) if the curve is not flat.
+	* src/org/jcae/mesh/mesher/algos1d/UniformLength.java: When an edge is discretized with only 2 points, add 1 more point (and not 2) if the curve is not flat.
 
 	* src/org/jcae/mesh/cad/CADCompound.java
 	  src/org/jcae/mesh/cad/CADShell.java
 	  src/org/jcae/mesh/cad/CADSolid.java
 	  src-occ/org/jcae/mesh/cad/occ/OCCCompound.java
 	  src-occ/org/jcae/mesh/cad/occ/OCCShell.java
-	  src-occ/org/jcae/mesh/cad/occ/OCCSolid.java:  Add support for new geometrical shapes.
+	  src-occ/org/jcae/mesh/cad/occ/OCCSolid.java
+	  src/org/jcae/mesh/cad/CADExplorer.java:  Add support for new geometrical shapes.
+	* src/org/jcae/mesh/cad/CADShapeBuilder.java
+	  src-occ/org/jcae/mesh/cad/occ/OCCShapeBuilder.java:  Add support for boolean operators.
+
+	* src/org/jcae/mesh/amibe/algos2d/CheckDelaunay.java: When an edge is swapped, its neighbours have to be checked again.
 
 Tue Mar 21 16:21:09 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 

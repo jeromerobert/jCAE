@@ -142,6 +142,33 @@ public class UniformLengthDeflection
 			range = curve.getRange();
 			curve.discretize(maxlen, deflection, relDefl);
 			nbPoints = curve.nbPoints();
+			int saveNbPoints =  nbPoints;
+			if (nbPoints <= 2 && !isCircular)
+			{
+				//  Compute the deflection
+				double mid1[], pnt1[], pnt2[];
+
+				mid1 = curve.value((range[0] + range[1])/2.0);
+				pnt1 = V[0].pnt();
+				pnt2 = V[1].pnt();
+				double d1 =
+					(mid1[0] - 0.5*(pnt1[0]+pnt2[0])) * (mid1[0] - 0.5*(pnt1[0]+pnt2[0])) +
+					(mid1[1] - 0.5*(pnt1[1]+pnt2[1])) * (mid1[1] - 0.5*(pnt1[1]+pnt2[1])) +
+					(mid1[2] - 0.5*(pnt1[2]+pnt2[2])) * (mid1[2] - 0.5*(pnt1[2]+pnt2[2]));
+				double d2 =
+					(pnt1[0] - pnt2[0]) * (pnt1[0] - pnt2[0]) +
+					(pnt1[1] - pnt2[1]) * (pnt1[1] - pnt2[1]) +
+					(pnt1[2] - pnt2[2]) * (pnt1[2] - pnt2[2]);
+				if (d1 > 0.01 * d2) {
+					nbPoints=3;
+				} else {
+					nbPoints=2;
+				}
+			}
+			else if (nbPoints <= 3 && isCircular)
+				nbPoints=4;
+			if (saveNbPoints != nbPoints)
+				curve.discretize(nbPoints);
 			paramOnEdge = new double[nbPoints];
 			for (int i = 0; i < nbPoints; i++)
 				paramOnEdge[i] = curve.parameter(i+1);
