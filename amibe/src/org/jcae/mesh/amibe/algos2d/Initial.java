@@ -287,39 +287,27 @@ public class Initial
 		//  This cannot be performed in a single loop because
 		//  triangles are modified within this loop.
 		firstOnWire = null;
-		for (int i = 0; i < bNodes.length; i++)
-		{
-			if (firstOnWire == null)
-				firstOnWire = bNodes[i];
-			else
-			{
-				mesh.forceBoundaryEdge(bNodes[i-1], bNodes[i], bNodes.length);
-				if (firstOnWire == bNodes[i])
-					firstOnWire = null;
-			}
-		}
-		assert firstOnWire == null;
+		boolean outerWire = true;
 		ArrayList saveList = new ArrayList();
-		firstOnWire = null;
 		for (int i = 0; i < bNodes.length; i++)
 		{
 			if (firstOnWire == null)
 				firstOnWire = bNodes[i];
 			else
 			{
-				saveList.add(mesh.forceBoundaryEdge(bNodes[i-1], bNodes[i], bNodes.length));
+				OTriangle2D s = mesh.forceBoundaryEdge(bNodes[i-1], bNodes[i], bNodes.length);
+				saveList.add(s);
+				s.setAttributes(OTriangle.BOUNDARY);
+				s.symOTri();
+				s.setAttributes(OTriangle.BOUNDARY);
 				if (firstOnWire == bNodes[i])
+				{
 					firstOnWire = null;
+					outerWire = false;
+				}
 			}
 		}
 		assert firstOnWire == null;
-		for (Iterator it = saveList.iterator(); it.hasNext(); )
-		{
-			OTriangle2D s = (OTriangle2D) it.next();
-			s.setAttributes(OTriangle.BOUNDARY);
-			s.symOTri();
-			s.setAttributes(OTriangle.BOUNDARY);
-		}
 		mesh.popCompGeom(2);
 		
 		logger.debug(" Mark outer elements");
