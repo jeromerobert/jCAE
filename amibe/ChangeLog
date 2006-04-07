@@ -1,3 +1,16 @@
+Fri Apr  7 10:46:00 CEST 2006 Jerome Robert <jeromerobert@users.sourceforge.net> 
+
+	* build.properties, build.xml, src/org/jcae/mesh/MeshView.java,
+	  src/org/jcae/mesh/java3d/ComputeEdgesConnectivity.java,
+	  src/org/jcae/mesh/java3d/XMLBranchGroup.java,
+	  src/org/jcae/mesh/xmldata/MMesh1DReader.java,
+	  src/org/jcae/mesh/xmldata/MMesh3DReader.java,
+	  src/org/jcae/mesh/xmldata/MeshReader.java,
+	  src/org/jcae/mesh/xmldata/MeshToMMesh3DConvert.java,
+	  src/org/jcae/mesh/xmldata/MeshToSoupConvert.java: Used XPath
+	  standard API. Xalan is no longer required with Java 1.5 but it is
+	  required with Java 1.4.
+
 Thu Apr  6 17:24:19 CEST 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos2d/Initial.java:  Detect boundary intersection.
@@ -35,6 +48,25 @@ Tue Mar 21 16:21:09 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos2d/BasicMesh.java
 	  src/org/jcae/mesh/amibe/algos2d/Initial.java: The procedure to perform the initial triangulation is moved into its own class.
+
+Tue Feb 21 09:55:00 CET 2006 Jerome Robert <jeromerobert@users.sourceforge.net> 
+
+	* src/org/jcae/mesh/amibe/algos3d/SmoothNodes3D.java: Add a main
+	  method
+
+Mon Feb 13 19:02:00 CET 2006 Jerome Robert <jeromerobert@users.sourceforge.net> 
+
+	* src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java: Add command
+	  line argument to decimate with a desired number of triangle
+
+Wed Feb  8 10:26:00 CET 2006 Jerome Robert <jeromerobert@users.sourceforge.net> 
+
+	* src/org/jcae/mesh/xmldata/UNVConverter.java: Add unit group (164)
+	  to UNV files
+
+	* src/org/jcae/mesh/xmldata/UNVConverter.java: UNV Group 2430 is
+	  obsolet, move to 2435.
+
 
 Fri Jan 27 16:49:10 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
