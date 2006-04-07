@@ -1,3 +1,19 @@
+2006-04-06 14:03:59  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/javax, src/org/jcae/viewer3d/View.java:
+	  Fix bug: Exception in thread "J3D-RenderingEnvironmentStructureUpdateThread-1"
+	  java.lang.ArrayIndexOutOfBoundsException: -1 at
+	  javax.media.j3d.Shape3DRetained.addModelClip(Shape3DRetained.java:1648)
+	  This is not a bug in Java 3D but a bug in jCAE.
+
+	* src/org/jcae/viewer3d/View.java, src/org/jcae/viewer3d/ViewBehavior.java:
+	  Fix a bug in picking. The front and back clip distance are no longer concidered
+	  when doing picking. Only the model clip is handled.
+
+2006-03-23 15:35:19  tag V0_12_2
+
+2006-03-23 15:35:19  tag V0_12_1
+
 2006-03-23 15:35:19  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/View.java:

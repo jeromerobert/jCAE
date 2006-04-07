@@ -1,3 +1,37 @@
+2006-04-07 15:45:55  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/:
+	  Show multiple and free edges
+
+2006-04-04 12:30:55  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/cad/GeomUtils.java,
+	  jcae-netbeans/src/org/jcae/netbeans/cad/RemoveAction.java:
+	  Remove geometry shape was not working in many case, this is now fixed.
+
+	* jcae-netbeans/src/org/jcae/netbeans/Standard.xml,
+	  jcae-netbeans/src/org/jcae/netbeans/layer.xml:
+	  Hide the ClipDistance toolbar
+
+	* jcae-netbeans/nbproject/project.properties:
+	  Install nbm global
+
+2006-03-30 12:17:00  Jerome Robert <jeromerobert@users.sourceforge.net>
+	* occjava/manifest.mf, occjava/nbproject/project.properties:
+	  Make global, change version
+
+2006-03-16 09:56:55  tag V0_12_2
+
+2006-03-16 09:56:55  tag V0_12_1
+
+2006-03-16 09:56:55  tag V0_12
+
+2006-03-16 09:56:55  Jerome Robert <jeromerobert@users.sourceforge.net>
+	* jcae-netbeans/src/org/jcae/netbeans/Standard.xml,
+	  jcae-netbeans/src/org/jcae/netbeans/WindowManager.wswmgr,
+	  jcae-netbeans/src/org/jcae/netbeans/layer.xml:
+	  Properly organize toolbars
+
 2006-03-15 18:02:15  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* jcae-netbeans/src/org/jcae/netbeans/cad/BooleanAction.java,

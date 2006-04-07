@@ -1,0 +1,111 @@
+package org.jcae.netbeans.mesh;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import javax.media.j3d.BranchGroup;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.xpath.XPathExpressionException;
+import org.jcae.mesh.java3d.ComputeEdgesConnectivity;
+import org.jcae.mesh.java3d.XMLBranchGroup;
+import org.jcae.netbeans.Utilities;
+import org.jcae.netbeans.viewer3d.View3DManager;
+import org.jcae.viewer3d.View;
+import org.jcae.viewer3d.bg.ViewableBG;
+import org.openide.ErrorManager;
+import org.openide.filesystems.FileUtil;
+import org.openide.nodes.Node;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
+import org.openide.util.actions.CookieAction;
+import org.xml.sax.SAXException;
+
+public abstract class AbstractEdgesAction extends CookieAction
+{
+	public abstract String getBranchGroupLabel();
+	public abstract String getActionLabel();
+	
+	protected void performAction(Node[] activatedNodes)
+	{
+		try
+		{
+			MeshDataObject c = (MeshDataObject) activatedNodes[0].getCookie(MeshDataObject.class);
+			
+			String reference = FileUtil.toFile(
+				c.getPrimaryFile().getParent()).getPath();
+			String xmlDir=Utilities.absoluteFileName(
+				c.getMesh().getMeshFile(), reference);
+
+			String xmlFile = "jcae3d";
+			ComputeEdgesConnectivity computeEdgesConnectivity =
+				new ComputeEdgesConnectivity(xmlDir, xmlFile);
+
+			computeEdgesConnectivity.compute();			
+			XMLBranchGroup xbg=new XMLBranchGroup(xmlDir, xmlFile);
+			xbg.parseXML();
+			BranchGroup bg=xbg.getBranchGroup(getBranchGroupLabel());
+			View bgView=View3DManager.getDefault().getView3D().getView();			
+			ViewableBG fe1 = new ViewableBG(bg);
+			fe1.setName(activatedNodes[0].getName()+" free edges");
+			bgView.add(fe1);			
+			bgView.setCurrentViewable(fe1);
+			
+		}
+		catch (XPathExpressionException ex)
+		{
+			ErrorManager.getDefault().notify(ex);
+		}
+		catch (IOException ex)
+		{
+			ErrorManager.getDefault().notify(ex);
+		}
+		catch (TransformerException ex)
+		{
+			ErrorManager.getDefault().notify(ex);
+		}
+		catch (ParserConfigurationException ex)
+		{
+			ErrorManager.getDefault().notify(ex);
+		}
+		catch (SAXException ex)
+		{
+			ErrorManager.getDefault().notify(ex);
+		}						
+	}
+	
+	protected int mode()
+	{
+		return CookieAction.MODE_EXACTLY_ONE;
+	}
+	
+	public String getName()
+	{
+		return NbBundle.getMessage(FreeEdgesAction.class, getActionLabel());
+	}
+	
+	protected Class[] cookieClasses()
+	{
+		return new Class[] {
+			MeshDataObject.class
+		};
+	}
+	
+	protected void initialize()
+	{
+		super.initialize();
+		// see org.openide.util.actions.SystemAction.iconResource() javadoc for more details
+		putValue("noIconInMenu", Boolean.TRUE);
+	}
+	
+	public HelpCtx getHelpCtx()
+	{
+		return HelpCtx.DEFAULT_HELP;
+	}
+	
+	protected boolean asynchronous()
+	{
+		return false;
+	}
+	
+}
+

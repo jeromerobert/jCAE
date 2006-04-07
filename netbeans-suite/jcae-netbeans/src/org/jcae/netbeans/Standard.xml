@@ -7,12 +7,10 @@
     <Toolbar name="Memory" position="0" visible="false" />
     <Toolbar name="File" />
     <Toolbar name="Edit" />
-    <Toolbar name="View" />
-  </Row>
-  <Row>
-    <Toolbar name="3DNavigation" />
+	<Toolbar name="3DNavigation" />    
+	<Toolbar name="View" />    
     <Toolbar name="WorkspaceSwitcher" />
     <Toolbar name="StatusLine" />
-    <Toolbar name="ClipDistance" />
+    <Toolbar name="ClipDistance" visible="false"/>
   </Row>
 </Configuration>

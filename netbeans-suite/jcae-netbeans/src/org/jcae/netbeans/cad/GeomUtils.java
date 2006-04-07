@@ -35,6 +35,26 @@ import org.openide.nodes.Node.Cookie;
 public class GeomUtils
 {
 	/**
+	 * Return the direct parent shape
+	 * @param A root shape where to start the search
+	 */
+	static public TopoDS_Shape getParentShape(TopoDS_Shape where, TopoDS_Shape child)
+	{		
+		TopoDS_Iterator it=new TopoDS_Iterator(where);
+		while(it.more())
+		{
+			TopoDS_Shape v=it.value();
+			if(v.equals(child))
+				return where;
+			v=getParentShape(v, child);
+			if(v!=null)
+				return v;
+			it.next();
+		}
+		return null;
+	}
+	
+	/**
 	 * Return the shape of a node or null the node do not have a ShapeCookie
 	 * @param n
 	 * @return

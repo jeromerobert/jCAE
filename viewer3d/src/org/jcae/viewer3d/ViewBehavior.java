@@ -376,6 +376,7 @@ public  class ViewBehavior extends OrbitBehavior
 		pickCanvas.setShapeLocation(evt.getX(), evt.getY());
 		long time = System.currentTimeMillis();
 		PickViewable result = pickPoint(pickCanvas.pickAllSorted());
+		//PickViewable result=new PickViewable(pickCanvas.pickClosest(), 0);
 		long time2 = System.currentTimeMillis();
 		Logger.global.finest("picked viewable is " + cv + " in "
 			+ (time2 - time) + " ms");
@@ -388,16 +389,21 @@ public  class ViewBehavior extends OrbitBehavior
 	protected PickViewable  pickPoint(PickResult[] result){
 		if(result==null) return null;
 		PickViewable toReturn=null;
-		double minDistance=view.getFrontClipDistance();
-		double maxDistance=view.getBackClipDistance();
+		
+		//Front and back clip distance are not related to picking distance,
+		//neither in PHYSICAL_EYE neither in VIRTUAL_EYE modes, so they
+		//cannot be used to filter picking. We keep this code as a remind.
+		//double minDistance=view.getFrontClipDistance();
+		//double maxDistance=view.getBackClipDistance();
+		
+		double minDistance=-Double.MAX_VALUE;
+		double maxDistance=Double.MAX_VALUE;
 		double d;
 		
-		
 		for(int i=0;i<result.length;i++){
-			PickResult pr=result[i];
+			PickResult pr=result[i];			
 			for(int j=0;j<pr.numIntersections();j++){
 				Point3d pt=pr.getIntersection(j).getPointCoordinatesVW();
-				
 				if(view.isInModelClip(pt)){
 					d=pr.getIntersection(j).getDistance();
 					if( (d>minDistance)&(d<maxDistance)){
@@ -408,7 +414,7 @@ public  class ViewBehavior extends OrbitBehavior
 			}
 		}
 		
-		return toReturn;
+		return toReturn;		
 	}
 	
 	protected void pickPoint(MouseEvent evt)

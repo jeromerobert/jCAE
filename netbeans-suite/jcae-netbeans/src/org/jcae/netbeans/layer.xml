@@ -55,7 +55,9 @@
 			<file name="org-jcae-netbeans-cad-RemoveAction.instance"/>
 			<file name="org-jcae-netbeans-cad-ReverseAction.instance"/>
 			<file name="org-jcae-netbeans-mesh-ComputeMeshAction.instance"/>
-			<file name="org-jcae-netbeans-mesh-UNVToUNVAction.instance">
+			<file name="org-jcae-netbeans-mesh-FreeEdgesAction.instance"/>
+			<file name="org-jcae-netbeans-mesh-MultipleEdgesAction.instance"/>
+            <file name="org-jcae-netbeans-mesh-UNVToUNVAction.instance">
 				<attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.UNVToUNVAction"/>
 			</file>
 			<file name="org-jcae-netbeans-mesh-smooth-Smooth.instance">
@@ -82,7 +84,14 @@
 				<folder name="Actions">
 					<file name="org-jcae-netbeans-mesh-ComputeMeshAction.instance"/>
 					<attr name="org-jcae-netbeans-mesh-ComputeMeshAction.instance/org-openide-actions-PropertiesAction.instance" boolvalue="true"/>					
-					<file name="org-jcae-netbeans-mesh-smooth-Smooth.shadow">
+					<file name="org-jcae-netbeans-mesh-FreeEdgesAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-FreeEdgesAction.instance"/>
+                    </file>
+					<file name="org-jcae-netbeans-mesh-MultipleEdgesAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-MultipleEdgesAction.instance"/>
+                    </file>
+
+                    <file name="org-jcae-netbeans-mesh-smooth-Smooth.shadow">
 						<attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-smooth-Smooth.instance"/>
 					</file>
 					<file name="org-openide-actions-PropertiesAction.instance"/>
@@ -103,7 +112,11 @@
 					<attr name="org-jcae-netbeans-mesh-smooth-Smooth.shadow/org-jcae-netbeans-mesh-ComputeMeshAction.instance" boolvalue="false"/>
 					<attr name="org-openide-actions-ViewAction.instance/org-jcae-netbeans-mesh-smooth-Smooth.shadow" boolvalue="true"/>
 					<attr name="org-jcae-netbeans-mesh-smooth-Smooth.shadow/sep-2.instance" boolvalue="true"/>
-				</folder>
+				    <attr name="org-jcae-netbeans-mesh-smooth-Smooth.shadow/org-jcae-netbeans-mesh-FreeEdgesAction.shadow" boolvalue="true"/>
+                    <attr name="org-jcae-netbeans-mesh-FreeEdgesAction.shadow/sep-2.instance" boolvalue="true"/>
+                    <attr name="org-jcae-netbeans-mesh-FreeEdgesAction.shadow/org-jcae-netbeans-mesh-MultipleEdgesAction.shadow" boolvalue="true"/>
+                    <attr name="org-jcae-netbeans-mesh-MultipleEdgesAction.shadow/sep-2.instance" boolvalue="true"/>
+                </folder>
 			</folder>
 			<folder name="x-unv">
 				<folder name="Actions">
@@ -226,6 +239,11 @@
             <file name="org-jcae-netbeans-viewer3d-UpFrontClipDistance.shadow">			
 			<attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-UpFrontClipDistance.instance"/>
 			</file>
+        </folder>
+        <folder name="Edit">
+            <file name="org-openide-actions-FindAction.instance_hidden"/>
+            <file name="org-openide-actions-RedoAction.instance_hidden"/>
+            <file name="org-openide-actions-UndoAction.instance_hidden"/>
         </folder>
         <file name="Standard.xml" url="Standard.xml"/>
         <folder name="View">
@@ -356,7 +374,7 @@
 	</folder>
 
 	<folder name="Services">
-		<folder name="MIMEResolver">
+        <folder name="MIMEResolver">
 			<file name="org-jcae-netbeans-mesh-MeshResolver.instance"/>
 			<file name="UNVResolver.xml" url="mesh/UNVResolver.xml">
 				<attr name="SystemFileSystem.localizingBundle" stringvalue="org.jcae.netbeans.Bundle"/>

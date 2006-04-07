@@ -188,7 +188,8 @@ public class View extends Canvas3D implements PositionListener
 		});
 		
 		getView().setFieldOfView(Math.PI/12);
-		//getView().setFrontClipPolicy(javax.media.j3d.View.VIRTUAL_SCREEN);
+		getView().setFrontClipPolicy(javax.media.j3d.View.PHYSICAL_EYE);
+		getView().setBackClipPolicy(javax.media.j3d.View.PHYSICAL_EYE);
 		
 		zoomTo(0,0,0,1.0f);	
     }	
@@ -1067,7 +1068,8 @@ public class View extends Canvas3D implements PositionListener
 	
 	protected void fireViewableChanged(Viewable viewable){
 		BranchGroup bg=getBranchGroup(viewable);
-		modelClip.removeScope(bg);
+		if(modelClip.indexOfScope(bg)>0)
+			modelClip.removeScope(bg);
 		modelClip.addScope(bg);
 	}
 	

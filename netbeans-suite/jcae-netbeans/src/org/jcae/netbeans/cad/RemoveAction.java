@@ -52,12 +52,14 @@ public class RemoveAction extends CookieAction
 	{
 		for(int i=0; i<arg0.length; i++)
 		{
-			Node parent=arg0[i].getParentNode();
-			TopoDS_Shape parentShape=GeomUtils.getShape(parent);
+			Node parent=arg0[i].getParentNode();			
 			TopoDS_Shape shape=GeomUtils.getShape(arg0[i]);
+			TopoDS_Shape parentShape=
+				GeomUtils.getParentShape(GeomUtils.getShape(parent), shape);
+			
 			if(shape!=null && parentShape!=null)
 			{
-				BRep_Builder bb = new BRep_Builder();
+				BRep_Builder bb = new BRep_Builder();				
 				bb.remove(parentShape, shape);
 			}
 			
