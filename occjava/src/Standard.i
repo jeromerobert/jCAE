@@ -21,7 +21,7 @@
 //Refine the catch keywoard
 %{#include <Standard_ErrorHandler.hxx>%}
 
-%exception
+/*%exception
 {
 	try
 	{
@@ -32,7 +32,7 @@
 		SWIG_JavaThrowException(jenv, SWIG_JavaRuntimeException, Standard_Failure::Caught()->DynamicType()->Name());
 		return $null;
 	}
-}
+}*/
 // Now we bind Opencascade types with Java types.
 // /usr/share/swig1.3/java/java.swg contains many simple example to do that.
 /**
