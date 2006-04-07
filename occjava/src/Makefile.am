@@ -26,3 +26,5 @@ $(BUILT_SOURCES) : $(IFACEFILES)
 
 libOccJava_la_SOURCES =	$(BUILT_SOURCES)
 
+CLEANFILES=OccJava_wrap.cxx
+

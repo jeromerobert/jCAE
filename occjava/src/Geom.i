@@ -77,7 +77,7 @@ class Handle_Geom_Surface: public Handle_Geom_Geometry
 
 %extend Handle_Geom_Surface
 {
-	const gp_Pnt & value(const Standard_Real U,const Standard_Real V) const
+	gp_Pnt value(const Standard_Real U,const Standard_Real V) const
 	{
 		return (*self)->Value(U, V);
 	}

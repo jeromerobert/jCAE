@@ -52,7 +52,7 @@
 	}
 }
 
-%typemap(out) const TopoDS_Shape &
+%typemap(out) const TopoDS_Shape &, const TopoDS_Compound &
 {
 	if($1->IsNull())
 	{
@@ -60,22 +60,18 @@
 	}
 	else
 	{
-		TopoDS_Shape * tsp=new TopoDS_Shape();
+		$1_basetype * tsp=new $1_basetype();
 		tsp->TShape($1->TShape());
 		tsp->Location($1->Location());
 		tsp->Orientation($1->Orientation());
 		$result=(jlong)tsp;
 	}
 }
-%typemap(javaout) TopoDS_Shape, const TopoDS_Shape&
-{
-	return TopoDS_Shape.downcast(new TopoDS_Shape($jnicall, true));
-}
 
-%typemap(javaout) TopoDS_Shape*
+%typemap(javaout) TopoDS_Shape*, TopoDS_Shape, const TopoDS_Shape&, const TopoDS_Compound &
 {
     long cPtr = $jnicall;
-    return (cPtr == 0) ? null : TopoDS_Shape.downcast(new TopoDS_Shape(cPtr, $owner));
+    return (cPtr == 0) ? null : ($javaclassname)TopoDS_Shape.downcast(new $javaclassname(cPtr, $owner));
 }
 
 %typemap(javacode) TopoDS_Shape

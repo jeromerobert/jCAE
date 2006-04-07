@@ -75,28 +75,3 @@ class BRepTools_WireExplorer
 	void Clear() ;
 };
 
-%{#include <BRepTools_Sewing.hxx>%}
-class BRepTools_Sewing 
-{
-	%rename(init) Init;
-	%rename(add) Add;
-	%rename(perform) Perform;
-	%rename(sewedShape) SewedShape;
-	%rename(nbContigousEdges) NbContigousEdges;
-	%rename(contigousEdge) ContigousEdge;
-	%rename(contigousEdgeCouple) ContigousEdgeCouple;
-	
-	public:
-	BRepTools_Sewing(const Standard_Real tolerance = 1.0e-06,
-		const Standard_Boolean option1 = Standard_True,
-		const Standard_Boolean option2 = Standard_True);
-	void Init(const Standard_Real tolerance,const Standard_Boolean option1,
-		const Standard_Boolean option2) ;
-	void Add(const TopoDS_Shape& shape) ;
-	void Perform() ;
-	const TopoDS_Shape& SewedShape() const;
-	Standard_Integer NbContigousEdges() const;
-	const TopoDS_Edge& ContigousEdge(const Standard_Integer index) const;
-	//TODO implement returning a TopTools_ListOfShape in TopTools.i
-	//const TopTools_ListOfShape& ContigousEdgeCouple(const Standard_Integer index) const;
-};

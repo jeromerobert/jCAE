@@ -18,6 +18,21 @@
  * (C) Copyright 2005, by EADS CRC
  */
 
+//Refine the catch keywoard
+%{#include <Standard_ErrorHandler.hxx>%}
+
+%exception
+{
+	try
+	{
+		$action
+	}
+	catch(Standard_Failure) 
+	{
+		SWIG_JavaThrowException(jenv, SWIG_JavaRuntimeException, Standard_Failure::Caught()->DynamicType()->Name());
+		return $null;
+	}
+}
 // Now we bind Opencascade types with Java types.
 // /usr/share/swig1.3/java/java.swg contains many simple example to do that.
 /**

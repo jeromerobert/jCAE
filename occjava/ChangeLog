@@ -1,11 +1,51 @@
-2006-03-23 14:37:32  Jerome Robert <jeromerobert@users.sourceforge.net>
+2006-04-07 14:03:35  Jerome Robert <jeromerobert@users.sourceforge.net>
 
+	* src/GeomLProp_SLProps.i, src/gp.i:
+	  Fix a bug in GLProp_SLProp::normal which gave an error message when meshing a cone
+	* src/Standard.i: Catch Opencascade exceptions.
+
+2006-04-06 12:40:14  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/Geom.i, src/GeomLProp_SLProps.i, src/gp.i:
+	  Fix a bug Geom_Surface::Value.
+
+2006-04-04 14:57:16  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* Makefile.am, autogen.sh, src/Makefile.am:
+	  Fix "make clean"
+	* src/BRepTools.i:
+	  Port to Opencascade 6.1
+	* src-java/test/Test3.java, src-java/test/Utilities.java:
+	  Add test for BRep_Builder.remove
+
+2006-04-03 10:44:54  Denis Barbier <barbier@users.sourceforge.net>
+
+	* build.bat:
+	  Set VS80COMNTOOLS variable so that vcvars32.bat can be found
+
+2006-03-31 17:07:13  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* build.bat:
+	  Add a batch script to build occjava from the command line on Windows.
+
+2006-03-30 12:10:49  tag V0_12_2
+
+2006-03-30 12:10:49  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* configure.ac, src/TopoDS.i:
+	  Fix bug 1460763: Free edges crash
+
+2006-03-23 14:37:32  tag V0_12_1
+
+2006-03-23 14:37:32  Jerome Robert <jeromerobert@users.sourceforge.net>
+	
 	* src/GeomLProp_SLProps.i:
 	  [bug 1452435] No deflection parameter with jCAE 0.11. See https://sourceforge.net/tracker/?func=detail&atid=540660&aid=1452435&group_id=74334 .
 
 2006-03-01 17:55:36  tag V0_12
 
 2006-03-01 17:55:36  Jerome Robert <jeromerobert@users.sourceforge.net>
+	
 	* occjava-swig.vcproj:
 	  In Windows compilation, remove dependency to msvcr80.dll and disable CLR.
 

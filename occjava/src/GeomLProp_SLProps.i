@@ -33,6 +33,13 @@
 		setParameters(u, v);
 	}
 	
+	public double[] normal()
+	{
+		double[] toReturn=new double[3];
+		normal(toReturn);
+		return toReturn;
+	}
+	
 	public double[] curvatureDirections()
 	{
 		double[] toReturn=new double[6];
@@ -62,7 +69,6 @@ class GeomLProp_SLProps
 	%rename(isTangentVDefined) IsTangentVDefined;
 	%rename(tangentV) TangentV;
 	%rename(isNormalDefined) IsNormalDefined;
-	%rename(normal) Normal;
 	%rename(isCurvatureDefined) IsCurvatureDefined;
 	%rename(isUmbilic) IsUmbilic;
 	%rename(meanCurvature) MeanCurvature;
@@ -82,7 +88,6 @@ class GeomLProp_SLProps
 	Standard_Boolean IsTangentVDefined() ;
 	void TangentV(gp_Dir& D) ;
 	Standard_Boolean IsNormalDefined() ;
-	const gp_Dir& Normal() ;
 	Standard_Boolean IsCurvatureDefined() ;
 	Standard_Boolean IsUmbilic() ;
 	Standard_Real MeanCurvature() ;
@@ -92,6 +97,23 @@ class GeomLProp_SLProps
 
 %extend GeomLProp_SLProps
 {
+	void normal(double normal[3])
+	{
+		if(!self->IsNormalDefined())
+		{
+			normal[0]=0;
+			normal[1]=0;
+			normal[2]=0;
+		}
+		else
+		{
+			const gp_Dir & d=self->Normal();
+			normal[0]=d.X();
+			normal[0]=d.Y();
+			normal[0]=d.Z();
+		}
+	}
+
 	Standard_Real minCurvature()
 	{
 	    if (!self->IsCurvatureDefined())

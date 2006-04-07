@@ -44,9 +44,14 @@
 	$1=new gp_Pnt(naxe[0],naxe[1],naxe[2]);
 }
 
-%typemap(out) gp_Pnt, const gp_Pnt&
+%typemap(out) const gp_Pnt&
 {
     $result=XYZtoDoubleArray(jenv, $1->XYZ());
+}
+
+%typemap(out) gp_Pnt
+{
+    $result=XYZtoDoubleArray(jenv, $1.XYZ());
 }
 
 %typemap(freearg) gp_Pnt, const gp_Pnt&
@@ -154,9 +159,14 @@
 	delete $1;
 }
 
-%typemap(out) gp_Dir, const gp_Dir&
+%typemap(out) const gp_Dir&
 {
     $result=XYZtoDoubleArray(jenv, $1->XYZ());
+}
+
+%typemap(out) gp_Dir
+{
+    $result=XYZtoDoubleArray(jenv, $1.XYZ());
 }
 
 %typemap(javain) gp_Dir, const gp_Dir& "$javainput"
