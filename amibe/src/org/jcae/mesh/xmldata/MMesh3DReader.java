@@ -39,12 +39,14 @@ import java.util.Iterator;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collection;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 import gnu.trove.TIntIntHashMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.apache.xpath.CachedXPathAPI;
 import org.apache.log4j.Logger;
 
 
@@ -63,43 +65,45 @@ public class MMesh3DReader
 		MMesh3D m3d = new MMesh3D();
 		int i;
 		logger.debug("begin reading "+xmlDir+File.separator+xmlFile);
-		CachedXPathAPI xpath = new CachedXPathAPI();
+		XPath xpath = XPathFactory.newInstance().newXPath();
 		HashMap map1DToMaster = new HashMap();
 		try
 		{
 			Document document = XMLHelper.parseXML(new File(xmlDir, xmlFile));
-			Node submeshElement = xpath.selectSingleNode(document, "/jcae/mesh/submesh");
-			Node submeshNodes = xpath.selectSingleNode(submeshElement, "nodes");
-			String refFile = xpath.selectSingleNode(submeshNodes,
-				"references/file/@location").getNodeValue();
+			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh",
+				document, XPathConstants.NODE);
+			Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement,
+				XPathConstants.NODE);
+			String refFile = xpath.evaluate("references/file/@location", submeshNodes);
 			if (refFile.charAt(0) != File.separatorChar)
 				refFile = xmlDir+File.separator+refFile;
 			FileChannel fcR = new FileInputStream(refFile).getChannel();
 			MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L, fcR.size());
 			IntBuffer refsBuffer = bbR.asIntBuffer();
-			String nodesFile = xpath.selectSingleNode(submeshNodes, "file/@location").getNodeValue();
+			String nodesFile = xpath.evaluate("file/@location", submeshNodes);
 			if (nodesFile.charAt(0) != File.separatorChar)
 				nodesFile = xmlDir+File.separator+nodesFile;
 			FileChannel fcN = new FileInputStream(nodesFile).getChannel();
 			MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
 			DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
 			
-			Node submeshTriangles = xpath.selectSingleNode(submeshElement, "triangles");
-			String trianglesFile = xpath.selectSingleNode(submeshTriangles,
-				"file/@location").getNodeValue();
+			Node submeshTriangles = (Node) xpath.evaluate("triangles",
+				submeshElement, XPathConstants.NODE);
+			String trianglesFile = xpath.evaluate("file/@location", submeshTriangles);
 			if (trianglesFile.charAt(0) != File.separatorChar)
 				trianglesFile = xmlDir+File.separator+trianglesFile;
 			FileChannel fcT = new FileInputStream(trianglesFile).getChannel();
 			MappedByteBuffer bbT = fcT.map(FileChannel.MapMode.READ_ONLY, 0L, fcT.size());
 			IntBuffer trianglesBuffer = bbT.asIntBuffer();
 
-			Node submeshNormals = xpath.selectSingleNode(submeshTriangles, "normals");
+			Node submeshNormals = (Node) xpath.evaluate("normals",
+				submeshTriangles, XPathConstants.NODE);
 			FileChannel fcNormals = null;
 			MappedByteBuffer bbNormals = null;
 			DoubleBuffer normalsBuffer = null;
 			if (submeshNormals != null)
 			{
-				String normalsFile = xpath.selectSingleNode(submeshNormals, "file/@location").getNodeValue();
+				String normalsFile = xpath.evaluate("file/@location", submeshNormals);
 				if (normalsFile.charAt(0) != File.separatorChar)
 					normalsFile = xmlDir+File.separator+normalsFile;
 				try
@@ -109,17 +113,17 @@ public class MMesh3DReader
 					normalsBuffer = bbNormals.asDoubleBuffer();
 				}
 				catch (FileNotFoundException ex)
-				{
+				{					
 				}
 			}
 			int numberOfReferences = Integer.parseInt(
-				xpath.selectSingleNode(submeshNodes, "references/number/text()").getNodeValue());
+				xpath.evaluate("references/number/text()", submeshNodes));
 			logger.debug("Reading "+numberOfReferences+" references");
 			int [] refs = new int[numberOfReferences];
 			refsBuffer.get(refs);
 			
 			int numberOfNodes = Integer.parseInt(
-				xpath.selectSingleNode(submeshNodes, "number/text()").getNodeValue());
+				xpath.evaluate("number/text()", submeshNodes));
 			MNode3D [] nodelist = new MNode3D[numberOfNodes];
 			int label;
 			double [] coord = new double[3];
@@ -136,7 +140,7 @@ public class MMesh3DReader
 			}
 			
 			int numberOfTriangles = Integer.parseInt(
-				xpath.selectSingleNode(submeshTriangles, "number/text()").getNodeValue());
+				xpath.evaluate("number/text()", submeshTriangles));
 			logger.debug("Reading "+numberOfTriangles+" elements");
 			MFace3D [] facelist = new MFace3D[numberOfTriangles];
 			double [] n = new double[3];
@@ -158,10 +162,12 @@ public class MMesh3DReader
 				m3d.addFace(facelist[i]);
 			}
 			
-			Node groupsElement = xpath.selectSingleNode(submeshElement, "groups");
-			NodeList groupsList = xpath.selectNodeList(groupsElement, "group");
+			Node groupsElement = (Node) xpath.evaluate("groups",
+				submeshElement, XPathConstants.NODE);
+			NodeList groupsList = (NodeList) xpath.evaluate("group",
+				groupsElement, XPathConstants.NODESET);
 			int numberOfGroups = groupsList.getLength();
-			String groupsFile = xpath.selectSingleNode(groupsList.item(0), "file/@location").getNodeValue();
+			String groupsFile = xpath.evaluate("file/@location", groupsList.item(0));
 			if (groupsFile.charAt(0) != File.separatorChar)
 				groupsFile = xmlDir+File.separator+groupsFile;
 			FileChannel fcG = new FileInputStream(groupsFile).getChannel();
@@ -172,15 +178,15 @@ public class MMesh3DReader
 				Node groupNode = groupsList.item(i);
 				
 				int numberOfElements = Integer.parseInt(
-					xpath.selectSingleNode(groupNode, "number/text()").getNodeValue());
+					xpath.evaluate("number/text()", groupNode));
 				int fileOffset = Integer.parseInt(
-					xpath.selectSingleNode(groupNode, "file/@offset").getNodeValue());
+					xpath.evaluate("file/@offset", groupNode));
 				
 				//int id=Integer.parseInt(
-				//	xpath.selectSingleNode(groupNode, "@id").getNodeValue());
+				//	xpath.evaluate(groupNode, "@id").getNodeValue());
 				
 				String name=
-					xpath.selectSingleNode(groupNode, "name/text()").getNodeValue();
+					xpath.evaluate("name/text()", groupNode);
 				logger.debug("Group "+name+": reading "+numberOfElements+" elements");
 								
 				Collection newfacelist = new ArrayList(numberOfElements);
@@ -215,19 +221,24 @@ public class MMesh3DReader
 	public static int [] getInfos(String xmlDir, String xmlFile)
 	{
 		int [] ret = new int[3];
-		CachedXPathAPI xpath = new CachedXPathAPI();
+		XPath xpath = XPathFactory.newInstance().newXPath();
 		try
 		{
 			Document document = XMLHelper.parseXML(new File(xmlDir, xmlFile));
-			Node submeshElement = xpath.selectSingleNode(document, "/jcae/mesh/submesh");
-			Node submeshNodes = xpath.selectSingleNode(submeshElement, "nodes");
-			ret[0] = Integer.parseInt(
-				xpath.selectSingleNode(submeshNodes, "number/text()").getNodeValue());
-			Node submeshTriangles = xpath.selectSingleNode(submeshElement, "triangles");
-			ret[1] = Integer.parseInt(
-				xpath.selectSingleNode(submeshTriangles, "number/text()").getNodeValue());
-			Node groupsElement = xpath.selectSingleNode(submeshElement, "groups");
-			NodeList groupsList = xpath.selectNodeList(groupsElement, "group");
+			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh",
+				document, XPathConstants.NODE);
+			Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement,
+				XPathConstants.NODE);
+			ret[0] = Integer.parseInt(xpath.evaluate("number/text()",
+				submeshNodes));
+			Node submeshTriangles = (Node) xpath.evaluate("triangles",
+				submeshElement, XPathConstants.NODE);
+			ret[1] = Integer.parseInt(xpath.evaluate("number/text()",
+				submeshTriangles));
+			Node groupsElement = (Node) xpath.evaluate("groups",
+				submeshElement, XPathConstants.NODE);
+			NodeList groupsList = (NodeList) xpath.evaluate("group",
+				groupsElement, XPathConstants.NODESET);
 			ret[2] = groupsList.getLength();
 		}
 		catch(FileNotFoundException ex)
@@ -244,16 +255,19 @@ public class MMesh3DReader
 	
 	public static void mergeGroups(String xmlDir, String xmlInFile, String xmlGroupsFile)
 	{
-		CachedXPathAPI xpath = new CachedXPathAPI();
+		XPath xpath = XPathFactory.newInstance().newXPath();
 		try
 		{
 			File oldXmlFile = new File(xmlDir, xmlInFile);
 			Document document = XMLHelper.parseXML(oldXmlFile);
-			Node submeshElement = xpath.selectSingleNode(document, "/jcae/mesh/submesh");
-			Node groupsElement = xpath.selectSingleNode(submeshElement, "groups");
-			NodeList groupsList = xpath.selectNodeList(groupsElement, "group");
+			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh",
+				document, XPathConstants.NODE);
+			Node groupsElement = (Node) xpath.evaluate("groups",
+				submeshElement, XPathConstants.NODE);
+			NodeList groupsList = (NodeList) xpath.evaluate("group",
+				groupsElement, XPathConstants.NODESET);
 			int numberOfGroups = groupsList.getLength();
-			String groupsFileName = xpath.selectSingleNode(groupsList.item(0), "file/@location").getNodeValue();
+			String groupsFileName = xpath.evaluate("file/@location", groupsList.item(0));
 			String groupsFileDir = null;
 			if (groupsFileName.charAt(0) != File.separatorChar)
 				groupsFileDir = xmlDir;
@@ -269,12 +283,12 @@ public class MMesh3DReader
 				Node groupNode = groupsList.item(i);
 				
 				int numberOfElements = Integer.parseInt(
-					xpath.selectSingleNode(groupNode, "number/text()").getNodeValue());
+					xpath.evaluate("number/text()", groupNode));
 				int fileOffset = Integer.parseInt(
-					xpath.selectSingleNode(groupNode, "file/@offset").getNodeValue());
-				int id = Integer.parseInt(xpath.selectSingleNode(groupNode, "@id").getNodeValue());
+					xpath.evaluate("file/@offset", groupNode));
+				int id = Integer.parseInt(xpath.evaluate("@id", groupNode));
 				numGroups.put(id, i);
-				String name = xpath.selectSingleNode(groupNode, "name/text()").getNodeValue();
+				String name = xpath.evaluate("name/text()", groupNode);
 				logger.debug("Group "+name+": reading "+numberOfElements+" elements");
 				maxId = Math.max(maxId, id);
 				Collection newfacelist = new ArrayList(numberOfElements);
@@ -286,8 +300,10 @@ public class MMesh3DReader
 			UNVConverter.clean(bbG);
 			// Now merge groups
 			Document documentGroup = XMLHelper.parseXML(new File(xmlDir, xmlGroupsFile));
-			Node newGroupsElement = xpath.selectSingleNode(documentGroup, "/mergegroups");
-			NodeList newGroupsList = xpath.selectNodeList(newGroupsElement, "newgroup");
+			Node newGroupsElement = (Node) xpath.evaluate("/mergegroups",
+				documentGroup, XPathConstants.NODE);
+			NodeList newGroupsList = (NodeList) xpath.evaluate("newgroup",
+				newGroupsElement, XPathConstants.NODESET);
 			int numberOfNewGroups = newGroupsList.getLength();
 			MGroup3D [] tmpgroups = new MGroup3D[numberOfGroups+numberOfNewGroups];
 			System.arraycopy(groups, 0, tmpgroups, 0, groups.length);
@@ -297,16 +313,17 @@ public class MMesh3DReader
 			{
 				Node newGroupNode = newGroupsList.item(i);
 				maxId++;
-				String name = xpath.selectSingleNode(newGroupNode, "name/text()").getNodeValue();
+				String name = xpath.evaluate("name/text()", newGroupNode);
 				groups[numberOfGroups+i] = new MGroup3D(maxId, name, new ArrayList());
 				numGroups.put(maxId, numberOfGroups+i);
-				NodeList oldGroupsList = xpath.selectNodeList(newGroupNode, "oldgroup");
+				NodeList oldGroupsList = (NodeList) xpath.evaluate("oldgroup",
+					newGroupNode, XPathConstants.NODESET);
 				int numberOfOldGroups = oldGroupsList.getLength();
 				logger.debug("Group "+name+": merging "+numberOfOldGroups+" groups");
 				for (int j=0; j < numberOfOldGroups; j++)
 				{
 					Node oldGroupNode = oldGroupsList.item(j);
-					int id = Integer.parseInt(xpath.selectSingleNode(oldGroupNode, "@id").getNodeValue());
+					int id = Integer.parseInt(xpath.evaluate("@id", oldGroupNode));
 					int k = numGroups.get(id);
 					if (k < 0 || k >= groups.length || groups[k] == null)
 						throw new RuntimeException("Group id "+id+" does not exist. Aborting.");

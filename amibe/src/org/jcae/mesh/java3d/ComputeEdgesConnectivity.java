@@ -24,15 +24,17 @@ package org.jcae.mesh.java3d;
 import gnu.trove.TObjectIntHashMap;
 import gnu.trove.TObjectIntIterator;
 import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
-import org.jcae.mesh.xmldata.XMLHelper;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import org.apache.log4j.Logger;
-import org.apache.xpath.XPathAPI;
+import org.jcae.mesh.xmldata.XMLHelper;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
-import org.w3c.dom.*;
 
 /**
  *
@@ -87,28 +89,26 @@ public class ComputeEdgesConnectivity
 	
 	File xmlDir;
 	File xmlFile;
-	String brepDir;
 	int numberOfTriangles, numberOfFreeEdges, numberOfMultiEdges;
 	Document document;
 	
-	public ComputeEdgesConnectivity(String dir, String file, String b)
+	public ComputeEdgesConnectivity(String dir, String file)
 	{
 		xmlFile = new File(dir, file);
 		xmlDir = new File(dir);
-		brepDir = b;
 	}
 	
-	public void compute()
-		throws ParserConfigurationException, IOException, TransformerException,
-		SAXException, URISyntaxException
+	public void compute() throws XPathExpressionException, ParserConfigurationException,
+		SAXException, IOException, TransformerException
 	{
+		XPath xpath=XPathFactory.newInstance().newXPath();
 		document=XMLHelper.parseXML(xmlFile);
 		
-		String trianglesFileName=XPathAPI.selectSingleNode(document,
-			"/jcae/mesh/submesh/triangles/file/@location").getNodeValue();
-		Text trianglesNumberText=(Text)XPathAPI.selectSingleNode(document,
-			"/jcae/mesh/submesh/triangles/number/text()");
-		numberOfTriangles=Integer.parseInt(trianglesNumberText.getData());				
+		String trianglesFileName=(String) xpath.evaluate(
+			"/jcae/mesh/submesh/triangles/file/@location", document, XPathConstants.STRING);
+		numberOfTriangles=((Double)
+			xpath.evaluate("/jcae/mesh/submesh/triangles/number/text()",
+				document, XPathConstants.NUMBER)).intValue();				
 		File trianglesFile=new File(xmlDir, trianglesFileName);
 		File subDir=trianglesFile.getParentFile();
 		File freeEdgesFile=new File(subDir, "freeEdges.bin");
@@ -168,10 +168,11 @@ public class ComputeEdgesConnectivity
 		outFree.close();
 		outMulti.close();
 		
-		Element eOldNode=(Element)XPathAPI.selectSingleNode(document,
-			"/jcae/mesh/submesh/nodes");
+		Element eOldNode=(Element)xpath.evaluate(
+			"/jcae/mesh/submesh/nodes", document, XPathConstants.NODE);
 		
-		Element meshElement=(Element)XPathAPI.selectSingleNode(document,"/jcae/mesh");
+		Element meshElement=(Element)xpath.evaluate(
+			"/jcae/mesh", document, XPathConstants.NODE);
 		
 		Element freeMeshElement=XMLHelper.parseXMLString(document,
 			"<submesh><flag value=\"FreeEdges\"/></submesh>");

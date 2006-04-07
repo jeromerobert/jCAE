@@ -33,11 +33,13 @@ import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 import gnu.trove.TIntIntHashMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.apache.xpath.CachedXPathAPI;
 import org.apache.log4j.Logger;
 
 
@@ -86,18 +88,19 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
-		CachedXPathAPI xpath = new CachedXPathAPI();
+		XPath xpath = XPathFactory.newInstance().newXPath();
 		try
 		{
-			Node submeshElement = xpath.selectSingleNode(document,
-				"/jcae/mesh/submesh");
-			Node submeshNodes = xpath.selectSingleNode(submeshElement, "nodes");
+			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh",
+				document, XPathConstants.NODE);
+			Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement,
+				XPathConstants.NODE);
 			
 			int numberOfReferences = Integer.parseInt(
-				xpath.selectSingleNode(submeshNodes, "references/number/text()").getNodeValue());
+				xpath.evaluate("references/number/text()", submeshNodes));
 			nrRefs += numberOfReferences;
 			int numberOfNodes = Integer.parseInt(
-				xpath.selectSingleNode(submeshNodes, "number/text()").getNodeValue());
+				xpath.evaluate("number/text()", submeshNodes));
 			nrIntNodes += numberOfNodes - numberOfReferences;
 		}
 		catch(Exception ex)
@@ -230,37 +233,39 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			throw new RuntimeException(ex);
 		}
 		int i;
-		CachedXPathAPI xpath = new CachedXPathAPI();
+		XPath xpath = XPathFactory.newInstance().newXPath();
 		CADGeomSurface surface = F.getGeomSurface();
 		surface.dinit(1);
 		try
 		{
-			String nodesFile = xpath.selectSingleNode(documentIn,
-				"/jcae/mesh/submesh/nodes/file/@location").getNodeValue();
+			String nodesFile = xpath.evaluate(
+				"/jcae/mesh/submesh/nodes/file/@location", documentIn);
 			FileChannel fcN = new FileInputStream(xmlDir+File.separator+nodesFile).getChannel();
 			MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
 			DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
-			String refFile = xpath.selectSingleNode(documentIn,
-				"/jcae/mesh/submesh/nodes/references/file/@location").getNodeValue();
+			String refFile = xpath.evaluate(
+				"/jcae/mesh/submesh/nodes/references/file/@location",
+				documentIn);
 			FileChannel fcR = new FileInputStream(xmlDir+File.separator+refFile).getChannel();
 			MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L, fcR.size());
 			IntBuffer refsBuffer = bbR.asIntBuffer();
-			String trianglesFile = xpath.selectSingleNode(documentIn,
-				"/jcae/mesh/submesh/triangles/file/@location").getNodeValue();
+			String trianglesFile = xpath.evaluate(
+				"/jcae/mesh/submesh/triangles/file/@location", documentIn);
 			FileChannel fcT = new FileInputStream(xmlDir+File.separator+trianglesFile).getChannel();
 			MappedByteBuffer bbT = fcT.map(FileChannel.MapMode.READ_ONLY, 0L, fcT.size());
 			IntBuffer trianglesBuffer = bbT.asIntBuffer();
 			
-			Node submeshElement = xpath.selectSingleNode(documentIn,
-				"/jcae/mesh/submesh");
-			Node submeshNodes = xpath.selectSingleNode(submeshElement, "nodes");
+			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh",
+				documentIn, XPathConstants.NODE);
+			Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement,
+				XPathConstants.NODE);
 			
 			int numberOfReferences = Integer.parseInt(
-				xpath.selectSingleNode(submeshNodes, "references/number/text()").getNodeValue());
+				xpath.evaluate("references/number/text()", submeshNodes));
 			int [] refs = new int[numberOfReferences];
 			logger.debug("Reading "+numberOfReferences+" references");
 			int numberOfNodes = Integer.parseInt(
-				xpath.selectSingleNode(submeshNodes, "number/text()").getNodeValue());
+				xpath.evaluate("number/text()", submeshNodes));
 			logger.debug("Reading "+numberOfNodes+" nodes");
 			double [] normals = new double[3*numberOfNodes];
 			//  Interior nodes
@@ -299,9 +304,10 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				}
 			}
 			
-			Node submeshFaces = xpath.selectSingleNode(submeshElement, "triangles");
-			int numberOfFaces = Integer.parseInt(
-					xpath.selectSingleNode(submeshFaces, "number/text()").getNodeValue());
+			Node submeshFaces = (Node) xpath.evaluate("triangles",
+				submeshElement, XPathConstants.NODE);
+			int numberOfFaces = Integer.parseInt(xpath.evaluate(
+				"number/text()", submeshFaces));
 			logger.debug("Reading "+numberOfFaces+" faces");
 			int ind [] = new int[3];
 			for (i=0; i < numberOfFaces; i++)

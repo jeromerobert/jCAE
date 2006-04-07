@@ -21,23 +21,15 @@
 package org.jcae.mesh.java3d;
 
 import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import javax.media.j3d.IndexedTriangleArray;
-import javax.media.j3d.BranchGroup;
-import javax.media.j3d.Appearance;
-import javax.media.j3d.PolygonAttributes;
-import javax.media.j3d.ColoringAttributes;
-import javax.media.j3d.TriangleArray;
-import javax.media.j3d.IndexedLineArray;
-import javax.media.j3d.Geometry;
-import javax.media.j3d.Shape3D;
-import javax.media.j3d.LineAttributes;
+import javax.media.j3d.*;
 import javax.xml.parsers.*;
 import org.xml.sax.SAXException;
-import javax.xml.transform.TransformerException;
-import org.apache.xpath.XPathAPI;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.*;
+import org.w3c.dom.Node;
 import org.jcae.mesh.xmldata.*;
 import org.apache.log4j.*;
 import com.sun.j3d.utils.geometry.GeometryInfo;
@@ -54,6 +46,7 @@ public class XMLBranchGroup
 	private static Logger logger=Logger.getLogger(XMLBranchGroup.class);
 	private final static float absOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorAbs", "20.0f"));
 	private final static float relOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorRel", "2.0f"));
+	private static XPath xpath=XPathFactory.newInstance().newXPath();
 	
 	class AppearanceBlackFace extends Appearance
 	{
@@ -141,32 +134,39 @@ public class XMLBranchGroup
 	}
 	
 	public BranchGroup getBranchGroup(int i)
-		throws TransformerException, IOException
+		throws IOException, XPathExpressionException
 	{
-		Node subMesh = XPathAPI.selectSingleNode(document,
-			"/jcae/mesh/submesh["+(i+1)+"]");
+		Node subMesh = (Node) xpath.evaluate(
+			"/jcae/mesh/submesh["+(i+1)+"]", document, XPathConstants.NODE);
 		return getBranchGroup(subMesh);
 	}
 	
 	public BranchGroup getBranchGroup(String flag)
-		throws TransformerException, IOException
+		throws IOException, XPathExpressionException
 	{
-		Node subMesh = XPathAPI.selectSingleNode(document,
-			"/jcae/mesh/submesh/flag[@value='"+flag+"']/..");
+		Node subMesh = (Node) xpath.evaluate(
+			"/jcae/mesh/submesh/flag[@value='"+flag+"']/..",
+			document, XPathConstants.NODE);
 		return getBranchGroup(subMesh);
 	}
 
 	private BranchGroup getBranchGroup(Node subMesh)
-		throws TransformerException, IOException
+		throws IOException, XPathExpressionException
 	{
 		int dim = 3;
-		Node dimDOM = XPathAPI.selectSingleNode(subMesh, "dimension/text()");
+		Node dimDOM = (Node) xpath.evaluate("dimension/text()", subMesh, XPathConstants.NODE); 
+
 		if (null != dimDOM)
 			dim = Integer.parseInt(dimDOM.getNodeValue());
-		Node trianglesDOM = XPathAPI.selectSingleNode(subMesh, "triangles");
-		Node nodesDOM = XPathAPI.selectSingleNode(subMesh, "nodes");
-		BranchGroup branchGroup=new BranchGroup();
-		Node flagDOM = XPathAPI.selectSingleNode(subMesh, "flag/@value");
+
+		Node trianglesDOM = (Node) xpath.evaluate("triangles", subMesh,
+			XPathConstants.NODE);
+		Node nodesDOM = (Node) xpath.evaluate("nodes", subMesh,
+			XPathConstants.NODE);
+		BranchGroup branchGroup = new BranchGroup();
+		Node flagDOM = (Node) xpath.evaluate("flag/@value", subMesh,
+			XPathConstants.NODE);
+
 		String flag=null;
 		
 		if(flagDOM!=null) flag=flagDOM.getNodeValue();
@@ -175,11 +175,9 @@ public class XMLBranchGroup
 		
 		if(nodesDOM!=null)
 		{
-			String nodesFile = XPathAPI.selectSingleNode(nodesDOM,
-				"file/@location").getNodeValue();
-			
-			int numberOfNodes = Integer.parseInt((XPathAPI.selectSingleNode(
-				nodesDOM, "number/text()").getNodeValue()));
+			String nodesFile = xpath.evaluate("file/@location", nodesDOM);
+			int numberOfNodes = Integer.parseInt(xpath.evaluate(
+				"number/text()", nodesDOM));
 			
 			float[] nodes=readFloat(nodesFile, numberOfNodes*dim);
 			if (dim == 2)
@@ -207,7 +205,9 @@ public class XMLBranchGroup
 			
 			if(flag != null && flag.equals("FreeEdges"))
 			{
-				Node beamsDOM = XPathAPI.selectSingleNode(subMesh, "beams");
+				Node beamsDOM = (Node) xpath.evaluate("beams", subMesh,
+					XPathConstants.NODE); 
+
 				IndexedLineArray geom = getGeomForWires(beamsDOM, nodes);
 				if (null != geom)
 				{
@@ -218,7 +218,9 @@ public class XMLBranchGroup
 			}
 			if(flag != null && flag.equals("MultiEdges"))
 			{
-				Node beamsDOM = XPathAPI.selectSingleNode(subMesh, "beams");
+				Node beamsDOM = (Node) xpath.evaluate("beams", subMesh,
+					XPathConstants.NODE); 
+
 				IndexedLineArray geom = getGeomForWires(beamsDOM, nodes);
 				if (null != geom)
 				{
@@ -233,24 +235,23 @@ public class XMLBranchGroup
 	}
 	
 	private Geometry getGeomForTriangles(Node trianglesDOM, float[] nodes)
-		throws TransformerException, IOException
+		throws IOException, XPathExpressionException
 	{
-		String triasFile = XPathAPI.selectSingleNode(trianglesDOM,
-			"file/@location").getNodeValue();
+		String triasFile =xpath.evaluate("file/@location", trianglesDOM); 
 
-		int numberOfTrias = Integer.parseInt((XPathAPI.selectSingleNode(
-			trianglesDOM, "number/text()").getNodeValue()));
+		int numberOfTrias = ((Double) xpath.evaluate("number/text()", trianglesDOM,
+			XPathConstants.NUMBER)).intValue(); 
 
 		int[] trias=readInteger(triasFile, numberOfTrias*3);				
 		IndexedTriangleArray geom = new IndexedTriangleArray(
 			nodes.length/3,
-			TriangleArray.COORDINATES,
+			GeometryArray.COORDINATES,
 			trias.length);
 		geom.setCoordinateIndices(0, trias);
-		geom.setCapability(IndexedTriangleArray.ALLOW_COUNT_READ);
-		geom.setCapability(IndexedTriangleArray.ALLOW_FORMAT_READ);
-		geom.setCapability(IndexedTriangleArray.ALLOW_REF_DATA_READ);
-		geom.setCapability(IndexedTriangleArray.ALLOW_COORDINATE_INDEX_READ);
+		geom.setCapability(GeometryArray.ALLOW_COUNT_READ);
+		geom.setCapability(GeometryArray.ALLOW_FORMAT_READ);
+		geom.setCapability(GeometryArray.ALLOW_REF_DATA_READ);
+		geom.setCapability(IndexedGeometryArray.ALLOW_COORDINATE_INDEX_READ);
 		trias=null;
 		geom.setCoordinates(0,nodes);
 		if(Boolean.getBoolean("org.jcae.mesh.java3d.stripify"))
@@ -269,25 +270,24 @@ public class XMLBranchGroup
 	}
 	
 	private IndexedLineArray getGeomForWires(Node beamsDOM, float[] nodes)
-		throws TransformerException, IOException
+		throws IOException, XPathExpressionException
 	{
-		String triasFile = XPathAPI.selectSingleNode(beamsDOM,
-			"file/@location").getNodeValue();
+		String triasFile = xpath.evaluate("file/@location", beamsDOM);
+		int numberOfBeams = ((Double) xpath.evaluate("number/text()", beamsDOM,
+			XPathConstants.NUMBER)).intValue(); 
 
-		int numberOfBeams = Integer.parseInt((XPathAPI.selectSingleNode(
-			beamsDOM, "number/text()").getNodeValue()));
 		if(numberOfBeams==0)
 			return null;
 		int[] beams=readInteger(triasFile, numberOfBeams*2);				
 		IndexedLineArray geom = new IndexedLineArray(
 			nodes.length/3,
-			IndexedLineArray.COORDINATES|IndexedLineArray.BY_REFERENCE,
+			GeometryArray.COORDINATES|GeometryArray.BY_REFERENCE,
 			beams.length);
 		geom.setCoordinateIndices(0, beams);
-		geom.setCapability(IndexedLineArray.ALLOW_COUNT_READ);
-		geom.setCapability(IndexedLineArray.ALLOW_FORMAT_READ);
-		geom.setCapability(IndexedLineArray.ALLOW_REF_DATA_READ);
-		geom.setCapability(IndexedLineArray.ALLOW_COORDINATE_INDEX_READ);
+		geom.setCapability(GeometryArray.ALLOW_COUNT_READ);
+		geom.setCapability(GeometryArray.ALLOW_FORMAT_READ);
+		geom.setCapability(GeometryArray.ALLOW_REF_DATA_READ);
+		geom.setCapability(IndexedGeometryArray.ALLOW_COORDINATE_INDEX_READ);
 		geom.setCoordRefFloat(nodes);		
 		return geom;
 	}	

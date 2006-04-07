@@ -46,7 +46,7 @@ public class MeshView
 		{
 			String xmlFile = "jcae3d";
 			ComputeEdgesConnectivity computeEdgesConnectivity =
-				new ComputeEdgesConnectivity(xmlDir, xmlFile, "..");
+				new ComputeEdgesConnectivity(xmlDir, xmlFile);
 			computeEdgesConnectivity.compute();
 			
 			XMLBranchGroup xbg=new XMLBranchGroup(xmlDir, xmlFile);

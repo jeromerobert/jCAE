@@ -29,8 +29,10 @@ import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 import org.apache.log4j.Logger;
-import org.apache.xpath.CachedXPathAPI;
 import org.jcae.mesh.cad.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -122,21 +124,23 @@ public class MeshToSoupConvert extends JCAEXMLData
 			throw new RuntimeException(ex);
 		}
 
-		CachedXPathAPI xpath = new CachedXPathAPI();
+		XPath xpath = XPathFactory.newInstance().newXPath();
 		CADGeomSurface surface = F.getGeomSurface();
 		surface.dinit(0);
 		try
 		{
-			Node submeshElement = xpath.selectSingleNode(documentIn,
-				"/jcae/mesh/submesh");
-			Node submeshNodes = xpath.selectSingleNode(submeshElement, "nodes");
-			Node submeshFaces = xpath.selectSingleNode(submeshElement, "triangles");
+			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh",
+				documentIn, XPathConstants.NODE);
+			Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement,
+				XPathConstants.NODE);
+			Node submeshFaces = (Node) xpath.evaluate("triangles",
+				submeshElement, XPathConstants.NODE);
 			
-			int numberOfNodes = Integer.parseInt(
-				xpath.selectSingleNode(submeshNodes, "number/text()").getNodeValue());
-			logger.debug("Reading "+numberOfNodes+" nodes");
-			String nodesFile = xpath.selectSingleNode(submeshNodes,
-				"file/@location").getNodeValue();
+			int numberOfNodes = Integer.parseInt(xpath.evaluate(
+				"number/text()", submeshNodes));
+
+			logger.debug("Reading " + numberOfNodes + " nodes");
+			String nodesFile = xpath.evaluate("file/@location", submeshNodes);
 			FileChannel fcN = new FileInputStream(xmlDir+File.separator+nodesFile).getChannel();
 			double [] coord = new double[3*numberOfNodes];
 			bb.clear();
@@ -167,11 +171,11 @@ public class MeshToSoupConvert extends JCAEXMLData
 			assert index == numberOfNodes;
 			fcN.close();
 			
-			int numberOfFaces = Integer.parseInt(
-					xpath.selectSingleNode(submeshFaces, "number/text()").getNodeValue());
-			logger.debug("Reading "+numberOfFaces+" faces");
-			String trianglesFile = xpath.selectSingleNode(submeshFaces,
-				"file/@location").getNodeValue();
+			int numberOfFaces = Integer.parseInt(xpath.evaluate(
+				"number/text()", submeshFaces));
+			logger.debug("Reading " + numberOfFaces + " faces");
+			String trianglesFile = xpath.evaluate("file/@location",
+				submeshFaces);
 			FileChannel fcT = new FileInputStream(xmlDir+File.separator+trianglesFile).getChannel();
 			bb.clear();
 			bbI.clear();

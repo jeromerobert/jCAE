@@ -29,7 +29,9 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.HashMap;
 import java.util.HashSet;
-import org.apache.xpath.CachedXPathAPI;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADShape;
@@ -85,13 +87,13 @@ public class MMesh1DReader
 		MMesh1D m1d = null;
 		int i;
 		logger.debug("begin reading "+xmlDir+File.separator+xmlFile);
-		CachedXPathAPI xpath = new CachedXPathAPI();
+		XPath xpath = XPathFactory.newInstance().newXPath();
 		HashMap map1DToMaster = new HashMap();
 		try
 		{
 			Document document = XMLHelper.parseXML(new File(xmlDir, xmlFile));
-			String brepFile = xpath.selectSingleNode(document,
-				"/jcae/mesh/shape/file/@location").getNodeValue();
+			String brepFile = xpath.evaluate("/jcae/mesh/shape/file/@location",
+				document);
 			
 			if(!new File(brepFile).isAbsolute())
 				brepFile = xmlDir+File.separator+brepFile;
@@ -99,31 +101,31 @@ public class MMesh1DReader
 			CADShape shape = CADShapeBuilder.factory.newShape(brepFile);
 			m1d = new MMesh1D(shape);
 			
-			String nodesFile = xpath.selectSingleNode(document,
-				"/jcae/mesh/submesh/nodes/file/@location").getNodeValue();
+			String nodesFile = xpath.evaluate(
+				"/jcae/mesh/submesh/nodes/file/@location", document);
 			if (nodesFile.charAt(0) != File.separatorChar)
 				nodesFile = xmlDir+File.separator+nodesFile;
 			FileChannel fcN = new FileInputStream(nodesFile).getChannel();
 			MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
 			DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
-			String refFile = xpath.selectSingleNode(document,
-				"/jcae/mesh/submesh/nodes/references/file/@location").getNodeValue();
+			String refFile = xpath.evaluate(
+				"/jcae/mesh/submesh/nodes/references/file/@location", document);
 			if (refFile.charAt(0) != File.separatorChar)
 				refFile = xmlDir+File.separator+refFile;
 			FileChannel fcR = new FileInputStream(refFile).getChannel();
 			MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L, fcR.size());
 			IntBuffer refsBuffer = bbR.asIntBuffer();
-			String edgesFile = xpath.selectSingleNode(document,
-				"/jcae/mesh/submesh/beams/file/@location").getNodeValue();
+			String edgesFile = xpath.evaluate(
+				"/jcae/mesh/submesh/beams/file/@location", document);
 			if (edgesFile.charAt(0) != File.separatorChar)
 				edgesFile = xmlDir+File.separator+edgesFile;
 			FileChannel fcE = new FileInputStream(edgesFile).getChannel();
 			MappedByteBuffer bbE = fcE.map(FileChannel.MapMode.READ_ONLY, 0L, fcE.size());
 			IntBuffer edgesBuffer = bbE.asIntBuffer();
 
-			NodeList submeshList = xpath.selectNodeList(
-				document.getDocumentElement(),
-				"/jcae/mesh/submesh");
+			NodeList submeshList = (NodeList) xpath.evaluate(
+				"/jcae/mesh/submesh", document.getDocumentElement(),
+				XPathConstants.NODESET);
 
 			int iEdge = 0;
 			//  References are counted from 1; 0 means an inner

@@ -31,10 +31,12 @@ import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.apache.xpath.CachedXPathAPI;
 import org.apache.log4j.Logger;
 
 
@@ -52,29 +54,40 @@ public class MeshReader
 	{
 		Mesh mesh = new Mesh(F);
 		logger.debug("begin reading "+xmlDir+File.separator+xmlFile);
-		CachedXPathAPI xpath = new CachedXPathAPI();
+		XPath xpath = XPathFactory.newInstance().newXPath();
+		
 		try
 		{
 			Document document = XMLHelper.parseXML(new File(xmlDir, xmlFile));
-			Node submeshElement = xpath.selectSingleNode(document, "/jcae/mesh/submesh");
-			Node submeshNodes = xpath.selectSingleNode(submeshElement, "nodes");
-			String refFile = xpath.selectSingleNode(submeshNodes,
-				"references/file/@location").getNodeValue();
+			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh",
+				document, XPathConstants.NODE);
+			Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement,
+				XPathConstants.NODE);
+			String refFile = xpath.evaluate("references/file/@location", submeshNodes);
+			
 			if (refFile.charAt(0) != File.separatorChar)
-				refFile = xmlDir+File.separator+refFile;
+				refFile = xmlDir + File.separator + refFile;
+			
 			FileChannel fcR = new FileInputStream(refFile).getChannel();
-			MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L, fcR.size());
+			
+			MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L,
+				fcR.size());
+			
 			IntBuffer refsBuffer = bbR.asIntBuffer();
-			String nodesFile = xpath.selectSingleNode(submeshNodes, "file/@location").getNodeValue();
-			if (nodesFile.charAt(0) != File.separatorChar)
-				nodesFile = xmlDir+File.separator+nodesFile;
+			String nodesFile = xpath.evaluate("file/@location", submeshNodes);
+			
+			if (nodesFile.charAt(0) != File.separatorChar) nodesFile = xmlDir
+				+ File.separator + nodesFile;
+			
 			FileChannel fcN = new FileInputStream(nodesFile).getChannel();
-			MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
+			MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L,
+				fcN.size());
 			DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
 			
-			Node submeshTriangles = xpath.selectSingleNode(submeshElement, "triangles");
-			String trianglesFile = xpath.selectSingleNode(submeshTriangles,
-				"file/@location").getNodeValue();
+			Node submeshTriangles = (Node) xpath.evaluate("triangles",
+				submeshElement, XPathConstants.NODE);
+			String trianglesFile = xpath.evaluate("file/@location",
+				submeshTriangles);
 			if (trianglesFile.charAt(0) != File.separatorChar)
 				trianglesFile = xmlDir+File.separator+trianglesFile;
 			FileChannel fcT = new FileInputStream(trianglesFile).getChannel();
@@ -82,13 +95,13 @@ public class MeshReader
 			IntBuffer trianglesBuffer = bbT.asIntBuffer();
 
 			int numberOfReferences = Integer.parseInt(
-				xpath.selectSingleNode(submeshNodes, "references/number/text()").getNodeValue());
+				xpath.evaluate("references/number/text()", submeshNodes));
 			logger.debug("Reading "+numberOfReferences+" references");
 			int [] refs = new int[numberOfReferences];
 			refsBuffer.get(refs);
 			
 			int numberOfNodes = Integer.parseInt(
-				xpath.selectSingleNode(submeshNodes, "number/text()").getNodeValue());
+				xpath.evaluate("number/text()", submeshNodes));
 			Vertex [] nodelist = new Vertex[numberOfNodes];
 			int label;
 			double [] coord = new double[2];
@@ -120,7 +133,7 @@ public class MeshReader
 				nodelist[i].addToQuadTree();
 			
 			int numberOfTriangles = Integer.parseInt(
-				xpath.selectSingleNode(submeshTriangles, "number/text()").getNodeValue());
+				xpath.evaluate("number/text()", submeshTriangles));
 			logger.debug("Reading "+numberOfTriangles+" elements");
 			Triangle [] facelist = new Triangle[numberOfTriangles];
 			for (int i=0; i < numberOfTriangles; i++)
@@ -167,28 +180,29 @@ public class MeshReader
 		Mesh mesh = new Mesh();
 		mesh.setType(Mesh.MESH_3D);
 		logger.debug("begin reading "+xmlDir+File.separator+xmlFile);
-		CachedXPathAPI xpath = new CachedXPathAPI();
+		XPath xpath = XPathFactory.newInstance().newXPath();
 		try
 		{
 			Document document = XMLHelper.parseXML(new File(xmlDir, xmlFile));
-			Node submeshElement = xpath.selectSingleNode(document, "/jcae/mesh/submesh");
-			Node submeshNodes = xpath.selectSingleNode(submeshElement, "nodes");
-			String refFile = xpath.selectSingleNode(submeshNodes,
-				"references/file/@location").getNodeValue();
+			
+			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh", document, XPathConstants.NODE);
+			Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement, XPathConstants.NODE);
+			String refFile = xpath.evaluate("references/file/@location", submeshNodes);
+
 			if (refFile.charAt(0) != File.separatorChar)
 				refFile = xmlDir+File.separator+refFile;
 			FileChannel fcR = new FileInputStream(refFile).getChannel();
 			MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L, fcR.size());
 			IntBuffer refsBuffer = bbR.asIntBuffer();
 			int numberOfReferences = Integer.parseInt(
-				xpath.selectSingleNode(submeshNodes, "references/number/text()").getNodeValue());
+				xpath.evaluate("references/number/text()", submeshNodes));
 			logger.debug("Reading "+numberOfReferences+" references");
 			int [] refs = new int[numberOfReferences];
 			refsBuffer.get(refs);
 			fcR.close();
 			UNVConverter.clean(bbR);
 			
-			String nodesFile = xpath.selectSingleNode(submeshNodes, "file/@location").getNodeValue();
+			String nodesFile = xpath.evaluate("file/@location", submeshNodes);
 			if (nodesFile.charAt(0) != File.separatorChar)
 				nodesFile = xmlDir+File.separator+nodesFile;
 			FileChannel fcN = new FileInputStream(nodesFile).getChannel();
@@ -196,7 +210,7 @@ public class MeshReader
 			DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
 			
 			int numberOfNodes = Integer.parseInt(
-				xpath.selectSingleNode(submeshNodes, "number/text()").getNodeValue());
+				xpath.evaluate("number/text()", submeshNodes));
 			Vertex [] nodelist = new Vertex[numberOfNodes];
 			int label;
 			double [] coord = new double[3];
@@ -228,16 +242,17 @@ public class MeshReader
 			fcN.close();
 			UNVConverter.clean(bbN);
 			
-			Node submeshTriangles = xpath.selectSingleNode(submeshElement, "triangles");
-			String trianglesFile = xpath.selectSingleNode(submeshTriangles,
-				"file/@location").getNodeValue();
+			Node submeshTriangles = (Node) xpath.evaluate("triangles",
+				submeshElement, XPathConstants.NODE);
+			String trianglesFile = xpath.evaluate("file/@location",
+				submeshTriangles);
 			if (trianglesFile.charAt(0) != File.separatorChar)
 				trianglesFile = xmlDir+File.separator+trianglesFile;
 			FileChannel fcT = new FileInputStream(trianglesFile).getChannel();
 			MappedByteBuffer bbT = fcT.map(FileChannel.MapMode.READ_ONLY, 0L, fcT.size());
 			IntBuffer trianglesBuffer = bbT.asIntBuffer();
 			int numberOfTriangles = Integer.parseInt(
-				xpath.selectSingleNode(submeshTriangles, "number/text()").getNodeValue());
+				xpath.evaluate("number/text()", submeshTriangles));
 			logger.debug("Reading "+numberOfTriangles+" elements");
 			Triangle [] facelist = new Triangle[numberOfTriangles];
 			for (int i=0; i < numberOfTriangles; i++)
@@ -254,10 +269,12 @@ public class MeshReader
 			fcT.close();
 			UNVConverter.clean(bbT);
 			
-			Node groupsElement = xpath.selectSingleNode(submeshElement, "groups");
-			NodeList groupsList = xpath.selectNodeList(groupsElement, "group");
+			Node groupsElement = (Node) xpath.evaluate("groups", submeshElement,
+				XPathConstants.NODE);
+			NodeList groupsList = (NodeList) xpath.evaluate("group",
+				groupsElement, XPathConstants.NODESET);
 			int numberOfGroups = groupsList.getLength();
-			String groupsFile = xpath.selectSingleNode(groupsList.item(0), "file/@location").getNodeValue();
+			String groupsFile = xpath.evaluate("file/@location", groupsList.item(0));
 			if (groupsFile.charAt(0) != File.separatorChar)
 				groupsFile = xmlDir+File.separator+groupsFile;
 			FileChannel fcG = new FileInputStream(groupsFile).getChannel();
@@ -268,12 +285,12 @@ public class MeshReader
 				Node groupNode = groupsList.item(i);
 				
 				int numberOfElements = Integer.parseInt(
-					xpath.selectSingleNode(groupNode, "number/text()").getNodeValue());
+					xpath.evaluate("number/text()", groupNode));
 				int fileOffset = Integer.parseInt(
-					xpath.selectSingleNode(groupNode, "file/@offset").getNodeValue());
+					xpath.evaluate("file/@offset", groupNode));
 				
 				int id=Integer.parseInt(
-					xpath.selectSingleNode(groupNode, "@id").getNodeValue());
+					xpath.evaluate("@id", groupNode));
 				logger.debug("Group "+id+": reading "+numberOfElements+" elements");
 								
 				for (int j=0; j < numberOfElements; j++)
