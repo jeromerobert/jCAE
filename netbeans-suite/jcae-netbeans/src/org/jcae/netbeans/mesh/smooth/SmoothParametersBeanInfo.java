@@ -1,7 +1,7 @@
 /*
  * SmoothParametersBeanInfo.java
  *
- * Created on 20 février 2006, 19:09
+ * Created on 20 fevrier 2006, 19:09
  */
 
 package org.jcae.netbeans.mesh.smooth;

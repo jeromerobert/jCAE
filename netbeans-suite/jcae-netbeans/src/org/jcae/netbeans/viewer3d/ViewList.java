@@ -1,3 +1,23 @@
+/*
+ * Project Info:  http://jcae.sourceforge.net
+ * 
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * (C) Copyright 2006, by EADS CRC
+ */
+
 package org.jcae.netbeans.viewer3d;
 
 import java.awt.BorderLayout;
@@ -22,11 +42,9 @@ import javax.swing.ListSelectionModel;
 import org.jcae.viewer3d.View;
 import org.openide.windows.WindowManager;
 
-
 /**
  * Class to display View Position
- * @author userloc
- *
+ * @author Erwann Feat
  */
 public  class ViewList extends JDialog {
 	
@@ -57,10 +75,10 @@ public  class ViewList extends JDialog {
 	     }
 	 }
 	
-	PositionManager mgr;
-	JButton goButton;
-	JList viewList;
-	ListModel model;
+	private PositionManager mgr;
+	private JButton goButton;
+	private JList viewList;
+	private ListModel model;
 	
 	private static ImageIcon goIcon=new ImageIcon(ViewList.class.getResource("1rightarrow.png"));
 	private static ImageIcon removeIcon=new ImageIcon(ViewList.class.getResource("button_cancel.png"));
@@ -114,7 +132,10 @@ public  class ViewList extends JDialog {
 		button.setIcon(removeIcon);
 		button.addActionListener(
 			new ActionListener(){
-				public void actionPerformed(ActionEvent e)	{removePerformed();}
+				public void actionPerformed(ActionEvent e)
+				{
+					removePerformed();
+				}
 			});
 		panel.add(button);
 		
@@ -140,22 +161,25 @@ public  class ViewList extends JDialog {
 	}
 	
 	
-	private void goPerformed(){
+	protected void goPerformed()
+	{
 		int index=viewList.getSelectedIndex();
-		if(index!=-1){
+		if(index!=-1 && model.getSize()>0)
+		{
 			mgr.goToPosition(view, index);
 			setVisible(false);
 		}
 	}
 	
-	private void removePerformed(){
-		int index=viewList.getSelectedIndex();
-		if(index!=-1){
+	protected void removePerformed()
+	{
+		int index=viewList.getSelectedIndex();		
+		if(index!=-1 && model.getSize()>0)
+		{
 			mgr.removePosition(index);
 			viewList.repaint();
 			if(mgr.getPositionCount()>0)
 				viewList.setSelectedIndex(0);
 		}
-	}
-	
+	}	
 }

@@ -275,6 +275,22 @@ class gp_Trsf
 		const Standard_Real TolDist);
 };
 
+%extend gp_Trsf
+{
+	/** Easy to use with javax.vecmath.Matrix4D */
+	void getValues(double matrix[16])
+	{
+		int k=0;
+		for(int i=1; i<=3; i++)
+			for(int j=1; j<=4; j++)
+				matrix[k++]=self->Value(i,j);
+		matrix[12]=0;
+		matrix[13]=0;
+		matrix[14]=0;
+		matrix[15]=1;
+	}
+}
+
 /**
  * TColgp_Array1OfPnt
  */

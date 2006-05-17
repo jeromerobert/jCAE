@@ -20,22 +20,16 @@
 
 package org.jcae.viewer3d;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.List;
 import java.util.Map.Entry;
 import javax.media.j3d.*;
-import javax.media.j3d.Locale;
 import javax.swing.JDialog;
-import javax.swing.JPanel;
 import javax.swing.JTextPane;
 import javax.vecmath.*;
 
@@ -91,19 +85,92 @@ public class View extends Canvas3D implements PositionListener
 	private ClipBox clipBox=null;
 	private PrintWriter writer=null;
 		
+    /**
+     * From https://java3d.dev.java.net/issues/show_bug.cgi?id=89
+     * Finds the preferred <code>GraphicsConfiguration</code> object
+     * for the system.  This object can then be used to create the
+     * Canvas3D objet for this system.
+     * @param window the window in which the Canvas3D will reside 
+     *
+     * @return The best <code>GraphicsConfiguration</code> object for
+     *  the system.
+     */
+    private static GraphicsConfiguration getPreferredConfiguration(Window window)
+    {
+    	if(window==null)
+    		return SimpleUniverse.getPreferredConfiguration();
+    	GraphicsDevice device = window.getGraphicsConfiguration().getDevice();
+        GraphicsConfigTemplate3D template = new GraphicsConfigTemplate3D();
+        String stereo;
+
+        // Check if the user has set the Java 3D stereo option.
+        // Getting the system properties causes appletviewer to fail with a
+        //  security exception without a try/catch.
+
+        stereo = (String) java.security.AccessController.doPrivileged(
+           new java.security.PrivilegedAction() {
+           public Object run() {
+               return System.getProperty("j3d.stereo");
+           }
+        });
+
+        // update template based on properties.
+        if (stereo != null) {
+            if (stereo.equals("REQUIRED"))
+                template.setStereo(GraphicsConfigTemplate.REQUIRED);
+            else if (stereo.equals("PREFERRED"))
+                template.setStereo(GraphicsConfigTemplate.PREFERRED);
+        }
+        // Return the GraphicsConfiguration that best fits our needs.
+        return device.getBestConfiguration(template);
+    } 	
+	
+    /** 
+     * See https://java3d.dev.java.net/issues/show_bug.cgi?id=89
+     * @deprecated Will cause a "java.lang.IllegalArgumentException: adding a
+     * container to a container on a different GraphicsDevice" in dual screen
+     * mode. 
+     */
 	public View()
 	{
-		this(false, true);
+		this(null, false, true);
 	}
 
+    /** 
+     * See https://java3d.dev.java.net/issues/show_bug.cgi?id=89
+     * @deprecated Will cause a "java.lang.IllegalArgumentException: adding a
+     * container to a container on a different GraphicsDevice" in dual screen
+     * mode. 
+     */
 	public View(boolean offscreen)
 	{
-		this(offscreen, true);
+		this(null, offscreen, true);
 	}
 		
+    /** 
+     * See https://java3d.dev.java.net/issues/show_bug.cgi?id=89
+     * @deprecated Will cause a "java.lang.IllegalArgumentException: adding a
+     * container to a container on a different GraphicsDevice" in dual screen
+     * mode. 
+     */
 	public View(boolean offscreen, boolean isSharedUniverse)
+	{
+		this(null, offscreen, isSharedUniverse);
+	}
+
+    public View(Window window)
+	{
+		this(window, false, true);
+	}
+
+	public View(Window window, boolean offscreen)
+	{
+		this(window, offscreen, true);
+	}
+		
+	public View(Window window, boolean offscreen, boolean isSharedUniverse)
 	{		
-		super(SimpleUniverse.getPreferredConfiguration(), offscreen);
+		super(getPreferredConfiguration(window), offscreen);
 		if(offscreen)
 		{
 			getScreen3D().setPhysicalScreenWidth(0.0254/90.0 * 1600);

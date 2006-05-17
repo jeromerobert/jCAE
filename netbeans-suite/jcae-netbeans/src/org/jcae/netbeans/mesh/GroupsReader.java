@@ -20,7 +20,6 @@
 
 package org.jcae.netbeans.mesh;
 
-/* import */
 import java.io.File;
 import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
@@ -32,14 +31,13 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-//import org.jcae.mesh.xmldata;
 public class GroupsReader
 {
 	/**
-	 * Le texte contenu dans le premier fils. du premier élément accessible
-	 * depuis l'élément racine qui a le tag voulu.
-	 * @param racine l'élément dont part la recherche
-	 * @param tag le tag de l'élément dont on veut obtenir le Text contenu
+	 * Le texte contenu dans le premier fils. du premier element accessible
+	 * depuis l'element racine qui a le tag voulu.
+	 * @param racine l'element dont part la recherche
+	 * @param tag le tag de l'element dont on veut obtenir le Text contenu
 	 */
 	public static String getStringByTagName(Element racine, String tag)
 	{
@@ -47,7 +45,7 @@ public class GroupsReader
 		String result = null;
 		Node fils = element.getFirstChild();
 		if (fils != null)
-		{ // Cas d'un élément non vide !
+		{ // Cas d'un element non vide !
 			result = fils.getNodeValue();        
 			while (fils.getNextSibling() != null)
 			{

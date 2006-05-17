@@ -287,11 +287,9 @@ public class ViewableCAD extends ViewableAdaptor
 	 */
 	public void hightLightEdge(int edgeID, boolean status,boolean fireListeners)
 	{
-		if(selectionMode==EDGE_SELECTION){
 			EdgePickingInfo epi=(EdgePickingInfo) edgesInfo.get(new Integer(edgeID));
 			setEdgeSelected(epi, status);
 			if(fireListeners) fireSelectionChanged();
-		}
 	}
 	
 	private void setFaceSelected(FacePickingInfo fpi, boolean selected)
@@ -351,7 +349,8 @@ public class ViewableCAD extends ViewableAdaptor
 	
 	public CADSelection[] getSelection(){
 		return new CADSelection[]{new CADSelection(0,
-				integerCollectionToArray(selectedFaces), new int[0], new int[0])};
+				integerCollectionToArray(selectedFaces),integerCollectionToArray(selectedEdges)
+				, new int[0])};
 	}
 	
 	private Node createEdgesNode(CADDomain domain)

@@ -25,6 +25,7 @@ import org.jcae.viewer3d.View;
 import org.jcae.viewer3d.Viewable;
 import org.openide.util.actions.SystemAction;
 import org.openide.windows.TopComponent;
+import org.openide.windows.WindowManager;
 
 /**
  * @author Jerome Robert
@@ -37,7 +38,7 @@ public class View3D extends TopComponent
 	public View3D()
 	{
 		View3DManager.getDefault().counter++;		
-		this.canvas=new View();
+		this.canvas=new View(WindowManager.getDefault().getMainWindow());
 		setLayout(new BorderLayout());
 		add(canvas, BorderLayout.CENTER);
 		canvas.setOriginAxisVisible(true);

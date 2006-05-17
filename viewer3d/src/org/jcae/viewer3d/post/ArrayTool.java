@@ -17,6 +17,9 @@ public class ArrayTool
 	
 	private void computeBounds()
 	{
+		max=Float.NEGATIVE_INFINITY;
+		min=Float.POSITIVE_INFINITY;
+
 		for(int i=0; i<array.length; i++)
 		{
 			if(array[i]>max)

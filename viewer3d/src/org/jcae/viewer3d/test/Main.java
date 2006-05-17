@@ -35,6 +35,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import org.jcae.opencascade.jni.BRepBuilderAPI_MakeEdge;
+import org.jcae.opencascade.jni.BRep_Tool;
+import org.jcae.opencascade.jni.TopoDS_Edge;
 import org.jcae.viewer3d.SelectionListener;
 import org.jcae.viewer3d.View;
 import org.jcae.viewer3d.cad.ViewableCAD;
@@ -67,43 +70,16 @@ public class Main
 	public static void main(String[] args)
 	{
 		try
-		{						
-			//Test CAD visu in 1 view
-			/*JFrame cadFrame=new JFrame("jcae-viewer3d-cad demo");			
-			cadFrame.setSize(800,600);
-			cadFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-			final View cadView=new View();					
-			
-			//ViewableCAD fcad=new ViewableCAD(new OCCProvider("/home/jerome/Project/geometry39489.brep"));
-			//ViewableCAD fcad=new ViewableCAD(new OCCProvider("/home/jerome/cao_fouga_joined.igs"));
-			ViewableCAD fcad=new ViewableCAD(new OCCProvider("/home/jerome/Models/F1.brep"));
-			cadView.add(fcad);
-			cadView.fitAll();
-			cadFrame.getContentPane().add(cadView);
-			cadFrame.getContentPane().add(new JButton(new AbstractAction(){
-
-				public void actionPerformed(ActionEvent e)
-				{
-					cadView.fitAll();
-				}}), BorderLayout.NORTH);
-			
-			cadFrame.setVisible(true);
-			cadView.setOriginAxisVisible(true);
-			fcad.domainsChanged(null);
-			cadView.setOriginAxisVisible(false);
-			cadView.setOriginAxisVisible(true);
-			//cadView.showFloatAxis(true);*/
-
-			
+		{	
 			//Test FE visu in 1 view
-			new JDialog().setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-			/*JFrame feFrame=new JFrame("jcae-viewer3d-fe demo");			
+			//new JDialog().setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+			JFrame feFrame=new JFrame("jcae-viewer3d-fe demo");			
 			feFrame.setSize(800,600);
 			feFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 			View feView=new View();			
-			final AmibeProvider ap=new AmibeProvider(new File("/var/tmp/mesh"));
+			final AmibeProvider ap=new AmibeProvider(new File("/home/jerome/JCAEProject/amibe1.dir"));
 			final ViewableFE fev=new ViewableFE(ap);			
-			ViewableFE ffe=new ViewableFE(new AmibeOverlayProvider(new File("/var/tmp/mesh"), AmibeOverlayProvider.FREE_EDGE));			
+			ViewableFE ffe=new ViewableFE(new AmibeOverlayProvider(new File("/home/jerome/JCAEProject/amibe1.dir"), AmibeOverlayProvider.FREE_EDGE));			
 			
 			feView.add(ffe);
 			feView.add(fev);			
@@ -126,10 +102,10 @@ public class Main
 						e.printStackTrace();
 					}
 				}
-			});*/
+			});
 
 			//Test UNV Loader
-			JFrame feFrame=new JFrame();			
+			/*JFrame feFrame=new JFrame();			
 			feFrame.setSize(800,600);
 			feFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 			View feView=new View();
@@ -142,13 +118,13 @@ public class Main
 			
 			/*ViewableFE fev=new ViewableFE(unvProvider);
 			feView.add(fev);*/
-			ViewableFE vfe=new ViewableFE(unvProviderSol);			
+			/*ViewableFE vfe=new ViewableFE(unvProviderSol);			
 			feView.add(vfe);			
 			feFrame.getContentPane().add(feView);
 			feView.setOriginAxisVisible(false);
 			feView.setFixedAxisVisible(false);
 			feView.fitAll();
-			feFrame.setVisible(true);
+			feFrame.setVisible(true);*/
 			/*feView.setOriginAxisVisible(true);
 			feView.setFixedAxisVisible(true);*/
 			

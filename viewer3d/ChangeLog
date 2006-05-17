@@ -1,3 +1,15 @@
+2006-05-17 14:41:12  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/View.java:
+	  Fix bug 1464775: Java3D and dual screen
+
+2006-05-15 18:46:09  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/cad/occ/OCCFaceDomain.java:
+	  Fix bug 1488681: shading not on geometry
+
+2006-04-06 14:03:59  tag V0_13
+
 2006-04-06 14:03:59  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* src/javax, src/org/jcae/viewer3d/View.java:

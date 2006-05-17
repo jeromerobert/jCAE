@@ -23,6 +23,8 @@ package org.jcae.viewer3d.cad.occ;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Iterator;
+import javax.vecmath.Matrix4d;
+import javax.vecmath.Point3d;
 import org.jcae.opencascade.jni.*;
 import org.jcae.viewer3d.cad.CADDomainAdapator;
 import org.jcae.viewer3d.cad.DefaultFaceMesh;
@@ -117,17 +119,40 @@ public class OCCFaceDomain extends CADDomainAdapator
 				reverseMesh(itriangles);
 			}
 			
-			final float[] fnodes=new float[dnodes.length];
-			for(int i=0; i<dnodes.length; i++)
-			{
-				fnodes[i]=(float) dnodes[i];
-			}
+
+			final float[] fnodes=new float[dnodes.length];			
 			
+			if(loc.isIdentity())
+			{
+				for(int i=0; i<dnodes.length; i++)
+				{
+					fnodes[i]=(float) dnodes[i];
+				}				
+			}
+			else
+				transformMesh(loc, dnodes, fnodes);
+				
 			faceMeshes.add(new DefaultFaceMesh(fnodes, itriangles));
 		}
 	}
 	
-	
+	void transformMesh(TopLoc_Location loc, double[] src, float[] dst)
+	{
+		double[] matrix=new double[16];
+		loc.transformation().getValues(matrix);
+		Matrix4d m4d=new Matrix4d(matrix);
+		Point3d p3d=new Point3d();
+		for(int i=0; i<src.length; i+=3)
+		{
+			p3d.x=src[i+0];
+			p3d.y=src[i+1];
+			p3d.z=src[i+2];
+			m4d.transform(p3d);
+			dst[i+0]=(float) p3d.x;
+			dst[i+1]=(float) p3d.y;
+			dst[i+2]=(float) p3d.z;
+		}		
+	}
 	
 	/**
 	 * Compute the bounding box of the shape and

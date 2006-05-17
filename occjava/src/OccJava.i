@@ -99,6 +99,11 @@ class BRep_Builder: public TopoDS_Builder
 
 class TopLoc_Location
 {
+	%rename(isIdentity) IsIdentity;
+	%rename(transformation) Transformation;
+	public:
+	Standard_Boolean IsIdentity();
+	const gp_Trsf& Transformation();
 };
 
 class TopExp
