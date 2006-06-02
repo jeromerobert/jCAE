@@ -53,6 +53,7 @@
 %include "gp.i"
 %include "TopAbs.i"
 %include "TopoDS.i"
+%include "GeomAbs.i"
 %include "TopTools.i"
 %include "BRep_Tool.i"
 %include "GeomLProp_SLProps.i"
@@ -63,6 +64,7 @@
 %include "BRepOffsetAPI_Sewing.i"
 %include "Poly.i"
 %include "Geom.i"
+%include "BRepLib.i"
 
 class TopoDS_Builder
 {
