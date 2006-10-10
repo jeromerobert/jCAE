@@ -42,6 +42,7 @@ import org.jcae.mesh.amibe.algos3d.Fuse;
 import org.jcae.mesh.xmldata.*;
 import org.jcae.mesh.cad.*;
 import gnu.trove.TIntArrayList;
+import gnu.trove.THashSet;
 
 /**
  * Main class to mesh a surface.
@@ -230,8 +231,11 @@ public class Mesher
 			logger.debug("org.jcae.mesh.Mesher.maxFace="+maxFace);
 			logger.debug("org.jcae.mesh.Mesher.meshFace="+numFace);
 			int nrFaces = 0;
+			THashSet seen = new THashSet();
 			for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
-				nrFaces++;			
+				seen.add(expF.current());
+			nrFaces = seen.size();;			
+			seen.clear();
 			for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
 			{
 				CADFace F = (CADFace) expF.current();
@@ -241,6 +245,9 @@ public class Mesher
 				if ((minFace != 0 || maxFace != 0) && (iFace < minFace || iFace > maxFace))
 					continue;
 				
+				if (seen.contains(F))
+					continue;
+				seen.add(F);
 				logger.info("Meshing face " + iFace+"/"+nrFaces);
 				//  This variable can be modified, thus reset it
 				Metric2D.setLength(discr);

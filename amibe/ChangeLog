@@ -1,3 +1,8 @@
+Tue Oct 10 16:11:07 CEST 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/Mesher.java: Mesh faces only once even of they
+	appear with different orientations.
+
 Fri Apr  7 10:46:00 CEST 2006 Jerome Robert <jeromerobert@users.sourceforge.net> 
 
 	* build.properties, build.xml, src/org/jcae/mesh/MeshView.java,
