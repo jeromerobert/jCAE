@@ -24,8 +24,11 @@ import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.opencascade.jni.BRep_Tool;
 import org.jcae.opencascade.jni.BRepTools;
-import org.jcae.opencascade.jni.TopoDS_Shape;
+import org.jcae.opencascade.jni.TopoDS_Vertex;
+import org.jcae.opencascade.jni.TopoDS_Edge;
 import org.jcae.opencascade.jni.TopoDS_Face;
+import org.jcae.opencascade.jni.TopoDS_Shape;
+import org.jcae.opencascade.jni.TopoDS_Solid;
 import org.jcae.opencascade.jni.TopAbs_Orientation;
 import org.jcae.opencascade.jni.Bnd_Box;
 import org.jcae.opencascade.jni.BRepBndLib;
@@ -65,7 +68,17 @@ public class OCCShape implements CADShape
 	
 	public CADShape reversed()
 	{
-		OCCShape s = new OCCShape();
+		OCCShape s;
+		if (myShape instanceof TopoDS_Vertex)
+			s = new OCCVertex();
+		else if (myShape instanceof TopoDS_Edge)
+			s = new OCCEdge();
+		else if (myShape instanceof TopoDS_Face)
+			s = new OCCFace();
+		else if (myShape instanceof TopoDS_Solid)
+			s = new OCCSolid();
+		else
+			s = new OCCShape();
 		s.setShape(myShape.reversed());
 		return (CADShape) s;
 	}

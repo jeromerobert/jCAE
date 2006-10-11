@@ -1,3 +1,8 @@
+Wed Oct 11 15:10:08 CEST 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src-occ/org/jcae/mesh/cad/occ/OCCShape.java: The object returned by
+	OCCShape.reversed() has the same class as original.
+
 Tue Oct 10 16:11:07 CEST 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/Mesher.java: Mesh faces only once even of they
