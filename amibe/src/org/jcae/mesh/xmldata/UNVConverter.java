@@ -379,7 +379,7 @@ public class UNVConverter
 				FileInputStream fisG = new FileInputStream(groupFile);
 				FileChannel fcG = fisG.getChannel();
 				
-				// Get the file's size and then map it into memory
+				// Map the file into memory
 				MappedByteBuffer bbG = fcG.map(FileChannel.MapMode.READ_ONLY, offset*4, number*4);
 				IntBuffer groupsBuffer = bbG.asIntBuffer();
 				
@@ -608,8 +608,7 @@ public class UNVConverter
 			FileInputStream fis = new FileInputStream(f);
 			FileChannel fc = fis.getChannel();
 		
-			// Get the file's size and then map it into memory
-			int sz = (int)fc.size();
+			// Map the file into memory
 			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
 			DoubleBuffer nodesBuffer=bb.asDoubleBuffer();
 			
@@ -711,8 +710,7 @@ public class UNVConverter
 			FileInputStream fis = new FileInputStream(f);
 			FileChannel fc = fis.getChannel();
 		
-			// Get the file's size and then map it into memory
-			int sz = (int)fc.size();
+			// Map the file into memory
 			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
 			DoubleBuffer nodesBuffer=bb.asDoubleBuffer();
 			
@@ -773,8 +771,7 @@ public class UNVConverter
 			FileInputStream fis = new FileInputStream(f);
 			FileChannel fc = fis.getChannel();
 			
-			// Get the file's size and then map it into memory
-			int sz = (int)fc.size();
+			// Map the file into memory
 			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
 			DoubleBuffer nodesBuffer=bb.asDoubleBuffer();
 			
@@ -837,8 +834,7 @@ public class UNVConverter
 			
 			out.println("\nNormals\n"+(3*count));
 			
-			// Get the file's size and then map it into memory
-			int sz = (int)fc.size();
+			// Map the file into memory
 			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
 			DoubleBuffer normalsBuffer=bb.asDoubleBuffer();
 			
@@ -891,8 +887,7 @@ public class UNVConverter
 			FileInputStream fis = new FileInputStream(f);
 			FileChannel fc = fis.getChannel();
 			
-			// Get the file's size and then map it into memory
-			int sz = (int)fc.size();
+			// Map the file into memory
 			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
 			DoubleBuffer nodesBuffer=bb.asDoubleBuffer();
 			
