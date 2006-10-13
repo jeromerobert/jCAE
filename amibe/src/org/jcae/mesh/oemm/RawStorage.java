@@ -31,7 +31,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
+import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 /**
@@ -113,6 +115,73 @@ public class RawStorage
 		logger.info("Number of triangles: "+tcount);
 		tree.status = RawOEMM.OEMM_INITIALIZED;
 		tree.printInfos();
+	}
+	
+	public static Iterator getFacesIterator(final RawOEMM tree)
+	{
+		if (tree.status != RawOEMM.OEMM_CREATED)
+		{
+			logger.error("The RawOEMM must first be initialized by calling RawOEMM(String file, int lmax, double [] umin, double [] umax)");
+			return null;
+		}
+		return new Iterator()
+		{
+			private boolean hasNext = true;
+			private FileChannel fc;
+			private ByteBuffer bb;
+			private DoubleBuffer bbD;
+			private IntBuffer bbI;
+			private double [] xyz = new double[10];
+			private int [] group = new int[1];
+			private long count = 0;
+			private void init()
+			{
+				try
+				{
+					fc = new FileInputStream(tree.getFileName()).getChannel();
+					bb = ByteBuffer.allocate(TRIANGLE_SIZE_RAW);
+					bbD = bb.asDoubleBuffer();
+					bbI = bb.asIntBuffer();
+				}
+				catch (FileNotFoundException ex)
+				{
+					logger.error("File "+tree.getFileName()+" not found");
+				}
+			}
+			public boolean hasNext()
+			{
+				if (fc == null)
+					init();
+				return hasNext;
+			}
+			public Object next()
+			{
+				if (fc == null)
+					init();
+				try
+				{
+					bb.rewind();
+count++;
+					int nr = fc.read(bb);
+					if (nr < TRIANGLE_SIZE_RAW)
+						hasNext = false;
+					bbD.rewind();
+					bbD.get(xyz);
+					bbI.position(2*bbD.position() - 2);
+					bbI.get(group);
+					xyz[9] = group[0] + 0.5;
+					return xyz;
+				}
+				catch (IOException ex)
+				{
+					hasNext = false;
+				}
+				return null;
+			}
+			public void remove()
+			{
+			}
+		};
 	}
 	
 	/**

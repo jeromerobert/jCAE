@@ -1,5 +1,11 @@
 Fri Oct 13 17:17:30 CEST 2006 Denis Barbier <barbier@users.sourceforge.net>
 
+	* src/org/jcae/mesh/MeshValidOEMM.java: New program to validate
+	triangle soups; this is needed because large meshes cannot be
+	processed by MeshValid3D.
+	* src/org/jcae/mesh/oemm/RawStorage.java: New getFacesIterator()
+	method.
+
 	* src/org/jcae/mesh/cad/CADExplorer.java: Add COMPSOLID.
 
 Wed Oct 11 15:10:08 CEST 2006 Denis Barbier <barbier@users.sourceforge.net>
