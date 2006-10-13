@@ -124,7 +124,7 @@ public class MMesh1D extends MMesh0D
 	public HashSet getAdjacentFaces(CADEdge E)
 	{
 		HashSet ret = (HashSet) mapTEdgeToFaces.get(E);
-		assert ret != null;
+		// May be null for beams
 		return ret;
 	}
 	
