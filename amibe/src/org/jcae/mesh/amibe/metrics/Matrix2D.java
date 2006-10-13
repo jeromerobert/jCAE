@@ -101,7 +101,6 @@ public class Matrix2D
 			norm2(res.data[0][1], res.data[1][1]),
 			B.norm2(res.data[0][1], res.data[1][1])
 		);
-		Matrix2D D = new Matrix2D(ev1, 0.0, 0.0, ev2);
 		double a11 = ev1 * resInv.data[0][0] * resInv.data[0][0] + ev2 * resInv.data[1][0] * resInv.data[1][0];
 		double a21 = ev1 * resInv.data[0][0] * resInv.data[0][1] + ev2 * resInv.data[1][0] * resInv.data[1][1];
 		double a22 = ev1 * resInv.data[0][1] * resInv.data[0][1] + ev2 * resInv.data[1][1] * resInv.data[1][1];
@@ -224,7 +223,7 @@ public class Matrix2D
 	/*  Unit tests.  */
 	public static void main(String args[])
 	{
-		Matrix2D A, B, C, D;
+		Matrix2D A, B, C;
 		A = new Matrix2D(4.0, 1.0, 1.0, 1.0);
 		System.out.println("A: "+A);
 		System.out.println("inv A: "+A.inv());

@@ -35,10 +35,6 @@ public class OTriangle2D extends OTriangle
 {
 	private static Logger logger = Logger.getLogger(OTriangle2D.class);
 	private static final Random rand = new Random(139L);
-	private double [] tempD = new double[3];
-	private double [] tempD1 = new double[3];
-	private double [] tempD2 = new double[3];
-	private static final OTriangle2D otVoid = new OTriangle2D();
 	private static OTriangle2D [] work = new OTriangle2D[4];
 	static {
 		for (int i = 0; i < 4; i++)
