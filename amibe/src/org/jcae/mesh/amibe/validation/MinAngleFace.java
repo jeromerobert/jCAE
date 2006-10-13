@@ -20,6 +20,8 @@
 
 package org.jcae.mesh.amibe.validation;
 
+import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.MFace3D;
 import org.jcae.mesh.amibe.ds.MNode3D;
 import java.util.Iterator;
@@ -38,9 +40,16 @@ public class MinAngleFace extends QualityProcedure
 	
 	public float quality(Object o)
 	{
-		if (!(o instanceof MFace3D))
+		if (o instanceof MFace3D)
+			return quality((MFace3D) o);
+		else if (o instanceof Triangle)
+			return quality((Triangle) o);
+		else
 			throw new IllegalArgumentException();
-		MFace3D f = (MFace3D) o;
+	}
+	
+	private float quality(MFace3D f)
+	{
 		Iterator itn = f.getNodesIterator();
 		MNode3D n1 = (MNode3D) itn.next();
 		MNode3D n2 = (MNode3D) itn.next();
@@ -48,6 +57,21 @@ public class MinAngleFace extends QualityProcedure
 		double a1 = Math.abs(n1.angle(n2, n3));
 		double a2 = Math.abs(n2.angle(n3, n1));
 		double a3 = Math.abs(n3.angle(n1, n2));
+		if (a2 < a1)
+			a1 = a2;
+		if (a3 < a1)
+			a1 = a3;
+		return (float) a1;
+	}
+	
+	private float quality(Triangle f)
+	{
+		Vertex n1 = f.vertex[0];
+		Vertex n2 = f.vertex[1];
+		Vertex n3 = f.vertex[2];
+		double a1 = Math.abs(n1.angle3D(n2, n3));
+		double a2 = Math.abs(n2.angle3D(n3, n1));
+		double a3 = Math.abs(n3.angle3D(n1, n2));
 		if (a2 < a1)
 			a1 = a2;
 		if (a3 < a1)

@@ -1,5 +1,8 @@
 Fri Oct 13 17:17:30 CEST 2006 Denis Barbier <barbier@users.sourceforge.net>
 
+	* src/org/jcae/mesh/amibe/validation/MinAngleFace.java: Also handle
+	Triangle elements.
+
 	* src/org/jcae/mesh/MeshValidOEMM.java: New program to validate
 	triangle soups; this is needed because large meshes cannot be
 	processed by MeshValid3D.
