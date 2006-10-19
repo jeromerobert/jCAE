@@ -8,6 +8,9 @@ release/modules/ext/xalan.jar
 release/modules/ext/serializer.jar
 
 2 - Required modules in the target Netbeans Platform
+
+This list is now obsolet as Netbeans 5.5 allow to include it in the platform.properties file.
+
 org-netbeans-api-xml.nbm				(XML Tools API)
 org-netbeans-modules-projectapi.nbm		(Project API)
 org-netbeans-modules-projectuiapi.nbm	(Project UI API)

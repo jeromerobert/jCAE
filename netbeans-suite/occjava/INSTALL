@@ -1,0 +1,5 @@
+Required files:
+release/modules/lib/OccJava.dll
+release/modules/lib/libOccJava.so
+release/modules/ext/occjava.jar
+
