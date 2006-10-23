@@ -109,8 +109,8 @@ class GeomLProp_SLProps
 		{
 			const gp_Dir & d=self->Normal();
 			normal[0]=d.X();
-			normal[0]=d.Y();
-			normal[0]=d.Z();
+			normal[1]=d.Y();
+			normal[2]=d.Z();
 		}
 	}
 
