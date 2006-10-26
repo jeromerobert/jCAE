@@ -120,11 +120,10 @@ public class OCCShape implements CADShape
 
 	public void setIds()
 	{
-		int i;
+		int i = 1;
 		OCCExplorer exp = new OCCExplorer();
 		for (int t = 0; t <= OCCExplorer.VERTEX; t++)
 		{
-			i = 1;
 			for (exp.init(this, t); exp.more(); exp.next())
 			{
 				OCCShape s = (OCCShape) exp.current();
