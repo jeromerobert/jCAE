@@ -24,7 +24,7 @@ import java.util.Iterator;
 import java.util.Vector;
 import org.apache.log4j.Logger;
 
-public class Constraint extends Hypothesis implements Cloneable
+public class Constraint extends Hypothesis
 {
 	private static Logger logger = Logger.getLogger(Constraint.class);
 	protected int dimension = -1;
@@ -35,7 +35,8 @@ public class Constraint extends Hypothesis implements Cloneable
 		innerClasses = Class.forName("org.jcae.mesh.constraints.Constraint").getDeclaredClasses();
 	} catch (Exception ex) {ex.printStackTrace();}};
 
-	public void copyHypothesis(Hypothesis h, int d)
+	// Is there a better way to do that?
+	private void copyHypothesis(Hypothesis h, int d)
 	{
 		dimension   = d;
 		lengthMin   = h.lengthMin;
@@ -49,7 +50,8 @@ public class Constraint extends Hypothesis implements Cloneable
 		logger.debug("("+Integer.toHexString(h.hashCode())+") Dim: "+d+" Algo "+h.elementType+" mapped to "+elementType);
 	}
 
-	public static Constraint createConstraint(Hypothesis h, int d)
+	// Creates a Constraint derived from an Hypothesis
+	private static Constraint createConstraint(Hypothesis h, int d)
 	{
 		Constraint ret = new Constraint();
 		ret.copyHypothesis(h, d);
@@ -58,20 +60,8 @@ public class Constraint extends Hypothesis implements Cloneable
 		return ret;
 	}
 
-	public final Object clone()
-	{
-		Object ret = null;
-		try
-		{
-			ret = super.clone();
-		}
-		catch (java.lang.CloneNotSupportedException ex)
-		{
-		}
-		return ret;
-	}
-
-	public void combine(MeshHypothesis mh, int d)
+	// Combines with an Hypothesis for a given dimension
+	private void combine(MeshHypothesis mh, int d)
 	{
 		Constraint that = createConstraint(mh.getHypothesis(), d);
 		if (that == null)
@@ -142,11 +132,19 @@ public class Constraint extends Hypothesis implements Cloneable
 		deflection = targetDefl;
 	}
 
-	public void printDirty(MeshHypothesis mh)
+	private void printDirty(MeshHypothesis mh)
 	{
 		logger.warn("Hypothesis not compatible: "+mh+": "+mh.getHypothesis()+" with "+this);
 	}
 
+	/**
+	 * Combines all Hypothesis of a Vector.  In order to improve error
+	 * reporting, MeshHypothesis objects are passed as arguments instead
+	 * of Hypothesis.
+	 *
+	 * @param mh  list of MeshHypothesis objects.
+	 * @param d   dimension
+	 */
 	public static Constraint combineAll(Vector mh, int d)
 	{
 		Constraint ret = null;
@@ -161,7 +159,7 @@ public class Constraint extends Hypothesis implements Cloneable
 		return ret;
 	}
 
-	public static Hyp getAlgo(int d, String elt)
+	private static Hyp getAlgo(int d, String elt)
 	{
 		Hyp h = null;
 		if (elt == null)
@@ -176,7 +174,7 @@ public class Constraint extends Hypothesis implements Cloneable
 		return h;
 	}
 
-	public static String impliedType(int d, String elt)
+	private static String impliedType(int d, String elt)
 	{
 		Hyp h = getAlgo(d, elt);
 		if (h == null)
@@ -184,6 +182,9 @@ public class Constraint extends Hypothesis implements Cloneable
 		return h.impliedType(d);
 	}
 
+	/**
+	 * Finds the best algorithm suited to constraints defined on a submesh.
+	 */
 	public void findAlgorithm()
 	{
 		double targetLength = 0.5*(lengthMin+lengthMax);

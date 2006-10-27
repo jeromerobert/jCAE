@@ -58,6 +58,9 @@ public class Mesh
 		classTypeArray[i++] = Class.forName("org.jcae.mesh.cad.CADSolid");
 	} catch (Exception ex) {}};
 
+	/**
+	 * Creates a root mesh.
+	 */
 	public Mesh ()
 	{
 		parent = this;
@@ -65,13 +68,21 @@ public class Mesh
 		allHypothesis = new Vector();
 	}
 	
-	public Mesh (Mesh p)
+	private Mesh (Mesh p)
 	{
 		parent = p;
 		cadShapeToMeshShape = parent.cadShapeToMeshShape;
 		allHypothesis = parent.allHypothesis;
 	}
 	
+	/**
+	 * Creates a submesh of current mesh.
+	 */
+	public Mesh createSubMesh()
+	{
+		return new Mesh(this);
+	}
+
 	/*
 	public CADShape [] explode(String type)
 	{
@@ -112,11 +123,11 @@ public class Mesh
 	}
 	*/
 
-	public Mesh createSubMesh()
-	{
-		return new Mesh(this);
-	}
-
+	/**
+	 * Adds a shape to current mesh.
+	 *
+	 * @param s  shape
+	 */
 	public Mesh add(CADShape s)
 	{
 		logger.debug("add: "+s);
@@ -158,11 +169,21 @@ public class Mesh
 		return this;
 	}
 
+	/**
+	 * Gets all geometrical elements belonging to current mesh.
+	 *
+	 * @return  the list of elements
+	 */
 	public ArrayList getShapes()
 	{
 		return listShapes;
 	}
 
+	/**
+	 * Gets the submesh of a shape.
+	 *
+	 * @return  the submesh
+	 */
 	public Mesh cadToMesh(CADShape s)
 	{
 		if (!s.isOrientationForward())
@@ -172,7 +193,12 @@ public class Mesh
 		return m;
 	}
 
-	public Mesh setHypothesis(Hypothesis h)
+	/**
+	 * Adds an hypothesis to a submesh.
+	 *
+	 * @param  h  hypothesis
+	 */
+	public void setHypothesis(Hypothesis h)
 	{
 		h.lock();
 		allHypothesis.add(h);
@@ -189,10 +215,10 @@ public class Mesh
 				m.constraints.add(c);
 			}
 		}
-		return this;
 	}
 
-	public Iterator subshapeIterator(final int d)
+	// Returns an iterator on all geometrical elements of dimension d
+	private Iterator subshapeIterator(final int d)
 	{
 		return new Iterator()
 		{
@@ -237,13 +263,16 @@ public class Mesh
 		};
 	}
 
+	/**
+	 * Combines all hypothesis and computes meshes.
+	 */
 	public void compute()
 	{
 		computeHypothesis();
 		computeAlgorithms();
 	}
 
-	public void computeHypothesis()
+	private void computeHypothesis()
 	{
 		for (int t = 0; t < classTypeArray.length; t++)
 		{
@@ -256,7 +285,7 @@ public class Mesh
 		}
 	}
 
-	public void computeAlgorithms()
+	private void computeAlgorithms()
 	{
 		for (int t = 0; t < classTypeArray.length; t++)
 		{
@@ -271,6 +300,9 @@ public class Mesh
 		}
 	}
 
+	/**
+	 * Prints the list of geometrical elements.
+	 */
 	public void printShapes()
 	{
 		CADShapeBuilder factory = CADShapeBuilder.factory;
@@ -302,6 +334,9 @@ public class Mesh
 		System.out.println("End list");
 	}
 
+	/**
+	 * Prints all hypothesis applied to any submesh.
+	 */
 	public void printAllHypothesis()
 	{
 		System.out.println("List of hypothesis");
@@ -313,6 +348,9 @@ public class Mesh
 		System.out.println("End list");
 	}
 
+	/**
+	 * Prints the constraints applied to geometrical elements of the current mesh.
+	 */
 	public void printConstraints()
 	{
 		System.out.println("List of constraints");
@@ -359,6 +397,7 @@ public class Mesh
 		return ret+explicitHypothesis;
 	}
 	*/
+	// Sample test
 	public static void main(String args[])
 	{
 		String file = "brep/2cubes.brep";

@@ -31,6 +31,11 @@ public class Hypothesis
 	protected int numberMin = -1, numberMax = -1;
 	private boolean locked = false;
 
+	/**
+	 * Sets element type.
+	 *
+	 * @param e  element type
+	 */
 	public void setElement(String e)
 	{
 		checkLock();
@@ -38,11 +43,22 @@ public class Hypothesis
 		elementType = e;
 	}
 
+	/**
+	 * Sets target length.
+	 *
+	 * @param l  length
+	 */
 	public void setLength(double l)
 	{
 		setLength(l, false);
 	}
 
+	/**
+	 * Sets target length.
+	 *
+	 * @param l  length
+	 * @param b  hard constraint
+	 */
 	public void setLength(double l, boolean b)
 	{
 		checkLock();
@@ -52,11 +68,24 @@ public class Hypothesis
 		lengthBool = b;
 	}
 
+	/**
+	 * Sets length interval.
+	 *
+	 * @param l1  length min
+	 * @param l2  length max
+	 */
 	public void setLength(double l1, double l2)
 	{
 		setLength(l1, l2,false);
 	}
 
+	/**
+	 * Sets length interval.
+	 *
+	 * @param l1  length min
+	 * @param l2  length max
+	 * @param b  hard constraint
+	 */
 	public void setLength(double l1, double l2, boolean b)
 	{
 		checkLock();
@@ -66,6 +95,11 @@ public class Hypothesis
 		lengthBool = b;
 	}
 
+	/**
+	 * Sets deflection.
+	 *
+	 * @param d  deflection
+	 */
 	public void setDeflection(double d)
 	{
 		checkLock();
@@ -73,11 +107,22 @@ public class Hypothesis
 		deflection = d;
 	}
 
+	/**
+	 * Sets number of segments.
+	 *
+	 * @param n  number of segments.
+	 */
 	public void setNumber(int n)
 	{
 		setNumber(n, false);
 	}
 
+	/**
+	 * Sets number of segments.
+	 *
+	 * @param n  number of segments.
+	 * @param b  hard constraint
+	 */
 	public void setNumber(int n, boolean b)
 	{
 		checkLock();
@@ -87,11 +132,24 @@ public class Hypothesis
 		numberBool = b;
 	}
 
+	/**
+	 * Sets number of segments.
+	 *
+	 * @param n1  minimal number of segments
+	 * @param n2  maximal number of segments
+	 */
 	public void setNumber(int n1, int n2)
 	{
 		setNumber(n1, n2, false);
 	}
 
+	/**
+	 * Sets number of segments.
+	 *
+	 * @param n1  minimal number of segments
+	 * @param n2  maximal number of segments
+	 * @param b  hard constraint
+	 */
 	public void setNumber(int n1, int n2, boolean b)
 	{
 		checkLock();
@@ -101,6 +159,9 @@ public class Hypothesis
 		numberBool = b;
 	}
 
+	/**
+	 * Locks the hypothesis so that it cannot be modified.
+	 */
 	public void lock()
 	{
 		locked = true;

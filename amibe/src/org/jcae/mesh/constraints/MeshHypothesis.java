@@ -20,6 +20,7 @@
 
 package org.jcae.mesh.constraints;
 
+//  This class is useful to improve error reporting in Mesh.computeHypothesis().
 public class MeshHypothesis
 {
 	protected Mesh mesh = null;
