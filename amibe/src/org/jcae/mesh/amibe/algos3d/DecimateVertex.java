@@ -299,6 +299,8 @@ public class DecimateVertex
 					noe.computeNormal3DT();
 					//  length(nu) == length(noe)
 					double [] nu = noe.getTempVector();
+					for (int k = 0; k < 3; k++)
+						nu[k] *= 100.0;
 					d = - Matrix3D.prodSca(nu, noe.origin().getUV());
 					Quadric q1 = (Quadric) quadricMap.get(noe.origin());
 					Quadric q2 = (Quadric) quadricMap.get(noe.destination());
