@@ -494,15 +494,15 @@ public class DecimateVertex
 						assert !tree.containsValue(edge);
 					}
 					ot.swap();
+					// Now ot = (ona) and edge = (dan)
 					assert edge.destination() == ot.apex() : ot+" "+edge;
+					assert edge.apex() == ot.destination() : ot+" "+edge;
 					for (int i = 0; i < 3; i++)
 					{
 						edge.nextOTri();
 						tree.insert(new NotOrientedEdge(edge), cost(edge.origin(), edge.destination(), quadricMap));
 					}
 					edge.nextOTri();
-					assert edge.origin() == ot.apex() : ot+" "+edge;
-					assert edge.destination() == ot.destination() : ot+" "+edge;
 					edge.symOTri();
 					for (int i = 0; i < 2; i++)
 					{
