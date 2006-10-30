@@ -693,9 +693,5 @@ public class HalfEdge implements Cloneable
 		unitTestCheckContract(m, v[0], v[1], v[0]);
 		unitTestCheckContract(m, v[5], v[0], v[0]);
 		unitTestCheckContract(m, v[4], v[0], v[0]);
-		// Rebuild m
-		m = new Mesh();
-		unitTestBuildMesh(m, v);
-		new org.jcae.mesh.amibe.algos3d.DecimateVertex2(m, 0.1).compute();
 	}
 }
