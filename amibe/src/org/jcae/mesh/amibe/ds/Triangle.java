@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finit element mesher, Plugin architecture.
 
-    Copyright (C) 2004,2005
+    Copyright (C) 2004,2005,2006
                   Jerome Robert <jeromerobert@users.sourceforge.net>
 
     This library is free software; you can redistribute it and/or
@@ -126,6 +126,8 @@ public class Triangle
 	private int groupId = -1;
 	// Reference to the next element in the singly linked list.
 	private Triangle listNext = null;
+	// Reference to edge V0-V1, for algorithms based on edges
+	public HalfEdge edge = null;
 	
 	// We need to process lists of triangles, and sometimes make sure
 	// that triangles are processed only once.  This can be achieved
@@ -477,6 +479,17 @@ public class Triangle
 		};
 	}
 	
+	public void createEdges()
+	{
+		HalfEdge hedge0 = new HalfEdge(this, (byte) 0, (byte) ((adjPos & 0x0000ff00) >> 8));
+		HalfEdge hedge1 = new HalfEdge(this, (byte) 1, (byte) ((adjPos & 0x00ff0000) >> 16));
+		HalfEdge hedge2 = new HalfEdge(this, (byte) 2, (byte) ((adjPos & 0xff000000) >> 24));
+		hedge0.setNext(hedge1);
+		hedge1.setNext(hedge2);
+		hedge2.setNext(hedge0);
+		edge = hedge0;
+	}
+
 	private final String showAdj(int num)
 	{
 		String r = "";
@@ -522,6 +535,8 @@ public class Triangle
 			r += " "+Integer.toHexString((adjPos >> (8*(1+i))) & 0xff);
 		if (listNext != null)
 			r += "\nLink next: "+listNext.hashCode();
+		if (edge != null)
+			r += "\nHalfedge: "+edge.hashCode()+" "+edge.next().hashCode()+" "+edge.next().next().hashCode();
 		return r;
 	}
 

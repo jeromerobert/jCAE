@@ -2,6 +2,12 @@ Mon Oct 30 16:59:16 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java: Increase
 	penalty for boundary edges.
+	* src/org/jcae/mesh/amibe/ds/HalfEdge.java: OTriangle is not well
+	suited for some algorithms, like DecimateVertex.  This new HalfEdge
+	class gives access to edge objects and will improve performance for
+	these algorithms.
+	* src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/amibe/ds/Triangle.java: Add support for HalfEdge.
 
 Thu Oct 26 14:14:43 CEST 2006 Denis Barbier <barbier@users.sourceforge.net>
 

@@ -356,6 +356,23 @@ public class Mesh
 	 */
 	public void remove(Triangle t)
 	{
+		if (t.edge != null)
+		{
+			// Remove links to help the garbage collector
+			HalfEdge e = t.edge;
+			HalfEdge last = e;
+			for (int i = 0; i < 3; i++)
+			{
+				e = e.next();
+				HalfEdge s = e.sym();
+				if (s != null && s.sym() == e)
+					s.setSym(null);
+				e.setSym(null);
+				last.setNext(null);
+				last = e;
+			}
+			t.edge = null;
+		}
 		triangleList.remove(t);
 	}
 	
@@ -962,6 +979,52 @@ public class Mesh
 		return true;
 	}
 	
+	/**
+	 * Builds edges.  Some algorithms are more efficient with edge objects.
+	 */
+	public void buildEdges()
+	{
+		logger.debug("Building edges");
+		for(Iterator it=triangleList.iterator();it.hasNext();)
+		{
+			Triangle t = (Triangle) it.next();
+			t.createEdges();
+		}
+		OTriangle ot = new OTriangle();
+		OTriangle sym = new OTriangle();
+		Triangle t2;
+		for(Iterator it=triangleList.iterator();it.hasNext();)
+		{
+			Triangle t = (Triangle) it.next();
+			ot.bind(t);
+			HalfEdge e = t.edge;
+			for (int i = 0; i < 3; i++)
+			{
+				ot.nextOTri();
+				e = e.next();
+				assert ot.origin() == e.origin();
+				assert ot.destination() == e.destination();
+				assert ot.apex() == e.apex();
+				if (ot.getAdj() == null)
+					continue;
+				if (e.sym() != null)
+					continue;
+				OTriangle.symOTri(ot, sym);
+				t2 = sym.getTri();
+				HalfEdge f = t2.edge;
+				for (int j = sym.getLocalNumber(); j > 0; j--)
+					f = f.next();
+				assert e.sym() == null: e;
+				assert f.sym() == null: f;
+				assert sym.origin() == f.origin();
+				assert sym.destination() == f.destination();
+				assert sym.apex() == f.apex();
+				e.glue(f);
+			}
+		}
+		logger.debug("End building edges");
+	}
+
 	/**
 	 * Sets an unused boundary reference on a vertex.
 	 */
