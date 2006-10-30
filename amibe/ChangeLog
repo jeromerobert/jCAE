@@ -1,3 +1,8 @@
+Mon Oct 30 23:09:36 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Mesh.java (isValid): Check that symmetric
+	OTriangle instances are consistent with respect to boundary tag.
+
 Mon Oct 30 16:59:16 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java: Increase

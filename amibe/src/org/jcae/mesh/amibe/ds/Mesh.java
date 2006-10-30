@@ -1268,6 +1268,13 @@ public class Mesh
 						logger.debug(" "+sym);
 						return false;
 					}
+					if ((sym.hasAttributes(OTriangle.BOUNDARY) && !ot.hasAttributes(OTriangle.BOUNDARY)) || (!sym.hasAttributes(OTriangle.BOUNDARY) && ot.hasAttributes(OTriangle.BOUNDARY)))
+					{
+						logger.debug("Wrong boundary relation");
+						logger.debug(" "+ot);
+						logger.debug(" "+sym);
+						return false;
+					}
 					sym.symOTri();
 					if (sym.origin() != v1 || sym.destination() != v2)
 					{
