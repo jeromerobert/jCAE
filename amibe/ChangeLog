@@ -8,6 +8,9 @@ Mon Oct 30 16:59:16 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 	these algorithms.
 	* src/org/jcae/mesh/amibe/ds/Mesh.java
 	  src/org/jcae/mesh/amibe/ds/Triangle.java: Add support for HalfEdge.
+	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java: New
+	decimation algorithm, based on HalfEdge structure.  It is not
+	equivalent to DecimateVertex because edges are not swapped yet.
 
 Thu Oct 26 14:14:43 CEST 2006 Denis Barbier <barbier@users.sourceforge.net>
 
