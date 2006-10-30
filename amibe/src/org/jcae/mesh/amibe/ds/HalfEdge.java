@@ -412,6 +412,110 @@ public class HalfEdge implements Cloneable
 	}
 	
 	/**
+	 * Swaps an edge.
+	 *
+	 * This routine swaps an edge (od) to (na).  (on) is returned
+	 * instead of (na), because this helps turning around o, eg.
+	 * at the end of {@link OTriangle2D#split3}.
+	 *        
+	 *          d                    d
+	 *          .                    .
+	 *         /|\                  / \
+	 *        / | \                /   \   
+	 *       /  |  \              /     \
+	 *    a +   |   + n  ---&gt;  a +-------+ n
+	 *       \  |  /              \     /
+	 *        \ | /                \   /
+	 *         \|/                  \ /
+	 *          '                    '
+	 *          o                    o
+	 */
+	public final HalfEdge swap()
+	{
+		Vertex o = origin();
+		Vertex d = destination();
+		Vertex a = apex();
+		/*
+		 *            d                    d
+		 *            .                    .
+		 *           /|\                  / \
+		 *       s0 / | \ s3         s0  /   \ s3
+		 *         /  |  \              / T2  \
+		 *      a + T1|T2 + n  --->  a +-------+ n
+		 *         \  |  /              \ T1  /
+		 *       s1 \ | / s2         s1  \   / s2
+		 *           \|/                  \ /
+		 *            '                    '
+		 *            o                    o
+		 */
+		// T1 = (oda)  --> (ona)
+		// T2 = (don)  --> (dan)
+		assert !(hasAttributes(OTriangle.OUTER) || hasAttributes(OTriangle.BOUNDARY));
+		HalfEdge [] e = new HalfEdge[6];
+		e[4] = this;
+		e[0] = next;
+		e[1] = next.next;
+		e[5] = sym;
+		e[2] = sym.next;
+		e[3] = sym.next.next;
+		HalfEdge [] s = new HalfEdge[4];
+		for (int i = 0; i < 4; i++)
+			s[i] = e[i].sym;
+		//  Clear SWAPPED flag for all edges of the 2 triangles
+		for (int i = 0; i < 6; i++)
+			e[i].clearAttributes(OTriangle.SWAPPED);
+		for (int i = 0; i < 4; i++)
+			s[i].clearAttributes(OTriangle.SWAPPED);
+		//  Adjust vertices
+		Vertex n = e[5].apex();
+		e[4].setDestination(n);           // (ona)
+		e[5].setDestination(a);           // (dan)
+		//  Adjust edge informations
+		//    T1: e[1] is unchanged
+		Triangle T1 = e[1].tri;
+		e[1].next = e[2];
+		e[2].next = e[4];
+		e[4].next = e[1];
+		e[2].tri = e[4].tri = T1;
+		e[2].localNumber = (byte) next3[e[1].localNumber];
+		e[4].localNumber = (byte) prev3[e[1].localNumber];
+		//    T2: e[3] is unchanged
+		Triangle T2 = e[3].tri;
+		e[3].next = e[0];
+		e[0].next = e[5];
+		e[5].next = e[3];
+		e[0].tri = e[5].tri = T2;
+		e[0].localNumber = (byte) next3[e[3].localNumber];
+		e[5].localNumber = (byte) prev3[e[3].localNumber];
+		//  Update attributes
+		for (int i = 0; i < 4; i++)
+			e[i].pushAttributes();
+		//  Adjust edge pointers of triangles
+		if (e[1].localNumber == 1)
+			T1.edge = e[4];
+		else if (e[1].localNumber == 2)
+			T1.edge = e[2];
+		if (e[3].localNumber == 1)
+			T2.edge = e[5];
+		else if (e[3].localNumber == 2)
+			T2.edge = e[0];
+		//  Glue edges to update triangle informations
+		for (int i = 0; i < 4; i++)
+			e[i].glue(s[i]);
+		e[4].glue(e[5]);
+		//  Mark new edges
+		e[4].attributes = 0;
+		e[5].attributes = 0;
+		e[4].setAttributes(OTriangle.SWAPPED);
+		e[5].setAttributes(OTriangle.SWAPPED);
+		//  Fix links to triangles
+		o.setLink(e[1].tri);
+		d.setLink(e[3].tri);
+		// Be consistent with OTriangle.swap()
+		return e[2];
+	}
+	
+	/**
 	 * Contract an edge.
 	 * TODO: Attributes are not checked.
 	 * @param n the resulting vertex
@@ -693,5 +797,17 @@ public class HalfEdge implements Cloneable
 		unitTestCheckContract(m, v[0], v[1], v[0]);
 		unitTestCheckContract(m, v[5], v[0], v[0]);
 		unitTestCheckContract(m, v[4], v[0], v[0]);
+		assert m.isValid();
+
+		/*
+		m = new Mesh();
+		unitTestBuildMesh(m, v);
+		m.buildEdges();
+		HalfEdge e = HalfEdge.find(v[0], v[4]);
+		HalfEdge s = e.swap();
+		assert m.isValid();
+		// m.printMesh();
+		new org.jcae.mesh.amibe.algos3d.DecimateHalfEdge(m, 0.1).compute();
+		*/
 	}
 }

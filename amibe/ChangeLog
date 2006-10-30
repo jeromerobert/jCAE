@@ -2,6 +2,9 @@ Mon Oct 30 23:09:36 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Mesh.java (isValid): Check that symmetric
 	OTriangle instances are consistent with respect to boundary tag.
+	* src/org/jcae/mesh/amibe/ds/HalfEdge.java: New swap() method.
+	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java: Add edge
+	swapping, DecimateHalfEdge can now be used instead of DecimateVertex.
 
 Mon Oct 30 16:59:16 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 

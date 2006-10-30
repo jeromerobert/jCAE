@@ -331,24 +331,8 @@ public class DecimateHalfEdge
 				}
 			}
 		}
-		unmarkEdges();
 		computeTree(tree, quadricMap);
-		unmarkEdges();
 		contractAllVertices(tree, nrTriangles, quadricMap);
-	}
-	
-	private void unmarkEdges()
-	{
-		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
-		{
-			Triangle f = (Triangle) itf.next();
-			HalfEdge e = f.edge;
-			for (int i = 0; i < 3; i++)
-			{
-				e = e.next();
-				e.clearAttributes(OTriangle.MARKED);
-			}
-		}
 	}
 	
 	private void computeTree(PAVLSortedTree tree, HashMap quadricMap)
@@ -363,14 +347,8 @@ public class DecimateHalfEdge
 			for (int i = 0; i < 3; i++)
 			{
 				e = e.next();
-				if (e.hasAttributes(OTriangle.MARKED))
+				if (tree.containsValue(e.notOriented()))
 					continue;
-				e.setAttributes(OTriangle.MARKED);
-				if (!e.hasAttributes(OTriangle.BOUNDARY))
-				{
-					HalfEdge sym = e.sym();
-					sym.setAttributes(OTriangle.MARKED);
-				}
 				Vertex v1 = e.origin();
 				Vertex v2 = e.destination();
 				tree.insert(e.notOriented(), cost(v1, v2, quadricMap));
@@ -383,7 +361,7 @@ public class DecimateHalfEdge
 		OTriangle ot = new OTriangle();
 		int contracted = 0;
 		double [] temp = new double[3];
-		boolean noSwap = true;
+		boolean noSwap = false;
 		int cnt = 0;
 		while (tree.size() > 0 && nrTriangles > nrFinal)
 		{
@@ -474,14 +452,15 @@ public class DecimateHalfEdge
 			
 			edge = edge.next();
 			assert edge.apex() == v3;
-			edge.copyOTriangle(ot);
+			if (edge.hasAttributes(OTriangle.OUTER) || edge.hasAttributes(OTriangle.BOUNDARY))
+				continue;
 			// Check if edges can be swapped
 			while(true)
 			{
+				edge.copyOTriangle(ot);
 				if (ot.checkSwap3D(0.95) >= 0.0)
 				{
 					// Swap edge
-					edge = HalfEdge.toHalfEdge(ot);
 					for (int i = 0; i < 3; i++)
 					{
 						edge = edge.next();
@@ -495,21 +474,20 @@ public class DecimateHalfEdge
 						tree.remove(sym.notOriented());
 						assert !tree.containsValue(sym.notOriented());
 					}
-					ot.swap();
-					assert edge.destination() == ot.apex() : ot+" "+edge;
+					Vertex a = edge.apex();
+					edge = edge.swap();
+					// Now edge = (ona)
+					assert a == edge.apex();
 					for (int i = 0; i < 3; i++)
 					{
 						edge = edge.next();
 						tree.insert(edge.notOriented(), cost(edge.origin(), edge.destination(), quadricMap));
 					}
-					edge = edge.next();
-					assert edge.origin() == ot.apex() : ot+" "+edge;
-					assert edge.destination() == ot.destination() : ot+" "+edge;
-					edge = edge.sym();
+					sym = edge.next().sym();
 					for (int i = 0; i < 2; i++)
 					{
-						edge = edge.next();
-						tree.insert(edge.notOriented(), cost(edge.origin(), edge.destination(), quadricMap));
+						sym = sym.next();
+						tree.insert(sym.notOriented(), cost(sym.origin(), sym.destination(), quadricMap));
 					}
 				}
 				else
