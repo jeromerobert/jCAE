@@ -112,7 +112,7 @@ public class Mesh
 	private static Logger logger=Logger.getLogger(Mesh.class);
 	
 	//  Triangle list
-	private HashSet triangleList = new HashSet();
+	private Collection triangleList = null;
 	
 	//  Topological face on which mesh is applied
 	private CADFace face;
@@ -153,6 +153,7 @@ public class Mesh
 	{
 		Vertex.mesh = this;
 		Vertex.outer = new Vertex(0.0, 0.0);
+		triangleList = new ArrayList();
 	}
 	
 	/**
@@ -170,6 +171,7 @@ public class Mesh
 	{
 		Vertex.mesh = this;
 		Vertex.outer = null;
+		triangleList = new ArrayList();
 		face = f;
 		surface = face.getGeomSurface();
 		double [] bb = face.boundingBox();
@@ -386,7 +388,17 @@ public class Mesh
 	{
 		return triangleList;
 	}
-	
+
+	/**
+	 * Sets triangle list.
+	 *
+	 * @param l triangle list
+	 */
+	public void setTrianglesList(Collection l)
+	{
+		triangleList = l;
+	}
+
 	/**
 	 * Enforces an edge between tow points.
 	 * This routine is used to build constrained Delaunay meshes.

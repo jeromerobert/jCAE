@@ -167,8 +167,11 @@ public class DecimateHalfEdge
 	 */
 	public void compute()
 	{
-		mesh.buildEdges();
 		logger.info("Running DecimateHalfEdge");
+		mesh.buildEdges();
+		// Store triangles in an HashSet to speed up removal.
+		HashSet newList = new HashSet(mesh.getTriangles());
+		mesh.setTrianglesList(newList);
 		int roughNrNodes = mesh.getTriangles().size()/2;
 		HashSet nodeset = new HashSet(roughNrNodes);
 		HashMap quadricMap = new HashMap(roughNrNodes);
