@@ -641,17 +641,16 @@ public class DecimateVertex
 		return ret;
 	}
 	
+	// TODO: this routine is obsolete since triangles are now
+	// stored in an HahsSet.
 	private void trashBin(HashSet trash)
 	{
 		// Remove deleted triangles from the list
-		ArrayList newlist = new ArrayList();
-		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
+		for (Iterator itf = trash.iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
-			if (!trash.contains(f))
-				newlist.add(f);
+			mesh.remove(f);
 		}
-		mesh.setTrianglesList(newlist);
 		trash.clear();
 		assert mesh.isValid();
 	}

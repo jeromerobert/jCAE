@@ -1,6 +1,7 @@
 Tue Oct 31 11:30:01 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java
 	  src/org/jcae/mesh/oemm/IndexedStorage.java
 	  src/org/jcae/mesh/xmldata/MeshWriter.java: Define Mesh.triangleList
 	as an HashSet instead of ArrayList to speed up triangle removal.
