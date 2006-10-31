@@ -1,8 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finit element mesher, Plugin architecture.
  
-    Copyright (C) 2005
-                  Jerome Robert <jeromerobert@users.sourceforge.net>
+    Copyright (C) 2005,2006 by EADS CRC
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -28,7 +27,7 @@ import org.apache.log4j.Logger;
  */
 public class Matrix3D
 {
-	public double data[][] = new double[3][3];
+	protected double [] data = new double[9];
 	
 	/**
 	 * Create a <code>Matrix3D</code> instance and set it to the identity
@@ -36,8 +35,7 @@ public class Matrix3D
 	 */
 	public Matrix3D()
 	{
-		for (int i = 0; i < 3; i++)
-			data[i][i] = 1.0;
+		data[0] = data[4] = data[8] = 1.0;
 	}
 	
 	/**
@@ -51,10 +49,19 @@ public class Matrix3D
 	{
 		for (int i = 0; i < 3; i++)
 		{
-			data[i][0] = e1[i];
-			data[i][1] = e2[i];
-			data[i][2] = e3[i];
+			data[i]   = e1[i];
+			data[i+3] = e2[i];
+			data[i+6] = e3[i];
 		}
+	}
+	
+	/**
+	 * Reset all coefficients to zero.
+	 */
+	public void reset()
+	{
+		for (int i = 0; i < 9; i++)
+			data[i] = 0.0;
 	}
 	
 	/**
@@ -68,7 +75,7 @@ public class Matrix3D
 		Matrix3D ret = new Matrix3D();
 		for (int i = 0; i < 3; i++)
 			for (int j = 0; j < 3; j++)
-				ret.data[i][j] = data[j][i];
+				ret.data[3*i+j] = data[3*j+i];
 		return ret;
 	}
 	
@@ -85,9 +92,9 @@ public class Matrix3D
 		for (int i = 0; i < 3; i++)
 			for (int j = 0; j < 3; j++)
 			{
-				ret.data[i][j] = 0.0;
+				ret.data[i+3*j] = 0.0;
 				for (int k = 0; k < 3; k++)
-					ret.data[i][j] += data[i][k] * A.data[k][j];
+					ret.data[i+3*j] += data[i+3*k] * A.data[k+3*j];
 			}
 		return ret;
 	}
@@ -105,9 +112,9 @@ public class Matrix3D
 		for (int i = 0; i < 3; i++)
 			for (int j = 0; j < 3; j++)
 			{
-				ret.data[i][j] = 0.0;
+				ret.data[i+3*j] = 0.0;
 				for (int k = 0; k < 3; k++)
-					ret.data[i][j] += A.data[i][k] * data[k][j];
+					ret.data[i+3*j] += A.data[i+3*k] * data[k+3*j];
 			}
 		return ret;
 	}
@@ -124,7 +131,7 @@ public class Matrix3D
 			throw new IllegalArgumentException(in.length+" is different from 3");
 		double [] out = new double[3];
 		for (int i = 0; i < 3; i++)
-			out[i] = data[i][0] * in[0] + data[i][1] * in[1] + data[i][2] * in[2];
+			out[i] = data[i] * in[0] + data[i+3] * in[1] + data[i+6] * in[2];
 		return out;
 	}
 	
@@ -135,9 +142,40 @@ public class Matrix3D
 	 */
 	protected void scale(double f)
 	{
-		for (int i = 0; i < 3; i++)
-			for (int j = 0; j < 3; j++)
-				data[i][j] *= f;
+		for (int i = 0; i < 9; i++)
+			data[i] *= f;
+	}
+	
+	/**
+	 * Set diagonal coefficients.
+	 *
+	 * @param d1  first diagonal coefficient
+	 * @param d2  second diagonal coefficient
+	 * @param d3  third diagonal coefficient
+	 */
+	protected void setDiagonal(double d1, double d2, double d3)
+	{
+		data[0] = d1;
+		data[4] = d2;
+		data[8] = d3;
+	}
+	
+	public void saxpby0(double l1, Matrix3D a, double l2, Matrix3D b)
+	{
+		for (int i = 0; i < 9; i++)
+			data[i] = l1 * a.data[i] + l2 * b.data[i];
+	}
+	
+	protected final void swap(int i, int j)
+	{
+		double temp = data[i+3*j];
+		data[i+3*j] = data[j+3*i];
+		data[j+3*i] = temp;
+	}
+	
+	protected final void copyColumn(int i, double [] dest)
+	{
+		System.arraycopy(data, 3*i, dest, 0, 3);
 	}
 	
 	//  Basic 3D linear algebra.
@@ -202,7 +240,7 @@ public class Matrix3D
 		{
 			ret += "data|"+i+"][] ";
 			for (int j = 0; j < 3; j++)
-				ret += " "+data[i][j];
+				ret += " "+data[i+3*j];
 			if (i < 2)
 				ret += "\n";
 		}

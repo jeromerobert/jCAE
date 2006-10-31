@@ -7,6 +7,14 @@ Tue Oct 31 11:30:01 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 	as an HashSet instead of ArrayList to speed up triangle removal.
 	* src/org/jcae/mesh/amibe/ds/Vertex.java (clone): Optimization:
 	Construct param[] only if needed.
+	* src/org/jcae/mesh/amibe/metrics/Quadric3DError.java
+	  src/org/jcae/mesh/amibe/metrics/Matrix3D.java
+	  src/org/jcae/mesh/amibe/metrics/Metric3D.java
+	  src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java
+	  src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java: Store
+	  Matrix3D.data in a double[9] array instead of double[3][3] for
+	  efficiency reasons.  New Quadric3DError class, to refactor code
+	  in Decimate* algorithms.
 
 Mon Oct 30 23:09:36 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 

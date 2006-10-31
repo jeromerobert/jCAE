@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finit element mesher, Plugin architecture.
 
-    Copyright (C) 2003 Jerome Robert <jeromerobert@users.sourceforge.net>
+    Copyright (C) 2003,2006 by EADS CRC
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -25,8 +25,9 @@ import org.jcae.mesh.amibe.ds.OTriangle;
 import org.jcae.mesh.amibe.ds.NotOrientedEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.metrics.Metric3D;
+import org.jcae.mesh.amibe.metrics.Quadric3DError;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
+import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
@@ -108,67 +109,7 @@ public class DecimateVertex
 	// 0.0 is not a valid value because it is a normalization factor.
 	private double tolerance = 1.0;
 	private int nrFinal = 0;
-	private int placement;
-	/**
-	 * Optimal placement strategy, select the best vertex.
-	 */
-	public static final int POS_VERTEX = 0;
-	/**
-	 * Optimal placement strategy, contract an edge into its middle point.
-	 */
-	public static final int POS_MIDDLE = 1;
-	/**
-	 * Optimal placement strategy, the contracted point is on the edge.
-	 */
-	public static final int POS_EDGE = 2;
-	/**
-	 * Optimal placement strategy, the contracted point is the point which
-	 * minimizes error metric.
-	 */
-	public static final int POS_OPTIMAL = 3;
-	
-	private class Quadric
-	{
-		public Metric3D A = new Metric3D();
-		public double [] b = new double[3];
-		public double c;
-		public double area;
-		public Quadric()
-		{
-			// By default, A is initialized to the identity matrix
-			A.reset();
-		}
-		// Define a new quadrics by addition of 2 quadrics
-		public Quadric(Quadric q1, Quadric q2)
-		{
-			assert q1.area > 0.0 : q1;
-			assert q2.area > 0.0 : q2;
-			double l1 = q1.area / (q1.area + q2.area);
-			double l2 = q2.area / (q1.area + q2.area);
-			for (int i = 0; i < 3; i++)
-				for (int j = 0; j < 3; j++)
-					A.data[i][j] = l1 * q1.A.data[i][j] + l2 * q2.A.data[i][j];
-			for (int i = 0; i < 3; i++)
-				b[i] = l1 * q1.b[i] + l2 * q2.b[i];
-			c = l1 * q1.c + l2 * q2.c;
-			area = q1.area + q2.area;
-		}
-		public double value(double [] vect)
-		{
-			double ret = c;
-			ret += 2.0 * Matrix3D.prodSca(b, vect);
-			for (int i = 0; i < b.length; i++)
-				for (int j = 0; j < b.length; j++)
-					ret += A.data[i][j] * vect[i] * vect[j];
-			return ret;
-		}
-		public String toString()
-		{
-			return "A: "+A+"\n"+
-			       " b: "+b[0]+" "+b[1]+" "+b[2]+"\n"+
-			       " c: "+c;
-		}
-	}
+	private int placement = Quadric3DError.POS_EDGE;
 	
 	/**
 	 * Creates a <code>DecimateVertex</code> instance.
@@ -180,7 +121,6 @@ public class DecimateVertex
 	{
 		mesh = m;
 		tolerance = tol * tol;
-		placement = POS_EDGE;
 	}
 	
 	/**
@@ -207,7 +147,6 @@ public class DecimateVertex
 	{
 		mesh = m;
 		nrFinal = n;
-		placement = POS_EDGE;
 	}
 	
 	/**
@@ -229,7 +168,7 @@ public class DecimateVertex
 	 */
 	public void compute()
 	{
-		logger.debug("Running DecimateVertex");
+		logger.info("Running DecimateVertex");
 		int roughNrNodes = mesh.getTriangles().size()/2;
 		HashSet nodeset = new HashSet(roughNrNodes);
 		HashMap quadricMap = new HashMap(roughNrNodes);
@@ -245,7 +184,7 @@ public class DecimateVertex
 			{
 				Vertex n = f.vertex[i];
 				nodeset.add(n);
-				quadricMap.put(n, new Quadric());
+				quadricMap.put(n, new Quadric3DError());
 			}
 		}
 		// Compute quadrics
@@ -276,15 +215,8 @@ public class DecimateVertex
 			double d = - Matrix3D.prodSca(normal, f.vertex[0].getUV());
 			for (int i = 0; i < 3; i++)
 			{
-				Quadric q = (Quadric) quadricMap.get(f.vertex[i]);
-				for (int k = 0; k < 3; k++)
-				{
-					q.b[k] += d * normal[k];
-					for (int l = 0; l < 3; l++)
-						q.A.data[k][l] += normal[k]*normal[l];
-				}
-				q.c += d*d;
-				q.area += area;
+				Quadric3DError q = (Quadric3DError) quadricMap.get(f.vertex[i]);
+				q.addError(normal, d, area);
 			}
 			// Penalty for boundary triangles
 			for (int i = 0; i < 3; i++)
@@ -302,21 +234,12 @@ public class DecimateVertex
 					for (int k = 0; k < 3; k++)
 						nu[k] *= 100.0;
 					d = - Matrix3D.prodSca(nu, noe.origin().getUV());
-					Quadric q1 = (Quadric) quadricMap.get(noe.origin());
-					Quadric q2 = (Quadric) quadricMap.get(noe.destination());
-					for (int k = 0; k < 3; k++)
-					{
-						q1.b[k] += d * nu[k];
-						q2.b[k] += d * nu[k];
-						for (int l = 0; l < 3; l++)
-						{
-							double delta = nu[k]*nu[l];
-							q1.A.data[k][l] += delta;
-							q2.A.data[k][l] += delta;
-						}
-					}
-					q1.c += d*d;
-					q2.c += d*d;
+					Quadric3DError q1 = (Quadric3DError) quadricMap.get(noe.origin());
+					Quadric3DError q2 = (Quadric3DError) quadricMap.get(noe.destination());
+					//area = Matrix3D.norm(nu) / tolerance;
+					area = 0.0;
+					q1.addError(nu, d, area);
+					q2.addError(nu, d, area);
 				}
 			}
 		}
@@ -387,7 +310,7 @@ public class DecimateVertex
 			if (nrFinal == 0)
 				cost = tree.getKey(edge);
 			Vertex v1 = null, v2 = null, v3 = null;
-			Quadric q1 = null, q2 = null, q3 = null;
+			Quadric3DError q1 = null, q2 = null, q3 = null;
 			do {
 				if (cost > tolerance)
 					break;
@@ -397,12 +320,12 @@ public class DecimateVertex
 				assert v1 != v2 : edge;
 				/* FIXME: add an option so that boundary nodes may be frozen. */
 				{
-					q1 = (Quadric) quadricMap.get(v1);
-					q2 = (Quadric) quadricMap.get(v2);
+					q1 = (Quadric3DError) quadricMap.get(v1);
+					q2 = (Quadric3DError) quadricMap.get(v2);
 					assert q1 != null : v1;
 					assert q2 != null : v2;
-					q3 = new Quadric(q1, q2);
-					v3 = optimalPlacement(v1, v2, q1, q2, q3, temp);
+					q3 = new Quadric3DError(q1, q2);
+					v3 = q3.optimalPlacement(v1, v2, q1, q2, placement, temp);
 					if (edge.canContract(v3))
 						break;
 					if (logger.isDebugEnabled())
@@ -537,107 +460,14 @@ public class DecimateVertex
 	
 	private static double cost(Vertex v1, Vertex v2, HashMap quadricMap)
 	{
-		Quadric q1 = (Quadric) quadricMap.get(v1);
+		Quadric3DError q1 = (Quadric3DError) quadricMap.get(v1);
 		assert q1 != null : v1;
-		Quadric q2 = (Quadric) quadricMap.get(v2);
+		Quadric3DError q2 = (Quadric3DError) quadricMap.get(v2);
 		assert q2 != null : v2;
 		double ret = Math.min(
 		  q1.value(v1.getUV()) + q2.value(v1.getUV()),
 		  q1.value(v2.getUV()) + q2.value(v2.getUV()));
 		assert ret >= -1.e-2 : q1+"\n"+q2+"\n"+ret;
-		return ret;
-	}
-	
-	private Vertex optimalPlacement(Vertex v1, Vertex v2, Quadric q1, Quadric q2, Quadric q3, double [] temp)
-	{
-		Vertex ret;
-		assert v1 != Vertex.outer;
-		assert v2 != Vertex.outer;
-		/* FIXME: add an option so that boundary nodes may be frozen.
-		if (!v1.isMutable())
-		{
-			assert v2.isMutable();
-			ret = (Vertex) v1.clone();
-			return ret;
-		}
-		else if (!v2.isMutable())
-		{
-			assert v1.isMutable();
-			ret = (Vertex) v2.clone();
-			return ret;
-		}
-		*/
-		if (placement == POS_VERTEX)
-		{
-			if (q1.value(v2.getUV()) + q2.value(v2.getUV()) < q1.value(v1.getUV()) + q2.value(v1.getUV()))
-				ret = (Vertex) v2.clone();
-			else
-				ret = (Vertex) v1.clone();
-		}
-		else if (placement == POS_MIDDLE)
-		{
-			// Keep a reference if there is one
-			if (v1.getRef() != 0)
-				ret = (Vertex) v1.clone();
-			else
-				ret = (Vertex) v2.clone();
-			double [] p1 = v1.getUV();
-			double [] p2 = v2.getUV();
-			ret.moveTo(0.5*(p1[0]+p2[0]), 0.5*(p1[1]+p2[1]), 0.5*(p1[2]+p2[2]));
-		}
-		else
-		{
-			// POS_EDGE and POS_OPTIMAL
-			// Keep a reference if there is one
-			if (v1.getRef() != 0)
-				ret = (Vertex) v1.clone();
-			else
-				ret = (Vertex) v2.clone();
-			if (placement == POS_OPTIMAL)
-			{
-				Metric3D Qinv = q3.A.inv();
-				if (Qinv != null)
-				{
-					double [] dx = Qinv.apply(q3.b);
-					ret.moveTo(-dx[0], -dx[1], -dx[2]);
-					return ret;
-				}
-			}
-			// Find M = v1 + s(v2-v1) which minimizes
-			//   q3(M) = s^2 (v2-v1)A(v2-v1) + s(v1A(v2-v1)+(v2-v1)Av1+2b(v2-v1))+cte
-			//   q3'(M) = 2 s (v2-v1)A(v2-v1) + 2(v1A(v2-v1)+b(v2-v1))
-			double [] p1 = v1.getUV();
-			double [] p2 = v2.getUV();
-			for (int i = 0; i < 3; i++)
-				temp[i] = p2[i] - p1[i];
-			double den = 0.0;
-			double num = Matrix3D.prodSca(q3.b, temp);
-			for (int i = 0; i < 3; i++)
-			{
-				for (int j = 0; j < 3; j++)
-				{
-					den += q3.A.data[i][j] * temp[i] * temp[j];
-					num += q3.A.data[i][j] * temp[i] * p1[j];
-				}
-			}
-			double s = 0.0;
-			if (den > 1.0e-20 * Math.abs(num))
-			{
-				s = - num / den;
-				if (s < 0.0)
-					s = 0.0;
-				else if (s > 1.0)
-					s = 1.0;
-				ret.moveTo(p1[0]+s*temp[0], p1[1]+s*temp[1], p1[2]+s*temp[2]);
-			}
-			else
-			{
-				if (q1.value(v2.getUV()) + q2.value(v2.getUV()) < q1.value(v1.getUV()) + q2.value(v1.getUV()))
-					ret = (Vertex) v2.clone();
-				else
-					ret = (Vertex) v1.clone();
-			}
-		}
 		return ret;
 	}
 	

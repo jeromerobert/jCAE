@@ -1,8 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finit element mesher, Plugin architecture.
  
-    Copyright (C) 2003,2004,2005
-                  Jerome Robert <jeromerobert@users.sourceforge.net>
+    Copyright (C) 2003,2004,2005,2006 by EADS CRC
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -84,6 +83,9 @@ public class Metric3D extends Matrix3D
 	private static double defl = 0.0;
 	private static boolean relDefl = true;
 	private static boolean isotropic = true;
+	private static double [] c0 = new double[3];
+	private static double [] c1 = new double[3];
+	private static double [] c2 = new double[3];
 	private static double [][] temp32 = new double[3][2];
 	private static double [][] temp22 = new double[2][2];
 	
@@ -221,20 +223,6 @@ public class Metric3D extends Matrix3D
 		return defl;
 	}
 	
-	public void reset()
-	{
-		for (int i = 0; i < 3; i++)
-			for (int j = 0; j < 3; j++)
-				data[i][j] = 0.0;
-	}
-	
-	private final void swap(int i, int j)
-	{
-		double temp = data[i][j];
-		data[i][j] = data[j][i];
-		data[j][i] = temp;
-	}
-	
 	/**
 	 * Compute the inverse metrics.
 	 *
@@ -244,10 +232,13 @@ public class Metric3D extends Matrix3D
 	public final Metric3D inv()
 	{
 		// adjoint matrix
-		double [] e0 = prodVect3D(data[1], data[2]);
-		double [] e1 = prodVect3D(data[2], data[0]);
-		double [] e2 = prodVect3D(data[0], data[1]);
-		double det = prodSca(data[0], e0);
+		copyColumn(0, c0);
+		copyColumn(1, c1);
+		copyColumn(2, c2);
+		double [] e0 = prodVect3D(c1, c2);
+		double [] e1 = prodVect3D(c2, c0);
+		double [] e2 = prodVect3D(c0, c1);
+		double det = prodSca(c0, e0);
 		if (det < 1.e-20)
 			return null;
 		Metric3D adj = new Metric3D(e0, e1, e2);
@@ -270,12 +261,9 @@ public class Metric3D extends Matrix3D
 	{
 		if (l <= 0)
 			return false;
-		for (int i = 0; i < 3; i++)
-		{
-			for (int j = 0; j < 3; j++)
-				data[i][j] = 0.0;
-			data[i][i] = 1.0/l/l;
-		}
+		reset();
+		double diag = 1.0/l/l;
+		setDiagonal(diag, diag, diag);
 		return true;
 	}
 	
@@ -333,20 +321,16 @@ public class Metric3D extends Matrix3D
 		//  targeted, and there is a sqrt(2) factor.  Division bt 2
 		//  provides a maximal deflection, 
 		double alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
-		data[0][0] = cmax*cmax / alpha2;
+		double diag = cmax*cmax / alpha2;
 		if (isotropic)
-		{
-			data[1][1] = data[0][0];
-			data[2][2] = data[0][0];
-		}
+			setDiagonal(diag, diag, diag);
 		else
 		{
 			epsilon *= cmax / cmin;
 			if (epsilon > 1.0)
 				epsilon = 1.0;
 			alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
-			data[1][1] = cmin*cmin / alpha2;
-			data[2][2] = 1.0/discr/discr;
+			setDiagonal(diag, cmin*cmin / alpha2, 1.0/discr/discr);
 		}
 		Matrix3D res = (this.multL(A.transp())).multR(A);
 		data = res.data;
@@ -395,9 +379,9 @@ public class Metric3D extends Matrix3D
 		//  targeted, and there is a sqrt(2) factor.  Division bt 2
 		//  provides a maximal deflection, 
 		double alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
-		data[0][0] = cmax*cmax / alpha2;
+		double diag = cmax*cmax / alpha2;
 		if (isotropic)
-			data[1][1] = data[0][0];
+			setDiagonal(diag, diag, diag);
 		else
 		{
 			if (cmin > 0.0)
@@ -407,9 +391,8 @@ public class Metric3D extends Matrix3D
 					epsilon = 1.0;
 				alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
 			}
-			data[1][1] = cmin*cmin / alpha2;
+			setDiagonal(diag, cmin*cmin / alpha2, diag);
 		}
-		data[2][2] = data[0][0];
 		Matrix3D res = (this.multL(A.transp())).multR(A);
 		data = res.data;
 		return true;
@@ -445,8 +428,8 @@ public class Metric3D extends Matrix3D
 		// temp32 = M3 * B
 		for (int i = 0; i < 3; i++)
 		{
-			temp32[i][0] = data[i][0] * d1U[0] + data[i][1] * d1U[1] + data[i][2] * d1U[2];
-			temp32[i][1] = data[i][0] * d1V[0] + data[i][1] * d1V[1] + data[i][2] * d1V[2];
+			temp32[i][0] = data[i] * d1U[0] + data[i+3] * d1U[1] + data[i+6] * d1U[2];
+			temp32[i][1] = data[i] * d1V[0] + data[i+3] * d1V[1] + data[i+6] * d1V[2];
 		}
 		//  temp22 = tB * temp32
 		temp22[0][0] = d1U[0] * temp32[0][0] + d1U[1] * temp32[1][0] + d1U[2] * temp32[2][0];
