@@ -1,6 +1,8 @@
 Tue Oct 31 23:39:49 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/metrics/Metric3D.java: New det() method.
+	* src/org/jcae/mesh/amibe/metrics/Quadric3DError.java: Improve
+	handling of degenerated cases.
 
 Tue Oct 31 11:30:01 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 

@@ -143,79 +143,96 @@ public class Quadric3DError
 		}
 		*/
 		if (placement == POS_VERTEX)
-		{
-			if (q1.value(v2.getUV()) + q2.value(v2.getUV()) < q1.value(v1.getUV()) + q2.value(v1.getUV()))
-				ret = (Vertex) v2.clone();
-			else
-				ret = (Vertex) v1.clone();
-		}
+			return bestCandidateV1V2(v1, v2, q1, q2);
 		else if (placement == POS_MIDDLE)
 		{
 			// Keep a reference if there is one
-			if (v1.getRef() != 0)
-				ret = (Vertex) v1.clone();
-			else
-				ret = (Vertex) v2.clone();
 			double [] p1 = v1.getUV();
 			double [] p2 = v2.getUV();
+			ret = bestCandidateV1V2Ref(v1, v2, q1, q2);
 			ret.moveTo(0.5*(p1[0]+p2[0]), 0.5*(p1[1]+p2[1]), 0.5*(p1[2]+p2[2]));
 		}
 		else
 		{
 			// POS_EDGE and POS_OPTIMAL
 			// Keep a reference if there is one
-			if (v1.getRef() != 0)
-				ret = (Vertex) v1.clone();
-			else
-				ret = (Vertex) v2.clone();
 			if (placement == POS_OPTIMAL)
 			{
 				Metric3D Qinv = A.inv();
 				if (Qinv != null)
 				{
 					double [] dx = Qinv.apply(b);
+					ret = bestCandidateV1V2Ref(v1, v2, q1, q2);
 					ret.moveTo(-dx[0], -dx[1], -dx[2]);
 					return ret;
 				}
+				else
+					return bestCandidateV1V2(v1, v2, q1, q2);
 			}
-			// Find M = v1 + s(v2-v1) which minimizes
-			//   q(M) = s^2 (v2-v1)A(v2-v1) + s(v1A(v2-v1)+(v2-v1)Av1+2b(v2-v1))+cte
-			//   q'(M) = 2 s (v2-v1)A(v2-v1) + 2(v1A(v2-v1)+b(v2-v1))
-			double [] p1 = v1.getUV();
-			double [] p2 = v2.getUV();
-			for (int i = 0; i < 3; i++)
-				temp[i] = p2[i] - p1[i];
-			double den = 0.0;
-			double num = Matrix3D.prodSca(b, temp);
-			for (int i = 0; i < 3; i++)
+			if (A.det() > 1.e-20)
 			{
-				for (int j = 0; j < 3; j++)
+				// Find M = v1 + s(v2-v1) which minimizes
+				//   q(M) = s^2 (v2-v1)A(v2-v1) + s(v1A(v2-v1)+(v2-v1)Av1+2b(v2-v1))+cte
+				//   q'(M) = 2 s (v2-v1)A(v2-v1) + 2(v1A(v2-v1)+b(v2-v1))
+				double [] p1 = v1.getUV();
+				double [] p2 = v2.getUV();
+				for (int i = 0; i < 3; i++)
+					temp[i] = p2[i] - p1[i];
+				double den = 0.0;
+				double num = Matrix3D.prodSca(b, temp);
+				for (int i = 0; i < 3; i++)
 				{
-					den += A.data[i+3*j] * temp[i] * temp[j];
-					num += A.data[i+3*j] * temp[i] * p1[j];
+					for (int j = 0; j < 3; j++)
+					{
+						den += A.data[i+3*j] * temp[i] * temp[j];
+						num += A.data[i+3*j] * temp[i] * p1[j];
+					}
+				}
+				if (den > 1.0e-4 * Math.abs(num))
+				{
+					double s = - num / den;
+					if (s < 1.0e-4)
+						s = 0.0;
+					else if (s > 1.0 - 1.0e-4)
+						s = 1.0;
+					ret = bestCandidateV1V2Ref(v1, v2, q1, q2);
+					ret.moveTo(p1[0]+s*temp[0], p1[1]+s*temp[1], p1[2]+s*temp[2]);
+					return ret;
 				}
 			}
-			double s = 0.0;
-			if (den > 1.0e-20 * Math.abs(num))
-			{
-				s = - num / den;
-				if (s < 0.0)
-					s = 0.0;
-				else if (s > 1.0)
-					s = 1.0;
-				ret.moveTo(p1[0]+s*temp[0], p1[1]+s*temp[1], p1[2]+s*temp[2]);
-			}
-			else
-			{
-				if (q1.value(v2.getUV()) + q2.value(v2.getUV()) < q1.value(v1.getUV()) + q2.value(v1.getUV()))
-					ret = (Vertex) v2.clone();
-				else
-					ret = (Vertex) v1.clone();
-			}
+			return bestCandidateV1V2(v1, v2, q1, q2);
 		}
 		return ret;
 	}
-	
+
+	private static boolean V1BetterThanV2(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2)
+	{
+		return (q1.value(v1.getUV()) + q2.value(v1.getUV()) < q1.value(v2.getUV()) + q2.value(v2.getUV()));
+	}
+
+	private static Vertex bestCandidateV1V2(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2)
+	{
+		Vertex ret;
+		if (V1BetterThanV2(v1, v2, q1, q2))
+			ret = (Vertex) v1.clone();
+		else
+			ret = (Vertex) v2.clone();
+		return ret;
+	}
+
+	private static Vertex bestCandidateV1V2Ref(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2)
+	{
+		Vertex ret;
+		if (v1.getRef() == 0 && v2.getRef() == 0)
+			ret = bestCandidateV1V2(v1, v2, q1, q2);
+		else if (v1.getRef() == 0)
+			ret = (Vertex) v2.clone();
+		else if (v2.getRef() == 0)
+			ret = (Vertex) v1.clone();
+		else
+			ret = bestCandidateV1V2(v1, v2, q1, q2);
+		return ret;
+	}
 
 	public String toString()
 	{
