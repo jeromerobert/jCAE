@@ -492,18 +492,19 @@ public class DecimateVertex
 	 * 
 	 * @param args xmlDir, xmlFile, <-t telerance | -n triangle>, brepDir, brepFile
 	 */
+	//TODO have the same command line as in DecimateHalfEdge (it will break jcae-netbeans)
 	public static void main(String[] args)
 	{
 		Mesh mesh=MeshReader.readObject3D(args[0], args[1], -1);
 		if(args[2].equals("-n"))
-			new DecimateVertex(mesh, Integer.parseInt(args[2])).compute();
+			new DecimateVertex(mesh, Integer.parseInt(args[3])).compute();
 		else if(args[2].equals("-t"))
-			new DecimateVertex(mesh, Double.parseDouble(args[2])).compute();
+			new DecimateVertex(mesh, Double.parseDouble(args[3])).compute();
 		else
 		{
 			System.out.println("<xmlDir> <xmlFile> <-t telerance | -n triangle> <brepDir> <brepFile>");
 			return;
 		}
-		MeshWriter.writeObject3D(mesh, args[0], args[1], args[3], args[4],1);
+		MeshWriter.writeObject3D(mesh, args[0], args[1], args[4], args[5],1);
 	}
 }

@@ -31,6 +31,7 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
+import java.io.File;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -453,20 +454,21 @@ public class DecimateHalfEdge
 	
 	/**
 	 * 
-	 * @param args xmlDir, xmlFile, <-t telerance | -n triangle>, brepDir, brepFile
+	 * @param args xmlDir, -t telerance | -n triangle, brepFile, output
 	 */
 	public static void main(String[] args)
 	{
-		Mesh mesh=MeshReader.readObject3D(args[0], args[1], -1);
-		if(args[2].equals("-n"))
+		Mesh mesh=MeshReader.readObject3D(args[0], "jcae3d", -1);
+		if(args[1].equals("-n"))
 			new DecimateHalfEdge(mesh, Integer.parseInt(args[2])).compute();
-		else if(args[2].equals("-t"))
+		else if(args[1].equals("-t"))
 			new DecimateHalfEdge(mesh, Double.parseDouble(args[2])).compute();
 		else
 		{
-			System.out.println("<xmlDir> <xmlFile> <-t telerance | -n triangle> <brepDir> <brepFile>");
+			System.out.println("<xmlDir> <-t telerance | -n triangle> <brepFile> <output>");
 			return;
 		}
-		MeshWriter.writeObject3D(mesh, args[0], args[1], args[3], args[4],1);
+		File brepFile=new File(args[4]);
+		MeshWriter.writeObject3D(mesh, args[4], "jcae3d", brepFile.getParent(), brepFile.getName(),1);
 	}
 }
