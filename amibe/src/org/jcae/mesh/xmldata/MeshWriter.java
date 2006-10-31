@@ -35,6 +35,7 @@ import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.util.Iterator;
+import java.util.Collection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import org.w3c.dom.Element;
@@ -113,7 +114,7 @@ public class MeshWriter
 	/**
 	 * Used by {@link writeObject}
 	 */
-	private static Element writeObjectTriangles(Document document, ArrayList trianglelist, File trianglesFile, String baseDir, TObjectIntHashMap nodeIndex)
+	private static Element writeObjectTriangles(Document document, Collection trianglelist, File trianglesFile, String baseDir, TObjectIntHashMap nodeIndex)
 		throws IOException
 	{
 		//save triangles
@@ -139,7 +140,7 @@ public class MeshWriter
 			"</triangles>");
 	}
 
-	private static Element writeObjectGroups(Document document, ArrayList trianglelist, File groupsFile, String baseDir)
+	private static Element writeObjectGroups(Document document, Collection trianglelist, File groupsFile, String baseDir)
 		throws IOException
 	{
 		logger.debug("begin writing "+groupsFile);
@@ -235,7 +236,7 @@ public class MeshWriter
 			File nodesFile=new File(dir, JCAEXMLData.nodes2dFilename);
 			File refFile = new File(dir, JCAEXMLData.ref1dFilename);
 			File trianglesFile=new File(dir, JCAEXMLData.triangles2dFilename);
-			ArrayList trianglelist = submesh.getTriangles();
+			Collection trianglelist = submesh.getTriangles();
 			ArrayList nodelist;
 			if (submesh.quadtree != null)
 				nodelist = submesh.quadtree.getAllVertices(trianglelist.size() / 2);
@@ -307,7 +308,7 @@ public class MeshWriter
 			File refFile = new File(dir, JCAEXMLData.ref1dFilename);
 			File trianglesFile=new File(dir, JCAEXMLData.triangles3dFilename);
 			File groupsFile = new File(dir, JCAEXMLData.groupsFilename);
-			ArrayList trianglelist = submesh.getTriangles();
+			Collection trianglelist = submesh.getTriangles();
 			ArrayList nodelist;
 			if (submesh.quadtree != null)
 				nodelist = submesh.quadtree.getAllVertices(trianglelist.size() / 2);

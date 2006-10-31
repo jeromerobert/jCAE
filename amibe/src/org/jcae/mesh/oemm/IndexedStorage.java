@@ -36,6 +36,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Iterator;
 import gnu.trove.TIntIterator;
@@ -635,7 +636,7 @@ public class IndexedStorage
 	{
 		logger.info("Creation of a mesh from reading selected nodes from an OEMM");
 		Mesh mesh = loadNodes(oemm, leaves);
-		ArrayList triList = mesh.getTriangles();
+		Collection triList = mesh.getTriangles();
 		int nrt = 0;
 		for (Iterator it = triList.iterator(); it.hasNext(); )
 		{
@@ -645,14 +646,16 @@ public class IndexedStorage
 		}
 		logger.info("Number of triangles for this selection: "+nrt);
 		double [] coord = new double[9*nrt];
-		for (int i = 0; i < nrt; i++)
+		int i = 0;
+		for (Iterator it = triList.iterator(); it.hasNext(); )
 		{
-			Triangle t = (Triangle) triList.get(i);
+			Triangle t = (Triangle) it.next();
 			if (t.isOuter())
 				continue;
 			for (int j = 0; j < 3; j++)
 				for (int k = 0; k < 3; k++)
 					coord[9*i+3*j+k] = t.vertex[j].param[k];
+			i++;
 		}
 		return coord;
 	}

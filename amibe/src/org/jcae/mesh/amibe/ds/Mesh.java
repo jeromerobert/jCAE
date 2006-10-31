@@ -26,6 +26,7 @@ import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.cad.*;
+import java.util.Collection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.HashMap;
@@ -111,7 +112,7 @@ public class Mesh
 	private static Logger logger=Logger.getLogger(Mesh.class);
 	
 	//  Triangle list
-	private ArrayList triangleList = new ArrayList();
+	private HashSet triangleList = new HashSet();
 	
 	//  Topological face on which mesh is applied
 	private CADFace face;
@@ -381,19 +382,9 @@ public class Mesh
 	 *
 	 * @return triangle list.
 	 */
-	public ArrayList getTriangles()
+	public Collection getTriangles()
 	{
 		return triangleList;
-	}
-	
-	/**
-	 * Sets triangle list.
-	 *
-	 * @param l triangle list
-	 */
-	public void setTrianglesList(ArrayList l)
-	{
-		triangleList = l;
 	}
 	
 	/**
