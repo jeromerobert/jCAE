@@ -524,7 +524,8 @@ public class HalfEdge implements Cloneable
 	{
 		Vertex o = origin();
 		Vertex d = destination();
-		logger.debug("contract ("+o+" "+d+")\ninto "+n);
+		if (logger.isDebugEnabled())
+			logger.debug("contract ("+o+" "+d+")\ninto "+n);
 		/*
 		 *           V1                       V1
 		 *  V3+-------+-------+ V4   V3 +------+------+ V4
