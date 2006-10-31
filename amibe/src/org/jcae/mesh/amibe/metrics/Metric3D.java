@@ -224,6 +224,21 @@ public class Metric3D extends Matrix3D
 	}
 	
 	/**
+	 * Compute matrix determinant.
+	 *
+	 * @return the matrix determinant.
+	 * otherwise.
+	 */
+	public final double det()
+	{
+		// adjoint matrix
+		copyColumn(0, c0);
+		copyColumn(1, c1);
+		copyColumn(2, c2);
+		return prodSca(c0, prodVect3D(c1, c2));
+	}
+	
+	/**
 	 * Compute the inverse metrics.
 	 *
 	 * @return the inverse metrics if it is not singular, <code>null</code>
