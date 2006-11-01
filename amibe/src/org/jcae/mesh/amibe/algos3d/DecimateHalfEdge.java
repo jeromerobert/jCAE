@@ -289,6 +289,7 @@ public class DecimateHalfEdge
 		double [] temp = new double[3];
 		boolean noSwap = false;
 		int cnt = 0;
+		int cntNotContracted = 0;
 		while (tree.size() > 0 && nrTriangles > nrFinal)
 		{
 			HalfEdge edge = (HalfEdge) tree.first();
@@ -315,6 +316,7 @@ public class DecimateHalfEdge
 					break;
 				if (logger.isDebugEnabled())
 					logger.debug("Edge not contracted: "+edge);
+				cntNotContracted++;
 				edge = (HalfEdge) tree.next();
 				if (nrFinal == 0)
 					cost = tree.getKey(edge);
@@ -432,6 +434,7 @@ public class DecimateHalfEdge
 			cnt++;
 			edge = (HalfEdge) tree.next();
 		}
+		logger.info("Total number of edges not contracted during processing: "+cntNotContracted);
 		logger.info("Number of edges which could have been contracted: "+cnt);
 		logger.info("Number of other edges not contracted: "+(tree.size() - cnt));
 		return contracted > 0;
