@@ -1,3 +1,11 @@
+Wed Nov  1 18:04:40 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java: Some edges
+	cannot be contracted because of geometry or topology reasons.  A
+	penalty is now added to these edges so that they are not processed
+	too much often.  They must not be discarded entirely because they
+	may be contracted later if their neighboorhood changes.
+
 Tue Oct 31 23:39:49 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/metrics/Metric3D.java: New det() method.

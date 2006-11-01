@@ -32,6 +32,7 @@ import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.File;
+import java.util.Stack;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -290,6 +291,7 @@ public class DecimateHalfEdge
 		boolean noSwap = false;
 		int cnt = 0;
 		int cntNotContracted = 0;
+		Stack notContracted = new Stack();
 		while (tree.size() > 0 && nrTriangles > nrFinal)
 		{
 			HalfEdge edge = (HalfEdge) tree.first();
@@ -317,6 +319,16 @@ public class DecimateHalfEdge
 				if (logger.isDebugEnabled())
 					logger.debug("Edge not contracted: "+edge);
 				cntNotContracted++;
+				// Add a penalty to edges which could not have been
+				// contracted.  This has to be done outside this loop,
+				// because PAVLSortedTree instances must not be modified
+				// when walked through.
+				// FIXME: Handle nrFinal != 0 case also
+				if (nrFinal == 0)
+				{
+					notContracted.push(edge);
+					notContracted.push(new Double(cost+0.1*(tolerance - cost)));
+				}
 				edge = (HalfEdge) tree.next();
 				if (nrFinal == 0)
 					cost = tree.getKey(edge);
@@ -326,6 +338,13 @@ public class DecimateHalfEdge
 			if (cost > tolerance || edge == null)
 				break;
 			tree.remove(edge);
+			// Update costs for edges which were not contracted
+			while (notContracted.size() > 0)
+			{
+				double newCost = ((Double) notContracted.pop()).doubleValue();
+				HalfEdge f = (HalfEdge) notContracted.pop();
+				tree.update(f.notOriented(), newCost);
+			}
 			if (logger.isDebugEnabled())
 				logger.debug("Contract edge: "+edge+" into "+v3);
 			Triangle t1 = edge.getTri();
