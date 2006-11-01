@@ -304,19 +304,17 @@ public class DecimateHalfEdge
 				v2 = edge.destination();
 				assert v1 != v2 : edge;
 				/* FIXME: add an option so that boundary nodes may be frozen. */
-				{
-					q1 = (Quadric3DError) quadricMap.get(v1);
-					q2 = (Quadric3DError) quadricMap.get(v2);
-					assert q1 != null : v1;
-					assert q2 != null : v2;
-					q3 = new Quadric3DError(q1, q2);
-					v3 = q3.optimalPlacement(v1, v2, q1, q2, placement, temp);
-					edge.copyOTriangle(ot);
-					if (ot.canContract(v3))
-						break;
-					if (logger.isDebugEnabled())
-						logger.debug("Edge not contracted: "+edge);
-				}
+				q1 = (Quadric3DError) quadricMap.get(v1);
+				q2 = (Quadric3DError) quadricMap.get(v2);
+				assert q1 != null : v1;
+				assert q2 != null : v2;
+				q3 = new Quadric3DError(q1, q2);
+				v3 = q3.optimalPlacement(v1, v2, q1, q2, placement, temp);
+				edge.copyOTriangle(ot);
+				if (ot.canContract(v3))
+					break;
+				if (logger.isDebugEnabled())
+					logger.debug("Edge not contracted: "+edge);
 				edge = (HalfEdge) tree.next();
 				if (nrFinal == 0)
 					cost = tree.getKey(edge);
