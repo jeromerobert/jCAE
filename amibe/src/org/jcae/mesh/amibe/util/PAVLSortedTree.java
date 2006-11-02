@@ -57,6 +57,14 @@ public class PAVLSortedTree
 			value = v;
 		}
 		
+		public void reset(Object o, double v)
+		{
+			balanceFactor = 0;
+			child[0] = child[1] = parent = null;
+			data = o;
+			value = v;
+		}
+		
 		/* Single left rotation
 	            A                     B
 	           / \      ------>     /   \
@@ -303,6 +311,11 @@ public class PAVLSortedTree
 		if (logger.isDebugEnabled())
 			logger.debug("insert "+node+" "+" value: "+value+" "+o);
 		map.put(o, node);
+		insertNode(node, value);
+	}
+
+	private final synchronized void insertNode(PAVLSortedTreeNode node, double value)
+	{
 		if (root == null)
 		{
 			root = new PAVLSortedTreeNode(null, 0.0);
@@ -386,8 +399,15 @@ public class PAVLSortedTree
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("Update "+o+" to "+value);
-		remove(o);
-		insert(o, value);
+		PAVLSortedTreeNode p = (PAVLSortedTreeNode) map.get(o);
+		if (p == null)
+		{
+			insert(o, value);
+			return;
+		}
+		removeNode(p);
+		p.reset(o, value);
+		insertNode(p, value);
 	}
 	
 	/**
@@ -424,13 +444,19 @@ public class PAVLSortedTree
 		PAVLSortedTreeNode p = (PAVLSortedTreeNode) map.get(o);
 		if (logger.isDebugEnabled())
 			logger.debug("Remove "+p+" "+o);
+		if (p != null)
+			map.remove(o);
+		return removeNode(p);
+	}
+
+	private final synchronized double removeNode(PAVLSortedTreeNode p)
+	{
 		if (p == null)
 			return -1.0;
 		assert p != null;
 		double ret = p.value;
 		if (logger.isDebugEnabled())
 			logger.debug("Value: "+ret);
-		map.remove(o);
 		count--;
 		int lastDir = 0;
 		PAVLSortedTreeNode q = p.parent;
