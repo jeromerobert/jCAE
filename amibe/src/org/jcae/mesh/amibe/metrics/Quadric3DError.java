@@ -62,6 +62,7 @@ public class Quadric3DError
 	private static Logger logger=Logger.getLogger(Quadric3DError.class);
 	public Metric3D A = new Metric3D();
 	public double [] b = new double[3];
+	public double [] temp = new double[3];
 	public double c;
 	public double area;
 
@@ -107,7 +108,8 @@ public class Quadric3DError
 	{
 		double ret = c;
 		ret += 2.0 * Matrix3D.prodSca(b, vect);
-		ret += Matrix3D.prodSca(A.apply(vect), vect);
+		A.apply(vect, temp);
+		ret += Matrix3D.prodSca(temp, vect);
 		return ret;
 	}
 
@@ -161,9 +163,9 @@ public class Quadric3DError
 				Metric3D Qinv = A.inv();
 				if (Qinv != null)
 				{
-					double [] dx = Qinv.apply(b);
+					Qinv.apply(b, temp);
 					ret = bestCandidateV1V2Ref(v1, v2, q1, q2);
-					ret.moveTo(-dx[0], -dx[1], -dx[2]);
+					ret.moveTo(-temp[0], -temp[1], -temp[2]);
 					return ret;
 				}
 				else

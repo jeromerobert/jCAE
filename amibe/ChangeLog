@@ -1,3 +1,9 @@
+Thu Nov  2 17:29:22 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/metrics/Matrix3D.java: New
+	apply(double [] in, double [] out) method to reduce array allocation.
+	* src/org/jcae/mesh/amibe/metrics/Quadric3DError.java: Use it.
+
 Thu Nov  2 10:06:08 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java: Apply

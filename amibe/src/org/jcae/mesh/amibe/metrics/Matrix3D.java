@@ -127,12 +127,17 @@ public class Matrix3D
 	 */
 	public double [] apply(double [] in)
 	{
+		double [] out = new double[3];
+		apply(in, out);
+		return out;
+	}
+	
+	public void apply(double [] in, double [] out)
+	{
 		if (3 != in.length)
 			throw new IllegalArgumentException(in.length+" is different from 3");
-		double [] out = new double[3];
 		for (int i = 0; i < 3; i++)
 			out[i] = data[i] * in[0] + data[i+3] * in[1] + data[i+6] * in[2];
-		return out;
 	}
 	
 	/**
