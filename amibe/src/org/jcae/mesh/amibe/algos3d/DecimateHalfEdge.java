@@ -36,7 +36,6 @@ import java.util.Stack;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 /**
@@ -175,7 +174,6 @@ public class DecimateHalfEdge
 		HashSet newList = new HashSet(mesh.getTriangles());
 		mesh.setTrianglesList(newList);
 		int roughNrNodes = mesh.getTriangles().size()/2;
-		HashSet nodeset = new HashSet(roughNrNodes);
 		HashMap quadricMap = new HashMap(roughNrNodes);
 		int nrTriangles = 0;
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
@@ -187,10 +185,8 @@ public class DecimateHalfEdge
 			for (int i = 0; i < 3; i++)
 			{
 				Vertex n = f.vertex[i];
-				if (nodeset.contains(n))
-					continue;
-				nodeset.add(n);
-				quadricMap.put(n, new Quadric3DError());
+				if (!quadricMap.containsKey(n))
+					quadricMap.put(n, new Quadric3DError());
 			}
 		}
 		// Compute quadrics
@@ -289,9 +285,9 @@ public class DecimateHalfEdge
 		int contracted = 0;
 		double [] temp = new double[3];
 		boolean noSwap = false;
-		int cnt = 0;
 		int cntNotContracted = 0;
 		Stack notContracted = new Stack();
+		Quadric3DError q3 = new Quadric3DError();
 		while (tree.size() > 0 && nrTriangles > nrFinal)
 		{
 			HalfEdge edge = (HalfEdge) tree.first();
@@ -299,7 +295,7 @@ public class DecimateHalfEdge
 			if (nrFinal == 0)
 				cost = tree.getKey(edge);
 			Vertex v1 = null, v2 = null, v3 = null;
-			Quadric3DError q1 = null, q2 = null, q3 = null;
+			Quadric3DError q1 = null, q2 = null;
 			do {
 				if (cost > tolerance)
 					break;
@@ -311,7 +307,7 @@ public class DecimateHalfEdge
 				q2 = (Quadric3DError) quadricMap.get(v2);
 				assert q1 != null : v1;
 				assert q2 != null : v2;
-				q3 = new Quadric3DError(q1, q2);
+				q3.computeQuadric3DError(q1, q2);
 				v3 = q3.optimalPlacement(v1, v2, q1, q2, placement, temp);
 				edge.copyOTriangle(ot);
 				if (ot.canContract(v3))
@@ -337,7 +333,6 @@ public class DecimateHalfEdge
 			} while (edge != null && cost <= tolerance);
 			if (cost > tolerance || edge == null)
 				break;
-			tree.remove(edge);
 			// Update costs for edges which were not contracted
 			while (notContracted.size() > 0)
 			{
@@ -348,28 +343,34 @@ public class DecimateHalfEdge
 			if (logger.isDebugEnabled())
 				logger.debug("Contract edge: "+edge+" into "+v3);
 			Triangle t1 = edge.getTri();
-			// Remove all edges of t1 and t2 from tree
+			// HalfEdge instances on t1 and t2 will be deleted
+			// when edge is contracted, and we do not know whether
+			// they appear within tree or their symmetric ones,
+			// so remove them now.
+			tree.remove(edge.notOriented());
 			if (!t1.isOuter())
 			{
 				nrTriangles--;
-				for (int i = 0; i < 3; i++)
+				for (int i = 0; i < 2; i++)
 				{
 					edge = edge.next();
 					tree.remove(edge.notOriented());
 					assert !tree.containsValue(edge.notOriented());
 				}
+				edge = edge.next();
 			}
 			HalfEdge sym = edge.sym();
 			Triangle t2 = sym.getTri();
 			if (!t2.isOuter())
 			{
 				nrTriangles--;
-				for (int i = 0; i < 3; i++)
+				for (int i = 0; i < 2; i++)
 				{
 					sym = sym.next();
 					tree.remove(sym.notOriented());
 					assert !tree.containsValue(sym.notOriented());
 				}
+				sym = sym.next();
 			}
 			Vertex apex = edge.apex();
 			// FIXME: is this test really necessary?
@@ -378,10 +379,11 @@ public class DecimateHalfEdge
 			//  Contract (v1,v2) into v3
 			edge.contract(v3);
 			contracted++;
-			// Update edge costs
 			quadricMap.remove(v1);
 			quadricMap.remove(v2);
+			// Update edge costs
 			quadricMap.put(v3, q3);
+			q3 = q1;
 			edge = HalfEdge.find(v3, apex);
 			assert edge != null : v3+" not connected to "+apex;
 			assert edge.destination() == apex : ""+edge+"\n"+v3+"\n"+apex;
@@ -444,7 +446,7 @@ public class DecimateHalfEdge
 			}
 		}
 		logger.info("Number of contracted edges: "+contracted);
-		cnt = 0;
+		int cnt = 0;
 		HalfEdge edge = (HalfEdge) tree.first();
 		while (edge != null)
 		{

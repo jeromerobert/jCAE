@@ -90,8 +90,8 @@ public class Quadric3DError
 		A.reset();
 	}
 
-	// Define a new quadrics by addition of 2 quadrics
-	public Quadric3DError(Quadric3DError q1, Quadric3DError q2)
+	// Add 2 quadrics
+	public void computeQuadric3DError(Quadric3DError q1, Quadric3DError q2)
 	{
 		assert q1.area > 0.0 : q1;
 		assert q2.area > 0.0 : q2;

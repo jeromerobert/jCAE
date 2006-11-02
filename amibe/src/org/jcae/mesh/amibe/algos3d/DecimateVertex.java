@@ -174,7 +174,6 @@ public class DecimateVertex
 		HashSet newList = new HashSet(mesh.getTriangles());
 		mesh.setTrianglesList(newList);
 		int roughNrNodes = mesh.getTriangles().size()/2;
-		HashSet nodeset = new HashSet(roughNrNodes);
 		HashMap quadricMap = new HashMap(roughNrNodes);
 		NotOrientedEdge noe = new NotOrientedEdge();
 		int nrTriangles = 0;
@@ -187,8 +186,8 @@ public class DecimateVertex
 			for (int i = 0; i < 3; i++)
 			{
 				Vertex n = f.vertex[i];
-				nodeset.add(n);
-				quadricMap.put(n, new Quadric3DError());
+				if (!quadricMap.containsKey(n))
+					quadricMap.put(n, new Quadric3DError());
 			}
 		}
 		// Compute quadrics
@@ -308,6 +307,7 @@ public class DecimateVertex
 		boolean noSwap = false;
 		int cntNotContracted = 0;
 		Stack notContracted = new Stack();
+		Quadric3DError q3 = new Quadric3DError();
 		while (tree.size() > 0 && nrTriangles > nrFinal)
 		{
 			NotOrientedEdge edge = (NotOrientedEdge) tree.first();
@@ -315,7 +315,7 @@ public class DecimateVertex
 			if (nrFinal == 0)
 				cost = tree.getKey(edge);
 			Vertex v1 = null, v2 = null, v3 = null;
-			Quadric3DError q1 = null, q2 = null, q3 = null;
+			Quadric3DError q1 = null, q2 = null;
 			do {
 				if (cost > tolerance)
 					break;
@@ -328,7 +328,7 @@ public class DecimateVertex
 				q2 = (Quadric3DError) quadricMap.get(v2);
 				assert q1 != null : v1;
 				assert q2 != null : v2;
-				q3 = new Quadric3DError(q1, q2);
+				q3.computeQuadric3DError(q1, q2);
 				v3 = q3.optimalPlacement(v1, v2, q1, q2, placement, temp);
 				if (edge.canContract(v3))
 					break;
@@ -402,6 +402,7 @@ public class DecimateVertex
 			quadricMap.remove(v1);
 			quadricMap.remove(v2);
 			quadricMap.put(v3, q3);
+			q3 = q1;
 			ot.find(v3, apex);
 			assert ot.destination() == apex : ""+edge+"\n"+v3+"\n"+apex;
 			do

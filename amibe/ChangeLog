@@ -3,6 +3,13 @@ Thu Nov  2 17:29:22 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/amibe/metrics/Matrix3D.java: New
 	apply(double [] in, double [] out) method to reduce array allocation.
 	* src/org/jcae/mesh/amibe/metrics/Quadric3DError.java: Use it.
+	* src/org/jcae/mesh/amibe/metrics/Quadric3DError.java: Replace
+	Quadric3DError(q1,q2) constructor by a new computeQuadric3DError(q1,q2)
+	method.
+	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java
+	  src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java: Reuse existing
+	Quadric3DError instances to avoid allocations.  The nodeset variable
+	is not really useful, so drop it.
 
 Thu Nov  2 10:06:08 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
