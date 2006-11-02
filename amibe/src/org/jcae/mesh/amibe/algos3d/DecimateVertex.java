@@ -31,6 +31,7 @@ import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
+import java.util.Stack;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -305,7 +306,8 @@ public class DecimateVertex
 		NotOrientedEdge sym = new NotOrientedEdge();
 		double [] temp = new double[3];
 		boolean noSwap = false;
-		int cnt = 0;
+		int cntNotContracted = 0;
+		Stack notContracted = new Stack();
 		while (tree.size() > 0 && nrTriangles > nrFinal)
 		{
 			NotOrientedEdge edge = (NotOrientedEdge) tree.first();
@@ -332,6 +334,17 @@ public class DecimateVertex
 					break;
 				if (logger.isDebugEnabled())
 					logger.debug("Edge not contracted: "+edge);
+				cntNotContracted++;
+				// Add a penalty to edges which could not have been
+				// contracted.  This has to be done outside this loop,
+				// because PAVLSortedTree instances must not be modified
+				// when walked through.
+				// FIXME: Handle nrFinal != 0 case also
+				if (nrFinal == 0)
+				{
+					notContracted.push(edge);
+					notContracted.push(new Double(cost+0.1*(tolerance - cost)));
+				}
 				edge = (NotOrientedEdge) tree.next();
 				if (nrFinal == 0)
 					cost = tree.getKey(edge);
@@ -341,6 +354,13 @@ public class DecimateVertex
 			if (cost > tolerance || edge == null)
 				break;
 			tree.remove(edge);
+			// Update costs for edges which were not contracted
+			while (notContracted.size() > 0)
+			{
+				double newCost = ((Double) notContracted.pop()).doubleValue();
+				NotOrientedEdge f = (NotOrientedEdge) notContracted.pop();
+				tree.update(f, newCost);
+			}
 			if (logger.isDebugEnabled())
 				logger.debug("Contract edge: "+edge+" into "+v3);
 			//  Keep track of triangles deleted when contracting
@@ -445,7 +465,7 @@ public class DecimateVertex
 		// Remove deleted triangles from the list
 		trashBin(trash);
 		logger.info("Number of contracted edges: "+contracted);
-		cnt = 0;
+		int cnt = 0;
 		NotOrientedEdge edge = (NotOrientedEdge) tree.first();
 		while (edge != null)
 		{
@@ -454,6 +474,7 @@ public class DecimateVertex
 			cnt++;
 			edge = (NotOrientedEdge) tree.next();
 		}
+		logger.info("Total number of edges not contracted during processing: "+cntNotContracted);
 		logger.info("Number of edges which could have been contracted: "+cnt);
 		logger.info("Number of other edges not contracted: "+(tree.size() - cnt));
 		return contracted > 0;

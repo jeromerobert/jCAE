@@ -1,3 +1,8 @@
+Thu Nov  2 10:06:08 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java: Apply
+	yesterday's optimization to DecimateVertex too.
+
 Wed Nov  1 18:04:40 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java: Some edges
