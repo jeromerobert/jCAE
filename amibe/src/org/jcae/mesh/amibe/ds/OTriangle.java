@@ -993,7 +993,6 @@ public class OTriangle implements Cloneable
 		//  Loop around apex to check that triangles will not be inverted
 		Vertex d = destination();
 		nextOTri(this, work[0]);
-		double [] v1 = new double[3];
 		do
 		{
 			if (work[0].hasAttributes(OUTER))
@@ -1005,8 +1004,8 @@ public class OTriangle implements Cloneable
 			double [] nu = work[0].getTempVector();
 			double [] x1 = work[0].origin().getUV();
 			for (int i = 0; i < 3; i++)
-				v1[i] = newpt[i] - x1[i];
-			if (Matrix3D.prodSca(v1, nu) >= - area2 / 2.0)
+				tempD1[i] = newpt[i] - x1[i];
+			if (Matrix3D.prodSca(tempD1, nu) >= - area2 / 2.0)
 				return false;
 			work[0].nextOTriApexLoop();
 		}
@@ -1054,7 +1053,6 @@ public class OTriangle implements Cloneable
 		//  Loop around o to check that triangles will not be inverted
 		nextOTri(this, work[0]);
 		symOTri(this, work[1]);
-		double [] v1 = new double[3];
 		double [] xn = n.getUV();
 		do
 		{
@@ -1064,11 +1062,11 @@ public class OTriangle implements Cloneable
 				double [] nu = work[0].getTempVector();
 				double [] x1 = work[0].origin().getUV();
 				for (int i = 0; i < 3; i++)
-					v1[i] = xn[i] - x1[i];
+					tempD1[i] = xn[i] - x1[i];
 				// Two triangles are removed when an edge is contracted.
 				// So normally triangle areas should increase.  If they
 				// decrease significantly, there may be a problem.
-				if (Matrix3D.prodSca(v1, nu) >= - area2 / 2.0)
+				if (Matrix3D.prodSca(tempD1, nu) >= - area2 / 2.0)
 					return false;
 			}
 			work[0].nextOTriApexLoop();
@@ -1085,8 +1083,8 @@ public class OTriangle implements Cloneable
 				double [] nu = work[0].getTempVector();
 				double [] x1 = work[0].origin().getUV();
 				for (int i = 0; i < 3; i++)
-					v1[i] = xn[i] - x1[i];
-				if (Matrix3D.prodSca(v1, nu) >= - area2 / 2.0)
+					tempD1[i] = xn[i] - x1[i];
+				if (Matrix3D.prodSca(tempD1, nu) >= - area2 / 2.0)
 					return false;
 			}
 			work[0].nextOTriApexLoop();
