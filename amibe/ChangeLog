@@ -1,3 +1,11 @@
+Fri Nov  3 15:16:22 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Vertex.java
+	  src/org/jcae/mesh/amibe/metrics/Quadric3DError.java
+	  src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java
+	  src/org/jcae/mesh/amibe/algos3d/DecimateVertex.java: In Decimate*
+	algorithms, reuse v3 to avoid allocating new Vertex instances.
+
 Fri Nov  3 12:20:09 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/OTriangle.java: Let computeNormal3D()

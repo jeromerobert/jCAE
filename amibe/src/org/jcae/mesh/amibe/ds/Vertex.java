@@ -180,6 +180,23 @@ public class Vertex implements Cloneable
 	}
 	
 	/**
+	 * Copy all attributes from another Vertex.
+	 *
+	 * @param that  the Vertex to be copied.
+	 */
+	public final void copy(Vertex that)
+	{
+		if (that.param.length != param.length)
+			param = new double[that.param.length];
+		for (int i = 0; i < param.length; i++)
+			param[i] = that.param[i];
+		link  = that.link;
+		m2    = that.m2;
+		ref1d = that.ref1d;
+		label = that.label;
+	}
+	
+	/**
 	 * Get the coordinates of this Vertex.
 	 *
 	 * @return the coordinates of this Vertex.

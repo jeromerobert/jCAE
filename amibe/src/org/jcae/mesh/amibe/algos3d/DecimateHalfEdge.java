@@ -111,6 +111,7 @@ public class DecimateHalfEdge
 	private double tolerance = 1.0;
 	private int nrFinal = 0;
 	private int placement = Quadric3DError.POS_EDGE;
+	
 	/**
 	 * Creates a <code>DecimateHalfEdge</code> instance.
 	 *
@@ -286,6 +287,9 @@ public class DecimateHalfEdge
 		boolean noSwap = false;
 		int cntNotContracted = 0;
 		Stack notContracted = new Stack();
+		Vertex v1 = null, v2 = null;
+		Quadric3DError q1 = null, q2 = null;
+		Vertex v3 = new Vertex(0.0, 0.0, 0.0);
 		Quadric3DError q3 = new Quadric3DError();
 		while (tree.size() > 0 && nrTriangles > nrFinal)
 		{
@@ -293,8 +297,13 @@ public class DecimateHalfEdge
 			double cost = -1.0;
 			if (nrFinal == 0)
 				cost = tree.getKey(edge);
-			Vertex v1 = null, v2 = null, v3 = null;
-			Quadric3DError q1 = null, q2 = null;
+			if (v1 != null)
+			{
+				// v1 and v2 have been removed from the
+				// mesh,, they can be reused.
+				v3 = v1;
+				q3 = q1;
+			}
 			do {
 				if (cost > tolerance)
 					break;
@@ -307,7 +316,7 @@ public class DecimateHalfEdge
 				assert q1 != null : v1;
 				assert q2 != null : v2;
 				q3.computeQuadric3DError(q1, q2);
-				v3 = q3.optimalPlacement(v1, v2, q1, q2, placement);
+				q3.optimalPlacement(v1, v2, q1, q2, placement, v3);
 				edge.copyOTriangle(ot);
 				if (ot.canContract(v3))
 					break;
@@ -382,7 +391,6 @@ public class DecimateHalfEdge
 			quadricMap.remove(v2);
 			// Update edge costs
 			quadricMap.put(v3, q3);
-			q3 = q1;
 			edge = HalfEdge.find(v3, apex);
 			assert edge != null : v3+" not connected to "+apex;
 			assert edge.destination() == apex : ""+edge+"\n"+v3+"\n"+apex;

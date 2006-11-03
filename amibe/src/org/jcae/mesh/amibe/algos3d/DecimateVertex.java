@@ -306,6 +306,9 @@ public class DecimateVertex
 		boolean noSwap = false;
 		int cntNotContracted = 0;
 		Stack notContracted = new Stack();
+		Vertex v1 = null, v2 = null;
+		Quadric3DError q1 = null, q2 = null;
+		Vertex v3 = new Vertex(0.0, 0.0, 0.0);
 		Quadric3DError q3 = new Quadric3DError();
 		while (tree.size() > 0 && nrTriangles > nrFinal)
 		{
@@ -313,8 +316,13 @@ public class DecimateVertex
 			double cost = -1.0;
 			if (nrFinal == 0)
 				cost = tree.getKey(edge);
-			Vertex v1 = null, v2 = null, v3 = null;
-			Quadric3DError q1 = null, q2 = null;
+			if (v1 != null)
+			{
+				// v1 and v2 have been removed from the
+				// mesh,, they can be reused.
+				v3 = v1;
+				q3 = q1;
+			}
 			do {
 				if (cost > tolerance)
 					break;
@@ -328,7 +336,7 @@ public class DecimateVertex
 				assert q1 != null : v1;
 				assert q2 != null : v2;
 				q3.computeQuadric3DError(q1, q2);
-				v3 = q3.optimalPlacement(v1, v2, q1, q2, placement);
+				q3.optimalPlacement(v1, v2, q1, q2, placement, v3);
 				if (edge.canContract(v3))
 					break;
 				if (logger.isDebugEnabled())
@@ -401,7 +409,6 @@ public class DecimateVertex
 			quadricMap.remove(v1);
 			quadricMap.remove(v2);
 			quadricMap.put(v3, q3);
-			q3 = q1;
 			ot.find(v3, apex);
 			assert ot.destination() == apex : ""+edge+"\n"+v3+"\n"+apex;
 			do

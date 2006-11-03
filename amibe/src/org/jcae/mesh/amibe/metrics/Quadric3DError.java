@@ -125,9 +125,8 @@ public class Quadric3DError
 		area += a;
 	}
 
-	public Vertex optimalPlacement(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2, int placement)
+	public void optimalPlacement(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2, int placement, Vertex ret)
 	{
-		Vertex ret = null;
 		assert v1 != Vertex.outer;
 		assert v2 != Vertex.outer;
 		/* FIXME: add an option so that boundary nodes may be frozen.
@@ -145,13 +144,13 @@ public class Quadric3DError
 		}
 		*/
 		if (placement == POS_VERTEX)
-			return bestCandidateV1V2(v1, v2, q1, q2);
+			ret.copy(bestCandidateV1V2(v1, v2, q1, q2));
 		else if (placement == POS_MIDDLE)
 		{
 			// Keep a reference if there is one
 			double [] p1 = v1.getUV();
 			double [] p2 = v2.getUV();
-			ret = bestCandidateV1V2Ref(v1, v2, q1, q2);
+			ret.copy(bestCandidateV1V2Ref(v1, v2, q1, q2));
 			ret.moveTo(0.5*(p1[0]+p2[0]), 0.5*(p1[1]+p2[1]), 0.5*(p1[2]+p2[2]));
 		}
 		else
@@ -164,12 +163,12 @@ public class Quadric3DError
 				if (Qinv != null)
 				{
 					Qinv.apply(b, temp);
-					ret = bestCandidateV1V2Ref(v1, v2, q1, q2);
+					ret.copy(bestCandidateV1V2Ref(v1, v2, q1, q2));
 					ret.moveTo(-temp[0], -temp[1], -temp[2]);
-					return ret;
 				}
 				else
-					return bestCandidateV1V2(v1, v2, q1, q2);
+					ret.copy(bestCandidateV1V2(v1, v2, q1, q2));
+				return;
 			}
 			if (A.det() > 1.e-20)
 			{
@@ -197,43 +196,33 @@ public class Quadric3DError
 						s = 0.0;
 					else if (s > 1.0 - 1.0e-4)
 						s = 1.0;
-					ret = bestCandidateV1V2Ref(v1, v2, q1, q2);
+					ret.copy(bestCandidateV1V2Ref(v1, v2, q1, q2));
 					ret.moveTo(p1[0]+s*temp[0], p1[1]+s*temp[1], p1[2]+s*temp[2]);
-					return ret;
+					return;
 				}
 			}
-			return bestCandidateV1V2(v1, v2, q1, q2);
+			ret.copy(bestCandidateV1V2(v1, v2, q1, q2));
 		}
-		return ret;
-	}
-
-	private static boolean V1BetterThanV2(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2)
-	{
-		return (q1.value(v1.getUV()) + q2.value(v1.getUV()) < q1.value(v2.getUV()) + q2.value(v2.getUV()));
 	}
 
 	private static Vertex bestCandidateV1V2(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2)
 	{
-		Vertex ret;
-		if (V1BetterThanV2(v1, v2, q1, q2))
-			ret = (Vertex) v1.clone();
+		if (q1.value(v1.getUV()) + q2.value(v1.getUV()) < q1.value(v2.getUV()) + q2.value(v2.getUV()))
+			return v1;
 		else
-			ret = (Vertex) v2.clone();
-		return ret;
+			return v2;
 	}
 
 	private static Vertex bestCandidateV1V2Ref(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2)
 	{
-		Vertex ret;
 		if (v1.getRef() == 0 && v2.getRef() == 0)
-			ret = bestCandidateV1V2(v1, v2, q1, q2);
+			return bestCandidateV1V2(v1, v2, q1, q2);
 		else if (v1.getRef() == 0)
-			ret = (Vertex) v2.clone();
+			return v2;
 		else if (v2.getRef() == 0)
-			ret = (Vertex) v1.clone();
+			return v1;
 		else
-			ret = bestCandidateV1V2(v1, v2, q1, q2);
-		return ret;
+			return bestCandidateV1V2(v1, v2, q1, q2);
 	}
 
 	public String toString()
