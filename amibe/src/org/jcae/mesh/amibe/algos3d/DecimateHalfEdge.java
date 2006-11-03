@@ -283,7 +283,6 @@ public class DecimateHalfEdge
 	{
 		OTriangle ot = new OTriangle();
 		int contracted = 0;
-		double [] temp = new double[3];
 		boolean noSwap = false;
 		int cntNotContracted = 0;
 		Stack notContracted = new Stack();
@@ -308,7 +307,7 @@ public class DecimateHalfEdge
 				assert q1 != null : v1;
 				assert q2 != null : v2;
 				q3.computeQuadric3DError(q1, q2);
-				v3 = q3.optimalPlacement(v1, v2, q1, q2, placement, temp);
+				v3 = q3.optimalPlacement(v1, v2, q1, q2, placement);
 				edge.copyOTriangle(ot);
 				if (ot.canContract(v3))
 					break;

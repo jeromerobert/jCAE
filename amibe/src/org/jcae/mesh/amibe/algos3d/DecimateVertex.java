@@ -303,7 +303,6 @@ public class DecimateVertex
 		HashSet trash = new HashSet();
 		OTriangle ot = new OTriangle();
 		NotOrientedEdge sym = new NotOrientedEdge();
-		double [] temp = new double[3];
 		boolean noSwap = false;
 		int cntNotContracted = 0;
 		Stack notContracted = new Stack();
@@ -329,7 +328,7 @@ public class DecimateVertex
 				assert q1 != null : v1;
 				assert q2 != null : v2;
 				q3.computeQuadric3DError(q1, q2);
-				v3 = q3.optimalPlacement(v1, v2, q1, q2, placement, temp);
+				v3 = q3.optimalPlacement(v1, v2, q1, q2, placement);
 				if (edge.canContract(v3))
 					break;
 				if (logger.isDebugEnabled())

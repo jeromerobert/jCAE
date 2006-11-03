@@ -125,7 +125,7 @@ public class Quadric3DError
 		area += a;
 	}
 
-	public Vertex optimalPlacement(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2, int placement, double [] temp)
+	public Vertex optimalPlacement(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2, int placement)
 	{
 		Vertex ret = null;
 		assert v1 != Vertex.outer;
