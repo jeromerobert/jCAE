@@ -22,7 +22,6 @@ package org.jcae.mesh.constraints;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Vector;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
 
@@ -40,9 +39,9 @@ public class Mesh
 	// All meshes from the same root share the same map
 	private THashMap cadShapeToMeshShape;
 	// List of all hyposthesis
-	private Vector allHypothesis = null;
+	private ArrayList allHypothesis = null;
 	// List of constraints applied to this Mesh
-	private Vector constraints = new Vector();
+	private ArrayList constraints = new ArrayList();
 	private Constraint resultConstraint = null;
 	// List of CADShape
 	private ArrayList listShapes = new ArrayList();
@@ -65,7 +64,7 @@ public class Mesh
 	{
 		parent = this;
 		cadShapeToMeshShape = new THashMap();
-		allHypothesis = new Vector();
+		allHypothesis = new ArrayList();
 	}
 	
 	private Mesh (Mesh p)

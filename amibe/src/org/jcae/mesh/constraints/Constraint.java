@@ -21,7 +21,7 @@
 package org.jcae.mesh.constraints;
 
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 public class Constraint extends Hypothesis
@@ -138,14 +138,14 @@ public class Constraint extends Hypothesis
 	}
 
 	/**
-	 * Combines all Hypothesis of a Vector.  In order to improve error
+	 * Combines all Hypothesis of a ArrayList.  In order to improve error
 	 * reporting, MeshHypothesis objects are passed as arguments instead
 	 * of Hypothesis.
 	 *
 	 * @param mh  list of MeshHypothesis objects.
 	 * @param d   dimension
 	 */
-	public static Constraint combineAll(Vector mh, int d)
+	public static Constraint combineAll(ArrayList mh, int d)
 	{
 		Constraint ret = null;
 		if (mh.size() > 0)
