@@ -785,7 +785,7 @@ public class OTriangle implements Cloneable
 			tempD2[2] /= norm;
 		}
 		Matrix3D.prodVect3D(tempD1, tempD2, tempD);
-		return norm;
+		return 0.5*norm;
 	}
 	
 	/**
@@ -814,7 +814,7 @@ public class OTriangle implements Cloneable
 			tempD[1] /= norm;
 			tempD[2] /= norm;
 		}
-		return norm;
+		return 0.5*norm;
 	}
 	
 	/**
@@ -1000,12 +1000,12 @@ public class OTriangle implements Cloneable
 				work[0].nextOTriApexLoop();
 				continue;
 			}
-			double area2 = work[0].computeNormal3DT();
+			double area  = work[0].computeNormal3DT();
 			double [] nu = work[0].getTempVector();
 			double [] x1 = work[0].origin().getUV();
 			for (int i = 0; i < 3; i++)
 				tempD1[i] = newpt[i] - x1[i];
-			if (Matrix3D.prodSca(tempD1, nu) >= - area2 / 2.0)
+			if (Matrix3D.prodSca(tempD1, nu) >= - area)
 				return false;
 			work[0].nextOTriApexLoop();
 		}
@@ -1058,7 +1058,7 @@ public class OTriangle implements Cloneable
 		{
 			if (work[0].tri != tri && work[0].tri != work[1].tri && !work[0].hasAttributes(OUTER))
 			{
-				double area2 = work[0].computeNormal3DT();
+				double area  = work[0].computeNormal3DT();
 				double [] nu = work[0].getTempVector();
 				double [] x1 = work[0].origin().getUV();
 				for (int i = 0; i < 3; i++)
@@ -1066,7 +1066,7 @@ public class OTriangle implements Cloneable
 				// Two triangles are removed when an edge is contracted.
 				// So normally triangle areas should increase.  If they
 				// decrease significantly, there may be a problem.
-				if (Matrix3D.prodSca(tempD1, nu) >= - area2 / 2.0)
+				if (Matrix3D.prodSca(tempD1, nu) >= - area)
 					return false;
 			}
 			work[0].nextOTriApexLoop();
@@ -1079,12 +1079,12 @@ public class OTriangle implements Cloneable
 		{
 			if (work[0].tri != tri && work[0].tri != work[1].tri && !work[0].hasAttributes(OUTER))
 			{
-				double area2 = work[0].computeNormal3DT();
+				double area  = work[0].computeNormal3DT();
 				double [] nu = work[0].getTempVector();
 				double [] x1 = work[0].origin().getUV();
 				for (int i = 0; i < 3; i++)
 					tempD1[i] = xn[i] - x1[i];
-				if (Matrix3D.prodSca(tempD1, nu) >= - area2 / 2.0)
+				if (Matrix3D.prodSca(tempD1, nu) >= - area)
 					return false;
 			}
 			work[0].nextOTriApexLoop();
