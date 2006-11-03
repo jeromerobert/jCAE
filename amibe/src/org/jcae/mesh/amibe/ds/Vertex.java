@@ -170,8 +170,7 @@ public class Vertex implements Cloneable
 		{
 			ret = super.clone();
 			Vertex that = (Vertex) ret;
-			if (that.param == null || that.param.length != param.length)
-				that.param = new double[param.length];
+			that.param = new double[param.length];
 			for (int i = 0; i < param.length; i++)
 				that.param[i] = param[i];
 		}
