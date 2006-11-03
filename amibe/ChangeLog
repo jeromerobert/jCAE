@@ -1,3 +1,8 @@
+Fri Nov  3 18:02:19 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/util/PAVLSortedTree.java: This class does
+	not need to be synchronized.
+
 Fri Nov  3 15:16:22 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Vertex.java

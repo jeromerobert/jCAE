@@ -1,8 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finit element mesher, Plugin architecture.
 
-    Copyright (C) 2005
-                  Jerome Robert <jeromerobert@users.sourceforge.net>
+    Copyright (C) 2005,2006 by EADS CRC
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -305,8 +304,9 @@ public class PAVLSortedTree
 	 * @param o      object
 	 * @param value  quality factor
 	 */
-	public final synchronized void insert(Object o, double value)
+	public final void insert(Object o, double value)
 	{
+		assert map.get(o) == null;
 		PAVLSortedTreeNode node = new PAVLSortedTreeNode(o, value);
 		if (logger.isDebugEnabled())
 			logger.debug("insert "+node+" "+" value: "+value+" "+o);
@@ -314,7 +314,7 @@ public class PAVLSortedTree
 		insertNode(node, value);
 	}
 
-	private final synchronized void insertNode(PAVLSortedTreeNode node, double value)
+	private final void insertNode(PAVLSortedTreeNode node, double value)
 	{
 		if (root == null)
 		{
@@ -395,7 +395,7 @@ public class PAVLSortedTree
 	 * @param o      object being updated
 	 * @param value  new quality factor
 	 */
-	public final synchronized void update(Object o, double value)
+	public final void update(Object o, double value)
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("Update "+o+" to "+value);
@@ -426,7 +426,7 @@ public class PAVLSortedTree
 	 * @param o      object.
 	 * @return  the quality factor associated to this object.
 	 */
-	public final synchronized double getKey(Object o)
+	public final double getKey(Object o)
 	{
 		PAVLSortedTreeNode p = (PAVLSortedTreeNode) map.get(o);
 		if (p == null)
@@ -439,7 +439,7 @@ public class PAVLSortedTree
 	 * @param o      object being removed
 	 * @return  the quality factor associated to this object.
 	 */
-	public final synchronized double remove(Object o)
+	public final double remove(Object o)
 	{
 		PAVLSortedTreeNode p = (PAVLSortedTreeNode) map.get(o);
 		if (logger.isDebugEnabled())
@@ -449,7 +449,7 @@ public class PAVLSortedTree
 		return removeNode(p);
 	}
 
-	private final synchronized double removeNode(PAVLSortedTreeNode p)
+	private final double removeNode(PAVLSortedTreeNode p)
 	{
 		if (p == null)
 			return -1.0;
@@ -624,7 +624,7 @@ public class PAVLSortedTree
 	 * Return the object with the lowest quality factor.
 	 * @return the object with the lowest quality factor.
 	 */
-	public final synchronized Object first()
+	public final Object first()
 	{
 		if (root == null || root.child[0] == null)
 			return null;
@@ -638,7 +638,7 @@ public class PAVLSortedTree
 	 * Return the object with the highest quality factor.
 	 * @return the object with the highest quality factor.
 	 */
-	public final synchronized Object last()
+	public final Object last()
 	{
 		if (root == null || root.child[0] == null)
 			return null;
@@ -653,7 +653,7 @@ public class PAVLSortedTree
 	 * factor.
 	 * @return the object with the immediate higher quality factor.
 	 */
-	public final synchronized Object next()
+	public final Object next()
 	{
 		if (travNode == null)
 			return null;
@@ -682,7 +682,7 @@ public class PAVLSortedTree
 	 * factor.
 	 * @return the object with the immediate lower quality factor.
 	 */
-	public final synchronized Object prev()
+	public final Object prev()
 	{
 		if (travNode == null)
 			return null;
