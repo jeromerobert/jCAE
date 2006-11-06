@@ -74,7 +74,7 @@ public class UNVReader
 					if (line.trim().equals("2411") || line.trim().equals("781"))
 					{
 						// read nodes
-						nodesmap = readNodes(rd, unit);
+						nodesmap = readNodes(mesh, rd, unit);
 					}
 					else if (line.trim().equals("2412"))
 					{
@@ -148,7 +148,7 @@ public class UNVReader
 		return unit;
 	}
 
-	private static TIntObjectHashMap readNodes(BufferedReader rd, double unit)
+	private static TIntObjectHashMap readNodes(Mesh m, BufferedReader rd, double unit)
 	{
 		TIntObjectHashMap nodesmap = new TIntObjectHashMap();
 		logger.debug("Reading nodes");
@@ -184,7 +184,7 @@ public class UNVReader
 				x = new Double(x1).doubleValue()/unit;
 				y = new Double(y1).doubleValue()/unit;
 				z = new Double(z1).doubleValue()/unit;
-				Vertex n = new Vertex(x,y,z);
+				Vertex n = m.newVertex(x,y,z);
 				nodesmap.put(index, n);
 			}
 		}

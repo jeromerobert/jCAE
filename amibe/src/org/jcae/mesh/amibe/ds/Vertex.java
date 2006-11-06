@@ -58,11 +58,6 @@ public class Vertex implements Cloneable
 	 * Outer vertex.
 	 */
 	public static Vertex outer = null;
-	/**
-	 * Backward reference to the mesh, to have access to the global
-	 * context.
-	 */
-	public static Mesh mesh = null;
 	private static final Random rand = new Random(139L);
 	private static Vertex circumcenter = new Vertex(0.0, 0.0);
 	
@@ -70,6 +65,11 @@ public class Vertex implements Cloneable
 	private static final int [] i0 = new int[2];
 	private static final int [] i1 = new int[2];
 	
+	/**
+	 * Backward reference to the mesh, to have access to the global
+	 * context.
+	 */
+	public Mesh mesh = null;
 	/**
 	 * 2D or 3D coordinates.
 	 */
@@ -131,8 +131,9 @@ public class Vertex implements Cloneable
 	 * @param C2d 2D curve on the face.
 	 * @param F   topological face.
 	 */
-	public Vertex(MNode1D pt, CADGeomCurve2D C2d, CADFace F)
+	public Vertex(Mesh m, MNode1D pt, CADGeomCurve2D C2d, CADFace F)
 	{
+		mesh = m;
 		ref1d = pt.getMaster().getLabel();
 		if (null != C2d)
 			param = C2d.value(pt.getParameter());
@@ -153,6 +154,8 @@ public class Vertex implements Cloneable
 	 */
 	public Vertex(Vertex pt1, Vertex pt2)
 	{
+		assert pt1.mesh == pt2.mesh;
+		mesh = pt1.mesh;
 		param = new double[2];
 		param[0] = 0.5 * (pt1.param[0] + pt2.param[0]);
 		param[1] = 0.5 * (pt1.param[1] + pt2.param[1]);
@@ -190,6 +193,7 @@ public class Vertex implements Cloneable
 			param = new double[that.param.length];
 		for (int i = 0; i < param.length; i++)
 			param[i] = that.param[i];
+		mesh  = that.mesh;
 		link  = that.link;
 		m2    = that.m2;
 		ref1d = that.ref1d;

@@ -56,7 +56,7 @@ public class QuadTreeTestNearest extends QuadTreeTest
 		boolean visu = true;
 		Random rand = new Random(113L);
 		final QuadTreeTest r = new QuadTreeTest(0.0, 1.0, 0.0, 1.0);
-		Mesh m = new Mesh();
+		final Mesh m = new Mesh();
 		m.pushCompGeom(2);
 		m.setQuadTree(r);
 		logger.debug("Start insertion");
@@ -64,7 +64,7 @@ public class QuadTreeTestNearest extends QuadTreeTest
 		{
 			u = rand.nextDouble();
 			v = rand.nextDouble();
-			Vertex pt = new Vertex(u, v);
+			Vertex pt = m.newVertex(u, v);
 			pt.addToQuadTree();
 		}
 		//CheckCoordProcedure checkproc = new CheckCoordProcedure();
@@ -84,7 +84,7 @@ public class QuadTreeTestNearest extends QuadTreeTest
 		{
 			u = rand.nextDouble();
 			v = rand.nextDouble();
-			Vertex vt = new Vertex(u, v);
+			Vertex vt = m.newVertex(u, v);
 			if (visu)
 			{
 				view.addBranchGroup(r.segment(vt, r.getNearVertex(vt), 5.0f, 1, 1, 0));
@@ -107,7 +107,7 @@ public class QuadTreeTestNearest extends QuadTreeTest
 					double [] xyz = view.getLastClick();
 					if (null != xyz)
 					{
-						Vertex vt = new Vertex(xyz[0], xyz[1]);
+						Vertex vt = m.newVertex(xyz[0], xyz[1]);
 						view.addBranchGroup(r.segment(vt, r.getNearVertex(vt), 5.0f, 1, 1, 0));
 						view.setVisible(true);
 						view.addBranchGroup(r.segment(vt, r.getNearestVertex(vt), 0.0f, 0, 1, 1));

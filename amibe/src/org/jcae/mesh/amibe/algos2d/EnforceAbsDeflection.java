@@ -116,7 +116,7 @@ public class EnforceAbsDeflection
 				if (!mesh.getTriangles().contains(t) || t.isBoundary())
 					continue;
 				double uv[] = t.centroid().getUV();
-				Vertex v = new Vertex(uv[0], uv[1]);
+				Vertex v = mesh.newVertex(uv[0], uv[1]);
 				OTriangle2D vt = v.getSurroundingOTriangle();
 				if (vt.split3(v, false))
 				{

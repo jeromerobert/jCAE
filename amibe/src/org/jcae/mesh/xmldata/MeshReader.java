@@ -113,7 +113,7 @@ public class MeshReader
 			for (int i=0; i < numberOfNodes; i++)
 			{
 				nodesBuffer.get(coord);
-				nodelist[i] = new Vertex(coord[0], coord[1]);
+				nodelist[i] = mesh.newVertex(coord[0], coord[1]);
 				if (i < numberOfNodes - numberOfReferences)
 					label = 0;
 				else
@@ -184,7 +184,6 @@ public class MeshReader
 		try
 		{
 			Document document = XMLHelper.parseXML(new File(xmlDir, xmlFile));
-			
 			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh", document, XPathConstants.NODE);
 			Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement, XPathConstants.NODE);
 			String refFile = xpath.evaluate("references/file/@location", submeshNodes);
@@ -225,7 +224,7 @@ public class MeshReader
 			for (int i=0; i < numberOfNodes; i++)
 			{
 				nodesBuffer.get(coord);
-				nodelist[i] = new Vertex(coord[0], coord[1], coord[2]);
+				nodelist[i] = mesh.newVertex(coord[0], coord[1], coord[2]);
 				if (i < numberOfNodes - numberOfReferences)
 					label = 0;
 				else

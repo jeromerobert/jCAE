@@ -780,12 +780,12 @@ public class HalfEdge implements Cloneable
 	{
 		Mesh m = new Mesh();
 		Vertex [] v = new Vertex[6];
-		v[0] = new Vertex(0.0, 0.0, 0.0);
-		v[1] = new Vertex(1.0, 0.0, 0.0);
-		v[2] = new Vertex(1.0, 1.0, 0.0);
-		v[3] = new Vertex(0.0, 1.0, 0.0);
-		v[4] = new Vertex(-1.0, 1.0, 0.0);
-		v[5] = new Vertex(-1.0, 0.0, 0.0);
+		v[0] = m.newVertex(0.0, 0.0, 0.0);
+		v[1] = m.newVertex(1.0, 0.0, 0.0);
+		v[2] = m.newVertex(1.0, 1.0, 0.0);
+		v[3] = m.newVertex(0.0, 1.0, 0.0);
+		v[4] = m.newVertex(-1.0, 1.0, 0.0);
+		v[5] = m.newVertex(-1.0, 0.0, 0.0);
 		unitTestBuildMesh(m, v);
 		assert m.isValid();
 		m.buildEdges();

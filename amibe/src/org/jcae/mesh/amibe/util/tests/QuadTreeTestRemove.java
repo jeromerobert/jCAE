@@ -59,7 +59,7 @@ public class QuadTreeTestRemove extends QuadTreeTest
 		boolean visu = true;
 		Random rand = new Random(113L);
 		final QuadTreeTest r = new QuadTreeTest(0.0, 1.0, 0.0, 1.0);
-		Mesh m = new Mesh();
+		final Mesh m = new Mesh();
 		m.pushCompGeom(2);
 		m.setQuadTree(r);
 		logger.debug("Start insertion");
@@ -67,7 +67,7 @@ public class QuadTreeTestRemove extends QuadTreeTest
 		{
 			u = rand.nextDouble();
 			v = rand.nextDouble();
-			Vertex pt = new Vertex(u, v);
+			Vertex pt = m.newVertex(u, v);
 			pt.addToQuadTree();
 		}
 		//CheckCoordProcedure checkproc = new CheckCoordProcedure();
@@ -85,7 +85,7 @@ public class QuadTreeTestRemove extends QuadTreeTest
 					double [] xyz = view.getLastClick();
 					if (null != xyz)
 					{
-						Vertex vt = r.getNearVertex(new Vertex(xyz[0], xyz[1]));
+						Vertex vt = r.getNearVertex(m.newVertex(xyz[0], xyz[1]));
 						r.remove(vt);
 						view.removeAllBranchGroup();
 						display(view, r);

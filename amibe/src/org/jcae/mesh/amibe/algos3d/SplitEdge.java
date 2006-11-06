@@ -177,7 +177,7 @@ public class SplitEdge
 				double [] p1 = edge.destination().getUV();
 				for (int i = 0; i < 3; i++)
 					newXYZ[i] = 0.5*(p0[i]+p1[i]);
-				v = new Vertex(newXYZ[0], newXYZ[1], newXYZ[2]);
+				v = mesh.newVertex(newXYZ[0], newXYZ[1], newXYZ[2]);
 				if (edge.hasAttributes(OTriangle.BOUNDARY))
 				{
 					// FIXME: Check deflection

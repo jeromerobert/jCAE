@@ -151,7 +151,6 @@ public class Mesh
 	 */
 	public Mesh()
 	{
-		Vertex.mesh = this;
 		Vertex.outer = new Vertex(0.0, 0.0);
 		triangleList = new ArrayList();
 	}
@@ -169,7 +168,6 @@ public class Mesh
 	 */
 	public Mesh(CADFace f)
 	{
-		Vertex.mesh = this;
 		Vertex.outer = null;
 		triangleList = new ArrayList();
 		face = f;
@@ -340,6 +338,20 @@ public class Mesh
 		quadtree.add(v2);
 	}
 	
+	public Vertex newVertex(double u, double v)
+	{
+		Vertex ret = new Vertex(u, v);
+		ret.mesh = this;
+		return ret;
+	}
+
+	public Vertex newVertex(double x, double y, double z)
+	{
+		Vertex ret = new Vertex(x, y, z);
+		ret.mesh = this;
+		return ret;
+	}
+
 	/**
 	 * Adds an existing triangle to triangle list.
 	 * This routine is useful when meshes are read from disk but not

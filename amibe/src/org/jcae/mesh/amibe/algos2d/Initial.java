@@ -469,7 +469,7 @@ public class Initial
 				p1 = (MNode1D) itn.next();
 				if (null == p2)
 				{
-					p2 = new Vertex(p1, c2d, face);
+					p2 = new Vertex(mesh, p1, c2d, face);
 					nodesWire.add(p2);
 					p20 = p2;
 					lastPoint = p2;
@@ -478,7 +478,7 @@ public class Initial
 				while (itn.hasNext())
 				{
 					p1 = (MNode1D) itn.next();
-					p2 = new Vertex(p1, c2d, face);
+					p2 = new Vertex(mesh, p1, c2d, face);
 					newNodes.add(p2);
 				}
 				// An edge is skipped if all the following conditions

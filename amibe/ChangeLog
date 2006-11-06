@@ -1,3 +1,8 @@
+Mon Nov  6 09:36:57 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Vertex.java: Make the mesh member
+	non-static.
+
 Fri Nov  3 18:02:19 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/util/PAVLSortedTree.java: This class does

@@ -666,7 +666,7 @@ public class IndexedStorage
 		Mesh ret = new Mesh();
 		ret.setType(Mesh.MESH_OEMM);
 		TIntObjectHashMap vertMap = new TIntObjectHashMap();
-		ReadVerticesProcedure rv_proc = new ReadVerticesProcedure(vertMap, leaves);
+		ReadVerticesProcedure rv_proc = new ReadVerticesProcedure(ret, vertMap, leaves);
 		oemm.walk(rv_proc);
 		ReadTrianglesProcedure rt_proc = new ReadTrianglesProcedure(oemm, vertMap, leaves, ret);
 		oemm.walk(rt_proc);
@@ -705,8 +705,10 @@ public class IndexedStorage
 	{
 		private TIntObjectHashMap vertMap;
 		private TIntHashSet leaves;
-		public ReadVerticesProcedure(TIntObjectHashMap map, TIntHashSet set)
+		private Mesh mesh;
+		public ReadVerticesProcedure(Mesh m, TIntObjectHashMap map, TIntHashSet set)
 		{
+			mesh = m;
 			vertMap = map;
 			leaves = set;
 		}
@@ -737,7 +739,7 @@ public class IndexedStorage
 					for(int nr = 0; nr < nf; nr ++)
 					{
 						bbD.get(xyz);
-						vert[index] = new Vertex(xyz[0], xyz[1], xyz[2]);
+						vert[index] = mesh.newVertex(xyz[0], xyz[1], xyz[2]);
 						vert[index].setLabel(current.minIndex + index);
 						vert[index].setReadable(true);
 						int n = bufIn.readInt();
