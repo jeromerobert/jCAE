@@ -396,6 +396,8 @@ public class Mesh
 	 */
 	public void setTrianglesList(Collection l)
 	{
+		if (triangleList != null)
+			triangleList.clear();
 		triangleList = l;
 	}
 
