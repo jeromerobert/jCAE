@@ -503,6 +503,7 @@ public class UNVConverter
 	 */
 	private void writeMesh(String fileName, String meshType)
 	{
+		logger.info("Export into file "+fileName+" (format "+meshType+")");
 		try
 		{
 			FileOutputStream fos=new FileOutputStream(fileName);
@@ -791,6 +792,7 @@ public class UNVConverter
 			fc.close();
 			fis.close();
 			clean(bb);
+			logger.info("Total number of nodes: "+count);
 		}
 		
 		/**
@@ -817,6 +819,7 @@ public class UNVConverter
 					out.println(amibeNodeToUNVNode.get(triangles[triaIndex++])+" "+amibeNodeToUNVNode.get(triangles[triaIndex++])+" "+amibeNodeToUNVNode.get(triangles[triaIndex++])+" "+(i+1));
 				}
 			}
+			logger.info("Total number of triangles: "+count);
 		}
 		
 		public void writeNormals(PrintStream out, int[] triangles,
@@ -908,6 +911,7 @@ public class UNVConverter
 			fc.close();
 			fis.close();
 			clean(bb);
+			logger.info("Total number of nodes: "+count);
 		}
 		
 		/**
