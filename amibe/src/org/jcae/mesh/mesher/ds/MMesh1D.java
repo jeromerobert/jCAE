@@ -21,6 +21,7 @@
 
 package org.jcae.mesh.mesher.ds;
 
+import org.jcae.mesh.bora.ds.Mesh;
 import org.jcae.mesh.cad.*;
 import java.util.Iterator;
 import java.util.ArrayList;
@@ -95,6 +96,53 @@ public class MMesh1D extends MMesh0D
 		for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
 		{
 			CADFace F = (CADFace) expF.current();
+			HashSet set;
+			for (expE.init(F, CADExplorer.EDGE); expE.more(); expE.next())
+			{
+				CADEdge E = (CADEdge) expE.current();
+				set = (HashSet) mapTEdgeToFaces.get(E);
+				set.add(F);
+			}
+		}
+		assert(isValid());
+	}
+	
+	public MMesh1D(Mesh mesh)
+	{
+		super(mesh);
+		shape = null;
+
+		//  HashMap size will not be greater than the number of edges,
+		//  so allocate them after computing their maximal size, they
+		//  won't be resized.
+		int edges = 0;
+		for (Iterator ite = mesh.subshapeIterator(1); ite.hasNext(); ite.next())
+			edges++;
+		if (edges == 0)
+			return;
+		mapTEdgeToSubMesh1D = new HashMap(edges);
+		listTEdge = new ArrayList(edges);
+		
+		for (Iterator ite = mesh.subshapeIterator(1); ite.hasNext(); )
+		{
+			CADEdge E = (CADEdge) ite.next();
+			//  Edges may get connected to several faces
+			if (mapTEdgeToSubMesh1D.containsKey(E))
+				continue;
+			SubMesh1D submesh1d = new SubMesh1D(E, (MMesh0D) this);
+			mapTEdgeToSubMesh1D.put(E, submesh1d);
+			listTEdge.add(E);
+		}
+		mapTEdgeToFaces = new HashMap(edges);
+		for (Iterator it = listTEdge.iterator(); it.hasNext(); )
+		{
+			CADEdge E = (CADEdge) it.next();
+			mapTEdgeToFaces.put(E, new HashSet());
+		}
+		CADExplorer expE = CADShapeBuilder.factory.newExplorer();
+		for (Iterator itf = mesh.subshapeIterator(2); itf.hasNext(); )
+		{
+			CADFace F = (CADFace) itf.next();
 			HashSet set;
 			for (expE.init(F, CADExplorer.EDGE); expE.more(); expE.next())
 			{
