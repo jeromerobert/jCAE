@@ -6,6 +6,8 @@ Wed Nov  8 13:24:40 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/mesher/ds/MMesh0D.java
 	  src/org/jcae/mesh/mesher/ds/MMesh1D.java: Allow initialization
 	from within bora meshes.
+	* src/org/jcae/mesh/xmldata/Bora1DWriter.java
+	  src/org/jcae/mesh/xmldata/Bora1DReader.java: New I/O helpers.
 
 Mon Nov  6 09:36:57 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
