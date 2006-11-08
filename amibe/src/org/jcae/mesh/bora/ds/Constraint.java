@@ -21,7 +21,7 @@
 package org.jcae.mesh.bora.ds;
 
 import org.jcae.mesh.cad.CADShape;
-import org.jcae.mesh.bora.algos.AlgoInterface;
+import org.jcae.mesh.bora.algos.*;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.lang.reflect.Constructor;
@@ -33,10 +33,7 @@ public class Constraint extends Hypothesis
 	protected int dimension = -1;
 	protected boolean dirty = false;
 	protected AlgoInterface algo = null;
-	private static Class [] innerClasses;
-	static { try {
-		innerClasses = Class.forName("org.jcae.mesh.bora.ds.Constraint").getDeclaredClasses();
-	} catch (Exception ex) {ex.printStackTrace();}};
+	private static Class [] innerClasses = Constraint.class.getDeclaredClasses();
 
 	// Is there a better way to do that?
 	private void copyHypothesis(Hypothesis h, int d)
@@ -170,7 +167,7 @@ public class Constraint extends Hypothesis
 		try {
 			for (int i = 0; i < innerClasses.length; i++)
 			{
-				if (innerClasses[i].getName().equals("org.jcae.mesh.bora.ds.Constraint$Hyp"+elt))
+				if (innerClasses[i].getName().equals(Constraint.class.getName()+"$Hyp"+elt))
 					h = (Hyp) innerClasses[i].newInstance();
 			}
 		} catch (Exception ex) {ex.printStackTrace(); };
@@ -195,13 +192,13 @@ public class Constraint extends Hypothesis
 			if (dimension == 1)
 			{
 				Class [] typeArgs = new Class[] {double.class, double.class, boolean.class};
-				Constructor cons = org.jcae.mesh.bora.algos.UniformLengthDeflection1d.class.getConstructor(typeArgs);
+				Constructor cons = UniformLengthDeflection1d.class.getConstructor(typeArgs);
 				algo = (AlgoInterface) cons.newInstance(new Object [] {new Double(targetLength), new Double(deflection), new Boolean(true)});
 			}
 			else if (dimension == 2)
 			{
 				Class [] typeArgs = new Class[] {double.class, double.class, boolean.class, boolean.class};
-				Constructor cons = org.jcae.mesh.bora.algos.Basic2d.class.getConstructor(typeArgs);
+				Constructor cons = Basic2d.class.getConstructor(typeArgs);
 				algo = (AlgoInterface) cons.newInstance(new Object [] {new Double(targetLength), new Double(deflection), new Boolean(true), new Boolean(true)});
 			}
 			/*

@@ -28,6 +28,7 @@ import org.jcae.mesh.cad.CADExplorer;
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADFace;
+import org.jcae.mesh.cad.CADSolid;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -69,14 +70,7 @@ public class Mesh
 	public MMesh1D mesh1D;
 
 	private static int shapeTypeArray[] = { CADExplorer.VERTEX, CADExplorer.EDGE, CADExplorer.FACE, CADExplorer.SOLID};
-	private static Class classTypeArray[] = new Class[shapeTypeArray.length];
-	static { try {
-		int i = 0;
-		classTypeArray[i++] = Class.forName("org.jcae.mesh.cad.CADVertex");
-		classTypeArray[i++] = Class.forName("org.jcae.mesh.cad.CADEdge");
-		classTypeArray[i++] = Class.forName("org.jcae.mesh.cad.CADFace");
-		classTypeArray[i++] = Class.forName("org.jcae.mesh.cad.CADSolid");
-	} catch (Exception ex) {}};
+	private static Class classTypeArray[] = { CADVertex.class, CADEdge.class, CADFace.class, CADSolid.class};
 
 	/**
 	 * Creates a root mesh.
