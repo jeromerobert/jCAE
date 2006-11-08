@@ -1,3 +1,9 @@
+Wed Nov  8 13:24:40 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/bora: Improve support for different mesh
+	constraints, and move src/org/jcae/mesh/amibe/constraints into
+	src/org/jcae/mesh/bora.
+
 Mon Nov  6 09:36:57 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Vertex.java: Make the mesh member
