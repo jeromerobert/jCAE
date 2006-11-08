@@ -18,7 +18,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-package org.jcae.mesh.bora.algos;
+package org.jcae.mesh.bora.algo;
 
 import org.jcae.mesh.bora.ds.Mesh;
 import org.jcae.mesh.amibe.algos2d.*;

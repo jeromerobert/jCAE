@@ -21,7 +21,7 @@
 package org.jcae.mesh.bora.ds;
 
 import org.jcae.mesh.cad.CADShape;
-import org.jcae.mesh.bora.algos.*;
+import org.jcae.mesh.bora.algo.*;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.lang.reflect.Constructor;
