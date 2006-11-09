@@ -365,18 +365,19 @@ public class Mesh
 				continue;
 			nrFaces++;
 		}
+		int indexShape = 0;
 		for (Iterator it = subshapeIterator(2); it.hasNext(); )
 		{
 			CADShape s = (CADShape) it.next();
+			indexShape++;
 			Mesh m = cadToMesh(s);
 			if (m.resultConstraint == null)
 				continue;
 			cnt++;
 			logger.info("Face "+cnt+"/"+nrFaces);
 			m.mesh1D = mesh1D;
-			m.resultConstraint.applyAlgorithm(m, s, cnt);
+			m.resultConstraint.applyAlgorithm(m, s, indexShape);
 		}
-		// logger.info("Discretize volumes");
 		MeshToMMesh3DConvert m2dTo3D = new MeshToMMesh3DConvert(xmlDir);
 		cnt = 0;
 		for (Iterator it = subshapeIterator(2); it.hasNext(); it.next())
@@ -409,6 +410,8 @@ public class Mesh
 			CADEdge E = (CADEdge) ite.next();
 			Mesh m = cadToMesh(E);
 			SubMesh1D submesh1d = (SubMesh1D) m.mesh;
+			if (submesh1d == null)
+				continue;
 			for (Iterator itn = submesh1d.getNodesIterator(); itn.hasNext(); )
 			{
 				MNode1D n = (MNode1D) itn.next();
@@ -421,6 +424,8 @@ public class Mesh
 			CADEdge E = (CADEdge) ite.next();
 			Mesh m = cadToMesh(E);
 			SubMesh1D submesh1d = (SubMesh1D) m.mesh;
+			if (submesh1d == null)
+				continue;
 			for (Iterator itn = submesh1d.getNodesIterator(); itn.hasNext(); )
 			{
 				MNode1D n = (MNode1D) itn.next();
@@ -454,6 +459,8 @@ public class Mesh
 			CADEdge E = (CADEdge) ite.next();
 			Mesh m = cadToMesh(E);
 			SubMesh1D submesh1d = (SubMesh1D) m.mesh;
+			if (submesh1d == null)
+				continue;
 			Iterator itn = submesh1d.getNodesIterator();
 			while (itn.hasNext())
 			{

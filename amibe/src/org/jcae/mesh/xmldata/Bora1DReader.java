@@ -136,6 +136,8 @@ public class Bora1DReader
 			{
 				CADEdge E = (CADEdge) ite.next();
 				Mesh m = mesh.cadToMesh(E);
+				if (m.mesh == null)
+					continue;
 				SubMesh1D submesh = m1d.getSubMesh1DFromMap(E);
 				m.mesh = (SubMesh1D) submesh;
 				if (null == submesh || setSeenEdges.contains(E))

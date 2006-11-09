@@ -148,12 +148,11 @@ public class Constraint extends Hypothesis
 	public static Constraint combineAll(ArrayList mh, int d)
 	{
 		Constraint ret = null;
-		if (mh.size() > 0)
-		{
-			ret = new Constraint();
-			for (Iterator ita = mh.iterator() ; ita.hasNext(); )
-				ret.combine((MeshHypothesis) ita.next(), d);
-		}
+		if (mh.size() == 0)
+			return null;
+		ret = new Constraint();
+		for (Iterator ita = mh.iterator() ; ita.hasNext(); )
+			ret.combine((MeshHypothesis) ita.next(), d);
 		if (ret.dimension == -1)
 			ret = null;
 		return ret;
