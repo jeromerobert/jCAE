@@ -200,12 +200,20 @@ public class Constraint extends Hypothesis
 				Constructor cons = Basic2d.class.getConstructor(typeArgs);
 				algo = (AlgoInterface) cons.newInstance(new Object [] {new Double(targetLength), new Double(deflection), new Boolean(true), new Boolean(true)});
 			}
-			/*
 			else if (dimension == 3)
 			{
-				algo = new String("org.jcae.mesh.amibe.algos3d.Netgen  length="+targetLength);
+				Class [] typeArgs = new Class[] {double.class};
+				Constructor cons = TetGen.class.getConstructor(typeArgs);
+				algo = (AlgoInterface) cons.newInstance(new Object [] {new Double(targetLength)});
+				if (!algo.isAvailable())
+					logger.error("TetGen not available!");
+				/*
+				Constructor cons = Netgen.class.getConstructor(typeArgs);
+				algo = (AlgoInterface) cons.newInstance(new Object [] {new Double(targetLength)});
+				if (!algo.isAvailable())
+					logger.error("Netgen not available!");
+				*/
 			}
-			*/
 		} catch (Exception ex)
 		{
 			ex.printStackTrace();
@@ -217,7 +225,8 @@ public class Constraint extends Hypothesis
 	{
 		if (algo == null)
 			findAlgorithm();
-		algo.compute(m, s, id);
+		if (!algo.compute(m, s, id))
+			logger.warn("Failed! "+algo);
 	}
 
 	private interface Hyp

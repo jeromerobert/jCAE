@@ -396,6 +396,28 @@ public class Mesh
 			m2dTo3D.convert(xmlFile, cnt, F);
 		}
 		m2dTo3D.finish();
+		// Solids
+		logger.info("Discretize solids");
+		int nrSolids = 0;
+		for (Iterator it = subshapeIterator(3); it.hasNext(); )
+		{
+			CADShape s = (CADShape) it.next();
+			Mesh m = cadToMesh(s);
+			if (m.resultConstraint == null)
+				continue;
+			nrSolids++;
+		}
+		cnt = 0;
+		for (Iterator it = subshapeIterator(3); it.hasNext(); )
+		{
+			CADShape s = (CADShape) it.next();
+			Mesh m = cadToMesh(s);
+			if (m.resultConstraint == null)
+				continue;
+			cnt++;
+			logger.info("Solid "+cnt+"/"+nrSolids);
+			m.resultConstraint.applyAlgorithm(m, s, cnt);
+		}
 	}
 
 	/**
@@ -563,6 +585,16 @@ public class Mesh
 		}
 		System.out.println("End list");
 	}
+
+	/**
+	 * Export the mesh onto file.
+	 */
+	/*
+	public void export(CADShape s, String file, int format)
+	{
+		ExportMesh.exportFile(this, s, file, format);
+	}
+	*/
 
 	/*
 	public String toString()
