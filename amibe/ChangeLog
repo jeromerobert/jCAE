@@ -1,3 +1,9 @@
+Thu Nov  9 17:32:00 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/bora/algo/Netgen.java
+	  src/org/jcae/mesh/bora/algo/TeTgen.java: Add wrappers for Netgen
+	and TetGen 3D meshers.
+
 Wed Nov  8 13:24:40 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/bora: Improve support for different mesh
