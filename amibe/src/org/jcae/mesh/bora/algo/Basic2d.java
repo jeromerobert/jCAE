@@ -188,6 +188,11 @@ public class Basic2d implements AlgoInterface
 		isotropic = iso;
 	}
 
+	public boolean isAvailable()
+	{
+		return true;
+	}
+
 	public boolean compute(Mesh mesh, CADShape s, int id)
 	{
 		CADFace F = (CADFace) s;

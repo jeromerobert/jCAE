@@ -26,4 +26,5 @@ import org.jcae.mesh.cad.CADShape;
 public interface AlgoInterface
 {
 	public abstract boolean compute(Mesh m, CADShape s, int id);
+	public abstract boolean isAvailable();
 }

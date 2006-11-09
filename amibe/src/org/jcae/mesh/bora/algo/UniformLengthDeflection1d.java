@@ -62,6 +62,11 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		relDefl = rel;
 	}
 
+	public boolean isAvailable()
+	{
+		return true;
+	}
+
 	public boolean compute(Mesh mesh, CADShape s, int id)
 	{
 		int nbPoints;
