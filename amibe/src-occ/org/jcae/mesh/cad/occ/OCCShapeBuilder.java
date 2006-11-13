@@ -86,22 +86,32 @@ public class OCCShapeBuilder extends CADShapeBuilder
 		TopoDS_Shape brepShape;
 		if (fileName.endsWith(".step") || fileName.endsWith(".stp"))
 		{
+			logger.debug("Read STEP file: "+fileName);
 			STEPControl_Reader aReader = new STEPControl_Reader();
 			aReader.readFile(fileName);
+			logger.debug("Transfer roots into shape...");
 			aReader.nbRootsForTransfer();
 			aReader.transferRoots();
 			brepShape = aReader.oneShape();
+			logger.debug("... done");
 		}
 		else if (fileName.endsWith(".igs"))
 		{
+			logger.debug("Read IGES file: "+fileName);
 			IGESControl_Reader aReader = new IGESControl_Reader();
 			aReader.readFile(fileName);
+			logger.debug("Transfer roots into shape...");
 			aReader.nbRootsForTransfer();
 			aReader.transferRoots();
 			brepShape = aReader.oneShape();
+			logger.debug("... done");
 		}
 		else
+		{
+			logger.debug("Read BREP file: "+fileName);
 			brepShape = BRepTools.read(fileName, new BRep_Builder());
+			logger.debug("... done");
+		}
 		return newShape(brepShape);
 	}
 	
