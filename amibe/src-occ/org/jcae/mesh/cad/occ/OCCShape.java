@@ -32,13 +32,10 @@ import org.jcae.opencascade.jni.TopoDS_Solid;
 import org.jcae.opencascade.jni.TopAbs_Orientation;
 import org.jcae.opencascade.jni.Bnd_Box;
 import org.jcae.opencascade.jni.BRepBndLib;
-import gnu.trove.TObjectIntHashMap;
 
 public class OCCShape implements CADShape
 {
 	protected TopoDS_Shape myShape = null;
-	protected int id = -1;
-	private static TObjectIntHashMap imap = new TObjectIntHashMap();
 	
 	public OCCShape()
 	{
@@ -111,29 +108,6 @@ public class OCCShape implements CADShape
 	public void writeNative(String filename)
 	{
   		BRepTools.write(myShape, filename);
-	}
-	
-	public int getId()
-	{
-		return imap.get(this);
-	}
-
-	public void setIds()
-	{
-		int i = 1;
-		OCCExplorer exp = new OCCExplorer();
-		for (int t = 0; t <= OCCExplorer.VERTEX; t++)
-		{
-			for (exp.init(this, t); exp.more(); exp.next())
-			{
-				OCCShape s = (OCCShape) exp.current();
-				if (imap.get(s) == 0)
-				{
-					imap.put(s, i);
-					i++;
-				}
-			}
-		}
 	}
 	
 	public int hashCode()

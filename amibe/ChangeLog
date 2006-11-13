@@ -1,3 +1,8 @@
+Mon Nov 13 10:40:18 CET 2006
+
+	* src/org/jcae/mesh/cad/CADShape.java
+	  src-occ/org/jcae/mesh/cad/occ/OCCShape.java: Remve CADShape.id member.
+
 Thu Nov  9 17:32:00 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/bora/algo/Netgen.java

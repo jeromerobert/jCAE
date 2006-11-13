@@ -45,9 +45,6 @@ public interface CADShape
 	public boolean isSame(Object o);
 	/** Write shape into the native format */
 	public void writeNative(String filename);
-	/** Affect unique IDs to elements; only useful for debugging purpose */
-	public void setIds();
-	public int getId();
 	/** Return a hash code matching the equals method */
 	public int hashCode();
 }
