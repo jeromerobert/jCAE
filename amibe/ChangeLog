@@ -1,7 +1,12 @@
-Mon Nov 13 10:40:18 CET 2006
+Mon Nov 13 10:40:18 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/cad/CADShape.java
-	  src-occ/org/jcae/mesh/cad/occ/OCCShape.java: Remve CADShape.id member.
+	  src-occ/org/jcae/mesh/cad/occ/OCCShape.java: Move CADShape.id member...
+	* src/org/jcae/mesh/bora/ds/Mesh.java: ... here.
+	* src-occ/org/jcae/mesh/cad/occ/OCCIterator.java
+	  src-occ/org/jcae/mesh/cad/occ/OCCCompSolid.java
+	  src/org/jcae/mesh/cad/CADIterator.java
+	  src/org/jcae/mesh/cad/CADCompSolid.java: New CAD entities.
 
 Thu Nov  9 17:32:00 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
