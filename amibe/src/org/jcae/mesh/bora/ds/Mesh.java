@@ -83,9 +83,6 @@ public class Mesh
 	public Object mesh = null;
 	public MMesh1D mesh1D;
 
-	private static int shapeTypeArray[] = { CADExplorer.VERTEX, CADExplorer.EDGE, CADExplorer.FACE, CADExplorer.SOLID};
-	private static Class classTypeArray[] = { CADVertex.class, CADEdge.class, CADFace.class, CADSolid.class};
-
 	/**
 	 * Creates a root mesh.
 	 */
@@ -256,9 +253,9 @@ public class Mesh
 		}
 		CADShapeBuilder factory = CADShapeBuilder.factory;
 		CADExplorer exp = factory.newExplorer();
-		for (int t = 0; t < shapeTypeArray.length; t++)
+		for (int t = 0; t < BCADGraph.shapeTypeArray.length; t++)
 		{
-			for (exp.init(s, shapeTypeArray[t]); exp.more(); exp.next())
+			for (exp.init(s, BCADGraph.shapeTypeArray[t]); exp.more(); exp.next())
 			{
 				CADShape sub = exp.current();
 				// By convention, store forward shapes in
@@ -313,7 +310,7 @@ public class Mesh
 		h.lock();
 		root.allHypothesis.add(h);
 		MeshHypothesis c = new MeshHypothesis(this, h);
-		for (int t = 0; t < classTypeArray.length; t++)
+		for (int t = 0; t < BCADGraph.classTypeArray.length; t++)
 		{
 			for (Iterator it = subshapeIterator(t); it.hasNext(); )
 			{
@@ -329,7 +326,7 @@ public class Mesh
 	{
 		return new Iterator()
 		{
-			private Class sample = classTypeArray[d];
+			private Class sample = BCADGraph.classTypeArray[d];
 			private Iterator its = setShapes.iterator();
 			private CADShape cur = null;
 			private CADShape next = null;
@@ -378,7 +375,7 @@ public class Mesh
 
 	private void computeHypothesis()
 	{
-		for (int t = 0; t < classTypeArray.length; t++)
+		for (int t = 0; t < BCADGraph.classTypeArray.length; t++)
 		{
 			for (Iterator it = subshapeIterator(t); it.hasNext(); )
 			{
@@ -584,7 +581,7 @@ public class Mesh
 		CADExplorer exp = factory.newExplorer();
 		System.out.println("List of geometrical entities");
 
-		for (int t = classTypeArray.length - 1; t >= 0; t--)
+		for (int t = BCADGraph.classTypeArray.length - 1; t >= 0; t--)
 		{
 			for (Iterator it = subshapeIterator(t); it.hasNext(); )
 			{
@@ -598,7 +595,7 @@ public class Mesh
 				else
 				{
 					System.out.println("Shape "+cadToMesh(s).getId()+" "+s+":");
-					for (exp.init(s, shapeTypeArray[t-1]); exp.more(); exp.next())
+					for (exp.init(s, BCADGraph.shapeTypeArray[t-1]); exp.more(); exp.next())
 					{
 						CADShape sub = exp.current();
 						System.out.println(" +> shape "+cadToMesh(sub).getId()+" "+sub);
@@ -630,7 +627,7 @@ public class Mesh
 	{
 		System.out.println("List of constraints");
 		String indent = "";
-		for (int t = classTypeArray.length - 1; t >= 0; t--)
+		for (int t = BCADGraph.classTypeArray.length - 1; t >= 0; t--)
 		{
 			for (Iterator it = subshapeIterator(t); it.hasNext(); )
 			{

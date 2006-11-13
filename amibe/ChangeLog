@@ -10,7 +10,12 @@ Mon Nov 13 10:40:18 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/cad/CADShapeBuilder.java
 	  src-occ/org/jcae/mesh/cad/occ/OCCShapeBuilder.java: New newIterator()
 	method to iterate on direct children.
-
+	* src/org/jcae/mesh/bora/xmldata/BModelReader.java
+	  src/org/jcae/mesh/bora/xmldata/BModelWriter.java
+	  src/org/jcae/mesh/bora/ds/BModel.java
+	  src/org/jcae/mesh/bora/ds/BCADGraph.java
+	  src/org/jcae/mesh/bora/ds/BCADGraphCell.java
+	  src/org/jcae/mesh/bora/ds/BGroup.java: New classes.
 
 Thu Nov  9 17:32:00 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
