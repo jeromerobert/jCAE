@@ -7,6 +7,10 @@ Mon Nov 13 10:40:18 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 	  src-occ/org/jcae/mesh/cad/occ/OCCCompSolid.java
 	  src/org/jcae/mesh/cad/CADIterator.java
 	  src/org/jcae/mesh/cad/CADCompSolid.java: New CAD entities.
+	* src/org/jcae/mesh/cad/CADShapeBuilder.java
+	  src-occ/org/jcae/mesh/cad/occ/OCCShapeBuilder.java: New newIterator()
+	method to iterate on direct children.
+
 
 Thu Nov  9 17:32:00 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 

@@ -164,6 +164,11 @@ public class OCCShapeBuilder extends CADShapeBuilder
 	{
 		return (CADWireExplorer) new OCCWireExplorer();
 	}
+
+	public CADIterator newIterator()
+	{
+		return (CADIterator) new OCCIterator();
+	}
 	
 	public CADGeomCurve2D newCurve2D(Object oe, Object of)
 	{

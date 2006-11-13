@@ -88,6 +88,12 @@ public abstract class CADShapeBuilder
 	public abstract CADWireExplorer newWireExplorer ();
 	
 	/**
+	 * Create a new CADIterator
+	 * @return The created CADIterator
+	 */
+	public abstract CADIterator newIterator ();
+	
+	/**
 	 * Create a new CADGeomCurve2D
 	 * @param oe The edge owning the curve
 	 * @param of The face owning the curve
