@@ -48,4 +48,19 @@ public class JCAEXMLWriter
 			"classpath:///org/jcae/mesh/xmldata/jcae.dtd");
 		return domImpl.createDocument(null, "jcae", docType);
 	}
+
+	/** 
+	 * Creates a jcae XML document.
+	 */	
+	public static Document createJcaeBoraDocument()
+		throws ParserConfigurationException
+	{
+		DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
+		factory.setValidating(true);
+		DocumentBuilder builder=factory.newDocumentBuilder();
+		DOMImplementation domImpl=builder.getDOMImplementation();
+		DocumentType docType=domImpl.createDocumentType("jcae", null,
+			"classpath:///org/jcae/mesh/xmldata/jcaebora.dtd");
+		return domImpl.createDocument(null, "jcae", docType);
+	}
 }

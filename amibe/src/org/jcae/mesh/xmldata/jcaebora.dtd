@@ -1,0 +1,47 @@
+<!-- The root element of a jCAE model file -->
+<!ELEMENT jcae (model)+>
+
+<!-- Model -->
+<!ELEMENT model (shape,graph)>
+
+<!-- not used -->
+<!ATTLIST model id CDATA #IMPLIED>
+
+<!-- geometry used to create the mesh -->
+<!ELEMENT shape (file)>
+
+<!-- a file -->
+<!ELEMENT file EMPTY>
+
+<!-- File attributes.
+Allowed values for "format" are doublestream, integerstream, brep.
+The offset attribute is only allowed for doublestream and integerstream.
+doublestream are raw file containing float values written by java.io.DataOutput.writeDouble.
+doublestream are raw file containing int values written by java.io.DataOutput.writeInt.
+brep are http://www.opencascade.org files.
+-->
+<!ATTLIST file location CDATA #REQUIRED>
+
+<!ELEMENT graph (description?,cad+,group*)>
+
+<!ELEMENT description (#PCDATA)>
+
+<!ELEMENT cad (children?,tessellation?)>
+<!ATTLIST cad id CDATA #IMPLIED
+              type (vertex|edge|wire|face|shell|solid|compsolid|compound) #REQUIRED
+              orientation CDATA #REQUIRED
+              reversed CDATA "">
+
+<!ELEMENT group (children?,tessellation?)>
+<!ATTLIST group id CDATA #IMPLIED>
+
+<!ELEMENT children EMPTY>
+<!ATTLIST children list CDATA #REQUIRED>
+
+<!ELEMENT tessellation EMPTY>
+<!ATTLIST tessellation format CDATA #REQUIRED
+                       location CDATA #REQUIRED>
+
+<!ELEMENT flag EMPTY>
+<!ATTLIST flag value CDATA #REQUIRED>
+
