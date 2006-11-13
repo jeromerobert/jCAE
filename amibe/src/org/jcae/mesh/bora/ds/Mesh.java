@@ -30,26 +30,39 @@ import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADFace;
 import org.jcae.mesh.cad.CADSolid;
 
+import java.util.Collection;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Stack;
+import java.util.Iterator;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
+import gnu.trove.TIntObjectHashMap;
 import java.io.File;
 
 import org.apache.log4j.Logger;
 
+/**
+ * Mesh graph.
+ */
 public class Mesh
 {
 	private static Logger logger=Logger.getLogger(Mesh.class);
 	// The following members are shared between all instances
-	// of the same Mesh root
-	//   Tree parent
-	private Mesh parent = null;
+	// of the same Mesh root.  They must always be accessed
+	// through the 'root' member.
+	//   Graph root
+	private Mesh root = null;
 	//   Map between topological elements and Mesh
 	private THashMap cadShapeToMeshShape;
+	//   Map between indices and Mesh
+	private TIntObjectHashMap indexToMesh;
 	//   Global shape
-	private CADShape shape;
+	private CADShape rootShape;
+	//   First free index
+	private int freeIndex;
+	//   List of all hyposthesis
+	private Collection allHypothesis;
 	//   Geometry file
 	private String brepFile;
 	//   Output variables
@@ -57,15 +70,16 @@ public class Mesh
 	private String xmlBrepDir;
 
 	// Local members
-	// List of all hyposthesis
-	private ArrayList allHypothesis = null;
-	// List of constraints applied to this Mesh
-	private ArrayList constraints = new ArrayList();
+	//   Unique identitier
+	private int id = -1;
+	//   List of CADShape
+	private Collection setShapes = new LinkedHashSet();
+	//   List of parents
+	private Collection parents = new LinkedHashSet();
+	//   List of constraints applied to this Mesh
+	private Collection constraints = new ArrayList();
 	private Constraint resultConstraint = null;
-	// List of CADShape
-	private ArrayList listShapes = new ArrayList();
-	private THashSet setShapes = new THashSet();
-	// 
+	//   Tessellation
 	public Object mesh = null;
 	public MMesh1D mesh1D;
 
@@ -77,8 +91,9 @@ public class Mesh
 	 */
 	public Mesh (String brep, String out)
 	{
-		parent = this;
+		root = this;
 		cadShapeToMeshShape = new THashMap();
+		indexToMesh = new TIntObjectHashMap();
 		allHypothesis = new ArrayList();
 		xmlDir = out;
 		File xmlDirF = new File(xmlDir);
@@ -93,30 +108,24 @@ public class Mesh
 		xmlBrepDir = relativize(new File(brep).getAbsoluteFile().getParentFile(), new File(xmlDir).getAbsoluteFile()).getPath();
 
 		CADShapeBuilder factory = CADShapeBuilder.factory;
-		shape = factory.newShape(brep);
-		shape.setIds();
-		add(shape);
+		rootShape = factory.newShape(brep);
+		add(rootShape);
+		setIds(rootShape);
 	}
 	
 	private Mesh (Mesh p)
 	{
-		parent = p;
-		cadShapeToMeshShape = parent.cadShapeToMeshShape;
-		shape = parent.shape;
-		allHypothesis = parent.allHypothesis;
-		xmlDir = parent.xmlDir;
-		brepFile = parent.brepFile;
-		xmlBrepDir = parent.xmlBrepDir;
+		root = p;
 	}
 	
 	public String getCADFile()
 	{
-		return brepFile;
+		return root.brepFile;
 	}
 
 	public String getOutputDir()
 	{
-		return xmlDir;
+		return root.xmlDir;
 	}
 
 	/**
@@ -125,6 +134,65 @@ public class Mesh
 	public Mesh createSubMesh()
 	{
 		return new Mesh(this);
+	}
+
+	public int getId()
+	{
+		return id;
+	}
+
+	private void setIds(CADShape shape)
+	{
+		int i = 1;
+		CADShapeBuilder factory = CADShapeBuilder.factory;
+		CADExplorer exp = factory.newExplorer();
+		CADExplorer exp2 = factory.newExplorer();
+		for (int t = 0; t <= CADExplorer.VERTEX; t++)
+		{
+			for (exp.init(shape, t); exp.more(); exp.next())
+			{
+				CADShape s = (CADShape) exp.current();
+				Mesh m = cadToMesh(s);
+				if (m != null && m.id <= 0)
+
+				{
+					m.id = i;
+					root.indexToMesh.put(i, s);
+					i++;
+				}
+			}
+		}
+		root.freeIndex = i;
+
+		// Add backward links
+		for (int t = 0; t <= CADExplorer.VERTEX; t++)
+		{
+			for (exp.init(shape, t); exp.more(); exp.next())
+			{
+				CADShape s = (CADShape) exp.current();
+				Mesh m = cadToMesh(s);
+				for (int sub = t+1; sub <= CADExplorer.VERTEX; sub++)
+				{
+					for (exp2.init(s, sub); exp2.more(); exp2.next())
+					{
+						CADShape s2 = (CADShape) exp2.current();
+						Mesh m2 = cadToMesh(s2);
+						if (m2 != null)
+							m2.addParent(m);
+					}
+				}
+			}
+		}
+	}
+
+	public void addParent(Mesh that)
+	{
+		parents.add(that);
+	}
+
+	public void printParents()
+	{
+		System.out.println(""+parents);
 	}
 
 	/*
@@ -142,7 +210,7 @@ public class Mesh
 			cadType = CADExplorer.FACE;
 		else if (type.equals("EDGE"))
 			cadType = CADExplorer.EDGE;
-		for (Iterator it = listShapes.iterator(); it.hasNext(); )
+		for (Iterator it = setShapes.iterator(); it.hasNext(); )
 		{
 			CADShape s = (CADShape) it.next();
 			for (exp.init(s, cadType); exp.more(); exp.next())
@@ -179,11 +247,10 @@ public class Mesh
 			s = s.reversed();
 		if (!setShapes.contains(s))
 		{
-			listShapes.add(s);
 			setShapes.add(s);
-			if (!cadShapeToMeshShape.contains(s))
+			if (!root.cadShapeToMeshShape.contains(s))
 			{
-				cadShapeToMeshShape.put(s, this);
+				root.cadShapeToMeshShape.put(s, this);
 				logger.debug("  Add submesh: "+s+" "+this);
 			}
 		}
@@ -200,12 +267,11 @@ public class Mesh
 					sub = sub.reversed();
 				if (setShapes.contains(sub))
 					continue;
-				listShapes.add(sub);
 				setShapes.add(sub);
-				if (!cadShapeToMeshShape.contains(sub))
+				if (!root.cadShapeToMeshShape.contains(sub))
 				{
 					Mesh submesh = new Mesh(this);
-					cadShapeToMeshShape.put(sub, submesh);
+					root.cadShapeToMeshShape.put(sub, submesh);
 					logger.debug("  Add submesh: "+sub+" "+submesh);
 				}
 			}
@@ -218,9 +284,9 @@ public class Mesh
 	 *
 	 * @return  the list of elements
 	 */
-	public ArrayList getShapes()
+	public Collection getShapes()
 	{
-		return listShapes;
+		return setShapes;
 	}
 
 	/**
@@ -232,7 +298,7 @@ public class Mesh
 	{
 		if (!s.isOrientationForward())
 			s = s.reversed();
-		Mesh m = (Mesh) cadShapeToMeshShape.get(s);
+		Mesh m = (Mesh) root.cadShapeToMeshShape.get(s);
 		assert m != null;
 		return m;
 	}
@@ -245,9 +311,8 @@ public class Mesh
 	public void setHypothesis(Hypothesis h)
 	{
 		h.lock();
-		allHypothesis.add(h);
+		root.allHypothesis.add(h);
 		MeshHypothesis c = new MeshHypothesis(this, h);
-		THashSet seen = new THashSet();
 		for (int t = 0; t < classTypeArray.length; t++)
 		{
 			for (Iterator it = subshapeIterator(t); it.hasNext(); )
@@ -265,7 +330,7 @@ public class Mesh
 		return new Iterator()
 		{
 			private Class sample = classTypeArray[d];
-			private Iterator its = listShapes.iterator();
+			private Iterator its = setShapes.iterator();
 			private CADShape cur = null;
 			private CADShape next = null;
 			private boolean initialized = false;
@@ -349,7 +414,7 @@ public class Mesh
 		}
 		updateNodeLabels();
 		String xmlFile = "jcae1d";
-		Bora1DWriter.writeObject(this, xmlDir, xmlFile, xmlBrepDir, brepFile);
+		Bora1DWriter.writeObject(this, root.xmlDir, xmlFile, root.xmlBrepDir, root.brepFile);
 		mesh1D = Bora1DReader.readObject(this, xmlFile);
 		// Faces
 		logger.info("Discretize faces");
@@ -378,7 +443,7 @@ public class Mesh
 			m.mesh1D = mesh1D;
 			m.resultConstraint.applyAlgorithm(m, s, indexShape);
 		}
-		MeshToMMesh3DConvert m2dTo3D = new MeshToMMesh3DConvert(xmlDir);
+		MeshToMMesh3DConvert m2dTo3D = new MeshToMMesh3DConvert(root.xmlDir);
 		cnt = 0;
 		for (Iterator it = subshapeIterator(2); it.hasNext(); it.next())
 		{
@@ -528,15 +593,15 @@ public class Mesh
 				{
 					CADVertex v = (CADVertex) s;
 					double [] coord = v.pnt();
-					System.out.println("Shape "+v.getId()+" "+v+ " ("+coord[0]+", "+coord[1]+", "+coord[2]+")");
+					System.out.println("Shape "+cadToMesh(v).getId()+" "+v+ " ("+coord[0]+", "+coord[1]+", "+coord[2]+")");
 				}
 				else
 				{
-					System.out.println("Shape "+s.getId()+" "+s+":");
+					System.out.println("Shape "+cadToMesh(s).getId()+" "+s+":");
 					for (exp.init(s, shapeTypeArray[t-1]); exp.more(); exp.next())
 					{
 						CADShape sub = exp.current();
-						System.out.println(" +> shape "+sub.getId()+" "+sub);
+						System.out.println(" +> shape "+cadToMesh(sub).getId()+" "+sub);
 					}
 				}
 			}
@@ -550,7 +615,7 @@ public class Mesh
 	public void printAllHypothesis()
 	{
 		System.out.println("List of hypothesis");
-		for (Iterator it = allHypothesis.iterator(); it.hasNext(); )
+		for (Iterator it = root.allHypothesis.iterator(); it.hasNext(); )
 		{
 			Hypothesis h = (Hypothesis) it.next();
 			System.out.println(" + ("+Integer.toHexString(h.hashCode())+") "+h);
@@ -570,7 +635,7 @@ public class Mesh
 			for (Iterator it = subshapeIterator(t); it.hasNext(); )
 			{
 				CADShape s = (CADShape) it.next();
-				System.out.println(indent+"Shape "+s.getId()+" "+s);
+				System.out.println(indent+"Shape "+cadToMesh(s).getId()+" "+s);
 				Mesh m = cadToMesh(s);
 				if (m.resultConstraint == null)
 					continue;
@@ -604,10 +669,10 @@ public class Mesh
 			return ""+explicitHypothesis;
 		}
 		String ret = "Root shape : "+rootShape+"\n";
-		if (listShapes.size() > 0)
+		if (setShapes.size() > 0)
 		{
 			ret += "List of shapes: ";
-			for (Iterator it = listShapes.iterator(); it.hasNext(); )
+			for (Iterator it = setShapes.iterator(); it.hasNext(); )
 			{
 				CADShape s = (CADShape) it.next();
 				ret += "   "+s+"\n";
@@ -676,6 +741,6 @@ public class Mesh
 		mesh.compute();
 		//submesh2.compute();
 		//submesh2.printConstraints();
-		new UNVConverter(mesh.xmlDir).writeMESH("main.mesh");
+		new UNVConverter(mesh.root.xmlDir).writeMESH("main.mesh");
 	}
 }

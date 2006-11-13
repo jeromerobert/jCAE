@@ -23,7 +23,7 @@ package org.jcae.mesh.bora.ds;
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.bora.algo.*;
 import java.util.Iterator;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.lang.reflect.Constructor;
 import org.apache.log4j.Logger;
 
@@ -138,14 +138,14 @@ public class Constraint extends Hypothesis
 	}
 
 	/**
-	 * Combines all Hypothesis of a ArrayList.  In order to improve error
+	 * Combines all Hypothesis of a Collection.  In order to improve error
 	 * reporting, MeshHypothesis objects are passed as arguments instead
 	 * of Hypothesis.
 	 *
 	 * @param mh  list of MeshHypothesis objects.
 	 * @param d   dimension
 	 */
-	public static Constraint combineAll(ArrayList mh, int d)
+	public static Constraint combineAll(Collection mh, int d)
 	{
 		Constraint ret = null;
 		if (mh.size() == 0)
