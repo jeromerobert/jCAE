@@ -21,7 +21,6 @@
 package org.jcae.mesh.bora.algo;
 
 import org.jcae.mesh.bora.ds.Mesh;
-import org.jcae.mesh.bora.ds.ExportMesh;
 import org.jcae.mesh.amibe.algos2d.*;
 import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
