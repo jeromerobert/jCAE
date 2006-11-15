@@ -60,7 +60,14 @@ public class BinaryReader
 		TIntObjectHashMap vertMap = new TIntObjectHashMap();
 		for (Iterator it = root.uniqueShapesExplorer(BCADGraph.DIM_FACE); it.hasNext(); )
 		{
+			boolean reversed = false;
 			BCADGraphCell s = (BCADGraphCell) it.next();
+			if (s.getOrientation() != 0)
+			{
+				reversed = true;
+				if (s.getReversed() != null)
+					s = s.getReversed();
+			}
 			String nfile = model.getOutputDir()+File.separator+model.get2dDir()+File.separator+"n"+s.getId();
 			try
 			{
@@ -131,7 +138,10 @@ public class BinaryReader
 					Vertex pt1 = nodelist[trianglesBuffer.get()-1];
 					Vertex pt2 = nodelist[trianglesBuffer.get()-1];
 					Vertex pt3 = nodelist[trianglesBuffer.get()-1];
-					facelist[i] = new Triangle(pt1, pt2, pt3);
+					if (!reversed)
+						facelist[i] = new Triangle(pt1, pt2, pt3);
+					else
+						facelist[i] = new Triangle(pt1, pt3, pt2);
 					mesh.add(facelist[i]);
 					pt1.setLink(facelist[i]);
 					pt2.setLink(facelist[i]);
