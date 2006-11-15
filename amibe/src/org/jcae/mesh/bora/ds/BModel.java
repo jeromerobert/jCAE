@@ -253,36 +253,6 @@ public class BModel
 			s.discretize();
 			BinaryWriter.writeCADFace(s, xmlDir+File.separator+dir2d);
 		}
-		/*
-		for (Iterator it = root.shapesExplorer(BCADGraph.DIM_FACE); it.hasNext(); )
-		{
-			BCADGraphCell s = (BCADGraphCell) it.next();
-			if (s.getReversed() != null && s.mesh == null)
-			{
-				s.mesh = s.getReversed().mesh;
-				s.mesh1D = s.getReversed().mesh1D;
-			}
-		}
-		MeshToMMesh3DConvert m2dTo3D = new MeshToMMesh3DConvert(xmlDir);
-		for (Iterator it = root.uniqueShapesExplorer(BCADGraph.DIM_FACE); it.hasNext(); it.next())
-		{
-			BCADGraphCell s = (BCADGraphCell) it.next();
-			xmlFile = "jcae2d."+s.getId();
-			m2dTo3D.computeRefs(xmlFile);
-		}
-		m2dTo3D.initialize("jcae3d", false);
-		cnt = 0;
-		for (Iterator it = root.uniqueShapesExplorer(BCADGraph.DIM_FACE); it.hasNext(); )
-		{
-			BCADGraphCell s = (BCADGraphCell) it.next();
-			CADFace F = (CADFace) s.getShape();
-			cnt++;
-			xmlFile = "jcae2d."+s.getId();
-			m2dTo3D.convert(xmlFile, cnt, F);
-		}
-		m2dTo3D.finish();
-		*/
-		/*
 		// Solids
 		logger.info("Discretize solids");
 		int nrSolids = 0;
@@ -301,9 +271,8 @@ public class BModel
 				continue;
 			cnt++;
 			logger.info("Solid "+cnt+"/"+nrSolids);
-			//m.resultConstraint.applyAlgorithm(m, s, cnt);
+			s.discretize();
 		}
-		*/
 	}
 
 	/**
