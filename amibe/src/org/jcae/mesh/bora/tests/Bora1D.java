@@ -63,7 +63,7 @@ public class Bora1D
 		for (Iterator it = root.uniqueShapesExplorer(BCADGraph.DIM_EDGE); it.hasNext(); )
 		{
 			BCADGraphCell edge = (BCADGraphCell) it.next();
-			File file = new File(model.getOutputDir()+File.separator+"edges", "n"+edge.getId());
+			File file = new File(model.getOutputDir()+File.separator+model.get1dDir(), "n"+edge.getId());
 			if (file.exists())
 				nEdges++;
 		}
@@ -76,11 +76,11 @@ public class Bora1D
 		for (Iterator it = root.uniqueShapesExplorer(BCADGraph.DIM_EDGE); it.hasNext(); )
 		{
 			BCADGraphCell edge = (BCADGraphCell) it.next();
-			File nodesfile = new File(model.getOutputDir()+File.separator+"edges", "n"+edge.getId());
+			File nodesfile = new File(model.getOutputDir()+File.separator+model.get1dDir(), "n"+edge.getId());
 			if (!nodesfile.exists())
 				continue;
 			nrNodes[nEdges+1] = nrNodes[nEdges] + (int) nodesfile.length() / 32;
-			File beamsfile = new File(model.getOutputDir()+File.separator+"edges", "b"+edge.getId());
+			File beamsfile = new File(model.getOutputDir()+File.separator+model.get1dDir(), "b"+edge.getId());
 			if (!beamsfile.exists())
 				continue;
 			nrBeams[nEdges+1] = nrBeams[nEdges] + (int) beamsfile.length() / 8;
@@ -102,10 +102,10 @@ public class Bora1D
 			BCADGraphCell edge = (BCADGraphCell) it.next();
 			try
 			{
-				File nodesfile = new File(model.getOutputDir()+File.separator+"edges", "n"+edge.getId());
+				File nodesfile = new File(model.getOutputDir()+File.separator+model.get1dDir(), "n"+edge.getId());
 				if (!nodesfile.exists())
 					continue;
-				File beamsfile = new File(model.getOutputDir()+File.separator+"edges", "b"+edge.getId());
+				File beamsfile = new File(model.getOutputDir()+File.separator+model.get1dDir(), "b"+edge.getId());
 				if (!beamsfile.exists())
 					continue;
 

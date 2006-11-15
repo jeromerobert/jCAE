@@ -43,7 +43,7 @@ public class BinaryWriter
 			return;
 		try
 		{
-			File dir = new File(xmlDir, "edges");
+			File dir = new File(xmlDir, edge.getGraph().getModel().get1dDir());
 
 			//create the output directory if it does not exist
 			if(!dir.exists())
