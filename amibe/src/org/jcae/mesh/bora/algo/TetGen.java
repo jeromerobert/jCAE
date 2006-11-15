@@ -21,9 +21,11 @@
 package org.jcae.mesh.bora.algo;
 
 import org.jcae.mesh.bora.ds.BCADGraphCell;
-import org.jcae.mesh.amibe.algos2d.*;
+import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.bora.xmldata.BinaryReader;
 import org.jcae.mesh.xmldata.UNVConverter;
-import org.jcae.mesh.cad.*;
+import org.jcae.mesh.xmldata.MeshWriter;
+import java.io.File;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import org.apache.log4j.Logger;
@@ -82,15 +84,21 @@ public class TetGen implements AlgoInterface
 
 	public boolean compute(BCADGraphCell mesh)
 	{
-		CADSolid S = (CADSolid) mesh.getShape();
 		logger.info("Running TetGen "+banner);
 		// mesh.export(s, "tetgen.poly", ExportMesh.FORMAT_POLY);
-		new UNVConverter(mesh.getGraph().getModel().getOutputDir()).writePOLY("tetgen.poly");
+		Mesh m = BinaryReader.readObject(mesh);
+		MeshWriter.writeObject3D(m, "tetgen.tmp", "jcae3d", "brep", mesh.getGraph().getModel().getCADFile(), 1);
+		new UNVConverter("tetgen.tmp").writePOLY("tetgen.poly");
 		try {
 			Process p = Runtime.getRuntime().exec(new String[] {"tetgen", "-a"+volume+"pYNEFg", "tetgen"});
 			p.waitFor();
 			if (p.exitValue() != 0)
 				return false;
+			File temp = new File(".", "tetgen.1.mesh");
+			File output = new File(".", "tetgen."+mesh.getId()+".mesh");
+			if (output.exists())
+				output.delete();
+			temp.renameTo(output);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return false;
