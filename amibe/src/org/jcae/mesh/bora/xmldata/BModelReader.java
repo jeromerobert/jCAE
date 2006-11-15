@@ -59,6 +59,10 @@ public class BModelReader
 	 * have links to the binary files.
 	 * @param xmlFile The name of the XML file
 	 */	
+	public static BModel readObject(String xmlDir)
+	{
+		return readObject(xmlDir, "model", true);
+	}
 	public static BModel readObject(String xmlDir, String xmlFile)
 	{
 		return readObject(xmlDir, xmlFile, true);

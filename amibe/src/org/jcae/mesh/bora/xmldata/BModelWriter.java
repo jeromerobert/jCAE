@@ -38,11 +38,11 @@ public class BModelWriter
 	 * have links to the binary files.
 	 * @param xmlFile The name of the XML file
 	 */	
-	public static void writeObject(BModel model, String xmlDir, String xmlFile)
+	public static void writeObject(BModel model)
 	{
 		try
 		{
-			File file = new File(xmlDir, xmlFile);
+			File file = new File(model.getOutputDir(), model.getOutputFile());
 
 			// Create and fill the DOM
 			Document document=JCAEXMLWriter.createJcaeBoraDocument();

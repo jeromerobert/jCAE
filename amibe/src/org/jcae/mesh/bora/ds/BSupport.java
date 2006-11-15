@@ -37,9 +37,9 @@ import org.apache.log4j.Logger;
 /**
  * Mesh graph.
  */
-public class BGroup
+public class BSupport
 {
-	private static Logger logger=Logger.getLogger(BGroup.class);
+	private static Logger logger=Logger.getLogger(BSupport.class);
 	//   Model
 	private BModel model;
 	//   First free index
@@ -48,15 +48,13 @@ public class BGroup
 	private int id = -1;
 	//   List of children
 	private Collection setShapes = new LinkedHashSet();
-	//   List of parents
-	private Collection parents = new LinkedHashSet();
 	//   Tessellation
 	public Object mesh = null;
 
 	/**
 	 * Creates a root mesh.
 	 */
-	public BGroup(BModel m, int offset)
+	public BSupport(BModel m, int offset)
 	{
 		model = m;
 		id = offset + freeIndex;
@@ -90,7 +88,7 @@ public class BGroup
 		}
 	}
 	
-	public void add(BGroup g)
+	public void add(BSupport g)
 	{
 		setShapes.addAll(g.setShapes);
 	}
@@ -103,6 +101,23 @@ public class BGroup
 	public Collection getShapes()
 	{
 		return setShapes;
+	}
+
+	/**
+	 * Adds an hypothesis to a submesh.
+	 *
+	 * @param  h  hypothesis
+	 */
+	public void setHypothesis(Hypothesis h)
+	{
+		BCADGraph graph = model.getGraph();
+		for (Iterator it = setShapes.iterator(); it.hasNext(); )
+		{
+			CADShape s = (CADShape) it.next();
+			BCADGraphCell c = graph.cadToGraphCell(s);
+			assert c != null : s;
+			c.setHypothesis(h);
+		}
 	}
 
 	// Returns an iterator on all geometrical elements of dimension d
@@ -174,8 +189,25 @@ public class BGroup
 		solids[0] = exp.current();
 		exp.next();
 		solids[1] = exp.current();
-		BGroup group1 = model.newMesh();
-		group1.add(solids[0]);
-		group1.printShapes();
+		BSupport submesh1 = model.newMesh();
+		submesh1.add(solids[0]);
+		BSupport submesh2 = model.newMesh();
+		submesh2.add(solids[1]);
+
+		Hypothesis h1 = new Hypothesis();
+		h1.setElement("T3");
+		h1.setLength(0.3, true);
+		h1.setDeflection(0.05);
+
+		Hypothesis h2 = new Hypothesis();
+		h2.setElement("T4");
+		h2.setLength(0.1);
+
+		submesh1.setHypothesis(h1);
+		submesh2.setHypothesis(h2);
+		model.printAllHypothesis();
+		model.compute();
+		model.printShapes();
+		// model.printConstraints();
 	}
 }

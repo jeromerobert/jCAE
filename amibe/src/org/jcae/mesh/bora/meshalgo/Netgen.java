@@ -18,13 +18,15 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-package org.jcae.mesh.bora.algo;
+package org.jcae.mesh.bora.meshalgo;
 
-import org.jcae.mesh.bora.ds.BCADGraphCell;
+import org.jcae.mesh.bora.ds.Mesh;
+import org.jcae.mesh.bora.ds.ExportMesh;
 import org.jcae.mesh.amibe.algos2d.*;
 import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.mesher.ds.MMesh1D;
+import org.jcae.mesh.xmldata.Bora1DReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import org.jcae.mesh.xmldata.UNVConverter;
 import org.jcae.mesh.cad.*;
@@ -44,6 +46,7 @@ import org.apache.log4j.Logger;
 public class Netgen implements AlgoInterface
 {
 	private static Logger logger=Logger.getLogger(Netgen.class);
+	private Mesh mesh = null;
 	private double maxlen;
 	private static boolean available = true;
 	private static String banner = null;
@@ -78,12 +81,12 @@ public class Netgen implements AlgoInterface
 		return available;
 	}
 
-	public boolean compute(BCADGraphCell mesh)
+	public boolean compute(Mesh mesh, CADShape s, int id)
 	{
-		CADSolid S = (CADSolid) mesh.getShape();
+		CADSolid S = (CADSolid) s;
 		logger.info("Running TetGen "+banner);
 		// mesh.export(s, "tetgen.poly", ExportMesh.FORMAT_POLY);
-		new UNVConverter(mesh.getGraph().getModel().getOutputDir()).writeSTL("netgen.stl");
+		new UNVConverter(mesh.getOutputDir()).writeSTL("netgen.stl");
 		try {
 			Process p = Runtime.getRuntime().exec(new String[] {"netgen", "-batchmode", "-meshfile=netgen.mesh", "-geofile=netgen.stl"});
 			p.waitFor();

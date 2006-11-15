@@ -18,12 +18,13 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-package org.jcae.mesh.bora.algo;
+package org.jcae.mesh.bora.meshalgo;
 
-import org.jcae.mesh.bora.ds.BCADGraphCell;
+import org.jcae.mesh.bora.ds.Mesh;
+import org.jcae.mesh.cad.CADShape;
 
 public interface AlgoInterface
 {
-	public abstract boolean compute(BCADGraphCell c);
+	public abstract boolean compute(Mesh m, CADShape s, int id);
 	public abstract boolean isAvailable();
 }

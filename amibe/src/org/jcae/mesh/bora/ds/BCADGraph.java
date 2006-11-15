@@ -51,6 +51,11 @@ public class BCADGraph
 	public static Class classTypeArray[] = { CADVertex.class, CADEdge.class, CADWire.class, CADFace.class, CADShell.class,  CADSolid.class, CADCompSolid.class, CADCompound.class};
 	public static String nameTypeArray[] = { "vertex", "edge", "wire", "face", "shell", "solid", "compsolid", "compound"};
 
+	public static int DIM_VERTEX = 0;
+	public static int DIM_EDGE   = 1;
+	public static int DIM_FACE   = 3;
+	public static int DIM_SOLID  = 5;
+
 	// In OccJava, 2 CADShape instances can be equal with different orientations.
 	// We sometimes need to keep track of shape orientation in our graph, hash
 	// sets and maps can then use the keepOrientation instance as hashing
@@ -163,8 +168,9 @@ public class BCADGraph
 	 *
 	 * @return  the submesh
 	 */
-	public BCADGraphCell cadToGraphCell(CADShape s)
+	public BCADGraphCell cadToGraphCell(Object s)
 	{
+		assert s instanceof CADShape;
 		return (BCADGraphCell) cadShapeToGraphCell.get(s);
 	}
 

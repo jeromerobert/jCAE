@@ -21,7 +21,7 @@
 
 package org.jcae.mesh.mesher.ds;
 
-import org.jcae.mesh.bora.ds.Mesh;
+import org.jcae.mesh.bora.ds.*;
 import org.jcae.mesh.cad.*;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -77,6 +77,24 @@ public class MMesh0D
 		vnodeset = new TObjectIntHashMap(nodes);
 		for (Iterator itn = mesh.subshapeIterator(0); itn.hasNext(); )
 			addGeometricalVertex((CADVertex) itn.next());
+	}
+	
+	public MMesh0D(BModel model)
+	{
+		int nodes = 0;
+		BCADGraphCell root = model.getGraph().getRootCell();
+		for (Iterator itn = root.shapesExplorer(BCADGraph.DIM_VERTEX); itn.hasNext(); itn.next())
+			nodes++;
+
+		//  Merge topological vertices found at the same geometrical point
+		vnodesize = 0;
+		vnodelist = new CADVertex[nodes];
+		vnodeset = new TObjectIntHashMap(nodes);
+		for (Iterator itn = root.shapesExplorer(BCADGraph.DIM_VERTEX); itn.hasNext(); )
+		{
+			BCADGraphCell v = (BCADGraphCell) itn.next();
+			addGeometricalVertex((CADVertex) v.getShape());
+		}
 	}
 	
 	//  Add a geometrical vertex.

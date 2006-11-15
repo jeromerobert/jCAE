@@ -21,7 +21,7 @@
 
 package org.jcae.mesh.mesher.ds;
 
-import org.jcae.mesh.bora.ds.Mesh;
+import org.jcae.mesh.bora.ds.*;
 import org.jcae.mesh.cad.*;
 import java.util.Iterator;
 import java.util.ArrayList;
@@ -143,6 +143,58 @@ public class MMesh1D extends MMesh0D
 		for (Iterator itf = mesh.subshapeIterator(2); itf.hasNext(); )
 		{
 			CADFace F = (CADFace) itf.next();
+			HashSet set;
+			for (expE.init(F, CADExplorer.EDGE); expE.more(); expE.next())
+			{
+				CADEdge E = (CADEdge) expE.current();
+				set = (HashSet) mapTEdgeToFaces.get(E);
+				set.add(F);
+			}
+		}
+		assert(isValid());
+	}
+	
+	public MMesh1D(BModel model)
+	{
+		super(model);
+		shape = null;
+
+		//  HashMap size will not be greater than the number of edges,
+		//  so allocate them after computing their maximal size, they
+		//  won't be resized.
+		int edges = 0;
+		BCADGraphCell root = model.getGraph().getRootCell();
+		for (Iterator ite = root.shapesExplorer(BCADGraph.DIM_EDGE); ite.hasNext(); ite.next())
+			edges++;
+		if (edges == 0)
+			return;
+		mapTEdgeToSubMesh1D = new HashMap(edges);
+		listTEdge = new ArrayList(edges);
+		
+		for (Iterator ite = root.shapesExplorer(BCADGraph.DIM_EDGE); ite.hasNext(); )
+		{
+			BCADGraphCell c = (BCADGraphCell) ite.next();
+			CADEdge E = (CADEdge) c.getShape();
+			//  Edges may get connected to several faces
+			if (mapTEdgeToSubMesh1D.containsKey(E))
+				continue;
+			SubMesh1D submesh1d = (SubMesh1D) c.mesh;
+			if (submesh1d == null && c.getReversed() != null)
+				submesh1d = (SubMesh1D) c.getReversed().mesh;
+			mapTEdgeToSubMesh1D.put(E, submesh1d);
+			listTEdge.add(E);
+		}
+		mapTEdgeToFaces = new HashMap(edges);
+		for (Iterator it = listTEdge.iterator(); it.hasNext(); )
+		{
+			CADEdge E = (CADEdge) it.next();
+			mapTEdgeToFaces.put(E, new HashSet());
+		}
+		CADExplorer expE = CADShapeBuilder.factory.newExplorer();
+		for (Iterator itf = root.shapesExplorer(BCADGraph.DIM_FACE); itf.hasNext(); )
+		{
+			BCADGraphCell s = (BCADGraphCell) itf.next();
+			CADFace F = (CADFace) s.getShape();
 			HashSet set;
 			for (expE.init(F, CADExplorer.EDGE); expE.more(); expE.next())
 			{

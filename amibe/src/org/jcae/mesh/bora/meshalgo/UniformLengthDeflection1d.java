@@ -18,9 +18,9 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-package org.jcae.mesh.bora.algo;
+package org.jcae.mesh.bora.meshalgo;
 
-import org.jcae.mesh.bora.ds.BCADGraphCell;
+import org.jcae.mesh.bora.ds.Mesh;
 import org.jcae.mesh.mesher.ds.SubMesh1D;
 import org.jcae.mesh.mesher.ds.MEdge1D;
 import org.jcae.mesh.mesher.ds.MNode1D;
@@ -67,14 +67,14 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		return true;
 	}
 
-	public boolean compute(BCADGraphCell mesh)
+	public boolean compute(Mesh mesh, CADShape s, int id)
 	{
 		int nbPoints;
 		boolean isCircular = false;
 		boolean isDegenerated = false;
 		double[] paramOnEdge;
 		double range[];
-		CADEdge E = (CADEdge) mesh.getShape();
+		CADEdge E = (CADEdge) s;
 		mesh.mesh = new SubMesh1D(E);
 		SubMesh1D submesh1d = (SubMesh1D) mesh.mesh;
 		logger.debug(""+this+"  shape: "+E);
@@ -172,7 +172,7 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		double param;
 
 		//  First vertex
-		CADVertex GPt = (CADVertex) mesh.getGraph().cadToGraphCell(V[0]).mesh;
+		CADVertex GPt = (CADVertex) mesh.cadToMesh(V[0]).mesh;
 		MNode1D firstNode = new MNode1D(paramOnEdge[0], GPt);
 		n1 = firstNode;
 		n1.isDegenerated(isDegenerated);
@@ -185,7 +185,7 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		{
 			param = paramOnEdge[i+1];
 			if (i == nbPoints - 2)
-				GPt = (CADVertex) mesh.getGraph().cadToGraphCell(V[1]).mesh;
+				GPt = (CADVertex) mesh.cadToMesh(V[1]).mesh;
 			n2 = new MNode1D(param, GPt);
 			n2.isDegenerated(isDegenerated);
 			nodelist.add(n2);

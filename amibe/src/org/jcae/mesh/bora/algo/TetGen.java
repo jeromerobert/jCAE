@@ -20,17 +20,10 @@
 
 package org.jcae.mesh.bora.algo;
 
-import org.jcae.mesh.bora.ds.Mesh;
+import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.amibe.algos2d.*;
-import org.jcae.mesh.amibe.metrics.Metric2D;
-import org.jcae.mesh.amibe.metrics.Metric3D;
-import org.jcae.mesh.mesher.ds.MMesh1D;
-import org.jcae.mesh.xmldata.Bora1DReader;
-import org.jcae.mesh.xmldata.MeshWriter;
 import org.jcae.mesh.xmldata.UNVConverter;
 import org.jcae.mesh.cad.*;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import org.apache.log4j.Logger;
@@ -46,7 +39,6 @@ import org.apache.log4j.Logger;
 public class TetGen implements AlgoInterface
 {
 	private static Logger logger=Logger.getLogger(TetGen.class);
-	private Mesh mesh = null;
 	private double volume;
 	private static boolean available = true;
 	private static String banner = null;
@@ -83,12 +75,12 @@ public class TetGen implements AlgoInterface
 		return available;
 	}
 
-	public boolean compute(Mesh mesh, CADShape s, int id)
+	public boolean compute(BCADGraphCell mesh)
 	{
-		CADSolid S = (CADSolid) s;
+		CADSolid S = (CADSolid) mesh.getShape();
 		logger.info("Running TetGen "+banner);
 		// mesh.export(s, "tetgen.poly", ExportMesh.FORMAT_POLY);
-		new UNVConverter(mesh.getOutputDir()).writePOLY("tetgen.poly");
+		new UNVConverter(mesh.getGraph().getModel().getOutputDir()).writePOLY("tetgen.poly");
 		try {
 			Process p = Runtime.getRuntime().exec(new String[] {"tetgen", "-a"+volume+"pYNEFg", "tetgen"});
 			p.waitFor();

@@ -21,19 +21,19 @@
 package org.jcae.mesh.bora.ds;
 
 import org.jcae.mesh.cad.CADShape;
-import org.jcae.mesh.bora.algo.*;
+import org.jcae.mesh.bora.meshalgo.*;
 import java.util.Iterator;
 import java.util.Collection;
 import java.lang.reflect.Constructor;
 import org.apache.log4j.Logger;
 
-public class Constraint extends Hypothesis
+public class MeshConstraint extends Hypothesis
 {
-	private static Logger logger = Logger.getLogger(Constraint.class);
+	private static Logger logger = Logger.getLogger(MeshConstraint.class);
 	protected int dimension = -1;
 	protected boolean dirty = false;
 	protected AlgoInterface algo = null;
-	private static Class [] innerClasses = Constraint.class.getDeclaredClasses();
+	private static Class [] innerClasses = MeshConstraint.class.getDeclaredClasses();
 
 	// Is there a better way to do that?
 	private void copyHypothesis(Hypothesis h, int d)
@@ -46,14 +46,14 @@ public class Constraint extends Hypothesis
 		numberBool  = h.numberBool;
 		numberMin   = h.numberMin;
 		numberMax   = h.numberMax;
-		elementType = Constraint.impliedType(d, h.elementType);
+		elementType = MeshConstraint.impliedType(d, h.elementType);
 		logger.debug("("+Integer.toHexString(h.hashCode())+") Dim: "+d+" Algo "+h.elementType+" mapped to "+elementType);
 	}
 
-	// Creates a Constraint derived from an Hypothesis
-	private static Constraint createConstraint(Hypothesis h, int d)
+	// Creates a MeshConstraint derived from an Hypothesis
+	private static MeshConstraint createConstraint(Hypothesis h, int d)
 	{
-		Constraint ret = new Constraint();
+		MeshConstraint ret = new MeshConstraint();
 		ret.copyHypothesis(h, d);
 		if (ret.elementType == null)
 			return null;
@@ -61,9 +61,9 @@ public class Constraint extends Hypothesis
 	}
 
 	// Combines with an Hypothesis for a given dimension
-	private void combine(BCADGraphCellHypothesis mh, int d)
+	private void combine(MeshHypothesis mh, int d)
 	{
-		Constraint that = createConstraint(mh.getHypothesis(), d);
+		MeshConstraint that = createConstraint(mh.getHypothesis(), d);
 		if (that == null)
 			return;
 		if (dimension == -1)
@@ -132,27 +132,27 @@ public class Constraint extends Hypothesis
 		deflection = targetDefl;
 	}
 
-	private void printDirty(BCADGraphCellHypothesis mh)
+	private void printDirty(MeshHypothesis mh)
 	{
 		logger.warn("Hypothesis not compatible: "+mh+": "+mh.getHypothesis()+" with "+this);
 	}
 
 	/**
 	 * Combines all Hypothesis of a Collection.  In order to improve error
-	 * reporting, BCADGraphCellHypothesis objects are passed as arguments instead
+	 * reporting, MeshHypothesis objects are passed as arguments instead
 	 * of Hypothesis.
 	 *
-	 * @param mh  list of BCADGraphCellHypothesis objects.
+	 * @param mh  list of MeshHypothesis objects.
 	 * @param d   dimension
 	 */
-	public static Constraint combineAll(Collection mh, int d)
+	public static MeshConstraint combineAll(Collection mh, int d)
 	{
-		Constraint ret = null;
+		MeshConstraint ret = null;
 		if (mh.size() == 0)
 			return null;
-		ret = new Constraint();
+		ret = new MeshConstraint();
 		for (Iterator ita = mh.iterator() ; ita.hasNext(); )
-			ret.combine((BCADGraphCellHypothesis) ita.next(), d);
+			ret.combine((MeshHypothesis) ita.next(), d);
 		if (ret.dimension == -1)
 			ret = null;
 		return ret;
@@ -166,7 +166,7 @@ public class Constraint extends Hypothesis
 		try {
 			for (int i = 0; i < innerClasses.length; i++)
 			{
-				if (innerClasses[i].getName().equals(Constraint.class.getName()+"$Hyp"+elt))
+				if (innerClasses[i].getName().equals(MeshConstraint.class.getName()+"$Hyp"+elt))
 					h = (Hyp) innerClasses[i].newInstance();
 			}
 		} catch (Exception ex) {ex.printStackTrace(); };
@@ -188,19 +188,19 @@ public class Constraint extends Hypothesis
 	{
 		double targetLength = 0.5*(lengthMin+lengthMax);
 		try {
-			if (dimension == BCADGraph.DIM_EDGE)
+			if (dimension == 1)
 			{
 				Class [] typeArgs = new Class[] {double.class, double.class, boolean.class};
 				Constructor cons = UniformLengthDeflection1d.class.getConstructor(typeArgs);
 				algo = (AlgoInterface) cons.newInstance(new Object [] {new Double(targetLength), new Double(deflection), new Boolean(true)});
 			}
-			else if (dimension == BCADGraph.DIM_FACE)
+			else if (dimension == 2)
 			{
 				Class [] typeArgs = new Class[] {double.class, double.class, boolean.class, boolean.class};
 				Constructor cons = Basic2d.class.getConstructor(typeArgs);
 				algo = (AlgoInterface) cons.newInstance(new Object [] {new Double(targetLength), new Double(deflection), new Boolean(true), new Boolean(true)});
 			}
-			else if (dimension == BCADGraph.DIM_SOLID)
+			else if (dimension == 3)
 			{
 				Class [] typeArgs = new Class[] {double.class};
 				Constructor cons = TetGen.class.getConstructor(typeArgs);
@@ -221,11 +221,11 @@ public class Constraint extends Hypothesis
 		}
 	}
 
-	public void applyAlgorithm(BCADGraphCell m)
+	public void applyAlgorithm(Mesh m, CADShape s, int id)
 	{
 		if (algo == null)
 			findAlgorithm();
-		if (!algo.compute(m))
+		if (!algo.compute(m, s, id))
 			logger.warn("Failed! "+algo);
 	}
 
@@ -239,11 +239,11 @@ public class Constraint extends Hypothesis
 	{
 		public int dim()
 		{
-			return BCADGraph.DIM_EDGE;
+			return 1;
 		}
 		public String impliedType(int d)
 		{
-			if (d == BCADGraph.DIM_EDGE)
+			if (d == 1)
 				return "E2";
 			else
 				return null;
@@ -253,13 +253,13 @@ public class Constraint extends Hypothesis
 	{
 		public int dim()
 		{
-			return BCADGraph.DIM_FACE;
+			return 2;
 		}
 		public String impliedType(int d)
 		{
-			if (d == BCADGraph.DIM_EDGE)
+			if (d == 1)
 				return "E2";
-			else if (d == BCADGraph.DIM_FACE)
+			else if (d == 2)
 				return "T3";
 			else
 				return null;
@@ -269,15 +269,15 @@ public class Constraint extends Hypothesis
 	{
 		public int dim()
 		{
-			return BCADGraph.DIM_SOLID;
+			return 3;
 		}
 		public String impliedType(int d)
 		{
-			if (d == BCADGraph.DIM_EDGE)
+			if (d == 1)
 				return "E2";
-			else if (d == BCADGraph.DIM_FACE)
+			else if (d == 2)
 				return "T3";
-			else if (d == BCADGraph.DIM_SOLID)
+			else if (d == 3)
 				return "T4";
 			else
 				return null;

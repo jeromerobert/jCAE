@@ -18,13 +18,15 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-package org.jcae.mesh.bora.algo;
+package org.jcae.mesh.bora.meshalgo;
 
-import org.jcae.mesh.bora.ds.BCADGraphCell;
+import org.jcae.mesh.bora.ds.Mesh;
+import org.jcae.mesh.bora.ds.ExportMesh;
 import org.jcae.mesh.amibe.algos2d.*;
 import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.mesher.ds.MMesh1D;
+import org.jcae.mesh.xmldata.Bora1DReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import org.jcae.mesh.xmldata.UNVConverter;
 import org.jcae.mesh.cad.*;
@@ -35,28 +37,31 @@ import java.io.InputStreamReader;
 import org.apache.log4j.Logger;
 
 /**
- * Run the Netgen 3D mesher.
- * Netgen is copyrighted by Joachim Schöberl <js@jku.at>
- * and is released under the GNU Lesser General Public License
- * as published by the Free Software Foundation, version 2 or above.
- * See http://www.hpfem.jku.at/netgen/
+ * Run the Tetgen 3D mesher.
+ * TetGen is Copyright 2002, 2004, 2005, 2006 Hang Si
+ * Rathausstr. 9, 10178 Berlin, Germany
+ * si@wias-berlin.de
+ * This is *not* a free software and can not be redistributed
+ * in jCAE.
  */
-public class Netgen implements AlgoInterface
+public class TetGen implements AlgoInterface
 {
-	private static Logger logger=Logger.getLogger(Netgen.class);
-	private double maxlen;
+	private static Logger logger=Logger.getLogger(TetGen.class);
+	private Mesh mesh = null;
+	private double volume;
 	private static boolean available = true;
 	private static String banner = null;
 
-	public Netgen(double len)
+	public TetGen(double len)
 	{
-		maxlen = len;
+		// Max volume
+		volume = 5.0*len*len*len;
 		if (banner == null)
 		{
 			available = true;
 			banner = "";
 			try {
-				Process p = Runtime.getRuntime().exec(new String[] {"netgen", "-batchmode"});
+				Process p = Runtime.getRuntime().exec(new String[] {"tetgen", "-version"});
 				p.waitFor();
 				if (p.exitValue() != 0)
 					available = false;
@@ -64,7 +69,8 @@ public class Netgen implements AlgoInterface
 				{
 					String line;
 					BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-					banner += input.readLine();
+					while ((line = input.readLine()) != null)
+						banner += line;
 					input.close();
 				}
 			} catch (Exception ex) {
@@ -78,14 +84,14 @@ public class Netgen implements AlgoInterface
 		return available;
 	}
 
-	public boolean compute(BCADGraphCell mesh)
+	public boolean compute(Mesh mesh, CADShape s, int id)
 	{
-		CADSolid S = (CADSolid) mesh.getShape();
+		CADSolid S = (CADSolid) s;
 		logger.info("Running TetGen "+banner);
 		// mesh.export(s, "tetgen.poly", ExportMesh.FORMAT_POLY);
-		new UNVConverter(mesh.getGraph().getModel().getOutputDir()).writeSTL("netgen.stl");
+		new UNVConverter(mesh.getOutputDir()).writePOLY("tetgen.poly");
 		try {
-			Process p = Runtime.getRuntime().exec(new String[] {"netgen", "-batchmode", "-meshfile=netgen.mesh", "-geofile=netgen.stl"});
+			Process p = Runtime.getRuntime().exec(new String[] {"tetgen", "-a"+volume+"pYNEFg", "tetgen"});
 			p.waitFor();
 			if (p.exitValue() != 0)
 				return false;
@@ -100,7 +106,7 @@ public class Netgen implements AlgoInterface
 	{
 		String ret = "Algo: "+getClass().getName();
 		ret += "\n"+banner;
-		ret += "\nTarget size: "+maxlen;
+		ret += "\nMax volume: "+volume;
 		return ret;
 	}
 }

@@ -18,15 +18,14 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-package org.jcae.mesh.bora.algo;
+package org.jcae.mesh.bora.meshalgo;
 
-import org.jcae.mesh.bora.ds.BCADGraphCell;
-import org.jcae.mesh.bora.ds.BModel;
-import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.bora.ds.Mesh;
 import org.jcae.mesh.amibe.algos2d.*;
 import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.mesher.ds.MMesh1D;
+import org.jcae.mesh.xmldata.Bora1DReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import org.jcae.mesh.cad.*;
 import java.util.ArrayList;
@@ -175,6 +174,7 @@ import org.apache.log4j.Logger;
 public class Basic2d implements AlgoInterface
 {
 	private static Logger logger=Logger.getLogger(Basic2d.class);
+	private Mesh mesh = null;
 	private double maxlen;
 	private double deflection;
 	private boolean relDefl;
@@ -193,11 +193,11 @@ public class Basic2d implements AlgoInterface
 		return true;
 	}
 
-	public boolean compute(BCADGraphCell mesh)
+	public boolean compute(Mesh mesh, CADShape s, int id)
 	{
-		CADFace F = (CADFace) mesh.getShape();
+		CADFace F = (CADFace) s;
 		logger.debug(""+this+"  shape: "+F);
-		Mesh m = new Mesh(F);
+		org.jcae.mesh.amibe.ds.Mesh m = new org.jcae.mesh.amibe.ds.Mesh(F);
 		mesh.mesh = m;
 		String xmlFile = "jcae1d";
 		Metric2D.setLength(maxlen);
@@ -211,10 +211,9 @@ public class Basic2d implements AlgoInterface
 		if (deflection > 0.0 && !relDefl)
 			new EnforceAbsDeflection(m).compute();
 		m.removeDegeneratedEdges();
-		xmlFile = "jcae2d."+mesh.getId();
+		xmlFile = "jcae2d."+id;
 		String xmlBrepDir = ".";
-		BModel model = mesh.getGraph().getModel();
-		MeshWriter.writeObject(m, model.getOutputDir(), xmlFile, xmlBrepDir, model.getCADFile(), mesh.getId());
+		MeshWriter.writeObject(m, mesh.getOutputDir(), xmlFile, xmlBrepDir, mesh.getCADFile(), id);
 		assert (m.isValid());
 		return true;
 	}
