@@ -51,6 +51,7 @@ public class Viewer extends JFrame
 	private SimpleUniverse universe;
 	private BranchGroup mainBranchGroup;
 	private double [] lastClick = null;
+	private char lastKey = 0;
 	
 	/** The constructor */	
 	public Viewer()
@@ -62,6 +63,13 @@ public class Viewer extends JFrame
 			public void mouseClicked(MouseEvent e)
 			{
 				canvas3D_mouseClicked(e);
+			}
+		});
+		canvas3D.addKeyListener(new java.awt.event.KeyAdapter()
+		{
+			public void keyPressed(KeyEvent e)
+			{
+				canvas3D_keyPressed(e);
 			}
 		});
 		getContentPane().add(canvas3D,BorderLayout.CENTER);
@@ -119,10 +127,7 @@ public class Viewer extends JFrame
 				lastClick[2] = pickPoint.z;
 				if (callBack != null)
 					callBack.run();
-				//float[] p1=new float[]
-				//	{(float)pickPoint.x,(float)pickPoint.y,(float)pickPoint.z};
-				//float[] p2=new float[]{(float)pt.x,(float)pt.y,(float)pt.z};
-				//logger.info("picked points: ["+pickPoint+"] ["+pt+"]");
+				lastClick = null;
 			}
 		}
 		catch(Exception ex)
@@ -135,6 +140,26 @@ public class Viewer extends JFrame
 	public double [] getLastClick()
 	{
 		return lastClick;
+	}
+	
+	void canvas3D_keyPressed(KeyEvent e)
+	{
+		try
+		{
+			lastKey = e.getKeyChar();
+			if (callBack != null)
+				callBack.run();
+			lastKey = 0;
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace(System.out);
+		}
+	}
+	
+	public char getLastKey()
+	{
+		return lastKey;
 	}
 	
 	/** Fit all the scenes in the current view */	
