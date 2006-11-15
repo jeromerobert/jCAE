@@ -34,6 +34,7 @@ import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Iterator;
+import gnu.trove.TIntObjectHashMap;
 import org.apache.log4j.Logger;
 
 
@@ -56,6 +57,7 @@ public class BinaryReader
 		Mesh mesh = new Mesh();
 		mesh.setType(Mesh.MESH_3D);
 		BModel model = root.getGraph().getModel();
+		TIntObjectHashMap vertMap = new TIntObjectHashMap();
 		for (Iterator it = root.uniqueShapesExplorer(BCADGraph.DIM_FACE); it.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) it.next();
@@ -101,7 +103,14 @@ public class BinaryReader
 					if (i < numberOfNodes - numberOfReferences)
 						label = 0;
 					else
+					{
 						label = refs[i+numberOfReferences-numberOfNodes];
+						Object o = vertMap.get(label);
+						if (o == null)
+							vertMap.put(label, nodelist[i]);
+						else
+							nodelist[i] = (Vertex) o;
+					}
 					nodelist[i].setRef(label);
 					for (int j = 0; j < 3; j++)
 					{
@@ -119,9 +128,9 @@ public class BinaryReader
 				Triangle [] facelist = new Triangle[numberOfTriangles];
 				for (int i=0; i < numberOfTriangles; i++)
 				{
-					Vertex pt1 = nodelist[trianglesBuffer.get()];
-					Vertex pt2 = nodelist[trianglesBuffer.get()];
-					Vertex pt3 = nodelist[trianglesBuffer.get()];
+					Vertex pt1 = nodelist[trianglesBuffer.get()-1];
+					Vertex pt2 = nodelist[trianglesBuffer.get()-1];
+					Vertex pt3 = nodelist[trianglesBuffer.get()-1];
 					facelist[i] = new Triangle(pt1, pt2, pt3);
 					mesh.add(facelist[i]);
 					pt1.setLink(facelist[i]);
