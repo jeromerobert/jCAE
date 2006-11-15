@@ -38,6 +38,9 @@ public class BinaryWriter
 
 	public static void writeCADEdge(BCADGraphCell edge, String xmlDir)
 	{
+		CADEdge E = (CADEdge) edge.getShape();
+		if (E.isDegenerated())
+			return;
 		try
 		{
 			File dir = new File(xmlDir, "edges");
