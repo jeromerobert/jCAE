@@ -1,5 +1,5 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
-   modeler, Finit element mesher, Plugin architecture.
+   modeler, Finite element mesher, Plugin architecture.
 
    (C) Copyright 2006, by EADS CRC
 
