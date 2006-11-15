@@ -75,6 +75,11 @@ public class TetGen implements AlgoInterface
 		return available;
 	}
 
+	public int getOrientation(int o)
+	{
+		return o;
+	}
+
 	public boolean compute(BCADGraphCell mesh)
 	{
 		CADSolid S = (CADSolid) mesh.getShape();

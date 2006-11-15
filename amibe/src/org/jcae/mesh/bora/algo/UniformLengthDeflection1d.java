@@ -67,6 +67,11 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		return true;
 	}
 
+	public int getOrientation(int o)
+	{
+		return o;
+	}
+
 	public boolean compute(BCADGraphCell mesh)
 	{
 		int nbPoints;

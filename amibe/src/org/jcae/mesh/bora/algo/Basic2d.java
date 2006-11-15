@@ -193,6 +193,11 @@ public class Basic2d implements AlgoInterface
 		return true;
 	}
 
+	public int getOrientation(int o)
+	{
+		return o;
+	}
+
 	public boolean compute(BCADGraphCell mesh)
 	{
 		CADFace F = (CADFace) mesh.getShape();

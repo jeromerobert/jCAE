@@ -26,4 +26,5 @@ public interface AlgoInterface
 {
 	public abstract boolean compute(BCADGraphCell c);
 	public abstract boolean isAvailable();
+	public abstract int getOrientation(int o);
 }
