@@ -54,9 +54,9 @@ public class Bora1D
 {
 	private static Logger logger=Logger.getLogger(Bora1D.class);	
 	
-	public static BranchGroup bgNodes3D(BModel model)
+	public static BranchGroup [] getBranchGroups(BModel model)
 	{
-		BranchGroup bg = new BranchGroup();
+		BranchGroup [] ret = new BranchGroup[3];
 		BCADGraphCell root = model.getGraph().getRootCell();
 		// Count edges
 		int nEdges = 0;
@@ -90,8 +90,11 @@ public class Bora1D
 		int nVertices = nrNodes[nEdges];
 		int nBeams = nrBeams[nEdges];
 
-		double [] xv = new double[3*nVertices];
+		double [] xyz = new double[3*nVertices];
+		double [] x1 = new double[nVertices];
+		double [] x3d1 = new double[3*nVertices];
 		int [] beams = new int[2*nBeams];
+		CADShapeBuilder factory = CADShapeBuilder.factory;
 
 		nEdges = 0;
 		for (Iterator it = root.uniqueShapesExplorer(BCADGraph.DIM_EDGE); it.hasNext(); )
@@ -110,9 +113,16 @@ public class Bora1D
 				FileChannel fcN = new FileInputStream(nodesfile).getChannel();
 				MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
 				DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
+				nodesBuffer.get(x1, 0, nr);
+				CADGeomCurve3D curve = factory.newCurve3D((CADEdge) edge.getShape());
 				for (int i = 0; i < nr; i++)
-					nodesBuffer.get();
-				nodesBuffer.get(xv, 3*nrNodes[nEdges], 3*nr);
+				{
+					double [] x3 = curve.value(x1[i]);
+					x3d1[3*nrNodes[nEdges]+3*i]   = x3[0];;
+					x3d1[3*nrNodes[nEdges]+3*i+1] = x3[1];;
+					x3d1[3*nrNodes[nEdges]+3*i+2] = x3[2];;
+				}
+				nodesBuffer.get(xyz, 3*nrNodes[nEdges], 3*nr);
 				fcN.close();
 
 				nr = nrBeams[nEdges+1] - nrBeams[nEdges];
@@ -132,11 +142,13 @@ public class Bora1D
 			}
 		}
 
+		// 3D edges
+		ret[0] = new BranchGroup();
 		IndexedLineArray s = new IndexedLineArray(nVertices,
 			GeometryArray.COORDINATES,
 			beams.length);
 		s.setCoordinateIndices(0, beams);
-		s.setCoordinates(0, xv);
+		s.setCoordinates(0, xyz);
 		s.setCapability(GeometryArray.ALLOW_COUNT_READ);
 		s.setCapability(GeometryArray.ALLOW_FORMAT_READ);
 		s.setCapability(GeometryArray.ALLOW_REF_DATA_READ);
@@ -145,119 +157,62 @@ public class Bora1D
 		Appearance lineApp = new Appearance();
 		lineApp.setLineAttributes(new LineAttributes(1,LineAttributes.PATTERN_SOLID,false));
 		lineApp.setColoringAttributes(new ColoringAttributes(0,0,1,ColoringAttributes.SHADE_FLAT));
+
 		Shape3D shapeEdges = new Shape3D(s, lineApp);
 		shapeEdges.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-		shapeEdges.setPickable(false);
-		bg.addChild(shapeEdges);
+		shapeEdges.setPickable(true);
+		ret[0].addChild(shapeEdges);
 
+		// 3D nodes
+		ret[1] = new BranchGroup();
 		PointArray p = new PointArray(nVertices, PointArray.COORDINATES);
-		p.setCoordinates(0, xv);
+		p.setCoordinates(0, xyz);
 
 		Appearance vertApp = new Appearance();
 		vertApp.setPointAttributes(new PointAttributes());
 		vertApp.setColoringAttributes(new ColoringAttributes(1,0,0,ColoringAttributes.SHADE_GOURAUD));
 		Shape3D shapePoint = new Shape3D(p, vertApp);
 		shapePoint.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-		shapePoint.setPickable(false);
-		bg.addChild(shapePoint);
+		shapePoint.setPickable(true);
+		ret[1].addChild(shapePoint);
 
-		return bg;
+		// 1D nodes
+		ret[2] = new BranchGroup();
+		PointArray p1 = new PointArray(nVertices, PointArray.COORDINATES);
+		p1.setCoordinates(0, x3d1);
+		Appearance vert1App = new Appearance();
+		vert1App.setPointAttributes(new PointAttributes());
+		vert1App.setColoringAttributes(new ColoringAttributes(0,1,0,ColoringAttributes.SHADE_GOURAUD));
+		Shape3D shapePoint1=new Shape3D(p1, vert1App);
+		shapePoint1.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
+		shapePoint1.setPickable(true);
+		ret[2].addChild(shapePoint1);
+		return ret;
 	}
 
-	public static BranchGroup bgNodes1D(BModel model)
-	{
-		BranchGroup bg = new BranchGroup();
-		BCADGraphCell root = model.getGraph().getRootCell();
-		int nVertices = 0;
-		for (Iterator it = root.uniqueShapesExplorer(BCADGraph.DIM_EDGE); it.hasNext(); )
-		{
-			BCADGraphCell edge = (BCADGraphCell) it.next();
-			File file = new File(model.getOutputDir()+File.separator+"edges", "n"+edge.getId());
-			if (!file.exists())
-				continue;
-			nVertices += file.length() / 32;
-		}
-
-		PointArray p = new PointArray(nVertices, PointArray.COORDINATES);
-		double [] xv = new double[3*nVertices];
-		double [] x1 = new double[nVertices];
-		CADShapeBuilder factory = CADShapeBuilder.factory;
-
-		int offset = 0;
-		for (Iterator it = root.uniqueShapesExplorer(BCADGraph.DIM_EDGE); it.hasNext(); )
-		{
-			BCADGraphCell edge = (BCADGraphCell) it.next();
-			try
-			{
-				File file = new File(model.getOutputDir()+File.separator+"edges", "n"+edge.getId());
-				if (!file.exists())
-					continue;
-				int nr = (int) file.length() / 32;
-				FileChannel fc = new FileInputStream(file).getChannel();
-				MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0L, fc.size());
-				DoubleBuffer nodesBuffer = bb.asDoubleBuffer();
-				nodesBuffer.get(x1, 0, nr);
-				CADGeomCurve3D curve = factory.newCurve3D((CADEdge) edge.getShape());
-				for (int i = 0; i < nr; i++)
-				{
-					double [] xyz = curve.value(x1[i]);
-					xv[offset+3*i]   = xyz[0];;
-					xv[offset+3*i+1] = xyz[1];;
-					xv[offset+3*i+2] = xyz[2];;
-				}
-				offset += 3*nr;
-			}
-			catch (Exception ex)
-			{
-				ex.printStackTrace();
-			}
-		}
-		p.setCoordinates(0, xv);
-		Appearance vertApp = new Appearance();
-		vertApp.setPointAttributes(new PointAttributes());
-		vertApp.setColoringAttributes(new ColoringAttributes(1,1,1,ColoringAttributes.SHADE_GOURAUD));
-		Shape3D shapePoint=new Shape3D(p, vertApp);
-		shapePoint.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-		shapePoint.setPickable(false);
-		bg.addChild(shapePoint);
-		return bg;
-	}
-
-	public static void display(Viewer view, BModel m)
-	{
-		view.addBranchGroup(bgNodes1D(m));
-		view.setVisible(true);
-		view.addBranchGroup(bgNodes3D(m));
-		view.setVisible(true);
-	}
-	
 	public static void main(String args[])
 	{
-		boolean visu = true;
-		// final BModel model = new BModel(args[0], args[1]);
 		final BModel model = BModelReader.readObject(args[0]);
-		
 		final Viewer view=new Viewer();
-		if (visu)
+		final BranchGroup [] bgList = getBranchGroups(model);
+		view.addBranchGroup(bgList[0]);
+		view.setVisible(true);
+		view.zoomTo(); 
+		view.callBack = new Runnable()
 		{
-			display(view, model);
-			view.zoomTo(); 
-			/*
-			view.callBack=new Runnable()
+			int idx = 0;
+			public void run()
 			{
-				public void run()
+				if (0 != view.getLastKey())
 				{
-					double [] xyz = view.getLastClick();
-					if (null != xyz)
-					{
-						Vertex vt = new Vertex(xyz[0], xyz[1]);
-						r.add(vt);
-						view.removeAllBranchGroup();
-						display(view, r);
-					}
+					idx++;
+					if (idx >= bgList.length)
+						idx = 0;
+					view.removeAllBranchGroup();
+					view.addBranchGroup(bgList[idx]);
+					view.setVisible(true);
 				}
-			};
-			*/
-		}
+			}
+		};
 	}
 }
