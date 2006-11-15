@@ -59,6 +59,9 @@ public class BinaryWriter
 			File nodesFile = new File(dir, "n"+edge.getId());
 			if(nodesFile.exists())
 				nodesFile.delete();
+			File parasFile = new File(dir, "p"+edge.getId());
+			if(parasFile.exists())
+				parasFile.delete();
 			File reffile = new File(dir, "r"+edge.getId());
 			if(reffile.exists())
 				reffile.delete();
@@ -71,16 +74,23 @@ public class BinaryWriter
 				return;
 
 			//save nodes
-			logger.debug("begin writing "+nodesFile);
+			logger.debug("begin writing "+nodesFile+" and "+parasFile);
 			TObjectIntHashMap localIdx = new TObjectIntHashMap();
 			DataOutputStream nodesout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile, true)));
+			DataOutputStream parasout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(parasFile, true)));
 			DataOutputStream refsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(reffile, true)));
 			// Set first index to 1; a null index in localIdx is thus an error
 			int i = 1;
+			CADShapeBuilder factory = CADShapeBuilder.factory;
+			CADGeomCurve3D curve = factory.newCurve3D((CADEdge) edge.getShape());
 			for (Iterator itn = submesh.getNodesIterator(); itn.hasNext(); )
 			{
 				MNode1D n = (MNode1D)itn.next();
-				nodesout.writeDouble(n.getParameter());
+				double p = n.getParameter();
+				parasout.writeDouble(p);
+				double [] xyz = curve.value(p);
+				for (int k = 0; k < 3; k++)
+					nodesout.writeDouble(xyz[k]);
 				localIdx.put(n, i);
 				i++;
 				CADVertex v = n.getCADVertex();
@@ -91,19 +101,10 @@ public class BinaryWriter
 					refsout.writeInt(vv.getId());
 				}
 			}
-			// Append 3D coordinates
-			CADShapeBuilder factory = CADShapeBuilder.factory;
-			CADGeomCurve3D curve = factory.newCurve3D((CADEdge) edge.getShape());
-			for (Iterator itn = submesh.getNodesIterator(); itn.hasNext(); )
-			{
-				MNode1D n = (MNode1D) itn.next();
-				double [] xyz = curve.value(n.getParameter());
-				for (int k = 0; k < 3; k++)
-					nodesout.writeDouble(xyz[k]);
-			}
 			nodesout.close();
+			parasout.close();
 			refsout.close();
-			logger.debug("end writing "+nodesFile);
+			logger.debug("end writing "+nodesFile+" and "+parasFile);
 
 			//save beams
 			logger.debug("begin writing "+beamsFile);
@@ -139,6 +140,9 @@ public class BinaryWriter
 			File nodesFile = new File(dir, "n"+face.getId());
 			if(nodesFile.exists())
 				nodesFile.delete();
+			File parasFile = new File(dir, "p"+face.getId());
+			if(parasFile.exists())
+				parasFile.delete();
 			File reffile = new File(dir, "r"+face.getId());
 			if(reffile.exists())
 				reffile.delete();
@@ -151,8 +155,9 @@ public class BinaryWriter
 				return;
 
 			//save nodes
-			logger.debug("begin writing "+nodesFile);
+			logger.debug("begin writing "+nodesFile+" and "+parasFile);
 			DataOutputStream nodesout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile, true)));
+			DataOutputStream parasout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(parasFile, true)));
 			DataOutputStream refsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(reffile, true)));
 
 			Collection trianglelist = submesh.getTriangles();
@@ -160,6 +165,8 @@ public class BinaryWriter
 			TObjectIntHashMap localIdx = new TObjectIntHashMap(nodelist.size());
 			// Set first index to 1; a null index in localIdx is thus an error
 			int i = 1;
+			CADFace F = (CADFace) face.getShape();
+			CADGeomSurface surface = F.getGeomSurface();
 			//  Write interior nodes first
 			for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
 			{
@@ -171,7 +178,10 @@ public class BinaryWriter
 					continue;
 				double [] p = n.getUV();
 				for (int d = 0; d < p.length; d++)
-					nodesout.writeDouble(p[d]);
+					parasout.writeDouble(p[d]);
+				double [] xyz = surface.value(p[0], p[1]);
+				for (int k = 0; k < 3; k++)
+					nodesout.writeDouble(xyz[k]);
 				localIdx.put(n, i);
 				i++;
 			}
@@ -187,45 +197,19 @@ public class BinaryWriter
 					continue;
 				double [] p = n.getUV();
 				for (int d = 0; d < p.length; d++)
-					nodesout.writeDouble(p[d]);
+					parasout.writeDouble(p[d]);
+				double [] xyz = surface.value(p[0], p[1]);
+				for (int k = 0; k < 3; k++)
+					nodesout.writeDouble(xyz[k]);
 				localIdx.put(n, i);
 				i++;
 				refsout.writeInt(Math.abs(ref1d));
 				nref++;
 			}
-			// Append 3D coordinates
-			CADFace F = (CADFace) face.getShape();
-			CADGeomSurface surface = F.getGeomSurface();
-
-			for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
-			{
-				Vertex n = (Vertex) itn.next();
-				if (n == Vertex.outer)
-					continue;
-				int ref1d = n.getRef();
-				if (0 != ref1d)
-					continue;
-				double [] p = n.getUV();
-				double [] xyz = surface.value(p[0], p[1]);
-				for (int k = 0; k < 3; k++)
-					nodesout.writeDouble(xyz[k]);
-			}
-			for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
-			{
-				Vertex n = (Vertex) itn.next();
-				if (n == Vertex.outer)
-					continue;
-				int ref1d = n.getRef();
-				if (0 == ref1d)
-					continue;
-				double [] p = n.getUV();
-				double [] xyz = surface.value(p[0], p[1]);
-				for (int k = 0; k < 3; k++)
-					nodesout.writeDouble(xyz[k]);
-			}
 			nodesout.close();
+			parasout.close();
 			refsout.close();
-			logger.debug("end writing "+nodesFile);
+			logger.debug("end writing "+nodesFile+" and "+parasFile);
 
 			//save faces
 			logger.debug("begin writing "+facesFile);

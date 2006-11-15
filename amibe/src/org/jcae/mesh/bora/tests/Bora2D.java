@@ -59,17 +59,19 @@ public class Bora2D
 
 	public static BranchGroup [] getBranchGroups(BModel model)
 	{
-		BranchGroup [] ret = new BranchGroup[4];
-		int iRet = -1;
 		BCADGraphCell root = model.getGraph().getRootCell();
 		// Count faces
 		int nFaces = 0;
 		for (Iterator it = root.uniqueShapesExplorer(BCADGraph.DIM_FACE); it.hasNext(); )
 		{
 			BCADGraphCell face = (BCADGraphCell) it.next();
-			File file = new File(model.getOutputDir()+File.separator+model.get2dDir(), "n"+face.getId());
-			if (file.exists())
-				nFaces++;
+			File nodesfile = new File(model.getOutputDir()+File.separator+model.get2dDir(), "n"+face.getId());
+			if (!nodesfile.exists())
+				continue;
+			File parasfile = new File(model.getOutputDir()+File.separator+model.get2dDir(), "p"+face.getId());
+			if (!parasfile.exists())
+				continue;
+			nFaces++;
 		}
 		// Count nodes and trias on each face
 		int [] nrNodes = new int[nFaces+1];
@@ -83,7 +85,10 @@ public class Bora2D
 			File nodesfile = new File(model.getOutputDir()+File.separator+model.get2dDir(), "n"+face.getId());
 			if (!nodesfile.exists())
 				continue;
-			nrNodes[nFaces+1] = nrNodes[nFaces] + (int) nodesfile.length() / 40;
+			File parasfile = new File(model.getOutputDir()+File.separator+model.get2dDir(), "p"+face.getId());
+			if (!parasfile.exists())
+				continue;
+			nrNodes[nFaces+1] = nrNodes[nFaces] + (int) nodesfile.length() / 24;
 			File triasfile = new File(model.getOutputDir()+File.separator+model.get2dDir(), "f"+face.getId());
 			if (!triasfile.exists())
 				continue;
@@ -109,15 +114,19 @@ public class Bora2D
 				File nodesfile = new File(model.getOutputDir()+File.separator+model.get2dDir(), "n"+face.getId());
 				if (!nodesfile.exists())
 					continue;
+				File parasfile = new File(model.getOutputDir()+File.separator+model.get2dDir(), "p"+face.getId());
+				if (!parasfile.exists())
+					continue;
 				File triasfile = new File(model.getOutputDir()+File.separator+model.get2dDir(), "f"+face.getId());
 				if (!triasfile.exists())
 					continue;
 
 				int nr = nrNodes[nFaces+1] - nrNodes[nFaces];
-				FileChannel fcN = new FileInputStream(nodesfile).getChannel();
-				MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
-				DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
-				nodesBuffer.get(x2, 0, 2*nr);
+				FileChannel fcP = new FileInputStream(parasfile).getChannel();
+				MappedByteBuffer bbP = fcP.map(FileChannel.MapMode.READ_ONLY, 0L, fcP.size());
+				DoubleBuffer parasBuffer = bbP.asDoubleBuffer();
+				parasBuffer.get(x2, 0, 2*nr);
+				fcP.close();
 				CADGeomSurface surface = F.getGeomSurface();
 				for (int i = 0; i < nr; i++)
 				{
@@ -126,6 +135,9 @@ public class Bora2D
 					x3d2[3*nrNodes[nFaces]+3*i+1] = x3[1];;
 					x3d2[3*nrNodes[nFaces]+3*i+2] = x3[2];;
 				}
+				FileChannel fcN = new FileInputStream(nodesfile).getChannel();
+				MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
+				DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
 				nodesBuffer.get(xyz, 3*nrNodes[nFaces], 3*nr);
 				fcN.close();
 
@@ -146,7 +158,12 @@ public class Bora2D
 			}
 		}
 
-		// 3D faces
+		BranchGroup [] ret = new BranchGroup[4];
+		PointAttributes pa = new PointAttributes();
+		pa.setPointSize(4.0f);
+		int iRet = -1;
+
+		// 3D edges
 		++iRet;
 		ret[iRet] = new BranchGroup();
 		IndexedTriangleArray s = new IndexedTriangleArray(nVertices,
@@ -165,9 +182,10 @@ public class Bora2D
 
 		Shape3D shapeTrias = new Shape3D(s, triaApp);
 		shapeTrias.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-		shapeTrias.setPickable(true);
+		shapeTrias.setPickable(false);
 		ret[iRet].addChild(shapeTrias);
 
+		// Black faces
 		++iRet;
 		ret[iRet] = new BranchGroup();
 		Appearance htriApp = new Appearance();
@@ -176,8 +194,21 @@ public class Bora2D
 
 		Shape3D hiddenTrias = new Shape3D(s, htriApp);
 		hiddenTrias.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-		hiddenTrias.setPickable(true);
+		hiddenTrias.setPickable(false);
 		ret[iRet].addChild(hiddenTrias);
+
+		// 2D nodes
+		++iRet;
+		ret[iRet] = new BranchGroup();
+		PointArray p2 = new PointArray(nVertices, PointArray.COORDINATES);
+		p2.setCoordinates(0, x3d2);
+		Appearance vert2App = new Appearance();
+		vert2App.setPointAttributes(pa);
+		vert2App.setColoringAttributes(new ColoringAttributes(0,1,0,ColoringAttributes.SHADE_GOURAUD));
+		Shape3D shapePoint2=new Shape3D(p2, vert2App);
+		shapePoint2.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
+		shapePoint2.setPickable(false);
+		ret[iRet].addChild(shapePoint2);
 
 		// 3D nodes
 		++iRet;
@@ -186,27 +217,13 @@ public class Bora2D
 		p.setCoordinates(0, xyz);
 
 		Appearance vertApp = new Appearance();
-		PointAttributes pa = new PointAttributes();
-		pa.setPointSize(4.0f);
 		vertApp.setPointAttributes(pa);
 		vertApp.setColoringAttributes(new ColoringAttributes(1f,1f,0f,ColoringAttributes.SHADE_GOURAUD));
 		Shape3D shapePoint = new Shape3D(p, vertApp);
 		shapePoint.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-		shapePoint.setPickable(true);
+		shapePoint.setPickable(false);
 		ret[iRet].addChild(shapePoint);
 
-		// 2D nodes
-		++iRet;
-		ret[iRet] = new BranchGroup();
-		PointArray p1 = new PointArray(nVertices, PointArray.COORDINATES);
-		p1.setCoordinates(0, x3d2);
-		Appearance vert1App = new Appearance();
-		vert1App.setPointAttributes(pa);
-		vert1App.setColoringAttributes(new ColoringAttributes(0,1,0,ColoringAttributes.SHADE_GOURAUD));
-		Shape3D shapePoint1=new Shape3D(p1, vert1App);
-		shapePoint1.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-		shapePoint1.setPickable(true);
-		ret[iRet].addChild(shapePoint1);
 		return ret;
 	}
 
@@ -233,8 +250,6 @@ public class Bora2D
 			public void run()
 			{
 				char k = view.getLastKey();
-				if (0 == k)
-					return;
 				if ('2' == k)
 					active[2] = !active[2];
 				else if ('3' == k)
