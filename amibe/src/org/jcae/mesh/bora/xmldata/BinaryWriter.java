@@ -20,14 +20,21 @@
 
 package org.jcae.mesh.bora.xmldata;
 
-import org.jcae.mesh.bora.ds.*;
+import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.cad.*;
-import org.jcae.mesh.mesher.ds.*;
+import org.jcae.mesh.mesher.ds.SubMesh1D;
+import org.jcae.mesh.mesher.ds.MNode1D;
+import org.jcae.mesh.mesher.ds.MEdge1D;
+import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.Vertex;
 import java.io.IOException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import gnu.trove.TObjectIntHashMap;
 import org.apache.log4j.Logger;
@@ -36,14 +43,14 @@ public class BinaryWriter
 {
 	private static Logger logger=Logger.getLogger(BinaryWriter.class);
 
-	public static void writeCADEdge(BCADGraphCell edge, String xmlDir)
+	public static void writeCADEdge(BCADGraphCell edge, String outDir)
 	{
 		CADEdge E = (CADEdge) edge.getShape();
 		if (E.isDegenerated())
 			return;
 		try
 		{
-			File dir = new File(xmlDir, edge.getGraph().getModel().get1dDir());
+			File dir = new File(outDir);
 
 			//create the output directory if it does not exist
 			if(!dir.exists())
@@ -112,6 +119,127 @@ public class BinaryWriter
 			}
 			beamsout.close();
 			logger.debug("end writing "+beamsFile);
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+
+	public static void writeCADFace(BCADGraphCell face, String outDir)
+	{
+		try
+		{
+			File dir = new File(outDir);
+
+			//create the output directory if it does not exist
+			if(!dir.exists())
+				dir.mkdirs();
+
+			File nodesFile = new File(dir, "n"+face.getId());
+			if(nodesFile.exists())
+				nodesFile.delete();
+			File reffile = new File(dir, "r"+face.getId());
+			if(reffile.exists())
+				reffile.delete();
+			File facesFile=new File(dir, "f"+face.getId());
+			if(facesFile.exists())
+				facesFile.delete();
+			
+			Mesh submesh = (Mesh) face.mesh;
+			if (null == submesh)
+				return;
+
+			//save nodes
+			logger.debug("begin writing "+nodesFile);
+			DataOutputStream nodesout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile, true)));
+			DataOutputStream refsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(reffile, true)));
+
+			Collection trianglelist = submesh.getTriangles();
+			ArrayList nodelist = submesh.quadtree.getAllVertices(trianglelist.size() / 2);
+			TObjectIntHashMap localIdx = new TObjectIntHashMap(nodelist.size());
+			// Set first index to 1; a null index in localIdx is thus an error
+			int i = 1;
+			//  Write interior nodes first
+			for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
+			{
+				Vertex n = (Vertex) itn.next();
+				if (n == Vertex.outer)
+					continue;
+				int ref1d = n.getRef();
+				if (0 != ref1d)
+					continue;
+				double [] p = n.getUV();
+				for (int d = 0; d < p.length; d++)
+					nodesout.writeDouble(p[d]);
+				localIdx.put(n, i);
+				i++;
+			}
+			//  Write boundary nodes and 1D references
+			int nref = 0;
+			for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
+			{
+				Vertex n = (Vertex) itn.next();
+				if (n == Vertex.outer)
+					continue;
+				int ref1d = n.getRef();
+				if (0 == ref1d)
+					continue;
+				double [] p = n.getUV();
+				for (int d = 0; d < p.length; d++)
+					nodesout.writeDouble(p[d]);
+				localIdx.put(n, i);
+				i++;
+				refsout.writeInt(Math.abs(ref1d));
+				nref++;
+			}
+			// Append 3D coordinates
+			CADFace F = (CADFace) face.getShape();
+			CADGeomSurface surface = F.getGeomSurface();
+
+			for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
+			{
+				Vertex n = (Vertex) itn.next();
+				if (n == Vertex.outer)
+					continue;
+				int ref1d = n.getRef();
+				if (0 != ref1d)
+					continue;
+				double [] p = n.getUV();
+				double [] xyz = surface.value(p[0], p[1]);
+				for (int k = 0; k < 3; k++)
+					nodesout.writeDouble(xyz[k]);
+			}
+			for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
+			{
+				Vertex n = (Vertex) itn.next();
+				if (n == Vertex.outer)
+					continue;
+				int ref1d = n.getRef();
+				if (0 == ref1d)
+					continue;
+				double [] p = n.getUV();
+				double [] xyz = surface.value(p[0], p[1]);
+				for (int k = 0; k < 3; k++)
+					nodesout.writeDouble(xyz[k]);
+			}
+			nodesout.close();
+			refsout.close();
+			logger.debug("end writing "+nodesFile);
+
+			//save faces
+			logger.debug("begin writing "+facesFile);
+			DataOutputStream facesout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(facesFile, true)));
+			for (Iterator itf = trianglelist.iterator(); itf.hasNext(); )
+			{
+				Triangle f = (Triangle) itf.next();
+				if (f.isOuter())
+					continue;
+				for (int j = 0; j < 3; j++)
+					facesout.writeInt(localIdx.get(f.vertex[j]));
+			}
+			facesout.close();
+			logger.debug("end writing "+facesFile);
 		}
 		catch(Exception ex)
 		{

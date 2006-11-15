@@ -219,7 +219,7 @@ public class BModel
 			if (!s.hasConstraints())
 				continue;
 			s.discretize();
-			BinaryWriter.writeCADEdge(s, xmlDir);
+			BinaryWriter.writeCADEdge(s, xmlDir+File.separator+dir1d);
 		}
 		for (Iterator it = root.shapesExplorer(BCADGraph.DIM_EDGE); it.hasNext(); )
 		{
@@ -251,7 +251,9 @@ public class BModel
 			logger.info("Face "+cnt+"/"+nrFaces);
 			s.mesh1D = mesh1D;
 			s.discretize();
+			BinaryWriter.writeCADFace(s, xmlDir+File.separator+dir2d);
 		}
+		/*
 		for (Iterator it = root.shapesExplorer(BCADGraph.DIM_FACE); it.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) it.next();
@@ -279,6 +281,7 @@ public class BModel
 			m2dTo3D.convert(xmlFile, cnt, F);
 		}
 		m2dTo3D.finish();
+		*/
 		/*
 		// Solids
 		logger.info("Discretize solids");
