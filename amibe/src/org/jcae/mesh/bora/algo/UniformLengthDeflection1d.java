@@ -177,7 +177,7 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		double param;
 
 		//  First vertex
-		CADVertex GPt = (CADVertex) mesh.getGraph().cadToGraphCell(V[0]).mesh;
+		CADVertex GPt = (CADVertex) mesh.getGraph().getByShape(V[0]).mesh;
 		MNode1D firstNode = new MNode1D(paramOnEdge[0], GPt);
 		n1 = firstNode;
 		n1.isDegenerated(isDegenerated);
@@ -190,7 +190,7 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		{
 			param = paramOnEdge[i+1];
 			if (i == nbPoints - 2)
-				GPt = (CADVertex) mesh.getGraph().cadToGraphCell(V[1]).mesh;
+				GPt = (CADVertex) mesh.getGraph().getByShape(V[1]).mesh;
 			n2 = new MNode1D(param, GPt);
 			n2.isDegenerated(isDegenerated);
 			nodelist.add(n2);

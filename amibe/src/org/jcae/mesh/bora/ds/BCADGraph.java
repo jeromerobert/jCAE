@@ -164,14 +164,26 @@ public class BCADGraph
 	}
 
 	/**
-	 * Gets the submesh of a shape.
+	 * Gets a graph cell by its shape
 	 *
-	 * @return  the submesh
+	 * @param  s  CAD shape
+	 * @return  graph cell representing s
 	 */
-	public BCADGraphCell cadToGraphCell(Object s)
+	public BCADGraphCell getByShape(Object s)
 	{
 		assert s instanceof CADShape;
 		return (BCADGraphCell) cadShapeToGraphCell.get(s);
+	}
+
+	/**
+	 * Gets a graph cell by its identifier
+	 *
+	 * @param  i  cell index
+	 * @return  graph cell with identifier i
+	 */
+	public BCADGraphCell getById(int i)
+	{
+		return (BCADGraphCell) indexToCell.get(i);
 	}
 
 	/**

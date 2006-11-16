@@ -96,7 +96,7 @@ public class BinaryWriter
 				CADVertex v = n.getCADVertex();
 				if (null != v)
 				{
-					BCADGraphCell vv = edge.getGraph().cadToGraphCell(v);
+					BCADGraphCell vv = edge.getGraph().getByShape(v);
 					refsout.writeInt(i);
 					refsout.writeInt(vv.getId());
 				}

@@ -114,7 +114,7 @@ public class BSupport
 		for (Iterator it = setShapes.iterator(); it.hasNext(); )
 		{
 			CADShape s = (CADShape) it.next();
-			BCADGraphCell c = graph.cadToGraphCell(s);
+			BCADGraphCell c = graph.getByShape(s);
 			assert c != null : s;
 			c.setHypothesis(h);
 		}
@@ -156,7 +156,7 @@ public class BSupport
 				else if (cur == next)
 					hasNext();
 				cur = next;
-				return graph.cadToGraphCell(cur);
+				return graph.getByShape(cur);
 			}
 			public void remove()
 			{

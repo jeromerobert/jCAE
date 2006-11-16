@@ -169,7 +169,7 @@ public class BCADGraphCell
 			public Object next()
 			{
 				CADShape curr = exp.current();
-				Object ret = graph.cadToGraphCell(curr);
+				Object ret = graph.getByShape(curr);
 				if (cadShapeSet == null)
 				{
 					if (exp.more())
@@ -218,7 +218,7 @@ public class BCADGraphCell
 			public Object next()
 			{
 				CADShape curr = it.value();
-				Object ret = graph.cadToGraphCell(curr);
+				Object ret = graph.getByShape(curr);
 				if (cadShapeSet == null)
 				{
 					if (it.more())
