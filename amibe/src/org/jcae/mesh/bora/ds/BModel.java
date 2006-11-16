@@ -181,16 +181,27 @@ public class BModel
 			BSubMesh sm = (BSubMesh) it.next();
 			sm.computeHypothesis();
 		}
+		logger.info("Find all vertices");
+		BCADGraphCell root = cad.getRootCell();
+		for (Iterator it = root.shapesExplorer(BCADGraph.DIM_VERTEX); it.hasNext(); )
+		{
+			BCADGraphCell s = (BCADGraphCell) it.next();
+			if (s.mesh == null)
+				s.mesh = s.getShape();
+		}
+		logger.debug("Discretize edges");
 		for (Iterator it = submesh.iterator(); it.hasNext(); )
 		{
 			BSubMesh sm = (BSubMesh) it.next();
 			sm.computeAlgorithms1d();
 		}
+		logger.info("Discretize faces");
 		for (Iterator it = submesh.iterator(); it.hasNext(); )
 		{
 			BSubMesh sm = (BSubMesh) it.next();
 			sm.computeAlgorithms2d();
 		}
+		logger.info("Discretize solids");
 		for (Iterator it = submesh.iterator(); it.hasNext(); )
 		{
 			BSubMesh sm = (BSubMesh) it.next();

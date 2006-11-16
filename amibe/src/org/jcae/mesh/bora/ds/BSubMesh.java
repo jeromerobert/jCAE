@@ -208,17 +208,9 @@ public class BSubMesh
 
 	public void computeAlgorithms1d()
 	{
-		logger.info("Submesh nr. "+id);
-		logger.info("Find all vertices");
-		for (Iterator it = shapesExplorer(BCADGraph.DIM_VERTEX); it.hasNext(); )
-		{
-			BCADGraphCell s = (BCADGraphCell) it.next();
-			if (s.mesh == null)
-				s.mesh = (CADVertex) s.getShape();
-		}
+		logger.debug("Submesh nr. "+id);
 		// Edges
 		int nrEdges = 0;
-		logger.debug("Discretize edges");
 		for (Iterator it = shapesExplorer(BCADGraph.DIM_EDGE); it.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) it.next();
@@ -250,7 +242,6 @@ public class BSubMesh
 		logger.info("Submesh nr. "+id);
 		MMesh1D mesh1D = new MMesh1D(model);
 		// Faces
-		logger.info("Discretize faces");
 		computeVertexReferences();
 		updateNodeLabels();
 		int nrFaces = 0;
@@ -285,7 +276,6 @@ public class BSubMesh
 	{
 		// Solids
 		logger.info("Submesh nr. "+id);
-		logger.info("Discretize solids");
 		int nrSolids = 0;
 		for (Iterator it = shapesExplorer(BCADGraph.DIM_SOLID); it.hasNext(); )
 		{
