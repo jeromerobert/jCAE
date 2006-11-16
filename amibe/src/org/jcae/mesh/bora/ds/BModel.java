@@ -176,13 +176,16 @@ public class BModel
 	 */
 	public void compute()
 	{
-		for (Iterator it = submesh.iterator(); it.hasNext(); )
-		{
-			BSubMesh sm = (BSubMesh) it.next();
-			sm.computeHypothesis();
-		}
-		logger.info("Find all vertices");
+		// Compute all constraints
 		BCADGraphCell root = cad.getRootCell();
+		for (int t = 0; t < BCADGraph.classTypeArray.length; t++)
+		{
+			for (Iterator it = root.shapesExplorer(t); it.hasNext(); )
+			{
+				BCADGraphCell s = (BCADGraphCell) it.next();
+				s.combineHypothesis(t);
+			}
+		}
 		for (Iterator it = root.shapesExplorer(BCADGraph.DIM_VERTEX); it.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) it.next();

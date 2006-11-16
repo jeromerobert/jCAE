@@ -194,18 +194,6 @@ public class BSubMesh
 		}
 	}
 
-	public void computeHypothesis()
-	{
-		for (int t = 0; t < BCADGraph.classTypeArray.length; t++)
-		{
-			for (Iterator it = shapesExplorer(t); it.hasNext(); )
-			{
-				BCADGraphCell c = (BCADGraphCell) it.next();
-				c.combineHypothesis(t);
-			}
-		}
-	}
-
 	public void computeAlgorithms1d()
 	{
 		logger.debug("Submesh nr. "+id);
