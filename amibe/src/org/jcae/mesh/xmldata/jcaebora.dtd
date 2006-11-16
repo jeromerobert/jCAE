@@ -26,7 +26,7 @@ brep are http://www.opencascade.org files.
 
 <!ELEMENT description (#PCDATA)>
 
-<!ELEMENT cad (children?,tessellation?)>
+<!ELEMENT cad (children?,parents?,tessellation?)>
 <!ATTLIST cad id CDATA #IMPLIED
               type (vertex|edge|wire|face|shell|solid|compsolid|compound) #REQUIRED
               orientation CDATA #REQUIRED
@@ -37,6 +37,9 @@ brep are http://www.opencascade.org files.
 
 <!ELEMENT children EMPTY>
 <!ATTLIST children list CDATA #REQUIRED>
+
+<!ELEMENT parents EMPTY>
+<!ATTLIST parents list CDATA #REQUIRED>
 
 <!ELEMENT tessellation EMPTY>
 <!ATTLIST tessellation format CDATA #REQUIRED

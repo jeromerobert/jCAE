@@ -83,6 +83,22 @@ public class BModelWriter
 						child.setAttribute("list", ""+list);
 						elt.appendChild(child);
 					}
+					if (s.getParents().size() > 0)
+					{
+						String list = "";
+						boolean first = true;
+						for (Iterator itp = s.getParents().iterator(); itp.hasNext(); )
+						{
+							BCADGraphCell p = (BCADGraphCell) itp.next();
+							if (!first)
+								list += ",";
+							first = false;
+							list += p.getId();
+						}
+						Element parent = document.createElement("parents");
+						parent.setAttribute("list", ""+list);
+						elt.appendChild(parent);
+					}
 					graphElement.appendChild(elt);
 				}
 			}
