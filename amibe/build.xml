@@ -68,6 +68,7 @@
 		<delete dir="${classes.dir}"/>
 		<delete dir="${javadoc.dir}"/>
 		<delete file="${jar}"/>
+		<delete file="${mesherocc.jar}"/>
 	</target>
 	
 	<target name="dist" depends="init" description="build a tar.bz2 archive to distribute sources">
