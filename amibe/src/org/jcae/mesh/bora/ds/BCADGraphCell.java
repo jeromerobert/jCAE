@@ -47,6 +47,8 @@ public class BCADGraphCell
 	private BCADGraph graph;
 	// CAD shape
 	private CADShape shape;
+	// Is this element
+	private boolean interior = false;
 	// Shape orientation  (0=forward, 1=reversed)
 	private int orientation;
 	// Link to the reversed shape, if it does exist
