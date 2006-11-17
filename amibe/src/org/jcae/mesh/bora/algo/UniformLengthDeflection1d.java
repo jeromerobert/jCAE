@@ -26,7 +26,6 @@ import org.jcae.mesh.mesher.ds.MEdge1D;
 import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.cad.*;
 import java.util.ArrayList;
-import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 /**

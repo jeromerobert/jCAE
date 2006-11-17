@@ -21,15 +21,7 @@
 package org.jcae.mesh.bora.algo;
 
 import org.jcae.mesh.bora.ds.BCADGraphCell;
-import org.jcae.mesh.amibe.algos2d.*;
-import org.jcae.mesh.amibe.metrics.Metric2D;
-import org.jcae.mesh.amibe.metrics.Metric3D;
-import org.jcae.mesh.mesher.ds.MMesh1D;
-import org.jcae.mesh.xmldata.MeshWriter;
 import org.jcae.mesh.xmldata.UNVConverter;
-import org.jcae.mesh.cad.*;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import org.apache.log4j.Logger;
@@ -62,7 +54,6 @@ public class Netgen implements AlgoInterface
 					available = false;
 				else
 				{
-					String line;
 					BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
 					banner += input.readLine();
 					input.close();
@@ -85,7 +76,6 @@ public class Netgen implements AlgoInterface
 
 	public boolean compute(BCADGraphCell mesh)
 	{
-		CADSolid S = (CADSolid) mesh.getShape();
 		logger.info("Running TetGen "+banner);
 		// mesh.export(s, "tetgen.poly", ExportMesh.FORMAT_POLY);
 		new UNVConverter(mesh.getGraph().getModel().getOutputDir()).writeSTL("netgen.stl");

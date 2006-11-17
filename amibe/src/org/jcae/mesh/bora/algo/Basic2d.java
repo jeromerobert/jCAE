@@ -26,7 +26,6 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.algos2d.*;
 import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
-import org.jcae.mesh.mesher.ds.MMesh1D;
 import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.xmldata.MeshWriter;
 import org.jcae.mesh.cad.*;
