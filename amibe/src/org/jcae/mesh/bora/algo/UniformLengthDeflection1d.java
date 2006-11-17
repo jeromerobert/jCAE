@@ -49,9 +49,9 @@ public class UniformLengthDeflection1d implements AlgoInterface
 	 * length is inferior to the desired length.  The geometrical edge is then
 	 * divided into segments of uniform lengths.
 	 *
-	 * @param maxlen  the maximal length admitted,
-	 * @param submesh1d  the 1D mesh being updated.
-	 * @return <code>true</code> if this edge was successfully discrtetized,
+	 * @param len  target length
+	 * @param defl  target deflection
+	 * @param rel  <code>true</code> if deflection is relative,
 	 * <code>false</code> otherwise.
 	 */
 	public UniformLengthDeflection1d(double len, double defl, boolean rel)
@@ -71,6 +71,10 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		return o;
 	}
 
+	/**
+	 * @return <code>true</code> if this edge was successfully discrtetized,
+	 * <code>false</code> otherwise.
+	 */
 	public boolean compute(BCADGraphCell mesh)
 	{
 		int nbPoints;

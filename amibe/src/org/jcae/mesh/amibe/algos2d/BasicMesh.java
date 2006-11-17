@@ -21,25 +21,13 @@
 package org.jcae.mesh.amibe.algos2d;
 
 import org.jcae.mesh.mesher.ds.MMesh1D;
-import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.OTriangle;
 import org.jcae.mesh.amibe.ds.OTriangle2D;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.metrics.Metric3D;
-import org.jcae.mesh.amibe.InvalidFaceException;
+import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.InitialTriangulationException;
-import org.jcae.mesh.cad.CADShapeBuilder;
-import org.jcae.mesh.cad.CADFace;
-import org.jcae.mesh.cad.CADEdge;
-import org.jcae.mesh.cad.CADWire;
-import org.jcae.mesh.cad.CADWireExplorer;
-import org.jcae.mesh.cad.CADExplorer;
-import org.jcae.mesh.cad.CADGeomCurve2D;
-import org.jcae.mesh.cad.CADGeomCurve3D;
-import java.util.Iterator;
-import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 /**
@@ -78,7 +66,7 @@ import org.apache.log4j.Logger;
  * Boundary nodes are then inserted iteratively.  For the moment, an Euclidian
  * 2D metric is used because a 3D metric will not help on a very rough
  * triangulation.  The nearest vertex already inserted in the mesh is retrieved
- * with {@link org.jcae.mesh.amibe.util.QuadTree#getNearestVertex(Vertex)}.
+ * with {@link org.jcae.mesh.amibe.util.QuadTree#getNearestVertex(Vertex2D)}.
  * It has a reference to a triangle containing this vertex.  From this starting
  * point, we search for the {@link Triangle} containing this boundary node by
  * looking for adjacent triangles into the right direction.  This
@@ -91,7 +79,7 @@ import org.apache.log4j.Logger;
  * When all boundary nodes are inserted, an unconstrained Delaunay mesh has
  * been built.  The list of boundary nodes computed previously gives a list of
  * boundary edges, which needs to be enforced.  This is performed by
- * {@link Mesh#forceBoundaryEdge(Vertex, Vertex, int)}; the segments which
+ * {@link Mesh#forceBoundaryEdge(Vertex2D, Vertex2D, int)}; the segments which
  * intersect the enforced edge are swapped.  The {@link OTriangle#BOUNDARY}
  * attribute is set on these edges (and on matte edges).
  * </p>
@@ -148,7 +136,7 @@ import org.apache.log4j.Logger;
  * In order to improve accuracy, Frédéric Hecht advised to recursively
  * split segments when metrics at end points are very different.  This
  * has been implemented in
- * {@link org.jcae.mesh.amibe.ds.tools.Calculus3D#distance(Vertex, Vertex)}
+ * {@link org.jcae.mesh.amibe.ds.tools.Calculus3D#distance(Vertex2D, Vertex2D)}
  * but did not give good results.  Now that the whole process works much
  * better, this issue could be investigated again.
  * </p>

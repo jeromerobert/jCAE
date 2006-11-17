@@ -65,7 +65,7 @@ public class HalfEdge implements Cloneable
 	/**
 	 * Set the edge tied to this object.
 	 *
-	 * @param e  the edge tied to this object.
+	 * @param s  the edge tied to this object.
 	 */
 	public final void glue(HalfEdge s)
 	{
@@ -77,11 +77,6 @@ public class HalfEdge implements Cloneable
 		s.tri.glue1(s.localNumber, tri, localNumber);
 	}
 	
-	/**
-	 * Set the edge tied to this object.
-	 *
-	 * @param e  the edge tied to this object.
-	 */
 	public final HalfEdge notOriented()
 	{
 		if (sym != null && sym.hashCode() < hashCode())
@@ -307,11 +302,6 @@ public class HalfEdge implements Cloneable
 		return tri.vertex[localNumber];
 	}
 	
-	/**
-	 * Returns the apex of this edge.
-	 *
-	 * @return the apex of this edge.
-	 */
 	public final void copyOTriangle(OTriangle ot)
 	{
 		ot.tri = tri;

@@ -370,7 +370,7 @@ public class Vertex2D extends Vertex
 	 * to provide exact computations.  This is important because
 	 * this method is called by {@link #getSurroundingOTriangle}
 	 * to find the triangle enclosing a vertex, or by
-	 * {@link OTriangle2D#forceBoundaryEdge(Vertex)} to compute
+	 * {@link OTriangle2D#forceBoundaryEdge(Vertex2D)} to compute
 	 * segment intersection.
 	 *
 	 * @param v1   first vertex of the segment

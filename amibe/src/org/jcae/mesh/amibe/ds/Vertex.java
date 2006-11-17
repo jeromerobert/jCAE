@@ -77,16 +77,19 @@ public class Vertex implements Cloneable
 	protected boolean deleted = false;
 	
 	/**
+	 * Create a dummy Vertex.
+	 */
+	public Vertex()
+	{
+	}
+
+	/**
 	 * Create an interior Vertex for a 3D mesh.
 	 *
 	 * @param x  first coordinate.
 	 * @param y  second coordinate.
 	 * @param z  third coordinate.
 	 */
-	public Vertex()
-	{
-	}
-
 	private Vertex(double x, double y, double z)
 	{
 		param = new double[3];
