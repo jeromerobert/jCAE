@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import gnu.trove.THashMap;
+import gnu.trove.TIntObjectHashMap;
 import java.util.Iterator;
 import java.io.File;
 
@@ -52,6 +53,9 @@ public class BSubMesh
 	private THashMap mapShapeToSubElement = new THashMap();
 	//   Tessellation
 	public Object mesh = null;
+	private boolean output1d = false;
+	private boolean output2d = false;
+	private boolean output3d = false;
 
 	private class SubElement
 	{
@@ -187,6 +191,13 @@ public class BSubMesh
 	 */
 	public void setHypothesis(Hypothesis h)
 	{
+		int dim = Constraint.getAlgo(h.getElement()).dim();
+		if (dim == BCADGraph.DIM_EDGE)
+			output1d = true;
+		else if (dim == BCADGraph.DIM_FACE)
+			output2d = true;
+		else if (dim == BCADGraph.DIM_SOLID)
+			output3d = true;
 		for (Iterator it = setCells.iterator(); it.hasNext(); )
 		{
 			BCADGraphCell c = (BCADGraphCell) it.next();
@@ -382,6 +393,17 @@ public class BSubMesh
 			for (int i = 1; i<vnodelist.size(); i++)
 				((MNode1D) vnodelist.get(i)).setMaster(master);
 		}
+	}
+
+	public void writeOutput0d(int offset, TIntObjectHashMap nodeMap)
+	{
+		if (!output1d && !output2d && !output3d)
+			return;
+	}
+	public void writeOutput1d(int offset, TIntObjectHashMap nodeMap, TIntObjectHashMap edgeMap)
+	{
+		if (!output1d)
+			return;
 	}
 
 	// Sample test

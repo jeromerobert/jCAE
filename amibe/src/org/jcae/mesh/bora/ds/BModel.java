@@ -21,7 +21,6 @@
 package org.jcae.mesh.bora.ds;
 
 import org.jcae.mesh.bora.xmldata.BModelWriter;
-import org.jcae.mesh.xmldata.*;
 import org.jcae.mesh.cad.CADShapeBuilder;
 import org.jcae.mesh.cad.CADShape;
 import java.util.Collection;
@@ -29,8 +28,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Stack;
 import java.util.Iterator;
-import gnu.trove.THashMap;
-import gnu.trove.THashSet;
 import java.io.File;
 
 import org.apache.log4j.Logger;
@@ -97,6 +94,11 @@ public class BModel
 	public String getCADFile()
 	{
 		return cadFile;
+	}
+
+	public String getRelativeCADDir()
+	{
+		return xmlBrepDir;
 	}
 
 	public CADShape getCADShape()
