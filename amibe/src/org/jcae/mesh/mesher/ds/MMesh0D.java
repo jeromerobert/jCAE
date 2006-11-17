@@ -64,20 +64,6 @@ public class MMesh0D
 			addGeometricalVertex((CADVertex) expV.current());
 	}
 	
-	public MMesh0D(Mesh mesh)
-	{
-		int nodes = 0;
-		for (Iterator itn = mesh.subshapeIterator(0); itn.hasNext(); itn.next())
-			nodes++;
-
-		//  Merge topological vertices found at the same geometrical point
-		vnodesize = 0;
-		vnodelist = new CADVertex[nodes];
-		vnodeset = new TObjectIntHashMap(nodes);
-		for (Iterator itn = mesh.subshapeIterator(0); itn.hasNext(); )
-			addGeometricalVertex((CADVertex) itn.next());
-	}
-	
 	public MMesh0D(BModel model)
 	{
 		int nodes = 0;
