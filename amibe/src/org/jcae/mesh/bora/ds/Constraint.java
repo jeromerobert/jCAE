@@ -225,6 +225,8 @@ public class Constraint extends Hypothesis
 	{
 		if (algo == null)
 			findAlgorithm();
+		if (!algo.isAvailable())
+			return;
 		if (!algo.compute(m))
 			logger.warn("Failed! "+algo);
 	}
