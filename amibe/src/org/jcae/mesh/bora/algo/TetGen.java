@@ -41,6 +41,7 @@ import org.apache.log4j.Logger;
 public class TetGen implements AlgoInterface
 {
 	private static Logger logger=Logger.getLogger(TetGen.class);
+	private static final String tetgenCmd = "tetgen";
 	private double volume;
 	private static boolean available = true;
 	private static String banner = null;
@@ -54,7 +55,7 @@ public class TetGen implements AlgoInterface
 			available = true;
 			banner = "";
 			try {
-				Process p = Runtime.getRuntime().exec(new String[] {"tetgen", "-version"});
+				Process p = Runtime.getRuntime().exec(new String[] {tetgenCmd, "-version"});
 				p.waitFor();
 				if (p.exitValue() != 0)
 					available = false;
@@ -90,7 +91,7 @@ public class TetGen implements AlgoInterface
 		MeshWriter.writeObject3D(m, "tetgen.tmp", "jcae3d", "brep", mesh.getGraph().getModel().getCADFile(), 1);
 		new UNVConverter("tetgen.tmp").writePOLY("tetgen.poly");
 		try {
-			Process p = Runtime.getRuntime().exec(new String[] {"tetgen", "-a"+volume+"pYNEFg", "tetgen"});
+			Process p = Runtime.getRuntime().exec(new String[] {tetgenCmd, "-a"+volume+"pYNEFg", "tetgen"});
 			p.waitFor();
 			if (p.exitValue() != 0)
 				return false;
