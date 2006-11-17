@@ -27,6 +27,7 @@ import org.jcae.mesh.amibe.algos2d.*;
 import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.mesher.ds.MMesh1D;
+import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.xmldata.MeshWriter;
 import org.jcae.mesh.cad.*;
 import java.util.ArrayList;
@@ -211,7 +212,31 @@ public class Basic2d implements AlgoInterface
 		Metric3D.setRelativeDeflection(relDefl);
 		Metric3D.setIsotropic(isotropic);
 
-		new BasicMesh(m, mesh.mesh1D).compute();
+		// new BasicMesh(m, mesh.mesh1D).compute();
+
+		// Insert interior vertices, if any
+		ArrayList innerV = new ArrayList();
+		for (Iterator it = mesh.shapesIterator(); it.hasNext(); )
+		{
+			BCADGraphCell sub = (BCADGraphCell) it.next();
+			CADShape subV = sub.getShape();
+			if (subV instanceof CADVertex)
+			{
+				MNode1D n = new MNode1D(0.0, (CADVertex) subV);
+				innerV.add(n);
+			}
+		}
+		new Initial(m, mesh.mesh1D, innerV).compute();
+
+		m.pushCompGeom(3);
+		new Insertion(m, 16.0).compute();
+		new ConstraintNormal3D(m).compute();
+		new Insertion(m, 4.0).compute();
+		new ConstraintNormal3D(m).compute();
+		new Insertion(m).compute();
+		new ConstraintNormal3D(m).compute();
+		m.popCompGeom(3);
+		
 		new CheckDelaunay(m).compute();
 		if (deflection > 0.0 && !relDefl)
 			new EnforceAbsDeflection(m).compute();

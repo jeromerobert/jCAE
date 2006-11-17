@@ -40,6 +40,7 @@ import org.jcae.mesh.cad.CADGeomCurve2D;
 import org.jcae.mesh.cad.CADGeomCurve3D;
 import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.Collection;
 import org.apache.log4j.Logger;
 
 /**
@@ -186,6 +187,7 @@ public class Initial
 	private static Logger logger=Logger.getLogger(Initial.class);
 	private Mesh mesh = null;
 	private MMesh1D mesh1d = null;
+	private Collection innerNodes = null;
 	
 	/**
 	 * Creates a <code>Initial</code> instance.
@@ -195,8 +197,14 @@ public class Initial
 	 */
 	public Initial(Mesh m, MMesh1D m1d)
 	{
+		this(m, m1d, null);
+	}
+	
+	public Initial(Mesh m, MMesh1D m1d, Collection list)
+	{
 		mesh = m;
 		mesh1d = m1d;
+		innerNodes = list;
 	}
 	
 	/**
@@ -388,6 +396,20 @@ public class Initial
 			}
 		}
 		
+		if (innerNodes != null && innerNodes.size() > 0)
+		{
+			logger.debug(" Insert interior vertices");
+			CADFace face = (CADFace) mesh.getGeometry();
+			for (Iterator it = innerNodes.iterator(); it.hasNext(); )
+			{
+				MNode1D p1 = (MNode1D) it.next();
+				v = new Vertex(mesh, p1, null, face);
+				ot = v.getSurroundingOTriangle();
+				ot.split3(v, true); 
+				v.addToQuadTree();
+			}
+		}
+
 		logger.debug(" Select 3D smaller diagonals");
 		mesh.pushCompGeom(3);
 		ot = new OTriangle2D();
