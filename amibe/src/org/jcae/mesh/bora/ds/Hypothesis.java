@@ -44,6 +44,16 @@ public class Hypothesis
 	}
 
 	/**
+	 * Gets element type.
+	 *
+	 * @return element type
+	 */
+	public String getElement()
+	{
+		return elementType;
+	}
+
+	/**
 	 * Sets target length.
 	 *
 	 * @param l  length
