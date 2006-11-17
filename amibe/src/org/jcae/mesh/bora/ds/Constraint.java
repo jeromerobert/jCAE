@@ -20,7 +20,6 @@
 
 package org.jcae.mesh.bora.ds;
 
-import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.bora.algo.*;
 import java.util.Iterator;
 import java.util.Collection;
@@ -34,6 +33,7 @@ public class Constraint extends Hypothesis
 	protected boolean dirty = false;
 	protected AlgoInterface algo = null;
 	private static Class [] innerClasses = Constraint.class.getDeclaredClasses();
+	private static HypNone HypNoneInstance = new HypNone();
 
 	// Is there a better way to do that?
 	private void copyHypothesis(Hypothesis h, int d)
@@ -158,24 +158,27 @@ public class Constraint extends Hypothesis
 		return ret;
 	}
 
-	private static Hyp getAlgo(int d, String elt)
+	public static HypInterface getAlgo(String elt)
 	{
-		Hyp h = null;
+		HypInterface h = null;
 		if (elt == null)
-			return null;
+			return HypNoneInstance;
 		try {
 			for (int i = 0; i < innerClasses.length; i++)
 			{
 				if (innerClasses[i].getName().equals(Constraint.class.getName()+"$Hyp"+elt))
-					h = (Hyp) innerClasses[i].newInstance();
+					h = (HypInterface) innerClasses[i].newInstance();
 			}
-		} catch (Exception ex) {ex.printStackTrace(); };
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			h = HypNoneInstance;
+		};
 		return h;
 	}
 
 	private static String impliedType(int d, String elt)
 	{
-		Hyp h = getAlgo(d, elt);
+		HypInterface h = getAlgo(elt);
 		if (h == null)
 			return null;
 		return h.impliedType(d);
@@ -231,13 +234,18 @@ public class Constraint extends Hypothesis
 			logger.warn("Failed! "+algo);
 	}
 
-	private interface Hyp
+	public static class HypNone implements HypInterface
 	{
-		public String impliedType(int d);
-		public int dim();
+		public int dim()
+		{
+			return -1;
+		}
+		public String impliedType(int d)
+		{
+			return null;
+		}
 	}
-
-	public static class HypE2 implements Hyp
+	public static class HypE2 implements HypInterface
 	{
 		public int dim()
 		{
@@ -251,7 +259,7 @@ public class Constraint extends Hypothesis
 				return null;
 		}
 	}
-	public static class HypT3 implements Hyp
+	public static class HypT3 implements HypInterface
 	{
 		public int dim()
 		{
@@ -267,7 +275,7 @@ public class Constraint extends Hypothesis
 				return null;
 		}
 	}
-	public static class HypT4 implements Hyp
+	public static class HypT4 implements HypInterface
 	{
 		public int dim()
 		{
