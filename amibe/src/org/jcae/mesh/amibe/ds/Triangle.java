@@ -103,7 +103,7 @@ public class Triangle
 	/**
 	 * Three vertices.
 	 */
-	public Vertex [] vertex = new Vertex[3];
+	public Vertex [] vertex;
 	
 	/**
 	 * Pointers to adjacent elements through edges.
@@ -142,6 +142,7 @@ public class Triangle
 	
 	public Triangle()
 	{
+		vertex = new Vertex[3];
 	}
 
 	/**
@@ -154,6 +155,10 @@ public class Triangle
 	public Triangle(Vertex a, Vertex b, Vertex c)
 	{
 		assert a != b && b != c && c != a : this;
+		if (a instanceof Vertex2D)
+			vertex = new Vertex2D[3];
+		else
+			vertex = new Vertex[3];
  		vertex[0] = a;
  		vertex[1] = b;
  		vertex[2] = c;
@@ -167,6 +172,10 @@ public class Triangle
 	 */
 	public Triangle(Triangle that)
 	{
+		if (that.vertex[0] instanceof Vertex2D)
+			vertex = new Vertex2D[3];
+		else
+			vertex = new Vertex[3];
 		for (int i = 0; i < 3; i++)
 		{
 			vertex[i] = that.vertex[i];
@@ -260,12 +269,12 @@ public class Triangle
 	 *
 	 * @return the 2D centroid of this triangle.
 	 */
-	public Vertex centroid()
+	public Vertex2D centroid()
 	{
 		double [] p1 = vertex[0].getUV();
 		double [] p2 = vertex[1].getUV();
 		double [] p3 = vertex[2].getUV();
-		return vertex[0].mesh.newVertex(
+		return Vertex2D.valueOf(vertex[0].mesh,
 			(p1[0]+p2[0]+p3[0])/3.0,
 			(p1[1]+p2[1]+p3[1])/3.0
 		);

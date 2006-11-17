@@ -64,9 +64,9 @@ public class MeshValidOEMM
 		for (Iterator itf = RawStorage.getFacesIterator(oemm); itf.hasNext();)
 		{
 			double [] xyz = (double []) itf.next();
-			Vertex n1 = new Vertex(xyz[0], xyz[1], xyz[2]);
-			Vertex n2 = new Vertex(xyz[3], xyz[4], xyz[5]);
-			Vertex n3 = new Vertex(xyz[6], xyz[7], xyz[8]);
+			Vertex n1 = Vertex.valueOf(null, xyz[0], xyz[1], xyz[2]);
+			Vertex n2 = Vertex.valueOf(null, xyz[3], xyz[4], xyz[5]);
+			Vertex n3 = Vertex.valueOf(null, xyz[6], xyz[7], xyz[8]);
 			double a1 = Math.abs(n1.angle3D(n2, n3));
 			double a2 = Math.abs(n2.angle3D(n3, n1));
 			double a3 = Math.abs(n3.angle3D(n1, n2));

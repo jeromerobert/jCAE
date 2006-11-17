@@ -26,7 +26,7 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.OTriangle;
 import org.jcae.mesh.amibe.ds.OTriangle2D;
-import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.Vertex2D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.InvalidFaceException;
 import org.jcae.mesh.amibe.InitialTriangulationException;
@@ -67,7 +67,7 @@ import org.apache.log4j.Logger;
  * <p>
  * A first triangle is created by iterating over the list of boundary nodes
  * to find three vertices which are not aligned.  The outer domain is also
- * triangulated; {@link Vertex#outer} is a vertex at infinite, and three
+ * triangulated; {@link Vertex2D#outer} is a vertex at infinite, and three
  * outer triangles are created by joining this vertex to vertices of the
  * first triangle.  With this trick, there is no need to have special
  * cases when vertices are inserted outside the convex hull of already inserted
@@ -79,7 +79,7 @@ import org.apache.log4j.Logger;
  * Boundary nodes are then inserted iteratively.  For the moment, an Euclidian
  * 2D metric is used because a 3D metric will not help on a very rough
  * triangulation.  The nearest vertex already inserted in the mesh is retrieved
- * with {@link org.jcae.mesh.amibe.util.QuadTree#getNearestVertex(Vertex)}.
+ * with {@link org.jcae.mesh.amibe.util.QuadTree#getNearestVertex(Vertex2D)}.
  * It has a reference to a triangle containing this vertex.  From this starting
  * point, we search for the {@link Triangle} containing this boundary node by
  * looking for adjacent triangles into the right direction.  This
@@ -92,13 +92,13 @@ import org.apache.log4j.Logger;
  * When all boundary nodes are inserted, an unconstrained Delaunay mesh has
  * been built.  The list of boundary nodes computed previously gives a list of
  * boundary edges, which needs to be enforced.  This is performed by
- * {@link Mesh#forceBoundaryEdge(Vertex, Vertex, int)}; the segments which
+ * {@link Mesh#forceBoundaryEdge(Vertex2D, Vertex2D, int)}; the segments which
  * intersect the enforced edge are swapped.  The {@link OTriangle#BOUNDARY}
  * attribute is set on these edges (and on matte edges).
  * </p>
  *
  * <p>
- * We know that the {@link Triangle} bound to {@link Vertex#outer} is an
+ * We know that the {@link Triangle} bound to {@link Vertex2D#outer} is an
  * outer triangle.  Triangles adjacent through a boundary edge are interior
  * triangles, and triangles adjacent through non-boundary edges are also
  * outer triangles.  All triangles of the mesh are visited, and outer
@@ -115,7 +115,7 @@ import org.apache.log4j.Logger;
  * <p>
  * It is important to note that triangles in holes have their
  * <code>OUTER</code> attribute set, but are not linked to
- * {@link Vertex#outer}.  So this attribute is the only safe way to
+ * {@link Vertex2D#outer}.  So this attribute is the only safe way to
  * detect outer triangles.  As outer triangles are not removed,
  * vertex location can still be performed as if the domain was
  * convex.  All subsequent 2D algorithms should consider these points.
@@ -125,7 +125,7 @@ import org.apache.log4j.Logger;
  * This is very different when remeshing 3D meshes; in such a case,
  * boundary edges are detected because they have only one incident
  * face.  An outer triangle is then added by connecting end points to
- * {@link Vertex#outer}, but outer triangles are not connected together.
+ * {@link Vertex2D#outer}, but outer triangles are not connected together.
  * Mesh domain is not convex, but that does not matter because 3D
  * algorithms do not require vertex location.
  * </p>
@@ -149,7 +149,7 @@ import org.apache.log4j.Logger;
  * In order to improve accuracy, Frédéric Hecht advised to recursively
  * split segments when metrics at end points are very different.  This
  * has been implemented in
- * {@link org.jcae.mesh.amibe.ds.tools.Calculus3D#distance(Vertex, Vertex)}
+ * {@link org.jcae.mesh.amibe.ds.tools.Calculus3D#distance(Vertex2D, Vertex2D)}
  * but did not give good results.  Now that the whole process works much
  * better, this issue could be investigated again.
  * </p>
@@ -214,9 +214,9 @@ public class Initial
 	{
 		Triangle t;
 		OTriangle2D ot;
-		Vertex v;
+		Vertex2D v;
 		
-		Vertex [] bNodes = boundaryNodes();
+		Vertex2D [] bNodes = boundaryNodes();
 		if (bNodes.length < 3)
 		{
 			logger.warn("Boundary face contains less than 3 points, it is skipped...");
@@ -245,16 +245,16 @@ public class Initial
 		//  Initial point insertion sometimes fail on 2D,
 		//  this needs to be investigated.
 		mesh.pushCompGeom(2);
-		Vertex firstOnWire = null;
+		Vertex2D firstOnWire = null;
 		{
 			//  Initializes mesh
 			int i = 0;
-			Vertex v1 = bNodes[i];
+			Vertex2D v1 = bNodes[i];
 			firstOnWire = v1;
 			i++;
-			Vertex v2 = bNodes[i];
+			Vertex2D v2 = bNodes[i];
 			i++;
-			Vertex v3 = null;
+			Vertex2D v3 = null;
 			//  Ensure that 1st triangle is not flat
 			for (; i < bNodes.length; i++)
 			{
@@ -318,16 +318,16 @@ public class Initial
 		mesh.popCompGeom(2);
 		
 		logger.debug(" Mark outer elements");
-		t = (Triangle) Vertex.outer.getLink();
+		t = (Triangle) Vertex2D.outer.getLink();
 		ot = new OTriangle2D(t, 0);
-		if (ot.origin() == Vertex.outer)
+		if (ot.origin() == Vertex2D.outer)
 			ot.nextOTri();
-		else if (ot.destination() == Vertex.outer)
+		else if (ot.destination() == Vertex2D.outer)
 			ot.prevOTri();
-		assert ot.apex() == Vertex.outer : ot;
+		assert ot.apex() == Vertex2D.outer : ot;
 		
 		Triangle.listLock();
-		Vertex first = ot.origin();
+		Vertex2D first = (Vertex2D) ot.origin();
 		do
 		{
 			for (int i = 0; i < 3; i++)
@@ -403,7 +403,7 @@ public class Initial
 			for (Iterator it = innerNodes.iterator(); it.hasNext(); )
 			{
 				MNode1D p1 = (MNode1D) it.next();
-				v = new Vertex(mesh, p1, null, face);
+				v = Vertex2D.valueOf(mesh, p1, null, face);
 				ot = v.getSurroundingOTriangle();
 				ot.split3(v, true); 
 				v.addToQuadTree();
@@ -424,7 +424,7 @@ public class Initial
 			for (Iterator it = saveList.iterator(); it.hasNext(); )
 			{
 				OTriangle2D s = (OTriangle2D) it.next();
-				if (s.apex() == Vertex.outer)
+				if (s.apex() == Vertex2D.outer)
 					s.symOTri();
 				s.nextOTri();
 				if (s.hasAttributes(OTriangle.SWAPPED))
@@ -440,9 +440,9 @@ public class Initial
 	
 	/*
 	 *  Builds the patch boundary.
-	 *  Returns a list of Vertex.
+	 *  Returns a list of Vertex2D.
 	 */
-	private Vertex [] boundaryNodes()
+	private Vertex2D [] boundaryNodes()
 	{
 		//  Rough approximation of the final size
 		int roughSize = 10*mesh1d.maximalNumberOfNodes();
@@ -454,7 +454,7 @@ public class Initial
 		for (expW.init(face, CADExplorer.WIRE); expW.more(); expW.next())
 		{
 			MNode1D p1 = null;
-			Vertex p20 = null, p2 = null, lastPoint = null;;
+			Vertex2D p20 = null, p2 = null, lastPoint = null;;
 			double accumulatedLength = 0.0;
 			ArrayList nodesWire = new ArrayList(roughSize);
 			for (wexp.init((CADWire) expW.current(), face); wexp.more(); wexp.next())
@@ -490,7 +490,7 @@ public class Initial
 				p1 = (MNode1D) itn.next();
 				if (null == p2)
 				{
-					p2 = new Vertex(mesh, p1, c2d, face);
+					p2 = Vertex2D.valueOf(mesh, p1, c2d, face);
 					nodesWire.add(p2);
 					p20 = p2;
 					lastPoint = p2;
@@ -499,7 +499,7 @@ public class Initial
 				while (itn.hasNext())
 				{
 					p1 = (MNode1D) itn.next();
-					p2 = new Vertex(mesh, p1, c2d, face);
+					p2 = Vertex2D.valueOf(mesh, p1, c2d, face);
 					newNodes.add(p2);
 				}
 				// An edge is skipped if all the following conditions
@@ -552,7 +552,7 @@ public class Initial
 			}
 		}
 		
-		return (Vertex []) result.toArray(new Vertex[result.size()]);
+		return (Vertex2D []) result.toArray(new Vertex2D[result.size()]);
 	}
 	
 }

@@ -308,7 +308,7 @@ public class DecimateVertex
 		Stack notContracted = new Stack();
 		Vertex v1 = null, v2 = null;
 		Quadric3DError q1 = null, q2 = null;
-		Vertex v3 = mesh.newVertex(0.0, 0.0, 0.0);
+		Vertex v3 = Vertex.valueOf(mesh, 0.0, 0.0, 0.0);
 		Quadric3DError q3 = new Quadric3DError();
 		while (tree.size() > 0 && nrTriangles > nrFinal)
 		{

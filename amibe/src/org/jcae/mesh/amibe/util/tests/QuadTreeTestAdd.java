@@ -21,7 +21,7 @@ package org.jcae.mesh.amibe.util.tests;
 
 import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.util.QuadTreeTest;
-import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.Vertex2D;
 import java.util.Random;
 import org.jcae.mesh.java3d.Viewer;
 
@@ -62,7 +62,7 @@ public class QuadTreeTestAdd extends QuadTreeTest
 		{
 			u = rand.nextDouble();
 			v = rand.nextDouble();
-			r.add(new Vertex(u, v));
+			r.add(Vertex2D.valueOf(null, u, v));
 		}
 		//CheckCoordProcedure checkproc = new CheckCoordProcedure();
 		//r.walk(checkproc);
@@ -79,7 +79,7 @@ public class QuadTreeTestAdd extends QuadTreeTest
 					double [] xyz = view.getLastClick();
 					if (null != xyz)
 					{
-						Vertex vt = new Vertex(xyz[0], xyz[1]);
+						Vertex2D vt = Vertex2D.valueOf(null, xyz[0], xyz[1]);
 						r.add(vt);
 						view.removeAllBranchGroup();
 						display(view, r);

@@ -62,8 +62,8 @@ public class OTriangle2D extends OTriangle
 	 */
 	public final void removeDegenerated()
 	{
-		Vertex o = origin();
-		Vertex d = destination();
+		Vertex2D o = (Vertex2D) origin();
+		Vertex2D d = (Vertex2D) destination();
 		assert o.getRef() != 0 && d.getRef() != 0 && o.getRef() ==  d.getRef();
 		
 		//  Replace o by d in all triangles
@@ -120,14 +120,14 @@ public class OTriangle2D extends OTriangle
 	 *
 	 * Origin and destination points must not be at infinite, which
 	 * is the case when current triangle is returned by
-	 * getSurroundingTriangle().  If apex is Vertex.outer, then
+	 * getSurroundingTriangle().  If apex is Vertex2D.outer, then
 	 * getSurroundingTriangle() ensures that v.onLeft(o,d) &gt; 0.
 	 *
 	 * @param v  the vertex being inserted.
 	 * @param force  if <code>false</code>, the vertex is inserted only if some edges were swapped after its insertion.  If <code>true</code>, the vertex is unconditionnally inserted.
 	 * @return <code>true</code> if vertex was successfully added, <code>false</code> otherwise.
 	 */
-	public final boolean split3(Vertex v, boolean force)
+	public final boolean split3(Vertex2D v, boolean force)
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("Split OTriangle2D "+this+"\nat Vertex "+v);
@@ -145,11 +145,11 @@ public class OTriangle2D extends OTriangle
 		oldSymRight = work[3];
 		symOTri(oldRight, oldSymRight);  // = (ad*)
 		//  Set vertices of newly created and current triangles
-		Vertex o = origin();
-		assert o != Vertex.outer;
-		Vertex d = destination();
-		assert d != Vertex.outer;
-		Vertex a = apex();
+		Vertex2D o = (Vertex2D) origin();
+		assert o != Vertex2D.outer;
+		Vertex2D d = (Vertex2D) destination();
+		assert d != Vertex2D.outer;
+		Vertex2D a = (Vertex2D) apex();
 		
 		OTriangle2D newLeft  = new OTriangle2D(new Triangle(a, o, v), 2);
 		OTriangle2D newRight = new OTriangle2D(new Triangle(d, a, v), 2);
@@ -230,11 +230,11 @@ public class OTriangle2D extends OTriangle
 	{
 		int nrSwap = 0;
 		int totNrSwap = 0;
-		Vertex v = apex();
-		assert v != Vertex.outer;
+		Vertex2D v = (Vertex2D) apex();
+		assert v != Vertex2D.outer;
 		OTriangle2D sym = new OTriangle2D();
 		//  Loops around v
-		Vertex first = origin();
+		Vertex2D first = (Vertex2D) origin();
 		while (true)
 		{
 			if (hasAttributes(BOUNDARY) || hasAttributes(NONMANIFOLD) || hasAttributes(OUTER))
@@ -249,16 +249,16 @@ public class OTriangle2D extends OTriangle
 			}
 			else
 			{
-				Vertex o = origin();
-				Vertex d = destination();
+				Vertex2D o = (Vertex2D) origin();
+				Vertex2D d = (Vertex2D) destination();
 				symOTri(this, sym);
-				Vertex a = sym.apex();
+				Vertex2D a = (Vertex2D) sym.apex();
 				boolean toSwap = false;
-				if (o == Vertex.outer)
+				if (o == Vertex2D.outer)
 					toSwap = (v.onLeft(d, a) < 0L);
-				else if (d == Vertex.outer)
+				else if (d == Vertex2D.outer)
 					toSwap = (v.onLeft(a, o) < 0L);
-				else if (a == Vertex.outer)
+				else if (a == Vertex2D.outer)
 					toSwap = (v.onLeft(o, d) == 0L);
 				else if (isMutable())
 				{
@@ -276,7 +276,7 @@ public class OTriangle2D extends OTriangle
 				else
 				{
 					nextOTriApexLoop();
-					if (origin() == first)
+					if ((Vertex2D) origin() == first)
 					{
 						if (nrSwap == 0)
 							break;
@@ -306,30 +306,30 @@ public class OTriangle2D extends OTriangle
 	 * @param end  end point of the boundary edge.
 	 * @return the number of intersected edges.
 	 */
-	public final int forceBoundaryEdge(Vertex end)
+	public final int forceBoundaryEdge(Vertex2D end)
 	{
 		long newl, oldl;
 		int count = 0;
 		
-		Vertex start = origin();
-		assert start != Vertex.outer;
-		assert end != Vertex.outer;
+		Vertex2D start = (Vertex2D) origin();
+		assert start != Vertex2D.outer;
+		assert end != Vertex2D.outer;
 
 		nextOTri();
 		while (true)
 		{
 			count++;
-			Vertex o = origin();
-			Vertex d = destination();
-			Vertex a = apex();
-			assert a != Vertex.outer : ""+this;
+			Vertex2D o = (Vertex2D) origin();
+			Vertex2D d = (Vertex2D) destination();
+			Vertex2D a = (Vertex2D) apex();
+			assert a != Vertex2D.outer : ""+this;
 			symOTri(this, work[0]);
 			work[0].nextOTri();
-			Vertex n = work[0].destination();
-			assert n != Vertex.outer : ""+work[0];
+			Vertex2D n = (Vertex2D) work[0].destination();
+			assert n != Vertex2D.outer : ""+work[0];
 			newl = n.onLeft(start, end);
 			oldl = a.onLeft(start, end);
-			boolean toSwap = (n != Vertex.outer) && (a.onLeft(n, d) > 0L) && (a.onLeft(o, n) > 0L) && !hasAttributes(BOUNDARY);
+			boolean toSwap = (n != Vertex2D.outer) && (a.onLeft(n, d) > 0L) && (a.onLeft(o, n) > 0L) && !hasAttributes(BOUNDARY);
 			if (newl > 0L)
 			{
 				//  o stands to the right of (start,end), d and n to the left.
@@ -397,21 +397,21 @@ public class OTriangle2D extends OTriangle
 	 * @return <code>true</code> if edge is Delaunay, <code>false</code>
 	 * otherwise.
 	 */
-	public final boolean isDelaunay(Vertex apex2)
+	public final boolean isDelaunay(Vertex2D apex2)
 	{
 		if (apex2.isPseudoIsotropic())
 			return isDelaunay_isotropic(apex2);
 		return isDelaunay_anisotropic(apex2);
 	}
 	
-	private final boolean isDelaunay_isotropic(Vertex apex2)
+	private final boolean isDelaunay_isotropic(Vertex2D apex2)
 	{
-		assert Vertex.outer != origin();
-		assert Vertex.outer != destination();
-		assert Vertex.outer != apex();
-		Vertex vA = origin();
-		Vertex vB = destination();
-		Vertex v1 = apex();
+		assert Vertex2D.outer != (Vertex2D) origin();
+		assert Vertex2D.outer != (Vertex2D) destination();
+		assert Vertex2D.outer != (Vertex2D) apex();
+		Vertex2D vA = (Vertex2D) origin();
+		Vertex2D vB = (Vertex2D) destination();
+		Vertex2D v1 = (Vertex2D) apex();
 		long tp1 = vA.onLeft(vB, v1);
 		long tp2 = vB.onLeft(vA, apex2);
 		long tp3 = apex2.onLeft(vB, v1);
@@ -426,12 +426,12 @@ public class OTriangle2D extends OTriangle
 		return !apex2.inCircleTest2(this);
 	}
 	
-	private final boolean isDelaunay_anisotropic(Vertex apex2)
+	private final boolean isDelaunay_anisotropic(Vertex2D apex2)
 	{
-		assert Vertex.outer != origin();
-		assert Vertex.outer != destination();
-		assert Vertex.outer != apex();
-		if (apex2 == Vertex.outer)
+		assert Vertex2D.outer != (Vertex2D) origin();
+		assert Vertex2D.outer != (Vertex2D) destination();
+		assert Vertex2D.outer != (Vertex2D) apex();
+		if (apex2 == Vertex2D.outer)
 			return true;
 		return !apex2.inCircleTest3(this);
 	}

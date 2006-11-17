@@ -20,7 +20,7 @@
 package org.jcae.mesh.amibe.util;
 
 import org.apache.log4j.Logger;
-import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.Vertex2D;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.FileNotFoundException;
@@ -105,7 +105,7 @@ public class QuadTreeTest extends QuadTree
 			coord[3] = p[1];
 			for (int i = 0; i < self.nItems; i++)
 			{
-				Vertex v = (Vertex) self.subQuad[i];
+				Vertex2D v = (Vertex2D) self.subQuad[i];
 				p = v.getUV();
 				if (p[0] < coord[0] || p[0] > coord[2] ||
 					p[1] < coord[1] || p[1] > coord[3])
@@ -132,7 +132,7 @@ public class QuadTreeTest extends QuadTree
 				return 0;
 			for (int i = 0; i < self.nItems; i++)
 			{
-				Vertex v = (Vertex) self.subQuad[i];
+				Vertex2D v = (Vertex2D) self.subQuad[i];
 				double [] param = v.getUV();
 				coord[index] = param[0];
 				coord[index+1] = param[1];
@@ -233,7 +233,7 @@ public class QuadTreeTest extends QuadTree
 		return bg;
 	}
 	
-	public BranchGroup segment(Vertex vt, Vertex vn, float depth, float r, float g, float b)
+	public BranchGroup segment(Vertex2D vt, Vertex2D vn, float depth, float r, float g, float b)
 	{
 		BranchGroup bg = new BranchGroup();
 		LineArray line = new LineArray(2, LineArray.COORDINATES | LineArray.COLOR_3);

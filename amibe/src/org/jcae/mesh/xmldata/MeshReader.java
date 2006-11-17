@@ -23,6 +23,7 @@ package org.jcae.mesh.xmldata;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.Vertex2D;
 import org.jcae.mesh.cad.CADFace;
 import java.io.File;
 import java.io.FileInputStream;
@@ -101,7 +102,7 @@ public class MeshReader
 			
 			int numberOfNodes = Integer.parseInt(
 				xpath.evaluate("number/text()", submeshNodes));
-			Vertex [] nodelist = new Vertex[numberOfNodes];
+			Vertex2D [] nodelist = new Vertex2D[numberOfNodes];
 			int label;
 			double [] coord = new double[2];
 			logger.debug("Reading "+numberOfNodes+" nodes");
@@ -112,7 +113,7 @@ public class MeshReader
 			for (int i=0; i < numberOfNodes; i++)
 			{
 				nodesBuffer.get(coord);
-				nodelist[i] = mesh.newVertex(coord[0], coord[1]);
+				nodelist[i] = (Vertex2D) Vertex.valueOf(mesh, coord);
 				if (i < numberOfNodes - numberOfReferences)
 					label = 0;
 				else
@@ -137,9 +138,9 @@ public class MeshReader
 			Triangle [] facelist = new Triangle[numberOfTriangles];
 			for (int i=0; i < numberOfTriangles; i++)
 			{
-				Vertex pt1 = nodelist[trianglesBuffer.get()];
-				Vertex pt2 = nodelist[trianglesBuffer.get()];
-				Vertex pt3 = nodelist[trianglesBuffer.get()];
+				Vertex2D pt1 = nodelist[trianglesBuffer.get()];
+				Vertex2D pt2 = nodelist[trianglesBuffer.get()];
+				Vertex2D pt3 = nodelist[trianglesBuffer.get()];
 				facelist[i] = new Triangle(pt1, pt2, pt3);
 				mesh.add(facelist[i]);
 				pt1.setLink(facelist[i]);
@@ -223,7 +224,7 @@ public class MeshReader
 			for (int i=0; i < numberOfNodes; i++)
 			{
 				nodesBuffer.get(coord);
-				nodelist[i] = mesh.newVertex(coord[0], coord[1], coord[2]);
+				nodelist[i] = Vertex.valueOf(mesh, coord);
 				if (i < numberOfNodes - numberOfReferences)
 					label = 0;
 				else

@@ -1,3 +1,16 @@
+Fri Nov 17 22:36:52 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Vertex.java
+	  src/org/jcae/mesh/amibe/ds/Vertex2D.java: New Vertex2D class
+	extending Vertex to handle meshes on parametrized surfaces.
+	This will save some space for 3D meshes.
+	* src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/amibe/ds/Vertex.java: Replace Mesh.newVertex()
+	by Vertex.valueOf(), to follow Java convention on naming static
+	factory methods.
+	* src/org/jcae/mesh/amibe/**.java: Above changes have to be
+	propagated to almost all source files.
+
 Wed Nov 15 12:13:10 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/java3d/Viewer.java: Add a key listener.

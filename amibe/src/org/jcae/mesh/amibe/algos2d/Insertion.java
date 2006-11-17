@@ -24,7 +24,7 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.OTriangle2D;
 import org.jcae.mesh.amibe.ds.OTriangle;
-import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.Vertex2D;
 import java.util.Iterator;
 import java.util.ArrayList;
 import gnu.trove.PrimeFinder;
@@ -37,7 +37,7 @@ import org.apache.log4j.Logger;
  * The next step is to take vertices from the bucket in random order.
  * For each vertex <code>v</code>, the closest vertex <code>w</code>
  * already present in the mesh is returned by
- * {@link org.jcae.mesh.amibe.util.QuadTree#getNearestVertex(Vertex)}
+ * {@link org.jcae.mesh.amibe.util.QuadTree#getNearestVertex(Vertex2D)}
  * If the distance between <code>v</code> and <code>w</code> is lower
  * than 1/sqrt(2), <code>v</code> is dropped, otherwise it is inserted
  * into the mesh.  Just after a vertex is inserted, incident edges are
@@ -139,16 +139,16 @@ public class Insertion
 					double lcrit = 1.0;
 					if (l > 4.0)
 						lcrit = l / 4.0;
-					Vertex start = ot.origin();
-					Vertex end = ot.destination();
+					Vertex2D start = (Vertex2D) ot.origin();
+					Vertex2D end = (Vertex2D) ot.destination();
 					double [] xs = start.getUV();
 					double [] xe = end.getUV();
 					int segments = (int) (2.0*l/lcrit) + 10;
-					Vertex [] np = new Vertex[segments-1];
+					Vertex2D [] np = new Vertex2D[segments-1];
 					for (int ns = 1; ns < segments; ns++)
-						np[ns-1] = mesh.newVertex(xs[0]+ns*(xe[0]-xs[0])/segments, xs[1]+ns*(xe[1]-xs[1])/segments);
+						np[ns-1] = Vertex2D.valueOf(mesh, xs[0]+ns*(xe[0]-xs[0])/segments, xs[1]+ns*(xe[1]-xs[1])/segments);
 					
-					Vertex last = start;
+					Vertex2D last = start;
 					int nrNodes = 0;
 					
 					l = 0.0;
@@ -180,8 +180,8 @@ public class Insertion
 					int index = imax / 2;
 					for (int i = 0; i < imax; i++)
 					{
-						Vertex v = (Vertex) triNodes.get(index);
-						Vertex n = mesh.getQuadTree().getNearestVertex(v);
+						Vertex2D v = (Vertex2D) triNodes.get(index);
+						Vertex2D n = mesh.getQuadTree().getNearestVertex(v);
 						assert n == mesh.getQuadTree().getNearestVertexDebug(v);
 						if (mesh.compGeom().distance(v, n) > minlen)
 						{
@@ -200,8 +200,8 @@ public class Insertion
 				Triangle t = (Triangle) it.next();
 				if (t.isOuter())
 					continue;
-				Vertex v = t.centroid();
-				Vertex n = mesh.getQuadTree().getNearestVertex(v);
+				Vertex2D v = (Vertex2D) t.centroid();
+				Vertex2D n = mesh.getQuadTree().getNearestVertex(v);
 				assert n == mesh.getQuadTree().getNearestVertexDebug(v);
 				if (mesh.compGeom().distance(v, n) > minlen)
 				{
@@ -211,7 +211,7 @@ public class Insertion
 			}
 			for (Iterator it = nodes.iterator(); it.hasNext(); )
 			{
-				Vertex v = (Vertex) it.next();
+				Vertex2D v = (Vertex2D) it.next();
 				//  These vertiuces are not bound to any triangles, so
 				//  they must be removed, otherwise getSurroundingOTriangle
 				//  may return a null pointer.
@@ -230,7 +230,7 @@ public class Insertion
 			int skippedNodes = 0;
 			for (int i = 0; i < imax; i++)
 			{
-				Vertex v = (Vertex) nodes.get(index);
+				Vertex2D v = (Vertex2D) nodes.get(index);
 				OTriangle2D vt = v.getSurroundingOTriangle();
 				if (vt.split3(v, false))
 					mesh.getQuadTree().add(v);

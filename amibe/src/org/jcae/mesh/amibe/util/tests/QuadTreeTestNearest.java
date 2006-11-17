@@ -21,7 +21,7 @@ package org.jcae.mesh.amibe.util.tests;
 
 import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.util.QuadTreeTest;
-import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.Vertex2D;
 import org.jcae.mesh.amibe.ds.Mesh;
 import java.util.Random;
 import org.jcae.mesh.java3d.Viewer;
@@ -63,7 +63,7 @@ public class QuadTreeTestNearest extends QuadTreeTest
 		{
 			u = rand.nextDouble();
 			v = rand.nextDouble();
-			Vertex pt = m.newVertex(u, v);
+			Vertex2D pt = Vertex2D.valueOf(m, u, v);
 			pt.addToQuadTree();
 		}
 		//CheckCoordProcedure checkproc = new CheckCoordProcedure();
@@ -83,7 +83,7 @@ public class QuadTreeTestNearest extends QuadTreeTest
 		{
 			u = rand.nextDouble();
 			v = rand.nextDouble();
-			Vertex vt = m.newVertex(u, v);
+			Vertex2D vt = Vertex2D.valueOf(m, u, v);
 			if (visu)
 			{
 				view.addBranchGroup(r.segment(vt, r.getNearVertex(vt), 5.0f, 1, 1, 0));
@@ -106,7 +106,7 @@ public class QuadTreeTestNearest extends QuadTreeTest
 					double [] xyz = view.getLastClick();
 					if (null != xyz)
 					{
-						Vertex vt = m.newVertex(xyz[0], xyz[1]);
+						Vertex2D vt = Vertex2D.valueOf(m, xyz[0], xyz[1]);
 						view.addBranchGroup(r.segment(vt, r.getNearVertex(vt), 5.0f, 1, 1, 0));
 						view.setVisible(true);
 						view.addBranchGroup(r.segment(vt, r.getNearestVertex(vt), 0.0f, 0, 1, 1));

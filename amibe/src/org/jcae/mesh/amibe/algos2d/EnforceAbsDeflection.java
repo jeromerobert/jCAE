@@ -23,7 +23,7 @@ package org.jcae.mesh.amibe.algos2d;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.OTriangle2D;
-import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.Vertex2D;
 import org.jcae.mesh.amibe.ds.MNode3D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
@@ -115,7 +115,7 @@ public class EnforceAbsDeflection
 				if (!mesh.getTriangles().contains(t) || t.isBoundary())
 					continue;
 				double uv[] = t.centroid().getUV();
-				Vertex v = mesh.newVertex(uv[0], uv[1]);
+				Vertex2D v = Vertex2D.valueOf(mesh, uv[0], uv[1]);
 				OTriangle2D vt = v.getSurroundingOTriangle();
 				if (vt.split3(v, false))
 				{

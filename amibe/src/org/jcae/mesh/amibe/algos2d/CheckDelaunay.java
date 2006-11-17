@@ -24,7 +24,7 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.OTriangle;
 import org.jcae.mesh.amibe.ds.OTriangle2D;
-import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.Vertex2D;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -61,7 +61,7 @@ public class CheckDelaunay
 	{
 		Triangle t;
 		OTriangle2D ot, sym;
-		Vertex v;
+		Vertex2D v;
 		int cnt = 0;
 		mesh.pushCompGeom(3);
 		logger.debug(" Checking Delaunay criterion");
@@ -105,7 +105,7 @@ public class CheckDelaunay
 						continue;
 					ot.setAttributes(OTriangle.SWAPPED);
 					sym.setAttributes(OTriangle.SWAPPED);
-					v = sym.apex();
+					v = (Vertex2D) sym.apex();
 					if (!ot.isDelaunay(v))
 					{
 						cnt++;

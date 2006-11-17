@@ -21,8 +21,8 @@
 package org.jcae.mesh.amibe.ds.tools;
 
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.OTriangle;
-import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.OTriangle2D;
+import org.jcae.mesh.amibe.ds.Vertex2D;
 import org.jcae.mesh.amibe.metrics.Metric2D;
 import java.util.Stack;
 import org.apache.log4j.Logger;
@@ -73,7 +73,7 @@ public class Calculus3D implements Calculus
 	 * @param end  the end node
 	 * @return the distance between nodes
 	 **/
-	public double distance(Vertex start, Vertex end)
+	public double distance(Vertex2D start, Vertex2D end)
 	{
 		double l1 = distance(start, end, start);
 		double l2 = distance(start, end, end);
@@ -82,7 +82,7 @@ public class Calculus3D implements Calculus
 			return lmax;
 		
 		Stack v = new Stack();
-		Vertex mid = new Vertex(start, end);
+		Vertex2D mid = Vertex2D.middle(start, end);
 		v.push(intArray[level_max]);
 		v.push(end);
 		v.push(mid);
@@ -93,8 +93,8 @@ public class Calculus3D implements Calculus
 		int level = level_max;
 		while (v.size() > 0)
 		{
-			Vertex pt1 = (Vertex) v.pop();
-			Vertex pt2 = (Vertex) v.pop();
+			Vertex2D pt1 = (Vertex2D) v.pop();
+			Vertex2D pt2 = (Vertex2D) v.pop();
 			level = ((Integer) v.pop()).intValue();
 			l1 = distance(pt1, pt2, pt1);
 			l2 = distance(pt1, pt2, pt2);
@@ -104,7 +104,7 @@ public class Calculus3D implements Calculus
 			else
 			{
 				level--;
-				mid = new Vertex(pt1, pt2);
+				mid = Vertex2D.middle(pt1, pt2);
 				v.push(intArray[level]);
 				v.push(pt2);
 				v.push(mid);
@@ -124,7 +124,7 @@ public class Calculus3D implements Calculus
 	 * @param vm  the vertex on which metrics is evaluated
 	 * @return the distance between nodes
 	 **/
-	public double distance(Vertex start, Vertex end, Vertex vm)
+	public double distance(Vertex2D start, Vertex2D end, Vertex2D vm)
 	{
 		double ret;
 		Metric2D m = vm.getMetrics(mesh.getGeomSurface());
@@ -142,7 +142,7 @@ public class Calculus3D implements Calculus
 	 * @param vm  the vertex on which metrics is evaluated
 	 * @return the radius in 2D space.
 	 */
-	public double radius2d(Vertex vm)
+	public double radius2d(Vertex2D vm)
 	{
 		Metric2D m = vm.getMetrics(mesh.getGeomSurface());
 		return 1.0 / Math.sqrt(m.minEV());
@@ -154,9 +154,9 @@ public class Calculus3D implements Calculus
 	 * @param ot  the edge being evaluated
 	 * @return the distance between its two endpoints.
 	 */
-	public double length(OTriangle ot)
+	public double length(OTriangle2D ot)
 	{
-		return distance(ot.origin(), ot.destination());
+		return distance((Vertex2D) ot.origin(), (Vertex2D) ot.destination());
 	}
 	
 }

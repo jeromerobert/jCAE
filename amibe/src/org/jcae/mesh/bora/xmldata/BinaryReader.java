@@ -122,7 +122,7 @@ public class BinaryReader
 		for (int i=0; i < numberOfNodes; i++)
 		{
 			nodesBuffer.get(coord);
-			nodelist[i] = mesh.newVertex(coord[0], coord[1], coord[2]);
+			nodelist[i] = Vertex.valueOf(mesh, coord);
 			if (i < numberOfNodes - numberOfReferences)
 				label = 0;
 			else

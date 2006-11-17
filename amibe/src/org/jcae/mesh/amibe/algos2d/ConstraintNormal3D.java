@@ -24,6 +24,7 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.OTriangle;
 import org.jcae.mesh.amibe.ds.OTriangle2D;
+import org.jcae.mesh.amibe.ds.Vertex2D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
@@ -112,7 +113,9 @@ public class ConstraintNormal3D
 						continue;
 					// Make sure that triangles are not
 					// inverted in 2D space
-					if (sym.apex().onLeft(ot.destination(), ot.apex()) <= 0L || ot.apex().onLeft(ot.origin(), sym.apex()) <= 0L)
+					Vertex2D sa = (Vertex2D) sym.apex();
+					Vertex2D oa = (Vertex2D) ot.apex();
+					if (sa.onLeft((Vertex2D) ot.destination(), (Vertex2D) ot.apex()) <= 0L || oa.onLeft((Vertex2D) ot.origin(), (Vertex2D) sym.apex()) <= 0L)
 						continue;
 					// 3D coordinates of vertices
 					double p1[] = ot.origin().getUV();

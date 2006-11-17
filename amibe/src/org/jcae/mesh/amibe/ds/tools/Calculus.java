@@ -20,15 +20,15 @@
 
 package org.jcae.mesh.amibe.ds.tools;
 
-import org.jcae.mesh.amibe.ds.OTriangle;
-import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.OTriangle2D;
+import org.jcae.mesh.amibe.ds.Vertex2D;
 
 public interface Calculus
 {
 	/**
 	 * Returns the length of an edge.
 	 */
-	public double length(OTriangle ot);
+	public double length(OTriangle2D ot);
 	
 	/**
 	 * Returns the distance between two points.
@@ -38,7 +38,7 @@ public interface Calculus
 	 * @param end  the end node
 	 * @return the distance between these two points.
 	 */
-	public double distance(Vertex start, Vertex end);
+	public double distance(Vertex2D start, Vertex2D end);
 	
 	/**
 	 * Returns the distance between two points.
@@ -49,7 +49,7 @@ public interface Calculus
 	 * @param vm  the vertex on which metrics is evaluated
 	 * @return the distance between these two points.
 	 */
-	public double distance(Vertex start, Vertex end, Vertex vm);
+	public double distance(Vertex2D start, Vertex2D end, Vertex2D vm);
 	
 	/**
 	 * Returns the 2D radius of the unit ball centered at a point.
@@ -61,5 +61,5 @@ public interface Calculus
 	 * @param vm  the vertex on which metrics is evaluated
 	 * @return the radius in 2D space.
 	 */
-	public double radius2d(Vertex vm);
+	public double radius2d(Vertex2D vm);
 }

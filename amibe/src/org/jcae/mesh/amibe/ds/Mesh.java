@@ -150,7 +150,7 @@ public class Mesh
 	 */
 	public Mesh()
 	{
-		Vertex.outer = new Vertex(0.0, 0.0);
+		Vertex.outer = null;
 		triangleList = new ArrayList();
 	}
 	
@@ -250,7 +250,7 @@ public class Mesh
 	{
 		quadtree = new QuadTree(umin, umax, vmin, vmax);
 		quadtree.setCompGeom(compGeom());
-		Vertex.outer = new Vertex((umin+umax)*0.5, (vmin+vmax)*0.5);
+		Vertex.outer = Vertex2D.valueOf(this, (umin+umax)*0.5, (vmin+vmax)*0.5);
 	}
 	
 	/**
@@ -288,19 +288,19 @@ public class Mesh
 	 * @param v1  second vertex.
 	 * @param v2  third vertex.
 	 */
-	public void bootstrap(Vertex v0, Vertex v1, Vertex v2)
+	public void bootstrap(Vertex2D v0, Vertex2D v1, Vertex2D v2)
 	{
 		assert quadtree != null;
 		assert v0.onLeft(v1, v2) != 0L;
 		if (v0.onLeft(v1, v2) < 0L)
 		{
-			Vertex temp = v2;
+			Vertex2D temp = v2;
 			v2 = v1;
 			v1 = temp;
 		}
 		Triangle first = new Triangle(v0, v1, v2);
 		if (Vertex.outer == null)
-			Vertex.outer = new Vertex(0.0, 0.0);
+			Vertex.outer = Vertex2D.valueOf(this, 0.0, 0.0);
 		Triangle adj0 = new Triangle(Vertex.outer, v2, v1);
 		Triangle adj1 = new Triangle(Vertex.outer, v0, v2);
 		Triangle adj2 = new Triangle(Vertex.outer, v1, v0);
@@ -337,20 +337,6 @@ public class Mesh
 		quadtree.add(v2);
 	}
 	
-	public Vertex newVertex(double u, double v)
-	{
-		Vertex ret = new Vertex(u, v);
-		ret.mesh = this;
-		return ret;
-	}
-
-	public Vertex newVertex(double x, double y, double z)
-	{
-		Vertex ret = new Vertex(x, y, z);
-		ret.mesh = this;
-		return ret;
-	}
-
 	/**
 	 * Adds an existing triangle to triangle list.
 	 * This routine is useful when meshes are read from disk but not
@@ -426,7 +412,7 @@ public class Mesh
 	 * @throws InitialTriangulationException  if the boundary edge cannot
 	 *         be enforced.
 	 */
-	public static OTriangle2D forceBoundaryEdge(Vertex start, Vertex end, int maxIter)
+	public static OTriangle2D forceBoundaryEdge(Vertex2D start, Vertex2D end, int maxIter)
 		throws InitialTriangulationException
 	{
 		assert (start != end);
@@ -437,26 +423,26 @@ public class Mesh
 		if (s.origin() != start)
 			s.nextOTri();
 		assert s.origin() == start : ""+start+" does not belong to "+t;
-		Vertex dest = s.destination();
+		Vertex2D dest = (Vertex2D) s.destination();
 		int i = 0;
 		while (true)
 		{
-			Vertex d = s.destination();
+			Vertex2D d = (Vertex2D) s.destination();
 			if (d == end)
 				return s;
 			else if (d != Vertex.outer && start.onLeft(end, d) > 0L)
 				break;
 			s.nextOTriOrigin();
 			i++;
-			if (s.destination() == dest || i > maxIter)
+			if ((Vertex2D) s.destination() == dest || i > maxIter)
 				throw new InitialTriangulationException();
 		}
 		s.prevOTriOrigin();
-		dest = s.destination();
+		dest = (Vertex2D) s.destination();
 		i = 0;
 		while (true)
 		{
-			Vertex d = s.destination();
+			Vertex2D d = (Vertex2D) s.destination();
 			if (d == end)
 				return s;
 			else if (d != Vertex.outer && start.onLeft(end, d) < 0L)
@@ -484,7 +470,7 @@ public class Mesh
 			i++;
 			if (i > maxIter)
 				throw new InitialTriangulationException();
-			Vertex temp = start;
+			Vertex2D temp = start;
 			start = end;
 			end = temp;
 		}
@@ -1240,7 +1226,10 @@ public class Mesh
 			}
 			else if (type == MESH_2D)
 			{
-				double l = t.vertex[0].onLeft(t.vertex[1], t.vertex[2]);
+				Vertex2D tv0 = (Vertex2D) t.vertex[0];
+				Vertex2D tv1 = (Vertex2D) t.vertex[1];
+				Vertex2D tv2 = (Vertex2D) t.vertex[2];
+				double l = tv0.onLeft(tv1, tv2);
 				if (l <= 0L)
 				{
 					logger.debug("Wrong orientation: "+l+" "+t);

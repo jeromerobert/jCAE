@@ -111,7 +111,6 @@ public class OTriangle implements Cloneable
 	
 	private static final int [] next3 = { 1, 2, 0 };
 	private static final int [] prev3 = { 2, 0, 1 };
-	private static final OTriangle otVoid = new OTriangle();
 	
 	private double [] tempD = new double[3];
 	private double [] tempD1 = new double[3];
@@ -663,7 +662,7 @@ public class OTriangle implements Cloneable
 	 *
 	 * @return the start vertex of this edge.
 	 */
-	public final Vertex origin()
+	public Vertex origin()
 	{
 		return tri.vertex[next3[localNumber]];
 	}
@@ -673,7 +672,7 @@ public class OTriangle implements Cloneable
 	 *
 	 * @return the end vertex of this edge.
 	 */
-	public final Vertex destination()
+	public Vertex destination()
 	{
 		return tri.vertex[prev3[localNumber]];
 	}
@@ -683,7 +682,7 @@ public class OTriangle implements Cloneable
 	 *
 	 * @return the apex of this edge.
 	 */
-	public final Vertex apex()
+	public Vertex apex()
 	{
 		return tri.vertex[localNumber];
 	}
@@ -1512,12 +1511,12 @@ public class OTriangle implements Cloneable
 	{
 		Mesh m = new Mesh();
 		Vertex [] v = new Vertex[6];
-		v[0] = m.newVertex(0.0, 0.0, 0.0);
-		v[1] = m.newVertex(1.0, 0.0, 0.0);
-		v[2] = m.newVertex(1.0, 1.0, 0.0);
-		v[3] = m.newVertex(0.0, 1.0, 0.0);
-		v[4] = m.newVertex(-1.0, 1.0, 0.0);
-		v[5] = m.newVertex(-1.0, 0.0, 0.0);
+		v[0] = Vertex.valueOf(m, 0.0, 0.0, 0.0);
+		v[1] = Vertex.valueOf(m, 1.0, 0.0, 0.0);
+		v[2] = Vertex.valueOf(m, 1.0, 1.0, 0.0);
+		v[3] = Vertex.valueOf(m, 0.0, 1.0, 0.0);
+		v[4] = Vertex.valueOf(m, -1.0, 1.0, 0.0);
+		v[5] = Vertex.valueOf(m, -1.0, 0.0, 0.0);
 		unitTestBuildMesh(m, v);
 		assert m.isValid();
 		System.out.println("Checking loops...");

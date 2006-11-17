@@ -20,7 +20,7 @@
 package org.jcae.mesh.amibe.util;
 
 import org.apache.log4j.Logger;
-import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.Vertex2D;
 import org.jcae.mesh.amibe.ds.tools.Calculus;
 import org.jcae.mesh.amibe.ds.tools.Calculus2D;
 import java.util.ArrayList;
@@ -126,10 +126,10 @@ import java.util.ArrayList;
  * </ol>
  *
  * <p>
- * The implementation of {@link #getNearestVertex(Vertex)} has two differences:
+ * The implementation of {@link #getNearestVertex(Vertex2D)} has two differences:
  * </p>
  * <ul>
- *   <li>The starting point is computed by {@link #getNearVertex(Vertex)}.  This
+ *   <li>The starting point is computed by {@link #getNearVertex(Vertex2D)}.  This
  *       means that much more cells are skipped.</li>
  *   <li>The ellipsis is replaced by a circle enclosing it, to have simpler
  *       calculus.  Using the real ellipsis could be tested though, it should
@@ -294,7 +294,7 @@ public class QuadTree
 	 *
 	 * @param v  the vertex being added.
 	 */
-	public void add(Vertex v)
+	public void add(Vertex2D v)
 	{
 		Cell current = root;
 		int s = gridSize;
@@ -327,14 +327,14 @@ public class QuadTree
 			//  Move points to their respective subquadtrees.
 			for (int i = 0; i < Cell.BUCKETSIZE; i++)
 			{
-				Vertex p = (Vertex) current.subQuad[i];
+				Vertex2D p = (Vertex2D) current.subQuad[i];
 				double2int(p.getUV(), oldij);
 				int ind = indexSubQuad(oldij[0], oldij[1], s);
 				if (null == newSubQuads[ind])
 				{
 					newSubQuads[ind] = new Cell();
 					nCells++;
-					newSubQuads[ind].subQuad = new Vertex[Cell.BUCKETSIZE];
+					newSubQuads[ind].subQuad = new Vertex2D[Cell.BUCKETSIZE];
 				}
 				Cell target = newSubQuads[ind];
 				target.subQuad[target.nItems] = current.subQuad[i];
@@ -353,7 +353,7 @@ public class QuadTree
 		}
 		//  Eventually insert the new point
 		if (current.nItems == 0)
-			current.subQuad = new Vertex[Cell.BUCKETSIZE];
+			current.subQuad = new Vertex2D[Cell.BUCKETSIZE];
 		current.subQuad[current.nItems] = v;
 		current.nItems++;
 	}
@@ -363,7 +363,7 @@ public class QuadTree
 	 *
 	 * @param v  the vertex being removed.
 	 */
-	public void remove(Vertex v)
+	public void remove(Vertex2D v)
 	{
 		Cell current = root;
 		Cell last = root;
@@ -391,7 +391,7 @@ public class QuadTree
 		int offset = 0;
 		for (int i = 0; i < current.nItems; i++)
 		{
-			if (v == (Vertex) current.subQuad[i])
+			if (v == (Vertex2D) current.subQuad[i])
 				offset++;
 			else if (offset > 0)
 				current.subQuad[i-offset] = current.subQuad[i];
@@ -414,12 +414,12 @@ public class QuadTree
 	 * vertices, the nearest one is returned (vertices in other leaves may
 	 * of course be nearer).  Otherwise the nearest vertex from sibling
 	 * children is returned.  The returned vertex is a good starting point
-	 * for {@link #getNearestVertex(Vertex)}.
+	 * for {@link #getNearestVertex(Vertex2D)}.
 	 *
 	 * @param v  the vertex to check.
 	 * @return a near vertex.
 	 */
-	public Vertex getNearVertex(Vertex v)
+	public Vertex2D getNearVertex(Vertex2D v)
 	{
 		Cell current = root;
 		Cell last = null;
@@ -441,12 +441,12 @@ public class QuadTree
 		if (null == current)
 			return getNearVertexInSubquads(last, v, searchedCells);
 		
-		Vertex vQ = (Vertex) current.subQuad[0];
-		Vertex ret = vQ;
+		Vertex2D vQ = (Vertex2D) current.subQuad[0];
+		Vertex2D ret = vQ;
 		double retdist = compGeom.distance(v, vQ, v);
 		for (int i = 1; i < current.nItems; i++)
 		{
-			vQ = (Vertex) current.subQuad[i];
+			vQ = (Vertex2D) current.subQuad[i];
 			double d = compGeom.distance(v, vQ, v);
 			if (d < retdist)
 			{
@@ -459,9 +459,9 @@ public class QuadTree
 		return ret;
 	}
 	
-	private Vertex getNearVertexInSubquads(Cell current, Vertex v, int searchedCells)
+	private Vertex2D getNearVertexInSubquads(Cell current, Vertex2D v, int searchedCells)
 	{
-		Vertex ret = null;
+		Vertex2D ret = null;
 		int [] ij = new int[2];
 		double dist = -1.0;
 		double2int(v.getUV(), ij);
@@ -493,7 +493,7 @@ public class QuadTree
 			{
 				for (int i = 0; i < quadStack[l].nItems; i++)
 				{
-					Vertex vQ = (Vertex) quadStack[l].subQuad[i];
+					Vertex2D vQ = (Vertex2D) quadStack[l].subQuad[i];
 					double d = compGeom.distance(v, vQ, v);
 					if (d < dist || dist < 0.0)
 					{
@@ -531,9 +531,9 @@ public class QuadTree
 		private final int [] ij = new int[2];;
 		private int idist;
 		private double dist, i2d;
-		public Vertex fromVertex, nearestVertex;
+		public Vertex2D fromVertex, nearestVertex;
 		public int searchedCells = 0;
-		public getNearestVertexProcedure(Vertex from, Vertex v)
+		public getNearestVertexProcedure(Vertex2D from, Vertex2D v)
 		{
 			double2int(from.getUV(), ij);
 			nearestVertex = v;
@@ -559,7 +559,7 @@ public class QuadTree
 			{
 				for (int i = 0; i < self.nItems; i++)
 				{
-					Vertex vtest = (Vertex) self.subQuad[i];
+					Vertex2D vtest = (Vertex2D) self.subQuad[i];
 					double retdist = compGeom.distance(fromVertex, vtest, fromVertex);
 					if (retdist < dist)
 					{
@@ -580,7 +580,7 @@ public class QuadTree
 	 * Computing distance to all vertices in the quadtree would be very
 	 * time consuming.  To speed up processing, whole quadtree cells are
 	 * ignored if their distance to the vertex is greater than the current
-	 * minimum.  The {@link #getNearVertex(Vertex)} method is used to find the
+	 * minimum.  The {@link #getNearVertex(Vertex2D)} method is used to find the
 	 * initial minimum.  It is very fast and provides a good candidate,
 	 * so that the ratio of quadtree cells visited over the number of
 	 * quadtree cells is very low.
@@ -588,10 +588,10 @@ public class QuadTree
 	 * @param v  the vertex to check.
 	 * @return the nearest vertex.
 	 */
-	public Vertex getNearestVertex(Vertex v)
+	public Vertex2D getNearestVertex(Vertex2D v)
 	{
 		Cell current = root;
-		Vertex ret = getNearVertex(v);
+		Vertex2D ret = getNearVertex(v);
 		assert ret != null;
 		if (logger.isDebugEnabled())
 			logger.debug("Nearest point of "+v);
@@ -611,9 +611,9 @@ public class QuadTree
 	{
 		private final int [] ij = new int[2];;
 		private double dist;
-		public Vertex fromVertex, nearestVertex;
+		public Vertex2D fromVertex, nearestVertex;
 		public int searchedCells = 0;
-		public getNearestVertexDebugProcedure(Vertex from, Vertex v)
+		public getNearestVertexDebugProcedure(Vertex2D from, Vertex2D v)
 		{
 			double2int(from.getUV(), ij);
 			nearestVertex = v;
@@ -628,7 +628,7 @@ public class QuadTree
 			{
 				for (int i = 0; i < self.nItems; i++)
 				{
-					Vertex vtest = (Vertex) self.subQuad[i];
+					Vertex2D vtest = (Vertex2D) self.subQuad[i];
 					double retdist = compGeom.distance(fromVertex, vtest, fromVertex);
 					if (retdist < dist)
 					{
@@ -642,16 +642,16 @@ public class QuadTree
 	}
 	
 	/**
-	 * Slow implementation of {@link #getNearestVertex(Vertex)}.
+	 * Slow implementation of {@link #getNearestVertex(Vertex2D)}.
 	 * This method should be called only for debugging purpose.
 	 *
 	 * @param v  the vertex to check.
 	 * @return the nearest vertex.
 	 */
-	public Vertex getNearestVertexDebug(Vertex v)
+	public Vertex2D getNearestVertexDebug(Vertex2D v)
 	{
 		Cell current = root;
-		Vertex ret = getNearVertex(v);
+		Vertex2D ret = getNearVertex(v);
 		assert ret != null;
 		if (logger.isDebugEnabled())
 			logger.debug("(debug) Nearest point of "+v);
@@ -708,7 +708,7 @@ public class QuadTree
 			if (self.nItems > 0)
 			{
 				for (int i = 0; i < self.nItems; i++)
-					((Vertex) self.subQuad[i]).clearMetrics();
+					((Vertex2D) self.subQuad[i]).clearMetrics();
 			}
 			return 0;
 		}

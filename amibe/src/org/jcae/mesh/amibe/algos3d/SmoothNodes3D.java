@@ -155,7 +155,7 @@ public class SmoothNodes3D
 		double[] oldp3 = n.getUV();
 		
 		//  Compute 3D coordinates centroid
-		Vertex c = mesh.newVertex(0.0, 0.0, 0.0);
+		Vertex c = Vertex.valueOf(mesh, 0.0, 0.0, 0.0);
 		int nn = 0;
 		double[] centroid3 = c.getUV();
 		centroid3[0] = centroid3[1] = centroid3[2] = 0.;
