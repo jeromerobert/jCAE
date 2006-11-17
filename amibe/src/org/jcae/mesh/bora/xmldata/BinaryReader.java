@@ -29,6 +29,8 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
@@ -52,6 +54,7 @@ public class BinaryReader
 	{
 		return readObject(root, false);
 	}
+
 	public static Mesh readObject(BCADGraphCell root, boolean buildAdj)
 	{
 		Mesh mesh = new Mesh();
@@ -68,96 +71,104 @@ public class BinaryReader
 				if (s.getReversed() != null)
 					s = s.getReversed();
 			}
-			String nfile = model.getOutputDir()+File.separator+model.get2dDir()+File.separator+"n"+s.getId();
+			String dir = model.getOutputDir()+File.separator+model.get2dDir();
+			int id = s.getId();
 			try
 			{
-				File nodesFile = new File(model.getOutputDir()+File.separator+model.get2dDir(), "n"+s.getId());
-				File refFile = new File(model.getOutputDir()+File.separator+model.get2dDir(), "r"+s.getId());
-				File trianglesFile = new File(model.getOutputDir()+File.separator+model.get2dDir(), "f"+s.getId());
-	
-				FileChannel fcR = new FileInputStream(refFile).getChannel();
-				MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L, fcR.size());
-				IntBuffer refsBuffer = bbR.asIntBuffer();
-				FileChannel fcN = new FileInputStream(nodesFile).getChannel();
-				MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
-				DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
-				
-				FileChannel fcT = new FileInputStream(trianglesFile).getChannel();
-				MappedByteBuffer bbT = fcT.map(FileChannel.MapMode.READ_ONLY, 0L, fcT.size());
-				IntBuffer trianglesBuffer = bbT.asIntBuffer();
-	
-				int numberOfReferences = (int) refFile.length() / 4;
-				int [] refs = new int[numberOfReferences];
-				refsBuffer.get(refs);
-				fcR.close();
-				
-				int numberOfNodes = (int) nodesFile.length() / 24;
-				Vertex [] nodelist = new Vertex[numberOfNodes];
-				int label;
-				double [] coord = new double[3];
-				logger.debug("Reading "+numberOfNodes+" nodes");
-				double [] bbmin = new double[3];
-				double [] bbmax = new double[3];
-				for (int j = 0; j < 3; j++)
-				{
-					bbmin[j] = Double.MAX_VALUE;
-					bbmax[j] = Double.MIN_VALUE;
-				}
-				for (int i=0; i < numberOfNodes; i++)
-				{
-					nodesBuffer.get(coord);
-					nodelist[i] = mesh.newVertex(coord[0], coord[1], coord[2]);
-					if (i < numberOfNodes - numberOfReferences)
-						label = 0;
-					else
-					{
-						label = refs[i+numberOfReferences-numberOfNodes];
-						Object o = vertMap.get(label);
-						if (o == null)
-							vertMap.put(label, nodelist[i]);
-						else
-							nodelist[i] = (Vertex) o;
-					}
-					nodelist[i].setRef(label);
-					for (int j = 0; j < 3; j++)
-					{
-						if (coord[j] > bbmax[j])
-							bbmax[j] = coord[j];
-						if (coord[j] < bbmin[j])
-							bbmin[j] = coord[j];
-					}
-				} 
-				fcN.close();
-				UNVConverter.clean(bbN);
-				
-				int numberOfTriangles = (int) trianglesFile.length() / 12;
-				logger.debug("Reading "+numberOfTriangles+" elements");
-				Triangle [] facelist = new Triangle[numberOfTriangles];
-				for (int i=0; i < numberOfTriangles; i++)
-				{
-					Vertex pt1 = nodelist[trianglesBuffer.get()-1];
-					Vertex pt2 = nodelist[trianglesBuffer.get()-1];
-					Vertex pt3 = nodelist[trianglesBuffer.get()-1];
-					if (!reversed)
-						facelist[i] = new Triangle(pt1, pt2, pt3);
-					else
-						facelist[i] = new Triangle(pt1, pt3, pt2);
-					mesh.add(facelist[i]);
-					pt1.setLink(facelist[i]);
-					pt2.setLink(facelist[i]);
-					pt3.setLink(facelist[i]);
-				}
-				fcT.close();
-				UNVConverter.clean(bbT);
+				int [] refs = readNodeReferences(dir, id);
+				Vertex [] nodelist = readCoordinates(mesh, dir, id, refs, vertMap);
+				readTriangles(mesh, dir, id, reversed, nodelist);
 			}
 			catch(Exception ex)
 			{
 				ex.printStackTrace();
 				throw new RuntimeException(ex);
 			}
-			logger.debug("end reading "+nfile);
+			logger.debug("end reading cell "+id);
 		}
 		return mesh;
+	}
+
+	private static int [] readNodeReferences(String dir, int id)
+		throws IOException, FileNotFoundException
+	{
+		File refFile = new File(dir, "r"+id);
+		FileChannel fcR = new FileInputStream(refFile).getChannel();
+		MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L, fcR.size());
+		IntBuffer refsBuffer = bbR.asIntBuffer();
+
+		int numberOfReferences = (int) refFile.length() / 4;
+		int [] refs = new int[numberOfReferences];
+		refsBuffer.get(refs);
+		fcR.close();
+		UNVConverter.clean(bbR);
+		return refs;
+	}
+
+	private static Vertex [] readCoordinates(Mesh mesh, String dir, int id, int [] refs, TIntObjectHashMap vertMap)
+		throws IOException, FileNotFoundException
+	{
+		File nodesFile = new File(dir, "n"+id);
+		FileChannel fcN = new FileInputStream(nodesFile).getChannel();
+		MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
+		DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
+		
+		int numberOfNodes = (int) nodesFile.length() / 24;
+		int numberOfReferences = refs.length;
+		Vertex [] nodelist = new Vertex[numberOfNodes];
+		int label;
+		double [] coord = new double[3];
+		logger.debug("Reading "+numberOfNodes+" nodes");
+		for (int i=0; i < numberOfNodes; i++)
+		{
+			nodesBuffer.get(coord);
+			nodelist[i] = mesh.newVertex(coord[0], coord[1], coord[2]);
+			if (i < numberOfNodes - numberOfReferences)
+				label = 0;
+			else
+			{
+				label = refs[i+numberOfReferences-numberOfNodes];
+				Object o = vertMap.get(label);
+				if (o == null)
+					vertMap.put(label, nodelist[i]);
+				else
+					nodelist[i] = (Vertex) o;
+			}
+			nodelist[i].setRef(label);
+		} 
+		fcN.close();
+		UNVConverter.clean(bbN);
+		logger.debug("end reading "+dir+File.separator+"n"+id);
+		return nodelist;
+	}
+
+	private static void readTriangles(Mesh mesh, String dir, int id, boolean reversed, Vertex [] nodelist)
+		throws IOException, FileNotFoundException
+	{
+		File trianglesFile = new File(dir, "f"+id);
+		FileChannel fcT = new FileInputStream(trianglesFile).getChannel();
+		MappedByteBuffer bbT = fcT.map(FileChannel.MapMode.READ_ONLY, 0L, fcT.size());
+		IntBuffer trianglesBuffer = bbT.asIntBuffer();
+
+		int numberOfTriangles = (int) trianglesFile.length() / 12;
+		logger.debug("Reading "+numberOfTriangles+" elements");
+		Triangle face;
+		for (int i=0; i < numberOfTriangles; i++)
+		{
+			Vertex pt1 = nodelist[trianglesBuffer.get()-1];
+			Vertex pt2 = nodelist[trianglesBuffer.get()-1];
+			Vertex pt3 = nodelist[trianglesBuffer.get()-1];
+			if (!reversed)
+				face = new Triangle(pt1, pt2, pt3);
+			else
+				face = new Triangle(pt1, pt3, pt2);
+			mesh.add(face);
+			pt1.setLink(face);
+			pt2.setLink(face);
+			pt3.setLink(face);
+		}
+		fcT.close();
+		UNVConverter.clean(bbT);
 	}
 }
 
