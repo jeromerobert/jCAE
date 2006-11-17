@@ -45,10 +45,9 @@ public class BinaryReader
 	private static Logger logger=Logger.getLogger(BinaryReader.class);
 	
 	/**
-	 * Create a Mesh instance from an XML file.
-	 * @param xmlDir       directory containing XML files
-	 * @param xmlFile      basename of the main XML file
-	 * @param F            yopological surface
+	 * Create a Mesh instance from a set of discretized faces
+	 * @param root    cell graph containing root shape
+	 * @return   the created Mesh instance.
 	 */
 	public static Mesh readObject(BCADGraphCell root)
 	{

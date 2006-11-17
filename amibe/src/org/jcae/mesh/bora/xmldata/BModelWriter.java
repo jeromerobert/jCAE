@@ -35,7 +35,7 @@ public class BModelWriter
 	/**
 	 * Write the current object to a XML file and binary files. The XML file
 	 * have links to the binary files.
-	 * @param xmlFile The name of the XML file
+	 * @param model  The model to store on disk
 	 */	
 	public static void writeObject(BModel model)
 	{

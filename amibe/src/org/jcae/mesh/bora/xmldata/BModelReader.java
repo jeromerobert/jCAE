@@ -53,11 +53,7 @@ public class BModelReader
 		}		
 		return null;
 	}
-	/**
-	 * Write the current object to a XML file and binary files. The XML file
-	 * have links to the binary files.
-	 * @param xmlFile The name of the XML file
-	 */	
+	
 	public static BModel readObject(String xmlDir)
 	{
 		return readObject(xmlDir, "model", true);
