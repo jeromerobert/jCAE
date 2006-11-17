@@ -21,7 +21,6 @@
 package org.jcae.mesh.bora.xmldata;
 
 import org.jcae.mesh.bora.ds.*;
-import org.jcae.mesh.cad.*;
 import org.jcae.mesh.xmldata.*;
 import java.io.File;
 import java.util.Iterator;
@@ -43,6 +42,7 @@ public class BModelWriter
 		try
 		{
 			File file = new File(model.getOutputDir(), model.getOutputFile());
+			logger.debug("Writing file "+file);
 
 			// Create and fill the DOM
 			Document document=JCAEXMLWriter.createJcaeBoraDocument();
@@ -56,8 +56,6 @@ public class BModelWriter
 			modelElement.appendChild(shapeElement);
 
 			Element graphElement=document.createElement("graph");
-			CADShapeBuilder factory = CADShapeBuilder.factory;
-			CADExplorer exp = factory.newExplorer();
 			for (int t = BCADGraph.classTypeArray.length - 1; t >= 0; t--)
 			{
 				for (Iterator it = model.getGraph().getCellList(t).iterator(); it.hasNext(); )

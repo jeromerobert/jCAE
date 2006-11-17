@@ -21,7 +21,6 @@
 package org.jcae.mesh.bora.xmldata;
 
 import org.jcae.mesh.bora.ds.*;
-import org.jcae.mesh.cad.*;
 import org.jcae.mesh.xmldata.*;
 import java.io.File;
 import java.util.Iterator;
@@ -82,8 +81,6 @@ public class BModelReader
 				return model;
 			// Check consistency
 			String errmsg = "Error when parsing XML file "+xmlDir+File.separator+xmlFile;
-			CADShapeBuilder factory = CADShapeBuilder.factory;
-			CADExplorer exp = factory.newExplorer();
 			for (int t = BCADGraph.classTypeArray.length - 1; t >= 0; t--)
 			{
 				for (Iterator it = model.getGraph().getRootCell().shapesExplorer(t); it.hasNext(); )

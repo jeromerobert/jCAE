@@ -28,7 +28,6 @@ import org.jcae.mesh.mesher.ds.MEdge1D;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
-import java.io.IOException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
