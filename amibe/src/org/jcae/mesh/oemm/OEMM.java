@@ -46,16 +46,16 @@ public class OEMM
 	public static final int OEMM_INITIALIZED = 2;
 	
 	protected static final int gridSize = 1 << MAXLEVEL;
-	protected String structFile;
+	protected final String structFile;
 	public int status;
 	public int nr_leaves;
-	protected int nr_cells;
+	private int nr_cells;
 	protected int nr_levels;
 	// Double-to-integer conversion
 	public double [] x0 = new double[4];
 	
 	protected OEMMNode [] head = new OEMMNode[MAXLEVEL];
-	protected OEMMNode [] tail = new OEMMNode[MAXLEVEL];
+	private OEMMNode [] tail = new OEMMNode[MAXLEVEL];
 	
 	// Array of leaves
 	public OEMMNode [] leaves;

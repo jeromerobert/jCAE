@@ -237,7 +237,7 @@ public class Octree
 	 * @param size  cell size of children nodes.
 	 * @return the index of the child node containing this vertex.
 	 */
-	protected static final int indexSubOctree(int [] ijk, int size)
+	private static final int indexSubOctree(int [] ijk, int size)
 	{
 		int ret = 0;
 		if (size == 0)

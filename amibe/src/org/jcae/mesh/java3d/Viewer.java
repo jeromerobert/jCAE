@@ -46,7 +46,7 @@ public class Viewer extends JFrame
 {	
 	private static Logger logger=Logger.getLogger(Viewer.class);
 	private BorderLayout borderLayout = new BorderLayout();
-	protected Canvas3D canvas3D;
+	private Canvas3D canvas3D;
 	private SimpleUniverse universe;
 	private BranchGroup mainBranchGroup;
 	private double [] lastClick = null;

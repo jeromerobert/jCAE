@@ -75,7 +75,7 @@ public class Matrix2D
 	 *
 	 * @return a new Matrix2D containing the inverse matrix.
 	 */
-	protected Matrix2D inv()
+	private Matrix2D inv()
 	{
 		double detA = det();
 		if (Math.abs(detA) < 1.e-40)

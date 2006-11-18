@@ -23,8 +23,8 @@ package org.jcae.mesh.bora.ds;
 //  This class is useful to improve error reporting in BGroup.computeHypothesis().
 public class BCADGraphCellHypothesis
 {
-	protected BCADGraphCell graphCell = null;
-	protected Hypothesis hypothesis = null;
+	private BCADGraphCell graphCell = null;
+	private Hypothesis hypothesis = null;
 
 	public BCADGraphCellHypothesis(BCADGraphCell g, Hypothesis h)
 	{

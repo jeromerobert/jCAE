@@ -281,7 +281,7 @@ public class QuadTree
 	 * @param size  cell size of children nodes.
 	 * @return the index of the child node containing this vertex.
 	 */
-	protected static int indexSubQuad(int i, int j, int size)
+	private static int indexSubQuad(int i, int j, int size)
 	{
 		int ret = ((j & size) == 0) ? 0 : 2;
 		if ((i & size) != 0)

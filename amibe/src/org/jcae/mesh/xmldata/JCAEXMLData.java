@@ -22,16 +22,16 @@ package org.jcae.mesh.xmldata;
 
 public class JCAEXMLData
 {
-	protected final static String nodes1dFilename = "nodes1d.bin";
-	protected final static String ref1dFilename = "nodes1dref.bin";
-	protected final static String beams1dFilename = "beams1d.bin";
+	final static String nodes1dFilename = "nodes1d.bin";
+	final static String ref1dFilename = "nodes1dref.bin";
+	final static String beams1dFilename = "beams1d.bin";
 	
-	protected final static String nodes2dFilename = "nodes2d.bin";
-	protected final static String ref2dFilename = "nodes2dref.bin";
-	protected final static String triangles2dFilename = "triangles2d.bin";
+	final static String nodes2dFilename = "nodes2d.bin";
+	final static String ref2dFilename = "nodes2dref.bin";
+	final static String triangles2dFilename = "triangles2d.bin";
 	
-	protected final static String nodes3dFilename = "nodes3d.bin";
-	protected final static String normals3dFilename = "normals3d.bin";
-	protected final static String triangles3dFilename = "triangles3d.bin";
-	protected final static String groupsFilename = "groups.bin";
+	final static String nodes3dFilename = "nodes3d.bin";
+	final static String normals3dFilename = "normals3d.bin";
+	final static String triangles3dFilename = "triangles3d.bin";
+	final static String groupsFilename = "groups.bin";
 }

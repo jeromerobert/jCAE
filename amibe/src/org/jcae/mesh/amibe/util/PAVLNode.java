@@ -72,7 +72,7 @@ public class PAVLNode
 	WARNING: Balance factors are not updated because they differ
 	         when inserting and deleting nodes
 	*/
-	protected PAVLNode rotateL()
+	private PAVLNode rotateL()
 	{
 		logger.debug("Single left rotation");
 		PAVLNode right = child[1];
@@ -97,7 +97,7 @@ public class PAVLNode
 	WARNING: Balance factors are not updated because they differ
 	         when inserting and deleting nodes
 	*/
-	protected PAVLNode rotateR()
+	private PAVLNode rotateR()
 	{
 		logger.debug("Single right rotation");
 		PAVLNode left = child[0];
@@ -120,7 +120,7 @@ public class PAVLNode
 	      / \                        / \
 	     T2 T3                      T3 T4
 	*/
-	protected PAVLNode rotateRL()
+	private PAVLNode rotateRL()
 	{
 		logger.debug("Right+left rotation");
 		assert balanceFactor == 2;
@@ -170,7 +170,7 @@ public class PAVLNode
 	         / \              / \
 	        T2 T3            T1 T2
 	*/
-	protected PAVLNode rotateLR()
+	private PAVLNode rotateLR()
 	{
 		logger.debug("Left+right rotation");
 		assert balanceFactor == -2;
