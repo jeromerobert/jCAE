@@ -129,20 +129,7 @@ public class Quadric3DError
 	{
 		assert v1 != Vertex.outer;
 		assert v2 != Vertex.outer;
-		/* FIXME: add an option so that boundary nodes may be frozen.
-		if (!v1.isMutable())
-		{
-			assert v2.isMutable();
-			ret = (Vertex) v1.clone();
-			return ret;
-		}
-		else if (!v2.isMutable())
-		{
-			assert v1.isMutable();
-			ret = (Vertex) v2.clone();
-			return ret;
-		}
-		*/
+		/* FIXME: add an option so that boundary nodes may be frozen.  */
 		if (placement == POS_VERTEX)
 			ret.copy(bestCandidateV1V2(v1, v2, q1, q2));
 		else if (placement == POS_MIDDLE)

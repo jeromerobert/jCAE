@@ -105,7 +105,7 @@ import org.apache.log4j.Logger;
  * objects as much as we can.
  * </p>
  */
-public class OTriangle implements Cloneable
+public class OTriangle
 {
 	private static Logger logger = Logger.getLogger(OTriangle.class);
 	
@@ -236,27 +236,6 @@ public class OTriangle implements Cloneable
 		}
 		while (destination() != d);
 		return false;
-	}
-	
-	/**
-	 * Clones an object.
-	 */
-	public final Object clone()
-	{
-		Object ret = null;
-		try
-		{
-			ret = super.clone();
-			// No shallow copy for private arrays
-			OTriangle that = (OTriangle) ret;
-			that.tempD = new double[3];
-			that.tempD1 = new double[3];
-			that.tempD2 = new double[3];
-		}
-		catch (java.lang.CloneNotSupportedException ex)
-		{
-		}
-		return ret;
 	}
 	
 	// Section: accessors

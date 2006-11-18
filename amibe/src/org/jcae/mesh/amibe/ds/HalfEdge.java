@@ -23,7 +23,7 @@ import java.util.Iterator;
 import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
-public class HalfEdge implements Cloneable
+public class HalfEdge
 {
 	private static Logger logger = Logger.getLogger(HalfEdge.class);
 	private Triangle tri;
@@ -84,25 +84,6 @@ public class HalfEdge implements Cloneable
 		return this;
 	}
 	
-	/**
-	 * Clones an object.
-	 */
-	public final Object clone()
-	{
-		Object ret = null;
-		try
-		{
-			ret = super.clone();
-			HalfEdge that = (HalfEdge) ret;
-			that.sym = null;
-			that.next = null;
-		}
-		catch (java.lang.CloneNotSupportedException ex)
-		{
-		}
-		return ret;
-	}
-
 	/**
 	 * Move to the symmetric edge.
 	 */

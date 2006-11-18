@@ -40,7 +40,7 @@ import java.util.Iterator;
  * infinite.  It is used to create exterior triangles.
  * </p>
  */
-public class Vertex implements Cloneable
+public class Vertex
 {
 	private static Logger logger = Logger.getLogger(Vertex.class);
 	/**
@@ -125,27 +125,6 @@ public class Vertex implements Cloneable
 		else
 			ret = new Vertex(p[0], p[1], p[2]);
 		ret.mesh = mesh;
-		return ret;
-	}
-	
-	/**
-	 * Copy the current Vertex into another one.
-	 *
-	 * @return a new Vertex with the same attributes.
-	 */
-	public final Object clone()
-	{
-		Object ret = null;
-		try
-		{
-			ret = super.clone();
-			Vertex that = (Vertex) ret;
-			that.param = new double[param.length];
-			for (int i = 0; i < param.length; i++)
-				that.param[i] = param[i];
-		}
-		catch (java.lang.CloneNotSupportedException ex)
-		{}
 		return ret;
 	}
 	
