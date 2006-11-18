@@ -112,9 +112,9 @@ public class OTriangle
 	private static final int [] next3 = { 1, 2, 0 };
 	private static final int [] prev3 = { 2, 0, 1 };
 	
-	private double [] tempD = new double[3];
-	private double [] tempD1 = new double[3];
-	private double [] tempD2 = new double[3];
+	private final double [] tempD = new double[3];
+	private final double [] tempD1 = new double[3];
+	private final double [] tempD2 = new double[3];
 	
 	/**
 	 * Numeric constants for edge attributes.  Set if edge is on
