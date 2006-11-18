@@ -23,6 +23,7 @@ package org.jcae.mesh.bora.ds;
 import org.jcae.mesh.bora.xmldata.*;
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADShapeBuilder;
+import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.cad.CADExplorer;
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.mesher.ds.MNode1D;
@@ -91,9 +92,10 @@ public class BSubMesh
 	public void add(CADShape s)
 	{
 		BCADGraphCell c = model.getGraph().getByShape(s);
-		for (int t = 0; t < BCADGraph.shapeTypeArray.length; t++)
+		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
-			for (Iterator it = c.shapesExplorer(t); it.hasNext(); )
+			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			for (Iterator it = c.shapesExplorer(cse); it.hasNext(); )
 			{
 				BCADGraphCell sub = (BCADGraphCell) it.next();
 				CADShape shape = sub.getShape();
@@ -129,9 +131,10 @@ public class BSubMesh
 		//   BCADGraph.printShapes(t, shapesExplorer(t));
 		// here because we want to flag interior elements.
 		System.out.println("List of geometrical entities");
-		for (int t = BCADGraph.classTypeArray.length - 1; t >= 0; t--)
+		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
-			for (Iterator it = shapesExplorer(t); it.hasNext(); )
+			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			for (Iterator it = shapesExplorer(cse); it.hasNext(); )
 			{
 				BCADGraphCell sub = (BCADGraphCell) it.next();
 				SubElement old = (SubElement) mapShapeToSubElement.get(sub.getShape());
@@ -142,11 +145,11 @@ public class BSubMesh
 	}
 
 	// Returns an iterator on all geometrical elements of dimension d
-	public Iterator shapesExplorer(final int d)
+	public Iterator shapesExplorer(final CADShapeEnum d)
 	{
 		return new Iterator()
 		{
-			private Class sample = BCADGraph.classTypeArray[d];
+			private Class sample = d.asClass();
 			private Iterator its = setCells.iterator();
 			private BCADGraphCell cur = null;
 			private BCADGraphCell next = null;
@@ -191,12 +194,12 @@ public class BSubMesh
 	 */
 	public void setHypothesis(Hypothesis h)
 	{
-		int dim = Constraint.getAlgo(h.getElement()).dim();
-		if (dim == BCADGraph.DIM_EDGE)
+		CADShapeEnum dim = Constraint.getAlgo(h.getElement()).dim();
+		if (dim == CADShapeEnum.EDGE)
 			output1d = true;
-		else if (dim == BCADGraph.DIM_FACE)
+		else if (dim == CADShapeEnum.FACE)
 			output2d = true;
-		else if (dim == BCADGraph.DIM_SOLID)
+		else if (dim == CADShapeEnum.SOLID)
 			output3d = true;
 		for (Iterator it = setCells.iterator(); it.hasNext(); )
 		{
@@ -210,14 +213,14 @@ public class BSubMesh
 		logger.debug("Submesh nr. "+id);
 		// Edges
 		int nrEdges = 0;
-		for (Iterator it = shapesExplorer(BCADGraph.DIM_EDGE); it.hasNext(); )
+		for (Iterator it = shapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) it.next();
 			if (s.hasConstraints())
 				nrEdges++;
 		}
 		int cnt = 0;
-		for (Iterator it = shapesExplorer(BCADGraph.DIM_EDGE); it.hasNext(); )
+		for (Iterator it = shapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) it.next();
 			cnt++;
@@ -244,14 +247,14 @@ public class BSubMesh
 		computeVertexReferences();
 		updateNodeLabels();
 		int nrFaces = 0;
-		for (Iterator it = shapesExplorer(BCADGraph.DIM_FACE); it.hasNext(); )
+		for (Iterator it = shapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) it.next();
 			if (s.hasConstraints())
 				nrFaces++;
 		}
 		int cnt = 0;
-		for (Iterator it = shapesExplorer(BCADGraph.DIM_FACE); it.hasNext(); )
+		for (Iterator it = shapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) it.next();
 			cnt++;
@@ -276,7 +279,7 @@ public class BSubMesh
 		// Solids
 		logger.info("Submesh nr. "+id);
 		int nrSolids = 0;
-		for (Iterator it = shapesExplorer(BCADGraph.DIM_SOLID); it.hasNext(); )
+		for (Iterator it = shapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) it.next();
 			if (!s.hasConstraints())
@@ -286,7 +289,7 @@ public class BSubMesh
 		if (nrSolids == 0)
 			return;
 		int cnt = 0;
-		for (Iterator it = shapesExplorer(BCADGraph.DIM_SOLID); it.hasNext(); )
+		for (Iterator it = shapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) it.next();
 			if (!s.hasConstraints())
@@ -312,7 +315,7 @@ public class BSubMesh
 		logger.debug("Update node labels");
 		//  Resets all labels
 		BCADGraphCell root = model.getGraph().getRootCell();
-		for (Iterator ite = root.shapesExplorer(BCADGraph.DIM_EDGE); ite.hasNext(); )
+		for (Iterator ite = root.shapesExplorer(CADShapeEnum.EDGE); ite.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) ite.next();
 			SubMesh1D submesh1d = (SubMesh1D) s.mesh;
@@ -325,7 +328,7 @@ public class BSubMesh
 			}
 		}
 		int i = 0;
-		for (Iterator ite = root.shapesExplorer(BCADGraph.DIM_EDGE); ite.hasNext(); )
+		for (Iterator ite = root.shapesExplorer(CADShapeEnum.EDGE); ite.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) ite.next();
 			SubMesh1D submesh1d = (SubMesh1D) s.mesh;
@@ -356,15 +359,15 @@ public class BSubMesh
 		//  MNode1D objects which are bound to this vertex.
 		BCADGraphCell root = model.getGraph().getRootCell();
 		int nVertex = 0;
-		for (Iterator itn = root.uniqueShapesExplorer(BCADGraph.DIM_VERTEX); itn.hasNext(); itn.next())
+		for (Iterator itn = root.uniqueShapesExplorer(CADShapeEnum.VERTEX); itn.hasNext(); itn.next())
 			nVertex++;
 		THashMap vertex2Ref = new THashMap(nVertex);
-		for (Iterator itn = root.uniqueShapesExplorer(BCADGraph.DIM_VERTEX); itn.hasNext(); )
+		for (Iterator itn = root.uniqueShapesExplorer(CADShapeEnum.VERTEX); itn.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) itn.next();
 			vertex2Ref.put(s.getShape(), new ArrayList());
 		}
-		for (Iterator ite = root.shapesExplorer(BCADGraph.DIM_EDGE); ite.hasNext(); )
+		for (Iterator ite = root.shapesExplorer(CADShapeEnum.EDGE); ite.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) ite.next();
 			SubMesh1D submesh1d = (SubMesh1D) s.mesh;
@@ -380,7 +383,7 @@ public class BSubMesh
 			}
 		}
 		
-		for (Iterator itn = root.uniqueShapesExplorer(BCADGraph.DIM_VERTEX); itn.hasNext(); )
+		for (Iterator itn = root.uniqueShapesExplorer(CADShapeEnum.VERTEX); itn.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) itn.next();
 			CADVertex V = (CADVertex) s.getShape();

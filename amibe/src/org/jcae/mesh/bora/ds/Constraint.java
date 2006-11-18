@@ -21,6 +21,7 @@
 package org.jcae.mesh.bora.ds;
 
 import org.jcae.mesh.bora.algo.*;
+import org.jcae.mesh.cad.CADShapeEnum;
 import java.util.Iterator;
 import java.util.Collection;
 import java.lang.reflect.Constructor;
@@ -29,14 +30,14 @@ import org.apache.log4j.Logger;
 public class Constraint extends Hypothesis
 {
 	private static Logger logger = Logger.getLogger(Constraint.class);
-	protected int dimension = -1;
+	protected CADShapeEnum dimension = null;
 	protected boolean dirty = false;
 	protected AlgoInterface algo = null;
 	private static Class [] innerClasses = Constraint.class.getDeclaredClasses();
 	private static HypNone HypNoneInstance = new HypNone();
 
 	// Is there a better way to do that?
-	private void copyHypothesis(Hypothesis h, int d)
+	private void copyHypothesis(Hypothesis h, CADShapeEnum d)
 	{
 		dimension   = d;
 		lengthMin   = h.lengthMin;
@@ -51,7 +52,7 @@ public class Constraint extends Hypothesis
 	}
 
 	// Creates a Constraint derived from an Hypothesis
-	private static Constraint createConstraint(Hypothesis h, int d)
+	private static Constraint createConstraint(Hypothesis h, CADShapeEnum d)
 	{
 		Constraint ret = new Constraint();
 		ret.copyHypothesis(h, d);
@@ -61,12 +62,12 @@ public class Constraint extends Hypothesis
 	}
 
 	// Combines with an Hypothesis for a given dimension
-	private void combine(BCADGraphCellHypothesis mh, int d)
+	private void combine(BCADGraphCellHypothesis mh, CADShapeEnum d)
 	{
 		Constraint that = createConstraint(mh.getHypothesis(), d);
 		if (that == null)
 			return;
-		if (dimension == -1)
+		if (dimension == null)
 			copyHypothesis(that, d);
 		if (elementType != that.elementType)
 		{
@@ -145,7 +146,7 @@ public class Constraint extends Hypothesis
 	 * @param mh  list of BCADGraphCellHypothesis objects.
 	 * @param d   dimension
 	 */
-	public static Constraint combineAll(Collection mh, int d)
+	public static Constraint combineAll(Collection mh, CADShapeEnum d)
 	{
 		Constraint ret = null;
 		if (mh.size() == 0)
@@ -153,7 +154,7 @@ public class Constraint extends Hypothesis
 		ret = new Constraint();
 		for (Iterator ita = mh.iterator() ; ita.hasNext(); )
 			ret.combine((BCADGraphCellHypothesis) ita.next(), d);
-		if (ret.dimension == -1)
+		if (ret.dimension == null)
 			ret = null;
 		return ret;
 	}
@@ -176,7 +177,7 @@ public class Constraint extends Hypothesis
 		return h;
 	}
 
-	private static String impliedType(int d, String elt)
+	private static String impliedType(CADShapeEnum d, String elt)
 	{
 		HypInterface h = getAlgo(elt);
 		if (h == null)
@@ -191,19 +192,19 @@ public class Constraint extends Hypothesis
 	{
 		double targetLength = 0.5*(lengthMin+lengthMax);
 		try {
-			if (dimension == BCADGraph.DIM_EDGE)
+			if (dimension == CADShapeEnum.EDGE)
 			{
 				Class [] typeArgs = new Class[] {double.class, double.class, boolean.class};
 				Constructor cons = UniformLengthDeflection1d.class.getConstructor(typeArgs);
 				algo = (AlgoInterface) cons.newInstance(new Object [] {new Double(targetLength), new Double(deflection), new Boolean(true)});
 			}
-			else if (dimension == BCADGraph.DIM_FACE)
+			else if (dimension == CADShapeEnum.FACE)
 			{
 				Class [] typeArgs = new Class[] {double.class, double.class, boolean.class, boolean.class};
 				Constructor cons = Basic2d.class.getConstructor(typeArgs);
 				algo = (AlgoInterface) cons.newInstance(new Object [] {new Double(targetLength), new Double(deflection), new Boolean(true), new Boolean(true)});
 			}
-			else if (dimension == BCADGraph.DIM_SOLID)
+			else if (dimension == CADShapeEnum.SOLID)
 			{
 				Class [] typeArgs = new Class[] {double.class};
 				Constructor cons = TetGen.class.getConstructor(typeArgs);
@@ -236,24 +237,24 @@ public class Constraint extends Hypothesis
 
 	public static class HypNone implements HypInterface
 	{
-		public int dim()
+		public CADShapeEnum dim()
 		{
-			return -1;
+			return null;
 		}
-		public String impliedType(int d)
+		public String impliedType(CADShapeEnum d)
 		{
 			return null;
 		}
 	}
 	public static class HypE2 implements HypInterface
 	{
-		public int dim()
+		public CADShapeEnum dim()
 		{
-			return BCADGraph.DIM_EDGE;
+			return CADShapeEnum.EDGE;
 		}
-		public String impliedType(int d)
+		public String impliedType(CADShapeEnum d)
 		{
-			if (d == BCADGraph.DIM_EDGE)
+			if (d == CADShapeEnum.EDGE)
 				return "E2";
 			else
 				return null;
@@ -261,15 +262,15 @@ public class Constraint extends Hypothesis
 	}
 	public static class HypT3 implements HypInterface
 	{
-		public int dim()
+		public CADShapeEnum dim()
 		{
-			return BCADGraph.DIM_FACE;
+			return CADShapeEnum.FACE;
 		}
-		public String impliedType(int d)
+		public String impliedType(CADShapeEnum d)
 		{
-			if (d == BCADGraph.DIM_EDGE)
+			if (d == CADShapeEnum.EDGE)
 				return "E2";
-			else if (d == BCADGraph.DIM_FACE)
+			else if (d == CADShapeEnum.FACE)
 				return "T3";
 			else
 				return null;
@@ -277,17 +278,17 @@ public class Constraint extends Hypothesis
 	}
 	public static class HypT4 implements HypInterface
 	{
-		public int dim()
+		public CADShapeEnum dim()
 		{
-			return BCADGraph.DIM_SOLID;
+			return CADShapeEnum.SOLID;
 		}
-		public String impliedType(int d)
+		public String impliedType(CADShapeEnum d)
 		{
-			if (d == BCADGraph.DIM_EDGE)
+			if (d == CADShapeEnum.EDGE)
 				return "E2";
-			else if (d == BCADGraph.DIM_FACE)
+			else if (d == CADShapeEnum.FACE)
 				return "T3";
-			else if (d == BCADGraph.DIM_SOLID)
+			else if (d == CADShapeEnum.SOLID)
 				return "T4";
 			else
 				return null;

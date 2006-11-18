@@ -47,15 +47,6 @@ public class BCADGraph
 	// First free index
 	private int freeIndex;
 
-	public static int shapeTypeArray[] = { CADExplorer.VERTEX, CADExplorer.EDGE, CADExplorer.WIRE, CADExplorer.FACE, CADExplorer.SHELL, CADExplorer.SOLID, CADExplorer.COMPSOLID, CADExplorer.COMPOUND};
-	public static Class classTypeArray[] = { CADVertex.class, CADEdge.class, CADWire.class, CADFace.class, CADShell.class,  CADSolid.class, CADCompSolid.class, CADCompound.class};
-	public static String nameTypeArray[] = { "vertex", "edge", "wire", "face", "shell", "solid", "compsolid", "compound"};
-
-	public static int DIM_VERTEX = 0;
-	public static int DIM_EDGE   = 1;
-	public static int DIM_FACE   = 3;
-	public static int DIM_SOLID  = 5;
-
 	// In OccJava, 2 CADShape instances can be equal with different orientations.
 	// We sometimes need to keep track of shape orientation in our graph, hash
 	// sets and maps can then use the keepOrientation instance as hashing
@@ -86,9 +77,10 @@ public class BCADGraph
 		THashMap seen = new THashMap();
 		CADShapeBuilder factory = CADShapeBuilder.factory;
 		CADExplorer exp = factory.newExplorer();
-		for (int t = 0; t < shapeTypeArray.length; t++)
+		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
-			for (exp.init(shape, shapeTypeArray[t]); exp.more(); exp.next())
+			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			for (exp.init(shape, cse.asType()); exp.more(); exp.next())
 			{
 				CADShape sub = exp.current();
 				if (cadShapeToGraphCell.contains(sub))
@@ -109,9 +101,10 @@ public class BCADGraph
 		// Add indices
 		int i = 1;
 		CADExplorer exp2 = factory.newExplorer();
-		for (int t = 0; t <= CADExplorer.VERTEX; t++)
+		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.COMPOUND, CADShapeEnum.VERTEX); itcse.hasNext(); )
 		{
-			for (exp.init(shape, t); exp.more(); exp.next())
+			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			for (exp.init(shape, cse.asType()); exp.more(); exp.next())
 			{
 				CADShape s = (CADShape) exp.current();
 				BCADGraphCell c = (BCADGraphCell) cadShapeToGraphCell.get(s);
@@ -126,17 +119,21 @@ public class BCADGraph
 		freeIndex = i;
 
 		// Add backward links
-		for (int t = 0; t <= CADExplorer.VERTEX; t++)
+		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.COMPOUND, CADShapeEnum.VERTEX); itcse.hasNext(); )
 		{
-			for (exp.init(shape, t); exp.more(); exp.next())
+			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			for (exp.init(shape, cse.asType()); exp.more(); exp.next())
 			{
 				CADShape s = (CADShape) exp.current();
 				BCADGraphCell c = (BCADGraphCell) cadShapeToGraphCell.get(s);
 				if (c == null)
 					continue;
-				for (int sub = t+1; sub <= CADExplorer.VERTEX; sub++)
+				Iterator it2 = CADShapeEnum.iterator(cse, CADShapeEnum.VERTEX);
+				it2.next();
+				while (it2.hasNext())
 				{
-					for (exp2.init(s, sub); exp2.more(); exp2.next())
+					CADShapeEnum cse2 = (CADShapeEnum) it2.next();
+					for (exp2.init(s, cse2.asType()); exp2.more(); exp2.next())
 					{
 						CADShape s2 = (CADShape) exp2.current();
 						BCADGraphCell c2 = (BCADGraphCell) cadShapeToGraphCell.get(s2);
@@ -189,12 +186,12 @@ public class BCADGraph
 	/**
 	 * Returns the list of cells for a given dimension.
 	 */
-	public Collection getCellList(int t)
+	public Collection getCellList(CADShapeEnum cse)
 	{
 		CADShapeBuilder factory = CADShapeBuilder.factory;
 		CADExplorer exp = factory.newExplorer();
 		Collection ret = new LinkedHashSet();
-		for (exp.init(root.getShape(), shapeTypeArray[t]); exp.more(); exp.next())
+		for (exp.init(root.getShape(), cse.asType()); exp.more(); exp.next())
 		{
 			CADShape s = exp.current();
 			BCADGraphCell c = (BCADGraphCell) cadShapeToGraphCell.get(s);
@@ -211,17 +208,20 @@ public class BCADGraph
 	public void printShapes()
 	{
 		System.out.println("List of geometrical entities");
-		for (int t = classTypeArray.length - 1; t >= 0; t--)
-			printShapes(t, root.shapesExplorer(t));
+		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
+		{
+			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			printShapes(cse, root.shapesExplorer(cse));
+		}
 		System.out.println("End list");
 	}
 
-	public static void printShapes(int t, Iterator it)
+	public static void printShapes(CADShapeEnum cse, Iterator it)
 	{
 		while (it.hasNext())
 		{
 			BCADGraphCell s = (BCADGraphCell) it.next();
-			if (t == 0)
+			if (cse == CADShapeEnum.VERTEX)
 			{
 				CADVertex v = (CADVertex) s.getShape();
 				double [] coord = v.pnt();

@@ -116,14 +116,14 @@ public class MMesh1D extends MMesh0D
 		//  won't be resized.
 		int edges = 0;
 		BCADGraphCell root = model.getGraph().getRootCell();
-		for (Iterator ite = root.shapesExplorer(BCADGraph.DIM_EDGE); ite.hasNext(); ite.next())
+		for (Iterator ite = root.shapesExplorer(CADShapeEnum.EDGE); ite.hasNext(); ite.next())
 			edges++;
 		if (edges == 0)
 			return;
 		mapTEdgeToSubMesh1D = new HashMap(edges);
 		listTEdge = new ArrayList(edges);
 		
-		for (Iterator ite = root.shapesExplorer(BCADGraph.DIM_EDGE); ite.hasNext(); )
+		for (Iterator ite = root.shapesExplorer(CADShapeEnum.EDGE); ite.hasNext(); )
 		{
 			BCADGraphCell c = (BCADGraphCell) ite.next();
 			CADEdge E = (CADEdge) c.getShape();
@@ -143,7 +143,7 @@ public class MMesh1D extends MMesh0D
 			mapTEdgeToFaces.put(E, new HashSet());
 		}
 		CADExplorer expE = CADShapeBuilder.factory.newExplorer();
-		for (Iterator itf = root.shapesExplorer(BCADGraph.DIM_FACE); itf.hasNext(); )
+		for (Iterator itf = root.shapesExplorer(CADShapeEnum.FACE); itf.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) itf.next();
 			CADFace F = (CADFace) s.getShape();

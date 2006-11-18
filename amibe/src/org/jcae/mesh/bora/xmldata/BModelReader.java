@@ -22,6 +22,7 @@ package org.jcae.mesh.bora.xmldata;
 
 import org.jcae.mesh.bora.ds.*;
 import org.jcae.mesh.xmldata.*;
+import org.jcae.mesh.cad.CADShapeEnum;
 import java.io.File;
 import java.util.Iterator;
 import javax.xml.xpath.XPath;
@@ -77,9 +78,10 @@ public class BModelReader
 				return model;
 			// Check consistency
 			String errmsg = "Error when parsing XML file "+xmlDir+File.separator+xmlFile;
-			for (int t = BCADGraph.classTypeArray.length - 1; t >= 0; t--)
+			for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.COMPOUND, CADShapeEnum.VERTEX); itcse.hasNext(); )
 			{
-				for (Iterator it = model.getGraph().getRootCell().shapesExplorer(t); it.hasNext(); )
+				CADShapeEnum cse = (CADShapeEnum) itcse.next();
+				for (Iterator it = model.getGraph().getRootCell().shapesExplorer(cse); it.hasNext(); )
 				{
 					BCADGraphCell s = (BCADGraphCell) it.next();
 					Node id = (Node) xpath.evaluate("/jcae/model/graph/cad[@id="+s.getId()+"]", document, XPathConstants.NODE);

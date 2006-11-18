@@ -23,6 +23,7 @@ package org.jcae.mesh.bora.ds;
 import org.jcae.mesh.bora.xmldata.BModelWriter;
 import org.jcae.mesh.cad.CADShapeBuilder;
 import org.jcae.mesh.cad.CADShape;
+import org.jcae.mesh.cad.CADShapeEnum;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -180,15 +181,16 @@ public class BModel
 	{
 		// Compute all constraints
 		BCADGraphCell root = cad.getRootCell();
-		for (int t = 0; t < BCADGraph.classTypeArray.length; t++)
+		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
-			for (Iterator it = root.shapesExplorer(t); it.hasNext(); )
+			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			for (Iterator it = root.shapesExplorer(cse); it.hasNext(); )
 			{
 				BCADGraphCell s = (BCADGraphCell) it.next();
-				s.combineHypothesis(t);
+				s.combineHypothesis(cse);
 			}
 		}
-		for (Iterator it = root.shapesExplorer(BCADGraph.DIM_VERTEX); it.hasNext(); )
+		for (Iterator it = root.shapesExplorer(CADShapeEnum.VERTEX); it.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) it.next();
 			if (s.mesh == null)
@@ -236,9 +238,10 @@ public class BModel
 		System.out.println("List of constraints");
 		BCADGraphCell root = cad.getRootCell();
 		String indent = "";
-		for (int t = BCADGraph.classTypeArray.length - 1; t >= 0; t--)
+		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
-			for (Iterator it = root.shapesExplorer(t); it.hasNext(); )
+			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			for (Iterator it = root.shapesExplorer(cse); it.hasNext(); )
 			{
 				BCADGraphCell s = (BCADGraphCell) it.next();
 				System.out.println(indent+"Shape "+s);

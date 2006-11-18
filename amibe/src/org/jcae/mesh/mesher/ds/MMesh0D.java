@@ -68,14 +68,14 @@ public class MMesh0D
 	{
 		int nodes = 0;
 		BCADGraphCell root = model.getGraph().getRootCell();
-		for (Iterator itn = root.shapesExplorer(BCADGraph.DIM_VERTEX); itn.hasNext(); itn.next())
+		for (Iterator itn = root.shapesExplorer(CADShapeEnum.VERTEX); itn.hasNext(); itn.next())
 			nodes++;
 
 		//  Merge topological vertices found at the same geometrical point
 		vnodesize = 0;
 		vnodelist = new CADVertex[nodes];
 		vnodeset = new TObjectIntHashMap(nodes);
-		for (Iterator itn = root.shapesExplorer(BCADGraph.DIM_VERTEX); itn.hasNext(); )
+		for (Iterator itn = root.shapesExplorer(CADShapeEnum.VERTEX); itn.hasNext(); )
 		{
 			BCADGraphCell v = (BCADGraphCell) itn.next();
 			addGeometricalVertex((CADVertex) v.getShape());

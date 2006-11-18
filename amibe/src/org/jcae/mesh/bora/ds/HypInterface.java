@@ -20,9 +20,11 @@
 
 package org.jcae.mesh.bora.ds;
 
+import org.jcae.mesh.cad.CADShapeEnum;
+
 public interface HypInterface
 {
-	public String impliedType(int d);
-	public int dim();
+	public String impliedType(CADShapeEnum d);
+	public CADShapeEnum dim();
 }
 

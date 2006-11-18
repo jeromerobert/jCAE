@@ -28,6 +28,7 @@ import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.bora.ds.BCADGraph;
 import org.jcae.mesh.cad.CADFace;
 import org.jcae.mesh.cad.CADGeomSurface;
+import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
@@ -62,7 +63,7 @@ public class Bora2D
 		BCADGraphCell root = model.getGraph().getRootCell();
 		// Count faces
 		int nFaces = 0;
-		for (Iterator it = root.uniqueShapesExplorer(BCADGraph.DIM_FACE); it.hasNext(); )
+		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 		{
 			BCADGraphCell face = (BCADGraphCell) it.next();
 			File nodesfile = new File(model.getOutputDir()+File.separator+model.get2dDir(), "n"+face.getId());
@@ -79,7 +80,7 @@ public class Bora2D
 		nrNodes[0] = 0;
 		nrTria[0] = 0;
 		nFaces = 0;
-		for (Iterator it = root.uniqueShapesExplorer(BCADGraph.DIM_FACE); it.hasNext(); )
+		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 		{
 			BCADGraphCell face = (BCADGraphCell) it.next();
 			File nodesfile = new File(model.getOutputDir()+File.separator+model.get2dDir(), "n"+face.getId());
@@ -105,7 +106,7 @@ public class Bora2D
 		int [] trias = new int[3*nTrias];
 
 		nFaces = 0;
-		for (Iterator it = root.uniqueShapesExplorer(BCADGraph.DIM_FACE); it.hasNext(); )
+		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 		{
 			BCADGraphCell face = (BCADGraphCell) it.next();
 			CADFace F = (CADFace) face.getShape();

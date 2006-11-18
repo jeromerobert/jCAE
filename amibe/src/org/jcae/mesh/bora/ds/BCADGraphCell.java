@@ -22,6 +22,7 @@ package org.jcae.mesh.bora.ds;
 
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADShapeBuilder;
+import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.cad.CADExplorer;
 import org.jcae.mesh.cad.CADIterator;
 import org.jcae.mesh.mesher.ds.MMesh1D;
@@ -144,24 +145,24 @@ public class BCADGraphCell
 	}
 
 	// Returns an iterator on geometrical elements of dimension d
-	public Iterator shapesExplorer(int d)
+	public Iterator shapesExplorer(CADShapeEnum d)
 	{
 		return shapesExplorer(d, new THashSet(keepOrientation));
 	}
 	// Returns an iterator on unique geometrical elements of dimension d
-	public Iterator uniqueShapesExplorer(int d)
+	public Iterator uniqueShapesExplorer(CADShapeEnum d)
 	{
 		return shapesExplorer(d, new THashSet());
 	}
 	// Returns an iterator on all geometrical elements of dimension d
-	public Iterator allShapesIterator(int d)
+	public Iterator allShapesIterator(CADShapeEnum d)
 	{
 		return shapesExplorer(d, null);
 	}
-	private Iterator shapesExplorer(final int d, final Collection cadShapeSet)
+	private Iterator shapesExplorer(final CADShapeEnum cse, final Collection cadShapeSet)
 	{
 		final CADExplorer exp = CADShapeBuilder.factory.newExplorer();
-		exp.init(shape, BCADGraph.shapeTypeArray[d]);
+		exp.init(shape, cse.asType());
 		return new Iterator()
 		{
 			public boolean hasNext()
@@ -254,9 +255,10 @@ public class BCADGraphCell
 		h.lock();
 		getGraph().getModel().allHypothesis.add(h);
 		BCADGraphCellHypothesis c = new BCADGraphCellHypothesis(this, h);
-		for (int t = 0; t < BCADGraph.classTypeArray.length; t++)
+		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
-			for (Iterator it = shapesExplorer(t); it.hasNext(); )
+			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			for (Iterator it = shapesExplorer(cse); it.hasNext(); )
 			{
 				BCADGraphCell s = (BCADGraphCell) it.next();
 				s.constraints.add(c);
@@ -264,7 +266,7 @@ public class BCADGraphCell
 		}
 	}
 
-	public void combineHypothesis(int d)
+	public void combineHypothesis(CADShapeEnum d)
 	{
 		resultConstraint = Constraint.combineAll(constraints, d);
 	}

@@ -27,6 +27,7 @@ import org.jcae.mesh.xmldata.UNVConverter;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.cad.CADShapeEnum;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -60,7 +61,7 @@ public class BinaryReader
 		mesh.setType(Mesh.MESH_3D);
 		BModel model = root.getGraph().getModel();
 		TIntObjectHashMap vertMap = new TIntObjectHashMap();
-		for (Iterator it = root.uniqueShapesExplorer(BCADGraph.DIM_FACE); it.hasNext(); )
+		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 		{
 			boolean reversed = false;
 			BCADGraphCell s = (BCADGraphCell) it.next();

@@ -29,6 +29,7 @@ import org.jcae.mesh.bora.ds.BCADGraph;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADGeomCurve3D;
 import org.jcae.mesh.cad.CADShapeBuilder;
+import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.mesher.ds.SubMesh1D;
 import org.jcae.mesh.mesher.ds.MNode1D;
 import javax.media.j3d.Appearance;
@@ -59,7 +60,7 @@ public class Bora1D
 		BCADGraphCell root = model.getGraph().getRootCell();
 		// Count edges
 		int nEdges = 0;
-		for (Iterator it = root.uniqueShapesExplorer(BCADGraph.DIM_EDGE); it.hasNext(); )
+		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
 		{
 			BCADGraphCell edge = (BCADGraphCell) it.next();
 			File nodesfile = new File(model.getOutputDir()+File.separator+model.get1dDir(), "n"+edge.getId());
@@ -76,7 +77,7 @@ public class Bora1D
 		nrNodes[0] = 0;
 		nrBeams[0] = 0;
 		nEdges = 0;
-		for (Iterator it = root.uniqueShapesExplorer(BCADGraph.DIM_EDGE); it.hasNext(); )
+		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
 		{
 			BCADGraphCell edge = (BCADGraphCell) it.next();
 			File nodesfile = new File(model.getOutputDir()+File.separator+model.get1dDir(), "n"+edge.getId());
@@ -103,7 +104,7 @@ public class Bora1D
 		CADShapeBuilder factory = CADShapeBuilder.factory;
 
 		nEdges = 0;
-		for (Iterator it = root.uniqueShapesExplorer(BCADGraph.DIM_EDGE); it.hasNext(); )
+		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
 		{
 			BCADGraphCell edge = (BCADGraphCell) it.next();
 			try

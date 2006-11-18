@@ -22,6 +22,7 @@ package org.jcae.mesh.bora.xmldata;
 
 import org.jcae.mesh.bora.ds.*;
 import org.jcae.mesh.xmldata.*;
+import org.jcae.mesh.cad.CADShapeEnum;
 import java.io.File;
 import java.util.Iterator;
 import org.w3c.dom.Document;
@@ -56,14 +57,15 @@ public class BModelWriter
 			modelElement.appendChild(shapeElement);
 
 			Element graphElement=document.createElement("graph");
-			for (int t = BCADGraph.classTypeArray.length - 1; t >= 0; t--)
+			for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.COMPOUND, CADShapeEnum.VERTEX); itcse.hasNext(); )
 			{
-				for (Iterator it = model.getGraph().getCellList(t).iterator(); it.hasNext(); )
+				CADShapeEnum cse = (CADShapeEnum) itcse.next();
+				for (Iterator it = model.getGraph().getCellList(cse).iterator(); it.hasNext(); )
 				{
 					BCADGraphCell s = (BCADGraphCell) it.next();
 					Element elt = document.createElement("cad");
 					elt.setAttribute("id", ""+s.getId());
-					elt.setAttribute("type", BCADGraph.nameTypeArray[t]);
+					elt.setAttribute("type", cse.toString());
 					elt.setAttribute("orientation", ""+s.getShape().orientation());
 					if (s.getReversed() != null)
 						elt.setAttribute("reversed", ""+s.getReversed().getId());
