@@ -35,7 +35,7 @@ public class Calculus2D implements Calculus
 	private static Logger logger=Logger.getLogger(Calculus2D.class);	
 
 	//  The Mesh instance on which methods are applied
-	protected Mesh mesh;
+	private Mesh mesh;
 	
 	/**
 	 * Constructor.

@@ -35,7 +35,7 @@ public class Calculus3D implements Calculus
 	private static Logger logger=Logger.getLogger(Calculus3D.class);	
 
 	//  The Mesh instance on which methods are applied
-	protected Mesh mesh;
+	private Mesh mesh;
 	
 	private static final int level_max = 10;
 	private static final double delta_max = 0.5;

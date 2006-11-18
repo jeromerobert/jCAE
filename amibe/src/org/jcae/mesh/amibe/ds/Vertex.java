@@ -71,10 +71,10 @@ public class Vertex
 	protected int ref1d = 0;
 	// Used in OEMM
 	protected int label = 0;
-	protected boolean readable = false;
-	protected boolean writable = false;
-	protected boolean modified = false;
-	protected boolean deleted = false;
+	private boolean readable = false;
+	private boolean writable = false;
+	private boolean modified = false;
+	private boolean deleted = false;
 	
 	/**
 	 * Create a dummy Vertex.
