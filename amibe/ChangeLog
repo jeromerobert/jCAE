@@ -1,3 +1,8 @@
+Sat Nov 18 20:19:59 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/cad/CADShapeEnum.java: New class, to implement
+	safe CAD type enumeration.
+
 Fri Nov 17 22:36:52 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Vertex.java
