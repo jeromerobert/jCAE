@@ -30,9 +30,9 @@ import org.apache.log4j.Logger;
 public class Constraint extends Hypothesis
 {
 	private static Logger logger = Logger.getLogger(Constraint.class);
-	protected CADShapeEnum dimension = null;
-	protected boolean dirty = false;
-	protected AlgoInterface algo = null;
+	private CADShapeEnum dimension = null;
+	private boolean dirty = false;
+	private AlgoInterface algo = null;
 	private static Class [] innerClasses = Constraint.class.getDeclaredClasses();
 	private static HypNone HypNoneInstance = new HypNone();
 
@@ -233,6 +233,14 @@ public class Constraint extends Hypothesis
 			return;
 		if (!algo.compute(m))
 			logger.warn("Failed! "+algo);
+	}
+
+	public String toString()
+	{
+		String ret = super.toString();
+		if (algo != null)
+			ret += "\n"+algo;
+		return ret;
 	}
 
 	public static class HypNone implements HypInterface

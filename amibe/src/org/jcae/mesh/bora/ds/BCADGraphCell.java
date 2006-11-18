@@ -291,8 +291,6 @@ public class BCADGraphCell
 		for (Iterator ita = constraints.iterator(); ita.hasNext(); )
 			System.out.println(headline+ita.next());
 		System.out.println(headline+"  Total constraint "+resultConstraint);
-		if (resultConstraint.algo != null)
-			System.out.println(headline+"  Algo "+resultConstraint.algo);
 	}
 
 	/**
