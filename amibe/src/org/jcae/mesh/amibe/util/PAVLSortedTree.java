@@ -41,7 +41,7 @@ public class PAVLSortedTree
 	private HashMap map = new HashMap();
 	private int count = 0;
 	
-	private class PAVLSortedTreeNode
+	private static class PAVLSortedTreeNode
 	{
 		private double value;
 		private Object data;

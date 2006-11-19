@@ -47,7 +47,7 @@ public class XMLBranchGroup
 	private final static float relOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorRel", "2.0f"));
 	private static XPath xpath=XPathFactory.newInstance().newXPath();
 	
-	class AppearanceBlackFace extends Appearance
+	static class AppearanceBlackFace extends Appearance
 	{
 		public AppearanceBlackFace()
 		{
@@ -60,7 +60,7 @@ public class XMLBranchGroup
 		}
 	}
 	
-	class AppearanceWireFrame extends Appearance
+	static class AppearanceWireFrame extends Appearance
 	{
 		public AppearanceWireFrame()
 		{
@@ -77,7 +77,7 @@ public class XMLBranchGroup
 		}
 	}   
 	
-	class AppearanceLine extends Appearance
+	static class AppearanceLine extends Appearance
 	{
 		public AppearanceLine()
 		{

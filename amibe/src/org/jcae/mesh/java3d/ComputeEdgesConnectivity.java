@@ -45,7 +45,7 @@ public class ComputeEdgesConnectivity
 {
 	private static Logger logger=Logger.getLogger(ComputeEdgesConnectivity.class);
 	
-	private class Edge
+	private static class Edge
 	{
 		private int n1, n2;
 		

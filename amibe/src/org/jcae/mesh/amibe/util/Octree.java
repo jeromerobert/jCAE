@@ -122,7 +122,7 @@ public class Octree
 	 * On the contrary, when all vertices are removed from a cell, it is deleted.
 	 * And when all children of a cell are null, this cell is removed.
 	 */
-	protected class Cell
+	protected static class Cell
 	{
 		/**
 		 * Number of vertices stored below the current cell.  If this cell
@@ -506,7 +506,7 @@ public class Octree
 		return ret;
 	}
 	
-	private final class getMinSizeProcedure implements OctreeProcedure
+	private static class getMinSizeProcedure implements OctreeProcedure
 	{
 		public int searchedCells = 0;
 		public int minSize = gridSize;

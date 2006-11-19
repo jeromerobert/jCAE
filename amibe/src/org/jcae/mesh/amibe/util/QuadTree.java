@@ -145,7 +145,7 @@ public class QuadTree
 	 * On the contrary, when all vertices are removed from a cell, it is deleted.
 	 * And when all children of a cell are null, this cell is removed.
 	 */
-	protected class Cell
+	protected static class Cell
 	{
 		/**
 		 * Maximal number of vertices which can be stored in a cell.
@@ -667,7 +667,7 @@ public class QuadTree
 		return ret;
 	}
 	
-	private final class getAllVerticesProcedure implements QuadTreeProcedure
+	private static class getAllVerticesProcedure implements QuadTreeProcedure
 	{
 		public ArrayList nodelist = null;
 		public getAllVerticesProcedure(int capacity)
@@ -700,7 +700,7 @@ public class QuadTree
 		return gproc.nodelist;
 	}
 	
-	private final class clearAllMetricsProcedure implements QuadTreeProcedure
+	private static class clearAllMetricsProcedure implements QuadTreeProcedure
 	{
 		public final int action(Object o, int s, int i0, int j0)
 		{

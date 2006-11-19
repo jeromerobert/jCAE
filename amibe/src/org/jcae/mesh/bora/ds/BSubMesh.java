@@ -58,7 +58,7 @@ public class BSubMesh
 	private boolean output2d = false;
 	private boolean output3d = false;
 
-	private class SubElement
+	private static class SubElement
 	{
 		private BCADGraphCell cell;
 		private boolean isVisible = true;
