@@ -25,8 +25,8 @@ import org.jcae.opencascade.jni.GeomLProp_SLProps;
 
 public class OCCGeomSurface implements CADGeomSurface
 {
-	protected Geom_Surface mySurface = null;
-	protected GeomLProp_SLProps myLprop = null;
+	private Geom_Surface mySurface = null;
+	private GeomLProp_SLProps myLprop = null;
 	
 	public OCCGeomSurface()
 	{

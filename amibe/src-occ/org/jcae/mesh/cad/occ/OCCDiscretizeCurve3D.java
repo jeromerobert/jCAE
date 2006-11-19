@@ -26,12 +26,12 @@ import java.util.ArrayList;
 public class OCCDiscretizeCurve3D
 {
 	private static Logger logger=Logger.getLogger(OCCDiscretizeCurve3D.class);
-	protected Adaptor3d_Curve curve = null;
+	private Adaptor3d_Curve curve = null;
 	// Number of points
-	protected int nr = 0;
-	protected double length = -1.0;
-	protected double [] a;
-	protected double start, end;
+	private int nr = 0;
+	private double length = -1.0;
+	private double [] a;
+	private double start, end;
 	
 	public OCCDiscretizeCurve3D(Adaptor3d_Curve myCurve, double s, double e)
 	{

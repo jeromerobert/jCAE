@@ -30,8 +30,8 @@ import org.jcae.opencascade.jni.TopoDS_Face;
 
 public class OCCGeomCurve2D implements CADGeomCurve2D
 {
-	protected Geom2dAdaptor_Curve myCurve = null;
-	protected double [] range = new double[2];
+	private Geom2dAdaptor_Curve myCurve = null;
+	private double [] range = new double[2];
 	
 	public OCCGeomCurve2D(CADEdge E, CADFace F)
 	{
