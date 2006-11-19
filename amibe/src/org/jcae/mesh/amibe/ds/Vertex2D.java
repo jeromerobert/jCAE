@@ -57,7 +57,7 @@ public class Vertex2D extends Vertex
 	 * Outer vertex.
 	 */
 	private static final Random rand = new Random(139L);
-	private static Vertex2D circumcenter = new Vertex2D(0.0, 0.0);
+	private static Vertex2D circumcenter = new Vertex2D(null, 0.0, 0.0);
 	
 	//  These 2 integer arrays are temporary workspaces
 	private static final int [] i0 = new int[2];
@@ -66,9 +66,9 @@ public class Vertex2D extends Vertex
 	//  Metrics at this location
 	private Metric2D m2 = null;
 	
-	public Vertex2D()
+	public Vertex2D(Mesh m)
 	{
-		super();
+		super(m);
 	}
 
 	/**
@@ -77,9 +77,9 @@ public class Vertex2D extends Vertex
 	 * @param u  first coordinate.
 	 * @param v  second coordinate.
 	 */
-	private Vertex2D(double u, double v)
+	private Vertex2D(Mesh m, double u, double v)
 	{
-		param = new double[2];
+		super(m);
 		param[0] = u;
 		param[1] = v;
 	}
@@ -92,9 +92,7 @@ public class Vertex2D extends Vertex
 	 */
 	public static Vertex2D valueOf(Mesh mesh, double u, double v)
 	{
-		Vertex2D ret = new Vertex2D(u, v);
-		ret.mesh = mesh;
-		return ret;
+		return new Vertex2D(mesh, u, v);
 	}
 	
 	/**
@@ -125,33 +123,21 @@ public class Vertex2D extends Vertex
 		Vertex2D ret = valueOf(m, 0.0, 0.0);
 		ret.ref1d = pt.getMaster().getLabel();
 		if (null != C2d)
-			ret.param = C2d.value(pt.getParameter());
+		{
+			double [] uv = C2d.value(pt.getParameter());
+			ret.param[0] = uv[0];
+			ret.param[1] = uv[1];
+		}
 		else
 		{
 			CADVertex V = pt.getCADVertex();
 			if (null == V)
 				throw new java.lang.RuntimeException("Error in Vertex()");
-			ret.param = V.parameters(F);
+			double [] uv = V.parameters(F);
+			ret.param[0] = uv[0];
+			ret.param[1] = uv[1];
 		}
 		return ret;
-	}
-	
-	/**
-	 * Copy all attributes from another Vertex.
-	 *
-	 * @param that  the Vertex to be copied.
-	 */
-	public void copy(Vertex2D that)
-	{
-		if (that.param.length != param.length)
-			param = new double[that.param.length];
-		for (int i = 0; i < param.length; i++)
-			param[i] = that.param[i];
-		mesh  = that.mesh;
-		link  = that.link;
-		ref1d = that.ref1d;
-		label = that.label;
-		m2    = that.m2;
 	}
 	
 	/**

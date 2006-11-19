@@ -52,11 +52,11 @@ public class Vertex
 	 * Backward reference to the mesh, to have access to the global
 	 * context.
 	 */
-	public Mesh mesh = null;
+	public final Mesh mesh;
 	/**
 	 * 2D or 3D coordinates.
 	 */
-	public double [] param = null;
+	public final double [] param;
 	//  link can be either:
 	//    1. a Triangle, for manifold vertices
 	//    2. an Object[2] array, zhere
@@ -77,10 +77,12 @@ public class Vertex
 	private boolean deleted = false;
 	
 	/**
-	 * Create a dummy Vertex.
+	 * Constructor called by Vertex2D.
 	 */
-	public Vertex()
+	public Vertex(Mesh m)
 	{
+		mesh = m;
+		param = new double[2];
 	}
 
 	/**
@@ -90,8 +92,9 @@ public class Vertex
 	 * @param y  second coordinate.
 	 * @param z  third coordinate.
 	 */
-	private Vertex(double x, double y, double z)
+	private Vertex(Mesh m, double x, double y, double z)
 	{
+		mesh = m;
 		param = new double[3];
 		param[0] = x;
 		param[1] = y;
@@ -107,9 +110,7 @@ public class Vertex
 	 */
 	public static Vertex valueOf(Mesh mesh, double x, double y, double z)
 	{
-		Vertex ret = new Vertex(x, y, z);
-		ret.mesh = mesh;
-		return ret;
+		return new Vertex(mesh, x, y, z);
 	}
 	
 	public static Vertex valueOf(Mesh mesh, double [] p)
@@ -117,14 +118,12 @@ public class Vertex
 		Vertex ret;
 		if (p.length == 2)
 		{
-			ret = new Vertex2D();
-			ret.param = new double[2];
+			ret = new Vertex2D(mesh);
 			ret.param[0] = p[0];
 			ret.param[1] = p[1];
 		}
 		else
-			ret = new Vertex(p[0], p[1], p[2]);
-		ret.mesh = mesh;
+			ret = new Vertex(mesh, p[0], p[1], p[2]);
 		return ret;
 	}
 	
@@ -135,11 +134,9 @@ public class Vertex
 	 */
 	public void copy(Vertex that)
 	{
-		if (that.param.length != param.length)
-			param = new double[that.param.length];
+		assert that.param.length == param.length;
 		for (int i = 0; i < param.length; i++)
 			param[i] = that.param[i];
-		mesh  = that.mesh;
 		link  = that.link;
 		ref1d = that.ref1d;
 		label = that.label;
