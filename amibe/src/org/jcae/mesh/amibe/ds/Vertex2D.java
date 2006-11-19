@@ -24,16 +24,12 @@ import org.jcae.mesh.amibe.util.LongLong;
 import org.jcae.mesh.amibe.ds.tools.Calculus;
 import org.jcae.mesh.amibe.ds.tools.Calculus2D;
 import org.jcae.mesh.amibe.metrics.Metric2D;
-import org.jcae.mesh.amibe.metrics.Metric3D;
-import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADFace;
 import org.jcae.mesh.cad.CADGeomCurve2D;
 import org.jcae.mesh.cad.CADGeomSurface;
 import java.util.Random;
-import java.util.HashSet;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
