@@ -439,7 +439,7 @@ public class Triangle
 	 * @throws ConcurrentModificationException if this element is
 	 * already linked.
 	 */
-	public void listCollect()
+	public final void listCollect()
 	{
 		assert listTail != null;
 		assert listTail.listNext == listSentinel : listTail;
