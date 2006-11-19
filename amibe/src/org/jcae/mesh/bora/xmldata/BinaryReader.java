@@ -21,7 +21,6 @@
 package org.jcae.mesh.bora.xmldata;
 
 import org.jcae.mesh.bora.ds.BCADGraphCell;
-import org.jcae.mesh.bora.ds.BCADGraph;
 import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.xmldata.UNVConverter;
 import org.jcae.mesh.amibe.ds.Mesh;
@@ -75,9 +74,9 @@ public class BinaryReader
 			int id = s.getId();
 			try
 			{
-				int [] refs = readNodeReferences(dir, id);
-				Vertex [] nodelist = readCoordinates(mesh, dir, id, refs, vertMap);
-				readTriangles(mesh, dir, id, reversed, nodelist);
+				int [] refs = read2dNodeReferences(dir, id);
+				Vertex [] nodelist = read2dCoordinates(dir, id, mesh, refs, vertMap);
+				read2dTriangles(dir, id, mesh, reversed, nodelist);
 			}
 			catch(Exception ex)
 			{
@@ -89,7 +88,7 @@ public class BinaryReader
 		return mesh;
 	}
 
-	private static int [] readNodeReferences(String dir, int id)
+	private static int [] read2dNodeReferences(String dir, int id)
 		throws IOException, FileNotFoundException
 	{
 		File refFile = new File(dir, "r"+id);
@@ -105,7 +104,7 @@ public class BinaryReader
 		return refs;
 	}
 
-	private static Vertex [] readCoordinates(Mesh mesh, String dir, int id, int [] refs, TIntObjectHashMap vertMap)
+	private static Vertex [] read2dCoordinates(String dir, int id, Mesh mesh, int [] refs, TIntObjectHashMap vertMap)
 		throws IOException, FileNotFoundException
 	{
 		File nodesFile = new File(dir, "n"+id);
@@ -142,7 +141,7 @@ public class BinaryReader
 		return nodelist;
 	}
 
-	private static void readTriangles(Mesh mesh, String dir, int id, boolean reversed, Vertex [] nodelist)
+	private static void read2dTriangles(String dir, int id, Mesh mesh, boolean reversed, Vertex [] nodelist)
 		throws IOException, FileNotFoundException
 	{
 		File trianglesFile = new File(dir, "f"+id);
