@@ -36,8 +36,13 @@ public class Test1
 		BRep_Builder bb=new BRep_Builder();
 		bb.add(face, vertex1);
 		
-		//Set UV coords of the vertex (it will be a projection in the general case)
-		bb.updateVertex(vertex1, 0.5, 0.5, face, 1E-7);
+		//Project p5 on surface
+		double [] uv = new double[2];
+		Geom_Surface surface = BRep_Tool.surface(face);
+		GeomAPI_ProjectPointOnSurf proj = new GeomAPI_ProjectPointOnSurf(p5, surface);
+		proj.lowerDistanceParameters(uv);
+		double tolerance = proj.lowerDistance();
+		bb.updateVertex(vertex1, uv[0], uv[1], face, tolerance);
 		
 		//Check that the vertex is on the face
 		double[] coords=BRep_Tool.parameters(vertex1, face);
