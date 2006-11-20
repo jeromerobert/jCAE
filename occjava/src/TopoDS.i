@@ -25,6 +25,7 @@
 #include <TopoDS_Compound.hxx>
 #include <TopoDS_Wire.hxx>
 #include <TopoDS_Iterator.hxx>
+#include <TopoDS_Builder.hxx>
 %}
 
 /** 
@@ -235,3 +236,19 @@ class TopoDS_Iterator
 	void Next() ;
 	const TopoDS_Shape& Value() const;
 };
+
+class TopoDS_Builder
+{
+	%rename(makeWire) MakeWire;
+	%rename(makeCompound) MakeCompound;
+	%rename(add) Add;
+	%rename(remove) Remove;
+	
+	TopoDS_Builder()=0;
+	public:
+	void MakeWire(TopoDS_Wire& W) const;
+	void MakeCompound(TopoDS_Compound& C) const;
+	void Add(TopoDS_Shape& S,const TopoDS_Shape& C) const;
+	void Remove(TopoDS_Shape& S,const TopoDS_Shape& C) const;	
+};
+

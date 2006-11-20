@@ -28,8 +28,6 @@
 #include <Adaptor3d_Curve.hxx>
 #include <TopExp.hxx>
 #include <Poly_Triangulation.hxx>
-#include <BRep_Builder.hxx>
-#include <TopoDS_Builder.hxx>
 %}
 
 // Handle enums with int
@@ -55,7 +53,7 @@
 %include "TopoDS.i"
 %include "GeomAbs.i"
 %include "TopTools.i"
-%include "BRep_Tool.i"
+%include "BRep.i"
 %include "GeomLProp_SLProps.i"
 %include "BRepTools.i"
 %include "BRepBuilderAPI.i"
@@ -65,27 +63,6 @@
 %include "Poly.i"
 %include "Geom.i"
 %include "BRepLib.i"
-
-class TopoDS_Builder
-{
-	%rename(makeWire) MakeWire;
-	%rename(makeCompound) MakeCompound;
-	%rename(add) Add;
-	%rename(remove) Remove;
-	
-	TopoDS_Builder()=0;
-	public:
-	void MakeWire(TopoDS_Wire& W) const;
-	void MakeCompound(TopoDS_Compound& C) const;
-	void Add(TopoDS_Shape& S,const TopoDS_Shape& C) const;
-	void Remove(TopoDS_Shape& S,const TopoDS_Shape& C) const;	
-};
-
-class BRep_Builder: public TopoDS_Builder
-{
-	public:
-	BRep_Builder();
-};
 
 
 %typemap(javacode) TopExp

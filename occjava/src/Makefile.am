@@ -2,7 +2,7 @@ lib_LTLIBRARIES=libOccJava.la
 
 IFACEFILES=\
 	BRepPrimAPI.i \
-	BRep_Tool.i \
+	BRep.i \
 	BRepTools.i \
 	GeomLProp_SLProps.i \
 	gp.i OccJava.i \

@@ -36,6 +36,13 @@ public class Test1
 		BRep_Builder bb=new BRep_Builder();
 		bb.add(face, vertex1);
 		
+		//Set UV coords of the vertex (it will be a projection in the general case)
+		bb.updateVertex(vertex1, 0.5, 0.5, face, 1E-7);
+		
+		//Check that the vertex is on the face
+		double[] coords=BRep_Tool.parameters(vertex1, face);
+		System.out.println("x="+coords[0]+" y="+coords[1]);
+		
 		//Put everything in a compound
 		TopoDS_Compound compound=new TopoDS_Compound();
 		bb.makeCompound(compound);

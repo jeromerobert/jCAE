@@ -21,6 +21,8 @@
 %{
 #include <BRep_Tool.hxx>
 #include <Geom_Curve.hxx>
+#include <BRep_Builder.hxx>
+#include <TopoDS_Builder.hxx>
 %}
 
 %typemap(javacode) BRep_Tool
@@ -127,3 +129,13 @@ class BRep_Tool
 			return hgc;
 	}
 };
+
+class BRep_Builder: public TopoDS_Builder
+{
+	%rename(updateVertex) UpdateVertex;
+	public:
+	BRep_Builder();
+    void UpdateVertex(const TopoDS_Vertex& Ve,const Standard_Real U,const Standard_Real V,const TopoDS_Face& F,const Standard_Real Tol) const;
+
+};
+
