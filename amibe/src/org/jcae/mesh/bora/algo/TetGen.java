@@ -22,7 +22,7 @@ package org.jcae.mesh.bora.algo;
 
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.bora.xmldata.BinaryReader;
+import org.jcae.mesh.bora.xmldata.Storage;
 import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.xmldata.UNVConverter;
 import org.jcae.mesh.xmldata.MeshWriter;
@@ -95,7 +95,7 @@ public class TetGen implements AlgoInterface
 		{
 			TIntObjectHashMap vertMap = new TIntObjectHashMap();
 			for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )                                                                                
-				BinaryReader.readFace(m, (BCADGraphCell) it.next(), vertMap);
+				Storage.readFace(m, (BCADGraphCell) it.next(), vertMap);
 			vertMap.clear();
 		}
 		MeshWriter.writeObject3D(m, "tetgen.tmp", "jcae3d", "brep", root.getGraph().getModel().getCADFile(), 1);
