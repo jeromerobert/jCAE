@@ -26,6 +26,7 @@ import org.jcae.mesh.xmldata.UNVConverter;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.cad.CADFace;
 import org.jcae.mesh.cad.CADShapeEnum;
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,47 +46,57 @@ public class BinaryReader
 	private static Logger logger=Logger.getLogger(BinaryReader.class);
 	
 	/**
-	 * Create a Mesh instance from a set of discretized faces
-	 * @param root    cell graph containing root shape
-	 * @return   the created Mesh instance.
+	 * Creates a Mesh instance by reading all faces.
+	 * @param root    root shape
+	 * @return a Mesh instance
+	 * @throws  RuntimeException if an error occurred
 	 */
-	public static Mesh readObject(BCADGraphCell root)
+	public static Mesh readAllFaces(BCADGraphCell root)
 	{
-		return readObject(root, false);
+		Mesh m = new Mesh();
+		m.setType(Mesh.MESH_3D);
+		TIntObjectHashMap vertMap = new TIntObjectHashMap();
+		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )                                                        
+			readFace(m, (BCADGraphCell) it.next(), vertMap);
+		return m;
 	}
 
-	public static Mesh readObject(BCADGraphCell root, boolean buildAdj)
+	/**
+	 * Append a discretized face into a Mesh instance.
+	 * @param mesh    original mesh
+	 * @param root    cell graph containing a CAD face
+	 * @param mapRefVertex    map between references and Vertex instances
+	 * @throws  RuntimeException if an error occurred
+	 */
+	public static void readFace(Mesh mesh, BCADGraphCell root, TIntObjectHashMap mapRefVertex)
 	{
-		Mesh mesh = new Mesh();
-		mesh.setType(Mesh.MESH_3D);
+		assert root.getShape() instanceof CADFace;
 		BModel model = root.getGraph().getModel();
-		TIntObjectHashMap vertMap = new TIntObjectHashMap();
-		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
+		String dir = model.getOutputDir()+File.separator+model.get2dDir();
+		boolean reversed = false;
+		if (root.getOrientation() != 0)
 		{
-			boolean reversed = false;
-			BCADGraphCell s = (BCADGraphCell) it.next();
-			if (s.getOrientation() != 0)
-			{
-				reversed = true;
-				if (s.getReversed() != null)
-					s = s.getReversed();
-			}
-			String dir = model.getOutputDir()+File.separator+model.get2dDir();
-			int id = s.getId();
-			try
-			{
-				int [] refs = read2dNodeReferences(dir, id);
-				Vertex [] nodelist = read2dCoordinates(dir, id, mesh, refs, vertMap);
-				read2dTriangles(dir, id, mesh, reversed, nodelist);
-			}
-			catch(Exception ex)
-			{
-				ex.printStackTrace();
-				throw new RuntimeException(ex);
-			}
-			logger.debug("end reading cell "+id);
+			reversed = true;
+			if (root.getReversed() != null)
+				root = root.getReversed();
 		}
-		return mesh;
+		int id = root.getId();
+		try
+		{
+			// Read vertex references
+			int [] refs = read2dNodeReferences(dir, id);
+			// Create a Vertex array, amd insert new references
+			// into mapRefVertex.
+			Vertex [] nodelist = read2dCoordinates(dir, id, mesh, refs, mapRefVertex);
+			// Read triangles and appends them to the mesh.
+			read2dTriangles(dir, id, mesh, reversed, nodelist);
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+		logger.debug("end reading cell "+id);
 	}
 
 	private static int [] read2dNodeReferences(String dir, int id)
@@ -104,7 +115,7 @@ public class BinaryReader
 		return refs;
 	}
 
-	private static Vertex [] read2dCoordinates(String dir, int id, Mesh mesh, int [] refs, TIntObjectHashMap vertMap)
+	private static Vertex [] read2dCoordinates(String dir, int id, Mesh mesh, int [] refs, TIntObjectHashMap mapRefVertex)
 		throws IOException, FileNotFoundException
 	{
 		File nodesFile = new File(dir, "n"+id);
@@ -127,9 +138,9 @@ public class BinaryReader
 			else
 			{
 				label = refs[i+numberOfReferences-numberOfNodes];
-				Object o = vertMap.get(label);
+				Object o = mapRefVertex.get(label);
 				if (o == null)
-					vertMap.put(label, nodelist[i]);
+					mapRefVertex.put(label, nodelist[i]);
 				else
 					nodelist[i] = (Vertex) o;
 			}
