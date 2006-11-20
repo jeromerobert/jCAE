@@ -185,13 +185,13 @@ public class Storage
 		DataOutputStream refsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile, true)));
 		TObjectIntHashMap localIdx = new TObjectIntHashMap(nodelist.size());
 
-		// Set first index to 1; a null index in localIdx is thus an error
-		int i = 1;
+		int i = 0;
 		for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
 		{
 			MNode1D n = (MNode1D) itn.next();
-			localIdx.put(n, i);
-			i++;
+			// Set first index to 1; a null index in
+			// localIdx is thus an error
+			localIdx.put(n, i+1);
 			CADVertex v = n.getCADVertex();
 			if (null != v)
 			{
@@ -200,6 +200,7 @@ public class Storage
 				refsout.writeInt(i);
 				refsout.writeInt(vv.getId());
 			}
+			i++;
 		}
 		refsout.close();
 		return localIdx;
@@ -217,24 +218,22 @@ public class Storage
 		DataOutputStream refsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile, true)));
 
 		TObjectIntHashMap localIdx = new TObjectIntHashMap(nodelist.size());
-		// Set first index to 1; a null index in localIdx is thus an error
-		int i = 1;
-		//  Write interior nodes first, then boundary nodes
-		for (int phase = 0; phase < 2; phase++)
+		int i = 0;
+		for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
 		{
-			for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
+			Vertex n = (Vertex) itn.next();
+			if (n == Vertex2D.outer)
+				continue;
+			// Set first index to 1; a null index in
+			// localIdx is thus an error
+			localIdx.put(n, i+1);
+			int ref1d = n.getRef();
+			if (ref1d != 0)
 			{
-				Vertex n = (Vertex) itn.next();
-				if (n == Vertex2D.outer)
-					continue;
-				int ref1d = n.getRef();
-				if ((0 != ref1d && phase == 0) || (0 == ref1d && phase == 1))
-					continue;
-				localIdx.put(n, i);
-				i++;
-				if (phase == 1)
-					refsout.writeInt(Math.abs(ref1d));
+				refsout.writeInt(i);
+				refsout.writeInt(Math.abs(ref1d));
 			}
+			i++;
 		}
 		refsout.close();
 		return localIdx;
@@ -280,24 +279,17 @@ public class Storage
 		logger.debug("begin writing "+nodesFile+" and "+parasFile);
 		DataOutputStream nodesout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile, true)));
 		DataOutputStream parasout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(parasFile, true)));
-		//  Write interior nodes first, then boundary nodes
-		for (int phase = 0; phase < 2; phase++)
+		for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
 		{
-			for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
-			{
-				Vertex n = (Vertex) itn.next();
-				if (n == Vertex2D.outer)
-					continue;
-				int ref1d = n.getRef();
-				if ((0 != ref1d && phase == 0) || (0 == ref1d && phase == 1))
-					continue;
-				double [] p = n.getUV();
-				for (int d = 0; d < p.length; d++)
-					parasout.writeDouble(p[d]);
-				double [] xyz = surface.value(p[0], p[1]);
-				for (int k = 0; k < 3; k++)
-					nodesout.writeDouble(xyz[k]);
-			}
+			Vertex n = (Vertex) itn.next();
+			if (n == Vertex2D.outer)
+				continue;
+			double [] p = n.getUV();
+			for (int d = 0; d < p.length; d++)
+				parasout.writeDouble(p[d]);
+			double [] xyz = surface.value(p[0], p[1]);
+			for (int k = 0; k < 3; k++)
+				nodesout.writeDouble(xyz[k]);
 		}
 		nodesout.close();
 		parasout.close();
@@ -369,27 +361,25 @@ public class Storage
 		DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
 		
 		int numberOfNodes = (int) nodesFile.length() / 24;
-		int numberOfReferences = refs.length;
+		int numberOfReferences = refs.length / 2;
 		Vertex [] nodelist = new Vertex[numberOfNodes];
-		int label;
 		double [] coord = new double[3];
 		logger.debug("Reading "+numberOfNodes+" nodes");
-		for (int i=0; i < numberOfNodes; i++)
+		for (int i = 0; i < numberOfNodes; i++)
 		{
 			nodesBuffer.get(coord);
 			nodelist[i] = Vertex.valueOf(mesh, coord);
-			if (i < numberOfNodes - numberOfReferences)
-				label = 0;
+		}
+		for (int i = 0; i < numberOfReferences; i++)
+		{
+			int ind = refs[2*i];
+			int label = refs[2*i+1];
+			Object o = mapRefVertex.get(label);
+			if (o == null)
+				mapRefVertex.put(label, nodelist[ind]);
 			else
-			{
-				label = refs[i+numberOfReferences-numberOfNodes];
-				Object o = mapRefVertex.get(label);
-				if (o == null)
-					mapRefVertex.put(label, nodelist[i]);
-				else
-					nodelist[i] = (Vertex) o;
-			}
-			nodelist[i].setRef(label);
+				nodelist[ind] = (Vertex) o;
+			nodelist[ind].setRef(label);
 		} 
 		fcN.close();
 		UNVConverter.clean(bbN);
