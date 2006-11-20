@@ -45,92 +45,15 @@ public class BinaryWriter
 {
 	private static Logger logger=Logger.getLogger(BinaryWriter.class);
 
-	public static void writeCADEdge(BCADGraphCell edge, String outDir)
+	public static void writeEdge(BCADGraphCell edge, String outDir)
 	{
 		CADEdge E = (CADEdge) edge.getShape();
 		if (E.isDegenerated())
 			return;
-		try
-		{
-			File dir = new File(outDir);
+		SubMesh1D submesh = (SubMesh1D) edge.mesh;
+		if (null == submesh)
+			return;
 
-			//create the output directory if it does not exist
-			if(!dir.exists())
-				dir.mkdirs();
-
-			File nodesFile = new File(dir, "n"+edge.getId());
-			if(nodesFile.exists())
-				nodesFile.delete();
-			File parasFile = new File(dir, "p"+edge.getId());
-			if(parasFile.exists())
-				parasFile.delete();
-			File reffile = new File(dir, "r"+edge.getId());
-			if(reffile.exists())
-				reffile.delete();
-			File beamsFile=new File(dir, "b"+edge.getId());
-			if(beamsFile.exists())
-				beamsFile.delete();
-			
-			SubMesh1D submesh = (SubMesh1D) edge.mesh;
-			if (null == submesh)
-				return;
-
-			//save nodes
-			logger.debug("begin writing "+nodesFile+" and "+parasFile);
-			TObjectIntHashMap localIdx = new TObjectIntHashMap();
-			DataOutputStream nodesout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile, true)));
-			DataOutputStream parasout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(parasFile, true)));
-			DataOutputStream refsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(reffile, true)));
-			// Set first index to 1; a null index in localIdx is thus an error
-			int i = 1;
-			CADShapeBuilder factory = CADShapeBuilder.factory;
-			CADGeomCurve3D curve = factory.newCurve3D((CADEdge) edge.getShape());
-			for (Iterator itn = submesh.getNodesIterator(); itn.hasNext(); )
-			{
-				MNode1D n = (MNode1D)itn.next();
-				double p = n.getParameter();
-				parasout.writeDouble(p);
-				double [] xyz = curve.value(p);
-				for (int k = 0; k < 3; k++)
-					nodesout.writeDouble(xyz[k]);
-				localIdx.put(n, i);
-				i++;
-				CADVertex v = n.getCADVertex();
-				if (null != v)
-				{
-					BCADGraphCell vv = edge.getGraph().getByShape(v);
-					refsout.writeInt(i);
-					refsout.writeInt(vv.getId());
-				}
-			}
-			nodesout.close();
-			parasout.close();
-			refsout.close();
-			logger.debug("end writing "+nodesFile+" and "+parasFile);
-
-			//save beams
-			logger.debug("begin writing "+beamsFile);
-			DataOutputStream beamsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(beamsFile, true)));
-			Iterator ite = submesh.getEdgesIterator();
-			while(ite.hasNext())
-			{
-				MEdge1D e = (MEdge1D)ite.next();
-				MNode1D pt1 = e.getNodes1();
-				MNode1D pt2 = e.getNodes2();
-				beamsout.writeInt(localIdx.get(pt1));
-				beamsout.writeInt(localIdx.get(pt2));
-			}
-			beamsout.close();
-			logger.debug("end writing "+beamsFile);
-		}
-		catch(Exception ex)
-		{
-			ex.printStackTrace();
-		}
-	}
-
-	public static void writeCADFace(BCADGraphCell face, String outDir)
-	{
 		try
 		{
 			File dir = new File(outDir);
@@ -139,9 +62,34 @@ public class BinaryWriter
 			if(!dir.exists())
 				dir.mkdirs();
 
-			Mesh submesh = (Mesh) face.mesh;
-			if (null == submesh)
-				return;
+			List nodelist = submesh.getNodes();
+			// Write node references and compute local indices
+			TObjectIntHashMap localIdx = write1dNodeReferences(outDir, edge.getId(), nodelist, edge);
+			// Write node coordinates
+			write1dCoordinates(outDir, edge.getId(), nodelist, CADShapeBuilder.factory.newCurve3D(E));
+			// Write edge connectivity
+			write1dEdges(outDir, edge.getId(), submesh.getEdges(), localIdx);
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			throw new RuntimeException();
+		}
+	}
+
+	public static void writeFace(BCADGraphCell face, String outDir)
+	{
+		Mesh submesh = (Mesh) face.mesh;
+		if (null == submesh)
+			return;
+
+		try
+		{
+			File dir = new File(outDir);
+
+			// Create the output directory if it does not exist
+			if(!dir.exists())
+				dir.mkdirs();
 
 			CADFace F = (CADFace) face.getShape();
 			Collection trianglelist = submesh.getTriangles();
@@ -153,7 +101,87 @@ public class BinaryWriter
 		catch(Exception ex)
 		{
 			ex.printStackTrace();
+			throw new RuntimeException();
 		}
+	}
+
+	private static TObjectIntHashMap write1dNodeReferences(String dir, int id, List nodelist, BCADGraphCell edge)
+		throws IOException, FileNotFoundException
+	{
+		File refFile = new File(dir, "r"+id);
+		if(refFile.exists())
+			refFile.delete();
+		
+		DataOutputStream refsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile, true)));
+		TObjectIntHashMap localIdx = new TObjectIntHashMap(nodelist.size());
+
+		// Set first index to 1; a null index in localIdx is thus an error
+		int i = 1;
+		for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
+		{
+			MNode1D n = (MNode1D) itn.next();
+			localIdx.put(n, i);
+			i++;
+			CADVertex v = n.getCADVertex();
+			if (null != v)
+			{
+				// TODO: replace this id by v.getRef()
+				BCADGraphCell vv = edge.getGraph().getByShape(v);
+				refsout.writeInt(i);
+				refsout.writeInt(vv.getId());
+			}
+		}
+		refsout.close();
+		logger.debug("end writing "+refFile);
+		return localIdx;
+	}
+
+	private static void write1dCoordinates(String dir, int id, List nodelist, CADGeomCurve3D curve)
+		throws IOException, FileNotFoundException
+	{
+		File nodesFile = new File(dir, "n"+id);
+		if(nodesFile.exists())
+			nodesFile.delete();
+		File parasFile = new File(dir, "p"+id);
+		if(parasFile.exists())
+			parasFile.delete();
+		
+		logger.debug("begin writing "+nodesFile+" and "+parasFile);
+		DataOutputStream nodesout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile, true)));
+		DataOutputStream parasout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(parasFile, true)));
+		for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
+		{
+			MNode1D n = (MNode1D)itn.next();
+			double p = n.getParameter();
+			parasout.writeDouble(p);
+			double [] xyz = curve.value(p);
+			for (int k = 0; k < 3; k++)
+				nodesout.writeDouble(xyz[k]);
+		}
+		nodesout.close();
+		parasout.close();
+		logger.debug("end writing "+nodesFile+" and "+parasFile);
+	}
+
+	private static void write1dEdges(String dir, int id, List edgelist, TObjectIntHashMap localIdx)
+		throws IOException, FileNotFoundException
+	{
+		File beamsFile=new File(dir, "b"+id);
+		if(beamsFile.exists())
+			beamsFile.delete();
+		
+		logger.debug("begin writing "+beamsFile);
+		DataOutputStream beamsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(beamsFile, true)));
+		for (Iterator ite = edgelist.iterator(); ite.hasNext(); )
+		{
+			MEdge1D e = (MEdge1D) ite.next();
+			MNode1D pt1 = e.getNodes1();
+			MNode1D pt2 = e.getNodes2();
+			beamsout.writeInt(localIdx.get(pt1));
+			beamsout.writeInt(localIdx.get(pt2));
+		}
+		beamsout.close();
+		logger.debug("end writing "+beamsFile);
 	}
 
 	private static TObjectIntHashMap write2dNodeReferences(String dir, int id, List nodelist)

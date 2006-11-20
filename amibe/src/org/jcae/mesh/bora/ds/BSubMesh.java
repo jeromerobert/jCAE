@@ -235,7 +235,7 @@ public class BSubMesh
 			}
 			logger.debug("Edge "+cnt+"/"+nrEdges);
 			s.discretize();
-			BinaryWriter.writeCADEdge(s, model.getOutputDir()+File.separator+model.get1dDir());
+			BinaryWriter.writeEdge(s, model.getOutputDir()+File.separator+model.get1dDir());
 		}
 	}
 
@@ -270,7 +270,7 @@ public class BSubMesh
 			logger.info("Face "+cnt+"/"+nrFaces);
 			s.mesh1D = mesh1D;
 			s.discretize();
-			BinaryWriter.writeCADFace(s, model.getOutputDir()+File.separator+model.get2dDir());
+			BinaryWriter.writeFace(s, model.getOutputDir()+File.separator+model.get2dDir());
 		}
 	}
 
