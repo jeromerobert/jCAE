@@ -161,9 +161,9 @@ public class Constraint extends Hypothesis
 
 	public static HypInterface getAlgo(String elt)
 	{
-		HypInterface h = null;
+		HypInterface h = HypNoneInstance;
 		if (elt == null)
-			return HypNoneInstance;
+			return h;
 		try {
 			for (int i = 0; i < innerClasses.length; i++)
 			{
@@ -180,8 +180,6 @@ public class Constraint extends Hypothesis
 	private static String impliedType(CADShapeEnum d, String elt)
 	{
 		HypInterface h = getAlgo(elt);
-		if (h == null)
-			return null;
 		return h.impliedType(d);
 	}
 
