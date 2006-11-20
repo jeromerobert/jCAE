@@ -49,6 +49,8 @@ public class BSubMesh
 	private static int freeIndex = 0;
 	//   Unique identitier
 	private int id = -1;
+	//   List of shapes added to this BSubMesh
+	private Collection setTopShapes = new LinkedHashSet();
 	//   List of children
 	private Collection setCells = new LinkedHashSet();
 	private THashMap mapShapeToSubElement = new THashMap();
@@ -92,6 +94,7 @@ public class BSubMesh
 	public void add(CADShape s)
 	{
 		BCADGraphCell c = model.getGraph().getByShape(s);
+		setTopShapes.add(c);
 		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
 			CADShapeEnum cse = (CADShapeEnum) itcse.next();
@@ -119,7 +122,7 @@ public class BSubMesh
 	 */
 	public Collection getCells()
 	{
-		return setCells;
+		return setTopShapes;
 	}
 
 	/**
