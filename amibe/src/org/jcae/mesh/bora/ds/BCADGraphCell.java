@@ -293,12 +293,9 @@ public class BCADGraphCell
 		System.out.println(headline+"  Total constraint "+resultConstraint);
 	}
 
-	/**
-	 * Update node labels.
-	 */
+	/*
 	private void updateNodeLabels()
 	{
-	/*
 		logger.debug("Update node labels");
 		//  Resets all labels
 		for (Iterator ite = shapesExplorer(1); ite.hasNext(); )
@@ -332,17 +329,9 @@ public class BCADGraphCell
 				}
 			}
 		}
-	*/
 	}
-	/**
-	 * Duplicates edges so that boundary faces are closed.
-	 * This method must be used after all 1D algorithms have been applied,
-	 * and before any 2D meshing is performed.
-	 *
-	 */
 	private void duplicateEdges()
 	{
-	/*
 		logger.debug("Compute vertex references");
 		//  For each topological vertex, compute the list of
 		//  MNode1D objects which are bound to this vertex.
@@ -384,8 +373,8 @@ public class BCADGraphCell
 			for (int i = 1; i<vnodelist.size(); i++)
 				((MNode1D) vnodelist.get(i)).setMaster(master);
 		}
-	*/
 	}
+	*/
 
 	public String toString()
 	{
