@@ -21,7 +21,12 @@
 package org.jcae.mesh.bora.xmldata;
 
 import org.jcae.mesh.bora.ds.BCADGraphCell;
-import org.jcae.mesh.cad.*;
+import org.jcae.mesh.cad.CADEdge;
+import org.jcae.mesh.cad.CADFace;
+import org.jcae.mesh.cad.CADVertex;
+import org.jcae.mesh.cad.CADGeomCurve3D;
+import org.jcae.mesh.cad.CADGeomSurface;
+import org.jcae.mesh.cad.CADShapeBuilder;
 import org.jcae.mesh.mesher.ds.SubMesh1D;
 import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.mesher.ds.MEdge1D;
@@ -112,6 +117,8 @@ public class BinaryWriter
 		if(refFile.exists())
 			refFile.delete();
 		
+		// Save references
+		logger.debug("begin writing "+refFile);
 		DataOutputStream refsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile, true)));
 		TObjectIntHashMap localIdx = new TObjectIntHashMap(nodelist.size());
 
@@ -132,7 +139,41 @@ public class BinaryWriter
 			}
 		}
 		refsout.close();
-		logger.debug("end writing "+refFile);
+		return localIdx;
+	}
+
+	private static TObjectIntHashMap write2dNodeReferences(String dir, int id, List nodelist)
+		throws IOException, FileNotFoundException
+	{
+		File refFile = new File(dir, "r"+id);
+		if(refFile.exists())
+			refFile.delete();
+
+		// Save references
+		logger.debug("begin writing "+refFile);
+		DataOutputStream refsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile, true)));
+
+		TObjectIntHashMap localIdx = new TObjectIntHashMap(nodelist.size());
+		// Set first index to 1; a null index in localIdx is thus an error
+		int i = 1;
+		//  Write interior nodes first, then boundary nodes
+		for (int phase = 0; phase < 2; phase++)
+		{
+			for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
+			{
+				Vertex n = (Vertex) itn.next();
+				if (n == Vertex2D.outer)
+					continue;
+				int ref1d = n.getRef();
+				if ((0 != ref1d && phase == 0) || (0 == ref1d && phase == 1))
+					continue;
+				localIdx.put(n, i);
+				i++;
+				if (phase == 1)
+					refsout.writeInt(Math.abs(ref1d));
+			}
+		}
+		refsout.close();
 		return localIdx;
 	}
 
@@ -160,73 +201,6 @@ public class BinaryWriter
 		}
 		nodesout.close();
 		parasout.close();
-		logger.debug("end writing "+nodesFile+" and "+parasFile);
-	}
-
-	private static void write1dEdges(String dir, int id, List edgelist, TObjectIntHashMap localIdx)
-		throws IOException, FileNotFoundException
-	{
-		File beamsFile=new File(dir, "b"+id);
-		if(beamsFile.exists())
-			beamsFile.delete();
-		
-		logger.debug("begin writing "+beamsFile);
-		DataOutputStream beamsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(beamsFile, true)));
-		for (Iterator ite = edgelist.iterator(); ite.hasNext(); )
-		{
-			MEdge1D e = (MEdge1D) ite.next();
-			MNode1D pt1 = e.getNodes1();
-			MNode1D pt2 = e.getNodes2();
-			beamsout.writeInt(localIdx.get(pt1));
-			beamsout.writeInt(localIdx.get(pt2));
-		}
-		beamsout.close();
-		logger.debug("end writing "+beamsFile);
-	}
-
-	private static TObjectIntHashMap write2dNodeReferences(String dir, int id, List nodelist)
-		throws IOException, FileNotFoundException
-	{
-		File refFile = new File(dir, "r"+id);
-		if(refFile.exists())
-			refFile.delete();
-
-		// Save references
-		logger.debug("begin writing "+refFile);
-		DataOutputStream refsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile, true)));
-
-		TObjectIntHashMap localIdx = new TObjectIntHashMap(nodelist.size());
-		// Set first index to 1; a null index in localIdx is thus an error
-		int i = 1;
-		//  Write interior nodes first
-		for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
-		{
-			Vertex n = (Vertex) itn.next();
-			if (n == Vertex2D.outer)
-				continue;
-			int ref1d = n.getRef();
-			if (0 != ref1d)
-				continue;
-			localIdx.put(n, i);
-			i++;
-		}
-		//  Write boundary nodes and 1D references
-		int nref = 0;
-		for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
-		{
-			Vertex n = (Vertex) itn.next();
-			if (n == Vertex2D.outer)
-				continue;
-			int ref1d = n.getRef();
-			if (0 == ref1d)
-				continue;
-			localIdx.put(n, i);
-			i++;
-			refsout.writeInt(Math.abs(ref1d));
-			nref++;
-		}
-		refsout.close();
-		return localIdx;
 	}
 
 	private static void write2dCoordinates(String dir, int id, List nodelist, CADGeomSurface surface)
@@ -264,7 +238,26 @@ public class BinaryWriter
 		}
 		nodesout.close();
 		parasout.close();
-		logger.debug("end writing "+nodesFile+" and "+parasFile);
+	}
+
+	private static void write1dEdges(String dir, int id, List edgelist, TObjectIntHashMap localIdx)
+		throws IOException, FileNotFoundException
+	{
+		File beamsFile=new File(dir, "b"+id);
+		if(beamsFile.exists())
+			beamsFile.delete();
+		
+		logger.debug("begin writing "+beamsFile);
+		DataOutputStream beamsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(beamsFile, true)));
+		for (Iterator ite = edgelist.iterator(); ite.hasNext(); )
+		{
+			MEdge1D e = (MEdge1D) ite.next();
+			MNode1D pt1 = e.getNodes1();
+			MNode1D pt2 = e.getNodes2();
+			beamsout.writeInt(localIdx.get(pt1));
+			beamsout.writeInt(localIdx.get(pt2));
+		}
+		beamsout.close();
 	}
 
 	private static void write2dTriangles(String dir, int id, Collection trianglelist, TObjectIntHashMap localIdx)
