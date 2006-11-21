@@ -167,6 +167,19 @@ public class Triangle
 		vertex[2].setLink(this);
 	}
 	
+	public Triangle(Vertex [] v)
+	{
+		if (v[0] instanceof Vertex2D)
+			vertex = new Vertex2D[v.length];
+		else
+			vertex = new Vertex[v.length];
+		for (int i = v.length - 1; i >= 0; i--)
+		{
+			vertex[i] = v[i];
+			vertex[i].setLink(this);
+		}
+	}
+	
 	/**
 	 * Clone an existing triangle.
 	 */
