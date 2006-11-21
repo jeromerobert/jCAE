@@ -2,6 +2,8 @@ Tue Nov 21 13:06:24 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/VolMesh.java: Dummy data structure to
 	read/write volume meshes.
+	* src/org/jcae/mesh/bora/xmldata/MESHReader.java: Read .mesh
+	files with tetrahedra and return a VolMesh instance.
 
 Sat Nov 18 20:19:59 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
