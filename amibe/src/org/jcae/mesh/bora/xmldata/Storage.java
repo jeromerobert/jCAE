@@ -20,15 +20,17 @@
 
 package org.jcae.mesh.bora.xmldata;
 
+import org.jcae.mesh.amibe.ds.VolMesh;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.Vertex2D;
 import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
+import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADFace;
-import org.jcae.mesh.cad.CADVertex;
+import org.jcae.mesh.cad.CADSolid;
 import org.jcae.mesh.cad.CADGeomCurve3D;
 import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.mesh.cad.CADShapeBuilder;
@@ -58,8 +60,9 @@ import org.apache.log4j.Logger;
 public class Storage
 {
 	private static Logger logger=Logger.getLogger(Storage.class);
-	private static final String dir1d = "1d";
-	private static final String dir2d = "2d";
+	static final String dir1d = "1d";
+	static final String dir2d = "2d";
+	static final String dir3d = "3d";
 
 	public static void writeEdge(BCADGraphCell edge, String outDir)
 	{
@@ -121,6 +124,32 @@ public class Storage
 		}
 	}
 
+	public static void writeVolume(BCADGraphCell solid, String outDir)
+	{
+		VolMesh submesh = (VolMesh) solid.mesh;
+		if (null == submesh)
+			return;
+
+		try
+		{
+			File dir = new File(outDir, dir3d);
+
+			// Create the output directory if it does not exist
+			if(!dir.exists())
+				dir.mkdirs();
+
+			List nodelist = (List) submesh.getNodes();
+			TObjectIntHashMap localIdx = write2dNodeReferences(dir, solid.getId(), nodelist);
+			write2dCoordinates(dir, solid.getId(), nodelist, null);
+			write2dTriangles(dir, solid.getId(), submesh.getTriangles(), localIdx);
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			throw new RuntimeException();
+		}
+	}
+
 	/**
 	 * Creates a Mesh instance by reading all faces.
 	 * @param root    root shape
@@ -132,7 +161,7 @@ public class Storage
 		Mesh m = new Mesh();
 		m.setType(Mesh.MESH_3D);
 		TIntObjectHashMap vertMap = new TIntObjectHashMap();
-		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )                                                        
+		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 			readFace(m, (BCADGraphCell) it.next(), vertMap);
 		return m;
 	}
@@ -165,7 +194,63 @@ public class Storage
 			// into mapRefVertex.
 			Vertex [] nodelist = read2dCoordinates(dir, id, mesh, refs, mapRefVertex);
 			// Read triangles and appends them to the mesh.
-			read2dTriangles(dir, id, mesh, reversed, nodelist);
+			read2dTriangles(dir, id, 3, mesh, reversed, nodelist);
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+		logger.debug("end reading cell "+id);
+	}
+
+	/**
+	 * Creates a VolMesh instance by reading all volumes.
+	 * @param root    root shape
+	 * @return a VolMesh instance
+	 * @throws  RuntimeException if an error occurred
+	 */
+	public static VolMesh readAllVolumes(BCADGraphCell root)
+	{
+		VolMesh m = new VolMesh();
+		m.setType(Mesh.MESH_3D);
+		TIntObjectHashMap vertMap = new TIntObjectHashMap();
+		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
+			readVolume(m, (BCADGraphCell) it.next(), vertMap);
+		return m;
+	}
+
+	/**
+	 * Append a discretized solid into a VolMesh instance.
+	 * @param mesh    original mesh
+	 * @param root    cell graph containing a CAD solid
+	 * @param mapRefVertex    map between references and Vertex instances
+	 * @throws  RuntimeException if an error occurred
+	 */
+	public static void readVolume(VolMesh mesh, BCADGraphCell root, TIntObjectHashMap mapRefVertex)
+	{
+		assert root.getShape() instanceof CADSolid;
+		BModel model = root.getGraph().getModel();
+		boolean reversed = false;
+		if (root.getOrientation() != 0)
+		{
+			reversed = true;
+			if (root.getReversed() != null)
+				root = root.getReversed();
+		}
+		int id = root.getId();
+		try
+		{
+			File dir = new File(model.getOutputDir(), dir3d);
+			// Read vertex references
+			int [] refs = read2dNodeReferences(dir, id);
+			// Create a Vertex array, amd insert new references
+			// into mapRefVertex.
+			Vertex [] nodelist = read2dCoordinates(dir, id, mesh, refs, mapRefVertex);
+			for (int i = 0, n = nodelist.length; i < n; i++)
+				mesh.add(nodelist[i]);
+			// Read triangles and appends them to the mesh.
+			read2dTriangles(dir, id, 4, mesh, reversed, nodelist);
 		}
 		catch(Exception ex)
 		{
@@ -281,15 +366,21 @@ public class Storage
 		logger.debug("begin writing "+nodesFile+" and "+parasFile);
 		DataOutputStream nodesout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile, true)));
 		DataOutputStream parasout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(parasFile, true)));
+		double [] xyz;
 		for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
 		{
 			Vertex n = (Vertex) itn.next();
 			if (n == Vertex2D.outer)
 				continue;
-			double [] p = n.getUV();
-			for (int d = 0; d < p.length; d++)
-				parasout.writeDouble(p[d]);
-			double [] xyz = surface.value(p[0], p[1]);
+			if (surface == null)
+				xyz = n.getUV();
+			else
+			{
+				double [] p = n.getUV();
+				for (int d = 0; d < p.length; d++)
+					parasout.writeDouble(p[d]);
+				xyz = surface.value(p[0], p[1]);
+			}
 			for (int k = 0; k < 3; k++)
 				nodesout.writeDouble(xyz[k]);
 		}
@@ -332,7 +423,7 @@ public class Storage
 			Triangle f = (Triangle) itf.next();
 			if (f.isOuter())
 				continue;
-			for (int j = 0; j < 3; j++)
+			for (int j = 0, n = f.vertex.length; j < n; j++)
 				facesout.writeInt(localIdx.get(f.vertex[j]));
 		}
 		facesout.close();
@@ -382,14 +473,14 @@ public class Storage
 			else
 				nodelist[ind] = (Vertex) o;
 			nodelist[ind].setRef(label);
-		} 
+		}
 		fcN.close();
 		UNVConverter.clean(bbN);
 		logger.debug("end reading "+dir+File.separator+"n"+id);
 		return nodelist;
 	}
 
-	private static void read2dTriangles(File dir, int id, Mesh mesh, boolean reversed, Vertex [] nodelist)
+	private static void read2dTriangles(File dir, int id, int nr, Mesh mesh, boolean reversed, Vertex [] nodelist)
 		throws IOException, FileNotFoundException
 	{
 		File trianglesFile = new File(dir, "f"+id);
@@ -397,22 +488,24 @@ public class Storage
 		MappedByteBuffer bbT = fcT.map(FileChannel.MapMode.READ_ONLY, 0L, fcT.size());
 		IntBuffer trianglesBuffer = bbT.asIntBuffer();
 
-		int numberOfTriangles = (int) trianglesFile.length() / 12;
+		int numberOfTriangles = (int) trianglesFile.length() / (4*nr);
 		logger.debug("Reading "+numberOfTriangles+" elements");
 		Triangle face;
-		for (int i=0; i < numberOfTriangles; i++)
+		Vertex [] pts = new Vertex[nr];
+		for (int i = 0; i < numberOfTriangles; i++)
 		{
-			Vertex pt1 = nodelist[trianglesBuffer.get()-1];
-			Vertex pt2 = nodelist[trianglesBuffer.get()-1];
-			Vertex pt3 = nodelist[trianglesBuffer.get()-1];
-			if (!reversed)
-				face = new Triangle(pt1, pt2, pt3);
-			else
-				face = new Triangle(pt1, pt3, pt2);
+			for (int j = 0; j < nr; j++)
+				pts[j] = nodelist[trianglesBuffer.get()-1];
+			if (reversed)
+			{
+				Vertex temp = pts[1];
+				pts[1] = pts[2];
+				pts[2] = temp;
+			}
+			face = new Triangle(pts);
 			mesh.add(face);
-			pt1.setLink(face);
-			pt2.setLink(face);
-			pt3.setLink(face);
+			for (int j = 0; j < nr; j++)
+				pts[j].setLink(face);
 		}
 		fcT.close();
 		UNVConverter.clean(bbT);

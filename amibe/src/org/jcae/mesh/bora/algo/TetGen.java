@@ -22,7 +22,9 @@ package org.jcae.mesh.bora.algo;
 
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.VolMesh;
 import org.jcae.mesh.bora.xmldata.Storage;
+import org.jcae.mesh.bora.xmldata.MESHReader;
 import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.xmldata.UNVConverter;
 import org.jcae.mesh.xmldata.MeshWriter;
@@ -90,14 +92,7 @@ public class TetGen implements AlgoInterface
 	{
 		logger.info("Running TetGen "+banner);
 		// root.export(s, "tetgen.poly", ExportMesh.FORMAT_POLY);
-		Mesh m = new Mesh();
-		m.setType(Mesh.MESH_3D);
-		{
-			TIntObjectHashMap vertMap = new TIntObjectHashMap();
-			for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )                                                                                
-				Storage.readFace(m, (BCADGraphCell) it.next(), vertMap);
-			vertMap.clear();
-		}
+		Mesh m = Storage.readAllFaces(root);
 		MeshWriter.writeObject3D(m, "tetgen.tmp", "jcae3d", "brep", root.getGraph().getModel().getCADFile(), 1);
 		new UNVConverter("tetgen.tmp").writePOLY("tetgen.poly");
 		try {
@@ -105,11 +100,17 @@ public class TetGen implements AlgoInterface
 			p.waitFor();
 			if (p.exitValue() != 0)
 				return false;
+			// Import volume mesh...
+			root.mesh = MESHReader.readMesh("tetgen.1.mesh");
+			// ... and store it on disk
+			Storage.writeVolume(root, root.getGraph().getModel().getOutputDir());
+			/*
 			File temp = new File(".", "tetgen.1.mesh");
 			File output = new File(".", "tetgen."+root.getId()+".mesh");
 			if (output.exists())
 				output.delete();
 			temp.renameTo(output);
+			*/
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return false;
