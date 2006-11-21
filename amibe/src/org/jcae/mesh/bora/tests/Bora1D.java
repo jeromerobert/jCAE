@@ -63,10 +63,10 @@ public class Bora1D
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
 		{
 			BCADGraphCell edge = (BCADGraphCell) it.next();
-			File nodesfile = new File(model.getOutputDir()+File.separator+model.get1dDir(), "n"+edge.getId());
+			File nodesfile = new File(model.getOutputDir()+File.separator+"1d", "n"+edge.getId());
 			if (!nodesfile.exists())
 				continue;
-			File parasfile = new File(model.getOutputDir()+File.separator+model.get1dDir(), "p"+edge.getId());
+			File parasfile = new File(model.getOutputDir()+File.separator+"1d", "p"+edge.getId());
 			if (!parasfile.exists())
 				continue;
 			nEdges++;
@@ -80,14 +80,14 @@ public class Bora1D
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
 		{
 			BCADGraphCell edge = (BCADGraphCell) it.next();
-			File nodesfile = new File(model.getOutputDir()+File.separator+model.get1dDir(), "n"+edge.getId());
+			File nodesfile = new File(model.getOutputDir()+File.separator+"1d", "n"+edge.getId());
 			if (!nodesfile.exists())
 				continue;
-			File parasfile = new File(model.getOutputDir()+File.separator+model.get1dDir(), "p"+edge.getId());
+			File parasfile = new File(model.getOutputDir()+File.separator+"1d", "p"+edge.getId());
 			if (!parasfile.exists())
 				continue;
 			nrNodes[nEdges+1] = nrNodes[nEdges] + (int) nodesfile.length() / 24;
-			File beamsfile = new File(model.getOutputDir()+File.separator+model.get1dDir(), "b"+edge.getId());
+			File beamsfile = new File(model.getOutputDir()+File.separator+"1d", "b"+edge.getId());
 			if (!beamsfile.exists())
 				continue;
 			nrBeams[nEdges+1] = nrBeams[nEdges] + (int) beamsfile.length() / 8;
@@ -109,13 +109,13 @@ public class Bora1D
 			BCADGraphCell edge = (BCADGraphCell) it.next();
 			try
 			{
-				File nodesfile = new File(model.getOutputDir()+File.separator+model.get1dDir(), "n"+edge.getId());
+				File nodesfile = new File(model.getOutputDir()+File.separator+"1d", "n"+edge.getId());
 				if (!nodesfile.exists())
 					continue;
-				File parasfile = new File(model.getOutputDir()+File.separator+model.get1dDir(), "p"+edge.getId());
+				File parasfile = new File(model.getOutputDir()+File.separator+"1d", "p"+edge.getId());
 				if (!parasfile.exists())
 					continue;
-				File beamsfile = new File(model.getOutputDir()+File.separator+model.get1dDir(), "b"+edge.getId());
+				File beamsfile = new File(model.getOutputDir()+File.separator+"1d", "b"+edge.getId());
 				if (!beamsfile.exists())
 					continue;
 

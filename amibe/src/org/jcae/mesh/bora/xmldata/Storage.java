@@ -58,6 +58,8 @@ import org.apache.log4j.Logger;
 public class Storage
 {
 	private static Logger logger=Logger.getLogger(Storage.class);
+	private static final String dir1d = "1d";
+	private static final String dir2d = "2d";
 
 	public static void writeEdge(BCADGraphCell edge, String outDir)
 	{
@@ -70,7 +72,7 @@ public class Storage
 
 		try
 		{
-			File dir = new File(outDir);
+			File dir = new File(outDir, dir1d);
 
 			// Create the output directory if it does not exist
 			if(!dir.exists())
@@ -78,11 +80,11 @@ public class Storage
 
 			List nodelist = submesh.getNodes();
 			// Write node references and compute local indices
-			TObjectIntHashMap localIdx = write1dNodeReferences(outDir, edge.getId(), nodelist, edge);
+			TObjectIntHashMap localIdx = write1dNodeReferences(dir, edge.getId(), nodelist, edge);
 			// Write node coordinates
-			write1dCoordinates(outDir, edge.getId(), nodelist, CADShapeBuilder.factory.newCurve3D(E));
+			write1dCoordinates(dir, edge.getId(), nodelist, CADShapeBuilder.factory.newCurve3D(E));
 			// Write edge connectivity
-			write1dEdges(outDir, edge.getId(), submesh.getEdges(), localIdx);
+			write1dEdges(dir, edge.getId(), submesh.getEdges(), localIdx);
 		}
 		catch(Exception ex)
 		{
@@ -99,7 +101,7 @@ public class Storage
 
 		try
 		{
-			File dir = new File(outDir);
+			File dir = new File(outDir, dir2d);
 
 			// Create the output directory if it does not exist
 			if(!dir.exists())
@@ -108,9 +110,9 @@ public class Storage
 			CADFace F = (CADFace) face.getShape();
 			Collection trianglelist = submesh.getTriangles();
 			List nodelist = submesh.quadtree.getAllVertices(trianglelist.size() / 2);
-			TObjectIntHashMap localIdx = write2dNodeReferences(outDir, face.getId(), nodelist);
-			write2dCoordinates(outDir, face.getId(), nodelist, F.getGeomSurface());
-			write2dTriangles(outDir, face.getId(), trianglelist, localIdx);
+			TObjectIntHashMap localIdx = write2dNodeReferences(dir, face.getId(), nodelist);
+			write2dCoordinates(dir, face.getId(), nodelist, F.getGeomSurface());
+			write2dTriangles(dir, face.getId(), trianglelist, localIdx);
 		}
 		catch(Exception ex)
 		{
@@ -146,7 +148,6 @@ public class Storage
 	{
 		assert root.getShape() instanceof CADFace;
 		BModel model = root.getGraph().getModel();
-		String dir = model.getOutputDir()+File.separator+model.get2dDir();
 		boolean reversed = false;
 		if (root.getOrientation() != 0)
 		{
@@ -157,6 +158,7 @@ public class Storage
 		int id = root.getId();
 		try
 		{
+			File dir = new File(model.getOutputDir(), dir2d);
 			// Read vertex references
 			int [] refs = read2dNodeReferences(dir, id);
 			// Create a Vertex array, amd insert new references
@@ -173,7 +175,7 @@ public class Storage
 		logger.debug("end reading cell "+id);
 	}
 
-	private static TObjectIntHashMap write1dNodeReferences(String dir, int id, List nodelist, BCADGraphCell edge)
+	private static TObjectIntHashMap write1dNodeReferences(File dir, int id, List nodelist, BCADGraphCell edge)
 		throws IOException, FileNotFoundException
 	{
 		File refFile = new File(dir, "r"+id);
@@ -206,7 +208,7 @@ public class Storage
 		return localIdx;
 	}
 
-	private static TObjectIntHashMap write2dNodeReferences(String dir, int id, List nodelist)
+	private static TObjectIntHashMap write2dNodeReferences(File dir, int id, List nodelist)
 		throws IOException, FileNotFoundException
 	{
 		File refFile = new File(dir, "r"+id);
@@ -239,7 +241,7 @@ public class Storage
 		return localIdx;
 	}
 
-	private static void write1dCoordinates(String dir, int id, List nodelist, CADGeomCurve3D curve)
+	private static void write1dCoordinates(File dir, int id, List nodelist, CADGeomCurve3D curve)
 		throws IOException, FileNotFoundException
 	{
 		File nodesFile = new File(dir, "n"+id);
@@ -265,7 +267,7 @@ public class Storage
 		parasout.close();
 	}
 
-	private static void write2dCoordinates(String dir, int id, List nodelist, CADGeomSurface surface)
+	private static void write2dCoordinates(File dir, int id, List nodelist, CADGeomSurface surface)
 		throws IOException, FileNotFoundException
 	{
 		File nodesFile = new File(dir, "n"+id);
@@ -295,7 +297,7 @@ public class Storage
 		parasout.close();
 	}
 
-	private static void write1dEdges(String dir, int id, List edgelist, TObjectIntHashMap localIdx)
+	private static void write1dEdges(File dir, int id, List edgelist, TObjectIntHashMap localIdx)
 		throws IOException, FileNotFoundException
 	{
 		File beamsFile=new File(dir, "b"+id);
@@ -315,7 +317,7 @@ public class Storage
 		beamsout.close();
 	}
 
-	private static void write2dTriangles(String dir, int id, Collection trianglelist, TObjectIntHashMap localIdx)
+	private static void write2dTriangles(File dir, int id, Collection trianglelist, TObjectIntHashMap localIdx)
 		throws IOException, FileNotFoundException
 	{
 		File facesFile=new File(dir, "f"+id);
@@ -336,7 +338,7 @@ public class Storage
 		facesout.close();
 	}
 
-	private static int [] read2dNodeReferences(String dir, int id)
+	private static int [] read2dNodeReferences(File dir, int id)
 		throws IOException, FileNotFoundException
 	{
 		File refFile = new File(dir, "r"+id);
@@ -352,7 +354,7 @@ public class Storage
 		return refs;
 	}
 
-	private static Vertex [] read2dCoordinates(String dir, int id, Mesh mesh, int [] refs, TIntObjectHashMap mapRefVertex)
+	private static Vertex [] read2dCoordinates(File dir, int id, Mesh mesh, int [] refs, TIntObjectHashMap mapRefVertex)
 		throws IOException, FileNotFoundException
 	{
 		File nodesFile = new File(dir, "n"+id);
@@ -387,7 +389,7 @@ public class Storage
 		return nodelist;
 	}
 
-	private static void read2dTriangles(String dir, int id, Mesh mesh, boolean reversed, Vertex [] nodelist)
+	private static void read2dTriangles(File dir, int id, Mesh mesh, boolean reversed, Vertex [] nodelist)
 		throws IOException, FileNotFoundException
 	{
 		File trianglesFile = new File(dir, "f"+id);

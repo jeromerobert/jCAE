@@ -53,10 +53,6 @@ public class BModel
 	private String xmlDir;
 	private String xmlFile = "model";
 	private String xmlBrepDir;
-	//   Directory name for meshes
-	private static String dir1d = "1d";
-	private static String dir2d = "2d";
-	private static String dir3d = "3d";
 	//   List of all hyposthesis
 	public Collection allHypothesis = new LinkedHashSet();
 
@@ -115,21 +111,6 @@ public class BModel
 	public String getOutputFile()
 	{
 		return xmlFile;
-	}
-
-	public String get1dDir()
-	{
-		return dir1d;
-	}
-
-	public String get2dDir()
-	{
-		return dir2d;
-	}
-
-	public String get3dDir()
-	{
-		return dir3d;
 	}
 
 	public BCADGraph getGraph()

@@ -66,10 +66,10 @@ public class Bora2D
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 		{
 			BCADGraphCell face = (BCADGraphCell) it.next();
-			File nodesfile = new File(model.getOutputDir()+File.separator+model.get2dDir(), "n"+face.getId());
+			File nodesfile = new File(model.getOutputDir()+File.separator+"2d", "n"+face.getId());
 			if (!nodesfile.exists())
 				continue;
-			File parasfile = new File(model.getOutputDir()+File.separator+model.get2dDir(), "p"+face.getId());
+			File parasfile = new File(model.getOutputDir()+File.separator+"2d", "p"+face.getId());
 			if (!parasfile.exists())
 				continue;
 			nFaces++;
@@ -83,14 +83,14 @@ public class Bora2D
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 		{
 			BCADGraphCell face = (BCADGraphCell) it.next();
-			File nodesfile = new File(model.getOutputDir()+File.separator+model.get2dDir(), "n"+face.getId());
+			File nodesfile = new File(model.getOutputDir()+File.separator+"2d", "n"+face.getId());
 			if (!nodesfile.exists())
 				continue;
-			File parasfile = new File(model.getOutputDir()+File.separator+model.get2dDir(), "p"+face.getId());
+			File parasfile = new File(model.getOutputDir()+File.separator+"2d", "p"+face.getId());
 			if (!parasfile.exists())
 				continue;
 			nrNodes[nFaces+1] = nrNodes[nFaces] + (int) nodesfile.length() / 24;
-			File triasfile = new File(model.getOutputDir()+File.separator+model.get2dDir(), "f"+face.getId());
+			File triasfile = new File(model.getOutputDir()+File.separator+"2d", "f"+face.getId());
 			if (!triasfile.exists())
 				continue;
 			nrTria[nFaces+1] = nrTria[nFaces] + (int) triasfile.length() / 12;
@@ -112,13 +112,13 @@ public class Bora2D
 			CADFace F = (CADFace) face.getShape();
 			try
 			{
-				File nodesfile = new File(model.getOutputDir()+File.separator+model.get2dDir(), "n"+face.getId());
+				File nodesfile = new File(model.getOutputDir()+File.separator+"2d", "n"+face.getId());
 				if (!nodesfile.exists())
 					continue;
-				File parasfile = new File(model.getOutputDir()+File.separator+model.get2dDir(), "p"+face.getId());
+				File parasfile = new File(model.getOutputDir()+File.separator+"2d", "p"+face.getId());
 				if (!parasfile.exists())
 					continue;
-				File triasfile = new File(model.getOutputDir()+File.separator+model.get2dDir(), "f"+face.getId());
+				File triasfile = new File(model.getOutputDir()+File.separator+"2d", "f"+face.getId());
 				if (!triasfile.exists())
 					continue;
 
