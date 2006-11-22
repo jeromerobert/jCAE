@@ -1,3 +1,8 @@
+Wed Nov 22 13:23:40 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/XMLHelper.java (writeXML): Close output
+	stream after file is written, this was not done automatically.
+
 Tue Nov 21 13:06:24 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/VolMesh.java: Dummy data structure to

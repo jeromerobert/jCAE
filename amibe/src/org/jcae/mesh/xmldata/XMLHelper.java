@@ -84,7 +84,7 @@ public class XMLHelper
 	
 	/** Write a DOM to a file. */
 	public static void writeXML(Document document, File file)
-		throws FileNotFoundException, TransformerConfigurationException, TransformerException
+		throws IOException, FileNotFoundException, TransformerConfigurationException, TransformerException
 	{
 		// save the DOM to file
 		StreamResult result = new StreamResult(new BufferedOutputStream(new FileOutputStream(file)));
@@ -95,6 +95,7 @@ public class XMLHelper
 		// to keep DOCTYPE field			
 		transformer.setOutputProperty(javax.xml.transform.OutputKeys.DOCTYPE_SYSTEM, document.getDoctype().getSystemId());
 		transformer.transform(new DOMSource(document), result);
+		result.getOutputStream().close();
 	}
 	
 	/** Removes useless path components.  */
