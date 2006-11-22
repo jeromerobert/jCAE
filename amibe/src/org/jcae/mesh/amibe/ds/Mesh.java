@@ -150,7 +150,7 @@ public class Mesh
 	 */
 	public Mesh()
 	{
-		Vertex.outer = null;
+		Vertex.outer = new Vertex(this);
 		triangleList = new ArrayList();
 	}
 	
@@ -167,7 +167,7 @@ public class Mesh
 	 */
 	public Mesh(CADFace f)
 	{
-		Vertex.outer = null;
+		Vertex.outer = new Vertex(this);
 		triangleList = new ArrayList();
 		face = f;
 		surface = face.getGeomSurface();
@@ -299,8 +299,6 @@ public class Mesh
 			v1 = temp;
 		}
 		Triangle first = new Triangle(v0, v1, v2);
-		if (Vertex.outer == null)
-			Vertex.outer = Vertex2D.valueOf(this, 0.0, 0.0);
 		Triangle adj0 = new Triangle(Vertex.outer, v2, v1);
 		Triangle adj1 = new Triangle(Vertex.outer, v0, v2);
 		Triangle adj2 = new Triangle(Vertex.outer, v1, v0);
