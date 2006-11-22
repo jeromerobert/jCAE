@@ -154,7 +154,7 @@ public class Triangle
 	 */
 	public Triangle(Vertex a, Vertex b, Vertex c)
 	{
-		assert a != b && b != c && c != a : this;
+		assert a != b && b != c && c != a : a+" "+b+" "+c;
 		if (a instanceof Vertex2D)
 			vertex = new Vertex2D[3];
 		else
