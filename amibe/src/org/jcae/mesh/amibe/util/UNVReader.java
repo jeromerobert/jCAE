@@ -201,6 +201,7 @@ public class UNVReader
 		logger.debug("Reading triangles");
 		TIntObjectHashMap facesmap = new TIntObjectHashMap();
 		String line = new String();
+		boolean quad = false;
 		
 		try
 		{
@@ -211,36 +212,60 @@ public class UNVReader
 				String index = st.nextToken();
 				String type = st.nextToken();
 				int ind = Integer.valueOf(index).intValue();
-				int p1 = 0, p2 = 0, p3 = 0;
 				if (type.equals("74") || type.equals("91"))
 				{
 					line=rd.readLine();
 					// triangle
 					st = new StringTokenizer(line);
-					p1 = Integer.valueOf(st.nextToken()).intValue();
-					p2 = Integer.valueOf(st.nextToken()).intValue();
-					p3 = Integer.valueOf(st.nextToken()).intValue();
+					int p1 = Integer.valueOf(st.nextToken()).intValue();
+					int p2 = Integer.valueOf(st.nextToken()).intValue();
+					int p3 = Integer.valueOf(st.nextToken()).intValue();
+					Vertex n1 = (Vertex) nodesmap.get(p1);
+					assert n1 != null : p1;
+					Vertex n2 = (Vertex) nodesmap.get(p2);
+					assert n2 != null : p2;
+					Vertex n3 = (Vertex) nodesmap.get(p3);
+					assert n3 != null : p3;
+					Triangle f = new Triangle(n1, n2, n3);
+					mesh.add(f);
+					n1.setLink(f);
+					n2.setLink(f);
+					n3.setLink(f);
+					// fill the map of faces
+					facesmap.put(ind, f);
 				}
-				if (type.equals("24"))
+				else if (type.equals("94"))
 				{
-					// line
-					line = rd.readLine();
-					line = rd.readLine();
+					quad = true;
+					line=rd.readLine();
+					// quadrangle
 					st = new StringTokenizer(line);
-					p1 = Integer.valueOf(st.nextToken()).intValue();
-					p2 = Integer.valueOf(st.nextToken()).intValue();
-					p3 = Integer.valueOf(st.nextToken()).intValue();
+					int p1 = Integer.valueOf(st.nextToken()).intValue();
+					int p2 = Integer.valueOf(st.nextToken()).intValue();
+					int p3 = Integer.valueOf(st.nextToken()).intValue();
+					int p4 = Integer.valueOf(st.nextToken()).intValue();
+					Vertex n1 = (Vertex) nodesmap.get(p1);
+					assert n1 != null : p1;
+					Vertex n2 = (Vertex) nodesmap.get(p2);
+					assert n2 != null : p2;
+					Vertex n3 = (Vertex) nodesmap.get(p3);
+					assert n3 != null : p3;
+					Vertex n4 = (Vertex) nodesmap.get(p4);
+					assert n4 != null : p4;
+					Triangle f = new Triangle(n1, n2, n3);
+					mesh.add(f);
+					n1.setLink(f);
+					n2.setLink(f);
+					n3.setLink(f);
+					f = new Triangle(n1, n3, n4);
+					mesh.add(f);
+					n4.setLink(f);
+					// triangles can not be put in facesmap,
+					// and readMesh will abort if those ids
+					// are found in groups
 				}
-				Vertex n1 = (Vertex) nodesmap.get(p1);
-				Vertex n2 = (Vertex) nodesmap.get(p2);
-				Vertex n3 = (Vertex) nodesmap.get(p3);
-				Triangle f = new Triangle(n1, n2, n3);
-				mesh.add(f);
-				n1.setLink(f);
-				n2.setLink(f);
-				n3.setLink(f);
-				// fill the map of faces
-				facesmap.put(ind, f);
+				else
+					throw new RuntimeException("Type "+type+" unknown");
 			}
 		}
 		catch(Exception e)
@@ -248,6 +273,8 @@ public class UNVReader
 			e.printStackTrace();
 		}
 		logger.debug("Found "+facesmap.size()+" triangles");
+		if (quad)
+			logger.error("Quadrangles have been detected and converted into triangles.  If errors occur, convert this UNV file to only use triangles!");
 		return facesmap;
 	}
 	
