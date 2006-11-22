@@ -150,7 +150,8 @@ public class Mesh
 	 */
 	public Mesh()
 	{
-		Vertex.outer = new Vertex(this);
+		if (Vertex.outer == null)
+			Vertex.outer = new Vertex(this);
 		triangleList = new ArrayList();
 	}
 	
@@ -167,7 +168,8 @@ public class Mesh
 	 */
 	public Mesh(CADFace f)
 	{
-		Vertex.outer = new Vertex(this);
+		if (Vertex.outer == null)
+			Vertex.outer = new Vertex(this);
 		triangleList = new ArrayList();
 		face = f;
 		surface = face.getGeomSurface();
