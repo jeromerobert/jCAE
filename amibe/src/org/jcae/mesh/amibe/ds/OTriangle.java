@@ -89,12 +89,12 @@ import org.apache.log4j.Logger;
  * <pre>
  *    ot.nextOTri();        // Moves (t,0) to (t,1)
  *    ot.prevOTri();        // Moves (t,0) to (t,2)
- *    ot.symOTri();         // Moves (t,0) to (t0,2)
+ *    ot.symOTri();         // Moves (t,0) to (t1,2)
  *    ot.nextOTriOrigin();  // Moves (t,0) to (t2,1)
- *    ot.prevOTriOrigin();  // Moves (t,0) to (t0,0)
- *    ot.nextOTriDest();    // Moves (t,0) to (t0,1)
- *    ot.prevOTriDest();    // Moves (t,0) to (t1,0)
- *    ot.nextOTriApex();    // Moves (t,0) to (t1,1)
+ *    ot.prevOTriOrigin();  // Moves (t,0) to (t1,0)
+ *    ot.nextOTriDest();    // Moves (t,0) to (t1,1)
+ *    ot.prevOTriDest();    // Moves (t,0) to (t0,2)
+ *    ot.nextOTriApex();    // Moves (t,0) to (t0,0)
  *    ot.prevOTriApex();    // Moves (t,0) to (t2,0)
  * </pre>
  *
