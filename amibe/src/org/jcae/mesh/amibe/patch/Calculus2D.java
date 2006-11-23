@@ -18,11 +18,9 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-package org.jcae.mesh.amibe.ds.tools;
+package org.jcae.mesh.amibe.patch;
 
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.OTriangle2D;
-import org.jcae.mesh.amibe.ds.Vertex2D;
 import org.apache.log4j.Logger;
 
 /**

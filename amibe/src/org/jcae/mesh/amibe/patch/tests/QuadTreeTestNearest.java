@@ -17,11 +17,11 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-package org.jcae.mesh.amibe.util.tests;
+package org.jcae.mesh.amibe.patch.tests;
 
 import org.apache.log4j.Logger;
-import org.jcae.mesh.amibe.util.QuadTreeTest;
-import org.jcae.mesh.amibe.ds.Vertex2D;
+import org.jcae.mesh.amibe.patch.QuadTreeTest;
+import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.ds.Mesh;
 import java.util.Random;
 import org.jcae.mesh.java3d.Viewer;
@@ -35,8 +35,8 @@ import org.jcae.mesh.java3d.Viewer;
  * to display an initial <code>QuadTree</code> with 500 vertices.
  * When clicking at a point, a yellow segment is displayed between this point
  * and the nearest point found in the same cell, returned by
- * {@link org.jcae.mesh.amibe.util.QuadTree#getNearVertex(Vertex2D)}.
- * If {@link org.jcae.mesh.amibe.util.QuadTree#getNearestVertex(Vertex2D)}
+ * {@link org.jcae.mesh.amibe.patch.QuadTree#getNearVertex(Vertex2D)}.
+ * If {@link org.jcae.mesh.amibe.patch.QuadTree#getNearestVertex(Vertex2D)}
  * finds a nearest point, a blue segment is displayed.
  */
 public class QuadTreeTestNearest extends QuadTreeTest

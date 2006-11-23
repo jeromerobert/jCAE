@@ -19,6 +19,7 @@
 
 package org.jcae.mesh.amibe.ds;
 
+import org.jcae.mesh.amibe.patch.Vertex2D;
 import java.util.ConcurrentModificationException;
 import java.util.NoSuchElementException;
 import java.util.Iterator;

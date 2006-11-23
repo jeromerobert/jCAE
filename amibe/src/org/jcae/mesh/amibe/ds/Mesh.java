@@ -19,8 +19,12 @@
 
 package org.jcae.mesh.amibe.ds;
 
-import org.jcae.mesh.amibe.util.QuadTree;
-import org.jcae.mesh.amibe.ds.tools.*;
+import org.jcae.mesh.amibe.patch.QuadTree;
+import org.jcae.mesh.amibe.patch.Calculus;
+import org.jcae.mesh.amibe.patch.Calculus2D;
+import org.jcae.mesh.amibe.patch.Calculus3D;
+import org.jcae.mesh.amibe.patch.Vertex2D;
+import org.jcae.mesh.amibe.patch.OTriangle2D;
 import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;

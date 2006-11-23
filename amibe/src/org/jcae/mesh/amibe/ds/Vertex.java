@@ -20,6 +20,7 @@
 package org.jcae.mesh.amibe.ds;
 
 import org.apache.log4j.Logger;
+import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import java.util.HashSet;
@@ -74,7 +75,7 @@ public class Vertex
 	/**
 	 * Constructor called by Vertex2D.
 	 */
-	Vertex()
+	protected Vertex()
 	{
 		param = new double[2];
 	}

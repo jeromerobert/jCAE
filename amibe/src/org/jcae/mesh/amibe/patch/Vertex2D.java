@@ -17,12 +17,14 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-package org.jcae.mesh.amibe.ds;
+package org.jcae.mesh.amibe.patch;
 
 import org.apache.log4j.Logger;
+import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.util.LongLong;
-import org.jcae.mesh.amibe.ds.tools.Calculus;
-import org.jcae.mesh.amibe.ds.tools.Calculus2D;
 import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.cad.CADVertex;
@@ -292,9 +294,9 @@ public class Vertex2D extends Vertex
 			assert d != Vertex2D.outer;
 			if (a == Vertex2D.outer)
 				break;
-			if (current.tri.isListed())
+			if (current.getTri().isListed())
 				return null;
-			current.tri.listCollect();
+			current.getTri().listCollect();
 			long d1 = onLeft(mesh, d, a);
 			long d2 = onLeft(mesh, a, o);
 			//  Note that for all cases, new origin and destination

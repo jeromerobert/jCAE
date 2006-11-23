@@ -17,12 +17,9 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-package org.jcae.mesh.amibe.util;
+package org.jcae.mesh.amibe.patch;
 
 import org.apache.log4j.Logger;
-import org.jcae.mesh.amibe.ds.Vertex2D;
-import org.jcae.mesh.amibe.ds.tools.Calculus;
-import org.jcae.mesh.amibe.ds.tools.Calculus2D;
 import java.util.ArrayList;
 
 /**

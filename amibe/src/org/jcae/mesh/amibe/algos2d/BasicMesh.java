@@ -24,9 +24,7 @@ import org.jcae.mesh.mesher.ds.MMesh1D;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.OTriangle;
-import org.jcae.mesh.amibe.ds.OTriangle2D;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.apache.log4j.Logger;
 

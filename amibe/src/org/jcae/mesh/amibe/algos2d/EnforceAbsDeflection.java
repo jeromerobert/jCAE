@@ -22,8 +22,8 @@ package org.jcae.mesh.amibe.algos2d;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.OTriangle2D;
-import org.jcae.mesh.amibe.ds.Vertex2D;
+import org.jcae.mesh.amibe.patch.OTriangle2D;
+import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.ds.MNode3D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
