@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
  
-    Copyright (C) 2003,2004,2005, by EADS CRC
+    Copyright (C) 2003,2004,2005,2006, by EADS CRC
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,6 +20,7 @@
 
 package org.jcae.mesh.xmldata;
 
+import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
@@ -221,7 +222,7 @@ public class MeshWriter
 	 * @param brepDir      path to brep file, relative to xmlDir
 	 * @param brepFile     basename of the brep file
 	 */
-	public static void writeObject(Mesh submesh, String xmlDir, String xmlFile, String brepDir, String brepFile, int index)
+	public static void writeObject(Mesh2D submesh, String xmlDir, String xmlFile, String brepDir, String brepFile, int index)
 	{
 		try
 		{
@@ -308,26 +309,21 @@ public class MeshWriter
 			File trianglesFile=new File(dir, JCAEXMLData.triangles3dFilename);
 			File groupsFile = new File(dir, JCAEXMLData.groupsFilename);
 			Collection trianglelist = submesh.getTriangles();
-			ArrayList nodelist;
-			if (submesh.quadtree != null)
-				nodelist = submesh.quadtree.getAllVertices(trianglelist.size() / 2);
-			else
+			HashSet nodeset = new HashSet();
+			ArrayList nodelist = new ArrayList();
+			for (Iterator itf = trianglelist.iterator(); itf.hasNext(); )
 			{
-				HashSet nodeset = new HashSet();
-				nodelist = new ArrayList();
-				for (Iterator itf = trianglelist.iterator(); itf.hasNext(); )
+				Triangle t = (Triangle) itf.next();
+				for (int j = 0; j < 3; j++)
 				{
-					Triangle t = (Triangle) itf.next();
-					for (int j = 0; j < 3; j++)
+					if (!nodeset.contains(t.vertex[j]))
 					{
-						if (!nodeset.contains(t.vertex[j]))
-						{
-							nodeset.add(t.vertex[j]);
-							nodelist.add(t.vertex[j]);
-						}
+						nodeset.add(t.vertex[j]);
+						nodelist.add(t.vertex[j]);
 					}
 				}
 			}
+			nodeset.clear();
 			TObjectIntHashMap nodeIndex=new TObjectIntHashMap(nodelist.size());
 			
 			// Create and fill the DOM

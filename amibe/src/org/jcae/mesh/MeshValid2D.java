@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2003,2004,2005, by EADS CRC
+    Copyright (C) 2003,2004,2005,2006, by EADS CRC
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -22,12 +22,8 @@ package org.jcae.mesh;
 
 import gnu.trove.TIntHashSet;
 import java.util.Iterator;
-import java.util.ArrayList;
-import org.jcae.mesh.amibe.ds.MNode3D;
-import org.jcae.mesh.amibe.ds.MFace3D;
 import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.amibe.validation.*;
 import org.jcae.mesh.cad.*;
@@ -74,7 +70,7 @@ public class MeshValid2D
 				if (numFace != 0 && iFace != numFace)
 					continue;
 				String xmlFile = "jcae2d."+iFace;
-				Mesh mesh = MeshReader.readObject(xmlDir, xmlFile, F);
+				Mesh2D mesh = MeshReader.readObject(xmlDir, xmlFile, F);
 				if (null == mesh)
 				{
 					logger.info("Face "+iFace+" ***");

@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2004,2005, by EADS CRC
+    Copyright (C) 2004,2005,2006, by EADS CRC
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@ package org.jcae.mesh.amibe.patch.tests;
 import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.patch.QuadTreeTest;
 import org.jcae.mesh.amibe.patch.Vertex2D;
-import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.patch.Mesh2D;
 import java.util.Random;
 import org.jcae.mesh.java3d.Viewer;
 
@@ -55,7 +55,7 @@ public class QuadTreeTestNearest extends QuadTreeTest
 		boolean visu = true;
 		Random rand = new Random(113L);
 		final QuadTreeTest r = new QuadTreeTest(0.0, 1.0, 0.0, 1.0);
-		final Mesh m = new Mesh();
+		final Mesh2D m = new Mesh2D();
 		m.pushCompGeom(2);
 		m.setQuadTree(r);
 		logger.debug("Start insertion");

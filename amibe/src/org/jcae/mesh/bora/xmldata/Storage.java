@@ -24,7 +24,8 @@ import org.jcae.mesh.amibe.ds.VolMesh;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.ds.Vertex2D;
+import org.jcae.mesh.amibe.patch.Mesh2D;
+import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.cad.CADVertex;
@@ -98,7 +99,7 @@ public class Storage
 
 	public static void writeFace(BCADGraphCell face, String outDir)
 	{
-		Mesh submesh = (Mesh) face.mesh;
+		Mesh2D submesh = (Mesh2D) face.mesh;
 		if (null == submesh)
 			return;
 

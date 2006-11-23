@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2005, by EADS CRC
+    Copyright (C) 2005,2006, by EADS CRC
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -19,20 +19,20 @@
 
 package org.jcae.mesh.amibe.validation;
 
+import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.MNode3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 
 public class AbsoluteDeflection2D extends QualityProcedure
 {
-	private Mesh mesh;
+	private Mesh2D mesh;
 	private MNode3D [] p = new MNode3D[4];
 	private double [] v1 = new double[3];
 	private double [] v2 = new double[3];
 	private double [] v3 = new double[3];
 	
-	public AbsoluteDeflection2D(Mesh m)
+	public AbsoluteDeflection2D(Mesh2D m)
 	{
 		mesh = m;
 		setType(QualityProcedure.FACE);

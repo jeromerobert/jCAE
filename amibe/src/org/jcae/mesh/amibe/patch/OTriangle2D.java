@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2005, by EADS CRC
+    Copyright (C) 2005,2006, by EADS CRC
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -21,7 +21,6 @@ package org.jcae.mesh.amibe.patch;
 
 import org.jcae.mesh.amibe.ds.OTriangle;
 import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.Mesh;
 import java.util.Random;
 import org.apache.log4j.Logger;
 
@@ -63,7 +62,7 @@ public class OTriangle2D extends OTriangle
 	 * Collapse an edge and update adjacency relations.
 	 * Its start and end points must have the same location.
 	 */
-	public final void removeDegenerated(Mesh mesh)
+	public final void removeDegenerated(Mesh2D mesh)
 	{
 		Vertex2D o = (Vertex2D) origin();
 		Vertex2D d = (Vertex2D) destination();
@@ -130,7 +129,7 @@ public class OTriangle2D extends OTriangle
 	 * @param force  if <code>false</code>, the vertex is inserted only if some edges were swapped after its insertion.  If <code>true</code>, the vertex is unconditionnally inserted.
 	 * @return <code>true</code> if vertex was successfully added, <code>false</code> otherwise.
 	 */
-	public final boolean split3(Mesh mesh, Vertex2D v, boolean force)
+	public final boolean split3(Mesh2D mesh, Vertex2D v, boolean force)
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("Split OTriangle2D "+this+"\nat Vertex "+v);
@@ -221,7 +220,7 @@ public class OTriangle2D extends OTriangle
 	}
 	
 	//  Called from BasicMesh to improve initial mesh
-	public int checkSmallerAndSwap(Mesh mesh)
+	public int checkSmallerAndSwap(Mesh2D mesh)
 	{
 		//  As CheckAndSwap modifies its arguments, 'this'
 		//  must be protected.
@@ -230,7 +229,7 @@ public class OTriangle2D extends OTriangle
 		return ot1.CheckAndSwap(mesh, true);
 	}
 	
-	private int CheckAndSwap(Mesh mesh, boolean smallerDiag)
+	private int CheckAndSwap(Mesh2D mesh, boolean smallerDiag)
 	{
 		int nrSwap = 0;
 		int totNrSwap = 0;
@@ -310,7 +309,7 @@ public class OTriangle2D extends OTriangle
 	 * @param end  end point of the boundary edge.
 	 * @return the number of intersected edges.
 	 */
-	public final int forceBoundaryEdge(Mesh mesh, Vertex2D end)
+	public final int forceBoundaryEdge(Mesh2D mesh, Vertex2D end)
 	{
 		long newl, oldl;
 		int count = 0;
@@ -401,14 +400,14 @@ public class OTriangle2D extends OTriangle
 	 * @return <code>true</code> if edge is Delaunay, <code>false</code>
 	 * otherwise.
 	 */
-	public final boolean isDelaunay(Mesh mesh, Vertex2D apex2)
+	public final boolean isDelaunay(Mesh2D mesh, Vertex2D apex2)
 	{
 		if (apex2.isPseudoIsotropic(mesh))
 			return isDelaunay_isotropic(mesh, apex2);
 		return isDelaunay_anisotropic(mesh, apex2);
 	}
 	
-	private final boolean isDelaunay_isotropic(Mesh mesh, Vertex2D apex2)
+	private final boolean isDelaunay_isotropic(Mesh2D mesh, Vertex2D apex2)
 	{
 		assert Vertex2D.outer != (Vertex2D) origin();
 		assert Vertex2D.outer != (Vertex2D) destination();
@@ -430,7 +429,7 @@ public class OTriangle2D extends OTriangle
 		return !apex2.inCircleTest2(mesh, this);
 	}
 	
-	private final boolean isDelaunay_anisotropic(Mesh mesh, Vertex2D apex2)
+	private final boolean isDelaunay_anisotropic(Mesh2D mesh, Vertex2D apex2)
 	{
 		assert Vertex2D.outer != (Vertex2D) origin();
 		assert Vertex2D.outer != (Vertex2D) destination();

@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2003,2004,2005, by EADS CRC
+    Copyright (C) 2003,2004,2005,2006, by EADS CRC
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,9 +20,9 @@
 
 package org.jcae.mesh.amibe.algos2d;
 
-import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.OTriangle2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import java.util.Iterator;
@@ -37,7 +37,7 @@ import org.apache.log4j.Logger;
  * The next step is to take vertices from the bucket in random order.
  * For each vertex <code>v</code>, the closest vertex <code>w</code>
  * already present in the mesh is returned by
- * {@link org.jcae.mesh.amibe.util.QuadTree#getNearestVertex(Vertex2D)}
+ * {@link org.jcae.mesh.amibe.patch.QuadTree#getNearestVertex(Vertex2D)}
  * If the distance between <code>v</code> and <code>w</code> is lower
  * than 1/sqrt(2), <code>v</code> is dropped, otherwise it is inserted
  * into the mesh.  Just after a vertex is inserted, incident edges are
@@ -64,7 +64,7 @@ import org.apache.log4j.Logger;
 public class Insertion
 {
 	private static Logger logger=Logger.getLogger(Insertion.class);
-	private Mesh mesh;
+	private Mesh2D mesh;
 	
 	private double minlen = 1.0 / Math.sqrt(2.);
 	private double maxlen = 1.0 * Math.sqrt(2.);
@@ -72,14 +72,14 @@ public class Insertion
 	/**
 	 * Creates a <code>Insertion</code> instance.
 	 *
-	 * @param m  the <code>Mesh</code> instance to refine.
+	 * @param m  the <code>Mesh2D</code> instance to refine.
 	 */
-	public Insertion(Mesh m)
+	public Insertion(Mesh2D m)
 	{
 		mesh = m;
 	}
 	
-	public Insertion(Mesh m, double scale)
+	public Insertion(Mesh2D m, double scale)
 	{
 		mesh = m;
 		minlen = scale / Math.sqrt(2.);

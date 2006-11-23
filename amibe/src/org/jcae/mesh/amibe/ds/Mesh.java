@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2004,2005, by EADS CRC
+    Copyright (C) 2004,2005,2006, by EADS CRC
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -19,23 +19,12 @@
 
 package org.jcae.mesh.amibe.ds;
 
-import org.jcae.mesh.amibe.patch.QuadTree;
-import org.jcae.mesh.amibe.patch.Calculus;
-import org.jcae.mesh.amibe.patch.Calculus2D;
-import org.jcae.mesh.amibe.patch.Calculus3D;
-import org.jcae.mesh.amibe.patch.Vertex2D;
-import org.jcae.mesh.amibe.patch.OTriangle2D;
-import org.jcae.mesh.amibe.InitialTriangulationException;
-import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
-import org.jcae.mesh.cad.*;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Stack;
-import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.FileNotFoundException;
@@ -56,12 +45,12 @@ import org.apache.log4j.Logger;
  * </ul>
  * The selected data structure is as follows:
  * <ul>
- *   <li>A mesh is composed of a quadtree and a list of {@link Triangle}.</li>
- *   <li>The quadtree ibject is described in {@link QuadTree}.</li>
  *   <li>A triangle is composed of three {@link Vertex}, pointers to
  *       adjacent triangles, and an integer which is explained below.</li>
  *   <li>A vertex contains a pointer to one of the triangles it is connected
  *       to.</li>
+ *   <li>This class can be extended to help finding the nearest vertex,
+ *       as in {@link org.jcae.mesh.amibe.patch.Mesh2D}.
  * </ul>
  * Example:
  * <pre>
@@ -100,14 +89,6 @@ import org.apache.log4j.Logger;
  *   a triangle are stored inside a single byte, which is part of an
  *   <code>int</code>.  (Remaining three bytes are used to store data on edges)
  * </p>
- * 
- * <p>
- *   With the {@link QuadTree} structure, it is easy to find the nearest
- *   {@link Vertex} <code>V</code> from any given point <code>V0</code>.
- *   This gives a {@link Triangle} having <code>V</code> in its vertices,
- *   and we can loop around <code>V</code> to find the {@link Triangle}
- *   containing <code>V0</code>.
- * </p>
  */
 
 public class Mesh
@@ -115,28 +96,18 @@ public class Mesh
 	private static Logger logger=Logger.getLogger(Mesh.class);
 	
 	//  Triangle list
-	private Collection triangleList = null;
+	protected Collection triangleList = null;
 	
-	//  Topological face on which mesh is applied
-	private CADShape face;
-	
-	//  The geometrical surface describing the topological face, stored for
-	//  efficiebcy reason
-	private CADGeomSurface surface;
-	
-	private int maxLabel = 0;
+	protected int maxLabel = 0;
 	
 	//  Minimal topological edge length
-	private double epsilon = 1.;
+	protected double epsilon = 1.;
 	
-	private boolean accumulateEpsilon = false;
+	protected boolean accumulateEpsilon = false;
 	
 	//  Utilities to help debugging meshes with writeMESH
-	private static final double scaleX = 1.0;
-	private static final double scaleY = 1.0;
-	
-	//  Stack of methods to compute geometrical values
-	private Stack compGeomStack = new Stack();
+	protected static final double scaleX = 1.0;
+	protected static final double scaleY = 1.0;
 	
 	//  2D/3D
 	public static final int MESH_1D = 2;
@@ -146,11 +117,6 @@ public class Mesh
 	private int type = MESH_2D;
 	
 	/**
-	 * Structure to fasten search of nearest vertices.
-	 */
-	public QuadTree quadtree = null;
-	
-	/**
 	 * Creates an empty mesh.
 	 */
 	public Mesh()
@@ -158,80 +124,6 @@ public class Mesh
 		if (Vertex.outer == null)
 			Vertex.outer = new Vertex();
 		triangleList = new ArrayList();
-	}
-	
-	/**
-	 * Creates an empty mesh bounded to the topological surface.
-	 * This constructor also initializes tolerance values.  If length
-	 * criterion is null, {@link Metric2D#setLength} is called with
-	 * the diagonal length of face bounding box as argument.
-	 * If property <code>org.jcae.mesh.amibe.ds.Mesh.epsilon</code> is
-	 * not set, epsilon is computed as being the maximal value between
-	 * length criterion by 100 and diagonal length by 1000.
-	 *
-	 * @param f   topological surface
-	 */
-	public Mesh(CADFace f)
-	{
-		if (Vertex.outer == null)
-			Vertex.outer = new Vertex();
-		triangleList = new ArrayList();
-		face = f;
-		surface = f.getGeomSurface();
-		double [] bb = f.boundingBox();
-		double diagonal = Math.sqrt(
-		    (bb[0] - bb[3]) * (bb[0] - bb[3]) +
-		    (bb[1] - bb[4]) * (bb[1] - bb[4]) +
-		    (bb[2] - bb[5]) * (bb[2] - bb[5]));
-		if (Metric2D.getLength() == 0.0)
-			Metric2D.setLength(diagonal);
-		String absEpsilonProp = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon");
-		if (absEpsilonProp == null)
-		{
-			absEpsilonProp = "-1.0";
-			System.setProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon", absEpsilonProp);
-		}
-		Double absEpsilon = new Double(absEpsilonProp);
-		epsilon = absEpsilon.doubleValue();
-		if (epsilon < 0)
-			epsilon = Math.max(diagonal/1000.0, Metric2D.getLength() / 100.0);
-		String accumulateEpsilonProp = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon");
-		if (accumulateEpsilonProp == null)
-		{
-			accumulateEpsilonProp = "false";
-			System.setProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon", accumulateEpsilonProp);
-		}
-		accumulateEpsilon = accumulateEpsilonProp.equals("true");
-		logger.debug("Bounding box diagonal: "+diagonal);
-		logger.debug("Epsilon: "+epsilon);
-	}
-	
-	public Mesh(CADEdge e)
-	{
-		if (Vertex.outer == null)
-			Vertex.outer = new Vertex();
-		triangleList = new ArrayList();
-		face = e;
-	}
-	
-	/**
-	 * Returns the topological face.
-	 *
-	 * @return the topological face.
-	 */
-	public CADShape getGeometry()
-	{
-		return face;
-	}
-	
-	/**
-	 * Returns the geometrical surface.
-	 *
-	 * @return the geometrical surface.
-	 */
-	public CADGeomSurface getGeomSurface()
-	{
-		return surface;
 	}
 	
 	/**
@@ -254,100 +146,9 @@ public class Mesh
 		type = t;
 	}
 	
-	/**
-	 * Initialize a QuadTree with a given bounding box.
-	 * @param umin  bottom-left U coordinate.
-	 * @param umax  top-right U coordinate.
-	 * @param vmin  bottom-left V coordinate.
-	 * @param vmax  top-right V coordinate.
-	 */
-	public void initQuadTree(double umin, double umax, double vmin, double vmax)
-	{
-		quadtree = new QuadTree(umin, umax, vmin, vmax);
-		quadtree.setCompGeom(compGeom());
-		Vertex.outer = Vertex2D.valueOf((umin+umax)*0.5, (vmin+vmax)*0.5);
-	}
-	
-	/**
-	 * Returns the quadtree associated with this mesh.
-	 *
-	 * @return the quadtree associated with this mesh.
-	 */
-	public QuadTree getQuadTree()
-	{
-		return quadtree;
-	}
-	
-	/**
-	 * Sets the quadtree associated with this mesh.
-	 *
-	 * @param q  the quadtree associated with this mesh.
-	 */
-	public void setQuadTree(QuadTree q)
-	{
-		quadtree = q;
-		quadtree.setCompGeom(compGeom());
-	}
-	
 	public void scaleTolerance(double scale)
 	{
 		epsilon *= scale;
-	}
-	
-	/**
-	 * Bootstraps node instertion by creating the first triangle.
-	 * This initial triangle is counter-clockwise oriented, and
-	 * outer triangles are constructed.
-	 *
-	 * @param v0  first vertex.
-	 * @param v1  second vertex.
-	 * @param v2  third vertex.
-	 */
-	public void bootstrap(Vertex2D v0, Vertex2D v1, Vertex2D v2)
-	{
-		assert quadtree != null;
-		assert v0.onLeft(this, v1, v2) != 0L;
-		if (v0.onLeft(this, v1, v2) < 0L)
-		{
-			Vertex2D temp = v2;
-			v2 = v1;
-			v1 = temp;
-		}
-		Triangle first = new Triangle(v0, v1, v2);
-		Triangle adj0 = new Triangle(Vertex.outer, v2, v1);
-		Triangle adj1 = new Triangle(Vertex.outer, v0, v2);
-		Triangle adj2 = new Triangle(Vertex.outer, v1, v0);
-		OTriangle ot = new OTriangle(first, 0);
-		OTriangle oa0 = new OTriangle(adj0, 0);
-		OTriangle oa1 = new OTriangle(adj1, 0);
-		OTriangle oa2 = new OTriangle(adj2, 0);
-		ot.glue(oa0);
-		ot.nextOTri();
-		ot.glue(oa1);
-		ot.nextOTri();
-		ot.glue(oa2);
-		oa0.nextOTri();
-		oa2.prevOTri();
-		oa0.glue(oa2);
-		oa0.nextOTri();
-		oa1.nextOTri();
-		oa0.glue(oa1);
-		oa1.nextOTri();
-		oa2.prevOTri();
-		oa2.glue(oa1);
-		
-		Vertex.outer.setLink(adj0);
-		v0.setLink(first);
-		v1.setLink(first);
-		v2.setLink(first);
-		
-		add(first);
-		add(adj0);
-		add(adj1);
-		add(adj2);
-		quadtree.add(v0);
-		quadtree.add(v1);
-		quadtree.add(v2);
 	}
 	
 	/**
@@ -412,173 +213,6 @@ public class Mesh
 	}
 
 	/**
-	 * Enforces an edge between tow points.
-	 * This routine is used to build constrained Delaunay meshes.
-	 * Intersections between existing mesh segments and the new
-	 * segment are computed, then edges are swapped so that the
-	 * new edge is part of the mesh.
-	 *
-	 * @param start    start point.
-	 * @param end      end point.
-	 * @param maxIter  maximal number of iterations.
-	 * @return a handle to the newly created edge.
-	 * @throws InitialTriangulationException  if the boundary edge cannot
-	 *         be enforced.
-	 */
-	public OTriangle2D forceBoundaryEdge(Vertex2D start, Vertex2D end, int maxIter)
-		throws InitialTriangulationException
-	{
-		assert (start != end);
-		Triangle t = (Triangle) start.getLink();
-		OTriangle2D s = new OTriangle2D(t, 0);
-		if (s.origin() != start)
-			s.nextOTri();
-		if (s.origin() != start)
-			s.nextOTri();
-		assert s.origin() == start : ""+start+" does not belong to "+t;
-		Vertex2D dest = (Vertex2D) s.destination();
-		int i = 0;
-		while (true)
-		{
-			Vertex2D d = (Vertex2D) s.destination();
-			if (d == end)
-				return s;
-			else if (d != Vertex.outer && start.onLeft(this, end, d) > 0L)
-				break;
-			s.nextOTriOrigin();
-			i++;
-			if ((Vertex2D) s.destination() == dest || i > maxIter)
-				throw new InitialTriangulationException();
-		}
-		s.prevOTriOrigin();
-		dest = (Vertex2D) s.destination();
-		i = 0;
-		while (true)
-		{
-			Vertex2D d = (Vertex2D) s.destination();
-			if (d == end)
-				return s;
-			else if (d != Vertex.outer && start.onLeft(this, end, d) < 0L)
-				break;
-			s.prevOTriOrigin();
-			i++;
-			if (s.destination() == dest || i > maxIter)
-				throw new InitialTriangulationException();
-		}
-		//  s has 'start' as its origin point, its destination point
-		//  is to the right side of (start,end) and its apex is to the
-		//  left side.
-		i = 0;
-		while (true)
-		{
-			int inter = s.forceBoundaryEdge(this, end);
-			logger.debug("Intersectionss: "+inter);
-			//  s is modified by forceBoundaryEdge, it now has 'end'
-			//  as its origin point, its destination point is to the
-			//  right side of (end,start) and its apex is to the left
-			//  side.  This algorithm can be called iteratively after
-			//  exchanging 'start' and 'end', it is known to finish.
-			if (s.destination() == start)
-				return s;
-			i++;
-			if (i > maxIter)
-				throw new InitialTriangulationException();
-			Vertex2D temp = start;
-			start = end;
-			end = temp;
-		}
-	}
-	
-	/**
-	 * Sets metrics dimension.
-	 * Metrics operations can be performed either on 2D or 3D Euclidien
-	 * spaces.  The latter is the normal case, but the former can
-	 * also be used, e.g. when retrieving boundary edges of a
-	 * constrained mesh.  Argument is either 2 or 3, other values
-	 *
-	 * @param i  metrics dimension.
-	 * @throws IllegalArgumentException  If argument is neither 2 nor 3,
-	 *         this exception is raised.
-	 */
-	public void pushCompGeom(int i)
-	{
-		if (i == 2)
-			compGeomStack.push(new Calculus2D(this));
-		else if (i == 3)
-			compGeomStack.push(new Calculus3D(this));
-		else
-			throw new java.lang.IllegalArgumentException("pushCompGeom argument must be either 2 or 3, current value is: "+i);
-		if (quadtree != null)
-		{
-			quadtree.setCompGeom(compGeom());
-			quadtree.clearAllMetrics();
-		}
-	}
-	
-	/**
-	 * Resets metrics dimension.
-	 *
-	 * @return metrics dimension.
-	 * @throws IllegalArgumentException  If argument is neither 2 nor 3,
-	 *         this exception is raised.
-	 */
-	public Calculus popCompGeom()
-	{
-		//  Metrics are always reset by pushCompGeom.
-		//  Only reset them here when there is a change.
-		Object ret = compGeomStack.pop();
-		if (!compGeomStack.empty() && !ret.getClass().equals(compGeomStack.peek().getClass()) && quadtree != null)
-		{
-			quadtree.setCompGeom(compGeom());
-			quadtree.clearAllMetrics();
-		}
-		return (Calculus) ret;
-	}
-	
-	/**
-	 * Resets metrics dimension.
-	 * Checks that the found metrics dimension is identical to the one
-	 * expected.
-	 *
-	 * @param i  expected metrics dimension.
-	 * @return metrics dimension.
-	 * @throws RuntimeException  If argument is different from
-	 *         metrics dimension.
-	 */
-	public Calculus popCompGeom(int i)
-		throws RuntimeException
-	{
-		Object ret = compGeomStack.pop();
-		if (compGeomStack.size() > 0 && !ret.getClass().equals(compGeomStack.peek().getClass()) && quadtree != null)
-			quadtree.clearAllMetrics();
-		if (i == 2)
-		{
-			if (!(ret instanceof Calculus2D))
-				throw new java.lang.RuntimeException("Internal error.  Expected value: 2, found: 3");
-		}
-		else if (i == 3)
-		{
-			if (!(ret instanceof Calculus3D))
-				throw new java.lang.RuntimeException("Internal error.  Expected value: 3, found: 2");
-		}
-		else
-			throw new java.lang.IllegalArgumentException("pushCompGeom argument must be either 2 or 3, current value is: "+i);
-		return (Calculus) ret;
-	}
-	
-	/**
-	 * Returns metrics dimension.
-	 *
-	 * @return metrics dimension.
-	 */
-	public Calculus compGeom()
-	{
-		if (compGeomStack.empty())
-			return null;
-		return (Calculus) compGeomStack.peek();
-	}
-	
-	/**
 	 * Checks whether a length is llower than a threshold.
 	 *
 	 * @param len   the length to be checked.
@@ -590,49 +224,6 @@ public class Mesh
 		if (accumulateEpsilon)
 			len += accumulatedLength;
 		return (len < epsilon);
-	}
-	
-	/**
-	 * Remove degenerted edges.
-	 * Degenerated wdges are present in 2D mesh, and have to be
-	 * removed in the 2D -&gt; 3D transformation.  Triangles and
-	 * vertices must then be updated too.
-	 */
-	public void removeDegeneratedEdges()
-	{
-		logger.debug("Removing degenerated edges");
-		OTriangle2D ot = new OTriangle2D();
-		HashSet removedTriangles = new HashSet();
-		for (Iterator it = triangleList.iterator(); it.hasNext(); )
-		{
-			Triangle t = (Triangle) it.next();
-			if (removedTriangles.contains(t))
-				continue;
-			if (t.isOuter())
-				continue;
-			ot.bind(t);
-			for (int i = 0; i < 3; i++)
-			{
-				ot.nextOTri();
-				if (!ot.hasAttributes(OTriangle.BOUNDARY))
-					continue;
-				int ref1 = ot.origin().getRef();
-				int ref2 = ot.destination().getRef();
-				if (ref1 != 0 && ref2 != 0 && ref1 == ref2)
-				{
-					if (logger.isDebugEnabled())
-						logger.debug("  Collapsing "+ot);
-					removedTriangles.add(ot.getTri());
-					ot.removeDegenerated(this);
-					break;
-				}
-			}
-		}
-		for (Iterator it = removedTriangles.iterator(); it.hasNext(); )
-		{
-			Triangle t = (Triangle) it.next();
-			triangleList.remove(t);
-		}
 	}
 	
 	/**
@@ -1234,18 +825,6 @@ public class Mesh
 				if (constrained && !t.isOuter())
 				{
 					logger.debug("Triangle should be outer: "+t);
-					return false;
-				}
-			}
-			else if (type == MESH_2D)
-			{
-				Vertex2D tv0 = (Vertex2D) t.vertex[0];
-				Vertex2D tv1 = (Vertex2D) t.vertex[1];
-				Vertex2D tv2 = (Vertex2D) t.vertex[2];
-				double l = tv0.onLeft(this, tv1, tv2);
-				if (l <= 0L)
-				{
-					logger.debug("Wrong orientation: "+l+" "+t);
 					return false;
 				}
 			}

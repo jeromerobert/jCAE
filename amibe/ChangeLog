@@ -5,6 +5,10 @@ Thu Nov 23 12:20:54 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 	removing a vertex or triangle) have a new Mesh argument, as
 	well as routines performing computations on 2D parametrized
 	surfaces.
+	* src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/amibe/patch/Mesh2D.java: New Mesh2D class,
+	which extends Mesh.  This class is designed specifically for
+	meshing parametrized surfaces.
 
 Wed Nov 22 13:23:40 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 

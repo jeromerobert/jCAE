@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2003,2004,2005, by EADS CRC
+    Copyright (C) 2003,2004,2005,2006, by EADS CRC
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -34,7 +34,7 @@ import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.jcae.mesh.amibe.InvalidFaceException;
 import org.jcae.mesh.amibe.metrics.*;
 import org.jcae.mesh.mesher.ds.MMesh1D;
-import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.mesher.algos1d.*;
 import org.jcae.mesh.amibe.algos2d.*;
 import org.jcae.mesh.amibe.algos3d.Fuse;
@@ -252,7 +252,7 @@ public class Mesher
 				Metric2D.setLength(discr);
 				if(Boolean.getBoolean("org.jcae.mesh.Mesher.explodeBrep"))
 					F.writeNative("face."+iFace+".brep");
-				Mesh mesh = new Mesh(F); 
+				Mesh2D mesh = new Mesh2D(F); 
 				int nTry = 0;
 				while (nTry < nTryMax)
 				{
@@ -271,7 +271,7 @@ public class Mesher
 						if (ex instanceof InitialTriangulationException)
 						{
 							logger.warn("Face "+iFace+" cannot be triangulated, trying again with a larger tolerance...");
-							mesh = new Mesh(F);
+							mesh = new Mesh2D(F);
 							mesh.scaleTolerance(10.);
 							nTry++;
 							continue;
@@ -279,7 +279,7 @@ public class Mesher
 						else if (ex instanceof InvalidFaceException)
 						{
 							logger.warn("Face "+iFace+" is invalid, skipping...");
-							mesh = new Mesh(F); 
+							mesh = new Mesh2D(F); 
 							xmlFile = "jcae2d."+iFace;
 							MeshWriter.writeObject(mesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
 							badGroups.add(iFace);
@@ -300,7 +300,7 @@ public class Mesher
 				{
 					logger.error("Face "+iFace+" cannot be triangulated, skipping...");
 					badGroups.add(iFace);
-					mesh = new Mesh(F); 
+					mesh = new Mesh2D(F); 
 					xmlFile = "jcae2d."+iFace;
 					MeshWriter.writeObject(mesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
 				}

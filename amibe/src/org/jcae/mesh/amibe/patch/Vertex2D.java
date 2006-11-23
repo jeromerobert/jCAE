@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2004,2005, by EADS CRC
+    Copyright (C) 2004,2005,2006, by EADS CRC
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,6 @@ import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.OTriangle;
 import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.util.LongLong;
 import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.mesher.ds.MNode1D;
@@ -154,7 +153,7 @@ public class Vertex2D extends Vertex
 	 *
 	 * @return the normal to the surface at this location.
 	 */
-	public double [] getNormal(Mesh mesh)
+	public double [] getNormal(Mesh2D mesh)
 	{
 		CADGeomSurface surface = mesh.getGeomSurface();
 		surface.setParameter(param[0], param[1]);
@@ -185,7 +184,7 @@ public class Vertex2D extends Vertex
 	 * @return a triangle containing this point.
 	 * @see OTriangle2D#split3
 	 */
-	public OTriangle2D getSurroundingOTriangle(Mesh mesh)
+	public OTriangle2D getSurroundingOTriangle(Mesh2D mesh)
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("Searching for the triangle surrounding "+this);
@@ -234,7 +233,7 @@ public class Vertex2D extends Vertex
 		return current;
 	}
 	
-	private OTriangle2D getSurroundingOTriangleStart(Mesh mesh, OTriangle2D current)
+	private OTriangle2D getSurroundingOTriangleStart(Mesh2D mesh, OTriangle2D current)
 	{
 		boolean redo = false;
 		Vertex2D o = (Vertex2D) current.origin();
@@ -332,16 +331,17 @@ public class Vertex2D extends Vertex
 	 * to provide exact computations.  This is important because
 	 * this method is called by {@link #getSurroundingOTriangle}
 	 * to find the triangle enclosing a vertex, or by
-	 * {@link OTriangle2D#forceBoundaryEdge(Vertex2D)} to compute
+	 * {@link OTriangle2D#forceBoundaryEdge(Mesh2D,Vertex2D)} to compute
 	 * segment intersection.
 	 *
+	 * @param mesh  underlying Mesh2D instance
 	 * @param v1   first vertex of the segment
 	 * @param v2   second vertex of the segment
 	 * @return the signed area of the triangle composed of these three
 	 * vertices. It is positive if the vertex is on the left of this
 	 * segment, and negative otherwise.
 	 */
-	public long onLeft(Mesh mesh, Vertex2D v1, Vertex2D v2)
+	public long onLeft(Mesh2D mesh, Vertex2D v1, Vertex2D v2)
 	{
 		assert this != Vertex.outer;
 		assert v1 != Vertex.outer;
@@ -421,7 +421,7 @@ public class Vertex2D extends Vertex
 	*/
 	
 	//  Current vertex is symmetric apical vertex
-	public final boolean inCircleTest2(Mesh mesh, OTriangle2D ot)
+	public final boolean inCircleTest2(Mesh2D mesh, OTriangle2D ot)
 	{
 		assert this != Vertex2D.outer;
 		Vertex2D v1 = (Vertex2D) ot.origin();
@@ -463,7 +463,7 @@ public class Vertex2D extends Vertex
 	     ==> x orth(M,V12) - y orth(M,V13) = 0.5 V23
 	         x = <V23, V13> / (2 <orth(M,V12), V13>)
 	*/
-	private Vertex2D circumcenter(Mesh mesh, Vertex2D v1, Vertex2D v2, Vertex2D v3)
+	private Vertex2D circumcenter(Mesh2D mesh, Vertex2D v1, Vertex2D v2, Vertex2D v3)
 		throws RuntimeException
 	{
 		double [] p1 = v1.getUV();
@@ -495,7 +495,7 @@ public class Vertex2D extends Vertex
 		throw new RuntimeException("Circumcenter cannot be computed");
 	}
 	
-	public final boolean inCircleTest3(Mesh mesh, OTriangle2D ot)
+	public final boolean inCircleTest3(Mesh2D mesh, OTriangle2D ot)
 	{
 		//  vcX: vertices of current edge
 		//  vaX: apices
@@ -557,7 +557,7 @@ public class Vertex2D extends Vertex
 		}
 	}
 	
-	public final boolean isSmallerDiagonale(Mesh mesh, OTriangle2D ot)
+	public final boolean isSmallerDiagonale(Mesh2D mesh, OTriangle2D ot)
 	{
 		//  vcX: vertices of current edge
 		//  vaX: apices
@@ -581,13 +581,13 @@ public class Vertex2D extends Vertex
 		        mesh.compGeom().distance(vc1, vc2, this)));
 	}
 	
-	public boolean isPseudoIsotropic(Mesh mesh)
+	public boolean isPseudoIsotropic(Mesh2D mesh)
 	{
 		Metric2D m2d = getMetrics(mesh);
 		return m2d.isPseudoIsotropic();
 	}
 	
-	public final long distance2(Mesh mesh, Vertex2D that)
+	public final long distance2(Mesh2D mesh, Vertex2D that)
 	{
 		mesh.quadtree.double2int(param, i0);
 		mesh.quadtree.double2int(that.param, i1);
@@ -595,7 +595,7 @@ public class Vertex2D extends Vertex
 		long dy = i0[1] - i1[1];
 		return dx * dx + dy * dy;
 	}
-	private final long distance2cached(Mesh mesh, Vertex2D that)
+	private final long distance2cached(Mesh2D mesh, Vertex2D that)
 	{
 		mesh.quadtree.double2int(that.param, i1);
 		long dx = i0[0] - i1[0];
@@ -608,11 +608,10 @@ public class Vertex2D extends Vertex
 	 * is computed and then stored into a private instance member.
 	 * This cached value can be discarded by calling {@link #clearMetrics}.
 	 *
-	 * @param surf  the geometric  surface on which the current
-	 *              point is located
+	 * @param mesh  underlying Mesh2D instance
 	 * @return the 2D Riemannian metrics at this point.
 	 */
-	public Metric2D getMetrics(Mesh mesh)
+	public Metric2D getMetrics(Mesh2D mesh)
 	{
 		if (null == m2)
 		{

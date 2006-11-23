@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
  
-    Copyright (C) 2005, by EADS CRC
+    Copyright (C) 2005,2006, by EADS CRC
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,8 @@ package org.jcae.mesh.xmldata;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.ds.Vertex2D;
+import org.jcae.mesh.amibe.patch.Mesh2D;
+import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.cad.CADFace;
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,9 +51,9 @@ public class MeshReader
 	 * @param xmlFile      basename of the main XML file
 	 * @param F            yopological surface
 	 */
-	public static Mesh readObject(String xmlDir, String xmlFile, CADFace F)
+	public static Mesh2D readObject(String xmlDir, String xmlFile, CADFace F)
 	{
-		Mesh mesh = new Mesh(F);
+		Mesh2D mesh = new Mesh2D(F);
 		logger.debug("begin reading "+xmlDir+File.separator+xmlFile);
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		

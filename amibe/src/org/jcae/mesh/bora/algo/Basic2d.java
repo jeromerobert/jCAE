@@ -22,7 +22,7 @@ package org.jcae.mesh.bora.algo;
 
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.bora.ds.BModel;
-import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.algos2d.*;
 import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
@@ -66,7 +66,7 @@ public class Basic2d implements AlgoInterface
 	{
 		CADFace F = (CADFace) mesh.getShape();
 		logger.debug(""+this+"  shape: "+F);
-		Mesh m = new Mesh(F);
+		Mesh2D m = new Mesh2D(F);
 		mesh.mesh = m;
 		String xmlFile = "jcae1d";
 		Metric2D.setLength(maxlen);

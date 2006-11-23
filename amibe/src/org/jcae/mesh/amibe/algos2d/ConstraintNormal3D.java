@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2005, by EADS CRC
+    Copyright (C) 2005,2006, by EADS CRC
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,9 +20,9 @@
 
 package org.jcae.mesh.amibe.algos2d;
 
-import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.OTriangle2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
@@ -51,14 +51,14 @@ import org.apache.log4j.Logger;
 public class ConstraintNormal3D
 {
 	private static Logger logger=Logger.getLogger(ConstraintNormal3D.class);
-	private Mesh mesh = null;
+	private Mesh2D mesh = null;
 	
 	/**
 	 * Creates a <code>ConstraintNormal3D</code> instance.
 	 *
 	 * @param m  the <code>ConstraintNormal3D</code> instance to check.
 	 */
-	public ConstraintNormal3D(Mesh m)
+	public ConstraintNormal3D(Mesh2D m)
 	{
 		mesh = m;
 	}

@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
  
-    Copyright (C) 2003,2004,2005, by EADS CRC
+    Copyright (C) 2003,2004,2005,2006, by EADS CRC
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,6 @@
 
 package org.jcae.mesh.amibe.patch;
 
-import org.jcae.mesh.amibe.ds.Mesh;
 import org.apache.log4j.Logger;
 
 /**
@@ -32,15 +31,15 @@ public class Calculus2D implements Calculus
 {
 	private static Logger logger=Logger.getLogger(Calculus2D.class);	
 
-	//  The Mesh instance on which methods are applied
-	private Mesh mesh;
+	//  The Mesh2D instance on which methods are applied
+	private Mesh2D mesh;
 	
 	/**
 	 * Constructor.
 	 *
-	 * @param  m   the <code>Mesh</code> being modified.
+	 * @param  m   the <code>Mesh2D</code> being modified.
 	 */
-	public Calculus2D(Mesh m)
+	public Calculus2D(Mesh2D m)
 	{
 		mesh = m;
 	}

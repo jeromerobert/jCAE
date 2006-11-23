@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
  
-    Copyright (C) 2003,2004,2005, by EADS CRC
+    Copyright (C) 2003,2004,2005,2006, by EADS CRC
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,7 +20,6 @@
 
 package org.jcae.mesh.amibe.patch;
 
-import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.metrics.Metric2D;
 import java.util.Stack;
 import org.apache.log4j.Logger;
@@ -32,8 +31,8 @@ public class Calculus3D implements Calculus
 {
 	private static Logger logger=Logger.getLogger(Calculus3D.class);	
 
-	//  The Mesh instance on which methods are applied
-	private Mesh mesh;
+	//  The Mesh2D instance on which methods are applied
+	private Mesh2D mesh;
 	
 	private static final int level_max = 10;
 	private static final double delta_max = 0.5;
@@ -55,9 +54,9 @@ public class Calculus3D implements Calculus
 	/**
 	 * Constructor.
 	 *
-	 * @param  m   the <code>Mesh</code> being modified.
+	 * @param  m   the <code>Mesh2D</code> being modified.
 	 */
-	public Calculus3D(Mesh m)
+	public Calculus3D(Mesh2D m)
 	{
 		mesh = m;
 	}
@@ -134,8 +133,7 @@ public class Calculus3D implements Calculus
 	 * Returns the 2D radius of the 3D unit ball centered at a point.
 	 * This routine returns a radius such that the 2D circle centered
 	 * at a given vertex will have a distance lower than 1 in 3D.
-	 * This method is used by
-	 * {@link org.jcae.mesh.amibe.util.QuadTree#getNearestVertex}
+	 * This method is used by {@link QuadTree#getNearestVertex}
 	 *
 	 * @param vm  the vertex on which metrics is evaluated
 	 * @return the radius in 2D space.

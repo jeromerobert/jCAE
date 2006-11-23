@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2003,2004,2005, by EADS CRC
+    Copyright (C) 2003,2004,2005,2006, by EADS CRC
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -21,10 +21,10 @@
 package org.jcae.mesh.amibe.algos2d;
 
 import org.jcae.mesh.mesher.ds.MMesh1D;
-import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.OTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.apache.log4j.Logger;
 
@@ -37,9 +37,9 @@ import org.apache.log4j.Logger;
  * and collected into a list.  These nodes are boundary nodes, and
  * all other nodes will be inserted in the interior domain.  A bounding
  * box enclosing all these nodes in the 2D space is computed, and
- * a {@link org.jcae.mesh.amibe.util.QuadTree} instance can then be
+ * a {@link org.jcae.mesh.amibe.patch.QuadTree} instance can then be
  * initialized by
- * {@link Mesh#initQuadTree(double, double, double, double)}.
+ * {@link Mesh2D#initQuadTree(double, double, double, double)}.
  *
  * <p>
  * Some checks have been added to remove tiny edges and make sure that
@@ -64,7 +64,7 @@ import org.apache.log4j.Logger;
  * Boundary nodes are then inserted iteratively.  For the moment, an Euclidian
  * 2D metric is used because a 3D metric will not help on a very rough
  * triangulation.  The nearest vertex already inserted in the mesh is retrieved
- * with {@link org.jcae.mesh.amibe.util.QuadTree#getNearestVertex(Vertex2D)}.
+ * with {@link org.jcae.mesh.amibe.patch.QuadTree#getNearestVertex(Vertex2D)}.
  * It has a reference to a triangle containing this vertex.  From this starting
  * point, we search for the {@link Triangle} containing this boundary node by
  * looking for adjacent triangles into the right direction.  This
@@ -77,7 +77,7 @@ import org.apache.log4j.Logger;
  * When all boundary nodes are inserted, an unconstrained Delaunay mesh has
  * been built.  The list of boundary nodes computed previously gives a list of
  * boundary edges, which needs to be enforced.  This is performed by
- * {@link Mesh#forceBoundaryEdge(Vertex2D, Vertex2D, int)}; the segments which
+ * {@link Mesh2D#forceBoundaryEdge(Vertex2D, Vertex2D, int)}; the segments which
  * intersect the enforced edge are swapped.  The {@link OTriangle#BOUNDARY}
  * attribute is set on these edges (and on matte edges).
  * </p>
@@ -134,7 +134,7 @@ import org.apache.log4j.Logger;
  * In order to improve accuracy, Frédéric Hecht advised to recursively
  * split segments when metrics at end points are very different.  This
  * has been implemented in
- * {@link org.jcae.mesh.amibe.ds.tools.Calculus3D#distance(Vertex2D, Vertex2D)}
+ * {@link org.jcae.mesh.amibe.patch.Calculus3D#distance(Vertex2D,Vertex2D)}
  * but did not give good results.  Now that the whole process works much
  * better, this issue could be investigated again.
  * </p>
@@ -147,8 +147,9 @@ import org.apache.log4j.Logger;
  *
  * <p>
  * The current implementation begins with swapping edges (by calling
- * {@link OTriangle2D#checkSmallerAndSwap}) if the opposite diagonal
- * is smaller.  This method did improve some test cases, but is
+ * {@link org.jcae.mesh.amibe.patch.OTriangle2D#checkSmallerAndSwap})
+ * if the opposite diagonal is smaller.
+ * This method did improve some test cases, but is
  * certainly useless with the current meshing process because it has
  * been dramatically improved since these tests have been performed.
  * The following steps are then performed:
@@ -170,7 +171,7 @@ import org.apache.log4j.Logger;
 public class BasicMesh
 {
 	private static Logger logger=Logger.getLogger(BasicMesh.class);
-	private Mesh mesh = null;
+	private Mesh2D mesh = null;
 	private MMesh1D mesh1d = null;
 	
 	/**
@@ -179,7 +180,7 @@ public class BasicMesh
 	 * @param m  the data structure in which the mesh will be stored.
 	 * @param m1d  discretization of edges.
 	 */
-	public BasicMesh(Mesh m, MMesh1D m1d)
+	public BasicMesh(Mesh2D m, MMesh1D m1d)
 	{
 		mesh = m;
 		mesh1d = m1d;
