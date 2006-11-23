@@ -90,7 +90,7 @@ public class MESHReader
 				x = new Double(x1).doubleValue();
 				y = new Double(y1).doubleValue();
 				z = new Double(z1).doubleValue();
-				Vertex n = Vertex.valueOf(m, x,y,z);
+				Vertex n = Vertex.valueOf(x,y,z);
 				m.add(n);
 				nodesmap.put(i, n);
 			}

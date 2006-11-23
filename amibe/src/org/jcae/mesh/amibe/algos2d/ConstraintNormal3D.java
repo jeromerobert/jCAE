@@ -115,7 +115,7 @@ public class ConstraintNormal3D
 					// inverted in 2D space
 					Vertex2D sa = (Vertex2D) sym.apex();
 					Vertex2D oa = (Vertex2D) ot.apex();
-					if (sa.onLeft((Vertex2D) ot.destination(), (Vertex2D) ot.apex()) <= 0L || oa.onLeft((Vertex2D) ot.origin(), (Vertex2D) sym.apex()) <= 0L)
+					if (sa.onLeft(mesh, (Vertex2D) ot.destination(), (Vertex2D) ot.apex()) <= 0L || oa.onLeft(mesh, (Vertex2D) ot.origin(), (Vertex2D) sym.apex()) <= 0L)
 						continue;
 					// 3D coordinates of vertices
 					double p1[] = ot.origin().getUV();

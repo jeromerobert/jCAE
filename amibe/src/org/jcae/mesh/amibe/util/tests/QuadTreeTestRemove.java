@@ -66,8 +66,8 @@ public class QuadTreeTestRemove extends QuadTreeTest
 		{
 			u = rand.nextDouble();
 			v = rand.nextDouble();
-			Vertex2D pt = Vertex2D.valueOf(m, u, v);
-			pt.addToQuadTree();
+			Vertex2D pt = Vertex2D.valueOf(u, v);
+			r.add(pt);
 		}
 		//CheckCoordProcedure checkproc = new CheckCoordProcedure();
 		//r.walk(checkproc);
@@ -84,7 +84,7 @@ public class QuadTreeTestRemove extends QuadTreeTest
 					double [] xyz = view.getLastClick();
 					if (null != xyz)
 					{
-						Vertex2D vt = r.getNearVertex(Vertex2D.valueOf(m, xyz[0], xyz[1]));
+						Vertex2D vt = r.getNearVertex(Vertex2D.valueOf(xyz[0], xyz[1]));
 						r.remove(vt);
 						view.removeAllBranchGroup();
 						display(view, r);

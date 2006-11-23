@@ -113,7 +113,7 @@ public class MeshReader
 			for (int i=0; i < numberOfNodes; i++)
 			{
 				nodesBuffer.get(coord);
-				nodelist[i] = (Vertex2D) Vertex.valueOf(mesh, coord);
+				nodelist[i] = (Vertex2D) Vertex.valueOf(coord);
 				if (i < numberOfNodes - numberOfReferences)
 					label = 0;
 				else
@@ -130,7 +130,7 @@ public class MeshReader
 			}
 			mesh.initQuadTree(umin, umax, vmin, vmax);
 			for (int i=0; i < numberOfNodes; i++)
-				nodelist[i].addToQuadTree();
+				mesh.getQuadTree().add(nodelist[i]);
 			
 			int numberOfTriangles = Integer.parseInt(
 				xpath.evaluate("number/text()", submeshTriangles));
@@ -224,7 +224,7 @@ public class MeshReader
 			for (int i=0; i < numberOfNodes; i++)
 			{
 				nodesBuffer.get(coord);
-				nodelist[i] = Vertex.valueOf(mesh, coord);
+				nodelist[i] = Vertex.valueOf(coord);
 				if (i < numberOfNodes - numberOfReferences)
 					label = 0;
 				else

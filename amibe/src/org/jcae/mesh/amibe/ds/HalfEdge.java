@@ -121,7 +121,7 @@ public class HalfEdge
 	 */
 	public final HalfEdge prevOrigin()
 	{
-		return sym().next();
+		return sym.next;
 	}
 	
 	/**
@@ -130,7 +130,7 @@ public class HalfEdge
 	 */
 	public final HalfEdge nextDest()
 	{
-		return sym().prev();
+		return sym.prev();
 	}
 	
 	/**
@@ -139,7 +139,7 @@ public class HalfEdge
 	 */
 	public final HalfEdge prevDest()
 	{
-		return next().sym();
+		return next.sym;
 	}
 	
 	/**
@@ -147,7 +147,7 @@ public class HalfEdge
 	 */
 	public final HalfEdge nextApex()
 	{
-		return next().sym().next();
+		return next.sym.next;
 	}
 	
 	/**
@@ -155,7 +155,7 @@ public class HalfEdge
 	 */
 	public final HalfEdge prevApex()
 	{
-		return prev().sym().prev();
+		return prev().sym.prev();
 	}
 	
 	//  The following 3 methods change the underlying triangle.
@@ -301,7 +301,7 @@ public class HalfEdge
 		HalfEdge edge = ot.getTri().edge;
 		assert edge != null : ot;
 		for (int j = ot.getLocalNumber(); j > 0; j--)
-			edge = edge.next();
+			edge = edge.next;
 		return edge;
 	}
 	
@@ -491,7 +491,7 @@ public class HalfEdge
 	 * TODO: Attributes are not checked.
 	 * @param n the resulting vertex
 	 */
-	public final void contract(Vertex n)
+	public final void contract(Mesh m, Vertex n)
 	{
 		Vertex o = origin();
 		Vertex d = destination();
@@ -522,7 +522,7 @@ public class HalfEdge
 		}
 		while (e.destination() != d);
 		//  Replace d by n in all incident triangles
-		e = e.sym();
+		e = e.sym;
 		do
 		{
 			e.setOrigin(n);
@@ -533,10 +533,10 @@ public class HalfEdge
 		//  written instead of n.
 		e = next();             // (dV1o)
 		int attr4 = e.attributes;
-		s = e.sym();            // (V1dV4)
+		s = e.sym;              // (V1dV4)
 		e = e.next();           // (V1od)
 		int attr3 = e.attributes;
-		f = e.sym();            // (oV1V3)
+		f = e.sym;              // (oV1V3)
 		if (f != null)
 			f.glue(s);
 		else if (s != null)
@@ -561,13 +561,13 @@ public class HalfEdge
 			n.setLink(t34);
 		}
 		e = e.next();                   // (odV1)
-		e = e.sym();                    // (doV2)
+		e = e.sym;                      // (doV2)
 		e = e.next();                   // (oV2d)
 		int attr5 = e.attributes;
-		s = e.sym();                    // (V2oV5)
+		s = e.sym;                      // (V2oV5)
 		e = e.next();                   // (V2do)
 		int attr6 = e.attributes;
-		f = e.sym();                    // (dV2V6)
+		f = e.sym;                      // (dV2V6)
 		if (f != null)
 			f.glue(s);
 		else if (s != null)
@@ -593,15 +593,15 @@ public class HalfEdge
 		}
 		e = e.next();                   // (doV2)
 		// Must be called before T2 is removed
-		s = e.sym();
+		s = e.sym;
 		e.clearAttributes(OTriangle.MARKED);
 		e.pushAttributes();
 		// Remove T2
-		n.mesh.remove(e.tri);
+		m.remove(e.tri);
 		s.clearAttributes(OTriangle.MARKED);
 		s.pushAttributes();
 		// Remove T1
-		n.mesh.remove(s.tri);
+		m.remove(s.tri);
 	}
 	
 	public String toString()
@@ -644,7 +644,7 @@ public class HalfEdge
 		m.setType(Mesh.MESH_3D);
 		System.out.println("Building mesh...");
 		Triangle T = new Triangle(v[0], v[1], v[2]);
-		T.addToMesh();
+		m.add(T);
 		assert m.isValid();
 		// Outer triangles
 		Triangle [] O = new Triangle[3];
@@ -654,7 +654,7 @@ public class HalfEdge
 		for (int i = 0; i < 3; i++)
 		{
 			O[i].setOuter();
-			O[i].addToMesh();
+			m.add(O[i]);
 		}
 		assert m.isValid();
 		OTriangle ot1 = new OTriangle();
@@ -670,7 +670,7 @@ public class HalfEdge
 		assert ot2.origin() == v[0];
 		assert m.isValid();
 		ot2.prevOTri();  // (v2,v0,v1)
-		ot2.split(v[3]); // (v2,v3,v1)
+		ot2.split(m, v[3]); // (v2,v3,v1)
 		assert m.isValid();
 		ot2.nextOTri();  // (v3,v1,v2)
 		ot2.swap();      // (v3,v0,v2)
@@ -685,7 +685,7 @@ public class HalfEdge
 		 *             +---------+
 		 *             v0       v1
 		 */
-		ot2.split(v[5]); // (v3,v5,v2)
+		ot2.split(m, v[5]); // (v3,v5,v2)
 		assert m.isValid();
 		ot2.nextOTri();  // (v5,v2,v3)
 		ot2.swap();      // (v5,v0,v3)
@@ -701,7 +701,7 @@ public class HalfEdge
 		 *   v5        v0       v1
 		 */
 		ot2.prevOTri();  // (v3,v5,v0)
-		ot2.split(v[4]); // (v3,v4,v0)
+		ot2.split(m, v[4]); // (v3,v4,v0)
 		assert m.isValid();
 		/*
 		 *  v4        v3        v2
@@ -743,7 +743,7 @@ public class HalfEdge
 	private static void unitTestCheckContract(Mesh m, Vertex o, Vertex d, Vertex n)
 	{
 		HalfEdge e = HalfEdge.find(o, d);
-		e.contract(n);
+		e.contract(m, n);
 		assert m.isValid();
 	}
 	
@@ -751,12 +751,12 @@ public class HalfEdge
 	{
 		Mesh m = new Mesh();
 		Vertex [] v = new Vertex[6];
-		v[0] = Vertex.valueOf(m, 0.0, 0.0, 0.0);
-		v[1] = Vertex.valueOf(m, 1.0, 0.0, 0.0);
-		v[2] = Vertex.valueOf(m, 1.0, 1.0, 0.0);
-		v[3] = Vertex.valueOf(m, 0.0, 1.0, 0.0);
-		v[4] = Vertex.valueOf(m, -1.0, 1.0, 0.0);
-		v[5] = Vertex.valueOf(m, -1.0, 0.0, 0.0);
+		v[0] = Vertex.valueOf(0.0, 0.0, 0.0);
+		v[1] = Vertex.valueOf(1.0, 0.0, 0.0);
+		v[2] = Vertex.valueOf(1.0, 1.0, 0.0);
+		v[3] = Vertex.valueOf(0.0, 1.0, 0.0);
+		v[4] = Vertex.valueOf(-1.0, 1.0, 0.0);
+		v[5] = Vertex.valueOf(-1.0, 0.0, 0.0);
 		unitTestBuildMesh(m, v);
 		assert m.isValid();
 		m.buildEdges();

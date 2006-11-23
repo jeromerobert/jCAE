@@ -106,7 +106,7 @@ public class CheckDelaunay
 					ot.setAttributes(OTriangle.SWAPPED);
 					sym.setAttributes(OTriangle.SWAPPED);
 					v = (Vertex2D) sym.apex();
-					if (!ot.isDelaunay(v))
+					if (!ot.isDelaunay(mesh, v))
 					{
 						cnt++;
 						toSwap.add(t);

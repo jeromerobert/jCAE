@@ -60,7 +60,7 @@ public class OTriangle2D extends OTriangle
 	 * Collapse an edge and update adjacency relations.
 	 * Its start and end points must have the same location.
 	 */
-	public final void removeDegenerated()
+	public final void removeDegenerated(Mesh mesh)
 	{
 		Vertex2D o = (Vertex2D) origin();
 		Vertex2D d = (Vertex2D) destination();
@@ -81,7 +81,7 @@ public class OTriangle2D extends OTriangle
 			}
 		}
 		while (work[0].destination() != d);
-		o.removeFromQuadTree();
+		mesh.getQuadTree().remove(o);
 		
 		//  Glue triangles
 		nextOTri(this, work[0]);
@@ -127,7 +127,7 @@ public class OTriangle2D extends OTriangle
 	 * @param force  if <code>false</code>, the vertex is inserted only if some edges were swapped after its insertion.  If <code>true</code>, the vertex is unconditionnally inserted.
 	 * @return <code>true</code> if vertex was successfully added, <code>false</code> otherwise.
 	 */
-	public final boolean split3(Vertex2D v, boolean force)
+	public final boolean split3(Mesh mesh, Vertex2D v, boolean force)
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("Split OTriangle2D "+this+"\nat Vertex "+v);
@@ -194,8 +194,8 @@ public class OTriangle2D extends OTriangle
 		if (logger.isDebugEnabled())
 			logger.debug("New triangles:\n"+this+"\n"+newRight+"\n"+newLeft);
 		if (force)
-			newLeft.CheckAndSwap(false);
-		else if (0 == newLeft.CheckAndSwap(false))
+			newLeft.CheckAndSwap(mesh, false);
+		else if (0 == newLeft.CheckAndSwap(mesh, false))
 		{
 			//  v has been inserted and no edges are swapped,
 			//  thus global quality has been decreased.
@@ -211,22 +211,23 @@ public class OTriangle2D extends OTriangle
 			oldLeft.glue(oldSymLeft);
 			return false;
 		}
-		newTri1.addToMesh();
-		newTri2.addToMesh();
+		mesh.add(newTri1);
+		mesh.add(newTri2);
+		mesh.getQuadTree().add(v);
 		return true;
 	}
 	
 	//  Called from BasicMesh to improve initial mesh
-	public int checkSmallerAndSwap()
+	public int checkSmallerAndSwap(Mesh mesh)
 	{
 		//  As CheckAndSwap modifies its arguments, 'this'
 		//  must be protected.
 		OTriangle2D ot1 = new OTriangle2D();
 		copyOTri(this, ot1);
-		return ot1.CheckAndSwap(true);
+		return ot1.CheckAndSwap(mesh, true);
 	}
 	
-	private int CheckAndSwap(boolean smallerDiag)
+	private int CheckAndSwap(Mesh mesh, boolean smallerDiag)
 	{
 		int nrSwap = 0;
 		int totNrSwap = 0;
@@ -255,17 +256,17 @@ public class OTriangle2D extends OTriangle
 				Vertex2D a = (Vertex2D) sym.apex();
 				boolean toSwap = false;
 				if (o == Vertex2D.outer)
-					toSwap = (v.onLeft(d, a) < 0L);
+					toSwap = (v.onLeft(mesh, d, a) < 0L);
 				else if (d == Vertex2D.outer)
-					toSwap = (v.onLeft(a, o) < 0L);
+					toSwap = (v.onLeft(mesh, a, o) < 0L);
 				else if (a == Vertex2D.outer)
-					toSwap = (v.onLeft(o, d) == 0L);
+					toSwap = (v.onLeft(mesh, o, d) == 0L);
 				else if (isMutable())
 				{
 					if (!smallerDiag)
-						toSwap = !isDelaunay(a);
+						toSwap = !isDelaunay(mesh, a);
 					else
-						toSwap = !a.isSmallerDiagonale(this);
+						toSwap = !a.isSmallerDiagonale(mesh, this);
 				}
 				if (toSwap)
 				{
@@ -306,7 +307,7 @@ public class OTriangle2D extends OTriangle
 	 * @param end  end point of the boundary edge.
 	 * @return the number of intersected edges.
 	 */
-	public final int forceBoundaryEdge(Vertex2D end)
+	public final int forceBoundaryEdge(Mesh mesh, Vertex2D end)
 	{
 		long newl, oldl;
 		int count = 0;
@@ -327,9 +328,9 @@ public class OTriangle2D extends OTriangle
 			work[0].nextOTri();
 			Vertex2D n = (Vertex2D) work[0].destination();
 			assert n != Vertex2D.outer : ""+work[0];
-			newl = n.onLeft(start, end);
-			oldl = a.onLeft(start, end);
-			boolean toSwap = (n != Vertex2D.outer) && (a.onLeft(n, d) > 0L) && (a.onLeft(o, n) > 0L) && !hasAttributes(BOUNDARY);
+			newl = n.onLeft(mesh, start, end);
+			oldl = a.onLeft(mesh, start, end);
+			boolean toSwap = (n != Vertex2D.outer) && (a.onLeft(mesh, n, d) > 0L) && (a.onLeft(mesh, o, n) > 0L) && !hasAttributes(BOUNDARY);
 			if (newl > 0L)
 			{
 				//  o stands to the right of (start,end), d and n to the left.
@@ -397,14 +398,14 @@ public class OTriangle2D extends OTriangle
 	 * @return <code>true</code> if edge is Delaunay, <code>false</code>
 	 * otherwise.
 	 */
-	public final boolean isDelaunay(Vertex2D apex2)
+	public final boolean isDelaunay(Mesh mesh, Vertex2D apex2)
 	{
-		if (apex2.isPseudoIsotropic())
-			return isDelaunay_isotropic(apex2);
-		return isDelaunay_anisotropic(apex2);
+		if (apex2.isPseudoIsotropic(mesh))
+			return isDelaunay_isotropic(mesh, apex2);
+		return isDelaunay_anisotropic(mesh, apex2);
 	}
 	
-	private final boolean isDelaunay_isotropic(Vertex2D apex2)
+	private final boolean isDelaunay_isotropic(Mesh mesh, Vertex2D apex2)
 	{
 		assert Vertex2D.outer != (Vertex2D) origin();
 		assert Vertex2D.outer != (Vertex2D) destination();
@@ -412,10 +413,10 @@ public class OTriangle2D extends OTriangle
 		Vertex2D vA = (Vertex2D) origin();
 		Vertex2D vB = (Vertex2D) destination();
 		Vertex2D v1 = (Vertex2D) apex();
-		long tp1 = vA.onLeft(vB, v1);
-		long tp2 = vB.onLeft(vA, apex2);
-		long tp3 = apex2.onLeft(vB, v1);
-		long tp4 = v1.onLeft(vA, apex2);
+		long tp1 = vA.onLeft(mesh, vB, v1);
+		long tp2 = vB.onLeft(mesh, vA, apex2);
+		long tp3 = apex2.onLeft(mesh, vB, v1);
+		long tp4 = v1.onLeft(mesh, vA, apex2);
 		if (Math.abs(tp3) + Math.abs(tp4) < Math.abs(tp1)+Math.abs(tp2) )
 			return true;
 		if (tp1 > 0L && tp2 > 0L)
@@ -423,17 +424,17 @@ public class OTriangle2D extends OTriangle
 			if (tp3 <= 0L || tp4 <= 0L)
 				return true;
 		}
-		return !apex2.inCircleTest2(this);
+		return !apex2.inCircleTest2(mesh, this);
 	}
 	
-	private final boolean isDelaunay_anisotropic(Vertex2D apex2)
+	private final boolean isDelaunay_anisotropic(Mesh mesh, Vertex2D apex2)
 	{
 		assert Vertex2D.outer != (Vertex2D) origin();
 		assert Vertex2D.outer != (Vertex2D) destination();
 		assert Vertex2D.outer != (Vertex2D) apex();
 		if (apex2 == Vertex2D.outer)
 			return true;
-		return !apex2.inCircleTest3(this);
+		return !apex2.inCircleTest3(mesh, this);
 	}
 	
 }

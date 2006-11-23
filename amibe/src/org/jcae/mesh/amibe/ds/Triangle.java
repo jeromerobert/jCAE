@@ -220,18 +220,6 @@ public class Triangle
 	}
 	
 	/**
-	 * Add this triangle to the global mesh.
-	 */
-	public void addToMesh()
-	{
-		Mesh m = vertex[0].mesh;
-		if (Vertex.outer == vertex[0])
-			m = vertex[1].mesh;
-		assert null != m;
-		m.add(this);
-	}
-	
-	/**
 	 * Change the adjacency relation of an edge.
 	 * Only one relation is modified.  If both sides have to be modified,
 	 * then {@link OTriangle#glue} should be used instead.
@@ -287,7 +275,7 @@ public class Triangle
 		double [] p1 = vertex[0].getUV();
 		double [] p2 = vertex[1].getUV();
 		double [] p3 = vertex[2].getUV();
-		return Vertex2D.valueOf(vertex[0].mesh,
+		return Vertex2D.valueOf(
 			(p1[0]+p2[0]+p3[0])/3.0,
 			(p1[1]+p2[1]+p3[1])/3.0
 		);

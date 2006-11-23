@@ -177,7 +177,7 @@ public class SplitEdge
 				double [] p1 = edge.destination().getUV();
 				for (int i = 0; i < 3; i++)
 					newXYZ[i] = 0.5*(p0[i]+p1[i]);
-				v = Vertex.valueOf(mesh, newXYZ);
+				v = Vertex.valueOf(newXYZ);
 				if (edge.hasAttributes(OTriangle.BOUNDARY))
 				{
 					// FIXME: Check deflection
@@ -219,7 +219,7 @@ public class SplitEdge
 			tree.remove(current);
 			if (logger.isDebugEnabled())
 				logger.debug("Split edge: "+edge);
-			edge.split(v);
+			edge.split(mesh, v);
 			assert edge.destination() == v : v+" "+edge;
 			splitted++;
 			// Update edge length

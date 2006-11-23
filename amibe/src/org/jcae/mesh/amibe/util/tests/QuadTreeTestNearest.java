@@ -63,8 +63,8 @@ public class QuadTreeTestNearest extends QuadTreeTest
 		{
 			u = rand.nextDouble();
 			v = rand.nextDouble();
-			Vertex2D pt = Vertex2D.valueOf(m, u, v);
-			pt.addToQuadTree();
+			Vertex2D pt = Vertex2D.valueOf(u, v);
+			r.add(pt);
 		}
 		//CheckCoordProcedure checkproc = new CheckCoordProcedure();
 		//r.walk(checkproc);
@@ -83,7 +83,7 @@ public class QuadTreeTestNearest extends QuadTreeTest
 		{
 			u = rand.nextDouble();
 			v = rand.nextDouble();
-			Vertex2D vt = Vertex2D.valueOf(m, u, v);
+			Vertex2D vt = Vertex2D.valueOf(u, v);
 			if (visu)
 			{
 				view.addBranchGroup(r.segment(vt, r.getNearVertex(vt), 5.0f, 1, 1, 0));
@@ -106,7 +106,7 @@ public class QuadTreeTestNearest extends QuadTreeTest
 					double [] xyz = view.getLastClick();
 					if (null != xyz)
 					{
-						Vertex2D vt = Vertex2D.valueOf(m, xyz[0], xyz[1]);
+						Vertex2D vt = Vertex2D.valueOf(xyz[0], xyz[1]);
 						view.addBranchGroup(r.segment(vt, r.getNearVertex(vt), 5.0f, 1, 1, 0));
 						view.setVisible(true);
 						view.addBranchGroup(r.segment(vt, r.getNearestVertex(vt), 0.0f, 0, 1, 1));

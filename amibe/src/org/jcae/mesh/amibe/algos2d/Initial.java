@@ -261,7 +261,7 @@ public class Initial
 				v3 = bNodes[i];
 				if (firstOnWire == v3)
 					throw new InitialTriangulationException();
-				if (v3.onLeft(v1, v2) != 0L)
+				if (v3.onLeft(mesh, v1, v2) != 0L)
 					break;
 			}
 			assert i < bNodes.length;
@@ -276,9 +276,8 @@ public class Initial
 					firstOnWire = null;
 				else
 				{
-					ot = v.getSurroundingOTriangle();
-					ot.split3(v, true); 
-					v.addToQuadTree();
+					ot = v.getSurroundingOTriangle(mesh);
+					ot.split3(mesh, v, true); 
 					if (firstOnWire == null)
 						firstOnWire = v;
 				}
@@ -403,10 +402,9 @@ public class Initial
 			for (Iterator it = innerNodes.iterator(); it.hasNext(); )
 			{
 				MNode1D p1 = (MNode1D) it.next();
-				v = Vertex2D.valueOf(mesh, p1, null, face);
-				ot = v.getSurroundingOTriangle();
-				ot.split3(v, true); 
-				v.addToQuadTree();
+				v = Vertex2D.valueOf(p1, null, face);
+				ot = v.getSurroundingOTriangle(mesh);
+				ot.split3(mesh, v, true); 
 			}
 		}
 
@@ -429,7 +427,7 @@ public class Initial
 				s.nextOTri();
 				if (s.hasAttributes(OTriangle.SWAPPED))
 					continue;
-				if (s.checkSmallerAndSwap() != 0)
+				if (s.checkSmallerAndSwap(mesh) != 0)
 					redo = true;
  			}
  		}
@@ -490,7 +488,7 @@ public class Initial
 				p1 = (MNode1D) itn.next();
 				if (null == p2)
 				{
-					p2 = Vertex2D.valueOf(mesh, p1, c2d, face);
+					p2 = Vertex2D.valueOf(p1, c2d, face);
 					nodesWire.add(p2);
 					p20 = p2;
 					lastPoint = p2;
@@ -499,7 +497,7 @@ public class Initial
 				while (itn.hasNext())
 				{
 					p1 = (MNode1D) itn.next();
-					p2 = Vertex2D.valueOf(mesh, p1, c2d, face);
+					p2 = Vertex2D.valueOf(p1, c2d, face);
 					newNodes.add(p2);
 				}
 				// An edge is skipped if all the following conditions

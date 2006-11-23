@@ -49,11 +49,6 @@ public class Vertex
 	public static Vertex outer = null;
 	
 	/**
-	 * Backward reference to the mesh, to have access to the global
-	 * context.
-	 */
-	public final Mesh mesh;
-	/**
 	 * 2D or 3D coordinates.
 	 */
 	public final double [] param;
@@ -79,9 +74,8 @@ public class Vertex
 	/**
 	 * Constructor called by Vertex2D.
 	 */
-	public Vertex(Mesh m)
+	Vertex()
 	{
-		mesh = m;
 		param = new double[2];
 	}
 
@@ -92,9 +86,8 @@ public class Vertex
 	 * @param y  second coordinate.
 	 * @param z  third coordinate.
 	 */
-	private Vertex(Mesh m, double x, double y, double z)
+	private Vertex(double x, double y, double z)
 	{
-		mesh = m;
 		param = new double[3];
 		param[0] = x;
 		param[1] = y;
@@ -108,22 +101,18 @@ public class Vertex
 	 * @param y  second coordinate.
 	 * @param z  third coordinate.
 	 */
-	public static Vertex valueOf(Mesh mesh, double x, double y, double z)
+	public static Vertex valueOf(double x, double y, double z)
 	{
-		return new Vertex(mesh, x, y, z);
+		return new Vertex(x, y, z);
 	}
 	
-	public static Vertex valueOf(Mesh mesh, double [] p)
+	public static Vertex valueOf(double [] p)
 	{
 		Vertex ret;
 		if (p.length == 2)
-		{
-			ret = new Vertex2D(mesh);
-			ret.param[0] = p[0];
-			ret.param[1] = p[1];
-		}
+			ret = Vertex2D.valueOf(p[0], p[1]);
 		else
-			ret = new Vertex(mesh, p[0], p[1], p[2]);
+			ret = new Vertex(p[0], p[1], p[2]);
 		return ret;
 	}
 	

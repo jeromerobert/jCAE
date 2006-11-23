@@ -998,7 +998,7 @@ public class OTriangle
 	 */
 	public final boolean canContract(Vertex n)
 	{
-		if (n.mesh.getType() == Mesh.MESH_3D && !checkInversion(n))
+		if (!checkInversion(n))
 				return false;
 		
 		//  Topology check
@@ -1168,7 +1168,7 @@ public class OTriangle
 	 *
 	 * @param n the resulting vertex
 	 */
-	public final void split(Vertex n)
+	public final void split(Mesh m, Vertex n)
 	{
 		/*
 		 *         V1                       V1        
@@ -1188,8 +1188,8 @@ public class OTriangle
 		Triangle t2 = (Triangle) tri.getAdj(localNumber);
 		Triangle t3 = new Triangle(t1);
 		Triangle t4 = new Triangle(t2);
-		t3.addToMesh();
-		t4.addToMesh();
+		m.add(t3);
+		m.add(t4);
 		copyOTri(this, work[1]);        // (odV1)
 		// Update vertices
 		setDestination(n);
@@ -1348,7 +1348,7 @@ public class OTriangle
 		m.setType(Mesh.MESH_3D);
 		System.out.println("Building mesh...");
 		Triangle T = new Triangle(v[0], v[1], v[2]);
-		T.addToMesh();
+		m.add(T);
 		assert m.isValid();
 		// Outer triangles
 		Triangle [] O = new Triangle[3];
@@ -1358,7 +1358,7 @@ public class OTriangle
 		for (int i = 0; i < 3; i++)
 		{
 			O[i].setOuter();
-			O[i].addToMesh();
+			m.add(O[i]);
 		}
 		assert m.isValid();
 		OTriangle ot1 = new OTriangle();
@@ -1375,7 +1375,7 @@ public class OTriangle
 // m.printMesh();
 		assert m.isValid();
 		ot2.prevOTri();  // (v2,v0,v1)
-		ot2.split(v[3]); // (v2,v3,v1)
+		ot2.split(m, v[3]); // (v2,v3,v1)
 		assert m.isValid();
 		ot2.nextOTri();  // (v3,v1,v2)
 		ot2.swap();      // (v3,v0,v2)
@@ -1390,7 +1390,7 @@ public class OTriangle
 		 *             +---------+
 		 *             v0       v1
 		 */
-		ot2.split(v[5]); // (v3,v5,v2)
+		ot2.split(m, v[5]); // (v3,v5,v2)
 		assert m.isValid();
 		ot2.nextOTri();  // (v5,v2,v3)
 		ot2.swap();      // (v5,v0,v3)
@@ -1406,7 +1406,7 @@ public class OTriangle
 		 *   v5        v0       v1
 		 */
 		ot2.prevOTri();  // (v3,v5,v0)
-		ot2.split(v[4]); // (v3,v4,v0)
+		ot2.split(m, v[4]); // (v3,v4,v0)
 		assert m.isValid();
 		/*
 		 *  v4        v3        v2
@@ -1490,12 +1490,12 @@ public class OTriangle
 	{
 		Mesh m = new Mesh();
 		Vertex [] v = new Vertex[6];
-		v[0] = Vertex.valueOf(m, 0.0, 0.0, 0.0);
-		v[1] = Vertex.valueOf(m, 1.0, 0.0, 0.0);
-		v[2] = Vertex.valueOf(m, 1.0, 1.0, 0.0);
-		v[3] = Vertex.valueOf(m, 0.0, 1.0, 0.0);
-		v[4] = Vertex.valueOf(m, -1.0, 1.0, 0.0);
-		v[5] = Vertex.valueOf(m, -1.0, 0.0, 0.0);
+		v[0] = Vertex.valueOf(0.0, 0.0, 0.0);
+		v[1] = Vertex.valueOf(1.0, 0.0, 0.0);
+		v[2] = Vertex.valueOf(1.0, 1.0, 0.0);
+		v[3] = Vertex.valueOf(0.0, 1.0, 0.0);
+		v[4] = Vertex.valueOf(-1.0, 1.0, 0.0);
+		v[5] = Vertex.valueOf(-1.0, 0.0, 0.0);
 		unitTestBuildMesh(m, v);
 		assert m.isValid();
 		System.out.println("Checking loops...");

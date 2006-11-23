@@ -152,7 +152,7 @@ public class Mesh
 	public Mesh()
 	{
 		if (Vertex.outer == null)
-			Vertex.outer = new Vertex(this);
+			Vertex.outer = new Vertex();
 		triangleList = new ArrayList();
 	}
 	
@@ -170,7 +170,7 @@ public class Mesh
 	public Mesh(CADFace f)
 	{
 		if (Vertex.outer == null)
-			Vertex.outer = new Vertex(this);
+			Vertex.outer = new Vertex();
 		triangleList = new ArrayList();
 		face = f;
 		surface = f.getGeomSurface();
@@ -205,7 +205,7 @@ public class Mesh
 	public Mesh(CADEdge e)
 	{
 		if (Vertex.outer == null)
-			Vertex.outer = new Vertex(this);
+			Vertex.outer = new Vertex();
 		triangleList = new ArrayList();
 		face = e;
 	}
@@ -261,7 +261,7 @@ public class Mesh
 	{
 		quadtree = new QuadTree(umin, umax, vmin, vmax);
 		quadtree.setCompGeom(compGeom());
-		Vertex.outer = Vertex2D.valueOf(this, (umin+umax)*0.5, (vmin+vmax)*0.5);
+		Vertex.outer = Vertex2D.valueOf((umin+umax)*0.5, (vmin+vmax)*0.5);
 	}
 	
 	/**
@@ -302,8 +302,8 @@ public class Mesh
 	public void bootstrap(Vertex2D v0, Vertex2D v1, Vertex2D v2)
 	{
 		assert quadtree != null;
-		assert v0.onLeft(v1, v2) != 0L;
-		if (v0.onLeft(v1, v2) < 0L)
+		assert v0.onLeft(this, v1, v2) != 0L;
+		if (v0.onLeft(this, v1, v2) < 0L)
 		{
 			Vertex2D temp = v2;
 			v2 = v1;
@@ -421,7 +421,7 @@ public class Mesh
 	 * @throws InitialTriangulationException  if the boundary edge cannot
 	 *         be enforced.
 	 */
-	public static OTriangle2D forceBoundaryEdge(Vertex2D start, Vertex2D end, int maxIter)
+	public OTriangle2D forceBoundaryEdge(Vertex2D start, Vertex2D end, int maxIter)
 		throws InitialTriangulationException
 	{
 		assert (start != end);
@@ -439,7 +439,7 @@ public class Mesh
 			Vertex2D d = (Vertex2D) s.destination();
 			if (d == end)
 				return s;
-			else if (d != Vertex.outer && start.onLeft(end, d) > 0L)
+			else if (d != Vertex.outer && start.onLeft(this, end, d) > 0L)
 				break;
 			s.nextOTriOrigin();
 			i++;
@@ -454,7 +454,7 @@ public class Mesh
 			Vertex2D d = (Vertex2D) s.destination();
 			if (d == end)
 				return s;
-			else if (d != Vertex.outer && start.onLeft(end, d) < 0L)
+			else if (d != Vertex.outer && start.onLeft(this, end, d) < 0L)
 				break;
 			s.prevOTriOrigin();
 			i++;
@@ -467,7 +467,7 @@ public class Mesh
 		i = 0;
 		while (true)
 		{
-			int inter = s.forceBoundaryEdge(end);
+			int inter = s.forceBoundaryEdge(this, end);
 			logger.debug("Intersectionss: "+inter);
 			//  s is modified by forceBoundaryEdge, it now has 'end'
 			//  as its origin point, its destination point is to the
@@ -619,7 +619,7 @@ public class Mesh
 					if (logger.isDebugEnabled())
 						logger.debug("  Collapsing "+ot);
 					removedTriangles.add(ot.getTri());
-					ot.removeDegenerated();
+					ot.removeDegenerated(this);
 					break;
 				}
 			}
@@ -1238,7 +1238,7 @@ public class Mesh
 				Vertex2D tv0 = (Vertex2D) t.vertex[0];
 				Vertex2D tv1 = (Vertex2D) t.vertex[1];
 				Vertex2D tv2 = (Vertex2D) t.vertex[2];
-				double l = tv0.onLeft(tv1, tv2);
+				double l = tv0.onLeft(this, tv1, tv2);
 				if (l <= 0L)
 				{
 					logger.debug("Wrong orientation: "+l+" "+t);

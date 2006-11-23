@@ -738,7 +738,7 @@ public class IndexedStorage
 					for(int nr = 0; nr < nf; nr ++)
 					{
 						bbD.get(xyz);
-						vert[index] = Vertex.valueOf(mesh, xyz);
+						vert[index] = Vertex.valueOf(xyz);
 						vert[index].setLabel(current.minIndex + index);
 						vert[index].setReadable(true);
 						int n = bufIn.readInt();

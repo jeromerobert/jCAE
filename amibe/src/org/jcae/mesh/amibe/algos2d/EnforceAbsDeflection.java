@@ -115,13 +115,10 @@ public class EnforceAbsDeflection
 				if (!mesh.getTriangles().contains(t) || t.isBoundary())
 					continue;
 				double uv[] = t.centroid().getUV();
-				Vertex2D v = Vertex2D.valueOf(mesh, uv[0], uv[1]);
-				OTriangle2D vt = v.getSurroundingOTriangle();
-				if (vt.split3(v, false))
-				{
-					mesh.getQuadTree().add(v);
+				Vertex2D v = Vertex2D.valueOf(uv[0], uv[1]);
+				OTriangle2D vt = v.getSurroundingOTriangle(mesh);
+				if (vt.split3(mesh, v, false))
 					redo = true;
-				}
 			}
 			niter--;
 			if (logger.isDebugEnabled())

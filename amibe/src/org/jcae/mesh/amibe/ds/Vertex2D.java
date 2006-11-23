@@ -53,7 +53,7 @@ public class Vertex2D extends Vertex
 	 * Outer vertex.
 	 */
 	private static final Random rand = new Random(139L);
-	private static Vertex2D circumcenter = new Vertex2D(null, 0.0, 0.0);
+	private static Vertex2D circumcenter = new Vertex2D(0.0, 0.0);
 	
 	//  These 2 integer arrays are temporary workspaces
 	private static final int [] i0 = new int[2];
@@ -62,9 +62,9 @@ public class Vertex2D extends Vertex
 	//  Metrics at this location
 	private Metric2D m2 = null;
 	
-	public Vertex2D(Mesh m)
+	private Vertex2D()
 	{
-		super(m);
+		super();
 	}
 
 	/**
@@ -73,9 +73,9 @@ public class Vertex2D extends Vertex
 	 * @param u  first coordinate.
 	 * @param v  second coordinate.
 	 */
-	private Vertex2D(Mesh m, double u, double v)
+	private Vertex2D(double u, double v)
 	{
-		super(m);
+		super();
 		param[0] = u;
 		param[1] = v;
 	}
@@ -86,9 +86,9 @@ public class Vertex2D extends Vertex
 	 * @param u  first coordinate.
 	 * @param v  second coordinate.
 	 */
-	public static Vertex2D valueOf(Mesh mesh, double u, double v)
+	public static Vertex2D valueOf(double u, double v)
 	{
-		return new Vertex2D(mesh, u, v);
+		return new Vertex2D(u, v);
 	}
 	
 	/**
@@ -99,12 +99,10 @@ public class Vertex2D extends Vertex
 	 */
 	public static Vertex2D middle(Vertex2D pt1, Vertex2D pt2)
 	{
-		assert pt1.mesh == pt2.mesh;
-		Vertex2D ret = Vertex2D.valueOf(pt1.mesh,
+		return new Vertex2D(
 			0.5 * (pt1.param[0] + pt2.param[0]),
 			0.5 * (pt1.param[1] + pt2.param[1])
 		);
-		return ret;
 	}
 	
 	/**
@@ -114,9 +112,9 @@ public class Vertex2D extends Vertex
 	 * @param C2d 2D curve on the face.
 	 * @param F   topological face.
 	 */
-	public static Vertex2D valueOf(Mesh m, MNode1D pt, CADGeomCurve2D C2d, CADFace F)
+	public static Vertex2D valueOf(MNode1D pt, CADGeomCurve2D C2d, CADFace F)
 	{
-		Vertex2D ret = valueOf(m, 0.0, 0.0);
+		Vertex2D ret = new Vertex2D(0.0, 0.0);
 		ret.ref1d = pt.getMaster().getLabel();
 		if (null != C2d)
 		{
@@ -154,31 +152,11 @@ public class Vertex2D extends Vertex
 	 *
 	 * @return the normal to the surface at this location.
 	 */
-	public double [] getNormal ()
+	public double [] getNormal(Mesh mesh)
 	{
 		CADGeomSurface surface = mesh.getGeomSurface();
 		surface.setParameter(param[0], param[1]);
 		return surface.normal();
-	}
-	
-	/**
-	 * Add this Vertex to the quadtree.
-	 */
-	public void addToQuadTree()
-	{
-		if (logger.isDebugEnabled())
-			logger.debug("Inserted point: "+this);
-		mesh.quadtree.add(this);
-	}
-	
-	/**
-	 * Remove this Vertex from the quadtree.
-	 */
-	public void removeFromQuadTree()
-	{
-		if (logger.isDebugEnabled())
-			logger.debug("Point removed: "+this);
-		mesh.quadtree.remove(this);
 	}
 	
 	/**
@@ -205,14 +183,14 @@ public class Vertex2D extends Vertex
 	 * @return a triangle containing this point.
 	 * @see OTriangle2D#split3
 	 */
-	public OTriangle2D getSurroundingOTriangle()
+	public OTriangle2D getSurroundingOTriangle(Mesh mesh)
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("Searching for the triangle surrounding "+this);
 		Triangle.listLock();
 		Triangle t = (Triangle) mesh.quadtree.getNearestVertex(this).link;
 		OTriangle2D start = new OTriangle2D(t, 0);
-		OTriangle2D current = getSurroundingOTriangleStart(start);
+		OTriangle2D current = getSurroundingOTriangleStart(mesh, start);
 		if (current == null)
 		{
 			// First, try with neighbours
@@ -227,7 +205,7 @@ public class Vertex2D extends Vertex
 					if (!start.hasAttributes(OTriangle.BOUNDARY))
 					{
 						start.symOTri();
-						current = getSurroundingOTriangleStart(start);
+						current = getSurroundingOTriangleStart(mesh, start);
 						if (current != null)
 							break;
 						start.symOTri();
@@ -244,7 +222,7 @@ public class Vertex2D extends Vertex
 			{
 				t = (Triangle) it.next();
 				start.bind(t);
-				current = getSurroundingOTriangleStart(start);
+				current = getSurroundingOTriangleStart(mesh, start);
 				if (current != null)
 					break;
 			}
@@ -254,7 +232,7 @@ public class Vertex2D extends Vertex
 		return current;
 	}
 	
-	private OTriangle2D getSurroundingOTriangleStart(OTriangle2D current)
+	private OTriangle2D getSurroundingOTriangleStart(Mesh mesh, OTriangle2D current)
 	{
 		boolean redo = false;
 		Vertex2D o = (Vertex2D) current.origin();
@@ -295,7 +273,7 @@ public class Vertex2D extends Vertex
 		}
 		//  Orient triangle so that point is to the left.  Apex may
 		//  be Vertex2D.outer again, but this is case 3 above.
-		if (onLeft((Vertex2D) current.origin(), (Vertex2D) current.destination()) < 0L)
+		if (onLeft(mesh, (Vertex2D) current.origin(), (Vertex2D) current.destination()) < 0L)
 		{
 			if (current.hasAttributes(OTriangle.BOUNDARY) && !redo)
 				return null;
@@ -317,8 +295,8 @@ public class Vertex2D extends Vertex
 			if (current.tri.isListed())
 				return null;
 			current.tri.listCollect();
-			long d1 = onLeft(d, a);
-			long d2 = onLeft(a, o);
+			long d1 = onLeft(mesh, d, a);
+			long d2 = onLeft(mesh, a, o);
 			//  Note that for all cases, new origin and destination
 			//  points cannot be Vertex2D.outer.
 			if (d1 < 0L && d2 < 0L)
@@ -361,7 +339,7 @@ public class Vertex2D extends Vertex
 	 * vertices. It is positive if the vertex is on the left of this
 	 * segment, and negative otherwise.
 	 */
-	public long onLeft(Vertex2D v1, Vertex2D v2)
+	public long onLeft(Mesh mesh, Vertex2D v1, Vertex2D v2)
 	{
 		assert this != Vertex.outer;
 		assert v1 != Vertex.outer;
@@ -441,7 +419,7 @@ public class Vertex2D extends Vertex
 	*/
 	
 	//  Current vertex is symmetric apical vertex
-	public final boolean inCircleTest2(OTriangle2D ot)
+	public final boolean inCircleTest2(Mesh mesh, OTriangle2D ot)
 	{
 		assert this != Vertex2D.outer;
 		Vertex2D v1 = (Vertex2D) ot.origin();
@@ -450,19 +428,19 @@ public class Vertex2D extends Vertex
 		assert v1 != Vertex2D.outer;
 		assert v2 != Vertex2D.outer;
 		assert v3 != Vertex2D.outer;
-		assert v1.onLeft(v2, v3) >= 0L : ot+" "+v1.onLeft(v2, v3);
-		assert v1.onLeft(this, v2) >= 0L : ot+" "+v1.onLeft(this, v2);
-		long d1 = v1.onLeft(v3, this);
+		assert v1.onLeft(mesh, v2, v3) >= 0L : ot+" "+v1.onLeft(mesh, v2, v3);
+		assert v1.onLeft(mesh, this, v2) >= 0L : ot+" "+v1.onLeft(mesh, this, v2);
+		long d1 = v1.onLeft(mesh, v3, this);
 		if (d1 >= 0L)
 			return false;
-		long d2 = v1.onLeft(v2, v3);
-		long d3 = v1.onLeft(this, v2);
+		long d2 = v1.onLeft(mesh, v2, v3);
+		long d3 = v1.onLeft(mesh, this, v2);
 		if (d2 <= 0L && d3 <= 0L)
 			return true;
 		//  Here, d1 < 0, d2 >= 0 and d3 >= 0
-		long o1 = v1.distance2(v2);
-		long o2 = v1.distance2cached(this);
-		long o3 = v1.distance2cached(v3);
+		long o1 = v1.distance2(mesh, v2);
+		long o2 = v1.distance2cached(mesh, this);
+		long o3 = v1.distance2cached(mesh, v3);
 		LongLong l1 = new LongLong(o1, d1);
 		LongLong l2 = new LongLong(o2, d2);
 		LongLong l3 = new LongLong(o3, d3);
@@ -483,14 +461,14 @@ public class Vertex2D extends Vertex
 	     ==> x orth(M,V12) - y orth(M,V13) = 0.5 V23
 	         x = <V23, V13> / (2 <orth(M,V12), V13>)
 	*/
-	private Vertex2D circumcenter(Vertex2D v1, Vertex2D v2, Vertex2D v3)
+	private Vertex2D circumcenter(Mesh mesh, Vertex2D v1, Vertex2D v2, Vertex2D v3)
 		throws RuntimeException
 	{
 		double [] p1 = v1.getUV();
 		double [] p2 = v2.getUV();
 		double [] p3 = v3.getUV();
 		//  Metrics on current vertex
-		Metric2D m2d = getMetrics(mesh.getGeomSurface());
+		Metric2D m2d = getMetrics(mesh);
 		double x12 = p2[0] - p1[0];
 		double y12 = p2[1] - p1[1];
 		double x23 = p3[0] - p2[0];
@@ -515,7 +493,7 @@ public class Vertex2D extends Vertex
 		throw new RuntimeException("Circumcenter cannot be computed");
 	}
 	
-	public final boolean inCircleTest3(OTriangle2D ot)
+	public final boolean inCircleTest3(Mesh mesh, OTriangle2D ot)
 	{
 		//  vcX: vertices of current edge
 		//  vaX: apices
@@ -528,28 +506,28 @@ public class Vertex2D extends Vertex
 		assert vc2 != Vertex2D.outer;
 		assert va3 != Vertex2D.outer;
 		// Special case when vc1, vc2 and va3 are aligned
-		if (va3.onLeft(vc1, vc2) == 0L)
+		if (va3.onLeft(mesh, vc1, vc2) == 0L)
 		{
-			if (onLeft(vc1, vc2) == 0L)
+			if (onLeft(mesh, vc1, vc2) == 0L)
 			{
-				long l1 = vc1.distance2(vc2);
-				return (distance2(vc1) < l1 && distance2(vc2) < l1 && va3.distance2(vc1) < l1 && va3.distance2(vc2) < l1);
+				long l1 = vc1.distance2(mesh, vc2);
+				return (distance2(mesh, vc1) < l1 && distance2(mesh, vc2) < l1 && va3.distance2(mesh, vc1) < l1 && va3.distance2(mesh, vc2) < l1);
 			}
-			if (vc1.onLeft(va3, this) >= 0L || vc2.onLeft(va3, this) <= 0L)
+			if (vc1.onLeft(mesh, va3, this) >= 0L || vc2.onLeft(mesh, va3, this) <= 0L)
 				return false;
-			long l1 = vc1.distance2(vc2);
-			return (va3.distance2(vc1) < l1 && va3.distance2(vc2) < l1);
+			long l1 = vc1.distance2(mesh, vc2);
+			return (va3.distance2(mesh, vc1) < l1 && va3.distance2(mesh, vc2) < l1);
 		}
 		// Do not swap if triangles are inverted in 2d space
-		if (vc1.onLeft(va3, this) >= 0L || vc2.onLeft(va3, this) <= 0L)
+		if (vc1.onLeft(mesh, va3, this) >= 0L || vc2.onLeft(mesh, va3, this) <= 0L)
 			return false;
 		
 		try {
-			Vertex2D C3 = va3.circumcenter(vc1, vc2, va3);
+			Vertex2D C3 = va3.circumcenter(mesh, vc1, vc2, va3);
 			double ret =
 				mesh.compGeom().distance(C3, this, va3) /
 				mesh.compGeom().distance(C3, va3, va3);
-			Vertex2D C0 = circumcenter(vc1, vc2, va3);
+			Vertex2D C0 = circumcenter(mesh, vc1, vc2, va3);
 			ret +=
 				mesh.compGeom().distance(C0, this, this) /
 				mesh.compGeom().distance(C0, va3, this);
@@ -561,11 +539,11 @@ public class Vertex2D extends Vertex
 		try {
 			// Test the swapped edge
 			// this -> vc2   vc1 -> this   vc2 -> va3  va3 -> vc1
-			Vertex2D C3 = vc1.circumcenter(this, va3, vc1);
+			Vertex2D C3 = vc1.circumcenter(mesh, this, va3, vc1);
 			double ret =
 				mesh.compGeom().distance(C3, vc2, vc1) /
 				mesh.compGeom().distance(C3, vc1, vc1);
-			Vertex2D C0 = circumcenter(this, va3, vc1);
+			Vertex2D C0 = circumcenter(mesh, this, va3, vc1);
 			ret +=
 				mesh.compGeom().distance(C0, vc2, vc2) /
 				mesh.compGeom().distance(C0, vc1, vc2);
@@ -573,11 +551,11 @@ public class Vertex2D extends Vertex
 		}
 		catch (RuntimeException ex)
 		{
-			return inCircleTest2(ot);
+			return inCircleTest2(mesh, ot);
 		}
 	}
 	
-	public final boolean isSmallerDiagonale(OTriangle2D ot)
+	public final boolean isSmallerDiagonale(Mesh mesh, OTriangle2D ot)
 	{
 		//  vcX: vertices of current edge
 		//  vaX: apices
@@ -590,7 +568,7 @@ public class Vertex2D extends Vertex
 		assert vc2 != Vertex2D.outer;
 		assert va3 != Vertex2D.outer;
 		// Do not swap if triangles are reversed in 2d space
-		if (vc1.onLeft(va3, this) >= 0L || vc2.onLeft(va3, this) <= 0L)
+		if (vc1.onLeft(mesh, va3, this) >= 0L || vc2.onLeft(mesh, va3, this) <= 0L)
 			return true;
 		
 		//  Add a 0.5 factor so that edges are swapped only if
@@ -601,13 +579,13 @@ public class Vertex2D extends Vertex
 		        mesh.compGeom().distance(vc1, vc2, this)));
 	}
 	
-	public boolean isPseudoIsotropic()
+	public boolean isPseudoIsotropic(Mesh mesh)
 	{
-		Metric2D m2d = getMetrics(mesh.getGeomSurface());
+		Metric2D m2d = getMetrics(mesh);
 		return m2d.isPseudoIsotropic();
 	}
 	
-	public final long distance2(Vertex2D that)
+	public final long distance2(Mesh mesh, Vertex2D that)
 	{
 		mesh.quadtree.double2int(param, i0);
 		mesh.quadtree.double2int(that.param, i1);
@@ -615,7 +593,7 @@ public class Vertex2D extends Vertex
 		long dy = i0[1] - i1[1];
 		return dx * dx + dy * dy;
 	}
-	private final long distance2cached(Vertex2D that)
+	private final long distance2cached(Mesh mesh, Vertex2D that)
 	{
 		mesh.quadtree.double2int(that.param, i1);
 		long dx = i0[0] - i1[0];
@@ -632,7 +610,7 @@ public class Vertex2D extends Vertex
 	 *              point is located
 	 * @return the 2D Riemannian metrics at this point.
 	 */
-	public Metric2D getMetrics(CADGeomSurface surf)
+	public Metric2D getMetrics(Mesh mesh)
 	{
 		if (null == m2)
 		{
@@ -640,7 +618,7 @@ public class Vertex2D extends Vertex
 			if (curr instanceof Calculus2D)
 				m2 = new Metric2D();
 			else
-				m2 = new Metric2D(surf, this);
+				m2 = new Metric2D(mesh.getGeomSurface(), this);
 		}
 		return m2;
 	}

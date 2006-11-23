@@ -146,7 +146,7 @@ public class Insertion
 					int segments = (int) (2.0*l/lcrit) + 10;
 					Vertex2D [] np = new Vertex2D[segments-1];
 					for (int ns = 1; ns < segments; ns++)
-						np[ns-1] = Vertex2D.valueOf(mesh, xs[0]+ns*(xe[0]-xs[0])/segments, xs[1]+ns*(xe[1]-xs[1])/segments);
+						np[ns-1] = Vertex2D.valueOf(xs[0]+ns*(xe[0]-xs[0])/segments, xs[1]+ns*(xe[1]-xs[1])/segments);
 					
 					Vertex2D last = start;
 					int nrNodes = 0;
@@ -231,10 +231,8 @@ public class Insertion
 			for (int i = 0; i < imax; i++)
 			{
 				Vertex2D v = (Vertex2D) nodes.get(index);
-				OTriangle2D vt = v.getSurroundingOTriangle();
-				if (vt.split3(v, false))
-					mesh.getQuadTree().add(v);
-				else
+				OTriangle2D vt = v.getSurroundingOTriangle(mesh);
+				if (!vt.split3(mesh, v, false))
 					skippedNodes++;
 				index += prime;
 				if (index >= imax)

@@ -461,7 +461,7 @@ public class Storage
 		for (int i = 0; i < numberOfNodes; i++)
 		{
 			nodesBuffer.get(coord);
-			nodelist[i] = Vertex.valueOf(mesh, coord);
+			nodelist[i] = Vertex.valueOf(coord);
 		}
 		for (int i = 0; i < numberOfReferences; i++)
 		{

@@ -127,7 +127,7 @@ public class Calculus3D implements Calculus
 	public double distance(Vertex2D start, Vertex2D end, Vertex2D vm)
 	{
 		double ret;
-		Metric2D m = vm.getMetrics(mesh.getGeomSurface());
+		Metric2D m = vm.getMetrics(mesh);
 		ret = m.distance(start.getUV(), end.getUV());
 		return ret;
 	}
@@ -144,7 +144,7 @@ public class Calculus3D implements Calculus
 	 */
 	public double radius2d(Vertex2D vm)
 	{
-		Metric2D m = vm.getMetrics(mesh.getGeomSurface());
+		Metric2D m = vm.getMetrics(mesh);
 		return 1.0 / Math.sqrt(m.minEV());
 	}
 	

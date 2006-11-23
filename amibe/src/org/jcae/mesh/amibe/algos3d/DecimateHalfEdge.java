@@ -289,7 +289,7 @@ public class DecimateHalfEdge
 		Stack notContracted = new Stack();
 		Vertex v1 = null, v2 = null;
 		Quadric3DError q1 = null, q2 = null;
-		Vertex v3 = Vertex.valueOf(mesh, 0.0, 0.0, 0.0);
+		Vertex v3 = Vertex.valueOf(0.0, 0.0, 0.0);
 		Quadric3DError q3 = new Quadric3DError();
 		while (tree.size() > 0 && nrTriangles > nrFinal)
 		{
@@ -385,7 +385,7 @@ public class DecimateHalfEdge
 			if (apex == Vertex.outer)
 				apex = sym.apex();
 			//  Contract (v1,v2) into v3
-			edge.contract(v3);
+			edge.contract(mesh, v3);
 			contracted++;
 			quadricMap.remove(v1);
 			quadricMap.remove(v2);

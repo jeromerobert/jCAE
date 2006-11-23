@@ -184,7 +184,7 @@ public class UNVReader
 				x = new Double(x1).doubleValue()/unit;
 				y = new Double(y1).doubleValue()/unit;
 				z = new Double(z1).doubleValue()/unit;
-				Vertex n = Vertex.valueOf(m, x,y,z);
+				Vertex n = Vertex.valueOf(x,y,z);
 				nodesmap.put(index, n);
 			}
 		}
