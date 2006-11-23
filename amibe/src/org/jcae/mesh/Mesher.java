@@ -231,11 +231,11 @@ public class Mesher
 			logger.debug("org.jcae.mesh.Mesher.meshFace="+numFace);
 			int nrFaces = 0;
 			THashSet seen = new THashSet();
-			for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
+			for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 				seen.add(expF.current());
 			nrFaces = seen.size();;			
 			seen.clear();
-			for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
+			for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 			{
 				CADFace F = (CADFace) expF.current();
 				iFace++;
@@ -315,7 +315,7 @@ public class Mesher
 				MeshToMMesh3DConvert m2dTo3D = new MeshToMMesh3DConvert(xmlDir);
 				m2dTo3D.exportUNV(exportUNVProp.equals("true"), unvName);
 				logger.info("Read informations on boundary nodes");
-				for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
+				for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 				{
 					CADFace F = (CADFace) expF.current();
 					iFace++;
@@ -328,7 +328,7 @@ public class Mesher
 				}
 				m2dTo3D.initialize("jcae3d", writeNormalsProp.equals("true"));
 				iFace = 0;
-				for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
+				for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 				{
 					CADFace F = (CADFace) expF.current();
 					iFace++;
@@ -468,7 +468,7 @@ public class Mesher
 		CADShape shape = factory.newShape(brepfilename);
 		CADExplorer expF = factory.newExplorer();
 		int nrFaces = 0;
-		for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
+		for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 			nrFaces++;
 		return nrFaces;
 	}

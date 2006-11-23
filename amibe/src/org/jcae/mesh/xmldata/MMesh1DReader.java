@@ -35,6 +35,7 @@ import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADShapeBuilder;
+import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.cad.CADExplorer;
 import org.jcae.mesh.mesher.ds.MEdge1D;
 import org.jcae.mesh.mesher.ds.MMesh1D;
@@ -132,7 +133,7 @@ public class MMesh1DReader
 			int offset = 1;
 			HashSet setSeenEdges = new HashSet();
 			CADExplorer expE = CADShapeBuilder.factory.newExplorer();
-			for (expE.init(shape, CADExplorer.EDGE); expE.more(); expE.next())
+			for (expE.init(shape, CADShapeEnum.EDGE); expE.more(); expE.next())
 			{
 				CADEdge E = (CADEdge) expE.current();
 				SubMesh1D submesh = m1d.getSubMesh1DFromMap(E);

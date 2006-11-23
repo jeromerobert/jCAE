@@ -67,13 +67,13 @@ public class MMesh1D extends MMesh0D
 		//  so allocate them after computing their maximal size, they
 		//  won't be resized.
 		int edges = 0;
-		for (expE.init(shape, CADExplorer.EDGE); expE.more(); expE.next())
+		for (expE.init(shape, CADShapeEnum.EDGE); expE.more(); expE.next())
 			edges++;
 		if (edges == 0)
 			return;
 		mapTEdgeToSubMesh1D = new LinkedHashMap(edges);
 		
-		for (expE.init(shape, CADExplorer.EDGE); expE.more(); expE.next())
+		for (expE.init(shape, CADShapeEnum.EDGE); expE.more(); expE.next())
 		{
 			CADEdge E = (CADEdge) expE.current();
 			//  Edges may get connected to several faces
@@ -89,11 +89,11 @@ public class MMesh1D extends MMesh0D
 			mapTEdgeToFaces.put(E, new LinkedHashSet());
 		}
 		CADExplorer expF = CADShapeBuilder.factory.newExplorer();
-		for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
+		for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 		{
 			CADFace F = (CADFace) expF.current();
 			LinkedHashSet set;
-			for (expE.init(F, CADExplorer.EDGE); expE.more(); expE.next())
+			for (expE.init(F, CADShapeEnum.EDGE); expE.more(); expE.next())
 			{
 				CADEdge E = (CADEdge) expE.current();
 				set = (LinkedHashSet) mapTEdgeToFaces.get(E);
@@ -143,7 +143,7 @@ public class MMesh1D extends MMesh0D
 			BCADGraphCell s = (BCADGraphCell) itf.next();
 			CADFace F = (CADFace) s.getShape();
 			Set set;
-			for (expE.init(F, CADExplorer.EDGE); expE.more(); expE.next())
+			for (expE.init(F, CADShapeEnum.EDGE); expE.more(); expE.next())
 			{
 				CADEdge E = (CADEdge) expE.current();
 				set = (Set) mapTEdgeToFaces.get(E);
@@ -183,7 +183,7 @@ public class MMesh1D extends MMesh0D
 		logger.debug("Update node labels");
 		//  Resets all labels
 		CADExplorer expE = CADShapeBuilder.factory.newExplorer();
-		for (expE.init(shape, CADExplorer.EDGE); expE.more(); expE.next())
+		for (expE.init(shape, CADShapeEnum.EDGE); expE.more(); expE.next())
 		{
 			CADEdge E = (CADEdge) expE.current();
 			SubMesh1D submesh1d = (SubMesh1D) mapTEdgeToSubMesh1D.get(E);
@@ -194,7 +194,7 @@ public class MMesh1D extends MMesh0D
 			}
 		}
 		int i = 0;
-		for (expE.init(shape, CADExplorer.EDGE); expE.more(); expE.next())
+		for (expE.init(shape, CADShapeEnum.EDGE); expE.more(); expE.next())
 		{
 			CADEdge E = (CADEdge) expE.current();
 			SubMesh1D submesh1d = (SubMesh1D) mapTEdgeToSubMesh1D.get(E);
@@ -223,10 +223,10 @@ public class MMesh1D extends MMesh0D
 		//  For each topological vertex, compute the list of
 		//  MNode1D objects which are bound to this vertex.
 		int nVertex = 0;
-		for (expV.init(shape, CADExplorer.VERTEX); expV.more(); expV.next())
+		for (expV.init(shape, CADShapeEnum.VERTEX); expV.more(); expV.next())
 			nVertex++;
 		HashMap vertex2Ref = new HashMap(nVertex);
-		for (expV.init(shape, CADExplorer.VERTEX); expV.more(); expV.next())
+		for (expV.init(shape, CADShapeEnum.VERTEX); expV.more(); expV.next())
 			vertex2Ref.put(expV.current(), new ArrayList());
 		
 		Iterator ite = mapTEdgeToSubMesh1D.values().iterator();
@@ -243,7 +243,7 @@ public class MMesh1D extends MMesh0D
 		}
 		
 		LinkedHashSet seen = new LinkedHashSet();
-		for (expV.init(shape, CADExplorer.VERTEX); expV.more(); expV.next())
+		for (expV.init(shape, CADShapeEnum.VERTEX); expV.more(); expV.next())
 		{
 			CADVertex V = (CADVertex) expV.current();
 			if (seen.contains(V))

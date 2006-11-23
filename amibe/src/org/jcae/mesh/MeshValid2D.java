@@ -63,7 +63,7 @@ public class MeshValid2D
 			CADExplorer expF = CADShapeBuilder.factory.newExplorer();
 			TIntHashSet indBnd = new TIntHashSet();
 			QualityFloat data = new QualityFloat(1000);
-			for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
+			for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 			{
 				CADFace F = (CADFace) expF.current();
 				iFace++;

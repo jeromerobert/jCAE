@@ -74,7 +74,7 @@ public class MeshToSoupConvert extends JCAEXMLData
 		MeshToSoupConvert m2dTo3D = new MeshToSoupConvert(xmlDir);
 		m2dTo3D.initialize("soup", false);
 		iFace = 0;
-		for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
+		for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 		{
 			CADFace F = (CADFace) expF.current();
 			iFace++;

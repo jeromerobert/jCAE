@@ -53,13 +53,13 @@ public class MMesh0D
 	{
 		CADExplorer expV = CADShapeBuilder.factory.newExplorer();
 		int nodes = 0;
-		for (expV.init(shape, CADExplorer.VERTEX); expV.more(); expV.next())
+		for (expV.init(shape, CADShapeEnum.VERTEX); expV.more(); expV.next())
 			nodes++;
 
 		//  Merge topological vertices found at the same geometrical point
 		vnodelist = new CADVertex[nodes];
 		vnodeset = new TObjectIntHashMap(nodes);
-		for (expV.init(shape, CADExplorer.VERTEX); expV.more(); expV.next())
+		for (expV.init(shape, CADShapeEnum.VERTEX); expV.more(); expV.next())
 			addGeometricalVertex((CADVertex) expV.current());
 	}
 	

@@ -1,3 +1,8 @@
+Thu Nov 23 20:19:55 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/cad/CADExplorer.java: Change signature to
+	void init(CADShape shape, CADShapeEnum type).
+
 Thu Nov 23 12:20:54 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Vertex.java: Remove mesh member.

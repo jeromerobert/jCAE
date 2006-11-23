@@ -31,6 +31,7 @@ import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.InvalidFaceException;
 import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.jcae.mesh.cad.CADShapeBuilder;
+import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.cad.CADFace;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADWire;
@@ -449,7 +450,7 @@ public class Initial
 		CADExplorer expW = CADShapeBuilder.factory.newExplorer();
 		CADWireExplorer wexp = CADShapeBuilder.factory.newWireExplorer();
 		
-		for (expW.init(face, CADExplorer.WIRE); expW.more(); expW.next())
+		for (expW.init(face, CADShapeEnum.WIRE); expW.more(); expW.next())
 		{
 			MNode1D p1 = null;
 			Vertex2D p20 = null, p2 = null, lastPoint = null;;

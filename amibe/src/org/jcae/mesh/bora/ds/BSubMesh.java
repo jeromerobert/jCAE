@@ -424,7 +424,7 @@ public class BSubMesh
 		CADShapeBuilder factory = CADShapeBuilder.factory;
 		CADExplorer exp = factory.newExplorer();
 		CADShape [] solids = new CADShape[2];
-		exp.init(shape, CADExplorer.SOLID);
+		exp.init(shape, CADShapeEnum.SOLID);
 		solids[0] = exp.current();
 		exp.next();
 		solids[1] = exp.current();

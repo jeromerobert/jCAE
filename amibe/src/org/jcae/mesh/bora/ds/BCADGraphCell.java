@@ -162,7 +162,7 @@ public class BCADGraphCell
 	private Iterator shapesExplorer(final CADShapeEnum cse, final Collection cadShapeSet)
 	{
 		final CADExplorer exp = CADShapeBuilder.factory.newExplorer();
-		exp.init(shape, cse.asType());
+		exp.init(shape, cse);
 		return new Iterator()
 		{
 			public boolean hasNext()

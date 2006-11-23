@@ -80,7 +80,7 @@ public class BCADGraph
 		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
 			CADShapeEnum cse = (CADShapeEnum) itcse.next();
-			for (exp.init(shape, cse.asType()); exp.more(); exp.next())
+			for (exp.init(shape, cse); exp.more(); exp.next())
 			{
 				CADShape sub = exp.current();
 				if (cadShapeToGraphCell.contains(sub))
@@ -104,7 +104,7 @@ public class BCADGraph
 		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.COMPOUND, CADShapeEnum.VERTEX); itcse.hasNext(); )
 		{
 			CADShapeEnum cse = (CADShapeEnum) itcse.next();
-			for (exp.init(shape, cse.asType()); exp.more(); exp.next())
+			for (exp.init(shape, cse); exp.more(); exp.next())
 			{
 				CADShape s = (CADShape) exp.current();
 				BCADGraphCell c = (BCADGraphCell) cadShapeToGraphCell.get(s);
@@ -122,7 +122,7 @@ public class BCADGraph
 		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.COMPOUND, CADShapeEnum.VERTEX); itcse.hasNext(); )
 		{
 			CADShapeEnum cse = (CADShapeEnum) itcse.next();
-			for (exp.init(shape, cse.asType()); exp.more(); exp.next())
+			for (exp.init(shape, cse); exp.more(); exp.next())
 			{
 				CADShape s = (CADShape) exp.current();
 				BCADGraphCell c = (BCADGraphCell) cadShapeToGraphCell.get(s);
@@ -133,7 +133,7 @@ public class BCADGraph
 				while (it2.hasNext())
 				{
 					CADShapeEnum cse2 = (CADShapeEnum) it2.next();
-					for (exp2.init(s, cse2.asType()); exp2.more(); exp2.next())
+					for (exp2.init(s, cse2); exp2.more(); exp2.next())
 					{
 						CADShape s2 = (CADShape) exp2.current();
 						BCADGraphCell c2 = (BCADGraphCell) cadShapeToGraphCell.get(s2);
@@ -191,7 +191,7 @@ public class BCADGraph
 		CADShapeBuilder factory = CADShapeBuilder.factory;
 		CADExplorer exp = factory.newExplorer();
 		Collection ret = new LinkedHashSet();
-		for (exp.init(root.getShape(), cse.asType()); exp.more(); exp.next())
+		for (exp.init(root.getShape(), cse); exp.more(); exp.next())
 		{
 			CADShape s = exp.current();
 			BCADGraphCell c = (BCADGraphCell) cadShapeToGraphCell.get(s);

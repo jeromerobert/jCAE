@@ -41,7 +41,7 @@ public interface CADExplorer
      * @param shape The shape to explore
      * @param type The type of shape to find: FACE, WIRE, EDGE or VERTEX
      */    
-	public void init(CADShape shape, int type);
+	public void init(CADShape shape, CADShapeEnum type);
     /**
      * Return true if there are more shapes to explore
      * @return true if there are more shapes to explore

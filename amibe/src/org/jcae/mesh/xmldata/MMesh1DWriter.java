@@ -26,6 +26,7 @@ import org.jcae.mesh.mesher.ds.MEdge1D;
 import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADShapeBuilder;
+import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADExplorer;
 import java.io.IOException;
@@ -190,7 +191,7 @@ public class MMesh1DWriter
 			int iEdge = 0;
 			HashSet setSeenEdges = new HashSet();
 			CADExplorer expE = CADShapeBuilder.factory.newExplorer();
-			for (expE.init(shape, CADExplorer.EDGE); expE.more(); expE.next())
+			for (expE.init(shape, CADShapeEnum.EDGE); expE.more(); expE.next())
 			{
 				CADEdge E = (CADEdge) expE.current();
 				
