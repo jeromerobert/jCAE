@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.io.File;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.Stack;
 import java.util.Date;
@@ -76,7 +77,10 @@ public class Mesher3D
 			mesh = MeshReader.readObject3D(xmlDir, "jcae3d", ridgeAngle);
 		try
 		{
-			new SmoothNodes3D(mesh, 10).compute();
+			HashMap opts = new HashMap();
+			opts.put("iterations", "5");
+			opts.put("boundaries", "true");
+			new SmoothNodes3D(mesh, opts).compute();
 		}
 		catch(Exception ex)
 		{

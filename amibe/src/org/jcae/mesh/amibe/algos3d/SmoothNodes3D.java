@@ -27,6 +27,8 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
@@ -49,8 +51,9 @@ public class SmoothNodes3D
 	private Mesh mesh;
 	private double sizeTarget = -1.0;
 	private int nloop = 10;
+	private boolean preserveBoundaries = false;
 	private static OTriangle temp = new OTriangle();
-	private static double speed = 0.1;
+	private static double speed = 0.2;
 	
 	/**
 	 * Creates a <code>SmoothNodes3D</code> instance.
@@ -66,38 +69,26 @@ public class SmoothNodes3D
 	 * Creates a <code>SmoothNodes3D</code> instance.
 	 *
 	 * @param m  the <code>Mesh</code> instance to refine.
-	 * @param s  the size target.
+	 * @param options  known options are <code>size</code>,
+	 * <code>iterations</code>, <code>
 	 */
-	public SmoothNodes3D(Mesh m, double s)
+	public SmoothNodes3D(Mesh m, Map options)
 	{
 		mesh = m;
-		sizeTarget = s;
-	}
-	
-	/**
-	 * Creates a <code>SmoothNodes3D</code> instance.
-	 *
-	 * @param m  the <code>Mesh</code> instance to refine.
-	 * @param n  the number of iterations.
-	 */
-	public SmoothNodes3D(Mesh m, int n)
-	{
-		mesh = m;
-		nloop = n;
-	}
-	
-	/**
-	 * Creates a <code>SmoothNodes3D</code> instance.
-	 *
-	 * @param m  the <code>Mesh</code> instance to refine.
-	 * @param s  the size target.
-	 * @param n  the number of iterations.
-	 */
-	public SmoothNodes3D(Mesh m, double s, int n)
-	{
-		mesh = m;
-		sizeTarget = s;
-		nloop = n;
+		for (Iterator it = options.entrySet().iterator(); it.hasNext(); )
+		{
+			Map.Entry opt = (Map.Entry) it.next();
+			String key = (String) opt.getKey();
+			String val = (String) opt.getValue();
+			if (key.equals("size"))
+				sizeTarget = new Double(val).doubleValue();
+			else if (key.equals("iterations"))
+				nloop = new Integer(val).intValue();
+			else if (key.equals("boundaries"))
+				preserveBoundaries = Boolean.valueOf(val).booleanValue();
+			else
+				throw new RuntimeException("Unknown option: "+key);
+		}
 	}
 	
 	/**
@@ -108,14 +99,14 @@ public class SmoothNodes3D
 		logger.debug("Running SmoothNodes3D");
 		int cnt = 0;
 		for (int i = 0; i < nloop; i++)
-			cnt += computeMesh(mesh, sizeTarget);
+			cnt += computeMesh();
 		logger.info("Number of moved points: "+cnt);
 	}
 	
 	/*
 	 * Moves all nodes using a laplacian smoothing.
 	 */
-	private static int computeMesh(Mesh mesh, double sizeTarget)
+	private int computeMesh()
 	{
 		int ret = 0;
 		HashSet nodeset = new HashSet(2*mesh.getTriangles().size());
@@ -141,6 +132,8 @@ public class SmoothNodes3D
 					continue;
 				nodeset.add(n);
 				if (!n.isMutable())
+					continue;
+				if (n.getRef() != 0 && preserveBoundaries)
 					continue;
 				if (smoothNode(mesh, ot, sizeTarget))
 					ret++;
@@ -230,7 +223,10 @@ public class SmoothNodes3D
 		Mesh mesh=MeshReader.readObject3D(args[0], args[1], -1);
 		double size=Double.parseDouble(args[2]);
 		int iter=Integer.parseInt(args[3]);
-		new SmoothNodes3D(mesh, size, iter).compute();			
+		Map opts = new HashMap();
+		opts.put("size", args[2]);
+		opts.put("iterations", args[3]);
+		new SmoothNodes3D(mesh, opts).compute();			
 		MeshWriter.writeObject3D(mesh, args[0], args[1], args[4], args[5],1);
 	}
 }
