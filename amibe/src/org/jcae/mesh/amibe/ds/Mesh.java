@@ -114,7 +114,7 @@ public class Mesh
 	private Collection triangleList = null;
 	
 	//  Topological face on which mesh is applied
-	private CADFace face;
+	private CADShape face;
 	
 	//  The geometrical surface describing the topological face, stored for
 	//  efficiebcy reason
@@ -135,6 +135,7 @@ public class Mesh
 	private Stack compGeomStack = new Stack();
 	
 	//  2D/3D
+	public static final int MESH_1D = 2;
 	public static final int MESH_2D = 2;
 	public static final int MESH_3D = 3;
 	public static final int MESH_OEMM = 4;
@@ -172,8 +173,8 @@ public class Mesh
 			Vertex.outer = new Vertex(this);
 		triangleList = new ArrayList();
 		face = f;
-		surface = face.getGeomSurface();
-		double [] bb = face.boundingBox();
+		surface = f.getGeomSurface();
+		double [] bb = f.boundingBox();
 		double diagonal = Math.sqrt(
 		    (bb[0] - bb[3]) * (bb[0] - bb[3]) +
 		    (bb[1] - bb[4]) * (bb[1] - bb[4]) +
@@ -199,6 +200,14 @@ public class Mesh
 		accumulateEpsilon = accumulateEpsilonProp.equals("true");
 		logger.debug("Bounding box diagonal: "+diagonal);
 		logger.debug("Epsilon: "+epsilon);
+	}
+	
+	public Mesh(CADEdge e)
+	{
+		if (Vertex.outer == null)
+			Vertex.outer = new Vertex(this);
+		triangleList = new ArrayList();
+		face = e;
 	}
 	
 	/**
