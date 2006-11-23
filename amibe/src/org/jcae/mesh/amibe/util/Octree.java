@@ -24,8 +24,9 @@ import org.jcae.mesh.amibe.ds.MNode3D;
 
 /**
  * Octree to store {@link MNode3D} vertices.
- * This class is very similar to {@link QuadTree}, it is useful to find
- * near vertices.  It was needed by {@link org.jcae.mesh.amibe.algos3d.Fuse}
+ * This class is very similar to {@link org.jcae.mesh.amibe.patch.QuadTree},
+ * it is useful to find near vertices.
+ * It was needed by {@link org.jcae.mesh.amibe.algos3d.Fuse}
  * to fuse near vertices, but now that 3D meshes are also handled by the
  * {@link org.jcae.mesh.amibe.ds.Mesh} class, it became oobsolete because
  * adjacency relations between vertices are provided by

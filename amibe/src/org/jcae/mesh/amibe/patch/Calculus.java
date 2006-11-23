@@ -53,7 +53,7 @@ public interface Calculus
 	 * This routine returns a radius such that the 2D circle centered
 	 * at a given vertex will have a distance lower than 1 in the
 	 * desired 2D or 3D space.  This method is used by
-	 * {@link org.jcae.mesh.amibe.util.QuadTree#getNearestVertex}
+	 * {@link QuadTree#getNearestVertex}
 	 *
 	 * @param vm  the vertex on which metrics is evaluated
 	 * @return the radius in 2D space.

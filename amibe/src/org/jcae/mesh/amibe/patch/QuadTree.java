@@ -86,9 +86,9 @@ import java.util.ArrayList;
  * Distances between vertices can be computed either in Euclidian 2D space, or
  * with a Riemannian metrics.  This is controlled by the {@link #setCompGeom(Calculus)}
  * method.  Distances are computed in Euclidian 2D space when its argument is
- * an instance of {@link org.jcae.mesh.amibe.ds.tools.Calculus2D}, and in
+ * an instance of {@link Calculus2D}, and in
  * Riemannian metrics (see {@link org.jcae.mesh.amibe.metrics.Metric2D}) when
- * it is an instance of {@link org.jcae.mesh.amibe.ds.tools.Calculus3D}.
+ * it is an instance of {@link Calculus3D}.
  * By default, distances are computed in Euclidian 2D space.
  * </p>
  *

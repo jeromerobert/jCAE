@@ -881,7 +881,7 @@ public class OTriangle
 	 * adjacency relations and backward links between vertices and
 	 * triangles.  Current object is transformed from (oda) to (ona)
 	 * and not (nao), because this helps turning around o, eg.
-	 * at the end of {@link OTriangle2D#split3}.
+	 * at the end of {@link org.jcae.mesh.amibe.patch.OTriangle2D#split3}.
 	 *        
 	 *          d                    d
 	 *          .                    .
