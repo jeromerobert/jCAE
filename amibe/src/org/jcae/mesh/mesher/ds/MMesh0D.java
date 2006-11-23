@@ -40,7 +40,7 @@ public class MMesh0D
 
 	//  Array of distinct geometric nodes
 	private CADVertex[] vnodelist;
-	private int vnodesize;
+	private int vnodesize = 0;
 	private TObjectIntHashMap vnodeset;
 	
 	/**
@@ -57,7 +57,6 @@ public class MMesh0D
 			nodes++;
 
 		//  Merge topological vertices found at the same geometrical point
-		vnodesize = 0;
 		vnodelist = new CADVertex[nodes];
 		vnodeset = new TObjectIntHashMap(nodes);
 		for (expV.init(shape, CADExplorer.VERTEX); expV.more(); expV.next())
@@ -72,7 +71,6 @@ public class MMesh0D
 			nodes++;
 
 		//  Merge topological vertices found at the same geometrical point
-		vnodesize = 0;
 		vnodelist = new CADVertex[nodes];
 		vnodeset = new TObjectIntHashMap(nodes);
 		for (Iterator itn = root.shapesExplorer(CADShapeEnum.VERTEX); itn.hasNext(); )

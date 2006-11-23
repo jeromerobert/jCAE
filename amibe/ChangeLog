@@ -9,6 +9,9 @@ Thu Nov 23 12:20:54 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 	  src/org/jcae/mesh/amibe/patch/Mesh2D.java: New Mesh2D class,
 	which extends Mesh.  This class is designed specifically for
 	meshing parametrized surfaces.
+	* src/org/jcae/mesh/amibe/mesher/ds/MMesh1D.java: Replace HashSet
+	and HashMap instances by their Linked* counterpart, so that 1D
+	mesh does not depend on objects location in memory.
 
 Wed Nov 22 13:23:40 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 

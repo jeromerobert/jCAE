@@ -20,9 +20,14 @@
 
 package org.jcae.mesh.mesher.algos1d;
 
-import org.jcae.mesh.mesher.ds.*;
-import org.jcae.mesh.cad.*;
-import org.jcae.mesh.*;
+import org.jcae.mesh.mesher.ds.MEdge1D;
+import org.jcae.mesh.mesher.ds.MNode1D;
+import org.jcae.mesh.mesher.ds.SubMesh1D;
+import org.jcae.mesh.mesher.ds.MMesh1D;
+import org.jcae.mesh.cad.CADGeomCurve3D;
+import org.jcae.mesh.cad.CADVertex;
+import org.jcae.mesh.cad.CADEdge;
+import org.jcae.mesh.cad.CADShapeBuilder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
@@ -56,7 +61,7 @@ public class UniformLengthDeflection
 	{
 		int nbTEdges = 0, nbNodes = 0, nbEdges = 0;
 		/* Explore the shape for each edge */
-		Iterator ite = mesh1d.getTEdgeList().iterator();
+		Iterator ite = mesh1d.getTEdgeIterator();
 		/*  First compute current nbNodes and nbEdges  */
 		while (ite.hasNext())
 		{
@@ -65,7 +70,7 @@ public class UniformLengthDeflection
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
 		}
-		ite = mesh1d.getTEdgeList().iterator();
+		ite = mesh1d.getTEdgeIterator();
 		while (ite.hasNext())
 		{
 			CADEdge E = (CADEdge) ite.next();

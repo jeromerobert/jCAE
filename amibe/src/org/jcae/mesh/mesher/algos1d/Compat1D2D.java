@@ -20,11 +20,19 @@
 
 package org.jcae.mesh.mesher.algos1d;
 
-import org.jcae.mesh.mesher.ds.*;
-import org.jcae.mesh.cad.*;
-import org.jcae.mesh.*;
+import org.jcae.mesh.mesher.ds.MEdge1D;
+import org.jcae.mesh.mesher.ds.MNode1D;
+import org.jcae.mesh.mesher.ds.SubMesh1D;
+import org.jcae.mesh.mesher.ds.MMesh1D;
+import org.jcae.mesh.cad.CADGeomSurface;
+import org.jcae.mesh.cad.CADGeomCurve2D;
+import org.jcae.mesh.cad.CADGeomCurve3D;
+import org.jcae.mesh.cad.CADVertex;
+import org.jcae.mesh.cad.CADEdge;
+import org.jcae.mesh.cad.CADFace;
+import org.jcae.mesh.cad.CADShapeBuilder;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Set;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
 
@@ -50,14 +58,14 @@ public class Compat1D2D
 	{
 		int nbTEdges = 0, nbNodes = 0, nbEdges = 0;
 		/* Explore the shape for each edge */
-		Iterator ite = mesh1d.getTEdgeList().iterator();
+		Iterator ite = mesh1d.getTEdgeIterator();
 		while (ite.hasNext())
 		{
 			CADEdge E = (CADEdge) ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(E);
 			if (null == submesh1d)
 				continue;
-			HashSet faceset = mesh1d.getAdjacentFaces(E);
+			Set faceset = mesh1d.getAdjacentFaces(E);
 			if (null != faceset && computeEdge(submesh1d, faceset, mesh1d.getMaxDeflection(), relDefl))
 				nbTEdges++;
 			nbNodes += submesh1d.getNodes().size();
@@ -69,7 +77,7 @@ public class Compat1D2D
 		assert(mesh1d.isValid());
 	}
 
-	private boolean computeEdge(SubMesh1D submesh1d, HashSet faceset, double deflection, boolean relDefl)
+	private boolean computeEdge(SubMesh1D submesh1d, Set faceset, double deflection, boolean relDefl)
 	{
 		ArrayList edgelist = submesh1d.getEdges();
 		ArrayList nodelist = submesh1d.getNodes();

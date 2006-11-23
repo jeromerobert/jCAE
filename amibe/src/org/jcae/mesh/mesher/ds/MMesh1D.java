@@ -25,7 +25,9 @@ import org.jcae.mesh.cad.*;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Set;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 import org.apache.log4j.Logger;
 
@@ -46,11 +48,8 @@ public class MMesh1D extends MMesh0D
 	private static double maxDeflection = 0.0;
 	
 	//  Edge map.
-	private HashMap mapTEdgeToSubMesh1D;
-	private HashMap mapTEdgeToFaces;;
-	
-	//  Edge list.
-	private ArrayList listTEdge;
+	private LinkedHashMap mapTEdgeToSubMesh1D;
+	private HashMap mapTEdgeToFaces;
 	
 	/**
 	 * Creates a <code>MMesh1D</code> instance by discretizing all edges
@@ -72,8 +71,7 @@ public class MMesh1D extends MMesh0D
 			edges++;
 		if (edges == 0)
 			return;
-		mapTEdgeToSubMesh1D = new HashMap(edges);
-		listTEdge = new ArrayList(edges);
+		mapTEdgeToSubMesh1D = new LinkedHashMap(edges);
 		
 		for (expE.init(shape, CADExplorer.EDGE); expE.more(); expE.next())
 		{
@@ -83,23 +81,22 @@ public class MMesh1D extends MMesh0D
 				continue;
 			SubMesh1D submesh1d = new SubMesh1D(E, (MMesh0D) this);
 			mapTEdgeToSubMesh1D.put(E, submesh1d);
-			listTEdge.add(E);
 		}
 		mapTEdgeToFaces = new HashMap(edges);
-		for (Iterator it = listTEdge.iterator(); it.hasNext(); )
+		for (Iterator it = mapTEdgeToSubMesh1D.keySet().iterator(); it.hasNext(); )
 		{
 			CADEdge E = (CADEdge) it.next();
-			mapTEdgeToFaces.put(E, new HashSet());
+			mapTEdgeToFaces.put(E, new LinkedHashSet());
 		}
 		CADExplorer expF = CADShapeBuilder.factory.newExplorer();
 		for (expF.init(shape, CADExplorer.FACE); expF.more(); expF.next())
 		{
 			CADFace F = (CADFace) expF.current();
-			HashSet set;
+			LinkedHashSet set;
 			for (expE.init(F, CADExplorer.EDGE); expE.more(); expE.next())
 			{
 				CADEdge E = (CADEdge) expE.current();
-				set = (HashSet) mapTEdgeToFaces.get(E);
+				set = (LinkedHashSet) mapTEdgeToFaces.get(E);
 				set.add(F);
 			}
 		}
@@ -120,8 +117,7 @@ public class MMesh1D extends MMesh0D
 			edges++;
 		if (edges == 0)
 			return;
-		mapTEdgeToSubMesh1D = new HashMap(edges);
-		listTEdge = new ArrayList(edges);
+		mapTEdgeToSubMesh1D = new LinkedHashMap(edges);
 		
 		for (Iterator ite = root.shapesExplorer(CADShapeEnum.EDGE); ite.hasNext(); )
 		{
@@ -134,24 +130,23 @@ public class MMesh1D extends MMesh0D
 			if (submesh1d == null && c.getReversed() != null)
 				submesh1d = (SubMesh1D) c.getReversed().mesh;
 			mapTEdgeToSubMesh1D.put(E, submesh1d);
-			listTEdge.add(E);
 		}
 		mapTEdgeToFaces = new HashMap(edges);
-		for (Iterator it = listTEdge.iterator(); it.hasNext(); )
+		for (Iterator it = mapTEdgeToSubMesh1D.keySet().iterator(); it.hasNext(); )
 		{
 			CADEdge E = (CADEdge) it.next();
-			mapTEdgeToFaces.put(E, new HashSet());
+			mapTEdgeToFaces.put(E, new LinkedHashSet());
 		}
 		CADExplorer expE = CADShapeBuilder.factory.newExplorer();
 		for (Iterator itf = root.shapesExplorer(CADShapeEnum.FACE); itf.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) itf.next();
 			CADFace F = (CADFace) s.getShape();
-			HashSet set;
+			Set set;
 			for (expE.init(F, CADExplorer.EDGE); expE.more(); expE.next())
 			{
 				CADEdge E = (CADEdge) expE.current();
-				set = (HashSet) mapTEdgeToFaces.get(E);
+				set = (Set) mapTEdgeToFaces.get(E);
 				set.add(F);
 			}
 		}
@@ -173,9 +168,9 @@ public class MMesh1D extends MMesh0D
 	 *
 	 * @return the set of faces containing this topological edge.
 	 */
-	public HashSet getAdjacentFaces(CADEdge E)
+	public Set getAdjacentFaces(CADEdge E)
 	{
-		HashSet ret = (HashSet) mapTEdgeToFaces.get(E);
+		Set ret = (Set) mapTEdgeToFaces.get(E);
 		// May be null for beams
 		return ret;
 	}
@@ -247,7 +242,7 @@ public class MMesh1D extends MMesh0D
 			}
 		}
 		
-		HashSet seen = new HashSet();
+		LinkedHashSet seen = new LinkedHashSet();
 		for (expV.init(shape, CADExplorer.VERTEX); expV.more(); expV.next())
 		{
 			CADVertex V = (CADVertex) expV.current();
@@ -301,9 +296,9 @@ public class MMesh1D extends MMesh0D
 	 *
 	 * @return the list of topological edges.
 	 */
-	public ArrayList getTEdgeList()
+	public Iterator getTEdgeIterator()
 	{
-		return listTEdge;
+		return mapTEdgeToSubMesh1D.keySet().iterator();
 	}
 	
 	/**
