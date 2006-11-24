@@ -126,10 +126,10 @@ public class Triangle
 	private byte [] edgeAttributes = new byte[3];
 	// Group id
 	private int groupId = -1;
-	// Reference to the next element in the singly linked list.
-	private Triangle listNext = null;
 	// Reference to edge V0-V1, for algorithms based on edges
 	public HalfEdge edge = null;
+	// Reference to the next element in the singly linked list.
+	private Triangle listNext = null;
 	
 	// We need to process lists of triangles, and sometimes make sure
 	// that triangles are processed only once.  This can be achieved
@@ -486,17 +486,6 @@ public class Triangle
 		};
 	}
 	
-	public void createEdges()
-	{
-		HalfEdge hedge0 = new HalfEdge(this, (byte) 0, edgeAttributes[0]);
-		HalfEdge hedge1 = new HalfEdge(this, (byte) 1, edgeAttributes[1]);
-		HalfEdge hedge2 = new HalfEdge(this, (byte) 2, edgeAttributes[2]);
-		hedge0.setNext(hedge1);
-		hedge1.setNext(hedge2);
-		hedge2.setNext(hedge0);
-		edge = hedge0;
-	}
-
 	private final String showAdj(int num)
 	{
 		String r = "";

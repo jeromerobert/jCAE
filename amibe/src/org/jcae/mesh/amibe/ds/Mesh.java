@@ -594,7 +594,15 @@ public class Mesh
 		for(Iterator it=triangleList.iterator();it.hasNext();)
 		{
 			Triangle t = (Triangle) it.next();
-			t.createEdges();
+			// Create 3 HalfEdge instances
+			HalfEdge hedge0 = new HalfEdge(t, (byte) 0, (byte) t.getEdgeAttributes(0));
+			HalfEdge hedge1 = new HalfEdge(t, (byte) 1, (byte) t.getEdgeAttributes(1));
+			HalfEdge hedge2 = new HalfEdge(t, (byte) 2, (byte) t.getEdgeAttributes(2));
+			// and link them together
+			hedge0.setNext(hedge1);
+			hedge1.setNext(hedge2);
+			hedge2.setNext(hedge0);
+			t.edge = hedge0;
 		}
 		OTriangle ot = new OTriangle();
 		OTriangle sym = new OTriangle();
