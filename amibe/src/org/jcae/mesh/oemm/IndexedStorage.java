@@ -652,8 +652,11 @@ public class IndexedStorage
 			if (t.isOuter())
 				continue;
 			for (int j = 0; j < 3; j++)
+			{
+				double [] xyz = t.vertex[j].getUV();
 				for (int k = 0; k < 3; k++)
-					coord[9*i+3*j+k] = t.vertex[j].param[k];
+					coord[9*i+3*j+k] = xyz[k];
+			}
 			i++;
 		}
 		return coord;

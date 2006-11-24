@@ -52,7 +52,7 @@ public class Vertex
 	/**
 	 * 2D or 3D coordinates.
 	 */
-	public final double [] param;
+	protected final double [] param;
 	//  link can be either:
 	//    1. a Triangle, for manifold vertices
 	//    2. an Object[2] array, zhere
