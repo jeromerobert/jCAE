@@ -122,7 +122,7 @@ public class Triangle
 	 * </ul>
 	 *  Bytes 1, 2 and 3 carry up bitfield attributes for edges 0, 1 and 2.
 	*/
-	public int adjPos = 0;
+	int adjPos = 0;
 	private int groupId = -1;
 	// Reference to the next element in the singly linked list.
 	private Triangle listNext = null;
@@ -190,6 +190,11 @@ public class Triangle
 			vertex = new Vertex2D[3];
 		else
 			vertex = new Vertex[3];
+		copy(that);
+	}
+	
+	public final void copy(Triangle that)
+	{
 		for (int i = 0; i < 3; i++)
 		{
 			vertex[i] = that.vertex[i];

@@ -133,7 +133,7 @@ public class OTriangle2D extends OTriangle
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("Split OTriangle2D "+this+"\nat Vertex "+v);
-		int savedAdjPos = tri.adjPos;
+		Triangle backup = new Triangle(tri);
 		// Aliases
 		OTriangle2D oldLeft = work[0];
 		OTriangle2D oldRight = work[1];
@@ -169,7 +169,6 @@ public class OTriangle2D extends OTriangle
 			oldRight.attributes = 0;
 			oldRight.pushAttributes();
 		}
-		Triangle iniTri = tri;
 		v.setLink(tri);
 		a.setLink(newLeft.tri);
 		//  Move apex of current OTriangle2D.  As a consequence,
@@ -202,11 +201,10 @@ public class OTriangle2D extends OTriangle
 			//  v has been inserted and no edges are swapped,
 			//  thus global quality has been decreased.
 			//  Remove v in such cases.
-			o.setLink(iniTri);
-			d.setLink(iniTri);
-			a.setLink(iniTri);
-			setApex(a);
-			tri.adjPos = savedAdjPos;
+			tri.copy(backup);
+			o.setLink(tri);
+			d.setLink(tri);
+			a.setLink(tri);
 			nextOTri(this, oldLeft);         // = (dao)
 			oldLeft.glue(oldSymRight);
 			oldLeft.nextOTri();              // = (aod)
