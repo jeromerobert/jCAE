@@ -22,8 +22,8 @@ package org.jcae.mesh.xmldata;
 
 import org.jcae.mesh.amibe.ds.MGroup3D;
 import org.jcae.mesh.amibe.ds.MMesh3D;
-import org.jcae.mesh.amibe.ds.MFace3D;
-import org.jcae.mesh.amibe.ds.MNode3D;
+import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.Vertex;
 import gnu.trove.TObjectIntHashMap;
 import java.io.IOException;
 import java.io.File;
@@ -55,13 +55,14 @@ public class MMesh3DWriter
 		Iterator nodesIterator = mesh3d.getNodesIterator();
 		while(nodesIterator.hasNext())
 		{
-			MNode3D n=(MNode3D)nodesIterator.next();
+			Vertex n=(Vertex)nodesIterator.next();
 			int ref1d = n.getRef();
 			if (0 == ref1d)
 			{
-				out.writeDouble(n.getX());
-				out.writeDouble(n.getY());
-				out.writeDouble(n.getZ());
+				double [] p = n.getUV();
+				out.writeDouble(p[0]);
+				out.writeDouble(p[1]);
+				out.writeDouble(p[2]);
 				nodeIndex.put(n, i);
 				i++;
 			}
@@ -70,13 +71,14 @@ public class MMesh3DWriter
 		nodesIterator = mesh3d.getNodesIterator();
 		while(nodesIterator.hasNext())
 		{
-			MNode3D n=(MNode3D)nodesIterator.next();
+			Vertex n=(Vertex)nodesIterator.next();
 			int ref1d = n.getRef();
 			if (0 != ref1d)
 			{
-				out.writeDouble(n.getX());
-				out.writeDouble(n.getY());
-				out.writeDouble(n.getZ());
+				double [] p = n.getUV();
+				out.writeDouble(p[0]);
+				out.writeDouble(p[1]);
+				out.writeDouble(p[2]);
 				refout.writeInt(ref1d);
 				nodeIndex.put(n, i);
 				nref++;
@@ -112,12 +114,11 @@ public class MMesh3DWriter
 		int i=0;
 		while(facesIterator.hasNext())
 		{
-			MFace3D f=(MFace3D)facesIterator.next();			
+			Triangle f=(Triangle)facesIterator.next();			
 			faceIndex.put(f, i);
 			i++;
-			Iterator it2=f.getNodesIterator();
-			while(it2.hasNext())
-				out.writeInt(nodeIndex.get(it2.next()));
+			for (int j = 0; j < 3; j++)
+				out.writeInt(nodeIndex.get(f.vertex[j]));
 		}
 		out.close();
 		logger.debug("end writing "+trianglesFile);

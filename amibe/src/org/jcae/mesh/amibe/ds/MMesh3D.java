@@ -29,15 +29,12 @@ import org.apache.log4j.Logger;
  * This class contains the 3D mesh of the whole shape.
  */
 
-public class MMesh3D
+public class MMesh3D extends Mesh
 {
 	private static Logger logger=Logger.getLogger(MMesh3D.class);	
 
 	//  Group list.
 	private ArrayList grouplist = new ArrayList();
-	
-	//  Face list.
-	private ArrayList facelist = new ArrayList();
 	
 	//  Node list.
 	private ArrayList nodelist = new ArrayList();
@@ -69,7 +66,7 @@ public class MMesh3D
 	 */
 	public Iterator getFacesIterator()
 	{
-		return facelist.iterator();
+		return triangleList.iterator();
 	}
 	
 	/**
@@ -79,7 +76,7 @@ public class MMesh3D
 	 */
 	public int getNumberOfFaces()
 	{
-		return facelist.size();
+		return triangleList.size();
 	}
 	
 	/**
@@ -107,17 +104,17 @@ public class MMesh3D
 		grouplist.add(g);
 	}
 	
-	public void addFace(MFace3D f)
+	public void addFace(Triangle f)
 	{
-		facelist.add(f);
+		triangleList.add(f);
 	}
 	
-	public void addNode(MNode3D n)
+	public void addNode(Vertex n)
 	{
 		nodelist.add(n);
 	}
 	
-	public void removeNode(MNode3D n)
+	public void removeNode(Vertex n)
 	{
 		nodelist.remove(n);
 	}	
@@ -131,12 +128,12 @@ public class MMesh3D
 		r+=cr;
 		for(Iterator it=nodelist.iterator();it.hasNext();)
 		{
-			MNode3D node=(MNode3D)it.next();
+			Vertex node=(Vertex)it.next();
 			r+=node+cr;
 		}
-		for(Iterator it=facelist.iterator();it.hasNext();)
+		for(Iterator it=triangleList.iterator();it.hasNext();)
 		{
-			MFace3D face=(MFace3D)it.next();
+			Triangle face=(Triangle)it.next();
 			r+=face+cr;
 		}
 		logger.debug("...done");

@@ -20,11 +20,11 @@
 
 package org.jcae.mesh.amibe.algos2d;
 
-import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.patch.Mesh2D;
+import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.patch.OTriangle2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
-import org.jcae.mesh.amibe.ds.MNode3D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import java.util.ArrayList;
@@ -64,7 +64,7 @@ public class EnforceAbsDeflection
 		logger.debug(" Enforcing absolute deflection");
 
 		Triangle t;
-		MNode3D [] p = new MNode3D[4];
+		Vertex [] p = new Vertex[4];
 		double [] v1 = new double[3];
 		double [] v2 = new double[3];
 		double [] v3 = new double[3];
@@ -82,17 +82,17 @@ public class EnforceAbsDeflection
 					continue;
 				double uv[] = Vertex2D.centroid((Vertex2D[]) t.vertex).getUV();
 				double [] xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
-				p[3] = new MNode3D(xyz, 0);
+				p[3] = Vertex.valueOf(xyz);
 				for (int i = 0; i < 3; i++)
 				{
 					uv = t.vertex[i].getUV();
 					xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
-					p[i] = new MNode3D(xyz, 0);
+					p[i] = Vertex.valueOf(xyz);
 				}
-				double [] xyz0 = p[0].getXYZ();
-				double [] xyz1 = p[1].getXYZ();
-				double [] xyz2 = p[2].getXYZ();
-				double [] xyz3 = p[3].getXYZ();
+				double [] xyz0 = p[0].getUV();
+				double [] xyz1 = p[1].getUV();
+				double [] xyz2 = p[2].getUV();
+				double [] xyz3 = p[3].getUV();
 				for (int i = 0; i < 3; i++)
 				{
 					v1[i] = xyz1[i] - xyz0[i];

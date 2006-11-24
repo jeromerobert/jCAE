@@ -23,7 +23,6 @@ package org.jcae.mesh;
 import java.util.Iterator;
 import java.io.File;
 import org.jcae.mesh.amibe.ds.MGroup3D;
-import org.jcae.mesh.amibe.ds.MFace3D;
 import org.jcae.mesh.amibe.ds.MMesh3D;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;

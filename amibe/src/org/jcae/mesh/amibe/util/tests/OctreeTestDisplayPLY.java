@@ -21,7 +21,7 @@ package org.jcae.mesh.amibe.util.tests;
 
 import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.util.OctreeTest;
-import org.jcae.mesh.amibe.ds.MNode3D;
+import org.jcae.mesh.amibe.ds.Vertex;
 import java.io.*;
 import java.util.StringTokenizer;
 import org.jcae.mesh.java3d.Viewer;
@@ -122,7 +122,7 @@ public class OctreeTestDisplayPLY extends OctreeTest
 		for (int i = 0; i < nrNodes - nrDuplicates; i++)
 		{
 			System.arraycopy(coord, 3*i, xyz, 0, 3);
-			r.add(new MNode3D(xyz, 0));
+			r.add(Vertex.valueOf(xyz));
 		}
 		logger.info("Max level: "+r.getMaxLevel());
 		logger.info("Number of cells: "+r.nCells);
@@ -142,7 +142,7 @@ public class OctreeTestDisplayPLY extends OctreeTest
 					double [] xyz = view.getLastClick();
 					if (null != xyz)
 					{
-						MNode3D vt = r.getNearVertex(new MNode3D(xyz, 0));
+						Vertex vt = r.getNearVertex(Vertex.valueOf(xyz));
 						r.remove(vt);
 						view.removeAllBranchGroup();
 						display(view, r);

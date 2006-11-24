@@ -20,10 +20,10 @@
 package org.jcae.mesh.amibe.util;
 
 import org.apache.log4j.Logger;
-import org.jcae.mesh.amibe.ds.MNode3D;
+import org.jcae.mesh.amibe.ds.Vertex;
 
 /**
- * Octree to store {@link MNode3D} vertices.
+ * Octree to store {@link Vertex} vertices.
  * This class is very similar to {@link org.jcae.mesh.amibe.patch.QuadTree},
  * it is useful to find near vertices.
  * It was needed by {@link org.jcae.mesh.amibe.algos3d.Fuse}
@@ -108,8 +108,8 @@ import org.jcae.mesh.amibe.ds.MNode3D;
  * </ol>
  *
  * <p>
- * The implementation of {@link #getNearestVertex(MNode3D)} is slightly improved:
- * the starting point is computed by {@link #getNearVertex(MNode3D)}, so that
+ * The implementation of {@link #getNearestVertex(Vertex)} is slightly improved:
+ * the starting point is computed by {@link #getNearVertex(Vertex)}, so that
  * much more cells are skipped.
  * </p>
  */
@@ -252,16 +252,16 @@ public class Octree
 	}
 	
 	/**
-	 * Add a {@link MNode3D} to the octree.
+	 * Add a {@link Vertex} to the octree.
 	 * @param v  the node to add.
 	 */
-	public final void add(MNode3D v)
+	public final void add(Vertex v)
 	{
 		Cell current = root;
 		int s = gridSize;
 		int [] ijk = new int[3];
 		int [] oldijk = new int[3];
-		double2int(v.getXYZ(), ijk);
+		double2int(v.getUV(), ijk);
 		while (current.nItems < 0)
 		{
 			current.nItems--;
@@ -285,14 +285,14 @@ public class Octree
 			//  Move points to their respective suboctrees.
 			for (int i = 0; i < BUCKETSIZE; i++)
 			{
-				MNode3D p = (MNode3D) current.subOctree[i];
-				double2int(p.getXYZ(), oldijk);
+				Vertex p = (Vertex) current.subOctree[i];
+				double2int(p.getUV(), oldijk);
 				int ind = indexSubOctree(oldijk, s);
 				if (null == newSubOctrees[ind])
 				{
 					newSubOctrees[ind] = new Cell();
 					nCells++;
-					newSubOctrees[ind].subOctree = new MNode3D[BUCKETSIZE];
+					newSubOctrees[ind].subOctree = new Vertex[BUCKETSIZE];
 				}
 				Cell target = newSubOctrees[ind];
 				target.subOctree[target.nItems] = current.subOctree[i];
@@ -311,16 +311,16 @@ public class Octree
 		}
 		//  Eventually insert the new point
 		if (current.nItems == 0)
-			current.subOctree = new MNode3D[BUCKETSIZE];
+			current.subOctree = new Vertex[BUCKETSIZE];
 		current.subOctree[current.nItems] = v;
 		current.nItems++;
 	}
 	
 	/**
-	 * Remove a {@link MNode3D} from the octree.
+	 * Remove a {@link Vertex} from the octree.
 	 * @param v  the node to remove.
 	 */
-	public final void remove(MNode3D v)
+	public final void remove(Vertex v)
 	{
 		Cell current = root;
 		Cell last = root;
@@ -328,7 +328,7 @@ public class Octree
 		int lastPos = 0;
 		int s = gridSize;
 		int [] ijk = new int[3];
-		double2int(v.getXYZ(), ijk);
+		double2int(v.getUV(), ijk);
 		while (current.nItems < 0)
 		{
 			//  nItems is negative
@@ -344,7 +344,7 @@ public class Octree
 			int ind = indexSubOctree(ijk, s);
 			next = (Cell) current.subOctree[ind];
 			if (null == next)
-				throw new RuntimeException("MNode3D "+v+" is not present and can not be deleted");
+				throw new RuntimeException("Vertex "+v+" is not present and can not be deleted");
 			last = current;
 			lastPos = ind;
 			current = next;
@@ -352,13 +352,13 @@ public class Octree
 		int offset = 0;
 		for (int i = 0; i < current.nItems; i++)
 		{
-			if (v == (MNode3D) current.subOctree[i])
+			if (v == (Vertex) current.subOctree[i])
 				offset++;
 			else if (offset > 0)
 				current.subOctree[i-offset] = current.subOctree[i];
 		}
 		if (offset == 0)
-			throw new RuntimeException("MNode3D "+v+" is not present and can not be deleted");
+			throw new RuntimeException("Vertex "+v+" is not present and can not be deleted");
 		current.nItems--;
 		if (current.nItems > 0)
 			current.subOctree[current.nItems] = null;
@@ -377,12 +377,12 @@ public class Octree
 	 * vertices, the nearest one is returned (vertices in other leaves may
 	 * of course be nearer).  Otherwise the nearest vertex from sibling
 	 * children is returned.  The returned vertex is a good starting point
-	 * for {@link #getNearestVertex(MNode3D)}.
+	 * for {@link #getNearestVertex(Vertex)}.
 	 *
 	 * @param v  the node to check.
 	 * @return a near vertex.
 	 */
-	public final MNode3D getNearVertex(MNode3D v)
+	public final Vertex getNearVertex(Vertex v)
 	{
 		Cell current = root;
 		if (current.nItems == 0)
@@ -391,7 +391,7 @@ public class Octree
 		int s = gridSize;
 		int [] ijk = new int[3];
 		int [] retijk = new int[3];
-		double2int(v.getXYZ(), ijk);
+		double2int(v.getUV(), ijk);
 		int searchedCells = 0;
 		if (logger.isDebugEnabled())
 			logger.debug("Near point: "+v);
@@ -407,17 +407,17 @@ public class Octree
 		if (null == current)
 			return getNearVertexInSubOctrees(last, v, s << 1, searchedCells);
 		
-		MNode3D vQ = (MNode3D) current.subOctree[0];
-		MNode3D ret = vQ;
-		double2int(vQ.getXYZ(), retijk);
+		Vertex vQ = (Vertex) current.subOctree[0];
+		Vertex ret = vQ;
+		double2int(vQ.getUV(), retijk);
 		long ldist =
 				((long) (ijk[0] - retijk[0])) * ((long) (ijk[0] - retijk[0])) +
 				((long) (ijk[1] - retijk[1])) * ((long) (ijk[1] - retijk[1])) +
 				((long) (ijk[2] - retijk[2])) * ((long) (ijk[2] - retijk[2]));
 		for (int i = 1; i < current.nItems; i++)
 		{
-			vQ = (MNode3D) current.subOctree[i];
-			double2int(vQ.getXYZ(), retijk);
+			vQ = (Vertex) current.subOctree[i];
+			double2int(vQ.getUV(), retijk);
 			long d =
 				((long) (ijk[0] - retijk[0])) * ((long) (ijk[0] - retijk[0])) +
 				((long) (ijk[1] - retijk[1])) * ((long) (ijk[1] - retijk[1])) +
@@ -433,12 +433,12 @@ public class Octree
 		return ret;
 	}
 	
-	private final MNode3D getNearVertexInSubOctrees(Cell current, MNode3D v, int dist, int searchedCells)
+	private final Vertex getNearVertexInSubOctrees(Cell current, Vertex v, int dist, int searchedCells)
 	{
-		MNode3D ret = null;
+		Vertex ret = null;
 		int [] ijk = new int[3];
 		int [] retijk = new int[3];
-		double2int(v.getXYZ(), ijk);
+		double2int(v.getUV(), ijk);
 		// Cell diagonal is of length sqrt(3)*dist
 		long ldist = 3L * ((long) dist) * ((long) dist);
 		if (logger.isDebugEnabled())
@@ -469,8 +469,8 @@ public class Octree
 			{
 				for (int i = 0; i < octreeStack[l].nItems; i++)
 				{
-					MNode3D vQ = (MNode3D) octreeStack[l].subOctree[i];
-					double2int(vQ.getXYZ(), retijk);
+					Vertex vQ = (Vertex) octreeStack[l].subOctree[i];
+					double2int(vQ.getUV(), retijk);
 					long d =
 						((long) (ijk[0] - retijk[0])) * ((long) (ijk[0] - retijk[0])) +
 						((long) (ijk[1] - retijk[1])) * ((long) (ijk[1] - retijk[1])) +
@@ -556,13 +556,13 @@ public class Octree
 		private final int [] retijk = new int[3];;
 		private int idist;
 		private long ldist;
-		public MNode3D nearestVertex;
+		public Vertex nearestVertex;
 		public int searchedCells = 0;
-		public getNearestVertexProcedure(MNode3D from, MNode3D v)
+		public getNearestVertexProcedure(Vertex from, Vertex v)
 		{
-			double2int(from.getXYZ(), ijk);
+			double2int(from.getUV(), ijk);
 			nearestVertex = v;
-			double2int(nearestVertex.getXYZ(), retijk);
+			double2int(nearestVertex.getUV(), retijk);
 			ldist =
 				((long) (ijk[0] - retijk[0])) * ((long) (ijk[0] - retijk[0])) +
 				((long) (ijk[1] - retijk[1])) * ((long) (ijk[1] - retijk[1])) +
@@ -582,8 +582,8 @@ public class Octree
 			{
 				for (int i = 0; i < self.nItems; i++)
 				{
-					MNode3D vtest = (MNode3D) self.subOctree[i];
-					double2int(vtest.getXYZ(), retijk);
+					Vertex vtest = (Vertex) self.subOctree[i];
+					double2int(vtest.getUV(), retijk);
 					long retdist =
 						((long) (ijk[0] - retijk[0])) * ((long) (ijk[0] - retijk[0])) +
 						((long) (ijk[1] - retijk[1])) * ((long) (ijk[1] - retijk[1])) +
@@ -606,10 +606,10 @@ public class Octree
 	 * @param v  the node to check.
 	 * @return the nearest vertex.
 	 */
-	public final MNode3D getNearestVertex(MNode3D v)
+	public final Vertex getNearestVertex(Vertex v)
 	{
 		Cell current = root;
-		MNode3D ret = getNearVertex(v);
+		Vertex ret = getNearVertex(v);
 		if (ret == null)
 			return null;
 		if (logger.isDebugEnabled())

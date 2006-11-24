@@ -1,3 +1,12 @@
+Fri Nov 24 19:38:29 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/MMesh3D.java
+	  src/org/jcae/mesh/amibe/ds/MFace3D
+	  src/org/jcae/mesh/amibe/ds/MNode3D.java: Modify MMesh3D to extend
+	Mesh; MFace3D and MNode3D are removed, and replaced respectively by
+	Triangle and Vertex.  For now, normals are no more written into
+	output files.
+
 Fri Nov 24 11:05:19 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/cad/CADExplorer.java

@@ -22,8 +22,8 @@ package org.jcae.mesh.xmldata;
 
 import org.jcae.mesh.amibe.ds.MGroup3D;
 import org.jcae.mesh.amibe.ds.MMesh3D;
-import org.jcae.mesh.amibe.ds.MFace3D;
-import org.jcae.mesh.amibe.ds.MNode3D;
+import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.Vertex;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileInputStream;
@@ -123,7 +123,7 @@ public class MMesh3DReader
 			
 			int numberOfNodes = Integer.parseInt(
 				xpath.evaluate("number/text()", submeshNodes));
-			MNode3D [] nodelist = new MNode3D[numberOfNodes];
+			Vertex [] nodelist = new Vertex[numberOfNodes];
 			int label;
 			double [] coord = new double[3];
 			logger.debug("Reading "+numberOfNodes+" nodes");
@@ -134,31 +134,32 @@ public class MMesh3DReader
 				else
 					label = refs[i+numberOfReferences-numberOfNodes];
 				nodesBuffer.get(coord);
-				nodelist[i] = new MNode3D(coord, label);
+				nodelist[i] = Vertex.valueOf(coord);
+				nodelist[i].setRef(label);
 				m3d.addNode(nodelist[i]);
 			}
 			
 			int numberOfTriangles = Integer.parseInt(
 				xpath.evaluate("number/text()", submeshTriangles));
 			logger.debug("Reading "+numberOfTriangles+" elements");
-			MFace3D [] facelist = new MFace3D[numberOfTriangles];
+			Triangle [] facelist = new Triangle[numberOfTriangles];
 			double [] n = new double[3];
 			for (i=0; i < numberOfTriangles; i++)
 			{
-				MNode3D pt1 = nodelist[trianglesBuffer.get()];
-				MNode3D pt2 = nodelist[trianglesBuffer.get()];
-				MNode3D pt3 = nodelist[trianglesBuffer.get()];
+				Vertex pt1 = nodelist[trianglesBuffer.get()];
+				Vertex pt2 = nodelist[trianglesBuffer.get()];
+				Vertex pt3 = nodelist[trianglesBuffer.get()];
 				if (fcNormals != null)
 				{
 					normalsBuffer.get(n);
-					pt1.addNormal(n);
+					//pt1.addNormal(n);
 					normalsBuffer.get(n);
-					pt2.addNormal(n);
+					//pt2.addNormal(n);
 					normalsBuffer.get(n);
-					pt3.addNormal(n);
+					//pt3.addNormal(n);
 				}
-				facelist[i] = new MFace3D(pt1, pt2, pt3);
-				m3d.addFace(facelist[i]);
+				facelist[i] = new Triangle(pt1, pt2, pt3);
+				m3d.add(facelist[i]);
 			}
 			
 			Node groupsElement = (Node) xpath.evaluate("groups",

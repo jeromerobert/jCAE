@@ -22,7 +22,7 @@ package org.jcae.mesh;
 
 import java.util.Iterator;
 import org.jcae.mesh.amibe.ds.MGroup3D;
-import org.jcae.mesh.amibe.ds.MFace3D;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.MMesh3D;
 import org.jcae.mesh.xmldata.MMesh3DReader;
 import org.jcae.mesh.xmldata.UNVConverter;
@@ -47,7 +47,7 @@ public class MeshValid3D
 		data.setQualityProcedure(qproc);
 		for (Iterator itf = mesh3D.getFacesIterator(); itf.hasNext();)
 		{
-			MFace3D f= (MFace3D) itf.next();
+			Triangle f= (Triangle) itf.next();
 			data.compute(f);
 		}
 		data.finish();

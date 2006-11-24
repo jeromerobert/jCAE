@@ -21,8 +21,8 @@
 package org.jcae.mesh.amibe.algos3d;
 
 import org.jcae.mesh.amibe.ds.MMesh3D;
-import org.jcae.mesh.amibe.ds.MFace3D;
-import org.jcae.mesh.amibe.ds.MNode3D;
+import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.util.Octree;
 import java.util.Iterator;
 import java.util.HashMap;
@@ -74,8 +74,8 @@ public class Fuse
 		}
 		for (Iterator it=mesh.getNodesIterator(); it.hasNext(); )
 		{
-			MNode3D n = (MNode3D) it.next();
-			double [] oldp = n.getXYZ();
+			Vertex n = (Vertex) it.next();
+			double [] oldp = n.getUV();
 			for (int i = 0; i < 3; i++)
 			{
 				bmin[i] = Math.min(bmin[i], oldp[i]);
@@ -99,31 +99,31 @@ public class Fuse
 		int nSubst = 0;
 		for (Iterator it = mesh.getNodesIterator(); it.hasNext(); )
 		{
-			MNode3D n = (MNode3D) it.next();
+			Vertex n = (Vertex) it.next();
 			if (n.isMutable())
 				continue;
-			MNode3D p = octree.getNearestVertex(n);
-			if (p == null || p.isMutable() || n.distance(p) > tolerance)
+			Vertex p = octree.getNearestVertex(n);
+			if (p == null || p.isMutable() || n.distance3D(p) > tolerance)
 				octree.add(n);
 			else
 			{
 				logger.debug("Node "+n+" is removed, it is too close from "+p);
 				nSubst++;
 				map.put(n, p);
-				n.clearRef();
+				n.setRef(0);
 			}
 		}
 		logger.debug(""+nSubst+" node(s) are removed");
 		for (Iterator it = mesh.getFacesIterator(); it.hasNext(); )
 		{
-			MFace3D face = (MFace3D) it.next();
-			for (Iterator itn = face.getNodesIterator(); itn.hasNext(); )
+			Triangle face = (Triangle) it.next();
+			for (int j = 0; j < 4; j++)
 			{
-				MNode3D n = (MNode3D) itn.next();
-				MNode3D p = (MNode3D) map.get(n);
+				Vertex n = face.vertex[j];
+				Vertex p = (Vertex) map.get(n);
 				if (p != null)
 				{
-					face.substNode(n, p);
+					face.vertex[j] = p;
 					mesh.removeNode(n);
 				}
 			}

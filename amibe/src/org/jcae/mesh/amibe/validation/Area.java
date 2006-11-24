@@ -19,10 +19,8 @@
 
 package org.jcae.mesh.amibe.validation;
 
-import org.jcae.mesh.amibe.ds.MFace3D;
-import org.jcae.mesh.amibe.ds.MNode3D;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
-import java.util.Iterator;
 
 /**
  * Compute triangle area.
@@ -41,16 +39,12 @@ public class Area extends QualityProcedure
 	
 	public float quality(Object o)
 	{
-		if (!(o instanceof MFace3D))
+		if (!(o instanceof Triangle))
 			throw new IllegalArgumentException();
-		MFace3D f = (MFace3D) o;
-		Iterator itn = f.getNodesIterator();
-		MNode3D n1 = (MNode3D) itn.next();
-		MNode3D n2 = (MNode3D) itn.next();
-		MNode3D n3 = (MNode3D) itn.next();
-		double [] p1 = n1.getXYZ();
-		double [] p2 = n2.getXYZ();
-		double [] p3 = n3.getXYZ();
+		Triangle f = (Triangle) o;
+		double [] p1 = f.vertex[0].getUV();
+		double [] p2 = f.vertex[1].getUV();
+		double [] p3 = f.vertex[2].getUV();
 		for (int i = 0; i < 3; i++)
 		{
 			v1[i] = p2[i] - p1[i];

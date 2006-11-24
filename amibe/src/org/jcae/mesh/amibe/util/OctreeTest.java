@@ -20,7 +20,7 @@
 package org.jcae.mesh.amibe.util;
 
 import org.apache.log4j.Logger;
-import org.jcae.mesh.amibe.ds.MNode3D;
+import org.jcae.mesh.amibe.ds.Vertex;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.FileNotFoundException;
@@ -150,8 +150,8 @@ public class OctreeTest extends Octree
 			coord[5] = p[2];
 			for (int i = 0; i < self.nItems; i++)
 			{
-				MNode3D v = (MNode3D) self.subOctree[i];
-				p = v.getXYZ();
+				Vertex v = (Vertex) self.subOctree[i];
+				p = v.getUV();
 				if (p[0] < coord[0] || p[0] > coord[3] ||
 					p[1] < coord[1] || p[1] > coord[4] ||
 					p[2] < coord[2] || p[2] > coord[5])
@@ -178,8 +178,8 @@ public class OctreeTest extends Octree
 				return 0;
 			for (int i = 0; i < self.nItems; i++)
 			{
-				MNode3D v = (MNode3D) self.subOctree[i];
-				double [] param = v.getXYZ();
+				Vertex v = (Vertex) self.subOctree[i];
+				double [] param = v.getUV();
 				coord[index]   = param[0];
 				coord[index+1] = param[1];
 				coord[index+2] = param[2];

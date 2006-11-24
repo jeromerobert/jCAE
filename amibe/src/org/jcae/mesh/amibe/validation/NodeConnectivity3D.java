@@ -20,10 +20,10 @@
 package org.jcae.mesh.amibe.validation;
 
 import gnu.trove.TObjectIntHashMap;
+import gnu.trove.TObjectIntProcedure;
 import gnu.trove.TFloatArrayList;
-import org.jcae.mesh.amibe.ds.MMesh3D;
-import org.jcae.mesh.amibe.ds.MFace3D;
-import org.jcae.mesh.amibe.ds.MNode3D;
+import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.Vertex;
 import java.util.Iterator;
 
 /**
@@ -32,7 +32,7 @@ import java.util.Iterator;
  * method to compute node connectivity of 3D meshes.  As 3D meshes
  * have a simplistic data structure, computing node neighbours would
  * be very extensive.  Thus instead <code>quality</code> is called
- * with a {@link org.jcae.mesh.amibe.ds.MFace3D} argument, this method
+ * with a {@link org.jcae.mesh.amibe.ds.Triangle} argument, this method
  * increments counters on its three vertices.  The {@link #finish}
  * method has to be called after looping on all faces.
  */
@@ -40,28 +40,20 @@ import java.util.Iterator;
 public class NodeConnectivity3D extends QualityProcedure
 {
 	private TObjectIntHashMap nodeMap = new TObjectIntHashMap();
-	private MMesh3D mesh3D;
 	
 	public NodeConnectivity3D()
 	{
-		throw new RuntimeException("NodeConnectivity3D constructor must be called with a MMesh3D argument!");
-	}
-	
-	public NodeConnectivity3D(MMesh3D m)
-	{
-		mesh3D = m;
 		setType(QualityProcedure.NODE);
 	}
 	
 	public float quality(Object o)
 	{
-		if (!(o instanceof MFace3D))
+		if (!(o instanceof Triangle))
 			throw new IllegalArgumentException();
-		MFace3D f = (MFace3D) o;
-		Iterator itn = f.getNodesIterator();
+		Triangle f = (Triangle) o;
 		for (int i = 0; i < 3; i++)
 		{
-			MNode3D n = (MNode3D) itn.next();
+			Vertex n = f.vertex[i];
 			if (!nodeMap.increment(n))
 				nodeMap.put(n, 1);
 		}
@@ -76,17 +68,27 @@ public class NodeConnectivity3D extends QualityProcedure
 	public void finish()
 	{
 		data.clear();
-		for (Iterator itn = mesh3D.getNodesIterator(); itn.hasNext(); )
+		Count proc = new Count(data);
+		nodeMap.forEachEntry(proc);
+	}
+
+	private class Count implements TObjectIntProcedure
+	{
+		private TFloatArrayList data;
+		public Count(final TFloatArrayList d)
 		{
-			MNode3D n = (MNode3D) itn.next();
-			int cnt = nodeMap.get(n);
-			float q = ((float) cnt) / 6.0f;
-			if (cnt <= 6)
+			data = d;
+		}
+		public boolean execute(Object a, int b)
+		{
+			float q = ((float) b) / 6.0f;
+			if (b <= 6)
 				data.add(q);
-			else if (cnt <= 12)
+			else if (b <= 12)
 				data.add(2.0f - q);
 			else
 				data.add(0.0f);
+			return true;
 		}
 	}
 	

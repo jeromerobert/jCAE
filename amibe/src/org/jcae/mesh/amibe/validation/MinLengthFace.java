@@ -19,9 +19,8 @@
 
 package org.jcae.mesh.amibe.validation;
 
-import org.jcae.mesh.amibe.ds.MFace3D;
-import org.jcae.mesh.amibe.ds.MNode3D;
-import java.util.Iterator;
+import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.Vertex;
 
 /**
  * Compute maximal edge length by triangle.
@@ -38,17 +37,16 @@ public class MinLengthFace extends QualityProcedure
 	
 	public float quality(Object o)
 	{
-		if (!(o instanceof MFace3D))
+		if (!(o instanceof Triangle))
 			throw new IllegalArgumentException();
 		double l1, l2, l3;
-		MFace3D f = (MFace3D) o;
-		Iterator itn = f.getNodesIterator();
-		MNode3D n1 = (MNode3D) itn.next();
-		MNode3D n2 = (MNode3D) itn.next();
-		MNode3D n3 = (MNode3D) itn.next();
-		l1 = n1.distance(n2);
-		l2 = n2.distance(n3);
-		l3 = n3.distance(n1);
+		Triangle f = (Triangle) o;
+		Vertex n1 = f.vertex[0];
+		Vertex n2 = f.vertex[1];
+		Vertex n3 = f.vertex[2];
+		l1 = n1.distance3D(n2);
+		l2 = n2.distance3D(n3);
+		l3 = n3.distance3D(n1);
 		if (l2 < l1)
 			l1 = l2;
 		if (l3 < l1)
