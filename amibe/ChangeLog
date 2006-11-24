@@ -8,11 +8,14 @@ Fri Nov 24 11:05:19 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 	extends CADShapeEnum.
 	* src-occ/org/jcae/mesh/cad/occ/OCCExplorer.java (init): Use shape
 	types from OCCShapeEnum.
-	* src/org/jcae/mesh/amibe/ds/Triangle.java: Change 'adjPos' access
-	to private, and add a new copy() to let OTriangle2D.split3() have
-	a backup copy of Triangle instances.
-	* src/org/jcae/mesh/amibe/ds/Triangle.java: Transform 'adjPos' into
-	byte[4] array to improve readability, there is no performance loss.
+	* src/org/jcae/mesh/amibe/ds/Triangle.java: adjPos was a packed
+	representation into an int of edge attributes and adjacent local
+	numbers.  It turns out that this representation is not that
+	efficient, thus let adjPos only contain adjacent local numbers,
+	and edgeAttributes is a new byte[3] array to store edge attributes.
+	These members are now private.
+	Add a new copy() to let OTriangle2D.split3() have a backup copy of
+	Triangle instances.
 
 Thu Nov 23 20:19:55 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 

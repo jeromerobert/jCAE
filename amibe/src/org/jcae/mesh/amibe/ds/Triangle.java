@@ -61,9 +61,7 @@ import org.apache.log4j.Logger;
  * this information into pointers themselves: they are respectively shifted
  * by 0, 1 or 2 bytes for edges 0, 1 and 2.  This very efficient trick
  * can not be performed with Java, and the three numbers are packed into
- * a single byte instead.  As attributes on edges are also needed, all
- * edge data are packed into a single {@link #adjPos} integer insstance
- * variable.
+ * a single byte instead.
  * </p>
  *
  * <p>
@@ -112,17 +110,21 @@ public class Triangle
 	private Object [] adj = new Object[3];
 	
 	/**
-	 * Edge packed data.
-	 * Byte 0 contains the local number of opposite edges in
+	 * Packed representation of adjacent edge local numbers.
+	 * adjPos contains the local number of opposite edges in
 	 * their respective triangles:
 	 * <ul>
 	 *     <li>bits 0-1: local number for matte edge 0</li>
 	 *     <li>bits 2-3: local number for matte edge 1</li>
 	 *     <li>bits 4-5: local number for matte edge 2</li>
 	 * </ul>
-	 *  Bytes 1, 2 and 3 carry up bitfield attributes for edges 0, 1 and 2.
 	*/
-	private byte [] adjPos = new byte[4];
+	private byte adjPos = 0;
+	/**
+	 * Edge attributes.
+	 */
+	private byte [] edgeAttributes = new byte[3];
+	// Group id
 	private int groupId = -1;
 	// Reference to the next element in the singly linked list.
 	private Triangle listNext = null;
@@ -200,8 +202,10 @@ public class Triangle
 			vertex[i] = that.vertex[i];
 			adj[i] = that.adj[i];
 		}
-		for (int i = 0; i < adjPos.length; i++)
-			adjPos[i] = that.adjPos[i];
+		adjPos = that.adjPos;
+		edgeAttributes[0] = that.edgeAttributes[0];
+		edgeAttributes[1] = that.edgeAttributes[1];
+		edgeAttributes[2] = that.edgeAttributes[2];
 		if (that.listNext != null)
 			listCollect();
 	}
@@ -240,9 +244,9 @@ public class Triangle
 	{
 		adj[num] = that;
 		//  Clear previous adjacent position ...
-		adjPos[0] &= ~(3 << (2*num));
+		adjPos &= ~(3 << (2*num));
 		//  ... and set it right
-		adjPos[0] |= (thatnum << (2*num));
+		adjPos |= (thatnum << (2*num));
 	}
 	
 	/**
@@ -280,20 +284,20 @@ public class Triangle
 	 */
 	public int getAdjLocalNumber(int num)
 	{
-		return (adjPos[0] >> (2*num)) & 3;
+		return (adjPos >> (2*num)) & 3;
 	}
 	
 	// Helper functions
 	private boolean isFlagged(int flag)
 	{
-		return ((adjPos[1] | adjPos[2] | adjPos[3]) & flag) != 0;
+		return ((edgeAttributes[0] | edgeAttributes[1] | edgeAttributes[2]) & flag) != 0;
 	}
 
 	private void setFlag(int flag)
 	{
-		adjPos[1] |= flag;
-		adjPos[2] |= flag;
-		adjPos[3] |= flag;
+		edgeAttributes[0] |= flag;
+		edgeAttributes[1] |= flag;
+		edgeAttributes[2] |= flag;
 	}
 
 	/**
@@ -339,9 +343,9 @@ public class Triangle
 	 */
 	public void unsetMarked()
 	{
-		adjPos[1] &= ~OTriangle.MARKED;
-		adjPos[2] &= ~OTriangle.MARKED;
-		adjPos[3] &= ~OTriangle.MARKED;
+		edgeAttributes[0] &= ~OTriangle.MARKED;
+		edgeAttributes[1] &= ~OTriangle.MARKED;
+		edgeAttributes[2] &= ~OTriangle.MARKED;
 	}
 	
 	/**
@@ -358,38 +362,38 @@ public class Triangle
 	
 	public boolean isReadable()
 	{
-		return (adjPos[1] & 0x80) != 0;
+		return (edgeAttributes[1] & 0x80) != 0;
 	}
 	
 	public boolean isWritable()
 	{
-		return (adjPos[2] & 0x80) != 0;
+		return (edgeAttributes[2] & 0x80) != 0;
 	}
 	
 	public void setReadable(boolean b)
 	{
 		if (b)
-			adjPos[1] |= 0x80;
+			edgeAttributes[1] |= 0x80;
 		else
-			adjPos[1] &= ~0x80;
+			edgeAttributes[1] &= ~0x80;
 	}
 	
 	public void setWritable(boolean b)
 	{
 		if (b)
-			adjPos[2] |= 0x80;
+			edgeAttributes[2] |= 0x80;
 		else
-			adjPos[2] &= ~0x80;
+			edgeAttributes[2] &= ~0x80;
 	}
 	
 	public int getEdgeAttributes(int num)
 	{
-		return adjPos[num+1];
+		return edgeAttributes[num];
 	}
 	
 	public void setEdgeAttributes(int num, int attributes)
 	{
-		adjPos[num+1] = (byte) attributes;
+		edgeAttributes[num] = (byte) attributes;
 	}
 	
 	/**
@@ -484,9 +488,9 @@ public class Triangle
 	
 	public void createEdges()
 	{
-		HalfEdge hedge0 = new HalfEdge(this, (byte) 0, adjPos[1]);
-		HalfEdge hedge1 = new HalfEdge(this, (byte) 1, adjPos[2]);
-		HalfEdge hedge2 = new HalfEdge(this, (byte) 2, adjPos[3]);
+		HalfEdge hedge0 = new HalfEdge(this, (byte) 0, edgeAttributes[0]);
+		HalfEdge hedge1 = new HalfEdge(this, (byte) 1, edgeAttributes[1]);
+		HalfEdge hedge2 = new HalfEdge(this, (byte) 2, edgeAttributes[2]);
 		hedge0.setNext(hedge1);
 		hedge1.setNext(hedge2);
 		hedge2.setNext(hedge0);
@@ -504,7 +508,7 @@ public class Triangle
 			if (t == null)
 				r+= "null";
 			else
-				r+= t.hashCode()+"["+(((adjPos[0] & (3 << (2*num))) >> (2*num)) & 3)+"]";
+				r+= t.hashCode()+"["+getAdjLocalNumber(num)+"]";
 		}
 		else
 		{
@@ -535,7 +539,7 @@ public class Triangle
 		r += "\nAdjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2);
 		r += "\nEdge attributes:";
 		for (int i = 0; i < 3; i++)
-			r += " "+Integer.toHexString(adjPos[1+i] & 0xff);
+			r += " "+Integer.toHexString(edgeAttributes[i]);
 		if (listNext != null)
 			r += "\nLink next: "+listNext.hashCode();
 		if (edge != null)
