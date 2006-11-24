@@ -63,38 +63,6 @@ import org.apache.log4j.Logger;
  * can not be performed with Java, and the three numbers are packed into
  * a single byte instead.
  * </p>
- *
- * <p>
- * Algorithms do often need to compute lists of triangles.  In order to
- * avoid allocation of these lists, a singly linked list is provided by this
- * class.  It uses class variables, so only one list can be active at
- * any time.  Here is an example:
- * </p>
- *   <pre>
- *   //  Begin a new list
- *   Triangle.{@link #listLock};
- *   ...
- *   //  In a loop, add triangles to this list.
- *     tri.{@link #listCollect};
- *   //  Check whether a triangle is contained in this list.
- *   //  This is very fast because it tests if its link pointer
- *   //  is <code>null</code> or not.
- *     if (tri.{@link #isListed}) {
- *        ...
- *     }
- *   //  Loop over collected triangles.
- *   for (Iterator it = Triangle.{@link #getTriangleListIterator}; it.hasNext(); )
- *   {
- *     Triangle t = (Triangle) it.next();
- *     ...
- *   }
- *   //  When finished, remove all links between triangles
- *   Triangle.{@link #listRelease};
- *   </pre>
- * <p>
- * New elements are added at the end of the list so that {@link #listCollect} can
- * be called while {@link #getTriangleListIterator} is in action.
- * </p>
  */
 public class Triangle
 {
@@ -132,14 +100,6 @@ public class Triangle
 	// We sometimes need to process lists of triangles before mesh
 	// connectivity has been set up.  This can be achieved efficiently
 	// with a singly linked list.
-	//   Head of the list.  Triangles are linked from this instance.
-	private static final Triangle listHead = new Triangle();
-	//   Sentinel.  This triangle is always the last triangle of the list.
-	private static final Triangle listSentinel = new Triangle();
-	//   Reference to the last collected triangle.
-	private static Triangle listTail = null;
-	//   Number of collected items (for debugging purpose, can be removed).
-	private static int listSize = 0;
 	// Reference to the next element in the singly linked list.
 	private Triangle listNext = null;
 	
@@ -193,8 +153,6 @@ public class Triangle
 		else
 			vertex = new Vertex[3];
 		copy(that);
-		if (that.listNext != null)
-			listCollect();
 	}
 	
 	public final void copy(Triangle that)
@@ -406,96 +364,6 @@ public class Triangle
 		return hedge;
 	}
 	
-	/**
-	 * Initialize a triangle linked list.  There can be only one
-	 * active linked list.
-	 *
-	 * @throws ConcurrentModificationException if this method is
-	 * called again before this list has been released.
-	 */
-	public static void listLock()
-	{
-		if (listTail != null)
-			throw new ConcurrentModificationException();
-		listTail = listHead;
-		listTail.listNext = listSentinel;
-		listSize = 0;
-	}
-	
-	/**
-	 * Release the triangle linked list.  This method has to be called
-	 * before creating a new list.
-	 * @throws NoSuchElementException if no list has been created.
-	 */
-	public static void listRelease()
-	{
-		if (listTail == null)
-			throw new NoSuchElementException();
-		Triangle next;
-		for (Triangle start = listHead; start != listSentinel; start = next)
-		{
-			next = start.listNext;
-			start.listNext = null;
-			listSize--;
-		}
-		listSize++;
-		assert listSize == 0;
-		listTail = null;
-	}
-	
-	/**
-	 * Add the current triangle to the end of the list.
-	 * @throws ConcurrentModificationException if this element is
-	 * already linked.
-	 */
-	public final void listCollect()
-	{
-		assert listTail != null;
-		assert listTail.listNext == listSentinel : listTail;
-		if (listNext != null)
-			throw new ConcurrentModificationException();
-		listTail.listNext = this;
-		listTail = this;
-		listNext = listSentinel;
-		listSize++;
-	}
-	
-	/**
-	 * Check whether this element is linked.
-	 */
-	public boolean isListed()
-	{
-		return listNext != null;
-	}
-	
-	/**
-	 * Create an iterator over linked triangles.
-	 *
-	 * @throws NoSuchElementException if no list has been created.
-	 */
-	public static Iterator getTriangleListIterator()
-	{
-		if (listTail == null)
-			throw new NoSuchElementException();
-		return new Iterator()
-		{
-			private Triangle curr = listHead;
-			public boolean hasNext()
-			{
-				return curr.listNext != listSentinel;
-			}
-			
-			public Object next()
-			{
-				curr = curr.listNext;
-				return curr;
-			}
-			public void remove()
-			{
-			}
-		};
-	}
-	
 	private final String showAdj(int num)
 	{
 		String r = "";
@@ -546,4 +414,134 @@ public class Triangle
 		return r;
 	}
 
+	/**
+	 * Singly linked list of triangles.
+	 * We sometimes need to process lists of triangles before mesh
+	 * connectivity has been set up.  This can be achieved efficiently
+	 * with a singly linked list, but there are few caveats.
+	 * <ul>
+	 *  <li>A Triangle can appear in one list only, trying to insert it
+	 *      twice will throw a ConcurrentModificationException exception.</li>
+	 *  <li>Lists have to be cleared out by calling the {@link #clear} method
+	 *      before being freed, otherwise Triangle can not be inserted into
+	 *      other lists.</li>
+	 * </ul>
+	 * <p>
+	 * Here is an example:
+	 * </p>
+	 *   <pre>
+	 *   //  Begin a new list
+	 *   Triangle.List tList = new Triangle.List();
+	 *   ...
+	 *   //  In a loop, add triangles to this list.
+	 *     tList.{@link List#add}(tri);
+	 *   //  Check whether a triangle is contained in this list.
+	 *   //  This is very fast because it tests if its link pointer
+	 *   //  is <code>null</code> or not.
+	 *     if (tList.{@link List#contains}(tri)) {
+	 *        ...
+	 *     }
+	 *   //  Loop over collected triangles.
+	 *   for (Iterator it = tList.{@link List#iterator}; it.hasNext(); )
+	 *   {
+	 *     Triangle t = (Triangle) it.next();
+	 *     ...
+	 *   }
+	 *   //  When finished, remove all links between triangles
+	 *   tList.{@link List#clear};
+	 *   </pre>
+	 * <p>
+	 * New elements are added at the end of the list so that {@link List#add} can
+	 * be called while {@link List#iterator} is in action.
+	 * </p>
+	 */
+	public static class List
+	{
+		//   Head of the list.  Triangles are linked from this instance.
+		private final Triangle listHead = new Triangle();
+		//   Sentinel.  This triangle is always the last triangle of the list.
+		private final Triangle listSentinel = new Triangle();
+		//   Reference to the last collected triangle.
+		private Triangle listTail = listHead;
+		//   Number of collected items (for debugging purpose, can be removed).
+		private int listSize = 0;
+
+		/**
+		 * Initialize a triangle linked list.
+		 */
+		public List()
+		{
+			listTail.listNext = listSentinel;
+		}
+	
+		/**
+		 * Unmark triangles.  This method must be called before freeing
+		 * the list.
+		 */
+		public void clear()
+		{
+			Triangle next;
+			for (Triangle start = listHead; start != listSentinel; start = next)
+			{
+				next = start.listNext;
+				start.listNext = null;
+				listSize--;
+			}
+			listSize++;
+			assert listSize == 0;
+			listTail = listHead;
+			listTail.listNext = listSentinel;
+		}
+	
+		/**
+		 * Add the current triangle to the end of the list.
+		 * @throws ConcurrentModificationException if this element is
+		 * already linked.
+		 */
+		public final void add(Triangle o)
+		{
+			assert listTail != null;
+			assert listTail.listNext == listSentinel : listTail;
+			if (o.listNext != null)
+				throw new ConcurrentModificationException();
+			listTail.listNext = o;
+			listTail = o;
+			o.listNext = listSentinel;
+			listSize++;
+		}
+
+		/**
+		 * Check whether this element appears in the list.
+		 */
+		public boolean contains(Triangle o)
+		{
+			return o.listNext != null;
+		}
+	
+		/**
+		 * Create an iterator over linked triangles.  Note that the list
+		 * can be extended while iterating over elements.
+		 */
+		public Iterator iterator()
+		{
+			return new Iterator()
+			{
+				private Triangle curr = listHead;
+				public boolean hasNext()
+				{
+					return curr.listNext != listSentinel;
+				}
+				
+				public Object next()
+				{
+					curr = curr.listNext;
+					return curr;
+				}
+				public void remove()
+				{
+				}
+			};
+		}
+	}
+	
 }

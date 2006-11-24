@@ -433,11 +433,11 @@ public class Mesh
 		boolean nonManifold = false;
 		//  Mark adjacent triangles
 		ArrayList list = (ArrayList) tVertList.get(v);
-		Triangle.listLock();
+		Triangle.List tList = new Triangle.List();
 		for (Iterator it = list.iterator(); it.hasNext(); )
 		{
 			Triangle t = (Triangle) it.next();
-			t.listCollect();
+			tList.add(t);
 		}
 		//  Find all adjacent triangles
 		for (Iterator it = list.iterator(); it.hasNext(); )
@@ -459,7 +459,7 @@ public class Mesh
 				Triangle t2 = (Triangle) it2.next();
 				if (t == t2)
 					continue;
-				if (t2.isListed())
+				if (tList.contains(t2))
 				{
 					ot2.bind(t2);
 					if (ot2.destination() == v2)
@@ -532,7 +532,7 @@ public class Mesh
 			}
 		}
 		//  Unmark adjacent triangles
-		Triangle.listRelease();
+		tList.clear();
 	}
 	
 	private static final boolean checkRidges(Vertex v, double cosMinAngle, OTriangle ot)

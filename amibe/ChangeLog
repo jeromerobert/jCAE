@@ -6,6 +6,9 @@ Fri Nov 24 19:38:29 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 	Mesh; MFace3D and MNode3D are removed, and replaced respectively by
 	Triangle and Vertex.  For now, normals are no more written into
 	output files.
+	* src/org/jcae/mesh/amibe/ds/Triangle.java (listLock, listCollect,
+	listRelease): Replace list operations by a Triangle.List inner class,
+	in order to remove static definitions.
 
 Fri Nov 24 11:05:19 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 

@@ -163,7 +163,7 @@ public class Vertex2D extends Vertex
 	/**
 	 * Return the 2D centroid of a list of vertices.
 	 *
-	 * @param vertex array
+	 * @param v array
 	 * @return the 2D centroid of these vertices.
 	 */
 	public static Vertex2D centroid(Vertex2D [] v)
@@ -210,14 +210,14 @@ public class Vertex2D extends Vertex
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("Searching for the triangle surrounding "+this);
-		Triangle.listLock();
+		Triangle.List tList = new Triangle.List();
 		Triangle t = (Triangle) mesh.quadtree.getNearestVertex(this).link;
 		OTriangle2D start = new OTriangle2D(t, 0);
-		OTriangle2D current = getSurroundingOTriangleStart(mesh, start);
+		OTriangle2D current = getSurroundingOTriangleStart(mesh, start, tList);
 		if (current == null)
 		{
 			// First, try with neighbours
-			for (Iterator it = Triangle.getTriangleListIterator(); it.hasNext(); )
+			for (Iterator it = tList.iterator(); it.hasNext(); )
 			{
 				t = (Triangle) it.next();
 				start.bind(t);
@@ -228,7 +228,7 @@ public class Vertex2D extends Vertex
 					if (!start.hasAttributes(OTriangle.BOUNDARY))
 					{
 						start.symOTri();
-						current = getSurroundingOTriangleStart(mesh, start);
+						current = getSurroundingOTriangleStart(mesh, start, tList);
 						if (current != null)
 							break;
 						start.symOTri();
@@ -245,17 +245,17 @@ public class Vertex2D extends Vertex
 			{
 				t = (Triangle) it.next();
 				start.bind(t);
-				current = getSurroundingOTriangleStart(mesh, start);
+				current = getSurroundingOTriangleStart(mesh, start, tList);
 				if (current != null)
 					break;
 			}
 		}
-		Triangle.listRelease();
+		tList.clear();
 		assert current != null;
 		return current;
 	}
 	
-	private OTriangle2D getSurroundingOTriangleStart(Mesh2D mesh, OTriangle2D current)
+	private OTriangle2D getSurroundingOTriangleStart(Mesh2D mesh, OTriangle2D current, Triangle.List tList)
 	{
 		boolean redo = false;
 		Vertex2D o = (Vertex2D) current.origin();
@@ -315,9 +315,9 @@ public class Vertex2D extends Vertex
 			assert d != Vertex2D.outer;
 			if (a == Vertex2D.outer)
 				break;
-			if (current.getTri().isListed())
+			if (tList.contains(current.getTri()))
 				return null;
-			current.getTri().listCollect();
+			tList.add(current.getTri());
 			long d1 = onLeft(mesh, d, a);
 			long d2 = onLeft(mesh, a, o);
 			//  Note that for all cases, new origin and destination

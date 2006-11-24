@@ -326,7 +326,7 @@ public class Initial
 			ot.prevOTri();
 		assert ot.apex() == Vertex2D.outer : ot;
 		
-		Triangle.listLock();
+		Triangle.List tList = new Triangle.List();
 		Vertex2D first = (Vertex2D) ot.origin();
 		do
 		{
@@ -335,7 +335,7 @@ public class Initial
 				ot.setAttributes(OTriangle.OUTER);
 				ot.nextOTri();
 			}
-			ot.getTri().listCollect();
+			tList.add(ot.getTri());
 			ot.nextOTriApex();
 		}
 		while (ot.origin() != first);
@@ -348,7 +348,7 @@ public class Initial
 		while (oldHead != newHead)
 		{
 			oldHead = newHead;
-			for (Iterator it = Triangle.getTriangleListIterator(); it.hasNext(); )
+			for (Iterator it = tList.iterator(); it.hasNext(); )
 			{
 				t = (Triangle) it.next();
 				if (t == oldHead)
@@ -359,10 +359,10 @@ public class Initial
 				{
 					ot.nextOTri();
 					OTriangle.symOTri(ot, sym);
-					if (sym.getTri().isListed())
+					if (tList.contains(sym.getTri()))
 						continue;
 					newHead = sym.getTri();
-					newHead.listCollect();
+					tList.add(newHead);
 					if (ot.hasAttributes(OTriangle.BOUNDARY))
 					{
 						if (!outer)
@@ -380,7 +380,7 @@ public class Initial
 				}
 			}
 		}
-		Triangle.listRelease();
+		tList.clear();
 		assert (mesh.isValid());
 		
 		logger.debug(" Remove links to outer triangles");
