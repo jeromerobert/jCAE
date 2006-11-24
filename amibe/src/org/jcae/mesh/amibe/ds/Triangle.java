@@ -122,7 +122,7 @@ public class Triangle
 	 * </ul>
 	 *  Bytes 1, 2 and 3 carry up bitfield attributes for edges 0, 1 and 2.
 	*/
-	int adjPos = 0;
+	byte [] adjPos = new byte[4];
 	private int groupId = -1;
 	// Reference to the next element in the singly linked list.
 	private Triangle listNext = null;
@@ -200,7 +200,8 @@ public class Triangle
 			vertex[i] = that.vertex[i];
 			adj[i] = that.adj[i];
 		}
-		adjPos = that.adjPos;
+		for (int i = 0; i < adjPos.length; i++)
+			adjPos[i] = that.adjPos[i];
 		if (that.listNext != null)
 			listCollect();
 	}
@@ -239,9 +240,9 @@ public class Triangle
 	{
 		adj[num] = that;
 		//  Clear previous adjacent position ...
-		adjPos &= ~(3 << (2*num));
+		adjPos[0] &= ~(3 << (2*num));
 		//  ... and set it right
-		adjPos |= (thatnum << (2*num));
+		adjPos[0] |= (thatnum << (2*num));
 	}
 	
 	/**
@@ -290,12 +291,14 @@ public class Triangle
 	// Helper functions
 	private boolean isFlagged(int flag)
 	{
-		return (adjPos & (flag << 8 | flag << 16 | flag << 24)) != 0;
+		return ((adjPos[1] | adjPos[2] | adjPos[3]) & flag) != 0;
 	}
 
 	private void setFlag(int flag)
 	{
-		adjPos |= (flag << 8 | flag << 16 | flag << 24);
+		adjPos[1] |= flag;
+		adjPos[2] |= flag;
+		adjPos[3] |= flag;
 	}
 
 	/**
@@ -341,7 +344,9 @@ public class Triangle
 	 */
 	public void unsetMarked()
 	{
-		adjPos &= ~(OTriangle.MARKED << 8 | OTriangle.MARKED << 16 | OTriangle.MARKED << 24);
+		adjPos[1] &= ~OTriangle.MARKED;
+		adjPos[2] &= ~OTriangle.MARKED;
+		adjPos[3] &= ~OTriangle.MARKED;
 	}
 	
 	/**
@@ -362,9 +367,9 @@ public class Triangle
 	 */
 	protected void swapAttributes12()
 	{
-		int byte0 = adjPos & 0xff;
-		int byte0sw = (byte0 & 0xc3) | ((byte0 & 0x0c) << 2) | ((byte0 & 0x30) >> 2);
-		adjPos = byte0sw | (adjPos & 0x0000ff00) | ((adjPos & 0x00ff0000) << 8) | ((adjPos & 0xff000000) >> 8);
+		byte temp = adjPos[2];
+		adjPos[2] = adjPos[3];
+		adjPos[3] = temp;
 	}
 	
 	/**
@@ -373,9 +378,9 @@ public class Triangle
 	 */
 	protected void swapAttributes01()
 	{
-		int byte0 = adjPos & 0xff;
-		int byte0sw = (byte0 & 0xf0) | ((byte0 & 0x03) << 2) | ((byte0 & 0x0c) >> 2);
-		adjPos = byte0sw | (adjPos & 0xff000000) | ((adjPos & 0x0000ff00) << 8) | ((adjPos & 0x00ff0000) >> 8);
+		byte temp = adjPos[1];
+		adjPos[1] = adjPos[2];
+		adjPos[2] = temp;
 	}
 	
 	/**
@@ -384,35 +389,35 @@ public class Triangle
 	 */
 	protected void swapAttributes02()
 	{
-		int byte0 = adjPos & 0xff;
-		int byte0sw = (byte0 & 0xcc) | ((byte0 & 0x03) << 4) | ((byte0 & 0x30) >> 4);
-		adjPos = byte0sw | (adjPos & 0x00ff0000) | ((adjPos & 0x0000ff00) << 16) | ((adjPos & 0xff000000) >> 16);
+		byte temp = adjPos[1];
+		adjPos[1] = adjPos[3];
+		adjPos[3] = temp;
 	}
 	
 	public boolean isReadable()
 	{
-		return (adjPos & 0x40000000) != 0;
+		return (adjPos[1] & 0x80) != 0;
 	}
 	
 	public boolean isWritable()
 	{
-		return (adjPos & 0x80000000) != 0;
+		return (adjPos[2] & 0x80) != 0;
 	}
 	
 	public void setReadable(boolean b)
 	{
 		if (b)
-			adjPos |= 0x40000000;
+			adjPos[1] |= 0x80;
 		else
-			adjPos &= ~0x40000000;
+			adjPos[1] &= ~0x80;
 	}
 	
 	public void setWritable(boolean b)
 	{
 		if (b)
-			adjPos |= 0x80000000;
+			adjPos[2] |= 0x80;
 		else
-			adjPos &= ~0x80000000;
+			adjPos[2] &= ~0x80;
 	}
 	
 	/**
@@ -507,9 +512,9 @@ public class Triangle
 	
 	public void createEdges()
 	{
-		HalfEdge hedge0 = new HalfEdge(this, (byte) 0, (byte) ((adjPos & 0x0000ff00) >> 8));
-		HalfEdge hedge1 = new HalfEdge(this, (byte) 1, (byte) ((adjPos & 0x00ff0000) >> 16));
-		HalfEdge hedge2 = new HalfEdge(this, (byte) 2, (byte) ((adjPos & 0xff000000) >> 24));
+		HalfEdge hedge0 = new HalfEdge(this, (byte) 0, adjPos[1]);
+		HalfEdge hedge1 = new HalfEdge(this, (byte) 1, adjPos[2]);
+		HalfEdge hedge2 = new HalfEdge(this, (byte) 2, adjPos[3]);
 		hedge0.setNext(hedge1);
 		hedge1.setNext(hedge2);
 		hedge2.setNext(hedge0);
@@ -527,7 +532,7 @@ public class Triangle
 			if (t == null)
 				r+= "null";
 			else
-				r+= t.hashCode()+"["+(((adjPos & (3 << (2*num))) >> (2*num)) & 3)+"]";
+				r+= t.hashCode()+"["+(((adjPos[0] & (3 << (2*num))) >> (2*num)) & 3)+"]";
 		}
 		else
 		{
@@ -558,7 +563,7 @@ public class Triangle
 		r += "\nAdjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2);
 		r += "\nEdge attributes:";
 		for (int i = 0; i < 3; i++)
-			r += " "+Integer.toHexString((adjPos >> (8*(1+i))) & 0xff);
+			r += " "+Integer.toHexString(adjPos[1+i] & 0xff);
 		if (listNext != null)
 			r += "\nLink next: "+listNext.hashCode();
 		if (edge != null)

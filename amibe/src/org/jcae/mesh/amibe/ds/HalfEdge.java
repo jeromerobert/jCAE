@@ -19,8 +19,6 @@
 
 package org.jcae.mesh.amibe.ds;
 
-import java.util.Iterator;
-import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 public class HalfEdge
@@ -243,14 +241,13 @@ public class HalfEdge
 	// Adjust tri.adjPos after attributes is modified.
 	public final void pushAttributes()
 	{
-		tri.adjPos &= ~(0xff << (8*(1+localNumber)));
-		tri.adjPos |= ((attributes & 0xff) << (8*(1+localNumber)));
+		tri.adjPos[localNumber+1] = (byte) attributes;
 	}
 	
 	// Adjust attributes after tri.adjPos is modified.
 	public final void pullAttributes()
 	{
-		attributes = (tri.adjPos >> (8*(1+localNumber))) & 0xff;
+		attributes = tri.adjPos[localNumber+1];
 	}
 	
 	/**
