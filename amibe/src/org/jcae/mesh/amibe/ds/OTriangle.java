@@ -1264,19 +1264,18 @@ public class OTriangle
 			if (seen.contains(t))
 				continue;
 			seen.add(t);
-			Vertex temp = t.vertex[next3[o]];
+			// Swap vertices
+			Vertex tempV = t.vertex[next3[o]];
 			t.vertex[next3[o]] = t.vertex[prev3[o]];
-			t.vertex[prev3[o]] = temp;
-			Object a = t.getAdj(next3[o]);
+			t.vertex[prev3[o]] = tempV;
+			// Swap adjacent triangles
+			Object tempA = t.getAdj(next3[o]);
 			t.setAdj(next3[o], t.getAdj(prev3[o]));
-			t.setAdj(prev3[o], a);
-			// Swap attributes for edges
-			if (o == 0)
-				t.swapAttributes12();
-			else if (o == 1)
-				t.swapAttributes02();
-			else
-				t.swapAttributes01();
+			t.setAdj(prev3[o], tempA);
+			// Swap edge attributes
+			int attr = t.getEdgeAttributes(next3[o]);
+			t.setEdgeAttributes(next3[o], t.getEdgeAttributes(prev3[o]));
+			t.setEdgeAttributes(prev3[o], attr);
 			// Fix adjacent triangles
 			ot.bind(t);
 			for (int i = 0; i < 3; i++)

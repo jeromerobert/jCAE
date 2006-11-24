@@ -356,39 +356,6 @@ public class Triangle
 		return isFlagged(OTriangle.BOUNDARY);
 	}
 	
-	/**
-	 * Swap attributes for edges 1 and 2.
-	 * @see OTriangle#invertOrientationFace
-	 */
-	void swapAttributes12()
-	{
-		byte temp = adjPos[2];
-		adjPos[2] = adjPos[3];
-		adjPos[3] = temp;
-	}
-	
-	/**
-	 * Swap attributes for edges 0 and 1.
-	 * @see OTriangle#invertOrientationFace
-	 */
-	void swapAttributes01()
-	{
-		byte temp = adjPos[1];
-		adjPos[1] = adjPos[2];
-		adjPos[2] = temp;
-	}
-	
-	/**
-	 * Swap attributes for edges 0 and 2.
-	 * @see OTriangle#invertOrientationFace
-	 */
-	void swapAttributes02()
-	{
-		byte temp = adjPos[1];
-		adjPos[1] = adjPos[3];
-		adjPos[3] = temp;
-	}
-	
 	public boolean isReadable()
 	{
 		return (adjPos[1] & 0x80) != 0;
