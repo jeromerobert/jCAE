@@ -226,7 +226,7 @@ public class DecimateHalfEdge
 				q.addError(normal, d, area);
 			}
 			// Penalty for boundary triangles
-			HalfEdge e = f.edge;
+			HalfEdge e = f.getHalfEdge();
 			for (int i = 0; i < 3; i++)
 			{
 				e = e.next();
@@ -267,7 +267,7 @@ public class DecimateHalfEdge
 			Triangle f = (Triangle) itf.next();
 			if (f.isOuter())
 				continue;
-			HalfEdge e = f.edge;
+			HalfEdge e = f.getHalfEdge();
 			for (int i = 0; i < 3; i++)
 			{
 				e = e.next();

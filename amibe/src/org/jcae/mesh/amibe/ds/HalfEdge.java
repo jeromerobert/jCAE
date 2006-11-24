@@ -295,7 +295,7 @@ public class HalfEdge
 	 */
 	public final static HalfEdge toHalfEdge(OTriangle ot)
 	{
-		HalfEdge edge = ot.getTri().edge;
+		HalfEdge edge = ot.getTri().getHalfEdge();
 		assert edge != null : ot;
 		for (int j = ot.getLocalNumber(); j > 0; j--)
 			edge = edge.next;
@@ -312,7 +312,7 @@ public class HalfEdge
 	 */
 	public static HalfEdge find(Vertex v1, Vertex v2)
 	{
-		HalfEdge ret = ((Triangle) v1.getLink()).edge;
+		HalfEdge ret = ((Triangle) v1.getLink()).getHalfEdge();
 		if (ret == null)
 			return null;
 		if (ret.destination() == v1)
@@ -460,13 +460,13 @@ public class HalfEdge
 			e[i].pushAttributes();
 		//  Adjust edge pointers of triangles
 		if (e[1].localNumber == 1)
-			T1.edge = e[4];
+			T1.setHalfEdge(e[4]);
 		else if (e[1].localNumber == 2)
-			T1.edge = e[2];
+			T1.setHalfEdge(e[2]);
 		if (e[3].localNumber == 1)
-			T2.edge = e[5];
+			T2.setHalfEdge(e[5]);
 		else if (e[3].localNumber == 2)
-			T2.edge = e[0];
+			T2.setHalfEdge(e[0]);
 		//  Glue edges to update triangle informations
 		for (int i = 0; i < 4; i++)
 			e[i].glue(s[i]);

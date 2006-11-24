@@ -126,14 +126,12 @@ public class Triangle
 	private byte [] edgeAttributes = new byte[3];
 	// Group id
 	private int groupId = -1;
-	// Reference to edge V0-V1, for algorithms based on edges
-	public HalfEdge edge = null;
-	// Reference to the next element in the singly linked list.
-	private Triangle listNext = null;
+	// Link to an HalfEdge
+	private HalfEdge hedge = null;
 	
-	// We need to process lists of triangles, and sometimes make sure
-	// that triangles are processed only once.  This can be achieved
-	// efficiently with a singly linked list.
+	// We sometimes need to process lists of triangles before mesh
+	// connectivity has been set up.  This can be achieved efficiently
+	// with a singly linked list.
 	//   Head of the list.  Triangles are linked from this instance.
 	private static final Triangle listHead = new Triangle();
 	//   Sentinel.  This triangle is always the last triangle of the list.
@@ -142,6 +140,8 @@ public class Triangle
 	private static Triangle listTail = null;
 	//   Number of collected items (for debugging purpose, can be removed).
 	private static int listSize = 0;
+	// Reference to the next element in the singly linked list.
+	private Triangle listNext = null;
 	
 	public Triangle()
 	{
@@ -193,6 +193,8 @@ public class Triangle
 		else
 			vertex = new Vertex[3];
 		copy(that);
+		if (that.listNext != null)
+			listCollect();
 	}
 	
 	public final void copy(Triangle that)
@@ -206,8 +208,6 @@ public class Triangle
 		edgeAttributes[0] = that.edgeAttributes[0];
 		edgeAttributes[1] = that.edgeAttributes[1];
 		edgeAttributes[2] = that.edgeAttributes[2];
-		if (that.listNext != null)
-			listCollect();
 	}
 	
 	/**
@@ -396,6 +396,16 @@ public class Triangle
 		edgeAttributes[num] = (byte) attributes;
 	}
 	
+	public void setHalfEdge(HalfEdge e)
+	{
+		hedge = e;
+	}
+	
+	public HalfEdge getHalfEdge()
+	{
+		return hedge;
+	}
+	
 	/**
 	 * Initialize a triangle linked list.  There can be only one
 	 * active linked list.
@@ -531,8 +541,8 @@ public class Triangle
 			r += " "+Integer.toHexString(edgeAttributes[i]);
 		if (listNext != null)
 			r += "\nLink next: "+listNext.hashCode();
-		if (edge != null)
-			r += "\nHalfedge: "+edge.hashCode()+" "+edge.next().hashCode()+" "+edge.next().next().hashCode();
+		if (hedge != null)
+			r += "\nHalfedge: "+hedge.hashCode()+" "+hedge.next().hashCode()+" "+hedge.next().next().hashCode();
 		return r;
 	}
 

@@ -170,10 +170,10 @@ public class Mesh
 	 */
 	public void remove(Triangle t)
 	{
-		if (t.edge != null)
+		if (t.getHalfEdge() != null)
 		{
 			// Remove links to help the garbage collector
-			HalfEdge e = t.edge;
+			HalfEdge e = t.getHalfEdge();
 			HalfEdge last = e;
 			for (int i = 0; i < 3; i++)
 			{
@@ -185,7 +185,7 @@ public class Mesh
 				last.setNext(null);
 				last = e;
 			}
-			t.edge = null;
+			t.setHalfEdge(null);
 		}
 		triangleList.remove(t);
 	}
@@ -602,7 +602,7 @@ public class Mesh
 			hedge0.setNext(hedge1);
 			hedge1.setNext(hedge2);
 			hedge2.setNext(hedge0);
-			t.edge = hedge0;
+			t.setHalfEdge(hedge0);
 		}
 		OTriangle ot = new OTriangle();
 		OTriangle sym = new OTriangle();
@@ -611,7 +611,7 @@ public class Mesh
 		{
 			Triangle t = (Triangle) it.next();
 			ot.bind(t);
-			HalfEdge e = t.edge;
+			HalfEdge e = t.getHalfEdge();
 			for (int i = 0; i < 3; i++)
 			{
 				ot.nextOTri();
@@ -625,7 +625,7 @@ public class Mesh
 					continue;
 				OTriangle.symOTri(ot, sym);
 				t2 = sym.getTri();
-				HalfEdge f = t2.edge;
+				HalfEdge f = t2.getHalfEdge();
 				for (int j = sym.getLocalNumber(); j > 0; j--)
 					f = f.next();
 				assert e.sym() == null: e;
