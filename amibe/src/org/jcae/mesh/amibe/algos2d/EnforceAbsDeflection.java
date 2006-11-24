@@ -80,7 +80,7 @@ public class EnforceAbsDeflection
 				t = (Triangle) it.next();
 				if (t.isOuter())
 					continue;
-				double uv[] = t.centroid().getUV();
+				double uv[] = Vertex2D.centroid((Vertex2D[]) t.vertex).getUV();
 				double [] xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
 				p[3] = new MNode3D(xyz, 0);
 				for (int i = 0; i < 3; i++)
@@ -114,7 +114,7 @@ public class EnforceAbsDeflection
 				t = (Triangle) it.next();
 				if (!mesh.getTriangles().contains(t) || t.isBoundary())
 					continue;
-				double uv[] = t.centroid().getUV();
+				double uv[] = Vertex2D.centroid((Vertex2D[]) t.vertex).getUV();
 				Vertex2D v = Vertex2D.valueOf(uv[0], uv[1]);
 				OTriangle2D vt = v.getSurroundingOTriangle(mesh);
 				if (vt.split3(mesh, v, false))

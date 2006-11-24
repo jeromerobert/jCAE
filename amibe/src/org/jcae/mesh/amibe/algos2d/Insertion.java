@@ -200,7 +200,7 @@ public class Insertion
 				Triangle t = (Triangle) it.next();
 				if (t.isOuter())
 					continue;
-				Vertex2D v = (Vertex2D) t.centroid();
+				Vertex2D v = Vertex2D.centroid((Vertex2D[]) t.vertex);
 				Vertex2D n = mesh.getQuadTree().getNearestVertex(v);
 				assert n == mesh.getQuadTree().getNearestVertexDebug(v);
 				if (mesh.compGeom().distance(v, n) > minlen)

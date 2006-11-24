@@ -20,6 +20,7 @@
 package org.jcae.mesh.amibe.validation;
 
 import org.jcae.mesh.amibe.patch.Mesh2D;
+import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.MNode3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
@@ -43,7 +44,7 @@ public class AbsoluteDeflection2D extends QualityProcedure
 		if (!(o instanceof Triangle))
 			throw new IllegalArgumentException();
 		Triangle t = (Triangle) o;
-		double [] uv = t.centroid().getUV();
+		double [] uv = Vertex2D.centroid((Vertex2D[]) t.vertex).getUV();
 		double [] xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
 		p[3] = new MNode3D(xyz, 0);
 		for (int i = 0; i < 3; i++)

@@ -283,22 +283,6 @@ public class Triangle
 		return (adjPos[0] >> (2*num)) & 3;
 	}
 	
-	/**
-	 * Return the 2D centroid of this triangle.
-	 *
-	 * @return the 2D centroid of this triangle.
-	 */
-	public Vertex2D centroid()
-	{
-		double [] p1 = vertex[0].getUV();
-		double [] p2 = vertex[1].getUV();
-		double [] p3 = vertex[2].getUV();
-		return Vertex2D.valueOf(
-			(p1[0]+p2[0]+p3[0])/3.0,
-			(p1[1]+p2[1]+p3[1])/3.0
-		);
-	}
-	
 	// Helper functions
 	private boolean isFlagged(int flag)
 	{

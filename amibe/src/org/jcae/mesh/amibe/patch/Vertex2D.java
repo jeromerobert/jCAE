@@ -161,6 +161,28 @@ public class Vertex2D extends Vertex
 	}
 	
 	/**
+	 * Return the 2D centroid of a list of vertices.
+	 *
+	 * @param vertex array
+	 * @return the 2D centroid of these vertices.
+	 */
+	public static Vertex2D centroid(Vertex2D [] v)
+	{
+		double x = 0.0, y = 0.0;
+		if (v.length == 0)
+			return Vertex2D.valueOf(0.0, 0.0);
+		for (int i = 0; i < v.length; i++)
+		{
+			double [] p = v[i].getUV();
+			x += p[0];
+			y += p[1];
+		}
+		x /= v.length;
+		y /= v.length;
+		return Vertex2D.valueOf(x, y);
+	}
+	
+	/**
 	 * Return a triangle containing this point.
 	 *
 	 * The returned oriented triangle T is noted (oda), and this
