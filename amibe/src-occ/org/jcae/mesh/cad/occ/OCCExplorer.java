@@ -33,9 +33,10 @@ public class OCCExplorer implements CADExplorer
 		occExp = new TopExp_Explorer();
 	}
 	
-	public void init(CADShape s, CADShapeEnum type)
+	public void init(CADShape s, CADShapeEnum t)
 	{
 		OCCShape shape = (OCCShape) s;
+		OCCShapeEnum type = (OCCShapeEnum) t;
 		occExp.init((TopoDS_Shape) shape.getShape(), type.asType());
 	}
 	

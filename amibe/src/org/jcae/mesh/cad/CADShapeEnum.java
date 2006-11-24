@@ -31,83 +31,30 @@ import java.util.Iterator;
 public abstract class CADShapeEnum
 {
 	private final String name;
-	private final int ordinal;
+	protected final int ordinal;
 	private static int nextOrdinal = 0;
-	CADShapeEnum(String name)
+	protected CADShapeEnum(String name)
 	{
 		this.name = name;
 		this.ordinal = nextOrdinal++;
 	}
 	public abstract Class asClass();
-	public abstract int asType();
 	public String toString()
 	{
 		return name;
 	}
 
-	public static final CADShapeEnum VERTEX = new CADShapeEnum("vertex") {
-		public Class asClass() { return CADVertex.class; }
-		public int asType() { return CADExplorer.VERTEX; }
-	};
-	public static final CADShapeEnum EDGE = new CADShapeEnum("edge") {
-		public Class asClass() { return CADEdge.class; }
-		public int asType() { return CADExplorer.EDGE; }
-	};
-	public static final CADShapeEnum WIRE = new CADShapeEnum("wire") {
-		public Class asClass() { return CADWire.class; }
-		public int asType() { return CADExplorer.WIRE; }
-	};
-	public static final CADShapeEnum FACE = new CADShapeEnum("face") {
-		public Class asClass() { return CADFace.class; }
-		public int asType() { return CADExplorer.FACE; }
-	};
-	public static final CADShapeEnum SHELL = new CADShapeEnum("shell") {
-		public Class asClass() { return CADShell.class; }
-		public int asType() { return CADExplorer.SHELL; }
-	};
-	public static final CADShapeEnum SOLID = new CADShapeEnum("solid") {
-		public Class asClass() { return CADSolid.class; }
-		public int asType() { return CADExplorer.SOLID; }
-	};
-	public static final CADShapeEnum COMPSOLID = new CADShapeEnum("compsolid") {
-		public Class asClass() { return CADCompSolid.class; }
-		public int asType() { return CADExplorer.COMPSOLID; }
-	};
-	public static final CADShapeEnum COMPOUND = new CADShapeEnum("compound") {
-		public Class asClass() { return CADCompound.class; }
-		public int asType() { return CADExplorer.COMPOUND; }
-	};
-	// Note: PRIVATE_VALUES must contain items in the same order as they
-	// have been declared!
-	private static final CADShapeEnum [] PRIVATE_VALUES = { VERTEX, EDGE, WIRE, FACE, SHELL, SOLID, COMPSOLID, COMPOUND };
-	public static final List VALUES = Collections.unmodifiableList(Arrays.asList(PRIVATE_VALUES));
-
-	public static final Iterator iterator(final CADShapeEnum start, final CADShapeEnum end)
+	public static final CADShapeEnum VERTEX = CADShapeBuilder.factory.getShapeEnumInstance("vertex");
+	public static final CADShapeEnum EDGE = CADShapeBuilder.factory.getShapeEnumInstance("edge");
+	public static final CADShapeEnum WIRE = CADShapeBuilder.factory.getShapeEnumInstance("wire");
+	public static final CADShapeEnum FACE = CADShapeBuilder.factory.getShapeEnumInstance("face");
+	public static final CADShapeEnum SHELL = CADShapeBuilder.factory.getShapeEnumInstance("shell");
+	public static final CADShapeEnum SOLID = CADShapeBuilder.factory.getShapeEnumInstance("solid");
+	public static final CADShapeEnum COMPSOLID = CADShapeBuilder.factory.getShapeEnumInstance("compsolid");
+	public static final CADShapeEnum COMPOUND = CADShapeBuilder.factory.getShapeEnumInstance("compound");
+	public static Iterator iterator(CADShapeEnum start, CADShapeEnum end)
 	{
-		final int iStep;
-		if (start.ordinal > end.ordinal)
-			iStep = -1;
-		else
-			iStep = 1;
-		return new Iterator()
-		{
-			CADShapeEnum current = null;
-			public boolean hasNext()
-			{
-				return current != end;
-			}
-			public Object next()
-			{
-				if (current == null)
-					current = start;
-				else
-					current = PRIVATE_VALUES[current.ordinal+iStep];
-				return current;
-			}
-			public void remove()
-			{
-			}
-		};
+		return CADShapeBuilder.factory.newShapeEnumIterator(start, end);
 	}
 
 }

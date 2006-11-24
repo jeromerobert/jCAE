@@ -30,6 +30,7 @@ import org.jcae.opencascade.jni.BRepAlgoAPI_BooleanOperation;
 import org.jcae.opencascade.jni.BRepAlgoAPI_Fuse;
 import org.jcae.opencascade.jni.BRepAlgoAPI_Common;
 import org.jcae.opencascade.jni.BRepAlgoAPI_Cut;
+import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 public class OCCShapeBuilder extends CADShapeBuilder
@@ -169,6 +170,16 @@ public class OCCShapeBuilder extends CADShapeBuilder
 		return (CADIterator) new OCCIterator();
 	}
 	
+	protected Iterator newShapeEnumIterator(CADShapeEnum start, CADShapeEnum end)
+	{
+		return OCCShapeEnum.newShapeEnumIterator((OCCShapeEnum) start, (OCCShapeEnum) end);
+	}
+
+	protected CADShapeEnum getShapeEnumInstance(String name)
+	{
+		return (CADShapeEnum) OCCShapeEnum.getSingleton(name);
+	}
+
 	public CADGeomCurve2D newCurve2D(Object oe, Object of)
 	{
 		CADEdge E = (CADEdge) oe;

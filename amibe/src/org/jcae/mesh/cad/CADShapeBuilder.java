@@ -19,6 +19,7 @@
 
 package org.jcae.mesh.cad;
 
+import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 /**
@@ -86,6 +87,12 @@ public abstract class CADShapeBuilder
 	 */
 	public abstract CADWireExplorer newWireExplorer ();
 	
+	/*
+	 * This method is needed to initialize CADShapeEnum
+	 */
+	protected abstract CADShapeEnum getShapeEnumInstance(String name);
+	protected abstract Iterator newShapeEnumIterator(CADShapeEnum start, CADShapeEnum end);
+
 	/**
 	 * Create a new CADIterator
 	 * @return The created CADIterator

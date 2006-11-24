@@ -1,3 +1,14 @@
+Fri Nov 24 11:05:19 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/cad/CADExplorer.java
+	  src/org/jcae/mesh/cad/CADShapeEnum.java: Remove shape type enum
+	definitions from CADExplorer, this feature is now implemented in
+	OCCShapeEnum.
+	* src-occ/org/jcae/mesh/cad/occ/OCCShapeEnum.java: New class,
+	extends CADShapeEnum.
+	* src-occ/org/jcae/mesh/cad/occ/OCCExplorer.java (init): Use shape
+	types from OCCShapeEnum.
+
 Thu Nov 23 20:19:55 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/cad/CADExplorer.java: Change signature to
