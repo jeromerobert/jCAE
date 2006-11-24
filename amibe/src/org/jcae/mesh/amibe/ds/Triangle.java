@@ -282,6 +282,17 @@ public class Triangle
 		);
 	}
 	
+	// Helper functions
+	private boolean isFlagged(int flag)
+	{
+		return (adjPos & (flag << 8 | flag << 16 | flag << 24)) != 0;
+	}
+
+	private void setFlag(int flag)
+	{
+		adjPos |= (flag << 8 | flag << 16 | flag << 24);
+	}
+
 	/**
 	 * Return the {@link OTriangle#OUTER} attribute of its edges.
 	 *
@@ -290,7 +301,7 @@ public class Triangle
 	 */
 	public boolean isOuter()
 	{
-		return (adjPos & (OTriangle.OUTER << 8 | OTriangle.OUTER << 16 | OTriangle.OUTER << 24)) != 0;
+		return isFlagged(OTriangle.OUTER);
 	}
 	
 	/**
@@ -298,7 +309,7 @@ public class Triangle
 	 */
 	public void setOuter()
 	{
-		adjPos |= (OTriangle.OUTER << 8 | OTriangle.OUTER << 16 | OTriangle.OUTER << 24);
+		setFlag(OTriangle.OUTER);
 	}
 	
 	/**
@@ -309,7 +320,7 @@ public class Triangle
 	 */
 	public boolean isMarked()
 	{
-		return (adjPos & (OTriangle.MARKED << 8 | OTriangle.MARKED << 16 | OTriangle.MARKED << 24)) != 0;
+		return isFlagged(OTriangle.MARKED);
 	}
 	
 	/**
@@ -317,7 +328,7 @@ public class Triangle
 	 */
 	public void setMarked()
 	{
-		adjPos |= (OTriangle.MARKED << 8 | OTriangle.MARKED << 16 | OTriangle.MARKED << 24);
+		setFlag(OTriangle.MARKED);
 	}
 	
 	/**
@@ -337,7 +348,7 @@ public class Triangle
 	 */
 	public boolean isBoundary()
 	{
-		return (adjPos & (OTriangle.BOUNDARY << 8 | OTriangle.BOUNDARY << 16 | OTriangle.BOUNDARY << 24)) != 0;
+		return isFlagged(OTriangle.BOUNDARY);
 	}
 	
 	/**
