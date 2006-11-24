@@ -9,8 +9,8 @@ Fri Nov 24 11:05:19 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 	* src-occ/org/jcae/mesh/cad/occ/OCCExplorer.java (init): Use shape
 	types from OCCShapeEnum.
 	* src/org/jcae/mesh/amibe/ds/Triangle.java: Change 'adjPos' access
-	to package-private, and add a new copy() to let
-	OTriangle2D.split3() have a backup copy of Triangle instances.
+	to private, and add a new copy() to let OTriangle2D.split3() have
+	a backup copy of Triangle instances.
 	* src/org/jcae/mesh/amibe/ds/Triangle.java: Transform 'adjPos' into
 	byte[4] array to improve readability, there is no performance loss.
 

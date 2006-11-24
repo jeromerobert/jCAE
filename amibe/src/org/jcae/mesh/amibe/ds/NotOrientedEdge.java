@@ -38,7 +38,7 @@ public class NotOrientedEdge extends OTriangle
 	{
 		tri = ot.tri;
 		localNumber = ot.localNumber;
-		attributes = tri.adjPos[localNumber+1];
+		attributes = tri.getEdgeAttributes(localNumber);
 	}
 
 	/**
@@ -61,7 +61,7 @@ public class NotOrientedEdge extends OTriangle
 			return false;
 		NotOrientedEdge that = (NotOrientedEdge) o;
 		return (that.tri == tri && that.localNumber == localNumber) ||
-		       (that.tri == (Triangle) tri.getAdj(localNumber) && that.localNumber == ((tri.adjPos[0] >> (2*localNumber)) & 3));
+		       (that.tri == (Triangle) tri.getAdj(localNumber) && that.localNumber == tri.getAdjLocalNumber(localNumber));
 	}
 	
 	public final String toString()

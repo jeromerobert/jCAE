@@ -241,13 +241,13 @@ public class HalfEdge
 	// Adjust tri.adjPos after attributes is modified.
 	public final void pushAttributes()
 	{
-		tri.adjPos[localNumber+1] = (byte) attributes;
+		tri.setEdgeAttributes(localNumber, attributes);
 	}
 	
 	// Adjust attributes after tri.adjPos is modified.
 	public final void pullAttributes()
 	{
-		attributes = tri.adjPos[localNumber+1];
+		attributes = (byte) tri.getEdgeAttributes(localNumber);
 	}
 	
 	/**

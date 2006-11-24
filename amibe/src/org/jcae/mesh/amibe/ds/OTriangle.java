@@ -324,13 +324,13 @@ public class OTriangle
 	// Adjust tri.adjPos after attributes is modified.
 	public final void pushAttributes()
 	{
-		tri.adjPos[1+localNumber] = (byte) attributes;
+		tri.setEdgeAttributes(localNumber, attributes);
 	}
 	
 	// Adjust attributes after tri.adjPos is modified.
 	public final void pullAttributes()
 	{
-		attributes = tri.adjPos[1+localNumber];
+		attributes = tri.getEdgeAttributes(localNumber);
 	}
 	
 	/**
@@ -379,7 +379,7 @@ public class OTriangle
 	public static final void symOTri(OTriangle o, OTriangle that)
 	{
 		that.tri = (Triangle) o.tri.getAdj(o.localNumber);
-		that.localNumber = ((o.tri.adjPos[0] >> (2*o.localNumber)) & 3);
+		that.localNumber = o.tri.getAdjLocalNumber(o.localNumber);
 		that.pullAttributes();
 	}
 	
@@ -388,7 +388,7 @@ public class OTriangle
 	 */
 	public final void symOTri()
 	{
-		int neworient = ((tri.adjPos[0] >> (2*localNumber)) & 3);
+		int neworient = tri.getAdjLocalNumber(localNumber);
 		tri = (Triangle) tri.getAdj(localNumber);
 		localNumber = neworient;
 		pullAttributes();
@@ -1305,7 +1305,7 @@ public class OTriangle
 		if (t == null)
 			r+= "null";
 		else
-			r+= t.hashCode()+"["+(((tri.adjPos[0] & (3 << (2*num))) >> (2*num)) & 3)+"]";
+			r+= t.hashCode()+"["+tri.getAdjLocalNumber(num)+"]";
 		return r;
 	}
 	
@@ -1314,7 +1314,7 @@ public class OTriangle
 		String r = "Local number: "+localNumber;
 		r += "\nTri hashcode: "+tri.hashCode();
 		r += "\nAdjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2);
-		r += "\nAttributes: "+Integer.toHexString(tri.adjPos[1] & 0xff)+" "+Integer.toHexString(tri.adjPos[2] & 0xff)+" "+Integer.toHexString(tri.adjPos[3] & 0xff)+" => "+Integer.toHexString(attributes);
+		r += "\nAttributes: "+Integer.toHexString(tri.getEdgeAttributes(0))+" "+Integer.toHexString(tri.getEdgeAttributes(1))+" "+Integer.toHexString(tri.getEdgeAttributes(2))+" => "+Integer.toHexString(attributes);
 		r += "\nVertices:";
 		r += "\n  Origin: "+origin();
 		r += "\n  Destination: "+destination();

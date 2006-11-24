@@ -122,7 +122,7 @@ public class Triangle
 	 * </ul>
 	 *  Bytes 1, 2 and 3 carry up bitfield attributes for edges 0, 1 and 2.
 	*/
-	byte [] adjPos = new byte[4];
+	private byte [] adjPos = new byte[4];
 	private int groupId = -1;
 	// Reference to the next element in the singly linked list.
 	private Triangle listNext = null;
@@ -273,6 +273,17 @@ public class Triangle
 	}
 	
 	/**
+	 * Return the local number of symmetric edge in adjacent Triangle.
+	 *
+	 * @param num  the local number of this edge.
+	 * @return the local number of symmetric edge in adjacent Triangle.
+	 */
+	public int getAdjLocalNumber(int num)
+	{
+		return (adjPos[0] >> (2*num)) & 3;
+	}
+	
+	/**
 	 * Return the 2D centroid of this triangle.
 	 *
 	 * @return the 2D centroid of this triangle.
@@ -365,7 +376,7 @@ public class Triangle
 	 * Swap attributes for edges 1 and 2.
 	 * @see OTriangle#invertOrientationFace
 	 */
-	protected void swapAttributes12()
+	void swapAttributes12()
 	{
 		byte temp = adjPos[2];
 		adjPos[2] = adjPos[3];
@@ -376,7 +387,7 @@ public class Triangle
 	 * Swap attributes for edges 0 and 1.
 	 * @see OTriangle#invertOrientationFace
 	 */
-	protected void swapAttributes01()
+	void swapAttributes01()
 	{
 		byte temp = adjPos[1];
 		adjPos[1] = adjPos[2];
@@ -387,7 +398,7 @@ public class Triangle
 	 * Swap attributes for edges 0 and 2.
 	 * @see OTriangle#invertOrientationFace
 	 */
-	protected void swapAttributes02()
+	void swapAttributes02()
 	{
 		byte temp = adjPos[1];
 		adjPos[1] = adjPos[3];
@@ -418,6 +429,16 @@ public class Triangle
 			adjPos[2] |= 0x80;
 		else
 			adjPos[2] &= ~0x80;
+	}
+	
+	public int getEdgeAttributes(int num)
+	{
+		return adjPos[num+1];
+	}
+	
+	public void setEdgeAttributes(int num, int attributes)
+	{
+		adjPos[num+1] = (byte) attributes;
 	}
 	
 	/**
