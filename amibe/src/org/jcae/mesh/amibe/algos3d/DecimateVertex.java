@@ -409,7 +409,8 @@ public class DecimateVertex
 			quadricMap.remove(v1);
 			quadricMap.remove(v2);
 			quadricMap.put(v3, q3);
-			ot.find(v3, apex);
+			if (!ot.find(v3, apex))
+				throw new RuntimeException();
 			assert ot.destination() == apex : ""+edge+"\n"+v3+"\n"+apex;
 			do
 			{

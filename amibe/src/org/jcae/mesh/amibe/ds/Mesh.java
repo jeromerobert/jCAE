@@ -271,6 +271,7 @@ public class Mesh
 		}
 		tVertList.clear();
 		//  3. Mark boundary edges and bind them to virtual triangles.
+		logger.debug("Mark boundary edges");
 		OTriangle ot = new OTriangle();
 		OTriangle sym = new OTriangle();
 		ArrayList newTri = new ArrayList();
@@ -293,7 +294,8 @@ public class Mesh
 				}
 			}
 		}
-		//  4. Mark non manifold edges and bind them to virtual triangles.
+		//  4. Mark non-manifold edges and bind them to virtual triangles.
+		logger.debug("Mark non-manifold edges");
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
 		{
 			Triangle t = (Triangle) it.next();

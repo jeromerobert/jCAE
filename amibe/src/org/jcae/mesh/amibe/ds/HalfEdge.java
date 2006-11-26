@@ -765,7 +765,8 @@ public class HalfEdge
 	private static void unitTestCheckToHalfEdge(Mesh m, Vertex o, Vertex d)
 	{
 		OTriangle ot = new OTriangle();
-		ot.find(o, d);
+		if (!ot.find(o, d))
+		        System.exit(-1);
 		HalfEdge e = HalfEdge.toHalfEdge(ot);
 		assert ot.origin() == e.origin() && ot.destination() == e.destination() && ot.apex() == e.apex();
 	}
@@ -773,6 +774,8 @@ public class HalfEdge
 	private static void unitTestCheckContract(Mesh m, Vertex o, Vertex d, Vertex n)
 	{
 		HalfEdge e = HalfEdge.find(o, d);
+		if (e == null)
+		        System.exit(-1);
 		e.contract(m, n);
 		assert m.isValid();
 	}

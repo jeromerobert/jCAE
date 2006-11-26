@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2004,2005, by EADS CRC
+    Copyright (C) 2004,2005,2006, by EADS CRC
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -218,6 +218,14 @@ public class OTriangle
 	 */
 	public boolean find(Vertex v1, Vertex v2)
 	{
+		if (v2.getLink() instanceof Triangle && v2.getLink() instanceof Triangle[])
+		{
+			boolean ret = find(v2, v1);
+			if (!ret)
+				return ret;
+			symOTri();
+			return !hasAttributes(OUTER);
+		}
 		bind((Triangle) v1.getLink());
 		assert tri.vertex[0] == v1 || tri.vertex[1] == v1 || tri.vertex[2] == v1 : v1+" "+tri;
 		if (destination() == v1)
