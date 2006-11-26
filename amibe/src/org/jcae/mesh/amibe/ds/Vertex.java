@@ -26,7 +26,6 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
 import java.util.HashSet;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.Iterator;
 
 /**
  * Vertex of a mesh.
@@ -774,7 +773,7 @@ public class Vertex
 		{
 			if (link instanceof Triangle)
 				r += " link: "+link.hashCode();
-			else
+			else if (link instanceof Triangle[])
 			{
 				Triangle [] list = (Triangle []) link;
 				r += " link: ["+list[0].hashCode();
