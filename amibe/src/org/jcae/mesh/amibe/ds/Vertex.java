@@ -40,6 +40,14 @@ import java.util.Iterator;
  * There is a special vertex, {@link #outer}, which represents a vertex at
  * infinite.  It is used to create exterior triangles.
  * </p>
+ *
+ * <p>
+ * Each vertex has a pointer to an incident <code>Triangle</code>,
+ * which allows to find any other incident <code>OTriangle</code> or
+ * <code>Triangle</code>.  For non-manifold vertices, this link points
+ * to a <code>Triangle []</code> array, which can be used to retrieve
+ * all incident triangles through their adjacency relations.
+ * </p>
  */
 public class Vertex
 {
