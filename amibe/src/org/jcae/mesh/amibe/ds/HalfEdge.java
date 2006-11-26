@@ -803,7 +803,33 @@ public class HalfEdge
 		unitTestCheckContract(m, v[5], v[0], v[0]);
 		unitTestCheckContract(m, v[4], v[0], v[0]);
 		assert m.isValid();
+		System.out.println("Done.");
 
+		System.out.println("Building non-manifold mesh...");
+		m = new Mesh();
+		m.setType(Mesh.MESH_3D);
+		Vertex [] nmv = new Vertex[6];
+		nmv[0] = Vertex.valueOf(0.0, 0.0, 0.0);
+		nmv[1] = Vertex.valueOf(0.0, 0.0, 3.0);
+		nmv[2] = Vertex.valueOf(1.0, 0.0, 0.0);
+		nmv[3] = Vertex.valueOf(0.0, 1.0, 0.0);
+		nmv[4] = Vertex.valueOf(-1.0, 0.0, 0.0);
+		nmv[5] = Vertex.valueOf(0.0, -1.0, 0.0);
+		for (int i = 2; i < 6; i++)
+		{
+			Triangle T = new Triangle(nmv[0], nmv[1], nmv[i]);
+			m.add(T);
+			if (i == 2)
+			{
+				nmv[0].setLink(T);
+				nmv[1].setLink(T);
+			}
+			nmv[i].setLink(T);
+		}
+		m.buildAdjacency(nmv, -1.0);
+		m.printMesh();
+		m.buildEdges();
+		assert m.isValid();
 		/*
 		m = new Mesh();
 		unitTestBuildMesh(m, v);
