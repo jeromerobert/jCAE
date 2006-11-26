@@ -415,7 +415,7 @@ public class DecimateVertex
 			do
 			{
 				ot.nextOTriOriginLoop();
-				if (ot.destination() != Vertex.outer)
+				if (!ot.hasAttributes(OTriangle.OUTER))
 					tree.update(new NotOrientedEdge(ot), cost(ot.destination(), v3, quadricMap));
 				ot.setAttributes(OTriangle.MARKED);
 			}

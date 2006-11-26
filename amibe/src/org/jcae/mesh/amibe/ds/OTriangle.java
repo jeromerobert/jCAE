@@ -619,6 +619,9 @@ public class OTriangle
 	 * Move counterclockwaise to the following edge with the same origin.
 	 * If a boundary is reached, loop backward until another
 	 * boundary is found and start again from there.
+	 * Note: outer triangles are taken into account in this loop, because
+	 * this is sometimes needed, as in OTriangle2D.removeDegenerated().
+	 * They have to be explicitly filtered out by testing hasAttributes(OUTER).
 	 */
 	public final void nextOTriOriginLoop()
 	{

@@ -284,7 +284,8 @@ public class Vertex
 		Vertex d = ot.destination();
 		do
 		{
-			nodes.add(d);
+			if (!ot.hasAttributes(OTriangle.OUTER))
+				nodes.add(ot.destination());
 			ot.nextOTriOriginLoop();
 			assert ot.origin() == this : ot+" should originate from "+this;
 		}
@@ -722,7 +723,7 @@ public class Vertex
 		do
 		{
 			ot.nextOTriOriginLoop();
-			if (ot.destination() == Vertex.outer)
+			if (ot.hasAttributes(OTriangle.OUTER))
 				continue;
 			double [] p1 = ot.destination().getUV();
 			for (int i = 0; i < 3; i++)
