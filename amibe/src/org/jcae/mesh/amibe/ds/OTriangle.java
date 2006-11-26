@@ -19,7 +19,7 @@
 
 package org.jcae.mesh.amibe.ds;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Stack;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
@@ -1005,7 +1005,7 @@ public class OTriangle
 		//        following test triggers an error:
 		//    * mesh Scie_shell.brep with deflexion=0.2 aboslute
 		//    * decimate with length=6
-		ArrayList link = origin().getNeighboursNodes();
+		Collection link = origin().getNeighboursNodes();
 		link.retainAll(destination().getNeighboursNodes());
 		return link.size() < 3;
 	}

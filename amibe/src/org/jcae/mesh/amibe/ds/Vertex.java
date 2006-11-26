@@ -24,7 +24,8 @@ import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import java.util.HashSet;
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Iterator;
 
 /**
@@ -252,59 +253,27 @@ public class Vertex
 	
 	/**
 	 * Get the list of adjacent vertices.
-	 * Note: this method is meant to deal with non-manifold meshes.
+	 * Note: this method works also with non-manifold meshes.
 	 *
 	 * @return the list of adjacent vertices.
 	 */
-	public ArrayList getNeighboursNodes()
+	public Collection getNeighboursNodes()
 	{
-		ArrayList ret = new ArrayList();
-		HashSet nodes = new HashSet();
-		OTriangle ot = new OTriangle();
-		for (Iterator it = getNeighboursTriangles().iterator(); it.hasNext(); )
-		{
-			Triangle t = (Triangle) it.next();
-			ot.bind(t);
-			if (ot.origin() != this)
-				ot.nextOTri();
-			if (ot.origin() != this)
-				ot.nextOTri();
-			assert ot.origin() == this : this+" not in "+ot;
-			Vertex d = ot.destination();
-			if (!nodes.contains(d))
-			{
-				nodes.add(d);
-				ret.add(d);
-			}
-			Vertex a = ot.apex();
-			if (!nodes.contains(a))
-			{
-				nodes.add(a);
-				ret.add(a);
-			}
-		}
-		return ret;
-	}
-	
-	private ArrayList getNeighboursTriangles()
-	{
-		ArrayList tri = new ArrayList();
-		HashSet triSet = new HashSet();
-		assert link != null : this;
+		Collection ret = new LinkedHashSet();
 		if (link instanceof Triangle)
-			appendNeighboursTri((Triangle) link, tri, triSet);
+			appendNeighboursTri((Triangle) link, ret);
 		else
 		{
 			// Non-manifold vertex
 			logger.debug("Non-manifold vertex: "+this);
 			Triangle [] t = (Triangle []) link;
 			for (int i = 0; i < t.length; i++)
-				appendNeighboursTri(t[i], tri, triSet);
+				appendNeighboursTri(t[i], ret);
 		}
-		return tri;
+		return ret;
 	}
 	
-	private void appendNeighboursTri(Triangle tri, ArrayList ret, HashSet triSet)
+	private void appendNeighboursTri(Triangle tri, Collection nodes)
 	{
 		assert tri.vertex[0] == this || tri.vertex[1] == this || tri.vertex[2] == this;
 		OTriangle ot = new OTriangle(tri, 0);
@@ -316,11 +285,9 @@ public class Vertex
 		Vertex d = ot.destination();
 		do
 		{
+			nodes.add(d);
 			ot.nextOTriOriginLoop();
 			assert ot.origin() == this : ot+" should originate from "+this;
-			Triangle t = ot.getTri();
-			if (!t.isOuter())
-				ret.add(t);
 		}
 		while (ot.destination() != d);
 	}
