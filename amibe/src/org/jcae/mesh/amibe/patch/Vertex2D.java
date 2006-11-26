@@ -69,7 +69,7 @@ public class Vertex2D extends Vertex
 	}
 
 	/**
-	 * Create an interior Vertex for a 2D mesh.
+	 * Create a Vertex for a 2D mesh.
 	 *
 	 * @param u  first coordinate.
 	 * @param v  second coordinate.
@@ -82,7 +82,7 @@ public class Vertex2D extends Vertex
 	}
 	
 	/**
-	 * Create an interior Vertex for a 2D mesh.
+	 * Create a Vertex for a 2D mesh.
 	 *
 	 * @param u  first coordinate.
 	 * @param v  second coordinate.

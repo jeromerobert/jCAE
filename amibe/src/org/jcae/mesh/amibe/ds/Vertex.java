@@ -81,7 +81,7 @@ public class Vertex
 	}
 
 	/**
-	 * Create an interior Vertex for a 3D mesh.
+	 * Create a Vertex for a 3D mesh.
 	 *
 	 * @param x  first coordinate.
 	 * @param y  second coordinate.
@@ -96,7 +96,7 @@ public class Vertex
 	}
 	
 	/**
-	 * Create an interior Vertex for a 3D mesh.
+	 * Create a Vertex for a 3D mesh.
 	 *
 	 * @param x  first coordinate.
 	 * @param y  second coordinate.
@@ -107,6 +107,11 @@ public class Vertex
 		return new Vertex(x, y, z);
 	}
 	
+	/**
+	 * Create a Vertex for a 3D mesh.
+	 *
+	 * @param p  3d coordinates.
+	 */
 	public static Vertex valueOf(double [] p)
 	{
 		Vertex ret;
@@ -133,7 +138,7 @@ public class Vertex
 	}
 	
 	/**
-	 * Get the coordinates of this Vertex.
+	 * Get coordinates of this Vertex.
 	 *
 	 * @return the coordinates of this Vertex.
 	 */
@@ -143,7 +148,7 @@ public class Vertex
 	}
 	
 	/**
-	 * Set the coordinates of this Vertex (3D).
+	 * Set coordinates of this Vertex.
 	 *
 	 * @param x  first coordinate of the new position
 	 * @param y  second coordinate of the new position
@@ -157,9 +162,9 @@ public class Vertex
 	}
 	
 	/**
-	 * Get the 1D reference of this node.
+	 * Get 1D reference of this node.
 	 *
-	 * @return the 1D reference of this node.
+	 * @return 1D reference of this node.
 	 */
 	public int getRef()
 	{
@@ -167,30 +172,51 @@ public class Vertex
 	}
 	
 	/**
-	 * Set the 1D reference of this node.
+	 * Set 1D reference of this node.
 	 *
-	 * @param l  the 1D reference of this node.
+	 * @param l  1D reference of this node.
 	 */
 	public void setRef(int l)
 	{
 		ref1d = l;
 	}
 	
+	/**
+	 * Get node label.
+	 *
+	 * @return node label.
+	 */
 	public int getLabel()
 	{
 		return label;
 	}
 	
+	/**
+	 * Set node label.
+	 *
+	 * @param l  node label.
+	 */
 	public void setLabel(int l)
 	{
 		label = l;
 	}
 	
+	/**
+	 * Get a finite element containing this Vertex.
+	 *
+	 * @return a <code>Triangle</code> instance for manifold vertices,
+	 * and a <code>Triangle []</code> array otherwise.
+	 */
 	public Object getLink()
 	{
 		return link;
 	}
 	
+	/**
+	 * Set link to a finite element containing this Vertex.
+	 *
+	 * @param o  object linked to this Vertex.
+	 */
 	public void setLink(Object o)
 	{
 		link = o;
