@@ -32,7 +32,6 @@ import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Stack;
 import java.util.HashSet;
 import java.util.HashMap;
@@ -214,7 +213,9 @@ public class DecimateHalfEdge
 			// This is in fact 2*area, but that does not matter
 			Matrix3D.prodVect3D(vect1, vect2, normal);
 			double norm = Matrix3D.norm(normal);
-			double area = norm / tolerance;
+			double area = norm;
+			if (tolerance > 0.0)
+				area /= tolerance;
 			if (norm > 1.e-20)
 			{
 				for (int i = 0; i < 3; i++)
@@ -314,13 +315,13 @@ public class DecimateHalfEdge
 				/* FIXME: add an option so that boundary nodes may be frozen. */
 				q1 = (Quadric3DError) quadricMap.get(v1);
 				q2 = (Quadric3DError) quadricMap.get(v2);
-				assert q1 != null : v1;
-				assert q2 != null : v2;
+				assert q1 != null : edge;
+				assert q2 != null : edge;
 				q3.computeQuadric3DError(q1, q2);
 				q3.optimalPlacement(v1, v2, q1, q2, placement, v3);
 				edge.copyOTriangle(ot);
 				// For now, do not contract non manifold edges
-				if (edge.getAdj() instanceof HalfEdge && ot.canContract(v3))
+				if (!edge.hasAttributes(OTriangle.NONMANIFOLD) && ot.canContract(v3))
 					break;
 				if (logger.isDebugEnabled())
 					logger.debug("Edge not contracted: "+edge);
@@ -333,7 +334,11 @@ public class DecimateHalfEdge
 				if (nrFinal == 0)
 				{
 					notContracted.push(edge);
-					notContracted.push(new Double(cost+0.1*(tolerance - cost)));
+					if (tolerance > 0.0)
+						notContracted.push(new Double(cost+0.1*(tolerance - cost)));
+					else
+						// tolerance = cost = 0
+						notContracted.push(new Double(1.0));
 				}
 				edge = (HalfEdge) tree.next();
 				if (nrFinal == 0)
@@ -369,7 +374,7 @@ public class DecimateHalfEdge
 				}
 				edge = edge.next();
 			}
-			HalfEdge sym = (HalfEdge) edge.getAdj();
+			HalfEdge sym = edge.sym();
 			Triangle t2 = sym.getTri();
 			if (!t2.isOuter())
 			{
@@ -408,7 +413,7 @@ public class DecimateHalfEdge
 			
 			edge = edge.next();
 			assert edge.apex() == v3;
-			if (edge.hasAttributes(OTriangle.OUTER) || edge.hasAttributes(OTriangle.BOUNDARY))
+			if (edge.hasAttributes(OTriangle.OUTER) || edge.hasAttributes(OTriangle.BOUNDARY) || edge.hasAttributes(OTriangle.NONMANIFOLD))
 				continue;
 			// Check if edges can be swapped
 			while(true)
@@ -423,7 +428,7 @@ public class DecimateHalfEdge
 						tree.remove(edge.notOriented());
 						assert !tree.containsValue(edge.notOriented());
 					}
-					sym = (HalfEdge) edge.getAdj();
+					sym = edge.sym();
 					for (int i = 0; i < 3; i++)
 					{
 						sym = sym.next();
@@ -439,7 +444,7 @@ public class DecimateHalfEdge
 						edge = edge.next();
 						tree.insert(edge.notOriented(), cost(edge.origin(), edge.destination(), quadricMap));
 					}
-					sym = (HalfEdge) edge.next().getAdj();
+					sym = edge.next().sym();
 					for (int i = 0; i < 2; i++)
 					{
 						sym = sym.next();

@@ -1021,7 +1021,7 @@ public class OTriangle
 		nextOTri(this, work[0]);
 		prevOTri(this, work[1]);
 		//  TODO: allow contracting edges when a vertex is non manifold
-		if (a.getLink() instanceof Triangle[])
+		if (o.getLink() instanceof Triangle[] || d.getLink() instanceof Triangle[] || a.getLink() instanceof Triangle[])
 			return false;
 		//  If both adjacent edges are on a boundary, do not contract
 		if (work[0].hasAttributes(BOUNDARY) && work[1].hasAttributes(BOUNDARY))
@@ -1031,13 +1031,16 @@ public class OTriangle
 		work[0].prevOTri();
 		work[1].nextOTri();
 		if (work[0].hasAttributes(BOUNDARY) && work[1].hasAttributes(BOUNDARY))
-				return false;
+			return false;
 		//  Loop around o to check that triangles will not be inverted
 		nextOTri(this, work[0]);
 		symOTri(this, work[1]);
 		double [] xn = n.getUV();
 		do
 		{
+			//  TODO: allow contracting edges when a vertex is non manifold
+			if (work[0].origin().getLink() instanceof Triangle[])
+				return false;
 			if (work[0].tri != tri && work[0].tri != work[1].tri && !work[0].hasAttributes(OUTER))
 			{
 				double area  = work[0].computeNormal3DT();
@@ -1051,9 +1054,6 @@ public class OTriangle
 				if (Matrix3D.prodSca(tempD1, nu) >= - area)
 					return false;
 			}
-			//  TODO: allow contracting edges when a vertex is non manifold
-			if (work[0].origin().getLink() instanceof Triangle[] || work[0].destination().getLink() instanceof Triangle[])
-				return false;
 			work[0].nextOTriApexLoop();
 		}
 		while (work[0].origin() != d);
@@ -1062,6 +1062,9 @@ public class OTriangle
 		work[0].prevOTri();
 		do
 		{
+			//  TODO: allow contracting edges when a vertex is non manifold
+			if (work[0].origin().getLink() instanceof Triangle[])
+				return false;
 			if (work[0].tri != tri && work[0].tri != work[1].tri && !work[0].hasAttributes(OUTER))
 			{
 				double area  = work[0].computeNormal3DT();
@@ -1290,15 +1293,12 @@ public class OTriangle
 			for (int i = 0; i < 3; i++)
 			{
 				ot.nextOTri();
-				if (!ot.hasAttributes(BOUNDARY))
+				if (!ot.hasAttributes(BOUNDARY) && !ot.hasAttributes(NONMANIFOLD))
 				{
-					if (!ot.hasAttributes(NONMANIFOLD))
-					{
-						OTriangle.symOTri(ot, sym);
-						todo.push(sym.tri);
-						todo.push(new Integer(sym.localNumber));
-						sym.tri.glue1(sym.localNumber, ot.tri, ot.localNumber);
-					}
+					OTriangle.symOTri(ot, sym);
+					todo.push(sym.tri);
+					todo.push(new Integer(sym.localNumber));
+					sym.tri.glue1(sym.localNumber, ot.tri, ot.localNumber);
 				}
 			}
 		}

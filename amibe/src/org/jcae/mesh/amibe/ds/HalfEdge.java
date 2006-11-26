@@ -29,8 +29,14 @@ public class HalfEdge
 	private Triangle tri;
 	private byte localNumber = 8;
 	private int attributes = 8;
-	// sym is an HalfEdge for manifold edges, and an ArrayList
-	// otherwise.
+	// For non manifold edges, a virtual triangle is added
+	//   Triangle(Vertex.outer, edge.origin(), edge.destination())
+	// and sym points to an edge of this triangle.  It is said to
+	// be outer.  The list of adjacent HalfEdge is stored in this
+	// triangle, more specifically in sym.next.sym
+	// This is very handy because all HalfEdge of non-outer triangles
+	// can be considered as being manifold.
+	// TODO: replace ArrayList by HalfEdge[]
 	private Object sym = null;
 	private HalfEdge next = null;
 
@@ -81,7 +87,8 @@ public class HalfEdge
 	
 	public final HalfEdge notOriented()
 	{
-		if (sym != null && sym instanceof HalfEdge && sym.hashCode() < hashCode())
+		assert sym instanceof HalfEdge;
+		if (sym != null && sym.hashCode() < hashCode())
 			return (HalfEdge) sym;
 		return this;
 	}
@@ -102,7 +109,7 @@ public class HalfEdge
 		sym = e;
 	}
 
-	private final HalfEdge sym()
+	public final HalfEdge sym()
 	{
 		return (HalfEdge) sym;
 	}

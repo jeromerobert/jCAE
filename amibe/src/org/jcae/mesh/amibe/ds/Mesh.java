@@ -42,7 +42,6 @@ import org.apache.log4j.Logger;
  *   <li>Memory usage must be minimal in order to perform very large
  *       meshes.</li>
  *   <li>Mesh traversal must be cheap.</li>
- *   <li>To find a triangle surrounding a given point must also be cheap.</li>
  * </ul>
  * The selected data structure is as follows:
  * <ul>
@@ -74,21 +73,21 @@ import org.apache.log4j.Logger;
  * <pre>
  *       Vertex [] vertex = { V0, V1, V2 };
  *       Triangle [] adj  = { t0, t1, t2 };
- *       byte [] adjPosEdge = { ??, 0, ?? };
+ *       byte adjPos = 0b00??00??;
+ *       byte [] edgeAttributes = { ??, 0, ?? };
  * </pre>
  * <p>
  *   By convention, edges are numbered so that edge <em>i</em> is the opposite 
  *   side of vertex <em>i</em>.  An edge is then fully characterized by a
  *   triangle and a local number between 0 and 2 inclusive.  Here, edge
  *   between <tt>V0</tt> and <tt>V2</tt> can be defined by <em>(t,1)</em> or
- *   <em>(t1,0)</em>.  The <code>adjPosEdge</code> instance variablle stores local
+ *   <em>(t1,0)</em>.  The <code>adjPos</code> instance variable stores local
  *   numbers for adjacent edges, so that mesh traversal becomes very cheap. 
  * </p>
  * <p>
- *   <b>Note:</b>  <code>adjPosEdge</code> contains values between 0 and 2,
+ *   <b>Note:</b>  <code>adjPos</code> contains values between 0 and 2,
  *   it can then be stored with 2 bits, and in practice the three values of
- *   a triangle are stored inside a single byte, which is part of an
- *   <code>int</code>.  (Remaining three bytes are used to store data on edges)
+ *   a triangle are stored inside a single byte.
  * </p>
  */
 
@@ -258,11 +257,12 @@ public class Mesh
 				list.add(t);
 			}
 		}
-		//  2. Connect all edges starting from v
+		//  2. Connect all edges together
 		logger.debug("Connect triangles");
 		for (int i = 0; i < vertices.length; i++)
 			checkNeighbours(vertices[i], tVertList);
 		//  tVertList is no more needed, remove all references
+		//  to help the garbage collector.
 		for (int i = 0; i < vertices.length; i++)
 		{
 			ArrayList list = (ArrayList) tVertList.get(vertices[i]);
@@ -293,8 +293,31 @@ public class Mesh
 				}
 			}
 		}
+		//  4. Mark non manifold edges and bind them to virtual triangles.
+		for (Iterator it = triangleList.iterator(); it.hasNext(); )
+		{
+			Triangle t = (Triangle) it.next();
+			ot.bind(t);
+			for (int i = 0; i < 3; i++)
+			{
+				ot.nextOTri();
+				if (ot.getAdj() instanceof Triangle)
+					continue;
+				ArrayList list = (ArrayList) ot.getAdj();
+				Triangle adj = new Triangle(Vertex.outer, ot.destination(), ot.origin());
+				newTri.add(adj);
+				adj.setOuter();
+				sym.bind(adj);
+				ot.glue(sym);
+				ot.setAttributes(OTriangle.NONMANIFOLD);
+				sym.setAttributes(OTriangle.NONMANIFOLD);
+				sym.nextOTri();
+				// By convention, put ArrayList on next edge
+				sym.setAdj(list);
+			}
+		}
 		
-		//  4. Find the list of vertices which are on mesh boundary
+		//  5. Find the list of vertices which are on mesh boundary
 		logger.debug("Build the list of boundary nodes");
 		HashSet bndNodes = new HashSet();
 		maxLabel = 0;
@@ -325,7 +348,8 @@ public class Mesh
 				}
 			}
 		}
-		//  5. Build links for non-manifold vertices
+
+		//  6. Build links for non-manifold vertices
 		logger.debug("Compute links for non-manifold vertices");
 		Vertex [] v = new Vertex[2];
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
@@ -348,8 +372,9 @@ public class Mesh
 							v[j].setLink(link);
 						}
 					}
-					Triangle first = ot.tri;
-					ArrayList adj = (ArrayList) ot.getAdj();
+					OTriangle.symOTri(ot, sym);
+					sym.nextOTri();
+					ArrayList adj = (ArrayList) sym.getAdj();
 					for (Iterator it2 = adj.iterator(); it2.hasNext(); )
 					{
 						Triangle t2 = (Triangle) it2.next();
@@ -364,6 +389,7 @@ public class Mesh
 			}
 		}
 		// Replace LinkedHashSet by Triangle[]
+		// TODO: put only one Triangle by connected region
 		int nrNM = 0;
 		int nrFE = 0;
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
@@ -394,7 +420,7 @@ public class Mesh
 			logger.debug("Found "+nrNM+" non manifold edges");
 		if (nrFE > 0)
 			logger.debug("Found "+nrFE+" free edges");
-		//  5. If vertices are on inner boundaries and there is
+		//  7. If vertices are on inner boundaries and there is
 		//     no ridge, change their label.
 		logger.debug("Set interior nodes mutable");
 		int nrJunctionPoints = 0;
@@ -464,12 +490,14 @@ public class Mesh
 				Triangle t2 = (Triangle) it2.next();
 				if (t == t2 || !markedTri.contains(t2))
 					continue;
+				// t2 contains v and v2, we now look for an edge
+				// (v,v2) or (v2,v)
 				ot2.bind(t2);
 				if (ot2.destination() == v2)
 					ot2.nextOTri();
 				else if (ot2.apex() == v2)
 					ot2.prevOTri();
-				if (manifold && ot2.destination() == v && ot.getAdj() == null && ot2.getAdj() == null && (!ot2.hasAttributes(OTriangle.NONMANIFOLD)))
+				if (manifold && ot2.destination() == v && ot.getAdj() == null && ot2.getAdj() == null)
 				{
 					// This edge seems to be manifold.
 					// It may become non manifold later when
@@ -482,7 +510,13 @@ public class Mesh
 					ot2.prevOTri();
 				// We are sure now that ot2 == (v,v2) or (v2,v)
 				assert (v == ot2.origin() && v2 == ot2.destination()) || (v2 == ot2.origin() && v == ot2.destination());
-				//  Collect all adjacent triangles into an ArrayList.
+				// This edge is non manifold.  In this routine, we
+				// replace adjacency relation by a list of all adjacent
+				// triangles.  This adjacency relation will be modified
+				// later in buildAdjacency.
+				// TODO: set final adjacency relations here.
+				//
+				// Collect all adjacent triangles into an ArrayList.
 				if (adj == null)
 					adj = new ArrayList();
 				if (ot.getAdj() == null)
@@ -491,7 +525,6 @@ public class Mesh
 					// thus put ot in it.
 					adj.add(t);
 					adj.add(new Integer(ot.getLocalNumber()));
-					ot.setAttributes(OTriangle.NONMANIFOLD);
 					ot.setAdj(adj);
 				}
 				else if (ot.getAdj() instanceof Triangle)
@@ -503,14 +536,11 @@ public class Mesh
 					adj.add(new Integer(ot.getLocalNumber()));
 					adj.add(sym.tri);
 					adj.add(new Integer(sym.getLocalNumber()));
-					ot.setAttributes(OTriangle.NONMANIFOLD);
-					sym.setAttributes(OTriangle.NONMANIFOLD);
 					ot.setAdj(adj);
 					sym.setAdj(adj);
 				}
 				adj.add(t2);
 				adj.add(new Integer(ot2.getLocalNumber()));
-				ot2.setAttributes(OTriangle.NONMANIFOLD);
 				ot2.setAdj(adj);
 				if (logger.isDebugEnabled())
 					logger.debug("Non-manifold: "+v+" "+v2);
@@ -634,15 +664,18 @@ public class Mesh
 						t2 = (Triangle) it2.next();
 						int i2 = ((Integer) it2.next()).intValue();
 						sym.bind(t2, i2);
-						assert sym.getAdj() == adj;
 						HalfEdge f = t2.getHalfEdge();
 						for (; i2 > 0; i2--)
 							f = f.next();
 						assert sym.origin() == f.origin();
 						assert sym.destination() == f.destination();
 						assert sym.apex() == f.apex();
-						assert f.getAdj() == null;
+						// Put this ArrayList at the same
+						// location as with OTriangle, see
+						// checkNeighbours.
 						edgeAdj.add(f);
+						f = ((HalfEdge) f.getAdj()).next();
+						assert f.getAdj() == null;
 						f.setAdj(edgeAdj);
 					}
 				}
@@ -920,6 +953,8 @@ public class Mesh
 						Triangle t2 = (Triangle) it2.next();
 						int i2 = ((Integer) it2.next()).intValue();
 						sym.bind(t2, i2);
+						sym.symOTri();
+						sym.nextOTri();
 						if (sym.getAdj() != adj)
 						{
 							logger.error("Multiple edges: Wrong adjacency relation");
