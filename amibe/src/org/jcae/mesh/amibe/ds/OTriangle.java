@@ -341,7 +341,7 @@ public class OTriangle
 	 */
 	public final boolean isMutable()
 	{
-		return !(hasAttributes(BOUNDARY) || hasAttributes(OUTER));
+		return !(hasAttributes(BOUNDARY) || hasAttributes(NONMANIFOLD) || hasAttributes(OUTER));
 	}
 	
 	// Section: geometrical primitives
@@ -835,11 +835,8 @@ public class OTriangle
 	public final double checkSwap3D(double minCos)
 	{
 		double invalid = -1.0;
-		//  TODO: allow swapping when a vertex is non manifold
-		if (origin().getLink() instanceof Triangle[] || destination().getLink() instanceof Triangle[])
-			return invalid;
 		// Check if there is an adjacent edge
-		if (hasAttributes(OUTER) || hasAttributes(BOUNDARY) || getAdj() == null)
+		if (hasAttributes(OUTER) || hasAttributes(BOUNDARY) || hasAttributes(NONMANIFOLD))
 			return invalid;
 		// Check for coplanarity
 		symOTri(this, work[0]);
@@ -917,7 +914,7 @@ public class OTriangle
 		 */
 		// T1 = (oda)  --> (ona)
 		// T2 = (don)  --> (dan)
-		assert !(hasAttributes(OUTER) || hasAttributes(BOUNDARY));
+		assert !(hasAttributes(OUTER) || hasAttributes(BOUNDARY) || hasAttributes(NONMANIFOLD));
 		copyOTri(this, work[0]);        // (oda)
 		symOTri(this, work[1]);         // (don)
 		symOTri(this, work[2]);         // (don)
@@ -1020,17 +1017,18 @@ public class OTriangle
 		Vertex a = apex();
 		nextOTri(this, work[0]);
 		prevOTri(this, work[1]);
-		//  TODO: allow contracting edges when a vertex is non manifold
-		if (o.getLink() instanceof Triangle[] || d.getLink() instanceof Triangle[] || a.getLink() instanceof Triangle[])
+		//  If both vertices are non-manifold, do not contract
+		//  TODO: allow contracting non-manifold edges
+		if (o.getLink() instanceof Triangle[] && d.getLink() instanceof Triangle[])
 			return false;
 		//  If both adjacent edges are on a boundary, do not contract
-		if (work[0].hasAttributes(BOUNDARY) && work[1].hasAttributes(BOUNDARY))
+		if ((work[0].hasAttributes(BOUNDARY) || work[0].hasAttributes(NONMANIFOLD)) && (work[1].hasAttributes(BOUNDARY) || work[1].hasAttributes(NONMANIFOLD)))
 			return false;
 		symOTri(this, work[1]);
 		symOTri(this, work[0]);
 		work[0].prevOTri();
 		work[1].nextOTri();
-		if (work[0].hasAttributes(BOUNDARY) && work[1].hasAttributes(BOUNDARY))
+		if ((work[0].hasAttributes(BOUNDARY) || work[0].hasAttributes(NONMANIFOLD)) && (work[1].hasAttributes(BOUNDARY) || work[1].hasAttributes(NONMANIFOLD)))
 			return false;
 		//  Loop around o to check that triangles will not be inverted
 		nextOTri(this, work[0]);
