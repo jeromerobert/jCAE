@@ -32,6 +32,7 @@ import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Stack;
 import java.util.HashSet;
 import java.util.HashMap;
@@ -318,7 +319,8 @@ public class DecimateHalfEdge
 				q3.computeQuadric3DError(q1, q2);
 				q3.optimalPlacement(v1, v2, q1, q2, placement, v3);
 				edge.copyOTriangle(ot);
-				if (ot.canContract(v3))
+				// For now, do not contract non manifold edges
+				if (edge.getAdj() instanceof HalfEdge && ot.canContract(v3))
 					break;
 				if (logger.isDebugEnabled())
 					logger.debug("Edge not contracted: "+edge);
@@ -367,7 +369,7 @@ public class DecimateHalfEdge
 				}
 				edge = edge.next();
 			}
-			HalfEdge sym = edge.sym();
+			HalfEdge sym = (HalfEdge) edge.getAdj();
 			Triangle t2 = sym.getTri();
 			if (!t2.isOuter())
 			{
@@ -421,7 +423,7 @@ public class DecimateHalfEdge
 						tree.remove(edge.notOriented());
 						assert !tree.containsValue(edge.notOriented());
 					}
-					sym = edge.sym();
+					sym = (HalfEdge) edge.getAdj();
 					for (int i = 0; i < 3; i++)
 					{
 						sym = sym.next();
@@ -437,7 +439,7 @@ public class DecimateHalfEdge
 						edge = edge.next();
 						tree.insert(edge.notOriented(), cost(edge.origin(), edge.destination(), quadricMap));
 					}
-					sym = edge.next().sym();
+					sym = (HalfEdge) edge.next().getAdj();
 					for (int i = 0; i < 2; i++)
 					{
 						sym = sym.next();

@@ -1,3 +1,8 @@
+Sun Nov 26 00:02:52 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Mesh.java (buildAdjacency): Fix adjacency
+	relations when reading non manifold meshes.
+
 Fri Nov 24 19:38:29 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/MMesh3D.java

@@ -19,6 +19,8 @@
 
 package org.jcae.mesh.amibe.ds;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 public class HalfEdge
@@ -27,7 +29,9 @@ public class HalfEdge
 	private Triangle tri;
 	private byte localNumber = 8;
 	private int attributes = 8;
-	private HalfEdge sym = null;
+	// sym is an HalfEdge for manifold edges, and an ArrayList
+	// otherwise.
+	private Object sym = null;
 	private HalfEdge next = null;
 
 	private static final int [] next3 = { 1, 2, 0 };
@@ -77,17 +81,30 @@ public class HalfEdge
 	
 	public final HalfEdge notOriented()
 	{
-		if (sym != null && sym.hashCode() < hashCode())
-			return sym;
+		if (sym != null && sym instanceof HalfEdge && sym.hashCode() < hashCode())
+			return (HalfEdge) sym;
 		return this;
 	}
 	
 	/**
-	 * Move to the symmetric edge.
+	 * Get the symmetric edge.
 	 */
-	public final HalfEdge sym()
+	public final Object getAdj()
 	{
 		return sym;
+	}
+
+	/**
+	 * Set the sym link.
+	 */
+	public final void setAdj(Object e)
+	{
+		sym = e;
+	}
+
+	private final HalfEdge sym()
+	{
+		return (HalfEdge) sym;
 	}
 
 	/**
@@ -119,7 +136,7 @@ public class HalfEdge
 	 */
 	public final HalfEdge prevOrigin()
 	{
-		return sym.next;
+		return sym().next;
 	}
 	
 	/**
@@ -128,7 +145,7 @@ public class HalfEdge
 	 */
 	public final HalfEdge nextDest()
 	{
-		return sym.prev();
+		return sym().prev();
 	}
 	
 	/**
@@ -137,7 +154,7 @@ public class HalfEdge
 	 */
 	public final HalfEdge prevDest()
 	{
-		return next.sym;
+		return next.sym();
 	}
 	
 	/**
@@ -145,7 +162,7 @@ public class HalfEdge
 	 */
 	public final HalfEdge nextApex()
 	{
-		return next.sym.next;
+		return next.sym().next;
 	}
 	
 	/**
@@ -153,7 +170,7 @@ public class HalfEdge
 	 */
 	public final HalfEdge prevApex()
 	{
-		return prev().sym.prev();
+		return prev().sym().prev();
 	}
 	
 	//  The following 3 methods change the underlying triangle.
@@ -196,14 +213,6 @@ public class HalfEdge
 		next = e;
 	}
 	
-	/**
-	 * Set the sym link.
-	 */
-	public final void setSym(HalfEdge e)
-	{
-		sym = e;
-	}
-
 	/**
 	 * Check if some attributes of this edge are set.
 	 *
@@ -423,12 +432,12 @@ public class HalfEdge
 		e[4] = this;
 		e[0] = next;
 		e[1] = next.next;
-		e[5] = sym;
-		e[2] = sym.next;
-		e[3] = sym.next.next;
+		e[5] = sym();
+		e[2] = sym().next;
+		e[3] = sym().next.next;
 		HalfEdge [] s = new HalfEdge[4];
 		for (int i = 0; i < 4; i++)
-			s[i] = e[i].sym;
+			s[i] = e[i].sym();
 		//  Clear SWAPPED flag for all edges of the 2 triangles
 		for (int i = 0; i < 6; i++)
 			e[i].clearAttributes(OTriangle.SWAPPED);
@@ -519,7 +528,7 @@ public class HalfEdge
 		}
 		while (e.destination() != d);
 		//  Replace d by n in all incident triangles
-		e = e.sym;
+		e = e.sym();
 		do
 		{
 			e.setOrigin(n);
@@ -530,10 +539,10 @@ public class HalfEdge
 		//  written instead of n.
 		e = next();             // (dV1o)
 		int attr4 = e.attributes;
-		s = e.sym;              // (V1dV4)
+		s = e.sym();            // (V1dV4)
 		e = e.next();           // (V1od)
 		int attr3 = e.attributes;
-		f = e.sym;              // (oV1V3)
+		f = e.sym();            // (oV1V3)
 		if (f != null)
 			f.glue(s);
 		else if (s != null)
@@ -558,13 +567,13 @@ public class HalfEdge
 			n.setLink(t34);
 		}
 		e = e.next();                   // (odV1)
-		e = e.sym;                      // (doV2)
+		e = e.sym();                    // (doV2)
 		e = e.next();                   // (oV2d)
 		int attr5 = e.attributes;
-		s = e.sym;                      // (V2oV5)
+		s = e.sym();                    // (V2oV5)
 		e = e.next();                   // (V2do)
 		int attr6 = e.attributes;
-		f = e.sym;                      // (dV2V6)
+		f = e.sym();                    // (dV2V6)
 		if (f != null)
 			f.glue(s);
 		else if (s != null)
@@ -590,7 +599,7 @@ public class HalfEdge
 		}
 		e = e.next();                   // (doV2)
 		// Must be called before T2 is removed
-		s = e.sym;
+		s = e.sym();
 		e.clearAttributes(OTriangle.MARKED);
 		e.pushAttributes();
 		// Remove T2
@@ -607,7 +616,24 @@ public class HalfEdge
 		r += "Triangle: "+tri.hashCode();
 		r += "\nLocal number: "+localNumber;
 		if (sym != null)
-			r += "\nSym: "+sym.tri.hashCode()+"["+sym.localNumber+"]";
+		{
+			if (sym instanceof HalfEdge)
+			{
+				HalfEdge e = (HalfEdge) sym;
+				r += "\nSym: "+e.tri.hashCode()+"["+e.localNumber+"]";
+			}
+			else
+			{
+				ArrayList list = (ArrayList) sym;
+				r += "\nSym: [";
+				for (Iterator it = list.iterator(); it.hasNext(); )
+				{
+					HalfEdge e = (HalfEdge) it.next();
+					r+= ","+e.tri.hashCode()+"["+e.localNumber+"]";
+				}
+				r += "]";
+			}
+		}
 		r += "\nAttributes: "+Integer.toHexString(attributes);
 		r += "\nVertices:";
 		r += "\n  Origin: "+origin();

@@ -835,6 +835,9 @@ public class OTriangle
 	public final double checkSwap3D(double minCos)
 	{
 		double invalid = -1.0;
+		//  TODO: allow swapping when a vertex is non manifold
+		if (origin().getLink() instanceof Triangle[] || destination().getLink() instanceof Triangle[])
+			return invalid;
 		// Check if there is an adjacent edge
 		if (hasAttributes(OUTER) || hasAttributes(BOUNDARY) || getAdj() == null)
 			return invalid;
@@ -998,7 +1001,7 @@ public class OTriangle
 	public final boolean canContract(Vertex n)
 	{
 		if (!checkInversion(n))
-				return false;
+			return false;
 		
 		//  Topology check
 		//  TODO: normally this check could be removed, but the
@@ -1017,9 +1020,12 @@ public class OTriangle
 		Vertex a = apex();
 		nextOTri(this, work[0]);
 		prevOTri(this, work[1]);
+		//  TODO: allow contracting edges when a vertex is non manifold
+		if (a.getLink() instanceof Triangle[])
+			return false;
 		//  If both adjacent edges are on a boundary, do not contract
 		if (work[0].hasAttributes(BOUNDARY) && work[1].hasAttributes(BOUNDARY))
-				return false;
+			return false;
 		symOTri(this, work[1]);
 		symOTri(this, work[0]);
 		work[0].prevOTri();
@@ -1045,6 +1051,9 @@ public class OTriangle
 				if (Matrix3D.prodSca(tempD1, nu) >= - area)
 					return false;
 			}
+			//  TODO: allow contracting edges when a vertex is non manifold
+			if (work[0].origin().getLink() instanceof Triangle[] || work[0].destination().getLink() instanceof Triangle[])
+				return false;
 			work[0].nextOTriApexLoop();
 		}
 		while (work[0].origin() != d);

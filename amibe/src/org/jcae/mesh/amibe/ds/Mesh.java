@@ -22,6 +22,7 @@ package org.jcae.mesh.amibe.ds;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import java.util.Collection;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -178,10 +179,21 @@ public class Mesh
 			for (int i = 0; i < 3; i++)
 			{
 				e = e.next();
-				HalfEdge s = e.sym();
-				if (s != null && s.sym() == e)
-					s.setSym(null);
-				e.setSym(null);
+				if (e.getAdj() == null)
+				{
+				}
+				else if (e.getAdj() instanceof HalfEdge)
+				{
+					HalfEdge s = (HalfEdge) e.getAdj();
+					if (s.getAdj() == e)
+						s.setAdj(null);
+				}
+				else
+				{
+					ArrayList adj = (ArrayList) e.getAdj();
+					adj.clear();
+				}
+				e.setAdj(null);
 				last.setNext(null);
 				last = e;
 			}
@@ -246,15 +258,19 @@ public class Mesh
 				list.add(t);
 			}
 		}
-		//  2. For each pair of vertices, count adjacent triangles.
-		//     If there is only one adjacent triangle, this edge
-		//     is tagged as a boundary.
-		//     If there are 2 adjacent triangles, they are connected
-		//     together.  If there are more than 2 adjacent triangles,
-		//     this edge is non manifold.
+		//  2. Connect all edges starting from v
 		logger.debug("Connect triangles");
 		for (int i = 0; i < vertices.length; i++)
 			checkNeighbours(vertices[i], tVertList);
+		//  tVertList is no more needed, remove all references
+		for (int i = 0; i < vertices.length; i++)
+		{
+			ArrayList list = (ArrayList) tVertList.get(vertices[i]);
+			list.clear();
+			tVertList.put(vertices[i], null);
+		}
+		tVertList.clear();
+		//  3. Mark boundary edges and bind them to virtual triangles.
 		OTriangle ot = new OTriangle();
 		OTriangle sym = new OTriangle();
 		ArrayList newTri = new ArrayList();
@@ -278,7 +294,7 @@ public class Mesh
 			}
 		}
 		
-		//  3. Find the list of vertices which are on mesh boundary
+		//  4. Find the list of vertices which are on mesh boundary
 		logger.debug("Build the list of boundary nodes");
 		HashSet bndNodes = new HashSet();
 		maxLabel = 0;
@@ -309,7 +325,7 @@ public class Mesh
 				}
 			}
 		}
-		//  4. Build links for non-manifold vertices
+		//  5. Build links for non-manifold vertices
 		logger.debug("Compute links for non-manifold vertices");
 		Vertex [] v = new Vertex[2];
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
@@ -327,36 +343,27 @@ public class Mesh
 					{
 						if (v[j].getLink() instanceof Triangle)
 						{
-							ArrayList link = new ArrayList();
+							LinkedHashSet link = new LinkedHashSet();
 							link.add(v[j].getLink());
 							v[j].setLink(link);
 						}
 					}
 					Triangle first = ot.tri;
-					do
+					ArrayList adj = (ArrayList) ot.getAdj();
+					for (Iterator it2 = adj.iterator(); it2.hasNext(); )
 					{
-						ot.symOTri();
-						assert ot.hasAttributes(OTriangle.NONMANIFOLD);
+						Triangle t2 = (Triangle) it2.next();
+						it2.next();
 						for (int j = 0; j < 2; j++)
 						{
-							ArrayList link = (ArrayList) v[j].getLink();
-							link.add(ot.tri);
+							LinkedHashSet link = (LinkedHashSet) v[j].getLink();
+							link.add(t2);
 						}
-					} while (ot.tri != first);
-				}
-			}
-			found[0] |= found[3];
-			for (int i = 0; i < 3; i++)
-			{
-				ot.nextOTri();
-				if (found[i])
-				{
-					bndNodes.add(ot.origin());
-					maxLabel = Math.max(maxLabel, ot.origin().getRef());
+					}
 				}
 			}
 		}
-		// Replace ArrayList by Triangle[]
+		// Replace LinkedHashSet by Triangle[]
 		int nrNM = 0;
 		int nrFE = 0;
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
@@ -365,10 +372,10 @@ public class Mesh
 			ot.bind(t);
 			for (int i = 0; i < 3; i++)
 			{
-				if (t.vertex[i].getLink() instanceof ArrayList)
+				if (t.vertex[i].getLink() instanceof LinkedHashSet)
 				{
 					nrNM++;
-					ArrayList link = (ArrayList) t.vertex[i].getLink();
+					LinkedHashSet link = (LinkedHashSet) t.vertex[i].getLink();
 					Triangle [] list = new Triangle[link.size()];
 					int ind = 0;
 					for (Iterator it2 = link.iterator(); it2.hasNext(); )
@@ -399,9 +406,7 @@ public class Mesh
 			if (bndNodes.contains(vertices[i]))
 				continue;
 			int label = vertices[i].getRef();
-			int nrVertNeigh = vertices[i].getNeighboursNodes().size();
-			int nrTriNeigh = ((ArrayList) tVertList.get(vertices[i])).size();
-			if (nrVertNeigh != nrTriNeigh)
+			if (vertices[i].getLink() instanceof Triangle[])
 			{
 				nrJunctionPoints++;
 				if (label == 0)
@@ -409,9 +414,8 @@ public class Mesh
 					maxLabel++;
 					vertices[i].setRef(maxLabel);
 				}
-				continue;
 			}
-			if (0 != label)
+			else if (0 != label)
 			{
 				//  Check for ridges
 				ot.bind((Triangle) vertices[i].getLink());
@@ -423,6 +427,7 @@ public class Mesh
 			logger.info("Found "+nrJunctionPoints+" non-manifold vertices");
 		// Add outer triangles
 		triangleList.addAll(newTri);
+		assert isValid();
 	}
 	
 	private static final void checkNeighbours(Vertex v, HashMap tVertList)
@@ -430,17 +435,13 @@ public class Mesh
 		OTriangle ot = new OTriangle();
 		OTriangle sym = new OTriangle();
 		OTriangle ot2 = new OTriangle();
-		boolean nonManifold = false;
-		//  Mark adjacent triangles
-		ArrayList list = (ArrayList) tVertList.get(v);
-		Triangle.List tList = new Triangle.List();
-		for (Iterator it = list.iterator(); it.hasNext(); )
-		{
-			Triangle t = (Triangle) it.next();
-			tList.add(t);
-		}
-		//  Find all adjacent triangles
-		for (Iterator it = list.iterator(); it.hasNext(); )
+		//  Mark all triangles having v as vertex
+		ArrayList neighTriList = (ArrayList) tVertList.get(v);
+		Triangle.List markedTri = new Triangle.List();
+		for (Iterator it = neighTriList.iterator(); it.hasNext(); )
+			markedTri.add((Triangle) it.next());
+		//  Loop on all edges incident to v
+		for (Iterator it = neighTriList.iterator(); it.hasNext(); )
 		{
 			Triangle t = (Triangle) it.next();
 			ot.bind(t);
@@ -449,90 +450,74 @@ public class Mesh
 			else if (ot.apex() == v)
 				ot.prevOTri();
 			assert ot.origin() == v;
+			// Skip this edge if adjacency relations already exist, 
 			if (ot.getAdj() != null)
 				continue;
 			Vertex v2 = ot.destination();
-			ArrayList list2 = (ArrayList) tVertList.get(v2);
-			int cnt = 0;
-			for (Iterator it2 = list2.iterator(); it2.hasNext(); )
+			// Edge (v,v2) has not yet been processed.
+			// List of triangles incident to v2.
+			ArrayList neighTriV2List = (ArrayList) tVertList.get(v2);
+			boolean manifold = true;
+			ArrayList adj = null;
+			for (Iterator it2 = neighTriV2List.iterator(); it2.hasNext(); )
 			{
 				Triangle t2 = (Triangle) it2.next();
-				if (t == t2)
+				if (t == t2 || !markedTri.contains(t2))
 					continue;
-				if (tList.contains(t2))
+				ot2.bind(t2);
+				if (ot2.destination() == v2)
+					ot2.nextOTri();
+				else if (ot2.apex() == v2)
+					ot2.prevOTri();
+				if (manifold && ot2.destination() == v && ot.getAdj() == null && ot2.getAdj() == null && (!ot2.hasAttributes(OTriangle.NONMANIFOLD)))
 				{
-					ot2.bind(t2);
-					if (ot2.destination() == v2)
-						ot2.nextOTri();
-					else if (ot2.apex() == v2)
-						ot2.prevOTri();
-					if (ot2.destination() != v)
-					{
-						ot2.prevOTri();
-						if (cnt == 0)
-						{
-							// Invert orientation of t2
-							// and all its neighbours
-							ot2.invertOrientationFace(true);
-						}
-					}
-					if (cnt == 0 && (!ot2.hasAttributes(OTriangle.NONMANIFOLD)))
-					{
-						ot.glue(ot2);
-					}
-					else
-					{
-						//  This edge is non manifold.  Find ot2 with endpoints
-						//  being v and v2.
-						//  Collect all adjacent triangles into an ArrayList.
-						ArrayList adj = null;
-						if (ot.getAdj() instanceof Triangle)
-						{
-							OTriangle.symOTri(ot, sym);
-							adj = new ArrayList();
-							adj.add(t);
-							adj.add(new Integer(ot.getLocalNumber()));
-							adj.add(sym.tri);
-							adj.add(new Integer(sym.getLocalNumber()));
-							ot.setAttributes(OTriangle.NONMANIFOLD);
-							sym.setAttributes(OTriangle.NONMANIFOLD);
-							ot.setAdj(adj);
-							sym.setAdj(adj);
-						}
-						else
-							adj = (ArrayList) ot.getAdj();
-						adj.add(t2);
-						adj.add(new Integer(ot2.getLocalNumber()));
-						ot2.setAdj(adj);
-						ot2.setAttributes(OTriangle.NONMANIFOLD);
-						if (logger.isDebugEnabled())
-							logger.debug("Non-manifold: "+v+" "+v2);
-					}
-					cnt++;
+					// This edge seems to be manifold.
+					// It may become non manifold later when
+					// other neighbours are processed.
+					ot.glue(ot2);
+					continue;
 				}
-			}
-			if (cnt > 1)
-			{
-				// Non manifold edge.
-				// Update links
-				ArrayList adj = (ArrayList) ot.getAdj();
-				for (int i = 0; i < 2; i++)
-					adj.add(adj.get(i));
-				Iterator it2 = adj.iterator();
-				Triangle t2 = (Triangle) it2.next();
-				Integer i2 = (Integer) it2.next();
-				while(it2.hasNext())
+				manifold = false;
+				if (ot2.destination() != v)
+					ot2.prevOTri();
+				// We are sure now that ot2 == (v,v2) or (v2,v)
+				assert (v == ot2.origin() && v2 == ot2.destination()) || (v2 == ot2.origin() && v == ot2.destination());
+				//  Collect all adjacent triangles into an ArrayList.
+				if (adj == null)
+					adj = new ArrayList();
+				if (ot.getAdj() == null)
 				{
-					Triangle told = t2;
-					Integer iold = i2;
-					t2 = (Triangle) it2.next();
-					i2 = (Integer) it2.next();
-					told.glue1(iold.intValue(), t2, i2.intValue());
+					// All adjacent edges share the same ArrayList,
+					// thus put ot in it.
+					adj.add(t);
+					adj.add(new Integer(ot.getLocalNumber()));
+					ot.setAttributes(OTriangle.NONMANIFOLD);
+					ot.setAdj(adj);
 				}
+				else if (ot.getAdj() instanceof Triangle)
+				{
+					OTriangle.symOTri(ot, sym);
+					assert sym.getAdj() == t;
+					assert sym.tri.getAdjLocalNumber(sym.getLocalNumber()) == ot.getLocalNumber();
+					adj.add(t);
+					adj.add(new Integer(ot.getLocalNumber()));
+					adj.add(sym.tri);
+					adj.add(new Integer(sym.getLocalNumber()));
+					ot.setAttributes(OTriangle.NONMANIFOLD);
+					sym.setAttributes(OTriangle.NONMANIFOLD);
+					ot.setAdj(adj);
+					sym.setAdj(adj);
+				}
+				adj.add(t2);
+				adj.add(new Integer(ot2.getLocalNumber()));
+				ot2.setAttributes(OTriangle.NONMANIFOLD);
+				ot2.setAdj(adj);
+				if (logger.isDebugEnabled())
+					logger.debug("Non-manifold: "+v+" "+v2);
 			}
 		}
 		//  Unmark adjacent triangles
-		tList.clear();
+		markedTri.clear();
 	}
 	
 	private static final boolean checkRidges(Vertex v, double cosMinAngle, OTriangle ot)
@@ -621,19 +606,46 @@ public class Mesh
 				assert ot.apex() == e.apex();
 				if (ot.getAdj() == null)
 					continue;
-				if (e.sym() != null)
+				if (e.getAdj() != null)
 					continue;
-				OTriangle.symOTri(ot, sym);
-				t2 = sym.getTri();
-				HalfEdge f = t2.getHalfEdge();
-				for (int j = sym.getLocalNumber(); j > 0; j--)
-					f = f.next();
-				assert e.sym() == null: e;
-				assert f.sym() == null: f;
-				assert sym.origin() == f.origin();
-				assert sym.destination() == f.destination();
-				assert sym.apex() == f.apex();
-				e.glue(f);
+				if (ot.getAdj() instanceof Triangle)
+				{
+					OTriangle.symOTri(ot, sym);
+					t2 = sym.getTri();
+					assert sym.getAdj() == t : ""+t+" "+t2;
+					assert t2.getAdjLocalNumber(sym.getLocalNumber()) == ot.getLocalNumber();
+					HalfEdge f = t2.getHalfEdge();
+					for (int j = sym.getLocalNumber(); j > 0; j--)
+						f = f.next();
+					assert sym.origin() == f.origin();
+					assert sym.destination() == f.destination();
+					assert sym.apex() == f.apex();
+					assert f.getAdj() == null: f;
+					e.glue(f);
+				}
+				else
+				{
+					ArrayList adj = (ArrayList) ot.getAdj();
+					ArrayList edgeAdj = new ArrayList();
+					// Note: ot is listed in adj, no need to add e
+					// explicitly in edgeAdj.
+					for (Iterator it2 = adj.iterator(); it2.hasNext(); )
+					{
+						t2 = (Triangle) it2.next();
+						int i2 = ((Integer) it2.next()).intValue();
+						sym.bind(t2, i2);
+						assert sym.getAdj() == adj;
+						HalfEdge f = t2.getHalfEdge();
+						for (; i2 > 0; i2--)
+							f = f.next();
+						assert sym.origin() == f.origin();
+						assert sym.destination() == f.destination();
+						assert sym.apex() == f.apex();
+						assert f.getAdj() == null;
+						edgeAdj.add(f);
+						f.setAdj(edgeAdj);
+					}
+				}
 			}
 		}
 		logger.debug("End building edges");
@@ -825,14 +837,14 @@ public class Mesh
 			Triangle t = (Triangle) it.next();
 			if (t.vertex[0] == t.vertex[1] || t.vertex[1] == t.vertex[2] || t.vertex[2] == t.vertex[0])
 			{
-				logger.debug("Duplicate vertices: "+t);
+				logger.error("Duplicate vertices: "+t);
 				return false;
 			}
 			if (t.vertex[0] == Vertex.outer || t.vertex[1] == Vertex.outer || t.vertex[2] == Vertex.outer)
 			{
 				if (constrained && !t.isOuter())
 				{
-					logger.debug("Triangle should be outer: "+t);
+					logger.error("Triangle should be outer: "+t);
 					return false;
 				}
 			}
@@ -846,7 +858,7 @@ public class Mesh
 					Triangle t2 = (Triangle) v.getLink();
 					if (t2.vertex[0] != v && t2.vertex[1] != v && t2.vertex[2] != v)
 					{
-						logger.debug("Vertex "+v+" linked to "+t2);
+						logger.error("Vertex "+v+" linked to "+t2);
 						return false;
 					}
 				}
@@ -858,40 +870,61 @@ public class Mesh
 				ot.nextOTri();
 				if (isOuter != ot.hasAttributes(OTriangle.OUTER))
 				{
-					logger.debug("Inconsistent outer state: "+ot);
+					logger.error("Inconsistent outer state: "+ot);
 					return false;
 				}
-				if (ot.getAdj() != null)
+				if (ot.getAdj() == null)
+					continue;
+				if (ot.getAdj() instanceof Triangle)
 				{
 					v1 = ot.origin();
 					v2 = ot.destination();
 					OTriangle.symOTri(ot, sym);
 					if (sym.origin() != v2 || sym.destination() != v1)
 					{
-						logger.debug("Wrong adjacency relation: ");
-						logger.debug(" "+ot);
-						logger.debug(" "+sym);
+						logger.error("Vertex mismatch in adjacency relation: ");
+						logger.error(" "+ot);
+						logger.error(" "+sym);
+						return false;
+					}
+					if (sym.getAdj() == null || !(sym.getAdj() instanceof Triangle))
+					{
+						logger.error("Wrong adjacency relation: ");
+						logger.error(" "+ot);
+						logger.error(" "+sym);
+						return false;
+					}
+					if (sym.getAdj() != t || sym.getTri().getAdjLocalNumber(sym.getLocalNumber()) != ot.getLocalNumber())
+					{
+						logger.error("Wrong adjacency relation: ");
+						logger.error(" adj1: "+ot);
+						logger.error(" adj2: "+sym);
+						logger.error(""+sym.getAdj().getClass().getName());
 						return false;
 					}
 					if ((sym.hasAttributes(OTriangle.BOUNDARY) && !ot.hasAttributes(OTriangle.BOUNDARY)) || (!sym.hasAttributes(OTriangle.BOUNDARY) && ot.hasAttributes(OTriangle.BOUNDARY)))
 					{
-						logger.debug("Wrong boundary relation");
-						logger.debug(" "+ot);
-						logger.debug(" "+sym);
+						logger.error("Inconsistent boundary flag");
+						logger.error(" "+ot);
+						logger.error(" "+sym);
 						return false;
 					}
-					sym.symOTri();
-					if (sym.origin() != v1 || sym.destination() != v2)
+				}
+				else
+				{
+					// Check that all edges share the same adjacency
+					// list.
+					ArrayList adj = (ArrayList) ot.getAdj();
+					for (Iterator it2 = adj.iterator(); it2.hasNext(); )
 					{
-						logger.debug("Wrong adjacency relation");
-						logger.debug(" "+ot);
-						logger.debug(" "+sym);
-						return false;
-					}
-					if (ot.getTri() != t)
-					{
-						logger.debug("Wrong adjacency relation");
-						return false;
+						Triangle t2 = (Triangle) it2.next();
+						int i2 = ((Integer) it2.next()).intValue();
+						sym.bind(t2, i2);
+						if (sym.getAdj() != adj)
+						{
+							logger.error("Multiple edges: Wrong adjacency relation");
+							return false;
+						}
 					}
 				}
 			}

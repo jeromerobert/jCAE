@@ -770,7 +770,18 @@ public class Vertex
 			r += " ref1d: "+ref1d;
 		r += " hash: "+hashCode();
 		if (link != null)
-			r += " link: "+link.hashCode();
+		{
+			if (link instanceof Triangle)
+				r += " link: "+link.hashCode();
+			else
+			{
+				Triangle [] list = (Triangle []) link;
+				r += " link: ["+list[0].hashCode();
+				for (int i = 1; i < list.length; i++)
+					r += ","+list[i].hashCode();
+				r += "]";
+			}
+		}
 		return r;
 	}
 	
