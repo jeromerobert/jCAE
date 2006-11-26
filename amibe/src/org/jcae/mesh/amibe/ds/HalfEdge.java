@@ -434,7 +434,7 @@ public class HalfEdge
 		 */
 		// T1 = (oda)  --> (ona)
 		// T2 = (don)  --> (dan)
-		assert !(hasAttributes(OTriangle.OUTER) || hasAttributes(OTriangle.BOUNDARY));
+		assert !(hasAttributes(OTriangle.OUTER) || hasAttributes(OTriangle.BOUNDARY) || hasAttributes(OTriangle.NONMANIFOLD));
 		HalfEdge [] e = new HalfEdge[6];
 		e[4] = this;
 		e[0] = next;
