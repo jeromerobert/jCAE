@@ -141,9 +141,12 @@ public class Triangle
  		vertex[0] = a;
  		vertex[1] = b;
  		vertex[2] = c;
-		vertex[0].setLink(this);
-		vertex[1].setLink(this);
-		vertex[2].setLink(this);
+		if (vertex[0].getLink() == null)
+			vertex[0].setLink(this);
+		if (vertex[1].getLink() == null)
+			vertex[1].setLink(this);
+		if (vertex[2].getLink() == null)
+			vertex[2].setLink(this);
 	}
 	
 	public Triangle(Vertex [] v)
