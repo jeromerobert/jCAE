@@ -33,8 +33,9 @@ import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.File;
 import java.util.Stack;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
 
@@ -117,51 +118,28 @@ public class DecimateHalfEdge
 	 *
 	 * @param m  the <code>Mesh</code> instance to refine.
 	 * @param tol  maximal allowed error
-	 */
-	public DecimateHalfEdge(Mesh m, double tol)
-	{
-		mesh = m;
-		tolerance = tol * tol;
-	}
-	
-	/**
-	 * Creates a <code>DecimateHalfEdge</code> instance.
-	 *
-	 * @param m  the <code>Mesh</code> instance to refine.
-	 * @param tol  maximal allowed error
 	 * @param p  placement of the new point. Legitimate values are <code>POS_VERTEX</code> (at a vertex location), <code>POS_MIDDLE</code> (at the middle of the contracted edge), <code>POS_EDGE</code> (optimal placement on the contracted edge, this is the default) and <code>POS_OPTIMAL</code> (optimal placement).
 	 */
-	public DecimateHalfEdge(Mesh m, double tol, int p)
+	public DecimateHalfEdge(Mesh m, Map options)
 	{
 		mesh = m;
-		tolerance = tol * tol;
-		placement = p;
-	}
-	
-	/**
-	 * Creates a <code>DecimateHalfEdge</code> instance.
-	 *
-	 * @param m  the <code>Mesh</code> instance to refine.
-	 * @param n  the desired number of triangles
-	 */
-	public DecimateHalfEdge(Mesh m, int n)
-	{
-		mesh = m;
-		nrFinal = n;
-	}
-	
-	/**
-	 * Creates a <code>DecimateHalfEdge</code> instance.
-	 *
-	 * @param m  the <code>Mesh</code> instance to refine.
-	 * @param n  the desired number of triangles
-	 * @param p  placement of the new point. Legitimate values are <code>POS_VERTEX</code> (at a vertex location), <code>POS_MIDDLE</code> (at the middle of the contracted edge), <code>POS_EDGE</code> (optimal placement on the contracted edge, this is the default) and <code>POS_OPTIMAL</code> (optimal placement).
-	 */
-	public DecimateHalfEdge(Mesh m, int n, int p)
-	{
-		mesh = m;
-		nrFinal = n;
-		placement = p;
+		for (Iterator it = options.entrySet().iterator(); it.hasNext(); )
+		{
+			Map.Entry opt = (Map.Entry) it.next();
+			String key = (String) opt.getKey();
+			String val = (String) opt.getValue();
+			if (key.equals("size"))
+			{
+				double sizeTarget = new Double(val).doubleValue();
+				tolerance = sizeTarget * sizeTarget;
+			}
+			else if (key.equals("placement"))
+				placement = Integer.valueOf(val).intValue();
+			else if (key.equals("maxtriangles"))
+				nrFinal = Integer.valueOf(val).intValue();
+			else
+				throw new RuntimeException("Unknown option: "+key);
+		}
 	}
 	
 	/**
@@ -172,8 +150,8 @@ public class DecimateHalfEdge
 		logger.info("Add HalfEdge data structure");
 		mesh.buildEdges();
 		logger.info("Run DecimateHalfEdge");
-		// Store triangles in an HashSet to speed up removal.
-		HashSet newList = new HashSet(mesh.getTriangles());
+		// Store triangles in an LinkedHashSet to speed up removal.
+		LinkedHashSet newList = new LinkedHashSet(mesh.getTriangles());
 		mesh.setTrianglesList(newList);
 		int roughNrNodes = mesh.getTriangles().size()/2;
 		HashMap quadricMap = new HashMap(roughNrNodes);
@@ -496,16 +474,19 @@ public class DecimateHalfEdge
 	 */
 	public static void main(String[] args)
 	{
-		Mesh mesh=MeshReader.readObject3D(args[0], "jcae3d", -1);
+		Map options = new HashMap();
 		if(args[1].equals("-n"))
-			new DecimateHalfEdge(mesh, Integer.parseInt(args[2])).compute();
+			options.put("maxtriangles", args[2]);
 		else if(args[1].equals("-t"))
-			new DecimateHalfEdge(mesh, Double.parseDouble(args[2])).compute();
+			options.put("size", args[2]);
 		else
 		{
 			System.out.println("<xmlDir> <-t telerance | -n triangle> <brepFile> <output>");
 			return;
 		}
+		logger.info("Load geometry file");
+		Mesh mesh=MeshReader.readObject3D(args[0], "jcae3d", -1);
+		new DecimateHalfEdge(mesh, options).compute();
 		File brepFile=new File(args[4]);
 		MeshWriter.writeObject3D(mesh, args[4], "jcae3d", brepFile.getParent(), brepFile.getName(),1);
 	}
