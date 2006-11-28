@@ -409,6 +409,17 @@ public class Triangle
 		return r;
 	}
 	
+	private static String showHalfEdge(HalfEdge e)
+	{
+		String ret = ""+e.hashCode()+"(";
+		if (e.sym() == null)
+			ret += "null";
+		else
+			ret += e.sym().hashCode();
+		ret += ")";
+		return ret;
+	}
+
 	public String toString()
 	{
 		String r = "";
@@ -423,7 +434,7 @@ public class Triangle
 		if (listNext != null)
 			r += "\nLink next: "+listNext.hashCode();
 		if (hedge != null)
-			r += "\nHalfedge: "+hedge.hashCode()+" "+hedge.next().hashCode()+" "+hedge.next().next().hashCode();
+			r += "\nHalfedge: "+showHalfEdge(hedge)+" "+showHalfEdge(hedge.next())+" "+showHalfEdge(hedge.next().next());
 		return r;
 	}
 

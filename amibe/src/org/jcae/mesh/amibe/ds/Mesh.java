@@ -892,9 +892,12 @@ public class Mesh
 			}
 			ot.bind(t);
 			boolean isOuter = ot.hasAttributes(OTriangle.OUTER);
+			HalfEdge e = t.getHalfEdge();
 			for (int i = 0; i < 3; i++)
 			{
 				ot.nextOTri();
+				if (e != null)
+					e = e.next();
 				if (isOuter != ot.hasAttributes(OTriangle.OUTER))
 				{
 					logger.error("Inconsistent outer state: "+ot);
@@ -935,6 +938,18 @@ public class Mesh
 						logger.error(" "+ot);
 						logger.error(" "+sym);
 						return false;
+					}
+					if (e != null && e.getAdj() != null)
+					{
+						if (e.sym().getTri() != sym.getTri() || e.sym().getLocalNumber() != sym.getLocalNumber())
+						{
+							logger.error("Inconsistent half-edges");
+							logger.error(" "+ot);
+							logger.error(" "+e);
+							logger.error(" "+sym);
+							logger.error(" "+e.sym());
+							return false;
+						}
 					}
 				}
 				else
