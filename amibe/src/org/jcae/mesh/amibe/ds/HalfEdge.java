@@ -617,6 +617,98 @@ public class HalfEdge
 		m.remove(s.tri);
 	}
 	
+	/**
+	 * Split an edge.  This is the opposite of contract.
+	 *
+	 * @param n the resulting vertex
+	 */
+	public final void split(Mesh m, Vertex n)
+	{
+		/*
+		 *            V1                             V1
+		 *            /'\                            /|\
+		 *          /     \                        /  |  \
+		 *        /      h1 \                    /    |    \
+		 *      /             \                /    n1|   h1 \
+		 *    /       t1        \            /   t1   |  t3    \
+		 * o +-------------------+ d ---> o +---------+---------+ d
+		 *    \       t2        /            \   t2   |  t4    /
+		 *      \             /                \    n2|   h2 /
+		 *        \      h2 /                    \    |    /
+		 *          \     /                        \  |  /
+		 *            \,/                            \|/
+		 *            V2                             V2
+		 */
+		HalfEdge h1 = next();        // (dV1o)
+		HalfEdge h2 = sym().prev();  // (v2do)
+		OTriangle ot = new OTriangle();
+		copyOTriangle(ot);
+		Triangle t1 = ot.getTri();
+		ot.symOTri();                // (dov2)
+		Triangle t2 = ot.getTri();
+		ot.symOTri();                // (odv1)
+		ot.split(m, n);              // (onv1)
+		// HalfEdges have to be updated on 4 triangles.
+		t1 = ot.getTri();
+		HalfEdge n1 = new HalfEdge(t1, (byte) next3[ot.getLocalNumber()], (byte) 0);
+		n1.pullAttributes();
+		n1.next = h1.next;
+		assert h1.next.next.next == h1;
+		h1.next.next.next = n1;
+		if (t1.getHalfEdge() == h1)
+			t1.setHalfEdge(n1);
+		ot.symOTri();                // (nov2)
+		t2 = ot.getTri();
+		HalfEdge n2 = new HalfEdge(t2, (byte) prev3[ot.getLocalNumber()], (byte) 0);
+		n2.pullAttributes();
+		n2.next = h2.next;
+		assert h2.next.next.next == h2;
+		h2.next.next.next = n2;
+		if (t2.getHalfEdge() == h2)
+			t2.setHalfEdge(n2);
+		ot.symOTri();                // (onv1)
+		HalfEdge [] e = new HalfEdge[3];
+		ot.prevOTriDest();           // (v1nd)
+		Triangle t3 = ot.getTri();
+		h1.tri = t3;
+		for (int i = 0; i < 3; i++)
+		{
+			if (i != h1.localNumber)
+			{
+				e[i] = new HalfEdge(t3, (byte) i, (byte) 0);
+				e[i].pullAttributes();
+			}
+		}
+		e[h1.localNumber] = h1;
+		h1.pullAttributes();
+		h1.next = e[next3[h1.localNumber]];
+		e[next3[h1.localNumber]].next = e[prev3[h1.localNumber]];
+		e[prev3[h1.localNumber]].next = h1;
+		h1.next.glue(n1);
+		t3.setHalfEdge(e[0]);
+
+		ot.prevOTriDest();           // (dnv2)
+		Triangle t4 = ot.getTri();
+		h2.tri = t4;
+		for (int i = 0; i < 3; i++)
+		{
+			if (i != h2.localNumber)
+			{
+				e[i] = new HalfEdge(t4, (byte) i, (byte) 0);
+				e[i].pullAttributes();
+			}
+		}
+		e[h2.localNumber] = h2;
+		h2.pullAttributes();
+		h2.next = e[next3[h2.localNumber]];
+		e[next3[h2.localNumber]].next = e[prev3[h2.localNumber]];
+		e[prev3[h2.localNumber]].next = h2;
+		h2.next.next.glue(n2);
+		t4.setHalfEdge(e[0]);
+		h2.next.glue(h1.next.next);
+		n2.next.glue(n1.next.next);
+	}
+	
 	public String toString()
 	{
 		String r = "hashCode: "+hashCode();;

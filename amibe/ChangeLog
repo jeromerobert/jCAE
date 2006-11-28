@@ -3,6 +3,7 @@ Tue Nov 28 13:27:28 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/amibe/ds/Triangle.java: In Triangle(Vertex [] v)
 	constructor, do not call Vertex.setLink(), let the caller handle
 	Vertex links.
+	* src/org/jcae/mesh/amibe/ds/HalfEdge.java: New split() method.
 
 Mon Nov 27 15:58:46 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
