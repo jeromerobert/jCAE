@@ -27,14 +27,12 @@ import org.jcae.mesh.amibe.ds.OTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Quadric3DError;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
-import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.File;
-import java.util.Stack;
 import java.util.LinkedHashSet;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
 
@@ -103,14 +101,16 @@ import org.apache.log4j.Logger;
  *       <a href="http://www.lis.inpg.fr/pages_perso/attali/DEA-IVR/PAPERS/frey00.ps">About Surface Remeshing</a>.</li>
  * </ol>
  */
-public class DecimateHalfEdge
+public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 {
 	private static Logger logger=Logger.getLogger(DecimateHalfEdge.class);
-	private Mesh mesh;
-	// 0.0 is not a valid value because it is a normalization factor.
-	private double tolerance = 1.0;
-	private int nrFinal = 0;
 	private int placement = Quadric3DError.POS_EDGE;
+	private HashMap quadricMap = null;
+	private OTriangle ot = new OTriangle();
+	private Vertex v1 = null, v2 = null;
+	private Quadric3DError q1 = null, q2 = null;
+	private Vertex v3 = Vertex.valueOf(0.0, 0.0, 0.0);
+	private Quadric3DError q3 = new Quadric3DError();
 	
 	/**
 	 * Creates a <code>DecimateHalfEdge</code> instance.
@@ -121,7 +121,7 @@ public class DecimateHalfEdge
 	 */
 	public DecimateHalfEdge(Mesh m, Map options)
 	{
-		mesh = m;
+		super(m, options);
 		for (Iterator it = options.entrySet().iterator(); it.hasNext(); )
 		{
 			Map.Entry opt = (Map.Entry) it.next();
@@ -141,26 +141,23 @@ public class DecimateHalfEdge
 		}
 	}
 	
-	/**
-	 * Contract all edges with the given error.
-	 */
-	public void compute()
+	public Logger thisLogger()
 	{
-		logger.info("Add HalfEdge data structure");
-		mesh.buildEdges();
-		logger.info("Run DecimateHalfEdge");
-		// Store triangles in an LinkedHashSet to speed up removal.
+		return logger;
+	}
+
+	public void preProcessAllHalfEdges()
+	{
+		// Store triangles in a LinkedHashSet to speed up removal.
 		LinkedHashSet newList = new LinkedHashSet(mesh.getTriangles());
 		mesh.setTrianglesList(newList);
 		int roughNrNodes = mesh.getTriangles().size()/2;
-		HashMap quadricMap = new HashMap(roughNrNodes);
-		int nrTriangles = 0;
+		quadricMap = new HashMap(roughNrNodes);
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
 			if (f.isOuter())
 				continue;
-			nrTriangles++;
 			for (int i = 0; i < 3; i++)
 			{
 				Vertex n = f.vertex[i];
@@ -169,7 +166,6 @@ public class DecimateHalfEdge
 			}
 		}
 		// Compute quadrics
-		PAVLSortedTree tree = new PAVLSortedTree();
 		double [] vect1 = new double[3];
 		double [] vect2 = new double[3];
 		double [] normal = new double[3];
@@ -234,209 +230,111 @@ public class DecimateHalfEdge
 				}
 			}
 		}
-		computeTree(tree, quadricMap);
-		contractAllVertices(tree, nrTriangles, quadricMap);
 	}
-	
-	private void computeTree(PAVLSortedTree tree, HashMap quadricMap)
+
+	public double cost(HalfEdge e)
 	{
-		//  Compute edge cost
-		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
+		Vertex o = e.origin();
+		Vertex d = e.destination();
+		Quadric3DError q1 = (Quadric3DError) quadricMap.get(o);
+		assert q1 != null : o;
+		Quadric3DError q2 = (Quadric3DError) quadricMap.get(d);
+		assert q2 != null : d;
+		double ret = Math.min(
+		  q1.value(o.getUV()) + q2.value(o.getUV()),
+		  q1.value(d.getUV()) + q2.value(d.getUV()));
+		// TODO: check why this assertion sometimes fail
+		// assert ret >= -1.e-2 : q1+"\n"+q2+"\n"+ret;
+		return ret;
+	}
+
+	public boolean canProcessEdge(HalfEdge current)
+	{
+		v1 = current.origin();
+		v2 = current.destination();
+		assert v1 != v2 : current;
+		/* FIXME: add an option so that boundary nodes may be frozen. */
+		q1 = (Quadric3DError) quadricMap.get(v1);
+		q2 = (Quadric3DError) quadricMap.get(v2);
+		assert q1 != null : current;
+		assert q2 != null : current;
+		q3.computeQuadric3DError(q1, q2);
+		q3.optimalPlacement(v1, v2, q1, q2, placement, v3);
+		current.copyOTriangle(ot);
+		// For now, do not contract non manifold edges
+		return (!current.hasAttributes(OTriangle.NONMANIFOLD) && ot.canContract(v3));
+	}
+
+	public void preProcessEdge()
+	{
+		if (v1 != null)
 		{
-			Triangle f = (Triangle) itf.next();
-			if (f.isOuter())
-				continue;
-			HalfEdge e = f.getHalfEdge();
-			for (int i = 0; i < 3; i++)
-			{
-				e = e.next();
-				if (tree.containsValue(e.notOriented()))
-					continue;
-				Vertex v1 = e.origin();
-				Vertex v2 = e.destination();
-				tree.insert(e.notOriented(), cost(v1, v2, quadricMap));
-			}
+			// v1 and v2 have been removed from the mesh,
+			// they can be reused.
+			v3 = v1;
+			q3 = q1;
 		}
 	}
-	
-	private boolean contractAllVertices(PAVLSortedTree tree, int nrTriangles, HashMap quadricMap)
+
+	public HalfEdge processEdge(HalfEdge current)
 	{
-		OTriangle ot = new OTriangle();
-		int contracted = 0;
-		boolean noSwap = false;
-		int cntNotContracted = 0;
-		Stack notContracted = new Stack();
-		Vertex v1 = null, v2 = null;
-		Quadric3DError q1 = null, q2 = null;
-		Vertex v3 = Vertex.valueOf(0.0, 0.0, 0.0);
-		Quadric3DError q3 = new Quadric3DError();
-		while (tree.size() > 0 && nrTriangles > nrFinal)
+		if (logger.isDebugEnabled())
+			logger.debug("Contract edge: "+current+" into "+v3);
+		Triangle t1 = current.getTri();
+		// HalfEdge instances on t1 and t2 will be deleted
+		// when edge is contracted, and we do not know whether
+		// they appear within tree or their symmetric ones,
+		// so remove them now.
+		tree.remove(current.notOriented());
+		if (!t1.isOuter())
 		{
-			HalfEdge edge = (HalfEdge) tree.first();
-			double cost = -1.0;
-			if (nrFinal == 0)
-				cost = tree.getKey(edge);
-			if (v1 != null)
+			nrTriangles--;
+			for (int i = 0; i < 2; i++)
 			{
-				// v1 and v2 have been removed from the
-				// mesh,, they can be reused.
-				v3 = v1;
-				q3 = q1;
+				current = current.next();
+				tree.remove(current.notOriented());
+				assert !tree.containsValue(current.notOriented());
 			}
-			do {
-				if (cost > tolerance)
-					break;
-				v1 = edge.origin();
-				v2 = edge.destination();
-				assert v1 != v2 : edge;
-				/* FIXME: add an option so that boundary nodes may be frozen. */
-				q1 = (Quadric3DError) quadricMap.get(v1);
-				q2 = (Quadric3DError) quadricMap.get(v2);
-				assert q1 != null : edge;
-				assert q2 != null : edge;
-				q3.computeQuadric3DError(q1, q2);
-				q3.optimalPlacement(v1, v2, q1, q2, placement, v3);
-				edge.copyOTriangle(ot);
-				// For now, do not contract non manifold edges
-				if (!edge.hasAttributes(OTriangle.NONMANIFOLD) && ot.canContract(v3))
-					break;
-				if (logger.isDebugEnabled())
-					logger.debug("Edge not contracted: "+edge);
-				cntNotContracted++;
-				// Add a penalty to edges which could not have been
-				// contracted.  This has to be done outside this loop,
-				// because PAVLSortedTree instances must not be modified
-				// when walked through.
-				// FIXME: Handle nrFinal != 0 case also
-				if (nrFinal == 0)
-				{
-					notContracted.push(edge);
-					if (tolerance > 0.0)
-						notContracted.push(new Double(cost+0.1*(tolerance - cost)));
-					else
-						// tolerance = cost = 0
-						notContracted.push(new Double(1.0));
-				}
-				edge = (HalfEdge) tree.next();
-				if (nrFinal == 0)
-					cost = tree.getKey(edge);
-				else
-					cost = -1.0;
-			} while (edge != null && cost <= tolerance);
-			if (cost > tolerance || edge == null)
-				break;
-			// Update costs for edges which were not contracted
-			while (notContracted.size() > 0)
+			current = current.next();
+		}
+		HalfEdge sym = current.sym();
+		Triangle t2 = sym.getTri();
+		if (!t2.isOuter())
+		{
+			nrTriangles--;
+			for (int i = 0; i < 2; i++)
 			{
-				double newCost = ((Double) notContracted.pop()).doubleValue();
-				HalfEdge f = (HalfEdge) notContracted.pop();
-				tree.update(f.notOriented(), newCost);
-			}
-			if (logger.isDebugEnabled())
-				logger.debug("Contract edge: "+edge+" into "+v3);
-			Triangle t1 = edge.getTri();
-			// HalfEdge instances on t1 and t2 will be deleted
-			// when edge is contracted, and we do not know whether
-			// they appear within tree or their symmetric ones,
-			// so remove them now.
-			tree.remove(edge.notOriented());
-			if (!t1.isOuter())
-			{
-				nrTriangles--;
-				for (int i = 0; i < 2; i++)
-				{
-					edge = edge.next();
-					tree.remove(edge.notOriented());
-					assert !tree.containsValue(edge.notOriented());
-				}
-				edge = edge.next();
-			}
-			HalfEdge sym = edge.sym();
-			Triangle t2 = sym.getTri();
-			if (!t2.isOuter())
-			{
-				nrTriangles--;
-				for (int i = 0; i < 2; i++)
-				{
-					sym = sym.next();
-					tree.remove(sym.notOriented());
-					assert !tree.containsValue(sym.notOriented());
-				}
 				sym = sym.next();
+				tree.remove(sym.notOriented());
+				assert !tree.containsValue(sym.notOriented());
 			}
-			Vertex apex = edge.apex();
-			// FIXME: is this test really necessary?
-			if (apex == Vertex.outer)
-				apex = sym.apex();
-			//  Contract (v1,v2) into v3
-			edge.contract(mesh, v3);
-			contracted++;
-			quadricMap.remove(v1);
-			quadricMap.remove(v2);
-			// Update edge costs
-			quadricMap.put(v3, q3);
-			edge = HalfEdge.find(v3, apex);
-			assert edge != null : v3+" not connected to "+apex;
-			assert edge.destination() == apex : ""+edge+"\n"+v3+"\n"+apex;
-			do
-			{
-				edge = edge.nextOriginLoop();
-				if (edge.destination() != Vertex.outer)
-					tree.update(edge.notOriented(), cost(edge.destination(), v3, quadricMap));
-			}
-			while (edge.destination() != apex);
-			if (noSwap)
-				continue;
-			
-			edge = edge.next();
-			assert edge.apex() == v3;
-			if (edge.hasAttributes(OTriangle.OUTER) || edge.hasAttributes(OTriangle.BOUNDARY) || edge.hasAttributes(OTriangle.NONMANIFOLD))
-				continue;
-			// Check if edges can be swapped
-			while(true)
-			{
-				edge.copyOTriangle(ot);
-				if (ot.checkSwap3D(0.95) >= 0.0)
-				{
-					// Swap edge
-					for (int i = 0; i < 3; i++)
-					{
-						edge = edge.next();
-						tree.remove(edge.notOriented());
-						assert !tree.containsValue(edge.notOriented());
-					}
-					sym = edge.sym();
-					for (int i = 0; i < 3; i++)
-					{
-						sym = sym.next();
-						tree.remove(sym.notOriented());
-						assert !tree.containsValue(sym.notOriented());
-					}
-					Vertex a = edge.apex();
-					edge = edge.swap();
-					// Now edge = (ona)
-					assert a == edge.apex();
-					for (int i = 0; i < 3; i++)
-					{
-						edge = edge.next();
-						tree.insert(edge.notOriented(), cost(edge.origin(), edge.destination(), quadricMap));
-					}
-					sym = edge.next().sym();
-					for (int i = 0; i < 2; i++)
-					{
-						sym = sym.next();
-						tree.insert(sym.notOriented(), cost(sym.origin(), sym.destination(), quadricMap));
-					}
-				}
-				else
-				{
-					edge = edge.nextApexLoop();
-					if (edge.origin() == apex)
-						break;
-				}
-			}
+			sym = sym.next();
 		}
-		logger.info("Number of contracted edges: "+contracted);
+		Vertex apex = current.apex();
+		// FIXME: is this test really necessary?
+		if (apex == Vertex.outer)
+			apex = sym.apex();
+		//  Contract (v1,v2) into v3
+		current.contract(mesh, v3);
+		quadricMap.remove(v1);
+		quadricMap.remove(v2);
+		// Update edge costs
+		quadricMap.put(v3, q3);
+		current = HalfEdge.find(v3, apex);
+		assert current != null : v3+" not connected to "+apex;
+		assert current.destination() == apex : ""+current+"\n"+v3+"\n"+apex;
+		do
+		{
+			current = current.nextOriginLoop();
+			if (current.destination() != Vertex.outer)
+				tree.update(current.notOriented(), cost(current));
+		}
+		while (current.destination() != apex);
+		return current.next();
+	}
+	
+	public void postProcessAllHalfEdges()
+	{
 		int cnt = 0;
 		HalfEdge edge = (HalfEdge) tree.first();
 		while (edge != null)
@@ -446,33 +344,19 @@ public class DecimateHalfEdge
 			cnt++;
 			edge = (HalfEdge) tree.next();
 		}
-		logger.info("Total number of edges not contracted during processing: "+cntNotContracted);
+		logger.info("Number of contracted edges: "+processed);
+		logger.info("Total number of edges not contracted during processing: "+cntNotProcessed);
 		logger.info("Number of edges which could have been contracted: "+cnt);
 		logger.info("Number of other edges not contracted: "+(tree.size() - cnt));
-		return contracted > 0;
 	}
-	
-	private static double cost(Vertex v1, Vertex v2, HashMap quadricMap)
-	{
-		Quadric3DError q1 = (Quadric3DError) quadricMap.get(v1);
-		assert q1 != null : v1;
-		Quadric3DError q2 = (Quadric3DError) quadricMap.get(v2);
-		assert q2 != null : v2;
-		double ret = Math.min(
-		  q1.value(v1.getUV()) + q2.value(v1.getUV()),
-		  q1.value(v2.getUV()) + q2.value(v2.getUV()));
-		// TODO: check why this assertion sometimes fail
-		// assert ret >= -1.e-2 : q1+"\n"+q2+"\n"+ret;
-		return ret;
-	}
-	
+
 	/**
 	 * 
 	 * @param args xmlDir, -t telerance | -n triangle, brepFile, output
 	 */
 	public static void main(String[] args)
 	{
-		Map options = new HashMap();
+		HashMap options = new HashMap();
 		if(args[1].equals("-n"))
 			options.put("maxtriangles", args[2]);
 		else if(args[1].equals("-t"))

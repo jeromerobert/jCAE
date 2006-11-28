@@ -4,6 +4,11 @@ Tue Nov 28 13:27:28 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 	constructor, do not call Vertex.setLink(), let the caller handle
 	Vertex links.
 	* src/org/jcae/mesh/amibe/ds/HalfEdge.java: New split() method.
+	* src/org/jcae/mesh/amibe/algos3d/AbstractAlgoHalfEdge.java:
+	New class, to provide a skeleton for HalfEdge based algorithms.
+	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java
+	  src/org/jcae/mesh/amibe/algos3d/SplitEdge.java: Rewritten to
+	extend AbstractAlgoHalfEdge.
 
 Mon Nov 27 15:58:46 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
