@@ -294,7 +294,6 @@ public class Initial
 		//  This cannot be performed in a single loop because
 		//  triangles are modified within this loop.
 		firstOnWire = null;
-		boolean outerWire = true;
 		ArrayList saveList = new ArrayList();
 		for (int i = 0; i < bNodes.length; i++)
 		{
@@ -308,10 +307,7 @@ public class Initial
 				s.symOTri();
 				s.setAttributes(OTriangle.BOUNDARY);
 				if (firstOnWire == bNodes[i])
-				{
 					firstOnWire = null;
-					outerWire = false;
-				}
 			}
 		}
 		assert firstOnWire == null;
@@ -459,7 +455,6 @@ public class Initial
 			for (wexp.init((CADWire) expW.current(), face); wexp.more(); wexp.next())
 			{
 				CADEdge te = wexp.current();
-				double range[] = new double[2];
 				CADGeomCurve2D c2d = CADShapeBuilder.factory.newCurve2D(te, face);
 				CADGeomCurve3D c3d = CADShapeBuilder.factory.newCurve3D(te);
 

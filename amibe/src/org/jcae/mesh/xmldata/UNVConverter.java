@@ -410,7 +410,7 @@ public class UNVConverter
 			{
 				fc.read(bb, groups[i][j] * 3 * 4);
 				bb.rewind();
-				bb.asIntBuffer().get(toReturn, count, 3);
+				tria.get(toReturn, count, 3);
 				count += 3;
 			}
 		}

@@ -587,7 +587,6 @@ public class QuadTree
 	 */
 	public Vertex2D getNearestVertex(Vertex2D v)
 	{
-		Cell current = root;
 		Vertex2D ret = getNearVertex(v);
 		assert ret != null;
 		if (logger.isDebugEnabled())
@@ -647,7 +646,6 @@ public class QuadTree
 	 */
 	public Vertex2D getNearestVertexDebug(Vertex2D v)
 	{
-		Cell current = root;
 		Vertex2D ret = getNearVertex(v);
 		assert ret != null;
 		if (logger.isDebugEnabled())
@@ -691,7 +689,6 @@ public class QuadTree
 	 */
 	public ArrayList getAllVertices(int capacity)
 	{
-		Cell current = root;
 		getAllVerticesProcedure gproc = new getAllVerticesProcedure(capacity);
 		walk(gproc);
 		return gproc.nodelist;
@@ -716,7 +713,6 @@ public class QuadTree
 	 */
 	public void clearAllMetrics()
 	{
-		Cell current = root;
 		clearAllMetricsProcedure gproc = new clearAllMetricsProcedure();
 		walk(gproc);
 	}

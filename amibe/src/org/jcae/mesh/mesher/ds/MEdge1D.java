@@ -22,7 +22,6 @@ package org.jcae.mesh.mesher.ds;
 
 import org.jcae.mesh.mesher.ds.MNode1D;
 import java.util.HashMap;
-import org.apache.log4j.Logger;
 
 /**
  * 1D edge.
@@ -30,17 +29,11 @@ import org.apache.log4j.Logger;
 
 public class MEdge1D
 {
-	private static Logger logger=Logger.getLogger(MEdge1D.class);
-	
 	//  First end point
 	private MNode1D pt1;
 	
 	//  Second end point
 	private MNode1D pt2;
-	
-	//  A boolean flag to test if the edge is a finite element.
-	//  Not used yet.
-	private boolean isFE;
 	
 	private static int id = 0;
 	private static HashMap mapHashcodeToID;
@@ -59,7 +52,6 @@ public class MEdge1D
 	{
 		pt1 = begin;
 		pt2 = end;
-		isFE = isFiniteElement;
 		assert(setID());
 	}
 	

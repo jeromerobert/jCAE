@@ -122,7 +122,6 @@ public class IndexedStorage
 			oemm = o;
 			fc = in.getChannel();
 			outDir = dir;
-			PAVLTreeIntArrayDup [] vertices = new PAVLTreeIntArrayDup[oemm.nr_leaves];
 			room = ((1 << 31) - 3*oemm.head[0].tn) / oemm.nr_leaves;
 		}
 		public final int action(OEMMNode current, int octant, int visit)
@@ -339,14 +338,12 @@ public class IndexedStorage
 	{
 		private OEMM oemm;
 		private FileChannel fc;
-		private String outDir;
 		private int [] ijk = new int[3];
 		private PAVLTreeIntArrayDup [] vertices;
 		public IndexExternalVerticesProcedure(OEMM o, FileInputStream in, String dir)
 		{
 			oemm = o;
 			fc = in.getChannel();
-			outDir = dir;
 			vertices = new PAVLTreeIntArrayDup[oemm.nr_leaves];
 		}
 		public final int action(OEMMNode current, int octant, int visit)
@@ -389,7 +386,6 @@ public class IndexedStorage
 				long pos = bbpos.getLong();
 				assert pos == current.counter : ""+pos+" != "+current.counter;
 				FileChannel fct = new FileOutputStream(current.file+"t").getChannel();
-				OEMMNode [] cell = new OEMMNode[3];
 				bb.clear();
 				IntBuffer bbI = bb.asIntBuffer();
 				bbt.clear();
@@ -448,7 +444,6 @@ public class IndexedStorage
 	private static class ConvertVertexCoordinatesProcedure extends TraversalProcedure
 	{
 		private OEMM oemm;
-		private FileChannel fc;
 		private int [] ijk = new int[3];
 		private double [] xyz = new double[3];
 		public ConvertVertexCoordinatesProcedure(OEMM o)
@@ -707,10 +702,8 @@ public class IndexedStorage
 	{
 		private TIntObjectHashMap vertMap;
 		private TIntHashSet leaves;
-		private Mesh mesh;
 		public ReadVerticesProcedure(Mesh m, TIntObjectHashMap map, TIntHashSet set)
 		{
-			mesh = m;
 			vertMap = map;
 			leaves = set;
 		}
@@ -830,7 +823,8 @@ public class IndexedStorage
 							else
 								readable = false;
 						}
-						int groupNumber = bbI.get();
+						// group number
+						bbI.get();
 						if (readable)
 						{
 							Triangle t = new Triangle(vert[0], vert[1], vert[2]);
@@ -881,6 +875,7 @@ public class IndexedStorage
 		}
 	}
 	
+	/*
 	private static class ShowIndexedNodesProcedure extends TraversalProcedure
 	{
 		public final int action(OEMMNode current, int octant, int visit)
@@ -898,6 +893,7 @@ public class IndexedStorage
 			return OK;
 		}
 	}
+	*/
 	
 	private static class IndexedVertex
 	{

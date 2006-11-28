@@ -19,24 +19,18 @@
 
 package org.jcae.mesh.oemm;
 
-import org.apache.log4j.Logger;
-
 public class OEMMVertex
 {
-	private static Logger logger=Logger.getLogger(OEMMVertex.class);	
-	
 	// Coordinates
 	public double[] xyz = new double[3];
-	private int OEMMVertIndex;
+	//private int OEMMVertIndex;
 	private boolean readable = false;
 	private boolean writable = false;
-	private boolean modified = false;
-	private boolean deleted = false;
 	
 	public OEMMVertex(double [] coord, int index)
 	{
 		System.arraycopy(coord, 0, xyz, 0, 3);
-		OEMMVertIndex = index;
+		//OEMMVertIndex = index;
 	}
 	
 	public void setReadable(boolean r)

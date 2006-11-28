@@ -20,14 +20,11 @@
 
 package org.jcae.mesh.amibe.metrics;
 
-import org.apache.log4j.Logger;
-
 /**
  * General 2D matrix.
  */
 public class Matrix2D
 {
-	private static Logger logger=Logger.getLogger(Matrix2D.class);
 	public double[][] data = new double[2][2];
 	
 	/**

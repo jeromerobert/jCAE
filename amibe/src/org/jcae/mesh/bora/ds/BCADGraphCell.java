@@ -34,22 +34,17 @@ import java.util.Iterator;
 import gnu.trove.THashSet;
 import gnu.trove.TObjectHashingStrategy;
 
-import org.apache.log4j.Logger;
-
 /**
  * Graph cell.  This class is a decorator for the CAD graph.
  */
 public class BCADGraphCell
 {
-	private static Logger logger=Logger.getLogger(BCADGraphCell.class);
 	// Unique identitier
 	private int id = -1;
 	// Link to root graph
 	private BCADGraph graph;
 	// CAD shape
 	private CADShape shape;
-	// Is this element
-	private boolean interior = false;
 	// Shape orientation  (0=forward, 1=reversed)
 	private int orientation;
 	// Link to the reversed shape, if it does exist

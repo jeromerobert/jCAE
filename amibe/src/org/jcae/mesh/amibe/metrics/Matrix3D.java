@@ -20,8 +20,6 @@
 
 package org.jcae.mesh.amibe.metrics;
 
-import org.apache.log4j.Logger;
-
 /**
  * General 3D matrix.
  */

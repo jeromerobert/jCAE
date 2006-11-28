@@ -163,7 +163,6 @@ public class ExtractShell
 	private static void readNodes(BufferedReader rd, PrintStream outNodes, TIntHashSet inodes)
 	{
 		logger.debug("Reading nodes");
-		double x,y,z;
 		String line = new String();
 		int count = 0;
 		int inner = 0;

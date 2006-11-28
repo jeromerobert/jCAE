@@ -22,17 +22,12 @@ package org.jcae.mesh.bora.algo;
 
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.VolMesh;
 import org.jcae.mesh.bora.xmldata.Storage;
 import org.jcae.mesh.bora.xmldata.MESHReader;
-import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.xmldata.UNVConverter;
 import org.jcae.mesh.xmldata.MeshWriter;
-import java.io.File;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.Iterator;
-import gnu.trove.TIntObjectHashMap;
 import org.apache.log4j.Logger;
 
 /**
@@ -104,13 +99,6 @@ public class TetGen implements AlgoInterface
 			root.mesh = MESHReader.readMesh("tetgen.1.mesh");
 			// ... and store it on disk
 			Storage.writeVolume(root, root.getGraph().getModel().getOutputDir());
-			/*
-			File temp = new File(".", "tetgen.1.mesh");
-			File output = new File(".", "tetgen."+root.getId()+".mesh");
-			if (output.exists())
-				output.delete();
-			temp.renameTo(output);
-			*/
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return false;

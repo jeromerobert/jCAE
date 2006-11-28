@@ -20,12 +20,9 @@
 package org.jcae.mesh.oemm;
 
 import java.util.ArrayList;
-import org.apache.log4j.Logger;
 
 public class OEMMMesh
 {
-	private static Logger logger=Logger.getLogger(OEMMMesh.class);
-	
 	//  Triangle list
 	private ArrayList triangleList = new ArrayList();
 

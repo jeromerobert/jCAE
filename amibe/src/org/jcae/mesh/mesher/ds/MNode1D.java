@@ -22,7 +22,6 @@ package org.jcae.mesh.mesher.ds;
 
 import org.jcae.mesh.cad.CADVertex;
 import java.util.HashMap;
-import org.apache.log4j.Logger;
 
 /**
  * 1D node.
@@ -34,8 +33,6 @@ import org.apache.log4j.Logger;
  */
 public class MNode1D
 {
-	private static Logger logger=Logger.getLogger(MNode1D.class);
-
 	//  Curvilinear coordinate on current edge
 	private double param;
 	

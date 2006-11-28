@@ -20,7 +20,6 @@
 
 package org.jcae.mesh;
 
-import gnu.trove.TIntHashSet;
 import java.util.Iterator;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.patch.Mesh2D;
@@ -61,7 +60,6 @@ public class MeshValid2D
 			}
 			int numFace = Integer.parseInt(numFaceProp);
 			CADExplorer expF = CADShapeBuilder.factory.newExplorer();
-			TIntHashSet indBnd = new TIntHashSet();
 			QualityFloat data = new QualityFloat(1000);
 			for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 			{

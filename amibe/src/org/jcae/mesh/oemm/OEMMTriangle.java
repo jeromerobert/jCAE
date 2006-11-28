@@ -19,17 +19,12 @@
 
 package org.jcae.mesh.oemm;
 
-import org.apache.log4j.Logger;
-
 public class OEMMTriangle
 {
-	private static Logger logger=Logger.getLogger(OEMMTriangle.class);	
 	public OEMMVertex [] vertex = new OEMMVertex[3];
 	
 	private boolean readable = false;
 	private boolean writable = false;
-	private boolean modified = false;
-	private boolean deleted = false;
 	
 	public OEMMTriangle(OEMMVertex v0, OEMMVertex v1, OEMMVertex v2)
 	{

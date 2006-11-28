@@ -289,13 +289,17 @@ public class UNVReader
 			{
 				// read the number of elements to read in the last number of the line
 				StringTokenizer st = new StringTokenizer(line);
+				/*
 				String snb = new String();
-				String noBloc = st.nextToken();
+				// Block number
+				st.nextToken();
 				while(st.hasMoreTokens())
 				{
 					snb = st.nextToken();
 				}
+				// Number of elements
 				int nbelem = Integer.valueOf(snb).intValue();
+				*/
 				// Read group name
 				String title = rd.readLine().trim();
 				ArrayList facelist = new ArrayList();
@@ -316,7 +320,7 @@ public class UNVReader
 						}
 					}
 				}
-				MGroup3D g = new MGroup3D(title, facelist);
+				new MGroup3D(title, facelist);
 			}
 		}
 		catch(Exception e)

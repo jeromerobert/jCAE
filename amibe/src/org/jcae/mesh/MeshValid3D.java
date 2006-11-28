@@ -21,7 +21,6 @@
 package org.jcae.mesh;
 
 import java.util.Iterator;
-import org.jcae.mesh.amibe.ds.MGroup3D;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.MMesh3D;
 import org.jcae.mesh.xmldata.MMesh3DReader;

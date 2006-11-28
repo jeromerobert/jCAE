@@ -25,7 +25,6 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.FileOutputStream;
 import java.util.zip.GZIPOutputStream;
 import javax.media.j3d.Appearance;
 import javax.media.j3d.QuadArray;
@@ -84,6 +83,7 @@ public class QuadTreeTest extends QuadTree
 		}
 	}
 	
+	/*
 	private final class CheckCoordProcedure implements QuadTreeProcedure
 	{
 		public final int action(Object o, int s, int i0, int j0)
@@ -116,6 +116,7 @@ public class QuadTreeTest extends QuadTree
 			return 0;
 		}
 	}
+	*/
 	
 	private final class CoordVertProcedure implements QuadTreeProcedure
 	{

@@ -37,7 +37,6 @@ import org.jcae.mesh.mesher.ds.MMesh1D;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.mesher.algos1d.*;
 import org.jcae.mesh.amibe.algos2d.*;
-import org.jcae.mesh.amibe.algos3d.Fuse;
 import org.jcae.mesh.xmldata.*;
 import org.jcae.mesh.cad.*;
 import gnu.trove.TIntArrayList;
@@ -317,7 +316,6 @@ public class Mesher
 				logger.info("Read informations on boundary nodes");
 				for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 				{
-					CADFace F = (CADFace) expF.current();
 					iFace++;
 					if (numFace != 0 && iFace != numFace)
 						continue;

@@ -171,10 +171,10 @@ public class Insertion
 				if (triNodes.size() > 0)
 				{
 					//  Process in pseudo-random order
-					int prime = gnu.trove.PrimeFinder.nextPrime(nrTriNodes);
+					int prime = PrimeFinder.nextPrime(nrTriNodes);
 					int imax = triNodes.size();
 					while (imax % prime == 0)
-						prime = gnu.trove.PrimeFinder.nextPrime(prime+1);
+						prime = PrimeFinder.nextPrime(prime+1);
 					if (prime >= imax)
 						prime = 1;
 					int index = imax / 2;
@@ -220,10 +220,10 @@ public class Insertion
 			if (nodes.size() == 0)
 				break;
 			//  Process in pseudo-random order
-			int prime = gnu.trove.PrimeFinder.nextPrime(maxNodes);
+			int prime = PrimeFinder.nextPrime(maxNodes);
 			int imax = nodes.size();
 			while (imax % prime == 0)
-				prime = gnu.trove.PrimeFinder.nextPrime(prime+1);
+				prime = PrimeFinder.nextPrime(prime+1);
 			if (prime >= imax)
 				prime = 1;
 			int index = imax / 2;

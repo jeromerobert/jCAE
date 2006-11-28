@@ -35,7 +35,6 @@ import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Iterator;
-import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.xml.xpath.XPath;
@@ -65,7 +64,6 @@ public class MMesh3DReader
 		int i;
 		logger.debug("begin reading "+xmlDir+File.separator+xmlFile);
 		XPath xpath = XPathFactory.newInstance().newXPath();
-		HashMap map1DToMaster = new HashMap();
 		try
 		{
 			Document document = XMLHelper.parseXML(new File(xmlDir, xmlFile));

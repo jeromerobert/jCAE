@@ -24,7 +24,6 @@ import gnu.trove.TObjectIntProcedure;
 import gnu.trove.TFloatArrayList;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
-import java.util.Iterator;
 
 /**
  * Compute node connectivity of 3D nodes.

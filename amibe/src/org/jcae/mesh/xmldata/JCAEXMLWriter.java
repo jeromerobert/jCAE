@@ -26,13 +26,10 @@ import javax.xml.parsers.DocumentBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentType;
 import org.w3c.dom.DOMImplementation;
-import org.apache.log4j.Logger;
 
 
 public class JCAEXMLWriter
 {
-	private static Logger logger=Logger.getLogger(JCAEXMLWriter.class);	
-
 	/** 
 	 * Creates a jcae XML document.
 	 */	

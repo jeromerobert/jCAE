@@ -26,7 +26,6 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.OTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Quadric3DError;
-import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import org.jcae.mesh.xmldata.MeshReader;
@@ -171,7 +170,6 @@ public class DecimateHalfEdge
 		}
 		// Compute quadrics
 		PAVLSortedTree tree = new PAVLSortedTree();
-		double [] b = new double[3];
 		double [] vect1 = new double[3];
 		double [] vect2 = new double[3];
 		double [] normal = new double[3];

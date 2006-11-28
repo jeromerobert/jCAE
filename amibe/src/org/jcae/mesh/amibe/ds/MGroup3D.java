@@ -23,7 +23,6 @@ package org.jcae.mesh.amibe.ds;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Collection;
-import org.apache.log4j.Logger;
 
 
 /**
@@ -31,8 +30,6 @@ import org.apache.log4j.Logger;
  */
 public class MGroup3D
 {
-	private static Logger logger=Logger.getLogger(MGroup3D.class);
-
 	//  Group name
 	private String name;
 	

@@ -20,20 +20,13 @@
 package org.jcae.mesh.java3d;
 
 import java.awt.event.*;
-import java.awt.Frame;
 import java.awt.BorderLayout;
-import java.awt.Toolkit;
-import java.awt.Graphics2D;
-import java.util.*;
 import javax.swing.*;
 import javax.media.j3d.*;
 import javax.vecmath.*;
 import com.sun.j3d.utils.universe.*;
-import com.sun.j3d.loaders.*;
-import com.sun.j3d.utils.geometry.*;
 import com.sun.j3d.utils.picking.*;
 import com.sun.j3d.utils.behaviors.vp.*;
-import org.jcae.mesh.*;
 import org.apache.log4j.Logger;
 
 /** This is the panel which include the J3DCanvas for 3D display. It should be set
@@ -224,8 +217,8 @@ public class Viewer extends JFrame
 		Vector3f light2Direction = new Vector3f(-1.0f, -1.0f, -1.0f);
 		DirectionalLight light2 = new DirectionalLight(light2Color, light2Direction);
 		light2.setInfluencingBounds(bounds);
-		light2.setCapability(light2.ALLOW_INFLUENCING_BOUNDS_WRITE);
-		light2.setCapability(light2.ALLOW_INFLUENCING_BOUNDS_READ);
+		light2.setCapability(DirectionalLight.ALLOW_INFLUENCING_BOUNDS_WRITE);
+		light2.setCapability(DirectionalLight.ALLOW_INFLUENCING_BOUNDS_READ);
 		gp.addChild(light2);
 		return gp;
 	}		

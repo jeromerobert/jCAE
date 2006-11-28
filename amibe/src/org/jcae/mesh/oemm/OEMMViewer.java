@@ -25,7 +25,6 @@ import javax.media.j3d.Shape3D;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.PolygonAttributes;
 import javax.media.j3d.ColoringAttributes;
-import javax.media.j3d.IndexedTriangleArray;
 import javax.media.j3d.TriangleArray;
 import gnu.trove.TIntHashSet;
 

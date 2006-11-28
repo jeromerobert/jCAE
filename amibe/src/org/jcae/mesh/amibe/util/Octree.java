@@ -516,7 +516,6 @@ public class Octree
 		}
 		public final int action(Object o, int s, int i0, int j0, int k0)
 		{
-			Cell self = (Cell) o;
 			searchedCells++;
 			if (s < minSize)
 				minSize = s;
@@ -526,7 +525,6 @@ public class Octree
 	
 	private final int getMinSize()
 	{
-		Cell current = root;
 		getMinSizeProcedure gproc = new getMinSizeProcedure();
 		walk(gproc);
 		int ret = gproc.minSize;
@@ -608,7 +606,6 @@ public class Octree
 	 */
 	public final Vertex getNearestVertex(Vertex v)
 	{
-		Cell current = root;
 		Vertex ret = getNearVertex(v);
 		if (ret == null)
 			return null;

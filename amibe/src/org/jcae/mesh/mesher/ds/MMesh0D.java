@@ -25,7 +25,6 @@ import org.jcae.mesh.cad.*;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import gnu.trove.TObjectIntHashMap;
-import org.apache.log4j.Logger;
 
 /**
  * List of vertices of the whole shape.
@@ -36,8 +35,6 @@ import org.apache.log4j.Logger;
 
 public class MMesh0D
 {
-	private static Logger logger = Logger.getLogger(MMesh0D.class);	
-
 	//  Array of distinct geometric nodes
 	private CADVertex[] vnodelist;
 	private int vnodesize = 0;

@@ -27,7 +27,6 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Quadric3DError;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
-import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
@@ -35,7 +34,6 @@ import java.util.Stack;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 /**
@@ -192,7 +190,6 @@ public class DecimateVertex
 		}
 		// Compute quadrics
 		PAVLSortedTree tree = new PAVLSortedTree();
-		double [] b = new double[3];
 		double [] vect1 = new double[3];
 		double [] vect2 = new double[3];
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )

@@ -36,7 +36,6 @@ import java.util.LinkedHashSet;
 import gnu.trove.THashMap;
 import gnu.trove.TIntObjectHashMap;
 import java.util.Iterator;
-import java.io.File;
 
 import org.apache.log4j.Logger;
 
@@ -54,8 +53,6 @@ public class BSubMesh
 	//   List of children
 	private Collection setCells = new LinkedHashSet();
 	private THashMap mapShapeToSubElement = new THashMap();
-	//   Tessellation
-	public Object mesh = null;
 	private boolean output1d = false;
 	private boolean output2d = false;
 	private boolean output3d = false;
@@ -64,7 +61,6 @@ public class BSubMesh
 	{
 		private BCADGraphCell cell;
 		private boolean isVisible = true;
-		private Object mesh;
 		private SubElement(BCADGraphCell that)
 		{
 			cell = that;

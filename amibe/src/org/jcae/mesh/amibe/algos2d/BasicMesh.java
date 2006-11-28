@@ -21,12 +21,7 @@
 package org.jcae.mesh.amibe.algos2d;
 
 import org.jcae.mesh.mesher.ds.MMesh1D;
-import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.OTriangle;
-import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.patch.Mesh2D;
-import org.jcae.mesh.amibe.InitialTriangulationException;
-import org.apache.log4j.Logger;
 
 /**
  * Performs an initial Delaunay triangulation.
@@ -50,14 +45,15 @@ import org.apache.log4j.Logger;
  * </p>
  *
  * <p>
- * A first triangle is created by iterating over the list of boundary nodes
- * to find three vertices which are not aligned.  The outer domain is also
- * triangulated; {@link Vertex#outer} is a vertex at infinite, and three
- * outer triangles are created by joining this vertex to vertices of the
- * first triangle.  With this trick, there is no need to have special
- * cases when vertices are inserted outside the convex hull of already inserted
- * vertices, and triangle location always succeed.  If these outer triangles
- * did not exist, we would have to triangulate the convex hull of nodes.
+ * A first triangle is created by iterating over the list of boundary nodes to
+ * find three vertices which are not aligned.  The outer domain is also
+ * triangulated; {@link org.jcae.mesh.amibe.ds.Vertex#outer} is a vertex at
+ * infinite, and three outer triangles are created by joining this vertex to
+ * vertices of the first triangle.  With this trick, there is no need to have
+ * special cases when vertices are inserted outside the convex hull of already
+ * inserted vertices, and triangle location always succeed.  If these outer
+ * triangles did not exist, we would have to triangulate the convex hull of
+ * nodes.
  * </p>
  *
  * <p>
@@ -66,10 +62,11 @@ import org.apache.log4j.Logger;
  * triangulation.  The nearest vertex already inserted in the mesh is retrieved
  * with {@link org.jcae.mesh.amibe.patch.QuadTree#getNearestVertex(Vertex2D)}.
  * It has a reference to a triangle containing this vertex.  From this starting
- * point, we search for the {@link Triangle} containing this boundary node by
- * looking for adjacent triangles into the right direction.  This
- * <code>Triangle</code> is splitted into three triangles (even if the vertex
- * is inserted on an edge), and edges are swapped if they are not Delaunay.
+ * point, we search for the {@link org.jcae.mesh.amibe.ds.Triangle} containing
+ * this boundary node by looking for adjacent triangles into the right
+ * direction.  This <code>Triangle</code> is splitted into three triangles
+ * (even if the vertex is inserted on an edge), and edges are swapped if they
+ * are not Delaunay.
  * (This criterion also applied with our Euclidian 2D metric)
  * </p>
  *
@@ -77,19 +74,21 @@ import org.apache.log4j.Logger;
  * When all boundary nodes are inserted, an unconstrained Delaunay mesh has
  * been built.  The list of boundary nodes computed previously gives a list of
  * boundary edges, which needs to be enforced.  This is performed by
- * {@link Mesh2D#forceBoundaryEdge(Vertex2D, Vertex2D, int)}; the segments which
- * intersect the enforced edge are swapped.  The {@link OTriangle#BOUNDARY}
- * attribute is set on these edges (and on matte edges).
+ * {@link Mesh2D#forceBoundaryEdge(Vertex2D, Vertex2D, int)}; the segments
+ * which intersect the enforced edge are swapped.
+ * The {@link org.jcae.mesh.amibe.ds.OTriangle#BOUNDARY} attribute is set on
+ * these edges (and on matte edges).
  * </p>
  *
  * <p>
- * We know that the {@link Triangle} bound to {@link Vertex#outer} is an
- * outer triangle.  Triangles adjacent through a boundary edge are interior
- * triangles, and triangles adjacent through non-boundary edges are also
- * outer triangles.  All triangles of the mesh are visited, and outer
- * triangles are tagged with the {@link OTriangle#OUTER} attribute.
- * If an inconsistency is found (for instance a boundary edge seperate
- * two outer triangles), {@link InitialTriangulationException} is
+ * We know that the {@link org.jcae.mesh.amibe.ds.Triangle} bound to
+ * {@link org.jcae.mesh.amibe.ds.Vertex#outer} is an outer triangle.  Triangles
+ * adjacent through a boundary edge are interior triangles, and triangles
+ * adjacent through non-boundary edges are also outer triangles.  All triangles
+ * of the mesh are visited, and outer triangles are tagged with the
+ * {@link org.jcae.mesh.amibe.ds.OTriangle#OUTER} attribute.  If an
+ * inconsistency is found (for instance a boundary edge seperate two outer
+ * triangles), {@link org.jcae.mesh.amibe.InitialTriangulationException} is
  * raised.  This means that boundary was invalid, eg. it is not closed
  * or intersects itself.
  * This detection of broken boundaries could be improved by taking
@@ -100,19 +99,19 @@ import org.apache.log4j.Logger;
  * <p>
  * It is important to note that triangles in holes have their
  * <code>OUTER</code> attribute set, but are not linked to
- * {@link Vertex#outer}.  So this attribute is the only safe way to
- * detect outer triangles.  As outer triangles are not removed,
- * vertex location can still be performed as if the domain was
- * convex.  All subsequent 2D algorithms should consider these points.
+ * {@link org.jcae.mesh.amibe.ds.Vertex#outer}.  So this attribute is the only
+ * safe way to detect outer triangles.  As outer triangles are not removed,
+ * vertex location can still be performed as if the domain was convex.  All
+ * subsequent 2D algorithms should consider these points.
  * </p>
  *
  * <p>
  * This is very different when remeshing 3D meshes; in such a case,
  * boundary edges are detected because they have only one incident
  * face.  An outer triangle is then added by connecting end points to
- * {@link Vertex#outer}, but outer triangles are not connected together.
- * Mesh domain is not convex, but that does not matter because 3D
- * algorithms do not require vertex location.
+ * {@link org.jcae.mesh.amibe.ds.Vertex#outer}, but outer triangles are not
+ * connected together.  Mesh domain is not convex, but that does not matter
+ * because 3D algorithms do not require vertex location.
  * </p>
  *
  * <p>
@@ -170,7 +169,6 @@ import org.apache.log4j.Logger;
  */
 public class BasicMesh
 {
-	private static Logger logger=Logger.getLogger(BasicMesh.class);
 	private Mesh2D mesh = null;
 	private MMesh1D mesh1d = null;
 	

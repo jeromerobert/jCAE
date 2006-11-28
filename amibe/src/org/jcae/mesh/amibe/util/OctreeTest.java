@@ -19,17 +19,9 @@
 
 package org.jcae.mesh.amibe.util;
 
-import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.ds.Vertex;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.FileOutputStream;
-import java.util.zip.GZIPOutputStream;
 import javax.media.j3d.Appearance;
 import javax.media.j3d.QuadArray;
-import javax.media.j3d.LineArray;
 import javax.media.j3d.PointArray;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.BranchGroup;
@@ -42,8 +34,6 @@ import javax.media.j3d.PointAttributes;
  */
 public class OctreeTest extends Octree
 {
-	private static Logger logger=Logger.getLogger(OctreeTest.class);	
-	
 	public OctreeTest(double [] umin, double [] umax)
 	{
 		super (umin, umax);
@@ -126,6 +116,7 @@ public class OctreeTest extends Octree
 		}
 	}
 	
+	/*
 	private final class CheckCoordProcedure implements OctreeProcedure
 	{
 		public final int action(Object o, int s, int i0, int j0, int k0)
@@ -162,6 +153,7 @@ public class OctreeTest extends Octree
 			return 0;
 		}
 	}
+	*/
 	
 	private final class CoordVertProcedure implements OctreeProcedure
 	{

@@ -21,10 +21,8 @@ package org.jcae.mesh.amibe.ds;
 
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import java.util.ConcurrentModificationException;
-import java.util.NoSuchElementException;
 import java.util.Iterator;
 import java.util.ArrayList;
-import org.apache.log4j.Logger;
 
 /**
  * A triangular element of the mesh.  Instances of this class carry up
@@ -82,7 +80,6 @@ import org.apache.log4j.Logger;
  */
 public class Triangle
 {
-	private static Logger logger = Logger.getLogger(Triangle.class);
 	/**
 	 * Three vertices.
 	 */

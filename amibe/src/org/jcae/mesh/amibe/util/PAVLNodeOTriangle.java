@@ -21,7 +21,6 @@ package org.jcae.mesh.amibe.util;
 
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.OTriangle;
-import org.apache.log4j.Logger;
 
 /**
  * Node of PAVL binary trees designed to store {@link OTriangle} instances.

@@ -53,7 +53,6 @@ public class OctreeTestRemove extends OctreeTest
 	
 	public static void main(String args[])
 	{
-		double u, v, w;
 		boolean visu = true;
 		Random rand = new Random(113L);
 		double [] umin = { 0.0, 0.0, 0.0 };

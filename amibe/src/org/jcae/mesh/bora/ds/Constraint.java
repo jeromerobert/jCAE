@@ -31,7 +31,6 @@ public class Constraint extends Hypothesis
 {
 	private static Logger logger = Logger.getLogger(Constraint.class);
 	private CADShapeEnum dimension = null;
-	private boolean dirty = false;
 	private AlgoInterface algo = null;
 	private static Class [] innerClasses = Constraint.class.getDeclaredClasses();
 	private static HypNone HypNoneInstance = new HypNone();
@@ -82,10 +81,7 @@ public class Constraint extends Hypothesis
 		if (lengthBool && that.lengthBool)
 		{
 			if (targetLengthMin > targetLengthMax)
-			{
-				dirty = true;
 				throw new RuntimeException("length min > length max");
-			}
 			lengthMax = targetLengthMax;
 			lengthMin = targetLengthMin;
 		}
@@ -94,7 +90,6 @@ public class Constraint extends Hypothesis
 			lengthBool |= that.lengthBool;
 			if (targetLengthMin > targetLengthMax)
 			{
-				dirty = true;
 				printDirty(mh);
 				lengthMax = targetLengthMin;
 				lengthMin = targetLengthMax;
@@ -109,10 +104,7 @@ public class Constraint extends Hypothesis
 		if (numberBool && that.numberBool)
 		{
 			if (targetNumberMin > targetNumberMax)
-			{
-				dirty = true;
 				throw new RuntimeException("number min > number max");
-			}
 			numberMax = targetNumberMax;
 			numberMin = targetNumberMin;
 		}
@@ -121,7 +113,6 @@ public class Constraint extends Hypothesis
 			numberBool |= that.numberBool;
 			if (targetNumberMin > targetNumberMax)
 			{
-				dirty = true;
 				printDirty(mh);
 				numberMax = targetNumberMin;
 				numberMin = targetNumberMax;

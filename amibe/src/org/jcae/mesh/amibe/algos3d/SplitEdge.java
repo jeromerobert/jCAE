@@ -139,7 +139,6 @@ public class SplitEdge
 	
 	private void unmarkEdges()
 	{
-		NotOrientedEdge noe = new NotOrientedEdge();
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
@@ -152,9 +151,7 @@ public class SplitEdge
 		int splitted = 0;
 		NotOrientedEdge edge = new NotOrientedEdge();
 		NotOrientedEdge sym = new NotOrientedEdge();
-		OTriangle temp = new OTriangle();
 		double [] newXYZ = new double[3];
-		double sinMin = Math.sin(Math.PI / 36.0);
 		while (tree.size() > 0)
 		{
 			PAVLNodeOTriangle current = (PAVLNodeOTriangle) tree.last();

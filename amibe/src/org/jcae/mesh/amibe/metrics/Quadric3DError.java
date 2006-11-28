@@ -21,7 +21,6 @@
 package org.jcae.mesh.amibe.metrics;
 
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.apache.log4j.Logger;
 
 /**
  * Garland's Quadric Error Metric.  See
@@ -59,7 +58,6 @@ import org.apache.log4j.Logger;
  */
 public class Quadric3DError
 {
-	private static Logger logger=Logger.getLogger(Quadric3DError.class);
 	public Metric3D A = new Metric3D();
 	public double [] b = new double[3];
 	public double [] temp = new double[3];

@@ -52,7 +52,6 @@ public class OctreeTestDisplayPLY extends OctreeTest
 	
 	public static void main(String args[])
 	{
-		double u, v, w;
 		boolean visu = true;
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		String line;

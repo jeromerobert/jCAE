@@ -221,8 +221,6 @@ public class SmoothNodes3D
 	public static void main(String[] args)
 	{
 		Mesh mesh=MeshReader.readObject3D(args[0], args[1], -1);
-		double size=Double.parseDouble(args[2]);
-		int iter=Integer.parseInt(args[3]);
 		Map opts = new HashMap();
 		opts.put("size", args[2]);
 		opts.put("iterations", args[3]);

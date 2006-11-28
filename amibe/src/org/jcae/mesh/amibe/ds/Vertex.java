@@ -79,8 +79,6 @@ public class Vertex
 	protected int label = 0;
 	private boolean readable = false;
 	private boolean writable = false;
-	private boolean modified = false;
-	private boolean deleted = false;
 	
 	/**
 	 * Constructor called by Vertex2D.
@@ -504,9 +502,8 @@ public class Vertex
 	 */
 	public boolean discreteCurvatureDirections(double [] normal, double[] t1, double [] t2)
 	{
-		double Kg = discreteCurvatures(normal);
+		discreteCurvatures(normal);
 		double n = Matrix3D.norm(normal);
-		double Kh = 0.5 * n;
 		if (n < 1.e-6)
 		{
 			// Either this is a saddle point, or surface is
@@ -514,7 +511,6 @@ public class Vertex
 			// by averaging triangle normals.
 			if (!discreteAverageNormal(normal))
 				return false;
-			Kh = 0.0;
 		}
 		else
 		{
@@ -584,7 +580,6 @@ public class Vertex
 			}
 			double c12 = Matrix3D.prodSca(vect1, vect2);
 			double c23 = Matrix3D.prodSca(vect2, vect3);
-			double c31 = Matrix3D.prodSca(vect3, vect1);
 			// Override vect2
 			Matrix3D.prodVect3D(vect1, vect3, vect2);
 			double area = 0.5 * Matrix3D.norm(vect2);

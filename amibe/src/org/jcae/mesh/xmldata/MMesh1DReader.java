@@ -178,7 +178,6 @@ public class MMesh1DReader
 				int numberOfEdges = Integer.parseInt(
 					getChild(submeshEdges, "number").getFirstChild().getNodeValue());
 					
-				MEdge1D [] edgelist = new MEdge1D[numberOfEdges];
 				for (i=0; i < numberOfEdges; i++)
 				{
 					MNode1D pt1 = nodelist[edgesBuffer.get() - offset];

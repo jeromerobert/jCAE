@@ -20,9 +20,7 @@
 
 package org.jcae.mesh;
 
-import java.io.File;
 import javax.media.j3d.BranchGroup;
-import org.jcae.mesh.xmldata.*;
 import org.jcae.mesh.java3d.*;
 import org.apache.log4j.Logger;
 

@@ -19,19 +19,15 @@
 
 package org.jcae.mesh.bora.tests;
 
-import org.apache.log4j.Logger;
 import org.jcae.mesh.java3d.Viewer;
 
 import org.jcae.mesh.bora.xmldata.BModelReader;
 import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
-import org.jcae.mesh.bora.ds.BCADGraph;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADGeomCurve3D;
 import org.jcae.mesh.cad.CADShapeBuilder;
 import org.jcae.mesh.cad.CADShapeEnum;
-import org.jcae.mesh.mesher.ds.SubMesh1D;
-import org.jcae.mesh.mesher.ds.MNode1D;
 import javax.media.j3d.Appearance;
 import javax.media.j3d.IndexedLineArray;
 import javax.media.j3d.PointArray;
@@ -53,8 +49,6 @@ import java.util.Iterator;
 
 public class Bora1D
 {
-	private static Logger logger=Logger.getLogger(Bora1D.class);	
-	
 	public static BranchGroup [] getBranchGroups(BModel model)
 	{
 		BCADGraphCell root = model.getGraph().getRootCell();

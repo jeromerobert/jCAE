@@ -240,15 +240,6 @@ public class Metric2D
 		return Math.sqrt(temp);
 	}
 	
-	private double [] getCoefs()
-	{
-		double [] toReturn = new double[3];
-		toReturn[0] = E;
-		toReturn[1] = F;
-		toReturn[2] = G;
-		return toReturn;
-	}
-	
 	public String stringCoefs()
 	{
 		return ""+E+" "+F+" "+G;

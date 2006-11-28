@@ -19,19 +19,14 @@
 
 package org.jcae.mesh.bora.tests;
 
-import org.apache.log4j.Logger;
 import org.jcae.mesh.java3d.Viewer;
 
 import org.jcae.mesh.bora.xmldata.BModelReader;
 import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
-import org.jcae.mesh.bora.ds.BCADGraph;
 import org.jcae.mesh.cad.CADFace;
 import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.mesh.cad.CADShapeEnum;
-import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.Vertex;
 import javax.media.j3d.Appearance;
 import javax.media.j3d.IndexedTriangleArray;
 import javax.media.j3d.PointArray;
@@ -53,8 +48,6 @@ import java.util.Iterator;
 
 public class Bora2D
 {
-	private static Logger logger=Logger.getLogger(Bora2D.class);	
-	
 	private final static float absOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorAbs", "20.0f"));
 	private final static float relOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorRel", "2.0f"));
 

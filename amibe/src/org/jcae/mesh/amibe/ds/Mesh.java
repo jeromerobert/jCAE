@@ -694,7 +694,7 @@ public class Mesh
 		PrintWriter out;
 		try {
 			if (file.endsWith(".gz") || file.endsWith(".GZ"))
-				out = new PrintWriter(new java.util.zip.GZIPOutputStream(new FileOutputStream(file)));
+				out = new PrintWriter(new GZIPOutputStream(new FileOutputStream(file)));
 			else
 				out = new PrintWriter(new FileOutputStream(file));
 			out.println("    -1"+cr+"  2411");
@@ -764,7 +764,7 @@ public class Mesh
 		PrintWriter out;
 		try {
 			if (file.endsWith(".gz") || file.endsWith(".GZ"))
-				out = new PrintWriter(new java.util.zip.GZIPOutputStream(new FileOutputStream(file)));
+				out = new PrintWriter(new GZIPOutputStream(new FileOutputStream(file)));
 			else
 				out = new PrintWriter(new FileOutputStream(file));
 			out.println("MeshVersionFormatted 1"+cr+"Dimension"+cr+"3");

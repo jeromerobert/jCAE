@@ -20,8 +20,6 @@
 
 package org.jcae.mesh.amibe.patch;
 
-import org.apache.log4j.Logger;
-
 /**
  * Distance computations in 2D Euclidian space.
  * This class is called from {@link org.jcae.mesh.amibe.algos2d.BasicMesh}
@@ -29,11 +27,6 @@ import org.apache.log4j.Logger;
  */
 public class Calculus2D implements Calculus
 {
-	private static Logger logger=Logger.getLogger(Calculus2D.class);	
-
-	//  The Mesh2D instance on which methods are applied
-	private Mesh2D mesh;
-	
 	/**
 	 * Constructor.
 	 *
@@ -41,7 +34,6 @@ public class Calculus2D implements Calculus
 	 */
 	public Calculus2D(Mesh2D m)
 	{
-		mesh = m;
 	}
 
 	/**

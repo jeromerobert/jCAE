@@ -20,7 +20,6 @@
 package org.jcae.mesh.oemm;
 
 import gnu.trove.TIntArrayList;
-import org.apache.log4j.Logger;
 
 /**
  * This class represents octants of a raw OEMM.

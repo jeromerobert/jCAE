@@ -33,7 +33,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
-import java.io.FileNotFoundException;
 import java.util.Iterator;
 import java.util.Collection;
 import java.util.ArrayList;
@@ -329,7 +328,6 @@ public class MeshWriter
 			// Create and fill the DOM
 			Document document=JCAEXMLWriter.createJcaeDocument();
 			
-			Element groupsElement = document.createElement("groups");
 			Element jcaeElement=document.getDocumentElement();
 			Element meshElement=document.createElement("mesh");
 			Element shapeElement=XMLHelper.parseXMLString(document, "<shape>"+

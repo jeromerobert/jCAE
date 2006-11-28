@@ -36,7 +36,6 @@ public class AVLTreeDup
 	private static int [] temp = new int[nrInt];
 	
 	private AVLTreeDupNode root;
-	private int height = 0;
 	private int [] dir;
 	
 	private class AVLTreeDupNode

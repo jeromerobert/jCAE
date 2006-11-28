@@ -22,12 +22,7 @@ package org.jcae.mesh;
 
 import java.util.Iterator;
 import java.io.File;
-import org.jcae.mesh.amibe.ds.MGroup3D;
-import org.jcae.mesh.amibe.ds.MMesh3D;
-import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.xmldata.UNVConverter;
-import org.jcae.mesh.amibe.validation.*;
 import org.jcae.mesh.oemm.*;
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADShapeBuilder;

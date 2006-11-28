@@ -22,15 +22,12 @@ package org.jcae.mesh.amibe.patch;
 
 import org.jcae.mesh.amibe.metrics.Metric2D;
 import java.util.Stack;
-import org.apache.log4j.Logger;
 
 /**
  * Distance computations in 2D parameter space by using 3D metrics.
  */
 public class Calculus3D implements Calculus
 {
-	private static Logger logger=Logger.getLogger(Calculus3D.class);	
-
 	//  The Mesh2D instance on which methods are applied
 	private Mesh2D mesh;
 	
