@@ -153,10 +153,7 @@ public class Triangle
 		else
 			vertex = new Vertex[v.length];
 		for (int i = v.length - 1; i >= 0; i--)
-		{
 			vertex[i] = v[i];
-			vertex[i].setLink(this);
-		}
 	}
 	
 	/**
