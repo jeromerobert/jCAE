@@ -619,8 +619,8 @@ public class HalfEdge
 	
 	public String toString()
 	{
-		String r = "";
-		r += "Triangle: "+tri.hashCode();
+		String r = "hashCode: "+hashCode();;
+		r += "\nTriangle: "+tri.hashCode();
 		r += "\nLocal number: "+localNumber;
 		if (sym != null)
 		{
@@ -676,34 +676,17 @@ public class HalfEdge
 		Triangle T = new Triangle(v[0], v[1], v[2]);
 		m.add(T);
 		assert m.isValid();
-		// Outer triangles
-		Triangle [] O = new Triangle[3];
-		O[0] = new Triangle(Vertex.outer, v[1], v[0]);
-		O[1] = new Triangle(Vertex.outer, v[2], v[1]);
-		O[2] = new Triangle(Vertex.outer, v[0], v[2]);
-		for (int i = 0; i < 3; i++)
-		{
-			O[i].setOuter();
-			m.add(O[i]);
-		}
+		Vertex [] init = new Vertex[3];
+		System.arraycopy(v, 0, init, 0, 3);
+		m.buildAdjacency(init, -1.0);
 		assert m.isValid();
-		OTriangle ot1 = new OTriangle();
-		OTriangle ot2 = new OTriangle(T, 2);
-		for (int i = 0; i < 3; i++)
-		{
-			ot1.bind(O[i]);
-			ot1.setAttributes(OTriangle.BOUNDARY);
-			ot2.setAttributes(OTriangle.BOUNDARY);
-			ot1.glue(ot2);
-			ot2.nextOTri();
-		}
-		assert ot2.origin() == v[0];
+		m.buildEdges();
 		assert m.isValid();
-		ot2.prevOTri();  // (v2,v0,v1)
-		ot2.split(m, v[3]); // (v2,v3,v1)
+		HalfEdge e = T.getHalfEdge().next(); // (v2,v0,v1)
+		e.split(m, v[3]); // (v2,v3,v1)
 		assert m.isValid();
-		ot2.nextOTri();  // (v3,v1,v2)
-		ot2.swap();      // (v3,v0,v2)
+		e = e.next();     // (v3,v1,v2)
+		e = e.swap();     // (v3,v0,v2)
 		assert m.isValid();
 		/*
 		 *            v3        v2
@@ -715,10 +698,10 @@ public class HalfEdge
 		 *             +---------+
 		 *             v0       v1
 		 */
-		ot2.split(m, v[5]); // (v3,v5,v2)
+		e.split(m, v[5]); // (v3,v5,v2)
 		assert m.isValid();
-		ot2.nextOTri();  // (v5,v2,v3)
-		ot2.swap();      // (v5,v0,v3)
+		e = e.next();     // (v5,v2,v3)
+		e = e.swap();     // (v5,v0,v3)
 		assert m.isValid();
 		/*
 		 *            v3        v2
@@ -730,8 +713,8 @@ public class HalfEdge
 		 *   +---------+---------+
 		 *   v5        v0       v1
 		 */
-		ot2.prevOTri();  // (v3,v5,v0)
-		ot2.split(m, v[4]); // (v3,v4,v0)
+		e = e.prev();     // (v3,v5,v0)
+		e.split(m, v[4]); // (v3,v4,v0)
 		assert m.isValid();
 		/*
 		 *  v4        v3        v2
