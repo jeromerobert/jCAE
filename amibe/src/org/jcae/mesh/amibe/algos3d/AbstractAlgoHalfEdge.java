@@ -43,7 +43,6 @@ public abstract class AbstractAlgoHalfEdge
 	
 	protected abstract void preProcessAllHalfEdges();
 	protected abstract void postProcessAllHalfEdges();
-	protected abstract void preProcessEdge();
 	protected abstract boolean canProcessEdge(HalfEdge e);
 	protected abstract HalfEdge processEdge(HalfEdge e);
 	protected abstract double cost(HalfEdge e);
