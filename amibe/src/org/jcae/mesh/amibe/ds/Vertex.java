@@ -23,9 +23,11 @@ import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
-import java.util.HashSet;
 import java.util.Collection;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Iterator;
 
 /**
  * Vertex of a mesh.
@@ -230,6 +232,45 @@ public class Vertex
 		link = o;
 	}
 	
+	/**
+	 * Set link to an array of Triangles.  This routine eliminates
+	 * duplicates to keep only one Triangle by fan.
+	 *
+	 * @param triangles  initial set of adjacent triangles.
+	 */
+	public void setLinkFan(Collection triangles)
+	{
+		OTriangle ot = new OTriangle();
+		ArrayList res = new ArrayList();
+		Collection allTriangles = new HashSet();
+		for (Iterator it = triangles.iterator(); it.hasNext(); )
+		{
+			Triangle t = (Triangle) it.next();
+			if (allTriangles.contains(t))
+				continue;
+			allTriangles.add(t);
+			res.add(t);
+			ot.bind(t);
+			if (ot.destination() == this)
+				ot.nextOTri();
+			else if (ot.apex() == this)
+				ot.prevOTri();
+			assert ot.origin() == this;
+			// Add all triangles of the same fan to allTriangles
+			Vertex d = ot.destination();
+			do
+			{
+				ot.nextOTriOriginLoop();
+				allTriangles.add(ot.getTri());
+			}
+			while (ot.destination() != d);
+		}
+		Triangle [] lArray = new Triangle[res.size()];
+		for (int i = 0, n = res.size(); i < n; i++)
+			lArray[i] = (Triangle) res.get(i);
+		link = lArray;
+	}
+
 	public void setReadable(boolean r)
 	{
 		readable = r;

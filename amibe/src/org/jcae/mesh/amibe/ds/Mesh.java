@@ -403,42 +403,7 @@ public class Mesh
 				if (t.vertex[i].getLink() instanceof LinkedHashSet)
 				{
 					nrNM++;
-					LinkedHashSet link = (LinkedHashSet) t.vertex[i].getLink();
-					OTriangle ot2 = new OTriangle();
-					ArrayList res = new ArrayList();
-					Triangle.List tList = new Triangle.List();
-					for (Iterator it2 = link.iterator(); it2.hasNext(); )
-					{
-						Triangle t2 = (Triangle) it2.next();
-						if (tList.contains(t2))
-							continue;
-						tList.add(t2);
-						res.add(t2);
-						ot2.bind(t2);
-						if (ot2.destination() == t.vertex[i])
-							ot2.nextOTri();
-						else if (ot2.apex() == t.vertex[i])
-							ot2.prevOTri();
-						assert ot2.origin() == t.vertex[i];
-						Vertex d = ot2.destination();
-						do
-						{
-							ot2.nextOTriOriginLoop();
-							t2 = ot2.getTri();
-							if (!ot2.hasAttributes(OTriangle.OUTER) && !tList.contains(t2))
-								tList.add(t2);
-						}
-						while (ot2.destination() != d);
-					}
-					tList.clear();
-					Triangle [] tArray = new Triangle[res.size()];
-					int ind = 0;
-					for (Iterator it2 = res.iterator(); it2.hasNext(); )
-					{
-						tArray[ind] = (Triangle) it2.next();
-						ind++;
-					}
-					t.vertex[i].setLink(tArray);
+					t.vertex[i].setLinkFan((LinkedHashSet) t.vertex[i].getLink());
 				}
 				ot.nextOTri();
 				if (ot.hasAttributes(OTriangle.BOUNDARY))
