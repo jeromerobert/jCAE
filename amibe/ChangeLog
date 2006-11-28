@@ -9,6 +9,12 @@ Tue Nov 28 13:27:28 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java
 	  src/org/jcae/mesh/amibe/algos3d/SplitEdge.java: Rewritten to
 	extend AbstractAlgoHalfEdge.
+	* src/org/jcae/mesh/amibe/util/PAVLSortedTree2.java
+	  src/org/jcae/mesh/amibe/util/PAVLNode.java
+	  src/org/jcae/mesh/amibe/util/PAVLNodeOTriangle.java: These classes
+	are removed.  When algorithms use edge-based quality criterion, it is
+	much more efficient to call Mesh.buildEdges() and use
+	AbstractAlgoHalfEdge.
 
 Mon Nov 27 15:58:46 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
