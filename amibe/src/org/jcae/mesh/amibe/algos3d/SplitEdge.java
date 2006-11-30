@@ -168,13 +168,12 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 	public void postProcessAllHalfEdges()
 	{
 		int cnt = 0;
-		HalfEdge edge = (HalfEdge) tree.first();
-		while (edge != null)
+		for (Iterator itt = tree.iterator(); itt.hasNext(); )
 		{
+			HalfEdge edge = (HalfEdge) itt.next();
 			if (tree.getKey(edge) > tolerance)
 				break;
 			cnt++;
-			edge = (HalfEdge) tree.next();
 		}
 		logger.info("Number of splitted edges: "+processed);
 		logger.info("Total number of edges not splitted during processing: "+cntNotProcessed);

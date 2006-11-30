@@ -309,10 +309,6 @@ public class DecimateVertex
 		Quadric3DError q3 = new Quadric3DError();
 		while (tree.size() > 0 && nrTriangles > nrFinal)
 		{
-			NotOrientedEdge edge = (NotOrientedEdge) tree.first();
-			double cost = -1.0;
-			if (nrFinal == 0)
-				cost = tree.getKey(edge);
 			if (v1 != null)
 			{
 				// v1 and v2 have been removed from the
@@ -320,7 +316,15 @@ public class DecimateVertex
 				v3 = v1;
 				q3 = q1;
 			}
-			do {
+			NotOrientedEdge edge = null;
+			double cost = -1.0;
+			for (Iterator itt = tree.iterator(); itt.hasNext(); )
+			{
+				edge = (NotOrientedEdge) itt.next();
+				if (nrFinal == 0)
+					cost = tree.getKey(edge);
+				else
+					cost = -1.0;
 				if (cost > tolerance)
 					break;
 				edge.pullAttributes();
@@ -349,12 +353,7 @@ public class DecimateVertex
 					notContracted.push(edge);
 					notContracted.push(new Double(cost+0.1*(tolerance - cost)));
 				}
-				edge = (NotOrientedEdge) tree.next();
-				if (nrFinal == 0)
-					cost = tree.getKey(edge);
-				else
-					cost = -1.0;
-			} while (edge != null && cost <= tolerance);
+			}
 			if (cost > tolerance || edge == null)
 				break;
 			tree.remove(edge);
@@ -471,13 +470,12 @@ public class DecimateVertex
 		trashBin(trash);
 		logger.info("Number of contracted edges: "+contracted);
 		int cnt = 0;
-		NotOrientedEdge edge = (NotOrientedEdge) tree.first();
-		while (edge != null)
+		for (Iterator itt = tree.iterator(); itt.hasNext(); )
 		{
+			NotOrientedEdge edge = (NotOrientedEdge) itt.next();
 			if (tree.getKey(edge) > tolerance)
 				break;
 			cnt++;
-			edge = (NotOrientedEdge) tree.next();
 		}
 		logger.info("Total number of edges not contracted during processing: "+cntNotContracted);
 		logger.info("Number of edges which could have been contracted: "+cnt);

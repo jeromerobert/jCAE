@@ -20,6 +20,7 @@
 package org.jcae.mesh.amibe.util;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.io.Serializable;
 import org.apache.log4j.Logger;
 
@@ -34,10 +35,7 @@ import org.apache.log4j.Logger;
 public class PAVLSortedTree implements Serializable
 {
 	private static Logger logger = Logger.getLogger(PAVLSortedTree.class);	
-	private PAVLSortedTreeNode root;
-	// Current node for tree traversal.  As there is no reason to have
-	// concurrent traversals, we do not need to define proper traversers.
-	private transient PAVLSortedTreeNode travNode;
+	private final PAVLSortedTreeNode root = new PAVLSortedTreeNode(null, Double.MAX_VALUE);
 	// Mapping between objects and tree nodes
 	private transient HashMap map = new HashMap();
 	private int count = 0;
@@ -217,7 +215,38 @@ public class PAVLSortedTree implements Serializable
 			return newRoot;
 		}
 
-		public PAVLSortedTreeNode next()
+		public PAVLSortedTreeNode firstNode()
+		{
+			PAVLSortedTreeNode current = this;
+			while (current.child[0] != null)
+				current = current.child[0];
+			return current;
+		}
+	
+		public PAVLSortedTreeNode lastNode()
+		{
+			PAVLSortedTreeNode current = this;
+			while (current.child[1] != null)
+				current = current.child[1];
+			return current;
+		}
+
+		public PAVLSortedTreeNode previousNode()
+		{
+			PAVLSortedTreeNode current = this;
+			if (current.child[0] != null)
+			{
+				current = current.child[0];
+				while (current.child[1] != null)
+					current = current.child[1];
+				return current;
+			}
+			while (current.parent != null && current.parent.child[1] != current)
+				current = current.parent;
+			return current.parent;
+		}
+
+		public PAVLSortedTreeNode nextNode()
 		{
 			PAVLSortedTreeNode current = this;
 			if (current.child[1] != null)
@@ -227,8 +256,10 @@ public class PAVLSortedTree implements Serializable
 					current = current.child[0];
 				return current;
 			}
-			// This loop always terminate
-			while (current.parent.child[0] != current)
+			// In our implementation, current.parent cannot be
+			// null because our tree has a dummy root node;
+			// keep this test anyway, this may change later.
+			while (current.parent != null && current.parent.child[0] != current)
 				current = current.parent;
 			return current.parent;
 		}
@@ -239,15 +270,9 @@ public class PAVLSortedTree implements Serializable
 	{
 		s.defaultWriteObject();
 		s.writeInt(count);
-		// Warning: we cannot use an iterator here, because
-		// this routine may be called from an already running
-		// walker.
-		if (root == null || root.child[0] == null)
+		if (isEmpty())
 			return;
-		PAVLSortedTreeNode current = root.child[0];
-		while (current.child[0] != null)
-			current = current.child[0];
-		for (; current != root; current = current.next())
+		for (PAVLSortedTreeNode current = root.child[0].firstNode(); current != root; current = current.nextNode())
 		{
 			s.writeObject(current.data);
 			s.writeDouble(current.value);
@@ -259,7 +284,6 @@ public class PAVLSortedTree implements Serializable
 	{
 		s.defaultReadObject();
 		int numBuckets = s.readInt();
-		root = null;
 		count = 0;
 		map = new HashMap(numBuckets);
 		for (int i = 0; i < numBuckets; i++)
@@ -271,11 +295,19 @@ public class PAVLSortedTree implements Serializable
 	}
 
 	/**
+	 * Tell whether this tree is empty.
+	 */
+	public boolean isEmpty()
+	{
+		return root.child[0] == null;
+	}
+	
+	/**
 	 * Pretty-print this tree.
 	 */
 	public void show()
 	{
-		if (root == null)
+		if (isEmpty())
 		{
 			System.out.println("Empty tree");
 			return;
@@ -311,7 +343,7 @@ public class PAVLSortedTree implements Serializable
 	 */
 	public void showValues()
 	{
-		if (root == null)
+		if (isEmpty())
 		{
 			System.out.println("Empty tree");
 			return;
@@ -337,15 +369,15 @@ public class PAVLSortedTree implements Serializable
 	
 	public void showKeys()
 	{
-		if (root == null)
+		if (isEmpty())
 		{
 			System.out.println("Empty tree");
 			return;
 		}
 		System.out.println("Sorted keys:");
-		for (Object current = last(); current != null; current = prev())
+		for (Iterator itt = backwardIterator(); itt.hasNext(); )
 		{
-			PAVLSortedTreeNode node = (PAVLSortedTreeNode) map.get(current);
+			PAVLSortedTreeNode node = (PAVLSortedTreeNode) map.get(itt.next());
 			assert node != null;
 			System.out.println("  "+node.value);
 		}
@@ -369,16 +401,6 @@ public class PAVLSortedTree implements Serializable
 
 	private final void insertNode(PAVLSortedTreeNode node, double value)
 	{
-		if (root == null)
-		{
-			root = new PAVLSortedTreeNode(null, 0.0);
-			// A fake node is inserted below root so that root
-			// never has to be updated.  Tree begins at
-			// root.child[0].
-			root.child[0] = node;
-			node.parent = root;
-			return;
-		}
 		count++;
 		PAVLSortedTreeNode current = root.child[0];
 		PAVLSortedTreeNode parent = root;
@@ -398,6 +420,8 @@ public class PAVLSortedTree implements Serializable
 		// Insert node
 		parent.child[lastDir] = node;
 		node.parent = parent;
+		if (topNode == null)
+			return;
 		// Update balance factors
 		for (current = node; current != topNode; current = parent)
 		{
@@ -659,8 +683,6 @@ public class PAVLSortedTree implements Serializable
 				}
 			}
 		}
-		if (root.child[0] == null)
-			root = null;
 		return ret;
 	}
 	
@@ -673,90 +695,56 @@ public class PAVLSortedTree implements Serializable
 		return map.size();
 	}
 	
-	/**
-	 * Return the object with the lowest quality factor.
-	 * @return the object with the lowest quality factor.
-	 */
-	public final Object first()
+	public Iterator iterator()
 	{
-		if (root == null || root.child[0] == null)
-			return null;
-		travNode = root.child[0];
-		while (travNode.child[0] != null)
-			travNode = travNode.child[0];
-		return travNode.data;
+		return new Iterator()
+		{
+			private PAVLSortedTreeNode current = root;
+			private PAVLSortedTreeNode next = root.firstNode();
+			public boolean hasNext()
+			{
+				return next != null;
+			}
+			public Object next()
+			{
+				current = next;
+				if (current == null)
+					return null;
+				next = next.nextNode();
+				return current.data;
+			}
+			public void remove()
+			{
+				// Not supported yet!
+				throw new RuntimeException();
+			}
+		};
 	}
 	
-	/**
-	 * Return the object with the highest quality factor.
-	 * @return the object with the highest quality factor.
-	 */
-	public final Object last()
+	public Iterator backwardIterator()
 	{
-		if (root == null || root.child[0] == null)
-			return null;
-		travNode = root.child[0];
-		while (travNode.child[1] != null)
-			travNode = travNode.child[1];
-		return travNode.data;
-	}
-	
-	/**
-	 * When traversing tree, return object with immediate higher quality
-	 * factor.
-	 * @return the object with the immediate higher quality factor.
-	 */
-	public final Object next()
-	{
-		if (travNode == null)
-			return null;
-		PAVLSortedTreeNode right = travNode.child[1];
-		if (right != null)
+		return new Iterator()
 		{
-			travNode = right;
-			while (travNode.child[0] != null)
-				travNode = travNode.child[0];
-			return travNode.data;
-		}
-		// This loop always terminate
-		while (travNode.parent.child[0] != travNode)
-			travNode = travNode.parent;
-		travNode = travNode.parent;
-		if (travNode == root)
-		{
-			travNode = null;
-			return null;
-		}
-		return travNode.data;
-	}
-	
-	/**
-	 * When traversing tree, return object with immediate lower quality
-	 * factor.
-	 * @return the object with the immediate lower quality factor.
-	 */
-	public final Object prev()
-	{
-		if (travNode == null)
-			return null;
-		PAVLSortedTreeNode left = travNode.child[0];
-		if (left != null)
-		{
-			travNode = left;
-			while (travNode.child[1] != null)
-				travNode = travNode.child[1];
-			return travNode.data;
-		}
-		// This loop always terminate
-		while (travNode.parent.child[1] != travNode && travNode.parent != root)
-			travNode = travNode.parent;
-		travNode = travNode.parent;
-		if (travNode == root)
-		{
-			travNode = null;
-			return null;
-		}
-		return travNode.data;
+			private PAVLSortedTreeNode current = root;
+			private PAVLSortedTreeNode next = root.child[0].lastNode();
+			public boolean hasNext()
+			{
+				return next != null;
+			}
+			public Object next()
+			{
+				current = next;
+				if (current == null)
+					return null;
+				next = next.previousNode();
+				return current.data;
+			}
+			public void remove()
+			{
+				// Not supported yet!
+				throw new RuntimeException();
+			}
+		};
 	}
 	
 	public static void main(String args[])

@@ -1,3 +1,9 @@
+Thu Nov 30 17:03:16 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/util/PAVLSortedTree.java: Nex isEmpty()
+	method. Replace first(), last(), next() and prev() by iterator()
+	and backwardIterator();
+
 Tue Nov 28 13:27:28 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Triangle.java: In Triangle(Vertex [] v)

@@ -115,14 +115,17 @@ public abstract class AbstractAlgoHalfEdge
 		boolean noSwap = false;
 		Stack notProcessed = new Stack();
 		double cost = -1.0;
-		while (tree.size() > 0 && nrTriangles > nrFinal)
+		while (!tree.isEmpty() && nrTriangles > nrFinal)
 		{
-			HalfEdge current = (HalfEdge) tree.first();
-			cost = -1.0;
-			if (nrFinal == 0)
-				cost = tree.getKey(current);
 			preProcessEdge();
-			do {
+			HalfEdge current = null;
+			for (Iterator itt = tree.iterator(); itt.hasNext(); )
+			{
+				current = (HalfEdge) itt.next();
+				if (nrFinal == 0)
+					cost = tree.getKey(current);
+				else
+					cost = -1.0;
 				if (cost > tolerance)
 					break;
 				if (canProcessEdge(current))
@@ -144,12 +147,7 @@ public abstract class AbstractAlgoHalfEdge
 						// tolerance = cost = 0
 						notProcessed.push(new Double(1.0));
 				}
-				current = (HalfEdge) tree.next();
-				if (nrFinal == 0)
-					cost = tree.getKey(current);
-				else
-					cost = -1.0;
-			} while (current != null && cost <= tolerance);
+			}
 			if (cost > tolerance || current == null)
 				break;
 			// Update costs for edges which were not contracted

@@ -120,9 +120,9 @@ public class SmoothNodes3D
 			tree.insert(f, cost(f));
 		}
 		OTriangle ot = new OTriangle();
-		for (Object o = tree.first(); o != null; o = tree.next())
+		for (Iterator itt = tree.iterator(); itt.hasNext(); )
 		{
-			Triangle f = (Triangle) o;
+			Triangle f = (Triangle) itt.next();
 			ot.bind(f);
 			for (int i = 0; i < 3; i++)
 			{
