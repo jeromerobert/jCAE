@@ -22,6 +22,7 @@ package org.jcae.mesh.amibe.metrics;
 
 import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.mesh.amibe.ds.Vertex;
+import java.io.Serializable;
 import org.apache.log4j.Logger;
 
 /**
@@ -72,7 +73,7 @@ import org.apache.log4j.Logger;
  * {@link #restrict2D}.
  * </p>
  */
-public class Metric3D extends Matrix3D
+public class Metric3D extends Matrix3D implements Serializable
 {
 	private static Logger logger=Logger.getLogger(Metric3D.class);
 	

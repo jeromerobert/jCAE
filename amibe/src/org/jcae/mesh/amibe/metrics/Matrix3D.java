@@ -20,10 +20,12 @@
 
 package org.jcae.mesh.amibe.metrics;
 
+import java.io.Serializable;
+
 /**
  * General 3D matrix.
  */
-public class Matrix3D
+public class Matrix3D implements Serializable
 {
 	protected double [] data = new double[9];
 	

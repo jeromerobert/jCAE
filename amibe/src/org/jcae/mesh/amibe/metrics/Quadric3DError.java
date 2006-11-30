@@ -21,6 +21,7 @@
 package org.jcae.mesh.amibe.metrics;
 
 import org.jcae.mesh.amibe.ds.Vertex;
+import java.io.Serializable;
 
 /**
  * Garland's Quadric Error Metric.  See
@@ -56,7 +57,7 @@ import org.jcae.mesh.amibe.ds.Vertex;
  * is non singular, the optimal placement is for <code>V3=-inv(A) B</code>.
  * </p>
  */
-public class Quadric3DError
+public class Quadric3DError implements Serializable
 {
 	public Metric3D A = new Metric3D();
 	public double [] b = new double[3];

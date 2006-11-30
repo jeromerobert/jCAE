@@ -21,9 +21,10 @@ package org.jcae.mesh.amibe.ds;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.io.Serializable;
 import org.apache.log4j.Logger;
 
-public class HalfEdge
+public class HalfEdge implements Serializable
 {
 	private static Logger logger = Logger.getLogger(HalfEdge.class);
 	private Triangle tri;

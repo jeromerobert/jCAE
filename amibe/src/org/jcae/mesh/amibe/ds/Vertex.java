@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Iterator;
+import java.io.Serializable;
 
 /**
  * Vertex of a mesh.
@@ -51,7 +52,7 @@ import java.util.Iterator;
  * all incident triangles through their adjacency relations.
  * </p>
  */
-public class Vertex
+public class Vertex implements Serializable
 {
 	private static Logger logger = Logger.getLogger(Vertex.class);
 	/**

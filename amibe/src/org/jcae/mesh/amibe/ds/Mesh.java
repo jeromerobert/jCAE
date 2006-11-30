@@ -31,6 +31,7 @@ import java.io.PrintWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
+import java.io.Serializable;
 import org.apache.log4j.Logger;
 
 /**
@@ -91,7 +92,7 @@ import org.apache.log4j.Logger;
  * </p>
  */
 
-public class Mesh
+public class Mesh implements Serializable
 {
 	private static Logger logger=Logger.getLogger(Mesh.class);
 	

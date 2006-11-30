@@ -20,6 +20,7 @@
 package org.jcae.mesh.amibe.util;
 
 import java.util.HashMap;
+import java.io.Serializable;
 import org.apache.log4j.Logger;
 
 /**
@@ -30,18 +31,18 @@ import org.apache.log4j.Logger;
  * order after they have been sorted.  See examples in algorithms from
  * {@link org.jcae.mesh.amibe.algos3d}.
  */
-public class PAVLSortedTree
+public class PAVLSortedTree implements Serializable
 {
 	private static Logger logger = Logger.getLogger(PAVLSortedTree.class);	
 	private PAVLSortedTreeNode root;
 	// Current node for tree traversal.  As there is no reason to have
 	// concurrent traversals, we do not need to define proper traversers.
-	private PAVLSortedTreeNode travNode;
+	private transient PAVLSortedTreeNode travNode;
 	// Mapping between objects and tree nodes
-	private HashMap map = new HashMap();
+	private transient HashMap map = new HashMap();
 	private int count = 0;
 	
-	private static class PAVLSortedTreeNode
+	private static class PAVLSortedTreeNode implements Serializable
 	{
 		private double value;
 		private Object data;
@@ -217,6 +218,35 @@ public class PAVLSortedTree
 		}
 	}
 	
+	private void writeObject(java.io.ObjectOutputStream s)
+		throws java.io.IOException
+	{
+		s.defaultWriteObject();
+		s.writeInt(count);
+		for (Object current = first(); current != null; current = next())
+		{
+			PAVLSortedTreeNode node = (PAVLSortedTreeNode) map.get(current);
+			s.writeObject(node.data);
+			s.writeDouble(node.value);
+		}
+	}
+
+	private void readObject(java.io.ObjectInputStream s)
+		throws java.io.IOException, ClassNotFoundException
+	{
+		s.defaultReadObject();
+		int numBuckets = s.readInt();
+		root = null;
+		count = 0;
+		map = new HashMap(numBuckets);
+		for (int i = 0; i < numBuckets; i++)
+		{
+			Object o = s.readObject();
+			double val = s.readDouble();
+			insert(o, val);
+		}
+	}
+
 	/**
 	 * Pretty-print this tree.
 	 */

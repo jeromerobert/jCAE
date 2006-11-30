@@ -23,6 +23,7 @@ import org.jcae.mesh.amibe.patch.Vertex2D;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.ArrayList;
+import java.io.Serializable;
 
 /**
  * A triangular element of the mesh.  Instances of this class carry up
@@ -78,7 +79,7 @@ import java.util.ArrayList;
  *       contain a pointer to the same list.
  * </ul>
  */
-public class Triangle
+public class Triangle implements Serializable
 {
 	/**
 	 * Three vertices.
