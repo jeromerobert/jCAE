@@ -216,6 +216,22 @@ public class PAVLSortedTree implements Serializable
 				child[0].parent = this;
 			return newRoot;
 		}
+
+		public PAVLSortedTreeNode next()
+		{
+			PAVLSortedTreeNode current = this;
+			if (current.child[1] != null)
+			{
+				current = current.child[1];
+				while (current.child[0] != null)
+					current = current.child[0];
+				return current;
+			}
+			// This loop always terminate
+			while (current.parent.child[0] != current)
+				current = current.parent;
+			return current.parent;
+		}
 	}
 	
 	private void writeObject(java.io.ObjectOutputStream s)
@@ -223,11 +239,18 @@ public class PAVLSortedTree implements Serializable
 	{
 		s.defaultWriteObject();
 		s.writeInt(count);
-		for (Object current = first(); current != null; current = next())
+		// Warning: we cannot use an iterator here, because
+		// this routine may be called from an already running
+		// walker.
+		if (root == null || root.child[0] == null)
+			return;
+		PAVLSortedTreeNode current = root.child[0];
+		while (current.child[0] != null)
+			current = current.child[0];
+		for (; current != root; current = current.next())
 		{
-			PAVLSortedTreeNode node = (PAVLSortedTreeNode) map.get(current);
-			s.writeObject(node.data);
-			s.writeDouble(node.value);
+			s.writeObject(current.data);
+			s.writeDouble(current.value);
 		}
 	}
 
