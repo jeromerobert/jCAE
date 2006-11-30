@@ -29,6 +29,12 @@ import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import java.util.Stack;
 import java.util.Map;
 import java.util.Iterator;
+import java.io.ObjectOutputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import org.apache.log4j.Logger;
 
 public abstract class AbstractAlgoHalfEdge
@@ -47,6 +53,7 @@ public abstract class AbstractAlgoHalfEdge
 	protected abstract HalfEdge processEdge(HalfEdge e);
 	protected abstract double cost(HalfEdge e);
 	protected abstract Logger thisLogger();
+	private final String dumpFile = "/tmp/jcae.dump";
 
 	public AbstractAlgoHalfEdge(Mesh m, Map options)
 	{
@@ -59,6 +66,7 @@ public abstract class AbstractAlgoHalfEdge
 		thisLogger().info("Run "+getClass().getName());
 		preProcessAllHalfEdges();
 		computeTree();
+		postComputeTree();
 		processAllHalfEdges();
 	}
 	
@@ -83,6 +91,10 @@ public abstract class AbstractAlgoHalfEdge
 		}
 	}
 	
+	protected void postComputeTree()
+	{
+	}
+
 	// This routine is needed by DecimateHalfedge.
 	protected void preProcessEdge()
 	{
@@ -203,4 +215,60 @@ public abstract class AbstractAlgoHalfEdge
 		postProcessAllHalfEdges();
 		return processed > 0;
 	}
+
+	protected final void dumpState()
+	{
+		ObjectOutputStream out = null;
+		try
+		{
+			out = new ObjectOutputStream(new FileOutputStream(dumpFile));
+			out.writeObject(Vertex.outer);
+			out.writeObject(mesh);
+			out.writeObject(tree);
+			appendDumpState(out);
+			out.close();
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+			System.exit(-1);
+		}
+	}
+
+	protected void appendDumpState(ObjectOutputStream out)
+		throws IOException
+	{
+	}
+
+	protected final boolean restoreState()
+	{
+		try
+		{
+			FileInputStream istream = new FileInputStream(dumpFile);
+			ObjectInputStream q = new ObjectInputStream(istream);
+			System.out.println("Loading restored state");
+			Vertex.outer = (Vertex) q.readObject();
+			mesh = (Mesh) q.readObject();
+			tree = (PAVLSortedTree) q.readObject();
+			appendRestoreState(q);
+			System.out.println("... Done.");
+			assert mesh.isValid();
+		}
+		catch (FileNotFoundException ex)
+		{
+			return false;
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+			System.exit(-1);
+		}
+		return true;
+	}
+
+	protected void appendRestoreState(ObjectInputStream q)
+		throws IOException
+	{
+	}
+
 }

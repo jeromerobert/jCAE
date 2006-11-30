@@ -30,6 +30,9 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.File;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
+import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.HashMap;
@@ -111,6 +114,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	private Quadric3DError q1 = null, q2 = null;
 	private Vertex v3 = Vertex.valueOf(0.0, 0.0, 0.0);
 	private Quadric3DError q3 = new Quadric3DError();
+	private static final boolean testDump = false;
 	
 	/**
 	 * Creates a <code>DecimateHalfEdge</code> instance.
@@ -232,6 +236,32 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		}
 	}
 
+	protected void postComputeTree()
+	{
+		if (testDump)
+			restoreState();
+	}
+
+	protected void appendDumpState(ObjectOutputStream out)
+		throws IOException
+	{
+		out.writeObject(quadricMap);
+	}
+
+	protected void appendRestoreState(ObjectInputStream q)
+		throws IOException
+	{
+		try
+		{
+			quadricMap = (HashMap) q.readObject();
+		}
+		catch (ClassNotFoundException ex)
+		{
+			ex.printStackTrace();
+			System.exit(-1);
+		}
+	}
+
 	public double cost(HalfEdge e)
 	{
 		Vertex o = e.origin();
@@ -267,6 +297,8 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 
 	public void preProcessEdge()
 	{
+		if (testDump)
+			dumpState();
 		if (v1 != null)
 		{
 			// v1 and v2 have been removed from the mesh,
