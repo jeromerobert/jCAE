@@ -252,6 +252,7 @@ public abstract class AbstractAlgoHalfEdge
 			tree = (PAVLSortedTree) q.readObject();
 			appendRestoreState(q);
 			System.out.println("... Done.");
+			q.close();
 			assert mesh.isValid();
 		}
 		catch (FileNotFoundException ex)
