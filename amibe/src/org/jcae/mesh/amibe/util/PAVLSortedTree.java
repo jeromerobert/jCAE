@@ -265,33 +265,13 @@ public class PAVLSortedTree implements Serializable
 		}
 	}
 	
-	private void writeObject(java.io.ObjectOutputStream s)
-		throws java.io.IOException
-	{
-		s.defaultWriteObject();
-		s.writeInt(count);
-		if (isEmpty())
-			return;
-		for (PAVLSortedTreeNode current = root.child[0].firstNode(); current != root; current = current.nextNode())
-		{
-			s.writeObject(current.data);
-			s.writeDouble(current.value);
-		}
-	}
-
 	private void readObject(java.io.ObjectInputStream s)
 		throws java.io.IOException, ClassNotFoundException
 	{
 		s.defaultReadObject();
-		int numBuckets = s.readInt();
-		count = 0;
-		map = new HashMap(numBuckets);
-		for (int i = 0; i < numBuckets; i++)
-		{
-			Object o = s.readObject();
-			double val = s.readDouble();
-			insert(o, val);
-		}
+		map = new HashMap(count);
+		for (PAVLSortedTreeNode current = root.child[0].firstNode(); current != root; current = current.nextNode())
+			map.put(current.data, current);
 	}
 
 	/**
