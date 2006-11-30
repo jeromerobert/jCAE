@@ -20,11 +20,13 @@
 
 package org.jcae.mesh.amibe.util;
 
-import java.io.*;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.MGroup3D;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 import java.util.ArrayList;
 import gnu.trove.TIntObjectHashMap;
@@ -257,12 +259,11 @@ public class UNVReader
 					n1.setLink(f);
 					n2.setLink(f);
 					n3.setLink(f);
+					facesmap.put(ind, f);
 					f = new Triangle(n1, n3, n4);
 					mesh.add(f);
 					n4.setLink(f);
-					// triangles can not be put in facesmap,
-					// and readMesh will abort if those ids
-					// are found in groups
+					facesmap.put(-ind, f);
 				}
 				else
 					throw new RuntimeException("Type "+type+" unknown");
