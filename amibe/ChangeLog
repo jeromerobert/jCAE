@@ -1,3 +1,8 @@
+Fri Dec  1 13:05:28 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Mesh.java: New outerVertex member,
+	which will replace Vertex.outer.
+
 Thu Nov 30 17:03:16 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/util/PAVLSortedTree.java: Nex isEmpty()

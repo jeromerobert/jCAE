@@ -96,6 +96,11 @@ public class Mesh implements Serializable
 {
 	private static Logger logger=Logger.getLogger(Mesh.class);
 	
+	/**
+	 * Vertex at infinite.
+	 */
+	public Vertex outerVertex = null;
+	
 	//  Triangle list
 	protected Collection triangleList = null;
 	
@@ -125,6 +130,7 @@ public class Mesh implements Serializable
 		if (Vertex.outer == null)
 			Vertex.outer = new Vertex();
 		triangleList = new ArrayList();
+		outerVertex = Vertex.outer;
 	}
 	
 	/**
@@ -286,7 +292,7 @@ public class Mesh implements Serializable
 				if (ot.getAdj() == null)
 				{
 					ot.setAttributes(OTriangle.BOUNDARY);
-					Triangle adj = new Triangle(Vertex.outer, ot.destination(), ot.origin());
+					Triangle adj = new Triangle(outerVertex, ot.destination(), ot.origin());
 					newTri.add(adj);
 					adj.setOuter();
 					sym.bind(adj);
@@ -307,7 +313,7 @@ public class Mesh implements Serializable
 				if (ot.getAdj() instanceof Triangle)
 					continue;
 				ArrayList list = (ArrayList) ot.getAdj();
-				Triangle adj = new Triangle(Vertex.outer, ot.destination(), ot.origin());
+				Triangle adj = new Triangle(outerVertex, ot.destination(), ot.origin());
 				newTri.add(adj);
 				adj.setOuter();
 				sym.bind(adj);
@@ -545,7 +551,7 @@ public class Mesh implements Serializable
 		markedTri.clear();
 	}
 	
-	private static final boolean checkRidges(Vertex v, double cosMinAngle, OTriangle ot)
+	private final boolean checkRidges(Vertex v, double cosMinAngle, OTriangle ot)
 	{
 		OTriangle sym = new OTriangle();
 		if (ot.origin() != v)
@@ -559,7 +565,7 @@ public class Mesh implements Serializable
 		while (true)
 		{
 			Vertex d = ot.destination();
-			if (d != Vertex.outer && 0 != d.getRef())
+			if (d != outerVertex && 0 != d.getRef())
 			{
 				if (id != ot.getTri().getGroupId())
 					return false;
@@ -577,7 +583,7 @@ public class Mesh implements Serializable
 		while (true)
 		{
 			Vertex d = ot.destination();
-			if (d != Vertex.outer && 0 != d.getRef())
+			if (d != outerVertex && 0 != d.getRef())
 			{
 				OTriangle.symOTri(ot, sym);
 				ot.computeNormal3D();
@@ -705,7 +711,7 @@ public class Mesh implements Serializable
 				Triangle t = (Triangle) it.next();
 				if (t.isOuter())
 					continue;
-				if (t.vertex[0] == Vertex.outer || t.vertex[1] == Vertex.outer || t.vertex[2] == Vertex.outer)
+				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
 					continue;
 				nodeset.add(t.vertex[0]);
 				nodeset.add(t.vertex[1]);
@@ -734,7 +740,7 @@ public class Mesh implements Serializable
 				Triangle t = (Triangle)it.next();
 				if (t.isOuter())
 					continue;
-				if (t.vertex[0] == Vertex.outer || t.vertex[1] == Vertex.outer || t.vertex[2] == Vertex.outer)
+				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
 					continue;
 				count++;
 				out.println(""+count+"        91         1         1         1         3");
@@ -775,7 +781,7 @@ public class Mesh implements Serializable
 				Triangle t = (Triangle) it.next();
 				if (t.isOuter())
 					continue;
-				if (t.vertex[0] == Vertex.outer || t.vertex[1] == Vertex.outer || t.vertex[2] == Vertex.outer)
+				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
 					continue;
 				nodeset.add(t.vertex[0]);
 				nodeset.add(t.vertex[1]);
@@ -802,7 +808,7 @@ public class Mesh implements Serializable
 				Triangle t = (Triangle)it.next();
 				if (t.isOuter())
 					continue;
-				if (t.vertex[0] == Vertex.outer || t.vertex[1] == Vertex.outer || t.vertex[2] == Vertex.outer)
+				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
 					continue;
 				count++;
 			}
@@ -813,7 +819,7 @@ public class Mesh implements Serializable
 				Triangle t = (Triangle)it.next();
 				if (t.isOuter())
 					continue;
-				if (t.vertex[0] == Vertex.outer || t.vertex[1] == Vertex.outer || t.vertex[2] == Vertex.outer)
+				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
 					continue;
 				count++;
 				for(int i = 0; i < 3; i++)
@@ -868,7 +874,7 @@ public class Mesh implements Serializable
 				logger.error("Duplicate vertices: "+t);
 				return false;
 			}
-			if (t.vertex[0] == Vertex.outer || t.vertex[1] == Vertex.outer || t.vertex[2] == Vertex.outer)
+			if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
 			{
 				if (constrained && !t.isOuter())
 				{
