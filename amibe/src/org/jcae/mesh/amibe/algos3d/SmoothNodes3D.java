@@ -115,9 +115,8 @@ public class SmoothNodes3D
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
-			if (f.isOuter())
-				continue;
-			tree.insert(f, cost(f));
+			if (!f.isOuter())
+				tree.insert(f, cost(f));
 		}
 		OTriangle ot = new OTriangle();
 		for (Iterator itt = tree.iterator(); itt.hasNext(); )
@@ -141,7 +140,7 @@ public class SmoothNodes3D
 		}
 		return ret;
 	}
-			
+	
 	private static boolean smoothNode(Mesh mesh, OTriangle ot, double sizeTarget)
 	{
 		Vertex n = ot.origin();
