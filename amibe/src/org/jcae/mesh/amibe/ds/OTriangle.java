@@ -1361,7 +1361,6 @@ public class OTriangle
 		 *   +---------+---------+
 		 *   v5        v0       v1
 		 */
-		m.setType(Mesh.MESH_3D);
 		System.out.println("Building mesh...");
 		Triangle T = new Triangle(v[0], v[1], v[2]);
 		m.add(T);

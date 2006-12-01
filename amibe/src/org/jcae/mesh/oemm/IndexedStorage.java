@@ -661,7 +661,6 @@ public class IndexedStorage
 	{
 		logger.info("Loading nodes");
 		Mesh ret = new Mesh();
-		ret.setType(Mesh.MESH_OEMM);
 		TIntObjectHashMap vertMap = new TIntObjectHashMap();
 		ReadVerticesProcedure rv_proc = new ReadVerticesProcedure(ret, vertMap, leaves);
 		oemm.walk(rv_proc);

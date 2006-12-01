@@ -160,7 +160,6 @@ public class Storage
 	public static Mesh readAllFaces(BCADGraphCell root)
 	{
 		Mesh m = new Mesh();
-		m.setType(Mesh.MESH_3D);
 		TIntObjectHashMap vertMap = new TIntObjectHashMap();
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 			readFace(m, (BCADGraphCell) it.next(), vertMap);
@@ -214,7 +213,6 @@ public class Storage
 	public static VolMesh readAllVolumes(BCADGraphCell root)
 	{
 		VolMesh m = new VolMesh();
-		m.setType(Mesh.MESH_3D);
 		TIntObjectHashMap vertMap = new TIntObjectHashMap();
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
 			readVolume(m, (BCADGraphCell) it.next(), vertMap);

@@ -40,7 +40,6 @@ public class MESHReader
 	public static VolMesh readMesh(String file)
 	{
 		VolMesh mesh = new VolMesh();
-		mesh.setType(Mesh.MESH_3D);
 		TIntObjectHashMap nodesmap = null;
 		String line = new String();
 		try

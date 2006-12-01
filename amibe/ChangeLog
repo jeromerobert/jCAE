@@ -4,6 +4,8 @@ Fri Dec  1 13:05:28 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 	which will replace Vertex.outer.
 	* src/org/jcae/mesh/amibe/ds/HalfEdge.java: nextOriginLoop() and
 	nextApexLoop() can check OUTER attributes
+	* src/org/jcae/mesh/amibe/ds/Mesh.java: Remove useless members:
+	type, scaleX, scaleY.
 
 Thu Nov 30 17:03:16 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 

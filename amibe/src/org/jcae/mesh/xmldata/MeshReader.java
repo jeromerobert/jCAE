@@ -179,7 +179,6 @@ public class MeshReader
 	private static Mesh readObject3D(String xmlDir, String xmlFile, double ridgeAngle, boolean buildAdj)
 	{
 		Mesh mesh = new Mesh();
-		mesh.setType(Mesh.MESH_3D);
 		logger.debug("begin reading "+xmlDir+File.separator+xmlFile);
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		try

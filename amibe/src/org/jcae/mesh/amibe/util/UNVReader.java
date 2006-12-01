@@ -59,7 +59,6 @@ public class UNVReader
 	private static Mesh readMesh(String file, double ridgeAngle, boolean buildAdj)
 	{
 		Mesh mesh = new Mesh();
-		mesh.setType(Mesh.MESH_3D);
 		TIntObjectHashMap nodesmap = null;
 		TIntObjectHashMap facesmap = null;
 		double unit = 1.0;

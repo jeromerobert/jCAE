@@ -764,7 +764,6 @@ public class HalfEdge implements Serializable
 		 *   +---------+---------+
 		 *   v5        v0       v1
 		 */
-		m.setType(Mesh.MESH_3D);
 		System.out.println("Building mesh...");
 		Triangle T = new Triangle(v[0], v[1], v[2]);
 		m.add(T);
@@ -883,7 +882,6 @@ public class HalfEdge implements Serializable
 
 		System.out.println("Building non-manifold mesh...");
 		m = new Mesh();
-		m.setType(Mesh.MESH_3D);
 		Vertex [] nmv = new Vertex[6];
 		nmv[0] = Vertex.valueOf(0.0, 0.0, 0.0);
 		nmv[1] = Vertex.valueOf(0.0, 0.0, 3.0);

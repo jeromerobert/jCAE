@@ -111,17 +111,6 @@ public class Mesh implements Serializable
 	
 	protected boolean accumulateEpsilon = false;
 	
-	//  Utilities to help debugging meshes with writeMESH
-	protected static final double scaleX = 1.0;
-	protected static final double scaleY = 1.0;
-	
-	//  2D/3D
-	public static final int MESH_1D = 1;
-	public static final int MESH_2D = 2;
-	public static final int MESH_3D = 3;
-	public static final int MESH_OEMM = 4;
-	private int type = MESH_2D;
-	
 	// Utility class to improve debugging output
 	private static class OuterVertex extends Vertex
 	{
@@ -137,26 +126,6 @@ public class Mesh implements Serializable
 	public Mesh()
 	{
 		triangleList = new ArrayList();
-	}
-	
-	/**
-	 * Returns the mesh type.
-	 *
-	 * @return the mesh type.
-	 */
-	public int getType()
-	{
-		return type;
-	}
-	
-	/**
-	 * Sets the mesh type.
-	 *
-	 * @param t mesh type
-	 */
-	public void setType(int t)
-	{
-		type = t;
 	}
 	
 	public void scaleTolerance(double scale)
