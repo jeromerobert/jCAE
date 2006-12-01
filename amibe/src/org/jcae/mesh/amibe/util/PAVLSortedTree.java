@@ -256,12 +256,13 @@ public class PAVLSortedTree implements Serializable
 					current = current.child[0];
 				return current;
 			}
-			// In our implementation, current.parent cannot be
-			// null because our tree has a dummy root node;
-			// keep this test anyway, this may change later.
-			while (current.parent != null && current.parent.child[0] != current)
+			// Our implementation has a fake root node.
+			while (current.parent.child[0] != current)
 				current = current.parent;
-			return current.parent;
+			if (current.parent.parent == null)
+				return null;
+			else
+				return current.parent;
 		}
 	}
 	
