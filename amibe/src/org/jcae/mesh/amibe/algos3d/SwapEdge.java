@@ -99,17 +99,15 @@ public class SwapEdge
 		int swapped = 0;
 		OTriangle ot = new OTriangle();
 		OTriangle sym = new OTriangle();
-		while (tree.size() > 0)
+		while (!tree.isEmpty())
 		{
-			Triangle t = (Triangle) tree.first();
+			Triangle t = null;
 			int localNumber = -1;
-			do
+			for (Iterator itt = tree.iterator(); itt.hasNext(); )
 			{
+				t = (Triangle) itt.next();
 				if (t.isMarked())
-				{
-					t = (Triangle) tree.next();
 					continue;
-				}
 				double quality = -1.0;
 				// Find the best edge candidate
 				ot.bind(t);
@@ -134,11 +132,8 @@ public class SwapEdge
 				// Mark this triangle so that it is not
 				// processed again
 				t.setMarked();
-				// Try with the next triangle
-				t = (Triangle) tree.next();
 			}
-			while (t != null && localNumber == -1);
-			if (t == null)
+			if (t == null || localNumber == -1)
 				break;
 			
 			ot.bind(t, localNumber);
