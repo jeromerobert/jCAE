@@ -393,7 +393,7 @@ public class DecimateVertex
 			}
 			Vertex apex = edge.apex();
 			// FIXME: is this test really necessary?
-			if (apex == Vertex.outer)
+			if (apex == mesh.outerVertex)
 				apex = sym.apex();
 			//  Compute quadrics
 			edge.contract(v3);

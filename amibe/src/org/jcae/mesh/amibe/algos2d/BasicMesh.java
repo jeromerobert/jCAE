@@ -47,7 +47,7 @@ import org.jcae.mesh.amibe.patch.Mesh2D;
  * <p>
  * A first triangle is created by iterating over the list of boundary nodes to
  * find three vertices which are not aligned.  The outer domain is also
- * triangulated; {@link org.jcae.mesh.amibe.ds.Vertex#outer} is a vertex at
+ * triangulated; {@link org.jcae.mesh.amibe.ds.Mesh#outerVertex} is a vertex at
  * infinite, and three outer triangles are created by joining this vertex to
  * vertices of the first triangle.  With this trick, there is no need to have
  * special cases when vertices are inserted outside the convex hull of already
@@ -82,10 +82,10 @@ import org.jcae.mesh.amibe.patch.Mesh2D;
  *
  * <p>
  * We know that the {@link org.jcae.mesh.amibe.ds.Triangle} bound to
- * {@link org.jcae.mesh.amibe.ds.Vertex#outer} is an outer triangle.  Triangles
- * adjacent through a boundary edge are interior triangles, and triangles
- * adjacent through non-boundary edges are also outer triangles.  All triangles
- * of the mesh are visited, and outer triangles are tagged with the
+ * {@link org.jcae.mesh.amibe.ds.Mesh#outerVertex} is an outer triangle.
+ * Triangles adjacent through a boundary edge are interior triangles, and
+ * triangles adjacent through non-boundary edges are also outer triangles.  All
+ * triangles of the mesh are visited, and outer triangles are tagged with the
  * {@link org.jcae.mesh.amibe.ds.OTriangle#OUTER} attribute.  If an
  * inconsistency is found (for instance a boundary edge seperate two outer
  * triangles), {@link org.jcae.mesh.amibe.InitialTriangulationException} is
@@ -99,17 +99,17 @@ import org.jcae.mesh.amibe.patch.Mesh2D;
  * <p>
  * It is important to note that triangles in holes have their
  * <code>OUTER</code> attribute set, but are not linked to
- * {@link org.jcae.mesh.amibe.ds.Vertex#outer}.  So this attribute is the only
- * safe way to detect outer triangles.  As outer triangles are not removed,
- * vertex location can still be performed as if the domain was convex.  All
- * subsequent 2D algorithms should consider these points.
+ * {@link org.jcae.mesh.amibe.ds.Mesh#outerVertex}.  So this attribute is the
+ * only safe way to detect outer triangles.  As outer triangles are not
+ * removed, vertex location can still be performed as if the domain was convex.
+ * All subsequent 2D algorithms should consider these points.
  * </p>
  *
  * <p>
  * This is very different when remeshing 3D meshes; in such a case,
  * boundary edges are detected because they have only one incident
  * face.  An outer triangle is then added by connecting end points to
- * {@link org.jcae.mesh.amibe.ds.Vertex#outer}, but outer triangles are not
+ * {@link org.jcae.mesh.amibe.ds.Mesh#outerVertex}, but outer triangles are not
  * connected together.  Mesh domain is not convex, but that does not matter
  * because 3D algorithms do not require vertex location.
  * </p>

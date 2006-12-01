@@ -147,7 +147,7 @@ public class SwapEdge
 			swapped++;
 			// After:  ot = (ona)   sym = (dan)
 			assert sym.apex() == ot.destination() : ot+" "+sym;
-			assert ot.destination() != Vertex.outer : ot+" "+sym;
+			assert ot.destination() != mesh.outerVertex : ot+" "+sym;
 			for (int i = 0; i < 2; i++)
 			{
 				if (ot.getAdj() != null)
@@ -180,10 +180,10 @@ public class SwapEdge
 		return swapped > 0;
 	}
 	
-	private static double cost(Triangle f)
+	private double cost(Triangle f)
 	{
 		temp.bind(f);
-		assert f.vertex[0] != Vertex.outer && f.vertex[1] != Vertex.outer && f.vertex[2] != Vertex.outer : f;
+		assert f.vertex[0] != mesh.outerVertex && f.vertex[1] != mesh.outerVertex && f.vertex[2] != mesh.outerVertex : f;
 		double p = f.vertex[0].distance3D(f.vertex[1]) + f.vertex[1].distance3D(f.vertex[2]) + f.vertex[2].distance3D(f.vertex[0]);
 		double area = temp.computeArea();
 		// No need to multiply by 12.0 * Math.sqrt(3.0)

@@ -114,8 +114,8 @@ public class Storage
 			CADFace F = (CADFace) face.getShape();
 			Collection trianglelist = submesh.getTriangles();
 			List nodelist = submesh.quadtree.getAllVertices(trianglelist.size() / 2);
-			TObjectIntHashMap localIdx = write2dNodeReferences(dir, face.getId(), nodelist);
-			write2dCoordinates(dir, face.getId(), nodelist, F.getGeomSurface());
+			TObjectIntHashMap localIdx = write2dNodeReferences(dir, face.getId(), nodelist, submesh.outerVertex);
+			write2dCoordinates(dir, face.getId(), nodelist, submesh.outerVertex, F.getGeomSurface());
 			write2dTriangles(dir, face.getId(), trianglelist, localIdx);
 		}
 		catch(Exception ex)
@@ -140,8 +140,8 @@ public class Storage
 				dir.mkdirs();
 
 			List nodelist = (List) submesh.getNodes();
-			TObjectIntHashMap localIdx = write2dNodeReferences(dir, solid.getId(), nodelist);
-			write2dCoordinates(dir, solid.getId(), nodelist, null);
+			TObjectIntHashMap localIdx = write2dNodeReferences(dir, solid.getId(), nodelist, submesh.outerVertex);
+			write2dCoordinates(dir, solid.getId(), nodelist, submesh.outerVertex, null);
 			write2dTriangles(dir, solid.getId(), submesh.getTriangles(), localIdx);
 		}
 		catch(Exception ex)
@@ -294,7 +294,7 @@ public class Storage
 		return localIdx;
 	}
 
-	private static TObjectIntHashMap write2dNodeReferences(File dir, int id, List nodelist)
+	private static TObjectIntHashMap write2dNodeReferences(File dir, int id, List nodelist, Vertex outer)
 		throws IOException, FileNotFoundException
 	{
 		File refFile = new File(dir, "r"+id);
@@ -310,7 +310,7 @@ public class Storage
 		for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
 		{
 			Vertex n = (Vertex) itn.next();
-			if (n == Vertex2D.outer)
+			if (n == outer)
 				continue;
 			// Set first index to 1; a null index in
 			// localIdx is thus an error
@@ -353,7 +353,7 @@ public class Storage
 		parasout.close();
 	}
 
-	private static void write2dCoordinates(File dir, int id, List nodelist, CADGeomSurface surface)
+	private static void write2dCoordinates(File dir, int id, List nodelist, Vertex outer, CADGeomSurface surface)
 		throws IOException, FileNotFoundException
 	{
 		File nodesFile = new File(dir, "n"+id);
@@ -371,7 +371,7 @@ public class Storage
 		for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
 		{
 			Vertex n = (Vertex) itn.next();
-			if (n == Vertex2D.outer)
+			if (n == outer)
 				continue;
 			if (surface == null)
 				xyz = n.getUV();

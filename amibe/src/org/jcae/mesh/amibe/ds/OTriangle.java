@@ -126,7 +126,7 @@ public class OTriangle
 	public static final int BOUNDARY = 1 << 0;
 	/**
 	 * Numeric constants for edge attributes.  Set if edge is outer.
-	 * (Ie. one of its end point is {@link Vertex#outer})
+	 * (Ie. one of its end point is {@link Mesh#outerVertex})
 	 * @see #setAttributes
 	 * @see #hasAttributes
 	 * @see #clearAttributes
@@ -601,7 +601,7 @@ public class OTriangle
 	 */
 	public final void nextOTriApexLoop()
 	{
-		if (destination() == Vertex.outer)
+		if (hasAttributes(OUTER))
 		{
 			// Loop clockwise to another boundary
 			// and start again from there.
@@ -609,7 +609,7 @@ public class OTriangle
 			{
 				prevOTriApex();
 			}
-			while (origin() != Vertex.outer);
+			while (!hasAttributes(OUTER));
 		}
 		else
 			nextOTriApex();
@@ -630,7 +630,7 @@ public class OTriangle
 		nextOTriApexLoop();
 		prevOTri();
 		*/
-		if (apex() == Vertex.outer)
+		if (hasAttributes(OUTER))
 		{
 			// Loop clockwise to another boundary
 			// and start again from there.
@@ -638,7 +638,7 @@ public class OTriangle
 			{
 				prevOTriOrigin();
 			}
-			while (destination() != Vertex.outer);
+			while (!hasAttributes(OUTER));
 		}
 		else
 			nextOTriOrigin();
@@ -1368,9 +1368,9 @@ public class OTriangle
 		assert m.isValid();
 		// Outer triangles
 		Triangle [] O = new Triangle[3];
-		O[0] = new Triangle(Vertex.outer, v[1], v[0]);
-		O[1] = new Triangle(Vertex.outer, v[2], v[1]);
-		O[2] = new Triangle(Vertex.outer, v[0], v[2]);
+		O[0] = new Triangle(m.outerVertex, v[1], v[0]);
+		O[1] = new Triangle(m.outerVertex, v[2], v[1]);
+		O[2] = new Triangle(m.outerVertex, v[0], v[2]);
 		for (int i = 0; i < 3; i++)
 		{
 			O[i].setOuter();
@@ -1517,10 +1517,10 @@ public class OTriangle
 		System.out.println("Checking loops...");
 		unitTestCheckLoopOrigin(m, v[3], v[4]);
 		unitTestCheckLoopOrigin(m, v[3], v[2]);
-		unitTestCheckLoopOrigin(m, v[3], Vertex.outer);
+		unitTestCheckLoopOrigin(m, v[3], m.outerVertex);
 		unitTestCheckLoopApex(m, v[3], v[4]);
 		unitTestCheckLoopApex(m, v[3], v[2]);
-		unitTestCheckLoopApex(m, v[3], Vertex.outer);
+		unitTestCheckLoopApex(m, v[3], m.outerVertex);
 		// Degrade triangle quality and swap edges
 		v[1].moveTo(1.0, 0.5, 0.0);
 		v[5].moveTo(-1.0, 0.5, 0.0);
@@ -1537,8 +1537,8 @@ public class OTriangle
 		assert m.isValid();
 		m = new Mesh();
 		unitTestBuildMesh(m, v);
-		unitTestCheckQuality(m, v[3], Vertex.outer, 2);
-		unitTestCheckQuality(m, v[3], Vertex.outer, 0);
+		unitTestCheckQuality(m, v[3], m.outerVertex, 2);
+		unitTestCheckQuality(m, v[3], m.outerVertex, 0);
 		assert m.isValid();
 	}
 	

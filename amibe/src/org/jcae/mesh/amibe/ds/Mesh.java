@@ -99,7 +99,7 @@ public class Mesh implements Serializable
 	/**
 	 * Vertex at infinite.
 	 */
-	public Vertex outerVertex = null;
+	public Vertex outerVertex = new OuterVertex();
 	
 	//  Triangle list
 	protected Collection triangleList = null;
@@ -116,21 +116,27 @@ public class Mesh implements Serializable
 	protected static final double scaleY = 1.0;
 	
 	//  2D/3D
-	public static final int MESH_1D = 2;
+	public static final int MESH_1D = 1;
 	public static final int MESH_2D = 2;
 	public static final int MESH_3D = 3;
 	public static final int MESH_OEMM = 4;
 	private int type = MESH_2D;
 	
+	// Utility class to improve debugging output
+	private static class OuterVertex extends Vertex
+	{
+		public String toString()
+		{
+			return "outer";
+		}
+	}
+
 	/**
 	 * Creates an empty mesh.
 	 */
 	public Mesh()
 	{
-		if (Vertex.outer == null)
-			Vertex.outer = new Vertex();
 		triangleList = new ArrayList();
-		outerVertex = Vertex.outer;
 	}
 	
 	/**
@@ -991,6 +997,7 @@ public class Mesh implements Serializable
 			Triangle t = (Triangle) it.next();
 			System.out.println(""+t);
 		}
+		System.out.println("Outer Vertex: "+outerVertex);
 	}
 	
 }

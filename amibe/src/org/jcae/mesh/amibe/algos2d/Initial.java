@@ -68,7 +68,7 @@ import org.apache.log4j.Logger;
  * <p>
  * A first triangle is created by iterating over the list of boundary nodes
  * to find three vertices which are not aligned.  The outer domain is also
- * triangulated; {@link Vertex2D#outer} is a vertex at infinite, and three
+ * triangulated; {@link Mesh#outerVertex} is a vertex at infinite, and three
  * outer triangles are created by joining this vertex to vertices of the
  * first triangle.  With this trick, there is no need to have special
  * cases when vertices are inserted outside the convex hull of already inserted
@@ -99,7 +99,7 @@ import org.apache.log4j.Logger;
  * </p>
  *
  * <p>
- * We know that the {@link Triangle} bound to {@link Vertex2D#outer} is an
+ * We know that the {@link Triangle} bound to {@link Mesh#outerVertex} is an
  * outer triangle.  Triangles adjacent through a boundary edge are interior
  * triangles, and triangles adjacent through non-boundary edges are also
  * outer triangles.  All triangles of the mesh are visited, and outer
@@ -116,7 +116,7 @@ import org.apache.log4j.Logger;
  * <p>
  * It is important to note that triangles in holes have their
  * <code>OUTER</code> attribute set, but are not linked to
- * {@link Vertex2D#outer}.  So this attribute is the only safe way to
+ * {@link Mesh#outerVertex}.  So this attribute is the only safe way to
  * detect outer triangles.  As outer triangles are not removed,
  * vertex location can still be performed as if the domain was
  * convex.  All subsequent 2D algorithms should consider these points.
@@ -126,7 +126,7 @@ import org.apache.log4j.Logger;
  * This is very different when remeshing 3D meshes; in such a case,
  * boundary edges are detected because they have only one incident
  * face.  An outer triangle is then added by connecting end points to
- * {@link Vertex2D#outer}, but outer triangles are not connected together.
+ * {@link Mesh#outerVertex}, but outer triangles are not connected together.
  * Mesh domain is not convex, but that does not matter because 3D
  * algorithms do not require vertex location.
  * </p>
@@ -314,13 +314,13 @@ public class Initial
 		mesh.popCompGeom(2);
 		
 		logger.debug(" Mark outer elements");
-		t = (Triangle) Vertex2D.outer.getLink();
+		t = (Triangle) mesh.outerVertex.getLink();
 		ot = new OTriangle2D(t, 0);
-		if (ot.origin() == Vertex2D.outer)
+		if (ot.origin() == mesh.outerVertex)
 			ot.nextOTri();
-		else if (ot.destination() == Vertex2D.outer)
+		else if (ot.destination() == mesh.outerVertex)
 			ot.prevOTri();
-		assert ot.apex() == Vertex2D.outer : ot;
+		assert ot.apex() == mesh.outerVertex : ot;
 		
 		Triangle.List tList = new Triangle.List();
 		Vertex2D first = (Vertex2D) ot.origin();
@@ -419,7 +419,7 @@ public class Initial
 			for (Iterator it = saveList.iterator(); it.hasNext(); )
 			{
 				OTriangle2D s = (OTriangle2D) it.next();
-				if (s.apex() == Vertex2D.outer)
+				if (s.apex() == mesh.outerVertex)
 					s.symOTri();
 				s.nextOTri();
 				if (s.hasAttributes(OTriangle.SWAPPED))

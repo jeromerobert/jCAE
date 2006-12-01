@@ -72,6 +72,9 @@ public class OTriangle2D extends OTriangle
 		copyOTri(this, work[0]);
 		do
 		{
+			// This routine is called when 2D meshing is over and
+			// before it is written onto disk, we can then call
+			// OTriangle.nextOTriOriginLoop() without trouble.
 			work[0].nextOTriOriginLoop();
 			for (int i = 0; i < 3; i++)
 			{
@@ -122,7 +125,7 @@ public class OTriangle2D extends OTriangle
 	 *
 	 * Origin and destination points must not be at infinite, which
 	 * is the case when current triangle is returned by
-	 * getSurroundingTriangle().  If apex is Vertex2D.outer, then
+	 * getSurroundingTriangle().  If apex is Mesh.outerVertex, then
 	 * getSurroundingTriangle() ensures that v.onLeft(o,d) &gt; 0.
 	 *
 	 * @param v  the vertex being inserted.
@@ -148,9 +151,9 @@ public class OTriangle2D extends OTriangle
 		symOTri(oldRight, oldSymRight);  // = (ad*)
 		//  Set vertices of newly created and current triangles
 		Vertex2D o = (Vertex2D) origin();
-		assert o != Vertex2D.outer;
+		assert o != mesh.outerVertex;
 		Vertex2D d = (Vertex2D) destination();
-		assert d != Vertex2D.outer;
+		assert d != mesh.outerVertex;
 		Vertex2D a = (Vertex2D) apex();
 		
 		OTriangle2D newLeft  = new OTriangle2D(new Triangle(a, o, v), 2);
@@ -232,34 +235,24 @@ public class OTriangle2D extends OTriangle
 		int nrSwap = 0;
 		int totNrSwap = 0;
 		Vertex2D v = (Vertex2D) apex();
-		assert v != Vertex2D.outer;
+		assert v != mesh.outerVertex;
 		OTriangle2D sym = new OTriangle2D();
 		//  Loops around v
 		Vertex2D first = (Vertex2D) origin();
 		while (true)
 		{
-			if (hasAttributes(BOUNDARY) || hasAttributes(NONMANIFOLD) || hasAttributes(OUTER))
-			{
-				nextOTriApexLoop();
-				if (origin() == first)
-				{
-					if (nrSwap == 0)
-						break;
-					nrSwap = 0;
-				}
-			}
-			else
+			boolean toSwap = false;
+			if (!hasAttributes(BOUNDARY) && !hasAttributes(NONMANIFOLD) && !hasAttributes(OUTER))
 			{
 				Vertex2D o = (Vertex2D) origin();
 				Vertex2D d = (Vertex2D) destination();
 				symOTri(this, sym);
 				Vertex2D a = (Vertex2D) sym.apex();
-				boolean toSwap = false;
-				if (o == Vertex2D.outer)
+				if (o == mesh.outerVertex)
 					toSwap = (v.onLeft(mesh, d, a) < 0L);
-				else if (d == Vertex2D.outer)
+				else if (d == mesh.outerVertex)
 					toSwap = (v.onLeft(mesh, a, o) < 0L);
-				else if (a == Vertex2D.outer)
+				else if (a == mesh.outerVertex)
 					toSwap = (v.onLeft(mesh, o, d) == 0L);
 				else if (isMutable())
 				{
@@ -268,21 +261,35 @@ public class OTriangle2D extends OTriangle
 					else
 						toSwap = !a.isSmallerDiagonale(mesh, this);
 				}
-				if (toSwap)
+			}
+			if (toSwap)
+			{
+				swap();
+				nrSwap++;
+				totNrSwap++;
+			}
+			else
+			{
+				// This routine may be called before boundaries
+				// are recreated, so OTriangle.nextOTriApexLoop
+				// is not relevant here.
+				if (destination() == mesh.outerVertex)
 				{
-					swap();
-					nrSwap++;
-					totNrSwap++;
+					// Loop clockwise to another boundary
+					// and start again from there.
+					do
+					{
+						prevOTriApex();
+					}
+					while (origin() != mesh.outerVertex);
 				}
 				else
+					nextOTriApex();
+				if ((Vertex2D) origin() == first)
 				{
-					nextOTriApexLoop();
-					if ((Vertex2D) origin() == first)
-					{
-						if (nrSwap == 0)
-							break;
-						nrSwap = 0;
-					}
+					if (nrSwap == 0)
+						break;
+					nrSwap = 0;
 				}
 			}
 		}
@@ -313,8 +320,8 @@ public class OTriangle2D extends OTriangle
 		int count = 0;
 		
 		Vertex2D start = (Vertex2D) origin();
-		assert start != Vertex2D.outer;
-		assert end != Vertex2D.outer;
+		assert start != mesh.outerVertex;
+		assert end != mesh.outerVertex;
 
 		nextOTri();
 		while (true)
@@ -323,14 +330,14 @@ public class OTriangle2D extends OTriangle
 			Vertex2D o = (Vertex2D) origin();
 			Vertex2D d = (Vertex2D) destination();
 			Vertex2D a = (Vertex2D) apex();
-			assert a != Vertex2D.outer : ""+this;
+			assert a != mesh.outerVertex : ""+this;
 			symOTri(this, work[0]);
 			work[0].nextOTri();
 			Vertex2D n = (Vertex2D) work[0].destination();
-			assert n != Vertex2D.outer : ""+work[0];
+			assert n != mesh.outerVertex : ""+work[0];
 			newl = n.onLeft(mesh, start, end);
 			oldl = a.onLeft(mesh, start, end);
-			boolean toSwap = (n != Vertex2D.outer) && (a.onLeft(mesh, n, d) > 0L) && (a.onLeft(mesh, o, n) > 0L) && !hasAttributes(BOUNDARY);
+			boolean toSwap = (n != mesh.outerVertex) && (a.onLeft(mesh, n, d) > 0L) && (a.onLeft(mesh, o, n) > 0L) && !hasAttributes(BOUNDARY);
 			if (newl > 0L)
 			{
 				//  o stands to the right of (start,end), d and n to the left.
@@ -407,9 +414,9 @@ public class OTriangle2D extends OTriangle
 	
 	private final boolean isDelaunay_isotropic(Mesh2D mesh, Vertex2D apex2)
 	{
-		assert Vertex2D.outer != (Vertex2D) origin();
-		assert Vertex2D.outer != (Vertex2D) destination();
-		assert Vertex2D.outer != (Vertex2D) apex();
+		assert mesh.outerVertex != (Vertex2D) origin();
+		assert mesh.outerVertex != (Vertex2D) destination();
+		assert mesh.outerVertex != (Vertex2D) apex();
 		Vertex2D vA = (Vertex2D) origin();
 		Vertex2D vB = (Vertex2D) destination();
 		Vertex2D v1 = (Vertex2D) apex();
@@ -429,10 +436,10 @@ public class OTriangle2D extends OTriangle
 	
 	private final boolean isDelaunay_anisotropic(Mesh2D mesh, Vertex2D apex2)
 	{
-		assert Vertex2D.outer != (Vertex2D) origin();
-		assert Vertex2D.outer != (Vertex2D) destination();
-		assert Vertex2D.outer != (Vertex2D) apex();
-		if (apex2 == Vertex2D.outer)
+		assert mesh.outerVertex != (Vertex2D) origin();
+		assert mesh.outerVertex != (Vertex2D) destination();
+		assert mesh.outerVertex != (Vertex2D) apex();
+		if (apex2 == mesh.outerVertex)
 			return true;
 		return !apex2.inCircleTest3(mesh, this);
 	}

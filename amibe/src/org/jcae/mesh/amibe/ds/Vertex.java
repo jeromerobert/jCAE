@@ -55,10 +55,6 @@ import java.io.Serializable;
 public class Vertex implements Serializable
 {
 	private static Logger logger = Logger.getLogger(Vertex.class);
-	/**
-	 * Outer vertex.
-	 */
-	public static Vertex outer = null;
 	
 	/**
 	 * 2D or 3D coordinates.
@@ -799,8 +795,6 @@ public class Vertex implements Serializable
 	
 	public String toString ()
 	{
-		if (this == Vertex.outer)
-			return "outer";
 		String r = "UV:";
 		for (int i = 0; i < param.length; i++)
 			r += " "+param[i];

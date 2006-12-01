@@ -49,7 +49,7 @@ public class MeshWriter
 	/**
 	 * Used by {@link writeObject}
 	 */
-	private static Element writeObjectNodes(Document document, ArrayList nodelist, File nodesFile, File refFile, String baseDir, TObjectIntHashMap nodeIndex)
+	private static Element writeObjectNodes(Document document, ArrayList nodelist, Vertex outer, File nodesFile, File refFile, String baseDir, TObjectIntHashMap nodeIndex)
 		throws IOException
 	{
 		//save nodes
@@ -62,7 +62,7 @@ public class MeshWriter
 		while (nodesIterator.hasNext())
 		{
 			Vertex n = (Vertex) nodesIterator.next();
-			if (n == Vertex.outer)
+			if (n == outer)
 				continue;
 			int ref1d = n.getRef();
 			if (0 == ref1d)
@@ -81,7 +81,7 @@ public class MeshWriter
 		while (nodesIterator.hasNext())
 		{
 			Vertex n = (Vertex) nodesIterator.next();
-			if (n == Vertex.outer)
+			if (n == outer)
 				continue;
 			int ref1d = n.getRef();
 			if (0 != ref1d)
@@ -278,7 +278,7 @@ public class MeshWriter
 			dimensionElement.appendChild(document.createTextNode("2"));
 			subMeshElement.appendChild(dimensionElement);
 			
-			subMeshElement.appendChild(writeObjectNodes(document, nodelist, nodesFile, refFile, xmlDir, nodeIndex));
+			subMeshElement.appendChild(writeObjectNodes(document, nodelist, submesh.outerVertex, nodesFile, refFile, xmlDir, nodeIndex));
 			subMeshElement.appendChild(writeObjectTriangles(document, trianglelist, trianglesFile, xmlDir, nodeIndex));
 			meshElement.appendChild(subMeshElement);
 			jcaeElement.appendChild(meshElement);
@@ -334,7 +334,7 @@ public class MeshWriter
 				"<file format=\"brep\" location=\""+brepDir+File.separator+brepFile+"\"/>"+"</shape>");
 			meshElement.appendChild(shapeElement);
 			Element subMeshElement=document.createElement("submesh");
-			subMeshElement.appendChild(writeObjectNodes(document, nodelist, nodesFile, refFile, xmlDir, nodeIndex));
+			subMeshElement.appendChild(writeObjectNodes(document, nodelist, submesh.outerVertex, nodesFile, refFile, xmlDir, nodeIndex));
 			subMeshElement.appendChild(writeObjectTriangles(document, trianglelist, trianglesFile, xmlDir, nodeIndex));
 			subMeshElement.appendChild(writeObjectGroups(document, trianglelist, groupsFile, xmlDir));
 			meshElement.appendChild(subMeshElement);

@@ -220,7 +220,6 @@ public abstract class AbstractAlgoHalfEdge
 		try
 		{
 			out = new ObjectOutputStream(new FileOutputStream(dumpFile));
-			out.writeObject(Vertex.outer);
 			out.writeObject(mesh);
 			out.writeObject(tree);
 			appendDumpState(out);
@@ -245,7 +244,6 @@ public abstract class AbstractAlgoHalfEdge
 			FileInputStream istream = new FileInputStream(dumpFile);
 			ObjectInputStream q = new ObjectInputStream(istream);
 			System.out.println("Loading restored state");
-			Vertex.outer = (Vertex) q.readObject();
 			mesh = (Mesh) q.readObject();
 			tree = (PAVLSortedTree) q.readObject();
 			appendRestoreState(q);

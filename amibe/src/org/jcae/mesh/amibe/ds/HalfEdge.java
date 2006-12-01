@@ -31,7 +31,7 @@ public class HalfEdge implements Serializable
 	private byte localNumber = 8;
 	private int attributes = 8;
 	// For non manifold edges, a virtual triangle is added
-	//   Triangle(Vertex.outer, edge.origin(), edge.destination())
+	//   Triangle(outerVertex, edge.origin(), edge.destination())
 	// and sym points to an edge of this triangle.  It is said to
 	// be outer.  The list of adjacent HalfEdge is stored in this
 	// triangle, more specifically in sym.next.sym
@@ -358,7 +358,7 @@ public class HalfEdge implements Serializable
 	public final HalfEdge nextOriginLoop()
 	{
 		HalfEdge ret = this;
-		if (ret.apex() == Vertex.outer)
+		if (ret.hasAttributes(OTriangle.OUTER))
 		{
 			// Loop clockwise to another boundary
 			// and start again from there.
@@ -366,7 +366,7 @@ public class HalfEdge implements Serializable
 			{
 				ret = ret.prevOrigin();
 			}
-			while (ret.destination() != Vertex.outer);
+			while (!ret.hasAttributes(OTriangle.OUTER));
 		}
 		else
 			ret = ret.nextOrigin();
@@ -381,7 +381,7 @@ public class HalfEdge implements Serializable
 	public final HalfEdge nextApexLoop()
 	{
 		HalfEdge ret = this;
-		if (ret.destination() == Vertex.outer)
+		if (ret.hasAttributes(OTriangle.OUTER))
 		{
 			// Loop clockwise to another boundary
 			// and start again from there.
@@ -389,7 +389,7 @@ public class HalfEdge implements Serializable
 			{
 				ret = ret.prevApex();
 			}
-			while (ret.origin() != Vertex.outer);
+			while (!ret.hasAttributes(OTriangle.OUTER));
 		}
 		else
 			ret.nextApex();
@@ -874,7 +874,7 @@ public class HalfEdge implements Serializable
 		System.out.println("Checking loops...");
 		unitTestCheckLoopOrigin(m, v[3], v[4]);
 		unitTestCheckLoopOrigin(m, v[3], v[2]);
-		unitTestCheckLoopOrigin(m, v[3], Vertex.outer);
+		unitTestCheckLoopOrigin(m, v[3], m.outerVertex);
 		unitTestCheckContract(m, v[0], v[1], v[0]);
 		unitTestCheckContract(m, v[5], v[0], v[0]);
 		unitTestCheckContract(m, v[4], v[0], v[0]);

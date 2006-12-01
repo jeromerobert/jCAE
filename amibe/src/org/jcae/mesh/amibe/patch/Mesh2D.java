@@ -60,12 +60,30 @@ public class Mesh2D extends Mesh
 	 */
 	public QuadTree quadtree = null;
 	
+	// Utility class to improve debugging output
+	private static class OuterVertex2D extends Vertex2D
+	{
+		public OuterVertex2D()
+		{
+			super();
+		}
+		public OuterVertex2D(double u, double v)
+		{
+			super(u, v);
+		}
+		public String toString()
+		{
+			return "outer";
+		}
+	}
+
 	/**
 	 * Sole constructor.
 	 */
 	public Mesh2D()
 	{
 		super();
+		outerVertex = new OuterVertex2D();
 	}
 
 	/**
@@ -82,6 +100,7 @@ public class Mesh2D extends Mesh
 	public Mesh2D(CADFace f)
 	{
 		super();
+		outerVertex = new OuterVertex2D();
 		face = f;
 		surface = f.getGeomSurface();
 		double [] bb = f.boundingBox();
@@ -115,6 +134,7 @@ public class Mesh2D extends Mesh
 	public Mesh2D(CADEdge e)
 	{
 		super();
+		outerVertex = new OuterVertex2D();
 		face = e;
 	}
 	
@@ -149,7 +169,7 @@ public class Mesh2D extends Mesh
 	{
 		quadtree = new QuadTree(umin, umax, vmin, vmax);
 		quadtree.setCompGeom(compGeom());
-		Vertex2D.outer = Vertex2D.valueOf((umin+umax)*0.5, (vmin+vmax)*0.5);
+		outerVertex = new OuterVertex2D((umin+umax)*0.5, (vmin+vmax)*0.5);
 	}
 	
 	/**
@@ -193,9 +213,9 @@ public class Mesh2D extends Mesh
 			v1 = temp;
 		}
 		Triangle first = new Triangle(v0, v1, v2);
-		Triangle adj0 = new Triangle(Vertex2D.outer, v2, v1);
-		Triangle adj1 = new Triangle(Vertex2D.outer, v0, v2);
-		Triangle adj2 = new Triangle(Vertex2D.outer, v1, v0);
+		Triangle adj0 = new Triangle(outerVertex, v2, v1);
+		Triangle adj1 = new Triangle(outerVertex, v0, v2);
+		Triangle adj2 = new Triangle(outerVertex, v1, v0);
 		OTriangle2D ot = new OTriangle2D(first, 0);
 		OTriangle2D oa0 = new OTriangle2D(adj0, 0);
 		OTriangle2D oa1 = new OTriangle2D(adj1, 0);
@@ -215,7 +235,7 @@ public class Mesh2D extends Mesh
 		oa2.prevOTri();
 		oa2.glue(oa1);
 		
-		Vertex2D.outer.setLink(adj0);
+		outerVertex.setLink(adj0);
 		v0.setLink(first);
 		v1.setLink(first);
 		v2.setLink(first);
@@ -261,7 +281,7 @@ public class Mesh2D extends Mesh
 			Vertex2D d = (Vertex2D) s.destination();
 			if (d == end)
 				return s;
-			else if (d != Vertex2D.outer && start.onLeft(this, end, d) > 0L)
+			else if (d != outerVertex && start.onLeft(this, end, d) > 0L)
 				break;
 			s.nextOTriOrigin();
 			i++;
@@ -276,7 +296,7 @@ public class Mesh2D extends Mesh
 			Vertex2D d = (Vertex2D) s.destination();
 			if (d == end)
 				return s;
-			else if (d != Vertex2D.outer && start.onLeft(this, end, d) < 0L)
+			else if (d != outerVertex && start.onLeft(this, end, d) < 0L)
 				break;
 			s.prevOTriOrigin();
 			i++;
@@ -398,7 +418,7 @@ public class Mesh2D extends Mesh
 	
 	/**
 	 * Remove degenerted edges.
-	 * Degenerated wdges are present in 2D mesh, and have to be
+	 * Degenerated edges are present in 2D mesh, and have to be
 	 * removed in the 2D -&gt; 3D transformation.  Triangles and
 	 * vertices must then be updated too.
 	 */
@@ -448,7 +468,7 @@ public class Mesh2D extends Mesh
 			Triangle t = (Triangle) it.next();
 			// We can not rely on t.isOuter() here, attributes
 			// may not have been set yet.
-			if (t.vertex[0] == Vertex2D.outer || t.vertex[1] == Vertex2D.outer || t.vertex[2] == Vertex2D.outer)
+			if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
 					continue;
 			Vertex2D tv0 = (Vertex2D) t.vertex[0];
 			Vertex2D tv1 = (Vertex2D) t.vertex[1];

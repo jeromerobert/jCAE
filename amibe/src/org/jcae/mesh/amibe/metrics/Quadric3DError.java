@@ -126,8 +126,6 @@ public class Quadric3DError implements Serializable
 
 	public void optimalPlacement(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2, int placement, Vertex ret)
 	{
-		assert v1 != Vertex.outer;
-		assert v2 != Vertex.outer;
 		/* FIXME: add an option so that boundary nodes may be frozen.  */
 		if (placement == POS_VERTEX)
 			ret.copy(bestCandidateV1V2(v1, v2, q1, q2));

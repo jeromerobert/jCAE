@@ -344,7 +344,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		}
 		Vertex apex = current.apex();
 		// FIXME: is this test really necessary?
-		if (apex == Vertex.outer)
+		if (apex == mesh.outerVertex)
 			apex = sym.apex();
 		//  Contract (v1,v2) into v3
 		current.contract(mesh, v3);
@@ -358,7 +358,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		do
 		{
 			current = current.nextOriginLoop();
-			if (current.destination() != Vertex.outer)
+			if (current.destination() != mesh.outerVertex)
 				tree.update(current.notOriented(), cost(current));
 		}
 		while (current.destination() != apex);

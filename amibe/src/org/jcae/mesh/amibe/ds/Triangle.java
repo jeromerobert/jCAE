@@ -67,10 +67,10 @@ import java.io.Serializable;
  * There are two special cases:
  * </p>
  * <ul>
- *   <li>Boundary edges; a virtual Triangle(Vertex.outer, v1, v2) is created,
+ *   <li>Boundary edges; a virtual Triangle(outerVertex, v1, v2) is created,
  *       and linked to this edge.  This triangle has an {@link OTriangle#OUTER}
  *       flag, and symmetric edges have a {@link OTriangle#BOUNDARY} flag.</li>
- *   <li>Non-manifold edges; a virtual Triangle(Vertex.outer, v1, v2) is
+ *   <li>Non-manifold edges; a virtual Triangle(outerVertex, v1, v2) is
  *       also created, and linked to this edge.  This triangle has an
  *       {@link OTriangle#OUTER} flag, and symmetric edges have a {@link
  *       OTriangle#NONMANIFOLD} flag.  The outer triangle contains in

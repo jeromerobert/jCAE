@@ -50,9 +50,6 @@ import java.util.Iterator;
 public class Vertex2D extends Vertex
 {
 	private static Logger logger = Logger.getLogger(Vertex2D.class);
-	/**
-	 * Outer vertex.
-	 */
 	private static final Random rand = new Random(139L);
 	private static Vertex2D circumcenter = new Vertex2D(0.0, 0.0);
 	
@@ -63,7 +60,7 @@ public class Vertex2D extends Vertex
 	//  Metrics at this location
 	private Metric2D m2 = null;
 	
-	private Vertex2D()
+	protected Vertex2D()
 	{
 		super();
 	}
@@ -74,7 +71,7 @@ public class Vertex2D extends Vertex
 	 * @param u  first coordinate.
 	 * @param v  second coordinate.
 	 */
-	private Vertex2D(double u, double v)
+	protected Vertex2D(double u, double v)
 	{
 		super();
 		param[0] = u;
@@ -189,11 +186,14 @@ public class Vertex2D extends Vertex
 	 * algorithm makes sure that there are only three possible
 	 * situations at exit:
 	 * <ol>
-	 *   <li>No vertex of T is Vertex2D.outer, and 'this' is interior to T.</li>
-	 *   <li>No vertex of T is Vertex2D.outer, and 'this' is on an edge of T.</li>
-	 *   <li>Apex is Vertex2D.outer, ond this.onLeft(d,o) &lt; 0.</li>
+	 *   <li>No vertex of T is Mesh.outerVertex, and 'this' is interior
+	 *       to T.</li>
+	 *   <li>No vertex of T is Mesh.outerVertex, and 'this' is on an
+	 *       edge of T.</li>
+	 *   <li>Apex is Mesh.outerVertex, and this.onLeft(d,o) &lt; 0.</li>
 	 * </ol>
-	 * Origin and destination points are always different from Vertex2D.outer.
+	 * Origin and destination points are always different from
+	 * {@link org.jcae.mesh.amibe.ds.Mesh#outerVertex}.
 	 *
 	 * Note that this algorithm had been initially written to take outer
 	 * triangles into account.  Later on, <code>BasicMesh</code> had been
@@ -263,7 +263,7 @@ public class Vertex2D extends Vertex
 		Vertex2D a = (Vertex2D) current.apex();
 		//  Start from an interior triangle, otherwise the loop below
 		//  will exit before real processing can take place.  An
-		//  alternative is, when apex is Vertex2D.outer, to check the sign
+		//  alternative is, when apex is outerVertex, to check the sign
 		//  of onLeft(o, d), but moving tests out of this loop is
 		//  better.
 		//  If the new triangle is also outer, this means that (od)
@@ -271,7 +271,7 @@ public class Vertex2D extends Vertex
 		//  mesh has been bootstrapped with 3 points (and is one of
 		//  the reasons why bootstrapping with only 2 points is a bad
 		//  idea).
-		if (o == Vertex2D.outer)
+		if (o == mesh.outerVertex)
 		{
 			current.nextOTri();
 			if (current.hasAttributes(OTriangle.BOUNDARY))
@@ -279,7 +279,7 @@ public class Vertex2D extends Vertex
 			current.symOTri();
 			redo = true;
 		}
-		else if (d == Vertex2D.outer)
+		else if (d == mesh.outerVertex)
 		{
 			current.prevOTri();
 			if (current.hasAttributes(OTriangle.BOUNDARY))
@@ -287,7 +287,7 @@ public class Vertex2D extends Vertex
 			current.symOTri();
 			redo = true;
 		}
-		else if (a == Vertex2D.outer)
+		else if (a == mesh.outerVertex)
 		{
 			if (current.hasAttributes(OTriangle.BOUNDARY))
 				return null;
@@ -295,7 +295,7 @@ public class Vertex2D extends Vertex
 			redo = true;
 		}
 		//  Orient triangle so that point is to the left.  Apex may
-		//  be Vertex2D.outer again, but this is case 3 above.
+		//  be outerVertex again, but this is case 3 above.
 		if (onLeft(mesh, (Vertex2D) current.origin(), (Vertex2D) current.destination()) < 0L)
 		{
 			if (current.hasAttributes(OTriangle.BOUNDARY) && !redo)
@@ -311,9 +311,9 @@ public class Vertex2D extends Vertex
 		}
 		while (true)
 		{
-			assert o != Vertex2D.outer;
-			assert d != Vertex2D.outer;
-			if (a == Vertex2D.outer)
+			assert o != mesh.outerVertex;
+			assert d != mesh.outerVertex;
+			if (a == mesh.outerVertex)
 				break;
 			if (tList.contains(current.getTri()))
 				return null;
@@ -321,7 +321,7 @@ public class Vertex2D extends Vertex
 			long d1 = onLeft(mesh, d, a);
 			long d2 = onLeft(mesh, a, o);
 			//  Note that for all cases, new origin and destination
-			//  points cannot be Vertex2D.outer.
+			//  points cannot be outerVertex.
 			if (d1 < 0L && d2 < 0L)
 			{
 				if (rand.nextBoolean())
@@ -365,9 +365,9 @@ public class Vertex2D extends Vertex
 	 */
 	public long onLeft(Mesh2D mesh, Vertex2D v1, Vertex2D v2)
 	{
-		assert this != Vertex.outer;
-		assert v1 != Vertex.outer;
-		assert v2 != Vertex.outer;
+		assert this != mesh.outerVertex;
+		assert v1 != mesh.outerVertex;
+		assert v2 != mesh.outerVertex;
 		mesh.quadtree.double2int(param, i0);
 		mesh.quadtree.double2int(v1.param, i1);
 		long x01 = i1[0] - i0[0];
@@ -393,10 +393,10 @@ public class Vertex2D extends Vertex
 	
 	public final boolean inCircle(Vertex2D v1, Vertex2D v2, Vertex2D v3)
 	{
-		assert this != Vertex2D.outer;
-		assert v1 != Vertex2D.outer;
-		assert v2 != Vertex2D.outer;
-		assert v3 != Vertex2D.outer;
+		assert this != mesh.outerVertex;
+		assert v1 != mesh.outerVertex;
+		assert v2 != mesh.outerVertex;
+		assert v3 != mesh.outerVertex;
 		// v3.onLeft(v1, v2) >= 0 and onLeft(v1, v2) <= 0
 		long d1 = onLeft(v1, v2);
 		long d2 = onLeft(v2, v3);
@@ -445,13 +445,13 @@ public class Vertex2D extends Vertex
 	//  Current vertex is symmetric apical vertex
 	public final boolean inCircleTest2(Mesh2D mesh, OTriangle2D ot)
 	{
-		assert this != Vertex2D.outer;
+		assert this != mesh.outerVertex;
 		Vertex2D v1 = (Vertex2D) ot.origin();
 		Vertex2D v2 = (Vertex2D) ot.destination();
 		Vertex2D v3 = (Vertex2D) ot.apex();
-		assert v1 != Vertex2D.outer;
-		assert v2 != Vertex2D.outer;
-		assert v3 != Vertex2D.outer;
+		assert v1 != mesh.outerVertex;
+		assert v2 != mesh.outerVertex;
+		assert v3 != mesh.outerVertex;
 		assert v1.onLeft(mesh, v2, v3) >= 0L : ot+" "+v1.onLeft(mesh, v2, v3);
 		assert v1.onLeft(mesh, this, v2) >= 0L : ot+" "+v1.onLeft(mesh, this, v2);
 		long d1 = v1.onLeft(mesh, v3, this);
@@ -521,14 +521,14 @@ public class Vertex2D extends Vertex
 	{
 		//  vcX: vertices of current edge
 		//  vaX: apices
-		assert this != Vertex2D.outer;
+		assert this != mesh.outerVertex;
 		Vertex2D vc1 = (Vertex2D) ot.origin();
 		Vertex2D vc2 = (Vertex2D) ot.destination();
 		Vertex2D va3 = (Vertex2D) ot.apex();
 		// va0 = this
-		assert vc1 != Vertex2D.outer;
-		assert vc2 != Vertex2D.outer;
-		assert va3 != Vertex2D.outer;
+		assert vc1 != mesh.outerVertex;
+		assert vc2 != mesh.outerVertex;
+		assert va3 != mesh.outerVertex;
 		// Special case when vc1, vc2 and va3 are aligned
 		if (va3.onLeft(mesh, vc1, vc2) == 0L)
 		{
@@ -583,14 +583,14 @@ public class Vertex2D extends Vertex
 	{
 		//  vcX: vertices of current edge
 		//  vaX: apices
-		assert this != Vertex2D.outer;
+		assert this != mesh.outerVertex;
 		Vertex2D vc1 = (Vertex2D) ot.origin();
 		Vertex2D vc2 = (Vertex2D) ot.destination();
 		Vertex2D va3 = (Vertex2D) ot.apex();
 		// va0 = this
-		assert vc1 != Vertex2D.outer;
-		assert vc2 != Vertex2D.outer;
-		assert va3 != Vertex2D.outer;
+		assert vc1 != mesh.outerVertex;
+		assert vc2 != mesh.outerVertex;
+		assert va3 != mesh.outerVertex;
 		// Do not swap if triangles are reversed in 2d space
 		if (vc1.onLeft(mesh, va3, this) >= 0L || vc2.onLeft(mesh, va3, this) <= 0L)
 			return true;
@@ -656,8 +656,6 @@ public class Vertex2D extends Vertex
 	
 	public String toString ()
 	{
-		if (this == Vertex2D.outer)
-			return "outer";
 		String r = "UV:";
 		for (int i = 0; i < param.length; i++)
 			r += " "+param[i];

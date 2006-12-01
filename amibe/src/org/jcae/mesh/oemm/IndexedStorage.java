@@ -831,7 +831,7 @@ public class IndexedStorage
 							vert[0].setLink(t);
 							vert[1].setLink(t);
 							vert[2].setLink(t);
-							if (vert[0] == Vertex.outer || vert[1] == Vertex.outer || vert[2] == Vertex.outer)
+							if (vert[0] == mesh.outerVertex || vert[1] == mesh.outerVertex || vert[2] == mesh.outerVertex)
 								t.setOuter();
 							t.setWritable(writable);
 							mesh.add(t);
