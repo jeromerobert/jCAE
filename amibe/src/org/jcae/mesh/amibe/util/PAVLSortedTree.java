@@ -271,7 +271,7 @@ public class PAVLSortedTree implements Serializable
 	{
 		s.defaultReadObject();
 		map = new HashMap(count);
-		for (PAVLSortedTreeNode current = root.child[0].firstNode(); current != root; current = current.nextNode())
+		for (PAVLSortedTreeNode current = root.child[0].firstNode(); current != null; current = current.nextNode())
 			map.put(current.data, current);
 	}
 
