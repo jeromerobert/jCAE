@@ -1,3 +1,11 @@
+Tue Dec  5 17:53:09 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/HalfEdge.java
+	  src/org/jcae/mesh/amibe/ds/OTriangle.java: Modify hasAttributes()
+	methods so that hasAttributes(FOO|BAR) is equivalent to
+	hasAttributes(FOO) || hasAttributes(BAR), this is more natural than
+	current behaviour: hasAttributes(FOO) && hasAttributes(BAR).
+
 Fri Dec  1 13:05:28 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Mesh.java: New outerVertex member,

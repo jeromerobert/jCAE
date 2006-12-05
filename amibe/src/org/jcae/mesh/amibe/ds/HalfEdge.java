@@ -230,7 +230,7 @@ public class HalfEdge implements Serializable
 	 */
 	public final boolean hasAttributes(int attr)
 	{
-		return (attributes & attr) == attr;
+		return (attributes & attr) != 0;
 	}
 	
 	/**
@@ -358,7 +358,7 @@ public class HalfEdge implements Serializable
 	public final HalfEdge nextOriginLoop()
 	{
 		HalfEdge ret = this;
-		if (ret.hasAttributes(OTriangle.OUTER | OTriangle.BOUNDARY))
+		if (ret.hasAttributes(OTriangle.OUTER) && ret.hasAttributes(OTriangle.BOUNDARY | OTriangle.NONMANIFOLD))
 		{
 			// Loop clockwise to another boundary
 			// and start again from there.
@@ -381,7 +381,7 @@ public class HalfEdge implements Serializable
 	public final HalfEdge nextApexLoop()
 	{
 		HalfEdge ret = this;
-		if (ret.hasAttributes(OTriangle.OUTER))
+		if (ret.hasAttributes(OTriangle.OUTER) && ret.hasAttributes(OTriangle.BOUNDARY | OTriangle.NONMANIFOLD))
 		{
 			// Loop clockwise to another boundary
 			// and start again from there.
@@ -435,7 +435,7 @@ public class HalfEdge implements Serializable
 		 */
 		// T1 = (oda)  --> (ona)
 		// T2 = (don)  --> (dan)
-		assert !(hasAttributes(OTriangle.OUTER) || hasAttributes(OTriangle.BOUNDARY) || hasAttributes(OTriangle.NONMANIFOLD));
+		assert !hasAttributes(OTriangle.OUTER | OTriangle.BOUNDARY | OTriangle.NONMANIFOLD);
 		HalfEdge [] e = new HalfEdge[6];
 		e[4] = this;
 		e[0] = next;

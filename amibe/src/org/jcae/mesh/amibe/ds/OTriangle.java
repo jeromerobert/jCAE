@@ -304,7 +304,7 @@ public class OTriangle
 	 */
 	public final boolean hasAttributes(int attr)
 	{
-		return (attributes & attr) == attr;
+		return (attributes & attr) != 0;
 	}
 	
 	/**
@@ -601,7 +601,7 @@ public class OTriangle
 	 */
 	public final void nextOTriApexLoop()
 	{
-		if (hasAttributes(OUTER | BOUNDARY))
+		if (hasAttributes(OUTER) && hasAttributes(BOUNDARY | NONMANIFOLD))
 		{
 			// Loop clockwise to another boundary
 			// and start again from there.
@@ -630,7 +630,7 @@ public class OTriangle
 		nextOTriApexLoop();
 		prevOTri();
 		*/
-		if (hasAttributes(OUTER | BOUNDARY))
+		if (hasAttributes(OUTER) && hasAttributes(BOUNDARY | NONMANIFOLD))
 		{
 			// Loop clockwise to another boundary
 			// and start again from there.
@@ -847,7 +847,7 @@ public class OTriangle
 	{
 		double invalid = -1.0;
 		// Check if there is an adjacent edge
-		if (hasAttributes(OUTER) || hasAttributes(BOUNDARY) || hasAttributes(NONMANIFOLD))
+		if (hasAttributes(OUTER | BOUNDARY | NONMANIFOLD))
 			return invalid;
 		// Check for coplanarity
 		symOTri(this, work[0]);
@@ -925,7 +925,7 @@ public class OTriangle
 		 */
 		// T1 = (oda)  --> (ona)
 		// T2 = (don)  --> (dan)
-		assert !(hasAttributes(OUTER) || hasAttributes(BOUNDARY) || hasAttributes(NONMANIFOLD));
+		assert !hasAttributes(OUTER | BOUNDARY | NONMANIFOLD);
 		copyOTri(this, work[0]);        // (oda)
 		symOTri(this, work[1]);         // (don)
 		symOTri(this, work[2]);         // (don)
