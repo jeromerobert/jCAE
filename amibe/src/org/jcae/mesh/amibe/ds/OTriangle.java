@@ -601,7 +601,7 @@ public class OTriangle
 	 */
 	public final void nextOTriApexLoop()
 	{
-		if (hasAttributes(OUTER))
+		if (hasAttributes(OUTER | BOUNDARY))
 		{
 			// Loop clockwise to another boundary
 			// and start again from there.
@@ -630,7 +630,7 @@ public class OTriangle
 		nextOTriApexLoop();
 		prevOTri();
 		*/
-		if (hasAttributes(OUTER))
+		if (hasAttributes(OUTER | BOUNDARY))
 		{
 			// Loop clockwise to another boundary
 			// and start again from there.

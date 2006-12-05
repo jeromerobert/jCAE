@@ -358,7 +358,7 @@ public class HalfEdge implements Serializable
 	public final HalfEdge nextOriginLoop()
 	{
 		HalfEdge ret = this;
-		if (ret.hasAttributes(OTriangle.OUTER))
+		if (ret.hasAttributes(OTriangle.OUTER | OTriangle.BOUNDARY))
 		{
 			// Loop clockwise to another boundary
 			// and start again from there.
@@ -868,6 +868,7 @@ public class HalfEdge implements Serializable
 		unitTestBuildMesh(m, v);
 		assert m.isValid();
 		m.buildEdges();
+		assert m.isValid();
 		unitTestCheckToHalfEdge(m, v[0], v[1]);
 		unitTestCheckToHalfEdge(m, v[1], v[0]);
 		System.out.println("Checking loops...");
