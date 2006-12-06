@@ -53,7 +53,7 @@ public class BCADGraphCell
 	private Collection parents = new LinkedHashSet();
 	//   List of constraints applied to this Mesh
 	private Collection constraints = new ArrayList();
-	private Constraint resultConstraint = null;
+	private ResultConstraint resultConstraint = null;
 
 	public Object mesh = null;
 	public MMesh1D mesh1D;
@@ -263,7 +263,7 @@ public class BCADGraphCell
 
 	public void combineHypothesis(CADShapeEnum d)
 	{
-		resultConstraint = Constraint.combineAll(constraints, d);
+		resultConstraint = ResultConstraint.combineAll(constraints, d);
 	}
 
 	public boolean hasConstraints()

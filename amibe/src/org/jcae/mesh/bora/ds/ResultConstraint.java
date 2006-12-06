@@ -27,12 +27,12 @@ import java.util.Collection;
 import java.lang.reflect.Constructor;
 import org.apache.log4j.Logger;
 
-public class Constraint extends Hypothesis
+public class ResultConstraint extends Hypothesis
 {
-	private static Logger logger = Logger.getLogger(Constraint.class);
+	private static Logger logger = Logger.getLogger(ResultConstraint.class);
 	private CADShapeEnum dimension = null;
 	private AlgoInterface algo = null;
-	private static Class [] innerClasses = Constraint.class.getDeclaredClasses();
+	private static Class [] innerClasses = ResultConstraint.class.getDeclaredClasses();
 	private static HypNone HypNoneInstance = new HypNone();
 
 	// Is there a better way to do that?
@@ -46,14 +46,14 @@ public class Constraint extends Hypothesis
 		numberBool  = h.numberBool;
 		numberMin   = h.numberMin;
 		numberMax   = h.numberMax;
-		elementType = Constraint.impliedType(d, h.elementType);
+		elementType = ResultConstraint.impliedType(d, h.elementType);
 		logger.debug("("+Integer.toHexString(h.hashCode())+") Dim: "+d+" Algo "+h.elementType+" mapped to "+elementType);
 	}
 
-	// Creates a Constraint derived from an Hypothesis
-	private static Constraint createConstraint(Hypothesis h, CADShapeEnum d)
+	// Creates a ResultConstraint derived from an Hypothesis
+	private static ResultConstraint createConstraint(Hypothesis h, CADShapeEnum d)
 	{
-		Constraint ret = new Constraint();
+		ResultConstraint ret = new ResultConstraint();
 		ret.copyHypothesis(h, d);
 		if (ret.elementType == null)
 			return null;
@@ -63,7 +63,7 @@ public class Constraint extends Hypothesis
 	// Combines with an Hypothesis for a given dimension
 	private void combine(BCADGraphCellHypothesis mh, CADShapeEnum d)
 	{
-		Constraint that = createConstraint(mh.getHypothesis(), d);
+		ResultConstraint that = createConstraint(mh.getHypothesis(), d);
 		if (that == null)
 			return;
 		if (dimension == null)
@@ -137,12 +137,12 @@ public class Constraint extends Hypothesis
 	 * @param mh  list of BCADGraphCellHypothesis objects.
 	 * @param d   dimension
 	 */
-	public static Constraint combineAll(Collection mh, CADShapeEnum d)
+	public static ResultConstraint combineAll(Collection mh, CADShapeEnum d)
 	{
-		Constraint ret = null;
+		ResultConstraint ret = null;
 		if (mh.size() == 0)
 			return null;
-		ret = new Constraint();
+		ret = new ResultConstraint();
 		for (Iterator ita = mh.iterator() ; ita.hasNext(); )
 			ret.combine((BCADGraphCellHypothesis) ita.next(), d);
 		if (ret.dimension == null)
@@ -158,7 +158,7 @@ public class Constraint extends Hypothesis
 		try {
 			for (int i = 0; i < innerClasses.length; i++)
 			{
-				if (innerClasses[i].getName().equals(Constraint.class.getName()+"$Hyp"+elt))
+				if (innerClasses[i].getName().equals(ResultConstraint.class.getName()+"$Hyp"+elt))
 					h = (HypInterface) innerClasses[i].newInstance();
 			}
 		} catch (Exception ex) {

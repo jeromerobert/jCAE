@@ -193,7 +193,7 @@ public class BSubMesh
 	 */
 	public void setHypothesis(Hypothesis h)
 	{
-		CADShapeEnum dim = Constraint.getAlgo(h.getElement()).dim();
+		CADShapeEnum dim = ResultConstraint.getAlgo(h.getElement()).dim();
 		if (dim == null)
 			return;
 		if (dim == CADShapeEnum.EDGE)
