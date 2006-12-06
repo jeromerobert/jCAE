@@ -83,13 +83,21 @@ public class BSubMesh
 	}
 
 	/**
-	 * Adds a shape to current submesh
+	 * Add a constraint to current submesh
 	 *
 	 * @param s  shape
 	 */
-	public void add(CADShape s)
+	public void add(Constraint s)
 	{
-		BCADGraphCell c = model.getGraph().getByShape(s);
+		// Connect s to this BSubMesh
+		s.addSubMesh(this);
+		// Store Hypothesis, this may be useful when debugging
+		model.allHypothesis.add(s.getHypothesis());
+		// Add this Constraint to the CAD cell
+		BCADGraphCell c = s.getGraphCell();
+		c.addConstraint(s);
+
+		// Process subshapes
 		setTopShapes.add(c);
 		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
@@ -416,21 +424,18 @@ public class BSubMesh
 		String file = "brep/2cubes.brep";
 
 		BModel model = new BModel(file, "out");
-		CADShape shape = model.getCADShape();
-		CADShapeBuilder factory = CADShapeBuilder.factory;
-		CADExplorer exp = factory.newExplorer();
-		CADShape [] solids = new CADShape[2];
-		exp.init(shape, CADShapeEnum.SOLID);
-		solids[0] = exp.current();
-		exp.next();
-		solids[1] = exp.current();
-		BSubMesh submesh1 = model.newMesh();
-		submesh1.add(solids[0]);
-		BSubMesh submesh2 = model.newMesh();
-		submesh2.add(solids[1]);
+		BCADGraphCell root = model.getGraph().getRootCell();
+		Iterator its = root.shapesExplorer(CADShapeEnum.SOLID);
+		BCADGraphCell [] solids = new BCADGraphCell[2];
+		solids[0] = (BCADGraphCell) its.next();
+		solids[1] = (BCADGraphCell) its.next();
+		BCADGraphCell f0 = model.getGraph().getById(7);
+
+		Hypothesis h0 = new Hypothesis();
+		h0.setElement("T3");
 
 		Hypothesis h1 = new Hypothesis();
-		h1.setElement("T3");
+		h1.setElement("T4");
 		h1.setLength(0.3);
 		h1.setDeflection(0.05);
 
@@ -438,8 +443,17 @@ public class BSubMesh
 		h2.setElement("T4");
 		h2.setLength(0.1);
 
-		submesh1.setHypothesis(h1);
-		submesh2.setHypothesis(h2);
+		Constraint c0 = new Constraint(f0, h0);
+		Constraint c1 = new Constraint(solids[0], h1);
+		Constraint c2 = new Constraint(solids[1], h2);
+
+		BSubMesh submesh1 = model.newMesh();
+		submesh1.add(c1);
+		submesh1.add(c0);
+		BSubMesh submesh2 = model.newMesh();
+		submesh2.add(c2);
+		submesh1.add(c0);
+
 		model.printAllHypothesis();
 		model.compute();
 		// model.printConstraints();

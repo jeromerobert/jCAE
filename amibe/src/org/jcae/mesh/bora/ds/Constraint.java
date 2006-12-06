@@ -20,23 +20,39 @@
 
 package org.jcae.mesh.bora.ds;
 
+import java.util.Collection;
+import java.util.ArrayList;
+
 public class Constraint
 {
-	private BCADGraphCell graphCell = null;
-	private Hypothesis hypothesis = null;
+	private final BCADGraphCell graphCell;
+	private final Hypothesis hypothesis;
+	// List of BSubMesh instances containing this Constraint.
+	private final Collection parent = new ArrayList();
 
 	public Constraint(BCADGraphCell g, Hypothesis h)
 	{
-		graphCell = g;
+		// Store forward oriented cell
+		if (g.getOrientation() != 0 && g.getReversed() != null)
+			graphCell = g.getReversed();
+		else
+			graphCell = g;
 		hypothesis = h;
 	}
+
 	public BCADGraphCell getGraphCell()
 	{
 		return graphCell;
 	}
+
 	public Hypothesis getHypothesis()
 	{
 		return hypothesis;
+	}
+
+	public void addSubMesh(BSubMesh s)
+	{
+		parent.add(s);
 	}
 
 	public String toString()
