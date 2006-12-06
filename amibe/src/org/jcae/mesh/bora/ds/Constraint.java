@@ -20,13 +20,12 @@
 
 package org.jcae.mesh.bora.ds;
 
-//  This class is useful to improve error reporting in BGroup.computeHypothesis().
-public class BCADGraphCellHypothesis
+public class Constraint
 {
 	private BCADGraphCell graphCell = null;
 	private Hypothesis hypothesis = null;
 
-	public BCADGraphCellHypothesis(BCADGraphCell g, Hypothesis h)
+	public Constraint(BCADGraphCell g, Hypothesis h)
 	{
 		graphCell = g;
 		hypothesis = h;

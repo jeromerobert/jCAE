@@ -249,7 +249,7 @@ public class BCADGraphCell
 	{
 		h.lock();
 		getGraph().getModel().allHypothesis.add(h);
-		BCADGraphCellHypothesis c = new BCADGraphCellHypothesis(this, h);
+		Constraint c = new Constraint(this, h);
 		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
 			CADShapeEnum cse = (CADShapeEnum) itcse.next();

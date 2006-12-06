@@ -61,7 +61,7 @@ public class ResultConstraint extends Hypothesis
 	}
 
 	// Combines with an Hypothesis for a given dimension
-	private void combine(BCADGraphCellHypothesis mh, CADShapeEnum d)
+	private void combine(Constraint mh, CADShapeEnum d)
 	{
 		ResultConstraint that = createConstraint(mh.getHypothesis(), d);
 		if (that == null)
@@ -124,17 +124,17 @@ public class ResultConstraint extends Hypothesis
 		deflection = targetDefl;
 	}
 
-	private void printDirty(BCADGraphCellHypothesis mh)
+	private void printDirty(Constraint mh)
 	{
 		logger.warn("Hypothesis not compatible: "+mh+": "+mh.getHypothesis()+" with "+this);
 	}
 
 	/**
 	 * Combines all Hypothesis of a Collection.  In order to improve error
-	 * reporting, BCADGraphCellHypothesis objects are passed as arguments instead
+	 * reporting, Constraint objects are passed as arguments instead
 	 * of Hypothesis.
 	 *
-	 * @param mh  list of BCADGraphCellHypothesis objects.
+	 * @param mh  list of Constraint objects.
 	 * @param d   dimension
 	 */
 	public static ResultConstraint combineAll(Collection mh, CADShapeEnum d)
@@ -144,7 +144,7 @@ public class ResultConstraint extends Hypothesis
 			return null;
 		ret = new ResultConstraint();
 		for (Iterator ita = mh.iterator() ; ita.hasNext(); )
-			ret.combine((BCADGraphCellHypothesis) ita.next(), d);
+			ret.combine((Constraint) ita.next(), d);
 		if (ret.dimension == null)
 			ret = null;
 		return ret;
