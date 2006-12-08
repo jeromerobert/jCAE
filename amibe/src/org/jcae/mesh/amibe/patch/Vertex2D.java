@@ -58,7 +58,7 @@ public class Vertex2D extends Vertex
 	private static final int [] i1 = new int[2];
 	
 	//  Metrics at this location
-	private Metric2D m2 = null;
+	private transient Metric2D m2 = null;
 	
 	protected Vertex2D()
 	{

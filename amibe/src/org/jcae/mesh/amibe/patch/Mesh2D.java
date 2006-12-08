@@ -46,19 +46,19 @@ public class Mesh2D extends Mesh
 	private static Logger logger=Logger.getLogger(Mesh2D.class);
 	
 	//  Topological face on which mesh is applied
-	private CADShape face;
+	private transient CADShape face;
 	
 	//  The geometrical surface describing the topological face, stored for
 	//  efficiebcy reason
-	private CADGeomSurface surface;
+	private transient CADGeomSurface surface;
 	
 	//  Stack of methods to compute geometrical values
-	private Stack compGeomStack = new Stack();
+	private transient Stack compGeomStack = new Stack();
 	
 	/**
 	 * Structure to fasten search of nearest vertices.
 	 */
-	public QuadTree quadtree = null;
+	public transient QuadTree quadtree = null;
 	
 	// Utility class to improve debugging output
 	private static class OuterVertex2D extends Vertex2D
