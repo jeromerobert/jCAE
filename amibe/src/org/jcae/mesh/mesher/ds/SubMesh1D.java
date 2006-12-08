@@ -197,20 +197,20 @@ public class SubMesh1D
 	public String toString()
 	{
 		String cr=System.getProperty("line.separator");
-		String r="SubMesh1D"+cr;
-		logger.debug("Printing "+r);
+		StringBuffer r = new StringBuffer("SubMesh1D"+cr);
+		logger.debug("Printing "+r.toString());
 		for(Iterator itn=nodelist.iterator();itn.hasNext();)
 		{
 			MNode1D node=(MNode1D)itn.next();
-			r+=node+cr;
+			r.append(node+cr);
 		}
 		for(Iterator ite=edgelist.iterator();ite.hasNext();)
 		{
 			MEdge1D edge=(MEdge1D)ite.next();
-			r+=edge+cr;
+			r.append(edge+cr);
 		}
 		logger.debug("...done");
-		return r;
+		return r.toString();
 	}
 }
 

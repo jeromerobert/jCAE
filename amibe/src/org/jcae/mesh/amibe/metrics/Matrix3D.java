@@ -240,16 +240,16 @@ public class Matrix3D implements Serializable
 	
 	public String toString()
 	{
-		String ret = "";
+		StringBuffer ret = new StringBuffer();
 		for (int i = 0; i < 3; i++)
 		{
-			ret += "data|"+i+"][] ";
+			ret.append("data|"+i+"][] ");
 			for (int j = 0; j < 3; j++)
-				ret += " "+data[i+3*j];
+				ret.append(" "+data[i+3*j]);
 			if (i < 2)
-				ret += "\n";
+				ret.append("\n");
 		}
-		return ret;
+		return ret.toString();
 	}
 	
 }

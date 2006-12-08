@@ -656,15 +656,15 @@ public class Vertex2D extends Vertex
 	
 	public String toString ()
 	{
-		String r = "UV:";
+		StringBuffer r = new StringBuffer("UV:");
 		for (int i = 0; i < param.length; i++)
-			r += " "+param[i];
+			r.append(" "+param[i]);
 		if (ref1d != 0)
-			r += " ref1d: "+ref1d;
-		r += " hash: "+hashCode();
+			r.append(" ref1d: "+ref1d);
+		r.append(" hash: "+hashCode());
 		if (link != null)
-			r += " link: "+link.hashCode();
-		return r;
+			r.append(" link: "+link.hashCode());
+		return r.toString();
 	}
 	
 }

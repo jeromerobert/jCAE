@@ -398,16 +398,16 @@ public class MMesh1D extends MMesh0D
 	public String toString()
 	{
 		String cr=System.getProperty("line.separator");
-		String r="MMesh1D"+cr;
-		logger.debug("Printing "+r);
+		StringBuffer r = new StringBuffer("MMesh1D"+cr);
+		logger.debug("Printing "+r.toString());
 		for(Iterator it=mapTEdgeToSubMesh1D.values().iterator();it.hasNext();)
 		{
 			SubMesh1D submesh1d = (SubMesh1D) it.next();
 			if (null != submesh1d)
-				r += submesh1d;
+				r.append(submesh1d);
 		}
 		logger.debug("...done");
-		return r;
+		return r.toString();
 	}
 }
 

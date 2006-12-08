@@ -143,9 +143,10 @@ public class IndexedStorage
 			ijk[0] = current.i0;
 			ijk[1] = current.j0;
 			ijk[2] = current.k0;
-			String dir = outDir;
+			StringBuffer sbdir = new StringBuffer(outDir);
 			for (int i = 0; i < path.size(); i++)
-				dir += File.separator + (String) path.get(i);
+				sbdir.append(File.separator + (String) path.get(i));
+			String dir = sbdir.toString();
 			File d = new File(dir);
 			d.mkdirs();
 			current.file = dir + File.separator + octant;

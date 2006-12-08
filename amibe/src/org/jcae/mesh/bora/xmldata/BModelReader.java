@@ -100,12 +100,13 @@ public class BModelReader
 					if (itc.hasNext())
 					{
 						BCADGraphCell c = (BCADGraphCell) itc.next();
-						String list = ""+c.getId();
+						StringBuffer sblist = new StringBuffer(""+c.getId());
 						while (itc.hasNext())
 						{
 							c = (BCADGraphCell) itc.next();
-							list += ","+c.getId();
+							sblist.append(","+c.getId());
 						}
+						String list = sblist.toString();
 						if (!children.getAttributes().getNamedItem("list").getNodeValue().equals(list))
 						{
 							logger.error(errmsg+", wrong children for shape id "+s.getId()+". Expected result was: list=\""+list+"\"");

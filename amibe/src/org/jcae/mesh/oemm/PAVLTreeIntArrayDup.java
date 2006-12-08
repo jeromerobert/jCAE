@@ -105,10 +105,10 @@ public class PAVLTreeIntArrayDup
 	
 	private final static String keyString(int [] data, int offKey)
 	{
-		String ret = "";
+		StringBuffer ret = new StringBuffer();
 		for (int i = 0; i < nrInt; i++)
-			ret += " 0x"+Integer.toHexString(data[offKey+i]);
-		return ret;
+			ret.append(" 0x"+Integer.toHexString(data[offKey+i]));
+		return ret.toString();
 	}
 	
 	/**
@@ -420,14 +420,14 @@ public class PAVLTreeIntArrayDup
 	
 	private void showNode(int current)
 	{
-		String r = "Key: "+keyString(work, work[current+POS_KEY])+"  bal. "+work[current+POS_BALANCE];
+		StringBuffer r = new StringBuffer("Key: "+keyString(work, work[current+POS_KEY])+"  bal. "+work[current+POS_BALANCE]);
 		if (work[current+POS_CHILD] != POS_NIL)
-			r += " Left -> "+keyString(work, work[work[current+POS_CHILD]+POS_KEY]);
+			r.append(" Left -> "+keyString(work, work[work[current+POS_CHILD]+POS_KEY]));
 		if (work[current+POS_CHILD+1] != POS_NIL)
-			r += " Right -> "+keyString(work, work[work[current+POS_CHILD+1]+POS_KEY]);
+			r.append(" Right -> "+keyString(work, work[work[current+POS_CHILD+1]+POS_KEY]));
 		if (work[current+POS_PARENT] != POS_NIL)
-			r += " Parent -> "+keyString(work, work[work[current+POS_PARENT]+POS_KEY]);
-		System.out.println(r);
+			r.append(" Parent -> "+keyString(work, work[work[current+POS_PARENT]+POS_KEY]));
+		System.out.println(r.toString());
 		if (work[current+POS_CHILD] != POS_NIL)
 		{
 			assert work[work[current+POS_CHILD]+POS_PARENT] == current;

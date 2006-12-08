@@ -73,30 +73,30 @@ public class BModelWriter
 					if (itc.hasNext())
 					{
 						BCADGraphCell c = (BCADGraphCell) itc.next();
-						String list = ""+c.getId();
+						StringBuffer sblist = new StringBuffer(""+c.getId());
 						while (itc.hasNext())
 						{
 							c = (BCADGraphCell) itc.next();
-							list += ","+c.getId();
+							sblist.append(","+c.getId());
 						}
 						Element child = document.createElement("children");
-						child.setAttribute("list", ""+list);
+						child.setAttribute("list", sblist.toString());
 						elt.appendChild(child);
 					}
 					if (s.getParents().size() > 0)
 					{
-						String list = "";
+						StringBuffer sblist = new StringBuffer();
 						boolean first = true;
 						for (Iterator itp = s.getParents().iterator(); itp.hasNext(); )
 						{
 							BCADGraphCell p = (BCADGraphCell) itp.next();
 							if (!first)
-								list += ",";
+								sblist.append(",");
 							first = false;
-							list += p.getId();
+							sblist.append(p.getId());
 						}
 						Element parent = document.createElement("parents");
-						parent.setAttribute("list", ""+list);
+						parent.setAttribute("list", ""+sblist.toString());
 						elt.appendChild(parent);
 					}
 					graphElement.appendChild(elt);

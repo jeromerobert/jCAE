@@ -53,14 +53,14 @@ public class PAVLTreeDup
 		}
 		public void show()
 		{
-			String r = "Key: "+keyString(key)+"  bal. "+balanceFactor;
+			StringBuffer r = new StringBuffer("Key: "+keyString(key)+"  bal. "+balanceFactor);
 			if (child[0] != null)
-				r += " Left -> "+keyString(child[0].key);
+				r.append(" Left -> "+keyString(child[0].key));
 			if (child[1] != null)
-				r += " Right -> "+keyString(child[1].key);
+				r.append(" Right -> "+keyString(child[1].key));
 			if (parent != null)
-				r += " Parent -> "+keyString(parent.key);
-			System.out.println(r);
+				r.append(" Parent -> "+keyString(parent.key));
+			System.out.println(r.toString());
 			if (child[0] != null)
 			{
 				assert child[0].parent == this;
@@ -125,10 +125,10 @@ public class PAVLTreeDup
 	
 	private final static String keyString(int [] key)
 	{
-		String ret = "";
+		StringBuffer ret = new StringBuffer();
 		for (int i = 0; i < nrInt; i++)
-			ret += " 0x"+Integer.toHexString(key[i]);
-		return ret;
+			ret.append(" 0x"+Integer.toHexString(key[i]));
+		return ret.toString();
 	}
 	
 	/**

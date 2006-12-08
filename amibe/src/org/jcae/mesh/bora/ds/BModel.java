@@ -218,17 +218,18 @@ public class BModel
 	{
 		System.out.println("List of constraints");
 		BCADGraphCell root = cad.getRootCell();
-		String indent = "";
+		StringBuffer indent = new StringBuffer();
 		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
 			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			String tab = indent.toString();
 			for (Iterator it = root.shapesExplorer(cse); it.hasNext(); )
 			{
 				BCADGraphCell s = (BCADGraphCell) it.next();
-				System.out.println(indent+"Shape "+s);
-				s.printConstraints(indent+"    + ");
+				System.out.println(tab+"Shape "+s);
+				s.printConstraints(tab+"    + ");
 			}
-			indent += "  ";
+			indent.append("  ");
 		}
 		System.out.println("End list");
 	}
