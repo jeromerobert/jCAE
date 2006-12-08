@@ -28,10 +28,11 @@ import org.apache.log4j.Logger;
 public abstract class CADShapeBuilder
 {
 	private static Logger logger=Logger.getLogger(CADShapeBuilder.class);
-	public static CADShapeBuilder factory = null;
+	public static final CADShapeBuilder factory;
 	static
 	{
 		String cadType = System.getProperty("org.jcae.mesh.cad");
+		CADShapeBuilder b = null;
 		if (cadType == null)
 		{
 			cadType = "org.jcae.mesh.cad.occ.OCCShapeBuilder";
@@ -39,13 +40,14 @@ public abstract class CADShapeBuilder
 		}
 		try
 		{
-			factory = (CADShapeBuilder) Class.forName(cadType).newInstance();
+			b = (CADShapeBuilder) Class.forName(cadType).newInstance();
 		}
 		catch (Exception e)
 		{
 			logger.error("Class "+cadType+" not found");
 			System.exit(1);
 		}
+		factory = b;
 	}
 	
 	public CADShapeBuilder ()
