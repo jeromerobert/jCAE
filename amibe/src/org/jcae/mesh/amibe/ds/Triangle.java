@@ -21,6 +21,7 @@ package org.jcae.mesh.amibe.ds;
 
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import java.util.ConcurrentModificationException;
+import java.util.NoSuchElementException;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.io.Serializable;
@@ -559,6 +560,8 @@ public class Triangle implements Serializable
 				
 				public Object next()
 				{
+					if (!hasNext())
+						throw new NoSuchElementException();
 					curr = curr.listNext;
 					return curr;
 				}

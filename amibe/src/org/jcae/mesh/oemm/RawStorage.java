@@ -33,6 +33,7 @@ import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import org.apache.log4j.Logger;
 
 /**
@@ -155,8 +156,8 @@ public class RawStorage
 			}
 			public Object next()
 			{
-				if (fc == null)
-					init();
+				if (!hasNext())
+					throw new NoSuchElementException();
 				try
 				{
 					bb.rewind();
