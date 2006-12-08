@@ -185,13 +185,13 @@ public class ResultConstraint extends Hypothesis
 			{
 				Class [] typeArgs = new Class[] {double.class, double.class, boolean.class};
 				Constructor cons = UniformLengthDeflection1d.class.getConstructor(typeArgs);
-				algo = (AlgoInterface) cons.newInstance(new Object [] {new Double(targetLength), new Double(deflection), new Boolean(true)});
+				algo = (AlgoInterface) cons.newInstance(new Object [] {new Double(targetLength), new Double(deflection), Boolean.valueOf(true)});
 			}
 			else if (dimension == CADShapeEnum.FACE)
 			{
 				Class [] typeArgs = new Class[] {double.class, double.class, boolean.class, boolean.class};
 				Constructor cons = Basic2d.class.getConstructor(typeArgs);
-				algo = (AlgoInterface) cons.newInstance(new Object [] {new Double(targetLength), new Double(deflection), new Boolean(true), new Boolean(true)});
+				algo = (AlgoInterface) cons.newInstance(new Object [] {new Double(targetLength), new Double(deflection), Boolean.valueOf(true), Boolean.valueOf(true)});
 			}
 			else if (dimension == CADShapeEnum.SOLID)
 			{

@@ -135,7 +135,7 @@ public class IndexedStorage
 			}
 			else if (visit == PREORDER)
 			{
-				path.add(new String(""+octant));
+				path.add(""+octant);
 				return SKIPWALK;
 			}
 			

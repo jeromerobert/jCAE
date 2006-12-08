@@ -79,7 +79,7 @@ public class OctreeTestDisplayPLY extends OctreeTest
 		logger.info("Found "+nrNodes+" nodes");
 		logger.debug("Start insertion");
 		double [] coord = new double[3*nrNodes];
-		String oldLine = new String("foo");
+		String oldLine = "foo";
 		int nrDuplicates = 0;
 		for (int i = 0; i + nrDuplicates< nrNodes; i++)
 		{

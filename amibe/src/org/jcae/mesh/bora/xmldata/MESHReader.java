@@ -41,7 +41,7 @@ public class MESHReader
 	{
 		VolMesh mesh = new VolMesh();
 		TIntObjectHashMap nodesmap = null;
-		String line = new String();
+		String line = "";
 		try
 		{
 			FileInputStream in = new FileInputStream(file);
@@ -67,7 +67,7 @@ public class MESHReader
 		logger.debug("Reading nodes");
 		TIntObjectHashMap nodesmap = null;
 		double x,y,z;
-		String line = new String();
+		String line = "";
 		int nrNodes = 0;
 		try
 		{
@@ -104,7 +104,7 @@ public class MESHReader
 	private static void readFace(BufferedReader rd, Mesh mesh, TIntObjectHashMap nodesmap)
 	{
 		logger.debug("Reading tetrahedra");
-		String line = new String();
+		String line = "";
 		int nrTetrahedra = 0;
 		Vertex [] v = new Vertex[4];
 		try

@@ -50,7 +50,7 @@ public class ExtractShell
 		String outfile = args[1];
 		String facesfile = "faces.inc";
 		TIntHashSet inodes = null;
-		String line = new String();
+		String line = "";
 		try
 		{
 			FileInputStream in = new FileInputStream(infile);
@@ -137,7 +137,7 @@ public class ExtractShell
 
 	private static void readUnit(BufferedReader rd, PrintStream outNodes)
 	{
-		String line = new String();
+		String line = "";
 		try
 		{
 			//retrieve the second line
@@ -163,7 +163,7 @@ public class ExtractShell
 	private static void readNodes(BufferedReader rd, PrintStream outNodes, TIntHashSet inodes)
 	{
 		logger.debug("Reading nodes");
-		String line = new String();
+		String line = "";
 		int count = 0;
 		int inner = 0;
 		try
@@ -201,7 +201,7 @@ public class ExtractShell
 		TIntHashSet inodes = new TIntHashSet();
 		logger.debug("Reading triangles");
 		HashMap facemap = new HashMap();
-		String line = new String();
+		String line = "";
 		
 		try
 		{

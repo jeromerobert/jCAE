@@ -29,8 +29,8 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
  */
 public class Area extends QualityProcedure
 {
-	public static double [] v1 = new double[3];
-	public static double [] v2 = new double[3];
+	private static final double [] v1 = new double[3];
+	private static final double [] v2 = new double[3];
 	
 	public Area()
 	{

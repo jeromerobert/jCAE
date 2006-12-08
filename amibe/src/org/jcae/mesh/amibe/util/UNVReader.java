@@ -62,7 +62,7 @@ public class UNVReader
 		TIntObjectHashMap nodesmap = null;
 		TIntObjectHashMap facesmap = null;
 		double unit = 1.0;
-		String line = new String();
+		String line = "";
 		try
 		{
 			FileInputStream in = new FileInputStream(file);
@@ -125,7 +125,7 @@ public class UNVReader
 	private static double readUnit(BufferedReader rd)
 	{
 		double unit = 1.0;
-		String line = new String();
+		String line = "";
 		try
 		{
 			//retrieve the second line
@@ -155,7 +155,7 @@ public class UNVReader
 		logger.debug("Reading nodes");
 		nodesmap.clear();
 		double x,y,z;
-		String line = new String();
+		String line = "";
 		try
 		{
 			while(!(line=rd.readLine().trim()).equals("-1"))
@@ -201,7 +201,7 @@ public class UNVReader
 	{
 		logger.debug("Reading triangles");
 		TIntObjectHashMap facesmap = new TIntObjectHashMap();
-		String line = new String();
+		String line = "";
 		boolean quad = false;
 		
 		try
@@ -281,7 +281,7 @@ public class UNVReader
 	private static void readGroup(BufferedReader rd, Mesh mesh, TIntObjectHashMap facesmap)
 	{
 		logger.debug("Reading groups");
-		String line = new String();
+		String line = "";
 		try
 		{
 			line = rd.readLine();
@@ -290,7 +290,7 @@ public class UNVReader
 				// read the number of elements to read in the last number of the line
 				StringTokenizer st = new StringTokenizer(line);
 				/*
-				String snb = new String();
+				String snb = "";
 				// Block number
 				st.nextToken();
 				while(st.hasMoreTokens())
