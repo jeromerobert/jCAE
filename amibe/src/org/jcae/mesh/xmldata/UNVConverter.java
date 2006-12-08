@@ -482,13 +482,7 @@ public class UNVConverter
 		proc.writeNodes(out, nodelist.toNativeArray(), amibeNodeToUNVNode);
 		TIntIntHashMap amibeTriaToUNVTria=new TIntIntHashMap();
 		proc.writeTriangles(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
-		try
-		{
-			proc.writeNormals(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
-		}
-		catch (Exception e)
-		{
-		}
+		proc.writeNormals(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
 		triangle=null;
 		amibeNodeToUNVNode=null;
 		proc.writeGroups(out, amibeTriaToUNVTria);
