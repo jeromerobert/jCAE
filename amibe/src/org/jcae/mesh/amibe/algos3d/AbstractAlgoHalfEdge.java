@@ -53,7 +53,7 @@ public abstract class AbstractAlgoHalfEdge
 	protected abstract HalfEdge processEdge(HalfEdge e);
 	protected abstract double cost(HalfEdge e);
 	protected abstract Logger thisLogger();
-	private final String dumpFile = "/tmp/jcae.dump";
+	private static final String dumpFile = "/tmp/jcae.dump";
 
 	public AbstractAlgoHalfEdge(Mesh m, Map options)
 	{

@@ -257,7 +257,8 @@ public class UNVConverter
 	public UNVConverter(File directory, int[] groupIds)
 	{
 		this.directory=directory;
-		this.groupIds=groupIds;
+		this.groupIds=new int[groupIds.length];
+		System.arraycopy(groupIds, 0, this.groupIds, 0, groupIds.length);
 	}
 
 	/**

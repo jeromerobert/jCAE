@@ -345,6 +345,8 @@ public class ExtractShell
 		{
 			if (o == null)
 				return false;
+			if (!(o instanceof Face))
+				return false;
 			Face that = (Face) o;
 			return (that.v[0] == v[0] && that.v[1] == v[1] && that.v[2] == v[2]);
 		}

@@ -59,6 +59,8 @@ public class NotOrientedEdge extends OTriangle
 	{
 		if (o == null)
 			return false;
+		if (!(o instanceof NotOrientedEdge))
+			return false;
 		NotOrientedEdge that = (NotOrientedEdge) o;
 		return (that.tri == tri && that.localNumber == localNumber) ||
 		       (that.tri == (Triangle) tri.getAdj(localNumber) && that.localNumber == tri.getAdjLocalNumber(localNumber));
