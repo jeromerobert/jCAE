@@ -52,7 +52,7 @@ public class AVLTreeDup
 		}
 		public void show()
 		{
-			StringBuffer ret = new StringBuffer("Key: "+keyString(key)+"  bal. "+balanceFactor);
+			StringBuffer r = new StringBuffer("Key: "+keyString(key)+"  bal. "+balanceFactor);
 			if (child[0] != null)
 				r.append(" Left -> "+keyString(child[0].key));
 			if (child[1] != null)
