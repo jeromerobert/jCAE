@@ -626,7 +626,6 @@ public class PAVLSortedTree implements Serializable
 						{
 							right.balanceFactor = 0;
 							y.balanceFactor = 0;
-							y = right;
 						}
 					}
 				}
@@ -658,7 +657,6 @@ public class PAVLSortedTree implements Serializable
 						{
 							x.balanceFactor = 0;
 							y.balanceFactor = 0;
-							y = x;
 						}
 					}
 				}
