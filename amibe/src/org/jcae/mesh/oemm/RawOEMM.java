@@ -259,7 +259,7 @@ public class RawOEMM extends OEMM
 		return true;
 	}
 	
-	private final class SumTrianglesProcedure extends TraversalProcedure
+	private static class SumTrianglesProcedure extends TraversalProcedure
 	{
 		public final int action(OEMMNode current, int octant, int visit)
 		{

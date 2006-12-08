@@ -39,7 +39,7 @@ public class OctreeTest extends Octree
 		super (umin, umax);
 	}
 	
-	private final class CoordProcedure implements OctreeProcedure
+	private class CoordProcedure implements OctreeProcedure
 	{
 		public final double [] coord;
 		private int index;
@@ -117,7 +117,7 @@ public class OctreeTest extends Octree
 	}
 	
 	/*
-	private final class CheckCoordProcedure implements OctreeProcedure
+	private class CheckCoordProcedure implements OctreeProcedure
 	{
 		public final int action(Object o, int s, int i0, int j0, int k0)
 		{
@@ -155,7 +155,7 @@ public class OctreeTest extends Octree
 	}
 	*/
 	
-	private final class CoordVertProcedure implements OctreeProcedure
+	private static class CoordVertProcedure implements OctreeProcedure
 	{
 		public final double [] coord;
 		private int index = 0;

@@ -71,7 +71,7 @@ public class NodeConnectivity3D extends QualityProcedure
 		nodeMap.forEachEntry(proc);
 	}
 
-	private class Count implements TObjectIntProcedure
+	private static class Count implements TObjectIntProcedure
 	{
 		private TFloatArrayList data;
 		public Count(final TFloatArrayList d)

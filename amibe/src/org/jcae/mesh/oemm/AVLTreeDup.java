@@ -38,7 +38,7 @@ public class AVLTreeDup
 	private AVLTreeDupNode root;
 	private int [] dir;
 	
-	private class AVLTreeDupNode
+	private static class AVLTreeDupNode
 	{
 		private int [] key = new int[nrInt];
 		private int value;

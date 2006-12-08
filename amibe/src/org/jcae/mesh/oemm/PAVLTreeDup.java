@@ -37,7 +37,7 @@ public class PAVLTreeDup
 	
 	private PAVLTreeDupNode root;
 	
-	private class PAVLTreeDupNode
+	private static class PAVLTreeDupNode
 	{
 		private int [] key = new int[nrInt];
 		private int value;

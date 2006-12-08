@@ -48,7 +48,7 @@ public class QuadTreeTest extends QuadTree
 		super (umin, umax, vmin, vmax);
 	}
 	
-	private final class CoordProcedure implements QuadTreeProcedure
+	private class CoordProcedure implements QuadTreeProcedure
 	{
 		public final double [] coord;
 		private int index;
@@ -84,7 +84,7 @@ public class QuadTreeTest extends QuadTree
 	}
 	
 	/*
-	private final class CheckCoordProcedure implements QuadTreeProcedure
+	private class CheckCoordProcedure implements QuadTreeProcedure
 	{
 		public final int action(Object o, int s, int i0, int j0)
 		{
@@ -118,7 +118,7 @@ public class QuadTreeTest extends QuadTree
 	}
 	*/
 	
-	private final class CoordVertProcedure implements QuadTreeProcedure
+	private static class CoordVertProcedure implements QuadTreeProcedure
 	{
 		public final double [] coord;
 		private int index = 0;
