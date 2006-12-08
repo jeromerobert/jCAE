@@ -23,7 +23,6 @@ import org.jcae.mesh.cad.CADExplorer;
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.opencascade.jni.TopExp_Explorer;
-import org.jcae.opencascade.jni.TopoDS_Shape;
 
 public class OCCExplorer implements CADExplorer
 {
@@ -37,7 +36,7 @@ public class OCCExplorer implements CADExplorer
 	{
 		OCCShape shape = (OCCShape) s;
 		OCCShapeEnum type = (OCCShapeEnum) t;
-		occExp.init((TopoDS_Shape) shape.getShape(), type.asType());
+		occExp.init(shape.getShape(), type.asType());
 	}
 	
 	public boolean more()

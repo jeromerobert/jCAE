@@ -25,6 +25,7 @@ import org.jcae.opencascade.jni.BRep_Tool;
 import org.jcae.opencascade.jni.BRepTools;
 import org.jcae.opencascade.jni.TopoDS_Vertex;
 import org.jcae.opencascade.jni.TopoDS_Edge;
+import org.jcae.opencascade.jni.TopoDS_Wire;
 import org.jcae.opencascade.jni.TopoDS_Face;
 import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.jcae.opencascade.jni.TopoDS_Solid;
@@ -40,21 +41,41 @@ public class OCCShape implements CADShape
 	{
 	}
 	
-	public void setShape(Object o)
+	protected void setShape(TopoDS_Shape o)
 	{
-		myShape = (TopoDS_Shape) o;
+		myShape = o;
 	}
 	
-	public Object getShape()
+	protected TopoDS_Shape getShape()
 	{
 		return myShape;
 	}
 	
+	// Specialized types, useful to avoid casts
+	protected TopoDS_Face asTopoDS_Face()
+	{
+		return (TopoDS_Face) myShape;
+	}
+	
+	protected TopoDS_Edge asTopoDS_Edge()
+	{
+		return (TopoDS_Edge) myShape;
+	}
+	
+	protected TopoDS_Wire asTopoDS_Wire()
+	{
+		return (TopoDS_Wire) myShape;
+	}
+	
+	protected TopoDS_Vertex asTopoDS_Vertex()
+	{
+		return (TopoDS_Vertex) myShape;
+	}
+	
 	public CADGeomSurface getGeomSurface()
 	{
-		assert myShape instanceof TopoDS_Face;
 		OCCGeomSurface surface = new OCCGeomSurface();
-		surface.setSurface(BRep_Tool.surface((TopoDS_Face) myShape));
+		surface.setSurface(BRep_Tool.surface(asTopoDS_Face()));
 		return (CADGeomSurface) surface;
 	}
 	

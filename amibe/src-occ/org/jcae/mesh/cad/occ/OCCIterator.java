@@ -22,7 +22,6 @@ package org.jcae.mesh.cad.occ;
 import org.jcae.mesh.cad.CADIterator;
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.opencascade.jni.TopoDS_Iterator;
-import org.jcae.opencascade.jni.TopoDS_Shape;
 
 public class OCCIterator implements CADIterator
 {
@@ -35,7 +34,7 @@ public class OCCIterator implements CADIterator
 	public void initialize(CADShape s)
 	{
 		OCCShape shape = (OCCShape) s;
-		occIt.initialize((TopoDS_Shape) shape.getShape());
+		occIt.initialize(shape.getShape());
 	}
 	
 	public boolean more()

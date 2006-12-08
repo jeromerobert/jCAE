@@ -25,8 +25,6 @@ import org.jcae.mesh.cad.CADFace;
 import org.jcae.opencascade.jni.BRep_Tool;
 import org.jcae.opencascade.jni.Geom2d_Curve;
 import org.jcae.opencascade.jni.Geom2dAdaptor_Curve;
-import org.jcae.opencascade.jni.TopoDS_Edge;
-import org.jcae.opencascade.jni.TopoDS_Face;
 
 public class OCCGeomCurve2D implements CADGeomCurve2D
 {
@@ -35,11 +33,15 @@ public class OCCGeomCurve2D implements CADGeomCurve2D
 	
 	public OCCGeomCurve2D(CADEdge E, CADFace F)
 	{
-		OCCEdge occEdge=(OCCEdge)E;
-		OCCFace occFace=(OCCFace)F;
+		if (!(E instanceof OCCEdge))
+			throw new IllegalArgumentException();
+		if (!(F instanceof OCCFace))
+			throw new IllegalArgumentException();
+		OCCEdge occEdge = (OCCEdge) E;
+		OCCFace occFace = (OCCFace) F;
 		Geom2d_Curve curve = BRep_Tool.curveOnSurface(
-			(TopoDS_Edge) occEdge.getShape(),
-			(TopoDS_Face) occFace.getShape(), range);
+			occEdge.asTopoDS_Edge(),
+			occFace.asTopoDS_Face(), range);
 		if (curve == null)
 			throw new RuntimeException();
 		myCurve = new Geom2dAdaptor_Curve(curve);

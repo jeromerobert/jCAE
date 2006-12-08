@@ -22,14 +22,13 @@ package org.jcae.mesh.cad.occ;
 import org.jcae.mesh.cad.CADCompound;
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.opencascade.jni.BRep_Builder;
-import org.jcae.opencascade.jni.TopoDS_Shape;
 
 public class OCCCompound extends OCCShape implements CADCompound
 {
 	public boolean add(CADShape o)
 	{
 		OCCShape s = (OCCShape) o;
-		new BRep_Builder().add((TopoDS_Shape) myShape, (TopoDS_Shape) s.myShape);
+		new BRep_Builder().add(myShape, s.myShape);
 		return true;
 	}
 }

@@ -29,16 +29,15 @@ public class OCCVertex extends OCCShape implements CADVertex
 {
 	public double [] parameters(CADFace o)
 	{
-		TopoDS_Vertex V = (TopoDS_Vertex) myShape;
 		OCCFace face = (OCCFace) o;
-		TopoDS_Face F = (TopoDS_Face) face.myShape;
+		TopoDS_Face F = face.asTopoDS_Face();
+		TopoDS_Vertex V = asTopoDS_Vertex();
 		return BRep_Tool.parameters(V, F);
 	}
 	
 	public double [] pnt()
 	{
-		TopoDS_Vertex V = (TopoDS_Vertex) myShape;
-		return BRep_Tool.pnt(V);
+		return BRep_Tool.pnt(asTopoDS_Vertex());
 	}
 	
 }

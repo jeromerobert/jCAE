@@ -48,6 +48,8 @@ public class OCCShapeBuilder extends CADShapeBuilder
 	
 	public CADShape newShape(Object o)
 	{
+		if (!(o instanceof TopoDS_Shape))
+			throw new IllegalArgumentException();
 		TopoDS_Shape ts = (TopoDS_Shape) o;
 		OCCShape shape;
 		switch (ts.shapeType())
@@ -77,7 +79,7 @@ public class OCCShapeBuilder extends CADShapeBuilder
 				shape = new OCCShape();
 				break;
 		}
-		shape.setShape(o);
+		shape.setShape(ts);
 		return (CADShape) shape;
 	}
 	

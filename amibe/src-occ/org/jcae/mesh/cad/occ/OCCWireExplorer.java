@@ -24,8 +24,6 @@ import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADFace;
 import org.jcae.mesh.cad.CADWire;
 import org.jcae.opencascade.jni.BRepTools_WireExplorer;
-import org.jcae.opencascade.jni.TopoDS_Wire;
-import org.jcae.opencascade.jni.TopoDS_Face;
 
 public class OCCWireExplorer implements CADWireExplorer
 {
@@ -37,9 +35,9 @@ public class OCCWireExplorer implements CADWireExplorer
 	
 	public void init(CADWire w, CADFace f)
 	{
-		OCCWire occWire=(OCCWire)w;
-		OCCFace occFace=(OCCFace)f;
-		occWExp.init((TopoDS_Wire) occWire.getShape(), (TopoDS_Face) occFace.getShape());
+		OCCWire occWire = (OCCWire) w;
+		OCCFace occFace = (OCCFace) f;
+		occWExp.init(occWire.asTopoDS_Wire(), occFace.asTopoDS_Face());
 	}
 	
 	public boolean more()

@@ -20,7 +20,6 @@
 package org.jcae.mesh.cad.occ;
 
 import org.jcae.mesh.cad.CADFace;
-import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.jcae.opencascade.jni.Bnd_Box;
 import org.jcae.opencascade.jni.BRepBndLib;
 
@@ -29,7 +28,7 @@ public class OCCFace extends OCCShape implements CADFace
 	public double [] boundingBox()
 	{
 		Bnd_Box box = new Bnd_Box();
-		BRepBndLib.add((TopoDS_Shape) myShape, box);
+		BRepBndLib.add(myShape, box);
 		return box.get();
 	}
 }

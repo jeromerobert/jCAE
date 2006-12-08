@@ -25,8 +25,6 @@ import org.jcae.opencascade.jni.Adaptor3d_Curve;
 import org.jcae.opencascade.jni.BRep_Tool;
 import org.jcae.opencascade.jni.Geom_Curve;
 import org.jcae.opencascade.jni.GeomAdaptor_Curve;
-import org.jcae.opencascade.jni.TopoDS_Edge;
-import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.jcae.opencascade.jni.GProp_GProps;
 import org.jcae.opencascade.jni.BRepGProp;
 
@@ -39,13 +37,15 @@ public class OCCGeomCurve3D implements CADGeomCurve3D
 	
 	public OCCGeomCurve3D(CADEdge E)
 	{
-		OCCEdge occEdge=(OCCEdge)E;
-		Geom_Curve curve = BRep_Tool.curve((TopoDS_Edge) occEdge.getShape(), range);
+		if (!(E instanceof OCCEdge))
+			throw new IllegalArgumentException();
+		OCCEdge occEdge = (OCCEdge) E;
+		Geom_Curve curve = BRep_Tool.curve(occEdge.asTopoDS_Edge(), range);
 		if (curve == null)
 			throw new RuntimeException();
 		myCurve = new GeomAdaptor_Curve(curve);
 		GProp_GProps myProps = new GProp_GProps();
-		BRepGProp.linearProperties ((TopoDS_Shape) occEdge.getShape(), myProps);
+		BRepGProp.linearProperties (occEdge.getShape(), myProps);
 		len = myProps.mass();
 	}
 	
