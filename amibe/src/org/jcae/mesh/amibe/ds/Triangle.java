@@ -380,20 +380,20 @@ public class Triangle implements Serializable
 	
 	private final String showAdj(int num)
 	{
-		String r = "";
 		if (adj[num] == null)
 			return "N/A";
 		else if (adj[num] instanceof Triangle)
 		{
 			Triangle t = (Triangle) adj[num];
 			if (t == null)
-				r+= "null";
+				return "null";
 			else
-				r+= t.hashCode()+"["+getAdjLocalNumber(num)+"]";
+				return t.hashCode()+"["+getAdjLocalNumber(num)+"]";
 		}
 		else
 		{
-			r+= "(";
+			StringBuffer r = new StringBuffer();
+			r.append("(");
 			ArrayList a = (ArrayList) adj[num];
 			boolean first = true;
 			for (Iterator it = a.iterator(); it.hasNext(); )
@@ -401,13 +401,13 @@ public class Triangle implements Serializable
 				Triangle t = (Triangle) it.next();
 				Integer i = (Integer) it.next();
 				if (!first)
-					r+= ",";
-				r+= t.hashCode()+"["+i+"]";
+					r.append(",");
+				r.append(t.hashCode()+"["+i+"]");
 				first = false;
 			}
-			r+= ")";
+			r.append(")");
+			return r.toString();
 		}
-		return r;
 	}
 	
 	private static String showHalfEdge(HalfEdge e)
@@ -423,20 +423,20 @@ public class Triangle implements Serializable
 
 	public String toString()
 	{
-		String r = "";
-		r += "hashcode: "+hashCode();
-		r += "\nVertices:";
+		StringBuffer r = new StringBuffer();
+		r.append("hashcode: "+hashCode());
+		r.append("\nVertices:");
 		for (int i = 0; i < 3; i++)
-			r += "\n  "+vertex[i];
-		r += "\nAdjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2);
-		r += "\nEdge attributes:";
+			r.append("\n  "+vertex[i]);
+		r.append("\nAdjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2));
+		r.append("\nEdge attributes:");
 		for (int i = 0; i < 3; i++)
-			r += " "+Integer.toHexString(edgeAttributes[i]);
+			r.append(" "+Integer.toHexString(edgeAttributes[i]));
 		if (listNext != null)
-			r += "\nLink next: "+listNext.hashCode();
+			r.append("\nLink next: "+listNext.hashCode());
 		if (hedge != null)
-			r += "\nHalfedge: "+showHalfEdge(hedge)+" "+showHalfEdge(hedge.next())+" "+showHalfEdge(hedge.next().next());
-		return r;
+			r.append("\nHalfedge: "+showHalfEdge(hedge)+" "+showHalfEdge(hedge.next())+" "+showHalfEdge(hedge.next().next()));
+		return r.toString();
 	}
 
 	/**

@@ -122,21 +122,22 @@ public class MMesh3D extends Mesh
 	public String toString()
 	{
 		String cr=System.getProperty("line.separator");
-		String r="MMesh3D";
+		StringBuffer r = new StringBuffer();
+		r.append("MMesh3D");
 		if (logger.isDebugEnabled())
 			logger.debug("Printing "+r+"...");
-		r+=cr;
+		r.append(cr);
 		for(Iterator it=nodelist.iterator();it.hasNext();)
 		{
 			Vertex node=(Vertex)it.next();
-			r+=node+cr;
+			r.append(node+cr);
 		}
 		for(Iterator it=triangleList.iterator();it.hasNext();)
 		{
 			Triangle face=(Triangle)it.next();
-			r+=face+cr;
+			r.append(face+cr);
 		}
 		logger.debug("...done");
-		return r;
+		return r.toString();
 	}
 }

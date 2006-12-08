@@ -712,34 +712,35 @@ public class HalfEdge implements Serializable
 	
 	public String toString()
 	{
-		String r = "hashCode: "+hashCode();;
-		r += "\nTriangle: "+tri.hashCode();
-		r += "\nLocal number: "+localNumber;
+		StringBuffer r = new StringBuffer();
+		r.append("hashCode: "+hashCode());
+		r.append("\nTriangle: "+tri.hashCode());
+		r.append("\nLocal number: "+localNumber);
 		if (sym != null)
 		{
 			if (sym instanceof HalfEdge)
 			{
 				HalfEdge e = (HalfEdge) sym;
-				r += "\nSym: "+e.tri.hashCode()+"["+e.localNumber+"]";
+				r.append("\nSym: "+e.tri.hashCode()+"["+e.localNumber+"]");
 			}
 			else
 			{
 				ArrayList list = (ArrayList) sym;
-				r += "\nSym: [";
+				r.append("\nSym: [");
 				for (Iterator it = list.iterator(); it.hasNext(); )
 				{
 					HalfEdge e = (HalfEdge) it.next();
-					r+= ","+e.tri.hashCode()+"["+e.localNumber+"]";
+					r.append(e.tri.hashCode()+"["+e.localNumber+"]");
 				}
-				r += "]";
+				r.append("]");
 			}
 		}
-		r += "\nAttributes: "+Integer.toHexString(attributes);
-		r += "\nVertices:";
-		r += "\n  Origin: "+origin();
-		r += "\n  Destination: "+destination();
-		r += "\n  Apex: "+apex();
-		return r;
+		r.append("\nAttributes: "+Integer.toHexString(attributes));
+		r.append("\nVertices:");
+		r.append("\n  Origin: "+origin());
+		r.append("\n  Destination: "+destination());
+		r.append("\n  Apex: "+apex());
+		return r.toString();
 	}
 
 	private static void unitTestBuildMesh(Mesh m, Vertex [] v)

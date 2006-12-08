@@ -795,26 +795,27 @@ public class Vertex implements Serializable
 	
 	public String toString ()
 	{
-		String r = "UV:";
+		StringBuffer r = new StringBuffer();
+		r.append("UV:");
 		for (int i = 0; i < param.length; i++)
-			r += " "+param[i];
+			r.append(" "+param[i]);
 		if (ref1d != 0)
-			r += " ref1d: "+ref1d;
-		r += " hash: "+hashCode();
+			r.append(" ref1d: "+ref1d);
+		r.append(" hash: "+hashCode());
 		if (link != null)
 		{
 			if (link instanceof Triangle)
-				r += " link: "+link.hashCode();
+				r.append(" link: "+link.hashCode());
 			else if (link instanceof Triangle[])
 			{
 				Triangle [] list = (Triangle []) link;
-				r += " link: ["+list[0].hashCode();
+				r.append(" link: ["+list[0].hashCode());
 				for (int i = 1; i < list.length; i++)
-					r += ","+list[i].hashCode();
-				r += "]";
+					r.append(","+list[i].hashCode());
+				r.append("]");
 			}
 		}
-		return r;
+		return r.toString();
 	}
 	
 }
