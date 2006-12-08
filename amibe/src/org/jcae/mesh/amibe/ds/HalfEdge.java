@@ -554,7 +554,7 @@ public class HalfEdge implements Serializable
 		if (f != null)
 			f.glue(s);
 		else if (s != null)
-			s.glue(f);
+			s.glue(null);
 		if (f != null)
 		{
 			f.attributes |= attr4;
@@ -585,7 +585,7 @@ public class HalfEdge implements Serializable
 		if (f != null)
 			f.glue(s);
 		else if (s != null)
-			s.glue(f);
+			s.glue(null);
 		if (f != null)
 		{
 			f.attributes |= attr5;

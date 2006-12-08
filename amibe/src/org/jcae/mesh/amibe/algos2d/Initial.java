@@ -407,7 +407,6 @@ public class Initial
 
 		logger.debug(" Select 3D smaller diagonals");
 		mesh.pushCompGeom(3);
-		ot = new OTriangle2D();
 		boolean redo = true;
 		//  With Riemannian metrics, there may be infinite loops,
 		//  make sure to exit this loop.
