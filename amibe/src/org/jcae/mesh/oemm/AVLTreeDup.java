@@ -52,12 +52,12 @@ public class AVLTreeDup
 		}
 		public void show()
 		{
-			String r = "Key: "+keyString(key)+"  bal. "+balanceFactor;
+			StringBuffer ret = new StringBuffer("Key: "+keyString(key)+"  bal. "+balanceFactor);
 			if (child[0] != null)
-				r += " Left -> "+keyString(child[0].key);
+				r.append(" Left -> "+keyString(child[0].key));
 			if (child[1] != null)
-				r += " Right -> "+keyString(child[1].key);
-			System.out.println(r);
+				r.append(" Right -> "+keyString(child[1].key));
+			System.out.println(r.toString());
 			if (child[0] != null)
 				child[0].show();
 			if (child[1] != null)
@@ -116,10 +116,10 @@ public class AVLTreeDup
 	
 	private final static String keyString(int [] key)
 	{
-		String ret = "";
+		StringBuffer ret = new StringBuffer();
 		for (int i = 0; i < nrInt; i++)
-			ret += " 0x"+Integer.toHexString(key[i]);
-		return ret;
+			ret.append(" 0x"+Integer.toHexString(key[i]));
+		return ret.toString();
 	}
 	
 	/**
