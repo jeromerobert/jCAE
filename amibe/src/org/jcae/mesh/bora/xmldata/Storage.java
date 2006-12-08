@@ -51,7 +51,6 @@ import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.List;
 import java.util.Collection;
 import java.util.Iterator;
 import gnu.trove.TObjectIntHashMap;
@@ -82,7 +81,7 @@ public class Storage
 			if(!dir.exists())
 				dir.mkdirs();
 
-			List nodelist = submesh.getNodes();
+			Collection nodelist = submesh.getNodes();
 			// Write node references and compute local indices
 			TObjectIntHashMap localIdx = write1dNodeReferences(dir, edge.getId(), nodelist, edge);
 			// Write node coordinates
@@ -113,7 +112,7 @@ public class Storage
 
 			CADFace F = (CADFace) face.getShape();
 			Collection trianglelist = submesh.getTriangles();
-			List nodelist = submesh.quadtree.getAllVertices(trianglelist.size() / 2);
+			Collection nodelist = submesh.quadtree.getAllVertices(trianglelist.size() / 2);
 			TObjectIntHashMap localIdx = write2dNodeReferences(dir, face.getId(), nodelist, submesh.outerVertex);
 			write2dCoordinates(dir, face.getId(), nodelist, submesh.outerVertex, F.getGeomSurface());
 			write2dTriangles(dir, face.getId(), trianglelist, localIdx);
@@ -139,7 +138,7 @@ public class Storage
 			if(!dir.exists())
 				dir.mkdirs();
 
-			List nodelist = (List) submesh.getNodes();
+			Collection nodelist = submesh.getNodes();
 			TObjectIntHashMap localIdx = write2dNodeReferences(dir, solid.getId(), nodelist, submesh.outerVertex);
 			write2dCoordinates(dir, solid.getId(), nodelist, submesh.outerVertex, null);
 			write2dTriangles(dir, solid.getId(), submesh.getTriangles(), localIdx);
@@ -259,7 +258,7 @@ public class Storage
 		logger.debug("end reading cell "+id);
 	}
 
-	private static TObjectIntHashMap write1dNodeReferences(File dir, int id, List nodelist, BCADGraphCell edge)
+	private static TObjectIntHashMap write1dNodeReferences(File dir, int id, Collection nodelist, BCADGraphCell edge)
 		throws IOException, FileNotFoundException
 	{
 		File refFile = new File(dir, "r"+id);
@@ -292,7 +291,7 @@ public class Storage
 		return localIdx;
 	}
 
-	private static TObjectIntHashMap write2dNodeReferences(File dir, int id, List nodelist, Vertex outer)
+	private static TObjectIntHashMap write2dNodeReferences(File dir, int id, Collection nodelist, Vertex outer)
 		throws IOException, FileNotFoundException
 	{
 		File refFile = new File(dir, "r"+id);
@@ -325,7 +324,7 @@ public class Storage
 		return localIdx;
 	}
 
-	private static void write1dCoordinates(File dir, int id, List nodelist, CADGeomCurve3D curve)
+	private static void write1dCoordinates(File dir, int id, Collection nodelist, CADGeomCurve3D curve)
 		throws IOException, FileNotFoundException
 	{
 		File nodesFile = new File(dir, "n"+id);
@@ -351,7 +350,7 @@ public class Storage
 		parasout.close();
 	}
 
-	private static void write2dCoordinates(File dir, int id, List nodelist, Vertex outer, CADGeomSurface surface)
+	private static void write2dCoordinates(File dir, int id, Collection nodelist, Vertex outer, CADGeomSurface surface)
 		throws IOException, FileNotFoundException
 	{
 		File nodesFile = new File(dir, "n"+id);
@@ -387,7 +386,7 @@ public class Storage
 		parasout.close();
 	}
 
-	private static void write1dEdges(File dir, int id, List edgelist, TObjectIntHashMap localIdx)
+	private static void write1dEdges(File dir, int id, Collection edgelist, TObjectIntHashMap localIdx)
 		throws IOException, FileNotFoundException
 	{
 		File beamsFile=new File(dir, "b"+id);
