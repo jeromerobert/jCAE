@@ -68,7 +68,7 @@ public class ResultConstraint extends Hypothesis
 			return;
 		if (dimension == null)
 			copyHypothesis(that, d);
-		if (elementType != that.elementType)
+		if (!elementType.equals(that.elementType))
 		{
 			logger.debug("Element "+elementType+" and "+that.elementType+" differ and are not combined together");
 		}
