@@ -36,6 +36,7 @@ import java.util.LinkedHashSet;
 import gnu.trove.THashMap;
 import gnu.trove.TIntObjectHashMap;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import org.apache.log4j.Logger;
 
@@ -180,11 +181,13 @@ public class BSubMesh
 			{
 				if (!initialized)
 				{
-					hasNext();
+					if (!hasNext())
+						throw new NoSuchElementException();
 					initialized = true;
 				}
 				else if (cur == next)
-					hasNext();
+					if (!hasNext())
+						throw new NoSuchElementException();
 				cur = next;
 				return cur;
 			}
