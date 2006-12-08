@@ -93,7 +93,7 @@ public class OCCDiscretizeCurve3D
 		}
 		logger.debug("(length) Number of points: "+nr);
 		length = -1.0;
-		adjustAbscissas(xyz, new checkRatioLength());
+		adjustAbscissas(xyz, new CheckRatioLength());
 	}
 	
 	public void setDiscretization(double [] param)
@@ -230,7 +230,7 @@ public class OCCDiscretizeCurve3D
 			}
 		}
 		length = -1.0;
-		adjustAbscissas(xyz, new checkRatioLength());
+		adjustAbscissas(xyz, new CheckRatioLength());
 	}
 	
 	public void discretizeMaxDeflection(double defl, boolean relDefl)
@@ -299,10 +299,10 @@ public class OCCDiscretizeCurve3D
 		}
 		logger.debug("(deflection) Number of points: "+nr);
 		length = -1.0;
-		adjustAbscissas(xyz, new checkRatioDeflection());
+		adjustAbscissas(xyz, new CheckRatioDeflection());
 	}
 	
-	private void adjustAbscissas(double [] xyz, checkRatio func)
+	private void adjustAbscissas(double [] xyz, CheckRatio func)
 	{
 		boolean backward = false;
 		int niter = 2*nr;
@@ -326,12 +326,12 @@ public class OCCDiscretizeCurve3D
 		}
 	}
 	
-	private interface checkRatio
+	private interface CheckRatio
 	{
 		boolean move(int i, double [] xyz);
 	}
 	
-	private class checkRatioLength implements checkRatio
+	private class CheckRatioLength implements CheckRatio
 	{
 		public boolean move(int i, double [] xyz)
 		{
@@ -371,7 +371,7 @@ public class OCCDiscretizeCurve3D
 		}
 	}
 	
-	private class checkRatioDeflection implements checkRatio
+	private class CheckRatioDeflection implements CheckRatio
 	{
 		public boolean move(int i, double [] xyz)
 		{

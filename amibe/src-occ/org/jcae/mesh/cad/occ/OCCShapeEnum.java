@@ -22,6 +22,7 @@ package org.jcae.mesh.cad.occ;
 
 import org.jcae.mesh.cad.*;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * Typesafe enum of CAD types
@@ -89,6 +90,8 @@ public abstract class OCCShapeEnum extends CADShapeEnum
 			}
 			public Object next()
 			{
+				if (!hasNext())
+					throw new NoSuchElementException();
 				if (current == null)
 					current = start;
 				else

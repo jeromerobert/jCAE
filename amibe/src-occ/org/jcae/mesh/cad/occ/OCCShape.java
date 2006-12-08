@@ -94,6 +94,10 @@ public class OCCShape implements CADShape
 	
 	public boolean equals(Object o)
 	{
+		if (o == null)
+			return false;
+		if (!(o instanceof OCCShape))
+			return false;
 		OCCShape that = (OCCShape) o;
 		return myShape.equals(that.myShape);
 	}

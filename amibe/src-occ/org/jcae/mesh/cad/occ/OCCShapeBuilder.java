@@ -145,6 +145,8 @@ public class OCCShapeBuilder extends CADShapeBuilder
 				op = new BRepAlgoAPI_Common(s1, s2);
 			else if (type == '\\')
 				op = new BRepAlgoAPI_Cut(s1, s2);
+			else
+				throw new IllegalArgumentException();
 			TopoDS_Shape s = op.shape();
 			if (s != null)
 				res = newShape(s);
