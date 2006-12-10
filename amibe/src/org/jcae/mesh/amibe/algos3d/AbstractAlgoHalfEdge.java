@@ -119,7 +119,8 @@ public abstract class AbstractAlgoHalfEdge
 		{
 			preProcessEdge();
 			HalfEdge current = null;
-			for (Iterator itt = tree.iterator(); itt.hasNext(); )
+			Iterator itt = tree.iterator();
+			while (itt.hasNext())
 			{
 				current = (HalfEdge) itt.next();
 				if (nrFinal == 0)
@@ -148,7 +149,7 @@ public abstract class AbstractAlgoHalfEdge
 						notProcessed.push(new Double(1.0));
 				}
 			}
-			if (cost > tolerance || current == null)
+			if (cost > tolerance || current == null || !itt.hasNext())
 				break;
 			// Update costs for edges which were not contracted
 			while (notProcessed.size() > 0)
