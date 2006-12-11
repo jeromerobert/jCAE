@@ -44,6 +44,7 @@ public abstract class AbstractAlgoHalfEdge
 	protected int nrTriangles = 0;
 	protected double tolerance = 0.0;
 	protected int processed = 0;
+	protected int swapped = 0;
 	protected int cntNotProcessed = 0;
 	protected PAVLSortedTree tree = new PAVLSortedTree();
 	
@@ -189,6 +190,7 @@ public abstract class AbstractAlgoHalfEdge
 					}
 					Vertex a = current.apex();
 					current = current.swap();
+					swapped++;
 					// Now current = (ona)
 					assert a == current.apex();
 					for (int i = 0; i < 3; i++)

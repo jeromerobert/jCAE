@@ -377,6 +377,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		}
 		logger.info("Number of contracted edges: "+processed);
 		logger.info("Total number of edges not contracted during processing: "+cntNotProcessed);
+		logger.info("Total number of edges swapped to increase quality: "+swapped);
 		logger.info("Number of edges which could have been contracted: "+cnt);
 		logger.info("Number of other edges not contracted: "+(tree.size() - cnt));
 	}
