@@ -381,7 +381,7 @@ public class HalfEdge implements Serializable
 	public final HalfEdge nextApexLoop()
 	{
 		HalfEdge ret = this;
-		if (ret.hasAttributes(OTriangle.OUTER) && ret.hasAttributes(OTriangle.BOUNDARY | OTriangle.NONMANIFOLD))
+		if (ret.hasAttributes(OTriangle.OUTER) && ret.next.next.hasAttributes(OTriangle.BOUNDARY | OTriangle.NONMANIFOLD))
 		{
 			// Loop clockwise to another boundary
 			// and start again from there.
@@ -392,7 +392,7 @@ public class HalfEdge implements Serializable
 			while (!ret.hasAttributes(OTriangle.OUTER));
 		}
 		else
-			ret.nextApex();
+			ret = ret.nextApex();
 		return ret;
 	}
 	

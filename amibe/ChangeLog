@@ -1,3 +1,7 @@
+Mon Dec 11 13:25:29 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/HalfEdge.java: Fix nextApexLoop().
+
 Tue Dec  5 17:53:09 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/HalfEdge.java
