@@ -176,7 +176,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 			cnt++;
 		}
 		logger.info("Number of splitted edges: "+processed);
-		logger.info("Total number of edges not splitted during processing: "+cntNotProcessed);
+		logger.info("Total number of edges not splitted during processing: "+notProcessed);
 		logger.info("Total number of edges swapped to increase quality: "+swapped);
 		logger.info("Number of edges which could have been splitted: "+cnt);
 		logger.info("Number of other edges not splitted: "+(tree.size() - cnt));

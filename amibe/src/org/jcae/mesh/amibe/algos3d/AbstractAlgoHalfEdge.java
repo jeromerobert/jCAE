@@ -45,7 +45,7 @@ public abstract class AbstractAlgoHalfEdge
 	protected double tolerance = 0.0;
 	protected int processed = 0;
 	protected int swapped = 0;
-	protected int cntNotProcessed = 0;
+	protected int notProcessed = 0;
 	protected PAVLSortedTree tree = new PAVLSortedTree();
 	
 	protected abstract void preProcessAllHalfEdges();
@@ -114,7 +114,7 @@ public abstract class AbstractAlgoHalfEdge
 	{
 		OTriangle ot = new OTriangle();
 		boolean noSwap = false;
-		Stack notProcessed = new Stack();
+		Stack stackNotProcessed = new Stack();
 		double cost = -1.0;
 		while (!tree.isEmpty() && nrTriangles > nrFinal)
 		{
@@ -134,7 +134,7 @@ public abstract class AbstractAlgoHalfEdge
 					break;
 				if (thisLogger().isDebugEnabled())
 					thisLogger().debug("Edge not processed: "+current);
-				cntNotProcessed++;
+				notProcessed++;
 				// Add a penalty to edges which could not have been
 				// processed.  This has to be done outside this loop,
 				// because PAVLSortedTree instances must not be modified
@@ -142,21 +142,21 @@ public abstract class AbstractAlgoHalfEdge
 				// FIXME: Handle nrFinal != 0 case also
 				if (nrFinal == 0)
 				{
-					notProcessed.push(current);
+					stackNotProcessed.push(current);
 					if (tolerance > 0.0)
-						notProcessed.push(new Double(cost+0.1*(tolerance - cost)));
+						stackNotProcessed.push(new Double(cost+0.1*(tolerance - cost)));
 					else
 						// tolerance = cost = 0
-						notProcessed.push(new Double(1.0));
+						stackNotProcessed.push(new Double(1.0));
 				}
 			}
 			if (cost > tolerance || current == null || !itt.hasNext())
 				break;
 			// Update costs for edges which were not contracted
-			while (notProcessed.size() > 0)
+			while (stackNotProcessed.size() > 0)
 			{
-				double newCost = ((Double) notProcessed.pop()).doubleValue();
-				HalfEdge f = (HalfEdge) notProcessed.pop();
+				double newCost = ((Double) stackNotProcessed.pop()).doubleValue();
+				HalfEdge f = (HalfEdge) stackNotProcessed.pop();
 				tree.update(f.notOriented(), newCost);
 			}
 			current = processEdge(current);
