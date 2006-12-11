@@ -106,6 +106,11 @@ public abstract class AbstractAlgoHalfEdge
 		if (e.hasAttributes(OTriangle.OUTER))
 			return;
 		double val = cost(e);
+		// If an edge will not be processed because of its cost, it is
+		// better to not put it in the tree.  One drawback though is
+		// that tree.size() is not equal to the total number of edges,
+		// and output displayed by postProcessAllHalfEdges() may thus
+		// not be very useful.
 		if (val <= tolerance)
 			tree.insert(e.notOriented(), val);
 	}
