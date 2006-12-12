@@ -70,8 +70,6 @@ public class PAVLSortedTree implements Serializable
 	            T2  C            T1 T2 T3 T4
 	               / \
 	              T3 T4
-	WARNING: Balance factors are not updated because they differ
-	         when inserting and deleting nodes
 		*/
 		public PAVLSortedTreeNode rotateL()
 		{
@@ -84,6 +82,19 @@ public class PAVLSortedTree implements Serializable
 			parent = right;
 			if (child[1] != null)
 				child[1].parent = this;
+			if (right.balanceFactor != 0)
+			{
+				assert right.balanceFactor == 1;
+				right.balanceFactor = 0;
+				balanceFactor = 0;
+			}
+			else
+			{
+				// This case happens only when removing
+				// a node below T1.
+				right.balanceFactor = -1;
+				balanceFactor = 1;
+			}
 			return right;
 		}
 		
@@ -95,8 +106,6 @@ public class PAVLSortedTree implements Serializable
 	              A  T3              T1 T2 T3 T4
 	             / \
 	            T1 T2
-	WARNING: Balance factors are not updated because they differ
-	         when inserting and deleting nodes
 		*/
 		public PAVLSortedTreeNode rotateR()
 		{
@@ -109,6 +118,19 @@ public class PAVLSortedTree implements Serializable
 			parent = left;
 			if (child[0] != null)
 				child[0].parent = this;
+			if (left.balanceFactor != 0)
+			{
+				assert left.balanceFactor == -1;
+				left.balanceFactor = 0;
+				balanceFactor = 0;
+			}
+			else
+			{
+				// This case happens only when removing
+				// a node below T4.
+				left.balanceFactor = 1;
+				balanceFactor = -1;
+			}
 			return left;
 		}
 		
@@ -384,10 +406,10 @@ public class PAVLSortedTree implements Serializable
 		if (logger.isDebugEnabled())
 			logger.debug("insert "+node+" "+" value: "+value+" "+o);
 		map.put(o, node);
-		insertNode(node, value);
+		insertNode(node);
 	}
 
-	private final void insertNode(PAVLSortedTreeNode node, double value)
+	private final void insertNode(PAVLSortedTreeNode node)
 	{
 		nrNodes++;
 		PAVLSortedTreeNode current = root.child[0];
@@ -426,11 +448,7 @@ public class PAVLSortedTree implements Serializable
 		{
 			PAVLSortedTreeNode left = topNode.child[0];
 			if (left.balanceFactor == -1)
-			{
 				newRoot = topNode.rotateR();
-				newRoot.balanceFactor = 0;
-				topNode.balanceFactor = 0;
-			}
 			else
 				newRoot = topNode.rotateLR();
 		}
@@ -438,11 +456,7 @@ public class PAVLSortedTree implements Serializable
 		{
 			PAVLSortedTreeNode right = topNode.child[1];
 			if (right.balanceFactor == 1)
-			{
 				newRoot = topNode.rotateL();
-				topNode.balanceFactor = 0;
-				newRoot.balanceFactor = 0;
-			}
 			else
 				newRoot = topNode.rotateRL();
 		}
@@ -474,7 +488,6 @@ public class PAVLSortedTree implements Serializable
 	{
 		if (p == null)
 			return -1.0;
-		assert p != null;
 		double ret = p.value;
 		if (logger.isDebugEnabled())
 			logger.debug("Value: "+ret);
@@ -485,12 +498,12 @@ public class PAVLSortedTree implements Serializable
 			lastDir = 1;
 		if (p.child[1] == null)
 		{
-			/* Deletion of C
-			    A                    A
+			/* Deletion of p
+			    q                    q
 			   / \      ------>     / \
-			  T1  C                T1  B
+			  T1  p                T1 T2
 			     /
-			    B
+			    T2
 			*/
 			q.child[lastDir] = p.child[0];
 			if (q.child[lastDir] != null)
@@ -498,12 +511,12 @@ public class PAVLSortedTree implements Serializable
 		}
 		else if (p.child[0] == null)
 		{
-			/* Deletion of A
-			    C                    C
+			/* Deletion of p
+			    q                    q
 			   / \      ------>     / \
-			  A   T1               B  T1
-			   \  
-			    B
+			  T1  p                T1 T2
+			       \
+			       T2
 			*/
 			q.child[lastDir] = p.child[1];
 			if (q.child[lastDir] != null)
@@ -511,15 +524,22 @@ public class PAVLSortedTree implements Serializable
 		}
 		else
 		{
-			//  p has two children.  Swap p with its
-			//  successor node in the tree, then delete p
+			//  p has two children.
 			PAVLSortedTreeNode r = p.child[1];
 			if (r.child[0] == null)
 			{
-				// Move r into p
+				/* Deletion of p
+				    q                    q
+				   / \      ------>     / \
+				  T1  p                T1  r
+				     / \                  / \
+				    T2  r                T2 T3
+				         \
+				         T3
+				*/
 				r.child[0] = p.child[0];
 				q.child[lastDir] = r;
-				r.parent = p.parent;
+				r.parent = q;
 				r.child[0].parent = r;
 				r.balanceFactor = p.balanceFactor;
 				// Tree above r needs to be rebalanced
@@ -528,7 +548,8 @@ public class PAVLSortedTree implements Serializable
 			}
 			else
 			{
-				// Walk on the left branch to a leaf 
+				//  Swap p with its successor node in the tree,
+				//  then delete p
 				r = r.child[0];
 				while (r.child[0] != null)
 					r = r.child[0];
@@ -541,7 +562,7 @@ public class PAVLSortedTree implements Serializable
 				q.child[lastDir] = r;
 				r.child[0].parent = r;
 				r.child[1].parent = r;
-				r.parent = p.parent;
+				r.parent = q;
 				r.balanceFactor = p.balanceFactor;
 				// Tree above s needs to be rebalanced
 				q = s;
@@ -550,79 +571,49 @@ public class PAVLSortedTree implements Serializable
 		}
 		// A node in the direction lastDir has been deleted from q,
 		// so the nodes above may need to be updated.
+		int dir = lastDir;
 		while (q != root)
 		{
 			PAVLSortedTreeNode y = q;
-			q = y.parent;
+			q = q.parent;
+			lastDir = dir;
+			if (q.child[0] == y)
+				dir = 0;
+			else
+				dir = 1;
 			if (lastDir == 0)
 			{
-				if (q.child[0] == y)
-					lastDir = 0;
-				else
-					lastDir = 1;
 				y.balanceFactor++;
-				// Previous balance was -1, 0 or 1.
 				// A node had been deleted on the left
 				// branch of q.  If the new balance is 0,
 				// height tree has changed, so upper nodes
 				// need to be checked too.  If it is 1,
 				// its height had not changed and processing
 				// can stop.  If it is 2, this node needs
-				// to be rebalanced.
+				// to be rebalanced, and processing can stop
+				// if its balance factor becomes 1.
+				if (y.balanceFactor == 2)
+				{
+					if (y.child[1].balanceFactor == -1)
+						q.child[dir] = y.rotateRL();
+					else
+						q.child[dir] = y.rotateL();
+				}
 				if (y.balanceFactor == 1)
 					break;
-				else if (y.balanceFactor == 2)
-				{
-					PAVLSortedTreeNode right = y.child[1];
-					if (right.balanceFactor == -1)
-						q.child[lastDir] = y.rotateRL();
-					else
-					{
-						q.child[lastDir] = y.rotateL();
-						if (right.balanceFactor == 0)
-						{
-							right.balanceFactor = -1;
-							y.balanceFactor = 1;
-							break;
-						}
-						else
-						{
-							right.balanceFactor = 0;
-							y.balanceFactor = 0;
-						}
-					}
-				}
 			}
 			else
 			{
-				if (q.child[0] == y)
-					lastDir = 0;
-				else
-					lastDir = 1;
 				y.balanceFactor--;
+				if (y.balanceFactor == -2)
+				{
+					if (y.child[0].balanceFactor == 1)
+						q.child[dir] = y.rotateLR();
+					else
+						q.child[dir] = y.rotateR();
+				}
 				if (y.balanceFactor == -1)
 					break;
-				else if (y.balanceFactor == -2)
-				{
-					PAVLSortedTreeNode x = y.child[0];
-					if (x.balanceFactor == 1)
-						q.child[lastDir] = y.rotateLR();
-					else
-					{
-						q.child[lastDir] = y.rotateR();
-						if (x.balanceFactor == 0)
-						{
-							x.balanceFactor = 1;
-							y.balanceFactor = -1;
-							break;
-						}
-						else
-						{
-							x.balanceFactor = 0;
-							y.balanceFactor = 0;
-						}
-					}
-				}
 			}
 		}
 		return ret;
@@ -645,7 +636,7 @@ public class PAVLSortedTree implements Serializable
 		}
 		removeNode(p);
 		p.reset(value);
-		insertNode(p, value);
+		insertNode(p);
 	}
 	
 	/**
