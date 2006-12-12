@@ -38,15 +38,15 @@ public class PAVLSortedTree implements Serializable
 	private final PAVLSortedTreeNode root = new PAVLSortedTreeNode(null, Double.MAX_VALUE);
 	// Mapping between objects and tree nodes
 	private transient HashMap map = new HashMap();
-	private int count = 0;
+	private int nrNodes = 0;
 	
 	private static class PAVLSortedTreeNode implements Serializable
 	{
+		private final Object data;
 		private double value;
-		private Object data;
 		//  balanceFactor = height(rightSubTree) - height(leftSubTree)
 		private int balanceFactor = 0;
-		private PAVLSortedTreeNode [] child = new PAVLSortedTreeNode[2];
+		private final PAVLSortedTreeNode [] child = new PAVLSortedTreeNode[2];
 		private PAVLSortedTreeNode parent = null;
 		
 		public PAVLSortedTreeNode(Object o, double v)
@@ -55,11 +55,10 @@ public class PAVLSortedTree implements Serializable
 			value = v;
 		}
 		
-		public void reset(Object o, double v)
+		public void reset(double v)
 		{
 			balanceFactor = 0;
 			child[0] = child[1] = parent = null;
-			data = o;
 			value = v;
 		}
 		
@@ -126,9 +125,9 @@ public class PAVLSortedTree implements Serializable
 		{
 			//logger.debug("Right+left rotation");
 			assert balanceFactor == 2;
-			PAVLSortedTreeNode right = child[1];
+			PAVLSortedTreeNode right = child[1];          // C
 			assert right.balanceFactor == -1;
-			PAVLSortedTreeNode newRoot = right.child[0];
+			PAVLSortedTreeNode newRoot = right.child[0];  // B
 			// Right rotation
 			right.child[0] = newRoot.child[1];
 			newRoot.child[1] = right;
@@ -139,27 +138,30 @@ public class PAVLSortedTree implements Serializable
 			newRoot.parent = parent;
 			parent = newRoot;
 			right.parent = newRoot;
+			if (right.child[0] != null)
+				right.child[0].parent = right;
+			if (child[1] != null)
+				child[1].parent = this;
 			if (newRoot.balanceFactor == 1)
 			{
+				// T2 is null, T3 != null
 				balanceFactor = -1;
 				right.balanceFactor = 0;
 				newRoot.balanceFactor = 0;
 			}
 			else if (newRoot.balanceFactor == -1)
 			{
+				// T3 is null, T2 != null
 				balanceFactor = 0;
 				right.balanceFactor = 1;
 				newRoot.balanceFactor = 0;
 			}
 			else
 			{
+				// T2 and T3 != null
 				balanceFactor = 0;
 				right.balanceFactor = 0;
 			}
-			if (right.child[0] != null)
-				right.child[0].parent = right;
-			if (child[1] != null)
-				child[1].parent = this;
 			return newRoot;
 		}
 		
@@ -176,9 +178,9 @@ public class PAVLSortedTree implements Serializable
 		{
 			//logger.debug("Left+right rotation");
 			assert balanceFactor == -2;
-			PAVLSortedTreeNode left = child[0];
+			PAVLSortedTreeNode left = child[0];         // A
 			assert left.balanceFactor == 1;
-			PAVLSortedTreeNode newRoot = left.child[1];
+			PAVLSortedTreeNode newRoot = left.child[1]; // B
 
 			assert newRoot != null;
 			// Left rotation
@@ -191,27 +193,32 @@ public class PAVLSortedTree implements Serializable
 			newRoot.parent = parent;
 			left.parent = newRoot;
 			parent = newRoot;
+			if (left.child[1] != null)
+				left.child[1].parent = left;
+			if (child[0] != null)
+				child[0].parent = this;
+			// Balance factors, T1 and T4 are not null,
+			// and T2 and T3 cannot be both null.
 			if (newRoot.balanceFactor == -1)
 			{
+				// T3 is null, T2 != null
 				left.balanceFactor = 0;
 				balanceFactor = 1;
 				newRoot.balanceFactor = 0;
 			}
 			else if (newRoot.balanceFactor == 1)
 			{
+				// T2 is null, T3 != null
 				left.balanceFactor = -1;
 				balanceFactor = 0;
 				newRoot.balanceFactor = 0;
 			}
 			else
 			{
+				// T2 and T3 != null
 				left.balanceFactor = 0;
 				balanceFactor = 0;
 			}
-			if (left.child[1] != null)
-				left.child[1].parent = left;
-			if (child[0] != null)
-				child[0].parent = this;
 			return newRoot;
 		}
 
@@ -270,7 +277,7 @@ public class PAVLSortedTree implements Serializable
 		throws java.io.IOException, ClassNotFoundException
 	{
 		s.defaultReadObject();
-		map = new HashMap(count);
+		map = new HashMap(nrNodes);
 		for (PAVLSortedTreeNode current = root.child[0].firstNode(); current != null; current = current.nextNode())
 			map.put(current.data, current);
 	}
@@ -382,7 +389,7 @@ public class PAVLSortedTree implements Serializable
 
 	private final void insertNode(PAVLSortedTreeNode node, double value)
 	{
-		count++;
+		nrNodes++;
 		PAVLSortedTreeNode current = root.child[0];
 		PAVLSortedTreeNode parent = root;
 		PAVLSortedTreeNode topNode = current;
@@ -449,50 +456,6 @@ public class PAVLSortedTree implements Serializable
 	}
 	
 	/**
-	 * Update the quality factor of an object.
-	 * @param o      object being updated
-	 * @param value  new quality factor
-	 */
-	public final void update(Object o, double value)
-	{
-		if (logger.isDebugEnabled())
-			logger.debug("Update "+o+" to "+value);
-		PAVLSortedTreeNode p = (PAVLSortedTreeNode) map.get(o);
-		if (p == null)
-		{
-			insert(o, value);
-			return;
-		}
-		removeNode(p);
-		p.reset(o, value);
-		insertNode(p, value);
-	}
-	
-	/**
-	 * Checks whether an object exist is the tree.
-	 * @param o      object being checked
-	 * @return <code>true</code> if this tree contains this object,
-	 *   <code>false</code> otherwise.
-	 */
-	public final boolean containsValue(Object o)
-	{
-		return map.containsKey(o);
-	}
-	
-	/**
-	 * Gets the quallity factor of an object.
-	 * @param o      object.
-	 * @return  the quality factor associated to this object.
-	 */
-	public final double getKey(Object o)
-	{
-		PAVLSortedTreeNode p = (PAVLSortedTreeNode) map.get(o);
-		if (p == null)
-			return -1.0;
-		return p.value;
-	}
-	
-	/**
 	 * Remove the node associated to an object from the tree.
 	 * @param o      object being removed
 	 * @return  the quality factor associated to this object.
@@ -515,7 +478,7 @@ public class PAVLSortedTree implements Serializable
 		double ret = p.value;
 		if (logger.isDebugEnabled())
 			logger.debug("Value: "+ret);
-		count--;
+		nrNodes--;
 		int lastDir = 0;
 		PAVLSortedTreeNode q = p.parent;
 		if (q.child[1] == p)
@@ -666,12 +629,57 @@ public class PAVLSortedTree implements Serializable
 	}
 	
 	/**
+	 * Update the quality factor of an object.
+	 * @param o      object being updated
+	 * @param value  new quality factor
+	 */
+	public final void update(Object o, double value)
+	{
+		if (logger.isDebugEnabled())
+			logger.debug("Update "+o+" to "+value);
+		PAVLSortedTreeNode p = (PAVLSortedTreeNode) map.get(o);
+		if (p == null)
+		{
+			insert(o, value);
+			return;
+		}
+		removeNode(p);
+		p.reset(value);
+		insertNode(p, value);
+	}
+	
+	/**
+	 * Checks whether an object exist is the tree.
+	 * @param o      object being checked
+	 * @return <code>true</code> if this tree contains this object,
+	 *   <code>false</code> otherwise.
+	 */
+	public final boolean containsValue(Object o)
+	{
+		return map.containsKey(o);
+	}
+	
+	/**
+	 * Gets the quallity factor of an object.
+	 * @param o      object.
+	 * @return  the quality factor associated to this object.
+	 */
+	public final double getKey(Object o)
+	{
+		PAVLSortedTreeNode p = (PAVLSortedTreeNode) map.get(o);
+		if (p == null)
+			return -1.0;
+		return p.value;
+	}
+	
+	/**
 	 * Return the object with the lowest quality factor.
 	 * @return the object with the lowest quality factor.
 	 */
 	public final int size()
 	{
-		return map.size();
+		assert nrNodes == map.size();
+		return nrNodes;
 	}
 	
 	public Iterator iterator()
