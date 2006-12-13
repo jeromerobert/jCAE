@@ -25,6 +25,7 @@ import org.jcae.mesh.amibe.ds.HalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.OTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.util.QSortedTree;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import java.util.Stack;
 import java.util.Map;
@@ -46,7 +47,7 @@ public abstract class AbstractAlgoHalfEdge
 	protected int processed = 0;
 	protected int swapped = 0;
 	protected int notProcessed = 0;
-	protected PAVLSortedTree tree = new PAVLSortedTree();
+	protected QSortedTree tree = new PAVLSortedTree();
 	
 	protected abstract void preProcessAllHalfEdges();
 	protected abstract void postProcessAllHalfEdges();
@@ -253,7 +254,7 @@ public abstract class AbstractAlgoHalfEdge
 			ObjectInputStream q = new ObjectInputStream(istream);
 			System.out.println("Loading restored state");
 			mesh = (Mesh) q.readObject();
-			tree = (PAVLSortedTree) q.readObject();
+			tree = (QSortedTree) q.readObject();
 			appendRestoreState(q);
 			System.out.println("... Done.");
 			q.close();

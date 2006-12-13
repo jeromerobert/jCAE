@@ -41,7 +41,7 @@ public abstract class QSortedTree implements Serializable
 	protected final QSortedTreeNode root = newNode(null, Double.MAX_VALUE);
 	// Mapping between objects and tree nodes
 	protected transient HashMap map = new HashMap();
-	protected int nrNodes = 0;
+	private int nrNodes = 0;
 	
 	/**
 	 * Constructor to cast new nodes into subclass type.
@@ -242,7 +242,7 @@ public abstract class QSortedTree implements Serializable
 	 */
 	public final int size()
 	{
-		assert nrNodes == map.size();
+		assert nrNodes == map.size() : "size error: "+nrNodes+" != "+map.size();
 		return nrNodes;
 	}
 	
