@@ -195,7 +195,6 @@ public class PAVLSortedTree extends QSortedTree
 	public final void insertNode(QSortedTreeNode o)
 	{
 		PAVLSortedTreeNode node = (PAVLSortedTreeNode) o;
-		nrNodes++;
 		PAVLSortedTreeNode current = (PAVLSortedTreeNode) root.child[0];
 		PAVLSortedTreeNode parent = (PAVLSortedTreeNode) root;
 		PAVLSortedTreeNode topNode = current;
@@ -255,13 +254,11 @@ public class PAVLSortedTree extends QSortedTree
 	
 	public final double removeNode(QSortedTreeNode o)
 	{
-		if (o == null)
-			return -1.0;
+		assert o != null;
 		PAVLSortedTreeNode p = (PAVLSortedTreeNode) o;
 		double ret = p.value;
 		if (logger.isDebugEnabled())
 			logger.debug("Value: "+ret);
-		nrNodes--;
 		int lastDir = 0;
 		PAVLSortedTreeNode q = (PAVLSortedTreeNode) p.parent;
 		if (q.child[1] == p)
