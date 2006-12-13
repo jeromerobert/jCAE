@@ -120,6 +120,13 @@ public class Mesh implements Serializable
 		}
 	}
 
+	private static final Integer [] int3 = new Integer[3];
+	static {
+		int3[0] = Integer.valueOf(0);
+		int3[1] = Integer.valueOf(1);
+		int3[2] = Integer.valueOf(2);
+	}
+
 	/**
 	 * Creates an empty mesh.
 	 */
@@ -500,7 +507,7 @@ public class Mesh implements Serializable
 					// All adjacent edges share the same ArrayList,
 					// thus put ot in it.
 					adj.add(t);
-					adj.add(new Integer(ot.getLocalNumber()));
+					adj.add(int3[ot.getLocalNumber()]);
 					ot.setAdj(adj);
 				}
 				else if (ot.getAdj() instanceof Triangle)
@@ -509,14 +516,14 @@ public class Mesh implements Serializable
 					assert sym.getAdj() == t;
 					assert sym.tri.getAdjLocalNumber(sym.getLocalNumber()) == ot.getLocalNumber();
 					adj.add(t);
-					adj.add(new Integer(ot.getLocalNumber()));
+					adj.add(int3[ot.getLocalNumber()]);
 					adj.add(sym.tri);
-					adj.add(new Integer(sym.getLocalNumber()));
+					adj.add(int3[sym.getLocalNumber()]);
 					ot.setAdj(adj);
 					sym.setAdj(adj);
 				}
 				adj.add(t2);
-				adj.add(new Integer(ot2.getLocalNumber()));
+				adj.add(int3[ot2.getLocalNumber()]);
 				ot2.setAdj(adj);
 				if (logger.isDebugEnabled())
 					logger.debug("Non-manifold: "+v+" "+v2);
