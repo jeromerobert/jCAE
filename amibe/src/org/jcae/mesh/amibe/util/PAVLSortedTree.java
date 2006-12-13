@@ -19,9 +19,6 @@
 
 package org.jcae.mesh.amibe.util;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.io.Serializable;
 import org.apache.log4j.Logger;
 
 /**
@@ -32,56 +29,41 @@ import org.apache.log4j.Logger;
  * order after they have been sorted.  See examples in algorithms from
  * {@link org.jcae.mesh.amibe.algos3d}.
  */
-public class PAVLSortedTree implements Serializable
+public class PAVLSortedTree extends QSortedTree
 {
 	private static Logger logger = Logger.getLogger(PAVLSortedTree.class);	
-	private final PAVLSortedTreeNode root = new PAVLSortedTreeNode(null, Double.MAX_VALUE);
-	// Mapping between objects and tree nodes
-	private transient HashMap map = new HashMap();
-	private int nrNodes = 0;
 	
-	private static class PAVLSortedTreeNode implements Serializable
+	private static class PAVLSortedTreeNode extends QSortedTreeNode
 	{
-		private final Object data;
-		private double value;
 		//  balanceFactor = height(rightSubTree) - height(leftSubTree)
 		private int balanceFactor = 0;
-		private final PAVLSortedTreeNode [] child = new PAVLSortedTreeNode[2];
-		private PAVLSortedTreeNode parent = null;
 		
 		public PAVLSortedTreeNode(Object o, double v)
 		{
-			data = o;
-			value = v;
+			super(o, v);
 		}
 		
+		public QSortedTreeNode [] newChilds()
+		{
+			return new PAVLSortedTreeNode[2];
+		}
+
 		public void reset(double v)
 		{
+			super.reset(v);
 			balanceFactor = 0;
-			child[0] = child[1] = parent = null;
-			value = v;
 		}
 		
 		/* Single left rotation
-	            A                     B
-	           / \      ------>     /   \
-	          T1  B                A     C
-	             / \              / \   / \
-	            T2  C            T1 T2 T3 T4
-	               / \
-	              T3 T4
+		    A                    B
+		   / \      ------>     / \
+		  T1  B                A   T3
+		     / \              / \
+		    T2 T3            T1 T2
 		*/
-		public PAVLSortedTreeNode rotateL()
+		public QSortedTreeNode rotateL()
 		{
-			//logger.debug("Single left rotation");
-			PAVLSortedTreeNode right = child[1];
-			assert right.balanceFactor >= 0;
-			child[1] = right.child[0];
-			right.child[0] = this;
-			right.parent = parent;
-			parent = right;
-			if (child[1] != null)
-				child[1].parent = this;
+			PAVLSortedTreeNode right = (PAVLSortedTreeNode) super.rotateL();
 			if (right.balanceFactor != 0)
 			{
 				assert right.balanceFactor == 1;
@@ -99,25 +81,16 @@ public class PAVLSortedTree implements Serializable
 		}
 		
 		/* Single right rotation
-	                  C                   B
-	                 / \     ------->   /   \
-	                B  T4              A     C
-	               / \                / \   / \
-	              A  T3              T1 T2 T3 T4
-	             / \
-	            T1 T2
+		          B                    A
+		         / \     ------->     / \
+		        A  T3                T1  B
+		       / \                      / \
+		      T1 T2                    T2 T3
 		*/
-		public PAVLSortedTreeNode rotateR()
+		public QSortedTreeNode rotateR()
 		{
 			//logger.debug("Single right rotation");
-			PAVLSortedTreeNode left = child[0];
-			assert left.balanceFactor <= 0;
-			child[0] = left.child[1];
-			left.child[1] = this;
-			left.parent = parent;
-			parent = left;
-			if (child[0] != null)
-				child[0].parent = this;
+			PAVLSortedTreeNode left = (PAVLSortedTreeNode) super.rotateR();
 			if (left.balanceFactor != 0)
 			{
 				assert left.balanceFactor == -1;
@@ -135,285 +108,96 @@ public class PAVLSortedTree implements Serializable
 		}
 		
 		/* Right+left rotation
-	       A                      A                     B
-	      / \      ------>       / \      ------>     /   \
-	     T1  C                  T1  B                A     C
-	        / \                    / \              / \   / \
-	       B  T4                  T2  C            T1 T2 T3 T4
-	      / \                        / \
-	     T2 T3                      T3 T4
+		     A                      A                     B
+		    / \      ------>       / \      ------>     /   \
+		   T1  C                  T1  B                A     C
+		      / \                    / \              / \   / \
+		     B  T4                  T2  C            T1 T2 T3 T4
+		    / \                        / \
+		   T2 T3                      T3 T4
 		*/
-		public PAVLSortedTreeNode rotateRL()
+		public QSortedTreeNode rotateRL()
 		{
-			//logger.debug("Right+left rotation");
+			PAVLSortedTreeNode newRoot = (PAVLSortedTreeNode) super.rotateRL();
 			assert balanceFactor == 2;
-			PAVLSortedTreeNode right = child[1];          // C
-			assert right.balanceFactor == -1;
-			PAVLSortedTreeNode newRoot = right.child[0];  // B
-			// Right rotation
-			right.child[0] = newRoot.child[1];
-			newRoot.child[1] = right;
-			// Left rotation
-			child[1] = newRoot.child[0];
-			newRoot.child[0] = this;
-			// Parent pointers
-			newRoot.parent = parent;
-			parent = newRoot;
-			right.parent = newRoot;
-			if (right.child[0] != null)
-				right.child[0].parent = right;
-			if (child[1] != null)
-				child[1].parent = this;
 			if (newRoot.balanceFactor == 1)
 			{
 				// T2 is null, T3 != null
-				balanceFactor = -1;
-				right.balanceFactor = 0;
 				newRoot.balanceFactor = 0;
+				balanceFactor = -1;
+				((PAVLSortedTreeNode) newRoot.child[1]).balanceFactor = 0;
 			}
 			else if (newRoot.balanceFactor == -1)
 			{
 				// T3 is null, T2 != null
-				balanceFactor = 0;
-				right.balanceFactor = 1;
 				newRoot.balanceFactor = 0;
+				balanceFactor = 0;
+				((PAVLSortedTreeNode) newRoot.child[1]).balanceFactor = 1;
 			}
 			else
 			{
 				// T2 and T3 != null
 				balanceFactor = 0;
-				right.balanceFactor = 0;
+				((PAVLSortedTreeNode) newRoot.child[1]).balanceFactor = 0;
 			}
 			return newRoot;
 		}
 		
 		/*  Left+right rotation
-	          C                    C                    B
-	         / \      ------>     / \    ------>      /   \
-	        A  T4                B  T4               A     C
-	       / \                  / \                 / \   / \
-	      T1  B                A  T3               T1 T2 T3 T4
-	         / \              / \
-	        T2 T3            T1 T2
+		      C                  C                    B
+		     / \    ------>     / \    ------>      /   \
+		    A  T4              B  T4               A     C
+		   / \                / \                 / \   / \
+		  T1  B              A  T3               T1 T2 T3 T4
+		     / \            / \
+		    T2 T3          T1 T2
 		*/
-		public PAVLSortedTreeNode rotateLR()
+		public QSortedTreeNode rotateLR()
 		{
-			//logger.debug("Left+right rotation");
+			PAVLSortedTreeNode newRoot = (PAVLSortedTreeNode) super.rotateLR();
 			assert balanceFactor == -2;
-			PAVLSortedTreeNode left = child[0];         // A
-			assert left.balanceFactor == 1;
-			PAVLSortedTreeNode newRoot = left.child[1]; // B
-
-			assert newRoot != null;
-			// Left rotation
-			left.child[1] = newRoot.child[0];
-			newRoot.child[0] = left;
-			// Right rotation
-			child[0] = newRoot.child[1];
-			newRoot.child[1] = this;
-			// Parent pointers
-			newRoot.parent = parent;
-			left.parent = newRoot;
-			parent = newRoot;
-			if (left.child[1] != null)
-				left.child[1].parent = left;
-			if (child[0] != null)
-				child[0].parent = this;
 			// Balance factors, T1 and T4 are not null,
 			// and T2 and T3 cannot be both null.
 			if (newRoot.balanceFactor == -1)
 			{
 				// T3 is null, T2 != null
-				left.balanceFactor = 0;
-				balanceFactor = 1;
 				newRoot.balanceFactor = 0;
+				balanceFactor = 1;
+				((PAVLSortedTreeNode) newRoot.child[0]).balanceFactor = 0;
 			}
 			else if (newRoot.balanceFactor == 1)
 			{
 				// T2 is null, T3 != null
-				left.balanceFactor = -1;
-				balanceFactor = 0;
 				newRoot.balanceFactor = 0;
+				balanceFactor = 0;
+				((PAVLSortedTreeNode) newRoot.child[0]).balanceFactor = -1;
 			}
 			else
 			{
 				// T2 and T3 != null
-				left.balanceFactor = 0;
 				balanceFactor = 0;
+				((PAVLSortedTreeNode) newRoot.child[0]).balanceFactor = 0;
 			}
 			return newRoot;
 		}
 
-		public PAVLSortedTreeNode firstNode()
+		public String toString()
 		{
-			PAVLSortedTreeNode current = this;
-			while (current.child[0] != null)
-				current = current.child[0];
-			return current;
-		}
-	
-		public PAVLSortedTreeNode lastNode()
-		{
-			PAVLSortedTreeNode current = this;
-			while (current.child[1] != null)
-				current = current.child[1];
-			return current;
-		}
-
-		public PAVLSortedTreeNode previousNode()
-		{
-			PAVLSortedTreeNode current = this;
-			if (current.child[0] != null)
-			{
-				current = current.child[0];
-				while (current.child[1] != null)
-					current = current.child[1];
-				return current;
-			}
-			while (current.parent != null && current.parent.child[1] != current)
-				current = current.parent;
-			return current.parent;
-		}
-
-		public PAVLSortedTreeNode nextNode()
-		{
-			PAVLSortedTreeNode current = this;
-			if (current.child[1] != null)
-			{
-				current = current.child[1];
-				while (current.child[0] != null)
-					current = current.child[0];
-				return current;
-			}
-			// Our implementation has a fake root node.
-			while (current.parent.child[0] != current)
-				current = current.parent;
-			if (current.parent.parent == null)
-				return null;
-			else
-				return current.parent;
+			return "Key: "+value+" bal. "+balanceFactor;
 		}
 	}
 	
-	private void readObject(java.io.ObjectInputStream s)
-		throws java.io.IOException, ClassNotFoundException
+	public final QSortedTreeNode newNode(Object o, double v)
 	{
-		s.defaultReadObject();
-		map = new HashMap(nrNodes);
-		for (PAVLSortedTreeNode current = root.child[0].firstNode(); current != null; current = current.nextNode())
-			map.put(current.data, current);
+		return new PAVLSortedTreeNode(o, v);
 	}
 
-	/**
-	 * Tell whether this tree is empty.
-	 */
-	public boolean isEmpty()
+	public final void insertNode(QSortedTreeNode o)
 	{
-		return root.child[0] == null;
-	}
-	
-	/**
-	 * Pretty-print this tree.
-	 */
-	public void show()
-	{
-		if (isEmpty())
-		{
-			System.out.println("Empty tree");
-			return;
-		}
-		System.out.println("Tree:");
-		showNode(root.child[0]);
-	}
-	
-	private static void showNode(PAVLSortedTreeNode node)
-	{
-		String r = "Key: "+node.value+"  bal. "+node.balanceFactor;
-		if (node.child[0] != null)
-			r += " Left -> "+node.child[0].value;
-		if (node.child[1] != null)
-			r += " Right -> "+node.child[1].value;
-		if (node.parent != null)
-			r += " Parent -> "+node.parent.value;
-		System.out.println(r);
-		if (node.child[0] != null)
-		{
-			assert node.child[0].parent == node;
-			showNode(node.child[0]);
-		}
-		if (node.child[1] != null)
-		{
-			assert node.child[1].parent == node;
-			showNode(node.child[1]);
-		}
-	}
-	
-	/**
-	 * Pretty-print this tree.
-	 */
-	public void showValues()
-	{
-		if (isEmpty())
-		{
-			System.out.println("Empty tree");
-			return;
-		}
-		System.out.println("Tree:");
-		showNodeValues(root.child[0]);
-	}
-	
-	private static void showNodeValues(PAVLSortedTreeNode node)
-	{
-		System.out.println("Key: "+node.value+"  Obj. "+node.data);
-		if (node.child[0] != null)
-		{
-			assert node.child[0].parent == node;
-			showNodeValues(node.child[0]);
-		}
-		if (node.child[1] != null)
-		{
-			assert node.child[1].parent == node;
-			showNodeValues(node.child[1]);
-		}
-	}
-	
-	public void showKeys()
-	{
-		if (isEmpty())
-		{
-			System.out.println("Empty tree");
-			return;
-		}
-		System.out.println("Sorted keys:");
-		for (Iterator itt = backwardIterator(); itt.hasNext(); )
-		{
-			PAVLSortedTreeNode node = (PAVLSortedTreeNode) map.get(itt.next());
-			assert node != null;
-			System.out.println("  "+node.value);
-		}
-	}
-	
-	/**
-	 * Insert a node to the tree.  Tree is sorted according to
-	 * <code>value</code>, and duplicates are not checked.
-	 * @param o      object
-	 * @param value  quality factor
-	 */
-	public final void insert(Object o, double value)
-	{
-		assert map.get(o) == null;
-		PAVLSortedTreeNode node = new PAVLSortedTreeNode(o, value);
-		if (logger.isDebugEnabled())
-			logger.debug("insert "+node+" "+" value: "+value+" "+o);
-		map.put(o, node);
-		insertNode(node);
-	}
-
-	private final void insertNode(PAVLSortedTreeNode node)
-	{
+		PAVLSortedTreeNode node = (PAVLSortedTreeNode) o;
 		nrNodes++;
-		PAVLSortedTreeNode current = root.child[0];
-		PAVLSortedTreeNode parent = root;
+		PAVLSortedTreeNode current = (PAVLSortedTreeNode) root.child[0];
+		PAVLSortedTreeNode parent = (PAVLSortedTreeNode) root;
 		PAVLSortedTreeNode topNode = current;
 		int lastDir = 0;
 		while (current != null)
@@ -425,7 +209,7 @@ public class PAVLSortedTree implements Serializable
 			if (current.balanceFactor != 0)
 				topNode = current;
 			parent = current;
-			current = current.child[lastDir];
+			current = (PAVLSortedTreeNode) current.child[lastDir];
 		}
 		// Insert node
 		parent.child[lastDir] = node;
@@ -435,30 +219,30 @@ public class PAVLSortedTree implements Serializable
 		// Update balance factors
 		for (current = node; current != topNode; current = parent)
 		{
-			parent = current.parent;
+			parent = (PAVLSortedTreeNode) current.parent;
 			if (parent.child[0] == current)
 				parent.balanceFactor--;
 			else
 				parent.balanceFactor++;
 		}
-		parent = topNode.parent;
+		parent = (PAVLSortedTreeNode) topNode.parent;
 		// Balance subtree
 		PAVLSortedTreeNode newRoot = null;
 		if (topNode.balanceFactor == -2)
 		{
-			PAVLSortedTreeNode left = topNode.child[0];
+			PAVLSortedTreeNode left = (PAVLSortedTreeNode) topNode.child[0];
 			if (left.balanceFactor == -1)
-				newRoot = topNode.rotateR();
+				newRoot = (PAVLSortedTreeNode) topNode.rotateR();
 			else
-				newRoot = topNode.rotateLR();
+				newRoot = (PAVLSortedTreeNode) topNode.rotateLR();
 		}
 		else if (topNode.balanceFactor == 2)
 		{
-			PAVLSortedTreeNode right = topNode.child[1];
+			PAVLSortedTreeNode right = (PAVLSortedTreeNode) topNode.child[1];
 			if (right.balanceFactor == 1)
-				newRoot = topNode.rotateL();
+				newRoot = (PAVLSortedTreeNode) topNode.rotateL();
 			else
-				newRoot = topNode.rotateRL();
+				newRoot = (PAVLSortedTreeNode) topNode.rotateRL();
 		}
 		else
 			return;
@@ -469,31 +253,17 @@ public class PAVLSortedTree implements Serializable
 			parent.child[1] = newRoot;
 	}
 	
-	/**
-	 * Remove the node associated to an object from the tree.
-	 * @param o      object being removed
-	 * @return  the quality factor associated to this object.
-	 */
-	public final double remove(Object o)
+	public final double removeNode(QSortedTreeNode o)
 	{
-		PAVLSortedTreeNode p = (PAVLSortedTreeNode) map.get(o);
-		if (logger.isDebugEnabled())
-			logger.debug("Remove "+p+" "+o);
-		if (p != null)
-			map.remove(o);
-		return removeNode(p);
-	}
-
-	private final double removeNode(PAVLSortedTreeNode p)
-	{
-		if (p == null)
+		if (o == null)
 			return -1.0;
+		PAVLSortedTreeNode p = (PAVLSortedTreeNode) o;
 		double ret = p.value;
 		if (logger.isDebugEnabled())
 			logger.debug("Value: "+ret);
 		nrNodes--;
 		int lastDir = 0;
-		PAVLSortedTreeNode q = p.parent;
+		PAVLSortedTreeNode q = (PAVLSortedTreeNode) p.parent;
 		if (q.child[1] == p)
 			lastDir = 1;
 		if (p.child[1] == null)
@@ -525,7 +295,7 @@ public class PAVLSortedTree implements Serializable
 		else
 		{
 			//  p has two children.
-			PAVLSortedTreeNode r = p.child[1];
+			PAVLSortedTreeNode r = (PAVLSortedTreeNode) p.child[1];
 			if (r.child[0] == null)
 			{
 				/* Deletion of p
@@ -550,10 +320,10 @@ public class PAVLSortedTree implements Serializable
 			{
 				//  Swap p with its successor node in the tree,
 				//  then delete p
-				r = r.child[0];
+				r = (PAVLSortedTreeNode) r.child[0];
 				while (r.child[0] != null)
-					r = r.child[0];
-				PAVLSortedTreeNode s = r.parent;
+					r = (PAVLSortedTreeNode) r.child[0];
+				PAVLSortedTreeNode s = (PAVLSortedTreeNode) r.parent;
 				s.child[0] = r.child[1];
 				if (s.child[0] != null)
 					s.child[0].parent = s;
@@ -575,7 +345,7 @@ public class PAVLSortedTree implements Serializable
 		while (q != root)
 		{
 			PAVLSortedTreeNode y = q;
-			q = q.parent;
+			q = (PAVLSortedTreeNode) q.parent;
 			lastDir = dir;
 			if (q.child[0] == y)
 				dir = 0;
@@ -594,7 +364,7 @@ public class PAVLSortedTree implements Serializable
 				// if its balance factor becomes 1.
 				if (y.balanceFactor == 2)
 				{
-					if (y.child[1].balanceFactor == -1)
+					if (((PAVLSortedTreeNode) y.child[1]).balanceFactor == -1)
 						q.child[dir] = y.rotateRL();
 					else
 						q.child[dir] = y.rotateL();
@@ -607,7 +377,7 @@ public class PAVLSortedTree implements Serializable
 				y.balanceFactor--;
 				if (y.balanceFactor == -2)
 				{
-					if (y.child[0].balanceFactor == 1)
+					if (((PAVLSortedTreeNode) y.child[0]).balanceFactor == 1)
 						q.child[dir] = y.rotateLR();
 					else
 						q.child[dir] = y.rotateR();
@@ -617,112 +387,6 @@ public class PAVLSortedTree implements Serializable
 			}
 		}
 		return ret;
-	}
-	
-	/**
-	 * Update the quality factor of an object.
-	 * @param o      object being updated
-	 * @param value  new quality factor
-	 */
-	public final void update(Object o, double value)
-	{
-		if (logger.isDebugEnabled())
-			logger.debug("Update "+o+" to "+value);
-		PAVLSortedTreeNode p = (PAVLSortedTreeNode) map.get(o);
-		if (p == null)
-		{
-			insert(o, value);
-			return;
-		}
-		removeNode(p);
-		p.reset(value);
-		insertNode(p);
-	}
-	
-	/**
-	 * Checks whether an object exist is the tree.
-	 * @param o      object being checked
-	 * @return <code>true</code> if this tree contains this object,
-	 *   <code>false</code> otherwise.
-	 */
-	public final boolean containsValue(Object o)
-	{
-		return map.containsKey(o);
-	}
-	
-	/**
-	 * Gets the quallity factor of an object.
-	 * @param o      object.
-	 * @return  the quality factor associated to this object.
-	 */
-	public final double getKey(Object o)
-	{
-		PAVLSortedTreeNode p = (PAVLSortedTreeNode) map.get(o);
-		if (p == null)
-			return -1.0;
-		return p.value;
-	}
-	
-	/**
-	 * Return the object with the lowest quality factor.
-	 * @return the object with the lowest quality factor.
-	 */
-	public final int size()
-	{
-		assert nrNodes == map.size();
-		return nrNodes;
-	}
-	
-	public Iterator iterator()
-	{
-		return new Iterator()
-		{
-			private PAVLSortedTreeNode current = root;
-			private PAVLSortedTreeNode next = root.firstNode();
-			public boolean hasNext()
-			{
-				return next != null;
-			}
-			public Object next()
-			{
-				current = next;
-				if (current == null)
-					return null;
-				next = next.nextNode();
-				return current.data;
-			}
-			public void remove()
-			{
-				// Not supported yet!
-				throw new RuntimeException();
-			}
-		};
-	}
-	
-	public Iterator backwardIterator()
-	{
-		return new Iterator()
-		{
-			private PAVLSortedTreeNode current = root;
-			private PAVLSortedTreeNode next = root.child[0].lastNode();
-			public boolean hasNext()
-			{
-				return next != null;
-			}
-			public Object next()
-			{
-				current = next;
-				if (current == null)
-					return null;
-				next = next.previousNode();
-				return current.data;
-			}
-			public void remove()
-			{
-				// Not supported yet!
-				throw new RuntimeException();
-			}
-		};
 	}
 	
 	public static void main(String args[])

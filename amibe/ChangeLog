@@ -1,3 +1,12 @@
+Wed Dec 13 07:59:35 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/util/QSortedTree.java
+	  src/org/jcae/mesh/amibe/util/QSortedTreeNode.java: Abstract classes
+	to define binary trees.
+	* src/org/jcae/mesh/amibe/util/PAVLSortedTree.java: Use these new classes.
+	* src/org/jcae/mesh/amibe/util/PRedBlackSortedTree.java: New class,
+	red-black tree.
+
 Tue Dec 12 13:15:57 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/util/PAVLSortedTree.java: Update balance
