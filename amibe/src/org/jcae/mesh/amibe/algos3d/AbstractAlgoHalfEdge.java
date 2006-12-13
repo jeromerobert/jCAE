@@ -65,10 +65,11 @@ public abstract class AbstractAlgoHalfEdge
 	{
 		thisLogger().info("Add HalfEdge data structure");
 		mesh.buildEdges();
-		thisLogger().info("Run "+getClass().getName());
+		thisLogger().info("Compute initial tree");
 		preProcessAllHalfEdges();
 		computeTree();
 		postComputeTree();
+		thisLogger().info("Run "+getClass().getName());
 		processAllHalfEdges();
 	}
 	
