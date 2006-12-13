@@ -198,8 +198,8 @@ public class OTriangle2D extends OTriangle
 		if (logger.isDebugEnabled())
 			logger.debug("New triangles:\n"+this+"\n"+newRight+"\n"+newLeft);
 		if (force)
-			newLeft.CheckAndSwap(mesh, false);
-		else if (0 == newLeft.CheckAndSwap(mesh, false))
+			newLeft.checkAndSwap(mesh, false);
+		else if (0 == newLeft.checkAndSwap(mesh, false))
 		{
 			//  v has been inserted and no edges are swapped,
 			//  thus global quality has been decreased.
@@ -223,14 +223,14 @@ public class OTriangle2D extends OTriangle
 	//  Called from BasicMesh to improve initial mesh
 	public int checkSmallerAndSwap(Mesh2D mesh)
 	{
-		//  As CheckAndSwap modifies its arguments, 'this'
+		//  As checkAndSwap modifies its arguments, 'this'
 		//  must be protected.
 		OTriangle2D ot1 = new OTriangle2D();
 		copyOTri(this, ot1);
-		return ot1.CheckAndSwap(mesh, true);
+		return ot1.checkAndSwap(mesh, true);
 	}
 	
-	private int CheckAndSwap(Mesh2D mesh, boolean smallerDiag)
+	private int checkAndSwap(Mesh2D mesh, boolean smallerDiag)
 	{
 		int nrSwap = 0;
 		int totNrSwap = 0;

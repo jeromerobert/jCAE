@@ -291,7 +291,7 @@ public class MMesh3DReader
 				maxId = Math.max(maxId, id);
 				Collection newfacelist = new ArrayList(numberOfElements);
 				for (int j=0; j < numberOfElements; j++)
-					newfacelist.add(new Integer(groupsBuffer.get(fileOffset+j)));
+					newfacelist.add(Integer.valueOf(groupsBuffer.get(fileOffset+j)));
 				groups[i] = new MGroup3D(id, name, newfacelist);
 			}
 			fcG.close();

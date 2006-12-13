@@ -523,14 +523,14 @@ public class QuadTree
 		return ret;
 	}
 	
-	private final class getNearestVertexProcedure implements QuadTreeProcedure
+	private final class GetNearestVertexProcedure implements QuadTreeProcedure
 	{
 		private final int [] ij = new int[2];;
 		private int idist;
 		private double dist, i2d;
 		public Vertex2D fromVertex, nearestVertex;
 		public int searchedCells = 0;
-		public getNearestVertexProcedure(Vertex2D from, Vertex2D v)
+		public GetNearestVertexProcedure(Vertex2D from, Vertex2D v)
 		{
 			double2int(from.getUV(), ij);
 			nearestVertex = v;
@@ -592,7 +592,7 @@ public class QuadTree
 		if (logger.isDebugEnabled())
 			logger.debug("Nearest point of "+v);
 		
-		getNearestVertexProcedure gproc = new getNearestVertexProcedure(v, ret);
+		GetNearestVertexProcedure gproc = new GetNearestVertexProcedure(v, ret);
 		walk(gproc);
 		ret = gproc.nearestVertex;
 		if (logger.isDebugEnabled())
@@ -603,13 +603,13 @@ public class QuadTree
 		return ret;
 	}
 	
-	private final class getNearestVertexDebugProcedure implements QuadTreeProcedure
+	private final class GetNearestVertexDebugProcedure implements QuadTreeProcedure
 	{
 		private final int [] ij = new int[2];;
 		private double dist;
 		public Vertex2D fromVertex, nearestVertex;
 		public int searchedCells = 0;
-		public getNearestVertexDebugProcedure(Vertex2D from, Vertex2D v)
+		public GetNearestVertexDebugProcedure(Vertex2D from, Vertex2D v)
 		{
 			double2int(from.getUV(), ij);
 			nearestVertex = v;
@@ -651,7 +651,7 @@ public class QuadTree
 		if (logger.isDebugEnabled())
 			logger.debug("(debug) Nearest point of "+v);
 		
-		getNearestVertexDebugProcedure gproc = new getNearestVertexDebugProcedure(v, ret);
+		GetNearestVertexDebugProcedure gproc = new GetNearestVertexDebugProcedure(v, ret);
 		walk(gproc);
 		ret = gproc.nearestVertex;
 		if (logger.isDebugEnabled())
@@ -662,10 +662,10 @@ public class QuadTree
 		return ret;
 	}
 	
-	private static class getAllVerticesProcedure implements QuadTreeProcedure
+	private static class GetAllVerticesProcedure implements QuadTreeProcedure
 	{
 		public ArrayList nodelist = null;
-		public getAllVerticesProcedure(int capacity)
+		public GetAllVerticesProcedure(int capacity)
 		{
 			nodelist = new ArrayList(capacity);
 		}
@@ -689,12 +689,12 @@ public class QuadTree
 	 */
 	public ArrayList getAllVertices(int capacity)
 	{
-		getAllVerticesProcedure gproc = new getAllVerticesProcedure(capacity);
+		GetAllVerticesProcedure gproc = new GetAllVerticesProcedure(capacity);
 		walk(gproc);
 		return gproc.nodelist;
 	}
 	
-	private static class clearAllMetricsProcedure implements QuadTreeProcedure
+	private static class ClearAllMetricsProcedure implements QuadTreeProcedure
 	{
 		public final int action(Object o, int s, int i0, int j0)
 		{
@@ -713,7 +713,7 @@ public class QuadTree
 	 */
 	public void clearAllMetrics()
 	{
-		clearAllMetricsProcedure gproc = new clearAllMetricsProcedure();
+		ClearAllMetricsProcedure gproc = new ClearAllMetricsProcedure();
 		walk(gproc);
 	}
 	

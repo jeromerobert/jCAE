@@ -65,7 +65,7 @@ import org.jcae.mesh.amibe.ds.Vertex;
  * Here is an example to collect all vertices in a list:
  * </p>
  * <pre>
- *	public final class collectAllVerticesProcedure implements OctreeProcedure
+ *	public final class CollectAllVerticesProcedure implements OctreeProcedure
  *	{
  *		public ArrayList vertexList = new ArrayList();
  *		public final int action(Object o, int s, int i0, int j0)
@@ -507,11 +507,11 @@ public class Octree
 		return ret;
 	}
 	
-	private static class getMinSizeProcedure implements OctreeProcedure
+	private static class GetMinSizeProcedure implements OctreeProcedure
 	{
 		public int searchedCells = 0;
 		public int minSize = gridSize;
-		public getMinSizeProcedure()
+		public GetMinSizeProcedure()
 		{
 		}
 		public final int action(Object o, int s, int i0, int j0, int k0)
@@ -525,7 +525,7 @@ public class Octree
 	
 	private final int getMinSize()
 	{
-		getMinSizeProcedure gproc = new getMinSizeProcedure();
+		GetMinSizeProcedure gproc = new GetMinSizeProcedure();
 		walk(gproc);
 		int ret = gproc.minSize;
 		if (logger.isDebugEnabled())
@@ -548,7 +548,7 @@ public class Octree
 		return ret;
 	}
 	
-	private final class getNearestVertexProcedure implements OctreeProcedure
+	private final class GetNearestVertexProcedure implements OctreeProcedure
 	{
 		private final int [] ijk = new int[3];;
 		private final int [] retijk = new int[3];;
@@ -556,7 +556,7 @@ public class Octree
 		private long ldist;
 		public Vertex nearestVertex;
 		public int searchedCells = 0;
-		public getNearestVertexProcedure(Vertex from, Vertex v)
+		public GetNearestVertexProcedure(Vertex from, Vertex v)
 		{
 			double2int(from.getUV(), ijk);
 			nearestVertex = v;
@@ -612,7 +612,7 @@ public class Octree
 		if (logger.isDebugEnabled())
 			logger.debug("Nearest point of "+v);
 		
-		getNearestVertexProcedure gproc = new getNearestVertexProcedure(v, ret);
+		GetNearestVertexProcedure gproc = new GetNearestVertexProcedure(v, ret);
 		walk(gproc);
 		ret = gproc.nearestVertex;
 		if (logger.isDebugEnabled())
