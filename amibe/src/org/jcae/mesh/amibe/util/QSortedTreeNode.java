@@ -30,7 +30,7 @@ import java.io.Serializable;
  */
 public abstract class QSortedTreeNode implements Serializable
 {
-	protected final Object data;
+	protected Object data;
 	protected double value;
 	protected final QSortedTreeNode [] child = newChilds();
 	protected QSortedTreeNode parent = null;
@@ -42,7 +42,7 @@ public abstract class QSortedTreeNode implements Serializable
 		data = o;
 		value = v;
 	}
-		
+	
 	public void reset(double v)
 	{
 		child[0] = child[1] = parent = null;

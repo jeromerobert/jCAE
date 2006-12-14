@@ -88,7 +88,7 @@ public abstract class QSortedTree implements Serializable
 		assert map.get(o) == null;
 		QSortedTreeNode node = newNode(o, value);
 		if (logger.isDebugEnabled())
-			logger.debug("insert "+node+" "+" value: "+value+" "+o);
+			logger.debug("Insert "+node+" "+" value: "+value+" "+o);
 		map.put(o, node);
 		nrNodes++;
 		insertNode(node);
@@ -131,6 +131,13 @@ public abstract class QSortedTree implements Serializable
 		insertNode(p);
 	}
 	
+	public void copyNode(QSortedTreeNode src, QSortedTreeNode dest)
+	{
+		dest.data = src.data;
+		dest.value = src.value;
+		map.put(dest.data, dest);
+	}
+
 	/**
 	 * Pretty-print this tree.
 	 */
@@ -157,12 +164,12 @@ public abstract class QSortedTree implements Serializable
 		System.out.println(r);
 		if (node.child[0] != null)
 		{
-			assert node.child[0].parent == node;
+			assert node.child[0].parent == node : "Invalid parent pointer: "+node.child[0].parent+" != "+node;
 			showNode(node.child[0]);
 		}
 		if (node.child[1] != null)
 		{
-			assert node.child[1].parent == node;
+			assert node.child[1].parent == node : "Invalid parent pointer: "+node.child[1].parent+" != "+node;
 			showNode(node.child[1]);
 		}
 	}
