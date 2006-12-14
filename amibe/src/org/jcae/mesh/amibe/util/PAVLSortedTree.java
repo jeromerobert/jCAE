@@ -33,19 +33,19 @@ public class PAVLSortedTree extends QSortedTree
 {
 	private static Logger logger = Logger.getLogger(PAVLSortedTree.class);	
 	
-	private static class PAVLSortedTreeNode extends QSortedTreeNode
+	private static class Node extends QSortedTreeNode
 	{
 		//  balanceFactor = height(rightSubTree) - height(leftSubTree)
 		private int balanceFactor = 0;
 		
-		public PAVLSortedTreeNode(Object o, double v)
+		public Node(Object o, double v)
 		{
 			super(o, v);
 		}
 		
 		public QSortedTreeNode [] newChilds()
 		{
-			return new PAVLSortedTreeNode[2];
+			return new Node[2];
 		}
 
 		public void reset(double v)
@@ -63,7 +63,7 @@ public class PAVLSortedTree extends QSortedTree
 		*/
 		public QSortedTreeNode rotateL()
 		{
-			PAVLSortedTreeNode right = (PAVLSortedTreeNode) super.rotateL();
+			Node right = (Node) super.rotateL();
 			if (right.balanceFactor != 0)
 			{
 				assert right.balanceFactor == 1;
@@ -90,7 +90,7 @@ public class PAVLSortedTree extends QSortedTree
 		public QSortedTreeNode rotateR()
 		{
 			//logger.debug("Single right rotation");
-			PAVLSortedTreeNode left = (PAVLSortedTreeNode) super.rotateR();
+			Node left = (Node) super.rotateR();
 			if (left.balanceFactor != 0)
 			{
 				assert left.balanceFactor == -1;
@@ -118,27 +118,27 @@ public class PAVLSortedTree extends QSortedTree
 		*/
 		public QSortedTreeNode rotateRL()
 		{
-			PAVLSortedTreeNode newRoot = (PAVLSortedTreeNode) super.rotateRL();
+			Node newRoot = (Node) super.rotateRL();
 			assert balanceFactor == 2;
 			if (newRoot.balanceFactor == 1)
 			{
 				// T2 is null, T3 != null
 				newRoot.balanceFactor = 0;
 				balanceFactor = -1;
-				((PAVLSortedTreeNode) newRoot.child[1]).balanceFactor = 0;
+				((Node) newRoot.child[1]).balanceFactor = 0;
 			}
 			else if (newRoot.balanceFactor == -1)
 			{
 				// T3 is null, T2 != null
 				newRoot.balanceFactor = 0;
 				balanceFactor = 0;
-				((PAVLSortedTreeNode) newRoot.child[1]).balanceFactor = 1;
+				((Node) newRoot.child[1]).balanceFactor = 1;
 			}
 			else
 			{
 				// T2 and T3 != null
 				balanceFactor = 0;
-				((PAVLSortedTreeNode) newRoot.child[1]).balanceFactor = 0;
+				((Node) newRoot.child[1]).balanceFactor = 0;
 			}
 			return newRoot;
 		}
@@ -154,7 +154,7 @@ public class PAVLSortedTree extends QSortedTree
 		*/
 		public QSortedTreeNode rotateLR()
 		{
-			PAVLSortedTreeNode newRoot = (PAVLSortedTreeNode) super.rotateLR();
+			Node newRoot = (Node) super.rotateLR();
 			assert balanceFactor == -2;
 			// Balance factors, T1 and T4 are not null,
 			// and T2 and T3 cannot be both null.
@@ -163,20 +163,20 @@ public class PAVLSortedTree extends QSortedTree
 				// T3 is null, T2 != null
 				newRoot.balanceFactor = 0;
 				balanceFactor = 1;
-				((PAVLSortedTreeNode) newRoot.child[0]).balanceFactor = 0;
+				((Node) newRoot.child[0]).balanceFactor = 0;
 			}
 			else if (newRoot.balanceFactor == 1)
 			{
 				// T2 is null, T3 != null
 				newRoot.balanceFactor = 0;
 				balanceFactor = 0;
-				((PAVLSortedTreeNode) newRoot.child[0]).balanceFactor = -1;
+				((Node) newRoot.child[0]).balanceFactor = -1;
 			}
 			else
 			{
 				// T2 and T3 != null
 				balanceFactor = 0;
-				((PAVLSortedTreeNode) newRoot.child[0]).balanceFactor = 0;
+				((Node) newRoot.child[0]).balanceFactor = 0;
 			}
 			return newRoot;
 		}
@@ -189,15 +189,15 @@ public class PAVLSortedTree extends QSortedTree
 	
 	public final QSortedTreeNode newNode(Object o, double v)
 	{
-		return new PAVLSortedTreeNode(o, v);
+		return new Node(o, v);
 	}
 
 	public final void insertNode(QSortedTreeNode o)
 	{
-		PAVLSortedTreeNode node = (PAVLSortedTreeNode) o;
-		PAVLSortedTreeNode current = (PAVLSortedTreeNode) root.child[0];
-		PAVLSortedTreeNode parent = (PAVLSortedTreeNode) root;
-		PAVLSortedTreeNode topNode = current;
+		Node node = (Node) o;
+		Node current = (Node) root.child[0];
+		Node parent = (Node) root;
+		Node topNode = current;
 		int lastDir = 0;
 		while (current != null)
 		{
@@ -208,7 +208,7 @@ public class PAVLSortedTree extends QSortedTree
 			if (current.balanceFactor != 0)
 				topNode = current;
 			parent = current;
-			current = (PAVLSortedTreeNode) current.child[lastDir];
+			current = (Node) current.child[lastDir];
 		}
 		// Insert node
 		parent.child[lastDir] = node;
@@ -218,30 +218,30 @@ public class PAVLSortedTree extends QSortedTree
 		// Update balance factors
 		for (current = node; current != topNode; current = parent)
 		{
-			parent = (PAVLSortedTreeNode) current.parent;
+			parent = (Node) current.parent;
 			if (parent.child[0] == current)
 				parent.balanceFactor--;
 			else
 				parent.balanceFactor++;
 		}
-		parent = (PAVLSortedTreeNode) topNode.parent;
+		parent = (Node) topNode.parent;
 		// Balance subtree
-		PAVLSortedTreeNode newRoot = null;
+		Node newRoot = null;
 		if (topNode.balanceFactor == -2)
 		{
-			PAVLSortedTreeNode left = (PAVLSortedTreeNode) topNode.child[0];
+			Node left = (Node) topNode.child[0];
 			if (left.balanceFactor == -1)
-				newRoot = (PAVLSortedTreeNode) topNode.rotateR();
+				newRoot = (Node) topNode.rotateR();
 			else
-				newRoot = (PAVLSortedTreeNode) topNode.rotateLR();
+				newRoot = (Node) topNode.rotateLR();
 		}
 		else if (topNode.balanceFactor == 2)
 		{
-			PAVLSortedTreeNode right = (PAVLSortedTreeNode) topNode.child[1];
+			Node right = (Node) topNode.child[1];
 			if (right.balanceFactor == 1)
-				newRoot = (PAVLSortedTreeNode) topNode.rotateL();
+				newRoot = (Node) topNode.rotateL();
 			else
-				newRoot = (PAVLSortedTreeNode) topNode.rotateRL();
+				newRoot = (Node) topNode.rotateRL();
 		}
 		else
 			return;
@@ -255,12 +255,12 @@ public class PAVLSortedTree extends QSortedTree
 	public final double removeNode(QSortedTreeNode o)
 	{
 		assert o != null;
-		PAVLSortedTreeNode p = (PAVLSortedTreeNode) o;
+		Node p = (Node) o;
 		double ret = p.value;
 		if (logger.isDebugEnabled())
 			logger.debug("Value: "+ret);
 		int lastDir = 0;
-		PAVLSortedTreeNode q = (PAVLSortedTreeNode) p.parent;
+		Node q = (Node) p.parent;
 		if (q.child[1] == p)
 			lastDir = 1;
 		if (p.child[1] == null)
@@ -292,7 +292,7 @@ public class PAVLSortedTree extends QSortedTree
 		else
 		{
 			//  p has two children.
-			PAVLSortedTreeNode r = (PAVLSortedTreeNode) p.child[1];
+			Node r = (Node) p.child[1];
 			if (r.child[0] == null)
 			{
 				/* Deletion of p
@@ -317,10 +317,10 @@ public class PAVLSortedTree extends QSortedTree
 			{
 				//  Swap p with its successor node in the tree,
 				//  then delete p
-				r = (PAVLSortedTreeNode) r.child[0];
+				r = (Node) r.child[0];
 				while (r.child[0] != null)
-					r = (PAVLSortedTreeNode) r.child[0];
-				PAVLSortedTreeNode s = (PAVLSortedTreeNode) r.parent;
+					r = (Node) r.child[0];
+				Node s = (Node) r.parent;
 				s.child[0] = r.child[1];
 				if (s.child[0] != null)
 					s.child[0].parent = s;
@@ -341,8 +341,8 @@ public class PAVLSortedTree extends QSortedTree
 		int dir = lastDir;
 		while (q != root)
 		{
-			PAVLSortedTreeNode y = q;
-			q = (PAVLSortedTreeNode) q.parent;
+			Node y = q;
+			q = (Node) q.parent;
 			lastDir = dir;
 			if (q.child[0] == y)
 				dir = 0;
@@ -361,7 +361,7 @@ public class PAVLSortedTree extends QSortedTree
 				// if its balance factor becomes 1.
 				if (y.balanceFactor == 2)
 				{
-					if (((PAVLSortedTreeNode) y.child[1]).balanceFactor == -1)
+					if (((Node) y.child[1]).balanceFactor == -1)
 						q.child[dir] = y.rotateRL();
 					else
 						q.child[dir] = y.rotateL();
@@ -374,7 +374,7 @@ public class PAVLSortedTree extends QSortedTree
 				y.balanceFactor--;
 				if (y.balanceFactor == -2)
 				{
-					if (((PAVLSortedTreeNode) y.child[0]).balanceFactor == 1)
+					if (((Node) y.child[0]).balanceFactor == 1)
 						q.child[dir] = y.rotateLR();
 					else
 						q.child[dir] = y.rotateR();
