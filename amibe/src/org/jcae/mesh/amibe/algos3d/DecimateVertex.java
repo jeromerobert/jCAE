@@ -28,6 +28,8 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Quadric3DError;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
+import org.jcae.mesh.amibe.util.QSortedTree;
+import org.jcae.mesh.amibe.util.QSortedTreeNode;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import java.util.Stack;
@@ -189,7 +191,7 @@ public class DecimateVertex
 			}
 		}
 		// Compute quadrics
-		PAVLSortedTree tree = new PAVLSortedTree();
+		QSortedTree tree = new PAVLSortedTree();
 		double [] vect1 = new double[3];
 		double [] vect2 = new double[3];
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
@@ -265,7 +267,7 @@ public class DecimateVertex
 		}
 	}
 	
-	private void computeTree(PAVLSortedTree tree, HashMap quadricMap)
+	private void computeTree(QSortedTree tree, HashMap quadricMap)
 	{
 		NotOrientedEdge noe = new NotOrientedEdge();
 		NotOrientedEdge sym = new NotOrientedEdge();
@@ -294,7 +296,7 @@ public class DecimateVertex
 		}
 	}
 	
-	private boolean contractAllVertices(PAVLSortedTree tree, int nrTriangles, HashMap quadricMap)
+	private boolean contractAllVertices(QSortedTree tree, int nrTriangles, HashMap quadricMap)
 	{
 		int contracted = 0;
 		HashSet trash = new HashSet();
@@ -320,9 +322,10 @@ public class DecimateVertex
 			double cost = -1.0;
 			for (Iterator itt = tree.iterator(); itt.hasNext(); )
 			{
-				edge = (NotOrientedEdge) itt.next();
+				QSortedTreeNode q = (QSortedTreeNode) itt.next();
+				edge = (NotOrientedEdge) q.getData();
 				if (nrFinal == 0)
-					cost = tree.getKey(edge);
+					cost = q.getValue();
 				else
 					cost = -1.0;
 				if (cost > tolerance)

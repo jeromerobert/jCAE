@@ -26,6 +26,7 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.OTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.util.QSortedTree;
+import org.jcae.mesh.amibe.util.QSortedTreeNode;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import java.util.Stack;
 import java.util.Map;
@@ -130,9 +131,10 @@ public abstract class AbstractAlgoHalfEdge
 			Iterator itt = tree.iterator();
 			while (itt.hasNext())
 			{
-				current = (HalfEdge) itt.next();
+				QSortedTreeNode q = (QSortedTreeNode) itt.next();
+				current = (HalfEdge) q.getData();
 				if (nrFinal == 0)
-					cost = tree.getKey(current);
+					cost = q.getValue();
 				else
 					cost = -1.0;
 				if (cost > tolerance)

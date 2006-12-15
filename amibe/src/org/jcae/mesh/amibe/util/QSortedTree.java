@@ -205,19 +205,6 @@ public abstract class QSortedTree implements Serializable
 	}
 	
 	/**
-	 * Gets the quality factor of an object.
-	 * @param o      object.
-	 * @return  the quality factor associated to this object.
-	 */
-	public final double getKey(Object o)
-	{
-		QSortedTreeNode p = (QSortedTreeNode) map.get(o);
-		if (p == null)
-			return -1.0;
-		return p.getValue();
-	}
-	
-	/**
 	 * Return the object with the lowest quality factor.
 	 * @return the object with the lowest quality factor.
 	 */
@@ -252,7 +239,7 @@ public abstract class QSortedTree implements Serializable
 				if (current == null)
 					throw new NoSuchElementException();
 				next = next.nextNode();
-				return current.getData();
+				return current;
 			}
 			public void remove()
 			{
@@ -280,7 +267,7 @@ public abstract class QSortedTree implements Serializable
 				if (current == null)
 					throw new NoSuchElementException();
 				next = next.previousNode();
-				return current.getData();
+				return current;
 			}
 			public void remove()
 			{
