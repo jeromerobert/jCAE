@@ -325,7 +325,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			{
 				current = current.next();
 				tree.remove(current.notOriented());
-				assert !tree.containsValue(current.notOriented());
+				assert !tree.contains(current.notOriented());
 			}
 			current = current.next();
 		}
@@ -338,7 +338,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			{
 				sym = sym.next();
 				tree.remove(sym.notOriented());
-				assert !tree.containsValue(sym.notOriented());
+				assert !tree.contains(sym.notOriented());
 			}
 			sym = sym.next();
 		}

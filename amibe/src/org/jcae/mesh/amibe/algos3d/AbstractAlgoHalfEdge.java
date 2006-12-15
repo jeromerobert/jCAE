@@ -87,7 +87,7 @@ public abstract class AbstractAlgoHalfEdge
 			for (int i = 0; i < 3; i++)
 			{
 				e = e.next();
-				if (tree.containsValue(e.notOriented()))
+				if (tree.contains(e.notOriented()))
 					continue;
 				addToTree(e);
 			}
@@ -187,14 +187,14 @@ public abstract class AbstractAlgoHalfEdge
 					{
 						current = current.next();
 						tree.remove(current.notOriented());
-						assert !tree.containsValue(current.notOriented());
+						assert !tree.contains(current.notOriented());
 					}
 					HalfEdge sym = current.sym();
 					for (int i = 0; i < 3; i++)
 					{
 						sym = sym.next();
 						tree.remove(sym.notOriented());
-						assert !tree.containsValue(sym.notOriented());
+						assert !tree.contains(sym.notOriented());
 					}
 					Vertex a = current.apex();
 					current = current.swap();

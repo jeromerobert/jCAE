@@ -378,7 +378,7 @@ public class DecimateVertex
 				{
 					edge.nextOTri();
 					tree.remove(edge);
-					assert !tree.containsValue(edge);
+					assert !tree.contains(edge);
 				}
 			}
 			if (!t2.isOuter())
@@ -388,7 +388,7 @@ public class DecimateVertex
 				{
 					sym.nextOTri();
 					tree.remove(sym);
-					assert !tree.containsValue(sym);
+					assert !tree.contains(sym);
 				}
 			}
 			Vertex apex = edge.apex();
@@ -432,14 +432,14 @@ public class DecimateVertex
 					{
 						edge.nextOTri();
 						tree.remove(edge);
-						assert !tree.containsValue(edge);
+						assert !tree.contains(edge);
 					}
 					edge.symOTri();
 					for (int i = 0; i < 3; i++)
 					{
 						edge.nextOTri();
 						tree.remove(edge);
-						assert !tree.containsValue(edge);
+						assert !tree.contains(edge);
 					}
 					ot.swap();
 					// Now ot = (ona) and edge = (dan)

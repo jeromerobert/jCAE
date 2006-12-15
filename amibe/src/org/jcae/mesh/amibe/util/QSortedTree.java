@@ -218,7 +218,7 @@ public abstract class QSortedTree implements Serializable
 	 * @return <code>true</code> if this tree contains this object,
 	 *   <code>false</code> otherwise.
 	 */
-	public final boolean containsValue(Object o)
+	public final boolean contains(Object o)
 	{
 		return map.containsKey(o);
 	}
