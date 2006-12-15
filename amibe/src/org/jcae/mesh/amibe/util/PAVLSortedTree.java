@@ -252,11 +252,11 @@ public class PAVLSortedTree extends QSortedTree
 			parent.child[1] = newRoot;
 	}
 	
-	public final double removeNode(QSortedTreeNode o)
+	public final QSortedTreeNode removeNode(QSortedTreeNode o)
 	{
 		assert o != null;
 		Node p = (Node) o;
-		double ret = p.value;
+		Node ret = p;
 		if (logger.isDebugEnabled())
 			logger.debug("Value: "+ret);
 		int lastDir = 0;
