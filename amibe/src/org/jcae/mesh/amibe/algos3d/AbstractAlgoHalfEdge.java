@@ -164,7 +164,8 @@ public abstract class AbstractAlgoHalfEdge
 			{
 				double newCost = ((Double) stackNotProcessed.pop()).doubleValue();
 				HalfEdge f = (HalfEdge) stackNotProcessed.pop();
-				tree.update(f.notOriented(), newCost);
+				assert f == f.notOriented();
+				tree.update(f, newCost);
 			}
 			current = processEdge(current);
 			processed++;
