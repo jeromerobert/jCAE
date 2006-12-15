@@ -113,7 +113,7 @@ public abstract class AbstractAlgoHalfEdge
 		// that tree.size() is not equal to the total number of edges,
 		// and output displayed by postProcessAllHalfEdges() may thus
 		// not be very useful.
-		if (val <= tolerance)
+		if (nrFinal != 0 || val <= tolerance)
 			tree.insert(e.notOriented(), val);
 	}
 
