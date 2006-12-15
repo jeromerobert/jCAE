@@ -85,50 +85,52 @@ public class PRedBlackSortedTree extends QSortedTree
 	
 	public final void insertNode(QSortedTreeNode o)
 	{
-		Node node = (Node) o;
+		Node p = (Node) o;
 		Node current = (Node) root.child[0];
-		Node parent = (Node) root;
+		Node q = (Node) root;
 		int lastDir = 0;
 		while (current != null)
 		{
-			if (current.value > node.value)
+			if (current.value > p.value)
 				lastDir = 0;
 			else
 				lastDir = 1;
-			parent = current;
+			q = current;
 			current = (Node) current.child[lastDir];
 		}
 		// Insert node
-		parent.child[lastDir] = node;
-		node.parent = parent;
+		q.child[lastDir] = p;
+		p.parent = q;
 		// Node color is red, so property 3 is preserved.
 		// We must check if property 2 is violated, in which
 		// case our tree has to be rebalanced and/or repainted.
-		// Case 1: root node
-		if (parent == root)
+		// Case I1: root node
+		if (q == root)
 		{
 			// We enforce root node to be black, this eases
 			// other cases below.
-			logger.debug("Case 1");
-			node.isRed = false;
+			logger.debug("Case I1");
+			p.isRed = false;
+			assert !((Node) root.child[0]).isRed;
 			return;
 		}
-		for (current = node; current != root; )
+		for (; p != root.child[0]; )
 		{
-			parent = (Node) current.parent;
+			q = (Node) p.parent;
 			// If parent is black, property 2 is preserved,
 			// everything is fine.
-			// Case 2: parent is black
-			if (parent == root || !parent.isRed)
+			// Case I2: parent is black
+			if (!q.isRed)
 			{
-				logger.debug("Case 2");
-				break;
+				logger.debug("Case I2");
+				assert !((Node) root.child[0]).isRed;
+				return;
 			}
 			// Parent is red, so it cannot be the root tree,
 			// and grandparent is black.
-			Node grandparent = (Node) parent.parent;
+			Node grandparent = (Node) q.parent;
 			assert grandparent != root;
-			if (grandparent.child[0] == parent)
+			if (grandparent.child[0] == q)
 				lastDir = 0;
 			else
 				lastDir = 1;
@@ -136,61 +138,61 @@ public class PRedBlackSortedTree extends QSortedTree
 			Node uncle = (Node) grandparent.child[sibDir];
 			if (isRedNode(uncle))
 			{
-				// Case 3: uncle is red
+				// Case I3: uncle is red
 				/* Paint nodes and continue from grandparent
 				     gB                gR
 				    / \   ------>     / \
-				   pR uR            pB  uB
+				   qR uR            qB  uB
 				    \                 \
-				    cR                cR
+				    pR                pR
 				*/
-				logger.debug("Case 3");
-				parent.isRed = false;
+				logger.debug("Case I3");
+				q.isRed = false;
 				uncle.isRed = false;
 				grandparent.isRed = true;
-				current = grandparent;
+				p = grandparent;
 			}
 			else
 			{
 				assert !isRedNode(uncle);
-				if (parent.child[lastDir] != current)
+				if (q.child[lastDir] != p)
 				{
 					/* Rotate to put red nodes on the
 					   same side
-					     gB                gB
-					    / \   ------>     / \
-					   pR uB            cR  uB
-					    \               /
-					    cR             pR
+					     gB            gB
+					    / \   ---->   / \
+					   qR uB        pR  uB
+					    \           /
+					    pR         qR
 					*/
-					logger.debug("Case 4");
-					current = parent;
+					logger.debug("Case I4");
 					if (lastDir == 0)
-						grandparent.child[0] = parent.rotateL();
+						grandparent.child[0] = q.rotateL();
 					else
-						grandparent.child[1] = parent.rotateR();
-					parent = (Node) current.parent;
+						grandparent.child[1] = q.rotateR();
+					p = q;
+					q = (Node) p.parent;
 				}
 				/* Rotate on opposite way and recolor.  Either
 				   uncle is null, or we come from case 3 and
 				   current node has 2 black children.
-				        gB                pB
+				        gB                qB
 				       / \   ------>     /  \
-				      pR uB            cR   gR
+				      qR uB            pR   gR
 				     / \              / \   / \
-				    cR zB            xB yB zB uB
+				    pR zB            xB yB zB uB
 				   / \
 				  xB yB
 				*/
-				assert (uncle == null && parent.child[sibDir] == null &&
-				  current.child[0] == null && current.child[1] == null) ||
-				 (uncle != null && parent.child[sibDir] != null &&
-				  current.child[0] != null && current.child[1] != null);
-				logger.debug("Case 5");
+				assert (uncle == null && q.child[sibDir] == null &&
+				  p.child[0] == null && p.child[1] == null) ||
+				 (uncle != null && q.child[sibDir] != null &&
+				  p.child[0] != null && p.child[1] != null);
+				logger.debug("Case I5");
 
 				Node greatgrandparent = (Node) grandparent.parent;
 				grandparent.isRed = true;
-				parent.isRed = false;
+				q.isRed = false;
 				if (greatgrandparent.child[0] == grandparent)
 					lastDir = 0;
 				else
@@ -200,17 +202,18 @@ public class PRedBlackSortedTree extends QSortedTree
 					greatgrandparent.child[lastDir] = grandparent.rotateR();
 				else
 					greatgrandparent.child[lastDir] = grandparent.rotateL();
-				break;
+				assert !((Node) root.child[0]).isRed;
+				return;
 			}
 		}
 		((Node) root.child[0]).isRed = false;
 		assert isValid();
 	}
 	
-	public final double removeNode(QSortedTreeNode o)
+	public final QSortedTreeNode removeNode(QSortedTreeNode o)
 	{
 		Node p = (Node) o;
-		double ret = p.value;
+		Node ret = p;
 		Node q = (Node) p.parent;
 		int lastDir = 0;
 		if (q.child[1] == p)
@@ -221,15 +224,10 @@ public class PRedBlackSortedTree extends QSortedTree
 			if (q.child[lastDir] != null)
 				q.child[lastDir].parent = q;
 		}
-		else if (p.child[0] == null)
-		{
-			q.child[lastDir] = p.child[1];
-			if (q.child[lastDir] != null)
-				q.child[lastDir].parent = q;
-		}
 		else
 		{
-			// Swap p with its successor, and delete it
+			// p has a right child.  Replace p by its
+			// successor, and update q and lastDir.
 			Node r = (Node) p.nextNode();
 			// Do not modify p's color!
 			copyNode(r, p);
@@ -243,9 +241,15 @@ public class PRedBlackSortedTree extends QSortedTree
 			q.child[lastDir] = p.child[1];
 			if (q.child[lastDir] != null)
 				q.child[lastDir].parent = q;
+			ret = r;
 		}
+		// p is the node to be removed, q its parent and
+		// lastDir so that q.child[lastDir] == p;
 		if (p.isRed)
 			return ret;
+		// p is a black node, so q is no more balanced, its
+		// lastDir child of q has 1 black node less than its
+		// sibling.
 		for (;;)
 		{
 			p = (Node) q.child[lastDir];
@@ -255,10 +259,11 @@ public class PRedBlackSortedTree extends QSortedTree
 				logger.debug("Red node :-)");
 				break;
 			}
-			// Case 1: root tree
-			if (q == root || q.child[0] == root)
+			// Case R1: root tree
+			if (q == root)
 			{
-				logger.debug("Case 1");
+				// All paths have one less black node
+				logger.debug("Case R1");
 				break;
 			}
 			int sibDir = 1 - lastDir;
@@ -267,12 +272,17 @@ public class PRedBlackSortedTree extends QSortedTree
 			if (grandparent.child[1] == q)
 				gLastDir = 1;
 			Node sibling = (Node) q.child[sibDir];
+			// A black node is removed, so its sibling cannot
+			// be null.
+			assert sibling != null : q.toString();
 			if (sibling.isRed)
 			{
-				// Case 2: sibling is red
-				logger.debug("Case 2");
+				// Case R2: sibling is red
+				logger.debug("Case R2");
 				sibling.isRed = false;
 				q.isRed = true;
+				assert sibling.child[0] != null;
+				assert sibling.child[1] != null;
 
 				/* Example with lastDir == 0
 				     qB          qR             sB => gB
@@ -286,30 +296,27 @@ public class PRedBlackSortedTree extends QSortedTree
 				else
 					grandparent.child[gLastDir] = q.rotateR();
 				grandparent = sibling;
+				gLastDir = lastDir;
 				sibling = (Node) q.child[sibDir];
-				if (grandparent.child[0] == q)
-					gLastDir = 1;
-				else
-					gLastDir = 1;
 			}
-			if (!q.isRed && !sibling.isRed && !isRedNode(sibling.child[0]) && !isRedNode(sibling.child[1]))
+			// Now sibling is black
+			assert !sibling.isRed;
+			if (!q.isRed && !isRedNode(sibling.child[0]) && !isRedNode(sibling.child[1]))
 			{
-				// Case 3: parent, sibling and sibling's
+				// Case R3: parent, sibling and sibling's
 				// children are black
-				logger.debug("Case 3");
+				logger.debug("Case R3");
 				sibling.isRed = true;
 			}
 			else
 			{
-				assert !isRedNode(sibling);
-				// Now sibling is black.
 				if (!isRedNode(sibling.child[0]) && !isRedNode(sibling.child[1]))
 				{
-					// Case 4: sibling and sibling's
+					// Case R4: sibling and sibling's
 					// children are black, but parent is
 					// red.
 					assert q.isRed;
-					logger.debug("Case 4");
+					logger.debug("Case R4");
 					sibling.isRed = true;
 					q.isRed = false;
 					break;
@@ -318,11 +325,11 @@ public class PRedBlackSortedTree extends QSortedTree
 				{
 					if (isRedNode(sibling.child[lastDir]) && !isRedNode(sibling.child[sibDir]))
 					{
-						// Case 5: sibling is black, left child is
+						// Case R5: sibling is black, left child is
 						// red and right child is black.
 						// Rotate at sibling and paint nodes
 						// so that sibling.child[sibDir] is red.
-						logger.debug("Case 5");
+						logger.debug("Case R5");
 						Node y = (Node) sibling.child[lastDir];
 						y.isRed = false;
 						sibling.isRed = true;
@@ -332,26 +339,26 @@ public class PRedBlackSortedTree extends QSortedTree
 							q.child[sibDir] = sibling.rotateL();
 						sibling = y;
 						/* Example with lastDir == 0
-						  qR       qR       qB
-						  / \ ---> / \ ---> / \
-						 xB sB    xB yR    xB yB
-						   / \      / \      / \
-						  yR  zB   T1  sB   T1  sR
-						 / \          / \      / \
-						T1 T2        T2  zB   T2  zB
+						  q*       q*
+						  / \ ---> / \
+						 xB sB    xB yB
+						   / \      / \
+						  yR  zB   aB  sR
+						 / \          / \
+						aB bB        bB  zB
 						*/
 					}
-					logger.debug("Case 6");
-					// Case 6: sibling is black and its right child
+					logger.debug("Case R6");
+					// Case R6: sibling is black and its right child
 					// is red.
 					/*
-					  q*            qB             s*      
-					 / \    --->   / \    --->    / \      
-					xB sB         xB s*         qB   yB     
-					  / \           / \        / \   / \     
-					 T1  yR        T1  yB     xB T1 T2 zB    
-					    / \           / \
-					   T2  zB        T2  zB
+					  q*       qB          s*
+					 / \ ---> / \  --->   / \
+					xB sB    xB s*      qB   yB
+					  / \      / \     / \   / \
+					 aB  yR   aB  yB  xB aB bB zB
+					    / \      / \
+					   bB  zB   bB  zB
 					*/
 					assert !isRedNode(sibling) && isRedNode(sibling.child[sibDir]);
 					sibling.isRed = q.isRed;
@@ -379,9 +386,25 @@ public class PRedBlackSortedTree extends QSortedTree
 		// Call debugIsValid() only when debugging, otherwise
 		// tree manipulations are way too slow.
 		return true;
+		//return debugIsValid();
+		//return checkParentPointers();
 	}
 
-	private boolean debugIsValid()
+	public boolean checkParentPointers()
+	{
+		if (root.child[0] == null)
+			return true;
+		for (Node current = (Node) root.child[0].firstNode(); current != null; current = (Node) current.nextNode())
+		{
+			if (current.child[0] != null && current.child[0].parent != current)
+				return false;
+			if (current.child[1] != null && current.child[1].parent != current)
+				return false;
+		}
+		return true;
+	}
+
+	public boolean debugIsValid()
 	{
 		Node current = (Node) root.child[0];
 		if (isRedNode(current))
@@ -455,7 +478,7 @@ public class PRedBlackSortedTree extends QSortedTree
 	{
 		// Remove in ascending order
 		Integer [] iii = unitTestInit(tree, n);
-		for (int i = iii.length - 1; i >= 0; i--)
+		for (int i = 0; i < iii.length; i++)
 			tree.remove(iii[i]);
 		if (!tree.isEmpty())
 			throw new RuntimeException();
@@ -463,9 +486,9 @@ public class PRedBlackSortedTree extends QSortedTree
 	
 	private static void unitTest2(QSortedTree tree, int n)
 	{
-		// Remove in ascending order
+		// Remove in descending order
 		Integer [] iii = unitTestInit(tree, n);
-		for (int i = 0; i < iii.length; i++)
+		for (int i = iii.length - 1; i >= 0; i--)
 			tree.remove(iii[i]);
 		if (!tree.isEmpty())
 			throw new RuntimeException();
@@ -485,7 +508,6 @@ public class PRedBlackSortedTree extends QSortedTree
 	
 	private static void unitTest4(QSortedTree tree, int n)
 	{
-		// Remove in ascending order
 		Integer [] iii = unitTestInit(tree, n);
 		for (int i = 0; i < iii.length / 2; i++)
 		{
@@ -496,11 +518,53 @@ public class PRedBlackSortedTree extends QSortedTree
 			throw new RuntimeException();
 	}
 	
+	private static void unitTest5(QSortedTree tree, int n, int s)
+	{
+		int prime = gnu.trove.PrimeFinder.nextPrime(n);
+		Integer [] iii = unitTestInit(tree, prime);
+		int index = 1;
+		for (int i = 0; i < prime; i++)
+		{
+			index += s;
+			while (index >= prime)
+				index -= prime;
+			tree.remove(iii[index]);
+		}
+		if (!tree.isEmpty())
+			throw new RuntimeException();
+	}
+	
+	private static void unitTest6(QSortedTree tree, int n, int s)
+	{
+		int prime = gnu.trove.PrimeFinder.nextPrime(n);
+		Integer [] iii = new Integer[prime];
+		for (int i = 0; i < iii.length; i++)
+			iii[i] = new Integer(i);
+		int index = 1;
+		for (int i = 0; i < prime; i++)
+		{
+			index += s;
+			while (index >= prime)
+				index -= prime;
+			tree.insert(iii[index], (double) index);
+		}
+		index = 3;
+		for (int i = 0; i < prime; i++)
+		{
+			index += s;
+			while (index >= prime)
+				index -= prime;
+			tree.remove(iii[index]);
+		}
+		if (!tree.isEmpty())
+			throw new RuntimeException();
+	}
+
 	public static void main(String args[])
 	{
 		PRedBlackSortedTree tree = new PRedBlackSortedTree();
 		// Check with various lengths
-		for (int n = 10; n < 1000; n+=2)
+		for (int n = 10; n < 100; n+=2)
 		{
 			try
 			{
@@ -512,6 +576,21 @@ public class PRedBlackSortedTree extends QSortedTree
 			catch (Exception ex)
 			{
 				System.out.println("Failed with length "+n);
+				ex.printStackTrace();
+				System.exit(1);
+			}
+		}
+		// Insert and remove in random order
+		for (int n = 3; n < 100; n+=2)
+		{
+			try
+			{
+				unitTest5(tree, 200, n);
+				unitTest6(tree, 200, n);
+			}
+			catch (Exception ex)
+			{
+				System.out.println("Failed with step "+n);
 				ex.printStackTrace();
 				System.exit(1);
 			}
