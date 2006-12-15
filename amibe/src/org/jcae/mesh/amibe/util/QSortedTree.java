@@ -56,7 +56,7 @@ public abstract class QSortedTree implements Serializable
 	/**
 	 * Remove a note from the binary tree.
 	 */
-	protected abstract double removeNode(QSortedTreeNode p);
+	protected abstract QSortedTreeNode removeNode(QSortedTreeNode p);
 
 	protected void readObject(java.io.ObjectInputStream s)
 		throws java.io.IOException, ClassNotFoundException
@@ -108,7 +108,8 @@ public abstract class QSortedTree implements Serializable
 			return -1.0;
 		map.remove(o);
 		nrNodes--;
-		return removeNode(p);
+		p = removeNode(p);
+		return p.value;
 	}
 
 	/**
@@ -118,21 +119,13 @@ public abstract class QSortedTree implements Serializable
 	 */
 	public final void update(Object o, double value)
 	{
-		if (logger.isDebugEnabled())
-			logger.debug("Update "+o+" to "+value);
-		QSortedTreeNode p = (QSortedTreeNode) map.get(o);
-		if (p == null)
-		{
-			insert(o, value);
-			return;
-		}
-		removeNode(p);
-		p.reset(value);
-		insertNode(p);
+		remove(o);
+		insert(o, value);
 	}
 	
 	public void copyNode(QSortedTreeNode src, QSortedTreeNode dest)
 	{
+		map.remove(src.data);
 		dest.data = src.data;
 		dest.value = src.value;
 		map.put(dest.data, dest);
