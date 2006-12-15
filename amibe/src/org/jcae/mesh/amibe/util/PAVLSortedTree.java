@@ -33,7 +33,7 @@ public class PAVLSortedTree extends QSortedTree
 {
 	private static Logger logger = Logger.getLogger(PAVLSortedTree.class);	
 	
-	private class Node extends QSortedTree.Node
+	private static class Node extends QSortedTree.Node
 	{
 		//  balanceFactor = height(rightSubTree) - height(leftSubTree)
 		private int balanceFactor = 0;

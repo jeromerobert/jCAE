@@ -58,7 +58,7 @@ public abstract class QSortedTree implements Serializable
 	 */
 	protected abstract Node removeNode(Node p);
 
-	public class Node implements Comparable, Serializable
+	public static class Node implements Comparable, Serializable
 	{
 		private Object data;
 		private double value;

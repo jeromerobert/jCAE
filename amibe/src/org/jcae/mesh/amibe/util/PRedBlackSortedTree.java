@@ -45,7 +45,7 @@ import org.apache.log4j.Logger;
 public class PRedBlackSortedTree extends QSortedTree
 {
 	private static Logger logger = Logger.getLogger(PRedBlackSortedTree.class);	
-	private class Node extends QSortedTree.Node
+	private static class Node extends QSortedTree.Node
 	{
 		private boolean isRed;
 		
