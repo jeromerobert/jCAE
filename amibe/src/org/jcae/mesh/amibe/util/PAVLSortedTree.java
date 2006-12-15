@@ -183,7 +183,7 @@ public class PAVLSortedTree extends QSortedTree
 
 		public String toString()
 		{
-			return "Key: "+value+" bal. "+balanceFactor;
+			return super.toString()+" bal. "+balanceFactor;
 		}
 	}
 	
@@ -201,7 +201,7 @@ public class PAVLSortedTree extends QSortedTree
 		int lastDir = 0;
 		while (current != null)
 		{
-			if (current.value > node.value)
+			if (node.compareTo(current) < 0)
 				lastDir = 0;
 			else
 				lastDir = 1;

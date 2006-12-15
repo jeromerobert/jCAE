@@ -106,10 +106,15 @@ public abstract class QSortedTree implements Serializable
 			logger.debug("Remove "+p+" "+o);
 		if (p == null)
 			return -1.0;
-		map.remove(o);
 		nrNodes--;
-		p = removeNode(p);
-		return p.value;
+		map.remove(o);
+		QSortedTreeNode r = removeNode(p);
+		if (r != p)
+		{
+			map.remove(r.data);
+			map.put(p.data, p);
+		}
+		return r.value;
 	}
 
 	/**
@@ -123,14 +128,6 @@ public abstract class QSortedTree implements Serializable
 		insert(o, value);
 	}
 	
-	public void copyNode(QSortedTreeNode src, QSortedTreeNode dest)
-	{
-		map.remove(src.data);
-		dest.data = src.data;
-		dest.value = src.value;
-		map.put(dest.data, dest);
-	}
-
 	/**
 	 * Pretty-print this tree.
 	 */
@@ -196,22 +193,6 @@ public abstract class QSortedTree implements Serializable
 		}
 	}
 	
-	public void showKeys()
-	{
-		if (isEmpty())
-		{
-			System.out.println("Empty tree");
-			return;
-		}
-		System.out.println("Sorted keys:");
-		for (Iterator itt = backwardIterator(); itt.hasNext(); )
-		{
-			QSortedTreeNode node = (QSortedTreeNode) map.get(itt.next());
-			assert node != null;
-			System.out.println("  "+node.value);
-		}
-	}
-	
 	/**
 	 * Checks whether an object exist is the tree.
 	 * @param o      object being checked
@@ -224,7 +205,7 @@ public abstract class QSortedTree implements Serializable
 	}
 	
 	/**
-	 * Gets the quallity factor of an object.
+	 * Gets the quality factor of an object.
 	 * @param o      object.
 	 * @return  the quality factor associated to this object.
 	 */

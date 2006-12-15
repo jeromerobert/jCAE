@@ -68,7 +68,7 @@ public class PRedBlackSortedTree extends QSortedTree
 
 		public String toString()
 		{
-			return "Key: "+value+" "+(isRed ? "red" : "black");
+			return super.toString()+" "+(isRed ? "red" : "black");
 		}
 	}
 
@@ -91,7 +91,7 @@ public class PRedBlackSortedTree extends QSortedTree
 		int lastDir = 0;
 		while (current != null)
 		{
-			if (current.value > p.value)
+			if (p.compareTo(current) < 0)
 				lastDir = 0;
 			else
 				lastDir = 1;
@@ -230,7 +230,7 @@ public class PRedBlackSortedTree extends QSortedTree
 			// successor, and update q and lastDir.
 			Node r = (Node) p.nextNode();
 			// Do not modify p's color!
-			copyNode(r, p);
+			p.swap(r);
 			p = r;
 			q = (Node) p.parent;
 			if (q.child[0] == p)
@@ -426,9 +426,9 @@ public class PRedBlackSortedTree extends QSortedTree
 				blackNodes--;
 			else if (isRedNode(current.child[0]) || isRedNode(current.child[1]))
 				return false;
-			if (current.child[0] != null && current.child[0].value > current.value)
+			if (current.child[0] != null && current.child[0].compareTo(current) > 0)
 				return false;
-			if (current.child[1] != null && current.child[1].value < current.value)
+			if (current.child[1] != null && current.child[1].compareTo(current) < 0)
 				return false;
 			if (current.child[1] != null)
 			{

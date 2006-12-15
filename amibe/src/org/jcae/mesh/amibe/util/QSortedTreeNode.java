@@ -28,7 +28,7 @@ import java.io.Serializable;
  * order after they have been sorted.  They differ from casual binary trees in
  * that duplicate quality factors are allowed.
  */
-public abstract class QSortedTreeNode implements Serializable
+public abstract class QSortedTreeNode implements Comparable, Serializable
 {
 	protected Object data;
 	protected double value;
@@ -43,12 +43,35 @@ public abstract class QSortedTreeNode implements Serializable
 		value = v;
 	}
 	
+	public int compareTo(Object o)
+	{
+		QSortedTreeNode that = (QSortedTreeNode) o;
+		if (value < that.value)
+			return -1;
+		else
+			return +1;
+	}
+	
 	public void reset(double v)
 	{
 		child[0] = child[1] = parent = null;
 		value = v;
 	}
-		
+	
+	public void swap(QSortedTreeNode that)
+	{
+		Object temp = that.data;
+		that.data = data;
+		data = temp;
+		// For now there is no reason to swap values
+		that.value = value;
+	}
+
+	public String toString()
+	{
+		return "Key: "+value+" obj. "+Integer.toHexString(data.hashCode());
+	}
+
 	/* Left rotation
 	    A                    B
 	   / \      ------>     / \
