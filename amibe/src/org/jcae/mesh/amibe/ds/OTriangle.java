@@ -1038,7 +1038,7 @@ public class OTriangle
 		prevOTri(this, work[1]);
 		if (!work[0].hasAttributes(OUTER) && work[0].getAdj() != null && work[1].getAdj() != null)
 		{
-			work[0].nextOTriApex();
+			work[0].nextOTriDest();
 			work[1].prevOTriOrigin();
 			if (work[0].origin() == work[1].destination())
 				return false;
@@ -1048,7 +1048,7 @@ public class OTriangle
 		work[0].nextOTri();
 		if (!work[0].hasAttributes(OUTER) && work[0].getAdj() != null && work[1].getAdj() != null)
 		{
-			work[0].nextOTriApex();
+			work[0].nextOTriDest();
 			work[1].prevOTriOrigin();
 			if (work[0].origin() == work[1].destination())
 				return false;

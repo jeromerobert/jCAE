@@ -1,3 +1,8 @@
+Fri Dec 15 15:51:58 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java (canContract): Fix
+	topology check.
+
 Wed Dec 13 07:59:35 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/util/QSortedTree.java
