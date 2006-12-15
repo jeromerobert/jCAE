@@ -469,17 +469,8 @@ public class DecimateVertex
 		// Remove deleted triangles from the list
 		trashBin(trash);
 		logger.info("Number of contracted edges: "+contracted);
-		int cnt = 0;
-		for (Iterator itt = tree.iterator(); itt.hasNext(); )
-		{
-			NotOrientedEdge edge = (NotOrientedEdge) itt.next();
-			if (tree.getKey(edge) > tolerance)
-				break;
-			cnt++;
-		}
 		logger.info("Total number of edges not contracted during processing: "+cntNotContracted);
-		logger.info("Number of edges which could have been contracted: "+cnt);
-		logger.info("Number of other edges not contracted: "+(tree.size() - cnt));
+		logger.info("Number of edges still present in the binary tree: "+tree.size());
 		return contracted > 0;
 	}
 	
