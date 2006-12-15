@@ -562,7 +562,7 @@ public class PRedBlackSortedTree extends QSortedTree
 
 	public static void main(String args[])
 	{
-		PRedBlackSortedTree tree = new PRedBlackSortedTree();
+		QSortedTree tree = new PRedBlackSortedTree();
 		// Check with various lengths
 		for (int n = 10; n < 100; n+=2)
 		{
@@ -596,13 +596,6 @@ public class PRedBlackSortedTree extends QSortedTree
 			}
 		}
 		System.out.println("ok");
-		//tree = new PRedBlackSortedTree();
-		//for (int i = 9; i >= 0; i--)
-		//	tree.insert(iii[i], (double) i);
-		//tree.remove(iii[0]);
-		//tree.remove(iii[8]);
-		//tree.remove(iii[9]);
-		//tree.showValues();
 	}
 		
 }
