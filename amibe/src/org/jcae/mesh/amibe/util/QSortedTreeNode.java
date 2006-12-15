@@ -30,8 +30,8 @@ import java.io.Serializable;
  */
 public abstract class QSortedTreeNode implements Comparable, Serializable
 {
-	protected Object data;
-	protected double value;
+	private Object data;
+	private double value;
 	protected final QSortedTreeNode [] child = newChilds();
 	protected QSortedTreeNode parent = null;
 	
@@ -65,6 +65,16 @@ public abstract class QSortedTreeNode implements Comparable, Serializable
 		data = temp;
 		// For now there is no reason to swap values
 		that.value = value;
+	}
+
+	public double getValue()
+	{
+		return value;
+	}
+
+	public Object getData()
+	{
+		return data;
 	}
 
 	public String toString()

@@ -66,7 +66,7 @@ public abstract class QSortedTree implements Serializable
 		if (nrNodes == 0)
 			return;
 		for (QSortedTreeNode current = root.child[0].firstNode(); current != null; current = current.nextNode())
-			map.put(current.data, current);
+			map.put(current.getData(), current);
 	}
 
 	/**
@@ -111,10 +111,10 @@ public abstract class QSortedTree implements Serializable
 		QSortedTreeNode r = removeNode(p);
 		if (r != p)
 		{
-			map.remove(r.data);
-			map.put(p.data, p);
+			map.remove(r.getData());
+			map.put(p.getData(), p);
 		}
-		return r.value;
+		return r.getValue();
 	}
 
 	/**
@@ -146,11 +146,11 @@ public abstract class QSortedTree implements Serializable
 	{
 		String r = node.toString();
 		if (node.child[0] != null)
-			r += " Left -> "+node.child[0].value;
+			r += " Left -> "+node.child[0].getValue();
 		if (node.child[1] != null)
-			r += " Right -> "+node.child[1].value;
+			r += " Right -> "+node.child[1].getValue();
 		if (node.parent != null)
-			r += " Parent -> "+node.parent.value;
+			r += " Parent -> "+node.parent.getValue();
 		System.out.println(r);
 		if (node.child[0] != null)
 		{
@@ -214,7 +214,7 @@ public abstract class QSortedTree implements Serializable
 		QSortedTreeNode p = (QSortedTreeNode) map.get(o);
 		if (p == null)
 			return -1.0;
-		return p.value;
+		return p.getValue();
 	}
 	
 	/**
@@ -252,7 +252,7 @@ public abstract class QSortedTree implements Serializable
 				if (current == null)
 					throw new NoSuchElementException();
 				next = next.nextNode();
-				return current.data;
+				return current.getData();
 			}
 			public void remove()
 			{
@@ -280,7 +280,7 @@ public abstract class QSortedTree implements Serializable
 				if (current == null)
 					throw new NoSuchElementException();
 				next = next.previousNode();
-				return current.data;
+				return current.getData();
 			}
 			public void remove()
 			{
