@@ -386,103 +386,6 @@ public class PAVLSortedTree extends QSortedTree
 		return ret;
 	}
 
-	private static Integer [] unitTestInit(QSortedTree tree, int n)
-	{
-		assert tree.isEmpty();
-		Integer [] ret = new Integer[n];
-		for (int i = 0; i < ret.length; i++)
-			ret[i] = new Integer(i);
-		for (int i = 0; i < ret.length; i++)
-			tree.insert(ret[i], (double) i);
-		return ret;
-	}
-	
-	private static void unitTest1(QSortedTree tree, int n)
-	{
-		// Remove in ascending order
-		Integer [] iii = unitTestInit(tree, n);
-		for (int i = 0; i < iii.length; i++)
-			tree.remove(iii[i]);
-		if (!tree.isEmpty())
-			throw new RuntimeException();
-	}
-	
-	private static void unitTest2(QSortedTree tree, int n)
-	{
-		// Remove in descending order
-		Integer [] iii = unitTestInit(tree, n);
-		for (int i = iii.length - 1; i >= 0; i--)
-			tree.remove(iii[i]);
-		if (!tree.isEmpty())
-			throw new RuntimeException();
-	}
-	
-	private static void unitTest3(QSortedTree tree, int n)
-	{
-		Integer [] iii = unitTestInit(tree, n);
-		for (int i = 0; i < iii.length / 2; i++)
-		{
-			tree.remove(iii[i]);
-			tree.remove(iii[i+iii.length / 2]);
-		}
-		if (!tree.isEmpty())
-			throw new RuntimeException();
-	}
-	
-	private static void unitTest4(QSortedTree tree, int n)
-	{
-		Integer [] iii = unitTestInit(tree, n);
-		for (int i = 0; i < iii.length / 2; i++)
-		{
-			tree.remove(iii[iii.length / 2+i]);
-			tree.remove(iii[iii.length / 2-1-i]);
-		}
-		if (!tree.isEmpty())
-			throw new RuntimeException();
-	}
-	
-	private static void unitTest5(QSortedTree tree, int n, int s)
-	{
-		int prime = gnu.trove.PrimeFinder.nextPrime(n);
-		Integer [] iii = unitTestInit(tree, prime);
-		int index = 1;
-		for (int i = 0; i < prime; i++)
-		{
-			index += s;
-			while (index >= prime)
-				index -= prime;
-			tree.remove(iii[index]);
-		}
-		if (!tree.isEmpty())
-			throw new RuntimeException();
-	}
-	
-	private static void unitTest6(QSortedTree tree, int n, int s)
-	{
-		int prime = gnu.trove.PrimeFinder.nextPrime(n);
-		Integer [] iii = new Integer[prime];
-		for (int i = 0; i < iii.length; i++)
-			iii[i] = new Integer(i);
-		int index = 1;
-		for (int i = 0; i < prime; i++)
-		{
-			index += s;
-			while (index >= prime)
-				index -= prime;
-			tree.insert(iii[index], (double) index);
-		}
-		index = 3;
-		for (int i = 0; i < prime; i++)
-		{
-			index += s;
-			while (index >= prime)
-				index -= prime;
-			tree.remove(iii[index]);
-		}
-		if (!tree.isEmpty())
-			throw new RuntimeException();
-	}
-
 	public static void main(String args[])
 	{
 		QSortedTree tree = new PAVLSortedTree();
@@ -491,10 +394,10 @@ public class PAVLSortedTree extends QSortedTree
 		{
 			try
 			{
-				unitTest1(tree, n);
-				unitTest2(tree, n);
-				unitTest3(tree, n);
-				unitTest4(tree, n);
+				tree.unitTest1(n);
+				tree.unitTest2(n);
+				tree.unitTest3(n);
+				tree.unitTest4(n);
 			}
 			catch (Exception ex)
 			{
@@ -508,8 +411,8 @@ public class PAVLSortedTree extends QSortedTree
 		{
 			try
 			{
-				unitTest5(tree, 200, n);
-				unitTest6(tree, 200, n);
+				tree.unitTest5(200, n);
+				tree.unitTest6(200, n);
 			}
 			catch (Exception ex)
 			{

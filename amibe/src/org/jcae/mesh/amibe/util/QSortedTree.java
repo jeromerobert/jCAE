@@ -277,4 +277,100 @@ public abstract class QSortedTree implements Serializable
 		};
 	}
 	
+	protected Integer [] unitTestInit(int n)
+	{
+		assert isEmpty();
+		Integer [] ret = new Integer[n];
+		for (int i = 0; i < ret.length; i++)
+			ret[i] = new Integer(i);
+		for (int i = 0; i < ret.length; i++)
+			insert(ret[i], (double) i);
+		return ret;
+	}
+	
+	protected void unitTest1(int n)
+	{
+		// Remove in ascending order
+		Integer [] iii = unitTestInit(n);
+		for (int i = 0; i < iii.length; i++)
+			remove(iii[i]);
+		if (!isEmpty())
+			throw new RuntimeException();
+	}
+	
+	protected void unitTest2(int n)
+	{
+		// Remove in descending order
+		Integer [] iii = unitTestInit(n);
+		for (int i = iii.length - 1; i >= 0; i--)
+			remove(iii[i]);
+		if (!isEmpty())
+			throw new RuntimeException();
+	}
+	
+	protected void unitTest3(int n)
+	{
+		Integer [] iii = unitTestInit(n);
+		for (int i = 0; i < iii.length / 2; i++)
+		{
+			remove(iii[i]);
+			remove(iii[i+iii.length / 2]);
+		}
+		if (!isEmpty())
+			throw new RuntimeException();
+	}
+	
+	protected void unitTest4(int n)
+	{
+		Integer [] iii = unitTestInit(n);
+		for (int i = 0; i < iii.length / 2; i++)
+		{
+			remove(iii[iii.length / 2+i]);
+			remove(iii[iii.length / 2-1-i]);
+		}
+		if (!isEmpty())
+			throw new RuntimeException();
+	}
+	
+	protected void unitTest5(int n, int s)
+	{
+		int prime = gnu.trove.PrimeFinder.nextPrime(n);
+		Integer [] iii = unitTestInit(prime);
+		int index = 1;
+		for (int i = 0; i < prime; i++)
+		{
+			index += s;
+			while (index >= prime)
+				index -= prime;
+			remove(iii[index]);
+		}
+		if (!isEmpty())
+			throw new RuntimeException();
+	}
+	
+	protected void unitTest6(int n, int s)
+	{
+		int prime = gnu.trove.PrimeFinder.nextPrime(n);
+		Integer [] iii = new Integer[prime];
+		for (int i = 0; i < iii.length; i++)
+			iii[i] = new Integer(i);
+		int index = 1;
+		for (int i = 0; i < prime; i++)
+		{
+			index += s;
+			while (index >= prime)
+				index -= prime;
+			insert(iii[index], (double) index);
+		}
+		index = 3;
+		for (int i = 0; i < prime; i++)
+		{
+			index += s;
+			while (index >= prime)
+				index -= prime;
+			remove(iii[index]);
+		}
+		if (!isEmpty())
+			throw new RuntimeException();
+	}
 }
