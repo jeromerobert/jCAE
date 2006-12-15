@@ -45,11 +45,11 @@ import org.apache.log4j.Logger;
 public class PRedBlackSortedTree extends QSortedTree
 {
 	private static Logger logger = Logger.getLogger(PRedBlackSortedTree.class);	
-	private static class Node extends QSortedTreeNode
+	private class Node extends QSortedTree.Node
 	{
 		private boolean isRed;
 		
-		public QSortedTreeNode [] newChilds()
+		public QSortedTree.Node [] newChilds()
 		{
 			return new Node[2];
 		}
@@ -72,18 +72,18 @@ public class PRedBlackSortedTree extends QSortedTree
 		}
 	}
 
-	public final QSortedTreeNode newNode(Object o, double v)
+	public final QSortedTree.Node newNode(Object o, double v)
 	{
 		return new Node(o, v);
 	}
 
 	// Helper function
-	private static final boolean isRedNode(QSortedTreeNode x)
+	private static final boolean isRedNode(QSortedTree.Node x)
 	{
 		return (x != null) && ((Node) x).isRed;
 	}
 	
-	public final void insertNode(QSortedTreeNode o)
+	public final void insertNode(QSortedTree.Node o)
 	{
 		Node p = (Node) o;
 		Node current = (Node) root.child[0];
@@ -210,7 +210,7 @@ public class PRedBlackSortedTree extends QSortedTree
 		assert isValid();
 	}
 	
-	public final QSortedTreeNode removeNode(QSortedTreeNode o)
+	public final QSortedTree.Node removeNode(QSortedTree.Node o)
 	{
 		Node p = (Node) o;
 		Node ret = p;

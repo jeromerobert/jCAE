@@ -33,7 +33,7 @@ public class PAVLSortedTree extends QSortedTree
 {
 	private static Logger logger = Logger.getLogger(PAVLSortedTree.class);	
 	
-	private static class Node extends QSortedTreeNode
+	private class Node extends QSortedTree.Node
 	{
 		//  balanceFactor = height(rightSubTree) - height(leftSubTree)
 		private int balanceFactor = 0;
@@ -43,7 +43,7 @@ public class PAVLSortedTree extends QSortedTree
 			super(o, v);
 		}
 		
-		public QSortedTreeNode [] newChilds()
+		public QSortedTree.Node [] newChilds()
 		{
 			return new Node[2];
 		}
@@ -61,7 +61,7 @@ public class PAVLSortedTree extends QSortedTree
 		     / \              / \
 		    T2 T3            T1 T2
 		*/
-		public QSortedTreeNode rotateL()
+		public QSortedTree.Node rotateL()
 		{
 			Node right = (Node) super.rotateL();
 			if (right.balanceFactor != 0)
@@ -87,7 +87,7 @@ public class PAVLSortedTree extends QSortedTree
 		       / \                      / \
 		      T1 T2                    T2 T3
 		*/
-		public QSortedTreeNode rotateR()
+		public QSortedTree.Node rotateR()
 		{
 			//logger.debug("Single right rotation");
 			Node left = (Node) super.rotateR();
@@ -116,7 +116,7 @@ public class PAVLSortedTree extends QSortedTree
 		    / \                        / \
 		   T2 T3                      T3 T4
 		*/
-		public QSortedTreeNode rotateRL()
+		public QSortedTree.Node rotateRL()
 		{
 			Node newRoot = (Node) super.rotateRL();
 			assert balanceFactor == 2;
@@ -152,7 +152,7 @@ public class PAVLSortedTree extends QSortedTree
 		     / \            / \
 		    T2 T3          T1 T2
 		*/
-		public QSortedTreeNode rotateLR()
+		public QSortedTree.Node rotateLR()
 		{
 			Node newRoot = (Node) super.rotateLR();
 			assert balanceFactor == -2;
@@ -187,12 +187,12 @@ public class PAVLSortedTree extends QSortedTree
 		}
 	}
 	
-	public final QSortedTreeNode newNode(Object o, double v)
+	public final QSortedTree.Node newNode(Object o, double v)
 	{
 		return new Node(o, v);
 	}
 
-	public final void insertNode(QSortedTreeNode o)
+	public final void insertNode(QSortedTree.Node o)
 	{
 		Node node = (Node) o;
 		Node current = (Node) root.child[0];
@@ -252,7 +252,7 @@ public class PAVLSortedTree extends QSortedTree
 			parent.child[1] = newRoot;
 	}
 	
-	public final QSortedTreeNode removeNode(QSortedTreeNode o)
+	public final QSortedTree.Node removeNode(QSortedTree.Node o)
 	{
 		assert o != null;
 		Node p = (Node) o;

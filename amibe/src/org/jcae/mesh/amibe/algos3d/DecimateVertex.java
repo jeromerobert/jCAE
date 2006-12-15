@@ -29,7 +29,6 @@ import org.jcae.mesh.amibe.metrics.Quadric3DError;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import org.jcae.mesh.amibe.util.QSortedTree;
-import org.jcae.mesh.amibe.util.QSortedTreeNode;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import java.util.Stack;
@@ -322,7 +321,7 @@ public class DecimateVertex
 			double cost = -1.0;
 			for (Iterator itt = tree.iterator(); itt.hasNext(); )
 			{
-				QSortedTreeNode q = (QSortedTreeNode) itt.next();
+				QSortedTree.Node q = (QSortedTree.Node) itt.next();
 				edge = (NotOrientedEdge) q.getData();
 				if (nrFinal == 0)
 					cost = q.getValue();

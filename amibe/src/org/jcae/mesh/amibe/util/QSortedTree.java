@@ -38,7 +38,7 @@ import org.apache.log4j.Logger;
 public abstract class QSortedTree implements Serializable
 {
 	private static Logger logger = Logger.getLogger(QSortedTree.class);	
-	protected final QSortedTreeNode root = newNode(null, Double.MAX_VALUE);
+	protected final Node root = newNode(null, Double.MAX_VALUE);
 	// Mapping between objects and tree nodes
 	protected transient HashMap map = new HashMap();
 	private int nrNodes = 0;
@@ -46,17 +46,231 @@ public abstract class QSortedTree implements Serializable
 	/**
 	 * Constructor to cast new nodes into subclass type.
 	 */
-	protected abstract QSortedTreeNode newNode(Object o, double v);
+	protected abstract Node newNode(Object o, double v);
 
 	/**
 	 * Insert a new note into the binary tree.
 	 */
-	protected abstract void insertNode(QSortedTreeNode node);
+	protected abstract void insertNode(Node node);
 
 	/**
 	 * Remove a note from the binary tree.
 	 */
-	protected abstract QSortedTreeNode removeNode(QSortedTreeNode p);
+	protected abstract Node removeNode(Node p);
+
+	public class Node implements Comparable, Serializable
+	{
+		private Object data;
+		private double value;
+		protected final Node [] child = newChilds();
+		protected Node parent = null;
+		
+		public Node [] newChilds()
+		{
+			return new Node[2];
+		}
+	
+		public Node(Object o, double v)
+		{
+			data = o;
+			value = v;
+		}
+		
+		public int compareTo(Object o)
+		{
+			Node that = (Node) o;
+			if (value < that.value)
+				return -1;
+			else
+				return +1;
+		}
+		
+		public void reset(double v)
+		{
+			child[0] = child[1] = parent = null;
+			value = v;
+		}
+		
+		public void swap(Node that)
+		{
+			Object temp = that.data;
+			that.data = data;
+			data = temp;
+			// For now there is no reason to swap values
+			that.value = value;
+		}
+	
+		public double getValue()
+		{
+			return value;
+		}
+	
+		public Object getData()
+		{
+			return data;
+		}
+	
+		public String toString()
+		{
+			return "Key: "+value+" obj. "+Integer.toHexString(data.hashCode());
+		}
+	
+		/* Left rotation
+		    A                    B
+		   / \      ------>     / \
+		  T1  B                A   T3
+		     / \              / \
+		    T2 T3            T1 T2
+		*/
+		public Node rotateL()
+		{
+			//logger.debug("Single left rotation");
+			Node right = child[1];
+			child[1] = right.child[0];
+			right.child[0] = this;
+			right.parent = parent;
+			parent = right;
+			if (child[1] != null)
+				child[1].parent = this;
+			return right;
+		}
+			
+		/* Right rotation
+		          B                    A
+		         / \     ------->     / \
+		        A  T3                T1  B
+		       / \                      / \
+		      T1 T2                    T2 T3
+		*/
+		public Node rotateR()
+		{
+			//logger.debug("Single right rotation");
+			Node left = child[0];
+			child[0] = left.child[1];
+			left.child[1] = this;
+			left.parent = parent;
+			parent = left;
+			if (child[0] != null)
+				child[0].parent = this;
+			return left;
+		}
+		
+		/* Right+left rotation
+		   A                   A                     B
+		  / \      ------>    / \      ------>     /   \
+		 T1  C               T1  B                A     C
+		    / \                 / \              / \   / \
+		   B  T4               T2  C            T1 T2 T3 T4
+		  / \                     / \
+		 T2 T3                   T3 T4
+		*/
+		public Node rotateRL()
+		{
+			//logger.debug("Right+left rotation");
+			Node right = child[1];          // C
+			Node newRoot = right.child[0];  // B
+			// Right rotation
+			right.child[0] = newRoot.child[1];
+			newRoot.child[1] = right;
+			// Left rotation
+			child[1] = newRoot.child[0];
+			newRoot.child[0] = this;
+			// Parent pointers
+			newRoot.parent = parent;
+			parent = newRoot;
+			right.parent = newRoot;
+			if (right.child[0] != null)
+				right.child[0].parent = right;
+			if (child[1] != null)
+				child[1].parent = this;
+			return newRoot;
+		}
+		
+		/*  Left+right rotation
+		    C                    C                    B
+		   / \      ------>     / \    ------>      /   \
+		  A  T4                B  T4               A     C
+		 / \                  / \                 / \   / \
+		T1  B                A  T3               T1 T2 T3 T4
+		   / \              / \
+		  T2 T3            T1 T2
+		*/
+		public Node rotateLR()
+		{
+			//logger.debug("Left+right rotation");
+			Node left = child[0];         // A
+			Node newRoot = left.child[1]; // B
+	
+			assert newRoot != null;
+			// Left rotation
+			left.child[1] = newRoot.child[0];
+			newRoot.child[0] = left;
+			// Right rotation
+			child[0] = newRoot.child[1];
+			newRoot.child[1] = this;
+			// Parent pointers
+			newRoot.parent = parent;
+			left.parent = newRoot;
+			parent = newRoot;
+			if (left.child[1] != null)
+				left.child[1].parent = left;
+			if (child[0] != null)
+				child[0].parent = this;
+			return newRoot;
+		}
+	
+		// The following 4 methods are useful for tree traversal.
+		// A NullPointerException is raised if they are used on an empty tree!
+		public Node firstNode()
+		{
+			Node current = this;
+			while (current.child[0] != null)
+				current = current.child[0];
+			return current;
+		}
+	
+		public Node lastNode()
+		{
+			Node current = this;
+			while (current.child[1] != null)
+				current = current.child[1];
+			return current;
+		}
+	
+		public Node previousNode()
+		{
+			Node current = this;
+			if (current.child[0] != null)
+			{
+				current = current.child[0];
+				while (current.child[1] != null)
+					current = current.child[1];
+				return current;
+			}
+			while (current.parent != null && current.parent.child[1] != current)
+				current = current.parent;
+			return current.parent;
+		}
+	
+		public Node nextNode()
+		{
+			Node current = this;
+			if (current.child[1] != null)
+			{
+				current = current.child[1];
+				while (current.child[0] != null)
+					current = current.child[0];
+				return current;
+			}
+			// Our implementation has a fake root node.
+			while (current.parent.child[0] != current)
+				current = current.parent;
+			if (current.parent.parent == null)
+				return null;
+			else
+				return current.parent;
+		}
+	}
 
 	protected void readObject(java.io.ObjectInputStream s)
 		throws java.io.IOException, ClassNotFoundException
@@ -65,7 +279,7 @@ public abstract class QSortedTree implements Serializable
 		map = new HashMap(nrNodes);
 		if (nrNodes == 0)
 			return;
-		for (QSortedTreeNode current = root.child[0].firstNode(); current != null; current = current.nextNode())
+		for (Node current = root.child[0].firstNode(); current != null; current = current.nextNode())
 			map.put(current.getData(), current);
 	}
 
@@ -86,7 +300,7 @@ public abstract class QSortedTree implements Serializable
 	public final void insert(Object o, double value)
 	{
 		assert map.get(o) == null;
-		QSortedTreeNode node = newNode(o, value);
+		Node node = newNode(o, value);
 		if (logger.isDebugEnabled())
 			logger.debug("Insert "+node+" "+" value: "+value+" "+o);
 		map.put(o, node);
@@ -101,14 +315,14 @@ public abstract class QSortedTree implements Serializable
 	 */
 	public final double remove(Object o)
 	{
-		QSortedTreeNode p = (QSortedTreeNode) map.get(o);
+		Node p = (Node) map.get(o);
 		if (logger.isDebugEnabled())
 			logger.debug("Remove "+p+" "+o);
 		if (p == null)
 			return -1.0;
 		nrNodes--;
 		map.remove(o);
-		QSortedTreeNode r = removeNode(p);
+		Node r = removeNode(p);
 		if (r != p)
 		{
 			map.remove(r.getData());
@@ -142,7 +356,7 @@ public abstract class QSortedTree implements Serializable
 		showNode(root.child[0]);
 	}
 	
-	private static void showNode(QSortedTreeNode node)
+	private static void showNode(Node node)
 	{
 		String r = node.toString();
 		if (node.child[0] != null)
@@ -178,7 +392,7 @@ public abstract class QSortedTree implements Serializable
 		showNodeValues(root.child[0]);
 	}
 	
-	private static void showNodeValues(QSortedTreeNode node)
+	private static void showNodeValues(Node node)
 	{
 		System.out.println(node.toString());
 		if (node.child[0] != null)
@@ -227,8 +441,8 @@ public abstract class QSortedTree implements Serializable
 			return nullIterator;
 		return new Iterator()
 		{
-			private QSortedTreeNode current = root;
-			private QSortedTreeNode next = root.child[0].firstNode();
+			private Node current = root;
+			private Node next = root.child[0].firstNode();
 			public boolean hasNext()
 			{
 				return next != null;
@@ -255,8 +469,8 @@ public abstract class QSortedTree implements Serializable
 			return nullIterator;
 		return new Iterator()
 		{
-			private QSortedTreeNode current = root;
-			private QSortedTreeNode next = root.child[0].lastNode();
+			private Node current = root;
+			private Node next = root.child[0].lastNode();
 			public boolean hasNext()
 			{
 				return next != null;
