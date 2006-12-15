@@ -192,7 +192,7 @@ public class PAVLSortedTree extends QSortedTree
 		return new Node(o, v);
 	}
 
-	public final void insertNode(QSortedTree.Node o)
+	public final boolean insertNode(QSortedTree.Node o)
 	{
 		Node node = (Node) o;
 		Node current = (Node) root.child[0];
@@ -214,7 +214,7 @@ public class PAVLSortedTree extends QSortedTree
 		parent.child[lastDir] = node;
 		node.parent = parent;
 		if (topNode == null)
-			return;
+			return true;
 		// Update balance factors
 		for (current = node; current != topNode; current = parent)
 		{
@@ -244,12 +244,13 @@ public class PAVLSortedTree extends QSortedTree
 				newRoot = (Node) topNode.rotateRL();
 		}
 		else
-			return;
+			return true;
 		
 		if (parent.child[0] == topNode)
 			parent.child[0] = newRoot;
 		else
 			parent.child[1] = newRoot;
+		return true;
 	}
 	
 	public final QSortedTree.Node removeNode(QSortedTree.Node o)

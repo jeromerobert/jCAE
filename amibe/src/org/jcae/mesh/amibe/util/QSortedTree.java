@@ -27,12 +27,10 @@ import org.apache.log4j.Logger;
 
 /**
  * Binary trees to store quality factors.
- * Main ideas come from Ben Pfaff's <a href="http://adtinfo.org/">GNU libavl</a>.
  * These trees are used to sort vertices, edges, or triangles according
  * to their quality factors, and to process them in increasing or decreasing
  * order after they have been sorted.  They differ from casual binary trees in
- * that duplicate quality factors are allowed.
- * See examples in algorithms from
+ * that duplicate quality factors are allowed.  See examples in algorithms from
  * {@link org.jcae.mesh.amibe.algos3d}.
  */
 public abstract class QSortedTree implements Serializable
@@ -40,7 +38,7 @@ public abstract class QSortedTree implements Serializable
 	private static Logger logger = Logger.getLogger(QSortedTree.class);	
 	protected final Node root = newNode(null, Double.MAX_VALUE);
 	// Mapping between objects and tree nodes
-	protected transient HashMap map = new HashMap();
+	private transient HashMap map = new HashMap();
 	private int nrNodes = 0;
 	
 	/**
@@ -51,7 +49,7 @@ public abstract class QSortedTree implements Serializable
 	/**
 	 * Insert a new note into the binary tree.
 	 */
-	protected abstract void insertNode(Node node);
+	protected abstract boolean insertNode(Node node);
 
 	/**
 	 * Remove a note from the binary tree.

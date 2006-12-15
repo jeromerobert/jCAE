@@ -83,7 +83,7 @@ public class PRedBlackSortedTree extends QSortedTree
 		return (x != null) && ((Node) x).isRed;
 	}
 	
-	public final void insertNode(QSortedTree.Node o)
+	public final boolean insertNode(QSortedTree.Node o)
 	{
 		Node p = (Node) o;
 		Node current = (Node) root.child[0];
@@ -112,7 +112,7 @@ public class PRedBlackSortedTree extends QSortedTree
 			logger.debug("Case I1");
 			p.isRed = false;
 			assert !((Node) root.child[0]).isRed;
-			return;
+			return true;
 		}
 		for (; p != root.child[0]; )
 		{
@@ -124,7 +124,7 @@ public class PRedBlackSortedTree extends QSortedTree
 			{
 				logger.debug("Case I2");
 				assert !((Node) root.child[0]).isRed;
-				return;
+				return true;
 			}
 			// Parent is red, so it cannot be the root tree,
 			// and grandparent is black.
@@ -203,11 +203,12 @@ public class PRedBlackSortedTree extends QSortedTree
 				else
 					greatgrandparent.child[lastDir] = grandparent.rotateL();
 				assert !((Node) root.child[0]).isRed;
-				return;
+				return true;
 			}
 		}
 		((Node) root.child[0]).isRed = false;
 		assert isValid();
+		return true;
 	}
 	
 	public final QSortedTree.Node removeNode(QSortedTree.Node o)
