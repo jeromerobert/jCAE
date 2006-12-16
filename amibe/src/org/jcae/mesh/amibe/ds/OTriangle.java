@@ -608,18 +608,9 @@ public class OTriangle
 	 */
 	public final void nextOTriApexLoop()
 	{
-		if (hasAttributes(OUTER) && hasAttributes(BOUNDARY | NONMANIFOLD))
-		{
-			// Loop clockwise to another boundary
-			// and start again from there.
-			do
-			{
-				prevOTriApex();
-			}
-			while (!hasAttributes(OUTER));
-		}
-		else
-			nextOTriApex();
+		prevOTri();
+		nextOTriOriginLoop();
+		nextOTri();
 	}
 	
 	/**
