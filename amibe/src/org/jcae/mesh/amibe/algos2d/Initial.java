@@ -224,25 +224,22 @@ public class Initial
 			throw new InvalidFaceException();
 		}
 		logger.debug(" Unconstrained Delaunay triangulation");
-		double umin = Double.MAX_VALUE;
-		double umax = Double.MIN_VALUE;
-		double vmin = Double.MAX_VALUE;
-		double vmax = Double.MIN_VALUE;
+		double [] bbmin = { Double.MAX_VALUE, Double.MAX_VALUE };
+		double [] bbmax = { Double.MIN_VALUE, Double.MIN_VALUE };
 		for (int i = 0; i < bNodes.length; i++)
 		{
 			double [] uv = bNodes[i].getUV();
-			if (uv[0] > umax)
-				umax = uv[0];
-			if (uv[0] < umin)
-				umin = uv[0];
-			if (uv[1] > vmax)
-				vmax = uv[1];
-			if (uv[1] < vmin)
-				vmin = uv[1];
+			for (int k = 0; k < 2; k++)
+			{
+				if (uv[k] > bbmax[k])
+					bbmax[k] = uv[k];
+				if (uv[k] < bbmin[k])
+					bbmin[k] = uv[k];
+			}
 		}
-		if (umax <= umin || vmax <= vmin)
+		if (bbmax[0] <= bbmin[0] || bbmax[1] <= bbmin[1])
 			throw new InvalidFaceException();
-		mesh.initQuadTree(umin, umax, vmin, vmax);
+		mesh.initQuadTree(bbmin, bbmax);
 		//  Initial point insertion sometimes fail on 2D,
 		//  this needs to be investigated.
 		mesh.pushCompGeom(2);

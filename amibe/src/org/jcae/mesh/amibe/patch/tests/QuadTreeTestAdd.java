@@ -38,9 +38,9 @@ public class QuadTreeTestAdd extends QuadTreeTest
 {
 	private static Logger logger=Logger.getLogger(QuadTreeTestAdd.class);	
 	
-	public QuadTreeTestAdd(double umin, double umax, double vmin, double vmax)
+	public QuadTreeTestAdd(double [] bbmin, double [] bbmax)
 	{
-		super (umin, umax, vmin, vmax);
+		super (bbmin, bbmax);
 	}
 	
 	public static void display(Viewer view, QuadTreeTest r)
@@ -56,7 +56,9 @@ public class QuadTreeTestAdd extends QuadTreeTest
 		double u, v;
 		boolean visu = true;
 		Random rand = new Random(113L);
-		final QuadTreeTest r = new QuadTreeTest(0.0, 1.0, 0.0, 1.0);
+		double [] bbmin = { 0.0, 0.0 };
+		double [] bbmax = { 1.0, 1.0 };
+		final QuadTreeTest r = new QuadTreeTest(bbmin, bbmax);
 		logger.debug("Start insertion");
 		for (int i = 0; i < 500; i++)
 		{

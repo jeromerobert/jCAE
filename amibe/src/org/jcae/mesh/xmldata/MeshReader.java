@@ -107,10 +107,8 @@ public class MeshReader
 			int label;
 			double [] coord = new double[2];
 			logger.debug("Reading "+numberOfNodes+" nodes");
-			double umin = Double.MAX_VALUE;
-			double umax = Double.MIN_VALUE;
-			double vmin = Double.MAX_VALUE;
-			double vmax = Double.MIN_VALUE;
+			double [] bbmin = { Double.MAX_VALUE, Double.MAX_VALUE };
+			double [] bbmax = { Double.MIN_VALUE, Double.MIN_VALUE };
 			for (int i=0; i < numberOfNodes; i++)
 			{
 				nodesBuffer.get(coord);
@@ -120,16 +118,15 @@ public class MeshReader
 				else
 					label = refs[i+numberOfReferences-numberOfNodes];
 				nodelist[i].setRef(label);
-				if (coord[0] > umax)
-					umax = coord[0];
-				if (coord[0] < umin)
-					umin = coord[0];
-				if (coord[1] > vmax)
-					vmax = coord[1];
-				if (coord[1] < vmin)
-					vmin = coord[1];
+				for (int k=0; k < 2; k++)
+				{
+					if (coord[k] > bbmax[k])
+						bbmax[k] = coord[k];
+					if (coord[k] < bbmin[k])
+						bbmin[k] = coord[k];
+				}
 			}
-			mesh.initQuadTree(umin, umax, vmin, vmax);
+			mesh.initQuadTree(bbmin, bbmax);
 			for (int i=0; i < numberOfNodes; i++)
 				mesh.getQuadTree().add(nodelist[i]);
 			

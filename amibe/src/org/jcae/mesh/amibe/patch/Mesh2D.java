@@ -165,10 +165,10 @@ public class Mesh2D extends Mesh
 	 * @param vmin  bottom-left V coordinate.
 	 * @param vmax  top-right V coordinate.
 	 */
-	public void initQuadTree(double umin, double umax, double vmin, double vmax)
+	public void initQuadTree(double [] bbmin, double [] bbmax)
 	{
-		quadtree = new QuadTree(umin, umax, vmin, vmax);
-		outerVertex = new OuterVertex2D((umin+umax)*0.5, (vmin+vmax)*0.5);
+		quadtree = new QuadTree(bbmin, bbmax);
+		outerVertex = new OuterVertex2D((bbmin[0]+bbmax[0])*0.5, (bbmin[1]+bbmax[1])*0.5);
 	}
 	
 	/**

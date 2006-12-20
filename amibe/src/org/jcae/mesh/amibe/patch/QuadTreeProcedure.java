@@ -37,5 +37,5 @@ public interface QuadTreeProcedure
 	 * abort now, <code>1</code> if node chikldren have to be ignored, and
 	 * <code>0</code> to process node children recursively.
 	 */
-	public int action(Object o, int s, int i, int j);
+	public int action(Object o, int s, final int [] i0);
 }

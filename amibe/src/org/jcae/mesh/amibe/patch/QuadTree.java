@@ -62,13 +62,13 @@ import java.util.ArrayList;
  *	public final class collectAllVerticesProcedure implements QuadTreeProcedure
  *	{
  *		public ArrayList vertexList = new ArrayList();
- *		public final int action(Object o, int s, int i0, int j0)
+ *		public final int action(Object o, int s, int [] i0)
  *		{
  *			Cell self = (Cell) o;
  *			if (self.nItems > 0)
  *			{
  *				for (int i = 0; i &lt; self.nItems; i++)
- *					vertexList.add(self.subQuad[i]);
+ *					vertexList.add(self.subCell[i]);
  *			}
  *			return 0;
  *		}
@@ -157,7 +157,7 @@ public class QuadTree
 		 * has children nodes, this value is negative and its opposite
 		 * value is the total number of vertices found in children nodes.
 		 * Otherwise, it contains the number of vertices which are stored
-		 * in the {@link #subQuad} array.
+		 * in the {@link #subCell} array.
 		 */
 		protected int nItems = 0;
 		
@@ -168,11 +168,14 @@ public class QuadTree
 		 * yo vertices.  This compact storage is needed to reduce memory
 		 * usage.
 		 */
-		protected Object [] subQuad = null;
+		protected Object [] subCell = null;
 	}
 	
 	private static Logger logger=Logger.getLogger(QuadTree.class);	
 	
+	private final int dimension = 2;
+	private final int nrSub = 1 << dimension;
+
 	// Integer coordinates (like gridSize) must be long if MAXLEVEL > 30
 	private static final int MAXLEVEL = 30;
 	private static final int gridSize = 1 << MAXLEVEL;
@@ -190,7 +193,7 @@ public class QuadTree
 	/**
 	 * Conversion between double and integer coordinates.
 	 */
-	public final double [] x0 = new double[3];
+	public final double [] x0;
 	
 	/**
 	 * Create a new <code>QuadTree</code> of the desired size.
@@ -200,14 +203,19 @@ public class QuadTree
 	 * @param vmin  V-coordinate of the leftmost bottom vertex
 	 * @param vmax  V-coordinate of the rightmost top vertex
 	 */
-	public QuadTree(double umin, double umax, double vmin, double vmax)
+	public QuadTree(double [] bbmin, double [] bbmax)
 	{
-		double deltaU = 1.01 * Math.abs(umin - umax);
-		double deltaV = 1.01 * Math.abs(vmin - vmax);
-		assert deltaU > 0.0 && deltaV > 0.0;
-		x0[0] = umin;
-		x0[1] = vmin;
-		x0[2] = ((double) gridSize) / Math.max(deltaU, deltaV);
+		x0 = new double[dimension+1];
+		double maxDelta = 0.0;
+		for (int i = 0; i < dimension; i++)
+		{
+			x0[i] = bbmin[i];
+			double delta = Math.abs(bbmax[i] - bbmin[i]);
+			if (delta > maxDelta)
+				maxDelta = delta;
+		}
+		maxDelta *= 1.01;
+		x0[dimension] = ((double) gridSize) / maxDelta;
 		root = new Cell();
 		nCells++;
 	}
@@ -219,8 +227,8 @@ public class QuadTree
 	 */
 	public void double2int(double [] p, int [] i)
 	{
-		i[0] = (int) ((p[0] - x0[0]) * x0[2]);
-		i[1] = (int) ((p[1] - x0[1]) * x0[2]);
+		for (int k = 0; k < dimension; k++)
+			i[k] = (int) ((p[k] - x0[k]) * x0[dimension]);
 	}
 	
 	/**
@@ -230,8 +238,8 @@ public class QuadTree
 	 */
 	public void int2double(int [] i, double [] p)
 	{
-		p[0] = x0[0] + i[0] / x0[2];
-		p[1] = x0[1] + i[1] / x0[2];
+		for (int k = 0; k < dimension; k++)
+			p[k] = x0[k] + i[k] / x0[dimension];
 	}
 	
 	/**
@@ -240,9 +248,9 @@ public class QuadTree
 	 */
 	public double [] center()
 	{
-		double [] p = new double[2];
-		p[0] = x0[0] + ((double) gridSize) * 0.5 / x0[2];
-		p[1] = x0[1] + ((double) gridSize) * 0.5 / x0[2];
+		double [] p = new double[dimension];
+		for (int k = 0; k < dimension; k++)
+			p[k] = x0[k] + ((double) gridSize) * 0.5 / x0[dimension];
 		return p;
 	}
 	
@@ -264,11 +272,16 @@ public class QuadTree
 	 * @param size  cell size of children nodes.
 	 * @return the index of the child node containing this vertex.
 	 */
-	private static int indexSubQuad(int i, int j, int size)
+	private int indexSubQuad(int [] ijk, int size)
 	{
-		int ret = ((j & size) == 0) ? 0 : 2;
-		if ((i & size) != 0)
-			ret ++;
+		int ret = 0;
+		if (size == 0)
+			throw new RuntimeException("Exceeded maximal number of levels for quadtrees... Aborting");
+		for (int k = 0; k < dimension; k++)
+		{
+			if ((ijk[k] & size) != 0)
+				ret |= 1 << k;
+		}
 		return ret;
 	}
 	
@@ -281,8 +294,8 @@ public class QuadTree
 	{
 		Cell current = root;
 		int s = gridSize;
-		int [] ij = new int[2];
-		int [] oldij = new int[2];
+		int [] ij = new int[dimension];
+		int [] oldij = new int[dimension];
 		double2int(v.getUV(), ij);
 		while (current.nItems < 0)
 		{
@@ -292,13 +305,13 @@ public class QuadTree
 			current.nItems--;
 			s >>= 1;
 			assert s > 0;
-			int ind = indexSubQuad(ij[0], ij[1], s);
-			if (null == current.subQuad[ind])
+			int ind = indexSubQuad(ij, s);
+			if (null == current.subCell[ind])
 			{
-				current.subQuad[ind] = new Cell();
+				current.subCell[ind] = new Cell();
 				nCells++;
 			}
-			current = (Cell) current.subQuad[ind];
+			current = (Cell) current.subCell[ind];
 		}
 		
 		//  If current box is full, split it into 4 subquads
@@ -306,38 +319,38 @@ public class QuadTree
 		{
 			s >>= 1;
 			assert s > 0;
-			Cell [] newSubQuads = new Cell[4];
+			Cell [] newSubQuads = new Cell[nrSub];
 			//  Move points to their respective subquadtrees.
 			for (int i = 0; i < Cell.BUCKETSIZE; i++)
 			{
-				Vertex2D p = (Vertex2D) current.subQuad[i];
+				Vertex2D p = (Vertex2D) current.subCell[i];
 				double2int(p.getUV(), oldij);
-				int ind = indexSubQuad(oldij[0], oldij[1], s);
+				int ind = indexSubQuad(oldij, s);
 				if (null == newSubQuads[ind])
 				{
 					newSubQuads[ind] = new Cell();
 					nCells++;
-					newSubQuads[ind].subQuad = new Vertex2D[Cell.BUCKETSIZE];
+					newSubQuads[ind].subCell = new Vertex2D[Cell.BUCKETSIZE];
 				}
 				Cell target = newSubQuads[ind];
-				target.subQuad[target.nItems] = current.subQuad[i];
+				target.subCell[target.nItems] = current.subCell[i];
 				target.nItems++;
 			}
-			current.subQuad = newSubQuads;
+			current.subCell = newSubQuads;
 			//  current will point to another cell, afjust it now.
 			current.nItems = - Cell.BUCKETSIZE - 1;
-			int ind = indexSubQuad(ij[0], ij[1], s);
-			if (null == current.subQuad[ind])
+			int ind = indexSubQuad(ij, s);
+			if (null == current.subCell[ind])
 			{
-				current.subQuad[ind] = new Cell();
+				current.subCell[ind] = new Cell();
 				nCells++;
 			}
-			current = (Cell) current.subQuad[ind];
+			current = (Cell) current.subCell[ind];
 		}
 		//  Eventually insert the new point
 		if (current.nItems == 0)
-			current.subQuad = new Vertex2D[Cell.BUCKETSIZE];
-		current.subQuad[current.nItems] = v;
+			current.subCell = new Vertex2D[Cell.BUCKETSIZE];
+		current.subCell[current.nItems] = v;
 		current.nItems++;
 	}
 	
@@ -353,18 +366,18 @@ public class QuadTree
 		Cell next;
 		int lastPos = 0;
 		int s = gridSize;
-		int [] ij = new int[2];
+		int [] ij = new int[dimension];
 		double2int(v.getUV(), ij);
 		while (current.nItems < 0)
 		{
 			//  nItems is negative
 			current.nItems++;
 			if (current.nItems == 0)
-				last.subQuad[lastPos] = null;
+				last.subCell[lastPos] = null;
 			s >>= 1;
 			assert s > 0;
-			int ind = indexSubQuad(ij[0], ij[1], s);
-			next = (Cell) current.subQuad[ind];
+			int ind = indexSubQuad(ij, s);
+			next = (Cell) current.subCell[ind];
 			if (null == next)
 				throw new RuntimeException("Vertex "+v+" is not present and can not be deleted");
 			last = current;
@@ -374,20 +387,20 @@ public class QuadTree
 		int offset = 0;
 		for (int i = 0; i < current.nItems; i++)
 		{
-			if (v == (Vertex2D) current.subQuad[i])
+			if (v == (Vertex2D) current.subCell[i])
 				offset++;
 			else if (offset > 0)
-				current.subQuad[i-offset] = current.subQuad[i];
+				current.subCell[i-offset] = current.subCell[i];
 		}
 		if (offset == 0)
 			throw new RuntimeException("Vertex "+v+" is not present and can not be deleted");
 		if (current.nItems > 1)
 		{
-			current.subQuad[current.nItems-1] = null;
+			current.subCell[current.nItems-1] = null;
 			current.nItems--;
 		}
 		else
-			last.subQuad[lastPos] = null;
+			last.subCell[lastPos] = null;
 	}
 	
 	/**
@@ -407,7 +420,7 @@ public class QuadTree
 		Cell current = root;
 		Cell last = null;
 		int s = gridSize;
-		int [] ij = new int[2];
+		int [] ij = new int[dimension];
 		double2int(v.getUV(), ij);
 		int searchedCells = 0;
 		if (logger.isDebugEnabled())
@@ -419,17 +432,17 @@ public class QuadTree
 			assert s > 0;
 			searchedCells++;
 			current = (Cell)
-				current.subQuad[indexSubQuad(ij[0], ij[1], s)];
+				current.subCell[indexSubQuad(ij, s)];
 		}
 		if (null == current)
 			return getNearVertexInSubquads(last, mesh, v, searchedCells);
 		
-		Vertex2D vQ = (Vertex2D) current.subQuad[0];
+		Vertex2D vQ = (Vertex2D) current.subCell[0];
 		Vertex2D ret = vQ;
 		double retdist = mesh.compGeom().distance(v, vQ, v);
 		for (int i = 1; i < current.nItems; i++)
 		{
-			vQ = (Vertex2D) current.subQuad[i];
+			vQ = (Vertex2D) current.subCell[i];
 			double d = mesh.compGeom().distance(v, vQ, v);
 			if (d < retdist)
 			{
@@ -445,7 +458,7 @@ public class QuadTree
 	private Vertex2D getNearVertexInSubquads(Cell current, Mesh2D mesh, Vertex2D v, int searchedCells)
 	{
 		Vertex2D ret = null;
-		int [] ij = new int[2];
+		int [] ij = new int[dimension];
 		double dist = -1.0;
 		double2int(v.getUV(), ij);
 		if (logger.isDebugEnabled())
@@ -453,20 +466,20 @@ public class QuadTree
 		int l = 0;
 		int [] posStack = new int[MAXLEVEL];
 		posStack[l] = 0;
-		Cell [] quadStack = new Cell[MAXLEVEL];
-		quadStack[l] = current;
+		Cell [] cellStack = new Cell[MAXLEVEL];
+		cellStack[l] = current;
 		while (true)
 		{
 			searchedCells++;
-			if (quadStack[l].nItems < 0)
+			if (cellStack[l].nItems < 0)
 			{
 				l++;
 				assert l <= MAXLEVEL;
-				for (int i = 0; i < 4; i++)
+				for (int i = 0; i < nrSub; i++)
 				{
-					if (null != quadStack[l-1].subQuad[i])
+					if (null != cellStack[l-1].subCell[i])
 					{
-						quadStack[l] = (Cell) quadStack[l-1].subQuad[i];
+						cellStack[l] = (Cell) cellStack[l-1].subCell[i];
 						posStack[l] = i;
 						break;
 					}
@@ -474,9 +487,9 @@ public class QuadTree
 			}
 			else
 			{
-				for (int i = 0; i < quadStack[l].nItems; i++)
+				for (int i = 0; i < cellStack[l].nItems; i++)
 				{
-					Vertex2D vQ = (Vertex2D) quadStack[l].subQuad[i];
+					Vertex2D vQ = (Vertex2D) cellStack[l].subCell[i];
 					double d = mesh.compGeom().distance(v, vQ, v);
 					if (d < dist || dist < 0.0)
 					{
@@ -494,14 +507,14 @@ public class QuadTree
 				while (l > 0)
 				{
 					posStack[l]++;
-					if (posStack[l] == 4)
+					if (posStack[l] == nrSub)
 						l--;
-					else if (null != quadStack[l-1].subQuad[posStack[l]])
+					else if (null != cellStack[l-1].subCell[posStack[l]])
 						break;
 				}
 				if (l == 0)
 					break;
-				quadStack[l] = (Cell) quadStack[l-1].subQuad[posStack[l]];
+				cellStack[l] = (Cell) cellStack[l-1].subCell[posStack[l]];
 			}
 		}
 		if (logger.isDebugEnabled())
@@ -511,7 +524,7 @@ public class QuadTree
 	
 	private final class GetNearestVertexProcedure implements QuadTreeProcedure
 	{
-		private final int [] ij = new int[2];;
+		private final int [] ij = new int[dimension];;
 		private final Mesh2D mesh;
 		private int idist;
 		private double dist, i2d;
@@ -527,25 +540,24 @@ public class QuadTree
 			// FIXME: a factor of 1.005 is added to take rounding
 			// errors into account, a better approximation should
 			// be used.
-			i2d = 1.005 * x0[2] * (mesh.compGeom().radius2d(fromVertex));
+			i2d = 1.005 * x0[dimension] * (mesh.compGeom().radius2d(fromVertex));
 			dist = mesh.compGeom().distance(fromVertex, v, fromVertex);
 			idist = (int) (dist * i2d);
 			if (idist > Integer.MAX_VALUE/2)
 				idist = Integer.MAX_VALUE/2;
 		}
-		public final int action(Object o, int s, int i0, int j0)
+		public final int action(Object o, int s, final int [] i0)
 		{
-			boolean valid = (ij[0] >= i0 - idist) && (ij[0] <= i0 + s + idist) &&
-			                (ij[1] >= j0 - idist) && (ij[1] <= j0 + s + idist);
-			if (!valid)
-				return 1;
+			for (int k = 0; k < dimension; k++)
+				if ((ij[k] < i0[k] - idist) || (ij[k] > i0[k] + s + idist))
+					return 1;
 			Cell self = (Cell) o;
 			searchedCells++;
 			if (self.nItems > 0)
 			{
 				for (int i = 0; i < self.nItems; i++)
 				{
-					Vertex2D vtest = (Vertex2D) self.subQuad[i];
+					Vertex2D vtest = (Vertex2D) self.subCell[i];
 					double retdist = mesh.compGeom().distance(fromVertex, vtest, fromVertex);
 					if (retdist < dist)
 					{
@@ -594,7 +606,7 @@ public class QuadTree
 	
 	private final class GetNearestVertexDebugProcedure implements QuadTreeProcedure
 	{
-		private final int [] ij = new int[2];;
+		private final int [] ij = new int[dimension];;
 		private double dist;
 		public final Vertex2D fromVertex;
 		public Vertex2D nearestVertex;
@@ -608,7 +620,7 @@ public class QuadTree
 			mesh = m;
 			dist = mesh.compGeom().distance(fromVertex, v, fromVertex);
 		}
-		public final int action(Object o, int s, int i0, int j0)
+		public final int action(Object o, int s, final int [] i0)
 		{
 			Cell self = (Cell) o;
 			searchedCells++;
@@ -616,7 +628,7 @@ public class QuadTree
 			{
 				for (int i = 0; i < self.nItems; i++)
 				{
-					Vertex2D vtest = (Vertex2D) self.subQuad[i];
+					Vertex2D vtest = (Vertex2D) self.subCell[i];
 					double retdist = mesh.compGeom().distance(fromVertex, vtest, fromVertex);
 					if (retdist < dist)
 					{
@@ -661,13 +673,13 @@ public class QuadTree
 		{
 			nodelist = new ArrayList(capacity);
 		}
-		public final int action(Object o, int s, int i0, int j0)
+		public final int action(Object o, int s, final int [] i0)
 		{
 			Cell self = (Cell) o;
 			if (self.nItems > 0)
 			{
 				for (int i = 0; i < self.nItems; i++)
-					nodelist.add(self.subQuad[i]);
+					nodelist.add(self.subCell[i]);
 			}
 			return 0;
 		}
@@ -688,13 +700,13 @@ public class QuadTree
 	
 	private static class ClearAllMetricsProcedure implements QuadTreeProcedure
 	{
-		public final int action(Object o, int s, int i0, int j0)
+		public final int action(Object o, int s, final int [] i0)
 		{
 			Cell self = (Cell) o;
 			if (self.nItems > 0)
 			{
 				for (int i = 0; i < self.nItems; i++)
-					((Vertex2D) self.subQuad[i]).clearMetrics();
+					((Vertex2D) self.subCell[i]).clearMetrics();
 			}
 			return 0;
 		}
@@ -725,76 +737,68 @@ public class QuadTree
 	{
 		int s = gridSize;
 		int l = 0;
-		int i0 = 0;
-		int j0 = 0;
+		int [] i0 = new int[dimension];
 		int [] posStack = new int[MAXLEVEL];
 		posStack[l] = 0;
-		Cell [] quadStack = new Cell[MAXLEVEL];
-		quadStack[l] = root;
+		Cell [] cellStack = new Cell[MAXLEVEL];
+		cellStack[l] = root;
 		while (true)
 		{
-			int res = proc.action(quadStack[l], s, i0, j0);
+			int res = proc.action(cellStack[l], s, i0);
 			if (res == -1)
 				return false;
-			if (quadStack[l].nItems < 0 && res == 0)
+			if (cellStack[l].nItems < 0 && res == 0)
 			{
 				s >>= 1;
 				assert s > 0;
 				l++;
 				assert l <= MAXLEVEL;
-				for (int i = 0; i < 4; i++)
+				for (int i = 0; i < nrSub; i++)
 				{
-					if (null != quadStack[l-1].subQuad[i])
+					if (null != cellStack[l-1].subCell[i])
 					{
-						quadStack[l] = (Cell) quadStack[l-1].subQuad[i];
+						cellStack[l] = (Cell) cellStack[l-1].subCell[i];
 						posStack[l] = i;
 						break;
 					}
 				}
-				if (posStack[l] == 1)
-					i0 += s;
-				else if (posStack[l] == 2)
-					j0 += s;
-				else if (posStack[l] == 3)
-				{
-					i0 += s;
-					j0 += s;
-				}
+				for (int k = 0; k < dimension; k++)
+					if ((posStack[l] & (1 << k)) != 0)
+						i0[k] += s;
 			}
 			else
 			{
 				while (l > 0)
 				{
 					posStack[l]++;
-					if (posStack[l] == 4)
+					if (posStack[l] == nrSub)
 					{
-						i0 -= s;
-						j0 -= s;
+						for (int k = 0; k < dimension; k++)
+							i0[k] -= s;
 						s <<= 1;
 						l--;
 					}
 					else
 					{
-						if (posStack[l] == 1)
-							i0 += s;
-						else if (posStack[l] == 2)
+						for (int k = 0; k < dimension; k++)
 						{
-							i0 -= s;
-							j0 += s;
+							if ((posStack[l] & (1 << k)) != 0)
+							{
+								i0[k] += s;
+								break;
+							}
+							else
+								i0[k] -= s;
 						}
-						else if (posStack[l] == 3)
-							i0 += s;
-						if (null != quadStack[l-1].subQuad[posStack[l]])
+						if (null != cellStack[l-1].subCell[posStack[l]])
 							break;
 					}
 				}
 				if (l == 0)
 					break;
-				quadStack[l] = (Cell) quadStack[l-1].subQuad[posStack[l]];
+				cellStack[l] = (Cell) cellStack[l-1].subCell[posStack[l]];
 			}
 		}
-		assert i0 == 0;
-		assert j0 == 0;
 		return true;
 	}
 	

@@ -39,9 +39,9 @@ public class QuadTreeTestRemove extends QuadTreeTest
 {
 	private static Logger logger=Logger.getLogger(QuadTreeTestRemove.class);
 	
-	public QuadTreeTestRemove(double umin, double umax, double vmin, double vmax)
+	public QuadTreeTestRemove(double [] bbmin, double [] bbmax)
 	{
-		super (umin, umax, vmin, vmax);
+		super (bbmin, bbmax);
 	}
 	
 	public static void display(Viewer view, QuadTreeTest r)
@@ -57,7 +57,9 @@ public class QuadTreeTestRemove extends QuadTreeTest
 		double u, v;
 		boolean visu = true;
 		Random rand = new Random(113L);
-		final QuadTreeTest r = new QuadTreeTest(0.0, 1.0, 0.0, 1.0);
+		double [] bbmin = { 0.0, 0.0 };
+		double [] bbmax = { 1.0, 1.0 };
+		final QuadTreeTest r = new QuadTreeTest(bbmin, bbmax);
 		final Mesh2D m = new Mesh2D();
 		m.pushCompGeom(2);
 		m.setQuadTree(r);

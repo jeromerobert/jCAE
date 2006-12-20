@@ -43,9 +43,9 @@ public class QuadTreeTest extends QuadTree
 {
 	private static Logger logger=Logger.getLogger(QuadTreeTest.class);	
 	
-	public QuadTreeTest(double umin, double umax, double vmin, double vmax)
+	public QuadTreeTest(double [] bbmin, double [] bbmax)
 	{
-		super (umin, umax, vmin, vmax);
+		super (bbmin, bbmax);
 	}
 	
 	private class CoordProcedure implements QuadTreeProcedure
@@ -56,9 +56,9 @@ public class QuadTreeTest extends QuadTree
 		{
 			coord = new double[8*n];
 		}
-		public final int action(Object o, int s, int i0, int j0)
+		public final int action(Object o, int s, final int [] i0)
 		{
-			int [] ii = { i0, j0 };
+			int [] ii = { i0[0], i0[1] };
 			double [] p = new double[2];
 			int2double(ii, p);
 			coord[index]   = p[0];
@@ -105,7 +105,7 @@ public class QuadTreeTest extends QuadTree
 			coord[3] = p[1];
 			for (int i = 0; i < self.nItems; i++)
 			{
-				Vertex2D v = (Vertex2D) self.subQuad[i];
+				Vertex2D v = (Vertex2D) self.subCell[i];
 				p = v.getUV();
 				if (p[0] < coord[0] || p[0] > coord[2] ||
 					p[1] < coord[1] || p[1] > coord[3])
@@ -126,14 +126,14 @@ public class QuadTreeTest extends QuadTree
 		{
 			coord = new double[2*n];
 		}
-		public final int action(Object o, int s, int i0, int j0)
+		public final int action(Object o, int s, final int [] i0)
 		{
 			Cell self = (Cell) o;
 			if (self.nItems < 0)
 				return 0;
 			for (int i = 0; i < self.nItems; i++)
 			{
-				Vertex2D v = (Vertex2D) self.subQuad[i];
+				Vertex2D v = (Vertex2D) self.subCell[i];
 				double [] param = v.getUV();
 				coord[index] = param[0];
 				coord[index+1] = param[1];
