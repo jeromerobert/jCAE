@@ -168,7 +168,6 @@ public class Mesh2D extends Mesh
 	public void initQuadTree(double umin, double umax, double vmin, double vmax)
 	{
 		quadtree = new QuadTree(umin, umax, vmin, vmax);
-		quadtree.setCompGeom(compGeom());
 		outerVertex = new OuterVertex2D((umin+umax)*0.5, (vmin+vmax)*0.5);
 	}
 	
@@ -190,7 +189,6 @@ public class Mesh2D extends Mesh
 	public void setQuadTree(QuadTree q)
 	{
 		quadtree = q;
-		quadtree.setCompGeom(compGeom());
 	}
 	
 	/**
@@ -347,10 +345,7 @@ public class Mesh2D extends Mesh
 		else
 			throw new java.lang.IllegalArgumentException("pushCompGeom argument must be either 2 or 3, current value is: "+i);
 		if (quadtree != null)
-		{
-			quadtree.setCompGeom(compGeom());
 			quadtree.clearAllMetrics();
-		}
 	}
 	
 	/**
@@ -366,10 +361,7 @@ public class Mesh2D extends Mesh
 		//  Only reset them here when there is a change.
 		Object ret = compGeomStack.pop();
 		if (!compGeomStack.empty() && !ret.getClass().equals(compGeomStack.peek().getClass()) && quadtree != null)
-		{
-			quadtree.setCompGeom(compGeom());
 			quadtree.clearAllMetrics();
-		}
 		return (Calculus) ret;
 	}
 	

@@ -86,15 +86,15 @@ public class QuadTreeTestNearest extends QuadTreeTest
 			Vertex2D vt = Vertex2D.valueOf(u, v);
 			if (visu)
 			{
-				view.addBranchGroup(r.segment(vt, r.getNearVertex(vt), 5.0f, 1, 1, 0));
+				view.addBranchGroup(r.segment(vt, r.getNearVertex(m, vt), 5.0f, 1, 1, 0));
 				view.setVisible(true);
-				view.addBranchGroup(r.segment(vt, r.getNearestVertex(vt), 0.0f, 0, 1, 1));
+				view.addBranchGroup(r.segment(vt, r.getNearestVertex(m, vt), 0.0f, 0, 1, 1));
 				view.setVisible(true);
 			}
 			else
 			{
-				r.getNearVertex(vt);
-				r.getNearestVertex(vt);
+				r.getNearVertex(m, vt);
+				r.getNearestVertex(m, vt);
 			}
 		}
 		if (visu)
@@ -107,9 +107,9 @@ public class QuadTreeTestNearest extends QuadTreeTest
 					if (null != xyz)
 					{
 						Vertex2D vt = Vertex2D.valueOf(xyz[0], xyz[1]);
-						view.addBranchGroup(r.segment(vt, r.getNearVertex(vt), 5.0f, 1, 1, 0));
+						view.addBranchGroup(r.segment(vt, r.getNearVertex(m, vt), 5.0f, 1, 1, 0));
 						view.setVisible(true);
-						view.addBranchGroup(r.segment(vt, r.getNearestVertex(vt), 0.0f, 0, 1, 1));
+						view.addBranchGroup(r.segment(vt, r.getNearestVertex(m, vt), 0.0f, 0, 1, 1));
 						view.setVisible(true);
 					}
 				}

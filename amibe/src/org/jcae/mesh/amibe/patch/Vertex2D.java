@@ -211,7 +211,7 @@ public class Vertex2D extends Vertex
 		if (logger.isDebugEnabled())
 			logger.debug("Searching for the triangle surrounding "+this);
 		Triangle.List tList = new Triangle.List();
-		Triangle t = (Triangle) mesh.quadtree.getNearestVertex(this).link;
+		Triangle t = (Triangle) mesh.quadtree.getNearestVertex(mesh, this).link;
 		OTriangle2D start = new OTriangle2D(t, 0);
 		OTriangle2D current = getSurroundingOTriangleStart(mesh, start, tList);
 		if (current == null)

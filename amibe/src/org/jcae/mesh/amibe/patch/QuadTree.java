@@ -192,9 +192,6 @@ public class QuadTree
 	 */
 	public final double [] x0 = new double[3];
 	
-	// Functions to compute distance between vertices
-	private Calculus compGeom;
-	
 	/**
 	 * Create a new <code>QuadTree</code> of the desired size.
 	 *
@@ -212,18 +209,7 @@ public class QuadTree
 		x0[1] = vmin;
 		x0[2] = ((double) gridSize) / Math.max(deltaU, deltaV);
 		root = new Cell();
-		compGeom = new Calculus2D(null);
 		nCells++;
-	}
-	
-	/**
-	 * Set functions to compute distances between vertices.
-	 *
-	 * @param c   instance of {@link Calculus} to compute distances between vertices.
-	 */
-	public void setCompGeom(Calculus c)
-	{
-		compGeom = c;
 	}
 	
 	/**
@@ -416,7 +402,7 @@ public class QuadTree
 	 * @param v  the vertex to check.
 	 * @return a near vertex.
 	 */
-	public Vertex2D getNearVertex(Vertex2D v)
+	public Vertex2D getNearVertex(Mesh2D mesh, Vertex2D v)
 	{
 		Cell current = root;
 		Cell last = null;
@@ -436,15 +422,15 @@ public class QuadTree
 				current.subQuad[indexSubQuad(ij[0], ij[1], s)];
 		}
 		if (null == current)
-			return getNearVertexInSubquads(last, v, searchedCells);
+			return getNearVertexInSubquads(last, mesh, v, searchedCells);
 		
 		Vertex2D vQ = (Vertex2D) current.subQuad[0];
 		Vertex2D ret = vQ;
-		double retdist = compGeom.distance(v, vQ, v);
+		double retdist = mesh.compGeom().distance(v, vQ, v);
 		for (int i = 1; i < current.nItems; i++)
 		{
 			vQ = (Vertex2D) current.subQuad[i];
-			double d = compGeom.distance(v, vQ, v);
+			double d = mesh.compGeom().distance(v, vQ, v);
 			if (d < retdist)
 			{
 				retdist = d;
@@ -456,7 +442,7 @@ public class QuadTree
 		return ret;
 	}
 	
-	private Vertex2D getNearVertexInSubquads(Cell current, Vertex2D v, int searchedCells)
+	private Vertex2D getNearVertexInSubquads(Cell current, Mesh2D mesh, Vertex2D v, int searchedCells)
 	{
 		Vertex2D ret = null;
 		int [] ij = new int[2];
@@ -491,7 +477,7 @@ public class QuadTree
 				for (int i = 0; i < quadStack[l].nItems; i++)
 				{
 					Vertex2D vQ = (Vertex2D) quadStack[l].subQuad[i];
-					double d = compGeom.distance(v, vQ, v);
+					double d = mesh.compGeom().distance(v, vQ, v);
 					if (d < dist || dist < 0.0)
 					{
 						dist = d;
@@ -526,20 +512,23 @@ public class QuadTree
 	private final class GetNearestVertexProcedure implements QuadTreeProcedure
 	{
 		private final int [] ij = new int[2];;
+		private final Mesh2D mesh;
 		private int idist;
 		private double dist, i2d;
-		public Vertex2D fromVertex, nearestVertex;
+		public final Vertex2D fromVertex;
+		public Vertex2D nearestVertex;
 		public int searchedCells = 0;
-		public GetNearestVertexProcedure(Vertex2D from, Vertex2D v)
+		public GetNearestVertexProcedure(Mesh2D m, Vertex2D from, Vertex2D v)
 		{
 			double2int(from.getUV(), ij);
 			nearestVertex = v;
 			fromVertex = from;
+			mesh = m;
 			// FIXME: a factor of 1.005 is added to take rounding
 			// errors into account, a better approximation should
 			// be used.
-			i2d = 1.005 * x0[2] * (compGeom.radius2d(fromVertex));
-			dist = compGeom.distance(fromVertex, v, fromVertex);
+			i2d = 1.005 * x0[2] * (mesh.compGeom().radius2d(fromVertex));
+			dist = mesh.compGeom().distance(fromVertex, v, fromVertex);
 			idist = (int) (dist * i2d);
 			if (idist > Integer.MAX_VALUE/2)
 				idist = Integer.MAX_VALUE/2;
@@ -557,7 +546,7 @@ public class QuadTree
 				for (int i = 0; i < self.nItems; i++)
 				{
 					Vertex2D vtest = (Vertex2D) self.subQuad[i];
-					double retdist = compGeom.distance(fromVertex, vtest, fromVertex);
+					double retdist = mesh.compGeom().distance(fromVertex, vtest, fromVertex);
 					if (retdist < dist)
 					{
 						dist = retdist;
@@ -585,14 +574,14 @@ public class QuadTree
 	 * @param v  the vertex to check.
 	 * @return the nearest vertex.
 	 */
-	public Vertex2D getNearestVertex(Vertex2D v)
+	public Vertex2D getNearestVertex(Mesh2D mesh, Vertex2D v)
 	{
-		Vertex2D ret = getNearVertex(v);
+		Vertex2D ret = getNearVertex(mesh, v);
 		assert ret != null;
 		if (logger.isDebugEnabled())
 			logger.debug("Nearest point of "+v);
 		
-		GetNearestVertexProcedure gproc = new GetNearestVertexProcedure(v, ret);
+		GetNearestVertexProcedure gproc = new GetNearestVertexProcedure(mesh, v, ret);
 		walk(gproc);
 		ret = gproc.nearestVertex;
 		if (logger.isDebugEnabled())
@@ -607,14 +596,17 @@ public class QuadTree
 	{
 		private final int [] ij = new int[2];;
 		private double dist;
-		public Vertex2D fromVertex, nearestVertex;
+		public final Vertex2D fromVertex;
+		public Vertex2D nearestVertex;
+		public final Mesh2D mesh;
 		public int searchedCells = 0;
-		public GetNearestVertexDebugProcedure(Vertex2D from, Vertex2D v)
+		public GetNearestVertexDebugProcedure(Mesh2D m, Vertex2D from, Vertex2D v)
 		{
 			double2int(from.getUV(), ij);
 			nearestVertex = v;
 			fromVertex = from;
-			dist = compGeom.distance(fromVertex, v, fromVertex);
+			mesh = m;
+			dist = mesh.compGeom().distance(fromVertex, v, fromVertex);
 		}
 		public final int action(Object o, int s, int i0, int j0)
 		{
@@ -625,7 +617,7 @@ public class QuadTree
 				for (int i = 0; i < self.nItems; i++)
 				{
 					Vertex2D vtest = (Vertex2D) self.subQuad[i];
-					double retdist = compGeom.distance(fromVertex, vtest, fromVertex);
+					double retdist = mesh.compGeom().distance(fromVertex, vtest, fromVertex);
 					if (retdist < dist)
 					{
 						dist = retdist;
@@ -644,14 +636,14 @@ public class QuadTree
 	 * @param v  the vertex to check.
 	 * @return the nearest vertex.
 	 */
-	public Vertex2D getNearestVertexDebug(Vertex2D v)
+	public Vertex2D getNearestVertexDebug(Mesh2D mesh, Vertex2D v)
 	{
-		Vertex2D ret = getNearVertex(v);
+		Vertex2D ret = getNearVertex(mesh, v);
 		assert ret != null;
 		if (logger.isDebugEnabled())
 			logger.debug("(debug) Nearest point of "+v);
 		
-		GetNearestVertexDebugProcedure gproc = new GetNearestVertexDebugProcedure(v, ret);
+		GetNearestVertexDebugProcedure gproc = new GetNearestVertexDebugProcedure(mesh, v, ret);
 		walk(gproc);
 		ret = gproc.nearestVertex;
 		if (logger.isDebugEnabled())
