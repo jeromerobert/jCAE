@@ -22,6 +22,7 @@ package org.jcae.mesh.amibe.util.tests;
 import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.util.OctreeTest;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.Mesh;
 import java.util.Random;
 import org.jcae.mesh.java3d.Viewer;
 
@@ -58,6 +59,7 @@ public class OctreeTestRemove extends OctreeTest
 		double [] umin = { 0.0, 0.0, 0.0 };
 		double [] umax = { 1.0, 1.0, 1.0 };
 		final OctreeTest r = new OctreeTest(umin, umax);
+		final Mesh m = new Mesh();
 		logger.debug("Start insertion");
 		double [] xyz = new double[3];
 		for (int i = 0; i < 200; i++)
@@ -82,7 +84,7 @@ public class OctreeTestRemove extends OctreeTest
 					double [] xyz = view.getLastClick();
 					if (null != xyz)
 					{
-						Vertex vt = r.getNearVertex(Vertex.valueOf(xyz));
+						Vertex vt = r.getNearVertex(m, Vertex.valueOf(xyz));
 						r.remove(vt);
 						view.removeAllBranchGroup();
 						display(view, r);

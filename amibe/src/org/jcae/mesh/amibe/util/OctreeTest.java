@@ -32,14 +32,14 @@ import javax.media.j3d.PointAttributes;
 /**
  * Utility class to write unit tests for the Octree class.
  */
-public class OctreeTest extends Octree
+public class OctreeTest extends KdTree
 {
 	public OctreeTest(double [] umin, double [] umax)
 	{
-		super (umin, umax);
+		super (3, umin, umax);
 	}
 	
-	private class CoordProcedure implements OctreeProcedure
+	private class CoordProcedure implements KdTreeProcedure
 	{
 		public final double [] coord;
 		private int index;
@@ -47,9 +47,9 @@ public class OctreeTest extends Octree
 		{
 			coord = new double[72*n];
 		}
-		public final int action(Object o, int s, int i0, int j0, int k0)
+		public final int action(Object o, int s, final int [] i0)
 		{
-			int [] ii = { i0, j0, k0 };
+			int [] ii = { i0[0], i0[1], i0[2] };
 			double [] p = new double[3];
 			double [] p2 = new double[3];
 			int2double(ii, p);
@@ -117,16 +117,16 @@ public class OctreeTest extends Octree
 	}
 	
 	/*
-	private class CheckCoordProcedure implements OctreeProcedure
+	private class CheckCoordProcedure implements KdTreeProcedure
 	{
-		public final int action(Object o, int s, int i0, int j0, int k0)
+		public final int action(Object o, int s, final int [] i0)
 		{
 			Cell self = (Cell) o;
-			if (self.nItems < 0)
+			if (!self.isLeaf())
 				return 0;
 			
 			double [] coord = new double[6];
-			int [] ii = { i0, j0, k0 };
+			int [] ii = { i0[0], i0[1], i0[2] };
 			double [] p = new double[3];
 			int2double(ii, p);
 			coord[0] = p[0];
@@ -139,9 +139,9 @@ public class OctreeTest extends Octree
 			coord[3] = p[0];
 			coord[4] = p[1];
 			coord[5] = p[2];
-			for (int i = 0; i < self.nItems; i++)
+			for (int i = 0, n = self.count(); i < n; i++)
 			{
-				Vertex v = (Vertex) self.subOctree[i];
+				Vertex v = self.getVertex(i);
 				p = v.getUV();
 				if (p[0] < coord[0] || p[0] > coord[3] ||
 					p[1] < coord[1] || p[1] > coord[4] ||
@@ -155,7 +155,7 @@ public class OctreeTest extends Octree
 	}
 	*/
 	
-	private static class CoordVertProcedure implements OctreeProcedure
+	private static class CoordVertProcedure implements KdTreeProcedure
 	{
 		public final double [] coord;
 		private int index = 0;
@@ -163,14 +163,14 @@ public class OctreeTest extends Octree
 		{
 			coord = new double[3*n];
 		}
-		public final int action(Object o, int s, int i0, int j0, int k0)
+		public final int action(Object o, int s, final int [] i0)
 		{
 			Cell self = (Cell) o;
-			if (self.nItems < 0)
+			if (!self.isLeaf())
 				return 0;
-			for (int i = 0; i < self.nItems; i++)
+			for (int i = 0, n = self.count(); i < n; i++)
 			{
-				Vertex v = (Vertex) self.subOctree[i];
+				Vertex v = self.getVertex(i);
 				double [] param = v.getUV();
 				coord[index]   = param[0];
 				coord[index+1] = param[1];
@@ -204,7 +204,7 @@ public class OctreeTest extends Octree
 	public BranchGroup bgVertices()
 	{
 		BranchGroup bg=new BranchGroup();
-		int nVertices = Math.abs(root.nItems);
+		int nVertices = root.count();
 		CoordVertProcedure vproc = new CoordVertProcedure(nVertices);
 		walk(vproc);
 		PointArray p = new PointArray(nVertices, PointArray.COORDINATES);

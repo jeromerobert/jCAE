@@ -1,3 +1,10 @@
+Thu Dec 21 15:39:46 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/patch/QuadTree.java
+	  src/org/jcae/mesh/amibe/util/OcTree.java: Replace QuadTree
+	and Octree classes by...
+	* src/org/jcae/mesh/amibe/util/KdTree.java: generic KdTree.
+
 Sat Dec 16 15:37:16 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/OTriangle.java: Fix nextOTriApexLoop().

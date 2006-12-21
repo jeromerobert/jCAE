@@ -676,6 +676,30 @@ public class Mesh implements Serializable
 		v.setRef(maxLabel);
 	}
 	
+	/**
+	 * Returns the squared distance between 2 vertices.
+	 */
+	public double distance2(Vertex start, Vertex end, Vertex vm)
+	{
+		double [] x1 = start.getUV();
+		double [] x2 = end.getUV();
+		assert x1.length == 3;
+		double dx = x1[0] - x2[0];
+		double dy = x1[1] - x2[1];
+		double dz = x1[2] - x2[2];
+		return dx*dx + dy*dy + dz*dz;
+	}
+	
+	public double distance(Vertex start, Vertex end, Vertex vm)
+	{
+		return Math.sqrt(distance2(start, end, vm));
+	}
+	
+	public double radius2d(Vertex v)
+	{
+		return 1.0;
+	}
+	
 	// Useful for debugging
 	public void writeUNV(String file)
 	{

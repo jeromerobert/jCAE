@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2004,2005, by EADS CRC
+    Copyright (C) 2004,2005,2006, by EADS CRC
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,23 +20,21 @@
 package org.jcae.mesh.amibe.util;
 
 /**
- * Procedure to apply on all octree elements.
+ * Procedure to apply on all kd-tree cells.
  */
-public interface OctreeProcedure
+public interface KdTreeProcedure
 {
 	/**
-	 * Perform an action on the given octree cell.
-	 * This method is called by {@link Octree#walk(OctreeProcedure)} on all cells
-	 * of the octree recursively.
+	 * Perform an action on the given kdtree cell.
+	 * This method is called by {@link KdTree#walk(KdTreeProcedure)} on
+	 * all cells of the kd-tree recursively.
 	 *
-	 * @param o  octree cell.
+	 * @param o  kd-tree cell.
 	 * @param s  cell size.
-	 * @param i  first coordinate of the bottom left corner of this cell.
-	 * @param j  second coordinate of the bottom left corner of this cell.
-	 * @param k  third coordinate of the bottom left corner of this cell.
+	 * @param ijk  coordinates of the bottom left corner of this cell.
 	 * @return <code>-1</code> if <code>walk</code> processing must
 	 * abort now, <code>1</code> if node chikldren have to be ignored, and
 	 * <code>0</code> to process node children recursively.
 	 */
-	public int action(Object o, int s, int i, int j, int k);
+	public int action(Object o, int s, final int [] i0);
 }

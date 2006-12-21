@@ -19,8 +19,8 @@
 
 package org.jcae.mesh.amibe.patch;
 
-import org.apache.log4j.Logger;
-import org.jcae.mesh.amibe.patch.Vertex2D;
+import org.jcae.mesh.amibe.util.KdTree;
+import org.jcae.mesh.amibe.util.KdTreeProcedure;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.FileNotFoundException;
@@ -35,20 +35,21 @@ import javax.media.j3d.BranchGroup;
 import javax.media.j3d.PolygonAttributes;
 import javax.media.j3d.ColoringAttributes;
 import javax.media.j3d.PointAttributes;
+import org.apache.log4j.Logger;
 
 /**
  * Utility class to write unit tests for the QuadTree class.
  */
-public class QuadTreeTest extends QuadTree
+public class QuadTreeTest extends KdTree
 {
 	private static Logger logger=Logger.getLogger(QuadTreeTest.class);	
 	
 	public QuadTreeTest(double [] bbmin, double [] bbmax)
 	{
-		super (bbmin, bbmax);
+		super (2, bbmin, bbmax);
 	}
 	
-	private class CoordProcedure implements QuadTreeProcedure
+	private class CoordProcedure implements KdTreeProcedure
 	{
 		public final double [] coord;
 		private int index;
@@ -84,7 +85,7 @@ public class QuadTreeTest extends QuadTree
 	}
 	
 	/*
-	private class CheckCoordProcedure implements QuadTreeProcedure
+	private class CheckCoordProcedure implements KdTreeProcedure
 	{
 		public final int action(Object o, int s, int i0, int j0)
 		{
@@ -118,7 +119,7 @@ public class QuadTreeTest extends QuadTree
 	}
 	*/
 	
-	private static class CoordVertProcedure implements QuadTreeProcedure
+	private static class CoordVertProcedure implements KdTreeProcedure
 	{
 		public final double [] coord;
 		private int index = 0;
@@ -129,11 +130,11 @@ public class QuadTreeTest extends QuadTree
 		public final int action(Object o, int s, final int [] i0)
 		{
 			Cell self = (Cell) o;
-			if (self.nItems < 0)
+			if (!self.isLeaf())
 				return 0;
-			for (int i = 0; i < self.nItems; i++)
+			for (int i = 0, n = self.count(); i < n; i++)
 			{
-				Vertex2D v = (Vertex2D) self.subCell[i];
+				Vertex2D v = (Vertex2D) self.getVertex(i);
 				double [] param = v.getUV();
 				coord[index] = param[0];
 				coord[index+1] = param[1];
@@ -212,7 +213,7 @@ public class QuadTreeTest extends QuadTree
 	public BranchGroup bgVertices()
 	{
 		BranchGroup bg=new BranchGroup();
-		int nVertices = Math.abs(root.nItems);
+		int nVertices = root.count();
 		CoordVertProcedure vproc = new CoordVertProcedure(nVertices);
 		walk(vproc);
 		PointArray p = new PointArray(nVertices, PointArray.COORDINATES);

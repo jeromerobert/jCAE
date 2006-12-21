@@ -22,8 +22,11 @@ package org.jcae.mesh.amibe.patch;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.OTriangle;
 import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.jcae.mesh.amibe.metrics.Metric2D;
+import org.jcae.mesh.amibe.util.KdTree;
+import org.jcae.mesh.amibe.util.KdTreeProcedure;
 import org.jcae.mesh.cad.*;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -58,7 +61,7 @@ public class Mesh2D extends Mesh
 	/**
 	 * Structure to fasten search of nearest vertices.
 	 */
-	public transient QuadTree quadtree = null;
+	public transient KdTree quadtree = null;
 	
 	// Utility class to improve debugging output
 	private static class OuterVertex2D extends Vertex2D
@@ -159,7 +162,7 @@ public class Mesh2D extends Mesh
 	}
 	
 	/**
-	 * Initialize a QuadTree with a given bounding box.
+	 * Initialize a KdTree with a given bounding box.
 	 * @param umin  bottom-left U coordinate.
 	 * @param umax  top-right U coordinate.
 	 * @param vmin  bottom-left V coordinate.
@@ -167,7 +170,7 @@ public class Mesh2D extends Mesh
 	 */
 	public void initQuadTree(double [] bbmin, double [] bbmax)
 	{
-		quadtree = new QuadTree(bbmin, bbmax);
+		quadtree = new KdTree(2, bbmin, bbmax);
 		outerVertex = new OuterVertex2D((bbmin[0]+bbmax[0])*0.5, (bbmin[1]+bbmax[1])*0.5);
 	}
 	
@@ -176,7 +179,7 @@ public class Mesh2D extends Mesh
 	 *
 	 * @return the quadtree associated with this mesh.
 	 */
-	public QuadTree getQuadTree()
+	public KdTree getQuadTree()
 	{
 		return quadtree;
 	}
@@ -186,7 +189,7 @@ public class Mesh2D extends Mesh
 	 *
 	 * @param q  the quadtree associated with this mesh.
 	 */
-	public void setQuadTree(QuadTree q)
+	public void setQuadTree(KdTree q)
 	{
 		quadtree = q;
 	}
@@ -344,8 +347,7 @@ public class Mesh2D extends Mesh
 			compGeomStack.push(new Calculus3D(this));
 		else
 			throw new java.lang.IllegalArgumentException("pushCompGeom argument must be either 2 or 3, current value is: "+i);
-		if (quadtree != null)
-			quadtree.clearAllMetrics();
+		clearAllMetrics();
 	}
 	
 	/**
@@ -360,8 +362,8 @@ public class Mesh2D extends Mesh
 		//  Metrics are always reset by pushCompGeom.
 		//  Only reset them here when there is a change.
 		Object ret = compGeomStack.pop();
-		if (!compGeomStack.empty() && !ret.getClass().equals(compGeomStack.peek().getClass()) && quadtree != null)
-			quadtree.clearAllMetrics();
+		if (!compGeomStack.empty() && !ret.getClass().equals(compGeomStack.peek().getClass()))
+			clearAllMetrics();
 		return (Calculus) ret;
 	}
 	
@@ -379,8 +381,8 @@ public class Mesh2D extends Mesh
 		throws RuntimeException
 	{
 		Object ret = compGeomStack.pop();
-		if (compGeomStack.size() > 0 && !ret.getClass().equals(compGeomStack.peek().getClass()) && quadtree != null)
-			quadtree.clearAllMetrics();
+		if (compGeomStack.size() > 0 && !ret.getClass().equals(compGeomStack.peek().getClass()))
+			clearAllMetrics();
 		if (i == 2)
 		{
 			if (!(ret instanceof Calculus2D))
@@ -406,6 +408,64 @@ public class Mesh2D extends Mesh
 		if (compGeomStack.empty())
 			return null;
 		return (Calculus) compGeomStack.peek();
+	}
+	
+	private static class ClearAllMetricsProcedure implements KdTreeProcedure
+	{
+		public final int action(Object o, int s, final int [] i0)
+		{
+			KdTree.Cell self = (KdTree.Cell) o;
+			if (self.isLeaf())
+			{
+				for (int i = 0, n = self.count(); i < n; i++)
+					((Vertex2D) self.getVertex(i)).clearMetrics();
+			}
+			return 0;
+		}
+	}
+	
+	/**
+	 * Remove all metrics of vertices stored in this <code>QuadTree</code>.
+	 */
+	private void clearAllMetrics()
+	{
+		if (quadtree == null)
+			return;
+		ClearAllMetricsProcedure gproc = new ClearAllMetricsProcedure();
+		quadtree.walk(gproc);
+	}
+
+	public double distance2(Vertex start, Vertex end, Vertex vm)
+	{
+		double ret = distance(start, end, vm);
+		return ret*ret;
+	}
+	
+	/**
+	 * Returns the Riemannian distance between nodes.
+	 *
+	 * @param start  the start node
+	 * @param end  the end node
+	 * @param vm  the vertex on which metrics is evaluated
+	 * @return the distance between nodes
+	 */
+	public double distance(Vertex start, Vertex end, Vertex vm)
+	{
+		return compGeom().distance((Vertex2D) start, (Vertex2D) end, (Vertex2D) vm);
+	}
+	
+	/**
+	 * Returns the 2D radius of the 3D unit ball centered at a point.
+	 * This routine returns a radius such that the 2D circle centered
+	 * at a given vertex will have a distance lower than 1 in 3D.
+	 * This method is used by {@link QuadTree#getNearestVertex}
+	 *
+	 * @param vm  the vertex on which metrics is evaluated
+	 * @return the radius in 2D space.
+	 */
+	public double radius2d(Vertex v)
+	{
+		return compGeom().radius2d((Vertex2D) v);
 	}
 	
 	/**

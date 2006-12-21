@@ -23,7 +23,7 @@ package org.jcae.mesh.amibe.algos3d;
 import org.jcae.mesh.amibe.ds.MMesh3D;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.util.Octree;
+import org.jcae.mesh.amibe.util.KdTree;
 import java.util.Iterator;
 import java.util.HashMap;
 import org.apache.log4j.Logger;
@@ -94,7 +94,7 @@ public class Fuse
 			else
 				bmax[i] *= 0.99;
 		}
-		Octree octree = new Octree(bmin, bmax);
+		KdTree octree = new KdTree(3, bmin, bmax);
 		HashMap map = new HashMap();
 		int nSubst = 0;
 		for (Iterator it = mesh.getNodesIterator(); it.hasNext(); )
@@ -102,7 +102,7 @@ public class Fuse
 			Vertex n = (Vertex) it.next();
 			if (n.isMutable())
 				continue;
-			Vertex p = octree.getNearestVertex(n);
+			Vertex p = octree.getNearestVertex(mesh, n);
 			if (p == null || p.isMutable() || n.distance3D(p) > tolerance)
 				octree.add(n);
 			else

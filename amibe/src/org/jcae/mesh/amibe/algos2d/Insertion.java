@@ -181,7 +181,7 @@ public class Insertion
 					for (int i = 0; i < imax; i++)
 					{
 						Vertex2D v = (Vertex2D) triNodes.get(index);
-						Vertex2D n = mesh.getQuadTree().getNearestVertex(mesh, v);
+						Vertex2D n = (Vertex2D) mesh.getQuadTree().getNearestVertex(mesh, v);
 						assert n == mesh.getQuadTree().getNearestVertexDebug(mesh, v);
 						if (mesh.compGeom().distance(v, n) > minlen)
 						{
@@ -201,7 +201,7 @@ public class Insertion
 				if (t.isOuter())
 					continue;
 				Vertex2D v = Vertex2D.centroid((Vertex2D[]) t.vertex);
-				Vertex2D n = mesh.getQuadTree().getNearestVertex(mesh, v);
+				Vertex2D n = (Vertex2D) mesh.getQuadTree().getNearestVertex(mesh, v);
 				assert n == mesh.getQuadTree().getNearestVertexDebug(mesh, v);
 				if (mesh.compGeom().distance(v, n) > minlen)
 				{

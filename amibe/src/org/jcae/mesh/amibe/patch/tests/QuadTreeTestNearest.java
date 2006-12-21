@@ -35,8 +35,8 @@ import org.jcae.mesh.java3d.Viewer;
  * to display an initial <code>QuadTree</code> with 500 vertices.
  * When clicking at a point, a yellow segment is displayed between this point
  * and the nearest point found in the same cell, returned by
- * {@link org.jcae.mesh.amibe.patch.QuadTree#getNearVertex(Vertex2D)}.
- * If {@link org.jcae.mesh.amibe.patch.QuadTree#getNearestVertex(Vertex2D)}
+ * {@link org.jcae.mesh.amibe.util.KdTree#getNearVertex(Vertex)}.
+ * If {@link org.jcae.mesh.amibe.util.KdTree#getNearestVertex(Vertex)}
  * finds a nearest point, a blue segment is displayed.
  */
 public class QuadTreeTestNearest extends QuadTreeTest
@@ -88,9 +88,9 @@ public class QuadTreeTestNearest extends QuadTreeTest
 			Vertex2D vt = Vertex2D.valueOf(u, v);
 			if (visu)
 			{
-				view.addBranchGroup(r.segment(vt, r.getNearVertex(m, vt), 5.0f, 1, 1, 0));
+				view.addBranchGroup(r.segment(vt, (Vertex2D) r.getNearVertex(m, vt), 5.0f, 1, 1, 0));
 				view.setVisible(true);
-				view.addBranchGroup(r.segment(vt, r.getNearestVertex(m, vt), 0.0f, 0, 1, 1));
+				view.addBranchGroup(r.segment(vt, (Vertex2D) r.getNearestVertex(m, vt), 0.0f, 0, 1, 1));
 				view.setVisible(true);
 			}
 			else
@@ -109,9 +109,9 @@ public class QuadTreeTestNearest extends QuadTreeTest
 					if (null != xyz)
 					{
 						Vertex2D vt = Vertex2D.valueOf(xyz[0], xyz[1]);
-						view.addBranchGroup(r.segment(vt, r.getNearVertex(m, vt), 5.0f, 1, 1, 0));
+						view.addBranchGroup(r.segment(vt, (Vertex2D) r.getNearVertex(m, vt), 5.0f, 1, 1, 0));
 						view.setVisible(true);
-						view.addBranchGroup(r.segment(vt, r.getNearestVertex(m, vt), 0.0f, 0, 1, 1));
+						view.addBranchGroup(r.segment(vt, (Vertex2D) r.getNearestVertex(m, vt), 0.0f, 0, 1, 1));
 						view.setVisible(true);
 					}
 				}
