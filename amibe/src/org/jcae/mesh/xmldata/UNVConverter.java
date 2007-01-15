@@ -409,8 +409,9 @@ public class UNVConverter
 		{
 			for (int j = 0; j < groups[i].length; j++)
 			{
+				bb.clear();
 				fc.read(bb, groups[i][j] * 3 * 4);
-				bb.rewind();
+				tria.rewind();
 				tria.get(toReturn, count, 3);
 				count += 3;
 			}
@@ -482,7 +483,13 @@ public class UNVConverter
 		proc.writeNodes(out, nodelist.toNativeArray(), amibeNodeToUNVNode);
 		TIntIntHashMap amibeTriaToUNVTria=new TIntIntHashMap();
 		proc.writeTriangles(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
-		proc.writeNormals(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
+		try
+		{
+			proc.writeNormals(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
+		}
+		catch (Exception e)
+		{
+		}
 		triangle=null;
 		amibeNodeToUNVNode=null;
 		proc.writeGroups(out, amibeTriaToUNVTria);
