@@ -1,3 +1,8 @@
+Wed Jan 24 14:35:05 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/oemm/IndexedStorage.java: Add a missing close()
+	statement.
+
 Thu Dec 21 15:39:46 CET 2006 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/patch/QuadTree.java

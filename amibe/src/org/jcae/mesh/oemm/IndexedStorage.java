@@ -757,6 +757,7 @@ public class IndexedStorage
 					}
 				}
 				fc.close();
+				bufIn.close();
 			}
 			catch (IOException ex)
 			{
