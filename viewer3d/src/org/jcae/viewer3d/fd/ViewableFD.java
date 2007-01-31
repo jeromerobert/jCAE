@@ -618,7 +618,7 @@ public class ViewableFD extends ViewableAdaptor
 		{	
 			Integer iDomainId=new Integer(domainId[d]);
 			
-			Logger.global.finest("Create BranchGroup for domain n°"+
+			Logger.global.finest("Create BranchGroup for domain nr. "+
 				Integer.toHexString(domainId[d])+ "provider="+provider+" ids="+ids);
 			
 			BranchGroup old=(BranchGroup)domainToBranchGroup.get(iDomainId);
