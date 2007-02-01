@@ -1,3 +1,10 @@
+Thu Feb  1 18:46:38 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/oemm/IndexedStorage.java
+	  src/org/jcae/mesh/oemm/OEMMNode.java: In OEMM structure file, write
+	file names relative to top-level directory so that the whole OEMM
+	directory can be renamed without trouble.
+
 Wed Jan 24 14:35:05 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/oemm/IndexedStorage.java: Add a missing close()

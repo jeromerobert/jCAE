@@ -100,10 +100,14 @@ public class IndexedStorage
 		catch (FileNotFoundException ex)
 		{
 			logger.error("File "+inFile+" not found");
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
 		}
 		catch (IOException ex)
 		{
 			logger.error("I/O error when reading inFile  "+inFile);
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
 		}
 		return ret;
 	}
@@ -143,11 +147,12 @@ public class IndexedStorage
 			ijk[0] = current.i0;
 			ijk[1] = current.j0;
 			ijk[2] = current.k0;
-			StringBuffer sbdir = new StringBuffer(outDir);
-			for (int i = 0; i < path.size(); i++)
+			current.topDir = outDir;
+			StringBuffer sbdir = new StringBuffer((String) path.get(0));
+			for (int i = 1; i < path.size(); i++)
 				sbdir.append(File.separator + (String) path.get(i));
 			String dir = sbdir.toString();
-			File d = new File(dir);
+			File d = new File(outDir, dir);
 			d.mkdirs();
 			current.file = dir + File.separator + octant;
 			PAVLTreeIntArrayDup inner = new PAVLTreeIntArrayDup();
@@ -248,7 +253,7 @@ public class IndexedStorage
 				globalIndex += index + room;
 				
 				//  Now store data structure onto disk
-				DataOutputStream output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(current.file+"h")));
+				DataOutputStream output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(new File(current.topDir, current.file+"h"))));
 				//  Leaf index
 				output.writeInt(current.leafIndex);
 				//  Cell size
@@ -286,8 +291,8 @@ public class IndexedStorage
 				
 				output.close();
 				
-				FileChannel fcv = new FileOutputStream(current.file+"i").getChannel();
-				DataOutputStream outAdj = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(current.file+"a")));
+				FileChannel fcv = new FileOutputStream(new File(current.topDir, current.file+"i")).getChannel();
+				DataOutputStream outAdj = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(new File(current.topDir, current.file+"a"))));
 				//  Inner vertices of this node
 				bb.clear();
 				bbI.clear();
@@ -386,7 +391,7 @@ public class IndexedStorage
 				bbpos.flip();
 				long pos = bbpos.getLong();
 				assert pos == current.counter : ""+pos+" != "+current.counter;
-				FileChannel fct = new FileOutputStream(current.file+"t").getChannel();
+				FileChannel fct = new FileOutputStream(new File(current.topDir, current.file+"t")).getChannel();
 				bb.clear();
 				IntBuffer bbI = bb.asIntBuffer();
 				bbt.clear();
@@ -459,8 +464,8 @@ public class IndexedStorage
 			
 			try
 			{
-				FileChannel fci = new FileInputStream(current.file+"i").getChannel();
-				FileChannel fco = new FileOutputStream(current.file+"v").getChannel();
+				FileChannel fci = new FileInputStream(new File(current.topDir, current.file+"i")).getChannel();
+				FileChannel fco = new FileOutputStream(new File(current.topDir, current.file+"v")).getChannel();
 				bb.clear();
 				IntBuffer bbI = bb.asIntBuffer();
 				bbt.clear();
@@ -490,7 +495,7 @@ public class IndexedStorage
 				}
 				fci.close();
 				fco.close();
-				new File(current.file+"i").delete();
+				new File(current.topDir, current.file+"i").delete();
 			}
 			catch (IOException ex)
 			{
@@ -506,7 +511,7 @@ public class IndexedStorage
 	{
 		try
 		{
-			DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(current.file+"h")));
+			DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(current.topDir, current.file+"h"))));
 			// Leaf index
 			current.leafIndex = bufIn.readInt();
 			// Cell size
@@ -538,7 +543,7 @@ public class IndexedStorage
 		}
 		catch (IOException ex)
 		{
-			logger.error("I/O error when reading indexed file "+current.file+"h");
+			logger.error("I/O error when reading indexed file "+current.topDir+File.separator+current.file+"h");
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
@@ -550,7 +555,7 @@ public class IndexedStorage
 		int [] ijk = new int[3];
 		try
 		{
-			FileChannel fc = new FileInputStream(current.file+"i").getChannel();
+			FileChannel fc = new FileInputStream(new File(current.topDir, current.file+"i")).getChannel();
 			int index = 0;
 			bb.clear();
 			IntBuffer bbI = bb.asIntBuffer();
@@ -575,7 +580,7 @@ public class IndexedStorage
 		}
 		catch (IOException ex)
 		{
-			logger.error("I/O error when reading indexed file "+current.file+"i");
+			logger.error("I/O error when reading indexed file "+current.topDir+File.separator+current.file+"i");
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
@@ -601,13 +606,14 @@ public class IndexedStorage
 			int [] ijk = new int[3];
 			for (int i = 0; i < nrleaves; i++)
 			{
-				OEMMNode fake = new OEMMNode(r.readLine());
+				OEMMNode fake = new OEMMNode(dir, r.readLine());
 				ijk[0] = fake.i0;
 				ijk[1] = fake.j0;
 				ijk[2] = fake.k0;
 				OEMMNode n = ret.build(fake.size, ijk);
 				n.tn = fake.tn;
 				n.vn = fake.vn;
+				n.topDir = fake.topDir;
 				n.file = fake.file;
 				n.leafIndex = fake.leafIndex;
 				n.minIndex = fake.minIndex;
@@ -713,11 +719,11 @@ public class IndexedStorage
 				return SKIPWALK;
 			try
 			{
-				logger.debug("Reading vertices from "+current.file+"v");
+				logger.debug("Reading vertices from "+current.topDir+File.separator+current.file+"v");
 				Vertex [] vert = new Vertex[current.vn];
 				double [] xyz = new double[3];
-				FileChannel fc = new FileInputStream(current.file+"v").getChannel();
-				DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(current.file+"a")));
+				FileChannel fc = new FileInputStream(new File(current.topDir, current.file+"v")).getChannel();
+				DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(current.topDir, current.file+"a"))));
 				bb.clear();
 				DoubleBuffer bbD = bb.asDoubleBuffer();
 				int remaining = current.vn;
@@ -761,7 +767,7 @@ public class IndexedStorage
 			}
 			catch (IOException ex)
 			{
-				logger.error("I/O error when reading file "+current.file+"i");
+				logger.error("I/O error when reading file "+current.topDir+File.separator+current.file+"i");
 				ex.printStackTrace();
 				throw new RuntimeException(ex);
 			}
@@ -788,8 +794,8 @@ public class IndexedStorage
 				return SKIPWALK;
 			try
 			{
-				logger.debug("Reading triangles from "+current.file+"t");
-				FileChannel fc = new FileInputStream(current.file+"t").getChannel();
+				logger.debug("Reading triangles from "+current.topDir+File.separator+current.file+"t");
+				FileChannel fc = new FileInputStream(new File(current.topDir, current.file+"t")).getChannel();
 				Vertex [] vert = new Vertex[3];
 				int [] leaf = new int[3];
 				int [] pointIndex = new int[3];
@@ -843,7 +849,7 @@ public class IndexedStorage
 			}
 			catch (IOException ex)
 			{
-				logger.error("I/O error when reading indexed file "+current.file+"t");
+				logger.error("I/O error when reading indexed file "+current.topDir+File.separator+current.file+"t");
 				ex.printStackTrace();
 				throw new RuntimeException(ex);
 			}

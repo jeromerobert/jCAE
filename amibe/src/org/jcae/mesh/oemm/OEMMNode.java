@@ -50,6 +50,8 @@ public class OEMMNode
 	public OEMMNode parent;
 	//  Is this node a leaf?
 	public boolean isLeaf = true;
+	//  Top-level directory
+	public String topDir;
 	//  File containing vertices and triangles
 	public String file;
 	//  Counter
@@ -102,8 +104,9 @@ public class OEMMNode
 		k0 = ijk[2] & mask;
 	}
 	
-	public OEMMNode(String f)
+	public OEMMNode(String d, String f)
 	{
+		topDir = d;
 		file = f;
 		IndexedStorage.readHeaderOEMMNode(this);
 	}
