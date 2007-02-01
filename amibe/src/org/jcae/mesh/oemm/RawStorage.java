@@ -267,10 +267,14 @@ count++;
 		catch (FileNotFoundException ex)
 		{
 			logger.error("File "+tree.getFileName()+" not found");
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
 		}
 		catch (IOException ex)
 		{
 			logger.error("I/O error when reading file  "+tree.getFileName());
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
 		}
 	}
 	
