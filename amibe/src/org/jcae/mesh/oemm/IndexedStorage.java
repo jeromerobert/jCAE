@@ -148,13 +148,22 @@ public class IndexedStorage
 			ijk[1] = current.j0;
 			ijk[2] = current.k0;
 			current.topDir = outDir;
-			StringBuffer sbdir = new StringBuffer((String) path.get(0));
-			for (int i = 1; i < path.size(); i++)
-				sbdir.append(File.separator + (String) path.get(i));
-			String dir = sbdir.toString();
-			File d = new File(outDir, dir);
-			d.mkdirs();
-			current.file = dir + File.separator + octant;
+			StringBuffer sbdir = new StringBuffer();
+			if (path.size() > 0)
+			{
+				sbdir.append((String) path.get(0));
+				for (int i = 1; i < path.size(); i++)
+					sbdir.append(File.separator + (String) path.get(i));
+				String dir = sbdir.toString();
+				File d = new File(outDir, dir);
+				d.mkdirs();
+				current.file = dir + File.separator + octant;
+			}
+			else
+			{
+				new File(outDir).mkdirs();
+				current.file = ""+octant;
+			}
 			PAVLTreeIntArrayDup inner = new PAVLTreeIntArrayDup();
 			PAVLTreeIntArrayDup outer = new PAVLTreeIntArrayDup();
 			int nrExternal = 0;
@@ -507,46 +516,48 @@ public class IndexedStorage
 		}
 	}
 	
-	public static void readHeaderOEMMNode(OEMMNode current)
+	private static OEMMNode readHeaderOEMMNode(String dir, String file)
 	{
+		OEMMNode ret = new OEMMNode(dir, file);
 		try
 		{
-			DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(current.topDir, current.file+"h"))));
+			DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(dir, file+"h"))));
 			// Leaf index
-			current.leafIndex = bufIn.readInt();
+			ret.leafIndex = bufIn.readInt();
 			// Cell size
-			current.size = bufIn.readInt();
+			ret.size = bufIn.readInt();
 			// Coordinates
-			current.i0 = bufIn.readInt();
-			current.j0 = bufIn.readInt();
-			current.k0 = bufIn.readInt();
+			ret.i0 = bufIn.readInt();
+			ret.j0 = bufIn.readInt();
+			ret.k0 = bufIn.readInt();
 			//  Number of neighboring nodes sharing data
 			int nr = bufIn.readInt();
-			current.adjLeaves = new TIntArrayList(nr);
+			ret.adjLeaves = new TIntArrayList(nr);
 			for (int i = 0; i < nr; i++)
-				current.adjLeaves.add(bufIn.readInt());
+				ret.adjLeaves.add(bufIn.readInt());
 			//  First global index
-			current.minIndex = bufIn.readInt();
+			ret.minIndex = bufIn.readInt();
 			//  Last available global index
-			current.maxIndex = bufIn.readInt();
+			ret.maxIndex = bufIn.readInt();
 			//  Number of inner vertices
-			current.vn = bufIn.readInt();
+			ret.vn = bufIn.readInt();
 			//  Number of triangles
-			current.tn = bufIn.readInt();
+			ret.tn = bufIn.readInt();
 			//  When IndexExternalVerticesProcedure is called
 			//  whereas IndexInternalVerticesProcedure was not
 			//  (e.g. after a crash to not reindex internal
 			//  vertices), uncomment the folllowing 2 lines
-			//current.counter = bufIn.readLong();
-			//current.tn = bufIn.readInt();
+			//ret.counter = bufIn.readLong();
+			//ret.tn = bufIn.readInt();
 			bufIn.close();
 		}
 		catch (IOException ex)
 		{
-			logger.error("I/O error when reading indexed file "+current.topDir+File.separator+current.file+"h");
+			logger.error("I/O error when reading indexed file "+dir+File.separator+file+"h");
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
+		return ret;
 	}
 	
 	private static PAVLTreeIntArrayDup loadVerticesInAVLTreeDup(OEMMNode current)
@@ -603,22 +614,10 @@ public class IndexedStorage
 			}
 			int nrleaves = Integer.parseInt(r.readLine());
 			ret.leaves = new OEMMNode[nrleaves];
-			int [] ijk = new int[3];
 			for (int i = 0; i < nrleaves; i++)
 			{
-				OEMMNode fake = new OEMMNode(dir, r.readLine());
-				ijk[0] = fake.i0;
-				ijk[1] = fake.j0;
-				ijk[2] = fake.k0;
-				OEMMNode n = ret.build(fake.size, ijk);
-				n.tn = fake.tn;
-				n.vn = fake.vn;
-				n.topDir = fake.topDir;
-				n.file = fake.file;
-				n.leafIndex = fake.leafIndex;
-				n.minIndex = fake.minIndex;
-				n.maxIndex = fake.maxIndex;
-				n.adjLeaves = fake.adjLeaves;
+				OEMMNode n = readHeaderOEMMNode(dir, r.readLine());
+				ret.insert(n);
 				ret.leaves[i] = n;
 			}
 			structIn.close();
@@ -631,37 +630,6 @@ public class IndexedStorage
 			throw new RuntimeException(ex);
 		}
 		return ret;
-	}
-	
-	public static double [] getMeshOEMMCoords(OEMM oemm, TIntHashSet leaves)
-	{
-		logger.info("Creation of a mesh from reading selected nodes from an OEMM");
-		Mesh mesh = loadNodes(oemm, leaves);
-		Collection triList = mesh.getTriangles();
-		int nrt = 0;
-		for (Iterator it = triList.iterator(); it.hasNext(); )
-		{
-			Triangle t = (Triangle) it.next();
-			if (!t.isOuter())
-				nrt++;
-		}
-		logger.info("Number of triangles for this selection: "+nrt);
-		double [] coord = new double[9*nrt];
-		int i = 0;
-		for (Iterator it = triList.iterator(); it.hasNext(); )
-		{
-			Triangle t = (Triangle) it.next();
-			if (t.isOuter())
-				continue;
-			for (int j = 0; j < 3; j++)
-			{
-				double [] xyz = t.vertex[j].getUV();
-				for (int k = 0; k < 3; k++)
-					coord[9*i+3*j+k] = xyz[k];
-			}
-			i++;
-		}
-		return coord;
 	}
 	
 	public static Mesh loadNodes(OEMM oemm, TIntHashSet leaves)

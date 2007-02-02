@@ -108,7 +108,6 @@ public class OEMMNode
 	{
 		topDir = d;
 		file = f;
-		IndexedStorage.readHeaderOEMMNode(this);
 	}
 	
 	public String toString()

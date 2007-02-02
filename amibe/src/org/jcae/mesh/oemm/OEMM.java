@@ -236,30 +236,41 @@ public class OEMM
 	}
 	
 	/**
-	 * Build an octanrt containing a given point if it does not already exist.
+	 * Build an octant containing a given point if it does not already exist.
 	 *
-	 * @param size    the returned octant must have this size.  If this value is 0,
-	 *                the deepest octant is returned.
 	 * @param ijk     integer coordinates of an interior node
-	 * @return  the octant of the desired size containing this point.  It is created
-	 *          if it does not exist.
+	 * @return  the octant of the smallest size containing this point.
+	 *          It is created if it does not exist.
 	 */
-	public final OEMMNode build(int size, int [] ijk)
+	public final OEMMNode build(int [] ijk)
 	{
-		if (size == 0)
-			size = 1 << (MAXLEVEL + 1 - nr_levels);
-		return search(size, ijk, true);
+		int minSize = 1 << (MAXLEVEL + 1 - nr_levels);
+		return search(minSize, ijk, true, null);
+	}
+	
+	/**
+	 * Insert an octant into the tree structure if it does not already exist.
+	 *
+	 * @param current     node being inserted.
+	 */
+	public final void insert(OEMMNode current)
+	{
+		int [] ijk = new int[3];
+		ijk[0] = current.i0;
+		ijk[1] = current.j0;
+		ijk[2] = current.k0;
+		search(current.size, ijk, true, current);
 	}
 	
 	/**
 	 * Return the octant of an OEMM structure containing a given point.
 	 *
 	 * @param ijk     integer coordinates of an interior node
-	 * @return  the octant of the desired size containing this point.
+	 * @return  the octant of the smallest size containing this point.
 	 */
 	public final OEMMNode search(int [] ijk)
 	{
-		return search(0, ijk, false);
+		return search(0, ijk, false, null);
 	}
 	
 	/**
@@ -272,7 +283,7 @@ public class OEMM
 	 *                 the desired octant must exist.
 	 * @return  the octant of the desired size containing this point.
 	 */
-	private final OEMMNode search(int size, int [] ijk, boolean create)
+	private final OEMMNode search(int size, int [] ijk, boolean create, OEMMNode node)
 	{
 		OEMMNode current = head[0];
 		int level = 0;
@@ -291,7 +302,10 @@ public class OEMM
 					throw new RuntimeException("Element not found... Aborting "+current+" "+Integer.toHexString(s)+" "+ind);
 				if (level > nr_levels)
 					nr_levels = level;
-				current.child[ind] = new OEMMNode(s, ijk);
+				if (s == size && node != null)
+					current.child[ind] = node;
+				else
+					current.child[ind] = new OEMMNode(s, ijk);
 				current.child[ind].parent = current;
 				if (head[level] != null)
 				{
@@ -318,11 +332,6 @@ public class OEMM
 		CoordProcedure proc = new CoordProcedure(onlyLeaves, nr_cells);
 		walk(proc);
 		return proc.coord;
-	}
-	
-	public double [] getMeshCoords(TIntHashSet leaves)
-	{
-		return IndexedStorage.getMeshOEMMCoords(this, leaves);
 	}
 	
 	public final class CoordProcedure extends TraversalProcedure

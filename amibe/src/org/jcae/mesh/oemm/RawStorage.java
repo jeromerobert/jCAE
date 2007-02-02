@@ -91,7 +91,7 @@ public class RawStorage
 					{
 						bbD.get(xyz);
 						tree.double2int(xyz, ijk);
-						cells[i] = tree.build(0, ijk);
+						cells[i] = tree.build(ijk);
 					}
 					bbD.get();
 					cells[0].tn++;
@@ -312,7 +312,8 @@ count++;
 				ijk[0] = bufIn.readInt();
 				ijk[1] = bufIn.readInt();
 				ijk[2] = bufIn.readInt();
-				OEMMNode n = ret.build(size, ijk);
+				OEMMNode n = new OEMMNode(size, ijk);
+				ret.insert(n);
 				n.counter = position;
 				n.tn = nr;
 				n.leafIndex = i;
