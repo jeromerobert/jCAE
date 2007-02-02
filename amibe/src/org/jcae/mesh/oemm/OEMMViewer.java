@@ -19,6 +19,10 @@
 
 package org.jcae.mesh.oemm;
 
+import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.Triangle;
+import java.util.Iterator;
+import java.util.Collection;
 import javax.media.j3d.Appearance;
 import javax.media.j3d.QuadArray;
 import javax.media.j3d.Shape3D;
@@ -72,25 +76,19 @@ public class OEMMViewer
 		return bg;
 	}
 	
-	public static BranchGroup meshOEMM(String dir)
+	public static BranchGroup meshOEMM(OEMM oemm)
 	{
-		OEMM oemm = IndexedStorage.buildOEMMStructure(dir);
 		TIntHashSet leaves = new TIntHashSet();
 		for (int i = 0; i < oemm.nr_leaves; i++)
 			leaves.add(i);
 		return meshOEMM(oemm, leaves);
 	}
 	
-	public static BranchGroup meshOEMM(String dir, TIntHashSet leaves)
-	{
-		OEMM oemm = IndexedStorage.buildOEMMStructure(dir);
-		return meshOEMM(oemm, leaves);
-	}
-
 	public static BranchGroup meshOEMM(OEMM oemm, TIntHashSet leaves)
 	{
 		BranchGroup bg = new BranchGroup();
-		double [] coord = IndexedStorage.getMeshOEMMCoords(oemm, leaves);
+		Mesh mesh = IndexedStorage.loadNodes(oemm, leaves);
+		double [] coord = meshCoord(mesh);
 		TriangleArray tri = new TriangleArray(coord.length/3, TriangleArray.COORDINATES);
 		tri.setCapability(TriangleArray.ALLOW_COUNT_READ);
 		tri.setCapability(TriangleArray.ALLOW_FORMAT_READ);
@@ -117,4 +115,33 @@ public class OEMMViewer
 		return bg;
 	}
 	
+	private static final double [] meshCoord (Mesh mesh)
+	{
+		Collection triList = mesh.getTriangles();
+		int nrt = 0;
+		for (Iterator it = triList.iterator(); it.hasNext(); )
+		{
+			Triangle t = (Triangle) it.next();
+			if (!t.isOuter())
+				nrt++;
+		}
+		double [] coord = new double[9*nrt];
+		int i = 0;
+		for (Iterator it = triList.iterator(); it.hasNext(); )
+		{
+			Triangle t = (Triangle) it.next();
+			if (t.isOuter())
+				continue;
+			for (int j = 0; j < 3; j++)
+			{
+				double [] xyz = t.vertex[j].getUV();
+				t.vertex[j].setLabel(3*i+j);
+				for (int k = 0; k < 3; k++)
+					coord[9*i+3*j+k] = xyz[k];
+			}
+			i++;
+		}
+		return coord;
+	}
+
 }

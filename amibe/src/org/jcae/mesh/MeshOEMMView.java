@@ -39,7 +39,7 @@ public class MeshOEMMView
 		OEMM oemm = IndexedStorage.buildOEMMStructure(dir);
 		Viewer view=new Viewer();
 		view.addBranchGroup(OEMMViewer.bgOEMM(oemm, true));
-		view.addBranchGroup(OEMMViewer.meshOEMM(dir));
+		view.addBranchGroup(OEMMViewer.meshOEMM(oemm));
 		view.zoomTo(); 
 		view.setVisible(true);
 	}
