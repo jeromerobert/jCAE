@@ -45,7 +45,6 @@ public class OEMM
 	public static final int OEMM_CREATED = 1;
 	public static final int OEMM_INITIALIZED = 2;
 	
-	protected static final int gridSize = 1 << MAXLEVEL;
 	protected final String structFile;
 	public int status;
 	public int nr_leaves;
@@ -72,7 +71,7 @@ public class OEMM
 		nr_leaves = 0;
 		x0[0] = x0[1] = x0[2] = 0.0;
 		x0[3] = 1.0;
-		head[0] = new OEMMNode(gridSize, 0, 0, 0);
+		head[0] = new OEMMNode(1 << MAXLEVEL, 0, 0, 0);
 		tail[0] = head[0];
 
 	}
@@ -126,7 +125,7 @@ public class OEMM
 			logger.error("The OEMM must be filled in first!... Aborting");
 			System.exit(9);
 		}
-		int s = gridSize;
+		int s = 1 << MAXLEVEL;
 		int l = 0;
 		int i0 = 0;
 		int j0 = 0;
