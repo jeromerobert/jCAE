@@ -302,7 +302,7 @@ count++;
 			ret.leaves = new OEMMNode[nrleaves];
 			for (int i = 0; i < 4; i++)
 				ret.x0[i] = bufIn.readDouble();
-			//  ret.nr_leaves will be set by this loop in ret.build()
+			//  ret.nr_leaves will be set by this loop in ret.insert()
 			//  unless nrleaves == 1
 			for (int i = 0; i < nrleaves; i++)
 			{
@@ -312,15 +312,19 @@ count++;
 				ijk[0] = bufIn.readInt();
 				ijk[1] = bufIn.readInt();
 				ijk[2] = bufIn.readInt();
-				OEMMNode n = new OEMMNode(size, ijk);
-				ret.insert(n);
-				n.counter = position;
-				n.tn = nr;
-				n.leafIndex = i;
-				n.isLeaf = true;
-				ret.leaves[i] = n;
-				if (!ret.head[0].isLeaf)
-					ret.head[0].tn += n.tn;
+				if (size == ret.head[0].size)
+					ret.leaves[i] = ret.head[0];
+				else
+				{
+					OEMMNode n = new OEMMNode(size, ijk);
+					ret.insert(n);
+					ret.leaves[i] = n;
+					ret.head[0].tn += nr;
+				}
+				ret.leaves[i].counter = position;
+				ret.leaves[i].tn = nr;
+				ret.leaves[i].leafIndex = i;
+				ret.leaves[i].isLeaf = true;
 			}
 			if (nrleaves <= 1)
 				ret.nr_leaves = 1;
