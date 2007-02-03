@@ -19,8 +19,6 @@
 
 package org.jcae.mesh.oemm;
 
-import org.apache.log4j.Logger;
-
 /**
  * Implementation of PAVL binary trees to store locational codes.
  * It is based on excellent Ben Pfaff's GNU libavl http://adtinfo.org/.
@@ -32,7 +30,6 @@ import org.apache.log4j.Logger;
  */
 public class PAVLTreeIntArrayDup
 {
-	private static Logger logger = Logger.getLogger(PAVLTreeIntArrayDup.class);	
 	//  A (x,y,z) triplet is stored in an int array of size nrInt.
 	//  It is 4 if coordinates are int, 8 if long.
 	private static final int nrInt = 4;
@@ -198,7 +195,6 @@ public class PAVLTreeIntArrayDup
 	             / \
 	            T1 T2
 */
-				logger.debug("Single right rotation");
 				newRoot = left;
 				work[topNode+POS_CHILD] = work[left+POS_CHILD+1];
 				work[left+POS_CHILD+1] = topNode;
@@ -220,7 +216,6 @@ public class PAVLTreeIntArrayDup
 	         / \              / \
 	        T2 T3            T1 T2
 */
-				logger.debug("Left+right rotation");
 				assert work[left+POS_BALANCE] == 1;
 				newRoot = work[left+POS_CHILD+1];
 				assert newRoot != POS_NIL;
@@ -271,7 +266,6 @@ public class PAVLTreeIntArrayDup
 	                       / \
 	                      T3 T4
 */
-				logger.debug("Single left rotation");
 				newRoot = right;
 				work[topNode+POS_CHILD+1] = work[right+POS_CHILD];
 				work[right+POS_CHILD] = topNode;
@@ -293,7 +287,6 @@ public class PAVLTreeIntArrayDup
 	      / \                        / \
 	     T2 T3                      T3 T4
 */
-				logger.debug("Right+left rotation");
 				assert work[right+POS_BALANCE] == -1;
 				newRoot = work[right+POS_CHILD];
 				// Right rotation
