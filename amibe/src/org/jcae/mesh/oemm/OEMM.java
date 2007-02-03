@@ -40,6 +40,7 @@ public class OEMM
 	private static Logger logger = Logger.getLogger(OEMM.class);	
 	
 	public static final int MAXLEVEL = 30;
+	protected static final int gridSize = 1 << MAXLEVEL;
 	
 	public static final int OEMM_DUMMY = 0;
 	public static final int OEMM_CREATED = 1;
@@ -66,14 +67,11 @@ public class OEMM
 	{
 		status = OEMM_DUMMY;
 		structFile = file;
-		nr_levels = 1;
-		nr_cells = 1;
+		nr_levels = 0;
+		nr_cells = 0;
 		nr_leaves = 0;
 		x0[0] = x0[1] = x0[2] = 0.0;
 		x0[3] = 1.0;
-		head[0] = new OEMMNode(1 << MAXLEVEL, 0, 0, 0);
-		tail[0] = head[0];
-
 	}
 	
 	public void printInfos()
@@ -125,7 +123,7 @@ public class OEMM
 			logger.error("The OEMM must be filled in first!... Aborting");
 			System.exit(9);
 		}
-		int s = 1 << MAXLEVEL;
+		int s = gridSize;
 		int l = 0;
 		int i0 = 0;
 		int j0 = 0;
@@ -284,6 +282,20 @@ public class OEMM
 	 */
 	private final OEMMNode search(int size, int [] ijk, boolean create, OEMMNode node)
 	{
+		if (head[0] == null)
+		{
+			if (!create)
+				throw new RuntimeException("Element not found... Aborting ");
+			if (node != null && node.size == gridSize)
+			{
+				head[0] = node;
+				nr_leaves++;
+			}
+			else
+				head[0] = new OEMMNode(gridSize, 0, 0, 0);
+			tail[0] = head[0];
+			nr_cells++;
+		}
 		OEMMNode current = head[0];
 		int level = 0;
 		int s = current.size;

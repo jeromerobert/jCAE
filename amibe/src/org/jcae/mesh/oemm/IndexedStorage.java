@@ -67,6 +67,8 @@ public class IndexedStorage
 	public static OEMM indexOEMM(String inFile, String outDir)
 	{
 		OEMM ret = RawStorage.loadIntermediate(inFile);
+		if (logger.isDebugEnabled())
+			ret.printInfos();
 		try
 		{
 			//  Index internal vertices
@@ -363,7 +365,7 @@ public class IndexedStorage
 		}
 		public final int action(OEMMNode current, int octant, int visit)
 		{
-			if (current.parent == null || visit != LEAF)
+			if (visit != LEAF)
 				return SKIPWALK;
 			logger.debug("Indexing external vertices of node "+(current.leafIndex+1)+"/"+oemm.nr_leaves);
 /*
@@ -617,13 +619,6 @@ public class IndexedStorage
 			for (int i = 0; i < nrleaves; i++)
 			{
 				OEMMNode n = readHeaderOEMMNode(dir, r.readLine());
-				// If there is only one cell, ret.head[0] and
-				// ret.nr_leaves have to be fixed!
-				if (nrleaves == 1)
-				{
-					ret.head[0] = n;
-					ret.nr_leaves = 1;
-				}
 				ret.insert(n);
 				ret.leaves[i] = n;
 			}
