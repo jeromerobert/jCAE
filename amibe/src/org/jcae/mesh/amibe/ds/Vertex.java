@@ -74,8 +74,8 @@ public class Vertex implements Serializable
 	protected int ref1d = 0;
 	// Used in OEMM
 	protected int label = 0;
-	private boolean readable = false;
-	private boolean writable = false;
+	private boolean readable = true;
+	private boolean writable = true;
 	
 	/**
 	 * Constructor called by Vertex2D.
