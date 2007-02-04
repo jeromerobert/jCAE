@@ -38,6 +38,7 @@ import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.HashSet;
 import gnu.trove.TIntIterator;
 import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntObjectHashMap;
@@ -644,25 +645,22 @@ public class IndexedStorage
 		ReadTrianglesProcedure rt_proc = new ReadTrianglesProcedure(oemm, vertMap, leaves, ret);
 		oemm.walk(rt_proc);
 		
-		Object [] oArray = vertMap.getValues();
-		int nrv = 0;
-		for (int i = 0; i < oArray.length; i++)
+		/*
+		 * Some vertices may not have been added into vertMap if they belong
+		 * to adjacent triangles, so compute the list of vertices
+		 */
+		HashSet vSet = new HashSet();
+		for (Iterator it = ret.getTriangles().iterator(); it.hasNext(); )
 		{
-			Vertex v = (Vertex) oArray[i];
-			if (v.getLink() != null)
-				nrv++;
+			Triangle t = (Triangle) it.next();
+			for (int i = 0; i < 3; i++)
+				vSet.add(t.vertex[i]);
 		}
-		Vertex [] vertices = new Vertex[nrv];
-		nrv = 0;
-		for (int i = 0; i < oArray.length; i++)
-		{
-			Vertex v = (Vertex) oArray[i];
-			if (v.getLink() != null)
-			{
-				vertices[nrv] = v;
-				nrv++;
-			}
-		}
+		int i = vSet.size();
+		Vertex [] vertices = new Vertex[i];
+		i = 0;
+		for (Iterator it = vSet.iterator(); it.hasNext(); i++)
+			vertices[i] = (Vertex) it.next();
 		ret.buildAdjacency(vertices, -1.0);
 		return ret;
 	}
@@ -798,21 +796,26 @@ public class IndexedStorage
 									writable = false;
 							}
 							else
+							{
 								readable = false;
+								writable = false;
+								vert[j] = Vertex.valueOf(0.0, 0.0, 0.0);
+							}
 						}
 						// group number
 						bbI.get();
-						if (readable)
+						Triangle t = new Triangle(vert[0], vert[1], vert[2]);
+						vert[0].setLink(t);
+						vert[1].setLink(t);
+						vert[2].setLink(t);
+						t.setReadable(readable);
+						t.setWritable(writable);
+						if (vert[0] == mesh.outerVertex || vert[1] == mesh.outerVertex || vert[2] == mesh.outerVertex)
 						{
-							Triangle t = new Triangle(vert[0], vert[1], vert[2]);
-							vert[0].setLink(t);
-							vert[1].setLink(t);
-							vert[2].setLink(t);
-							if (vert[0] == mesh.outerVertex || vert[1] == mesh.outerVertex || vert[2] == mesh.outerVertex)
-								t.setOuter();
-							t.setWritable(writable);
-							mesh.add(t);
+							t.setOuter();
+							t.setReadable(false);
 						}
+						mesh.add(t);
 					}
 				}
 				fc.close();

@@ -1,3 +1,8 @@
+Sun Feb  4 02:34:17 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/oemm/IndexedStorage.java
+	  src/org/jcae/mesh/oemm/OEMMViewer.java: Display free edges in red.
+
 Thu Feb  1 18:46:38 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/oemm/IndexedStorage.java

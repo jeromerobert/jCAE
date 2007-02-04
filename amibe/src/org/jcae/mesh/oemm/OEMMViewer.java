@@ -21,6 +21,7 @@ package org.jcae.mesh.oemm;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.OTriangle;
 import java.util.Iterator;
 import java.util.Collection;
 import javax.media.j3d.Appearance;
@@ -30,6 +31,10 @@ import javax.media.j3d.BranchGroup;
 import javax.media.j3d.PolygonAttributes;
 import javax.media.j3d.ColoringAttributes;
 import javax.media.j3d.TriangleArray;
+import javax.media.j3d.IndexedLineArray;
+import javax.media.j3d.IndexedGeometryArray;
+import javax.media.j3d.GeometryArray;
+import javax.media.j3d.LineAttributes;
 import gnu.trove.TIntHashSet;
 
 public class OEMMViewer
@@ -76,6 +81,11 @@ public class OEMMViewer
 		return bg;
 	}
 	
+	public static BranchGroup meshOEMM(String dir)
+	{
+		return meshOEMM(IndexedStorage.buildOEMMStructure(dir));
+	}
+	
 	public static BranchGroup meshOEMM(OEMM oemm)
 	{
 		TIntHashSet leaves = new TIntHashSet();
@@ -112,17 +122,38 @@ public class OEMMViewer
 		Shape3D shapeLine = new Shape3D(tri, wireFrame);
 		shapeLine.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 		bg.addChild(shapeLine);
+
+		// Free edges
+		int [] beams = meshFreeEdges(mesh);
+		if (beams.length <= 0)
+			return bg;
+		IndexedLineArray geom = new IndexedLineArray(
+			coord.length/3,
+			GeometryArray.COORDINATES|GeometryArray.BY_REFERENCE,
+			beams.length);
+		geom.setCoordinateIndices(0, beams);
+		geom.setCapability(GeometryArray.ALLOW_COUNT_READ);
+		geom.setCapability(GeometryArray.ALLOW_FORMAT_READ);
+		geom.setCapability(GeometryArray.ALLOW_REF_DATA_READ);
+		geom.setCapability(IndexedGeometryArray.ALLOW_COORDINATE_INDEX_READ);
+		geom.setCoordRefDouble(coord);
+		Appearance freeEdgeApp = new Appearance();
+		freeEdgeApp.setLineAttributes(new LineAttributes(1,LineAttributes.PATTERN_SOLID,false));
+		freeEdgeApp.setColoringAttributes(new ColoringAttributes(1.0f,0.0f,0.0f,ColoringAttributes.SHADE_FLAT));
+		Shape3D shapeFreeEdges = new Shape3D(geom, freeEdgeApp);
+		shapeFreeEdges.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
+		bg.addChild(shapeFreeEdges);
 		return bg;
 	}
-	
-	private static final double [] meshCoord (Mesh mesh)
+
+	private static final double [] meshCoord(Mesh mesh)
 	{
 		Collection triList = mesh.getTriangles();
 		int nrt = 0;
 		for (Iterator it = triList.iterator(); it.hasNext(); )
 		{
 			Triangle t = (Triangle) it.next();
-			if (!t.isOuter())
+			if (t.isReadable())
 				nrt++;
 		}
 		double [] coord = new double[9*nrt];
@@ -130,7 +161,7 @@ public class OEMMViewer
 		for (Iterator it = triList.iterator(); it.hasNext(); )
 		{
 			Triangle t = (Triangle) it.next();
-			if (t.isOuter())
+			if (!t.isReadable())
 				continue;
 			for (int j = 0; j < 3; j++)
 			{
@@ -142,6 +173,46 @@ public class OEMMViewer
 			i++;
 		}
 		return coord;
+	}
+
+	private static final int [] meshFreeEdges(Mesh mesh)
+	{
+		Collection triList = mesh.getTriangles();
+		int nrt = 0;
+		OTriangle ot = new OTriangle();
+		for (Iterator it = triList.iterator(); it.hasNext(); )
+		{
+			Triangle t = (Triangle) it.next();
+			if (!t.isReadable())
+				continue;
+			ot.bind(t);
+			for (int j = 0; j < 3; j++)
+			{
+				ot.nextOTri();
+				if (ot.hasAttributes(OTriangle.BOUNDARY))
+					nrt++;
+			}
+		}
+		int [] ret = new int[2*nrt];
+		int i = 0;
+		for (Iterator it = triList.iterator(); it.hasNext(); )
+		{
+			Triangle t = (Triangle) it.next();
+			if (!t.isReadable())
+				continue;
+			ot.bind(t);
+			for (int j = 0; j < 3; j++)
+			{
+				ot.nextOTri();
+				if (ot.hasAttributes(OTriangle.BOUNDARY))
+				{
+					ret[2*i] = ot.origin().getLabel();
+					ret[2*i+1] = ot.destination().getLabel();
+					i++;
+				}
+			}
+		}
+		return ret;
 	}
 
 }
