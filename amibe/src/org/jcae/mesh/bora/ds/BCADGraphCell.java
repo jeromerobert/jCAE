@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
    (C) Copyright 2006, by EADS CRC
+   (C) Copyright 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -28,17 +29,22 @@ import org.jcae.mesh.cad.CADIterator;
 import org.jcae.mesh.mesher.ds.MMesh1D;
 
 import java.util.Collection;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Iterator;
 import gnu.trove.THashSet;
+import gnu.trove.THashMap;
+import gnu.trove.TObjectObjectProcedure;
 import gnu.trove.TObjectHashingStrategy;
+
+import org.apache.log4j.Logger;
 
 /**
  * Graph cell.  This class is a decorator for the CAD graph.
  */
 public class BCADGraphCell
 {
+	private static Logger logger=Logger.getLogger(BCADGraphCell.class);
+
 	// Unique identitier
 	private int id = -1;
 	// Link to root graph
@@ -51,17 +57,20 @@ public class BCADGraphCell
 	private BCADGraphCell reversed;
 	// List of parents
 	private Collection parents = new LinkedHashSet();
-	//   List of constraints applied to this instance
-	private Collection constraints = new ArrayList();
-	private ResultConstraint resultConstraint = null;
+	//   Map { submesh => constraint } applied to this instance:
+	private THashMap constraints = new THashMap();
+	private THashMap implicitConstraints = new THashMap();
+	private THashMap resultConstraint = new THashMap();
 
-	public Object mesh = null;
-	public MMesh1D mesh1D;
+	private THashMap mesh = new THashMap();
+	// public Object mesh = null;
+	private THashMap mesh1D = new THashMap();
+	// public MMesh1D mesh1D;
 	
-	// In OccJava, 2 CADShape instances can be equal with different orientations.
-	// We sometimes need to keep track of shape orientation in our graph, hash
-	// sets and maps can then use the keepOrientation instance as hashing
-	// strategy.
+	// In OccJava, two CADShape instances can be equal with different
+	// orientations.  We sometimes need to keep track of shape orientation
+	// in our graph, hash sets and maps can then use the keepOrientation
+	// instance as hashing strategy.
 	private static TObjectHashingStrategy keepOrientation = new TObjectHashingStrategy()
 	{
 		public int computeHashCode(Object o)
@@ -240,57 +249,177 @@ public class BCADGraphCell
 		};
 	}
 
-	/**
-	 * Adds an hypothesis to a submesh.
-	 *
-	 * @param  h  hypothesis
-	 */
-	public void setHypothesis(Hypothesis h)
+	public void addSubMeshConstraint(BSubMesh s, Constraint c)
 	{
-		h.lock();
-		getGraph().getModel().allHypothesis.add(h);
-		Constraint c = new Constraint(this, h);
+		constraints.put(s, c);
+		// For convenience, constraints contain a link to all
+		// BSubMesh instances in which they appear.
+		c.addSubMesh(s);
+	}
+	
+	private class BuildConstraintToSubMeshMapProcedure implements TObjectObjectProcedure
+	{
+		private final THashMap map;
+		private BuildConstraintToSubMeshMapProcedure(THashMap m)
+		{
+			map = m;
+		}
+		public boolean execute(Object key, Object val)
+		{
+			THashSet meshes = (THashSet) map.get(val);
+			if (meshes == null)
+			{
+				meshes = new THashSet();
+				map.put(val, meshes);
+			}
+			// Add submesh
+			meshes.add(key);
+			return true;
+		}
+	}
+
+	// Add implicit constraints on subshapes
+	public void addImplicitConstraints()
+	{
+		// If a constraint appears in several submeshes, it
+		// must be derived only once.  First create a map
+		//   Constraint ==> { list of BSubMesh }
+		THashMap map = new THashMap();
+		BuildConstraintToSubMeshMapProcedure proc = new BuildConstraintToSubMeshMapProcedure(map);
+		constraints.forEachEntry(proc);
+
 		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
 			CADShapeEnum cse = (CADShapeEnum) itcse.next();
 			for (Iterator it = shapesExplorer(cse); it.hasNext(); )
 			{
-				BCADGraphCell s = (BCADGraphCell) it.next();
-				s.constraints.add(c);
+				BCADGraphCell sub = (BCADGraphCell) it.next();
+				for (Iterator itc = map.keySet().iterator(); itc.hasNext(); )
+				{
+					Constraint c = (Constraint) itc.next();
+					Constraint derived = c.newConstraint(cse);
+					THashSet smSet = (THashSet) map.get(c);
+					assert smSet != null;
+					for (Iterator itsm = smSet.iterator(); itsm.hasNext(); )
+					{
+						BSubMesh sm = (BSubMesh) itsm.next();
+						THashSet subsmSet = (THashSet) sub.implicitConstraints.get(sm);
+						if (subsmSet == null)
+						{
+							subsmSet = new THashSet();
+							sub.implicitConstraints.put(sm, subsmSet);
+						}
+						subsmSet.add(derived);
+					}
+				}
 			}
 		}
 	}
 
-	public void addConstraint(Constraint c)
+	public Constraint getSubMeshConstraint(BSubMesh s)
 	{
-		constraints.add(c);
+		return (Constraint) constraints.get(s);
+	}
+
+	public Collection setOfSubMesh()
+	{
+		return constraints.keySet();
 	}
 
 	public void combineHypothesis(CADShapeEnum d)
 	{
-		resultConstraint = ResultConstraint.combineAll(constraints, d);
+		for (Iterator its = implicitConstraints.keySet().iterator(); its.hasNext(); )
+		{
+			BSubMesh s = (BSubMesh) its.next();
+			LinkedHashSet mh = new LinkedHashSet();
+			Constraint c = (Constraint) constraints.get(s);
+			if (c != null)
+				mh.add(c);
+			THashSet h = (THashSet) implicitConstraints.get(s);
+			if (h != null)
+				for (Iterator it = h.iterator(); it.hasNext(); )
+					mh.add(it.next());
+			resultConstraint.put(s, ResultConstraint.combineAll(mh, d));
+		}
 	}
 
-	public boolean hasConstraints()
+	public boolean hasConstraints(BSubMesh s)
 	{
-		return resultConstraint != null;
+		return resultConstraint.get(s) != null;
 	}
 
-	public boolean discretize()
+	public boolean discretize(BSubMesh s)
 	{
-		if (resultConstraint == null)
-			return false;
-		resultConstraint.applyAlgorithm(this);
+		ResultConstraint c = (ResultConstraint) resultConstraint.get(s);
+		if (c != null)
+			c.applyAlgorithm(this, s);
 		return true;
+	}
+
+	public Object getMesh(BSubMesh s)
+	{
+		return mesh.get(s);
+	}
+
+	public void setMesh(BSubMesh s, Object m)
+	{
+		mesh.put(s, m);
+	}
+
+	public MMesh1D getMesh1D(BSubMesh s)
+	{
+		return (MMesh1D) mesh1D.get(s);
+	}
+
+	public void setMesh1D(BSubMesh s, MMesh1D m)
+	{
+		mesh1D.put(s, m);
+	}
+
+	private class PrintProcedure implements TObjectObjectProcedure
+	{
+		private final String header;
+		private PrintProcedure(String h)
+		{
+			header = h;
+		}
+		public boolean execute(Object key, Object val)
+		{
+			BSubMesh s = (BSubMesh) key;
+			Constraint c = (Constraint) val;
+			System.out.println(header+" submesh "+s.getId()+" "+c);
+			return true;
+		}
+	}
+
+	private class PrintImplicitProcedure implements TObjectObjectProcedure
+	{
+		private final String header;
+		private PrintImplicitProcedure(String h)
+		{
+			header = h;
+		}
+		public boolean execute(Object key, Object val)
+		{
+			BSubMesh s = (BSubMesh) key;
+			THashSet h = (THashSet) val;
+			String r = "";
+			for (Iterator it = h.iterator(); it.hasNext(); )
+			{
+				Constraint c = (Constraint) it.next();
+				r += " constraint "+c.getOrigin();
+			}
+			System.out.println(header+" submesh "+s.getId()+" ["+r+"]");
+			return true;
+		}
 	}
 
 	public void printConstraints(String headline)
 	{
-		if (resultConstraint == null)
-			return;
-		for (Iterator ita = constraints.iterator(); ita.hasNext(); )
-			System.out.println(headline+ita.next());
-		System.out.println(headline+"  Total constraint "+resultConstraint);
+		PrintProcedure proc = new PrintProcedure(headline);
+		constraints.forEachEntry(proc);
+		PrintImplicitProcedure p2 = new PrintImplicitProcedure(headline);
+		implicitConstraints.forEachEntry(p2);
 	}
 
 	/*

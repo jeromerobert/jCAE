@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
    (C) Copyright 2006, by EADS CRC
+   (C) Copyright 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -30,6 +31,21 @@ public class Hypothesis
 	protected boolean lengthBool = false, numberBool = false;
 	protected int numberMin = -1, numberMax = -1;
 	private boolean locked = false;
+
+	// Unique identitier
+	private int id = -1;
+	private static int nextId = -1;
+
+	public Hypothesis()
+	{
+		nextId++;
+		id = nextId;
+	}
+
+	public int getId()
+	{
+		return id;
+	}
 
 	/**
 	 * Sets element type.
@@ -185,7 +201,8 @@ public class Hypothesis
 
 	public String toString()
 	{
-		String ret = "elementType: "+elementType+"\n";
+		String ret = "Hyp. "+id+"\n";
+		ret += "elementType: "+elementType+"\n";
 		ret += "lengthMin: "+lengthMin+"\n";
 		ret += "lengthMax: "+lengthMax+"\n";
 		ret += "lengthBool: "+lengthBool+"\n";

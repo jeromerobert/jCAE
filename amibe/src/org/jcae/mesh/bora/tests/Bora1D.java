@@ -23,6 +23,7 @@ import org.jcae.mesh.java3d.Viewer;
 
 import org.jcae.mesh.bora.xmldata.BModelReader;
 import org.jcae.mesh.bora.ds.BModel;
+import org.jcae.mesh.bora.ds.BSubMesh;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADGeomCurve3D;
@@ -49,7 +50,7 @@ import java.util.Iterator;
 
 public class Bora1D
 {
-	public static BranchGroup [] getBranchGroups(BModel model)
+	public static BranchGroup [] getBranchGroups(BModel model, BSubMesh s)
 	{
 		BCADGraphCell root = model.getGraph().getRootCell();
 		// Count edges
@@ -57,10 +58,10 @@ public class Bora1D
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
 		{
 			BCADGraphCell edge = (BCADGraphCell) it.next();
-			File nodesfile = new File(model.getOutputDir()+File.separator+"1d", "n"+edge.getId());
+			File nodesfile = new File(model.getOutputDir(s)+File.separator+"1d", "n"+edge.getId());
 			if (!nodesfile.exists())
 				continue;
-			File parasfile = new File(model.getOutputDir()+File.separator+"1d", "p"+edge.getId());
+			File parasfile = new File(model.getOutputDir(s)+File.separator+"1d", "p"+edge.getId());
 			if (!parasfile.exists())
 				continue;
 			nEdges++;
@@ -74,14 +75,14 @@ public class Bora1D
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
 		{
 			BCADGraphCell edge = (BCADGraphCell) it.next();
-			File nodesfile = new File(model.getOutputDir()+File.separator+"1d", "n"+edge.getId());
+			File nodesfile = new File(model.getOutputDir(s)+File.separator+"1d", "n"+edge.getId());
 			if (!nodesfile.exists())
 				continue;
-			File parasfile = new File(model.getOutputDir()+File.separator+"1d", "p"+edge.getId());
+			File parasfile = new File(model.getOutputDir(s)+File.separator+"1d", "p"+edge.getId());
 			if (!parasfile.exists())
 				continue;
 			nrNodes[nEdges+1] = nrNodes[nEdges] + (int) nodesfile.length() / 24;
-			File beamsfile = new File(model.getOutputDir()+File.separator+"1d", "b"+edge.getId());
+			File beamsfile = new File(model.getOutputDir(s)+File.separator+"1d", "b"+edge.getId());
 			if (!beamsfile.exists())
 				continue;
 			nrBeams[nEdges+1] = nrBeams[nEdges] + (int) beamsfile.length() / 8;
@@ -103,13 +104,13 @@ public class Bora1D
 			BCADGraphCell edge = (BCADGraphCell) it.next();
 			try
 			{
-				File nodesfile = new File(model.getOutputDir()+File.separator+"1d", "n"+edge.getId());
+				File nodesfile = new File(model.getOutputDir(s)+File.separator+"1d", "n"+edge.getId());
 				if (!nodesfile.exists())
 					continue;
-				File parasfile = new File(model.getOutputDir()+File.separator+"1d", "p"+edge.getId());
+				File parasfile = new File(model.getOutputDir(s)+File.separator+"1d", "p"+edge.getId());
 				if (!parasfile.exists())
 					continue;
-				File beamsfile = new File(model.getOutputDir()+File.separator+"1d", "b"+edge.getId());
+				File beamsfile = new File(model.getOutputDir(s)+File.separator+"1d", "b"+edge.getId());
 				if (!beamsfile.exists())
 					continue;
 
@@ -158,21 +159,21 @@ public class Bora1D
 		// 3D edges
 		iRet++;
 		ret[iRet] = new BranchGroup();
-		IndexedLineArray s = new IndexedLineArray(nVertices,
+		IndexedLineArray l = new IndexedLineArray(nVertices,
 			GeometryArray.COORDINATES,
 			beams.length);
-		s.setCoordinateIndices(0, beams);
-		s.setCoordinates(0, xyz);
-		s.setCapability(GeometryArray.ALLOW_COUNT_READ);
-		s.setCapability(GeometryArray.ALLOW_FORMAT_READ);
-		s.setCapability(GeometryArray.ALLOW_REF_DATA_READ);
-		s.setCapability(IndexedLineArray.ALLOW_COORDINATE_INDEX_READ);
+		l.setCoordinateIndices(0, beams);
+		l.setCoordinates(0, xyz);
+		l.setCapability(GeometryArray.ALLOW_COUNT_READ);
+		l.setCapability(GeometryArray.ALLOW_FORMAT_READ);
+		l.setCapability(GeometryArray.ALLOW_REF_DATA_READ);
+		l.setCapability(IndexedLineArray.ALLOW_COORDINATE_INDEX_READ);
 
 		Appearance lineApp = new Appearance();
 		lineApp.setLineAttributes(new LineAttributes(1,LineAttributes.PATTERN_SOLID,false));
 		lineApp.setColoringAttributes(new ColoringAttributes(1f,0f,0f,ColoringAttributes.SHADE_FLAT));
 
-		Shape3D shapeEdges = new Shape3D(s, lineApp);
+		Shape3D shapeEdges = new Shape3D(l, lineApp);
 		shapeEdges.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 		shapeEdges.setPickable(false);
 		ret[iRet].addChild(shapeEdges);
@@ -210,8 +211,9 @@ public class Bora1D
 	public static void main(String args[])
 	{
 		final BModel model = BModelReader.readObject(args[0]);
+		final BSubMesh s = model.newMesh();
 		final Viewer view=new Viewer();
-		final BranchGroup [] bgList = getBranchGroups(model);
+		final BranchGroup [] bgList = getBranchGroups(model, s);
 		// bgList:
 		//   0: edges
 		//   1: 1D nodes on the 3D curve

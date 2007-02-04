@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
    (C) Copyright 2006, by EADS CRC
+   (C) Copyright 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -108,6 +109,11 @@ public class BModel
 		return xmlDir;
 	}
 
+	public String getOutputDir(BSubMesh s)
+	{
+		return xmlDir+File.separator+"s"+s.getId();
+	}
+
 	public String getOutputFile()
 	{
 		return xmlFile;
@@ -160,8 +166,18 @@ public class BModel
 	 */
 	public void compute()
 	{
-		// Compute all constraints
 		BCADGraphCell root = cad.getRootCell();
+		// Compute implicit constraints
+		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
+		{
+			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			for (Iterator it = root.shapesExplorer(cse); it.hasNext(); )
+			{
+				BCADGraphCell s = (BCADGraphCell) it.next();
+				s.addImplicitConstraints();
+			}
+		}
+		// Compute all constraints
 		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
 			CADShapeEnum cse = (CADShapeEnum) itcse.next();
@@ -171,11 +187,17 @@ public class BModel
 				s.combineHypothesis(cse);
 			}
 		}
-		for (Iterator it = root.shapesExplorer(CADShapeEnum.VERTEX); it.hasNext(); )
+		// Not really needed, will be useful when edge meshing
+		// is rewritten.
+		for (Iterator it = submesh.iterator(); it.hasNext(); )
 		{
-			BCADGraphCell s = (BCADGraphCell) it.next();
-			if (s.mesh == null)
-				s.mesh = s.getShape();
+			BSubMesh sm = (BSubMesh) it.next();
+			for (Iterator its = root.shapesExplorer(CADShapeEnum.VERTEX); its.hasNext(); )
+			{
+				BCADGraphCell s = (BCADGraphCell) its.next();
+				if (s.getMesh(sm) == null)
+					s.setMesh(sm, s.getShape());
+			}
 		}
 		logger.debug("Discretize edges");
 		for (Iterator it = submesh.iterator(); it.hasNext(); )
@@ -228,6 +250,33 @@ public class BModel
 				BCADGraphCell s = (BCADGraphCell) it.next();
 				System.out.println(tab+"Shape "+s);
 				s.printConstraints(tab+"    + ");
+			}
+			indent.append("  ");
+		}
+		System.out.println("End list");
+	}
+
+	/**
+	 * Prints the constraints applied to a given submesh
+	 */
+	public void printConstraints(BSubMesh sm)
+	{
+		System.out.println("List of constraints applied on submesh "+sm.getId());
+		BCADGraphCell root = cad.getRootCell();
+		StringBuffer indent = new StringBuffer();
+		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
+		{
+			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			String tab = indent.toString();
+			for (Iterator it = root.shapesExplorer(cse); it.hasNext(); )
+			{
+				BCADGraphCell s = (BCADGraphCell) it.next();
+				Constraint c = s.getSubMeshConstraint(sm);
+				if (c != null)
+				{
+					System.out.println(tab+"Shape "+s);
+					s.printConstraints(tab+"    + ");
+				}
 			}
 			indent.append("  ");
 		}

@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
    (C) Copyright 2006, by EADS CRC
+   (C) Copyright 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -214,13 +215,13 @@ public class ResultConstraint extends Hypothesis
 		}
 	}
 
-	public void applyAlgorithm(BCADGraphCell m)
+	public void applyAlgorithm(BCADGraphCell m, BSubMesh s)
 	{
 		if (algo == null)
 			findAlgorithm();
 		if (!algo.isAvailable())
 			return;
-		if (!algo.compute(m))
+		if (!algo.compute(m, s))
 			logger.warn("Failed! "+algo);
 	}
 

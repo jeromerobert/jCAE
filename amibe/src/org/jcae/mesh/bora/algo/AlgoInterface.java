@@ -21,10 +21,11 @@
 package org.jcae.mesh.bora.algo;
 
 import org.jcae.mesh.bora.ds.BCADGraphCell;
+import org.jcae.mesh.bora.ds.BSubMesh;
 
 public interface AlgoInterface
 {
-	public abstract boolean compute(BCADGraphCell c);
+	public abstract boolean compute(BCADGraphCell c, BSubMesh s);
 	public abstract boolean isAvailable();
 	public abstract int getOrientation(int o);
 }

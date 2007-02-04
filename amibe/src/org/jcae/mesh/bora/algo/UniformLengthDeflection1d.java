@@ -21,6 +21,7 @@
 package org.jcae.mesh.bora.algo;
 
 import org.jcae.mesh.bora.ds.BCADGraphCell;
+import org.jcae.mesh.bora.ds.BSubMesh;
 import org.jcae.mesh.mesher.ds.SubMesh1D;
 import org.jcae.mesh.mesher.ds.MEdge1D;
 import org.jcae.mesh.mesher.ds.MNode1D;
@@ -75,7 +76,7 @@ public class UniformLengthDeflection1d implements AlgoInterface
 	 * @return <code>true</code> if this edge was successfully discrtetized,
 	 * <code>false</code> otherwise.
 	 */
-	public boolean compute(BCADGraphCell mesh)
+	public boolean compute(BCADGraphCell mesh, BSubMesh s)
 	{
 		int nbPoints;
 		boolean isCircular = false;
@@ -83,8 +84,8 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		double[] paramOnEdge;
 		double range[];
 		CADEdge E = (CADEdge) mesh.getShape();
-		mesh.mesh = new SubMesh1D(E);
-		SubMesh1D submesh1d = (SubMesh1D) mesh.mesh;
+		SubMesh1D submesh1d = new SubMesh1D(E);
+		mesh.setMesh(s, submesh1d);
 		logger.debug(""+this+"  shape: "+E);
 		
 		ArrayList edgelist = submesh1d.getEdges();
@@ -180,7 +181,7 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		double param;
 
 		//  First vertex
-		CADVertex GPt = (CADVertex) mesh.getGraph().getByShape(V[0]).mesh;
+		CADVertex GPt = (CADVertex) mesh.getGraph().getByShape(V[0]).getMesh(s);
 		MNode1D firstNode = new MNode1D(paramOnEdge[0], GPt);
 		n1 = firstNode;
 		n1.isDegenerated(isDegenerated);
@@ -193,7 +194,7 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		{
 			param = paramOnEdge[i+1];
 			if (i == nbPoints - 2)
-				GPt = (CADVertex) mesh.getGraph().getByShape(V[1]).mesh;
+				GPt = (CADVertex) mesh.getGraph().getByShape(V[1]).getMesh(s);
 			n2 = new MNode1D(param, GPt);
 			n2.isDegenerated(isDegenerated);
 			nodelist.add(n2);

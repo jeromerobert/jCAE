@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
    (C) Copyright 2006, by EADS CRC
+   (C) Copyright 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -40,6 +41,37 @@ import java.util.NoSuchElementException;
 
 import org.apache.log4j.Logger;
 
+/*
+ * Here is an example with 2 connected faces.
+ *       +----------+---------+
+ *       |          |E1       |
+ *       |          |         |
+ *       |   F1     |    F2   |
+ *       |          |         |
+ *       +----------+---------+
+ * Let us define 3 constraints:
+ *   c1 = (F1, h1)
+ *   c2 = (F2, h2)
+ *   c3 = (E1, h3)
+ * where h1, h2 and h3 are three known hypothesis.
+ * We have to consider the following cases:
+ *   .------------------------------------------------.
+ *   |   Submesh    |  Expected result                | 
+ *   |--------------+---------------------------------|
+ *   | S = c1+c2    | A single mesh over F1 and F2,   |
+ *   |              | E1 tessellation is removed when |
+ *   |              | optimizing.                     |
+ *   |--------------+---------------------------------|
+ *   | S = c1+c2+c3 | A simple mesh, E1 tessellation  |
+ *   |              | is preserved.                   |
+ *   |--------------+---------------------------------|
+ *   | S1 = c1      | Two independent meshes, E1 has  |
+ *   | S2 = c2      | two distinct tessellations      |
+ *   |--------------+---------------------------------|
+ *   | S1 = c1+c3   | Two consistent meshes           |
+ *   | S2 = c2+c3   |                                 |
+ *   `------------------------------------------------'
+ */
 public class BSubMesh
 {
 	private static Logger logger=Logger.getLogger(BSubMesh.class);
@@ -74,7 +106,7 @@ public class BSubMesh
 	public BSubMesh(BModel m, int offset)
 	{
 		model = m;
-		id = offset + freeIndex;
+		id = freeIndex;
 		freeIndex++;
 	}
 	
@@ -90,14 +122,11 @@ public class BSubMesh
 	 */
 	public void add(Constraint s)
 	{
-		// Connect s to this BSubMesh
-		s.addSubMesh(this);
 		// Store Hypothesis, this may be useful when debugging
 		model.allHypothesis.add(s.getHypothesis());
 		// Add this Constraint to the CAD cell
 		BCADGraphCell c = s.getGraphCell();
-		c.addConstraint(s);
-
+		c.addSubMeshConstraint(this, s);
 		// Process subshapes
 		setTopShapes.add(c);
 		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
@@ -197,27 +226,18 @@ public class BSubMesh
 		};
 	}
 
-	/**
-	 * Adds an hypothesis to a submesh.
-	 *
-	 * @param  h  hypothesis
-	 */
-	public void setHypothesis(Hypothesis h)
+	private boolean needMesh(BCADGraphCell s)
 	{
-		CADShapeEnum dim = ResultConstraint.getAlgo(h.getElement()).dim();
-		if (dim == null)
-			return;
-		if (dim == CADShapeEnum.EDGE)
-			output1d = true;
-		else if (dim == CADShapeEnum.FACE)
-			output2d = true;
-		else if (dim == CADShapeEnum.SOLID)
-			output3d = true;
-		for (Iterator it = setCells.iterator(); it.hasNext(); )
+		if (!s.hasConstraints(this))
+			return false;
+		if (s.getMesh(this) != null)
+			return false;
+		if (s.getReversed() != null && s.getReversed().getMesh(this) != null)
 		{
-			BCADGraphCell c = (BCADGraphCell) it.next();
-			c.setHypothesis(h);
+			s.setMesh(this, s.getReversed().getMesh(this));
+			return false;
 		}
+		return true;
 	}
 
 	public void computeAlgorithms1d()
@@ -228,7 +248,7 @@ public class BSubMesh
 		for (Iterator it = shapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) it.next();
-			if (s.hasConstraints())
+			if (s.hasConstraints(this))
 				nrEdges++;
 		}
 		int cnt = 0;
@@ -236,25 +256,18 @@ public class BSubMesh
 		{
 			BCADGraphCell s = (BCADGraphCell) it.next();
 			cnt++;
-			if (!s.hasConstraints())
+			if (!needMesh(s))
 				continue;
-			if (s.mesh != null)
-				continue;
-			if (s.getReversed() != null && s.getReversed().mesh != null)
-			{
-				s.mesh = s.getReversed().mesh;
-				continue;
-			}
 			logger.debug("Edge "+cnt+"/"+nrEdges);
-			s.discretize();
-			Storage.writeEdge(s, model.getOutputDir());
+			s.discretize(this);
+			Storage.writeEdge(s, this, model.getOutputDir(this));
 		}
 	}
 
 	public void computeAlgorithms2d()
 	{
 		logger.info("Submesh nr. "+id);
-		MMesh1D mesh1D = new MMesh1D(model);
+		MMesh1D mesh1D = new MMesh1D(model, this);
 		// Faces
 		computeVertexReferences();
 		updateNodeLabels();
@@ -262,7 +275,7 @@ public class BSubMesh
 		for (Iterator it = shapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) it.next();
-			if (s.hasConstraints())
+			if (s.hasConstraints(this))
 				nrFaces++;
 		}
 		int cnt = 0;
@@ -270,19 +283,12 @@ public class BSubMesh
 		{
 			BCADGraphCell s = (BCADGraphCell) it.next();
 			cnt++;
-			if (!s.hasConstraints())
+			if (!needMesh(s))
 				continue;
-			if (s.mesh != null)
-				continue;
-			if (s.getReversed() != null && s.getReversed().mesh != null)
-			{
-				s.mesh = s.getReversed().mesh;
-				continue;
-			}
 			logger.info("Face "+cnt+"/"+nrFaces);
-			s.mesh1D = mesh1D;
-			s.discretize();
-			Storage.writeFace(s, model.getOutputDir());
+			s.setMesh1D(this, mesh1D);
+			s.discretize(this);
+			Storage.writeFace(s, this, model.getOutputDir(this));
 		}
 	}
 
@@ -294,7 +300,7 @@ public class BSubMesh
 		for (Iterator it = shapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) it.next();
-			if (!s.hasConstraints())
+			if (!s.hasConstraints(this))
 				continue;
 			nrSolids++;
 		}
@@ -304,18 +310,11 @@ public class BSubMesh
 		for (Iterator it = shapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) it.next();
-			if (!s.hasConstraints())
+			if (!needMesh(s))
 				continue;
-			if (s.mesh != null)
-				continue;
-			if (s.getReversed() != null && s.getReversed().mesh != null)
-			{
-				s.mesh = s.getReversed().mesh;
-				continue;
-			}
 			cnt++;
 			logger.info("Solid "+cnt+"/"+nrSolids);
-			s.discretize();
+			s.discretize(this);
 		}
 	}
 
@@ -330,7 +329,7 @@ public class BSubMesh
 		for (Iterator ite = root.shapesExplorer(CADShapeEnum.EDGE); ite.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) ite.next();
-			SubMesh1D submesh1d = (SubMesh1D) s.mesh;
+			SubMesh1D submesh1d = (SubMesh1D) s.getMesh(this);
 			if (submesh1d == null)
 				continue;
 			for (Iterator itn = submesh1d.getNodesIterator(); itn.hasNext(); )
@@ -343,7 +342,7 @@ public class BSubMesh
 		for (Iterator ite = root.shapesExplorer(CADShapeEnum.EDGE); ite.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) ite.next();
-			SubMesh1D submesh1d = (SubMesh1D) s.mesh;
+			SubMesh1D submesh1d = (SubMesh1D) s.getMesh(this);
 			if (submesh1d == null)
 				continue;
 			for (Iterator itn = submesh1d.getNodesIterator(); itn.hasNext(); )
@@ -382,7 +381,7 @@ public class BSubMesh
 		for (Iterator ite = root.shapesExplorer(CADShapeEnum.EDGE); ite.hasNext(); )
 		{
 			BCADGraphCell s = (BCADGraphCell) ite.next();
-			SubMesh1D submesh1d = (SubMesh1D) s.mesh;
+			SubMesh1D submesh1d = (SubMesh1D) s.getMesh(this);
 			if (submesh1d == null)
 				continue;
 			Iterator itn = submesh1d.getNodesIterator();
@@ -436,11 +435,12 @@ public class BSubMesh
 
 		Hypothesis h0 = new Hypothesis();
 		h0.setElement("T3");
+		h0.setLength(0.3);
 
 		Hypothesis h1 = new Hypothesis();
 		h1.setElement("T4");
 		h1.setLength(0.3);
-		h1.setDeflection(0.05);
+		//h1.setDeflection(0.05);
 
 		Hypothesis h2 = new Hypothesis();
 		h2.setElement("T4");
@@ -450,15 +450,16 @@ public class BSubMesh
 		Constraint c1 = new Constraint(solids[0], h1);
 		Constraint c2 = new Constraint(solids[1], h2);
 
+		BSubMesh submesh0 = model.newMesh();
+		submesh0.add(c1);
+		submesh0.add(c0);
 		BSubMesh submesh1 = model.newMesh();
-		submesh1.add(c1);
-		submesh1.add(c0);
-		BSubMesh submesh2 = model.newMesh();
-		submesh2.add(c2);
+		submesh1.add(c2);
 		submesh1.add(c0);
 
 		model.printAllHypothesis();
 		model.compute();
-		// model.printConstraints();
+		model.printConstraints();
+		model.printConstraints(submesh0);
 	}
 }

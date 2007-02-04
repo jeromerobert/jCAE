@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
    (C) Copyright 2006, by EADS CRC
+   (C) Copyright 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,6 +21,7 @@
 
 package org.jcae.mesh.bora.ds;
 
+import org.jcae.mesh.cad.CADShapeEnum;
 import java.util.Collection;
 import java.util.ArrayList;
 
@@ -29,6 +31,11 @@ public class Constraint
 	private final Hypothesis hypothesis;
 	// List of BSubMesh instances containing this Constraint.
 	private final Collection parent = new ArrayList();
+	private Constraint origin = null;
+
+	// Unique identitier
+	private int id = -1;
+	private static int nextId = -1;
 
 	public Constraint(BCADGraphCell g, Hypothesis h)
 	{
@@ -38,6 +45,30 @@ public class Constraint
 		else
 			graphCell = g;
 		hypothesis = h;
+		setId();
+	}
+
+	public Constraint newConstraint(CADShapeEnum d)
+	{
+		Constraint ret = new Constraint(graphCell, hypothesis);
+		ret.origin = this;
+		return ret;
+	}
+
+	private void setId()
+	{
+		nextId++;
+		id = nextId;
+	}
+
+	public void setOrigin(Constraint c)
+	{
+		origin = c;
+	}
+
+	public Constraint getOrigin()
+	{
+		return origin;
 	}
 
 	public BCADGraphCell getGraphCell()
@@ -57,8 +88,10 @@ public class Constraint
 
 	public String toString()
 	{
-		String ret = ""+hypothesis.getClass().getName()+"@"+Integer.toHexString(hypothesis.hashCode());
-		ret += " "+graphCell.getClass().getName()+"@"+Integer.toHexString(graphCell.hashCode());
+		String ret = "Constraint: "+id;
+		ret += " (hyp "+hypothesis.getId()+", cell "+Integer.toHexString(graphCell.hashCode())+")";
+		if (origin != null)
+			ret += " ["+origin.id+"]";
 		return ret;
 	}
 }

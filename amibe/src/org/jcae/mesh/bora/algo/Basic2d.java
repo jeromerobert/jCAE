@@ -21,6 +21,7 @@
 package org.jcae.mesh.bora.algo;
 
 import org.jcae.mesh.bora.ds.BCADGraphCell;
+import org.jcae.mesh.bora.ds.BSubMesh;
 import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.algos2d.*;
@@ -62,12 +63,12 @@ public class Basic2d implements AlgoInterface
 		return o;
 	}
 
-	public boolean compute(BCADGraphCell mesh)
+	public boolean compute(BCADGraphCell mesh, BSubMesh s)
 	{
 		CADFace F = (CADFace) mesh.getShape();
 		logger.debug(""+this+"  shape: "+F);
 		Mesh2D m = new Mesh2D(F);
-		mesh.mesh = m;
+		mesh.setMesh(s, m);
 		String xmlFile = "jcae1d";
 		Metric2D.setLength(maxlen);
 		Metric3D.setLength(maxlen);
@@ -89,7 +90,7 @@ public class Basic2d implements AlgoInterface
 				innerV.add(n);
 			}
 		}
-		new Initial(m, mesh.mesh1D, innerV).compute();
+		new Initial(m, mesh.getMesh1D(s), innerV).compute();
 
 		m.pushCompGeom(3);
 		new Insertion(m, 16.0).compute();
@@ -107,7 +108,7 @@ public class Basic2d implements AlgoInterface
 		xmlFile = "jcae2d."+mesh.getId();
 		String xmlBrepDir = ".";
 		BModel model = mesh.getGraph().getModel();
-		MeshWriter.writeObject(m, model.getOutputDir(), xmlFile, xmlBrepDir, model.getCADFile(), mesh.getId());
+		MeshWriter.writeObject(m, model.getOutputDir(s), xmlFile, xmlBrepDir, model.getCADFile(), mesh.getId());
 		assert (m.isValid());
 		return true;
 	}

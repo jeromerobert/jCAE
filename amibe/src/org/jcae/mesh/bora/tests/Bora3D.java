@@ -23,6 +23,7 @@ import org.jcae.mesh.java3d.Viewer;
 
 import org.jcae.mesh.bora.xmldata.BModelReader;
 import org.jcae.mesh.bora.ds.BModel;
+import org.jcae.mesh.bora.ds.BSubMesh;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.cad.CADShapeEnum;
 import javax.media.j3d.Appearance;
@@ -49,7 +50,7 @@ public class Bora3D
 	private final static float absOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorAbs", "20.0f"));
 	private final static float relOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorRel", "2.0f"));
 
-	public static BranchGroup [] getBranchGroups(BModel model)
+	public static BranchGroup [] getBranchGroups(BModel model, BSubMesh s)
 	{
 		BCADGraphCell root = model.getGraph().getRootCell();
 		// Count faces
@@ -57,7 +58,7 @@ public class Bora3D
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
 		{
 			BCADGraphCell solid = (BCADGraphCell) it.next();
-			File nodesfile = new File(model.getOutputDir()+File.separator+"3d", "n"+solid.getId());
+			File nodesfile = new File(model.getOutputDir(s)+File.separator+"3d", "n"+solid.getId());
 			if (!nodesfile.exists())
 				continue;
 			nFaces++;
@@ -71,11 +72,11 @@ public class Bora3D
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
 		{
 			BCADGraphCell solid = (BCADGraphCell) it.next();
-			File nodesfile = new File(model.getOutputDir()+File.separator+"3d", "n"+solid.getId());
+			File nodesfile = new File(model.getOutputDir(s)+File.separator+"3d", "n"+solid.getId());
 			if (!nodesfile.exists())
 				continue;
 			nrNodes[nFaces+1] = nrNodes[nFaces] + (int) nodesfile.length() / 24;
-			File triasfile = new File(model.getOutputDir()+File.separator+"3d", "f"+solid.getId());
+			File triasfile = new File(model.getOutputDir(s)+File.separator+"3d", "f"+solid.getId());
 			if (!triasfile.exists())
 				continue;
 			nrTetra[nFaces+1] = nrTetra[nFaces] + (int) triasfile.length() / 16;
@@ -95,10 +96,10 @@ public class Bora3D
 			BCADGraphCell solid = (BCADGraphCell) it.next();
 			try
 			{
-				File nodesfile = new File(model.getOutputDir()+File.separator+"3d", "n"+solid.getId());
+				File nodesfile = new File(model.getOutputDir(s)+File.separator+"3d", "n"+solid.getId());
 				if (!nodesfile.exists())
 					continue;
-				File triasfile = new File(model.getOutputDir()+File.separator+"3d", "f"+solid.getId());
+				File triasfile = new File(model.getOutputDir(s)+File.separator+"3d", "f"+solid.getId());
 				if (!triasfile.exists())
 					continue;
 
@@ -150,22 +151,22 @@ public class Bora3D
 		// 3D edges
 		++iRet;
 		ret[iRet] = new BranchGroup();
-		IndexedTriangleArray s = new IndexedTriangleArray(nVertices,
+		IndexedTriangleArray l = new IndexedTriangleArray(nVertices,
 			GeometryArray.COORDINATES,
 			trias.length);
 
-		s.setCoordinateIndices(0, trias);
-		s.setCoordinates(0, xyz);
-		s.setCapability(GeometryArray.ALLOW_COUNT_READ);
-		s.setCapability(GeometryArray.ALLOW_FORMAT_READ);
-		s.setCapability(GeometryArray.ALLOW_REF_DATA_READ);
-		s.setCapability(IndexedTriangleArray.ALLOW_COORDINATE_INDEX_READ);
+		l.setCoordinateIndices(0, trias);
+		l.setCoordinates(0, xyz);
+		l.setCapability(GeometryArray.ALLOW_COUNT_READ);
+		l.setCapability(GeometryArray.ALLOW_FORMAT_READ);
+		l.setCapability(GeometryArray.ALLOW_REF_DATA_READ);
+		l.setCapability(IndexedTriangleArray.ALLOW_COORDINATE_INDEX_READ);
 
 		Appearance triaApp = new Appearance();
 		triaApp.setPolygonAttributes(new PolygonAttributes(PolygonAttributes.POLYGON_LINE, PolygonAttributes.CULL_NONE, 0));
 		triaApp.setColoringAttributes(new ColoringAttributes(1f,0f,0f,ColoringAttributes.SHADE_FLAT));
 
-		Shape3D shapeTrias = new Shape3D(s, triaApp);
+		Shape3D shapeTrias = new Shape3D(l, triaApp);
 		shapeTrias.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 		shapeTrias.setPickable(false);
 		ret[iRet].addChild(shapeTrias);
@@ -177,7 +178,7 @@ public class Bora3D
 		htriApp.setPolygonAttributes(new PolygonAttributes(PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE, 2.0f*absOffsetStep, false, relOffsetStep));
 		htriApp.setColoringAttributes(new ColoringAttributes(0.1f,0.1f,0.3f,ColoringAttributes.SHADE_FLAT));
 
-		Shape3D hiddenTrias = new Shape3D(s, htriApp);
+		Shape3D hiddenTrias = new Shape3D(l, htriApp);
 		hiddenTrias.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 		hiddenTrias.setPickable(false);
 		ret[iRet].addChild(hiddenTrias);
@@ -202,8 +203,9 @@ public class Bora3D
 	public static void main(String args[])
 	{
 		final BModel model = BModelReader.readObject(args[0]);
+		final BSubMesh s = model.newMesh();
 		final Viewer view=new Viewer();
-		final BranchGroup [] bgList = getBranchGroups(model);
+		final BranchGroup [] bgList = getBranchGroups(model, s);
 		// bgList:
 		//   0: triangles
 		//   1: triangles without hidden faces

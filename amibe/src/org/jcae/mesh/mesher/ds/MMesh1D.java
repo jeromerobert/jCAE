@@ -103,7 +103,7 @@ public class MMesh1D extends MMesh0D
 		assert(isValid());
 	}
 	
-	public MMesh1D(BModel model)
+	public MMesh1D(BModel model, BSubMesh sub)
 	{
 		super(model);
 		shape = null;
@@ -126,9 +126,9 @@ public class MMesh1D extends MMesh0D
 			//  Edges may get connected to several faces
 			if (mapTEdgeToSubMesh1D.containsKey(E))
 				continue;
-			SubMesh1D submesh1d = (SubMesh1D) c.mesh;
+			SubMesh1D submesh1d = (SubMesh1D) c.getMesh(sub);
 			if (submesh1d == null && c.getReversed() != null)
-				submesh1d = (SubMesh1D) c.getReversed().mesh;
+				submesh1d = (SubMesh1D) c.getReversed().getMesh(sub);
 			mapTEdgeToSubMesh1D.put(E, submesh1d);
 		}
 		mapTEdgeToFaces = new HashMap(edges);

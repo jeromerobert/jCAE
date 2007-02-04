@@ -27,6 +27,7 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.bora.ds.BModel;
+import org.jcae.mesh.bora.ds.BSubMesh;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADEdge;
@@ -64,12 +65,12 @@ public class Storage
 	static final String dir2d = "2d";
 	static final String dir3d = "3d";
 
-	public static void writeEdge(BCADGraphCell edge, String outDir)
+	public static void writeEdge(BCADGraphCell edge, BSubMesh s, String outDir)
 	{
 		CADEdge E = (CADEdge) edge.getShape();
 		if (E.isDegenerated())
 			return;
-		SubMesh1D submesh = (SubMesh1D) edge.mesh;
+		SubMesh1D submesh = (SubMesh1D) edge.getMesh(s);
 		if (null == submesh)
 			return;
 
@@ -96,9 +97,9 @@ public class Storage
 		}
 	}
 
-	public static void writeFace(BCADGraphCell face, String outDir)
+	public static void writeFace(BCADGraphCell face, BSubMesh s, String outDir)
 	{
-		Mesh2D submesh = (Mesh2D) face.mesh;
+		Mesh2D submesh = (Mesh2D) face.getMesh(s);
 		if (null == submesh)
 			return;
 
@@ -124,9 +125,9 @@ public class Storage
 		}
 	}
 
-	public static void writeVolume(BCADGraphCell solid, String outDir)
+	public static void writeVolume(BCADGraphCell solid, BSubMesh s, String outDir)
 	{
-		VolMesh submesh = (VolMesh) solid.mesh;
+		VolMesh submesh = (VolMesh) solid.getMesh(s);
 		if (null == submesh)
 			return;
 
@@ -156,12 +157,12 @@ public class Storage
 	 * @return a Mesh instance
 	 * @throws  RuntimeException if an error occurred
 	 */
-	public static Mesh readAllFaces(BCADGraphCell root)
+	public static Mesh readAllFaces(BCADGraphCell root, BSubMesh s)
 	{
 		Mesh m = new Mesh();
 		TIntObjectHashMap vertMap = new TIntObjectHashMap();
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
-			readFace(m, (BCADGraphCell) it.next(), vertMap);
+			readFace(m, (BCADGraphCell) it.next(), s, vertMap);
 		return m;
 	}
 
@@ -172,7 +173,7 @@ public class Storage
 	 * @param mapRefVertex    map between references and Vertex instances
 	 * @throws  RuntimeException if an error occurred
 	 */
-	public static void readFace(Mesh mesh, BCADGraphCell root, TIntObjectHashMap mapRefVertex)
+	public static void readFace(Mesh mesh, BCADGraphCell root, BSubMesh s, TIntObjectHashMap mapRefVertex)
 	{
 		assert root.getShape() instanceof CADFace;
 		BModel model = root.getGraph().getModel();
@@ -186,7 +187,7 @@ public class Storage
 		int id = root.getId();
 		try
 		{
-			File dir = new File(model.getOutputDir(), dir2d);
+			File dir = new File(model.getOutputDir(s), dir2d);
 			// Read vertex references
 			int [] refs = read2dNodeReferences(dir, id);
 			// Create a Vertex array, amd insert new references
@@ -209,12 +210,12 @@ public class Storage
 	 * @return a VolMesh instance
 	 * @throws  RuntimeException if an error occurred
 	 */
-	public static VolMesh readAllVolumes(BCADGraphCell root)
+	public static VolMesh readAllVolumes(BCADGraphCell root, BSubMesh s)
 	{
 		VolMesh m = new VolMesh();
 		TIntObjectHashMap vertMap = new TIntObjectHashMap();
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
-			readVolume(m, (BCADGraphCell) it.next(), vertMap);
+			readVolume(m, (BCADGraphCell) it.next(), s, vertMap);
 		return m;
 	}
 
@@ -225,7 +226,7 @@ public class Storage
 	 * @param mapRefVertex    map between references and Vertex instances
 	 * @throws  RuntimeException if an error occurred
 	 */
-	public static void readVolume(VolMesh mesh, BCADGraphCell root, TIntObjectHashMap mapRefVertex)
+	public static void readVolume(VolMesh mesh, BCADGraphCell root, BSubMesh s, TIntObjectHashMap mapRefVertex)
 	{
 		assert root.getShape() instanceof CADSolid;
 		BModel model = root.getGraph().getModel();
@@ -239,7 +240,7 @@ public class Storage
 		int id = root.getId();
 		try
 		{
-			File dir = new File(model.getOutputDir(), dir3d);
+			File dir = new File(model.getOutputDir(s), dir3d);
 			// Read vertex references
 			int [] refs = read2dNodeReferences(dir, id);
 			// Create a Vertex array, amd insert new references
