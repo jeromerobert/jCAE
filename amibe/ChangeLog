@@ -1,3 +1,8 @@
+Sun Feb  4 23:47:56 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/MeshToSoupConvert.java: Ensure that nodes
+	on boundary faces have the same coordinates on all faces.
+
 Sun Feb  4 02:34:17 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/oemm/IndexedStorage.java

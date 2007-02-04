@@ -31,19 +31,30 @@ import java.nio.channels.FileChannel;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
-import org.apache.log4j.Logger;
-import org.jcae.mesh.cad.*;
+import org.jcae.mesh.cad.CADShapeBuilder;
+import org.jcae.mesh.cad.CADShapeEnum;
+import org.jcae.mesh.cad.CADExplorer;
+import org.jcae.mesh.cad.CADGeomSurface;
+import org.jcae.mesh.cad.CADShape;
+import org.jcae.mesh.cad.CADFace;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import gnu.trove.TIntIntHashMap;
+import org.apache.log4j.Logger;
 
 
 public class MeshToSoupConvert extends JCAEXMLData
 {
 	private static Logger logger=Logger.getLogger(MeshToSoupConvert.class);
 	private int nrTriangles = 0;
+	private int nrIntNodes = 0;
 	private int nrNodes = 0;
+	private int nrRefs = 0;
+	private int offsetBnd = 0;
 	private String xmlDir;
 	private File rawFile;
+	private TIntIntHashMap xrefs = null;
+	private double [] coordRefs = null;
 	// Must be a multiple of 8*2, 4*3 and 8*10
 	private static final int bufferSize = 15 << 12;
 	private ByteBuffer bb = ByteBuffer.allocate(bufferSize);
@@ -72,6 +83,17 @@ public class MeshToSoupConvert extends JCAEXMLData
 
 		int iFace = 0;
 		MeshToSoupConvert m2dTo3D = new MeshToSoupConvert(xmlDir);
+		logger.info("Read informations on boundary nodes");
+		for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
+		{
+			iFace++;
+			if (numFace != 0 && iFace != numFace)
+				continue;
+			if ((minFace != 0 || maxFace != 0) && (iFace < minFace || iFace > maxFace))
+				continue;
+			String xmlFile = "jcae2d."+iFace;
+			m2dTo3D.computeRefs(xmlFile);
+		}
 		m2dTo3D.initialize("soup", false);
 		iFace = 0;
 		for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
@@ -94,8 +116,50 @@ public class MeshToSoupConvert extends JCAEXMLData
 		xmlDir = dir;
 	}
 	
+	public void computeRefs(String xmlInFile)
+	{
+		Document document;
+		try
+		{
+			document = XMLHelper.parseXML(new File(xmlDir, xmlInFile));
+		}
+		catch(FileNotFoundException ex)
+		{
+			return;
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+		XPath xpath = XPathFactory.newInstance().newXPath();
+		try
+		{
+			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh",
+				document, XPathConstants.NODE);
+			Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement,
+				XPathConstants.NODE);
+			
+			int numberOfReferences = Integer.parseInt(
+				xpath.evaluate("references/number/text()", submeshNodes));
+			nrRefs += numberOfReferences;
+			int numberOfNodes = Integer.parseInt(
+				xpath.evaluate("number/text()", submeshNodes));
+			nrIntNodes += numberOfNodes - numberOfReferences;
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+		logger.debug("Total: "+nrRefs+" references");
+	}
+	
 	public void initialize(String xmlOutFile, boolean writeNormal)
 	{
+		coordRefs = new double[3*nrRefs];
+		xrefs = new TIntIntHashMap(nrRefs);
+
 		rawFile = new File(xmlDir, xmlOutFile);
 		rawFile.delete();
 	}
@@ -135,6 +199,35 @@ public class MeshToSoupConvert extends JCAEXMLData
 			Node submeshFaces = (Node) xpath.evaluate("triangles",
 				submeshElement, XPathConstants.NODE);
 			
+			String refFile = xpath.evaluate("references/file/@location", submeshNodes);
+			FileChannel fcR = new FileInputStream(xmlDir+File.separator+refFile).getChannel();
+			int numberOfReferences = Integer.parseInt(
+				xpath.evaluate("references/number/text()", submeshNodes));
+			int [] refs = new int[numberOfReferences];
+			logger.debug("Reading "+numberOfReferences+" references");
+			bb.clear();
+			bbI.clear();
+			int remaining = numberOfReferences;
+			int index = 0;
+			int nf = bufferSize / 12;
+			for (int nblock = (remaining * 12) / bufferSize; nblock >= 0; --nblock)
+			{
+				if (remaining <= 0)
+					break;
+				else if (remaining < nf)
+					nf = remaining;
+				remaining -= nf;
+				bb.rewind();
+				fcR.read(bb);
+				bbI.rewind();
+				for(int nr = 0; nr < nf; nr ++)
+				{
+					refs[index] = bbI.get();
+					index++;
+				}
+			}
+			assert index == numberOfReferences;
+
 			int numberOfNodes = Integer.parseInt(xpath.evaluate(
 				"number/text()", submeshNodes));
 
@@ -144,9 +237,9 @@ public class MeshToSoupConvert extends JCAEXMLData
 			double [] coord = new double[3*numberOfNodes];
 			bb.clear();
 			bbD.clear();
-			int index = 0;
-			int remaining = numberOfNodes;
-			int nf = bufferSize / 16;
+			index = 0;
+			remaining = numberOfNodes;
+			nf = bufferSize / 16;
 			for (int nblock = (remaining * 16) / bufferSize; nblock >= 0; --nblock)
 			{
 				if (remaining <= 0)
@@ -161,9 +254,27 @@ public class MeshToSoupConvert extends JCAEXMLData
 				{
 					double u = bbD.get();
 					double v = bbD.get();
-					double [] p3 = surface.value(u, v);
-					for (int j = 0; j < 3; j++)
-						coord[3*index+j] = p3[j];
+					if (index < numberOfNodes - numberOfReferences)
+					{
+						double [] p3 = surface.value(u, v);
+						for (int j = 0; j < 3; j++)
+							coord[3*index+j] = p3[j];
+					}
+					else
+					{
+						int ref = refs[index - numberOfNodes + numberOfReferences];
+						if (!xrefs.contains(ref))
+						{
+							double [] p3 = surface.value(u, v);
+							xrefs.put(ref, offsetBnd);
+							for (int j = 0; j < 3; j++)
+								coordRefs[3*offsetBnd+j] = p3[j];
+							offsetBnd++;
+						}
+						ref = xrefs.get(ref);
+						for (int j = 0; j < 3; j++)
+							coord[3*index+j] = coordRefs[3*ref+j];
+					}
 					index++;
 				}
 			}
@@ -236,4 +347,3 @@ public class MeshToSoupConvert extends JCAEXMLData
 		}
 	}
 }
-
