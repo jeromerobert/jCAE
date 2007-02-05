@@ -24,7 +24,10 @@ import org.jcae.mesh.amibe.util.OctreeTest;
 import org.jcae.mesh.amibe.ds.Vertex;
 import java.io.*;
 import java.util.StringTokenizer;
-import org.jcae.mesh.java3d.Viewer;
+import javax.swing.JFrame;
+import javax.swing.WindowConstants;
+import org.jcae.viewer3d.bg.ViewableBG;
+import org.jcae.viewer3d.View;
 
 /**
  * Unit test to check the influence of <code>BUCKETSIZE</code>.
@@ -42,17 +45,8 @@ public class OctreeTestDisplayPLY extends OctreeTest
 		super (umin, umax);
 	}
 	
-	public static void display(Viewer view, OctreeTest r)
-	{
-		view.addBranchGroup(r.bgOctree());
-		view.setVisible(true);
-		view.addBranchGroup(r.bgVertices());
-		view.setVisible(true);
-	}
-	
 	public static void main(String args[])
 	{
-		boolean visu = true;
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		String line;
 		int nrNodes = 0;
@@ -128,27 +122,15 @@ public class OctreeTestDisplayPLY extends OctreeTest
 		//CheckCoordProcedure checkproc = new CheckCoordProcedure();
 		//r.walk(checkproc);
 		
-		final Viewer view=new Viewer();
-		if (visu)
-		{
-			display(view, r);
-			view.zoomTo(); 
-/*
-			view.callBack=new Runnable()
-			{
-				public void run()
-				{
-					double [] xyz = view.getLastClick();
-					if (null != xyz)
-					{
-						Vertex vt = r.getNearVertex(Vertex.valueOf(xyz));
-						r.remove(vt);
-						view.removeAllBranchGroup();
-						display(view, r);
-					}
-				}
-			};
-*/
-		}
+		final View view = new View();
+		JFrame feFrame = new JFrame("PLY Viewer Demo");
+		feFrame.setSize(800,600);
+		feFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+		view.add(new ViewableBG(r.bgOctree()));
+		view.add(new ViewableBG(r.bgVertices()));
+		view.fitAll(); 
+		feFrame.getContentPane().add(view);
+		feFrame.setVisible(true);
 	}
 }
