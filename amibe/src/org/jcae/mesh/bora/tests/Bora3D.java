@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2006, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -18,8 +19,6 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
 package org.jcae.mesh.bora.tests;
-
-import org.jcae.mesh.java3d.Viewer;
 
 import org.jcae.mesh.bora.xmldata.BModelReader;
 import org.jcae.mesh.bora.ds.BModel;
@@ -42,6 +41,13 @@ import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import javax.swing.JFrame;
+import javax.swing.WindowConstants;
+import org.jcae.viewer3d.bg.ViewableBG;
+import org.jcae.viewer3d.View;
 
 import java.util.Iterator;
 
@@ -204,8 +210,13 @@ public class Bora3D
 	{
 		final BModel model = BModelReader.readObject(args[0]);
 		final BSubMesh s = model.newMesh();
-		final Viewer view=new Viewer();
+		final View view = new View();
+		JFrame feFrame = new JFrame("Bora Demo");
+		feFrame.setSize(800,600);
+		feFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
 		final BranchGroup [] bgList = getBranchGroups(model, s);
+		final ViewableBG [] viewList = new ViewableBG[bgList.length];
 		// bgList:
 		//   0: triangles
 		//   1: triangles without hidden faces
@@ -213,17 +224,17 @@ public class Bora3D
 		//   3: 3D nodes
 		final boolean [] active = new boolean[bgList.length];
 		for (int i = 0; i < bgList.length; i++)
+		{
 			active[i] = true;
+			viewList[i] = new ViewableBG(bgList[i]);
+		}
 		for (int i = 0; i < bgList.length; i++)
 			if (active[i])
-				view.addBranchGroup(bgList[i]);
-		view.setVisible(true);
-		view.zoomTo(); 
-		view.callBack = new Runnable()
-		{
-			public void run()
+				view.add(viewList[i]);
+		view.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent event)
 			{
-				char k = view.getLastKey();
+				char k = event.getKeyChar();
 				if ('2' == k)
 					active[2] = !active[2];
 				else if ('3' == k)
@@ -232,14 +243,20 @@ public class Bora3D
 					active[0] = !active[0];
 				else if ('f' == k)
 					active[1] = !active[1];
+				else if ('q' == k)
+					System.exit(0);
 				else
 					return;
-				view.removeAllBranchGroup();
 				for (int i = 0; i < bgList.length; i++)
+				{
+					view.remove(viewList[i]);
 					if (active[i])
-						view.addBranchGroup(bgList[i]);
-				view.setVisible(true);
+						view.add(viewList[i]);
+				}
 			}
-		};
+		});
+		view.fitAll(); 
+		feFrame.getContentPane().add(view);
+		feFrame.setVisible(true);
 	}
 }
