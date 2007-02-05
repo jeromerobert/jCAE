@@ -57,6 +57,7 @@ public class IndexedStorage
 	private static final int VERTEX_SIZE_INDEXED = 12;
 	private static final int TRIANGLE_SIZE_INDEXED = 28;
 	private static final int VERTEX_SIZE = 24;
+	// bufferSize = 16128
 	private static final int bufferSize = TRIANGLE_SIZE_DISPATCHED * VERTEX_SIZE_INDEXED * TRIANGLE_SIZE_INDEXED;
 	
 	private static ByteBuffer bb = ByteBuffer.allocate(bufferSize);
@@ -73,6 +74,7 @@ public class IndexedStorage
 		try
 		{
 			//  Index internal vertices
+			logger.info("Write octree cells onto disk");
 			logger.debug("Index internal vertices");
 			FileInputStream fis = new FileInputStream(ret.getFileName());
 			IndexInternalVerticesProcedure iiv_proc = new IndexInternalVerticesProcedure(ret, fis, outDir);
@@ -358,39 +360,38 @@ public class IndexedStorage
 		private FileChannel fc;
 		private int [] ijk = new int[3];
 		private PAVLTreeIntArrayDup [] vertices;
+		private boolean [] needed;
 		public IndexExternalVerticesProcedure(OEMM o, FileInputStream in, String dir)
 		{
 			oemm = o;
 			fc = in.getChannel();
 			vertices = new PAVLTreeIntArrayDup[oemm.nr_leaves];
+			needed = new boolean[vertices.length];
 		}
 		public final int action(OEMMNode current, int octant, int visit)
 		{
 			if (visit != LEAF)
 				return SKIPWALK;
 			logger.debug("Indexing external vertices of node "+(current.leafIndex+1)+"/"+oemm.nr_leaves);
-/*
-			//  TODO:  Add a better memory management system
-			System.gc();
-			if (Runtime.getRuntime().freeMemory() < 100000000L)
+			// Only adjacent leaves are needed, drop others
+			// to free memory.
+			// TODO: Add a better mamory management system.
+			for (int i = 0; i < needed.length; i++)
+				needed[i] = false;
+			needed[current.leafIndex] = true;
+			for (int i = 0; i < current.adjLeaves.size(); i++)
+				needed[current.adjLeaves.get(i)] = true;
+			for (int i = 0; i < needed.length; i++)
 			{
-				logger.debug("Purging cached vertices to release memory");
-				for (int i = 0; i < vertices.length; i++)
+				if (!needed[i])
 					vertices[i] = null;
 			}
-*/
-			for (int i = 0; i < vertices.length; i++)
-				vertices[i] = null;
 			
-			//  Load inner vertices...
-			if (vertices[current.leafIndex] == null)
-				vertices[current.leafIndex] = loadVerticesInAVLTreeDup(current);
-			//  ... and adjacent ones.
-			for (int i = 0; i < current.adjLeaves.size(); i++)
+			//  Load needed vertices
+			for (int i = 0; i < vertices.length; i++)
 			{
-				int ind = current.adjLeaves.get(i);
-				if (vertices[ind] == null)
-					vertices[ind] = loadVerticesInAVLTreeDup(oemm.leaves[ind]);
+				if (needed[i] && vertices[i] == null)
+					vertices[i] = loadVerticesInAVLTreeDup(oemm.leaves[i]);
 			}
 			
 			try
