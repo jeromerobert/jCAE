@@ -67,6 +67,7 @@ public class RawStorage
 			logger.error("The RawOEMM must first be initialized by calling RawOEMM(String file, int lmax, double [] umin, double [] umax)");
 			return;
 		}
+		logger.info("Count triangles");
 		logger.debug("Reading "+tree.getFileName()+" and count triangles");
 		long tcount = 0;
 		try
@@ -209,10 +210,12 @@ count++;
 			logger.error("The RawOEMM must first be initialized by calling countTriangles()");
 			return;
 		}
-		logger.debug("Raw OEMM: computing global offset for raw file");
+		logger.info("Put triangles into a linearized octree");
+		logger.debug("Raw OEMM: compute global offset for raw file");
 		//  For each octant, compute its index and its offset in output file.
 		ComputeOffsetProcedure proc = new ComputeOffsetProcedure();
 		tree.walk(proc);
+		logger.debug("Raw OEMM: compute min/max indices");
 		long outputFileSize = proc.getOffset();
 		ComputeMinMaxIndicesProcedure cmmi_proc = new ComputeMinMaxIndicesProcedure();
 		tree.walk(cmmi_proc);
