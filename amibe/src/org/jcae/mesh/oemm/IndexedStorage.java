@@ -42,6 +42,7 @@ import java.util.HashSet;
 import gnu.trove.TIntIterator;
 import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntObjectHashMap;
+import gnu.trove.TIntObjectIterator;
 import gnu.trove.TIntArrayList;
 import gnu.trove.TIntHashSet;
 import org.jcae.mesh.amibe.ds.Mesh;
@@ -361,6 +362,7 @@ public class IndexedStorage
 		private int [] ijk = new int[3];
 		private PAVLTreeIntArrayDup [] vertices;
 		private boolean [] needed;
+		private int nr_ld_leaves = 0;
 		public IndexExternalVerticesProcedure(OEMM o, FileInputStream in, String dir)
 		{
 			oemm = o;
@@ -391,7 +393,10 @@ public class IndexedStorage
 			for (int i = 0; i < vertices.length; i++)
 			{
 				if (needed[i] && vertices[i] == null)
+				{
+					nr_ld_leaves++;
 					vertices[i] = loadVerticesInAVLTreeDup(oemm.leaves[i]);
+				}
 			}
 			
 			try
@@ -457,6 +462,10 @@ public class IndexedStorage
 				throw new RuntimeException(ex);
 			}
 			return OK;
+		}
+		public void finish()
+		{
+			logger.debug("Total number of leaves loaded: "+nr_ld_leaves);
 		}
 	}
 	
@@ -646,23 +655,38 @@ public class IndexedStorage
 		ReadTrianglesProcedure rt_proc = new ReadTrianglesProcedure(oemm, vertMap, leaves, ret);
 		oemm.walk(rt_proc);
 		
-		/*
-		 * Some vertices may not have been added into vertMap if they belong
-		 * to adjacent triangles, so compute the list of vertices
-		 */
-		HashSet vSet = new HashSet();
+		int nrv = 0;
+		for (TIntObjectIterator it = vertMap.iterator(); it.hasNext(); )
+		{
+			it.advance();
+			Vertex v = (Vertex) it.value();
+			if (v.getLink() != null)
+				nrv++;
+		}
+		Vertex [] vertices = new Vertex[nrv];
+		nrv = 0;
+		for (TIntObjectIterator it = vertMap.iterator(); it.hasNext(); )
+		{
+			it.advance();
+			Vertex v = (Vertex) it.value();
+			if (v.getLink() != null)
+			{
+				vertices[nrv] = v;
+				nrv++;
+			}
+		}
+
+		ret.buildAdjacency(vertices, -1.0);
+		// Outer triangles have been added, mark these triangles
 		for (Iterator it = ret.getTriangles().iterator(); it.hasNext(); )
 		{
 			Triangle t = (Triangle) it.next();
-			for (int i = 0; i < 3; i++)
-				vSet.add(t.vertex[i]);
+			if (t.isOuter())
+			{
+				t.setReadable(false);
+				t.setWritable(false);
+			}
 		}
-		int i = vSet.size();
-		Vertex [] vertices = new Vertex[i];
-		i = 0;
-		for (Iterator it = vSet.iterator(); it.hasNext(); i++)
-			vertices[i] = (Vertex) it.next();
-		ret.buildAdjacency(vertices, -1.0);
 		return ret;
 	}
 	
@@ -793,29 +817,23 @@ public class IndexedStorage
 							{
 								vert[j] = (Vertex) vertMap.get(globalIndex);
 								assert vert[j] != null;
-								if (!vert[j].isWritable())
-									writable = false;
 							}
 							else
 							{
-								readable = false;
 								writable = false;
-								vert[j] = Vertex.valueOf(0.0, 0.0, 0.0);
+								vert[j] = null;
 							}
 						}
 						// group number
 						bbI.get();
+						if (!writable)
+							continue;
 						Triangle t = new Triangle(vert[0], vert[1], vert[2]);
 						vert[0].setLink(t);
 						vert[1].setLink(t);
 						vert[2].setLink(t);
 						t.setReadable(readable);
 						t.setWritable(writable);
-						if (vert[0] == mesh.outerVertex || vert[1] == mesh.outerVertex || vert[2] == mesh.outerVertex)
-						{
-							t.setOuter();
-							t.setReadable(false);
-						}
 						mesh.add(t);
 					}
 				}
