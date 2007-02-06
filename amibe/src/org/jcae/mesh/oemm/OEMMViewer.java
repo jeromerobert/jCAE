@@ -36,9 +36,11 @@ import javax.media.j3d.IndexedGeometryArray;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.LineAttributes;
 import gnu.trove.TIntHashSet;
+import org.apache.log4j.Logger;
 
 public class OEMMViewer
 {
+	private static Logger logger = Logger.getLogger(OEMMViewer.class);	
 	private final static float absOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorAbs", "20.0f"));
 	private final static float relOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorRel", "2.0f"));
 
@@ -143,6 +145,7 @@ public class OEMMViewer
 		Shape3D shapeFreeEdges = new Shape3D(geom, freeEdgeApp);
 		shapeFreeEdges.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 		bg.addChild(shapeFreeEdges);
+		logger.info("Number of free edges: "+(beams.length/2));
 		return bg;
 	}
 
@@ -189,6 +192,8 @@ public class OEMMViewer
 			for (int j = 0; j < 3; j++)
 			{
 				ot.nextOTri();
+				if (!ot.origin().isWritable() && !ot.destination().isWritable())
+					continue;
 				if (ot.hasAttributes(OTriangle.BOUNDARY))
 					nrt++;
 			}
@@ -204,6 +209,8 @@ public class OEMMViewer
 			for (int j = 0; j < 3; j++)
 			{
 				ot.nextOTri();
+				if (!ot.origin().isWritable() && !ot.destination().isWritable())
+					continue;
 				if (ot.hasAttributes(OTriangle.BOUNDARY))
 				{
 					ret[2*i] = ot.origin().getLabel();
