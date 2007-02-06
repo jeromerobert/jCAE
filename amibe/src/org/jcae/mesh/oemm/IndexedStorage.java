@@ -546,7 +546,7 @@ public class IndexedStorage
 		return ret;
 	}
 	
-	private static void writeHeaderOEMMNode(OEMMNode current)
+	public static void writeHeaderOEMMNode(OEMMNode current)
 	{
 		try
 		{
@@ -656,6 +656,11 @@ public class IndexedStorage
 	
 	public static Mesh loadNodes(OEMM oemm, TIntHashSet leaves)
 	{
+		return loadNodes(oemm, leaves, true);
+	}
+
+	public static Mesh loadNodes(OEMM oemm, TIntHashSet leaves, boolean adjacency)
+	{
 		logger.info("Loading nodes");
 		Mesh ret = new Mesh();
 		TIntObjectHashMap vertMap = new TIntObjectHashMap();
@@ -685,17 +690,21 @@ public class IndexedStorage
 			}
 		}
 
-		ret.buildAdjacency(vertices, -1.0);
-		// Outer triangles have been added, mark these triangles
-		for (Iterator it = ret.getTriangles().iterator(); it.hasNext(); )
+		if (adjacency)
 		{
-			Triangle t = (Triangle) it.next();
-			if (t.isOuter())
+			ret.buildAdjacency(vertices, -1.0);
+			// Outer triangles have been added, mark these triangles
+			for (Iterator it = ret.getTriangles().iterator(); it.hasNext(); )
 			{
-				t.setReadable(false);
-				t.setWritable(false);
+				Triangle t = (Triangle) it.next();
+				if (t.isOuter())
+				{
+					t.setReadable(false);
+					t.setWritable(false);
+				}
 			}
 		}
+		logger.info("Nr. of triangles: "+ret.getTriangles().size());
 		return ret;
 	}
 	

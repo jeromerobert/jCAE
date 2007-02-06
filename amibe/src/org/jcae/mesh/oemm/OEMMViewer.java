@@ -98,8 +98,13 @@ public class OEMMViewer
 	
 	public static BranchGroup meshOEMM(OEMM oemm, TIntHashSet leaves)
 	{
+		return meshOEMM(oemm, leaves, true);
+	}
+
+	public static BranchGroup meshOEMM(OEMM oemm, TIntHashSet leaves, boolean adjacency)
+	{
 		BranchGroup bg = new BranchGroup();
-		Mesh mesh = IndexedStorage.loadNodes(oemm, leaves);
+		Mesh mesh = IndexedStorage.loadNodes(oemm, leaves, adjacency);
 		double [] coord = meshCoord(mesh);
 		TriangleArray tri = new TriangleArray(coord.length/3, TriangleArray.COORDINATES);
 		tri.setCapability(TriangleArray.ALLOW_COUNT_READ);
@@ -124,6 +129,8 @@ public class OEMMViewer
 		Shape3D shapeLine = new Shape3D(tri, wireFrame);
 		shapeLine.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 		bg.addChild(shapeLine);
+		if (!adjacency)
+			return bg;
 
 		// Free edges
 		int [] beams = meshFreeEdges(mesh);
