@@ -112,14 +112,15 @@ public class OEMMNode
 	
 	public String toString()
 	{
-		return "Leaf?: "+isLeaf+
+		return " IJK "+Integer.toHexString(i0)+" "+Integer.toHexString(j0)+" "+Integer.toHexString(k0)+
 		       " Size=" +Integer.toHexString(size)+
-		       " IJK "+Integer.toHexString(i0)+" "+Integer.toHexString(j0)+" "+Integer.toHexString(k0)+
+			"Leaf?: "+isLeaf+
 		       " NrV="+vn+
 		       " NrT="+tn+
 		       " index="+leafIndex+
 		       " min="+minIndex+
 		       " max="+maxIndex+
-		       " file="+file;
+		       " file="+file+
+		       " adj="+adjLeaves;
 	}
 }
