@@ -111,6 +111,9 @@ public class Triangle implements Serializable
 	private int groupId = -1;
 	// Link to an HalfEdge
 	private HalfEdge hedge = null;
+	// Used by OEMM
+	private boolean readable = true;
+	private boolean writable = true;
 	
 	// We sometimes need to process lists of triangles before mesh
 	// connectivity has been set up.  This can be achieved efficiently
@@ -333,30 +336,24 @@ public class Triangle implements Serializable
 		return isFlagged(OTriangle.BOUNDARY);
 	}
 	
+	public void setReadable(boolean r)
+	{
+		readable = r;
+	}
+	
+	public void setWritable(boolean w)
+	{
+		writable = w;
+	}
+	
 	public boolean isReadable()
 	{
-		return (edgeAttributes[1] & 0x80) != 0;
+		return readable;
 	}
 	
 	public boolean isWritable()
 	{
-		return (edgeAttributes[2] & 0x80) != 0;
-	}
-	
-	public void setReadable(boolean b)
-	{
-		if (b)
-			edgeAttributes[1] |= 0x80;
-		else
-			edgeAttributes[1] &= ~0x80;
-	}
-	
-	public void setWritable(boolean b)
-	{
-		if (b)
-			edgeAttributes[2] |= 0x80;
-		else
-			edgeAttributes[2] &= ~0x80;
+		return writable;
 	}
 	
 	public int getEdgeAttributes(int num)
