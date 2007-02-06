@@ -132,11 +132,8 @@ public abstract class AbstractAlgoHalfEdge
 			{
 				QSortedTree.Node q = (QSortedTree.Node) itt.next();
 				current = (HalfEdge) q.getData();
-				if (nrFinal == 0)
-					cost = q.getValue();
-				else
-					cost = -1.0;
-				if (cost > tolerance)
+				cost = q.getValue();
+				if (nrFinal == 0 && cost > tolerance)
 					break;
 				if (canProcessEdge(current))
 					break;
@@ -147,7 +144,6 @@ public abstract class AbstractAlgoHalfEdge
 				// processed.  This has to be done outside this loop,
 				// because PAVLSortedTree instances must not be modified
 				// when walked through.
-				// FIXME: Handle nrFinal != 0 case also
 				if (nrFinal == 0)
 				{
 					stackNotProcessed.push(current);
@@ -157,8 +153,13 @@ public abstract class AbstractAlgoHalfEdge
 						// tolerance = cost = 0
 						stackNotProcessed.push(new Double(1.0));
 				}
+				else
+				{
+					stackNotProcessed.push(current);
+					stackNotProcessed.push(new Double(2.0*cost));
+				}
 			}
-			if (cost > tolerance || current == null || !itt.hasNext())
+			if ((nrFinal == 0 && cost > tolerance) || current == null || !itt.hasNext())
 				break;
 			// Update costs for edges which were not contracted
 			while (stackNotProcessed.size() > 0)

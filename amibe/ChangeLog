@@ -3,6 +3,9 @@ Tue Feb  6 12:36:26 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/oemm/OEMMMesh.java
 	  src/org/jcae/mesh/oemm/OEMMTriangle.java
 	  src/org/jcae/mesh/oemm/OEMMVertex.java: Remove useless classes.
+	* src/org/jcae/mesh/amibe/algos3d/AbstractAlgoHalfEdge.java: Also
+	add penalty to edges which cannot be contracted when "maxtriangles"
+	parameter is set.
 
 Sun Feb  4 23:47:56 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
