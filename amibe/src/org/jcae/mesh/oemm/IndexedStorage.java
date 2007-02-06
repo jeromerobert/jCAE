@@ -718,7 +718,7 @@ public class IndexedStorage
 						for (int j = 0; j < n; j++)
 						{
 							int num = (int) bufIn.readByte();
-							if (!leaves.contains(num))
+							if (!leaves.contains(current.adjLeaves.get(num)))
 							{
 								writable = false;
 								for (j++; j < n; j++)
