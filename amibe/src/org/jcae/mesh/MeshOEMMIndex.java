@@ -44,13 +44,9 @@ public class MeshOEMMIndex
 			umax[i] = bbox[i+3];
 		String rawMesh = soupDir+File.separator+"soup";
 		final RawOEMM oemm = new RawOEMM(rawMesh, lmax, bbox, umax);
-		logger.info("Count triangles");
 		RawStorage.countTriangles(oemm);
-		logger.info("Build octree structure");
 		oemm.aggregate(triangles_max);
-		logger.info("Put triangles into a linearized octree");
 		RawStorage.dispatch(oemm, "dispatched", "dispatched.data");
-		logger.info("Write octree onto disk");
 		IndexedStorage.indexOEMM("dispatched", outDir);
 		logger.info("End processing");
 	}
