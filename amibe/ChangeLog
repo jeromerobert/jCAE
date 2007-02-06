@@ -1,3 +1,9 @@
+Tue Feb  6 12:36:26 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/oemm/OEMMMesh.java
+	  src/org/jcae/mesh/oemm/OEMMTriangle.java
+	  src/org/jcae/mesh/oemm/OEMMVertex.java: Remove useless classes.
+
 Sun Feb  4 23:47:56 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/MeshToSoupConvert.java: Ensure that nodes
