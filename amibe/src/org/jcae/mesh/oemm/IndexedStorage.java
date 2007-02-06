@@ -267,44 +267,23 @@ public class IndexedStorage
 				current.maxIndex = globalIndex + current.vn + room - 1;
 				globalIndex += index + room;
 				
-				//  Now store data structure onto disk
-				DataOutputStream output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(new File(current.topDir, current.file+"h"))));
-				//  Leaf index
-				output.writeInt(current.leafIndex);
-				//  Cell size
-				output.writeInt(current.size);
-				//  Coordiantes
-				output.writeInt(current.i0);
-				output.writeInt(current.j0);
-				output.writeInt(current.k0);
-				//  Number of neighboring nodes sharing data
-				output.writeInt(set.size());
-				TIntIntHashMap map = new TIntIntHashMap(set.size());
+				current.adjLeaves = new TIntArrayList(set.size());
+				TIntIntHashMap invMap = new TIntIntHashMap(set.size());
 				int cnt = 0;
 				for (TIntIterator it = set.iterator(); it.hasNext();)
 				{
 					int ind = it.next();
-					output.writeInt(ind);
-					map.put(ind, cnt);
+					current.adjLeaves.add(ind);
+					invMap.put(ind, cnt);
 					cnt++;
 				}
-				//  First global index
-				output.writeInt(current.minIndex);
-				//  Last available global index
-				output.writeInt(current.maxIndex);
-				//  Number of inner vertices
-				output.writeInt(current.vn);
-				//  Number of triangles
-				output.writeInt(tCount);
-				//  These two integers are not used during normal
-				//  processing, but they are needed to recover
-				//  from a crash in IndexExternalVerticesProcedure
-				//  without having to run IndexInternalVerticesProcedure
-				//  again
-				output.writeLong(current.counter);
-				output.writeInt(current.tn);
-				
-				output.close();
+				// tCount will be the nymber of triangles
+				// written onto disk, but we still need the
+				// old value.
+				int tn = current.tn;
+				current.tn = tCount;
+				writeHeaderOEMMNode(current);
+				current.tn = tn;
 				
 				FileChannel fcv = new FileOutputStream(new File(current.topDir, current.file+"i")).getChannel();
 				DataOutputStream outAdj = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(new File(current.topDir, current.file+"a"))));
@@ -330,7 +309,7 @@ public class IndexedStorage
 						for (TIntIterator it = c.adj.iterator(); it.hasNext();)
 						{
 							int ind = it.next();
-							outAdj.writeByte((byte) map.get(ind));
+							outAdj.writeByte((byte) invMap.get(ind));
 						}
 						i++;
 					}
@@ -556,12 +535,6 @@ public class IndexedStorage
 			ret.vn = bufIn.readInt();
 			//  Number of triangles
 			ret.tn = bufIn.readInt();
-			//  When IndexExternalVerticesProcedure is called
-			//  whereas IndexInternalVerticesProcedure was not
-			//  (e.g. after a crash to not reindex internal
-			//  vertices), uncomment the folllowing 2 lines
-			//ret.counter = bufIn.readLong();
-			//ret.tn = bufIn.readInt();
 			bufIn.close();
 		}
 		catch (IOException ex)
@@ -573,6 +546,42 @@ public class IndexedStorage
 		return ret;
 	}
 	
+	private static void writeHeaderOEMMNode(OEMMNode current)
+	{
+		try
+		{
+			DataOutputStream output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(new File(current.topDir, current.file+"h"))));
+			//  Leaf index
+			output.writeInt(current.leafIndex);
+			//  Cell size
+			output.writeInt(current.size);
+			//  Coordiantes
+			output.writeInt(current.i0);
+			output.writeInt(current.j0);
+			output.writeInt(current.k0);
+			//  Number of neighboring nodes sharing data
+			int n = current.adjLeaves.size();
+			output.writeInt(n);
+			for (int i = 0; i < n; i++)
+				output.writeInt(current.adjLeaves.get(i));
+			//  First global index
+			output.writeInt(current.minIndex);
+			//  Last available global index
+			output.writeInt(current.maxIndex);
+			//  Number of inner vertices
+			output.writeInt(current.vn);
+			//  Number of triangles
+			output.writeInt(current.tn);
+			output.close();
+		}
+		catch (IOException ex)
+		{
+			logger.error("I/O error when writing header file "+current.topDir+File.separator+current.file+"h");
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+	}
+
 	private static PAVLTreeIntArrayDup loadVerticesInAVLTreeDup(OEMMNode current)
 	{
 		PAVLTreeIntArrayDup ret = new PAVLTreeIntArrayDup();
