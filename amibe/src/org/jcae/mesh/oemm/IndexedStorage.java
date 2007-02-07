@@ -847,6 +847,7 @@ public class IndexedStorage
 						if (!writable)
 							continue;
 						Triangle t = new Triangle(vert[0], vert[1], vert[2]);
+						t.setGroupId(0);
 						vert[0].setLink(t);
 						vert[1].setLink(t);
 						vert[2].setLink(t);
