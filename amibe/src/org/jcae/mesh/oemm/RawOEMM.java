@@ -94,14 +94,13 @@ public class RawOEMM extends OEMM
 
 	/**
 	 * Create an empty raw OEMM.
-	 * @param file   file name containing the triangle soup
 	 * @param lmax   maximal level of the tree
 	 * @param umin   coordinates of the lower-left corner of mesh bounding box
 	 * @param umax   coordinates of the upper-right corner of mesh bounding box
 	 */
-	public RawOEMM(String file, int lmax, double [] umin, double [] umax)
+	public RawOEMM(int lmax, double [] umin, double [] umax)
 	{
-		super(file);
+		super("(null)");
 		//  Adjust status, nr_levels and x0
 		status = OEMM_CREATED;
 		nr_levels = lmax;

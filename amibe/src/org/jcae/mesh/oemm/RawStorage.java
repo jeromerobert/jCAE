@@ -33,8 +33,6 @@ import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 import org.apache.log4j.Logger;
 
 /**
@@ -149,7 +147,7 @@ public class RawStorage
 	 * 
 	 * @param  tree  a raw OEMM
 	 */
-	public static void countTriangles(RawOEMM tree)
+	public static void countTriangles(RawOEMM tree, String soupFile)
 	{
 		if (tree.status != RawOEMM.OEMM_CREATED)
 		{
@@ -157,79 +155,12 @@ public class RawStorage
 			return;
 		}
 		logger.info("Count triangles");
-		logger.debug("Reading "+tree.getFileName()+" and count triangles");
+		logger.debug("Reading "+soupFile+" and count triangles");
 		CountTriangles ct = new CountTriangles(tree);
-		readSoup(tree, tree.getFileName(), ct);
+		readSoup(tree, soupFile, ct);
 		logger.info("Number of triangles: "+ct.getTriangleCount());
 		tree.status = RawOEMM.OEMM_INITIALIZED;
 		tree.printInfos();
-	}
-	
-	public static Iterator getFacesIterator(final RawOEMM tree)
-	{
-		if (tree.status != RawOEMM.OEMM_CREATED)
-		{
-			logger.error("The RawOEMM must first be initialized by calling RawOEMM(String file, int lmax, double [] umin, double [] umax)");
-			return null;
-		}
-		return new Iterator()
-		{
-			private boolean hasNext = true;
-			private FileChannel fc;
-			private ByteBuffer bb;
-			private DoubleBuffer bbD;
-			private IntBuffer bbI;
-			private double [] xyz = new double[10];
-			private int [] group = new int[1];
-			private long count = 0;
-			private void init()
-			{
-				try
-				{
-					fc = new FileInputStream(tree.getFileName()).getChannel();
-					bb = ByteBuffer.allocate(TRIANGLE_SIZE_RAW);
-					bbD = bb.asDoubleBuffer();
-					bbI = bb.asIntBuffer();
-				}
-				catch (FileNotFoundException ex)
-				{
-					logger.error("File "+tree.getFileName()+" not found");
-				}
-			}
-			public boolean hasNext()
-			{
-				if (fc == null)
-					init();
-				return hasNext;
-			}
-			public Object next()
-			{
-				if (!hasNext())
-					throw new NoSuchElementException();
-				try
-				{
-					bb.rewind();
-					count++;
-					int nr = fc.read(bb);
-					if (nr < TRIANGLE_SIZE_RAW)
-						hasNext = false;
-					bbD.rewind();
-					bbD.get(xyz);
-					bbI.position(2*bbD.position() - 2);
-					bbI.get(group);
-					xyz[9] = group[0] + 0.5;
-					return xyz;
-				}
-				catch (IOException ex)
-				{
-					hasNext = false;
-				}
-				return null;
-			}
-			public void remove()
-			{
-			}
-		};
 	}
 	
 	public static class DispatchTriangles implements SoupReaderInterface
@@ -262,7 +193,7 @@ public class RawStorage
 			}
 			catch (IOException ex)
 			{
-				logger.error("I/O error when reading file  "+oemm.getFileName());
+				logger.error("I/O error when writing dispatched file");
 				ex.printStackTrace();
 				throw new RuntimeException(ex);
 			}
@@ -287,7 +218,7 @@ public class RawStorage
 	 * @param  structFile  output file containing octree data structure
 	 * @param  dataFile  dispatched data file
 	 */
-	public static final void dispatch(RawOEMM tree, String structFile, String dataFile)
+	public static final void dispatch(OEMM tree, String soupFile, String structFile, String dataFile)
 	{
 		if (tree.status < RawOEMM.OEMM_INITIALIZED)
 		{
@@ -307,14 +238,12 @@ public class RawStorage
 		try
 		{
 			logger.debug("Raw OEMM: dispatch triangles into raw OEMM");
-			FileInputStream fs = new FileInputStream(tree.getFileName());
-			long size = fs.getChannel().size();
 			RandomAccessFile raf = new RandomAccessFile(dataFile, "rw");
 			FileChannel fc = raf.getChannel();
 			raf.setLength(outputFileSize);
 
 			DispatchTriangles dt = new DispatchTriangles(tree, fc);
-			readSoup(tree, tree.getFileName(), dt);
+			readSoup(tree, soupFile, dt);
 
 			logger.debug("Raw OEMM: flush buffers");
 			FlushBuffersProcedure fb_proc = new FlushBuffersProcedure(fc);
@@ -329,13 +258,13 @@ public class RawStorage
 		}
 		catch (FileNotFoundException ex)
 		{
-			logger.error("File "+tree.getFileName()+" not found");
+			logger.error("File "+soupFile+" not found");
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
 		catch (IOException ex)
 		{
-			logger.error("I/O error when reading file  "+tree.getFileName());
+			logger.error("I/O error when reading file  "+soupFile);
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}

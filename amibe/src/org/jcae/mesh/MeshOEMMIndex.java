@@ -42,11 +42,11 @@ public class MeshOEMMIndex
 		double [] umax = new double[3];
 		for (int i = 0; i < 3; i++)
 			umax[i] = bbox[i+3];
-		String rawMesh = soupDir+File.separator+"soup";
-		final RawOEMM oemm = new RawOEMM(rawMesh, lmax, bbox, umax);
-		RawStorage.countTriangles(oemm);
+		final RawOEMM oemm = new RawOEMM(lmax, bbox, umax);
+		String soupFile = soupDir+File.separator+"soup";
+		RawStorage.countTriangles(oemm, soupFile);
 		oemm.aggregate(triangles_max);
-		RawStorage.dispatch(oemm, "dispatched", "dispatched.data");
+		RawStorage.dispatch(oemm, soupFile, "dispatched", "dispatched.data");
 		IndexedStorage.indexOEMM("dispatched", outDir);
 		logger.info("End processing");
 	}
