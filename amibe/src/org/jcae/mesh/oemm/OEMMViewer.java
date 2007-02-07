@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -44,25 +45,6 @@ public class OEMMViewer
 	private final static float absOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorAbs", "20.0f"));
 	private final static float relOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorRel", "2.0f"));
 
-	
-	public static BranchGroup bgRawOEMM(RawOEMM oemm, boolean onlyLeaves)
-	{
-		BranchGroup bg=new BranchGroup();
-		
-		double [] coord = oemm.getCoords(onlyLeaves);
-		QuadArray quad = new QuadArray(coord.length/3, QuadArray.COORDINATES);
-		quad.setCapability(QuadArray.ALLOW_FORMAT_READ);
-		quad.setCapability(QuadArray.ALLOW_COUNT_READ);
-		quad.setCapability(QuadArray.ALLOW_COORDINATE_READ);
-		quad.setCoordinates(0, coord);
-		Appearance quadApp = new Appearance();
-		quadApp.setPolygonAttributes(new PolygonAttributes(PolygonAttributes.POLYGON_LINE, PolygonAttributes.CULL_NONE, 0));
-		quadApp.setColoringAttributes(new ColoringAttributes(0,1,0,ColoringAttributes.SHADE_GOURAUD));
-		Shape3D shapeQuad=new Shape3D(quad, quadApp);
-		shapeQuad.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-		bg.addChild(shapeQuad);
-		return bg;
-	}
 	
 	public static BranchGroup bgOEMM(OEMM oemm, boolean onlyLeaves)
 	{
