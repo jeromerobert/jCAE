@@ -22,12 +22,10 @@ package org.jcae.mesh.oemm;
 import org.apache.log4j.Logger;
 
 /**
- * This class represents an empty raw OEMM.
- * 
- * A raw OEMM is a pointer-based octree, but cells do not contain any data.
- * Only its spatial structure is considered, and it is assumed that the whole
- * tree can reside in memory.  This class defines the octree structure and
- * how to traverse it.
+ * Helper class to merge neighbor octree cells.
+ * The sole purpose of this class is to provide an {@link #aggregate}
+ * method, which is called to merge neighbor cells when they contain
+ * few triangles.
  */
 public class RawOEMM extends OEMM
 {
