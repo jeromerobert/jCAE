@@ -20,12 +20,8 @@
 
 package org.jcae.mesh;
 
-import java.util.Iterator;
-import java.io.File;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.oemm.*;
-import org.jcae.mesh.cad.CADShape;
-import org.jcae.mesh.cad.CADShapeBuilder;
 import org.apache.log4j.Logger;
 
 /**
@@ -35,38 +31,31 @@ public class MeshValidOEMM
 {
 	private static Logger logger=Logger.getLogger(MeshValidOEMM.class);
 
-	private static void check(String brepfilename, String xmlDir, float discr, float defl)
+	public static class ComputeTriangleQuality implements RawStorage.SoupReaderInterface
 	{
-		logger.info("Reading triangle soup");
-
-		CADShapeBuilder factory = CADShapeBuilder.factory;
-		CADShape shape = factory.newShape(brepfilename);
-		double [] bbox = shape.boundingBox();
-		double [] umax = new double[3];
-		for (int i = 0; i < 3; i++)
-			umax[i] = bbox[i+3];
-		String rawMesh = xmlDir+File.separator+"soup";
-		final RawOEMM oemm = new RawOEMM(rawMesh, 1, bbox, umax);
-
-		final int split = 10;
+		Vertex [] n = new Vertex[3];
+		int nrgroup = 0;
 		final int maxgroup = 5000;
+		final int split = 10;
 		int [][] nr = new int[maxgroup][split+1];
 		double [] amin = new double[maxgroup];
-		int nrgroup = 0;
-		for (int i = 0; i < maxgroup; i++)
-			amin[i] = 1.0;
-		for (Iterator itf = RawStorage.getFacesIterator(oemm); itf.hasNext();)
+		public ComputeTriangleQuality()
 		{
-			double [] xyz = (double []) itf.next();
-			Vertex n1 = Vertex.valueOf(xyz[0], xyz[1], xyz[2]);
-			Vertex n2 = Vertex.valueOf(xyz[3], xyz[4], xyz[5]);
-			Vertex n3 = Vertex.valueOf(xyz[6], xyz[7], xyz[8]);
-			double a1 = Math.abs(n1.angle3D(n2, n3));
-			double a2 = Math.abs(n2.angle3D(n3, n1));
-			double a3 = Math.abs(n3.angle3D(n1, n2));
-			int group = (int) xyz[9];
+			for (int i = 0; i < maxgroup; i++)
+				amin[i] = 1.0;
+		}
+		public void processVertex(int i, Object coord)
+		{
+			double [] xyz = (double []) coord;
+			n[i] = Vertex.valueOf(xyz[0], xyz[1], xyz[2]);
+		}
+		public void processTriangle(int group)
+		{
 			if (group > nrgroup)
 				nrgroup = group;
+			double a1 = Math.abs(n[0].angle3D(n[1], n[2]));
+			double a2 = Math.abs(n[1].angle3D(n[2], n[0]));
+			double a3 = Math.abs(n[2].angle3D(n[0], n[1]));
 			if (a2 < a1)
 				a1 = a2;
 			if (a3 < a1)
@@ -77,21 +66,32 @@ public class MeshValidOEMM
 			int index = (int) (a1 * (double) split);
 			nr[group][index]++;
 		}
-		double amintot = amin[1];
-		for (int g = 1; g <= nrgroup; g++)
+		public void printStats()
 		{
-			System.out.println("Group "+g+" Minimum angle: "+(60.0*amin[g]));
-			if (amin[g] < amintot)
-				amintot = amin[g];
-			for (int i = 0; i < split; i++)
-				System.out.println("Slice: "+i+" "+nr[g][i]);
-			if (g > 1)
+			double amintot = amin[1];
+			for (int g = 1; g <= nrgroup; g++)
+			{
+				System.out.println("Group "+g+" Minimum angle: "+(60.0*amin[g]));
+				if (amin[g] < amintot)
+					amintot = amin[g];
 				for (int i = 0; i < split; i++)
-					nr[1][i] += nr[g][i];
+					System.out.println("Slice: "+i+" "+nr[g][i]);
+				if (g > 1)
+					for (int i = 0; i < split; i++)
+						nr[1][i] += nr[g][i];
+			}
+			System.out.println("Minimum angle: "+(60.0*amintot));
+			for (int i = 0; i < split; i++)
+				System.out.println("Slice: "+i+" "+nr[1][i]);
 		}
-		System.out.println("Minimum angle: "+(60.0*amintot));
-		for (int i = 0; i < split; i++)
-			System.out.println("Slice: "+i+" "+nr[1][i]);
+	}
+
+	private static void check(String brepfilename, String xmlDir, float discr, float defl)
+	{
+		logger.info("Reading triangle soup");
+		ComputeTriangleQuality ctq = new ComputeTriangleQuality();
+		RawStorage.readSoup(null, xmlDir+java.io.File.separator+"soup", ctq);
+		ctq.printStats();
 	}
 
 	/**
