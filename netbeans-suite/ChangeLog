@@ -1,3 +1,41 @@
+2007-02-07 17:51:00  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/ComputeMeshAction.java,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/MeshDataObject.java:
+	  Properly close IOs. It looks like Java 6 take more time than Java
+	  5 to automatically finalize streams.
+
+	* jcae-netbeans/nbproject/project.xml,
+	  nbproject/platform.properties: port to netbeans 6.0
+
+	* jcae-netbeans/release/, occjava/release/:
+	  Add some missing empty directory to help build configuration
+
+2006-10-19 13:24:00  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/INSTALL, jcae-netbeans/nbproject/project.xml,
+	  nbproject/platform.properties, nbproject/project.properties,
+	  occjava/INSTALL: Port to netbeans 5.5
+
+2006-10-02 23:47:00  Jerome Robert <jeromerobert@users.sourceforge.net>
+	
+	* *: Switch to subversion
+
+2006-05-17 15:48:57  tag V0_13_1
+
+2006-05-17 15:48:57  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/viewer3d/ViewList.java,
+	  jcae-netbeans/src/org/jcae/netbeans/viewer3d/actions/GoToAction.java:
+	  Fix bug 1467614: exception when the "go to" list is empty
+
+2006-05-17 15:04:49  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/viewer3d/View3D.java:
+	  Fix bug 1464775: Java3D and dual screen
+
+2006-04-07 15:45:55  tag V0_13
+
 2006-04-07 15:45:55  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* jcae-netbeans/src/org/jcae/netbeans/mesh/:
@@ -17,6 +55,7 @@
 	  Install nbm global
 
 2006-03-30 12:17:00  Jerome Robert <jeromerobert@users.sourceforge.net>
+
 	* occjava/manifest.mf, occjava/nbproject/project.properties:
 	  Make global, change version
 
@@ -27,6 +66,7 @@
 2006-03-16 09:56:55  tag V0_12
 
 2006-03-16 09:56:55  Jerome Robert <jeromerobert@users.sourceforge.net>
+
 	* jcae-netbeans/src/org/jcae/netbeans/Standard.xml,
 	  jcae-netbeans/src/org/jcae/netbeans/WindowManager.wswmgr,
 	  jcae-netbeans/src/org/jcae/netbeans/layer.xml:
