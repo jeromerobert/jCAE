@@ -69,8 +69,10 @@ public abstract class AbstractAlgoHalfEdge
 		preProcessAllHalfEdges();
 		computeTree();
 		postComputeTree();
+		thisLogger().info("Initial number of triangles: "+mesh.getTriangles().size());
 		thisLogger().info("Run "+getClass().getName());
 		processAllHalfEdges();
+		thisLogger().info("Final number of triangles: "+mesh.getTriangles().size());
 	}
 	
 	private void computeTree()
