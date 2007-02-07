@@ -25,6 +25,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.IOException;
+import java.io.InputStream;
 import org.jcae.netbeans.Utilities;
 import org.openide.ErrorManager;
 import org.openide.cookies.SaveCookie;
@@ -61,10 +62,13 @@ public class MeshDataObject extends MultiDataObject implements SaveCookie, Prope
 	
 	protected Mesh initMesh()
 	{
+		InputStream in=null;
+		Mesh toReturn;
 		try
 		{
-			XMLDecoder decoder=new XMLDecoder(getPrimaryFile().getInputStream());
-			return (Mesh)decoder.readObject();			
+			in=getPrimaryFile().getInputStream();
+			XMLDecoder decoder=new XMLDecoder(in);
+			toReturn=(Mesh)decoder.readObject();
 		}
 		catch (Exception ex)
 		{
@@ -72,25 +76,45 @@ public class MeshDataObject extends MultiDataObject implements SaveCookie, Prope
 			String name=Utilities.getFreeName(
 				getPrimaryFile().getParent(),
 				"amibe",".dir");
-			return new Mesh(name);
+			toReturn = new Mesh(name);
 		}
+		finally
+		{
+			if(in!=null)				
+				try
+				{
+					in.close();
+				}
+				catch (IOException ex)
+				{
+					ErrorManager.getDefault().notify(ex);
+				}
+		}
+		return toReturn;
 	}
 	
 	public void save() throws IOException
 	{
+		FileLock l = null;
+		XMLEncoder encoder = null;
 		try
 		{
 			FileObject out = getPrimaryFile();
-			FileLock l = out.lock();
-			XMLEncoder encoder=new XMLEncoder(out.getOutputStream(l));
+			l = out.lock();
+			encoder = new XMLEncoder(out.getOutputStream(l));
 			encoder.writeObject(mesh);
-			encoder.close();
-			l.releaseLock();
 			setModified(false);
 		}
 		catch(IOException ex)
 		{
 			ErrorManager.getDefault().notify(ex);
+		}
+		finally
+		{
+			if(encoder!=null)
+				encoder.close();
+			if(l!=null)
+				l.releaseLock();			
 		}
 	}
 

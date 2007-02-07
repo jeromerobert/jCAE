@@ -21,6 +21,7 @@
 package org.jcae.netbeans.mesh;
 
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.LifecycleManager;
@@ -81,12 +82,17 @@ public class ComputeMeshAction extends CookieAction
 			}
 			else
 			{
-				JOptionPane.showMessageDialog(
-					WindowManager.getDefault().getMainWindow(),
-					"This mesh have no geometry. To set a geometry in this mesh"+
-					"copy/past or drag/drop a geomtry node on it.",
-					"Undefined geometry file",
-					JOptionPane.ERROR_MESSAGE);
+				SwingUtilities.invokeLater(new Runnable(){
+					public void run()
+					{
+						JOptionPane.showMessageDialog(
+							WindowManager.getDefault().getMainWindow(),
+							"This mesh have no geometry. To set a geometry in "+
+							"this mesh copy/past or drag/drop a geomtry node on it.",
+							"Undefined geometry file",
+							JOptionPane.ERROR_MESSAGE);
+					}
+				});
 			}
 		}
 	}
