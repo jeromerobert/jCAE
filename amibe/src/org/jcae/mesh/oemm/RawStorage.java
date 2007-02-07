@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -48,7 +49,89 @@ public class RawStorage
 	//  In the dispatched file, a triangle has 9 int coordinates and an int.
 	private static final int TRIANGLE_SIZE_DISPATCHED = 40;
 	private static final int bufferSize = (TRIANGLE_SIZE_RAW * TRIANGLE_SIZE_DISPATCHED) << 4;
+	private static ByteBuffer bb = ByteBuffer.allocate(bufferSize);
+	private static DoubleBuffer bbD = bb.asDoubleBuffer();
+	private static IntBuffer bbI = bb.asIntBuffer();
 	
+	public static interface SoupReaderInterface
+	{
+		void processVertex(int i, int [] ijk);
+		void processTriangle(int group);
+	}
+
+	public static void readSoup(OEMM oemm, String file, SoupReaderInterface proc)
+	{
+		int [] ijk = new int[3];
+		double [] xyz = new double[3];
+		boolean hasNext = true;
+		try
+		{
+			FileChannel fc = new FileInputStream(file).getChannel();
+			while (hasNext)
+			{
+				bb.rewind();
+				int nr = fc.read(bb);
+				if (nr < bufferSize)
+					hasNext = false;
+				bbD.rewind();
+				for(; nr > 0; nr -= TRIANGLE_SIZE_RAW)
+				{
+					for (int i = 0; i < 3; i++)
+					{
+						bbD.get(xyz);
+						oemm.double2int(xyz, ijk);
+						proc.processVertex(i, ijk);
+					}
+					bbD.get();
+					bbI.position(2*bbD.position() - 2);
+					int attribute = bbI.get();
+					proc.processTriangle(attribute);
+				}
+			}
+			fc.close();
+		}
+		catch (FileNotFoundException ex)
+		{
+			logger.error("File "+file+" not found");
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+		catch (IOException ex)
+		{
+			logger.error("I/O error when reading "+file);
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+	}
+
+	public static class CountTriangles implements SoupReaderInterface
+	{
+		private OEMMNode [] cells = new OEMMNode[3];
+		private OEMM oemm;
+		private long tcount = 0;
+		public CountTriangles(OEMM o)
+		{
+			oemm = o;
+		}
+		public void processVertex(int i, int [] ijk)
+		{
+			cells[i] = oemm.build(ijk);
+		}
+		public void processTriangle(int group)
+		{
+			tcount++;
+			cells[0].tn++;
+			if (cells[1] != cells[0])
+				cells[1].tn++;
+			if (cells[2] != cells[0] && cells[2] != cells[1])
+				cells[2].tn++;
+		}
+		long getTriangleCount()
+		{
+			return tcount;
+		}
+	}
+
 	/**
 	 * Build a raw OEMM and count the number of triangles which have to be assigned
 	 * to each leaf.
@@ -69,51 +152,9 @@ public class RawStorage
 		}
 		logger.info("Count triangles");
 		logger.debug("Reading "+tree.getFileName()+" and count triangles");
-		long tcount = 0;
-		try
-		{
-			int [] ijk = new int[3];
-			double [] xyz = new double[3];
-			OEMMNode [] cells = new OEMMNode[3];
-			FileChannel fc = new FileInputStream(tree.getFileName()).getChannel();
-			ByteBuffer bb = ByteBuffer.allocate(bufferSize);
-			DoubleBuffer bbD = bb.asDoubleBuffer();
-			boolean hasNext = true;
-			while (hasNext)
-			{
-				bb.rewind();
-				int nr = fc.read(bb);
-				if (nr < bufferSize)
-					hasNext = false;
-				bbD.rewind();
-				for(; nr > 0; nr -= TRIANGLE_SIZE_RAW)
-				{
-					for (int i = 0; i < 3; i++)
-					{
-						bbD.get(xyz);
-						tree.double2int(xyz, ijk);
-						cells[i] = tree.build(ijk);
-					}
-					bbD.get();
-					cells[0].tn++;
-					if (cells[1] != cells[0])
-						cells[1].tn++;
-					if (cells[2] != cells[0] && cells[2] != cells[1])
-						cells[2].tn++;
-					tcount++;
-				}
-			}
-			fc.close();
-}
-		catch (FileNotFoundException ex)
-		{
-			logger.error("File "+tree.getFileName()+" not found");
-		}
-		catch (IOException ex)
-		{
-			logger.error("I/O error when reading file "+tree.getFileName());
-		}
-		logger.info("Number of triangles: "+tcount);
+		CountTriangles ct = new CountTriangles(tree);
+		readSoup(tree, tree.getFileName(), ct);
+		logger.info("Number of triangles: "+ct.getTriangleCount());
 		tree.status = RawOEMM.OEMM_INITIALIZED;
 		tree.printInfos();
 	}
@@ -162,7 +203,7 @@ public class RawStorage
 				try
 				{
 					bb.rewind();
-count++;
+					count++;
 					int nr = fc.read(bb);
 					if (nr < TRIANGLE_SIZE_RAW)
 						hasNext = false;
@@ -185,6 +226,42 @@ count++;
 		};
 	}
 	
+	public static class DispatchTriangles implements SoupReaderInterface
+	{
+		private OEMMNode [] cells = new OEMMNode[3];
+		private int [] ijk9 = new int[9];
+		private OEMM oemm;
+		private FileChannel fc;
+		public DispatchTriangles(OEMM o, FileChannel f)
+		{
+			oemm = o;
+			fc = f;
+		}
+		public void processVertex(int i, int [] ijk)
+		{
+			cells[i] = oemm.search(ijk);
+			for (int j = 0; j < 3; j++)
+				ijk9[6-3*i+j] = ijk[j];
+		}
+		public void processTriangle(int group)
+		{
+			try
+			{
+				addToCell(fc, cells[0], ijk9, group);
+				if (cells[1] != cells[0])
+					addToCell(fc, cells[1], ijk9, group);
+				if (cells[2] != cells[0] && cells[2] != cells[1])
+					addToCell(fc, cells[2], ijk9, group);
+			}
+			catch (IOException ex)
+			{
+				logger.error("I/O error when reading file  "+oemm.getFileName());
+				ex.printStackTrace();
+				throw new RuntimeException(ex);
+			}
+		}
+	}
+
 	/**
 	 * Read the triangle soup another time, and dispatch triangles into an intermediate
 	 * OEMM data structure.
@@ -220,42 +297,18 @@ count++;
 		ComputeMinMaxIndicesProcedure cmmi_proc = new ComputeMinMaxIndicesProcedure();
 		tree.walk(cmmi_proc);
 		
-		logger.debug("Raw OEMM: dispatch triangles into raw OEMM");
 		try
 		{
-			int [] ijk = new int[9];
-			double [] xyz = new double[3];
-			OEMMNode [] cells = new OEMMNode[3];
+			logger.debug("Raw OEMM: dispatch triangles into raw OEMM");
 			FileInputStream fs = new FileInputStream(tree.getFileName());
-			DataInputStream coordsIn = new DataInputStream(new BufferedInputStream(fs));
 			long size = fs.getChannel().size();
 			RandomAccessFile raf = new RandomAccessFile(dataFile, "rw");
 			FileChannel fc = raf.getChannel();
 			raf.setLength(outputFileSize);
-			for(long nr = 0L; nr < size; nr += TRIANGLE_SIZE_RAW)
-			{
-				for (int i = 0; i < 3; i++)
-				{
-					xyz[0] = coordsIn.readDouble();
-					xyz[1] = coordsIn.readDouble();
-					xyz[2] = coordsIn.readDouble();
-					tree.double2int(xyz, ijk);
-					cells[i] = tree.search(ijk);
-					if (i < 2)
-					{
-						for (int j = 0; j < 3; j++)
-							ijk[6-3*i+j] = ijk[j];
-					}
-				}
-				int attribute = coordsIn.readInt();
-				coordsIn.readInt();
-				addToCell(fc, cells[0], ijk, attribute);
-				if (cells[1] != cells[0])
-					addToCell(fc, cells[1], ijk, attribute);
-				if (cells[2] != cells[0] && cells[2] != cells[1])
-					addToCell(fc, cells[2], ijk, attribute);
-			}
-			coordsIn.close();
+
+			DispatchTriangles dt = new DispatchTriangles(tree, fc);
+			readSoup(tree, tree.getFileName(), dt);
+
 			logger.debug("Raw OEMM: flush buffers");
 			FlushBuffersProcedure fb_proc = new FlushBuffersProcedure(fc);
 			tree.walk(fb_proc);
