@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -24,7 +25,7 @@ import org.apache.log4j.Logger;
 /**
  * Abstract class ro implement raw OEMM traversal.
  * 
- * @see RawOEMM#walk
+ * @see OEMM#walk
  */
 public abstract class TraversalProcedure
 {
@@ -74,7 +75,7 @@ public abstract class TraversalProcedure
 	 * @param  visit   this parameter is set to <code>LEAF</code> if the current
 	 *                 node is a leaf, <code>PREORDER</code> if children have not
 	 *                 yet been traversed, and <code>POSTOREDER</code> otherwise.
-	 * @return  ABORT      exit from {@link RawOEMM#walk} immediately
+	 * @return  ABORT      exit from {@link OEMM#walk} immediately
 	 *          SKIPCHILD  skip current cell (ie do not process its children)
 	 *          SKIPWALK   node was skipped, process normally
 	 *          OK         process normally

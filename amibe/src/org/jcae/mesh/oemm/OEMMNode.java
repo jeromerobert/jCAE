@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -22,17 +23,11 @@ package org.jcae.mesh.oemm;
 import gnu.trove.TIntArrayList;
 
 /**
- * This class represents octants of a raw OEMM.
- *
- * A raw OEMM is a pointer-based octree, but cells do not contain any data.
- * Only its spatial structure is considered, and it is assumed that the whole
- * tree can reside in memory.
+ * This class represents octants of an OEMM.
  */
 public class OEMMNode
 {
 	//  Integer coordinates of the lower-left corner
-	//  These coordiantes are only used in RawOEMM.CoordProcedure
-	//  and thus only useful for debugging purposes.
 	public int i0, j0, k0;
 	//  Cell size (= 1 << (MAXLEVEL - level))
 	public int size;
