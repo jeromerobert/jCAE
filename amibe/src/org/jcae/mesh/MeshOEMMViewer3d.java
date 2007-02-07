@@ -34,9 +34,9 @@ import org.apache.log4j.Logger;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Iterator;
+import java.util.HashMap;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
-import javax.media.j3d.BranchGroup;
 import org.jcae.viewer3d.bg.ViewableBG;
 import org.jcae.viewer3d.View;
 import gnu.trove.TIntHashSet;
@@ -51,6 +51,7 @@ public class MeshOEMMViewer3d
 	private static TIntHashSet leaves = new TIntHashSet();
 	private static ViewableBG fe1;
 	private static boolean showOctree = true;
+	private static boolean showAxis = true;
 
 	public static void main(String args[])
 	{
@@ -68,8 +69,7 @@ public class MeshOEMMViewer3d
 		boolean onlyLeaves = true;
 		try
 		{
-			BranchGroup octree = OEMMViewer.bgOEMM(oemm, onlyLeaves);
-			fe1 = new ViewableBG(octree);
+			fe1 = new ViewableBG(OEMMViewer.bgOEMM(oemm, onlyLeaves));
 			bgView.add(fe1);
 			bgView.addKeyListener(new KeyAdapter() {
 				public void keyPressed(KeyEvent event)
@@ -78,9 +78,7 @@ public class MeshOEMMViewer3d
 					{
 						if (femesh != null)
 							bgView.remove(femesh);
-						BranchGroup mesh = OEMMViewer.meshOEMM(oemm, fe1.getResultSet());
-						mesh.setPickable(false);
-						femesh=new ViewableBG(mesh);
+						femesh=new ViewableBG(OEMMViewer.meshOEMM(oemm, fe1.getResultSet()));
 						fe1.unselectAll();
 						bgView.add(femesh);
 					}
@@ -94,7 +92,7 @@ public class MeshOEMMViewer3d
 					}
 					else if(event.getKeyChar()=='s')
 					{
-						Mesh amesh = org.jcae.mesh.oemm.IndexedStorage.loadNodes(oemm, fe1.getResultSet());
+						Mesh amesh = org.jcae.mesh.oemm.IndexedStorage.loadNodes(oemm, fe1.getResultSet(), false);
 						String xmlDir = "oemm-tmp";
 						String xmlFile = "jcae3d";
 						MeshWriter.writeObject3D(amesh, xmlDir, xmlFile, ".", "tmp.brep", 1);
@@ -116,20 +114,32 @@ public class MeshOEMMViewer3d
 					{
 						if (femesh != null)
 							bgView.remove(femesh);
-Mesh amesh = org.jcae.mesh.oemm.IndexedStorage.loadNodes(oemm, fe1.getResultSet());
-new org.jcae.mesh.amibe.algos3d.DecimateVertex(amesh, 0.1).compute();
-BranchGroup mesh = OEMMViewer.meshOEMM(oemm, fe1.getResultSet());
-						mesh.setPickable(false);
+						Mesh amesh = org.jcae.mesh.oemm.IndexedStorage.loadNodes(oemm, fe1.getResultSet(), true);
+						HashMap opts = new HashMap();
+						opts.put("maxtriangles", Integer.toString(amesh.getTriangles().size() / 100));
+						new org.jcae.mesh.amibe.algos3d.DecimateHalfEdge(amesh, opts).compute();
+						String xmlDir = "dec-tmp";
+						String xmlFile = "jcae3d";
+						MeshWriter.writeObject3D(amesh, xmlDir, xmlFile, ".", "tmp.brep", 1);
+						/*
 						femesh=new ViewableBG(mesh);
 						fe1.unselectAll();
 						bgView.add(femesh);
+						*/
 					}
+					else if(event.getKeyChar()=='a')
+					{
+						showAxis = !showAxis;
+						bgView.setOriginAxisVisible(showAxis);
+					}
+					else if(event.getKeyChar()=='q')
+						System.exit(0);
 				}
 			});
 			bgView.fitAll();
 			feFrame.getContentPane().add(bgView);
 			feFrame.setVisible(true);
-			bgView.setOriginAxisVisible(true);
+			bgView.setOriginAxisVisible(showAxis);
 		}
 		catch(Exception ex)
 		{
