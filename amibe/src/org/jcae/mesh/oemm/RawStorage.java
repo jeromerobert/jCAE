@@ -55,8 +55,8 @@ public class RawStorage
 	
 	public static interface SoupReaderInterface
 	{
-		void processVertex(int i, int [] ijk);
-		void processTriangle(int group);
+		public void processVertex(int i, Object coord);
+		public void processTriangle(int group);
 	}
 
 	public static void readSoup(OEMM oemm, String file, SoupReaderInterface proc)
@@ -79,8 +79,13 @@ public class RawStorage
 					for (int i = 0; i < 3; i++)
 					{
 						bbD.get(xyz);
-						oemm.double2int(xyz, ijk);
-						proc.processVertex(i, ijk);
+						if (oemm != null)
+						{
+							oemm.double2int(xyz, ijk);
+							proc.processVertex(i, ijk);
+						}
+						else
+							proc.processVertex(i, xyz);
 					}
 					bbD.get();
 					bbI.position(2*bbD.position() - 2);
@@ -113,8 +118,9 @@ public class RawStorage
 		{
 			oemm = o;
 		}
-		public void processVertex(int i, int [] ijk)
+		public void processVertex(int i, Object coord)
 		{
+			int [] ijk = (int []) coord;
 			cells[i] = oemm.build(ijk);
 		}
 		public void processTriangle(int group)
@@ -237,8 +243,9 @@ public class RawStorage
 			oemm = o;
 			fc = f;
 		}
-		public void processVertex(int i, int [] ijk)
+		public void processVertex(int i, Object coord)
 		{
+			int [] ijk = (int []) coord;
 			cells[i] = oemm.search(ijk);
 			for (int j = 0; j < 3; j++)
 				ijk9[6-3*i+j] = ijk[j];
@@ -394,7 +401,7 @@ public class RawStorage
 	}
 	
 	private static void addToCell(FileChannel fc, OEMMNode current, int [] ijk, int attribute)
-		throws java.io.IOException
+		throws IOException
 	{
 		assert current.counter <= fc.size();
 		//  With 20 millions of triangles, unbuffered output took 420s
