@@ -1,3 +1,10 @@
+Wed Feb  7 16:24:16 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java
+	  src/org/jcae/mesh/amibe/metrics/Quadric3DError.java: When loading
+	partial mesh through OEMM, do not contract edges when both endpoints
+	are not writable.
+
 Tue Feb  6 12:36:26 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/oemm/OEMMMesh.java
