@@ -137,21 +137,22 @@ public class RawStorage
 	}
 
 	/**
-	 * Build a raw OEMM and count the number of triangles which have to be assigned
-	 * to each leaf.
+	 * Build an OEMM and count the number of triangles which have to be
+	 * assigned to each leaf.
 	 *
-	 * A triangle soup is read from the file associated with a raw OEMM, deepest cells
-	 * for triangle vertices are created if needed, and triangle counters are updated.
-	 * When this routine returns, all leaf nodes have been created and each node knowa
-	 * how many triangles will be assigned to it in later stages.
+	 * A triangle soup is read from the file associated with an OEMM,
+	 * deepest cells for triangle vertices are created if needed, and
+	 * triangle counters are updated.  When this routine returns, all leaf
+	 * nodes have been created and each node knowa how many triangles will
+	 * be assigned to it in later stages.
 	 * 
-	 * @param  tree  a raw OEMM
+	 * @param  tree  an OEMM
 	 */
-	public static void countTriangles(RawOEMM tree, String soupFile)
+	public static void countTriangles(OEMM tree, String soupFile)
 	{
-		if (tree.status != RawOEMM.OEMM_CREATED)
+		if (tree == null || tree.status != OEMM.OEMM_CREATED)
 		{
-			logger.error("The RawOEMM must first be initialized by calling RawOEMM(String file, int lmax, double [] umin, double [] umax)");
+			logger.error("OEMM not created!");
 			return;
 		}
 		logger.info("Count triangles");
@@ -159,7 +160,7 @@ public class RawStorage
 		CountTriangles ct = new CountTriangles(tree);
 		readSoup(tree, soupFile, ct);
 		logger.info("Number of triangles: "+ct.getTriangleCount());
-		tree.status = RawOEMM.OEMM_INITIALIZED;
+		tree.status = OEMM.OEMM_INITIALIZED;
 		tree.printInfos();
 	}
 	
@@ -220,9 +221,9 @@ public class RawStorage
 	 */
 	public static final void dispatch(OEMM tree, String soupFile, String structFile, String dataFile)
 	{
-		if (tree.status < RawOEMM.OEMM_INITIALIZED)
+		if (tree == null || tree.status < OEMM.OEMM_INITIALIZED)
 		{
-			logger.error("The RawOEMM must first be initialized by calling countTriangles()");
+			logger.error("OEMM not initialized!");
 			return;
 		}
 		logger.info("Put triangles into a linearized octree");
@@ -274,7 +275,7 @@ public class RawStorage
 	 * Extracts a raw OEMM from an intermediate OEMM.
 	 *
 	 * @param  file  file containing the intermediate OEMM.
-	 * @return RawOEMM a raw OEMM.
+	 * @return OEMM  an OEMM structure.
 	 */
 	public static OEMM loadIntermediate(String file)
 	{
@@ -322,7 +323,7 @@ public class RawStorage
 		{
 			logger.error("I/O error when reading file "+file);
 		}
-		ret.status = RawOEMM.OEMM_INITIALIZED;
+		ret.status = OEMM.OEMM_INITIALIZED;
 		//  Adjust minIndex and maxIndex values
 		ComputeMinMaxIndicesProcedure cmmi_proc = new ComputeMinMaxIndicesProcedure();
 		ret.walk(cmmi_proc);
