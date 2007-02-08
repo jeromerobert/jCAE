@@ -1,3 +1,43 @@
+2007-02-08 15:04  jeromerobert
+
+	* *: Remove deprecated API uses and clean code
+
+	* src/org/jcae/viewer3d/*:
+	  Allow to unselect (contrib Erwann Feat)
+
+2007-02-08 12:52  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/ViewBehavior.java: Take focal into account
+	  to compute axis size
+
+	* src/org/jcae/viewer3d/View.java: Allow to tune orbit beaviour in
+	  child class
+
+	* src/org/jcae/viewer3d/fe/ViewableFE.java: Fix a bug bounds
+	  computation (GeomInfo is a mess)
+
+	* src/org/jcae/viewer3d/post/ImageViewable.java: Support image with
+	  transparency
+
+	* src/org/jcae/viewer3d/test/TestScreenshot.java: Add screenshot
+	  example code
+
+	* src/org/jcae/viewer3d/test/Main.java,
+	  src/org/jcae/viewer3d/test/TestCAD.java: Add "using viewer3d with
+	  Opencascade" examples
+
+2006-10-19 12:46  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/javax: Was related to
+	  http://java3d.dev.java.net/issues/show_bug.cgi?id=233 but no
+	  longer used
+
+2006-10-02 23:47:00  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* *: Switch to subversion
+
+2006-05-17 14:41:12  tag V0_13_1
+
 2006-05-17 14:41:12  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/View.java:
