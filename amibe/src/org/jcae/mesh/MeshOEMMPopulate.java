@@ -21,8 +21,8 @@
 package org.jcae.mesh;
 
 import org.jcae.mesh.oemm.OEMM;
-import org.jcae.mesh.oemm.IndexedStorage;
 import org.jcae.mesh.oemm.RawStorage;
+import org.jcae.mesh.oemm.Storage;
 
 /**
  * This class fills an OEMM structure with a new triangle soup.
@@ -40,11 +40,11 @@ public class MeshOEMMPopulate
 		String outOEMM  = args[1];
 		String soupFile = args[2];
 		// Read initial OEMM structure
-		OEMM oemm = IndexedStorage.buildOEMMStructure(inOEMM);
+		OEMM oemm = Storage.readOEMMStructure(inOEMM);
 		// Convert triangle soup into an intermediate OEMM file
 		RawStorage.dispatch(oemm, soupFile, "dispatched", "dispatched.data");
 		// Convert intermediate OEMM file into final OEMM
-		IndexedStorage.indexOEMM("dispatched", outOEMM);
+		RawStorage.indexOEMM("dispatched", outOEMM);
 	}
 
 }

@@ -20,6 +20,7 @@
 
 package org.jcae.mesh.oemm;
 
+import java.io.File;
 import java.io.DataInputStream;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -27,16 +28,24 @@ import java.io.RandomAccessFile;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
+import java.io.PrintStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import gnu.trove.TIntIterator;
+import gnu.trove.TIntIntHashMap;
+import gnu.trove.TIntArrayList;
+import gnu.trove.TIntHashSet;
 import org.apache.log4j.Logger;
 
 /**
- * This class implements out-of-core storage of raw OEMM structures.
+ * Convert a triangle soup into an OEMM data structure.
  */
 public class RawStorage
 {
@@ -44,13 +53,18 @@ public class RawStorage
 
 	//  In triangle soup, a triangle has 9 double coordinates and two ints.
 	private static final int TRIANGLE_SIZE_RAW = 80;
-	//  In the dispatched file, a triangle has 9 int coordinates and an int.
+	//  In dispatched file, a triangle has 9 int coordinates and an int.
 	private static final int TRIANGLE_SIZE_DISPATCHED = 40;
-	private static final int bufferSize = (TRIANGLE_SIZE_RAW * TRIANGLE_SIZE_DISPATCHED) << 4;
+	//  In intermediate file, a vertex has 3 integer coordiantes
+	private static final int VERTEX_SIZE_INDEXED = 12;
+	private static final int TRIANGLE_SIZE_INDEXED = 28;
+	private static final int VERTEX_SIZE = 24;
+	// bufferSize = 26880
+	private static final int bufferSize = (TRIANGLE_SIZE_RAW * VERTEX_SIZE_INDEXED * TRIANGLE_SIZE_INDEXED);
 	private static ByteBuffer bb = ByteBuffer.allocate(bufferSize);
-	private static DoubleBuffer bbD = bb.asDoubleBuffer();
-	private static IntBuffer bbI = bb.asIntBuffer();
-	
+	private static ByteBuffer bbt = ByteBuffer.allocate(bufferSize);
+	private static ByteBuffer bbpos = ByteBuffer.allocate(8);
+
 	public static interface SoupReaderInterface
 	{
 		public void processVertex(int i, double [] xyz);
@@ -62,6 +76,9 @@ public class RawStorage
 		int [] ijk = new int[3];
 		double [] xyz = new double[3];
 		boolean hasNext = true;
+		bb.clear();
+		DoubleBuffer bbD = bb.asDoubleBuffer();
+		IntBuffer bbI = bb.asIntBuffer();
 		try
 		{
 			FileChannel fc = new FileInputStream(file).getChannel();
@@ -492,6 +509,489 @@ public class RawStorage
 		//  Adjust minIndex and maxIndex values
 		ComputeMinMaxIndicesProcedure cmmi_proc = new ComputeMinMaxIndicesProcedure();
 		ret.walk(cmmi_proc);
+		return ret;
+	}
+	
+	public static OEMM indexOEMM(String inFile, String outDir)
+	{
+		OEMM ret = loadIntermediate(inFile);
+		if (logger.isDebugEnabled())
+			ret.printInfos();
+		try
+		{
+			//  Index internal vertices
+			logger.info("Write octree cells onto disk");
+			logger.debug("Index internal vertices");
+			FileInputStream fis = new FileInputStream(ret.getFileName());
+			IndexInternalVerticesProcedure iiv_proc = new IndexInternalVerticesProcedure(ret, fis, outDir);
+			ret.walk(iiv_proc);
+			fis.close();
+			
+			logger.debug("Store data header on disk");
+			Storage.writeOEMMStructure(ret, outDir+File.separator+"files");
+			
+			//  Index external vertices
+			logger.debug("Index external vertices");
+			fis = new FileInputStream(ret.getFileName());
+			IndexExternalVerticesProcedure iev_proc = new IndexExternalVerticesProcedure(ret, fis, outDir);
+			ret.walk(iev_proc);
+			fis.close();
+			
+			//  Transform vertex coordinates into doubles
+			logger.debug("Transform vertex coordinates into doubles");
+			ConvertVertexCoordinatesProcedure cvc_proc = new ConvertVertexCoordinatesProcedure(ret);
+			ret.walk(cvc_proc);
+			
+			//ShowIndexedNodesProcedure debug = new ShowIndexedNodesProcedure();
+			//ret.walk(debug);
+		}
+		catch (FileNotFoundException ex)
+		{
+			logger.error("File "+inFile+" not found");
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+		catch (IOException ex)
+		{
+			logger.error("I/O error when reading inFile  "+inFile);
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+		return ret;
+	}
+	
+	private static class IndexInternalVerticesProcedure extends TraversalProcedure
+	{
+		private OEMM oemm;
+		private FileChannel fc;
+		private String outDir;
+		private int globalIndex = 0;
+		private ArrayList path = new ArrayList();
+		private int [] ijk = new int[3];
+		private int room = 0;
+		public IndexInternalVerticesProcedure(OEMM o, FileInputStream in, String dir)
+		{
+			oemm = o;
+			fc = in.getChannel();
+			outDir = dir;
+			room = ((1 << 31) - 3*oemm.head[0].tn) / oemm.nr_leaves;
+		}
+		public final int action(OEMMNode current, int octant, int visit)
+		{
+			if (current.parent == null && visit != LEAF)
+				return SKIPWALK;
+			if (visit == POSTORDER)
+			{
+				path.remove(path.size() - 1);
+				return SKIPWALK;
+			}
+			else if (visit == PREORDER)
+			{
+				path.add(""+octant);
+				return SKIPWALK;
+			}
+			
+			logger.debug("Indexing internal vertices of node "+(current.leafIndex+1)+"/"+oemm.nr_leaves);
+			ijk[0] = current.i0;
+			ijk[1] = current.j0;
+			ijk[2] = current.k0;
+			current.topDir = outDir;
+			StringBuffer sbdir = new StringBuffer();
+			if (path.size() > 0)
+			{
+				sbdir.append((String) path.get(0));
+				for (int i = 1; i < path.size(); i++)
+					sbdir.append(File.separator + (String) path.get(i));
+				String dir = sbdir.toString();
+				File d = new File(outDir, dir);
+				d.mkdirs();
+				current.file = dir + File.separator + octant;
+			}
+			else
+			{
+				new File(outDir).mkdirs();
+				current.file = ""+octant;
+			}
+			PAVLTreeIntArrayDup inner = new PAVLTreeIntArrayDup();
+			PAVLTreeIntArrayDup outer = new PAVLTreeIntArrayDup();
+			int nrExternal = 0;
+			int nrDuplicates = 0;
+			int index = 0;
+			int fakeIndex = 0;
+			TIntHashSet [] localAdjSet = new TIntHashSet[3*current.tn];
+			//  Leaves have less than 256 neighbors
+			TIntHashSet set = new TIntHashSet(256);
+			current.adjLeaves = new TIntArrayList(20);
+			try
+			{
+				int [] leaf = new int[3];
+				int [] pointIndex = new int[3];
+				fc.position(current.counter);
+				bbpos.rewind();
+				fc.read(bbpos);
+				bbpos.flip();
+				long pos = bbpos.getLong();
+				assert pos == current.counter : ""+pos+" != "+current.counter;
+				bb.clear();
+				IntBuffer bbI = bb.asIntBuffer();
+				int tCount = 0;
+				int remaining = current.tn;
+				// In this first loop, vertices are read from
+				// intermediate OEMM file.  Internal vertices
+				// are written into fcv via bbt buffer.
+				// As bbt and bb have the same size, bbtI
+				// does not overflow.
+				// TODO: write directly into final "v" file.
+				FileChannel fcv = new FileOutputStream(new File(current.topDir, current.file+"i")).getChannel();
+				bbt.clear();
+				IntBuffer bbtI = bbt.asIntBuffer();
+				for (int nblock = (remaining * TRIANGLE_SIZE_DISPATCHED) / bufferSize; nblock >= 0; --nblock)
+				{
+					bb.rewind();
+					fc.read(bb);
+					bbI.rewind();
+					bbtI.rewind();
+					int nf = bufferSize / TRIANGLE_SIZE_DISPATCHED;
+					if (remaining < nf)
+						nf = remaining;
+					remaining -= nf;
+					for(int nr = 0; nr < nf; nr ++)
+					{
+						for (int i = 0; i < 3; i++)
+						{
+							bbI.get(ijk);
+							if (ijk[0] < current.i0 || ijk[0] >= current.i0 + current.size ||
+							    ijk[1] < current.j0 || ijk[1] >= current.j0 + current.size ||
+							    ijk[2] < current.k0 || ijk[2] >= current.k0 + current.size)
+							{
+								// Find its bounding node to update
+								// adjacency relations.
+								OEMMNode node = oemm.search(ijk);
+								leaf[i] = node.leafIndex;
+								fakeIndex--;
+								pointIndex[i] = outer.insert(ijk, fakeIndex);
+								if (pointIndex[i] == fakeIndex)
+									nrExternal++;
+								else
+									nrDuplicates++;
+							}
+							else
+							{
+								leaf[i] = current.leafIndex;
+								pointIndex[i] = inner.insert(ijk, index);
+								if (pointIndex[i] == index)
+								{
+									bbtI.put(ijk);
+									localAdjSet[index] = new TIntHashSet();
+									index++;
+								}
+								else
+								{
+									nrDuplicates++;
+								}
+							}
+						}
+						//  Group number
+						bbI.get();
+						for (int i = 0; i < 3; i++)
+						{
+							if (leaf[i] != current.leafIndex)
+								continue;
+							for (int j = 0; j < 3; j++)
+							{
+								if (i == j || leaf[j] == current.leafIndex)
+									continue;
+								if (!set.contains(leaf[j]))
+								{
+									set.add(leaf[j]);
+									current.adjLeaves.add(leaf[j]);
+								}
+								localAdjSet[pointIndex[i]].add(leaf[j]);
+							}
+						}
+						//  Triangles are stored in the node with lowest leafIndex
+						if (leaf[0] >= current.leafIndex && leaf[1] >= current.leafIndex && leaf[2] >= current.leafIndex )
+							tCount++;
+					}
+					bbt.position(4*bbtI.position());
+					bbt.flip();
+					fcv.write(bbt);
+					bbt.clear();
+				}
+				fcv.close();
+
+				//  Adjust data information
+				current.vn = index;
+				current.minIndex = globalIndex;
+				current.maxIndex = globalIndex + current.vn + room - 1;
+				globalIndex += index + room;
+				
+				current.adjLeaves = new TIntArrayList(set.size());
+				TIntIntHashMap invMap = new TIntIntHashMap(set.size());
+				int cnt = 0;
+				for (TIntIterator it = set.iterator(); it.hasNext();)
+				{
+					int ind = it.next();
+					current.adjLeaves.add(ind);
+					invMap.put(ind, cnt);
+					cnt++;
+				}
+				// tCount will be the nymber of triangles
+				// written onto disk, but we still need the
+				// old value.
+				int tn = current.tn;
+				current.tn = tCount;
+				Storage.writeHeaderOEMMNode(current);
+				current.tn = tn;
+				
+				FileChannel fca = new FileOutputStream(new File(current.topDir, current.file+"a")).getChannel();
+				bb.clear();
+				//  Inner vertices of this node
+				int room = bb.capacity();
+				for (int i = 0; i < index; i++)
+				{
+					int n = localAdjSet[i].size();
+					if (room < 1 + n)
+					{
+						bb.flip();
+						fca.write(bb);
+						bb.clear();
+						room = bb.capacity();
+					}
+					//     Adjacent leaves
+					bb.put((byte) n);
+					for (TIntIterator it = localAdjSet[i].iterator(); it.hasNext();)
+						bb.put((byte) invMap.get(it.next()));
+					room -= 1 + n;
+				}
+				bb.flip();
+				fca.write(bb);
+				//  Triangles will be written during 2nd pass
+				fca.close();
+			}
+			catch (IOException ex)
+			{
+				logger.error("I/O error when reading intermediate file");
+				ex.printStackTrace();
+				throw new RuntimeException(ex);
+			}
+			logger.debug("number of internal vertices: "+index);
+			logger.debug("number of external vertices: "+nrExternal);
+			logger.debug("number of duplicated vertices: "+nrDuplicates);
+			return OK;
+		}
+	}
+	
+	private static class IndexExternalVerticesProcedure extends TraversalProcedure
+	{
+		private OEMM oemm;
+		private FileChannel fc;
+		private int [] ijk = new int[3];
+		private PAVLTreeIntArrayDup [] vertices;
+		private boolean [] needed;
+		private int nr_ld_leaves = 0;
+		public IndexExternalVerticesProcedure(OEMM o, FileInputStream in, String dir)
+		{
+			oemm = o;
+			fc = in.getChannel();
+			vertices = new PAVLTreeIntArrayDup[oemm.nr_leaves];
+			needed = new boolean[vertices.length];
+		}
+		public final int action(OEMMNode current, int octant, int visit)
+		{
+			if (visit != LEAF)
+				return SKIPWALK;
+			logger.debug("Indexing external vertices of node "+(current.leafIndex+1)+"/"+oemm.nr_leaves);
+			// Only adjacent leaves are needed, drop others
+			// to free memory.
+			// TODO: Add a better mamory management system.
+			for (int i = 0; i < needed.length; i++)
+				needed[i] = false;
+			needed[current.leafIndex] = true;
+			for (int i = 0; i < current.adjLeaves.size(); i++)
+				needed[current.adjLeaves.get(i)] = true;
+			for (int i = 0; i < needed.length; i++)
+			{
+				if (!needed[i])
+					vertices[i] = null;
+			}
+			
+			//  Load needed vertices
+			for (int i = 0; i < vertices.length; i++)
+			{
+				if (needed[i] && vertices[i] == null)
+				{
+					nr_ld_leaves++;
+					vertices[i] = loadVerticesInAVLTreeDup(oemm.leaves[i]);
+				}
+			}
+			
+			try
+			{
+				int [] leaf = new int[3];
+				int [] pointIndex = new int[3];
+				fc.position(current.counter);
+				bbpos.rewind();
+				fc.read(bbpos);
+				bbpos.flip();
+				long pos = bbpos.getLong();
+				assert pos == current.counter : ""+pos+" != "+current.counter;
+				FileChannel fct = new FileOutputStream(new File(current.topDir, current.file+"t")).getChannel();
+				bb.clear();
+				IntBuffer bbI = bb.asIntBuffer();
+				bbt.clear();
+				IntBuffer bbtI = bbt.asIntBuffer();
+				int remaining = current.tn;
+				for (int nblock = (remaining * TRIANGLE_SIZE_DISPATCHED) / bufferSize; nblock >= 0; --nblock)
+				{
+					bb.rewind();
+					fc.read(bb);
+					bbI.rewind();
+					int nf = bufferSize / TRIANGLE_SIZE_DISPATCHED;
+					if (remaining < nf)
+						nf = remaining;
+					remaining -= nf;
+					for(int nr = 0; nr < nf; nr ++)
+					{
+						for (int i = 0; i < 3; i++)
+						{
+							bbI.get(ijk);
+							leaf[i] = oemm.search(ijk).leafIndex;
+							pointIndex[i] = vertices[leaf[i]].get(ijk);
+						}
+						int groupNumber = bbI.get();
+						if (leaf[0] >= current.leafIndex && leaf[1] >= current.leafIndex && leaf[2] >= current.leafIndex)
+						{
+							bbtI.put(leaf);
+							bbtI.put(pointIndex);
+							bbtI.put(groupNumber);
+							if (!bbtI.hasRemaining())
+							{
+								bbt.clear();
+								fct.write(bbt);
+								bbtI.rewind();
+							}
+						}
+					}
+				}
+				if (bbtI.position() > 0)
+				{
+					bbt.position(4*bbtI.position());
+					bbt.flip();
+					fct.write(bbt);
+				}
+				fct.close();
+			}
+			catch (IOException ex)
+			{
+				logger.error("I/O error when reading intermediate file");
+				ex.printStackTrace();
+				throw new RuntimeException(ex);
+			}
+			return OK;
+		}
+		public void finish()
+		{
+			logger.debug("Total number of leaves loaded: "+nr_ld_leaves);
+		}
+	}
+	
+	private static class ConvertVertexCoordinatesProcedure extends TraversalProcedure
+	{
+		private OEMM oemm;
+		private int [] ijk = new int[3];
+		private double [] xyz = new double[3];
+		public ConvertVertexCoordinatesProcedure(OEMM o)
+		{
+			oemm = o;
+		}
+		public final int action(OEMMNode current, int octant, int visit)
+		{
+			if (visit != LEAF)
+				return SKIPWALK;
+			logger.debug("Converting coordinates of node "+(current.leafIndex+1)+"/"+oemm.nr_leaves);
+			
+			try
+			{
+				FileChannel fci = new FileInputStream(new File(current.topDir, current.file+"i")).getChannel();
+				FileChannel fco = new FileOutputStream(new File(current.topDir, current.file+"v")).getChannel();
+				bb.clear();
+				IntBuffer bbI = bb.asIntBuffer();
+				bbt.clear();
+				DoubleBuffer bbtD = bbt.asDoubleBuffer();
+				bb.limit(bb.capacity() / 2);
+				int remaining = current.vn;
+				for (int nblock = (remaining * 2 * VERTEX_SIZE_INDEXED) / bufferSize; nblock >= 0; --nblock)
+				{
+					bb.rewind();
+					fci.read(bb);
+					bbI.rewind();
+					bbtD.rewind();
+					int nf = bufferSize / VERTEX_SIZE_INDEXED / 2;
+					if (remaining < nf)
+						nf = remaining;
+					remaining -= nf;
+					for(int nr = 0; nr < nf; nr ++)
+					{
+						bbI.get(ijk);
+						oemm.int2double(ijk, xyz);
+						bbtD.put(xyz);
+					}
+					bbt.position(8*bbtD.position());
+					bbt.flip();
+					fco.write(bbt);
+					
+				}
+				fci.close();
+				fco.close();
+				new File(current.topDir, current.file+"i").delete();
+			}
+			catch (IOException ex)
+			{
+				logger.error("I/O error when converting coordinates file");
+				ex.printStackTrace();
+				throw new RuntimeException(ex);
+			}
+			return OK;
+		}
+	}
+	
+	private static PAVLTreeIntArrayDup loadVerticesInAVLTreeDup(OEMMNode current)
+	{
+		PAVLTreeIntArrayDup ret = new PAVLTreeIntArrayDup();
+		int [] ijk = new int[3];
+		try
+		{
+			FileChannel fc = new FileInputStream(new File(current.topDir, current.file+"i")).getChannel();
+			int index = 0;
+			bb.clear();
+			IntBuffer bbI = bb.asIntBuffer();
+			int remaining = current.vn;
+			for (int nblock = (remaining * VERTEX_SIZE_INDEXED) / bufferSize; nblock >= 0; --nblock)
+			{
+				bb.rewind();
+				fc.read(bb);
+				bbI.rewind();
+				int nf = bufferSize / VERTEX_SIZE_INDEXED;
+				if (remaining < nf)
+					nf = remaining;
+				remaining -= nf;
+				for(int nr = 0; nr < nf; nr ++)
+				{
+					bbI.get(ijk);
+					ret.insert(ijk, index);
+					index++;
+				}
+			}
+			fc.close();
+		}
+		catch (IOException ex)
+		{
+			logger.error("I/O error when reading indexed file "+current.topDir+File.separator+current.file+"i");
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+
 		return ret;
 	}
 	

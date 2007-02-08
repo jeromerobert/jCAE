@@ -67,7 +67,7 @@ public class OEMMViewer
 	
 	public static BranchGroup meshOEMM(String dir)
 	{
-		return meshOEMM(IndexedStorage.buildOEMMStructure(dir));
+		return meshOEMM(Storage.readOEMMStructure(dir));
 	}
 	
 	public static BranchGroup meshOEMM(OEMM oemm)
@@ -86,7 +86,7 @@ public class OEMMViewer
 	public static BranchGroup meshOEMM(OEMM oemm, TIntHashSet leaves, boolean adjacency)
 	{
 		BranchGroup bg = new BranchGroup();
-		Mesh mesh = IndexedStorage.loadNodes(oemm, leaves, adjacency);
+		Mesh mesh = Storage.loadNodes(oemm, leaves, adjacency);
 		double [] coord = meshCoord(mesh);
 		TriangleArray tri = new TriangleArray(coord.length/3, TriangleArray.COORDINATES);
 		tri.setCapability(TriangleArray.ALLOW_COUNT_READ);

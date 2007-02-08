@@ -47,7 +47,7 @@ public class MeshOEMMIndex
 		RawStorage.countTriangles(oemm, soupFile);
 		oemm.aggregate(triangles_max);
 		RawStorage.dispatch(oemm, soupFile, "dispatched", "dispatched.data");
-		IndexedStorage.indexOEMM("dispatched", outDir);
+		RawStorage.indexOEMM("dispatched", outDir);
 		logger.info("End processing");
 	}
 	

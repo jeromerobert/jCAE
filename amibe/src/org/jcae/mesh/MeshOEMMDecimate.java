@@ -23,8 +23,7 @@ package org.jcae.mesh;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.OEMMNode;
-import org.jcae.mesh.oemm.IndexedStorage;
-import org.jcae.mesh.oemm.RawStorage;
+import org.jcae.mesh.oemm.Storage;
 import org.jcae.mesh.oemm.TraversalProcedure;
 import java.util.HashMap;
 import gnu.trove.TIntHashSet;
@@ -45,7 +44,7 @@ public class MeshOEMMDecimate
 		String dir = args[0];
 		int scale = Integer.valueOf(args[1]).intValue();
 		
-		OEMM oemm = IndexedStorage.buildOEMMStructure(dir);
+		OEMM oemm = Storage.readOEMMStructure(dir);
 		DecimateProcedure d_proc = new DecimateProcedure(oemm, scale);
 		oemm.walk(d_proc);
 		// TODO: write mesh back into oemm
@@ -66,7 +65,7 @@ public class MeshOEMMDecimate
 				return SKIPWALK;
 			TIntHashSet leaves = new TIntHashSet();
 			leaves.add(current.leafIndex);
-			Mesh amesh = IndexedStorage.loadNodes(oemm, leaves);
+			Mesh amesh = Storage.loadNodes(oemm, leaves);
 			HashMap options = new HashMap();
 			options.put("maxtriangles", ""+(current.tn / scale));
 			new org.jcae.mesh.amibe.algos3d.DecimateHalfEdge(amesh, options).compute();

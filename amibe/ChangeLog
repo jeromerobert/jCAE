@@ -1,3 +1,11 @@
+Thu Feb  8 17:57:02 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/oemm/Storage.java: This new class contains
+	reader and writer methods for OEMM structures.
+	* src/org/jcae/mesh/oemm/IndexedStorage.java: Class removed,
+	indexOEMM() is moved into RawStorage, and other methods have been
+	moved into Storage.
+
 Thu Feb  8 16:35:09 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/oemm/IndexedStorage.java: Modify internal format
