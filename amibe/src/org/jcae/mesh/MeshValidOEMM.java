@@ -44,9 +44,8 @@ public class MeshValidOEMM
 			for (int i = 0; i < maxgroup; i++)
 				amin[i] = 1.0;
 		}
-		public void processVertex(int i, Object coord)
+		public void processVertex(int i, double [] xyz)
 		{
-			double [] xyz = (double []) coord;
 			n[i] = Vertex.valueOf(xyz[0], xyz[1], xyz[2]);
 		}
 		public void processTriangle(int group)

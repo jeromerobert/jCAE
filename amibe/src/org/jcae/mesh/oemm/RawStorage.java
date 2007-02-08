@@ -42,7 +42,7 @@ public class RawStorage
 {
 	private static Logger logger = Logger.getLogger(RawStorage.class);	
 
-	//  In the raw file, a triangle has 9 double coordinates and two ints.
+	//  In triangle soup, a triangle has 9 double coordinates and two ints.
 	private static final int TRIANGLE_SIZE_RAW = 80;
 	//  In the dispatched file, a triangle has 9 int coordinates and an int.
 	private static final int TRIANGLE_SIZE_DISPATCHED = 40;
@@ -53,7 +53,7 @@ public class RawStorage
 	
 	public static interface SoupReaderInterface
 	{
-		public void processVertex(int i, Object coord);
+		public void processVertex(int i, double [] xyz);
 		public void processTriangle(int group);
 	}
 
@@ -77,13 +77,7 @@ public class RawStorage
 					for (int i = 0; i < 3; i++)
 					{
 						bbD.get(xyz);
-						if (oemm != null)
-						{
-							oemm.double2int(xyz, ijk);
-							proc.processVertex(i, ijk);
-						}
-						else
-							proc.processVertex(i, xyz);
+						proc.processVertex(i, xyz);
 					}
 					bbD.get();
 					bbI.position(2*bbD.position() - 2);
@@ -112,13 +106,14 @@ public class RawStorage
 		private OEMMNode [] cells = new OEMMNode[3];
 		private OEMM oemm;
 		private long tcount = 0;
+		private int [] ijk = new int[3];
 		public CountTriangles(OEMM o)
 		{
 			oemm = o;
 		}
-		public void processVertex(int i, Object coord)
+		public void processVertex(int i, double [] xyz)
 		{
-			int [] ijk = (int []) coord;
+			oemm.double2int(xyz, ijk);
 			cells[i] = oemm.build(ijk);
 		}
 		public void processTriangle(int group)
@@ -175,12 +170,15 @@ public class RawStorage
 			oemm = o;
 			fc = f;
 		}
-		public void processVertex(int i, Object coord)
+		public void processVertex(int i, double [] xyz)
 		{
-			int [] ijk = (int []) coord;
-			cells[i] = oemm.search(ijk);
-			for (int j = 0; j < 3; j++)
-				ijk9[6-3*i+j] = ijk[j];
+			oemm.double2int(xyz, ijk9);
+			cells[i] = oemm.search(ijk9);
+			if (i < 2)
+			{
+				for (int j = 0; j < 3; j++)
+					ijk9[3*i+3+j] = ijk9[j];
+			}
 		}
 		public void processTriangle(int group)
 		{
