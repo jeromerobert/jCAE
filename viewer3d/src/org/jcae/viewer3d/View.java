@@ -76,7 +76,7 @@ public class View extends Canvas3D implements PositionListener
 	private ViewingPlatform viewingPlatform;
 	private BranchGroup axisBranchGroup=new BranchGroup();
 	private Viewable currentViewable;
-	private OrbitBehavior orbit= new ViewBehavior(this);
+	protected OrbitBehavior orbit= new ViewBehavior(this);
 	private AxisBehavior axisBehavior;
 	ModelClip modelClip;
 	private boolean isModelClip=false;
@@ -1127,7 +1127,8 @@ public class View extends Canvas3D implements PositionListener
 		Transform3D t3d=new Transform3D();		
 		Point3d center=new Point3d();
 		bs.getCenter(center);
-		eye.scale(5f*bs.getRadius());
+		float focal=(float) Math.tan(getView().getFieldOfView()/2);
+		eye.scale(bs.getRadius()/focal);
 		t3d.lookAt(eye, center, up);
 		t3d.invert();
 		move(t3d);
