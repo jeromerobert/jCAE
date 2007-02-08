@@ -421,7 +421,7 @@ public  class ViewBehavior extends OrbitBehavior
 	{
 		PickViewable result = basicPickPoint(evt);
 		if (result != null)
-			view.getCurrentViewable().pick(result, true);
+			view.getCurrentViewable().pick(result);
 	}
 
 	protected void startRectangleDrawing(MouseEvent evt)
@@ -479,7 +479,7 @@ public  class ViewBehavior extends OrbitBehavior
 		long time2 = System.currentTimeMillis();
 		Logger.global.finest("picked viewable is " + cv + " in "
 			+ (time2 - time) + " ms");		
-		if (result != null) cv.pick(result, true);
+		if (result != null) cv.pick(result);
 		}
 		selectionRectangle = null;
 	}

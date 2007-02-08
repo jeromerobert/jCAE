@@ -107,12 +107,12 @@ public class ViewableBG extends ViewableAdaptor
 		return leaves;
 	}
 
-	public void pick(PickViewable result, boolean selected)
+	public void pick(PickViewable result)
 	{		
 		if(result==null)
 			return;
 		
-		pickSolid(result, selected);
+		pickSolid(result, true);
 	}
 	
 	private void pickSolid(PickViewable result, boolean selected)

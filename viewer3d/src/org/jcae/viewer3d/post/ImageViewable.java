@@ -89,7 +89,7 @@ public class ImageViewable extends ViewableAdaptor
 		return branchGroup;
 	}
 
-	public void pick(PickViewable result, boolean selected)
+	public void pick(PickViewable result)
 	{
 		// nothing
 	}

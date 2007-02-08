@@ -34,6 +34,11 @@ public class NodeSelectionImpl implements NodeSelection
 		nodeIDs.add(nodeID);
 	}
 	
+	boolean containsNode(int elementID, byte nodeID)
+	{
+		return nodeIDs.contains(nodeID)&elementIDs.contains(elementID);
+	}
+	
 	public Object clone()
 	{
 		try

@@ -618,7 +618,7 @@ public class ViewableFD extends ViewableAdaptor
 		{	
 			Integer iDomainId=new Integer(domainId[d]);
 			
-			Logger.global.finest("Create BranchGroup for domain nr. "+
+			Logger.global.finest("Create BranchGroup for domain n°"+
 				Integer.toHexString(domainId[d])+ "provider="+provider+" ids="+ids);
 			
 			BranchGroup old=(BranchGroup)domainToBranchGroup.get(iDomainId);
@@ -820,41 +820,41 @@ public class ViewableFD extends ViewableAdaptor
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.Viewable#pick(com.sun.j3d.utils.picking.PickResult)
 	 */
-	public void pick(PickViewable result, boolean selected)
+	public void pick(PickViewable result)
 	{				
 		if(result==null)
 			return;
 		
 		if(result.getObject().getUserData()==PLATE_IDENTIFIER)
 		{
-			pickPlate(result, selected);
+			pickPlate(result);
 		}
 		if(result.getObject().getUserData()==SOLID_IDENTIFIER)
 		{
-			pickSolid(result, selected);
+			pickSolid(result);
 		}
 		else if(result.getObject().getUserData() instanceof WireDomainID)
 		{
 			if(cellPicking)
-				pickWireCell(result, selected);
+				pickWireCell(result);
 			else
-				pickWire(result, selected);
+				pickWire(result);
 		}
 		else if(result.getObject().getUserData() instanceof SlotDomainID)
 		{
 			if(cellPicking)
-				pickSlotCell(result, selected);
+				pickSlotCell(result);
 			else
-				pickSlot(result, selected);
+				pickSlot(result);
 		}
 		else if(result.getObject().getUserData() instanceof MarkUtils.MarkID)
 		{
-			pickJunction(result, selected);
+			pickJunction(result);
 		}
 		fireSelectionChanged();
 	}
 
-	private void pickSlotCell(PickViewable result, boolean selected)
+	private void pickSlotCell(PickViewable result)
 	{
 		int domainId=((SlotDomainID)result.getObject().getUserData()).getValue();
 		PickIntersection pi = result.getIntersection();
@@ -862,8 +862,10 @@ public class ViewableFD extends ViewableAdaptor
 		
 		Point3d[] cds=pi.getPrimitiveCoordinates();
 		Point3d point=pi.getPointCoordinates();
-		LineArray la=null;
-		if(selected)
+		Geometry la=null;
+		
+		boolean toSelected=!cellManager.isSlotSelected(o.getType(), domainId, o.getValue(), cds, point);
+		if(toSelected)
 		{						
 			la=cellManager.selectSlot(o.getType(), domainId, o.getValue(), cds, point);
 			selectedWires.addGeometry(la);
@@ -875,7 +877,7 @@ public class ViewableFD extends ViewableAdaptor
 		}
 	}
 
-	private void pickWireCell(PickViewable result, boolean selected)
+	private void pickWireCell(PickViewable result)
 	{
 		int domainId=((WireDomainID)result.getObject().getUserData()).getValue();
 		PickIntersection pi = result.getIntersection();
@@ -885,7 +887,21 @@ public class ViewableFD extends ViewableAdaptor
 		Point3d point=pi.getPointCoordinates();
 		Geometry la=null;
 		
-		if(selected)
+		boolean toSelect=false;
+		if(o instanceof XLineID)
+		{				
+			toSelect=!cellManager.isXWireSelected(domainId, o.getValue(), cds, point);
+		}
+		else if(o instanceof YLineID)
+		{
+			toSelect=!cellManager.isYWireSelected(domainId, o.getValue(), cds, point);
+		}
+		else if(o instanceof ZLineID)
+		{
+			toSelect=!cellManager.isZWireSelected(domainId, o.getValue(), cds, point);
+		}
+
+		if(toSelect)
 		{			
 			if(o instanceof XLineID)
 			{				
@@ -920,7 +936,7 @@ public class ViewableFD extends ViewableAdaptor
 		}
 	}
 
-	private void pickJunction(PickViewable result, boolean selected)
+	private void pickJunction(PickViewable result)
 	{
 		int domainId=((MarkUtils.MarkID)result.getObject().getUserData()).getDomainID();
 		PickIntersection pi = result.getIntersection();
@@ -929,7 +945,9 @@ public class ViewableFD extends ViewableAdaptor
 		int[] idx = pi.getPrimitiveVertexIndices();
 		int markID=idx[0];		
 		
-		if(selected)
+		boolean toSelect=!selectionManager.isMarkSelected(domainId, typeId, markID);
+
+		if(toSelect)
 		{
 			Point3d[] cds=pi.getPrimitiveCoordinates();
 			PointArray pa=new PointArray(cds.length, GeometryArray.COORDINATES);
@@ -941,16 +959,30 @@ public class ViewableFD extends ViewableAdaptor
 		{
 			selectedJunctions.removeGeometry(
 				selectionManager.getGeometryForMark(domainId, typeId, markID));
-			selectionManager.unselect(domainId, typeId, markID);
+			selectionManager.unselectMark(domainId, typeId, markID);
 		}
 	}
 	
-	private void pickWire(PickViewable result, boolean selected)
+	private void pickWire(PickViewable result)
 	{
 		int domainId=((WireDomainID)result.getObject().getUserData()).getValue();
 		PickIntersection pi = result.getIntersection();
 		IntegerUserData o=(IntegerUserData)pi.getGeometryArray().getUserData();
-		if(selected)
+		
+		boolean toSelect=false;
+		if(o instanceof XLineID)
+		{				
+			toSelect=!selectionManager.isXWireSelected(domainId, o.getValue());
+		}
+		else if(o instanceof YLineID)
+		{
+			toSelect=!selectionManager.isYWireSelected(domainId, o.getValue());
+		}
+		else if(o instanceof ZLineID)
+		{
+			toSelect=!selectionManager.isZWireSelected(domainId, o.getValue());
+		}
+		if(toSelect)
 		{
 			Point3d[] cds=pi.getPrimitiveCoordinates();
 			LineArray la=new LineArray(cds.length, GeometryArray.COORDINATES);
@@ -994,12 +1026,14 @@ public class ViewableFD extends ViewableAdaptor
 		}
 	}
 	
-	private void pickSlot(PickViewable result, boolean selected)
+	private void pickSlot(PickViewable result)
 	{		
 		int domainId=((SlotDomainID)result.getObject().getUserData()).getValue();
 		PickIntersection pi = result.getIntersection();
 		SlotID o=(SlotID)pi.getGeometryArray().getUserData();
-		if(selected)
+		
+		boolean toSelect=!selectionManager.isSlotSelected(o.getType(), domainId, o.getValue());
+		if(toSelect)
 		{
 			Point3d[] cds=pi.getPrimitiveCoordinates();
 			LineArray la=new LineArray(cds.length, GeometryArray.COORDINATES);
@@ -1016,7 +1050,7 @@ public class ViewableFD extends ViewableAdaptor
 		}
 	}
 	
-	private void pickPlate(PickViewable result, boolean selected)
+	private void pickPlate(PickViewable result)
 	{		
 		PickIntersection pi = result.getIntersection();
 
@@ -1028,7 +1062,8 @@ public class ViewableFD extends ViewableAdaptor
 		int plateID=idx[0]/4;
 		int domainID=((Integer)pi.getGeometryArray().getUserData()).intValue();
 
-		if(selected)
+		boolean toSelect=!selectionManager.isPlateSelected(plateID, domainID);
+		if(toSelect)
 		{
 			Point3d[] pc=pi.getPrimitiveCoordinates();
 			Logger.global.finest("domainID: "+domainID);		
@@ -1047,7 +1082,7 @@ public class ViewableFD extends ViewableAdaptor
 		}
 	}
 	
-	private void pickSolid(PickViewable result, boolean selected)
+	private void pickSolid(PickViewable result)
 	{		
 		PickIntersection pi = result.getIntersection();
 
@@ -1058,7 +1093,9 @@ public class ViewableFD extends ViewableAdaptor
 		int[] idx = pi.getPrimitiveVertexIndices();
 		int solidID=idx[0]/24;
 		int domainID=((Integer)pi.getGeometryArray().getUserData()).intValue();
-		if(selected)
+		
+		boolean toSelect=!selectionManager.isSolidSelected(solidID, domainID);
+		if(toSelect)
 		{
 			Logger.global.finest("cellid= "+idx[0]/24);
 			Logger.global.finest("domainID: "+domainID);					

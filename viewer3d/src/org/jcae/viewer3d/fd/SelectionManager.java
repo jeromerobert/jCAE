@@ -150,7 +150,16 @@ public class SelectionManager
 		public boolean addXPlate(int relativeID)
 		{
 			return xPlates.add(new Integer(relativeID));
-		}	
+		}
+		
+		/**
+		 * @param relativeID
+		 * @return
+		 */
+		public boolean containsXPlate(int relativeID)
+		{
+			return xPlates.contains(new Integer(relativeID));
+		}
 
 		/**
 		 * @param relativeID
@@ -160,6 +169,15 @@ public class SelectionManager
 		{
 			return yPlates.add(new Integer(relativeID));
 		}
+		
+		/**
+		 * @param relativeID
+		 * @return
+		 */
+		public boolean containsYPlate(int relativeID)
+		{
+			return yPlates.contains(new Integer(relativeID));
+		}
 
 		/**
 		 * @param relativeID
@@ -168,6 +186,15 @@ public class SelectionManager
 		public boolean addZPlate(int relativeID)
 		{
 			return zPlates.add(new Integer(relativeID));
+		}
+		
+		/**
+		 * @param relativeID
+		 * @return
+		 */
+		public boolean containsZPlate(int relativeID)
+		{
+			return zPlates.contains(new Integer(relativeID));
 		}
 
 		/**
@@ -282,6 +309,14 @@ public class SelectionManager
 		/**
 		 * @param value
 		 */
+		public boolean containsXWire(int value)
+		{
+			return xWires.contains(new Integer(value));
+		}
+		
+		/**
+		 * @param value
+		 */
 		public void addXWire(int value)
 		{
 			xWires.add(new Integer(value));
@@ -290,11 +325,26 @@ public class SelectionManager
 		/**
 		 * @param value
 		 */
+		public boolean containsZWire(int value)
+		{
+			return zWires.contains(new Integer(value));
+		}
+		
+		/**
+		 * @param value
+		 */
 		public void addZWire(int value)
 		{
 			zWires.add(new Integer(value));
 		}
 
+		/**
+		 * @param value
+		 */
+		public boolean containsYWire(int value)
+		{
+			return yWires.contains(new Integer(value));
+		}
 		/**
 		 * @param value
 		 */
@@ -335,6 +385,15 @@ public class SelectionManager
 		{
 			slots[type].add(new Integer(value));
 		}
+		
+		/**
+		 * @param type
+		 * @param value
+		 */
+		public boolean containsSlot(byte type, int value)
+		{
+			return slots[type].contains(new Integer(value));
+		}
 
 		/**
 		 * @param type
@@ -345,6 +404,19 @@ public class SelectionManager
 			slots[type].remove(new Integer(value));
 		}
 
+		/**
+		 * @param typeId
+		 * @param markID
+		 */
+		public boolean containsMark(int typeId, int markID)
+		{
+			Integer i=new Integer(typeId);			
+			Collection c=(Collection) marks.get(new Integer(typeId));
+			if(c==null)
+				return false;
+			return c.contains(new Integer(markID));
+		}
+		
 		/**
 		 * @param typeId
 		 * @param markID
@@ -370,6 +442,12 @@ public class SelectionManager
 			((Collection)marks.get(new Integer(typeId))).remove(new Integer(markID));
 		}
 
+		
+		public boolean containsSolid(int solidID)
+		{
+			return solids.contains(new Integer(solidID));
+		}
+		
 		public void addSolid(int solidID)
 		{
 			solids.add(new Integer(solidID));
@@ -389,6 +467,7 @@ public class SelectionManager
 	private Map zWireToLineArray=new HashMap();
 	private Map slotToLineArray=new HashMap();
 	private Map solidIDToQuadArray=new HashMap();
+	private Map markToGeometryArray=new HashMap();
 	
 	/**
 	 * 
@@ -421,6 +500,31 @@ public class SelectionManager
 			domainToSelection.put(new Integer(domainID), s);
 		}
 		return s;
+	}
+	
+	
+	public boolean isPlateSelected(int plateID, int domainID)
+	{
+		FDDomain d=(FDDomain) provider.getDomain(domainID);
+		Selection s=getSelection(domainID);
+		int relativeID;
+		boolean selected=false;
+		if(plateID<d.getNumberOfXPlate())
+		{		
+			relativeID=plateID;
+			selected=s.containsXPlate(relativeID);
+		}
+		else if(plateID<d.getNumberOfYPlate()+d.getNumberOfXPlate())
+		{		
+			relativeID=plateID-d.getNumberOfXPlate();
+			selected=s.containsYPlate(relativeID);
+		}
+		else
+		{		
+			relativeID=plateID-d.getNumberOfXPlate()-d.getNumberOfYPlate();
+			selected=s.containsZPlate(relativeID);
+		}
+		return selected;
 	}
 	
 	public boolean selectPlate(int plateID, int domainID, QuadArray qa)
@@ -462,7 +566,7 @@ public class SelectionManager
 				relativeID=plateID;
 				removed=s.removeXPlate(relativeID);
 			}
-			else if(plateID<d.getNumberOfYPlate())
+			else if(plateID<d.getNumberOfYPlate()+d.getNumberOfXPlate())
 			{		
 				relativeID=plateID-d.getNumberOfXPlate();
 				removed=s.removeYPlate(relativeID);
@@ -489,6 +593,7 @@ public class SelectionManager
 		yWireToLineArray.clear();
 		zWireToLineArray.clear();
 		domainToSelection.clear();
+		markToGeometryArray.clear();
 	}
 
 	/**
@@ -501,6 +606,16 @@ public class SelectionManager
 			new IntegerPair(domainID, plateID));
 	}
 
+	
+	/**
+	 * @param domainId
+	 * @param value
+	 * @param la
+	 */
+	public boolean isXWireSelected(int domainId, int value)
+	{
+		return getSelection(domainId).containsXWire(value);
+	}
 	/**
 	 * @param domainId
 	 * @param value
@@ -517,12 +632,30 @@ public class SelectionManager
 	 * @param value
 	 * @param la
 	 */
+	public boolean isYWireSelected(int domainId, int value)
+	{
+		return getSelection(domainId).containsYWire(value);
+	}
+	/**
+	 * @param domainId
+	 * @param value
+	 * @param la
+	 */
 	public void selectYWire(int domainId, int value, LineArray la)
 	{
 		getSelection(domainId).addYWire(value);
 		yWireToLineArray.put(new IntegerPair(domainId, value), la);
 	}
 
+	/**
+	 * @param domainId
+	 * @param value
+	 * @param la
+	 */
+	public boolean isZWireSelected(int domainId, int value)
+	{
+		return getSelection(domainId).containsZWire(value);
+	}
 	/**
 	 * @param domainId
 	 * @param value
@@ -591,6 +724,17 @@ public class SelectionManager
 		return (Geometry) zWireToLineArray.get(new IntegerPair(domainId, value));
 	}
 
+	
+	/**
+	 * @param type
+	 * @param domainId
+	 * @param value
+	 * @param la
+	 */
+	public boolean isSlotSelected(byte type, int domainId, int value)
+	{
+		return getSelection(domainId).containsSlot(type, value);
+	}
 	/**
 	 * @param type
 	 * @param domainId
@@ -626,6 +770,36 @@ public class SelectionManager
 		return (Geometry) slotToLineArray.get(new IntegerPairTyped(type, domainId, value));
 	}
 
+	class MarkInfo {
+		int domainId;
+		int typeId;
+		int markID;
+		public MarkInfo(int id, int markid, int id2) {
+			super();
+			domainId = id;
+			markID = markid;
+			typeId = id2;
+		}
+		
+		public boolean equals(Object obj){
+			MarkInfo mi=(MarkInfo)obj;
+			return (domainId==mi.domainId)&(markID==mi.markID)&(typeId==mi.typeId);
+		}
+		
+		public int hashCode(){
+			return domainId+typeId+markID;
+		}
+	}
+	/**
+	 * @param domainId
+	 * @param typeId
+	 * @param markID
+	 * @param pa
+	 */
+	public boolean isMarkSelected(int domainId, int typeId, int markID)
+	{
+		return getSelection(domainId).containsMark(typeId, markID);
+	}
 	/**
 	 * @param domainId
 	 * @param typeId
@@ -635,8 +809,9 @@ public class SelectionManager
 	public void selectMark(int domainId, int typeId, int markID, PointArray pa)
 	{
 		getSelection(domainId).addMark(typeId, markID);
+		markToGeometryArray.put(new MarkInfo(domainId,typeId,markID),pa);
 	}
-
+	
 	/**
 	 * @param domainId
 	 * @param typeId
@@ -645,8 +820,7 @@ public class SelectionManager
 	 */
 	public Geometry getGeometryForMark(int domainId, int typeId, int markID)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return (Geometry) markToGeometryArray.get(new MarkInfo(domainId,typeId,markID));
 	}
 
 	/**
@@ -654,11 +828,19 @@ public class SelectionManager
 	 * @param typeId
 	 * @param markID
 	 */
-	public void unselect(int domainId, int typeId, int markID)
+	public void unselectMark(int domainId, int typeId, int markID)
 	{
 		getSelection(domainId).removeMark(typeId, markID);
 	}
 
+	
+	public boolean isSolidSelected(int solidID, int domainID)
+	{
+		FDDomain d=(FDDomain) provider.getDomain(domainID);
+		Selection s=getSelection(domainID);
+		return s.containsSolid(solidID);
+	}
+	
 	public void selectSolid(int solidID, int domainID, QuadArray qa)
 	{
 		FDDomain d=(FDDomain) provider.getDomain(domainID);

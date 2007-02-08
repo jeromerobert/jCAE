@@ -205,20 +205,22 @@ public class ViewableCAD extends ViewableAdaptor
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.Viewable#pick(com.sun.j3d.utils.picking.PickResult)
 	 */
-	public void pick(PickViewable result, boolean selected)
+	public void pick(PickViewable result)
 	{
 		Logger.global.finest("result.getGeometryArray().getUserData()="+result.getGeometryArray().getUserData());
 		Object o=getPickUserData(result);
 		if((o instanceof FacePickingInfo)&(selectionMode==FACE_SELECTION))
 		{
 			FacePickingInfo fpi=(FacePickingInfo) o;
-			setFaceSelected(fpi, selected);
+			boolean toSelect=!selectedFaces.contains(new Integer(fpi.id));
+			setFaceSelected(fpi, toSelect);
 			fireSelectionChanged();
 		}
 		else if((o instanceof EdgePickingInfo)&(selectionMode==EDGE_SELECTION))
 		{
 			EdgePickingInfo epi=(EdgePickingInfo) o;
-			setEdgeSelected(epi, selected);
+			boolean toSelect=!selectedEdges.contains(new Integer(epi.id));
+			setEdgeSelected(epi, toSelect);
 			fireSelectionChanged();
 		}
 	}

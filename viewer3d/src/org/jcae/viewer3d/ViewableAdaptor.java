@@ -34,7 +34,7 @@ public abstract class ViewableAdaptor implements Viewable {
 
 	public abstract Node getJ3DNode();
 
-	public abstract void pick(PickViewable result, boolean selected);
+	public abstract void pick(PickViewable result);
 
 	public abstract void unselectAll();
 

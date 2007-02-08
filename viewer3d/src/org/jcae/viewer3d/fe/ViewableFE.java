@@ -296,35 +296,59 @@ public class ViewableFE extends ViewableAdaptor
 		pickingMode=mode;
 	}
 	
-	/* (non-Javadoc)
+    /*
+	 * (non-Javadoc)
 	 * @see org.jcae.viewer3d.Viewable#pick(com.sun.j3d.utils.picking.PickResult)
 	 */
-	public void pick(PickViewable result, boolean selected)
-	{	
-		System.out.println("picked node="+result.getObject());
-		Logger.global.finest("result="+result);
-		Logger.global.finest("result.getGeometryArray().getUserData()="+result.getGeometryArray().getUserData());
-		Integer o=(Integer)result.getGeometryArray().getUserData();		
-		
-		switch(pickingMode)
+	public void pick(PickViewable result)
+	{
+		System.out.println("picked node=" + result.getObject());
+		Logger.global.finest("result=" + result);
+		Logger.global.finest("result.getGeometryArray().getUserData()="
+			+ result.getGeometryArray().getUserData());
+		Integer o = (Integer) result.getGeometryArray().getUserData();
+		int domainID = o.intValue();
+		switch (pickingMode)
 		{
-			case PICK_NODE:
-				PickIntersection pi=result.getIntersection();
-				
-				int[] ids=pi.getPrimitiveVertexIndices();
-				setSelectedNode(
-					ids[0]/ids.length,
-					(byte) pi.getClosestVertexIndex(),
-					pi.getClosestVertexCoordinates(),
-					o.intValue(),
-					selected);
-			break;
-			case PICK_DOMAIN:
-				setSelectedDomain(o.intValue(), selected);
+			case PICK_NODE :
+				PickIntersection pi = result.getIntersection();
+				int[] ids = pi.getPrimitiveVertexIndices();
+				pickdNode(ids[0] / ids.length, (byte) pi
+					.getClosestVertexIndex(), pi.getClosestVertexCoordinates(),
+					domainID);
+				break;
+			case PICK_DOMAIN :
+				boolean toSelect = !selectedDomains.contains(new Integer(
+					domainID));
+				setSelectedDomain(domainID, toSelect);
 				fireSelectionChanged();
-			break;
-		}		
+				break;
+		}
 	}
+
+	private void pickdNode(int triaID, byte nodeID, Point3d point3d,
+		int domainID)
+	{
+		NodeSelectionImpl ns = (NodeSelectionImpl) nodeSelections
+			.get(new Integer(domainID));
+		if (ns == null)
+		{
+			ns = new NodeSelectionImpl(domainID);
+			nodeSelections.put(new Integer(domainID), ns);
+		}
+		boolean toSelect = !ns.containsNode(triaID, nodeID);
+		if (toSelect)
+		{
+			ns.addNode(triaID, nodeID);
+			PointArray pa = new PointArray(1, PointArray.COORDINATES);
+			nodeSelectionShape.addGeometry(pa);
+			fireSelectionChanged();
+		} else
+		{
+			// TODO Implement unselect
+		}
+	}
+
 
 	private void setSelectedNode(int triaID, byte nodeID, Point3d point3d,
 		int domainID, boolean selected)
