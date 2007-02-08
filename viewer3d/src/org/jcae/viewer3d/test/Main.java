@@ -15,13 +15,12 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.test;
 
 import java.awt.BorderLayout;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,9 +34,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import org.jcae.opencascade.jni.BRepBuilderAPI_MakeEdge;
-import org.jcae.opencascade.jni.BRep_Tool;
-import org.jcae.opencascade.jni.TopoDS_Edge;
 import org.jcae.viewer3d.SelectionListener;
 import org.jcae.viewer3d.View;
 import org.jcae.viewer3d.cad.ViewableCAD;
@@ -67,19 +63,46 @@ public class Main
 		Logger.global.addHandler(cd);
 	}
 	
+	public static void testCAD()
+	{
+		//Test CAD visu in 1 view
+		JFrame cadFrame=new JFrame("jcae-viewer3d-cad demo");			
+		cadFrame.setSize(800,600);
+		cadFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		final View cadView=new View();					
+		
+		ViewableCAD fcad=new ViewableCAD(new OCCProvider("/home/jerome/Models/F1.brep"));
+		cadView.add(fcad);
+		cadView.fitAll();
+		cadFrame.getContentPane().add(cadView);
+		cadFrame.getContentPane().add(new JButton(new AbstractAction(){
+
+			public void actionPerformed(ActionEvent e)
+			{
+				cadView.fitAll();
+			}}), BorderLayout.NORTH);
+		
+		cadFrame.setVisible(true);
+		cadView.setOriginAxisVisible(true);
+		fcad.domainsChanged(null);
+		cadView.setOriginAxisVisible(false);
+		cadView.setOriginAxisVisible(true);
+		//cadView.showFloatAxis(true);
+	}
+
 	public static void main(String[] args)
 	{
 		try
-		{	
+		{						
+			//testCAD();
 			//Test FE visu in 1 view
-			//new JDialog().setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-			JFrame feFrame=new JFrame("jcae-viewer3d-fe demo");			
+			/*JFrame feFrame=new JFrame("jcae-viewer3d-fe demo");			
 			feFrame.setSize(800,600);
 			feFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 			View feView=new View();			
-			final AmibeProvider ap=new AmibeProvider(new File("/home/jerome/JCAEProject/amibe1.dir"));
+			final AmibeProvider ap=new AmibeProvider(new File("/var/tmp/mesh"));
 			final ViewableFE fev=new ViewableFE(ap);			
-			ViewableFE ffe=new ViewableFE(new AmibeOverlayProvider(new File("/home/jerome/JCAEProject/amibe1.dir"), AmibeOverlayProvider.FREE_EDGE));			
+			ViewableFE ffe=new ViewableFE(new AmibeOverlayProvider(new File("/var/tmp/mesh"), AmibeOverlayProvider.FREE_EDGE));			
 			
 			feView.add(ffe);
 			feView.add(fev);			
@@ -102,29 +125,26 @@ public class Main
 						e.printStackTrace();
 					}
 				}
-			});
+			});*/
 
 			//Test UNV Loader
-			/*JFrame feFrame=new JFrame();			
+			JFrame feFrame=new JFrame();			
 			feFrame.setSize(800,600);
 			feFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 			View feView=new View();
 			UNVProvider unvProvider=new UNVProvider();
-			//unvProvider.load(new FileInputStream("/home/jerome/cassiope/maill_surf.unv"));
 			UNVProvider unvProviderSol=new UNVProvider();
-			//unvProviderSol.load(new FileInputStream("/home/jerome/cassiope/resources/example/maill_vol.unv"));
-			//unvProviderSol.load(new FileInputStream("/home/jerome/Models/unv/flight_solid.unv"));
-			unvProviderSol.load(new FileInputStream("/home/jerome/cassiope/resources/example/tecplot50x50x50.unv"));
+			unvProviderSol.load(new FileInputStream("/home/jerome/mesh.unv"));
 			
 			/*ViewableFE fev=new ViewableFE(unvProvider);
 			feView.add(fev);*/
-			/*ViewableFE vfe=new ViewableFE(unvProviderSol);			
+			ViewableFE vfe=new ViewableFE(unvProviderSol);			
 			feView.add(vfe);			
 			feFrame.getContentPane().add(feView);
 			feView.setOriginAxisVisible(false);
 			feView.setFixedAxisVisible(false);
 			feView.fitAll();
-			feFrame.setVisible(true);*/
+			feFrame.setVisible(true);
 			/*feView.setOriginAxisVisible(true);
 			feView.setFixedAxisVisible(true);*/
 			
