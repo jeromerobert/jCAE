@@ -21,7 +21,7 @@ public class TestScreenshot extends JFrame
 	implements KeyListener, ScreenshotListener
 {
 	private Legend legend=new Legend();
-	private View view=new View();	
+	private View view=new View(this);	
 
 	/** Create frame with a view and a legend */
 	public TestScreenshot()

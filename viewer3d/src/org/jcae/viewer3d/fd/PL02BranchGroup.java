@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.fd;
@@ -26,8 +26,6 @@ import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.util.*;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.media.j3d.*;
 import javax.vecmath.Point3d;
@@ -44,6 +42,7 @@ import com.sun.j3d.utils.picking.PickTool;
  */
 public class PL02BranchGroup extends BranchGroup
 {
+	private static Logger logger=Logger.getLogger("global");
 	protected FDProvider provider;
 	protected HashSet currentSelection;
 	protected ArrayList allEdgeShapes;
@@ -63,7 +62,7 @@ public class PL02BranchGroup extends BranchGroup
 	{						
 		this.provider=provider;
 		setUserData(this);
-		setCapability(TransformGroup.ALLOW_BOUNDS_READ);
+		setCapability(Node.ALLOW_BOUNDS_READ);
 		setCapability(Group.ALLOW_CHILDREN_EXTEND);
 		setCapability(BranchGroup.ALLOW_DETACH);
 		setCapability(Node.ALLOW_PICKABLE_WRITE);
@@ -104,9 +103,9 @@ public class PL02BranchGroup extends BranchGroup
 	
 	private Plate[] domainToPlates(FDDomain domain)
 	{
-		Logger.global.finest("<creating plates >");
+		logger.finest("<creating plates >");
 		int n=domain.getNumberOfXPlate()+domain.getNumberOfYPlate()+domain.getNumberOfZPlate();
-		Logger.global.finest("number of plates in domain is "+n);
+		logger.finest("number of plates in domain is "+n);
 		Plate[] plates=new Plate[n];
 		
 		Iterator it=domain.getXPlateIterator();
@@ -162,7 +161,7 @@ public class PL02BranchGroup extends BranchGroup
 		if(i!=n)
 			throw new IllegalStateException(i+"!="+n);
 		
-		Logger.global.finest("</creating plates>");
+		logger.finest("</creating plates>");
 		return plates;
 	}
 	
@@ -178,7 +177,7 @@ public class PL02BranchGroup extends BranchGroup
 		
 		for (int g = 0; g < groupID.length; ++g)
 		{
-			Logger.global.finest("generating java3d tree for group number "+groupID[g]);
+			logger.finest("generating java3d tree for group number "+groupID[g]);
 			// Set of EdgeLine objects. Overlapping edges on the same line are
 			// merged together
 			HashMap externalEdges = new HashMap();
@@ -226,8 +225,8 @@ public class PL02BranchGroup extends BranchGroup
 				GeometryArray.COORDINATES | GeometryArray.COLOR_3);
 			qa.setCoordRefBuffer(new J3DBuffer(nioCoords));
 			qa.setColorRefBuffer(new J3DBuffer(nioColors));
-			qa.setCapability(QuadArray.ALLOW_COLOR_WRITE);
-			qa.setCapabilityIsFrequent(QuadArray.ALLOW_COLOR_WRITE);
+			qa.setCapability(GeometryArray.ALLOW_COLOR_WRITE);
+			qa.setCapabilityIsFrequent(GeometryArray.ALLOW_COLOR_WRITE);
 			Appearance a = new Appearance();
 			PolygonAttributes pa = new PolygonAttributes(
 				PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE, 0);
@@ -238,8 +237,8 @@ public class PL02BranchGroup extends BranchGroup
 			PickTool.setCapabilities(s3d, PickTool.INTERSECT_FULL);
 			s3d.setCapability(Shape3D.ALLOW_APPEARANCE_READ);
 			s3d.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
-			s3d.setCapability(Shape3D.ALLOW_PICKABLE_READ);
-			s3d.setCapability(Shape3D.ALLOW_PICKABLE_WRITE);
+			s3d.setCapability(Node.ALLOW_PICKABLE_READ);
+			s3d.setCapability(Node.ALLOW_PICKABLE_WRITE);
 			s3d.setPickable(true);
 			s3d.setUserData(new BehindShape(s3d, plates, g));
 			
@@ -292,8 +291,8 @@ public class PL02BranchGroup extends BranchGroup
 				PickTool.setCapabilities(s3d, PickTool.INTERSECT_FULL);
 				s3d.setCapability(Shape3D.ALLOW_APPEARANCE_READ);
 				s3d.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
-				s3d.setCapability(Shape3D.ALLOW_PICKABLE_READ);
-				s3d.setCapability(Shape3D.ALLOW_PICKABLE_WRITE);
+				s3d.setCapability(Node.ALLOW_PICKABLE_READ);
+				s3d.setCapability(Node.ALLOW_PICKABLE_WRITE);
 				s3d.setPickable(false); // by default, see actions
 				s3d.setUserData(this); // this object will handle edges
 				this.addChild(s3d);
@@ -339,8 +338,8 @@ public class PL02BranchGroup extends BranchGroup
 				PickTool.setCapabilities(s3d, PickTool.INTERSECT_FULL);
 				s3d.setCapability(Shape3D.ALLOW_APPEARANCE_READ);
 				s3d.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
-				s3d.setCapability(Shape3D.ALLOW_PICKABLE_READ);
-				s3d.setCapability(Shape3D.ALLOW_PICKABLE_WRITE);
+				s3d.setCapability(Node.ALLOW_PICKABLE_READ);
+				s3d.setCapability(Node.ALLOW_PICKABLE_WRITE);
 				s3d.setPickable(false); // by default, see actions
 				s3d.setUserData(this); // this object will handle edges
 				this.addChild(s3d);
@@ -428,7 +427,7 @@ public class PL02BranchGroup extends BranchGroup
 			double[] toReturn=new double[fs.length];
 			for(int i=0; i<fs.length; i++)
 			{
-				toReturn[i]=(double)fs[i];
+				toReturn[i]=fs[i];
 			}
 			return toReturn;
 		}
@@ -492,7 +491,7 @@ public class PL02BranchGroup extends BranchGroup
 			double[] toReturn=new double[fs.length];
 			for(int i=0; i<fs.length; i++)
 			{
-				toReturn[i]=(double)fs[i];
+				toReturn[i]=fs[i];
 			}
 			return toReturn;
 		}
@@ -743,7 +742,7 @@ public class PL02BranchGroup extends BranchGroup
 	 */
 	protected void toggleSelectedQuad(boolean on, SelectionQuad sq)
 	{
-		Logger.global.finest("on="+on+" selectionQuad="+sq);
+		logger.finest("on="+on+" selectionQuad="+sq);
 		if (on)
 		{
 			// add the given quad to the list
@@ -1311,7 +1310,7 @@ public class PL02BranchGroup extends BranchGroup
 	private Wire[] createWireList()
 	{
 		int[] ids=provider.getDomainIDs();
-		Logger.global.finest("computing wires for "+ids.length+" domain.");
+		logger.finest("computing wires for "+ids.length+" domain.");
 		int numberOfWire=0;
 
 		for(int i=0; i<ids.length; i++)
@@ -1321,7 +1320,7 @@ public class PL02BranchGroup extends BranchGroup
 			numberOfWire+=domain.getNumberOfYWire();
 			numberOfWire+=domain.getNumberOfZWire();
 		}
-		Logger.global.finest("found "+numberOfWire+" wires.");
+		logger.finest("found "+numberOfWire+" wires.");
 		
 		Wire[] wires=new Wire[numberOfWire];
 		int iw=0;
@@ -1416,8 +1415,8 @@ public class PL02BranchGroup extends BranchGroup
 		PickTool.setCapabilities(s3d, PickTool.INTERSECT_FULL);
 		s3d.setCapability(Shape3D.ALLOW_APPEARANCE_READ);
 		s3d.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
-		s3d.setCapability(Shape3D.ALLOW_PICKABLE_READ);
-		s3d.setCapability(Shape3D.ALLOW_PICKABLE_WRITE);
+		s3d.setCapability(Node.ALLOW_PICKABLE_READ);
+		s3d.setCapability(Node.ALLOW_PICKABLE_WRITE);
 		s3d.setPickable(true); // by default, can be changed with actions
 		s3d.setUserData(this); // this object will handle edges
 		addChild(s3d);

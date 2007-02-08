@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.fd;
@@ -33,6 +33,7 @@ import javax.media.j3d.QuadArray;
  */
 public class SelectionManager
 {
+	private static Logger logger=Logger.getLogger("global");
 	private static class IntegerPair
 	{
 		private int first, second;
@@ -409,8 +410,7 @@ public class SelectionManager
 		 * @param markID
 		 */
 		public boolean containsMark(int typeId, int markID)
-		{
-			Integer i=new Integer(typeId);			
+		{			
 			Collection c=(Collection) marks.get(new Integer(typeId));
 			if(c==null)
 				return false;
@@ -743,7 +743,7 @@ public class SelectionManager
 	 */
 	public void selectSlot(byte type, int domainId, int value, LineArray la)
 	{
-		Logger.global.finest("type="+type+" domainId="+domainId+" value="+value);
+		logger.finest("type="+type+" domainId="+domainId+" value="+value);
 		getSelection(domainId).addSlot(type, value);
 		slotToLineArray.put(new IntegerPairTyped(type, domainId, value), la);
 	}
@@ -835,15 +835,13 @@ public class SelectionManager
 
 	
 	public boolean isSolidSelected(int solidID, int domainID)
-	{
-		FDDomain d=(FDDomain) provider.getDomain(domainID);
+	{	
 		Selection s=getSelection(domainID);
 		return s.containsSolid(solidID);
 	}
 	
 	public void selectSolid(int solidID, int domainID, QuadArray qa)
-	{
-		FDDomain d=(FDDomain) provider.getDomain(domainID);
+	{	
 		Selection s=getSelection(domainID);
 		s.addSolid(solidID);
 		solidIDToQuadArray.put(new IntegerPair(domainID, solidID), qa);
@@ -856,8 +854,7 @@ public class SelectionManager
 	}
 
 	public void unselectSolid(int solidID, int domainID)
-	{
-		FDDomain d=(FDDomain) provider.getDomain(domainID);
+	{	
 		Selection s=(Selection) domainToSelection.get(new Integer(domainID));
 		s.removeSolid(solidID);		
 		plateIDToQuadArray.remove(new IntegerPair(domainID, solidID));		

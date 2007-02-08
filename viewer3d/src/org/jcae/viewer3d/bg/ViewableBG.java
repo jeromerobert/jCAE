@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.bg;
@@ -127,12 +127,12 @@ public class ViewableBG extends ViewableAdaptor
 		int solidID=idx[0]/24;
 		if(selected)
 		{
-			Logger.global.finest("cellid= "+solidID);
+			Logger.getLogger("global").finest("cellid= "+solidID);
 			QuadArray geom = (QuadArray) pi.getGeometryArray();
-			QuadArray qa=new QuadArray(24, QuadArray.COORDINATES);
+			QuadArray qa=new QuadArray(24, GeometryArray.COORDINATES);
 			float [] coord = new float[72];
 			geom.getCoordinates(24*solidID, coord);
-			qa.setCapability(QuadArray.ALLOW_COORDINATE_READ);
+			qa.setCapability(GeometryArray.ALLOW_COORDINATE_READ);
 			qa.setCoordinates(0, coord);
 /*
 			QuadArray qa=new QuadArray(24, QuadArray.COORDINATES);

@@ -3,6 +3,7 @@ package org.jcae.viewer3d.test;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.GridLayout;
+import java.awt.Window;
 import java.io.File;
 import javax.swing.*;
 import org.jcae.viewer3d.View;
@@ -15,16 +16,18 @@ public class TestCAD
 	{
 		private Container component;
 		private String fileName;
+		private Window window;
 
-		public Loader(String fileName, Container component)
+		public Loader(String fileName, Container component, Window window)
 		{
 			this.fileName=fileName;
 			this.component=component;
+			this.window=window;
 		}
 		
 		public void run()
 		{
-			View view=new View(false, true);
+			View view=new View(window, false, true);
 			OCCProvider occProvider=new OCCProvider(fileName);
 			System.out.println("Loading "+fileName);
 			ViewableCAD c=new ViewableCAD(occProvider);
@@ -55,11 +58,11 @@ public class TestCAD
 		new Thread(new Loader(modelDir+File.separator+"flight_solid.brep", container)).start();
 		new Thread(new Loader(modelDir+File.separator+"66_shaver3.brep", container)).start();
 		*/
-		new Loader(modelDir+File.separator+"tube2_biseau.brep", container).run();
-		new Loader(modelDir+File.separator+"hammer.brep", container).run();
-		new Loader(modelDir+File.separator+"flight_solid.brep", container).run();
-		new Loader(modelDir+File.separator+"66_shaver3.brep", container).run();
-		new Loader(modelDir+File.separator+"lego.brep", container).run();
+		new Loader(modelDir+File.separator+"tube2_biseau.brep", container, frame).run();
+		new Loader(modelDir+File.separator+"hammer.brep", container, frame).run();
+		new Loader(modelDir+File.separator+"flight_solid.brep", container, frame).run();
+		new Loader(modelDir+File.separator+"66_shaver3.brep", container, frame).run();
+		new Loader(modelDir+File.separator+"lego.brep", container, frame).run();
 		frame.setVisible(true);
 	}
 	

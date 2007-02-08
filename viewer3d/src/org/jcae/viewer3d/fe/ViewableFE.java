@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.fe;
@@ -44,6 +44,7 @@ import com.sun.j3d.utils.picking.PickIntersection;
  */
 public class ViewableFE extends ViewableAdaptor
 {
+	private static Logger logger=Logger.getLogger("global");
 	public static final byte PICK_DOMAIN = 2;
 	public static final byte PICK_NODE = 1;
 	private FEProvider provider;
@@ -122,9 +123,9 @@ public class ViewableFE extends ViewableAdaptor
 				}
 				if(b.booleanValue())
 				{
-					Logger.global.finest("<Loading domain "+ids[i]+">");
+					logger.finest("<Loading domain "+ids[i]+">");
 					createBranchGroup((FEDomain)provider.getDomain(ids[i]));
-					Logger.global.finest("</Loading domain "+ids[i]+">");
+					logger.finest("</Loading domain "+ids[i]+">");
 				}
 			}
 		}
@@ -143,9 +144,9 @@ public class ViewableFE extends ViewableAdaptor
 				}
 				if(b.booleanValue())
 				{
-					Logger.global.finest("<Loading domain "+ids[i]+">");
+					logger.finest("<Loading domain "+ids[i]+">");
 					createBranchGroup((FEDomain)provider.getDomain(ids[i]));
-					Logger.global.finest("</Loading domain "+ids[i]+">");
+					logger.finest("</Loading domain "+ids[i]+">");
 				}				
 			}
 		}
@@ -303,8 +304,8 @@ public class ViewableFE extends ViewableAdaptor
 	public void pick(PickViewable result)
 	{
 		System.out.println("picked node=" + result.getObject());
-		Logger.global.finest("result=" + result);
-		Logger.global.finest("result.getGeometryArray().getUserData()="
+		logger.finest("result=" + result);
+		logger.finest("result.getGeometryArray().getUserData()="
 			+ result.getGeometryArray().getUserData());
 		Integer o = (Integer) result.getGeometryArray().getUserData();
 		int domainID = o.intValue();
@@ -390,7 +391,7 @@ public class ViewableFE extends ViewableAdaptor
 		
 		if(showShapeLine)
 		{
-			Logger.global.finest("Changing color of domain n°"+domainID+" to red. bg="+bg);
+			logger.finest("Changing color of domain n°"+domainID+" to red. bg="+bg);
 			Color colorToSet;
 			if(selected)
 			{

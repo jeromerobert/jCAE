@@ -1,3 +1,23 @@
+/*
+ * Project Info:  http://jcae.sourceforge.net
+ * 
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * (C) Copyright 2007, by EADS France
+ */
+
 package org.jcae.viewer3d.fe.amibe;
 
 import gnu.trove.TIntHashSet;
@@ -20,13 +40,15 @@ public class AmibeBeanDomain extends FEDomainAdapter
 	private int[] beam2;
 	private float[] nodes;
 
-	public AmibeBeanDomain(File directory, Element subMesh, Color color) throws IOException
+	public AmibeBeanDomain(File directory, Element subMesh, Color color)
+		throws IOException
 	{
 		this.color=color;
 		beam2=readBeam2(subMesh, directory);
 		int[] nodesID=makeNodeIDArray(beam2);
 		nodes=readNodes(nodesID, directory, subMesh);
-		Logger.global.finest("number of nodes="+nodes.length+", number of beams="+beam2.length/2.0);
+		Logger.getLogger("global").finest( "number of nodes=" + nodes.length +
+			"," + "number of beams="+beam2.length/2.0);
 		renumberArray(beam2, nodesID);		
 	}
 	

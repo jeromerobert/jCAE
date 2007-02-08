@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d;
@@ -26,13 +26,7 @@ import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
 import java.util.logging.Logger;
 
-import javax.media.j3d.Appearance;
-import javax.media.j3d.BoundingPolytope;
-import javax.media.j3d.BranchGroup;
-import javax.media.j3d.PointArray;
-import javax.media.j3d.PointAttributes;
-import javax.media.j3d.Shape3D;
-import javax.media.j3d.Transform3D;
+import javax.media.j3d.*;
 import javax.vecmath.*;
 
 import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
@@ -42,6 +36,7 @@ import com.sun.j3d.utils.picking.PickTool;
 
 public  class ViewBehavior extends OrbitBehavior
 {
+	private static Logger logger=Logger.getLogger("global");
 	// dirty warkaround for bug
 	// https://java3d.dev.java.net/issues/show_bug.cgi?id=179
 	// because xtrans, ytrans and ztrans should be protected not private
@@ -137,7 +132,7 @@ public  class ViewBehavior extends OrbitBehavior
 				Appearance app=new Appearance();
 				app.setPointAttributes(pa);
 				
-				PointArray pt=new PointArray(1,PointArray.COORDINATES | PointArray.COLOR_3);
+				PointArray pt=new PointArray(1,GeometryArray.COORDINATES | GeometryArray.COLOR_3);
 				pt.setCoordinate(0,firstClipBoxPoint3d);
 				pt.setColor(0,new Color3f(1,0,0));
 				
@@ -367,7 +362,7 @@ public  class ViewBehavior extends OrbitBehavior
 			return null;
 		if (!evt.isControlDown())
 		{
-			Logger.global.finest("Ctrl is up so everything is unselected");
+			logger.finest("Ctrl is up so everything is unselected");
 			cv.unselectAll();
 		}
 		PickCanvas pickCanvas = new PickCanvas(view, view.getBranchGroup(cv));
@@ -378,7 +373,7 @@ public  class ViewBehavior extends OrbitBehavior
 		PickViewable result = pickPoint(pickCanvas.pickAllSorted());
 		//PickViewable result=new PickViewable(pickCanvas.pickClosest(), 0);
 		long time2 = System.currentTimeMillis();
-		Logger.global.finest("picked viewable is " + cv + " in "
+		logger.finest("picked viewable is " + cv + " in "
 			+ (time2 - time) + " ms");
 		return result;
 	}
@@ -477,7 +472,7 @@ public  class ViewBehavior extends OrbitBehavior
 		long time = System.currentTimeMillis();
 		PickViewable result = pickPoint(pickCanvas.pickAllSorted());
 		long time2 = System.currentTimeMillis();
-		Logger.global.finest("picked viewable is " + cv + " in "
+		logger.finest("picked viewable is " + cv + " in "
 			+ (time2 - time) + " ms");		
 		if (result != null) cv.pick(result);
 		}

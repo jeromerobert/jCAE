@@ -207,7 +207,10 @@ public class ViewableCAD extends ViewableAdaptor
 	 */
 	public void pick(PickViewable result)
 	{
-		Logger.global.finest("result.getGeometryArray().getUserData()="+result.getGeometryArray().getUserData());
+		Logger.getLogger("global").finest(
+			"result.getGeometryArray().getUserData()=" +
+			result.getGeometryArray().getUserData());
+		
 		Object o=getPickUserData(result);
 		if((o instanceof FacePickingInfo)&(selectionMode==FACE_SELECTION))
 		{

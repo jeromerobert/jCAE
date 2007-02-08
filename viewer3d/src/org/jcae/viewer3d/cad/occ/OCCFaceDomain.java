@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.cad.occ;
@@ -244,7 +244,7 @@ public class OCCFaceDomain extends CADDomainAdapator
 		GeomAPI_ProjectPointOnSurf pof=new GeomAPI_ProjectPointOnSurf(point, gs);
 		double[] uv=new double[2];
 		pof.lowerDistanceParameters(uv);
-		myLprop.setParameter(uv[0], uv[1]);
+		myLprop.setParameters(uv[0], uv[1]);
 		double[] toReturn=myLprop.normal();
 		if(face.orientation()==TopAbs_Orientation.REVERSED)
 		{
