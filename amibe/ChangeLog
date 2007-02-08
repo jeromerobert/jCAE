@@ -1,3 +1,8 @@
+Thu Feb  8 16:35:09 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/oemm/IndexedStorage.java: Modify internal format
+	of OEMM "*a" files.
+
 Wed Feb  7 16:24:16 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java

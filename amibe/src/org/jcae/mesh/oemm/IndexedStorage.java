@@ -302,30 +302,30 @@ public class IndexedStorage
 				writeHeaderOEMMNode(current);
 				current.tn = tn;
 				
-				DataOutputStream outAdj = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(new File(current.topDir, current.file+"a"))));
+				FileChannel fca = new FileOutputStream(new File(current.topDir, current.file+"a")).getChannel();
+				bb.clear();
 				//  Inner vertices of this node
-				remaining = index;
-				int i = 0;
-				for (int nblock = (remaining * VERTEX_SIZE_INDEXED) / bufferSize; nblock >= 0; --nblock)
+				int room = bb.capacity();
+				for (int i = 0; i < index; i++)
 				{
-					int nf = bufferSize / VERTEX_SIZE_INDEXED;
-					if (remaining < nf)
-						nf = remaining;
-					remaining -= nf;
-					for(int nr = 0; nr < nf; nr ++)
+					int n = localAdjSet[i].size();
+					if (room < 1 + n)
 					{
-						//     Adjacent leaves
-						outAdj.writeInt(localAdjSet[i].size());
-						for (TIntIterator it = localAdjSet[i].iterator(); it.hasNext();)
-						{
-							int ind = it.next();
-							outAdj.writeByte((byte) invMap.get(ind));
-						}
-						i++;
+						bb.flip();
+						fca.write(bb);
+						bb.clear();
+						room = bb.capacity();
 					}
+					//     Adjacent leaves
+					bb.put((byte) n);
+					for (TIntIterator it = localAdjSet[i].iterator(); it.hasNext();)
+						bb.put((byte) invMap.get(it.next()));
+					room -= 1 + n;
 				}
+				bb.flip();
+				fca.write(bb);
 				//  Triangles will be written during 2nd pass
-				outAdj.close();
+				fca.close();
 			}
 			catch (IOException ex)
 			{
@@ -760,7 +760,7 @@ public class IndexedStorage
 						vert[index] = Vertex.valueOf(xyz);
 						vert[index].setLabel(current.minIndex + index);
 						vert[index].setReadable(true);
-						int n = bufIn.readInt();
+						int n = (int) bufIn.readByte();
 						//  Read neighbors
 						boolean writable = true;
 						for (int j = 0; j < n; j++)
