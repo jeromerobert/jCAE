@@ -500,7 +500,7 @@ public  class ViewBehavior extends OrbitBehavior
 		Vector3f translation = new Vector3f();
 		t3d.get(translation);
 		Transform3D t3d2 = new Transform3D();
-		double scale = translation.length() / 20;
+		double scale = translation.length() / 10 * Math.tan(view.getView().getFieldOfView());
 		t3d2.setScale(scale);
 		view.getOriginAxisTransformGroup().setTransform(t3d2);
 	}
