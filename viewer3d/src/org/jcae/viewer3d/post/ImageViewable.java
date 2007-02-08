@@ -23,6 +23,7 @@ package org.jcae.viewer3d.post;
 import java.awt.Image;
 import java.awt.image.*;
 import java.awt.image.Raster;
+import java.net.URL;
 import java.util.Map;
 import javax.media.j3d.*;
 import org.jcae.viewer3d.DomainProvider;
@@ -45,6 +46,11 @@ public class ImageViewable extends ViewableAdaptor
 	private int imageWidth;
 	private static float[] TEXT_COORD={0f,0f,1f,0f,1f,1f,0f,1f};
 	private boolean interpolate;
+	
+	public ImageViewable(float[] coordinates)
+	{
+		this(coordinates, 0, 0, true);
+	}
 	
 	public ImageViewable(float[] coordinates, int imageWidth, int imageHeight, boolean interpolate)
 	{
@@ -118,7 +124,22 @@ public class ImageViewable extends ViewableAdaptor
 			t.setMagFilter(Texture.BASE_LEVEL_POINT);
 		appearance.setTexture(t);
 	}
-	
+
+	public void setImage(URL url)
+	{
+		TextureLoader tl = new TextureLoader(url, null);
+		Texture t=tl.getTexture();
+		t.setBoundaryModeS(Texture.CLAMP);
+		t.setBoundaryModeT(Texture.CLAMP);
+		if(!interpolate)
+			t.setMagFilter(Texture.BASE_LEVEL_POINT);
+		TransparencyAttributes ta=new TransparencyAttributes();
+		ta.setTransparency(0.5f);
+		ta.setTransparencyMode(TransparencyAttributes.BLENDED);
+		appearance.setTransparencyAttributes(ta);
+		appearance.setTexture(t);
+	}
+
 	public void setValues(float[] values)
 	{
 		long t1=System.currentTimeMillis();
