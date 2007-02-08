@@ -176,7 +176,7 @@ public class IndexedStorage
 			int nrDuplicates = 0;
 			int index = 0;
 			int fakeIndex = 0;
-			IndexedVertex [] innerVertices = new IndexedVertex[3*current.tn];
+			TIntHashSet [] localAdjSet = new TIntHashSet[3*current.tn];
 			//  Leaves have less than 256 neighbors
 			TIntHashSet set = new TIntHashSet(256);
 			current.adjLeaves = new TIntArrayList(20);
@@ -194,11 +194,21 @@ public class IndexedStorage
 				IntBuffer bbI = bb.asIntBuffer();
 				int tCount = 0;
 				int remaining = current.tn;
+				// In this first loop, vertices are read from
+				// intermediate OEMM file.  Internal vertices
+				// are written into fcv via bbt buffer.
+				// As bbt and bb have the same size, bbtI
+				// does not overflow.
+				// TODO: write directly into final "v" file.
+				FileChannel fcv = new FileOutputStream(new File(current.topDir, current.file+"i")).getChannel();
+				bbt.clear();
+				IntBuffer bbtI = bbt.asIntBuffer();
 				for (int nblock = (remaining * TRIANGLE_SIZE_DISPATCHED) / bufferSize; nblock >= 0; --nblock)
 				{
 					bb.rewind();
 					fc.read(bb);
 					bbI.rewind();
+					bbtI.rewind();
 					int nf = bufferSize / TRIANGLE_SIZE_DISPATCHED;
 					if (remaining < nf)
 						nf = remaining;
@@ -229,7 +239,8 @@ public class IndexedStorage
 								pointIndex[i] = inner.insert(ijk, index);
 								if (pointIndex[i] == index)
 								{
-									innerVertices[index] = new IndexedVertex(ijk);
+									bbtI.put(ijk);
+									localAdjSet[index] = new TIntHashSet();
 									index++;
 								}
 								else
@@ -253,14 +264,20 @@ public class IndexedStorage
 									set.add(leaf[j]);
 									current.adjLeaves.add(leaf[j]);
 								}
-								innerVertices[pointIndex[i]].adj.add(leaf[j]);
+								localAdjSet[pointIndex[i]].add(leaf[j]);
 							}
 						}
 						//  Triangles are stored in the node with lowest leafIndex
 						if (leaf[0] >= current.leafIndex && leaf[1] >= current.leafIndex && leaf[2] >= current.leafIndex )
 							tCount++;
 					}
+					bbt.position(4*bbtI.position());
+					bbt.flip();
+					fcv.write(bbt);
+					bbt.clear();
 				}
+				fcv.close();
+
 				//  Adjust data information
 				current.vn = index;
 				current.minIndex = globalIndex;
@@ -285,11 +302,8 @@ public class IndexedStorage
 				writeHeaderOEMMNode(current);
 				current.tn = tn;
 				
-				FileChannel fcv = new FileOutputStream(new File(current.topDir, current.file+"i")).getChannel();
 				DataOutputStream outAdj = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(new File(current.topDir, current.file+"a"))));
 				//  Inner vertices of this node
-				bb.clear();
-				bbI.clear();
 				remaining = index;
 				int i = 0;
 				for (int nblock = (remaining * VERTEX_SIZE_INDEXED) / bufferSize; nblock >= 0; --nblock)
@@ -298,27 +312,19 @@ public class IndexedStorage
 					if (remaining < nf)
 						nf = remaining;
 					remaining -= nf;
-					bbI.rewind();
 					for(int nr = 0; nr < nf; nr ++)
 					{
-						IndexedVertex c = innerVertices[i];
-						//     Coordinates
-						bbI.put(c.ijk);
 						//     Adjacent leaves
-						outAdj.writeInt(c.adj.size());
-						for (TIntIterator it = c.adj.iterator(); it.hasNext();)
+						outAdj.writeInt(localAdjSet[i].size());
+						for (TIntIterator it = localAdjSet[i].iterator(); it.hasNext();)
 						{
 							int ind = it.next();
 							outAdj.writeByte((byte) invMap.get(ind));
 						}
 						i++;
 					}
-					bb.position(4*bbI.position());
-					bb.flip();
-					fcv.write(bb);
 				}
 				//  Triangles will be written during 2nd pass
-				fcv.close();
 				outAdj.close();
 			}
 			catch (IOException ex)
@@ -913,15 +919,4 @@ public class IndexedStorage
 	}
 	*/
 	
-	private static class IndexedVertex
-	{
-		// Integer coordinates
-		public int[] ijk = new int[3];
-		// This set is used to build the ol array.
-		public TIntHashSet adj = new TIntHashSet();
-		public IndexedVertex(int [] coord)
-		{
-			System.arraycopy(coord, 0, ijk, 0, 3);
-		}
-	}
 }
