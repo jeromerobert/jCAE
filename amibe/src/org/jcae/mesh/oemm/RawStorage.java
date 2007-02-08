@@ -101,36 +101,6 @@ public class RawStorage
 		}
 	}
 
-	public static class CountTriangles implements SoupReaderInterface
-	{
-		private OEMMNode [] cells = new OEMMNode[3];
-		private OEMM oemm;
-		private long tcount = 0;
-		private int [] ijk = new int[3];
-		public CountTriangles(OEMM o)
-		{
-			oemm = o;
-		}
-		public void processVertex(int i, double [] xyz)
-		{
-			oemm.double2int(xyz, ijk);
-			cells[i] = oemm.build(ijk);
-		}
-		public void processTriangle(int group)
-		{
-			tcount++;
-			cells[0].tn++;
-			if (cells[1] != cells[0])
-				cells[1].tn++;
-			if (cells[2] != cells[0] && cells[2] != cells[1])
-				cells[2].tn++;
-		}
-		long getTriangleCount()
-		{
-			return tcount;
-		}
-	}
-
 	/**
 	 * Build an OEMM and count the number of triangles which have to be
 	 * assigned to each leaf.
@@ -159,7 +129,109 @@ public class RawStorage
 		tree.printInfos();
 	}
 	
-	public static class DispatchTriangles implements SoupReaderInterface
+	private static final class CountTriangles implements SoupReaderInterface
+	{
+		private OEMMNode [] cells = new OEMMNode[3];
+		private OEMM oemm;
+		private long nrTriangles = 0;
+		private int [] ijk = new int[3];
+		public CountTriangles(OEMM o)
+		{
+			oemm = o;
+		}
+		public void processVertex(int i, double [] xyz)
+		{
+			oemm.double2int(xyz, ijk);
+			cells[i] = oemm.build(ijk);
+		}
+		public void processTriangle(int group)
+		{
+			nrTriangles++;
+			cells[0].tn++;
+			if (cells[1] != cells[0])
+				cells[1].tn++;
+			if (cells[2] != cells[0] && cells[2] != cells[1])
+				cells[2].tn++;
+		}
+		long getTriangleCount()
+		{
+			return nrTriangles;
+		}
+	}
+
+	/**
+	 * Read a triangle soup and dispatch triangles into an intermediate
+	 * OEMM data structure.
+	 *
+	 * The data structure has been setup in {@link #countTriangles}, and
+	 * willl now be written onto disk as a linear octree.  Each block is
+	 * composed of a header containing:
+	 * <ol>
+	 *   <li>Block size.</li>
+	 *   <li>Cell size (in integer coordinates).</li>
+	 *   <li>Integer coordinates of its lower-left corner.</li>
+	 *   <li>Exact number of triangles stored in this leaf.</li>
+	 * </ol>
+	 * It is followed by the integer coordinates of triangle vertices.
+	 * 
+	 * @param  tree  a raw OEMM
+	 * @param  structFile  output file containing octree data structure
+	 * @param  dataFile  dispatched data file
+	 */
+	public static final void dispatch(OEMM tree, String soupFile, String structFile, String dataFile)
+	{
+		if (tree == null || tree.status < OEMM.OEMM_INITIALIZED)
+		{
+			logger.error("OEMM not initialized!");
+			return;
+		}
+		logger.info("Put triangles into a linearized octree");
+		logger.debug("Raw OEMM: compute global offset for raw file");
+		//  For each octant, compute its index and its offset in
+		//  output file.
+		ComputeOffsetProcedure co_proc = new ComputeOffsetProcedure();
+		tree.walk(co_proc);
+		long outputFileSize = co_proc.getOffset();
+		logger.debug("Raw OEMM: compute min/max indices");
+		ComputeMinMaxIndicesProcedure cmmi_proc = new ComputeMinMaxIndicesProcedure();
+		tree.walk(cmmi_proc);
+		
+		logger.debug("Raw OEMM: dispatch triangles into raw OEMM");
+		try
+		{
+			RandomAccessFile raf = new RandomAccessFile(dataFile, "rw");
+			FileChannel fc = raf.getChannel();
+			raf.setLength(outputFileSize);
+
+			DispatchTriangles dt = new DispatchTriangles(tree, fc);
+			readSoup(tree, soupFile, dt);
+
+			logger.debug("Raw OEMM: flush buffers");
+			FlushBuffersProcedure fb_proc = new FlushBuffersProcedure(fc);
+			tree.walk(fb_proc);
+			raf.close();
+			
+			//  Write octree data structure onto disk
+			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(structFile)));
+			WriteStructureProcedure wh_proc = new WriteStructureProcedure(out, dataFile, tree.nr_leaves, tree.x0);
+			tree.walk(wh_proc);
+			out.close();
+		}
+		catch (FileNotFoundException ex)
+		{
+			logger.error("File "+soupFile+" not found");
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+		catch (IOException ex)
+		{
+			logger.error("I/O error when reading file  "+soupFile);
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+	}
+	
+	private static final class DispatchTriangles implements SoupReaderInterface
 	{
 		private OEMMNode [] cells = new OEMMNode[3];
 		private int [] ijk9 = new int[9];
@@ -199,73 +271,168 @@ public class RawStorage
 		}
 	}
 
-	/**
-	 * Read the triangle soup another time, and dispatch triangles into an intermediate
-	 * OEMM data structure.
-	 *
-	 * The data structure has been setup in {@link #countTriangles}, and willl now be
-	 * written onto disk as a linear octree.  Each block is composed of a header containing:
-	 * <ol>
-	 * <li>Block size.</li>
-	 * <li>Cell size (in integer coordinates).</li>
-	 * <li>Integer coordinates of its lower-left corner.</li>
-	 * <li>Exact number of triangles stored in this leaf.</li>
-	 * </ol>
-	 * It is followed by the integer coordinates of triangle vertices.
-	 * 
-	 * @param  tree  a raw OEMM
-	 * @param  structFile  output file containing octree data structure
-	 * @param  dataFile  dispatched data file
-	 */
-	public static final void dispatch(OEMM tree, String soupFile, String structFile, String dataFile)
+	private static final void addToCell(FileChannel fc, OEMMNode current, int [] ijk, int attribute)
+		throws IOException
 	{
-		if (tree == null || tree.status < OEMM.OEMM_INITIALIZED)
+		assert current.counter <= fc.size();
+		//  With 20 millions of triangles, unbuffered output took 420s
+		//  and buffered output 180s (4K buffer cache)
+		ByteBuffer list = (ByteBuffer) current.extra;
+		if (list == null)
 		{
-			logger.error("OEMM not initialized!");
-			return;
+			//  Must be a multiple of 10!
+			current.extra = ByteBuffer.allocate(4000);
+			list = (ByteBuffer) current.extra;
+			list.putLong(current.counter);
+			list.flip();
+			fc.write(list, current.counter);
+			current.counter += list.limit();
+			list.clear();
 		}
-		logger.info("Put triangles into a linearized octree");
-		logger.debug("Raw OEMM: compute global offset for raw file");
-		//  For each octant, compute its index and its offset in output file.
-		ComputeOffsetProcedure proc = new ComputeOffsetProcedure();
-		tree.walk(proc);
-		logger.debug("Raw OEMM: compute min/max indices");
-		long outputFileSize = proc.getOffset();
-		ComputeMinMaxIndicesProcedure cmmi_proc = new ComputeMinMaxIndicesProcedure();
-		tree.walk(cmmi_proc);
-		
-		try
+		else if (!list.hasRemaining())
 		{
-			logger.debug("Raw OEMM: dispatch triangles into raw OEMM");
-			RandomAccessFile raf = new RandomAccessFile(dataFile, "rw");
-			FileChannel fc = raf.getChannel();
-			raf.setLength(outputFileSize);
-
-			DispatchTriangles dt = new DispatchTriangles(tree, fc);
-			readSoup(tree, soupFile, dt);
-
-			logger.debug("Raw OEMM: flush buffers");
-			FlushBuffersProcedure fb_proc = new FlushBuffersProcedure(fc);
-			tree.walk(fb_proc);
-			raf.close();
-			
-			//  Write octree data structure onto disk
-			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(structFile)));
-			WriteStructureProcedure wh_proc = new WriteStructureProcedure(out, dataFile, tree.nr_leaves, tree.x0);
-			tree.walk(wh_proc);
-			out.close();
+			// Flush buffer
+			list.flip();
+			fc.write(list, current.counter);
+			current.counter += list.limit();
+			list.clear();
 		}
-		catch (FileNotFoundException ex)
+		for (int i = 0; i < ijk.length; i++)
+			list.putInt(ijk[i]);
+		list.putInt(attribute);
+		current.tn++;
+	}
+	
+	private static final class ComputeOffsetProcedure extends TraversalProcedure
+	{
+		private long offset = 0L;
+		public final int action(OEMMNode current, int octant, int visit)
 		{
-			logger.error("File "+soupFile+" not found");
-			ex.printStackTrace();
-			throw new RuntimeException(ex);
+			if (visit != LEAF)
+				return SKIPWALK;
+			current.counter = offset;
+			offset += 8L + TRIANGLE_SIZE_DISPATCHED * (long) current.tn;
+			//  Reinitialize this counter for further processing
+			current.tn = 0;
+			current.extra = null;
+			return OK;
 		}
-		catch (IOException ex)
+		public long getOffset()
 		{
-			logger.error("I/O error when reading file  "+soupFile);
-			ex.printStackTrace();
-			throw new RuntimeException(ex);
+			return offset;
+		}
+		public void init()
+		{
+			super.init();
+			offset = 0L;
+		}
+	}
+	
+	private static final class ComputeMinMaxIndicesProcedure extends TraversalProcedure
+	{
+		private int nrLeaves = 0;
+		public final int action(OEMMNode current, int octant, int visit)
+		{
+			if (visit == PREORDER)
+				current.minIndex = nrLeaves;
+			else if (visit == POSTORDER)
+				current.maxIndex = nrLeaves;
+			else if (visit == LEAF)
+			{
+				current.leafIndex = nrLeaves;
+				nrLeaves++;
+			}
+			return OK;
+		}
+	}
+	
+	private static final class FlushBuffersProcedure extends TraversalProcedure
+	{
+		private FileChannel fc;
+		public FlushBuffersProcedure(FileChannel channel)
+		{
+			fc = channel;
+		}
+		public final int action(OEMMNode current, int octant, int visit)
+		{
+			if (visit != LEAF)
+				return SKIPWALK;
+			ByteBuffer list = (ByteBuffer) current.extra;
+			if (list == null)
+			{
+				list = ByteBuffer.allocate(8);
+				list.putLong(current.counter);
+				list.rewind();
+				try
+				{
+					assert current.counter <= fc.size();
+					fc.write(list, current.counter);
+				}
+				catch (IOException ex)
+				{
+					logger.error("I/O error when writing file");
+				}
+				return OK;
+			}
+			// Flush buffer
+			try
+			{
+				assert current.counter <= fc.size();
+				list.flip();
+				fc.write(list, current.counter);
+				current.counter += list.limit();
+			}
+			catch (IOException ex)
+			{
+				logger.error("I/O error when writing file");
+			}
+			return OK;
+		}
+	}
+	
+	private static final class WriteStructureProcedure extends TraversalProcedure
+	{
+		private DataOutputStream out;
+		public WriteStructureProcedure(DataOutputStream outStream, String dataFile, int l, double [] x0)
+			throws IOException
+		{
+			out = outStream;
+			//  Format version
+			out.writeInt(1);
+			//  Number of leaves
+			out.writeInt(l);
+			//  Number of bytes in data file name
+			out.writeInt(dataFile.length());
+			//  Data file
+			out.writeBytes(dataFile);
+			//  Integer <--> double coordinates
+			for (int i = 0; i < 4; i++)
+				out.writeDouble(x0[i]);
+		}
+		public final int action(OEMMNode current, int octant, int visit)
+		{
+			if (visit != LEAF)
+				return SKIPWALK;
+			try
+			{
+				//  Offset in data file
+				//  This offset had been shifted when writing triangles
+				current.counter -= 8L + TRIANGLE_SIZE_DISPATCHED * current.tn;
+				out.writeLong(current.counter);
+				//  Number of triangles really found
+				out.writeInt(current.tn);
+				//  Edge size
+				out.writeInt(current.size);
+				//  Lower-left corner
+				out.writeInt(current.i0);
+				out.writeInt(current.j0);
+				out.writeInt(current.k0);
+			}
+			catch (IOException ex)
+			{
+				logger.error("I/O error when writing intermediate raw OEMM");
+			}
+			return OK;
 		}
 	}
 	
@@ -326,171 +493,6 @@ public class RawStorage
 		ComputeMinMaxIndicesProcedure cmmi_proc = new ComputeMinMaxIndicesProcedure();
 		ret.walk(cmmi_proc);
 		return ret;
-	}
-	
-	private static void addToCell(FileChannel fc, OEMMNode current, int [] ijk, int attribute)
-		throws IOException
-	{
-		assert current.counter <= fc.size();
-		//  With 20 millions of triangles, unbuffered output took 420s
-		//  and buffered output 180s (4K buffer cache)
-		ByteBuffer list = (ByteBuffer) current.extra;
-		if (list == null)
-		{
-			//  Must be a multiple of 10!
-			current.extra = ByteBuffer.allocate(4000);
-			list = (ByteBuffer) current.extra;
-			list.putLong(current.counter);
-			list.flip();
-			fc.write(list, current.counter);
-			current.counter += list.limit();
-			list.clear();
-		}
-		else if (!list.hasRemaining())
-		{
-			// Flush buffer
-			list.flip();
-			fc.write(list, current.counter);
-			current.counter += list.limit();
-			list.clear();
-		}
-		for (int i = 0; i < ijk.length; i++)
-			list.putInt(ijk[i]);
-		list.putInt(attribute);
-		current.tn++;
-	}
-	
-	private static class ComputeOffsetProcedure extends TraversalProcedure
-	{
-		private long offset = 0L;
-		public final int action(OEMMNode current, int octant, int visit)
-		{
-			if (visit != LEAF)
-				return SKIPWALK;
-			current.counter = offset;
-			offset += 8L + TRIANGLE_SIZE_DISPATCHED * (long) current.tn;
-			//  Reinitialize this counter for further processing
-			current.tn = 0;
-			current.extra = null;
-			return OK;
-		}
-		public long getOffset()
-		{
-			return offset;
-		}
-		public void init()
-		{
-			super.init();
-			offset = 0L;
-		}
-	}
-	
-	private static class ComputeMinMaxIndicesProcedure extends TraversalProcedure
-	{
-		private int nrLeaves = 0;
-		public final int action(OEMMNode current, int octant, int visit)
-		{
-			if (visit == PREORDER)
-				current.minIndex = nrLeaves;
-			else if (visit == POSTORDER)
-				current.maxIndex = nrLeaves;
-			else if (visit == LEAF)
-			{
-				current.leafIndex = nrLeaves;
-				nrLeaves++;
-			}
-			return OK;
-		}
-	}
-	
-	private static class FlushBuffersProcedure extends TraversalProcedure
-	{
-		private FileChannel fc;
-		public FlushBuffersProcedure(FileChannel channel)
-		{
-			fc = channel;
-		}
-		public final int action(OEMMNode current, int octant, int visit)
-		{
-			if (visit != LEAF)
-				return SKIPWALK;
-			ByteBuffer list = (ByteBuffer) current.extra;
-			if (list == null)
-			{
-				list = ByteBuffer.allocate(8);
-				list.putLong(current.counter);
-				list.rewind();
-				try
-				{
-					assert current.counter <= fc.size();
-					fc.write(list, current.counter);
-				}
-				catch (IOException ex)
-				{
-					logger.error("I/O error when writing file");
-				}
-				return OK;
-			}
-			// Flush buffer
-			try
-			{
-				assert current.counter <= fc.size();
-				list.flip();
-				fc.write(list, current.counter);
-				current.counter += list.limit();
-			}
-			catch (IOException ex)
-			{
-				logger.error("I/O error when writing file");
-			}
-			return OK;
-		}
-	}
-	
-	private static class WriteStructureProcedure extends TraversalProcedure
-	{
-		private DataOutputStream out;
-		public WriteStructureProcedure(DataOutputStream outStream, String dataFile, int l, double [] x0)
-			throws IOException
-		{
-			out = outStream;
-			//  Format version
-			out.writeInt(1);
-			//  Number of leaves
-			out.writeInt(l);
-			//  Number of bytes in data file name
-			out.writeInt(dataFile.length());
-			//  Data file
-			out.writeBytes(dataFile);
-			//  Integer <--> double coordinates
-			for (int i = 0; i < 4; i++)
-				out.writeDouble(x0[i]);
-		}
-		public final int action(OEMMNode current, int octant, int visit)
-		{
-			if (visit != LEAF)
-				return SKIPWALK;
-			try
-			{
-				//  Offset in data file
-				//  This offset had been shifted when writing triangles
-				current.counter -= 8L + TRIANGLE_SIZE_DISPATCHED * current.tn;
-				out.writeLong(current.counter);
-				//  Number of triangles really found
-				out.writeInt(current.tn);
-				//  Edge size
-				out.writeInt(current.size);
-				//  Lower-left corner
-				out.writeInt(current.i0);
-				out.writeInt(current.j0);
-				out.writeInt(current.k0);
-			}
-			catch (IOException ex)
-			{
-				logger.error("I/O error when writing intermediate raw OEMM");
-			}
-			return OK;
-		}
 	}
 	
 }
