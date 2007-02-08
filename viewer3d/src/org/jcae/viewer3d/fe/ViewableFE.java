@@ -154,7 +154,7 @@ public class ViewableFE extends ViewableAdaptor
 	private void createBranchGroup(FEDomain d)
 	{
 		if(d.getNumberOfTria3()>0)
-			branchGroup.addChild(createTriaBranchGroup(getGeomForTrianglesGroup(d), d));
+			branchGroup.addChild(createTriaBranchGroup(d));		
 		if(d.getNumberOfQuad4()>0)
 			branchGroup.addChild(createQuadBranchGroup(d));
 		else if(d.getNumberOfBeam2()>0)
@@ -191,7 +191,7 @@ public class ViewableFE extends ViewableAdaptor
 		return bg;
 	}
 
-	/** Workaround to buggy auto bouding box of quad arrays */
+	/** Workaround to buggy auto bouding box of GeomInfo */
 	public static BoundingBox computeBoundingBox(float[] nodes)
 	{
 		float[] min=new float[]{Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE};
@@ -270,7 +270,7 @@ public class ViewableFE extends ViewableAdaptor
 				else
 				{
 					FEDomain d=(FEDomain) provider.getDomain(((Integer)entry.getKey()).intValue());
-					branchGroup.addChild(createTriaBranchGroup(getGeomForTrianglesGroup(d), d));
+					createBranchGroup(d);
 				}
 			}
 			visibleDomain.put(entry.getKey(), newStatus);
@@ -366,7 +366,7 @@ public class ViewableFE extends ViewableAdaptor
 		
 		if(showShapeLine)
 		{
-			Logger.global.finest("Changing color of domain nr. "+domainID+" to red. bg="+bg);
+			Logger.global.finest("Changing color of domain n°"+domainID+" to red. bg="+bg);
 			Color colorToSet;
 			if(selected)
 			{
@@ -383,14 +383,11 @@ public class ViewableFE extends ViewableAdaptor
 		}
 	}
 	
-	private IndexedTriangleArray getGeomForTrianglesGroup(FEDomain domain)
+	private IndexedTriangleArray getGeomForTrianglesGroup(FEDomain domain, float[] nodes)
 	{
 		if(domain.getNumberOfNodes()==0 || domain.getNumberOfTria3()==0)
 			return null;
 		int[] tria3=new int[domain.getNumberOfTria3()*3];
-		float[] nodes=domain.getNodes();
-		if(nodes==null)
-			nodes=iteratorToArray(domain.getNodesIterator(), domain.getNumberOfNodes());
 		
 		int i=0;
 		Iterator it=domain.getTria3Iterator();
@@ -407,7 +404,7 @@ public class ViewableFE extends ViewableAdaptor
 			geom = new IndexedTriangleArray(nodes.length / 3,
 				GeometryArray.COORDINATES, tria3.length);
 			geom.setCoordinateIndices(0, tria3);
-			geom.setCoordinates(0, nodes);
+			geom.setCoordinates(0, nodes);			
 		}
 		else
 		{
@@ -446,16 +443,29 @@ public class ViewableFE extends ViewableAdaptor
 	 * It creates two Java3D Shapes3D : one for polygons, one for edges.
 	 * @param the Java3D geometry of a Group.
 	 */
-	private BranchGroup createTriaBranchGroup(IndexedTriangleArray geom, FEDomain domain)
+	private BranchGroup createTriaBranchGroup(FEDomain domain)
 	{
-		BranchGroup branchGroup = new BranchGroup();
+		BranchGroup toReturn = new BranchGroup();
+		float[] nodes=domain.getNodes();
+		if(nodes==null)
+			nodes=iteratorToArray(domain.getNodesIterator(), domain.getNumberOfNodes());
+		
+		//bouding box computed from GeomInfo are buggy so we do it ourself
+		BoundingBox bb=computeBoundingBox(nodes);
+		IndexedTriangleArray geom = getGeomForTrianglesGroup(domain, nodes);
+
+		//free nodes array because it may be large.
+		nodes=null;
 		if(geom==null)
 		{
-			return branchGroup;
+			return toReturn;
 		}
+		
 		Appearance shapeFillAppearance = new Appearance();
 		shapeFillAppearance.setPolygonAttributes(FILL_POLYGON_ATTR);
 		Shape3D shapeFill = new Shape3D(geom, shapeFillAppearance);
+		shapeFill.setBoundsAutoCompute(false);
+		shapeFill.setBounds(bb);
 		
 		if(showShapeLine)
 		{
@@ -472,7 +482,7 @@ public class ViewableFE extends ViewableAdaptor
 		}
 						
 		shapeFill.setCapability(Shape3D.ALLOW_GEOMETRY_READ);		
-		branchGroup.addChild(shapeFill);
+		toReturn.addChild(shapeFill);
 		
 		if(showShapeLine)
 		{
@@ -485,15 +495,17 @@ public class ViewableFE extends ViewableAdaptor
 			ca.setCapability(ColoringAttributes.ALLOW_COLOR_WRITE);
 			shapeLineAppearance.setColoringAttributes(ca);
 			Shape3D shapeLine = new Shape3D(geom, shapeLineAppearance);
+			shapeLine.setBoundsAutoCompute(false);
+			shapeLine.setBounds(bb);
 			shapeLine.setPickable(false);
 			shapeLine.setCapability(Shape3D.ALLOW_APPEARANCE_READ);
 			shapeLineAppearance.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_READ);		
-			branchGroup.addChild(shapeLine);
+			toReturn.addChild(shapeLine);
 		}
-		branchGroup.setCapability(Group.ALLOW_CHILDREN_READ);
-		branchGroup.setCapability(BranchGroup.ALLOW_DETACH);
-		domainIDToBranchGroup.put(new Integer(domain.getID()), branchGroup);
-		return branchGroup;
+		toReturn.setCapability(Group.ALLOW_CHILDREN_READ);
+		toReturn.setCapability(BranchGroup.ALLOW_DETACH);
+		domainIDToBranchGroup.put(new Integer(domain.getID()), toReturn);
+		return toReturn;
 	}	
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.Viewable#getBranchGroup()
