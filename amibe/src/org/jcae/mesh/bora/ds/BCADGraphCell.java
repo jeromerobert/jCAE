@@ -30,6 +30,7 @@ import org.jcae.mesh.mesher.ds.MMesh1D;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Iterator;
 import gnu.trove.THashSet;
 import gnu.trove.THashMap;
@@ -257,7 +258,7 @@ public class BCADGraphCell
 		c.addSubMesh(s);
 	}
 	
-	private class BuildConstraintToSubMeshMapProcedure implements TObjectObjectProcedure
+	private static class BuildConstraintToSubMeshMapProcedure implements TObjectObjectProcedure
 	{
 		private final THashMap map;
 		private BuildConstraintToSubMeshMapProcedure(THashMap m)
@@ -294,11 +295,12 @@ public class BCADGraphCell
 			for (Iterator it = shapesExplorer(cse); it.hasNext(); )
 			{
 				BCADGraphCell sub = (BCADGraphCell) it.next();
-				for (Iterator itc = map.keySet().iterator(); itc.hasNext(); )
+				for (Iterator itc = map.entrySet().iterator(); itc.hasNext(); )
 				{
-					Constraint c = (Constraint) itc.next();
+					Map.Entry e = (Map.Entry) itc.next();
+					Constraint c = (Constraint) e.getKey();
 					Constraint derived = c.newConstraint(cse);
-					THashSet smSet = (THashSet) map.get(c);
+					THashSet smSet = (THashSet) e.getValue();
 					assert smSet != null;
 					for (Iterator itsm = smSet.iterator(); itsm.hasNext(); )
 					{
@@ -376,7 +378,7 @@ public class BCADGraphCell
 		mesh1D.put(s, m);
 	}
 
-	private class PrintProcedure implements TObjectObjectProcedure
+	private static class PrintProcedure implements TObjectObjectProcedure
 	{
 		private final String header;
 		private PrintProcedure(String h)
@@ -392,7 +394,7 @@ public class BCADGraphCell
 		}
 	}
 
-	private class PrintImplicitProcedure implements TObjectObjectProcedure
+	private static class PrintImplicitProcedure implements TObjectObjectProcedure
 	{
 		private final String header;
 		private PrintImplicitProcedure(String h)
@@ -403,13 +405,13 @@ public class BCADGraphCell
 		{
 			BSubMesh s = (BSubMesh) key;
 			THashSet h = (THashSet) val;
-			String r = "";
+			StringBuffer r = new StringBuffer();
 			for (Iterator it = h.iterator(); it.hasNext(); )
 			{
 				Constraint c = (Constraint) it.next();
-				r += " constraint "+c.getOrigin();
+				r.append(" constraint "+c.getOrigin());
 			}
-			System.out.println(header+" submesh "+s.getId()+" ["+r+"]");
+			System.out.println(header+" submesh "+s.getId()+" ["+r.toString()+"]");
 			return true;
 		}
 	}
