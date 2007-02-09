@@ -28,6 +28,7 @@ import java.io.RandomAccessFile;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -523,12 +524,15 @@ public class RawStorage
 			logger.info("Write octree cells onto disk");
 			logger.debug("Index internal vertices");
 			FileInputStream fis = new FileInputStream(ret.getFileName());
-			IndexInternalVerticesProcedure iiv_proc = new IndexInternalVerticesProcedure(ret, fis, outDir);
+			new File(outDir).mkdirs();
+			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File(outDir, "nodes")));
+			IndexInternalVerticesProcedure iiv_proc = new IndexInternalVerticesProcedure(ret, fis, oos, outDir);
 			ret.walk(iiv_proc);
 			fis.close();
+			oos.close();
 			
 			logger.debug("Store data header on disk");
-			Storage.writeOEMMStructure(ret, outDir+File.separator+"files");
+			Storage.writeOEMMStructure(ret, outDir);
 			
 			//  Index external vertices
 			logger.debug("Index external vertices");
@@ -564,16 +568,18 @@ public class RawStorage
 	{
 		private OEMM oemm;
 		private FileChannel fc;
+		private ObjectOutputStream oos;
 		private String outDir;
 		private int globalIndex = 0;
 		private ArrayList path = new ArrayList();
 		private int [] ijk = new int[3];
 		private int room = 0;
-		public IndexInternalVerticesProcedure(OEMM o, FileInputStream in, String dir)
+		public IndexInternalVerticesProcedure(OEMM o, FileInputStream in, ObjectOutputStream headerOut, String dir)
 		{
 			oemm = o;
 			fc = in.getChannel();
 			outDir = dir;
+			oos = headerOut;
 			room = ((1 << 31) - 3*oemm.head[0].tn) / oemm.nr_leaves;
 		}
 		public final int action(OEMMNode current, int octant, int visit)
@@ -741,7 +747,7 @@ public class RawStorage
 				// old value.
 				int tn = current.tn;
 				current.tn = tCount;
-				Storage.writeHeaderOEMMNode(current);
+				oos.writeObject(current);
 				current.tn = tn;
 				
 				FileChannel fca = new FileOutputStream(new File(current.topDir, current.file+"a")).getChannel();

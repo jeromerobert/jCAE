@@ -20,12 +20,13 @@
 
 package org.jcae.mesh.oemm;
 
+import java.io.Serializable;
 import gnu.trove.TIntArrayList;
 
 /**
  * This class represents octants of an OEMM.
  */
-public class OEMMNode
+public class OEMMNode implements Serializable
 {
 	//  Integer coordinates of the lower-left corner
 	public int i0, j0, k0;
@@ -36,21 +37,21 @@ public class OEMMNode
 	//  Number of vertices
 	public int vn = 0;
 	//  Child list
-	public OEMMNode[] child = new OEMMNode[8];
+	public transient OEMMNode[] child = new OEMMNode[8];
 	//  Linked list of nodes at the same level
-	public Object extra;
+	public transient Object extra;
 	//  Parent node
 	//  TODO: The parent pointer can be replaced by a stack
 	//        if more room is needed.
-	public OEMMNode parent;
+	public transient OEMMNode parent;
 	//  Is this node a leaf?
-	public boolean isLeaf = true;
+	public transient boolean isLeaf = true;
 	//  Top-level directory
 	public String topDir;
 	//  File containing vertices and triangles
 	public String file;
 	//  Counter
-	public long counter = 0L;
+	public transient long counter = 0L;
 	
 	//  Index for leaves
 	public int leafIndex = -1;
@@ -99,17 +100,19 @@ public class OEMMNode
 		k0 = ijk[2] & mask;
 	}
 	
-	public OEMMNode(String d, String f)
+	private void readObject(java.io.ObjectInputStream s)
+	        throws java.io.IOException, ClassNotFoundException
 	{
-		topDir = d;
-		file = f;
+		s.defaultReadObject();
+		child = new OEMMNode[8];
+		isLeaf = true;
 	}
-	
+
 	public String toString()
 	{
 		return " IJK "+Integer.toHexString(i0)+" "+Integer.toHexString(j0)+" "+Integer.toHexString(k0)+
 		       " Size=" +Integer.toHexString(size)+
-			"Leaf?: "+isLeaf+
+		       " Leaf?: "+isLeaf+
 		       " NrV="+vn+
 		       " NrT="+tn+
 		       " index="+leafIndex+

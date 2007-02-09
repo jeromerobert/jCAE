@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.DataInputStream;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
+import java.io.ObjectInputStream;
 import java.io.DataOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
@@ -57,11 +58,13 @@ public class Storage
 	
 	public static OEMM readOEMMStructure(String dir)
 	{
-		logger.info("Build an OEMM from "+dir+File.separator+"files");
-		OEMM ret = new OEMM(dir+File.separator+"files");
+		OEMM ret = new OEMM(dir);
+		String structFile = ret.getFileName();
+		logger.info("Build an OEMM from "+structFile);
 		try
 		{
-			DataInputStream structIn = new DataInputStream(new BufferedInputStream(new FileInputStream(ret.structFile)));
+			ObjectInputStream oemmNodes = new ObjectInputStream(new FileInputStream(new File(dir, "nodes")));
+			DataInputStream structIn = new DataInputStream(new BufferedInputStream(new FileInputStream(structFile)));
 			BufferedReader r = new BufferedReader(new InputStreamReader(structIn));
 			for (int i = 0; i < 4; i++)
 			{
@@ -72,11 +75,12 @@ public class Storage
 			ret.leaves = new OEMMNode[nrleaves];
 			for (int i = 0; i < nrleaves; i++)
 			{
-				OEMMNode n = readHeaderOEMMNode(dir, r.readLine());
+				OEMMNode n = (OEMMNode) oemmNodes.readObject();
 				ret.insert(n);
 				ret.leaves[i] = n;
 			}
 			structIn.close();
+			oemmNodes.close();
 			ret.status = OEMM.OEMM_INITIALIZED;
 		}
 		catch (IOException ex)
@@ -85,16 +89,19 @@ public class Storage
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
+		catch (ClassNotFoundException ex)
+		{
+			logger.error("I/O error when reading indexed file in "+dir);
+			ex.printStackTrace();
+			throw new RuntimeException();
+		}
 		return ret;
 	}
 	
-	public static void writeOEMMStructure(OEMM oemm)
+	public static void writeOEMMStructure(OEMM oemm, String dir)
 	{
-		writeOEMMStructure(oemm, oemm.structFile);
-	}
-
-	public static void writeOEMMStructure(OEMM oemm, String file)
-	{
+		OEMM fake = new OEMM(dir);
+		String file = fake.getFileName();
 		logger.info("Write OEMM structure into "+file);
 		try
 		{
@@ -119,80 +126,6 @@ public class Storage
 		}
 	}
 	
-	private static OEMMNode readHeaderOEMMNode(String dir, String file)
-	{
-		OEMMNode ret = new OEMMNode(dir, file);
-		try
-		{
-			DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(dir, file+"h"))));
-			// Leaf index
-			ret.leafIndex = bufIn.readInt();
-			// Cell size
-			ret.size = bufIn.readInt();
-			// Coordinates
-			ret.i0 = bufIn.readInt();
-			ret.j0 = bufIn.readInt();
-			ret.k0 = bufIn.readInt();
-			//  Number of neighboring nodes sharing data
-			int nr = bufIn.readInt();
-			ret.adjLeaves = new TIntArrayList(nr);
-			for (int i = 0; i < nr; i++)
-				ret.adjLeaves.add(bufIn.readInt());
-			//  First global index
-			ret.minIndex = bufIn.readInt();
-			//  Last available global index
-			ret.maxIndex = bufIn.readInt();
-			//  Number of inner vertices
-			ret.vn = bufIn.readInt();
-			//  Number of triangles
-			ret.tn = bufIn.readInt();
-			bufIn.close();
-		}
-		catch (IOException ex)
-		{
-			logger.error("I/O error when reading indexed file "+dir+File.separator+file+"h");
-			ex.printStackTrace();
-			throw new RuntimeException(ex);
-		}
-		return ret;
-	}
-	
-	public static void writeHeaderOEMMNode(OEMMNode current)
-	{
-		try
-		{
-			DataOutputStream output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(new File(current.topDir, current.file+"h"))));
-			//  Leaf index
-			output.writeInt(current.leafIndex);
-			//  Cell size
-			output.writeInt(current.size);
-			//  Coordiantes
-			output.writeInt(current.i0);
-			output.writeInt(current.j0);
-			output.writeInt(current.k0);
-			//  Number of neighboring nodes sharing data
-			int n = current.adjLeaves.size();
-			output.writeInt(n);
-			for (int i = 0; i < n; i++)
-				output.writeInt(current.adjLeaves.get(i));
-			//  First global index
-			output.writeInt(current.minIndex);
-			//  Last available global index
-			output.writeInt(current.maxIndex);
-			//  Number of inner vertices
-			output.writeInt(current.vn);
-			//  Number of triangles
-			output.writeInt(current.tn);
-			output.close();
-		}
-		catch (IOException ex)
-		{
-			logger.error("I/O error when writing header file "+current.topDir+File.separator+current.file+"h");
-			ex.printStackTrace();
-			throw new RuntimeException(ex);
-		}
-	}
-
 	public static Mesh loadNodes(OEMM oemm, TIntHashSet leaves)
 	{
 		return loadNodes(oemm, leaves, true);
