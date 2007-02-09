@@ -459,7 +459,7 @@ public class RawStorage
 	 * @param  file  file containing the intermediate OEMM.
 	 * @return OEMM  an OEMM structure.
 	 */
-	public static OEMM loadIntermediate(String file)
+	private static OEMM loadIntermediate(String file)
 	{
 		logger.debug("Loading intermediate raw OEMM from "+file);
 		OEMM ret = new OEMM("(null)");
