@@ -1,3 +1,8 @@
+Fri Feb  9 16:50:45 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/oemm/*.java: Use standard serialization to
+	store OEMM and OEMMNode instances.
+
 Thu Feb  8 17:57:02 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/oemm/Storage.java: This new class contains

@@ -19,7 +19,7 @@
 
 package org.jcae.mesh.oemm;
 
-import gnu.trove.TIntHashSet;
+import java.io.Serializable;
 import org.apache.log4j.Logger;
 
 /**
@@ -35,7 +35,7 @@ import org.apache.log4j.Logger;
  * P. Cignoni, C. Montani, C. Rocchini, R. Scopigno
  * http://vcg.isti.cnr.it/publications/papers/oemm_tvcg.pdf
  */
-public class OEMM
+public class OEMM implements Serializable
 {
 	private static Logger logger = Logger.getLogger(OEMM.class);	
 	
@@ -46,7 +46,7 @@ public class OEMM
 	public static final int OEMM_CREATED = 1;
 	public static final int OEMM_INITIALIZED = 2;
 	
-	protected final String structFile;
+	protected transient String topDir;
 	public int status;
 	public int nr_leaves;
 	private int nr_cells;
@@ -54,19 +54,19 @@ public class OEMM
 	// Double-to-integer conversion
 	public double [] x0 = new double[4];
 	
-	protected OEMMNode [] head = new OEMMNode[MAXLEVEL];
-	private OEMMNode [] tail = new OEMMNode[MAXLEVEL];
+	protected transient OEMMNode [] head = new OEMMNode[MAXLEVEL];
+	private transient OEMMNode [] tail = new OEMMNode[MAXLEVEL];
 	
 	// Array of leaves
-	public OEMMNode [] leaves;
+	public transient OEMMNode [] leaves;
 	
 	/**
 	 * Create an empty OEMM.
 	 */
-	public OEMM(String file)
+	public OEMM(String dir)
 	{
 		status = OEMM_DUMMY;
-		structFile = file;
+		topDir = dir;
 		nr_levels = 0;
 		nr_cells = 0;
 		nr_leaves = 0;
@@ -74,16 +74,30 @@ public class OEMM
 		x0[3] = 1.0;
 	}
 	
+	private void readObject(java.io.ObjectInputStream s)
+	        throws java.io.IOException, ClassNotFoundException
+	{
+		s.defaultReadObject();
+		head = new OEMMNode[MAXLEVEL];
+		tail = new OEMMNode[MAXLEVEL];
+		leaves = new OEMMNode[nr_leaves];
+	}
+
+	public String getFileName()
+	{
+		return topDir+java.io.File.separator+"oemm";
+	}
+
+	public void setTopDir(String dir)
+	{
+		topDir = dir;
+	}
+	
 	public void printInfos()
 	{
 		logger.info("Number of leaves: "+nr_leaves);
 		logger.info("Number of octants: "+nr_cells);
 		logger.info("Max level: "+nr_levels);
-	}
-	
-	public final String getFileName()
-	{
-		return structFile;
 	}
 	
 	/**

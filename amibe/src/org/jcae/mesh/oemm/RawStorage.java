@@ -29,9 +29,6 @@ import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -520,19 +517,20 @@ public class RawStorage
 			ret.printInfos();
 		try
 		{
-			//  Index internal vertices
 			logger.info("Write octree cells onto disk");
+			OEMM fake = new OEMM(outDir);
+			logger.debug("Store data header on disk");
+			new File(outDir).mkdirs();
+			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File(fake.getFileName())));
+			oos.writeObject(ret);
+			
+			//  Index internal vertices
 			logger.debug("Index internal vertices");
 			FileInputStream fis = new FileInputStream(ret.getFileName());
-			new File(outDir).mkdirs();
-			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File(outDir, "nodes")));
 			IndexInternalVerticesProcedure iiv_proc = new IndexInternalVerticesProcedure(ret, fis, oos, outDir);
 			ret.walk(iiv_proc);
 			fis.close();
 			oos.close();
-			
-			logger.debug("Store data header on disk");
-			Storage.writeOEMMStructure(ret, outDir);
 			
 			//  Index external vertices
 			logger.debug("Index external vertices");

@@ -24,21 +24,14 @@ import java.io.DataInputStream;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
-import java.io.DataOutputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.io.IOException;
 import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.Iterator;
 import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TIntObjectIterator;
-import gnu.trove.TIntArrayList;
 import gnu.trove.TIntHashSet;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
@@ -59,28 +52,21 @@ public class Storage
 	public static OEMM readOEMMStructure(String dir)
 	{
 		OEMM ret = new OEMM(dir);
-		String structFile = ret.getFileName();
-		logger.info("Build an OEMM from "+structFile);
+		logger.info("Build an OEMM from "+ret.getFileName());
 		try
 		{
-			ObjectInputStream oemmNodes = new ObjectInputStream(new FileInputStream(new File(dir, "nodes")));
-			DataInputStream structIn = new DataInputStream(new BufferedInputStream(new FileInputStream(structFile)));
-			BufferedReader r = new BufferedReader(new InputStreamReader(structIn));
-			for (int i = 0; i < 4; i++)
+			ObjectInputStream os = new ObjectInputStream(new FileInputStream(new File(ret.getFileName())));
+			ret = (OEMM) os.readObject();
+			for (int i = 0; i < ret.nr_leaves; i++)
 			{
-				long d = Long.parseLong(r.readLine());
-				ret.x0[i] = Double.longBitsToDouble(d);
-			}
-			int nrleaves = Integer.parseInt(r.readLine());
-			ret.leaves = new OEMMNode[nrleaves];
-			for (int i = 0; i < nrleaves; i++)
-			{
-				OEMMNode n = (OEMMNode) oemmNodes.readObject();
+				OEMMNode n = (OEMMNode) os.readObject();
 				ret.insert(n);
+				// nr_leaves has been incremented by insert
+				ret.nr_leaves--;
 				ret.leaves[i] = n;
 			}
-			structIn.close();
-			oemmNodes.close();
+			os.close();
+			ret.setTopDir(dir);
 			ret.status = OEMM.OEMM_INITIALIZED;
 		}
 		catch (IOException ex)
@@ -96,34 +82,6 @@ public class Storage
 			throw new RuntimeException();
 		}
 		return ret;
-	}
-	
-	public static void writeOEMMStructure(OEMM oemm, String dir)
-	{
-		OEMM fake = new OEMM(dir);
-		String file = fake.getFileName();
-		logger.info("Write OEMM structure into "+file);
-		try
-		{
-			PrintStream out = new PrintStream(new FileOutputStream(file));
-			//  Integer <-> Double scaling
-			for (int i = 0; i < 4; i++)
-			{
-				long d = Double.doubleToLongBits(oemm.x0[i]);
-				out.println(""+d);
-			}
-			//  Number of leaves
-			out.println(""+oemm.nr_leaves);
-			for (int i = 0; i < oemm.nr_leaves; i++)
-				out.println(oemm.leaves[i].file);
-			out.close();
-		}
-		catch (IOException ex)
-		{
-			logger.error("I/O error when writing into "+file);
-			ex.printStackTrace();
-			throw new RuntimeException(ex);
-		}
 	}
 	
 	public static Mesh loadNodes(OEMM oemm, TIntHashSet leaves)
