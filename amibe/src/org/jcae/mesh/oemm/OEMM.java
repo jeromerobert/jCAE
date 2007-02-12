@@ -57,8 +57,8 @@ public class OEMM implements Serializable
 	public double [] x0 = new double[4];
 	public double xdelta;
 	
-	protected transient OEMMNode [] head;
-	private transient OEMMNode [] tail;
+	protected transient OEMMNode [] head = new OEMMNode[MAXLEVEL];
+	private transient OEMMNode [] tail = new OEMMNode[MAXLEVEL];
 	
 	// Array of leaves
 	public transient OEMMNode [] leaves;
