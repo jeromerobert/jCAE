@@ -87,6 +87,10 @@ public class OEMMViewer
 	{
 		BranchGroup bg = new BranchGroup();
 		Mesh mesh = Storage.loadNodes(oemm, leaves, adjacency);
+		// Mesh may be empty if all vertices are connected to
+		// external vertices
+		if (mesh.getTriangles().isEmpty())
+			return bg;
 		double [] coord = meshCoord(mesh);
 		TriangleArray tri = new TriangleArray(coord.length/3, TriangleArray.COORDINATES);
 		tri.setCapability(TriangleArray.ALLOW_COUNT_READ);
