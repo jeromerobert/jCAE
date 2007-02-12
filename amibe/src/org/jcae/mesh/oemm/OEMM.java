@@ -37,6 +37,8 @@ import org.apache.log4j.Logger;
  */
 public class OEMM implements Serializable
 {
+	private static final long serialVersionUID = -4754402824983962085L;
+
 	private static Logger logger = Logger.getLogger(OEMM.class);	
 	
 	public static final int MAXLEVEL = 30;
