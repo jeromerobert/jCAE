@@ -55,9 +55,10 @@ public class OEMM implements Serializable
 	protected int nr_levels;
 	// Double-to-integer conversion
 	public double [] x0 = new double[4];
+	public double xdelta;
 	
-	protected transient OEMMNode [] head = new OEMMNode[MAXLEVEL];
-	private transient OEMMNode [] tail = new OEMMNode[MAXLEVEL];
+	protected transient OEMMNode [] head;
+	private transient OEMMNode [] tail;
 	
 	// Array of leaves
 	public transient OEMMNode [] leaves;
@@ -76,6 +77,29 @@ public class OEMM implements Serializable
 		x0[3] = 1.0;
 	}
 	
+	public final void reset(double [] bbox)
+	{
+		nr_levels = 0;
+		nr_cells = 0;
+		nr_leaves = 0;
+		head = new OEMMNode[MAXLEVEL];
+		tail = new OEMMNode[MAXLEVEL];
+		xdelta = Double.MIN_VALUE;
+		for (int i = 0; i < 3; i++)
+		{
+			double delta = bbox[i+3] - bbox[i];
+			if (delta > xdelta)
+				xdelta = delta;
+			x0[i] = bbox[i];
+		}
+		// Enlarge bounding box by 1% to avoid rounding errors
+		for (int i = 0; i < 3; i++)
+			x0[i] -= 0.005*xdelta;
+		xdelta *= 1.01;
+		x0[3] = ((double) gridSize) / xdelta;
+		logger.debug("Lower left corner : ("+x0[0]+", "+x0[1]+", "+x0[2]+")   Bounding box length: "+xdelta);
+	}
+
 	private void readObject(java.io.ObjectInputStream s)
 	        throws java.io.IOException, ClassNotFoundException
 	{
@@ -329,6 +353,8 @@ public class OEMM implements Serializable
 					throw new RuntimeException("Element not found... Aborting "+current+" "+Integer.toHexString(s)+" "+ind);
 				if (level > nr_levels)
 					nr_levels = level;
+				if (level >= MAXLEVEL)
+					throw new RuntimeException("Too many octree levels... Aborting");
 				if (s == size && node != null)
 					current.child[ind] = node;
 				else

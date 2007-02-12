@@ -45,6 +45,15 @@ public class MeshOEMMIndex
 		final RawOEMM oemm = new RawOEMM(lmax, bbox, umax);
 		String soupFile = soupDir+File.separator+"soup";
 		RawStorage.countTriangles(oemm, soupFile);
+		if (oemm.status != OEMM.OEMM_INITIALIZED)
+		{
+			// Bounding box was invalid and has been fixed
+			// in RawStorage.countTriangles(), we need to
+			// count triangles against the new OEMM.
+			logger.info("Invalid bounding box has been detected");
+			RawStorage.countTriangles(oemm, soupFile);
+			assert oemm.status == OEMM.OEMM_INITIALIZED;
+		}
 		oemm.aggregate(triangles_max);
 		RawStorage.dispatch(oemm, soupFile, "dispatched", "dispatched.data");
 		RawStorage.indexOEMM("dispatched", outDir);

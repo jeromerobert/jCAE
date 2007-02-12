@@ -99,6 +99,13 @@ public class RawOEMM extends OEMM
 	public RawOEMM(int lmax, double [] umin, double [] umax)
 	{
 		super("(null)");
+		double [] bbox = new double[6];
+		for (int i = 0; i < 3; i++)
+		{
+			bbox[i] = umin[i];
+			bbox[i+3] = umax[i];
+		}
+		reset(bbox);
 		//  Adjust status, nr_levels and x0
 		status = OEMM_CREATED;
 		nr_levels = lmax;
@@ -113,14 +120,6 @@ public class RawOEMM extends OEMM
 			//  In this case, the root cell is a leaf
 			nr_leaves = 1;
 		}
-		double deltaX = Math.abs(umin[0] - umax[0]);
-		double deltaY = Math.abs(umin[1] - umax[1]);
-		double deltaZ = Math.abs(umin[2] - umax[2]);
-		deltaX = Math.max(deltaX, deltaY);
-		deltaX = Math.max(deltaX, deltaZ);
-		for (int i = 0; i < 3; i++)
-			x0[i] = umin[i];
-		x0[3] = ((double) gridSize) / deltaX;
 	}
 	
 	public void aggregate(int max)

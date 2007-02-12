@@ -127,6 +127,7 @@ public class RawStorage
 	 * be assigned to it in later stages.
 	 * 
 	 * @param  tree  an OEMM
+	 * @param  soupFile  triangle soup file name
 	 */
 	public static void countTriangles(OEMM tree, String soupFile)
 	{
@@ -140,6 +141,14 @@ public class RawStorage
 		CountTriangles ct = new CountTriangles(tree);
 		readSoup(tree, soupFile, ct);
 		logger.info("Number of triangles: "+ct.getTriangleCount());
+		double [] bbox = ct.getBoundingBox();
+		if (bbox[0] < tree.x0[0] || bbox[0] > tree.x0[0]+tree.xdelta ||
+		    bbox[1] < tree.x0[1] || bbox[1] > tree.x0[1]+tree.xdelta ||
+		    bbox[2] < tree.x0[2] || bbox[2] > tree.x0[2]+tree.xdelta)
+		{
+			tree.reset(bbox);
+			return;
+		}
 		tree.status = OEMM.OEMM_INITIALIZED;
 		tree.printInfos();
 	}
@@ -150,12 +159,25 @@ public class RawStorage
 		private OEMM oemm;
 		private long nrTriangles = 0;
 		private int [] ijk = new int[3];
+		private double [] bbox = new double[6];
 		public CountTriangles(OEMM o)
 		{
 			oemm = o;
+			for (int k = 0; k < 3; k++)
+			{
+				bbox[k] = Double.MAX_VALUE;
+				bbox[k+3] = Double.MIN_VALUE;
+			}
 		}
 		public void processVertex(int i, double [] xyz)
 		{
+			for (int k = 0; k < 3; k++)
+			{
+				if (xyz[k] < bbox[k])
+					bbox[k] = xyz[k];
+				if (xyz[k] > bbox[k+3])
+					bbox[k+3] = xyz[k];
+			}
 			oemm.double2int(xyz, ijk);
 			cells[i] = oemm.build(ijk);
 		}
@@ -171,6 +193,10 @@ public class RawStorage
 		long getTriangleCount()
 		{
 			return nrTriangles;
+		}
+		double [] getBoundingBox()
+		{
+			return bbox;
 		}
 	}
 
@@ -694,6 +720,7 @@ public class RawStorage
 									nrDuplicates++;
 								}
 							}
+							assert (leaf[i] == current.leafIndex && pointIndex[i] >= 0) || (leaf[i] != current.leafIndex && pointIndex[i] < 0);
 						}
 						//  Group number
 						bbI.get();
