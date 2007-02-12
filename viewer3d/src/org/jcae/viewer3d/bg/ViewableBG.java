@@ -125,7 +125,7 @@ public class ViewableBG extends ViewableAdaptor
 		// => easy to find the plate index from this
 		int[] idx = pi.getPrimitiveVertexIndices();
 		int solidID=idx[0]/24;
-		if(selected)
+		if(!leaves.contains(solidID))
 		{
 			Logger.getLogger("global").finest("cellid= "+solidID);
 			QuadArray geom = (QuadArray) pi.getGeometryArray();
@@ -143,9 +143,9 @@ public class ViewableBG extends ViewableAdaptor
 		}
 		else
 		{
-			//selectedLeaves.removeGeometry((QuadArray) leavesGeometry.get(solidID));
-			//leavesGeometry.remove(solidID);
-			//leaves.remove(solidID);
+			selectedLeaves.removeGeometry((QuadArray) leavesGeometry.get(solidID));
+			leavesGeometry.remove(solidID);
+			leaves.remove(solidID);
 		}
 	}	
 
