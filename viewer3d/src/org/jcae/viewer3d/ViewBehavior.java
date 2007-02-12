@@ -433,7 +433,8 @@ public  class ViewBehavior extends OrbitBehavior
 		g2d.drawImage(image, null, 0, 0);
 	}
 	
-	protected void createClipRectanglePlanes(MouseEvent evt){
+	protected void createClipRectanglePlanes(MouseEvent evt)
+	{
 		Viewable cv = view.getCurrentViewable();
 		if (cv == null) return;
 //		if (!evt.isControlDown())
@@ -441,13 +442,14 @@ public  class ViewBehavior extends OrbitBehavior
 //			Logger.global.finest("Ctrl is up so everything is unselected");
 //			cv.unselectAll();
 //		}
-		Vector4d[] planes=computeClipPlanes(selectionRectangle);
-		if(planes!=null)
+		if(selectionRectangle!=null)
+		{
+			Vector4d[] planes=new Vector4d[4];
+			new ViewPyramid(view, selectionRectangle).getSidePlanes(planes);
 			view.setClipPlanes(planes);
+		}
 		selectionRectangle = null;
 	}
-	
-	
 
 	protected void pickRectangle(MouseEvent evt)
 	{
@@ -459,22 +461,22 @@ public  class ViewBehavior extends OrbitBehavior
 //			cv.unselectAll();
 //		}
 		PickCanvas pickCanvas = new PickCanvas(view, view.getBranchGroup(cv));
-		Point3d startPoint = new Point3d();
-		BoundingPolytope shape = computeRectangleProjection(selectionRectangle,
-			startPoint);
-		if(shape!=null){
-		Vector4d[] v = new Vector4d[4];
-		for (int i = 0; i < 4; i++)
-			v[i] = new Vector4d();
-		shape.getPlanes(v);
-		pickCanvas.setMode(PickTool.GEOMETRY_INTERSECT_INFO);
-		pickCanvas.setShapeBounds(shape, startPoint);
-		long time = System.currentTimeMillis();
-		PickViewable result = pickPoint(pickCanvas.pickAllSorted());
-		long time2 = System.currentTimeMillis();
-		logger.finest("picked viewable is " + cv + " in "
-			+ (time2 - time) + " ms");		
-		if (result != null) cv.pick(result);
+
+		if(selectionRectangle!=null)
+		{
+			ViewPyramid shape = new ViewPyramid(view, selectionRectangle);
+			Vector4d[] v = new Vector4d[4];
+			for (int i = 0; i < 4; i++)
+				v[i] = new Vector4d();
+			shape.getPlanes(v);
+			pickCanvas.setMode(PickTool.GEOMETRY_INTERSECT_INFO);
+			pickCanvas.setShapeBounds(shape, shape.getStartPoint());
+			long time = System.currentTimeMillis();
+			PickViewable result = pickPoint(pickCanvas.pickAllSorted());
+			long time2 = System.currentTimeMillis();
+			logger.finest("picked viewable is " + cv + " in "
+				+ (time2 - time) + " ms");		
+			if (result != null) cv.pick(result);
 		}
 		selectionRectangle = null;
 	}
@@ -498,151 +500,5 @@ public  class ViewBehavior extends OrbitBehavior
 		double scale = translation.length() / 10 * Math.tan(view.getView().getFieldOfView());
 		t3d2.setScale(scale);
 		view.getOriginAxisTransformGroup().setTransform(t3d2);
-	}
-
-	
-	private Vector4d[] computeClipPlanes(Rectangle rectangle){
-		
-		Point3d[] pyramVertex=getPyramVertex(rectangle);
-		if(pyramVertex==null) return null;
-		//Compute rectangle center
-		Point3d center=new Point3d(pyramVertex[0]);
-		center.add(pyramVertex[2]);
-		center.scale(0.5);
-		
-		Vector3d screenNormal;
-		Point3d eye=new Point3d(pyramVertex[5]);
-		Vector4d[] toReturn=new Vector4d[4];
-		Vector3d n=new Vector3d();
-		
-		for(int ii=0;ii<3;ii++){
-			//Compute the screen normal
-			screenNormal=new Vector3d();	
-			screenNormal.sub(eye,pyramVertex[ii]);
-			n.sub(pyramVertex[ii],pyramVertex[ii+1]);
-			toReturn[ii]=computePlane(n,screenNormal,pyramVertex[ii],center);
-			toReturn[ii].scale(-1);
-		}
-		
-		//Compute the screen normal
-		screenNormal=new Vector3d();	
-		screenNormal.sub(eye,pyramVertex[3]);
-		n.sub(pyramVertex[3],pyramVertex[0]);
-		toReturn[3]=computePlane(n,screenNormal,pyramVertex[3],center);
-		toReturn[3].scale(-1);
-		return toReturn;
-	}
-	
-	/** returns the { {minX,minY},{minX,maxY},{maxX,maxY},{maxX,minY},{midle},{eye} }
-	 * positions in the Vworld coordinates corresponding to the rectangle parameter
-	 * on the canvas3d.
-	 * @param rectangle
-	 * @return
-	 */
-	private Point3d[] getPyramVertex(Rectangle rectangle){
-		if(rectangle==null) return null;
-		Point3d[] pyramVertex = new Point3d[6];
-		Point2d[] rectPoint = new Point2d[5];
-		for (int ii = 0; ii < pyramVertex.length; ii++)
-			pyramVertex[ii] = new Point3d();
-		rectPoint[0] = new Point2d(rectangle.getMinX(), rectangle.getMinY());
-		rectPoint[1] = new Point2d(rectangle.getMinX(), rectangle.getMaxY());
-		rectPoint[2] = new Point2d(rectangle.getMaxX(), rectangle.getMaxY());
-		rectPoint[3] = new Point2d(rectangle.getMaxX(), rectangle.getMinY());
-		java.awt.Dimension dim = view.getSize();
-		rectPoint[4] = new Point2d(dim.width / 2.0, dim.height / 2.0);
-		//rectPoint[4] = new Point2d(orgX + (newX - orgX)/2.0,
-		//                         orgY + (newY - orgY)/2.0);
-		for (int ii = 0; ii < rectPoint.length; ii++)
-			view.getPixelLocationInImagePlate(rectPoint[ii], pyramVertex[ii]);
-		view.getCenterEyeInImagePlate(pyramVertex[5]);
-		Transform3D trans = new Transform3D();
-		view.getImagePlateToVworld(trans);
-		for (int ii = 0; ii < pyramVertex.length; ii++)
-			trans.transform(pyramVertex[ii], pyramVertex[ii]);
-		
-		return pyramVertex;
-	}
-	
-	/** returns the plane equation defined by tow vectors a point going throw and a point
-	 * pointed by the plane normal*/
-	private Vector4d computePlane(Vector3d n1,Vector3d n2,Point3d goesThrow,Point3d pointed){
-		Vector3d n=new Vector3d();
-		//Compute normal
-		n.cross(n1,n2);
-		n.normalize();
-		Point3d p=new Point3d();
-		p.sub(pointed,goesThrow);
-		if(n.dot(new Vector3d(p))<0)
-			n.scale(-1);
-		//Compute origine
-		double[] plane=new double[4];
-		n.get(plane);
-		plane[3]=-1*n.dot(new Vector3d(goesThrow));
-		
-		return new Vector4d(plane);	
-	}
-	
-	private BoundingPolytope computeRectangleProjection(Rectangle rectangle,
-		Point3d startPoint)
-	{
-		Point3d[] pyramVertex=getPyramVertex(rectangle);
-		if(pyramVertex==null) return null;
-		//Compute the plane function of the bottom face of the pyramid bounds
-		double farClipLength = getView().getBackClipDistance();
-		Vector3d farClipVect = new Vector3d();
-		farClipVect.sub(pyramVertex[4], pyramVertex[5]);
-		farClipVect.normalize();
-		Vector3d farClipPt = new Vector3d();
-		farClipPt.scale(farClipLength, farClipVect);
-		double d0 = -farClipVect.dot(farClipPt);
-		//Define an array of Vector4d for all the planes of the pickBounds
-		Vector4d[] planeFunc = new Vector4d[5];
-		planeFunc[0] = new Vector4d(farClipVect.x, farClipVect.y,
-			farClipVect.z, d0);
-		planeFunc[1] = getPlaneFunc(pyramVertex[0], pyramVertex[1],
-			pyramVertex[5]);
-		planeFunc[2] = getPlaneFunc(pyramVertex[1], pyramVertex[2],
-			pyramVertex[5]);
-		planeFunc[3] = getPlaneFunc(pyramVertex[2], pyramVertex[3],
-			pyramVertex[5]);
-		planeFunc[4] = getPlaneFunc(pyramVertex[3], pyramVertex[0],
-			pyramVertex[5]);
-		//Define the BoundingPolytope bounds object for picking
-		startPoint = pyramVertex[4];
-		return new BoundingPolytope(planeFunc)
-		{
-			//Fix a bug in PickResult line 1819
-			public void getPlanes(Vector4d[] planes)
-			{
-				for(int i=0;i<planes.length;i++)
-				{
-					planes[i]=new Vector4d();
-				}
-				super.getPlanes(planes);				
-			}
-		};		
-	}
-
-	/**
-	 * Compute the plane function, return it
-	 * @param p1 The 1rst point
-	 * @param p2 The 2nd point
-	 * @param p3 The 3rd point
-	 * @return An object of Vector4d, which represents a plane function
-	 */
-	private Vector4d getPlaneFunc(Point3d p1, Point3d p2, Point3d p3)
-	{
-		Point3d pt = new Point3d();
-		pt.sub(p1, p2);
-		Vector3d v1 = new Vector3d(pt);
-		pt.sub(p3, p2);
-		Vector3d v2 = new Vector3d(pt);
-		Vector3d planeVec = new Vector3d();
-		planeVec.cross(v2, v1);
-		planeVec.normalize();
-		//double d0 = -planeVec.dot(new Vector3d(p1));
-		double d1 = -planeVec.dot(new Vector3d(p2));
-		return new Vector4d(planeVec.x, planeVec.y, planeVec.z, d1);
 	}
 }
