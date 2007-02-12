@@ -1,3 +1,7 @@
+Mon Feb 12 12:46:06 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/oemm/OEMM.java: Fix array length in getCoords().
+
 Fri Feb  9 16:50:45 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/oemm/*.java: Use standard serialization to

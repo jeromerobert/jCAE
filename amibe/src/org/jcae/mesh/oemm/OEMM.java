@@ -382,7 +382,7 @@ public class OEMM implements Serializable
 	
 	public double [] getCoords(boolean onlyLeaves)
 	{
-		CoordProcedure proc = new CoordProcedure(onlyLeaves, nr_cells);
+		CoordProcedure proc = new CoordProcedure(onlyLeaves, nr_cells, nr_leaves);
 		walk(proc);
 		return proc.coord;
 	}
@@ -392,10 +392,13 @@ public class OEMM implements Serializable
 		public final double [] coord;
 		private int index;
 		private boolean onlyLeaves;
-		public CoordProcedure(boolean b, int n)
+		public CoordProcedure(boolean b, int nC, int nL)
 		{
 			onlyLeaves = b;
-			coord = new double[72*n];
+			if (onlyLeaves)
+				coord = new double[72*nL];
+			else
+				coord = new double[72*nC];
 		}
 		public final int action(OEMMNode current, int octant, int visit)
 		{
