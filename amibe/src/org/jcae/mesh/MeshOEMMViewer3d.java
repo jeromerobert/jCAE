@@ -72,7 +72,7 @@ public class MeshOEMMViewer3d
 		feFrame.setSize(800,600);
 		feFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		final OEMM oemm = Storage.readOEMMStructure(dir);
-		final View bgView=new View();
+		final View bgView=new View(feFrame);
 		final ViewableBG octree = new ViewableBG(OEMMViewer.bgOEMM(oemm, true));
 		try
 		{
