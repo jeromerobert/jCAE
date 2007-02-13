@@ -140,6 +140,8 @@ public class Vertex implements Serializable
 		link  = that.link;
 		ref1d = that.ref1d;
 		label = that.label;
+		readable = that.readable;
+		writable = that.writable;
 	}
 	
 	/**
