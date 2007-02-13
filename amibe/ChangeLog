@@ -1,3 +1,11 @@
+Tue Feb 13 15:34:15 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java
+	  src/org/jcae/mesh/amibe/metrics/Quadric3DError.java: Previous
+	fix was incorrect, an edge must not be contracted if any of its
+	endpoints is not writable, because its neighborhood is not fully
+	known.
+
 Mon Feb 12 12:46:06 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/oemm/OEMM.java: Fix array length in getCoords().

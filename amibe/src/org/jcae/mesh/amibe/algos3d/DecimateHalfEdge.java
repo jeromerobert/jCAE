@@ -290,7 +290,10 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		v1 = current.origin();
 		v2 = current.destination();
 		assert v1 != v2 : current;
-		if (!v1.isWritable() && !v2.isWritable())
+		// If an endpoint is not writable, its neighborhood is
+		// not fully determined and contraction must not be
+		// performed.
+		if (!v1.isWritable() || !v2.isWritable())
 			return false;
 		/* FIXME: add an option so that boundary nodes may be frozen. */
 		q1 = (Quadric3DError) quadricMap.get(v1);
