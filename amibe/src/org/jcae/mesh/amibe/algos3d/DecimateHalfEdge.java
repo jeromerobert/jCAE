@@ -135,11 +135,18 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			{
 				double sizeTarget = new Double(val).doubleValue();
 				tolerance = sizeTarget * sizeTarget;
+				logger.debug("Tolerance: "+tolerance);
 			}
 			else if (key.equals("placement"))
+			{
 				placement = Integer.valueOf(val).intValue();
+				logger.debug("Placement: "+placement);
+			}
 			else if (key.equals("maxtriangles"))
+			{
 				nrFinal = Integer.valueOf(val).intValue();
+				logger.debug("Nr max triangles: "+nrFinal);
+			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
 		}
