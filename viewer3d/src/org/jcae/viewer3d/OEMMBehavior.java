@@ -61,6 +61,7 @@ public class OEMMBehavior extends Behavior
 	private WakeupCriterion wakeupFrame;
 	
 	private WakeupCriterion wakeupTransf;
+	private TIntHashSet currentIds=new TIntHashSet();
 
 	public OEMMBehavior(View canvas, OEMM oemm)
 	{
@@ -79,7 +80,7 @@ public class OEMMBehavior extends Behavior
 		}
 		this.oemm=oemm;
 		d2limit=2*(coords[0]-coords[6*4*3-6]);
-		wakeupFrame=new WakeupOnElapsedFrames(60);
+		wakeupFrame=new WakeupOnElapsedFrames(1);
 		wakeupTransf=new WakeupOnTransformChange(
 			view.getViewingPlatform().getViewPlatformTransform());
 	}
@@ -132,25 +133,36 @@ public class OEMMBehavior extends Behavior
 			return;
 		}
 		
-		ViewPyramid vp=new ViewPyramid(view, scaleRectangle(view.getBounds(), 2));
-		
 		TIntHashSet ids=new TIntHashSet();
+		ViewPyramid vp=new ViewPyramid(view, scaleRectangle(view.getBounds(), 2));		
+		
 		for(int i=0; i<voxels.length; i++)
 		{
-			if(vp.intersect(voxels[i]) &&
-				voxels[i].distanceSquared(vp.getEye())<d2limit)
-					ids.add(i);
+			if(voxels[i].distanceSquared(vp.getEye())<d2limit
+				&& vp.intersect(voxels[i]))
+				ids.add(i);
 		}
-
-		view.remove(decMesh);
-
-		oemmActive=ids.size()>0;
-		if(ids.size()>0)
+		
+		if(!currentIds.containsAll(ids.toArray()) || ids.size()==0)
 		{
-			decMesh = new ViewableBG(OEMMViewer.meshOEMM(oemm, ids));                
-			view.add(decMesh);
+			if(decMesh!=null)
+				view.remove(decMesh);
+
+			oemmActive=ids.size()>0;
+			
+			if(ids.size()>0)
+			{
+				decMesh = new ViewableBG(OEMMViewer.meshOEMM(oemm, ids, true));                			
+				view.add(decMesh);
+			}
+			else
+			{
+				decMesh=null;
+			}
+
+			fireChangeListenerStateChanged();
+			currentIds=ids;
 		}
-		fireChangeListenerStateChanged();
 		wakeupOn(wakeupTransf);
 	}
 
