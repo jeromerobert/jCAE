@@ -1,3 +1,23 @@
+/*
+ * Project Info:  http://jcae.sourceforge.net
+ * 
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * (C) Copyright 2007, by EADS France
+ */
+
 package org.jcae.viewer3d;
 
 import java.awt.Rectangle;
@@ -15,9 +35,9 @@ public class ViewPyramid extends BoundingPolytope
 	private Canvas3D canvas;
 	/**
 	 * Point where start rays when doing picking
-	 * @todo find if it should be the top of the pyramid or it's projection on the screen
 	 */
 	private Point3d startPoint=new Point3d();
+	private Point3d eye;
 
 	public ViewPyramid(Canvas3D canvas)
 	{
@@ -77,6 +97,7 @@ public class ViewPyramid extends BoundingPolytope
 			pyramVertex[5]);
 		//Define the BoundingPolytope bounds object for picking
 		startPoint = pyramVertex[4];
+		eye = pyramVertex[5];
 		return planeFunc;
 	}
 
@@ -129,9 +150,10 @@ public class ViewPyramid extends BoundingPolytope
 		rectPoint[0] = new Point2d(rectangle.getMinX(), rectangle.getMinY());
 		rectPoint[1] = new Point2d(rectangle.getMinX(), rectangle.getMaxY());
 		rectPoint[2] = new Point2d(rectangle.getMaxX(), rectangle.getMaxY());
-		rectPoint[3] = new Point2d(rectangle.getMaxX(), rectangle.getMinY());
-		java.awt.Dimension dim = canvas.getSize();
-		rectPoint[4] = new Point2d(dim.width / 2.0, dim.height / 2.0);
+		rectPoint[3] = new Point2d(rectangle.getMaxX(), rectangle.getMinY());		
+		rectPoint[4] = new Point2d(
+			(rectangle.getMaxX()-rectangle.getMinX()) / 2.0,
+			(rectangle.getMaxY()-rectangle.getMinY()) / 2.0);
 
 		for (int ii = 0; ii < rectPoint.length; ii++)
 			canvas.getPixelLocationInImagePlate(rectPoint[ii], pyramVertex[ii]);
@@ -144,6 +166,10 @@ public class ViewPyramid extends BoundingPolytope
 		return pyramVertex;
 	}
 
+	/**
+	 * Return a point from where to start when picking
+	 * @todo Probably useless, must be checked
+	 */
 	public Point3d getStartPoint()
 	{
 		return startPoint;
@@ -157,5 +183,14 @@ public class ViewPyramid extends BoundingPolytope
 		planes[1]=vs[2];
 		planes[2]=vs[3];
 		planes[3]=vs[4];
+	}
+
+	/**
+	 * Return the position of the eye in the VWorld
+	 * @todo Probably useless, must be checked
+	 */	
+	public Point3d getEye()
+	{
+		return eye;
 	}
 }

@@ -783,6 +783,11 @@ public class View extends Canvas3D implements PositionListener
 		return currentViewable;
 	}
 	
+	public ViewingPlatform getViewingPlatform()
+	{
+		return viewingPlatform;		
+	}
+	
 	public void setCurrentViewable(Viewable v)
 	{
 		currentViewable=v;
