@@ -69,10 +69,22 @@ public abstract class AbstractAlgoHalfEdge
 		preProcessAllHalfEdges();
 		computeTree();
 		postComputeTree();
-		thisLogger().info("Initial number of triangles: "+mesh.getTriangles().size());
+		thisLogger().info("Initial number of triangles: "+countInnerTriangles(mesh));
 		thisLogger().info("Run "+getClass().getName());
 		processAllHalfEdges();
-		thisLogger().info("Final number of triangles: "+mesh.getTriangles().size());
+		thisLogger().info("Final number of triangles: "+countInnerTriangles(mesh));
+	}
+
+	public static int countInnerTriangles(Mesh mesh)
+	{
+		int ret = 0;
+		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
+		{
+			Triangle f = (Triangle) itf.next();
+			if (!f.isOuter())
+				ret++;
+		}
+		return ret;
 	}
 	
 	private void computeTree()
