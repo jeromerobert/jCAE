@@ -817,6 +817,10 @@ public class Vertex implements Serializable
 				r.append("]");
 			}
 		}
+		if (!readable)
+			r.append(" !R");
+		if (!writable)
+			r.append(" !W");
 		return r.toString();
 	}
 	
