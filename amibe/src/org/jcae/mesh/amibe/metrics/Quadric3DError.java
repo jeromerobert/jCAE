@@ -192,9 +192,9 @@ public class Quadric3DError implements Serializable
 	private static Vertex bestCandidateV1V2(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2)
 	{
 		if (v1.isWritable() && !v2.isWritable())
-			return v1;
-		else if (v2.isWritable() && !v1.isWritable())
 			return v2;
+		else if (v2.isWritable() && !v1.isWritable())
+			return v1;
 		else if (q1.value(v1.getUV()) + q2.value(v1.getUV()) < q1.value(v2.getUV()) + q2.value(v2.getUV()))
 			return v1;
 		else
@@ -204,9 +204,9 @@ public class Quadric3DError implements Serializable
 	private static Vertex bestCandidateV1V2Ref(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2)
 	{
 		if (v1.isWritable() && !v2.isWritable())
-			return v1;
-		else if (v2.isWritable() && !v1.isWritable())
 			return v2;
+		else if (v2.isWritable() && !v1.isWritable())
+			return v1;
 		else if (v1.getRef() == 0 && v2.getRef() == 0)
 			return bestCandidateV1V2(v1, v2, q1, q2);
 		else if (v1.getRef() == 0)
