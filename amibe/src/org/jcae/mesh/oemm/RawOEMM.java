@@ -19,6 +19,8 @@
 
 package org.jcae.mesh.oemm;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 /**
@@ -91,8 +93,7 @@ public class RawOEMM extends OEMM
 	private OEMMNode [] candidates = new OEMMNode[SIZE_DELTA*SIZE_DELTA];
 
 	// Array of doubly-linked lists of octree cellsm needed by aggregate()
-	private transient OEMMNode [] head = new OEMMNode[MAXLEVEL];
-	private transient OEMMNode [] tail = new OEMMNode[MAXLEVEL];
+	private transient ArrayList [] head = new ArrayList[MAXLEVEL];
 
 	/**
 	 * Create an empty raw OEMM.
@@ -109,8 +110,7 @@ public class RawOEMM extends OEMM
 			bbox[i] = umin[i];
 			bbox[i+3] = umax[i];
 		}
-		head = new OEMMNode[MAXLEVEL];
-		tail = new OEMMNode[MAXLEVEL];
+		head = new ArrayList[MAXLEVEL];
 		//  Adjust status and x0
 		reset(bbox);
 		status = OEMM_CREATED;
@@ -120,10 +120,9 @@ public class RawOEMM extends OEMM
 	protected final void createRootNode(OEMMNode node)
 	{
 		super.createRootNode(node);
-		head = new OEMMNode[MAXLEVEL];
-		tail = new OEMMNode[MAXLEVEL];
-		head[0] = root;
-		tail[0] = head[0];
+		head = new ArrayList[MAXLEVEL];
+		head[0] = new ArrayList();
+		head[0].add(root);
 	}
 	
 	// Called by OEMM.search()
@@ -131,16 +130,9 @@ public class RawOEMM extends OEMM
 	protected final void postInsertNode(OEMMNode node, int level)
 	{
 		super.postInsertNode(node, level);
-		if (head[level] != null)
-		{
-			tail[level].extra = node;
-			tail[level] = (OEMMNode) tail[level].extra;
-		}
-		else
-		{
-			head[level] = node;
-			tail[level] = head[level];
-		}
+		if (head[level] == null)
+			head[level] = new ArrayList();
+		head[level].add(node);
 	}
 
 	public void aggregate(int max)
@@ -152,11 +144,12 @@ public class RawOEMM extends OEMM
 		for (int level = MAXLEVEL - 1; level >= 0; level--)
 		{
 			if (head[level] == null)
-					continue;
+				continue;
 			int merged = 0;
 			logger.debug(" Checking neighbors at level "+level);
-			for (OEMMNode current = head[level]; current != null; current = (OEMMNode) current.extra)
+			for (Iterator it = head[level].iterator(); it.hasNext(); )
 			{
+				OEMMNode current = (OEMMNode) it.next();
 				if (current.isLeaf || current.tn > max)
 					continue;
 				//  This node is not a leaf and its children
