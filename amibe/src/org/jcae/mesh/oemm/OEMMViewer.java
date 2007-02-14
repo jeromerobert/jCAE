@@ -73,7 +73,7 @@ public class OEMMViewer
 	public static BranchGroup meshOEMM(OEMM oemm)
 	{
 		TIntHashSet leaves = new TIntHashSet();
-		for (int i = 0; i < oemm.nr_leaves; i++)
+		for (int i = 0; i < oemm.getNumberOfLeaves(); i++)
 			leaves.add(i);
 		return meshOEMM(oemm, leaves);
 	}

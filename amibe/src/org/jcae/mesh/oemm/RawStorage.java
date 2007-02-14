@@ -254,7 +254,7 @@ public class RawStorage
 			
 			//  Write octree data structure onto disk
 			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(structFile)));
-			WriteStructureProcedure wh_proc = new WriteStructureProcedure(out, dataFile, tree.nr_leaves, tree.x0);
+			WriteStructureProcedure wh_proc = new WriteStructureProcedure(out, dataFile, tree.getNumberOfLeaves(), tree.x0);
 			tree.walk(wh_proc);
 			out.close();
 		}
@@ -511,8 +511,6 @@ public class RawStorage
 				ijk[2] = bufIn.readInt();
 				OEMMNode n = new OEMMNode(size, ijk);
 				ret.insert(n);
-				if (ret.root != n)
-					ret.root.tn += nr;
 				n.counter = position;
 				n.tn = nr;
 				n.leafIndex = i;
@@ -604,7 +602,7 @@ public class RawStorage
 			fc = in.getChannel();
 			outDir = dir;
 			oos = headerOut;
-			room = ((1 << 31) - 3*oemm.root.tn) / oemm.nr_leaves;
+			room = ((1 << 31) - 3*oemm.root.tn) / oemm.getNumberOfLeaves();
 		}
 		public final int action(OEMMNode current, int octant, int visit)
 		{
@@ -621,7 +619,7 @@ public class RawStorage
 				return SKIPWALK;
 			}
 			
-			logger.debug("Indexing internal vertices of node "+(current.leafIndex+1)+"/"+oemm.nr_leaves);
+			logger.debug("Indexing internal vertices of node "+(current.leafIndex+1)+"/"+oemm.getNumberOfLeaves());
 			ijk[0] = current.i0;
 			ijk[1] = current.j0;
 			ijk[2] = current.k0;
@@ -825,14 +823,14 @@ public class RawStorage
 		{
 			oemm = o;
 			fc = in.getChannel();
-			vertices = new PAVLTreeIntArrayDup[oemm.nr_leaves];
+			vertices = new PAVLTreeIntArrayDup[oemm.getNumberOfLeaves()];
 			needed = new boolean[vertices.length];
 		}
 		public final int action(OEMMNode current, int octant, int visit)
 		{
 			if (visit != LEAF)
 				return SKIPWALK;
-			logger.debug("Indexing external vertices of node "+(current.leafIndex+1)+"/"+oemm.nr_leaves);
+			logger.debug("Indexing external vertices of node "+(current.leafIndex+1)+"/"+oemm.getNumberOfLeaves());
 			// Only adjacent leaves are needed, drop others
 			// to free memory.
 			// TODO: Add a better mamory management system.
@@ -940,7 +938,7 @@ public class RawStorage
 		{
 			if (visit != LEAF)
 				return SKIPWALK;
-			logger.debug("Converting coordinates of node "+(current.leafIndex+1)+"/"+oemm.nr_leaves);
+			logger.debug("Converting coordinates of node "+(current.leafIndex+1)+"/"+oemm.getNumberOfLeaves());
 			
 			try
 			{

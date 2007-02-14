@@ -121,11 +121,7 @@ public class RawOEMM extends OEMM
 			nr_levels = MAXLEVEL;
 		}
 		else if (nr_levels <= 1)
-		{
 			nr_levels = 1;
-			//  In this case, the root cell is a leaf
-			nr_leaves = 1;
-		}
 	}
 	
 	// Called by OEMM.search()
@@ -160,9 +156,8 @@ public class RawOEMM extends OEMM
 		int minCellSize = 1 << (MAXLEVEL + 1 - nr_levels);
 		SumTrianglesProcedure st_proc = new SumTrianglesProcedure();
 		walk(st_proc);
-		logger.debug("Nr triangles: "+head[0].tn);
-		st_proc.printStats();
-		for (int level = nr_levels - 1; level > 0; level--)
+		int total = 0;
+		for (int level = nr_levels - 1; level >= 0; level--)
 		{
 			int merged = 0;
 			logger.debug(" Checking neighbors at level "+level);
@@ -176,20 +171,15 @@ public class RawOEMM extends OEMM
 				if (current.size <= SIZE_DELTA * minCellSize ||  checkLevelNeighbors(current))
 				{
 					for (int ind = 0; ind < 8; ind++)
-					{
-						if (current.child[ind] != null && current.child[ind].isLeaf)
-						{
-							current.child[ind] = null;
-							nr_leaves--;
-						}
-					}
-					current.isLeaf = true;
-					merged++;
-					nr_leaves++;
+						if (current.child[ind] != null)
+							merged++;
+					mergeChildren(current);
 				}
 			}
-			logger.debug(" Merged nodes: "+merged);
+			logger.debug(" Merged octree cells: "+merged);
+			total += merged;
 		}
+		logger.info("Merged octree cells: "+total);
 	}
 	
 	/**
@@ -300,11 +290,8 @@ public class RawOEMM extends OEMM
 				return SKIPWALK;
 			}
 			for (int i = 0; i < 8; i++)
-			{
-				if (current.child[i] == null)
-					continue;
-				current.tn += current.child[i].tn;
-			}
+				if (current.child[i] != null)
+					current.tn += current.child[i].tn;
 			return OK;
 		}
 	}

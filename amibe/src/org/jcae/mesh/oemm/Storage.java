@@ -57,18 +57,21 @@ public class Storage
 		{
 			ObjectInputStream os = new ObjectInputStream(new FileInputStream(new File(ret.getFileName())));
 			ret = (OEMM) os.readObject();
-			ret.leaves = new OEMMNode[ret.nr_leaves];
-			for (int i = 0; i < ret.nr_leaves; i++)
+			// Reset nr_leaves and nr_cells because they are
+			// incremented by OEMM.insert()
+			int nrl = ret.getNumberOfLeaves();
+			ret.reset();
+			ret.leaves = new OEMMNode[nrl];
+			for (int i = 0; i < nrl; i++)
 			{
 				OEMMNode n = (OEMMNode) os.readObject();
 				ret.insert(n);
-				// nr_leaves has been incremented by insert
-				ret.nr_leaves--;
 				ret.leaves[i] = n;
 			}
 			os.close();
 			ret.setTopDir(dir);
 			ret.status = OEMM.OEMM_INITIALIZED;
+			ret.printInfos();
 		}
 		catch (IOException ex)
 		{

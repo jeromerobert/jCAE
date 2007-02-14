@@ -50,7 +50,7 @@ public class OEMM implements Serializable
 	
 	protected transient String topDir;
 	public int status;
-	public int nr_leaves;
+	private int nr_leaves;
 	private int nr_cells;
 	protected int nr_levels;
 	// Double-to-integer conversion
@@ -69,19 +69,22 @@ public class OEMM implements Serializable
 	{
 		status = OEMM_DUMMY;
 		topDir = dir;
-		nr_levels = 0;
-		nr_cells = 0;
-		nr_leaves = 0;
 		x0[0] = x0[1] = x0[2] = 0.0;
 		x0[3] = 1.0;
+		reset();
 	}
 	
-	public final void reset(double [] bbox)
+	public final void reset()
 	{
 		nr_levels = 0;
 		nr_cells = 0;
 		nr_leaves = 0;
 		root = null;
+	}
+
+	public final void reset(double [] bbox)
+	{
+		reset();
 		xdelta = Double.MIN_VALUE;
 		for (int i = 0; i < 3; i++)
 		{
@@ -108,6 +111,11 @@ public class OEMM implements Serializable
 		topDir = dir;
 	}
 	
+	public int getNumberOfLeaves()
+	{
+		return nr_leaves;
+	}
+
 	public void printInfos()
 	{
 		logger.info("Number of leaves: "+nr_leaves);
@@ -355,12 +363,14 @@ public class OEMM implements Serializable
 	protected void createRootNode(OEMMNode node)
 	{
 		if (node != null && node.size == gridSize)
-		{
 			root = node;
-			nr_leaves++;
-		}
 		else
 			root = new OEMMNode(gridSize, 0, 0, 0);
+		if (nr_levels <= 1)
+		{
+			root.isLeaf = true;
+			nr_leaves++;
+		}
 		nr_cells++;
 	}
 
@@ -368,6 +378,23 @@ public class OEMM implements Serializable
 	{
 	}
 	
+	protected final void mergeChildren(OEMMNode node)
+	{
+		assert !node.isLeaf;
+		for (int ind = 0; ind < 8; ind++)
+		{
+			if (node.child[ind] != null)
+			{
+				assert node.child[ind].isLeaf;
+				node.child[ind] = null;
+				nr_leaves--;
+				nr_cells--;
+			}
+		}
+		node.isLeaf = true;
+		nr_leaves++;
+	}
+
 	public double [] getCoords(boolean onlyLeaves)
 	{
 		CoordProcedure proc = new CoordProcedure(onlyLeaves, nr_cells, nr_leaves);
