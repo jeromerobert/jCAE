@@ -90,6 +90,9 @@ public class RawOEMM extends OEMM
 	private static final int SIZE_DELTA = 4;
 	private OEMMNode [] candidates = new OEMMNode[SIZE_DELTA*SIZE_DELTA];
 
+	protected transient OEMMNode [] head = new OEMMNode[MAXLEVEL];
+	private transient OEMMNode [] tail = new OEMMNode[MAXLEVEL];
+
 	/**
 	 * Create an empty raw OEMM.
 	 * @param lmax   maximal level of the tree
@@ -122,6 +125,43 @@ public class RawOEMM extends OEMM
 		}
 	}
 	
+	public void reset(double [] bbox)
+	{
+		super.reset(bbox);
+		head = new OEMMNode[MAXLEVEL];
+		tail = new OEMMNode[MAXLEVEL];
+	}
+
+	private void readObject(java.io.ObjectInputStream s)
+	        throws java.io.IOException, ClassNotFoundException
+	{
+		s.defaultReadObject();
+		head = new OEMMNode[MAXLEVEL];
+		tail = new OEMMNode[MAXLEVEL];
+		leaves = new OEMMNode[nr_leaves];
+	}
+
+	protected void createRootNode(OEMMNode node)
+	{
+		super.createRootNode(node);
+		head[0] = root;
+		tail[0] = head[0];
+	}
+	
+	protected void postInsertNode(OEMMNode node, int level)
+	{
+		if (head[level] != null)
+		{
+			tail[level].extra = node;
+			tail[level] = (OEMMNode) tail[level].extra;
+		}
+		else
+		{
+			head[level] = node;
+			tail[level] = head[level];
+		}
+	}
+
 	public void aggregate(int max)
 	{
 		int minCellSize = 1 << (MAXLEVEL + 1 - nr_levels);

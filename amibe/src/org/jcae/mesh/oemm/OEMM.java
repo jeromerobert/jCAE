@@ -57,8 +57,7 @@ public class OEMM implements Serializable
 	public double [] x0 = new double[4];
 	public double xdelta;
 	
-	protected transient OEMMNode [] head = new OEMMNode[MAXLEVEL];
-	private transient OEMMNode [] tail = new OEMMNode[MAXLEVEL];
+	protected transient OEMMNode root = null;
 	
 	// Array of leaves
 	public transient OEMMNode [] leaves;
@@ -77,13 +76,12 @@ public class OEMM implements Serializable
 		x0[3] = 1.0;
 	}
 	
-	public final void reset(double [] bbox)
+	public void reset(double [] bbox)
 	{
 		nr_levels = 0;
 		nr_cells = 0;
 		nr_leaves = 0;
-		head = new OEMMNode[MAXLEVEL];
-		tail = new OEMMNode[MAXLEVEL];
+		root = null;
 		xdelta = Double.MIN_VALUE;
 		for (int i = 0; i < 3; i++)
 		{
@@ -104,8 +102,6 @@ public class OEMM implements Serializable
 	        throws java.io.IOException, ClassNotFoundException
 	{
 		s.defaultReadObject();
-		head = new OEMMNode[MAXLEVEL];
-		tail = new OEMMNode[MAXLEVEL];
 		leaves = new OEMMNode[nr_leaves];
 	}
 
@@ -171,7 +167,7 @@ public class OEMM implements Serializable
 		int [] posStack = new int[nr_levels+1];
 		posStack[l] = 0;
 		OEMMNode [] octreeStack = new OEMMNode[nr_levels+1];
-		octreeStack[l] = head[0];
+		octreeStack[l] = root;
 		proc.init();
 		while (true)
 		{
@@ -322,21 +318,13 @@ public class OEMM implements Serializable
 	 */
 	private final OEMMNode search(int size, int [] ijk, boolean create, OEMMNode node)
 	{
-		if (head[0] == null)
+		if (root == null)
 		{
 			if (!create)
 				throw new RuntimeException("Element not found... Aborting ");
-			if (node != null && node.size == gridSize)
-			{
-				head[0] = node;
-				nr_leaves++;
-			}
-			else
-				head[0] = new OEMMNode(gridSize, 0, 0, 0);
-			tail[0] = head[0];
-			nr_cells++;
+			createRootNode(node);
 		}
-		OEMMNode current = head[0];
+		OEMMNode current = root;
 		int level = 0;
 		int s = current.size;
 		while (s > size)
@@ -360,16 +348,7 @@ public class OEMM implements Serializable
 				else
 					current.child[ind] = new OEMMNode(s, ijk);
 				current.child[ind].parent = current;
-				if (head[level] != null)
-				{
-					tail[level].extra = current.child[ind];
-					tail[level] = (OEMMNode) tail[level].extra;
-				}
-				else
-				{
-					head[level] = current.child[ind];
-					tail[level] = head[level];
-				}
+				postInsertNode(current.child[ind], level);
 				current.isLeaf = false;
 				nr_cells++;
 				if (s == size)
@@ -378,6 +357,22 @@ public class OEMM implements Serializable
 			current = current.child[ind];
 		}
 		return current;
+	}
+
+	protected void createRootNode(OEMMNode node)
+	{
+		if (node != null && node.size == gridSize)
+		{
+			root = node;
+			nr_leaves++;
+		}
+		else
+			root = new OEMMNode(gridSize, 0, 0, 0);
+		nr_cells++;
+	}
+
+	protected void postInsertNode(OEMMNode node, int level)
+	{
 	}
 	
 	public double [] getCoords(boolean onlyLeaves)

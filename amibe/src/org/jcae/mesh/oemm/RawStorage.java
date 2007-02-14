@@ -511,8 +511,8 @@ public class RawStorage
 				ijk[2] = bufIn.readInt();
 				OEMMNode n = new OEMMNode(size, ijk);
 				ret.insert(n);
-				if (ret.head[0] != n)
-					ret.head[0].tn += nr;
+				if (ret.root != n)
+					ret.root.tn += nr;
 				n.counter = position;
 				n.tn = nr;
 				n.leafIndex = i;
@@ -604,7 +604,7 @@ public class RawStorage
 			fc = in.getChannel();
 			outDir = dir;
 			oos = headerOut;
-			room = ((1 << 31) - 3*oemm.head[0].tn) / oemm.nr_leaves;
+			room = ((1 << 31) - 3*oemm.root.tn) / oemm.nr_leaves;
 		}
 		public final int action(OEMMNode current, int octant, int visit)
 		{
