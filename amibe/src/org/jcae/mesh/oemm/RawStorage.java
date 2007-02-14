@@ -547,6 +547,7 @@ public class RawStorage
 			new File(outDir).mkdirs();
 			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File(fake.getFileName())));
 			oos.writeObject(ret);
+			oos.writeObject(Integer.valueOf(ret.getNumberOfLeaves()));
 			
 			//  Index internal vertices
 			logger.debug("Index internal vertices");

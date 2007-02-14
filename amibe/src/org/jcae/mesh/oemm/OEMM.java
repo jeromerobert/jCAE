@@ -50,9 +50,9 @@ public class OEMM implements Serializable
 	
 	protected transient String topDir;
 	public int status;
-	private int nr_leaves;
-	private int nr_cells;
-	protected int nr_levels;
+	private transient int nr_leaves = 0;
+	private transient int nr_cells = 0;
+	private transient int depth = 0;
 	// Double-to-integer conversion
 	public double [] x0 = new double[4];
 	public double xdelta;
@@ -67,24 +67,39 @@ public class OEMM implements Serializable
 	 */
 	public OEMM(String dir)
 	{
-		status = OEMM_DUMMY;
 		topDir = dir;
-		x0[0] = x0[1] = x0[2] = 0.0;
-		x0[3] = 1.0;
-		reset();
+		status = OEMM_DUMMY;
 	}
 	
-	public final void reset()
+	/**
+	 * Create an empty OEMM with a given depth.
+	 */
+	public OEMM(int l)
 	{
-		nr_levels = 0;
+		depth = l;
+		if (depth > MAXLEVEL)
+		{
+			logger.error("Max. level too high");
+			depth = MAXLEVEL;
+		}
+		else if (depth < 1)
+		{
+			logger.error("Max. level too low");
+			depth = 1;
+		}
+	}
+	
+	public final void clearNodes()
+	{
 		nr_cells = 0;
 		nr_leaves = 0;
+		leaves = null;
 		root = null;
 	}
 
-	public final void reset(double [] bbox)
+	protected final void reset(double [] bbox)
 	{
-		reset();
+		clearNodes();
 		xdelta = Double.MIN_VALUE;
 		for (int i = 0; i < 3; i++)
 		{
@@ -116,11 +131,16 @@ public class OEMM implements Serializable
 		return nr_leaves;
 	}
 
+	protected int minCellsize()
+	{
+		return (1 << (MAXLEVEL + 1 - depth));
+	}
+
 	public void printInfos()
 	{
 		logger.info("Number of leaves: "+nr_leaves);
 		logger.info("Number of octants: "+nr_cells);
-		logger.info("Max level: "+nr_levels);
+		logger.info("Depth: "+depth);
 	}
 	
 	/**
@@ -165,9 +185,9 @@ public class OEMM implements Serializable
 		int i0 = 0;
 		int j0 = 0;
 		int k0 = 0;
-		int [] posStack = new int[nr_levels+1];
+		int [] posStack = new int[depth];
 		posStack[l] = 0;
-		OEMMNode [] octreeStack = new OEMMNode[nr_levels+1];
+		OEMMNode [] octreeStack = new OEMMNode[depth];
 		octreeStack[l] = root;
 		proc.init();
 		while (true)
@@ -180,7 +200,7 @@ public class OEMM implements Serializable
 				s >>= 1;
 				assert s > 0;
 				l++;
-				assert l <= nr_levels;
+				assert l < depth;
 				for (int i = 0; i < 8; i++)
 				{
 					if (null != octreeStack[l-1].child[i])
@@ -278,8 +298,7 @@ public class OEMM implements Serializable
 	 */
 	public final OEMMNode build(int [] ijk)
 	{
-		int minSize = 1 << (MAXLEVEL + 1 - nr_levels);
-		return search(minSize, ijk, true, null);
+		return search(minCellsize(), ijk, true, null);
 	}
 	
 	/**
@@ -324,6 +343,13 @@ public class OEMM implements Serializable
 			if (!create)
 				throw new RuntimeException("Element not found... Aborting ");
 			createRootNode(node);
+			if (size == gridSize)
+			{
+				root.isLeaf = true;
+				nr_leaves++;
+				if (depth == 0)
+					depth++;
+			}
 		}
 		OEMMNode current = root;
 		int level = 0;
@@ -340,9 +366,9 @@ public class OEMM implements Serializable
 			{
 				if (!create)
 					throw new RuntimeException("Element not found... Aborting "+current+" "+Integer.toHexString(s)+" "+ind);
-				if (level > nr_levels)
-					nr_levels = level;
-				if (level >= MAXLEVEL)
+				if (level >= depth)
+					depth = level + 1;
+				if (depth > MAXLEVEL)
 					throw new RuntimeException("Too many octree levels... Aborting");
 				if (s == size && node != null)
 					current.child[ind] = node;
@@ -363,14 +389,14 @@ public class OEMM implements Serializable
 	protected void createRootNode(OEMMNode node)
 	{
 		if (node != null && node.size == gridSize)
+		{
+			// This happens only when OEMM has only one leaf
+			// and is read from disk, root has to be set to
+			// this leaf.
 			root = node;
+		}
 		else
 			root = new OEMMNode(gridSize, 0, 0, 0);
-		if (nr_levels <= 1)
-		{
-			root.isLeaf = true;
-			nr_leaves++;
-		}
 		nr_cells++;
 	}
 

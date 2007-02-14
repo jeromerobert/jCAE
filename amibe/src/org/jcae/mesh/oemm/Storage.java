@@ -59,8 +59,8 @@ public class Storage
 			ret = (OEMM) os.readObject();
 			// Reset nr_leaves and nr_cells because they are
 			// incremented by OEMM.insert()
-			int nrl = ret.getNumberOfLeaves();
-			ret.reset();
+			int nrl = ((Integer) os.readObject()).intValue();
+			ret.clearNodes();
 			ret.leaves = new OEMMNode[nrl];
 			for (int i = 0; i < nrl; i++)
 			{

@@ -102,26 +102,18 @@ public class RawOEMM extends OEMM
 	 */
 	public RawOEMM(int lmax, double [] umin, double [] umax)
 	{
-		super("(null)");
+		super(lmax);
 		double [] bbox = new double[6];
 		for (int i = 0; i < 3; i++)
 		{
 			bbox[i] = umin[i];
 			bbox[i+3] = umax[i];
 		}
-		reset(bbox);
 		head = new OEMMNode[MAXLEVEL];
 		tail = new OEMMNode[MAXLEVEL];
-		//  Adjust status, nr_levels and x0
+		//  Adjust status and x0
+		reset(bbox);
 		status = OEMM_CREATED;
-		nr_levels = lmax;
-		if (nr_levels > MAXLEVEL)
-		{
-			logger.error("Max. level too high");
-			nr_levels = MAXLEVEL;
-		}
-		else if (nr_levels <= 1)
-			nr_levels = 1;
 	}
 	
 	// Called by OEMM.search()
@@ -153,12 +145,14 @@ public class RawOEMM extends OEMM
 
 	public void aggregate(int max)
 	{
-		int minCellSize = 1 << (MAXLEVEL + 1 - nr_levels);
+		int minSize = SIZE_DELTA * minCellsize();
 		SumTrianglesProcedure st_proc = new SumTrianglesProcedure();
 		walk(st_proc);
 		int total = 0;
-		for (int level = nr_levels - 1; level >= 0; level--)
+		for (int level = MAXLEVEL - 1; level >= 0; level--)
 		{
+			if (head[level] == null)
+					continue;
 			int merged = 0;
 			logger.debug(" Checking neighbors at level "+level);
 			for (OEMMNode current = head[level]; current != null; current = (OEMMNode) current.extra)
@@ -168,7 +162,7 @@ public class RawOEMM extends OEMM
 				//  This node is not a leaf and its children
 				//  can be merged if neighbors have a difference
 				//  level lower than SIZE_DELTA
-				if (current.size <= SIZE_DELTA * minCellSize ||  checkLevelNeighbors(current))
+				if (current.size <= minSize ||  checkLevelNeighbors(current))
 				{
 					for (int ind = 0; ind < 8; ind++)
 						if (current.child[ind] != null)
