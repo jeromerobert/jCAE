@@ -36,6 +36,8 @@ import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import gnu.trove.TIntIterator;
 import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntArrayList;
@@ -244,11 +246,12 @@ public class RawStorage
 			FileChannel fc = raf.getChannel();
 			raf.setLength(outputFileSize);
 
-			DispatchTriangles dt = new DispatchTriangles(tree, fc);
+			HashMap buffers = new HashMap();
+			DispatchTriangles dt = new DispatchTriangles(tree, fc, buffers);
 			readSoup(tree, soupFile, dt);
 
 			logger.debug("Raw OEMM: flush buffers");
-			FlushBuffersProcedure fb_proc = new FlushBuffersProcedure(fc);
+			FlushBuffersProcedure fb_proc = new FlushBuffersProcedure(fc, buffers);
 			tree.walk(fb_proc);
 			raf.close();
 			
@@ -278,10 +281,12 @@ public class RawStorage
 		private int [] ijk9 = new int[9];
 		private OEMM oemm;
 		private FileChannel fc;
-		public DispatchTriangles(OEMM o, FileChannel f)
+		private Map buffers;
+		public DispatchTriangles(OEMM o, FileChannel f, Map m)
 		{
 			oemm = o;
 			fc = f;
+			buffers = m;
 		}
 		public void processVertex(int i, double [] xyz)
 		{
@@ -297,11 +302,11 @@ public class RawStorage
 		{
 			try
 			{
-				addToCell(fc, cells[0], ijk9, group);
+				addToCell(fc, cells[0], buffers, ijk9, group);
 				if (cells[1] != cells[0])
-					addToCell(fc, cells[1], ijk9, group);
+					addToCell(fc, cells[1], buffers, ijk9, group);
 				if (cells[2] != cells[0] && cells[2] != cells[1])
-					addToCell(fc, cells[2], ijk9, group);
+					addToCell(fc, cells[2], buffers, ijk9, group);
 			}
 			catch (IOException ex)
 			{
@@ -312,18 +317,18 @@ public class RawStorage
 		}
 	}
 
-	private static final void addToCell(FileChannel fc, OEMMNode current, int [] ijk, int attribute)
+	private static final void addToCell(FileChannel fc, OEMMNode current, Map buffers, int [] ijk, int attribute)
 		throws IOException
 	{
 		assert current.counter <= fc.size();
 		//  With 20 millions of triangles, unbuffered output took 420s
 		//  and buffered output 180s (4K buffer cache)
-		ByteBuffer list = (ByteBuffer) current.extra;
+		ByteBuffer list = (ByteBuffer) buffers.get(current);
 		if (list == null)
 		{
 			//  Must be a multiple of 10!
-			current.extra = ByteBuffer.allocate(4000);
-			list = (ByteBuffer) current.extra;
+			list = ByteBuffer.allocate(4000);
+			buffers.put(current, list);
 			list.putLong(current.counter);
 			list.flip();
 			fc.write(list, current.counter);
@@ -355,7 +360,6 @@ public class RawStorage
 			offset += 8L + TRIANGLE_SIZE_DISPATCHED * (long) current.tn;
 			//  Reinitialize this counter for further processing
 			current.tn = 0;
-			current.extra = null;
 			return OK;
 		}
 		public long getOffset()
@@ -390,15 +394,17 @@ public class RawStorage
 	private static final class FlushBuffersProcedure extends TraversalProcedure
 	{
 		private FileChannel fc;
-		public FlushBuffersProcedure(FileChannel channel)
+		private Map buffers;
+		public FlushBuffersProcedure(FileChannel channel, Map m)
 		{
 			fc = channel;
+			buffers = m;
 		}
 		public final int action(OEMMNode current, int octant, int visit)
 		{
 			if (visit != LEAF)
 				return SKIPWALK;
-			ByteBuffer list = (ByteBuffer) current.extra;
+			ByteBuffer list = (ByteBuffer) buffers.get(current);
 			if (list == null)
 			{
 				list = ByteBuffer.allocate(8);

@@ -2,6 +2,8 @@ Wed Feb 14 17:28:19 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/oemm/RawOEMM.java: Replace own implementation
 	of linked lists by ArrayList.
+	* src/org/jcae/mesh/oemm/RawStorage.java: In dispatch(), use a map
+	for buffering values on octree cells instead of OEMMNode.extra.
 
 Wed Feb 14 14:50:37 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
