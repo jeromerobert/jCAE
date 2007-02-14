@@ -90,7 +90,8 @@ public class RawOEMM extends OEMM
 	private static final int SIZE_DELTA = 4;
 	private OEMMNode [] candidates = new OEMMNode[SIZE_DELTA*SIZE_DELTA];
 
-	protected transient OEMMNode [] head = new OEMMNode[MAXLEVEL];
+	// Array of doubly-linked lists of octree cellsm needed by aggregate()
+	private transient OEMMNode [] head = new OEMMNode[MAXLEVEL];
 	private transient OEMMNode [] tail = new OEMMNode[MAXLEVEL];
 
 	/**
@@ -127,23 +128,21 @@ public class RawOEMM extends OEMM
 		}
 	}
 	
-	private void readObject(java.io.ObjectInputStream s)
-	        throws java.io.IOException, ClassNotFoundException
-	{
-		s.defaultReadObject();
-		head = new OEMMNode[MAXLEVEL];
-		tail = new OEMMNode[MAXLEVEL];
-	}
-
-	protected void createRootNode(OEMMNode node)
+	// Called by OEMM.search()
+	protected final void createRootNode(OEMMNode node)
 	{
 		super.createRootNode(node);
+		head = new OEMMNode[MAXLEVEL];
+		tail = new OEMMNode[MAXLEVEL];
 		head[0] = root;
 		tail[0] = head[0];
 	}
 	
-	protected void postInsertNode(OEMMNode node, int level)
+	// Called by OEMM.search()
+	// Add the inserted node into doubly-linked list for current level.
+	protected final void postInsertNode(OEMMNode node, int level)
 	{
+		super.postInsertNode(node, level);
 		if (head[level] != null)
 		{
 			tail[level].extra = node;
