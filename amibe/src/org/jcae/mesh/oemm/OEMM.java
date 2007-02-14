@@ -76,7 +76,7 @@ public class OEMM implements Serializable
 		x0[3] = 1.0;
 	}
 	
-	public void reset(double [] bbox)
+	public final void reset(double [] bbox)
 	{
 		nr_levels = 0;
 		nr_cells = 0;
@@ -96,13 +96,6 @@ public class OEMM implements Serializable
 		xdelta *= 1.01;
 		x0[3] = ((double) gridSize) / xdelta;
 		logger.debug("Lower left corner : ("+x0[0]+", "+x0[1]+", "+x0[2]+")   Bounding box length: "+xdelta);
-	}
-
-	private void readObject(java.io.ObjectInputStream s)
-	        throws java.io.IOException, ClassNotFoundException
-	{
-		s.defaultReadObject();
-		leaves = new OEMMNode[nr_leaves];
 	}
 
 	public String getFileName()

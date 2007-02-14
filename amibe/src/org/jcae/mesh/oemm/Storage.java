@@ -57,6 +57,7 @@ public class Storage
 		{
 			ObjectInputStream os = new ObjectInputStream(new FileInputStream(new File(ret.getFileName())));
 			ret = (OEMM) os.readObject();
+			ret.leaves = new OEMMNode[ret.nr_leaves];
 			for (int i = 0; i < ret.nr_leaves; i++)
 			{
 				OEMMNode n = (OEMMNode) os.readObject();

@@ -109,6 +109,8 @@ public class RawOEMM extends OEMM
 			bbox[i+3] = umax[i];
 		}
 		reset(bbox);
+		head = new OEMMNode[MAXLEVEL];
+		tail = new OEMMNode[MAXLEVEL];
 		//  Adjust status, nr_levels and x0
 		status = OEMM_CREATED;
 		nr_levels = lmax;
@@ -125,20 +127,12 @@ public class RawOEMM extends OEMM
 		}
 	}
 	
-	public void reset(double [] bbox)
-	{
-		super.reset(bbox);
-		head = new OEMMNode[MAXLEVEL];
-		tail = new OEMMNode[MAXLEVEL];
-	}
-
 	private void readObject(java.io.ObjectInputStream s)
 	        throws java.io.IOException, ClassNotFoundException
 	{
 		s.defaultReadObject();
 		head = new OEMMNode[MAXLEVEL];
 		tail = new OEMMNode[MAXLEVEL];
-		leaves = new OEMMNode[nr_leaves];
 	}
 
 	protected void createRootNode(OEMMNode node)
