@@ -4,6 +4,7 @@ Wed Feb 14 17:28:19 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	of linked lists by ArrayList.
 	* src/org/jcae/mesh/oemm/RawStorage.java: In dispatch(), use a map
 	for buffering values on octree cells instead of OEMMNode.extra.
+	* src/org/jcae/mesh/oemm/OEMMNode.java: Remove 'extra' member.
 
 Wed Feb 14 14:50:37 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 

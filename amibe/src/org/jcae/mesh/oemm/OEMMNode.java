@@ -38,8 +38,6 @@ public class OEMMNode implements Serializable
 	public int vn = 0;
 	//  Child list
 	public transient OEMMNode[] child = new OEMMNode[8];
-	//  Linked list of nodes at the same level
-	public transient Object extra;
 	//  Parent node
 	//  TODO: The parent pointer can be replaced by a stack
 	//        if more room is needed.
