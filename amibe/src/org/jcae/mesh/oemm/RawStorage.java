@@ -619,7 +619,7 @@ public class RawStorage
 		}
 		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
-			if (current.parent == null && visit != LEAF)
+			if (current == oemm.root && visit != LEAF)
 				return SKIPWALK;
 			if (visit == POSTORDER)
 			{
