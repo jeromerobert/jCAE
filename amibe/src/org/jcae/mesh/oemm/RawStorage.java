@@ -566,7 +566,11 @@ public class RawStorage
 			//  Index external vertices
 			logger.debug("Index external vertices");
 			fis = new FileInputStream(ret.getFileName());
-			IndexExternalVerticesProcedure iev_proc = new IndexExternalVerticesProcedure(fis, outDir);
+			//  We have a handle on triangle soup, which will be
+			//  no more read, we can now set output diirectory
+			//  to its final value.
+			ret.setTopDir(outDir);
+			IndexExternalVerticesProcedure iev_proc = new IndexExternalVerticesProcedure(fis);
 			ret.walk(iev_proc);
 			fis.close();
 			
@@ -632,7 +636,6 @@ public class RawStorage
 			ijk[0] = current.i0;
 			ijk[1] = current.j0;
 			ijk[2] = current.k0;
-			current.topDir = outDir;
 			StringBuffer sbdir = new StringBuffer();
 			if (path.size() > 0)
 			{
@@ -679,7 +682,7 @@ public class RawStorage
 				// As bbt and bb have the same size, bbtI
 				// does not overflow.
 				// TODO: write directly into final "v" file.
-				FileChannel fcv = new FileOutputStream(new File(current.topDir, current.file+"i")).getChannel();
+				FileChannel fcv = new FileOutputStream(new File(outDir, current.file+"i")).getChannel();
 				bbt.clear();
 				IntBuffer bbtI = bbt.asIntBuffer();
 				for (int nblock = (remaining * TRIANGLE_SIZE_DISPATCHED) / bufferSize; nblock >= 0; --nblock)
@@ -782,7 +785,7 @@ public class RawStorage
 				oos.writeObject(current);
 				current.tn = tn;
 				
-				FileChannel fca = new FileOutputStream(new File(current.topDir, current.file+"a")).getChannel();
+				FileChannel fca = new FileOutputStream(new File(outDir, current.file+"a")).getChannel();
 				bb.clear();
 				//  Inner vertices of this node
 				int room = bb.capacity();
@@ -827,7 +830,7 @@ public class RawStorage
 		private PAVLTreeIntArrayDup [] vertices;
 		private boolean [] needed;
 		private int nr_ld_leaves = 0;
-		public IndexExternalVerticesProcedure(FileInputStream in, String dir)
+		public IndexExternalVerticesProcedure(FileInputStream in)
 		{
 			fc = in.getChannel();
 		}
@@ -861,7 +864,7 @@ public class RawStorage
 				if (needed[i] && vertices[i] == null)
 				{
 					nr_ld_leaves++;
-					vertices[i] = loadVerticesInAVLTreeDup(oemm.leaves[i]);
+					vertices[i] = loadVerticesInAVLTreeDup(oemm.topDir, oemm.leaves[i]);
 				}
 			}
 			
@@ -875,7 +878,7 @@ public class RawStorage
 				bbpos.flip();
 				long pos = bbpos.getLong();
 				assert pos == current.counter : ""+pos+" != "+current.counter;
-				FileChannel fct = new FileOutputStream(new File(current.topDir, current.file+"t")).getChannel();
+				FileChannel fct = new FileOutputStream(new File(oemm.topDir, current.file+"t")).getChannel();
 				bb.clear();
 				IntBuffer bbI = bb.asIntBuffer();
 				bbt.clear();
@@ -947,8 +950,8 @@ public class RawStorage
 			
 			try
 			{
-				FileChannel fci = new FileInputStream(new File(current.topDir, current.file+"i")).getChannel();
-				FileChannel fco = new FileOutputStream(new File(current.topDir, current.file+"v")).getChannel();
+				FileChannel fci = new FileInputStream(new File(oemm.topDir, current.file+"i")).getChannel();
+				FileChannel fco = new FileOutputStream(new File(oemm.topDir, current.file+"v")).getChannel();
 				bb.clear();
 				IntBuffer bbI = bb.asIntBuffer();
 				bbt.clear();
@@ -978,7 +981,7 @@ public class RawStorage
 				}
 				fci.close();
 				fco.close();
-				new File(current.topDir, current.file+"i").delete();
+				new File(oemm.topDir, current.file+"i").delete();
 			}
 			catch (IOException ex)
 			{
@@ -990,13 +993,13 @@ public class RawStorage
 		}
 	}
 	
-	private static PAVLTreeIntArrayDup loadVerticesInAVLTreeDup(OEMMNode current)
+	private static PAVLTreeIntArrayDup loadVerticesInAVLTreeDup(String outDir, OEMMNode current)
 	{
 		PAVLTreeIntArrayDup ret = new PAVLTreeIntArrayDup();
 		int [] ijk = new int[3];
 		try
 		{
-			FileChannel fc = new FileInputStream(new File(current.topDir, current.file+"i")).getChannel();
+			FileChannel fc = new FileInputStream(new File(outDir, current.file+"i")).getChannel();
 			int index = 0;
 			bb.clear();
 			IntBuffer bbI = bb.asIntBuffer();
@@ -1021,7 +1024,7 @@ public class RawStorage
 		}
 		catch (IOException ex)
 		{
-			logger.error("I/O error when reading indexed file "+current.topDir+File.separator+current.file+"i");
+			logger.error("I/O error when reading indexed file "+outDir+File.separator+current.file+"i");
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}

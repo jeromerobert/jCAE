@@ -44,8 +44,6 @@ public class OEMMNode implements Serializable
 	public transient OEMMNode parent;
 	//  Is this node a leaf?
 	public transient boolean isLeaf = true;
-	//  Top-level directory
-	public String topDir;
 	//  File containing vertices and triangles
 	public String file;
 	//  Counter
