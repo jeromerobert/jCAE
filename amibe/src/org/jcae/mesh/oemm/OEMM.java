@@ -137,6 +137,14 @@ public class OEMM implements Serializable
 		return (1 << (MAXLEVEL + 1 - depth));
 	}
 
+	protected final int cellSizeByHeight(int h)
+	{
+		if (h < depth)
+			return (1 << (MAXLEVEL + 1 - depth + h));
+		else
+			return gridSize;
+	}
+
 	public final void printInfos()
 	{
 		logger.info("Number of leaves: "+nr_leaves);
