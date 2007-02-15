@@ -4,6 +4,9 @@ Thu Feb 15 10:44:59 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	all methods, the OEMM instance which is walked through is passed as
 	first parameter.
 	* src/org/jcae/mesh/oemm/OEMMNode.java: Remove 'topDir' member.
+	* src/org/jcae/mesh/Mesher.java
+	  src/org/jcae/mesh/xmldata/MeshToSoupConvert.java: Fix handling of
+	org.jcae.mesh.Mesher.minFace and org.jcae.mesh.Mesher.maxFace options.
 
 Wed Feb 14 17:28:19 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 

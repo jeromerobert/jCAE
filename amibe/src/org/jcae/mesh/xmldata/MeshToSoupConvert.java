@@ -89,7 +89,9 @@ public class MeshToSoupConvert extends JCAEXMLData
 			iFace++;
 			if (numFace != 0 && iFace != numFace)
 				continue;
-			if ((minFace != 0 || maxFace != 0) && (iFace < minFace || iFace > maxFace))
+			if (minFace != 0 && iFace < minFace)
+				continue;
+			if (maxFace != 0 && iFace > maxFace)
 				continue;
 			String xmlFile = "jcae2d."+iFace;
 			m2dTo3D.computeRefs(xmlFile);
@@ -102,7 +104,9 @@ public class MeshToSoupConvert extends JCAEXMLData
 			iFace++;
 			if (numFace != 0 && iFace != numFace)
 				continue;
-			if ((minFace != 0 || maxFace != 0) && !(iFace >= minFace && iFace <= maxFace))
+			if (minFace != 0 && iFace < minFace)
+				continue;
+			if (maxFace != 0 && iFace > maxFace)
 				continue;
 			String xmlFile = "jcae2d."+iFace;
 			logger.info("Importing face "+iFace);
