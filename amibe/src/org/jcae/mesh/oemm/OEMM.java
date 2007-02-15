@@ -299,7 +299,7 @@ public class OEMM implements Serializable
 	 */
 	public final OEMMNode build(int [] ijk)
 	{
-		return search(minCellsize(), ijk, true, null);
+		return search(minCellSize(), ijk, true, null);
 	}
 	
 	/**
