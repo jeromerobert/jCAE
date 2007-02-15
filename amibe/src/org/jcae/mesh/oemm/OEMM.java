@@ -117,27 +117,27 @@ public class OEMM implements Serializable
 		logger.debug("Lower left corner : ("+x0[0]+", "+x0[1]+", "+x0[2]+")   Bounding box length: "+xdelta);
 	}
 
-	public String getFileName()
+	public final String getFileName()
 	{
 		return topDir+java.io.File.separator+"oemm";
 	}
 
-	public void setTopDir(String dir)
+	public final void setTopDir(String dir)
 	{
 		topDir = dir;
 	}
 	
-	public int getNumberOfLeaves()
+	public final int getNumberOfLeaves()
 	{
 		return nr_leaves;
 	}
 
-	protected int minCellsize()
+	protected final int minCellSize()
 	{
 		return (1 << (MAXLEVEL + 1 - depth));
 	}
 
-	public void printInfos()
+	public final void printInfos()
 	{
 		logger.info("Number of leaves: "+nr_leaves);
 		logger.info("Number of octants: "+nr_cells);
