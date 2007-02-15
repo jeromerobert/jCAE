@@ -34,7 +34,7 @@ public class RawOEMM extends OEMM
 {
 	private static Logger logger = Logger.getLogger(RawOEMM.class);	
 	
-	private static int [] neighborOffset = {
+	private static final int [] neighborOffset = {
 		//  Face neighbors
 		 1,  0,  0,
 		 0,  1,  0,
@@ -71,8 +71,8 @@ public class RawOEMM extends OEMM
 	//  Initialize other neighbor-finding related arrays
 	//  Adjacent nodes can be connected by faces (6), edges (12)
 	//  or vertices (8).
-	private static int [] neighborMask = new int[26];
-	private static int [] neighborValue = new int[26];
+	private static final int [] neighborMask = new int[26];
+	private static final int [] neighborValue = new int[26];
 	static {
 		for (int i = 0; i < neighborOffset.length/3; i++)
 		{
@@ -96,10 +96,9 @@ public class RawOEMM extends OEMM
 	// Maximum level difference between adjacent cells.
 	// With a difference of N, a node has at most (6*N*N + 12*N + 8)
 	// = 6*(N+1)*(N+1)+2 neighbors; we want this number to be less
-	// than 256 to store neighbors indices in byte arrays, and thus
-	// N <= 5.  In her paper, Cignoni takes N=3, but this can be changed.
+	// than 256 to store neighbor indices in byte arrays, and thus
+	// N <= 5.  In her paper, Cignoni takes N=3.
 	private static final int MAX_DELTA_LEVEL = 3;
-	private static OEMMNode [] candidates = new OEMMNode[(1+MAX_DELTA_LEVEL)*(1+MAX_DELTA_LEVEL)];
 
 	// Array of linked lists of octree cells, needed by aggregate()
 	private transient ArrayList [] head = new ArrayList[MAXLEVEL];
@@ -154,12 +153,24 @@ public class RawOEMM extends OEMM
 	 * @param max   maximal number of triangles in merged cells
 	 * @return total number of merged nodes
 	 */
-	public int aggregate(int max)
+	public final int aggregate(int max)
 	{
-		int minSize = (1+MAX_DELTA_LEVEL) * minCellSize();
 		// Compute total number of triangles in non-leaf nodes
 		SumTrianglesProcedure st_proc = new SumTrianglesProcedure();
 		walk(st_proc);
+
+		if (MAX_DELTA_LEVEL <= 0)
+			return 0;
+		// If a cell is smaller than minCellSize() << MAX_DELTA_LEVEL
+		// depth of adjacent nodes can not differ more than
+		// MAX_DELTA_LEVEL, and checkLevelNeighbors() can safely
+		// be skipped.  The cellSizeByHeight() method ensures that
+		// this variable does not overflow.
+		int minSize = cellSizeByHeight(MAX_DELTA_LEVEL+1);
+		// checkLevelNeighbors() needs a stack of OEMMNode instances,
+		// allocate it here.
+		OEMMNode [] nodeStack = new OEMMNode[4*MAXLEVEL];
+
 		int ret = 0;
 		for (int level = MAXLEVEL - 1; level >= 0; level--)
 		{
@@ -175,7 +186,7 @@ public class RawOEMM extends OEMM
 				//  This node is not a leaf and its children
 				//  can be merged if neighbors have a difference
 				//  level lower than MAX_DELTA_LEVEL
-				if (current.size <= minSize || checkLevelNeighbors(current))
+				if (current.size < minSize || checkLevelNeighbors(current, nodeStack))
 				{
 					for (int ind = 0; ind < 8; ind++)
 						if (current.child[ind] != null)
@@ -239,10 +250,11 @@ public class RawOEMM extends OEMM
 		return ret;
 	}
 	
-	private boolean checkLevelNeighbors(OEMMNode current)
+	private static final boolean checkLevelNeighbors(OEMMNode current, OEMMNode [] nodeStack)
 	{
-		int minSize = current.size / (1+MAX_DELTA_LEVEL);
-		int pos = 0;
+		// If an adjacent node has a size lower than minSize, children
+		// nodes must not be merged
+		int minSize = current.size >> MAX_DELTA_LEVEL;
 		logger.debug("Checking neighbors of "+current);
 		int [] ijk = new int[3];
 		for (int i = 0; i < neighborOffset.length/3; i++)
@@ -255,18 +267,20 @@ public class RawOEMM extends OEMM
 				continue;
 			assert n.size == current.size;
 			logger.debug("Node "+n+" contains "+Integer.toHexString(ijk[0])+" "+Integer.toHexString(ijk[1])+" " +Integer.toHexString(ijk[2]));
-			//  Check if children are not too deep in the tree.
-			pos = 0;
-			candidates[pos] = n;
+			//  We found the adjacent node with same size,
+			//  and have now to find all its children which are
+			//  adjacent to current node.
+			int pos = 0;
+			nodeStack[pos] = n;
 			while (pos >= 0)
 			{
-				OEMMNode c = candidates[pos];
+				OEMMNode c = nodeStack[pos];
 				pos--;
 				if (c.tn == 0)
 					continue;
 				if (c.isLeaf)
 				{
-					if (c.size <= minSize || MAX_DELTA_LEVEL <= 1)
+					if (c.size < minSize)
 					{
 						logger.debug("Found too deep neighbor: "+c+"    "+c.tn);
 						return false;
@@ -275,10 +289,12 @@ public class RawOEMM extends OEMM
 				}
 				for (int ind = 0; ind < 8; ind++)
 				{
+					// Only push children on the "right"
+					// side, at most 4 nodes are added.
 					if (c.child[ind] != null && (ind & neighborMask[i]) == neighborValue[i])
 					{
 						pos++;
-						candidates[pos] = c.child[ind];
+						nodeStack[pos] = c.child[ind];
 					}
 				}
 			}
@@ -286,7 +302,7 @@ public class RawOEMM extends OEMM
 		return true;
 	}
 	
-	private static class SumTrianglesProcedure extends TraversalProcedure
+	private static final class SumTrianglesProcedure extends TraversalProcedure
 	{
 		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
