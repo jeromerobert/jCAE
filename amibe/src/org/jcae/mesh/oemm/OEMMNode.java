@@ -28,6 +28,8 @@ import gnu.trove.TIntArrayList;
  */
 public class OEMMNode implements Serializable
 {
+	private static final long serialVersionUID = 1632948181488810349L;
+
 	//  Integer coordinates of the lower-left corner
 	public int i0, j0, k0;
 	//  Cell size (= 1 << (MAXLEVEL - level))
