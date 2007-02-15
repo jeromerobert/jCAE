@@ -69,6 +69,8 @@ public class RawOEMM extends OEMM
 		 1, -1, -1
 	};
 	//  Initialize other neighbor-finding related arrays
+	//  Adjacent nodes can be connected by faces (6), edges (12)
+	//  or vertices (8).
 	private static int [] neighborMask = new int[26];
 	private static int [] neighborValue = new int[26];
 	static {
@@ -90,10 +92,16 @@ public class RawOEMM extends OEMM
 			}
 		}
 	}
-	private static final int SIZE_DELTA = 4;
-	private OEMMNode [] candidates = new OEMMNode[SIZE_DELTA*SIZE_DELTA];
 
-	// Array of doubly-linked lists of octree cellsm needed by aggregate()
+	// Maximum level difference between adjacent cells.
+	// With a difference of N, a node has at most (6*N*N + 12*N + 8)
+	// = 6*(N+1)*(N+1)+2 neighbors; we want this number to be less
+	// than 256 to store neighbors indices in byte arrays, and thus
+	// N <= 5.  In her paper, Cignoni takes N=3, but this can be changed.
+	private static final int MAX_DELTA_LEVEL = 3;
+	private static OEMMNode [] candidates = new OEMMNode[(1+MAX_DELTA_LEVEL)*(1+MAX_DELTA_LEVEL)];
+
+	// Array of linked lists of octree cells, needed by aggregate()
 	private transient ArrayList [] head = new ArrayList[MAXLEVEL];
 
 	/**
@@ -127,7 +135,7 @@ public class RawOEMM extends OEMM
 	}
 	
 	// Called by OEMM.search()
-	// Add the inserted node into doubly-linked list for current level.
+	// Add the inserted node into a linked list for current level.
 	protected final void postInsertNode(OEMMNode node, int level)
 	{
 		super.postInsertNode(node, level);
@@ -136,12 +144,23 @@ public class RawOEMM extends OEMM
 		head[level].add(node);
 	}
 
-	public void aggregate(int max)
+	/**
+	 * Merge children when they contain few triangles.  Children are
+	 * merged if these two conditions are met: the total numbers of
+	 * triangles in merged nodes does not exceed a given threshold,
+	 * and levels of adjacent nodes do not differ more than MAX_DELTA_LEVEL.
+	 * This process is an optimization to have fewer octree nodes.  
+	 *
+	 * @param max   maximal number of triangles in merged cells
+	 * @return total number of merged nodes
+	 */
+	public int aggregate(int max)
 	{
-		int minSize = SIZE_DELTA * minCellsize();
+		int minSize = (1+MAX_DELTA_LEVEL) * minCellSize();
+		// Compute total number of triangles in non-leaf nodes
 		SumTrianglesProcedure st_proc = new SumTrianglesProcedure();
 		walk(st_proc);
-		int total = 0;
+		int ret = 0;
 		for (int level = MAXLEVEL - 1; level >= 0; level--)
 		{
 			if (head[level] == null)
@@ -155,8 +174,8 @@ public class RawOEMM extends OEMM
 					continue;
 				//  This node is not a leaf and its children
 				//  can be merged if neighbors have a difference
-				//  level lower than SIZE_DELTA
-				if (current.size <= minSize ||  checkLevelNeighbors(current))
+				//  level lower than MAX_DELTA_LEVEL
+				if (current.size <= minSize || checkLevelNeighbors(current))
 				{
 					for (int ind = 0; ind < 8; ind++)
 						if (current.child[ind] != null)
@@ -165,9 +184,10 @@ public class RawOEMM extends OEMM
 				}
 			}
 			logger.debug(" Merged octree cells: "+merged);
-			total += merged;
+			ret += merged;
 		}
-		logger.info("Merged octree cells: "+total);
+		logger.info("Merged octree cells: "+ret);
+		return ret;
 	}
 	
 	/**
@@ -178,7 +198,7 @@ public class RawOEMM extends OEMM
 	 * @param ijk      integer coordinates of an interior node
 	 * @return  the octant of the desired size containing this point.
 	 */
-	private OEMMNode searchFromNode(OEMMNode fromNode, int [] ijk)
+	private static final OEMMNode searchFromNode(OEMMNode fromNode, int [] ijk)
 	{
 		int i1 = ijk[0];
 		if (i1 < 0 || i1 > gridSize)
@@ -221,7 +241,7 @@ public class RawOEMM extends OEMM
 	
 	private boolean checkLevelNeighbors(OEMMNode current)
 	{
-		int minSize = current.size / SIZE_DELTA;
+		int minSize = current.size / (1+MAX_DELTA_LEVEL);
 		int pos = 0;
 		logger.debug("Checking neighbors of "+current);
 		int [] ijk = new int[3];
@@ -246,7 +266,7 @@ public class RawOEMM extends OEMM
 					continue;
 				if (c.isLeaf)
 				{
-					if (c.size <= minSize || SIZE_DELTA <= 1)
+					if (c.size <= minSize || MAX_DELTA_LEVEL <= 1)
 					{
 						logger.debug("Found too deep neighbor: "+c+"    "+c.tn);
 						return false;
