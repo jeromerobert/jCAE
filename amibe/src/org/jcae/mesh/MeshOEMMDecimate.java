@@ -45,21 +45,19 @@ public class MeshOEMMDecimate
 		int scale = Integer.valueOf(args[1]).intValue();
 		
 		OEMM oemm = Storage.readOEMMStructure(dir);
-		DecimateProcedure d_proc = new DecimateProcedure(oemm, scale);
+		DecimateProcedure d_proc = new DecimateProcedure(scale);
 		oemm.walk(d_proc);
 		// TODO: write mesh back into oemm
 	}
 
 	private static class DecimateProcedure extends TraversalProcedure
 	{
-		private OEMM oemm;
 		private int scale;
-		public DecimateProcedure(OEMM o, int s)
+		public DecimateProcedure(int s)
 		{
-			oemm = o;
 			scale = s;
 		}
-		public final int action(OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (visit != LEAF)
 				return SKIPWALK;
@@ -68,6 +66,7 @@ public class MeshOEMMDecimate
 			Mesh amesh = Storage.loadNodes(oemm, leaves);
 			HashMap options = new HashMap();
 			options.put("maxtriangles", ""+(current.tn / scale));
+			System.out.println("Processing octant nr. "+current.leafIndex);
 			new org.jcae.mesh.amibe.algos3d.DecimateHalfEdge(amesh, options).compute();
 			return OK;
 		}

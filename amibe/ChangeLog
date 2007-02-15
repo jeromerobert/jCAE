@@ -1,3 +1,9 @@
+Thu Feb 15 10:44:59 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/oemm/TraversalProcedure.java: Modify signature of
+	all methods, the OEMM instance which is walked through is passed as
+	first parameter.
+
 Wed Feb 14 17:28:19 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/oemm/RawOEMM.java: Replace own implementation

@@ -46,7 +46,7 @@ public abstract class TraversalProcedure
 	/**
 	 * Method called before traversing the OEMM.
 	 */
-	public void init()
+	public void init(OEMM oemm)
 	{
 		nrNodes = 0;
 		nrLeaves = 0;
@@ -55,7 +55,7 @@ public abstract class TraversalProcedure
 	/**
 	 * Method called after traversing the OEMM.
 	 */
-	public void finish()
+	public void finish(OEMM oemm)
 	{
 	}
 	
@@ -70,6 +70,7 @@ public abstract class TraversalProcedure
 	/**
 	 * Abstract class which has to be overridden by subclasses.
 	 * 
+	 * @param  o       OEMM structure
 	 * @param  c       the current node of the OEMM structure
 	 * @param  octant  the octant number in parent node
 	 * @param  visit   this parameter is set to <code>LEAF</code> if the current
@@ -80,14 +81,16 @@ public abstract class TraversalProcedure
 	 *          SKIPWALK   node was skipped, process normally
 	 *          OK         process normally
 	 */
-	public abstract int action(OEMMNode c, int octant, int visit);
+	public abstract int action(OEMM o, OEMMNode c, int octant, int visit);
 	
 	/**
 	 * This method is called when descending the tree.
 	 * 
-	 * @param  c   the current node of the OEMM structure
+	 * @param  o       OEMM structure
+	 * @param  c       the current node of the OEMM structure
+	 * @param  octant  the octant number in parent node
 	 */
-	public int preorder(OEMMNode c, int octant)
+	public int preorder(OEMM o, OEMMNode c, int octant)
 	{
 		int res = 0;
 		nrNodes++;
@@ -95,12 +98,12 @@ public abstract class TraversalProcedure
 		{
 			nrLeaves++;
 			logger.debug("Found LEAF: "+c);
-			res = action(c, octant, LEAF);
+			res = action(o, c, octant, LEAF);
 		}
 		else
 		{
 			logger.debug("Found PREORDER: "+c);
-			res = action(c, octant, PREORDER);
+			res = action(o, c, octant, PREORDER);
 		}
 		logger.debug("  Res; "+res);
 		return res;
@@ -110,12 +113,14 @@ public abstract class TraversalProcedure
 	 * This method is called when ascending the tree, which means that all children
 	 * have been traversed.
 	 * 
-	 * @param  c   the current node of the OEMM structure
+	 * @param  o       OEMM structure
+	 * @param  c       the current node of the OEMM structure
+	 * @param  octant  the octant number in parent node
 	 */
-	public int postorder(OEMMNode c, int octant)
+	public int postorder(OEMM o, OEMMNode c, int octant)
 	{
 		logger.debug("Found POSTORDER: "+c);
-		int res = action(c, octant, POSTORDER);
+		int res = action(o, c, octant, POSTORDER);
 		logger.debug("  Res; "+res);
 		return res;
 	}

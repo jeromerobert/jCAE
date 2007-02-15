@@ -352,7 +352,7 @@ public class RawStorage
 	private static final class ComputeOffsetProcedure extends TraversalProcedure
 	{
 		private long offset = 0L;
-		public final int action(OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (visit != LEAF)
 				return SKIPWALK;
@@ -366,9 +366,9 @@ public class RawStorage
 		{
 			return offset;
 		}
-		public void init()
+		public void init(OEMM oemm)
 		{
-			super.init();
+			super.init(oemm);
 			offset = 0L;
 		}
 	}
@@ -376,7 +376,7 @@ public class RawStorage
 	private static final class ComputeMinMaxIndicesProcedure extends TraversalProcedure
 	{
 		private int nrLeaves = 0;
-		public final int action(OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (visit == PREORDER)
 				current.minIndex = nrLeaves;
@@ -400,7 +400,7 @@ public class RawStorage
 			fc = channel;
 			buffers = m;
 		}
-		public final int action(OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (visit != LEAF)
 				return SKIPWALK;
@@ -456,7 +456,7 @@ public class RawStorage
 			for (int i = 0; i < 4; i++)
 				out.writeDouble(x0[i]);
 		}
-		public final int action(OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (visit != LEAF)
 				return SKIPWALK;
@@ -558,7 +558,7 @@ public class RawStorage
 			//  Index internal vertices
 			logger.debug("Index internal vertices");
 			FileInputStream fis = new FileInputStream(ret.getFileName());
-			IndexInternalVerticesProcedure iiv_proc = new IndexInternalVerticesProcedure(ret, fis, oos, outDir);
+			IndexInternalVerticesProcedure iiv_proc = new IndexInternalVerticesProcedure(fis, oos, outDir);
 			ret.walk(iiv_proc);
 			fis.close();
 			oos.close();
@@ -566,13 +566,13 @@ public class RawStorage
 			//  Index external vertices
 			logger.debug("Index external vertices");
 			fis = new FileInputStream(ret.getFileName());
-			IndexExternalVerticesProcedure iev_proc = new IndexExternalVerticesProcedure(ret, fis, outDir);
+			IndexExternalVerticesProcedure iev_proc = new IndexExternalVerticesProcedure(fis, outDir);
 			ret.walk(iev_proc);
 			fis.close();
 			
 			//  Transform vertex coordinates into doubles
 			logger.debug("Transform vertex coordinates into doubles");
-			ConvertVertexCoordinatesProcedure cvc_proc = new ConvertVertexCoordinatesProcedure(ret);
+			ConvertVertexCoordinatesProcedure cvc_proc = new ConvertVertexCoordinatesProcedure();
 			ret.walk(cvc_proc);
 			
 			//ShowIndexedNodesProcedure debug = new ShowIndexedNodesProcedure();
@@ -595,7 +595,6 @@ public class RawStorage
 	
 	private static class IndexInternalVerticesProcedure extends TraversalProcedure
 	{
-		private OEMM oemm;
 		private FileChannel fc;
 		private ObjectOutputStream oos;
 		private String outDir;
@@ -603,15 +602,18 @@ public class RawStorage
 		private ArrayList path = new ArrayList();
 		private int [] ijk = new int[3];
 		private int room = 0;
-		public IndexInternalVerticesProcedure(OEMM o, FileInputStream in, ObjectOutputStream headerOut, String dir)
+		public IndexInternalVerticesProcedure(FileInputStream in, ObjectOutputStream headerOut, String dir)
 		{
-			oemm = o;
 			fc = in.getChannel();
 			outDir = dir;
 			oos = headerOut;
+		}
+		public void init(OEMM oemm)
+		{
+			super.init(oemm);
 			room = ((1 << 31) - 3*oemm.root.tn) / oemm.getNumberOfLeaves();
 		}
-		public final int action(OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (current.parent == null && visit != LEAF)
 				return SKIPWALK;
@@ -820,20 +822,21 @@ public class RawStorage
 	
 	private static class IndexExternalVerticesProcedure extends TraversalProcedure
 	{
-		private OEMM oemm;
 		private FileChannel fc;
 		private int [] ijk = new int[3];
 		private PAVLTreeIntArrayDup [] vertices;
 		private boolean [] needed;
 		private int nr_ld_leaves = 0;
-		public IndexExternalVerticesProcedure(OEMM o, FileInputStream in, String dir)
+		public IndexExternalVerticesProcedure(FileInputStream in, String dir)
 		{
-			oemm = o;
 			fc = in.getChannel();
+		}
+		public void init(OEMM oemm)
+		{
 			vertices = new PAVLTreeIntArrayDup[oemm.getNumberOfLeaves()];
 			needed = new boolean[vertices.length];
 		}
-		public final int action(OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (visit != LEAF)
 				return SKIPWALK;
@@ -934,14 +937,9 @@ public class RawStorage
 	
 	private static class ConvertVertexCoordinatesProcedure extends TraversalProcedure
 	{
-		private OEMM oemm;
 		private int [] ijk = new int[3];
 		private double [] xyz = new double[3];
-		public ConvertVertexCoordinatesProcedure(OEMM o)
-		{
-			oemm = o;
-		}
-		public final int action(OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (visit != LEAF)
 				return SKIPWALK;

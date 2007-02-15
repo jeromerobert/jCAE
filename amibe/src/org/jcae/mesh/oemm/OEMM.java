@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -189,10 +190,10 @@ public class OEMM implements Serializable
 		posStack[l] = 0;
 		OEMMNode [] octreeStack = new OEMMNode[depth];
 		octreeStack[l] = root;
-		proc.init();
+		proc.init(this);
 		while (true)
 		{
-			int res = proc.preorder(octreeStack[l], posStack[l]);
+			int res = proc.preorder(this, octreeStack[l], posStack[l]);
 			if (res == TraversalProcedure.ABORT)
 				return false;
 			if (!octreeStack[l].isLeaf && (res == TraversalProcedure.OK || res == TraversalProcedure.SKIPWALK))
@@ -245,7 +246,7 @@ public class OEMM implements Serializable
 						s <<= 1;
 						l--;
 						logger.debug("Found POSTORDER: "+Integer.toHexString(s)+" "+Integer.toHexString(i0)+" "+Integer.toHexString(j0)+" "+Integer.toHexString(k0));
-						res = proc.postorder(octreeStack[l], posStack[l]);
+						res = proc.postorder(this, octreeStack[l], posStack[l]);
 						logger.debug("  Res; "+res);
 					}
 					else
@@ -264,7 +265,7 @@ public class OEMM implements Serializable
 		assert i0 == 0;
 		assert j0 == 0;
 		assert k0 == 0;
-		proc.finish();
+		proc.finish(this);
 		return true;
 	}
 	
@@ -441,7 +442,7 @@ public class OEMM implements Serializable
 			else
 				coord = new double[72*nC];
 		}
-		public final int action(OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (visit != PREORDER && visit != LEAF)
 				return SKIPWALK;

@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -267,7 +268,7 @@ public class RawOEMM extends OEMM
 	
 	private static class SumTrianglesProcedure extends TraversalProcedure
 	{
-		public final int action(OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (current.isLeaf)
 				return OK;

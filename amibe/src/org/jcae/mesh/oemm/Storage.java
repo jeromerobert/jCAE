@@ -100,7 +100,7 @@ public class Storage
 		TIntObjectHashMap vertMap = new TIntObjectHashMap();
 		ReadVerticesProcedure rv_proc = new ReadVerticesProcedure(ret, vertMap, leaves);
 		oemm.walk(rv_proc);
-		ReadTrianglesProcedure rt_proc = new ReadTrianglesProcedure(oemm, vertMap, leaves, ret);
+		ReadTrianglesProcedure rt_proc = new ReadTrianglesProcedure(vertMap, leaves, ret);
 		oemm.walk(rt_proc);
 		
 		int nrv = 0;
@@ -158,7 +158,7 @@ public class Storage
 			vertMap = map;
 			leaves = set;
 		}
-		public final int action(OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (visit != LEAF || !leaves.contains(current.leafIndex))
 				return SKIPWALK;
@@ -222,18 +222,16 @@ public class Storage
 	
 	private static class ReadTrianglesProcedure extends TraversalProcedure
 	{
-		private OEMM oemm;
 		private TIntObjectHashMap vertMap;
 		private TIntHashSet leaves;
 		private Mesh mesh;
-		public ReadTrianglesProcedure(OEMM o, TIntObjectHashMap map, TIntHashSet set, Mesh m)
+		public ReadTrianglesProcedure(TIntObjectHashMap map, TIntHashSet set, Mesh m)
 		{
-			oemm = o;
 			vertMap = map;
 			leaves = set;
 			mesh = m;
 		}
-		public final int action(OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (visit != LEAF || !leaves.contains(current.leafIndex))
 				return SKIPWALK;
