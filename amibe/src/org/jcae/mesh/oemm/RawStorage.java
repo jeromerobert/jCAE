@@ -570,7 +570,7 @@ public class RawStorage
 			//  We have a handle on triangle soup, which will be
 			//  no more read, we can now set output diirectory
 			//  to its final value.
-			ret.setTopDir(outDir);
+			ret.setDirectory(outDir);
 			IndexExternalVerticesProcedure iev_proc = new IndexExternalVerticesProcedure(fis);
 			ret.walk(iev_proc);
 			fis.close();

@@ -112,8 +112,6 @@ public class Aggregate
 	public final static int compute(OEMM oemm, int max)
 	{
 		logger.info("Merge cells, delta="+MAX_DELTA_LEVEL+" triangles="+max);
-		if (MAX_DELTA_LEVEL <= 0)
-			return 0;
 
 		// Array of linked lists of non-leaf octree cells
 		ArrayList [] nonLeaves = new ArrayList[OEMM.MAXLEVEL];
@@ -126,6 +124,11 @@ public class Aggregate
 		// depth a linked list of non-leaf nodes
 		PreProcessOEMM st_proc = new PreProcessOEMM(nonLeaves);
 		oemm.walk(st_proc);
+
+		// Exit only after PreProcessOEMM has been called, we have to
+		// compute oemm.root.tn
+		if (MAX_DELTA_LEVEL <= 0)
+			return 0;
 
 		// If a cell is smaller than minCellSize() << MAX_DELTA_LEVEL
 		// depth of adjacent nodes can not differ more than
