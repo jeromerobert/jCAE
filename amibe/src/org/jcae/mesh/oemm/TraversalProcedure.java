@@ -38,7 +38,6 @@ public abstract class TraversalProcedure
 	public static final int OK  = 0;
 	public static final int ABORT = 1;
 	public static final int SKIPCHILD = 2;
-	public static final int SKIPWALK = 4;
 	
 	private int nrNodes = 0;
 	private int nrLeaves = 0;
@@ -78,7 +77,6 @@ public abstract class TraversalProcedure
 	 *                 yet been traversed, and <code>POSTOREDER</code> otherwise.
 	 * @return  ABORT      exit from {@link OEMM#walk} immediately
 	 *          SKIPCHILD  skip current cell (ie do not process its children)
-	 *          SKIPWALK   node was skipped, process normally
 	 *          OK         process normally
 	 */
 	public abstract int action(OEMM o, OEMMNode c, int octant, int visit);

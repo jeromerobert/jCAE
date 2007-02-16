@@ -357,7 +357,7 @@ public class RawStorage
 		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (visit != LEAF)
-				return SKIPWALK;
+				return OK;
 			current.counter = offset;
 			offset += 8L + TRIANGLE_SIZE_DISPATCHED * (long) current.tn;
 			//  Reinitialize this counter for further processing
@@ -405,7 +405,7 @@ public class RawStorage
 		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (visit != LEAF)
-				return SKIPWALK;
+				return OK;
 			ByteBuffer list = (ByteBuffer) buffers.get(current);
 			if (list == null)
 			{
@@ -461,7 +461,7 @@ public class RawStorage
 		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (visit != LEAF)
-				return SKIPWALK;
+				return OK;
 			try
 			{
 				//  Offset in data file
@@ -621,16 +621,16 @@ public class RawStorage
 		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (current == oemm.root && visit != LEAF)
-				return SKIPWALK;
+				return OK;
 			if (visit == POSTORDER)
 			{
 				path.remove(path.size() - 1);
-				return SKIPWALK;
+				return OK;
 			}
 			else if (visit == PREORDER)
 			{
 				path.add(""+octant);
-				return SKIPWALK;
+				return OK;
 			}
 			
 			if (logger.isDebugEnabled())
@@ -844,7 +844,7 @@ public class RawStorage
 		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (visit != LEAF)
-				return SKIPWALK;
+				return OK;
 			if (logger.isDebugEnabled())
 				logger.debug("Indexing external vertices of node "+(current.leafIndex+1)+"/"+oemm.getNumberOfLeaves());
 			// Only adjacent leaves are needed, drop others
@@ -948,7 +948,7 @@ public class RawStorage
 		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (visit != LEAF)
-				return SKIPWALK;
+				return OK;
 			if (logger.isDebugEnabled())
 				logger.debug("Converting coordinates of node "+(current.leafIndex+1)+"/"+oemm.getNumberOfLeaves());
 			

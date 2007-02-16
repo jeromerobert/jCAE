@@ -194,7 +194,7 @@ public class OEMM implements Serializable
 			int res = proc.preorder(this, octreeStack[l], posStack[l]);
 			if (res == TraversalProcedure.ABORT)
 				return false;
-			if (!octreeStack[l].isLeaf && (res == TraversalProcedure.OK || res == TraversalProcedure.SKIPWALK))
+			if (!octreeStack[l].isLeaf && res == TraversalProcedure.OK)
 			{
 				s >>= 1;
 				assert s > 0;
@@ -494,7 +494,7 @@ public class OEMM implements Serializable
 		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (visit != PREORDER && visit != LEAF)
-				return SKIPWALK;
+				return OK;
 			if (onlyLeaves && !current.isLeaf)
 				return OK;
 			int [] ii = { current.i0, current.j0, current.k0 };

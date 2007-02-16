@@ -160,7 +160,7 @@ public class Storage
 		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (visit != LEAF || !leaves.contains(current.leafIndex))
-				return SKIPWALK;
+				return OK;
 			try
 			{
 				logger.debug("Reading vertices from "+oemm.topDir+File.separator+current.file+"v");
@@ -233,7 +233,7 @@ public class Storage
 		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (visit != LEAF || !leaves.contains(current.leafIndex))
-				return SKIPWALK;
+				return OK;
 			try
 			{
 				logger.debug("Reading triangles from "+oemm.topDir+File.separator+current.file+"t");

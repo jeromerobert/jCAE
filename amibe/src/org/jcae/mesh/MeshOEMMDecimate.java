@@ -60,7 +60,7 @@ public class MeshOEMMDecimate
 		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
 			if (visit != LEAF)
-				return SKIPWALK;
+				return OK;
 			TIntHashSet leaves = new TIntHashSet();
 			leaves.add(current.leafIndex);
 			Mesh amesh = Storage.loadNodes(oemm, leaves);
