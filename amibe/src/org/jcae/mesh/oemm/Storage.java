@@ -69,7 +69,7 @@ public class Storage
 				ret.leaves[i] = n;
 			}
 			os.close();
-			ret.setTopDir(dir);
+			ret.setDirectory(dir);
 			ret.printInfos();
 		}
 		catch (IOException ex)
@@ -163,11 +163,11 @@ public class Storage
 				return OK;
 			try
 			{
-				logger.debug("Reading vertices from "+oemm.getTopDir()+File.separator+current.file+"v");
+				logger.debug("Reading vertices from "+oemm.getDirectory()+File.separator+current.file+"v");
 				Vertex [] vert = new Vertex[current.vn];
 				double [] xyz = new double[3];
-				FileChannel fc = new FileInputStream(new File(oemm.getTopDir(), current.file+"v")).getChannel();
-				DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(oemm.getTopDir(), current.file+"a"))));
+				FileChannel fc = new FileInputStream(new File(oemm.getDirectory(), current.file+"v")).getChannel();
+				DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(oemm.getDirectory(), current.file+"a"))));
 				bb.clear();
 				DoubleBuffer bbD = bb.asDoubleBuffer();
 				int remaining = current.vn;
@@ -211,7 +211,7 @@ public class Storage
 			}
 			catch (IOException ex)
 			{
-				logger.error("I/O error when reading file "+oemm.getTopDir()+File.separator+current.file+"i");
+				logger.error("I/O error when reading file "+oemm.getDirectory()+File.separator+current.file+"i");
 				ex.printStackTrace();
 				throw new RuntimeException(ex);
 			}
@@ -236,8 +236,8 @@ public class Storage
 				return OK;
 			try
 			{
-				logger.debug("Reading triangles from "+oemm.getTopDir()+File.separator+current.file+"t");
-				FileChannel fc = new FileInputStream(new File(oemm.getTopDir(), current.file+"t")).getChannel();
+				logger.debug("Reading triangles from "+oemm.getDirectory()+File.separator+current.file+"t");
+				FileChannel fc = new FileInputStream(new File(oemm.getDirectory(), current.file+"t")).getChannel();
 				Vertex [] vert = new Vertex[3];
 				int [] leaf = new int[3];
 				int [] pointIndex = new int[3];
@@ -291,7 +291,7 @@ public class Storage
 			}
 			catch (IOException ex)
 			{
-				logger.error("I/O error when reading indexed file "+oemm.getTopDir()+File.separator+current.file+"t");
+				logger.error("I/O error when reading indexed file "+oemm.getDirectory()+File.separator+current.file+"t");
 				ex.printStackTrace();
 				throw new RuntimeException(ex);
 			}

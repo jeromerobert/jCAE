@@ -111,12 +111,12 @@ public class OEMM implements Serializable
 		logger.debug("Lower left corner : ("+x0[0]+", "+x0[1]+", "+x0[2]+")   Bounding box length: "+xdelta);
 	}
 
-	public final String getTopDir()
+	public final String getDirectory()
 	{
 		return topDir;
 	}
 	
-	public final void setTopDir(String dir)
+	public final void setDirectory(String dir)
 	{
 		topDir = dir;
 	}
