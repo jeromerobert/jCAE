@@ -867,7 +867,7 @@ public class RawStorage
 				if (needed[i] && vertices[i] == null)
 				{
 					nr_ld_leaves++;
-					vertices[i] = loadVerticesInAVLTreeDup(oemm.topDir, oemm.leaves[i]);
+					vertices[i] = loadVerticesInAVLTreeDup(oemm.getTopDir(), oemm.leaves[i]);
 				}
 			}
 			
@@ -881,7 +881,7 @@ public class RawStorage
 				bbpos.flip();
 				long pos = bbpos.getLong();
 				assert pos == current.counter : ""+pos+" != "+current.counter;
-				FileChannel fct = new FileOutputStream(new File(oemm.topDir, current.file+"t")).getChannel();
+				FileChannel fct = new FileOutputStream(new File(oemm.getTopDir(), current.file+"t")).getChannel();
 				bb.clear();
 				IntBuffer bbI = bb.asIntBuffer();
 				bbt.clear();
@@ -954,8 +954,8 @@ public class RawStorage
 			
 			try
 			{
-				FileChannel fci = new FileInputStream(new File(oemm.topDir, current.file+"i")).getChannel();
-				FileChannel fco = new FileOutputStream(new File(oemm.topDir, current.file+"v")).getChannel();
+				FileChannel fci = new FileInputStream(new File(oemm.getTopDir(), current.file+"i")).getChannel();
+				FileChannel fco = new FileOutputStream(new File(oemm.getTopDir(), current.file+"v")).getChannel();
 				bb.clear();
 				IntBuffer bbI = bb.asIntBuffer();
 				bbt.clear();
@@ -985,7 +985,7 @@ public class RawStorage
 				}
 				fci.close();
 				fco.close();
-				new File(oemm.topDir, current.file+"i").delete();
+				new File(oemm.getTopDir(), current.file+"i").delete();
 			}
 			catch (IOException ex)
 			{

@@ -45,7 +45,7 @@ public class OEMM implements Serializable
 	public static final int MAXLEVEL = 30;
 	private static final int gridSize = 1 << MAXLEVEL;
 	
-	protected transient String topDir;
+	private transient String topDir;
 	private transient int nr_leaves = 0;
 	private transient int nr_cells = 0;
 	private transient int depth = 0;
@@ -111,16 +111,21 @@ public class OEMM implements Serializable
 		logger.debug("Lower left corner : ("+x0[0]+", "+x0[1]+", "+x0[2]+")   Bounding box length: "+xdelta);
 	}
 
-	public final String getFileName()
+	public final String getTopDir()
 	{
-		return topDir+java.io.File.separator+"oemm";
+		return topDir;
 	}
-
+	
 	public final void setTopDir(String dir)
 	{
 		topDir = dir;
 	}
 	
+	public final String getFileName()
+	{
+		return topDir+java.io.File.separator+"oemm";
+	}
+
 	public final int getNumberOfLeaves()
 	{
 		return nr_leaves;
