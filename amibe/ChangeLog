@@ -4,6 +4,9 @@ Fri Feb 16 10:57:33 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	replaced by a static method Aggregate.compute() which can be invoked
 	on an OEMM.
 	* src/org/jcae/mesh/oemm/RawOEMM.java: Removed.
+	* src/org/jcae/mesh/oemm/OEMM.java: Remove 'status' member.
+	* src/org/jcae/mesh/oemm/RawStorage.java: Let countTriangles() return
+	a boolean to tell if an error occurred.
 
 Thu Feb 15 10:44:59 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 

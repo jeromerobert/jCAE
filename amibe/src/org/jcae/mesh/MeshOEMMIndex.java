@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -42,15 +43,14 @@ public class MeshOEMMIndex
 		final OEMM oemm = new OEMM(lmax);
 		oemm.setBoundingBox(bbox);
 		String soupFile = soupDir+File.separator+"soup";
-		RawStorage.countTriangles(oemm, soupFile);
-		if (oemm.status != OEMM.OEMM_INITIALIZED)
+		if (!RawStorage.countTriangles(oemm, soupFile))
 		{
 			// Bounding box was invalid and has been fixed
 			// in RawStorage.countTriangles(), we need to
 			// count triangles against the new OEMM.
 			logger.info("Invalid bounding box has been detected");
-			RawStorage.countTriangles(oemm, soupFile);
-			assert oemm.status == OEMM.OEMM_INITIALIZED;
+			if (!RawStorage.countTriangles(oemm, soupFile))
+				throw new RuntimeException("Fatal error... aborting");
 		}
 		Aggregate.compute(oemm, triangles_max);
 		RawStorage.dispatch(oemm, soupFile, "dispatched", "dispatched.data");

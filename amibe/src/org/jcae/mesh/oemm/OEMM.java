@@ -45,12 +45,7 @@ public class OEMM implements Serializable
 	public static final int MAXLEVEL = 30;
 	protected static final int gridSize = 1 << MAXLEVEL;
 	
-	public static final int OEMM_DUMMY = 0;
-	public static final int OEMM_CREATED = 1;
-	public static final int OEMM_INITIALIZED = 2;
-	
 	protected transient String topDir;
-	public int status;
 	private transient int nr_leaves = 0;
 	private transient int nr_cells = 0;
 	private transient int depth = 0;
@@ -69,7 +64,6 @@ public class OEMM implements Serializable
 	public OEMM(String dir)
 	{
 		topDir = dir;
-		status = OEMM_DUMMY;
 	}
 	
 	/**
@@ -88,7 +82,6 @@ public class OEMM implements Serializable
 			logger.error("Max. level too low");
 			depth = 1;
 		}
-		status = OEMM_CREATED;
 	}
 	
 	public final void clearNodes()
@@ -185,11 +178,6 @@ public class OEMM implements Serializable
 	public final boolean walk(TraversalProcedure proc)
 	{
 		logger.debug("walk: init "+proc.getClass().getName());
-		if (status < OEMM_INITIALIZED)
-		{
-			logger.error("The OEMM must be filled in first!... Aborting");
-			System.exit(9);
-		}
 		int s = gridSize;
 		int l = 0;
 		int i0 = 0;

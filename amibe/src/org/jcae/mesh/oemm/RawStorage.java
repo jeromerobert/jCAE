@@ -130,13 +130,15 @@ public class RawStorage
 	 * 
 	 * @param  tree  an OEMM
 	 * @param  soupFile  triangle soup file name
+	 * @return <code>false</code> if a vertex was found outside of octree
+	 *         bounds, <code>true</code> otherwise.
 	 */
-	public static void countTriangles(OEMM tree, String soupFile)
+	public static boolean countTriangles(OEMM tree, String soupFile)
 	{
-		if (tree == null || tree.status != OEMM.OEMM_CREATED)
+		if (tree == null)
 		{
 			logger.error("OEMM not created!");
-			return;
+			return false;
 		}
 		logger.info("Count triangles");
 		logger.debug("Reading "+soupFile+" and count triangles");
@@ -149,10 +151,10 @@ public class RawStorage
 		    bbox[2] < tree.x0[2] || bbox[2] > tree.x0[2]+tree.xdelta)
 		{
 			tree.setBoundingBox(bbox);
-			return;
+			return false;
 		}
-		tree.status = OEMM.OEMM_INITIALIZED;
 		tree.printInfos();
+		return true;
 	}
 	
 	private static final class CountTriangles implements SoupReaderInterface
@@ -223,7 +225,7 @@ public class RawStorage
 	 */
 	public static final void dispatch(OEMM tree, String soupFile, String structFile, String dataFile)
 	{
-		if (tree == null || tree.status < OEMM.OEMM_INITIALIZED)
+		if (tree == null)
 		{
 			logger.error("OEMM not initialized!");
 			return;
@@ -533,7 +535,6 @@ public class RawStorage
 		{
 			logger.error("I/O error when reading file "+file);
 		}
-		ret.status = OEMM.OEMM_INITIALIZED;
 		//  Adjust minIndex and maxIndex values
 		ComputeMinMaxIndicesProcedure cmmi_proc = new ComputeMinMaxIndicesProcedure();
 		ret.walk(cmmi_proc);

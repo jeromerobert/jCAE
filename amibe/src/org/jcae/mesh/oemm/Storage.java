@@ -70,7 +70,6 @@ public class Storage
 			}
 			os.close();
 			ret.setTopDir(dir);
-			ret.status = OEMM.OEMM_INITIALIZED;
 			ret.printInfos();
 		}
 		catch (IOException ex)
