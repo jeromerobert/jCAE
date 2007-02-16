@@ -111,11 +111,14 @@ public class Aggregate
 	 */
 	public final static int compute(OEMM oemm, int max)
 	{
+		logger.info("Merge cells, delta="+MAX_DELTA_LEVEL+" triangles="+max);
 		if (MAX_DELTA_LEVEL <= 0)
 			return 0;
 
 		// Array of linked lists of non-leaf octree cells
 		ArrayList [] nonLeaves = new ArrayList[OEMM.MAXLEVEL];
+		for (int i = 0; i < nonLeaves.length; i++)
+			nonLeaves[i] = new ArrayList();
 		// A bottom-up traversal is the most efficient way to
 		// merge nodes when both conditions above are met.
 		// We first walk through the whole tree to compute total
@@ -135,10 +138,8 @@ public class Aggregate
 		OEMMNode [] nodeStack = new OEMMNode[4*OEMM.MAXLEVEL];
 
 		int ret = 0;
-		for (int level = OEMM.MAXLEVEL - 1; level >= 0; level--)
+		for (int level = nonLeaves.length - 1; level >= 0; level--)
 		{
-			if (nonLeaves[level] == null)
-				continue;
 			int merged = 0;
 			logger.debug(" Checking neighbors at level "+level);
 			for (Iterator it = nonLeaves[level].iterator(); it.hasNext(); )
@@ -162,7 +163,7 @@ public class Aggregate
 			logger.debug(" Merged octree cells: "+merged);
 			ret += merged;
 		}
-		logger.info("Merged octree cells: "+ret);
+		logger.info("Octree cells merged: "+ret);
 		return ret;
 	}
 	
@@ -224,7 +225,6 @@ public class Aggregate
 	private static final class PreProcessOEMM extends TraversalProcedure
 	{
 		private int depth = 0;
-		private int maxDepth = 0;
 		private final ArrayList [] nonLeaves;
 		public PreProcessOEMM(ArrayList [] a)
 		{
@@ -235,12 +235,8 @@ public class Aggregate
 			if (visit == PREORDER)
 			{
 				current.tn = 0;
-				if (nonLeaves[depth] == null)
-					nonLeaves[depth] = new ArrayList();
 				nonLeaves[depth].add(current);
 				depth++;
-				if (depth > maxDepth)
-					maxDepth = depth;
 			}
 			else if (visit == POSTORDER)
 			{
