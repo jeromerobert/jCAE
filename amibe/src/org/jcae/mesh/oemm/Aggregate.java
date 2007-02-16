@@ -171,7 +171,8 @@ public class Aggregate
 		// If an adjacent node has a size lower than minSize, children
 		// nodes must not be merged
 		int minSize = current.size >> MAX_DELTA_LEVEL;
-		logger.debug("Checking neighbors of "+current);
+		if (logger.isDebugEnabled())
+			logger.debug("Checking neighbors of "+current);
 		int [] ijk = new int[3];
 		for (int i = 0; i < neighborOffset.length/3; i++)
 		{
@@ -182,7 +183,8 @@ public class Aggregate
 			if (n == null || n.isLeaf)
 				continue;
 			assert n.size == current.size;
-			logger.debug("Node "+n+" contains "+Integer.toHexString(ijk[0])+" "+Integer.toHexString(ijk[1])+" " +Integer.toHexString(ijk[2]));
+			if (logger.isDebugEnabled())
+				logger.debug("Node "+n+" contains "+Integer.toHexString(ijk[0])+" "+Integer.toHexString(ijk[1])+" " +Integer.toHexString(ijk[2]));
 			//  We found the adjacent node with same size,
 			//  and have now to find all its children which are
 			//  adjacent to current node.
@@ -198,7 +200,8 @@ public class Aggregate
 				{
 					if (c.size < minSize)
 					{
-						logger.debug("Found too deep neighbor: "+c+"    "+c.tn);
+						if (logger.isDebugEnabled())
+							logger.debug("Found too deep neighbor: "+c+"    "+c.tn);
 						return false;
 					}
 					continue;

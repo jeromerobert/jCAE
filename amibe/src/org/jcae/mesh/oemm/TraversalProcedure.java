@@ -97,12 +97,14 @@ public abstract class TraversalProcedure
 		if (c.isLeaf)
 		{
 			nrLeaves++;
-			logger.debug("Found LEAF: "+c);
+			if (logger.isDebugEnabled())
+				logger.debug("Found LEAF: "+c);
 			res = action(o, c, octant, LEAF);
 		}
 		else
 		{
-			logger.debug("Found PREORDER: "+c);
+			if (logger.isDebugEnabled())
+				logger.debug("Found PREORDER: "+c);
 			res = action(o, c, octant, PREORDER);
 		}
 		logger.debug("  Res; "+res);
@@ -119,7 +121,8 @@ public abstract class TraversalProcedure
 	 */
 	public int postorder(OEMM o, OEMMNode c, int octant)
 	{
-		logger.debug("Found POSTORDER: "+c);
+		if (logger.isDebugEnabled())
+			logger.debug("Found POSTORDER: "+c);
 		int res = action(o, c, octant, POSTORDER);
 		logger.debug("  Res; "+res);
 		return res;

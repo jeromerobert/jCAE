@@ -633,7 +633,8 @@ public class RawStorage
 				return SKIPWALK;
 			}
 			
-			logger.debug("Indexing internal vertices of node "+(current.leafIndex+1)+"/"+oemm.getNumberOfLeaves());
+			if (logger.isDebugEnabled())
+				logger.debug("Indexing internal vertices of node "+(current.leafIndex+1)+"/"+oemm.getNumberOfLeaves());
 			ijk[0] = current.i0;
 			ijk[1] = current.j0;
 			ijk[2] = current.k0;
@@ -844,7 +845,8 @@ public class RawStorage
 		{
 			if (visit != LEAF)
 				return SKIPWALK;
-			logger.debug("Indexing external vertices of node "+(current.leafIndex+1)+"/"+oemm.getNumberOfLeaves());
+			if (logger.isDebugEnabled())
+				logger.debug("Indexing external vertices of node "+(current.leafIndex+1)+"/"+oemm.getNumberOfLeaves());
 			// Only adjacent leaves are needed, drop others
 			// to free memory.
 			// TODO: Add a better mamory management system.
@@ -947,7 +949,8 @@ public class RawStorage
 		{
 			if (visit != LEAF)
 				return SKIPWALK;
-			logger.debug("Converting coordinates of node "+(current.leafIndex+1)+"/"+oemm.getNumberOfLeaves());
+			if (logger.isDebugEnabled())
+				logger.debug("Converting coordinates of node "+(current.leafIndex+1)+"/"+oemm.getNumberOfLeaves());
 			
 			try
 			{

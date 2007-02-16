@@ -177,7 +177,8 @@ public class OEMM implements Serializable
 	 */
 	public final boolean walk(TraversalProcedure proc)
 	{
-		logger.debug("walk: init "+proc.getClass().getName());
+		if (logger.isDebugEnabled())
+			logger.debug("walk: init "+proc.getClass().getName());
 		int s = gridSize;
 		int l = 0;
 		int i0 = 0;
@@ -242,7 +243,8 @@ public class OEMM implements Serializable
 					{
 						s <<= 1;
 						l--;
-						logger.debug("Found POSTORDER: "+Integer.toHexString(s)+" "+Integer.toHexString(i0)+" "+Integer.toHexString(j0)+" "+Integer.toHexString(k0));
+						if (logger.isDebugEnabled())
+							logger.debug("Found POSTORDER: "+Integer.toHexString(s)+" "+Integer.toHexString(i0)+" "+Integer.toHexString(j0)+" "+Integer.toHexString(k0));
 						res = proc.postorder(this, octreeStack[l], posStack[l]);
 						logger.debug("  Res; "+res);
 					}
@@ -250,7 +252,7 @@ public class OEMM implements Serializable
 					{
 						if (null != octreeStack[l-1].child[posStack[l]])
 							break;
-						else
+						if (logger.isDebugEnabled())
 							logger.debug("Empty node skipped: pos="+posStack[l]);
 					}
 				}
