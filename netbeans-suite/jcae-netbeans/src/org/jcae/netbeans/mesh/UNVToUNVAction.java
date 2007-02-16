@@ -3,8 +3,8 @@ package org.jcae.netbeans.mesh;
 import java.io.File;
 import java.io.IOException;
 import org.jcae.mesh.amibe.util.UNVReader;
+import org.jcae.mesh.xmldata.MeshExporter;
 import org.jcae.mesh.xmldata.MeshWriter;
-import org.jcae.mesh.xmldata.UNVConverter;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileLock;
 import org.openide.filesystems.FileObject;
@@ -36,7 +36,7 @@ public final class UNVToUNVAction extends CookieAction
 			
 			// Write the new UNV to a temporary place
 			File newUNVFile=File.createTempFile("jcae", null);
-			new UNVConverter(tmpDir.getPath()).writeUNV(newUNVFile.getPath());
+			new MeshExporter.UNV(tmpDir.getPath()).write(newUNVFile.getPath());
 			
 			// Overwrite the old unv with the new one
 			FileObject newUnv=FileUtil.toFileObject(newUNVFile);

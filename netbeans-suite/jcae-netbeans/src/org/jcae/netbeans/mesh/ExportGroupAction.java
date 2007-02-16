@@ -15,21 +15,25 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.netbeans.mesh;
 
 import java.io.*;
 import java.util.HashSet;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.xml.parsers.ParserConfigurationException;
-import org.jcae.mesh.xmldata.UNVConverter;
+import org.jcae.mesh.xmldata.MeshExporter;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CookieAction;
@@ -37,7 +41,28 @@ import org.xml.sax.SAXException;
 
 public class ExportGroupAction extends CookieAction
 {
-
+	private static class ChooseUnitPanel extends JPanel
+	{	
+		private JRadioButton meters=new JRadioButton("Meters");
+		public ChooseUnitPanel()
+		{	
+			setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+			JRadioButton mm=new JRadioButton("Millimeters");
+			ButtonGroup bg=new ButtonGroup();
+			bg.add(meters);
+			bg.add(mm);
+			meters.setSelected(true);
+			add(meters);
+			add(Box.createVerticalStrut(5));
+			add(mm);
+		}
+		
+		public boolean isMeters()
+		{
+			return meters.isSelected();
+		}
+	}	
+	
 	protected int mode()
 	{
 		return CookieAction.MODE_ALL;
@@ -73,6 +98,8 @@ public class ExportGroupAction extends CookieAction
 				meshNode.getDataObject().getPrimaryFile().getParent();
 			
 			JFileChooser jfc=new JFileChooser();
+			ChooseUnitPanel unitPanel=new ChooseUnitPanel();
+			jfc.setAccessory(unitPanel);
 			jfc.setCurrentDirectory(FileUtil.toFile(meshDirFile));
 			if(jfc.showSaveDialog(null)==JFileChooser.APPROVE_OPTION)
 			{
@@ -88,8 +115,13 @@ public class ExportGroupAction extends CookieAction
 					unvFile+=".unv";
 				
 				PrintStream stream=new PrintStream(new BufferedOutputStream(
-					new FileOutputStream(unvFile)));
-				new UNVConverter(new File(meshDir), ids).writeUNV(stream);
+					new FileOutputStream(unvFile)));				
+				MeshExporter.UNV exporter=new MeshExporter.UNV(new File(meshDir), ids);				
+				if(unitPanel.isMeters())
+					exporter.setUnit(MeshExporter.UNV.UNIT_METER);
+				else
+					exporter.setUnit(MeshExporter.UNV.UNIT_MM);				
+				exporter.write(stream);				
 				stream.close();				
 			}
 		}

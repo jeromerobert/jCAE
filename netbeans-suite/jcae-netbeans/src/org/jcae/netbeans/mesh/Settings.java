@@ -57,7 +57,7 @@ public class Settings extends SystemOption
 		{
 			mesherJar=new File(Mesher.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
 			log4jConfigurationFile=InstalledFileLocator.getDefault().locate(
-				"etc/log4j.properties", "org.jcae.netbeans", false).toURL();
+				"etc/log4j.properties", "org.jcae.netbeans", false).toURI().toURL();
 		}
 		catch (MalformedURLException e)
 		{

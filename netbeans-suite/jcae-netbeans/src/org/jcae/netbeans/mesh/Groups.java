@@ -35,7 +35,7 @@ import javax.vecmath.Color3f;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
-import org.jcae.mesh.xmldata.UNVConverter;
+import org.jcae.mesh.xmldata.MeshExporter;
 import org.jcae.netbeans.viewer3d.View3D;
 import org.jcae.viewer3d.SelectionListener;
 import org.jcae.viewer3d.fe.ViewableFE;
@@ -479,7 +479,7 @@ public class Groups implements SelectionListener
 			inb.get(trianglesGroup);
 			fc.close();
 			fis.close();
-			UNVConverter.clean(bb);
+			MeshExporter.clean(bb);
 			return trianglesGroup;
 		}
 		catch(IOException ex)
@@ -580,7 +580,8 @@ public class Groups implements SelectionListener
 				ids[i]=((Group)os[i]).getId();
 			}			
 			PrintStream stream=new PrintStream(new BufferedOutputStream(new FileOutputStream(jfc.getSelectedFile())));
-			new UNVConverter(new File(meshFile), ids).writeUNV(stream);
+			MeshExporter.UNV exporter=new MeshExporter.UNV(new File(meshFile), ids);
+			exporter.write(stream);
 			stream.close();
 		}
 	}
