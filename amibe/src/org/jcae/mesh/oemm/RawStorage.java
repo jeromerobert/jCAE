@@ -148,7 +148,7 @@ public class RawStorage
 		    bbox[1] < tree.x0[1] || bbox[1] > tree.x0[1]+tree.xdelta ||
 		    bbox[2] < tree.x0[2] || bbox[2] > tree.x0[2]+tree.xdelta)
 		{
-			tree.reset(bbox);
+			tree.setBoundingBox(bbox);
 			return;
 		}
 		tree.status = OEMM.OEMM_INITIALIZED;

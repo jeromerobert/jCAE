@@ -39,10 +39,8 @@ public class MeshOEMMIndex
 		CADShapeBuilder factory = CADShapeBuilder.factory;
 		CADShape shape = factory.newShape(brepfilename);
 		double [] bbox = shape.boundingBox();
-		double [] umax = new double[3];
-		for (int i = 0; i < 3; i++)
-			umax[i] = bbox[i+3];
-		final RawOEMM oemm = new RawOEMM(lmax, bbox, umax);
+		final OEMM oemm = new OEMM(lmax);
+		oemm.setBoundingBox(bbox);
 		String soupFile = soupDir+File.separator+"soup";
 		RawStorage.countTriangles(oemm, soupFile);
 		if (oemm.status != OEMM.OEMM_INITIALIZED)
@@ -54,7 +52,7 @@ public class MeshOEMMIndex
 			RawStorage.countTriangles(oemm, soupFile);
 			assert oemm.status == OEMM.OEMM_INITIALIZED;
 		}
-		oemm.aggregate(triangles_max);
+		Aggregate.compute(oemm, triangles_max);
 		RawStorage.dispatch(oemm, soupFile, "dispatched", "dispatched.data");
 		RawStorage.indexOEMM("dispatched", outDir);
 		logger.info("End processing");

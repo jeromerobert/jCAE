@@ -1,3 +1,10 @@
+Fri Feb 16 10:57:33 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/oemm/Aggregate.java: RawOEMM.aggregate() is
+	replaced by a static method Aggregate.compute() which can be invoked
+	on an OEMM.
+	* src/org/jcae/mesh/oemm/RawOEMM.java: Removed.
+
 Thu Feb 15 10:44:59 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/oemm/TraversalProcedure.java: Modify signature of

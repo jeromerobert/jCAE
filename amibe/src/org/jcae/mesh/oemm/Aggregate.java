@@ -30,9 +30,9 @@ import org.apache.log4j.Logger;
  * method, which is called to merge neighbor cells when they contain
  * few triangles.
  */
-public class RawOEMM extends OEMM
+public class Aggregate
 {
-	private static Logger logger = Logger.getLogger(RawOEMM.class);	
+	private static Logger logger = Logger.getLogger(Aggregate.class);	
 	
 	private static final int [] neighborOffset = {
 		//  Face neighbors
@@ -101,47 +101,7 @@ public class RawOEMM extends OEMM
 	private static final int MAX_DELTA_LEVEL = 3;
 
 	// Array of linked lists of octree cells, needed by aggregate()
-	private transient ArrayList [] head = new ArrayList[MAXLEVEL];
-
-	/**
-	 * Create an empty raw OEMM.
-	 * @param lmax   maximal level of the tree
-	 * @param umin   coordinates of the lower-left corner of mesh bounding box
-	 * @param umax   coordinates of the upper-right corner of mesh bounding box
-	 */
-	public RawOEMM(int lmax, double [] umin, double [] umax)
-	{
-		super(lmax);
-		double [] bbox = new double[6];
-		for (int i = 0; i < 3; i++)
-		{
-			bbox[i] = umin[i];
-			bbox[i+3] = umax[i];
-		}
-		head = new ArrayList[MAXLEVEL];
-		//  Adjust status and x0
-		reset(bbox);
-		status = OEMM_CREATED;
-	}
-	
-	// Called by OEMM.search()
-	protected final void createRootNode(OEMMNode node)
-	{
-		super.createRootNode(node);
-		head = new ArrayList[MAXLEVEL];
-		head[0] = new ArrayList();
-		head[0].add(root);
-	}
-	
-	// Called by OEMM.search()
-	// Add the inserted node into a linked list for current level.
-	protected final void postInsertNode(OEMMNode node, int level)
-	{
-		super.postInsertNode(node, level);
-		if (head[level] == null)
-			head[level] = new ArrayList();
-		head[level].add(node);
-	}
+	private transient static ArrayList [] head = new ArrayList[OEMM.MAXLEVEL];
 
 	/**
 	 * Merge children when they contain few triangles.  Children are
@@ -153,26 +113,28 @@ public class RawOEMM extends OEMM
 	 * @param max   maximal number of triangles in merged cells
 	 * @return total number of merged nodes
 	 */
-	public final int aggregate(int max)
+	public final static int compute(OEMM oemm, int max)
 	{
-		// Compute total number of triangles in non-leaf nodes
-		SumTrianglesProcedure st_proc = new SumTrianglesProcedure();
-		walk(st_proc);
-
 		if (MAX_DELTA_LEVEL <= 0)
 			return 0;
+
+		// Walk through the whole tree to compute total number of triangles
+		// in non-leaf nodes and linked lists of nodes
+		PreProcessOEMM st_proc = new PreProcessOEMM();
+		oemm.walk(st_proc);
+
 		// If a cell is smaller than minCellSize() << MAX_DELTA_LEVEL
 		// depth of adjacent nodes can not differ more than
 		// MAX_DELTA_LEVEL, and checkLevelNeighbors() can safely
 		// be skipped.  The cellSizeByHeight() method ensures that
 		// this variable does not overflow.
-		int minSize = cellSizeByHeight(MAX_DELTA_LEVEL+1);
+		int minSize = oemm.cellSizeByHeight(MAX_DELTA_LEVEL+1);
 		// checkLevelNeighbors() needs a stack of OEMMNode instances,
 		// allocate it here.
-		OEMMNode [] nodeStack = new OEMMNode[4*MAXLEVEL];
+		OEMMNode [] nodeStack = new OEMMNode[4*OEMM.MAXLEVEL];
 
 		int ret = 0;
-		for (int level = MAXLEVEL - 1; level >= 0; level--)
+		for (int level = st_proc.getDepth() - 1; level >= 0; level--)
 		{
 			if (head[level] == null)
 				continue;
@@ -186,14 +148,15 @@ public class RawOEMM extends OEMM
 				//  This node is not a leaf and its children
 				//  can be merged if neighbors have a difference
 				//  level lower than MAX_DELTA_LEVEL
-				if (current.size < minSize || checkLevelNeighbors(current, nodeStack))
+				if (current.size < minSize || checkLevelNeighbors(oemm, current, nodeStack))
 				{
 					for (int ind = 0; ind < 8; ind++)
 						if (current.child[ind] != null)
 							merged++;
-					mergeChildren(current);
+					oemm.mergeChildren(current);
 				}
 			}
+			head[level] = null;
 			logger.debug(" Merged octree cells: "+merged);
 			ret += merged;
 		}
@@ -201,56 +164,7 @@ public class RawOEMM extends OEMM
 		return ret;
 	}
 	
-	/**
-	 * Return the octant of an OEMM structure containing a given point
-	 * with a size at least equal to those of start node.
-	 *
-	 * @param fromNode start node
-	 * @param ijk      integer coordinates of an interior node
-	 * @return  the octant of the desired size containing this point.
-	 */
-	private static final OEMMNode searchFromNode(OEMMNode fromNode, int [] ijk)
-	{
-		int i1 = ijk[0];
-		if (i1 < 0 || i1 > gridSize)
-			return null;
-		int j1 = ijk[1];
-		if (j1 < 0 || j1 > gridSize)
-			return null;
-		int k1 = ijk[2];
-		if (k1 < 0 || k1 > gridSize)
-			return null;
-		//  Neighbor octant is within OEMM bounds
-		//  First climb tree until an octant enclosing this
-		//  point is encountered.
-		OEMMNode ret = fromNode;
-		int i2, j2, k2;
-		do
-		{
-			if (null == ret.parent)
-				break;
-			ret = ret.parent;
-			int mask = ~(ret.size - 1);
-			i2 = i1 & mask;
-			j2 = j1 & mask;
-			k2 = k1 & mask;
-		}
-		while (i2 != ret.i0 || j2 != ret.j0 || k2 != ret.k0);
-		//  Now find the deepest matching octant.
-		int s = ret.size;
-		while (s > fromNode.size && !ret.isLeaf)
-		{
-			s >>= 1;
-			assert s > 0;
-			int ind = indexSubOctree(s, ijk);
-			if (null == ret.child[ind])
-				break;
-			ret = ret.child[ind];
-		}
-		return ret;
-	}
-	
-	private static final boolean checkLevelNeighbors(OEMMNode current, OEMMNode [] nodeStack)
+	private static final boolean checkLevelNeighbors(OEMM oemm, OEMMNode current, OEMMNode [] nodeStack)
 	{
 		// If an adjacent node has a size lower than minSize, children
 		// nodes must not be merged
@@ -262,7 +176,7 @@ public class RawOEMM extends OEMM
 			ijk[0] = current.i0 + neighborOffset[3*i]   * current.size;
 			ijk[1] = current.j0 + neighborOffset[3*i+1] * current.size;
 			ijk[2] = current.k0 + neighborOffset[3*i+2] * current.size;
-			OEMMNode n = searchFromNode(current, ijk);
+			OEMMNode n = oemm.searchFromNode(current, ijk);
 			if (n == null || n.isLeaf || n.size > current.size)
 				continue;
 			assert n.size == current.size;
@@ -302,21 +216,38 @@ public class RawOEMM extends OEMM
 		return true;
 	}
 	
-	private static final class SumTrianglesProcedure extends TraversalProcedure
+	private static final class PreProcessOEMM extends TraversalProcedure
 	{
+		private int depth = 0;
+		private int maxDepth = 0;
 		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
-			if (current.isLeaf)
-				return OK;
-			if (visit != POSTORDER)
+			if (visit == POSTORDER)
 			{
-				current.tn = 0;
-				return SKIPWALK;
+				depth--;
+				for (int i = 0; i < 8; i++)
+					if (current.child[i] != null)
+						current.tn += current.child[i].tn;
+				return OK;
 			}
-			for (int i = 0; i < 8; i++)
-				if (current.child[i] != null)
-					current.tn += current.child[i].tn;
-			return OK;
+			else
+			{
+				if (head[depth] == null)
+					head[depth] = new ArrayList();
+				head[depth].add(current);
+				if (visit == PREORDER)
+				{
+					depth++;
+					if (depth > maxDepth)
+						maxDepth = depth;
+					current.tn = 0;
+				}
+				return OK;
+			}
+		}
+		public final int getDepth()
+		{
+			return maxDepth;
 		}
 	}
 	

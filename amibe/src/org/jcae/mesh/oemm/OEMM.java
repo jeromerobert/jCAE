@@ -88,6 +88,7 @@ public class OEMM implements Serializable
 			logger.error("Max. level too low");
 			depth = 1;
 		}
+		status = OEMM_CREATED;
 	}
 	
 	public final void clearNodes()
@@ -98,7 +99,7 @@ public class OEMM implements Serializable
 		root = null;
 	}
 
-	protected final void reset(double [] bbox)
+	public final void setBoundingBox(double [] bbox)
 	{
 		clearNodes();
 		xdelta = Double.MIN_VALUE;
@@ -430,6 +431,55 @@ public class OEMM implements Serializable
 		nr_leaves++;
 	}
 
+	/**
+	 * Return the octant of an OEMM structure containing a given point
+	 * with a size at least equal to those of start node.
+	 *
+	 * @param fromNode start node
+	 * @param ijk      integer coordinates of an interior node
+	 * @return  the octant of the desired size containing this point.
+	 */
+	public static final OEMMNode searchFromNode(OEMMNode fromNode, int [] ijk)
+	{
+		int i1 = ijk[0];
+		if (i1 < 0 || i1 > gridSize)
+			return null;
+		int j1 = ijk[1];
+		if (j1 < 0 || j1 > gridSize)
+			return null;
+		int k1 = ijk[2];
+		if (k1 < 0 || k1 > gridSize)
+			return null;
+		//  Neighbor octant is within OEMM bounds
+		//  First climb tree until an octant enclosing this
+		//  point is encountered.
+		OEMMNode ret = fromNode;
+		int i2, j2, k2;
+		do
+		{
+			if (null == ret.parent)
+				break;
+			ret = ret.parent;
+			int mask = ~(ret.size - 1);
+			i2 = i1 & mask;
+			j2 = j1 & mask;
+			k2 = k1 & mask;
+		}
+		while (i2 != ret.i0 || j2 != ret.j0 || k2 != ret.k0);
+		//  Now find the deepest matching octant.
+		int s = ret.size;
+		while (s > fromNode.size && !ret.isLeaf)
+		{
+			s >>= 1;
+			assert s > 0;
+			int ind = indexSubOctree(s, ijk);
+			if (null == ret.child[ind])
+				break;
+			ret = ret.child[ind];
+		}
+		return ret;
+	}
+	
 	public double [] getCoords(boolean onlyLeaves)
 	{
 		CoordProcedure proc = new CoordProcedure(onlyLeaves, nr_cells, nr_leaves);
