@@ -94,7 +94,10 @@ public class MeshOEMMViewer3d
 					{
 						showOctree = !showOctree;
 						if (showOctree)
+						{
 							bgView.add(octree);
+							bgView.setCurrentViewable(octree);
+						}
 						else
 							bgView.remove(octree);
 					}
