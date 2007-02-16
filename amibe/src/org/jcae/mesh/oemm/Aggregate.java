@@ -25,15 +25,26 @@ import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 /**
- * Helper class to merge neighbor octree cells.
- * The sole purpose of this class is to provide an {@link #aggregate}
- * method, which is called to merge neighbor cells when they contain
- * few triangles.
- */
+ * Merge adjacent octree nodes.
+ * Children are merged if these two conditions are met: the total number of
+ * triangles in merged nodes does not exceed a given threshold, and levels of
+ * adjacent nodes do not differ more than MAX_DELTA_LEVEL.
+ * This process is an optimization to have fewer octree nodes.  
+*/
 public class Aggregate
 {
 	private static Logger logger = Logger.getLogger(Aggregate.class);	
 	
+	// Maximum level difference between adjacent cells.
+	// With a difference of N, a node has at most
+	// (6*(2^N)*(2^N) + 12*(2^N) + 8)
+	// = 6*(2^N+1)*(2^N+1)+2 neighbors.
+	// In her paper, Cignoni takes N=3, but we consider N=2
+	// instead so that upper bound is less than 256 and
+	// neighbor indices can be stored in byte arrays.
+	// In practice, N=3 or 4 should also work.
+	private static final int MAX_DELTA_LEVEL = 2;
+
 	private static final int [] neighborOffset = {
 		//  Face neighbors
 		 1,  0,  0,
@@ -93,20 +104,10 @@ public class Aggregate
 		}
 	}
 
-	// Maximum level difference between adjacent cells.
-	// With a difference of N, a node has at most (6*N*N + 12*N + 8)
-	// = 6*(N+1)*(N+1)+2 neighbors; we want this number to be less
-	// than 256 to store neighbor indices in byte arrays, and thus
-	// N <= 5.  In her paper, Cignoni takes N=3.
-	private static final int MAX_DELTA_LEVEL = 3;
-
 	/**
-	 * Merge children when they contain few triangles.  Children are
-	 * merged if these two conditions are met: the total numbers of
-	 * triangles in merged nodes does not exceed a given threshold,
-	 * and levels of adjacent nodes do not differ more than MAX_DELTA_LEVEL.
-	 * This process is an optimization to have fewer octree nodes.  
+	 * Merge nodes.
 	 *
+	 * @param oemm  OEMM instance
 	 * @param max   maximal number of triangles in merged cells
 	 * @return total number of merged nodes
 	 */
@@ -136,8 +137,10 @@ public class Aggregate
 		OEMMNode [] nodeStack = new OEMMNode[4*OEMM.MAXLEVEL];
 
 		int ret = 0;
-		for (int level = st_proc.getDepth() - 1; level >= 0; level--)
+		for (int level = OEMM.MAXLEVEL - 1; level >= 0; level--)
 		{
+			if (nonLeaves[level] == null)
+				continue;
 			int merged = 0;
 			logger.debug(" Checking neighbors at level "+level);
 			for (Iterator it = nonLeaves[level].iterator(); it.hasNext(); )
@@ -246,10 +249,6 @@ public class Aggregate
 						current.tn += current.child[i].tn;
 			}
 			return OK;
-		}
-		public final int getDepth()
-		{
-			return maxDepth;
 		}
 	}
 	

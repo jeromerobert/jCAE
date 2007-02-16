@@ -17,38 +17,32 @@
 </p>
 <h3 name="structure">Determination of the octree structure</h3>
 <p>
- An empty {@link org.jcae.mesh.oemm.RawOEMM} is first created with three
- parameters: the maximul depth <code>dmax</code> of this octree, a number
- of triangles <code>tmax</code> and geometrical bounding box.
- The latter is needed to transform double coordinates into integers (and
- also the other way around), see {@link org.jcae.mesh.oemm.OEMM#double2int}
- and {@link org.jcae.mesh.oemm.OEMM#int2double}.
+ An empty {@link org.jcae.mesh.oemm.OEMM} is first created with a given
+ maximul depth, and its bounding box is set.  This is needed to transform
+ double coordinates into integers (and also the other way around), see
+ {@link org.jcae.mesh.oemm.OEMM#double2int} and
+ {@link org.jcae.mesh.oemm.OEMM#int2double}.
 </p>
 <p>
  The triangle soup is read a first time by
  {@link org.jcae.mesh.oemm.RawStorage#countTriangles}; for each triangle,
  vertices are located in the smallest octant (i.e. with the depth
- <code>dmax</code> specified when creating this octree), and a counter is
+ specified when creating this octree), and a counter is
  incremented for all octants containing at least one vertex.  At the end
  of this first pass, we know how many triangles will be collected by each
  octant.
 </p>
 <p>
  An optimization is then performed by
- {@link org.jcae.mesh.oemm.RawOEMM#aggregate} on this
- {@link org.jcae.mesh.oemm.RawOEMM} structure: octants are recursively
+ {@link org.jcae.mesh.oemm.Aggregate#compute} on this
+ {@link org.jcae.mesh.oemm.OEMM} structure: octants are recursively
  merged with their siblings if
 </p>
 <ol>
-  <li>The total number of triangles is less than <code>tmax</code></li>
+  <li>The total number of triangles is less than a given threshold</li>
   <li>Neighbors in the final octree have a depth difference not
       greater than 2.</li>
 </ol>
-<p>
- During this phase, links to neighbors are computed and stored in the
- data structure.  This information is needed by future passes, so it
- is written onto disk.
-</p>
 <p>
  The optimized octree has fewer leaves than the original, and the number
  of neighbors is bounded by a small constant.  This property is important
@@ -83,8 +77,8 @@
  {@link org.jcae.mesh.oemm.OEMMNode#minIndex} and a local index.
  The task performed during this traversal is thus to identify unique
  interior vertices.  This is done by using
- {@link org.jcae.mesh.oemm.AVLTreeDup} class, which is an implementation
- of AVL trees based on Ben Pfaff's
+ {@link org.jcae.mesh.oemm.PAVLTreeIntArrayDup} class, which is an
+ implementation of AVL trees based on Ben Pfaff's
  <a href="http://adtinfo.org/">GNU libavl</a>.
 </p>
 <p>
