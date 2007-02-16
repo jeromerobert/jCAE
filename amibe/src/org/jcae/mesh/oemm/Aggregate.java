@@ -100,9 +100,6 @@ public class Aggregate
 	// N <= 5.  In her paper, Cignoni takes N=3.
 	private static final int MAX_DELTA_LEVEL = 3;
 
-	// Array of linked lists of octree cells, needed by aggregate()
-	private transient static ArrayList [] head = new ArrayList[OEMM.MAXLEVEL];
-
 	/**
 	 * Merge children when they contain few triangles.  Children are
 	 * merged if these two conditions are met: the total numbers of
@@ -118,9 +115,14 @@ public class Aggregate
 		if (MAX_DELTA_LEVEL <= 0)
 			return 0;
 
-		// Walk through the whole tree to compute total number of triangles
-		// in non-leaf nodes and linked lists of nodes
-		PreProcessOEMM st_proc = new PreProcessOEMM();
+		// Array of linked lists of non-leaf octree cells
+		ArrayList [] nonLeaves = new ArrayList[OEMM.MAXLEVEL];
+		// A bottom-up traversal is the most efficient way to
+		// merge nodes when both conditions above are met.
+		// We first walk through the whole tree to compute total
+		// number of triangles in non-leaf nodes, and for each
+		// depth a linked list of non-leaf nodes
+		PreProcessOEMM st_proc = new PreProcessOEMM(nonLeaves);
 		oemm.walk(st_proc);
 
 		// If a cell is smaller than minCellSize() << MAX_DELTA_LEVEL
@@ -136,14 +138,13 @@ public class Aggregate
 		int ret = 0;
 		for (int level = st_proc.getDepth() - 1; level >= 0; level--)
 		{
-			if (head[level] == null)
-				continue;
 			int merged = 0;
 			logger.debug(" Checking neighbors at level "+level);
-			for (Iterator it = head[level].iterator(); it.hasNext(); )
+			for (Iterator it = nonLeaves[level].iterator(); it.hasNext(); )
 			{
 				OEMMNode current = (OEMMNode) it.next();
-				if (current.isLeaf || current.tn > max)
+				assert !current.isLeaf;
+				if (current.tn > max)
 					continue;
 				//  This node is not a leaf and its children
 				//  can be merged if neighbors have a difference
@@ -156,7 +157,7 @@ public class Aggregate
 					oemm.mergeChildren(current);
 				}
 			}
-			head[level] = null;
+			nonLeaves[level] = null;
 			logger.debug(" Merged octree cells: "+merged);
 			ret += merged;
 		}
@@ -220,30 +221,31 @@ public class Aggregate
 	{
 		private int depth = 0;
 		private int maxDepth = 0;
+		private final ArrayList [] nonLeaves;
+		public PreProcessOEMM(ArrayList [] a)
+		{
+			nonLeaves = a;
+		}
 		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
-			if (visit == POSTORDER)
+			if (visit == PREORDER)
+			{
+				current.tn = 0;
+				if (nonLeaves[depth] == null)
+					nonLeaves[depth] = new ArrayList();
+				nonLeaves[depth].add(current);
+				depth++;
+				if (depth > maxDepth)
+					maxDepth = depth;
+			}
+			else if (visit == POSTORDER)
 			{
 				depth--;
 				for (int i = 0; i < 8; i++)
 					if (current.child[i] != null)
 						current.tn += current.child[i].tn;
-				return OK;
 			}
-			else
-			{
-				if (head[depth] == null)
-					head[depth] = new ArrayList();
-				head[depth].add(current);
-				if (visit == PREORDER)
-				{
-					depth++;
-					if (depth > maxDepth)
-						maxDepth = depth;
-					current.tn = 0;
-				}
-				return OK;
-			}
+			return OK;
 		}
 		public final int getDepth()
 		{
