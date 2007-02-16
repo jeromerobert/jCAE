@@ -61,7 +61,7 @@ public abstract class TransformAction extends CookieAction
 
 			item = new JMenuItem();
 			Mnemonics.setLocalizedText(item, item.getText());
-			Actions.connect(item, (Action)SystemAction.get(Rotate.class), true);
+			Actions.connect(item, (Action)SystemAction.get(RotateDialog.RotateAction.class), true);
 			menu.add(item);
 
 			item = new JMenuItem();
@@ -85,30 +85,6 @@ public abstract class TransformAction extends CookieAction
 		protected void performAction(Node[] arg0)
 		{
 		}
-	}
-	static public class Rotate extends TransformAction
-	{
-		public String getName()
-		{
-			return "Rotation";
-		}
-
-		protected Object getParameters()
-		{
-			return new Rotation();
-		}
-
-		protected GP_Trsf getTrsf(Object parameter)
-		{
-			Rotation r=(Rotation) parameter;
-			GP_Trsf theTransformation = new GP_Trsf();
-			double[] axisStruct = new double[]{
-				r.getAxisX1(), r.getAxisY1(), r.getAxisZ1(),
-				r.getAxisX2(), r.getAxisY2(), r.getAxisZ2()};
-			theTransformation.setRotation(axisStruct, r.getAngle());
-			return theTransformation;
-		}
-
 	}
 	
 	static public class Translate extends TransformAction
