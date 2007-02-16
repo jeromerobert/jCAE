@@ -24,7 +24,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
 import javax.media.j3d.BranchGroup;
-import org.jcae.mesh.oemm.IndexedStorage;
+import org.jcae.mesh.oemm.Storage;
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.OEMMViewer;
 import org.jcae.netbeans.Utilities;
@@ -83,7 +83,7 @@ public final class OEMMViewAction extends CookieAction
 				if (femesh != null)
 					bgView.remove(femesh);
 				org.jcae.mesh.amibe.ds.Mesh amesh =
-					IndexedStorage.loadNodes(oemm, fe1.getResultSet());
+					Storage.loadNodes(oemm, fe1.getResultSet(), false);
 				
 				if(fe1.getResultSet().size()>0)
 				{
@@ -112,7 +112,7 @@ public final class OEMMViewAction extends CookieAction
 
 	public static void view(String dir, String viewableName)
 	{
-		final OEMM oemm = IndexedStorage.buildOEMMStructure(dir);
+		final OEMM oemm = Storage.readOEMMStructure(dir);
 		boolean onlyLeaves = true;
 		View bgView=View3DManager.getDefault().getView3D().getView();
 		BranchGroup octree = OEMMViewer.bgOEMM(oemm, onlyLeaves);
