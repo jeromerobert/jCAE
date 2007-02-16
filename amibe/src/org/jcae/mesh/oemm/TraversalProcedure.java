@@ -61,7 +61,7 @@ public abstract class TraversalProcedure
 	/**
 	 * Display statistics about this traversal.
 	 */
-	public void printStats()
+	public final void printStats()
 	{
 		logger.info("Leaves: "+nrLeaves+"   Octants: "+nrNodes);
 	}
@@ -88,7 +88,7 @@ public abstract class TraversalProcedure
 	 * @param  c       the current node of the OEMM structure
 	 * @param  octant  the octant number in parent node
 	 */
-	public int preorder(OEMM o, OEMMNode c, int octant)
+	public final int preorder(OEMM o, OEMMNode c, int octant)
 	{
 		int res = 0;
 		nrNodes++;
@@ -117,7 +117,7 @@ public abstract class TraversalProcedure
 	 * @param  c       the current node of the OEMM structure
 	 * @param  octant  the octant number in parent node
 	 */
-	public int postorder(OEMM o, OEMMNode c, int octant)
+	public final int postorder(OEMM o, OEMMNode c, int octant)
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("Found POSTORDER: "+c);
