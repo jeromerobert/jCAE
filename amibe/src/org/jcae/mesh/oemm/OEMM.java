@@ -420,23 +420,23 @@ public class OEMM implements Serializable
 	}
 
 	/**
-	 * Return the octant of an OEMM structure containing a given point
-	 * with a size at least equal to those of start node.
+	 * Return the adjacent node located at a given point with the
+	 * same size.
 	 *
 	 * @param fromNode start node
-	 * @param ijk      integer coordinates of an interior node
+	 * @param ijk      integer coordinates of lower-left corner
 	 * @return  the octant of the desired size containing this point.
 	 */
-	public static final OEMMNode searchFromNode(OEMMNode fromNode, int [] ijk)
+	public static final OEMMNode searchAdjacentNode(OEMMNode fromNode, int [] ijk)
 	{
 		int i1 = ijk[0];
-		if (i1 < 0 || i1 > gridSize)
+		if (i1 < 0 || i1 >= gridSize)
 			return null;
 		int j1 = ijk[1];
-		if (j1 < 0 || j1 > gridSize)
+		if (j1 < 0 || j1 >= gridSize)
 			return null;
 		int k1 = ijk[2];
-		if (k1 < 0 || k1 > gridSize)
+		if (k1 < 0 || k1 >= gridSize)
 			return null;
 		//  Neighbor octant is within OEMM bounds
 		//  First climb tree until an octant enclosing this
@@ -456,15 +456,16 @@ public class OEMM implements Serializable
 		while (i2 != ret.i0 || j2 != ret.j0 || k2 != ret.k0);
 		//  Now find the deepest matching octant.
 		int s = ret.size;
-		while (s > fromNode.size && !ret.isLeaf)
+		while (s > fromNode.size)
 		{
 			s >>= 1;
 			assert s > 0;
 			int ind = indexSubOctree(s, ijk);
 			if (null == ret.child[ind])
-				break;
+				return null;
 			ret = ret.child[ind];
 		}
+		assert (i1 == ret.i0 && j1 == ret.j0 && k1 == ret.k0);
 		return ret;
 	}
 	

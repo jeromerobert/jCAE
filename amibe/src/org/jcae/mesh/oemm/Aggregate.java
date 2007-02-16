@@ -37,12 +37,10 @@ public class Aggregate
 	
 	// Maximum level difference between adjacent cells.
 	// With a difference of N, a node has at most
-	// (6*(2^N)*(2^N) + 12*(2^N) + 8)
-	// = 6*(2^N+1)*(2^N+1)+2 neighbors.
-	// In her paper, Cignoni takes N=3, but we consider N=2
-	// instead so that upper bound is less than 256 and
-	// neighbor indices can be stored in byte arrays.
-	// In practice, N=3 or 4 should also work.
+	// (6*(2^N)*(2^N) + 12*(2^N) + 8) = 6*(2^N+1)*(2^N+1)+2 neighbors.
+	// In her paper, Cignoni takes N=3, but we consider N=2 instead so that
+	// upper bound is less than 256 and neighbor indices can be stored in
+	// byte arrays.  In practice, N=3 or 4 should also work though.
 	private static final int MAX_DELTA_LEVEL = 2;
 
 	private static final int [] neighborOffset = {
@@ -180,8 +178,8 @@ public class Aggregate
 			ijk[0] = current.i0 + neighborOffset[3*i]   * current.size;
 			ijk[1] = current.j0 + neighborOffset[3*i+1] * current.size;
 			ijk[2] = current.k0 + neighborOffset[3*i+2] * current.size;
-			OEMMNode n = oemm.searchFromNode(current, ijk);
-			if (n == null || n.isLeaf || n.size > current.size)
+			OEMMNode n = oemm.searchAdjacentNode(current, ijk);
+			if (n == null || n.isLeaf)
 				continue;
 			assert n.size == current.size;
 			logger.debug("Node "+n+" contains "+Integer.toHexString(ijk[0])+" "+Integer.toHexString(ijk[1])+" " +Integer.toHexString(ijk[2]));
