@@ -43,7 +43,7 @@ public class OEMM implements Serializable
 	private static Logger logger = Logger.getLogger(OEMM.class);	
 	
 	public static final int MAXLEVEL = 30;
-	protected static final int gridSize = 1 << MAXLEVEL;
+	private static final int gridSize = 1 << MAXLEVEL;
 	
 	protected transient String topDir;
 	private transient int nr_leaves = 0;
