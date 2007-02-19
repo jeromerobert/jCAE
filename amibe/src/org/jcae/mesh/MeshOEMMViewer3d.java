@@ -22,6 +22,7 @@
 package org.jcae.mesh;
 
 import org.jcae.mesh.oemm.OEMM;
+import org.jcae.mesh.oemm.OEMMNode;
 import org.jcae.mesh.oemm.Storage;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.MMesh3D;
@@ -33,6 +34,8 @@ import org.jcae.mesh.amibe.validation.*;
 import org.apache.log4j.Logger;
 
 import java.io.File;
+import java.io.DataOutputStream;
+import java.io.BufferedOutputStream;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Iterator;
@@ -55,7 +58,6 @@ public class MeshOEMMViewer3d
 	private static Logger logger=Logger.getLogger(MeshOEMMViewer3d.class);
 	private static ViewableBG fineMesh;
 	private static ViewableFE decMesh;
-	private static TIntHashSet leaves = new TIntHashSet();
 
 	private static boolean showOctree = true;
 	private static boolean showAxis = true;
@@ -103,23 +105,30 @@ public class MeshOEMMViewer3d
 					}
 					else if(event.getKeyChar()=='s')
 					{
-						Mesh amesh = Storage.loadNodes(oemm, octree.getResultSet(), false);
-						String xmlDir = "oemm-tmp";
-						String xmlFile = "jcae3d";
-						MeshWriter.writeObject3D(amesh, xmlDir, xmlFile, ".", "tmp.brep", 1);
-						new UNVConverter(xmlDir).writeMESH("oemm-tmp.mesh");
-						MMesh3D mesh3D = MMesh3DReader.readObject(xmlDir, xmlFile);
-						MinAngleFace qproc = new MinAngleFace();
-						QualityFloat data = new QualityFloat(1000);
-						data.setQualityProcedure(qproc);
-						for (Iterator itf = mesh3D.getFacesIterator(); itf.hasNext();)
+						TIntHashSet leaves = octree.getResultSet();
+						if (leaves.size() == 1)
 						{
-							Triangle f= (Triangle) itf.next();
-							data.compute(f);
+							int idx = leaves.iterator().next();
+							OEMMNode current = oemm.leaves[idx];
+							Mesh amesh = Storage.loadNodeWithNeighbours(oemm, idx, false);
+							MinAngleFace qproc = new MinAngleFace();
+							QualityFloat data = new QualityFloat(amesh.getTriangles().size());
+							data.setQualityProcedure(qproc);
+							for (Iterator itf = amesh.getTriangles().iterator(); itf.hasNext();)
+							{
+								Triangle f = (Triangle) itf.next();
+								if (f.getGroupId() == idx)
+									data.compute(f);
+							}
+							data.setTarget((float) Math.PI/3.0f);
+							String outFile = oemm.getDirectory()+File.separator+current.file+"q";
+							data.writeRawData(outFile);
+							logger.info("Quality factor written into "+outFile);
 						}
-						data.finish();
-						data.setTarget((float) Math.PI/3.0f);
-						data.printMeshBB("oemm-tmp.bb");
+						else
+						{
+							logger.error("Only one node must be selected!");
+						}
 					}
 					else if(event.getKeyChar()=='d')
 					{
