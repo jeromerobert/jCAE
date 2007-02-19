@@ -21,8 +21,10 @@ package org.jcae.mesh.amibe.validation;
 
 import gnu.trove.TFloatArrayList;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.PrintStream;
 import org.apache.log4j.Logger;
 
@@ -292,6 +294,31 @@ public class QualityFloat
 		catch (FileNotFoundException ex)
 		{
 			logger.error("Cannot write into: "+file);
+		}
+	}
+
+	/**
+	 * Write quality values into a raw file.  They are stored in
+	 * machine format, in the same order as they have been computed.
+	 *
+	 * @param file   name of the output file
+	 */
+	public void writeRawData(String file)
+	{
+		try
+		{
+			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
+			for (int i = 0, n = data.size(); i < n; i++)
+				out.writeFloat(data.get(i));
+			out.close();
+		}
+		catch (FileNotFoundException ex)
+		{
+			logger.error("Cannot write into: "+file);
+		}
+		catch (IOException ex)
+		{
+			logger.error("Error when writing data into "+file);
 		}
 	}
 }
