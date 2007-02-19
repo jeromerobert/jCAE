@@ -28,7 +28,6 @@ import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 import javax.vecmath.Point3d;
 import org.jcae.mesh.oemm.OEMM;
-import org.jcae.mesh.oemm.OEMMViewer;
 import org.jcae.mesh.oemm.Storage;
 import org.jcae.viewer3d.bg.ViewableBG;
 import org.jcae.viewer3d.cad.ViewableCAD;

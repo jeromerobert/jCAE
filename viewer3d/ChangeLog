@@ -1,3 +1,10 @@
+2007-02-19 11:35:45  Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/OEMMViewer.java: Break circular dependency
+	by moving amibe/src/org/jcae/mesh/oemm/OEMMViewer.java into
+	viewer3d/src/org/jcae/viewer3d/OEMMViewer.java; jcae-viewer3d now
+	depends on jcae.jar.
+
 2007-02-12 17:16:48  Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/bg/ViewableBG.java: In pickSolid(),

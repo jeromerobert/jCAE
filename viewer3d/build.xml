@@ -12,6 +12,7 @@
 		<javac source="1.4" target="1.4" debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}">
 			<compilerarg line="${compiler.arg}"/>
 			<classpath>
+				<pathelement location="${jcae.jar}"/>
 				<pathelement location="${occjava.jar}"/>
 				<pathelement location="${log4j.jar}"/>
 				<pathelement location="${trove.jar}"/>
@@ -25,7 +26,7 @@
 		<jar compress="true" jarfile="${jar.dir}/${jcae-viewer3d.jar}">
 			<manifest>
 				<attribute name="Main-Class" value="org.jcae.viewer3d.test.Main"/>
-				<attribute name="Class-Path" value="trove.jar occjava.jar"/>
+				<attribute name="Class-Path" value="trove.jar jcae.jar occjava.jar"/>
 			</manifest>
 			<fileset dir="${classes.dir}" includes="org/jcae/viewer3d/**"/>
 			<fileset dir="${classes.dir}" includes="org/jdesktop/j3d/utils/behaviors/vp/**"/>
@@ -72,6 +73,7 @@
 	<target name="dist-bin" description="build a zip to distribute binaries" depends="jar">
 		<zip destfile="${project.name}-bin-${version}.zip">
 			<zipfileset prefix="${project.name}-${version}" file="${jar.dir}/${jcae-viewer3d.jar}"/>
+			<zipfileset prefix="${project.name}-${version}" file="${jcae.jar}"/>
 			<zipfileset prefix="${project.name}-${version}" file="${occjava.jar}"/>
 			<zipfileset prefix="${project.name}-${version}" file="${log4j.jar}"/>
 			<zipfileset prefix="${project.name}-${version}" file="${trove.jar}"/>
