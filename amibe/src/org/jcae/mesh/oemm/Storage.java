@@ -141,11 +141,11 @@ public class Storage
 		return ret;
 	}
 	
-	public static Mesh loadNodesNeighbours(OEMM oemm, int leaf)
+	public static Mesh loadNodeWithNeighbours(OEMM oemm, int leaf, boolean adjacency)
 	{
 		TIntHashSet leaves = new TIntHashSet(oemm.leaves[leaf].adjLeaves.toNativeArray());
 		leaves.add(leaf);
-		return loadNodes(oemm, leaves);
+		return loadNodes(oemm, leaves, adjacency);
 	}
 	
 	private static class ReadVerticesProcedure extends TraversalProcedure
@@ -188,7 +188,7 @@ public class Storage
 						vert[index].setLabel(current.minIndex + index);
 						vert[index].setReadable(true);
 						int n = (int) bufIn.readByte();
-						//  Read neighbors
+						//  Read neighbours
 						boolean writable = true;
 						for (int j = 0; j < n; j++)
 						{
@@ -278,7 +278,7 @@ public class Storage
 						if (!writable)
 							continue;
 						Triangle t = new Triangle(vert[0], vert[1], vert[2]);
-						t.setGroupId(0);
+						t.setGroupId(current.leafIndex);
 						vert[0].setLink(t);
 						vert[1].setLink(t);
 						vert[2].setLink(t);
