@@ -27,9 +27,9 @@ import org.apache.log4j.Logger;
 /**
  * This class illustrates how to perform quality checks.
  */
-public class MeshValidOEMM
+public class MeshValidSoup
 {
-	private static Logger logger=Logger.getLogger(MeshValidOEMM.class);
+	private static Logger logger=Logger.getLogger(MeshValidSoup.class);
 
 	public static class ComputeTriangleQuality implements RawStorage.SoupReaderInterface
 	{
