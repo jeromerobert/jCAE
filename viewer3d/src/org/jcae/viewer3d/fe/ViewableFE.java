@@ -391,7 +391,7 @@ public class ViewableFE extends ViewableAdaptor
 		
 		if(showShapeLine)
 		{
-			logger.finest("Changing color of domain n°"+domainID+" to red. bg="+bg);
+			logger.finest("Changing color of domain nr"+domainID+" to red. bg="+bg);
 			Color colorToSet;
 			if(selected)
 			{
