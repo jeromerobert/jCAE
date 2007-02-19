@@ -21,9 +21,9 @@
 package org.jcae.mesh;
 
 import org.jcae.mesh.oemm.OEMM;
-import org.jcae.mesh.oemm.OEMMViewer;
 import org.jcae.mesh.oemm.Storage;
 import org.jcae.mesh.java3d.Viewer;
+import org.jcae.viewer3d.OEMMViewer;
 
 /**
  * This class illustrates how to perform quality checks.

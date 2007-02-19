@@ -22,7 +22,6 @@
 package org.jcae.mesh;
 
 import org.jcae.mesh.oemm.OEMM;
-import org.jcae.mesh.oemm.OEMMViewer;
 import org.jcae.mesh.oemm.Storage;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.MMesh3D;
@@ -40,6 +39,7 @@ import java.util.Iterator;
 import java.util.HashMap;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
+import org.jcae.viewer3d.OEMMViewer;
 import org.jcae.viewer3d.bg.ViewableBG;
 import org.jcae.viewer3d.fe.amibe.AmibeProvider;
 import org.jcae.viewer3d.fe.ViewableFE;

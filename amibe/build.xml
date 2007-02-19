@@ -7,7 +7,7 @@
 		<property file="build.properties"/>
 	</target>
 	
-	<target name="compile" depends="init, compile-oemm, compile-test">
+	<target name="compile" depends="init">
 		<mkdir dir="${classes.dir}"/>
 		<propertyfile file="${classes.dir}/timestamp.properties">
 			<entry key="build.time" type="date" pattern="yyyy-MM-dd HH:mm:ss" value="now" />
@@ -19,8 +19,6 @@
 				<pathelement location="${trove.jar}"/>
 				<pathelement location="${xml-apis.jar}"/>
 			</classpath>
-			<!-- exclude classes which need jcae-viewer3d -->
-			<exclude name="org/jcae/mesh/MeshOEMMViewer3d.java"/>
 		</javac>
 		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.mesherocc.dir}">
 			<compilerarg line="${compiler.arg}"/>
@@ -32,19 +30,7 @@
 		</javac>
 	</target>
 
-	<target name="compile-oemm" depends="init" description="Compile the OEMM viewer" if="build.oemm">
-		<mkdir dir="${classes.dir}"/>
-		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}">
-			<compilerarg line="${compiler.arg}"/>
-			<classpath>
-				<pathelement location="${log4j.jar}"/>
-				<pathelement location="${jcae-viewer3d.jar}"/>
-			</classpath>
-			<include name="org/jcae/mesh/MeshOEMMViewer3d.java"/>
-		</javac>
-	</target>
-
-	<target name="compile-test" depends="init" description="Compile the tests" if="build.test">
+	<target name="compile-test" depends="init" description="Compile the tests" if="build.tests">
 		<mkdir dir="${classes.dir}"/>
 		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}" includes="${test.packages}">
 			<compilerarg line="${compiler.arg}"/>
@@ -55,9 +41,11 @@
 		</javac>
 	</target>
 
-	<target name="jar" depends="compile" description="jar">
+	<target name="jar" depends="jar-main,jar-test" description="jar"/>
+	
+	<target name="jar-main" depends="compile" description="jar">
 		<mkdir dir="lib"/>
-		<jar basedir="${classes.dir}" excludes="**/occ/*" compress="true" jarfile="${jar}">
+		<jar basedir="${classes.dir}" excludes="${test.packages} **/occ/*" compress="true" jarfile="${jar}">
 			<manifest>
 				<attribute name="Main-Class" value="org.jcae.mesh.Mesher"/>
 				<attribute name="Class-Path" value="${jar.dependencies}"/>
@@ -68,6 +56,15 @@
 		<jar basedir="${classes.dir}" includes="**/occ/*" compress="true" jarfile="${mesherocc.jar}">
 			<manifest>
 				<attribute name="Class-Path" value="${mesherocc.jar.dependencies}"/>
+			</manifest>
+		</jar>
+	</target>
+	
+	<target name="jar-test" depends="compile-test" description="jar" if="build.tests">
+		<mkdir dir="lib"/>
+		<jar basedir="${classes.dir}" includes="${test.packages}" compress="true" jarfile="${test.jar}">
+			<manifest>
+				<attribute name="Class-Path" value="${test.jar.dependencies}"/>
 			</manifest>
 		</jar>
 	</target>
@@ -93,6 +90,7 @@
 		<delete dir="${classes.dir}"/>
 		<delete dir="${javadoc.dir}"/>
 		<delete file="${jar}"/>
+		<delete file="${test.jar}"/>
 		<delete file="${mesherocc.jar}"/>
 	</target>
 	

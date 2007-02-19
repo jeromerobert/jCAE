@@ -1,3 +1,11 @@
+Mon Feb 19 11:45:26 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* build.xml build.properties: A new jcae-test.jar is created in order
+	to avoid circular dependencies between jcae-viewer3d.jar and jcae.jar, 
+	It contains classes which depends on jcae-viewer3d.jar (ie.  mpstly
+	test classes).
+	* src/org/jcae/mesh/oemm/OEMMViewer.java: Moved into jcae-viewer3d.
+
 Fri Feb 16 10:57:33 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/oemm/Aggregate.java: RawOEMM.aggregate() is
