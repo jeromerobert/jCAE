@@ -70,7 +70,7 @@ public class PAVLTreeIntArrayDup
 	 * etc.  This has many advantages, e.g. if an octant is split,
 	 * nodes can be dispatched very efficiently.
 	 */
-	public static void mortonCode(int [] ijk, int [] hash)
+	private static final void mortonCode(int [] ijk, int [] hash)
 	{
 		int i0 = ijk[0];
 		int j0 = ijk[1];
@@ -83,8 +83,23 @@ public class PAVLTreeIntArrayDup
 			k0 >>= 8;
 		}
 	}
-	//  Inverse operation
-	public static void mortonCodeInv(int [] hash, int [] ijk)
+
+	private static final int dilate4 (int b)
+	{
+		//  byte b = b7b6b5b4b3b2b1b0
+		b &= 0xff;
+		//  u = 00000000 0000b7b6b5b4 00000000 0000b3b2b1b0
+		int u = ((b & 0x000000f0) << 12) | (b & 0x0000000f);
+		//  v = 000000b7b6 000000b5b4 000000b3b2 000000b1b0
+		int v = ((u & 0x000c000c) << 6) | (u & 0x00030003);
+		//  w = 000b7000b6 000b5000b4 000b3000b2 000b1000b0
+		int w = ((v & 0x02020202) << 3) | (v & 0x01010101);
+		return w;
+	}
+	
+	//  Inverse operation (not used currently)
+	/*
+	private static final void mortonCodeInv(int [] hash, int [] ijk)
 	{
 		ijk[0] = 0;
 		ijk[1] = 0;
@@ -99,8 +114,24 @@ public class PAVLTreeIntArrayDup
 			ijk[2] |= contract4(hash[ind] >> 2);
 		}
 	}
+
+	private static final int contract4 (int w)
+	{
+		//  Clear unwanted bits
+		//  w = 000b7000b6 000b5000b4 000b3000b2 000b1000b0
+		w &= 0x11111111;
+		//  v = 000000b7b6 000000b5b4 000000b3b2 000000b1b0
+		int v = ((w & 0x10101010) >> 3) | (w & 0x01010101);
+		//  u = 00000000 0000b7b6b5b4 00000000 0000b3b2b1b0
+		int u = ((v & 0x03000300) >> 6) | (v & 0x00030003);
+		//  b = b7b6b5b4b3b2b1b0
+		int b = ((u & 0x000f0000) >> 12) | (u & 0x0000000f);
+		assert b >= 0 && b <= 0xff;
+		return b;
+	}
+	*/
 	
-	private final static String keyString(int [] data, int offKey)
+	private static final String keyString(int [] data, int offKey)
 	{
 		StringBuffer ret = new StringBuffer();
 		for (int i = 0; i < nrInt; i++)
@@ -371,33 +402,6 @@ public class PAVLTreeIntArrayDup
 				return ret;
 		}
 		return 0;
-	}
-	
-	private final static int dilate4 (int b)
-	{
-		//  byte b = b7b6b5b4b3b2b1b0
-		b &= 0xff;
-		//  u = 00000000 0000b7b6b5b4 00000000 0000b3b2b1b0
-		int u = ((b & 0x000000f0) << 12) | (b & 0x0000000f);
-		//  v = 000000b7b6 000000b5b4 000000b3b2 000000b1b0
-		int v = ((u & 0x000c000c) << 6) | (u & 0x00030003);
-		//  w = 000b7000b6 000b5000b4 000b3000b2 000b1000b0
-		int w = ((v & 0x02020202) << 3) | (v & 0x01010101);
-		return w;
-	}
-	private final static int contract4 (int w)
-	{
-		//  Clear unwanted bits
-		//  w = 000b7000b6 000b5000b4 000b3000b2 000b1000b0
-		w &= 0x11111111;
-		//  v = 000000b7b6 000000b5b4 000000b3b2 000000b1b0
-		int v = ((w & 0x10101010) >> 3) | (w & 0x01010101);
-		//  u = 00000000 0000b7b6b5b4 00000000 0000b3b2b1b0
-		int u = ((v & 0x03000300) >> 6) | (v & 0x00030003);
-		//  b = b7b6b5b4b3b2b1b0
-		int b = ((u & 0x000f0000) >> 12) | (u & 0x0000000f);
-		assert b >= 0 && b <= 0xff;
-		return b;
 	}
 	
 	public int size()
