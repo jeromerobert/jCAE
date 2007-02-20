@@ -19,9 +19,6 @@
 
 package org.jcae.mesh.amibe.util;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.io.Serializable;
 import org.apache.log4j.Logger;
 
 /**
