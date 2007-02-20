@@ -120,8 +120,9 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	 * Creates a <code>DecimateHalfEdge</code> instance.
 	 *
 	 * @param m  the <code>Mesh</code> instance to refine.
-	 * @param tol  maximal allowed error
-	 * @param p  placement of the new point. Legitimate values are <code>POS_VERTEX</code> (at a vertex location), <code>POS_MIDDLE</code> (at the middle of the contracted edge), <code>POS_EDGE</code> (optimal placement on the contracted edge, this is the default) and <code>POS_OPTIMAL</code> (optimal placement).
+	 * @param options  map containing key-value pairs to modify algorithm
+	 *        behaviour.  Valid keys are <code>size</code>,
+	 *        <code>placement</code> and <code>maxtriangles</code>.
 	 */
 	public DecimateHalfEdge(Mesh m, Map options)
 	{

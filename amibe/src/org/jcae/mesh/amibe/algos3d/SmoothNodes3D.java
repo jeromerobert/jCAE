@@ -69,8 +69,9 @@ public class SmoothNodes3D
 	 * Creates a <code>SmoothNodes3D</code> instance.
 	 *
 	 * @param m  the <code>Mesh</code> instance to refine.
-	 * @param options  known options are <code>size</code>,
-	 * <code>iterations</code>, <code>
+	 * @param options  map containing key-value pairs to modify algorithm
+	 *        behaviour.  Valid keys are <code>size</code>,
+	 *        <code>iterations</code> and <code>boundaries</code>.
 	 */
 	public SmoothNodes3D(Mesh m, Map options)
 	{

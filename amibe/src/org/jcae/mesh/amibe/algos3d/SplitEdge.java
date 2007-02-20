@@ -69,7 +69,9 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 	 * Creates a <code>SplitEdge</code> instance.
 	 *
 	 * @param m  the <code>Mesh</code> instance to refine.
-	 * @param options 
+	 * @param options  map containing key-value pairs to modify algorithm
+	 *        behaviour.  Valid keys are <code>size</code> and
+	 *        <code>maxtriangles</code>.
 	 */
 	public SplitEdge(Mesh m, Map options)
 	{

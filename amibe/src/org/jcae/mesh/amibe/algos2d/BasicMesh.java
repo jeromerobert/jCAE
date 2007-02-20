@@ -32,9 +32,9 @@ import org.jcae.mesh.amibe.patch.Mesh2D;
  * and collected into a list.  These nodes are boundary nodes, and
  * all other nodes will be inserted in the interior domain.  A bounding
  * box enclosing all these nodes in the 2D space is computed, and
- * a {@link org.jcae.mesh.amibe.patch.QuadTree} instance can then be
+ * a {@link org.jcae.mesh.amibe.util.KdTree} instance can then be
  * initialized by
- * {@link Mesh2D#initQuadTree(double, double, double, double)}.
+ * {@link Mesh2D#initQuadTree(double [], double [])}.
  *
  * <p>
  * Some checks have been added to remove tiny edges and make sure that
@@ -60,7 +60,7 @@ import org.jcae.mesh.amibe.patch.Mesh2D;
  * Boundary nodes are then inserted iteratively.  For the moment, an Euclidian
  * 2D metric is used because a 3D metric will not help on a very rough
  * triangulation.  The nearest vertex already inserted in the mesh is retrieved
- * with {@link org.jcae.mesh.amibe.patch.QuadTree#getNearestVertex(Vertex2D)}.
+ * with {@link org.jcae.mesh.amibe.util.KdTree#getNearestVertex(Mesh,Vertex)}.
  * It has a reference to a triangle containing this vertex.  From this starting
  * point, we search for the {@link org.jcae.mesh.amibe.ds.Triangle} containing
  * this boundary node by looking for adjacent triangles into the right
