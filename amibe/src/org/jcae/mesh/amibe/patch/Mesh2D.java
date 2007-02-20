@@ -36,7 +36,7 @@ import org.apache.log4j.Logger;
 /**
  * Mesh data structure for paramterized surfaces.
  * Connectivity between triangles and vertices is inherited from {@link Mesh},
- * and a {@link QuadTree} instance added in order to speed up finding the
+ * and a {@link KdTree} instance added in order to speed up finding the
  * nearest {@link Vertex2D} <code>V</code> from any given point <code>V0</code>.
  * This gives a {@link Triangle} having <code>V</code> in its vertices,
  * and we can loop around <code>V</code> to find the {@link Triangle}
@@ -163,10 +163,8 @@ public class Mesh2D extends Mesh
 	
 	/**
 	 * Initialize a KdTree with a given bounding box.
-	 * @param umin  bottom-left U coordinate.
-	 * @param umax  top-right U coordinate.
-	 * @param vmin  bottom-left V coordinate.
-	 * @param vmax  top-right V coordinate.
+	 * @param bbmin  coordinates of bottom-left vertex
+	 * @param bbmax  coordinates of top-right vertex
 	 */
 	public void initQuadTree(double [] bbmin, double [] bbmax)
 	{
@@ -425,7 +423,7 @@ public class Mesh2D extends Mesh
 	}
 	
 	/**
-	 * Remove all metrics of vertices stored in this <code>QuadTree</code>.
+	 * Remove all metrics of vertices stored in this <code>KdTree</code>.
 	 */
 	private void clearAllMetrics()
 	{
@@ -458,9 +456,9 @@ public class Mesh2D extends Mesh
 	 * Returns the 2D radius of the 3D unit ball centered at a point.
 	 * This routine returns a radius such that the 2D circle centered
 	 * at a given vertex will have a distance lower than 1 in 3D.
-	 * This method is used by {@link QuadTree#getNearestVertex}
+	 * This method is used by {@link KdTree#getNearestVertex}
 	 *
-	 * @param vm  the vertex on which metrics is evaluated
+	 * @param v  the vertex on which metrics is evaluated
 	 * @return the radius in 2D space.
 	 */
 	public double radius2d(Vertex v)

@@ -50,7 +50,7 @@ import org.apache.log4j.Logger;
  * <p>
  * Quadtree cells are very compact, they do not contain any locational
  * information.  It is instead passed to the
- * {@link KdTreeProcedure#action(Object, int, int, int)} method.
+ * {@link KdTreeProcedure#action(Object, int, int[])} method.
  * This design had been chosen for performance reasons on large meshes, and in
  * practice it works very well because quadtrees are used for vertex location,
  * and no neighbourhood information is needed.
@@ -86,11 +86,12 @@ import org.apache.log4j.Logger;
  *
  * <p>
  * Distances between vertices can be computed either in Euclidian 2D space, or
- * with a Riemannian metrics.  This is controlled by the {@link #setCompGeom(Calculus)}
- * method.  Distances are computed in Euclidian 2D space when its argument is
- * an instance of {@link Calculus2D}, and in
+ * with a Riemannian metrics.  This is controlled by the
+ * {@link org.jcae.mesh.amibe.patch.Mesh2D#pushCompGeom(int)} method.
+ * Distances are computed in Euclidian 2D space when its argument is
+ * an instance of {@link org.jcae.mesh.amibe.patch.Calculus2D}, and in
  * Riemannian metrics (see {@link org.jcae.mesh.amibe.metrics.Metric2D}) when
- * it is an instance of {@link Calculus3D}.
+ * it is an instance of {@link org.jcae.mesh.amibe.patch.Calculus3D}.
  * By default, distances are computed in Euclidian 2D space.
  * </p>
  *
@@ -125,11 +126,12 @@ import org.apache.log4j.Logger;
  * </ol>
  *
  * <p>
- * The implementation of {@link #getNearestVertex(Vertex)} has two differences:
+ * The implementation of {@link #getNearestVertex(Mesh, Vertex)} has two
+ * differences:
  * </p>
  * <ul>
- *   <li>The starting point is computed by {@link #getNearVertex(Vertex)}.  This
- *       means that much more cells are skipped.</li>
+ *   <li>The starting point is computed by {@link #getNearVertex(Mesh, Vertex)}.
+ *       This means that much more cells are skipped.</li>
  *   <li>The ellipsis is replaced by a circle enclosing it, to have simpler
  *       calculus.  Using the real ellipsis could be tested though, it should
  *       also speed up this processing.</li>
@@ -139,7 +141,7 @@ public class KdTree
 {
 	private static Logger logger=Logger.getLogger(KdTree.class);	
 	/**
-	 * Cell of a {@link QuadTree}.  Each cell contains either four children nodes
+	 * Cell of a {@link KdTree}.  Each cell contains either four children nodes
 	 * or up to <code>BUCKETSIZE</code> vertices.  When this number is exceeded,
 	 * the cell is splitted and vertices are moved to these children.
 	 * On the contrary, when all vertices are removed from a cell, it is deleted.
@@ -221,12 +223,11 @@ public class KdTree
 	public final double [] x0;
 	
 	/**
-	 * Create a new <code>QuadTree</code> of the desired size.
+	 * Create a new <code>KdTree</code> of the desired size.
 	 *
-	 * @param umin  U-coordinate of the leftmost bottom vertex
-	 * @param umax  U-coordinate of the rightmost top vertex
-	 * @param vmin  V-coordinate of the leftmost bottom vertex
-	 * @param vmax  V-coordinate of the rightmost top vertex
+	 * @param d   dimension (2 or 3)
+	 * @param bbmin  coordinates of bottom-left vertex
+	 * @param bbmax  coordinates of top-right vertex
 	 */
 	public KdTree(int d, double [] bbmin, double [] bbmax)
 	{
@@ -281,9 +282,9 @@ public class KdTree
 		return p;
 	}
 	
-	/**
+	/*
 	 * Return the index of the child node containing a given point.
-	 * A quadtree cell contains at most 4 children.  Cell size is a power of
+	 * A KdTree.Cell contains at most 4 children.  Cell size is a power of
 	 * two, so locating a vertex can be performed by bitwise operators, as
 	 * shown below.
 	 * <pre>
@@ -294,8 +295,7 @@ public class KdTree
 	 *      └───┴───┘
 	 *      I=0  &lt;>0
 	 * </pre>
-	 * @param i     first coordinate of a vertex.
-	 * @param j     second coordinate of a vertex.
+	 * @param ijk   coordinates of a vertex.
 	 * @param size  cell size of children nodes.
 	 * @return the index of the child node containing this vertex.
 	 */
@@ -550,7 +550,7 @@ public class KdTree
 	 * vertices, the nearest one is returned (vertices in other leaves may
 	 * of course be nearer).  Otherwise the nearest vertex from sibling
 	 * children is returned.  The returned vertex is a good starting point
-	 * for {@link #getNearestVertex(Vertex)}.
+	 * for {@link #getNearestVertex(Mesh, Vertex)}.
 	 *
 	 * @param v  the node to check.
 	 * @return a near vertex.
@@ -776,7 +776,7 @@ public class KdTree
 	}
 	
 	/**
-	 * Slow implementation of {@link #getNearestVertex(Vertex)}.
+	 * Slow implementation of {@link #getNearestVertex(Mesh, Vertex)}.
 	 * This method should be called only for debugging purpose.
 	 *
 	 * @param v  the vertex to check.

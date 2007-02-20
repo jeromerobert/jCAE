@@ -31,7 +31,7 @@ public interface KdTreeProcedure
 	 *
 	 * @param o  kd-tree cell.
 	 * @param s  cell size.
-	 * @param ijk  coordinates of the bottom left corner of this cell.
+	 * @param i0  coordinates of the bottom left corner of this cell.
 	 * @return <code>-1</code> if <code>walk</code> processing must
 	 * abort now, <code>1</code> if node chikldren have to be ignored, and
 	 * <code>0</code> to process node children recursively.

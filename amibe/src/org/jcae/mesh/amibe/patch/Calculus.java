@@ -24,6 +24,7 @@ public interface Calculus
 {
 	/**
 	 * Returns the length of an edge.
+	 * @param ot  edge being measured
 	 */
 	public double length(OTriangle2D ot);
 	
@@ -53,7 +54,7 @@ public interface Calculus
 	 * This routine returns a radius such that the 2D circle centered
 	 * at a given vertex will have a distance lower than 1 in the
 	 * desired 2D or 3D space.  This method is used by
-	 * {@link QuadTree#getNearestVertex}
+	 * {@link org.jcae.mesh.amibe.util.KdTree#getNearestVertex}
 	 *
 	 * @param vm  the vertex on which metrics is evaluated
 	 * @return the radius in 2D space.

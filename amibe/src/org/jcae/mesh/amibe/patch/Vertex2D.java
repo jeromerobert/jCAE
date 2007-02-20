@@ -41,11 +41,6 @@ import java.util.Iterator;
  * When the underlying surface is defined by the 3D mesh itself, a vertex has
  * three parameters and the surface is locally interpolated by a quadrics
  * computed from vertex neighbours.
- *
- * <p>
- * There is a special vertex, {@link #outer}, which represents a vertex at
- * infinite.  It is used to create exterior triangles.
- * </p>
  */
 public class Vertex2D extends Vertex
 {
