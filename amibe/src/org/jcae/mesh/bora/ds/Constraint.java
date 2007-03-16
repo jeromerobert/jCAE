@@ -30,7 +30,7 @@ public class Constraint
 	private final BCADGraphCell graphCell;
 	private final Hypothesis hypothesis;
 	// List of BSubMesh instances containing this Constraint.
-	private final Collection parent = new ArrayList();
+	private final Collection submesh = new ArrayList();
 	private Constraint origin = null;
 
 	// Unique identitier
@@ -83,7 +83,12 @@ public class Constraint
 
 	public void addSubMesh(BSubMesh s)
 	{
-		parent.add(s);
+		submesh.add(s);
+	}
+
+	public Collection getSubMesh()
+	{
+		return submesh;
 	}
 
 	public String toString()
