@@ -86,11 +86,6 @@ public class Constraint
 		submesh.add(s);
 	}
 
-	public Collection getSubMesh()
-	{
-		return submesh;
-	}
-
 	public String toString()
 	{
 		String ret = "Constraint: "+id;

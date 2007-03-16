@@ -90,16 +90,6 @@ public class BSubMesh
 	private boolean output2d = false;
 	private boolean output3d = false;
 
-	private static class SubElement
-	{
-		private BCADGraphCell cell;
-		private boolean isVisible = true;
-		private SubElement(BCADGraphCell that)
-		{
-			cell = that;
-		}
-	}
-
 	/**
 	 * Creates a root mesh.
 	 */
@@ -118,37 +108,22 @@ public class BSubMesh
 	/**
 	 * Add a constraint to current submesh
 	 *
-	 * @param s  shape
+	 * @param cons  constraint to add
 	 */
-	public void add(Constraint s)
+	public void add(Constraint cons)
 	{
-		// Store Hypothesis, this may be useful when debugging
-		model.allHypothesis.add(s.getHypothesis());
+		logger.debug("Add constraint "+cons+" to submesh "+id);
+		// Store constraint, this may be useful when debugging
+		model.addConstraint(cons);
 		// Add this Constraint to the CAD cell
-		BCADGraphCell c = s.getGraphCell();
-		c.addSubMeshConstraint(this, s);
-		// Process subshapes
-		setTopShapes.add(c);
-		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
-		{
-			CADShapeEnum cse = (CADShapeEnum) itcse.next();
-			for (Iterator it = c.shapesExplorer(cse); it.hasNext(); )
-			{
-				BCADGraphCell sub = (BCADGraphCell) it.next();
-				CADShape shape = sub.getShape();
-				SubElement old = (SubElement) mapShapeToSubElement.get(shape);
-				if (old != null && old.cell.getShape().orientation() != shape.orientation())
-				{
-					old.isVisible = false;
-					continue;
-				}
-				SubElement se = new SubElement(sub);
-				setCells.add(sub);
-				mapShapeToSubElement.put(shape, se);
-			}
-		}
+		BCADGraphCell cell = cons.getGraphCell();
+		cell.addSubMeshConstraint(this, cons);
+		// For convenience, constraints contain a link to all
+		// BSubMesh instances in which they appear.
+		cons.addSubMesh(this);
+		setTopShapes.add(cell);
 	}
-	
+
 	/**
 	 * Gets all CAD graph cells belonging to current mesh.
 	 *
@@ -174,19 +149,18 @@ public class BSubMesh
 			for (Iterator it = shapesExplorer(cse); it.hasNext(); )
 			{
 				BCADGraphCell sub = (BCADGraphCell) it.next();
-				SubElement old = (SubElement) mapShapeToSubElement.get(sub.getShape());
-				System.out.println(""+sub+(old.isVisible ? "" : " (*)"));
+				System.out.println(""+sub);
 			}
 		}
 		System.out.println("End list");
 	}
 
-	// Returns an iterator on all geometrical elements of dimension d
-	public Iterator shapesExplorer(final CADShapeEnum d)
+	// Returns an iterator on all geometrical elements of a given type
+	public Iterator shapesExplorer(final CADShapeEnum cse)
 	{
 		return new Iterator()
 		{
-			private Class sample = d.asClass();
+			private Class sample = cse.asClass();
 			private Iterator its = setCells.iterator();
 			private BCADGraphCell cur = null;
 			private BCADGraphCell next = null;
@@ -226,15 +200,15 @@ public class BSubMesh
 		};
 	}
 
-	private boolean needMesh(BCADGraphCell s)
+	private boolean needMesh(BCADGraphCell cell)
 	{
-		if (!s.hasConstraints(this))
+		if (!cell.hasConstraints(this))
 			return false;
-		if (s.getMesh(this) != null)
+		if (cell.getMesh(this) != null)
 			return false;
-		if (s.getReversed() != null && s.getReversed().getMesh(this) != null)
+		if (cell.getReversed() != null && cell.getReversed().getMesh(this) != null)
 		{
-			s.setMesh(this, s.getReversed().getMesh(this));
+			cell.setMesh(this, cell.getReversed().getMesh(this));
 			return false;
 		}
 		return true;
@@ -247,20 +221,20 @@ public class BSubMesh
 		int nrEdges = 0;
 		for (Iterator it = shapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
 		{
-			BCADGraphCell s = (BCADGraphCell) it.next();
-			if (s.hasConstraints(this))
+			BCADGraphCell cell = (BCADGraphCell) it.next();
+			if (cell.hasConstraints(this))
 				nrEdges++;
 		}
 		int cnt = 0;
 		for (Iterator it = shapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
 		{
-			BCADGraphCell s = (BCADGraphCell) it.next();
+			BCADGraphCell cell = (BCADGraphCell) it.next();
 			cnt++;
-			if (!needMesh(s))
+			if (!needMesh(cell))
 				continue;
 			logger.debug("Edge "+cnt+"/"+nrEdges);
-			s.discretize(this);
-			Storage.writeEdge(s, this, model.getOutputDir(this));
+			cell.discretize(this);
+			Storage.writeEdge(cell, this, model.getOutputDir(this));
 		}
 	}
 
@@ -274,21 +248,21 @@ public class BSubMesh
 		int nrFaces = 0;
 		for (Iterator it = shapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 		{
-			BCADGraphCell s = (BCADGraphCell) it.next();
-			if (s.hasConstraints(this))
+			BCADGraphCell cell = (BCADGraphCell) it.next();
+			if (cell.hasConstraints(this))
 				nrFaces++;
 		}
 		int cnt = 0;
 		for (Iterator it = shapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 		{
-			BCADGraphCell s = (BCADGraphCell) it.next();
+			BCADGraphCell cell = (BCADGraphCell) it.next();
 			cnt++;
-			if (!needMesh(s))
+			if (!needMesh(cell))
 				continue;
 			logger.info("Face "+cnt+"/"+nrFaces);
-			s.setMesh1D(this, mesh1D);
-			s.discretize(this);
-			Storage.writeFace(s, this, model.getOutputDir(this));
+			cell.setMesh1D(this, mesh1D);
+			cell.discretize(this);
+			Storage.writeFace(cell, this, model.getOutputDir(this));
 		}
 	}
 
@@ -299,8 +273,8 @@ public class BSubMesh
 		int nrSolids = 0;
 		for (Iterator it = shapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
 		{
-			BCADGraphCell s = (BCADGraphCell) it.next();
-			if (!s.hasConstraints(this))
+			BCADGraphCell cell = (BCADGraphCell) it.next();
+			if (!cell.hasConstraints(this))
 				continue;
 			nrSolids++;
 		}
@@ -309,12 +283,12 @@ public class BSubMesh
 		int cnt = 0;
 		for (Iterator it = shapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
 		{
-			BCADGraphCell s = (BCADGraphCell) it.next();
-			if (!needMesh(s))
+			BCADGraphCell cell = (BCADGraphCell) it.next();
+			if (!needMesh(cell))
 				continue;
 			cnt++;
 			logger.info("Solid "+cnt+"/"+nrSolids);
-			s.discretize(this);
+			cell.discretize(this);
 		}
 	}
 
@@ -328,8 +302,8 @@ public class BSubMesh
 		BCADGraphCell root = model.getGraph().getRootCell();
 		for (Iterator ite = root.shapesExplorer(CADShapeEnum.EDGE); ite.hasNext(); )
 		{
-			BCADGraphCell s = (BCADGraphCell) ite.next();
-			SubMesh1D submesh1d = (SubMesh1D) s.getMesh(this);
+			BCADGraphCell cell = (BCADGraphCell) ite.next();
+			SubMesh1D submesh1d = (SubMesh1D) cell.getMesh(this);
 			if (submesh1d == null)
 				continue;
 			for (Iterator itn = submesh1d.getNodesIterator(); itn.hasNext(); )
@@ -341,8 +315,8 @@ public class BSubMesh
 		int i = 0;
 		for (Iterator ite = root.shapesExplorer(CADShapeEnum.EDGE); ite.hasNext(); )
 		{
-			BCADGraphCell s = (BCADGraphCell) ite.next();
-			SubMesh1D submesh1d = (SubMesh1D) s.getMesh(this);
+			BCADGraphCell cell = (BCADGraphCell) ite.next();
+			SubMesh1D submesh1d = (SubMesh1D) cell.getMesh(this);
 			if (submesh1d == null)
 				continue;
 			for (Iterator itn = submesh1d.getNodesIterator(); itn.hasNext(); )
@@ -375,13 +349,13 @@ public class BSubMesh
 		THashMap vertex2Ref = new THashMap(nVertex);
 		for (Iterator itn = root.uniqueShapesExplorer(CADShapeEnum.VERTEX); itn.hasNext(); )
 		{
-			BCADGraphCell s = (BCADGraphCell) itn.next();
-			vertex2Ref.put(s.getShape(), new ArrayList());
+			BCADGraphCell cell = (BCADGraphCell) itn.next();
+			vertex2Ref.put(cell.getShape(), new ArrayList());
 		}
 		for (Iterator ite = root.shapesExplorer(CADShapeEnum.EDGE); ite.hasNext(); )
 		{
-			BCADGraphCell s = (BCADGraphCell) ite.next();
-			SubMesh1D submesh1d = (SubMesh1D) s.getMesh(this);
+			BCADGraphCell cell = (BCADGraphCell) ite.next();
+			SubMesh1D submesh1d = (SubMesh1D) cell.getMesh(this);
 			if (submesh1d == null)
 				continue;
 			Iterator itn = submesh1d.getNodesIterator();
@@ -396,8 +370,8 @@ public class BSubMesh
 		
 		for (Iterator itn = root.uniqueShapesExplorer(CADShapeEnum.VERTEX); itn.hasNext(); )
 		{
-			BCADGraphCell s = (BCADGraphCell) itn.next();
-			CADVertex V = (CADVertex) s.getShape();
+			BCADGraphCell cell = (BCADGraphCell) itn.next();
+			CADVertex V = (CADVertex) cell.getShape();
 			ArrayList vnodelist = (ArrayList) vertex2Ref.get(V);
 			if (vnodelist.size() <= 1)
 				continue;
@@ -458,8 +432,9 @@ public class BSubMesh
 		submesh1.add(c0);
 
 		model.printAllHypothesis();
-		model.compute();
+		model.computeConstraints();
 		model.printConstraints();
 		model.printConstraints(submesh0);
+		model.printConstraints(submesh1);
 	}
 }

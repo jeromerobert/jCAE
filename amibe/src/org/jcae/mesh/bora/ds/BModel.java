@@ -55,7 +55,13 @@ public class BModel
 	private String xmlFile = "model";
 	private String xmlBrepDir;
 	//   List of all hyposthesis
-	public Collection allHypothesis = new LinkedHashSet();
+	private Collection allConstraints = new LinkedHashSet();
+	//   Internal state
+	private int state = 0;
+	//   Valid state values
+	private static int INPUT        = 0;
+	private static int CONSTRAINTS  = 1;
+	private static int TESSELLATION = 2;
 
 	/**
 	 * Bind a CAD representation to a disk directory.
@@ -109,9 +115,9 @@ public class BModel
 		return xmlDir;
 	}
 
-	public String getOutputDir(BSubMesh s)
+	public String getOutputDir(BSubMesh sub)
 	{
-		return xmlDir+File.separator+"s"+s.getId();
+		return xmlDir+File.separator+"s"+sub.getId();
 	}
 
 	public String getOutputFile()
@@ -148,6 +154,8 @@ public class BModel
 
 	public BSubMesh newMesh()
 	{
+		if (state != INPUT)
+			throw new RuntimeException("BModel.newMesh() cannot be called after model has been computed");
 		BSubMesh ret = new BSubMesh(this, cad.getFreeIndex());
 		submesh.add(ret);
 		return ret;
@@ -161,10 +169,17 @@ public class BModel
 		cad.printShapes();
 	}
 
+	public void addConstraint(Constraint cons)
+	{
+		if (state != INPUT)
+			throw new RuntimeException("Constraints cannot be added after model has been computed");
+		allConstraints.add(cons);
+	}
+
 	/**
-	 * Combines all hypothesis and computes meshes.
+  	 * Combines all hypothesis.
 	 */
-	public void compute()
+	public void computeConstraints()
 	{
 		BCADGraphCell root = cad.getRootCell();
 		// Compute implicit constraints
@@ -173,8 +188,8 @@ public class BModel
 			CADShapeEnum cse = (CADShapeEnum) itcse.next();
 			for (Iterator it = root.shapesExplorer(cse); it.hasNext(); )
 			{
-				BCADGraphCell s = (BCADGraphCell) it.next();
-				s.addImplicitConstraints();
+				BCADGraphCell cell = (BCADGraphCell) it.next();
+				cell.addImplicitConstraints();
 			}
 		}
 		// Compute all constraints
@@ -183,10 +198,23 @@ public class BModel
 			CADShapeEnum cse = (CADShapeEnum) itcse.next();
 			for (Iterator it = root.shapesExplorer(cse); it.hasNext(); )
 			{
-				BCADGraphCell s = (BCADGraphCell) it.next();
-				s.combineHypothesis(cse);
+				BCADGraphCell cell = (BCADGraphCell) it.next();
+				cell.combineHypothesis(cse);
 			}
 		}
+		state = CONSTRAINTS;
+	}
+
+	/**
+	 * Combines all hypothesis and computes meshes.
+	 */
+	public void compute()
+	{
+		if (state == INPUT)
+			computeConstraints();
+		else if (state != CONSTRAINTS)
+			throw new RuntimeException("Invalid state: "+state);
+		BCADGraphCell root = cad.getRootCell();
 		// Not really needed, will be useful when edge meshing
 		// is rewritten.
 		for (Iterator it = submesh.iterator(); it.hasNext(); )
@@ -194,9 +222,9 @@ public class BModel
 			BSubMesh sm = (BSubMesh) it.next();
 			for (Iterator its = root.shapesExplorer(CADShapeEnum.VERTEX); its.hasNext(); )
 			{
-				BCADGraphCell s = (BCADGraphCell) its.next();
-				if (s.getMesh(sm) == null)
-					s.setMesh(sm, s.getShape());
+				BCADGraphCell cell = (BCADGraphCell) its.next();
+				if (cell.getMesh(sm) == null)
+					cell.setMesh(sm, cell.getShape());
 			}
 		}
 		logger.debug("Discretize edges");
@@ -217,6 +245,7 @@ public class BModel
 			BSubMesh sm = (BSubMesh) it.next();
 			sm.computeAlgorithms3d();
 		}
+		state = TESSELLATION;
 	}
 
 	/**
@@ -225,9 +254,10 @@ public class BModel
 	public void printAllHypothesis()
 	{
 		System.out.println("List of hypothesis");
-		for (Iterator it = allHypothesis.iterator(); it.hasNext(); )
+		for (Iterator it = allConstraints.iterator(); it.hasNext(); )
 		{
-			Hypothesis h = (Hypothesis) it.next();
+			Constraint cons = (Constraint) it.next();
+			Hypothesis h = cons.getHypothesis();
 			System.out.println(" + ("+Integer.toHexString(h.hashCode())+") "+h);
 		}
 		System.out.println("End list");
@@ -247,9 +277,9 @@ public class BModel
 			String tab = indent.toString();
 			for (Iterator it = root.shapesExplorer(cse); it.hasNext(); )
 			{
-				BCADGraphCell s = (BCADGraphCell) it.next();
-				System.out.println(tab+"Shape "+s);
-				s.printConstraints(tab+"    + ");
+				BCADGraphCell cell = (BCADGraphCell) it.next();
+				System.out.println(tab+"Shape "+cell);
+				cell.printConstraints(tab+"    + ");
 			}
 			indent.append("  ");
 		}
@@ -270,12 +300,12 @@ public class BModel
 			String tab = indent.toString();
 			for (Iterator it = root.shapesExplorer(cse); it.hasNext(); )
 			{
-				BCADGraphCell s = (BCADGraphCell) it.next();
-				Constraint c = s.getSubMeshConstraint(sm);
-				if (c != null)
+				BCADGraphCell cell = (BCADGraphCell) it.next();
+				Constraint cons = cell.getSubMeshConstraint(sm);
+				if (cons != null)
 				{
-					System.out.println(tab+"Shape "+s);
-					s.printConstraints(tab+"    + ");
+					System.out.println(tab+"Shape "+cell);
+					cell.printConstraints(tab+"    + ");
 				}
 			}
 			indent.append("  ");

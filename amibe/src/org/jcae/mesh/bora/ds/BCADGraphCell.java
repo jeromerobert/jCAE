@@ -61,6 +61,7 @@ public class BCADGraphCell
 	//   Map { submesh => constraint } applied to this instance:
 	private THashMap constraints = new THashMap();
 	private THashMap implicitConstraints = new THashMap();
+	private THashMap originConstraints = new THashMap();
 	private THashMap resultConstraint = new THashMap();
 
 	private THashMap mesh = new THashMap();
@@ -149,20 +150,20 @@ public class BCADGraphCell
 		System.out.println(parents);
 	}
 
-	// Returns an iterator on geometrical elements of dimension d
-	public Iterator shapesExplorer(CADShapeEnum d)
+	// Returns an iterator on geometrical elements of a given type
+	public Iterator shapesExplorer(CADShapeEnum cse)
 	{
-		return shapesExplorer(d, new THashSet(keepOrientation));
+		return shapesExplorer(cse, new THashSet(keepOrientation));
 	}
-	// Returns an iterator on unique geometrical elements of dimension d
-	public Iterator uniqueShapesExplorer(CADShapeEnum d)
+	// Returns an iterator on unique geometrical elements of a given type
+	public Iterator uniqueShapesExplorer(CADShapeEnum cse)
 	{
-		return shapesExplorer(d, new THashSet());
+		return shapesExplorer(cse, new THashSet());
 	}
-	// Returns an iterator on all geometrical elements of dimension d
-	public Iterator allShapesIterator(CADShapeEnum d)
+	// Returns an iterator on all geometrical elements of a given type
+	public Iterator allShapesIterator(CADShapeEnum cse)
 	{
-		return shapesExplorer(d, null);
+		return shapesExplorer(cse, null);
 	}
 	private Iterator shapesExplorer(final CADShapeEnum cse, final Collection cadShapeSet)
 	{
@@ -250,12 +251,12 @@ public class BCADGraphCell
 		};
 	}
 
-	public void addSubMeshConstraint(BSubMesh s, Constraint c)
+	void addSubMeshConstraint(BSubMesh sub, Constraint cons)
 	{
-		constraints.put(s, c);
-		// For convenience, constraints contain a link to all
-		// BSubMesh instances in which they appear.
-		c.addSubMesh(s);
+		// Only one explicit constraint per submesh is allowed
+		if (constraints.get(sub) != null)
+			throw new RuntimeException("Constraint "+cons+" cannot be applied to shape "+shape+", another constraint "+constraints.get(sub)+" is already defined");
+		constraints.put(sub, cons);
 	}
 	
 	private static class BuildConstraintToSubMeshMapProcedure implements TObjectObjectProcedure
@@ -298,29 +299,50 @@ public class BCADGraphCell
 				for (Iterator itc = map.entrySet().iterator(); itc.hasNext(); )
 				{
 					Map.Entry e = (Map.Entry) itc.next();
-					Constraint c = (Constraint) e.getKey();
-					Constraint derived = c.newConstraint(cse);
+					Constraint cons = (Constraint) e.getKey();
+					Constraint derived = cons.newConstraint(cse);
 					THashSet smSet = (THashSet) e.getValue();
 					assert smSet != null;
 					for (Iterator itsm = smSet.iterator(); itsm.hasNext(); )
 					{
 						BSubMesh sm = (BSubMesh) itsm.next();
 						THashSet subsmSet = (THashSet) sub.implicitConstraints.get(sm);
+						THashSet originSet = (THashSet) sub.originConstraints.get(sm);
 						if (subsmSet == null)
 						{
 							subsmSet = new THashSet();
 							sub.implicitConstraints.put(sm, subsmSet);
+							assert originSet == null;
+							originSet = new THashSet();
+							sub.originConstraints.put(sm, originSet);
+
+							if (sub.reversed != null)
+							{
+								sub.reversed.implicitConstraints.put(sm, subsmSet);
+								sub.reversed.originConstraints.put(sm, originSet);
+							}
 						}
-						subsmSet.add(derived);
+
+						Constraint origin = derived.getOrigin();
+						if (origin != null)
+						{
+							if (!originSet.contains(origin))
+							{
+								originSet.add(origin);
+								subsmSet.add(derived);
+							}
+						}
+						else
+							subsmSet.add(derived);
 					}
 				}
 			}
 		}
 	}
 
-	public Constraint getSubMeshConstraint(BSubMesh s)
+	public Constraint getSubMeshConstraint(BSubMesh sub)
 	{
-		return (Constraint) constraints.get(s);
+		return (Constraint) constraints.get(sub);
 	}
 
 	public Collection setOfSubMesh()
@@ -332,53 +354,53 @@ public class BCADGraphCell
 	{
 		for (Iterator its = implicitConstraints.keySet().iterator(); its.hasNext(); )
 		{
-			BSubMesh s = (BSubMesh) its.next();
+			BSubMesh sub = (BSubMesh) its.next();
 			LinkedHashSet mh = new LinkedHashSet();
-			Constraint c = (Constraint) constraints.get(s);
-			if (c != null)
-				mh.add(c);
-			THashSet h = (THashSet) implicitConstraints.get(s);
+			Constraint cons = (Constraint) constraints.get(sub);
+			if (cons != null)
+				mh.add(cons);
+			THashSet h = (THashSet) implicitConstraints.get(sub);
 			if (h != null)
 				for (Iterator it = h.iterator(); it.hasNext(); )
 					mh.add(it.next());
-			resultConstraint.put(s, ResultConstraint.combineAll(mh, d));
+			resultConstraint.put(sub, ResultConstraint.combineAll(mh, d));
 		}
 	}
 
-	public boolean hasConstraints(BSubMesh s)
+	public boolean hasConstraints(BSubMesh sub)
 	{
-		return resultConstraint.get(s) != null;
+		return resultConstraint.get(sub) != null;
 	}
 
-	public boolean discretize(BSubMesh s)
+	public boolean discretize(BSubMesh sub)
 	{
-		ResultConstraint c = (ResultConstraint) resultConstraint.get(s);
-		if (c != null)
-			c.applyAlgorithm(this, s);
+		ResultConstraint cons = (ResultConstraint) resultConstraint.get(sub);
+		if (cons != null)
+			cons.applyAlgorithm(this, sub);
 		return true;
 	}
 
-	public Object getMesh(BSubMesh s)
+	public Object getMesh(BSubMesh sub)
 	{
-		return mesh.get(s);
+		return mesh.get(sub);
 	}
 
-	public void setMesh(BSubMesh s, Object m)
+	public void setMesh(BSubMesh sub, Object m)
 	{
-		mesh.put(s, m);
+		mesh.put(sub, m);
 	}
 
-	public MMesh1D getMesh1D(BSubMesh s)
+	public MMesh1D getMesh1D(BSubMesh sub)
 	{
-		return (MMesh1D) mesh1D.get(s);
+		return (MMesh1D) mesh1D.get(sub);
 	}
 
-	public void setMesh1D(BSubMesh s, MMesh1D m)
+	public void setMesh1D(BSubMesh sub, MMesh1D m)
 	{
-		mesh1D.put(s, m);
+		mesh1D.put(sub, m);
 	}
 
-	private static class PrintProcedure implements TObjectObjectProcedure
+	private class PrintProcedure implements TObjectObjectProcedure
 	{
 		private final String header;
 		private PrintProcedure(String h)
@@ -387,9 +409,9 @@ public class BCADGraphCell
 		}
 		public boolean execute(Object key, Object val)
 		{
-			BSubMesh s = (BSubMesh) key;
-			Constraint c = (Constraint) val;
-			System.out.println(header+" submesh "+s.getId()+" "+c);
+			BSubMesh sub = (BSubMesh) key;
+			Constraint cons = (Constraint) val;
+			System.out.println(header+" submesh "+sub.getId()+" "+cons);
 			return true;
 		}
 	}
@@ -403,15 +425,15 @@ public class BCADGraphCell
 		}
 		public boolean execute(Object key, Object val)
 		{
-			BSubMesh s = (BSubMesh) key;
+			BSubMesh sub = (BSubMesh) key;
 			THashSet h = (THashSet) val;
 			StringBuffer r = new StringBuffer();
 			for (Iterator it = h.iterator(); it.hasNext(); )
 			{
-				Constraint c = (Constraint) it.next();
-				r.append(" constraint "+c.getOrigin());
+				Constraint cons = (Constraint) it.next();
+				r.append(" implicit "+cons.getOrigin());
 			}
-			System.out.println(header+" submesh "+s.getId()+" ["+r.toString()+"]");
+			System.out.println(header+" submesh "+sub.getId()+" ["+r.toString()+"]");
 			return true;
 		}
 	}
@@ -509,7 +531,7 @@ public class BCADGraphCell
 
 	public String toString()
 	{
-		String ret = id+" "+shape+" "+orientation;
+		String ret = id+" "+shape+" "+orientation+" "+Integer.toHexString(hashCode());
 		if (reversed != null)
 			ret += " rev="+Integer.toHexString(reversed.hashCode());
 		return ret;
