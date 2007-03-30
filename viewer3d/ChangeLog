@@ -1,23 +1,40 @@
+2007-02-19 11:35:45  tag V0_14
+
 2007-02-19 11:35:45  Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/OEMMViewer.java: Break circular dependency
-	by moving amibe/src/org/jcae/mesh/oemm/OEMMViewer.java into
-	viewer3d/src/org/jcae/viewer3d/OEMMViewer.java; jcae-viewer3d now
-	depends on jcae.jar.
+	  by moving amibe/src/org/jcae/mesh/oemm/OEMMViewer.java into
+	  viewer3d/src/org/jcae/viewer3d/OEMMViewer.java; jcae-viewer3d now
+	  depends on jcae.jar.
+
+2007-02-13 17:24:00  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/OEMMBehavior.java,
+	  src/org/jcae/viewer3d/View.java: Add a dynamic OEMM viewer
 
 2007-02-12 17:16:48  Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/bg/ViewableBG.java: In pickSolid(),
-	picking an already selected cell unselects it.
+	  picking an already selected cell unselects it.
 
-2007-02-08 15:04  jeromerobert
+2007-02-12 10:48:00  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/ViewBehavior.java,
+	  src/org/jcae/viewer3d/ViewPyramid.java: Refactor view pyramid
+	  computation to use it in both oemm and clipping plane
+
+	* src/org/jcae/viewer3d/FPSBehavior.java,
+	  src/org/jcae/viewer3d/test/FPSCounterTest.java:
+	  Add classes to measure FPS in a Java3D scene
+
+2007-02-08 15:04:00  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* *: Remove deprecated API uses and clean code
 
 	* src/org/jcae/viewer3d/*:
 	  Allow to unselect (contrib Erwann Feat)
 
-2007-02-08 12:52  Jerome Robert <jeromerobert@users.sourceforge.net>
+2007-02-08 12:52:00  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/ViewBehavior.java: Take focal into account
 	  to compute axis size
@@ -48,6 +65,7 @@
 
 	* *: Switch to subversion
 
+2006-05-17 14:41:12  tag V0_13_2
 2006-05-17 14:41:12  tag V0_13_1
 
 2006-05-17 14:41:12  Jerome Robert <jeromerobert@users.sourceforge.net>
