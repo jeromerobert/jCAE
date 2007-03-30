@@ -1,7 +1,34 @@
+2007-03-30 07:42  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src-java/test/Test4.java, src/BRepBuilderAPI.i, src/BRepTools.i,
+	  src/gp.i: Add BRepTools_Quilt and gp_Circ, allow to create holed
+	  faces and circles
+
+2007-03-07 09:12:00  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/BRepPrimAPI.i: Add BRepPrimAPI_MakePrism
+
+2006-11-20 11:19:00  Denis Barbier <barbier@users.sourceforge.net>
+
+	* src-java/test/Test1.java: Compute vertex1 parameters on the
+	  surface
+
+2006-11-20 10:49:00  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src-java/test/Test1.java, src/BRep.i, src/BRep_Tool.i,
+	  src/Makefile.am, src/OccJava.i, src/TopoDS.i: Allow to set UV
+	  coords of a vertex on a face. Move some class as I would like to
+	  have one .i file by OCC package.
+
+2006-10-23 15:00:47  tag V0_13_2
+
 2006-10-23 15:00:47  Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/GeomLProp_SLProps.i:
 	  Really fix GLProp_SLProp::normal
+
+2006-04-07 14:03:35  tag V0_13_1
+2006-04-07 14:03:35  tag V0_13
 
 2006-04-07 14:03:35  Jerome Robert <jeromerobert@users.sourceforge.net>
 
