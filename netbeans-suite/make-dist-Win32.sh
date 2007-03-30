@@ -12,7 +12,7 @@ set ZFACTORABS=0
 set ZFACTORREL=0
 set MMGT_OPT=0
 set jcaeHome=%~dp0
-set PATH=%jcaeHome%OpenCASCADE6.2.0/ros/win32/bin;%jcaeHome%jcae/modules/ext/;%PATH%
+set PATH=%jcaeHome%OpenCASCADE6.2.0/ros/win32/bin;%jcaeHome%jcae/modules/lib/;%PATH%
 "%jcaeHome%/bin/jcae" --jdkhome "%jcaeHome%/$JAVA_NAME" -J-Xmx%MEMORY% -J-Djavax.media.j3d.zFactorAbs=%ZFACTORABS% -J-Djavax.media.j3d.zFactorRel=%ZFACTORREL%
 EOF
 

@@ -14,7 +14,7 @@ ZFACTORREL=2
 MMGT_OPT=0
 export MMGT_OPT
 jcaeHome=\`dirname \$0\`
-LD_LIBRARY_PATH=\$jcaeHome/OpenCASCADE6.2.0/ros/Linux/lib:\$jcaeHome/jcae/modules/ext/:\$LD_LIBRARY_PATH
+LD_LIBRARY_PATH=\$jcaeHome/OpenCASCADE6.2.0/ros/Linux/lib:\$jcaeHome/jcae/modules/lib/:\$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH
 \$jcaeHome/bin/jcae --jdkhome \$jcaeHome/$JAVA_NAME -J-Xmx\$MEMORY -J-Djavax.media.j3d.zFactorAbs=\$ZFACTORABS -J-Djavax.media.j3d.zFactorRel=\$ZFACTORREL
 EOF
