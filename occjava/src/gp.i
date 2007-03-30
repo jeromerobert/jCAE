@@ -320,3 +320,12 @@ class gp_Trsf
     free(ns);
     $result=jarray;
 }
+
+%{#include <gp_Circ.hxx>%}
+%rename(GP_Circ) gp_Circ;
+class gp_Circ
+{
+    public:
+    gp_Circ(const gp_Ax2& A2,const Standard_Real Radius);
+};
+
