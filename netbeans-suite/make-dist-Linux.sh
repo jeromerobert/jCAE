@@ -21,7 +21,7 @@ EOF
 
 chmod +x jcae.sh
 
-cp -r /usr/lib/jvm/java-6-sun/jre/ $JAVA_NAME
+ln -s ../jre-6-Linux/ $JAVA_NAME
 rm -rf $JAVA_NAME/plugin $JAVA_NAME/javaw $JAVA_NAME/lib/i386/client/classes.jsa
 mkdir -p OpenCASCADE6.2.0/ros/Linux/
 ln -s $CASROOT/../LICENSE OpenCASCADE6.2.0/LICENSE
@@ -32,5 +32,6 @@ mv tmp/* .
 rmdir tmp
 
 cd ..
+rm $VERSION-Linux.tar.bz2
 tar cvfj $VERSION-Linux.tar.bz2 --totals --owner 0 --group 0 -h $VERSION
 

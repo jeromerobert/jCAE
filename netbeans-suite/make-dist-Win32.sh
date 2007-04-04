@@ -17,6 +17,7 @@ set PATH=%jcaeHome%OpenCASCADE6.2.0/ros/win32/bin;%jcaeHome%jcae/modules/lib/;%P
 EOF
 
 ln -s ../jre-6-win32/ $JAVA_NAME
+rm -rf $JAVA_NAME/plugin $JAVA_NAME/javaw $JAVA_NAME/lib/i386/client/classes.jsa
 mkdir -p OpenCASCADE6.2.0/ros/win32
 ln -s $CASROOT/../LICENSE OpenCASCADE6.2.0/LICENSE
 ln -s $CASROOT/win32-jcae/bin/ OpenCASCADE6.2.0/ros/win32/bin
@@ -27,5 +28,6 @@ rmdir tmp
 
 cd ..
 
+rm $VERSION-win32.zip
 zip -9r "$VERSION-win32.zip" "$VERSION"
 
