@@ -78,17 +78,17 @@ public class MeshToUNVConvert extends JCAEXMLData
 	
 	public void writeNode(int label, double [] coord)
 	{
-		UNVConverter.writeSingleNodeUNV(streamN, label+1, coord[0], coord[1], coord[2]);
+		MeshExporter.writeSingleNodeUNV(streamN, label+1, coord[0], coord[1], coord[2]);
 	}
 	
 	public void writeTriangle(int label, int [] ind)
 	{
-		UNVConverter.writeSingleTriangleUNV(streamT, label+1, ind[0]+1, ind[1]+1, ind[2]+1);
+		MeshExporter.writeSingleTriangleUNV(streamT, label+1, ind[0]+1, ind[1]+1, ind[2]+1);
 	}
 	
 	public void writeGroup(String name, int first, int count)
 	{
-		UNVConverter.writeSingleGroupUNV(streamG, name, first+1, count);
+		MeshExporter.writeSingleGroupUNV(streamG, name, first+1, count);
 	}
 	
 	public void finish(int nr, int nrIntNodes, int nrTriangles, double [] coordRefs)
@@ -96,7 +96,7 @@ public class MeshToUNVConvert extends JCAEXMLData
 		int nrNodes = nrIntNodes + nr;
 		logger.debug("Append coordinates of "+nr+" nodes");
 		for (int i = 0; i < nr; i++)
-			UNVConverter.writeSingleNodeUNV(streamN, i+nrIntNodes+1, coordRefs[3*i], coordRefs[3*i+1], coordRefs[3*i+2]);
+			MeshExporter.writeSingleNodeUNV(streamN, i+nrIntNodes+1, coordRefs[3*i], coordRefs[3*i+1], coordRefs[3*i+2]);
 		try
 		{
 			streamN.println("    -1");

@@ -22,7 +22,7 @@ package org.jcae.mesh.bora.algo;
 
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.bora.ds.BSubMesh;
-import org.jcae.mesh.xmldata.UNVConverter;
+import org.jcae.mesh.xmldata.MeshExporter;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import org.apache.log4j.Logger;
@@ -79,7 +79,7 @@ public class Netgen implements AlgoInterface
 	{
 		logger.info("Running TetGen "+banner);
 		// mesh.export(s, "tetgen.poly", ExportMesh.FORMAT_POLY);
-		new UNVConverter(mesh.getGraph().getModel().getOutputDir(s)).writeSTL("netgen.stl");
+		new MeshExporter.STL(mesh.getGraph().getModel().getOutputDir(s)).write("netgen.stl");
 		try {
 			Process p = Runtime.getRuntime().exec(new String[] {"netgen", "-batchmode", "-meshfile=netgen.mesh", "-geofile=netgen.stl"});
 			p.waitFor();

@@ -146,11 +146,11 @@ public class MeshReader
 				pt3.setLink(facelist[i]);
 			}
 			fcT.close();
-			UNVConverter.clean(bbT);
+			MeshExporter.clean(bbT);
 			fcN.close();
-			UNVConverter.clean(bbN);
+			MeshExporter.clean(bbN);
 			fcR.close();
-			UNVConverter.clean(bbR);
+			MeshExporter.clean(bbR);
 			//  Build adjacency relations
 			mesh.buildAdjacency(nodelist, -1.0);
 		}
@@ -196,7 +196,7 @@ public class MeshReader
 			int [] refs = new int[numberOfReferences];
 			refsBuffer.get(refs);
 			fcR.close();
-			UNVConverter.clean(bbR);
+			MeshExporter.clean(bbR);
 			
 			String nodesFile = xpath.evaluate("file/@location", submeshNodes);
 			if (nodesFile.charAt(0) != File.separatorChar)
@@ -236,7 +236,7 @@ public class MeshReader
 				}
 			} 
 			fcN.close();
-			UNVConverter.clean(bbN);
+			MeshExporter.clean(bbN);
 			
 			Node submeshTriangles = (Node) xpath.evaluate("triangles",
 				submeshElement, XPathConstants.NODE);
@@ -263,7 +263,7 @@ public class MeshReader
 				pt3.setLink(facelist[i]);
 			}
 			fcT.close();
-			UNVConverter.clean(bbT);
+			MeshExporter.clean(bbT);
 			
 			Node groupsElement = (Node) xpath.evaluate("groups", submeshElement,
 				XPathConstants.NODE);
@@ -293,7 +293,7 @@ public class MeshReader
 					facelist[groupsBuffer.get(fileOffset+j)].setGroupId(id);
 			}
 			fcG.close();
-			UNVConverter.clean(bbG);
+			MeshExporter.clean(bbG);
 			//  Build adjacency relations
 			if (buildAdj)
 				mesh.buildAdjacency(nodelist, ridgeAngle);

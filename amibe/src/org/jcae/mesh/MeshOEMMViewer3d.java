@@ -25,17 +25,12 @@ import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.OEMMNode;
 import org.jcae.mesh.oemm.Storage;
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.MMesh3D;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.xmldata.MeshWriter;
-import org.jcae.mesh.xmldata.MMesh3DReader;
-import org.jcae.mesh.xmldata.UNVConverter;
 import org.jcae.mesh.amibe.validation.*;
 import org.apache.log4j.Logger;
 
 import java.io.File;
-import java.io.DataOutputStream;
-import java.io.BufferedOutputStream;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Iterator;

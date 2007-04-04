@@ -363,11 +363,11 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			nodeOffset += numberOfNodes - numberOfReferences;
 			nrTriangles += numberOfFaces;
 			fcT.close();
-			UNVConverter.clean(bbT);
+			MeshExporter.clean(bbT);
 			fcN.close();
-			UNVConverter.clean(bbN);
+			MeshExporter.clean(bbN);
 			fcR.close();
-			UNVConverter.clean(bbR);
+			MeshExporter.clean(bbR);
 			
 		}
 		catch(Exception ex)

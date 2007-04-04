@@ -24,7 +24,7 @@ import java.util.Iterator;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.MMesh3D;
 import org.jcae.mesh.xmldata.MMesh3DReader;
-import org.jcae.mesh.xmldata.UNVConverter;
+import org.jcae.mesh.xmldata.MeshExporter;
 import org.jcae.mesh.amibe.validation.*;
 import org.apache.log4j.Logger;
 
@@ -76,6 +76,6 @@ public class MeshValid3D
 		Float defl = new Float(args[3]);
 		check(filename, xmlDir, discr.floatValue(), defl.floatValue());
 		String MESHName=filename.substring(0, filename.lastIndexOf('.'))+".mesh";
-		new UNVConverter(xmlDir).writeMESH(MESHName);
+		new MeshExporter.MESH(xmlDir).write(MESHName);
 	}
 }

@@ -194,17 +194,17 @@ public class MMesh3DReader
 				m3d.addGroup(g);
 			}
 			fcG.close();
-			UNVConverter.clean(bbG);
+			MeshExporter.clean(bbG);
 			fcT.close();
-			UNVConverter.clean(bbT);
+			MeshExporter.clean(bbT);
 			fcN.close();
-			UNVConverter.clean(bbN);
+			MeshExporter.clean(bbN);
 			fcR.close();
-			UNVConverter.clean(bbR);
+			MeshExporter.clean(bbR);
 			if (fcNormals != null)
 			{
 				fcNormals.close();
-				UNVConverter.clean(bbNormals);
+				MeshExporter.clean(bbNormals);
 			}
 		}
 		catch(Exception ex)
@@ -295,7 +295,7 @@ public class MMesh3DReader
 				groups[i] = new MGroup3D(id, name, newfacelist);
 			}
 			fcG.close();
-			UNVConverter.clean(bbG);
+			MeshExporter.clean(bbG);
 			// Now merge groups
 			Document documentGroup = XMLHelper.parseXML(new File(xmlDir, xmlGroupsFile));
 			Node newGroupsElement = (Node) xpath.evaluate("/mergegroups",

@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2004, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.mesh.xmldata;
@@ -60,9 +60,9 @@ import org.apache.log4j.Logger;
  * @author Jerome Robert
  *
  */
-public class UNVConverter
+abstract public class MeshExporter
 {
-	private static Logger logger=Logger.getLogger(UNVConverter.class);
+	private static Logger logger=Logger.getLogger(MeshExporter.class);
 	
 	public static class FormatD25_16 extends DecimalFormat
 	{
@@ -157,35 +157,20 @@ public class UNVConverter
 		System.out.println(FORMAT_D25_16.format(Double.NaN));
 		try
 		{
-			int[] ids=new int[83];
+			int[] ids=new int[2];
 			for(int i=0; i<ids.length; i++)
 			{
 				ids[i]=i;
 			}
 			
-			PrintStream p=new PrintStream(new BufferedOutputStream(new FileOutputStream(new File("/tmp/blub.unv"))));
-			new UNVConverter(new File("/home/usr/local2/home/jerome/"), ids).
-				writeUNV(p);
+			PrintStream p=new PrintStream(new BufferedOutputStream(new FileOutputStream(
+				"/tmp/blub.unv")));
+			new MeshExporter.UNV(new File("/home/jerome/jCAE-cvs-head/FLIGHT0.01/"), ids).
+				write(p);
 			p.close();
-			//	writeUNV(System.out);
-			
-			/*int[] ids=new int[2];
-			for(int i=0; i<ids.length; i++)
-			{
-				ids[i]=i;
-			}
-			new UNVConverter(new File("/home/usr/local2/home/jerome/enorme.2/"), ids).
-				writeUNV(new PrintStream(new BufferedOutputStream(new FileOutputStream(new File("/tmp/blub.unv")))));	
-			*/
-			
-			
-		} catch (ParserConfigurationException e)
-		{
-			e.printStackTrace();
-		} catch (SAXException e)
-		{
-			e.printStackTrace();
-		} catch (IOException e)
+						
+		}
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
@@ -198,8 +183,8 @@ public class UNVConverter
 	private File directory;
 	private Document document;
 	private int[] groupIds;
-	private int[][] groups;
-	private String[] names;
+	protected int[][] groups;
+	protected String[] names;
 	private int numberOfTriangles;
 	
 	/**
@@ -254,7 +239,7 @@ public class UNVConverter
 	 * @param directory The directory which contain the jcae3d file
 	 * @param groupIds The list of ids of groups to convert
 	 */
-	public UNVConverter(File directory, int[] groupIds)
+	protected MeshExporter(File directory, int[] groupIds)
 	{
 		this.directory=directory;
 		this.groupIds=new int[groupIds.length];
@@ -265,9 +250,9 @@ public class UNVConverter
 	 * Convert all groups to UNV
 	 * @param directory The directory which contain the jcae3d file
 	 */
-	public UNVConverter(String directory)
+	protected MeshExporter(String directory)
 	{
-		this.directory=new File(directory);
+		this(new File(directory), null);
 	}
 	
 	private int[] getAllGroupIDs()
@@ -283,7 +268,7 @@ public class UNVConverter
 		return toReturn;
 	}
 	
-	private File getNodeFile()
+	protected File getNodeFile()
 	{
 		Element xmlNodes = (Element) document.getElementsByTagName(
 			"nodes").item(0);
@@ -300,7 +285,7 @@ public class UNVConverter
 		return new File(directory, a);
 	}
 	
-	private File getNormalFile()
+	protected File getNormalFile()
 	{
 		Element xmlNormals = (Element) document.getElementsByTagName(
 			"normals").item(0);
@@ -419,47 +404,7 @@ public class UNVConverter
 		return toReturn;
 	}	
 	
-	public void writeUNV(String fileName)
-	{
-		writeMesh(fileName, "UNV");
-	}
-	
-	public void writeUNV(PrintStream out) throws ParserConfigurationException, SAXException, IOException
-	{
-		writeMesh(out, "UNV");
-	}
-	
-	public void writeMESH(String fileName)
-	{
-		writeMesh(fileName, "MESH");
-	}
-	
-	public void writeMESH(PrintStream out) throws ParserConfigurationException, SAXException, IOException
-	{
-		writeMesh(out, "MESH");
-	}
-	
-	public void writePOLY(String fileName)
-	{
-		writeMesh(fileName, "POLY");
-	}
-	
-	public void writePOLY(PrintStream out) throws ParserConfigurationException, SAXException, IOException
-	{
-		writeMesh(out, "POLY");
-	}
-	
-	public void writeSTL(String fileName)
-	{
-		writeMesh(fileName, "STL");
-	}
-	
-	public void writeSTL(PrintStream out) throws ParserConfigurationException, SAXException, IOException
-	{
-		writeMesh(out, "STL");
-	}
-	
-	private void writeMesh(PrintStream out, String meshType) throws ParserConfigurationException, SAXException, IOException
+	public void write(PrintStream out) throws ParserConfigurationException, SAXException, IOException
 	{
 		document=XMLHelper.parseXML(new File(directory,"jcae3d"));
 		if(groupIds==null)
@@ -467,33 +412,18 @@ public class UNVConverter
 		readGroups();
 		int[] triangle=readTriangles();
 		TIntIntHashMap amibeNodeToUNVNode=new TIntIntHashMap();
-		WriteMeshProcedures proc;
-		if (meshType.equals("UNV"))
-			proc = new WriteMeshUNV();
-		else if (meshType.equals("POLY"))
-			proc = new WriteMeshPOLY();
-		else if (meshType.equals("STL"))
-			proc = new WriteMeshSTL();
-		else
-			proc = new WriteMeshMESH();
-		proc.writeInit(out);
+		writeInit(out);
 		TIntHashSet nodeset = new TIntHashSet(triangle);
 		TIntArrayList nodelist = new TIntArrayList(nodeset.toArray());
 		nodelist.sort();
-		proc.writeNodes(out, nodelist.toNativeArray(), amibeNodeToUNVNode);
+		writeNodes(out, nodelist.toNativeArray(), amibeNodeToUNVNode);
 		TIntIntHashMap amibeTriaToUNVTria=new TIntIntHashMap();
-		proc.writeTriangles(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
-		try
-		{
-			proc.writeNormals(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
-		}
-		catch (Exception e)
-		{
-		}
+		writeTriangles(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
+		writeNormals(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
 		triangle=null;
 		amibeNodeToUNVNode=null;
-		proc.writeGroups(out, amibeTriaToUNVTria);
-		proc.writeFinish(out);
+		writeGroups(out, amibeTriaToUNVTria);
+		writeFinish(out);
 	}
 	
 	/**
@@ -503,9 +433,9 @@ public class UNVConverter
 	 * @throws SAXException
 	 * @throws ParserConfigurationException
 	 */
-	private void writeMesh(String fileName, String meshType)
+	public void write(String fileName)
 	{
-		logger.info("Export into file "+fileName+" (format "+meshType+")");
+		logger.info("Export into file "+fileName+" (format "+getClass().getSimpleName()+")");
 		try
 		{
 			FileOutputStream fos=new FileOutputStream(fileName);
@@ -517,7 +447,7 @@ public class UNVConverter
 			else
 				pstream=new PrintStream(bos);
 
-			writeMesh(pstream, meshType);
+			write(pstream);
 			pstream.close();
 		}
 		catch(IOException e)
@@ -537,28 +467,34 @@ public class UNVConverter
 		}
 	}
 	
-	private abstract class WriteMeshProcedures
+	protected abstract void writeNodes(PrintStream out, int[] nodesID,
+		TIntIntHashMap amibeToUNV) throws IOException;
+	
+	protected abstract void writeTriangles(PrintStream out, int[] triangles,
+		TIntIntHashMap amibeNodeToUNVNode,
+		TIntIntHashMap amibeTriaToUNVTria) throws IOException;
+	
+	protected void writeInit(PrintStream out)
 	{
-		public abstract void writeNodes(PrintStream out, int[] nodesID,
-			TIntIntHashMap amibeToUNV) throws IOException;
-		public abstract void writeTriangles(PrintStream out, int[] triangles,
-			TIntIntHashMap amibeNodeToUNVNode,
-			TIntIntHashMap amibeTriaToUNVTria) throws IOException;
-		public void writeInit(PrintStream out)
-		{
-		}
-		public void writeFinish(PrintStream out)
-		{
-		}
-		public void writeNormals(PrintStream out, int[] triangles,
-			TIntIntHashMap amibeNodeToUNVNode,
-			TIntIntHashMap amibeTriaToUNVTria) throws IOException
-		{
-		}
-		public void writeGroups(PrintStream out,
-			TIntIntHashMap amibeTriaToUNVTria) throws IOException
-		{
-		}
+		//To be implemented by instanciating class
+	}
+	
+	protected void writeFinish(PrintStream out)
+	{
+		//To be implemented by instanciating class
+	}
+	
+	protected void writeNormals(PrintStream out, int[] triangles,
+		TIntIntHashMap amibeNodeToUNVNode,
+		TIntIntHashMap amibeTriaToUNVTria) throws IOException
+	{
+		//To be implemented by instanciating class
+	}
+	
+	protected void writeGroups(PrintStream out,
+		TIntIntHashMap amibeTriaToUNVTria) throws IOException
+	{
+		//To be implemented by instanciating class
 	}
 	
 	public static void writeSingleNodeUNV(PrintStream out, int count, double x, double y, double z)
@@ -592,14 +528,41 @@ public class UNVConverter
 			out.println();
 	}
 	
-	private class WriteMeshUNV extends WriteMeshProcedures
+	public static class UNV extends MeshExporter
 	{
+		public final static int UNIT_METER=1;
+		public final static int UNIT_MM=5;
+		private int unit=1;
+		
+		public UNV(File directory, int[] groupIds)
+		{
+			super(directory, groupIds);
+		}
+		
+		public UNV(String file)
+		{
+			super(file);
+		}
+
+		public void setUnit(int unit)
+		{
+			this.unit=unit;
+		}
+		
 		public void writeInit(PrintStream arg0)
 		{
 			arg0.println("    -1");
 			arg0.println("   164");
-			arg0.println("         1Meter (newton)               2");
-			arg0.println("  1.00000000000000000D+00  1.00000000000000000D+00  1.00000000000000000D+00");
+			if(unit==UNIT_MM)
+			{
+				arg0.println("         5mm (milli-newton)            2");
+				arg0.println("  1.00000000000000000D+03  1.00000000000000000D+03  1.00000000000000000D+00");
+			}
+			else
+			{
+				arg0.println("         1Meter (newton)               2");
+				arg0.println("  1.00000000000000000D+00  1.00000000000000000D+00  1.00000000000000000D+00");				
+			}
 			arg0.println("  2.73149999999999977D+02");
 			arg0.println("    -1");
 		}	
@@ -641,7 +604,6 @@ public class UNVConverter
 		 */
 		public void writeTriangles(PrintStream out, int[] triangles,
 			TIntIntHashMap amibeNodeToUNVNode, TIntIntHashMap amibeTriaToUNVTria)
-			throws IOException
 		{
 			out.println("    -1"+CR+"  2412");
 			int count=0;
@@ -667,7 +629,6 @@ public class UNVConverter
 		 * @param amibeTriaToUNVTria
 		 */
 		public void writeGroups(PrintStream out, TIntIntHashMap amibeTriaToUNVTria)
-			throws IOException
 		{
 			out.println("    -1"+CR+"  2435");
 			for(int i=0;i<groups.length; i++)
@@ -694,10 +655,16 @@ public class UNVConverter
 		}
 	}
 	
-	private class WriteMeshSTL extends WriteMeshProcedures
-	{
-		public void writeNodes(PrintStream out, int[] nodesID, TIntIntHashMap amibeToUNV) throws IOException
+	public static class STL extends MeshExporter
+	{		
+		public STL(File directory, int[] groupIds)
 		{
+			super(directory, groupIds);
+		}
+
+		public STL(String file)
+		{
+			super(file);
 		}
 		
 		/**
@@ -746,19 +713,25 @@ public class UNVConverter
 			out.println("endsolid");
 			logger.info("Total number of triangles: "+count);
 		}
-		
-		/**
-		 * @param out
-		 * @param amibeTriaToUNVTria
-		 */
-		public void writeGroups(PrintStream out, TIntIntHashMap amibeTriaToUNVTria)
-			throws IOException
+
+		protected void writeNodes(PrintStream out, int[] nodesID, TIntIntHashMap amibeToUNV)
 		{
+			//Nothing to do
 		}
 	}
 	
-	private class WriteMeshMESH extends WriteMeshProcedures
+	public static class MESH extends MeshExporter
 	{
+		public MESH(File directory, int[] groupIds)
+		{
+			super(directory, groupIds);
+		}
+		
+		public MESH(String file)
+		{
+			super(file);
+		}		
+		
 		public void writeInit(PrintStream out)
 		{
 			out.println("\nMeshVersionFormatted 1\n\nDimension\n3");
@@ -803,7 +776,6 @@ public class UNVConverter
 		 */
 		public void writeTriangles(PrintStream out, int[] triangles,
 			TIntIntHashMap amibeNodeToUNVNode, TIntIntHashMap amibeTriaToUNVTria)
-			throws IOException
 		{
 			int count=0;
 			for(int i=0; i<groups.length; i++)
@@ -876,8 +848,18 @@ public class UNVConverter
 		}
 	}
 	
-	private class WriteMeshPOLY extends WriteMeshProcedures
+	public static class POLY extends MeshExporter
 	{
+		public POLY(File directory, int[] groupIds)
+		{
+			super(directory, groupIds);
+		}
+		
+		public POLY(String file)
+		{
+			super(file);
+		}
+		
 		public void writeFinish(PrintStream out)
 		{
 			out.println("# Part 3 - hole list");

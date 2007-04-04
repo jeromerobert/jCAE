@@ -40,7 +40,7 @@ import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.mesher.ds.SubMesh1D;
 import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.mesher.ds.MEdge1D;
-import org.jcae.mesh.xmldata.UNVConverter;
+import org.jcae.mesh.xmldata.MeshExporter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -440,7 +440,7 @@ public class Storage
 		int [] refs = new int[numberOfReferences];
 		refsBuffer.get(refs);
 		fcR.close();
-		UNVConverter.clean(bbR);
+		MeshExporter.clean(bbR);
 		return refs;
 	}
 
@@ -474,7 +474,7 @@ public class Storage
 			nodelist[ind].setRef(label);
 		}
 		fcN.close();
-		UNVConverter.clean(bbN);
+		MeshExporter.clean(bbN);
 		logger.debug("end reading "+dir+File.separator+"n"+id);
 		return nodelist;
 	}
@@ -507,7 +507,7 @@ public class Storage
 				pts[j].setLink(face);
 		}
 		fcT.close();
-		UNVConverter.clean(bbT);
+		MeshExporter.clean(bbT);
 	}
 }
 

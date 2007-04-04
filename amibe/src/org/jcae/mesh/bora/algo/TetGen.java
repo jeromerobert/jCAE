@@ -25,7 +25,7 @@ import org.jcae.mesh.bora.ds.BSubMesh;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.bora.xmldata.Storage;
 import org.jcae.mesh.bora.xmldata.MESHReader;
-import org.jcae.mesh.xmldata.UNVConverter;
+import org.jcae.mesh.xmldata.MeshExporter;
 import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -91,7 +91,7 @@ public class TetGen implements AlgoInterface
 		Mesh m = Storage.readAllFaces(root, s);
 		String outDir = "tetgen.tmp"+java.io.File.separator+"s"+s.getId();
 		MeshWriter.writeObject3D(m, outDir, "jcae3d", "brep", root.getGraph().getModel().getCADFile(), 1);
-		new UNVConverter(outDir).writePOLY("tetgen.poly");
+		new MeshExporter.POLY(outDir).write("tetgen.poly");
 		try {
 			String args = "-a"+volume+"pYNEFg";
 			Process p = Runtime.getRuntime().exec(new String[] {tetgenCmd, args, "tetgen"});

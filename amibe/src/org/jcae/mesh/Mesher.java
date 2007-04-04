@@ -356,19 +356,19 @@ public class Mesher
 			{
 				logger.info("Exporting MESH");
 				String MESHName=brepfilename.substring(0, brepfilename.lastIndexOf('.'))+".mesh";
-				new UNVConverter(xmlDir).writeMESH(MESHName);
+				new MeshExporter.MESH(xmlDir).write(MESHName);
 			}
 			if (exportSTLProp.equals("true"))
 			{
 				logger.info("Exporting STL");
 				String STLName=brepfilename.substring(0, brepfilename.lastIndexOf('.'))+".stl";
-				new UNVConverter(xmlDir).writeSTL(STLName);
+				new MeshExporter.STL(xmlDir).write(STLName);
 			}
 			if (exportPOLYProp.equals("true"))
 			{
 				logger.info("Exporting POLY");
 				String MESHName=brepfilename.substring(0, brepfilename.lastIndexOf('.'))+".poly";
-				new UNVConverter(xmlDir).writePOLY(MESHName);
+				new MeshExporter.POLY(xmlDir).write(MESHName);
 			}
 		}
 		if (exportTriangleSoupProp.equals("true"))
