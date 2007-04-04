@@ -56,7 +56,7 @@ public class OCCGeomSurface implements CADGeomSurface
 	public void setParameter(double u, double v)
 	{
 		assert null != myLprop;
-		myLprop.setParameter(u, v);
+		myLprop.setParameters(u, v);
 	}
 	
 	public double [] d1U()

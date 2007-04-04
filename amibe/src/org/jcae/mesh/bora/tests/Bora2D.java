@@ -232,8 +232,8 @@ public class Bora2D
 	{
 		final BModel model = BModelReader.readObject(args[0]);
 		final BSubMesh s = model.newMesh();
-		final View view = new View();
 		JFrame feFrame = new JFrame("Bora Demo");
+		final View view = new View(feFrame);
 		feFrame.setSize(800,600);
 		feFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 

@@ -122,8 +122,8 @@ public class OctreeTestDisplayPLY extends OctreeTest
 		//CheckCoordProcedure checkproc = new CheckCoordProcedure();
 		//r.walk(checkproc);
 		
-		final View view = new View();
 		JFrame feFrame = new JFrame("PLY Viewer Demo");
+		final View view = new View(feFrame);
 		feFrame.setSize(800,600);
 		feFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
