@@ -20,14 +20,20 @@
 
 package org.jcae.netbeans.mesh;
 
+import java.io.IOException;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+import org.jcae.mesh.xmldata.Mesh3dToSoupConvert;
 import org.jcae.mesh.xmldata.MeshToSoupConvert;
 import org.jcae.netbeans.ProcessExecutor;
 import org.jcae.netbeans.Utilities;
+import org.openide.ErrorManager;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 import org.openide.util.actions.CookieAction;
+import org.xml.sax.SAXException;
 
 public final class BuildSoupAction extends CookieAction
 {	
@@ -39,18 +45,14 @@ public final class BuildSoupAction extends CookieAction
 			c.getPrimaryFile().getParent()).getPath();
 		
 		String xmlDir=Utilities.absoluteFileName(c.getMesh().getMeshFile(), reference);
-		String brepName=Utilities.absoluteFileName(c.getMesh().getGeometryFile(), reference);
-		String className="org.jcae.mesh.xmldata.MeshToSoupConvert";
-		String[] cmdLinePre=Settings.getDefault().getCommandLineAlgo();
-		String[] cmdLine=new String[cmdLinePre.length+3];
-		System.arraycopy(cmdLinePre, 0, cmdLine, 0, cmdLinePre.length);
-		int i=cmdLinePre.length;
-		cmdLine[i++]=className;
-		cmdLine[i++]=xmlDir;
-		cmdLine[i++]=brepName;
-		ProcessExecutor pe=new ProcessExecutor(cmdLine);
-		pe.setName("Build soup");
-		pe.start();
+		try
+		{
+			Mesh3dToSoupConvert.convert(xmlDir);
+		}
+		catch (IOException ex)
+		{
+			ErrorManager.getDefault().notify(ex);
+		}
 	}
 	
 	protected int mode()

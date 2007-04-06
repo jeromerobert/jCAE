@@ -45,12 +45,9 @@ public final class BuidOEMMAction extends CookieAction
 			String xmlDir=Utilities.absoluteFileName(
 				c.getMesh().getMeshFile(), reference);
 			
-			String brepName=Utilities.absoluteFileName(
-				c.getMesh().getGeometryFile(), reference);
-			
 			String className="org.jcae.mesh.MeshOEMMIndex";
 			String[] cmdLinePre=Settings.getDefault().getCommandLineAlgo();
-			String[] cmdLine=new String[cmdLinePre.length+6];
+			String[] cmdLine=new String[cmdLinePre.length+5];
 
 			System.arraycopy(cmdLinePre, 0, cmdLine, 0, cmdLinePre.length);
 			int i=cmdLinePre.length;
@@ -60,7 +57,7 @@ public final class BuidOEMMAction extends CookieAction
 			cmdLine[i++]=Integer.toString(bean.getTriangle());
 			cmdLine[i++]=Utilities.absoluteFileName(
 				activatedNodes[0].getName()+".oemm", reference);
-			cmdLine[i++]=brepName;
+
 			cmdLine[i++]=xmlDir;
 
 			// level_max tri_max outDir brep soupDir
