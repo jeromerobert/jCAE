@@ -56,7 +56,8 @@
 			<file name="org-jcae-netbeans-cad-ReverseAction.instance"/>
 			<file name="org-jcae-netbeans-mesh-ComputeMeshAction.instance"/>
 			<file name="org-jcae-netbeans-mesh-FreeEdgesAction.instance"/>
-			<file name="org-jcae-netbeans-mesh-MultipleEdgesAction.instance"/>
+			<file name="org-jcae-netbeans-mesh-ImportUNV.instance"/>
+            <file name="org-jcae-netbeans-mesh-MultipleEdgesAction.instance"/>
             <file name="org-jcae-netbeans-mesh-UNVToUNVAction.instance">
 				<attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.UNVToUNVAction"/>
 			</file>
@@ -87,7 +88,10 @@
 					<file name="org-jcae-netbeans-mesh-FreeEdgesAction.shadow">
                         <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-FreeEdgesAction.instance"/>
                     </file>
-					<file name="org-jcae-netbeans-mesh-MultipleEdgesAction.shadow">
+					<file name="org-jcae-netbeans-mesh-ImportUNV.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-ImportUNV.instance"/>
+                    </file>
+                    <file name="org-jcae-netbeans-mesh-MultipleEdgesAction.shadow">
                         <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-MultipleEdgesAction.instance"/>
                     </file>
 
@@ -116,6 +120,8 @@
                     <attr name="org-jcae-netbeans-mesh-FreeEdgesAction.shadow/sep-2.instance" boolvalue="true"/>
                     <attr name="org-jcae-netbeans-mesh-FreeEdgesAction.shadow/org-jcae-netbeans-mesh-MultipleEdgesAction.shadow" boolvalue="true"/>
                     <attr name="org-jcae-netbeans-mesh-MultipleEdgesAction.shadow/sep-2.instance" boolvalue="true"/>
+                    <attr name="org-jcae-netbeans-mesh-MultipleEdgesAction.shadow/org-jcae-netbeans-mesh-ImportUNV.shadow" boolvalue="true"/>
+                    <attr name="org-jcae-netbeans-mesh-ImportUNV.shadow/sep-2.instance" boolvalue="true"/>
                 </folder>
 			</folder>
 			<folder name="x-unv">

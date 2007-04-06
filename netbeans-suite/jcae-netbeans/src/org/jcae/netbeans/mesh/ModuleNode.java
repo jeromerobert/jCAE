@@ -136,7 +136,10 @@ public class ModuleNode extends AbstractNode
 			{
 				Project p=(Project) getLookup().lookup(Project.class);
 				FileObject fo=p.getProjectDirectory();
-				fo.createData(Utilities.getFreeName(fo,"new","_mesh.xml"));
+				FileObject m=fo.createData(Utilities.getFreeName(fo,"new","_mesh.xml"));
+				MeshDataObject mdo=(MeshDataObject) DataObject.find(m);
+				mdo.getMesh();
+				mdo.save();
 			}
 			
 			public String getName()
