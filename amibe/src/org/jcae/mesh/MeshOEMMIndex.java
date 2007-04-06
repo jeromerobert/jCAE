@@ -37,11 +37,14 @@ public class MeshOEMMIndex
 	private static void check(String brepfilename, int lmax, int triangles_max, String soupDir, String outDir)
 	{
 		logger.info("Reading "+brepfilename);
-		CADShapeBuilder factory = CADShapeBuilder.factory;
-		CADShape shape = factory.newShape(brepfilename);
-		double [] bbox = shape.boundingBox();
 		final OEMM oemm = new OEMM(lmax);
-		oemm.setBoundingBox(bbox);
+		if(brepfilename!=null)
+		{
+			CADShapeBuilder factory = CADShapeBuilder.factory;
+			CADShape shape = factory.newShape(brepfilename);
+			double [] bbox = shape.boundingBox();		
+			oemm.setBoundingBox(bbox);
+		}
 		String soupFile = soupDir+File.separator+"soup";
 		if (!RawStorage.countTriangles(oemm, soupFile))
 		{
@@ -66,14 +69,23 @@ public class MeshOEMMIndex
 	{
 		if (args.length < 4)
 		{
-			System.out.println("Usage: MeshOEMMIndex level_max tri_max outDir brep soupDir");
+			System.out.println("Usage: MeshOEMMIndex level_max tri_max outDir [brep] soupDir");
 			System.exit(0);
 		}
 		Integer lmax = new Integer(args[0]);
 		Integer triangles_max = new Integer(args[1]);
+		
 		String outDir=args[2];
-		String filename=args[3];
-		String soupDir=args[4];
+		String filename=null;
+		String soupDir;
+		if(args.length==5)
+		{
+			filename=args[3];
+			soupDir=args[4];
+		}
+		else
+			soupDir=args[3];
+
 		check(filename, lmax.intValue(), triangles_max.intValue(), soupDir, outDir);
 	}
 }
