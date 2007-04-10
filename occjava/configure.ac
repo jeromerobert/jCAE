@@ -19,12 +19,11 @@
 #  
 #  
 
-AC_PREREQ(2.57)
-AC_INIT(libOccJava)
-AC_CONFIG_SRCDIR([src/OccJava.i])
-AC_CONFIG_HEADERS([config.h:config.h.in])
-
+AC_PREREQ([2.57])
+AC_INIT([src/OccJava.i])
 AM_INIT_AUTOMAKE(libOccJava, 1.0)
+AM_CONFIG_HEADER([config.h:config.h.in])
+
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_INSTALL

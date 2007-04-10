@@ -1,7 +1,9 @@
 2007-04-10 10:59:04  Denis Barbier <barbier@users.sourceforge.net>
 
 	* autogen.sh: Fix bashism, patch by nyholku
-	  https://sourceforge.net/forum/message.php?msg_id=4249115
+	  https://sf.net/forum/message.php?msg_id=4249115
+	* configure.ac: Replace AC_CONFIG_HEADERS by AM_CONFIG_HEADER.
+	  Patch by nyholku https://sf.net/forum/message.php?msg_id=4249115
 
 2007-03-30 07:42  Jerome Robert <jeromerobert@users.sourceforge.net>
 
