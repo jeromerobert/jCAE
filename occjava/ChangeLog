@@ -1,3 +1,8 @@
+2007-04-12 10:35:52  Denis Barbier <barbier@users.sourceforge.net>
+
+	* acsite.m4: Fix JVM detection on Darwin, thanks to nyholku
+	  https://sf.net/forum/message.php?msg_id=4255715
+
 2007-04-10 10:59:04  Denis Barbier <barbier@users.sourceforge.net>
 
 	* autogen.sh: Fix bashism, patch by nyholku

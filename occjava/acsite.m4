@@ -80,18 +80,18 @@ AC_PATH_PROG(_ACJNI_JAVAC, $JAVAC, no)
 test "x$_ACJNI_JAVAC" = xno && AC_MSG_ERROR([$JAVAC could not be found in path])
 
 _ACJNI_FOLLOW_SYMLINKS("$_ACJNI_JAVAC")
-_JTOPDIR=`echo "$_ACJNI_FOLLOWED" | sed -e 's://*:/:g' -e 's:/[[^/]]*$::'`
+_JTOPDIR=`echo "$_ACJNI_FOLLOWED" | sed -e 's://*:/:g' -e 's:/[[^/]]*$::' -e 's:/[[^/]]*$::'`
+_JINC_ARCH=include
 case "$host_os" in
-        darwin*)        _JTOPDIR=`echo "$_JTOPDIR" | sed -e 's:/[[^/]]*$::'`
-                        _JINC="$_JTOPDIR/Headers";;
-        *)              _JINC="$_JTOPDIR/include";;
+        darwin*)        _JINC_ARCH=Headers ;;
 esac
+_JINC="$_JTOPDIR/$_JINC_ARCH"
 if test -f "$_JINC/jni.h"; then
         JNI_INCLUDE_DIRS="$JNI_INCLUDE_DIRS $_JINC"
 else
         _JTOPDIR=`echo "$_JTOPDIR" | sed -e 's:/[[^/]]*$::'`
-        if test -f "$_JTOPDIR/include/jni.h"; then
-                JNI_INCLUDE_DIRS="$JNI_INCLUDE_DIRS $_JTOPDIR/include"
+        if test -f "$_JTOPDIR/$_JINC_ARCH/jni.h"; then
+                JNI_INCLUDE_DIRS="$JNI_INCLUDE_DIRS $_JTOPDIR/$_JINC_ARCH"
         else
                 AC_MSG_ERROR([cannot find java include files])
         fi
@@ -111,8 +111,8 @@ esac
 # add any subdirectories that are present
 for JINCSUBDIR in $_JNI_INC_SUBDIRS
 do
-        if test -d "$_JTOPDIR/include/$JINCSUBDIR"; then
-                JNI_INCLUDE_DIRS="$JNI_INCLUDE_DIRS $_JTOPDIR/include/$JINCSUBDIR"
+        if test -d "$_JTOPDIR/$_JINC_ARCH/$JINCSUBDIR"; then
+                JNI_INCLUDE_DIRS="$JNI_INCLUDE_DIRS $_JTOPDIR/$_JINC_ARCH/$JINCSUBDIR"
         fi
 done
 ])
