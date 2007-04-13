@@ -37,15 +37,22 @@ class BRepPrimAPI_MakeBox : public BRepBuilderAPI_MakeShape
 class BRepPrimAPI_MakeCone : public BRepBuilderAPI_MakeShape
 {
 	public:
-	BRepPrimAPI_MakeCone(const gp_Ax2& Axes,const Standard_Real R1,
-		const Standard_Real R2,const Standard_Real H,const Standard_Real angle);
+	BRepPrimAPI_MakeCone(const gp_Ax2& axes, const Standard_Real baseRadius,
+		const Standard_Real topRadius,const Standard_Real height, const Standard_Real angle);
 };
+
 
 class BRepPrimAPI_MakeCylinder : public BRepBuilderAPI_MakeShape
 {
 	public:
-	BRepPrimAPI_MakeCylinder(const gp_Ax2& Axes,const Standard_Real R,
-		const Standard_Real H,const Standard_Real Angle);
+%javamethodmodifiers BRepPrimAPI_MakeCylinder(const gp_Ax2& axes,const Standard_Real radius,
+		const Standard_Real height,const Standard_Real angle) "
+  /**
+   * @param axes is {X, Y, Z, directionX, directionY, directionZ}
+   */
+public";
+	BRepPrimAPI_MakeCylinder(const gp_Ax2& axes,const Standard_Real radius,
+		const Standard_Real height,const Standard_Real angle);
 };
 
 class BRepPrimAPI_MakeTorus : public BRepBuilderAPI_MakeShape
@@ -58,7 +65,7 @@ class BRepPrimAPI_MakeTorus : public BRepBuilderAPI_MakeShape
 class BRepPrimAPI_MakeSphere : public BRepBuilderAPI_MakeShape
 {
 	public:
-	BRepPrimAPI_MakeSphere(const gp_Pnt& Center,const Standard_Real R);
+	BRepPrimAPI_MakeSphere(const gp_Pnt& center,const Standard_Real radius);
 };
 
 class BRepPrimAPI_MakeSweep  : public BRepBuilderAPI_MakeShape
@@ -68,7 +75,7 @@ class BRepPrimAPI_MakeSweep  : public BRepBuilderAPI_MakeShape
 class BRepPrimAPI_MakePrism  : public BRepPrimAPI_MakeSweep
 {
     public:
-    BRepPrimAPI_MakePrism(const TopoDS_Shape& S,const gp_Vec& V,const
+    BRepPrimAPI_MakePrism(const TopoDS_Shape& baseShape, const gp_Vec& extrudeDirection, const
         Standard_Boolean Copy = Standard_False,
         const Standard_Boolean Canonize = Standard_True);
 
