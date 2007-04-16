@@ -86,6 +86,25 @@ public class ViewableCAD extends ViewableAdaptor
 			this.coloringAttributes = coloringAttributes;
 		}
 	}
+		
+	private static class VertexPickingInfo implements CADPickingInfo
+	{
+		int id;
+		Appearance appearance;
+		Shape3D shape3D;
+		/**
+		 * 
+		 * @param id
+		 * @param appearance
+		 * @param coloringAttributes
+		 */
+		public VertexPickingInfo(int id, Appearance appearance, Shape3D shape3D)
+		{
+			this.id = id;
+			this.appearance = appearance;
+			this.shape3D = shape3D;
+		}
+	}
 	
 	public final static short NONE_SELECTION=0;
 	public final static short DOMAIN_SELECTION=1;
@@ -100,8 +119,10 @@ public class ViewableCAD extends ViewableAdaptor
 	private List selectionListeners=new ArrayList();
 	private Map facesInfo;
 	private Map edgesInfo;
+	private Map verticesInfo;
 	private Collection selectedFaces=new HashSet();
 	private Collection selectedEdges=new HashSet();
+	private Collection selectedVertices=new HashSet();
 	private String name;
 	private LineAttributes lineAttributes=new LineAttributes();
 	/**
@@ -126,12 +147,12 @@ public class ViewableCAD extends ViewableAdaptor
 		for(int i=0;i<domainId.length;i++){
 		
 			switch(domainId[i]){
-			case 0 : //Edges
+			/*case 0 : //Edges
 				branchGroup.addChild(createEdgesNode((CADDomain) provider.getDomain(0)));
 				break;
 			case 1 : //Faces
 				branchGroup.addChild(createFacesNode((CADDomain) provider.getDomain(1)));
-				break;
+				break;*/
 			case 2 : //Vertices
 				branchGroup.addChild(createVerticesNode((CADDomain) provider.getDomain(2)));
 				break;
@@ -210,7 +231,7 @@ public class ViewableCAD extends ViewableAdaptor
 		Logger.getLogger("global").finest(
 			"result.getGeometryArray().getUserData()=" +
 			result.getGeometryArray().getUserData());
-		
+
 		Object o=getPickUserData(result);
 		if((o instanceof FacePickingInfo)&(selectionMode==FACE_SELECTION))
 		{
@@ -224,6 +245,13 @@ public class ViewableCAD extends ViewableAdaptor
 			EdgePickingInfo epi=(EdgePickingInfo) o;
 			boolean toSelect=!selectedEdges.contains(new Integer(epi.id));
 			setEdgeSelected(epi, toSelect);
+			fireSelectionChanged();
+		}
+		else if((o instanceof VertexPickingInfo)&(selectionMode==VERTEX_SELECTION))
+		{
+			VertexPickingInfo epi=(VertexPickingInfo) o;
+			boolean toSelect=!selectedVertices.contains(new Integer(epi.id));
+			setVertexSelected(epi, toSelect);
 			fireSelectionChanged();
 		}
 	}
@@ -334,6 +362,27 @@ public class ViewableCAD extends ViewableAdaptor
 		
 	}
 	
+	private void setVertexSelected(VertexPickingInfo epi, boolean selected)
+	{
+		if(selected)
+		{
+			ColoringAttributes ca=new ColoringAttributes();
+			ca.setColor(new Color3f(Color.YELLOW));
+			PointAttributes pa=new PointAttributes(5f, false);
+			Appearance a=new Appearance();
+			a.setPointAttributes(pa);
+			a.setColoringAttributes(ca);
+			epi.shape3D.setAppearance(a);
+			selectedVertices.add(new Integer(epi.id));
+		}
+		else
+		{
+			epi.shape3D.setAppearance(epi.appearance);
+			selectedVertices.remove(new Integer(epi.id));
+		}
+		
+	}
+	
 	protected void fireSelectionChanged()
 	{
 		
@@ -355,7 +404,7 @@ public class ViewableCAD extends ViewableAdaptor
 	public CADSelection[] getSelection(){
 		return new CADSelection[]{new CADSelection(0,
 				integerCollectionToArray(selectedFaces),integerCollectionToArray(selectedEdges)
-				, new int[0])};
+				, integerCollectionToArray(selectedVertices))};
 	}
 	
 	private Node createEdgesNode(CADDomain domain)
@@ -533,22 +582,56 @@ public class ViewableCAD extends ViewableAdaptor
 		float pointSize=((Float)domain.getMarksTypes()[0]).floatValue();
 		float[] points=domain.getMarks(null);
 		BranchGroup toReturn=new BranchGroup();
-		toReturn.setCapability(BranchGroup.ALLOW_DETACH);
-
-		if(points.length>0)
+		toReturn.setCapability(BranchGroup.ALLOW_DETACH);		
+		int n=0;
+		verticesInfo=new HashMap();
+		PointAttributes pat=new PointAttributes(pointSize, false);
+		for(int i=0; i<points.length/3; i++)
 		{
-			PointArray pa=new PointArray(points.length/3, PointArray.COORDINATES);
+			PointArray pa=new PointArray(1, GeometryArray.COORDINATES);
+			pa.setCoordinates(0, new float[]{points[3*i], points[3*i+1], points[3*i+2]});
+			Appearance a=new Appearance();			
+			a.setPointAttributes(pat);
+			ColoringAttributes ca=new ColoringAttributes(
+				new Color3f(Color.RED),
+				ColoringAttributes.FASTEST);
+			a.setColoringAttributes(ca);
+			
+			Shape3D s3d = new Shape3D(pa, a);
+			s3d.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
+			s3d.setPickable(true);
+			//return a BranchGroup which is the only detachable node.			
+			toReturn.addChild(s3d);
+			
+			//Build Picking Data
+			VertexPickingInfo epi=new VertexPickingInfo(n,a, s3d);
+			verticesInfo.put(new Integer(n), epi); 
+			pa.setUserData(epi);
+			n++;			
+		}
+		
+		/*if(points.length>0)
+		{
+			PointArray pa=new PointArray(points.length/3, GeometryArray.COORDINATES);
 			pa.setCoordinates(0, points);
 			Appearance a=new Appearance();
 			PointAttributes pat=new PointAttributes(pointSize, false);
 			a.setPointAttributes(pat);
 			ColoringAttributes ca=new ColoringAttributes(new Color3f(Color.RED), ColoringAttributes.FASTEST);
 			a.setColoringAttributes(ca);
+			a.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_WRITE);
 			Shape3D s3d = new Shape3D(pa, a);
-			s3d.setPickable(false);
+			s3d.setPickable(true);
 			//return a BranchGroup which is the only detachable node.			
 			toReturn.addChild(s3d);
-		}
+			
+			//Build Picking Data
+			VertexPickingInfo epi=new VertexPickingInfo(n,a,ca);
+			verticesInfo.put(new Integer(n), epi); 
+			pa.setUserData(epi);
+			n++;		
+		}*/
+		org.jcae.viewer3d.MarkUtils.setPickable(toReturn,true);
 		return toReturn;
 	}
 	
@@ -578,7 +661,15 @@ public class ViewableCAD extends ViewableAdaptor
 			EdgePickingInfo epi=(EdgePickingInfo) edgesInfo.get(new Integer(ids[i]));
 			setEdgeSelected(epi, false);
 		}
+		
+		ids=integerCollectionToArray(selectedVertices);
+		for(int i=0; i<ids.length; i++)
+		{
+			VertexPickingInfo epi=(VertexPickingInfo) verticesInfo.get(new Integer(ids[i]));
+			setVertexSelected(epi, false);
+		}
 		fireSelectionChanged();
+		
 	}
 	
 	public void setName(String name)
