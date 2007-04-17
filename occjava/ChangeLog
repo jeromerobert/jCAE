@@ -1,3 +1,13 @@
+2007-04-17 11:04:53  Denis Barbier <barbier@users.sourceforge.net>
+
+	* configure.ac: Remove -Wl,-rpath-link linker flag, it is
+	  not supported on Darwin, environment variables are set
+	  instead.  Thanks to nyholku
+	  https://sf.net/forum/message.php?msg_id=4255715
+	* acsite.m4: We only support javac for now, check it first
+	  before other Java compiler alternatives.  This can be
+	  overridden by JAVAC configure command-line flag.
+
 2007-04-12 10:35:52  Denis Barbier <barbier@users.sourceforge.net>
 
 	* acsite.m4: Fix JVM detection on Darwin, thanks to nyholku

@@ -45,11 +45,18 @@ AC_CHECK_HEADERS([limits.h] [iostream])
 
 # Configuring for Opencascade
 if test -z "$CASROOT" ; then AC_MSG_FAILURE("Opencascade not found"); fi
-CPPFLAGS="${CPPFLAGS} -I${CASROOT}/inc -DLIN -DNO_CXX_EXCEPTION"
-LDFLAGS="${LDFLAGS} -L${CASROOT}/`uname -s`/lib -Wl,-rpath-link,${CASROOT}/`uname -s`/lib"
+occinc="$CASROOT/inc"
+occlib="$CASROOT/`uname -s`/lib"
+CPPFLAGS="${CPPFLAGS} -I$occinc -DLIN -DNO_CXX_EXCEPTION"
+LDFLAGS="${LDFLAGS} -L$occlib"
+# OpenCascade libraries have no -rpath information, set
+# LD_RUN_PATH (or LD_LIBRARY_PATH) so that we can set LIBS
+# to the libs we need, without their dependencies.
+eval "$shlibpath_var=\${$shlibpath_var}\${${shlibpath_var}:+:}\$occlib"
+export $shlibpath_var
 LIBS="${LIBS} -lTKBRep -lTKBool -lTKG2d -lTKG3d -lTKGeomBase -lTKIGES -lTKMath -lTKOffset -lTKXSBase -lTKernel -lTKSTEP -lTKPrim -lTKTopAlgo"
 
-if test -r "${CASROOT}/`uname -s`/lib/libTKMesh.so"
+if test -r "$occlib/libTKMesh.so"
 then
 	LIBS="${LIBS} -lTKMesh"
 fi
