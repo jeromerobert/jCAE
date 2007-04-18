@@ -25,11 +25,7 @@ import java.util.*;
 import java.util.logging.Logger;
 import javax.media.j3d.*;
 import javax.vecmath.Color3f;
-import org.jcae.viewer3d.ColoredDomain;
-import org.jcae.viewer3d.DomainProvider;
-import org.jcae.viewer3d.PickViewable;
-import org.jcae.viewer3d.SelectionListener;
-import org.jcae.viewer3d.ViewableAdaptor;
+import org.jcae.viewer3d.*;
 import org.jcae.viewer3d.cad.occ.OCCFaceDomain;
 
 import com.sun.j3d.utils.geometry.GeometryInfo;
@@ -125,6 +121,9 @@ public class ViewableCAD extends ViewableAdaptor
 	private Collection selectedVertices=new HashSet();
 	private String name;
 	private LineAttributes lineAttributes=new LineAttributes();
+	private Node edgesNode;
+	private Node facesNode;
+	private Node verticesNode;
 	/**
 	 * 
 	 */
@@ -147,14 +146,17 @@ public class ViewableCAD extends ViewableAdaptor
 		for(int i=0;i<domainId.length;i++){
 		
 			switch(domainId[i]){
-			/*case 0 : //Edges
-				branchGroup.addChild(createEdgesNode((CADDomain) provider.getDomain(0)));
+			case 0 : //Edges
+				edgesNode=createEdgesNode((CADDomain) provider.getDomain(0));
+				branchGroup.addChild(edgesNode);
 				break;
 			case 1 : //Faces
-				branchGroup.addChild(createFacesNode((CADDomain) provider.getDomain(1)));
-				break;*/
+				facesNode=createFacesNode((CADDomain) provider.getDomain(1));
+				branchGroup.addChild(facesNode);
+				break;
 			case 2 : //Vertices
-				branchGroup.addChild(createVerticesNode((CADDomain) provider.getDomain(2)));
+				verticesNode=createVerticesNode((CADDomain) provider.getDomain(2));
+				branchGroup.addChild(verticesNode);
 				break;
 			}
 		}
@@ -193,6 +195,26 @@ public class ViewableCAD extends ViewableAdaptor
 	public void setSelectionMode(short mode)
 	{
 		selectionMode=mode;
+		setPickable(verticesNode, mode==VERTEX_SELECTION);
+		setPickable(facesNode, mode==FACE_SELECTION);
+		setPickable(edgesNode, mode==EDGE_SELECTION);
+	}
+		
+	/** Set sub shape3d pickable status */
+	private void setPickable(Node node, boolean b)
+	{
+		if(node instanceof Group)
+		{
+			Group g=(Group)node;
+			for(int i=0; i<g.numChildren(); i++)
+			{
+				setPickable(g.getChild(i), b);
+			}
+		}
+		else if(node instanceof Shape3D)
+		{
+			node.setPickable(b);
+		}
 	}
 	
 	public void setSelectionMode(short mode,boolean unselectAll){
@@ -443,6 +465,7 @@ public class ViewableCAD extends ViewableAdaptor
 			a.setColoringAttributes(ca);
 			shape3d.setAppearance(a);
 			shape3d.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
+			shape3d.setCapability(Node.ALLOW_PICKABLE_WRITE);
 			toReturn.addChild(shape3d);
 			
 			//Build Picking Data
@@ -523,6 +546,7 @@ public class ViewableCAD extends ViewableAdaptor
 				m1.setCapability(Material.ALLOW_COMPONENT_WRITE);			
 				a.setMaterial(m1);			
 				shape3d.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
+				shape3d.setCapability(Node.ALLOW_PICKABLE_WRITE);
 				toReturn.addChild(shape3d);
 				materials.add(m1);
 				
@@ -534,7 +558,8 @@ public class ViewableCAD extends ViewableAdaptor
 				m2.setAmbientColor(new Color3f(Color.GREEN));
 				m2.setCapability(Material.ALLOW_COMPONENT_WRITE);			
 				a.setMaterial(m2);			
-				shape3d.setCapability(Shape3D.ALLOW_GEOMETRY_READ);						
+				shape3d.setCapability(Shape3D.ALLOW_GEOMETRY_READ);	
+				shape3d.setCapability(Node.ALLOW_PICKABLE_WRITE);
 				toReturn.addChild(shape3d);	
 				materials.add(m2);
 				
@@ -562,6 +587,7 @@ public class ViewableCAD extends ViewableAdaptor
 				m1.setCapability(Material.ALLOW_COMPONENT_WRITE);			
 				a.setMaterial(m1);			
 				shape3d.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
+				shape3d.setCapability(Node.ALLOW_PICKABLE_WRITE);
 				toReturn.addChild(shape3d);
 				materials.add(m1);
 				
@@ -599,7 +625,7 @@ public class ViewableCAD extends ViewableAdaptor
 			
 			Shape3D s3d = new Shape3D(pa, a);
 			s3d.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
-			s3d.setPickable(true);
+			s3d.setCapability(Node.ALLOW_PICKABLE_WRITE);
 			//return a BranchGroup which is the only detachable node.			
 			toReturn.addChild(s3d);
 			
@@ -610,28 +636,6 @@ public class ViewableCAD extends ViewableAdaptor
 			n++;			
 		}
 		
-		/*if(points.length>0)
-		{
-			PointArray pa=new PointArray(points.length/3, GeometryArray.COORDINATES);
-			pa.setCoordinates(0, points);
-			Appearance a=new Appearance();
-			PointAttributes pat=new PointAttributes(pointSize, false);
-			a.setPointAttributes(pat);
-			ColoringAttributes ca=new ColoringAttributes(new Color3f(Color.RED), ColoringAttributes.FASTEST);
-			a.setColoringAttributes(ca);
-			a.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_WRITE);
-			Shape3D s3d = new Shape3D(pa, a);
-			s3d.setPickable(true);
-			//return a BranchGroup which is the only detachable node.			
-			toReturn.addChild(s3d);
-			
-			//Build Picking Data
-			VertexPickingInfo epi=new VertexPickingInfo(n,a,ca);
-			verticesInfo.put(new Integer(n), epi); 
-			pa.setUserData(epi);
-			n++;		
-		}*/
-		org.jcae.viewer3d.MarkUtils.setPickable(toReturn,true);
 		return toReturn;
 	}
 	
