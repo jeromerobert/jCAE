@@ -22,6 +22,7 @@ package org.jcae.viewer3d.cad.occ;
 
 import java.awt.Color;
 import java.util.NoSuchElementException;
+import org.jcae.opencascade.Utilities;
 import org.jcae.opencascade.jni.*;
 import org.jcae.viewer3d.Domain;
 import org.jcae.viewer3d.cad.CADDomainAdapator;
@@ -63,7 +64,7 @@ public class OCCProvider implements CADProvider
 	 */
 	public OCCProvider(String fileName)
 	{
-        this(loadShape(fileName));
+        this(Utilities.readFile(fileName));
 	}
 	
 	/**
@@ -105,30 +106,6 @@ public class OCCProvider implements CADProvider
 		provideVertex=provide;
 	}
 	
-	
-	private static TopoDS_Shape loadShape(String fileName)
-	{
-        TopoDS_Shape brepShape;
-        if (fileName.endsWith(".step"))
-        {
-            STEPControl_Reader aReader = new STEPControl_Reader();
-            aReader.readFile(fileName);
-            aReader.nbRootsForTransfer();
-            aReader.transferRoots();
-            brepShape = aReader.oneShape();
-        }
-        else if (fileName.endsWith(".igs"))
-        {
-            IGESControl_Reader aReader = new IGESControl_Reader();
-            aReader.readFile(fileName);
-            aReader.nbRootsForTransfer();
-            aReader.transferRoots();
-            brepShape = aReader.oneShape();
-        }
-        else
-            brepShape = BRepTools.read(fileName, new BRep_Builder());
-        return brepShape;
-	}
 	/* (non-Javadoc)
 	 * @see jcae.viewer3d.DomainProvider#getDomainIDs()
 	 */
