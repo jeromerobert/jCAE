@@ -1,5 +1,6 @@
 package org.jcae.netbeans.mesh;
 
+import java.io.File;
 import java.io.IOException;
 import javax.swing.JFileChooser;
 import org.jcae.mesh.xmldata.UNV2Amibe;
@@ -29,8 +30,14 @@ public final class ImportUNV extends CookieAction
 			String xmlDir=Utilities.absoluteFileName(c.getMesh().getMeshFile(), reference);
 			
 			try
-			{				
-				new UNV2Amibe().importMesh(chooser.getSelectedFile(), xmlDir);
+			{	
+				File selectedFile = chooser.getSelectedFile();
+				String prefix = Utilities.removeExt(selectedFile.getName());				
+				String strp = Utilities.getFreeName(
+					c.getPrimaryFile().getParent(), prefix, "-strp.unv");
+				UNV2Amibe u = new UNV2Amibe();
+				u.setStripedUnv(new File(reference, strp).getPath());
+				u.importMesh(selectedFile, xmlDir);
 				meshNode.refreshGroups();				
 			}
 			catch (IOException ex)

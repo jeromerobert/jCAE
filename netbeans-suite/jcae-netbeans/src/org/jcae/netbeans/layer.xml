@@ -61,7 +61,8 @@
             <file name="org-jcae-netbeans-mesh-UNVToUNVAction.instance">
 				<attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.UNVToUNVAction"/>
 			</file>
-			<file name="org-jcae-netbeans-mesh-smooth-Smooth.instance">
+			<file name="org-jcae-netbeans-mesh-ViewUNV.instance"/>
+            <file name="org-jcae-netbeans-mesh-smooth-Smooth.instance">
 				<attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.smooth.Smooth"/>
 			</file>
 			<file name="org-jcae-netbeans-mesh-BuidOEMMAction.instance">
@@ -126,17 +127,20 @@
 			</folder>
 			<folder name="x-unv">
 				<folder name="Actions">
-					<file name="org-jcae-netbeans-mesh-UNVToUNVAction.shadow">
-						<attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-UNVToUNVAction.instance"/>
-					</file>
-					<attr name="org-jcae-netbeans-mesh-UNVToUNVAction.shadow/org-openide-actions-OpenAction.instance" boolvalue="true"/>
 					<attr name="org-openide-actions-OpenAction.instance/org-openide-actions-FileSystemAction.instance" boolvalue="true"/>
 					<attr name="org-openide-actions-FileSystemAction.instance/sep-1.instance" boolvalue="true"/>
 					<attr name="sep-3.instance/org-openide-actions-SaveAsTemplateAction.instance" boolvalue="true"/>
 					<attr name="org-openide-actions-SaveAsTemplateAction.instance/sep-4.instance" boolvalue="true"/>
 					<attr name="org-openide-actions-ToolsAction.instance/org-openide-actions-PropertiesAction.instance" boolvalue="true"/>
+					<file name="org-jcae-netbeans-mesh-ViewUNV.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-ViewUNV.instance"/>
+                    </file>
+					<attr name="org-jcae-netbeans-mesh-ViewUNV.shadow/org-jcae-netbeans-mesh-UNVToUNVAction.shadow" boolvalue="true"/>
+					<file name="org-jcae-netbeans-mesh-UNVToUNVAction.shadow">
+						<attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-UNVToUNVAction.instance"/>
+					</file>
 					<attr name="org-jcae-netbeans-mesh-UNVToUNVAction.shadow/sep-1.instance" boolvalue="true"/>
-					<file name="sep-1.instance">
+                    <file name="sep-1.instance">
 						<attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
 					</file>
 					<attr name="sep-1.instance/org-openide-actions-CutAction.instance" boolvalue="true"/>
@@ -151,15 +155,16 @@
 					<file name="org-openide-actions-DeleteAction.instance"/>
 					<attr name="org-openide-actions-DeleteAction.instance/org-openide-actions-RenameAction.instance" boolvalue="true"/>
 					<file name="org-openide-actions-RenameAction.instance"/>
-					<attr name="org-openide-actions-RenameAction.instance/sep-3.instance" boolvalue="true"/>
 					<attr name="org-openide-actions-RenameAction.instance/sep-4.instance" boolvalue="true"/>
 					<file name="sep-4.instance">
 						<attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
 					</file>
-					<attr name="sep-4.instance/org-openide-actions-ToolsAction.instance" boolvalue="true"/>
 					<attr name="sep-4.instance/org-openide-actions-PropertiesAction.instance" boolvalue="true"/>
 					<file name="org-openide-actions-PropertiesAction.instance"/>
-				</folder>
+					<attr name="sep-4.instance/org-openide-actions-ToolsAction.instance" boolvalue="true"/>
+					<attr name="org-openide-actions-RenameAction.instance/sep-3.instance" boolvalue="true"/>
+				    <attr name="org-jcae-netbeans-mesh-UNVToUNVAction.shadow/org-openide-actions-OpenAction.instance" boolvalue="true"/>
+                </folder>
 			</folder>
 			<file name="xml_hidden"/>
 		</folder>
