@@ -127,7 +127,7 @@ public class UNV2Amibe
 		
 	private int numberOfNodes, numberOfTriangles;
 	private ArrayList groups=new ArrayList();
-	private PrintStream stripedUnv;
+	private String stripedUnvFile;
 	
 	/** a list of 2412 elements which won't be store in the amibe file */
 	private ArrayList elements=new ArrayList();
@@ -260,7 +260,7 @@ public class UNV2Amibe
 				}
 			}
 		}
-		if(stripedUnv!=null)
+		if(stripedUnvFile!=null)
 			writeStripedUnv(nodeChannel);
 	}
 
@@ -287,7 +287,11 @@ public class UNV2Amibe
 	
 	private void writeStripedUnv(FileChannel nodeChannel) throws IOException
 	{
+		if(elements.size()==0)
+			return;
+		PrintStream stripedUnv=new PrintStream(new FileOutputStream(stripedUnvFile));
 		stripedUnv.println("    -1");
+		stripedUnv.println("   164");
 		stripedUnv.println(unitBlock);
 		stripedUnv.println("    -1");
 		stripedUnv.println("    -1");
@@ -314,6 +318,7 @@ public class UNV2Amibe
 		//write elements
 		stripedUnv.println("    -1");
 		//don't write groups for now :-(
+		stripedUnv.close();
 	}
 
 	/**
@@ -472,9 +477,9 @@ public class UNV2Amibe
 		}
 	}
 	
-	public void setStripedUnv(PrintStream out)
+	public void setStripedUnv(String file)
 	{
-		stripedUnv=out;
+		stripedUnvFile=file;
 	}
 	
 	public static void main(String[] args)
@@ -482,7 +487,7 @@ public class UNV2Amibe
 		try
 		{
 			UNV2Amibe u=new UNV2Amibe();
-			u.setStripedUnv(new PrintStream(new FileOutputStream("/tmp/toto.unv")));
+			u.setStripedUnv("/tmp/toto.unv");
 			u.importMesh("/home/jerome/Models/unv/FlightSMALL.unv", "/tmp");
 		}
 		catch (IOException e)
