@@ -23,10 +23,7 @@ package org.jcae.mesh.xmldata;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.StringTokenizer;
+import java.util.*;
 import org.apache.log4j.Logger;
 
 
@@ -267,7 +264,7 @@ public class UNV2Amibe
 	/** List of nodes used in elements which are not written in the amibe file */
 	private int[] computeListOfNodes()
 	{
-		HashSet hs=new HashSet();
+		TreeSet hs=new TreeSet();
 		for(int i=0; i<elements.size(); i++)
 		{
 			Element e=(Element)elements.get(i);
@@ -301,7 +298,7 @@ public class UNV2Amibe
 		ByteBuffer bb=ByteBuffer.allocate(3*8);
 		for(int i=0; i<nodes.length; i++)
 		{
-			nodeChannel.read(bb, 3*8*nodes[i]);
+			nodeChannel.read(bb, 3*8*(nodes[i]-1));
 			bb.rewind();
 			MeshExporter.writeSingleNodeUNV(stripedUnv, nodes[i],
 				bb.getDouble(), bb.getDouble(), bb.getDouble());
@@ -441,7 +438,7 @@ public class UNV2Amibe
 			st.nextToken(); // face index
 			int type=Integer.parseInt(st.nextToken());
 			//write degenerated triangle if
-			p1 = 0; p2 = 0; p3 = 0;  
+			p1 = 1; p2 = 1; p3 = 1;  
 			switch(type)
 			{
 				case 74:
@@ -487,7 +484,7 @@ public class UNV2Amibe
 		try
 		{
 			UNV2Amibe u=new UNV2Amibe();
-			u.setStripedUnv("/tmp/toto.unv");
+			u.setStripedUnv("/home/jerome/JCAEProject/FlightSMALL1-strp.unv");
 			u.importMesh("/home/jerome/Models/unv/FlightSMALL.unv", "/tmp");
 		}
 		catch (IOException e)
