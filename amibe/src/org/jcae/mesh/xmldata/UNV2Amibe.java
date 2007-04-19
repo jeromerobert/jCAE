@@ -24,21 +24,97 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.StringTokenizer;
 import org.apache.log4j.Logger;
 
 
 /**
  * Convert a UNV mesh to an Amibe mesh.
- * The convertion is out-of-core and can handle large mesh.
- * The nodes and triangles of the input file must have contiguous ids.
- * Only triangles, nodes, and groups are imported.
- * If the input file do not contains any groups, a group with all triangles is
- * created
+ * <ul>
+ * <li>The convertion is out-of-core and can handle large mesh.</li>
+ * <li>The nodes and triangles of the input file must have contiguous ids.</li>
+ * <li>Only triangles, nodes, and groups are imported.</li>
+ * <li>2412-21 (linear beams) and 2412-92 (parabolic trias) are exported as a minimal unv
+ * if setStripedUnv as been called.</li>
+ * <li>If the input file do not contains any groups, a group with all triangles is
+ * created.</li>
+ * </ul>
  * @author Jerome Robert
  */
 public class UNV2Amibe
 {
+	/** A 2412 element which won't be stored into the amibe file */
+	private abstract class Element
+	{
+		private String buffer;
+		protected int[] nodes;
+				
+		protected abstract String parse(BufferedReader in) throws IOException;
+		
+		public Element(String line, BufferedReader in) throws IOException
+		{
+			buffer=line+'\n'+parse(in);
+		}
+		
+		public void write(PrintStream out)
+		{
+			out.println(buffer);
+		}
+		
+		public int getNode(int id)
+		{
+			return nodes[id];
+		}
+		
+		public int getNbNodes()
+		{
+			return nodes.length;
+		}
+	}
+	
+	private class Element21 extends Element
+	{		
+		public Element21(String line, BufferedReader in) throws IOException
+		{
+			super(line, in);
+		}
+
+		protected String parse(BufferedReader in) throws IOException
+		{
+			nodes=new int[2];
+			String l1=in.readLine();
+			String l2=in.readLine();
+			StringTokenizer st=new StringTokenizer(l2);
+			nodes[0]=Integer.parseInt(st.nextToken());
+			nodes[1]=Integer.parseInt(st.nextToken());
+			return l1+'\n'+l2;
+		}		
+	}
+
+	private class Element92 extends Element
+	{		
+		public Element92(String line, BufferedReader in) throws IOException
+		{
+			super(line, in);
+		}
+
+		protected String parse(BufferedReader in) throws IOException
+		{
+			nodes=new int[6];
+			String l1=in.readLine();
+			StringTokenizer st=new StringTokenizer(l1);
+			for(int i=0; i<6; i++)
+				nodes[i]=Integer.parseInt(st.nextToken());
+			
+			return l1;
+		}		
+	}	
+	/**
+	 * Contains informations about groups, which will be written to the
+	 * XML file
+	 */
 	private static class Group
 	{
 		String name;
@@ -47,9 +123,14 @@ public class UNV2Amibe
 	}
 	
 	private static Logger logger=Logger.getLogger(UNV2Amibe.class);
+	private String unitBlock;
 		
 	private int numberOfNodes, numberOfTriangles;
 	private ArrayList groups=new ArrayList();
+	private PrintStream stripedUnv;
+	
+	/** a list of 2412 elements which won't be store in the amibe file */
+	private ArrayList elements=new ArrayList();
 	
 	public void importMesh(String input, String output) throws IOException
 	{
@@ -71,7 +152,7 @@ public class UNV2Amibe
 		File fnode=new File(dir3d, "nodes3d.bin");
 		File ftria=new File(dir3d, "triangles3d.bin");
 		File fgrp=new File(dir3d, "groups.bin");
-		FileChannel cnode=new FileOutputStream(fnode).getChannel();
+		FileChannel cnode=new RandomAccessFile(fnode, "rw").getChannel();
 		FileChannel ctria=new FileOutputStream(ftria).getChannel();
 		FileChannel cgroups=new FileOutputStream(fgrp).getChannel();
 		importMesh(in, cnode, ctria, cgroups);
@@ -84,6 +165,10 @@ public class UNV2Amibe
 		xml.close();
 	}
 	
+	/**
+	 * If the unv do not contains any groups, create one with all
+	 * elements 
+	 */
 	private void checkNoGroup(FileChannel cgroups) throws IOException
 	{
 		if(groups.size()==0)
@@ -140,11 +225,9 @@ public class UNV2Amibe
 		String line;
 		while ((line=in.readLine())!=null)
 		{
-			System.out.println(line);
 			if (line.trim().equals("-1"))
 			{
 				line = in.readLine();
-				System.out.println(line);
 				if (line.trim().equals("2411") || line.trim().equals("781"))
 				{
 					// read nodes
@@ -177,6 +260,60 @@ public class UNV2Amibe
 				}
 			}
 		}
+		if(stripedUnv!=null)
+			writeStripedUnv(nodeChannel);
+	}
+
+	/** List of nodes used in elements which are not written in the amibe file */
+	private int[] computeListOfNodes()
+	{
+		HashSet hs=new HashSet();
+		for(int i=0; i<elements.size(); i++)
+		{
+			Element e=(Element)elements.get(i);
+			for(int j=0; j<e.getNbNodes(); j++)
+				hs.add(Integer.valueOf(e.getNode(j)));					
+		}
+		
+		int[] toReturn=new int[hs.size()];
+		Iterator it=hs.iterator();
+		
+		int k=0;
+		while(it.hasNext())
+			toReturn[k++]=((Integer)it.next()).intValue();
+		
+		return toReturn;
+	}
+	
+	private void writeStripedUnv(FileChannel nodeChannel) throws IOException
+	{
+		stripedUnv.println("    -1");
+		stripedUnv.println(unitBlock);
+		stripedUnv.println("    -1");
+		stripedUnv.println("    -1");
+		stripedUnv.println("  2411");
+		//write nodes
+		int[] nodes=computeListOfNodes();
+		ByteBuffer bb=ByteBuffer.allocate(3*8);
+		for(int i=0; i<nodes.length; i++)
+		{
+			nodeChannel.read(bb, 3*8*nodes[i]);
+			bb.rewind();
+			MeshExporter.writeSingleNodeUNV(stripedUnv, nodes[i],
+				bb.getDouble(), bb.getDouble(), bb.getDouble());
+			bb.rewind();
+		}
+		stripedUnv.println("    -1");
+		stripedUnv.println("    -1");
+		stripedUnv.println("  2412");
+		for(int i=0; i<elements.size(); i++)
+		{
+			Element e=(Element)elements.get(i);
+			stripedUnv.println(e.buffer);
+		}
+		//write elements
+		stripedUnv.println("    -1");
+		//don't write groups for now :-(
 	}
 
 	/**
@@ -222,21 +359,23 @@ public class UNV2Amibe
 		}
 	}
 
-	private static double readUnit(BufferedReader rd) throws IOException
+	private double readUnit(BufferedReader rd) throws IOException
 	{
 		double unit = 1.0;
 		String line = "";
-		//retrieve the second line
+		//retrieve the second line		
 		
+		unitBlock = rd.readLine()+'\n';
 		line = rd.readLine();
-		line = rd.readLine();
-		
+		unitBlock += line +'\n';
+				
 		// fisrt number : the unit
 		StringTokenizer st = new StringTokenizer(line);
 		String unite = st.nextToken();
 		unite = unite.replace('D','E');
-		unit = new Double(unite).doubleValue();
-		while(!(line=rd.readLine().trim()).equals("-1"));
+		unit = Double.parseDouble(unite); 
+		while(!(line=rd.readLine().trim()).equals("-1"))
+			unitBlock += line;
 
 		return unit;
 	}
@@ -289,45 +428,62 @@ public class UNV2Amibe
 		String line = "";
 
 		ByteBuffer bb=ByteBuffer.allocate(3*4);
-		
-		while (!(line=rd.readLine().trim()).equals("-1"))
+		int p1, p2, p3;
+		while (!(line=rd.readLine()).trim().equals("-1"))
 		{
 			// first line: type of object
 			StringTokenizer st = new StringTokenizer(line);
 			st.nextToken(); // face index
-			String type = st.nextToken();
-
-			if (type.equals("74") || type.equals("91"))
+			int type=Integer.parseInt(st.nextToken());
+			//write degenerated triangle if
+			p1 = 0; p2 = 0; p3 = 0;  
+			switch(type)
 			{
-				line=rd.readLine();
-				// triangle
-				st = new StringTokenizer(line);
-				int p1 = Integer.parseInt(st.nextToken());
-				int p2 = Integer.parseInt(st.nextToken());
-				int p3 = Integer.parseInt(st.nextToken());					
-
-				bb.putInt(p1-1);
-				bb.putInt(p2-1);
-				bb.putInt(p3-1);
-				bb.rewind();
-				faceChannel.write(bb);
-				bb.rewind();
-				numberOfTriangles++;
+				case 74:
+				case 91:
+					line=rd.readLine();
+					// triangle
+					st = new StringTokenizer(line);
+					p1 = Integer.parseInt(st.nextToken());
+					p2 = Integer.parseInt(st.nextToken());
+					p3 = Integer.parseInt(st.nextToken());					
+					break;
+				case 94: break; //ignored
+				case 21: //linear beam
+					elements.add(new Element21(line, rd));
+					break;
+				case 92: //parabolic triangles
+					Element92 e=new Element92(line, rd);
+					elements.add(e);
+					p1=e.getNode(0);
+					p2=e.getNode(2);
+					p3=e.getNode(4);					
+					break;
+				default:
+					System.out.println("Warning: Section 2412, type "+type+" unknown");
 			}
-			else if (type.equals("94"))
-			{
-				//ignored
-			}
-			else
-				throw new RuntimeException("Type "+type+" unknown");
+			bb.putInt(p1-1);
+			bb.putInt(p2-1);
+			bb.putInt(p3-1);
+			bb.rewind();
+			faceChannel.write(bb);
+			bb.rewind();
+			numberOfTriangles++;
 		}
+	}
+	
+	public void setStripedUnv(PrintStream out)
+	{
+		stripedUnv=out;
 	}
 	
 	public static void main(String[] args)
 	{
 		try
 		{
-			new UNV2Amibe().importMesh("/tmp/cobraFuselage_0_r16.unv", "/tmp");
+			UNV2Amibe u=new UNV2Amibe();
+			u.setStripedUnv(new PrintStream(new FileOutputStream("/tmp/toto.unv")));
+			u.importMesh("/home/jerome/Models/unv/FlightSMALL.unv", "/tmp");
 		}
 		catch (IOException e)
 		{
