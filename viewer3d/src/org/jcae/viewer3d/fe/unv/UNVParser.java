@@ -24,7 +24,9 @@ public class UNVParser
 	private ArrayList quad4Groups=new ArrayList();
 	private TIntArrayList tria3Indices=new TIntArrayList();
 	private TIntArrayList quad4Indices=new TIntArrayList();
-	private TIntIntHashMap tria3IndicesMap;
+	private TIntIntHashMap tria3IndicesMap, tria6IndicesMap, beam2IndicesMap;
+	private TIntArrayList tria6Indices=new TIntArrayList(); 
+	private TIntArrayList beam2Indices=new TIntArrayList();
 
 	public float[] getNodesCoordinates()
 	{
@@ -44,6 +46,16 @@ public class UNVParser
 	public int[] getTria3Indices()
 	{
 		return tria3Indices.toNativeArray();
+	}
+
+	public int[] getTria6Indices()
+	{
+		return tria6Indices.toNativeArray();
+	}
+
+	public int[] getBeam2Indices()
+	{
+		return beam2Indices.toNativeArray();
 	}
 
 	public String[] getQuad4GroupNames()
@@ -68,6 +80,8 @@ public class UNVParser
 		
 		nodesIndicesMap=new TIntIntHashMap();
 		tria3IndicesMap=new TIntIntHashMap();
+		tria6IndicesMap=new TIntIntHashMap();
+		beam2IndicesMap=new TIntIntHashMap();
 		volumeIndicesMap=new TIntIntHashMap();
 		
 		while ((line = rd.readLine()) != null)
@@ -115,8 +129,10 @@ public class UNVParser
 		nodesIndicesMap=null;
 		tria3IndicesMap=null;
 		volumeIndicesMap=null;
+		tria6IndicesMap=null;
+		beam2IndicesMap=null;
 		tetra4Indices=null;
-		hexa8Indices=null;
+		hexa8Indices=null;		
 	}
 	
 	private void readFace(BufferedReader rd) throws IOException
@@ -126,51 +142,59 @@ public class UNVParser
 		
 		String line;
 
-		while (!(line = rd.readLine().trim()).equals("-1")) {
+		while (!(line = rd.readLine().trim()).equals("-1"))
+		{
 			// first line: type of object
 			StringTokenizer st = new StringTokenizer(line);
-			String index = st.nextToken();
-			String type = st.nextToken();
-			int ind = Integer.parseInt(index);		
+			int ind = Integer.parseInt(st.nextToken());
+			int type = Integer.parseInt(st.nextToken());
 
-			line = rd.readLine(); //RECORD 2
+			line = rd.readLine(); //RECORD 2			
 			
-			if (type.equals("74") || type.equals("91") || type.equals("41"))
-			{				
-				// triangle
-				st = new StringTokenizer(line);	
-				tria3IndicesMap.put(ind, tria3Indices.size()/3);
-				for(int i=0; i<3; i++)
-					tria3Indices.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken()))); 				
-			}			
-			else if (type.equals("111"))
+			switch(type)
 			{
-				st = new StringTokenizer(line);	
-				volumeIndicesMap.put(ind, TETRA4_MASK | (tetra4.size()/4) );
-				for(int i=0; i<4; i++)
-					tetra4.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken())));   
+				case 74:
+				case 91:
+				case 41:
+					// triangle
+					st = new StringTokenizer(line);	
+					tria3IndicesMap.put(ind, tria3Indices.size()/3);
+					for(int i=0; i<3; i++)
+						tria3Indices.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken()))); 									
+					break;
+				case 111:
+					st = new StringTokenizer(line);	
+					volumeIndicesMap.put(ind, TETRA4_MASK | (tetra4.size()/4) );
+					for(int i=0; i<4; i++)
+						tetra4.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken())));   
+					break;
+				case 115:
+					st = new StringTokenizer(line);	
+					volumeIndicesMap.put(ind, HEXA8_MASK | (hexa8.size()/8) );				
+					for(int i=0; i<8; i++)
+						hexa8.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken())));   
+					break;
+				case 21:
+					line=rd.readLine(); //skip          0         1         1
+					st = new StringTokenizer(line);	
+					beam2IndicesMap.put(ind, beam2Indices.size()/2);
+					for(int i=0; i<2; i++)
+						beam2Indices.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken())));
+					break;
+				case 92:
+					st = new StringTokenizer(line);	
+					tria6IndicesMap.put(ind, tria6Indices.size()/3);
+					for(int i=0; i<3; i++)
+					{
+						tria6Indices.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken())));
+						st.nextToken(); //keep only vertex nodes
+					}
+					break;
 			}
-			else if (type.equals("115"))
-			{
-				st = new StringTokenizer(line);	
-				volumeIndicesMap.put(ind, HEXA8_MASK | (hexa8.size()/8) );				
-				for(int i=0; i<8; i++)
-					hexa8.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken())));   
-			}			
 		}
 		
 		tetra4Indices=tetra4.toNativeArray();
-		hexa8Indices=hexa8.toNativeArray();
-		
-		/*PrintStream ps=new PrintStream(new FileOutputStream("/tmp/proutzob"));
-		System.out.println("hexa8: "+(hexa8Indices.length/8.0));
-		for(int i=0; i<hexa8Indices.length; i++)
-		{
-			ps.print(hexa8Indices[i]+" ");
-			if((i+1)%8 == 0)
-				ps.println();
-		}
-		ps.close();*/
+		hexa8Indices=hexa8.toNativeArray();		
 	}
 	
 	private boolean isTetra4(int id)

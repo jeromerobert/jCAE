@@ -32,12 +32,20 @@ public class UNVDomain extends FEDomainAdapter
 	private float[] nodes;
 	private int[] tria3=new int[0];
 	private int[] quad4=new int[0];
-
+	private int[] beam2=new int[0];
+	private int[] tria6=new int[0];
+	
 	public UNVDomain(UNVParser parser, int id, Color color)
 	{
 		this.id=id;
 		this.color=color;
-		if(id<parser.getTria3GroupNames().length)
+		if(id==UNVProvider.OTHERS_GROUP)
+		{
+			nodes=parser.getNodesCoordinates();
+			beam2=parser.getBeam2Indices();
+			tria6=parser.getTria6Indices();	
+		}
+		else if(id<parser.getTria3GroupNames().length)
 		{
 			tria3=readTria3(parser);
 			int[] nodesID=makeNodeIDArray(tria3);
@@ -50,7 +58,7 @@ public class UNVDomain extends FEDomainAdapter
 			int[] nodesID=makeNodeIDArray(quad4);
 			nodes=readNodes(nodesID, parser.getNodesCoordinates());
 			renumberArray(quad4, nodesID);			
-		}
+		}		
 	}
 	
 	/* (non-Javadoc)
@@ -94,6 +102,28 @@ public class UNVDomain extends FEDomainAdapter
 	 */
 	public int getNumberOfQuad4(){
 		return quad4.length/3;
+	}
+	
+	public int getNumberOfBeam2()
+	{
+		System.out.println("beam2: "+beam2.length);
+		return beam2.length;
+	}
+	
+	public int[] getBeam2Indices()
+	{
+		return beam2;
+	}
+	
+	public int getNumberOfTria6()
+	{
+		System.out.println("tria6: "+tria6.length);
+		return tria6.length;
+	}
+	
+	public int[] getTria6()
+	{
+		return tria6;
 	}
 	
 	/*

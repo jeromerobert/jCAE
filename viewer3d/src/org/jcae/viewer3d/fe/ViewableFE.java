@@ -155,7 +155,9 @@ public class ViewableFE extends ViewableAdaptor
 	private void createBranchGroup(FEDomain d)
 	{
 		if(d.getNumberOfTria3()>0)
-			branchGroup.addChild(createTriaBranchGroup(d));		
+			branchGroup.addChild(createTriaBranchGroup(d, false));		
+		if(d.getNumberOfTria6()>0)
+			branchGroup.addChild(createTriaBranchGroup(d, true));		
 		if(d.getNumberOfQuad4()>0)
 			branchGroup.addChild(createQuadBranchGroup(d));
 		else if(d.getNumberOfBeam2()>0)
@@ -408,21 +410,37 @@ public class ViewableFE extends ViewableAdaptor
 		}
 	}
 	
-	private IndexedTriangleArray getGeomForTrianglesGroup(FEDomain domain, float[] nodes)
+	private int[] getTriaIndices(FEDomain domain, boolean parabolic)
 	{
-		if(domain.getNumberOfNodes()==0 || domain.getNumberOfTria3()==0)
-			return null;
-		int[] tria3=new int[domain.getNumberOfTria3()*3];
-		
-		int i=0;
-		Iterator it=domain.getTria3Iterator();
-		while(it.hasNext())
+		if(parabolic)
 		{
-			int[] f=(int[]) it.next();
-			System.arraycopy(f, 0, tria3, i, 3);
-			i+=3;
+			return domain.getTria6();
 		}
+		else
+		{
+			int[] tria3=new int[domain.getNumberOfTria3()*3];
+			
+			int i=0;
+			Iterator it=domain.getTria3Iterator();
+			while(it.hasNext())
+			{
+				int[] f=(int[]) it.next();
+				System.arraycopy(f, 0, tria3, i, 3);
+				i+=3;
+			}
+			return tria3;
+		}
+	}
+	
+	private IndexedTriangleArray getGeomForTrianglesGroup(FEDomain domain, float[] nodes,
+		boolean parabolic)
+	{
+		if(domain.getNumberOfNodes()==0 ||
+			(domain.getNumberOfTria3()==0 && !parabolic) ||
+			(domain.getNumberOfTria6()==0 && parabolic))
+			return null;
 		
+		int[] tria3=getTriaIndices(domain, parabolic);
 		IndexedTriangleArray geom;
 		if(showShapeLine)
 		{
@@ -468,7 +486,7 @@ public class ViewableFE extends ViewableAdaptor
 	 * It creates two Java3D Shapes3D : one for polygons, one for edges.
 	 * @param the Java3D geometry of a Group.
 	 */
-	private BranchGroup createTriaBranchGroup(FEDomain domain)
+	private BranchGroup createTriaBranchGroup(FEDomain domain, boolean parabolic)
 	{
 		BranchGroup toReturn = new BranchGroup();
 		float[] nodes=domain.getNodes();
@@ -477,7 +495,7 @@ public class ViewableFE extends ViewableAdaptor
 		
 		//bouding box computed from GeomInfo are buggy so we do it ourself
 		BoundingBox bb=computeBoundingBox(nodes);
-		IndexedTriangleArray geom = getGeomForTrianglesGroup(domain, nodes);
+		IndexedTriangleArray geom = getGeomForTrianglesGroup(domain, nodes, parabolic);
 
 		//free nodes array because it may be large.
 		nodes=null;
@@ -494,6 +512,11 @@ public class ViewableFE extends ViewableAdaptor
 		
 		if(showShapeLine)
 		{
+			Color c=domain.getColor().darker();
+			if(parabolic)
+				c=c.brighter();
+			else
+				c=c.darker();
 			shapeFillAppearance.setColoringAttributes(new ColoringAttributes(
 				new Color3f(domain.getColor().darker()), ColoringAttributes.FASTEST));
 		}

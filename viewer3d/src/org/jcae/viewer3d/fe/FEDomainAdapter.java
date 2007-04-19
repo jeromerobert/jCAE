@@ -238,17 +238,15 @@ public class FEDomainAdapter implements FEDomain
 	 */
 	public int getNumberOfTria6()
 	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		return 0;
 	}
 
 	/* (non-Javadoc)
 	 * @see jcae.viewer3d.fe.FEDomain#getTria6Iterator()
 	 */
-	public Iterator getTria6Iterator()
+	public int[] getTria6()
 	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		return new int[0];
 	}
 
 	/* (non-Javadoc)

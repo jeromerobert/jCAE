@@ -28,6 +28,7 @@ import org.jcae.viewer3d.fe.FEProvider;
 
 public class UNVProvider implements FEProvider
 {
+	static final int OTHERS_GROUP = Integer.MAX_VALUE-1;
 	private static Palette palette = new Palette(Integer.MAX_VALUE);
 	private UNVParser parser=new UNVParser();
 	private Color[] colors;
@@ -68,14 +69,20 @@ public class UNVProvider implements FEProvider
 	{		
 		int l=parser.getTria3GroupNames().length;
 		int l4=parser.getQuad4GroupNames().length;
-		int[] toReturn=new int[l+l4];
+		int s=l+l4;
+		boolean b=parser.getBeam2Indices().length>0 || parser.getTria6Indices().length>0;
+		if(b) s++;
+		
+		int[] toReturn=new int[s];
 
 		for(int i=0; i<l; i++)
 			toReturn[i]=i;
 
 		for(int i=0; i<l4; i++)
 			toReturn[l+i]=l+i;
-				
+		
+		if(b)
+			toReturn[l+l4]=OTHERS_GROUP;
 		return toReturn;
 	}
 

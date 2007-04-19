@@ -79,7 +79,7 @@ public interface FEDomain extends MarkDomain, ColoredDomain
 	Iterator getTria3Res();
 
 	int getNumberOfTria6();	
-	Iterator getTria6Iterator();
+	int[] getTria6();
 	int getNumberOfTria6Comp();
 	Iterator getTria6Res();
 	
