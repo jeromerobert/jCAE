@@ -21,8 +21,7 @@
 package org.jcae.viewer3d;
 
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.PrintWriter;
 import java.util.*;
@@ -33,6 +32,7 @@ import javax.swing.JDialog;
 import javax.swing.JTextPane;
 import javax.vecmath.*;
 
+import org.jcae.viewer3d.cad.ViewableCAD;
 import org.jdesktop.j3d.utils.behaviors.vp.AxisBehavior;
 import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
 import com.sun.j3d.utils.picking.PickResult;
@@ -51,7 +51,36 @@ import com.sun.j3d.utils.universe.ViewingPlatform;
  */
 public class View extends Canvas3D implements PositionListener
 {
-
+	/** Cheat codes to change polygon offset on CAD */
+	private class PAKeyListener extends KeyAdapter
+	{
+		float offset=1.0f;
+		float offsetRel=1.0f;
+		public void keyPressed(KeyEvent e)
+		{
+			boolean found=true;
+			switch(e.getKeyChar())
+			{
+				case ']': offset *= 2; break;
+				case '[': offset /= 2; break;
+				case '}': offsetRel *= 2; break;
+				case '{': offsetRel /= 2; break;
+				default: found=false;
+			}
+			if(found)
+			{
+				ViewableCAD.polygonAttrFront.setPolygonOffset(offset);
+				ViewableCAD.polygonAttrBack.setPolygonOffset(offset);
+				ViewableCAD.polygonAttrNone.setPolygonOffset(offset);
+				
+				ViewableCAD.polygonAttrFront.setPolygonOffsetFactor(offsetRel);
+				ViewableCAD.polygonAttrBack.setPolygonOffsetFactor(offsetRel);
+				ViewableCAD.polygonAttrNone.setPolygonOffsetFactor(offsetRel);
+				System.out.println("polygon offset: "+offset+" polygon offset factor: "+offsetRel);
+			}
+		}
+	}
+	
 	final public static float FrontClipDistanceFactor=0.005f;
 	final public static float BackClipDistanceFactor=5f;
 	
@@ -259,6 +288,7 @@ public class View extends Canvas3D implements PositionListener
 		getView().setBackClipPolicy(javax.media.j3d.View.PHYSICAL_EYE);
 		
 		zoomTo(0,0,0,1.0f);	
+		addKeyListener(new PAKeyListener());
     }	
 	
 	private void createWidgetsBranchGroup(){

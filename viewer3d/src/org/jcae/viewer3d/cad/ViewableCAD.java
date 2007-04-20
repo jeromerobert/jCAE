@@ -39,7 +39,24 @@ import com.sun.j3d.utils.geometry.Stripifier;
  * @todo all methods must be implemented.
  */
 public class ViewableCAD extends ViewableAdaptor 
-{
+{	
+	public final static PolygonAttributes polygonAttrFront =
+		new PolygonAttributes();
+	public final static PolygonAttributes polygonAttrBack =
+		new PolygonAttributes();
+	public final static PolygonAttributes polygonAttrNone =
+		new PolygonAttributes();
+	
+	static
+	{
+		polygonAttrFront.setCullFace(PolygonAttributes.CULL_FRONT);
+		polygonAttrFront.setCapability(PolygonAttributes.ALLOW_OFFSET_WRITE);
+		polygonAttrBack.setCullFace(PolygonAttributes.CULL_BACK);
+		polygonAttrBack.setCapability(PolygonAttributes.ALLOW_OFFSET_WRITE);
+		polygonAttrNone.setCullFace(PolygonAttributes.CULL_NONE);
+		polygonAttrNone.setCapability(PolygonAttributes.ALLOW_OFFSET_WRITE);
+	}
+	
 	private static interface CADPickingInfo{}
 	
 	private static class FacePickingInfo implements CADPickingInfo
@@ -56,7 +73,6 @@ public class ViewableCAD extends ViewableAdaptor
 		}
 		public FacePickingInfo(int id, Material[] material,Color3f oldColor)
 		{
-			super();
 			this.id = id;
 			this.materials = material;
 			this.oldColor=oldColor;
@@ -487,20 +503,16 @@ public class ViewableCAD extends ViewableAdaptor
 		
 		float factorAbs=20.0f * Float.parseFloat(System.getProperty(
 			"javax.media.j3d.zFactorAbs", "20.0f"));
-		float factorRel=Float.parseFloat(System.getProperty("javax.media.j3d.zFactorRel",
-			"2.0f"));
+		float factorRel=Float.parseFloat(System.getProperty(
+			"javax.media.j3d.zFactorRel", "2.0f"));
 		
-		PolygonAttributes paFront=new PolygonAttributes(
-			PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_FRONT,
-			factorAbs, false, factorRel);	
+		polygonAttrFront.setPolygonOffset(factorAbs);
+		polygonAttrBack.setPolygonOffset(factorAbs);
+		polygonAttrNone.setPolygonOffset(factorAbs);
 
-		PolygonAttributes paBack=new PolygonAttributes(
-			PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_BACK,
-			factorAbs, false, factorRel);	
-
-		PolygonAttributes paNone=new PolygonAttributes(
-			PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE,
-			factorAbs, false, factorRel);	
+		polygonAttrFront.setPolygonOffsetFactor(factorRel);
+		polygonAttrBack.setPolygonOffsetFactor(factorRel);
+		polygonAttrNone.setPolygonOffsetFactor(factorRel);
 		
 		Vector materials=new Vector();//Vector to save Face Materials
 		
@@ -540,7 +552,7 @@ public class ViewableCAD extends ViewableAdaptor
 				Shape3D shape3d=new Shape3D(g);
 				Appearance a=new Appearance();
 				shape3d.setAppearance(a);
-				a.setPolygonAttributes(paFront);
+				a.setPolygonAttributes(polygonAttrFront);
 				Material m1=new Material();
 				m1.setAmbientColor(new Color3f(Color.BLUE));
 				m1.setCapability(Material.ALLOW_COMPONENT_WRITE);			
@@ -553,7 +565,7 @@ public class ViewableCAD extends ViewableAdaptor
 				shape3d=new Shape3D(g);
 				a=new Appearance();
 				shape3d.setAppearance(a);
-				a.setPolygonAttributes(paBack);
+				a.setPolygonAttributes(polygonAttrBack);
 				Material m2=new Material();
 				m2.setAmbientColor(new Color3f(Color.GREEN));
 				m2.setCapability(Material.ALLOW_COMPONENT_WRITE);			
@@ -573,7 +585,7 @@ public class ViewableCAD extends ViewableAdaptor
 				Shape3D shape3d=new Shape3D(g);
 				Appearance a=new Appearance();
 				shape3d.setAppearance(a);
-				a.setPolygonAttributes(paNone);
+				a.setPolygonAttributes(polygonAttrNone);
 				Material m1=new Material();
 				Color3f color=new Color3f(
 						((float)faceColor.getRed())/255
