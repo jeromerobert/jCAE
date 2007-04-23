@@ -63,7 +63,7 @@
 %include "Poly.i"
 %include "Geom.i"
 %include "BRepLib.i"
-
+%include "BRepFilletAPI.i"
 
 %typemap(javacode) TopExp
 %{

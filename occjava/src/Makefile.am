@@ -16,7 +16,8 @@ IFACEFILES=\
 	BRepBuilderAPI.i \
 	TopTools.i \
 	GeomAbs.i \
-	BRepLib.i
+	BRepLib.i \
+	BRepFilletAPI.i
 
 BUILT_SOURCES = OccJava_wrap.cxx
 JAVAGENSRCDIR=$(top_srcdir)/src-java/org/jcae/opencascade/jni/
