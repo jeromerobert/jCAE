@@ -8,9 +8,9 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 import org.jcae.opencascade.jni.*;
-import org.jcae.viewer3d.View;
+/*import org.jcae.viewer3d.View;
 import org.jcae.viewer3d.cad.ViewableCAD;
-import org.jcae.viewer3d.cad.occ.OCCProvider;
+import org.jcae.viewer3d.cad.occ.OCCProvider;*/
 
 /** Test circles, extrude, BRepTools_Quilt */
 public class Test4

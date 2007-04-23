@@ -1,4 +1,5 @@
 package test;
+import org.jcae.opencascade.Utilities;
 import org.jcae.opencascade.jni.*;
 
 /**
