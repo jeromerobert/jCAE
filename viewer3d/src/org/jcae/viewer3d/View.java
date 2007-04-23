@@ -277,9 +277,12 @@ public class View extends Canvas3D implements PositionListener
 			private Transform3D myT3d=new Transform3D();
 			public void componentResized(ComponentEvent e)
 			{
-				tg.getTransform(myT3d);
-				myT3d.set(new Vector3d(-4, -4*((float)getHeight())/getWidth(), -40));
-				tg.setTransform(myT3d);
+				if(getWidth()!=0)
+				{
+					tg.getTransform(myT3d);
+					myT3d.set(new Vector3d(-4, -4*((float)getHeight())/getWidth(), -40));
+					tg.setTransform(myT3d);
+				}
 			}
 		});
 		
