@@ -26,6 +26,7 @@
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepPrimAPI_MakeSphere.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
+#include <BRepPrimAPI_MakeRevol.hxx>
 %}
 
 class BRepPrimAPI_MakeBox : public BRepBuilderAPI_MakeShape
@@ -86,3 +87,10 @@ class BRepPrimAPI_MakePrism  : public BRepPrimAPI_MakeSweep
     //      Standard_Boolean Inf = Standard_True,const Standard_Boolean Copy =
     //      Standard_False,const Standard_Boolean Canonize = Standard_True);
 };
+
+class BRepPrimAPI_MakeRevol  : public BRepPrimAPI_MakeSweep {
+    public:
+    BRepPrimAPI_MakeRevol(const TopoDS_Shape& shape, const gp_Ax1& axis, const Standard_Real angle, const Standard_Boolean copy = Standard_False);
+    BRepPrimAPI_MakeRevol(const TopoDS_Shape& shape, const gp_Ax1& axis, const Standard_Boolean copy = Standard_False);
+};
+
