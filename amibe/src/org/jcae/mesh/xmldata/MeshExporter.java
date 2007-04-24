@@ -157,7 +157,7 @@ abstract public class MeshExporter
 		System.out.println(FORMAT_D25_16.format(Double.NaN));
 		try
 		{
-			int[] ids=new int[2];
+			int[] ids=new int[82];
 			for(int i=0; i<ids.length; i++)
 			{
 				ids[i]=i;
@@ -165,7 +165,7 @@ abstract public class MeshExporter
 			
 			PrintStream p=new PrintStream(new BufferedOutputStream(new FileOutputStream(
 				"/tmp/blub.unv")));
-			new MeshExporter.UNV(new File("/home/jerome/jCAE-cvs-head/FLIGHT0.01/"), ids).
+			new MeshExporter.UNV("/home/jerome/OCCShapeGal/amibe1.dir/").
 				write(p);
 			p.close();
 						
@@ -242,8 +242,11 @@ abstract public class MeshExporter
 	protected MeshExporter(File directory, int[] groupIds)
 	{
 		this.directory=directory;
-		this.groupIds=new int[groupIds.length];
-		System.arraycopy(groupIds, 0, this.groupIds, 0, groupIds.length);
+		if(groupIds!=null)
+		{
+			this.groupIds=new int[groupIds.length];
+			System.arraycopy(groupIds, 0, this.groupIds, 0, groupIds.length);
+		}
 	}
 
 	/**
