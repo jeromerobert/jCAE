@@ -41,7 +41,7 @@ import org.xml.sax.SAXException;
 
 public class ExportGroupAction extends CookieAction
 {
-	private static class ChooseUnitPanel extends JPanel
+	public static class ChooseUnitPanel extends JPanel
 	{	
 		private JRadioButton meters=new JRadioButton("Meters");
 		public ChooseUnitPanel()

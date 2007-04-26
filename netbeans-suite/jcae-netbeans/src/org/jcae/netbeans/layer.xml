@@ -55,7 +55,8 @@
 			<file name="org-jcae-netbeans-cad-RemoveAction.instance"/>
 			<file name="org-jcae-netbeans-cad-ReverseAction.instance"/>
 			<file name="org-jcae-netbeans-mesh-ComputeMeshAction.instance"/>
-			<file name="org-jcae-netbeans-mesh-FreeEdgesAction.instance"/>
+			<file name="org-jcae-netbeans-mesh-ExportUNV.instance"/>
+            <file name="org-jcae-netbeans-mesh-FreeEdgesAction.instance"/>
 			<file name="org-jcae-netbeans-mesh-ImportUNV.instance"/>
             <file name="org-jcae-netbeans-mesh-MultipleEdgesAction.instance"/>
             <file name="org-jcae-netbeans-mesh-UNVToUNVAction.instance">
@@ -86,7 +87,10 @@
 				<folder name="Actions">
 					<file name="org-jcae-netbeans-mesh-ComputeMeshAction.instance"/>
 					<attr name="org-jcae-netbeans-mesh-ComputeMeshAction.instance/org-openide-actions-PropertiesAction.instance" boolvalue="true"/>					
-					<file name="org-jcae-netbeans-mesh-FreeEdgesAction.shadow">
+					<file name="org-jcae-netbeans-mesh-ExportUNV.shadow">
+                        <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-ExportUNV.instance"/>
+                    </file>
+                    <file name="org-jcae-netbeans-mesh-FreeEdgesAction.shadow">
                         <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-mesh-FreeEdgesAction.instance"/>
                     </file>
 					<file name="org-jcae-netbeans-mesh-ImportUNV.shadow">
@@ -123,6 +127,8 @@
                     <attr name="org-jcae-netbeans-mesh-MultipleEdgesAction.shadow/sep-2.instance" boolvalue="true"/>
                     <attr name="org-jcae-netbeans-mesh-MultipleEdgesAction.shadow/org-jcae-netbeans-mesh-ImportUNV.shadow" boolvalue="true"/>
                     <attr name="org-jcae-netbeans-mesh-ImportUNV.shadow/sep-2.instance" boolvalue="true"/>
+                    <attr name="org-jcae-netbeans-mesh-ImportUNV.shadow/org-jcae-netbeans-mesh-ExportUNV.shadow" boolvalue="true"/>
+                    <attr name="org-jcae-netbeans-mesh-ExportUNV.shadow/sep-2.instance" boolvalue="true"/>
                 </folder>
 			</folder>
 			<folder name="x-unv">
