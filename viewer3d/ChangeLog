@@ -1,3 +1,27 @@
+2007-04-23 14:59  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/View.java: Fix a division by zero when the
+	  view width is 0
+
+2007-04-20 15:25  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/View.java,
+	  src/org/jcae/viewer3d/cad/ViewableCAD.java: Add cheat codes to
+	  change polygon offset. Keys are [, ], {, }.
+
+2007-04-19 14:04  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/fe/, src/org/jcae/viewer3d/fe/unv/ :
+	  Display parabolic triangles and linear beams
+
+	* src/org/jcae/viewer3d/cad/occ/OCCProvider.java: move TopoDS_Shape
+	  loader to occjava
+
+2007-04-18 12:10  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/cad/ViewableCAD.java: allow to pick
+	  geometry vertices
+
 2007-02-19 11:35:45  tag V0_14
 
 2007-02-19 11:35:45  Denis Barbier <barbier@users.sourceforge.net>
