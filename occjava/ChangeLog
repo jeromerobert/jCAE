@@ -1,3 +1,16 @@
+2007-04-24 17:04  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/BRepPrimAPI.i: add BRepPrimAPI_MakeRevol
+
+2007-04-23 15:11  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src-java/test/Test6.java, src/BRepFilletAPI.i, src/Makefile.am,
+	  src/OccJava.i: Allow to make fillet and chamfer
+	* src-java/org/jcae/opencascade/Utilities.java,
+	  src-java/test/Utilities.java: Move utilities from test to
+	  official package. This class should not be used outside jCAE as
+	  it's API may change.
+
 2007-04-17 11:04:53  Denis Barbier <barbier@users.sourceforge.net>
 
 	* configure.ac: Remove -Wl,-rpath-link linker flag, it is
@@ -20,7 +33,9 @@
 	* configure.ac: Replace AC_CONFIG_HEADERS by AM_CONFIG_HEADER.
 	  Patch by nyholku https://sf.net/forum/message.php?msg_id=4249115
 
-2007-03-30 07:42  Jerome Robert <jeromerobert@users.sourceforge.net>
+2006-04-04 10:27:00  tag V0_14
+
+2007-03-30 07:42:00  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* src-java/test/Test4.java, src/BRepBuilderAPI.i, src/BRepTools.i,
 	  src/gp.i: Add BRepTools_Quilt and gp_Circ, allow to create holed
