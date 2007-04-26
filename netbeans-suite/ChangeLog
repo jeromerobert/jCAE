@@ -1,3 +1,48 @@
+2007-04-26 11:52  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/layer.xml,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/ExportUNV.java:
+	  Add an out-of-core unv export action
+
+2007-04-19 14:43  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/layer.xml,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/ViewUNV.java:
+	  Plug the UNV viewer into jcae-netbeans
+
+2007-04-06 16:33  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/BuidOEMMAction.java,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/BuildSoupAction.java:
+	  Allow to use the OEMM viewer without geometry
+
+	* jcae-netbeans/src/org/jcae/netbeans/layer.xml,
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/:
+	  Add a import UNV action
+
+2006-04-04 10:27:00  tag V0_14
+
+2007-04-04 09:34:00  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/OEMMViewAction.java: The
+	  OEMM viewer has moved from amibe to jcae-viewer3d
+
+2007-03-30 14:54:00  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* make-dist-Linux.sh, make-dist-Win32.sh: Add distribution building
+	  scripts
+
+2007-02-16 16:26:00  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/:
+	  Allow to choose unit while exporting to UNV
+
+	* jcae-netbeans/src/org/jcae/netbeans/cad/:
+	  New geom rotation GUI
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/OEMMViewAction.java:
+	  update OEMM API
+
 2007-02-07 17:51:00  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* jcae-netbeans/src/org/jcae/netbeans/mesh/ComputeMeshAction.java,
@@ -20,6 +65,8 @@
 2006-10-02 23:47:00  Jerome Robert <jeromerobert@users.sourceforge.net>
 	
 	* *: Switch to subversion
+
+2006-05-17 15:48:57  tag V0_13_2
 
 2006-05-17 15:48:57  tag V0_13_1
 
