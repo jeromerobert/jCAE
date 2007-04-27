@@ -33,7 +33,7 @@ public class TextureFitterTest
 	private int step=0;
 	private BufferedImage image;
 	
-	/*private static Point3d[] point3ds=new Point3d[]{
+	private static Point3d[] point3ds=new Point3d[]{
 		new Point3d(105.876103680699, 154.355112438377, 444.233449262934),
 		new Point3d(15649.9293772451, 170.548470749469, 494.066332188722),
 		new Point3d(5504.83546309108, 31.9677707249711, 67.6028607292355)};
@@ -41,17 +41,17 @@ public class TextureFitterTest
 	private static Point3d[] point2ds=new Point3d[]{
 		new Point3d(7838, 408, 0),
 		new Point3d(65, 379, 0),
-		new Point3d(5137, 605, 0)};*/
+		new Point3d(5137, 605, 0)};
 
-	private static Point3d[] point3ds=new Point3d[]{
+	/*private static Point3d[] point3ds=new Point3d[]{
 		new Point3d(15425.4735650595, 101.630084521872, 281.979264993215),
 		new Point3d(6972.95999971717, 93.695636325025, 257.562067493599),
 		new Point3d(834.41408284612, 172.766820120453, 500.893004108474)};
 
 	private static Point3d[] point2ds=new Point3d[]{
-		new Point3d(176, 490, 0),
+		new Point3d(178, 491, 0),
 		new Point3d(4405, 505, 0),
-		new Point3d(7474, 378, 0)};
+		new Point3d(7474, 378, 0)};*/
 
 	/**
 	 * Add interactions with the view.
@@ -75,6 +75,8 @@ public class TextureFitterTest
 						break;
 					case 1:
 						secondStep();
+						TextureFitter.displayMatrixInfo(
+							TextureFitter.getTransform(point2ds, point3ds));
 						step++;
 						break;
 				}
@@ -115,6 +117,9 @@ public class TextureFitterTest
 				System.out.println("Point "+currentPoint+" : "+
 					point2ds[currentPoint].x +" "+point2ds[currentPoint].y);
 				view.updateTexture(point2ds, point3ds);
+				TextureFitter.displayMatrixInfo(
+					TextureFitter.getTransform(point2ds, point3ds));
+
 			}
 		}
 	}
@@ -157,8 +162,8 @@ public class TextureFitterTest
 			view.displayTexture(faceShape, point2ds, point3ds, image);
 
 			//and the full CAD
-			view.remove(faceViewable);
-			view.add(fullViewable);
+			/*view.remove(faceViewable);
+			view.add(fullViewable);*/
 		}
 		catch(IOException ex)
 		{

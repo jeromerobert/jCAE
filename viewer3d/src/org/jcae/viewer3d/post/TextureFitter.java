@@ -33,26 +33,25 @@ public class TextureFitter extends View
 	private static Transform3D computeTransform(
 		Point3d[] triangle2d, Point3d[] triangle3d, int width, int height)
 	{
+		//3D -> 2D matrix
+		Transform3D trsf1=normalizeTriangle(triangle2d);
+		trsf1.mulInverse(normalizeTriangle(triangle3d));
+		
+		//force orthogonal and unifrom scale matrix		
+		trsf1.normalizeCP();		
+		trsf1.setScale(trsf1.getScale());
+
 		//bitmap 2D -> 1x1 square
 		Matrix4d m2d=new Matrix4d();
 		m2d.setM00(1.0/width);
 		m2d.setM11(-1.0/height);
 		m2d.setM22(1);
 		m2d.setM33(1);
-				
-		Point3d[] p2d=new Point3d[]{
-			new Point3d(triangle2d[0]),
-			new Point3d(triangle2d[1]),
-			new Point3d(triangle2d[2])};
 		
 		Transform3D t2d=new Transform3D(m2d);
-		for(int i=0; i<3; i++)
-			t2d.transform(p2d[i]);
+		t2d.mul(trsf1);
 		
-		//3D -> 2D matrix
-		Transform3D trsf1=normalizeTriangle(p2d);		
-		trsf1.mulInverse(normalizeTriangle(triangle3d));
-		return trsf1;		
+		return t2d;		
 	}
 	
 	private static GeometryArray createGeometry(OCCProvider occProvider)
@@ -146,10 +145,117 @@ public class TextureFitter extends View
         trsf1.get(m);
         return m;
 	}
+	
+	public static void displayMatrixInfo(Matrix4d matrix)
+	{
+		System.out.println("Matrix4d: "+matrix);
+		Vector4d vx=new Vector4d();
+		Vector4d vy=new Vector4d();
+		Vector4d vz=new Vector4d();
+		Vector4d vt=new Vector4d();
+		
+		matrix.getColumn(0, vx);
+		System.out.println("X scale: "+vx.length());
+		matrix.getColumn(1, vy);
+		System.out.println("Y scale: "+vy.length());
+		matrix.getColumn(2, vz);
+		System.out.println("Z scale: "+vz.length());
+		matrix.getColumn(3, vt);
+		System.out.println("translation: "+vt);
 
+		System.out.println("x.y : "+vx.dot(vy));
+		System.out.println("x.z : "+vx.dot(vz));
+		System.out.println("y.z : "+vy.dot(vz));
+		
+		
+		Vector3d eulerAngles=new Vector3d();
+		Quat4d rotation=new Quat4d();
+		matrix.get(rotation);
+		getEulerAngles(eulerAngles, rotation);
+		System.out.println("theta: "+eulerAngles.x*180/Math.PI);
+		System.out.println("phi: "+eulerAngles.y*180/Math.PI);
+		System.out.println("psi: "+eulerAngles.z*180/Math.PI);
+	}
+	
+	private static Transform3D normalized(Transform3D t3d)
+	{	
+		Matrix4d matrix=new Matrix4d();
+		t3d.get(matrix);
+		Vector4d v=new Vector4d();
+		
+		matrix.getColumn(0, v);
+		double scaleX=v.length();
+		matrix.getColumn(1, v);
+		double scaleY=v.length();
+		matrix.getColumn(2, v);
+		double scaleZ=v.length();
+
+		Vector3d translation=new Vector3d();
+		t3d.get(translation);
+		Quat4d rotation=new Quat4d();
+		matrix.get(rotation);				
+		return new Transform3D(rotation, translation, (scaleX+scaleY+scaleZ)/3);
+	}
+	
+	/** 
+	 * from
+	 * http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+     */
+	
+	/*public static void getEulerAngles(Tuple3d angles, Quat4d quat)
+	{
+		double q0=quat.x;
+		double q1=quat.y;
+		double q2=quat.z;
+		double q3=quat.w;		
+		angles.x=Math.atan2(2*(q0*q1+q2*q3), 1-2*(q1*q1+q2+q2));
+		angles.y=Math.asin(2*(q0*q2-q3*q1));
+		angles.z=Math.atan2(2*(q0*q3+q1*q2), 1-2*(q2*q2+q3*q3));
+	}*/
+	
+	
 	/**
-	 * Compute the transformation which will transform the triangle
-	 * (O, x, y) to (p1, p2, p3)
+	 * from
+	 * http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/
+	 */
+	public static void getEulerAngles(Tuple3d angles, Quat4d q1)
+	{
+		double heading, attitude, bank;
+		double sqw = q1.w * q1.w;
+		double sqx = q1.x * q1.x;
+		double sqy = q1.y * q1.y;
+		double sqz = q1.z * q1.z;
+		double unit = sqx + sqy + sqz + sqw; // if normalised is one,
+												// otherwise is correction
+												// factor
+		double test = q1.x * q1.y + q1.z * q1.w;
+		if (test > 0.499 * unit)
+		{ // singularity at north pole
+			heading = 2 * Math.atan2(q1.x, q1.w);
+			attitude = Math.PI / 2;
+			bank = 0;
+		}
+		else if (test < -0.499 * unit)
+		{ // singularity at south pole
+			heading = -2 * Math.atan2(q1.x, q1.w);
+			attitude = -Math.PI / 2;
+			bank = 0;
+		} else
+		{
+			heading = Math.atan2(2 * q1.y * q1.w - 2 * q1.x * q1.z, sqx - sqy
+				- sqz + sqw);
+			attitude = Math.asin(2 * test / unit);
+			bank = Math.atan2(2 * q1.x * q1.w - 2 * q1.y * q1.z, -sqx + sqy
+				- sqz + sqw);
+		}
+		angles.x = heading;
+		angles.y = attitude;
+		angles.z = bank;
+	}
+	
+	/**
+	 * Compute the transformation which will transform the triangle (O, x, y) to
+	 * (p1, p2, p3)
 	 */
 	private static Transform3D normalizeTriangle(Point3d[] p)
 	{
