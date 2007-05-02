@@ -1103,16 +1103,23 @@ public class View extends Canvas3D implements PositionListener
 		return toReturn;
 	}
 	
+	
 	public void setRotationCenter(double x, double y, double z)
 	{
 		orbit.setRotationCenter(new Point3d(x, y, z));
 	}
 	
+	/**
+	 * Allow the user to specify the rotation center.
+	 * The next click will be concidered as a rotation center
+	 * redefinition.
+	 */
 	public void setChangeRotationCenter(boolean status)
 	{
 		this.requestFocus();
 		((ViewBehavior)orbit).setChangeRotationCenter(true);
 	}
+	
 	/** set the current mouse mode : see ViewBehavior*/
 	public void setMouseMode(int mode){
 		this.requestFocus();
@@ -1130,7 +1137,10 @@ public class View extends Canvas3D implements PositionListener
 	public final static byte FRONT	=4;
 	public final static byte BACK	=5;
 	
-	/** TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK */
+	/**
+	 * Change the view angle to a predefined one. 
+	 * It could be TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK.
+	 */
 	public void setOrientation(byte orientation)
 	{
 		Point3d eye=null;
