@@ -250,7 +250,11 @@ class BRepGProp
 {
 	public:
 	%rename(linearProperties) LinearProperties;
-	static void LinearProperties(const TopoDS_Shape& S,GProp_GProps& LProps);
+	%rename(surfaceProperties) SurfaceProperties;
+	%rename(volumeProperties) VolumeProperties;
+	static void LinearProperties(const TopoDS_Shape& shape, GProp_GProps& properties);
+    static void VolumeProperties(const TopoDS_Shape& shape, GProp_GProps& properties, const Standard_Boolean onlyClosed = Standard_False) ;
+    static void SurfaceProperties(const TopoDS_Shape& shape, GProp_GProps& properties) ;
 };
 
 /**
