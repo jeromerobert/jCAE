@@ -66,6 +66,10 @@ public class ViewableFE extends ViewableAdaptor
 		PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE,
 		2.0f * zFactorAbs, true, zFactorRel);
 	
+	final private static PolygonAttributes LINE_POLYGON_ATTR=new PolygonAttributes(
+		PolygonAttributes.POLYGON_LINE, PolygonAttributes.CULL_NONE, Float
+			.parseFloat(System.getProperty("javax.media.j3d.zFactorAbs",
+				"20.0f")));
 	/**
 	 * 
 	 */
@@ -168,20 +172,35 @@ public class ViewableFE extends ViewableAdaptor
 	{
 		BranchGroup bg=new BranchGroup();
 
-		GeometryInfo gi=new GeometryInfo(GeometryInfo.QUAD_ARRAY);
-		gi.setCoordinates(d.getNodes());
-		gi.setCoordinateIndices(d.getQuad4());
-		NormalGenerator ng=new NormalGenerator(0);
-		ng.generateNormals(gi);
-		IndexedQuadArray ila=(IndexedQuadArray) gi.getIndexedGeometryArray();
-
+		IndexedQuadArray ila;
 		Appearance app = new Appearance();
-		app.setPolygonAttributes(FILL_POLYGON_ATTR);
-		Material m=new Material();
-		m.setAmbientColor(new Color3f(d.getColor()));
-		app.setMaterial(m);
-		app.setCapability(Shape3D.ALLOW_APPEARANCE_READ);
-		app.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_READ);
+		if(showShapeLine)
+		{
+			app.setColoringAttributes(new ColoringAttributes(
+				new Color3f(d.getColor()), ColoringAttributes.FASTEST));
+			
+			ila = new IndexedQuadArray(d.getNumberOfNodes(),
+				GeometryArray.COORDINATES, d.getNumberOfQuad4()*4);
+			ila.setCoordinateIndices(0, d.getQuad4());
+			ila.setCoordinates(0, d.getNodes());
+			app.setPolygonAttributes(LINE_POLYGON_ATTR);
+		}
+		else
+		{
+			GeometryInfo gi=new GeometryInfo(GeometryInfo.QUAD_ARRAY);
+			gi.setCoordinates(d.getNodes());
+			gi.setCoordinateIndices(d.getQuad4());
+			NormalGenerator ng=new NormalGenerator(0);
+			ng.generateNormals(gi);
+			ila=(IndexedQuadArray) gi.getIndexedGeometryArray();
+
+			app.setPolygonAttributes(FILL_POLYGON_ATTR);
+			Material m=new Material();
+			m.setAmbientColor(new Color3f(d.getColor()));
+			app.setMaterial(m);
+			app.setCapability(Shape3D.ALLOW_APPEARANCE_READ);
+			app.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_READ);
+		}
 				
 		Shape3D s3d=new Shape3D(ila, app);
 		s3d.setBoundsAutoCompute(false);
@@ -535,10 +554,7 @@ public class ViewableFE extends ViewableAdaptor
 		if(showShapeLine)
 		{
 			Appearance shapeLineAppearance = new Appearance();
-			shapeLineAppearance.setPolygonAttributes(new PolygonAttributes(
-				PolygonAttributes.POLYGON_LINE, PolygonAttributes.CULL_NONE, Float
-					.parseFloat(System.getProperty("javax.media.j3d.zFactorAbs",
-						"20.0f"))));
+			shapeLineAppearance.setPolygonAttributes(LINE_POLYGON_ATTR);
 			ColoringAttributes ca = new ColoringAttributes(new Color3f(Color.WHITE), ColoringAttributes.FASTEST);
 			ca.setCapability(ColoringAttributes.ALLOW_COLOR_WRITE);
 			shapeLineAppearance.setColoringAttributes(ca);
