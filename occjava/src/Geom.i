@@ -81,6 +81,31 @@ class Handle_Geom_Surface: public Handle_Geom_Geometry
 	{
 		return (*self)->Value(U, V);
 	}
+	
+	void bounds(Standard_Real& U1,Standard_Real& U2,Standard_Real& V1,Standard_Real& V2) const
+	{
+		(*self)->Bounds(U1,U2,V1,V2);
+	}
+	
+	Standard_Boolean isUClosed() const
+	{
+		return (*self)->IsUClosed();
+	}
+	
+	Standard_Boolean isVClosed() const
+	{
+		return (*self)->IsVClosed();
+	}
+	
+	Handle_Geom_Curve uIso(const Standard_Real U) const
+	{
+		return (*self)->UIso(U);
+	}
+	
+	Handle_Geom_Curve vIso(const Standard_Real V) const
+	{
+		return (*self)->VIso(V);
+	}
 }
 
 class Handle_Geom2d_Geometry

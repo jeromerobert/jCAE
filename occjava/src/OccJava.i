@@ -64,6 +64,8 @@
 %include "Geom.i"
 %include "BRepLib.i"
 %include "BRepFilletAPI.i"
+%include "BRepCheck.i"
+%include "ShapeBuild.i"
 
 %typemap(javacode) TopExp
 %{

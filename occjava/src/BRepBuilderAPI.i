@@ -27,6 +27,13 @@
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_MakeSolid.hxx>
+#include <Standard_Version.hxx>
+#if OCC_VERSION_MAJOR >= 6
+#include <BRepBuilderAPI_Sewing.hxx>
+#else
+#include <BRepAlgo_Sewing.hxx>
+#define BRepBuilderAPI_Sewing BRepAlgo_Sewing
+#endif
 %}
 
 class BRepBuilderAPI_MakeShape
@@ -128,4 +135,27 @@ class BRepBuilderAPI_MakeSolid: public BRepBuilderAPI_MakeShape
 	void Add(const TopoDS_Shell& S) ;
 	Standard_Boolean IsDone() const;
 	Standard_Boolean IsDeleted(const TopoDS_Shape& S) ;
+};
+
+class BRepBuilderAPI_Sewing
+{
+	public:
+	
+	%rename(init) Init;
+	%rename(add) Add;
+	%rename(perform) Perform;
+	%rename(sewedShape) SewedShape;
+	%rename(isModifiedSubShape) IsModifiedSubShape;
+	%rename(modifiedSubShape) ModifiedSubShape;
+	
+	void Init(const Standard_Real tolerance = 1.0e-06,
+		const Standard_Boolean option1 = Standard_True,
+		const Standard_Boolean option2 = Standard_True,
+		const Standard_Boolean option3 = Standard_True,
+		const Standard_Boolean option4 = Standard_False) ;
+	void Add(const TopoDS_Shape& shape) ;
+	void Perform();
+	const TopoDS_Shape& SewedShape() const;
+	Standard_Boolean IsModifiedSubShape(const TopoDS_Shape& shape) const;
+	TopoDS_Shape ModifiedSubShape(const TopoDS_Shape& shape) const;
 };
