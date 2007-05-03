@@ -59,7 +59,6 @@
 %include "BRepBuilderAPI.i"
 %include "BRepPrimAPI.i"
 %include "BRepAlgoAPI.i"
-%include "BRepOffsetAPI_Sewing.i"
 %include "Poly.i"
 %include "Geom.i"
 %include "BRepLib.i"

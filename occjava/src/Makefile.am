@@ -10,7 +10,6 @@ IFACEFILES=\
 	TopAbs.i \
 	TopoDS.i \
 	BRepAlgoAPI.i \
-	BRepOffsetAPI_Sewing.i \
 	Poly.i \
 	Geom.i \
 	BRepBuilderAPI.i \

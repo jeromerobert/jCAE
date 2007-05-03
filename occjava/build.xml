@@ -30,10 +30,13 @@
         </javadoc>
     </target>
 
-    <target depends="init" description="Clean all build products." name="clean">
-        <delete dir="${classes.dir}"/>
+    <target name="clean" depends="init" description="Clean all build products." >
+		<delete dir="${classes.dir}"/>
         <delete dir="${javadoc.dir}"/>
         <delete file="${jar}"/>
+		<delete>
+			<fileset dir="src-java/org/jcae/opencascade/jni" excludes="BRepOffsetAPI_Sewing.java"/>
+		</delete>
     </target>
 
 </project>
