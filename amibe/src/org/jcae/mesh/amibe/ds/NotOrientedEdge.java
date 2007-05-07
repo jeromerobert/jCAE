@@ -30,7 +30,7 @@ public class NotOrientedEdge extends VirtualHalfEdge
 	}
 	
 	/**
-	 * Copy an VirtualHalfEdge into a new NotOrientedEdge instance.
+	 * Copy a VirtualHalfEdge into a new NotOrientedEdge instance.
 	 *
 	 * @param ot  source VirtualHalfEdge.
 	 */

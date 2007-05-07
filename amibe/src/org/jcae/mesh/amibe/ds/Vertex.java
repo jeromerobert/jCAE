@@ -62,7 +62,7 @@ public class Vertex extends AbstractVertex implements Serializable
 	 */
 	protected final double [] param;
 	//  link can be either:
-	//    1. a AbstractTriangle, for manifold vertices
+	//    1. an AbstractTriangle, for manifold vertices
 	//    2. an Object[2] array, zhere
 	//         0: list of head triangles
 	//         1: list of incident wires
