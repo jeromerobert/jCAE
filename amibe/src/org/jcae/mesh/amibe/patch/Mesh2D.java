@@ -49,9 +49,6 @@ public class Mesh2D extends Mesh
 {
 	private static Logger logger=Logger.getLogger(Mesh2D.class);
 	
-	//  Entity factory
-	public ElementPatchFactory factory = null;
-
 	//  Topological face on which mesh is applied
 	private transient CADShape face = null;
 	

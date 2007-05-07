@@ -113,7 +113,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	private Collection groupList = null;
 	
 	//  Entity factory
-	public ElementFactory factory = null;
+	public ElementFactoryInterface factory = null;
 
 	protected int maxLabel = 0;
 	

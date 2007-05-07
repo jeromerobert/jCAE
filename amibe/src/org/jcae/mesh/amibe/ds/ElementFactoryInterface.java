@@ -25,6 +25,7 @@ public interface ElementFactoryInterface
 	public AbstractVertex createVertex(double p);
 	public AbstractVertex createVertex(double u, double v);
 	public AbstractVertex createVertex(double x, double y, double z);
+	public AbstractVertex createVertex(double [] x);
 	public AbstractTriangle createTriangle();
 	public AbstractTriangle createTriangle(AbstractVertex v0, AbstractVertex v1, AbstractVertex v2);
 	public AbstractTriangle createTriangle(AbstractVertex [] v);
