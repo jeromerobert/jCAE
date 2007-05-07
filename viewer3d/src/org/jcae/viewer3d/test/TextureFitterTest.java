@@ -39,8 +39,8 @@ public class TextureFitterTest
 		new Point3d(5504.83546309108, 31.9677707249711, 67.6028607292355)};
 
 	private static Point3d[] point2ds=new Point3d[]{
-		new Point3d(7838, 408, 0),
-		new Point3d(65, 379, 0),
+		new Point3d(7836, 408, 0),
+		new Point3d(66, 380, 0),
 		new Point3d(5137, 605, 0)};
 
 	/*private static Point3d[] point3ds=new Point3d[]{
@@ -188,6 +188,7 @@ public class TextureFitterTest
 				for(int j=0; j<ids.length; j++)
 				{
 					TopoDS_Vertex v=Utilities.getVertex(faceShape, ids[j]);
+					//Get the coordinates if each selected vertices
 					double[] coords=BRep_Tool.pnt(v);
 					System.out.println("Vertex selected: "+ids[j]+
 						" ("+coords[0]+", "+coords[1]+", "+coords[2]+")");
@@ -203,11 +204,14 @@ public class TextureFitterTest
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		view=new TextureFitter(frame);
 		
+		//Display the geometry to allow selection of faces
 		fullShape=Utilities.readFile("/home/jerome/ndtkit/g53330052-200.igs");
 		OCCProvider occProvider=new OCCProvider(fullShape);
 		fullViewable=new ViewableCAD(occProvider);
 		view.add(fullViewable);
 		frame.add(view);
+		
+		//Fit the view to the geometry
 		view.fitAll();
 		frame.setVisible(true);
 		view.setOriginAxisVisible(true);

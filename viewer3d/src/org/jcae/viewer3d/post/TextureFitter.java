@@ -23,7 +23,14 @@ import com.sun.j3d.utils.image.TextureLoader;
 /**
  * A special View which allows to fit a texture on a given geometry.
  * It helps to compute the transformation which will match the texture
- * on the geometry
+ * on the geometry.
+ * The texture is mapped with an orthogonal projection on the geometry.
+ * The projection is done by OpenGL. The transformation applied on the
+ * texture before being projected is computed using 2 user specified triangles,
+ * one in the geometry space (3D) and one in the texture space (3D with z=0).
+ * If the specified triangles are not similar (the angles of one are equal
+ * to the corresponding angles of the other) the computed transformation
+ * is normalized to ensure that the projection is not deformant.
  * @author Jerome Robert
  */
 public class TextureFitter extends View

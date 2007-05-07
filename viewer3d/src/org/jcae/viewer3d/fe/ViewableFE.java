@@ -638,6 +638,10 @@ public class ViewableFE extends ViewableAdaptor
 		return toReturn;
 	}
 
+	/**
+	 * if true the border of the element will be displayed else elements
+	 * are render with shading. The default value is true.
+	 */
 	public void setShowShapeLine(boolean showShapeLine)
 	{
 		this.showShapeLine = showShapeLine;
