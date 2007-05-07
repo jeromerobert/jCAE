@@ -23,6 +23,12 @@
 // define another read method that match the one of libOccJava (the one below don't).
 %typemap(javacode) BRepTools
 %{
+	/**
+	 * Read a shape from a file.
+	 * This is an helper method. It do not exists in Opencascade.
+	 * @param file the file to read
+	 * @param builder the builder which will be used to create the shape (i.e. <code>new BRep_Builder()</code>).
+	 */
 	public static TopoDS_Shape read(String file, BRep_Builder builder)
 	{
 		TopoDS_Shape toReturn=new TopoDS_Shape();
@@ -33,8 +39,22 @@
 	}
 %}
 
+%typemap(javaimports) BRepTools "
+/** Provides various utilities for BRep. */"
+
+%typemap(javadestruct, methodname="delete", methodmodifiers="private synchronized") BRepTools {};
+
 class BRepTools
 {
+	%javamethodmodifiers Read(TopoDS_Shape& ,const Standard_CString, const BRep_Builder&) "
+	/**
+	 * Reads a shape from a file.
+	 * @param shape an empty shape created with <code>new TopoDS_Shape()</code>
+	 * @param builder used to build the shape (i.e. <code>new BRep_Builder()</code>).
+	 * @return false on IO or file format errors.
+	 */
+	public";
+
 	//Hide the constructor to make this class entirely static.
 	BRepTools()=0;
 	public:
@@ -43,8 +63,17 @@ class BRepTools
 	static Standard_Boolean Read(TopoDS_Shape& shape,
 		const Standard_CString file, const BRep_Builder& builder) ;
 	
+	%javamethodmodifiers Write(const TopoDS_Shape&, const Standard_CString)"
+	/**
+	 * Write a shape to a file.
+	 * @param shape the shape to write
+	 * @param file the file where to write the shape
+	 * @return false on IO error.
+	 */
+	public";
+
 	%rename(write) Write;
-	static Standard_Boolean Write(const TopoDS_Shape& Sh,
+	static Standard_Boolean Write(const TopoDS_Shape& shape,
 		const Standard_CString file);
 };
 
