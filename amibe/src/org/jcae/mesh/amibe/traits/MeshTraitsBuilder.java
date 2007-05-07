@@ -40,7 +40,6 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	private VertexTraitsBuilder vertexTraitsBuilder = null;
 	private HalfEdgeTraitsBuilder halfedgeTraitsBuilder = null;
 	private TriangleTraitsBuilder triangleTraitsBuilder = null;
-	private MeshTraitsBuilder meshTraitsBuilder = null;
 
 	public MeshTraitsBuilder()
 	{
