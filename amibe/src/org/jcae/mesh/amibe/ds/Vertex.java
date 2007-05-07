@@ -804,6 +804,10 @@ public class Vertex extends AbstractVertex implements Serializable
 				r.append("]");
 			}
 		}
+		if (!readable)
+			r.append(" !R");
+		if (!writable)
+			r.append(" !W");
 		return r.toString();
 	}
 	

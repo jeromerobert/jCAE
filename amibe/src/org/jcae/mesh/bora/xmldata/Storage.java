@@ -503,6 +503,8 @@ public class Storage
 			}
 			face = (Triangle) mesh.factory.createTriangle(pts);
 			mesh.add(face);
+			for (int j = 0; j < nr; j++)
+				pts[j].setLink(face);
 		}
 		fcT.close();
 		MeshExporter.clean(bbT);
