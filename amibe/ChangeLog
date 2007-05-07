@@ -1,3 +1,19 @@
+Mon May  7 10:49:16 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/OTriangle.java
+	  src/org/jcae/mesh/amibe/ds/VirtualHalfEdge.java: Rename OTriangle
+	into VirtualHalfEdge.
+	* src/org/jcae/mesh/amibe/traits/*.java
+	  src/org/jcae/mesh/amibe/ds/AbstractHalfEdge.java
+	  src/org/jcae/mesh/amibe/ds/AbstractMesh.java
+	  src/org/jcae/mesh/amibe/ds/AbstractTriangle.java
+	  src/org/jcae/mesh/amibe/ds/AbstractVertex.java: A new concept of
+	'traits' is introduced to increase object genericity.  All entities
+	have an Abstract* superclass, which contains common definitions for
+	all subclasses.
+	* src/org/jcae/mesh/amibe/ds/MMesh3D.java: Removed, 3d meshes are
+	fully handled by Mesh class.
+
 Release jCAE 0.14.1
 
 Tue Apr 24 16:48:00 CET 2007  Jerome Robert <jeromerobert@users.sourceforge.net> 
@@ -7,7 +23,6 @@ Tue Apr 24 16:48:00 CET 2007  Jerome Robert <jeromerobert@users.sourceforge.net>
 	  Full out-of-core UNV export
 
 Thu Apr 19 17:17:00 CET 2007  Jerome Robert <jeromerobert@users.sourceforge.net> 
-
 
 	* src/org/jcae/mesh/xmldata/UNV2Amibe.java: Allow to export 2412-21
 	  (linear beams) and 2412-92 (parabolic trias) as a minimal unv

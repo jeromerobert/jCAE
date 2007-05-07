@@ -21,7 +21,8 @@
 package org.jcae.mesh.amibe.algos2d;
 
 import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.OTriangle2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
@@ -93,7 +94,7 @@ public class ConstraintNormal3D
 				for (int i = 0; i < 3; i++)
 				{
 					ot.nextOTri();
-					ot.clearAttributes(OTriangle.SWAPPED);
+					ot.clearAttributes(AbstractHalfEdge.SWAPPED);
 				}
 			}
 			
@@ -108,8 +109,8 @@ public class ConstraintNormal3D
 					ot.nextOTri();
 					if (!ot.isMutable())
 						continue;
-					OTriangle.symOTri(ot, sym);
-					if (ot.hasAttributes(OTriangle.SWAPPED) || sym.hasAttributes(OTriangle.SWAPPED))
+					VirtualHalfEdge.symOTri(ot, sym);
+					if (ot.hasAttributes(AbstractHalfEdge.SWAPPED) || sym.hasAttributes(AbstractHalfEdge.SWAPPED))
 						continue;
 					// Make sure that triangles are not
 					// inverted in 2D space

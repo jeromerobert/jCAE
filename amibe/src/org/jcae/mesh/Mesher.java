@@ -36,6 +36,9 @@ import org.jcae.mesh.amibe.InvalidFaceException;
 import org.jcae.mesh.amibe.metrics.*;
 import org.jcae.mesh.mesher.ds.MMesh1D;
 import org.jcae.mesh.amibe.patch.Mesh2D;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
+import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
 import org.jcae.mesh.mesher.algos1d.*;
 import org.jcae.mesh.amibe.algos2d.*;
 import org.jcae.mesh.xmldata.*;
@@ -192,6 +195,14 @@ public class Mesher
 			discr *= 2.0;
 			//defl *= 2.0;
 		}
+		VertexTraitsBuilder vtb = new VertexTraitsBuilder();
+		vtb.addNormal();
+		TriangleTraitsBuilder ttb = new TriangleTraitsBuilder();
+		ttb.addShallowHalfEdge();
+		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
+		mtb.addTriangleList();
+		mtb.add(vtb);
+		mtb.add(ttb);
 		if (processMesh1dProp.equals("true")) {
 			//  Step 1: Compute 1D mesh
 			logger.info("1D mesh");
@@ -254,7 +265,7 @@ public class Mesher
 				Metric2D.setLength(discr);
 				if(Boolean.getBoolean("org.jcae.mesh.Mesher.explodeBrep"))
 					F.writeNative("face."+iFace+".brep");
-				Mesh2D mesh = new Mesh2D(F); 
+				Mesh2D mesh = new Mesh2D(mtb, F); 
 				int nTry = 0;
 				while (nTry < nTryMax)
 				{
@@ -273,7 +284,7 @@ public class Mesher
 						if (ex instanceof InitialTriangulationException)
 						{
 							logger.warn("Face "+iFace+" cannot be triangulated, trying again with a larger tolerance...");
-							mesh = new Mesh2D(F);
+							mesh = new Mesh2D(mtb, F);
 							mesh.scaleTolerance(10.);
 							nTry++;
 							continue;
@@ -281,7 +292,7 @@ public class Mesher
 						else if (ex instanceof InvalidFaceException)
 						{
 							logger.warn("Face "+iFace+" is invalid, skipping...");
-							mesh = new Mesh2D(F); 
+							mesh = new Mesh2D(mtb, F); 
 							xmlFile = "jcae2d."+iFace;
 							MeshWriter.writeObject(mesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
 							badGroups.add(iFace);
@@ -302,7 +313,7 @@ public class Mesher
 				{
 					logger.error("Face "+iFace+" cannot be triangulated, skipping...");
 					badGroups.add(iFace);
-					mesh = new Mesh2D(F); 
+					mesh = new Mesh2D(mtb, F); 
 					xmlFile = "jcae2d."+iFace;
 					MeshWriter.writeObject(mesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
 				}
@@ -398,7 +409,7 @@ public class Mesher
 			Properties prop = new Properties();
 			prop.load(in);
 			String buildDate = prop.getProperty("build.time");
-			int [] res = MMesh3DReader.getInfos(xmlDir, "jcae3d");
+			int [] res = MeshReader.getInfos(xmlDir, "jcae3d");
 			out.println("MESH REPORT");
 			out.println("===========");
 			out.println("Start date: "+startDate);

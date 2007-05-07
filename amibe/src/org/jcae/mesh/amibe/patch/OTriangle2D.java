@@ -19,7 +19,7 @@
 
 package org.jcae.mesh.amibe.patch;
 
-import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
 import java.util.Random;
 import org.apache.log4j.Logger;
@@ -32,7 +32,7 @@ import org.apache.log4j.Logger;
  * attribute is set but need to test if vertices are equal to
  * the infinite point instead.
  */
-public class OTriangle2D extends OTriangle
+public class OTriangle2D extends VirtualHalfEdge
 {
 	private static Logger logger = Logger.getLogger(OTriangle2D.class);
 	private static final Random rand = new Random(139L);
@@ -74,7 +74,7 @@ public class OTriangle2D extends OTriangle
 		{
 			// This routine is called when 2D meshing is over and
 			// before it is written onto disk, we can then call
-			// OTriangle.nextOTriOriginLoop() without trouble.
+			// VirtualHalfEdge.nextOTriOriginLoop() without trouble.
 			work[0].nextOTriOriginLoop();
 			for (int i = 0; i < 3; i++)
 			{
@@ -136,7 +136,7 @@ public class OTriangle2D extends OTriangle
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("Split OTriangle2D "+this+"\nat Vertex "+v);
-		Triangle backup = new Triangle(tri);
+		Triangle backup = (Triangle) mesh.factory.createTriangle(tri);
 		// Aliases
 		OTriangle2D oldLeft = work[0];
 		OTriangle2D oldRight = work[1];
@@ -156,8 +156,10 @@ public class OTriangle2D extends OTriangle
 		assert d != mesh.outerVertex;
 		Vertex2D a = (Vertex2D) apex();
 		
-		OTriangle2D newLeft  = new OTriangle2D(new Triangle(a, o, v), 2);
-		OTriangle2D newRight = new OTriangle2D(new Triangle(d, a, v), 2);
+		Triangle t1 = (Triangle) mesh.factory.createTriangle(a, o, v);
+		Triangle t2 = (Triangle) mesh.factory.createTriangle(d, a, v);
+		OTriangle2D newLeft  = new OTriangle2D(t1, 2);
+		OTriangle2D newRight = new OTriangle2D(t2, 2);
 		if (oldLeft.attributes != 0)
 		{
 			newLeft.attributes = oldLeft.attributes;
@@ -271,7 +273,7 @@ public class OTriangle2D extends OTriangle
 			else
 			{
 				// This routine may be called before boundaries
-				// are recreated, so OTriangle.nextOTriApexLoop
+				// are recreated, so VirtualHalfEdge.nextOTriApexLoop
 				// is not relevant here.
 				if (destination() == mesh.outerVertex)
 				{

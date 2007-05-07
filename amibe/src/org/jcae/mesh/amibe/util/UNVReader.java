@@ -21,7 +21,7 @@
 package org.jcae.mesh.amibe.util;
 
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.MGroup3D;
 import java.io.BufferedReader;
@@ -46,19 +46,13 @@ public class UNVReader
 
 	private static Logger logger=Logger.getLogger(UNVReader.class);
 	
-	public static Mesh readMesh(String file, double ridgeAngle)
+	public static void readMesh(Mesh mesh, String file)
 	{
-		return readMesh(file, ridgeAngle, true);
+		readMesh(mesh, file, 0.0);
 	}
 	
-	public static Mesh readMesh(String file)
+	public static void readMesh(Mesh mesh, String file, double ridgeAngle)
 	{
-		return readMesh(file, 0.0, false);
-	}
-	
-	private static Mesh readMesh(String file, double ridgeAngle, boolean buildAdj)
-	{
-		Mesh mesh = new Mesh();
 		TIntObjectHashMap nodesmap = null;
 		TIntObjectHashMap facesmap = null;
 		double unit = 1.0;
@@ -100,9 +94,8 @@ public class UNVReader
 					{
 						// default group
 						// read end of group
-						while (!(line=rd.readLine().trim()).equals("-1"))
+						while (!rd.readLine().trim().equals("-1"))
 						{
-						
 						}
 					}
 				}
@@ -113,13 +106,12 @@ public class UNVReader
 		{
 				e.printStackTrace();
 		}
-		if (buildAdj)
+		if (mesh.factory.hasAdjacency())
 		{
 			Vertex [] v = new Vertex[nodesmap.size()];
 			System.arraycopy(nodesmap.getValues(), 0, v, 0, v.length);
 			mesh.buildAdjacency(v, ridgeAngle);
 		}
-		return mesh;
 	}
 
 	private static double readUnit(BufferedReader rd)
@@ -129,7 +121,7 @@ public class UNVReader
 		try
 		{
 			//retrieve the second line
-			line = rd.readLine();
+			rd.readLine();
 			line = rd.readLine();
 			
 			// fisrt number : the unit
@@ -137,9 +129,8 @@ public class UNVReader
 			String unite = st.nextToken();
 			unite = unite.replace('D','E');
 			unit = new Double(unite).doubleValue();
-			while(!(line=rd.readLine().trim()).equals("-1"))
+			while(!rd.readLine().trim().equals("-1"))
 			{
-				// ???
 			}
 		}
 		catch(Exception e)
@@ -185,7 +176,7 @@ public class UNVReader
 				x = new Double(x1).doubleValue()/unit;
 				y = new Double(y1).doubleValue()/unit;
 				z = new Double(z1).doubleValue()/unit;
-				Vertex n = Vertex.valueOf(x,y,z);
+				Vertex n = (Vertex) m.factory.createVertex(x,y,z);
 				nodesmap.put(index, n);
 			}
 		}
@@ -227,7 +218,7 @@ public class UNVReader
 					assert n2 != null : p2;
 					Vertex n3 = (Vertex) nodesmap.get(p3);
 					assert n3 != null : p3;
-					Triangle f = new Triangle(n1, n2, n3);
+					AbstractTriangle f = (AbstractTriangle) mesh.factory.createTriangle(n1, n2, n3);
 					mesh.add(f);
 					n1.setLink(f);
 					n2.setLink(f);
@@ -253,13 +244,13 @@ public class UNVReader
 					assert n3 != null : p3;
 					Vertex n4 = (Vertex) nodesmap.get(p4);
 					assert n4 != null : p4;
-					Triangle f = new Triangle(n1, n2, n3);
+					AbstractTriangle f = (AbstractTriangle) mesh.factory.createTriangle(n1, n2, n3);
 					mesh.add(f);
 					n1.setLink(f);
 					n2.setLink(f);
 					n3.setLink(f);
 					facesmap.put(ind, f);
-					f = new Triangle(n1, n3, n4);
+					f = (AbstractTriangle) mesh.factory.createTriangle(n1, n3, n4);
 					mesh.add(f);
 					n4.setLink(f);
 					facesmap.put(-ind, f);
@@ -315,7 +306,7 @@ public class UNVReader
 						int ind = new Integer(index).intValue();
 						if (ind != 0)
 						{
-							Triangle f1 = (Triangle)facesmap.get(ind);
+							AbstractTriangle f1 = (AbstractTriangle)facesmap.get(ind);
 							facelist.add(f1);
 						}
 					}

@@ -22,7 +22,7 @@ package org.jcae.mesh.amibe.ds;
 /**
  * Unique edges, without considering their orientation.
  */
-public class NotOrientedEdge extends OTriangle
+public class NotOrientedEdge extends VirtualHalfEdge
 {
 	public NotOrientedEdge()
 	{
@@ -30,11 +30,11 @@ public class NotOrientedEdge extends OTriangle
 	}
 	
 	/**
-	 * Copy an OTriangle into a new NotOrientedEdge instance.
+	 * Copy an VirtualHalfEdge into a new NotOrientedEdge instance.
 	 *
-	 * @param ot  source OTriangle.
+	 * @param ot  source VirtualHalfEdge.
 	 */
-	public NotOrientedEdge(OTriangle ot)
+	public NotOrientedEdge(VirtualHalfEdge ot)
 	{
 		tri = ot.tri;
 		localNumber = ot.localNumber;

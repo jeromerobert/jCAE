@@ -20,6 +20,7 @@
 
 package org.jcae.mesh;
 
+import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.oemm.*;
 import org.apache.log4j.Logger;
@@ -39,6 +40,7 @@ public class MeshValidSoup
 		final int split = 10;
 		int [][] nr = new int[maxgroup][split+1];
 		double [] amin = new double[maxgroup];
+		Mesh mesh = new Mesh();
 		public ComputeTriangleQuality()
 		{
 			for (int i = 0; i < maxgroup; i++)
@@ -46,7 +48,7 @@ public class MeshValidSoup
 		}
 		public void processVertex(int i, double [] xyz)
 		{
-			n[i] = Vertex.valueOf(xyz[0], xyz[1], xyz[2]);
+			n[i] = (Vertex) mesh.factory.createVertex(xyz[0], xyz[1], xyz[2]);
 		}
 		public void processTriangle(int group)
 		{

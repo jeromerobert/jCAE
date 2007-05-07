@@ -21,7 +21,7 @@
 package org.jcae.mesh.amibe.algos3d;
 
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
@@ -38,7 +38,7 @@ public class SwapEdge
 	private Mesh mesh;
 	private double planarMin = 0.95;
 	// Used by cost()
-	private static OTriangle temp = new OTriangle();
+	private static VirtualHalfEdge temp = new VirtualHalfEdge();
 	
 	/**
 	 * Creates a <code>SwapEdge</code> instance.
@@ -67,7 +67,7 @@ public class SwapEdge
 	
 	private void unmarkEdges()
 	{
-		OTriangle ot = new OTriangle();
+		VirtualHalfEdge ot = new VirtualHalfEdge();
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
@@ -77,7 +77,7 @@ public class SwapEdge
 			for (int i = 0; i < 3; i++)
 			{
 				ot.nextOTri();
-				ot.clearAttributes(OTriangle.MARKED);
+				ot.clearAttributes(VirtualHalfEdge.MARKED);
 			}
 		}
 	}
@@ -97,8 +97,8 @@ public class SwapEdge
 	private boolean processAllTriangles(PAVLSortedTree tree)
 	{
 		int swapped = 0;
-		OTriangle ot = new OTriangle();
-		OTriangle sym = new OTriangle();
+		VirtualHalfEdge ot = new VirtualHalfEdge();
+		VirtualHalfEdge sym = new VirtualHalfEdge();
 		while (!tree.isEmpty())
 		{
 			Triangle t = null;
@@ -115,7 +115,7 @@ public class SwapEdge
 				for (int i = 0; i < 3; i++)
 				{
 					ot.nextOTri();
-					if (ot.hasAttributes(OTriangle.BOUNDARY))
+					if (ot.hasAttributes(VirtualHalfEdge.BOUNDARY))
 						continue;
 					assert ot.getAdj() != null : ot;
 					double qnew = ot.checkSwap3D(planarMin);
@@ -139,7 +139,7 @@ public class SwapEdge
 			ot.bind(t, localNumber);
 			if (logger.isDebugEnabled())
 				logger.debug("Swap edge: "+ot);
-			OTriangle.symOTri(ot, sym);
+			VirtualHalfEdge.symOTri(ot, sym);
 			tree.remove(t);
 			tree.remove(sym.getTri());
 			// Before: ot = (oda)   sym = (don)
@@ -152,7 +152,7 @@ public class SwapEdge
 			{
 				if (ot.getAdj() != null)
 				{
-					OTriangle.symOTri(ot, sym);
+					VirtualHalfEdge.symOTri(ot, sym);
 					sym.getTri().unsetMarked();
 				}
 				ot.prevOTri();
@@ -170,7 +170,7 @@ public class SwapEdge
 				ot.prevOTri();
 				if (ot.getAdj() != null)
 				{
-					OTriangle.symOTri(ot, sym);
+					VirtualHalfEdge.symOTri(ot, sym);
 					sym.getTri().unsetMarked();
 				}
 			}

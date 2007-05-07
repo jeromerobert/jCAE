@@ -23,8 +23,10 @@ package org.jcae.mesh.amibe.algos2d;
 import org.jcae.mesh.mesher.ds.MMesh1D;
 import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.OTriangle2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
@@ -83,9 +85,9 @@ import org.apache.log4j.Logger;
  * triangulation.  The nearest vertex already inserted in the mesh is retrieved
  * with {@link org.jcae.mesh.amibe.util.KdTree#getNearestVertex(Mesh, Vertex)}.
  * It has a reference to a triangle containing this vertex.  From this starting
- * point, we search for the {@link Triangle} containing this boundary node by
+ * point, we search for the {@link AbstractTriangle} containing this boundary node by
  * looking for adjacent triangles into the right direction.  This
- * <code>Triangle</code> is splitted into three triangles (even if the vertex
+ * <code>AbstractTriangle</code> is splitted into three triangles (even if the vertex
  * is inserted on an edge), and edges are swapped if they are not Delaunay.
  * (This criterion also applied with our Euclidian 2D metric)
  * </p>
@@ -95,16 +97,16 @@ import org.apache.log4j.Logger;
  * been built.  The list of boundary nodes computed previously gives a list of
  * boundary edges, which needs to be enforced.  This is performed by
  * {@link Mesh2D#forceBoundaryEdge(Vertex2D, Vertex2D, int)}; the segments which
- * intersect the enforced edge are swapped.  The {@link OTriangle#BOUNDARY}
+ * intersect the enforced edge are swapped.  The {@link AbstractHalfEdge#BOUNDARY}
  * attribute is set on these edges (and on matte edges).
  * </p>
  *
  * <p>
- * We know that the {@link Triangle} bound to {@link Mesh#outerVertex} is an
+ * We know that the {@link AbstractTriangle} bound to {@link Mesh#outerVertex} is an
  * outer triangle.  Triangles adjacent through a boundary edge are interior
  * triangles, and triangles adjacent through non-boundary edges are also
  * outer triangles.  All triangles of the mesh are visited, and outer
- * triangles are tagged with the {@link OTriangle#OUTER} attribute.
+ * triangles are tagged with the {@link AbstractHalfEdge#OUTER} attribute.
  * If an inconsistency is found (for instance a boundary edge seperate
  * two outer triangles), {@link InitialTriangulationException} is
  * raised.  This means that boundary was invalid, eg. it is not closed
@@ -301,9 +303,9 @@ public class Initial
 			{
 				OTriangle2D s = mesh.forceBoundaryEdge(bNodes[i-1], bNodes[i], bNodes.length);
 				saveList.add(s);
-				s.setAttributes(OTriangle.BOUNDARY);
+				s.setAttributes(AbstractHalfEdge.BOUNDARY);
 				s.symOTri();
-				s.setAttributes(OTriangle.BOUNDARY);
+				s.setAttributes(AbstractHalfEdge.BOUNDARY);
 				if (firstOnWire == bNodes[i])
 					firstOnWire = null;
 			}
@@ -320,13 +322,13 @@ public class Initial
 			ot.prevOTri();
 		assert ot.apex() == mesh.outerVertex : ot;
 		
-		Triangle.List tList = new Triangle.List();
+		AbstractTriangle.List tList = new AbstractTriangle.List();
 		Vertex2D first = (Vertex2D) ot.origin();
 		do
 		{
 			for (int i = 0; i < 3; i++)
 			{
-				ot.setAttributes(OTriangle.OUTER);
+				ot.setAttributes(AbstractHalfEdge.OUTER);
 				ot.nextOTri();
 			}
 			tList.add(ot.getTri());
@@ -348,27 +350,27 @@ public class Initial
 				if (t == oldHead)
 					break;
 				ot.bind(t);
-				boolean outer = ot.hasAttributes(OTriangle.OUTER);
+				boolean outer = ot.hasAttributes(AbstractHalfEdge.OUTER);
 				for (int i = 0; i < 3; i++)
 				{
 					ot.nextOTri();
-					OTriangle.symOTri(ot, sym);
+					VirtualHalfEdge.symOTri(ot, sym);
 					if (tList.contains(sym.getTri()))
 						continue;
 					newHead = sym.getTri();
 					tList.add(newHead);
-					if (ot.hasAttributes(OTriangle.BOUNDARY))
+					if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
 					{
 						if (!outer)
 							newHead.setOuter();
-						else if (sym.hasAttributes(OTriangle.OUTER))
+						else if (sym.hasAttributes(AbstractHalfEdge.OUTER))
 								throw new InitialTriangulationException();
 					}
 					else
 					{
 						if (outer)
 							newHead.setOuter();
-						else if (sym.hasAttributes(OTriangle.OUTER))
+						else if (sym.hasAttributes(AbstractHalfEdge.OUTER))
 								throw new InitialTriangulationException();
 					}
 				}
@@ -419,7 +421,7 @@ public class Initial
 				if (s.apex() == mesh.outerVertex)
 					s.symOTri();
 				s.nextOTri();
-				if (s.hasAttributes(OTriangle.SWAPPED))
+				if (s.hasAttributes(AbstractHalfEdge.SWAPPED))
 					continue;
 				if (s.checkSmallerAndSwap(mesh) != 0)
 					redo = true;

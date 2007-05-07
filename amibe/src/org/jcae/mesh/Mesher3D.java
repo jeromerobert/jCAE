@@ -32,10 +32,11 @@ import java.text.SimpleDateFormat;
 
 import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.algos3d.SmoothNodes3D;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
+import org.jcae.mesh.amibe.algos3d.*;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
-import org.jcae.mesh.xmldata.MMesh3DReader;
 
 /**
  * Reads a 3D mesh, performs computations and stores it back.
@@ -63,7 +64,13 @@ public class Mesher3D
 		String brepFile = (new File(brepfilename)).getName();		
 		String xmlBrepDir = relativize(new File(brepfilename).getAbsoluteFile().getParentFile(),
 			new File(xmlDir).getAbsoluteFile()).getPath();
-		Mesh mesh = null;
+		TriangleTraitsBuilder ttb = new TriangleTraitsBuilder();
+		ttb.addHalfEdge();
+		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
+		mtb.addTriangleSet();
+		mtb.addNodeList();
+		mtb.add(ttb);
+		Mesh mesh = new Mesh(mtb);
 		String ridgeAngleProp = System.getProperty("org.jcae.mesh.xmldata.MeshReader.ridgeAngleDegre");
 		if (ridgeAngleProp == null)
 		{
@@ -72,9 +79,9 @@ public class Mesher3D
 		}
 		double ridgeAngle = Double.parseDouble(ridgeAngleProp);
 		if (brepFile.endsWith(".unv"))
-			mesh = org.jcae.mesh.amibe.util.UNVReader.readMesh(brepFile, ridgeAngle);
+			org.jcae.mesh.amibe.util.UNVReader.readMesh(mesh, brepFile, ridgeAngle);
 		else
-			mesh = MeshReader.readObject3D(xmlDir, "jcae3d", ridgeAngle);
+			MeshReader.readObject3D(mesh, xmlDir, "jcae3d", ridgeAngle);
 		try
 		{
 			HashMap opts = new HashMap();
@@ -105,7 +112,7 @@ public class Mesher3D
 			Properties prop = new Properties();
 			prop.load(in);
 			String buildDate = prop.getProperty("build.time");
-			int [] res = MMesh3DReader.getInfos(xmlDir, "jcae3d");
+			int [] res = MeshReader.getInfos(xmlDir, "jcae3d");
 			out.println("MESH REPORT");
 			out.println("===========");
 			out.println("Start date: "+startDate);

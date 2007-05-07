@@ -58,6 +58,7 @@ public class OctreeTestRemove extends OctreeTest
 		Random rand = new Random(113L);
 		double [] umin = { 0.0, 0.0, 0.0 };
 		double [] umax = { 1.0, 1.0, 1.0 };
+		final Mesh mesh = new Mesh();
 		final OctreeTest r = new OctreeTest(umin, umax);
 		final Mesh m = new Mesh();
 		logger.debug("Start insertion");
@@ -67,7 +68,7 @@ public class OctreeTestRemove extends OctreeTest
 			xyz[0] = rand.nextDouble();
 			xyz[1] = rand.nextDouble();
 			xyz[2] = rand.nextDouble();
-			r.add(Vertex.valueOf(xyz));
+			r.add((Vertex) mesh.factory.createVertex(xyz));
 		}
 		//CheckCoordProcedure checkproc = new CheckCoordProcedure();
 		//r.walk(checkproc);
@@ -84,7 +85,7 @@ public class OctreeTestRemove extends OctreeTest
 					double [] xyz = view.getLastClick();
 					if (null != xyz)
 					{
-						Vertex vt = r.getNearVertex(m, Vertex.valueOf(xyz));
+						Vertex vt = r.getNearVertex(mesh, (Vertex) mesh.factory.createVertex(xyz));
 						r.remove(vt);
 						view.removeAllBranchGroup();
 						display(view, r);

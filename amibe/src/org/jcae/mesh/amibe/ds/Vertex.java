@@ -20,6 +20,7 @@
 package org.jcae.mesh.amibe.ds;
 
 import org.apache.log4j.Logger;
+import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
@@ -40,14 +41,19 @@ import java.io.Serializable;
  * computed from vertex neighbours.
  *
  * <p>
- * Each vertex has a pointer to an incident <code>Triangle</code>,
- * which allows to find any other incident <code>OTriangle</code> or
- * <code>Triangle</code>.  For non-manifold vertices, this link points
- * to a <code>Triangle []</code> array, which can be used to retrieve
+ * There is a special vertex, {@link #outer}, which represents a vertex at
+ * infinite.  It is used to create exterior triangles.
+ * </p>
+ *
+ * <p>
+ * Each vertex has a pointer to an incident <code>AbstractTriangle</code>,
+ * which allows to find any other incident <code>VirtualHalfEdge</code> or
+ * <code>AbstractTriangle</code>.  For non-manifold vertices, this link points
+ * to a <code>AbstractTriangle []</code> array, which can be used to retrieve
  * all incident triangles through their adjacency relations.
  * </p>
  */
-public class Vertex implements Serializable
+public class Vertex extends AbstractVertex implements Serializable
 {
 	private static Logger logger = Logger.getLogger(Vertex.class);
 	
@@ -56,11 +62,11 @@ public class Vertex implements Serializable
 	 */
 	protected final double [] param;
 	//  link can be either:
-	//    1. a Triangle, for manifold vertices
+	//    1. a AbstractTriangle, for manifold vertices
 	//    2. an Object[2] array, zhere
 	//         0: list of head triangles
 	//         1: list of incident wires
-	protected Object link;
+	protected Object link = null;
 	
 	//  ref1d > 0: link to the geometrical node
 	//  ref1d = 0: inner node
@@ -80,6 +86,12 @@ public class Vertex implements Serializable
 		param = new double[2];
 	}
 
+	protected Vertex(VertexTraitsBuilder vtb)
+	{
+		super(vtb);
+		param = new double[2];
+	}
+
 	/**
 	 * Create a Vertex for a 3D mesh.
 	 *
@@ -87,7 +99,7 @@ public class Vertex implements Serializable
 	 * @param y  second coordinate.
 	 * @param z  third coordinate.
 	 */
-	private Vertex(double x, double y, double z)
+	public Vertex(double x, double y, double z)
 	{
 		param = new double[3];
 		param[0] = x;
@@ -95,31 +107,13 @@ public class Vertex implements Serializable
 		param[2] = z;
 	}
 	
-	/**
-	 * Create a Vertex for a 3D mesh.
-	 *
-	 * @param x  first coordinate.
-	 * @param y  second coordinate.
-	 * @param z  third coordinate.
-	 */
-	public static Vertex valueOf(double x, double y, double z)
+	public Vertex(VertexTraitsBuilder vtb, double x, double y, double z)
 	{
-		return new Vertex(x, y, z);
-	}
-	
-	/**
-	 * Create a Vertex for a 3D mesh.
-	 *
-	 * @param p  3d coordinates.
-	 */
-	public static Vertex valueOf(double [] p)
-	{
-		Vertex ret;
-		if (p.length == 2)
-			ret = Vertex2D.valueOf(p[0], p[1]);
-		else
-			ret = new Vertex(p[0], p[1], p[2]);
-		return ret;
+		super(vtb);
+		param = new double[3];
+		param[0] = x;
+		param[1] = y;
+		param[2] = z;
 	}
 	
 	/**
@@ -206,8 +200,8 @@ public class Vertex implements Serializable
 	/**
 	 * Get a finite element containing this Vertex.
 	 *
-	 * @return a <code>Triangle</code> instance for manifold vertices,
-	 * and a <code>Triangle []</code> array otherwise.
+	 * @return a <code>AbstractTriangle</code> instance for manifold vertices,
+	 * and a <code>AbstractTriangle []</code> array otherwise.
 	 */
 	public Object getLink()
 	{
@@ -226,13 +220,12 @@ public class Vertex implements Serializable
 	
 	/**
 	 * Set link to an array of Triangles.  This routine eliminates
-	 * duplicates to keep only one Triangle by fan.
+	 * duplicates to keep only one AbstractTriangle by fan.
 	 *
 	 * @param triangles  initial set of adjacent triangles.
 	 */
 	public void setLinkFan(Collection triangles)
 	{
-		OTriangle ot = new OTriangle();
 		ArrayList res = new ArrayList();
 		Collection allTriangles = new HashSet();
 		for (Iterator it = triangles.iterator(); it.hasNext(); )
@@ -242,17 +235,17 @@ public class Vertex implements Serializable
 				continue;
 			allTriangles.add(t);
 			res.add(t);
-			ot.bind(t);
+			AbstractHalfEdge ot = t.getAbstractHalfEdge();
 			if (ot.destination() == this)
-				ot.nextOTri();
+				ot = ot.next();
 			else if (ot.apex() == this)
-				ot.prevOTri();
+				ot = ot.prev();
 			assert ot.origin() == this;
 			// Add all triangles of the same fan to allTriangles
 			Vertex d = ot.destination();
 			do
 			{
-				ot.nextOTriOriginLoop();
+				ot = ot.nextOriginLoop();
 				allTriangles.add(ot.getTri());
 			}
 			while (ot.destination() != d);
@@ -308,18 +301,18 @@ public class Vertex implements Serializable
 	private void appendNeighboursTri(Triangle tri, Collection nodes)
 	{
 		assert tri.vertex[0] == this || tri.vertex[1] == this || tri.vertex[2] == this;
-		OTriangle ot = new OTriangle(tri, 0);
+		AbstractHalfEdge ot = tri.getAbstractHalfEdge();
 		if (ot.origin() != this)
-			ot.nextOTri();
+			ot = ot.next();
 		if (ot.origin() != this)
-			ot.nextOTri();
+			ot = ot.next();
 		assert ot.origin() == this : this+" not in "+ot;
 		Vertex d = ot.destination();
 		do
 		{
-			if (!ot.hasAttributes(OTriangle.OUTER))
+			if (!ot.hasAttributes(AbstractHalfEdge.OUTER))
 				nodes.add(ot.destination());
-			ot.nextOTriOriginLoop();
+			ot = ot.nextOriginLoop();
 			assert ot.origin() == this : ot+" should originate from "+this;
 		}
 		while (ot.destination() != d);
@@ -421,11 +414,11 @@ public class Vertex implements Serializable
 		for (int i = 0; i < 3; i++)
 			meanNormal[i] = 0.0;
 		assert link instanceof Triangle;
-		OTriangle ot = new OTriangle((Triangle) link, 0);
+		AbstractHalfEdge ot = ((Triangle) link).getAbstractHalfEdge();
 		if (ot.origin() != this)
-			ot.nextOTri();
+			ot = ot.next();
 		if (ot.origin() != this)
-			ot.nextOTri();
+			ot = ot.next();
 		assert ot.origin() == this;
 		double [] vect1 = new double[3];
 		double [] vect2 = new double[3];
@@ -436,8 +429,8 @@ public class Vertex implements Serializable
 		Vertex d = ot.destination();
 		do
 		{
-			ot.nextOTriOriginLoop();
-			if (ot.hasAttributes(OTriangle.BOUNDARY))
+			ot = ot.nextOriginLoop();
+			if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
 			{
 				// FIXME: what to do when a boundary
 				// is encountered?  For now, return
@@ -446,7 +439,7 @@ public class Vertex implements Serializable
 					meanNormal[i] = 0.0;
 				return 0.0;
 			}
-			if (ot.hasAttributes(OTriangle.OUTER))
+			if (ot.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			double [] p1 = ot.destination().getUV();
 			double [] p2 = ot.apex().getUV();
@@ -543,11 +536,11 @@ public class Vertex implements Serializable
 		// but we found that Kh is much less accurate than Kg on
 		// a sphere, so we do not use this identity.
 		//   (1/2) grad E = G (a b c) - H
-		OTriangle ot = new OTriangle((Triangle) link, 0);
+		AbstractHalfEdge ot = ((Triangle) link).getAbstractHalfEdge();
 		if (ot.origin() != this)
-			ot.nextOTri();
+			ot = ot.next();
 		if (ot.origin() != this)
-			ot.nextOTri();
+			ot = ot.next();
 		assert ot.origin() == this;
 		double [] vect1 = new double[3];
 		double [] vect2 = new double[3];
@@ -561,8 +554,8 @@ public class Vertex implements Serializable
 		Vertex d = ot.destination();
 		do
 		{
-			ot.nextOTriOriginLoop();
-			if (ot.hasAttributes(OTriangle.OUTER))
+			ot = ot.nextOriginLoop();
+			if (ot.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			double [] p1 = ot.destination().getUV();
 			double [] p2 = ot.apex().getUV();
@@ -653,22 +646,22 @@ public class Vertex implements Serializable
 		for (int i = 0; i < 3; i++)
 			normal[i] = 0.0;
 		assert link instanceof Triangle;
-		OTriangle ot = new OTriangle((Triangle) link, 0);
+		AbstractHalfEdge ot = ((Triangle) link).getAbstractHalfEdge();
 		if (ot.origin() != this)
-			ot.nextOTri();
+			ot = ot.next();
 		if (ot.origin() != this)
-			ot.nextOTri();
+			ot = ot.next();
 		assert ot.origin() == this;
+		double [][] temp = new double[3][3];
 		Vertex d = ot.destination();
 		do
 		{
-			ot.nextOTriOriginLoop();
-			if (ot.hasAttributes(OTriangle.OUTER))
+			ot = ot.nextOriginLoop();
+			if (ot.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			double area = ot.computeNormal3D();
-			double [] nu = ot.getTempVector();
+			double area = Matrix3D.computeNormal3D(param, ot.destination().param, ot.apex().param, temp[0], temp[1], temp[2]);
 			for (int i = 0; i < 3; i++)
-				normal[i] += area * nu[i];
+				normal[i] += area * temp[2][i];
 		}
 		while (ot.destination() != d);
 		double n = Matrix3D.norm(normal);
@@ -735,11 +728,11 @@ public class Vertex implements Serializable
 		// Transformation matrix
 		Matrix3D Pinv = new Matrix3D(t1, t2, normal);
 		Matrix3D P = (Matrix3D) Pinv.transp();
-		OTriangle ot = new OTriangle((Triangle) link, 0);
+		AbstractHalfEdge ot = ((Triangle) link).getAbstractHalfEdge();
 		if (ot.origin() != this)
-			ot.nextOTri();
+			ot = ot.next();
 		if (ot.origin() != this)
-			ot.nextOTri();
+			ot = ot.next();
 		assert ot.origin() == this;
 		double [] vect1 = new double[3];
 		double [] g0 = new double[3];
@@ -752,8 +745,8 @@ public class Vertex implements Serializable
 		Vertex d = ot.destination();
 		do
 		{
-			ot.nextOTriOriginLoop();
-			if (ot.hasAttributes(OTriangle.OUTER))
+			ot = ot.nextOriginLoop();
+			if (ot.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			double [] p1 = ot.destination().getUV();
 			for (int i = 0; i < 3; i++)
@@ -792,8 +785,7 @@ public class Vertex implements Serializable
 	
 	public String toString ()
 	{
-		StringBuffer r = new StringBuffer();
-		r.append("UV:");
+		StringBuffer r = new StringBuffer("UV:");
 		for (int i = 0; i < param.length; i++)
 			r.append(" "+param[i]);
 		if (ref1d != 0)
@@ -812,10 +804,6 @@ public class Vertex implements Serializable
 				r.append("]");
 			}
 		}
-		if (!readable)
-			r.append(" !R");
-		if (!writable)
-			r.append(" !W");
 		return r.toString();
 	}
 	

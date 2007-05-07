@@ -21,7 +21,8 @@
 package org.jcae.mesh.amibe.algos2d;
 
 import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.OTriangle2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
@@ -84,9 +85,9 @@ public class CheckDelaunay
 				for (int i = 0; i < 3; i++)
 				{
 					ot.nextOTri();
-					ot.clearAttributes(OTriangle.SWAPPED);
-					OTriangle.symOTri(ot, sym);
-					sym.clearAttributes(OTriangle.SWAPPED);
+					ot.clearAttributes(AbstractHalfEdge.SWAPPED);
+					VirtualHalfEdge.symOTri(ot, sym);
+					sym.clearAttributes(AbstractHalfEdge.SWAPPED);
 				}
 			}
 			
@@ -100,11 +101,11 @@ public class CheckDelaunay
 					ot.nextOTri();
 					if (!ot.isMutable())
 						continue;
-					OTriangle.symOTri(ot, sym);
-					if (ot.hasAttributes(OTriangle.SWAPPED) || sym.hasAttributes(OTriangle.SWAPPED))
+					VirtualHalfEdge.symOTri(ot, sym);
+					if (ot.hasAttributes(AbstractHalfEdge.SWAPPED) || sym.hasAttributes(AbstractHalfEdge.SWAPPED))
 						continue;
-					ot.setAttributes(OTriangle.SWAPPED);
-					sym.setAttributes(OTriangle.SWAPPED);
+					ot.setAttributes(AbstractHalfEdge.SWAPPED);
+					sym.setAttributes(AbstractHalfEdge.SWAPPED);
 					v = (Vertex2D) sym.apex();
 					if (!ot.isDelaunay(mesh, v))
 					{
@@ -122,10 +123,10 @@ public class CheckDelaunay
 				ot.bind(t);
 				for (int i = 0; i < orient; i++)
 					ot.nextOTri();
-				if (ot.hasAttributes(OTriangle.SWAPPED))
+				if (ot.hasAttributes(AbstractHalfEdge.SWAPPED))
 				{
 					newList.add(ot.getTri());
-					OTriangle.symOTri(ot, sym);
+					VirtualHalfEdge.symOTri(ot, sym);
 					newList.add(sym.getTri());
 					ot.swap();
 					redo = true;

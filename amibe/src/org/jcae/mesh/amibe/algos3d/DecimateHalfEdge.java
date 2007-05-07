@@ -23,8 +23,8 @@ package org.jcae.mesh.amibe.algos3d;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.HalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.OTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.metrics.Quadric3DError;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.xmldata.MeshReader;
@@ -109,10 +109,9 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	private static Logger logger=Logger.getLogger(DecimateHalfEdge.class);
 	private int placement = Quadric3DError.POS_EDGE;
 	private HashMap quadricMap = null;
-	private OTriangle ot = new OTriangle();
 	private Vertex v1 = null, v2 = null;
 	private Quadric3DError q1 = null, q2 = null;
-	private Vertex v3 = Vertex.valueOf(0.0, 0.0, 0.0);
+	private Vertex v3;
 	private Quadric3DError q3 = new Quadric3DError();
 	private static final boolean testDump = false;
 	
@@ -127,6 +126,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	public DecimateHalfEdge(Mesh m, Map options)
 	{
 		super(m, options);
+		v3 = (Vertex) m.factory.createVertex(0.0, 0.0, 0.0);
 		for (Iterator it = options.entrySet().iterator(); it.hasNext(); )
 		{
 			Map.Entry opt = (Map.Entry) it.next();
@@ -160,9 +160,6 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 
 	public void preProcessAllHalfEdges()
 	{
-		// Store triangles in a LinkedHashSet to speed up removal.
-		LinkedHashSet newList = new LinkedHashSet(mesh.getTriangles());
-		mesh.setTrianglesList(newList);
 		int roughNrNodes = mesh.getTriangles().size()/2;
 		quadricMap = new HashMap(roughNrNodes);
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
@@ -213,11 +210,11 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 				q.addError(normal, d, area);
 			}
 			// Penalty for boundary triangles
-			HalfEdge e = f.getHalfEdge();
+			HalfEdge e = (HalfEdge) f.getAbstractHalfEdge();
 			for (int i = 0; i < 3; i++)
 			{
-				e = e.next();
-				if (e.hasAttributes(OTriangle.BOUNDARY) || e.hasAttributes(OTriangle.NONMANIFOLD))
+				e = (HalfEdge) e.next();
+				if (e.hasAttributes(AbstractHalfEdge.BOUNDARY) || e.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 				{
 					//  Add a virtual plane
 					//  In his dissertation, Garland suggests to
@@ -303,9 +300,8 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		assert q2 != null : current;
 		q3.computeQuadric3DError(q1, q2);
 		q3.optimalPlacement(v1, v2, q1, q2, placement, v3);
-		current.copyOTriangle(ot);
 		// For now, do not contract non manifold edges
-		return (!current.hasAttributes(OTriangle.NONMANIFOLD) && ot.canContract(v3));
+		return (!current.hasAttributes(AbstractHalfEdge.NONMANIFOLD) && current.canCollapse(v3));
 	}
 
 	public void preProcessEdge()
@@ -336,46 +332,46 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			nrTriangles--;
 			for (int i = 0; i < 2; i++)
 			{
-				current = current.next();
+				current = (HalfEdge) current.next();
 				tree.remove(current.notOriented());
 				assert !tree.contains(current.notOriented());
 			}
-			current = current.next();
+			current = (HalfEdge) current.next();
 		}
-		HalfEdge sym = current.sym();
+		HalfEdge sym = (HalfEdge) current.sym();
 		Triangle t2 = sym.getTri();
 		if (!t2.isOuter())
 		{
 			nrTriangles--;
 			for (int i = 0; i < 2; i++)
 			{
-				sym = sym.next();
+				sym = (HalfEdge) sym.next();
 				tree.remove(sym.notOriented());
 				assert !tree.contains(sym.notOriented());
 			}
-			sym = sym.next();
+			sym = (HalfEdge) sym.next();
 		}
-		Vertex apex = current.apex();
-		// FIXME: is this test really necessary?
-		if (apex == mesh.outerVertex)
-			apex = sym.apex();
 		//  Contract (v1,v2) into v3
-		current.contract(mesh, v3);
+		//  By convention, collapse() returns edge (v3, apex)
+		if (current.hasAttributes(AbstractHalfEdge.OUTER))
+			current = (HalfEdge) current.sym();
+		Vertex apex = current.apex();
+		current = (HalfEdge) current.collapse(mesh, v3);
 		quadricMap.remove(v1);
 		quadricMap.remove(v2);
 		// Update edge costs
 		quadricMap.put(v3, q3);
-		current = HalfEdge.find(v3, apex);
 		assert current != null : v3+" not connected to "+apex;
+		assert current.origin() == v3 : ""+current+"\n"+v3+"\n"+apex;
 		assert current.destination() == apex : ""+current+"\n"+v3+"\n"+apex;
 		do
 		{
-			current = current.nextOriginLoop();
+			current = (HalfEdge) current.nextOriginLoop();
 			if (current.destination() != mesh.outerVertex)
 				tree.update(current.notOriented(), cost(current));
 		}
 		while (current.destination() != apex);
-		return current.next();
+		return (HalfEdge) current.next();
 	}
 	
 	public void postProcessAllHalfEdges()
@@ -403,7 +399,13 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			return;
 		}
 		logger.info("Load geometry file");
-		Mesh mesh=MeshReader.readObject3D(args[0], "jcae3d", -1);
+		org.jcae.mesh.amibe.traits.TriangleTraitsBuilder ttb = new org.jcae.mesh.amibe.traits.TriangleTraitsBuilder();
+		ttb.addHalfEdge();
+		org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = new org.jcae.mesh.amibe.traits.MeshTraitsBuilder();
+		mtb.addTriangleSet();
+		mtb.add(ttb);
+		Mesh mesh = new Mesh(mtb);
+		MeshReader.readObject3D(mesh, args[0], "jcae3d", -1);
 		new DecimateHalfEdge(mesh, options).compute();
 		File brepFile=new File(args[4]);
 		MeshWriter.writeObject3D(mesh, args[4], "jcae3d", brepFile.getParent(), brepFile.getName(),1);

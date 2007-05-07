@@ -22,7 +22,7 @@ package org.jcae.mesh.amibe.algos3d;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import org.jcae.mesh.xmldata.MeshReader;
@@ -52,7 +52,7 @@ public class SmoothNodes3D
 	private double sizeTarget = -1.0;
 	private int nloop = 10;
 	private boolean preserveBoundaries = false;
-	private static OTriangle temp = new OTriangle();
+	private static VirtualHalfEdge temp = new VirtualHalfEdge();
 	private static double speed = 0.2;
 	
 	/**
@@ -119,7 +119,7 @@ public class SmoothNodes3D
 			if (!f.isOuter())
 				tree.insert(f, cost(f));
 		}
-		OTriangle ot = new OTriangle();
+		VirtualHalfEdge ot = new VirtualHalfEdge();
 		for (Iterator itt = tree.iterator(); itt.hasNext(); )
 		{
 			Triangle f = (Triangle) itt.next();
@@ -142,13 +142,13 @@ public class SmoothNodes3D
 		return ret;
 	}
 	
-	private static boolean smoothNode(Mesh mesh, OTriangle ot, double sizeTarget)
+	private static boolean smoothNode(Mesh mesh, VirtualHalfEdge ot, double sizeTarget)
 	{
 		Vertex n = ot.origin();
 		double[] oldp3 = n.getUV();
 		
 		//  Compute 3D coordinates centroid
-		Vertex c = Vertex.valueOf(0.0, 0.0, 0.0);
+		Vertex c = (Vertex) mesh.factory.createVertex(0.0, 0.0, 0.0);
 		int nn = 0;
 		double[] centroid3 = c.getUV();
 		centroid3[0] = centroid3[1] = centroid3[2] = 0.;
@@ -220,7 +220,13 @@ public class SmoothNodes3D
 	 */
 	public static void main(String[] args)
 	{
-		Mesh mesh=MeshReader.readObject3D(args[0], args[1], -1);
+		org.jcae.mesh.amibe.traits.TriangleTraitsBuilder ttb = new org.jcae.mesh.amibe.traits.TriangleTraitsBuilder();
+		ttb.addHalfEdge();
+		org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = new org.jcae.mesh.amibe.traits.MeshTraitsBuilder();
+		mtb.addTriangleSet();
+		mtb.add(ttb);
+		Mesh mesh = new Mesh(mtb);
+		MeshReader.readObject3D(mesh, args[0], args[1], -1);
 		Map opts = new HashMap();
 		opts.put("size", args[2]);
 		opts.put("iterations", args[3]);

@@ -68,7 +68,8 @@ public class MeshValid2D
 				if (numFace != 0 && iFace != numFace)
 					continue;
 				String xmlFile = "jcae2d."+iFace;
-				Mesh2D mesh = MeshReader.readObject(xmlDir, xmlFile, F);
+				Mesh2D mesh = new Mesh2D(F);
+				MeshReader.readObject(mesh, xmlDir, xmlFile);
 				if (null == mesh)
 				{
 					logger.info("Face "+iFace+" ***");

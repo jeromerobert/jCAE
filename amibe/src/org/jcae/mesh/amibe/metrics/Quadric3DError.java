@@ -21,6 +21,7 @@
 package org.jcae.mesh.amibe.metrics;
 
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.Mesh;
 import java.io.Serializable;
 
 /**

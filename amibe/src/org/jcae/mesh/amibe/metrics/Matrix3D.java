@@ -238,6 +238,45 @@ public class Matrix3D implements Serializable
 		ret[2] = v1[0] * v2[1] - v1[1] * v2[0];
 	}
 	
+	public static final double computeNormal3D(double [] p0, double [] p1, double [] p2, double [] tempD1, double [] tempD2, double [] tempD3)
+	{
+		tempD1[0] = p1[0] - p0[0];
+		tempD1[1] = p1[1] - p0[1];
+		tempD1[2] = p1[2] - p0[2];
+		tempD2[0] = p2[0] - p0[0];
+		tempD2[1] = p2[1] - p0[1];
+		tempD2[2] = p2[2] - p0[2];
+		prodVect3D(tempD1, tempD2, tempD3);
+		double norm = norm(tempD3);
+		if (norm != 0.0)
+		{
+			tempD3[0] /= norm;
+			tempD3[1] /= norm;
+			tempD3[2] /= norm;
+		}
+		return 0.5 * norm;
+	}
+
+	public static final double computeNormal3DT(double [] p0, double [] p1, double [] p2, double [] tempD1, double [] tempD2, double [] tempD3)
+	{
+		tempD1[0] = p1[0] - p0[0];
+		tempD1[1] = p1[1] - p0[1];
+		tempD1[2] = p1[2] - p0[2];
+		tempD3[0] = p2[0] - p0[0];
+		tempD3[1] = p2[1] - p0[1];
+		tempD3[2] = p2[2] - p0[2];
+		prodVect3D(tempD1, tempD3, tempD2);
+		double norm = norm(tempD2);
+		if (norm != 0.0)
+		{
+			tempD2[0] /= norm;
+			tempD2[1] /= norm;
+			tempD2[2] /= norm;
+		}
+		prodVect3D(tempD1, tempD2, tempD3);
+		return 0.5*norm;
+	}
+	
 	public String toString()
 	{
 		StringBuffer ret = new StringBuffer();

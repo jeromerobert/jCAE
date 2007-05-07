@@ -152,10 +152,12 @@ public class Storage
 	{
 		private TIntObjectHashMap vertMap;
 		private TIntHashSet leaves;
+		private Mesh mesh;
 		public ReadVerticesProcedure(Mesh m, TIntObjectHashMap map, TIntHashSet set)
 		{
 			vertMap = map;
 			leaves = set;
+			mesh = m;
 		}
 		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
 		{
@@ -184,7 +186,7 @@ public class Storage
 					for(int nr = 0; nr < nf; nr ++)
 					{
 						bbD.get(xyz);
-						vert[index] = Vertex.valueOf(xyz);
+						vert[index] = (Vertex) mesh.factory.createVertex(xyz);
 						vert[index].setLabel(current.minIndex + index);
 						vert[index].setReadable(true);
 						int n = (int) bufIn.readByte();
@@ -277,7 +279,7 @@ public class Storage
 						bbI.get();
 						if (!writable)
 							continue;
-						Triangle t = new Triangle(vert[0], vert[1], vert[2]);
+						Triangle t = (Triangle) mesh.factory.createTriangle(vert[0], vert[1], vert[2]);
 						t.setGroupId(current.leafIndex);
 						vert[0].setLink(t);
 						vert[1].setLink(t);

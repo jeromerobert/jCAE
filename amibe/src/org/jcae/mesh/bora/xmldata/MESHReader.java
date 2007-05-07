@@ -25,7 +25,7 @@ import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import org.jcae.mesh.amibe.ds.VolMesh;
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import java.util.StringTokenizer;
 import gnu.trove.TIntObjectHashMap;
@@ -88,7 +88,7 @@ public class MESHReader
 				x = new Double(x1).doubleValue();
 				y = new Double(y1).doubleValue();
 				z = new Double(z1).doubleValue();
-				Vertex n = Vertex.valueOf(x,y,z);
+				Vertex n = (Vertex) m.factory.createVertex(x,y,z);
 				m.add(n);
 				nodesmap.put(i, n);
 			}
@@ -122,7 +122,7 @@ public class MESHReader
 					if (v[j] == null)
 						throw new RuntimeException();
 				}
-				Triangle f = new Triangle(v);
+				AbstractTriangle f = (AbstractTriangle) mesh.factory.createTriangle(v);
 				mesh.add(f);
 			}
 		}

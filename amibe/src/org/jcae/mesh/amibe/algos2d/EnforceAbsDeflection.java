@@ -80,14 +80,14 @@ public class EnforceAbsDeflection
 				t = (Triangle) it.next();
 				if (t.isOuter())
 					continue;
-				double uv[] = Vertex2D.centroid((Vertex2D[]) t.vertex).getUV();
+				double uv[] = Vertex2D.centroid(mesh, (Vertex2D[]) t.vertex).getUV();
 				double [] xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
-				p[3] = Vertex.valueOf(xyz);
+				p[3] = new Vertex(xyz[0], xyz[1], xyz[2]);
 				for (int i = 0; i < 3; i++)
 				{
 					uv = t.vertex[i].getUV();
 					xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
-					p[i] = Vertex.valueOf(xyz);
+					p[i] = new Vertex(xyz[0], xyz[1], xyz[2]);
 				}
 				double [] xyz0 = p[0].getUV();
 				double [] xyz1 = p[1].getUV();
@@ -114,8 +114,8 @@ public class EnforceAbsDeflection
 				t = (Triangle) it.next();
 				if (!mesh.getTriangles().contains(t) || t.isBoundary())
 					continue;
-				double uv[] = Vertex2D.centroid((Vertex2D[]) t.vertex).getUV();
-				Vertex2D v = Vertex2D.valueOf(uv[0], uv[1]);
+				double uv[] = Vertex2D.centroid(mesh, (Vertex2D[]) t.vertex).getUV();
+				Vertex2D v = (Vertex2D) mesh.factory.createVertex(uv[0], uv[1]);
 				OTriangle2D vt = v.getSurroundingOTriangle(mesh);
 				if (vt.split3(mesh, v, false))
 					redo = true;

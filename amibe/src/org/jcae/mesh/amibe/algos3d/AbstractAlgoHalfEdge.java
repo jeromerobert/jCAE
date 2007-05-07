@@ -23,7 +23,7 @@ package org.jcae.mesh.amibe.algos3d;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.HalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.util.QSortedTree;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
@@ -63,9 +63,7 @@ public abstract class AbstractAlgoHalfEdge
 	}
 	public void compute()
 	{
-		thisLogger().info("Add HalfEdge data structure");
-		mesh.buildEdges();
-		thisLogger().info("Compute initial tree");
+		thisLogger().info("Run "+getClass().getName());
 		preProcessAllHalfEdges();
 		computeTree();
 		postComputeTree();
@@ -97,10 +95,10 @@ public abstract class AbstractAlgoHalfEdge
 			if (f.isOuter())
 				continue;
 			nrTriangles++;
-			HalfEdge e = f.getHalfEdge();
+			HalfEdge e = (HalfEdge) f.getAbstractHalfEdge();
 			for (int i = 0; i < 3; i++)
 			{
-				e = e.next();
+				e = (HalfEdge) e.next();
 				if (tree.contains(e.notOriented()))
 					continue;
 				addToTree(e);
@@ -119,8 +117,6 @@ public abstract class AbstractAlgoHalfEdge
 
 	protected void addToTree(HalfEdge e)
 	{
-		if (e.hasAttributes(OTriangle.OUTER))
-			return;
 		double val = cost(e);
 		// If an edge will not be processed because of its cost, it is
 		// better to not put it in the tree.  One drawback though is
@@ -133,7 +129,6 @@ public abstract class AbstractAlgoHalfEdge
 
 	private boolean processAllHalfEdges()
 	{
-		OTriangle ot = new OTriangle();
 		boolean noSwap = false;
 		Stack stackNotProcessed = new Stack();
 		double cost = -1.0;
@@ -189,49 +184,48 @@ public abstract class AbstractAlgoHalfEdge
 			if (noSwap)
 				continue;
 			
-			if (current.hasAttributes(OTriangle.OUTER) || current.hasAttributes(OTriangle.BOUNDARY) || current.hasAttributes(OTriangle.NONMANIFOLD))
+			if (current.hasAttributes(AbstractHalfEdge.OUTER | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 				continue;
 			// Check if edges can be swapped
 			Vertex o = current.origin();
 			while(true)
 			{
-				current.copyOTriangle(ot);
-				if (ot.checkSwap3D(0.95) >= 0.0)
+				if (current.checkSwap3D(0.95) >= 0.0)
 				{
 					// Swap edge
 					for (int i = 0; i < 3; i++)
 					{
-						current = current.next();
+						current = (HalfEdge) current.next();
 						tree.remove(current.notOriented());
 						assert !tree.contains(current.notOriented());
 					}
-					HalfEdge sym = current.sym();
-					for (int i = 0; i < 3; i++)
+					HalfEdge sym = (HalfEdge) current.sym();
+					for (int i = 0; i < 2; i++)
 					{
-						sym = sym.next();
+						sym = (HalfEdge) sym.next();
 						tree.remove(sym.notOriented());
 						assert !tree.contains(sym.notOriented());
 					}
 					Vertex a = current.apex();
-					current = current.swap();
+					current = (HalfEdge) current.swap();
 					swapped++;
 					// Now current = (ona)
 					assert a == current.apex();
 					for (int i = 0; i < 3; i++)
 					{
-						current = current.next();
+						current = (HalfEdge) current.next();
 						addToTree(current);
 					}
-					sym = current.next().sym();
+					sym = (HalfEdge) ((HalfEdge) current.next()).sym();
 					for (int i = 0; i < 2; i++)
 					{
-						sym = sym.next();
+						sym = (HalfEdge) sym.next();
 						addToTree(sym);
 					}
 				}
 				else
 				{
-					current = current.nextApexLoop();
+					current = (HalfEdge) current.nextApexLoop();
 					if (current.origin() == o)
 						break;
 				}

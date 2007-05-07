@@ -21,23 +21,33 @@
 package org.jcae.mesh.xmldata;
 
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.MGroup3D;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.cad.CADFace;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Iterator;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import gnu.trove.TIntIntHashMap;
 import org.apache.log4j.Logger;
 
 
@@ -51,9 +61,8 @@ public class MeshReader
 	 * @param xmlFile      basename of the main XML file
 	 * @param F            yopological surface
 	 */
-	public static Mesh2D readObject(String xmlDir, String xmlFile, CADFace F)
+	public static void readObject(Mesh2D mesh, String xmlDir, String xmlFile)
 	{
-		Mesh2D mesh = new Mesh2D(F);
 		logger.debug("begin reading "+xmlDir+File.separator+xmlFile);
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		
@@ -112,7 +121,7 @@ public class MeshReader
 			for (int i=0; i < numberOfNodes; i++)
 			{
 				nodesBuffer.get(coord);
-				nodelist[i] = (Vertex2D) Vertex.valueOf(coord);
+				nodelist[i] = (Vertex2D) mesh.factory.createVertex(coord);
 				if (i < numberOfNodes - numberOfReferences)
 					label = 0;
 				else
@@ -133,13 +142,13 @@ public class MeshReader
 			int numberOfTriangles = Integer.parseInt(
 				xpath.evaluate("number/text()", submeshTriangles));
 			logger.debug("Reading "+numberOfTriangles+" elements");
-			Triangle [] facelist = new Triangle[numberOfTriangles];
+			AbstractTriangle [] facelist = new AbstractTriangle[numberOfTriangles];
 			for (int i=0; i < numberOfTriangles; i++)
 			{
 				Vertex2D pt1 = nodelist[trianglesBuffer.get()];
 				Vertex2D pt2 = nodelist[trianglesBuffer.get()];
 				Vertex2D pt3 = nodelist[trianglesBuffer.get()];
-				facelist[i] = new Triangle(pt1, pt2, pt3);
+				facelist[i] = (AbstractTriangle) mesh.factory.createTriangle(pt1, pt2, pt3);
 				mesh.add(facelist[i]);
 				pt1.setLink(facelist[i]);
 				pt2.setLink(facelist[i]);
@@ -160,22 +169,15 @@ public class MeshReader
 			throw new RuntimeException(ex);
 		}
 		logger.debug("end reading "+xmlFile);
-		return mesh;
 	}
 	
-	public static Mesh readObject3D(String xmlDir, String xmlFile)
+	public static void readObject3D(Mesh mesh, String xmlDir, String xmlFile)
 	{
-		return readObject3D(xmlDir, xmlFile, 0.0, false);
+		readObject3D(mesh, xmlDir, xmlFile, 0.0);
+
 	}
-	
-	public static Mesh readObject3D(String xmlDir, String xmlFile, double ridgeAngle)
+	public static void readObject3D(Mesh mesh, String xmlDir, String xmlFile, double ridgeAngle)
 	{
-		return readObject3D(xmlDir, xmlFile, ridgeAngle, true);
-	}
-	
-	private static Mesh readObject3D(String xmlDir, String xmlFile, double ridgeAngle, boolean buildAdj)
-	{
-		Mesh mesh = new Mesh();
 		logger.debug("begin reading "+xmlDir+File.separator+xmlFile);
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		try
@@ -221,7 +223,7 @@ public class MeshReader
 			for (int i=0; i < numberOfNodes; i++)
 			{
 				nodesBuffer.get(coord);
-				nodelist[i] = Vertex.valueOf(coord);
+				nodelist[i] = (Vertex) mesh.factory.createVertex(coord);
 				if (i < numberOfNodes - numberOfReferences)
 					label = 0;
 				else
@@ -250,13 +252,13 @@ public class MeshReader
 			int numberOfTriangles = Integer.parseInt(
 				xpath.evaluate("number/text()", submeshTriangles));
 			logger.debug("Reading "+numberOfTriangles+" elements");
-			Triangle [] facelist = new Triangle[numberOfTriangles];
+			AbstractTriangle [] facelist = new AbstractTriangle[numberOfTriangles];
 			for (int i=0; i < numberOfTriangles; i++)
 			{
 				Vertex pt1 = nodelist[trianglesBuffer.get()];
 				Vertex pt2 = nodelist[trianglesBuffer.get()];
 				Vertex pt3 = nodelist[trianglesBuffer.get()];
-				facelist[i] = new Triangle(pt1, pt2, pt3);
+				facelist[i] = (AbstractTriangle) mesh.factory.createTriangle(pt1, pt2, pt3);
 				mesh.add(facelist[i]);
 				pt1.setLink(facelist[i]);
 				pt2.setLink(facelist[i]);
@@ -295,7 +297,7 @@ public class MeshReader
 			fcG.close();
 			MeshExporter.clean(bbG);
 			//  Build adjacency relations
-			if (buildAdj)
+			if (mesh.factory.hasAdjacency())
 				mesh.buildAdjacency(nodelist, ridgeAngle);
 		}
 		catch(Exception ex)
@@ -304,7 +306,43 @@ public class MeshReader
 			throw new RuntimeException(ex);
 		}
 		logger.debug("end reading "+xmlFile);
-		return mesh;
 	}
+
+	// Method previously in MMesh3DReader, remove it?
+	public static int [] getInfos(String xmlDir, String xmlFile)
+	{
+		int [] ret = new int[3];
+		XPath xpath = XPathFactory.newInstance().newXPath();
+		try
+		{
+			Document document = XMLHelper.parseXML(new File(xmlDir, xmlFile));
+			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh",
+				document, XPathConstants.NODE);
+			Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement,
+				XPathConstants.NODE);
+			ret[0] = Integer.parseInt(xpath.evaluate("number/text()",
+				submeshNodes));
+			Node submeshTriangles = (Node) xpath.evaluate("triangles",
+				submeshElement, XPathConstants.NODE);
+			ret[1] = Integer.parseInt(xpath.evaluate("number/text()",
+				submeshTriangles));
+			Node groupsElement = (Node) xpath.evaluate("groups",
+				submeshElement, XPathConstants.NODE);
+			NodeList groupsList = (NodeList) xpath.evaluate("group",
+				groupsElement, XPathConstants.NODESET);
+			ret[2] = groupsList.getLength();
+		}
+		catch(FileNotFoundException ex)
+		{
+			//  Do nothing if 3d was not processed
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+		return ret;
+	}
+	
 }
 

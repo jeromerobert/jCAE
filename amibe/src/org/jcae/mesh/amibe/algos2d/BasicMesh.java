@@ -62,9 +62,9 @@ import org.jcae.mesh.amibe.patch.Mesh2D;
  * triangulation.  The nearest vertex already inserted in the mesh is retrieved
  * with {@link org.jcae.mesh.amibe.util.KdTree#getNearestVertex(Mesh,Vertex)}.
  * It has a reference to a triangle containing this vertex.  From this starting
- * point, we search for the {@link org.jcae.mesh.amibe.ds.Triangle} containing
+ * point, we search for the {@link org.jcae.mesh.amibe.ds.AbstractTriangle} containing
  * this boundary node by looking for adjacent triangles into the right
- * direction.  This <code>Triangle</code> is splitted into three triangles
+ * direction.  This <code>AbstractTriangle</code> is splitted into three triangles
  * (even if the vertex is inserted on an edge), and edges are swapped if they
  * are not Delaunay.
  * (This criterion also applied with our Euclidian 2D metric)
@@ -76,17 +76,17 @@ import org.jcae.mesh.amibe.patch.Mesh2D;
  * boundary edges, which needs to be enforced.  This is performed by
  * {@link Mesh2D#forceBoundaryEdge(Vertex2D, Vertex2D, int)}; the segments
  * which intersect the enforced edge are swapped.
- * The {@link org.jcae.mesh.amibe.ds.OTriangle#BOUNDARY} attribute is set on
+ * The {@link org.jcae.mesh.amibe.ds.AbstractHalfEdge#BOUNDARY} attribute is set on
  * these edges (and on matte edges).
  * </p>
  *
  * <p>
- * We know that the {@link org.jcae.mesh.amibe.ds.Triangle} bound to
+ * We know that the {@link org.jcae.mesh.amibe.ds.AbstractTriangle} bound to
  * {@link org.jcae.mesh.amibe.ds.Mesh#outerVertex} is an outer triangle.
  * Triangles adjacent through a boundary edge are interior triangles, and
  * triangles adjacent through non-boundary edges are also outer triangles.  All
  * triangles of the mesh are visited, and outer triangles are tagged with the
- * {@link org.jcae.mesh.amibe.ds.OTriangle#OUTER} attribute.  If an
+ * {@link org.jcae.mesh.amibe.ds.AbstractHalfEdge#OUTER} attribute.  If an
  * inconsistency is found (for instance a boundary edge seperate two outer
  * triangles), {@link org.jcae.mesh.amibe.InitialTriangulationException} is
  * raised.  This means that boundary was invalid, eg. it is not closed

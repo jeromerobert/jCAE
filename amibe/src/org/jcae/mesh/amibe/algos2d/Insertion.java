@@ -21,7 +21,9 @@
 package org.jcae.mesh.amibe.algos2d;
 
 import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
+import org.jcae.mesh.amibe.ds.AbstractVertex;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.OTriangle2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
@@ -54,7 +56,7 @@ import org.apache.log4j.Logger;
  * </p>
  *
  * <p>
- * Triangle centroids are also inserted if they are not too near of
+ * AbstractTriangle centroids are also inserted if they are not too near of
  * existing vertices.  This was added to try to improve triangle
  * quality, but is a bad idea.  Bad triangles should instead be sorted
  * (with {@link org.jcae.mesh.amibe.util.PAVLSortedTree}) and their
@@ -108,10 +110,10 @@ public class Insertion
 				for (int i = 0; i < 3; i++)
 				{
 					ot.nextOTri();
-					if (ot.hasAttributes(OTriangle.BOUNDARY))
-						ot.setAttributes(OTriangle.MARKED);
+					if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
+						ot.setAttributes(AbstractHalfEdge.MARKED);
 					else
-						ot.clearAttributes(OTriangle.MARKED);
+						ot.clearAttributes(AbstractHalfEdge.MARKED);
 				}
 			}
 			for(Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
@@ -125,13 +127,13 @@ public class Insertion
 				for (int i = 0; i < 3; i++)
 				{
 					ot.nextOTri();
-					if (ot.hasAttributes(OTriangle.MARKED))
+					if (ot.hasAttributes(AbstractHalfEdge.MARKED))
 						continue;
-					ot.setAttributes(OTriangle.MARKED);
-					OTriangle.symOTri(ot, sym);
-					if (sym.hasAttributes(OTriangle.MARKED))
+					ot.setAttributes(AbstractHalfEdge.MARKED);
+					VirtualHalfEdge.symOTri(ot, sym);
+					if (sym.hasAttributes(AbstractHalfEdge.MARKED))
 						continue;
-					sym.setAttributes(OTriangle.MARKED);
+					sym.setAttributes(AbstractHalfEdge.MARKED);
 					double l = mesh.compGeom().length(ot);
 					if (l < maxlen)
 						continue;
@@ -144,9 +146,9 @@ public class Insertion
 					double [] xs = start.getUV();
 					double [] xe = end.getUV();
 					int segments = (int) (2.0*l/lcrit) + 10;
-					Vertex2D [] np = new Vertex2D[segments-1];
+					AbstractVertex [] np = new AbstractVertex[segments-1];
 					for (int ns = 1; ns < segments; ns++)
-						np[ns-1] = Vertex2D.valueOf(xs[0]+ns*(xe[0]-xs[0])/segments, xs[1]+ns*(xe[1]-xs[1])/segments);
+						np[ns-1] = mesh.factory.createVertex(xs[0]+ns*(xe[0]-xs[0])/segments, xs[1]+ns*(xe[1]-xs[1])/segments);
 					
 					Vertex2D last = start;
 					int nrNodes = 0;
@@ -154,10 +156,10 @@ public class Insertion
 					l = 0.0;
 					for (int ns = 0; ns < segments-1; ns++)
 					{
-						l = mesh.compGeom().distance(last, np[ns]);
+						l = mesh.compGeom().distance(last, (Vertex2D) np[ns]);
 						if (l > lcrit)
 						{
-							last = np[ns];
+							last = (Vertex2D) np[ns];
 							triNodes.add(last);
 							l = 0.0;
 							nrNodes++;
@@ -200,7 +202,7 @@ public class Insertion
 				Triangle t = (Triangle) it.next();
 				if (t.isOuter())
 					continue;
-				Vertex2D v = Vertex2D.centroid((Vertex2D[]) t.vertex);
+				Vertex2D v = Vertex2D.centroid(mesh, (Vertex2D[]) t.vertex);
 				Vertex2D n = (Vertex2D) mesh.getQuadTree().getNearestVertex(mesh, v);
 				assert n == mesh.getQuadTree().getNearestVertexDebug(mesh, v);
 				if (mesh.compGeom().distance(v, n) > minlen)

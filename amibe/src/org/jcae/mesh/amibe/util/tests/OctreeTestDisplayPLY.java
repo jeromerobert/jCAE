@@ -22,6 +22,7 @@ package org.jcae.mesh.amibe.util.tests;
 import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.util.OctreeTest;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.Mesh;
 import java.io.*;
 import java.util.StringTokenizer;
 import javax.swing.JFrame;
@@ -50,6 +51,7 @@ public class OctreeTestDisplayPLY extends OctreeTest
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		String line;
 		int nrNodes = 0;
+		final Mesh mesh = new Mesh();
 		StringTokenizer st;
 		try
 		{
@@ -115,7 +117,7 @@ public class OctreeTestDisplayPLY extends OctreeTest
 		for (int i = 0; i < nrNodes - nrDuplicates; i++)
 		{
 			System.arraycopy(coord, 3*i, xyz, 0, 3);
-			r.add(Vertex.valueOf(xyz));
+			r.add((Vertex) mesh.factory.createVertex(xyz));
 		}
 		logger.info("Max level: "+r.getMaxLevel());
 		logger.info("Number of cells: "+r.nCells);

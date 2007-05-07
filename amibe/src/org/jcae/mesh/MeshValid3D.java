@@ -21,9 +21,9 @@
 package org.jcae.mesh;
 
 import java.util.Iterator;
-import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.MMesh3D;
-import org.jcae.mesh.xmldata.MMesh3DReader;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshExporter;
 import org.jcae.mesh.amibe.validation.*;
 import org.apache.log4j.Logger;
@@ -39,14 +39,15 @@ public class MeshValid3D
 	{
 		logger.info("Reading 3D mesh");
 		String xmlFile = "jcae3d";
-		MMesh3D mesh3D = MMesh3DReader.readObject(xmlDir, xmlFile);
+		Mesh mesh3D = new Mesh();
+		MeshReader.readObject3D(mesh3D, xmlDir, xmlFile);
 		//MinLengthFace qproc = new MinLengthFace();
 		MinAngleFace qproc = new MinAngleFace();
 		QualityFloat data = new QualityFloat(1000);
 		data.setQualityProcedure(qproc);
-		for (Iterator itf = mesh3D.getFacesIterator(); itf.hasNext();)
+		for (Iterator itf = mesh3D.getTriangles().iterator(); itf.hasNext();)
 		{
-			Triangle f= (Triangle) itf.next();
+			AbstractTriangle f= (AbstractTriangle) itf.next();
 			data.compute(f);
 		}
 		data.finish();

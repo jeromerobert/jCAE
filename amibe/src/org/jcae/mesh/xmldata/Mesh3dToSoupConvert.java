@@ -43,43 +43,28 @@ import org.xml.sax.SAXException;
  */
 public class Mesh3dToSoupConvert
 {
-	public static void convert(String meshDirectory) throws IOException
+	public static void convert(String meshDirectory) throws XPathExpressionException, ParserConfigurationException, SAXException, IOException
 	{
-		try
-		{
-			Document document = XMLHelper.parseXML(
-				new File(meshDirectory, "jcae3d"));
-			XPath xpath = XPathFactory.newInstance().newXPath();
-			String fnodes = (String) xpath.evaluate(
-				"/jcae/mesh/submesh/nodes/file/@location", document,
-				XPathConstants.STRING);
-			String ftrias = (String) xpath.evaluate(
-				"/jcae/mesh/submesh/triangles/file/@location", document,
-				XPathConstants.STRING);
-			FileChannel nodesChannel=new FileInputStream(
-				new File(meshDirectory, fnodes)).getChannel();
-			FileChannel triasChannel=new FileInputStream(
-				new File(meshDirectory, ftrias)).getChannel();
-			FileChannel soupChannel=new FileOutputStream(
-				new File(meshDirectory, "soup")).getChannel();
-			
-			convert(nodesChannel, triasChannel, soupChannel);
-			nodesChannel.close();
-			triasChannel.close();
-			soupChannel.close();
-		}
-		catch (ParserConfigurationException e)
-		{
-			throw new IOException(e);			
-		}
-		catch (SAXException e)
-		{
-			throw new IOException(e);
-		}
-		catch (XPathExpressionException e)
-		{
-			throw new IOException(e);
-		}
+		Document document = XMLHelper.parseXML(
+			new File(meshDirectory, "jcae3d"));
+		XPath xpath = XPathFactory.newInstance().newXPath();
+		String fnodes = (String) xpath.evaluate(
+			"/jcae/mesh/submesh/nodes/file/@location", document,
+			XPathConstants.STRING);
+		String ftrias = (String) xpath.evaluate(
+			"/jcae/mesh/submesh/triangles/file/@location", document,
+			XPathConstants.STRING);
+		FileChannel nodesChannel=new FileInputStream(
+			new File(meshDirectory, fnodes)).getChannel();
+		FileChannel triasChannel=new FileInputStream(
+			new File(meshDirectory, ftrias)).getChannel();
+		FileChannel soupChannel=new FileOutputStream(
+			new File(meshDirectory, "soup")).getChannel();
+		
+		convert(nodesChannel, triasChannel, soupChannel);
+		nodesChannel.close();
+		triasChannel.close();
+		soupChannel.close();
 	}
 
 	private static void convert(FileChannel nodesChannel,
@@ -94,11 +79,11 @@ public class Mesh3dToSoupConvert
 		toWrite.putInt(72,0); //align on 64 bit
 		
 		while(triasChannel.read(trias)>0)
-		{			
+		{
 			trias.rewind();
 			for(int i=0; i<3; i++)
 			{
-				int nodeId=trias.getInt();				
+				int nodeId=trias.getInt();
 				nodesChannel.read(nodes, 3*8*nodeId);
 				nodes.rewind();
 				for(int j=0; j<3; j++)

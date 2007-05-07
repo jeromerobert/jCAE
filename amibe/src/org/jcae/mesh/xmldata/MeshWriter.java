@@ -22,6 +22,7 @@ package org.jcae.mesh.xmldata;
 
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import gnu.trove.TObjectIntHashMap;
@@ -245,7 +246,7 @@ public class MeshWriter
 				nodelist = new ArrayList();
 				for (Iterator itf = trianglelist.iterator(); itf.hasNext(); )
 				{
-					Triangle t = (Triangle) itf.next();
+					AbstractTriangle t = (AbstractTriangle) itf.next();
 					for (int j = 0; j < 3; j++)
 					{
 						if (!nodeset.contains(t.vertex[j]))
@@ -312,7 +313,7 @@ public class MeshWriter
 			ArrayList nodelist = new ArrayList();
 			for (Iterator itf = trianglelist.iterator(); itf.hasNext(); )
 			{
-				Triangle t = (Triangle) itf.next();
+				AbstractTriangle t = (AbstractTriangle) itf.next();
 				for (int j = 0; j < 3; j++)
 				{
 					if (!nodeset.contains(t.vertex[j]))

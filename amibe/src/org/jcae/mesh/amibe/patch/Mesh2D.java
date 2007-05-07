@@ -20,9 +20,10 @@
 package org.jcae.mesh.amibe.patch;
 
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.amibe.util.KdTree;
@@ -38,8 +39,8 @@ import org.apache.log4j.Logger;
  * Connectivity between triangles and vertices is inherited from {@link Mesh},
  * and a {@link KdTree} instance added in order to speed up finding the
  * nearest {@link Vertex2D} <code>V</code> from any given point <code>V0</code>.
- * This gives a {@link Triangle} having <code>V</code> in its vertices,
- * and we can loop around <code>V</code> to find the {@link Triangle}
+ * This gives a {@link AbstractTriangle} having <code>V</code> in its vertices,
+ * and we can loop around <code>V</code> to find the {@link AbstractTriangle}
  * containing <code>V0</code>.
  */
 
@@ -48,8 +49,11 @@ public class Mesh2D extends Mesh
 {
 	private static Logger logger=Logger.getLogger(Mesh2D.class);
 	
+	//  Entity factory
+	public ElementPatchFactory factory = null;
+
 	//  Topological face on which mesh is applied
-	private transient CADShape face;
+	private transient CADShape face = null;
 	
 	//  The geometrical surface describing the topological face, stored for
 	//  efficiebcy reason
@@ -86,7 +90,16 @@ public class Mesh2D extends Mesh
 	public Mesh2D()
 	{
 		super();
-		outerVertex = new OuterVertex2D();
+		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
+		factory = new ElementPatchFactory(mtb);
+		init();
+	}
+
+	public Mesh2D(MeshTraitsBuilder mtb)
+	{
+		super(mtb);
+		factory = new ElementPatchFactory(mtb);
+		init();
 	}
 
 	/**
@@ -100,19 +113,33 @@ public class Mesh2D extends Mesh
 	 *
 	 * @param f   topological surface
 	 */
-	public Mesh2D(CADFace f)
+	public Mesh2D(MeshTraitsBuilder mtb, CADShape f)
+	{
+		super(mtb);
+		factory = new ElementPatchFactory(mtb);
+		face = f;
+		init();
+	}
+
+	public Mesh2D(CADShape f)
 	{
 		super();
-		outerVertex = new OuterVertex2D();
+		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
+		factory = new ElementPatchFactory(mtb);
 		face = f;
-		surface = f.getGeomSurface();
-		double [] bb = f.boundingBox();
-		double diagonal = Math.sqrt(
-		    (bb[0] - bb[3]) * (bb[0] - bb[3]) +
-		    (bb[1] - bb[4]) * (bb[1] - bb[4]) +
-		    (bb[2] - bb[5]) * (bb[2] - bb[5]));
-		if (Metric2D.getLength() == 0.0)
-			Metric2D.setLength(diagonal);
+		init();
+	}
+
+	private void init()
+	{
+		outerVertex = new OuterVertex2D();
+		String accumulateEpsilonProp = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon");
+		if (accumulateEpsilonProp == null)
+		{
+			accumulateEpsilonProp = "false";
+			System.setProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon", accumulateEpsilonProp);
+		}
+		accumulateEpsilon = accumulateEpsilonProp.equals("true");
 		String absEpsilonProp = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon");
 		if (absEpsilonProp == null)
 		{
@@ -121,24 +148,27 @@ public class Mesh2D extends Mesh
 		}
 		Double absEpsilon = new Double(absEpsilonProp);
 		epsilon = absEpsilon.doubleValue();
+
+		if (face == null || !(face instanceof CADFace))
+		{
+			if (epsilon < 0.0)
+				epsilon = 0.0;
+			return;
+		}
+
+		CADFace F = (CADFace) face;
+		surface = F.getGeomSurface();
+		double [] bb = F.boundingBox();
+		double diagonal = Math.sqrt(
+		    (bb[0] - bb[3]) * (bb[0] - bb[3]) +
+		    (bb[1] - bb[4]) * (bb[1] - bb[4]) +
+		    (bb[2] - bb[5]) * (bb[2] - bb[5]));
+		if (Metric2D.getLength() == 0.0)
+			Metric2D.setLength(diagonal);
 		if (epsilon < 0)
 			epsilon = Math.max(diagonal/1000.0, Metric2D.getLength() / 100.0);
-		String accumulateEpsilonProp = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon");
-		if (accumulateEpsilonProp == null)
-		{
-			accumulateEpsilonProp = "false";
-			System.setProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon", accumulateEpsilonProp);
-		}
-		accumulateEpsilon = accumulateEpsilonProp.equals("true");
 		logger.debug("Bounding box diagonal: "+diagonal);
 		logger.debug("Epsilon: "+epsilon);
-	}
-	
-	public Mesh2D(CADEdge e)
-	{
-		super();
-		outerVertex = new OuterVertex2D();
-		face = e;
 	}
 	
 	/**
@@ -211,10 +241,10 @@ public class Mesh2D extends Mesh
 			v2 = v1;
 			v1 = temp;
 		}
-		Triangle first = new Triangle(v0, v1, v2);
-		Triangle adj0 = new Triangle(outerVertex, v2, v1);
-		Triangle adj1 = new Triangle(outerVertex, v0, v2);
-		Triangle adj2 = new Triangle(outerVertex, v1, v0);
+		Triangle first = (Triangle) factory.createTriangle(v0, v1, v2);
+		Triangle adj0 = (Triangle) factory.createTriangle(outerVertex, v2, v1);
+		Triangle adj1 = (Triangle) factory.createTriangle(outerVertex, v0, v2);
+		Triangle adj2 = (Triangle) factory.createTriangle(outerVertex, v1, v0);
 		OTriangle2D ot = new OTriangle2D(first, 0);
 		OTriangle2D oa0 = new OTriangle2D(adj0, 0);
 		OTriangle2D oa1 = new OTriangle2D(adj1, 0);
@@ -488,7 +518,7 @@ public class Mesh2D extends Mesh
 			for (int i = 0; i < 3; i++)
 			{
 				ot.nextOTri();
-				if (!ot.hasAttributes(OTriangle.BOUNDARY))
+				if (!ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
 					continue;
 				int ref1 = ot.origin().getRef();
 				int ref2 = ot.destination().getRef();
@@ -526,7 +556,7 @@ public class Mesh2D extends Mesh
 			double l = tv0.onLeft(this, tv1, tv2);
 			if (l <= 0L)
 			{
-				logger.debug("Wrong orientation: "+l+" "+t);
+				logger.error("Wrong orientation: "+l+" "+t);
 				return false;
 			}
 		}

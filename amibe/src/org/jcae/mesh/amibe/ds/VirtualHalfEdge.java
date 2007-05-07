@@ -27,7 +27,7 @@ import org.apache.log4j.Logger;
 
 /*
  * This class is derived from Jonathan Richard Shewchuk's work
- * on Triangle, see
+ * on AbstractTriangle, see
  *       http://www.cs.cmu.edu/~quake/triangle.html
  * His data structure is very compact, and similar ideas were
  * developed here, but due to Java constraints, this version is a
@@ -56,17 +56,17 @@ import org.apache.log4j.Logger;
  *
  * <p>
  *   A triangle is composed of three edges, so a triangle and a number
- *   between 0 and 2 can represent an edge.  This <code>OTriangle</code>
+ *   between 0 and 2 can represent an edge.  This <code>VirtualHalfEdge</code>
  *   class plays this role, it defines an <em>oriented triangle</em>, or
  *   in other words an oriented edge.  Instances of this class are tied to
- *   their underlying {@link Triangle} instances, so modifications are not
+ *   their underlying {@link AbstractTriangle} instances, so modifications are not
  *   local to this class!
  * </p>
  *
  * <p>
  *   The main goal of this class is to ease mesh traversal.
- *   Consider the <code>ot</code> {@link OTriangle} with a null localNumber of
- *   {@link Triangle} <code>t</code> below.
+ *   Consider the <code>ot</code> {@link VirtualHalfEdge} with a null localNumber of
+ *   {@link AbstractTriangle} <code>t</code> below.
  * </p>
  * <pre>
  *                        V2
@@ -99,85 +99,29 @@ import org.apache.log4j.Logger;
  * </pre>
  *
  * <p>
- * When an <code>OTriangle</code> is traversing the mesh, its reference
+ * When an <code>VirtualHalfEdge</code> is traversing the mesh, its reference
  * is not modified, but its instance variables are updated.  In order
- * to prevent object allocations, we try to reuse <code>OTriangle</code>
+ * to prevent object allocations, we try to reuse <code>VirtualHalfEdge</code>
  * objects as much as we can.
  * </p>
  */
-public class OTriangle
+public class VirtualHalfEdge extends AbstractHalfEdge
 {
-	private static Logger logger = Logger.getLogger(OTriangle.class);
+	private static Logger logger = Logger.getLogger(VirtualHalfEdge.class);
 	
 	private static final int [] next3 = { 1, 2, 0 };
 	private static final int [] prev3 = { 2, 0, 1 };
 	
-	private static final Integer [] int3 = new Integer[3];
-	static {
-		int3[0] = Integer.valueOf(0);
-		int3[1] = Integer.valueOf(1);
-		int3[2] = Integer.valueOf(2);
-	}
-
 	private final double [] tempD = new double[3];
 	private final double [] tempD1 = new double[3];
 	private final double [] tempD2 = new double[3];
 	
-	/**
-	 * Numeric constants for edge attributes.  Set if edge is on
-	 * boundary.
-	 * @see #setAttributes
-	 * @see #hasAttributes
-	 * @see #clearAttributes
-	 */
-	public static final int BOUNDARY = 1 << 0;
-	/**
-	 * Numeric constants for edge attributes.  Set if edge is outer.
-	 * (Ie. one of its end point is {@link Mesh#outerVertex})
-	 * @see #setAttributes
-	 * @see #hasAttributes
-	 * @see #clearAttributes
-	 */
-	public static final int OUTER    = 1 << 1;
-	/**
-	 * Numeric constants for edge attributes.  Set if edge had been
-	 * swapped.
-	 * @see #setAttributes
-	 * @see #hasAttributes
-	 * @see #clearAttributes
-	 */
-	public static final int SWAPPED  = 1 << 2;
-	/**
-	 * Numeric constants for edge attributes.  Set if edge had been
-	 * marked (for any operation).
-	 * @see #setAttributes
-	 * @see #hasAttributes
-	 * @see #clearAttributes
-	 */
-	public static final int MARKED   = 1 << 3;
-	/**
-	 * Numeric constants for edge attributes.  Set if edge is the inner
-	 * edge of a quadrangle.
-	 * @see #setAttributes
-	 * @see #hasAttributes
-	 * @see #clearAttributes
-	 */
-	public static final int QUAD     = 1 << 4;
-	/**
-	 * Numeric constants for edge attributes.  Set if edge is non
-	 * manifold.
-	 * @see #setAttributes
-	 * @see #hasAttributes
-	 * @see #clearAttributes
-	 */
-	public static final int NONMANIFOLD = 1 << 5;
-	
-	//  Complex algorithms require several OTriangle, they are
+	//  Complex algorithms require several VirtualHalfEdge, they are
 	//  allocated here to prevent allocation/deallocation overhead.
-	private static OTriangle [] work = new OTriangle[4];
+	private static VirtualHalfEdge [] work = new VirtualHalfEdge[4];
 	static {
 		for (int i = 0; i < 4; i++)
-			work[i] = new OTriangle();
+			work[i] = new VirtualHalfEdge();
 	}
 	
 	/*
@@ -197,7 +141,7 @@ public class OTriangle
 	/**
 	 * Sole constructor.
 	 */
-	public OTriangle()
+	public VirtualHalfEdge()
 	{
 	}
 	
@@ -207,7 +151,7 @@ public class OTriangle
 	 * @param t  geometrical triangle.
 	 * @param o  a number between 0 and 2 determining an edge.
 	 */
-	public OTriangle(Triangle t, int o)
+	public VirtualHalfEdge(Triangle t, int o)
 	{
 		tri = t;
 		localNumber = o;
@@ -215,12 +159,12 @@ public class OTriangle
 	}
 	
 	/**
-	 * Find the <code>OTriangle</code> joining two given vertices
+	 * Find the <code>VirtualHalfEdge</code> joining two given vertices
 	 * and move to it.
 	 *
-	 * @param v1  start point of the desired <code>OTriangle</code>
-	 * @param v2  end point of the desired <code>OTriangle</code>
-	 * @return <code>true</code> if an <code>OTriangle</code> was
+	 * @param v1  start point of the desired <code>VirtualHalfEdge</code>
+	 * @param v2  end point of the desired <code>VirtualHalfEdge</code>
+	 * @return <code>true</code> if an <code>VirtualHalfEdge</code> was
 	 *         found, <code>false</code> otherwise.
 	 */
 	public boolean find(Vertex v1, Vertex v2)
@@ -306,12 +250,12 @@ public class OTriangle
 	 * Check if some attributes of this oriented triangle are set.
 	 *
 	 * @param attr  the attributes to check
-	 * @return <code>true</code> if this OTriangle has all these
+	 * @return <code>true</code> if this VirtualHalfEdge has all these
 	 * attributes set, <code>false</code> otherwise.
 	 */
 	public final boolean hasAttributes(int attr)
 	{
-		return (attributes & attr) != 0;
+		return (attributes & attr) == attr;
 	}
 	
 	/**
@@ -362,13 +306,13 @@ public class OTriangle
 	// Section: geometrical primitives
 	
 	/**
-	 * Copy an <code>OTriangle</code> into another <code>OTriangle</code>.
+	 * Copy an <code>VirtualHalfEdge</code> into another <code>VirtualHalfEdge</code>.
 	 *
-	 * @param src   <code>OTriangle</code> being duplicated
-	 * @param dest  already allocated <code>OTriangle</code> where data are
+	 * @param src   <code>VirtualHalfEdge</code> being duplicated
+	 * @param dest  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
-	public static final void copyOTri(OTriangle src, OTriangle dest)
+	public static final void copyOTri(VirtualHalfEdge src, VirtualHalfEdge dest)
 	{
 		dest.tri = src.tri;
 		dest.localNumber = src.localNumber;
@@ -385,13 +329,13 @@ public class OTriangle
 	//  these routines requires extra care.
 	
 	/**
-	 * Copy an <code>OTriangle</code> and move to its symmetric edge.
+	 * Copy an <code>VirtualHalfEdge</code> and move to its symmetric edge.
 	 *
-	 * @param o     source <code>OTriangle</code>
-	 * @param that  already allocated <code>OTriangle</code> where data are
+	 * @param o     source <code>VirtualHalfEdge</code>
+	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
-	public static final void symOTri(OTriangle o, OTriangle that)
+	public static final void symOTri(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
 		that.tri = (Triangle) o.tri.getAdj(o.localNumber);
 		that.localNumber = o.tri.getAdjLocalNumber(o.localNumber);
@@ -409,15 +353,33 @@ public class OTriangle
 		pullAttributes();
 	}
 	
+	public final AbstractHalfEdge sym(AbstractHalfEdge that)
+	{
+		VirtualHalfEdge dest = (VirtualHalfEdge) that;
+		dest.tri = (Triangle) tri.getAdj(localNumber);
+		dest.localNumber = tri.getAdjLocalNumber(localNumber);
+		dest.pullAttributes();
+		return dest;
+	}
+	
+	public final AbstractHalfEdge sym()
+	{
+		int neworient = tri.getAdjLocalNumber(localNumber);
+		tri = (Triangle) tri.getAdj(localNumber);
+		localNumber = neworient;
+		pullAttributes();
+		return this;
+	}
+	
 	/**
-	 * Copy an <code>OTriangle</code> and move it to the counterclockwaise
+	 * Copy an <code>VirtualHalfEdge</code> and move it to the counterclockwaise
 	 * following edge.
 	 *
-	 * @param o     source <code>OTriangle</code>
-	 * @param that  already allocated <code>OTriangle</code> where data are
+	 * @param o     source <code>VirtualHalfEdge</code>
+	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
-	public static final void nextOTri(OTriangle o, OTriangle that)
+	public static final void nextOTri(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
 		that.tri = o.tri;
 		that.localNumber = next3[o.localNumber];
@@ -433,15 +395,31 @@ public class OTriangle
 		pullAttributes();
 	}
 	
+	public final AbstractHalfEdge next(AbstractHalfEdge that)
+	{
+		VirtualHalfEdge dest = (VirtualHalfEdge) that;
+		dest.tri = tri;
+		dest.localNumber = next3[localNumber];
+		dest.pullAttributes();
+		return dest;
+	}
+	
+	public final AbstractHalfEdge next()
+	{
+		localNumber = next3[localNumber];
+		pullAttributes();
+		return this;
+	}
+	
 	/**
-	 * Copy an <code>OTriangle</code> and move it to the counterclockwaise
+	 * Copy an <code>VirtualHalfEdge</code> and move it to the counterclockwaise
 	 * previous edge.
 	 *
-	 * @param o     source <code>OTriangle</code>
-	 * @param that  already allocated <code>OTriangle</code> where data are
+	 * @param o     source <code>VirtualHalfEdge</code>
+	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
-	public static final void prevOTri(OTriangle o, OTriangle that)
+	public static final void prevOTri(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
 		that.tri = o.tri;
 		that.localNumber = prev3[o.localNumber];
@@ -457,15 +435,31 @@ public class OTriangle
 		pullAttributes();
 	}
 	
+	public final AbstractHalfEdge prev(AbstractHalfEdge that)
+	{
+		VirtualHalfEdge dest = (VirtualHalfEdge) that;
+		dest.tri = tri;
+		dest.localNumber = prev3[localNumber];
+		dest.pullAttributes();
+		return dest;
+	}
+	
+	public final AbstractHalfEdge prev()
+	{
+		localNumber = prev3[localNumber];
+		pullAttributes();
+		return this;
+	}
+	
 	/**
-	 * Copy an <code>OTriangle</code> and move it to the counterclockwaise
+	 * Copy an <code>VirtualHalfEdge</code> and move it to the counterclockwaise
 	 * following edge which has the same origin.
 	 *
-	 * @param o     source <code>OTriangle</code>
-	 * @param that  already allocated <code>OTriangle</code> where data are
+	 * @param o     source <code>VirtualHalfEdge</code>
+	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
-	public static final void nextOTriOrigin(OTriangle o, OTriangle that)
+	public static final void nextOTriOrigin(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
 		prevOTri(o, that);
 		that.symOTri();
@@ -480,15 +474,25 @@ public class OTriangle
 		symOTri();
 	}
 	
+	public final AbstractHalfEdge nextOrigin(AbstractHalfEdge that)
+	{
+		return prev(that).sym();
+	}
+	
+	public final AbstractHalfEdge nextOrigin()
+	{
+		return prev().sym();
+	}
+	
 	/**
-	 * Copy an <code>OTriangle</code> and move it to the counterclockwaise
+	 * Copy an <code>VirtualHalfEdge</code> and move it to the counterclockwaise
 	 * previous edge which has the same origin.
 	 *
-	 * @param o     source <code>OTriangle</code>
-	 * @param that  already allocated <code>OTriangle</code> where data are
+	 * @param o     source <code>VirtualHalfEdge</code>
+	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
-	public static final void prevOTriOrigin(OTriangle o, OTriangle that)
+	public static final void prevOTriOrigin(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
 		symOTri(o, that);
 		that.nextOTri();
@@ -503,15 +507,25 @@ public class OTriangle
 		nextOTri();
 	}
 	
+	public final AbstractHalfEdge prevOrigin(AbstractHalfEdge that)
+	{
+		return sym(that).next();
+	}
+	
+	public final AbstractHalfEdge prevOrigin()
+	{
+		return sym().next();
+	}
+	
 	/**
-	 * Copy an <code>OTriangle</code> and move it to the counterclockwaise
+	 * Copy an <code>VirtualHalfEdge</code> and move it to the counterclockwaise
 	 * following edge which has the same destination.
 	 *
-	 * @param o     source <code>OTriangle</code>
-	 * @param that  already allocated <code>OTriangle</code> where data are
+	 * @param o     source <code>VirtualHalfEdge</code>
+	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
-	public static final void nextOTriDest(OTriangle o, OTriangle that)
+	public static final void nextOTriDest(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
 		symOTri(o, that);
 		that.prevOTri();
@@ -527,15 +541,25 @@ public class OTriangle
 		prevOTri();
 	}
 	
+	public final AbstractHalfEdge nextDest(AbstractHalfEdge that)
+	{
+		return sym(that).prev();
+	}
+	
+	public final AbstractHalfEdge nextDest()
+	{
+		return sym().prev();
+	}
+	
 	/**
-	 * Copy an <code>OTriangle</code> and move it to the counterclockwaise
+	 * Copy an <code>VirtualHalfEdge</code> and move it to the counterclockwaise
 	 * previous edge which has the same destination.
 	 *
-	 * @param o     source <code>OTriangle</code>
-	 * @param that  already allocated <code>OTriangle</code> where data are
+	 * @param o     source <code>VirtualHalfEdge</code>
+	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
-	public static final void prevOTriDest(OTriangle o, OTriangle that)
+	public static final void prevOTriDest(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
 		nextOTri(o, that);
 		that.symOTri();
@@ -551,15 +575,25 @@ public class OTriangle
 		symOTri();
 	}
 	
+	public final AbstractHalfEdge prevDest(AbstractHalfEdge that)
+	{
+		return next(that).sym();
+	}
+	
+	public final AbstractHalfEdge prevDest()
+	{
+		return next().sym();
+	}
+	
 	/**
-	 * Copy an <code>OTriangle</code> and move it to the counterclockwaise
+	 * Copy an <code>VirtualHalfEdge</code> and move it to the counterclockwaise
 	 * following edge which has the same apex.
 	 *
-	 * @param o     source <code>OTriangle</code>
-	 * @param that  already allocated <code>OTriangle</code> where data are
+	 * @param o     source <code>VirtualHalfEdge</code>
+	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
-	public static final void nextOTriApex(OTriangle o, OTriangle that)
+	public static final void nextOTriApex(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
 		nextOTri(o, that);
 		that.symOTri();
@@ -576,15 +610,25 @@ public class OTriangle
 		nextOTri();
 	}
 	
+	public final AbstractHalfEdge nextApex(AbstractHalfEdge that)
+	{
+		return next(that).sym().next();
+	}
+	
+	public final AbstractHalfEdge nextApex()
+	{
+		return next().sym().next();
+	}
+	
 	/**
-	 * Copy an <code>OTriangle</code> and move it to the clockwaise
+	 * Copy an <code>VirtualHalfEdge</code> and move it to the clockwaise
 	 * previous edge which has the same apex.
 	 *
-	 * @param o     source <code>OTriangle</code>
-	 * @param that  already allocated <code>OTriangle</code> where data are
+	 * @param o     source <code>VirtualHalfEdge</code>
+	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
-	public static final void prevOTriApex(OTriangle o, OTriangle that)
+	public static final void prevOTriApex(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
 		prevOTri(o, that);
 		that.symOTri();
@@ -601,6 +645,16 @@ public class OTriangle
 		prevOTri();
 	}
 	
+	public final AbstractHalfEdge prevApex(AbstractHalfEdge that)
+	{
+		return prev(that).sym().prev();
+	}
+	
+	public final AbstractHalfEdge prevApex()
+	{
+		return prev().sym().prev();
+	}
+	
 	/**
 	 * Move counterclockwaise to the following edge with the same apex.
 	 * If a boundary is reached, loop backward until another
@@ -608,9 +662,35 @@ public class OTriangle
 	 */
 	public final void nextOTriApexLoop()
 	{
-		prevOTri();
-		nextOTriOriginLoop();
-		nextOTri();
+		if (hasAttributes(OUTER))
+		{
+			// Loop clockwise to another boundary
+			// and start again from there.
+			do
+			{
+				prevOTriApex();
+			}
+			while (!hasAttributes(OUTER));
+		}
+		else
+			nextOTriApex();
+	}
+	
+	public final AbstractHalfEdge nextApexLoop()
+	{
+		if (hasAttributes(OUTER) && hasAttributes(BOUNDARY | NONMANIFOLD))
+		{
+			// Loop clockwise to another boundary
+			// and start again from there.
+			do
+			{
+				prevApex();
+			}
+			while (!hasAttributes(OUTER));
+		}
+		else
+			nextApex();
+		return this;
 	}
 	
 	/**
@@ -618,7 +698,7 @@ public class OTriangle
 	 * If a boundary is reached, loop backward until another
 	 * boundary is found and start again from there.
 	 * Note: outer triangles are taken into account in this loop, because
-	 * this is sometimes needed, as in OTriangle2D.removeDegenerated().
+	 * this is sometimes needed, as in VirtualHalfEdge2D.removeDegenerated().
 	 * They have to be explicitly filtered out by testing hasAttributes(OUTER).
 	 */
 	public final void nextOTriOriginLoop()
@@ -628,7 +708,7 @@ public class OTriangle
 		nextOTriApexLoop();
 		prevOTri();
 		*/
-		if (hasAttributes(OUTER) && hasAttributes(BOUNDARY | NONMANIFOLD))
+		if (hasAttributes(OUTER))
 		{
 			// Loop clockwise to another boundary
 			// and start again from there.
@@ -640,6 +720,23 @@ public class OTriangle
 		}
 		else
 			nextOTriOrigin();
+	}
+	
+	public final AbstractHalfEdge nextOriginLoop()
+	{
+		if (hasAttributes(OUTER) && hasAttributes(BOUNDARY | NONMANIFOLD))
+		{
+			// Loop clockwise to another boundary
+			// and start again from there.
+			do
+			{
+				prevOrigin();
+			}
+			while (!hasAttributes(OUTER));
+		}
+		else
+			nextOrigin();
+		return this;
 	}
 	
 	// Section: vertex handling
@@ -675,7 +772,7 @@ public class OTriangle
 	}
 	
 	//  The following 3 methods change the underlying triangle.
-	//  So they also modify all OTriangle bound to this one.
+	//  So they also modify all VirtualHalfEdge bound to this one.
 	/**
 	 * Sets the start vertex of this edge.
 	 *
@@ -713,11 +810,17 @@ public class OTriangle
 	 *
 	 * @param sym  the triangle bond to this one.
 	 */
-	public final void glue(OTriangle sym)
+	public final void glue(AbstractHalfEdge sym)
+	{
+		VHglue((VirtualHalfEdge) sym);
+	}
+	private void VHglue(VirtualHalfEdge sym)
 	{
 		assert !(hasAttributes(NONMANIFOLD) || sym.hasAttributes(NONMANIFOLD)) : this+"\n"+sym;
-		tri.glue1(localNumber, sym.tri, sym.localNumber);
-		sym.tri.glue1(sym.localNumber, tri, localNumber);
+		tri.setAdj(localNumber, sym.tri);
+		tri.setAdjLocalNumber(localNumber, sym.localNumber);
+		sym.tri.setAdj(sym.localNumber, tri);
+		sym.tri.setAdjLocalNumber(sym.localNumber, localNumber);
 	}
 	
 	/**
@@ -845,7 +948,7 @@ public class OTriangle
 	{
 		double invalid = -1.0;
 		// Check if there is an adjacent edge
-		if (hasAttributes(OUTER | BOUNDARY | NONMANIFOLD))
+		if (hasAttributes(OUTER) || hasAttributes(BOUNDARY) || hasAttributes(NONMANIFOLD))
 			return invalid;
 		// Check for coplanarity
 		symOTri(this, work[0]);
@@ -903,7 +1006,12 @@ public class OTriangle
 	 *          '                    '
 	 *          o                    o
 	 */
-	public final void swap()
+	public final AbstractHalfEdge swap()
+	{
+		VHswap();
+		return this;
+	}
+	private final void VHswap()
 	{
 		Vertex o = origin();
 		Vertex d = destination();
@@ -923,7 +1031,7 @@ public class OTriangle
 		 */
 		// T1 = (oda)  --> (ona)
 		// T2 = (don)  --> (dan)
-		assert !hasAttributes(OUTER | BOUNDARY | NONMANIFOLD);
+		assert !(hasAttributes(OUTER) || hasAttributes(BOUNDARY) || hasAttributes(NONMANIFOLD));
 		copyOTri(this, work[0]);        // (oda)
 		symOTri(this, work[1]);         // (don)
 		symOTri(this, work[2]);         // (don)
@@ -939,18 +1047,18 @@ public class OTriangle
 		work[1].nextOTri();             // (ond)
 		int attr3 = work[1].attributes;
 		work[1].symOTri();              // a3 = (no*)
-		work[1].glue(work[0]);
+		work[1].VHglue(work[0]);
 		work[0].attributes = attr3;
 		work[0].pushAttributes();
 		work[0].nextOTri();             // (dao)
 		copyOTri(work[0], work[1]);     // (dao)
 		int attr1 = work[1].attributes;
 		work[0].symOTri();              // a1 = (ad*)
-		work[2].glue(work[0]);
+		work[2].VHglue(work[0]);
 		work[2].attributes = attr1;
 		work[2].pushAttributes();
 		work[2].nextOTri();             // (ond)
-		work[2].glue(work[1]);
+		work[2].VHglue(work[1]);
 		//  Mark new edge
 		work[1].attributes = 0;
 		work[2].attributes = 0;
@@ -1004,48 +1112,19 @@ public class OTriangle
 	 * @param n the resulting vertex
 	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise.
 	 */
-	public final boolean canContract(Vertex n)
+	public final boolean canCollapse(AbstractVertex n)
 	{
-		/*  
-		 * Topology check:  (od) cannot be contracted with the pattern
-		 * below, because T1 and T2 are then connected to the same
-		 * vertices.  This happens for instance when trying to remove
-		 * an edge from a tetrahedron.
-		 *
-		 *                 V
-		 *                 +
-		 *                /|\
-		 *               / | \
-		 *              /  |  \
-		 *             /  a|   \
-		 *            /    +    \
-		 *           / T1 / \ T2 \
-		 *          /   /     \   \
-		 *         /  /         \  \
-		 *        / /             \ \
-		 *     o +-------------------+ d
-		 */
-		nextOTri(this, work[0]);
-		prevOTri(this, work[1]);
-		if (!work[0].hasAttributes(OUTER) && work[0].getAdj() != null && work[1].getAdj() != null)
-		{
-			work[0].nextOTriDest();
-			work[1].prevOTriOrigin();
-			if (work[0].origin() == work[1].destination())
-				return false;
-		}
-		symOTri(this, work[0]);
-		prevOTri(work[0], work[1]);
-		work[0].nextOTri();
-		if (!work[0].hasAttributes(OUTER) && work[0].getAdj() != null && work[1].getAdj() != null)
-		{
-			work[0].nextOTriDest();
-			work[1].prevOTriOrigin();
-			if (work[0].origin() == work[1].destination())
-				return false;
-		}
-
-		return checkInversion(n);
+		if (!checkInversion((Vertex) n))
+			return false;
+		
+		//  Topology check
+		//  TODO: normally this check could be removed, but the
+		//        following test triggers an error:
+		//    * mesh Scie_shell.brep with deflexion=0.2 aboslute
+		//    * decimate with length=6
+		Collection link = origin().getNeighboursNodes();
+		link.retainAll(destination().getNeighboursNodes());
+		return link.size() < 3;
 	}
 	
 	private final boolean checkInversion(Vertex n)
@@ -1122,7 +1201,12 @@ public class OTriangle
 	 * TODO: Attributes are not checked.
 	 * @param n the resulting vertex
 	 */
-	public final void contract(Vertex n)
+	public final AbstractHalfEdge collapse(AbstractMesh m, AbstractVertex n)
+	{
+		VHcollapse((Mesh) m, (Vertex) n);
+		return this;
+	}
+	private final void VHcollapse(Mesh m, Vertex n)
 	{
 		Vertex o = origin();
 		Vertex d = destination();
@@ -1168,7 +1252,7 @@ public class OTriangle
 			nextOTri();             // (V1od)
 			int attr3 = attributes;
 			symOTri(this, work[1]); // (oV1V3)
-			work[0].glue(work[1]);
+			work[0].VHglue(work[1]);
 			work[0].attributes |= attr3;
 			work[1].attributes |= attr4;
 			work[0].pushAttributes();
@@ -1190,7 +1274,7 @@ public class OTriangle
 			nextOTri();             // (V2do)
 			int attr6 = attributes;
 			symOTri(this, work[1]); // (dV2V6)
-			work[0].glue(work[1]);
+			work[0].VHglue(work[1]);
 			work[0].attributes |= attr6;
 			work[1].attributes |= attr5;
 			work[0].pushAttributes();
@@ -1203,11 +1287,18 @@ public class OTriangle
 			n.setLink(t56);
 			nextOTri();             // (doV2)
 		}
+		symOTri(this, work[0]);
 		clearAttributes(MARKED);
 		pushAttributes();
-		symOTri();
-		clearAttributes(MARKED);
-		pushAttributes();
+		m.remove(tri);
+		// By convention, edge is moved into (oV1V3), but this may change.
+		// We have to move before removing adjacency relations.
+		nextOTri(work[0], this);        // (dV1o)
+		symOTri();                      // (V1dV4)
+		symOTri();                      // (oV1V3)
+		work[0].clearAttributes(MARKED);
+		work[0].pushAttributes();
+		m.remove(work[0].tri);
 	}
 	
 	/**
@@ -1215,7 +1306,12 @@ public class OTriangle
 	 *
 	 * @param n the resulting vertex
 	 */
-	public final void split(Mesh m, Vertex n)
+	public final AbstractHalfEdge split(AbstractMesh m, AbstractVertex n)
+	{
+		VHsplit((Mesh) m, (Vertex) n);
+		return this;
+	}
+	private void VHsplit(Mesh m, Vertex n)
 	{
 		/*
 		 *         V1                       V1        
@@ -1233,8 +1329,8 @@ public class OTriangle
 		// this = (odV1)
 		Triangle t1 = tri;
 		Triangle t2 = (Triangle) tri.getAdj(localNumber);
-		Triangle t3 = new Triangle(t1);
-		Triangle t4 = new Triangle(t2);
+		Triangle t3 = (Triangle) m.factory.createTriangle(t1);
+		Triangle t4 = (Triangle) m.factory.createTriangle(t2);
 		m.add(t3);
 		m.add(t4);
 		copyOTri(this, work[1]);        // (odV1)
@@ -1258,11 +1354,11 @@ public class OTriangle
 		if (work[0].getAdj() != null)
 		{
 			work[0].symOTri();      // (V1d*)
-			work[1].glue(work[0]);
+			work[1].VHglue(work[0]);
 			nextOTri(this, work[0]);// (nV1o)
 		}
 		work[1].nextOTri();             // (V1nd)
-		work[1].glue(work[0]);
+		work[1].VHglue(work[0]);
 		work[0].clearAttributes(BOUNDARY);
 		work[1].clearAttributes(BOUNDARY);
 		work[1].nextOTri();             // (ndV1)
@@ -1275,15 +1371,15 @@ public class OTriangle
 		if (work[0].getAdj() != null)
 		{
 			work[0].symOTri();      // (dV2*)
-			work[2].glue(work[0]);
+			work[2].VHglue(work[0]);
 			nextOTriDest(this, work[0]);    // (V2no)
 		}
 		work[2].prevOTri();             // (nV2d)
-		work[2].glue(work[0]);
+		work[2].VHglue(work[0]);
 		work[0].clearAttributes(BOUNDARY | MARKED);
 		work[2].clearAttributes(BOUNDARY | MARKED);
 		work[2].prevOTri();             // (dnV2)
-		work[2].glue(work[1]);
+		work[2].VHglue(work[1]);
 	}
 	
 	public void invertOrientationFace(boolean markLocked)
@@ -1296,15 +1392,15 @@ public class OTriangle
 		Stack todo = new Stack();
 		HashSet seen = new HashSet();
 		todo.push(tri);
-		todo.push(int3[localNumber]);
+		todo.push(new Integer(localNumber));
 		swapVertices(seen, todo);
 		assert o == destination() : o+" "+d+" "+this;
 	}
 	
 	private static void swapVertices(HashSet seen, Stack todo)
 	{
-		OTriangle ot = new OTriangle();
-		OTriangle sym = new OTriangle();
+		VirtualHalfEdge ot = new VirtualHalfEdge();
+		VirtualHalfEdge sym = new VirtualHalfEdge();
 		while (todo.size() > 0)
 		{
 			int o = ((Integer) todo.pop()).intValue();
@@ -1331,10 +1427,11 @@ public class OTriangle
 				ot.nextOTri();
 				if (!ot.hasAttributes(BOUNDARY) && !ot.hasAttributes(NONMANIFOLD))
 				{
-					OTriangle.symOTri(ot, sym);
+					VirtualHalfEdge.symOTri(ot, sym);
 					todo.push(sym.tri);
-					todo.push(int3[sym.localNumber]);
-					sym.tri.glue1(sym.localNumber, ot.tri, ot.localNumber);
+					todo.push(new Integer(sym.localNumber));
+					sym.tri.setAdj(sym.localNumber, ot.tri);
+					sym.tri.setAdjLocalNumber(sym.localNumber, ot.localNumber);
 				}
 			}
 		}
@@ -1344,25 +1441,26 @@ public class OTriangle
 	{
 		if (!(tri.getAdj(num) instanceof Triangle))
 			return "N/A";
+		String r = "";
 		Triangle t = (Triangle) tri.getAdj(num);
 		if (t == null)
-			return "null";
+			r+= "null";
 		else
-			return t.hashCode()+"["+tri.getAdjLocalNumber(num)+"]";
+			r+= t.hashCode()+"["+tri.getAdjLocalNumber(num)+"]";
+		return r;
 	}
 	
 	public String toString()
 	{
-		StringBuffer r = new StringBuffer();
-		r.append("Local number: "+localNumber);
-		r.append("\nTri hashcode: "+tri.hashCode());
-		r.append("\nAdjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2));
-		r.append("\nAttributes: "+Integer.toHexString(tri.getEdgeAttributes(0))+" "+Integer.toHexString(tri.getEdgeAttributes(1))+" "+Integer.toHexString(tri.getEdgeAttributes(2))+" => "+Integer.toHexString(attributes));
-		r.append("\nVertices:");
-		r.append("\n  Origin: "+origin());
-		r.append("\n  Destination: "+destination());
-		r.append("\n  Apex: "+apex());
-		return r.toString();
+		String r = "Local number: "+localNumber;
+		r += "\nTri hashcode: "+tri.hashCode();
+		r += "\nAdjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2);
+		r += "\nAttributes: "+Integer.toHexString(tri.getEdgeAttributes(0))+" "+Integer.toHexString(tri.getEdgeAttributes(1))+" "+Integer.toHexString(tri.getEdgeAttributes(2))+" => "+Integer.toHexString(attributes);
+		r += "\nVertices:";
+		r += "\n  Origin: "+origin();
+		r += "\n  Destination: "+destination();
+		r += "\n  Apex: "+apex();
+		return r;
 	}
 
 	private static void unitTestBuildMesh(Mesh m, Vertex [] v)
@@ -1388,38 +1486,38 @@ public class OTriangle
 		 *   v5        v0       v1
 		 */
 		System.out.println("Building mesh...");
-		Triangle T = new Triangle(v[0], v[1], v[2]);
+		Triangle T = (Triangle) m.factory.createTriangle(v[0], v[1], v[2]);
 		m.add(T);
 		assert m.isValid();
 		// Outer triangles
 		Triangle [] O = new Triangle[3];
-		O[0] = new Triangle(m.outerVertex, v[1], v[0]);
-		O[1] = new Triangle(m.outerVertex, v[2], v[1]);
-		O[2] = new Triangle(m.outerVertex, v[0], v[2]);
+		O[0] = (Triangle) m.factory.createTriangle(m.outerVertex, v[1], v[0]);
+		O[1] = (Triangle) m.factory.createTriangle(m.outerVertex, v[2], v[1]);
+		O[2] = (Triangle) m.factory.createTriangle(m.outerVertex, v[0], v[2]);
 		for (int i = 0; i < 3; i++)
 		{
 			O[i].setOuter();
 			m.add(O[i]);
 		}
 		assert m.isValid();
-		OTriangle ot1 = new OTriangle();
-		OTriangle ot2 = new OTriangle(T, 2);
+		VirtualHalfEdge ot1 = new VirtualHalfEdge();
+		VirtualHalfEdge ot2 = new VirtualHalfEdge(T, 2);
 		for (int i = 0; i < 3; i++)
 		{
 			ot1.bind(O[i]);
 			ot1.setAttributes(BOUNDARY);
 			ot2.setAttributes(BOUNDARY);
-			ot1.glue(ot2);
+			ot1.VHglue(ot2);
 			ot2.nextOTri();
 		}
 		assert ot2.origin() == v[0];
 // m.printMesh();
 		assert m.isValid();
-		ot2.prevOTri();  // (v2,v0,v1)
-		ot2.split(m, v[3]); // (v2,v3,v1)
+		ot2.prevOTri();       // (v2,v0,v1)
+		ot2.VHsplit(m, v[3]); // (v2,v3,v1)
 		assert m.isValid();
-		ot2.nextOTri();  // (v3,v1,v2)
-		ot2.swap();      // (v3,v0,v2)
+		ot2.nextOTri();       // (v3,v1,v2)
+		ot2.VHswap();         // (v3,v0,v2)
 		assert m.isValid();
 		/*
 		 *            v3        v2
@@ -1431,10 +1529,10 @@ public class OTriangle
 		 *             +---------+
 		 *             v0       v1
 		 */
-		ot2.split(m, v[5]); // (v3,v5,v2)
+		ot2.VHsplit(m, v[5]); // (v3,v5,v2)
 		assert m.isValid();
-		ot2.nextOTri();  // (v5,v2,v3)
-		ot2.swap();      // (v5,v0,v3)
+		ot2.nextOTri();       // (v5,v2,v3)
+		ot2.VHswap();         // (v5,v0,v3)
 		assert m.isValid();
 		/*
 		 *            v3        v2
@@ -1446,8 +1544,8 @@ public class OTriangle
 		 *   +---------+---------+
 		 *   v5        v0       v1
 		 */
-		ot2.prevOTri();  // (v3,v5,v0)
-		ot2.split(m, v[4]); // (v3,v4,v0)
+		ot2.prevOTri();       // (v3,v5,v0)
+		ot2.VHsplit(m, v[4]); // (v3,v4,v0)
 		assert m.isValid();
 		/*
 		 *  v4        v3        v2
@@ -1463,8 +1561,8 @@ public class OTriangle
 	
 	private static void unitTestCheckLoopOrigin(Mesh m, Vertex o, Vertex d)
 	{
-		OTriangle ot1 = new OTriangle();
-		OTriangle ot2 = new OTriangle();
+		VirtualHalfEdge ot1 = new VirtualHalfEdge();
+		VirtualHalfEdge ot2 = new VirtualHalfEdge();
 		if (!ot2.find(o, d))
 		        System.exit(-1);
 		copyOTri(ot2, ot1);
@@ -1482,8 +1580,8 @@ public class OTriangle
 	
 	private static void unitTestCheckLoopApex(Mesh m, Vertex a, Vertex o)
 	{
-		OTriangle ot1 = new OTriangle();
-		OTriangle ot2 = new OTriangle();
+		VirtualHalfEdge ot1 = new VirtualHalfEdge();
+		VirtualHalfEdge ot2 = new VirtualHalfEdge();
 		if (!ot2.find(a, o))
 		        System.exit(-1);
 		nextOTri(ot2, ot1);
@@ -1501,8 +1599,8 @@ public class OTriangle
 	
 	private static void unitTestCheckQuality(Mesh m, Vertex o, Vertex d, int expected)
 	{
-		OTriangle ot1 = new OTriangle();
-		OTriangle ot2 = new OTriangle();
+		VirtualHalfEdge ot1 = new VirtualHalfEdge();
+		VirtualHalfEdge ot2 = new VirtualHalfEdge();
 		if (!ot2.find(o, d))
 		        System.exit(-1);
 		nextOTri(ot2, ot1);
@@ -1514,7 +1612,7 @@ public class OTriangle
 			if (ot1.checkSwap3D(0.95) >= 0.0)
 			{
 				// Swap edge
-				ot1.swap();
+				ot1.VHswap();
 				cnt++;
 			}
 			else
@@ -1531,12 +1629,12 @@ public class OTriangle
 	{
 		Mesh m = new Mesh();
 		Vertex [] v = new Vertex[6];
-		v[0] = Vertex.valueOf(0.0, 0.0, 0.0);
-		v[1] = Vertex.valueOf(1.0, 0.0, 0.0);
-		v[2] = Vertex.valueOf(1.0, 1.0, 0.0);
-		v[3] = Vertex.valueOf(0.0, 1.0, 0.0);
-		v[4] = Vertex.valueOf(-1.0, 1.0, 0.0);
-		v[5] = Vertex.valueOf(-1.0, 0.0, 0.0);
+		v[0] = (Vertex) m.factory.createVertex(0.0, 0.0, 0.0);
+		v[1] = (Vertex) m.factory.createVertex(1.0, 0.0, 0.0);
+		v[2] = (Vertex) m.factory.createVertex(1.0, 1.0, 0.0);
+		v[3] = (Vertex) m.factory.createVertex(0.0, 1.0, 0.0);
+		v[4] = (Vertex) m.factory.createVertex(-1.0, 1.0, 0.0);
+		v[5] = (Vertex) m.factory.createVertex(-1.0, 0.0, 0.0);
 		unitTestBuildMesh(m, v);
 		assert m.isValid();
 		System.out.println("Checking loops...");

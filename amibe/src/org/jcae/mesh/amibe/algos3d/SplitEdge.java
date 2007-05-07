@@ -22,7 +22,7 @@ package org.jcae.mesh.amibe.algos3d;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.HalfEdge;
-import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
@@ -100,9 +100,6 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 
 	public void preProcessAllHalfEdges()
 	{
-		// Store triangles in a LinkedHashSet to speed up removal.
-		LinkedHashSet newList = new LinkedHashSet(mesh.getTriangles());
-		mesh.setTrianglesList(newList);
 	}
 
 	public double cost(HalfEdge e)
@@ -125,8 +122,8 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		double [] p1 = current.destination().getUV();
 		for (int i = 0; i < 3; i++)
 			newXYZ[i] = 0.5*(p0[i]+p1[i]);
-		insertedVertex = Vertex.valueOf(newXYZ);
-		if (current.hasAttributes(OTriangle.BOUNDARY))
+		insertedVertex = (Vertex) mesh.factory.createVertex(newXYZ);
+		if (current.hasAttributes(VirtualHalfEdge.BOUNDARY))
 		{
 			// FIXME: Check deflection
 			mesh.setRefVertexOnboundary(insertedVertex);
@@ -142,9 +139,9 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 			return false;
 
 		double dapex = insertedVertex.distance3D(current.apex());
-		if (!current.hasAttributes(OTriangle.BOUNDARY))
+		if (!current.hasAttributes(VirtualHalfEdge.BOUNDARY))
 		{
-			current = current.sym();
+			current = (HalfEdge) current.sym();
 			dapex = Math.min(dapex, insertedVertex.distance3D(current.apex()));
 		}
 		return (dapex * dapex > tolerance / 16.0);
@@ -162,9 +159,9 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		for (int i = 0; i < 4; i++)
 		{
 			addToTree(current);
-			current = current.prevDest();
+			current = (HalfEdge) current.prevDest();
 		}
-		return current.next();
+		return (HalfEdge) current.next();
 	}
 	
 	public void postProcessAllHalfEdges()
@@ -192,7 +189,13 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 			return;
 		}
 		logger.info("Load geometry file");
-		Mesh mesh=MeshReader.readObject3D(args[0], "jcae3d", -1);
+		org.jcae.mesh.amibe.traits.TriangleTraitsBuilder ttb = new org.jcae.mesh.amibe.traits.TriangleTraitsBuilder();
+		ttb.addHalfEdge();
+		org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = new org.jcae.mesh.amibe.traits.MeshTraitsBuilder();
+		mtb.addTriangleSet();
+		mtb.add(ttb);
+		Mesh mesh = new Mesh(mtb);
+		MeshReader.readObject3D(mesh, args[0], "jcae3d", -1);
 		new SplitEdge(mesh, options).compute();
 		File brepFile=new File(args[4]);
 		MeshWriter.writeObject3D(mesh, args[4], "jcae3d", brepFile.getParent(), brepFile.getName(),1);

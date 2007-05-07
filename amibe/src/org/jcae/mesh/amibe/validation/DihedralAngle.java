@@ -20,7 +20,7 @@
 package org.jcae.mesh.amibe.validation;
 
 import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 
 /**
@@ -34,8 +34,8 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
  */
 public class DihedralAngle extends QualityProcedure
 {
-	private OTriangle ot = new OTriangle();
-	private OTriangle sym = new OTriangle();
+	private VirtualHalfEdge ot = new VirtualHalfEdge();
+	private VirtualHalfEdge sym = new VirtualHalfEdge();
 	
 	public DihedralAngle()
 	{
@@ -52,11 +52,11 @@ public class DihedralAngle extends QualityProcedure
 		for (int i = 0; i < 3; i++)
 		{
 			ot.nextOTri();
-			if (ot.hasAttributes(OTriangle.BOUNDARY))
+			if (ot.hasAttributes(VirtualHalfEdge.BOUNDARY))
 				continue;
 			if (ot.getAdj() == null)
 				continue;
-			OTriangle.symOTri(ot, sym);
+			VirtualHalfEdge.symOTri(ot, sym);
 			if (t.getGroupId() != sym.getTri().getGroupId())
 				continue;
 			ot.computeNormal3D();

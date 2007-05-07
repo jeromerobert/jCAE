@@ -20,6 +20,8 @@
 package org.jcae.mesh.amibe.ds;
 
 import org.jcae.mesh.amibe.metrics.Matrix3D;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -69,11 +71,11 @@ import org.apache.log4j.Logger;
  *                        t0      V2
  * </pre>
  * <p>
- *   The <code>t</code> {@link Triangle} has the following instance variables:
+ *   The <code>t</code> {@link AbstractTriangle} has the following instance variables:
  * </p>
  * <pre>
  *       Vertex [] vertex = { V0, V1, V2 };
- *       Triangle [] adj  = { t0, t1, t2 };
+ *       AbstractTriangle [] adj  = { t0, t1, t2 };
  *       byte adjPos = 0b00??00??;
  *       byte [] edgeAttributes = { ??, 0, ?? };
  * </pre>
@@ -92,7 +94,7 @@ import org.apache.log4j.Logger;
  * </p>
  */
 
-public class Mesh implements Serializable
+public class Mesh extends AbstractMesh implements Serializable
 {
 	private static Logger logger=Logger.getLogger(Mesh.class);
 	
@@ -101,9 +103,18 @@ public class Mesh implements Serializable
 	 */
 	public Vertex outerVertex = new OuterVertex();
 	
-	//  Triangle list
+	//  AbstractTriangle list
 	protected Collection triangleList = null;
 	
+	//  Node list.
+	private Collection nodeList = null;
+
+	//  Group list.
+	private Collection groupList = null;
+	
+	//  Entity factory
+	public ElementFactory factory = null;
+
 	protected int maxLabel = 0;
 	
 	//  Minimal topological edge length
@@ -132,7 +143,21 @@ public class Mesh implements Serializable
 	 */
 	public Mesh()
 	{
+		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
+		factory = new ElementFactory(mtb);
 		triangleList = new ArrayList();
+	}
+	
+	/**
+	 * Creates an empty mesh.
+	 */
+	public Mesh(MeshTraitsBuilder mtb)
+	{
+		super(mtb);
+		factory = new ElementFactory(mtb);
+		triangleList = mtb.getTriangles(traits);
+		nodeList  = mtb.getNodes(traits);
+		groupList = mtb.getGroups(traits);
 	}
 	
 	public void scaleTolerance(double scale)
@@ -147,7 +172,7 @@ public class Mesh implements Serializable
 	 *
 	 * @param t  triangle being added.
 	 */
-	public void add(Triangle t)
+	public void add(AbstractTriangle t)
 	{
 		triangleList.add(t);
 	}
@@ -157,37 +182,37 @@ public class Mesh implements Serializable
 	 *
 	 * @param t  triangle being removed.
 	 */
-	public void remove(Triangle t)
+	public void remove(AbstractTriangle t)
 	{
-		if (t.getHalfEdge() != null)
-		{
-			// Remove links to help the garbage collector
-			HalfEdge e = t.getHalfEdge();
-			HalfEdge last = e;
-			for (int i = 0; i < 3; i++)
-			{
-				e = e.next();
-				if (e.getAdj() == null)
-				{
-				}
-				else if (e.getAdj() instanceof HalfEdge)
-				{
-					HalfEdge s = (HalfEdge) e.getAdj();
-					if (s.getAdj() == e)
-						s.setAdj(null);
-				}
-				else
-				{
-					ArrayList adj = (ArrayList) e.getAdj();
-					adj.clear();
-				}
-				e.setAdj(null);
-				last.setNext(null);
-				last = e;
-			}
-			t.setHalfEdge(null);
-		}
 		triangleList.remove(t);
+		if (!(t instanceof TriangleHE))
+			return;
+		TriangleHE that = (TriangleHE) t;
+		// Remove links to help the garbage collector
+		HalfEdge e = (HalfEdge) that.getAbstractHalfEdge();
+		HalfEdge last = e;
+		for (int i = 0; i < 3; i++)
+		{
+			e = (HalfEdge) e.next();
+			if (e.getAdj() == null)
+			{
+			}
+			else if (e.getAdj() instanceof HalfEdge)
+			{
+				HalfEdge s = (HalfEdge) e.getAdj();
+				if (s.getAdj() == e)
+					s.setAdj(null);
+				e.setAdj(null);
+			}
+			else
+			{
+				ArrayList adj = (ArrayList) e.getAdj();
+				adj.clear();
+				e.setAdj(null);
+			}
+			last.setNext(null);
+			last = e;
+		}
 	}
 	
 	/**
@@ -210,6 +235,21 @@ public class Mesh implements Serializable
 		if (triangleList != null)
 			triangleList.clear();
 		triangleList = l;
+	}
+
+	/**
+	 * Removes a vertex from vertex list.
+	 *
+	 * @param v  vertex being removed.
+	 */
+	public void remove(Vertex v)
+	{
+		nodeList.remove(v);
+	}
+	
+	public Collection getNodes()
+	{
+		return nodeList;
 	}
 
 	/**
@@ -239,7 +279,7 @@ public class Mesh implements Serializable
 			tVertList.put(vertices[i], new ArrayList(10));
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
 		{
-			Triangle t = (Triangle) it.next();
+			AbstractTriangle t = (AbstractTriangle) it.next();
 			for (int i = 0; i < 3; i++)
 			{
 				ArrayList list = (ArrayList) tVertList.get(t.vertex[i]);
@@ -261,24 +301,22 @@ public class Mesh implements Serializable
 		tVertList.clear();
 		//  3. Mark boundary edges and bind them to virtual triangles.
 		logger.debug("Mark boundary edges");
-		OTriangle ot = new OTriangle();
-		OTriangle sym = new OTriangle();
 		ArrayList newTri = new ArrayList();
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
 		{
 			Triangle t = (Triangle) it.next();
-			ot.bind(t);
+			AbstractHalfEdge ot = t.getAbstractHalfEdge();
 			for (int i = 0; i < 3; i++)
 			{
-				ot.nextOTri();
+				ot = ot.next();
 				if (ot.getAdj() == null)
 				{
-					ot.setAttributes(OTriangle.BOUNDARY);
-					Triangle adj = new Triangle(outerVertex, ot.destination(), ot.origin());
+					ot.setAttributes(AbstractHalfEdge.BOUNDARY);
+					Triangle adj = (Triangle) factory.createTriangle(outerVertex, ot.destination(), ot.origin());
 					newTri.add(adj);
 					adj.setOuter();
-					sym.bind(adj);
-					sym.setAttributes(OTriangle.BOUNDARY);
+					AbstractHalfEdge sym = adj.getAbstractHalfEdge();
+					sym.setAttributes(AbstractHalfEdge.BOUNDARY);
 					ot.glue(sym);
 				}
 			}
@@ -288,21 +326,21 @@ public class Mesh implements Serializable
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
 		{
 			Triangle t = (Triangle) it.next();
-			ot.bind(t);
+			AbstractHalfEdge ot = t.getAbstractHalfEdge();
 			for (int i = 0; i < 3; i++)
 			{
-				ot.nextOTri();
-				if (ot.getAdj() instanceof Triangle)
+				ot = ot.next();
+				if (!(ot.getAdj() instanceof ArrayList))
 					continue;
 				ArrayList list = (ArrayList) ot.getAdj();
-				Triangle adj = new Triangle(outerVertex, ot.destination(), ot.origin());
+				Triangle adj = (Triangle) factory.createTriangle(outerVertex, ot.destination(), ot.origin());
 				newTri.add(adj);
 				adj.setOuter();
-				sym.bind(adj);
+				AbstractHalfEdge sym = adj.getAbstractHalfEdge();
 				ot.glue(sym);
-				ot.setAttributes(OTriangle.NONMANIFOLD);
-				sym.setAttributes(OTriangle.NONMANIFOLD);
-				sym.nextOTri();
+				ot.setAttributes(AbstractHalfEdge.NONMANIFOLD);
+				sym.setAttributes(AbstractHalfEdge.NONMANIFOLD);
+				sym = sym.next();
 				// By convention, put ArrayList on next edge
 				sym.setAdj(list);
 			}
@@ -316,13 +354,13 @@ public class Mesh implements Serializable
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
 		{
 			Triangle t = (Triangle) it.next();
-			ot.bind(t);
+			AbstractHalfEdge ot = t.getAbstractHalfEdge();
 			for (int i = 0; i < found.length; i++)
 				found[i] = false;
 			for (int i = 0; i < 3; i++)
 			{
-				ot.nextOTri();
-				if (ot.hasAttributes(OTriangle.BOUNDARY))
+				ot = ot.next();
+				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
 				{
 					found[i] = true;
 					found[i+1] = true;
@@ -331,7 +369,7 @@ public class Mesh implements Serializable
 			found[0] |= found[3];
 			for (int i = 0; i < 3; i++)
 			{
-				ot.nextOTri();
+				ot = ot.next();
 				if (found[i])
 				{
 					bndNodes.add(ot.origin());
@@ -346,11 +384,12 @@ public class Mesh implements Serializable
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
 		{
 			Triangle t = (Triangle) it.next();
-			ot.bind(t);
+			AbstractHalfEdge ot = t.getAbstractHalfEdge();
+			AbstractHalfEdge sym = t.getAbstractHalfEdge();
 			for (int i = 0; i < 3; i++)
 			{
-				ot.nextOTri();
-				if (ot.hasAttributes(OTriangle.NONMANIFOLD))
+				ot = ot.next();
+				if (ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 				{
 					v[0] = ot.origin();
 					v[1] = ot.destination();
@@ -363,8 +402,8 @@ public class Mesh implements Serializable
 							v[j].setLink(link);
 						}
 					}
-					OTriangle.symOTri(ot, sym);
-					sym.nextOTri();
+					sym = ot.sym(sym);
+					sym = sym.next();
 					ArrayList adj = (ArrayList) sym.getAdj();
 					for (Iterator it2 = adj.iterator(); it2.hasNext(); )
 					{
@@ -379,14 +418,14 @@ public class Mesh implements Serializable
 				}
 			}
 		}
-		// Replace LinkedHashSet by Triangle[], and keep onlyone
-		// Triangle by fan.
+		// Replace LinkedHashSet by AbstractTriangle[], and keep only one
+		// AbstractTriangle by fan.
 		int nrNM = 0;
 		int nrFE = 0;
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
 		{
 			Triangle t = (Triangle) it.next();
-			ot.bind(t);
+			AbstractHalfEdge ot = t.getAbstractHalfEdge();
 			for (int i = 0; i < 3; i++)
 			{
 				if (t.vertex[i].getLink() instanceof LinkedHashSet)
@@ -394,8 +433,8 @@ public class Mesh implements Serializable
 					nrNM++;
 					t.vertex[i].setLinkFan((LinkedHashSet) t.vertex[i].getLink());
 				}
-				ot.nextOTri();
-				if (ot.hasAttributes(OTriangle.BOUNDARY))
+				ot = ot.next();
+				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
 					nrFE++;
 			}
 		}
@@ -410,6 +449,7 @@ public class Mesh implements Serializable
 		double cosMinAngle = Math.cos(Math.PI*minAngle/180.0);
 		if (minAngle < 0.0)
 			cosMinAngle = -2.0;
+		double [][] temp = new double[4][3];
 		for (int i = 0; i < vertices.length; i++)
 		{
 			if (bndNodes.contains(vertices[i]))
@@ -427,8 +467,8 @@ public class Mesh implements Serializable
 			else if (0 != label)
 			{
 				//  Check for ridges
-				ot.bind((Triangle) vertices[i].getLink());
-				if (checkRidges(vertices[i], cosMinAngle, ot))
+				Triangle t = (Triangle) vertices[i].getLink();
+				if (checkRidges(vertices[i], cosMinAngle, t, temp))
 					vertices[i].setRef(-label);
 			}
 		}
@@ -436,28 +476,25 @@ public class Mesh implements Serializable
 			logger.info("Found "+nrJunctionPoints+" non-manifold vertices");
 		// Add outer triangles
 		triangleList.addAll(newTri);
-		assert isValid();
 	}
 	
 	private static final void checkNeighbours(Vertex v, HashMap tVertList)
 	{
-		OTriangle ot = new OTriangle();
-		OTriangle sym = new OTriangle();
-		OTriangle ot2 = new OTriangle();
 		//  Mark all triangles having v as vertex
 		ArrayList neighTriList = (ArrayList) tVertList.get(v);
-		Triangle.List markedTri = new Triangle.List();
+		AbstractTriangle.List markedTri = new AbstractTriangle.List();
 		for (Iterator it = neighTriList.iterator(); it.hasNext(); )
-			markedTri.add((Triangle) it.next());
+			markedTri.add((AbstractTriangle) it.next());
 		//  Loop on all edges incident to v
 		for (Iterator it = neighTriList.iterator(); it.hasNext(); )
 		{
 			Triangle t = (Triangle) it.next();
-			ot.bind(t);
+			AbstractHalfEdge ot = t.getAbstractHalfEdge();
+			AbstractHalfEdge sym = t.getAbstractHalfEdge();
 			if (ot.destination() == v)
-				ot.nextOTri();
+				ot = ot.next();
 			else if (ot.apex() == v)
-				ot.prevOTri();
+				ot = ot.prev();
 			assert ot.origin() == v;
 			// Skip this edge if adjacency relations already exist, 
 			if (ot.getAdj() != null)
@@ -475,11 +512,11 @@ public class Mesh implements Serializable
 					continue;
 				// t2 contains v and v2, we now look for an edge
 				// (v,v2) or (v2,v)
-				ot2.bind(t2);
+				AbstractHalfEdge ot2 = t2.getAbstractHalfEdge();
 				if (ot2.destination() == v2)
-					ot2.nextOTri();
+					ot2 = ot2.next();
 				else if (ot2.apex() == v2)
-					ot2.prevOTri();
+					ot2 = ot2.prev();
 				if (manifold && ot2.destination() == v && ot.getAdj() == null && ot2.getAdj() == null)
 				{
 					// This edge seems to be manifold.
@@ -490,7 +527,7 @@ public class Mesh implements Serializable
 				}
 				manifold = false;
 				if (ot2.destination() != v)
-					ot2.prevOTri();
+					ot2 = ot2.prev();
 				// We are sure now that ot2 == (v,v2) or (v2,v)
 				assert (v == ot2.origin() && v2 == ot2.destination()) || (v2 == ot2.origin() && v == ot2.destination());
 				// This edge is non manifold.  In this routine, we
@@ -512,12 +549,12 @@ public class Mesh implements Serializable
 				}
 				else if (ot.getAdj() instanceof Triangle)
 				{
-					OTriangle.symOTri(ot, sym);
+					sym = ot.sym(sym);
 					assert sym.getAdj() == t;
-					assert sym.tri.getAdjLocalNumber(sym.getLocalNumber()) == ot.getLocalNumber();
+					assert sym.getTri().getAdjLocalNumber(sym.getLocalNumber()) == ot.getLocalNumber();
 					adj.add(t);
 					adj.add(int3[ot.getLocalNumber()]);
-					adj.add(sym.tri);
+					adj.add(sym.getTri());
 					adj.add(int3[sym.getLocalNumber()]);
 					ot.setAdj(adj);
 					sym.setAdj(adj);
@@ -533,13 +570,14 @@ public class Mesh implements Serializable
 		markedTri.clear();
 	}
 	
-	private final boolean checkRidges(Vertex v, double cosMinAngle, OTriangle ot)
+	private final boolean checkRidges(Vertex v, double cosMinAngle, Triangle t, double [][] temp)
 	{
-		OTriangle sym = new OTriangle();
+		AbstractHalfEdge ot = t.getAbstractHalfEdge();
+		AbstractHalfEdge sym = t.getAbstractHalfEdge();
 		if (ot.origin() != v)
-			ot.nextOTri();
+			ot = ot.next();
 		if (ot.origin() != v)
-			ot.nextOTri();
+			ot = ot.next();
 		assert ot.origin() == v;
 		Vertex first = ot.destination();
 		int id = ot.getTri().getGroupId();
@@ -551,11 +589,11 @@ public class Mesh implements Serializable
 			{
 				if (id != ot.getTri().getGroupId())
 					return false;
-				OTriangle.symOTri(ot, sym);
+				sym = ot.sym(sym);
 				if (id != sym.getTri().getGroupId())
 					return false;
 			}
-			ot.nextOTriOrigin();
+			ot = ot.nextOrigin();
 			if (ot.destination() == first)
 				break;
 		}
@@ -567,106 +605,20 @@ public class Mesh implements Serializable
 			Vertex d = ot.destination();
 			if (d != outerVertex && 0 != d.getRef())
 			{
-				OTriangle.symOTri(ot, sym);
-				ot.computeNormal3D();
-				double [] n1 = ot.getTempVector();
-				sym.computeNormal3D();
-				double [] n2 = sym.getTempVector();
-				double angle = Matrix3D.prodSca(n1, n2);
+				sym = ot.sym(sym);
+				Matrix3D.computeNormal3D(v.getUV(), d.getUV(), ot.apex().getUV(), temp[0], temp[1], temp[2]);
+				Matrix3D.computeNormal3D(d.getUV(), v.getUV(), sym.apex().getUV(), temp[0], temp[1], temp[3]);
+				double angle = Matrix3D.prodSca(temp[2], temp[3]);
 				if (angle > -cosMinAngle)
 					return false;
 			}
-			ot.nextOTriOrigin();
+			ot = ot.nextOrigin();
 			if (ot.destination() == first)
 				break;
 		}
 		return true;
 	}
 	
-	/**
-	 * Builds edges.  Some algorithms are more efficient with edge objects.
-	 */
-	public void buildEdges()
-	{
-		logger.debug("Building edges");
-		for(Iterator it=triangleList.iterator();it.hasNext();)
-		{
-			Triangle t = (Triangle) it.next();
-			// Create 3 HalfEdge instances
-			HalfEdge hedge0 = new HalfEdge(t, (byte) 0, (byte) t.getEdgeAttributes(0));
-			HalfEdge hedge1 = new HalfEdge(t, (byte) 1, (byte) t.getEdgeAttributes(1));
-			HalfEdge hedge2 = new HalfEdge(t, (byte) 2, (byte) t.getEdgeAttributes(2));
-			// and link them together
-			hedge0.setNext(hedge1);
-			hedge1.setNext(hedge2);
-			hedge2.setNext(hedge0);
-			t.setHalfEdge(hedge0);
-		}
-		OTriangle ot = new OTriangle();
-		OTriangle sym = new OTriangle();
-		Triangle t2;
-		for(Iterator it=triangleList.iterator();it.hasNext();)
-		{
-			Triangle t = (Triangle) it.next();
-			ot.bind(t);
-			HalfEdge e = t.getHalfEdge();
-			for (int i = 0; i < 3; i++)
-			{
-				ot.nextOTri();
-				e = e.next();
-				assert ot.origin() == e.origin();
-				assert ot.destination() == e.destination();
-				assert ot.apex() == e.apex();
-				if (ot.getAdj() == null)
-					continue;
-				if (e.getAdj() != null)
-					continue;
-				if (ot.getAdj() instanceof Triangle)
-				{
-					OTriangle.symOTri(ot, sym);
-					t2 = sym.getTri();
-					assert sym.getAdj() == t : ""+t+" "+t2;
-					assert t2.getAdjLocalNumber(sym.getLocalNumber()) == ot.getLocalNumber();
-					HalfEdge f = t2.getHalfEdge();
-					for (int j = sym.getLocalNumber(); j > 0; j--)
-						f = f.next();
-					assert sym.origin() == f.origin();
-					assert sym.destination() == f.destination();
-					assert sym.apex() == f.apex();
-					assert f.getAdj() == null: f;
-					e.glue(f);
-				}
-				else
-				{
-					ArrayList adj = (ArrayList) ot.getAdj();
-					ArrayList edgeAdj = new ArrayList();
-					// Note: ot is listed in adj, no need to add e
-					// explicitly in edgeAdj.
-					for (Iterator it2 = adj.iterator(); it2.hasNext(); )
-					{
-						t2 = (Triangle) it2.next();
-						int i2 = ((Integer) it2.next()).intValue();
-						sym.bind(t2, i2);
-						HalfEdge f = t2.getHalfEdge();
-						for (; i2 > 0; i2--)
-							f = f.next();
-						assert sym.origin() == f.origin();
-						assert sym.destination() == f.destination();
-						assert sym.apex() == f.apex();
-						// Put this ArrayList at the same
-						// location as with OTriangle, see
-						// checkNeighbours.
-						edgeAdj.add(f);
-						f = ((HalfEdge) f.getAdj()).next();
-						assert f.getAdj() == null;
-						f.setAdj(edgeAdj);
-					}
-				}
-			}
-		}
-		logger.debug("End building edges");
-	}
-
 	/**
 	 * Sets an unused boundary reference on a vertex.
 	 */
@@ -869,12 +821,9 @@ public class Mesh implements Serializable
 	 */
 	public boolean isValid(boolean constrained)
 	{
-		OTriangle ot = new OTriangle();
-		OTriangle sym = new OTriangle();
-		Vertex v1, v2;
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
 		{
-			Triangle t = (Triangle) it.next();
+			AbstractTriangle t = (AbstractTriangle) it.next();
 			if (t.vertex[0] == t.vertex[1] || t.vertex[1] == t.vertex[2] || t.vertex[2] == t.vertex[0])
 			{
 				logger.error("Duplicate vertices: "+t);
@@ -882,10 +831,13 @@ public class Mesh implements Serializable
 			}
 			if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
 			{
-				if (constrained && !t.isOuter())
+				if (constrained && t instanceof Triangle)
 				{
-					logger.error("Triangle should be outer: "+t);
-					return false;
+					if (!((Triangle) t).isOuter())
+					{
+						logger.error("AbstractTriangle should be outer: "+t);
+						return false;
+					}
 				}
 			}
 			for (int i = 0; i < 3; i++)
@@ -893,9 +845,9 @@ public class Mesh implements Serializable
 				Vertex v = t.vertex[i];
 				if (v.getLink() == null)
 					continue;
-				if (v.getLink() instanceof Triangle)
+				if (v.getLink() instanceof AbstractTriangle)
 				{
-					Triangle t2 = (Triangle) v.getLink();
+					AbstractTriangle t2 = (AbstractTriangle) v.getLink();
 					if (t2.vertex[0] != v && t2.vertex[1] != v && t2.vertex[2] != v)
 					{
 						logger.error("Vertex "+v+" linked to "+t2);
@@ -903,85 +855,157 @@ public class Mesh implements Serializable
 					}
 				}
 			}
-			ot.bind(t);
-			boolean isOuter = ot.hasAttributes(OTriangle.OUTER);
-			HalfEdge e = t.getHalfEdge();
-			for (int i = 0; i < 3; i++)
+			if (!checkVirtualHalfEdges(t))
+				return false;
+			if (!checkHalfEdges(t))
+				return false;
+		}
+		return true;
+	}
+
+	private boolean checkVirtualHalfEdges(AbstractTriangle t)
+	{
+		if (!t.traitsBuilder.hasCapability(TriangleTraitsBuilder.SHALLOWHALFEDGE))
+			return true;
+		VirtualHalfEdge ot = new VirtualHalfEdge();
+		VirtualHalfEdge sym = new VirtualHalfEdge();
+		ot.bind((Triangle) t);
+		boolean isOuter = ot.hasAttributes(AbstractHalfEdge.OUTER);
+		for (int i = 0; i < 3; i++)
+		{
+			ot = (VirtualHalfEdge) ot.next();
+			if (isOuter != ot.hasAttributes(AbstractHalfEdge.OUTER))
 			{
-				ot.nextOTri();
-				if (e != null)
-					e = e.next();
-				if (isOuter != ot.hasAttributes(OTriangle.OUTER))
+				logger.error("Inconsistent outer state: "+ot);
+				return false;
+			}
+			if (ot.getAdj() == null)
+				continue;
+			if (ot.getAdj() instanceof Triangle)
+			{
+				Vertex v1 = ot.origin();
+				Vertex v2 = ot.destination();
+				sym = (VirtualHalfEdge) ot.sym(sym);
+				if (sym.origin() != v2 || sym.destination() != v1)
 				{
-					logger.error("Inconsistent outer state: "+ot);
+					logger.error("Vertex mismatch in adjacency relation: ");
+					logger.error(" "+ot);
+					logger.error(" "+sym);
 					return false;
 				}
-				if (ot.getAdj() == null)
-					continue;
-				if (ot.getAdj() instanceof Triangle)
+				if (sym.getAdj() == null || !(sym.getAdj() instanceof Triangle))
 				{
-					v1 = ot.origin();
-					v2 = ot.destination();
-					OTriangle.symOTri(ot, sym);
-					if (sym.origin() != v2 || sym.destination() != v1)
+					logger.error("Wrong adjacency relation: ");
+					logger.error(" "+ot);
+					logger.error(" "+sym);
+					return false;
+				}
+				if (sym.getAdj() != t || sym.getTri().getAdjLocalNumber(sym.getLocalNumber()) != ot.getLocalNumber())
+				{
+					logger.error("Wrong adjacency relation: ");
+					logger.error(" adj1: "+ot);
+					logger.error(" adj2: "+sym);
+					logger.error(""+sym.getAdj().getClass().getName());
+					return false;
+				}
+				if ((sym.hasAttributes(AbstractHalfEdge.BOUNDARY) && !ot.hasAttributes(AbstractHalfEdge.BOUNDARY)) || (!sym.hasAttributes(AbstractHalfEdge.BOUNDARY) && ot.hasAttributes(AbstractHalfEdge.BOUNDARY)))
+				{
+					logger.error("Inconsistent boundary flag");
+					logger.error(" "+ot);
+					logger.error(" "+sym);
+					return false;
+				}
+			}
+			else
+			{
+				// Check that all edges share the same adjacency
+				// list.
+				ArrayList adj = (ArrayList) ot.getAdj();
+				for (Iterator it2 = adj.iterator(); it2.hasNext(); )
+				{
+					Triangle t2 = (Triangle) it2.next();
+					int i2 = ((Integer) it2.next()).intValue();
+					sym.bind(t2, i2);
+					sym = (VirtualHalfEdge) sym.sym();
+					sym = (VirtualHalfEdge) sym.next();
+					if (sym.getAdj() != adj)
 					{
-						logger.error("Vertex mismatch in adjacency relation: ");
-						logger.error(" "+ot);
-						logger.error(" "+sym);
+						logger.error("Multiple edges: Wrong adjacency relation");
 						return false;
-					}
-					if (sym.getAdj() == null || !(sym.getAdj() instanceof Triangle))
-					{
-						logger.error("Wrong adjacency relation: ");
-						logger.error(" "+ot);
-						logger.error(" "+sym);
-						return false;
-					}
-					if (sym.getAdj() != t || sym.getTri().getAdjLocalNumber(sym.getLocalNumber()) != ot.getLocalNumber())
-					{
-						logger.error("Wrong adjacency relation: ");
-						logger.error(" adj1: "+ot);
-						logger.error(" adj2: "+sym);
-						logger.error(""+sym.getAdj().getClass().getName());
-						return false;
-					}
-					if ((sym.hasAttributes(OTriangle.BOUNDARY) && !ot.hasAttributes(OTriangle.BOUNDARY)) || (!sym.hasAttributes(OTriangle.BOUNDARY) && ot.hasAttributes(OTriangle.BOUNDARY)))
-					{
-						logger.error("Inconsistent boundary flag");
-						logger.error(" "+ot);
-						logger.error(" "+sym);
-						return false;
-					}
-					if (e != null && e.getAdj() != null)
-					{
-						if (e.sym().getTri() != sym.getTri() || e.sym().getLocalNumber() != sym.getLocalNumber())
-						{
-							logger.error("Inconsistent half-edges");
-							logger.error(" "+ot);
-							logger.error(" "+e);
-							logger.error(" "+sym);
-							logger.error(" "+e.sym());
-							return false;
-						}
 					}
 				}
-				else
+			}
+		}
+		return true;
+	}
+
+	private boolean checkHalfEdges(AbstractTriangle t)
+	{
+		if (!t.traitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE))
+			return true;
+		HalfEdge e = (HalfEdge) ((Triangle) t).getAbstractHalfEdge();
+		boolean isOuter = e.hasAttributes(AbstractHalfEdge.OUTER);
+		for (int i = 0; i < 3; i++)
+		{
+			e = (HalfEdge) e.next();
+			if (isOuter != e.hasAttributes(AbstractHalfEdge.OUTER))
+			{
+				logger.error("Inconsistent outer state: "+e);
+				return false;
+			}
+			if (e.getAdj() == null)
+				continue;
+			if (e.getAdj() instanceof HalfEdge)
+			{
+				Vertex v1 = e.origin();
+				Vertex v2 = e.destination();
+				HalfEdge f = (HalfEdge) e.sym();
+				if (f.origin() != v2 || f.destination() != v1)
 				{
-					// Check that all edges share the same adjacency
-					// list.
-					ArrayList adj = (ArrayList) ot.getAdj();
-					for (Iterator it2 = adj.iterator(); it2.hasNext(); )
+					logger.error("Vertex mismatch in adjacency relation: ");
+					logger.error(" "+e);
+					logger.error(" "+f);
+					return false;
+				}
+				if (f.getAdj() == null || !(f.getAdj() instanceof HalfEdge))
+				{
+					logger.error("Wrong adjacency relation: ");
+					logger.error(" "+e);
+					logger.error(" "+f);
+					return false;
+				}
+				if (f.sym() != e)
+				{
+					logger.error("Wrong adjacency relation: ");
+					logger.error(" adj1: "+e);
+					logger.error(" adj2: "+f);
+					return false;
+				}
+				if ((f.hasAttributes(AbstractHalfEdge.BOUNDARY) && !e.hasAttributes(AbstractHalfEdge.BOUNDARY)) || (!f.hasAttributes(AbstractHalfEdge.BOUNDARY) && e.hasAttributes(AbstractHalfEdge.BOUNDARY)))
+				{
+					logger.error("Inconsistent boundary flag");
+					logger.error(" "+e);
+					logger.error(" "+f);
+					return false;
+				}
+			}
+			else
+			{
+				// Check that all edges share the same adjacency
+				// list.
+				ArrayList adj = (ArrayList) e.getAdj();
+				for (Iterator it2 = adj.iterator(); it2.hasNext(); )
+				{
+					Triangle t2 = (Triangle) it2.next();
+					int i2 = ((Integer) it2.next()).intValue();
+					HalfEdge f = (HalfEdge) t2.getAbstractHalfEdge();
+					for (; i2 > 0; i2--)
+						f = (HalfEdge) f.next();
+					HalfEdge s = (HalfEdge) f.sym().next();
+					if (s.getAdj() != adj)
 					{
-						Triangle t2 = (Triangle) it2.next();
-						int i2 = ((Integer) it2.next()).intValue();
-						sym.bind(t2, i2);
-						sym.symOTri();
-						sym.nextOTri();
-						if (sym.getAdj() != adj)
-						{
-							logger.error("Multiple edges: Wrong adjacency relation");
-							return false;
-						}
+						logger.error("Multiple edges: Wrong adjacency relation");
+						return false;
 					}
 				}
 			}
@@ -993,10 +1017,7 @@ public class Mesh implements Serializable
 	{
 		System.out.println("Mesh:");
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
-		{
-			Triangle t = (Triangle) it.next();
-			System.out.println(""+t);
-		}
+			System.out.println(""+it.next());
 		System.out.println("Outer Vertex: "+outerVertex);
 	}
 	

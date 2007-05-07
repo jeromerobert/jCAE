@@ -21,8 +21,10 @@ package org.jcae.mesh.amibe.patch;
 
 import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
 import org.jcae.mesh.amibe.util.LongLong;
 import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.mesher.ds.MNode1D;
@@ -60,28 +62,29 @@ public class Vertex2D extends Vertex
 		super();
 	}
 
+	protected Vertex2D(VertexTraitsBuilder vtb)
+	{
+		super(vtb);
+	}
+
 	/**
 	 * Create a Vertex for a 2D mesh.
 	 *
 	 * @param u  first coordinate.
 	 * @param v  second coordinate.
 	 */
-	protected Vertex2D(double u, double v)
+	public Vertex2D(VertexTraitsBuilder vtb, double u, double v)
 	{
-		super();
+		super(vtb);
 		param[0] = u;
 		param[1] = v;
 	}
 	
-	/**
-	 * Create a Vertex for a 2D mesh.
-	 *
-	 * @param u  first coordinate.
-	 * @param v  second coordinate.
-	 */
-	public static Vertex2D valueOf(double u, double v)
+	public Vertex2D(double u, double v)
 	{
-		return new Vertex2D(u, v);
+		super();
+		param[0] = u;
+		param[1] = v;
 	}
 	
 	/**
@@ -158,11 +161,11 @@ public class Vertex2D extends Vertex
 	 * @param v array
 	 * @return the 2D centroid of these vertices.
 	 */
-	public static Vertex2D centroid(Vertex2D [] v)
+	public static Vertex2D centroid(Mesh2D m, Vertex2D [] v)
 	{
 		double x = 0.0, y = 0.0;
 		if (v.length == 0)
-			return Vertex2D.valueOf(0.0, 0.0);
+			return (Vertex2D) m.factory.createVertex(0.0, 0.0);
 		for (int i = 0; i < v.length; i++)
 		{
 			double [] p = v[i].getUV();
@@ -171,7 +174,7 @@ public class Vertex2D extends Vertex
 		}
 		x /= v.length;
 		y /= v.length;
-		return Vertex2D.valueOf(x, y);
+		return (Vertex2D) m.factory.createVertex(x, y);
 	}
 	
 	/**
@@ -205,9 +208,8 @@ public class Vertex2D extends Vertex
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("Searching for the triangle surrounding "+this);
-		Triangle.List tList = new Triangle.List();
-		Vertex2D n = (Vertex2D) mesh.quadtree.getNearestVertex(mesh, this);
-		Triangle t = (Triangle) n.link;
+		AbstractTriangle.List tList = new AbstractTriangle.List();
+		Triangle t = (Triangle) mesh.quadtree.getNearestVertex(mesh, this).getLink();
 		OTriangle2D start = new OTriangle2D(t, 0);
 		OTriangle2D current = getSurroundingOTriangleStart(mesh, start, tList);
 		if (current == null)
@@ -221,7 +223,7 @@ public class Vertex2D extends Vertex
 				for (int i = 0; i < 3; i++)
 				{
 					start.nextOTri();
-					if (!start.hasAttributes(OTriangle.BOUNDARY))
+					if (!start.hasAttributes(AbstractHalfEdge.BOUNDARY))
 					{
 						start.symOTri();
 						current = getSurroundingOTriangleStart(mesh, start, tList);
@@ -251,7 +253,7 @@ public class Vertex2D extends Vertex
 		return current;
 	}
 	
-	private OTriangle2D getSurroundingOTriangleStart(Mesh2D mesh, OTriangle2D current, Triangle.List tList)
+	private OTriangle2D getSurroundingOTriangleStart(Mesh2D mesh, OTriangle2D current, AbstractTriangle.List tList)
 	{
 		boolean redo = false;
 		Vertex2D o = (Vertex2D) current.origin();
@@ -270,7 +272,7 @@ public class Vertex2D extends Vertex
 		if (o == mesh.outerVertex)
 		{
 			current.nextOTri();
-			if (current.hasAttributes(OTriangle.BOUNDARY))
+			if (current.hasAttributes(AbstractHalfEdge.BOUNDARY))
 				return null;
 			current.symOTri();
 			redo = true;
@@ -278,14 +280,14 @@ public class Vertex2D extends Vertex
 		else if (d == mesh.outerVertex)
 		{
 			current.prevOTri();
-			if (current.hasAttributes(OTriangle.BOUNDARY))
+			if (current.hasAttributes(AbstractHalfEdge.BOUNDARY))
 				return null;
 			current.symOTri();
 			redo = true;
 		}
 		else if (a == mesh.outerVertex)
 		{
-			if (current.hasAttributes(OTriangle.BOUNDARY))
+			if (current.hasAttributes(AbstractHalfEdge.BOUNDARY))
 				return null;
 			current.symOTri();
 			redo = true;
@@ -294,7 +296,7 @@ public class Vertex2D extends Vertex
 		//  be outerVertex again, but this is case 3 above.
 		if (onLeft(mesh, (Vertex2D) current.origin(), (Vertex2D) current.destination()) < 0L)
 		{
-			if (current.hasAttributes(OTriangle.BOUNDARY) && !redo)
+			if (current.hasAttributes(AbstractHalfEdge.BOUNDARY) && !redo)
 				return null;
 			current.symOTri();
 			redo = true;
@@ -335,7 +337,7 @@ public class Vertex2D extends Vertex
 			o = (Vertex2D) current.origin();
 			d = (Vertex2D) current.destination();
 			a = (Vertex2D) current.apex();
-			if (current.hasAttributes(OTriangle.BOUNDARY))
+			if (current.hasAttributes(AbstractHalfEdge.BOUNDARY))
 				return null;
 		}
 		if (logger.isDebugEnabled())

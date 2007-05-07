@@ -22,7 +22,7 @@ package org.jcae.mesh.amibe.validation;
 import gnu.trove.TObjectIntHashMap;
 import gnu.trove.TObjectIntProcedure;
 import gnu.trove.TFloatArrayList;
-import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 
 /**
@@ -31,7 +31,7 @@ import org.jcae.mesh.amibe.ds.Vertex;
  * method to compute node connectivity of 3D meshes.  As 3D meshes
  * have a simplistic data structure, computing node neighbours would
  * be very extensive.  Thus instead <code>quality</code> is called
- * with a {@link org.jcae.mesh.amibe.ds.Triangle} argument, this method
+ * with a {@link org.jcae.mesh.amibe.ds.AbstractTriangle} argument, this method
  * increments counters on its three vertices.  The {@link #finish}
  * method has to be called after looping on all faces.
  */
@@ -47,9 +47,9 @@ public class NodeConnectivity3D extends QualityProcedure
 	
 	public float quality(Object o)
 	{
-		if (!(o instanceof Triangle))
+		if (!(o instanceof AbstractTriangle))
 			throw new IllegalArgumentException();
-		Triangle f = (Triangle) o;
+		AbstractTriangle f = (AbstractTriangle) o;
 		for (int i = 0; i < 3; i++)
 		{
 			Vertex n = f.vertex[i];
