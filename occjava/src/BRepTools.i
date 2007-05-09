@@ -75,6 +75,8 @@ class BRepTools
 	%rename(write) Write;
 	static Standard_Boolean Write(const TopoDS_Shape& shape,
 		const Standard_CString file);
+
+	static  void Write(const TopoDS_Shape& Sh,Standard_OStream& S) ;
 };
 
 /**

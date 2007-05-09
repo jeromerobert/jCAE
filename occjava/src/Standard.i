@@ -79,3 +79,19 @@
 %typedef int Standard_Integer;
 %typedef double Quantity_Length;
 %typedef double Quantity_Parameter;
+
+/**
+ * Standard_OStream
+ */
+%{ #include "jnistream.hxx" %}
+%typemap(jni) Standard_OStream& "jobject"
+%typemap(jtype) Standard_OStream& "java.nio.channels.WritableByteChannel"
+%typemap(jstype) Standard_OStream& "java.nio.channels.WritableByteChannel"
+
+%typemap(in) Standard_OStream&
+{
+    jnistreambuf buf(jenv, $input);
+    Standard_OStream os(&buf);
+	$1=&os;
+}
+

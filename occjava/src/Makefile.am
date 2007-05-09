@@ -26,7 +26,7 @@ $(BUILT_SOURCES) : $(IFACEFILES)
 	mkdir -p $(JAVAGENSRCDIR)
 	swig -c++ -v $(CPPFLAGS) -Wall -java -package org.jcae.opencascade.jni -outdir $(JAVAGENSRCDIR) OccJava.i
 
-libOccJava_la_SOURCES =	$(BUILT_SOURCES)
+libOccJava_la_SOURCES =	$(BUILT_SOURCES) jnistream.cxx
 
 CLEANFILES=OccJava_wrap.cxx
 
