@@ -107,17 +107,17 @@ class BRepTools_WireExplorer
 %{#include <BRepTools_Quilt.hxx>%}
 class BRepTools_Quilt
 {
-    %rename(bind) Bind;
-    %rename(add) Add;
-    %rename(isCopied) IsCopied;
-    %rename(copy) Copy;
-    %rename(shells) Shells;
-    public:
-    BRepTools_Quilt();
-    void Bind(const TopoDS_Edge& Eold,const TopoDS_Edge& Enew) ;
-    void Bind(const TopoDS_Vertex& Vold,const TopoDS_Vertex& Vnew) ;
-    void Add(const TopoDS_Shape& S) ;
-    Standard_Boolean IsCopied(const TopoDS_Shape& S) const;
-    const TopoDS_Shape& Copy(const TopoDS_Shape& S) const;
-    TopoDS_Shape Shells() const;
+	%rename(bind) Bind;
+	%rename(add) Add;
+	%rename(isCopied) IsCopied;
+	%rename(copy) Copy;
+	%rename(shells) Shells;
+	public:
+	BRepTools_Quilt();
+	void Bind(const TopoDS_Edge& Eold,const TopoDS_Edge& Enew) ;
+	void Bind(const TopoDS_Vertex& Vold,const TopoDS_Vertex& Vnew) ;
+	void Add(const TopoDS_Shape& S) ;
+	Standard_Boolean IsCopied(const TopoDS_Shape& S) const;
+	const TopoDS_Shape& Copy(const TopoDS_Shape& S) const;
+	TopoDS_Shape Shells() const;
 };
