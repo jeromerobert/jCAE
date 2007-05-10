@@ -41,10 +41,12 @@
 
 // load the native library
 %pragma(java) jniclasscode=%{
-  static
-  {
-	  System.loadLibrary("OccJava");
-  }
+	static
+	{
+		System.loadLibrary("OccJava");
+		if(!System.getenv("MMGT_OPT").equals("0"))
+			throw new RuntimeException("The MMGT_OPT environement variable must be set to 0 before using occjava.");
+	}
 %}
 
 %include "Standard.i"
