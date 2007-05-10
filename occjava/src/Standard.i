@@ -89,9 +89,15 @@
 %typemap(jstype) Standard_OStream& "java.nio.channels.WritableByteChannel"
 
 %typemap(in) Standard_OStream&
-{
+%{
     jnistreambuf buf(jenv, $input);
     Standard_OStream os(&buf);
 	$1=&os;
+%}
+
+%typemap(javain) Standard_OStream& "$javainput"
+%typemap(javaout) Standard_OStream& 
+{
+	return $jnicall;
 }
 

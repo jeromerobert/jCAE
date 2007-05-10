@@ -1,5 +1,8 @@
 #include "jnistream.hxx"
 
+//#define DEBUG
+using namespace std;
+
 static void jthrow(JNIEnv *env, const char *name, const char *msg)
 {
 	jclass cls = env->FindClass(name);
@@ -22,9 +25,17 @@ static void jthrow(JNIEnv *env, const char *name, const char *msg)
 	}
 }
 
+jnistreambuf::~jnistreambuf()
+{
+	delete[] nativeBuffer;
+}
+
 jnistreambuf::jnistreambuf(JNIEnv * env, jobject jstream, int bufferSize):
 	env(env), jstream(jstream)
 {
+#ifdef DEBUG
+	cerr << "jnistreambuf::jnistreambuf [start]" << endl;
+#endif
 	nativeBuffer = new char[bufferSize];
 	fullNioBuffer=env->NewDirectByteBuffer(nativeBuffer, bufferSize);
 
@@ -39,6 +50,9 @@ jnistreambuf::jnistreambuf(JNIEnv * env, jobject jstream, int bufferSize):
 
 	if(in)
 	{
+#ifdef DEBUG
+	cerr << "jnistreambuf::jnistreambuf: init reading buffer" << endl;
+#endif
 		setg(nativeBuffer,     // beginning of putback area
 			 nativeBuffer,     // read position
 			 nativeBuffer);    // end position      
@@ -46,17 +60,32 @@ jnistreambuf::jnistreambuf(JNIEnv * env, jobject jstream, int bufferSize):
 
 	if(out)
 	{
+#ifdef DEBUG
+	cerr << "jnistreambuf::jnistreambuf: init writting buffer [start]" << endl;
+#endif
 		setp( nativeBuffer, nativeBuffer + bufferSize );
+
+#ifdef DEBUG
+	cerr << "jnistreambuf::jnistreambuf: init writting buffer [done]" << endl;
+#endif
 	}
 
 	if(!out && !in)
 	{
 		jthrow(env, "java/lang/ClassCastException", "InputStream or OutputStream expected");
 	}
+
+#ifdef DEBUG
+	cerr << "jnistreambuf::jnistreambuf [done]" << endl;
+#endif
 }
 
 int jnistreambuf::underflow()
-{ // used for input buffer only
+{
+#ifdef DEBUG
+	cerr << "jnistreambuf::underflow" << endl;
+#endif
+	// used for input buffer only
     if ( gptr() && ( gptr() < egptr()))
         return * reinterpret_cast<unsigned char *>( gptr());
 
@@ -76,11 +105,16 @@ int jnistreambuf::underflow()
 }
 
 int jnistreambuf::overflow( int c)
-{ // used for output buffer only
+{
+#ifdef DEBUG
+	cerr << "jnistreambuf::overflow" << endl;
+#endif
+	// used for output buffer only
     if (c != EOF) {
         *pptr() = c;
         pbump(1);
     }
+
     if ( flush_buffer() == EOF)
         return EOF;
     return c;
@@ -88,6 +122,9 @@ int jnistreambuf::overflow( int c)
 
 int jnistreambuf::sync()
 {
+#ifdef DEBUG
+	cerr << "jnistreambuf::sync()" << endl;
+#endif
     // Changed to use flush_buffer() instead of overflow( EOF)
     // which caused improper behavior with std::endl and flush(),
     // bug reported by Vincent Ricard.
@@ -100,6 +137,10 @@ int jnistreambuf::sync()
 
 int jnistreambuf::flush_buffer()
 {
+#ifdef DEBUG
+	cerr << "jnistreambuf::flush_buffer" << endl;
+	//for(char * p=pbase(); p!=pptr(); p++) cerr << *p;
+#endif
     // Separate the writing of the buffer from overflow() and
     // sync() operation.
     int w = pptr() - pbase();

@@ -12,7 +12,7 @@ public:
     virtual int overflow( int c = EOF);
     virtual int underflow();
     virtual int sync();
-	~jnistreambuf() { delete nativeBuffer; }
+	~jnistreambuf();
 private:
 	int flush_buffer();
 	char * nativeBuffer;
