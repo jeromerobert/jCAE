@@ -142,9 +142,9 @@
 /**
  * gp_Dir
  */
-%typemap(jni) gp_Dir, const gp_Dir&  "jdoubleArray"
-%typemap(jtype) gp_Dir, const gp_Dir& "double[]"
-%typemap(jstype) gp_Dir, const gp_Dir& "double[]"
+%typemap(jni) gp_Dir, const gp_Dir&, gp_Dir&  "jdoubleArray"
+%typemap(jtype) gp_Dir, const gp_Dir&, gp_Dir& "double[]"
+%typemap(jstype) gp_Dir, const gp_Dir&, gp_Dir& "double[]"
 
 %typemap(in) gp_Dir, const gp_Dir&
 {
@@ -169,8 +169,8 @@
     $result=XYZtoDoubleArray(jenv, $1.XYZ());
 }
 
-%typemap(javain) gp_Dir, const gp_Dir& "$javainput"
-%typemap(javaout) gp_Dir, const gp_Dir&
+%typemap(javain) gp_Dir, const gp_Dir&, gp_Dir&  "$javainput"
+%typemap(javaout) gp_Dir, const gp_Dir&, gp_Dir&
 {
 	return $jnicall;
 }
@@ -326,6 +326,6 @@ class gp_Trsf
 class gp_Circ
 {
     public:
-    gp_Circ(const gp_Ax2& A2,const Standard_Real Radius);
+    gp_Circ(const gp_Ax2& axis, const Standard_Real radius);
 };
 
