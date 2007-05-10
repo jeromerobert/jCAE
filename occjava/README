@@ -11,6 +11,15 @@ installed like this :
 - make install
 - ant
 
+Mixing libstdc++5 and libstdc++6
+--------------------------------
+Starting from version 0.14.1+r1221 (2007-05-10), using the same g++ version for
+OpenCASCADE and occjava is required. This is due to the addition of STL iostream
+binding. The official binaries of OpenCASCADE 6.2 are built with g++-3.3. If
+you get this compilation warning:
+ld: warning: libstdc++.so.5, needed by XXXXXX, may conflict with libstdc++.so.6
+occjava will crash as soon as you will use the iostream binding.
+
 Note
 ----
 The wrapper may not compile properly with -O2. -fno-strict-aliasing

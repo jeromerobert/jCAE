@@ -101,3 +101,23 @@
 	return $jnicall;
 }
 
+/**
+ * Standard_IStream
+ */
+%typemap(jni) Standard_IStream& "jobject"
+%typemap(jtype) Standard_IStream& "java.nio.channels.ReadableByteChannel"
+%typemap(jstype) Standard_IStream& "java.nio.channels.ReadableByteChannel"
+
+%typemap(in) Standard_IStream&
+%{
+	jnistreambuf buf(jenv, $input);
+	Standard_IStream is(&buf);
+	$1=&is;
+%}
+
+%typemap(javain) Standard_IStream& "$javainput"
+%typemap(javaout) Standard_IStream& 
+{
+	return $jnicall;
+}
+
