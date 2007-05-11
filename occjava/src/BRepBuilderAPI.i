@@ -146,6 +146,7 @@ class BRepBuilderAPI_Sewing
 	%rename(perform) Perform;
 	%rename(sewedShape) SewedShape;
 
+	%rename(load) Load;
 	%rename(nbFreeEdges) NbFreeEdges;
 	%rename(freeEdge) FreeEdge;
 	%rename(nbMultipleEdges) NbMultipleEdges;
