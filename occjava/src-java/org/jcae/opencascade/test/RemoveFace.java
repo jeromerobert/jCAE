@@ -1,4 +1,4 @@
-package test;
+package org.jcae.opencascade.test;
 
 import org.jcae.opencascade.Utilities;
 import org.jcae.opencascade.jni.*;
@@ -7,7 +7,7 @@ import org.jcae.opencascade.jni.*;
  * Remove a face from a cube
  * @author Jerome Robert
  */
-public class Test3
+public class RemoveFace
 {
 	public static void main(String[] args)
 	{
@@ -29,7 +29,7 @@ public class Test3
 		
 		exp=new TopExp_Explorer(cube, TopAbs_ShapeEnum.FACE);
 		exp.next();
-		TopoDS_Shell face=(TopoDS_Shell) exp.current();
+		TopoDS_Face face=(TopoDS_Face) exp.current();
 
 		if(!Utilities.isShapeInShape(shell, face))
 			throw new IllegalStateException();

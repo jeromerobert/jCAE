@@ -1,4 +1,4 @@
-package test;
+package org.jcae.opencascade.test;
 import org.jcae.opencascade.Utilities;
 import org.jcae.opencascade.jni.*;
 
@@ -6,7 +6,7 @@ import org.jcae.opencascade.jni.*;
  * Create a square with an attached free edge
  * @author Jerome Robert
  */
-public class Test1
+public class TopoJunction
 {
 	public static void main(String[] args)
 	{

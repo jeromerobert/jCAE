@@ -1,25 +1,32 @@
-package test;
+package org.jcae.opencascade.test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import org.jcae.opencascade.jni.*;
 
-/*
-import java.awt.*;
+// Packages for 3D display
+/*import java.awt.Container;
+import java.awt.GridLayout;
+import java.awt.Window;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import javax.media.j3d.Transform3D;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
+import javax.vecmath.Matrix4d;
 import org.jcae.viewer3d.PositionListener;
 import org.jcae.viewer3d.View;
+import org.jcae.viewer3d.ViewBehavior;
 import org.jcae.viewer3d.cad.ViewableCAD;
-import org.jcae.viewer3d.cad.occ.OCCProvider;
-*/
+import org.jcae.viewer3d.cad.occ.OCCProvider;*/
+
 
 /**
  * A dirty static class to show what are holes, chamfer and fillet
  * @author Jerome Robert
  */
-public class Test6
+public class HoleFilletChamfer
 {
 	/** Return the list of face owning the given edge */
 	private static TopoDS_Face[] getFace(TopoDS_Shape shape, TopoDS_Edge edge)
@@ -69,9 +76,9 @@ public class Test6
 	
 	private static TopoDS_Shape makeHole(TopoDS_Shape shape)
 	{
-		TopoDS_Shape h1 = createVerticalCylinder(0.05, 0.5, 1.5, 2);
-		TopoDS_Shape h2 = createVerticalCylinder(0.1, 2.5, 1.5, 0.5);
-		TopoDS_Shape h3 = createVerticalCylinder(0.07, 3.5, 1.5, 1.9);
+		TopoDS_Shape h1 = createVerticalCylinder(0.05, 0.4, 0.5, 2);
+		TopoDS_Shape h2 = createVerticalCylinder(0.1, 0.7, 0.5, 0.5);
+		TopoDS_Shape h3 = createVerticalCylinder(0.07, 3.5, 0.5, 1.9);
 		TopoDS_Shape toReturn = new BRepAlgoAPI_Cut(shape, h1).shape();
 		toReturn = new BRepAlgoAPI_Cut(toReturn, h2).shape();		
 		toReturn = new BRepAlgoAPI_Cut(toReturn, h3).shape();		
@@ -97,6 +104,7 @@ public class Test6
 		//displayAll(cuttedBox, fillet.shape(), chamfer.shape(), makeHole(cuttedBox));
 	}
 
+	// 3D display
 	/*private static View view1, view2, view3, view4;
 	
 	private static View createView(TopoDS_Shape shape, Window w)
@@ -109,6 +117,7 @@ public class Test6
 
 			public void positionChanged()
 			{
+				System.out.println(cadView.where());
 				view1.move(cadView.where());
 				view2.move(cadView.where());
 				view3.move(cadView.where());
@@ -118,6 +127,7 @@ public class Test6
 		return cadView;
 	}
 		
+	
 	private static void displayAll(TopoDS_Shape s1, TopoDS_Shape s2, TopoDS_Shape s3, TopoDS_Shape s4)
 	{
 		JFrame cadFrame=new JFrame();			
@@ -133,7 +143,26 @@ public class Test6
 		p.add(view1);
 		p.add(view2);
 		p.add(view3);
-		p.add(view4);		
+		p.add(view4);
+		view4.setMouseMode(ViewBehavior.CLIP_RECTANGLE_MODE);
+		view4.addKeyListener(new KeyAdapter()
+		{
+			public void keyPressed(KeyEvent e)
+			{
+				if(e.getKeyCode()!=KeyEvent.VK_SPACE)
+					return;
+				view4.setMouseMode(ViewBehavior.DEFAULT_MODE);
+				Transform3D t3d=new Transform3D();
+				t3d.set(new Matrix4d(0.807441418753272, -0.12841821107377785, -0.5758012837310318, -9.570716029950235,
+					-0.5857562663771008, -0.2906520518814561, -0.7565784699137629, -13.674618670515233,
+					-0.07019937094913933, 0.948172003278784, -0.30990627698811507, -5.144127106635848,
+					0.0, 0.0, 0.0, 1.0));
+				view1.move(t3d);
+				view2.move(t3d);
+				view3.move(t3d);
+				view4.move(t3d);
+			}
+		});
 		cadFrame.setVisible(true);
 	}*/
 }

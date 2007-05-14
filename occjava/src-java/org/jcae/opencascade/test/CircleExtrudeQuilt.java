@@ -1,4 +1,4 @@
-package test;
+package org.jcae.opencascade.test;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -13,7 +13,7 @@ import org.jcae.viewer3d.cad.ViewableCAD;
 import org.jcae.viewer3d.cad.occ.OCCProvider;*/
 
 /** Test circles, extrude, BRepTools_Quilt */
-public class Test4
+public class CircleExtrudeQuilt
 {
 	/** Easy creation of faces */
 	private static TopoDS_Face createFace(TopoDS_Edge e1)

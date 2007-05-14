@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project basedir="." default="all" name="occjava">
+<project basedir="." default="jar" name="occjava">
     <target name="init">
         <property location="classes" name="classes.dir"/>
         <property location="src-java" name="src.dir"/>
@@ -8,27 +8,50 @@
         <property location="lib/${project.name}.jar" name="jar"/>
     </target>
 
-    <target depends="init" description="Compile" name="compile">
+    <target name="compile" depends="init" description="Compile">
         <mkdir dir="${classes.dir}"/>
-        <javac source="1.4" target="1.4" debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}" excludes="test/**">
-        </javac>
+        <javac source="1.4" target="1.4" debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}">
+			<include name="org/jcae/opencascade/**"/>
+		</javac>
     </target>
 
-    <target depends="init,compile" description="Create a jar file" name="jar">
+    <target name="jar" depends="init,compile" description="Create a jar file" >
         <mkdir dir="lib"/>
-        <jar basedir="${classes.dir}" compress="true" jarfile="${jar}"/>
+        <jar compress="true" jarfile="${jar}">
+			<fileset dir="classes" excludes="org/jcae/opencascade/test/**" />
+			<manifest>
+				<attribute name="Class-Path" value="jcae-viewer3d.jar"/>
+			</manifest>
+		</jar>
     </target>
 
-    <target depends="init,jar" description="Build everything." name="all"/>
+    <target name="jar-test" depends="init,compile" description="Create a jar file" >
+        <mkdir dir="lib"/>
+        <jar compress="true" jarfile="lib/occjava-test.jar">
+			<fileset dir="classes" includes="org/jcae/opencascade/test/**" />
+			<manifest>
+				<attribute name="Main-Class" value="org.jcae.opencascade.test.All"/>
+				<attribute name="Class-Path" value="occjava.jar jcae-viewer3d.jar"/>
+			</manifest>
+		</jar>
+    </target>
 
-    <target depends="init" description="Javadoc for my API." name="javadoc">
+    <target depends="init" description="Javadoc" name="javadoc">
         <mkdir dir="${javadoc.dir}"/>
-        <javadoc destdir="${javadoc.dir}" packagenames="org.jcae.*" access="public">
+        <javadoc destdir="${javadoc.dir}" access="public">
+			<packageset dir="src" defaultexcludes="yes">
+				<include name="org/jcae/opencascade/**"/>
+				<exclude name="org/jcae/opencascade/test/**"/>
+			</packageset>
             <sourcepath>
                 <pathelement location="${src.dir}"/>
             </sourcepath>
         </javadoc>
     </target>
+	
+	<target name="test" description="Run tests" depends="jar-test">
+		<java jar="lib/occjava-test.jar" fork="true"/>
+	</target>
 
     <target name="clean" depends="init" description="Clean all build products." >
 		<delete dir="${classes.dir}"/>
@@ -38,5 +61,20 @@
 			<fileset dir="src-java/org/jcae/opencascade/jni" excludes="BRepOffsetAPI_Sewing.java"/>
 		</delete>
     </target>
+
+	<target name="jar-undo" depends="init" description="jar">
+		<mkdir dir="lib"/>
+        <javac source="1.4" target="1.4" debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}" includes="undo/**">
+			<classpath>
+				<pathelement location="lib/jcae-viewer3d.jar"/>
+			</classpath>
+		</javac>
+		<jar basedir="${classes.dir}" includes="undo/**" compress="true" jarfile="lib/undo.jar">
+			<manifest>
+				<attribute name="Main-Class" value="undo.OccVi"/>
+				<attribute name="Class-Path" value="occjava.jar jcae-viewer3d.jar"/>
+			</manifest>
+		</jar>
+	</target>
 
 </project>

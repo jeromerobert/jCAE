@@ -1,4 +1,4 @@
-package test;
+package org.jcae.opencascade.test;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,7 +8,7 @@ import java.nio.channels.FileChannel;
 import org.jcae.opencascade.jni.*;
 
 /** Test native stream */
-public class Test7
+public class NativeStream
 {
 	public static void main(String[] args)
 	{
@@ -24,7 +24,6 @@ public class Test7
 			BRepTools.read(new TopoDS_Shape(),
 				new FileInputStream(f).getChannel(),new BRep_Builder());
 			TopoDS_Solid solid=(TopoDS_Solid)TopoDS_Shape.downcast(s);
-			System.out.println(solid);
 		}
 		catch(IOException ex)
 		{

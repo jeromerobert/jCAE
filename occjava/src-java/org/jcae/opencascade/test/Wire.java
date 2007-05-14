@@ -1,4 +1,4 @@
-package test;
+package org.jcae.opencascade.test;
 
 import org.jcae.opencascade.Utilities;
 import org.jcae.opencascade.jni.*;
@@ -7,7 +7,7 @@ import org.jcae.opencascade.jni.*;
  * Create a wire from 2 edges
  * @author Jerome Robert
  */
-public class Test2
+public class Wire
 {
 	public static void main(String[] args)
 	{

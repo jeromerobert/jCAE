@@ -1,4 +1,4 @@
-package test;
+package org.jcae.opencascade.test;
 
 import java.util.HashMap;
 import org.jcae.opencascade.jni.*;
@@ -7,7 +7,7 @@ import org.jcae.opencascade.jni.*;
  * Workshop JINA 2006, Finite tilted Grid in front of a cavity
  * @author Jerome Robert and Guillaume Sylvand
  */
-public class Test5
+public class Jina2006
 {
 	// Size of the grid
 	public final static int I_MAX=1;
