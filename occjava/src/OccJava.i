@@ -122,6 +122,9 @@ class TopExp_Explorer
 %{#include "Bnd_Box.hxx"%}
 %typemap(javacode) Bnd_Box
 %{
+    /**
+     * Return the array { Xmin, Ymin, Zmin, Xmax, Ymax, Zmax }
+     */ 
 	public double[] get()
 	{
 		double[] toReturn=new double[6];
@@ -152,7 +155,7 @@ class BRepBndLib
 {
 	public:
 	%rename(add) Add;
-	static void Add(const TopoDS_Shape& S,Bnd_Box& B) ;	
+	static void Add(const TopoDS_Shape& shape,Bnd_Box& bndBox) ;	
 };
 
 /**
