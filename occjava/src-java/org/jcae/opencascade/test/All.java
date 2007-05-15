@@ -8,6 +8,7 @@ public class All
 		Wire.main(args);
 		TopoJunction.main(args);
 		Dimensions.main(args);
+		BRepBuilder.main(args);
 		RemoveFace.main(args);
 		NativeStream.main(args);
 		Jina2006.main(args);
