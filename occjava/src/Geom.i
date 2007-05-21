@@ -81,7 +81,23 @@ class Handle_Geom_Surface: public Handle_Geom_Geometry
 	{
 		return (*self)->Value(U, V);
 	}
+
+	%javamethodmodifiers bounds(double bounds[4]) const "
+	/**
+	 * Return the bounds of the parameters of the surface.
+	 * @param an array of size 4 which will receive {Umin, Umax, Vmin, Vmax}
+	 */
+	public";
+	void bounds(double bounds[4]) const
+	{
+		(*self)->Bounds(bounds[0], bounds[1], bounds[2], bounds[3]);
+	}
 	
+	%javamethodmodifiers bounds(Standard_Real&, Standard_Real&, Standard_Real&, Standard_Real&) const "
+	/**
+	 * @deprecated use bounds(double[]) , it do not need to allocate 4 arrays.
+	 */
+	public";
 	void bounds(Standard_Real& U1,Standard_Real& U2,Standard_Real& V1,Standard_Real& V2) const
 	{
 		(*self)->Bounds(U1,U2,V1,V2);

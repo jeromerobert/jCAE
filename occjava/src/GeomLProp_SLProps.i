@@ -74,9 +74,20 @@ class GeomLProp_SLProps
 	%rename(meanCurvature) MeanCurvature;
 	%rename(gaussianCurvature) GaussianCurvature;
 	%rename(setSurface) SetSurface;
+
 	public:
-	GeomLProp_SLProps(const Standard_Integer N,const Standard_Real Resolution);
-	void SetParameters(const Standard_Real U,const Standard_Real V) ;
+	%javamethodmodifiers GeomLProp_SLProps(const Standard_Integer, const Standard_Real) "
+	/**
+	 * The current point and the derivatives are computed at the same time,
+	 * which allows an optimization of the computation time.
+	 * @param degree The maximum number of derivations to be done (0, 1, or 2).
+	 * For example, to compute only the tangent, N should be equal to 1.
+	 * @param resolution The linear tolerance (it is used to test if a vector is null).
+	 */
+	public";
+
+	GeomLProp_SLProps(const Standard_Integer degree, const Standard_Real resolution);
+	void SetParameters(const Standard_Real u, const Standard_Real v) ;
 	const gp_Pnt& Value() const;
 	const gp_Vec& D1U() ;
 	const gp_Vec& D1V() ;
@@ -92,7 +103,7 @@ class GeomLProp_SLProps
 	Standard_Boolean IsUmbilic() ;
 	Standard_Real MeanCurvature() ;
 	Standard_Real GaussianCurvature() ;
-	void SetSurface(const Handle_Geom_Surface & S) ;	
+	void SetSurface(const Handle_Geom_Surface & S) ;
 };
 
 %extend GeomLProp_SLProps
@@ -116,17 +127,17 @@ class GeomLProp_SLProps
 
 	Standard_Real minCurvature()
 	{
-	    if (!self->IsCurvatureDefined())
+		if (!self->IsCurvatureDefined())
 			return sqrt(-1.0);
-	    else
+		else
 			return self->MinCurvature ();
 	}
 
 	Standard_Real maxCurvature()
 	{
-	    if (!self->IsCurvatureDefined())
+		if (!self->IsCurvatureDefined())
 			return sqrt(-1.0);
-	    else
+		else
 			return self->MaxCurvature ();
 	}
 	
