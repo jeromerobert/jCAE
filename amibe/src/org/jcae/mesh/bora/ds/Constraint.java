@@ -54,7 +54,12 @@ public class Constraint
 	{
 		Constraint ret = new Constraint(g, hypothesis.createInheritedHypothesis(g.getType()));
 		if (old != null)
-			ret.origin = old;
+		{
+			if (old.origin != null)
+				ret.origin = old.origin;
+			else
+				ret.origin = old;
+		}
 		else if (origin != null)
 			ret.origin = origin;
 		else
