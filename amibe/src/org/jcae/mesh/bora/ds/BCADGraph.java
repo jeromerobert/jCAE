@@ -72,7 +72,16 @@ public class BCADGraph
 	public BCADGraph (BModel m, CADShape shape)
 	{
 		model = m;
-		root = new BCADGraphCell(this, shape);
+		if (shape instanceof CADSolid)
+			root = new BCADGraphCell(this, shape, CADShapeEnum.SOLID);
+		else if (shape instanceof CADFace)
+			root = new BCADGraphCell(this, shape, CADShapeEnum.FACE);
+		else if (shape instanceof CADEdge)
+			root = new BCADGraphCell(this, shape, CADShapeEnum.EDGE);
+		else if (shape instanceof CADVertex)
+			root = new BCADGraphCell(this, shape, CADShapeEnum.VERTEX);
+		else
+			root = new BCADGraphCell(this, shape, CADShapeEnum.COMPOUND);
 
 		// Build the whole graph
 		THashMap seen = new THashMap();
@@ -86,7 +95,7 @@ public class BCADGraph
 				CADShape sub = exp.current();
 				if (cadShapeToGraphCell.contains(sub))
 					continue;
-				BCADGraphCell cell = new BCADGraphCell(this, sub);
+				BCADGraphCell cell = new BCADGraphCell(this, sub, cse);
 				cadShapeToGraphCell.put(sub, cell);
 				CADShape r = (CADShape) seen.get(sub);
 				if (r != null)

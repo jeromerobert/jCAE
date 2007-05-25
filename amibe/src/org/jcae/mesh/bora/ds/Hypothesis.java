@@ -21,12 +21,15 @@
 
 package org.jcae.mesh.bora.ds;
 
+import org.jcae.mesh.bora.algo.*;
+import org.jcae.mesh.cad.CADShapeEnum;
 import org.apache.log4j.Logger;
+import java.lang.reflect.Constructor;
 
 public class Hypothesis
 {
 	private static Logger logger = Logger.getLogger(Hypothesis.class);
-	protected String elementType = null;
+	protected HypInterface hyp = HypNoneInstance;
 	protected double lengthMin = -1.0, lengthMax = -1.0, deflection = -1.0;
 	protected boolean lengthBool = false, numberBool = false;
 	protected int numberMin = -1, numberMax = -1;
@@ -35,6 +38,9 @@ public class Hypothesis
 	// Unique identitier
 	private int id = -1;
 	private static int nextId = -1;
+
+	private static Class [] innerClasses = Hypothesis.class.getDeclaredClasses();
+	private static HypNone HypNoneInstance = new HypNone();
 
 	public Hypothesis()
 	{
@@ -55,8 +61,8 @@ public class Hypothesis
 	public void setElement(String e)
 	{
 		checkLock();
-		logger.debug("("+Integer.toHexString(this.hashCode())+") Setting element type to "+e);
-		elementType = e;
+		hyp = getAlgo(e);
+		logger.debug("("+Integer.toHexString(this.hashCode())+") Setting element type to "+e+"  "+hyp.getClass().getName());
 	}
 
 	/**
@@ -66,7 +72,20 @@ public class Hypothesis
 	 */
 	public String getElement()
 	{
-		return elementType;
+		return hyp.getType();
+	}
+
+	/**
+	 * Checks compatibility with geometrical objects.
+	 *
+	 * @param cse geometrical object type
+	 * @return <code>true</code> if this hypothesis can be appplied on
+	 * geometrical objects of a given type, and <code>false</code>
+	 * otherwise.
+	 */
+	public boolean checkCompatibility(CADShapeEnum cse)
+	{
+		return hyp.impliedType(cse) != null;
 	}
 
 	/**
@@ -199,18 +218,221 @@ public class Hypothesis
 			throw new RuntimeException("Cannot modify an Hypothesis after it has been aplied!");
 	}
 
+	private static double combineDouble(double current, double that)
+	{
+		if (current < 0)
+			return that;
+		else if (that < 0 || that > current)
+			return current;
+		else
+			return that;
+	}
+
+	public void combine(Hypothesis that)
+	{
+		String elt = getElement();
+		if (elt == null || !elt.equals(that.getElement()))
+			throw new RuntimeException();
+
+		lengthMin  = combineDouble(lengthMin, that.lengthMin);
+		lengthMax  = combineDouble(lengthMax, that.lengthMax);
+		deflection = combineDouble(deflection, that.deflection);
+		lengthBool |= that.lengthBool;
+	}
+
 	public String toString()
 	{
-		String ret = "Hyp. "+id+"\n";
-		ret += "elementType: "+elementType+"\n";
-		ret += "lengthMin: "+lengthMin+"\n";
-		ret += "lengthMax: "+lengthMax+"\n";
-		ret += "lengthBool: "+lengthBool+"\n";
-		ret += "deflection: "+deflection+"\n";
-		ret += "numberMin: "+numberMin+"\n";
-		ret += "numberMax: "+numberMax+"\n";
-		ret += "numberBool: "+numberBool;
+		String ret = "Hyp. "+id+" elementType: "+hyp.getType();
+		if (lengthMin >= 0.0)
+			ret += " lengthMin: "+lengthMin;
+		if (lengthMax >= 0.0)
+			ret += " lengthMax: "+lengthMax;
+		if (lengthBool)
+			ret += " lengthBool: "+lengthBool;
+		if (deflection >= 0.0)
+			ret += " deflection: "+deflection;
+		if (numberMin >= 0)
+			ret += " numberMin: "+numberMin;
+		if (numberMax >= 0)
+			ret += " numberMax: "+numberMax;
+		if (numberBool)
+			ret += " numberBool: "+numberBool;
 		return ret;
+	}
+
+	public Hypothesis createInheritedHypothesis(CADShapeEnum cse)
+	{
+		Hypothesis ret = new Hypothesis();
+		ret.lengthMin   = lengthMin;
+		ret.lengthMax   = lengthMax;
+		ret.lengthBool  = lengthBool;
+		ret.deflection  = deflection;
+		ret.hyp         = getAlgo(hyp.impliedType(cse));
+		return ret;
+	}
+
+	public AlgoInterface findAlgorithm(CADShapeEnum cse)
+	{
+		AlgoInterface ret = null;
+		double targetLength = 0.5*(lengthMin+lengthMax);
+		try {
+			if (cse == CADShapeEnum.EDGE)
+			{
+				Class [] typeArgs = new Class[] {double.class, double.class, boolean.class};
+				Constructor cons = UniformLengthDeflection1d.class.getConstructor(typeArgs);
+				ret = (AlgoInterface) cons.newInstance(new Object [] {new Double(targetLength), new Double(deflection), Boolean.valueOf(true)});
+			}
+			else if (cse == CADShapeEnum.FACE)
+			{
+				Class [] typeArgs = new Class[] {double.class, double.class, boolean.class, boolean.class};
+				Constructor cons = Basic2d.class.getConstructor(typeArgs);
+				ret = (AlgoInterface) cons.newInstance(new Object [] {new Double(targetLength), new Double(deflection), Boolean.valueOf(true), Boolean.valueOf(true)});
+			}
+			else if (cse == CADShapeEnum.SOLID)
+			{
+				Class [] typeArgs = new Class[] {double.class};
+				Constructor cons = TetGen.class.getConstructor(typeArgs);
+				ret = (AlgoInterface) cons.newInstance(new Object [] {new Double(targetLength)});
+				if (!ret.isAvailable())
+					logger.error("TetGen not available!");
+				/*
+				Constructor cons = Netgen.class.getConstructor(typeArgs);
+				ret = (AlgoInterface) cons.newInstance(new Object [] {new Double(targetLength)});
+				if (!ret.isAvailable())
+					logger.error("Netgen not available!");
+				*/
+			}
+		} catch (Exception ex)
+		{
+			ex.printStackTrace();
+			System.exit(1);
+		}
+		return ret;
+	}
+
+	public static interface HypInterface
+	{
+		public String impliedType(CADShapeEnum d);
+		public String getType();
+		public CADShapeEnum dim();
+	}
+
+	private static HypInterface getAlgo(String elt)
+	{
+		HypInterface h = HypNoneInstance;
+		if (elt == null)
+			return h;
+		try {
+			for (int i = 0; i < innerClasses.length; i++)
+			{
+				if (innerClasses[i].getName().equals(Hypothesis.class.getName()+"$Hyp"+elt))
+					h = (HypInterface) innerClasses[i].newInstance();
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			h = HypNoneInstance;
+		};
+		return h;
+	}
+
+	public static class HypNone implements HypInterface
+	{
+		public CADShapeEnum dim()
+		{
+			return null;
+		}
+		public String getType()
+		{
+			return null;
+		}
+		public String impliedType(CADShapeEnum d)
+		{
+			return null;
+		}
+	}
+	public static class HypV1 implements HypInterface
+	{
+		public CADShapeEnum dim()
+		{
+			return CADShapeEnum.VERTEX;
+		}
+		public String getType()
+		{
+			return "V1";
+		}
+		public String impliedType(CADShapeEnum d)
+		{
+			if (d == CADShapeEnum.VERTEX)
+				return getType();
+			else
+				return null;
+		}
+	}
+	public static class HypE2 implements HypInterface
+	{
+		public CADShapeEnum dim()
+		{
+			return CADShapeEnum.EDGE;
+		}
+		public String getType()
+		{
+			return "E2";
+		}
+		public String impliedType(CADShapeEnum d)
+		{
+			if (d == CADShapeEnum.VERTEX)
+				return "V1";
+			else if (d == CADShapeEnum.EDGE)
+				return getType();
+			else
+				return null;
+		}
+	}
+	public static class HypT3 implements HypInterface
+	{
+		public CADShapeEnum dim()
+		{
+			return CADShapeEnum.FACE;
+		}
+		public String getType()
+		{
+			return "T3";
+		}
+		public String impliedType(CADShapeEnum d)
+		{
+			if (d == CADShapeEnum.VERTEX)
+				return "V1";
+			else if (d == CADShapeEnum.EDGE)
+				return "E2";
+			else if (d == CADShapeEnum.FACE)
+				return getType();
+			else
+				return null;
+		}
+	}
+	public static class HypT4 implements HypInterface
+	{
+		public CADShapeEnum dim()
+		{
+			return CADShapeEnum.SOLID;
+		}
+		public String getType()
+		{
+			return "T4";
+		}
+		public String impliedType(CADShapeEnum d)
+		{
+			if (d == CADShapeEnum.VERTEX)
+				return "V1";
+			else if (d == CADShapeEnum.EDGE)
+				return "E2";
+			else if (d == CADShapeEnum.FACE)
+				return "T3";
+			else if (d == CADShapeEnum.SOLID)
+				return getType();
+			else
+				return null;
+		}
 	}
 
 }

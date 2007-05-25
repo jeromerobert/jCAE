@@ -182,25 +182,23 @@ public class BModel
 	public void computeConstraints()
 	{
 		BCADGraphCell root = cad.getRootCell();
-		// Compute implicit constraints
-		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
+		for (Iterator its = root.shapesExplorer(CADShapeEnum.SOLID); its.hasNext(); )
 		{
-			CADShapeEnum cse = (CADShapeEnum) itcse.next();
-			for (Iterator it = root.shapesExplorer(cse); it.hasNext(); )
-			{
-				BCADGraphCell cell = (BCADGraphCell) it.next();
-				cell.addImplicitConstraints();
-			}
+			BCADGraphCell cell = (BCADGraphCell) its.next();
+			cell.addImplicitConstraints(CADShapeEnum.FACE, true);
+			cell.addImplicitConstraints(CADShapeEnum.EDGE, false);
+			cell.addImplicitConstraints(CADShapeEnum.VERTEX, false);
 		}
-		// Compute all constraints
-		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
+		for (Iterator its = root.shapesExplorer(CADShapeEnum.FACE); its.hasNext(); )
 		{
-			CADShapeEnum cse = (CADShapeEnum) itcse.next();
-			for (Iterator it = root.shapesExplorer(cse); it.hasNext(); )
-			{
-				BCADGraphCell cell = (BCADGraphCell) it.next();
-				cell.combineHypothesis(cse);
-			}
+			BCADGraphCell cell = (BCADGraphCell) its.next();
+			cell.addImplicitConstraints(CADShapeEnum.EDGE, true);
+			cell.addImplicitConstraints(CADShapeEnum.VERTEX, false);
+		}
+		for (Iterator its = root.shapesExplorer(CADShapeEnum.EDGE); its.hasNext(); )
+		{
+			BCADGraphCell cell = (BCADGraphCell) its.next();
+			cell.addImplicitConstraints(CADShapeEnum.VERTEX, true);
 		}
 		state = CONSTRAINTS;
 	}
@@ -215,19 +213,27 @@ public class BModel
 		else if (state != CONSTRAINTS)
 			throw new RuntimeException("Invalid state: "+state);
 		BCADGraphCell root = cad.getRootCell();
-		// Not really needed, will be useful when edge meshing
-		// is rewritten.
-		for (Iterator it = submesh.iterator(); it.hasNext(); )
+		for (Iterator its = root.shapesExplorer(CADShapeEnum.VERTEX); its.hasNext(); )
 		{
-			BSubMesh sm = (BSubMesh) it.next();
-			for (Iterator its = root.shapesExplorer(CADShapeEnum.VERTEX); its.hasNext(); )
+			BCADGraphCell cell = (BCADGraphCell) its.next();
+			for (Iterator itd = cell.discretizationIterator(); itd.hasNext(); )
 			{
-				BCADGraphCell cell = (BCADGraphCell) its.next();
-				if (cell.getMesh(sm) == null)
-					cell.setMesh(sm, cell.getShape());
+				BDiscretization d = (BDiscretization) itd.next();
+				if (d.getMesh() == null)
+					d.setMesh(cell.getShape());
 			}
 		}
 		logger.debug("Discretize edges");
+		for (Iterator its = root.shapesExplorer(CADShapeEnum.EDGE); its.hasNext(); )
+		{
+			BCADGraphCell cell = (BCADGraphCell) its.next();
+			for (Iterator itd = cell.discretizationIterator(); itd.hasNext(); )
+			{
+				BDiscretization d = (BDiscretization) itd.next();
+				d.discretize();
+			}
+		}
+		/*
 		for (Iterator it = submesh.iterator(); it.hasNext(); )
 		{
 			BSubMesh sm = (BSubMesh) it.next();
@@ -246,6 +252,7 @@ public class BModel
 			sm.computeAlgorithms3d();
 		}
 		state = TESSELLATION;
+		*/
 	}
 
 	/**
@@ -278,8 +285,15 @@ public class BModel
 			for (Iterator it = root.shapesExplorer(cse); it.hasNext(); )
 			{
 				BCADGraphCell cell = (BCADGraphCell) it.next();
-				System.out.println(tab+"Shape "+cell);
-				cell.printConstraints(tab+"    + ");
+				boolean first = true;
+				for (Iterator itd = cell.discretizationIterator(); itd.hasNext(); )
+				{
+					BDiscretization d = (BDiscretization) itd.next();
+					if (first)
+						System.out.println(tab+"Shape "+cell);
+					first = false;
+					System.out.println(tab+"    + "+d);
+				}
 			}
 			indent.append("  ");
 		}
@@ -301,11 +315,14 @@ public class BModel
 			for (Iterator it = root.shapesExplorer(cse); it.hasNext(); )
 			{
 				BCADGraphCell cell = (BCADGraphCell) it.next();
-				Constraint cons = cell.getSubMeshConstraint(sm);
-				if (cons != null)
+				for (Iterator itd = cell.discretizationIterator(); itd.hasNext(); )
 				{
-					System.out.println(tab+"Shape "+cell);
-					cell.printConstraints(tab+"    + ");
+					BDiscretization d = (BDiscretization) itd.next();
+					if (d.contains(sm))
+					{
+						System.out.println(tab+"Shape "+cell);
+						System.out.println(tab+"    + "+d);
+					}
 				}
 			}
 			indent.append("  ");

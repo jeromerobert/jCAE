@@ -22,6 +22,7 @@ package org.jcae.mesh.bora.algo;
 
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.bora.ds.BSubMesh;
+import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.mesher.ds.SubMesh1D;
 import org.jcae.mesh.mesher.ds.MEdge1D;
 import org.jcae.mesh.mesher.ds.MNode1D;
@@ -76,16 +77,17 @@ public class UniformLengthDeflection1d implements AlgoInterface
 	 * @return <code>true</code> if this edge was successfully discrtetized,
 	 * <code>false</code> otherwise.
 	 */
-	public boolean compute(BCADGraphCell mesh, BSubMesh s)
+	public boolean compute(BDiscretization d)
 	{
 		int nbPoints;
 		boolean isCircular = false;
 		boolean isDegenerated = false;
 		double[] paramOnEdge;
 		double range[];
-		CADEdge E = (CADEdge) mesh.getShape();
+		BCADGraphCell cell = d.getGraphCell();
+		CADEdge E = (CADEdge) cell.getShape();
 		SubMesh1D submesh1d = new SubMesh1D(E);
-		mesh.setMesh(s, submesh1d);
+		d.setMesh(submesh1d);
 		logger.debug(""+this+"  shape: "+E);
 		
 		ArrayList edgelist = submesh1d.getEdges();
@@ -105,11 +107,9 @@ public class UniformLengthDeflection1d implements AlgoInterface
 				throw new java.lang.RuntimeException("Curve not defined on edge, but this  edhe is not degenrerated.  Something must be wrong.");
 			
 			isDegenerated = true;
-			/*
-			 * Degenerated edges should not be discretized, but then
-			 * their vertices have very low connectivity.  So let
-			 * discretize them until a solution is found.
-			 */
+			// Degenerated edges should not be discretized, but then
+			// their vertices have very low connectivity.  So let
+			// discretize them until a solution is found.
 			range = E.range();
 			nbPoints=2;
 			paramOnEdge = new double[nbPoints];
@@ -181,7 +181,8 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		double param;
 
 		//  First vertex
-		CADVertex GPt = (CADVertex) mesh.getGraph().getByShape(V[0]).getMesh(s);
+		BDiscretization dc = cell.getGraph().getByShape(V[0]).getDiscretizationSubMesh(d.getFirstSubMesh());
+		CADVertex GPt = (CADVertex) dc.getMesh();
 		MNode1D firstNode = new MNode1D(paramOnEdge[0], GPt);
 		n1 = firstNode;
 		n1.isDegenerated(isDegenerated);
@@ -194,7 +195,10 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		{
 			param = paramOnEdge[i+1];
 			if (i == nbPoints - 2)
-				GPt = (CADVertex) mesh.getGraph().getByShape(V[1]).getMesh(s);
+			{
+				dc = cell.getGraph().getByShape(V[1]).getDiscretizationSubMesh(d.getFirstSubMesh());
+				GPt = (CADVertex) dc.getMesh();
+			}
 			n2 = new MNode1D(param, GPt);
 			n2.isDegenerated(isDegenerated);
 			nodelist.add(n2);

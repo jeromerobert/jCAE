@@ -23,6 +23,7 @@ package org.jcae.mesh.bora.algo;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.bora.ds.BSubMesh;
 import org.jcae.mesh.bora.ds.BModel;
+import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.algos2d.*;
 import org.jcae.mesh.amibe.metrics.Metric2D;
@@ -63,12 +64,13 @@ public class Basic2d implements AlgoInterface
 		return o;
 	}
 
-	public boolean compute(BCADGraphCell mesh, BSubMesh s)
+	public boolean compute(BDiscretization d)
 	{
-		CADFace F = (CADFace) mesh.getShape();
+		BCADGraphCell cell = d.getGraphCell();
+		CADFace F = (CADFace) cell.getShape();
 		logger.debug(""+this+"  shape: "+F);
 		Mesh2D m = new Mesh2D(F);
-		mesh.setMesh(s, m);
+		d.setMesh(m);
 		String xmlFile = "jcae1d";
 		Metric2D.setLength(maxlen);
 		Metric3D.setLength(maxlen);
@@ -80,7 +82,7 @@ public class Basic2d implements AlgoInterface
 
 		// Insert interior vertices, if any
 		ArrayList innerV = new ArrayList();
-		for (Iterator it = mesh.shapesIterator(); it.hasNext(); )
+		for (Iterator it = cell.shapesIterator(); it.hasNext(); )
 		{
 			BCADGraphCell sub = (BCADGraphCell) it.next();
 			CADShape subV = sub.getShape();
@@ -90,7 +92,13 @@ public class Basic2d implements AlgoInterface
 				innerV.add(n);
 			}
 		}
-		new Initial(m, mesh.getMesh1D(s), innerV).compute();
+		for (Iterator it = cell.shapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
+		{
+			BCADGraphCell edge = (BCADGraphCell) it.next();
+			BDiscretization dc = edge.getDiscretizationSubMesh(d.getFirstSubMesh());
+		}
+		/*
+		new Initial(m, cell.getMesh1D(s), innerV).compute();
 
 		m.pushCompGeom(3);
 		new Insertion(m, 16.0).compute();
@@ -110,6 +118,7 @@ public class Basic2d implements AlgoInterface
 		BModel model = mesh.getGraph().getModel();
 		MeshWriter.writeObject(m, model.getOutputDir(s), xmlFile, xmlBrepDir, model.getCADFile(), mesh.getId());
 		assert (m.isValid());
+		*/
 		return true;
 	}
 	

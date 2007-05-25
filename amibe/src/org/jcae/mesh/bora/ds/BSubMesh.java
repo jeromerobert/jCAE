@@ -81,6 +81,8 @@ public class BSubMesh
 	private static int freeIndex = 0;
 	//   Unique identitier
 	private int id = -1;
+	//   List of user defined constraints
+	private Collection constraints = new ArrayList();
 	//   List of shapes added to this BSubMesh
 	private Collection setTopShapes = new LinkedHashSet();
 	//   List of children
@@ -112,16 +114,19 @@ public class BSubMesh
 	 */
 	public void add(Constraint cons)
 	{
-		logger.debug("Add constraint "+cons+" to submesh "+id);
-		// Store constraint, this may be useful when debugging
+		if (logger.isDebugEnabled())
+			logger.debug("Add constraint "+cons+" to submesh "+id);
 		model.addConstraint(cons);
+		constraints.add(cons);
 		// Add this Constraint to the CAD cell
 		BCADGraphCell cell = cons.getGraphCell();
 		cell.addSubMeshConstraint(this, cons);
+		/*
 		// For convenience, constraints contain a link to all
 		// BSubMesh instances in which they appear.
 		cons.addSubMesh(this);
 		setTopShapes.add(cell);
+		*/
 	}
 
 	/**
@@ -200,200 +205,6 @@ public class BSubMesh
 		};
 	}
 
-	private boolean needMesh(BCADGraphCell cell)
-	{
-		if (!cell.hasConstraints(this))
-			return false;
-		if (cell.getMesh(this) != null)
-			return false;
-		if (cell.getReversed() != null && cell.getReversed().getMesh(this) != null)
-		{
-			cell.setMesh(this, cell.getReversed().getMesh(this));
-			return false;
-		}
-		return true;
-	}
-
-	public void computeAlgorithms1d()
-	{
-		logger.debug("Submesh nr. "+id);
-		// Edges
-		int nrEdges = 0;
-		for (Iterator it = shapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
-		{
-			BCADGraphCell cell = (BCADGraphCell) it.next();
-			if (cell.hasConstraints(this))
-				nrEdges++;
-		}
-		int cnt = 0;
-		for (Iterator it = shapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
-		{
-			BCADGraphCell cell = (BCADGraphCell) it.next();
-			cnt++;
-			if (!needMesh(cell))
-				continue;
-			logger.debug("Edge "+cnt+"/"+nrEdges);
-			cell.discretize(this);
-			Storage.writeEdge(cell, this, model.getOutputDir(this));
-		}
-	}
-
-	public void computeAlgorithms2d()
-	{
-		logger.info("Submesh nr. "+id);
-		MMesh1D mesh1D = new MMesh1D(model, this);
-		// Faces
-		computeVertexReferences();
-		updateNodeLabels();
-		int nrFaces = 0;
-		for (Iterator it = shapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
-		{
-			BCADGraphCell cell = (BCADGraphCell) it.next();
-			if (cell.hasConstraints(this))
-				nrFaces++;
-		}
-		int cnt = 0;
-		for (Iterator it = shapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
-		{
-			BCADGraphCell cell = (BCADGraphCell) it.next();
-			cnt++;
-			if (!needMesh(cell))
-				continue;
-			logger.info("Face "+cnt+"/"+nrFaces);
-			cell.setMesh1D(this, mesh1D);
-			cell.discretize(this);
-			Storage.writeFace(cell, this, model.getOutputDir(this));
-		}
-	}
-
-	public void computeAlgorithms3d()
-	{
-		// Solids
-		logger.info("Submesh nr. "+id);
-		int nrSolids = 0;
-		for (Iterator it = shapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
-		{
-			BCADGraphCell cell = (BCADGraphCell) it.next();
-			if (!cell.hasConstraints(this))
-				continue;
-			nrSolids++;
-		}
-		if (nrSolids == 0)
-			return;
-		int cnt = 0;
-		for (Iterator it = shapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
-		{
-			BCADGraphCell cell = (BCADGraphCell) it.next();
-			if (!needMesh(cell))
-				continue;
-			cnt++;
-			logger.info("Solid "+cnt+"/"+nrSolids);
-			cell.discretize(this);
-		}
-	}
-
-	/**
-	 * Update node labels.
-	 */
-	private void updateNodeLabels()
-	{
-		logger.debug("Update node labels");
-		//  Resets all labels
-		BCADGraphCell root = model.getGraph().getRootCell();
-		for (Iterator ite = root.shapesExplorer(CADShapeEnum.EDGE); ite.hasNext(); )
-		{
-			BCADGraphCell cell = (BCADGraphCell) ite.next();
-			SubMesh1D submesh1d = (SubMesh1D) cell.getMesh(this);
-			if (submesh1d == null)
-				continue;
-			for (Iterator itn = submesh1d.getNodesIterator(); itn.hasNext(); )
-			{
-				MNode1D n = (MNode1D) itn.next();
-				n.setLabel(0);
-			}
-		}
-		int i = 0;
-		for (Iterator ite = root.shapesExplorer(CADShapeEnum.EDGE); ite.hasNext(); )
-		{
-			BCADGraphCell cell = (BCADGraphCell) ite.next();
-			SubMesh1D submesh1d = (SubMesh1D) cell.getMesh(this);
-			if (submesh1d == null)
-				continue;
-			for (Iterator itn = submesh1d.getNodesIterator(); itn.hasNext(); )
-			{
-				MNode1D n = (MNode1D) itn.next();
-				if (0 == n.getMaster().getLabel())
-				{
-					i++;
-					n.getMaster().setLabel(i);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Duplicates edges so that boundary faces are closed.
-	 * This method must be used after all 1D algorithms have been applied,
-	 * and before any 2D meshing is performed.
-	 *
-	 */
-	private void computeVertexReferences()
-	{
-		logger.debug("Compute vertex references");
-		//  For each topological vertex, compute the list of
-		//  MNode1D objects which are bound to this vertex.
-		BCADGraphCell root = model.getGraph().getRootCell();
-		int nVertex = 0;
-		for (Iterator itn = root.uniqueShapesExplorer(CADShapeEnum.VERTEX); itn.hasNext(); itn.next())
-			nVertex++;
-		THashMap vertex2Ref = new THashMap(nVertex);
-		for (Iterator itn = root.uniqueShapesExplorer(CADShapeEnum.VERTEX); itn.hasNext(); )
-		{
-			BCADGraphCell cell = (BCADGraphCell) itn.next();
-			vertex2Ref.put(cell.getShape(), new ArrayList());
-		}
-		for (Iterator ite = root.shapesExplorer(CADShapeEnum.EDGE); ite.hasNext(); )
-		{
-			BCADGraphCell cell = (BCADGraphCell) ite.next();
-			SubMesh1D submesh1d = (SubMesh1D) cell.getMesh(this);
-			if (submesh1d == null)
-				continue;
-			Iterator itn = submesh1d.getNodesIterator();
-			while (itn.hasNext())
-			{
-				MNode1D pt = (MNode1D) itn.next();
-				CADVertex V = pt.getCADVertex();
-				if (null != V)
-					((ArrayList) vertex2Ref.get(V)).add(pt);
-			}
-		}
-		
-		for (Iterator itn = root.uniqueShapesExplorer(CADShapeEnum.VERTEX); itn.hasNext(); )
-		{
-			BCADGraphCell cell = (BCADGraphCell) itn.next();
-			CADVertex V = (CADVertex) cell.getShape();
-			ArrayList vnodelist = (ArrayList) vertex2Ref.get(V);
-			if (vnodelist.size() <= 1)
-				continue;
-			// Make sure that all MNode1D objects share the same master.
-			MNode1D master = (MNode1D) vnodelist.get(0);
-			master.setMaster(null);
-			for (int i = 1; i<vnodelist.size(); i++)
-				((MNode1D) vnodelist.get(i)).setMaster(master);
-		}
-	}
-
-	public void writeOutput0d(int offset, TIntObjectHashMap nodeMap)
-	{
-		if (!output1d && !output2d && !output3d)
-			return;
-	}
-	public void writeOutput1d(int offset, TIntObjectHashMap nodeMap, TIntObjectHashMap edgeMap)
-	{
-		if (!output1d)
-			return;
-	}
-
 	// Sample test
 	public static void main(String args[])
 	{
@@ -407,22 +218,21 @@ public class BSubMesh
 		solids[1] = (BCADGraphCell) its.next();
 		BCADGraphCell f0 = model.getGraph().getById(7);
 
-		Hypothesis h0 = new Hypothesis();
-		h0.setElement("T3");
-		h0.setLength(0.3);
-
 		Hypothesis h1 = new Hypothesis();
 		h1.setElement("T4");
 		h1.setLength(0.3);
-		//h1.setDeflection(0.05);
 
 		Hypothesis h2 = new Hypothesis();
 		h2.setElement("T4");
 		h2.setLength(0.1);
 
-		Constraint c0 = new Constraint(f0, h0);
+		Hypothesis h3 = new Hypothesis();
+		h3.setElement("T3");
+
+		Constraint c0 = new Constraint(f0, h3);
 		Constraint c1 = new Constraint(solids[0], h1);
 		Constraint c2 = new Constraint(solids[1], h2);
+		Constraint c9 = new Constraint(solids[0], h1);
 
 		BSubMesh submesh0 = model.newMesh();
 		submesh0.add(c1);
@@ -432,9 +242,8 @@ public class BSubMesh
 		submesh1.add(c0);
 
 		model.printAllHypothesis();
-		model.computeConstraints();
+		model.compute();
 		model.printConstraints();
 		model.printConstraints(submesh0);
-		model.printConstraints(submesh1);
 	}
 }

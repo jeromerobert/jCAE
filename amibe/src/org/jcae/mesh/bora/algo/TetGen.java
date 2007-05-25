@@ -22,6 +22,7 @@ package org.jcae.mesh.bora.algo;
 
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.bora.ds.BSubMesh;
+import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.bora.xmldata.Storage;
 import org.jcae.mesh.bora.xmldata.MESHReader;
@@ -84,8 +85,9 @@ public class TetGen implements AlgoInterface
 		return o;
 	}
 
-	public boolean compute(BCADGraphCell root, BSubMesh s)
+	public boolean compute(BDiscretization d)
 	{
+		/*
 		logger.info("Running TetGen "+banner);
 		// root.export(s, "tetgen.poly", ExportMesh.FORMAT_POLY);
 		Mesh m = Storage.readAllFaces(root, s);
@@ -106,6 +108,7 @@ public class TetGen implements AlgoInterface
 			ex.printStackTrace();
 			return false;
 		}
+		*/
 		return true;
 	}
 	

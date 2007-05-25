@@ -31,7 +31,7 @@ public class Constraint
 	private final Hypothesis hypothesis;
 	// List of BSubMesh instances containing this Constraint.
 	private final Collection submesh = new ArrayList();
-	private Constraint origin = null;
+	private Constraint origin;
 
 	// Unique identitier
 	private int id = -1;
@@ -45,13 +45,20 @@ public class Constraint
 		else
 			graphCell = g;
 		hypothesis = h;
+		if (!hypothesis.checkCompatibility(graphCell.getType()))
+			throw new RuntimeException("Element type "+hypothesis.getElement()+" cannot be applied to CAD element of type: "+graphCell.getType()+"   "+h);
 		setId();
 	}
 
-	public Constraint newConstraint(CADShapeEnum d)
+	public Constraint createInheritedConstraint(BCADGraphCell g, Constraint old)
 	{
-		Constraint ret = new Constraint(graphCell, hypothesis);
-		ret.origin = this;
+		Constraint ret = new Constraint(g, hypothesis.createInheritedHypothesis(g.getType()));
+		if (old != null)
+			ret.origin = old;
+		else if (origin != null)
+			ret.origin = origin;
+		else
+			ret.origin = this;
 		return ret;
 	}
 
@@ -61,14 +68,9 @@ public class Constraint
 		id = nextId;
 	}
 
-	public void setOrigin(Constraint c)
+	public int getId()
 	{
-		origin = c;
-	}
-
-	public Constraint getOrigin()
-	{
-		return origin;
+		return id;
 	}
 
 	public BCADGraphCell getGraphCell()
@@ -89,9 +91,10 @@ public class Constraint
 	public String toString()
 	{
 		String ret = "Constraint: "+id;
-		ret += " (hyp "+hypothesis.getId()+", cell "+Integer.toHexString(graphCell.hashCode())+")";
+		ret += " (hyp "+hypothesis+", cell "+Integer.toHexString(graphCell.hashCode())+")";
 		if (origin != null)
 			ret += " ["+origin.id+"]";
 		return ret;
 	}
+
 }
