@@ -1,3 +1,8 @@
+2007-05-30 11:24:50  Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/OEMMViewer.java: In jcae.jar, OTriangle class
+	  has been replaced by VirtualHalfEdge.
+
 2007-04-23 14:59  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/View.java: Fix a division by zero when the

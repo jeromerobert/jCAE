@@ -24,7 +24,8 @@ import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.Storage;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.OTriangle;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
+import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import java.util.Iterator;
 import java.util.Collection;
 import javax.media.j3d.Appearance;
@@ -177,19 +178,18 @@ public class OEMMViewer
 	{
 		Collection triList = mesh.getTriangles();
 		int nrt = 0;
-		OTriangle ot = new OTriangle();
 		for (Iterator it = triList.iterator(); it.hasNext(); )
 		{
 			Triangle t = (Triangle) it.next();
 			if (!t.isReadable())
 				continue;
-			ot.bind(t);
+			AbstractHalfEdge e = t.getAbstractHalfEdge();
 			for (int j = 0; j < 3; j++)
 			{
-				ot.nextOTri();
-				if (!ot.origin().isWritable() && !ot.destination().isWritable())
+				e = e.next();
+				if (!e.origin().isWritable() && !e.destination().isWritable())
 					continue;
-				if (ot.hasAttributes(OTriangle.BOUNDARY))
+				if (e.hasAttributes(VirtualHalfEdge.BOUNDARY))
 					nrt++;
 			}
 		}
@@ -200,16 +200,16 @@ public class OEMMViewer
 			Triangle t = (Triangle) it.next();
 			if (!t.isReadable())
 				continue;
-			ot.bind(t);
+			AbstractHalfEdge e = t.getAbstractHalfEdge();
 			for (int j = 0; j < 3; j++)
 			{
-				ot.nextOTri();
-				if (!ot.origin().isWritable() && !ot.destination().isWritable())
+				e = e.next();
+				if (!e.origin().isWritable() && !e.destination().isWritable())
 					continue;
-				if (ot.hasAttributes(OTriangle.BOUNDARY))
+				if (e.hasAttributes(VirtualHalfEdge.BOUNDARY))
 				{
-					ret[2*i] = ot.origin().getLabel();
-					ret[2*i+1] = ot.destination().getLabel();
+					ret[2*i] = e.origin().getLabel();
+					ret[2*i+1] = e.destination().getLabel();
 					i++;
 				}
 			}
