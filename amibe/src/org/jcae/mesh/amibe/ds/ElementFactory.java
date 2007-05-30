@@ -32,9 +32,18 @@ public class ElementFactory implements ElementFactoryInterface
 
 	public ElementFactory(MeshTraitsBuilder mtb)
 	{
-		vertexTraitsBuilder   = mtb.getVertexTraitsBuilder();
-		halfedgeTraitsBuilder = mtb.getHalfEdgeTraitsBuilder();
-		triangleTraitsBuilder = mtb.getTriangleTraitsBuilder();
+		if (mtb != null)
+		{
+			vertexTraitsBuilder   = mtb.getVertexTraitsBuilder();
+			halfedgeTraitsBuilder = mtb.getHalfEdgeTraitsBuilder();
+			triangleTraitsBuilder = mtb.getTriangleTraitsBuilder();
+		}
+		else
+		{
+			vertexTraitsBuilder   = null;
+			halfedgeTraitsBuilder = null;
+			triangleTraitsBuilder = null;
+		}
 	}
 
 	public AbstractVertex createVertex()

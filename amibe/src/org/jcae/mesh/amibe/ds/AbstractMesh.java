@@ -27,11 +27,6 @@ public class AbstractMesh
 	//  User-defined traits
 	public final MeshTraitsBuilder traitsBuilder;
 	public final Traits traits;
-	public AbstractMesh()
-	{
-		traitsBuilder = null;
-		traits = null;
-	}
 	public AbstractMesh(MeshTraitsBuilder builder)
 	{
 		traitsBuilder = builder;

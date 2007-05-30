@@ -143,8 +143,12 @@ public class Mesh extends AbstractMesh implements Serializable
 	 */
 	public Mesh()
 	{
-		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
-		factory = new ElementFactory(mtb);
+		super(new MeshTraitsBuilder());
+		TriangleTraitsBuilder ttb = new TriangleTraitsBuilder();
+		ttb.addHalfEdge();
+		traitsBuilder.add(ttb);
+		traitsBuilder.addTriangleList();
+		factory = new ElementFactory(traitsBuilder);
 		triangleList = new ArrayList();
 	}
 	
