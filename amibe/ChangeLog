@@ -1,3 +1,8 @@
+Wed May 23 12:01:48 CEST 2007 Ahmed Bennani <ahmed_b@users.sourceforge.net>
+
+	* src/org/jcae/mesh/bora/ds/BDiscretization.java: New class.
+	Most bora data structures are modified to fix previous bugs.
+
 Mon May  7 10:49:16 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/OTriangle.java
