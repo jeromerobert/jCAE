@@ -322,21 +322,37 @@ return null;
 				BCADGraphCell child = (BCADGraphCell) itc.next();
 				if (!recursive && child.getType() != cse)
 					continue;
+				boolean allIntersectionsEmpty = false;
 				BDiscretization discrChild = null;
 				for (Iterator itd = child.discrete.iterator(); itd.hasNext(); )
 				{
 					discrChild = (BDiscretization) itd.next();
 					if (!discr.emptyIntersection(discrChild))
-							break;
+						break;
 					discrChild = null;
+					allIntersectionsEmpty = true;
 				}
 				if (discrChild == null)
 				{
-						discrChild = new BDiscretization(child, null);
-						child.discrete.add(discrChild);
+					discrChild = new BDiscretization(child, null);
+					child.discrete.add(discrChild);
 				}
 				discrChild.combineConstraint(discr);
 				discrChild.addAllSubMeshes(discr);
+				if (!allIntersectionsEmpty)
+				{
+					for (Iterator itd = child.discrete.iterator(); itd.hasNext(); )
+					{
+						BDiscretization otherDiscrChild = (BDiscretization) itd.next();
+						if ((otherDiscrChild != discrChild) && 
+						   (!discrChild.emptyIntersection(otherDiscrChild)))
+						{
+							discrChild.combineConstraint(otherDiscrChild);
+							discrChild.addAllSubMeshes(otherDiscrChild);
+							itd.remove();
+						}
+					}
+				}
 			}
 		}
 	}
