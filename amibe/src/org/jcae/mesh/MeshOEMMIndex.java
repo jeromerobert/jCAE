@@ -62,29 +62,24 @@ public class MeshOEMMIndex
 	}
 	
 	/**
-	 * main method, reads 2 arguments and calls mesh() method
+	 * main method, reads 4 arguments and calls mesh() method
 	 * @param args  an array of String, filename, algorithm type and constraint value
 	 */
 	public static void main(String args[])
 	{
 		if (args.length < 4)
 		{
-			System.out.println("Usage: MeshOEMMIndex level_max tri_max outDir [brep] soupDir");
+			System.out.println("Usage: MeshOEMMIndex soupDir outDir level_max tri_max [brep]");
 			System.exit(0);
 		}
-		Integer lmax = new Integer(args[0]);
-		Integer triangles_max = new Integer(args[1]);
+		String soupDir = args[0];
+		String outDir = args[1];
+		Integer lmax = new Integer(args[2]);
+		Integer triangles_max = new Integer(args[3]);
 		
-		String outDir=args[2];
 		String filename=null;
-		String soupDir;
-		if(args.length==5)
-		{
-			filename=args[3];
-			soupDir=args[4];
-		}
-		else
-			soupDir=args[3];
+		if(args.length > 4)
+			filename=args[4];
 
 		check(filename, lmax.intValue(), triangles_max.intValue(), soupDir, outDir);
 	}

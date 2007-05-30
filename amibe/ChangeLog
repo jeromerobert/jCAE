@@ -1,3 +1,8 @@
+Wed May 30 14:06:49 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/MeshOEMMIndex.java: Modify main arguments, to be
+	consistent with Mesher arguments.
+
 Wed May 23 12:01:48 CEST 2007 Ahmed Bennani <ahmed_b@users.sourceforge.net>
 
 	* src/org/jcae/mesh/bora/ds/BDiscretization.java: New class.
