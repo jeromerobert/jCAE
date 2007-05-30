@@ -4,21 +4,27 @@
  P. Cignoni, C. Montani, C. Rocchini and R. Scopigno described in their paper
  <a href="http://vcg.isti.cnr.it/publications/papers/oemm_tvcg.pdf">External
  Memory Management and Simplification of Huge Meshes</a>
- a data structure for out-of-core processing of huge meshes.  The
- <code>org.jcae.mesh.oemm</code> package is a Java implementation of these
- ideas.  Algorithms to build and use this data structure are detailed below.
+ a data structure for out-of-core processing of huge meshes (also called
+ Octree based External Memory Mesh, or OEMM).  The <code>org.jcae.mesh.oemm</code>
+ package is a Java implementation of these ideas.  Algorithms to build and
+ use this data structure are detailed below.
 </p>
 <h2>Building an OEMM</h2>
 <p>
- Input is a non-indexed mesh, also known as a triangle soup.  We have a
- list of triangles, each triangle being represented by the coordinates of
- its three vertices.  We cannot work with indexed triangles because storing
- indices in memory would require lots of RAM.
+ An OEMM structure is designed to handle very large meshes.
+ We cannot work with indexed triangles because storing
+ indices in memory would require lots of RAM.  For this reason, our
+ starting point is a triangle soup, which consists of a sequence of
+ triangles, each triangle being represented by the coordinates of
+ its three vertices and predefined attributes.
+ This triangle soup had been computed for instance by running
+ {@link org.jcae.mesh.Mesher} and setting <code>org.jcae.mesh.Mesher.triangleSoup</code>
+ property to <code>true</code>.
 </p>
 <h3 name="structure">Determination of the octree structure</h3>
 <p>
  An empty {@link org.jcae.mesh.oemm.OEMM} is first created with a given
- maximul depth, and its bounding box is set.  This is needed to transform
+ maximul depth <code>dmax</code>, and its bounding box is set.  This is needed to transform
  double coordinates into integers (and also the other way around), see
  {@link org.jcae.mesh.oemm.OEMM#double2int} and
  {@link org.jcae.mesh.oemm.OEMM#int2double}.
@@ -61,7 +67,14 @@
  to each octant. so dispatched file offset for each octant can be computed,
  Triangles are read a second time from the triangle soup and copied into
  the right block.  This dispatched file is similar to the triangle soup,
- but triangles have been rearranged by octant.
+ but triangles have been sorted by octant.
+</p>
+
+<h4>Indexing vertices and triangles</h4>
+<p>
+ In each octant, triangle soup is replaced by an indexed mesh, and
+ connections to adjacent octants are kept.  This is performed by
+ {@link org.jcae.mesh.oemm.RawStorage#indexOEMM} in two steps.
 </p>
 
 <h3>Indexing internal vertices</h3>
@@ -100,4 +113,25 @@
  and vertices are replaced by their global index (or more precisely by its
  leaf and local indices).
 </p>
+<h2>Examples</h2>
+<p>
+ Creation of a triangle soup:
+</p>
+<pre>
+  java -Dorg.jcae.mesh.Mesher.triangleSoup=true org.jcae.mesh.Mesher hammer.brep RAW 10 0
+</pre>
+<p>
+ Transformation of a triangle soup (found in file <code>RAW/soup</code>) into an
+ OEMM data structure, stored into directory <code>oemm</code>, with maximal depth
+ set to 5 and at most 1000 triangles by octant:
+</p>
+<pre>
+  java org.jcae.mesh.MeshOEMMIndex RAW oemm 5 1000
+</pre>
+<p>
+ Visualization of an OEMM:
+</p>
+<pre>
+  java org.jcae.mesh.MeshOEMMViewer3d oemm
+</pre>
 </body>
