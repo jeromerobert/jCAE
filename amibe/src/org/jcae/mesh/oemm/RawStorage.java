@@ -71,7 +71,17 @@ public class RawStorage
 		public void processTriangle(int group);
 	}
 
-	public static void readSoup(OEMM oemm, String file, SoupReaderInterface proc)
+	/**
+	 * Reads a triangle soup and executes a procedure on all triangles
+	 * and vertices.
+	 * 
+	 * @param  file  triangle soup file name
+	 * @param  proc  a {@link SoupReaderInterface} instance, its
+	 *  {@link SoupReaderInterface#processVertex} method is called for each
+	 *  vertex, and {@link SoupReaderInterface#processTriangle} is called
+	 *  for each triangle.
+	 */
+	public static void readSoup(String file, SoupReaderInterface proc)
 	{
 		int [] ijk = new int[3];
 		double [] xyz = new double[3];
@@ -119,7 +129,7 @@ public class RawStorage
 	}
 
 	/**
-	 * Build an OEMM and count the number of triangles which have to be
+	 * Builds an OEMM and counts the number of triangles which have to be
 	 * assigned to each leaf.
 	 *
 	 * A triangle soup is read from the file associated with an OEMM,
@@ -143,7 +153,7 @@ public class RawStorage
 		logger.info("Count triangles");
 		logger.debug("Reading "+soupFile+" and count triangles");
 		CountTriangles ct = new CountTriangles(tree);
-		readSoup(tree, soupFile, ct);
+		readSoup(soupFile, ct);
 		logger.info("Number of triangles: "+ct.getTriangleCount());
 		double [] bbox = ct.getBoundingBox();
 		if (bbox[0] < tree.x0[0] || bbox[3] > tree.x0[0]+tree.xdelta ||
@@ -205,7 +215,7 @@ public class RawStorage
 	}
 
 	/**
-	 * Read a triangle soup and dispatch triangles into an intermediate
+	 * Reads a triangle soup and dispatches triangles into an intermediate
 	 * OEMM data structure.
 	 *
 	 * The data structure has been setup in {@link #countTriangles}, and
@@ -219,7 +229,8 @@ public class RawStorage
 	 * </ol>
 	 * It is followed by the integer coordinates of triangle vertices.
 	 * 
-	 * @param  tree  a raw OEMM
+	 * @param  tree  an OEMM
+	 * @param  soupFile  triangle soup file name
 	 * @param  structFile  output file containing octree data structure
 	 * @param  dataFile  dispatched data file
 	 */
@@ -250,7 +261,7 @@ public class RawStorage
 
 			HashMap buffers = new HashMap();
 			DispatchTriangles dt = new DispatchTriangles(tree, fc, buffers);
-			readSoup(tree, soupFile, dt);
+			readSoup(soupFile, dt);
 
 			logger.debug("Raw OEMM: flush buffers");
 			FlushBuffersProcedure fb_proc = new FlushBuffersProcedure(fc, buffers);
@@ -486,14 +497,14 @@ public class RawStorage
 	}
 	
 	/**
-	 * Extracts a raw OEMM from an intermediate OEMM.
+	 * Extracts an OEMM from an intermediate OEMM.
 	 *
 	 * @param  file  file containing the intermediate OEMM.
 	 * @return OEMM  an OEMM structure.
 	 */
 	private static OEMM loadIntermediate(String file)
 	{
-		logger.debug("Loading intermediate raw OEMM from "+file);
+		logger.debug("Loading intermediate OEMM from "+file);
 		OEMM ret = new OEMM("(null)");
 		try
 		{

@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -21,7 +22,7 @@ package org.jcae.mesh.oemm;
 
 /**
  * Implementation of PAVL binary trees to store locational codes.
- * It is based on excellent Ben Pfaff's GNU libavl http://adtinfo.org/.
+ * It is based on excellent Ben Pfaff's <a href="http://adtinfo.org/.">GNU libavl</a>.
  * In C, the version with parent pointers (pavl) is slightly faster than avl.
  * Even if there does not seem to be much difference in Java, we chose this
  * version.  A major improvement is to use an int array for storing nodes,
@@ -30,25 +31,46 @@ package org.jcae.mesh.oemm;
  */
 public class PAVLTreeIntArrayDup
 {
-	//  A (x,y,z) triplet is stored in an int array of size nrInt.
+	//  An (x,y,z) triplet is stored in an int array of size nrInt.
 	//  It is 4 if coordinates are int, 8 if long.
 	private static final int nrInt = 4;
 	
 	private static final int POS_NIL = -1;
+	/**
+	 * A triplet is stored at location POS_KEY, its size is nrInt.
+	 */
 	private static final int POS_KEY = 0;
+	/**
+	 * An int value is stored at location POS_VALUE.
+	 */
 	private static final int POS_VALUE = nrInt;
+	/**
+	 * Balance factor is stored at location POS_BALANCE.
+	 */
 	private static final int POS_BALANCE = POS_VALUE + 1;
+	/**
+	 * Two pointers to children nodes are stored at location POS_CHILD.
+	 */
 	private static final int POS_CHILD = POS_BALANCE + 1;
+	/**
+	 * A pointer to parent node is stored at location POS_PARENT.
+	 */
 	private static final int POS_PARENT = POS_CHILD + 2;
 	private static final int TOTAL_SIZE = POS_PARENT + 1;
 	private static final int allocNodes = 100000;
 	private int [] work = new int[allocNodes*TOTAL_SIZE];
 	
-	// Root tree
+	/**
+	 * Root tree.
+	 */
 	private int root = POS_NIL;
-	// Next free index
+	/**
+	 * Next free index
+	 */
 	private int nextIndex = 0;
-	// Temporary array
+	/**
+	 * Temporary array
+	 */
 	private final int [] temp = new int[nrInt];
 	
 	/*
@@ -140,10 +162,10 @@ public class PAVLTreeIntArrayDup
 	}
 	
 	/**
-	 * Insert a node to the tree.
+	 * Inserts a node associated to a value into the tree.
 	 *
 	 * @param ijk    integer coordinates
-	 * @param value  node index
+	 * @param value  node value
 	 * @return if the node is already present, returns its associated value,
 	 *         otherwise returns <code>value</code>
 	 */
@@ -367,15 +389,16 @@ public class PAVLTreeIntArrayDup
 	}
 	
 	/**
-	 * Return index node.
+	 * Returns node value.
+	 *
 	 * @param ijk    coordinates
-	 * @return node index, or <code>-1</code> if this key does not
+	 * @return node value, or <code>-1</code> if this key does not
 	 *         exist in the tree.
 	 */
 	public final int get(int [] ijk)
 	{
 		if (root == POS_NIL)
-			return POS_NIL;
+			return -1;
 		int current = root;
 		mortonCode(ijk, temp);
 		while (current != POS_NIL)
@@ -404,11 +427,19 @@ public class PAVLTreeIntArrayDup
 		return 0;
 	}
 	
+	/**
+	 * Returns tree size.
+	 *
+	 * @return tree size.
+	 */
 	public int size()
 	{
-		return (nextIndex + 1) / TOTAL_SIZE;
+		return nextIndex / TOTAL_SIZE;
 	}
 	
+	/**
+	 * Dumps tree content.
+	 */
 	public void show()
 	{
 		System.out.println("Tree");
