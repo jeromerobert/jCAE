@@ -63,7 +63,7 @@ public class MeshOEMMDecimate
 				return OK;
 			TIntHashSet leaves = new TIntHashSet();
 			leaves.add(current.leafIndex);
-			Mesh amesh = Storage.loadNodes(oemm, leaves);
+			Mesh amesh = Storage.loadNodes(oemm, leaves, true);
 			HashMap options = new HashMap();
 			options.put("maxtriangles", ""+(current.tn / scale));
 			System.out.println("Processing octant nr. "+current.leafIndex);
