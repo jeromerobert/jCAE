@@ -196,7 +196,12 @@ public class OEMM implements Serializable
 		proc.init(this);
 		while (true)
 		{
-			int res = proc.preorder(this, octreeStack[l], posStack[l]);
+			int res = 0;
+			int visit = octreeStack[l].isLeaf ? TraversalProcedure.LEAF : TraversalProcedure.PREORDER;
+			if (logger.isDebugEnabled())
+				logger.debug("Found "+(octreeStack[l].isLeaf ? "LEAF" : "PREORDER")+Integer.toHexString(s)+" "+Integer.toHexString(i0)+" "+Integer.toHexString(j0)+" "+Integer.toHexString(k0)+" "+octreeStack[l]);
+			res = proc.action(this, octreeStack[l], posStack[l], visit);
+			logger.debug("  Res; "+res);
 			if (res == TraversalProcedure.ABORT)
 				return false;
 			if (!octreeStack[l].isLeaf && res == TraversalProcedure.OK)
@@ -249,8 +254,8 @@ public class OEMM implements Serializable
 						s <<= 1;
 						l--;
 						if (logger.isDebugEnabled())
-							logger.debug("Found POSTORDER: "+Integer.toHexString(s)+" "+Integer.toHexString(i0)+" "+Integer.toHexString(j0)+" "+Integer.toHexString(k0));
-						res = proc.postorder(this, octreeStack[l], posStack[l]);
+							logger.debug("Found POSTORDER: "+Integer.toHexString(s)+" "+Integer.toHexString(i0)+" "+Integer.toHexString(j0)+" "+Integer.toHexString(k0)+" "+octreeStack[l]);
+						res = proc.action(this, octreeStack[l], posStack[l], TraversalProcedure.POSTORDER);
 						logger.debug("  Res; "+res);
 					}
 					else

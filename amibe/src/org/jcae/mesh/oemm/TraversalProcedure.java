@@ -20,35 +20,46 @@
 
 package org.jcae.mesh.oemm;
 
-import org.apache.log4j.Logger;
 
 /**
- * Abstract class ro implement raw OEMM traversal.
+ * Abstract class to implement OEMM traversal.  Derived classes must define the
+ * {@link #action} method.
  * 
  * @see OEMM#walk
  */
 public abstract class TraversalProcedure
 {
-	private static Logger logger = Logger.getLogger(TraversalProcedure.class);	
-	
+	/**
+	 * Current node is not a leaf and its children have not been processed yet.
+	 */
 	protected static final int PREORDER  = 1;
+	/**
+	 * Current node is not a leaf and its children have already been processed.
+	 */
 	protected static final int POSTORDER = 2;
+	/**
+	 * Current node is a leaf
+	 */
 	protected static final int LEAF      = 3;
 	
+	/**
+	 * Continue tree traversal.
+	 */
 	public static final int OK  = 0;
+	/**
+	 * Abort tree traversal immediately.
+	 */
 	public static final int ABORT = 1;
+	/**
+	 * Do not process children.
+	 */
 	public static final int SKIPCHILD = 2;
-	
-	private int nrNodes = 0;
-	private int nrLeaves = 0;
 	
 	/**
 	 * Method called before traversing the OEMM.
 	 */
 	public void init(OEMM oemm)
 	{
-		nrNodes = 0;
-		nrLeaves = 0;
 	}
 	
 	/**
@@ -56,14 +67,6 @@ public abstract class TraversalProcedure
 	 */
 	public void finish(OEMM oemm)
 	{
-	}
-	
-	/**
-	 * Display statistics about this traversal.
-	 */
-	public final void printStats()
-	{
-		logger.info("Leaves: "+nrLeaves+"   Octants: "+nrNodes);
 	}
 	
 	/**
@@ -78,51 +81,8 @@ public abstract class TraversalProcedure
 	 * @return  ABORT      exit from {@link OEMM#walk} immediately
 	 *          SKIPCHILD  skip current cell (ie do not process its children)
 	 *          OK         process normally
+	 * @see OEMM#walk
 	 */
 	public abstract int action(OEMM o, OEMMNode c, int octant, int visit);
 	
-	/**
-	 * This method is called when descending the tree.
-	 * 
-	 * @param  o       OEMM structure
-	 * @param  c       the current node of the OEMM structure
-	 * @param  octant  the octant number in parent node
-	 */
-	public final int preorder(OEMM o, OEMMNode c, int octant)
-	{
-		int res = 0;
-		nrNodes++;
-		if (c.isLeaf)
-		{
-			nrLeaves++;
-			if (logger.isDebugEnabled())
-				logger.debug("Found LEAF: "+c);
-			res = action(o, c, octant, LEAF);
-		}
-		else
-		{
-			if (logger.isDebugEnabled())
-				logger.debug("Found PREORDER: "+c);
-			res = action(o, c, octant, PREORDER);
-		}
-		logger.debug("  Res; "+res);
-		return res;
-	}
-	
-	/**
-	 * This method is called when ascending the tree, which means that all children
-	 * have been traversed.
-	 * 
-	 * @param  o       OEMM structure
-	 * @param  c       the current node of the OEMM structure
-	 * @param  octant  the octant number in parent node
-	 */
-	public final int postorder(OEMM o, OEMMNode c, int octant)
-	{
-		if (logger.isDebugEnabled())
-			logger.debug("Found POSTORDER: "+c);
-		int res = action(o, c, octant, POSTORDER);
-		logger.debug("  Res; "+res);
-		return res;
-	}
 }
