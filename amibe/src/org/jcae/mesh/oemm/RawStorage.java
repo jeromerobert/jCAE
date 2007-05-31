@@ -45,7 +45,16 @@ import gnu.trove.TIntHashSet;
 import org.apache.log4j.Logger;
 
 /**
- * Convert a triangle soup into an OEMM data structure.
+ * Convert a triangle soup into an OEMM data structure.  The different steps
+ * can be found in {@link org.jcae.mesh.MeshOEMMIndex}, here is a summary:
+ * <ol>
+ *  <li>Initialize an {@link OEMM} instance with desired depth.</li>
+ *  <li>Read triangle soup and count triangle in each OEMM cell.</li>
+ *  <li>Merge adjacent cells when they contain few triangles.</li>
+ *  <li>Copy triangle soup into a dispatched file in which triangles
+ *      are sorted by octants.</li>
+ *  <li>In each octant, write an indexed OEMM data structure.</li>
+ * </ol>
  */
 public class RawStorage
 {
@@ -55,11 +64,13 @@ public class RawStorage
 	private static final int TRIANGLE_SIZE_RAW = 80;
 	//  In dispatched file, a triangle has 9 int coordinates and an int.
 	private static final int TRIANGLE_SIZE_DISPATCHED = 40;
-	//  In intermediate file, a vertex has 3 integer coordiantes
+	//  In intermediate file, a vertex has 3 integer coordiantes and a triangle
+	//  has 2 int[3] arrays and an int.
 	private static final int VERTEX_SIZE_INDEXED = 12;
 	private static final int TRIANGLE_SIZE_INDEXED = 28;
-	private static final int VERTEX_SIZE = 24;
 	// bufferSize = 26880
+	// As TRIANGLE_SIZE_RAW is 2*TRIANGLE_SIZE_DISPATCHED, the latter does not
+	// need to be taken into account
 	private static final int bufferSize = (TRIANGLE_SIZE_RAW * VERTEX_SIZE_INDEXED * TRIANGLE_SIZE_INDEXED);
 	private static ByteBuffer bb = ByteBuffer.allocate(bufferSize);
 	private static ByteBuffer bbt = ByteBuffer.allocate(bufferSize);
@@ -219,7 +230,7 @@ public class RawStorage
 	 * OEMM data structure.
 	 *
 	 * The data structure has been setup in {@link #countTriangles}, and
-	 * willl now be written onto disk as a linear octree.  Each block is
+	 * will now be written onto disk as a linear octree.  Each block is
 	 * composed of a header containing:
 	 * <ol>
 	 *   <li>Block size.</li>
@@ -231,7 +242,7 @@ public class RawStorage
 	 * 
 	 * @param  tree  an OEMM
 	 * @param  soupFile  triangle soup file name
-	 * @param  structFile  output file containing octree data structure
+	 * @param  structFile  output file containing dispatched data structure
 	 * @param  dataFile  dispatched data file
 	 */
 	public static final void dispatch(OEMM tree, String soupFile, String structFile, String dataFile)
@@ -496,19 +507,14 @@ public class RawStorage
 		}
 	}
 	
-	/**
-	 * Extracts an OEMM from an intermediate OEMM.
-	 *
-	 * @param  file  file containing the intermediate OEMM.
-	 * @return OEMM  an OEMM structure.
-	 */
-	private static OEMM loadIntermediate(String file)
+	// TODO: This method may surely be replaced by Storage.readOEMMStructure()
+	private static OEMM readDispatchedStructure(String structFile)
 	{
-		logger.debug("Loading intermediate OEMM from "+file);
+		logger.debug("Loading dispatched OEMM structure from "+structFile);
 		OEMM ret = new OEMM("(null)");
 		try
 		{
-			DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
+			DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(structFile)));
 			int [] ijk = new int[3];
 			int version = bufIn.readInt();
 			assert version == 1;
@@ -540,11 +546,11 @@ public class RawStorage
 		}
 		catch (FileNotFoundException ex)
 		{
-			logger.error("File "+file+" not found");
+			logger.error("File "+structFile+" not found");
 		}
 		catch (IOException ex)
 		{
-			logger.error("I/O error when reading file "+file);
+			logger.error("I/O error when reading file "+structFile);
 		}
 		//  Adjust minIndex and maxIndex values
 		ComputeMinMaxIndicesProcedure cmmi_proc = new ComputeMinMaxIndicesProcedure();
@@ -552,13 +558,19 @@ public class RawStorage
 		return ret;
 	}
 	
-	public static OEMM indexOEMM(String inFile, String outDir)
+	/**
+	 * Transforms dispatched file into an OEMM.
+	 *
+	 * @param  structFile  dispatched file.
+	 * @return outDir  directory in which OEMM structure will be stored.
+	 */
+	public static void indexOEMM(String structFile, String outDir)
 	{
-		OEMM ret = loadIntermediate(inFile);
-		if (logger.isDebugEnabled())
-			ret.printInfos();
 		try
 		{
+			OEMM ret = readDispatchedStructure(structFile);
+			if (logger.isDebugEnabled())
+				ret.printInfos();
 			logger.info("Write octree cells onto disk");
 			OEMM fake = new OEMM(outDir);
 			logger.debug("Store data header on disk");
@@ -596,17 +608,16 @@ public class RawStorage
 		}
 		catch (FileNotFoundException ex)
 		{
-			logger.error("File "+inFile+" not found");
+			logger.error("File "+structFile+" not found");
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
 		catch (IOException ex)
 		{
-			logger.error("I/O error when reading inFile  "+inFile);
+			logger.error("I/O error when reading file  "+structFile);
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
-		return ret;
 	}
 	
 	private static class IndexInternalVerticesProcedure extends TraversalProcedure
@@ -898,6 +909,9 @@ public class RawStorage
 				bbt.clear();
 				IntBuffer bbtI = bbt.asIntBuffer();
 				int remaining = current.tn;
+				// If TRIANGLE_SIZE_INDEXED > TRIANGLE_SIZE_DISPATCHED
+				// the following loop must be fixed to use the larger
+				// value.
 				for (int nblock = (remaining * TRIANGLE_SIZE_DISPATCHED) / bufferSize; nblock >= 0; --nblock)
 				{
 					bb.rewind();
