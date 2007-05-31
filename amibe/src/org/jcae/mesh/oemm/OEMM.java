@@ -26,7 +26,7 @@ import org.apache.log4j.Logger;
 /**
  * This class represents an empty OEMM.
  * 
- * A raw OEMM is a pointer-based octree, but cells do not contain any data.
+ * An OEMM is a pointer-based octree, but cells do not contain any data.
  * Only its spatial structure is considered, and it is assumed that the whole
  * tree can reside in memory.  This class defines the octree structure and
  * how to traverse it.
@@ -38,24 +38,68 @@ import org.apache.log4j.Logger;
  */
 public class OEMM implements Serializable
 {
-	private static final long serialVersionUID = -1375654681644527771L;
+	private static final long serialVersionUID = -745324615207484210L;
 
 	private static Logger logger = Logger.getLogger(OEMM.class);	
 	
+	/**
+	 * Maximal tree depth.
+	 */
 	public static final int MAXLEVEL = 30;
+
+	/**
+	 * Root cell size.
+	 */
 	private static final int gridSize = 1 << MAXLEVEL;
 	
+	/**
+	 * Top-level directory.
+	 */
 	private transient String topDir;
+
+	/**
+	 * Number of leaves.
+	 */
 	private transient int nr_leaves = 0;
+
+	/**
+	 * Total number of cells.
+	 */
 	private transient int nr_cells = 0;
+
+	/**
+	 * Tree depth.
+	 */
 	private transient int depth = 0;
-	// Double-to-integer conversion
+	
+	/**
+	 * Double/integer conversion.  First three values contain coordinates
+	 * of bottom-left corner, and the last one is a scale factor.
+	 * Any coordinate can then been converted from double to integer by this
+	 * formula:
+	 * <pre>
+	 *  I[i] = (D[i] - x0[i]) * x0[3];
+	 * </pre>
+	 * and inverse conversion is
+	 * <pre>
+	 *  D[i] = x0[i] + I[i] / x0[3];
+	 * </pre>
+	 */
 	public double [] x0 = new double[4];
+
+	/**
+	 * Maximal width in a dimension.
+	 */
 	public double xdelta;
 	
+	/**
+	 * Root cell.
+	 */
 	protected transient OEMMNode root = null;
 	
-	// Array of leaves
+	/**
+	 * Array of leaves.
+	 */
 	public transient OEMMNode [] leaves;
 	
 	/**
@@ -84,6 +128,9 @@ public class OEMM implements Serializable
 		}
 	}
 	
+	/**
+	 * Remove all cells from a tree.
+	 */
 	public final void clearNodes()
 	{
 		nr_cells = 0;
@@ -92,6 +139,12 @@ public class OEMM implements Serializable
 		root = null;
 	}
 
+	/**
+	 * Sets object bounding box.  This method computes {@link #x0} and
+	 * {@link #xdelta}.
+	 *
+	 * @param bbox  bounding box
+	 */
 	public final void setBoundingBox(double [] bbox)
 	{
 		clearNodes();
@@ -111,39 +164,73 @@ public class OEMM implements Serializable
 		logger.debug("Lower left corner : ("+x0[0]+", "+x0[1]+", "+x0[2]+")   Bounding box length: "+xdelta);
 	}
 
+	/**
+	 * Returns top-level directory.
+	 *
+	 * @return top-level directory
+	 */
 	public final String getDirectory()
 	{
 		return topDir;
 	}
 	
+	/**
+	 * Sets top-level directory.
+	 *
+	 * @param dir  top-level directory
+	 */
 	public final void setDirectory(String dir)
 	{
 		topDir = dir;
 	}
 	
+	/**
+	 * Returns file name containing {@link OEMM} data structure.
+	 *
+	 * @return file name
+	 */
 	public final String getFileName()
 	{
 		return topDir+java.io.File.separator+"oemm";
 	}
 
+	/**
+	 * Returns number of leaves.
+	 *
+	 * @return number of leaves
+	 */
 	public final int getNumberOfLeaves()
 	{
 		return nr_leaves;
 	}
 
+	/**
+	 * Returns size of deepest cell.
+	 *
+	 * @return size of deepest cell
+	 */
 	protected final int minCellSize()
 	{
 		return (1 << (MAXLEVEL + 1 - depth));
 	}
 
-	protected final int cellSizeByHeight(int h)
+	/**
+	 * Returns size of cells at a given depth.
+	 *
+	 * @param d  cell depth
+	 * @return size of cells at depth d
+	 */
+	protected final int cellSizeByDepth(int d)
 	{
-		if (h < depth)
-			return (1 << (MAXLEVEL + 1 - depth + h));
+		if (d < depth)
+			return (1 << (MAXLEVEL + 1 - depth + d));
 		else
 			return gridSize;
 	}
 
+	/**
+	 * Prints tree stats.
+	 */
 	public final void printInfos()
 	{
 		logger.info("Number of leaves: "+nr_leaves);
@@ -152,7 +239,7 @@ public class OEMM implements Serializable
 	}
 	
 	/**
-	 * Convert from double coordinates to integer coordinates.
+	 * Converts from double coordinates to integer coordinates.
 	 * @param p    double coordinates.
 	 * @param ijk  integer coordinates.
 	 */
@@ -163,7 +250,7 @@ public class OEMM implements Serializable
 	}
 	
 	/**
-	 * Convert from integer coordinates to double coordinates.
+	 * Converts from integer coordinates to double coordinates.
 	 * @param ijk  integer coordinates.
 	 * @param p    double coordinates.
 	 */
@@ -174,9 +261,9 @@ public class OEMM implements Serializable
 	}
 	
 	/**
-	 * Traverse the whole OEMM structure.
+	 * Traverses the whole OEMM structure.
 	 *
-	 * @param proc    the procedure called on each octant.
+	 * @param proc    procedure called on each octant.
 	 * @return  <code>true</code> if the whole structure has been traversed,
 	 *          <code>false</code> if traversal aborted.
 	 */
@@ -286,6 +373,11 @@ public class OEMM implements Serializable
 	 *      `-------'    `-------'
 	 *          i          
 	 */
+	/**
+	 * Returns local index of cell containing a given point.
+	 * @param size  size of child cells
+	 * @param ijk   integer coordinates of desired point
+	 */
 	protected static final int indexSubOctree(int size, int [] ijk)
 	{
 		int ret = 0;
@@ -300,7 +392,7 @@ public class OEMM implements Serializable
 	}
 	
 	/**
-	 * Build an octant containing a given point if it does not already exist.
+	 * Builds an octant containing a given point if it does not already exist.
 	 *
 	 * @param ijk     integer coordinates of an interior node
 	 * @return  the octant of the smallest size containing this point.
@@ -312,7 +404,7 @@ public class OEMM implements Serializable
 	}
 	
 	/**
-	 * Insert an octant into the tree structure if it does not already exist.
+	 * Inserts an octant into the tree structure if it does not already exist.
 	 *
 	 * @param current     node being inserted.
 	 */
@@ -326,7 +418,7 @@ public class OEMM implements Serializable
 	}
 	
 	/**
-	 * Return the octant of an OEMM structure containing a given point.
+	 * Returns the octant of an OEMM structure containing a given point.
 	 *
 	 * @param ijk     integer coordinates of an interior node
 	 * @return  the octant of the smallest size containing this point.
@@ -337,7 +429,7 @@ public class OEMM implements Serializable
 	}
 	
 	/**
-	 * Return the octant of an OEMM structure containing a given point.
+	 * Returns the octant of an OEMM structure containing a given point.
 	 *
 	 * @param size     the returned octant must have this size.  If this value is 0,
 	 *                 the deepest octant is returned.
@@ -385,7 +477,6 @@ public class OEMM implements Serializable
 				else
 					current.child[ind] = new OEMMNode(s, ijk);
 				current.child[ind].parent = current;
-				postInsertNode(current.child[ind], level);
 				current.isLeaf = false;
 				nr_cells++;
 				if (s == size)
@@ -396,7 +487,13 @@ public class OEMM implements Serializable
 		return current;
 	}
 
-	protected void createRootNode(OEMMNode node)
+	/**
+	 * Returns the octant of an OEMM structure containing a given point.
+	 *
+	 * @param ijk     integer coordinates of an interior node
+	 * @return  the octant of the smallest size containing this point.
+	 */
+	private void createRootNode(OEMMNode node)
 	{
 		if (node != null && node.size == gridSize)
 		{
@@ -410,10 +507,11 @@ public class OEMM implements Serializable
 		nr_cells++;
 	}
 
-	protected void postInsertNode(OEMMNode node, int level)
-	{
-	}
-	
+	/**
+	 * Merges all children of a given cell.
+	 *
+	 * @param node   cell to be merged
+	 */
 	protected final void mergeChildren(OEMMNode node)
 	{
 		assert !node.isLeaf;
@@ -432,7 +530,7 @@ public class OEMM implements Serializable
 	}
 
 	/**
-	 * Return the adjacent node located at a given point with the
+	 * Returns the adjacent node located at a given point with the
 	 * same size.
 	 *
 	 * @param fromNode start node
@@ -481,6 +579,13 @@ public class OEMM implements Serializable
 		return ret;
 	}
 	
+	/**
+	 * Returns coordinates of all cell corners.
+	 *
+	 * @param onlyLeaves  if set to <code>true</code>, only leaf cells are
+	 * considered, otherwise all cells are considered.
+	 * @return  an array containing corners coordinates
+	 */
 	public double [] getCoords(boolean onlyLeaves)
 	{
 		CoordProcedure proc = new CoordProcedure(onlyLeaves, nr_cells, nr_leaves);
@@ -488,7 +593,7 @@ public class OEMM implements Serializable
 		return proc.coord;
 	}
 	
-	public final class CoordProcedure extends TraversalProcedure
+	private final class CoordProcedure extends TraversalProcedure
 	{
 		public final double [] coord;
 		private int index;

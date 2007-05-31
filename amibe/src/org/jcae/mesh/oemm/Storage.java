@@ -38,17 +38,49 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.apache.log4j.Logger;
 
+/**
+ * This class converts between disk and memory formats.
+ * 
+ */
 public class Storage
 {
 	private static Logger logger = Logger.getLogger(Storage.class);	
 	
+	/**
+	 * Number of bytes per triangle.  On disk a triangle is represented by
+	 * <ul>
+	 *  <li>3 int : leaf numbers for each vertex</li>
+	 *  <li>3 int : local vertex indices</li>
+	 *  <li>1 int : group number</li>
+	 * </ul>
+	 */
 	private static final int TRIANGLE_SIZE = 28;
+
+	/**
+	 * Number of bytes per vertex.  On disk a vertex is represented by 3 double
+	 * (coordinates).
+	 */
 	private static final int VERTEX_SIZE = 24;
-	// bufferSize = 16128
+
+	/**
+	 * Buffer size.  Vertices and triangles are read through buffers to improve
+	 * efficiency, buffer size must be a multiple of {@link #TRIANGLE_SIZE} and
+	 * {@link #VERTEX_SIZE}.
+	 */
 	private static final int bufferSize = 24 * VERTEX_SIZE * TRIANGLE_SIZE;
+	// bufferSize = 16128
 	
+	/**
+	 * Buffer to improve I/O efficiency.
+	 */
 	private static ByteBuffer bb = ByteBuffer.allocate(bufferSize);
 	
+	/**
+	 * Creates an {@link OEMM} instance from its disk representation.
+	 *
+	 * @param dir   directory containing disk representation
+	 * @return an {@link OEMM} instance
+	 */
 	public static OEMM readOEMMStructure(String dir)
 	{
 		OEMM ret = new OEMM(dir);
@@ -87,11 +119,14 @@ public class Storage
 		return ret;
 	}
 	
-	public static Mesh loadNodes(OEMM oemm, TIntHashSet leaves)
-	{
-		return loadNodes(oemm, leaves, true);
-	}
-
+	/**
+	 * Builds a mesh composed of specified octants of an {@link OEMM} instance.
+	 *
+	 * @param oemm  memory data structure
+	 * @param leaves  set of leaves to load
+	 * @param adjacency  whether generated mesh must contain adjacency relations
+	 * @return a {@link Mesh} instance composed of meshes found in specified leaves
+	 */
 	public static Mesh loadNodes(OEMM oemm, TIntHashSet leaves, boolean adjacency)
 	{
 		logger.info("Loading nodes");
@@ -141,6 +176,14 @@ public class Storage
 		return ret;
 	}
 	
+	/**
+	 * Builds a mesh composed of a specified octant and its neighbors.
+	 *
+	 * @param oemm  memory data structure
+	 * @param leaf  leaf number
+	 * @param adjacency  whether generated mesh must contain adjacency relations
+	 * @return a {@link Mesh} instance composed of meshes found in specified leaf
+	 */
 	public static Mesh loadNodeWithNeighbours(OEMM oemm, int leaf, boolean adjacency)
 	{
 		TIntHashSet leaves = new TIntHashSet(oemm.leaves[leaf].adjLeaves.toNativeArray());
