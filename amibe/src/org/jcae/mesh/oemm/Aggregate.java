@@ -133,9 +133,9 @@ public class Aggregate
 		// If a cell is smaller than minCellSize() << MAX_DELTA_LEVEL
 		// depth of adjacent nodes can not differ more than
 		// MAX_DELTA_LEVEL, and checkLevelNeighbors() can safely
-		// be skipped.  The cellSizeByHeight() method ensures that
+		// be skipped.  The cellSizeByDepth() method ensures that
 		// this variable does not overflow.
-		int minSize = oemm.cellSizeByHeight(MAX_DELTA_LEVEL+1);
+		int minSize = oemm.cellSizeByDepth(MAX_DELTA_LEVEL+1);
 		// checkLevelNeighbors() needs a stack of OEMMNode instances,
 		// allocate it here.
 		OEMMNode [] nodeStack = new OEMMNode[4*OEMM.MAXLEVEL];
