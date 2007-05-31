@@ -24,68 +24,97 @@ import java.io.Serializable;
 import gnu.trove.TIntArrayList;
 
 /**
- * This class represents octants of an OEMM.
+ * This class represents octants of an OEMM.  Octants can either be leaves or internal
+ * nodes.
  */
 public class OEMMNode implements Serializable
 {
 	private static final long serialVersionUID = 1632948181488810349L;
 
-	//  Integer coordinates of the lower-left corner
+	/**
+	 * Integer coordinates of lower-left corner.
+	 */
 	public int i0, j0, k0;
-	//  Cell size (= 1 << (MAXLEVEL - level))
+
+	/**
+	 * Cell size.  It is equal to (1 &lt;&lt; (OEMM.MAXLEVEL - depth))
+	 */
 	public int size;
-	//  Number of triangles
+
+	/**
+	 * Total number of triangles found in this node and its children.
+	 */
 	public int tn = 0;
-	//  Number of vertices
+
+	/**
+	 * Number of vertices found in this node and its children.
+	 */
 	public int vn = 0;
-	//  Child list
+
+	/**
+	 * Array of 8 children nodes.
+	 */
 	public transient OEMMNode[] child = new OEMMNode[8];
-	//  Parent node
+
+	/**
+	 * Parent node.
+	 */
 	//  TODO: The parent pointer can be replaced by a stack
 	//        if more room is needed.
 	public transient OEMMNode parent;
-	//  Is this node a leaf?
+
+	/**
+	 * Flag set when this node a leaf.
+	 */
 	public transient boolean isLeaf = true;
-	//  File containing vertices and triangles
+
+	/**
+	 * File containing vertices and triangles.
+	 */
 	public String file;
-	//  Counter
+
+	/**
+	 * Counter.  This is a temporary variable used by some algorithms.
+	 */
 	public transient long counter = 0L;
 	
-	//  Index for leaves
+	/**
+	 * Leaf index in {@link OEMM#leaves}.
+	 */
 	public int leafIndex = -1;
-	//  Nodes are either
-	//    a. leaves and contain
-	//         1. vertices with global indices between minIndex and maxIndex
-	//         2. a list of adjacent leaves with shared data
-	//         3. a leaf index
-	//  or
-	//    b. non-leaves and internal leaves have an index between minIndex
-	//       and maxIndex.
-	//  As described in Cignoni's paper, having maxIndex > minIndex + vn
-	//  for leaves gives room to add vertices without having to reindex
-	//  all nodes.
+
+	/**
+	 * First index of all vertices found in this node and its children.
+	 */
 	public int minIndex = 0;
+
+	/**
+	 * Maximal index allowed for vertices found in this node and its children.
+	 */
 	public int maxIndex = 0;
-	//  List of adjacent leaves with shared data
+
+	/**
+	 * List of adjacent leaves.
+	 */
 	public TIntArrayList adjLeaves;
 	
 	/**
-	 * Create a new leaf.
+	 * Creates a new leaf.
 	 * @param s   cell size
-	 * @param ii  1st coordinate of its lower-left corner
-	 * @param jj  2nd coordinate of its lower-left corner
-	 * @param kk  3rd coordinate of its lower-left corner
+	 * @param i0  1st coordinate of its lower-left corner
+	 * @param j0  2nd coordinate of its lower-left corner
+	 * @param k0  3rd coordinate of its lower-left corner
 	 */
-	public OEMMNode(int s, int ii, int jj, int kk)
+	public OEMMNode(int s, int i0, int j0, int k0)
 	{
 		size = s;
-		i0 = ii;
-		j0 = jj;
-		k0 = kk;
+		this.i0 = i0;
+		this.j0 = j0;
+		this.k0 = k0;
 	}
 	
 	/**
-	 * Create a new leaf.
+	 * Creates a new leaf.
 	 * @param s   cell size
 	 * @param ijk  coordinates of an interior point
 	 */
