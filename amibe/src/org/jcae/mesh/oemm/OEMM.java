@@ -221,7 +221,7 @@ public class OEMM implements Serializable
 	 * @param h  cell height
 	 * @return size of cells at given height
 	 */
-	private final int cellSizeByHeight(int h)
+	public final int cellSizeByHeight(int h)
 	{
 		if (h < depth)
 			return (1 << (MAXLEVEL + 1 - depth + h));
