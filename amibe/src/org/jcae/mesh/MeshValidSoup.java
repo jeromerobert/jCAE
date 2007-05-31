@@ -91,7 +91,7 @@ public class MeshValidSoup
 	{
 		logger.info("Reading triangle soup");
 		ComputeTriangleQuality ctq = new ComputeTriangleQuality();
-		RawStorage.readSoup(null, xmlDir+java.io.File.separator+"soup", ctq);
+		RawStorage.readSoup(xmlDir+java.io.File.separator+"soup", ctq);
 		ctq.printStats();
 	}
 
