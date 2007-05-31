@@ -330,12 +330,12 @@ return null;
 					if (!discr.emptyIntersection(discrChild))
 						break;
 					discrChild = null;
-					allIntersectionsEmpty = true;
 				}
 				if (discrChild == null)
 				{
 					discrChild = new BDiscretization(child, null);
 					child.discrete.add(discrChild);
+					allIntersectionsEmpty = true;
 				}
 				discrChild.combineConstraint(discr);
 				discrChild.addAllSubMeshes(discr);
