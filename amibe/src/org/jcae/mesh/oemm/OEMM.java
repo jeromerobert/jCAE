@@ -215,15 +215,16 @@ public class OEMM implements Serializable
 	}
 
 	/**
-	 * Returns size of cells at a given depth.
+	 * Returns size of cells at a given height.  By convention, height is set
+	 * to 0 for bottom leaves.
 	 *
-	 * @param d  cell depth
-	 * @return size of cells at depth d
+	 * @param h  cell height
+	 * @return size of cells at given height
 	 */
-	protected final int cellSizeByDepth(int d)
+	private final int cellSizeByHeight(int h)
 	{
-		if (d < depth)
-			return (1 << (MAXLEVEL + 1 - depth + d));
+		if (h < depth)
+			return (1 << (MAXLEVEL + 1 - depth + h));
 		else
 			return gridSize;
 	}
