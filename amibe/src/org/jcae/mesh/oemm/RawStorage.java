@@ -167,9 +167,7 @@ public class RawStorage
 		readSoup(soupFile, ct);
 		logger.info("Number of triangles: "+ct.getTriangleCount());
 		double [] bbox = ct.getBoundingBox();
-		if (bbox[0] < tree.x0[0] || bbox[3] > tree.x0[0]+tree.xdelta ||
-		    bbox[1] < tree.x0[1] || bbox[4] > tree.x0[1]+tree.xdelta ||
-		    bbox[2] < tree.x0[2] || bbox[5] > tree.x0[2]+tree.xdelta)
+		if (!tree.checkBoundingBox(bbox))
 		{
 			tree.setBoundingBox(bbox);
 			return false;

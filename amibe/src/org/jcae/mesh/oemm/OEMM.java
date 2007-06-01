@@ -292,6 +292,20 @@ public class OEMM implements Serializable
 	}
 
 	/**
+	 * Checks whether a bounding box lies within current OEMM.
+	 *
+	 * @param bbox  bounding box
+	 * @return <code>true</code> if bounding box lies within current OEMM,
+	 *   <code>false</code> otherwise.
+	 */
+	public final boolean checkBoundingBox(double [] bbox)
+	{
+		return bbox[0] >= x0[0] && bbox[3] <= x0[0]+xdelta &&
+		       bbox[1] >= x0[1] && bbox[4] <= x0[1]+xdelta &&
+		       bbox[2] >= x0[2] && bbox[5] <= x0[2]+xdelta;
+	}
+
+	/**
 	 * Returns top-level directory.
 	 *
 	 * @return top-level directory
