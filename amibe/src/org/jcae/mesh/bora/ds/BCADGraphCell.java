@@ -74,7 +74,7 @@ public class BCADGraphCell
 		{
 			return o.hashCode();
 		}
-		public boolean equals(Object o1, Object o2)               
+		public boolean equals(Object o1, Object o2)
 		{
 			CADShape s1 = ((CADShape) o1);
 			CADShape s2 = ((CADShape) o2);
@@ -339,6 +339,18 @@ return null;
 				}
 				discrChild.combineConstraint(discr);
 				discrChild.addAllSubMeshes(discr);
+				/*
+				 * We want to ensure that in each BCADGraphCell, the intersection of
+				 * the submeshes list for any two different BDiscretization is void. 
+				 *
+				 * If a new BDiscretization has been created, there is no need to 
+				 * perform an additionnal test to enforce this.
+				 * But if we had an intersection between the submesh list of discr and 
+				 * the one of discrChild, we have to check if the combined BDiscretization 
+				 * has an intersection with other child BDiscretization.
+				 * The other child BDiscretization that intersect discrChild has to be removed
+				 * after combination with discrChild.
+				 */
 				if (!allIntersectionsEmpty)
 				{
 					for (Iterator itd = child.discrete.iterator(); itd.hasNext(); )
