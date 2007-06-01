@@ -28,7 +28,7 @@ import org.apache.log4j.Logger;
  * Merge adjacent octree nodes.
  * Children are merged if these two conditions are met: the total number of
  * triangles in merged nodes does not exceed a given threshold, and levels of
- * adjacent nodes do not differ more than MAX_DELTA_LEVEL.
+ * adjacent nodes do not differ more than {@link #MAX_DELTA_LEVEL}.
  * This process is an optimization to have fewer octree nodes.  
 */
 public class Aggregate

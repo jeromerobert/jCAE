@@ -64,13 +64,13 @@ public class RawStorage
 	private static final int TRIANGLE_SIZE_RAW = 80;
 	//  In dispatched file, a triangle has 9 int coordinates and an int.
 	private static final int TRIANGLE_SIZE_DISPATCHED = 40;
-	//  In intermediate file, a vertex has 3 integer coordiantes and a triangle
-	//  has 2 int[3] arrays and an int.
+	//  In intermediate file, a vertex has 3 integer coordiantes and a
+	//  triangle has 2 int[3] arrays and an int.
 	private static final int VERTEX_SIZE_INDEXED = 12;
 	private static final int TRIANGLE_SIZE_INDEXED = 28;
 	// bufferSize = 26880
-	// As TRIANGLE_SIZE_RAW is 2*TRIANGLE_SIZE_DISPATCHED, the latter does not
-	// need to be taken into account
+	// As TRIANGLE_SIZE_RAW is 2*TRIANGLE_SIZE_DISPATCHED, the latter
+	// does not need to be taken into account
 	private static final int bufferSize = (TRIANGLE_SIZE_RAW * VERTEX_SIZE_INDEXED * TRIANGLE_SIZE_INDEXED);
 	private static ByteBuffer bb = ByteBuffer.allocate(bufferSize);
 	private static ByteBuffer bbt = ByteBuffer.allocate(bufferSize);

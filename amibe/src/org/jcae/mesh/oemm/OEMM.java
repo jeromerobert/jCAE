@@ -33,9 +33,8 @@ import org.apache.log4j.Logger;
  * how to traverse it.
  *
  * References:
- * External Memory Management and Simplification of Huge Meshes
- * P. Cignoni, C. Montani, C. Rocchini, R. Scopigno
- * http://vcg.isti.cnr.it/publications/papers/oemm_tvcg.pdf
+ * <a href="http://vcg.isti.cnr.it/publications/papers/oemm_tvcg.pdf">External Memory Management and Simplification of Huge Meshes</a>, by
+ * P. Cignoni, C. Montani, C. Rocchini and R. Scopigno.
  */
 public class OEMM implements Serializable
 {
