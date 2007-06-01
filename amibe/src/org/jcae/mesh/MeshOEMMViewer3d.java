@@ -22,7 +22,6 @@
 package org.jcae.mesh;
 
 import org.jcae.mesh.oemm.OEMM;
-import org.jcae.mesh.oemm.OEMMNode;
 import org.jcae.mesh.oemm.Storage;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
@@ -104,7 +103,7 @@ public class MeshOEMMViewer3d
 						if (leaves.size() == 1)
 						{
 							int idx = leaves.iterator().next();
-							OEMMNode current = oemm.leaves[idx];
+							OEMM.Node current = oemm.leaves[idx];
 							Mesh amesh = Storage.loadNodeWithNeighbours(oemm, idx, false);
 							MinAngleFace qproc = new MinAngleFace();
 							QualityFloat data = new QualityFloat(amesh.getTriangles().size());

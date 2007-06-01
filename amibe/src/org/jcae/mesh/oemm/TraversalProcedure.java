@@ -83,6 +83,6 @@ public abstract class TraversalProcedure
 	 *          OK         process normally
 	 * @see OEMM#walk
 	 */
-	public abstract int action(OEMM o, OEMMNode c, int octant, int visit);
+	public abstract int action(OEMM o, OEMM.Node c, int octant, int visit);
 	
 }

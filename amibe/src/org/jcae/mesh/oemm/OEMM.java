@@ -20,6 +20,7 @@
 
 package org.jcae.mesh.oemm;
 
+import gnu.trove.TIntArrayList;
 import java.io.Serializable;
 import org.apache.log4j.Logger;
 
@@ -38,7 +39,7 @@ import org.apache.log4j.Logger;
  */
 public class OEMM implements Serializable
 {
-	private static final long serialVersionUID = -745324615207484210L;
+	private static final long serialVersionUID = 1185139261716263080L;
 
 	private static Logger logger = Logger.getLogger(OEMM.class);	
 	
@@ -95,12 +96,12 @@ public class OEMM implements Serializable
 	/**
 	 * Root cell.
 	 */
-	protected transient OEMMNode root = null;
+	protected transient Node root = null;
 	
 	/**
 	 * Array of leaves.
 	 */
-	public transient OEMMNode [] leaves;
+	public transient Node [] leaves;
 	
 	/**
 	 * Create an empty OEMM.
@@ -128,6 +129,133 @@ public class OEMM implements Serializable
 		}
 	}
 	
+	/**
+	 * This class represents octants of an OEMM.  Octants can either be leaves
+	 * or internal nodes.
+	 */
+	public static class Node implements Serializable
+	{
+		private static final long serialVersionUID = 4260896424545081301L;
+
+		/**
+		 * Integer coordinates of lower-left corner.
+		 */
+		public int i0, j0, k0;
+
+		/**
+		 * Cell size.  It is equal to (1 &lt;&lt; (OEMM.MAXLEVEL - depth))
+		 */
+		public int size;
+
+		/**
+		 * Total number of triangles found in this node and its children.
+		 */
+		public int tn = 0;
+
+		/**
+		 * Number of vertices found in this node and its children.
+		 */
+		public int vn = 0;
+
+		/**
+		 * Array of 8 children nodes.
+		 */
+		public transient Node[] child = new Node[8];
+
+		/**
+		 * Parent node.
+		 */
+		//  TODO: The parent pointer can be replaced by a stack
+		//        if more room is needed.
+		public transient Node parent;
+
+		/**
+		 * Flag set when this node a leaf.
+		 */
+		public transient boolean isLeaf = true;
+
+		/**
+		 * File containing vertices and triangles.
+		 */
+		public String file;
+
+		/**
+		 * Counter.  This is a temporary variable used by some algorithms.
+		 */
+		public transient long counter = 0L;
+		
+		/**
+		 * Leaf index in {@link OEMM#leaves}.
+		 */
+		public int leafIndex = -1;
+
+		/**
+		 * First index of all vertices found in this node and its children.
+		 */
+		public int minIndex = 0;
+
+		/**
+		 * Maximal index allowed for vertices found in this node and its children.
+		 */
+		public int maxIndex = 0;
+
+		/**
+		 * List of adjacent leaves.
+		 */
+		public TIntArrayList adjLeaves;
+		
+		/**
+		 * Creates a new leaf.
+		 * @param s   cell size
+		 * @param i0  1st coordinate of its lower-left corner
+		 * @param j0  2nd coordinate of its lower-left corner
+		 * @param k0  3rd coordinate of its lower-left corner
+		 */
+		public Node(int s, int i0, int j0, int k0)
+		{
+			size = s;
+			this.i0 = i0;
+			this.j0 = j0;
+			this.k0 = k0;
+		}
+		
+		/**
+		 * Creates a new leaf.
+		 * @param s   cell size
+		 * @param ijk  coordinates of an interior point
+		 */
+		public Node(int s, int [] ijk)
+		{
+			size = s;
+			int mask = ~(s - 1);
+			i0 = ijk[0] & mask;
+			j0 = ijk[1] & mask;
+			k0 = ijk[2] & mask;
+		}
+		
+		private void readObject(java.io.ObjectInputStream s)
+		        throws java.io.IOException, ClassNotFoundException
+		{
+			s.defaultReadObject();
+			child = new Node[8];
+			isLeaf = true;
+		}
+
+		public String toString()
+		{
+			return " IJK "+Integer.toHexString(i0)+" "+Integer.toHexString(j0)+" "+Integer.toHexString(k0)+
+			       " Size=" +Integer.toHexString(size)+
+			       " Leaf?: "+isLeaf+
+			       " NrV="+vn+
+			       " NrT="+tn+
+			       " index="+leafIndex+
+			       " min="+minIndex+
+			       " max="+maxIndex+
+			       " file="+file+
+			       " adj="+adjLeaves;
+		}
+	}
+
 	/**
 	 * Remove all cells from a tree.
 	 */
@@ -279,7 +407,7 @@ public class OEMM implements Serializable
 		int k0 = 0;
 		int [] posStack = new int[depth];
 		posStack[l] = 0;
-		OEMMNode [] octreeStack = new OEMMNode[depth];
+		Node [] octreeStack = new Node[depth];
 		octreeStack[l] = root;
 		proc.init(this);
 		while (true)
@@ -399,7 +527,7 @@ public class OEMM implements Serializable
 	 * @return  the octant of the smallest size containing this point.
 	 *          It is created if it does not exist.
 	 */
-	public final OEMMNode build(int [] ijk)
+	public final Node build(int [] ijk)
 	{
 		return search(minCellSize(), ijk, true, null);
 	}
@@ -409,7 +537,7 @@ public class OEMM implements Serializable
 	 *
 	 * @param current     node being inserted.
 	 */
-	public final void insert(OEMMNode current)
+	public final void insert(Node current)
 	{
 		int [] ijk = new int[3];
 		ijk[0] = current.i0;
@@ -424,7 +552,7 @@ public class OEMM implements Serializable
 	 * @param ijk     integer coordinates of an interior node
 	 * @return  the octant of the smallest size containing this point.
 	 */
-	public final OEMMNode search(int [] ijk)
+	public final Node search(int [] ijk)
 	{
 		return search(0, ijk, false, null);
 	}
@@ -439,7 +567,7 @@ public class OEMM implements Serializable
 	 *                 the desired octant must exist.
 	 * @return  the octant of the desired size containing this point.
 	 */
-	private final OEMMNode search(int size, int [] ijk, boolean create, OEMMNode node)
+	private final Node search(int size, int [] ijk, boolean create, Node node)
 	{
 		if (root == null)
 		{
@@ -454,7 +582,7 @@ public class OEMM implements Serializable
 					depth++;
 			}
 		}
-		OEMMNode current = root;
+		Node current = root;
 		int level = 0;
 		int s = current.size;
 		while (s > size)
@@ -476,7 +604,7 @@ public class OEMM implements Serializable
 				if (s == size && node != null)
 					current.child[ind] = node;
 				else
-					current.child[ind] = new OEMMNode(s, ijk);
+					current.child[ind] = new Node(s, ijk);
 				current.child[ind].parent = current;
 				current.isLeaf = false;
 				nr_cells++;
@@ -494,7 +622,7 @@ public class OEMM implements Serializable
 	 * @param ijk     integer coordinates of an interior node
 	 * @return  the octant of the smallest size containing this point.
 	 */
-	private void createRootNode(OEMMNode node)
+	private void createRootNode(Node node)
 	{
 		if (node != null && node.size == gridSize)
 		{
@@ -504,7 +632,7 @@ public class OEMM implements Serializable
 			root = node;
 		}
 		else
-			root = new OEMMNode(gridSize, 0, 0, 0);
+			root = new Node(gridSize, 0, 0, 0);
 		nr_cells++;
 	}
 
@@ -513,7 +641,7 @@ public class OEMM implements Serializable
 	 *
 	 * @param node   cell to be merged
 	 */
-	protected final void mergeChildren(OEMMNode node)
+	protected final void mergeChildren(Node node)
 	{
 		assert !node.isLeaf;
 		for (int ind = 0; ind < 8; ind++)
@@ -538,7 +666,7 @@ public class OEMM implements Serializable
 	 * @param ijk      integer coordinates of lower-left corner
 	 * @return  the octant of the desired size containing this point.
 	 */
-	public static final OEMMNode searchAdjacentNode(OEMMNode fromNode, int [] ijk)
+	public static final Node searchAdjacentNode(Node fromNode, int [] ijk)
 	{
 		int i1 = ijk[0];
 		if (i1 < 0 || i1 >= gridSize)
@@ -552,7 +680,7 @@ public class OEMM implements Serializable
 		//  Neighbor octant is within OEMM bounds
 		//  First climb tree until an octant enclosing this
 		//  point is encountered.
-		OEMMNode ret = fromNode;
+		Node ret = fromNode;
 		int i2, j2, k2;
 		do
 		{
@@ -607,7 +735,7 @@ public class OEMM implements Serializable
 			else
 				coord = new double[72*nC];
 		}
-		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, Node current, int octant, int visit)
 		{
 			if (visit != PREORDER && visit != LEAF)
 				return OK;

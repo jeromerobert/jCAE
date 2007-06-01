@@ -136,9 +136,9 @@ public class Aggregate
 		// be skipped.  The cellSizeByHeight() method ensures that
 		// this variable does not overflow.
 		int minSize = oemm.cellSizeByHeight(MAX_DELTA_LEVEL+1);
-		// checkLevelNeighbors() needs a stack of OEMMNode instances,
+		// checkLevelNeighbors() needs a stack of OEMM.Node instances,
 		// allocate it here.
-		OEMMNode [] nodeStack = new OEMMNode[4*OEMM.MAXLEVEL];
+		OEMM.Node [] nodeStack = new OEMM.Node[4*OEMM.MAXLEVEL];
 
 		int ret = 0;
 		for (int level = nonLeaves.length - 1; level >= 0; level--)
@@ -147,7 +147,7 @@ public class Aggregate
 			logger.debug(" Checking neighbors at level "+level);
 			for (Iterator it = nonLeaves[level].iterator(); it.hasNext(); )
 			{
-				OEMMNode current = (OEMMNode) it.next();
+				OEMM.Node current = (OEMM.Node) it.next();
 				assert !current.isLeaf;
 				if (current.tn > max)
 					continue;
@@ -170,7 +170,7 @@ public class Aggregate
 		return ret;
 	}
 	
-	private static final boolean checkLevelNeighbors(OEMM oemm, OEMMNode current, OEMMNode [] nodeStack)
+	private static final boolean checkLevelNeighbors(OEMM oemm, OEMM.Node current, OEMM.Node [] nodeStack)
 	{
 		// If an adjacent node has a size lower than minSize, children
 		// nodes must not be merged
@@ -183,7 +183,7 @@ public class Aggregate
 			ijk[0] = current.i0 + neighborOffset[3*i]   * current.size;
 			ijk[1] = current.j0 + neighborOffset[3*i+1] * current.size;
 			ijk[2] = current.k0 + neighborOffset[3*i+2] * current.size;
-			OEMMNode n = oemm.searchAdjacentNode(current, ijk);
+			OEMM.Node n = oemm.searchAdjacentNode(current, ijk);
 			if (n == null || n.isLeaf)
 				continue;
 			assert n.size == current.size;
@@ -196,7 +196,7 @@ public class Aggregate
 			nodeStack[pos] = n;
 			while (pos >= 0)
 			{
-				OEMMNode c = nodeStack[pos];
+				OEMM.Node c = nodeStack[pos];
 				pos--;
 				if (c.tn == 0)
 					continue;
@@ -233,7 +233,7 @@ public class Aggregate
 		{
 			nonLeaves = a;
 		}
-		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
 			if (visit == PREORDER)
 			{

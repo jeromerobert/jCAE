@@ -180,7 +180,7 @@ public class RawStorage
 	
 	private static final class CountTriangles implements SoupReaderInterface
 	{
-		private OEMMNode [] cells = new OEMMNode[3];
+		private OEMM.Node [] cells = new OEMM.Node[3];
 		private OEMM oemm;
 		private long nrTriangles = 0;
 		private int [] ijk = new int[3];
@@ -301,7 +301,7 @@ public class RawStorage
 	
 	private static final class DispatchTriangles implements SoupReaderInterface
 	{
-		private OEMMNode [] cells = new OEMMNode[3];
+		private OEMM.Node [] cells = new OEMM.Node[3];
 		private int [] ijk9 = new int[9];
 		private OEMM oemm;
 		private FileChannel fc;
@@ -341,7 +341,7 @@ public class RawStorage
 		}
 	}
 
-	private static final void addToCell(FileChannel fc, OEMMNode current, Map buffers, int [] ijk, int attribute)
+	private static final void addToCell(FileChannel fc, OEMM.Node current, Map buffers, int [] ijk, int attribute)
 		throws IOException
 	{
 		assert current.counter <= fc.size();
@@ -376,7 +376,7 @@ public class RawStorage
 	private static final class ComputeOffsetProcedure extends TraversalProcedure
 	{
 		private long offset = 0L;
-		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
 			if (visit != LEAF)
 				return OK;
@@ -400,7 +400,7 @@ public class RawStorage
 	private static final class ComputeMinMaxIndicesProcedure extends TraversalProcedure
 	{
 		private int nrLeaves = 0;
-		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
 			if (visit == PREORDER)
 				current.minIndex = nrLeaves;
@@ -424,7 +424,7 @@ public class RawStorage
 			fc = channel;
 			buffers = m;
 		}
-		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
 			if (visit != LEAF)
 				return OK;
@@ -480,7 +480,7 @@ public class RawStorage
 			for (int i = 0; i < 4; i++)
 				out.writeDouble(x0[i]);
 		}
-		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
 			if (visit != LEAF)
 				return OK;
@@ -523,7 +523,7 @@ public class RawStorage
 			byte [] name = new byte[nrbytes+1];
 			bufIn.read(name, 0, nrbytes);
 			ret = new OEMM(new String(name));
-			ret.leaves = new OEMMNode[nrleaves];
+			ret.leaves = new OEMM.Node[nrleaves];
 			for (int i = 0; i < 4; i++)
 				ret.x0[i] = bufIn.readDouble();
 			for (int i = 0; i < nrleaves; i++)
@@ -534,7 +534,7 @@ public class RawStorage
 				ijk[0] = bufIn.readInt();
 				ijk[1] = bufIn.readInt();
 				ijk[2] = bufIn.readInt();
-				OEMMNode n = new OEMMNode(size, ijk);
+				OEMM.Node n = new OEMM.Node(size, ijk);
 				ret.insert(n);
 				n.counter = position;
 				n.tn = nr;
@@ -561,8 +561,8 @@ public class RawStorage
 	/**
 	 * Transforms dispatched file into an OEMM.
 	 *
-	 * @param  structFile  dispatched file.
-	 * @return outDir  directory in which OEMM structure will be stored.
+	 * @param structFile  dispatched file.
+	 * @param outDir  directory in which OEMM structure will be stored.
 	 */
 	public static void indexOEMM(String structFile, String outDir)
 	{
@@ -640,7 +640,7 @@ public class RawStorage
 			super.init(oemm);
 			room = ((1 << 31) - 3*oemm.root.tn) / oemm.getNumberOfLeaves();
 		}
-		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
 			if (current == oemm.root && visit != LEAF)
 				return OK;
@@ -730,7 +730,7 @@ public class RawStorage
 							{
 								// Find its bounding node to update
 								// adjacency relations.
-								OEMMNode node = oemm.search(ijk);
+								OEMM.Node node = oemm.search(ijk);
 								leaf[i] = node.leafIndex;
 								fakeIndex--;
 								pointIndex[i] = outer.insert(ijk, fakeIndex);
@@ -863,7 +863,7 @@ public class RawStorage
 			vertices = new PAVLTreeIntArrayDup[oemm.getNumberOfLeaves()];
 			needed = new boolean[vertices.length];
 		}
-		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
 			if (visit != LEAF)
 				return OK;
@@ -970,7 +970,7 @@ public class RawStorage
 	{
 		private int [] ijk = new int[3];
 		private double [] xyz = new double[3];
-		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
 			if (visit != LEAF)
 				return OK;
@@ -1022,7 +1022,7 @@ public class RawStorage
 		}
 	}
 	
-	private static PAVLTreeIntArrayDup loadVerticesInAVLTreeDup(String outDir, OEMMNode current)
+	private static PAVLTreeIntArrayDup loadVerticesInAVLTreeDup(String outDir, OEMM.Node current)
 	{
 		PAVLTreeIntArrayDup ret = new PAVLTreeIntArrayDup();
 		int [] ijk = new int[3];

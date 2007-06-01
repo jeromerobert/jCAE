@@ -1,3 +1,9 @@
+Fri Jun  1 11:39:21 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/oemm/OEMMNode.java
+	  src/org/jcae/mesh/oemm/OEMM.java: Make OEMMNode an inner class
+	of OEMM, renamed into OEMM.Node.
+
 Wed May 30 14:06:49 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/MeshOEMMIndex.java: Modify main arguments, to be

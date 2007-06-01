@@ -22,7 +22,6 @@ package org.jcae.mesh;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.oemm.OEMM;
-import org.jcae.mesh.oemm.OEMMNode;
 import org.jcae.mesh.oemm.Storage;
 import org.jcae.mesh.oemm.TraversalProcedure;
 import java.util.HashMap;
@@ -57,7 +56,7 @@ public class MeshOEMMDecimate
 		{
 			scale = s;
 		}
-		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
 			if (visit != LEAF)
 				return OK;

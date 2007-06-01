@@ -93,10 +93,10 @@ public class Storage
 			// incremented by OEMM.insert()
 			int nrl = ((Integer) os.readObject()).intValue();
 			ret.clearNodes();
-			ret.leaves = new OEMMNode[nrl];
+			ret.leaves = new OEMM.Node[nrl];
 			for (int i = 0; i < nrl; i++)
 			{
-				OEMMNode n = (OEMMNode) os.readObject();
+				OEMM.Node n = (OEMM.Node) os.readObject();
 				ret.insert(n);
 				ret.leaves[i] = n;
 			}
@@ -202,7 +202,7 @@ public class Storage
 			leaves = set;
 			mesh = m;
 		}
-		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
 			if (visit != LEAF || !leaves.contains(current.leafIndex))
 				return OK;
@@ -275,7 +275,7 @@ public class Storage
 			leaves = set;
 			mesh = m;
 		}
-		public final int action(OEMM oemm, OEMMNode current, int octant, int visit)
+		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
 			if (visit != LEAF || !leaves.contains(current.leafIndex))
 				return OK;
