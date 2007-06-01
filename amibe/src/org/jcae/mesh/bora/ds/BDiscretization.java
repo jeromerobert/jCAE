@@ -85,11 +85,28 @@ public class BDiscretization
 		return (BSubMesh) submesh.iterator().next();
 	}
 
-	public void combineConstraint(BDiscretization parent)
+	/**
+	 * When combining two constraints on the same BCADGraphCell (this happens during
+	 * the phase when the set of needed BDiscretization are created), we want to
+	 * ensure that those two constraints are not both "original" constraints
+	 * set by the user on the same object of the CAD.
+	 */
+	public void combineConstraint(BDiscretization baseDiscr)
 	{
-		Constraint newCons = parent.constraint.createInheritedConstraint(graphCell, constraint);
+		Constraint newCons = baseDiscr.constraint.createInheritedConstraint(graphCell, constraint);
 		if (constraint != null)
-			newCons.getHypothesis().combine(constraint.getHypothesis());
+		{
+			Constraint baseOrigCons = baseDiscr.constraint.originConstraint(graphCell);
+			Constraint localOrigCons = constraint.originConstraint(graphCell);
+			// situation where there are two conflicting user
+			// constraints for the same discretization
+			if (((localOrigCons != null) && (baseOrigCons != null)) && (localOrigCons != baseOrigCons))
+				throw new RuntimeException("Definition of model imposes the same discretization for shape "+graphCell.getShape()+" but there are two different user-defined constraints for this discretization:" + baseOrigCons + " and " + localOrigCons );
+			else
+				newCons.getHypothesis().combine(constraint.getHypothesis());
+			// TODO: in combine(), it will be necessary to detect 
+			// which is the original constraint
+		} 
 		constraint = newCons;
 	}
 

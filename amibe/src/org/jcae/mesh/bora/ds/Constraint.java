@@ -50,9 +50,30 @@ public class Constraint
 		setId();
 	}
 
+	/**
+	 * Returns parent constraint.
+	 * Returns null if the constraint is not considered a resultant 
+	 * constraint of a user constraint on g, or the resultant of the 
+	 * user constraint on g
+	 */
+	public Constraint originConstraint(BCADGraphCell g)
+	{
+		Constraint baseOrigCons = null;
+		if (origin == null)
+		{
+			if (graphCell == g)
+				baseOrigCons = this;
+		}
+		else if (origin.getGraphCell() == graphCell)
+			baseOrigCons = origin;
+
+		return baseOrigCons;
+	}
+
 	public Constraint createInheritedConstraint(BCADGraphCell g, Constraint old)
 	{
 		Constraint ret = new Constraint(g, hypothesis.createInheritedHypothesis(g.getType()));
+
 		if (old != null)
 		{
 			if (old.origin != null)
@@ -86,6 +107,11 @@ public class Constraint
 	public Hypothesis getHypothesis()
 	{
 		return hypothesis;
+	}
+
+	public Constraint getOrigin()
+	{
+		return origin;
 	}
 
 	public void addSubMesh(BSubMesh s)
