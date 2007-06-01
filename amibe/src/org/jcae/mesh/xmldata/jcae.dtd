@@ -1,24 +1,24 @@
-<!-- The root element of a jCAE mesh file -->
+<!-- Root element of a jCAE mesh file -->
 <!ELEMENT jcae (mesh)+>
 
-<!-- The root element of a mesh -->
+<!-- Root element of a mesh -->
 <!ELEMENT mesh (shape?,submesh+)>
 
 <!-- not used -->
 <!ATTLIST mesh id CDATA #IMPLIED>
 
-<!-- geometry used to create the mesh -->
+<!-- Geometry used to create the mesh -->
 <!ELEMENT shape (file)>
 
-<!-- a file -->
+<!-- A file -->
 <!ELEMENT file EMPTY>
 
 <!-- File attributes.
 Allowed values for "format" are doublestream, integerstream, brep.
 The offset attribute is only allowed for doublestream and integerstream.
-doublestream are raw file containing float values written by java.io.DataOutput.writeDouble.
-doublestream are raw file containing int values written by java.io.DataOutput.writeInt.
-brep are http://www.opencascade.org files.
+ + doublestream are raw file containing float values written by java.io.DataOutput.writeDouble.
+ + integerstream are raw file containing int values written by java.io.DataOutput.writeInt.
+ + brep are http://www.opencascade.org files.
 -->
 <!ATTLIST file format CDATA #REQUIRED
                location CDATA #REQUIRED
@@ -30,47 +30,47 @@ brep are http://www.opencascade.org files.
 <!ELEMENT flag EMPTY>
 <!ATTLIST flag value CDATA #REQUIRED>
 
-<!-- An number identifying a face in shape -->
+<!-- A number identifying a face within shape -->
 <!ELEMENT subshape (#PCDATA)>
 
 <!-- Number of coordinates of nodes of the parent submesh -->
 <!ELEMENT dimension (#PCDATA)>
 
-<!-- The nodes of the submesh
-They are read from an "doublestream" file as {x1, y1, z1, x2, y2, z2...}
+<!-- Nodes of submesh
+They are read from a "doublestream" file as {x1, y1, z1, x2, y2, z2...}
 -->
 <!ELEMENT nodes (number,file,references?,labels?)>
 
-<!-- The number of entities in a nodes, beams, group or references element -->
+<!-- Number of entities in a nodes, beams, group or references element -->
 <!ELEMENT number (#PCDATA)>
 
-<!-- References to march border nodes between 2D submeshes -->
+<!-- References to match boundary nodes between 2D submeshes -->
 <!ELEMENT references (number,file)>
 
 <!ELEMENT labels (file)>
 
-<!-- The 1D finit elements of the submesh
+<!-- 1D finite elements of the submesh
 They are read from an "integerstream" file as {n1_1, n1_2, n2_1, n2_2...}
 -->
 <!ELEMENT beams (number,file,labels?)>
 
-<!-- The 3 nodes triangles of the submesh -->
+<!-- Indices of triangle nodes -->
 <!ELEMENT triangles (number,file,normals?,labels?)>
 
-<!-- The normals at nodes -->
+<!-- Normals at nodes -->
 <!ELEMENT normals (file)>
 
 <!ELEMENT result (file)>
 <!ATTLIST result id CDATA #IMPLIED>
 
-<!-- The list of groups -->
+<!-- List of groups -->
 <!ELEMENT groups (group+)>
 
-<!-- The name of a group -->
+<!-- Name of a group -->
 <!ELEMENT name (#PCDATA)>
 
 <!-- A group of triangles
-It is read from an integerstream containing the id of triangles.
+It is read from an integerstream containing triangles IDs.
 -->
 <!ELEMENT group (name, number, file)>
 
