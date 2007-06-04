@@ -176,9 +176,8 @@ public class BCADGraph
 	 * @param  s  CAD shape
 	 * @return  graph cell representing s
 	 */
-	public BCADGraphCell getByShape(Object s)
+	public BCADGraphCell getByShape(CADShape s)
 	{
-		assert s instanceof CADShape;
 		return (BCADGraphCell) cadShapeToGraphCell.get(s);
 	}
 
@@ -226,7 +225,7 @@ public class BCADGraph
 		System.out.println("End list");
 	}
 
-	public static void printShapes(CADShapeEnum cse, Iterator it)
+	private static void printShapes(CADShapeEnum cse, Iterator it)
 	{
 		while (it.hasNext())
 		{
