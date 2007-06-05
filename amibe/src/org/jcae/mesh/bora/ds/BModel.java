@@ -47,14 +47,14 @@ public class BModel
 	//   CAD graph
 	private BCADGraph cad;
 	//   List of submeshes
-	private ArrayList submesh = new ArrayList();
+	private Collection submesh = new ArrayList();
 	//   Geometry file
 	private String cadFile;
 	//   Output variables
 	private String xmlDir;
 	private String xmlFile = "model";
 	private String xmlBrepDir;
-	//   List of all hyposthesis
+	//   List of all constraints
 	private Collection allConstraints = new LinkedHashSet();
 	//   Internal state
 	private int state = 0;

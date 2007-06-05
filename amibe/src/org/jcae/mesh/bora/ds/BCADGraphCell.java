@@ -153,18 +153,23 @@ public class BCADGraphCell
 		System.out.println(parents);
 	}
 
-	// Returns an iterator on geometrical elements of a given type
+	// Returns an iterator on geometrical elements of a given type.
+	// There are no duplicates, but shapes with different orientations
+	// may both be listed.
 	public Iterator shapesExplorer(CADShapeEnum cse)
 	{
 		return shapesExplorer(cse, new THashSet(keepOrientation));
 	}
-	// Returns an iterator on unique geometrical elements of a given type
+	// Returns an iterator on geometrical elements of a given type.
+	// There are no duplicates, shapes with different orientations
+	// are listed only once.
 	public Iterator uniqueShapesExplorer(CADShapeEnum cse)
 	{
 		return shapesExplorer(cse, new THashSet());
 	}
-	// Returns an iterator on all geometrical elements of a given type
-	public Iterator allShapesIterator(CADShapeEnum cse)
+	// Returns an iterator on geometrical elements of a given type.
+	// This list may contain duplicates.
+	public Iterator allShapesExplorer(CADShapeEnum cse)
 	{
 		return shapesExplorer(cse, null);
 	}
@@ -215,7 +220,7 @@ public class BCADGraphCell
 	}
 	public Iterator allShapesIterator()
 	{
-		return shapesIterator(new THashSet());
+		return shapesIterator(null);
 	}
 	private Iterator shapesIterator(final Collection cadShapeSet)
 	{
