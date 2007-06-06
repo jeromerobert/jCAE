@@ -1,3 +1,10 @@
+Wed Jun  6 15:13:33 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/VirtualHalfEdge.java: When OTriangle
+	had been renamed into VirtualHalfEdge, latest fixes in OTriangle had
+	been erroneously dropped due to merge conflicts.  Fix hasAttributes()
+	nextOTriOriginLoop(), nextApexLoop() and canCollapse().
+
 Fri Jun  1 11:39:21 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/oemm/OEMMNode.java

@@ -255,7 +255,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 */
 	public final boolean hasAttributes(int attr)
 	{
-		return (attributes & attr) == attr;
+		return (attributes & attr) != 0;
 	}
 	
 	/**
@@ -678,18 +678,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	
 	public final AbstractHalfEdge nextApexLoop()
 	{
-		if (hasAttributes(OUTER) && hasAttributes(BOUNDARY | NONMANIFOLD))
-		{
-			// Loop clockwise to another boundary
-			// and start again from there.
-			do
-			{
-				prevApex();
-			}
-			while (!hasAttributes(OUTER));
-		}
-		else
-			nextApex();
+		prev();
+		nextOriginLoop();
+		next();
 		return this;
 	}
 	
@@ -708,7 +699,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		nextOTriApexLoop();
 		prevOTri();
 		*/
-		if (hasAttributes(OUTER))
+		if (hasAttributes(OUTER) && hasAttributes(BOUNDARY | NONMANIFOLD))
 		{
 			// Loop clockwise to another boundary
 			// and start again from there.
@@ -948,7 +939,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	{
 		double invalid = -1.0;
 		// Check if there is an adjacent edge
-		if (hasAttributes(OUTER) || hasAttributes(BOUNDARY) || hasAttributes(NONMANIFOLD))
+		if (hasAttributes(OUTER | BOUNDARY | NONMANIFOLD))
 			return invalid;
 		// Check for coplanarity
 		symOTri(this, work[0]);
@@ -1031,7 +1022,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		 */
 		// T1 = (oda)  --> (ona)
 		// T2 = (don)  --> (dan)
-		assert !(hasAttributes(OUTER) || hasAttributes(BOUNDARY) || hasAttributes(NONMANIFOLD));
+		assert !hasAttributes(OUTER | BOUNDARY | NONMANIFOLD);
 		copyOTri(this, work[0]);        // (oda)
 		symOTri(this, work[1]);         // (don)
 		symOTri(this, work[2]);         // (don)
@@ -1114,17 +1105,46 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 */
 	public final boolean canCollapse(AbstractVertex n)
 	{
-		if (!checkInversion((Vertex) n))
-			return false;
-		
-		//  Topology check
-		//  TODO: normally this check could be removed, but the
-		//        following test triggers an error:
-		//    * mesh Scie_shell.brep with deflexion=0.2 aboslute
-		//    * decimate with length=6
-		Collection link = origin().getNeighboursNodes();
-		link.retainAll(destination().getNeighboursNodes());
-		return link.size() < 3;
+		/*  
+		 * Topology check:  (od) cannot be contracted with the pattern
+		 * below, because T1 and T2 are then connected to the same
+		 * vertices.  This happens for instance when trying to remove
+		 * an edge from a tetrahedron.
+		 *
+		 *                 V
+		 *                 +
+		 *                /|\
+		 *               / | \
+		 *              /  |  \
+		 *             /  a|   \
+		 *            /    +    \
+		 *           / T1 / \ T2 \
+		 *          /   /     \   \
+		 *         /  /         \  \
+		 *        / /             \ \
+		 *     o +-------------------+ d
+		 */
+		nextOTri(this, work[0]);
+		prevOTri(this, work[1]);
+		if (!work[0].hasAttributes(OUTER) && work[0].getAdj() != null && work[1].getAdj() != null)
+		{
+			work[0].nextOTriDest();
+			work[1].prevOTriOrigin();
+			if (work[0].origin() == work[1].destination())
+				return false;
+		}
+		symOTri(this, work[0]);
+		prevOTri(work[0], work[1]);
+		work[0].nextOTri();
+		if (!work[0].hasAttributes(OUTER) && work[0].getAdj() != null && work[1].getAdj() != null)
+		{
+			work[0].nextOTriDest();
+			work[1].prevOTriOrigin();
+			if (work[0].origin() == work[1].destination())
+				return false;
+		}
+
+		return checkInversion(n);
 	}
 	
 	private final boolean checkInversion(Vertex n)
