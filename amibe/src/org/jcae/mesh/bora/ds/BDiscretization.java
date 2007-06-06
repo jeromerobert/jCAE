@@ -75,6 +75,11 @@ public class BDiscretization
 		return constraint;
 	}
 
+	public Collection getSubmesh()
+	{
+		return submesh;
+	}
+
 	public void addSubMesh(BSubMesh s)
 	{
 		submesh.add(s);
@@ -127,6 +132,23 @@ public class BDiscretization
 	}
 
 	/**
+	 * Test of inclusion of the submesh list in the submesh list of that
+	 * Check whether a <code>BDiscretization</code> has all of its
+	 * submesh list contained in the parameter's submesh list
+	 * @param that  object being checked.
+	 */
+	public boolean contained(BDiscretization that)
+	{
+		for (Iterator it = submesh.iterator(); it.hasNext(); )
+		{
+			BSubMesh s = (BSubMesh) it.next();
+			if (!(that.submesh.contains(s)))
+				return false;
+		}
+		return true;
+	}
+
+	/**
 	 * Check whether a <code>BDiscretization</code> instance contains
 	 * at least a common <code>BSubMesh</code>.
 	 * @param that  object being checked.
@@ -142,6 +164,39 @@ public class BDiscretization
 				return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Check whether a <code>BDiscretization</code> instance is needed for 
+	 * the definition of a <code>BSubMesh</code>.
+	 */
+	public boolean isSubmeshChild(BSubMesh that)
+	{
+		// if the submesh is not contained in the submesh list, there is no need
+		// to continue further
+		if (!submesh.contains(that))
+			return false;
+		// loop on the constraints of the submesh
+		for (Iterator itc = that.getConstraints().iterator(); itc.hasNext(); )
+		{
+			Constraint cons = (Constraint) itc.next();
+			BCADGraphCell cell = cons.getGraphCell();
+			// loop on the childs of the graphcell of the constraint of the same type
+			for (Iterator it = cell.shapesExplorer(graphCell.getType()); it.hasNext(); )
+			{
+				BCADGraphCell child = (BCADGraphCell) it.next();
+				// loop on the discretizations of the child
+				for (Iterator itd = child.discretizationIterator(); itd.hasNext(); )
+				{
+					BDiscretization discr = (BDiscretization) itd.next();
+
+					if (discr == this)
+					    return true;
+				}
+			}
+
+		}
+		return false;
 	}
 
 	public Object getMesh()

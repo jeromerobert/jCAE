@@ -271,6 +271,142 @@ public class BModel
 	}
 
 	/**
+	 * Prints user defined constraints on the submeshes.
+	 */
+	public void printSubmeshesConstraints()
+	{
+		System.out.println("List of submeshes");
+		for (Iterator it = submesh.iterator(); it.hasNext(); )
+		{
+			BSubMesh subm = (BSubMesh) it.next();
+			System.out.println(" Submesh ("+subm.getId()+") ");
+			for (Iterator itc = subm.getConstraints().iterator(); itc.hasNext(); )
+			{
+				Constraint cons = (Constraint) itc.next();
+				System.out.println("    "+cons);
+			}
+		}
+		System.out.println("End list");
+	}
+
+	/**
+	 * Prints used discretizations on the submeshes.
+	 */
+	public void printSubmeshesDiscretizations()
+	{
+		System.out.println("List of discretizations on submeshes");
+		for (Iterator it = submesh.iterator(); it.hasNext(); )
+		{
+			BSubMesh subm = (BSubMesh) it.next();
+			System.out.println(" Discretizations used on submesh ("+subm.getId()+") ");
+			subm.printSubmeshDiscretizations();
+		}
+		System.out.println("End list");
+	}
+
+	/**
+	 * Print all discretizations.
+	 */
+	private void printDiscretizations()
+	{
+		System.out.println("List of discretizations");
+		BCADGraphCell root = cad.getRootCell();
+		StringBuffer indent = new StringBuffer();
+		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
+		{
+			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			CADShapeEnum normalChildType;
+			if (cse == CADShapeEnum.EDGE)
+				normalChildType = CADShapeEnum.VERTEX;
+			else if (cse == CADShapeEnum.FACE)
+				normalChildType = CADShapeEnum.EDGE;
+			else if (cse == CADShapeEnum.SOLID)
+				normalChildType = CADShapeEnum.FACE;
+			else 
+				normalChildType = CADShapeEnum.VERTEX;
+
+			if ((cse == CADShapeEnum.WIRE) || (cse == CADShapeEnum.SHELL) ||
+			    (cse == CADShapeEnum.COMPSOLID) || (cse == CADShapeEnum.COMPOUND))
+			    continue;
+
+			String tab = indent.toString();
+			for (Iterator itp = root.shapesExplorer(cse); itp.hasNext(); )
+			{
+				BCADGraphCell pcell = (BCADGraphCell) itp.next();
+				System.out.println(tab+"Discretizations of shape "+pcell);
+				for (Iterator itpd = pcell.discretizationIterator(); itpd.hasNext(); )
+				{
+					BDiscretization pd = (BDiscretization) itpd.next();
+					if (pcell == pd.getGraphCell())
+						System.out.println(tab+"    + "+"Used discretization: "+pd.getId()+" with orientation: forward;  element type : "+pd.getConstraint().getHypothesis().getElement()+" constraint : "+pd.getConstraint().getId()+" submesh list : "+pd.getSubmesh());
+					else if (pcell == pd.getGraphCell().getReversed() )
+						System.out.println(tab+"    + "+"Used discretization: "+pd.getId()+" with orientation: reversed; element type : "+pd.getConstraint().getHypothesis().getElement()+" constraint : "+pd.getConstraint().getId()+" submesh list : "+pd.getSubmesh());
+					else
+						throw new RuntimeException("Invalid discretization "+pd+" on shape "+pcell);
+
+ 					if (cse != CADShapeEnum.VERTEX)
+ 					{
+ 						System.out.println(tab+"    + "+"    + "+"discretizations of boundary shapes: ");
+						for (Iterator itc = pcell.shapesExplorer(normalChildType); itc.hasNext(); )
+						{
+							BCADGraphCell ccell = (BCADGraphCell) itc.next();
+							for (Iterator itcd = ccell.discretizationIterator(); itcd.hasNext(); )
+							{
+								BDiscretization cd = (BDiscretization) itcd.next();
+								if (pd.contained(cd))
+								{
+									if (ccell == cd.getGraphCell())
+										System.out.println(tab+"    + "+"    + "+"    + "+"Used discretization: "+cd.getId()+" with orientation: forward;  element type : "+cd.getConstraint().getHypothesis().getElement()+" constraint : "+cd.getConstraint().getId()+" submesh list : "+cd.getSubmesh());
+									else if (ccell == cd.getGraphCell().getReversed() )
+										System.out.println(tab+"    + "+"    + "+"    + "+"Used discretization: "+cd.getId()+" with orientation: reversed; element type : "+cd.getConstraint().getHypothesis().getElement()+" constraint : "+cd.getConstraint().getId()+" submesh list : "+cd.getSubmesh());
+									else
+										throw new RuntimeException("Invalid discretization "+cd+" on shape "+ccell);
+								}
+
+							}
+						}
+						boolean first = true;
+ 						if (cse != CADShapeEnum.EDGE)
+						{
+							for (Iterator itccse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, normalChildType); itccse.hasNext(); )
+							{
+								CADShapeEnum ccse = (CADShapeEnum) itccse.next();
+								for (Iterator itc = pcell.shapesIterator(); itc.hasNext(); )
+								{
+									BCADGraphCell ccell = (BCADGraphCell) itc.next();
+									if (ccell.getType() == ccse)
+									{
+										for (Iterator itcd = ccell.discretizationIterator(); itcd.hasNext(); )
+										{
+											BDiscretization cd = (BDiscretization) itcd.next();
+											if (pd.contained(cd))
+											{
+												if (first)
+												{
+													System.out.println(tab+"    + "+"    + "+"discretizations of additionnal boundary shapes: ");
+													first = false;
+												}
+												if (ccell == cd.getGraphCell())
+													System.out.println(tab+"    + "+"    + "+"    + "+"    + "+"Used discretization: "+cd.getId()+" with orientation: forward;  element type : "+cd.getConstraint().getHypothesis().getElement()+" constraint : "+cd.getConstraint().getId()+" submesh list : "+cd.getSubmesh());
+												else if (ccell == cd.getGraphCell().getReversed() )
+													System.out.println(tab+"    + "+"    + "+"    + "+"    + "+"Used discretization: "+cd.getId()+" with orientation: reversed; element type : "+cd.getConstraint().getHypothesis().getElement()+" constraint : "+cd.getConstraint().getId()+" submesh list : "+cd.getSubmesh());
+												else
+													throw new RuntimeException("Invalid discretization "+cd+" on shape "+ccell);
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			indent.append("  ");
+		}
+		System.out.println("End list");
+	}
+
+	/**
 	 * Prints the constraints applied to geometrical elements of the current mesh.
 	 */
 	public void printConstraints()
@@ -301,7 +437,7 @@ public class BModel
 	}
 
 	/**
-	 * Prints the constraints applied to a given submesh
+	 * Prints the constraints applied to a given submesh.
 	 */
 	public void printConstraints(BSubMesh sm)
 	{

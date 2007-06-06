@@ -107,6 +107,11 @@ public class BSubMesh
 		return id;
 	}
 
+	public Collection getConstraints()
+	{
+		return constraints;
+	}
+
 	/**
 	 * Add a constraint to current submesh
 	 *
@@ -203,6 +208,45 @@ public class BSubMesh
 			{
 			}
 		};
+	}
+
+	/**
+	 * Prints discretizations to a submesh.
+	 * Some cells may appear twice with opposite orientations but the same discretization.
+	 * This is due to the use of shapesExplorer on the root of the CAD. Another solution 
+	 * would have been to use the CADGraphCell in the user constraints related to the 
+	 * submesh. This solution would ensure that the CAD object with the right orientation 
+	 * is printed, but CAD objects related to more than one constraint on this submesh 
+	 * would appear that many times.
+	 */
+	public void printSubmeshDiscretizations()
+	{
+		BCADGraphCell root = model.getGraph().getRootCell();
+		StringBuffer indent = new StringBuffer();
+
+		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
+		{
+			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			String tab = indent.toString();
+			/* returns only one of the two shapes of the same orientation, but not
+			   necessarily the good one. */
+			// for (Iterator its = root.uniqueShapesExplorer(cse); its.hasNext(); )
+			/* may returns the two shapes of the same orientation */
+ 		        for (Iterator its = root.shapesExplorer(cse); its.hasNext(); )
+			{
+				BCADGraphCell cell = (BCADGraphCell) its.next();
+				for (Iterator itd = cell.discretizationIterator(); itd.hasNext(); )
+				{
+					BDiscretization discr = (BDiscretization) itd.next();
+					if (discr.contains(this) && discr.isSubmeshChild(this))
+					{
+						System.out.println(tab+"Shape "+cell);
+						System.out.println(tab+"    + "+discr);
+					}
+				}
+			}
+			indent.append("  ");
+		}
 	}
 
 	// Sample test
