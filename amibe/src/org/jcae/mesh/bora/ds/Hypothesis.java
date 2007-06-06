@@ -410,6 +410,28 @@ public class Hypothesis
 				return null;
 		}
 	}
+	public static class HypQ4 implements HypInterface
+	{
+		public CADShapeEnum dim()
+		{
+			return CADShapeEnum.FACE;
+		}
+		public String getType()
+		{
+			return "Q4";
+		}
+		public String impliedType(CADShapeEnum d)
+		{
+			if (d == CADShapeEnum.VERTEX)
+				return "V1";
+			else if (d == CADShapeEnum.EDGE)
+				return "E2";
+			else if (d == CADShapeEnum.FACE)
+				return getType();
+			else
+				return null;
+		}
+	}
 	public static class HypT4 implements HypInterface
 	{
 		public CADShapeEnum dim()
