@@ -112,6 +112,13 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	private static final int [] next3 = { 1, 2, 0 };
 	private static final int [] prev3 = { 2, 0, 1 };
 	
+	private static final Integer [] int3 = new Integer[3];
+	static {
+		int3[0] = Integer.valueOf(0);
+		int3[1] = Integer.valueOf(1);
+		int3[2] = Integer.valueOf(2);
+	}
+
 	private final double [] tempD = new double[3];
 	private final double [] tempD1 = new double[3];
 	private final double [] tempD2 = new double[3];
@@ -1317,7 +1324,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		Stack todo = new Stack();
 		HashSet seen = new HashSet();
 		todo.push(tri);
-		todo.push(new Integer(localNumber));
+		todo.push(int3[localNumber]);
 		swapVertices(seen, todo);
 		assert o == destination() : o+" "+d+" "+this;
 	}
@@ -1354,7 +1361,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 				{
 					VirtualHalfEdge.symOTri(ot, sym);
 					todo.push(sym.tri);
-					todo.push(new Integer(sym.localNumber));
+					todo.push(int3[sym.localNumber]);
 					sym.tri.setAdj(sym.localNumber, ot.tri);
 					sym.tri.setAdjLocalNumber(sym.localNumber, ot.localNumber);
 				}
