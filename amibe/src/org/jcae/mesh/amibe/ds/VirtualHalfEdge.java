@@ -1259,7 +1259,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		work[1].clearAttributes(BOUNDARY);
 		work[1].next();                 // (ndV1)
 		
-		nextOTriDest(this, work[0]);    // (V2do)
+		symOTri(this, work[0]);         // (doV2)
+		work[0].prev();                 // (V2do)
 		copyOTri(work[0], work[2]);     // (V2do)
 		work[0].setDestination(n);      // (V2no)
 		work[2].tri = t4;
@@ -1268,7 +1269,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		{
 			work[0].sym();          // (dV2*)
 			work[2].VHglue(work[0]);
-			nextOTriDest(this, work[0]);    // (V2no)
+			symOTri(this, work[0]); // (noV2)
+			work[0].prev();         // (V2no)
 		}
 		work[2].prev();                 // (nV2d)
 		work[2].VHglue(work[0]);
