@@ -84,7 +84,7 @@ public class CheckDelaunay
 				ot.bind(t);
 				for (int i = 0; i < 3; i++)
 				{
-					ot.nextOTri();
+					ot.next();
 					ot.clearAttributes(AbstractHalfEdge.SWAPPED);
 					VirtualHalfEdge.symOTri(ot, sym);
 					sym.clearAttributes(AbstractHalfEdge.SWAPPED);
@@ -95,10 +95,10 @@ public class CheckDelaunay
 			{
 				t = (Triangle) it.next();
 				ot.bind(t);
-				ot.prevOTri();
+				ot.prev();
 				for (int i = 0; i < 3; i++)
 				{
-					ot.nextOTri();
+					ot.next();
 					if (!ot.isMutable())
 						continue;
 					VirtualHalfEdge.symOTri(ot, sym);
@@ -122,7 +122,7 @@ public class CheckDelaunay
 				int orient = ((Integer) it.next()).intValue();
 				ot.bind(t);
 				for (int i = 0; i < orient; i++)
-					ot.nextOTri();
+					ot.next();
 				if (ot.hasAttributes(AbstractHalfEdge.SWAPPED))
 				{
 					newList.add(ot.getTri());

@@ -93,7 +93,7 @@ public class ConstraintNormal3D
 				ot.bind(t);
 				for (int i = 0; i < 3; i++)
 				{
-					ot.nextOTri();
+					ot.next();
 					ot.clearAttributes(AbstractHalfEdge.SWAPPED);
 				}
 			}
@@ -106,7 +106,7 @@ public class ConstraintNormal3D
 				double best = 0.0;
 				for (int i = 0; i < 3; i++)
 				{
-					ot.nextOTri();
+					ot.next();
 					if (!ot.isMutable())
 						continue;
 					VirtualHalfEdge.symOTri(ot, sym);
@@ -176,7 +176,7 @@ public class ConstraintNormal3D
 				{
 					ot.bind(t);
 					for (int i = 0; i <= l; i++)
-						ot.nextOTri();
+						ot.next();
 					ot.swap();
 					cnt++;
 				}

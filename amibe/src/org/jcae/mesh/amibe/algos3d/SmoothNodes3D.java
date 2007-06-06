@@ -126,7 +126,7 @@ public class SmoothNodes3D
 			ot.bind(f);
 			for (int i = 0; i < 3; i++)
 			{
-				ot.nextOTri();
+				ot.next();
 				Vertex n = ot.origin();
 				if (nodeset.contains(n))
 					continue;

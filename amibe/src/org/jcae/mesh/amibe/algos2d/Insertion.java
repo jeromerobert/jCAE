@@ -109,7 +109,7 @@ public class Insertion
 				ot.bind(t);
 				for (int i = 0; i < 3; i++)
 				{
-					ot.nextOTri();
+					ot.next();
 					if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
 						ot.setAttributes(AbstractHalfEdge.MARKED);
 					else
@@ -126,7 +126,7 @@ public class Insertion
 				int nrTriNodes = 0;
 				for (int i = 0; i < 3; i++)
 				{
-					ot.nextOTri();
+					ot.next();
 					if (ot.hasAttributes(AbstractHalfEdge.MARKED))
 						continue;
 					ot.setAttributes(AbstractHalfEdge.MARKED);

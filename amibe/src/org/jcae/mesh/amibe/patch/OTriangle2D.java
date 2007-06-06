@@ -74,8 +74,8 @@ public class OTriangle2D extends VirtualHalfEdge
 		{
 			// This routine is called when 2D meshing is over and
 			// before it is written onto disk, we can then call
-			// VirtualHalfEdge.nextOTriOriginLoop() without trouble.
-			work[0].nextOTriOriginLoop();
+			// VirtualHalfEdge.nextOriginLoop() without trouble.
+			work[0].nextOriginLoop();
 			for (int i = 0; i < 3; i++)
 			{
 				if (work[0].tri.vertex[i] == o)
@@ -91,8 +91,8 @@ public class OTriangle2D extends VirtualHalfEdge
 		//  Glue triangles
 		nextOTri(this, work[0]);
 		prevOTri(this, work[1]);
-		work[0].symOTri();
-		work[1].symOTri();
+		work[0].sym();
+		work[1].sym();
 		work[0].glue(work[1]);
 	}
 	
@@ -184,17 +184,17 @@ public class OTriangle2D extends VirtualHalfEdge
 		newRight.glue(oldSymRight);
 		
 		//  Creates 3 inner links
-		newLeft.nextOTri();              // = (ova)
+		newLeft.next();                  // = (ova)
 		newLeft.glue(oldLeft);
-		newRight.prevOTri();             // = (vda)
+		newRight.prev();                 // = (vda)
 		newRight.glue(oldRight);
-		newLeft.nextOTri();              // = (vao)
-		newRight.prevOTri();             // = (avd)
+		newLeft.next();                  // = (vao)
+		newRight.prev();                 // = (avd)
 		newLeft.glue(newRight);
 		
 		//  Data structures have been created, search now for non-Delaunay
 		//  edges.  Re-use newLeft to walk through new vertex ring.
-		newLeft.nextOTri();              // = (aov)
+		newLeft.next();                  // = (aov)
 		Triangle newTri1 = newLeft.tri;
 		Triangle newTri2 = newRight.tri;
 		if (logger.isDebugEnabled())
@@ -212,7 +212,7 @@ public class OTriangle2D extends VirtualHalfEdge
 			a.setLink(tri);
 			nextOTri(this, oldLeft);         // = (dao)
 			oldLeft.glue(oldSymRight);
-			oldLeft.nextOTri();              // = (aod)
+			oldLeft.next();                  // = (aod)
 			oldLeft.glue(oldSymLeft);
 			return false;
 		}
@@ -273,7 +273,7 @@ public class OTriangle2D extends VirtualHalfEdge
 			else
 			{
 				// This routine may be called before boundaries
-				// are recreated, so VirtualHalfEdge.nextOTriApexLoop
+				// are recreated, so VirtualHalfEdge.nextApexLoop
 				// is not relevant here.
 				if (destination() == mesh.outerVertex)
 				{
@@ -281,12 +281,12 @@ public class OTriangle2D extends VirtualHalfEdge
 					// and start again from there.
 					do
 					{
-						prevOTriApex();
+						prevApex();
 					}
 					while (origin() != mesh.outerVertex);
 				}
 				else
-					nextOTriApex();
+					nextApex();
 				if ((Vertex2D) origin() == first)
 				{
 					if (nrSwap == 0)
@@ -325,7 +325,7 @@ public class OTriangle2D extends VirtualHalfEdge
 		assert start != mesh.outerVertex;
 		assert end != mesh.outerVertex;
 
-		nextOTri();
+		next();
 		while (true)
 		{
 			count++;
@@ -334,7 +334,7 @@ public class OTriangle2D extends VirtualHalfEdge
 			Vertex2D a = (Vertex2D) apex();
 			assert a != mesh.outerVertex : ""+this;
 			symOTri(this, work[0]);
-			work[0].nextOTri();
+			work[0].next();
 			Vertex2D n = (Vertex2D) work[0].destination();
 			assert n != mesh.outerVertex : ""+work[0];
 			newl = n.onLeft(mesh, start, end);
@@ -344,7 +344,7 @@ public class OTriangle2D extends VirtualHalfEdge
 			{
 				//  o stands to the right of (start,end), d and n to the left.
 				if (!toSwap)
-					prevOTriOrigin();    // = (ond)
+					prevOrigin();        // = (ond)
 				else if (oldl >= 0L)
 				{
 					//  a stands to the left of (start,end).
@@ -353,40 +353,40 @@ public class OTriangle2D extends VirtualHalfEdge
 				else if (rand.nextBoolean())
 					swap();              // = (ona)
 				else
-					prevOTriOrigin();    // = (ond)
+					prevOrigin();        // = (ond)
 			}
 			else if (newl < 0L)
 			{
 				//  o and n stand to the right of (start,end), d to the left.
 				if (!toSwap)
-					nextOTriDest();      // = (ndo)
+					nextDest();          // = (ndo)
 				else if (oldl <= 0L)
 				{
 					//  a stands to the right of (start,end).
 					swap();              // = (ona)
-					nextOTri();          // = (nao)
-					prevOTriOrigin();    // = (nda)
+					next();              // = (nao)
+					prevOrigin();        // = (nda)
 				}
 				else if (rand.nextBoolean())
 				{
 					swap();              // = (ona)
-					nextOTri();          // = (nao)
-					prevOTriOrigin();    // = (nda)
+					next();              // = (nao)
+					prevOrigin();        // = (nda)
 				}
 				else
-					nextOTriDest();      // = (ndo)
+					nextDest();          // = (ndo)
 			}
 			else
 			{
 				//  n is the end point.
 				if (!toSwap)
-					nextOTriDest();      // = (ndo)
+					nextDest();          // = (ndo)
 				else
 				{
 					swap();              // = (ona)
-					nextOTri();          // = (nao)
+					next();              // = (nao)
 					if (oldl < 0L)
-						prevOTriOrigin();// = (nda)
+						prevOrigin();// = (nda)
 				}
 				break;
 			}

@@ -304,7 +304,7 @@ public class Initial
 				OTriangle2D s = mesh.forceBoundaryEdge(bNodes[i-1], bNodes[i], bNodes.length);
 				saveList.add(s);
 				s.setAttributes(AbstractHalfEdge.BOUNDARY);
-				s.symOTri();
+				s.sym();
 				s.setAttributes(AbstractHalfEdge.BOUNDARY);
 				if (firstOnWire == bNodes[i])
 					firstOnWire = null;
@@ -317,9 +317,9 @@ public class Initial
 		t = (Triangle) mesh.outerVertex.getLink();
 		ot = new OTriangle2D(t, 0);
 		if (ot.origin() == mesh.outerVertex)
-			ot.nextOTri();
+			ot.next();
 		else if (ot.destination() == mesh.outerVertex)
-			ot.prevOTri();
+			ot.prev();
 		assert ot.apex() == mesh.outerVertex : ot;
 		
 		AbstractTriangle.List tList = new AbstractTriangle.List();
@@ -329,10 +329,10 @@ public class Initial
 			for (int i = 0; i < 3; i++)
 			{
 				ot.setAttributes(AbstractHalfEdge.OUTER);
-				ot.nextOTri();
+				ot.next();
 			}
 			tList.add(ot.getTri());
-			ot.nextOTriApex();
+			ot.nextApex();
 		}
 		while (ot.origin() != first);
 		
@@ -353,7 +353,7 @@ public class Initial
 				boolean outer = ot.hasAttributes(AbstractHalfEdge.OUTER);
 				for (int i = 0; i < 3; i++)
 				{
-					ot.nextOTri();
+					ot.next();
 					VirtualHalfEdge.symOTri(ot, sym);
 					if (tList.contains(sym.getTri()))
 						continue;
@@ -419,8 +419,8 @@ public class Initial
 			{
 				OTriangle2D s = (OTriangle2D) it.next();
 				if (s.apex() == mesh.outerVertex)
-					s.symOTri();
-				s.nextOTri();
+					s.sym();
+				s.next();
 				if (s.hasAttributes(AbstractHalfEdge.SWAPPED))
 					continue;
 				if (s.checkSmallerAndSwap(mesh) != 0)

@@ -222,14 +222,14 @@ public class Vertex2D extends Vertex
 				current = null;
 				for (int i = 0; i < 3; i++)
 				{
-					start.nextOTri();
+					start.next();
 					if (!start.hasAttributes(AbstractHalfEdge.BOUNDARY))
 					{
-						start.symOTri();
+						start.sym();
 						current = getSurroundingOTriangleStart(mesh, start, tList);
 						if (current != null)
 							break;
-						start.symOTri();
+						start.sym();
 					}
 				}
 				if (current != null)
@@ -271,25 +271,25 @@ public class Vertex2D extends Vertex
 		//  idea).
 		if (o == mesh.outerVertex)
 		{
-			current.nextOTri();
+			current.next();
 			if (current.hasAttributes(AbstractHalfEdge.BOUNDARY))
 				return null;
-			current.symOTri();
+			current.sym();
 			redo = true;
 		}
 		else if (d == mesh.outerVertex)
 		{
-			current.prevOTri();
+			current.prev();
 			if (current.hasAttributes(AbstractHalfEdge.BOUNDARY))
 				return null;
-			current.symOTri();
+			current.sym();
 			redo = true;
 		}
 		else if (a == mesh.outerVertex)
 		{
 			if (current.hasAttributes(AbstractHalfEdge.BOUNDARY))
 				return null;
-			current.symOTri();
+			current.sym();
 			redo = true;
 		}
 		//  Orient triangle so that point is to the left.  Apex may
@@ -298,7 +298,7 @@ public class Vertex2D extends Vertex
 		{
 			if (current.hasAttributes(AbstractHalfEdge.BOUNDARY) && !redo)
 				return null;
-			current.symOTri();
+			current.sym();
 			redo = true;
 		}
 		if (redo)
@@ -323,14 +323,14 @@ public class Vertex2D extends Vertex
 			if (d1 < 0L && d2 < 0L)
 			{
 				if (rand.nextBoolean())
-					current.prevOTriDest();     // (ad*)
+					current.prevDest();     // (ad*)
 				else
-					current.nextOTriOrigin();   // (oa*)
+					current.nextOrigin();   // (oa*)
 			}
 			else if (d1 < 0L)
-				current.prevOTriDest();         // (ad*)
+				current.prevDest();             // (ad*)
 			else if (d2 < 0L)
-				current.nextOTriOrigin();       // (oa*)
+				current.nextOrigin();           // (oa*)
 			else
 				//  d1 >= 0 && d2 >= 0.  
 				break;

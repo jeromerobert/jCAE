@@ -439,19 +439,12 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Copy an <code>VirtualHalfEdge</code> and move it to the counterclockwaise
+	 * Copy current <code>VirtualHalfEdge</code> and move it to the counterclockwaise
 	 * following edge which has the same origin.
 	 *
-	 * @param o     source <code>VirtualHalfEdge</code>
 	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
-	public static final void nextOTriOrigin(VirtualHalfEdge o, VirtualHalfEdge that)
-	{
-		prevOTri(o, that);
-		that.sym();
-	}
-	
 	public final AbstractHalfEdge nextOrigin(AbstractHalfEdge that)
 	{
 		return prev(that).sym();
@@ -466,19 +459,12 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Copy an <code>VirtualHalfEdge</code> and move it to the counterclockwaise
+	 * Copy current <code>VirtualHalfEdge</code> and move it to the counterclockwaise
 	 * previous edge which has the same origin.
 	 *
-	 * @param o     source <code>VirtualHalfEdge</code>
 	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
-	public static final void prevOTriOrigin(VirtualHalfEdge o, VirtualHalfEdge that)
-	{
-		symOTri(o, that);
-		that.next();
-	}
-	
 	public final AbstractHalfEdge prevOrigin(AbstractHalfEdge that)
 	{
 		return sym(that).next();
@@ -493,19 +479,12 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Copy an <code>VirtualHalfEdge</code> and move it to the counterclockwaise
+	 * Copy current <code>VirtualHalfEdge</code> and move it to the counterclockwaise
 	 * following edge which has the same destination.
 	 *
-	 * @param o     source <code>VirtualHalfEdge</code>
 	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
-	public static final void nextOTriDest(VirtualHalfEdge o, VirtualHalfEdge that)
-	{
-		symOTri(o, that);
-		that.prev();
-	}
-	
 	public final AbstractHalfEdge nextDest(AbstractHalfEdge that)
 	{
 		return sym(that).prev();
@@ -521,19 +500,12 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Copy an <code>VirtualHalfEdge</code> and move it to the counterclockwaise
+	 * Copy current <code>VirtualHalfEdge</code> and move it to the counterclockwaise
 	 * previous edge which has the same destination.
 	 *
-	 * @param o     source <code>VirtualHalfEdge</code>
 	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
-	public static final void prevOTriDest(VirtualHalfEdge o, VirtualHalfEdge that)
-	{
-		nextOTri(o, that);
-		that.sym();
-	}
-	
 	public final AbstractHalfEdge prevDest(AbstractHalfEdge that)
 	{
 		return next(that).sym();
@@ -549,20 +521,12 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Copy an <code>VirtualHalfEdge</code> and move it to the counterclockwaise
+	 * Copy current <code>VirtualHalfEdge</code> and move it to the counterclockwaise
 	 * following edge which has the same apex.
 	 *
-	 * @param o     source <code>VirtualHalfEdge</code>
 	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
-	public static final void nextOTriApex(VirtualHalfEdge o, VirtualHalfEdge that)
-	{
-		nextOTri(o, that);
-		that.sym();
-		that.next();
-	}
-	
 	public final AbstractHalfEdge nextApex(AbstractHalfEdge that)
 	{
 		return next(that).sym().next();
@@ -584,7 +548,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
-	public static final void prevOTriApex(VirtualHalfEdge o, VirtualHalfEdge that)
+	private static final void prevOTriApex(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
 		prevOTri(o, that);
 		that.sym();

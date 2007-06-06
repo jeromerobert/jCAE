@@ -37,9 +37,9 @@ public class NodeConnectivity2D extends QualityProcedure
 		Vertex n = (Vertex) o;
 		VirtualHalfEdge start = new VirtualHalfEdge((Triangle) n.getLink(), 0);
 		if (n == start.destination())
-			start.nextOTri();
+			start.next();
 		else if (n == start.apex())
-			start.prevOTri();
+			start.prev();
 		if (!start.isMutable())
 			return 1.0f;
 		Vertex d = start.destination();
@@ -50,11 +50,11 @@ public class NodeConnectivity2D extends QualityProcedure
 			count++;
 			if (count >= 12)
 				return 0.0f;
-			start.prevOTri();
+			start.prev();
 			//  Do not consider boundary nodes
 			if (start == null || !start.isMutable())
 				return 1.0f;
-			start.symOTri();
+			start.sym();
 			if (start.destination() == d)
 				break;
 		}

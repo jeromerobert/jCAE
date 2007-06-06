@@ -247,18 +247,18 @@ public class Mesh2D extends Mesh
 		OTriangle2D oa1 = new OTriangle2D(adj1, 0);
 		OTriangle2D oa2 = new OTriangle2D(adj2, 0);
 		ot.glue(oa0);
-		ot.nextOTri();
+		ot.next();
 		ot.glue(oa1);
-		ot.nextOTri();
+		ot.next();
 		ot.glue(oa2);
-		oa0.nextOTri();
-		oa2.prevOTri();
+		oa0.next();
+		oa2.prev();
 		oa0.glue(oa2);
-		oa0.nextOTri();
-		oa1.nextOTri();
+		oa0.next();
+		oa1.next();
 		oa0.glue(oa1);
-		oa1.nextOTri();
-		oa2.prevOTri();
+		oa1.next();
+		oa2.prev();
 		oa2.glue(oa1);
 		
 		outerVertex.setLink(adj0);
@@ -296,9 +296,9 @@ public class Mesh2D extends Mesh
 		Triangle t = (Triangle) start.getLink();
 		OTriangle2D s = new OTriangle2D(t, 0);
 		if (s.origin() != start)
-			s.nextOTri();
+			s.next();
 		if (s.origin() != start)
-			s.nextOTri();
+			s.next();
 		assert s.origin() == start : ""+start+" does not belong to "+t;
 		Vertex2D dest = (Vertex2D) s.destination();
 		int i = 0;
@@ -309,12 +309,12 @@ public class Mesh2D extends Mesh
 				return s;
 			else if (d != outerVertex && start.onLeft(this, end, d) > 0L)
 				break;
-			s.nextOTriOrigin();
+			s.nextOrigin();
 			i++;
 			if ((Vertex2D) s.destination() == dest || i > maxIter)
 				throw new InitialTriangulationException();
 		}
-		s.prevOTriOrigin();
+		s.prevOrigin();
 		dest = (Vertex2D) s.destination();
 		i = 0;
 		while (true)
@@ -324,7 +324,7 @@ public class Mesh2D extends Mesh
 				return s;
 			else if (d != outerVertex && start.onLeft(this, end, d) < 0L)
 				break;
-			s.prevOTriOrigin();
+			s.prevOrigin();
 			i++;
 			if (s.destination() == dest || i > maxIter)
 				throw new InitialTriangulationException();
@@ -514,7 +514,7 @@ public class Mesh2D extends Mesh
 			ot.bind(t);
 			for (int i = 0; i < 3; i++)
 			{
-				ot.nextOTri();
+				ot.next();
 				if (!ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
 					continue;
 				int ref1 = ot.origin().getRef();

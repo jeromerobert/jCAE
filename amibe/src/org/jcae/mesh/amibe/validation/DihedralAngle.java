@@ -51,7 +51,7 @@ public class DihedralAngle extends QualityProcedure
 		float ret = 1.0f;
 		for (int i = 0; i < 3; i++)
 		{
-			ot.nextOTri();
+			ot.next();
 			if (ot.hasAttributes(VirtualHalfEdge.BOUNDARY))
 				continue;
 			if (ot.getAdj() == null)

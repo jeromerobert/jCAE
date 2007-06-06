@@ -76,7 +76,7 @@ public class SwapEdge
 			ot.bind(f);
 			for (int i = 0; i < 3; i++)
 			{
-				ot.nextOTri();
+				ot.next();
 				ot.clearAttributes(VirtualHalfEdge.MARKED);
 			}
 		}
@@ -114,7 +114,7 @@ public class SwapEdge
 				localNumber = -1;
 				for (int i = 0; i < 3; i++)
 				{
-					ot.nextOTri();
+					ot.next();
 					if (ot.hasAttributes(VirtualHalfEdge.BOUNDARY))
 						continue;
 					assert ot.getAdj() != null : ot;
@@ -155,19 +155,19 @@ public class SwapEdge
 					VirtualHalfEdge.symOTri(ot, sym);
 					sym.getTri().unsetMarked();
 				}
-				ot.prevOTri();
+				ot.prev();
 			}
 			// ot = (nao)
 			t = ot.getTri();
 			t.unsetMarked();
 			tree.insert(t, cost(t));
-			ot.symOTri();  // (and)
+			ot.sym();  // (and)
 			t = ot.getTri();
 			t.unsetMarked();
 			tree.insert(t, cost(t));
 			for (int i = 0; i < 2; i++)
 			{
-				ot.prevOTri();
+				ot.prev();
 				if (ot.getAdj() != null)
 				{
 					VirtualHalfEdge.symOTri(ot, sym);
