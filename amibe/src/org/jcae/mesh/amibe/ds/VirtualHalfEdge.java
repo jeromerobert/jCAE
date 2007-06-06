@@ -87,15 +87,15 @@ import org.apache.log4j.Logger;
  * </pre>
  * The following methods can be applied to <code>ot</code>:
  * <pre>
- *    ot.nextOTri();        // Moves (t,0) to (t,1)
- *    ot.prevOTri();        // Moves (t,0) to (t,2)
- *    ot.symOTri();         // Moves (t,0) to (t1,2)
- *    ot.nextOTriOrigin();  // Moves (t,0) to (t2,1)
- *    ot.prevOTriOrigin();  // Moves (t,0) to (t1,0)
- *    ot.nextOTriDest();    // Moves (t,0) to (t1,1)
- *    ot.prevOTriDest();    // Moves (t,0) to (t0,2)
- *    ot.nextOTriApex();    // Moves (t,0) to (t0,0)
- *    ot.prevOTriApex();    // Moves (t,0) to (t2,0)
+ *    ot.next();        // Moves (t,0) to (t,1)
+ *    ot.prev();        // Moves (t,0) to (t,2)
+ *    ot.sym();         // Moves (t,0) to (t1,2)
+ *    ot.nextOrigin();  // Moves (t,0) to (t2,1)
+ *    ot.prevOrigin();  // Moves (t,0) to (t1,0)
+ *    ot.nextDest();    // Moves (t,0) to (t1,1)
+ *    ot.prevDest();    // Moves (t,0) to (t0,2)
+ *    ot.nextApex();    // Moves (t,0) to (t0,0)
+ *    ot.prevApex();    // Moves (t,0) to (t2,0)
  * </pre>
  *
  * <p>
@@ -174,22 +174,22 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			boolean ret = find(v2, v1);
 			if (!ret)
 				return ret;
-			symOTri();
+			sym();
 			return !hasAttributes(OUTER);
 		}
 		bind((Triangle) v1.getLink());
 		assert tri.vertex[0] == v1 || tri.vertex[1] == v1 || tri.vertex[2] == v1 : v1+" "+tri;
 		if (destination() == v1)
-			nextOTri();
+			next();
 		else if (apex() == v1)
-			prevOTri();
+			prev();
 		assert origin() == v1 : v1+" not in "+this;
 		Vertex d = destination();
 		if (d == v2)
 			return true;
 		do
 		{
-			nextOTriOriginLoop();
+			nextOriginLoop();
 			if (destination() == v2)
 				return true;
 		}
@@ -342,17 +342,6 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		that.pullAttributes();
 	}
 	
-	/**
-	 * Move to the symmetric edge.
-	 */
-	public final void symOTri()
-	{
-		int neworient = tri.getAdjLocalNumber(localNumber);
-		tri = (Triangle) tri.getAdj(localNumber);
-		localNumber = neworient;
-		pullAttributes();
-	}
-	
 	public final AbstractHalfEdge sym(AbstractHalfEdge that)
 	{
 		VirtualHalfEdge dest = (VirtualHalfEdge) that;
@@ -362,6 +351,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		return dest;
 	}
 	
+	/**
+	 * Move to the symmetric edge.
+	 */
 	public final AbstractHalfEdge sym()
 	{
 		int neworient = tri.getAdjLocalNumber(localNumber);
@@ -386,15 +378,6 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		that.pullAttributes();
 	}
 	
-	/**
-	 * Move to the counterclockwaise following edge.
-	 */
-	public final void nextOTri()
-	{
-		localNumber = next3[localNumber];
-		pullAttributes();
-	}
-	
 	public final AbstractHalfEdge next(AbstractHalfEdge that)
 	{
 		VirtualHalfEdge dest = (VirtualHalfEdge) that;
@@ -404,6 +387,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		return dest;
 	}
 	
+	/**
+	 * Move to the counterclockwaise following edge.
+	 */
 	public final AbstractHalfEdge next()
 	{
 		localNumber = next3[localNumber];
@@ -426,15 +412,6 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		that.pullAttributes();
 	}
 	
-	/**
-	 * Move to the counterclockwaise previous edge.
-	 */
-	public final void prevOTri()
-	{
-		localNumber = prev3[localNumber];
-		pullAttributes();
-	}
-	
 	public final AbstractHalfEdge prev(AbstractHalfEdge that)
 	{
 		VirtualHalfEdge dest = (VirtualHalfEdge) that;
@@ -444,6 +421,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		return dest;
 	}
 	
+	/**
+	 * Move to the counterclockwaise previous edge.
+	 */
 	public final AbstractHalfEdge prev()
 	{
 		localNumber = prev3[localNumber];
@@ -462,16 +442,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	public static final void nextOTriOrigin(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
 		prevOTri(o, that);
-		that.symOTri();
-	}
-	
-	/**
-	 * Move counterclockwaise to the following edge with the same origin.
-	 */
-	public final void nextOTriOrigin()
-	{
-		prevOTri();
-		symOTri();
+		that.sym();
 	}
 	
 	public final AbstractHalfEdge nextOrigin(AbstractHalfEdge that)
@@ -479,6 +450,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		return prev(that).sym();
 	}
 	
+	/**
+	 * Move counterclockwaise to the following edge with the same origin.
+	 */
 	public final AbstractHalfEdge nextOrigin()
 	{
 		return prev().sym();
@@ -495,16 +469,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	public static final void prevOTriOrigin(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
 		symOTri(o, that);
-		that.nextOTri();
-	}
-	
-	/**
-	 * Move counterclockwaise to the previous edge with the same origin.
-	 */
-	public final void prevOTriOrigin()
-	{
-		symOTri();
-		nextOTri();
+		that.next();
 	}
 	
 	public final AbstractHalfEdge prevOrigin(AbstractHalfEdge that)
@@ -512,6 +477,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		return sym(that).next();
 	}
 	
+	/**
+	 * Move counterclockwaise to the previous edge with the same origin.
+	 */
 	public final AbstractHalfEdge prevOrigin()
 	{
 		return sym().next();
@@ -528,17 +496,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	public static final void nextOTriDest(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
 		symOTri(o, that);
-		that.prevOTri();
-	}
-	
-	/**
-	 * Move counterclockwaise to the following edge with the same
-	 * destination.
-	 */
-	public final void nextOTriDest()
-	{
-		symOTri();
-		prevOTri();
+		that.prev();
 	}
 	
 	public final AbstractHalfEdge nextDest(AbstractHalfEdge that)
@@ -546,6 +504,10 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		return sym(that).prev();
 	}
 	
+	/**
+	 * Move counterclockwaise to the following edge with the same
+	 * destination.
+	 */
 	public final AbstractHalfEdge nextDest()
 	{
 		return sym().prev();
@@ -562,17 +524,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	public static final void prevOTriDest(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
 		nextOTri(o, that);
-		that.symOTri();
-	}
-	
-	/**
-	 * Move counterclockwaise to the previous edge with the same
-	 * destination.
-	 */
-	public final void prevOTriDest()
-	{
-		nextOTri();
-		symOTri();
+		that.sym();
 	}
 	
 	public final AbstractHalfEdge prevDest(AbstractHalfEdge that)
@@ -580,6 +532,10 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		return next(that).sym();
 	}
 	
+	/**
+	 * Move counterclockwaise to the previous edge with the same
+	 * destination.
+	 */
 	public final AbstractHalfEdge prevDest()
 	{
 		return next().sym();
@@ -596,18 +552,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	public static final void nextOTriApex(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
 		nextOTri(o, that);
-		that.symOTri();
-		that.nextOTri();
-	}
-	
-	/**
-	 * Move counterclockwaise to the following edge with the same apex.
-	 */
-	public final void nextOTriApex()
-	{
-		nextOTri();
-		symOTri();
-		nextOTri();
+		that.sym();
+		that.next();
 	}
 	
 	public final AbstractHalfEdge nextApex(AbstractHalfEdge that)
@@ -615,6 +561,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		return next(that).sym().next();
 	}
 	
+	/**
+	 * Move counterclockwaise to the following edge with the same apex.
+	 */
 	public final AbstractHalfEdge nextApex()
 	{
 		return next().sym().next();
@@ -631,18 +580,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	public static final void prevOTriApex(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
 		prevOTri(o, that);
-		that.symOTri();
-		that.prevOTri();
-	}
-	
-	/**
-	 * Move clockwaise to the previous edge with the same apex.
-	 */
-	public final void prevOTriApex()
-	{
-		prevOTri();
-		symOTri();
-		prevOTri();
+		that.sym();
+		that.prev();
 	}
 	
 	public final AbstractHalfEdge prevApex(AbstractHalfEdge that)
@@ -650,6 +589,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		return prev(that).sym().prev();
 	}
 	
+	/**
+	 * Move clockwaise to the previous edge with the same apex.
+	 */
 	public final AbstractHalfEdge prevApex()
 	{
 		return prev().sym().prev();
@@ -660,22 +602,6 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * If a boundary is reached, loop backward until another
 	 * boundary is found and start again from there.
 	 */
-	public final void nextOTriApexLoop()
-	{
-		if (hasAttributes(OUTER))
-		{
-			// Loop clockwise to another boundary
-			// and start again from there.
-			do
-			{
-				prevOTriApex();
-			}
-			while (!hasAttributes(OUTER));
-		}
-		else
-			nextOTriApex();
-	}
-	
 	public final AbstractHalfEdge nextApexLoop()
 	{
 		prev();
@@ -692,27 +618,6 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * this is sometimes needed, as in VirtualHalfEdge2D.removeDegenerated().
 	 * They have to be explicitly filtered out by testing hasAttributes(OUTER).
 	 */
-	public final void nextOTriOriginLoop()
-	{
-		/*
-		nextOTri();
-		nextOTriApexLoop();
-		prevOTri();
-		*/
-		if (hasAttributes(OUTER) && hasAttributes(BOUNDARY | NONMANIFOLD))
-		{
-			// Loop clockwise to another boundary
-			// and start again from there.
-			do
-			{
-				prevOTriOrigin();
-			}
-			while (!hasAttributes(OUTER));
-		}
-		else
-			nextOTriOrigin();
-	}
-	
 	public final AbstractHalfEdge nextOriginLoop()
 	{
 		if (hasAttributes(OUTER) && hasAttributes(BOUNDARY | NONMANIFOLD))
@@ -1032,23 +937,23 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		{
 			work[0].clearAttributes(SWAPPED);
 			work[1].clearAttributes(SWAPPED);
-			work[0].nextOTri();
-			work[1].nextOTri();
+			work[0].next();
+			work[1].next();
 		}
-		work[1].nextOTri();             // (ond)
+		work[1].next();                 // (ond)
 		int attr3 = work[1].attributes;
-		work[1].symOTri();              // a3 = (no*)
+		work[1].sym();                  // a3 = (no*)
 		work[1].VHglue(work[0]);
 		work[0].attributes = attr3;
 		work[0].pushAttributes();
-		work[0].nextOTri();             // (dao)
+		work[0].next();                 // (dao)
 		copyOTri(work[0], work[1]);     // (dao)
 		int attr1 = work[1].attributes;
-		work[0].symOTri();              // a1 = (ad*)
+		work[0].sym();                  // a1 = (ad*)
 		work[2].VHglue(work[0]);
 		work[2].attributes = attr1;
 		work[2].pushAttributes();
-		work[2].nextOTri();             // (ond)
+		work[2].next();                 // (ond)
 		work[2].VHglue(work[1]);
 		//  Mark new edge
 		work[1].attributes = 0;
@@ -1081,7 +986,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		{
 			if (work[0].hasAttributes(OUTER))
 			{
-				work[0].nextOTriApexLoop();
+				work[0].nextApexLoop();
 				continue;
 			}
 			double area  = work[0].computeNormal3DT();
@@ -1091,7 +996,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 				tempD1[i] = newpt[i] - x1[i];
 			if (Matrix3D.prodSca(tempD1, nu) >= - area)
 				return false;
-			work[0].nextOTriApexLoop();
+			work[0].nextApexLoop();
 		}
 		while (work[0].origin() != d);
 		return true;
@@ -1128,23 +1033,23 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		prevOTri(this, work[1]);
 		if (!work[0].hasAttributes(OUTER) && work[0].getAdj() != null && work[1].getAdj() != null)
 		{
-			work[0].nextOTriDest();
-			work[1].prevOTriOrigin();
+			work[0].nextDest();
+			work[1].prevOrigin();
 			if (work[0].origin() == work[1].destination())
 				return false;
 		}
 		symOTri(this, work[0]);
 		prevOTri(work[0], work[1]);
-		work[0].nextOTri();
+		work[0].next();
 		if (!work[0].hasAttributes(OUTER) && work[0].getAdj() != null && work[1].getAdj() != null)
 		{
-			work[0].nextOTriDest();
-			work[1].prevOTriOrigin();
+			work[0].nextDest();
+			work[1].prevOrigin();
 			if (work[0].origin() == work[1].destination())
 				return false;
 		}
 
-		return checkInversion(n);
+		return checkInversion((Vertex) n);
 	}
 	
 	private final boolean checkInversion(Vertex n)
@@ -1163,8 +1068,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			return false;
 		symOTri(this, work[1]);
 		symOTri(this, work[0]);
-		work[0].prevOTri();
-		work[1].nextOTri();
+		work[0].prev();
+		work[1].next();
 		if ((work[0].hasAttributes(BOUNDARY) || work[0].hasAttributes(NONMANIFOLD)) && (work[1].hasAttributes(BOUNDARY) || work[1].hasAttributes(NONMANIFOLD)))
 			return false;
 		//  Loop around o to check that triangles will not be inverted
@@ -1189,12 +1094,12 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 				if (Matrix3D.prodSca(tempD1, nu) >= - area)
 					return false;
 			}
-			work[0].nextOTriApexLoop();
+			work[0].nextApexLoop();
 		}
 		while (work[0].origin() != d);
 		//  Loop around d to check that triangles will not be inverted
 		copyOTri(this, work[0]);
-		work[0].prevOTri();
+		work[0].prev();
 		do
 		{
 			//  TODO: allow contracting edges when a vertex is non manifold
@@ -1210,7 +1115,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 				if (Matrix3D.prodSca(tempD1, nu) >= - area)
 					return false;
 			}
-			work[0].nextOTriApexLoop();
+			work[0].nextApexLoop();
 		}
 		while (work[0].origin() != a);
 		return true;
@@ -1251,7 +1156,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		do
 		{
 			work[0].setOrigin(n);
-			work[0].nextOTriOriginLoop();
+			work[0].nextOriginLoop();
 		}
 		while (work[0].destination() != d);
 		//  Replace d by n in all incident triangles
@@ -1259,17 +1164,17 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		do
 		{
 			work[0].setOrigin(n);
-			work[0].nextOTriOriginLoop();
+			work[0].nextOriginLoop();
 		}
 		while (work[0].destination() != n);
 		//  Update adjacency links.  For clarity, o and d are
 		//  written instead of n.
 		if (!hasAttributes(OUTER))
 		{
-			nextOTri();             // (dV1o)
+			next();                 // (dV1o)
 			int attr4 = attributes;
 			symOTri(this, work[0]); // (V1dV4)
-			nextOTri();             // (V1od)
+			next();                 // (V1od)
 			int attr3 = attributes;
 			symOTri(this, work[1]); // (oV1V3)
 			work[0].VHglue(work[1]);
@@ -1283,15 +1188,15 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			assert !t34.isOuter() : work[0]+"\n"+work[1];
 			work[1].destination().setLink(t34);
 			n.setLink(t34);
-			nextOTri();             // (odV1)
+			next();                 // (odV1)
 		}
-		symOTri();                      // (doV2)
+		sym();                          // (doV2)
 		if (!hasAttributes(OUTER))
 		{
-			nextOTri();             // (oV2d)
+			next();                 // (oV2d)
 			int attr5 = attributes;
 			symOTri(this, work[0]); // (V2oV5)
-			nextOTri();             // (V2do)
+			next();                 // (V2do)
 			int attr6 = attributes;
 			symOTri(this, work[1]); // (dV2V6)
 			work[0].VHglue(work[1]);
@@ -1305,7 +1210,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			assert !t56.isOuter();
 			work[0].origin().setLink(t56);
 			n.setLink(t56);
-			nextOTri();             // (doV2)
+			next();                 // (doV2)
 		}
 		symOTri(this, work[0]);
 		clearAttributes(MARKED);
@@ -1314,8 +1219,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		// By convention, edge is moved into (oV1V3), but this may change.
 		// We have to move before removing adjacency relations.
 		nextOTri(work[0], this);        // (dV1o)
-		symOTri();                      // (V1dV4)
-		symOTri();                      // (oV1V3)
+		sym();                          // (V1dV4)
+		sym();                          // (oV1V3)
 		work[0].clearAttributes(MARKED);
 		work[0].pushAttributes();
 		m.remove(work[0].tri);
@@ -1370,18 +1275,18 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		}
 		
 		nextOTri(this, work[0]);        // (nV1o)
-		work[1].nextOTri();             // (dV1n)
+		work[1].next();                 // (dV1n)
 		if (work[0].getAdj() != null)
 		{
-			work[0].symOTri();      // (V1d*)
+			work[0].sym();          // (V1d*)
 			work[1].VHglue(work[0]);
 			nextOTri(this, work[0]);// (nV1o)
 		}
-		work[1].nextOTri();             // (V1nd)
+		work[1].next();                 // (V1nd)
 		work[1].VHglue(work[0]);
 		work[0].clearAttributes(BOUNDARY);
 		work[1].clearAttributes(BOUNDARY);
-		work[1].nextOTri();             // (ndV1)
+		work[1].next();                 // (ndV1)
 		
 		nextOTriDest(this, work[0]);    // (V2do)
 		copyOTri(work[0], work[2]);     // (V2do)
@@ -1390,15 +1295,15 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		work[2].setApex(n);             // (V2dn)
 		if (work[0].getAdj() != null)
 		{
-			work[0].symOTri();      // (dV2*)
+			work[0].sym();          // (dV2*)
 			work[2].VHglue(work[0]);
 			nextOTriDest(this, work[0]);    // (V2no)
 		}
-		work[2].prevOTri();             // (nV2d)
+		work[2].prev();                 // (nV2d)
 		work[2].VHglue(work[0]);
 		work[0].clearAttributes(BOUNDARY | MARKED);
 		work[2].clearAttributes(BOUNDARY | MARKED);
-		work[2].prevOTri();             // (dnV2)
+		work[2].prev();                 // (dnV2)
 		work[2].VHglue(work[1]);
 	}
 	
@@ -1444,7 +1349,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			ot.bind(t);
 			for (int i = 0; i < 3; i++)
 			{
-				ot.nextOTri();
+				ot.next();
 				if (!ot.hasAttributes(BOUNDARY) && !ot.hasAttributes(NONMANIFOLD))
 				{
 					VirtualHalfEdge.symOTri(ot, sym);
@@ -1528,15 +1433,15 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			ot1.setAttributes(BOUNDARY);
 			ot2.setAttributes(BOUNDARY);
 			ot1.VHglue(ot2);
-			ot2.nextOTri();
+			ot2.next();
 		}
 		assert ot2.origin() == v[0];
 // m.printMesh();
 		assert m.isValid();
-		ot2.prevOTri();       // (v2,v0,v1)
+		ot2.prev();           // (v2,v0,v1)
 		ot2.VHsplit(m, v[3]); // (v2,v3,v1)
 		assert m.isValid();
-		ot2.nextOTri();       // (v3,v1,v2)
+		ot2.next();           // (v3,v1,v2)
 		ot2.VHswap();         // (v3,v0,v2)
 		assert m.isValid();
 		/*
@@ -1551,7 +1456,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		 */
 		ot2.VHsplit(m, v[5]); // (v3,v5,v2)
 		assert m.isValid();
-		ot2.nextOTri();       // (v5,v2,v3)
+		ot2.next();           // (v5,v2,v3)
 		ot2.VHswap();         // (v5,v0,v3)
 		assert m.isValid();
 		/*
@@ -1564,7 +1469,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		 *   +---------+---------+
 		 *   v5        v0       v1
 		 */
-		ot2.prevOTri();       // (v3,v5,v0)
+		ot2.prev();           // (v3,v5,v0)
 		ot2.VHsplit(m, v[4]); // (v3,v4,v0)
 		assert m.isValid();
 		/*
@@ -1591,7 +1496,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		int cnt = 0;
 		do
 		{
-			ot1.nextOTriOriginLoop();
+			ot1.nextOriginLoop();
 			cnt++;
 		}
 		while (ot1.destination() != d);
@@ -1611,7 +1516,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		do
 		{
 			cnt++;
-			ot1.nextOTriApexLoop();
+			ot1.nextApexLoop();
 		}
 		while (ot1.origin() != o);
 		assert cnt == 4 : "Failed test: LoopApex cnt != 4: "+a+" "+o;
@@ -1637,7 +1542,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			}
 			else
 			{
-				ot1.nextOTriApexLoop();
+				ot1.nextApexLoop();
 				if (ot1.origin() == d)
 					break;
 			}
