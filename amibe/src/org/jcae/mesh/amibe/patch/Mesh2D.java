@@ -39,12 +39,7 @@ import org.apache.log4j.Logger;
  * Connectivity between triangles and vertices is inherited from {@link Mesh},
  * and a {@link KdTree} instance added in order to speed up finding the
  * nearest {@link Vertex2D} <code>V</code> from any given point <code>V0</code>.
- * This gives a {@link AbstractTriangle} having <code>V</code> in its vertices,
- * and we can loop around <code>V</code> to find the {@link AbstractTriangle}
- * containing <code>V0</code>.
  */
-
-
 public class Mesh2D extends Mesh
 {
 	private static Logger logger=Logger.getLogger(Mesh2D.class);

@@ -92,7 +92,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	/**
 	 * Set the edge tied to this object.
 	 *
-	 * @param s  the edge tied to this object.
+	 * @param e  the edge tied to this object.
 	 */
 	public final void glue(AbstractHalfEdge e)
 	{

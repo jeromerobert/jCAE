@@ -7,19 +7,18 @@ They can be combined into three groups:
 </p>
 <dl>
   <dt>{@link org.jcae.mesh.mesher.ds.MNode1D},
-      {@link org.jcae.mesh.amibe.ds.Vertex},
-      {@link org.jcae.mesh.amibe.ds.MNode3D},
       {@link org.jcae.mesh.mesher.ds.MEdge1D},
-      {@link org.jcae.mesh.amibe.ds.Triangle} and
-      {@link org.jcae.mesh.amibe.ds.MFace3D}.</dt>
+      {@link org.jcae.mesh.amibe.patch.Vertex2D},
+      {@link org.jcae.mesh.amibe.ds.Vertex} and
+      {@link org.jcae.mesh.amibe.ds.Triangle}.</dt>
     <dd>Mesh entities.</dd>
   <dt>{@link org.jcae.mesh.mesher.ds.SubMesh1D} and
-      {@link org.jcae.mesh.amibe.ds.Mesh}.</dt>
+      {@link org.jcae.mesh.amibe.patch.Mesh2D}.</dt>
     <dd>Portions of meshes associated with a given topological element
       (edges in 1D, surfaces in 2D).</dd>
   <dt>{@link org.jcae.mesh.mesher.ds.MMesh0D},
       {@link org.jcae.mesh.mesher.ds.MMesh1D} and
-      {@link org.jcae.mesh.amibe.ds.MMesh3D}.</dt>
+      {@link org.jcae.mesh.amibe.ds.Mesh}.</dt>
     <dd>Meshes of the whole geometry.</dd>
 </dl>
 
@@ -61,33 +60,28 @@ This class contains a set of {@link org.jcae.mesh.mesher.ds.MNode1D} and
 </p>
 
 <p>
-{@link org.jcae.mesh.amibe.ds.MMesh3D} is a 3D discretization of the whole
+{@link org.jcae.mesh.amibe.ds.Mesh} is a 3D discretization of the whole
 geometry.  This is by far the largest structure, so all elements which were
 not absolutely necessary have been removed, and it now mostly contains a
-set of {@link org.jcae.mesh.amibe.ds.MFace3D} instances and a set of
-{@link org.jcae.mesh.amibe.ds.MNode3D} instances.  Edges are not stored
+set of {@link org.jcae.mesh.amibe.ds.Triangle} instances and a set of
+{@link org.jcae.mesh.amibe.ds.Vertex} instances.  Edges are not stored
 to save space.
 3D elements are built by projecting {@link
-org.jcae.mesh.amibe.ds.Mesh} instances into 3D space.  Nodes
+org.jcae.mesh.amibe.patch.Mesh2D} instances into 3D space.  Nodes
 coordinates are computed from their 2D coordinates, triangle topology is
 preserved, and nodes uniqueness on boundaries is guaranteed because all
-{@link org.jcae.mesh.amibe.ds.Mesh} instances are bound to the same
+{@link org.jcae.mesh.amibe.patch.Mesh2D} instances are bound to the same
 {@link org.jcae.mesh.mesher.ds.MMesh1D} instance.
 </p>
 
 <p>
-{@link org.jcae.mesh.amibe.ds.MNode3D} and 
-{@link org.jcae.mesh.amibe.ds.MFace3D} classes are very simple, the former
-carry out 3D coordinates and the latter is defined by its three vertices.
-</p>
-
-<p>
 Since most of the time is spent meshing 2D surfaces, great care must be
-taken of {@link org.jcae.mesh.amibe.ds.Mesh} class.  Topological
+taken of {@link org.jcae.mesh.amibe.patch.Mesh2D} class.  Topological
 faces are meshed independently, so there is no memory requirements here,
 and everything needed to speed up processing is kept.  This class currently
-contains a set of {@link org.jcae.mesh.amibe.ds.Vertex} instances and a set
-of {@link org.jcae.mesh.amibe.ds.Triangle} instances.
+contains a set of {@link org.jcae.mesh.amibe.ds.Triangle} instances and
+a {@link org.jcae.mesh.amibe.util.KdTree} data structure with
+{@link org.jcae.mesh.amibe.patch.Vertex2D} instances.
 </p>
 
 </body>

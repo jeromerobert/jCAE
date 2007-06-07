@@ -61,7 +61,6 @@ public abstract class Triangle extends AbstractTriangle implements Serializable
 	
 	/**
 	 * Set the AbstractTriangle adjacent to an edge.
-	 * Note: this routine could certainly be replaced by {@link #glue1}.
 	 *
 	 * @param num  the local number of this edge.
 	 * @param link  the adjacent AbstractTriangle.

@@ -41,8 +41,8 @@ import java.io.Serializable;
  * computed from vertex neighbours.
  *
  * <p>
- * There is a special vertex, {@link #outer}, which represents a vertex at
- * infinite.  It is used to create exterior triangles.
+ * There is a special vertex, {@link Mesh#outerVertex}, which represents a
+ * vertex at infinite.  It is used to create exterior triangles.
  * </p>
  *
  * <p>
