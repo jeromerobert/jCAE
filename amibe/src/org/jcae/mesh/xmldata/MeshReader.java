@@ -56,10 +56,11 @@ public class MeshReader
 	private static Logger logger=Logger.getLogger(MeshReader.class);
 	
 	/**
-	 * Create a Mesh instance from an XML file.
-	 * @param xmlDir       directory containing XML files
-	 * @param xmlFile      basename of the main XML file
-	 * @param F            yopological surface
+	 * Loads an Amibe 2D XML file into an existing Mesh2D instance.
+	 *
+	 * @param mesh     data structure updated when reading files
+	 * @param xmlDir   directory containing XML files
+	 * @param xmlFile  basename of the main XML file
 	 */
 	public static void readObject(Mesh2D mesh, String xmlDir, String xmlFile)
 	{
@@ -171,11 +172,27 @@ public class MeshReader
 		logger.debug("end reading "+xmlFile);
 	}
 	
+	/**
+	 * Loads an Amibe 3D XML file into an existing Mesh instance.
+	 *
+	 * @param mesh     data structure updated when reading files
+	 * @param xmlDir   directory containing XML files
+	 * @param xmlFile  basename of the main XML file
+	 */
 	public static void readObject3D(Mesh mesh, String xmlDir, String xmlFile)
 	{
 		readObject3D(mesh, xmlDir, xmlFile, 0.0);
 
 	}
+
+	/**
+	 * Loads an Amibe 3D XML file into an existing Mesh instance.
+	 *
+	 * @param mesh     data structure updated when reading files
+	 * @param xmlDir   directory containing XML files
+	 * @param xmlFile  basename of the main XML file
+	 * @param ridgeAngle  an edge with a dihedral angle lower than this value is considered as a sharp edge which has to be preserved.
+	 */
 	public static void readObject3D(Mesh mesh, String xmlDir, String xmlFile, double ridgeAngle)
 	{
 		logger.debug("begin reading "+xmlDir+File.separator+xmlFile);
