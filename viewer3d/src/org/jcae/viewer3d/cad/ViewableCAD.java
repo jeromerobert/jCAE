@@ -157,6 +157,8 @@ public class ViewableCAD extends ViewableAdaptor
 	 */
 	public void domainsChangedPerform(int[] domainId)
 	{
+		if(domainId==null)
+			domainId=new int[]{0,1,2};
 		if(branchGroup.numChildren()>0)
 			branchGroup.removeAllChildren();
 		for(int i=0;i<domainId.length;i++){
