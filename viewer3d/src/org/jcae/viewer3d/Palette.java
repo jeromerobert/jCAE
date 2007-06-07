@@ -55,6 +55,7 @@ public class Palette
 	
 	public Color getColor(int i)
 	{
+		if(i<0) i=-i;
 		i=i%colors.size();
 		return (Color)colors.toArray()[i];
 	}
