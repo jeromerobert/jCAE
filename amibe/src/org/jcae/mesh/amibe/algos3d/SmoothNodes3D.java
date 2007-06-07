@@ -231,6 +231,6 @@ public class SmoothNodes3D
 		opts.put("size", args[2]);
 		opts.put("iterations", args[3]);
 		new SmoothNodes3D(mesh, opts).compute();			
-		MeshWriter.writeObject3D(mesh, args[0], args[1], args[4], args[5],1);
+		MeshWriter.writeObject3D(mesh, args[0], args[1], args[4], args[5]);
 	}
 }

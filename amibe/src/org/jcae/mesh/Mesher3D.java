@@ -95,7 +95,7 @@ public class Mesher3D
 			ex.printStackTrace();
 		}
 		
-		MeshWriter.writeObject3D(mesh, xmlDir, "jcae3d", xmlBrepDir, brepFile, 1);
+		MeshWriter.writeObject3D(mesh, xmlDir, "jcae3d", xmlBrepDir, brepFile);
 	}
 	
 	private static void report(String brepfilename, String xmlDir, double discr, double defl, String startDate)

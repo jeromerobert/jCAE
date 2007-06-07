@@ -215,12 +215,14 @@ public class MeshWriter
 	}
 	
 	/**
-	 * Write the current object to a XML file and binary files. The XML file
-	 * have links to the binary files.
+	 * Write the current object to an Amibe 2D XML file and binary files.
+	 *
+	 * @param submesh      mesh to be written on disk
 	 * @param xmlDir       name of the XML file
 	 * @param xmlFile      basename of the main XML file
 	 * @param brepDir      path to brep file, relative to xmlDir
 	 * @param brepFile     basename of the brep file
+	 * @param index        shape index
 	 */
 	public static void writeObject(Mesh2D submesh, String xmlDir, String xmlFile, String brepDir, String brepFile, int index)
 	{
@@ -293,7 +295,16 @@ public class MeshWriter
 		}
 	}
 	
-	public static void writeObject3D(Mesh submesh, String xmlDir, String xmlFile, String brepDir, String brepFile, int index)
+	/**
+	 * Write the current object to an Amibe 3D XML file and binary files.
+	 *
+	 * @param submesh      mesh to be written on disk
+	 * @param xmlDir       name of the XML file
+	 * @param xmlFile      basename of the main XML file
+	 * @param brepDir      path to brep file, relative to xmlDir
+	 * @param brepFile     basename of the brep file
+	 */
+	public static void writeObject3D(Mesh submesh, String xmlDir, String xmlFile, String brepDir, String brepFile)
 	{
 		try
 		{

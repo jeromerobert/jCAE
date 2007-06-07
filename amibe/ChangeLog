@@ -1,3 +1,8 @@
+Thu Jun  7 15:24:38 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/MeshWriter.java (writeObject3D): Drop
+	last argument, it is unused.
+
 Wed Jun  6 15:13:33 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/VirtualHalfEdge.java: When OTriangle
