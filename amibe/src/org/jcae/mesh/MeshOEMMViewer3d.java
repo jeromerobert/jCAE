@@ -136,7 +136,7 @@ public class MeshOEMMViewer3d
 						new org.jcae.mesh.amibe.algos3d.DecimateHalfEdge(amesh, opts).compute();
 						String xmlDir = "dec-tmp";
 						String xmlFile = "jcae3d";
-						MeshWriter.writeObject3D(amesh, xmlDir, xmlFile, ".", "tmp.brep", 1);
+						MeshWriter.writeObject3D(amesh, xmlDir, xmlFile, ".", "tmp.brep");
 						octree.unselectAll();
 						try
 						{
