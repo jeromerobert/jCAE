@@ -40,7 +40,26 @@ import org.apache.log4j.Logger;
 
 /**
  * This class converts between disk and memory formats.
- * 
+ * {@link org.jcae.mesh.MeshOEMMIndex} is an example to show how to
+ * convert a triangle soup into an out-of-core mesh data structure.
+ * When an OEMM is generated on disk, octants can be loaded and unloaded
+ * on demand.  An {@link OEMM} instance is first created by calling
+ * {@link #readOEMMStructure}.  Then {@link #loadNodes} can be called
+ * to select which octants are loaded into memory.
+ *
+ * As can be seen in {@link #readOEMMStructure}, {@link OEMM} instances
+ * are serialized on disk.  But this is different with partial mesh data
+ * structure.  Each child octant has a local number between 0 and 7 depending
+ * on its spatial localization.  A similar structure is kept on disk, each
+ * child octant is put into a seperate directory named after its number.
+ * Octant leaves contain vertex and triangle data.  A file with a "v" suffix
+ * contains coordinates of vertices stored as 3 double values.  A file with
+ * a "a" suffix contains for each vertex the list of leaves which are
+ * connected to this vertex.  This allows setting <code>readable</code> and
+ * <code>writable</code> attributes, as explained in original paper.
+ * A file with a "t" suffix contains for each triangle 6 int values, the first
+ * 3 are leaf numbers for its 3 vertices, and last 3 are local vertex number
+ * in their respective leaf.
  */
 public class Storage
 {

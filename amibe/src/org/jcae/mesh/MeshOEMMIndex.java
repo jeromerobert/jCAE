@@ -28,7 +28,7 @@ import org.apache.log4j.Logger;
 import java.io.File;
 
 /**
- * This class illustrates how to perform quality checks.
+ * This class converts a triangle soup into an OEMM.
  */
 public class MeshOEMMIndex
 {
@@ -62,8 +62,8 @@ public class MeshOEMMIndex
 	}
 	
 	/**
-	 * main method, reads 4 arguments and calls mesh() method
-	 * @param args  an array of String, filename, algorithm type and constraint value
+	 * Main method, reads 4 arguments and calls mesh() method
+	 * @param args  an array of String, soup directory, OEMM output directory, max level and maximal numbre of triangles by octant.
 	 */
 	public static void main(String args[])
 	{
