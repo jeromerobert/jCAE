@@ -30,7 +30,9 @@ import org.xml.sax.SAXException;
 /**
  * Convert an Amibe mesh to a VTK file.
  * Output file extension should be <cite>.vtp</cite>.
- * @see http://www.vtk.org/pdf/file-formats.pdf
+ * The documentation of the file format may be found here:
+ * <a href="http://www.vtk.org/pdf/file-formats.pdf">
+ * http://www.vtk.org/pdf/file-formats.pdf</a>
  * @todo output one VTK piece by mesh group, support VTK parellel files.
  * @author Jerome Robert
  */
@@ -46,8 +48,8 @@ public class Amibe2VTK
 		{			
 			PrintStream p=new PrintStream(new BufferedOutputStream(new FileOutputStream(
 				"/tmp/test.vtp")));
-			new Amibe2VTK(new File("/home/jerome/OCCShapeGal/amibe1.dir/")).write(p);
-			//new Amibe2VTK(new File("/home/jerome/JCAEProject/amibe11.dir")).write(p);
+			//new Amibe2VTK(new File("/home/jerome/OCCShapeGal/amibe1.dir/")).write(p);
+			new Amibe2VTK(new File("/home/jerome/JCAEProject/amibe9.dir")).write(p);
 			
 			p.close();
 						
@@ -66,7 +68,7 @@ public class Amibe2VTK
 		this.directory=directory;
 	}
 	
-	protected File getNodeFile()
+	private File getNodeFile()
 	{
 		Element xmlNodes = (Element) document.getElementsByTagName(
 			"nodes").item(0);
