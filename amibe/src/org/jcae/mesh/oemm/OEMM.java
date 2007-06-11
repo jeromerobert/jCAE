@@ -90,7 +90,7 @@ public class OEMM implements Serializable
 	/**
 	 * Maximal width in a dimension.
 	 */
-	public double xdelta;
+	private double xdelta;
 	
 	/**
 	 * Root cell.
