@@ -170,7 +170,7 @@ public class MMesh1DReader
 						iref += 2;
 					}
 					else
-						nodelist[i] = new MNode1D(nodesBuffer.get(), null);
+						nodelist[i] = new MNode1D(nodesBuffer.get(), (CADVertex) null);
 					submesh.getNodes().add(nodelist[i]);
 				}
 				

@@ -24,6 +24,7 @@ import org.jcae.mesh.mesher.ds.MEdge1D;
 import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.mesher.ds.SubMesh1D;
 import org.jcae.mesh.mesher.ds.MMesh1D;
+import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADEdge;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -128,7 +129,7 @@ public class Refine
 			for (int i = 1; i < divisions; i++)
 			{
 				double param = firstNode.getParameter() + i * delta;
-				n2 = new MNode1D(param, null);
+				n2 = new MNode1D(param, (CADVertex) null);
 				//  Would be useful if degenerated edges are refined for
 				//  any reason
 				n2.isDegenerated(n1.isDegenerated());
