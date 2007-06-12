@@ -103,53 +103,75 @@ public class MMesh1D extends MMesh0D
 		assert(isValid());
 	}
 	
-	public MMesh1D(BModel model, BSubMesh sub)
+	public MMesh1D(BModel model)
 	{
 		super(model);
-		shape = null;
-
-		//  HashMap size will not be greater than the number of edges,
-		//  so allocate them after computing their maximal size, they
-		//  won't be resized.
-		int edges = 0;
 		BCADGraphCell root = model.getGraph().getRootCell();
-		for (Iterator ite = root.shapesExplorer(CADShapeEnum.EDGE); ite.hasNext(); ite.next())
-			edges++;
-		if (edges == 0)
-			return;
-		mapTEdgeToSubMesh1D = new LinkedHashMap(edges);
-		
-		for (Iterator ite = root.shapesExplorer(CADShapeEnum.EDGE); ite.hasNext(); )
+		shape = root.getShape();
+
+		int edgediscrs = 0;
+		// estimation of the maximum number of nodes created on the vertices of the CAD
+		for (Iterator itn = root.shapesExplorer(CADShapeEnum.EDGE); itn.hasNext(); )
 		{
-			BCADGraphCell c = (BCADGraphCell) ite.next();
-			CADEdge E = (CADEdge) c.getShape();
-			//  Edges may get connected to several faces
-			if (mapTEdgeToSubMesh1D.containsKey(E))
-				continue;
-			SubMesh1D submesh1d = (SubMesh1D) c.getMesh(sub);
-			if (submesh1d == null && c.getReversed() != null)
-				submesh1d = (SubMesh1D) c.getReversed().getMesh(sub);
-			mapTEdgeToSubMesh1D.put(E, submesh1d);
-		}
-		mapTEdgeToFaces = new HashMap(edges);
-		for (Iterator it = mapTEdgeToSubMesh1D.keySet().iterator(); it.hasNext(); )
-		{
-			CADEdge E = (CADEdge) it.next();
-			mapTEdgeToFaces.put(E, new LinkedHashSet());
-		}
-		CADExplorer expE = CADShapeBuilder.factory.newExplorer();
-		for (Iterator itf = root.shapesExplorer(CADShapeEnum.FACE); itf.hasNext(); )
-		{
-			BCADGraphCell s = (BCADGraphCell) itf.next();
-			CADFace F = (CADFace) s.getShape();
-			Set set;
-			for (expE.init(F, CADShapeEnum.EDGE); expE.more(); expE.next())
+			BCADGraphCell cell = (BCADGraphCell) itn.next();
+			for (Iterator itpd = cell.discretizationIterator(); itpd.hasNext(); itpd.next())
 			{
-				CADEdge E = (CADEdge) expE.current();
-				set = (Set) mapTEdgeToFaces.get(E);
-				set.add(F);
+				edgediscrs++;
 			}
 		}
+		if (edgediscrs == 0)
+			return;
+
+		mapTEdgeToSubMesh1D = new LinkedHashMap(edgediscrs);
+		edgediscrs = 0;
+		for (Iterator itn = root.shapesExplorer(CADShapeEnum.EDGE); itn.hasNext(); )
+		{
+			BCADGraphCell cell = (BCADGraphCell) itn.next();
+			for (Iterator itpd = cell.discretizationIterator(); itpd.hasNext(); )
+			{
+				BDiscretization discr = (BDiscretization)  itpd.next();
+				//  Edges may get connected to several faces
+				if (mapTEdgeToSubMesh1D.containsKey(discr))
+					continue;
+				SubMesh1D submesh1d = new SubMesh1D(discr, (MMesh0D) this);
+				mapTEdgeToSubMesh1D.put(discr, submesh1d);
+				edgediscrs++;
+			}
+		}
+		System.out.println("Number of Edge discretizations created in MMesh1D: "+ edgediscrs);
+
+		mapTEdgeToFaces = new HashMap(edgediscrs);
+		for (Iterator it = mapTEdgeToSubMesh1D.keySet().iterator(); it.hasNext(); )
+		{
+			BDiscretization discr = (BDiscretization) it.next();
+			mapTEdgeToFaces.put(discr, new LinkedHashSet());
+		}
+
+		LinkedHashSet set;
+		for (Iterator itp = root.shapesExplorer(CADShapeEnum.FACE); itp.hasNext(); )
+		{
+			BCADGraphCell pcell = (BCADGraphCell) itp.next();
+			for (Iterator itpd = pcell.discretizationIterator(); itpd.hasNext(); )
+			{
+				BDiscretization pd = (BDiscretization) itpd.next();
+				for (Iterator itc = pcell.shapesExplorer(CADShapeEnum.EDGE); itc.hasNext(); )
+				{
+					BCADGraphCell ccell = (BCADGraphCell) itc.next();
+					for (Iterator itcd = ccell.discretizationIterator(); itcd.hasNext(); )
+					{
+						BDiscretization cd = (BDiscretization) itcd.next();
+						if (pd.contained(cd))
+						{
+							// here mapTEdgeToFaces maps the parent discretizations on 
+							// the faces to the child discretizations on the edge
+							set = (LinkedHashSet) mapTEdgeToFaces.get(cd);
+							set.add(pd);
+						}
+					}
+				}
+			}
+		}
+
 		assert(isValid());
 	}
 	

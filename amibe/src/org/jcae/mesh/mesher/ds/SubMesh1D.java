@@ -21,6 +21,8 @@
 package org.jcae.mesh.mesher.ds;
 
 import org.jcae.mesh.cad.*;
+import org.jcae.mesh.bora.ds.BDiscretization;
+import org.jcae.mesh.bora.ds.BCADGraphCell;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -40,6 +42,9 @@ public class SubMesh1D
 
 	//  Topological edge being discretized
 	private CADEdge edge;
+	
+	//  Discretization definition
+	private BDiscretization discr;
 	
 	//  Edge list
 	private ArrayList edgelist = new ArrayList();
@@ -65,6 +70,38 @@ public class SubMesh1D
 		CADVertex[] V = edge.vertices();
 		MNode1D n1 = new MNode1D(range[0], m0d.getGeometricalVertex(V[0]));
 		MNode1D n2 = new MNode1D(range[1], m0d.getGeometricalVertex(V[1]));
+		n1.isDegenerated(degenerated);
+		n2.isDegenerated(degenerated);
+		MEdge1D e=new MEdge1D(n1, n2, false);
+		nodelist.add(n1);
+		nodelist.add(n2);
+		edgelist.add(e);
+		assert(isValid());
+	}
+
+	/**
+	 * Creates a <code>SubMesh1D</code> instance and initializes it with
+	 * vertices found in a <code>MMesh0D</code> instance.  The returned
+	 * <code>SubMesh1D</code> instance can be seen as a very rough
+	 * approximation of the geometrical edge, which can be refined via
+	 * algorithms found in {@link org.jcae.mesh.mesher.algos1d}.
+	 *
+	 * @param E  the topological edge being disretized,
+	 * @param m0d  the mesh containing all vertices
+	 */
+	public SubMesh1D(BDiscretization d, MMesh0D m0d)
+	{
+		discr = d;
+		BCADGraphCell cell = discr.getGraphCell();
+		if (cell.getType() != CADShapeEnum.EDGE)
+			throw new RuntimeException("Attempt to use invalid discretization "+d+" in SubMesh1D ");
+		edge = (CADEdge) cell.getShape();
+		double range[] = edge.range();
+		boolean degenerated = edge.isDegenerated();
+		CADVertex[] V = edge.vertices();
+
+		MNode1D n1 = new MNode1D(range[0], m0d.getChildDiscretization(V[0], cell, d));
+		MNode1D n2 = new MNode1D(range[1], m0d.getChildDiscretization(V[1], cell, d));
 		n1.isDegenerated(degenerated);
 		n2.isDegenerated(degenerated);
 		MEdge1D e=new MEdge1D(n1, n2, false);
