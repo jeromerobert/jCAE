@@ -20,8 +20,10 @@
 
 package org.jcae.mesh.mesher.ds;
 
-import org.jcae.mesh.bora.ds.*;
 import org.jcae.mesh.cad.*;
+import org.jcae.mesh.bora.ds.BModel;
+import org.jcae.mesh.bora.ds.BDiscretization;
+import org.jcae.mesh.bora.ds.BCADGraphCell;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import gnu.trove.TObjectIntHashMap;
@@ -39,6 +41,11 @@ public class MMesh0D
 	private CADVertex[] vnodelist;
 	private int vnodesize = 0;
 	private TObjectIntHashMap vnodeset;
+
+	//  Array of distinct discretizations of geometric nodes
+	private BDiscretization[] vnodediscrlist;
+	private int vnodediscrsize = 0;
+	private TObjectIntHashMap vnodediscrset;
 	
 	/**
 	 * Creates a <code>MMesh0D</code> instance by merging all topological
@@ -60,23 +67,51 @@ public class MMesh0D
 			addGeometricalVertex((CADVertex) expV.current());
 	}
 	
+	/**
+	 * Creates one node for each different discretization of the
+	 * BCADGraphCell of type Vertex
+	 */
 	public MMesh0D(BModel model)
 	{
-		int nodes = 0;
+		int nodediscrs = 0;
 		BCADGraphCell root = model.getGraph().getRootCell();
-		for (Iterator itn = root.shapesExplorer(CADShapeEnum.VERTEX); itn.hasNext(); itn.next())
-			nodes++;
-
-		//  Merge topological vertices found at the same geometrical point
-		vnodelist = new CADVertex[nodes];
-		vnodeset = new TObjectIntHashMap(nodes);
+		// estimation of the maximum number of nodes created on the vertices of the CAD
 		for (Iterator itn = root.shapesExplorer(CADShapeEnum.VERTEX); itn.hasNext(); )
 		{
-			BCADGraphCell v = (BCADGraphCell) itn.next();
-			addGeometricalVertex((CADVertex) v.getShape());
+			BCADGraphCell cell = (BCADGraphCell) itn.next();
+			for (Iterator itpd = cell.discretizationIterator(); itpd.hasNext(); itpd.next())
+			{
+				nodediscrs++;
+			}
 		}
+
+		//  Merge nodes at the same discretization
+		vnodediscrlist = new BDiscretization[nodediscrs];
+		vnodediscrset = new TObjectIntHashMap(nodediscrs);
+		for (Iterator itn = root.shapesExplorer(CADShapeEnum.VERTEX); itn.hasNext();)
+		{
+			BCADGraphCell cell = (BCADGraphCell) itn.next();
+			for (Iterator itpd = cell.discretizationIterator(); itpd.hasNext(); )
+			{
+				BDiscretization discr = (BDiscretization)  itpd.next();
+				addVertexDiscretization(discr);
+			}
+		}
+                System.out.println("Number of Vertex discretizations created in MMesh0D: "+ vnodediscrsize);
 	}
 	
+	//  Add a vertex discretization if necessary
+	private void addVertexDiscretization(BDiscretization d)
+	{
+		// test to see if this discretization has already been processed
+		if (vnodediscrset.contains(d))
+			return;
+		// if not, create a node
+		vnodediscrset.put(d, vnodediscrsize);
+		vnodediscrlist[vnodediscrsize] = d;
+		vnodediscrsize++;
+	}
+
 	//  Add a geometrical vertex.
 	private void addGeometricalVertex(CADVertex V)
 	{
@@ -102,6 +137,52 @@ public class MMesh0D
 		return vnodelist[vnodeset.get(V)];
 	}
 	
+	/**
+	 * Returns the discretization that is the same as the argument if available.
+	 * This routine does not seem useful, it is here in order to clone the 
+	 * old behaviour without BDiscretization structure. It checks that the
+	 * discretizations needed here are already available.
+	 * The discretization is already unique for the vertices of both orientations
+	 * that share the same location.
+	 */
+	private BDiscretization getVertexDiscretization(BDiscretization d)
+	{
+		if (!vnodediscrset.contains(d))
+			throw new NoSuchElementException("Discretization : "+d);
+		if (d != vnodediscrlist[vnodediscrset.get(d)])
+			throw new RuntimeException("In getVertexDiscretization. Discretization : "+d);
+		return d;
+	}
+
+	/**
+	 * Returns the discretization of CADVertex V related to parent discretization pd on cell
+	 *
+	 * @param V  vertex
+	 * @param cell  graphcell of a parent edge of V
+	 * @param pd  discretization of cell, parent discretization 
+	 * @return child discretization on V
+	 */
+	public BDiscretization getChildDiscretization(CADVertex V, BCADGraphCell pcell, BDiscretization pd)
+	{
+		// Selection of the cell's child that has the same shape as V. The orientation of ccell
+		// is of no importance because both orientations share the same discretizations
+		for (Iterator itc = pcell.shapesExplorer(CADShapeEnum.VERTEX); itc.hasNext(); )
+		{
+			BCADGraphCell ccell = (BCADGraphCell) itc.next();
+			if ( V.isSame(ccell.getShape()) )
+			{
+				// Selection of the child cell's discretization of parent pd
+				for (Iterator itcd = ccell.discretizationIterator(); itcd.hasNext(); )
+				{
+					BDiscretization cd = (BDiscretization) itcd.next();
+					if (pd.contained(cd))
+						return getVertexDiscretization(cd); // equivalent to return cd if everything went right
+				}
+			}
+		}
+		throw new RuntimeException("Invalid use of getChildDiscretization. Vertex: "+V+" Shape: "+pcell+" Discretization: "+pd);
+	}
+
 	/**
 	 * Returns an index of the vertex which has the same location as the argument.
 	 *
