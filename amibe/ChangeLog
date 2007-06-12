@@ -1,3 +1,12 @@
+Tue Jun 12 14:13:00 CEST 2007 Ahmed Bennani <ahmed_b@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/ds/MNode1D.java
+	  src/org/jcae/mesh/mesher/ds/MMesh0D.java
+	  src/org/jcae/mesh/mesher/ds/MMesh1D.java
+	  src/org/jcae/mesh/mesher/ds/SubMesh1D.java
+	Creation of a MMesh0D and a MMesh1D using the discretizations' 
+	definition found in a model
+
 Thu Jun  7 15:24:38 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/MeshWriter.java (writeObject3D): Drop
