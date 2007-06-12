@@ -26,7 +26,6 @@ import org.jcae.mesh.cad.CADShapeBuilder;
 import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.cad.CADExplorer;
 import org.jcae.mesh.cad.CADIterator;
-import org.jcae.mesh.mesher.ds.MMesh1D;
 
 import java.util.Collection;
 import java.util.ArrayList;
@@ -266,11 +265,6 @@ return null;
 public void setMesh(BSubMesh sub, Object m)
 {
 }
-public MMesh1D getMesh1D(BSubMesh sub)
-{
-return null;
-}
-
 
 	public BDiscretization getDiscretizationSubMesh(BSubMesh sub)
 	{

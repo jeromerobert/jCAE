@@ -27,9 +27,6 @@ import org.jcae.mesh.cad.CADShapeBuilder;
 import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.cad.CADExplorer;
 import org.jcae.mesh.cad.CADVertex;
-import org.jcae.mesh.mesher.ds.MNode1D;
-import org.jcae.mesh.mesher.ds.MMesh1D;
-import org.jcae.mesh.mesher.ds.SubMesh1D;
 
 import java.util.Collection;
 import java.util.ArrayList;
