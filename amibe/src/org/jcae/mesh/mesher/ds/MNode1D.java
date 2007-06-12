@@ -21,6 +21,9 @@
 package org.jcae.mesh.mesher.ds;
 
 import org.jcae.mesh.cad.CADVertex;
+import org.jcae.mesh.cad.CADShapeEnum;
+import org.jcae.mesh.bora.ds.BDiscretization;
+import org.jcae.mesh.bora.ds.BCADGraphCell;
 import java.util.HashMap;
 
 /**
@@ -36,9 +39,12 @@ public class MNode1D
 	//  Curvilinear coordinate on current edge
 	private double param;
 	
-	//  The geometrical vertexm if any
+	//  The geometrical vertex if any
 	private CADVertex vertex;
 	
+	//  Discretization definition if any
+	private BDiscretization discr;
+
 	//  Label used when exchanging data
 	private int label = 0;
 	
@@ -71,6 +77,31 @@ public class MNode1D
 		assert(setID());
 	}
 	
+	/**
+	 * Creates a <code>MNode1D</code> instance.
+	 *
+	 * @param t  curvilinear abscissa on current edge
+	 * @param d  if not null, the vertex discretization used
+	 */
+	public MNode1D(double t, BDiscretization d)
+	{
+		param = t;
+		discr = d;
+		if (d != null)
+		{
+			BCADGraphCell cell = discr.getGraphCell();
+			if (cell.getType() != CADShapeEnum.VERTEX)
+				throw new RuntimeException("Attempt to use invalid discretization "+d+" in MNode1D ");
+			vertex = (CADVertex) cell.getShape();
+		}
+		else
+		{
+		    vertex = null;
+		}
+		isDegenerated = false;
+		assert(setID());
+	}
+
 	private boolean setID()
 	{
 		id++;
