@@ -23,11 +23,11 @@ public class Dimensions
 		
 		// Display the bounding box
 		System.out.println("Xmin="+bboxValues[0]);
-		System.out.println("Ymin="+bboxValues[0]);
-		System.out.println("Zmin="+bboxValues[0]);
-		System.out.println("Xmax="+bboxValues[0]);
-		System.out.println("Ymax="+bboxValues[0]);
-		System.out.println("Zmax="+bboxValues[0]);
+		System.out.println("Ymin="+bboxValues[1]);
+		System.out.println("Zmin="+bboxValues[2]);
+		System.out.println("Xmax="+bboxValues[3]);
+		System.out.println("Ymax="+bboxValues[4]);
+		System.out.println("Zmax="+bboxValues[5]);
 		
 		// Display various other properties
 		GProp_GProps property=new GProp_GProps();
