@@ -33,7 +33,21 @@ public class Utilities
 		Arrays.fill(dots, '-');
 		String dotss=new String(dots);
 		String label=shape.toString().substring("org.jcae.opencascade.jni.TopoDS_".length());
-		System.out.println("+"+dotss+label);
+		System.out.print("+"+dotss+label);
+		switch(shape.shapeType())
+		{
+			case TopAbs_ShapeEnum.FACE:
+				out.print(" "+BRep_Tool.tolerance((TopoDS_Face)shape));
+				break;
+			case TopAbs_ShapeEnum.EDGE:
+				out.print(" "+BRep_Tool.tolerance((TopoDS_Edge)shape));
+				break;
+			case TopAbs_ShapeEnum.VERTEX:
+				out.print(" "+BRep_Tool.tolerance((TopoDS_Vertex)shape));
+				break;
+			default:
+		}
+		out.println();
 		while(it.more())
 		{
 			dumpTopology(it.value(), out, level+1);
