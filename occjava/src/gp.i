@@ -329,3 +329,33 @@ class gp_Circ
     gp_Circ(const gp_Ax2& axis, const Standard_Real radius);
 };
 
+/**
+ * TColgp_Array1OfPnt2d
+ */
+%{#include <TColgp_Array1OfPnt2d.hxx>%}
+%typemap(jni) TColgp_Array1OfPnt2d&  "jdoubleArray"
+%typemap(jtype) TColgp_Array1OfPnt2d& "double[]"
+%typemap(jstype) TColgp_Array1OfPnt2d& "double[]"
+%typemap(javaout) TColgp_Array1OfPnt2d&
+{
+	return $jnicall;
+}
+
+%typemap(out) TColgp_Array1OfPnt2d&
+{
+    const TColgp_Array1OfPnt2d &Nodes2d = *$1;
+    int i,j,s;
+    s=Nodes2d.Length()*2;
+    jdouble * ns=(jdouble *)malloc(sizeof(jdouble)*s);
+    for(j=0,i=Nodes2d.Lower();i<=Nodes2d.Upper();j+=2,i++)
+    {
+        ns[j]=Nodes2d(i).X();
+        ns[j+1]=Nodes2d(i).Y();
+    }
+    jdoubleArray jarray=JCALL1(NewDoubleArray, jenv, s);
+	JCALL4(SetDoubleArrayRegion, jenv, jarray, 0, s, ns);
+    free(ns);
+    $result=jarray;
+}
+
+

@@ -59,6 +59,7 @@ class Poly_Triangulation
 	%rename(nbTriangles) NbTriangles;
 	%rename(triangles) Triangles;
 	%rename(nodes) Nodes;
+	%rename(uvNodes) UVNodes;
 	
 	public:
 	Poly_Triangulation(const Standard_Integer nbNodes,
@@ -71,4 +72,5 @@ class Poly_Triangulation
 	Standard_Boolean HasUVNodes() const;
 	const Poly_Array1OfTriangle& Triangles() const;
 	const TColgp_Array1OfPnt& Nodes() const;
+	const TColgp_Array1OfPnt2d& UVNodes() const;
 };
