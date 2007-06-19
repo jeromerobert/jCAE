@@ -2,6 +2,12 @@ package org.jcae.viewer3d.post;
 
 import java.awt.Color;
 
+/**
+ * Map colors on values.
+ * This class properly handle set of values including Float.NEGATIVE_INFINITY,
+ * but positive infinity will lead to unexpected behavior.
+ * @author Jerome Robert
+ */
 public class DefaultColorMapper implements ColorMapper
 {
 	private float min=0;
@@ -10,11 +16,25 @@ public class DefaultColorMapper implements ColorMapper
 	private float minInf=0;
 	private int paletteSize=1;
 
+	/**
+	 * Create a color mapper with the following caracteristics:
+	 * <ul>
+	 * 	<li>min=0</li>
+	 * 	<li>max=1</li>
+	 * 	<li>palletteSize=1</li>
+	 * </ul>
+	 */
 	public DefaultColorMapper()
 	{
 		//nothing
 	}
 	
+	/**
+	 * Create a mapper for a given set of values
+	 * @param values Extract the min and max value from this array
+	 * @param paletteSize The number of color to generate
+	 * @todo Call DefaultColorMapper(float, float, boolean, int)
+	 */
 	public DefaultColorMapper(float[] values, int paletteSize)
 	{
 		ArrayTool at=new ArrayTool(values);
@@ -25,8 +45,9 @@ public class DefaultColorMapper implements ColorMapper
 	}
 	
 	/**
-	 * @param max
-	 * @param min
+	 * Create a mapper for a set of values whose only min and max are known
+	 * @param max greated value
+	 * @param min smallest <strong>finit</strong> value
 	 * @param infinity true if the values include Float.NEGATIVE_INFINITY
 	 */
 	public DefaultColorMapper( float min, float max, boolean infinity, int paletteSize)
@@ -37,6 +58,12 @@ public class DefaultColorMapper implements ColorMapper
 		this.paletteSize=paletteSize;
 	}
 
+	/**
+	 * Return the palette in the RGB format.
+	 * The size of the return array is 3 times the size of the palette.
+	 * Note that this method do not use min and max values as it always
+	 * return an HSB palette from red to blue through green.
+	 */
 	public byte[] getPalette()
 	{		
 		byte[] palette=new byte[paletteSize*3];
@@ -51,6 +78,10 @@ public class DefaultColorMapper implements ColorMapper
 		return palette;		
 	} 
 	
+	/**
+	 * Return the color index in the palette for the given value.
+	 * This is a discret mapping.
+	 */
 	public int map(float value)
 	{
 		if(value==Float.NEGATIVE_INFINITY)		
@@ -64,6 +95,11 @@ public class DefaultColorMapper implements ColorMapper
 		return toReturn;
 	}
 	
+	/**
+	 * Return the color for the given value.
+	 * This is a continues mapping (i.e. the returned value may not be in
+	 * the palette).
+	 */
 	public Color mapColor(float value)
 	{
 		if(value==Float.NEGATIVE_INFINITY)		
@@ -76,6 +112,14 @@ public class DefaultColorMapper implements ColorMapper
 		return Color.getHSBColor((1f-v)*2f/3f, 1f, 1f);
 	}
 	
+	/**
+	 * Set the color associated to the value into the destination array
+	 * This is a continues mapping (.e. the returned value may not be in
+	 * the palette).
+	 * This methods aims at being use in loop to fill large destination
+	 * arrays. Each element of the destination array is a ARGB color
+	 * encoded on one integer: 0xffRRGGBB.
+	 */
 	public void mapColor(float value, int[] dst, int index)
 	{
 		if (value == Float.NEGATIVE_INFINITY) value = minInf;
@@ -118,17 +162,26 @@ public class DefaultColorMapper implements ColorMapper
 		dst[index] = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
 	}
 	
+	/**
+	 * Set the <strong>finit</strong> smalled value
+	 */
 	public void setMin(float min)
 	{
 		this.min=min;
 		setNegativeInfinity(haveInfinity);
 	}
 
+	/**
+	 * Set the greatest value
+	 */
 	public void setMax(float max)
 	{
 		this.max=max;
 	}
 	
+	/**
+	 * Specifiy that the working set of value contains Float.NEGATIVE_INFINITY.
+	 */
 	public void setNegativeInfinity(boolean b)
 	{
 		haveInfinity=b;
