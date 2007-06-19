@@ -44,7 +44,7 @@
 	static
 	{
 		System.loadLibrary("OccJava");
-		if(!System.getenv("MMGT_OPT").equals("0"))
+		if(!"0".equals(System.getenv("MMGT_OPT")))
 			throw new RuntimeException("The MMGT_OPT environement variable must be set to 0 before using occjava.");
 	}
 %}
