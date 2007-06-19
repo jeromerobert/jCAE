@@ -40,6 +40,24 @@
 		return toReturn;
 	}
 	
+	/**Return the normal on the uv nodes.<br>
+	 *Invalid ones are set to zero.
+	 */
+	public double[] normalArray(double[] uvNodes)
+	{
+		if(uvNodes==null)
+			throw new NullPointerException();
+		
+		if(uvNodes.length%2!=0)
+			throw new IllegalArgumentException("uvNodes array length must be peer");
+			
+		int numNodes=uvNodes.length/2;
+		double[] toReturn=new double[numNodes*3];
+		normalArray(uvNodes,toReturn,numNodes);
+		
+		return toReturn;
+	}
+	
 	public double[] curvatureDirections()
 	{
 		double[] toReturn=new double[6];
@@ -85,6 +103,8 @@ class GeomLProp_SLProps
 	 * @param resolution The linear tolerance (it is used to test if a vector is null).
 	 */
 	public";
+	
+	%javamethodmodifiers normalArray(double*, double*, int) "private";
 
 	GeomLProp_SLProps(const Standard_Integer degree, const Standard_Real resolution);
 	void SetParameters(const Standard_Real u, const Standard_Real v) ;
@@ -122,6 +142,29 @@ class GeomLProp_SLProps
 			normal[0]=d.X();
 			normal[1]=d.Y();
 			normal[2]=d.Z();
+		}
+	}
+	
+	void normalArray(double* uvNodes,double* normalArray,int numNodes)
+	{
+		for(int i=0;i<numNodes;i++)
+		{
+			self->SetParameters(uvNodes[2*i],uvNodes[2*i+1]);
+			
+			if(!self->IsNormalDefined())
+			{
+				normalArray[3*i]=0;
+				normalArray[3*i+1]=0;
+				normalArray[3*i+2]=0;
+			}
+			else
+			{
+				const gp_Dir & d=self->Normal();
+				
+				normalArray[3*i]=d.X();
+				normalArray[3*i+1]=d.Y();
+				normalArray[3*i+2]=d.Z();
+			}
 		}
 	}
 
