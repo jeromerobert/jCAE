@@ -1,5 +1,6 @@
 lib_LTLIBRARIES=libOccJava.la
-
+bin_PROGRAMS = jnistreamtest
+jnistreamtest_SOURCES = jnistreamtest.cxx
 IFACEFILES=\
 	BRepPrimAPI.i \
 	BRep.i \
@@ -16,7 +17,8 @@ IFACEFILES=\
 	TopTools.i \
 	GeomAbs.i \
 	BRepLib.i \
-	BRepFilletAPI.i
+	BRepFilletAPI.i \
+	ShapeUpgrade.i
 
 BUILT_SOURCES = OccJava_wrap.cxx
 JAVAGENSRCDIR=$(top_srcdir)/src-java/org/jcae/opencascade/jni/

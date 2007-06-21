@@ -81,7 +81,8 @@ public class HoleFilletChamfer
 		TopoDS_Shape h3 = createVerticalCylinder(0.07, 3.5, 0.5, 1.9);
 		TopoDS_Shape toReturn = new BRepAlgoAPI_Cut(shape, h1).shape();
 		toReturn = new BRepAlgoAPI_Cut(toReturn, h2).shape();		
-		toReturn = new BRepAlgoAPI_Cut(toReturn, h3).shape();		
+		toReturn = new BRepAlgoAPI_Cut(toReturn, h3).shape();
+		
 		return toReturn;
 	}
 	
@@ -101,7 +102,15 @@ public class HoleFilletChamfer
 			chamfer.add(0.1, edges[i], getFace(cuttedBox, edges[i])[0]);
 		}
 
-		//displayAll(cuttedBox, fillet.shape(), chamfer.shape(), makeHole(cuttedBox));
+		TopoDS_Shape holled=makeHole(cuttedBox);
+		//displayAll(cuttedBox, fillet.shape(), chamfer.shape(), holled);
+		
+		//try the new Opencascade 6.2 tool to remove the hole 
+		ShapeUpgrade_RemoveInternalWires sr=new ShapeUpgrade_RemoveInternalWires(holled);
+		sr.setMinArea(1);
+		sr.setRemoveFaceMode(true);
+		sr.perform();
+		BRepTools.write(sr.getResult(), "/tmp/toto.brep");
 	}
 
 	// 3D display
@@ -144,7 +153,7 @@ public class HoleFilletChamfer
 		p.add(view2);
 		p.add(view3);
 		p.add(view4);
-		view4.setMouseMode(ViewBehavior.CLIP_RECTANGLE_MODE);
+		//view4.setMouseMode(ViewBehavior.CLIP_RECTANGLE_MODE);
 		view4.addKeyListener(new KeyAdapter()
 		{
 			public void keyPressed(KeyEvent e)
