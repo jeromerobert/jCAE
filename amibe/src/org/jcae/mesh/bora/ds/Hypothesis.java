@@ -30,7 +30,10 @@ public class Hypothesis
 {
 	private static Logger logger = Logger.getLogger(Hypothesis.class);
 	protected HypInterface hyp = HypNoneInstance;
-	protected double lengthMin = -1.0, lengthMax = -1.0, deflection = -1.0;
+	// Now, length is the target length and is the variable that is used;
+	// In the near future we will want to enforce a maximum length lengthMax 
+	protected double length = -1.0, lengthMin = -1.0, lengthMax = -1.0;
+	protected double deflection = -1.0;
 	protected boolean lengthBool = false, numberBool = false;
 	protected int numberMin = -1, numberMax = -1;
 	private boolean locked = false;
@@ -108,9 +111,18 @@ public class Hypothesis
 	{
 		checkLock();
 		logger.debug("("+Integer.toHexString(this.hashCode())+") Setting length to "+l+"; strong constraint: "+b);
-		lengthMin = l;
-		lengthMax = l;
+		length = l;
 		lengthBool = b;
+	}
+
+	public double getLength()
+	{
+		return length;
+	}
+
+	public double getDeflection()
+	{
+		return deflection;
 	}
 
 	/**
@@ -220,9 +232,9 @@ public class Hypothesis
 
 	private static double combineDouble(double current, double that)
 	{
-		if (current < 0)
+		if (current < 0.0)
 			return that;
-		else if (that < 0 || that > current)
+		else if (that < 0.0 || that > current)
 			return current;
 		else
 			return that;
@@ -234,6 +246,7 @@ public class Hypothesis
 		if (elt == null || !elt.equals(that.getElement()))
 			throw new RuntimeException();
 
+		length     = combineDouble(length, that.length);
 		lengthMin  = combineDouble(lengthMin, that.lengthMin);
 		lengthMax  = combineDouble(lengthMax, that.lengthMax);
 		deflection = combineDouble(deflection, that.deflection);
@@ -243,6 +256,8 @@ public class Hypothesis
 	public String toString()
 	{
 		String ret = "Hyp. "+id+" elementType: "+hyp.getType();
+		if (length >= 0.0)
+			ret += " length: "+length;
 		if (lengthMin >= 0.0)
 			ret += " lengthMin: "+lengthMin;
 		if (lengthMax >= 0.0)
@@ -263,6 +278,7 @@ public class Hypothesis
 	public Hypothesis createInheritedHypothesis(CADShapeEnum cse)
 	{
 		Hypothesis ret = new Hypothesis();
+		ret.length      = length;
 		ret.lengthMin   = lengthMin;
 		ret.lengthMax   = lengthMax;
 		ret.lengthBool  = lengthBool;
