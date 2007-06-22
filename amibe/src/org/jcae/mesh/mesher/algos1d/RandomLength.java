@@ -116,7 +116,7 @@ public class RandomLength
 		if (curve == null)
 		{
 			if (!E.isDegenerated())
-				throw new java.lang.RuntimeException("Curve not defined on edge, but this  edhe is not degenrerated.  Something must be wrong.");
+				throw new java.lang.RuntimeException("Curve not defined on edge, but this  edge is not degenerated.  Something must be wrong.");
 			
 			isDegenerated = true;
 			range = E.range();

@@ -97,7 +97,7 @@ public class Refine
 	 *
 	 * @param divisions  the number of divisions for each edge.
 	 * @param submesh1d  the 1D mesh being updated.
-	 * @return <code>true</code> if this edge was successfully discrtetized,
+	 * @return <code>true</code> if this edge was successfully discretized,
 	 * <code>false</code> otherwise.
 	 */
 	private static boolean computeEdge(int divisions, SubMesh1D submesh1d)

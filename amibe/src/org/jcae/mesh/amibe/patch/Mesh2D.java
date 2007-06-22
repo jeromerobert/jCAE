@@ -35,7 +35,7 @@ import java.util.Stack;
 import org.apache.log4j.Logger;
 
 /**
- * Mesh data structure for paramterized surfaces.
+ * Mesh data structure for parameterized surfaces.
  * Connectivity between triangles and vertices is inherited from {@link Mesh},
  * and a {@link KdTree} instance added in order to speed up finding the
  * nearest {@link Vertex2D} <code>V</code> from any given point <code>V0</code>.
@@ -48,7 +48,7 @@ public class Mesh2D extends Mesh
 	private transient CADShape face = null;
 	
 	//  The geometrical surface describing the topological face, stored for
-	//  efficiebcy reason
+	//  efficiency reason
 	private transient CADGeomSurface surface;
 	
 	//  Stack of methods to compute geometrical values
@@ -271,7 +271,7 @@ public class Mesh2D extends Mesh
 	}
 	
 	/**
-	 * Enforces an edge between tow points.
+	 * Enforces an edge between two points.
 	 * This routine is used to build constrained Delaunay meshes.
 	 * Intersections between existing mesh segments and the new
 	 * segment are computed, then edges are swapped so that the
