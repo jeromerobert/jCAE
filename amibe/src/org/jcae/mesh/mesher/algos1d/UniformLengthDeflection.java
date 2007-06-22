@@ -97,10 +97,10 @@ public class UniformLengthDeflection
 	 *
 	 * @param maxlen  the maximal length admitted,
 	 * @param submesh1d  the 1D mesh being updated.
-	 * @return <code>true</code> if this edge was successfully discrtetized,
+	 * @return <code>true</code> if this edge was successfully discretized,
 	 * <code>false</code> otherwise.
 	 */
-	private boolean computeEdge(double maxlen, double deflection, boolean relDefl, SubMesh1D submesh1d)
+	public boolean computeEdge(double maxlen, double deflection, boolean relDefl, SubMesh1D submesh1d)
 	{
 		int nbPoints;
 		boolean isCircular = false;
@@ -127,7 +127,7 @@ public class UniformLengthDeflection
 		if (curve == null)
 		{
 			if (!E.isDegenerated())
-				throw new java.lang.RuntimeException("Curve not defined on edge, but this  edhe is not degenrerated.  Something must be wrong.");
+				throw new java.lang.RuntimeException("Curve not defined on edge, but this  edge is not degenerated.  Something must be wrong.");
 			
 			isDegenerated = true;
 			/*
