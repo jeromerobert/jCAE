@@ -7,6 +7,7 @@
             <suite-component/>
             <module-dependencies/>
             <public-packages>
+                <package>org.jcae.opencascade</package>
                 <package>org.jcae.opencascade.jni</package>
             </public-packages>
             <class-path-extension>

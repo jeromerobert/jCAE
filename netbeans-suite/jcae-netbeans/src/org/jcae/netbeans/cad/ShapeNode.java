@@ -20,14 +20,21 @@
 
 package org.jcae.netbeans.cad;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import javax.swing.Action;
+import org.jcae.opencascade.Utilities;
+import org.jcae.opencascade.jni.BRepTools;
+import org.jcae.opencascade.jni.BRep_Tool;
 import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
 import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.openide.actions.DeleteAction;
 import org.openide.actions.ViewAction;
 import org.openide.nodes.AbstractNode;
+import org.openide.nodes.Node;
+import org.openide.nodes.PropertySupport;
+import org.openide.nodes.Sheet;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.NewType;
 
@@ -99,4 +106,20 @@ public class ShapeNode extends AbstractNode implements ShapeCookie
 		return PrimitiveNewType.getNewType(this);		
 	}
 
+	public Sheet createSheet()
+	{
+		Sheet sheet=super.createSheet();
+		Sheet.Set set=new Sheet.Set();
+		set.put(new PropertySupport.ReadOnly(
+			"tolerance", Double.class, "tolerance", "tolerance")
+			{	
+				public Object getValue()
+				{
+					return Double.valueOf(Utilities.tolerance(getShape()));
+				};
+			});
+		set.setName("Geometry");
+		sheet.put(set);
+		return sheet;
+	}
 }

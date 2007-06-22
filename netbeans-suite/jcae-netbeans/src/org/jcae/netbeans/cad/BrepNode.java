@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.netbeans.cad;
@@ -24,13 +25,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
 import javax.swing.Action;
+import org.jcae.opencascade.Utilities;
 import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
+import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.openide.ErrorManager;
 import org.openide.actions.*;
 import org.openide.loaders.DataNode;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.FileEntry;
 import org.openide.nodes.Node;
+import org.openide.nodes.PropertySupport;
+import org.openide.nodes.Sheet;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.NewType;
 
@@ -149,6 +154,24 @@ public class BrepNode extends DataNode implements Node.Cookie
 
 	public MetaNode getMetaNode() {
 		return metaNode;
+	}
+	
+	public Sheet createSheet()
+	{
+		Sheet sheet=super.createSheet();
+		Sheet.Set set=new Sheet.Set();
+		set.put(new PropertySupport.ReadOnly(
+			"tolerance", Double.class, "tolerance", "tolerance")
+			{	
+				public Object getValue()
+				{
+					TopoDS_Shape s= ((BrepDataObject)getDataObject()).getShape();
+					return Double.valueOf(Utilities.tolerance(s));
+				};
+			});
+		set.setName("Geometry");
+		sheet.put(set);
+		return sheet;
 	}
 
 	/*public Transferable clipboardCopy() throws IOException
