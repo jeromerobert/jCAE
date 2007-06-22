@@ -29,6 +29,7 @@ import org.jcae.opencascade.jni.BRepTools;
 import org.jcae.opencascade.jni.BRep_Tool;
 import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
 import org.jcae.opencascade.jni.TopoDS_Shape;
+import org.openide.actions.CopyAction;
 import org.openide.actions.DeleteAction;
 import org.openide.actions.ViewAction;
 import org.openide.nodes.AbstractNode;
@@ -70,8 +71,8 @@ public class ShapeNode extends AbstractNode implements ShapeCookie
 		toReturn.add(SystemAction.get(BoundingBoxAction.class));
 		if(getShape().shapeType()==TopAbs_ShapeEnum.FACE)
 			toReturn.add(SystemAction.get(ReverseAction.class));
-
-		toReturn.addAll(Arrays.asList(super.getActions(arg0)));
+		toReturn.add(null);
+		toReturn.add(SystemAction.get(CopyAction.class));
 		return (Action[]) toReturn.toArray(new Action[0]); 
 	}
 
@@ -121,5 +122,10 @@ public class ShapeNode extends AbstractNode implements ShapeCookie
 		set.setName("Geometry");
 		sheet.put(set);
 		return sheet;
+	}
+
+	public boolean canCopy()
+	{
+		return true;
 	}
 }

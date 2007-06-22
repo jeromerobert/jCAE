@@ -20,21 +20,28 @@
 
 package org.jcae.netbeans.cad;
 
+import java.awt.datatransfer.Transferable;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.Action;
 import org.jcae.netbeans.Utilities;
+import org.jcae.opencascade.jni.BRepTools;
 import org.netbeans.api.project.Project;
 import org.openide.actions.NewAction;
+import org.openide.actions.PasteAction;
 import org.openide.filesystems.*;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
+import org.openide.nodes.NodeTransfer;
 import org.openide.util.RequestProcessor;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.NewType;
+import org.openide.util.datatransfer.PasteType;
 import org.openide.util.lookup.Lookups;
 
 public class ModuleNode extends AbstractNode
@@ -121,7 +128,9 @@ public class ModuleNode extends AbstractNode
 	
 	public Action[] getActions(boolean arg0)
 	{
-		return new Action[]{SystemAction.get(NewAction.class)};
+		return new Action[]{
+			SystemAction.get(NewAction.class),
+			SystemAction.get(PasteAction.class)};
 	}
 	
 	public NewType[] getNewTypes()
@@ -140,5 +149,29 @@ public class ModuleNode extends AbstractNode
 				return "Geometry";
 			}
 		}};
+	}
+
+	protected void createPasteTypes(Transferable t, List ls)
+	{
+		final Node[] ns = NodeTransfer.nodes(t, NodeTransfer.COPY|NodeTransfer.MOVE);
+		if (ns != null && ns.length==1)
+		{
+			final ShapeNode n=(ShapeNode) ns[0].getCookie(ShapeNode.class);
+			if(n!=null) ls.add(new PasteType()
+			{
+				public Transferable paste()
+				{
+					Project p=(Project) getLookup().lookup(Project.class);
+					FileObject fo=p.getProjectDirectory();
+					String s = Utilities.getFreeName(fo, n.getName(), ".brep");					
+					String fileName=new File(FileUtil.toFile(fo), s).getPath();
+					System.out.println("write to "+fileName);
+					BRepTools.write(n.getShape(), fileName);
+					return null;
+				}
+			});
+		}
+		// Also try superclass, but give it lower priority:
+		super.createPasteTypes(t, ls);
 	}
 }
