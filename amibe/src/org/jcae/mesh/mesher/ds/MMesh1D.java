@@ -386,6 +386,21 @@ public class MMesh1D extends MMesh0D
 	}
 	
 	/**
+	 * Returns the <code>SubMesh1D</code> instance associated with a
+	 * BDiscretization.
+	 *
+	 * @param discrE  discretization of an edge.
+	 * @return the <code>SubMesh1D</code> instance associated with it.
+	 */
+	public SubMesh1D getSubMesh1DFromMap(BDiscretization discrE)
+	       throws NoSuchElementException
+	{
+		if (! mapTEdgeToSubMesh1D.containsKey(discrE))
+			throw new NoSuchElementException("TEdge : "+discrE);
+		return (SubMesh1D) mapTEdgeToSubMesh1D.get(discrE);
+	}
+
+	/**
 	 * Checks the validity of a <code>MMesh1D</code> instance.
 	 * This method is called within assertions, this is why it returns a
 	 * <code>boolean</code>.

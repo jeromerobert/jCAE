@@ -70,11 +70,30 @@ public class MMesh0D
 	/**
 	 * Creates one node for each different discretization of the
 	 * BCADGraphCell of type Vertex
+	 * The current method may be unnecessary: even if there are many
+	 * discretizations on a 0D Vertex, we may want to use the same CADVertex.
+	 * However, as we need the method public MMesh1D(BModel model) we have
+	 * to define a method public MMesh0D(BModel model)
 	 */
 	public MMesh0D(BModel model)
 	{
-		int nodediscrs = 0;
 		BCADGraphCell root = model.getGraph().getRootCell();
+
+		CADShape shape = root.getShape();
+		// This is a copy of the first method.
+		CADExplorer expV = CADShapeBuilder.factory.newExplorer();
+		int nodes = 0;
+		for (expV.init(shape, CADShapeEnum.VERTEX); expV.more(); expV.next())
+			nodes++;
+
+		//  Merge topological vertices found at the same geometrical point
+		vnodelist = new CADVertex[nodes];
+		vnodeset = new TObjectIntHashMap(nodes);
+		for (expV.init(shape, CADShapeEnum.VERTEX); expV.more(); expV.next())
+			addGeometricalVertex((CADVertex) expV.current());
+
+		// Processing of the found discretizations; is this necessary?
+		int nodediscrs = 0;
 		// estimation of the maximum number of nodes created on the vertices of the CAD
 		for (Iterator itn = root.shapesExplorer(CADShapeEnum.VERTEX); itn.hasNext(); )
 		{
@@ -98,6 +117,7 @@ public class MMesh0D
 			}
 		}
                 System.out.println("Number of Vertex discretizations created in MMesh0D: "+ vnodediscrsize);
+
 	}
 	
 	//  Add a vertex discretization if necessary
