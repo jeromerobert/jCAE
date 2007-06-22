@@ -49,7 +49,19 @@ public final class BuildSoupAction extends CookieAction
 		{
 			Mesh3dToSoupConvert.convert(xmlDir);
 		}
+		catch (XPathExpressionException ex)
+		{
+			ErrorManager.getDefault().notify(ex);
+		}
+		catch (SAXException ex)
+		{
+			ErrorManager.getDefault().notify(ex);
+		}
 		catch (IOException ex)
+		{
+			ErrorManager.getDefault().notify(ex);
+		}
+		catch (ParserConfigurationException ex)
 		{
 			ErrorManager.getDefault().notify(ex);
 		}

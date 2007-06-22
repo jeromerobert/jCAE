@@ -22,7 +22,7 @@ package org.jcae.netbeans.cad;
 
 import java.awt.Component;
 import javax.swing.*;
-import org.jcae.opencascade.jni.BRepOffsetAPI_Sewing;
+import org.jcae.opencascade.jni.BRepBuilderAPI_Sewing;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CookieAction;
@@ -113,7 +113,7 @@ public class SewAction extends CookieAction
 			JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null,
 			null, null)==JOptionPane.OK_OPTION)
 		{		
-			BRepOffsetAPI_Sewing sewer=new BRepOffsetAPI_Sewing();
+			BRepBuilderAPI_Sewing sewer=new BRepBuilderAPI_Sewing();
 			sewer.init(spanel.getTolerance(), spanel.getOption(),
 				spanel.getCutting(), spanel.getNonManifold());
 			

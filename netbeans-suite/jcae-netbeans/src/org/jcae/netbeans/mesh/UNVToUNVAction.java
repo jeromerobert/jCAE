@@ -25,14 +25,14 @@ public final class UNVToUNVAction extends CookieAction
 				UNVDataObject.class);
 			FileObject oldUnv=c.getPrimaryFile();
 			// Read the mesh
-			org.jcae.mesh.amibe.ds.Mesh m=UNVReader.readMesh(
-				FileUtil.toFile(oldUnv).getPath());		
+			org.jcae.mesh.amibe.ds.Mesh m=new org.jcae.mesh.amibe.ds.Mesh();
+			UNVReader.readMesh(m, FileUtil.toFile(oldUnv).getPath());
 
 			// Write the mesh as a jCAE mesh
 			File tmpDir=File.createTempFile("jcae", null);
 			tmpDir.delete();
 			tmpDir.mkdirs();
-			MeshWriter.writeObject3D(m, tmpDir.getPath(), "jcae3d", null, null, 0);			
+			MeshWriter.writeObject3D(m, tmpDir.getPath(), "jcae3d", null, null);			
 			
 			// Write the new UNV to a temporary place
 			File newUNVFile=File.createTempFile("jcae", null);
