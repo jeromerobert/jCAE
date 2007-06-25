@@ -143,4 +143,34 @@ public class Utilities
 		}
 		throw new IndexOutOfBoundsException("Vertex "+id+" not found");		
 	}
+	
+	/**
+	 * Compute the tolerance of shapes by selecting the highest
+	 * tolerance of the give child shapes
+	 */
+	public static double tolerance(TopoDS_Shape shape)
+	{
+		double toReturn=0;
+		if(shape instanceof TopoDS_Face)
+		{
+			toReturn=BRep_Tool.tolerance((TopoDS_Face)shape);
+		}
+		else if(shape instanceof TopoDS_Edge)
+		{
+			toReturn=BRep_Tool.tolerance((TopoDS_Edge)shape);
+		}
+		else if(shape instanceof TopoDS_Vertex)
+			return BRep_Tool.tolerance((TopoDS_Vertex)shape);
+		
+		TopoDS_Iterator it=new TopoDS_Iterator(shape);
+		while(it.more())
+		{
+			TopoDS_Shape s=it.value();
+			double t=tolerance(s);
+			if(t>toReturn)
+				toReturn=t;
+			it.next();
+		}
+		return toReturn;
+	}
 }
