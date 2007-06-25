@@ -53,8 +53,10 @@
 			<file name="org-jcae-netbeans-cad-ExplodeAction.instance"/>
 			<file name="org-jcae-netbeans-cad-ImportAction.instance"/>
 			<file name="org-jcae-netbeans-cad-RemoveAction.instance"/>
-			<file name="org-jcae-netbeans-cad-ReverseAction.instance"/>
-			<file name="org-jcae-netbeans-mesh-ComputeMeshAction.instance"/>
+			<file name="org-jcae-netbeans-cad-RemoveHoles.instance"/>
+            <file name="org-jcae-netbeans-cad-ReverseAction.instance"/>
+			<file name="org-jcae-netbeans-cad-SplitFaces.instance"/>
+            <file name="org-jcae-netbeans-mesh-ComputeMeshAction.instance"/>
 			<file name="org-jcae-netbeans-mesh-ExportUNV.instance"/>
             <file name="org-jcae-netbeans-mesh-FreeEdgesAction.instance"/>
 			<file name="org-jcae-netbeans-mesh-ImportUNV.instance"/>

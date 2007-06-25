@@ -20,27 +20,81 @@
 
 package org.jcae.netbeans.cad;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import javax.swing.Action;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import org.jcae.netbeans.cad.BooleanAction.Common;
+import org.jcae.netbeans.cad.BooleanAction.Cut;
+import org.jcae.netbeans.cad.BooleanAction.Section;
 import org.jcae.opencascade.Utilities;
-import org.jcae.opencascade.jni.BRepTools;
-import org.jcae.opencascade.jni.BRep_Tool;
 import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
 import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.openide.actions.CopyAction;
-import org.openide.actions.DeleteAction;
 import org.openide.actions.ViewAction;
+import org.openide.awt.Actions;
+import org.openide.awt.Mnemonics;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Node;
+import org.openide.nodes.Node.Cookie;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
+import org.openide.util.HelpCtx;
+import org.openide.util.actions.NodeAction;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.NewType;
 
 public class ShapeNode extends AbstractNode implements ShapeCookie
 {	
+	static public class UpgradeActions extends NodeAction
+	{
+		public javax.swing.JMenuItem getMenuPresenter() 
+		{
+			JMenu menu = new JMenu();		
+			Mnemonics.setLocalizedText(menu, getName());		
+
+			JMenuItem item = new JMenuItem();
+			Mnemonics.setLocalizedText(item, item.getText());
+			Actions.connect(item, (Action)SystemAction.get(SewAction.class), true);
+			menu.add(item);
+
+			item = new JMenuItem();
+			Mnemonics.setLocalizedText(item, item.getText());
+			Actions.connect(item, (Action)SystemAction.get(RemoveHoles.class), true);
+			menu.add(item);
+
+			item = new JMenuItem();
+			Mnemonics.setLocalizedText(item, item.getText());
+			Actions.connect(item, (Action)SystemAction.get(SplitFaces.class), true);
+			menu.add(item);
+
+			return menu;
+		}
+
+	    public javax.swing.JMenuItem getPopupPresenter() {
+	    	return getMenuPresenter();
+	    }
+
+		protected void performAction(Node[] arg0)
+		{
+		}
+
+		protected boolean enable(Node[] arg0)
+		{
+			return true;
+		}
+
+		public String getName()
+		{
+			return "Upgrade";
+		}
+
+		public HelpCtx getHelpCtx()
+		{
+			return null;
+		}
+	}
+		
 	private String name;
 	
 	protected TopoDS_Shape shape;
@@ -65,7 +119,7 @@ public class ShapeNode extends AbstractNode implements ShapeCookie
 		toReturn.add(SystemAction.get(RemoveAction.class));
 		toReturn.add(SystemAction.get(BooleanAction.AllActions.class));
 		toReturn.add(SystemAction.get(TransformAction.AllActions.class));
-		toReturn.add(SystemAction.get(SewAction.class));
+		toReturn.add(SystemAction.get(UpgradeActions.class));
 		toReturn.add(SystemAction.get(GroupFaceAction.class));
 		toReturn.add(SystemAction.get(FreeBoundsAction.class));
 		toReturn.add(SystemAction.get(BoundingBoxAction.class));

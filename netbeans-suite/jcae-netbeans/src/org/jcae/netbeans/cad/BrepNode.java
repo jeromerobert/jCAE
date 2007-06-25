@@ -88,7 +88,7 @@ public class BrepNode extends DataNode implements Node.Cookie
 		l.add(SystemAction.get(NewAction.class));
 		l.add(SystemAction.get(BooleanAction.AllActions.class));
 		l.add(SystemAction.get(TransformAction.AllActions.class));
-		l.add(SystemAction.get(SewAction.class));
+		l.add(SystemAction.get(ShapeNode.UpgradeActions.class));
 		l.add(SystemAction.get(FreeBoundsAction.class));
 		l.add(SystemAction.get(BoundingBoxAction.class));
 		
