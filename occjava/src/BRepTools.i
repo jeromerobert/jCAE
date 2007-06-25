@@ -18,7 +18,10 @@
  * (C) Copyright 2005, by EADS CRC
  */
 
-%{#include <BRepTools.hxx>%}
+%{
+#include <BRepTools.hxx>
+#include <BRepTools_ShapeSet.hxx>    
+%}
 
 // define another read method that match the one of libOccJava (the one below don't).
 %typemap(javacode) BRepTools
@@ -77,8 +80,22 @@ class BRepTools
 		const Standard_CString file);
 
 	static  void Write(const TopoDS_Shape& Sh,Standard_OStream& S) ;
-	static  void Read(TopoDS_Shape& Sh,Standard_IStream& S,const BRep_Builder& B) ;
 };
+
+%extend BRepTools
+{
+	//in the original version of this method opencascade suppose that the format of the stream is
+	//correct and don't do any verification. It cause segfault when the stream is wrong.
+	static Standard_Boolean read(TopoDS_Shape& shape, Standard_IStream& input, const BRep_Builder& builder)
+	{
+		BRepTools_ShapeSet SS(builder);
+		SS.Read(input);
+		if(!SS.NbShapes()) return Standard_False;
+		SS.Read(shape,input);
+		return Standard_True;
+	}
+}
+
 
 /**
  * BRepTools_WireExplorer

@@ -95,6 +95,11 @@
 	$1=&os;
 %}
 
+%typemap(freearg) Standard_OStream&
+%{
+    $1->flush();
+%}
+
 %typemap(javain) Standard_OStream& "$javainput"
 %typemap(javaout) Standard_OStream& 
 {
