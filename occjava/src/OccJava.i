@@ -67,6 +67,7 @@
 %include "BRepFilletAPI.i"
 %include "BRepCheck.i"
 %include "ShapeBuild.i"
+// This one require Opencascade 6.2
 %include "ShapeUpgrade.i"
 
 %typemap(javacode) TopExp

@@ -1,6 +1,5 @@
 lib_LTLIBRARIES=libOccJava.la
-bin_PROGRAMS = jnistreamtest
-jnistreamtest_SOURCES = jnistreamtest.cxx
+
 IFACEFILES=\
 	BRepPrimAPI.i \
 	BRep.i \

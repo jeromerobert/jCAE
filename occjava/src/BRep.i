@@ -48,8 +48,8 @@
 		Geom_Curve toReturn=curve(e, range, d2);
 		range[1]=d2[0];
 		return toReturn;
-	}	
-%}	
+	}
+%}
 
 class BRep_Tool
 {
@@ -104,7 +104,7 @@ class BRep_Tool
 		Standard_Real& First,Standard_Real& Last)
 	{
 		Handle_Geom_Curve * hgc=new Handle_Geom_Curve(BRep_Tool::Curve(E, First, Last));
-		if(hgc->IsNull())		
+		if(hgc->IsNull())
 			return NULL;
 		else
 			return hgc;
@@ -135,7 +135,7 @@ class BRep_Builder: public TopoDS_Builder
 	%rename(updateVertex) UpdateVertex;
 	public:
 	BRep_Builder();
-    void UpdateVertex(const TopoDS_Vertex& Ve,const Standard_Real U,const Standard_Real V,const TopoDS_Face& F,const Standard_Real Tol) const;
-
+	void UpdateVertex(const TopoDS_Vertex& vertex, const Standard_Real u, const Standard_Real v, const TopoDS_Face& face, const Standard_Real tolerance) const;
+	void UpdateVertex(const TopoDS_Vertex& vertex, const Standard_Real tolerance) const;
 };
 
