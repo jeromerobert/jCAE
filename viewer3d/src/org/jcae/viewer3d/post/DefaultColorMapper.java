@@ -163,7 +163,7 @@ public class DefaultColorMapper implements ColorMapper
 	}
 	
 	/**
-	 * Set the <strong>finit</strong> smalled value
+	 * Set the <strong>finit</strong> smallest value
 	 */
 	public void setMin(float min)
 	{
@@ -191,5 +191,29 @@ public class DefaultColorMapper implements ColorMapper
 		}
 		else
 			minInf=min;
+	}
+	
+	/**
+	 * Get the <strong>finit</strong> smallest value
+	 */	
+	public float getMin()
+	{
+		return min;
+	}
+
+	/**
+	 * Get the greatest value
+	 */	
+	public float getMax()
+	{
+		return min;
+	}
+	
+	/**
+	 * Return true is the set of value contains Float.NEGATIVE_INFINITY
+	 */
+	public boolean isNegativeInfinity()
+	{
+		return haveInfinity;
 	}
 }
