@@ -206,7 +206,7 @@ public class DefaultColorMapper implements ColorMapper
 	 */	
 	public float getMax()
 	{
-		return min;
+		return max;
 	}
 	
 	/**
