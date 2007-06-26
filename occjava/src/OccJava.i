@@ -132,20 +132,23 @@ class TopExp_Explorer
 		double[] toReturn=new double[6];
 		get(toReturn);
 		return toReturn;
-	}	
+	}
 %}
 
 class Bnd_Box
 {
-	public:	
-	Bnd_Box();	
+	%rename(isVoid) IsVoid;
+	public:
+	Bnd_Box();
+	Standard_Boolean IsVoid() const;
 };
 
 %extend Bnd_Box
 {
 	void get(double box[6])
 	{
-		self->Get(box[0], box[1], box[2], box[3], box[4], box[5]);
+		if(!self->IsVoid())
+			self->Get(box[0], box[1], box[2], box[3], box[4], box[5]);
 	}
 };
 
@@ -157,7 +160,7 @@ class BRepBndLib
 {
 	public:
 	%rename(add) Add;
-	static void Add(const TopoDS_Shape& shape,Bnd_Box& bndBox) ;	
+	static void Add(const TopoDS_Shape& shape,Bnd_Box& bndBox);
 };
 
 /**
