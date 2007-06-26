@@ -1182,11 +1182,26 @@ public class View extends Canvas3D implements PositionListener
 		move(t3d);
 	}
 	
+	/** refresh the clip planes value*/
 	protected void fireViewableChanged(Viewable viewable){
-		BranchGroup bg=getBranchGroup(viewable);
-		if(modelClip.indexOfScope(bg)>0)
-			modelClip.removeScope(bg);
-		modelClip.addScope(bg);
+		if(!isModelClip) return;
+		int planeCount=0;
+		for(int i=0;i<6;i++){
+			if(modelClip.getEnable(i))
+				planeCount++;
+		}
+		
+		Vector4d[] planes=new Vector4d[planeCount];
+		int ii=0;
+		for(int i=0;i<6;i++){
+			if(modelClip.getEnable(i))
+			{
+				planes[ii]=new Vector4d();
+				modelClip.getPlane(i,planes[ii]);
+				ii++;
+			}	
+		}
+		setClipPlanes(planes);
 	}
 	
 	public static void viewableChanged(Viewable viewable){
