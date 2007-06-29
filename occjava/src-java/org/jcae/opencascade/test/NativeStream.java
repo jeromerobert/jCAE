@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import org.jcae.opencascade.Utilities;
 import org.jcae.opencascade.jni.*;
 
 /** Test native stream */
@@ -21,9 +22,17 @@ public class NativeStream
 			BRepTools.write(shape, c);
 			c.close();
 			TopoDS_Shape s=new TopoDS_Shape();
-			BRepTools.read(new TopoDS_Shape(),
-				new FileInputStream(f).getChannel(),new BRep_Builder());
-			TopoDS_Solid solid=(TopoDS_Solid)TopoDS_Shape.downcast(s);
+			System.out.println("read");
+			BRepTools.read(s, new FileInputStream(f).getChannel(),new BRep_Builder());
+			Utilities.dumpTopology(s);
+			
+			//Test reading an empty brep file
+			s=new TopoDS_Shape();
+			f=File.createTempFile("occjava", "brep");
+			f.deleteOnExit();
+			c = new FileInputStream(f).getChannel();
+			System.out.println(BRepTools.read(s, c, new BRep_Builder()));
+			c.close();			
 		}
 		catch(IOException ex)
 		{
