@@ -404,6 +404,24 @@ public class View extends Canvas3D implements PositionListener
 		return vp;		
 	}
 
+	/** return all the clipped groups in the view*/ 
+	private Group[] getAllClipGroup(){
+		int numGroup=0;
+		Viewable[] viewable=getViewables();
+		numGroup+=widgetsBranchGroup.numChildren();
+		numGroup+=viewable.length;
+		Group[] toReturn=new Group[numGroup];
+		int ii=0;
+		for(int i=0;i<widgetsBranchGroup.numChildren();i++){
+			toReturn[ii++]=(Group) widgetsBranchGroup.getChild(i);
+		}
+		
+		for(int i=0;i<viewable.length;i++){
+			toReturn[ii++]=getBranchGroup(viewable[i]);
+		}
+		return toReturn;
+	}
+	
 	/** Add a Viewable to the current view */
 	public void add(Viewable viewable)
 	{
@@ -430,9 +448,7 @@ public class View extends Canvas3D implements PositionListener
 		if(currentViewable==null)
 			currentViewable=viewable;
 		
-		if(isModelClip){
-				modelClip.addScope(getBranchGroup(viewable));
-		}
+		updateModelClipGroup();
 	}
 
 	/**
@@ -453,6 +469,7 @@ public class View extends Canvas3D implements PositionListener
 	{
 		branchGroup.setCapability(BranchGroup.ALLOW_DETACH);
 		widgetsBranchGroup.addChild(branchGroup);
+		updateModelClipGroup();
 	}
 	
 	
@@ -462,6 +479,7 @@ public class View extends Canvas3D implements PositionListener
 	 */
 	public void removeWidgetBranchGroup(BranchGroup branchGroup){
 		widgetsBranchGroup.removeChild(branchGroup);
+		updateModelClipGroup();
 	}
 	
 	/**
@@ -486,7 +504,7 @@ public class View extends Canvas3D implements PositionListener
 	
 	private void setModelClip(ModelClip newModelClip){
 		removeModelClip();
-		initModelClipScope(modelClip);
+		updateModelClipGroup();
 		for(int i=0;i<6;i++){
 			if(newModelClip.getEnable(i)){
 				Vector4d plane=new Vector4d();
@@ -497,6 +515,16 @@ public class View extends Canvas3D implements PositionListener
 		}
 		modelClip.setInfluencingBounds(new BoundingSphere(new Point3d(),Double.MAX_VALUE));
 		isModelClip=true;
+	}
+	
+	/** update the group list of the modelclip*/
+	private void updateModelClipGroup(){
+		if(!isModelClip) return;
+		modelClip.removeAllScopes();
+		Group[] all=getAllClipGroup();
+		for(int i=0;i<all.length;i++){
+			modelClip.addScope(all[i]);
+		}
 	}
 	
 	private void initModelClipScope(ModelClip modelClip) {
@@ -897,9 +925,6 @@ public class View extends Canvas3D implements PositionListener
 			vsg.removeView(getView());			
 			if(vsg.numViews()==0)
 			{				
-				if(isModelClip){
-					modelClip.removeScope(getBranchGroup(viewable));
-				}
 				universe.getLocale().removeBranchGraph(getBranchGroup(viewable));
 				viewableToViewSpecificGroup.remove(viewable);
 				vsg.removeAllChildren();
@@ -913,6 +938,8 @@ public class View extends Canvas3D implements PositionListener
 			else
 				currentViewable=null;
 		}
+		
+		updateModelClipGroup();
 	}
 	
 	/** inform if the view contains the viewable*/
