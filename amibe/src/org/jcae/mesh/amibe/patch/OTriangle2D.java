@@ -19,6 +19,7 @@
 
 package org.jcae.mesh.amibe.patch;
 
+import org.jcae.mesh.amibe.InvalidFaceException;
 import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
 import java.util.Random;
@@ -395,7 +396,7 @@ public class OTriangle2D extends VirtualHalfEdge
 		{
 			//  A midpoint is aligned with start and end, this should
 			//  never happen.
-			throw new RuntimeException("Point "+origin()+" is aligned with "+start+" and "+end);
+			throw new InvalidFaceException("Point "+origin()+" is aligned with "+start+" and "+end);
 		}
 		return count;
 	}

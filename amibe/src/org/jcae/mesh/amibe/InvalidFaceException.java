@@ -22,4 +22,12 @@ package org.jcae.mesh.amibe;
 
 public class InvalidFaceException extends RuntimeException
 {
+	public InvalidFaceException()
+	{
+	}
+	
+	public InvalidFaceException(String reason)
+	{
+		super(reason);
+	}
 }
