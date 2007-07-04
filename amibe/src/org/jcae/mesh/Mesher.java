@@ -21,10 +21,7 @@
 
 package org.jcae.mesh;
 
-import java.io.InputStream;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-import java.io.File;
+import java.io.*;
 import java.util.Properties;
 import java.util.Stack;
 import java.util.Date;
@@ -62,137 +59,285 @@ import gnu.trove.THashSet;
 public class Mesher
 {
 	private static Logger logger=Logger.getLogger(Mesher.class);
-
-	/** 
-	 * Mesh a CAD surface.
-	 *
-	 * @param brepfilename  the filename of the brep file	 
-	 * @param xmlDir  directory where output files are stored
-	 * @param discr  length constraint
-	 * @param defl   deflection constraint
+	private static SimpleDateFormat DATE_FORMAT =
+		new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	
+	/** meshing constraint: edge length */
+	protected double edgeLength;
+	
+	/** meshing constraint: deflection */
+	protected double deflection;
+	
+	/** The geometry file to be meshed */
+	protected String geometryFile;
+	
+	/** The file where to export the mesh in UNV format */
+	protected String unvName;
+	
+	/** The output directory */
+	protected String outputDir;
+	private boolean exportTriangleSoup;
+	private boolean exportPOLY;
+	private boolean exportSTL;
+	private boolean exportMESH;
+	private boolean writeNormals;
+	private boolean exportUNV;
+	private boolean processMesh3d=true;
+	private boolean processMesh2d=true;
+	private boolean processMesh1d=true;
+	private boolean quadrangles;
+	private boolean relDefl=true;
+	private boolean isotropic=true;
+	private int minFace=0;
+	private int maxFace=0;
+	private int numFace=0;
+		
+	/**
+	 * Read system properties which affect the meshing behavior.
+	 * See package level javadoc for more information. 
 	 */
-	private static TIntArrayList mesh(String brepfilename, String unvName, String xmlDir, double discr, double defl)
+	protected void readProperties()
 	{
-		//  Process all needed properties
+		//TODO Clumsy code, should be rewrote. here are some avenues.
+		//The default value for a boolean property is always false. Doing so
+		//allows using Boolean.getBoolean. It means replacing
+		//Metric3D.relativeDeflection by Metric3D.noRelativeDeflection.
+		//When possible system properties should not be used as global variable,
+		//here they are set, only to be read in the report method.
+		//System.getProperty can take a parameter which is the default property
+		//value.
 		String relDeflProp = System.getProperty("org.jcae.mesh.amibe.ds.Metric3D.relativeDeflection");
 		if (relDeflProp == null)
-		{
-			relDeflProp = "true";
+		{			
+			relDeflProp="true";
 			System.setProperty("org.jcae.mesh.amibe.ds.Metric3D.relativeDeflection", relDeflProp);
 		}
+		relDefl=relDeflProp.equals("true");
+		
 		String numFaceProp = System.getProperty("org.jcae.mesh.Mesher.meshFace");
 		if (numFaceProp == null)
 		{
 			numFaceProp = "0";
 			System.setProperty("org.jcae.mesh.Mesher.meshFace", numFaceProp);
 		}
+		numFace=Integer.parseInt(numFaceProp);
+		
 		String minFaceProp = System.getProperty("org.jcae.mesh.Mesher.minFace");
 		if (minFaceProp == null)
 		{
 			minFaceProp = "0";
 			System.setProperty("org.jcae.mesh.Mesher.minFace", minFaceProp);
 		}
+		minFace=Integer.parseInt(minFaceProp);
+		
 		String maxFaceProp = System.getProperty("org.jcae.mesh.Mesher.maxFace");
 		if (maxFaceProp == null)
 		{
 			maxFaceProp = "0";
 			System.setProperty("org.jcae.mesh.Mesher.maxFace", maxFaceProp);
 		}
+		maxFace=Integer.parseInt(maxFaceProp);
+		
 		String processMesh1dProp = System.getProperty("org.jcae.mesh.Mesher.mesh1d");
 		if (processMesh1dProp == null)
 		{
 			processMesh1dProp = "true";
 			System.setProperty("org.jcae.mesh.Mesher.mesh1d", processMesh1dProp);
 		}
+		processMesh1d=processMesh1dProp.equals("true");
+		
 		String processMesh2dProp = System.getProperty("org.jcae.mesh.Mesher.mesh2d");
 		if (processMesh2dProp == null)
 		{
 			processMesh2dProp = "true";
 			System.setProperty("org.jcae.mesh.Mesher.mesh2d", processMesh2dProp);
 		}
+		processMesh2d=processMesh2dProp.equals("true");
+		
 		String processMesh3dProp = System.getProperty("org.jcae.mesh.Mesher.mesh3d");
 		if (processMesh3dProp == null)
 		{
 			processMesh3dProp = "true";
 			System.setProperty("org.jcae.mesh.Mesher.mesh3d", processMesh3dProp);
 		}
+		processMesh3d=processMesh3dProp.equals("true");
+		
 		String isotropicMeshProp = System.getProperty("org.jcae.mesh.Mesher.isotropic");
 		if (isotropicMeshProp == null)
 		{
 			isotropicMeshProp = "true";
 			System.setProperty("org.jcae.mesh.Mesher.isotropic", isotropicMeshProp);
 		}
+		isotropic=isotropicMeshProp.equals("true");
+		
 		String exportTriangleSoupProp = System.getProperty("org.jcae.mesh.Mesher.triangleSoup");
 		if (exportTriangleSoupProp == null)
 		{
 			exportTriangleSoupProp = "false";
 			System.setProperty("org.jcae.mesh.Mesher.triangleSoup", exportTriangleSoupProp);
 		}
+		exportTriangleSoup=exportTriangleSoupProp.equals("true");
+		
 		String writeNormalsProp = System.getProperty("org.jcae.mesh.Mesher.writeNormals");
 		if (writeNormalsProp == null)
 		{
 			writeNormalsProp = "false";
 			System.setProperty("org.jcae.mesh.Mesher.writeNormals", writeNormalsProp);
 		}
+		writeNormals=writeNormalsProp.equals("true");
+		
 		String exportUNVProp = System.getProperty("org.jcae.mesh.exportUNV");
 		if (exportUNVProp == null)
 		{
 			exportUNVProp = "false";
 			System.setProperty("org.jcae.mesh.exportUNV", exportUNVProp);
 		}
+		exportUNV=exportUNVProp.equals("true");
+		
 		String exportMESHProp = System.getProperty("org.jcae.mesh.exportMESH");
 		if (exportMESHProp == null)
 		{
 			exportMESHProp = "false";
 			System.setProperty("org.jcae.mesh.exportMESH", exportMESHProp);
 		}
+		exportMESH=exportMESHProp.equals("true");
+		
 		String exportSTLProp = System.getProperty("org.jcae.mesh.exportSTL");
 		if (exportSTLProp == null)
 		{
 			exportSTLProp = "false";
 			System.setProperty("org.jcae.mesh.exportSTL", exportSTLProp);
 		}
+		exportSTL=exportSTLProp.equals("true");
+		
 		String exportPOLYProp = System.getProperty("org.jcae.mesh.exportPOLY");
 		if (exportPOLYProp == null)
 		{
 			exportPOLYProp = "false";
 			System.setProperty("org.jcae.mesh.exportPOLY", exportPOLYProp);
 		}
+		exportPOLY=exportPOLYProp.equals("true");
+		
 		String quadranglesProp = System.getProperty("org.jcae.mesh.Mesher.quadrangles");
 		if (quadranglesProp == null)
 		{
 			quadranglesProp = "false";
 			System.setProperty("org.jcae.mesh.Mesher.quadrangles", quadranglesProp);
 		}
-
+		quadrangles=quadranglesProp.equals("true");
+	}
+	
+	protected MMesh1D mesh1D(CADShape shape, String xmlBrepDir, String brepFile)
+	{
+		logger.info("1D mesh");
+		MMesh1D mesh1D = new MMesh1D(shape);
+		mesh1D.setMaxLength(edgeLength);
+		if (deflection <= 0.0)
+			new UniformLength(mesh1D).compute();
+		else
+		{
+			mesh1D.setMaxDeflection(deflection);
+			new UniformLengthDeflection(mesh1D).compute(relDefl);
+			if (isotropic)
+				new Compat1D2D(mesh1D).compute(relDefl);
+		}
+		//  Store the 1D mesh onto disk
+		MMesh1DWriter.writeObject(mesh1D, outputDir, "jcae1d", xmlBrepDir, brepFile);
+		return mesh1D;
+	}
+	
+	
+	protected boolean mesh2D(int iFace, CADFace F, int nrFaces, MMesh1D mesh1D, 
+		String xmlBrepDir, String brepFile, MeshTraitsBuilder mtb)
+	{
+		int nTryMax = 20;
+		logger.info("Meshing face " + iFace+"/"+nrFaces);
+		//  This variable can be modified, thus reset it
+		Metric2D.setLength(edgeLength);
+		if(Boolean.getBoolean("org.jcae.mesh.Mesher.explodeBrep"))
+			F.writeNative("face."+iFace+".brep");
+		Mesh2D mesh = new Mesh2D(mtb, F); 
+		int nTry = 0;
+		boolean toReturn=true;
+		while (nTry < nTryMax)
+		{
+			try
+			{
+				new BasicMesh(mesh, mesh1D).compute();
+				new CheckDelaunay(mesh).compute();
+				if (deflection > 0.0 && !relDefl)
+					new EnforceAbsDeflection(mesh).compute();
+				mesh.removeDegeneratedEdges();
+				MeshWriter.writeObject(mesh, outputDir, "jcae2d."+iFace, xmlBrepDir, brepFile, iFace);
+			}
+			catch(Exception ex)
+			{
+				if (ex instanceof InitialTriangulationException)
+				{
+					logger.warn("Face "+iFace+" cannot be triangulated, trying again with a larger tolerance...");
+					mesh = new Mesh2D(mtb, F);
+					mesh.scaleTolerance(10.);
+					nTry++;
+					continue;
+				}
+				else if (ex instanceof InvalidFaceException)
+				{
+					logger.warn("Face "+iFace+" is invalid, skipping...");
+					mesh = new Mesh2D(mtb, F); 
+					MeshWriter.writeObject(mesh, outputDir, "jcae2d."+iFace, xmlBrepDir, brepFile, iFace);
+					toReturn=false;					
+					break;
+				}
+				else
+				{
+					ex.printStackTrace();
+					System.exit(-1);
+				}
+				toReturn=false;
+				logger.warn(ex.getMessage());
+				ex.printStackTrace();
+			}
+			break;
+		}
+		if (nTry == nTryMax)
+		{
+			logger.error("Face "+iFace+" cannot be triangulated, skipping...");
+			toReturn=false;
+			mesh = new Mesh2D(mtb, F); 
+			MeshWriter.writeObject(mesh, outputDir, "jcae2d."+iFace, xmlBrepDir, brepFile, iFace);
+		}
+		return toReturn;
+	}
+	
+	/** 
+	 * Run the mesh
+	 */
+	protected TIntArrayList mesh()
+	{
 		//  Declare all variables here
 		//  xmlDir:      absolute path name where XML files are stored
 		//  xmlFile:     basename of the main XML file
 		//  xmlBrepDir:  path to brep file, relative to xmlDir
 		//  brepFile:    basename of the brep file
 		
-		String brepFile = (new File(brepfilename)).getName();		
-		String xmlFile = "jcae1d";
+		String brepFile = (new File(geometryFile)).getName();		
+
 		MMesh1D mesh1D;
 		TIntArrayList badGroups = new TIntArrayList();
 						
-		String xmlBrepDir = relativize(new File(brepfilename).getAbsoluteFile().getParentFile(),
-			new File(xmlDir).getAbsoluteFile()).getPath();
+		String xmlBrepDir = relativize(new File(geometryFile).getAbsoluteFile().getParentFile(),
+			new File(outputDir).getAbsoluteFile()).getPath();
 		
-		logger.info("Loading " + brepfilename);
+		logger.info("Loading " + geometryFile);
 		
 		CADShapeBuilder factory = CADShapeBuilder.factory;
-		CADShape shape = factory.newShape(brepfilename);
+		CADShape shape = factory.newShape(geometryFile);
 		CADExplorer expF = factory.newExplorer();
-		boolean relDefl = relDeflProp.equals("true");
-		boolean isotropic = isotropicMeshProp.equals("true");
-		int numFace = Integer.parseInt(numFaceProp);
-		int minFace = Integer.parseInt(minFaceProp);
-		int maxFace = Integer.parseInt(maxFaceProp);
+
 		if (minFace != 0 || maxFace != 0)
 			numFace=0;
-		if (quadranglesProp.equals("true")) {
-			discr *= 2.0;
+		if (quadrangles) {
+			edgeLength *= 2.0;
 			//defl *= 2.0;
 		}
 		VertexTraitsBuilder vtb = new VertexTraitsBuilder();
@@ -203,30 +348,17 @@ public class Mesher
 		mtb.addTriangleList();
 		mtb.add(vtb);
 		mtb.add(ttb);
-		if (processMesh1dProp.equals("true")) {
+		if (processMesh1d) {
 			//  Step 1: Compute 1D mesh
-			logger.info("1D mesh");
-			mesh1D = new MMesh1D(shape);
-			mesh1D.setMaxLength(discr);
-			if (defl <= 0.0)
-				new UniformLength(mesh1D).compute();
-			else
-			{
-				mesh1D.setMaxDeflection(defl);
-				new UniformLengthDeflection(mesh1D).compute(relDefl);
-				if (isotropic)
-					new Compat1D2D(mesh1D).compute(relDefl);
-			}
-			//  Store the 1D mesh onto disk
-			MMesh1DWriter.writeObject(mesh1D, xmlDir, xmlFile, xmlBrepDir, brepFile);
+			mesh1D = mesh1D(shape, xmlBrepDir, brepFile);
 		}
-		if (processMesh2dProp.equals("true")) {
+		if (processMesh2d) {
 			//  Step 2: Read the 1D mesh and compute 2D meshes
-			mesh1D = MMesh1DReader.readObject(xmlDir, xmlFile);
+			mesh1D = MMesh1DReader.readObject(outputDir, "jcae1d");
 			shape = mesh1D.getGeometry();
-			mesh1D.setMaxLength(discr);
-			Metric3D.setLength(discr);
-			Metric3D.setDeflection(defl);
+			mesh1D.setMaxLength(edgeLength);
+			Metric3D.setLength(edgeLength);
+			Metric3D.setDeflection(deflection);
 			Metric3D.setRelativeDeflection(relDefl);
 			Metric3D.setIsotropic(isotropic);
 	
@@ -236,7 +368,7 @@ public class Mesher
 			mesh1D.updateNodeLabels();
 			
 			int iFace = 0;
-			int nTryMax = 20;
+
 			logger.debug("org.jcae.mesh.Mesher.minFace="+minFace);
 			logger.debug("org.jcae.mesh.Mesher.maxFace="+maxFace);
 			logger.debug("org.jcae.mesh.Mesher.meshFace="+numFace);
@@ -260,73 +392,18 @@ public class Mesher
 				if (seen.contains(F))
 					continue;
 				seen.add(F);
-				logger.info("Meshing face " + iFace+"/"+nrFaces);
-				//  This variable can be modified, thus reset it
-				Metric2D.setLength(discr);
-				if(Boolean.getBoolean("org.jcae.mesh.Mesher.explodeBrep"))
-					F.writeNative("face."+iFace+".brep");
-				Mesh2D mesh = new Mesh2D(mtb, F); 
-				int nTry = 0;
-				while (nTry < nTryMax)
-				{
-					try
-					{
-						new BasicMesh(mesh, mesh1D).compute();
-						new CheckDelaunay(mesh).compute();
-						if (defl > 0.0 && !relDefl)
-							new EnforceAbsDeflection(mesh).compute();
-						mesh.removeDegeneratedEdges();
-						xmlFile = "jcae2d."+iFace;
-						MeshWriter.writeObject(mesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
-					}
-					catch(Exception ex)
-					{
-						if (ex instanceof InitialTriangulationException)
-						{
-							logger.warn("Face "+iFace+" cannot be triangulated, trying again with a larger tolerance...");
-							mesh = new Mesh2D(mtb, F);
-							mesh.scaleTolerance(10.);
-							nTry++;
-							continue;
-						}
-						else if (ex instanceof InvalidFaceException)
-						{
-							logger.warn("Face "+iFace+" is invalid, skipping...");
-							mesh = new Mesh2D(mtb, F); 
-							xmlFile = "jcae2d."+iFace;
-							MeshWriter.writeObject(mesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
-							badGroups.add(iFace);
-							break;
-						}
-						else
-						{
-							ex.printStackTrace();
-							System.exit(-1);
-						}
-						badGroups.add(iFace);
-						logger.warn(ex.getMessage());
-						ex.printStackTrace();
-					}
-					break;
-				}
-				if (nTry == nTryMax)
-				{
-					logger.error("Face "+iFace+" cannot be triangulated, skipping...");
+				if(!mesh2D(iFace, F, nrFaces, mesh1D, xmlBrepDir, brepFile, mtb))
 					badGroups.add(iFace);
-					mesh = new Mesh2D(mtb, F); 
-					xmlFile = "jcae2d."+iFace;
-					MeshWriter.writeObject(mesh, xmlDir, xmlFile, xmlBrepDir, brepFile, iFace);
-				}
 			}
 		}
 
-		if (processMesh3dProp.equals("true")) {
+		if (processMesh3d) {
 			// Step 3: Read 2D meshes and compute 3D mesh
 			try
 			{
 				int iFace = 0;
-				MeshToMMesh3DConvert m2dTo3D = new MeshToMMesh3DConvert(xmlDir);
-				m2dTo3D.exportUNV(exportUNVProp.equals("true"), unvName);
+				MeshToMMesh3DConvert m2dTo3D = new MeshToMMesh3DConvert(outputDir);
+				m2dTo3D.exportUNV(exportUNV, unvName);
 				logger.info("Read informations on boundary nodes");
 				for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 				{
@@ -337,10 +414,9 @@ public class Mesher
 						continue;
 					if (maxFace != 0 && iFace > maxFace)
 						continue;
-					xmlFile = "jcae2d."+iFace;
-					m2dTo3D.computeRefs(xmlFile);
+					m2dTo3D.computeRefs("jcae2d."+iFace);
 				}
-				m2dTo3D.initialize("jcae3d", writeNormalsProp.equals("true"));
+				m2dTo3D.initialize("jcae3d", writeNormals);
 				iFace = 0;
 				for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 				{
@@ -352,9 +428,8 @@ public class Mesher
 						continue;
 					if (maxFace != 0 && iFace > maxFace)
 						continue;
-					xmlFile = "jcae2d."+iFace;
 					logger.info("Importing face "+iFace);
-					m2dTo3D.convert(xmlFile, iFace, F);
+					m2dTo3D.convert("jcae2d."+iFace, iFace, F);
 				}
 				m2dTo3D.finish();
 			}
@@ -363,29 +438,29 @@ public class Mesher
 				logger.warn(ex.getMessage());
 				ex.printStackTrace();
 			}
-			if (exportMESHProp.equals("true"))
+			if (exportMESH)
 			{
 				logger.info("Exporting MESH");
-				String MESHName=brepfilename.substring(0, brepfilename.lastIndexOf('.'))+".mesh";
-				new MeshExporter.MESH(xmlDir).write(MESHName);
+				String MESHName=geometryFile.substring(0, geometryFile.lastIndexOf('.'))+".mesh";
+				new MeshExporter.MESH(outputDir).write(MESHName);
 			}
-			if (exportSTLProp.equals("true"))
+			if (exportSTL)
 			{
 				logger.info("Exporting STL");
-				String STLName=brepfilename.substring(0, brepfilename.lastIndexOf('.'))+".stl";
-				new MeshExporter.STL(xmlDir).write(STLName);
+				String STLName=geometryFile.substring(0, geometryFile.lastIndexOf('.'))+".stl";
+				new MeshExporter.STL(outputDir).write(STLName);
 			}
-			if (exportPOLYProp.equals("true"))
+			if (exportPOLY)
 			{
 				logger.info("Exporting POLY");
-				String MESHName=brepfilename.substring(0, brepfilename.lastIndexOf('.'))+".poly";
-				new MeshExporter.POLY(xmlDir).write(MESHName);
+				String MESHName=geometryFile.substring(0, geometryFile.lastIndexOf('.'))+".poly";
+				new MeshExporter.POLY(outputDir).write(MESHName);
 			}
 		}
-		if (exportTriangleSoupProp.equals("true"))
+		if (exportTriangleSoup)
 		{
 			// Step 3bis: Read 2D meshes and compute raw 3D mesh
-			MeshToSoupConvert.meshToSoup(xmlDir, shape);
+			MeshToSoupConvert.meshToSoup(outputDir, shape);
 		}
 		if (badGroups.size() > 0)
 		{
@@ -395,10 +470,10 @@ public class Mesher
 		return badGroups;
 	}
 	
-	private static void report(String brepfilename, TIntArrayList badGroups, String xmlDir, double discr, double defl, String startDate)
+	protected void report(TIntArrayList badGroups, String startDate)
 	{
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		String endDate = sdf.format(new Date());
+		
+		String endDate = DATE_FORMAT.format(new Date());
 		String outfile = System.getProperty("org.jcae.mesh.Mesher.reportFile");
 		if (outfile == null)
 			return;
@@ -409,14 +484,14 @@ public class Mesher
 			Properties prop = new Properties();
 			prop.load(in);
 			String buildDate = prop.getProperty("build.time");
-			int [] res = MeshReader.getInfos(xmlDir, "jcae3d");
+			int [] res = MeshReader.getInfos(outputDir, "jcae3d");
 			out.println("MESH REPORT");
 			out.println("===========");
 			out.println("Start date: "+startDate);
 			out.println("End date: "+endDate);
-			out.println("Geometry: "+brepfilename);
-			out.println("Edge length criterion: "+discr);
-			out.println("Deflection criterion: "+defl);
+			out.println("Geometry: "+geometryFile);
+			out.println("Edge length criterion: "+edgeLength);
+			out.println("Deflection criterion: "+deflection);
 			out.println("Number of nodes: "+res[0]);
 			out.println("Number of triangles: "+res[1]);
 			out.println("Number of groups: "+res[2]);
@@ -457,7 +532,7 @@ public class Mesher
 		}
 	}
 
-	static public boolean deleteDirectory(File path, File avoid)
+	private static boolean deleteDirectory(File path, File avoid)
 	{
 		if (path.exists())
 		{
@@ -490,72 +565,81 @@ public class Mesher
 	}
 	
 	/**
+	 * @param args The main function argument 
+	 * @throws IOException If the creation of the output directory failed
+	 */
+	protected void parseCommandLine(String[] args) throws IOException
+	{
+		if (args.length < 2 || args.length > 4)
+		{
+			System.out.println("Usage : Mesher filename output_directory edge_length deflection");
+			System.exit(0);
+		}
+		geometryFile=args[0];
+		unvName=System.getProperty("org.jcae.mesh.unv.name");
+		
+		if(unvName==null)
+		{
+			unvName=geometryFile.substring(0, geometryFile.lastIndexOf('.'))+".unv";
+			if(!Boolean.getBoolean("org.jcae.mesh.unv.nogz"))
+				unvName += ".gz";
+		}
+		
+		if (geometryFile.endsWith(".step") || geometryFile.endsWith(".stp") || geometryFile.endsWith(".igs"))
+		{
+			CADShape shape = CADShapeBuilder.factory.newShape(geometryFile);
+			geometryFile = geometryFile.substring(0, geometryFile.lastIndexOf('.')) + ".tmp.brep";
+			shape.writeNative(geometryFile);
+		}
+		
+		// if what we want is just the mesh count, print it and exit
+		if(Boolean.getBoolean("org.jcae.mesh.countFaces"))
+			System.exit(countFaces(geometryFile));
+		
+		//Init xmlDir
+		
+		if(Boolean.getBoolean("org.jcae.mesh.tmpDir.auto"))
+		{
+			File f=File.createTempFile("jcae","");
+			f.delete();
+			f.mkdirs();
+			outputDir=f.getPath();
+		}
+		else
+		{
+			outputDir = args[1];
+		}
+		
+		//Do some checks on xmlDir
+		File xmlDirF=new File(outputDir);
+		xmlDirF.mkdirs();
+		if(!xmlDirF.exists() || !xmlDirF.isDirectory())
+		{
+			System.out.println("Cannot write to "+outputDir);
+			return;
+		}
+		
+		edgeLength=Double.parseDouble(args[2]);
+		deflection=Double.parseDouble(args[3]);		
+	}
+	
+	/**
 	 * main method, reads 2 arguments and calls mesh() method
 	 * @param args an array of String, filename, algorithm type and constraint
 	 * value
 	 */
 	public static void main(String args[])
 	{
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		String startDate = sdf.format(new Date());
+		String startDate = DATE_FORMAT.format(new Date());
+		Mesher m=new Mesher();
 		try
 		{
-			if (args.length < 2 || args.length > 4)
-			{
-				System.out.println("Usage : Mesher filename output_directory edge_length deflection");
-				System.exit(0);
-			}
-			String filename=args[0];
-			String unvName=System.getProperty("org.jcae.mesh.unv.name");
-			
-			if(unvName==null)
-			{
-				unvName=filename.substring(0, filename.lastIndexOf('.'))+".unv";
-				if(!Boolean.getBoolean("org.jcae.mesh.unv.nogz"))
-					unvName += ".gz";
-			}
-			
-			if (filename.endsWith(".step") || filename.endsWith(".stp") || filename.endsWith(".igs"))
-			{
-				CADShape shape = CADShapeBuilder.factory.newShape(filename);
-				filename = filename.substring(0, filename.lastIndexOf('.')) + ".tmp.brep";
-				shape.writeNative(filename);
-			}
-			
-			// if what we want is just the mesh count, print it and exit
-			if(Boolean.getBoolean("org.jcae.mesh.countFaces"))
-				System.exit(countFaces(filename));
-			
-			//Init xmlDir
-			String xmlDir;
-			if(Boolean.getBoolean("org.jcae.mesh.tmpDir.auto"))
-			{
-				File f=File.createTempFile("jcae","");
-				f.delete();
-				f.mkdirs();
-				xmlDir=f.getPath();
-			}
-			else
-			{
-				xmlDir = args[1];
-			}
-			
-			//Do some checks on xmlDir
-			File xmlDirF=new File(xmlDir);
-			xmlDirF.mkdirs();
-			if(!xmlDirF.exists() || !xmlDirF.isDirectory())
-			{
-				System.out.println("Cannot write to "+xmlDir);
-				return;
-			}
-			
-			Double discr=new Double(args[2]);
-			Double defl=new Double(args[3]);
-			TIntArrayList badGroups = mesh(filename, unvName, xmlDir, discr.doubleValue(), defl.doubleValue());
-			report(args[0], badGroups, xmlDir, discr.doubleValue(), defl.doubleValue(), startDate);
+			m.parseCommandLine(args);
+			TIntArrayList badGroups = m.mesh();
+			m.report(badGroups, startDate);
 			if(Boolean.getBoolean("org.jcae.mesh.tmpDir.delete"))
 			{
-				deleteDirectory(new File(xmlDir), new File(unvName));
+				deleteDirectory(new File(m.outputDir), new File(m.unvName));
 			}
 			
 			logger.info("End mesh");
