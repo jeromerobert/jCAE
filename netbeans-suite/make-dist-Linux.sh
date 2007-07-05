@@ -1,7 +1,7 @@
 #! /bin/sh -x
 
 JAVA_NAME=jre-6
-VERSION=jcae-0.14.1
+VERSION=jcae-0.14.2
 rm -rf $VERSION
 mkdir $VERSION
 cd $VERSION

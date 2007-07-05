@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
 OpenIDE-Module: org.jcae.opencascade.jni
 OpenIDE-Module-Localizing-Bundle: org/jcae/opencascade/jni/Bundle.properties
-OpenIDE-Module-Specification-Version: 0.14.1
+OpenIDE-Module-Specification-Version: 0.14.2
 
