@@ -24,6 +24,8 @@ import java.awt.datatransfer.Transferable;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import javax.swing.Action;
 import org.jcae.netbeans.Utilities;
@@ -50,6 +52,16 @@ public class ModuleNode extends AbstractNode
 	{
 		private FileObject directory;
 
+		private final static Comparator DATAOBJECT_COMPARATOR=new Comparator()
+		{
+			public int compare(Object o1, Object o2)
+			{
+				DataObject d1=(DataObject) o1;
+				DataObject d2=(DataObject) o2;
+				return d1.getName().compareTo(d2.getName());
+			}
+		};
+
 		public ModuleChildren(FileObject directory)
 		{		
 			this.directory=directory;
@@ -72,7 +84,9 @@ public class ModuleNode extends AbstractNode
 					if(os[i].getExt().equalsIgnoreCase("brep"))
 						l.add(DataObject.find(os[i]));						
 				}
-				setKeys(l);
+				Object[] o=l.toArray();
+				Arrays.sort(o, DATAOBJECT_COMPARATOR);
+				setKeys(o);
 			}
 			catch (DataObjectNotFoundException e) {
 				org.openide.ErrorManager.getDefault().notify(e);
