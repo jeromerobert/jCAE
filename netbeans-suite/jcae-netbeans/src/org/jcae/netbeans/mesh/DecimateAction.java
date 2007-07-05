@@ -21,7 +21,6 @@
 package org.jcae.netbeans.mesh;
 
 import java.io.File;
-import org.jcae.mesh.amibe.algos3d.DecimateVertex;
 import org.jcae.netbeans.ProcessExecutor;
 import org.jcae.netbeans.Utilities;
 import org.openide.filesystems.FileUtil;
