@@ -227,6 +227,13 @@ public class Mesher
 		quadrangles=quadranglesProp.equals("true");
 	}
 	
+	/**
+	 * Compute 1D mesh
+	 * @param shape The geometry to be meshed
+	 * @param xmlBrepDir path to BRep file, relative to the output directory
+	 * @param brepFile basename of the BRep file
+	 * @return
+	 */
 	protected MMesh1D mesh1D(CADShape shape, String xmlBrepDir, String brepFile)
 	{
 		logger.info("1D mesh");
@@ -246,17 +253,26 @@ public class Mesher
 		return mesh1D;
 	}
 	
-	
-	protected boolean mesh2D(int iFace, CADFace F, int nrFaces, MMesh1D mesh1D, 
+	/**
+	 * Read the 1D mesh and compute 2D meshes
+	 * @param iFace
+	 * @param face the id of the face to be meshed
+	 * @param mesh1D the boundary mesh used to create this 2D mesh
+	 * @param xmlBrepDir path to BRep file, relative to the output directory
+	 * @param brepFile basename of the BRep file
+	 * @param mtb ???
+	 * @return
+	 */
+	protected boolean mesh2D(int iFace, CADFace face, MMesh1D mesh1D, 
 		String xmlBrepDir, String brepFile, MeshTraitsBuilder mtb)
 	{
 		int nTryMax = 20;
-		logger.info("Meshing face " + iFace+"/"+nrFaces);
+		
 		//  This variable can be modified, thus reset it
 		Metric2D.setLength(edgeLength);
 		if(Boolean.getBoolean("org.jcae.mesh.Mesher.explodeBrep"))
-			F.writeNative("face."+iFace+".brep");
-		Mesh2D mesh = new Mesh2D(mtb, F); 
+			face.writeNative("face."+iFace+".brep");
+		Mesh2D mesh = new Mesh2D(mtb, face); 
 		int nTry = 0;
 		boolean toReturn=true;
 		while (nTry < nTryMax)
@@ -270,32 +286,25 @@ public class Mesher
 				mesh.removeDegeneratedEdges();
 				MeshWriter.writeObject(mesh, outputDir, "jcae2d."+iFace, xmlBrepDir, brepFile, iFace);
 			}
+			catch(InitialTriangulationException ex)
+			{
+				logger.warn("Face "+iFace+" cannot be triangulated, trying again with a larger tolerance...");
+				mesh = new Mesh2D(mtb, face);
+				mesh.scaleTolerance(10.);
+				nTry++;
+				continue;				
+			}
+			catch(InvalidFaceException ex)
+			{
+				logger.warn("Face "+iFace+" is invalid, skipping...");
+				mesh = new Mesh2D(mtb, face); 
+				MeshWriter.writeObject(mesh, outputDir, "jcae2d."+iFace, xmlBrepDir, brepFile, iFace);
+				toReturn=false;
+			}
 			catch(Exception ex)
 			{
-				if (ex instanceof InitialTriangulationException)
-				{
-					logger.warn("Face "+iFace+" cannot be triangulated, trying again with a larger tolerance...");
-					mesh = new Mesh2D(mtb, F);
-					mesh.scaleTolerance(10.);
-					nTry++;
-					continue;
-				}
-				else if (ex instanceof InvalidFaceException)
-				{
-					logger.warn("Face "+iFace+" is invalid, skipping...");
-					mesh = new Mesh2D(mtb, F); 
-					MeshWriter.writeObject(mesh, outputDir, "jcae2d."+iFace, xmlBrepDir, brepFile, iFace);
-					toReturn=false;					
-					break;
-				}
-				else
-				{
-					ex.printStackTrace();
-					System.exit(-1);
-				}
-				toReturn=false;
-				logger.warn(ex.getMessage());
 				ex.printStackTrace();
+				nTry=nTryMax;
 			}
 			break;
 		}
@@ -303,14 +312,80 @@ public class Mesher
 		{
 			logger.error("Face "+iFace+" cannot be triangulated, skipping...");
 			toReturn=false;
-			mesh = new Mesh2D(mtb, F); 
+			mesh = new Mesh2D(mtb, face); 
 			MeshWriter.writeObject(mesh, outputDir, "jcae2d."+iFace, xmlBrepDir, brepFile, iFace);
 		}
 		return toReturn;
 	}
 	
+	/**
+	 * Export the created mesh to various format
+	 */
+	protected void exportMesh()
+	{
+		if (exportMESH)
+		{
+			logger.info("Exporting MESH");
+			String MESHName=geometryFile.substring(0, geometryFile.lastIndexOf('.'))+".mesh";
+			new MeshExporter.MESH(outputDir).write(MESHName);
+		}
+		if (exportSTL)
+		{
+			logger.info("Exporting STL");
+			String STLName=geometryFile.substring(0, geometryFile.lastIndexOf('.'))+".stl";
+			new MeshExporter.STL(outputDir).write(STLName);
+		}
+		if (exportPOLY)
+		{
+			logger.info("Exporting POLY");
+			String MESHName=geometryFile.substring(0, geometryFile.lastIndexOf('.'))+".poly";
+			new MeshExporter.POLY(outputDir).write(MESHName);
+		}
+	}
+	
+	/**
+	 * Read 2D meshes and compute 3D mesh
+	 * @param shape
+	 */
+	protected void mesh3D(CADShape shape)
+	{
+		int iFace = 0;
+		CADExplorer expF = CADShapeBuilder.factory.newExplorer();
+		MeshToMMesh3DConvert m2dTo3D = new MeshToMMesh3DConvert(outputDir);
+		m2dTo3D.exportUNV(exportUNV, unvName);
+		logger.info("Read informations on boundary nodes");
+		for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
+		{
+			iFace++;
+			if (numFace != 0 && iFace != numFace)
+				continue;
+			if (minFace != 0 && iFace < minFace)
+				continue;
+			if (maxFace != 0 && iFace > maxFace)
+				continue;
+			m2dTo3D.computeRefs("jcae2d."+iFace);
+		}
+		m2dTo3D.initialize("jcae3d", writeNormals);
+		iFace = 0;
+		for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
+		{
+			CADFace F = (CADFace) expF.current();
+			iFace++;
+			if (numFace != 0 && iFace != numFace)
+				continue;
+			if (minFace != 0 && iFace < minFace)
+				continue;
+			if (maxFace != 0 && iFace > maxFace)
+				continue;
+			logger.info("Importing face "+iFace);
+			m2dTo3D.convert("jcae2d."+iFace, iFace, F);
+		}
+		m2dTo3D.finish();
+	}
+	
 	/** 
 	 * Run the mesh
+	 * @return the list of face id on which the mesher failed
 	 */
 	protected TIntArrayList mesh()
 	{
@@ -329,10 +404,9 @@ public class Mesher
 			new File(outputDir).getAbsoluteFile()).getPath();
 		
 		logger.info("Loading " + geometryFile);
-		
-		CADShapeBuilder factory = CADShapeBuilder.factory;
-		CADShape shape = factory.newShape(geometryFile);
-		CADExplorer expF = factory.newExplorer();
+
+		CADShape shape = CADShapeBuilder.factory.newShape(geometryFile);
+		CADExplorer expF = CADShapeBuilder.factory.newExplorer();
 
 		if (minFace != 0 || maxFace != 0)
 			numFace=0;
@@ -380,7 +454,7 @@ public class Mesher
 			seen.clear();
 			for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 			{
-				CADFace F = (CADFace) expF.current();
+				CADFace face = (CADFace) expF.current();
 				iFace++;
 				if (numFace != 0 && iFace != numFace)
 					continue;
@@ -389,10 +463,11 @@ public class Mesher
 				if (maxFace != 0 && iFace > maxFace)
 					continue;
 				
-				if (seen.contains(F))
+				if (seen.contains(face))
 					continue;
-				seen.add(F);
-				if(!mesh2D(iFace, F, nrFaces, mesh1D, xmlBrepDir, brepFile, mtb))
+				seen.add(face);
+				logger.info("Meshing face " + iFace+"/"+nrFaces);
+				if(!mesh2D(iFace, face, mesh1D, xmlBrepDir, brepFile, mtb))
 					badGroups.add(iFace);
 			}
 		}
@@ -401,61 +476,15 @@ public class Mesher
 			// Step 3: Read 2D meshes and compute 3D mesh
 			try
 			{
-				int iFace = 0;
-				MeshToMMesh3DConvert m2dTo3D = new MeshToMMesh3DConvert(outputDir);
-				m2dTo3D.exportUNV(exportUNV, unvName);
-				logger.info("Read informations on boundary nodes");
-				for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
-				{
-					iFace++;
-					if (numFace != 0 && iFace != numFace)
-						continue;
-					if (minFace != 0 && iFace < minFace)
-						continue;
-					if (maxFace != 0 && iFace > maxFace)
-						continue;
-					m2dTo3D.computeRefs("jcae2d."+iFace);
-				}
-				m2dTo3D.initialize("jcae3d", writeNormals);
-				iFace = 0;
-				for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
-				{
-					CADFace F = (CADFace) expF.current();
-					iFace++;
-					if (numFace != 0 && iFace != numFace)
-						continue;
-					if (minFace != 0 && iFace < minFace)
-						continue;
-					if (maxFace != 0 && iFace > maxFace)
-						continue;
-					logger.info("Importing face "+iFace);
-					m2dTo3D.convert("jcae2d."+iFace, iFace, F);
-				}
-				m2dTo3D.finish();
+				mesh3D(shape);
 			}
 			catch(Exception ex)
 			{
 				logger.warn(ex.getMessage());
 				ex.printStackTrace();
 			}
-			if (exportMESH)
-			{
-				logger.info("Exporting MESH");
-				String MESHName=geometryFile.substring(0, geometryFile.lastIndexOf('.'))+".mesh";
-				new MeshExporter.MESH(outputDir).write(MESHName);
-			}
-			if (exportSTL)
-			{
-				logger.info("Exporting STL");
-				String STLName=geometryFile.substring(0, geometryFile.lastIndexOf('.'))+".stl";
-				new MeshExporter.STL(outputDir).write(STLName);
-			}
-			if (exportPOLY)
-			{
-				logger.info("Exporting POLY");
-				String MESHName=geometryFile.substring(0, geometryFile.lastIndexOf('.'))+".poly";
-				new MeshExporter.POLY(outputDir).write(MESHName);
-			}
+			exportMesh();
+
 		}
 		if (exportTriangleSoup)
 		{
@@ -470,6 +499,12 @@ public class Mesher
 		return badGroups;
 	}
 	
+	/**
+	 * Create a report to the file specified by the
+	 * org.jcae.mesh.Mesher.reportFile system property.
+	 * @param badGroups The list of face id which failed
+	 * @param startDate The date when the mesher was started
+	 */
 	protected void report(TIntArrayList badGroups, String startDate)
 	{
 		
@@ -505,9 +540,16 @@ public class Mesher
 		}
 		catch (java.io.IOException ex)
 		{
+			ex.printStackTrace();
 		}
 	}
 
+	/**
+	 * Create a relative path from a reference and an absolute path
+	 * @param file The path to create a relative path from
+	 * @param reference The reference of the created relative path
+	 * @return
+	 */
 	private static File relativize(File file, File reference)
 	{
 		File current=file;
@@ -532,6 +574,12 @@ public class Mesher
 		}
 	}
 
+	/**
+	 * Delete a directory
+	 * @param path The directory to be deleted
+	 * @param avoid A file name (possibly null) which will not be deleted
+	 * @return true on success
+	 */
 	private static boolean deleteDirectory(File path, File avoid)
 	{
 		if (path.exists())
