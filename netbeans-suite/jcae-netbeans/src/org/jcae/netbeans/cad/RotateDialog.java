@@ -78,7 +78,7 @@ public class RotateDialog extends javax.swing.JPanel
 			if (dialog.showDialog())
 			{
 				GP_Trsf trsf = new GP_Trsf();
-				trsf.setRotation(dialog.getAxis(), dialog.getAngle()*180/Math.PI);
+				trsf.setRotation(dialog.getAxis(), dialog.getAngle()*Math.PI/180);
 				for (int i = 0; i < arg0.length; i++)
 				{
 					TopoDS_Shape s = GeomUtils.getShape(arg0[i]);
