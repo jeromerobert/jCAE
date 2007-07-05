@@ -22,6 +22,7 @@ package org.jcae.netbeans.cad;
 import java.util.Arrays;
 import org.jcae.opencascade.jni.BRep_Builder;
 import org.jcae.opencascade.jni.TopExp_Explorer;
+import org.jcae.opencascade.jni.TopoDS_Iterator;
 import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
@@ -56,29 +57,26 @@ public class ReverseAction extends CookieAction implements Node.Cookie
 		}
 	}
 
-	protected TopoDS_Shape findParent(TopoDS_Shape where, TopoDS_Shape toRev)
+	protected TopoDS_Shape findParent(TopoDS_Shape where, TopoDS_Shape child)
 	{
-		if(where.shapeType()==(toRev.shapeType()-1))
-		{			
-			TopExp_Explorer exp=new TopExp_Explorer(where, toRev.shapeType());
-			for(; exp.more(); exp.next())
-			{
-				if(exp.current().equals(toRev))
-					return where;
-			}
-			return null;
-		}
-		else
+		System.out.println("where: "+where+" child: "+child);
+		TopoDS_Iterator it=new TopoDS_Iterator(where);
+		while(it.more())
 		{
-			TopExp_Explorer exp=new TopExp_Explorer(where, toRev.shapeType()-1);
-			for(; exp.more(); exp.next())
+			TopoDS_Shape shape = it.value();
+			
+			if(shape.equals(child))
+				return where;
+			
+			if(shape.shapeType()<child.shapeType())
 			{
-				TopoDS_Shape ssh = findParent(exp.current(), toRev);
-				if(ssh!=null)
-					return ssh;				
+				shape = findParent(shape, child);
+				if(shape!=null)
+					return shape;
 			}
-			return null;
+			it.next();
 		}
+		return null;		
 	}
 	
 	public String getName()
