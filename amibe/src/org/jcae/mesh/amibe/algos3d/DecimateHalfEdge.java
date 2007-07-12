@@ -384,18 +384,23 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 
 	/**
 	 * 
-	 * @param args xmlDir, -t telerance | -n triangle, brepFile, output
+	 * @param args xmlDir, xmlFile, <-t tolerance | -n triangle>, brepDir, brepFile
 	 */
 	public static void main(String[] args)
 	{
 		HashMap options = new HashMap();
-		if(args[1].equals("-n"))
-			options.put("maxtriangles", args[2]);
-		else if(args[1].equals("-t"))
-			options.put("size", args[2]);
+		if(args.length != 6)
+		{
+			System.out.println("<xmlDir> <xmlFile> <-t tolerance | -n triangle> <brepDir> <brepFile>");
+			return;
+		}
+		if(args[2].equals("-n"))
+			options.put("maxtriangles", args[3]);
+		else if(args[2].equals("-t"))
+			options.put("size", args[3]);
 		else
 		{
-			System.out.println("<xmlDir> <-t telerance | -n triangle> <brepFile> <output>");
+			System.out.println("<xmlDir> <xmlFile> <-t tolerance | -n triangle> <brepDir> <brepFile>");
 			return;
 		}
 		logger.info("Load geometry file");
@@ -405,9 +410,8 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		mtb.addTriangleSet();
 		mtb.add(ttb);
 		Mesh mesh = new Mesh(mtb);
-		MeshReader.readObject3D(mesh, args[0], "jcae3d", -1);
+		MeshReader.readObject3D(mesh, args[0], args[1], -1);
 		new DecimateHalfEdge(mesh, options).compute();
-		File brepFile=new File(args[4]);
-		MeshWriter.writeObject3D(mesh, args[4], "jcae3d", brepFile.getParent(), brepFile.getName());
+		MeshWriter.writeObject3D(mesh, args[0], args[1], args[4], args[5]);
 	}
 }

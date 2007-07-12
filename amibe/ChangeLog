@@ -1,3 +1,9 @@
+Thu Jul 12 16:31:40 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java (main): Modify
+	parameters so that jcae-netbeans can call DecimateHalfEdge instead of
+	DecimateVertex with the same arguments.
+
 Tue Jun 12 14:13:00 CEST 2007 Ahmed Bennani <ahmed_b@users.sourceforge.net>
 
 	* src/org/jcae/mesh/mesher/ds/MNode1D.java
