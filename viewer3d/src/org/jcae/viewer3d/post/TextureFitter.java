@@ -2,9 +2,12 @@ package org.jcae.viewer3d.post;
 
 import java.awt.Window;
 import java.awt.image.BufferedImage;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
+
 import javax.media.j3d.*;
 import javax.vecmath.*;
 import org.jcae.opencascade.Utilities;
@@ -319,7 +322,7 @@ public class TextureFitter extends View
 		int textureHeightMax=((Integer)map.get("textureHeightMax")).intValue();
 		boolean textureNonPowerOfTwoAvailable=
 			((Boolean)map.get("textureNonPowerOfTwoAvailable")).booleanValue();
-
+		
 		while(true)
 		{
 			ImageComponent2D img=tl.getImage();
@@ -329,7 +332,12 @@ public class TextureFitter extends View
 				TextureLoader.ALLOW_NON_POWER_OF_TWO);
 		}
 		
-		int flags=TextureLoader.GENERATE_MIPMAP;
+		//We disable the mip mapping as it cause texture to do not be displayed
+		//on some hardware.
+		//TODO find which property of Canvas3D control the availability of mip
+		//mapping.
+		//int flags=TextureLoader.GENERATE_MIPMAP;
+		int flags=0;
 		if(!textureNonPowerOfTwoAvailable)
 			flags=flags|TextureLoader.ALLOW_NON_POWER_OF_TWO;
 		
@@ -376,5 +384,21 @@ public class TextureFitter extends View
         m.getRow(1, vT);
         texCoordGeneration.setPlaneS(vS);
         texCoordGeneration.setPlaneT(vT);
-	}	
+	}
+	
+	/**
+	 * Display 3D properties for debugging purpose
+	 * It use Canvas3D.queryProperties
+	 * @param out The PrintStream where to print (i.e. System.out)
+	 */
+	public void print3DProperties(PrintStream out)
+	{
+		Map map=queryProperties();
+		Iterator it=map.entrySet().iterator();
+		while(it.hasNext())
+		{
+			Entry e = (Entry)it.next();
+			System.out.println(e.getKey()+" "+e.getValue());
+		}
+	}
 }
