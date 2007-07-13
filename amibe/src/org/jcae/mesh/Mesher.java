@@ -389,6 +389,7 @@ public class Mesher
 	 */
 	protected TIntArrayList mesh()
 	{
+		readProperties();
 		//  Declare all variables here
 		//  xmlDir:      absolute path name where XML files are stored
 		//  xmlFile:     basename of the main XML file
