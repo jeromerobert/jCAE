@@ -1,3 +1,32 @@
+2007-07-03 08:06  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/View.java: more fixes concerning
+	  https://java3d.dev.java.net/issues/show_bug.cgi?id=233 (contrib
+	  erwann)
+
+2007-06-26 11:56  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/View.java: Fix ArrayIndexOutOfBound
+	  exception when working with model clips
+
+2007-06-25 15:09  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/post/DefaultColorMapper.java: Add min, max,
+	  infinity getters
+
+2007-06-14 12:25  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* build.properties, build.xml: Allow to do not build the OEMM
+	  viewer
+
+2007-06-07 09:44  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/cad/ViewableCAD.java: Allow to call
+	  ViewableCAD.domainsChangedPerform with null
+
+	* src/org/jcae/viewer3d/Palette.java: Fix
+	  ArrayIndexOutOfBoundsException for negative group ids
+
 2007-05-30 11:24:50  Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/OEMMViewer.java: In jcae.jar, OTriangle class
