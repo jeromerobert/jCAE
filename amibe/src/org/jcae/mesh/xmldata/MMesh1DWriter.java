@@ -48,15 +48,15 @@ public class MMesh1DWriter
 	/**
 	 * Used by {@link writeObject}
 	 */
-	private static Element writeObjectNodes(Document document, Iterator nodesIterator, File nodesFile, File reffile, String baseDir, MMesh1D m1d)
+	private static Element writeObjectNodes(Document document, Iterator nodesIterator, File nodesFile, File refFile, String baseDir, MMesh1D m1d)
 		throws IOException
 	{
 		//save nodes
 		logger.debug("begin writing "+nodesFile);
 		DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile, true)));
-		DataOutputStream refout=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(reffile, true)));
+		DataOutputStream refout=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile, true)));
 		long offsetNodes = nodesFile.length();
-		long offsetRefNodes = reffile.length();
+		long offsetRefNodes = refFile.length();
 		int i=0, nref=0;
 		while(nodesIterator.hasNext())
 		{
@@ -78,15 +78,15 @@ public class MMesh1DWriter
 		Element file=document.createElement("file");
 		Element references=document.createElement("references");
 		Element refNumber=document.createElement("number");
-		Element refFile=document.createElement("file");		
+		Element reffile=document.createElement("file");		
 
 
-		refFile.setAttribute("format", "integerstream");
-		refFile.setAttribute("location", XMLHelper.canonicalize(baseDir, reffile.toString()));
-		refFile.setAttribute("offset", ""+offsetRefNodes);
+		reffile.setAttribute("format", "integerstream");
+		reffile.setAttribute("location", XMLHelper.canonicalize(baseDir, refFile.toString()));
+		reffile.setAttribute("offset", ""+offsetRefNodes);
 		refNumber.appendChild(document.createTextNode(""+nref));
 		references.appendChild(refNumber);
-		references.appendChild(refFile);
+		references.appendChild(reffile);
 		file.setAttribute("format", "doublestream");
 		file.setAttribute("location", XMLHelper.canonicalize(baseDir, nodesFile.toString()));
 		file.setAttribute("offset", ""+offsetNodes);
@@ -103,7 +103,7 @@ public class MMesh1DWriter
 			"<file format=\"doublestream\" location=\""+XMLHelper.canonicalize(baseDir, nodesFile.toString())+"\" offset=\""+offsetNodes+"\"/>"+
 			"<references>"+
 			"<number>"+nref+"</number>"+
-			"<file format=\"integerstream\" location=\""+XMLHelper.canonicalize(baseDir, reffile.toString())+"\" offset=\""+offsetRefNodes+"\"/>"+
+			"<file format=\"integerstream\" location=\""+XMLHelper.canonicalize(baseDir, refFile.toString())+"\" offset=\""+offsetRefNodes+"\"/>"+
 			"</references></nodes>");*/
 	}
 	
@@ -170,9 +170,9 @@ public class MMesh1DWriter
 			File nodesFile = new File(dir, JCAEXMLData.nodes1dFilename);
 			if(nodesFile.exists())
 				nodesFile.delete();
-			File reffile = new File(dir, JCAEXMLData.ref1dFilename);
-			if(reffile.exists())
-				reffile.delete();
+			File refFile = new File(dir, JCAEXMLData.ref1dFilename);
+			if(refFile.exists())
+				refFile.delete();
 			File beamsFile=new File(dir, JCAEXMLData.beams1dFilename);
 			if(beamsFile.exists())
 				beamsFile.delete();
@@ -208,7 +208,7 @@ public class MMesh1DWriter
 				subMeshElement.appendChild(subshapeElement);
 				
 				// Create <nodes>
-				subMeshElement.appendChild(writeObjectNodes(document, submesh.getNodesIterator(), nodesFile, reffile, xmlDir, m1d));
+				subMeshElement.appendChild(writeObjectNodes(document, submesh.getNodesIterator(), nodesFile, refFile, xmlDir, m1d));
 				// Create <beams>
 				subMeshElement.appendChild(writeObjectBeams(document, submesh.getEdgesIterator(), beamsFile, xmlDir));
 				meshElement.appendChild(subMeshElement);
