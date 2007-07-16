@@ -1,3 +1,98 @@
+2007-06-29 15:18  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src-java/org/jcae/opencascade/test/NativeStream.java: Test
+	  reading empty stream
+
+2007-06-26 07:25  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/OccJava.i: Fix a segfault in Bnd_Box.get
+
+2007-06-25 08:35  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src-java/org/jcae/opencascade/Utilities.java: Add
+	  Utilities.tolerance method
+
+2007-06-21 16:39  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src-java/org/jcae/opencascade/test/SplitFace.java,
+	  src/ShapeUpgrade.i: Add ShapeUpgade_ShapeDivideArea
+
+	* src-java/org/jcae/opencascade/test/HoleFilletChamfer.java,
+	  src/Makefile.am, src/OccJava.i, src/ShapeUpgrade.i: Add
+	  ShapeUpgrade_RemoveInternalWires
+
+2007-06-19 13:59  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/Poly.i, src/gp.i: Return uv nodes from Poly_Triangulation
+	  (contrib Erwann)
+
+	* src/GeomLProp_SLProps.i: Adding normal array computation on
+	  GeomLProp_SLProps. This is faster than doing it on one value at a
+	  time. (contrib Erwann)
+
+	* src/OccJava.i: Fix a NullPointerException when MMGT_OPT is not
+	  set
+
+2007-06-14 12:40  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src-java/org/jcae/opencascade/Utilities.java: Display tolerance
+	  in Utilities.dump
+
+2007-05-21 14:12  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src-java/org/jcae/opencascade/test/: Add many examples
+
+2007-05-14 14:30  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* build.xml, src-java/org/jcae/opencascade/test, src-java/test:
+	  Rename test package to org.jcae.opencascade.test.
+
+2007-05-11 16:10  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/BRepBuilderAPI.i: Change BRepBuilderAPI::Load to load
+
+2007-05-10 13:24  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* README, src-java/test/Test7.java, src/BRepTools.i,
+	  src/Standard.i: Add istream typemap
+
+	* src/OccJava.i: Throw an exception if MMGT_OPT is not set to 0
+
+	* src/gp.i: Fix GeomLProp_SLProps::tangent* methods
+
+2007-05-03 11:33  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* Makefile.am, build.xml,
+	  src-java/org/jcae/opencascade/jni/BRepOffsetAPI_Sewing.java,
+	  src/BRepBuilderAPI.i, src/BRepOffsetAPI_Sewing.i,
+	  src/Makefile.am, src/OccJava.i: Merge BRepOffsetAPI_Sewing with
+	  BRepBuilderAPI_Sewing and make it deprecated. Run ant from the
+	  Makefile.
+
+2007-05-03 10:18  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* occjava-swig.vcproj: Fix compilation on Windows which was broken
+	  since the addition on fille and chamfer class (contrib Erwann
+	  Feat)
+
+2007-05-03 10:16  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/BRepBuilderAPI.i, src/BRepCheck.i, src/Geom.i, src/OccJava.i,
+	  src/ShapeBuild.i: Add BRepCheck_Analyzer, ShapeBuild_ReShape,
+	  BRepBuilderAPI_Sewing, more Geom_Surface methods (contrib Erwann
+	  Feat)
+
+2007-05-02 04:06  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/OccJava.i: add BRepGProp::SurfaceProperties and
+	  BRepGProp::VolumeProperties
+
+2006-04-26 14:25  tag V0_14_1
+
+2007-04-26 12:54  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* build.xml: Exclude tests from the release jar
+
 2007-04-24 17:04  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* src/BRepPrimAPI.i: add BRepPrimAPI_MakeRevol
