@@ -86,7 +86,7 @@ public class SubMesh1D
 	 * approximation of the geometrical edge, which can be refined via
 	 * algorithms found in {@link org.jcae.mesh.mesher.algos1d}.
 	 *
-	 * @param E  the topological edge being disretized,
+	 * @param d  container for the requested discretization
 	 * @param m0d  the mesh containing all vertices
 	 */
 	public SubMesh1D(BDiscretization d, MMesh0D m0d)

@@ -178,7 +178,7 @@ public class MMesh0D
 	 * Returns the discretization of CADVertex V related to parent discretization pd on cell
 	 *
 	 * @param V  vertex
-	 * @param cell  graphcell of a parent edge of V
+	 * @param pcell  graphcell of a parent edge of V
 	 * @param pd  discretization of cell, parent discretization 
 	 * @return child discretization on V
 	 */

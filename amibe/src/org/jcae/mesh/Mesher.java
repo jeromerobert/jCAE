@@ -253,13 +253,13 @@ public class Mesher
 	
 	/**
 	 * Read the 1D mesh and compute 2D meshes
-	 * @param iFace
-	 * @param face the id of the face to be meshed
+	 * @param iFace the id of the face to be meshed
+	 * @param face topological face
 	 * @param mesh1D the boundary mesh used to create this 2D mesh
 	 * @param xmlBrepDir path to BRep file, relative to the output directory
 	 * @param brepFile basename of the BRep file
-	 * @param mtb ???
-	 * @return
+	 * @param mtb container for 2D mesh traits
+	 * @return <code>true</code> if face had been successfully meshed, <code>false</code> otherwise.
 	 */
 	protected boolean mesh2D(int iFace, CADFace face, MMesh1D mesh1D, 
 		String xmlBrepDir, String brepFile, MeshTraitsBuilder mtb)
