@@ -232,9 +232,8 @@ public class Mesher
 	 * @param shape The geometry to be meshed
 	 * @param xmlBrepDir path to BRep file, relative to the output directory
 	 * @param brepFile basename of the BRep file
-	 * @return
 	 */
-	protected MMesh1D mesh1D(CADShape shape, String xmlBrepDir, String brepFile)
+	protected void mesh1D(CADShape shape, String xmlBrepDir, String brepFile)
 	{
 		logger.info("1D mesh");
 		MMesh1D mesh1D = new MMesh1D(shape);
@@ -250,7 +249,6 @@ public class Mesher
 		}
 		//  Store the 1D mesh onto disk
 		MMesh1DWriter.writeObject(mesh1D, outputDir, "jcae1d", xmlBrepDir, brepFile);
-		return mesh1D;
 	}
 	
 	/**
@@ -425,7 +423,7 @@ public class Mesher
 		mtb.add(ttb);
 		if (processMesh1d) {
 			//  Step 1: Compute 1D mesh
-			mesh1D = mesh1D(shape, xmlBrepDir, brepFile);
+			mesh1D(shape, xmlBrepDir, brepFile);
 		}
 		if (processMesh2d) {
 			//  Step 2: Read the 1D mesh and compute 2D meshes
