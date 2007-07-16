@@ -41,15 +41,18 @@ public class TextureFitter extends View
 	private static final long serialVersionUID = 2147414791584387916L;
 
 	private static Transform3D computeTransform(
-		Point3d[] triangle2d, Point3d[] triangle3d, int width, int height)
+		Point3d[] triangle2d, Point3d[] triangle3d, int width, int height, boolean normalize)
 	{
 		//3D -> 2D matrix
 		Transform3D trsf1=normalizeTriangle(triangle2d);
 		trsf1.mulInverse(normalizeTriangle(triangle3d));
-		
+
 		//force orthogonal and unifrom scale matrix		
-		trsf1.normalizeCP();		
-		trsf1.setScale(trsf1.getScale());
+		if(normalize)
+		{
+			trsf1.normalizeCP();		
+			trsf1.setScale(trsf1.getScale());
+		}
 
 		//bitmap 2D -> 1x1 square
 		Matrix4d m2d=new Matrix4d();
@@ -144,16 +147,66 @@ public class TextureFitter extends View
 	}
 
 	/**
-	 * Compute the transformation of triangle src to triangle dst
+	 * Compute the normalized transformation of triangle src to triangle dst
 	 * @param dst The 3 transformed points
 	 * @param src The 3 points to transform
 	 */
 	public static Matrix4d getTransform(Point3d[] dst, Point3d[] src)
 	{		
+		return getTransform(dst, src, true);
+	}
+	
+	/**
+	 * Compute the transformation of triangle src to triangle dst
+	 * @param dst The 3 transformed points
+	 * @param src The 3 points to transform
+	 * @param true to normalize the transformation
+	 */
+	public static Matrix4d getTransform(Point3d[] dst, Point3d[] src, boolean normalize)
+	{		
 	    Matrix4d m=new Matrix4d();
-        Transform3D trsf1=computeTransform(dst, src, 1, 1);
+        Transform3D trsf1=computeTransform(dst, src, 1, 1, normalize);
         trsf1.get(m);
         return m;
+	}
+	
+	/**
+	 * Return the scaling factor in the 3 direction for the given
+	 * transformation. For texture fitting the 3 values should be equals, so
+	 * using this method is a way to control the validity of the input points.
+	 * @return a vector containing scaling for x, y and z
+	 */
+	public static Vector3d getScaling(Matrix4d m)
+	{
+		Vector3d toReturn=new Vector3d();
+		Vector4d v=new Vector4d();
+		m.getColumn(0, v);
+		toReturn.x=v.length();
+		m.getColumn(1, v);
+		toReturn.y=v.length();
+		m.getColumn(2, v);
+		toReturn.z=v.length();
+		return toReturn;
+	}
+	
+	/**
+	 * Return the sum in absolute value of scalar product of column vector of
+	 * the matrix. A value close to 0 means that the input points used to
+	 * define the texture fitting are good. A big value means they are not.
+	 */
+	public static double getOrthogonality(Matrix4d m)
+	{
+		double toReturn=0;
+		Vector4d v4d1=new Vector4d();
+		Vector4d v4d2=new Vector4d();
+		Vector4d v4d3=new Vector4d();		
+		m.getColumn(0, v4d1);
+		m.getColumn(1, v4d2);
+		m.getColumn(2, v4d3);
+		toReturn+=Math.abs(v4d1.dot(v4d2));
+		toReturn+=Math.abs(v4d1.dot(v4d3));
+		toReturn+=Math.abs(v4d2.dot(v4d3));
+		return toReturn;
 	}
 	
 	public static void displayMatrixInfo(Matrix4d matrix)
@@ -300,7 +353,8 @@ public class TextureFitter extends View
 		super(frame, false, true);
 	}
 	
-	private Appearance createAppearance(Point3d[] triangle2d, Point3d[] triangle3d)
+	private Appearance createAppearance(Point3d[] triangle2d, Point3d[] triangle3d,
+		boolean normalize)
 	{		
 		Appearance toReturn=new Appearance();
 		Texture theTexture = createTexture(image);				
@@ -308,7 +362,7 @@ public class TextureFitter extends View
         	TexCoordGeneration.EYE_LINEAR,
         	TexCoordGeneration.TEXTURE_COORDINATE_2);
 		texCoordGeneration.setCapability(TexCoordGeneration.ALLOW_PLANE_WRITE);
-		updateTexture(triangle2d, triangle3d);
+		updateTexture(triangle2d, triangle3d, normalize);
         toReturn.setTexture(theTexture);
         toReturn.setTexCoordGeneration(texCoordGeneration);                
 		return toReturn;
@@ -332,13 +386,8 @@ public class TextureFitter extends View
 				TextureLoader.ALLOW_NON_POWER_OF_TWO);
 		}
 		
-		//We disable the mip mapping as it cause texture to do not be displayed
-		//on some hardware.
-		//TODO find which property of Canvas3D control the availability of mip
-		//mapping.
-		//int flags=TextureLoader.GENERATE_MIPMAP;
-		int flags=0;
-		if(!textureNonPowerOfTwoAvailable)
+		int flags=TextureLoader.GENERATE_MIPMAP;
+		if(textureNonPowerOfTwoAvailable)
 			flags=flags|TextureLoader.ALLOW_NON_POWER_OF_TWO;
 		
 		tl=new TextureLoader(tl.getImage().getImage(), flags);
@@ -347,18 +396,34 @@ public class TextureFitter extends View
 	}
 	
 	/** 
+	 * Display the texture with a normalized projection
 	 * @param shape The shape on which the texture must be displayed
 	 * @param triangle2d The 2D points (z=0) picked on the bitmap
 	 * @param triangle3d The 3D points picked on the geometry
 	 * @param image The image to display
+	 * @param true to normalize
 	 */
 	public void displayTexture(TopoDS_Shape shape,
 		Point3d[] triangle2d, Point3d[] triangle3d, BufferedImage image)
 	{
+		displayTexture(shape, triangle2d, triangle3d, image, true);
+	}
+	
+	/** 
+	 * @param shape The shape on which the texture must be displayed
+	 * @param triangle2d The 2D points (z=0) picked on the bitmap
+	 * @param triangle3d The 3D points picked on the geometry
+	 * @param image The image to display
+	 * @param true to normalize
+	 */
+	public void displayTexture(TopoDS_Shape shape,
+		Point3d[] triangle2d, Point3d[] triangle3d, BufferedImage image,
+		boolean normalize)
+	{
 		this.image=image;
 		OCCProvider occProvider=new OCCProvider(shape);
 		Shape3D shape3D=new Shape3D(createGeometry(occProvider));
-		shape3D.setAppearance(createAppearance(triangle2d, triangle3d));
+		shape3D.setAppearance(createAppearance(triangle2d, triangle3d, normalize));
 		BranchGroup bg=new BranchGroup();
 		bg.addChild(shape3D);
 		textureViewable=new ViewableBG(bg);
@@ -367,16 +432,28 @@ public class TextureFitter extends View
 	}
 	
 	/** 
-	 * Move the texture
+	 * Move the texture. The projection is normalized.
 	 * @param triangle2d The 2D points (z=0) picked on the bitmap
 	 * @param triangle3d The 3D points picked on the geometry
 	 */
 	public void updateTexture(Point3d[] triangle2d, Point3d[] triangle3d)
 	{
+		updateTexture(triangle2d, triangle3d, true);
+	}
+
+	/** 
+	 * Move the texture
+	 * @param triangle2d The 2D points (z=0) picked on the bitmap
+	 * @param triangle3d The 3D points picked on the geometry
+	 * @param true to normalize
+	 */
+	public void updateTexture(Point3d[] triangle2d, Point3d[] triangle3d,
+		boolean normalize)
+	{
         
 		Matrix4f m=new Matrix4f();
         Transform3D trsf1=computeTransform(triangle2d, triangle3d,
-        	image.getWidth(), image.getHeight());
+        	image.getWidth(), image.getHeight(), normalize);
         trsf1.get(m);
         Vector4f vS=new Vector4f();
         Vector4f vT=new Vector4f();
@@ -400,5 +477,5 @@ public class TextureFitter extends View
 			Entry e = (Entry)it.next();
 			System.out.println(e.getKey()+" "+e.getValue());
 		}
-	}
+	}	
 }

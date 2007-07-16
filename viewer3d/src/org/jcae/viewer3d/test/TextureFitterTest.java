@@ -8,6 +8,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
+import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
 import org.jcae.opencascade.Utilities;
 import org.jcae.opencascade.jni.*;
@@ -159,8 +160,10 @@ public class TextureFitterTest
 			//display the texture
 			image=ImageIO.read(
 				new File("/home/jerome/ndtkit/190887A.png"));
-			view.displayTexture(faceShape, point2ds, point3ds, image);
-
+			view.displayTexture(faceShape, point2ds, point3ds, image, false);
+			Matrix4d m=TextureFitter.getTransform(point2ds, point3ds, false);
+			System.out.println("orthogonality: "+TextureFitter.getOrthogonality(m));
+			System.out.println("scaling: "+TextureFitter.getScaling(m));
 			//and the full CAD
 			/*view.remove(faceViewable);
 			view.add(fullViewable);*/
@@ -216,6 +219,7 @@ public class TextureFitterTest
 		frame.setVisible(true);
 		view.setOriginAxisVisible(true);
 		view.addKeyListener(new MyKeyListener());
+		view.print3DProperties(System.out);
 	}
 
 	public static void main(String[] args)
