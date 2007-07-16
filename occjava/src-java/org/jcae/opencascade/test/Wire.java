@@ -4,7 +4,7 @@ import org.jcae.opencascade.Utilities;
 import org.jcae.opencascade.jni.*;
 
 /**
- * Create a wire from 2 edges
+ * Create a square with an attached free edge
  * @author Jerome Robert
  */
 public class Wire
