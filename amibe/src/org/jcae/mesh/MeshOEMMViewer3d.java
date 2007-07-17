@@ -142,7 +142,8 @@ public class MeshOEMMViewer3d
 						{
 							AmibeProvider ap = new AmibeProvider(new File(xmlDir));
 							decMesh = new ViewableFE(ap);                
-							logger.info("Nr. of triangles: "+((FEDomain)ap.getDomain(0)).getNumberOfTria3());
+							int [] ids = ap.getDomainIDs();
+							logger.info("Nr. of triangles: "+((FEDomain)ap.getDomain(ids[0])).getNumberOfTria3());
 							bgView.add(decMesh);
 						}
 						catch (Exception ex)
