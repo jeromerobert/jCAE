@@ -765,6 +765,22 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		// Remove T1
 		s.clearAttributes(AbstractHalfEdge.MARKED);
 		m.remove(s.tri);
+		// Check that all o and d instances have been removed
+		// This is costful, it is disabled by default but may
+		// be enabled when debugging.
+		/*
+		boolean checkVertices = false;
+		assert checkVertices = true;
+		if (checkVertices)
+		{
+			for (Iterator it = m.getTriangles().iterator(); it.hasNext(); )
+			{
+				Triangle t = (Triangle) it.next();
+				assert t.vertex[0] != o && t.vertex[1] != o && t.vertex[2] != o : "Vertex "+o+" found in "+t;
+				assert t.vertex[0] != d && t.vertex[1] != d && t.vertex[2] != d : "Vertex "+d+" found in "+t;
+			}
+		}
+		*/
 		// By convention, edge is moved into (dV4V1), but this may change.
 		// This is why V1 cannot be m.outerVertex, otherwise we cannot
 		// ensure that return HalfEdge is (oV1V3)
