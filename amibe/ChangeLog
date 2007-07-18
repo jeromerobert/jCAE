@@ -1,3 +1,8 @@
+Wed Jul 18 13:02:59 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/MeshReader.java (readObject3D): Avoid
+	NullPointerException when jcae3d.files/nodes1dref.bin file is missing.
+
 Thu Jul 12 16:31:40 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java (main): Modify

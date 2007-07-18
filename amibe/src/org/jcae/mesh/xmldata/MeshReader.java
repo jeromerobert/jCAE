@@ -203,19 +203,24 @@ public class MeshReader
 			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh", document, XPathConstants.NODE);
 			Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement, XPathConstants.NODE);
 			String refFile = xpath.evaluate("references/file/@location", submeshNodes);
+			int [] refs = null;
+			int numberOfReferences = 0;
 
-			if (refFile.charAt(0) != File.separatorChar)
-				refFile = xmlDir+File.separator+refFile;
-			FileChannel fcR = new FileInputStream(refFile).getChannel();
-			MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L, fcR.size());
-			IntBuffer refsBuffer = bbR.asIntBuffer();
-			int numberOfReferences = Integer.parseInt(
-				xpath.evaluate("references/number/text()", submeshNodes));
-			logger.debug("Reading "+numberOfReferences+" references");
-			int [] refs = new int[numberOfReferences];
-			refsBuffer.get(refs);
-			fcR.close();
-			MeshExporter.clean(bbR);
+			if (refFile != null && refFile.length() > 0)
+			{
+				if (refFile.charAt(0) != File.separatorChar)
+					refFile = xmlDir+File.separator+refFile;
+				FileChannel fcR = new FileInputStream(refFile).getChannel();
+				MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L, fcR.size());
+				IntBuffer refsBuffer = bbR.asIntBuffer();
+				numberOfReferences = Integer.parseInt(
+					xpath.evaluate("references/number/text()", submeshNodes));
+				logger.debug("Reading "+numberOfReferences+" references");
+				refs = new int[numberOfReferences];
+				refsBuffer.get(refs);
+				fcR.close();
+				MeshExporter.clean(bbR);
+			}
 			
 			String nodesFile = xpath.evaluate("file/@location", submeshNodes);
 			if (nodesFile.charAt(0) != File.separatorChar)
