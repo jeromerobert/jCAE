@@ -365,6 +365,18 @@ public class ViewableCAD extends ViewableAdaptor
 			if(fireListeners) fireSelectionChanged();
 	}
 	
+	public void hightLightVertex(int vertexID, boolean status)
+	{
+		hightLightVertex(vertexID, status, true);
+	}
+
+	public void hightLightVertex(int vertexID, boolean status,boolean fireListeners)
+	{
+		VertexPickingInfo epi=(VertexPickingInfo) verticesInfo.get(new Integer(vertexID));
+		setVertexSelected(epi, status);
+		if(fireListeners) fireSelectionChanged();
+	}
+	
 	private void setFaceSelected(FacePickingInfo fpi, boolean selected)
 	{
 		Color3f colorToSet;
