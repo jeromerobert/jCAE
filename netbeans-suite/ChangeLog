@@ -1,3 +1,39 @@
+2007-07-05 14:42  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/cad/ModuleNode.java: Sort
+	  geometries by alphanumerical order
+
+2007-07-05 13:37  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/cad/RotateDialog.java: Fix a
+	  bug in rotation
+
+2007-07-05 12:25  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/DecimateAction.java: The
+	  decimator of Amibe has changed. This is just a commit to allow
+	  jcae to compile. The decimator do not work.
+
+2007-07-05 12:24  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/cad/ReverseAction.java: Fix a
+	  NullPointerException when reverting a face directly binded to
+	  TopoDS_Compound
+
+2007-06-25 14:10  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/cad/,
+	  jcae-netbeans/src/org/jcae/netbeans/layer.xml: Add a geometry
+	  "upgrade" menu with "remove holes" ans "split faces" actions.
+
+2007-06-22 17:07  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/cad/: Allow to copy/paste
+	  shape as a new file (i.e. extract subshape).  Display geometry
+	  tolerance in the property panel
+
+2006-04-26 15:25  tag V0_14_1
+
 2007-04-26 11:52  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* jcae-netbeans/src/org/jcae/netbeans/layer.xml,
