@@ -33,3 +33,56 @@ How to add class and methods (draft)
 - Copy method/class definition from Opencascade header
 - For Geom_Geometry and Geom2d_Geometry: Change Handle(aType) to Handle_aType
 
+Required OpenCASCADE libraries
+------------------------------
+The whole OpenCASCADE bundle is not require to use OccJava. Here is the list
+of required libraries.
+
+On Linux:
+libTKBO.so
+libTKBRep.so
+libTKernel.so
+libTKFillet.so
+libTKG2d.so
+libTKG3d.so
+libTKGeomAlgo.so
+libTKGeomBase.so
+libTKIGES.so
+libTKMath.so
+libTKMesh.so
+libTKOffset.so
+libTKPrim.so
+libTKShHealing.so
+libTKSTEP209.so
+libTKSTEPAttr.so
+libTKSTEPBase.so
+libTKSTEP.so
+libTKTopAlgo.so
+libTKV2d.so
+libTKV3d.so
+libTKXSBase.so
+
+On Windows:
+TKBO.dll
+TKBool.dll
+TKBRep.dll
+TKernel.dll
+TKFillet.dll
+TKG2d.dll
+TKG3d.dll
+TKGeomAlgo.dll
+TKGeomBase.dll
+TKIGES.dll
+TKMath.dll
+TKMesh.dll
+TKOffset.dll
+TKPrim.dll
+TKShHealing.dll
+TKSTEP209.dll
+TKSTEPAttr.dll
+TKSTEPBase.dll
+TKSTEP.dll
+TKTopAlgo.dll
+TKV2d.dll
+TKV3d.dll
+TKXSBase.dll
