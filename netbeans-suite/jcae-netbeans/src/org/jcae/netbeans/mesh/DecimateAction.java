@@ -74,12 +74,21 @@ public final class DecimateAction extends CookieAction
 			cmdLine[i++]=brepFile.getParent();
 			cmdLine[i++]=brepFile.getName();
 				
+			final MeshNode m =
+				(MeshNode) activatedNodes[0].getCookie(MeshNode.class);
+
 			// level_max tri_max outDir brep soupDir
-			ProcessExecutor pe=new ProcessExecutor(cmdLine);
+			ProcessExecutor pe=new ProcessExecutor(cmdLine)
+			{
+				public void run()
+				{
+					super.run();
+					m.refreshGroups();
+				}
+			};
 			pe.setName("Decimate");
 			pe.start();
 		}
-
 	}
 	
 	protected int mode()
