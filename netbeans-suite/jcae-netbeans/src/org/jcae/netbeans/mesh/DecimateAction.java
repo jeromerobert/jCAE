@@ -49,7 +49,7 @@ public final class DecimateAction extends CookieAction
 			File brepFile=new File(Utilities.absoluteFileName(
 				c.getMesh().getGeometryFile(), reference));
 			
-			String className="org.jcae.mesh.amibe.algos3d.DecimateVertex";
+			String className="org.jcae.mesh.amibe.algos3d.DecimateHalfEdge";
 			String[] cmdLinePre=Settings.getDefault().getCommandLineAlgo();
 			String[] cmdLine=new String[cmdLinePre.length+7];
 

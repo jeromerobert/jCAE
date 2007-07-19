@@ -2,6 +2,9 @@
 
 	* jcae-netbeans/src/org/jcae/netbeans/mesh/BuidOEMMAction.java: Fix 
 	  org.jcae.mesh.MeshOEMMIndex arguments.
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/DecimateAction.java: Fix
+	  decimation, org.jcae.mesh.amibe.algos3d.DecimateVertex has been
+	  replaced by org.jcae.mesh.amibe.algos3d.DecimateHalfEdge
 
 2007-07-19 14:25  tag V0_14_2
 
