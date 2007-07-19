@@ -333,7 +333,7 @@ public class Metric3D extends Matrix3D
 		if (epsilon > 1.0)
 			epsilon = 1.0;
 		//  In org.jcae.mesh.amibe.algos2d.Insertion, mean lengths are
-		//  targeted, and there is a sqrt(2) factor.  Division bt 2
+		//  targeted, and there is a sqrt(2) factor.  Division by 2
 		//  provides a maximal deflection, 
 		double alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
 		double diag = cmax*cmax / alpha2;
@@ -391,7 +391,7 @@ public class Metric3D extends Matrix3D
 		Metric3D A = new Metric3D(dcurvmax, dcurvmin, prodVect3D(dcurvmax, dcurvmin));
 		double epsilon = defl * cmax;
 		//  In org.jcae.mesh.amibe.algos2d.Insertion, mean lengths are
-		//  targeted, and there is a sqrt(2) factor.  Division bt 2
+		//  targeted, and there is a sqrt(2) factor.  Division by 2
 		//  provides a maximal deflection, 
 		double alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
 		double diag = cmax*cmax / alpha2;
