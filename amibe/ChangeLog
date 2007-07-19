@@ -3,6 +3,11 @@ Wed Jul 18 13:02:59 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/xmldata/MeshReader.java (readObject3D): Avoid
 	NullPointerException when jcae3d.files/nodes1dref.bin file is missing.
 
+Thu Jul 13 13:29:40 CEST 2007 Jerome Robert <jeromerobert@users.sourforge.net>
+
+	* src/org/jcae/mesh/Mesher.java: Try to make the main class more
+	  accessible and easier to gridify (not yet finished).
+
 Thu Jul 12 16:31:40 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java (main): Modify
@@ -22,6 +27,11 @@ Thu Jun  7 15:24:38 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/MeshWriter.java (writeObject3D): Drop
 	last argument, it is unused.
+
+Thu Jun  7 12:37:38 CEST 2007 Jerome Robert <jeromerobert@users.sourforge.net>
+
+	* src/org/jcae/mesh/xmldata/Amibe2VTK.java: Add tool to convert
+	  Amibe mesh to VTK meshes
 
 Wed Jun  6 15:13:33 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
