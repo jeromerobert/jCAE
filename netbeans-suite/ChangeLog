@@ -1,3 +1,10 @@
+2007-07-19 15:36  Denis Barbier <barbier@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/BuidOEMMAction.java: Fix 
+	  org.jcae.mesh.MeshOEMMIndex arguments.
+
+2007-07-19 14:25  tag V0_14_2
+
 2007-07-05 14:42  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* jcae-netbeans/src/org/jcae/netbeans/cad/ModuleNode.java: Sort

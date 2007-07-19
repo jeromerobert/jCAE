@@ -53,12 +53,12 @@ public final class BuidOEMMAction extends CookieAction
 			int i=cmdLinePre.length;
 
 			cmdLine[i++]=className;
-			cmdLine[i++]=Integer.toString(bean.getLevel());
-			cmdLine[i++]=Integer.toString(bean.getTriangle());
+			cmdLine[i++]=xmlDir;
 			cmdLine[i++]=Utilities.absoluteFileName(
 				activatedNodes[0].getName()+".oemm", reference);
+			cmdLine[i++]=Integer.toString(bean.getLevel());
+			cmdLine[i++]=Integer.toString(bean.getTriangle());
 
-			cmdLine[i++]=xmlDir;
 
 			// level_max tri_max outDir brep soupDir
 			ProcessExecutor pe=new ProcessExecutor(cmdLine);
