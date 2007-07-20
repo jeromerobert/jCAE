@@ -209,19 +209,17 @@ public class BDiscretization
 		mesh = m;
 	}
 
-	public void applyAlgorithm()
+	public void discretize()
 	{
+		if (computed)
+			return;
 		if (algo == null)
 			algo = constraint.getHypothesis().findAlgorithm(graphCell.getType());
-		if (!algo.isAvailable())
+		if (algo == null || !algo.isAvailable())
 			return;
 		if (!algo.compute(this))
 			logger.warn("Failed! "+algo);
 		computed = true;
-	}
-
-	public void discretize()
-	{
 	}
 
 	public String toString()
