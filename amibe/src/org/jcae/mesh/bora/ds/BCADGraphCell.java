@@ -258,14 +258,6 @@ public class BCADGraphCell
 		};
 	}
 
-public Object getMesh(BSubMesh sub)
-{
-return null;
-}
-public void setMesh(BSubMesh sub, Object m)
-{
-}
-
 	public BDiscretization getDiscretizationSubMesh(BSubMesh sub)
 	{
 		for (Iterator it = discrete.iterator(); it.hasNext(); )
