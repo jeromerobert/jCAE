@@ -196,7 +196,7 @@ public class Initial
 	 * Creates a <code>Initial</code> instance.
 	 *
 	 * @param m  the data structure in which the mesh will be stored.
-	 * @param m1d  discretization of edges.
+	 * @param b  ordered list of boundary nodes
 	 */
 	public Initial(Mesh2D m, Vertex2D [] b)
 	{
