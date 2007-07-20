@@ -162,6 +162,11 @@ public class BModel
 		return ret;
 	}
 
+	public Iterator getSubMeshIterator()
+	{
+		return submesh.iterator();
+	}
+
 	/**
 	 * Prints the list of geometrical elements.
 	 */
