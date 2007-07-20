@@ -5,6 +5,7 @@ Fri Jul 20 16:01:31 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	  src/org/jcae/mesh/amibe/algos2d/BasicMesh.java: Modify Initial()
 	  constructor, its 2nd argument is now a Vertex2D array instead of
 	  MMesh1D.
+	* src/org/jcae/mesh/bora/ds/BModel.java: Compute 2D meshes.
 
 Release jCAE 0.14.2
 
