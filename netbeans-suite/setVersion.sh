@@ -1,0 +1,15 @@
+#! /bin/sh
+files="
+	branding/core/core.jar/org/netbeans/core/startup/Bundle.properties \
+	branding/modules/org-netbeans-core.jar/org/netbeans/core/ui/Bundle.properties \
+	branding/modules/org-netbeans-core-windows.jar/org/netbeans/core/windows/view/ui/Bundle.properties \
+	jcae-netbeans/manifest.mf \
+	make-dist-Linux.sh \
+	make-dist-Win32.sh \
+	nbproject/project.properties \
+	occjava/manifest.mf"
+
+for file in $files; do
+	sed -i "s/@JCAE_VERSION@/$0/g" $file
+done
+
