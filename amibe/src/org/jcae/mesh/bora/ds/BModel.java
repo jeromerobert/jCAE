@@ -234,18 +234,18 @@ public class BModel
 				Storage.writeEdge(d, getOutputDir(d.getFirstSubMesh()));
 			}
 		}
+		logger.debug("Discretize faces");
+		for (Iterator its = root.shapesExplorer(CADShapeEnum.FACE); its.hasNext(); )
+		{
+			BCADGraphCell cell = (BCADGraphCell) its.next();
+			for (Iterator itd = cell.discretizationIterator(); itd.hasNext(); )
+			{
+				BDiscretization d = (BDiscretization) itd.next();
+				d.discretize();
+				Storage.writeFace(d, getOutputDir(d.getFirstSubMesh()));
+			}
+		}
 		/*
-		for (Iterator it = submesh.iterator(); it.hasNext(); )
-		{
-			BSubMesh sm = (BSubMesh) it.next();
-			sm.computeAlgorithms1d();
-		}
-		logger.info("Discretize faces");
-		for (Iterator it = submesh.iterator(); it.hasNext(); )
-		{
-			BSubMesh sm = (BSubMesh) it.next();
-			sm.computeAlgorithms2d();
-		}
 		logger.info("Discretize solids");
 		for (Iterator it = submesh.iterator(); it.hasNext(); )
 		{

@@ -188,6 +188,8 @@ public class Storage
 			if (root.getReversed() != null)
 				root = root.getReversed();
 		}
+		if (null == root.getDiscretizationSubMesh(s))
+			return;
 		int id = root.getId();
 		try
 		{

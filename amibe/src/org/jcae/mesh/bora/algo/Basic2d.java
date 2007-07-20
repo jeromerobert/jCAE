@@ -21,16 +21,27 @@
 package org.jcae.mesh.bora.algo;
 
 import org.jcae.mesh.bora.ds.BCADGraphCell;
-import org.jcae.mesh.bora.ds.BSubMesh;
-import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.amibe.patch.Mesh2D;
-import org.jcae.mesh.amibe.algos2d.*;
+import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
+import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import org.jcae.mesh.mesher.ds.SubMesh1D;
 import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.xmldata.MeshWriter;
-import org.jcae.mesh.cad.*;
+import org.jcae.mesh.cad.CADShape;
+import org.jcae.mesh.cad.CADVertex;
+import org.jcae.mesh.cad.CADEdge;
+import org.jcae.mesh.cad.CADWire;
+import org.jcae.mesh.cad.CADFace;
+import org.jcae.mesh.cad.CADShapeEnum;
+import org.jcae.mesh.cad.CADShapeBuilder;
+import org.jcae.mesh.cad.CADWireExplorer;
+import org.jcae.mesh.cad.CADGeomCurve2D;
+import org.jcae.mesh.cad.CADGeomCurve3D;
+import org.jcae.mesh.amibe.algos2d.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
@@ -69,16 +80,19 @@ public class Basic2d implements AlgoInterface
 		BCADGraphCell cell = d.getGraphCell();
 		CADFace F = (CADFace) cell.getShape();
 		logger.debug(""+this+"  shape: "+F);
-		Mesh2D m = new Mesh2D(F);
+
+		TriangleTraitsBuilder ttb = new TriangleTraitsBuilder();
+		ttb.addShallowHalfEdge();
+		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
+		mtb.addTriangleList();
+		mtb.add(ttb);
+		Mesh2D m = new Mesh2D(mtb, F);
 		d.setMesh(m);
-		String xmlFile = "jcae1d";
 		Metric2D.setLength(maxlen);
 		Metric3D.setLength(maxlen);
 		Metric3D.setDeflection(deflection);
 		Metric3D.setRelativeDeflection(relDefl);
 		Metric3D.setIsotropic(isotropic);
-
-		// new BasicMesh(m, mesh.mesh1D).compute();
 
 		// Insert interior vertices, if any
 		ArrayList innerV = new ArrayList();
@@ -97,8 +111,113 @@ public class Basic2d implements AlgoInterface
 			BCADGraphCell edge = (BCADGraphCell) it.next();
 			BDiscretization dc = edge.getDiscretizationSubMesh(d.getFirstSubMesh());
 		}
-		/*
-		new Initial(m, cell.getMesh1D(s), innerV).compute();
+
+		// Boundary nodes. See org.jcae.mesh.mesher.ds.MMesh1D.boundaryNodes()
+		ArrayList bndV = new ArrayList();
+		CADWireExplorer wexp = CADShapeBuilder.factory.newWireExplorer();
+		for (Iterator it = cell.shapesExplorer(CADShapeEnum.WIRE); it.hasNext(); )
+		{
+			BCADGraphCell wire = (BCADGraphCell) it.next();
+			MNode1D p1 = null;
+			Vertex2D p20 = null, p2 = null, lastPoint = null;;
+			double accumulatedLength = 0.0;
+			ArrayList nodesWire = new ArrayList();
+			for (wexp.init((CADWire) wire.getShape(), F); wexp.more(); wexp.next())
+			{
+				CADEdge te = wexp.current();
+				CADGeomCurve2D c2d = CADShapeBuilder.factory.newCurve2D(te, F);
+				CADGeomCurve3D c3d = CADShapeBuilder.factory.newCurve3D(te);
+				BDiscretization dc = cell.getGraph().getByShape(te).getDiscretizationSubMesh(d.getFirstSubMesh());
+
+				SubMesh1D submesh1d = (SubMesh1D) dc.getMesh();
+				ArrayList nodelist = submesh1d.getNodes();
+				Iterator itn = nodelist.iterator();
+				ArrayList saveList = new ArrayList();
+				while (itn.hasNext())
+				{
+					p1 = (MNode1D) itn.next();
+					saveList.add(p1);
+				}
+				if (!te.isOrientationForward())
+				{
+					//  Sort in reverse order
+					int size = saveList.size();
+					for (int i = 0; i < size/2; i++)
+					{
+						Object o = saveList.get(i);
+						saveList.set(i, saveList.get(size - i - 1));
+						saveList.set(size - i - 1, o);
+					}
+				}
+				itn = saveList.iterator();
+				//  Except for the very first edge, the first
+				//  vertex is constrained to be the last one
+				//  of the previous edge.
+				p1 = (MNode1D) itn.next();
+				if (null == p2)
+				{
+					p2 = Vertex2D.valueOf(p1, c2d, F);
+					nodesWire.add(p2);
+					p20 = p2;
+					lastPoint = p2;
+				}
+				ArrayList newNodes = new ArrayList(saveList.size());
+				while (itn.hasNext())
+				{
+					p1 = (MNode1D) itn.next();
+					p2 = Vertex2D.valueOf(p1, c2d, F);
+					newNodes.add(p2);
+				}
+				// An edge is skipped if all the following conditions
+				// are met:
+				//   1.  It is not degenerated
+				//   2.  It has not been discretized in 1D
+				//   3.  Edge length is smaller than epsilon
+				//   4.  Accumulated points form a curve with a deflection
+				//       which meets its criterion
+				boolean canSkip = false;
+				if (nodelist.size() == 2 && !te.isDegenerated())
+				{
+					//   3.  Edge length is smaller than epsilon
+					double edgelen = c3d.length();
+					canSkip = m.tooSmall(edgelen, accumulatedLength);;
+					if (canSkip)
+						accumulatedLength += edgelen;
+					// 4.  Check whether deflection is valid.
+					if (canSkip && Metric3D.hasDeflection())
+					{
+						double [] uv = lastPoint.getUV();
+						double [] start = m.getGeomSurface().value(uv[0], uv[1]);
+						uv = p2.getUV();
+						double [] end = m.getGeomSurface().value(uv[0], uv[1]);
+						double dist = Math.sqrt(
+						  (start[0] - end[0]) * (start[0] - end[0]) +
+						  (start[1] - end[1]) * (start[1] - end[1]) +
+						  (start[2] - end[2]) * (start[2] - end[2]));
+						double dmax = Metric3D.getDeflection();
+						if (Metric3D.hasRelativeDeflection())
+							dmax *= accumulatedLength;
+						if (accumulatedLength - dist > dmax)
+							canSkip = false;
+					}
+				}
+
+				if (!canSkip)
+				{
+					nodesWire.addAll(newNodes);
+					accumulatedLength = 0.0;
+					lastPoint = p2;
+				}
+			}
+			//  If a wire has less than 3 points, it is discarded
+			if (nodesWire.size() > 3)
+			{
+				//  Overwrite the last value to close the wire
+				nodesWire.set(nodesWire.size()-1, p20);
+				bndV.addAll(nodesWire);
+			}
+		}
+		new Initial(m, (Vertex2D []) bndV.toArray(new Vertex2D[bndV.size()]), innerV).compute();
 
 		m.pushCompGeom(3);
 		new Insertion(m, 16.0).compute();
@@ -113,10 +232,11 @@ public class Basic2d implements AlgoInterface
 		if (deflection > 0.0 && !relDefl)
 			new EnforceAbsDeflection(m).compute();
 		m.removeDegeneratedEdges();
-		xmlFile = "jcae2d."+mesh.getId();
+		/*
+		String xmlFile = "jcae2d."+m.getId();
 		String xmlBrepDir = ".";
-		BModel model = mesh.getGraph().getModel();
-		MeshWriter.writeObject(m, model.getOutputDir(s), xmlFile, xmlBrepDir, model.getCADFile(), mesh.getId());
+		BModel model = m.getGraph().getModel();
+		MeshWriter.writeObject(m, model.getOutputDir(s), xmlFile, xmlBrepDir, model.getCADFile(), m.getId());
 		assert (m.isValid());
 		*/
 		return true;
