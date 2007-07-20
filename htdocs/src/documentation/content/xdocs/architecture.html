@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-15"/>
+	<title>jCAE architecture</title>
+	<!-- style type="text/css">
+	table
+	{
+		border: 1px outset ;
+		border-spacing: 0px;
+	}
+
+	td
+	{
+		border-style: inset;
+		border-width: 1px;
+		padding: 2pt;
+	}
+
+	th
+	{
+		border-style: inset;
+		border-width: 1px;
+		padding: 2px;
+		background-color: rgb(214, 255, 214);
+	}
+	</style -->
+</head>
+<body>
+	<h1>Overview</h1>
+	<p>This diagram show the jCAE architecture. Blue boxes are jCAE components. They are (nearly) named as in the Subversion repository. Yellow boxes are software required by jCAE.</p>
+	<p><img src="jcae-arch.png" alt="Architecture diagram"/></p>
+	<table>
+		<tr><th>Component</th><th>Description</th></tr>
+		<tr><td>netbeans-suite</td><td>This is a Netbeans module suite. It contains jcae-netbeans and occjava netbeans modules. It also provide application branding (icons, splash screen and application names).</td></tr>
+		<tr><td>jcae-netbeans</td><td>This is a Netbeans module. It contains the geometry modeler and the mesher GUI.</td></tr>
+		<tr><td>occjava-netbeans</td><td>This is the Netbeans module which wrap occjava-swig.</td></tr>
+		<tr><td><a href="amibe.html">Amibe</a></td><td>This is the finit element mesher. It's targeted to produce very large triangle mesh.</td></tr>
+		<tr><td>src-occ</td><td>This a is an abstraction layer of occjava-swig to possibly (it is not implemeted) mesh not Opencascade geometry.</td></tr>
+		<tr><td><a href="viewer3d.html">viewer3d</a></td><td>A library to display mesh and geometry in Java3D. It aims at being a the same abstraction level as VTK (with unfortunately many fewer features).
+		It only currently only support pre-processing as post-processing is still at the prototype step.</td></tr>
+		<tr><td><a href="occjava.html">occjava</a></td><td>Java binding with Opencascade. It keep the same API so Opencascade documentation is still the reference. It is faster and more Java like than Java API which can be generated with Wok.</td></tr>
+	</table>
+
+	<h1>Description</h1>
+<h2>netbeans-suite</h2>
+<p>From Netbeans documentation:</p>
+<p><cite><b>Module Suite.</b> A group of interdependent modules that are deployed
+together. The IDE helps you to brand the suite -- for example, you can add a
+splash screen and you can specify the parts of the NetBeans Platform that you
+don't want your application to provide.</cite></p>
+
+<h2>Netbeans platform</h2>
+<p>From Wikipedia:</p>
+<cite>
+<ul>
+<li>Reusable framework for simplifying the development of other desktop applications (Rich Client Platform).</li>
+<li>Offers services common to desktop applications, allowing developers to focus on the logic specific to their application.</li> 
+</ul>
+<p>Among the features of the platform are:</p>
+<ul>
+<li>User interface management (e.g. menus and toolbars)</li>
+<li>User settings management</li>
+<li>Storage management (saving and loading any kind of data)</li>
+<li>Window management</li>
+<li>Wizard framework (supports step-by-step dialogs)</li>
+<li>Module (installation and update) management</li>
+</ul></cite>
+</body>
+</html>

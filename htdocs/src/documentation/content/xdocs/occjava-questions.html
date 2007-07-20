@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-15"/>
+	<title>OccJava FAQ</title>
+</head>
+<body>
+	<h1>OccJava FAQ</h1>
+<h2>How difficult and error-prone is the extension process based on SWIG ? Is it easy to add wrappers to the API ?</h2>
+<br/>
+<ul>
+<li>Adding a new class or member without type redefinition takes 1 or 2 minutes (without testing).</li>
+<li>Adding a new type redefinition, for example the conversion of gp_Pnt to double[3] will take longer. Looking at what
+already exists may help but someone who does not already know swig and JNI will need about one day to add a new type
+redefinition. Not that type refinition is the key for performance and simplicity of the API.</li>
+</ul>
+<h2>How robust are the wrappers ? Do you ever get strange behaviors or is the quality production-class ?</h2>
+<p>Of course, such problems occured during the development but there are currently no known bugs in occjava-swig.
+None of the jCAE known bugs are related to occjava-swig.</p>
+<h2>How performant is the occjava-swig wrapper ? Does the occjava-swig wrapper enjoy full access to the API it wraps without penalty ?</h2>
+<p>The wrapper does nothing but calling Opencascade methods. The time required to handle an occjava-swig call is the sum
+of the JNI call time plus the Opencascade call time. Fast Opencascade methods call will spend more time in the JNI part
+(as JNI is quite slow). That's why, when it's possible, the wrapper provides methods to handle arrays instead of
+single elements. This tip coupled with type redefinition makes occjava-swig faster than Opencascade Wok based wrapper.</p>
+<h2>Do you have an opinion or know anything about potential Eclipse integration ?</h2>
+<p>There are no reasons why it should not be possible as Eclipse is in Java. Moreover I know it's now possible to include Java3d components in SWT.</p>
+<h2>What is already implemented in occjava-swig</h2>
+<p>Everything needed in jCAE, that is:</p>
+<ul>
+<li>Nearly everything to access the OpenCascade object model</li>
+<li>Some solid modeling features</li>
+</ul>
+</body>
+</html>

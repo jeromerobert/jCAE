@@ -1,0 +1,116 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-15"/>
+	<title>Scripting with OccJava</title>
+	<!-- style type="text/css">
+	table
+	{
+		border: 1px outset ;
+		border-spacing: 0px;
+	}
+
+	td
+	{
+		border-style: inset;
+		border-width: 1px;
+		padding: 2pt;
+	}
+
+	th
+	{
+		border-style: inset;
+		border-width: 1px;
+		padding: 2px;
+		background-color: rgb(214, 255, 214);
+	}
+	</style -->
+</head>
+<body>
+	<h1>Scripting with OccJava</h1>
+	<h2>Introduction</h2>
+	<p>OccJava is a Java binding to Opencascade. Java libraries are scriptable throw many languages. It allow to make scripts with Opencascade.
+	We will explain how to do it with the Groovy language but it's also possible with Jython (Java Python), Beanshell and propably
+	many others which are listed here:</p>
+	<a href="http://java-source.net/open-source/scripting-languages">http://java-source.net/open-source/scripting-languages</a>.
+	<h2>Download groovy</h2>
+	<p>The Groovy home page is <a href="http://groovy.codehaus.org">http://groovy.codehaus.org</a>. Here are shortcuts to last (on 2006-04-14) version archives:</p>
+	<ul>
+		<li><a href="http://dist.codehaus.org/groovy/distributions/groovy-1.0-jsr-05.zip">http://dist.codehaus.org/groovy/distributions/groovy-1.0-jsr-05.zip</a></li>
+		<li><a href="http://dist.codehaus.org/groovy/distributions/groovy-1.0-jsr-05.tar.gz">http://dist.codehaus.org/groovy/distributions/groovy-1.0-jsr-05.tar.gz</a></li>
+	</ul>
+	<p>Just unzip the archives.</p>
+	<h2>Environment and running</h2>
+	<p>Here are examples on how running a Groovy/OccJava script. They need to be adapted to your configuration. You may find easier
+	to set JAVA_HOME and CLASSPATH in your .bashrc file (Linux) or in the <cite>Environment Variable</cite> panel (Windows).
+	You may also run the groovy command line from you own script (.sh or .bat).</p>
+<h3>On Linux</h3>
+<pre class="code">
+export JAVA_HOME=/a/path/jcae-0.13/jre1.5.0_06
+export CLASSPATH=/a/path/jcae-0.13/jcae/modules/ext/occjava.jar:$CLASSPATH
+export LD_LIBRARY_PATH=/a/path/jcae-0.13/jcae/modules/ext/:$LD_LIBRARY_PATH
+groovy test.groovy
+</pre>
+<h3>On Windows</h3>
+<pre class="code">
+set JAVA_HOME=c:\jcae-0.13\jre1.5.0_06
+set CLASSPATH=c:\jcae-0.13\jcae\modules\ext\occjava.jar;%CLASSPATH%
+set PATH=c:\jcae-0.13\jcae\modules\ext;%PATH%
+groovy.bat test.groovy
+</pre>
+
+<h2>Testing</h2>
+<h3>Create a cone</h3>
+<pre class="code">
+//An example which create a cone
+import org.jcae.opencascade.jni.*;
+double[] axis=[0,0,0,1,1,1]
+b=new BRepPrimAPI_MakeCone(axis, 0, 2, 3, 5)
+BRepTools.write(b.shape(), "/tmp/cone.brep")
+</pre>
+<h3>Create a square with an attached free edge</h3>
+<pre class="code">
+//Create a square with an attached free edge
+
+import org.jcae.opencascade.jni.*;
+
+// The plate
+double[] p1=[0, 0, 0];
+double[] p2=[0, 1, 0];
+double[] p3=[1, 1, 0];
+double[] p4=[1, 0, 0];
+double[] p5=[0.5, 0.5, 0];
+double[] p6=[0.5, 0.5, 1];
+
+TopoDS_Edge edge1=new BRepBuilderAPI_MakeEdge(p1,p2).shape();
+TopoDS_Edge edge2=new BRepBuilderAPI_MakeEdge(p2,p3).shape();
+TopoDS_Edge edge3=new BRepBuilderAPI_MakeEdge(p3,p4).shape();
+TopoDS_Edge edge4=new BRepBuilderAPI_MakeEdge(p4,p1).shape();
+
+TopoDS_Wire wirePlate=
+	new BRepBuilderAPI_MakeWire(edge1, edge2, edge3, edge4).shape();
+	
+TopoDS_Face face=new BRepBuilderAPI_MakeFace(wirePlate, true).shape();
+
+// The wire
+TopoDS_Vertex vertex1=new BRepBuilderAPI_MakeVertex(p5).shape();
+TopoDS_Vertex vertex2=new BRepBuilderAPI_MakeVertex(p6).shape();
+TopoDS_Edge freeEdge=new BRepBuilderAPI_MakeEdge(vertex1,vertex2).shape();
+	
+//Connect the wire to the plate
+BRep_Builder bb=new BRep_Builder();
+bb.add(face, vertex1);
+	
+//Put everything in a compound
+TopoDS_Compound compound=new TopoDS_Compound();
+bb.makeCompound(compound);
+bb.add(compound, freeEdge);
+bb.add(compound, face);
+
+//Write to to a file
+BRepTools.write(compound, "/tmp/plate.brep");
+</pre>
+<h2>API Documentation</h2>
+<p>The list of available API is <a href="occjava-doc/">here</a>. The semantic of each object and method is available in the Opencascade documentation.</p>
+</body>
+</html>

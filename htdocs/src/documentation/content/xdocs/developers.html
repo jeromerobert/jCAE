@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-15"/>
+	<title>What jCAE developers should know</title>
+</head>
+<body>
+	<h1>What jCAE developers should know</h1>
+	<h2>Introduction</h2>
+	<p>jCAE is an assembly of several components. To know where to start see the
+	<a href="architecture.html">architecture</a> diagram.</p>
+
+	<h2>Compiling occjava-swig</h2>
+	<p>This is an <a
+	href="http://java.sun.com/j2se/1.5.0/docs/guide/jni/">JNI</a> Opencascade
+	wrapper generated with <a href="http://www.swig.org">Swig</a>. On Linux the
+	native part is built with <a
+	href="http://sourceware.org/autobook/">autotools</a> and g++. For Windows a <a
+	href="http://msdn.microsoft.com/vstudio/express/visualc/">Visual Studio
+	2005</a> project is provided. In both cases the swig process (to generate .cxx
+	from .i) is handled so you do not have to call swig manually. The swig
+	process also generates .java files. They must be compiled using the provided
+	<a href="http://ant.apache.org/">Ant</a> script (<code>build.xml</code>) to
+	create the <code>occjava.jar</code> file.</p>
+
+	<p>On Windows you must tell Visual Studio where you installed dependencies. To
+	do so go to Tools, Options, Project and Solutions, VC++ directories. You must add
+	swig binary path, Opencascade include and library path, and Java include path.</p>
+	<p>On Linux, configure script should find all dependencies (otherwise set CPPFLAGS and LDFLAGS)
+	but Opencascade. For Opencascade you have to set the CASROOT environment variable.</p>
+	<p></p>
+	<p>Adding new classes to occjava-swig is easy but if you want to add new typemaps
+	you may have a look to gp.i for examples. Reading swig and JNI references may
+	also be required.</p>
+	<h2>Compiling jCAE-mesher and jcae-viewer3d</h2>
+	<ul>
+	<li>Edit the build.properties file to set properties. You may also create the lib
+	directory and make link to theses dependencies.</li>
+	<li>Run <a href="http://ant.apache.org/">Ant</a></li>
+	<li>Check that jar file(s) have been created in the lib directory. At the
+	end of the jCAE-mesher compilation you should get jcae.jar and
+	jcae-mesherocc.jar in the lib directory. At the end of jcae-viewer3d
+	compilation you shoud get a jcae-viewer3d.jar file in the lib
+	directory.</li>
+	</ul>
+
+	<h2>Compiling Netbeans modules</h2>
+
+	<p>TODO I want to kown what's going on with that: <a
+	href="http://sourceforge.net/forum/message.php?msg_id=3806445">http://sourceforge.net/forum/message.php?msg_id=3806445</a></p>
+	<p>The 2 Netbeans modules are grouped in a module suite named jcae-netbeans-suite, which must be loaded in
+	netbeans.</p>
+	<ul>
+	<li>jcae-netbeans have dependencies on jCAE-mesher and jcae-viewer. To provide these dependencies you should read jcae-netbeans-suite/jcae-netbeans/INSTALL.</li>
+	<li>occjava (the netbeans module) needs occjava-swig files (OccJava.dll, libOccJava.so, occjava.jar) in
+	jcae-netbeans-suite/occjava/release/modules/ext/. Make links or copy them.</li>
+	</ul>
+	<p>Reference: <a href="http://platform.netbeans.org/">http://platform.netbeans.org/</a></p>
+	<h2>Concerning Ant</h2>
+	<p><a href="http://ant.apache.org/">Ant</a> is command line tool. If you do
+	not like command line tool, you should know that Ant is a standard in Java
+	world and that all IDE (including Netbeans and Eclipse) allow to import
+	project from an Ant script.  In Netbeans this feature is called "Java
+	Project with Existing Ant Script".</p>
+</body>
+</html>

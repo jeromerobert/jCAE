@@ -1,0 +1,102 @@
+Version 0.14.1 (2007-04-26)
+
+* Fix bug 1464773, OutOfMemory in UNV export
+* Feature request 1435021, UNV import
+* Start port of occjava to OSX thanks to nyholku
+* Add revolution, circle, extrusion, fillet and chamfer to occjava
+* Allow to view UNV files
+
+Version 0.14 (2007-04-04)
+
+* Update dependencies: Opencascade 6.2, netbeans 5.5, Java 1.6.0_01
+* Many bug fix in Amibe
+* Optimization of the decimation algorithm
+* Bug 1488677: Rotation GUI is ugly
+* Bug 1465817: Export UNV in mm
+
+Version 0.13.2 (2007-03-30)
+
+* Fix a bug in occjava which was making normal computation wrong. It should remove most of the glitch in meshes.
+
+Version 0.13.1
+
+* Bug 1467614: exception when the "go to" list is empty
+* Bug 1488681: shading not on geometry
+* Bug 1464775: Java3D and dual screen
+
+Version 0.13
+
+* Switch to Opencascade 6.1
+* Fix remove action on geometry which most of the time has no effect
+* Fix picking on geometry which most of the time was not working anymore
+* Fix a bug in occjava wich, sometime, was giving strange meshes (all points x=y=z or x=y=z=0)
+* Fix an ArrayIndexOutOfBound exception when playing with the clip rectangle tool in the 3D viewer
+* Display free and multiple edges in a mesh
+* Fix a bug in occjava which was causing a crash when meshing a cone
+
+Version 0.12.2
+
+* Bug 1460763: Free edges crash
+
+Version 0.12.1
+
+* Bug 1437470: Wrong clipping in 3D view
+* Bug 1452435: No deflection parameter with jCAE 0.11
+* Bug 1452490: Mesh aborts wiith large deflection
+
+Version 0.12
+
+* Fix 1439445: Exception when trying to access Geometry-popup menu
+* Fix 1437468: Face reverse do not work 
+* Do 1435029: Clipping planes and rotation center in 3D view
+* Picking on geometry face no longer freeze
+* upgrade to Java 3D 1.4
+
+Version 0.11
+
+* Full rewrite of libOccJava with http://www.swig.org
+* Update to Netbeans 5.0
+* Add UNV to UNV action, to fix possible problemes in existing UNV
+* Allow to specify a "desired number of triangle" in decimation
+* [Bug 1433432] Smoothing of mesh
+* [bug 1415280 and 1421276] View3d combo refresh
+* [Bug 1410622] TriangleArray: illegal vertexCount in OEMM viewer
+* [Bug 1418453] mesh compute without geometry.
+* [Bug 1418451] unit convertion in "Import geometry".
+* [Bug 1421278] Properties button
+* [bug gforge 94] many module object nodes creates for one file
+
+Version 0.10
+
+* OEMM viewer (for large mesh)
+* Mesh decimation
+* Update to Netbeans 5.0-RC1 and j2re 1.5.0_06
+* [Feature 1377237] Scale geometry
+* Fix bug 1400446 and 1362822 : explicite name for imported geometries
+* Fix bug: Second 3D view always frozen
+* Fix bug [gforge 53] visu of mesh, no name
+* Show UNV files in the project
+
+Version 0.9-RC2
+
+* upgrade to netbeans 5.0 beta 2
+* fix bugs 1375104, 1375103, 1373702, 1362822, 1359040 and 1358976
+
+Version 0.9-RC1
+
+* Java 5.0
+* Based on netbeans 5.0
+* Explode CAD in shell, face, wire...
+* Show free boundaries in a CAD
+
+Version 0.8-20050415
+
+* Fix bug 1183178
+* update to last CVS jCAE-mesher
+
+Version 0.8-20050414
+
+* new 3d viewer
+* New geometry module with sewing and face reverse
+* upgrade to Opencascade5.2 
+

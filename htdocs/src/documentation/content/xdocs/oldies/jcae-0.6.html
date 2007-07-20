@@ -1,0 +1,637 @@
+<html lang="en">
+<head>
+<title>jCAE user's guide</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="jCAE user's guide">
+<meta name="generator" content="makeinfo 4.3">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home">
+</head>
+<body>
+<h1 class="settitle">jCAE 0.5 user's guide</h1>
+
+<h2 class="chapter"><a name="TOC0"></a>1 Version of this document</h2>
+
+   <p>This document is the user's guide of jCAE v0.5. It was last modified on Thu Aug 21 CEST 2003. It may be found in the jCAE package under jCAE/doc or <a href="http://jcae.sourceforge.net/manual.html">here</a>.
+
+<h2 class="chapter"><a name="TOC1"></a>2 Building and installing</h2>
+
+<h3 class="section"><a name="TOC2"></a>2.1 Prerequisites</h3>
+
+   <p><a name="Prerequisites"></a>
+   <p><table><tr align="left"><td valign="top"><b>Name</b> </td><td valign="top"><b>URL</b>
+<br></td></tr><tr align="left"><td valign="top">Java Runtime Environement v1.4
+</td><td valign="top"><a href="http://java.sun.com/j2se">http://java.sun.com/j2se</a>
+<br></td></tr><tr align="left"><td valign="top">Java3D 1.3 Runtime
+</td><td valign="top"><a href="http://java.sun.com/products/java-media/3D">http://java.sun.com/products/java-media/3D</a>
+<br></td></tr><tr align="left"><td valign="top">Opencascade v4.0 (5.0 may work)
+</td><td valign="top"><a href="http://www.opencascade.org">http://www.opencascade.org</a>
+<br></td></tr><tr align="left"><td valign="top">Luxor 1.0b7(*)
+</td><td valign="top"><a href="http://luxor-xul.sourceforge.net">http://luxor-xul.sourceforge.net</a>
+<br></td></tr><tr align="left"><td valign="top">Jacorb (**)
+</td><td valign="top"><a href="http://www.jacorb.org">http://www.jacorb.org</a>
+<br></td></tr><tr align="left"><td valign="top">Beanshell 1.3
+</td><td valign="top"><a href="http://www.beanshell.org">http://www.beanshell.org</a>
+<br></td></tr><tr align="left"><td valign="top">log4j
+</td><td valign="top"><a href="http://jakarta.apache.org/log4j">http://jakarta.apache.org/log4j</a>
+<br></td></tr><tr align="left"><td valign="top">GNU Trove
+</td><td valign="top"><a href="http://trove4j.sourceforge.net">http://trove4j.sourceforge.net</a>
+   <br></td></tr></table>
+
+   <p>An archive ("jCAE-third-party") including Luxor (and its dependencies), Jacorb, Beanshell, log4j and GNU Trove runtimes can be found on the <a href="http://sourceforge.net/project/showfiles.php?group_id=74334">download</a> page.
+
+   <p>(*) I used Luxor in a messy way so recent release may not work with jCAE. It would be better to use the version included in the jCAE-third-party archive.
+
+   <p>(**) If you want to compile jCAE you will need the Jacorb IDL compiler which is not in the "jCAE-third-party" archive.
+
+<h3 class="section"><a name="TOC3"></a>2.2 Building libOccJava</h3>
+
+<h4 class="subsection"><a name="TOC4"></a>2.2.1 About Opencascade</h4>
+
+   <p>libOccJava is a JNI interface to a subset of Opencascade libraries. It's linked with these libraries :
+<a name="Opencascade-libs-list"></a>
+     <ul>
+<li>TKBRep
+<li>TKBool
+<li>TKG2d
+<li>TKG3d
+<li>TKGeomBase
+<li>TKIGES
+<li>TKMath
+<li>TKOffset
+<li>TKXSBase
+<li>TKernel
+<li>TKIGES
+<li>TKPrim
+<li>TKTopAlgo
+</ul>
+   To be able to link you can use the -with-occ argument (see configure -help) or set the <code>$CASROOT</code> environment variable. 
+Under linux, the binaries distribution of Opencascade 3.0, 4.0 and 5.0 are linked with gcc 2.x. Therefore you will have to use this compiler if you want to use binary distribution. You can also try to recompile Opencascade (beware, it takes a long time).
+
+<h4 class="subsection"><a name="TOC5"></a>2.2.2 Under Linux/Unix</h4>
+
+   <p><kbd>
+cd &lt;libOccJava directory&gt;<br>
+mkdir build<br>
+cd build<br>
+../configure --prefix=&lt;jCAE directory&gt; --with-occ=&lt;CASROOT directory&gt;<br>
+make<br>
+make install
+</kbd>
+
+<h4 class="subsection"><a name="TOC6"></a>2.2.3 Under Windows</h4>
+
+   <p>The easiest way to build libOccJava (the name of the file will be OccJava.dll) is to use the binary distribution of Opencascade and Visual C++ :
+     <ul>
+<li>Create a new project with Visual C++
+<li>Add the libOccJava file to the project
+<li>Define the <code>WNT</code> symbol in the preprocessor (see <code>Project Settings</code>)
+<li>Add the needed Opencascade <a href="#Opencascade-libs-list">libraries</a> to the project settings. 
+<li>Build the project
+</ul>
+
+<h3 class="section"><a name="TOC7"></a>2.3 Building jCAE</h3>
+
+   <p>To build jCAE you need ant (<a href="http://ant.apache.org">http://ant.apache.org</a>).<br>
+Be sure you have all the <a href="#Prerequisites">prerequisites</a> in your <code>CLASSPATH</code>.<br>
+Type "ant jar" to build jCAE or "ant -projecthelp" for more details.
+
+<h2 class="chapter"><a name="TOC8"></a>3 Running jCAE</h2>
+
+   <p>There is 2 way to run jCAE. For both you must have the <code>CASROOT</code> environement variable pointing to opencascade.
+
+<h3 class="section"><a name="TOC9"></a>3.1 For users</h3>
+
+   <p>Go to the jCAE directory and run the <code>jcae</code> script. It will open 2 xterm windows :
+     <ul>
+<li>The Jacorb Naming Service
+<li>The jCAE server
+</ul>
+   The current terminal will handle the message of the GUI client. 
+You will have to close the 3 windows to fully exit jCAE. 
+If something go wrong try the following method.
+
+<h3 class="section"><a name="TOC10"></a>3.2 For developpers</h3>
+
+   <p>The previous method do not allow to get the error messages of the naming server and of the jCAE server. To get these message you run each process manually.
+
+   <p>Go to the jCAE directory and run the following script in his own terminal (in this order) :
+     <ul>
+<li><code>jcaeNs</code> : Run the Jacorb Naming server
+<li><code>jcaeSrv</code> : Run the jCAE server
+<li><code>jcaeGui</code> : Run the GUI client
+</ul>
+
+<h2 class="chapter"><a name="TOC11"></a>4 General Information</h2>
+
+   <p>This jCAE version does contain two modules:
+     <ul>
+<li>a simple 3D design tool
+<li>a meshing tool
+</ul>
+
+   <p>These two modules are mainly driven by a text interface which enables the
+user to run beanshell scripts or commands. The 3D objects are either displayed
+in one (CAD module) or several (meshing module) 3D windows.
+
+   <br>
+
+<h3 class="section"><a name="TOC12"></a>4.1 How to use beanshell</h3>
+
+   <p>The beanshell syntax is very close to C or Java. Therefore, one must take care of the followings:
+
+     <ul>
+<li>Characters strings (filenames, ...) are delimited by quotes
+<li>
+Slash ("/") s preferred to backslash ("\") for filenames
+<li>Each commands ends up with a ;
+<li>Every command ends with () especially if no parameter is requested. 
+</ul>
+
+   <p>The java rule is applied for naming functions - each embedded word starts with a capital letter except the first one which is a small letter.
+
+   <p>ex :
+thisIsACommand();
+
+   <br>
+
+   <p>The existing commands are detailled below. You may find a complete documentation of Beanshell at <a href="http://www.beanshell.org/">http://www.beanshell.org</a>.
+
+   <br>
+
+<h3 class="section"><a name="TOC13"></a>4.2 How to use 3D windows ?</h3>
+
+<h4 class="subsection"><a name="TOC14"></a>4.2.1 Rotate the scene</h4>
+
+   <p>Just move the cursor while pushing the mouse left button.
+
+<h4 class="subsection"><a name="TOC15"></a>4.2.2 Zoom</h4>
+
+   <p>Move the cursor while pressing the ALT key and the left button of the  mouse. 
+A movement to the upper part of the screen will make the object closer while the opposite movement will make it shrink.
+
+   <br>
+
+   <p>The script command view.zoomTo() will fit the scene to the window.
+
+   <br>
+
+<h4 class="subsection"><a name="TOC16"></a>4.2.3 Recadrer</h4>
+
+   <p>Move the cursor while pressing the right button of the mouse.
+
+   <br>
+
+   <br>
+
+<h2 class="chapter"><a name="TOC17"></a>5 CAD Module</h2>
+
+<h3 class="section"><a name="TOC18"></a>5.1 Technical features</h3>
+
+<h4 class="subsection"><a name="TOC19"></a>5.1.1 Basic shapes</h4>
+
+     <ul>
+<li>Parallelepipede
+<li>Cylinder
+<li>Sphere
+<li>Torus
+</ul>
+
+<h4 class="subsection"><a name="TOC20"></a>5.1.2 Operators</h4>
+
+     <ul>
+<li>Translation
+<li>Rotation
+<li>Intersection
+<li>Explode and group creation
+</ul>
+
+<h4 class="subsection"><a name="TOC21"></a>5.1.3 file formats</h4>
+
+<h5 class="subsubsection"><a name="TOC22"></a>5.1.3.1 BREP</h5>
+
+   <p>This is the Opencascade native format (Opencascade is the CAD engine used within jCAE).
+
+<h5 class="subsubsection"><a name="TOC23"></a>5.1.3.2 IGES</h5>
+
+   <p>The IGES format is partially supported:
+
+     <ul>
+<li>some files can not be loaded,
+<li>when a file is loaded, some surfaces may be missing. 
+<li>When loading a large file, the connection between the CAD server and the
+GUI may fail (jCAE has to be restarted). Nevertheless, IGES files no larger than 150 KB will not cause problem on recent machines). 
+</ul>
+
+<h3 class="section"><a name="TOC24"></a>5.2 Snapshots</h3>
+
+   <img src="images/cadmodule.png" alt="images/cadmodule.png">
+
+   <p>The CAD module commands are available through:
+     <ul>
+<li>menu
+<li>buttons (for creation and CAD modifications)
+<li>script. 
+</ul>
+
+<h4 class="subsection"><a name="TOC25"></a>5.2.1 A first test</h4>
+
+   <p>- Click on the sphere icon in the button bar. A dialog box shows up.
+
+   <p>- keep default parameters (center (0,0,0) and radius of 1) and push the
+create button. A sphere appears in the "jCAE 3D view".
+
+<h4 class="subsection"><a name="TOC26"></a>5.2.2 Remark</h4>
+
+   <p>- The first command is always longer than the following because the server has to be initialized.
+
+<h3 class="section"><a name="TOC27"></a>5.3 Opening and Saving files</h3>
+
+   <p>These commands are got through the "File" menu.
+
+<h4 class="subsection"><a name="TOC28"></a>5.3.1 Import</h4>
+
+   <p>This command allows to add a form to the current scene. Once the group is added , it can be exploded and modified.
+
+   <br>
+
+<h5 class="subsubsection"><a name="TOC29"></a>5.3.1.1 Text user Interface</h5>
+
+   <p>importBREP(filename)
+importIGES(filename)
+<br>
+
+   <p>example :
+
+   <p>bsh %
+importBREP("C:/My Models/example.brep");
+
+   <br>
+
+<h4 class="subsection"><a name="TOC30"></a>5.3.2 Saving</h4>
+
+   <p>This command save the existing scene as one group. Writing an IGES file
+is only provided as an experimental feature and through the text user
+interface only.
+
+   <br>
+
+<h5 class="subsubsection"><a name="TOC31"></a>5.3.2.1 Text User Interface</h5>
+
+   <p>saveBREP(filename)
+
+   <p>saveIGES(filename)
+
+   <br>
+
+   <p>example :
+
+   <p>bsh % saveBREP("C:/My Models/example2.brep");
+
+   <br>
+
+<h3 class="section"><a name="TOC32"></a>5.4 Volume Creation</h3>
+
+<h4 class="subsection"><a name="TOC33"></a>5.4.1 3D box</h4>
+
+   <p>It is defined by the two points of one of its main diagonal.
+
+   <br>
+
+<h5 class="subsubsection"><a name="TOC34"></a>5.4.1.1 Scripting language</h5>
+
+   <p>makeBox(x1,y1,z1,x2,y2,z2)
+
+   <br>
+
+<h4 class="subsection"><a name="TOC35"></a>5.4.2 Cylinder</h4>
+
+   <p>A cylinder is defined by a radius and the two points describing its axis.
+
+<h5 class="subsubsection"><a name="TOC36"></a>5.4.2.1 Scripting language</h5>
+
+   <p>makeCylinder(x1,y1,z1,x2,y2,z2,radius)
+
+<h4 class="subsection"><a name="TOC37"></a>5.4.3 Sphere</h4>
+
+   <p>A sphere is described by its center and its radius.
+
+<h5 class="subsubsection"><a name="TOC38"></a>5.4.3.1 Scripting language</h5>
+
+   <p>makeSphere(x,y,z,radius)
+
+<h4 class="subsection"><a name="TOC39"></a>5.4.4 Torus</h4>
+
+   <p>It is defined by its center, its axis direction (vector), its
+main radius and its section radius.
+
+<h5 class="subsubsection"><a name="TOC40"></a>5.4.4.1 Scripting language</h5>
+
+   <p>makeTorus(x0,y0,z0,dx,dy,dz,rmain,rsection)
+
+   <br>
+
+   <p>example :
+
+   <p>bsh % makeTorus(0,0,0, 1,0,0, 3,1);
+
+   <br>
+
+<h3 class="section"><a name="TOC41"></a>5.5 Scene modification</h3>
+
+   <p>Every modification is applied onto the currently selected (one or several) object(s).
+
+   <br>
+
+<h4 class="subsection"><a name="TOC42"></a>5.5.1 Volume selection</h4>
+
+   <p>A volume is selected or unseleccted when clicked. When selected a volume changes its
+color from grey to blue. Multiple selection is possible at the same time using the
+shift key.
+
+   <br>
+
+<h4 class="subsection"><a name="TOC43"></a>5.5.2 Translation</h4>
+
+<h5 class="subsubsection"><a name="TOC44"></a>5.5.2.1 Scripting instruction</h5>
+
+   <p>makeTranslation(x,y,z)
+
+<h4 class="subsection"><a name="TOC45"></a>5.5.3 Rotation</h4>
+
+   <p>(x0,y0,z0) is a point located on the rotation axis, (dx, dy, dz) is its direction. 
+The rotation angle is given in degree.
+
+<h5 class="subsubsection"><a name="TOC46"></a>5.5.3.1 Scripting instruction</h5>
+
+   <p>makeRotation(x0,y0,z0,dx,dy,dz,angle)
+
+   <br>
+
+<h4 class="subsection"><a name="TOC47"></a>5.5.4 Intersection</h4>
+
+   <p>It is possible to compute the intersection of two objects. In case of multiple selection
+only the first two are considered. For computing the intersection of more than two objects
+groups have to be used (see group creation).
+
+   <br>
+
+<h5 class="subsubsection"><a name="TOC48"></a>5.5.4.1 Scripting instruction</h5>
+
+   <p>makeIntersection()
+
+   <br>
+
+<h4 class="subsection"><a name="TOC49"></a>5.5.5 Group management</h4>
+
+   <p>It is possible to group and ungroup objects. The tree located on the
+left part of the GUI give information on groups.
+
+   <br>
+
+<h5 class="subsubsection"><a name="TOC50"></a>5.5.5.1 Scripting instructions</h5>
+
+   <p>makeCompound()
+
+   <p>explodeCompound()
+
+   <br>
+
+<h4 class="subsection"><a name="TOC51"></a>5.5.6 Suppression</h4>
+
+   <p>Suppress the selected objects
+
+   <br>
+
+<h5 class="subsubsection"><a name="TOC52"></a>5.5.6.1 Scripting instruction</h5>
+
+   <p>delete()
+
+<h2 class="chapter"><a name="TOC53"></a>6 The Mesh Module</h2>
+
+<h3 class="section"><a name="TOC54"></a>6.1 Using the TUI</h3>
+
+<h4 class="subsection"><a name="TOC55"></a>6.1.1 Meshing of a geometry</h4>
+
+     <ul>
+<li>Select the elements you want to mesh in the CAD view. The become blue when they are selected. 
+<li>Enter the following command : <code>mesh(</code><var>&lt;max triangle aera&gt;</var><code>)</code>
+</ul>
+   For example :<br>
+<code>mesh(0.1f)</code><br>
+The <code>f</code> is requiered to specify a <code>float</code> variable.<br>
+
+   <p>This command is a script defined in <a href=""../script/initMesh.bsh"">script/initMesh.bsh</a> (see next section).
+
+<h4 class="subsection"><a name="TOC56"></a>6.1.2 The Mesh beanshell API</h4>
+
+   <p>A full documentation of the mesh beanshell API is generated from the Java sources. You read them to write custom scripts. If theses links below are dead this is because you did not have compile the java doc api with <code>ant doc</code>. 
+The objects of the mesh interface are :
+     <ul>
+<li><a href="api/org/jcae/mesh/MeshModuleImpl.html">MeshModule</a>
+<li><a href="api/org/jcae/mesh/MeshObjectImpl.html">MeshObject</a>
+<li><a href="api/org/jcae/mesh/MeshGroupImpl.html">MeshGroup</a>
+<li><a href="api/org/jcae/mesh/ViewableMeshImpl.html">ViewableMesh</a>
+<li><a href="api/org/jcae/mesh/MeshSceneImpl.html">MeshScene</a>
+</ul>
+
+   <p>Here is a sample of how to use them :
+
+   <p><code>
+view.setHiddenWireFrame(false);<br>
+m=meshModule.createMeshObject(null);<br>
+m.importSFM("../cobra-casqu_cf_1m.sfm");<br>
+meshScene=meshModule.createMeshScene();<br>
+meshScene.name("Mesh Scene");<br>
+view.addScene(meshScene);<br>
+vm=meshModule.createViewableMesh(m.getAsGroup());<br>
+meshScene.addObject(vm);<br>
+meshScene.showFreeEdges(vm,true);<br>
+meshScene.showTEdges(vm,true);<br>
+view.refresh();<br>
+view.zoomTo();<br>
+m.saveUNV("sample.unv"); </code>
+
+   <p>You may also see the <a href=""../script/initMesh.bsh"">script/initMesh.bsh</a> file to know how <code>meshModule</code> is initialised.
+
+<h3 class="section"><a name="TOC57"></a>6.2 Using the GUI</h3>
+
+   <p>The main features of the mesh module can be found in poppup menu of the tree on the right of the GUI.
+
+<h4 class="subsection"><a name="TOC58"></a>6.2.1 The mesh module (<small>MESH</small>)</h4>
+
+   <p>This the mesh module object. It load and own meshes. The only available command is :
+     <ul>
+<li><code>Open</code> : Open a mesh from a file. The UNV (IDEAS) file format is supported. 
+</ul>
+
+<h4 class="subsection"><a name="TOC59"></a>6.2.2 The mesh object</h4>
+
+   <p>If it is loaded from a file, the name of the file is displayed in the tree. If it is created from geometry an arbitrary name is displayed. Available commands are :
+     <ul>
+<li><code>Save</code> : Save a mesh to a file. The UNV (IDEAS) file format is supported. 
+<li><code>Explode groups</code> : Extract the groups of mesh. This normaly automatically done by the <code>Open</code> command of the mesh module. 
+</ul>
+
+<h4 class="subsection"><a name="TOC60"></a>6.2.3 The groups of elements</h4>
+
+   <p>The default name of a group is its ID. Available commands are :
+     <ul>
+<li><code>Rename</code> : Rename a group
+<li><code>Union</code> : Create a new group which is the union of selected groups. 
+<li><code>Merge</code> : Create a new group which is the union of selected groups. Selected group are deleted. 
+<li><code>Intersection</code> : Intersect selected groups. 
+<li><code>Display</code> : Display selected groups in a unique windows. 
+<li><code>Insert into a new mesh</code> : Create a new mesh from the selected group. 
+<li><code>Delete</code> : Delete the selected groups. 
+</ul>
+
+
+<h2 class="chapter"><a name="TOC61"></a>7 Appendix</h2>
+
+<h3 class="section"><a name="TOC62"></a>7.1 Limitations and known problems</h3>
+
+<h4 class="subsection"><a name="TOC63"></a>7.1.1 CAD modules</h4>
+
+   <p>- Loading very large IGES models can stop the software which then need to be restarted. 
+<br>
+- Some IGES patches can be incorrectly loaded. 
+<br>
+- For some odd configuration, intersection of 2 tori can led to an invisible solid.
+
+<h4 class="subsection"><a name="TOC64"></a>7.1.2 Others</h4>
+
+   <p>- From time to time, the main window failed to be refreshed. Should this happen, just resize it. 
+<br>
+- When running under Linux, windows may have odd size or place. This behavior is
+different from KDE &amp; GNOME and has not been reported on Windows. 
+<br>
+- Sometimes the following error message occurs at starting time :
+
+   <p>Sourced file:
+script\init.bsh : Invalid argument: `url' for method: source : Can't
+assign java.lang.String to
+
+   <p>java.net.URL : at Line:
+26 : in file: script\init.bsh : source ( "script/initCAD.bsh"
+)
+
+   <p>It is then required to stop the jCAE server, the JacORB naming service and then
+restart the application. This error may occur several times.
+
+   <br>
+
+   <p>- When some resources (CPU or disk) are slow, the starting timings may be to
+small, therefore edit the starting script (jcae or jcae.bat) and increase the
+value of the sleep commands.
+
+   <br>
+
+<h3 class="section"><a name="TOC65"></a>7.2 jCAE Architecture</h3>
+
+<h4 class="subsection"><a name="TOC66"></a>7.2.1 Overall view</h4>
+
+   <br>
+
+   <img src="images/architecture.png" alt="images/architecture.png">
+
+<h4 class="subsection"><a name="TOC67"></a>7.2.2 Modular architecture</h4>
+
+   <p>jCAE is composed of a main component and several modules.
+
+   <br>
+
+   <p>The main module contains the following :
+     <ul>
+<li>the 3d vizualisation windows
+<li>the main windows containing the beanshell scripting panel
+<li>abstract classes defining the modules
+</ul>
+
+   <p>From the latest, one can create modules as follows:
+
+     <ul>
+<li>write a server based on the jCAE CORBA interface,
+<li>write a beanshell interface. This optional interface will ease the requests
+made to the server. 
+One can start from the init.bsh &amp; initMesh.bsh located in the script directory.
+
+     <li>GUI description
+The description is done using XUL (XML format) and its behavior is coded using beanshell. 
+This is optional. The CAD GUI is located in the initCADGUI.bsh script and can be used as
+an example. 
+</ul>
+
+   <p>The modular approach does simplify the maintenance by limiting side effects when
+adding new functionnalities. A new functionnality does not modify the main module
+but only the startting script (init.bsh).
+
+<h4 class="subsection"><a name="TOC68"></a>7.2.3 Software used within jCAE</h4>
+
+   <p>jCAE uses the following software :
+
+   <br>
+
+<h5 class="subsubsection"><a name="TOC69"></a>7.2.3.1 Java Runtime Environement v1.4</h5>
+
+   <p>URL :<a href="http://java.sun.com/j2se">http://java.sun.com/j2se</a>
+
+   <p>jCAE is almost completely written in Java. Only the interface to
+OpenCascade has been done in C++ using the Java Native Interface (JNI).
+
+   <br>
+
+<h5 class="subsubsection"><a name="TOC70"></a>7.2.3.2 Java 3D v1.3</h5>
+
+   <p>URL :<a href="http://java.sun.com/products/java-media/3D">http://java.sun.com/products/java-media/3D</a>
+
+   <p>The 3D vizualisation is done through Java3D. Java3D is a high level API sitting on top OpenGL or
+DirectX.
+
+   <br>
+
+<h5 class="subsubsection"><a name="TOC71"></a>7.2.3.3 Opencascade v4.0</h5>
+
+   <p>URL :<a href="http://www.opencascade.org/">http://www.opencascade.org</a>
+
+   <p>OpenCascade is used for the following operations:
+     <ul>
+<li>Geometrical &amp; topological operations,
+<li>Generation of polygons for displaying 3D shapes. 
+</ul>
+
+<h5 class="subsubsection"><a name="TOC72"></a>7.2.3.4 Luxor v1.0b7</h5>
+
+   <p>URL :<a href="http://luxor-xul.sourceforge.net/">http://luxor-xul.sourceforge.net</a>
+
+   <p>jCAE dialog boxes are written using XUL (XML dialect). The SWING GUI are automaticaly generated
+at runtime from the XUL description.
+
+   <br>
+
+<h5 class="subsubsection"><a name="TOC73"></a>7.2.3.5 Jacorb v1.4.1</h5>
+
+   <p>URL :<a href="http://www.jacorb.org/">http://www.jacorb.org</a>
+
+   <p>The jCAE CAD engine is a server. It is connected to the GUI (client) through a CORBA interface. JacORB is used as ORB.
+
+   <br>
+
+<h5 class="subsubsection"><a name="TOC74"></a>7.2.3.6 Beanshell v1.3b2</h5>
+
+   <p>URL :<a href="http://www.beanshell.org/">http://www.beanshell.org</a>
+
+   <p>Beanshell is a scripting language. The following operations are realized in Beanshell:
+     <ul>
+<li>CAD engine control
+<li>3D vizualisation windows
+<li>display &amp; control of the dialog boxes
+</ul>
+
+<h3 class="section"><a name="TOC75"></a>7.3 The API documentation</h3>
+
+   <p>The API documentation can be found <a href="api/index.html">here</a>. 
+The jCAE beanshell interpreter is initialiased with a variable named jcaeRoot which is a <a href="api/org/jcae/Main.html">Main</a> object. 
+All following operations are made with this object (see script/init*.bsh files).
+
+   </body></html>
+

@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<title> jCAE - Viewer3d </title>
+	</head>
+	<body>
+
+<h1>Introduction</h1>
+<p>jCAE-viewer3d is a library to display mesh and geometry in Java3D. It aims at being at the
+same abstraction level as VTK (with unfortunately many fewer features). It
+currently only supports pre-processing (post-processing is still at the
+prototype step).</p>
+<p>jCAE Viewer3D rely on 3 object types:</p>
+<ul>
+	<li>View: The AWT object which display the object.</li>
+	<li>Viewable: An object describing what we want to see. Currently, it could be a geometry, a finite element mesh or a finite difference mesh.</li>
+	<li>Provider: An object which represent the data source. It could be a STEP/IGES file, an Amibe file, or an UNV file.</li>
+</ul>
+<p>The library is designed to allow customized Viewable and Provider instances.</p>
+<h1>Dependencies</h1>
+<p><code>Viewer3D</code> require java3d:</p>
+<ul>
+	<li><a href="https://java3d.dev.java.net/">Home page</a></li>
+	<li><a href="https://java3d.dev.java.net/binary-builds.html">Download</a></li>
+	<li><a href="http://download.java.net/media/java3d/builds/release/1.5.0/README-download.html">Installation</a></li>
+</ul>
+<p>To display Opencascade geometries, <a href="occjava.html"><code>occjava</code></a> is required in the CLASSPATH and PATH/LD_LIBRARY_PATH.</p>
+<p>To display Amibe meshes or use the OEMM features, the <a href="amibe.html">amibe</a> jar file is required.</p>
+<h1>Code Sample</h1>
+<p>These 2 basic examples are from the test package of <code>viewer3d</code>:<p>
+<ul>
+<li><a href="http://jcae.svn.sourceforge.net/viewvc/jcae/trunk/viewer3d/src/org/jcae/viewer3d/test/Example1.java?view=markup">Display an Amibe mesh and an Opencascade file</a></li>
+<li><a href="http://jcae.svn.sourceforge.net/viewvc/jcae/trunk/viewer3d/src/org/jcae/viewer3d/test/TestFEQuad.java?view=markup">Display quadrilateral finite elements</a></li>
+</ul>
+<h1>API documentation</h1>
+<p>The API documentation is available <a href="viewer3d-doc">here</a>. 
+</body></html>

@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE jcae SYSTEM "classpath:///org/jcae/mesh/xmldata/jcae.dtd">
+<jcae>
+<mesh>
+<shape>
+<file format="brep" location="./box.brep"/>
+</shape>
+<submesh>
+<subshape>1</subshape>
+<nodes>
+<number>8</number>
+<file format="doublestream" location="jcae1d.files/nodes1d.bin" offset="0"/>
+<references>
+<number>2</number>
+<file format="integerstream" location="jcae1d.files/nodes1dref.bin" offset="0"/>
+</references>
+</nodes>
+<beams>
+<number>7</number>
+<file format="integerstream" location="jcae1d.files/beams1d.bin" offset="0"/>
+</beams>
+</submesh>
+<submesh>
+<subshape>2</subshape>
+<nodes>
+<number>8</number>
+<file format="doublestream" location="jcae1d.files/nodes1d.bin" offset="64"/>
+<references>
+<number>2</number>
+<file format="integerstream" location="jcae1d.files/nodes1dref.bin" offset="16"/>
+</references>
+</nodes>
+<beams>
+<number>7</number>
+<file format="integerstream" location="jcae1d.files/beams1d.bin" offset="56"/>
+</beams>
+</submesh>
+<submesh>
+<subshape>3</subshape>
+<nodes>
+<number>8</number>
+<file format="doublestream" location="jcae1d.files/nodes1d.bin" offset="128"/>
+<references>
+<number>2</number>
+<file format="integerstream" location="jcae1d.files/nodes1dref.bin" offset="32"/>
+</references>
+</nodes>
+<beams>
+<number>7</number>
+<file format="integerstream" location="jcae1d.files/beams1d.bin" offset="112"/>
+</beams>
+</submesh>
+<submesh>
+<subshape>4</subshape>
+<nodes>
+<number>8</number>
+<file format="doublestream" location="jcae1d.files/nodes1d.bin" offset="192"/>
+<references>
+<number>2</number>
+<file format="integerstream" location="jcae1d.files/nodes1dref.bin" offset="48"/>
+</references>
+</nodes>
+<beams>
+<number>7</number>
+<file format="integerstream" location="jcae1d.files/beams1d.bin" offset="168"/>
+</beams>
+</submesh>
+<submesh>
+<subshape>5</subshape>
+<nodes>
+<number>8</number>
+<file format="doublestream" location="jcae1d.files/nodes1d.bin" offset="256"/>
+<references>
+<number>2</number>
+<file format="integerstream" location="jcae1d.files/nodes1dref.bin" offset="64"/>
+</references>
+</nodes>
+<beams>
+<number>7</number>
+<file format="integerstream" location="jcae1d.files/beams1d.bin" offset="224"/>
+</beams>
+</submesh>
+<submesh>
+<subshape>6</subshape>
+<nodes>
+<number>8</number>
+<file format="doublestream" location="jcae1d.files/nodes1d.bin" offset="320"/>
+<references>
+<number>2</number>
+<file format="integerstream" location="jcae1d.files/nodes1dref.bin" offset="80"/>
+</references>
+</nodes>
+<beams>
+<number>7</number>
+<file format="integerstream" location="jcae1d.files/beams1d.bin" offset="280"/>
+</beams>
+</submesh>
+<submesh>
+<subshape>7</subshape>
+<nodes>
+<number>8</number>
+<file format="doublestream" location="jcae1d.files/nodes1d.bin" offset="384"/>
+<references>
+<number>2</number>
+<file format="integerstream" location="jcae1d.files/nodes1dref.bin" offset="96"/>
+</references>
+</nodes>
+<beams>
+<number>7</number>
+<file format="integerstream" location="jcae1d.files/beams1d.bin" offset="336"/>
+</beams>
+</submesh>
+<submesh>
+<subshape>8</subshape>
+<nodes>
+<number>8</number>
+<file format="doublestream" location="jcae1d.files/nodes1d.bin" offset="448"/>
+<references>
+<number>2</number>
+<file format="integerstream" location="jcae1d.files/nodes1dref.bin" offset="112"/>
+</references>
+</nodes>
+<beams>
+<number>7</number>
+<file format="integerstream" location="jcae1d.files/beams1d.bin" offset="392"/>
+</beams>
+</submesh>
+<submesh>
+<subshape>9</subshape>
+<nodes>
+<number>8</number>
+<file format="doublestream" location="jcae1d.files/nodes1d.bin" offset="512"/>
+<references>
+<number>2</number>
+<file format="integerstream" location="jcae1d.files/nodes1dref.bin" offset="128"/>
+</references>
+</nodes>
+<beams>
+<number>7</number>
+<file format="integerstream" location="jcae1d.files/beams1d.bin" offset="448"/>
+</beams>
+</submesh>
+<submesh>
+<subshape>10</subshape>
+<nodes>
+<number>8</number>
+<file format="doublestream" location="jcae1d.files/nodes1d.bin" offset="576"/>
+<references>
+<number>2</number>
+<file format="integerstream" location="jcae1d.files/nodes1dref.bin" offset="144"/>
+</references>
+</nodes>
+<beams>
+<number>7</number>
+<file format="integerstream" location="jcae1d.files/beams1d.bin" offset="504"/>
+</beams>
+</submesh>
+<submesh>
+<subshape>11</subshape>
+<nodes>
+<number>8</number>
+<file format="doublestream" location="jcae1d.files/nodes1d.bin" offset="640"/>
+<references>
+<number>2</number>
+<file format="integerstream" location="jcae1d.files/nodes1dref.bin" offset="160"/>
+</references>
+</nodes>
+<beams>
+<number>7</number>
+<file format="integerstream" location="jcae1d.files/beams1d.bin" offset="560"/>
+</beams>
+</submesh>
+<submesh>
+<subshape>12</subshape>
+<nodes>
+<number>8</number>
+<file format="doublestream" location="jcae1d.files/nodes1d.bin" offset="704"/>
+<references>
+<number>2</number>
+<file format="integerstream" location="jcae1d.files/nodes1dref.bin" offset="176"/>
+</references>
+</nodes>
+<beams>
+<number>7</number>
+<file format="integerstream" location="jcae1d.files/beams1d.bin" offset="616"/>
+</beams>
+</submesh>
+</mesh>
+</jcae>

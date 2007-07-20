@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+	<title> jCAE - Amibe </title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<h1>Overview</h1>
+<p>Amibe is the name of jCAE main mesher. It reads OpenCASCADE geometries (BRep, STEP and IGES)
+and produces 3D finite element surface meshes.  It is designed to create very large meshes
+(hundreds of millions of triangles), and tries to mesh even if geometry is dirty.</p>
+<h2>Algorithm</h2>
+<p><img src="amibe-diag.png" alt="Amibe diagram overview"/></p>
+<p>All edges are discretized first.  This step is fast and does not need to be
+parallelized.  Faces are then discretized, and edge discretization is not modified
+to ensure that final mesh is conformant.  This is the most costful step, so it
+has been designed to run on clusters if needed.  Each face can be meshed without
+interaction from other faces; there is no restriction on final mesh size, but in
+this step, each mesh of a face has to reside in memory.  when finished, each mesh is
+written into separate files, and merged to produce final 3D mesh.  Of course this step
+does not require loading whole mesh into memory!</p>
+<h2>Patch mesher</h2>
+<p>In OpenCASCADE faces are 2D parametrized surfaces.  We mesh those parametrized surfaces
+so that the 3D projection on our geometry has the desired properties (edge length and/or
+deflection), as described in
+<a href="ftp://ftp.inria.fr/INRIA/publication/publi-pdf/RR/RR-2928.pdf">Maillage de
+surfaces paramétriques</a> (in French), by Houman Borouchaki and Paul Louis George.</p>
+<h1>Amibe file format</h1>
+	<h2>Background</h2>
+	<ol>
+		<li>Mesh files must be easy to parse with any language on any architecture.</li>
+		<li>Mesh may be huge (hundred millions of triangles) and handled by
+		out-of-core algorithms.</li>
+		<li>A mesh is a set of nodes and triangles, but other data may be added
+		(groups, results...), so the file format must be extendable.</li>
+		<li>There is no existing open file format designed to work with out-of-core
+		algorithms, in both Java and native.</li>
+	</ol>
+	<h2>Format overview</h2>
+	<p>XML is a convenient solution to store structured data, it is portable and
+	our own file format can be easily designed and extended.  But its main
+	drawback is its verbosity and parsing an XML file containing several gigabytes
+	would be challenging.  We chose an intermediate solution: an XML file
+	contains only structured data (link to geometry file, list of geometrical
+	elements, etc) and raw data (like node coordinates) are stored into separate
+	binary files.
+	<h2>1D, 2D and 3D meshes</h2>
+	<p>Amibe creates 3 meshes in the same directory:</p>
+	<ol>
+		<li>A discretization of geometrical edges. These are 1D linear elements
+		(beams).</li>
+		<li>A 2D discretization geometry. These are 2D triangles.  In order to help
+		parallel computations, tessellation of different geometry patches are written
+		into separate files.</li>
+		<li>A 3D discretization geometry. These are 3D triangles.</li>
+	</ol>
+	<p>The two first meshes are intermediate steps to reach the third one which is
+	the exploitable mesh for computation. Intermediate meshes are kept because
+	they can be used in specific algorithms.</p>
+	<h2>XML file</h2>
+	<p>The exact format is given by a <a href="https://svn.sourceforge.net/svnroot/jcae/trunk/amibe/src/org/jcae/mesh/xmldata/jcae.dtd">DTD</a> (XML Schema format coming ASAP). The information it contains are:</p>
+	<ul>
+		<li>Path to binary files</li>
+		<li>Number of nodes and triangles</li>
+		<li>Path to geometry (only required for some algorithm)</li>
+		<li>Description of groups and pointer in the binary group files</li>
+	</ul>
+	<h2>Binary files</h2>
+	<ul>
+		<li>To ensure portability, binary files of amibe are always written in big endian.</li>
+		<li>To make files easy to parse, they contains only one type of data (64 bit integer or double).</li>
+		<li>Binary files do not contain any headers or meta data, they are only raw array.</li>
+	</ul>
+	<h3>1D binary files</h3>
+	<p>An example of 1D XML file linking to these 1D binary files can be found <a href="amibe-samples/jcae1d">here</a>.</p>
+	<dl>
+		<dt><a href="amibe-samples/jcae1d.files/nodes1d.bin">jcae1d.files/nodes1d.bin</a></dt>
+		<dd>1D node coordinates.
+		All curves are concatenated, <code>offset</code> attribute tells at which
+		position a curve is stored into binary file.
+		File length is <code>(sum of all number of nodes)*8</code>.</dd>
+
+		<dt><a href="amibe-samples/jcae1d.files/nodes1dref.bin">jcae1d.files/nodes1dref.bin</a></dt>
+		<dd>References to geometrical vertices.  We need to glue edge endpoints together
+		when they are referring to the same geometrical vertex.  An entry in this binary file
+		consists of 2 integers:
+		<ul>
+			<li>Node index in <code>jcae1d.files/nodes1d.bin</code> (starting to 1).</li>
+			<li>Geometrical vertex number.</li>
+		</ul>
+		All curves are concatenated, <code>offset</code> attribute tells at which
+		position a curve is stored into binary file.
+		In practice, edge endpoints are geometrical vertices, and there is no other candidate,
+		file length is thus <code>2*(number of geometrical edges)*2*4</code>.</dd>
+
+		<dt><a href="amibe-samples/jcae1d.files/beams1d.bin">jcae1d.files/beams1d.bin</a></dt>
+		<dd>Beam tessellation.  This file contains node index in <code>jcae1d.files/nodes1d.bin</code>
+		(starting to 1) of segment endpoints.
+		All curves are concatenated, <code>offset</code> attribute tells at which
+		position a curve is stored into binary file.
+		File length is <code>(number of segments)*2*4</code>.</dd>
+	</dl>
+	<h3>2D binary files</h3>
+	<p>An example of 2D XML file linking to these 2D binary files can be found <a href="amibe-samples/jcae2d.1">here</a>.</p>
+	<dl>
+		<dt><a href="amibe-samples/jcae2d.1.files/nodes2d.bin">jcae2d.<i>&lt;patch_number&gt;</i>.files/nodes2d.bin</a></dt>
+		<dd>2D node coordinates.
+		File length is <code>(number of nodes)*8*2</code>.</dd>
+
+		<dt><a href="amibe-samples/jcae2d.1.files/nodes1dref.bin">jcae2d.<i>&lt;patch_number&gt;</i>.files/nodes1dref.bin</a></dt>
+		<dd>References to 1D vertices.  This is needed to glue patch boundaries. 2D vertices on different
+		patches are assigned the same reference number if and only if they shared the same 1D ancestor.
+		By convention, inner nodes are first written into <code>jcae2d.<i>&lt;n&gt;</i>.files/nodes2d.bin</code>,
+		then boundary nodes are appended.  This file contains an array of integers which are global reference
+		numbers (and must be non-null).
+		File length is <code>(number of reference nodes)*4</code>.</dd>
+
+		<dt><a href="amibe-samples/jcae2d.1.files/triangles2d.bin">jcae2d.<i>&lt;patch_number&gt;</i>.files/triangles2d.bin</a></dt>
+		<dd>Patch tessellation.  This file contains node index in <code>jcae2d.<i>&lt;n&gt;</i>.files/nodes2d.bin</code>
+		(starting to 0) of triangles.
+		File length is <code>(number of triangles)*3*4</code>.</dd>
+	</dl>
+	<h3>3D binary files</h3>
+	<p>An example of 3D XML file linking to these 3D binary files can be found <a href="amibe-samples/jcae3d">here</a>.</p>
+	<dl>
+		<dt><a href="amibe-samples/jcae3d.files/nodes3d.bin">jcae3d.files/nodes3d.bin</a></dt>
+		<dd>3D node coordinates.
+		File length is <code>(number of nodes)*8*3</code>.</dd>
+
+		<dt><a href="amibe-samples/jcae3d.files/nodes1dref.bin">jcae3d.files/nodes1dref.bin</a></dt>
+		<dd>References to 1D vertices.  This may be needed if we want to preserve patch boundaries,
+		this file has the same structure as in 2D.
+		File length is <code>(number of reference nodes)*4</code>.</dd>
+
+		<dt><a href="amibe-samples/jcae3d.files/triangles3d.bin">jcae3d.files/triangles3d.bin</a></dt>
+		<dd>Geometry tessellation.
+		File length is <code>(number of triangles)*3*4</code>.</dd>
+
+		<dt><a href="amibe-samples/jcae3d.files/groups.bin">jcae3d.files/groups.bin</a></dt>
+		<dd>Groups.
+		Each group contains the list of index (starting to 0) of triangles enclosed in this group.
+		All groups are concatenated, <code>offset</code> attribute tells at which
+		index (this is not position, it has to be multiplicated by 4!) a group is stored into binary file.
+		File length is <code>(total number of triangles)*4</code>.</dd>
+	</dl>
+	<h2>Examples</h2>
+	<p>Here is how one can retrieve the 3D nodes coordinates of the 3rd triangle of the group named "foobar":</p>
+	<ul>
+		<li>Parse <a href="amibe-samples/jcae3d">3D XML root file</a> into a DOM.</li>
+		<li>Search the foobar node in the XML structure either with DOM API or XPath.</li>
+		<li>Get the foobar group offset in the binary group file</li>
+		<li>Seek the binary group file to <code>offset+8</code> and get the triangle ID</li>
+		<li>Seek the binary triangle file to <code>triangle ID</code></li>
+		<li>Get the 3 nodes ID</li>
+		<li>Seek the binary node file to the 3 nodes ID</li>
+	</ul>
+<p>A Java code to do it will look like this:</p>
+<pre>
+Document document = parseXML("jcae3d");
+
+//Open binary files
+RandomAccessFile rafNodes = new RandomAccessFile(getNodeFile(document), "r");
+RandomAccessFile rafTriangles = new RandomAccessFile(getTriaFile(document), "r");
+RandomAccessFile rafGroups = new RandomAccessFile(getGrpFile(document), "r");
+
+//Search the foobar node in the XML structure	
+Element fooBar = getGroup(document, "foobar");
+
+//Get the foobar group offset
+long index = getGroupOffset(fooBar);
+
+//Seek the binary group file to 4*index+2*4 and get the triangle ID
+rafGroups.seek(4*index+8L);
+int triangleID = rafGroups.readInt();
+
+//Seek the binary triangle file to triangle ID
+rafTriangles.seek(triangleID*3*4);
+
+//Get the 3 nodes ID
+int [] nodeIDs = new int[3];
+for(int i=0; i&lt;3; i++)
+	nodeIDs[i] = rafTriangles.readInt();
+
+for(int i=0; i&lt;3; i++)
+{
+	rafNodes.seek(nodeIDs[i]*3*8);
+	double x = rafNodes.readDouble();
+	double y = rafNodes.readDouble();
+	double z = rafNodes.readDouble();
+	System.out.println(x+" "+y+" "+z);
+}
+</pre>
+</body>
+</html>

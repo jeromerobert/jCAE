@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE jcae SYSTEM "classpath:///org/jcae/mesh/xmldata/jcae.dtd">
+<jcae>
+<mesh>
+<submesh>
+<nodes>
+<number>290</number>
+<file format="doublestream" location="jcae3d.files/nodes3d.bin" offset="0"/>
+<references>
+<number>80</number>
+<file format="integerstream" location="jcae3d.files/nodes1dref.bin" offset="0"/>
+</references>
+</nodes>
+<triangles>
+<number>576</number>
+<file format="integerstream" location="jcae3d.files/triangles3d.bin" offset="0"/>
+<normals>
+<file format="doublestream" location="jcae3d.files/normals3d.bin" offset="0"/>
+</normals>
+</triangles>
+<groups>
+<group id="0">
+<name>1</name>
+<number>98</number>
+<file format="integerstream" location="jcae3d.files/groups.bin" offset="0"/>
+</group>
+<group id="1">
+<name>2</name>
+<number>94</number>
+<file format="integerstream" location="jcae3d.files/groups.bin" offset="98"/>
+</group>
+<group id="2">
+<name>3</name>
+<number>98</number>
+<file format="integerstream" location="jcae3d.files/groups.bin" offset="192"/>
+</group>
+<group id="3">
+<name>4</name>
+<number>94</number>
+<file format="integerstream" location="jcae3d.files/groups.bin" offset="290"/>
+</group>
+<group id="4">
+<name>5</name>
+<number>98</number>
+<file format="integerstream" location="jcae3d.files/groups.bin" offset="384"/>
+</group>
+<group id="5">
+<name>6</name>
+<number>94</number>
+<file format="integerstream" location="jcae3d.files/groups.bin" offset="482"/>
+</group>
+</groups>
+</submesh>
+<submesh>
+<flag value="FreeEdges"/>
+<nodes>
+<number>290</number>
+<file format="doublestream" location="jcae3d.files/nodes3d.bin" offset="0"/>
+<references>
+<number>80</number>
+<file format="integerstream" location="jcae3d.files/nodes1dref.bin" offset="0"/>
+</references>
+</nodes>
+<beams>
+<number>0</number>
+<file format="integerstream" location="jcae3d.files/freeEdges.bin" offset="0"/>
+</beams>
+</submesh>
+<submesh>
+<flag value="MultiEdges"/>
+<nodes>
+<number>290</number>
+<file format="doublestream" location="jcae3d.files/nodes3d.bin" offset="0"/>
+<references>
+<number>80</number>
+<file format="integerstream" location="jcae3d.files/nodes1dref.bin" offset="0"/>
+</references>
+</nodes>
+<beams>
+<number>0</number>
+<file format="integerstream" location="jcae3d.files/multiEdges.bin" offset="0"/>
+</beams>
+</submesh>
+</mesh>
+</jcae>

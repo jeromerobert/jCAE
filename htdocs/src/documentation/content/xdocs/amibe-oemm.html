@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+	<title> jCAE - Amibe OEMM </title>
+</head>
+<body>
+<h1>Amibe OEMM</h1>
+ <p>P. Cignoni, C. Montani, C. Rocchini and R. Scopigno described in their paper
+ <a href="http://vcg.isti.cnr.it/publications/papers/oemm_tvcg.pdf">External
+ Memory Management and Simplification of Huge Meshes</a>
+ a data structure for out-of-core processing of huge meshes (also called
+ Octree based External Memory Mesh, or <b>OEMM</b>).  We implemented these ideas
+ into Amibe.  An overview of our OEMM file format is given below, more
+ informations can be found into <a href="amibe-doc/">Amibe API</a>.</p>
+
+<h2>Main Data Structure</h2>
+<p>OEMM has been developed as a prototype in order to test out-of-core algorithms.
+Its file format has not been designed to be robust, we modify it when needed.
+It is not portable and varies a lot between versions, but hopefully this will
+be fixed soon.</p>
+
+<p>An OEMM is an octree-based mesh.  Its main data structure is stored in a binary
+file (named <code>oemm</code> by default) created by serializing and concatenating
+several Java objects.  This file format is not discussed here, see
+<a href="amibe-doc/org/jcae/mesh/oemm/Storage.html#readOEMMStructure(java.lang.String)">org.jcae.mesh.oemm.Storage.readOEMMStructure(String)</a>
+source code to learn how to read this file.</p>
+
+<h2>Octant Data Structure</h2>
+<p>Fortunately octants are stored in a non-native format, which is described now.
+Non-leaf nodes contain up to 8 children, numbered from 0 to 7.  Data files for
+children are stored in subdirectories named after their respective child number,
+which means that an octant found by traversing <code>6-0-1-4-3</code> children
+(in this order) is stored under <code>6/0/1/4/3/</code> directory.</p>
+<p>A leaf node contains triangles and vertices.  Data files have a common prefix,
+which is local leaf number (from 0 to 7).  There are 3 different files, their
+suffix being:
+</p>
+<dl>
+	<dt>v</dt>
+	<dd>3D coordinates of vertices (in <code>double</code> format)</dd>
+
+	<dt>a</dt>
+	<dd>Adjacent leaves.  The main OEMM data structure contains an array
+	of leaf nodes, called
+	<a href="amibe-doc/org/jcae/mesh/oemm/OEMM.html#leaves">org.jcae.mesh.oemm.OEMM.leaves</a>.
+	Each leaf node knows its neighborhood through its
+	<a href="amibe-doc/org/jcae/mesh/oemm/OEMM.Node.html#adjLeaves">org.jcae.mesh.oemm.OEMM.Node.adjLeaves</a>
+	member, which is a list of indices referring to elements from <code>leaves</code> array.
+	Each vertex encodes the list of neighboring leaf nodes connected to this vertex via an edge;
+	the number of such adjacent leaves is stored as a byte value (by construction there is less
+	than 256 leaf neighbors), and local indices (referring to element from <code>adjLeaves</code>,
+	starting to 0) of these adjacent leaves are stored as byte values.
+
+	<dt>t</dt>
+	<dd>Triangles: an entry consists of leaf indices (referring to elements from <code>leaves</code>
+	array, starting to 0) for its 3 vertices, local indices of these vertices in their respective
+	octant (starting to 0), and a group number</dd>
+</dl>
+</body>
+</html>

@@ -1,0 +1,5 @@
+Create the following links:
+src/documentation/content/occjava-doc -> /a/path/occjava/doc/api
+src/documentation/content/viewer3d-doc -> /a/path/viewer3d/doc/api
+src/documentation/content/amibe-doc -> /a/path/amibe/doc/api
+
