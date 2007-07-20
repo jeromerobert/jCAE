@@ -1,3 +1,5 @@
+Release jCAE 0.14.2
+
 Wed Jul 18 13:02:59 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/MeshReader.java (readObject3D): Avoid
