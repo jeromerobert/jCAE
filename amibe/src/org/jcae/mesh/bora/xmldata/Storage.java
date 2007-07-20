@@ -161,6 +161,26 @@ public class Storage
 	 * @return a Mesh instance
 	 * @throws  RuntimeException if an error occurred
 	 */
+	public static Mesh readAllFaces(BCADGraphCell root)
+	{
+		Mesh m = new Mesh();
+		TIntObjectHashMap vertMap = new TIntObjectHashMap();
+		for (Iterator its = root.getGraph().getModel().getSubMeshIterator(); its.hasNext(); )
+		{
+			BSubMesh s = (BSubMesh) its.next();
+			for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
+				readFace(m, (BCADGraphCell) it.next(), s, vertMap);
+		}
+		return m;
+	}
+
+	/**
+	 * Creates a Mesh instance by reading all faces.
+	 * @param root    root shape
+	 * @param s       consider discretizations only if they appear in this BSubMesh instance
+	 * @return a Mesh instance
+	 * @throws  RuntimeException if an error occurred
+	 */
 	public static Mesh readAllFaces(BCADGraphCell root, BSubMesh s)
 	{
 		Mesh m = new Mesh();
@@ -174,6 +194,7 @@ public class Storage
 	 * Append a discretized face into a Mesh instance.
 	 * @param mesh    original mesh
 	 * @param root    cell graph containing a CAD face
+	 * @param s       consider discretizations only if they appear in this BSubMesh instance
 	 * @param mapRefVertex    map between references and Vertex instances
 	 * @throws  RuntimeException if an error occurred
 	 */
