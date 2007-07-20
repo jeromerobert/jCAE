@@ -189,7 +189,7 @@ public class BasicMesh
 	 */
 	public void compute()
 	{
-		new Initial(mesh, mesh1d).compute();
+		new Initial(mesh, mesh1d.boundaryNodes(mesh)).compute();
 		mesh.pushCompGeom(3);
 		new Insertion(mesh, 16.0).compute();
 		new ConstraintNormal3D(mesh).compute();

@@ -22,6 +22,9 @@ package org.jcae.mesh.mesher.ds;
 
 import org.jcae.mesh.bora.ds.*;
 import org.jcae.mesh.cad.*;
+import org.jcae.mesh.amibe.patch.Vertex2D;
+import org.jcae.mesh.amibe.patch.Mesh2D;
+import org.jcae.mesh.amibe.metrics.Metric3D;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -400,6 +403,118 @@ public class MMesh1D extends MMesh0D
 		return (SubMesh1D) mapTEdgeToSubMesh1D.get(discrE);
 	}
 
+	public Vertex2D [] boundaryNodes(Mesh2D mesh)
+	{
+		//  Rough approximation of the final size
+		int roughSize = 10*maximalNumberOfNodes();
+		ArrayList result = new ArrayList(roughSize);
+		CADFace face = (CADFace) mesh.getGeometry();
+		CADExplorer expW = CADShapeBuilder.factory.newExplorer();
+		CADWireExplorer wexp = CADShapeBuilder.factory.newWireExplorer();
+		
+		for (expW.init(face, CADShapeEnum.WIRE); expW.more(); expW.next())
+		{
+			MNode1D p1 = null;
+			Vertex2D p20 = null, p2 = null, lastPoint = null;;
+			double accumulatedLength = 0.0;
+			ArrayList nodesWire = new ArrayList(roughSize);
+			for (wexp.init((CADWire) expW.current(), face); wexp.more(); wexp.next())
+			{
+				CADEdge te = wexp.current();
+				CADGeomCurve2D c2d = CADShapeBuilder.factory.newCurve2D(te, face);
+				CADGeomCurve3D c3d = CADShapeBuilder.factory.newCurve3D(te);
+
+				ArrayList nodelist = getNodelistFromMap(te);
+				Iterator itn = nodelist.iterator();
+				ArrayList saveList = new ArrayList();
+				while (itn.hasNext())
+				{
+					p1 = (MNode1D) itn.next();
+					saveList.add(p1);
+				}
+				if (!te.isOrientationForward())
+				{
+					//  Sort in reverse order
+					int size = saveList.size();
+					for (int i = 0; i < size/2; i++)
+					{
+						Object o = saveList.get(i);
+						saveList.set(i, saveList.get(size - i - 1));
+						saveList.set(size - i - 1, o);
+					}
+				}
+				itn = saveList.iterator();
+				//  Except for the very first edge, the first
+				//  vertex is constrained to be the last one
+				//  of the previous edge.
+				p1 = (MNode1D) itn.next();
+				if (null == p2)
+				{
+					p2 = Vertex2D.valueOf(p1, c2d, face);
+					nodesWire.add(p2);
+					p20 = p2;
+					lastPoint = p2;
+				}
+				ArrayList newNodes = new ArrayList(saveList.size());
+				while (itn.hasNext())
+				{
+					p1 = (MNode1D) itn.next();
+					p2 = Vertex2D.valueOf(p1, c2d, face);
+					newNodes.add(p2);
+				}
+				// An edge is skipped if all the following conditions
+				// are met:
+				//   1.  It is not degenerated
+				//   2.  It has not been discretized in 1D
+				//   3.  Edge length is smaller than epsilon
+				//   4.  Accumulated points form a curve with a deflection
+				//       which meets its criterion
+				boolean canSkip = false;
+				if (nodelist.size() == 2 && !te.isDegenerated())
+				{
+					//   3.  Edge length is smaller than epsilon
+					double edgelen = c3d.length();
+					canSkip = mesh.tooSmall(edgelen, accumulatedLength);;
+					if (canSkip)
+						accumulatedLength += edgelen;
+					// 4.  Check whether deflection is valid.
+					if (canSkip && Metric3D.hasDeflection())
+					{
+						double [] uv = lastPoint.getUV();
+						double [] start = mesh.getGeomSurface().value(uv[0], uv[1]);
+						uv = p2.getUV();
+						double [] end = mesh.getGeomSurface().value(uv[0], uv[1]);
+						double dist = Math.sqrt(
+						  (start[0] - end[0]) * (start[0] - end[0]) +
+						  (start[1] - end[1]) * (start[1] - end[1]) +
+						  (start[2] - end[2]) * (start[2] - end[2]));
+						double dmax = Metric3D.getDeflection();
+						if (Metric3D.hasRelativeDeflection())
+							dmax *= accumulatedLength;
+						if (accumulatedLength - dist > dmax)
+							canSkip = false;
+					}
+				}
+
+				if (!canSkip)
+				{
+					nodesWire.addAll(newNodes);
+					accumulatedLength = 0.0;
+					lastPoint = p2;
+				}
+			}
+			//  If a wire has less than 3 points, it is discarded
+			if (nodesWire.size() > 3)
+			{
+				//  Overwrite the last value to close the wire
+				nodesWire.set(nodesWire.size()-1, p20);
+				result.addAll(nodesWire);
+			}
+		}
+		
+		return (Vertex2D []) result.toArray(new Vertex2D[result.size()]);
+	}
+	
 	/**
 	 * Checks the validity of a <code>MMesh1D</code> instance.
 	 * This method is called within assertions, this is why it returns a

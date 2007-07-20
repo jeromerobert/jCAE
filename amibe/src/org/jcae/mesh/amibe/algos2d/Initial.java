@@ -20,7 +20,6 @@
 
 package org.jcae.mesh.amibe.algos2d;
 
-import org.jcae.mesh.mesher.ds.MMesh1D;
 import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
@@ -190,7 +189,7 @@ public class Initial
 {
 	private static Logger logger=Logger.getLogger(Initial.class);
 	private Mesh2D mesh = null;
-	private MMesh1D mesh1d = null;
+	private Vertex2D [] bNodes;
 	private Collection innerNodes = null;
 	
 	/**
@@ -199,15 +198,15 @@ public class Initial
 	 * @param m  the data structure in which the mesh will be stored.
 	 * @param m1d  discretization of edges.
 	 */
-	public Initial(Mesh2D m, MMesh1D m1d)
+	public Initial(Mesh2D m, Vertex2D [] b)
 	{
-		this(m, m1d, null);
+		this(m, b, null);
 	}
 	
-	public Initial(Mesh2D m, MMesh1D m1d, Collection list)
+	public Initial(Mesh2D m, Vertex2D [] b, Collection list)
 	{
 		mesh = m;
-		mesh1d = m1d;
+		bNodes = b;
 		innerNodes = list;
 	}
 	
@@ -220,7 +219,6 @@ public class Initial
 		OTriangle2D ot;
 		Vertex2D v;
 		
-		Vertex2D [] bNodes = boundaryNodes();
 		if (bNodes.length < 3)
 		{
 			logger.warn("Boundary face contains less than 3 points, it is skipped...");
@@ -430,122 +428,6 @@ public class Initial
 		mesh.popCompGeom(3);
 		
 		assert (mesh.isValid());
-	}
-	
-	/*
-	 *  Builds the patch boundary.
-	 *  Returns a list of Vertex2D.
-	 */
-	private Vertex2D [] boundaryNodes()
-	{
-		//  Rough approximation of the final size
-		int roughSize = 10*mesh1d.maximalNumberOfNodes();
-		ArrayList result = new ArrayList(roughSize);
-		CADFace face = (CADFace) mesh.getGeometry();
-		CADExplorer expW = CADShapeBuilder.factory.newExplorer();
-		CADWireExplorer wexp = CADShapeBuilder.factory.newWireExplorer();
-		
-		for (expW.init(face, CADShapeEnum.WIRE); expW.more(); expW.next())
-		{
-			MNode1D p1 = null;
-			Vertex2D p20 = null, p2 = null, lastPoint = null;;
-			double accumulatedLength = 0.0;
-			ArrayList nodesWire = new ArrayList(roughSize);
-			for (wexp.init((CADWire) expW.current(), face); wexp.more(); wexp.next())
-			{
-				CADEdge te = wexp.current();
-				CADGeomCurve2D c2d = CADShapeBuilder.factory.newCurve2D(te, face);
-				CADGeomCurve3D c3d = CADShapeBuilder.factory.newCurve3D(te);
-
-				ArrayList nodelist = mesh1d.getNodelistFromMap(te);
-				Iterator itn = nodelist.iterator();
-				ArrayList saveList = new ArrayList();
-				while (itn.hasNext())
-				{
-					p1 = (MNode1D) itn.next();
-					saveList.add(p1);
-				}
-				if (!te.isOrientationForward())
-				{
-					//  Sort in reverse order
-					int size = saveList.size();
-					for (int i = 0; i < size/2; i++)
-					{
-						Object o = saveList.get(i);
-						saveList.set(i, saveList.get(size - i - 1));
-						saveList.set(size - i - 1, o);
-					}
-				}
-				itn = saveList.iterator();
-				//  Except for the very first edge, the first
-				//  vertex is constrained to be the last one
-				//  of the previous edge.
-				p1 = (MNode1D) itn.next();
-				if (null == p2)
-				{
-					p2 = Vertex2D.valueOf(p1, c2d, face);
-					nodesWire.add(p2);
-					p20 = p2;
-					lastPoint = p2;
-				}
-				ArrayList newNodes = new ArrayList(saveList.size());
-				while (itn.hasNext())
-				{
-					p1 = (MNode1D) itn.next();
-					p2 = Vertex2D.valueOf(p1, c2d, face);
-					newNodes.add(p2);
-				}
-				// An edge is skipped if all the following conditions
-				// are met:
-				//   1.  It is not degenerated
-				//   2.  It has not been discretized in 1D
-				//   3.  Edge length is smaller than epsilon
-				//   4.  Accumulated points form a curve with a deflection
-				//       which meets its criterion
-				boolean canSkip = false;
-				if (nodelist.size() == 2 && !te.isDegenerated())
-				{
-					//   3.  Edge length is smaller than epsilon
-					double edgelen = c3d.length();
-					canSkip = mesh.tooSmall(edgelen, accumulatedLength);;
-					if (canSkip)
-						accumulatedLength += edgelen;
-					// 4.  Check whether deflection is valid.
-					if (canSkip && Metric3D.hasDeflection())
-					{
-						double [] uv = lastPoint.getUV();
-						double [] start = mesh.getGeomSurface().value(uv[0], uv[1]);
-						uv = p2.getUV();
-						double [] end = mesh.getGeomSurface().value(uv[0], uv[1]);
-						double dist = Math.sqrt(
-						  (start[0] - end[0]) * (start[0] - end[0]) +
-						  (start[1] - end[1]) * (start[1] - end[1]) +
-						  (start[2] - end[2]) * (start[2] - end[2]));
-						double dmax = Metric3D.getDeflection();
-						if (Metric3D.hasRelativeDeflection())
-							dmax *= accumulatedLength;
-						if (accumulatedLength - dist > dmax)
-							canSkip = false;
-					}
-				}
-
-				if (!canSkip)
-				{
-					nodesWire.addAll(newNodes);
-					accumulatedLength = 0.0;
-					lastPoint = p2;
-				}
-			}
-			//  If a wire has less than 3 points, it is discarded
-			if (nodesWire.size() > 3)
-			{
-				//  Overwrite the last value to close the wire
-				nodesWire.set(nodesWire.size()-1, p20);
-				result.addAll(nodesWire);
-			}
-		}
-		
-		return (Vertex2D []) result.toArray(new Vertex2D[result.size()]);
 	}
 	
 }
