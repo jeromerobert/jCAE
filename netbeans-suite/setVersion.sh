@@ -10,6 +10,6 @@ files="
 	occjava/manifest.mf"
 
 for file in $files; do
-	sed -i "s/@JCAE_VERSION@/$0/g" $file
+	sed -i "s/@JCAE_VERSION@/$1/g" $file
 done
 
