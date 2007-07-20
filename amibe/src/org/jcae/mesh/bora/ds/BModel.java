@@ -22,6 +22,7 @@
 package org.jcae.mesh.bora.ds;
 
 import org.jcae.mesh.bora.xmldata.BModelWriter;
+import org.jcae.mesh.bora.xmldata.Storage;
 import org.jcae.mesh.cad.CADShapeBuilder;
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADShapeEnum;
@@ -219,8 +220,7 @@ public class BModel
 			for (Iterator itd = cell.discretizationIterator(); itd.hasNext(); )
 			{
 				BDiscretization d = (BDiscretization) itd.next();
-				if (d.getMesh() == null)
-					d.setMesh(cell.getShape());
+				d.discretize();
 			}
 		}
 		logger.debug("Discretize edges");
@@ -231,6 +231,7 @@ public class BModel
 			{
 				BDiscretization d = (BDiscretization) itd.next();
 				d.discretize();
+				Storage.writeEdge(d, getOutputDir(d.getFirstSubMesh()));
 			}
 		}
 		/*
