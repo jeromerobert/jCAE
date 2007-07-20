@@ -290,7 +290,6 @@ public class Hypothesis
 	public AlgoInterface findAlgorithm(CADShapeEnum cse)
 	{
 		AlgoInterface ret = null;
-		double targetLength = 0.5*(lengthMin+lengthMax);
 		try {
 			if (cse == CADShapeEnum.VERTEX)
 			{
@@ -302,24 +301,24 @@ public class Hypothesis
 			{
 				Class [] typeArgs = new Class[] {double.class, double.class, boolean.class};
 				Constructor cons = UniformLengthDeflection1d.class.getConstructor(typeArgs);
-				ret = (AlgoInterface) cons.newInstance(new Object [] {new Double(targetLength), new Double(deflection), Boolean.valueOf(true)});
+				ret = (AlgoInterface) cons.newInstance(new Object [] {new Double(length), new Double(deflection), Boolean.valueOf(true)});
 			}
 			else if (cse == CADShapeEnum.FACE)
 			{
 				Class [] typeArgs = new Class[] {double.class, double.class, boolean.class, boolean.class};
 				Constructor cons = Basic2d.class.getConstructor(typeArgs);
-				ret = (AlgoInterface) cons.newInstance(new Object [] {new Double(targetLength), new Double(deflection), Boolean.valueOf(true), Boolean.valueOf(true)});
+				ret = (AlgoInterface) cons.newInstance(new Object [] {new Double(length), new Double(deflection), Boolean.valueOf(true), Boolean.valueOf(true)});
 			}
 			else if (cse == CADShapeEnum.SOLID)
 			{
 				Class [] typeArgs = new Class[] {double.class};
 				Constructor cons = TetGen.class.getConstructor(typeArgs);
-				ret = (AlgoInterface) cons.newInstance(new Object [] {new Double(targetLength)});
+				ret = (AlgoInterface) cons.newInstance(new Object [] {new Double(length)});
 				if (!ret.isAvailable())
 					logger.error("TetGen not available!");
 				/*
 				Constructor cons = Netgen.class.getConstructor(typeArgs);
-				ret = (AlgoInterface) cons.newInstance(new Object [] {new Double(targetLength)});
+				ret = (AlgoInterface) cons.newInstance(new Object [] {new Double(length)});
 				if (!ret.isAvailable())
 					logger.error("Netgen not available!");
 				*/
