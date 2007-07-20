@@ -292,7 +292,13 @@ public class Hypothesis
 		AlgoInterface ret = null;
 		double targetLength = 0.5*(lengthMin+lengthMax);
 		try {
-			if (cse == CADShapeEnum.EDGE)
+			if (cse == CADShapeEnum.VERTEX)
+			{
+				Class [] typeArgs = new Class[0];
+				Constructor cons = Vertex0d.class.getConstructor(typeArgs);
+				ret = (AlgoInterface) cons.newInstance(new Object[0]);
+			}
+			else if (cse == CADShapeEnum.EDGE)
 			{
 				Class [] typeArgs = new Class[] {double.class, double.class, boolean.class};
 				Constructor cons = UniformLengthDeflection1d.class.getConstructor(typeArgs);
