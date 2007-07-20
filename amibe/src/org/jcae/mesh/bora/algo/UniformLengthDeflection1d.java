@@ -21,13 +21,13 @@
 package org.jcae.mesh.bora.algo;
 
 import org.jcae.mesh.bora.ds.BCADGraphCell;
-import org.jcae.mesh.bora.ds.BSubMesh;
 import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.mesher.ds.SubMesh1D;
 import org.jcae.mesh.mesher.ds.MEdge1D;
 import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.cad.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 /**
@@ -74,7 +74,7 @@ public class UniformLengthDeflection1d implements AlgoInterface
 	}
 
 	/**
-	 * @return <code>true</code> if this edge was successfully discrtetized,
+	 * @return <code>true</code> if this edge was successfully discretized,
 	 * <code>false</code> otherwise.
 	 */
 	public boolean compute(BDiscretization d)
@@ -84,6 +84,7 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		boolean isDegenerated = false;
 		double[] paramOnEdge;
 		double range[];
+		assert null == d.getMesh();
 		BCADGraphCell cell = d.getGraphCell();
 		CADEdge E = (CADEdge) cell.getShape();
 		SubMesh1D submesh1d = new SubMesh1D(E);
@@ -96,7 +97,13 @@ public class UniformLengthDeflection1d implements AlgoInterface
 			return false;
 		edgelist.clear();
 		nodelist.clear();
-		CADVertex[] V = E.vertices();
+		BCADGraphCell [] child = new BCADGraphCell[2];
+		{
+			Iterator it = cell.shapesExplorer(CADShapeEnum.VERTEX);
+			child[0] = (BCADGraphCell) it.next();
+			child[1] = (BCADGraphCell) it.next();
+		}
+		CADVertex [] V = E.vertices();
 		if (V[0].isSame(V[1]))
 			isCircular=true;
 		
@@ -181,7 +188,7 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		double param;
 
 		//  First vertex
-		BDiscretization dc = cell.getGraph().getByShape(V[0]).getDiscretizationSubMesh(d.getFirstSubMesh());
+		BDiscretization dc = child[0].getDiscretizationSubMesh(d.getFirstSubMesh());
 		CADVertex GPt = (CADVertex) dc.getMesh();
 		MNode1D firstNode = new MNode1D(paramOnEdge[0], GPt);
 		n1 = firstNode;
@@ -196,7 +203,7 @@ public class UniformLengthDeflection1d implements AlgoInterface
 			param = paramOnEdge[i+1];
 			if (i == nbPoints - 2)
 			{
-				dc = cell.getGraph().getByShape(V[1]).getDiscretizationSubMesh(d.getFirstSubMesh());
+				dc = child[1].getDiscretizationSubMesh(d.getFirstSubMesh());
 				GPt = (CADVertex) dc.getMesh();
 			}
 			n2 = new MNode1D(param, GPt);
