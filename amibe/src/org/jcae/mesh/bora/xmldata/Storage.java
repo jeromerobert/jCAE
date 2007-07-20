@@ -29,6 +29,7 @@ import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.bora.ds.BSubMesh;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
+import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADFace;
@@ -65,12 +66,13 @@ public class Storage
 	static final String dir2d = "2d";
 	static final String dir3d = "3d";
 
-	public static void writeEdge(BCADGraphCell edge, BSubMesh s, String outDir)
+	public static void writeEdge(BDiscretization d, String outDir)
 	{
+		BCADGraphCell edge = d.getGraphCell();
 		CADEdge E = (CADEdge) edge.getShape();
 		if (E.isDegenerated())
 			return;
-		SubMesh1D submesh = (SubMesh1D) edge.getMesh(s);
+		SubMesh1D submesh = (SubMesh1D) d.getMesh();
 		if (null == submesh)
 			return;
 
@@ -97,9 +99,10 @@ public class Storage
 		}
 	}
 
-	public static void writeFace(BCADGraphCell face, BSubMesh s, String outDir)
+	public static void writeFace(BDiscretization d, String outDir)
 	{
-		Mesh2D submesh = (Mesh2D) face.getMesh(s);
+		BCADGraphCell face = d.getGraphCell();
+		Mesh2D submesh = (Mesh2D) d.getMesh();
 		if (null == submesh)
 			return;
 
@@ -125,9 +128,10 @@ public class Storage
 		}
 	}
 
-	public static void writeVolume(BCADGraphCell solid, BSubMesh s, String outDir)
+	public static void writeVolume(BDiscretization d, String outDir)
 	{
-		VolMesh submesh = (VolMesh) solid.getMesh(s);
+		BCADGraphCell solid = d.getGraphCell();
+		VolMesh submesh = (VolMesh) d.getMesh();
 		if (null == submesh)
 			return;
 
