@@ -23,7 +23,7 @@ package org.jcae.mesh.bora.ds;
 import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.bora.algo.AlgoInterface;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Iterator;
 
 import org.apache.log4j.Logger;
@@ -33,7 +33,7 @@ public class BDiscretization
 	private static Logger logger=Logger.getLogger(BDiscretization.class);
 	private final BCADGraphCell graphCell;
 	// List of set of BSubMesh instances containing this BDiscretization.
-	private final Collection submesh = new HashSet();
+	private final Collection submesh = new LinkedHashSet();
 	private Constraint constraint;
 	private AlgoInterface algo;
 	private boolean computed = false;
