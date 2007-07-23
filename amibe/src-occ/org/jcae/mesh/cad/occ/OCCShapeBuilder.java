@@ -184,10 +184,8 @@ public class OCCShapeBuilder extends CADShapeBuilder
 		return (CADShapeEnum) OCCShapeEnum.getSingleton(name);
 	}
 
-	public CADGeomCurve2D newCurve2D(Object oe, Object of)
+	public CADGeomCurve2D newCurve2D(CADEdge E, CADFace F)
 	{
-		CADEdge E = (CADEdge) oe;
-		CADFace F = (CADFace) of;
 		CADGeomCurve2D curve = null;
 		try
 		{
@@ -199,9 +197,8 @@ public class OCCShapeBuilder extends CADShapeBuilder
 		return curve;
 	}
 	
-	public CADGeomCurve3D newCurve3D(Object o)
+	public CADGeomCurve3D newCurve3D(CADEdge E)
 	{
-		CADEdge E = (CADEdge) o;
 		CADGeomCurve3D curve = null;
 		try
 		{

@@ -107,13 +107,13 @@ public abstract class CADShapeBuilder
 	 * @param of The face owning the curve
 	 * @return The created CADGeomCurve2D
 	 */
-	public abstract CADGeomCurve2D newCurve2D(Object oe, Object of);
+	public abstract CADGeomCurve2D newCurve2D(CADEdge E, CADFace F);
 	
 	/**
 	 * Create a new CADGeomCurve3D
 	 * @param o The edge owning this curve
 	 * @return The created CADGeomCurve3D
 	 */
-	public abstract CADGeomCurve3D newCurve3D(Object o);
+	public abstract CADGeomCurve3D newCurve3D(CADEdge E);
 
 }
