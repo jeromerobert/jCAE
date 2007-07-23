@@ -19,11 +19,8 @@
 
 package org.jcae.mesh.amibe.ds;
 
-import org.jcae.mesh.amibe.patch.Vertex2D;
-import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.ArrayList;
-import java.io.Serializable;
 
 /**
  * A triangular element of the mesh.  Instances of this class carry up
@@ -302,8 +299,7 @@ public class AdjacencyVH implements AdjacencyWrapper
 			Triangle t = (Triangle) adj[num];
 			if (t == null)
 				return "null";
-			else
-				return t.hashCode()+"["+getAdjLocalNumber(num)+"]";
+			return t.hashCode()+"["+getAdjLocalNumber(num)+"]";
 		}
 		else
 		{

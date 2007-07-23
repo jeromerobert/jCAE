@@ -36,7 +36,7 @@ public class TriangleHE extends Triangle
 
 	public HalfEdge getHalfEdge()
 	{
-		return (HalfEdge) ((AdjacencyHE) adj).getHalfEdge(0);
+		return ((AdjacencyHE) adj).getHalfEdge(0);
 	}
 
 	public void setHalfEdge(HalfEdge e)

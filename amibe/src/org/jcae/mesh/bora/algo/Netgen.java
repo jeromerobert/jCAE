@@ -20,8 +20,6 @@
 
 package org.jcae.mesh.bora.algo;
 
-import org.jcae.mesh.bora.ds.BCADGraphCell;
-import org.jcae.mesh.bora.ds.BSubMesh;
 import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.xmldata.MeshExporter;
 import java.io.BufferedReader;

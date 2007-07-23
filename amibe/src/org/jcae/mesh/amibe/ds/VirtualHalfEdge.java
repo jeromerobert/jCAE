@@ -19,7 +19,6 @@
 
 package org.jcae.mesh.amibe.ds;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Stack;
 import org.jcae.mesh.amibe.metrics.Matrix3D;

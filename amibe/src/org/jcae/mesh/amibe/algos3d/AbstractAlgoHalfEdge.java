@@ -225,7 +225,7 @@ public abstract class AbstractAlgoHalfEdge
 				}
 				else
 				{
-					current = (HalfEdge) current.nextApexLoop();
+					current = current.nextApexLoop();
 					if (current.origin() == o)
 						break;
 				}

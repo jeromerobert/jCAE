@@ -21,18 +21,11 @@
 
 package org.jcae.mesh.bora.ds;
 
-import org.jcae.mesh.bora.xmldata.*;
-import org.jcae.mesh.cad.CADShape;
-import org.jcae.mesh.cad.CADShapeBuilder;
 import org.jcae.mesh.cad.CADShapeEnum;
-import org.jcae.mesh.cad.CADExplorer;
-import org.jcae.mesh.cad.CADVertex;
 
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import gnu.trove.THashMap;
-import gnu.trove.TIntObjectHashMap;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -84,10 +77,6 @@ public class BSubMesh
 	private Collection setTopShapes = new LinkedHashSet();
 	//   List of children
 	private Collection setCells = new LinkedHashSet();
-	private THashMap mapShapeToSubElement = new THashMap();
-	private boolean output1d = false;
-	private boolean output2d = false;
-	private boolean output3d = false;
 
 	/**
 	 * Creates a root mesh.
@@ -273,7 +262,6 @@ public class BSubMesh
 		Constraint c0 = new Constraint(f0, h3);
 		Constraint c1 = new Constraint(solids[0], h1);
 		Constraint c2 = new Constraint(solids[1], h2);
-		Constraint c9 = new Constraint(solids[0], h1);
 
 		BSubMesh submesh0 = model.newMesh();
 		submesh0.add(c1);

@@ -352,7 +352,7 @@ public class Hypothesis
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			h = HypNoneInstance;
-		};
+		}
 		return h;
 	}
 
@@ -385,8 +385,7 @@ public class Hypothesis
 		{
 			if (d == CADShapeEnum.VERTEX)
 				return getType();
-			else
-				return null;
+			return null;
 		}
 	}
 	public static class HypE2 implements HypInterface

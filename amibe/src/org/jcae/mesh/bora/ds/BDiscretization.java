@@ -20,7 +20,6 @@
 
 package org.jcae.mesh.bora.ds;
 
-import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.bora.algo.AlgoInterface;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -107,8 +106,8 @@ public class BDiscretization
 			// constraints for the same discretization
 			if (((localOrigCons != null) && (baseOrigCons != null)) && (localOrigCons != baseOrigCons))
 				throw new RuntimeException("Definition of model imposes the same discretization for shape "+graphCell.getShape()+" but there are two different user-defined constraints for this discretization:" + baseOrigCons + " and " + localOrigCons );
-			else
-				newCons.getHypothesis().combine(constraint.getHypothesis());
+
+			newCons.getHypothesis().combine(constraint.getHypothesis());
 			// TODO: in combine(), it will be necessary to detect 
 			// which is the original constraint
 		} 

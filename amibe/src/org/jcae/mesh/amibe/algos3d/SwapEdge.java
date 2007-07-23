@@ -23,7 +23,6 @@ package org.jcae.mesh.amibe.algos3d;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import java.util.Iterator;
 import org.apache.log4j.Logger;

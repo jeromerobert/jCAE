@@ -30,7 +30,6 @@ import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.mesher.ds.SubMesh1D;
 import org.jcae.mesh.mesher.ds.MNode1D;
-import org.jcae.mesh.xmldata.MeshWriter;
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADEdge;
@@ -106,11 +105,6 @@ public class Basic2d implements AlgoInterface
 				innerV.add(n);
 			}
 		}
-		for (Iterator it = cell.shapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
-		{
-			BCADGraphCell edge = (BCADGraphCell) it.next();
-			BDiscretization dc = edge.getDiscretizationSubMesh(d.getFirstSubMesh());
-		}
 
 		// Boundary nodes. See org.jcae.mesh.mesher.ds.MMesh1D.boundaryNodes()
 		ArrayList bndV = new ArrayList();
@@ -119,7 +113,7 @@ public class Basic2d implements AlgoInterface
 		{
 			BCADGraphCell wire = (BCADGraphCell) it.next();
 			MNode1D p1 = null;
-			Vertex2D p20 = null, p2 = null, lastPoint = null;;
+			Vertex2D p20 = null, p2 = null, lastPoint = null;
 			double accumulatedLength = 0.0;
 			ArrayList nodesWire = new ArrayList();
 			for (wexp.init((CADWire) wire.getShape(), F); wexp.more(); wexp.next())
@@ -180,7 +174,7 @@ public class Basic2d implements AlgoInterface
 				{
 					//   3.  Edge length is smaller than epsilon
 					double edgelen = c3d.length();
-					canSkip = m.tooSmall(edgelen, accumulatedLength);;
+					canSkip = m.tooSmall(edgelen, accumulatedLength);
 					if (canSkip)
 						accumulatedLength += edgelen;
 					// 4.  Check whether deflection is valid.
@@ -232,13 +226,6 @@ public class Basic2d implements AlgoInterface
 		if (deflection > 0.0 && !relDefl)
 			new EnforceAbsDeflection(m).compute();
 		m.removeDegeneratedEdges();
-		/*
-		String xmlFile = "jcae2d."+m.getId();
-		String xmlBrepDir = ".";
-		BModel model = m.getGraph().getModel();
-		MeshWriter.writeObject(m, model.getOutputDir(s), xmlFile, xmlBrepDir, model.getCADFile(), m.getId());
-		assert (m.isValid());
-		*/
 		return true;
 	}
 	

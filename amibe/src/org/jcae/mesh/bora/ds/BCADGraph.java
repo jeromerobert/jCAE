@@ -116,7 +116,7 @@ public class BCADGraph
 			CADShapeEnum cse = (CADShapeEnum) itcse.next();
 			for (exp.init(shape, cse); exp.more(); exp.next())
 			{
-				CADShape s = (CADShape) exp.current();
+				CADShape s = exp.current();
 				BCADGraphCell c = (BCADGraphCell) cadShapeToGraphCell.get(s);
 				if (c != null && c.getId() <= 0)
 				{
@@ -134,7 +134,7 @@ public class BCADGraph
 			CADShapeEnum cse = (CADShapeEnum) itcse.next();
 			for (exp.init(shape, cse); exp.more(); exp.next())
 			{
-				CADShape s = (CADShape) exp.current();
+				CADShape s = exp.current();
 				BCADGraphCell c = (BCADGraphCell) cadShapeToGraphCell.get(s);
 				if (c == null)
 					continue;
@@ -145,7 +145,7 @@ public class BCADGraph
 					CADShapeEnum cse2 = (CADShapeEnum) it2.next();
 					for (exp2.init(s, cse2); exp2.more(); exp2.next())
 					{
-						CADShape s2 = (CADShape) exp2.current();
+						CADShape s2 = exp2.current();
 						BCADGraphCell c2 = (BCADGraphCell) cadShapeToGraphCell.get(s2);
 						if (c2 != null)
 							c2.addParent(c);

@@ -257,8 +257,8 @@ public class BModel
 			BSubMesh sm = (BSubMesh) it.next();
 			sm.computeAlgorithms3d();
 		}
-		state = TESSELLATION;
 		*/
+		state = TESSELLATION;
 	}
 
 	/**
@@ -313,7 +313,7 @@ public class BModel
 	/**
 	 * Print all discretizations.
 	 */
-	private void printDiscretizations()
+	public void printDiscretizations()
 	{
 		System.out.println("List of discretizations");
 		BCADGraphCell root = cad.getRootCell();

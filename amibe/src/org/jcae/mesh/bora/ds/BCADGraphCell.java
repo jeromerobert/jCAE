@@ -30,11 +30,8 @@ import org.jcae.mesh.cad.CADIterator;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Iterator;
 import gnu.trove.THashSet;
-import gnu.trove.THashMap;
-import gnu.trove.TObjectObjectProcedure;
 import gnu.trove.TObjectHashingStrategy;
 
 import org.apache.log4j.Logger;

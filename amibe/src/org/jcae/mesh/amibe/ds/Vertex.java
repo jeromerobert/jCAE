@@ -21,7 +21,6 @@ package org.jcae.mesh.amibe.ds;
 
 import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
-import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import java.util.Collection;
@@ -727,7 +726,7 @@ public class Vertex extends AbstractVertex implements Serializable
 		Matrix3D.prodVect3D(normal, t1, t2);
 		// Transformation matrix
 		Matrix3D Pinv = new Matrix3D(t1, t2, normal);
-		Matrix3D P = (Matrix3D) Pinv.transp();
+		Matrix3D P = Pinv.transp();
 		AbstractHalfEdge ot = ((Triangle) link).getAbstractHalfEdge();
 		if (ot.origin() != this)
 			ot = ot.next();

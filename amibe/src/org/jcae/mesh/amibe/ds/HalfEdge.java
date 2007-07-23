@@ -1090,7 +1090,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		m = new Mesh(mtb);
 		unitTestBuildMesh(m, v);
 		HalfEdge e = HalfEdge.find(v[0], v[4]);
-		HalfEdge s = e.HEswap();
+		e.HEswap();
 		assert m.isValid();
 		java.util.HashMap opts = new java.util.HashMap();
 		opts.put("size", "0.1");

@@ -132,9 +132,9 @@ public class Bora2D
 				for (int i = 0; i < nr; i++)
 				{
 					double [] x3 = surface.value(x2[2*i], x2[2*i+1]);
-					x3d2[3*nrNodes[nFaces]+3*i]   = x3[0];;
-					x3d2[3*nrNodes[nFaces]+3*i+1] = x3[1];;
-					x3d2[3*nrNodes[nFaces]+3*i+2] = x3[2];;
+					x3d2[3*nrNodes[nFaces]+3*i]   = x3[0];
+					x3d2[3*nrNodes[nFaces]+3*i+1] = x3[1];
+					x3d2[3*nrNodes[nFaces]+3*i+2] = x3[2];
 				}
 				FileChannel fcN = new FileInputStream(nodesfile).getChannel();
 				MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());

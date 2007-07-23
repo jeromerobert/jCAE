@@ -21,7 +21,6 @@
 
 package org.jcae.mesh.bora.ds;
 
-import org.jcae.mesh.cad.CADShapeEnum;
 import java.util.Collection;
 import java.util.ArrayList;
 

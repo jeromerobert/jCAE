@@ -19,8 +19,6 @@
 
 package org.jcae.mesh.amibe.ds;
 
-import org.jcae.mesh.amibe.traits.HalfEdgeTraitsBuilder;
-
 public class AdjacencyHE implements AdjacencyWrapper
 {
 	/**

@@ -130,9 +130,9 @@ public class Bora1D
 				for (int i = 0; i < nr; i++)
 				{
 					double [] x3 = curve.value(x1[i]);
-					x3d1[3*nrNodes[nEdges]+3*i]   = x3[0];;
-					x3d1[3*nrNodes[nEdges]+3*i+1] = x3[1];;
-					x3d1[3*nrNodes[nEdges]+3*i+2] = x3[2];;
+					x3d1[3*nrNodes[nEdges]+3*i]   = x3[0];
+					x3d1[3*nrNodes[nEdges]+3*i+1] = x3[1];
+					x3d1[3*nrNodes[nEdges]+3*i+2] = x3[2];
 				}
 				FileChannel fcN = new FileInputStream(nodesfile).getChannel();
 				MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());

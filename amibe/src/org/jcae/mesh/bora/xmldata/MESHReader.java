@@ -81,7 +81,7 @@ public class MESHReader
 				StringTokenizer st = new StringTokenizer(line);
 				String x1 = st.nextToken();
 				String y1 = st.nextToken();
-				String z1 = st.nextToken();;
+				String z1 = st.nextToken();
 				x1 = x1.replace('D','E');
 				y1 = y1.replace('D','E');
 				z1 = z1.replace('D','E');
@@ -122,7 +122,7 @@ public class MESHReader
 					if (v[j] == null)
 						throw new RuntimeException();
 				}
-				AbstractTriangle f = (AbstractTriangle) mesh.factory.createTriangle(v);
+				AbstractTriangle f = mesh.factory.createTriangle(v);
 				mesh.add(f);
 			}
 		}

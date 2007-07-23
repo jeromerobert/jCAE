@@ -27,7 +27,6 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.File;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -111,8 +110,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		            (p1[2] - p0[2]) * (p1[2] - p0[2]);
 		if (l2 == 0.0)
 			return Double.MAX_VALUE;
-		else
-			return 1.0 / l2;
+		return 1.0 / l2;
 	}
 
 	public boolean canProcessEdge(HalfEdge current)
