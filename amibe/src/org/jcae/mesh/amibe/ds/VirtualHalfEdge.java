@@ -539,7 +539,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		return next().sym().next();
 	}
 	
-	/**
+	/*
 	 * Copy an <code>VirtualHalfEdge</code> and move it to the clockwaise
 	 * previous edge which has the same apex.
 	 *
