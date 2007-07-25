@@ -99,8 +99,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	{
 		if ((attributes & GROUPLIST) != 0)
 			return (Collection) t.array[index[BITGROUPLIST]];
-		else
-			return null;
+		return null;
 	}
 
 	protected void subInitTraits(Traits t)

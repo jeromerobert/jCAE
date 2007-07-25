@@ -19,11 +19,6 @@
 
 package org.jcae.mesh.amibe.traits;
 
-import org.jcae.mesh.amibe.ds.HalfEdge;
-import org.jcae.mesh.amibe.ds.AdjacencyWrapper;
-import org.jcae.mesh.amibe.ds.AdjacencyVH;
-import org.jcae.mesh.amibe.ds.AdjacencyHE;
-
 public class TriangleTraitsBuilder extends TraitsBuilder
 {
 	private static final int BITSHALLOWHALFEDGE = 13;

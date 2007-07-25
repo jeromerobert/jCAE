@@ -71,7 +71,7 @@ public class CheckDelaunay
 
 		boolean redo = false;
 		int niter = mesh.getTriangles().size();
-		Collection oldList = (Collection) mesh.getTriangles();
+		Collection oldList = mesh.getTriangles();
 		do {
 			redo = false;
 			cnt = 0;
@@ -137,7 +137,7 @@ public class CheckDelaunay
 			//  so we lower it now.
 			if (niter > 10 * cnt)
 				niter = 10 * cnt;
-			oldList = (Collection) newList;
+			oldList = newList;
 		} while (redo && niter > 0);
 		mesh.popCompGeom(3);
 	}

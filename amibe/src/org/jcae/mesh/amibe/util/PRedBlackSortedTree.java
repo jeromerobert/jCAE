@@ -319,55 +319,52 @@ public class PRedBlackSortedTree extends QSortedTree
 					q.isRed = false;
 					break;
 				}
-				else
+				if (isRedNode(sibling.child[lastDir]) && !isRedNode(sibling.child[sibDir]))
 				{
-					if (isRedNode(sibling.child[lastDir]) && !isRedNode(sibling.child[sibDir]))
-					{
-						// Case R5: sibling is black, left child is
-						// red and right child is black.
-						// Rotate at sibling and paint nodes
-						// so that sibling.child[sibDir] is red.
-						logger.debug("Case R5");
-						Node y = (Node) sibling.child[lastDir];
-						y.isRed = false;
-						sibling.isRed = true;
-						if (lastDir == 0)
-							q.child[sibDir] = sibling.rotateR();
-						else
-							q.child[sibDir] = sibling.rotateL();
-						sibling = y;
-						/* Example with lastDir == 0
-						  q*       q*
-						  / \ ---> / \
-						 xB sB    xB yB
-						   / \      / \
-						  yR  zB   aB  sR
-						 / \          / \
-						aB bB        bB  zB
-						*/
-					}
-					logger.debug("Case R6");
-					// Case R6: sibling is black and its right child
-					// is red.
-					/*
-					  q*       qB          s*
-					 / \ ---> / \  --->   / \
-					xB sB    xB s*      qB   yB
-					  / \      / \     / \   / \
-					 aB  yR   aB  yB  xB aB bB zB
-					    / \      / \
-					   bB  zB   bB  zB
-					*/
-					assert !isRedNode(sibling) && isRedNode(sibling.child[sibDir]);
-					sibling.isRed = q.isRed;
-					q.isRed = false;
-					((Node) sibling.child[sibDir]).isRed = false;
+					// Case R5: sibling is black, left child is
+					// red and right child is black.
+					// Rotate at sibling and paint nodes
+					// so that sibling.child[sibDir] is red.
+					logger.debug("Case R5");
+					Node y = (Node) sibling.child[lastDir];
+					y.isRed = false;
+					sibling.isRed = true;
 					if (lastDir == 0)
-						grandparent.child[gLastDir] = q.rotateL();
+						q.child[sibDir] = sibling.rotateR();
 					else
-						grandparent.child[gLastDir] = q.rotateR();
-					break;
+						q.child[sibDir] = sibling.rotateL();
+					sibling = y;
+					/* Example with lastDir == 0
+					  q*       q*
+					  / \ ---> / \
+					 xB sB    xB yB
+					   / \      / \
+					  yR  zB   aB  sR
+					 / \          / \
+					aB bB        bB  zB
+					*/
 				}
+				logger.debug("Case R6");
+				// Case R6: sibling is black and its right child
+				// is red.
+				/*
+				  q*       qB          s*
+				 / \ ---> / \  --->   / \
+				xB sB    xB s*      qB   yB
+				  / \      / \     / \   / \
+				 aB  yR   aB  yB  xB aB bB zB
+				    / \      / \
+				   bB  zB   bB  zB
+				*/
+				assert !isRedNode(sibling) && isRedNode(sibling.child[sibDir]);
+				sibling.isRed = q.isRed;
+				q.isRed = false;
+				((Node) sibling.child[sibDir]).isRed = false;
+				if (lastDir == 0)
+					grandparent.child[gLastDir] = q.rotateL();
+				else
+					grandparent.child[gLastDir] = q.rotateR();
+				break;
 			}
 			if (q.parent.child[0] == q)
 				lastDir = 0;
@@ -410,7 +407,6 @@ public class PRedBlackSortedTree extends QSortedTree
 		if (current == null)
 			return true;
 		int blackNodes = 0;
-		int seenRoot = 0;
 		while (current.child[0] != null)
 		{
 			if (!isRedNode(current))

@@ -218,7 +218,7 @@ public class UNVReader
 					assert n2 != null : p2;
 					Vertex n3 = (Vertex) nodesmap.get(p3);
 					assert n3 != null : p3;
-					AbstractTriangle f = (AbstractTriangle) mesh.factory.createTriangle(n1, n2, n3);
+					AbstractTriangle f = mesh.factory.createTriangle(n1, n2, n3);
 					mesh.add(f);
 					n1.setLink(f);
 					n2.setLink(f);
@@ -244,13 +244,13 @@ public class UNVReader
 					assert n3 != null : p3;
 					Vertex n4 = (Vertex) nodesmap.get(p4);
 					assert n4 != null : p4;
-					AbstractTriangle f = (AbstractTriangle) mesh.factory.createTriangle(n1, n2, n3);
+					AbstractTriangle f = mesh.factory.createTriangle(n1, n2, n3);
 					mesh.add(f);
 					n1.setLink(f);
 					n2.setLink(f);
 					n3.setLink(f);
 					facesmap.put(ind, f);
-					f = (AbstractTriangle) mesh.factory.createTriangle(n1, n3, n4);
+					f = mesh.factory.createTriangle(n1, n3, n4);
 					mesh.add(f);
 					n4.setLink(f);
 					facesmap.put(-ind, f);

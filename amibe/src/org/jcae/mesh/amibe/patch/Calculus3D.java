@@ -46,7 +46,7 @@ public class Calculus3D implements Calculus
 		accurateDistance = accurateDistanceProp.equals("true");
 		for (int i = 0; i <= level_max; i++)
 			intArray[i] = new Integer(i);
-	};
+	}
 	
 	/**
 	 * Constructor.

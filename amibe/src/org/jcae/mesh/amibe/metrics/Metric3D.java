@@ -294,8 +294,7 @@ public class Metric3D extends Matrix3D
 	{
 		if (relDefl)
 			return relDeflection();
-		else
-			return absDeflection();
+		return absDeflection();
 	}
 	
 	private boolean relDeflection()

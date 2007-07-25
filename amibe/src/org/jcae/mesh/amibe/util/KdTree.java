@@ -189,8 +189,7 @@ public class KdTree
 		{
 			if (nItems >= 0)
 				return nItems;
-			else
-				return -nItems;
+			return -nItems;
 		}
 
 		public Vertex getVertex(int i)
@@ -528,8 +527,7 @@ public class KdTree
 								i0[k] += s;
 								break;
 							}
-							else
-								i0[k] -= s;
+							i0[k] -= s;
 						}
 						if (null != cellStack[l-1].subCell[posStack[l]])
 							break;
@@ -740,7 +738,7 @@ public class KdTree
 	
 	private final class GetNearestVertexDebugProcedure implements KdTreeProcedure
 	{
-		private final int [] ij = new int[dimension];;
+		private final int [] ij = new int[dimension];
 		private double dist;
 		public final Vertex fromVertex;
 		public Vertex nearestVertex;

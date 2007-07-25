@@ -547,12 +547,14 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
+	/*
 	private static final void prevOTriApex(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
 		prevOTri(o, that);
 		that.sym();
 		that.prev();
 	}
+	*/
 	
 	public final AbstractHalfEdge prevApex(AbstractHalfEdge that)
 	{

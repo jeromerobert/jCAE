@@ -109,9 +109,6 @@ public class Mesh extends AbstractMesh implements Serializable
 	//  Node list.
 	private Collection nodeList = null;
 
-	//  Group list.
-	private Collection groupList = null;
-	
 	//  Entity factory
 	public ElementFactoryInterface factory = null;
 
@@ -161,7 +158,6 @@ public class Mesh extends AbstractMesh implements Serializable
 		factory = new ElementFactory(mtb);
 		triangleList = mtb.getTriangles(traits);
 		nodeList  = mtb.getNodes(traits);
-		groupList = mtb.getGroups(traits);
 	}
 	
 	public void scaleTolerance(double scale)

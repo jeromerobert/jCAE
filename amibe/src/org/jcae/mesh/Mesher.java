@@ -449,7 +449,7 @@ public class Mesher
 			THashSet seen = new THashSet();
 			for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 				seen.add(expF.current());
-			nrFaces = seen.size();;			
+			nrFaces = seen.size();			
 			seen.clear();
 			for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 			{

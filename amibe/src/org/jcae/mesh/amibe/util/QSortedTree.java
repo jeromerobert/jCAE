@@ -79,8 +79,7 @@ public abstract class QSortedTree implements Serializable
 			Node that = (Node) o;
 			if (value < that.value)
 				return -1;
-			else
-				return +1;
+			return +1;
 		}
 		
 		public void reset(double v)
@@ -265,8 +264,7 @@ public abstract class QSortedTree implements Serializable
 				current = current.parent;
 			if (current.parent.parent == null)
 				return null;
-			else
-				return current.parent;
+			return current.parent;
 		}
 	}
 
@@ -496,7 +494,7 @@ public abstract class QSortedTree implements Serializable
 		for (int i = 0; i < ret.length; i++)
 			ret[i] = new Integer(i);
 		for (int i = 0; i < ret.length; i++)
-			insert(ret[i], (double) i);
+			insert(ret[i], i);
 		return ret;
 	}
 	
@@ -572,7 +570,7 @@ public abstract class QSortedTree implements Serializable
 			index += s;
 			while (index >= prime)
 				index -= prime;
-			insert(iii[index], (double) index);
+			insert(iii[index], index);
 		}
 		index = 3;
 		for (int i = 0; i < prime; i++)

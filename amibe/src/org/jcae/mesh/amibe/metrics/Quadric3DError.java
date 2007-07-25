@@ -21,7 +21,6 @@
 package org.jcae.mesh.amibe.metrics;
 
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.ds.Mesh;
 import java.io.Serializable;
 
 /**
@@ -194,8 +193,7 @@ public class Quadric3DError implements Serializable
 	{
 		if (q1.value(v1.getUV()) + q2.value(v1.getUV()) < q1.value(v2.getUV()) + q2.value(v2.getUV()))
 			return v1;
-		else
-			return v2;
+		return v2;
 	}
 
 	private static Vertex bestCandidateV1V2Ref(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2)

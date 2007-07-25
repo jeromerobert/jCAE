@@ -60,7 +60,6 @@ public class OctreeTestRemove extends OctreeTest
 		double [] umax = { 1.0, 1.0, 1.0 };
 		final Mesh mesh = new Mesh();
 		final OctreeTest r = new OctreeTest(umin, umax);
-		final Mesh m = new Mesh();
 		logger.debug("Start insertion");
 		double [] xyz = new double[3];
 		for (int i = 0; i < 200; i++)

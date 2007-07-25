@@ -21,7 +21,6 @@ package org.jcae.mesh.amibe.patch;
 
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.AbstractVertex;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.ElementFactoryInterface;
@@ -70,8 +69,7 @@ public class ElementPatchFactory implements ElementFactoryInterface
 	{
 		if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.SHALLOWHALFEDGE))
 			return new TriangleVH(triangleTraitsBuilder);
-		else
-			return new AbstractTriangle(triangleTraitsBuilder);
+		return new AbstractTriangle(triangleTraitsBuilder);
 	}
 	
 	public AbstractTriangle createTriangle(AbstractVertex v0, AbstractVertex v1, AbstractVertex v2)
@@ -110,7 +108,7 @@ public class ElementPatchFactory implements ElementFactoryInterface
 		if (ret instanceof Triangle)
 			((Triangle) ret).copy((Triangle) that);
 		else
-			ret.copy((AbstractTriangle) that);
+			ret.copy(that);
 		return ret;
 	}
 
