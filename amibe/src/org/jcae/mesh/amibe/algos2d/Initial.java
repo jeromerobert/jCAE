@@ -27,7 +27,7 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.patch.Mesh2D;
-import org.jcae.mesh.amibe.patch.OTriangle2D;
+import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.InvalidFaceException;
@@ -165,7 +165,7 @@ import org.apache.log4j.Logger;
  *
  * <p>
  * The current implementation begins with swapping edges (by calling
- * {@link OTriangle2D#checkSmallerAndSwap}) if the opposite diagonal
+ * {@link VirtualHalfEdge2D#checkSmallerAndSwap}) if the opposite diagonal
  * is smaller.  This method did improve some test cases, but is
  * certainly useless with the current meshing process because it has
  * been dramatically improved since these tests have been performed.
@@ -216,7 +216,7 @@ public class Initial
 	public void compute()
 	{
 		Triangle t;
-		OTriangle2D ot;
+		VirtualHalfEdge2D ot;
 		Vertex2D v;
 		
 		if (bNodes.length < 3)
@@ -299,7 +299,7 @@ public class Initial
 				firstOnWire = bNodes[i];
 			else
 			{
-				OTriangle2D s = mesh.forceBoundaryEdge(bNodes[i-1], bNodes[i], bNodes.length);
+				VirtualHalfEdge2D s = mesh.forceBoundaryEdge(bNodes[i-1], bNodes[i], bNodes.length);
 				saveList.add(s);
 				s.setAttributes(AbstractHalfEdge.BOUNDARY);
 				s.sym();
@@ -313,7 +313,7 @@ public class Initial
 		
 		logger.debug(" Mark outer elements");
 		t = (Triangle) mesh.outerVertex.getLink();
-		ot = new OTriangle2D(t, 0);
+		ot = new VirtualHalfEdge2D(t, 0);
 		if (ot.origin() == mesh.outerVertex)
 			ot.next();
 		else if (ot.destination() == mesh.outerVertex)
@@ -335,7 +335,7 @@ public class Initial
 		while (ot.origin() != first);
 		
 		logger.debug(" Mark holes");
-		OTriangle2D sym = new OTriangle2D();
+		VirtualHalfEdge2D sym = new VirtualHalfEdge2D();
 		// Dummy value to enter the loop
 		Triangle oldHead = t;
 		Triangle newHead = null;
@@ -415,7 +415,7 @@ public class Initial
 			--niter;
 			for (Iterator it = saveList.iterator(); it.hasNext(); )
 			{
-				OTriangle2D s = (OTriangle2D) it.next();
+				VirtualHalfEdge2D s = (VirtualHalfEdge2D) it.next();
 				if (s.apex() == mesh.outerVertex)
 					s.sym();
 				s.next();

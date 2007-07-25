@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2005,2006, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -33,17 +34,17 @@ import org.apache.log4j.Logger;
  * attribute is set but need to test if vertices are equal to
  * the infinite point instead.
  */
-public class OTriangle2D extends VirtualHalfEdge
+public class VirtualHalfEdge2D extends VirtualHalfEdge
 {
-	private static Logger logger = Logger.getLogger(OTriangle2D.class);
+	private static Logger logger = Logger.getLogger(VirtualHalfEdge2D.class);
 	private static final Random rand = new Random(139L);
-	private static OTriangle2D [] work = new OTriangle2D[4];
+	private static VirtualHalfEdge2D [] work = new VirtualHalfEdge2D[4];
 	static {
 		for (int i = 0; i < 4; i++)
-			work[i] = new OTriangle2D();
+			work[i] = new VirtualHalfEdge2D();
 	}
 	
-	public OTriangle2D()
+	public VirtualHalfEdge2D()
 	{
 		super();
 	}
@@ -54,7 +55,7 @@ public class OTriangle2D extends VirtualHalfEdge
 	 * @param t  geometrical triangle.
 	 * @param o  a number between 0 and 2 determining an edge.
 	 */
-	public OTriangle2D(Triangle t, int o)
+	public VirtualHalfEdge2D(Triangle t, int o)
 	{
 		super(t, o);
 	}
@@ -136,13 +137,13 @@ public class OTriangle2D extends VirtualHalfEdge
 	public final boolean split3(Mesh2D mesh, Vertex2D v, boolean force)
 	{
 		if (logger.isDebugEnabled())
-			logger.debug("Split OTriangle2D "+this+"\nat Vertex "+v);
+			logger.debug("Split VirtualHalfEdge2D "+this+"\nat Vertex "+v);
 		Triangle backup = (Triangle) mesh.factory.createTriangle(tri);
 		// Aliases
-		OTriangle2D oldLeft = work[0];
-		OTriangle2D oldRight = work[1];
-		OTriangle2D oldSymLeft = null;
-		OTriangle2D oldSymRight = null;
+		VirtualHalfEdge2D oldLeft = work[0];
+		VirtualHalfEdge2D oldRight = work[1];
+		VirtualHalfEdge2D oldSymLeft = null;
+		VirtualHalfEdge2D oldSymRight = null;
 		
 		prevOTri(this, oldLeft);         // = (aod)
 		nextOTri(this, oldRight);        // = (dao)
@@ -159,8 +160,8 @@ public class OTriangle2D extends VirtualHalfEdge
 		
 		Triangle t1 = (Triangle) mesh.factory.createTriangle(a, o, v);
 		Triangle t2 = (Triangle) mesh.factory.createTriangle(d, a, v);
-		OTriangle2D newLeft  = new OTriangle2D(t1, 2);
-		OTriangle2D newRight = new OTriangle2D(t2, 2);
+		VirtualHalfEdge2D newLeft  = new VirtualHalfEdge2D(t1, 2);
+		VirtualHalfEdge2D newRight = new VirtualHalfEdge2D(t2, 2);
 		if (oldLeft.attributes != 0)
 		{
 			newLeft.attributes = oldLeft.attributes;
@@ -177,7 +178,7 @@ public class OTriangle2D extends VirtualHalfEdge
 		}
 		v.setLink(tri);
 		a.setLink(newLeft.tri);
-		//  Move apex of current OTriangle2D.  As a consequence,
+		//  Move apex of current VirtualHalfEdge2D.  As a consequence,
 		//  oldLeft is now (vod) and oldRight is changed to (dvo).
 		setApex(v);
 		
@@ -228,7 +229,7 @@ public class OTriangle2D extends VirtualHalfEdge
 	{
 		//  As checkAndSwap modifies its arguments, 'this'
 		//  must be protected.
-		OTriangle2D ot1 = new OTriangle2D();
+		VirtualHalfEdge2D ot1 = new VirtualHalfEdge2D();
 		copyOTri(this, ot1);
 		return ot1.checkAndSwap(mesh, true);
 	}
@@ -239,7 +240,7 @@ public class OTriangle2D extends VirtualHalfEdge
 		int totNrSwap = 0;
 		Vertex2D v = (Vertex2D) apex();
 		assert v != mesh.outerVertex;
-		OTriangle2D sym = new OTriangle2D();
+		VirtualHalfEdge2D sym = new VirtualHalfEdge2D();
 		//  Loops around v
 		Vertex2D first = (Vertex2D) origin();
 		while (true)

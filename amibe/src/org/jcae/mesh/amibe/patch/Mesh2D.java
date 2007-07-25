@@ -237,10 +237,10 @@ public class Mesh2D extends Mesh
 		Triangle adj0 = (Triangle) factory.createTriangle(outerVertex, v2, v1);
 		Triangle adj1 = (Triangle) factory.createTriangle(outerVertex, v0, v2);
 		Triangle adj2 = (Triangle) factory.createTriangle(outerVertex, v1, v0);
-		OTriangle2D ot = new OTriangle2D(first, 0);
-		OTriangle2D oa0 = new OTriangle2D(adj0, 0);
-		OTriangle2D oa1 = new OTriangle2D(adj1, 0);
-		OTriangle2D oa2 = new OTriangle2D(adj2, 0);
+		VirtualHalfEdge2D ot = new VirtualHalfEdge2D(first, 0);
+		VirtualHalfEdge2D oa0 = new VirtualHalfEdge2D(adj0, 0);
+		VirtualHalfEdge2D oa1 = new VirtualHalfEdge2D(adj1, 0);
+		VirtualHalfEdge2D oa2 = new VirtualHalfEdge2D(adj2, 0);
 		ot.glue(oa0);
 		ot.next();
 		ot.glue(oa1);
@@ -284,12 +284,12 @@ public class Mesh2D extends Mesh
 	 * @throws InitialTriangulationException  if the boundary edge cannot
 	 *         be enforced.
 	 */
-	public OTriangle2D forceBoundaryEdge(Vertex2D start, Vertex2D end, int maxIter)
+	public VirtualHalfEdge2D forceBoundaryEdge(Vertex2D start, Vertex2D end, int maxIter)
 		throws InitialTriangulationException
 	{
 		assert (start != end);
 		Triangle t = (Triangle) start.getLink();
-		OTriangle2D s = new OTriangle2D(t, 0);
+		VirtualHalfEdge2D s = new VirtualHalfEdge2D(t, 0);
 		if (s.origin() != start)
 			s.next();
 		if (s.origin() != start)
@@ -497,7 +497,7 @@ public class Mesh2D extends Mesh
 	public void removeDegeneratedEdges()
 	{
 		logger.debug("Removing degenerated edges");
-		OTriangle2D ot = new OTriangle2D();
+		VirtualHalfEdge2D ot = new VirtualHalfEdge2D();
 		HashSet removedTriangles = new HashSet();
 		for (Iterator it = triangleList.iterator(); it.hasNext(); )
 		{

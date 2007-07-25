@@ -481,7 +481,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *
 	 * This routine swaps an edge (od) to (na).  (on) is returned
 	 * instead of (na), because this helps turning around o, eg.
-	 * at the end of {@link org.jcae.mesh.amibe.patch.OTriangle2D#split3}.
+	 * at the end of {@link org.jcae.mesh.amibe.patch.VirtualHalfEdge2D#split3}.
 	 *
 	 *          d                    d
 	 *          .                    .

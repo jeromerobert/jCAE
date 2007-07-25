@@ -24,7 +24,7 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.patch.Mesh2D;
-import org.jcae.mesh.amibe.patch.OTriangle2D;
+import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import java.util.Iterator;
 import java.util.ArrayList;
@@ -61,13 +61,13 @@ public class CheckDelaunay
 	public void compute()
 	{
 		Triangle t;
-		OTriangle2D ot, sym;
+		VirtualHalfEdge2D ot, sym;
 		Vertex2D v;
 		int cnt = 0;
 		mesh.pushCompGeom(3);
 		logger.debug(" Checking Delaunay criterion");
-		ot = new OTriangle2D();
-		sym = new OTriangle2D();
+		ot = new VirtualHalfEdge2D();
+		sym = new VirtualHalfEdge2D();
 
 		boolean redo = false;
 		int niter = mesh.getTriangles().size();

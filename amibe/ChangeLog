@@ -2,6 +2,9 @@ Thu Jul 26 02:19:57 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/NotOrientedEdge.java: Remove obsolete
 	class.
+	* src/org/jcae/mesh/amibe/patch/OTriangle2D.java
+	  src/org/jcae/mesh/amibe/patch/VirtualHalfEdge2D.java: Rename OTriangle2D
+	into VirtualHalfEdge2D for consistency reason.
 
 Mon Jul 23 20:08:36 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

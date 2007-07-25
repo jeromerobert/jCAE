@@ -26,7 +26,7 @@ public interface Calculus
 	 * Returns the length of an edge.
 	 * @param ot  edge being measured
 	 */
-	public double length(OTriangle2D ot);
+	public double length(VirtualHalfEdge2D ot);
 	
 	/**
 	 * Returns the distance between two points.

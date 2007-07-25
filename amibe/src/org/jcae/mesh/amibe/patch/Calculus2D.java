@@ -71,7 +71,7 @@ public class Calculus2D implements Calculus
 	 * @param ot  the edge being evaluated
 	 * @return the distance between its two endpoints.
 	 */
-	public double length(OTriangle2D ot)
+	public double length(VirtualHalfEdge2D ot)
 	{
 		return distance((Vertex2D) ot.origin(), (Vertex2D) ot.destination());
 	}

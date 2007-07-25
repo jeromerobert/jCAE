@@ -24,7 +24,7 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.patch.Mesh2D;
-import org.jcae.mesh.amibe.patch.OTriangle2D;
+import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import java.util.Iterator;
@@ -70,12 +70,12 @@ public class ConstraintNormal3D
 	public void compute()
 	{
 		Triangle t;
-		OTriangle2D ot, sym;
+		VirtualHalfEdge2D ot, sym;
 		int cnt = 0;
 		mesh.pushCompGeom(3);
 		logger.debug(" Checking inverted triangles");
-		ot = new OTriangle2D();
-		sym = new OTriangle2D();
+		ot = new VirtualHalfEdge2D();
+		sym = new VirtualHalfEdge2D();
 		double [] vect1 = new double[3];
 		double [] vect2 = new double[3];
 		double [] vect3 = new double[3];

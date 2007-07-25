@@ -25,7 +25,7 @@ import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractVertex;
 import org.jcae.mesh.amibe.patch.Mesh2D;
-import org.jcae.mesh.amibe.patch.OTriangle2D;
+import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import java.util.Iterator;
 import java.util.ArrayList;
@@ -99,8 +99,8 @@ public class Insertion
 		{
 			maxNodes = 0;
 			ArrayList nodes = new ArrayList();
-			OTriangle2D sym = new OTriangle2D();
-			OTriangle2D ot = new OTriangle2D();
+			VirtualHalfEdge2D sym = new VirtualHalfEdge2D();
+			VirtualHalfEdge2D ot = new VirtualHalfEdge2D();
 			for(Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
 				Triangle t = (Triangle) it.next();
@@ -233,7 +233,7 @@ public class Insertion
 			for (int i = 0; i < imax; i++)
 			{
 				Vertex2D v = (Vertex2D) nodes.get(index);
-				OTriangle2D vt = v.getSurroundingOTriangle(mesh);
+				VirtualHalfEdge2D vt = v.getSurroundingOTriangle(mesh);
 				if (!vt.split3(mesh, v, false))
 					skippedNodes++;
 				index += prime;

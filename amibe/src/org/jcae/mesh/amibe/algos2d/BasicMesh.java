@@ -146,7 +146,7 @@ import org.jcae.mesh.amibe.patch.Mesh2D;
  *
  * <p>
  * The current implementation begins with swapping edges (by calling
- * {@link org.jcae.mesh.amibe.patch.OTriangle2D#checkSmallerAndSwap})
+ * {@link org.jcae.mesh.amibe.patch.VirtualHalfEdge2D#checkSmallerAndSwap})
  * if the opposite diagonal is smaller.
  * This method did improve some test cases, but is
  * certainly useless with the current meshing process because it has

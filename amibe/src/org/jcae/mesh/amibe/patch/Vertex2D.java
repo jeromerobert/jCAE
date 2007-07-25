@@ -202,16 +202,16 @@ public class Vertex2D extends Vertex
 	 * cleaned up.
 	 *
 	 * @return a triangle containing this point.
-	 * @see OTriangle2D#split3
+	 * @see VirtualHalfEdge2D#split3
 	 */
-	public OTriangle2D getSurroundingOTriangle(Mesh2D mesh)
+	public VirtualHalfEdge2D getSurroundingOTriangle(Mesh2D mesh)
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("Searching for the triangle surrounding "+this);
 		AbstractTriangle.List tList = new AbstractTriangle.List();
 		Triangle t = (Triangle) mesh.quadtree.getNearestVertex(mesh, this).getLink();
-		OTriangle2D start = new OTriangle2D(t, 0);
-		OTriangle2D current = getSurroundingOTriangleStart(mesh, start, tList);
+		VirtualHalfEdge2D start = new VirtualHalfEdge2D(t, 0);
+		VirtualHalfEdge2D current = getSurroundingOTriangleStart(mesh, start, tList);
 		if (current == null)
 		{
 			// First, try with neighbours
@@ -253,7 +253,7 @@ public class Vertex2D extends Vertex
 		return current;
 	}
 	
-	private OTriangle2D getSurroundingOTriangleStart(Mesh2D mesh, OTriangle2D current, AbstractTriangle.List tList)
+	private VirtualHalfEdge2D getSurroundingOTriangleStart(Mesh2D mesh, VirtualHalfEdge2D current, AbstractTriangle.List tList)
 	{
 		boolean redo = false;
 		Vertex2D o = (Vertex2D) current.origin();
@@ -351,7 +351,7 @@ public class Vertex2D extends Vertex
 	 * to provide exact computations.  This is important because
 	 * this method is called by {@link #getSurroundingOTriangle}
 	 * to find the triangle enclosing a vertex, or by
-	 * {@link OTriangle2D#forceBoundaryEdge(Mesh2D,Vertex2D)} to compute
+	 * {@link VirtualHalfEdge2D#forceBoundaryEdge(Mesh2D,Vertex2D)} to compute
 	 * segment intersection.
 	 *
 	 * @param mesh  underlying Mesh2D instance
@@ -441,7 +441,7 @@ public class Vertex2D extends Vertex
 	*/
 	
 	//  Current vertex is symmetric apical vertex
-	public final boolean inCircleTest2(Mesh2D mesh, OTriangle2D ot)
+	public final boolean inCircleTest2(Mesh2D mesh, VirtualHalfEdge2D ot)
 	{
 		assert this != mesh.outerVertex;
 		Vertex2D v1 = (Vertex2D) ot.origin();
@@ -515,7 +515,7 @@ public class Vertex2D extends Vertex
 		throw new RuntimeException("Circumcenter cannot be computed");
 	}
 	
-	public final boolean inCircleTest3(Mesh2D mesh, OTriangle2D ot)
+	public final boolean inCircleTest3(Mesh2D mesh, VirtualHalfEdge2D ot)
 	{
 		//  vcX: vertices of current edge
 		//  vaX: apices
@@ -577,7 +577,7 @@ public class Vertex2D extends Vertex
 		}
 	}
 	
-	public final boolean isSmallerDiagonale(Mesh2D mesh, OTriangle2D ot)
+	public final boolean isSmallerDiagonale(Mesh2D mesh, VirtualHalfEdge2D ot)
 	{
 		//  vcX: vertices of current edge
 		//  vaX: apices

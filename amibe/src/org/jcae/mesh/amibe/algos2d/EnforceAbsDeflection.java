@@ -23,7 +23,7 @@ package org.jcae.mesh.amibe.algos2d;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.patch.OTriangle2D;
+import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
@@ -116,7 +116,7 @@ public class EnforceAbsDeflection
 					continue;
 				double uv[] = Vertex2D.centroid(mesh, (Vertex2D[]) t.vertex).getUV();
 				Vertex2D v = (Vertex2D) mesh.factory.createVertex(uv[0], uv[1]);
-				OTriangle2D vt = v.getSurroundingOTriangle(mesh);
+				VirtualHalfEdge2D vt = v.getSurroundingOTriangle(mesh);
 				if (vt.split3(mesh, v, false))
 					redo = true;
 			}
