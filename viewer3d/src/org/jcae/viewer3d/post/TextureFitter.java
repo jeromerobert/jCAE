@@ -120,7 +120,7 @@ public class TextureFitter extends View
 		//bitmap 2D -> 1x1 square
 		Matrix4d m2d=new Matrix4d();
 		m2d.setM00(1.0/width);
-		m2d.setM11(-1.0/height);
+		m2d.setM11(1.0/height);
 		m2d.setM22(1);
 		m2d.setM33(1);
 		
@@ -516,7 +516,7 @@ public class TextureFitter extends View
         
 		Matrix4f m=new Matrix4f();
         Transform3D trsf1=computeTransform(triangle2d, triangle3d,
-        	image.getWidth(), image.getHeight(), normalize);
+        	image.getWidth(), -image.getHeight(), normalize);
         trsf1.get(m);
         Vector4f vS=new Vector4f();
         Vector4f vT=new Vector4f();
