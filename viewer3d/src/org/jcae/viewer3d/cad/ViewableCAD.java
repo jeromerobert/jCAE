@@ -57,11 +57,11 @@ public class ViewableCAD extends ViewableAdaptor
 		polygonAttrNone.setCapability(PolygonAttributes.ALLOW_OFFSET_WRITE);
 	}
 	
-	private static interface CADPickingInfo{}
+	protected static interface CADPickingInfo{}
 	
-	private static class FacePickingInfo implements CADPickingInfo
+	protected static class FacePickingInfo implements CADPickingInfo
 	{
-		int id;
+		public int id;
 		Material[] materials;
 		Color3f oldColor;
 		/**
@@ -79,7 +79,7 @@ public class ViewableCAD extends ViewableAdaptor
 		}
 	}  
 	
-	private static class EdgePickingInfo implements CADPickingInfo
+	protected static class EdgePickingInfo implements CADPickingInfo
 	{
 		int id;
 		Appearance appearance;
@@ -99,7 +99,7 @@ public class ViewableCAD extends ViewableAdaptor
 		}
 	}
 		
-	private static class VertexPickingInfo implements CADPickingInfo
+	protected static class VertexPickingInfo implements CADPickingInfo
 	{
 		int id;
 		Appearance appearance;
@@ -297,7 +297,7 @@ public class ViewableCAD extends ViewableAdaptor
 	}
 	
 	
-	private static Object getPickUserData(PickViewable result){
+	protected static Object getPickUserData(PickViewable result){
 		SceneGraphObject sgo;
 		sgo=result.getGeometryArray();
 		if(sgo!=null){
