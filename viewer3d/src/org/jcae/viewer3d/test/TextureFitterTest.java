@@ -27,7 +27,7 @@ public class TextureFitterTest
 	private ViewableCAD fullViewable;
 	private TopoDS_Shape fullShape;
 	
-	private ViewableCAD faceViewable;
+	private TextureFitter.PickViewableCAD faceViewable;
 	private TopoDS_Shape faceShape;
 
 	private TextureFitter view;
@@ -140,14 +140,16 @@ public class TextureFitterTest
 		view.remove(fullViewable);
 		
 		//display only the selected faces
-		faceViewable=new ViewableCAD(new OCCProvider(faceShape));
+		//faceViewable=new ViewableCAD(new OCCProvider(faceShape));
+		faceViewable=new TextureFitter.PickViewableCAD(new OCCProvider(faceShape), faceShape);
 		view.add(faceViewable);
 		
 		// switch from face picking mode to vertex picking mode
-		faceViewable.setSelectionMode(ViewableCAD.VERTEX_SELECTION);
+		//faceViewable.setSelectionMode(ViewableCAD.VERTEX_SELECTION);
 		
 		// display the coordinates of the selected vertex
-		faceViewable.addSelectionListener(new VertexSelectionListener());		
+		faceViewable.addSelectionListener(new VertexSelectionListener());
+		faceViewable.addSelectionListener(new PointSelectionListener());
 	}
 	
 	/**
@@ -176,7 +178,7 @@ public class TextureFitterTest
 	}
 	
 	/**
-	 * A simple SelectionListener which display the picked coordinates
+	 * A simple SelectionListener which display the picked coordinates of vertices
 	 * in the console
 	 * @author Jerome Robert
 	 */
@@ -199,6 +201,23 @@ public class TextureFitterTest
 			}
 		}		
 	}
+
+	/**
+	 * A simple SelectionListener which display the picked coordinates on faces
+	 * in the console
+	 * @author Jerome Robert
+	 */
+	private class PointSelectionListener implements SelectionListener
+	{
+		public void selectionChanged()
+		{					
+			double[] point = faceViewable.getLastPick();
+			if(point!=null)
+				System.out.println("Point selected on the surface: "+point[0]+" "+point[1]+" "+point[2]);
+	
+		}		
+	}
+
 	
 	public TextureFitterTest()
 	{
@@ -208,7 +227,7 @@ public class TextureFitterTest
 		view=new TextureFitter(frame);
 		
 		//Display the geometry to allow selection of faces
-		fullShape=Utilities.readFile("/home/jerome/ndtkit/g53330052-200.igs");
+		fullShape=Utilities.readFile("/home/jerome/occ-shape-gal/66_shaver3.brep");
 		OCCProvider occProvider=new OCCProvider(fullShape);
 		fullViewable=new ViewableCAD(occProvider);
 		view.add(fullViewable);

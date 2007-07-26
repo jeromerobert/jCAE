@@ -10,13 +10,20 @@ import java.util.Map.Entry;
 
 import javax.media.j3d.*;
 import javax.vecmath.*;
+
 import org.jcae.opencascade.Utilities;
 import org.jcae.opencascade.jni.BRep_Builder;
+import org.jcae.opencascade.jni.BRep_Tool;
+import org.jcae.opencascade.jni.GeomAPI_ProjectPointOnSurf;
+import org.jcae.opencascade.jni.Geom_Surface;
 import org.jcae.opencascade.jni.TopoDS_Compound;
+import org.jcae.opencascade.jni.TopoDS_Face;
 import org.jcae.opencascade.jni.TopoDS_Shape;
+import org.jcae.viewer3d.PickViewable;
 import org.jcae.viewer3d.View;
 import org.jcae.viewer3d.bg.ViewableBG;
 import org.jcae.viewer3d.cad.CADDomain;
+import org.jcae.viewer3d.cad.CADProvider;
 import org.jcae.viewer3d.cad.CADSelection;
 import org.jcae.viewer3d.cad.FaceMesh;
 import org.jcae.viewer3d.cad.ViewableCAD;
@@ -40,6 +47,62 @@ public class TextureFitter extends View
 {
 	private static final long serialVersionUID = 2147414791584387916L;
 
+	/**
+	 * A special ViewableCAD which allows picking points on a surface.
+	 * Other kind of picking are not availables (use the ViewableCAD if
+	 * you need them).
+	 */
+	public static class PickViewableCAD extends ViewableCAD
+	{
+		private Point3d pickingPoint;
+		private int faceID;
+		private TopoDS_Shape shape;
+		public PickViewableCAD(CADProvider provider, TopoDS_Shape shape)
+		{		
+			super(provider);
+			this.shape=shape;
+		}
+		
+		public void pick(PickViewable result)
+		{
+			Object o=getPickUserData(result);
+			if((o instanceof ViewableCAD.FacePickingInfo))
+			{
+				FacePickingInfo fpi=(FacePickingInfo) o;
+				pickingPoint = result.getIntersection().getPointCoordinates();
+				faceID=fpi.id;
+				fireSelectionChanged();
+			}
+		}
+		
+		public double[] getLastPick()
+		{
+			if(pickingPoint!=null)
+			{
+				TopoDS_Face face = Utilities.getFace(shape, faceID);
+				Geom_Surface geom = BRep_Tool.surface(face);
+				double[] point=new double[3];
+				pickingPoint.get(point);
+				GeomAPI_ProjectPointOnSurf proj=new GeomAPI_ProjectPointOnSurf(point, geom);
+				if(proj.nbPoints()>0)
+					return proj.point(1);
+				else
+					return point;
+			}
+			else
+				return null;
+		}
+		
+		public void setSelectionMode(short mode) {
+			throw new UnsupportedOperationException();
+		}
+		
+		public void unselectAll()
+		{
+			//do nothing, particularly do not fire event about unselecting
+		}
+	}
+
 	private static Transform3D computeTransform(
 		Point3d[] triangle2d, Point3d[] triangle3d, int width, int height, boolean normalize)
 	{
@@ -47,7 +110,7 @@ public class TextureFitter extends View
 		Transform3D trsf1=normalizeTriangle(triangle2d);
 		trsf1.mulInverse(normalizeTriangle(triangle3d));
 
-		//force orthogonal and unifrom scale matrix		
+		//force orthogonal and uniform scale matrix		
 		if(normalize)
 		{
 			trsf1.normalizeCP();		
