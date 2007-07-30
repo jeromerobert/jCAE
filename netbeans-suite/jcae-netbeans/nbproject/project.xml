@@ -192,8 +192,8 @@
                 <binary-origin>release/modules/ext/jcae.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/log4j-1.2.8.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/log4j-1.2.8.jar</binary-origin>
+                <runtime-relative-path>ext/log4j.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/log4j.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/jcae-mesherocc.jar</runtime-relative-path>

@@ -3,7 +3,7 @@ release/modules/ext/jcae-viewer3d.jar
 release/modules/ext/jcae.jar
 release/modules/ext/jcae-mesherocc.jar
 release/modules/ext/trove.jar
-release/modules/ext/log4j-1.2.8.jar
+release/modules/ext/log4j.jar
 release/modules/ext/xalan.jar
 release/modules/ext/serializer.jar
 
