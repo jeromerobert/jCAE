@@ -75,6 +75,7 @@ public class TextureFitter extends View
 			}
 		}
 		
+		/** Return the coordinates of the last picked point on a surface */
 		public double[] getLastPick()
 		{
 			if(pickingPoint!=null)
