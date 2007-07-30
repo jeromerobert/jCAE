@@ -1,3 +1,18 @@
+Version 0.14.3 (2007-07-20)
+
+* Fix decimation and OEMM
+
+Version 0.14.2 (2007-07-19)
+
+* Sort geometries by alphabetic order
+* Fix bugs in geometry rotation
+* Fix a bug which occured when reverting geometry faces
+* Add "remove holes" and "split faces"
+* Allows to copy/paste sub shapes
+* Fix crash when displaying empty geometries
+* Display geometry tolerance in property sheets
+* Add various developer features in viewer3d, occjava and amibe (see ChangeLogs)
+
 Version 0.14.1 (2007-04-26)
 
 * Fix bug 1464773, OutOfMemory in UNV export
