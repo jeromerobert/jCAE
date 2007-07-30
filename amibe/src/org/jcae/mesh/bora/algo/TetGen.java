@@ -21,6 +21,7 @@
 package org.jcae.mesh.bora.algo;
 
 import org.jcae.mesh.bora.ds.BDiscretization;
+import org.jcae.mesh.bora.ds.BSubMesh;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.bora.xmldata.Storage;
 import org.jcae.mesh.bora.xmldata.MESHReader;
@@ -85,12 +86,11 @@ public class TetGen implements AlgoInterface
 
 	public boolean compute(BDiscretization d)
 	{
-		/*
 		logger.info("Running TetGen "+banner);
-		// root.export(s, "tetgen.poly", ExportMesh.FORMAT_POLY);
-		Mesh m = Storage.readAllFaces(root, s);
+		BSubMesh s = d.getFirstSubMesh();
+		Mesh m = Storage.readAllFaces(d.getGraphCell(), s);
 		String outDir = "tetgen.tmp"+java.io.File.separator+"s"+s.getId();
-		MeshWriter.writeObject3D(m, outDir, "jcae3d", "brep", root.getGraph().getModel().getCADFile(), 1);
+		MeshWriter.writeObject3D(m, outDir, "jcae3d", "brep", d.getGraphCell().getGraph().getModel().getCADFile());
 		new MeshExporter.POLY(outDir).write("tetgen.poly");
 		try {
 			String args = "-a"+volume+"pYNEFg";
@@ -99,14 +99,13 @@ public class TetGen implements AlgoInterface
 			if (p.exitValue() != 0)
 				return false;
 			// Import volume mesh...
-			root.setMesh(s, MESHReader.readMesh("tetgen.1.mesh"));
+			d.setMesh(MESHReader.readMesh("tetgen.1.mesh"));
 			// ... and store it on disk
-			Storage.writeVolume(root, s, root.getGraph().getModel().getOutputDir(s));
+			Storage.writeSolid(d, d.getGraphCell().getGraph().getModel().getOutputDir(s));
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return false;
 		}
-		*/
 		return true;
 	}
 	

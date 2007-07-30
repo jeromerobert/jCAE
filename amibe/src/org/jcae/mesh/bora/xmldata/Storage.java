@@ -127,7 +127,7 @@ public class Storage
 		}
 	}
 
-	public static void writeVolume(BDiscretization d, String outDir)
+	public static void writeSolid(BDiscretization d, String outDir)
 	{
 		BCADGraphCell solid = d.getGraphCell();
 		VolMesh submesh = (VolMesh) d.getMesh();
@@ -192,25 +192,25 @@ public class Storage
 	/**
 	 * Append a discretized face into a Mesh instance.
 	 * @param mesh    original mesh
-	 * @param root    cell graph containing a CAD face
+	 * @param face    cell graph containing a CAD face
 	 * @param s       consider discretizations only if they appear in this BSubMesh instance
 	 * @param mapRefVertex    map between references and Vertex instances
 	 * @throws  RuntimeException if an error occurred
 	 */
-	public static void readFace(Mesh mesh, BCADGraphCell root, BSubMesh s, TIntObjectHashMap mapRefVertex)
+	public static void readFace(Mesh mesh, BCADGraphCell face, BSubMesh s, TIntObjectHashMap mapRefVertex)
 	{
-		assert root.getShape() instanceof CADFace;
-		BModel model = root.getGraph().getModel();
+		assert face.getShape() instanceof CADFace;
+		BModel model = face.getGraph().getModel();
 		boolean reversed = false;
-		if (root.getOrientation() != 0)
+		if (face.getOrientation() != 0)
 		{
 			reversed = true;
-			if (root.getReversed() != null)
-				root = root.getReversed();
+			if (face.getReversed() != null)
+				face = face.getReversed();
 		}
-		if (null == root.getDiscretizationSubMesh(s))
+		if (null == face.getDiscretizationSubMesh(s))
 			return;
-		int id = root.getId();
+		int id = face.getId();
 		try
 		{
 			File dir = new File(model.getOutputDir(s), dir2d);
@@ -221,6 +221,9 @@ public class Storage
 			Vertex [] nodelist = read2dCoordinates(dir, id, mesh, refs, mapRefVertex);
 			// Read triangles and appends them to the mesh.
 			read2dTriangles(dir, id, 3, mesh, reversed, nodelist);
+		}
+		catch(java.io.FileNotFoundException ex)
+		{
 		}
 		catch(Exception ex)
 		{

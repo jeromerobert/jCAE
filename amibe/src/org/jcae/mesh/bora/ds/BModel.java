@@ -250,14 +250,17 @@ public class BModel
 				Storage.writeFace(d, getOutputDir(d.getFirstSubMesh()));
 			}
 		}
-		/*
 		logger.info("Discretize solids");
-		for (Iterator it = submesh.iterator(); it.hasNext(); )
+		for (Iterator its = root.shapesExplorer(CADShapeEnum.SOLID); its.hasNext(); )
 		{
-			BSubMesh sm = (BSubMesh) it.next();
-			sm.computeAlgorithms3d();
+			BCADGraphCell cell = (BCADGraphCell) its.next();
+			for (Iterator itd = cell.discretizationIterator(); itd.hasNext(); )
+			{
+				BDiscretization d = (BDiscretization) itd.next();
+				d.discretize();
+				Storage.writeSolid(d, getOutputDir(d.getFirstSubMesh()));
+			}
 		}
-		*/
 		state = TESSELLATION;
 	}
 
