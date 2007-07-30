@@ -119,7 +119,7 @@ public AbstractHalfEdge nextOrigin();
 public AbstractHalfEdge nextOriginLoop();
         </source>
         <p>
-        See <a href="amibe-doc/org/jcae/mesh/amibe/ds/VirtualHalfEdge.html">Amibe API</code> for more details
+        See <a href="amibe-doc/org/jcae/mesh/amibe/ds/VirtualHalfEdge.html">Amibe API</a> for more details
         about these methods.
         </p>
       </answer>
