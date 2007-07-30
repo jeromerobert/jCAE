@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE faqs PUBLIC "-//APACHE//DTD FAQ V2.0//EN" "http://forrest.apache.org/dtd/faq-v20.dtd">
+<faqs>
+  <title>Frequently Asked Questions</title>
+  <faqsection id="import_export">
+    <title>Import/export mesh</title>
+    <faq>
+      <question> Which output formats are supported? </question>
+      <answer>
+        <p>
+        Amibe uses its own file format to store meshes, but they can also be exported into the following
+        formats:
+        </p>
+        <ol>
+          <li>I-deas UNV file</li>
+          <li>Medit <a href="http://www.ann.jussieu.fr/~frey/logiciels/Docmedit.dir/Fichiers/formatmesh.pdf">MESH</a> format (in French)</li>
+          <li><a href="http://www.ennex.com/~fabbers/StL.asp">STL</a> format</li>
+          <li>TetGen <a href="http://tetgen.berlios.de/files/tetgen-manual.pdf">POLY</a> format</li>
+        </ol>
+        <p>
+        Here are some sample source code:
+        </p>
+        <source>
+// Directory containing Amibe 3D mesh files (jcae3d)
+String outputDir3D = "amibe.out";
+// Conversion into UNV format
+new org.jcae.mesh.xmldata.MeshExporter.UNV(outputDir3D).write("foo.unv");
+// Conversion into POLY format
+new org.jcae.mesh.xmldata.MeshExporter.POLY(outputDir3D).write("foo.poly");
+// Conversion into STL format
+new org.jcae.mesh.xmldata.MeshExporter.STL(outputDir3D).write("foo.stl");
+// Conversion into MESH format
+new org.jcae.mesh.xmldata.MeshExporter.MESH(outputDir3D).write("foo.mesh");
+        </source>
+
+        <p>
+        These conversions are applied on the whole indexed mesh.  It is thus not possible
+        to handle very large meshes, and we have to convert Amibe 2D files instead.  An
+        example can be found in <code>org.jcae.mesh.Mesher</code> class.
+        </p>
+      </answer>
+    </faq>
+
+    <faq>
+      <question> Which input formats are supported? </question>
+      <answer>
+        <p>
+        Amibe is mainly targeted at meshing CAD surfaces, but some basic support to read I-deas UNV files
+        have been added.
+        </p>
+        <source>
+Mesh mesh = new Mesh();
+String filename = "mymesh.unv";
+org.jcae.mesh.amibe.util.UNVReader.readMesh(mesh, filename);
+        </source>
+      </answer>
+    </faq>
+
+    <faq>
+      <question> Adjacency relations are not computed when importing meshes </question>
+      <answer>
+        <p>
+        When a <code>Mesh</code> instance is created, a list of traits (=features) is passed to the
+        constructor.  The list of defined traits cannot be modified afterwards.  For instance if
+        we need adjacency relations, we have to write something like:
+        </p>
+        <source>
+org.jcae.mesh.amibe.traits.TriangleTraitsBuilder ttb = new org.jcae.mesh.amibe.traits.TriangleTraitsBuilder();
+ttb.addHalfEdge();
+// Above line can be replaced by
+//   ttb.addShallowHalfEdge();
+// if mesh operations can be performed on cheaper VirtualHalfEdge data structure.
+org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = new org.jcae.mesh.amibe.traits.MeshTraitsBuilder();
+        </source>
+      </answer>
+    </faq>
+  </faqsection>
+
+  <faqsection id="traversal">
+    <title>Mesh traversal</title>
+    <faq>
+      <question> Why are there two half-edge implementations? </question>
+      <answer>
+        <p>
+        Our first implementation was designed to be very compact.  But under some circumstances we faced
+        problems and had to find an alternative.  As we focus on very large meshes, we decided to keep both;
+        <code>org.jcae.mesh.amibe.ds.AbstractHalfEdge</code> is an abstract class, with two derived classes:
+        </p>
+        <ol>
+          <li><code>org.jcae.mesh.amibe.ds.VirtualHalfEdge</code> is the most compact representation, edges are not
+              stored as separate objects but as handles on triangles (since an edge is only a local number on a
+              given triangle).</li>
+          <li><code>org.jcae.mesh.amibe.ds.HalfEdge</code> is very similar, but edges are stored within objects.</li>
+        </ol>
+        <p>
+        You should write generic code wherever possible, unless it is absolutely clear that a given implementation
+        will be used.  This means that mesh traversal should be performed only by calling methods from
+        <code>AbstractHalfEdge</code> and not from derived classes.
+        </p>
+      </answer>
+    </faq>
+
+    <faq>
+      <question> How to traverse mesh? </question>
+      <answer>
+        <p>
+        Classes derived from <code>org.jcae.mesh.amibe.ds.AbstractHalfEdge</code> define the following methods:
+        </p>
+        <source>
+// Retrieves symmetric edge
+public AbstractHalfEdge sym();
+// Retrieves next edge on the same triangle
+public AbstractHalfEdge next();
+// Retrieves previous edge on the same triangle
+public AbstractHalfEdge prev();
+// Retrieves next edge (on a different triangle) starting from the same vertex
+public AbstractHalfEdge nextOrigin();
+// Like nextOrigin(), but takes care of mesh boundaries
+public AbstractHalfEdge nextOriginLoop();
+        </source>
+        <p>
+        See <a href="amibe-doc/org/jcae/mesh/amibe/ds/VirtualHalfEdge.html">Amibe API</code> for more details
+        about these methods.
+        </p>
+      </answer>
+    </faq>
+
+    <faq>
+      <question> How to loop over edges inside a triangle? </question>
+      <answer>
+        <p>
+        Here is a trivial example:
+        </p>
+        <source>
+Triangle f = ...;
+AbstractHalfEdge e = f.getAbstractHalfEdge();
+for (int i = 0; i &lt; 3; i++)
+{
+   // do some processing on e
+   ...
+   e = e.next();
+}
+        </source>
+        <warning>
+          The following example does not work, because if triangle adjacency is obtained through
+          <code>VirtualHalfEdge</code>, <code>e</code> and <code>start</code> then references the
+          exact same object.
+        </warning>
+        <source>
+Triangle f = ...;
+AbstractHalfEdge start = f.getAbstractHalfEdge();
+AbstractHalfEdge e = start;
+do
+{
+   // do some processing on e
+   ...
+   e = e.next();
+}
+while (e != start);
+        </source>
+      </answer>
+    </faq>
+
+    <faq>
+      <question> How to loop around a vertex? </question>
+      <answer>
+        <p>
+        Each vertex has a link to one of its adjacent triangles.  We first determine
+        the half-edge in this triangle which starts from this vertex, and we can then
+        use edge pointers to walk through adjacent edges.
+        </p>
+        <source>
+Vertex v = ...;
+Triangle f = (Triangle) v.getLink();
+AbstractHalfEdge e = f.getAbstractHalfEdge();
+if (e.destination() == v)
+  e = e.next();
+else if (e.apex() == v)
+  e = e.prev();
+assert e.origin() == v;
+Vertex d = e.destination();
+do
+{
+   // do some processing on e
+   ...
+   e = e.nextOriginLoop();
+}
+while (d != e.destination());
+        </source>
+        <warning>
+          In these constructs, we always call <code>nextOriginLoop()</code> method instead of
+          <code>nextOrigin()</code> because the former is designed to gracefully handle mesh
+          boundaries whereas the latter is a geometric primitive.
+        </warning>
+      </answer>
+    </faq>
+  </faqsection>
+</faqs>
+

@@ -55,6 +55,7 @@ See http://forrest.apache.org/docs/linking.html for more info
 			<amibe-format label="File Formats" href="amibe.html#Amibe+file+format"/>
 			<amibe-oemm label="OEMM" href="amibe-oemm.html"/>
 			<amibe-api label="API" href="amibe-doc/"/>
+			<amibe-faq label="FAQ" href="amibe-faq.html"/>
 		</amibe>
 		<developers label="Developers" href="developers.html"/>
 		<oldies label="Oldies" href="oldies/">
