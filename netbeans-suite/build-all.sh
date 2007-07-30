@@ -18,23 +18,28 @@ export JRE_HOME
 
 echo Build occjava
 cd occjava
+./autogen.sh
 ./configure CXX=$CXX33
 make
 
 echo Build amibe
-cd $JCAE_ROOT/amibe
-ln -sf $LOG4J lib/log4j.jar
-ln -sf $TROVE lib/trove.jar
+mkdir $JCAE_ROOT/amibe/lib
+cd $JCAE_ROOT/amibe/lib
+ln -sf $LOG4J log4j.jar
+ln -sf $TROVE trove.jar
 ln -sf ../../occjava/lib/occjava.jar
 ln -sf ../../viewer3d/lib/jcae-viewer3d.jar
+cd ..
 ant jar
 
 echo Build viewer3d
-cd $JCAE_ROOT/viewer3d
+mkdir $JCAE_ROOT/viewer3d/lib
+cd $JCAE_ROOT/viewer3d/lib
 ln -sf ../../occjava/lib/occjava.jar
-ln -sf $LOG4J lib/log4j.jar
-ln -sf $TROVE lib/trove.jar
+ln -sf $LOG4J log4j.jar
+ln -sf $TROVE trove.jar
 ln -sf ../../amibe/lib/jcae.jar
+cd ..
 ant jar
 
 #dirty workaround because of dirty cross dependencies
@@ -44,12 +49,16 @@ cd $JCAE_ROOT/amibe
 ant -Dbuild.tests=true jar
 
 echo Configure netbeans-suite
-cd $JCAE_ROOT/netbeans-suite/jcae-netbeans/release/modules
+cd $JCAE_ROOT/netbeans-suite/jcae-netbeans/release/modules/ext/
 ln -sf ../../../../../amibe/lib/jcae.jar
 ln -sf ../../../../../amibe/lib/jcae-mesherocc.jar
 ln -sf ../../../../../viewer3d/lib/jcae-viewer3d.jar
 ln -sf $LOG4J log4j.jar
 ln -sf $TROVE trove.jar
+cd $JCAE_ROOT/netbeans-suite/occjava/release/modules/lib/
+ln -sf ../../../../../occjava/src/.libs/libOccJava.so
+cd $JCAE_ROOT/netbeans-suite/occjava/release/modules/ext/
+ln -sf ../../../../../occjava/lib/occjava.jar
 
 echo Open the netbeans-suite project in Netbeans and run "Build zip distribution". Then run the make-dist-Linux.sh and you are done.
 
