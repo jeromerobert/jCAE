@@ -187,6 +187,7 @@ public class BModel
 	 */
 	public void computeConstraints()
 	{
+		logger.info("Compute constraints");
 		BCADGraphCell root = cad.getRootCell();
 		for (Iterator its = root.shapesExplorer(CADShapeEnum.SOLID); its.hasNext(); )
 		{
@@ -228,7 +229,7 @@ public class BModel
 				d.discretize();
 			}
 		}
-		logger.debug("Discretize edges");
+		logger.info("Discretize edges");
 		for (Iterator its = root.shapesExplorer(CADShapeEnum.EDGE); its.hasNext(); )
 		{
 			BCADGraphCell cell = (BCADGraphCell) its.next();
@@ -239,7 +240,7 @@ public class BModel
 				Storage.writeEdge(d, getOutputDir(d.getFirstSubMesh()));
 			}
 		}
-		logger.debug("Discretize faces");
+		logger.info("Discretize faces");
 		for (Iterator its = root.shapesExplorer(CADShapeEnum.FACE); its.hasNext(); )
 		{
 			BCADGraphCell cell = (BCADGraphCell) its.next();
@@ -250,6 +251,7 @@ public class BModel
 				Storage.writeFace(d, getOutputDir(d.getFirstSubMesh()));
 			}
 		}
+		/*
 		logger.info("Discretize solids");
 		for (Iterator its = root.shapesExplorer(CADShapeEnum.SOLID); its.hasNext(); )
 		{
@@ -261,7 +263,9 @@ public class BModel
 				Storage.writeSolid(d, getOutputDir(d.getFirstSubMesh()));
 			}
 		}
+		*/
 		state = TESSELLATION;
+		logger.info("Discretization finished");
 	}
 
 	/**
