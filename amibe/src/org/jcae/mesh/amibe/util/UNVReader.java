@@ -48,7 +48,7 @@ public class UNVReader
 	
 	public static void readMesh(Mesh mesh, String file)
 	{
-		readMesh(mesh, file, 0.0);
+		readMesh(mesh, file, -1.0);
 	}
 	
 	public static void readMesh(Mesh mesh, String file, double ridgeAngle)
