@@ -1,6 +1,9 @@
-#! /bin/sh -x
+#! /bin/sh -xe
 
+# Change this to your own OpenCASCADE installation
 CASROOT=/home/jerome/OpenCASCADE6.2.0/ros
+
+# Name of the Java directory in the final bundle
 JAVA_NAME=jre-6
 VERSION=jcae-@JCAE_VERSION@
 rm -rf $VERSION
@@ -38,7 +41,7 @@ if [ ! -d "$JRE_HOME" ]; then
 fi
 
 ln -s $JRE_HOME $JAVA_NAME
-rm -rf $JAVA_NAME/plugin $JAVA_NAME/javaw $JAVA_NAME/lib/i386/client/classes.jsa
+rm -rf $JAVA_NAME/plugin $JAVA_NAME/javaw $JAVA_NAME/lib/i386/client/classes.jsa || true
 mkdir -p OpenCASCADE6.2.0/ros/Linux/
 ln -s $CASROOT/../LICENSE OpenCASCADE6.2.0/LICENSE
 ln -s $CASCADE_LIB OpenCASCADE6.2.0/ros/Linux/lib
@@ -48,6 +51,6 @@ mv tmp/* .
 rmdir tmp
 
 cd ..
-rm $VERSION-Linux.tar.bz2
+rm $VERSION-Linux.tar.bz2 || true
 tar cfj $VERSION-Linux.tar.bz2 --totals --owner 0 --group 0 -h $VERSION
 

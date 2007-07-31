@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/sh -e
 
 # Configure you path
 CASROOT=/home/jerome/OpenCASCADE6.2.0/ros
@@ -23,7 +23,7 @@ cd occjava
 make
 
 echo Build amibe
-mkdir $JCAE_ROOT/amibe/lib
+mkdir $JCAE_ROOT/amibe/lib || true
 cd $JCAE_ROOT/amibe/lib
 ln -sf $LOG4J log4j.jar
 ln -sf $TROVE trove.jar
@@ -33,7 +33,7 @@ cd ..
 ant jar
 
 echo Build viewer3d
-mkdir $JCAE_ROOT/viewer3d/lib
+mkdir $JCAE_ROOT/viewer3d/lib || true
 cd $JCAE_ROOT/viewer3d/lib
 ln -sf ../../occjava/lib/occjava.jar
 ln -sf $LOG4J log4j.jar
