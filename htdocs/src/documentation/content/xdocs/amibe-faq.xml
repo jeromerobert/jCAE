@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE faqs PUBLIC "-//APACHE//DTD FAQ V2.0//EN" "http://forrest.apache.org/dtd/faq-v20.dtd">
 <faqs>
-  <title>Frequently Asked Questions</title>
+  <title>Amibe Frequently Asked Questions</title>
   <faqsection id="import_export">
     <title>Import/export mesh</title>
     <faq>
@@ -65,12 +65,12 @@ org.jcae.mesh.amibe.util.UNVReader.readMesh(mesh, filename);
         we need adjacency relations, we have to write something like:
         </p>
         <source>
-org.jcae.mesh.amibe.traits.TriangleTraitsBuilder ttb = new org.jcae.mesh.amibe.traits.TriangleTraitsBuilder();
+TriangleTraitsBuilder ttb = new org.jcae.mesh.amibe.traits.TriangleTraitsBuilder();
 ttb.addHalfEdge();
 // Above line can be replaced by
 //   ttb.addShallowHalfEdge();
 // if mesh operations can be performed on cheaper VirtualHalfEdge data structure.
-org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = new org.jcae.mesh.amibe.traits.MeshTraitsBuilder();
+MeshTraitsBuilder mtb = new org.jcae.mesh.amibe.traits.MeshTraitsBuilder();
         </source>
       </answer>
     </faq>
@@ -96,6 +96,21 @@ org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = new org.jcae.mesh.amibe.trait
         You should write generic code wherever possible, unless it is absolutely clear that a given implementation
         will be used.  This means that mesh traversal should be performed only by calling methods from
         <code>AbstractHalfEdge</code> and not from derived classes.
+        </p>
+      </answer>
+    </faq>
+
+    <faq>
+      <question> How to choose between these two implementations? </question>
+      <answer>
+        <p>
+        It depends on which operations will be performed on the mesh.  If edges are going to be sorted according
+        to a given criterion, you must have an object representation and call
+        <code>TriangleTraitsBuilder.addHalfEdge()</code>.  Otherwise, it is likely that 
+        <code>TriangleTraitsBuilder.addShallowHalfEdge()</code> is a more efficient alternative.
+        If you are writing some new methods to modify mesh topology, it is surely a good idea to begin with
+        <code>HalfEdge</code> instances which are simpler to deal with, and when it is over, implement these
+        methods with <code>VirtualHalfEdge</code> instances.
         </p>
       </answer>
     </faq>
@@ -143,7 +158,7 @@ for (int i = 0; i &lt; 3; i++)
         </source>
         <warning>
           The following example does not work, because if triangle adjacency is obtained through
-          <code>VirtualHalfEdge</code>, <code>e</code> and <code>start</code> then references the
+          <code>VirtualHalfEdge</code>, <code>e</code> and <code>start</code> references then the
           exact same object.
         </warning>
         <source>
@@ -187,11 +202,11 @@ do
 }
 while (d != e.destination());
         </source>
-        <warning>
+        <note>
           In these constructs, we always call <code>nextOriginLoop()</code> method instead of
           <code>nextOrigin()</code> because the former is designed to gracefully handle mesh
           boundaries whereas the latter is a geometric primitive.
-        </warning>
+        </note>
       </answer>
     </faq>
   </faqsection>
