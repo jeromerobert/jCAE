@@ -290,8 +290,9 @@ abstract public class MeshExporter
 	
 	protected File getNormalFile()
 	{
-		Element xmlNormals = (Element) document.getElementsByTagName(
-			"normals").item(0);
+		Element xmlNormals = (Element) document.getElementsByTagName("normals").item(0);
+		if (xmlNormals == null)
+			return null;
 		String a=((Element)xmlNormals.getElementsByTagName("file").item(0)).getAttribute("location");
 		return new File(directory, a);
 	}
@@ -422,7 +423,14 @@ abstract public class MeshExporter
 		writeNodes(out, nodelist.toNativeArray(), amibeNodeToUNVNode);
 		TIntIntHashMap amibeTriaToUNVTria=new TIntIntHashMap();
 		writeTriangles(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
-		writeNormals(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
+		try
+		{
+			// Do not complain if normals had not been written
+			writeNormals(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
+		}
+		catch (IOException ex)
+		{
+		}
 		triangle=null;
 		amibeNodeToUNVNode=null;
 		writeGroups(out, amibeTriaToUNVTria);
@@ -805,6 +813,8 @@ abstract public class MeshExporter
 			//  Open the input file first so that an exception is
 			//  raised if it is not found.
 			File f=getNormalFile();
+			if (f == null)
+				throw new IOException();
 			FileInputStream fis = new FileInputStream(f);
 			FileChannel fc = fis.getChannel();
 			
