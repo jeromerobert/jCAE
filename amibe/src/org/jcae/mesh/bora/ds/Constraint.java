@@ -123,7 +123,7 @@ public class Constraint
 		String ret = "Constraint: "+id;
 		ret += " (hyp "+hypothesis+", cell "+Integer.toHexString(graphCell.hashCode())+")";
 		if (origin != null)
-			ret += " ["+origin.id+"]";
+			ret += " [derived from "+origin.id+"]";
 		return ret;
 	}
 
