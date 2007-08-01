@@ -251,7 +251,6 @@ public class BModel
 				Storage.writeFace(d, getOutputDir(d));
 			}
 		}
-		/*
 		logger.info("Discretize solids");
 		for (Iterator its = root.shapesExplorer(CADShapeEnum.SOLID); its.hasNext(); )
 		{
@@ -263,7 +262,6 @@ public class BModel
 				Storage.writeSolid(d, getOutputDir(d));
 			}
 		}
-		*/
 		state = TESSELLATION;
 		logger.info("Discretization finished");
 	}
