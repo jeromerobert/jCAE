@@ -21,7 +21,12 @@
 package org.jcae.mesh.bora.algo;
 
 import org.jcae.mesh.bora.ds.BDiscretization;
+import org.jcae.mesh.bora.ds.BSubMesh;
+import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.bora.xmldata.Storage;
+import org.jcae.mesh.bora.xmldata.MESHReader;
 import org.jcae.mesh.xmldata.MeshExporter;
+import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import org.apache.log4j.Logger;
@@ -76,20 +81,29 @@ public class Netgen implements AlgoInterface
 
 	public boolean compute(BDiscretization d)
 	{
-		/*
-		logger.info("Running TetGen "+banner);
-		// mesh.export(s, "tetgen.poly", ExportMesh.FORMAT_POLY);
-		new MeshExporter.STL(mesh.getGraph().getModel().getOutputDir(s)).write("netgen.stl");
+		logger.info("Running Netgen "+banner);
+		BSubMesh s = d.getFirstSubMesh();
+		Mesh m = Storage.readAllFaces(d.getGraphCell(), s);
+		String outDir = "netgen.tmp"+java.io.File.separator+"s"+s.getId();
+		MeshWriter.writeObject3D(m, outDir, "jcae3d", "brep", d.getGraphCell().getGraph().getModel().getCADFile());
+		String pfx = "netgen-"+d.getId();
+		new MeshExporter.STL(outDir).write(pfx+".stl");
 		try {
-			Process p = Runtime.getRuntime().exec(new String[] {"netgen", "-batchmode", "-meshfile=netgen.mesh", "-geofile=netgen.stl"});
+			Process p = Runtime.getRuntime().exec(new String[] {"netgen", "-batchmode", "-meshfile="+pfx+".mesh", "-geofile="+pfx+".stl"});
 			p.waitFor();
 			if (p.exitValue() != 0)
 				return false;
+			// Import volume mesh...
+			d.setMesh(MESHReader.readMesh(pfx+".mesh"));
+			// ... and store it on disk
+			Storage.writeSolid(d, d.getGraphCell().getGraph().getModel().getOutputDir(d));
+			// Remove temporary files
+			//new File(pfx+".stl").delete();
+			//new File(pfx+".mesh").delete();
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return false;
 		}
-		*/
 		return true;
 	}
 	
