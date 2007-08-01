@@ -532,6 +532,7 @@ public class Storage
 			}
 			face = (Triangle) mesh.factory.createTriangle(pts);
 			mesh.add(face);
+			face.setGroupId(id);
 			for (int j = 0; j < nr; j++)
 				pts[j].setLink(face);
 		}
