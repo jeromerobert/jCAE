@@ -134,9 +134,20 @@ public AbstractHalfEdge nextOrigin();
 public AbstractHalfEdge nextOriginLoop();
         </source>
         <p>
-        See <a href="amibe-doc/org/jcae/mesh/amibe/ds/VirtualHalfEdge.html">Amibe API</a> for more details
-        about these methods.
+        With these methods, it is possible to define all other geometric primitives
+        which are needed to traverse mesh.
         </p>
+        <p><img src="amibe-halfedge.png" alt="Geometric primitives"/></p>
+        <p>
+        Edge endpoints can be obtained through <code>origin()</code>, <code>destination()</code>
+        and <code>apex()</code> methods.  These identities may help to better understand how
+        all these methods are defined:
+        </p>
+        <source>
+e.nextOrigin().origin() == e.prevOrigin().origin() == e.origin() == A
+e.nextDest().destination() == e.prevDest().destination() == e.destination() == B
+e.nextApex().apex() == e.prevApex().apex() == e.apex() == C
+        </source>
       </answer>
     </faq>
 
