@@ -1,3 +1,11 @@
+Wed Aug  1 17:21:57 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/bora/ds/Hypothesis.java (checkCompatibility):
+	Stricter check, FE type must match its argument.
+	* src/org/jcae/mesh/bora/ds/Hypothesis.java (combine): This method now
+	returns a boolean telling if constraints have been successfully
+	combined.
+
 Thu Jul 26 02:19:57 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/NotOrientedEdge.java: Remove obsolete

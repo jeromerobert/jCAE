@@ -107,7 +107,8 @@ public class BDiscretization
 			if (((localOrigCons != null) && (baseOrigCons != null)) && (localOrigCons != baseOrigCons))
 				throw new RuntimeException("Definition of model imposes the same discretization for shape "+graphCell.getShape()+" but there are two different user-defined constraints for this discretization:" + baseOrigCons + " and " + localOrigCons );
 
-			newCons.getHypothesis().combine(constraint.getHypothesis());
+			if (!newCons.getHypothesis().combine(constraint.getHypothesis()))
+				throw new RuntimeException("Cannot combine "+newCons+" with "+constraint+" on "+graphCell);
 			// TODO: in combine(), it will be necessary to detect 
 			// which is the original constraint
 		} 

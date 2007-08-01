@@ -88,7 +88,7 @@ public class Hypothesis
 	 */
 	public boolean checkCompatibility(CADShapeEnum cse)
 	{
-		return hyp.impliedType(cse) != null;
+		return hyp == null || hyp.getType() == null || hyp.dim() == cse;
 	}
 
 	/**
@@ -240,17 +240,23 @@ public class Hypothesis
 			return that;
 	}
 
-	public void combine(Hypothesis that)
+	/**
+	 * Combines with another hypothesis.
+	 *
+	 * @return <code>true</code> if hypothesis have been successfully combined, <code>false</code> otherwise.
+	 */
+	public boolean combine(Hypothesis that)
 	{
 		String elt = getElement();
-		if (elt == null || !elt.equals(that.getElement()))
-			throw new RuntimeException();
+		if (elt != null && that.getElement() != null && !elt.equals(that.getElement()))
+			return false;
 
 		length     = combineDouble(length, that.length);
 		lengthMin  = combineDouble(lengthMin, that.lengthMin);
 		lengthMax  = combineDouble(lengthMax, that.lengthMax);
 		deflection = combineDouble(deflection, that.deflection);
 		lengthBool |= that.lengthBool;
+		return true;
 	}
 
 	public String toString()
