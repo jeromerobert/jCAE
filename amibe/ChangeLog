@@ -7,6 +7,7 @@ Wed Aug  1 17:21:57 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	combined.
 	* src/org/jcae/mesh/xmldata/MeshExporter.java: Do not abort if the <normals>
 	node is not present in jcae3d.
+	* src/org/jcae/mesh/bora/ds/BModel.java: Modify getOutputDir() signature.
 
 Thu Jul 26 02:19:57 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

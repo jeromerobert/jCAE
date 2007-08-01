@@ -208,12 +208,13 @@ public class Storage
 			if (face.getReversed() != null)
 				face = face.getReversed();
 		}
-		if (null == face.getDiscretizationSubMesh(s))
+		BDiscretization d = face.getDiscretizationSubMesh(s);
+		if (null == d)
 			return;
 		int id = face.getId();
 		try
 		{
-			File dir = new File(model.getOutputDir(s), dir2d);
+			File dir = new File(model.getOutputDir(d), dir2d);
 			// Read vertex references
 			int [] refs = read2dNodeReferences(dir, id);
 			// Create a Vertex array, amd insert new references
@@ -251,25 +252,28 @@ public class Storage
 	/**
 	 * Append a discretized solid into a VolMesh instance.
 	 * @param mesh    original mesh
-	 * @param root    cell graph containing a CAD solid
+	 * @param volume    cell graph containing a CAD solid
 	 * @param mapRefVertex    map between references and Vertex instances
 	 * @throws  RuntimeException if an error occurred
 	 */
-	public static void readVolume(VolMesh mesh, BCADGraphCell root, BSubMesh s, TIntObjectHashMap mapRefVertex)
+	public static void readVolume(VolMesh mesh, BCADGraphCell volume, BSubMesh s, TIntObjectHashMap mapRefVertex)
 	{
-		assert root.getShape() instanceof CADSolid;
-		BModel model = root.getGraph().getModel();
+		assert volume.getShape() instanceof CADSolid;
+		BModel model = volume.getGraph().getModel();
 		boolean reversed = false;
-		if (root.getOrientation() != 0)
+		if (volume.getOrientation() != 0)
 		{
 			reversed = true;
-			if (root.getReversed() != null)
-				root = root.getReversed();
+			if (volume.getReversed() != null)
+				volume = volume.getReversed();
 		}
-		int id = root.getId();
+		BDiscretization d = volume.getDiscretizationSubMesh(s);
+		if (null == d)
+			return;
+		int id = volume.getId();
 		try
 		{
-			File dir = new File(model.getOutputDir(s), dir3d);
+			File dir = new File(model.getOutputDir(d), dir3d);
 			// Read vertex references
 			int [] refs = read2dNodeReferences(dir, id);
 			// Create a Vertex array, amd insert new references

@@ -116,9 +116,9 @@ public class BModel
 		return xmlDir;
 	}
 
-	public String getOutputDir(BSubMesh sub)
+	public String getOutputDir(BDiscretization d)
 	{
-		return xmlDir+File.separator+"s"+sub.getId();
+		return xmlDir+File.separator+"d"+d.getId();
 	}
 
 	public String getOutputFile()
@@ -237,7 +237,7 @@ public class BModel
 			{
 				BDiscretization d = (BDiscretization) itd.next();
 				d.discretize();
-				Storage.writeEdge(d, getOutputDir(d.getFirstSubMesh()));
+				Storage.writeEdge(d, getOutputDir(d));
 			}
 		}
 		logger.info("Discretize faces");
@@ -248,7 +248,7 @@ public class BModel
 			{
 				BDiscretization d = (BDiscretization) itd.next();
 				d.discretize();
-				Storage.writeFace(d, getOutputDir(d.getFirstSubMesh()));
+				Storage.writeFace(d, getOutputDir(d));
 			}
 		}
 		/*
@@ -260,7 +260,7 @@ public class BModel
 			{
 				BDiscretization d = (BDiscretization) itd.next();
 				d.discretize();
-				Storage.writeSolid(d, getOutputDir(d.getFirstSubMesh()));
+				Storage.writeSolid(d, getOutputDir(d));
 			}
 		}
 		*/

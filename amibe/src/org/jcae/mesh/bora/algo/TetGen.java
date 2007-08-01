@@ -91,17 +91,18 @@ public class TetGen implements AlgoInterface
 		Mesh m = Storage.readAllFaces(d.getGraphCell(), s);
 		String outDir = "tetgen.tmp"+java.io.File.separator+"s"+s.getId();
 		MeshWriter.writeObject3D(m, outDir, "jcae3d", "brep", d.getGraphCell().getGraph().getModel().getCADFile());
-		new MeshExporter.POLY(outDir).write("tetgen.poly");
+		String pfx = "tetgen-"+d.getId();
+		new MeshExporter.POLY(outDir).write(pfx+".poly");
 		try {
 			String args = "-a"+volume+"pYNEFg";
-			Process p = Runtime.getRuntime().exec(new String[] {tetgenCmd, args, "tetgen"});
+			Process p = Runtime.getRuntime().exec(new String[] {tetgenCmd, args, pfx});
 			p.waitFor();
 			if (p.exitValue() != 0)
 				return false;
 			// Import volume mesh...
-			d.setMesh(MESHReader.readMesh("tetgen.1.mesh"));
+			d.setMesh(MESHReader.readMesh(pfx+".1.mesh"));
 			// ... and store it on disk
-			Storage.writeSolid(d, d.getGraphCell().getGraph().getModel().getOutputDir(s));
+			Storage.writeSolid(d, d.getGraphCell().getGraph().getModel().getOutputDir(d));
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			return false;
