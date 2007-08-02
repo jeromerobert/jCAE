@@ -27,6 +27,7 @@ import org.jcae.mesh.bora.xmldata.Storage;
 import org.jcae.mesh.bora.xmldata.MESHReader;
 import org.jcae.mesh.xmldata.MeshExporter;
 import org.jcae.mesh.xmldata.MeshWriter;
+import java.io.File;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import org.apache.log4j.Logger;
@@ -84,7 +85,7 @@ public class Netgen implements AlgoInterface
 		logger.info("Running Netgen "+banner);
 		BSubMesh s = d.getFirstSubMesh();
 		Mesh m = Storage.readAllFaces(d.getGraphCell(), s);
-		String outDir = "netgen.tmp"+java.io.File.separator+"s"+s.getId();
+		String outDir = "netgen.tmp"+File.separator+"s"+s.getId();
 		MeshWriter.writeObject3D(m, outDir, "jcae3d", "brep", d.getGraphCell().getGraph().getModel().getCADFile());
 		String pfx = "netgen-"+d.getId();
 		new MeshExporter.STL(outDir).write(pfx+".stl");
