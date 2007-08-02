@@ -58,11 +58,11 @@ public class BModel
 	//   List of all constraints
 	private Collection allConstraints = new LinkedHashSet();
 	//   Internal state
-	private int state = 0;
+	private int state = INPUT;
 	//   Valid state values
-	private static int INPUT        = 0;
-	private static int CONSTRAINTS  = 1;
-	private static int TESSELLATION = 2;
+	private static final int INPUT         = 0;
+	private static final int CONSTRAINTS   = 1;
+	private static final int TESSELLATION  = 2;
 
 	/**
 	 * Bind a CAD representation to a disk directory.
@@ -87,8 +87,6 @@ public class BModel
 		xmlBrepDir = relativize(new File(brep).getAbsoluteFile().getParentFile(), new File(xmlDir).getAbsoluteFile()).getPath();
 		// CAD graph
 		cad = new BCADGraph(this, factory.newShape(brep));
-		// Store CAD graph on disk
-		BModelWriter.writeObject(this);
 	}
 	
 	public int getId()
@@ -129,6 +127,11 @@ public class BModel
 	public BCADGraph getGraph()
 	{
 		return cad;
+	}
+
+	public Collection getConstraints()
+	{
+		return allConstraints;
 	}
 
 	private static File relativize(File file, File reference)
@@ -208,6 +211,8 @@ public class BModel
 			cell.addImplicitConstraints(CADShapeEnum.VERTEX, true);
 		}
 		state = CONSTRAINTS;
+		// Update constraints
+		BModelWriter.writeObject(this);
 	}
 
 	/**

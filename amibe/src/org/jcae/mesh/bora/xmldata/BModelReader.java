@@ -28,9 +28,11 @@ import java.util.Iterator;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
+import gnu.trove.TIntObjectHashMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.apache.log4j.Logger;
 
 public class BModelReader
@@ -74,6 +76,49 @@ public class BModelReader
 			if(!new File(cadFile).isAbsolute())
 				cadFile = xmlDir+File.separator+cadFile;
 			model = new BModel(cadFile, xmlDir);
+			Node constraints = (Node) xpath.evaluate("/jcae/model/constraints", document, XPathConstants.NODE);
+			if (constraints != null)
+			{
+				NodeList hypList = (NodeList) xpath.evaluate("hypothesis", constraints, XPathConstants.NODESET);
+				TIntObjectHashMap hypIdMap = new TIntObjectHashMap(hypList.getLength());
+				for (int i = 0, n = hypList.getLength(); i < n; i++)
+				{
+					Node hypNode = hypList.item(i);
+					int id = Integer.parseInt(xpath.evaluate("@id", hypNode));
+					Hypothesis h = new Hypothesis(id);
+					hypIdMap.put(id, h);
+					String type = xpath.evaluate("element/text()", hypNode);
+					String length = xpath.evaluate("length/text()", hypNode);
+					String deflection = xpath.evaluate("deflection/text()", hypNode);
+					if (type != null && type.length() > 0)
+						h.setElement(type);
+					if (length != null && length.length() > 0)
+						h.setLength(Double.parseDouble(length));
+					if (deflection != null && deflection.length() > 0)
+						h.setDeflection(Double.parseDouble(deflection));
+				}
+				NodeList consList = (NodeList) xpath.evaluate("constraint", constraints, XPathConstants.NODESET);
+				TIntObjectHashMap consIdMap = new TIntObjectHashMap(consList.getLength());
+				for (int i = 0, n = consList.getLength(); i < n; i++)
+				{
+					Node consNode = consList.item(i);
+					int id = Integer.parseInt(xpath.evaluate("@id", consNode));
+					int cId = Integer.parseInt(xpath.evaluate("cadId/text()", consNode));
+					int hId = Integer.parseInt(xpath.evaluate("hypId/text()", consNode));
+					Constraint c = new Constraint(model.getGraph().getById(cId), (Hypothesis) hypIdMap.get(hId));
+					consIdMap.put(id, c);
+				}
+				NodeList subList = (NodeList) xpath.evaluate("submesh", constraints, XPathConstants.NODESET);
+				for (int i = 0, n = subList.getLength(); i < n; i++)
+				{
+					Node subNode = subList.item(i);
+					BSubMesh s = model.newMesh();
+					String [] c = subNode.getAttributes().getNamedItem("list").getNodeValue().split(",");
+					for (int j = 0; j < c.length; j++)
+						s.add((Constraint) consIdMap.get(Integer.parseInt(c[j])));
+				}
+				model.computeConstraints();
+			}
 			if (!validate)
 				return model;
 			// Check consistency

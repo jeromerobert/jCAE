@@ -51,6 +51,13 @@ public class Hypothesis
 		id = nextId;
 	}
 
+	public Hypothesis(int i)
+	{
+		id = i;
+		if (i > nextId)
+			nextId = i;
+	}
+
 	public int getId()
 	{
 		return id;

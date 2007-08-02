@@ -25,6 +25,7 @@ import org.jcae.mesh.xmldata.*;
 import org.jcae.mesh.cad.CADShapeEnum;
 import java.io.File;
 import java.util.Iterator;
+import java.util.Collection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.apache.log4j.Logger;
@@ -56,6 +57,65 @@ public class BModelWriter
 			shapeElement.appendChild(fileElement);
 			modelElement.appendChild(shapeElement);
 
+			Collection allConstraints = model.getConstraints();
+			if (allConstraints != null && allConstraints.size() > 0)
+			{
+				Element constraintsElement=document.createElement("constraints");
+				for (Iterator it = allConstraints.iterator(); it.hasNext(); )
+				{
+					Constraint c = (Constraint) it.next();
+					Hypothesis h = c.getHypothesis();
+					Element hypElement=document.createElement("hypothesis");
+					hypElement.setAttribute("id", ""+h.getId());
+					if (h.getElement() != null)
+					{
+						Element elt = document.createElement("element");
+						elt.appendChild(document.createTextNode(""+h.getElement()));
+						hypElement.appendChild(elt);
+					}
+					if (h.getLength() >= 0)
+					{
+						Element elt = document.createElement("length");
+						elt.appendChild(document.createTextNode(""+h.getLength()));
+						hypElement.appendChild(elt);
+					}
+					if (h.getDeflection() >= 0)
+					{
+						Element elt = document.createElement("deflection");
+						elt.appendChild(document.createTextNode(""+h.getDeflection()));
+						hypElement.appendChild(elt);
+					}
+					constraintsElement.appendChild(hypElement);
+				}
+				for (Iterator it = allConstraints.iterator(); it.hasNext(); )
+				{
+					Constraint c = (Constraint) it.next();
+					constraintsElement.appendChild(
+						XMLHelper.parseXMLString(document, "<constraint id=\""+c.getId()+"\">"+
+							"<cadId>"+c.getGraphCell().getId()+"</cadId>"+
+							"<hypId>"+c.getHypothesis().getId()+"</hypId></constraint>"));
+				}
+				for (Iterator it = model.getSubMeshIterator(); it.hasNext(); )
+				{
+					BSubMesh s = (BSubMesh) it.next();
+					Iterator itc = s.getConstraints().iterator();
+					if (itc.hasNext())
+					{
+						Constraint c = (Constraint) itc.next();
+						StringBuffer sblist = new StringBuffer(""+c.getId());
+						while (itc.hasNext())
+						{
+							c = (Constraint) itc.next();
+							sblist.append(","+c.getId());
+						}
+						Element subElement=document.createElement("submesh");
+						subElement.setAttribute("id", ""+s.getId());
+						subElement.setAttribute("list", sblist.toString());
+						constraintsElement.appendChild(subElement);
+					}
+				}
+				modelElement.appendChild(constraintsElement);
+			}
 			Element graphElement=document.createElement("graph");
 			for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.COMPOUND, CADShapeEnum.VERTEX); itcse.hasNext(); )
 			{
@@ -98,6 +158,23 @@ public class BModelWriter
 						Element parent = document.createElement("parents");
 						parent.setAttribute("list", ""+sblist.toString());
 						elt.appendChild(parent);
+					}
+					Iterator itp = s.discretizationIterator();
+					if (itp.hasNext())
+					{
+						StringBuffer sblist = new StringBuffer();
+						boolean first = true;
+						while (itp.hasNext())
+						{
+							BDiscretization d = (BDiscretization) itp.next();
+							if (!first)
+								sblist.append(",");
+							first = false;
+							sblist.append(d.getId());
+						}
+						Element discr = document.createElement("discretization");
+						discr.setAttribute("list", ""+sblist.toString());
+						elt.appendChild(discr);
 					}
 					graphElement.appendChild(elt);
 				}

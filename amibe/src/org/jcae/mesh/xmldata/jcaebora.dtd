@@ -2,7 +2,7 @@
 <!ELEMENT jcae (model)+>
 
 <!-- Model -->
-<!ELEMENT model (shape,graph)>
+<!ELEMENT model (shape,constraints?,graph)>
 
 <!-- not used -->
 <!ATTLIST model id CDATA #IMPLIED>
@@ -22,17 +22,36 @@ brep are http://www.opencascade.org files.
 -->
 <!ATTLIST file location CDATA #REQUIRED>
 
+<!ELEMENT constraints (hypothesis*,constraint*,submesh*)>
+
+<!ELEMENT hypothesis (element?,length?,deflection?)>
+<!ATTLIST hypothesis id CDATA #IMPLIED>
+
+<!ELEMENT element (#PCDATA)>
+<!ELEMENT length (#PCDATA)>
+<!ELEMENT deflection (#PCDATA)>
+
+<!ELEMENT constraint (cadId,hypId)>
+<!ATTLIST constraint id CDATA #IMPLIED>
+
+<!ELEMENT cadId (#PCDATA)>
+<!ELEMENT hypId (#PCDATA)>
+
+<!ELEMENT submesh EMPTY>
+<!ATTLIST submesh id CDATA #IMPLIED
+	      list CDATA #REQUIRED>
+
 <!ELEMENT graph (description?,cad+,group*)>
 
 <!ELEMENT description (#PCDATA)>
 
-<!ELEMENT cad (children?,parents?,tessellation?)>
+<!ELEMENT cad (children?,parents?,discretization?)>
 <!ATTLIST cad id CDATA #IMPLIED
               type (vertex|edge|wire|face|shell|solid|compsolid|compound) #REQUIRED
               orientation CDATA #REQUIRED
               reversed CDATA "">
 
-<!ELEMENT group (children?,tessellation?)>
+<!ELEMENT group (children?,discretization?)>
 <!ATTLIST group id CDATA #IMPLIED>
 
 <!ELEMENT children EMPTY>
@@ -41,9 +60,8 @@ brep are http://www.opencascade.org files.
 <!ELEMENT parents EMPTY>
 <!ATTLIST parents list CDATA #REQUIRED>
 
-<!ELEMENT tessellation EMPTY>
-<!ATTLIST tessellation format CDATA #REQUIRED
-                       location CDATA #REQUIRED>
+<!ELEMENT discretization EMPTY>
+<!ATTLIST discretization list CDATA #REQUIRED>
 
 <!ELEMENT flag EMPTY>
 <!ATTLIST flag value CDATA #REQUIRED>
