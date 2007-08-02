@@ -73,10 +73,6 @@ public class BSubMesh
 	private int id = -1;
 	//   List of user defined constraints
 	private Collection constraints = new ArrayList();
-	//   List of shapes added to this BSubMesh
-	private Collection setTopShapes = new LinkedHashSet();
-	//   List of children
-	private Collection setCells = new LinkedHashSet();
 
 	/**
 	 * Creates a root mesh.
@@ -112,88 +108,6 @@ public class BSubMesh
 		// Add this Constraint to the CAD cell
 		BCADGraphCell cell = cons.getGraphCell();
 		cell.addSubMeshConstraint(this, cons);
-		/*
-		// For convenience, constraints contain a link to all
-		// BSubMesh instances in which they appear.
-		cons.addSubMesh(this);
-		setTopShapes.add(cell);
-		*/
-	}
-
-	/**
-	 * Gets all CAD graph cells belonging to current mesh.
-	 *
-	 * @return  the list of CAD graph cells
-	 */
-	public Collection getCells()
-	{
-		return setTopShapes;
-	}
-
-	/**
-	 * Prints the list of geometrical elements.
-	 */
-	public void printShapes()
-	{
-		// We cannot use
-		//   BCADGraph.printShapes(t, shapesExplorer(t));
-		// here because we want to flag interior elements.
-		System.out.println("List of geometrical entities");
-		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
-		{
-			CADShapeEnum cse = (CADShapeEnum) itcse.next();
-			for (Iterator it = shapesExplorer(cse); it.hasNext(); )
-			{
-				BCADGraphCell sub = (BCADGraphCell) it.next();
-				System.out.println(""+sub);
-			}
-		}
-		System.out.println("End list");
-	}
-
-	// Returns an iterator on all geometrical elements of a given type
-	public Iterator shapesExplorer(final CADShapeEnum cse)
-	{
-		return new Iterator()
-		{
-			private Class sample = cse.asClass();
-			private Iterator its = setCells.iterator();
-			private BCADGraphCell cur = null;
-			private BCADGraphCell next = null;
-			private boolean initialized = false;
-			public boolean hasNext()
-			{
-				if (cur != next && next != null)
-					return true;
-				if (!its.hasNext())
-					return false;
-				next = (BCADGraphCell) its.next();
-				while (next != null && !sample.isInstance(next.getShape()))
-				{
-					if (!its.hasNext())
-						return false;
-					next = (BCADGraphCell) its.next();
-				}
-				return next != null;
-			}
-			public Object next()
-			{
-				if (!initialized)
-				{
-					if (!hasNext())
-						throw new NoSuchElementException();
-					initialized = true;
-				}
-				else if (cur == next)
-					if (!hasNext())
-						throw new NoSuchElementException();
-				cur = next;
-				return cur;
-			}
-			public void remove()
-			{
-			}
-		};
 	}
 
 	/**
