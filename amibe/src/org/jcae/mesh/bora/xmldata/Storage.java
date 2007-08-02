@@ -46,6 +46,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
+import java.io.PrintStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.nio.DoubleBuffer;
@@ -61,9 +62,26 @@ import org.apache.log4j.Logger;
 public class Storage
 {
 	private static Logger logger=Logger.getLogger(Storage.class);
-	static final String dir1d = "1d";
-	static final String dir2d = "2d";
-	static final String dir3d = "3d";
+
+	public static void writeId(File dir, int id)
+	{
+		// Create the output directory if it does not exist
+		if(!dir.exists())
+			dir.mkdirs();
+
+		File idFile = new File(dir, "id");
+		if(idFile.exists())
+			idFile.delete();
+		try
+		{
+			PrintStream out=new PrintStream(new FileOutputStream(idFile, true));
+			out.println(""+id);
+			out.close();
+		}
+		catch(java.io.FileNotFoundException ex)
+		{
+		}
+	}
 
 	public static void writeEdge(BDiscretization d, String outDir)
 	{
@@ -77,19 +95,15 @@ public class Storage
 
 		try
 		{
-			File dir = new File(outDir, dir1d);
-
-			// Create the output directory if it does not exist
-			if(!dir.exists())
-				dir.mkdirs();
-
+			File dir = new File(outDir);
+			writeId(dir, edge.getId());
 			Collection nodelist = submesh.getNodes();
 			// Write node references and compute local indices
-			TObjectIntHashMap localIdx = write1dNodeReferences(dir, edge.getId(), nodelist, edge);
+			TObjectIntHashMap localIdx = write1dNodeReferences(dir, nodelist, edge);
 			// Write node coordinates
-			write1dCoordinates(dir, edge.getId(), nodelist, CADShapeBuilder.factory.newCurve3D(E));
+			write1dCoordinates(dir, nodelist, CADShapeBuilder.factory.newCurve3D(E));
 			// Write edge connectivity
-			write1dEdges(dir, edge.getId(), submesh.getEdges(), localIdx);
+			write1dEdges(dir, submesh.getEdges(), localIdx);
 		}
 		catch(Exception ex)
 		{
@@ -107,18 +121,14 @@ public class Storage
 
 		try
 		{
-			File dir = new File(outDir, dir2d);
-
-			// Create the output directory if it does not exist
-			if(!dir.exists())
-				dir.mkdirs();
-
+			File dir = new File(outDir);
+			writeId(dir, face.getId());
 			CADFace F = (CADFace) face.getShape();
 			Collection trianglelist = submesh.getTriangles();
 			Collection nodelist = submesh.quadtree.getAllVertices(trianglelist.size() / 2);
 			TObjectIntHashMap localIdx = write2dNodeReferences(dir, face.getId(), nodelist, submesh.outerVertex);
-			write2dCoordinates(dir, face.getId(), nodelist, submesh.outerVertex, F.getGeomSurface());
-			write2dTriangles(dir, face.getId(), trianglelist, localIdx);
+			write2dCoordinates(dir, nodelist, submesh.outerVertex, F.getGeomSurface());
+			write2dTriangles(dir, trianglelist, localIdx);
 		}
 		catch(Exception ex)
 		{
@@ -136,16 +146,12 @@ public class Storage
 
 		try
 		{
-			File dir = new File(outDir, dir3d);
-
-			// Create the output directory if it does not exist
-			if(!dir.exists())
-				dir.mkdirs();
-
+			File dir = new File(outDir);
+			writeId(dir, solid.getId());
 			Collection nodelist = submesh.getNodes();
 			TObjectIntHashMap localIdx = write2dNodeReferences(dir, solid.getId(), nodelist, submesh.outerVertex);
-			write2dCoordinates(dir, solid.getId(), nodelist, submesh.outerVertex, null);
-			write2dTriangles(dir, solid.getId(), submesh.getTriangles(), localIdx);
+			write2dCoordinates(dir, nodelist, submesh.outerVertex, null);
+			write2dTriangles(dir, submesh.getTriangles(), localIdx);
 		}
 		catch(Exception ex)
 		{
@@ -214,12 +220,12 @@ public class Storage
 		int id = face.getId();
 		try
 		{
-			File dir = new File(model.getOutputDir(d), dir2d);
+			File dir = new File(model.getOutputDir(d));
 			// Read vertex references
-			int [] refs = read2dNodeReferences(dir, id);
+			int [] refs = read2dNodeReferences(dir);
 			// Create a Vertex array, amd insert new references
 			// into mapRefVertex.
-			Vertex [] nodelist = read2dCoordinates(dir, id, mesh, refs, mapRefVertex);
+			Vertex [] nodelist = read2dCoordinates(dir, mesh, refs, mapRefVertex);
 			// Read triangles and appends them to the mesh.
 			read2dTriangles(dir, id, 3, mesh, reversed, nodelist);
 		}
@@ -273,12 +279,12 @@ public class Storage
 		int id = volume.getId();
 		try
 		{
-			File dir = new File(model.getOutputDir(d), dir3d);
+			File dir = new File(model.getOutputDir(d));
 			// Read vertex references
-			int [] refs = read2dNodeReferences(dir, id);
+			int [] refs = read2dNodeReferences(dir);
 			// Create a Vertex array, amd insert new references
 			// into mapRefVertex.
-			Vertex [] nodelist = read2dCoordinates(dir, id, mesh, refs, mapRefVertex);
+			Vertex [] nodelist = read2dCoordinates(dir, mesh, refs, mapRefVertex);
 			for (int i = 0, n = nodelist.length; i < n; i++)
 				mesh.add(nodelist[i]);
 			// Read triangles and appends them to the mesh.
@@ -292,10 +298,10 @@ public class Storage
 		logger.debug("end reading cell "+id);
 	}
 
-	private static TObjectIntHashMap write1dNodeReferences(File dir, int id, Collection nodelist, BCADGraphCell edge)
+	private static TObjectIntHashMap write1dNodeReferences(File dir, Collection nodelist, BCADGraphCell edge)
 		throws IOException, FileNotFoundException
 	{
-		File refFile = new File(dir, "r"+id);
+		File refFile = new File(dir, "r");
 		if(refFile.exists())
 			refFile.delete();
 		
@@ -328,7 +334,7 @@ public class Storage
 	private static TObjectIntHashMap write2dNodeReferences(File dir, int id, Collection nodelist, Vertex outer)
 		throws IOException, FileNotFoundException
 	{
-		File refFile = new File(dir, "r"+id);
+		File refFile = new File(dir, "r");
 		if(refFile.exists())
 			refFile.delete();
 
@@ -358,13 +364,13 @@ public class Storage
 		return localIdx;
 	}
 
-	private static void write1dCoordinates(File dir, int id, Collection nodelist, CADGeomCurve3D curve)
+	private static void write1dCoordinates(File dir, Collection nodelist, CADGeomCurve3D curve)
 		throws IOException, FileNotFoundException
 	{
-		File nodesFile = new File(dir, "n"+id);
+		File nodesFile = new File(dir, "n");
 		if(nodesFile.exists())
 			nodesFile.delete();
-		File parasFile = new File(dir, "p"+id);
+		File parasFile = new File(dir, "p");
 		if(parasFile.exists())
 			parasFile.delete();
 		
@@ -384,13 +390,13 @@ public class Storage
 		parasout.close();
 	}
 
-	private static void write2dCoordinates(File dir, int id, Collection nodelist, Vertex outer, CADGeomSurface surface)
+	private static void write2dCoordinates(File dir, Collection nodelist, Vertex outer, CADGeomSurface surface)
 		throws IOException, FileNotFoundException
 	{
-		File nodesFile = new File(dir, "n"+id);
+		File nodesFile = new File(dir, "n");
 		if(nodesFile.exists())
 			nodesFile.delete();
-		File parasFile = new File(dir, "p"+id);
+		File parasFile = new File(dir, "p");
 		if(parasFile.exists())
 			parasFile.delete();
 
@@ -420,10 +426,10 @@ public class Storage
 		parasout.close();
 	}
 
-	private static void write1dEdges(File dir, int id, Collection edgelist, TObjectIntHashMap localIdx)
+	private static void write1dEdges(File dir, Collection edgelist, TObjectIntHashMap localIdx)
 		throws IOException, FileNotFoundException
 	{
-		File beamsFile=new File(dir, "b"+id);
+		File beamsFile=new File(dir, "b");
 		if(beamsFile.exists())
 			beamsFile.delete();
 		
@@ -440,10 +446,10 @@ public class Storage
 		beamsout.close();
 	}
 
-	private static void write2dTriangles(File dir, int id, Collection trianglelist, TObjectIntHashMap localIdx)
+	private static void write2dTriangles(File dir, Collection trianglelist, TObjectIntHashMap localIdx)
 		throws IOException, FileNotFoundException
 	{
-		File facesFile=new File(dir, "f"+id);
+		File facesFile=new File(dir, "f");
 		if(facesFile.exists())
 			facesFile.delete();
 
@@ -461,10 +467,10 @@ public class Storage
 		facesout.close();
 	}
 
-	private static int [] read2dNodeReferences(File dir, int id)
+	private static int [] read2dNodeReferences(File dir)
 		throws IOException, FileNotFoundException
 	{
-		File refFile = new File(dir, "r"+id);
+		File refFile = new File(dir, "r");
 		FileChannel fcR = new FileInputStream(refFile).getChannel();
 		MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L, fcR.size());
 		IntBuffer refsBuffer = bbR.asIntBuffer();
@@ -477,10 +483,10 @@ public class Storage
 		return refs;
 	}
 
-	private static Vertex [] read2dCoordinates(File dir, int id, Mesh mesh, int [] refs, TIntObjectHashMap mapRefVertex)
+	private static Vertex [] read2dCoordinates(File dir, Mesh mesh, int [] refs, TIntObjectHashMap mapRefVertex)
 		throws IOException, FileNotFoundException
 	{
-		File nodesFile = new File(dir, "n"+id);
+		File nodesFile = new File(dir, "n");
 		FileChannel fcN = new FileInputStream(nodesFile).getChannel();
 		MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
 		DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
@@ -508,14 +514,14 @@ public class Storage
 		}
 		fcN.close();
 		MeshExporter.clean(bbN);
-		logger.debug("end reading "+dir+File.separator+"n"+id);
+		logger.debug("end reading "+dir+File.separator+"n");
 		return nodelist;
 	}
 
 	private static void read2dTriangles(File dir, int id, int nr, Mesh mesh, boolean reversed, Vertex [] nodelist)
 		throws IOException, FileNotFoundException
 	{
-		File trianglesFile = new File(dir, "f"+id);
+		File trianglesFile = new File(dir, "f");
 		FileChannel fcT = new FileInputStream(trianglesFile).getChannel();
 		MappedByteBuffer bbT = fcT.map(FileChannel.MapMode.READ_ONLY, 0L, fcT.size());
 		IntBuffer trianglesBuffer = bbT.asIntBuffer();

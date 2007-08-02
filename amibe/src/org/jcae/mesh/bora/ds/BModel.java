@@ -116,7 +116,17 @@ public class BModel
 
 	public String getOutputDir(BDiscretization d)
 	{
-		return xmlDir+File.separator+"d"+d.getId();
+		String ret = xmlDir+File.separator;
+		CADShapeEnum cse = d.getGraphCell().getType();
+		if (cse == CADShapeEnum.EDGE)
+			ret += "1";
+		else if (cse == CADShapeEnum.FACE)
+			ret += "2";
+		else if (cse == CADShapeEnum.SOLID)
+			ret += "3";
+		else
+			throw new RuntimeException("Invalid CADShapeEnum: "+cse);
+		return ret+"d"+d.getId();
 	}
 
 	public String getOutputFile()
