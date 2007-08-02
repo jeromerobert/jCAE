@@ -22,7 +22,7 @@ package org.jcae.mesh.bora.tests;
 
 import org.jcae.mesh.bora.xmldata.BModelReader;
 import org.jcae.mesh.bora.ds.BModel;
-import org.jcae.mesh.bora.ds.BSubMesh;
+import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.cad.CADFace;
 import org.jcae.mesh.cad.CADGeomSurface;
@@ -58,7 +58,7 @@ public class Bora2D
 	private final static float absOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorAbs", "20.0f"));
 	private final static float relOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorRel", "2.0f"));
 
-	public static BranchGroup [] getBranchGroups(BModel model, BSubMesh s)
+	public static BranchGroup [] getBranchGroups(BModel model)
 	{
 		BCADGraphCell root = model.getGraph().getRootCell();
 		// Count faces
@@ -66,10 +66,18 @@ public class Bora2D
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 		{
 			BCADGraphCell face = (BCADGraphCell) it.next();
-			File nodesfile = new File(model.getOutputDir(s)+File.separator+"2d", "n"+face.getId());
+			if (face.getOrientation() != 0)
+			{
+				if (face.getReversed() != null)
+					face = face.getReversed();
+			}
+			BDiscretization d = (BDiscretization) face.discretizationIterator().next();
+			if (null == d)
+				continue;
+			File nodesfile = new File(model.getOutputDir(d)+File.separator+"2d", "n"+face.getId());
 			if (!nodesfile.exists())
 				continue;
-			File parasfile = new File(model.getOutputDir(s)+File.separator+"2d", "p"+face.getId());
+			File parasfile = new File(model.getOutputDir(d)+File.separator+"2d", "p"+face.getId());
 			if (!parasfile.exists())
 				continue;
 			nFaces++;
@@ -83,14 +91,22 @@ public class Bora2D
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 		{
 			BCADGraphCell face = (BCADGraphCell) it.next();
-			File nodesfile = new File(model.getOutputDir(s)+File.separator+"2d", "n"+face.getId());
+			if (face.getOrientation() != 0)
+			{
+				if (face.getReversed() != null)
+					face = face.getReversed();
+			}
+			BDiscretization d = (BDiscretization) face.discretizationIterator().next();
+			if (null == d)
+				continue;
+			File nodesfile = new File(model.getOutputDir(d)+File.separator+"2d", "n"+face.getId());
 			if (!nodesfile.exists())
 				continue;
-			File parasfile = new File(model.getOutputDir(s)+File.separator+"2d", "p"+face.getId());
+			File parasfile = new File(model.getOutputDir(d)+File.separator+"2d", "p"+face.getId());
 			if (!parasfile.exists())
 				continue;
 			nrNodes[nFaces+1] = nrNodes[nFaces] + (int) nodesfile.length() / 24;
-			File triasfile = new File(model.getOutputDir(s)+File.separator+"2d", "f"+face.getId());
+			File triasfile = new File(model.getOutputDir(d)+File.separator+"2d", "f"+face.getId());
 			if (!triasfile.exists())
 				continue;
 			nrTria[nFaces+1] = nrTria[nFaces] + (int) triasfile.length() / 12;
@@ -109,16 +125,24 @@ public class Bora2D
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 		{
 			BCADGraphCell face = (BCADGraphCell) it.next();
+			if (face.getOrientation() != 0)
+			{
+				if (face.getReversed() != null)
+					face = face.getReversed();
+			}
+			BDiscretization d = (BDiscretization) face.discretizationIterator().next();
+			if (null == d)
+				continue;
 			CADFace F = (CADFace) face.getShape();
 			try
 			{
-				File nodesfile = new File(model.getOutputDir(s)+File.separator+"2d", "n"+face.getId());
+				File nodesfile = new File(model.getOutputDir(d)+File.separator+"2d", "n"+face.getId());
 				if (!nodesfile.exists())
 					continue;
-				File parasfile = new File(model.getOutputDir(s)+File.separator+"2d", "p"+face.getId());
+				File parasfile = new File(model.getOutputDir(d)+File.separator+"2d", "p"+face.getId());
 				if (!parasfile.exists())
 					continue;
-				File triasfile = new File(model.getOutputDir(s)+File.separator+"2d", "f"+face.getId());
+				File triasfile = new File(model.getOutputDir(d)+File.separator+"2d", "f"+face.getId());
 				if (!triasfile.exists())
 					continue;
 
@@ -231,13 +255,12 @@ public class Bora2D
 	public static void main(String args[])
 	{
 		final BModel model = BModelReader.readObject(args[0]);
-		final BSubMesh s = model.newMesh();
 		JFrame feFrame = new JFrame("Bora Demo");
 		final View view = new View(feFrame);
 		feFrame.setSize(800,600);
 		feFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-		final BranchGroup [] bgList = getBranchGroups(model, s);
+		final BranchGroup [] bgList = getBranchGroups(model);
 		final ViewableBG [] viewList = new ViewableBG[bgList.length];
 		// bgList:
 		//   0: triangles

@@ -22,7 +22,7 @@ package org.jcae.mesh.bora.tests;
 
 import org.jcae.mesh.bora.xmldata.BModelReader;
 import org.jcae.mesh.bora.ds.BModel;
-import org.jcae.mesh.bora.ds.BSubMesh;
+import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.cad.CADShapeEnum;
 import javax.media.j3d.Appearance;
@@ -56,7 +56,7 @@ public class Bora3D
 	private final static float absOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorAbs", "20.0f"));
 	private final static float relOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorRel", "2.0f"));
 
-	public static BranchGroup [] getBranchGroups(BModel model, BSubMesh s)
+	public static BranchGroup [] getBranchGroups(BModel model)
 	{
 		BCADGraphCell root = model.getGraph().getRootCell();
 		// Count faces
@@ -64,7 +64,15 @@ public class Bora3D
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
 		{
 			BCADGraphCell solid = (BCADGraphCell) it.next();
-			File nodesfile = new File(model.getOutputDir(s)+File.separator+"3d", "n"+solid.getId());
+			if (solid.getOrientation() != 0)
+			{
+				if (solid.getReversed() != null)
+					solid = solid.getReversed();
+			}
+			BDiscretization d = (BDiscretization) solid.discretizationIterator().next();
+			if (null == d)
+				continue;
+			File nodesfile = new File(model.getOutputDir(d)+File.separator+"3d", "n"+solid.getId());
 			if (!nodesfile.exists())
 				continue;
 			nFaces++;
@@ -78,11 +86,19 @@ public class Bora3D
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
 		{
 			BCADGraphCell solid = (BCADGraphCell) it.next();
-			File nodesfile = new File(model.getOutputDir(s)+File.separator+"3d", "n"+solid.getId());
+			if (solid.getOrientation() != 0)
+			{
+				if (solid.getReversed() != null)
+					solid = solid.getReversed();
+			}
+			BDiscretization d = (BDiscretization) solid.discretizationIterator().next();
+			if (null == d)
+				continue;
+			File nodesfile = new File(model.getOutputDir(d)+File.separator+"3d", "n"+solid.getId());
 			if (!nodesfile.exists())
 				continue;
 			nrNodes[nFaces+1] = nrNodes[nFaces] + (int) nodesfile.length() / 24;
-			File triasfile = new File(model.getOutputDir(s)+File.separator+"3d", "f"+solid.getId());
+			File triasfile = new File(model.getOutputDir(d)+File.separator+"3d", "f"+solid.getId());
 			if (!triasfile.exists())
 				continue;
 			nrTetra[nFaces+1] = nrTetra[nFaces] + (int) triasfile.length() / 16;
@@ -100,12 +116,20 @@ public class Bora3D
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
 		{
 			BCADGraphCell solid = (BCADGraphCell) it.next();
+			if (solid.getOrientation() != 0)
+			{
+				if (solid.getReversed() != null)
+					solid = solid.getReversed();
+			}
+			BDiscretization d = (BDiscretization) solid.discretizationIterator().next();
+			if (null == d)
+				continue;
 			try
 			{
-				File nodesfile = new File(model.getOutputDir(s)+File.separator+"3d", "n"+solid.getId());
+				File nodesfile = new File(model.getOutputDir(d)+File.separator+"3d", "n"+solid.getId());
 				if (!nodesfile.exists())
 					continue;
-				File triasfile = new File(model.getOutputDir(s)+File.separator+"3d", "f"+solid.getId());
+				File triasfile = new File(model.getOutputDir(d)+File.separator+"3d", "f"+solid.getId());
 				if (!triasfile.exists())
 					continue;
 
@@ -209,13 +233,12 @@ public class Bora3D
 	public static void main(String args[])
 	{
 		final BModel model = BModelReader.readObject(args[0]);
-		final BSubMesh s = model.newMesh();
 		JFrame feFrame = new JFrame("Bora Demo");
 		final View view = new View(feFrame);
 		feFrame.setSize(800,600);
 		feFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-		final BranchGroup [] bgList = getBranchGroups(model, s);
+		final BranchGroup [] bgList = getBranchGroups(model);
 		final ViewableBG [] viewList = new ViewableBG[bgList.length];
 		// bgList:
 		//   0: triangles

@@ -22,7 +22,7 @@ package org.jcae.mesh.bora.tests;
 
 import org.jcae.mesh.bora.xmldata.BModelReader;
 import org.jcae.mesh.bora.ds.BModel;
-import org.jcae.mesh.bora.ds.BSubMesh;
+import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADGeomCurve3D;
@@ -56,7 +56,7 @@ import java.util.Iterator;
 
 public class Bora1D
 {
-	public static BranchGroup [] getBranchGroups(BModel model, BSubMesh s)
+	public static BranchGroup [] getBranchGroups(BModel model)
 	{
 		BCADGraphCell root = model.getGraph().getRootCell();
 		// Count edges
@@ -64,10 +64,18 @@ public class Bora1D
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
 		{
 			BCADGraphCell edge = (BCADGraphCell) it.next();
-			File nodesfile = new File(model.getOutputDir(s)+File.separator+"1d", "n"+edge.getId());
+			if (edge.getOrientation() != 0)
+			{
+				if (edge.getReversed() != null)
+					edge = edge.getReversed();
+			}
+			BDiscretization d = (BDiscretization) edge.discretizationIterator().next();
+			if (null == d)
+				continue;
+			File nodesfile = new File(model.getOutputDir(d)+File.separator+"1d", "n"+edge.getId());
 			if (!nodesfile.exists())
 				continue;
-			File parasfile = new File(model.getOutputDir(s)+File.separator+"1d", "p"+edge.getId());
+			File parasfile = new File(model.getOutputDir(d)+File.separator+"1d", "p"+edge.getId());
 			if (!parasfile.exists())
 				continue;
 			nEdges++;
@@ -81,14 +89,22 @@ public class Bora1D
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
 		{
 			BCADGraphCell edge = (BCADGraphCell) it.next();
-			File nodesfile = new File(model.getOutputDir(s)+File.separator+"1d", "n"+edge.getId());
+			if (edge.getOrientation() != 0)
+			{
+				if (edge.getReversed() != null)
+					edge = edge.getReversed();
+			}
+			BDiscretization d = (BDiscretization) edge.discretizationIterator().next();
+			if (null == d)
+				continue;
+			File nodesfile = new File(model.getOutputDir(d)+File.separator+"1d", "n"+edge.getId());
 			if (!nodesfile.exists())
 				continue;
-			File parasfile = new File(model.getOutputDir(s)+File.separator+"1d", "p"+edge.getId());
+			File parasfile = new File(model.getOutputDir(d)+File.separator+"1d", "p"+edge.getId());
 			if (!parasfile.exists())
 				continue;
 			nrNodes[nEdges+1] = nrNodes[nEdges] + (int) nodesfile.length() / 24;
-			File beamsfile = new File(model.getOutputDir(s)+File.separator+"1d", "b"+edge.getId());
+			File beamsfile = new File(model.getOutputDir(d)+File.separator+"1d", "b"+edge.getId());
 			if (!beamsfile.exists())
 				continue;
 			nrBeams[nEdges+1] = nrBeams[nEdges] + (int) beamsfile.length() / 8;
@@ -108,15 +124,23 @@ public class Bora1D
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
 		{
 			BCADGraphCell edge = (BCADGraphCell) it.next();
+			if (edge.getOrientation() != 0)
+			{
+				if (edge.getReversed() != null)
+					edge = edge.getReversed();
+			}
+			BDiscretization d = (BDiscretization) edge.discretizationIterator().next();
+			if (null == d)
+				continue;
 			try
 			{
-				File nodesfile = new File(model.getOutputDir(s)+File.separator+"1d", "n"+edge.getId());
+				File nodesfile = new File(model.getOutputDir(d)+File.separator+"1d", "n"+edge.getId());
 				if (!nodesfile.exists())
 					continue;
-				File parasfile = new File(model.getOutputDir(s)+File.separator+"1d", "p"+edge.getId());
+				File parasfile = new File(model.getOutputDir(d)+File.separator+"1d", "p"+edge.getId());
 				if (!parasfile.exists())
 					continue;
-				File beamsfile = new File(model.getOutputDir(s)+File.separator+"1d", "b"+edge.getId());
+				File beamsfile = new File(model.getOutputDir(d)+File.separator+"1d", "b"+edge.getId());
 				if (!beamsfile.exists())
 					continue;
 
@@ -217,13 +241,12 @@ public class Bora1D
 	public static void main(String args[])
 	{
 		final BModel model = BModelReader.readObject(args[0]);
-		final BSubMesh s = model.newMesh();
 		JFrame feFrame = new JFrame("Bora Demo");
 		final View view = new View(feFrame);
 		feFrame.setSize(800,600);
 		feFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-		final BranchGroup [] bgList = getBranchGroups(model, s);
+		final BranchGroup [] bgList = getBranchGroups(model);
 		final ViewableBG [] viewList = new ViewableBG[bgList.length];
 		// bgList:
 		//   0: edges
