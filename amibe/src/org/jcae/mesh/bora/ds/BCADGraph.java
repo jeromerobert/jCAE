@@ -101,8 +101,7 @@ public class BCADGraph
 				if (r != null)
 				{
 					BCADGraphCell rev = (BCADGraphCell) cadShapeToGraphCell.get(r);
-					rev.setReversed(cell);
-					cell.setReversed(rev);
+					rev.bindReversed(cell);
 				}
 				seen.put(sub, sub);
 				logger.debug("  Add submesh: "+sub+" "+cell);

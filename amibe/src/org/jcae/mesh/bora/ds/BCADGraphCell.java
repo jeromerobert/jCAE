@@ -34,30 +34,38 @@ import java.util.Iterator;
 import gnu.trove.THashSet;
 import gnu.trove.TObjectHashingStrategy;
 
-import org.apache.log4j.Logger;
-
 /**
  * Graph cell.  This class is a decorator for the CAD graph.
  */
 public class BCADGraphCell
 {
-	private static Logger logger=Logger.getLogger(BCADGraphCell.class);
-
-	// Unique identitier
+	/**
+	 * Unique identifier.
+	 */
 	private int id = -1;
-	// Link to root graph
+	/**
+	 * Link to root graph.
+	 */
 	private BCADGraph graph;
-	// CAD shape
+	/**
+	 * CAD shape.
+	 */
 	private CADShape shape;
-	// CAD shape type
+	/**
+	 * CAD shape type.
+	 */
 	private CADShapeEnum type;
-	// Shape orientation  (0=forward, 1=reversed)
-	private int orientation;
-	// Link to the reversed shape, if it does exist
+	/**
+	 * Link to the reversed shape, if it does exist.
+	 */
 	private BCADGraphCell reversed;
-	// List of parents
+	/**
+	 * List of parents.
+	 */
 	private Collection parents = new LinkedHashSet();
-	// List of discretizations
+	/**
+	 * List of discretizations.
+	 */
 	private Collection discrete = new ArrayList();
 
 	// In OccJava, two CADShape instances can be equal with different
@@ -79,55 +87,76 @@ public class BCADGraphCell
 	};
 
 	/**
-	 * Creates a graph cell.
+	 * Constructor.
+	 * @param g  graph cell
+	 * @param s  CAD shape contained in this cell
+	 * @param t  CAD shape type
 	 */
 	public BCADGraphCell (BCADGraph g, CADShape s, CADShapeEnum t)
 	{
 		graph = g;
 		shape = s;
 		type  = t;
-		orientation = s.orientation();
 	}
 	
+	/**
+	 * Returns cell id.
+	 * @return cell id
+	 */
 	public int getId()
 	{
 		return id;
 	}
 
+	/**
+	 * Sets cell id.
+	 * @param i  cell id
+	 */
 	public void setId(int i)
 	{
 		id = i;
 	}
 
+	/**
+	 * Returns CAD graph.
+	 * @return CAD graph
+	 */
 	public BCADGraph getGraph()
 	{
 		return graph;
 	}
 
+	/**
+	 * Returns CAD shape.
+	 * @return CAD shape
+	 */
 	public CADShape getShape()
 	{
 		return shape;
 	}
 
+	/**
+	 * Returns shape orientation.
+	 * @return shape orientation
+	 */
 	public int getOrientation()
 	{
-		return orientation;
+		return shape.orientation();
 	}
 
+	/**
+	 * Returns cell containing reversed shape.
+	 * @return cell containing reversed shape
+	 */
 	public BCADGraphCell getReversed()
 	{
 		return reversed;
 	}
 
-	public void setReversed(BCADGraphCell that)
-	{
-		assert shape.equals(that.shape);
-		assert shape.orientation() != that.shape.orientation();
-		reversed = that;
-		if (orientation != 0)
-			discrete = that.discrete;
-	}
-
+	/**
+	 * Returns CAD shape type.
+	 * @return CAD shape type
+	 */
 	public CADShapeEnum getType()
 	{
 		return type;
@@ -144,31 +173,63 @@ public class BCADGraphCell
 		parents.add(that);
 	}
 
-	public void printParents()
+	/**
+	 * Binds two cells containing reversed shapes together.  These shapes then
+	 * contain the same discretizations.
+	 */
+	public void bindReversed(BCADGraphCell that)
 	{
-		System.out.println(parents);
+		assert shape.equals(that.shape);
+		assert shape.orientation() != that.shape.orientation();
+		reversed = that;
+		that.reversed = this;
+		if (shape.orientation() != 0)
+			discrete = that.discrete;
+		else
+			that.discrete = discrete;
 	}
 
-	// Returns an iterator on geometrical elements of a given type.
-	// There are no duplicates, but shapes with different orientations
-	// may both be listed.
+	/**
+	 * Returns an iterator on geometrical elements of a given type.
+	 * CAD graph is traversed recursively and geometrical elements of
+	 * a given type are returned.  There are no duplicates, but shapes
+	 * with different orientations may both be listed.
+	 *
+	 * @param cse  CAD shape type
+	 * @returns iterator on geometrical elements.
+	 */
 	public Iterator shapesExplorer(CADShapeEnum cse)
 	{
 		return shapesExplorer(cse, new THashSet(keepOrientation));
 	}
-	// Returns an iterator on geometrical elements of a given type.
-	// There are no duplicates, shapes with different orientations
-	// are listed only once.
+
+	/**
+	 * Returns an iterator on unique geometrical elements.
+	 * CAD graph is traversed recursively and geometrical elements of a
+	 * given type are returned.  There are no duplicates, shapes with
+	 * different orientations are listed only once.
+	 *
+	 * @param cse  CAD shape type
+	 * @returns iterator on unique geometrical elements.
+	 */
 	public Iterator uniqueShapesExplorer(CADShapeEnum cse)
 	{
 		return shapesExplorer(cse, new THashSet());
 	}
-	// Returns an iterator on geometrical elements of a given type.
-	// This list may contain duplicates.
+
+	/**
+	 * Returns an iterator on all geometrical elements of a given type.
+	 * CAD graph is traversed recursively and geometrical elements of a
+	 * given type are returned, even if they have already been seen.
+	 *
+	 * @param cse  CAD shape type
+	 * @returns iterator on all geometrical elements.
+	 */
 	public Iterator allShapesExplorer(CADShapeEnum cse)
 	{
 		return shapesExplorer(cse, null);
 	}
+
 	private Iterator shapesExplorer(final CADShapeEnum cse, final Collection cadShapeSet)
 	{
 		final CADExplorer exp = CADShapeBuilder.factory.newExplorer();
@@ -206,18 +267,40 @@ public class BCADGraphCell
 		};
 	}
 
+	/**
+	 * Returns an iterator on immediate sub-shapes.
+	 * There are no duplicates, but shapes with different orientations may
+	 * both be listed.
+	 *
+	 * @returns an iterator on immediate sub-shapes
+	 */
 	public Iterator shapesIterator()
 	{
 		return shapesIterator(new THashSet(keepOrientation));
 	}
+
+	/**
+	 * Returns an iterator on immediate sub-shapes.
+	 * There are no duplicates, shapes with different orientations are
+	 * listed only once.
+	 *
+	 * @returns an iterator on immediate sub-shapes
+	 */
 	public Iterator uniqueShapesIterator()
 	{
 		return shapesIterator(new THashSet());
 	}
+
+	/**
+	 * Returns an iterator on all immediate sub-shapes.
+	 *
+	 * @returns an iterator on all immediate sub-shapes
+	 */
 	public Iterator allShapesIterator()
 	{
 		return shapesIterator(null);
 	}
+
 	private Iterator shapesIterator(final Collection cadShapeSet)
 	{
 		final CADIterator it = CADShapeBuilder.factory.newIterator();
@@ -255,6 +338,12 @@ public class BCADGraphCell
 		};
 	}
 
+	/**
+	 * Returns the BDiscretization instance corresponding to a given submesh.
+	 *
+	 * @param sub  submesh
+	 * @returns the discretization corresponding to a given submesh.
+	 */
 	public BDiscretization getDiscretizationSubMesh(BSubMesh sub)
 	{
 		for (Iterator it = discrete.iterator(); it.hasNext(); )
@@ -289,6 +378,9 @@ public class BCADGraphCell
 		found.addSubMesh(sub);
 	}
 
+	/**
+	 * Returns an iterator on BDiscretization instances bound to this cell.
+	 */
 	public Iterator discretizationIterator()
 	{
 		return discrete.iterator();
@@ -359,7 +451,7 @@ public class BCADGraphCell
 
 	public String toString()
 	{
-		String ret = id+" "+shape+" "+orientation+" "+Integer.toHexString(hashCode());
+		String ret = id+" "+shape+" "+shape.orientation()+" "+Integer.toHexString(hashCode());
 		if (reversed != null)
 			ret += " rev="+Integer.toHexString(reversed.hashCode());
 		return ret;
