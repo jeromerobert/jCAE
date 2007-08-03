@@ -1,3 +1,10 @@
+Fri Aug  3 09:14:58 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/bora/xmldata/BModelReader.java
+	  src/org/jcae/mesh/bora/xmldata/BModelWriter.java
+	  src/org/jcae/mesh/xmldata/jcaebora.dtd: Extend jcaebora.dtd to store
+	  constraints used to build current mesh.
+
 Wed Aug  1 17:21:57 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/bora/ds/Hypothesis.java (checkCompatibility):
