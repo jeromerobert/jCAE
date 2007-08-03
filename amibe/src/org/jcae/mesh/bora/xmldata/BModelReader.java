@@ -68,6 +68,8 @@ public class BModelReader
 	public static BModel readObject(String xmlDir, String xmlFile, boolean validate)
 	{
 		BModel model = null;
+		// Reset ids
+		BModel.reset();
 		try
 		{
 			Document document = XMLHelper.parseXML(new File(xmlDir, xmlFile));

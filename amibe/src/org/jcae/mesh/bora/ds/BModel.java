@@ -89,6 +89,12 @@ public class BModel
 		cad = new BCADGraph(this, factory.newShape(brep));
 	}
 	
+	public static void reset()
+	{
+		freeIndex = 1;
+		BDiscretization.nextId = -1;
+	}
+
 	public int getId()
 	{
 		return id;

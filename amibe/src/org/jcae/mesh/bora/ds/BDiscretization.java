@@ -40,7 +40,7 @@ public class BDiscretization
 
 	// Unique identitier
 	private int id = -1;
-	private static int nextId = -1;
+	protected static int nextId = -1;
 
 	public BDiscretization(BCADGraphCell g, Constraint c)
 	{
