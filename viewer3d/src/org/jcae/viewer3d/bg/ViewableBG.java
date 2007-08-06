@@ -109,10 +109,11 @@ public class ViewableBG extends ViewableAdaptor
 
 	public void pick(PickViewable result)
 	{		
-		if(result==null)
-			return;
-		
-		pickSolid(result, true);
+		if(result != null && result.getIntersection() != null &&
+			result.getIntersection().getGeometryArray() instanceof QuadArray)
+		{						
+			pickSolid(result, true);
+		}
 	}
 	
 	private void pickSolid(PickViewable result, boolean selected)
