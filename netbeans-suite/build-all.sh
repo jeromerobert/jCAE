@@ -1,9 +1,9 @@
 #! /bin/sh -e
 
 # Configure you path
-CASROOT=/home/jerome/OpenCASCADE6.2.0/ros
-LOG4J=/home/jerome/jcae-0.14.2/jcae/modules/ext/log4j-1.2.8.jar
-TROVE=/home/jerome/jcae-0.14.2/jcae/modules/ext/trove.jar
+CASROOT=/home/jerome/home2/OpenCASCADE6.2.0/ros
+LOG4J=/usr/share/java/log4j-1.2.13.jar
+TROVE=/home/jerome/home2/JAVA/trove-2.0/lib/trove.jar
 # G++ 3.3 compiler (required by opencascade)
 CXX33=g++-3.3
 JRE_HOME=/usr/lib/jvm/java-6-sun/jre/
@@ -30,7 +30,7 @@ ln -sf $TROVE trove.jar
 ln -sf ../../occjava/lib/occjava.jar
 ln -sf ../../viewer3d/lib/jcae-viewer3d.jar
 cd ..
-ant jar
+ant -Dskip.tests=true jar
 
 echo Build viewer3d
 mkdir $JCAE_ROOT/viewer3d/lib || true
@@ -46,7 +46,7 @@ ant jar
 cd $JCAE_ROOT/viewer3d
 ant -Dbuild.oemm=true jar
 cd $JCAE_ROOT/amibe
-ant -Dbuild.tests=true jar
+ant jar
 
 echo Configure netbeans-suite
 cd $JCAE_ROOT/netbeans-suite/jcae-netbeans/release/modules/ext/

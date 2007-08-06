@@ -30,7 +30,7 @@
 		</javac>
 	</target>
 
-	<target name="compile-test" depends="init" description="Compile the tests" if="build.tests">
+	<target name="compile-test" depends="init" description="Compile the tests" unless="skip.tests">
 		<mkdir dir="${classes.dir}"/>
 		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}" includes="${test.packages}">
 			<compilerarg line="${compiler.arg}"/>
