@@ -184,7 +184,7 @@ public class SwapEdge
 		temp.bind(f);
 		assert f.vertex[0] != mesh.outerVertex && f.vertex[1] != mesh.outerVertex && f.vertex[2] != mesh.outerVertex : f;
 		double p = f.vertex[0].distance3D(f.vertex[1]) + f.vertex[1].distance3D(f.vertex[2]) + f.vertex[2].distance3D(f.vertex[0]);
-		double area = temp.computeArea();
+		double area = temp.area();
 		// No need to multiply by 12.0 * Math.sqrt(3.0)
 		return area/p/p;
 	}
