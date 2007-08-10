@@ -778,7 +778,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @return the area of this triangle.
 	 * Warning: this method uses tempD, tempD1 and tempD2 temporary arrays.
 	 */
-	public double computeArea()
+	public double area()
 	{
 		double [] p0 = origin().getUV();
 		double [] p1 = destination().getUV();
@@ -839,9 +839,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		if (s4 <= 0.0)
 			return invalid;
 		double p1 = o.distance3D(d) + d.distance3D(a) + a.distance3D(o);
-		double s1 = computeArea();
+		double s1 = area();
 		double p2 = d.distance3D(o) + o.distance3D(n) + n.distance3D(d);
-		double s2 = work[0].computeArea();
+		double s2 = work[0].area();
 		// No need to multiply by 12.0 * Math.sqrt(3.0)
 		double Qbefore = Math.min(s1/p1/p1, s2/p2/p2);
 		
@@ -942,12 +942,12 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Checks that triangles are not inverted if this edge is contracted.
+	 * Checks that triangles are not inverted if origin vertex is moved.
 	 *
-	 * @param newpt  the point which will become the contraction of
-	 *    this edge.
-	 * @return <code>false</code> if this edge contraction produces
+	 * @param newpt  the new position to be checked.
+	 * @return <code>false</code> if the new position produces
 	 *    an inverted triangle, <code>true</code> otherwise.
+	 * Warning: this method uses temp[0], temp[1], temp[2] and temp[3] temporary arrays.
 	 */
 	public final boolean checkNewRingNormals(double [] newpt)
 	{

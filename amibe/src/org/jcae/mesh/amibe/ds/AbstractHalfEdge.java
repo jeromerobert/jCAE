@@ -31,6 +31,8 @@ public abstract class AbstractHalfEdge
 	public abstract void glue(AbstractHalfEdge e);
 	public abstract AbstractHalfEdge split(AbstractMesh m, AbstractVertex v);
 	public abstract AbstractHalfEdge collapse(AbstractMesh m, AbstractVertex v);
+	public abstract double area();
+	public abstract boolean checkNewRingNormals(double [] newpt);
 	public abstract boolean canCollapse(AbstractVertex v);
 	public abstract AbstractHalfEdge swap();
 

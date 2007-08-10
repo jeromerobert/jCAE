@@ -576,6 +576,60 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
+	 * Return the area of this triangle.
+	 * @return the area of this triangle.
+	 * Warning: this method uses temp[0], temp[1] and temp[2] temporary arrays.
+	 */
+	public double area()
+	{
+		double [] p0 = origin().getUV();
+		double [] p1 = destination().getUV();
+		double [] p2 = apex().getUV();
+		temp[1][0] = p1[0] - p0[0];
+		temp[1][1] = p1[1] - p0[1];
+		temp[1][2] = p1[2] - p0[2];
+		temp[2][0] = p2[0] - p0[0];
+		temp[2][1] = p2[1] - p0[1];
+		temp[2][2] = p2[2] - p0[2];
+		Matrix3D.prodVect3D(temp[1], temp[2], temp[0]);
+		return 0.5 * Matrix3D.norm(temp[0]);
+	}
+	
+	/**
+	 * Checks that triangles are not inverted if origin vertex is moved.
+	 *
+	 * @param newpt  the new position to be checked.
+	 * @return <code>false</code> if the new position produces
+	 *    an inverted triangle, <code>true</code> otherwise.
+	 * Warning: this method uses temp[0], temp[1], temp[2] and temp[3] temporary arrays.
+	 */
+	public final boolean checkNewRingNormals(double [] newpt)
+	{
+		//  Loop around apex to check that triangles will not be inverted
+		Vertex d = destination();
+		HalfEdge f = next;
+		do
+		{
+			if (f.hasAttributes(OUTER))
+			{
+				f = f.nextApexLoop();
+				continue;
+			}
+			if (f.origin().getLink() instanceof Triangle[])
+				return false;
+			double area  = Matrix3D.computeNormal3DT(f.origin().getUV(), f.destination().getUV(), f.apex().getUV(), temp[0], temp[1], temp[2]);
+			double [] x1 = f.origin().getUV();
+			for (int i = 0; i < 3; i++)
+				temp[3][i] = newpt[i] - x1[i];
+			if (Matrix3D.prodSca(temp[3], temp[2]) >= - area)
+				return false;
+			f = f.nextApexLoop();
+		}
+		while (f.origin() != d);
+		return true;
+	}
+	
+	/**
 	 * Check whether an edge can be contracted.
 	 *
 	 * @param n the resulting vertex
