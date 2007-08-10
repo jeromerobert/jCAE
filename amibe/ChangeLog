@@ -6,6 +6,8 @@ Sat Aug 11 02:59:10 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	checkNewRingNormals() abstract methods.
 	* src/org/jcae/mesh/amibe/ds/VirtualHalfEdge.java: Rename
 	computeArea() into area().
+	* src/org/jcae/mesh/amibe/algos3d/SmoothNodes3D.java: Works now with
+	both HalfEdge and VirtualHalfEdge implementations.
 
 Fri Aug  3 09:14:58 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

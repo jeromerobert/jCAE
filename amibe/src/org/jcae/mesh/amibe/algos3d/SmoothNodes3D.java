@@ -22,7 +22,7 @@ package org.jcae.mesh.amibe.algos3d;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.util.QSortedTree;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
@@ -53,7 +53,6 @@ public class SmoothNodes3D
 	private double sizeTarget = -1.0;
 	private int nloop = 10;
 	private boolean preserveBoundaries = false;
-	private static VirtualHalfEdge temp = new VirtualHalfEdge();
 	private static double speed = 0.2;
 	
 	/**
@@ -120,15 +119,14 @@ public class SmoothNodes3D
 			if (!f.isOuter())
 				tree.insert(f, cost(f));
 		}
-		VirtualHalfEdge ot = new VirtualHalfEdge();
 		for (Iterator itt = tree.iterator(); itt.hasNext(); )
 		{
 			QSortedTree.Node q = (QSortedTree.Node) itt.next();
 			Triangle f = (Triangle) q.getData();
-			ot.bind(f);
+ 			AbstractHalfEdge ot = f.getAbstractHalfEdge();
 			for (int i = 0; i < 3; i++)
 			{
-				ot.next();
+				ot = ot.next();
 				Vertex n = ot.origin();
 				if (nodeset.contains(n))
 					continue;
@@ -144,7 +142,7 @@ public class SmoothNodes3D
 		return ret;
 	}
 	
-	private static boolean smoothNode(Mesh mesh, VirtualHalfEdge ot, double sizeTarget)
+	private static boolean smoothNode(Mesh mesh, AbstractHalfEdge ot, double sizeTarget)
 	{
 		Vertex n = ot.origin();
 		double[] oldp3 = n.getUV();
@@ -208,10 +206,10 @@ public class SmoothNodes3D
 	
 	private double cost(Triangle f)
 	{
-		temp.bind(f);
+		AbstractHalfEdge temp = f.getAbstractHalfEdge();
 		assert f.vertex[0] != mesh.outerVertex && f.vertex[1] != mesh.outerVertex && f.vertex[2] != mesh.outerVertex : f;
 		double p = f.vertex[0].distance3D(f.vertex[1]) + f.vertex[1].distance3D(f.vertex[2]) + f.vertex[2].distance3D(f.vertex[0]);
-		double area = temp.computeArea();
+		double area = temp.area();
 		// No need to multiply by 12.0 * Math.sqrt(3.0)
 		return area/p/p;
 	}
