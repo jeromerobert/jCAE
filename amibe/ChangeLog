@@ -1,3 +1,8 @@
+Sat Aug 11 02:59:10 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos3d/SmoothNodes3D.java: This class had
+	been broken by changes in QSortedTree interface.
+
 Fri Aug  3 09:14:58 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/bora/xmldata/BModelReader.java

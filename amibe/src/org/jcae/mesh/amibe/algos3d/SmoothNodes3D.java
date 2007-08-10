@@ -24,6 +24,7 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.util.QSortedTree;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
@@ -112,7 +113,7 @@ public class SmoothNodes3D
 		int ret = 0;
 		HashSet nodeset = new HashSet(2*mesh.getTriangles().size());
 		// First compute triangle quality
-		PAVLSortedTree tree = new PAVLSortedTree();
+		QSortedTree tree = new PAVLSortedTree();
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
@@ -122,7 +123,8 @@ public class SmoothNodes3D
 		VirtualHalfEdge ot = new VirtualHalfEdge();
 		for (Iterator itt = tree.iterator(); itt.hasNext(); )
 		{
-			Triangle f = (Triangle) itt.next();
+			QSortedTree.Node q = (QSortedTree.Node) itt.next();
+			Triangle f = (Triangle) q.getData();
 			ot.bind(f);
 			for (int i = 0; i < 3; i++)
 			{
@@ -221,7 +223,7 @@ public class SmoothNodes3D
 	public static void main(String[] args)
 	{
 		org.jcae.mesh.amibe.traits.TriangleTraitsBuilder ttb = new org.jcae.mesh.amibe.traits.TriangleTraitsBuilder();
-		ttb.addHalfEdge();
+		ttb.addShallowHalfEdge();
 		org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = new org.jcae.mesh.amibe.traits.MeshTraitsBuilder();
 		mtb.addTriangleSet();
 		mtb.add(ttb);
