@@ -46,19 +46,18 @@ public final class DecimateAction extends CookieAction
 			String xmlDir=Utilities.absoluteFileName(
 				c.getMesh().getMeshFile(), reference);
 			
-			File brepFile=new File(Utilities.absoluteFileName(
-				c.getMesh().getGeometryFile(), reference));
+			String brepFile=Utilities.absoluteFileName(
+				c.getMesh().getGeometryFile(), reference);
 			
 			String className="org.jcae.mesh.amibe.algos3d.DecimateHalfEdge";
 			String[] cmdLinePre=Settings.getDefault().getCommandLineAlgo();
-			String[] cmdLine=new String[cmdLinePre.length+7];
+			String[] cmdLine=new String[cmdLinePre.length+6];
 
 			System.arraycopy(cmdLinePre, 0, cmdLine, 0, cmdLinePre.length);
 			int i=cmdLinePre.length;
 
 			cmdLine[i++]=className;
 			cmdLine[i++]=xmlDir;
-			cmdLine[i++]="jcae3d";
 			
 			if(bean.isUseTolerance())
 			{
@@ -71,8 +70,8 @@ public final class DecimateAction extends CookieAction
 				cmdLine[i++]=Integer.toString(bean.getTriangle());
 			}
 			
-			cmdLine[i++]=brepFile.getParent();
-			cmdLine[i++]=brepFile.getName();
+			cmdLine[i++]=brepFile;
+			cmdLine[i++]=xmlDir;
 				
 			final MeshNode m =
 				(MeshNode) activatedNodes[0].getCookie(MeshNode.class);
