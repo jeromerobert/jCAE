@@ -1,3 +1,9 @@
+Sat Aug 11 16:27:04 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos3d/SplitEdge.java
+	  src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java: Modify main
+	class arguments.
+
 Sat Aug 11 02:59:10 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos3d/SmoothNodes3D.java: This class had

@@ -32,6 +32,7 @@ import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 import java.io.IOException;
+import java.io.File;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -380,25 +381,27 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		logger.info("Number of edges still present in the binary tree: "+tree.size());
 	}
 
+	private final static String usageString = "<xmlDir> <-t tolerance | -n nrTriangles> <brepFile> <outputDir>";
+
 	/**
 	 * 
-	 * @param args xmlDir, xmlFile, <-t tolerance | -n triangle>, brepDir, brepFile
+	 * @param args xmlDir, -t tolerance | -n triangle, brepFile, output
 	 */
 	public static void main(String[] args)
 	{
 		HashMap options = new HashMap();
-		if(args.length != 6)
+		if(args.length != 5)
 		{
-			System.out.println("<xmlDir> <xmlFile> <-t tolerance | -n triangle> <brepDir> <brepFile>");
+			System.out.println(usageString);
 			return;
 		}
-		if(args[2].equals("-n"))
-			options.put("maxtriangles", args[3]);
-		else if(args[2].equals("-t"))
-			options.put("size", args[3]);
+		if(args[1].equals("-n"))
+			options.put("maxtriangles", args[2]);
+		else if(args[1].equals("-t"))
+			options.put("size", args[2]);
 		else
 		{
-			System.out.println("<xmlDir> <xmlFile> <-t tolerance | -n triangle> <brepDir> <brepFile>");
+			System.out.println(usageString);
 			return;
 		}
 		logger.info("Load geometry file");
@@ -408,8 +411,9 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		mtb.addTriangleSet();
 		mtb.add(ttb);
 		Mesh mesh = new Mesh(mtb);
-		MeshReader.readObject3D(mesh, args[0], args[1], -1);
+		MeshReader.readObject3D(mesh, args[0], "jcae3d", -1);
 		new DecimateHalfEdge(mesh, options).compute();
-		MeshWriter.writeObject3D(mesh, args[0], args[1], args[4], args[5]);
+		File brepFile=new File(args[3]);
+		MeshWriter.writeObject3D(mesh, args[4], "jcae3d", brepFile.getParent(), brepFile.getName());
 	}
 }

@@ -170,20 +170,27 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		logger.info("Number of edges still present in the binary tree: "+tree.size());
 	}
 
+	private final static String usageString = "<xmlDir> <-t maxLength | -n nrTriangles> <brepFile> <outputDir>";
+
 	/**
 	 * 
-	 * @param args xmlDir, -t telerance | -n triangle, brepFile, output
+	 * @param args xmlDir, -t tolerance | -n triangle, brepFile, output
 	 */
 	public static void main(String[] args)
 	{
 		HashMap options = new HashMap();
+		if(args.length != 5)
+		{
+			System.out.println(usageString);
+			return;
+		}
 		if(args[1].equals("-n"))
 			options.put("maxtriangles", args[2]);
 		else if(args[1].equals("-t"))
 			options.put("size", args[2]);
 		else
 		{
-			System.out.println("<xmlDir> <-t telerance | -n triangle> <brepFile> <output>");
+			System.out.println(usageString);
 			return;
 		}
 		logger.info("Load geometry file");
@@ -195,7 +202,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		Mesh mesh = new Mesh(mtb);
 		MeshReader.readObject3D(mesh, args[0], "jcae3d", -1);
 		new SplitEdge(mesh, options).compute();
-		File brepFile=new File(args[4]);
+		File brepFile=new File(args[3]);
 		MeshWriter.writeObject3D(mesh, args[4], "jcae3d", brepFile.getParent(), brepFile.getName());
 	}
 }
