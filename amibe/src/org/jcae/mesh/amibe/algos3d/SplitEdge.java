@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2003,2006 by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -82,8 +83,8 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 			String val = (String) opt.getValue();
 			if (key.equals("size"))
 			{
-				double sizeTarget = new Double(val).doubleValue();
-				tolerance = 1.0 / (2.0 * sizeTarget * sizeTarget);
+				double sizeTarget = Double.valueOf(val).doubleValue();
+				tolerance = 1.0 / (sizeTarget * sizeTarget);
 			}
 			else if (key.equals("maxtriangles"))
 				nrFinal = Integer.valueOf(val).intValue();
@@ -134,15 +135,25 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		if (vm.getRef() != 0)
 			vm = current.destination();
 		if (vm.getRef() == 0 && !vm.discreteProject(insertedVertex))
+		{
+			if (logger.isDebugEnabled())
+				logger.debug("Point "+vm+" cannot be projected onto discrete surface!");
 			return false;
+		}
 
+		if (tolerance <= 0.0)
+			return true;
 		double dapex = insertedVertex.distance3D(current.apex());
 		if (!current.hasAttributes(VirtualHalfEdge.BOUNDARY))
 		{
 			current = (HalfEdge) current.sym();
 			dapex = Math.min(dapex, insertedVertex.distance3D(current.apex()));
 		}
-		return (dapex * dapex > tolerance / 16.0);
+		if (dapex * dapex * tolerance * 16.0 > 1.0)
+			return true;
+		if (logger.isDebugEnabled())
+			logger.debug("Point "+vm+" too near from apical vertex");
+		return false;
 	}
 
 	public HalfEdge processEdge(HalfEdge current)
