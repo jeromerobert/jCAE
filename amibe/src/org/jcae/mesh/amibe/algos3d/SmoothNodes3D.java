@@ -97,7 +97,7 @@ public class SmoothNodes3D
 	 */
 	public void compute()
 	{
-		logger.debug("Running SmoothNodes3D");
+		logger.info("Run "+getClass().getName());
 		int cnt = 0;
 		for (int i = 0; i < nloop; i++)
 			cnt += computeMesh();
