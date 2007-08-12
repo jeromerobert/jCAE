@@ -82,9 +82,9 @@ public class SmoothNodes3D
 			String key = (String) opt.getKey();
 			String val = (String) opt.getValue();
 			if (key.equals("size"))
-				sizeTarget = new Double(val).doubleValue();
+				sizeTarget = Double.valueOf(val).doubleValue();
 			else if (key.equals("iterations"))
-				nloop = new Integer(val).intValue();
+				nloop = Integer.valueOf(val).intValue();
 			else if (key.equals("boundaries"))
 				preserveBoundaries = Boolean.valueOf(val).booleanValue();
 			else
