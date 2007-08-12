@@ -167,8 +167,9 @@ public abstract class AbstractAlgoHalfEdge
 					stackNotProcessed.push(current);
 					stackNotProcessed.push(new Double(2.0*cost));
 				}
+				current = null;
 			}
-			if ((nrFinal == 0 && cost > tolerance) || current == null || !itt.hasNext())
+			if ((nrFinal == 0 && cost > tolerance) || current == null)
 				break;
 			// Update costs for edges which were not contracted
 			while (stackNotProcessed.size() > 0)

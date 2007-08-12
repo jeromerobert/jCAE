@@ -1,3 +1,8 @@
+Sun Aug 12 17:18:01 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos3d/AbstractAlgoHalfEdge.java: Fix
+	off-by-one error in processAllHalfEdges(), last edge was not processed.
+
 Sat Aug 11 16:27:04 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos3d/SplitEdge.java
