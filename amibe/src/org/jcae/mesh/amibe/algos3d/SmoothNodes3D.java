@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2003, 2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -52,8 +53,11 @@ public class SmoothNodes3D
 	private Mesh mesh;
 	private double sizeTarget = -1.0;
 	private int nloop = 10;
+	private double tolerance = 2.0;
 	private boolean preserveBoundaries = false;
+	private static final double scaleFactor = 12.0 * Math.sqrt(3.0);
 	private static double speed = 0.2;
+	private final Vertex c;
 	
 	/**
 	 * Creates a <code>SmoothNodes3D</code> instance.
@@ -63,6 +67,7 @@ public class SmoothNodes3D
 	public SmoothNodes3D(Mesh m)
 	{
 		mesh = m;
+		c = (Vertex) mesh.factory.createVertex(0.0, 0.0, 0.0);
 	}
 	
 	/**
@@ -76,6 +81,7 @@ public class SmoothNodes3D
 	public SmoothNodes3D(Mesh m, Map options)
 	{
 		mesh = m;
+		c = (Vertex) mesh.factory.createVertex(0.0, 0.0, 0.0);
 		for (Iterator it = options.entrySet().iterator(); it.hasNext(); )
 		{
 			Map.Entry opt = (Map.Entry) it.next();
@@ -87,6 +93,8 @@ public class SmoothNodes3D
 				nloop = Integer.valueOf(val).intValue();
 			else if (key.equals("boundaries"))
 				preserveBoundaries = Boolean.valueOf(val).booleanValue();
+			else if (key.equals("tolerance"))
+				tolerance = Double.valueOf(val).doubleValue();
 			else
 				throw new RuntimeException("Unknown option: "+key);
 		}
@@ -98,30 +106,35 @@ public class SmoothNodes3D
 	public void compute()
 	{
 		logger.info("Run "+getClass().getName());
-		int cnt = 0;
-		for (int i = 0; i < nloop; i++)
-			cnt += computeMesh();
-		logger.info("Number of moved points: "+cnt);
-	}
-	
-	/*
-	 * Moves all nodes using a laplacian smoothing.
-	 */
-	private int computeMesh()
-	{
-		int ret = 0;
-		HashSet nodeset = new HashSet(2*mesh.getTriangles().size());
 		// First compute triangle quality
 		QSortedTree tree = new PAVLSortedTree();
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
-			if (!f.isOuter())
-				tree.insert(f, cost(f));
+			if (f.isOuter())
+				continue;
+			double val = cost(f);
+			if (val <= tolerance)
+				tree.insert(f, val);
 		}
+		int cnt = 0;
+		for (int i = 0; i < nloop; i++)
+			cnt += computeMesh(tree);
+		logger.info("Number of moved points: "+cnt);
+	}
+	
+	/*
+	 * Moves all nodes using a modified Laplacian smoothing.
+	 */
+	private int computeMesh(QSortedTree tree)
+	{
+		int ret = 0;
+		HashSet nodeset = new HashSet(2*mesh.getTriangles().size());
 		for (Iterator itt = tree.iterator(); itt.hasNext(); )
 		{
 			QSortedTree.Node q = (QSortedTree.Node) itt.next();
+			if (q.getValue() > tolerance)
+				break;
 			Triangle f = (Triangle) q.getData();
  			AbstractHalfEdge ot = f.getAbstractHalfEdge();
 			for (int i = 0; i < 3; i++)
@@ -142,13 +155,12 @@ public class SmoothNodes3D
 		return ret;
 	}
 	
-	private static boolean smoothNode(Mesh mesh, AbstractHalfEdge ot, double sizeTarget)
+	private boolean smoothNode(Mesh mesh, AbstractHalfEdge ot, double sizeTarget)
 	{
 		Vertex n = ot.origin();
 		double[] oldp3 = n.getUV();
 		
 		//  Compute 3D coordinates centroid
-		Vertex c = (Vertex) mesh.factory.createVertex(0.0, 0.0, 0.0);
 		int nn = 0;
 		double[] centroid3 = c.getUV();
 		centroid3[0] = centroid3[1] = centroid3[2] = 0.;
@@ -210,8 +222,9 @@ public class SmoothNodes3D
 		assert f.vertex[0] != mesh.outerVertex && f.vertex[1] != mesh.outerVertex && f.vertex[2] != mesh.outerVertex : f;
 		double p = f.vertex[0].distance3D(f.vertex[1]) + f.vertex[1].distance3D(f.vertex[2]) + f.vertex[2].distance3D(f.vertex[0]);
 		double area = temp.area();
-		// No need to multiply by 12.0 * Math.sqrt(3.0)
-		return area/p/p;
+		double ret = scaleFactor * temp.area() * area / p / p;
+		assert ret >= 0.0 && ret <= 1.01;
+		return ret;
 	}
 
 	/**
