@@ -137,12 +137,39 @@ public class SmoothNodes3D
 				break;
 			Triangle f = (Triangle) q.getData();
  			AbstractHalfEdge ot = f.getAbstractHalfEdge();
-			for (int i = 0; i < 3; i++)
+			double l0 = f.vertex[1].distance3D(f.vertex[2]);
+			double l1 = f.vertex[2].distance3D(f.vertex[0]);
+			double l2 = f.vertex[0].distance3D(f.vertex[1]);
+			double z01 = Math.abs(l0 - l1);
+			double z02 = Math.abs(l0 - l2);
+			double z12 = Math.abs(l1 - l2);
+			Vertex n;
+			if (z01 < z02)
 			{
-				ot = ot.next();
-				Vertex n = ot.origin();
-				if (nodeset.contains(n))
-					continue;
+				if (z01 < z12)
+				{
+					ot = ot.next();
+					n = f.vertex[2];
+				}
+				else
+				{
+					ot = ot.prev();
+					n = f.vertex[0];
+				}
+			}
+			else
+			{
+				if (z02 < z12)
+					n = f.vertex[1];
+				else
+				{
+					ot = ot.prev();
+					n = f.vertex[0];
+				}
+			}
+			assert ot.origin() == n;
+			if (!nodeset.contains(n))
+			{
 				nodeset.add(n);
 				if (!n.isMutable())
 					continue;
