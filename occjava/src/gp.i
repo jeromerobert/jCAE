@@ -99,6 +99,41 @@
 	JCALL4(SetDoubleArrayRegion, jenv, toReturn, 0, 2, nativeArray);
 	$result=toReturn;
 }
+/**
+ * gp_Pln
+ */
+%typemap(jni) gp_Pln, const gp_Pln&  "jdoubleArray"
+%typemap(jtype) gp_Pln, const gp_Pln& "double[]"
+%typemap(jstype) gp_Pln, const gp_Pln& "double[]"
+
+%typemap(in) gp_Pln, const gp_Pln&
+{
+	if(JCALL1(GetArrayLength, jenv, $input)!=4)
+		SWIG_JavaThrowException(jenv, SWIG_JavaIllegalArgumentException, "array length must be 4");
+	jdouble * naxe=JCALL2(GetDoubleArrayElements, jenv, $input, NULL);
+	$1=new gp_Pln(naxe[0],naxe[1],naxe[2],naxe[4]);
+}
+
+%typemap(freearg) gp_Pln, const gp_Pln&
+{
+	delete $1;
+}
+
+%typemap(javain) gp_Pln, const gp_Pln& "$javainput"
+%typemap(javaout) gp_Pln, const gp_Pln&
+{
+	return $jnicall;
+}
+
+%typemap(out) gp_Pln, const gp_Pln &
+{
+	double a, b, c, d;
+	$1.Coefficients(a, b, c, d);
+	jdouble nativeArray[] = {a, b, c, d};
+	jdoubleArray toReturn = JCALL1(NewDoubleArray, jenv, 4);
+	JCALL4(SetDoubleArrayRegion, jenv, toReturn, 0, 4, nativeArray);
+	$result=toReturn;
+}
 
 /**
  * gp_Vec
@@ -126,17 +161,9 @@
 	return $jnicall;
 }
 
-%typemap(out) gp_Vec, const gp_Vec &
-{
-    jdouble nativeArray[]={$1.X(), $1.Y(), $1.Z()};
-	jdoubleArray toReturn=JCALL1(NewDoubleArray, jenv, 3);
-	JCALL4(SetDoubleArrayRegion, jenv, toReturn, 0, 3, nativeArray);
-    $result=toReturn;
-}
-
 %typemap(out) gp_Vec, const gp_Vec&
 {
-    $result=XYZtoDoubleArray(jenv, $1->XYZ());
+	$result=XYZtoDoubleArray(jenv, $1->XYZ());
 }
 
 /**
