@@ -49,7 +49,9 @@ public class Amibe2VTK
 			PrintStream p=new PrintStream(new BufferedOutputStream(new FileOutputStream(
 				"/tmp/test.vtp")));
 			//new Amibe2VTK(new File("/home/jerome/OCCShapeGal/amibe1.dir/")).write(p);
-			new Amibe2VTK(new File("/home/jerome/JCAEProject/amibe9.dir")).write(p);
+			Amibe2VTK a = new Amibe2VTK(new File("/home/jerome/JCAEProject/amibe10.dir"));
+			a.setDummyData(true);
+			a.write(p);
 			
 			p.close();
 						
@@ -61,6 +63,7 @@ public class Amibe2VTK
 	}
 	private File directory;
 	private Document document;
+	private boolean dummyData;
 	
 	/** @param directory The directory which contain the jcae3d file */
 	public Amibe2VTK(File directory)
@@ -85,6 +88,13 @@ public class Amibe2VTK
 		return new File(directory, a);
 	}	
 		
+	/**
+	 * Write the VTK file
+	 * @param out The stream to write on 
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 */
 	public void write(OutputStream out)
 		throws ParserConfigurationException, SAXException, IOException
 	{
@@ -100,51 +110,153 @@ public class Amibe2VTK
 		DataOutputStream dos=new DataOutputStream(new BufferedOutputStream(out));
 		writeNode(dos, nodeFile, nbp);
 		writeTriangles(dos, triaFile, nbt);
+		if(dummyData)
+			writeData(dos, nbt);
 		dos.flush();
 		os.println("</AppendedData></VTKFile>");
 		os.flush();
 	}
 	
+	/**
+	 * write the triangle connectivity
+	 * @param dos the stream to write on
+	 * @param triaFile the amibe triangle file
+	 * @param nbt the number of triangles
+	 * @throws IOException
+	 */
 	private void writeTriangles(DataOutputStream dos, File triaFile, long nbt)
 		throws IOException
 	{
+		//Write the size of the array in octets
 		dos.writeInt((int) nbt*4*3);
 		DataInputStream in = new DataInputStream(
 			new BufferedInputStream(new FileInputStream(triaFile)));
 		
+		//Write the connectivity array
 		for(int i=0; i<nbt*3; i++)
 			dos.writeInt(in.readInt());
+		
+		//Write the size of the array in octets
 		dos.writeInt((int) nbt*4);
+		
+		//Write the offset of each cells (in our case triangles) in the
+		//connectivity array
 		for(int i=1; i<=nbt; i++)
 			dos.writeInt(3*i);
 	}
 
-	private void writeNode(DataOutputStream dos, File nodeFile, long nbp)
+	/**
+	 * Write the nodes of the mesh
+	 * @param dos the stream to write on
+	 * @param nodeFile the amibe node file
+	 * @param nbp the number of nodes
+	 * @throws IOException
+	 */	private void writeNode(DataOutputStream dos, File nodeFile, long nbp)
 		throws IOException
 	{
-		dos.writeInt((int) nbp*8*3);
+		//Write the size of the array in octets
+		 dos.writeInt((int) nbp*8*3);
 		DataInputStream in = new DataInputStream(
 			new BufferedInputStream(new FileInputStream(nodeFile)));
 		
 		for(int i=0; i<nbp*3; i++)
 			dos.writeDouble(in.readDouble());
 	}
-
-	private void writeHeader(PrintStream out, long nbp, long nbt)
+	 
+	/**
+	 * write dummy data associated to the triangle
+	 * @param dos the stream to write on
+	 * @param triaFile the amibe triangle file
+	 * @param nbt the number of triangles
+	 * @throws IOException
+	 */
+	private void writeData(DataOutputStream dos, long nbt)
+		throws IOException
 	{
+		//Write the size of the array in octets
+		dos.writeInt((int) nbt*8);		
+		for(int i=0; i<nbt; i++)
+			dos.writeDouble(i);
+		
+		dos.writeInt((int) nbt*8);
+		for(int i=0; i<nbt; i++)
+			dos.writeDouble((double)i*i);
+
+		dos.writeInt((int) nbt*8*3);
+		for(int i=0; i<nbt; i++)
+		{
+			dos.writeDouble(i);
+			dos.writeDouble(i);
+			dos.writeDouble(i);
+		}
+	}	 
+
+	/**
+	 * Write the header of the file (XML)
+	 * @param out the stream to write on
+	 * @param numberOfNodes the number of nodes
+	 * @param numberOfTriangles the number of triangles
+	 */
+	private void writeHeader(PrintStream out, long numberOfNodes, long numberOfTriangles)
+	{
+		//This is Java so we write in big endian		
 		out.println("<VTKFile type=\"PolyData\" version=\"0.1\" byte_order=\"BigEndian\">");
 		out.println("<PolyData>");
-		out.println("<Piece NumberOfPoints=\""+nbp+"\" NumberOfPolys=\""+nbt+"\">");
-		out.println("<Points><DataArray type=\"Float64\" NumberOfComponents=\"3\" "+
-			"format=\"appended\" offset=\"0\"/></Points>");
 		
-		int offset=(int) (4+(nbp*8*3));
+		//Everything in one piece
+		//TODO write one piece by group
+		out.println("<Piece NumberOfPoints=\""+numberOfNodes+
+			"\" NumberOfPolys=\""+numberOfTriangles+"\">");
+		
+		out.println("<Points><DataArray type=\"Float64\" NumberOfComponents=\"3\" "+
+			"format=\"appended\" offset=\"0\"/></Points>");		
+		long offset=4+(numberOfNodes*8*3);		
+		
 		out.println("<Polys><DataArray type=\"Int32\" Name=\"connectivity\""+
 			" format=\"appended\" offset=\""+offset+"\"/>");
-		offset+=4+nbt*4*3;
+		offset+=4+numberOfTriangles*4*3;
+		
 		out.println("<DataArray type=\"Int32\" Name=\"offsets\" format=\"appended\"" +
-			" offset=\""+offset+"\"/></Polys>");
+			" offset=\""+offset+"\"/></Polys>");		
+		offset+=4+numberOfTriangles*4;
+		
+		if(dummyData)
+		{
+			out.println("<CellData Scalars=\"Dummy\">");
+			out.println("\t<DataArray type=\"Float64\" Name=\"Dummy\" format=\"appended\" offset=\""
+				+offset+"\"/>");
+			offset += 4+numberOfTriangles * 8;
+
+			out.println("\t<DataArray type=\"Float64\" Name=\"Dummy x Dummy\" format=\"appended\" offset=\""
+				+offset+"\"/>");
+			//always keep track of offset in case we want to add thins to the
+			//file
+			offset += 4+numberOfTriangles * 8;
+			
+			out.println("\t<DataArray type=\"Float64\" Name=\"Dummy vector\" NumberOfComponents=\"3\""+
+				" format=\"appended\" offset=\""+offset+"\"/>");
+			//always keep track of offset in case we want to add thins to the
+			//file
+			offset += 4+numberOfTriangles*8*3;			
+			out.println("</CellData>");
+		}
+		
 		out.println("</Piece></PolyData>");
 		out.print("<AppendedData encoding=\"raw\"> _");
+	}
+
+	public boolean isDummyData()
+	{
+		return dummyData;
+	}
+
+	/**
+	 * Write data cell associated to triangles
+	 * It's a scalar double value which is the ID of the triangle.
+	 * It won't help you much, it's just to have the code somewhere?
+	 */
+	public void setDummyData(boolean dummyData)
+	{
+		this.dummyData = dummyData;
 	}
 }
