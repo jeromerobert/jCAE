@@ -22,7 +22,6 @@ package org.jcae.viewer3d;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
 import java.util.logging.Logger;
 
@@ -37,7 +36,7 @@ import com.sun.j3d.utils.picking.PickTool;
 public  class ViewBehavior extends OrbitBehavior
 {
 	private static Logger logger=Logger.getLogger("global");
-	// dirty warkaround for bug
+	// dirty workaround for bug
 	// https://java3d.dev.java.net/issues/show_bug.cgi?id=179
 	// because xtrans, ytrans and ztrans should be protected not private
 	private final static Field FIELD_XTRANS;
@@ -73,9 +72,8 @@ public  class ViewBehavior extends OrbitBehavior
 	}
 	
 	private Point anchor;
-	private BufferedImage image;
 	private View view;
-	private Rectangle selectionRectangle;
+	private SelectionRectangle selectionRectangle3D; 
 	private boolean changeRotationCenter;
 	
 	//Viewer mouse modes
@@ -92,6 +90,7 @@ public  class ViewBehavior extends OrbitBehavior
 	{
 		super(view, OrbitBehavior.REVERSE_ALL);
 		this.view = view;
+		selectionRectangle3D = new SelectionRectangle.SelectionRectangle2D(view);
 	}
 
 	public void setChangeRotationCenter(boolean status)
@@ -101,8 +100,7 @@ public  class ViewBehavior extends OrbitBehavior
 	}
 	
 	protected void processMouseEvent(MouseEvent evt)
-	{	
-		
+	{			
 		switch(mouseMode){
 		case CLIP_RECTANGLE_MODE :
 			 rectangleClipMode(evt);
@@ -190,11 +188,11 @@ public  class ViewBehavior extends OrbitBehavior
 	}
 	
 	/** Defines what to do for the BOX_MODE*/
-	private void rectangleClipMode(MouseEvent evt){
+	private void rectangleClipMode(MouseEvent evt){		
 		if (evt.getButton() == MouseEvent.BUTTON1
 				&& evt.getID() == MouseEvent.MOUSE_PRESSED)
 		{
-			startRectangleDrawing(evt);
+			startRectangleDrawing(evt, Color.MAGENTA);
 		}
 		else if (anchor != null)
 		{
@@ -205,7 +203,7 @@ public  class ViewBehavior extends OrbitBehavior
 				createClipRectanglePlanes(evt);
 			} else
 			{
-				processRectangleDrawing(evt,Color.MAGENTA);
+				selectionRectangle3D.setGeometry(anchor, evt.getPoint());
 			}
 		}
 	}
@@ -215,7 +213,7 @@ public  class ViewBehavior extends OrbitBehavior
 		if (evt.getButton() == MouseEvent.BUTTON1
 				&& evt.getID() == MouseEvent.MOUSE_PRESSED)
 		{
-			startRectangleDrawing(evt);
+			startRectangleDrawing(evt, Color.WHITE);
 		}
 		else if (anchor != null)
 		{
@@ -226,7 +224,7 @@ public  class ViewBehavior extends OrbitBehavior
 				pickRectangle(evt);
 			} else
 			{
-				processRectangleDrawing(evt,Color.WHITE);
+				selectionRectangle3D.setGeometry(anchor, evt.getPoint());
 			}
 		}
 	} 
@@ -419,18 +417,17 @@ public  class ViewBehavior extends OrbitBehavior
 			view.getCurrentViewable().pick(result);
 	}
 
-	protected void startRectangleDrawing(MouseEvent evt)
+	protected void startRectangleDrawing(MouseEvent evt, Color color)
 	{
 		anchor = evt.getPoint();
-		image = view.getImage();
+		selectionRectangle3D.setColor(color);
+		selectionRectangle3D.setVisible(true);
 	}
 	
 	protected void endRectangleDrawing(MouseEvent evt)
 	{
 		anchor = null;
-		//delete the rectangle
-		Graphics2D g2d=(Graphics2D) view.getGraphics();
-		g2d.drawImage(image, null, 0, 0);
+		selectionRectangle3D.setVisible(false);
 	}
 	
 	protected void createClipRectanglePlanes(MouseEvent evt)
@@ -442,13 +439,9 @@ public  class ViewBehavior extends OrbitBehavior
 //			Logger.global.finest("Ctrl is up so everything is unselected");
 //			cv.unselectAll();
 //		}
-		if(selectionRectangle!=null)
-		{
-			Vector4d[] planes=new Vector4d[4];
-			new ViewPyramid(view, selectionRectangle).getSidePlanes(planes);
-			view.setClipPlanes(planes);
-		}
-		selectionRectangle = null;
+		Vector4d[] planes=new Vector4d[4];
+		new ViewPyramid(view, selectionRectangle3D.getGeometry2D()).getSidePlanes(planes);
+		view.setClipPlanes(planes);
 	}
 
 	protected void pickRectangle(MouseEvent evt)
@@ -462,34 +455,19 @@ public  class ViewBehavior extends OrbitBehavior
 //		}
 		PickCanvas pickCanvas = new PickCanvas(view, view.getBranchGroup(cv));
 
-		if(selectionRectangle!=null)
-		{
-			ViewPyramid shape = new ViewPyramid(view, selectionRectangle);
-			Vector4d[] v = new Vector4d[4];
-			for (int i = 0; i < 4; i++)
-				v[i] = new Vector4d();
-			shape.getPlanes(v);
-			pickCanvas.setMode(PickTool.GEOMETRY_INTERSECT_INFO);
-			pickCanvas.setShapeBounds(shape, shape.getStartPoint());
-			long time = System.currentTimeMillis();
-			PickViewable result = pickPoint(pickCanvas.pickAllSorted());
-			long time2 = System.currentTimeMillis();
-			logger.finest("picked viewable is " + cv + " in "
-				+ (time2 - time) + " ms");		
-			if (result != null) cv.pick(result);
-		}
-		selectionRectangle = null;
-	}
-
-	
-	protected void processRectangleDrawing(MouseEvent evt,Color rectangleColor)
-	{
-		selectionRectangle = new Rectangle(anchor.x, anchor.y, 0, 0);
-		selectionRectangle.add(evt.getPoint());
-		Graphics2D g2d = (Graphics2D) view.getGraphics();
-		g2d.drawImage(image, null, 0, 0);
-		g2d.setColor(rectangleColor);
-		g2d.draw(selectionRectangle);
+		ViewPyramid shape = new ViewPyramid(view, selectionRectangle3D.getGeometry2D());
+		Vector4d[] v = new Vector4d[4];
+		for (int i = 0; i < 4; i++)
+			v[i] = new Vector4d();
+		shape.getPlanes(v);
+		pickCanvas.setMode(PickTool.GEOMETRY_INTERSECT_INFO);
+		pickCanvas.setShapeBounds(shape, shape.getStartPoint());
+		long time = System.currentTimeMillis();
+		PickViewable result = pickPoint(pickCanvas.pickAllSorted());
+		long time2 = System.currentTimeMillis();
+		logger.finest("picked viewable is " + cv + " in "
+			+ (time2 - time) + " ms");		
+		if (result != null) cv.pick(result);
 	}
 
 	private void fixOriginAxis(Transform3D t3d)

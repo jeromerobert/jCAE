@@ -21,6 +21,9 @@
 package org.jcae.viewer3d.test;
 
 import java.awt.BorderLayout;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.NumberFormat;
@@ -32,6 +35,7 @@ import javax.swing.event.ChangeListener;
 import javax.vecmath.Point3d;
 import org.jcae.viewer3d.FPSBehavior;
 import org.jcae.viewer3d.View;
+import org.jcae.viewer3d.ViewBehavior;
 import org.jcae.viewer3d.fe.ViewableFE;
 
 /**
@@ -95,6 +99,16 @@ public class FPSCounterTest extends JFrame
 		view.setOriginAxisVisible(true);
 		view.setFixedAxisVisible(true);
 		updateMesgSize(slider.getValue());
+		view.addKeyListener(new KeyAdapter()
+		{
+			public void keyTyped(KeyEvent e)
+			{
+				if(e.getKeyChar()==' ')
+					view.setMouseMode(ViewBehavior.CLIP_RECTANGLE_MODE);
+				else
+					view.setMouseMode(ViewBehavior.DEFAULT_MODE);
+			}
+		});
 	}
 	
 	protected void updateMesgSize(int value)

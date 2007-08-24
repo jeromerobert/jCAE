@@ -105,7 +105,7 @@ public class View extends Canvas3D implements PositionListener
 	private ViewingPlatform viewingPlatform;
 	private BranchGroup axisBranchGroup=new BranchGroup();
 	private Viewable currentViewable;
-	protected OrbitBehavior orbit= new ViewBehavior(this);
+	protected OrbitBehavior orbit;
 	private AxisBehavior axisBehavior;
 	ModelClip modelClip;
 	private boolean isModelClip=false;
@@ -113,6 +113,7 @@ public class View extends Canvas3D implements PositionListener
 	private BranchGroup unClipWidgetsBranchGroup;
 	private ClipBox clipBox=null;
 	private PrintWriter writer=null;
+	private List postRenderers=new ArrayList();
 		
     /**
      * From https://java3d.dev.java.net/issues/show_bug.cgi?id=89
@@ -231,8 +232,14 @@ public class View extends Canvas3D implements PositionListener
 			universe.addBranchGraph(createLights(new BoundingSphere(new Point3d(),Double.MAX_VALUE)));
 		}
 
+				
+		PlatformGeometry platformGeometry = new PlatformGeometry();
+		platformGeometry.setCapability(Group.ALLOW_CHILDREN_WRITE);
+		platformGeometry.setCapability(Group.ALLOW_CHILDREN_EXTEND);	
+		viewingPlatform.setPlatformGeometry(platformGeometry);		
+		orbit = new ViewBehavior(this);
 		orbit.setCapability(Node.ALLOW_BOUNDS_WRITE);
-		viewingPlatform.setViewPlatformBehavior(orbit);		
+		viewingPlatform.setViewPlatformBehavior(orbit);
 		
 		originAxisSwitch.setCapability(Switch.ALLOW_SWITCH_READ);
 		originAxisSwitch.setCapability(Switch.ALLOW_SWITCH_WRITE);
@@ -252,8 +259,19 @@ public class View extends Canvas3D implements PositionListener
 		createClipBranchGroup();
 		createWidgetsBranchGroup();
 		createUnClipWidgetsBranchGroup();
+				
+		createFixedAxis();
 		
-		// Create the fixed axis		
+		getView().setFieldOfView(Math.PI/12);
+		getView().setFrontClipPolicy(javax.media.j3d.View.PHYSICAL_EYE);
+		getView().setBackClipPolicy(javax.media.j3d.View.PHYSICAL_EYE);
+		
+		zoomTo(0,0,0,1.0f);	
+		addKeyListener(new PAKeyListener());
+    }	
+		
+	private void createFixedAxis()
+	{
 		final TransformGroup tg=new TransformGroup();
 		tg.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
 		tg.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
@@ -263,15 +281,15 @@ public class View extends Canvas3D implements PositionListener
 		tg.setTransform(t3d);
 		tg.addChild(fixedAxisTransformGroup);
 		fixedAxisSwitch.addChild(tg);
-		PlatformGeometry pg=new PlatformGeometry();
-		vsp=new ViewSpecificGroup();
+
+		ViewSpecificGroup vsp=new ViewSpecificGroup();
 		vsp.addView(getView());
+		BranchGroup bg = new BranchGroup();
 		vsp.addChild(fixedAxisSwitch);
-		pg.addChild(vsp);		
-		axisBehavior=new AxisBehavior(fixedAxisTransformGroup,
+		bg.addChild(vsp);
+		axisBehavior = new AxisBehavior( fixedAxisTransformGroup,
 			viewingPlatform.getViewPlatformTransform());
-		pg.addChild(axisBehavior);
-		viewingPlatform.setPlatformGeometry(pg);
+		bg.addChild(axisBehavior);
 		addComponentListener(new ComponentAdapter()
 		{
 			private Transform3D myT3d=new Transform3D();
@@ -285,14 +303,8 @@ public class View extends Canvas3D implements PositionListener
 				}
 			}
 		});
-		
-		getView().setFieldOfView(Math.PI/12);
-		getView().setFrontClipPolicy(javax.media.j3d.View.PHYSICAL_EYE);
-		getView().setBackClipPolicy(javax.media.j3d.View.PHYSICAL_EYE);
-		
-		zoomTo(0,0,0,1.0f);	
-		addKeyListener(new PAKeyListener());
-    }	
+		viewingPlatform.getPlatformGeometry().addChild(bg);
+	}
 	
 	private void createWidgetsBranchGroup(){
 		widgetsBranchGroup=new BranchGroup();
@@ -1287,5 +1299,30 @@ public class View extends Canvas3D implements PositionListener
 			}
 		}
 	}
+		
+	/**
+	 * Runnable to be call in the postRender method 
+	 * @param runnable
+	 * @todo think if it's good to set this "protected
+	 * @todo think about synchronization (set this method synchronized
+	 * or not as postRender is called by Java3D thread)
+	 */
+	protected void addPostRenderer(Runnable runnable)
+	{
+		postRenderers.add(runnable);
+	}
 	
+	protected void removePostRenderer(Runnable runnable)
+	{
+		postRenderers.remove(runnable);
+	}
+	
+	final public void postRender()
+	{
+		for(int i=0; i<postRenderers.size(); i++)
+		{
+			Runnable r = (Runnable) postRenderers.get(i);
+			r.run();
+		}
+	}
 }
