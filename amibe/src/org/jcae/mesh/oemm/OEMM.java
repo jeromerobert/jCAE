@@ -275,20 +275,20 @@ public class OEMM implements Serializable
 	public final void setBoundingBox(double [] bbox)
 	{
 		clearNodes();
-		xdelta = Double.MIN_VALUE;
+		double dmax = Double.MIN_VALUE;
 		for (int i = 0; i < 3; i++)
 		{
 			double delta = bbox[i+3] - bbox[i];
-			if (delta > xdelta)
-				xdelta = delta;
+			if (delta > dmax)
+				dmax = delta;
 			x0[i] = bbox[i];
 		}
 		// Enlarge bounding box by 1% to avoid rounding errors
 		for (int i = 0; i < 3; i++)
-			x0[i] -= 0.005*xdelta;
-		xdelta *= 1.01;
-		x0[3] = ((double) gridSize) / xdelta;
-		logger.debug("Lower left corner : ("+x0[0]+", "+x0[1]+", "+x0[2]+")   Bounding box length: "+xdelta);
+			x0[i] -= 0.005*dmax;
+		dmax *= 1.01;
+		x0[3] = ((double) gridSize) / dmax;
+		logger.debug("Lower left corner : ("+x0[0]+", "+x0[1]+", "+x0[2]+")   Bounding box length: "+dmax);
 	}
 
 	/**
@@ -300,6 +300,7 @@ public class OEMM implements Serializable
 	 */
 	public final boolean checkBoundingBox(double [] bbox)
 	{
+		xdelta = ((double) gridSize) / x0[3];
 		return bbox[0] >= x0[0] && bbox[3] <= x0[0]+xdelta &&
 		       bbox[1] >= x0[1] && bbox[4] <= x0[1]+xdelta &&
 		       bbox[2] >= x0[2] && bbox[5] <= x0[2]+xdelta;

@@ -41,6 +41,11 @@ public class MeshOEMMPopulate
 		String soupFile = args[2];
 		// Read initial OEMM structure
 		OEMM oemm = Storage.readOEMMStructure(inOEMM);
+		// Count triangles for this new triangle soup
+		int save_nrLeaves = oemm.getNumberOfLeaves();
+		RawStorage.countTriangles(oemm, soupFile, false);
+		if (oemm.getNumberOfLeaves() != save_nrLeaves)
+			throw new RuntimeException("Octree structure does not fit triangle soup");
 		// Convert triangle soup into an intermediate OEMM file
 		RawStorage.dispatch(oemm, soupFile, "dispatched", "dispatched.data");
 		// Convert intermediate OEMM file into final OEMM

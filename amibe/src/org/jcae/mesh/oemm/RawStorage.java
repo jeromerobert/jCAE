@@ -156,6 +156,27 @@ public class RawStorage
 	 */
 	public static boolean countTriangles(OEMM tree, String soupFile)
 	{
+		return countTriangles(tree, soupFile, true);
+	}
+
+	/**
+	 * Counts the number of triangles which have to be assigned to each leaf.
+	 *
+	 * A triangle soup is read from the file associated with an OEMM,
+	 * deepest cells for triangle vertices are created if needed, and
+	 * triangle counters are updated.  When this routine returns, all leaf
+	 * nodes have been created and each node know how many triangles will
+	 * be assigned to it in later stages.
+	 * 
+	 * @param  tree  an OEMM
+	 * @param  soupFile  triangle soup file name
+	 * @param  build  if <code>true</code>, OEMM instance is built.  Otherwise,
+	 *         it is supposed to have already been built.
+	 * @return <code>false</code> if a vertex was found outside of octree
+	 *         bounds, <code>true</code> otherwise.
+	 */
+	public static boolean countTriangles(OEMM tree, String soupFile, boolean build)
+	{
 		if (tree == null)
 		{
 			logger.error("OEMM not created!");
@@ -163,16 +184,19 @@ public class RawStorage
 		}
 		logger.info("Count triangles");
 		logger.debug("Reading "+soupFile+" and count triangles");
-		CountTriangles ct = new CountTriangles(tree);
+		CountTriangles ct = new CountTriangles(tree, build);
 		readSoup(soupFile, ct);
 		logger.info("Number of triangles: "+ct.getTriangleCount());
 		double [] bbox = ct.getBoundingBox();
 		if (!tree.checkBoundingBox(bbox))
 		{
+			if (!build)
+				throw new RuntimeException("Some vertices of this soup file do not fit octree");
 			tree.setBoundingBox(bbox);
 			return false;
 		}
-		tree.printInfos();
+		if (build)
+			tree.printInfos();
 		return true;
 	}
 	
@@ -183,9 +207,16 @@ public class RawStorage
 		private long nrTriangles = 0;
 		private int [] ijk = new int[3];
 		private double [] bbox = new double[6];
-		public CountTriangles(OEMM o)
+		private boolean build;
+		public CountTriangles(OEMM o, boolean b)
 		{
 			oemm = o;
+			build = b;
+			if (!build)
+			{
+				for (int i = 0; i < oemm.getNumberOfLeaves(); i++)
+					oemm.leaves[i].tn = 0;
+			}
 			for (int k = 0; k < 3; k++)
 			{
 				bbox[k] = Double.MAX_VALUE;
@@ -202,7 +233,10 @@ public class RawStorage
 					bbox[k+3] = xyz[k];
 			}
 			oemm.double2int(xyz, ijk);
-			cells[i] = oemm.build(ijk);
+			if (build)
+				cells[i] = oemm.build(ijk);
+			else
+				cells[i] = oemm.search(ijk);
 		}
 		public void processTriangle(int group)
 		{

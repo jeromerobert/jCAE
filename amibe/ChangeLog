@@ -1,3 +1,9 @@
+Sun Aug 26 01:46:56 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/MeshOEMMPopulate.java: Run
+	RawStorage.countTriangles() to count triangles from new triangle soup.
+	Thanks to Jan Kozusznik for the report.
+
 Sun Aug 12 17:18:01 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos3d/AbstractAlgoHalfEdge.java: Fix
