@@ -21,15 +21,27 @@
 package org.jcae.viewer3d;
 
 import java.awt.Rectangle;
+
+import javax.media.j3d.Appearance;
+import javax.media.j3d.BoundingBox;
 import javax.media.j3d.BoundingPolytope;
 import javax.media.j3d.Canvas3D;
+import javax.media.j3d.IndexedQuadArray;
+import javax.media.j3d.PolygonAttributes;
+import javax.media.j3d.Shape3D;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector4d;
 
 
+/**
+ * A Bound object representing the visible part of the space.
+ * It's computed by cutting the infinite pyramid made by the eye and
+ * the screen, by the back and front clipping planes.
+ */
 public class ViewPyramid extends BoundingPolytope
 {
 	private Canvas3D canvas;
@@ -38,6 +50,7 @@ public class ViewPyramid extends BoundingPolytope
 	 */
 	private Point3d startPoint=new Point3d();
 	private Point3d eye;
+	private Rectangle rectangle;
 
 	public ViewPyramid(Canvas3D canvas)
 	{
@@ -47,7 +60,7 @@ public class ViewPyramid extends BoundingPolytope
 	public ViewPyramid(Canvas3D canvas, Rectangle rectangle)
 	{
 		this.canvas=canvas;
-		
+		this.rectangle=rectangle;
 		setPlanes(computeRectangleProjection(rectangle));
 	}
 	
@@ -64,7 +77,7 @@ public class ViewPyramid extends BoundingPolytope
 		p.sub(pointed,goesThrow);
 		if(n.dot(new Vector3d(p))<0)
 			n.scale(-1);
-		//Compute origine
+		//Compute origin
 		double[] plane=new double[4];
 		n.get(plane);
 		plane[3]=-1*n.dot(new Vector3d(goesThrow));
@@ -74,30 +87,19 @@ public class ViewPyramid extends BoundingPolytope
 	
 	private Vector4d[] computeRectangleProjection(Rectangle rectangle)
 	{
-		Point3d[] pyramVertex=getPyramVertex(rectangle);
-		//Compute the plane function of the bottom face of the pyramid bounds
-		double farClipLength = canvas.getView().getBackClipDistance();
-		Vector3d farClipVect = new Vector3d();
-		farClipVect.sub(pyramVertex[4], pyramVertex[5]);
-		farClipVect.normalize();
-		Vector3d farClipPt = new Vector3d();
-		farClipPt.scale(farClipLength, farClipVect);
-		double d0 = -farClipVect.dot(farClipPt);
+		Point3d[] p=getPrismVertices(rectangle);
 		//Define an array of Vector4d for all the planes of the pickBounds
-		Vector4d[] planeFunc = new Vector4d[5];
-		planeFunc[0] = new Vector4d(farClipVect.x, farClipVect.y,
-			farClipVect.z, d0);
-		planeFunc[1] = getPlaneFunc(pyramVertex[0], pyramVertex[1],
-			pyramVertex[5]);
-		planeFunc[2] = getPlaneFunc(pyramVertex[1], pyramVertex[2],
-			pyramVertex[5]);
-		planeFunc[3] = getPlaneFunc(pyramVertex[2], pyramVertex[3],
-			pyramVertex[5]);
-		planeFunc[4] = getPlaneFunc(pyramVertex[3], pyramVertex[0],
-			pyramVertex[5]);
+		Vector4d[] planeFunc = new Vector4d[6];
+		planeFunc[0] = getPlaneFunc(p[0], p[1], p[2]);
+		planeFunc[1] = getPlaneFunc(p[4], p[6], p[5]);
+		planeFunc[2] = getPlaneFunc(p[1], p[0], p[4]);
+		planeFunc[3] = getPlaneFunc(p[1], p[6], p[2]);
+		planeFunc[4] = getPlaneFunc(p[2], p[6], p[3]);
+		planeFunc[5] = getPlaneFunc(p[0], p[3], p[4]);
+		
 		//Define the BoundingPolytope bounds object for picking
-		startPoint = pyramVertex[4];
-		eye = pyramVertex[5];
+		startPoint = p[4];
+		eye = p[5];
 		return planeFunc;
 	}
 
@@ -110,7 +112,6 @@ public class ViewPyramid extends BoundingPolytope
 		}
 		super.getPlanes(planes);				
 	}
-	
 	
 	/**
 	 * Compute the plane function, return it
@@ -137,7 +138,7 @@ public class ViewPyramid extends BoundingPolytope
 	/**
 	 * returns the { {minX,minY},{minX,maxY},{maxX,maxY},{maxX,minY},{midle},{eye} }
 	 * positions in the Vworld coordinates corresponding to the rectangle parameter
-	 * on the canvas3d.
+	 * on the canvas3d. This is the pyramid between the eye and the screen.
 	 * @param rectangle
 	 * @return
 	 */
@@ -164,6 +165,50 @@ public class ViewPyramid extends BoundingPolytope
 			trans.transform(pyramVertex[ii], pyramVertex[ii]);
 		
 		return pyramVertex;
+	}
+	
+	/**
+	 * Return
+	 * {{minX,minY,frontZ},{minX,maxY,frontZ},{maxX,maxY,fontZ},{maxX,minY,frontZ},
+	 * {minX,minY,backZ},{minX,maxY,backZ},{maxX,maxY,backZ},{maxX,minY,backZ}}
+	 * @param rectangle
+	 * @return
+	 */
+	private Point3d[] getPrismVertices(Rectangle rectangle)
+	{
+		double farClip = canvas.getView().getBackClipDistance();
+		double frontClip = canvas.getView().getFrontClipDistance();		
+		Point3d[] pyramid = getPyramVertex(rectangle);
+		Point3d eye = pyramid[5];
+		Point3d center = pyramid[4];
+		double frontFactor = computeClipFactor(eye, center, frontClip);
+		double backFactor = computeClipFactor(eye, center, farClip);
+		Point3d[] toReturn = new Point3d[8];
+		for(int i=0; i<4; i++)
+		{
+			toReturn[i] = computePrismPoint(frontFactor, eye, pyramid[i]);
+			toReturn[i+4] = computePrismPoint(backFactor, eye, pyramid[i]);
+		}
+		return toReturn;
+	}	
+	
+	private Point3d computePrismPoint(double factor, Point3d pyramidTop,
+		Point3d pyramidBasePoint)
+	{
+		Point3d p3d=new Point3d(pyramidTop);
+		p3d.scale(1-factor);
+		Point3d toReturn=new Point3d(pyramidBasePoint);
+		toReturn.scaleAdd(factor, p3d);
+		return toReturn;
+	}
+
+	/** Compute ||v1-v2||+d / ||v1-v2|| **/
+	private double computeClipFactor(Tuple3d v1, Tuple3d v2, double d)
+	{
+		Vector3d p=new Vector3d(v1);
+		p.sub(v2);
+		double l=p.length();
+		return (l+d)/l;
 	}
 
 	/**
@@ -192,5 +237,32 @@ public class ViewPyramid extends BoundingPolytope
 	public Point3d getEye()
 	{
 		return eye;
+	}
+	
+	/**
+	 * Return a shape3D representing the current pyramid.
+	 * This method aims to be used for debugging.
+	 */
+	public Shape3D getShape3D()
+	{
+		IndexedQuadArray geom=new IndexedQuadArray(8,IndexedQuadArray.COORDINATES,24);;
+		geom.setCoordinates(0, getPrismVertices(rectangle));
+		geom.setCoordinateIndices(0, new int[]{
+			0,1,2,3,
+			4,5,6,7,
+			1,2,6,5,
+			0,1,5,4,
+			2,3,7,6,
+			0,3,7,4});
+		Shape3D s3d = new Shape3D(geom);
+		Appearance app=new Appearance();
+		PolygonAttributes pa=new PolygonAttributes();
+		pa.setCullFace(PolygonAttributes.CULL_NONE);
+		pa.setPolygonMode(PolygonAttributes.POLYGON_LINE);
+		app.setPolygonAttributes(pa);
+		s3d.setAppearance(app);
+		System.out.println(new BoundingBox(s3d.getBounds()));
+		System.out.println(new BoundingBox(this));
+		return s3d;
 	}
 }
