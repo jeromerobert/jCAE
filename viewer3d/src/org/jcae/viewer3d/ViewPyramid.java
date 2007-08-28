@@ -153,8 +153,8 @@ public class ViewPyramid extends BoundingPolytope
 		rectPoint[2] = new Point2d(rectangle.getMaxX(), rectangle.getMaxY());
 		rectPoint[3] = new Point2d(rectangle.getMaxX(), rectangle.getMinY());		
 		rectPoint[4] = new Point2d(
-			(rectangle.getMaxX()-rectangle.getMinX()) / 2.0,
-			(rectangle.getMaxY()-rectangle.getMinY()) / 2.0);
+			(rectangle.getMaxX()+rectangle.getMinX()) / 2.0,
+			(rectangle.getMaxY()+rectangle.getMinY()) / 2.0);
 
 		for (int ii = 0; ii < rectPoint.length; ii++)
 			canvas.getPixelLocationInImagePlate(rectPoint[ii], pyramVertex[ii]);
