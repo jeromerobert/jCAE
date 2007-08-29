@@ -98,8 +98,6 @@ public class ViewPyramid extends BoundingPolytope
 		planeFunc[5] = getPlaneFunc(p[0], p[3], p[4]);
 		
 		//Define the BoundingPolytope bounds object for picking
-		startPoint = p[4];
-		eye = p[5];
 		return planeFunc;
 	}
 
@@ -179,10 +177,10 @@ public class ViewPyramid extends BoundingPolytope
 		double farClip = canvas.getView().getBackClipDistance();
 		double frontClip = canvas.getView().getFrontClipDistance();		
 		Point3d[] pyramid = getPyramVertex(rectangle);
-		Point3d eye = pyramid[5];
-		Point3d center = pyramid[4];
-		double frontFactor = computeClipFactor(eye, center, frontClip);
-		double backFactor = computeClipFactor(eye, center, farClip);
+		eye = pyramid[5];
+		startPoint = pyramid[4];
+		double frontFactor = computeClipFactor(eye, startPoint, frontClip);
+		double backFactor = computeClipFactor(eye, startPoint, farClip);
 		Point3d[] toReturn = new Point3d[8];
 		for(int i=0; i<4; i++)
 		{
