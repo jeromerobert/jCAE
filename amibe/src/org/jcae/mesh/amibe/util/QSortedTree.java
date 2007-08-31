@@ -309,13 +309,13 @@ public abstract class QSortedTree implements Serializable
 	 * @param o      object being removed
 	 * @return  the quality factor associated to this object.
 	 */
-	public final double remove(Object o)
+	public final boolean remove(Object o)
 	{
 		Node p = (Node) map.get(o);
 		if (logger.isDebugEnabled())
 			logger.debug("Remove "+p+" "+o);
 		if (p == null)
-			return -1.0;
+			return false;
 		nrNodes--;
 		map.remove(o);
 		Node r = removeNode(p);
@@ -324,7 +324,7 @@ public abstract class QSortedTree implements Serializable
 			map.remove(r.getData());
 			map.put(p.getData(), p);
 		}
-		return r.getValue();
+		return true;
 	}
 
 	/**

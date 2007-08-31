@@ -4,6 +4,9 @@ Fri Aug 31 17:33:34 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	obsolete.  Make Node.file transient and add a new pathComponents
 	member to store component paths.  Serialized OEMM instances should
 	now be portable, but serialVersionUID have been modified.
+	* src/org/jcae/mesh/amibe/util/QSortedTree.java: Modify remove()
+	method signature, it now returns a boolean telling if removed
+	object did exist in tree.
 
 Fri Aug 31 12:52:40 CEST 2007 Jan Kozusznik <jan.kozusznik@vsb.cz>
 
