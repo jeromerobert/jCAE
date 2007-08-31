@@ -1,3 +1,9 @@
+2007-08-31 14:30  Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/cad/ViewableCAD.java
+	  src/org/jcae/viewer3d/fe/ViewableFE.java: Fix typos, replace
+	  hightLight by highlight in all method names.
+
 2007-08-31 13:58 Jan Kozusznik
 
 	* src/org/jcae/viewer3d/FPSBehavior.java: Fix call to

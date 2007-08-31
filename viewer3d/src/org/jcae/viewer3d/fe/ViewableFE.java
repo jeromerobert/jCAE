@@ -394,10 +394,11 @@ public class ViewableFE extends ViewableAdaptor
 			//TODO Implement unselect
 		}
 	}
-	public void hightLight(int domainID, boolean selected){
-		 hightLight(domainID, selected, true);
+	public void highlight(int domainID, boolean selected)
+	{
+		 highlight(domainID, selected, true);
 	}
-	public void hightLight(int domainID, boolean selected,boolean fireListeners)
+	public void highlight(int domainID, boolean selected,boolean fireListeners)
 	{
 		setSelectedDomain(domainID, selected);
 		if(fireListeners) fireSelectionChanged();

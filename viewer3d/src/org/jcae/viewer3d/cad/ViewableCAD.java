@@ -34,7 +34,7 @@ import com.sun.j3d.utils.geometry.Stripifier;
 
 /**
  * A Viewable specilized to display CAD scenes.
- * The selected elements are hightlighted.
+ * The selected elements are highlighted.
  * @author Jerome Robert
  * @todo all methods must be implemented.
  */
@@ -326,8 +326,9 @@ public class ViewableCAD extends ViewableAdaptor
 	 * @param faceID
 	 * @param status
 	 */
-	public void hightLightFace(int faceID, boolean status){
-		hightLightFace(faceID, status,true);
+	public void highlightFace(int faceID, boolean status)
+	{
+		highlightFace(faceID, status,true);
 	}
 	/**
 	 * 
@@ -335,7 +336,7 @@ public class ViewableCAD extends ViewableAdaptor
 	 * @param status
 	 * @param fireListeners
 	 */
-	public void hightLightFace(int faceID, boolean status,boolean fireListeners)
+	public void highlightFace(int faceID, boolean status,boolean fireListeners)
 	{
 		
 		FacePickingInfo fpi=(FacePickingInfo) facesInfo.get(new Integer(faceID));
@@ -349,8 +350,9 @@ public class ViewableCAD extends ViewableAdaptor
 	 * @param edgeID
 	 * @param status
 	 */
-	public void hightLightEdge(int edgeID, boolean status){
-		hightLightEdge(edgeID, status, true);
+	public void highlightEdge(int edgeID, boolean status)
+	{
+		highlightEdge(edgeID, status, true);
 	}
 	/**
 	 * 
@@ -358,19 +360,19 @@ public class ViewableCAD extends ViewableAdaptor
 	 * @param status
 	 * @param fireListeners
 	 */
-	public void hightLightEdge(int edgeID, boolean status,boolean fireListeners)
+	public void highlightEdge(int edgeID, boolean status,boolean fireListeners)
 	{
 			EdgePickingInfo epi=(EdgePickingInfo) edgesInfo.get(new Integer(edgeID));
 			setEdgeSelected(epi, status);
 			if(fireListeners) fireSelectionChanged();
 	}
 	
-	public void hightLightVertex(int vertexID, boolean status)
+	public void highlightVertex(int vertexID, boolean status)
 	{
-		hightLightVertex(vertexID, status, true);
+		highlightVertex(vertexID, status, true);
 	}
 
-	public void hightLightVertex(int vertexID, boolean status,boolean fireListeners)
+	public void highlightVertex(int vertexID, boolean status,boolean fireListeners)
 	{
 		VertexPickingInfo epi=(VertexPickingInfo) verticesInfo.get(new Integer(vertexID));
 		setVertexSelected(epi, status);
