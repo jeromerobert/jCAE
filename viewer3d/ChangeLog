@@ -4,7 +4,7 @@
 	  src/org/jcae/viewer3d/fe/ViewableFE.java: Fix typos, replace
 	  hightLight by highlight in all method names.
 
-2007-08-31 13:58 Jan Kozusznik
+2007-08-31 13:58 Jan Kozusznik <jan.kozusznik@vsb.cz>
 
 	* src/org/jcae/viewer3d/FPSBehavior.java: Fix call to
 	firePropertyChangeListenerPropertyChange().

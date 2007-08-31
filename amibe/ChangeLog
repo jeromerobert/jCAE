@@ -5,7 +5,7 @@ Fri Aug 31 17:33:34 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	member to store component paths.  Serialized OEMM instances should
 	now be portable, but serialVersionUID have been modified.
 
-Fri Aug 31 12:52:40 CEST 2007 Jan Kozusznik
+Fri Aug 31 12:52:40 CEST 2007 Jan Kozusznik <jan.kozusznik@vsb.cz>
 
 	* src/org/jcae/mesh/oemm/OEMM.java: New OEMM.Node.getMaxIndex() and
 	OEMM.getDepth() methods.
