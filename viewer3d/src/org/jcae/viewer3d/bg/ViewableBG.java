@@ -22,6 +22,7 @@ package org.jcae.viewer3d.bg;
 
 import java.awt.Component;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.logging.Logger;
 import javax.media.j3d.*;
@@ -126,10 +127,25 @@ public class ViewableBG extends ViewableAdaptor
 		// => easy to find the plate index from this
 		int[] idx = pi.getPrimitiveVertexIndices();
 		int solidID=idx[0]/24;
-		if(!leaves.contains(solidID))
+		selected = !leaves.contains(solidID);
+		if(selected)
 		{
 			Logger.getLogger("global").finest("cellid= "+solidID);
-			QuadArray geom = (QuadArray) pi.getGeometryArray();
+			highlightNode(solidID, pi.getGeometryArray());
+		}
+		else
+		{
+			selectedLeaves.removeGeometry((QuadArray) leavesGeometry.get(solidID));
+			leavesGeometry.remove(solidID);
+			leaves.remove(solidID);
+		}
+	}
+
+	private void highlightNode(int solidID, Object obj)
+	{
+		if (obj instanceof QuadArray) {
+			QuadArray geom = (QuadArray) obj;
+			
 			QuadArray qa=new QuadArray(24, GeometryArray.COORDINATES);
 			float [] coord = new float[72];
 			geom.getCoordinates(24*solidID, coord);
@@ -142,16 +158,24 @@ public class ViewableBG extends ViewableAdaptor
 			leavesGeometry.put(solidID, qa);
 			leaves.add(solidID);
 		}
-		else
-		{
-			selectedLeaves.removeGeometry((QuadArray) leavesGeometry.get(solidID));
-			leavesGeometry.remove(solidID);
-			leaves.remove(solidID);
-		}
 	}	
 
-	public void hightLight(int domainID, boolean selected)
+	@SuppressWarnings("unchecked")
+	public void highlight(int domainID, boolean selected)
 	{
+		for (Enumeration enumer = branchGroup.getAllChildren(); enumer.hasMoreElements(); )
+		{
+			Shape3D shape3D = (Shape3D) enumer.nextElement();
+			for (Enumeration enumer2 = shape3D.getAllGeometries(); enumer2.hasMoreElements(); )
+			{
+				Object obj = enumer2.nextElement();
+				try {
+					highlightNode(domainID, obj);
+				} catch (ArrayIndexOutOfBoundsException e) {
+					//ignore
+				}
+			}
+		}
 	}
 		
 	public Node getJ3DNode()

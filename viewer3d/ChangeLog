@@ -5,6 +5,8 @@
 	* src/org/jcae/viewer3d/OEMMViewer.java: Do not build mesh
 	adjacency by default.  Minor changes in meshCoord() to
 	handle non-readable triangles.
+	* src/org/jcae/viewer3d/bg/ViewableBG.java: New highlight()
+	method.
 
 2007-07-16 11:43  Jerome Robert <jeromerobert@users.sourceforge.net>
 
