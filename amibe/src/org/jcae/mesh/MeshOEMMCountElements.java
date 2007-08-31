@@ -23,6 +23,8 @@ import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.Storage;
 import org.jcae.mesh.oemm.OEMM.Node;
 
+import java.io.IOException;
+
 /**
  * Prints total number of triangles and vertices.
  */
