@@ -79,7 +79,7 @@ public abstract class AbstractAlgoHalfEdge
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
-			if (!f.isOuter())
+			if (!isSkippedTriangle(f))
 				ret++;
 		}
 		return ret;
@@ -92,7 +92,7 @@ public abstract class AbstractAlgoHalfEdge
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
-			if (f.isOuter())
+			if (isSkippedTriangle(f))
 				continue;
 			nrTriangles++;
 			HalfEdge e = (HalfEdge) f.getAbstractHalfEdge();
@@ -104,6 +104,17 @@ public abstract class AbstractAlgoHalfEdge
 				addToTree(e);
 			}
 		}
+	}
+
+	/**
+	 * Tells whether to skip outer triangle or non-writable triangle.
+	 * @param f triangle to test.
+	 * @return <code>true</code> if this triangle has to be skipped,
+	 * <code>false</code> otherwise.
+	 */
+	protected static boolean isSkippedTriangle(Triangle f)
+	{
+		return f.isOuter() || !f.isWritable();
 	}
 	
 	protected void postComputeTree()
@@ -117,6 +128,8 @@ public abstract class AbstractAlgoHalfEdge
 
 	protected void addToTree(HalfEdge e)
 	{
+		if (!e.origin().isReadable() || !e.destination().isReadable())
+			return;
 		double val = cost(e);
 		// If an edge will not be processed because of its cost, it is
 		// better to not put it in the tree.  One drawback though is
@@ -157,7 +170,7 @@ public abstract class AbstractAlgoHalfEdge
 				{
 					stackNotProcessed.push(current);
 					if (tolerance > 0.0)
-						stackNotProcessed.push(new Double(cost+0.1*(tolerance - cost)));
+						stackNotProcessed.push(new Double(cost+0.7*(tolerance - cost)));
 					else
 						// tolerance = cost = 0
 						stackNotProcessed.push(new Double(1.0));
@@ -165,7 +178,10 @@ public abstract class AbstractAlgoHalfEdge
 				else
 				{
 					stackNotProcessed.push(current);
-					stackNotProcessed.push(new Double(2.0*cost));
+					double penalty = tree.getRootValue()*0.7;
+					if (penalty == 0.0)
+						penalty = 1.0;
+					stackNotProcessed.push(new Double(cost+penalty));
 				}
 				current = null;
 			}

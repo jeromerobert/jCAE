@@ -110,8 +110,9 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	private HashMap quadricMap = null;
 	private Vertex v1 = null, v2 = null;
 	private Quadric3DError q1 = null, q2 = null;
-	private Vertex v3;
+	private Vertex v3, v4;
 	private Quadric3DError q3 = new Quadric3DError();
+	private Quadric3DError q4 = new Quadric3DError();
 	private static final boolean testDump = false;
 	
 	/**
@@ -126,6 +127,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	{
 		super(m, options);
 		v3 = (Vertex) m.factory.createVertex(0.0, 0.0, 0.0);
+		v4 = (Vertex) m.factory.createVertex(0.0, 0.0, 0.0);
 		for (Iterator it = options.entrySet().iterator(); it.hasNext(); )
 		{
 			Map.Entry opt = (Map.Entry) it.next();
@@ -164,7 +166,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
-			if (f.isOuter())
+			if (isSkippedTriangle(f))
 				continue;
 			for (int i = 0; i < 3; i++)
 			{
@@ -180,7 +182,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
-			if (f.isOuter())
+			if (isSkippedTriangle(f) )
 				continue;
 			double [] p0 = f.vertex[0].getUV();
 			double [] p1 = f.vertex[1].getUV();
@@ -240,6 +242,8 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		}
 	}
 
+	
+
 	protected void postComputeTree()
 	{
 		if (testDump)
@@ -274,9 +278,9 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		assert q1 != null : o;
 		Quadric3DError q2 = (Quadric3DError) quadricMap.get(d);
 		assert q2 != null : d;
-		double ret = Math.min(
-		  q1.value(o.getUV()) + q2.value(o.getUV()),
-		  q1.value(d.getUV()) + q2.value(d.getUV()));
+		q4.computeQuadric3DError(q1, q2);
+		q4.optimalPlacement(o, d, q1, q2, placement, v4);
+		double ret = q1.value(v4.getUV()) + q2.value(v4.getUV());
 		// TODO: check why this assertion sometimes fail
 		// assert ret >= -1.e-2 : q1+"\n"+q2+"\n"+ret;
 		return ret;
@@ -326,7 +330,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		// they appear within tree or their symmetric ones,
 		// so remove them now.
 		tree.remove(current.notOriented());
-		if (!t1.isOuter())
+		if (!isSkippedTriangle(t1))
 		{
 			nrTriangles--;
 			for (int i = 0; i < 2; i++)
@@ -339,7 +343,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		}
 		HalfEdge sym = (HalfEdge) current.sym();
 		Triangle t2 = sym.getTri();
-		if (!t2.isOuter())
+		if (!isSkippedTriangle(t2))
 		{
 			nrTriangles--;
 			for (int i = 0; i < 2; i++)
@@ -366,7 +370,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		do
 		{
 			current = (HalfEdge) current.nextOriginLoop();
-			if (current.destination() != mesh.outerVertex)
+			if (current.destination() != mesh.outerVertex && current.destination().isReadable() && current.origin().isReadable())
 				tree.update(current.notOriented(), cost(current));
 		}
 		while (current.destination() != apex);

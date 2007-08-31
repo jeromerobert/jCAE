@@ -424,6 +424,16 @@ public abstract class QSortedTree implements Serializable
 		return nrNodes;
 	}
 	
+	/**
+	 * Return the value found at root binary tree.  As trees are balanced, this is a
+	 * good approximation of tree median value.
+	 * @return the value found at root binary tree.
+	 */
+	public final double getRootValue()
+	{
+		return root.child[0].getValue();
+	}
+	
 	private static Iterator nullIterator = new Iterator()
 	{
 		public boolean hasNext() { return false; }

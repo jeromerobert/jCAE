@@ -8,6 +8,20 @@ Fri Aug 31 12:52:40 CEST 2007 Jan Kozusznik
 	read/modify/store meshes onto disk.
 	* src/org/jcae/mesh/amibe/ds/Mesh.java: Fix OuterVertex constructor.
 	Implement vertex list, this is needed to save OEMM instances.
+	* src/org/jcae/mesh/amibe/algos3d/AbstractAlgoHalfEdge.java
+	  src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java: Replace
+	f.isOuter() test on triangles by isSkippedTriangle() to also detect
+	non-writable triangles.
+
+Fri Aug 31 15:21:26 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/util/QSortedTree.java: New getRootValue()
+	method.
+	* src/org/jcae/mesh/amibe/algos3d/AbstractAlgoHalfEdge.java: Fix
+	penalty when edge cannot be processed, QSortedTree.getRootValue()
+	gives a better value.
+	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java: Fix cost()
+	computation by using definitive location of vertex.
 
 Sun Aug 26 01:46:56 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
