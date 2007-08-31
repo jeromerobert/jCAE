@@ -630,9 +630,9 @@ public class Storage
 			
 			DataOutputStream fc;
 			try {
-				fc = new DataOutputStream( new FileOutputStream(new File(oemm.getDirectory(), node.file+"t")));
+				fc = new DataOutputStream( new FileOutputStream(getTrianglesFile(oemm, node)));
 			} catch (FileNotFoundException e1) {
-				logger.error("I/O error when reading indexed file "+oemm.getDirectory()+File.separator+node.file+"t");
+				logger.error("I/O error when reading indexed file "+getTrianglesFile(oemm, node));
 				e1.printStackTrace();
 				throw new RuntimeException(e1);
 			}
@@ -654,7 +654,7 @@ public class Storage
 				node.tn = entry.getValue().size();
 			
 			} catch (IOException e) {
-				logger.error("Error in saving to " + oemm.getDirectory()+File.separator+node.file+"t", e);
+				logger.error("Error in saving to " + getTrianglesFile(oemm, node), e);
 				e.printStackTrace();
 				throw new RuntimeException(e);
 			} finally {
@@ -705,9 +705,9 @@ public class Storage
 			DataOutputStream fc;
 			DataOutputStream afc = null;
 			try {
-				fc = new DataOutputStream( new FileOutputStream(new File(oemm.getDirectory(), node.file+"v")));
+				fc = new DataOutputStream( new FileOutputStream(getVerticesFile(oemm, node)));
 			} catch (FileNotFoundException e1) {
-				logger.error("I/O error when reading indexed file "+oemm.getDirectory()+File.separator+node.file+"v");
+				logger.error("I/O error when reading indexed file "+getVerticesFile(oemm, node));
 				e1.printStackTrace();
 				throw new RuntimeException(e1);
 			}
@@ -716,7 +716,7 @@ public class Storage
 				try {
 					afc = new DataOutputStream( new FileOutputStream(getAdjacencyFile(oemm, node)));
 				} catch (FileNotFoundException e1) {
-					logger.error("I/O error when reading indexed file "+oemm.getDirectory()+File.separator+node.file+"a");
+					logger.error("I/O error when reading indexed file "+getAdjacencyFile(oemm, node));
 					e1.printStackTrace();
 					throw new RuntimeException(e1);
 				}
