@@ -112,7 +112,7 @@ public class MeshOEMMCoarseViewer
 				{
 					octree.unselectAll();
 					for (int i: oemmBehavior.getIds()) {
-						octree.hightLight(i, true);	
+						octree.highlight(i, true);	
 					}
 				}
 				else if (event.getKeyChar() == 'f')
