@@ -284,6 +284,9 @@ public class Vertex extends AbstractVertex implements Serializable
 	public Collection getNeighboursNodes()
 	{
 		Collection ret = new LinkedHashSet();
+		//if the vertex has no link then we return empty list
+		if (link == null)
+			return ret;
 		if (link instanceof Triangle)
 			appendNeighboursTri((Triangle) link, ret);
 		else
