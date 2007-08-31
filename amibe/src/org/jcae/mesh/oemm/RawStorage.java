@@ -658,7 +658,7 @@ public class RawStorage
 		private ObjectOutputStream oos;
 		private String outDir;
 		private int globalIndex = 0;
-		private ArrayList path = new ArrayList();
+		private ArrayList<String> path = new ArrayList<String>();
 		private int [] ijk = new int[3];
 		private int room = 0;
 		public IndexInternalVerticesProcedure(FileInputStream in, ObjectOutputStream headerOut, String dir)
@@ -692,21 +692,20 @@ public class RawStorage
 			ijk[0] = current.i0;
 			ijk[1] = current.j0;
 			ijk[2] = current.k0;
-			StringBuffer sbdir = new StringBuffer();
 			if (path.size() > 0)
 			{
-				sbdir.append((String) path.get(0));
+				StringBuffer sbdir = new StringBuffer(path.get(0));
 				for (int i = 1; i < path.size(); i++)
-					sbdir.append(File.separator + (String) path.get(i));
+					sbdir.append(File.separator + path.get(i));
 				String dir = sbdir.toString();
 				File d = new File(outDir, dir);
 				d.mkdirs();
-				current.file = dir + File.separator + octant;
+				current.setPathComponents(path, octant);
 			}
 			else
 			{
 				new File(outDir).mkdirs();
-				current.file = ""+octant;
+				current.setPathComponents(null, octant);
 			}
 			PAVLTreeIntArrayDup inner = new PAVLTreeIntArrayDup();
 			PAVLTreeIntArrayDup outer = new PAVLTreeIntArrayDup();

@@ -20,6 +20,7 @@
 
 package org.jcae.mesh.oemm;
 
+import java.util.ArrayList;
 import gnu.trove.TIntArrayList;
 import java.io.Serializable;
 import org.apache.log4j.Logger;
@@ -38,7 +39,7 @@ import org.apache.log4j.Logger;
  */
 public class OEMM implements Serializable
 {
-	private static final long serialVersionUID = 1185139261716263080L;
+	private static final long serialVersionUID = -8244900407797088903L;
 
 	private static Logger logger = Logger.getLogger(OEMM.class);	
 	
@@ -88,11 +89,6 @@ public class OEMM implements Serializable
 	public double [] x0 = new double[4];
 
 	/**
-	 * Maximal width in a dimension.
-	 */
-	private double xdelta;
-	
-	/**
 	 * Root cell.
 	 */
 	protected transient Node root = null;
@@ -134,7 +130,7 @@ public class OEMM implements Serializable
 	 */
 	public static class Node implements Serializable
 	{
-		private static final long serialVersionUID = 4260896424545081301L;
+		private static final long serialVersionUID = 4559047657359540101L;
 
 		/**
 		 * Integer coordinates of lower-left corner.
@@ -176,7 +172,8 @@ public class OEMM implements Serializable
 		/**
 		 * File containing vertices and triangles.
 		 */
-		public String file;
+		public transient String file;
+		private String [] pathComponents;
 
 		/**
 		 * Counter.  This is a temporary variable used by some algorithms.
@@ -238,6 +235,31 @@ public class OEMM implements Serializable
 			s.defaultReadObject();
 			child = new Node[8];
 			isLeaf = true;
+			updateFilename();
+		}
+
+		public void setPathComponents(ArrayList<String> dir, int octant)
+		{
+			if (dir != null && dir.size() > 0)
+			{
+				pathComponents = new String[dir.size()+1];
+				for (int i = 0; i < pathComponents.length - 1; i++)
+					pathComponents[i] = dir.get(i);
+			}
+			else
+				pathComponents = new String[1];
+			pathComponents[pathComponents.length - 1] = ""+octant;
+			updateFilename();
+		}
+
+		private void updateFilename()
+		{
+			if (pathComponents == null || pathComponents.length == 0)
+				return;
+			StringBuffer buf = new StringBuffer();
+			for (String p: pathComponents)
+				buf.append(p+java.io.File.separator);
+			file = buf.substring(0, buf.length()-1);
 		}
 
 		public String toString()
@@ -280,8 +302,7 @@ public class OEMM implements Serializable
 	}
 
 	/**
-	 * Sets object bounding box.  This method computes {@link #x0} and
-	 * {@link #xdelta}.
+	 * Sets object bounding box.  This method computes {@link #x0}.
 	 *
 	 * @param bbox  bounding box
 	 */
@@ -313,7 +334,7 @@ public class OEMM implements Serializable
 	 */
 	public final boolean checkBoundingBox(double [] bbox)
 	{
-		xdelta = ((double) gridSize) / x0[3];
+		double xdelta = ((double) gridSize) / x0[3];
 		return bbox[0] >= x0[0] && bbox[3] <= x0[0]+xdelta &&
 		       bbox[1] >= x0[1] && bbox[4] <= x0[1]+xdelta &&
 		       bbox[2] >= x0[2] && bbox[5] <= x0[2]+xdelta;

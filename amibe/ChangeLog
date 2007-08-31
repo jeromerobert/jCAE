@@ -1,3 +1,10 @@
+Fri Aug 31 17:33:34 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/oemm/OEMM.java: Remove xdelta member, it is
+	obsolete.  Make Node.file transient and add a new pathComponents
+	member to store component paths.  Serialized OEMM instances should
+	now be portable, but serialVersionUID have been modified.
+
 Fri Aug 31 12:52:40 CEST 2007 Jan Kozusznik
 
 	* src/org/jcae/mesh/oemm/OEMM.java: New OEMM.Node.getMaxIndex() and
@@ -17,7 +24,6 @@ Fri Aug 31 12:52:40 CEST 2007 Jan Kozusznik
 	* src/org/jcae/mesh/MeshOEMMCountElements.java
 	  src/org/jcae/mesh/MeshOEMMCoarseViewer.java
 	  src/org/jcae/mesh/MeshOEMMDecimateMoreLeaves.java: New main classes.
-
 
 Fri Aug 31 15:21:26 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
