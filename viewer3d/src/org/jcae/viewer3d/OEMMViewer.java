@@ -83,15 +83,20 @@ public class OEMMViewer
 	
 	public static BranchGroup meshOEMM(OEMM oemm, TIntHashSet leaves)
 	{
-		return meshOEMM(oemm, leaves, true);
+		return meshOEMM(oemm, leaves, false);
 	}
 
 	public static BranchGroup meshOEMM(OEMM oemm, TIntHashSet leaves, boolean adjacency)
 	{
-		BranchGroup bg = new BranchGroup();
-		Mesh mesh = Storage.loadNodes(oemm, leaves, adjacency);
+		Mesh mesh = Storage.loadNodes(oemm, leaves, adjacency, true);
+		return meshOEMM(mesh, adjacency);
+	}
+
+	public static BranchGroup meshOEMM(Mesh mesh, boolean adjacency)
+	{
 		// Mesh may be empty if all vertices are connected to
 		// external vertices
+		BranchGroup bg = new BranchGroup();
 		if (mesh.getTriangles().isEmpty())
 			return bg;
 		double [] coord = meshCoord(mesh);
@@ -104,6 +109,7 @@ public class OEMMViewer
 		Appearance blackFace = new Appearance();
 		PolygonAttributes pa = new PolygonAttributes(PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE, 2.0f*absOffsetStep, false, relOffsetStep);
 		ColoringAttributes ca = new ColoringAttributes(0,0,0,ColoringAttributes.SHADE_FLAT);
+		//pa.setCullFace(PolygonAttributes.CULL_BACK);
 		blackFace.setPolygonAttributes(pa);
 		blackFace.setColoringAttributes(ca);
 		Shape3D shapeFill = new Shape3D(tri, blackFace);
@@ -112,6 +118,7 @@ public class OEMMViewer
 		Appearance wireFrame = new Appearance();
 		PolygonAttributes pa2 = new PolygonAttributes(PolygonAttributes.POLYGON_LINE, PolygonAttributes.CULL_NONE, absOffsetStep);
 		ColoringAttributes ca2 = new ColoringAttributes(0,0,1,ColoringAttributes.SHADE_GOURAUD);
+		//pa2.setCullFace(PolygonAttributes.CULL_BACK);
 		wireFrame.setPolygonAttributes(pa2);
 		wireFrame.setColoringAttributes(ca2);
 
@@ -147,20 +154,25 @@ public class OEMMViewer
 
 	private static final double [] meshCoord(Mesh mesh)
 	{
+		
 		Collection triList = mesh.getTriangles();
+		boolean [] isViewable = new boolean[triList.size()];
 		int nrt = 0;
-		for (Iterator it = triList.iterator(); it.hasNext(); )
-		{
-			Triangle t = (Triangle) it.next();
-			if (t.isReadable())
-				nrt++;
-		}
-		double [] coord = new double[9*nrt];
 		int i = 0;
 		for (Iterator it = triList.iterator(); it.hasNext(); )
 		{
 			Triangle t = (Triangle) it.next();
-			if (!t.isReadable())
+			isViewable[i] = isViewable(t);
+			if (isViewable[i])
+				nrt++;
+			i++;
+		}
+		double [] coord = new double[9*nrt];
+		i = 0;
+		for (Iterator it = triList.iterator(); it.hasNext(); )
+		{
+			Triangle t = (Triangle) it.next();
+			if (!isViewable[i])
 				continue;
 			for (int j = 0; j < 3; j++)
 			{
@@ -172,6 +184,11 @@ public class OEMMViewer
 			i++;
 		}
 		return coord;
+	}
+
+	private static boolean isViewable(Triangle t)
+	{
+		return t.isReadable() && t.vertex[0].isReadable() && t.vertex[1].isReadable() && t.vertex[2].isReadable();
 	}
 
 	private static final int [] meshFreeEdges(Mesh mesh)

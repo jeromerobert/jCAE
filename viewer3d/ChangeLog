@@ -2,6 +2,9 @@
 
 	* src/org/jcae/viewer3d/FPSBehavior.java: Fix call to
 	firePropertyChangeListenerPropertyChange().
+	* src/org/jcae/viewer3d/OEMMViewer.java: Do not build mesh
+	adjacency by default.  Minor changes in meshCoord() to
+	handle non-readable triangles.
 
 2007-07-16 11:43  Jerome Robert <jeromerobert@users.sourceforge.net>
 
