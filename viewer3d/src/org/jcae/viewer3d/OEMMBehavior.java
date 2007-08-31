@@ -20,24 +20,158 @@
 
 package org.jcae.viewer3d;
 
+import gnu.trove.TIntArrayList;
 import gnu.trove.TIntHashSet;
+import gnu.trove.TIntProcedure;
+
 import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.WeakHashMap;
+import java.util.Map.Entry;
+
+
 import javax.media.j3d.*;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
+import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.Storage;
+import org.jcae.mesh.oemm.TraversalProcedure;
+import org.jcae.mesh.oemm.OEMM.Node;
 import org.jcae.viewer3d.bg.ViewableBG;
 import org.jcae.viewer3d.cad.ViewableCAD;
 import org.jcae.viewer3d.cad.occ.OCCProvider;
+
+import com.sun.jmx.remote.util.CacheMap;
 
 /**
  * Dynamically hide and show voxel in a OEMM viewer
  */
 public class OEMMBehavior extends Behavior
-{	
+{
+	private static final int DEFAULT_MAX_TRIANGLES_NBR = -1;
+	private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(OEMMBehavior.class);
+	private boolean frozen = false;
+	private static class LoadCoarseOEMMProcedure extends TraversalProcedure
+	{
+		private Map<Integer, ViewHolder> oemmNodeId2BranchGroup;
+		
+		private TIntHashSet set = new TIntHashSet();
+		private Map<Integer,Mesh> nodeToMeshMap = null;
+		
+		public LoadCoarseOEMMProcedure(Map<Integer, ViewHolder> oemmNodeId2BranchGroup, boolean cloneBoundaryTriangles)
+		{
+			this.oemmNodeId2BranchGroup = oemmNodeId2BranchGroup;
+			if (cloneBoundaryTriangles) {
+				nodeToMeshMap = new HashMap<Integer, Mesh>();
+			}
+		}
+		
+		public LoadCoarseOEMMProcedure(Map<Integer, ViewHolder> coarseOemmNodeId2BranchGroup)
+		{
+			this(coarseOemmNodeId2BranchGroup, false);
+		}
+
+		@Override
+		public int action(OEMM o, Node c, int octant, int visit)
+		{
+			if (visit != LEAF) {
+				return OK;
+			}
+			ViewHolder vh = ViewHolder.makeViewHolder(o, c.leafIndex, set, nodeToMeshMap);
+			oemmNodeId2BranchGroup.put(c.leafIndex, vh);
+			return OK;
+		}
+	}
+	
+	private static class ViewHolder
+	{
+		private BranchGroup viewElem;
+		private int id;
+		private Mesh mesh;
+
+		public ViewHolder(Integer id, Mesh mesh, BranchGroup viewElem)
+		{
+			super();
+			this.viewElem = viewElem;
+			this.id = id;
+			this.mesh = mesh;
+		}
+
+		public BranchGroup getViewElement()
+		{
+			return viewElem;
+		}
+
+		public void setViewElem(BranchGroup viewElem)
+		{
+			this.viewElem = viewElem;
+		}
+		
+		public int getId()
+		{
+			return id;
+		}
+
+		public static ViewHolder makeViewHolder(OEMM o, int index, TIntHashSet set, Map<Integer, Mesh> nodeToMeshMap)
+		{
+			set.clear();
+			set.add(index);
+			Mesh mesh = Storage.loadNodes(o, set, false, true, nodeToMeshMap);
+			BranchGroup bg = null;
+			if (nodeToMeshMap == null) {
+				bg = OEMMViewer.meshOEMM(mesh, false);
+			}
+			ViewHolder vh = new ViewHolder(index, mesh, bg);
+			return vh;
+		}
+
+		public Mesh getMesh()
+		{
+			return mesh;
+		}
+	}
+	
+	private static class VoxelSortHelper implements Comparable<VoxelSortHelper>
+	{
+		private float distance;
+		private int voxelIndex;
+
+		public VoxelSortHelper(float distance, int voxelIndex)
+		{
+			super();
+			this.distance = distance;
+			this.voxelIndex = voxelIndex;
+		}
+
+		@Override
+		public int compareTo(VoxelSortHelper o)
+		{
+			return Float.compare(this.distance, o.distance);
+		}
+
+		public int getVoxelIndex()
+		{
+			return voxelIndex;
+		}
+		
+	}
+	
 	interface ChangeListener
 	{
 		void stateChanged(OEMMBehavior behaviour);
@@ -51,8 +185,10 @@ public class OEMMBehavior extends Behavior
 	 * OEMM voxel
 	 */ 
 	private double d2limit;
-	private Viewable decMesh;
+	private long maxNumberOfTriangles;
+	
 	private OEMM oemm;
+	
 	private boolean oemmActive;
 	private View view;
 	private Point3d[] voxels;
@@ -60,30 +196,85 @@ public class OEMMBehavior extends Behavior
 	private WakeupCriterion wakeupFrame;
 	
 	private WakeupCriterion wakeupTransf;
-	private TIntHashSet currentIds=new TIntHashSet();
-
-	public OEMMBehavior(View canvas, OEMM oemm)
+	private Map<Integer, ViewHolder> coarseOemmNodeId2BranchGroup = new HashMap<Integer, ViewHolder>();
+	
+	private Map<Integer, ViewHolder> visibleFineOemmNodeId2BranchGroup = new HashMap<Integer, ViewHolder>();
+	
+	private Map<Integer, ViewHolder> cacheOemmNodeId2BranchGroup ;
+	
+	private BranchGroup visibleMeshBranchGroup = new BranchGroup();
+	
+	public OEMMBehavior(View canvas, OEMM oemm, OEMM coarseOEMM)
 	{
+		
+		visibleMeshBranchGroup.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
+		visibleMeshBranchGroup.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
+		cacheOemmNodeId2BranchGroup = new CacheMap(100);
+		canvas.add(new ViewableBG(visibleMeshBranchGroup));
+		boolean cloneBoundaryTriangles = Boolean.getBoolean("org.jcae.viewer3d.OEMMBehavior.cloneBoundaryTringles");
+		
+		
+		coarseOEMM.walk(new LoadCoarseOEMMProcedure(coarseOemmNodeId2BranchGroup, cloneBoundaryTriangles));
+		
+		for(Entry<Integer,ViewHolder> entry: coarseOemmNodeId2BranchGroup.entrySet()) 
+		{
+			if (entry.getValue().getViewElement() == null) {
+				entry.getValue().setViewElem(OEMMViewer.meshOEMM(entry.getValue().getMesh(), false));
+			}
+			addBranchGroup(entry.getValue(), true);
+		}
+		
 		setSchedulingBounds(new BoundingSphere(
 			new Point3d(), Double.MAX_VALUE));
 		double[] coords=oemm.getCoords(true);
-		view=canvas;
-		voxels=new Point3d[coords.length/6/4/3];
-		for(int i=0; i<voxels.length; i++)
-		{
-			int n=6*4*3*i;
-			voxels[i]=new Point3d(
-				(coords[n+0]+coords[n+6*4*3-6])/2,
-				(coords[n+1]+coords[n+6*4*3-5])/2,
-				(coords[n+2]+coords[n+6*4*3-4])/2);
-		}
+		computeVoxels(canvas, coarseOEMM, coords);
+		
 		this.oemm=oemm;
+		
 		d2limit=2*(coords[0]-coords[6*4*3-6]);
 		wakeupFrame=new WakeupOnElapsedFrames(1);
 		wakeupTransf=new WakeupOnTransformChange(
 			view.getViewingPlatform().getViewPlatformTransform());
+		maxNumberOfTriangles = Long.getLong("org.jcae.viewer3d.OEMMBehavior.maxNumberOfTringles", DEFAULT_MAX_TRIANGLES_NBR);
+		if (log.isInfoEnabled()) {
+			log.info("Maximal number of triangles: " + maxNumberOfTriangles);
+		}
 	}
-	
+
+	public Set<Integer> getIds()
+	{
+		return visibleFineOemmNodeId2BranchGroup.keySet();
+	}
+
+	private void computeVoxels(View canvas, OEMM coarseOEMM, double[] coords)
+	{
+		final double[] values = new double[3];
+//		Collection<Integer> nodesWithoutVoxel = new ArrayList<Integer>();
+		view=canvas;
+		voxels=new Point3d[coords.length/6/4/3];
+		for(int i=0; i<voxels.length; i++)
+		{
+//			int n=6*4*3*i;
+//			voxels[i]=new Point3d(
+//				(coords[n+0]+coords[n+6*4*3-6])/2,
+//				(coords[n+1]+coords[n+6*4*3-5])/2,
+//				(coords[n+2]+coords[n+6*4*3-4])/2);
+			ViewHolder vh = coarseOemmNodeId2BranchGroup.get(i);
+			Collection nodes = vh.mesh.getNodes();
+			if (getAveragePointForVertices(nodes, values)) {
+				voxels[i]=new Point3d(values[0], values[1], values[2]);
+			} else {
+//				nodesWithoutVoxel.add(i);
+				int n=6*4*3*i;
+				voxels[i]=new Point3d(
+					(coords[n+0]+coords[n+6*4*3-6])/2,
+					(coords[n+1]+coords[n+6*4*3-5])/2,
+					(coords[n+2]+coords[n+6*4*3-4])/2);
+			}
+			vh.mesh = null;
+		}
+	}
+
 	/**
 	 * Registers ChangeListener to receive events.
 	 * @param listener The listener to register.
@@ -131,40 +322,108 @@ public class OEMMBehavior extends Behavior
 			wakeupOn(wakeupFrame);
 			return;
 		}
+		if (!frozen) {
+			final Set<Integer> ids = new HashSet<Integer>();
+			findVoxelsWithFineMesh(ids);
+			showFineMesh(ids);
+		}
+		wakeupOn(wakeupTransf);
 		
-		TIntHashSet ids=new TIntHashSet();
-		ViewPyramid vp=new ViewPyramid(view, scaleRectangle(view.getBounds(), 2));		
-		
+	}
+
+	private void findVoxelsWithFineMesh(final Set<Integer> ids)
+	{
+		ViewPyramid vp=new ViewPyramid(view, scaleRectangle(view.getBounds(), 2.5));
+		List<VoxelSortHelper> helper = new ArrayList<VoxelSortHelper>();
+		long totalNumberTriangles = 0; //number of already visible vertices
 		for(int i=0; i<voxels.length; i++)
 		{
-			if(voxels[i].distanceSquared(vp.getEye())<d2limit
-				&& vp.intersect(voxels[i]))
-				ids.add(i);
-		}
+			if (voxels[i] == null) {
+				continue;
+			}
+			double distance_2 = voxels[i].distanceSquared(vp.getEye());
+			if(distance_2 < d2limit	&& vp.intersect(voxels[i])) {
+				if (maxNumberOfTriangles > 0) {
+					double distanceFromCenter_2 = distanceOfPointFromLine(vp.getStartPoint(), vp.getEye(), voxels[i]);
+					helper.add(new VoxelSortHelper((float) (distance_2 + distanceFromCenter_2 / distance_2), i));
+				} else {
+					ids.add(i);
+				}
+			}
 		
-		if(!currentIds.containsAll(ids.toArray()) || ids.size()==0)
-		{
-			if(decMesh!=null)
-				view.remove(decMesh);
+		}
+		if (maxNumberOfTriangles > 0) {
+			Collections.sort(helper);
+			for (VoxelSortHelper voxel: helper) {
+				long newTotalNumber = totalNumberTriangles + oemm.leaves[voxel.voxelIndex].tn;
+				if (newTotalNumber < maxNumberOfTriangles ) {
+					totalNumberTriangles = newTotalNumber;
+					ids.add(voxel.voxelIndex);
+				} else {
+					break;
+				}
+			}
+		}
+	}
+	
+	/**
+	 *  Computes squared distance of a point x0 
+	 *  from a line (defined by x1 and x2) 
+	 * 	t = - (x1 - x0)* (x2 - x1) / |x2 - x1|^2;
+	 *  d^2 = [x1 + (x2 - x2) * t - x0]^2
+	 *  
+	 * @param startPoint is x1
+	 * @param eye is x2
+	 * @param pt is x0
+	 * @return
+	 */
+	private double distanceOfPointFromLine(Point3d startPoint, Point3d eye, Point3d pt)
+	{
+		Vector3d x1 = new Vector3d(startPoint);
+		Vector3d x2 = new Vector3d(eye);
+		Vector3d x0 = new Vector3d(pt);
+		Vector3d temp = (Vector3d) x2.clone();
+		temp.sub(x1);
+		double absolute = temp.length();
+		temp = (Vector3d) x1.clone();
+		temp.sub(x0);
+		Vector3d temp2 = (Vector3d) x2.clone();
+		temp2.sub(x1);
+		double t = - temp.dot(temp2) / (absolute * absolute);
+		
+		temp = (Vector3d) x2.clone();
+		x2.sub(x1);
+		x2.scale(t);
+		temp.add(x1);
+		temp.sub(x0);
+		double result = temp.lengthSquared();
+		return result;
+	}
 
+	private void showFineMesh(final Set<Integer> ids)
+	{
+		if (log.isInfoEnabled()) {
+			log.info("Fine occtree nodes> " + ids);
+		}
+		if(!getIds().containsAll(ids) || ids.size()==0)
+		{
 			oemmActive=ids.size()>0;
-			
+			if (log.isDebugEnabled()) {
+				log.debug("We will show fine mesh for nodes: " + ids);
+			}
 			if(ids.size()>0)
 			{
-				decMesh = new ViewableBG(OEMMViewer.meshOEMM(oemm, ids, true));                			
-				view.add(decMesh);
+				visibilityRevisionOfCoarseMesh(ids);
 			}
 			else
 			{
-				decMesh=null;
+				showAllHiddenCoarseNodes(null);
 			}
 
 			fireChangeListenerStateChanged();
-			currentIds=ids;
 		}
-		wakeupOn(wakeupTransf);
 	}
-
+	
 	/**
 	 * Removes ChangeListener from the list of listeners.
 	 * @param listener The listener to remove.
@@ -191,26 +450,130 @@ public class OEMMBehavior extends Behavior
 		return rectangle;
 	}
 	
-	/** Test / example */
-	public static void main(String[] args)
+	private void addBranchGroup(ViewHolder vh, boolean coarse)
 	{
-		JFrame f=new JFrame("jcae-viewer3d-fd demo");
-		f.setSize(800,600);
-		f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		final View view=new View(f);
-		f.getContentPane().add(view);		
+		if (log.isDebugEnabled()) {
+			log.debug("addBranchGroup> id:" + vh.getId() + ", coarse:" + coarse);
+		}
+		Map<Integer, ViewHolder> map = coarse ? coarseOemmNodeId2BranchGroup : visibleFineOemmNodeId2BranchGroup;
+		BranchGroup branchGroup = vh.getViewElement();
+		if (!branchGroup.getCapability(BranchGroup.ALLOW_DETACH))
+			branchGroup.setCapability(BranchGroup.ALLOW_DETACH);
 		
-		OEMM oemm = Storage.readOEMMStructure("/home/jerome/JCAEProject/new1.oemm");
-		ViewableCAD vcad=new ViewableCAD(new OCCProvider("/home/jerome/Models/flight_solid.brep"));
+		visibleMeshBranchGroup.addChild(branchGroup);
 		
-		BranchGroup bg=new BranchGroup();
-		OEMMBehavior oemmBehavior=new OEMMBehavior(view, oemm);		
-		bg.addChild(oemmBehavior);
+		if (!coarse) {
+			map.put(vh.getId(), vh);
+		}
+	}
+	
+	private void removeBranchGroup(int id, boolean coarse)
+	{
+		if (log.isDebugEnabled()) {
+			log.debug("removeBranchGroup> id:" + id + ", coarse:" + coarse);
+		}
+		Map<Integer, ViewHolder> map = coarse ? coarseOemmNodeId2BranchGroup : visibleFineOemmNodeId2BranchGroup;
 		
-		view.addBranchGroup(bg);
-		view.add(vcad);
-		view.setOriginAxisVisible(true);
-		view.fitAll();
-		f.setVisible(true);
-	}	
+		//branchGroup.setCapability(BranchGroup.ALLOW_DETACH);
+		ViewHolder vh = map.get(id);
+		visibleMeshBranchGroup.removeChild(vh.getViewElement());
+		if (!coarse) {
+			map.remove(id);
+		}
+	}
+	
+	private void showAllHiddenCoarseNodes(Set<Integer> exceptSet)
+	{
+		Set<Integer> hidedIs = new HashSet<Integer>( visibleFineOemmNodeId2BranchGroup.keySet());
+		
+		for (Integer arg0: hidedIs) {
+			if (exceptSet == null || !exceptSet.contains(arg0)) {
+				addBranchGroup(coarseOemmNodeId2BranchGroup.get(arg0), true);
+				removeBranchGroup(arg0, false);
+			}
+		}
+	}
+
+	private void visibilityRevisionOfCoarseMesh(final Set<Integer> ids)
+	{
+		showAllHiddenCoarseNodes(ids);
+		
+		TIntHashSet set = new TIntHashSet();
+		for (Integer arg0: ids) {
+			if (!visibleFineOemmNodeId2BranchGroup.containsKey(arg0)) {
+				ViewHolder vh = getFineMeshFromCache(arg0, set);
+				
+				addBranchGroup(vh, false);
+				removeBranchGroup(arg0, true);
+				
+			}
+		}
+	}
+
+	private ViewHolder getFineMeshFromCache(Integer arg0, TIntHashSet set)
+	{
+		ViewHolder vh = cacheOemmNodeId2BranchGroup.get(arg0);
+		if (vh == null) {
+			if (log.isDebugEnabled()) {
+				log.debug("finemesh node:" + arg0 + " is not loaded and I will load it.");
+			}
+			
+			vh = ViewHolder.makeViewHolder(oemm, arg0, set, null);
+			vh.mesh = null;
+			cacheOemmNodeId2BranchGroup.put(arg0, vh);
+		}
+		return vh;
+	}
+	
+	/**
+	 * Computes average center of vertices
+	 * @param vertices
+	 * @param result vector for store result
+
+	 */
+	private boolean getAveragePointForVertices(Collection vertices, double[] result)
+	{
+		int count = 0;
+		for (int ii = 0; ii < result.length; ii++) {
+			result[ii] = 0;
+		}
+		for (Iterator i = vertices.iterator(); i.hasNext();)
+		{
+			Vertex v = (Vertex) i.next();
+			if (!v.isReadable())
+				continue;
+			count++;
+			double []coords = v.getUV();
+			for (int ii = 0; ii < result.length; ii++) {
+				result[ii] += coords[ii] ;
+			}
+		}
+		if (count > 0) {
+			double size = count;
+			for (int ii = 0; ii < result.length; ii++) {
+				result[ii] /= size;
+			}
+		}
+		return count > 0;
+	}
+
+	public Point3d getVoxel(int arg0)
+	{
+		return voxels[arg0];
+	}
+
+	public int getNumberOfCacheNodes()
+	{
+		return cacheOemmNodeId2BranchGroup.size();
+	}
+
+	public int getNumberOfVisibleFineElements()
+	{
+		return visibleFineOemmNodeId2BranchGroup.size();
+	}
+
+	public void switchFreeze()
+	{
+		frozen = !frozen;
+	}
 }
