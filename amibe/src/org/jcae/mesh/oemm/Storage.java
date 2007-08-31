@@ -260,9 +260,9 @@ public class Storage
 			Map<Integer, Mesh> nodeToMeshMap)
 	{
 		logger.info("Loading nodes");
-		Map<Integer, List<FakeNonReadedVertex>> unloadedNodeIndex2RequiredVertices = null;
+		Map<Integer, List<FakeNonReadVertex>> unloadedNodeIndex2RequiredVertices = null;
 		if (loadNonWritableNodes) {
-			unloadedNodeIndex2RequiredVertices = new HashMap<Integer, List<FakeNonReadedVertex>>();
+			unloadedNodeIndex2RequiredVertices = new HashMap<Integer, List<FakeNonReadVertex>>();
 		}
 		Mesh ret = null;
 		if (nodeToMeshMap != null) {
@@ -381,7 +381,7 @@ public class Storage
 			for (int i = 0; i < 3; i++)
 			{
 				Vertex vertex = tr.vertex[i];
-				if (!vertex.isReadable() || vertex instanceof FakeNonReadedVertex) {
+				if (!vertex.isReadable() || vertex instanceof FakeNonReadVertex) {
 					continue;
 				}
 				//check that there are no different vertices with the same label
@@ -503,7 +503,7 @@ public class Storage
 	 * 		  collection of vertices that should be read from that node. 
 	 */
 	private static void loadVerticesFromUnloadedNodes( OEMM oemm,
-			Map<Integer, List<FakeNonReadedVertex>> unloadedNodeIndex2RequiredVertices)
+			Map<Integer, List<FakeNonReadVertex>> unloadedNodeIndex2RequiredVertices)
 	{
 		int lastLimit = bb.limit();
 		
@@ -513,14 +513,14 @@ public class Storage
 			DoubleBuffer dbb = bb.asDoubleBuffer();
 			
 			
-			for (Entry<Integer, List<FakeNonReadedVertex>> entry: unloadedNodeIndex2RequiredVertices.entrySet()) {
+			for (Entry<Integer, List<FakeNonReadVertex>> entry: unloadedNodeIndex2RequiredVertices.entrySet()) {
 				OEMM.Node node = oemm.leaves[entry.getKey()];
-				List<FakeNonReadedVertex> list = entry.getValue();
-				sortFakeNonReadedVertexList(list);
+				List<FakeNonReadVertex> list = entry.getValue();
+				sortFakeNonReadVertexList(list);
 				FileChannel fch = null;
 				try {
 					fch = new FileInputStream(getVerticesFile(oemm, node)).getChannel();
-					for (FakeNonReadedVertex vertex: list) {
+					for (FakeNonReadVertex vertex: list) {
 						
 						fch.position(VERTEX_SIZE * vertex.getLocalNumber());
 						bb.rewind();
@@ -591,20 +591,16 @@ public class Storage
 			TIntHashSet leaves,
 			Mesh ret,
 			TIntObjectHashMap vertMap,
-			Map<Integer, List<FakeNonReadedVertex>> unloadedNodeIndex2RequiredVertices, 
+			Map<Integer, List<FakeNonReadVertex>> unloadedNodeIndex2RequiredVertices, 
 			Map<Integer, Mesh> nodeToMeshMap)
 	{
-		int []nodes = leaves.toArray();
+		int [] nodes = leaves.toArray();
 		Arrays.sort(nodes);
-		ReadVerticesProcedure rv_proc = new ReadVerticesProcedure(ret, vertMap, leaves);
-		//oemm.walk(rv_proc);
 		for (int i: nodes) {
-			rv_proc.read(oemm, oemm.leaves[i]);
+			readVertices(oemm, leaves, ret, vertMap, oemm.leaves[i]);
 		}
-		ReadTrianglesProcedure rt_proc = new ReadTrianglesProcedure(vertMap, leaves, ret,unloadedNodeIndex2RequiredVertices, nodeToMeshMap);
-		//oemm.walk(rt_proc);
 		for (int i: nodes) {
-			rt_proc.read(oemm, oemm.leaves[i]);
+			readTriangles(oemm, leaves, ret, vertMap, unloadedNodeIndex2RequiredVertices, nodeToMeshMap, oemm.leaves[i]);
 		}
 	}
 	
@@ -783,7 +779,7 @@ public class Storage
 			}
 		}
 		
-		updateNonReadedNodes(oemm, nodes4Update, old2newIndex);
+		updateNonReadNodes(oemm, nodes4Update, old2newIndex);
 	}
 
 	/**
@@ -812,7 +808,7 @@ public class Storage
 	 * @param nodes4Update
 	 * @param old2newIndex
 	 */
-	private static void updateNonReadedNodes(OEMM oemm,
+	private static void updateNonReadNodes(OEMM oemm,
 			Set<Integer> nodes4Update, Map<Integer, VertexIndexHolder> old2newIndex)
 	{
 		int []leaf = new int[3];
@@ -1087,7 +1083,7 @@ public class Storage
 	private static int searchNode(OEMM oemm, Triangle tr, int[] positions)
 	{
 		int smallerIndexOfNode = Integer.MAX_VALUE;
-		FakeNonReadedVertex fnrv = null;
+		FakeNonReadVertex fnrv = null;
 		for(Vertex vert: tr.vertex) {
 			int index;
 			
@@ -1106,8 +1102,8 @@ public class Storage
 
 	private static int searchNode(OEMM oemm, Vertex vert, int[] positions)
 	{
-		if (vert instanceof FakeNonReadedVertex) {
-			return ((FakeNonReadedVertex) vert).getContaingNode().leafIndex;
+		if (vert instanceof FakeNonReadVertex) {
+			return ((FakeNonReadVertex) vert).getContaingNode().leafIndex;
 		}
 		double []coords = vert.getUV();
 		return searchNode(oemm, coords, positions);
@@ -1128,12 +1124,12 @@ public class Storage
 		
 	}
 	
-	private static void sortFakeNonReadedVertexList(List<FakeNonReadedVertex> list)
+	private static void sortFakeNonReadVertexList(List<FakeNonReadVertex> list)
 	{
-		Collections.sort(list, new Comparator<FakeNonReadedVertex>() {
+		Collections.sort(list, new Comparator<FakeNonReadVertex>() {
 
 			@Override
-			public int compare(FakeNonReadedVertex o1, FakeNonReadedVertex o2) {
+			public int compare(FakeNonReadVertex o1, FakeNonReadVertex o2) {
 				return (o1.getLabel()<o2.getLabel() ? -1 : (o1.getLabel()==o2.getLabel() ? 0 : 1));
 			}
 			
@@ -1170,7 +1166,7 @@ public class Storage
 		}
 	}
 	
-	private static class FakeNonReadedVertex extends Vertex
+	private static class FakeNonReadVertex extends Vertex
 	{
 		/**
 		 * 
@@ -1181,7 +1177,7 @@ public class Storage
 		 */
 		private OEMM.Node containgNode;
 
-		public FakeNonReadedVertex(OEMM oemm, int leaf, int localNumber) {
+		public FakeNonReadVertex(OEMM oemm, int leaf, int localNumber) {
 			super(0.0, 0.0, 0.0);
 			containgNode = oemm.leaves[leaf];
 			setLabel(containgNode.minIndex + localNumber);
@@ -1206,216 +1202,168 @@ public class Storage
 		}
 	}
 	
-	private static class ReadVerticesProcedure extends TraversalProcedure
+	private static void readVertices(OEMM oemm, TIntHashSet leaves, Mesh mesh, TIntObjectHashMap vertMap, OEMM.Node current)
 	{
-		private TIntObjectHashMap vertMap;
-		private TIntHashSet leaves;
-		private Mesh mesh;
-		public ReadVerticesProcedure(Mesh m, TIntObjectHashMap map, TIntHashSet set)
+		try
 		{
-			vertMap = map;
-			leaves = set;
-			mesh = m;
-		}
-		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
-		{
-			if (visit != LEAF || !leaves.contains(current.leafIndex))
-				return OK;
-			read(oemm, current);
-			return OK;
-		}
-		private void read(OEMM oemm, OEMM.Node current)
-		{
-			try
+			logger.debug("Reading vertices from "+getVerticesFile(oemm, current));
+			Vertex [] vert = new Vertex[current.vn];
+			double [] xyz = new double[3];
+			FileChannel fc = new FileInputStream(getVerticesFile(oemm, current)).getChannel();
+			DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(getAdjacencyFile(oemm, current))));
+			bb.clear();
+			DoubleBuffer bbD = bb.asDoubleBuffer();
+			int remaining = current.vn;
+			int index = 0;
+			for (int nblock = (remaining * VERTEX_SIZE) / bufferSize; nblock >= 0; --nblock)
 			{
-				logger.debug("Reading vertices from "+oemm.getDirectory()+File.separator+current.file+"v");
-				Vertex [] vert = new Vertex[current.vn];
-				double [] xyz = new double[3];
-				FileChannel fc = new FileInputStream(getVerticesFile(oemm, current)).getChannel();
-				DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(oemm.getDirectory(), current.file+"a"))));
-				bb.clear();
-				DoubleBuffer bbD = bb.asDoubleBuffer();
-				int remaining = current.vn;
-				int index = 0;
-				for (int nblock = (remaining * VERTEX_SIZE) / bufferSize; nblock >= 0; --nblock)
+				bb.rewind();
+				fc.read(bb);
+				bbD.rewind();
+				int nf = bufferSize / VERTEX_SIZE;
+				if (remaining < nf)
+					nf = remaining;
+				remaining -= nf;
+				for(int nr = 0; nr < nf; nr ++)
 				{
-					bb.rewind();
-					fc.read(bb);
-					bbD.rewind();
-					int nf = bufferSize / VERTEX_SIZE;
-					if (remaining < nf)
-						nf = remaining;
-					remaining -= nf;
-					for(int nr = 0; nr < nf; nr ++)
+					bbD.get(xyz);
+					vert[index] = (Vertex) mesh.factory.createVertex(xyz);
+					vert[index].setLabel(current.minIndex + index);
+					vert[index].setReadable(true);
+					int n = (int) bufIn.readByte();
+					//  Read neighbours
+					boolean writable = true;
+					for (int j = 0; j < n; j++)
 					{
-						bbD.get(xyz);
-						vert[index] = (Vertex) mesh.factory.createVertex(xyz);
-						vert[index].setLabel(current.minIndex + index);
-						vert[index].setReadable(true);
-						int n = (int) bufIn.readByte();
-						//  Read neighbours
-						boolean writable = true;
-						for (int j = 0; j < n; j++)
+						int num = (int) bufIn.readByte();
+						if (!leaves.contains(current.adjLeaves.get(num)))
 						{
-							int num = (int) bufIn.readByte();
-							if (!leaves.contains(current.adjLeaves.get(num)))
-							{
-								writable = false;
-								for (j++; j < n; j++)
-									bufIn.readByte();
-								break;
-							}
+							writable = false;
+							for (j++; j < n; j++)
+								bufIn.readByte();
+							break;
 						}
-						vert[index].setWritable(writable);
-						vertMap.put(current.minIndex + index, vert[index]);
-						mesh.add(vert[index]);
-						index++;
-						
 					}
+					vert[index].setWritable(writable);
+					vertMap.put(current.minIndex + index, vert[index]);
+					mesh.add(vert[index]);
+					index++;
+					
 				}
-				fc.close();
-				bufIn.close();
 			}
-			catch (IOException ex)
-			{
-				logger.error("I/O error when reading file "+oemm.getDirectory()+File.separator+current.file+"i");
-				ex.printStackTrace();
-				throw new RuntimeException(ex);
-			}
+			fc.close();
+			bufIn.close();
+		}
+		catch (IOException ex)
+		{
+			logger.error("I/O error when reading file "+getVerticesFile(oemm, current));
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
 		}
 	}
 	
-	private static class ReadTrianglesProcedure extends TraversalProcedure
+	private static void readTriangles(OEMM oemm, TIntHashSet leaves, Mesh mesh, TIntObjectHashMap vertMap, Map<Integer, List<FakeNonReadVertex>> unloadedNodeIndex2RequiredNodes, Map<Integer, Mesh> node2MeshMap, OEMM.Node current)
 	{
-		private TIntObjectHashMap vertMap;
-		private TIntHashSet leaves;
-		private Mesh mesh;
-		private Map<Integer, List<FakeNonReadedVertex>> unloadedNodeIndex2RequiredNodes;
-		private Map<Integer, Mesh> node2MeshMap;
-		public ReadTrianglesProcedure(TIntObjectHashMap map, TIntHashSet set, Mesh m, Map<Integer, List<FakeNonReadedVertex>> unloadedNodesmap, Map<Integer, Mesh> node2MeshMap)
+		try
 		{
-			vertMap = map;
-			leaves = set;	
-			mesh = m;
-			this.unloadedNodeIndex2RequiredNodes = unloadedNodesmap;
-			this.node2MeshMap = node2MeshMap;
-			
-		}
-		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
-		{
-			if (visit != LEAF || !leaves.contains(current.leafIndex))
-				return OK;
-			read(oemm, current);
-			return OK;
-		}
-		private void read(OEMM oemm, OEMM.Node current)
-		{
-			try
+			logger.debug("Reading triangles from "+getTrianglesFile(oemm, current));
+			FileChannel fc = new FileInputStream(getTrianglesFile(oemm, current)).getChannel();
+			Vertex [] vert = new Vertex[3];
+			int [] leaf = new int[3];
+			int [] pointIndex = new int[3];
+			int remaining = current.tn;
+			bb.clear();
+			IntBuffer bbI = bb.asIntBuffer();
+			for (int nblock = (remaining * TRIANGLE_SIZE) / bufferSize; nblock >= 0; --nblock)
 			{
-				logger.debug("Reading triangles from "+oemm.getDirectory()+File.separator+current.file+"t");
-				FileChannel fc = new FileInputStream(new File(oemm.getDirectory(), current.file+"t")).getChannel();
-				Vertex [] vert = new Vertex[3];
-				int [] leaf = new int[3];
-				int [] pointIndex = new int[3];
-				int remaining = current.tn;
-				bb.clear();
-				IntBuffer bbI = bb.asIntBuffer();
-				for (int nblock = (remaining * TRIANGLE_SIZE) / bufferSize; nblock >= 0; --nblock)
+				bb.rewind();
+				fc.read(bb);
+				bbI.rewind();
+				int nf = bufferSize / TRIANGLE_SIZE;
+				if (remaining < nf)
+					nf = remaining;
+				remaining -= nf;
+				for(int nr = 0; nr < nf; nr ++)
 				{
-					bb.rewind();
-					fc.read(bb);
-					bbI.rewind();
-					int nf = bufferSize / TRIANGLE_SIZE;
-					if (remaining < nf)
-						nf = remaining;
-					remaining -= nf;
-					for(int nr = 0; nr < nf; nr ++)
+					boolean readable = true;
+					boolean writable = true;
+					bbI.get(leaf);
+					bbI.get(pointIndex);
+					for (int j = 0; j < 3; j++)
 					{
-						boolean readable = true;
-						boolean writable = true;
-						bbI.get(leaf);
-						bbI.get(pointIndex);
-						for (int j = 0; j < 3; j++)
+						int globalIndex = oemm.leaves[leaf[j]].minIndex + pointIndex[j];
+						if (leaves.contains(leaf[j]))
 						{
-							int globalIndex = oemm.leaves[leaf[j]].minIndex + pointIndex[j];
-							if (leaves.contains(leaf[j]))
-							{
-								vert[j] = (Vertex) vertMap.get(globalIndex);
-								assert vert[j] != null;
-							}
-							else
-							{
-								writable = false;
-								vert[j] = (Vertex) vertMap.get(globalIndex);
-								if (vert[j] == null) {
-									vert[j] = new FakeNonReadedVertex(oemm,leaf[j], pointIndex[j]);
-									vertMap.put(globalIndex, vert[j]);
-									putToUnloadedNodeMap(leaf[j], (FakeNonReadedVertex) vert[j]);
-								}
-							}
+							vert[j] = (Vertex) vertMap.get(globalIndex);
+							assert vert[j] != null;
 						}
-						// group number
-						bbI.get();
-//						if (!writable)
-//							continue;
-						Mesh operationMesh = mesh;
-						createTriangle(current, vert, readable, writable,
-								operationMesh);
-						//put triangle to every mesh that should be constructed for specific nodes
-						if (node2MeshMap != null) {
-							Set<Integer> processedNode = new HashSet<Integer>();
-							for (int j = 0; j < 3; j++) {
-								if (vert[j] instanceof FakeNonReadedVertex) {
-									FakeNonReadedVertex fnrVertex = (FakeNonReadedVertex) vert[j];
-									int leafIndex = fnrVertex.getContaingNode().leafIndex;
-									if (!processedNode.contains(leafIndex)) {
-										
-										Mesh mesh4Add = node2MeshMap.get(leafIndex);
-										if (mesh4Add == null) {
-											mesh4Add = new Mesh();
-											node2MeshMap.put(leafIndex, mesh4Add);
-										}
-										createTriangle(current, vert, readable, writable, mesh4Add);
-										processedNode.add(fnrVertex.getContaingNode().leafIndex);
+						else
+						{
+							writable = false;
+							vert[j] = (Vertex) vertMap.get(globalIndex);
+							if (vert[j] == null) {
+								vert[j] = new FakeNonReadVertex(oemm,leaf[j], pointIndex[j]);
+								vertMap.put(globalIndex, vert[j]);
+								if (unloadedNodeIndex2RequiredNodes != null)
+								{
+									FakeNonReadVertex vertex = (FakeNonReadVertex) vert[j];
+									List<FakeNonReadVertex> vertices = unloadedNodeIndex2RequiredNodes.get(leaf[j]);
+									if (vertices == null) {
+										vertices = new ArrayList<FakeNonReadVertex>();
+										unloadedNodeIndex2RequiredNodes.put(leaf[j], vertices);
 									}
+									vertices.add(vertex);
+								}
+							}
+						}
+					}
+					// group number
+					bbI.get();
+//					if (!writable)
+//						continue;
+					Mesh operationMesh = mesh;
+					createTriangle(current, vert, readable, writable, operationMesh);
+					//put triangle to every mesh that should be constructed for specific nodes
+					if (node2MeshMap != null) {
+						Set<Integer> processedNode = new HashSet<Integer>();
+						for (int j = 0; j < 3; j++) {
+							if (vert[j] instanceof FakeNonReadVertex) {
+								FakeNonReadVertex fnrVertex = (FakeNonReadVertex) vert[j];
+								int leafIndex = fnrVertex.getContaingNode().leafIndex;
+								if (!processedNode.contains(leafIndex)) {
+									
+									Mesh mesh4Add = node2MeshMap.get(leafIndex);
+									if (mesh4Add == null) {
+										mesh4Add = new Mesh();
+										node2MeshMap.put(leafIndex, mesh4Add);
+									}
+									createTriangle(current, vert, readable, writable, mesh4Add);
+									processedNode.add(fnrVertex.getContaingNode().leafIndex);
 								}
 							}
 						}
 					}
 				}
-				fc.close();
 			}
-			catch (IOException ex)
-			{
-				logger.error("I/O error when reading indexed file "+oemm.getDirectory()+File.separator+current.file+"t");
-				ex.printStackTrace();
-				throw new RuntimeException(ex);
-			}
+			fc.close();
 		}
-		private void createTriangle(OEMM.Node current, Vertex[] vert,
-				boolean readable, boolean writable, Mesh operationMesh)
+		catch (IOException ex)
 		{
-			Triangle t = (Triangle) operationMesh.factory.createTriangle(vert[0], vert[1], vert[2]);
-			t.setGroupId(current.leafIndex);
-			vert[0].setLink(t);
-			vert[1].setLink(t);
-			vert[2].setLink(t);
-			t.setReadable(readable);
-			t.setWritable(writable);
-			operationMesh.add(t);
-		}
-		private void putToUnloadedNodeMap(int i, FakeNonReadedVertex vertex)
-		{
-			if (unloadedNodeIndex2RequiredNodes == null)
-				return;
-			
-			List<FakeNonReadedVertex> vertices = unloadedNodeIndex2RequiredNodes.get(i);
-			if (vertices == null) {
-				vertices = new ArrayList<FakeNonReadedVertex>();
-				unloadedNodeIndex2RequiredNodes.put(i, vertices);
-			}
-			vertices.add(vertex);
+			logger.error("I/O error when reading indexed file "+getTrianglesFile(oemm, current));
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
 		}
 	}
-	
+
+	private static void createTriangle(OEMM.Node current, Vertex[] vert, boolean readable, boolean writable, Mesh operationMesh)
+	{
+		Triangle t = (Triangle) operationMesh.factory.createTriangle(vert[0], vert[1], vert[2]);
+		t.setGroupId(current.leafIndex);
+		vert[0].setLink(t);
+		vert[1].setLink(t);
+		vert[2].setLink(t);
+		t.setReadable(readable);
+		t.setWritable(writable);
+		operationMesh.add(t);
+	}
 }
