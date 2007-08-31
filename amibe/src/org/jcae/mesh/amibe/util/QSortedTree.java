@@ -328,14 +328,20 @@ public abstract class QSortedTree implements Serializable
 	}
 
 	/**
-	 * Update the quality factor of an object.
+	 * Update the quality factor of an object, if it was already
+	 * present in tree.
+	 *
 	 * @param o      object being updated
 	 * @param value  new quality factor
+	 * @return <code>true</code> if object was present in tree,
+	 *         <code>false</code> otherwise.
 	 */
-	public final void update(Object o, double value)
+	public final boolean update(Object o, double value)
 	{
-		remove(o);
+		if (!remove(o))
+			return false;
 		insert(o, value);
+		return true;
 	}
 	
 	/**
