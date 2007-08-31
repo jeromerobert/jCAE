@@ -2,6 +2,10 @@ Fri Aug 31 12:52:40 CEST 2007 Jan Kozusznik
 
 	* src/org/jcae/mesh/oemm/OEMM.java: New OEMM.Node.getMaxIndex() and
 	OEMM.getDepth() methods.
+	* src/org/jcae/mesh/oemm/Storage.java: Implement saveNodes() to store
+	modified octants back onto disk.  Add an optional argument to
+	loadNodes() to build non-readable triangles.  It is now possible to
+	read/modify/store meshes onto disk.
 
 Sun Aug 26 01:46:56 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
