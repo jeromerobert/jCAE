@@ -76,7 +76,7 @@ public class FPSBehavior extends Behavior
 			if(numframes>=maxframes)
 			{			
 				currentFPS=numframes/((double)currtime-lasttime)*1000;
-				firePropertyChangeListenerPropertyChange(this, null, null, null);
+				firePropertyChangeListenerPropertyChange(this, null, null, currentFPS);
 				numframes=0;
 				lasttime=currtime;
 			}
