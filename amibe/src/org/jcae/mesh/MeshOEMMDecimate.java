@@ -27,26 +27,82 @@ import org.jcae.mesh.oemm.TraversalProcedure;
 import java.util.HashMap;
 import gnu.trove.TIntHashSet;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 /**
  * Decimates all cells of an OEMM.
  */
 public class MeshOEMMDecimate
 {
-
+	
+	private static final int SIZE_OF_BUFFER = 20000024;
+	private byte[] buffer = new byte[SIZE_OF_BUFFER];
+	
 	public static void main(String args[])
+		throws IOException
 	{
 		if (args.length < 2)
 		{
-			System.out.println("Usage: MeshOEMMDecimate oemm scaleTriangles");
+			System.out.println("Usage: MeshOEMMDecimate oemm scaleTriangles [decimated_oemm]");
 			System.exit(0);
 		}
 		String dir = args[0];
 		int scale = Integer.valueOf(args[1]).intValue();
+		if (args.length >= 3)
+		{
+			dir = args[2];
+			File decDir = new File(dir);
+			if (decDir.exists()) {
+				deleteFiles(decDir);
+			}
+			new MeshOEMMDecimate().copyFiles(args[0], dir);
+		}
 		
 		OEMM oemm = Storage.readOEMMStructure(dir);
 		DecimateProcedure d_proc = new DecimateProcedure(scale);
 		oemm.walk(d_proc);
 		// TODO: write mesh back into oemm
+	}
+
+	private static void deleteFiles(File decDir)
+	{
+		if (decDir.isDirectory()) {
+			for (File subFile: decDir.listFiles()) {
+				deleteFiles(subFile);
+			}
+			decDir.delete();
+		} else {
+			decDir.delete();
+		}
+	}
+
+	public void copyFiles(String strPath, String dstPath)
+		throws IOException
+	{
+		File src = new File(strPath);
+		File dest = new File(dstPath);
+
+		if (src.isDirectory()) {
+			dest.mkdirs();
+			String list[] = src.list();
+
+			for (int i = 0; i < list.length; i++) {
+				String dest1 = dest.getAbsolutePath() + "\\" + list[i];
+				String src1 = src.getAbsolutePath() + "\\" + list[i];
+				copyFiles(src1, dest1);
+			}
+		} else {
+			FileInputStream fin = new FileInputStream(src);
+			FileOutputStream fout = new FileOutputStream(dest);
+			int c;
+			while ((c = fin.read(buffer)) >= 0)
+				fout.write(buffer, 0, c);
+			fin.close();
+			fout.close();
+		}
 	}
 
 	private static class DecimateProcedure extends TraversalProcedure
@@ -67,6 +123,7 @@ public class MeshOEMMDecimate
 			options.put("maxtriangles", ""+(current.tn / scale));
 			System.out.println("Processing octant nr. "+current.leafIndex);
 			new org.jcae.mesh.amibe.algos3d.DecimateHalfEdge(amesh, options).compute();
+			Storage.saveNodes(oemm, amesh, leaves);
 			return OK;
 		}
 	}

@@ -32,10 +32,18 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Iterator;
 import java.util.HashMap;
+
+import javax.media.j3d.BoundingSphere;
+import javax.media.j3d.BranchGroup;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
+import javax.vecmath.Point3d;
+
+import org.jcae.viewer3d.FPSBehavior;
 import org.jcae.viewer3d.OEMMViewer;
 import org.jcae.viewer3d.bg.ViewableBG;
 import org.jcae.viewer3d.fe.amibe.AmibeProvider;
@@ -76,14 +84,28 @@ public class MeshOEMMViewer3d
 			bgView.addKeyListener(new KeyAdapter() {
 				public void keyPressed(KeyEvent event)
 				{
-					if(event.getKeyChar()=='n')
+					if(event.getKeyChar()=='A')
+					{
+						if (fineMesh != null)
+							bgView.remove(fineMesh);
+						if (decMesh != null)
+							bgView.remove(decMesh);
+						TIntHashSet set = new TIntHashSet();
+						for(OEMM.Node in: oemm.leaves) {
+							set.add(in.leafIndex);
+						}
+						fineMesh = new ViewableBG(OEMMViewer.meshOEMM(oemm, set));
+						//octree.unselectAll();
+						bgView.add(fineMesh);
+					}
+					else if(event.getKeyChar()=='n')
 					{
 						if (fineMesh != null)
 							bgView.remove(fineMesh);
 						if (decMesh != null)
 							bgView.remove(decMesh);
 						fineMesh = new ViewableBG(OEMMViewer.meshOEMM(oemm, octree.getResultSet()));
-						octree.unselectAll();
+						//octree.unselectAll();
 						bgView.add(fineMesh);
 					}
 					else if(event.getKeyChar()=='o')
@@ -98,6 +120,11 @@ public class MeshOEMMViewer3d
 							bgView.remove(octree);
 					}
 					else if(event.getKeyChar()=='s')
+					{
+						Mesh mesh = Storage.loadNodes(oemm, octree.getResultSet(), true, false);
+						Storage.saveNodes(oemm, mesh, octree.getResultSet());
+					}
+					else if(event.getKeyChar()=='c')
 					{
 						TIntHashSet leaves = octree.getResultSet();
 						if (leaves.size() == 1)
@@ -130,7 +157,7 @@ public class MeshOEMMViewer3d
 							bgView.remove(fineMesh);
 						if (decMesh != null)
 							bgView.remove(decMesh);
-						Mesh amesh = Storage.loadNodes(oemm, octree.getResultSet(), true);
+						Mesh amesh = Storage.loadNodes(oemm, octree.getResultSet(), true, false);
 						HashMap opts = new HashMap();
 						opts.put("maxtriangles", Integer.toString(amesh.getTriangles().size() / 100));
 						new org.jcae.mesh.amibe.algos3d.DecimateHalfEdge(amesh, opts).compute();
@@ -160,6 +187,22 @@ public class MeshOEMMViewer3d
 						System.exit(0);
 				}
 			});
+			FPSBehavior fps = new FPSBehavior();
+			fps.setSchedulingBounds(new BoundingSphere(
+					new Point3d(), Double.MAX_VALUE));
+			fps.addPropertyChangeListener(new PropertyChangeListener() {
+
+				@Override
+				public void propertyChange(PropertyChangeEvent evt) {
+					if (logger.isInfoEnabled()) {
+						logger.info("FPS>" + evt.getNewValue());
+					}
+				}
+				
+			});
+			BranchGroup bg = new BranchGroup();
+			bg.addChild(fps);
+			bgView.addBranchGroup(bg);
 			bgView.fitAll();
 			feFrame.getContentPane().add(bgView);
 			feFrame.setVisible(true);

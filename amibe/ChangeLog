@@ -12,6 +12,12 @@ Fri Aug 31 12:52:40 CEST 2007 Jan Kozusznik
 	  src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java: Replace
 	f.isOuter() test on triangles by isSkippedTriangle() to also detect
 	non-writable triangles.
+	* src/org/jcae/mesh/MeshOEMMDecimate.java
+	  src/org/jcae/mesh/MeshOEMMViewer3d.java: Minor changes.
+	* src/org/jcae/mesh/MeshOEMMCountElements.java
+	  src/org/jcae/mesh/MeshOEMMCoarseViewer.java
+	  src/org/jcae/mesh/MeshOEMMDecimateMoreLeaves.java: New main classes.
+
 
 Fri Aug 31 15:21:26 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
