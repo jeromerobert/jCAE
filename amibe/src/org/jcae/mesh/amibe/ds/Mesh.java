@@ -122,6 +122,14 @@ public class Mesh extends AbstractMesh implements Serializable
 	// Utility class to improve debugging output
 	private static class OuterVertex extends Vertex
 	{
+		
+		public OuterVertex()
+		{
+			super();
+			setReadable(false);
+			setWritable(false);
+		}
+
 		public String toString()
 		{
 			return "outer";
@@ -145,8 +153,11 @@ public class Mesh extends AbstractMesh implements Serializable
 		ttb.addHalfEdge();
 		traitsBuilder.add(ttb);
 		traitsBuilder.addTriangleList();
+		traitsBuilder.addNodeList();
+		
 		factory = new ElementFactory(traitsBuilder);
 		triangleList = new ArrayList();
+		nodeList = new ArrayList();
 	}
 	
 	/**
@@ -238,6 +249,14 @@ public class Mesh extends AbstractMesh implements Serializable
 	}
 
 	/**
+	 *  Adds a vertex to vertex list.
+	 */
+	public void add(Vertex vertex)
+	{
+		nodeList.add(vertex);
+	}
+	
+	/**
 	 * Removes a vertex from vertex list.
 	 *
 	 * @param v  vertex being removed.
@@ -247,6 +266,11 @@ public class Mesh extends AbstractMesh implements Serializable
 		nodeList.remove(v);
 	}
 	
+	/**
+	 * Returns vertex list.
+	 *
+	 * @return vertex list.
+	 */
 	public Collection getNodes()
 	{
 		return nodeList;

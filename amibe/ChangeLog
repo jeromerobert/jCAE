@@ -6,6 +6,8 @@ Fri Aug 31 12:52:40 CEST 2007 Jan Kozusznik
 	modified octants back onto disk.  Add an optional argument to
 	loadNodes() to build non-readable triangles.  It is now possible to
 	read/modify/store meshes onto disk.
+	* src/org/jcae/mesh/amibe/ds/Mesh.java: Fix OuterVertex constructor.
+	Implement vertex list, this is needed to save OEMM instances.
 
 Sun Aug 26 01:46:56 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
