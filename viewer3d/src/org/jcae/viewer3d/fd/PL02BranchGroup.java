@@ -651,7 +651,7 @@ public class PL02BranchGroup extends BranchGroup
 		{
 			System.out.println("Total memory: "+Runtime.getRuntime().totalMemory());
 			System.out.println("Free memory: "+Runtime.getRuntime().freeMemory());
-			System.out.println(System.currentTimeMillis()+" starting hightlight with "+parameter);
+			System.out.println(System.currentTimeMillis()+" starting highlight with "+parameter);
 			if (parameter instanceof PickResult)
 			{
 				PickResult result = (PickResult) parameter;
@@ -723,7 +723,7 @@ public class PL02BranchGroup extends BranchGroup
 				colors = null;				
 				colors = tmp;
 			}
-			System.out.println(System.currentTimeMillis()+" end of hightlight");
+			System.out.println(System.currentTimeMillis()+" end of highlight");
 		}		
 	}
 
@@ -1061,7 +1061,7 @@ public class PL02BranchGroup extends BranchGroup
 			}
 		}
 		// event propagation		
-		System.out.println(System.currentTimeMillis()+" end of hightlight");
+		System.out.println(System.currentTimeMillis()+" end of highlight");
 	}
 
 	/**
