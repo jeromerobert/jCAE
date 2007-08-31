@@ -253,6 +253,19 @@ public class OEMM implements Serializable
 			       " file="+file+
 			       " adj="+adjLeaves;
 		}
+		
+		/**
+		 * This methods calculate mexIndex of OEMM.Node. There is probably 
+		 * back with setting of maxIndex value because maxIndex < minIndex.
+		 * It is sufficient 
+		 * compute getMaxIndex(n) := minIndex(n) + |maxIndex(n) - minIndex(n)|  
+		 * 
+		 * @return correct value of maxIndex
+		 */
+		public int getMaxIndex()
+		{
+			return minIndex + Math.abs(maxIndex - minIndex);
+		}
 	}
 
 	/**
@@ -820,6 +833,11 @@ public class OEMM implements Serializable
 			}
 			return OK;
 		}
+	}
+
+	public int getDepth()
+	{
+		return depth;
 	}
 	
 }
