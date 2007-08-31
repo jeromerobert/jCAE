@@ -724,6 +724,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		Vertex o = origin();
 		Vertex d = destination();
 		assert apex() != m.outerVertex : "Cannot contract "+this;
+		assert o.isWritable() && d.isWritable(): "Cannot contract "+this;
 		if (logger.isDebugEnabled())
 			logger.debug("contract ("+o+" "+d+")\ninto "+n);
 		/*
