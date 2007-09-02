@@ -4,6 +4,8 @@ Mon Sep  3 00:11:09 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	method with two arguments.  Drop apply() method with one argument.
 	* src/org/jcae/mesh/amibe/ds/Vertex.java: Add an argument to outer3D()
 	to contain outer product.
+	* src/org/jcae/mesh/amibe/metrics/Matrix3D.java: Modify transp() to
+	operate on current instance.
 
 Fri Aug 31 17:33:34 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

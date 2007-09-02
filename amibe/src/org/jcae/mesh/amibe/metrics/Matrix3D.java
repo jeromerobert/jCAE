@@ -65,18 +65,13 @@ public class Matrix3D implements Serializable
 	}
 	
 	/**
-	 * Create a <code>Matrix3D</code> instance containing the transposition
-	 * of this one.
-	 *
-	 * @return a new Matrix3D containing the transposition of this one.
+	 * Transpose current matrix.
 	 */
-	public Matrix3D transp()
+	public void transp()
 	{
-		Matrix3D ret = new Matrix3D();
-		for (int i = 0; i < 3; i++)
-			for (int j = 0; j < 3; j++)
-				ret.data[3*i+j] = data[3*j+i];
-		return ret;
+		swap(0, 1);
+		swap(0, 2);
+		swap(1, 2);
 	}
 	
 	/**

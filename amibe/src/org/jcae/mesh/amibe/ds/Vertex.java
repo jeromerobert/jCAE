@@ -729,8 +729,8 @@ public class Vertex extends AbstractVertex implements Serializable
 			t1[i] /= n;
 		Matrix3D.prodVect3D(normal, t1, t2);
 		// Transformation matrix
-		Matrix3D Pinv = new Matrix3D(t1, t2, normal);
-		Matrix3D P = Pinv.transp();
+		Matrix3D P = new Matrix3D(t1, t2, normal);
+		P.transp();
 		AbstractHalfEdge ot = ((Triangle) link).getAbstractHalfEdge();
 		if (ot.origin() != this)
 			ot = ot.next();
@@ -785,7 +785,8 @@ public class Vertex extends AbstractVertex implements Serializable
 		Ginv.apply(h, vect1);
 		loc[2] = vect1[0] * loc[0] * loc[0] + vect1[1] * loc[0] * loc[1] + vect1[2] * loc[1] * loc[1];
 		// Reuse vect1
-		Pinv.apply(loc, vect1);
+		P.transp();
+		P.apply(loc, vect1);
 		pt.moveTo(param[0] + vect1[0], param[1] + vect1[1], param[2] + vect1[2]);
 		return true;
 	}

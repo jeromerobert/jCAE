@@ -349,8 +349,11 @@ public class Metric3D extends Matrix3D
 			alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
 			setDiagonal(diag, cmin*cmin / alpha2, 1.0/discr/discr);
 		}
-		Matrix3D res = (this.multL(A.transp())).multR(A);
-		data = res.data;
+		A.transp();
+		Matrix3D temp = this.multL(A);
+		A.transp();
+		Matrix3D res = temp.multR(A);
+		System.arraycopy(res.data, 0, data, 0, 9);
 		return true;
 	}
 	
@@ -411,8 +414,11 @@ public class Metric3D extends Matrix3D
 			}
 			setDiagonal(diag, cmin*cmin / alpha2, diag);
 		}
-		Matrix3D res = (this.multL(A.transp())).multR(A);
-		data = res.data;
+		A.transp();
+		Matrix3D temp = this.multL(A);
+		A.transp();
+		Matrix3D res = temp.multR(A);
+		System.arraycopy(res.data, 0, data, 0, 9);
 		return true;
 	}
 	
