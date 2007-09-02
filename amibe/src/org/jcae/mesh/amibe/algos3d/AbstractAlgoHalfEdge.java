@@ -48,6 +48,7 @@ public abstract class AbstractAlgoHalfEdge
 	protected int processed = 0;
 	protected int swapped = 0;
 	protected int notProcessed = 0;
+	protected int notInTree = 0;
 	protected QSortedTree tree = new PAVLSortedTree();
 	
 	protected abstract void preProcessAllHalfEdges();
@@ -66,6 +67,7 @@ public abstract class AbstractAlgoHalfEdge
 	{
 		thisLogger().info("Run "+getClass().getName());
 		preProcessAllHalfEdges();
+		thisLogger().info("Compute initial tree");
 		computeTree();
 		postComputeTree();
 		thisLogger().info("Initial number of triangles: "+countInnerTriangles(mesh));
@@ -150,6 +152,8 @@ public abstract class AbstractAlgoHalfEdge
 			preProcessEdge();
 			HalfEdge current = null;
 			Iterator itt = tree.iterator();
+			if ((processed % 10000) == 0)
+				thisLogger().info("Edges processed: "+processed+" "+tree.size()+" "+notProcessed);
 			while (itt.hasNext())
 			{
 				QSortedTree.Node q = (QSortedTree.Node) itt.next();
@@ -213,14 +217,16 @@ public abstract class AbstractAlgoHalfEdge
 					for (int i = 0; i < 3; i++)
 					{
 						current = (HalfEdge) current.next();
-						tree.remove(current.notOriented());
+						if (!tree.remove(current.notOriented()))
+							notInTree++;
 						assert !tree.contains(current.notOriented());
 					}
 					HalfEdge sym = (HalfEdge) current.sym();
 					for (int i = 0; i < 2; i++)
 					{
 						sym = (HalfEdge) sym.next();
-						tree.remove(sym.notOriented());
+						if (!tree.remove(sym.notOriented()))
+							notInTree++;
 						assert !tree.contains(sym.notOriented());
 					}
 					Vertex a = current.apex();

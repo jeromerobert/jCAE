@@ -107,7 +107,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 {
 	private static Logger logger=Logger.getLogger(DecimateHalfEdge.class);
 	private int placement = Quadric3DError.POS_EDGE;
-	private HashMap quadricMap = null;
+	private HashMap<Vertex, Quadric3DError> quadricMap = null;
 	private Vertex v1 = null, v2 = null;
 	private Quadric3DError q1 = null, q2 = null;
 	private Vertex v3, v4;
@@ -162,7 +162,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	public void preProcessAllHalfEdges()
 	{
 		int roughNrNodes = mesh.getTriangles().size()/2;
-		quadricMap = new HashMap(roughNrNodes);
+		quadricMap = new HashMap<Vertex, Quadric3DError>(roughNrNodes);
 		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
@@ -242,8 +242,6 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		}
 	}
 
-	
-
 	protected void postComputeTree()
 	{
 		if (testDump)
@@ -261,7 +259,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	{
 		try
 		{
-			quadricMap = (HashMap) q.readObject();
+			quadricMap = (HashMap<Vertex, Quadric3DError>) q.readObject();
 		}
 		catch (ClassNotFoundException ex)
 		{
@@ -329,14 +327,16 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		// when edge is contracted, and we do not know whether
 		// they appear within tree or their symmetric ones,
 		// so remove them now.
-		tree.remove(current.notOriented());
+		if (!tree.remove(current.notOriented()))
+			notInTree++;
 		if (!isSkippedTriangle(t1))
 		{
 			nrTriangles--;
 			for (int i = 0; i < 2; i++)
 			{
 				current = (HalfEdge) current.next();
-				tree.remove(current.notOriented());
+				if (!tree.remove(current.notOriented()))
+					notInTree++;
 				assert !tree.contains(current.notOriented());
 			}
 			current = (HalfEdge) current.next();
@@ -349,7 +349,8 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			for (int i = 0; i < 2; i++)
 			{
 				sym = (HalfEdge) sym.next();
-				tree.remove(sym.notOriented());
+				if (!tree.remove(sym.notOriented()))
+					notInTree++;
 				assert !tree.contains(sym.notOriented());
 			}
 			sym = (HalfEdge) sym.next();
@@ -382,6 +383,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		logger.info("Number of contracted edges: "+processed);
 		logger.info("Total number of edges not contracted during processing: "+notProcessed);
 		logger.info("Total number of edges swapped to increase quality: "+swapped);
+		//logger.info("Number of edges which were not in the binary tree before being removed: "+notInTree);
 		logger.info("Number of edges still present in the binary tree: "+tree.size());
 	}
 
