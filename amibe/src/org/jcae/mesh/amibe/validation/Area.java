@@ -31,6 +31,7 @@ public class Area extends QualityProcedure
 {
 	private static final double [] v1 = new double[3];
 	private static final double [] v2 = new double[3];
+	private static final double [] v3 = new double[3];
 	
 	public Area()
 	{
@@ -50,7 +51,7 @@ public class Area extends QualityProcedure
 			v1[i] = p2[i] - p1[i];
 			v2[i] = p3[i] - p1[i];
 		}
-		double [] v3 = Matrix3D.prodVect3D(v1, v2);
+		Matrix3D.prodVect3D(v1, v2, v3);
 		return (float) (0.5 * Matrix3D.norm(v3));
 	}
 }

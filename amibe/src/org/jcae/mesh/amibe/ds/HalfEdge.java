@@ -432,6 +432,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	
 	/**
 	 * Checks the dihedral angle of an edge.
+	 * Warning: this method uses temp[0], temp[1], temp[2] and temp[3] temporary arrays.
 	 *
 	 * @param minCos  if the dot product of the normals to adjacent
 	 *    triangles is lower than monCos, then <code>-1.0</code> is
@@ -457,10 +458,12 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		// Check for quality improvement
 		Vertex n = f.apex();
 		// Check for inverted triangles
-		double s3 = 0.5 * Matrix3D.prodSca(temp[2], o.outer3D(n, a));
+		o.outer3D(n, a, temp[0]);
+		double s3 = 0.5 * Matrix3D.prodSca(temp[2], temp[0]);
 		if (s3 <= 0.0)
 			return invalid;
-		double s4 = 0.5 * Matrix3D.prodSca(temp[2], d.outer3D(a, n));
+		d.outer3D(a, n, temp[0]);
+		double s4 = 0.5 * Matrix3D.prodSca(temp[2], temp[0]);
 		if (s4 <= 0.0)
 			return invalid;
 		double p1 = o.distance3D(d) + d.distance3D(a) + a.distance3D(o);

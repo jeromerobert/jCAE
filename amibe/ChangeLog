@@ -1,3 +1,10 @@
+Mon Sep  3 00:11:09 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/metrics/Matrix3D.java: Drop prodVect3D()
+	method with two arguments.
+	* src/org/jcae/mesh/amibe/ds/Vertex.java: Add an argument to outer3D()
+	to contain outer product.
+
 Fri Aug 31 17:33:34 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/oemm/OEMM.java: Remove xdelta member, it is

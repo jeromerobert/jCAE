@@ -32,6 +32,7 @@ public class AbsoluteDeflection2D extends QualityProcedure
 	private double [] v1 = new double[3];
 	private double [] v2 = new double[3];
 	private double [] v3 = new double[3];
+	private double [] v4 = new double[3];
 	
 	public AbsoluteDeflection2D(Mesh2D m)
 	{
@@ -63,13 +64,13 @@ public class AbsoluteDeflection2D extends QualityProcedure
 			v2[i] = xyz2[i] - xyz0[i];
 			v3[i] = xyz3[i] - xyz0[i];
 		}
-		double [] vec = Matrix3D.prodVect3D(v1, v2);
-		double norm = Matrix3D.norm(vec);
+		Matrix3D.prodVect3D(v1, v2, v4);
+		double norm = Matrix3D.norm(v4);
 		double dist = 0.0;
 		if (norm > 0.0)
 		{
-			dist = Math.abs(Matrix3D.prodSca(vec, v3));
-			dist /= Matrix3D.norm(vec);
+			dist = Math.abs(Matrix3D.prodSca(v4, v3));
+			dist /= Matrix3D.norm(v4);
 		}
 		return (float) dist;
 	}

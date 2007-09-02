@@ -373,9 +373,9 @@ public class Vertex extends AbstractVertex implements Serializable
 	 *
 	 * @param n1  end point of the first vector
 	 * @param n2  end point of the second vector
-	 * @return the outer product of the two vectors
-	 **/
-	public double [] outer3D(Vertex n1, Vertex n2)
+	 * @param ret array which will store the outer product of the two vectors
+	 */
+	public void outer3D(Vertex n1, Vertex n2, double [] ret)
 	{
 		double [] vect1 = new double[3];
 		double [] vect2 = new double[3];
@@ -384,7 +384,7 @@ public class Vertex extends AbstractVertex implements Serializable
 			vect1[i] = n1.param[i] - param[i];
 			vect2[i] = n2.param[i] - param[i];
 		}
-		return Matrix3D.prodVect3D(vect1, vect2);
+		Matrix3D.prodVect3D(vect1, vect2, ret);
 	}
 	
 	/**

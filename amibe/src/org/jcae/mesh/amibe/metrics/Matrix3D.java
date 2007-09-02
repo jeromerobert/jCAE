@@ -211,21 +211,6 @@ public class Matrix3D implements Serializable
 	
 	/**
 	 * Return the outer product of two 3D vectors.
-	 * Output is stored in a newly allocated array.
-	 *
-	 * @param v1 first vector
-	 * @param v2 second vector
-	 * @return the outer product of two 3D vectors.
-	 */
-	public static double [] prodVect3D(double [] v1, double [] v2)
-	{
-		double [] ret = new double[3];
-		prodVect3D(v1, v2, ret);
-		return ret;			
-	}
-	
-	/**
-	 * Return the outer product of two 3D vectors.
 	 *
 	 * @param v1 first vector
 	 * @param v2 second vector

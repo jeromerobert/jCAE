@@ -68,6 +68,7 @@ public class EnforceAbsDeflection
 		double [] v1 = new double[3];
 		double [] v2 = new double[3];
 		double [] v3 = new double[3];
+		double [] v4 = new double[3];
 		boolean redo = false;
 		int niter = mesh.getTriangles().size();
 		double defl = Metric3D.getDeflection();
@@ -99,12 +100,12 @@ public class EnforceAbsDeflection
 					v2[i] = xyz2[i] - xyz0[i];
 					v3[i] = xyz3[i] - xyz0[i];
 				}
-				double [] vec = Matrix3D.prodVect3D(v1, v2);
-				double norm = Matrix3D.norm(vec);
+				Matrix3D.prodVect3D(v1, v2, v4);
+				double norm = Matrix3D.norm(v4);
 				if (norm > 0.0)
 				{
-					double dist = Math.abs(Matrix3D.prodSca(vec, v3));
-					dist /= Matrix3D.norm(vec);
+					double dist = Math.abs(Matrix3D.prodSca(v4, v3));
+					dist /= Matrix3D.norm(v4);
 					if (dist > defl)
 						badTriangles.add(t);
 				}
