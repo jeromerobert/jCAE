@@ -600,10 +600,9 @@ public class Vertex extends AbstractVertex implements Serializable
 		g2[0] = g0[2];
 		g2[1] = g1[2];
 		Metric3D G = new Metric3D(g0, g1, g2);
-		Metric3D Ginv = G.inv();
-		if (Ginv == null)
+		if (!G.inv())
 			return false;
-		Ginv.apply(h, vect1);
+		G.apply(h, vect1);
 		// We can eventually compute eigenvectors of B(a b; b c).  
 		// Let first compute the eigenvector associated to K1
 		double e1, e2;
@@ -774,15 +773,14 @@ public class Vertex extends AbstractVertex implements Serializable
 		g2[0] = g0[2];
 		g2[1] = g1[2];
 		Metric3D G = new Metric3D(g0, g1, g2);
-		Metric3D Ginv = G.inv();
-		if (Ginv == null)
+		if (!G.inv())
 			return false;
 		// Now project pt onto this quadric
 		for (int i = 0; i < 3; i++)
 			vect1[i] = pt.param[i] - param[i];
 		P.apply(vect1, loc);
 		// Reuse vect1
-		Ginv.apply(h, vect1);
+		G.apply(h, vect1);
 		loc[2] = vect1[0] * loc[0] * loc[0] + vect1[1] * loc[0] * loc[1] + vect1[2] * loc[1] * loc[1];
 		// Reuse vect1
 		P.transp();

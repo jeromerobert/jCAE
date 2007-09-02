@@ -72,7 +72,7 @@ import org.apache.log4j.Logger;
  * {@link #restrict2D}.
  * </p>
  */
-public class Metric3D extends Matrix3D
+public class Metric3D extends Matrix3D implements Cloneable
 {
 	private static Logger logger=Logger.getLogger(Metric3D.class);
 	
@@ -128,6 +128,23 @@ public class Metric3D extends Matrix3D
 	public Metric3D(double [] e1, double [] e2, double [] e3)
 	{
 		super(e1, e2, e3);
+	}
+	
+	/**
+	 * Create a <code>Metric3D</code> instance and copy another instance.
+	 *
+	 * @param that  instance being copied.
+	 */
+	public Object clone()
+	{
+		Metric3D ret = null;
+		try {
+			ret = (Metric3D) super.clone();
+		} catch(CloneNotSupportedException ex) {
+			ex.printStackTrace();
+		}
+		System.arraycopy(data, 0, ret.data, 0, 9);
+		return ret;
 	}
 	
 	/**
@@ -241,12 +258,12 @@ public class Metric3D extends Matrix3D
 	}
 	
 	/**
-	 * Compute the inverse metrics.
+	 * Replace current metrics by its inverse.
 	 *
-	 * @return the inverse metrics if it is not singular, <code>null</code>
+	 * @return <code>true</code> if it is not singular, <code>false</code>
 	 * otherwise.
 	 */
-	public final Metric3D inv()
+	public final boolean inv()
 	{
 		// adjoint matrix
 		copyColumn(0, c0);
@@ -255,15 +272,18 @@ public class Metric3D extends Matrix3D
 		prodVect3D(c1, c2, c3);
 		double det = prodSca(c0, c3);
 		if (det < 1.e-20)
-			return null;
+			return false;
 		prodVect3D(c2, c0, c4);
 		prodVect3D(c0, c1, c2);
-		Metric3D adj = new Metric3D(c3, c4, c2);
-		adj.swap(0, 1);
-		adj.swap(0, 2);
-		adj.swap(1, 2);
-		adj.scale(1.0 / det);
-		return adj;
+		// Metric3D adj = new Metric3D(c3, c4, c2);
+		System.arraycopy(c3, 0, data, 0, 3);
+		System.arraycopy(c4, 0, data, 3, 3);
+		System.arraycopy(c2, 0, data, 6, 3);
+		swap(0, 1);
+		swap(0, 2);
+		swap(1, 2);
+		scale(1.0 / det);
+		return true;
 	}
 	
 	/**

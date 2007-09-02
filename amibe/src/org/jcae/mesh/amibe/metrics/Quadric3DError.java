@@ -143,8 +143,8 @@ public class Quadric3DError implements Serializable
 			// Keep a reference if there is one
 			if (placement == POS_OPTIMAL)
 			{
-				Metric3D Qinv = A.inv();
-				if (Qinv != null)
+				Metric3D Qinv = (Metric3D) A.clone();
+				if (Qinv.inv())
 				{
 					Qinv.apply(b, temp);
 					ret.copy(bestCandidateV1V2Ref(v1, v2, q1, q2));
