@@ -153,7 +153,7 @@ public abstract class AbstractAlgoHalfEdge
 			HalfEdge current = null;
 			Iterator itt = tree.iterator();
 			if ((processed % 10000) == 0)
-				thisLogger().info("Edges processed: "+processed+" "+tree.size()+" "+notProcessed);
+				thisLogger().info("Edges processed: "+processed);
 			while (itt.hasNext())
 			{
 				QSortedTree.Node q = (QSortedTree.Node) itt.next();
