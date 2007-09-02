@@ -595,6 +595,7 @@ public class Vertex extends AbstractVertex implements Serializable
 			h[2] += omega * kappa * d2 * d2;
 		}
 		while (ot.destination() != d);
+		// vect1, vect2 and vect3 can be reused
 		g1[0] = g0[1];
 		g2[0] = g0[2];
 		g2[1] = g1[2];
@@ -602,13 +603,13 @@ public class Vertex extends AbstractVertex implements Serializable
 		Metric3D Ginv = G.inv();
 		if (Ginv == null)
 			return false;
-		double [] abc = Ginv.apply(h);
+		Ginv.apply(h, vect1);
 		// We can eventually compute eigenvectors of B(a b; b c).  
 		// Let first compute the eigenvector associated to K1
 		double e1, e2;
-		if (Math.abs(abc[1]) < 1.e-10)
+		if (Math.abs(vect1[1]) < 1.e-10)
 		{
-			if (Math.abs(abc[0]) < Math.abs(abc[2]))
+			if (Math.abs(vect1[0]) < Math.abs(vect1[2]))
 			{
 				e1 = 0.0;
 				e2 = 1.0;
@@ -622,13 +623,13 @@ public class Vertex extends AbstractVertex implements Serializable
 		else
 		{
 			e2 = 1.0;
-			double delta = Math.sqrt((abc[0]-abc[2])*(abc[0]-abc[2]) + 4.0*abc[1]*abc[1]);
+			double delta = Math.sqrt((vect1[0]-vect1[2])*(vect1[0]-vect1[2]) + 4.0*vect1[1]*vect1[1]);
 			double K1;
-			if (abc[0] + abc[2] < 0.0)
-				K1 = 0.5 * (abc[0] + abc[2] - delta);
+			if (vect1[0] + vect1[2] < 0.0)
+				K1 = 0.5 * (vect1[0] + vect1[2] - delta);
 			else
-				K1 = 0.5 * (abc[0] + abc[2] + delta);
-			e1 = (K1 - abc[0]) / abc[1];
+				K1 = 0.5 * (vect1[0] + vect1[2] + delta);
+			e1 = (K1 - vect1[0]) / vect1[1];
 			n = Math.sqrt(e1 * e1 + e2 * e2);
 			e1 /= n;
 			e2 /= n;
@@ -745,6 +746,7 @@ public class Vertex extends AbstractVertex implements Serializable
 		for (int i = 0; i < 3; i++)
 			g0[i] = g1[i] = g2[i] = h[i] = 0.0;
 		Vertex d = ot.destination();
+		double [] loc = new double[3];
 		do
 		{
 			ot = ot.nextOriginLoop();
@@ -755,7 +757,7 @@ public class Vertex extends AbstractVertex implements Serializable
 				vect1[i] = p1[i] - param[i];
 			dmin = Math.min(dmin, Matrix3D.norm(vect1));
 			// Find coordinates in the local frame (t1,t2,n)
-			double [] loc = P.apply(vect1);
+			P.apply(vect1, loc);
 			h[0] += loc[2] * loc[0] * loc[0];
 			h[1] += loc[2] * loc[0] * loc[1];
 			h[2] += loc[2] * loc[1] * loc[1];
@@ -766,6 +768,7 @@ public class Vertex extends AbstractVertex implements Serializable
 			g2[2] += loc[1] * loc[1] * loc[1] * loc[1];
 		}
 		while (ot.destination() != d);
+		// vect1 can be reused
 		g1[1] = g0[2];
 		g1[0] = g0[1];
 		g2[0] = g0[2];
@@ -774,14 +777,16 @@ public class Vertex extends AbstractVertex implements Serializable
 		Metric3D Ginv = G.inv();
 		if (Ginv == null)
 			return false;
-		double [] abc = Ginv.apply(h);
 		// Now project pt onto this quadric
 		for (int i = 0; i < 3; i++)
 			vect1[i] = pt.param[i] - param[i];
-		double [] loc = P.apply(vect1);
-		loc[2] = abc[0] * loc[0] * loc[0] + abc[1] * loc[0] * loc[1] + abc[2] * loc[1] * loc[1];
-		double [] glob = Pinv.apply(loc);
-		pt.moveTo(param[0] + glob[0], param[1] + glob[1], param[2] + glob[2]);
+		P.apply(vect1, loc);
+		// Reuse vect1
+		Ginv.apply(h, vect1);
+		loc[2] = vect1[0] * loc[0] * loc[0] + vect1[1] * loc[0] * loc[1] + vect1[2] * loc[1] * loc[1];
+		// Reuse vect1
+		Pinv.apply(loc, vect1);
+		pt.moveTo(param[0] + vect1[0], param[1] + vect1[1], param[2] + vect1[2]);
 		return true;
 	}
 	

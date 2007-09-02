@@ -119,19 +119,6 @@ public class Matrix3D implements Serializable
 		return ret;
 	}
 	
-	/**
-	 * Return the multiplication of this <code>Matrix3D</code> by a vector.
-	 *
-	 * @param in  input vector.
-	 * @return a new vector containing the multiplication this*in.
-	 */
-	public double [] apply(double [] in)
-	{
-		double [] out = new double[3];
-		apply(in, out);
-		return out;
-	}
-	
 	public void apply(double [] in, double [] out)
 	{
 		if (3 != in.length)
