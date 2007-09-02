@@ -320,7 +320,10 @@ public class MeshReader
 			MeshExporter.clean(bbG);
 			//  Build adjacency relations
 			if (mesh.factory.hasAdjacency())
+			{
+				logger.debug("Build mesh adjacency");
 				mesh.buildAdjacency(nodelist, ridgeAngle);
+			}
 		}
 		catch(Exception ex)
 		{
