@@ -86,6 +86,8 @@ public class Metric3D extends Matrix3D
 	private static double [] c0 = new double[3];
 	private static double [] c1 = new double[3];
 	private static double [] c2 = new double[3];
+	private static double [] c3 = new double[3];
+	private static double [] c4 = new double[3];
 	private static double [][] temp32 = new double[3][2];
 	private static double [][] temp22 = new double[2][2];
 	
@@ -227,15 +229,15 @@ public class Metric3D extends Matrix3D
 	 * Compute matrix determinant.
 	 *
 	 * @return the matrix determinant.
-	 * otherwise.
 	 */
 	public final double det()
 	{
 		// adjoint matrix
-		copyColumn(0, c0);
 		copyColumn(1, c1);
 		copyColumn(2, c2);
-		return prodSca(c0, prodVect3D(c1, c2));
+		prodVect3D(c1, c2, c0);
+		copyColumn(0, c1);
+		return prodSca(c0, c1);
 	}
 	
 	/**
@@ -250,13 +252,13 @@ public class Metric3D extends Matrix3D
 		copyColumn(0, c0);
 		copyColumn(1, c1);
 		copyColumn(2, c2);
-		double [] e0 = prodVect3D(c1, c2);
-		double [] e1 = prodVect3D(c2, c0);
-		double [] e2 = prodVect3D(c0, c1);
-		double det = prodSca(c0, e0);
+		prodVect3D(c1, c2, c3);
+		double det = prodSca(c0, c3);
 		if (det < 1.e-20)
 			return null;
-		Metric3D adj = new Metric3D(e0, e1, e2);
+		prodVect3D(c2, c0, c4);
+		prodVect3D(c0, c1, c2);
+		Metric3D adj = new Metric3D(c3, c4, c2);
 		adj.swap(0, 1);
 		adj.swap(0, 2);
 		adj.swap(1, 2);
@@ -312,8 +314,8 @@ public class Metric3D extends Matrix3D
 			return false;
 		}
 		double [] dcurv = cacheSurf.curvatureDirections();
-		double [] dcurvmax = new double[3];
-		double [] dcurvmin = new double[3];
+		double [] dcurvmax = c0;
+		double [] dcurvmin = c1;
 		if (cmin < cmax)
 		{
 			System.arraycopy(dcurv, 0, dcurvmax, 0, 3);
@@ -327,7 +329,8 @@ public class Metric3D extends Matrix3D
 			System.arraycopy(dcurv, 0, dcurvmin, 0, 3);
 			System.arraycopy(dcurv, 3, dcurvmax, 0, 3);
 		}
-		Metric3D A = new Metric3D(dcurvmax, dcurvmin, prodVect3D(dcurvmax, dcurvmin));
+		prodVect3D(dcurvmax, dcurvmin, c2);
+		Metric3D A = new Metric3D(dcurvmax, dcurvmin, c2);
 		double epsilon = defl;
 		if (epsilon > 1.0)
 			epsilon = 1.0;
@@ -372,8 +375,8 @@ public class Metric3D extends Matrix3D
 			return true;
 		}
 		double [] dcurv = cacheSurf.curvatureDirections();
-		double [] dcurvmax = new double[3];
-		double [] dcurvmin = new double[3];
+		double [] dcurvmax = c0;
+		double [] dcurvmin = c1;
 		if (cmin < cmax)
 		{
 			System.arraycopy(dcurv, 0, dcurvmax, 0, 3);
@@ -387,7 +390,8 @@ public class Metric3D extends Matrix3D
 			System.arraycopy(dcurv, 0, dcurvmin, 0, 3);
 			System.arraycopy(dcurv, 3, dcurvmax, 0, 3);
 		}
-		Metric3D A = new Metric3D(dcurvmax, dcurvmin, prodVect3D(dcurvmax, dcurvmin));
+		prodVect3D(dcurvmax, dcurvmin, c2);
+		Metric3D A = new Metric3D(dcurvmax, dcurvmin, c2);
 		double epsilon = defl * cmax;
 		//  In org.jcae.mesh.amibe.algos2d.Insertion, mean lengths are
 		//  targeted, and there is a sqrt(2) factor.  Division by 2
@@ -420,24 +424,11 @@ public class Metric3D extends Matrix3D
 		double d1U[] = cacheSurf.d1U();
 		double d1V[] = cacheSurf.d1V();
 		// Check whether there is a tangent plane
-		double unitNorm[] = prodVect3D(d1U, d1V);
-		double nnorm = norm(unitNorm);
-		if (nnorm > 0.0)
-		{
-			nnorm = 1.0 / nnorm;
-			unitNorm[0] *= nnorm;
-			unitNorm[1] *= nnorm;
-			unitNorm[2] *= nnorm;
-		}
-		else
-		{
+		prodVect3D(d1U, d1V, c0);
+		if (norm(c0) <= 0.0)
 			logger.debug("Unable to compute normal vector");
-			unitNorm[0] = 0.0;
-			unitNorm[1] = 0.0;
-			unitNorm[2] = 0.0;
-		}
 		
-		// B = (d1U,d1V,unitNorm) is the local frame.
+		// B = (d1U,d1V,c0) is the local frame.
 		// The metrics induced by M3 on the tangent plane is tB M3 B
 		// temp32 = M3 * B
 		for (int i = 0; i < 3; i++)
