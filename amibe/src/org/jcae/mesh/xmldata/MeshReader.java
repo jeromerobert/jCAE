@@ -300,19 +300,20 @@ public class MeshReader
 			FileChannel fcG = new FileInputStream(groupsFile).getChannel();
 			MappedByteBuffer bbG = fcG.map(FileChannel.MapMode.READ_ONLY, 0L, fcG.size());
 			IntBuffer groupsBuffer = bbG.asIntBuffer();
+			// FIXME: Why is it much faster to build node lists than to iterate over
+			//        group nodes and extract XPath expressions?
+			NodeList groupNumberList = (NodeList) xpath.evaluate("group/number/text()",
+				groupsElement, XPathConstants.NODESET);
+			NodeList groupOffsetList = (NodeList) xpath.evaluate("group/file/@offset",
+				groupsElement, XPathConstants.NODESET);
+			NodeList groupIdList = (NodeList) xpath.evaluate("group/@id",
+				groupsElement, XPathConstants.NODESET);
 			for (int i=0; i < numberOfGroups; i++)
 			{
-				Node groupNode = groupsList.item(i);
-				
-				int numberOfElements = Integer.parseInt(
-					xpath.evaluate("number/text()", groupNode));
-				int fileOffset = Integer.parseInt(
-					xpath.evaluate("file/@offset", groupNode));
-				
-				int id=Integer.parseInt(
-					xpath.evaluate("@id", groupNode));
+				int numberOfElements = Integer.parseInt(groupNumberList.item(i).getTextContent());
+				int fileOffset = Integer.parseInt(groupOffsetList.item(i).getTextContent());
+				int id = Integer.parseInt(groupIdList.item(i).getTextContent());
 				logger.debug("Group "+id+": reading "+numberOfElements+" elements");
-								
 				for (int j=0; j < numberOfElements; j++)
 					facelist[groupsBuffer.get(fileOffset+j)].setGroupId(id);
 			}

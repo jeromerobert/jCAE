@@ -1,3 +1,9 @@
+Mon Sep  3 11:45:18 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/MeshReader.java (readObject3D): XPath
+	processing of <group> elements was very slow, move XPath expressions
+	outside of inner loops.
+
 Mon Sep  3 00:11:09 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/metrics/Matrix3D.java: Drop prodVect3D()
