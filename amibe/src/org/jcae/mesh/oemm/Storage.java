@@ -275,18 +275,49 @@ public class Storage
 		}
 		if (ret == null) {
 			ret = new Mesh();
-		}
-		if (nodeToMeshMap != null) {
-			for (TIntIterator iter = leaves.iterator(); iter.hasNext();) {
-				int nodeId = iter.next();
+			if (nodeToMeshMap != null) {
+				int nodeId = leaves.toArray()[0];
 				nodeToMeshMap.put(nodeId, ret);
 			}
 		}
 		
 		TIntObjectHashMap vertMap = new TIntObjectHashMap();
 		
-		readDataForNodes(oemm, leaves, ret, vertMap,
-				unloadedNodeIndex2RequiredVertices, nodeToMeshMap);
+		int [] nodes = leaves.toArray();
+		Arrays.sort(nodes);
+		for (int i: nodes) {
+			readVertices(oemm, leaves, ret, vertMap, oemm.leaves[i]);
+		}
+		for (int i: nodes) {
+			readTriangles(oemm, leaves, ret, vertMap, unloadedNodeIndex2RequiredVertices, oemm.leaves[i]);
+		}
+
+		if (nodeToMeshMap != null) {
+			//put triangle to every mesh that should be constructed for specific nodes
+			Set<Integer> processedNode = new HashSet<Integer>();
+			int nodeIndex = oemm.leaves[nodes[0]].leafIndex;
+			for (AbstractTriangle at: ret.getTriangles())
+			{
+				if (at.getGroupId() == nodeIndex)
+					continue;
+				processedNode.clear();
+				for (int j = 0; j < 3; j++) {
+					if (at.vertex[j] instanceof FakeNonReadVertex) {
+						FakeNonReadVertex fnrVertex = (FakeNonReadVertex) at.vertex[j];
+						int leafIndex = fnrVertex.getOEMMIndex();
+						if (!processedNode.contains(leafIndex)) {
+							Mesh mesh4Add = nodeToMeshMap.get(leafIndex);
+							if (mesh4Add == null) {
+								mesh4Add = new Mesh();
+								nodeToMeshMap.put(leafIndex, mesh4Add);
+							}
+							createTriangle(leafIndex, at.vertex, false, false, mesh4Add);
+							processedNode.add(leafIndex);
+						}
+					}
+				}
+			}
+		}
 		int nrv = 0;
 		for (TIntObjectIterator it = vertMap.iterator(); it.hasNext(); )
 		{
@@ -364,8 +395,7 @@ public class Storage
 	public static Map<Integer, Vertex> getAllVerticesMap(Mesh mesh)
 	{
 		Map<Integer, Vertex> referencedVertices = new HashMap<Integer, Vertex>();
-		for(Object obj: mesh.getTriangles()) {
-			Triangle tr = (Triangle) obj;
+		for(AbstractTriangle tr: mesh.getTriangles()) {
 			for (int i = 0; i < 3; i++)
 			{
 				Vertex vertex = tr.vertex[i];
@@ -409,9 +439,9 @@ public class Storage
 	public static void collectAllVertices(OEMM oemm, Mesh mesh, Map<Integer, List<Vertex>> nodemap, Set<Integer> movedVerticesSet, TIntHashSet storedLeaves)
 	{
 		int positions[] = new int[3];
-		for(Object obj: mesh.getNodes())
+		for(AbstractVertex av: mesh.getNodes())
 		{
-			Vertex vertex = (Vertex) obj;
+			Vertex vertex = (Vertex) av;
 			
 			oemm.double2int(vertex.getUV(), positions);
 			Node n = null;
@@ -465,9 +495,9 @@ public class Storage
 	private static void collectAllTriangles(OEMM oemm, Mesh mesh, Map<Integer, List<Triangle>> node2TrianglesMap)
 	{
 		int positions[] = new int[3];
-		for(Object obj: mesh.getTriangles()) {
+		for(AbstractTriangle at: mesh.getTriangles()) {
 			
-			Triangle tr = (Triangle) obj;
+			Triangle tr = (Triangle) at;
 			boolean hasOuterEdge = tr.vertex[0].getUV().length == 2 || tr.vertex[1].getUV().length == 2
 			|| tr.vertex[2].getUV().length == 2;
 			assert !hasOuterEdge && !tr.isOuter() || hasOuterEdge && tr.isOuter();
@@ -571,25 +601,6 @@ public class Storage
 			}
 		}
 		
-	}
-
-	
-	private static void readDataForNodes(
-			OEMM oemm,
-			TIntHashSet leaves,
-			Mesh ret,
-			TIntObjectHashMap vertMap,
-			Map<Integer, List<FakeNonReadVertex>> unloadedNodeIndex2RequiredVertices, 
-			Map<Integer, Mesh> nodeToMeshMap)
-	{
-		int [] nodes = leaves.toArray();
-		Arrays.sort(nodes);
-		for (int i: nodes) {
-			readVertices(oemm, leaves, ret, vertMap, oemm.leaves[i]);
-		}
-		for (int i: nodes) {
-			readTriangles(oemm, leaves, ret, vertMap, unloadedNodeIndex2RequiredVertices, nodeToMeshMap, oemm.leaves[i]);
-		}
 	}
 	
 	/**
@@ -1082,7 +1093,7 @@ public class Storage
 				smallerIndexOfNode = index;
 			}
 		}
-		if (fnrv != null && fnrv.getContaingNode().leafIndex == smallerIndexOfNode) {
+		if (fnrv != null && fnrv.getOEMMIndex() == smallerIndexOfNode) {
 			throw new RuntimeException("Cannot move triangle into not loaded octree node: " + smallerIndexOfNode);
 		}
 		return smallerIndexOfNode;
@@ -1091,7 +1102,7 @@ public class Storage
 	private static int searchNode(OEMM oemm, Vertex vert, int[] positions)
 	{
 		if (vert instanceof FakeNonReadVertex) {
-			return ((FakeNonReadVertex) vert).getContaingNode().leafIndex;
+			return ((FakeNonReadVertex) vert).getOEMMIndex();
 		}
 		double []coords = vert.getUV();
 		return searchNode(oemm, coords, positions);
@@ -1163,21 +1174,21 @@ public class Storage
 		/**
 		 * Containing OEMM node 
 		 */
-		private OEMM.Node containgNode;
+		private OEMM.Node containingNode;
 
 		public FakeNonReadVertex(OEMM oemm, int leaf, int localNumber) {
 			super(0.0, 0.0, 0.0);
-			containgNode = oemm.leaves[leaf];
-			setLabel(containgNode.minIndex + localNumber);
-			int []positions = new int[]{containgNode.i0, containgNode.j0, containgNode.k0};
+			containingNode = oemm.leaves[leaf];
+			setLabel(containingNode.minIndex + localNumber);
+			int []positions = new int[]{containingNode.i0, containingNode.j0, containingNode.k0};
 			oemm.int2double(positions, getUV());
-			assert oemm.search(positions) == containgNode;
+			assert oemm.search(positions) == containingNode;
 			setReadable(false);
 			setWritable(false);
 		}
 	
 		public int getLocalNumber() {
-			return getLabel() - containgNode.minIndex;
+			return getLabel() - containingNode.minIndex;
 		}
 
 		@Override
@@ -1185,8 +1196,8 @@ public class Storage
 			return false;
 		}
 
-		public OEMM.Node getContaingNode() {
-			return containgNode;
+		public int getOEMMIndex() {
+			return containingNode.leafIndex;
 		}
 	}
 	
@@ -1250,7 +1261,7 @@ public class Storage
 		}
 	}
 	
-	private static void readTriangles(OEMM oemm, TIntHashSet leaves, Mesh mesh, TIntObjectHashMap vertMap, Map<Integer, List<FakeNonReadVertex>> unloadedNodeIndex2RequiredNodes, Map<Integer, Mesh> node2MeshMap, OEMM.Node current)
+	private static void readTriangles(OEMM oemm, TIntHashSet leaves, Mesh mesh, TIntObjectHashMap vertMap, Map<Integer, List<FakeNonReadVertex>> unloadedNodeIndex2RequiredNodes, OEMM.Node current)
 	{
 		try
 		{
@@ -1290,7 +1301,7 @@ public class Storage
 							writable = false;
 							vert[j] = (Vertex) vertMap.get(globalIndex);
 							if (vert[j] == null) {
-								vert[j] = new FakeNonReadVertex(oemm,leaf[j], pointIndex[j]);
+								vert[j] = new FakeNonReadVertex(oemm, leaf[j], pointIndex[j]);
 								vertMap.put(globalIndex, vert[j]);
 								if (unloadedNodeIndex2RequiredNodes != null)
 								{
@@ -1309,28 +1320,7 @@ public class Storage
 					bbI.get();
 //					if (!writable)
 //						continue;
-					Mesh operationMesh = mesh;
-					createTriangle(current, vert, readable, writable, operationMesh);
-					//put triangle to every mesh that should be constructed for specific nodes
-					if (node2MeshMap != null) {
-						Set<Integer> processedNode = new HashSet<Integer>();
-						for (int j = 0; j < 3; j++) {
-							if (vert[j] instanceof FakeNonReadVertex) {
-								FakeNonReadVertex fnrVertex = (FakeNonReadVertex) vert[j];
-								int leafIndex = fnrVertex.getContaingNode().leafIndex;
-								if (!processedNode.contains(leafIndex)) {
-									
-									Mesh mesh4Add = node2MeshMap.get(leafIndex);
-									if (mesh4Add == null) {
-										mesh4Add = new Mesh();
-										node2MeshMap.put(leafIndex, mesh4Add);
-									}
-									createTriangle(current, vert, readable, writable, mesh4Add);
-									processedNode.add(fnrVertex.getContaingNode().leafIndex);
-								}
-							}
-						}
-					}
+					createTriangle(current.leafIndex, vert, readable, writable, mesh);
 				}
 			}
 			fc.close();
@@ -1343,15 +1333,15 @@ public class Storage
 		}
 	}
 
-	private static void createTriangle(OEMM.Node current, Vertex[] vert, boolean readable, boolean writable, Mesh operationMesh)
+	private static void createTriangle(int groupId, Vertex[] vert, boolean readable, boolean writable, Mesh mesh)
 	{
-		Triangle t = (Triangle) operationMesh.factory.createTriangle(vert[0], vert[1], vert[2]);
-		t.setGroupId(current.leafIndex);
+		Triangle t = (Triangle) mesh.factory.createTriangle(vert[0], vert[1], vert[2]);
+		t.setGroupId(groupId);
 		vert[0].setLink(t);
 		vert[1].setLink(t);
 		vert[2].setLink(t);
 		t.setReadable(readable);
 		t.setWritable(writable);
-		operationMesh.add(t);
+		mesh.add(t);
 	}
 }
