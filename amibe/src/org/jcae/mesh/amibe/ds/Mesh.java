@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005,2006, by EADS CRC
+    Copyright (C) 2007 by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -104,10 +105,10 @@ public class Mesh extends AbstractMesh implements Serializable
 	public Vertex outerVertex = new OuterVertex();
 	
 	//  AbstractTriangle list
-	protected Collection triangleList = null;
+	protected Collection<AbstractTriangle> triangleList = null;
 	
 	//  Node list.
-	private Collection nodeList = null;
+	private Collection<AbstractVertex> nodeList = null;
 
 	//  Entity factory
 	public ElementFactoryInterface factory = null;
@@ -231,7 +232,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	 *
 	 * @return triangle list.
 	 */
-	public Collection getTriangles()
+	public Collection<AbstractTriangle> getTriangles()
 	{
 		return triangleList;
 	}
@@ -241,7 +242,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	 *
 	 * @param l triangle list
 	 */
-	public void setTrianglesList(Collection l)
+	public void setTrianglesList(Collection<AbstractTriangle> l)
 	{
 		if (triangleList != null)
 			triangleList.clear();
@@ -251,7 +252,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	/**
 	 *  Adds a vertex to vertex list.
 	 */
-	public void add(Vertex vertex)
+	public void add(AbstractVertex vertex)
 	{
 		nodeList.add(vertex);
 	}
@@ -271,7 +272,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	 *
 	 * @return vertex list.
 	 */
-	public Collection getNodes()
+	public Collection<AbstractVertex> getNodes()
 	{
 		return nodeList;
 	}

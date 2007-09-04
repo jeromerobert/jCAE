@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2003,2006 by EADS CRC
+    Copyright (C) 2007 by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -22,6 +23,7 @@ package org.jcae.mesh.amibe.algos3d;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.HalfEdge;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
@@ -35,7 +37,6 @@ import java.io.IOException;
 import java.io.File;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 /**
@@ -163,14 +164,13 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	{
 		final int roughNrNodes = mesh.getTriangles().size()/2;
 		quadricMap = new HashMap<Vertex, Quadric3DError>(roughNrNodes);
-		for (final Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
+		for (AbstractTriangle af: mesh.getTriangles())
 		{
-			final Triangle f = (Triangle) itf.next();
-			if (isSkippedTriangle(f))
+			if (isSkippedTriangle((Triangle) af))
 				continue;
 			for (int i = 0; i < 3; i++)
 			{
-				final Vertex n = f.vertex[i];
+				final Vertex n = af.vertex[i];
 				if (!quadricMap.containsKey(n))
 					quadricMap.put(n, new Quadric3DError());
 			}
@@ -179,9 +179,9 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		final double [] vect1 = new double[3];
 		final double [] vect2 = new double[3];
 		final double [] normal = new double[3];
-		for (final Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
+		for (AbstractTriangle af: mesh.getTriangles())
 		{
-			final Triangle f = (Triangle) itf.next();
+			final Triangle f = (Triangle) af;
 			if (isSkippedTriangle(f) )
 				continue;
 			double [] p0 = f.vertex[0].getUV();

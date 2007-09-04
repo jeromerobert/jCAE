@@ -25,6 +25,7 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.HalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.util.QSortedTree;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
@@ -78,10 +79,9 @@ public abstract class AbstractAlgoHalfEdge
 	public static int countInnerTriangles(Mesh mesh)
 	{
 		int ret = 0;
-		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
+		for (AbstractTriangle af: mesh.getTriangles())
 		{
-			Triangle f = (Triangle) itf.next();
-			if (!isSkippedTriangle(f))
+			if (!isSkippedTriangle((Triangle) af))
 				ret++;
 		}
 		return ret;
@@ -91,9 +91,9 @@ public abstract class AbstractAlgoHalfEdge
 	{
 		//  Compute edge cost
 		nrTriangles = 0;
-		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
+		for (AbstractTriangle af: mesh.getTriangles())
 		{
-			Triangle f = (Triangle) itf.next();
+			Triangle f = (Triangle) af;
 			if (isSkippedTriangle(f))
 				continue;
 			nrTriangles++;
@@ -145,18 +145,19 @@ public abstract class AbstractAlgoHalfEdge
 	private boolean processAllHalfEdges()
 	{
 		boolean noSwap = false;
-		Stack stackNotProcessed = new Stack();
+		Stack<HalfEdge> stackNotProcessedObject = new Stack<HalfEdge>();
+		Stack<Double> stackNotProcessedValue = new Stack<Double>();
 		double cost = -1.0;
 		while (!tree.isEmpty() && nrTriangles > nrFinal)
 		{
 			preProcessEdge();
 			HalfEdge current = null;
-			Iterator itt = tree.iterator();
+			Iterator<QSortedTree.Node> itt = tree.iterator();
 			if ((processed % 10000) == 0)
 				thisLogger().info("Edges processed: "+processed);
 			while (itt.hasNext())
 			{
-				QSortedTree.Node q = (QSortedTree.Node) itt.next();
+				QSortedTree.Node q = itt.next();
 				current = (HalfEdge) q.getData();
 				cost = q.getValue();
 				if (nrFinal == 0 && cost > tolerance)
@@ -172,30 +173,30 @@ public abstract class AbstractAlgoHalfEdge
 				// when walked through.
 				if (nrFinal == 0)
 				{
-					stackNotProcessed.push(current);
+					stackNotProcessedObject.push(current);
 					if (tolerance > 0.0)
-						stackNotProcessed.push(new Double(cost+0.7*(tolerance - cost)));
+						stackNotProcessedValue.push(new Double(cost+0.7*(tolerance - cost)));
 					else
 						// tolerance = cost = 0
-						stackNotProcessed.push(new Double(1.0));
+						stackNotProcessedValue.push(Double.valueOf(1.0));
 				}
 				else
 				{
-					stackNotProcessed.push(current);
+					stackNotProcessedObject.push(current);
 					double penalty = tree.getRootValue()*0.7;
 					if (penalty == 0.0)
 						penalty = 1.0;
-					stackNotProcessed.push(new Double(cost+penalty));
+					stackNotProcessedValue.push(new Double(cost+penalty));
 				}
 				current = null;
 			}
 			if ((nrFinal == 0 && cost > tolerance) || current == null)
 				break;
 			// Update costs for edges which were not contracted
-			while (stackNotProcessed.size() > 0)
+			while (stackNotProcessedObject.size() > 0)
 			{
-				double newCost = ((Double) stackNotProcessed.pop()).doubleValue();
-				HalfEdge f = (HalfEdge) stackNotProcessed.pop();
+				double newCost = stackNotProcessedValue.pop().doubleValue();
+				HalfEdge f = stackNotProcessedObject.pop();
 				assert f == f.notOriented();
 				tree.update(f, newCost);
 			}
