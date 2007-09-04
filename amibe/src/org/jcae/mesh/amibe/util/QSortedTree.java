@@ -47,12 +47,15 @@ public abstract class QSortedTree implements Serializable
 	protected abstract Node newNode(Object o, double v);
 
 	/**
-	 * Insert a new note into the binary tree.
+	 * Insert a new note into the binary tree.  This method always returns
+	 * <code>true</code>.
 	 */
 	protected abstract boolean insertNode(Node node);
 
 	/**
-	 * Remove a note from the binary tree.
+	 * Remove a note from the binary tree.  Some algorithms may remove
+	 * another node (for instance PRedBlackSortedTree), this method
+	 * returns the node which has been removed.
 	 */
 	protected abstract Node removeNode(Node p);
 
@@ -307,7 +310,8 @@ public abstract class QSortedTree implements Serializable
 	/**
 	 * Remove the node associated to an object from the tree.
 	 * @param o      object being removed
-	 * @return  the quality factor associated to this object.
+	 * @return  <code>true</code> if node was present in tree,
+	 * </code>false</code> otherwise.
 	 */
 	public final boolean remove(Object o)
 	{
@@ -319,6 +323,9 @@ public abstract class QSortedTree implements Serializable
 		nrNodes--;
 		map.remove(o);
 		Node r = removeNode(p);
+		// PRedBlackSortedTree implementation may swap p
+		// and r nodes and remove r, we then need to
+		// update map.
 		if (r != p)
 		{
 			map.remove(r.getData());
@@ -338,9 +345,22 @@ public abstract class QSortedTree implements Serializable
 	 */
 	public final boolean update(Object o, double value)
 	{
-		if (!remove(o))
+		Node p = (Node) map.get(o);
+		if (logger.isDebugEnabled())
+			logger.debug("Update "+p+" content to "+value);
+		if (p == null)
 			return false;
-		insert(o, value);
+		Node r = removeNode(p);
+		// PRedBlackSortedTree implementation may swap p
+		// and r nodes and remove r, we then need to
+		// update map.
+		if (r != p)
+		{
+			map.remove(r.getData());
+			map.put(p.getData(), p);
+		}
+		r.reset(value);
+		insertNode(r);
 		return true;
 	}
 	

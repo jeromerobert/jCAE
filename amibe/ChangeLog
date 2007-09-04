@@ -4,6 +4,8 @@ Tue Sep  4 09:34:15 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	method by copy().
 	* src/org/jcae/mesh/amibe/metrics/Quadric3DError.java: Use a static
 	Metric3D instance to compute inverse matrix.
+	* src/org/jcae/mesh/amibe/util/QSortedTree.java (update): Reuse
+	the removed node.
 
 Mon Sep  3 11:45:18 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
