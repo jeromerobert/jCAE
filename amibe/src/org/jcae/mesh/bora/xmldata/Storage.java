@@ -20,7 +20,6 @@
 
 package org.jcae.mesh.bora.xmldata;
 
-import org.jcae.mesh.amibe.ds.VolMesh;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
@@ -140,7 +139,7 @@ public class Storage
 	public static void writeSolid(BDiscretization d, String outDir)
 	{
 		BCADGraphCell solid = d.getGraphCell();
-		VolMesh submesh = (VolMesh) d.getMesh();
+		Mesh submesh = (Mesh) d.getMesh();
 		if (null == submesh)
 			return;
 
@@ -241,14 +240,14 @@ public class Storage
 	}
 
 	/**
-	 * Creates a VolMesh instance by reading all volumes.
+	 * Creates a Mesh instance by reading all volumes.
 	 * @param root    root shape
-	 * @return a VolMesh instance
+	 * @return a Mesh instance
 	 * @throws  RuntimeException if an error occurred
 	 */
-	public static VolMesh readAllVolumes(BCADGraphCell root, BSubMesh s)
+	public static Mesh readAllVolumes(BCADGraphCell root, BSubMesh s)
 	{
-		VolMesh m = new VolMesh();
+		Mesh m = new Mesh();
 		TIntObjectHashMap vertMap = new TIntObjectHashMap();
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
 			readVolume(m, (BCADGraphCell) it.next(), s, vertMap);
@@ -256,13 +255,13 @@ public class Storage
 	}
 
 	/**
-	 * Append a discretized solid into a VolMesh instance.
+	 * Append a discretized solid into a Mesh instance.
 	 * @param mesh    original mesh
 	 * @param volume    cell graph containing a CAD solid
 	 * @param mapRefVertex    map between references and Vertex instances
 	 * @throws  RuntimeException if an error occurred
 	 */
-	public static void readVolume(VolMesh mesh, BCADGraphCell volume, BSubMesh s, TIntObjectHashMap mapRefVertex)
+	public static void readVolume(Mesh mesh, BCADGraphCell volume, BSubMesh s, TIntObjectHashMap mapRefVertex)
 	{
 		assert volume.getShape() instanceof CADSolid;
 		BModel model = volume.getGraph().getModel();

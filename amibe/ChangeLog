@@ -6,6 +6,8 @@ Tue Sep  4 09:34:15 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	Metric3D instance to compute inverse matrix.
 	* src/org/jcae/mesh/amibe/util/QSortedTree.java (update): Reuse
 	the removed node.
+	* src/org/jcae/mesh/amibe/ds/VolMesh.java: Class removed, Mesh
+	instances can now contains a list of nodes.
 
 Mon Sep  3 11:45:18 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

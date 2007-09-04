@@ -23,7 +23,6 @@ package org.jcae.mesh.bora.xmldata;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
-import org.jcae.mesh.amibe.ds.VolMesh;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
@@ -37,9 +36,9 @@ public class MESHReader
 
 	private static Logger logger=Logger.getLogger(MESHReader.class);
 	
-	public static VolMesh readMesh(String file)
+	public static Mesh readMesh(String file)
 	{
-		VolMesh mesh = new VolMesh();
+		Mesh mesh = new Mesh();
 		TIntObjectHashMap nodesmap = null;
 		String line = "";
 		try
@@ -62,7 +61,7 @@ public class MESHReader
 		return mesh;
 	}
 
-	private static TIntObjectHashMap readNodes(VolMesh m, BufferedReader rd)
+	private static TIntObjectHashMap readNodes(Mesh m, BufferedReader rd)
 	{
 		logger.debug("Reading nodes");
 		TIntObjectHashMap nodesmap = null;
