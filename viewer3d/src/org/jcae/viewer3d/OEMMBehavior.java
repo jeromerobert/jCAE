@@ -56,6 +56,7 @@ import org.jcae.mesh.oemm.OEMM.Node;
 import org.jcae.viewer3d.bg.ViewableBG;
 import org.jcae.viewer3d.cad.ViewableCAD;
 import org.jcae.viewer3d.cad.occ.OCCProvider;
+import org.apache.log4j.Logger;
 
 import com.sun.jmx.remote.util.CacheMap;
 
@@ -64,8 +65,8 @@ import com.sun.jmx.remote.util.CacheMap;
  */
 public class OEMMBehavior extends Behavior
 {
+	private static Logger logger = Logger.getLogger(OEMMBehavior.class);
 	private static final int DEFAULT_MAX_TRIANGLES_NBR = -1;
-	private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(OEMMBehavior.class);
 	private boolean frozen = false;
 	private static class LoadCoarseOEMMProcedure extends TraversalProcedure
 	{
@@ -236,8 +237,8 @@ public class OEMMBehavior extends Behavior
 		wakeupTransf=new WakeupOnTransformChange(
 			view.getViewingPlatform().getViewPlatformTransform());
 		maxNumberOfTriangles = Long.getLong("org.jcae.viewer3d.OEMMBehavior.maxNumberOfTringles", DEFAULT_MAX_TRIANGLES_NBR);
-		if (log.isInfoEnabled()) {
-			log.info("Maximal number of triangles: " + maxNumberOfTriangles);
+		if (logger.isInfoEnabled()) {
+			logger.info("Maximal number of triangles: " + maxNumberOfTriangles);
 		}
 	}
 
@@ -402,14 +403,14 @@ public class OEMMBehavior extends Behavior
 
 	private void showFineMesh(final Set<Integer> ids)
 	{
-		if (log.isInfoEnabled()) {
-			log.info("Fine occtree nodes> " + ids);
+		if (logger.isInfoEnabled()) {
+			logger.info("Fine occtree nodes> " + ids);
 		}
 		if(!getIds().containsAll(ids) || ids.size()==0)
 		{
 			oemmActive=ids.size()>0;
-			if (log.isDebugEnabled()) {
-				log.debug("We will show fine mesh for nodes: " + ids);
+			if (logger.isDebugEnabled()) {
+				logger.debug("We will show fine mesh for nodes: " + ids);
 			}
 			if(ids.size()>0)
 			{
@@ -452,8 +453,8 @@ public class OEMMBehavior extends Behavior
 	
 	private void addBranchGroup(ViewHolder vh, boolean coarse)
 	{
-		if (log.isDebugEnabled()) {
-			log.debug("addBranchGroup> id:" + vh.getId() + ", coarse:" + coarse);
+		if (logger.isDebugEnabled()) {
+			logger.debug("addBranchGroup> id:" + vh.getId() + ", coarse:" + coarse);
 		}
 		Map<Integer, ViewHolder> map = coarse ? coarseOemmNodeId2BranchGroup : visibleFineOemmNodeId2BranchGroup;
 		BranchGroup branchGroup = vh.getViewElement();
@@ -469,8 +470,8 @@ public class OEMMBehavior extends Behavior
 	
 	private void removeBranchGroup(int id, boolean coarse)
 	{
-		if (log.isDebugEnabled()) {
-			log.debug("removeBranchGroup> id:" + id + ", coarse:" + coarse);
+		if (logger.isDebugEnabled()) {
+			logger.debug("removeBranchGroup> id:" + id + ", coarse:" + coarse);
 		}
 		Map<Integer, ViewHolder> map = coarse ? coarseOemmNodeId2BranchGroup : visibleFineOemmNodeId2BranchGroup;
 		
@@ -514,8 +515,8 @@ public class OEMMBehavior extends Behavior
 	{
 		ViewHolder vh = cacheOemmNodeId2BranchGroup.get(arg0);
 		if (vh == null) {
-			if (log.isDebugEnabled()) {
-				log.debug("finemesh node:" + arg0 + " is not loaded and I will load it.");
+			if (logger.isDebugEnabled()) {
+				logger.debug("finemesh node:" + arg0 + " is not loaded and I will load it.");
 			}
 			
 			vh = ViewHolder.makeViewHolder(oemm, arg0, set, null);
