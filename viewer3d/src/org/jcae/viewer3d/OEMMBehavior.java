@@ -72,7 +72,6 @@ public class OEMMBehavior extends Behavior
 	{
 		private Map<Integer, ViewHolder> oemmNodeId2BranchGroup;
 		
-		private TIntHashSet set = new TIntHashSet();
 		private Map<Integer,Mesh> nodeToMeshMap = null;
 		
 		public LoadCoarseOEMMProcedure(Map<Integer, ViewHolder> oemmNodeId2BranchGroup, boolean cloneBoundaryTriangles)
@@ -94,7 +93,7 @@ public class OEMMBehavior extends Behavior
 			if (visit != LEAF) {
 				return OK;
 			}
-			ViewHolder vh = ViewHolder.makeViewHolder(o, c.leafIndex, set, nodeToMeshMap);
+			ViewHolder vh = ViewHolder.makeViewHolder(o, c.leafIndex, nodeToMeshMap);
 			oemmNodeId2BranchGroup.put(c.leafIndex, vh);
 			return OK;
 		}
@@ -136,9 +135,9 @@ public class OEMMBehavior extends Behavior
 			return id;
 		}
 
-		public static ViewHolder makeViewHolder(OEMM o, int index, TIntHashSet set, Map<Integer, Mesh> nodeToMeshMap)
+		public static ViewHolder makeViewHolder(OEMM o, int index, Map<Integer, Mesh> nodeToMeshMap)
 		{
-			set.clear();
+			TIntHashSet set = new TIntHashSet();
 			set.add(index);
 			Mesh mesh = Storage.loadNodes(o, set, false, true, nodeToMeshMap);
 			ViewHolder vh = null;
@@ -510,10 +509,9 @@ public class OEMMBehavior extends Behavior
 	{
 		showAllHiddenCoarseNodes(ids);
 		
-		TIntHashSet set = new TIntHashSet();
 		int nrTriangles = 0;
 		for (Integer arg0: ids) {
-			ViewHolder vh = getFineMeshFromCache(arg0, set);
+			ViewHolder vh = getFineMeshFromCache(arg0);
 			if (!visibleFineOemmNodeId2BranchGroup.containsKey(arg0)) {
 				addBranchGroup(vh, false);
 				removeBranchGroup(arg0, true);
@@ -524,7 +522,7 @@ public class OEMMBehavior extends Behavior
 	
 	}
 
-	private ViewHolder getFineMeshFromCache(Integer arg0, TIntHashSet set)
+	private ViewHolder getFineMeshFromCache(Integer arg0)
 	{
 		ViewHolder vh = cacheOemmNodeId2BranchGroup.get(arg0);
 		if (vh == null) {
@@ -532,7 +530,7 @@ public class OEMMBehavior extends Behavior
 				logger.debug("finemesh node:" + arg0 + " is not loaded and I will load it.");
 			}
 			
-			vh = ViewHolder.makeViewHolder(oemm, arg0, set, null);
+			vh = ViewHolder.makeViewHolder(oemm, arg0, null);
 			cacheOemmNodeId2BranchGroup.put(arg0, vh);
 		}
 		return vh;
