@@ -312,19 +312,7 @@ public class Storage
 			loadVerticesFromUnloadedNodes(oemm, unloadedNodeIndex2RequiredVertices);
 		}
 		if (adjacency)
-		{
 			ret.buildAdjacency(vertices, -1.0);
-			// Outer triangles have been added, mark these triangles
-			for (AbstractTriangle at: ret.getTriangles())
-			{
-				Triangle t = (Triangle) at;
-				if (t.isOuter())
-				{
-					t.setReadable(false);
-					t.setWritable(false);
-				}
-			}
-		}
 		logger.info("Nr. of triangles: "+ret.getTriangles().size());
 		return ret;
 	}
