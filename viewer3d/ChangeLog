@@ -1,3 +1,8 @@
+2007-09-04 14:21 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/OEMMBehavior.java: Modify ViewHolder inner
+	class to display total number of triangles in displayed fine mesh.
+
 2007-08-31 14:30  Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/cad/ViewableCAD.java

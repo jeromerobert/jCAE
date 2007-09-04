@@ -105,17 +105,24 @@ public class OEMMBehavior extends Behavior
 		private BranchGroup viewElem;
 		private int id;
 		private Mesh mesh;
+		private int nrTriangles;
 
-		public ViewHolder(Integer id, Mesh mesh, BranchGroup viewElem)
+		public ViewHolder(Integer id, Mesh mesh)
+		{
+			super();
+			this.id = id;
+			this.mesh = mesh;
+			this.nrTriangles = mesh.getTriangles().size();
+		}
+
+		public ViewHolder(Integer id, BranchGroup viewElem)
 		{
 			super();
 			this.viewElem = viewElem;
 			this.id = id;
-			this.mesh = mesh;
 		}
 
-		public BranchGroup getViewElement()
-		{
+		public BranchGroup getViewElement() {
 			return viewElem;
 		}
 
@@ -134,11 +141,15 @@ public class OEMMBehavior extends Behavior
 			set.clear();
 			set.add(index);
 			Mesh mesh = Storage.loadNodes(o, set, false, true, nodeToMeshMap);
-			BranchGroup bg = null;
+			ViewHolder vh = null;
 			if (nodeToMeshMap == null) {
-				bg = OEMMViewer.meshOEMM(mesh, false);
+				BranchGroup bg = OEMMViewer.meshOEMM(mesh, false);
+				vh = new ViewHolder(index, bg);
 			}
-			ViewHolder vh = new ViewHolder(index, mesh, bg);
+			else {
+				vh = new ViewHolder(index, mesh);
+			}
+			vh.nrTriangles = mesh.getTriangles().size();
 			return vh;
 		}
 
@@ -500,15 +511,17 @@ public class OEMMBehavior extends Behavior
 		showAllHiddenCoarseNodes(ids);
 		
 		TIntHashSet set = new TIntHashSet();
+		int nrTriangles = 0;
 		for (Integer arg0: ids) {
+			ViewHolder vh = getFineMeshFromCache(arg0, set);
 			if (!visibleFineOemmNodeId2BranchGroup.containsKey(arg0)) {
-				ViewHolder vh = getFineMeshFromCache(arg0, set);
-				
 				addBranchGroup(vh, false);
 				removeBranchGroup(arg0, true);
-				
 			}
+			nrTriangles += vh.nrTriangles;
 		}
+		logger.info("Number of triangles in fine mesh: " + nrTriangles);
+	
 	}
 
 	private ViewHolder getFineMeshFromCache(Integer arg0, TIntHashSet set)
@@ -520,7 +533,6 @@ public class OEMMBehavior extends Behavior
 			}
 			
 			vh = ViewHolder.makeViewHolder(oemm, arg0, set, null);
-			vh.mesh = null;
 			cacheOemmNodeId2BranchGroup.put(arg0, vh);
 		}
 		return vh;
