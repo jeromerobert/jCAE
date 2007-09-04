@@ -56,6 +56,8 @@ import java.util.Map.Entry;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.AbstractVertex;
 import org.jcae.mesh.oemm.OEMM.Node;
 import org.apache.log4j.Logger;
 
@@ -202,7 +204,6 @@ public class Storage
 
 	 * @return a {@link Mesh} instance composed of meshes found in specified leaves
 	 */
-	@SuppressWarnings("unchecked")
 	public static Mesh loadNodes(OEMM oemm, TIntHashSet leaves, boolean adjacency)
 	{
 		return loadNodes(oemm, leaves, adjacency, false);
@@ -229,7 +230,6 @@ public class Storage
 	 * @param loadNonWritableNodes TODO	
 	 * @return a {@link Mesh} instance composed of meshes found in specified leaves
 	 */
-	@SuppressWarnings("unchecked")
 	public static Mesh loadNodes(OEMM oemm, TIntHashSet leaves, boolean adjacency, boolean loadNonWritableNodes)
 	{
 		Map<Integer,Mesh> nodeToMeshMap = null;
@@ -259,7 +259,7 @@ public class Storage
 			boolean adjacency, boolean loadNonWritableNodes,
 			Map<Integer, Mesh> nodeToMeshMap)
 	{
-		logger.info("Loading nodes");
+		logger.debug("Loading nodes");
 		Map<Integer, List<FakeNonReadVertex>> unloadedNodeIndex2RequiredVertices = null;
 		if (loadNonWritableNodes) {
 			unloadedNodeIndex2RequiredVertices = new HashMap<Integer, List<FakeNonReadVertex>>();
@@ -315,9 +315,9 @@ public class Storage
 		{
 			ret.buildAdjacency(vertices, -1.0);
 			// Outer triangles have been added, mark these triangles
-			for (Iterator it = ret.getTriangles().iterator(); it.hasNext(); )
+			for (AbstractTriangle at: ret.getTriangles())
 			{
-				Triangle t = (Triangle) it.next();
+				Triangle t = (Triangle) at;
 				if (t.isOuter())
 				{
 					t.setReadable(false);
@@ -558,7 +558,7 @@ public class Storage
 	
 	private static void removeNonReferencedVertices(Mesh mesh)
 	{
-		List<Vertex> tempCollection = new ArrayList<Vertex>();
+		List<AbstractVertex> tempCollection = new ArrayList<AbstractVertex>();
 		tempCollection.addAll(mesh.getNodes());
 		mesh.getNodes().clear();
 		
@@ -573,8 +573,8 @@ public class Storage
 			mesh.add(entry.getValue());
 			processedVertIndex.add(entry.getValue().getLabel());
 		}
-		for (Object obj: tempCollection) {
-			Vertex vert = (Vertex) obj;
+		for (AbstractVertex av: tempCollection) {
+			Vertex vert = (Vertex) av;
 			if (processedVertIndex.contains(vert.getLabel()))
 				continue;
 			processedVertIndex.add(vert.getLabel());
