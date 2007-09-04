@@ -25,7 +25,8 @@ import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.Storage;
 import org.jcae.mesh.oemm.TraversalProcedure;
 import java.util.HashMap;
-import gnu.trove.TIntHashSet;
+import java.util.HashSet;
+import java.util.Set;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -116,10 +117,10 @@ public class MeshOEMMDecimate
 		{
 			if (visit != LEAF)
 				return OK;
-			TIntHashSet leaves = new TIntHashSet();
-			leaves.add(current.leafIndex);
+			Set<Integer> leaves = new HashSet<Integer>();
+			leaves.add(Integer.valueOf(current.leafIndex));
 			Mesh amesh = Storage.loadNodes(oemm, leaves, true);
-			HashMap options = new HashMap();
+			HashMap<String, String> options = new HashMap<String, String>();
 			options.put("maxtriangles", ""+(current.tn / scale));
 			System.out.println("Processing octant nr. "+current.leafIndex);
 			new org.jcae.mesh.amibe.algos3d.DecimateHalfEdge(amesh, options).compute();

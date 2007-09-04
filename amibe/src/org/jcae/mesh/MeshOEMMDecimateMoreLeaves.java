@@ -19,11 +19,10 @@
 
 package org.jcae.mesh;
 
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIterator;
-
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.oemm.OEMM;
@@ -68,11 +67,10 @@ public class MeshOEMMDecimateMoreLeaves
 			this.minTN = minimalNumberOfTriangles;
 		}
 
-		public final int action(OEMM oemm, OEMM.Node current, int octant,
-				int visit) {
+		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit) {
 			if (visit != POSTORDER )
 				return OK;
-			TIntHashSet leaves = new TIntHashSet();
+			Set<Integer> leaves = new HashSet<Integer>();
 			getChildLeaves(current, leaves);
 			
 //			System.out.println("Processing octant nr. " + current.leafIndex);
@@ -85,7 +83,7 @@ public class MeshOEMMDecimateMoreLeaves
 //			if (decimatedNodes.contains(current.leafIndex))
 //				return OK;
 			
-			TIntHashSet decSet = leaves;//getAppropriateNeigbr(oemm, current, 50000);
+			Set<Integer> decSet = leaves;//getAppropriateNeigbr(oemm, current, 50000);
 			if (minTN >=0 && getTriangles(oemm, leaves) < minTN) {
 				return OK;
 			}
@@ -110,17 +108,17 @@ public class MeshOEMMDecimateMoreLeaves
 			return OK;
 		}
 
-		private int getTriangles(OEMM oemm, TIntHashSet leaves)
+		private int getTriangles(OEMM oemm, Set<Integer> leaves)
 		{
 			int result = 0;
-			for (TIntIterator iter = leaves.iterator(); iter.hasNext(); )
+			for (Integer i: leaves)
 			{
-				result += oemm.leaves[iter.next()].tn;
+				result += oemm.leaves[i.intValue()].tn;
 			}
 			return result;
 		}
 
-		private void getChildLeaves(Node current, TIntHashSet leaves)
+		private void getChildLeaves(Node current, Set<Integer> leaves)
 		{
 			for (OEMM.Node node: current.child)
 			{
