@@ -154,7 +154,7 @@ public class Aggregate
 				//  This node is not a leaf and its children
 				//  can be merged if neighbors have a difference
 				//  level lower than MAX_DELTA_LEVEL
-				if (current.size < minSize || checkLevelNeighbors(oemm, current, nodeStack))
+				if (current.size < minSize || checkLevelNeighbors(current, nodeStack))
 				{
 					for (int ind = 0; ind < 8; ind++)
 						if (current.child[ind] != null)
@@ -170,7 +170,7 @@ public class Aggregate
 		return ret;
 	}
 	
-	private static final boolean checkLevelNeighbors(OEMM oemm, OEMM.Node current, OEMM.Node [] nodeStack)
+	private static final boolean checkLevelNeighbors(OEMM.Node current, OEMM.Node [] nodeStack)
 	{
 		// If an adjacent node has a size lower than minSize, children
 		// nodes must not be merged
@@ -183,7 +183,7 @@ public class Aggregate
 			ijk[0] = current.i0 + neighborOffset[3*i]   * current.size;
 			ijk[1] = current.j0 + neighborOffset[3*i+1] * current.size;
 			ijk[2] = current.k0 + neighborOffset[3*i+2] * current.size;
-			OEMM.Node n = oemm.searchAdjacentNode(current, ijk);
+			OEMM.Node n = OEMM.searchAdjacentNode(current, ijk);
 			if (n == null || n.isLeaf)
 				continue;
 			assert n.size == current.size;

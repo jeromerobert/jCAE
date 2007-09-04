@@ -331,10 +331,8 @@ abstract public class MeshExporter
 		if (found)
 		{
 			return elt;
-		} else
-		{
-			return null;
 		}
+		return null;
 	}
 	
 	private void readGroups()

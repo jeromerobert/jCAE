@@ -26,7 +26,6 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.MGroup3D;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
-import org.jcae.mesh.cad.CADFace;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -149,7 +148,7 @@ public class MeshReader
 				Vertex2D pt1 = nodelist[trianglesBuffer.get()];
 				Vertex2D pt2 = nodelist[trianglesBuffer.get()];
 				Vertex2D pt3 = nodelist[trianglesBuffer.get()];
-				facelist[i] = (AbstractTriangle) mesh.factory.createTriangle(pt1, pt2, pt3);
+				facelist[i] = mesh.factory.createTriangle(pt1, pt2, pt3);
 				mesh.add(facelist[i]);
 				pt1.setLink(facelist[i]);
 				pt2.setLink(facelist[i]);
@@ -280,7 +279,7 @@ public class MeshReader
 				Vertex pt1 = nodelist[trianglesBuffer.get()];
 				Vertex pt2 = nodelist[trianglesBuffer.get()];
 				Vertex pt3 = nodelist[trianglesBuffer.get()];
-				facelist[i] = (AbstractTriangle) mesh.factory.createTriangle(pt1, pt2, pt3);
+				facelist[i] = mesh.factory.createTriangle(pt1, pt2, pt3);
 				mesh.add(facelist[i]);
 				pt1.setLink(facelist[i]);
 				pt2.setLink(facelist[i]);

@@ -205,6 +205,7 @@ public class KdTree
 	// Integer coordinates (like gridSize) must be long if MAXLEVEL > 30
 	protected static final int MAXLEVEL = 30;
 	protected static final int gridSize = 1 << MAXLEVEL;
+	private static final double DGridSize = gridSize;
 	
 	/**
 	 * Root of the kd-tree.
@@ -242,7 +243,7 @@ public class KdTree
 				maxDelta = delta;
 		}
 		maxDelta *= 1.01;
-		x0[dimension] = ((double) gridSize) / maxDelta;
+		x0[dimension] = DGridSize / maxDelta;
 		root = new Cell();
 		nCells++;
 	}
@@ -277,7 +278,7 @@ public class KdTree
 	{
 		double [] p = new double[dimension];
 		for (int k = 0; k < dimension; k++)
-			p[k] = x0[k] + ((double) gridSize) * 0.5 / x0[dimension];
+			p[k] = x0[k] + DGridSize * 0.5 / x0[dimension];
 		return p;
 	}
 	
@@ -664,7 +665,7 @@ public class KdTree
 	
 	private final class GetNearestVertexProcedure implements KdTreeProcedure
 	{
-		private final int [] ijk = new int[dimension];;
+		private final int [] ijk = new int[dimension];
 		private final Mesh mesh;
 		public Vertex nearestVertex;
 		public final Vertex fromVertex;
