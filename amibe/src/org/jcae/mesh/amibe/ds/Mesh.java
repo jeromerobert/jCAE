@@ -363,6 +363,8 @@ public class Mesh extends AbstractMesh implements Serializable
 				Triangle adj = (Triangle) factory.createTriangle(outerVertex, ot.destination(), ot.origin());
 				newTri.add(adj);
 				adj.setOuter();
+				adj.setReadable(false);
+				adj.setWritable(false);
 				AbstractHalfEdge sym = adj.getAbstractHalfEdge();
 				ot.glue(sym);
 				ot.setAttributes(AbstractHalfEdge.NONMANIFOLD);
