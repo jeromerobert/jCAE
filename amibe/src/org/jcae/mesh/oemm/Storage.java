@@ -41,12 +41,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import gnu.trove.TIntArrayList;
-import gnu.trove.TIntIterator;
 import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TIntObjectIterator;
-import gnu.trove.TIntHashSet;
 
 import java.util.List;
 import java.util.Map;
@@ -204,7 +201,7 @@ public class Storage
 
 	 * @return a {@link Mesh} instance composed of meshes found in specified leaves
 	 */
-	public static Mesh loadNodes(OEMM oemm, TIntHashSet leaves, boolean adjacency)
+	public static Mesh loadNodes(OEMM oemm, Set<Integer> leaves, boolean adjacency)
 	{
 		return loadNodes(oemm, leaves, adjacency, false);
 	}	
@@ -216,8 +213,8 @@ public class Storage
 	 */
 	public static Mesh loadNodes(OEMM oemm, int arg0)
 	{
-		TIntHashSet set = new TIntHashSet();
-		set.add(arg0);
+		Set<Integer> set = new HashSet<Integer>();
+		set.add(Integer.valueOf(arg0));
 		return loadNodes(oemm, set, false);
 	}
 	
@@ -230,14 +227,10 @@ public class Storage
 	 * @param loadNonWritableNodes TODO	
 	 * @return a {@link Mesh} instance composed of meshes found in specified leaves
 	 */
-	public static Mesh loadNodes(OEMM oemm, TIntHashSet leaves, boolean adjacency, boolean loadNonWritableNodes)
+	public static Mesh loadNodes(OEMM oemm, Set<Integer> leaves, boolean adjacency, boolean loadNonWritableNodes)
 	{
 		Map<Integer,Mesh> nodeToMeshMap = null;
-		
-		Mesh ret = loadNodes(oemm, leaves, adjacency, loadNonWritableNodes,
-				nodeToMeshMap);
-		
-		return ret;
+		return loadNodes(oemm, leaves, adjacency, loadNonWritableNodes, nodeToMeshMap);
 	}
 
 	
@@ -255,7 +248,7 @@ public class Storage
 	 * @throws UnsupportedOperationException if nodeToMeshMap attribute is not null butattribute leaves 
 	 * 		   contains more nodes to load.
 	 */
-	public static Mesh loadNodes(OEMM oemm, TIntHashSet leaves,
+	public static Mesh loadNodes(OEMM oemm, Set<Integer> leaves,
 			boolean adjacency, boolean loadNonWritableNodes,
 			Map<Integer, Mesh> nodeToMeshMap)
 	{
@@ -265,37 +258,37 @@ public class Storage
 			unloadedNodeIndex2RequiredVertices = new HashMap<Integer, List<FakeNonReadVertex>>();
 		}
 		Mesh ret = null;
+		// if nodeToMeshMap is not null, there is only one value in leaves
+		Integer nodeId = Integer.valueOf(-1);
 		if (nodeToMeshMap != null) {
 			//check whether exists mesh for given loaded node.
 			if (leaves.size() != 1)
 				throw new UnsupportedOperationException("We cannot handle more nodes with set attribute <nodeToMeshMap>");
-			else {
-				ret = nodeToMeshMap.get(leaves.toArray()[0]);
-			}
+			nodeId = leaves.iterator().next();
+			ret = nodeToMeshMap.get(nodeId);
 		}
 		if (ret == null) {
 			ret = new Mesh();
 			if (nodeToMeshMap != null) {
-				int nodeId = leaves.toArray()[0];
 				nodeToMeshMap.put(nodeId, ret);
 			}
 		}
 		
 		TIntObjectHashMap vertMap = new TIntObjectHashMap();
 		
-		int [] nodes = leaves.toArray();
-		Arrays.sort(nodes);
-		for (int i: nodes) {
-			readVertices(oemm, leaves, ret, vertMap, oemm.leaves[i]);
+		ArrayList<Integer> sortedLeaves = new ArrayList<Integer>(leaves);
+		Collections.sort(sortedLeaves);
+		for (Integer i: sortedLeaves) {
+			readVertices(oemm, leaves, ret, vertMap, oemm.leaves[i.intValue()]);
 		}
-		for (int i: nodes) {
-			readTriangles(oemm, leaves, ret, vertMap, unloadedNodeIndex2RequiredVertices, oemm.leaves[i]);
+		for (Integer i: sortedLeaves) {
+			readTriangles(oemm, leaves, ret, vertMap, unloadedNodeIndex2RequiredVertices, oemm.leaves[i.intValue()]);
 		}
 
 		if (nodeToMeshMap != null) {
 			//put triangle to every mesh that should be constructed for specific nodes
 			Set<Integer> processedNode = new HashSet<Integer>();
-			int nodeIndex = oemm.leaves[nodes[0]].leafIndex;
+			int nodeIndex = oemm.leaves[nodeId.intValue()].leafIndex;
 			for (AbstractTriangle at: ret.getTriangles())
 			{
 				if (at.getGroupId() == nodeIndex)
@@ -304,14 +297,14 @@ public class Storage
 				for (int j = 0; j < 3; j++) {
 					if (at.vertex[j] instanceof FakeNonReadVertex) {
 						FakeNonReadVertex fnrVertex = (FakeNonReadVertex) at.vertex[j];
-						int leafIndex = fnrVertex.getOEMMIndex();
+						Integer leafIndex = Integer.valueOf(fnrVertex.getOEMMIndex());
 						if (!processedNode.contains(leafIndex)) {
 							Mesh mesh4Add = nodeToMeshMap.get(leafIndex);
 							if (mesh4Add == null) {
 								mesh4Add = new Mesh();
 								nodeToMeshMap.put(leafIndex, mesh4Add);
 							}
-							createTriangle(leafIndex, at.vertex, false, false, mesh4Add);
+							createTriangle(leafIndex.intValue(), at.vertex, false, false, mesh4Add);
 							processedNode.add(leafIndex);
 						}
 					}
@@ -358,8 +351,11 @@ public class Storage
 	 */
 	public static Mesh loadNodeWithNeighbours(OEMM oemm, int leaf, boolean adjacency)
 	{
-		TIntHashSet leaves = new TIntHashSet(oemm.leaves[leaf].adjLeaves.toNativeArray());
-		leaves.add(leaf);
+		Set<Integer> leaves = new HashSet<Integer>();
+		leaves.add(Integer.valueOf(leaf));
+		TIntArrayList adj = oemm.leaves[leaf].adjLeaves;
+		for (int i = 0; i < adj.size(); i++)
+			leaves.add(Integer.valueOf(adj.get(i)));
 		return loadNodes(oemm, leaves, adjacency, false);
 	}
 	
@@ -370,7 +366,7 @@ public class Storage
 	 * @param mesh
 	 * TODO There is no support for moving vertices into another octree node. 
 	 */
-	public static void saveNodes(OEMM oemm, Mesh mesh, TIntHashSet storedLeaves)
+	public static void saveNodes(OEMM oemm, Mesh mesh, Set<Integer> storedLeaves)
 	{
 		if (logger.isInfoEnabled()) {
 			logger.info("saveNodes started");
@@ -403,11 +399,12 @@ public class Storage
 					continue;
 				}
 				//check that there are no different vertices with the same label
-				assert !referencedVertices.containsKey(vertex.getLabel()) ||
-					referencedVertices.get(vertex.getLabel()) == vertex: 
+				Integer label = Integer.valueOf(vertex.getLabel());
+				assert !referencedVertices.containsKey(label) ||
+					referencedVertices.get(label) == vertex: 
 						"There are different vertices with the same label!";
 				
-				referencedVertices.put(vertex.getLabel(), vertex);
+				referencedVertices.put(label, vertex);
 			}
 		}
 		return referencedVertices;
@@ -436,7 +433,7 @@ public class Storage
 	 * @param storedLeaves 
 	 * @param  
 	 */
-	public static void collectAllVertices(OEMM oemm, Mesh mesh, Map<Integer, List<Vertex>> nodemap, Set<Integer> movedVerticesSet, TIntHashSet storedLeaves)
+	public static void collectAllVertices(OEMM oemm, Mesh mesh, Map<Integer, List<Vertex>> nodemap, Set<Integer> movedVerticesSet, Set<Integer> storedLeaves)
 	{
 		int positions[] = new int[3];
 		for(AbstractVertex av: mesh.getNodes())
@@ -445,41 +442,43 @@ public class Storage
 			
 			oemm.double2int(vertex.getUV(), positions);
 			Node n = null;
+			Integer nIdx = null;
 			try {
 				
 				n = oemm.search(positions);
+				nIdx = Integer.valueOf(n.leafIndex);
 			} catch (RuntimeException e) {
 				//ingore this - try move vertex more closer
 				n = createNewNode(oemm, positions);
+				nIdx = Integer.valueOf(n.leafIndex);
 				
-				storedLeaves.add(n.leafIndex);
-				nodemap.put(n.leafIndex, new ArrayList<Vertex>());	
+				storedLeaves.add(nIdx);
+				nodemap.put(nIdx, new ArrayList<Vertex>());	
 			}
 			List<Vertex> vertices = null;
-			vertices = nodemap.get(n.leafIndex);
+			vertices = nodemap.get(nIdx);
+			int label = vertex.getLabel();
 			if (vertices == null) {
-				throw new UnsupportedOperationException("Cannot put vertex into octree node: " 
-						+n.leafIndex + ". Node is not loaded!");
+				throw new UnsupportedOperationException("Cannot put vertex into octree node: "+n.leafIndex+". Node is not loaded!");
 			}
-			if ((vertex.getLabel() >= n.minIndex && vertex.getLabel() <= (n.minIndex + Math.abs((n.maxIndex - n.minIndex)))) && 
-						(vertex.getLabel() - n.minIndex + 1) > n.vn ) {
-				System.out.println("Vertex: " + vertex.getLabel() + " added!!!");
+			if ((label >= n.minIndex && label <= (n.minIndex + Math.abs((n.maxIndex - n.minIndex)))) && 
+						(label - n.minIndex + 1) > n.vn ) {
+				System.out.println("Vertex: " + label + " added!!!");
 			}
-			if (vertex.getLabel() < n.minIndex || vertex.getLabel() > (n.minIndex + Math.abs((n.maxIndex - n.minIndex)))) {
+			if (label < n.minIndex || label > (n.minIndex + Math.abs((n.maxIndex - n.minIndex)))) {
 				//throw new RuntimeException("Cannot move vertex between leafs");
 				//experimental implementation
 				if (n.getMaxIndex() - n.minIndex < n.vn) {
 					throw new UnsupportedOperationException("Cannot put vertex into octree node: " 
 							+n.leafIndex + ". It contains " + n.vn + " of vertices.");
 				}
-				if (!vertex.isWritable() || !vertex.isWritable()) {
+				if (!vertex.isWritable()) {
 					throw new UnsupportedOperationException("Cannot move non-writable vertices!!");
 				}
 				int newLabel = n.minIndex + n.vn;
 				n.vn++;
 				vertex.setLabel(newLabel);
-				movedVerticesSet.add(newLabel);
-				
+				movedVerticesSet.add(Integer.valueOf(newLabel));
 			}
 			vertices.add(vertex);
 		}
@@ -504,7 +503,7 @@ public class Storage
 			if (tr.isOuter())
 				continue;
 			int nodeNumber = searchNode(oemm, tr, positions);
-			List<Triangle> triangles = node2TrianglesMap.get(nodeNumber);
+			List<Triangle> triangles = node2TrianglesMap.get(Integer.valueOf(nodeNumber));
 			if (triangles == null) {
 				throw new UnsupportedOperationException("Cannot put triangle into octree node: " 
 						+nodeNumber + ". Node is not loaded!");
@@ -532,7 +531,7 @@ public class Storage
 			
 			
 			for (Entry<Integer, List<FakeNonReadVertex>> entry: unloadedNodeIndex2RequiredVertices.entrySet()) {
-				OEMM.Node node = oemm.leaves[entry.getKey()];
+				OEMM.Node node = oemm.leaves[entry.getKey().intValue()];
 				List<FakeNonReadVertex> list = entry.getValue();
 				sortFakeNonReadVertexList(list);
 				FileChannel fch = null;
@@ -586,16 +585,17 @@ public class Storage
 		Map<Integer, Vertex> referencedVertices = getAllVerticesMap(mesh);
 		
 		Set<Integer> processedVertIndex = new HashSet<Integer>();
-		for (Entry<Integer, Vertex> entry: referencedVertices.entrySet()) 
+		for (Vertex v: referencedVertices.values()) 
 		{
-			mesh.add(entry.getValue());
-			processedVertIndex.add(entry.getValue().getLabel());
+			mesh.add(v);
+			processedVertIndex.add(Integer.valueOf(v.getLabel()));
 		}
 		for (AbstractVertex av: tempCollection) {
 			Vertex vert = (Vertex) av;
-			if (processedVertIndex.contains(vert.getLabel()))
+			Integer label = Integer.valueOf(vert.getLabel());
+			if (processedVertIndex.contains(label))
 				continue;
-			processedVertIndex.add(vert.getLabel());
+			processedVertIndex.add(label);
 			if (!vert.isWritable()) {
 				mesh.add(vert);
 			}
@@ -609,19 +609,19 @@ public class Storage
 	 * @param mesh
 	 * @param storedLeaves 
 	 */
-	private static void storeTriangles(OEMM oemm, Mesh mesh, TIntHashSet storedLeaves)
+	private static void storeTriangles(OEMM oemm, Mesh mesh, Set<Integer> storedLeaves)
 	{
 		Map<Integer, List<Triangle>> node2TrianglesMap = new HashMap<Integer, List<Triangle>>();
-		int []leaf = new int[3];
-		int []pointIndex = new int[3];
-		int positions[] = new int[3];
-		for (TIntIterator iter = storedLeaves.iterator(); iter.hasNext();) {
-			node2TrianglesMap.put(iter.next(), new ArrayList<Triangle>());
-		}
+		int[] leaf = new int[3];
+		int[] pointIndex = new int[3];
+		int[] positions = new int[3];
+		for (Integer i: storedLeaves)
+			node2TrianglesMap.put(i, new ArrayList<Triangle>());
+
 		collectAllTriangles(oemm, mesh, node2TrianglesMap);
 		for(Entry<Integer, List<Triangle>> entry: node2TrianglesMap.entrySet()) {
 			
-			Node node = oemm.leaves[entry.getKey()];
+			Node node = oemm.leaves[entry.getKey().intValue()];
 			
 			DataOutputStream fc;
 			try {
@@ -667,7 +667,7 @@ public class Storage
 	 * @param oemm
 	 * @param mesh
 	 */
-	private static void storeVertices(OEMM oemm, Mesh mesh, TIntHashSet storedLeaves)
+	private static void storeVertices(OEMM oemm, Mesh mesh, Set<Integer> storedLeaves)
 	{
 		Map<Integer, List<Vertex>> nodemap = new HashMap<Integer, List<Vertex>>();
 		byte[] byteBuffer = new byte[256];
@@ -677,14 +677,13 @@ public class Storage
 		Set<Integer> addedNeighbour = new HashSet<Integer>();
 		Set<Integer> movedVertices = new HashSet<Integer>();
 		int neighbours = 0;
-		int positions[] = new int[3];
-		for (TIntIterator iter = storedLeaves.iterator(); iter.hasNext();) {
-			nodemap.put(iter.next(), new ArrayList<Vertex>());
-		}
-		collectAllVertices(oemm, mesh, nodemap, movedVertices, storedLeaves);
+		int[] positions = new int[3];
+		for (Integer i: storedLeaves)
+			nodemap.put(i, new ArrayList<Vertex>());
 		
+		collectAllVertices(oemm, mesh, nodemap, movedVertices, storedLeaves);
 		for(Entry<Integer, List<Vertex>> entry: nodemap.entrySet()) {
-			Node node = oemm.leaves[entry.getKey()];
+			Node node = oemm.leaves[entry.getKey().intValue()];
 			sortVertexList(entry.getValue());
 			
 			fixVertexCollection(node, entry.getValue(), old2newIndex, new2oldIndex);
@@ -726,29 +725,31 @@ public class Storage
 					for(Object neighbour: vertex.getNeighboursNodes()){
 						Vertex vert = (Vertex) neighbour;
 						int nodeNumber = searchNode(oemm, vert , positions);
-						if (nodeNumber != node.leafIndex && !addedNeighbour.contains(nodeNumber)) {
-							if (!nodeIndex2adjIndex.containsKey(nodeNumber)) {
+						Integer InodeNumber = Integer.valueOf(nodeNumber);
+						if (nodeNumber != node.leafIndex && !addedNeighbour.contains(InodeNumber)) {
+							if (!nodeIndex2adjIndex.containsKey(InodeNumber)) {
 								//throw new UnsupportedOperationException ("Add adjacent nodes not implemented yet");
-								byte index = (byte) (node.adjLeaves.size() & 0xff);
+								Byte index = Byte.valueOf((byte) (node.adjLeaves.size() & 0xff));
 								node.adjLeaves.add(nodeNumber);
-								nodeIndex2adjIndex.put(nodeNumber, index);
+								nodeIndex2adjIndex.put(InodeNumber, index);
 							}
-							byteBuffer[neighbours++] = nodeIndex2adjIndex.get(nodeNumber);
-							addedNeighbour.add(nodeNumber);
+							byteBuffer[neighbours++] = nodeIndex2adjIndex.get(InodeNumber).byteValue();
+							addedNeighbour.add(InodeNumber);
 						}
 					}
 					//add adjacent non-loaded nodes
-					int lastIndex = getLaterIndex(new2oldIndex, vertex.getLabel()) ;
-					int localIndex = lastIndex - node.minIndex;
-					if (!movedVertices.contains(lastIndex ) && localIndex < adjacencyFileWithoutLoadedNodes.size() ) {
+					Integer Ilabel = Integer.valueOf(vertex.getLabel());
+					Integer lastIndex = getLaterIndex(new2oldIndex, Ilabel);
+					int localIndex = lastIndex.intValue() - node.minIndex;
+					if (!movedVertices.contains(lastIndex) && localIndex < adjacencyFileWithoutLoadedNodes.size() ) {
 						for (Integer adjacent: adjacencyFileWithoutLoadedNodes.get(localIndex)) {
 							
 							if (!addedNeighbour.contains(adjacent)) {
 								addedNeighbour.add(adjacent);
-								byteBuffer[neighbours++] = nodeIndex2adjIndex.get(adjacent);
+								byteBuffer[neighbours++] = nodeIndex2adjIndex.get(adjacent).byteValue();
 							}
 						}
-						if (new2oldIndex.containsKey(vertex.getLabel())) {
+						if (new2oldIndex.containsKey(Ilabel)) {
 							addRequiredNodes4Update(node, nodemap.keySet(), nodes4Update, byteBuffer, neighbours);
 						}
 					}
@@ -788,12 +789,12 @@ public class Storage
 	 * @param node
 	 * @param storedLeaves
 	 */
-	private static void removeLoadedAdjacentNodes(Node node, TIntHashSet storedLeaves)
+	private static void removeLoadedAdjacentNodes(Node node, Set<Integer> storedLeaves)
 	{
 		TIntArrayList list = new TIntArrayList(node.adjLeaves.toNativeArray());
 		node.adjLeaves.clear();
 		for (int nodeValue: list.toNativeArray()) {
-			if (!storedLeaves.contains(nodeValue)) {
+			if (!storedLeaves.contains(Integer.valueOf(nodeValue))) {
 				node.adjLeaves.add(nodeValue);
 			}
 		}
@@ -817,7 +818,7 @@ public class Storage
 		IntBuffer tib = tbb.asIntBuffer();
 		tbb.limit(TRIANGLE_SIZE - 4);
 		for (Integer nodeIndex: nodes4Update) {
-			OEMM.Node node = oemm.leaves[nodeIndex];
+			OEMM.Node node = oemm.leaves[nodeIndex.intValue()];
 			FileChannel fc = null;
 			try {
 				fc = new RandomAccessFile(getTrianglesFile(oemm, node),"rw").getChannel();
@@ -835,7 +836,7 @@ public class Storage
 					
 					for (int ii = 0; ii < 3; ii++) {
 						OEMM.Node oldNode = oemm.leaves[leaf[ii]];
-						int globalIndexOfNode = oldNode.minIndex + localIndices[ii];
+						Integer globalIndexOfNode = Integer.valueOf(oldNode.minIndex + localIndices[ii]);
 						if (!old2newIndex.containsKey(globalIndexOfNode)) {
 							assert 0 <= localIndices[ii] && localIndices[ii] <= oldNode.vn;
 							continue;
@@ -891,7 +892,7 @@ public class Storage
 			Set<Integer> nodes4Update, byte[] byteBuffer, int neighbours)
 	{
 		for (int i = 0; i < neighbours; i++) {
-			int nodeNumber = node.adjLeaves.get(byteBuffer[i]);
+			Integer nodeNumber = Integer.valueOf(node.adjLeaves.get(byteBuffer[i]));
 			if (!visitedNodes.contains(nodeNumber)) {
 				nodes4Update.add(nodeNumber);
 			}
@@ -906,13 +907,11 @@ public class Storage
 	 * @param counter new label of vertex
 	 * @return
 	 */
-	private static Integer getLaterIndex(Map<Integer, Integer> new2oldIndex, int counter)
+	private static Integer getLaterIndex(Map<Integer, Integer> new2oldIndex, Integer counter)
 	{
-		if (new2oldIndex.containsKey(counter)) {
+		if (new2oldIndex.containsKey(counter))
 			return new2oldIndex.get(counter);
-		} else {
-			return counter;
-		}
+		return counter;
 	}
 	
 	/**
@@ -936,11 +935,11 @@ public class Storage
 				Vertex moved = values[upperBound--]; 
 				vertices.add(moved);
 				node.vn = vertices.size();
-				int oldIndex = moved.getLabel();
+				Integer oldIndex = Integer.valueOf(moved.getLabel());
 				//new index is next empty index
 				int newIndex = vertices.size() + node.minIndex - 1;
 				old2newIndex.put(oldIndex, new VertexIndexHolder(node, newIndex));
-				new2oldIndex.put(newIndex, oldIndex);
+				new2oldIndex.put(Integer.valueOf(newIndex), oldIndex);
 				moved.setLabel(newIndex);
 			}
 			if (i > upperBound) {
@@ -962,7 +961,7 @@ public class Storage
 	{
 		Map<Integer,Byte> nodeIndex2adjIndex = new HashMap<Integer, Byte>();
 		for(int i = 0; i < node.adjLeaves.size(); i++) {
-			nodeIndex2adjIndex.put(node.adjLeaves.get(i), (byte)(0xff & i));
+			nodeIndex2adjIndex.put(Integer.valueOf(node.adjLeaves.get(i)), Byte.valueOf((byte)(0xff & i)));
 		}
 		return nodeIndex2adjIndex;
 	}
@@ -1008,7 +1007,7 @@ public class Storage
 				}
 				for (int i = 0; i < count; i++) {
 					byte adjacentLeave = dis.readByte();
-					int leafIndex = node.adjLeaves.get(adjacentLeave);
+					Integer leafIndex = Integer.valueOf(node.adjLeaves.get(adjacentLeave));
 					if (!visitedNodes.contains(leafIndex)) {
 						row.add(leafIndex);
 					}
@@ -1055,7 +1054,7 @@ public class Storage
 		StringBuilder sb = new StringBuilder();
 		getFile(oemm,n, sb);
 		n.file = sb.toString();
-		oemm.leaves = Arrays.copyOf(oemm.leaves,oemm.leaves.length + 1);
+		oemm.leaves = Arrays.copyOf(oemm.leaves, oemm.leaves.length + 1);
 		oemm.leaves[n.leafIndex] = n;
 		return n;
 	}
@@ -1084,11 +1083,7 @@ public class Storage
 		int smallerIndexOfNode = Integer.MAX_VALUE;
 		FakeNonReadVertex fnrv = null;
 		for(Vertex vert: tr.vertex) {
-			int index;
-			
-			index = searchNode(oemm, vert, positions);
-			
-			
+			int index = searchNode(oemm, vert, positions);
 			if (smallerIndexOfNode > index) {
 				smallerIndexOfNode = index;
 			}
@@ -1104,7 +1099,7 @@ public class Storage
 		if (vert instanceof FakeNonReadVertex) {
 			return ((FakeNonReadVertex) vert).getOEMMIndex();
 		}
-		double []coords = vert.getUV();
+		double[] coords = vert.getUV();
 		return searchNode(oemm, coords, positions);
 	}
 
@@ -1201,7 +1196,7 @@ public class Storage
 		}
 	}
 	
-	private static void readVertices(OEMM oemm, TIntHashSet leaves, Mesh mesh, TIntObjectHashMap vertMap, OEMM.Node current)
+	private static void readVertices(OEMM oemm, Set<Integer> leaves, Mesh mesh, TIntObjectHashMap vertMap, OEMM.Node current)
 	{
 		try
 		{
@@ -1229,13 +1224,13 @@ public class Storage
 					vert[index] = (Vertex) mesh.factory.createVertex(xyz);
 					vert[index].setLabel(current.minIndex + index);
 					vert[index].setReadable(true);
-					int n = (int) bufIn.readByte();
+					int n = bufIn.readByte();
 					//  Read neighbours
 					boolean writable = true;
 					for (int j = 0; j < n; j++)
 					{
-						int num = (int) bufIn.readByte();
-						if (!leaves.contains(current.adjLeaves.get(num)))
+						int num = bufIn.readByte();
+						if (!leaves.contains(Integer.valueOf(current.adjLeaves.get(num))))
 						{
 							writable = false;
 							for (j++; j < n; j++)
@@ -1261,7 +1256,7 @@ public class Storage
 		}
 	}
 	
-	private static void readTriangles(OEMM oemm, TIntHashSet leaves, Mesh mesh, TIntObjectHashMap vertMap, Map<Integer, List<FakeNonReadVertex>> unloadedNodeIndex2RequiredNodes, OEMM.Node current)
+	private static void readTriangles(OEMM oemm, Set<Integer> leaves, Mesh mesh, TIntObjectHashMap vertMap, Map<Integer, List<FakeNonReadVertex>> unloadedNodeIndex2RequiredNodes, OEMM.Node current)
 	{
 		try
 		{
@@ -1306,10 +1301,10 @@ public class Storage
 								if (unloadedNodeIndex2RequiredNodes != null)
 								{
 									FakeNonReadVertex vertex = (FakeNonReadVertex) vert[j];
-									List<FakeNonReadVertex> vertices = unloadedNodeIndex2RequiredNodes.get(leaf[j]);
+									List<FakeNonReadVertex> vertices = unloadedNodeIndex2RequiredNodes.get(Integer.valueOf(leaf[j]));
 									if (vertices == null) {
 										vertices = new ArrayList<FakeNonReadVertex>();
-										unloadedNodeIndex2RequiredNodes.put(leaf[j], vertices);
+										unloadedNodeIndex2RequiredNodes.put(Integer.valueOf(leaf[j]), vertices);
 									}
 									vertices.add(vertex);
 								}
