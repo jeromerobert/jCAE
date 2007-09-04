@@ -20,10 +20,6 @@
 
 package org.jcae.viewer3d;
 
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntProcedure;
-
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -137,7 +133,7 @@ public class OEMMBehavior extends Behavior
 
 		public static ViewHolder makeViewHolder(OEMM o, int index, Map<Integer, Mesh> nodeToMeshMap)
 		{
-			TIntHashSet set = new TIntHashSet();
+			Set<Integer> set = new HashSet<Integer>();
 			set.add(index);
 			Mesh mesh = Storage.loadNodes(o, set, false, true, nodeToMeshMap);
 			ViewHolder vh = null;

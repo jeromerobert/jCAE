@@ -26,6 +26,8 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Collection;
 import javax.media.j3d.Appearance;
@@ -39,7 +41,6 @@ import javax.media.j3d.IndexedLineArray;
 import javax.media.j3d.IndexedGeometryArray;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.LineAttributes;
-import gnu.trove.TIntHashSet;
 import org.apache.log4j.Logger;
 
 public class OEMMViewer
@@ -75,18 +76,18 @@ public class OEMMViewer
 	
 	public static BranchGroup meshOEMM(OEMM oemm)
 	{
-		TIntHashSet leaves = new TIntHashSet();
+		Set<Integer> leaves = new HashSet<Integer>();
 		for (int i = 0; i < oemm.getNumberOfLeaves(); i++)
 			leaves.add(i);
 		return meshOEMM(oemm, leaves);
 	}
 	
-	public static BranchGroup meshOEMM(OEMM oemm, TIntHashSet leaves)
+	public static BranchGroup meshOEMM(OEMM oemm, Set<Integer> leaves)
 	{
 		return meshOEMM(oemm, leaves, false);
 	}
 
-	public static BranchGroup meshOEMM(OEMM oemm, TIntHashSet leaves, boolean adjacency)
+	public static BranchGroup meshOEMM(OEMM oemm, Set<Integer> leaves, boolean adjacency)
 	{
 		Mesh mesh = Storage.loadNodes(oemm, leaves, adjacency, true);
 		return meshOEMM(mesh, adjacency);
