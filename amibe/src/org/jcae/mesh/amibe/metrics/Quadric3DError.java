@@ -61,9 +61,12 @@ public class Quadric3DError implements Serializable
 {
 	public Metric3D A = new Metric3D();
 	public double [] b = new double[3];
-	public double [] temp = new double[3];
 	public double c;
 	public double area;
+
+	// Temporary arrays
+	public static double [] temp = new double[3];
+	public static Metric3D Qtemp = new Metric3D();
 
 	/**
 	 * Optimal placement strategy, select the best vertex.
@@ -143,10 +146,10 @@ public class Quadric3DError implements Serializable
 			// Keep a reference if there is one
 			if (placement == POS_OPTIMAL)
 			{
-				Metric3D Qinv = (Metric3D) A.clone();
-				if (Qinv.inv())
+				Qtemp.copy(A);
+				if (Qtemp.inv())
 				{
-					Qinv.apply(b, temp);
+					Qtemp.apply(b, temp);
 					ret.copy(bestCandidateV1V2Ref(v1, v2, q1, q2));
 					ret.moveTo(-temp[0], -temp[1], -temp[2]);
 				}

@@ -1,3 +1,10 @@
+Tue Sep  4 09:34:15 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/metrics/Metric3D.java: Replace clone()
+	method by copy().
+	* src/org/jcae/mesh/amibe/metrics/Quadric3DError.java: Use a static
+	Metric3D instance to compute inverse matrix.
+
 Mon Sep  3 11:45:18 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/MeshReader.java (readObject3D): XPath

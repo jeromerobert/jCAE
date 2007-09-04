@@ -72,7 +72,7 @@ import org.apache.log4j.Logger;
  * {@link #restrict2D}.
  * </p>
  */
-public class Metric3D extends Matrix3D implements Cloneable
+public class Metric3D extends Matrix3D
 {
 	private static Logger logger=Logger.getLogger(Metric3D.class);
 	
@@ -131,20 +131,13 @@ public class Metric3D extends Matrix3D implements Cloneable
 	}
 	
 	/**
-	 * Create a <code>Metric3D</code> instance and copy another instance.
+	 * Copy another instance.
 	 *
 	 * @param that  instance being copied.
 	 */
-	public Object clone()
+	public void copy(Metric3D that)
 	{
-		Metric3D ret = null;
-		try {
-			ret = (Metric3D) super.clone();
-		} catch(CloneNotSupportedException ex) {
-			ex.printStackTrace();
-		}
-		System.arraycopy(data, 0, ret.data, 0, 9);
-		return ret;
+		System.arraycopy(that.data, 0, data, 0, 9);
 	}
 	
 	/**
