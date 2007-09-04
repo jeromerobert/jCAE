@@ -94,7 +94,6 @@ public class RawStorage
 	 */
 	public static void readSoup(String file, SoupReaderInterface proc)
 	{
-		int [] ijk = new int[3];
 		double [] xyz = new double[3];
 		boolean hasNext = true;
 		bb.clear();
@@ -843,22 +842,22 @@ public class RawStorage
 				FileChannel fca = new FileOutputStream(new File(outDir, current.file+"a")).getChannel();
 				bb.clear();
 				//  Inner vertices of this node
-				int room = bb.capacity();
+				int freeSpace = bb.capacity();
 				for (int i = 0; i < index; i++)
 				{
 					int n = localAdjSet[i].size();
-					if (room < 1 + n)
+					if (freeSpace < 1 + n)
 					{
 						bb.flip();
 						fca.write(bb);
 						bb.clear();
-						room = bb.capacity();
+						freeSpace = bb.capacity();
 					}
 					//     Adjacent leaves
 					bb.put((byte) n);
 					for (TIntIterator it = localAdjSet[i].iterator(); it.hasNext();)
 						bb.put((byte) invMap.get(it.next()));
-					room -= 1 + n;
+					freeSpace -= 1 + n;
 				}
 				bb.flip();
 				fca.write(bb);
