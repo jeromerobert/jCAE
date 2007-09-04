@@ -38,7 +38,7 @@ public abstract class QSortedTree implements Serializable
 	private static Logger logger = Logger.getLogger(QSortedTree.class);	
 	protected final Node root = newNode(null, Double.MAX_VALUE);
 	// Mapping between objects and tree nodes
-	private transient HashMap map = new HashMap();
+	private transient HashMap<Object, Node> map = new HashMap<Object, Node>();
 	private int nrNodes = 0;
 	
 	/**
@@ -59,7 +59,8 @@ public abstract class QSortedTree implements Serializable
 	 */
 	protected abstract Node removeNode(Node p);
 
-	public static class Node implements Comparable, Serializable
+	@SuppressWarnings("serial")
+	public static class Node implements Comparable<Object>, Serializable
 	{
 		private Object data;
 		private double value;
@@ -71,29 +72,29 @@ public abstract class QSortedTree implements Serializable
 			return new Node[2];
 		}
 	
-		public Node(Object o, double v)
+		public Node(final Object o, final double v)
 		{
 			data = o;
 			value = v;
 		}
 		
-		public int compareTo(Object o)
+		public int compareTo(final Object o)
 		{
-			Node that = (Node) o;
+			final Node that = (Node) o;
 			if (value < that.value)
 				return -1;
 			return +1;
 		}
 		
-		public void reset(double v)
+		public void reset(final double v)
 		{
 			child[0] = child[1] = parent = null;
 			value = v;
 		}
 		
-		public void swap(Node that)
+		public void swap(final Node that)
 		{
-			Object temp = that.data;
+			final Object temp = that.data;
 			that.data = data;
 			data = temp;
 			// For now there is no reason to swap values
@@ -125,7 +126,7 @@ public abstract class QSortedTree implements Serializable
 		public Node rotateL()
 		{
 			//logger.debug("Single left rotation");
-			Node right = child[1];
+			final Node right = child[1];
 			child[1] = right.child[0];
 			right.child[0] = this;
 			right.parent = parent;
@@ -145,7 +146,7 @@ public abstract class QSortedTree implements Serializable
 		public Node rotateR()
 		{
 			//logger.debug("Single right rotation");
-			Node left = child[0];
+			final Node left = child[0];
 			child[0] = left.child[1];
 			left.child[1] = this;
 			left.parent = parent;
@@ -167,8 +168,8 @@ public abstract class QSortedTree implements Serializable
 		public Node rotateRL()
 		{
 			//logger.debug("Right+left rotation");
-			Node right = child[1];          // C
-			Node newRoot = right.child[0];  // B
+			final Node right = child[1];          // C
+			final Node newRoot = right.child[0];  // B
 			// Right rotation
 			right.child[0] = newRoot.child[1];
 			newRoot.child[1] = right;
@@ -198,8 +199,8 @@ public abstract class QSortedTree implements Serializable
 		public Node rotateLR()
 		{
 			//logger.debug("Left+right rotation");
-			Node left = child[0];         // A
-			Node newRoot = left.child[1]; // B
+			final Node left = child[0];         // A
+			final Node newRoot = left.child[1]; // B
 	
 			assert newRoot != null;
 			// Left rotation
@@ -275,7 +276,7 @@ public abstract class QSortedTree implements Serializable
 		throws java.io.IOException, ClassNotFoundException
 	{
 		s.defaultReadObject();
-		map = new HashMap(nrNodes);
+		map = new HashMap<Object, Node>(nrNodes);
 		if (nrNodes == 0)
 			return;
 		for (Node current = root.child[0].firstNode(); current != null; current = current.nextNode())
@@ -315,7 +316,7 @@ public abstract class QSortedTree implements Serializable
 	 */
 	public final boolean remove(Object o)
 	{
-		Node p = (Node) map.get(o);
+		Node p = map.get(o);
 		if (logger.isDebugEnabled())
 			logger.debug("Remove "+p+" "+o);
 		if (p == null)
@@ -345,7 +346,7 @@ public abstract class QSortedTree implements Serializable
 	 */
 	public final boolean update(Object o, double value)
 	{
-		Node p = (Node) map.get(o);
+		Node p = map.get(o);
 		if (logger.isDebugEnabled())
 			logger.debug("Update "+p+" content to "+value);
 		if (p == null)
@@ -460,18 +461,18 @@ public abstract class QSortedTree implements Serializable
 		return root.child[0].getValue();
 	}
 	
-	private static Iterator nullIterator = new Iterator()
+	private static Iterator<Node> nullIterator = new Iterator<Node>()
 	{
 		public boolean hasNext() { return false; }
-		public Object next() { throw new NoSuchElementException(); }
+		public Node next() { throw new NoSuchElementException(); }
 		public void remove() { throw new RuntimeException(); }
 	};
 
-	public Iterator iterator()
+	public Iterator<Node> iterator()
 	{
 		if (nrNodes == 0)
 			return nullIterator;
-		return new Iterator()
+		return new Iterator<Node>()
 		{
 			private Node current = root;
 			private Node next = root.child[0].firstNode();
@@ -479,7 +480,7 @@ public abstract class QSortedTree implements Serializable
 			{
 				return next != null;
 			}
-			public Object next()
+			public Node next()
 			{
 				current = next;
 				if (current == null)
@@ -495,11 +496,11 @@ public abstract class QSortedTree implements Serializable
 		};
 	}
 	
-	public Iterator backwardIterator()
+	public Iterator<Node> backwardIterator()
 	{
 		if (nrNodes == 0)
 			return nullIterator;
-		return new Iterator()
+		return new Iterator<Node>()
 		{
 			private Node current = root;
 			private Node next = root.child[0].lastNode();
@@ -507,7 +508,7 @@ public abstract class QSortedTree implements Serializable
 			{
 				return next != null;
 			}
-			public Object next()
+			public Node next()
 			{
 				current = next;
 				if (current == null)

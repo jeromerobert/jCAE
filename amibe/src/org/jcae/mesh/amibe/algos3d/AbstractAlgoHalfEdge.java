@@ -59,7 +59,7 @@ public abstract class AbstractAlgoHalfEdge
 	protected abstract Logger thisLogger();
 	private static final String dumpFile = "/tmp/jcae.dump";
 
-	public AbstractAlgoHalfEdge(Mesh m, Map options)
+	public AbstractAlgoHalfEdge(Mesh m, Map<String, String> options)
 	{
 		mesh = m;
 	}

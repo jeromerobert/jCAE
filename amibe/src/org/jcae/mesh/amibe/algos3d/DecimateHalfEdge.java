@@ -110,9 +110,10 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	private HashMap<Vertex, Quadric3DError> quadricMap = null;
 	private Vertex v1 = null, v2 = null;
 	private Quadric3DError q1 = null, q2 = null;
-	private Vertex v3, v4;
+	private Vertex v3;
+	private final Vertex v4;
 	private Quadric3DError q3 = new Quadric3DError();
-	private Quadric3DError q4 = new Quadric3DError();
+	private final Quadric3DError q4 = new Quadric3DError();
 	private static final boolean testDump = false;
 	
 	/**
@@ -123,19 +124,18 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	 *        behaviour.  Valid keys are <code>size</code>,
 	 *        <code>placement</code> and <code>maxtriangles</code>.
 	 */
-	public DecimateHalfEdge(Mesh m, Map options)
+	public DecimateHalfEdge(final Mesh m, final Map<String, String> options)
 	{
 		super(m, options);
 		v3 = (Vertex) m.factory.createVertex(0.0, 0.0, 0.0);
 		v4 = (Vertex) m.factory.createVertex(0.0, 0.0, 0.0);
-		for (Iterator it = options.entrySet().iterator(); it.hasNext(); )
+		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
-			Map.Entry opt = (Map.Entry) it.next();
-			String key = (String) opt.getKey();
-			String val = (String) opt.getValue();
+			final String key = opt.getKey();
+			final String val = opt.getValue();
 			if (key.equals("size"))
 			{
-				double sizeTarget = new Double(val).doubleValue();
+				final double sizeTarget = new Double(val).doubleValue();
 				tolerance = sizeTarget * sizeTarget;
 				logger.debug("Tolerance: "+tolerance);
 			}
@@ -161,32 +161,32 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 
 	public void preProcessAllHalfEdges()
 	{
-		int roughNrNodes = mesh.getTriangles().size()/2;
+		final int roughNrNodes = mesh.getTriangles().size()/2;
 		quadricMap = new HashMap<Vertex, Quadric3DError>(roughNrNodes);
-		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
+		for (final Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
-			Triangle f = (Triangle) itf.next();
+			final Triangle f = (Triangle) itf.next();
 			if (isSkippedTriangle(f))
 				continue;
 			for (int i = 0; i < 3; i++)
 			{
-				Vertex n = f.vertex[i];
+				final Vertex n = f.vertex[i];
 				if (!quadricMap.containsKey(n))
 					quadricMap.put(n, new Quadric3DError());
 			}
 		}
 		// Compute quadrics
-		double [] vect1 = new double[3];
-		double [] vect2 = new double[3];
-		double [] normal = new double[3];
-		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
+		final double [] vect1 = new double[3];
+		final double [] vect2 = new double[3];
+		final double [] normal = new double[3];
+		for (final Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
 		{
-			Triangle f = (Triangle) itf.next();
+			final Triangle f = (Triangle) itf.next();
 			if (isSkippedTriangle(f) )
 				continue;
 			double [] p0 = f.vertex[0].getUV();
 			double [] p1 = f.vertex[1].getUV();
-			double [] p2 = f.vertex[2].getUV();
+			final double [] p2 = f.vertex[2].getUV();
 			vect1[0] = p1[0] - p0[0];
 			vect1[1] = p1[1] - p0[1];
 			vect1[2] = p1[2] - p0[2];
@@ -195,7 +195,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			vect2[2] = p2[2] - p0[2];
 			// This is in fact 2*area, but that does not matter
 			Matrix3D.prodVect3D(vect1, vect2, normal);
-			double norm = Matrix3D.norm(normal);
+			final double norm = Matrix3D.norm(normal);
 			double area = norm;
 			if (tolerance > 0.0)
 				area /= tolerance;
@@ -207,7 +207,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			double d = - Matrix3D.prodSca(normal, f.vertex[0].getUV());
 			for (int i = 0; i < 3; i++)
 			{
-				Quadric3DError q = (Quadric3DError) quadricMap.get(f.vertex[i]);
+				final Quadric3DError q = quadricMap.get(f.vertex[i]);
 				q.addError(normal, d, area);
 			}
 			// Penalty for boundary triangles
@@ -231,8 +231,8 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 					for (int k = 0; k < 3; k++)
 						vect2[k] *= 100.0;
 					d = - Matrix3D.prodSca(vect2, e.origin().getUV());
-					Quadric3DError q1 = (Quadric3DError) quadricMap.get(e.origin());
-					Quadric3DError q2 = (Quadric3DError) quadricMap.get(e.destination());
+					final Quadric3DError q1 = quadricMap.get(e.origin());
+					final Quadric3DError q2 = quadricMap.get(e.destination());
 					//area = Matrix3D.norm(vect2) / tolerance;
 					area = 0.0;
 					q1.addError(vect2, d, area);
@@ -248,43 +248,43 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			restoreState();
 	}
 
-	protected void appendDumpState(ObjectOutputStream out)
+	protected void appendDumpState(final ObjectOutputStream out)
 		throws IOException
 	{
 		out.writeObject(quadricMap);
 	}
 
-	protected void appendRestoreState(ObjectInputStream q)
+	protected void appendRestoreState(final ObjectInputStream q)
 		throws IOException
 	{
 		try
 		{
 			quadricMap = (HashMap<Vertex, Quadric3DError>) q.readObject();
 		}
-		catch (ClassNotFoundException ex)
+		catch (final ClassNotFoundException ex)
 		{
 			ex.printStackTrace();
 			System.exit(-1);
 		}
 	}
 
-	public double cost(HalfEdge e)
+	public double cost(final HalfEdge e)
 	{
-		Vertex o = e.origin();
-		Vertex d = e.destination();
-		Quadric3DError q1 = (Quadric3DError) quadricMap.get(o);
+		final Vertex o = e.origin();
+		final Vertex d = e.destination();
+		final Quadric3DError q1 = quadricMap.get(o);
 		assert q1 != null : o;
-		Quadric3DError q2 = (Quadric3DError) quadricMap.get(d);
+		final Quadric3DError q2 = quadricMap.get(d);
 		assert q2 != null : d;
 		q4.computeQuadric3DError(q1, q2);
 		q4.optimalPlacement(o, d, q1, q2, placement, v4);
-		double ret = q1.value(v4.getUV()) + q2.value(v4.getUV());
+		final double ret = q1.value(v4.getUV()) + q2.value(v4.getUV());
 		// TODO: check why this assertion sometimes fail
 		// assert ret >= -1.e-2 : q1+"\n"+q2+"\n"+ret;
 		return ret;
 	}
 
-	public boolean canProcessEdge(HalfEdge current)
+	public boolean canProcessEdge(final HalfEdge current)
 	{
 		v1 = current.origin();
 		v2 = current.destination();
@@ -295,8 +295,8 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		if (!v1.isWritable() || !v2.isWritable())
 			return false;
 		/* FIXME: add an option so that boundary nodes may be frozen. */
-		q1 = (Quadric3DError) quadricMap.get(v1);
-		q2 = (Quadric3DError) quadricMap.get(v2);
+		q1 = quadricMap.get(v1);
+		q2 = quadricMap.get(v2);
 		assert q1 != null : current;
 		assert q2 != null : current;
 		q3.computeQuadric3DError(q1, q2);
@@ -322,7 +322,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("Contract edge: "+current+" into "+v3);
-		Triangle t1 = current.getTri();
+		final Triangle t1 = current.getTri();
 		// HalfEdge instances on t1 and t2 will be deleted
 		// when edge is contracted, and we do not know whether
 		// they appear within tree or their symmetric ones,
@@ -342,7 +342,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			current = (HalfEdge) current.next();
 		}
 		HalfEdge sym = (HalfEdge) current.sym();
-		Triangle t2 = sym.getTri();
+		final Triangle t2 = sym.getTri();
 		if (!isSkippedTriangle(t2))
 		{
 			nrTriangles--;
@@ -359,7 +359,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		//  By convention, collapse() returns edge (v3, apex)
 		if (current.hasAttributes(AbstractHalfEdge.OUTER))
 			current = (HalfEdge) current.sym();
-		Vertex apex = current.apex();
+		final Vertex apex = current.apex();
 		current = (HalfEdge) current.collapse(mesh, v3);
 		quadricMap.remove(v1);
 		quadricMap.remove(v2);
@@ -393,9 +393,9 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	 * 
 	 * @param args xmlDir, -t tolerance | -n triangle, brepFile, output
 	 */
-	public static void main(String[] args)
+	public static void main(final String[] args)
 	{
-		HashMap options = new HashMap();
+		final HashMap<String, String> options = new HashMap<String, String>();
 		if(args.length != 5)
 		{
 			System.out.println(usageString);
@@ -411,15 +411,15 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			return;
 		}
 		logger.info("Load geometry file");
-		org.jcae.mesh.amibe.traits.TriangleTraitsBuilder ttb = new org.jcae.mesh.amibe.traits.TriangleTraitsBuilder();
+		final org.jcae.mesh.amibe.traits.TriangleTraitsBuilder ttb = new org.jcae.mesh.amibe.traits.TriangleTraitsBuilder();
 		ttb.addHalfEdge();
-		org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = new org.jcae.mesh.amibe.traits.MeshTraitsBuilder();
+		final org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = new org.jcae.mesh.amibe.traits.MeshTraitsBuilder();
 		mtb.addTriangleSet();
 		mtb.add(ttb);
-		Mesh mesh = new Mesh(mtb);
+		final Mesh mesh = new Mesh(mtb);
 		MeshReader.readObject3D(mesh, args[0], "jcae3d", -1);
 		new DecimateHalfEdge(mesh, options).compute();
-		File brepFile=new File(args[3]);
+		final File brepFile=new File(args[3]);
 		MeshWriter.writeObject3D(mesh, args[4], "jcae3d", brepFile.getParent(), brepFile.getName());
 	}
 }
