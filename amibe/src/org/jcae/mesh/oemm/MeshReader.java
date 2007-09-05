@@ -153,6 +153,12 @@ public class MeshReader extends Storage
 	private void appendMesh(Mesh mesh, Set<Integer> leaves)
 	{
 		logger.debug("Loading nodes");
+
+		// Reset maps between consecutive calls to buildMesh()
+		if (mapNodeToMesh != null)
+			mapNodeToMesh.clear();
+		if (mapNodeToNonReadVertexList != null)
+			mapNodeToNonReadVertexList.clear();
 		
 		TIntObjectHashMap vertMap = new TIntObjectHashMap();
 		
