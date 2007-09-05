@@ -5,6 +5,9 @@ Wed Sep  5 15:23:36 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	readable/writable members from Triangle to AbstractTriangle.
 	* src/org/jcae/mesh/oemm/MeshReader.java: New class to improve
 	user control on reading OEMM nodes.
+	* src/org/jcae/mesh/oemm/RawStorage.java (IndexExternalVerticesProcedure):
+	More aggressive memory management by catching OutOfMemoryError
+	exception.
 
 Tue Sep  4 09:34:15 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

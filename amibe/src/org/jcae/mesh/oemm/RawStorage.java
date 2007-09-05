@@ -899,21 +899,28 @@ public class RawStorage
 				return OK;
 			if (logger.isDebugEnabled())
 				logger.debug("Indexing external vertices of node "+(current.leafIndex+1)+"/"+oemm.getNumberOfLeaves());
-			// Only adjacent leaves are needed, drop others
-			// to free memory.
-			// TODO: Add a better mamory management system.
-			for (int i = 0; i < needed.length; i++)
-				needed[i] = false;
+			int rc = OK;
+			try
+			{
+				rc = processIndexExternalVerticesProcedure(oemm, current);
+			}
+			catch (OutOfMemoryError ex)
+			{
+				for (int i = 0; i < needed.length; i++)
+				{
+					needed[i] = false;
+					vertices[i] = null;
+				}
+				rc = processIndexExternalVerticesProcedure(oemm, current);
+			}
+			return rc;
+		}
+
+		private final int processIndexExternalVerticesProcedure(OEMM oemm, OEMM.Node current)
+		{
 			needed[current.leafIndex] = true;
 			for (int i = 0; i < current.adjLeaves.size(); i++)
 				needed[current.adjLeaves.get(i)] = true;
-			for (int i = 0; i < needed.length; i++)
-			{
-				if (!needed[i])
-					vertices[i] = null;
-			}
-			
-			//  Load needed vertices
 			for (int i = 0; i < vertices.length; i++)
 			{
 				if (needed[i] && vertices[i] == null)
