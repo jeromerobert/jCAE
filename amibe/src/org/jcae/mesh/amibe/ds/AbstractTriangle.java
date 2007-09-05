@@ -114,6 +114,10 @@ public class AbstractTriangle
 	{
 		StringBuffer r = new StringBuffer();
 		r.append("hashcode: "+hashCode());
+		if (!readable)
+			r.append(" !r");
+		if (!writable)
+			r.append(" !w");
 		r.append("\nVertices:");
 		for (int i = 0; i < 3; i++)
 			r.append("\n  "+vertex[i]);
