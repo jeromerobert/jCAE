@@ -138,6 +138,43 @@ public class MeshReader extends Storage
 	 * Builds a mesh composed of specified octants.
 	 * If parameter mapNodeToMesh is not null then it also add boundary triangles
 	 * to the mesh that us created for neighbor node.
+	 * @param leaves set of selected octants
+	 * @return mesh contained in these octants
+	 */
+	public Mesh buildMesh(Set<Integer> leaves)
+	{
+		if (mapNodeToMesh != null)
+			throw new RuntimeException("Error: buildMesh() cannot be called after buildMeshes()!");
+		Mesh ret = new Mesh();
+		appendMesh(ret, leaves);
+		return ret;
+	}
+
+	private void appendMesh(Mesh mesh, Set<Integer> leaves)
+	{
+		logger.debug("Loading nodes");
+		
+		TIntObjectHashMap vertMap = new TIntObjectHashMap();
+		
+		ArrayList<Integer> sortedLeaves = new ArrayList<Integer>(leaves);
+		Collections.sort(sortedLeaves);
+		for (Integer i: sortedLeaves) {
+			readVertices(leaves, mesh, vertMap, oemm.leaves[i.intValue()]);
+		}
+		for (Integer i: sortedLeaves) {
+			readTriangles(leaves, mesh, vertMap, false, oemm.leaves[i.intValue()]);
+		}
+		if (mapNodeToNonReadVertexList != null) {
+			loadVerticesFromUnloadedNodes();
+		}
+		buildMeshAdjacency(mesh, vertMap);
+		logger.info("Nr. of triangles: "+mesh.getTriangles().size());
+	}
+
+	/**
+	 * Builds a mesh composed of specified octants.
+	 * If parameter mapNodeToMesh is not null then it also add boundary triangles
+	 * to the mesh that us created for neighbor node.
 	 * @param mtb  mesh traits builder used to create <code>Mesh</code> instances
 	 * @param leaves set of selected octants
 	 * @return mesh contained in these octants
@@ -153,22 +190,7 @@ public class MeshReader extends Storage
 		if (!mtb.hasNodes())
 			mtb.addNodeList();
 		Mesh ret = new Mesh(mtb);
-		
-		TIntObjectHashMap vertMap = new TIntObjectHashMap();
-		
-		ArrayList<Integer> sortedLeaves = new ArrayList<Integer>(leaves);
-		Collections.sort(sortedLeaves);
-		for (Integer i: sortedLeaves) {
-			readVertices(leaves, ret, vertMap, oemm.leaves[i.intValue()]);
-		}
-		for (Integer i: sortedLeaves) {
-			readTriangles(leaves, ret, vertMap, false, oemm.leaves[i.intValue()]);
-		}
-		if (mapNodeToNonReadVertexList != null) {
-			loadVerticesFromUnloadedNodes();
-		}
-		buildMeshAdjacency(ret, vertMap);
-		logger.info("Nr. of triangles: "+ret.getTriangles().size());
+		appendMesh(ret, leaves);
 		return ret;
 	}
 
