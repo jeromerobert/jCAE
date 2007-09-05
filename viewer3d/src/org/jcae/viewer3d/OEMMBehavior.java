@@ -45,10 +45,10 @@ import javax.vecmath.Vector3d;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.Storage;
-import org.jcae.mesh.oemm.TraversalProcedure;
-import org.jcae.mesh.oemm.OEMM.Node;
+import org.jcae.mesh.oemm.MeshReader;
 import org.jcae.viewer3d.bg.ViewableBG;
 import org.jcae.viewer3d.cad.ViewableCAD;
 import org.jcae.viewer3d.cad.occ.OCCProvider;
@@ -64,36 +64,7 @@ public class OEMMBehavior extends Behavior
 	private static Logger logger = Logger.getLogger(OEMMBehavior.class);
 	private static final int DEFAULT_MAX_TRIANGLES_NBR = -1;
 	private boolean frozen = false;
-	private static class LoadCoarseOEMMProcedure extends TraversalProcedure
-	{
-		private Map<Integer, ViewHolder> oemmNodeId2BranchGroup;
-		
-		private Map<Integer,Mesh> nodeToMeshMap = null;
-		
-		public LoadCoarseOEMMProcedure(Map<Integer, ViewHolder> oemmNodeId2BranchGroup, boolean cloneBoundaryTriangles)
-		{
-			this.oemmNodeId2BranchGroup = oemmNodeId2BranchGroup;
-			if (cloneBoundaryTriangles) {
-				nodeToMeshMap = new HashMap<Integer, Mesh>();
-			}
-		}
-		
-		public LoadCoarseOEMMProcedure(Map<Integer, ViewHolder> coarseOemmNodeId2BranchGroup)
-		{
-			this(coarseOemmNodeId2BranchGroup, false);
-		}
-
-		@Override
-		public int action(OEMM o, Node c, int octant, int visit)
-		{
-			if (visit != LEAF) {
-				return OK;
-			}
-			ViewHolder vh = ViewHolder.makeViewHolder(o, c.leafIndex, nodeToMeshMap);
-			oemmNodeId2BranchGroup.put(c.leafIndex, vh);
-			return OK;
-		}
-	}
+	private MeshReader coarseReader;
 	
 	private static class ViewHolder
 	{
@@ -220,15 +191,19 @@ public class OEMMBehavior extends Behavior
 		canvas.add(new ViewableBG(visibleMeshBranchGroup));
 		boolean cloneBoundaryTriangles = Boolean.getBoolean("org.jcae.viewer3d.OEMMBehavior.cloneBoundaryTringles");
 		
+		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
+		mtb.addTriangleList();
+		coarseReader = new MeshReader(oemm);
+		coarseReader.buildMeshes(mtb, cloneBoundaryTriangles);
 		
-		coarseOEMM.walk(new LoadCoarseOEMMProcedure(coarseOemmNodeId2BranchGroup, cloneBoundaryTriangles));
-		
-		for(Entry<Integer,ViewHolder> entry: coarseOemmNodeId2BranchGroup.entrySet()) 
+		for(int i = 0, n = coarseOEMM.getNumberOfLeaves(); i < n; i++)
 		{
-			if (entry.getValue().getViewElement() == null) {
-				entry.getValue().setViewElem(OEMMViewer.meshOEMM(entry.getValue().getMesh(), false));
-			}
-			addBranchGroup(entry.getValue(), true);
+			Integer II = Integer.valueOf(i);
+			Mesh mesh = coarseReader.getMesh(i);
+			ViewHolder vh = new ViewHolder(II, mesh);
+			coarseOemmNodeId2BranchGroup.put(II, vh);
+			vh.setViewElem(OEMMViewer.meshOEMM(mesh, false));
+			addBranchGroup(vh, true);
 		}
 		
 		setSchedulingBounds(new BoundingSphere(
