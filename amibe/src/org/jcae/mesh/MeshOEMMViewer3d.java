@@ -25,7 +25,7 @@ import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.Storage;
 import org.jcae.mesh.oemm.MeshReader;
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.xmldata.MeshWriter;
 import org.jcae.mesh.amibe.validation.*;
 import org.apache.log4j.Logger;
@@ -35,7 +35,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.Iterator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -134,13 +133,13 @@ public class MeshOEMMViewer3d
 						{
 							int idx = leaves.iterator().next();
 							OEMM.Node current = oemm.leaves[idx];
-							Mesh amesh = Storage.loadNodeWithNeighbours(oemm, idx, false);
+							mr.setLoadNonReadableTriangles(true);
+							Mesh amesh = mr.buildMesh(leaves);
 							MinAngleFace qproc = new MinAngleFace();
 							QualityFloat data = new QualityFloat(amesh.getTriangles().size());
 							data.setQualityProcedure(qproc);
-							for (Iterator itf = amesh.getTriangles().iterator(); itf.hasNext();)
+							for (AbstractTriangle f: amesh.getTriangles())
 							{
-								Triangle f = (Triangle) itf.next();
 								if (f.getGroupId() == idx)
 									data.compute(f);
 							}
@@ -160,6 +159,7 @@ public class MeshOEMMViewer3d
 							bgView.remove(fineMesh);
 						if (decMesh != null)
 							bgView.remove(decMesh);
+						mr.setLoadNonReadableTriangles(false);
 						Mesh amesh = mr.buildMesh(octree.getResultSet());
 						HashMap opts = new HashMap();
 						opts.put("maxtriangles", Integer.toString(amesh.getTriangles().size() / 100));
