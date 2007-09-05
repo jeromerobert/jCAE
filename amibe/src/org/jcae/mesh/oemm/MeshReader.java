@@ -104,10 +104,7 @@ public class MeshReader extends Storage
 		mapNodeToMesh = new HashMap<Integer, Mesh>(nrL);
 		for (int i = 0; i < nrL; i++)
 			mapNodeToMesh.put(Integer.valueOf(i), new Mesh(mtb));
-		if (cloneCrossBoundaryTriangles)
-			mapNodeToNonReadVertexList = new HashMap<Integer, List<FakeNonReadVertex>>();
-		else
-			mapNodeToNonReadVertexList = null;
+		mapNodeToNonReadVertexList = new HashMap<Integer, List<FakeNonReadVertex>>();
 		Set<Integer> loadedLeaves = new HashSet<Integer>();
 		for (int i = 0; i < nrL; i++)
 		{
@@ -116,7 +113,7 @@ public class MeshReader extends Storage
 			loadedLeaves.add(Integer.valueOf(i));
 			TIntObjectHashMap vertMap = new TIntObjectHashMap();
 			readVertices(loadedLeaves, mesh, vertMap, oemm.leaves[i]);
-			readTriangles(loadedLeaves, mesh, vertMap, oemm.leaves[i]);
+			readTriangles(loadedLeaves, mesh, vertMap, cloneCrossBoundaryTriangles, oemm.leaves[i]);
 			buildMeshAdjacency(mesh, vertMap);
 		}
 		if (mapNodeToNonReadVertexList != null) {
@@ -147,6 +144,8 @@ public class MeshReader extends Storage
 	 */
 	public Mesh buildMesh(MeshTraitsBuilder mtb, Set<Integer> leaves)
 	{
+		if (mapNodeToMesh != null)
+			throw new RuntimeException("Error: buildMesh() cannot be called after buildMeshes()!");
 		logger.debug("Loading nodes");
 		// Mesh needs triangle and vertex collections, otherwise it cannot be stored back on disk
 		if (!mtb.hasTriangles())
@@ -163,7 +162,7 @@ public class MeshReader extends Storage
 			readVertices(leaves, ret, vertMap, oemm.leaves[i.intValue()]);
 		}
 		for (Integer i: sortedLeaves) {
-			readTriangles(leaves, ret, vertMap, oemm.leaves[i.intValue()]);
+			readTriangles(leaves, ret, vertMap, false, oemm.leaves[i.intValue()]);
 		}
 		if (mapNodeToNonReadVertexList != null) {
 			loadVerticesFromUnloadedNodes();
@@ -239,7 +238,7 @@ public class MeshReader extends Storage
 	/**
 	 * Reads triangle file, create Triangle instances and store them into mesh.
 	 */
-	private void readTriangles(Set<Integer> leaves, Mesh mesh, TIntObjectHashMap vertMap, OEMM.Node current)
+	private void readTriangles(Set<Integer> leaves, Mesh mesh, TIntObjectHashMap vertMap, boolean cloneCrossBoundaryTriangles, OEMM.Node current)
 	{
 		try
 		{
@@ -299,7 +298,7 @@ public class MeshReader extends Storage
 					createTriangle(current.leafIndex, vert, readable, writable, mesh);
 					// When called from buildMeshes(), cross boundary triangles are put into
 					// all crossed octants.
-					if (mapNodeToNonReadVertexList != null && mapNodeToMesh != null)
+					if (cloneCrossBoundaryTriangles)
 					{
 						Set<Integer> processedNode = new HashSet<Integer>();
 						for (int j = 0; j < 3; j++) {
