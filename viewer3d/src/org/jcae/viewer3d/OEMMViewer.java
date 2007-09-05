@@ -191,7 +191,7 @@ public class OEMMViewer
 				for (int j = 0; j < 3; j++)
 				{
 					double [] xyz = t.vertex[j].getUV();
-					t.vertex[j].setLabel(3*i+j);
+					t.vertex[j].setLabel(3*nrt+j);
 					for (int k = 0; k < 3; k++)
 						coord[9*nrt+3*j+k] = xyz[k];
 				}

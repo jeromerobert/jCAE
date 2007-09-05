@@ -109,7 +109,7 @@ public class OEMMBehavior extends Behavior
 			Mesh mesh = Storage.loadNodes(o, set, false, true, nodeToMeshMap);
 			ViewHolder vh = null;
 			if (nodeToMeshMap == null) {
-				BranchGroup bg = OEMMViewer.meshOEMM(mesh, false);
+				BranchGroup bg = OEMMViewer.meshOEMM(mesh);
 				vh = new ViewHolder(index, bg);
 			}
 			else {
@@ -189,11 +189,11 @@ public class OEMMBehavior extends Behavior
 		visibleMeshBranchGroup.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
 		cacheOemmNodeId2BranchGroup = new CacheMap(100);
 		canvas.add(new ViewableBG(visibleMeshBranchGroup));
-		boolean cloneBoundaryTriangles = Boolean.getBoolean("org.jcae.viewer3d.OEMMBehavior.cloneBoundaryTringles");
+		boolean cloneBoundaryTriangles = Boolean.getBoolean("org.jcae.viewer3d.OEMMBehavior.cloneBoundaryTriangles");
 		
 		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
 		mtb.addTriangleList();
-		coarseReader = new MeshReader(oemm);
+		coarseReader = new MeshReader(coarseOEMM);
 		coarseReader.buildMeshes(mtb, cloneBoundaryTriangles);
 		
 		for(int i = 0, n = coarseOEMM.getNumberOfLeaves(); i < n; i++)
@@ -202,7 +202,7 @@ public class OEMMBehavior extends Behavior
 			Mesh mesh = coarseReader.getMesh(i);
 			ViewHolder vh = new ViewHolder(II, mesh);
 			coarseOemmNodeId2BranchGroup.put(II, vh);
-			vh.setViewElem(OEMMViewer.meshOEMM(mesh, false));
+			vh.setViewElem(OEMMViewer.meshOEMM(mesh));
 			addBranchGroup(vh, true);
 		}
 		
@@ -217,7 +217,7 @@ public class OEMMBehavior extends Behavior
 		wakeupFrame=new WakeupOnElapsedFrames(1);
 		wakeupTransf=new WakeupOnTransformChange(
 			view.getViewingPlatform().getViewPlatformTransform());
-		maxNumberOfTriangles = Long.getLong("org.jcae.viewer3d.OEMMBehavior.maxNumberOfTringles", DEFAULT_MAX_TRIANGLES_NBR);
+		maxNumberOfTriangles = Long.getLong("org.jcae.viewer3d.OEMMBehavior.maxNumberOfTriangles", DEFAULT_MAX_TRIANGLES_NBR);
 		if (logger.isInfoEnabled()) {
 			logger.info("Maximal number of triangles: " + maxNumberOfTriangles);
 		}
