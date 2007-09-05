@@ -93,26 +93,26 @@ public class Storage
 	 *  <li>1 int : group number</li>
 	 * </ul>
 	 */
-	private static final int TRIANGLE_SIZE = 28;
+	protected static final int TRIANGLE_SIZE = 28;
 
 	/**
 	 * Number of bytes per vertex.  On disk a vertex is represented by 3 double
 	 * (coordinates).
 	 */
-	private static final int VERTEX_SIZE = 24;
+	protected static final int VERTEX_SIZE = 24;
 
 	/**
 	 * Buffer size.  Vertices and triangles are read through buffers to improve
 	 * efficiency, buffer size must be a multiple of {@link #TRIANGLE_SIZE} and
 	 * {@link #VERTEX_SIZE}.
 	 */
-	private static final int bufferSize = 24 * VERTEX_SIZE * TRIANGLE_SIZE;
+	protected static final int bufferSize = 24 * VERTEX_SIZE * TRIANGLE_SIZE;
 	// bufferSize = 16128
 	
 	/**
 	 * Buffer to improve I/O efficiency.
 	 */
-	private static ByteBuffer bb = ByteBuffer.allocate(bufferSize);
+	protected static ByteBuffer bb = ByteBuffer.allocate(bufferSize);
 	
 	/**
 	 * Creates an {@link OEMM} instance from its disk representation.
@@ -966,17 +966,17 @@ public class Storage
 		return nodeIndex2adjIndex;
 	}
 
-	private static File getAdjacencyFile(OEMM oemm, Node node)
+	protected static File getAdjacencyFile(OEMM oemm, Node node)
 	{
 		return new File(oemm.getDirectory(), node.file+"a");
 	}
 	
-	private static File getTrianglesFile(OEMM oemm, Node node)
+	protected static File getTrianglesFile(OEMM oemm, Node node)
 	{
 		return new File(oemm.getDirectory(), node.file+"t");
 	}
 
-	static private File getVerticesFile(OEMM oemm, OEMM.Node current)
+	protected static File getVerticesFile(OEMM oemm, OEMM.Node current)
 	{
 		return new File(oemm.getDirectory(), current.file+"v");
 	}
