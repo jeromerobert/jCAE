@@ -43,6 +43,7 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.Storage;
+import org.jcae.mesh.oemm.MeshReader;
 import org.jcae.viewer3d.FPSBehavior;
 import org.jcae.viewer3d.OEMMBehavior;
 import org.jcae.viewer3d.OEMMViewer;
@@ -119,15 +120,20 @@ public class MeshOEMMCoarseViewer
 				}
 				else if (event.getKeyChar() == 'n')
 				{
-					for (int i: octree.getResultSet())
+					MeshReader fineReader = new MeshReader(oemm);
+					MeshReader coarseReader = new MeshReader(decimatedOemm);
+					Set<Integer> leaves = new HashSet<Integer>();
+					for (Integer I: octree.getResultSet())
 					{
-						Mesh mesh = Storage.loadNodes(oemm, i);
-						Mesh coarseMesh = Storage.loadNodes(decimatedOemm, i);
+						leaves.clear();
+						leaves.add(I);
+						Mesh mesh = fineReader.buildMesh(leaves);
+						Mesh coarseMesh = coarseReader.buildMesh(leaves);
 						Triangle triangle = (Triangle) mesh.getTriangles().iterator().next();
 						
 						double[] tempn1 = getTriangleNormal(triangle);
 						double[] tempn2 = getTriangleNormal((Triangle) coarseMesh.getTriangles().iterator().next());
-						System.out.println("Coarse normal for leaf: " + i + " [" 
+						System.out.println("Coarse normal for leaf: " + I.intValue() + " [" 
 								+ tempn1[0] + ", "+ tempn1[1] + ", "+ tempn1[2] + "] and fine " +
 								" [" 
 								+ tempn2[0] + ", "+ tempn2[1] + ", "+ tempn2[2] + "]" + " and "

@@ -27,6 +27,7 @@ import java.util.Set;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.Storage;
+import org.jcae.mesh.oemm.MeshReader;
 import org.jcae.mesh.oemm.TraversalProcedure;
 import org.jcae.mesh.oemm.OEMM.Node;
 
@@ -51,20 +52,23 @@ public class MeshOEMMDecimateMoreLeaves
 		}
 		
 		OEMM oemm = Storage.readOEMMStructure(decimatedRepository);
-		DecimateProcedure d_proc = new DecimateProcedure(scale, minimalNumberOfTriangles);
+		MeshReader reader = new MeshReader(oemm);
+		DecimateProcedure d_proc = new DecimateProcedure(reader, scale, minimalNumberOfTriangles);
 		oemm.walk(d_proc);
 		// TODO: write mesh back into oemm
 	}
 	
 	private static class DecimateProcedure extends TraversalProcedure
 	{
+		private MeshReader reader;
 		private int scale;
 		private int minTN;
 		
-		public DecimateProcedure(int s, int minimalNumberOfTriangles)
+		public DecimateProcedure(MeshReader mr, int s, int minimalNumberOfTriangles)
 		{
+			reader = mr;
 			scale = s;
-			this.minTN = minimalNumberOfTriangles;
+			minTN = minimalNumberOfTriangles;
 		}
 
 		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit) {
@@ -95,7 +99,7 @@ public class MeshOEMMDecimateMoreLeaves
 //				//ingore this - there is some bug
 //				return OK;
 //			}
-			Mesh amesh = Storage.loadNodes(oemm, decSet, true);
+			Mesh amesh = reader.buildMesh(decSet);
 			HashMap options = new HashMap();
 			try {
 				
