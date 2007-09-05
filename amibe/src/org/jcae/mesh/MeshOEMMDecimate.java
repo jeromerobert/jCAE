@@ -21,8 +21,11 @@
 package org.jcae.mesh;
 
 import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.Storage;
+import org.jcae.mesh.oemm.MeshReader;
 import org.jcae.mesh.oemm.TraversalProcedure;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,7 +66,8 @@ public class MeshOEMMDecimate
 		}
 		
 		OEMM oemm = Storage.readOEMMStructure(dir);
-		DecimateProcedure d_proc = new DecimateProcedure(scale);
+		MeshReader mr = new MeshReader(oemm);
+		DecimateProcedure d_proc = new DecimateProcedure(scale, mr);
 		oemm.walk(d_proc);
 		// TODO: write mesh back into oemm
 	}
@@ -108,18 +112,28 @@ public class MeshOEMMDecimate
 
 	private static class DecimateProcedure extends TraversalProcedure
 	{
-		private int scale;
-		public DecimateProcedure(int s)
+		private final int scale;
+		private final MeshReader reader;
+		private final Set<Integer> leaves = new HashSet<Integer>();
+		private final MeshTraitsBuilder mtb;
+		public DecimateProcedure(int s, MeshReader mr)
 		{
 			scale = s;
+			reader = mr;
+			mtb = new MeshTraitsBuilder();
+			mtb.addTriangleList();
+			mtb.addNodeList();
+			TriangleTraitsBuilder ttb = new TriangleTraitsBuilder();
+			ttb.addHalfEdge();
+			mtb.add(ttb);
 		}
 		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
 			if (visit != LEAF)
 				return OK;
-			Set<Integer> leaves = new HashSet<Integer>();
+			leaves.clear();
 			leaves.add(Integer.valueOf(current.leafIndex));
-			Mesh amesh = Storage.loadNodes(oemm, leaves, true);
+			Mesh amesh = reader.buildMesh(mtb, leaves);
 			HashMap<String, String> options = new HashMap<String, String>();
 			options.put("maxtriangles", ""+(current.tn / scale));
 			System.out.println("Processing octant nr. "+current.leafIndex);

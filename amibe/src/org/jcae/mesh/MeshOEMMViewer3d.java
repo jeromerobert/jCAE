@@ -23,6 +23,7 @@ package org.jcae.mesh;
 
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.Storage;
+import org.jcae.mesh.oemm.MeshReader;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.xmldata.MeshWriter;
@@ -77,6 +78,7 @@ public class MeshOEMMViewer3d
 		feFrame.setSize(800,600);
 		feFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		final OEMM oemm = Storage.readOEMMStructure(dir);
+		final MeshReader mr = new MeshReader(oemm);
 		final View bgView=new View(feFrame);
 		final ViewableBG octree = new ViewableBG(OEMMViewer.bgOEMM(oemm, true));
 		try
@@ -122,8 +124,8 @@ public class MeshOEMMViewer3d
 					}
 					else if(event.getKeyChar()=='s')
 					{
-						Mesh mesh = Storage.loadNodes(oemm, octree.getResultSet(), true, false);
-						Storage.saveNodes(oemm, mesh, octree.getResultSet());
+						Mesh amesh = mr.buildMesh(octree.getResultSet());
+						Storage.saveNodes(oemm, amesh, octree.getResultSet());
 					}
 					else if(event.getKeyChar()=='c')
 					{
@@ -158,7 +160,7 @@ public class MeshOEMMViewer3d
 							bgView.remove(fineMesh);
 						if (decMesh != null)
 							bgView.remove(decMesh);
-						Mesh amesh = Storage.loadNodes(oemm, octree.getResultSet(), true, false);
+						Mesh amesh = mr.buildMesh(octree.getResultSet());
 						HashMap opts = new HashMap();
 						opts.put("maxtriangles", Integer.toString(amesh.getTriangles().size() / 100));
 						new org.jcae.mesh.amibe.algos3d.DecimateHalfEdge(amesh, opts).compute();
