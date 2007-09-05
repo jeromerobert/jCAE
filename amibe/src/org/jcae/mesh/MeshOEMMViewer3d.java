@@ -36,6 +36,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Iterator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.media.j3d.BoundingSphere;
 import javax.media.j3d.BranchGroup;
@@ -50,7 +52,6 @@ import org.jcae.viewer3d.fe.amibe.AmibeProvider;
 import org.jcae.viewer3d.fe.ViewableFE;
 import org.jcae.viewer3d.fe.FEDomain;
 import org.jcae.viewer3d.View;
-import gnu.trove.TIntHashSet;
 
 /**
  * This class illustrates how to perform quality checks.
@@ -90,7 +91,7 @@ public class MeshOEMMViewer3d
 							bgView.remove(fineMesh);
 						if (decMesh != null)
 							bgView.remove(decMesh);
-						TIntHashSet set = new TIntHashSet();
+						Set<Integer> set = new HashSet<Integer>();
 						for(OEMM.Node in: oemm.leaves) {
 							set.add(in.leafIndex);
 						}
@@ -126,7 +127,7 @@ public class MeshOEMMViewer3d
 					}
 					else if(event.getKeyChar()=='c')
 					{
-						TIntHashSet leaves = octree.getResultSet();
+						Set<Integer> leaves = octree.getResultSet();
 						if (leaves.size() == 1)
 						{
 							int idx = leaves.iterator().next();

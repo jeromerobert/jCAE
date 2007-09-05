@@ -19,8 +19,6 @@
 
 package org.jcae.mesh;
 
-import gnu.trove.TIntProcedure;
-
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
@@ -101,7 +99,7 @@ public class MeshOEMMCoarseViewer
 				{
 					Set<Integer> result = new HashSet<Integer>();
 					
-					for(int i:octree.getResultSet().toArray()) {
+					for(int i: octree.getResultSet()) {
 						result.add(i);
 					}
 					if (logger.isInfoEnabled()) {
@@ -121,40 +119,31 @@ public class MeshOEMMCoarseViewer
 				}
 				else if (event.getKeyChar() == 'n')
 				{
-					octree.getResultSet().forEach(new TIntProcedure() {
-
-						@Override
-						public boolean execute(int arg0) {
-							Mesh mesh = Storage.loadNodes(oemm, arg0);
-							Mesh coarseMesh = Storage.loadNodes(decimatedOemm, arg0);
-							Triangle triangle = (Triangle) mesh.getTriangles().iterator().next();
-							
-							double[] tempn1 = getTriangleNormal(triangle);
-							double[] tempn2 = getTriangleNormal((Triangle) coarseMesh.getTriangles().iterator().next());
-							System.out.println("Coarse normal for leaf: " + arg0 + " [" 
-									+ tempn1[0] + ", "+ tempn1[1] + ", "+ tempn1[2] + "] and fine " +
-									" [" 
-									+ tempn2[0] + ", "+ tempn2[1] + ", "+ tempn2[2] + "]" + " and "
-									+ " orientation: " + (tempn1[0]*tempn2[0] + tempn1[1]*tempn2[1] + tempn1[2]*tempn2[2]  ));
-							return true;
-						}
-					});
+					for (int i: octree.getResultSet())
+					{
+						Mesh mesh = Storage.loadNodes(oemm, i);
+						Mesh coarseMesh = Storage.loadNodes(decimatedOemm, i);
+						Triangle triangle = (Triangle) mesh.getTriangles().iterator().next();
+						
+						double[] tempn1 = getTriangleNormal(triangle);
+						double[] tempn2 = getTriangleNormal((Triangle) coarseMesh.getTriangles().iterator().next());
+						System.out.println("Coarse normal for leaf: " + i + " [" 
+								+ tempn1[0] + ", "+ tempn1[1] + ", "+ tempn1[2] + "] and fine " +
+								" [" 
+								+ tempn2[0] + ", "+ tempn2[1] + ", "+ tempn2[2] + "]" + " and "
+								+ " orientation: " + (tempn1[0]*tempn2[0] + tempn1[1]*tempn2[1] + tempn1[2]*tempn2[2]  ));
+					}
 				}
 				else if (event.getKeyChar() == 'p')
 				{
-					octree.getResultSet().forEach(new TIntProcedure() {
+					for (int i: octree.getResultSet())
+					{
+						Point3d vector = oemmBehavior.getVoxel(i);
 
-						@Override
-						public boolean execute(int arg0) {
-							Point3d vector = oemmBehavior.getVoxel(arg0);
-
-							if (logger.isInfoEnabled()) {
-								logger.info("Node: " + arg0 + ", vector: [" + vector.x + ", " + vector.y + ", " + vector.z + "]");
-							}
-							return true;
+						if (logger.isInfoEnabled()) {
+							logger.info("Node: " + i + ", vector: [" + vector.x + ", " + vector.y + ", " + vector.z + "]");
 						}
-						
-					});
+					}
 					if (logger.isInfoEnabled()) {
 						logger.info("Visible oemm nodes: " + oemmBehavior.getNumberOfVisibleFineElements() + ", cache: " + oemmBehavior.getNumberOfCacheNodes());
 					}
