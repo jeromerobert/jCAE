@@ -22,10 +22,14 @@ package org.jcae.viewer3d;
 
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.Storage;
+import org.jcae.mesh.oemm.MeshReader;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -89,11 +93,21 @@ public class OEMMViewer
 
 	public static BranchGroup meshOEMM(OEMM oemm, Set<Integer> leaves, boolean adjacency)
 	{
-		Mesh mesh = Storage.loadNodes(oemm, leaves, adjacency, true);
-		return meshOEMM(mesh, adjacency);
+		MeshReader reader = new MeshReader(oemm);
+		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
+		mtb.addTriangleList();
+		mtb.addNodeList();
+		if (adjacency)
+		{
+			TriangleTraitsBuilder ttb = new TriangleTraitsBuilder();
+			ttb.addShallowHalfEdge();
+			mtb.add(ttb);
+		}
+		Mesh mesh = reader.buildMesh(mtb, leaves);
+		return meshOEMM(mesh);
 	}
 
-	public static BranchGroup meshOEMM(Mesh mesh, boolean adjacency)
+	public static BranchGroup meshOEMM(Mesh mesh)
 	{
 		// Mesh may be empty if all vertices are connected to
 		// external vertices
@@ -126,7 +140,7 @@ public class OEMMViewer
 		Shape3D shapeLine = new Shape3D(tri, wireFrame);
 		shapeLine.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 		bg.addChild(shapeLine);
-		if (!adjacency)
+		if (!mesh.factory.hasAdjacency())
 			return bg;
 
 		// Free edges
@@ -156,51 +170,52 @@ public class OEMMViewer
 	private static final double [] meshCoord(Mesh mesh)
 	{
 		
-		Collection triList = mesh.getTriangles();
+		Collection<AbstractTriangle> triList = mesh.getTriangles();
 		boolean [] isViewable = new boolean[triList.size()];
 		int nrt = 0;
 		int i = 0;
-		for (Iterator it = triList.iterator(); it.hasNext(); )
+		for (AbstractTriangle t: triList)
 		{
-			Triangle t = (Triangle) it.next();
 			isViewable[i] = isViewable(t);
 			if (isViewable[i])
 				nrt++;
 			i++;
 		}
 		double [] coord = new double[9*nrt];
+		nrt = 0;
 		i = 0;
-		for (Iterator it = triList.iterator(); it.hasNext(); )
+		for (AbstractTriangle t: triList)
 		{
-			Triangle t = (Triangle) it.next();
-			if (!isViewable[i])
-				continue;
-			for (int j = 0; j < 3; j++)
+			if (isViewable[i])
 			{
-				double [] xyz = t.vertex[j].getUV();
-				t.vertex[j].setLabel(3*i+j);
-				for (int k = 0; k < 3; k++)
-					coord[9*i+3*j+k] = xyz[k];
+				for (int j = 0; j < 3; j++)
+				{
+					double [] xyz = t.vertex[j].getUV();
+					t.vertex[j].setLabel(3*i+j);
+					for (int k = 0; k < 3; k++)
+						coord[9*nrt+3*j+k] = xyz[k];
+				}
+				nrt++;
 			}
 			i++;
 		}
 		return coord;
 	}
 
-	private static boolean isViewable(Triangle t)
+	private static boolean isViewable(AbstractTriangle t)
 	{
 		return t.isReadable() && t.vertex[0].isReadable() && t.vertex[1].isReadable() && t.vertex[2].isReadable();
 	}
 
 	private static final int [] meshFreeEdges(Mesh mesh)
 	{
-		Collection triList = mesh.getTriangles();
+		Collection<AbstractTriangle> triList = mesh.getTriangles();
 		int nrt = 0;
-		for (Iterator it = triList.iterator(); it.hasNext(); )
+		for (AbstractTriangle at: triList)
 		{
-			Triangle t = (Triangle) it.next();
-			if (!t.isReadable())
+			if (!at.isReadable())
 				continue;
+			Triangle t = (Triangle) at;
 			AbstractHalfEdge e = t.getAbstractHalfEdge();
 			for (int j = 0; j < 3; j++)
 			{
@@ -213,11 +228,11 @@ public class OEMMViewer
 		}
 		int [] ret = new int[2*nrt];
 		int i = 0;
-		for (Iterator it = triList.iterator(); it.hasNext(); )
+		for (AbstractTriangle at: triList)
 		{
-			Triangle t = (Triangle) it.next();
-			if (!t.isReadable())
+			if (!at.isReadable())
 				continue;
+			Triangle t = (Triangle) at;
 			AbstractHalfEdge e = t.getAbstractHalfEdge();
 			for (int j = 0; j < 3; j++)
 			{
