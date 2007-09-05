@@ -35,6 +35,9 @@ public class AbstractTriangle
 	// Group id
 	private int groupId = -1;
 	
+	protected boolean readable = true;
+	protected boolean writable = true;
+
 	// We sometimes need to process lists of triangles before mesh
 	// connectivity has been set up.  This can be achieved efficiently
 	// with a singly linked list.
@@ -85,6 +88,26 @@ public class AbstractTriangle
 	public void setGroupId(int g)
 	{
 		groupId = g;
+	}
+	
+	public void setReadable(boolean b)
+	{
+		readable = b;
+	}
+	
+	public void setWritable(boolean b)
+	{
+		writable = b;
+	}
+	
+	public boolean isReadable()
+	{
+		return readable;
+	}
+	
+	public boolean isWritable()
+	{
+		return writable;
 	}
 	
 	public String toString()

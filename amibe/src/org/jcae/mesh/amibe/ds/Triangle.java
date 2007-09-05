@@ -25,8 +25,6 @@ import java.io.Serializable;
 public abstract class Triangle extends AbstractTriangle implements Serializable
 {
 	protected AdjacencyWrapper adj = null;
-	private boolean readable = true;
-	private boolean writable = true;
 
 	public Triangle(TriangleTraitsBuilder ttb)
 	{
@@ -137,26 +135,6 @@ public abstract class Triangle extends AbstractTriangle implements Serializable
 	public boolean isBoundary()
 	{
 		return adj.hasFlag(AbstractHalfEdge.BOUNDARY);
-	}
-	
-	public void setReadable(boolean b)
-	{
-		readable = b;
-	}
-	
-	public void setWritable(boolean b)
-	{
-		writable = b;
-	}
-	
-	public boolean isReadable()
-	{
-		return readable;
-	}
-	
-	public boolean isWritable()
-	{
-		return writable;
 	}
 	
 	public int getEdgeAttributes(int num)
