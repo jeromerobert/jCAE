@@ -1,3 +1,11 @@
+Wed Sep  5 15:23:36 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Triangle.java
+	  src/org/jcae/mesh/amibe/ds/AbstractTriangle.java: Move
+	readable/writable members from Triangle to AbstractTriangle.
+	* src/org/jcae/mesh/oemm/MeshReader.java: New class to improve
+	user control on reading OEMM nodes.
+
 Tue Sep  4 09:34:15 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/metrics/Metric3D.java: Replace clone()
