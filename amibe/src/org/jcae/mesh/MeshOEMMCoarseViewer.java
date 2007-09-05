@@ -63,8 +63,10 @@ public class MeshOEMMCoarseViewer
 	public static void main(String[] args)
 	{
 		//Logger.getLogger(OEMMBehavior.class).setLevel(Level.DEBUG);
-		if (args.length < 1 || !new File(args[0]).exists() || !new File(args[0] + ".decimated").exists()) {
-			System.out.println("MeshOEMMCoarseViewer oemm  (file {oemm}, {oemm}.decimated should exist");
+		String decimatedPath = args.length > 1 ? args[1] : args[0] + ".decimated";
+		if (!new File(args[0]).exists() || !new File(decimatedPath).exists()) {
+			System.out.println("MeshOEMMCoarseViewer oemm [decimated_oemm]");
+			return;
 		}
 		JFrame f=new JFrame("jcae-viewer3d-fd demo");
 		f.setSize(800,600);
@@ -73,9 +75,7 @@ public class MeshOEMMCoarseViewer
 		f.getContentPane().add(view);		
 		
 		final OEMM oemm = Storage.readOEMMStructure(args[0]);
-		String decimatedPath = args.length > 1?args[1]:args[0] + ".decimated";
 		final OEMM decimatedOemm = Storage.readOEMMStructure(decimatedPath);
-
 
 		BranchGroup bg=new BranchGroup();
 		final OEMMBehavior oemmBehavior=new OEMMBehavior(view, oemm, decimatedOemm);
