@@ -65,6 +65,8 @@ public class OEMMBehavior extends Behavior
 	private static final int DEFAULT_MAX_TRIANGLES_NBR = -1;
 	private boolean frozen = false;
 	private MeshReader coarseReader;
+	private MeshReader fineReader;
+	private MeshTraitsBuilder mtb = new MeshTraitsBuilder();
 	
 	private static class ViewHolder
 	{
@@ -100,23 +102,6 @@ public class OEMMBehavior extends Behavior
 		public int getId()
 		{
 			return id;
-		}
-
-		public static ViewHolder makeViewHolder(OEMM o, int index, Map<Integer, Mesh> nodeToMeshMap)
-		{
-			Set<Integer> set = new HashSet<Integer>();
-			set.add(index);
-			Mesh mesh = Storage.loadNodes(o, set, false, true, nodeToMeshMap);
-			ViewHolder vh = null;
-			if (nodeToMeshMap == null) {
-				BranchGroup bg = OEMMViewer.meshOEMM(mesh);
-				vh = new ViewHolder(index, bg);
-			}
-			else {
-				vh = new ViewHolder(index, mesh);
-			}
-			vh.nrTriangles = mesh.getTriangles().size();
-			return vh;
 		}
 
 		public Mesh getMesh()
@@ -191,7 +176,9 @@ public class OEMMBehavior extends Behavior
 		canvas.add(new ViewableBG(visibleMeshBranchGroup));
 		boolean cloneBoundaryTriangles = Boolean.getBoolean("org.jcae.viewer3d.OEMMBehavior.cloneBoundaryTriangles");
 		
-		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
+		fineReader = new MeshReader(oemm);
+		fineReader.setLoadNonReadableTriangles(true);
+
 		mtb.addTriangleList();
 		coarseReader = new MeshReader(coarseOEMM);
 		coarseReader.buildMeshes(mtb, cloneBoundaryTriangles);
@@ -501,7 +488,12 @@ public class OEMMBehavior extends Behavior
 				logger.debug("finemesh node:" + arg0 + " is not loaded and I will load it.");
 			}
 			
-			vh = ViewHolder.makeViewHolder(oemm, arg0, null);
+			Set<Integer> set = new HashSet<Integer>();
+			set.add(arg0);
+			Mesh mesh = fineReader.buildMesh(set);
+			vh = new ViewHolder(arg0, OEMMViewer.meshOEMM(mesh));
+			vh.nrTriangles = mesh.getTriangles().size();
+
 			cacheOemmNodeId2BranchGroup.put(arg0, vh);
 		}
 		return vh;
