@@ -38,9 +38,9 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	public static final int TRIANGLESET      = 1 << (BITTRIANGLES+3);
 	public static final int NODESET          = 1 << (BITNODES+3);
 
-	private VertexTraitsBuilder vertexTraitsBuilder = null;
-	private HalfEdgeTraitsBuilder halfedgeTraitsBuilder = null;
-	private TriangleTraitsBuilder triangleTraitsBuilder = null;
+	private VertexTraitsBuilder vertexTraitsBuilder = new VertexTraitsBuilder();
+	private HalfEdgeTraitsBuilder halfedgeTraitsBuilder = new HalfEdgeTraitsBuilder();
+	private TriangleTraitsBuilder triangleTraitsBuilder = new TriangleTraitsBuilder();
 
 	public MeshTraitsBuilder()
 	{
@@ -85,6 +85,16 @@ public class MeshTraitsBuilder extends TraitsBuilder
 			return (Collection<AbstractVertex>) t.array[index[BITNODES]];
 		else
 			return null;
+	}
+
+	public boolean hasNodes()
+	{
+		return hasCapability(NODELIST | NODESET);
+	}
+
+	public boolean hasTriangles()
+	{
+		return hasCapability(TRIANGLELIST | TRIANGLESET);
 	}
 
 	public void addGroupList()
