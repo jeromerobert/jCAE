@@ -177,11 +177,11 @@ public class OEMMBehavior extends Behavior
 		boolean cloneBoundaryTriangles = Boolean.getBoolean("org.jcae.viewer3d.OEMMBehavior.cloneBoundaryTriangles");
 		
 		fineReader = new MeshReader(oemm);
-		fineReader.setLoadNonReadableTriangles(true);
+		fineReader.setLoadNonReadableTriangles(cloneBoundaryTriangles);
 
 		mtb.addTriangleList();
 		coarseReader = new MeshReader(coarseOEMM);
-		coarseReader.buildMeshes(mtb, cloneBoundaryTriangles);
+		coarseReader.buildMeshes(mtb);
 		
 		for(int i = 0, n = coarseOEMM.getNumberOfLeaves(); i < n; i++)
 		{
