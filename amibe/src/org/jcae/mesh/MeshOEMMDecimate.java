@@ -121,8 +121,7 @@ public class MeshOEMMDecimate
 			scale = s;
 			reader = mr;
 			mtb = new MeshTraitsBuilder();
-			mtb.addTriangleList();
-			mtb.addNodeList();
+			mtb.addTriangleSet();
 			TriangleTraitsBuilder ttb = new TriangleTraitsBuilder();
 			ttb.addHalfEdge();
 			mtb.add(ttb);
