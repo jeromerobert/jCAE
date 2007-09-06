@@ -55,6 +55,8 @@ import org.jcae.viewer3d.cad.occ.OCCProvider;
 public class MeshOEMMCoarseViewer
 {
 	private static boolean showOctree = false;
+	private static boolean showAxis = true;
+	private static boolean showFPS = true;
 	private static Logger logger = Logger.getLogger(MeshOEMMCoarseViewer.class);
 	/**
 	 * @param args
@@ -67,22 +69,36 @@ public class MeshOEMMCoarseViewer
 			System.out.println("MeshOEMMCoarseViewer oemm [decimated_oemm]");
 			return;
 		}
-		JFrame f=new JFrame("jcae-viewer3d-fd demo");
-		f.setSize(800,600);
-		f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		final View view=new View(f);
-		f.getContentPane().add(view);		
-		
+		JFrame feFrame=new JFrame("jcae-viewer3d-fd demo");
+		feFrame.setSize(800,600);
+		feFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		final View bgView=new View(feFrame);
+
 		final OEMM oemm = Storage.readOEMMStructure(args[0]);
 		final OEMM decimatedOemm = Storage.readOEMMStructure(decimatedPath);
 
-		BranchGroup bg=new BranchGroup();
-		final OEMMBehavior oemmBehavior=new OEMMBehavior(view, oemm, decimatedOemm);
-		
-		bg.addChild(oemmBehavior);
 		final ViewableBG octree = new ViewableBG(OEMMViewer.bgOEMM(oemm, true));
+
+		BranchGroup bg=new BranchGroup();
+		final OEMMBehavior oemmBehavior=new OEMMBehavior(bgView, oemm, decimatedOemm);
+		bg.addChild(oemmBehavior);
 		
-		view.addKeyListener(new KeyAdapter() {
+		FPSBehavior fpsB = new FPSBehavior();
+		fpsB.setSchedulingBounds(new BoundingSphere(new Point3d(), Double.MAX_VALUE));
+		fpsB.addPropertyChangeListener(new PropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				logger.info("FPS>" + evt.getNewValue());
+			}
+		});
+		BranchGroup fpsBG = new BranchGroup();
+		fpsBG.addChild(fpsB);
+		final ViewableBG fps = new ViewableBG(fpsBG);
+
+		bgView.addBranchGroup(bg);
+		bgView.add(fps);
+
+		bgView.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent event)
 			{
 				char k = event.getKeyChar();
@@ -95,11 +111,27 @@ public class MeshOEMMCoarseViewer
 					showOctree = !showOctree;
 					if (showOctree)
 					{
-						view.add(octree);
-						view.setCurrentViewable(octree);
+						bgView.add(octree);
+						bgView.setCurrentViewable(octree);
 					}
 					else
-						view.remove(octree);
+						bgView.remove(octree);
+				}
+				else if (k == 'a')
+				{
+					showAxis = !showAxis;
+					bgView.setOriginAxisVisible(showAxis);
+				}
+				else if (k == 'F')
+				{
+					showFPS = !showFPS;
+					if (showFPS)
+					{
+						bgView.add(fps);
+						bgView.setCurrentViewable(fps);
+					}
+					else
+						bgView.remove(fps);
 				}
 				else if (k == 'i')
 				{
@@ -110,7 +142,7 @@ public class MeshOEMMCoarseViewer
 				{
 					octree.unselectAll();
 					for (int i: oemmBehavior.getIds()) {
-						octree.highlight(i, true);	
+						octree.highlight(i, true);
 					}
 				}
 				else if (k == 'f')
@@ -143,7 +175,7 @@ public class MeshOEMMCoarseViewer
 								+ " orientation: " + (tempn1[0]*tempn2[0] + tempn1[1]*tempn2[1] + tempn1[2]*tempn2[2]  ));
 					}
 				}
-				else if (k == 'p')
+				else if (k == 'c')
 				{
 					for (int i: octree.getResultSet())
 					{
@@ -157,29 +189,19 @@ public class MeshOEMMCoarseViewer
 						logger.info("Visible oemm nodes: " + oemmBehavior.getNumberOfVisibleFineElements() + ", cache: " + oemmBehavior.getNumberOfCacheNodes());
 					}
 				}
+				else if (k == 'p')
+				{
+					printMeshStatistics("Coarse mesh", decimatedOemm);
+					printMeshStatistics("Fine mesh", oemm);
+				}
 				else if (k == 'q')
 					System.exit(0);
 			}
 		});
-		FPSBehavior fps = new FPSBehavior();
-		fps.setSchedulingBounds(new BoundingSphere(
-				new Point3d(), Double.MAX_VALUE));
-		fps.addPropertyChangeListener(new PropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent evt) {
-				if (logger.isInfoEnabled()) {
-					logger.info("FPS>" + evt.getNewValue());
-				}
-			}
-			
-		});
-		bg.addChild(fps);
-		
-		view.addBranchGroup(bg);
-		view.setOriginAxisVisible(true);
-		view.fitAll();
-		f.setVisible(true);
-		
+		bgView.fitAll();
+		bgView.setOriginAxisVisible(showAxis);
+		feFrame.getContentPane().add(bgView);
+		feFrame.setVisible(true);
 	}
 
 	private static final void printInteractiveUsage()
@@ -188,11 +210,25 @@ public class MeshOEMMCoarseViewer
 		System.out.println("  ?: Display this help message");
 		System.out.println("  q: Exit");
 		System.out.println("  o: Toggle display of octree boxes");
+		System.out.println("  a: Toggle axis display");
+		System.out.println("  F: Toggle FPS display");
 		System.out.println("  i: Print selected nodes");
 		System.out.println("  v: Highlight octree nodes containing fine mesh");
 		System.out.println("  f: Toggle freeze of coarse/fine mesh adaptation");
 		System.out.println("  n: Print mesh normals in selected octree nodes");
-		System.out.println("  p: Print statistics");
+		System.out.println("  p: Print mesh statistics");
+		System.out.println("  c: Print cache statistics");
 	}
 
+	private static final void printMeshStatistics(String header, OEMM oemm)
+	{
+		int triangles = 0;
+		int vertices = 0;
+		for(OEMM.Node current: oemm.leaves)
+		{
+			triangles += current.tn;
+			vertices += current.vn;
+		}
+		System.out.println(header+": "+triangles+" triangles and "+vertices+" vertices");
+	}
 }

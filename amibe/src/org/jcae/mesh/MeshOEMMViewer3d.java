@@ -64,6 +64,7 @@ public class MeshOEMMViewer3d
 
 	private static boolean showOctree = true;
 	private static boolean showAxis = true;
+	private static boolean showFPS = true;
 	private static boolean showNonReadableTriangles = false;
 
 	public static void main(String args[])
@@ -81,9 +82,22 @@ public class MeshOEMMViewer3d
 		final MeshReader mr = new MeshReader(oemm);
 		final View bgView=new View(feFrame);
 		final ViewableBG octree = new ViewableBG(OEMMViewer.bgOEMM(oemm, true));
+		FPSBehavior fpsB = new FPSBehavior();
+		fpsB.setSchedulingBounds(new BoundingSphere(new Point3d(), Double.MAX_VALUE));
+		fpsB.addPropertyChangeListener(new PropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				logger.info("FPS>" + evt.getNewValue());
+			}
+		});
+		BranchGroup fpsBG = new BranchGroup();
+		fpsBG.addChild(fpsB);
+		final ViewableBG fps = new ViewableBG(fpsBG);
 		try
 		{
 			bgView.add(octree);
+			bgView.add(fps);
+
 			bgView.addKeyListener(new KeyAdapter() {
 				public void keyPressed(KeyEvent event)
 				{
@@ -122,6 +136,22 @@ public class MeshOEMMViewer3d
 						}
 						else
 							bgView.remove(octree);
+					}
+					else if (k == 'a')
+					{
+						showAxis = !showAxis;
+						bgView.setOriginAxisVisible(showAxis);
+					}
+					else if (k == 'F')
+					{
+						showFPS = !showFPS;
+						if (showFPS)
+						{
+							bgView.add(fps);
+							bgView.setCurrentViewable(fps);
+						}
+						else
+							bgView.remove(fps);
 					}
 					else if (k == 'R')
 					{
@@ -192,33 +222,25 @@ public class MeshOEMMViewer3d
 							ex.printStackTrace();
 						}
 					}
-					else if (k == 'a')
+					else if (k == 'p')
 					{
-						showAxis = !showAxis;
-						bgView.setOriginAxisVisible(showAxis);
+						int triangles = 0;
+						int vertices = 0;
+						for(OEMM.Node current: oemm.leaves)
+						{
+							triangles += current.tn;
+							vertices += current.vn;
+						}
+						System.out.println("Total mesh: "+triangles+" triangles and "+vertices+" vertices");
 					}
 					else if (k == 'q')
 						System.exit(0);
 				}
 			});
-			if (logger.isDebugEnabled())
-			{
-				FPSBehavior fps = new FPSBehavior();
-				fps.setSchedulingBounds(new BoundingSphere(new Point3d(), Double.MAX_VALUE));
-				fps.addPropertyChangeListener(new PropertyChangeListener() {
-					@Override
-					public void propertyChange(PropertyChangeEvent evt) {
-						logger.debug("FPS>" + evt.getNewValue());
-					}
-				});
-				BranchGroup bg = new BranchGroup();
-				bg.addChild(fps);
-				bgView.addBranchGroup(bg);
-			}
 			bgView.fitAll();
+			bgView.setOriginAxisVisible(showAxis);
 			feFrame.getContentPane().add(bgView);
 			feFrame.setVisible(true);
-			bgView.setOriginAxisVisible(showAxis);
 		}
 		catch(Exception ex)
 		{
@@ -235,10 +257,12 @@ public class MeshOEMMViewer3d
 		System.out.println("  n: Display mesh loaded from selected octree nodes");
 		System.out.println("  R: Toggle display of non-readable triangles");
 		System.out.println("  o: Toggle display of octree boxes");
+		System.out.println("  a: Toggle axis display");
+		System.out.println("  F: Toggle FPS display");
 		System.out.println("  s: Load selected octree nodes and store them back to disk");
 		System.out.println("  i: Print selected nodes");
 		System.out.println("  c: When a single octree node is selected, compute its mesh quality");
 		System.out.println("  d: Decimate selected octree nodes into dec-tmp directory");
-		System.out.println("  a: Toggle display of axis");
+		System.out.println("  p: Print mesh statistics");
 	}
 }
