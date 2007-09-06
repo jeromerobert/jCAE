@@ -166,7 +166,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		quadricMap = new HashMap<Vertex, Quadric3DError>(roughNrNodes);
 		for (AbstractTriangle af: mesh.getTriangles())
 		{
-			if (isSkippedTriangle((Triangle) af))
+			if (!af.isWritable())
 				continue;
 			for (int i = 0; i < 3; i++)
 			{
@@ -181,9 +181,9 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		final double [] normal = new double[3];
 		for (AbstractTriangle af: mesh.getTriangles())
 		{
-			final Triangle f = (Triangle) af;
-			if (isSkippedTriangle(f) )
+			if (!af.isWritable())
 				continue;
+			final Triangle f = (Triangle) af;
 			double [] p0 = f.vertex[0].getUV();
 			double [] p1 = f.vertex[1].getUV();
 			final double [] p2 = f.vertex[2].getUV();
@@ -329,7 +329,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		// so remove them now.
 		if (!tree.remove(current.notOriented()))
 			notInTree++;
-		if (!isSkippedTriangle(t1))
+		if (t1.isWritable())
 		{
 			nrTriangles--;
 			for (int i = 0; i < 2; i++)
@@ -343,7 +343,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		}
 		HalfEdge sym = (HalfEdge) current.sym();
 		final Triangle t2 = sym.getTri();
-		if (!isSkippedTriangle(t2))
+		if (t2.isWritable())
 		{
 			nrTriangles--;
 			for (int i = 0; i < 2; i++)

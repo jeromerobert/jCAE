@@ -81,7 +81,7 @@ public abstract class AbstractAlgoHalfEdge
 		int ret = 0;
 		for (AbstractTriangle af: mesh.getTriangles())
 		{
-			if (!isSkippedTriangle((Triangle) af))
+			if (af.isWritable())
 				ret++;
 		}
 		return ret;
@@ -93,9 +93,9 @@ public abstract class AbstractAlgoHalfEdge
 		nrTriangles = 0;
 		for (AbstractTriangle af: mesh.getTriangles())
 		{
-			Triangle f = (Triangle) af;
-			if (isSkippedTriangle(f))
+			if (!af.isWritable())
 				continue;
+			Triangle f = (Triangle) af;
 			nrTriangles++;
 			HalfEdge e = (HalfEdge) f.getAbstractHalfEdge();
 			for (int i = 0; i < 3; i++)
@@ -108,17 +108,6 @@ public abstract class AbstractAlgoHalfEdge
 		}
 	}
 
-	/**
-	 * Tells whether to skip outer triangle or non-writable triangle.
-	 * @param f triangle to test.
-	 * @return <code>true</code> if this triangle has to be skipped,
-	 * <code>false</code> otherwise.
-	 */
-	protected static boolean isSkippedTriangle(Triangle f)
-	{
-		return f.isOuter() || !f.isWritable();
-	}
-	
 	protected void postComputeTree()
 	{
 	}
