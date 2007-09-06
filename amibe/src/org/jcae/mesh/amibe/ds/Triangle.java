@@ -96,6 +96,7 @@ public abstract class Triangle extends AbstractTriangle implements Serializable
 	public void setOuter()
 	{
 		adj.setFlag(AbstractHalfEdge.OUTER);
+		writable = false;
 	}
 	
 	/**
