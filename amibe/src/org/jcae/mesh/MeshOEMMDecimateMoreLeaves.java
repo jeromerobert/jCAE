@@ -44,20 +44,39 @@ public class MeshOEMMDecimateMoreLeaves
 			System.out.println("Usage: MeshOEMMDecimate oemm scaleTriangles [minimal number for decimation]");
 			System.exit(0);
 		}
+		String decimatedRepository = args[0];
 		int scale = Integer.valueOf(args[1]).intValue();
 		int minimalNumberOfTriangles = 0;
-		String decimatedRepository = args[0];
 		if (args.length >= 3) {
+			// If an octree node contains less than minimalNumberOfTriangles triangles,
+			// it is not decimated.
 			minimalNumberOfTriangles = Integer.parseInt(args[2]);
 		}
 		
 		OEMM oemm = Storage.readOEMMStructure(decimatedRepository);
+		// Count triangles in non-leaf nodes
+		CountProcedure c_proc = new CountProcedure();
+		oemm.walk(c_proc);
 		MeshReader reader = new MeshReader(oemm);
 		DecimateProcedure d_proc = new DecimateProcedure(reader, scale, minimalNumberOfTriangles);
 		oemm.walk(d_proc);
-		// TODO: write mesh back into oemm
 	}
 	
+	private static class CountProcedure extends TraversalProcedure
+	{
+		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
+		{
+			if (visit != POSTORDER)
+				return OK;
+			current.tn = 0;
+			for (OEMM.Node node: current.child)
+			{
+				if (node != null)
+					current.tn += node.tn;
+			}
+			return OK;
+		}
+	}
 	private static class DecimateProcedure extends TraversalProcedure
 	{
 		private MeshReader reader;
@@ -72,54 +91,28 @@ public class MeshOEMMDecimateMoreLeaves
 		}
 
 		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit) {
+			if (current.tn <= minTN)
+				return SKIPCHILD;
 			if (visit != POSTORDER )
 				return OK;
+			// Children may have been decimated, update current.tn
+			current.tn = 0;
+			for (OEMM.Node node: current.child)
+			{
+				if (node != null)
+					current.tn += node.tn;
+			}
+			if (current.tn <= minTN)
+				return OK;
+			
 			Set<Integer> leaves = new HashSet<Integer>();
 			getChildLeaves(current, leaves);
-			
-//			System.out.println("Processing octant nr. " + current.leafIndex);
-//			new org.jcae.mesh.amibe.algos3d.DecimateHalfEdge(amesh, options)
-//					.compute();
-
-//			if (visit != LEAF) {
-//				return OK;
-//			}
-//			if (decimatedNodes.contains(current.leafIndex))
-//				return OK;
-			
-			Set<Integer> decSet = leaves;//getAppropriateNeigbr(oemm, current, 50000);
-			if (minTN >=0 && getTriangles(oemm, leaves) < minTN) {
-				return OK;
-			}
-			
-//			try {
-				
-				
-//			} catch (AssertionError e) {
-//				//ingore this - there is some bug
-//				return OK;
-//			}
-			Mesh amesh = reader.buildMesh(decSet);
+			Mesh amesh = reader.buildMesh(leaves);
 			HashMap options = new HashMap();
-			try {
-				
-				options.put("maxtriangles", "" + (amesh.getTriangles().size() / scale));
-				new org.jcae.mesh.amibe.algos3d.DecimateHalfEdge(amesh, options).compute();
-				Storage.saveNodes(oemm, amesh, decSet);
-			} catch (AssertionError e) {
-				
-			}
+			options.put("maxtriangles", "" + (amesh.getTriangles().size() / scale));
+			new org.jcae.mesh.amibe.algos3d.DecimateHalfEdge(amesh, options).compute();
+			Storage.saveNodes(oemm, amesh, leaves);
 			return OK;
-		}
-
-		private int getTriangles(OEMM oemm, Set<Integer> leaves)
-		{
-			int result = 0;
-			for (Integer i: leaves)
-			{
-				result += oemm.leaves[i.intValue()].tn;
-			}
-			return result;
 		}
 
 		private void getChildLeaves(Node current, Set<Integer> leaves)
