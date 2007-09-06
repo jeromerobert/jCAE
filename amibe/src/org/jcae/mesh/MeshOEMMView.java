@@ -22,6 +22,8 @@ package org.jcae.mesh;
 
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.Storage;
+import org.jcae.mesh.oemm.MeshReader;
+import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.java3d.Viewer;
 import org.jcae.viewer3d.OEMMViewer;
 
@@ -39,9 +41,11 @@ public class MeshOEMMView
 		}
 		String dir=args[0];
 		OEMM oemm = Storage.readOEMMStructure(dir);
+		MeshReader mr = new MeshReader(oemm);
+		Mesh mesh = mr.buildWholeMesh();
 		Viewer view=new Viewer();
 		view.addBranchGroup(OEMMViewer.bgOEMM(oemm, true));
-		view.addBranchGroup(OEMMViewer.meshOEMM(oemm));
+		view.addBranchGroup(OEMMViewer.meshOEMM(mesh));
 		view.zoomTo(); 
 		view.setVisible(true);
 	}
