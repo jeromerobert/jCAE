@@ -64,6 +64,7 @@ public class MeshOEMMViewer3d
 
 	private static boolean showOctree = true;
 	private static boolean showAxis = true;
+	private static boolean showNonReadableTriangles = false;
 
 	public static void main(String args[])
 	{
@@ -86,7 +87,12 @@ public class MeshOEMMViewer3d
 			bgView.addKeyListener(new KeyAdapter() {
 				public void keyPressed(KeyEvent event)
 				{
-					if(event.getKeyChar()=='A')
+					char k = event.getKeyChar();
+					if(k == '?')
+					{
+						printInteractiveUsage();
+					}
+					else if (k == 'w')
 					{
 						if (fineMesh != null)
 							bgView.remove(fineMesh);
@@ -96,7 +102,7 @@ public class MeshOEMMViewer3d
 						//octree.unselectAll();
 						bgView.add(fineMesh);
 					}
-					else if(event.getKeyChar()=='n')
+					else if (k == 'n')
 					{
 						if (fineMesh != null)
 							bgView.remove(fineMesh);
@@ -106,7 +112,7 @@ public class MeshOEMMViewer3d
 						//octree.unselectAll();
 						bgView.add(fineMesh);
 					}
-					else if(event.getKeyChar()=='o')
+					else if (k == 'o')
 					{
 						showOctree = !showOctree;
 						if (showOctree)
@@ -117,19 +123,24 @@ public class MeshOEMMViewer3d
 						else
 							bgView.remove(octree);
 					}
-					else if(event.getKeyChar()=='s')
+					else if (k == 'R')
+					{
+						showNonReadableTriangles = !showNonReadableTriangles;
+						logger.info("Show non-readable triangles: "+showNonReadableTriangles);
+						mr.setLoadNonReadableTriangles(showNonReadableTriangles);
+					}
+					else if (k == 's')
 					{
 						Mesh amesh = mr.buildMesh(octree.getResultSet());
 						Storage.saveNodes(oemm, amesh, octree.getResultSet());
 					}
-					else if(event.getKeyChar()=='c')
+					else if (k == 'c')
 					{
 						Set<Integer> leaves = octree.getResultSet();
 						if (leaves.size() == 1)
 						{
 							int idx = leaves.iterator().next();
 							OEMM.Node current = oemm.leaves[idx];
-							mr.setLoadNonReadableTriangles(true);
 							Mesh amesh = mr.buildMesh(leaves);
 							MinAngleFace qproc = new MinAngleFace();
 							QualityFloat data = new QualityFloat(amesh.getTriangles().size());
@@ -149,13 +160,12 @@ public class MeshOEMMViewer3d
 							logger.error("Only one node must be selected!");
 						}
 					}
-					else if(event.getKeyChar()=='d')
+					else if (k == 'd')
 					{
 						if (fineMesh != null)
 							bgView.remove(fineMesh);
 						if (decMesh != null)
 							bgView.remove(decMesh);
-						mr.setLoadNonReadableTriangles(false);
 						Mesh amesh = mr.buildMesh(octree.getResultSet());
 						HashMap opts = new HashMap();
 						opts.put("maxtriangles", Integer.toString(amesh.getTriangles().size() / 100));
@@ -167,7 +177,7 @@ public class MeshOEMMViewer3d
 						try
 						{
 							AmibeProvider ap = new AmibeProvider(new File(xmlDir));
-							decMesh = new ViewableFE(ap);                
+							decMesh = new ViewableFE(ap);
 							int [] ids = ap.getDomainIDs();
 							logger.info("Nr. of triangles: "+((FEDomain)ap.getDomain(ids[0])).getNumberOfTria3());
 							bgView.add(decMesh);
@@ -177,12 +187,12 @@ public class MeshOEMMViewer3d
 							ex.printStackTrace();
 						}
 					}
-					else if(event.getKeyChar()=='a')
+					else if (k == 'a')
 					{
 						showAxis = !showAxis;
 						bgView.setOriginAxisVisible(showAxis);
 					}
-					else if(event.getKeyChar()=='q')
+					else if (k == 'q')
 						System.exit(0);
 				}
 			});
@@ -209,5 +219,20 @@ public class MeshOEMMViewer3d
 		{
 			ex.printStackTrace();
 		}
+	}
+
+	private static final void printInteractiveUsage()
+	{
+		System.out.println("Key usage:");
+		System.out.println("  ?: Display this help message");
+		System.out.println("  q: Exit");
+		System.out.println("  w: Display whole mesh");
+		System.out.println("  n: Display mesh loaded from selected octree nodes");
+		System.out.println("  R: Toggle display of non-readable triangles");
+		System.out.println("  o: Toggle display of octree boxes");
+		System.out.println("  s: Load selected octree nodes and store them back to disk");
+		System.out.println("  c: When a single octree node is selected, compute its mesh quality");
+		System.out.println("  d: Decimate selected octree nodes into dec-tmp directory");
+		System.out.println("  a: Toggle display of axis");
 	}
 }
