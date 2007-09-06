@@ -85,7 +85,12 @@ public class MeshOEMMCoarseViewer
 		view.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent event)
 			{
-				if(event.getKeyChar() == 'o')
+				char k = event.getKeyChar();
+				if(k == '?')
+				{
+					printInteractiveUsage();
+				}
+				else if (k == 'o')
 				{
 					showOctree = !showOctree;
 					if (showOctree)
@@ -96,32 +101,30 @@ public class MeshOEMMCoarseViewer
 					else
 						view.remove(octree);
 				}
-				else if (event.getKeyChar() == 'i')
+				else if (k == 'i')
 				{
-					Set<Integer> result = new HashSet<Integer>();
-					
-					for(int i: octree.getResultSet()) {
-						result.add(i);
-					}
-					if (logger.isInfoEnabled()) {
-						logger.info("Selected: " + result);
-					}
+					if (logger.isInfoEnabled())
+						logger.info("Selected: " + octree.getResultSet());
 				}
-				else if (event.getKeyChar() == 'v')
+				else if (k == 'v')
 				{
 					octree.unselectAll();
 					for (int i: oemmBehavior.getIds()) {
 						octree.highlight(i, true);	
 					}
 				}
-				else if (event.getKeyChar() == 'f')
+				else if (k == 'f')
 				{
 					oemmBehavior.switchFreeze();
 				}
-				else if (event.getKeyChar() == 'n')
+				else if (k == 'n')
 				{
 					MeshReader fineReader = new MeshReader(oemm);
 					MeshReader coarseReader = new MeshReader(decimatedOemm);
+					double[] tempD1 = new double[3];
+					double[] tempD2 = new double[3];
+					double[] tempn1 = new double[3];
+					double[] tempn2 = new double[3];
 					Set<Integer> leaves = new HashSet<Integer>();
 					for (Integer I: octree.getResultSet())
 					{
@@ -129,18 +132,18 @@ public class MeshOEMMCoarseViewer
 						leaves.add(I);
 						Mesh mesh = fineReader.buildMesh(leaves);
 						Mesh coarseMesh = coarseReader.buildMesh(leaves);
-						Triangle triangle = (Triangle) mesh.getTriangles().iterator().next();
-						
-						double[] tempn1 = getTriangleNormal(triangle);
-						double[] tempn2 = getTriangleNormal((Triangle) coarseMesh.getTriangles().iterator().next());
-						System.out.println("Coarse normal for leaf: " + I.intValue() + " [" 
+						Triangle tf = (Triangle) mesh.getTriangles().iterator().next();
+						Matrix3D.computeNormal3D(tf.vertex[0].getUV(), tf.vertex[1].getUV(), tf.vertex[2].getUV(), tempD1, tempD2, tempn1);
+						Triangle tc = (Triangle) coarseMesh.getTriangles().iterator().next();
+						Matrix3D.computeNormal3D(tc.vertex[0].getUV(), tc.vertex[1].getUV(), tc.vertex[2].getUV(), tempD1, tempD2, tempn2);
+						System.out.println("Coarse normal for first triangle of leaf: " + I.intValue() + " [" 
 								+ tempn1[0] + ", "+ tempn1[1] + ", "+ tempn1[2] + "] and fine " +
 								" [" 
 								+ tempn2[0] + ", "+ tempn2[1] + ", "+ tempn2[2] + "]" + " and "
 								+ " orientation: " + (tempn1[0]*tempn2[0] + tempn1[1]*tempn2[1] + tempn1[2]*tempn2[2]  ));
 					}
 				}
-				else if (event.getKeyChar() == 'p')
+				else if (k == 'p')
 				{
 					for (int i: octree.getResultSet())
 					{
@@ -154,6 +157,8 @@ public class MeshOEMMCoarseViewer
 						logger.info("Visible oemm nodes: " + oemmBehavior.getNumberOfVisibleFineElements() + ", cache: " + oemmBehavior.getNumberOfCacheNodes());
 					}
 				}
+				else if (k == 'q')
+					System.exit(0);
 			}
 		});
 		FPSBehavior fps = new FPSBehavior();
@@ -176,13 +181,18 @@ public class MeshOEMMCoarseViewer
 		f.setVisible(true);
 		
 	}
-	private static double[] getTriangleNormal(Triangle triangle)
+
+	private static final void printInteractiveUsage()
 	{
-		double []tempD1 = new double[3];
-		double []tempD2 = new double[3];
-		double []tempD3 = new double[3];
-		Matrix3D.computeNormal3D(triangle.vertex[0].getUV(), triangle.vertex[1].getUV(), triangle.vertex[2].getUV(), tempD1, tempD2, tempD3);
-		return tempD3;
+		System.out.println("Key usage:");
+		System.out.println("  ?: Display this help message");
+		System.out.println("  q: Exit");
+		System.out.println("  o: Toggle display of octree boxes");
+		System.out.println("  i: Print selected nodes");
+		System.out.println("  v: Highlight octree nodes containing fine mesh");
+		System.out.println("  f: Toggle freeze of coarse/fine mesh adaptation");
+		System.out.println("  n: Print mesh normals in selected octree nodes");
+		System.out.println("  p: Print statistics");
 	}
 
 }
