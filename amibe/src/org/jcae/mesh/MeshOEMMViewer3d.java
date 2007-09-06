@@ -64,7 +64,7 @@ public class MeshOEMMViewer3d
 
 	private static boolean showOctree = true;
 	private static boolean showAxis = true;
-	private static boolean showFPS = true;
+	private static boolean showFPS = false;
 	private static boolean showNonReadableTriangles = false;
 
 	public static void main(String args[])
@@ -161,8 +161,9 @@ public class MeshOEMMViewer3d
 					}
 					else if (k == 's')
 					{
-						Mesh amesh = mr.buildMesh(octree.getResultSet());
-						Storage.saveNodes(oemm, amesh, octree.getResultSet());
+						Set<Integer> leaves = octree.getResultSet();
+						Mesh amesh = mr.buildMesh(leaves);
+						Storage.saveNodes(oemm, amesh, leaves);
 					}
 					else if (k == 'i')
 					{
