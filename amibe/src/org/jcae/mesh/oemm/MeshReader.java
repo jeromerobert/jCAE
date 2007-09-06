@@ -214,8 +214,8 @@ public class MeshReader extends Storage
 			logger.debug("Reading "+current.vn+" vertices from "+getVerticesFile(oemm, current));
 			Vertex [] vert = new Vertex[current.vn];
 			double [] xyz = new double[3];
+			List<List<Integer>> listAdjacentLeaves = readAdjacencyFile(oemm, current, null);
 			FileChannel fc = new FileInputStream(getVerticesFile(oemm, current)).getChannel();
-			DataInputStream bufIn = new DataInputStream(new BufferedInputStream(new FileInputStream(getAdjacencyFile(oemm, current))));
 			bb.clear();
 			DoubleBuffer bbD = bb.asDoubleBuffer();
 			int remaining = current.vn;
@@ -235,17 +235,12 @@ public class MeshReader extends Storage
 					vert[index] = (Vertex) mesh.factory.createVertex(xyz);
 					vert[index].setLabel(current.minIndex + index);
 					vert[index].setReadable(true);
-					int n = bufIn.readByte();
-					//  Read neighbours
 					boolean writable = true;
-					for (int j = 0; j < n; j++)
+					for (Integer num: listAdjacentLeaves.get(Integer.valueOf(index)))
 					{
-						int num = bufIn.readByte();
-						if (!leaves.contains(Integer.valueOf(current.adjLeaves.get(num))))
+						if (!leaves.contains(num))
 						{
 							writable = false;
-							for (j++; j < n; j++)
-								bufIn.readByte();
 							break;
 						}
 					}
@@ -257,7 +252,6 @@ public class MeshReader extends Storage
 				}
 			}
 			fc.close();
-			bufIn.close();
 		}
 		catch (IOException ex)
 		{

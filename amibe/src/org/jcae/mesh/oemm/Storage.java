@@ -221,7 +221,7 @@ public class Storage
 	 * @throws AssertionError There are different vertices with the same label 
 	 * in the mesh.
 	 */
-	public static Map<Integer, Vertex> getAllVerticesMap(Mesh mesh)
+	private static Map<Integer, Vertex> getAllVerticesMap(Mesh mesh)
 	{
 		Map<Integer, Vertex> referencedVertices = new HashMap<Integer, Vertex>();
 		for(AbstractTriangle tr: mesh.getTriangles()) {
@@ -247,7 +247,7 @@ public class Storage
 	 * It makes ascending sort of list of vertices in respect of their label.
 	 * @param list
 	 */
-	public static void sortVertexList(List<Vertex> list)
+	private static void sortVertexList(List<Vertex> list)
 	{
 		Collections.sort(list, new Comparator<Vertex>() {
 			@Override
@@ -266,7 +266,7 @@ public class Storage
 	 * @param storedLeaves 
 	 * @param  
 	 */
-	public static void collectAllVertices(OEMM oemm, Mesh mesh, Map<Integer, List<Vertex>> nodemap, Set<Integer> movedVerticesSet, Set<Integer> storedLeaves)
+	private static void collectAllVertices(OEMM oemm, Mesh mesh, Map<Integer, List<Vertex>> nodemap, Set<Integer> movedVerticesSet, Set<Integer> storedLeaves)
 	{
 		int positions[] = new int[3];
 		for(AbstractVertex av: mesh.getNodes())
@@ -466,8 +466,7 @@ public class Storage
 			
 			fixVertexCollection(node, entry.getValue(), old2newIndex, new2oldIndex);
 			
-			List<List<Integer>> adjacencyFileWithoutLoadedNodes;
-			adjacencyFileWithoutLoadedNodes = readAdjacencyFile(oemm, node, nodemap.keySet());
+			List<List<Integer>> adjacencyFileWithoutLoadedNodes = readAdjacencyFile(oemm, node, nodemap.keySet());
 			removeLoadedAdjacentNodes(node, storedLeaves);
 			Map<Integer, Byte> nodeIndex2adjIndex = makeNodeIndex2adjIndexMap(node);
 			if (entry.getValue().size() > node.vn) {
@@ -520,8 +519,8 @@ public class Storage
 					Integer lastIndex = getLaterIndex(new2oldIndex, Ilabel);
 					int localIndex = lastIndex.intValue() - node.minIndex;
 					if (!movedVertices.contains(lastIndex) && localIndex < adjacencyFileWithoutLoadedNodes.size() ) {
-						for (Integer adjacent: adjacencyFileWithoutLoadedNodes.get(localIndex)) {
-							
+						for (Integer adjacent: adjacencyFileWithoutLoadedNodes.get(localIndex))
+						{
 							if (!addedNeighbour.contains(adjacent)) {
 								addedNeighbour.add(adjacent);
 								byteBuffer[neighbours++] = nodeIndex2adjIndex.get(adjacent).byteValue();
@@ -768,29 +767,36 @@ public class Storage
 	 * @return List<byte> that contains local indexes of adjacent and non-loaded 
 	 * 	nodes
 	 */
-	private static List<List<Integer>> readAdjacencyFile(OEMM oemm, Node node, Set<Integer> visitedNodes)
+	protected static List<List<Integer>> readAdjacencyFile(OEMM oemm, Node node, Set<Integer> visitedNodes)
 	{
 		List<List<Integer>> result = new ArrayList<List<Integer>>();
+		List<Integer> nullList = new ArrayList<Integer>();
 		DataInputStream dis = null;
 		try {
 			dis= new DataInputStream(new FileInputStream(getAdjacencyFile(oemm, node)));
 			
-			while (true) {
+			while (true)
+			{
 				int count;
-				List<Integer> row = new ArrayList<Integer>();
 				try {
 					count = dis.readByte();
 				} catch (EOFException e) {
 					break;
 				}
-				for (int i = 0; i < count; i++) {
-					byte adjacentLeave = dis.readByte();
-					Integer leafIndex = Integer.valueOf(node.adjLeaves.get(adjacentLeave));
-					if (!visitedNodes.contains(leafIndex)) {
-						row.add(leafIndex);
+				if (count == 0)
+					result.add(nullList);
+				else
+				{
+					List<Integer> row = new ArrayList<Integer>(count);
+					for (int i = 0; i < count; i++)
+					{
+						byte adjacentLeave = dis.readByte();
+						Integer leafIndex = Integer.valueOf(node.adjLeaves.get(adjacentLeave));
+						if (visitedNodes == null || !visitedNodes.contains(leafIndex))
+							row.add(leafIndex);
 					}
+					result.add(row);
 				}
-				result.add(row);
 			}
 		} catch (FileNotFoundException e) {
 			logger.error("Problem with opening " + getAdjacencyFile(oemm, node).getPath() + ". It may be new node.", e);
@@ -800,13 +806,14 @@ public class Storage
 			throw new RuntimeException(e);
 		} finally {
 			if (dis != null)
+			{
 				try {
 					dis.close();
 				} catch (IOException e) {
 					///ignore this
 				}
+			}
 		}
-		
 		
 		return result;
 	}
