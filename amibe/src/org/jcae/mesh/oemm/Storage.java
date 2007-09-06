@@ -761,11 +761,11 @@ public class Storage
 	/**
 	 * Read adjacency file and returns List of adjacent nodes without nodes
 	 * that are loaded. 
-	 * @param oemm
-	 * @param node
-	 * @param visitedNodes
-	 * @return List<byte> that contains local indexes of adjacent and non-loaded 
-	 * 	nodes
+	 * @param oemm  OEMM instance
+	 * @param node  OEMM node
+	 * @param visitedNodes  set of node indices being loaded
+	 * @return a <code>List<List<Integer>></code> instance; for each vertex, returns indices of adjacent
+	 *      and non-loaded nodes
 	 */
 	protected static List<List<Integer>> readAdjacencyFile(OEMM oemm, Node node, Set<Integer> visitedNodes)
 	{
@@ -787,14 +787,20 @@ public class Storage
 					result.add(nullList);
 				else
 				{
-					List<Integer> row = new ArrayList<Integer>(count);
+					List<Integer> row = null;
 					for (int i = 0; i < count; i++)
 					{
 						byte adjacentLeave = dis.readByte();
 						Integer leafIndex = Integer.valueOf(node.adjLeaves.get(adjacentLeave));
 						if (visitedNodes == null || !visitedNodes.contains(leafIndex))
+						{
+							if (row == null)
+								row = new ArrayList<Integer>(count-i);
 							row.add(leafIndex);
+						}
 					}
+					if (row == null)
+						row = nullList;
 					result.add(row);
 				}
 			}

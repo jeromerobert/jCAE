@@ -214,7 +214,7 @@ public class MeshReader extends Storage
 			logger.debug("Reading "+current.vn+" vertices from "+getVerticesFile(oemm, current));
 			Vertex [] vert = new Vertex[current.vn];
 			double [] xyz = new double[3];
-			List<List<Integer>> listAdjacentLeaves = readAdjacencyFile(oemm, current, null);
+			List<List<Integer>> listAdjacentLeaves = readAdjacencyFile(oemm, current, leaves);
 			FileChannel fc = new FileInputStream(getVerticesFile(oemm, current)).getChannel();
 			bb.clear();
 			DoubleBuffer bbD = bb.asDoubleBuffer();
@@ -235,15 +235,7 @@ public class MeshReader extends Storage
 					vert[index] = (Vertex) mesh.factory.createVertex(xyz);
 					vert[index].setLabel(current.minIndex + index);
 					vert[index].setReadable(true);
-					boolean writable = true;
-					for (Integer num: listAdjacentLeaves.get(Integer.valueOf(index)))
-					{
-						if (!leaves.contains(num))
-						{
-							writable = false;
-							break;
-						}
-					}
+					boolean writable = listAdjacentLeaves.get(Integer.valueOf(index)).isEmpty();
 					vert[index].setWritable(writable);
 					vertMap.put(current.minIndex + index, vert[index]);
 					mesh.add(vert[index]);
