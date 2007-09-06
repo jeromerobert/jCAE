@@ -92,11 +92,7 @@ public class MeshOEMMViewer3d
 							bgView.remove(fineMesh);
 						if (decMesh != null)
 							bgView.remove(decMesh);
-						Set<Integer> set = new HashSet<Integer>();
-						for(OEMM.Node in: oemm.leaves) {
-							set.add(in.leafIndex);
-						}
-						fineMesh = new ViewableBG(OEMMViewer.meshOEMM(oemm, set));
+						fineMesh = new ViewableBG(OEMMViewer.meshOEMM(mr.buildWholeMesh()));
 						//octree.unselectAll();
 						bgView.add(fineMesh);
 					}
@@ -106,7 +102,7 @@ public class MeshOEMMViewer3d
 							bgView.remove(fineMesh);
 						if (decMesh != null)
 							bgView.remove(decMesh);
-						fineMesh = new ViewableBG(OEMMViewer.meshOEMM(oemm, octree.getResultSet()));
+						fineMesh = new ViewableBG(OEMMViewer.meshOEMM(mr.buildMesh(octree.getResultSet())));
 						//octree.unselectAll();
 						bgView.add(fineMesh);
 					}
@@ -190,22 +186,20 @@ public class MeshOEMMViewer3d
 						System.exit(0);
 				}
 			});
-			FPSBehavior fps = new FPSBehavior();
-			fps.setSchedulingBounds(new BoundingSphere(
-					new Point3d(), Double.MAX_VALUE));
-			fps.addPropertyChangeListener(new PropertyChangeListener() {
-
-				@Override
-				public void propertyChange(PropertyChangeEvent evt) {
-					if (logger.isInfoEnabled()) {
-						logger.info("FPS>" + evt.getNewValue());
+			if (logger.isDebugEnabled())
+			{
+				FPSBehavior fps = new FPSBehavior();
+				fps.setSchedulingBounds(new BoundingSphere(new Point3d(), Double.MAX_VALUE));
+				fps.addPropertyChangeListener(new PropertyChangeListener() {
+					@Override
+					public void propertyChange(PropertyChangeEvent evt) {
+						logger.debug("FPS>" + evt.getNewValue());
 					}
-				}
-				
-			});
-			BranchGroup bg = new BranchGroup();
-			bg.addChild(fps);
-			bgView.addBranchGroup(bg);
+				});
+				BranchGroup bg = new BranchGroup();
+				bg.addChild(fps);
+				bgView.addBranchGroup(bg);
+			}
 			bgView.fitAll();
 			feFrame.getContentPane().add(bgView);
 			feFrame.setVisible(true);
