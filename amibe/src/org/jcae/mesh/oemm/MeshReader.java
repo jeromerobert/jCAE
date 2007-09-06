@@ -91,29 +91,26 @@ public class MeshReader extends Storage
 	 * from all octants; each mesh can be retrieved by {@link #getMesh}.
 	 *
 	 * @param mtb  mesh traits builder used to create <code>Mesh</code> instances
-	 * @param cloneCrossBoundaryTriangles  if this argument is <code>true</code>, a
-	 *        triangle crossing several octants is copied into each octant.
 	 */
-	public void buildMeshes(MeshTraitsBuilder mtb, boolean cloneCrossBoundaryTriangles)
+	public void buildMeshes(MeshTraitsBuilder mtb)
 	{
 		if (!mtb.hasNodes())
 			mtb.addNodeList();
 		if (!mtb.hasTriangles())
 			mtb.addTriangleList();
-		int nrL = oemm.getNumberOfLeaves();
-		mapNodeToMesh = new HashMap<Integer, Mesh>(nrL);
-		for (int i = 0; i < nrL; i++)
-			mapNodeToMesh.put(Integer.valueOf(i), new Mesh(mtb));
+		mapNodeToMesh = new HashMap<Integer, Mesh>(oemm.getNumberOfLeaves());
+		for(OEMM.Node current: oemm.leaves)
+			mapNodeToMesh.put(Integer.valueOf(current.leafIndex), new Mesh(mtb));
 		mapNodeToNonReadVertexList = new HashMap<Integer, List<FakeNonReadVertex>>();
 		Set<Integer> loadedLeaves = new HashSet<Integer>();
-		for (int i = 0; i < nrL; i++)
+		for(OEMM.Node current: oemm.leaves)
 		{
-			Mesh mesh = mapNodeToMesh.get(Integer.valueOf(i));
+			Mesh mesh = mapNodeToMesh.get(Integer.valueOf(current.leafIndex));
 			loadedLeaves.clear();
-			loadedLeaves.add(Integer.valueOf(i));
+			loadedLeaves.add(Integer.valueOf(current.leafIndex));
 			TIntObjectHashMap vertMap = new TIntObjectHashMap();
-			readVertices(loadedLeaves, mesh, vertMap, oemm.leaves[i]);
-			readTriangles(loadedLeaves, mesh, vertMap, cloneCrossBoundaryTriangles, oemm.leaves[i]);
+			readVertices(loadedLeaves, mesh, vertMap, current);
+			readTriangles(loadedLeaves, mesh, vertMap, current);
 			buildMeshAdjacency(mesh, vertMap);
 		}
 		if (mapNodeToNonReadVertexList != null) {
@@ -135,9 +132,19 @@ public class MeshReader extends Storage
 	}
 
 	/**
+	 * Builds a mesh composed of all octants.
+	 * @return mesh contained in all octants
+	 */
+	public Mesh buildWholeMesh()
+	{
+		Set<Integer> leaves = new HashSet<Integer>(oemm.getNumberOfLeaves());
+		for(OEMM.Node current: oemm.leaves)
+			leaves.add(Integer.valueOf(current.leafIndex));
+		return buildMesh(leaves);
+	}
+
+	/**
 	 * Builds a mesh composed of specified octants.
-	 * If parameter mapNodeToMesh is not null then it also add boundary triangles
-	 * to the mesh that us created for neighbor node.
 	 * @param leaves set of selected octants
 	 * @return mesh contained in these octants
 	 */
@@ -146,6 +153,26 @@ public class MeshReader extends Storage
 		if (mapNodeToMesh != null)
 			throw new RuntimeException("Error: buildMesh() cannot be called after buildMeshes()!");
 		Mesh ret = new Mesh();
+		appendMesh(ret, leaves);
+		return ret;
+	}
+
+	/**
+	 * Builds a mesh composed of specified octants.
+	 * @param mtb  mesh traits builder used to create <code>Mesh</code> instances
+	 * @param leaves set of selected octants
+	 * @return mesh contained in these octants
+	 */
+	public Mesh buildMesh(MeshTraitsBuilder mtb, Set<Integer> leaves)
+	{
+		if (mapNodeToMesh != null)
+			throw new RuntimeException("Error: buildMesh() cannot be called after buildMeshes()!");
+		// Mesh needs triangle and vertex collections, otherwise it cannot be stored back on disk
+		if (!mtb.hasTriangles())
+			mtb.addTriangleList();
+		if (!mtb.hasNodes())
+			mtb.addNodeList();
+		Mesh ret = new Mesh(mtb);
 		appendMesh(ret, leaves);
 		return ret;
 	}
@@ -168,36 +195,13 @@ public class MeshReader extends Storage
 			readVertices(leaves, mesh, vertMap, oemm.leaves[i.intValue()]);
 		}
 		for (Integer i: sortedLeaves) {
-			readTriangles(leaves, mesh, vertMap, false, oemm.leaves[i.intValue()]);
+			readTriangles(leaves, mesh, vertMap, oemm.leaves[i.intValue()]);
 		}
 		if (mapNodeToNonReadVertexList != null) {
 			loadVerticesFromUnloadedNodes();
 		}
 		buildMeshAdjacency(mesh, vertMap);
 		logger.info("Nr. of triangles: "+mesh.getTriangles().size());
-	}
-
-	/**
-	 * Builds a mesh composed of specified octants.
-	 * If parameter mapNodeToMesh is not null then it also add boundary triangles
-	 * to the mesh that us created for neighbor node.
-	 * @param mtb  mesh traits builder used to create <code>Mesh</code> instances
-	 * @param leaves set of selected octants
-	 * @return mesh contained in these octants
-	 */
-	public Mesh buildMesh(MeshTraitsBuilder mtb, Set<Integer> leaves)
-	{
-		if (mapNodeToMesh != null)
-			throw new RuntimeException("Error: buildMesh() cannot be called after buildMeshes()!");
-		logger.debug("Loading nodes");
-		// Mesh needs triangle and vertex collections, otherwise it cannot be stored back on disk
-		if (!mtb.hasTriangles())
-			mtb.addTriangleList();
-		if (!mtb.hasNodes())
-			mtb.addNodeList();
-		Mesh ret = new Mesh(mtb);
-		appendMesh(ret, leaves);
-		return ret;
 	}
 
 	/**
@@ -266,7 +270,7 @@ public class MeshReader extends Storage
 	/**
 	 * Reads triangle file, create Triangle instances and store them into mesh.
 	 */
-	private void readTriangles(Set<Integer> leaves, Mesh mesh, TIntObjectHashMap vertMap, boolean cloneCrossBoundaryTriangles, OEMM.Node current)
+	private void readTriangles(Set<Integer> leaves, Mesh mesh, TIntObjectHashMap vertMap, OEMM.Node current)
 	{
 		try
 		{
@@ -326,7 +330,7 @@ public class MeshReader extends Storage
 					createTriangle(current.leafIndex, vert, readable, writable, mesh);
 					// When called from buildMeshes(), cross boundary triangles are put into
 					// all crossed octants.
-					if (cloneCrossBoundaryTriangles)
+					if (mapNodeToMesh != null && mapNodeToNonReadVertexList != null)
 					{
 						Set<Integer> processedNode = new HashSet<Integer>();
 						for (int j = 0; j < 3; j++) {
