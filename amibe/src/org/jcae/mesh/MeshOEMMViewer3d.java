@@ -134,6 +134,11 @@ public class MeshOEMMViewer3d
 						Mesh amesh = mr.buildMesh(octree.getResultSet());
 						Storage.saveNodes(oemm, amesh, octree.getResultSet());
 					}
+					else if (k == 'i')
+					{
+						if (logger.isInfoEnabled())
+							logger.info("Selected: " + octree.getResultSet());
+					}
 					else if (k == 'c')
 					{
 						Set<Integer> leaves = octree.getResultSet();
@@ -231,6 +236,7 @@ public class MeshOEMMViewer3d
 		System.out.println("  R: Toggle display of non-readable triangles");
 		System.out.println("  o: Toggle display of octree boxes");
 		System.out.println("  s: Load selected octree nodes and store them back to disk");
+		System.out.println("  i: Print selected nodes");
 		System.out.println("  c: When a single octree node is selected, compute its mesh quality");
 		System.out.println("  d: Decimate selected octree nodes into dec-tmp directory");
 		System.out.println("  a: Toggle display of axis");
