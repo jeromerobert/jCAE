@@ -68,6 +68,8 @@ public class AbstractTriangle
 	{
 		for (int i = 0; i < 3; i++)
 			vertex[i] = src.vertex[i];
+		readable = src.readable;
+		writable = src.writable;
 	}
 	
 	/**
