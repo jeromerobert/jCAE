@@ -21,8 +21,6 @@
 package org.jcae.viewer3d;
 
 import org.jcae.mesh.oemm.OEMM;
-import org.jcae.mesh.oemm.Storage;
-import org.jcae.mesh.oemm.MeshReader;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
@@ -73,40 +71,6 @@ public class OEMMViewer
 		return bg;
 	}
 	
-	public static BranchGroup meshOEMM(String dir)
-	{
-		return meshOEMM(Storage.readOEMMStructure(dir));
-	}
-	
-	public static BranchGroup meshOEMM(OEMM oemm)
-	{
-		Set<Integer> leaves = new HashSet<Integer>();
-		for (int i = 0; i < oemm.getNumberOfLeaves(); i++)
-			leaves.add(i);
-		return meshOEMM(oemm, leaves);
-	}
-	
-	public static BranchGroup meshOEMM(OEMM oemm, Set<Integer> leaves)
-	{
-		return meshOEMM(oemm, leaves, false);
-	}
-
-	public static BranchGroup meshOEMM(OEMM oemm, Set<Integer> leaves, boolean adjacency)
-	{
-		MeshReader reader = new MeshReader(oemm);
-		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
-		mtb.addTriangleList();
-		mtb.addNodeList();
-		if (adjacency)
-		{
-			TriangleTraitsBuilder ttb = new TriangleTraitsBuilder();
-			ttb.addShallowHalfEdge();
-			mtb.add(ttb);
-		}
-		Mesh mesh = reader.buildMesh(mtb, leaves);
-		return meshOEMM(mesh);
-	}
-
 	public static BranchGroup meshOEMM(Mesh mesh)
 	{
 		// Mesh may be empty if all vertices are connected to
