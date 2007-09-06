@@ -327,8 +327,8 @@ public class Storage
 	private static void collectAllTriangles(OEMM oemm, Mesh mesh, Map<Integer, List<Triangle>> node2TrianglesMap)
 	{
 		int positions[] = new int[3];
-		for(AbstractTriangle at: mesh.getTriangles()) {
-			
+		for(AbstractTriangle at: mesh.getTriangles())
+		{
 			Triangle tr = (Triangle) at;
 			boolean hasOuterEdge = tr.vertex[0].getUV().length == 2 || tr.vertex[1].getUV().length == 2
 			|| tr.vertex[2].getUV().length == 2;
@@ -414,10 +414,10 @@ public class Storage
 				for (Triangle triangle: entry.getValue()) {
 					triangle.setGroupId(node.leafIndex);
 					for (int i = 0; i < 3; i++) {
-						Node foundedNode = oemm.leaves[searchNode(oemm, triangle.vertex[i], positions)];
-						leaf[i] = foundedNode.leafIndex;
+						Node foundNode = oemm.leaves[searchNode(oemm, triangle.vertex[i], positions)];
+						leaf[i] = foundNode.leafIndex;
 						assert leaf[i] < oemm.leaves.length; 
-						pointIndex[i] = triangle.vertex[i].getLabel() - foundedNode.minIndex;
+						pointIndex[i] = triangle.vertex[i].getLabel() - foundNode.minIndex;
 						assert pointIndex[i] < oemm.leaves[leaf[i]].vn; 
 					}
 					writeIntArray(fc, leaf);
@@ -856,19 +856,23 @@ public class Storage
 		}
 	}
 
+	// By convention, if T=(V1,V2,V3) and each Vi is contained in node Ni,
+	// then T belongs to min(Ni)
 	private static int searchNode(OEMM oemm, Triangle tr, int[] positions)
 	{
 		int smallerIndexOfNode = Integer.MAX_VALUE;
-		FakeNonReadVertex fnrv = null;
+		//FakeNonReadVertex fnrv = null;
 		for(Vertex vert: tr.vertex) {
 			int index = searchNode(oemm, vert, positions);
 			if (smallerIndexOfNode > index) {
 				smallerIndexOfNode = index;
 			}
 		}
+		/*
 		if (fnrv != null && fnrv.getOEMMIndex() == smallerIndexOfNode) {
 			throw new RuntimeException("Cannot move triangle into not loaded octree node: " + smallerIndexOfNode);
 		}
+		*/
 		return smallerIndexOfNode;
 	}
 
@@ -935,42 +939,6 @@ public class Storage
 
 		public int getLocalIndex() {
 			return localIndex;
-		}
-	}
-	
-	private static class FakeNonReadVertex extends Vertex
-	{
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 3971359567640848232L;
-		/**
-		 * Containing OEMM node 
-		 */
-		private OEMM.Node containingNode;
-
-		public FakeNonReadVertex(OEMM oemm, int leaf, int localNumber) {
-			super(0.0, 0.0, 0.0);
-			containingNode = oemm.leaves[leaf];
-			setLabel(containingNode.minIndex + localNumber);
-			int []positions = new int[]{containingNode.i0, containingNode.j0, containingNode.k0};
-			oemm.int2double(positions, getUV());
-			assert oemm.search(positions) == containingNode;
-			setReadable(false);
-			setWritable(false);
-		}
-	
-		public int getLocalNumber() {
-			return getLabel() - containingNode.minIndex;
-		}
-
-		@Override
-		public boolean isWritable() {
-			return false;
-		}
-
-		public int getOEMMIndex() {
-			return containingNode.leafIndex;
 		}
 	}
 	

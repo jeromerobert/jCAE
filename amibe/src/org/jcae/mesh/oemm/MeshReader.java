@@ -467,39 +467,4 @@ public class MeshReader extends Storage
 		});
 	}
 	
-	private static class FakeNonReadVertex extends Vertex
-	{
-		/**
-		 * Containing OEMM node 
-		 */
-		private OEMM.Node containingNode;
-
-		public FakeNonReadVertex(OEMM oemm, int leaf, int localNumber)
-		{
-			super(0.0, 0.0, 0.0);
-			containingNode = oemm.leaves[leaf];
-			setLabel(containingNode.minIndex + localNumber);
-			/*
-			int[] positions = new int[]{containingNode.i0, containingNode.j0, containingNode.k0};
-			oemm.int2double(positions, getUV());
-			assert oemm.search(positions) == containingNode;
-			*/
-			setReadable(false);
-			setWritable(false);
-		}
-	
-		public int getLocalNumber() {
-			return getLabel() - containingNode.minIndex;
-		}
-
-		@Override
-		public boolean isWritable() {
-			return false;
-		}
-
-		public int getOEMMIndex() {
-			return containingNode.leafIndex;
-		}
-	}
-	
 }
