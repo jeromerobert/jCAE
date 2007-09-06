@@ -79,6 +79,8 @@ public class OEMMViewer
 		if (mesh.getTriangles().isEmpty())
 			return bg;
 		double [] coord = meshCoord(mesh);
+		if (coord.length == 0)
+			return bg;
 		TriangleArray tri = new TriangleArray(coord.length/3, TriangleArray.COORDINATES);
 		tri.setCapability(TriangleArray.ALLOW_COUNT_READ);
 		tri.setCapability(TriangleArray.ALLOW_FORMAT_READ);
