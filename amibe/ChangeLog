@@ -2,6 +2,8 @@ Thu Sep  6 11:20:33 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/AbstractTriangle.java (copy): Also copy
 	readable/writable members.
+	* src/org/jcae/mesh/MeshOEMMCountElements.java: Class removed, this
+	feature has been included into OEMM viewers.
 
 Wed Sep  5 15:23:36 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
