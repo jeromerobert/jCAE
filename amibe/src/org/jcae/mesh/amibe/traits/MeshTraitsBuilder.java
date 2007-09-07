@@ -32,11 +32,11 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	private static final int BITNODES     = 9;
 	private static final int BITGROUPS    = 10;
 
-	public static final int TRIANGLELIST     = 1 << BITTRIANGLES;
-	public static final int NODELIST         = 1 << BITNODES;
-	public static final int GROUPLIST        = 1 << BITGROUPS;
-	public static final int TRIANGLESET      = 1 << (BITTRIANGLES+3);
-	public static final int NODESET          = 1 << (BITNODES+3);
+	private static final int TRIANGLES        = 1 << BITTRIANGLES;
+	private static final int NODES            = 1 << BITNODES;
+	private static final int GROUPLIST        = 1 << BITGROUPS;
+	private static final int TRIANGLESET      = 1 << (BITTRIANGLES+3);
+	private static final int NODESET          = 1 << (BITNODES+3);
 
 	private VertexTraitsBuilder vertexTraitsBuilder = new VertexTraitsBuilder();
 	private HalfEdgeTraitsBuilder halfedgeTraitsBuilder = new HalfEdgeTraitsBuilder();
@@ -49,19 +49,19 @@ public class MeshTraitsBuilder extends TraitsBuilder
 
 	public void addTriangleList()
 	{
-		attributes |= TRIANGLELIST;
+		attributes |= TRIANGLES;
 		attributes &= ~TRIANGLESET;
 	}
 
 	public void addTriangleSet()
 	{
+		attributes |= TRIANGLES;
 		attributes |= TRIANGLESET;
-		attributes &= ~TRIANGLELIST;
 	}
 
 	public Collection<AbstractTriangle> getTriangles(Traits t)
 	{
-		if ((attributes & (TRIANGLELIST | TRIANGLESET)) != 0)
+		if ((attributes & TRIANGLES) != 0)
 			return (Collection<AbstractTriangle>) t.array[index[BITTRIANGLES]];
 		else
 			return null;
@@ -69,19 +69,19 @@ public class MeshTraitsBuilder extends TraitsBuilder
 
 	public void addNodeList()
 	{
-		attributes |= NODELIST;
+		attributes |= NODES;
 		attributes &= ~NODESET;
 	}
 
 	public void addNodeSet()
 	{
+		attributes |= NODES;
 		attributes |= NODESET;
-		attributes &= ~NODELIST;
 	}
 
 	public Collection<AbstractVertex> getNodes(Traits t)
 	{
-		if ((attributes & (NODELIST | NODESET)) != 0)
+		if ((attributes & NODES) != 0)
 			return (Collection<AbstractVertex>) t.array[index[BITNODES]];
 		else
 			return null;
@@ -89,12 +89,12 @@ public class MeshTraitsBuilder extends TraitsBuilder
 
 	public boolean hasNodes()
 	{
-		return hasCapability(NODELIST | NODESET);
+		return hasCapability(NODES);
 	}
 
 	public boolean hasTriangles()
 	{
-		return hasCapability(TRIANGLELIST | TRIANGLESET);
+		return hasCapability(TRIANGLES);
 	}
 
 	public void addGroupList()
@@ -111,14 +111,14 @@ public class MeshTraitsBuilder extends TraitsBuilder
 
 	protected void subInitTraits(Traits t)
 	{
-		if ((attributes & TRIANGLELIST) != 0)
-			t.array[index[BITTRIANGLES]] = new ArrayList<AbstractTriangle>();
-		else if ((attributes & TRIANGLESET) != 0)
+		if ((attributes & TRIANGLESET) != 0)
 			t.array[index[BITTRIANGLES]] = new LinkedHashSet<AbstractTriangle>();
-		if ((attributes & NODELIST) != 0)
-			t.array[index[BITNODES]] = new ArrayList<AbstractVertex>();
-		else if ((attributes & NODESET) != 0)
+		else if ((attributes & TRIANGLES) != 0)
+			t.array[index[BITTRIANGLES]] = new ArrayList<AbstractTriangle>();
+		if ((attributes & NODESET) != 0)
 			t.array[index[BITNODES]] = new LinkedHashSet<AbstractVertex>();
+		else if ((attributes & NODES) != 0)
+			t.array[index[BITNODES]] = new ArrayList<AbstractVertex>();
 		if ((attributes & GROUPLIST) != 0)
 			t.array[index[BITGROUPS]] = new ArrayList();
 	}
