@@ -52,6 +52,7 @@ public class OEMM implements Serializable
 	 * Root cell size.
 	 */
 	private static final int gridSize = 1 << MAXLEVEL;
+	private static final double dGridSize = gridSize;
 	
 	/**
 	 * Top-level directory.
@@ -321,7 +322,7 @@ public class OEMM implements Serializable
 		for (int i = 0; i < 3; i++)
 			x0[i] -= 0.005*dmax;
 		dmax *= 1.01;
-		x0[3] = ((double) gridSize) / dmax;
+		x0[3] = dGridSize / dmax;
 		logger.debug("Lower left corner : ("+x0[0]+", "+x0[1]+", "+x0[2]+")   Bounding box length: "+dmax);
 	}
 
@@ -334,7 +335,7 @@ public class OEMM implements Serializable
 	 */
 	public final boolean checkBoundingBox(double [] bbox)
 	{
-		double xdelta = ((double) gridSize) / x0[3];
+		double xdelta = dGridSize / x0[3];
 		return bbox[0] >= x0[0] && bbox[3] <= x0[0]+xdelta &&
 		       bbox[1] >= x0[1] && bbox[4] <= x0[1]+xdelta &&
 		       bbox[2] >= x0[2] && bbox[5] <= x0[2]+xdelta;
@@ -401,8 +402,7 @@ public class OEMM implements Serializable
 	{
 		if (h < depth)
 			return (1 << (MAXLEVEL + 1 - depth + h));
-		else
-			return gridSize;
+		return gridSize;
 	}
 
 	/**
@@ -482,8 +482,7 @@ public class OEMM implements Serializable
 						posStack[l] = i;
 						break;
 					}
-					else
-						logger.debug("Empty node skipped: pos="+i);
+					logger.debug("Empty node skipped: pos="+i);
 				}
 				if ((posStack[l] & 1) != 0)
 					i0 += s;
@@ -665,10 +664,7 @@ public class OEMM implements Serializable
 	}
 
 	/**
-	 * Returns the octant of an OEMM structure containing a given point.
-	 *
-	 * @param ijk     integer coordinates of an interior node
-	 * @return  the octant of the smallest size containing this point.
+	 * Creates root node.
 	 */
 	private void createRootNode(Node node)
 	{

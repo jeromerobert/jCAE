@@ -23,7 +23,6 @@ import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.DataInputStream;
-import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -31,7 +30,6 @@ import java.io.ObjectInputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
-import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -42,9 +40,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import gnu.trove.TIntArrayList;
-import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TIntObjectIterator;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -911,18 +906,6 @@ public class Storage
 			fc.writeDouble(uv[i]);
 		}
 		
-	}
-	
-	private static void sortFakeNonReadVertexList(List<FakeNonReadVertex> list)
-	{
-		Collections.sort(list, new Comparator<FakeNonReadVertex>() {
-
-			@Override
-			public int compare(FakeNonReadVertex o1, FakeNonReadVertex o2) {
-				return (o1.getLabel()<o2.getLabel() ? -1 : (o1.getLabel()==o2.getLabel() ? 0 : 1));
-			}
-			
-		});
 	}
 	
 	/**

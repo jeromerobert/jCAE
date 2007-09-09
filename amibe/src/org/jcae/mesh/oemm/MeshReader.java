@@ -19,8 +19,6 @@
 
 package org.jcae.mesh.oemm;
 
-import java.io.DataInputStream;
-import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -235,7 +233,7 @@ public class MeshReader extends Storage
 					vert[index] = (Vertex) mesh.factory.createVertex(xyz);
 					vert[index].setLabel(current.minIndex + index);
 					vert[index].setReadable(true);
-					boolean writable = listAdjacentLeaves.get(Integer.valueOf(index)).isEmpty();
+					boolean writable = listAdjacentLeaves.get(index).isEmpty();
 					vert[index].setWritable(writable);
 					vertMap.put(current.minIndex + index, vert[index]);
 					mesh.add(vert[index]);
@@ -286,7 +284,7 @@ public class MeshReader extends Storage
 					for (int j = 0; j < 3; j++)
 					{
 						int globalIndex = oemm.leaves[leaf[j]].minIndex + pointIndex[j];
-						if (leaves.contains(leaf[j]))
+						if (leaves.contains(Integer.valueOf(leaf[j])))
 						{
 							vert[j] = (Vertex) vertMap.get(globalIndex);
 							assert vert[j] != null;
