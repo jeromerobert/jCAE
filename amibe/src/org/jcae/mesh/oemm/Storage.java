@@ -188,10 +188,12 @@ public class Storage
 	}
 	
 	/**
-	 * It saves mesh on the disk into octree structure. The o-nodes, that 
-	 * will be saved, are deduced from mesh (from position of vetices). 
+	 * Saves mesh on the disk into octree structure. The o-nodes, that 
+	 * will be saved, are deduced from mesh (from position of vertices). 
+	 *
 	 * @param oemm 
-	 * @param mesh
+	 * @param mesh  mesh to be stored onto disk
+	 * @param storedLeaves  set of leaves to store
 	 * TODO There is no support for moving vertices into another octree node. 
 	 */
 	public static void saveNodes(OEMM oemm, Mesh mesh, Set<Integer> storedLeaves)
@@ -210,16 +212,17 @@ public class Storage
 	}
 	
 	/**
-	 * It creates a map of vertex label into vertex.
-	 * @param mesh
-	 * @return
-	 * @throws AssertionError There are different vertices with the same label 
-	 * in the mesh.
+	 * Returns a map of vertex label into vertex.
+	 *
+	 * @param mesh  mesh
+	 * @return a map of vertex label into vertex.
+	 * @throws RuntimeException There are different vertices with the same label in the mesh.
 	 */
-	private static Map<Integer, Vertex> getAllVerticesMap(Mesh mesh)
+	private static Map<Integer, Vertex> getMapLabelToVertex(Mesh mesh)
 	{
-		Map<Integer, Vertex> referencedVertices = new HashMap<Integer, Vertex>();
-		for(AbstractTriangle tr: mesh.getTriangles()) {
+		Map<Integer, Vertex> referencedVertices = new HashMap<Integer, Vertex>(mesh.getTriangles().size() / 2);
+		for(AbstractTriangle tr: mesh.getTriangles())
+		{
 			for (int i = 0; i < 3; i++)
 			{
 				Vertex vertex = tr.vertex[i];
@@ -228,10 +231,9 @@ public class Storage
 				}
 				//check that there are no different vertices with the same label
 				Integer label = Integer.valueOf(vertex.getLabel());
-				assert !referencedVertices.containsKey(label) ||
-					referencedVertices.get(label) == vertex: 
-						"There are different vertices with the same label!";
-				
+				Vertex oldVertex = referencedVertices.get(label);
+				if (oldVertex != null && oldVertex != vertex)
+					throw new RuntimeException("There are different vertices with the same label!");
 				referencedVertices.put(label, vertex);
 			}
 		}
@@ -355,7 +357,7 @@ public class Storage
 		//actually we do not need create map (set is enough) but we index with label of vertex 
 		// - it should be faster. Also, we could control that there is 
 		// no different vertices with the same label.
-		Map<Integer, Vertex> referencedVertices = getAllVerticesMap(mesh);
+		Map<Integer, Vertex> referencedVertices = getMapLabelToVertex(mesh);
 		
 		Set<Integer> processedVertIndex = new HashSet<Integer>();
 		for (Vertex v: referencedVertices.values()) 
@@ -363,7 +365,8 @@ public class Storage
 			mesh.add(v);
 			processedVertIndex.add(Integer.valueOf(v.getLabel()));
 		}
-		for (AbstractVertex av: tempCollection) {
+		for (AbstractVertex av: tempCollection)
+		{
 			Vertex vert = (Vertex) av;
 			Integer label = Integer.valueOf(vert.getLabel());
 			if (processedVertIndex.contains(label))
