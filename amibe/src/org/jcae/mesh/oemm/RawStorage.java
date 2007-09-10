@@ -407,6 +407,7 @@ public class RawStorage
 	private static final class ComputeOffsetProcedure extends TraversalProcedure
 	{
 		private long offset = 0L;
+		@Override
 		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
 			if (visit != LEAF)
@@ -421,6 +422,7 @@ public class RawStorage
 		{
 			return offset;
 		}
+		@Override
 		public void init(OEMM oemm)
 		{
 			super.init(oemm);
@@ -431,6 +433,7 @@ public class RawStorage
 	private static final class ComputeMinMaxIndicesProcedure extends TraversalProcedure
 	{
 		private int nrLeaves = 0;
+		@Override
 		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
 			if (visit == PREORDER)
@@ -455,6 +458,7 @@ public class RawStorage
 			fc = channel;
 			buffers = m;
 		}
+		@Override
 		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
 			if (visit != LEAF)
@@ -511,6 +515,7 @@ public class RawStorage
 			for (int i = 0; i < 4; i++)
 				out.writeDouble(x0[i]);
 		}
+		@Override
 		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
 			if (visit != LEAF)
@@ -666,11 +671,13 @@ public class RawStorage
 			outDir = dir;
 			oos = headerOut;
 		}
+		@Override
 		public void init(OEMM oemm)
 		{
 			super.init(oemm);
 			room = ((1 << 31) - 3*oemm.root.tn) / oemm.getNumberOfLeaves();
 		}
+		@Override
 		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
 			if (current == oemm.root && visit != LEAF)
@@ -888,11 +895,13 @@ public class RawStorage
 		{
 			fc = in.getChannel();
 		}
+		@Override
 		public void init(OEMM oemm)
 		{
 			vertices = new PAVLTreeIntArrayDup[oemm.getNumberOfLeaves()];
 			needed = new boolean[vertices.length];
 		}
+		@Override
 		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
 			if (visit != LEAF)
@@ -1007,6 +1016,7 @@ public class RawStorage
 	{
 		private int [] ijk = new int[3];
 		private double [] xyz = new double[3];
+		@Override
 		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
 			if (visit != LEAF)
