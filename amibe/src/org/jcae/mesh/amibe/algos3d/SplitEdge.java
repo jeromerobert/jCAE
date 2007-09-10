@@ -30,7 +30,6 @@ import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.File;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 /**
@@ -73,14 +72,13 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 	 *        behaviour.  Valid keys are <code>size</code> and
 	 *        <code>maxtriangles</code>.
 	 */
-	public SplitEdge(Mesh m, Map options)
+	public SplitEdge(final Mesh m, final Map<String, String> options)
 	{
 		super(m, options);
-		for (Iterator it = options.entrySet().iterator(); it.hasNext(); )
+		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
-			Map.Entry opt = (Map.Entry) it.next();
-			String key = (String) opt.getKey();
-			String val = (String) opt.getValue();
+			final String key = opt.getKey();
+			final String val = opt.getValue();
 			if (key.equals("size"))
 			{
 				double sizeTarget = Double.valueOf(val).doubleValue();
@@ -93,16 +91,19 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		}
 	}
 	
+	@Override
 	public Logger thisLogger()
 	{
 		return logger;
 	}
 
+	@Override
 	public void preProcessAllHalfEdges()
 	{
 	}
 
-	public double cost(HalfEdge e)
+	@Override
+	public double cost(final HalfEdge e)
 	{
 		double [] p0 = e.origin().getUV();
 		double [] p1 = e.destination().getUV();
@@ -114,6 +115,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		return 1.0 / l2;
 	}
 
+	@Override
 	public boolean canProcessEdge(HalfEdge current)
 	{
 		// New point
@@ -156,6 +158,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		return false;
 	}
 
+	@Override
 	public HalfEdge processEdge(HalfEdge current)
 	{
 		if (logger.isDebugEnabled())
@@ -173,6 +176,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		return (HalfEdge) current.next();
 	}
 	
+	@Override
 	public void postProcessAllHalfEdges()
 	{
 		logger.info("Number of splitted edges: "+processed);
@@ -189,7 +193,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 	 */
 	public static void main(String[] args)
 	{
-		HashMap options = new HashMap();
+		HashMap<String, String> options = new HashMap<String, String>();
 		if(args.length != 5)
 		{
 			System.out.println(usageString);

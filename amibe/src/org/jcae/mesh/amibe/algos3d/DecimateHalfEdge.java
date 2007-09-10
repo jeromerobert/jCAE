@@ -155,11 +155,13 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		}
 	}
 	
+	@Override
 	public Logger thisLogger()
 	{
 		return logger;
 	}
 
+	@Override
 	public void preProcessAllHalfEdges()
 	{
 		final int roughNrNodes = mesh.getTriangles().size()/2;
@@ -242,18 +244,21 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		}
 	}
 
+	@Override
 	protected void postComputeTree()
 	{
 		if (testDump)
 			restoreState();
 	}
 
+	@Override
 	protected void appendDumpState(final ObjectOutputStream out)
 		throws IOException
 	{
 		out.writeObject(quadricMap);
 	}
 
+	@Override
 	protected void appendRestoreState(final ObjectInputStream q)
 		throws IOException
 	{
@@ -268,6 +273,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		}
 	}
 
+	@Override
 	public double cost(final HalfEdge e)
 	{
 		final Vertex o = e.origin();
@@ -284,6 +290,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		return ret;
 	}
 
+	@Override
 	public boolean canProcessEdge(final HalfEdge current)
 	{
 		v1 = current.origin();
@@ -305,6 +312,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		return (!current.hasAttributes(AbstractHalfEdge.NONMANIFOLD) && current.canCollapse(v3));
 	}
 
+	@Override
 	public void preProcessEdge()
 	{
 		if (testDump)
@@ -318,6 +326,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		}
 	}
 
+	@Override
 	public HalfEdge processEdge(HalfEdge current)
 	{
 		if (logger.isDebugEnabled())
@@ -378,6 +387,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		return (HalfEdge) current.next();
 	}
 	
+	@Override
 	public void postProcessAllHalfEdges()
 	{
 		logger.info("Number of contracted edges: "+processed);

@@ -60,7 +60,7 @@ public abstract class AbstractAlgoHalfEdge
 	protected abstract Logger thisLogger();
 	private static final String dumpFile = "/tmp/jcae.dump";
 
-	public AbstractAlgoHalfEdge(Mesh m, Map<String, String> options)
+	public AbstractAlgoHalfEdge(final Mesh m, final Map<String, String> options)
 	{
 		mesh = m;
 	}
@@ -76,7 +76,7 @@ public abstract class AbstractAlgoHalfEdge
 		thisLogger().info("Final number of triangles: "+countInnerTriangles(mesh));
 	}
 
-	public static int countInnerTriangles(Mesh mesh)
+	public static int countInnerTriangles(final Mesh mesh)
 	{
 		int ret = 0;
 		for (AbstractTriangle af: mesh.getTriangles())
@@ -117,7 +117,7 @@ public abstract class AbstractAlgoHalfEdge
 	{
 	}
 
-	protected void addToTree(HalfEdge e)
+	protected void addToTree(final HalfEdge e)
 	{
 		if (!e.origin().isReadable() || !e.destination().isReadable())
 			return;

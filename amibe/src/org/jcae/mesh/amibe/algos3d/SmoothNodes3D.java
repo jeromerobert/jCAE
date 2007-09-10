@@ -23,6 +23,7 @@ package org.jcae.mesh.amibe.algos3d;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.util.QSortedTree;
@@ -32,6 +33,7 @@ import org.jcae.mesh.xmldata.MeshWriter;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
 
@@ -78,15 +80,14 @@ public class SmoothNodes3D
 	 *        behaviour.  Valid keys are <code>size</code>,
 	 *        <code>iterations</code> and <code>boundaries</code>.
 	 */
-	public SmoothNodes3D(Mesh m, Map options)
+	public SmoothNodes3D(final Mesh m, final Map<String, String> options)
 	{
 		mesh = m;
 		c = (Vertex) mesh.factory.createVertex(0.0, 0.0, 0.0);
-		for (Iterator it = options.entrySet().iterator(); it.hasNext(); )
+		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
-			Map.Entry opt = (Map.Entry) it.next();
-			String key = (String) opt.getKey();
-			String val = (String) opt.getValue();
+			final String key = opt.getKey();
+			final String val = opt.getValue();
 			if (key.equals("size"))
 				sizeTarget = Double.valueOf(val).doubleValue();
 			else if (key.equals("iterations"))
@@ -108,9 +109,9 @@ public class SmoothNodes3D
 		logger.info("Run "+getClass().getName());
 		// First compute triangle quality
 		QSortedTree tree = new PAVLSortedTree();
-		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
+		for (AbstractTriangle at: mesh.getTriangles())
 		{
-			Triangle f = (Triangle) itf.next();
+			Triangle f = (Triangle) at;
 			if (f.isOuter())
 				continue;
 			double val = cost(f);
@@ -129,10 +130,10 @@ public class SmoothNodes3D
 	private int computeMesh(QSortedTree tree)
 	{
 		int ret = 0;
-		HashSet nodeset = new HashSet(2*mesh.getTriangles().size());
-		for (Iterator itt = tree.iterator(); itt.hasNext(); )
+		Set<Vertex> nodeset = new HashSet<Vertex>(2*mesh.getTriangles().size());
+		for (Iterator<QSortedTree.Node> itt = tree.iterator(); itt.hasNext(); )
 		{
-			QSortedTree.Node q = (QSortedTree.Node) itt.next();
+			QSortedTree.Node q = itt.next();
 			if (q.getValue() > tolerance)
 				break;
 			Triangle f = (Triangle) q.getData();
@@ -175,14 +176,14 @@ public class SmoothNodes3D
 					continue;
 				if (n.getRef() != 0 && preserveBoundaries)
 					continue;
-				if (smoothNode(mesh, ot, sizeTarget))
+				if (smoothNode(ot))
 					ret++;
 			}
 		}
 		return ret;
 	}
 	
-	private boolean smoothNode(Mesh mesh, AbstractHalfEdge ot, double sizeTarget)
+	private boolean smoothNode(AbstractHalfEdge ot)
 	{
 		Vertex n = ot.origin();
 		double[] oldp3 = n.getUV();
@@ -192,10 +193,9 @@ public class SmoothNodes3D
 		double[] centroid3 = c.getUV();
 		centroid3[0] = centroid3[1] = centroid3[2] = 0.;
 		double lmin = Double.MAX_VALUE;
-		for (Iterator itn=n.getNeighboursNodes().iterator(); itn.hasNext(); )
+		for (Vertex v: n.getNeighboursNodes())
 		{
 			nn++;
-			Vertex v = ((Vertex) itn.next());
 			double l = n.distance3D(v);
 			if (l < lmin)
 				lmin = l;
