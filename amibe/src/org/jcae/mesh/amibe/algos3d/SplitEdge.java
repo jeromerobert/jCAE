@@ -74,7 +74,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 	 */
 	public SplitEdge(final Mesh m, final Map<String, String> options)
 	{
-		super(m, options);
+		super(m);
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
 			final String key = opt.getKey();

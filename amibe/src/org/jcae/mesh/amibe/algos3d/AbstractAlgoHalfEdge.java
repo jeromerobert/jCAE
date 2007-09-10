@@ -30,7 +30,6 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.util.QSortedTree;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import java.util.Stack;
-import java.util.Map;
 import java.util.Iterator;
 import java.io.ObjectOutputStream;
 import java.io.FileOutputStream;
@@ -60,7 +59,7 @@ public abstract class AbstractAlgoHalfEdge
 	protected abstract Logger thisLogger();
 	private static final String dumpFile = "/tmp/jcae.dump";
 
-	public AbstractAlgoHalfEdge(final Mesh m, final Map<String, String> options)
+	public AbstractAlgoHalfEdge(final Mesh m)
 	{
 		mesh = m;
 	}
