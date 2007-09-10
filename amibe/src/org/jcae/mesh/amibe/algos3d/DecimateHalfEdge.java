@@ -109,12 +109,12 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	private static Logger logger=Logger.getLogger(DecimateHalfEdge.class);
 	private int placement = Quadric3DError.POS_EDGE;
 	private HashMap<Vertex, Quadric3DError> quadricMap = null;
-	private Vertex v1 = null, v2 = null;
-	private Quadric3DError q1 = null, q2 = null;
 	private Vertex v3;
-	private final Vertex v4;
 	private Quadric3DError q3 = new Quadric3DError();
-	private final Quadric3DError q4 = new Quadric3DError();
+	// vCostOpt and qCostOpt must be used only by cost() method.
+	// Their aim is to avoid creating new objects for each cost() call.
+	private final Vertex vCostOpt;
+	private final Quadric3DError qCostOpt = new Quadric3DError();
 	private static final boolean testDump = false;
 	
 	/**
@@ -129,7 +129,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	{
 		super(m);
 		v3 = (Vertex) m.factory.createVertex(0.0, 0.0, 0.0);
-		v4 = (Vertex) m.factory.createVertex(0.0, 0.0, 0.0);
+		vCostOpt = (Vertex) m.factory.createVertex(0.0, 0.0, 0.0);
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
 			final String key = opt.getKey();
@@ -282,9 +282,9 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		assert q1 != null : o;
 		final Quadric3DError q2 = quadricMap.get(d);
 		assert q2 != null : d;
-		q4.computeQuadric3DError(q1, q2);
-		q4.optimalPlacement(o, d, q1, q2, placement, v4);
-		final double ret = q1.value(v4.getUV()) + q2.value(v4.getUV());
+		qCostOpt.computeQuadric3DError(q1, q2);
+		qCostOpt.optimalPlacement(o, d, q1, q2, placement, vCostOpt);
+		final double ret = q1.value(vCostOpt.getUV()) + q2.value(vCostOpt.getUV());
 		// TODO: check why this assertion sometimes fail
 		// assert ret >= -1.e-2 : q1+"\n"+q2+"\n"+ret;
 		return ret;
@@ -293,8 +293,8 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	@Override
 	public boolean canProcessEdge(final HalfEdge current)
 	{
-		v1 = current.origin();
-		v2 = current.destination();
+		final Vertex v1 = current.origin();
+		final Vertex v2 = current.destination();
 		assert v1 != v2 : current;
 		// If an endpoint is not writable, its neighborhood is
 		// not fully determined and contraction must not be
@@ -302,8 +302,8 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		if (!v1.isWritable() || !v2.isWritable())
 			return false;
 		/* FIXME: add an option so that boundary nodes may be frozen. */
-		q1 = quadricMap.get(v1);
-		q2 = quadricMap.get(v2);
+		final Quadric3DError q1 = quadricMap.get(v1);
+		final Quadric3DError q2 = quadricMap.get(v2);
 		assert q1 != null : current;
 		assert q2 != null : current;
 		q3.computeQuadric3DError(q1, q2);
@@ -317,13 +317,6 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	{
 		if (testDump)
 			dumpState();
-		if (v1 != null)
-		{
-			// v1 and v2 have been removed from the mesh,
-			// they can be reused.
-			v3 = v1;
-			q3 = q1;
-		}
 	}
 
 	@Override
@@ -369,14 +362,18 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		if (current.hasAttributes(AbstractHalfEdge.OUTER))
 			current = (HalfEdge) current.sym();
 		final Vertex apex = current.apex();
+		// v1 and v2 are removed from the mesh, they can be reused.
+		Vertex vFree = current.origin();
+		Quadric3DError qFree = quadricMap.remove(vFree);
+		quadricMap.remove(current.destination());
 		current = (HalfEdge) current.collapse(mesh, v3);
-		quadricMap.remove(v1);
-		quadricMap.remove(v2);
 		// Update edge costs
 		quadricMap.put(v3, q3);
 		assert current != null : v3+" not connected to "+apex;
 		assert current.origin() == v3 : ""+current+"\n"+v3+"\n"+apex;
 		assert current.destination() == apex : ""+current+"\n"+v3+"\n"+apex;
+		v3 = vFree;
+		q3 = qFree;
 		do
 		{
 			current = (HalfEdge) current.nextOriginLoop();
