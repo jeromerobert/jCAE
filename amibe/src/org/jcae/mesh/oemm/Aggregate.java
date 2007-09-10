@@ -21,7 +21,8 @@
 package org.jcae.mesh.oemm;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -114,9 +115,9 @@ public class Aggregate
 		logger.info("Merge cells, delta="+MAX_DELTA_LEVEL+" triangles="+max);
 
 		// Array of linked lists of non-leaf octree cells
-		ArrayList [] nonLeaves = new ArrayList[OEMM.MAXLEVEL];
+		List<OEMM.Node> [] nonLeaves = new ArrayList[OEMM.MAXLEVEL];
 		for (int i = 0; i < nonLeaves.length; i++)
-			nonLeaves[i] = new ArrayList();
+			nonLeaves[i] = new ArrayList<OEMM.Node>();
 		// A bottom-up traversal is the most efficient way to
 		// merge nodes when both conditions above are met.
 		// We first walk through the whole tree to compute total
@@ -145,9 +146,8 @@ public class Aggregate
 		{
 			int merged = 0;
 			logger.debug(" Checking neighbors at level "+level);
-			for (Iterator it = nonLeaves[level].iterator(); it.hasNext(); )
+			for (OEMM.Node current: nonLeaves[level])
 			{
-				OEMM.Node current = (OEMM.Node) it.next();
 				assert !current.isLeaf;
 				if (current.tn > max)
 					continue;
@@ -228,8 +228,8 @@ public class Aggregate
 	private static final class PreProcessOEMM extends TraversalProcedure
 	{
 		private int depth = 0;
-		private final ArrayList [] nonLeaves;
-		public PreProcessOEMM(ArrayList [] a)
+		private final List<OEMM.Node> [] nonLeaves;
+		public PreProcessOEMM(List<OEMM.Node> [] a)
 		{
 			nonLeaves = a;
 		}

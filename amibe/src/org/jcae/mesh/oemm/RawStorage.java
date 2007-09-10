@@ -301,7 +301,7 @@ public class RawStorage
 			FileChannel fc = raf.getChannel();
 			raf.setLength(outputFileSize);
 
-			HashMap buffers = new HashMap();
+			Map<OEMM.Node, ByteBuffer> buffers = new HashMap<OEMM.Node, ByteBuffer>();
 			DispatchTriangles dt = new DispatchTriangles(tree, fc, buffers);
 			readSoup(soupFile, dt);
 
@@ -336,8 +336,8 @@ public class RawStorage
 		private int [] ijk9 = new int[9];
 		private OEMM oemm;
 		private FileChannel fc;
-		private Map buffers;
-		public DispatchTriangles(OEMM o, FileChannel f, Map m)
+		private Map<OEMM.Node, ByteBuffer> buffers;
+		public DispatchTriangles(OEMM o, FileChannel f, Map<OEMM.Node, ByteBuffer> m)
 		{
 			oemm = o;
 			fc = f;
@@ -372,13 +372,13 @@ public class RawStorage
 		}
 	}
 
-	private static final void addToCell(FileChannel fc, OEMM.Node current, Map buffers, int [] ijk, int attribute)
+	private static final void addToCell(FileChannel fc, OEMM.Node current, Map<OEMM.Node, ByteBuffer> buffers, int [] ijk, int attribute)
 		throws IOException
 	{
 		assert current.counter <= fc.size();
 		//  With 20 millions of triangles, unbuffered output took 420s
 		//  and buffered output 180s (4K buffer cache)
-		ByteBuffer list = (ByteBuffer) buffers.get(current);
+		ByteBuffer list = buffers.get(current);
 		if (list == null)
 		{
 			//  Must be a multiple of 10!
@@ -449,8 +449,8 @@ public class RawStorage
 	private static final class FlushBuffersProcedure extends TraversalProcedure
 	{
 		private FileChannel fc;
-		private Map buffers;
-		public FlushBuffersProcedure(FileChannel channel, Map m)
+		private Map<OEMM.Node, ByteBuffer> buffers;
+		public FlushBuffersProcedure(FileChannel channel, Map<OEMM.Node, ByteBuffer> m)
 		{
 			fc = channel;
 			buffers = m;
@@ -459,7 +459,7 @@ public class RawStorage
 		{
 			if (visit != LEAF)
 				return OK;
-			ByteBuffer list = (ByteBuffer) buffers.get(current);
+			ByteBuffer list = buffers.get(current);
 			if (list == null)
 			{
 				list = ByteBuffer.allocate(8);
