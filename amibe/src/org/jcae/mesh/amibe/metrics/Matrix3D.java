@@ -245,6 +245,7 @@ public class Matrix3D implements Serializable
 		return 0.5*norm;
 	}
 	
+	@Override
 	public String toString()
 	{
 		StringBuffer ret = new StringBuffer();

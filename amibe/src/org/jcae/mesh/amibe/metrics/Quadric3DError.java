@@ -216,6 +216,7 @@ public class Quadric3DError implements Serializable
 			return bestCandidateV1V2(v1, v2, q1, q2);
 	}
 
+	@Override
 	public String toString()
 	{
 		return "A: "+A+"\n"+
