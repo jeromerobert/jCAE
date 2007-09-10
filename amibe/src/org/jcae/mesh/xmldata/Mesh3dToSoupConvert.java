@@ -99,9 +99,12 @@ public class Mesh3dToSoupConvert
 	
 	public static void main(String[] args)
 	{
+		String dir = "/home/jerome/JCAEProject/amibe2.dir";
+		if (args.length >= 1)
+			dir = args[0];
 		try
 		{
-			Mesh3dToSoupConvert.convert("/home/jerome/JCAEProject/amibe2.dir/");
+			Mesh3dToSoupConvert.convert(dir);
 		}
 		catch (Exception e)
 		{	
