@@ -426,8 +426,8 @@ public class Mesh extends AbstractMesh implements Serializable
 					{
 						if (v[j].getLink() instanceof Triangle)
 						{
-							LinkedHashSet link = new LinkedHashSet();
-							link.add(v[j].getLink());
+							LinkedHashSet<Triangle> link = new LinkedHashSet<Triangle>();
+							link.add((Triangle) v[j].getLink());
 							v[j].setLink(link);
 						}
 					}
@@ -440,7 +440,7 @@ public class Mesh extends AbstractMesh implements Serializable
 						it2.next();
 						for (int j = 0; j < 2; j++)
 						{
-							LinkedHashSet link = (LinkedHashSet) v[j].getLink();
+							LinkedHashSet<Triangle> link = (LinkedHashSet<Triangle>) v[j].getLink();
 							link.add(t2);
 						}
 					}
@@ -460,7 +460,7 @@ public class Mesh extends AbstractMesh implements Serializable
 				if (t.vertex[i].getLink() instanceof LinkedHashSet)
 				{
 					nrNM++;
-					t.vertex[i].setLinkFan((LinkedHashSet) t.vertex[i].getLink());
+					t.vertex[i].setLinkFan((LinkedHashSet<Triangle>) t.vertex[i].getLink());
 				}
 				ot = ot.next();
 				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))

@@ -26,8 +26,8 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.LinkedHashSet;
-import java.util.Iterator;
 import java.io.Serializable;
 
 /**
@@ -223,13 +223,12 @@ public class Vertex extends AbstractVertex implements Serializable
 	 *
 	 * @param triangles  initial set of adjacent triangles.
 	 */
-	public void setLinkFan(Collection triangles)
+	public void setLinkFan(Collection<Triangle> triangles)
 	{
-		ArrayList res = new ArrayList();
-		Collection allTriangles = new HashSet();
-		for (Iterator it = triangles.iterator(); it.hasNext(); )
+		ArrayList<Triangle> res = new ArrayList<Triangle>();
+		Set<Triangle> allTriangles = new HashSet<Triangle>();
+		for (Triangle t: triangles)
 		{
-			Triangle t = (Triangle) it.next();
 			if (allTriangles.contains(t))
 				continue;
 			allTriangles.add(t);
@@ -251,7 +250,7 @@ public class Vertex extends AbstractVertex implements Serializable
 		}
 		Triangle [] lArray = new Triangle[res.size()];
 		for (int i = 0, n = res.size(); i < n; i++)
-			lArray[i] = (Triangle) res.get(i);
+			lArray[i] = res.get(i);
 		link = lArray;
 	}
 
@@ -281,9 +280,9 @@ public class Vertex extends AbstractVertex implements Serializable
 	 *
 	 * @return the list of adjacent vertices.
 	 */
-	public Collection getNeighboursNodes()
+	public Collection<Vertex> getNeighboursNodes()
 	{
-		Collection ret = new LinkedHashSet();
+		Collection<Vertex> ret = new LinkedHashSet<Vertex>();
 		//if the vertex has no link then we return empty list
 		if (link == null)
 			return ret;
@@ -300,7 +299,7 @@ public class Vertex extends AbstractVertex implements Serializable
 		return ret;
 	}
 	
-	private void appendNeighboursTri(Triangle tri, Collection nodes)
+	private void appendNeighboursTri(Triangle tri, Collection<Vertex> nodes)
 	{
 		assert tri.vertex[0] == this || tri.vertex[1] == this || tri.vertex[2] == this;
 		AbstractHalfEdge ot = tri.getAbstractHalfEdge();
@@ -789,6 +788,7 @@ public class Vertex extends AbstractVertex implements Serializable
 		return true;
 	}
 	
+	@Override
 	public String toString ()
 	{
 		StringBuffer r = new StringBuffer("UV:");
