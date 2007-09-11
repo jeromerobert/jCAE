@@ -191,7 +191,7 @@ public class Storage
 	 * Saves mesh on the disk into octree structure. The o-nodes, that 
 	 * will be saved, are deduced from mesh (from position of vertices). 
 	 *
-	 * @param oemm 
+	 * @param oemm OEMM instance
 	 * @param mesh  mesh to be stored onto disk
 	 * @param storedLeaves  set of leaves to store
 	 * TODO There is no support for moving vertices into another octree node. 
@@ -208,6 +208,41 @@ public class Storage
 		storeOEMMStructure(oemm);
 		if (logger.isInfoEnabled()) {
 			logger.info("saveNodes ended");
+		}
+	}
+	
+	/**
+	 * Removes vertices from mesh that are not in any triangle of mesh except vertices 
+	 * that are read only. 
+	 * @param mesh
+	 */
+	private static void removeNonReferencedVertices(Mesh mesh)
+	{
+		List<AbstractVertex> tempCollection = new ArrayList<AbstractVertex>();
+		tempCollection.addAll(mesh.getNodes());
+		mesh.getNodes().clear();
+		
+		//actually we do not need create map (set is enough) but we index with label of vertex 
+		// - it should be faster. Also, we could control that there is 
+		// no different vertices with the same label.
+		Map<Integer, Vertex> referencedVertices = getMapLabelToVertex(mesh);
+		
+		Set<Integer> processedVertIndex = new HashSet<Integer>();
+		for (Vertex v: referencedVertices.values()) 
+		{
+			mesh.add(v);
+			processedVertIndex.add(Integer.valueOf(v.getLabel()));
+		}
+		for (AbstractVertex av: tempCollection)
+		{
+			Vertex vert = (Vertex) av;
+			Integer label = Integer.valueOf(vert.getLabel());
+			if (processedVertIndex.contains(label))
+				continue;
+			processedVertIndex.add(label);
+			if (!vert.isWritable()) {
+				mesh.add(vert);
+			}
 		}
 	}
 	
@@ -241,207 +276,10 @@ public class Storage
 	}
 	
 	/**
-	 * It makes ascending sort of list of vertices in respect of their label.
-	 * @param list
-	 */
-	private static void sortVertexList(List<Vertex> list)
-	{
-		Collections.sort(list, new Comparator<Vertex>() {
-			@Override
-			public int compare(Vertex o1, Vertex o2) {
-				return (o1.getLabel()<o2.getLabel() ? -1 : (o1.getLabel()==o2.getLabel() ? 0 : 1));
-			}
-		});
-	}
-	
-	/**
-	 * It browses all nodes of the mesh and it fills map of node index to list 
-	 * of contained vertices.
+	 * Stores vertices of the mesh into oemm structure on the disk. 
 	 * @param oemm
 	 * @param mesh
-	 * @param nodemap
-	 * @param storedLeaves 
-	 * @param  
-	 */
-	private static void collectAllVertices(OEMM oemm, Mesh mesh, Map<Integer, List<Vertex>> nodemap, Set<Integer> movedVerticesSet, Set<Integer> storedLeaves)
-	{
-		int positions[] = new int[3];
-		for(AbstractVertex av: mesh.getNodes())
-		{
-			Vertex vertex = (Vertex) av;
-			
-			oemm.double2int(vertex.getUV(), positions);
-			Node n = null;
-			Integer nIdx = null;
-			try {
-				
-				n = oemm.search(positions);
-				nIdx = Integer.valueOf(n.leafIndex);
-			} catch (RuntimeException e) {
-				//ingore this - try move vertex more closer
-				n = createNewNode(oemm, positions);
-				nIdx = Integer.valueOf(n.leafIndex);
-				
-				storedLeaves.add(nIdx);
-				nodemap.put(nIdx, new ArrayList<Vertex>());	
-			}
-			List<Vertex> vertices = null;
-			vertices = nodemap.get(nIdx);
-			int label = vertex.getLabel();
-			if (vertices == null) {
-				throw new UnsupportedOperationException("Cannot put vertex into octree node: "+n.leafIndex+". Node is not loaded!");
-			}
-			if ((label >= n.minIndex && label <= (n.minIndex + Math.abs((n.maxIndex - n.minIndex)))) && 
-						(label - n.minIndex + 1) > n.vn ) {
-				System.out.println("Vertex: " + label + " added!!!");
-			}
-			if (label < n.minIndex || label > (n.minIndex + Math.abs((n.maxIndex - n.minIndex)))) {
-				//throw new RuntimeException("Cannot move vertex between leafs");
-				//experimental implementation
-				if (n.getMaxIndex() - n.minIndex < n.vn) {
-					throw new UnsupportedOperationException("Cannot put vertex into octree node: " 
-							+n.leafIndex + ". It contains " + n.vn + " of vertices.");
-				}
-				if (!vertex.isWritable()) {
-					throw new UnsupportedOperationException("Cannot move non-writable vertices!!");
-				}
-				int newLabel = n.minIndex + n.vn;
-				n.vn++;
-				vertex.setLabel(newLabel);
-				movedVerticesSet.add(Integer.valueOf(newLabel));
-			}
-			vertices.add(vertex);
-		}
-	}
-	
-	/**
-	 * It browses all triangle of the mesh and it fills map of node index to list 
-	 * of contained vertices.
-	 * @param oemm
-	 * @param mesh
-	 * @param nodemap
-	 */
-	private static void collectAllTriangles(OEMM oemm, Mesh mesh, Map<Integer, List<Triangle>> node2TrianglesMap)
-	{
-		int positions[] = new int[3];
-		for(AbstractTriangle at: mesh.getTriangles())
-		{
-			Triangle tr = (Triangle) at;
-			boolean hasOuterEdge = tr.vertex[0].getUV().length == 2 || tr.vertex[1].getUV().length == 2
-			|| tr.vertex[2].getUV().length == 2;
-			assert !hasOuterEdge && !tr.isOuter() || hasOuterEdge && tr.isOuter();
-			if (tr.isOuter())
-				continue;
-			int nodeNumber = searchNode(oemm, tr, positions);
-			List<Triangle> triangles = node2TrianglesMap.get(Integer.valueOf(nodeNumber));
-			if (triangles == null) {
-				throw new UnsupportedOperationException("Cannot put triangle into octree node: " 
-						+nodeNumber + ". Node is not loaded!");
-			}
-			triangles.add(tr);
-		}
-	}
-	
-	/**
-	 * It removes vertices from mesh that are not in any triangle of mesh except vertices 
-	 * that are read only. 
-	 * @param mesh
-	 */
-	
-	private static void removeNonReferencedVertices(Mesh mesh)
-	{
-		List<AbstractVertex> tempCollection = new ArrayList<AbstractVertex>();
-		tempCollection.addAll(mesh.getNodes());
-		mesh.getNodes().clear();
-		
-		//actually we do not need create map (set is enough) but we index with label of vertex 
-		// - it should be faster. Also, we could control that there is 
-		// no different vertices with the same label.
-		Map<Integer, Vertex> referencedVertices = getMapLabelToVertex(mesh);
-		
-		Set<Integer> processedVertIndex = new HashSet<Integer>();
-		for (Vertex v: referencedVertices.values()) 
-		{
-			mesh.add(v);
-			processedVertIndex.add(Integer.valueOf(v.getLabel()));
-		}
-		for (AbstractVertex av: tempCollection)
-		{
-			Vertex vert = (Vertex) av;
-			Integer label = Integer.valueOf(vert.getLabel());
-			if (processedVertIndex.contains(label))
-				continue;
-			processedVertIndex.add(label);
-			if (!vert.isWritable()) {
-				mesh.add(vert);
-			}
-		}
-		
-	}
-	
-	/**
-	 * It store triangles of the mesh into oemm structure on the disk. 
-	 * @param oemm
-	 * @param mesh
-	 * @param storedLeaves 
-	 */
-	private static void storeTriangles(OEMM oemm, Mesh mesh, Set<Integer> storedLeaves)
-	{
-		Map<Integer, List<Triangle>> node2TrianglesMap = new HashMap<Integer, List<Triangle>>();
-		int[] leaf = new int[3];
-		int[] pointIndex = new int[3];
-		int[] positions = new int[3];
-		for (Integer i: storedLeaves)
-			node2TrianglesMap.put(i, new ArrayList<Triangle>());
-
-		collectAllTriangles(oemm, mesh, node2TrianglesMap);
-		for(Entry<Integer, List<Triangle>> entry: node2TrianglesMap.entrySet()) {
-			
-			Node node = oemm.leaves[entry.getKey().intValue()];
-			
-			DataOutputStream fc;
-			try {
-				fc = new DataOutputStream( new FileOutputStream(getTrianglesFile(oemm, node)));
-			} catch (FileNotFoundException e1) {
-				logger.error("I/O error when reading indexed file "+getTrianglesFile(oemm, node));
-				e1.printStackTrace();
-				throw new RuntimeException(e1);
-			}
-			try {
-				
-				for (Triangle triangle: entry.getValue()) {
-					triangle.setGroupId(node.leafIndex);
-					for (int i = 0; i < 3; i++) {
-						Node foundNode = oemm.leaves[searchNode(oemm, triangle.vertex[i], positions)];
-						leaf[i] = foundNode.leafIndex;
-						assert leaf[i] < oemm.leaves.length; 
-						pointIndex[i] = triangle.vertex[i].getLabel() - foundNode.minIndex;
-						assert pointIndex[i] < oemm.leaves[leaf[i]].vn; 
-					}
-					writeIntArray(fc, leaf);
-					writeIntArray(fc, pointIndex);
-					fc.writeInt(triangle.getGroupId());
-				}
-				node.tn = entry.getValue().size();
-			
-			} catch (IOException e) {
-				logger.error("Error in saving to " + getTrianglesFile(oemm, node), e);
-				e.printStackTrace();
-				throw new RuntimeException(e);
-			} finally {
-				try {
-					fc.close();
-				} catch (IOException e) {
-					//ignore this
-				}
-			}
-		}
-	}
-
-	/**
-	 * It stores vertices of the mesh into oemm structure on the disk. 
-	 * @param oemm
-	 * @param mesh
+	 * @param storedLeaves  set of leaves to store
 	 */
 	private static void storeVertices(OEMM oemm, Mesh mesh, Set<Integer> storedLeaves)
 	{
@@ -558,6 +396,117 @@ public class Storage
 	}
 
 	/**
+	 * It browses all nodes of the mesh and it fills map of node index to list 
+	 * of contained vertices.
+	 * @param oemm
+	 * @param mesh
+	 * @param nodemap
+	 * @param storedLeaves 
+	 * @param  
+	 */
+	private static void collectAllVertices(OEMM oemm, Mesh mesh, Map<Integer, List<Vertex>> nodemap, Set<Integer> movedVerticesSet, Set<Integer> storedLeaves)
+	{
+		int positions[] = new int[3];
+		for(AbstractVertex av: mesh.getNodes())
+		{
+			Vertex vertex = (Vertex) av;
+			
+			oemm.double2int(vertex.getUV(), positions);
+			Node n = null;
+			Integer nIdx = null;
+			try {
+				
+				n = oemm.search(positions);
+				nIdx = Integer.valueOf(n.leafIndex);
+			} catch (RuntimeException e) {
+				//ingore this - try move vertex more closer
+				n = createNewNode(oemm, positions);
+				nIdx = Integer.valueOf(n.leafIndex);
+				
+				storedLeaves.add(nIdx);
+				nodemap.put(nIdx, new ArrayList<Vertex>());	
+			}
+			List<Vertex> vertices = null;
+			vertices = nodemap.get(nIdx);
+			int label = vertex.getLabel();
+			if (vertices == null) {
+				throw new UnsupportedOperationException("Cannot put vertex into octree node: "+n.leafIndex+". Node is not loaded!");
+			}
+			if ((label >= n.minIndex && label <= (n.minIndex + Math.abs((n.maxIndex - n.minIndex)))) && 
+						(label - n.minIndex + 1) > n.vn ) {
+				System.out.println("Vertex: " + label + " added!!!");
+			}
+			if (label < n.minIndex || label > (n.minIndex + Math.abs((n.maxIndex - n.minIndex)))) {
+				//throw new RuntimeException("Cannot move vertex between leafs");
+				//experimental implementation
+				if (n.getMaxIndex() - n.minIndex < n.vn) {
+					throw new UnsupportedOperationException("Cannot put vertex into octree node: " 
+							+n.leafIndex + ". It contains " + n.vn + " of vertices.");
+				}
+				if (!vertex.isWritable()) {
+					throw new UnsupportedOperationException("Cannot move non-writable vertices!!");
+				}
+				int newLabel = n.minIndex + n.vn;
+				n.vn++;
+				vertex.setLabel(newLabel);
+				movedVerticesSet.add(Integer.valueOf(newLabel));
+			}
+			vertices.add(vertex);
+		}
+	}
+	
+	/**
+	 * It makes ascending sort of list of vertices in respect of their label.
+	 * @param list
+	 */
+	private static void sortVertexList(List<Vertex> list)
+	{
+		Collections.sort(list, new Comparator<Vertex>() {
+			@Override
+			public int compare(Vertex o1, Vertex o2) {
+				return (o1.getLabel()<o2.getLabel() ? -1 : (o1.getLabel()==o2.getLabel() ? 0 : 1));
+			}
+		});
+	}
+	
+	/**
+	 * Reindexes vertices in given oemm node. List of vertices must satisfy
+	 * for every n in <0,n-1> this condition: label(v_n) + 1 = label(v_n + 1).  
+	 * @param node node being reindexed
+	 * @param vertices vertices contained in the node
+	 * @param old2newIndex map of old label to new label
+	 * @param new2oldIndex map of new label to old label
+	 */
+	private static void fixVertexCollection(Node node, List<Vertex> vertices,
+			Map<Integer, VertexIndexHolder> old2newIndex,
+			Map<Integer, Integer> new2oldIndex)
+	{
+		Vertex[] values = vertices.toArray(new Vertex[vertices.size()]);
+		vertices.clear();
+		int upperBound = values.length - 1;
+		for (int i = 0; i <= upperBound; i++) {
+			//there is hole in labeling. We move vertex from the tail and reindex it
+			while (values[i].getLabel() > node.minIndex + vertices.size()) {
+				Vertex moved = values[upperBound--]; 
+				vertices.add(moved);
+				node.vn = vertices.size();
+				Integer oldIndex = Integer.valueOf(moved.getLabel());
+				//new index is next empty index
+				int newIndex = vertices.size() + node.minIndex - 1;
+				old2newIndex.put(oldIndex, new VertexIndexHolder(node, newIndex));
+				new2oldIndex.put(Integer.valueOf(newIndex), oldIndex);
+				moved.setLabel(newIndex);
+			}
+			if (i > upperBound) {
+				break;
+			}
+			vertices.add(values[i]);
+			node.vn = vertices.size();
+		}
+		
+	}
+	
+	/**
 	 * Remove adjacent nodes for given node. It removes nodes that will be stored, because
 	 * adjacency will be constructed again.
 	 * 
@@ -575,7 +524,28 @@ public class Storage
 		}
 		
 	}
-
+	
+	/**
+	 * It add leafIndex of nodes that are not loaded but it is necessary update 
+	 * index of vertices in triangles.
+	 * @param node
+	 * @param visitedNodes
+	 * @param nodes4Update
+	 * @param byteBuffer
+	 * @param neighbours
+	 */
+	private static void addRequiredNodes4Update(OEMM.Node node, Set<Integer> visitedNodes,
+			Set<Integer> nodes4Update, byte[] byteBuffer, int neighbours)
+	{
+		for (int i = 0; i < neighbours; i++) {
+			Integer nodeNumber = Integer.valueOf(node.adjLeaves.get(byteBuffer[i]));
+			if (!visitedNodes.contains(nodeNumber)) {
+				nodes4Update.add(nodeNumber);
+			}
+		}
+		
+	}
+	
 	/**
 	 * It updates labels of reindexed vertices in the triangle file of the non-loaded nodes.
 	 * 
@@ -655,27 +625,6 @@ public class Storage
 	}
 	
 	/**
-	 * It add leafIndex of nodes that are not loaded but it is necessary update 
-	 * index of vertices in triangles.
-	 * @param node
-	 * @param visitedNodes
-	 * @param nodes4Update
-	 * @param byteBuffer
-	 * @param neighbours
-	 */
-	private static void addRequiredNodes4Update(OEMM.Node node, Set<Integer> visitedNodes,
-			Set<Integer> nodes4Update, byte[] byteBuffer, int neighbours)
-	{
-		for (int i = 0; i < neighbours; i++) {
-			Integer nodeNumber = Integer.valueOf(node.adjLeaves.get(byteBuffer[i]));
-			if (!visitedNodes.contains(nodeNumber)) {
-				nodes4Update.add(nodeNumber);
-			}
-		}
-		
-	}
-	
-	/**
 	 * Get label of vertex before reindexing. It means old label whether was reindexed, 
 	 * or present label otherwise.  
 	 * @param new2oldIndex
@@ -687,43 +636,6 @@ public class Storage
 		if (new2oldIndex.containsKey(counter))
 			return new2oldIndex.get(counter);
 		return counter;
-	}
-	
-	/**
-	 * It reindexes vertices in given oemm node. List of vertices must satisfy
-	 * for every n in <0,n-1> this condition: label(v_n) + 1 = label(v_n + 1).  
-	 * @param node node for reindex
-	 * @param vertices vertices contained in the node
-	 * @param old2newIndex map of old label to new label
-	 * @param new2oldIndex map of new label to old label
-	 */
-	private static void fixVertexCollection(Node node, List<Vertex> vertices,
-			Map<Integer, VertexIndexHolder> old2newIndex,
-			Map<Integer, Integer> new2oldIndex)
-	{
-		Vertex[] values = vertices.toArray(new Vertex[vertices.size()]);
-		vertices.clear();
-		int upperBound = values.length - 1;
-		for (int i = 0; i <= upperBound; i++) {
-			//there is hole in labeling. We move vertex from the tail and reindex it
-			while (values[i].getLabel() > node.minIndex + vertices.size()) {
-				Vertex moved = values[upperBound--]; 
-				vertices.add(moved);
-				node.vn = vertices.size();
-				Integer oldIndex = Integer.valueOf(moved.getLabel());
-				//new index is next empty index
-				int newIndex = vertices.size() + node.minIndex - 1;
-				old2newIndex.put(oldIndex, new VertexIndexHolder(node, newIndex));
-				new2oldIndex.put(Integer.valueOf(newIndex), oldIndex);
-				moved.setLabel(newIndex);
-			}
-			if (i > upperBound) {
-				break;
-			}
-			vertices.add(values[i]);
-			node.vn = vertices.size();
-		}
-		
 	}
 	
 	/**
@@ -739,6 +651,94 @@ public class Storage
 			nodeIndex2adjIndex.put(Integer.valueOf(node.adjLeaves.get(i)), Byte.valueOf((byte)(0xff & i)));
 		}
 		return nodeIndex2adjIndex;
+	}
+
+	/**
+	 * Stores triangles of the mesh into oemm structure on the disk. 
+	 *
+	 * @param oemm
+	 * @param mesh
+	 * @param storedLeaves 
+	 */
+	private static void storeTriangles(OEMM oemm, Mesh mesh, Set<Integer> storedLeaves)
+	{
+		Map<Integer, List<Triangle>> node2TrianglesMap = new HashMap<Integer, List<Triangle>>();
+		int[] leaf = new int[3];
+		int[] pointIndex = new int[3];
+		int[] positions = new int[3];
+		for (Integer i: storedLeaves)
+			node2TrianglesMap.put(i, new ArrayList<Triangle>());
+
+		collectAllTriangles(oemm, mesh, node2TrianglesMap);
+		for(Entry<Integer, List<Triangle>> entry: node2TrianglesMap.entrySet()) {
+			
+			Node node = oemm.leaves[entry.getKey().intValue()];
+			
+			DataOutputStream fc;
+			try {
+				fc = new DataOutputStream( new FileOutputStream(getTrianglesFile(oemm, node)));
+			} catch (FileNotFoundException e1) {
+				logger.error("I/O error when reading indexed file "+getTrianglesFile(oemm, node));
+				e1.printStackTrace();
+				throw new RuntimeException(e1);
+			}
+			try {
+				
+				for (Triangle triangle: entry.getValue()) {
+					triangle.setGroupId(node.leafIndex);
+					for (int i = 0; i < 3; i++) {
+						Node foundNode = oemm.leaves[searchNode(oemm, triangle.vertex[i], positions)];
+						leaf[i] = foundNode.leafIndex;
+						assert leaf[i] < oemm.leaves.length; 
+						pointIndex[i] = triangle.vertex[i].getLabel() - foundNode.minIndex;
+						assert pointIndex[i] < oemm.leaves[leaf[i]].vn; 
+					}
+					writeIntArray(fc, leaf);
+					writeIntArray(fc, pointIndex);
+					fc.writeInt(triangle.getGroupId());
+				}
+				node.tn = entry.getValue().size();
+			
+			} catch (IOException e) {
+				logger.error("Error in saving to " + getTrianglesFile(oemm, node), e);
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			} finally {
+				try {
+					fc.close();
+				} catch (IOException e) {
+					//ignore this
+				}
+			}
+		}
+	}
+
+	/**
+	 * It browses all triangle of the mesh and it fills map of node index to list 
+	 * of contained vertices.
+	 * @param oemm
+	 * @param mesh
+	 * @param nodemap
+	 */
+	private static void collectAllTriangles(OEMM oemm, Mesh mesh, Map<Integer, List<Triangle>> node2TrianglesMap)
+	{
+		int positions[] = new int[3];
+		for(AbstractTriangle at: mesh.getTriangles())
+		{
+			Triangle tr = (Triangle) at;
+			boolean hasOuterEdge = tr.vertex[0].getUV().length == 2 || tr.vertex[1].getUV().length == 2
+			|| tr.vertex[2].getUV().length == 2;
+			assert !hasOuterEdge && !tr.isOuter() || hasOuterEdge && tr.isOuter();
+			if (tr.isOuter())
+				continue;
+			int nodeNumber = searchNode(oemm, tr, positions);
+			List<Triangle> triangles = node2TrianglesMap.get(Integer.valueOf(nodeNumber));
+			if (triangles == null) {
+				throw new UnsupportedOperationException("Cannot put triangle into octree node: " 
+						+nodeNumber + ". Node is not loaded!");
+			}
+			triangles.add(tr);
+		}
 	}
 
 	protected static File getAdjacencyFile(OEMM oemm, Node node)
@@ -822,32 +822,6 @@ public class Storage
 		return result;
 	}
 	
-	private static void writeIntArray(DataOutputStream fc, int[] pointIndex) throws IOException
-	{
-		for(int val: pointIndex) {
-			fc.writeInt(val);
-		}
-		
-	}
-	
-	private static Node createNewNode(OEMM oemm, int[] positions)
-	{
-		Node n;
-		logger.info("Creating new leaf node.");
-		n = oemm.build(positions);
-		n.adjLeaves = new TIntArrayList();
-		n.leafIndex = oemm.leaves.length;
-		Node prev = oemm.leaves[oemm.leaves.length - 1];
-		n.minIndex = prev.minIndex - prev.getMaxIndex() + prev.minIndex - 1;
-		n.maxIndex = n.minIndex - prev.getMaxIndex() + prev.minIndex;
-		StringBuilder sb = new StringBuilder();
-		getFile(oemm,n, sb);
-		n.file = sb.toString();
-		oemm.leaves = Arrays.copyOf(oemm.leaves, oemm.leaves.length + 1);
-		oemm.leaves[n.leafIndex] = n;
-		return n;
-	}
-	
 	private static void getFile(OEMM oemm, Node n, StringBuilder sb)
 	{
 		if (n.parent == null) {
@@ -867,6 +841,24 @@ public class Storage
 		}
 	}
 
+	private static Node createNewNode(OEMM oemm, int[] positions)
+	{
+		Node n;
+		logger.info("Creating new leaf node.");
+		n = oemm.build(positions);
+		n.adjLeaves = new TIntArrayList();
+		n.leafIndex = oemm.leaves.length;
+		Node prev = oemm.leaves[oemm.leaves.length - 1];
+		n.minIndex = prev.minIndex - prev.getMaxIndex() + prev.minIndex - 1;
+		n.maxIndex = n.minIndex - prev.getMaxIndex() + prev.minIndex;
+		StringBuilder sb = new StringBuilder();
+		getFile(oemm,n, sb);
+		n.file = sb.toString();
+		oemm.leaves = Arrays.copyOf(oemm.leaves, oemm.leaves.length + 1);
+		oemm.leaves[n.leafIndex] = n;
+		return n;
+	}
+	
 	// By convention, if T=(V1,V2,V3) and each Vi is contained in node Ni,
 	// then T belongs to min(Ni)
 	private static int searchNode(OEMM oemm, Triangle tr, int[] positions)
@@ -902,13 +894,16 @@ public class Storage
 		return oemm.search(positions).leafIndex;
 	}
 	
+	private static void writeIntArray(DataOutputStream fc, int[] pointIndex) throws IOException
+	{
+		for(int val: pointIndex)
+			fc.writeInt(val);
+	}
+	
 	private static void writeDoubleArray(DataOutputStream fc, double[] uv) throws IOException
 	{
-		for (int i = 0; i < uv.length; i++)
-		{
-			fc.writeDouble(uv[i]);
-		}
-		
+		for (double val: uv)
+			fc.writeDouble(val);
 	}
 	
 	/**
