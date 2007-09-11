@@ -296,16 +296,18 @@ public class Storage
 			nodemap.put(i, new ArrayList<Vertex>());
 		
 		collectAllVertices(oemm, mesh, nodemap, movedVertices, storedLeaves);
-		for(Entry<Integer, List<Vertex>> entry: nodemap.entrySet()) {
+		for(Entry<Integer, List<Vertex>> entry: nodemap.entrySet())
+		{
 			Node node = oemm.leaves[entry.getKey().intValue()];
-			sortVertexList(entry.getValue());
+			List<Vertex> vertexList = entry.getValue();
+			sortVertexList(vertexList);
 			
-			fixVertexCollection(node, entry.getValue(), old2newIndex, new2oldIndex);
+			reindexVerticesInNode(node, vertexList, old2newIndex, new2oldIndex);
 			
 			List<List<Integer>> adjacencyFileWithoutLoadedNodes = readAdjacencyFile(oemm, node, nodemap.keySet());
 			removeLoadedAdjacentNodes(node, storedLeaves);
 			Map<Integer, Byte> nodeIndex2adjIndex = makeNodeIndex2adjIndexMap(node);
-			if (entry.getValue().size() > node.vn) {
+			if (vertexList.size() > node.vn) {
 				throw new RuntimeException("Cannot add/delete vertex yet");
 			}
 			
@@ -329,7 +331,7 @@ public class Storage
 				}
 				
 				int counter = 0;
-				for (Vertex vertex: entry.getValue()) {
+				for (Vertex vertex: vertexList) {
 					assert ((counter + node.minIndex) == vertex.getLabel());
 					writeDoubleArray(fc, vertex.getUV());
 					
@@ -370,7 +372,7 @@ public class Storage
 					afc.write(byteBuffer, 0, neighbours);
 					counter++;
 				}
-				node.vn = entry.getValue().size();
+				node.vn = vertexList.size();
 			} catch (IOException e) {
 				
 				e.printStackTrace();
@@ -473,37 +475,37 @@ public class Storage
 	 * Reindexes vertices in given oemm node. List of vertices must satisfy
 	 * for every n in <0,n-1> this condition: label(v_n) + 1 = label(v_n + 1).  
 	 * @param node node being reindexed
-	 * @param vertices vertices contained in the node
+	 * @param vertices list of vertices contained in the node
 	 * @param old2newIndex map of old label to new label
 	 * @param new2oldIndex map of new label to old label
 	 */
-	private static void fixVertexCollection(Node node, List<Vertex> vertices,
+	private static void reindexVerticesInNode(Node node, List<Vertex> vertices,
 			Map<Integer, VertexIndexHolder> old2newIndex,
 			Map<Integer, Integer> new2oldIndex)
 	{
+		assert node.vn == vertices.size();
 		Vertex[] values = vertices.toArray(new Vertex[vertices.size()]);
 		vertices.clear();
 		int upperBound = values.length - 1;
 		for (int i = 0; i <= upperBound; i++) {
 			//there is hole in labeling. We move vertex from the tail and reindex it
-			while (values[i].getLabel() > node.minIndex + vertices.size()) {
-				Vertex moved = values[upperBound--]; 
-				vertices.add(moved);
-				node.vn = vertices.size();
+			while (values[i].getLabel() > node.minIndex + vertices.size())
+			{
+				Vertex moved = values[upperBound]; 
+				upperBound--; 
 				Integer oldIndex = Integer.valueOf(moved.getLabel());
 				//new index is next empty index
-				int newIndex = vertices.size() + node.minIndex - 1;
+				int newIndex = vertices.size() + node.minIndex;
 				old2newIndex.put(oldIndex, new VertexIndexHolder(node, newIndex));
 				new2oldIndex.put(Integer.valueOf(newIndex), oldIndex);
 				moved.setLabel(newIndex);
+				vertices.add(moved);
 			}
 			if (i > upperBound) {
 				break;
 			}
 			vertices.add(values[i]);
-			node.vn = vertices.size();
 		}
-		
 	}
 	
 	/**
@@ -670,9 +672,10 @@ public class Storage
 			node2TrianglesMap.put(i, new ArrayList<Triangle>());
 
 		collectAllTriangles(oemm, mesh, node2TrianglesMap);
-		for(Entry<Integer, List<Triangle>> entry: node2TrianglesMap.entrySet()) {
-			
+		for(Entry<Integer, List<Triangle>> entry: node2TrianglesMap.entrySet())
+		{
 			Node node = oemm.leaves[entry.getKey().intValue()];
+			List<Triangle> triangleList = entry.getValue();
 			
 			DataOutputStream fc;
 			try {
@@ -684,7 +687,7 @@ public class Storage
 			}
 			try {
 				
-				for (Triangle triangle: entry.getValue()) {
+				for (Triangle triangle: triangleList) {
 					triangle.setGroupId(node.leafIndex);
 					for (int i = 0; i < 3; i++) {
 						Node foundNode = oemm.leaves[searchNode(oemm, triangle.vertex[i], positions)];
@@ -697,7 +700,7 @@ public class Storage
 					writeIntArray(fc, pointIndex);
 					fc.writeInt(triangle.getGroupId());
 				}
-				node.tn = entry.getValue().size();
+				node.tn = triangleList.size();
 			
 			} catch (IOException e) {
 				logger.error("Error in saving to " + getTrianglesFile(oemm, node), e);
