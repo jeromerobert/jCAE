@@ -428,7 +428,7 @@ public class Storage
 				
 				n = oemm.search(positions);
 				nIdx = Integer.valueOf(n.leafIndex);
-			} catch (RuntimeException e) {
+			} catch (IllegalArgumentException e) {
 				//ingore this - try move vertex more closer
 				n = createNewNode(oemm, positions);
 				nIdx = Integer.valueOf(n.leafIndex);

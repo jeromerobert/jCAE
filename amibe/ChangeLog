@@ -1,3 +1,9 @@
+Thu Sep 13 18:21:50 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/oemm/OEMM.java (search): Throw
+	IllegalArgumentException instead of RuntimeException when vertex does
+	not belong to any octree leaf.
+
 Wed Sep 12 00:08:54 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/MeshOEMMDecimate.java

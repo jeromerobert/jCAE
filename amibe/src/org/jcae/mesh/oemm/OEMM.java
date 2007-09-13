@@ -620,7 +620,7 @@ public class OEMM implements Serializable
 		if (root == null)
 		{
 			if (!create)
-				throw new RuntimeException("Element not found... Aborting ");
+				throw new RuntimeException("Root element not found... Aborting");
 			createRootNode(node);
 			if (size == gridSize)
 			{
@@ -644,7 +644,7 @@ public class OEMM implements Serializable
 			if (null == current.child[ind])
 			{
 				if (!create)
-					throw new RuntimeException("Element not found... Aborting "+current+" "+Integer.toHexString(s)+" "+ind);
+					throw new IllegalArgumentException("Element not found... Aborting "+current+" "+Integer.toHexString(s)+" "+ind);
 				if (level >= depth)
 					depth = level + 1;
 				if (depth > MAXLEVEL)
