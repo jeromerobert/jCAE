@@ -202,8 +202,11 @@ public class Storage
 			logger.info("saveNodes started");
 		}
 		removeNonReferencedVertices(mesh);
-		storeVertices(oemm, mesh, storedLeaves);
-		storeTriangles(oemm, mesh, storedLeaves);
+		// For each Vertex, find its enclosing octant leaf.
+		// Side-effect: storedLeaves may be modified if new leaves have to be added.
+		Map<Vertex, Integer> mapVertexToLeafindex = locateAllVertices(oemm, mesh, storedLeaves);
+		storeVertices(oemm, mesh, storedLeaves, mapVertexToLeafindex);
+		storeTriangles(oemm, mesh, storedLeaves, mapVertexToLeafindex);
 		
 		storeOEMMStructure(oemm);
 		if (logger.isInfoEnabled()) {
@@ -276,26 +279,60 @@ public class Storage
 	}
 	
 	/**
+	 * Locates mesh vertices.
+	 *
+	 * @param oemm
+	 * @param mesh
+	 * @param storedLeaves 
+	 * @param  
+	 */
+	private static Map<Vertex, Integer> locateAllVertices(OEMM oemm, Mesh mesh, Set<Integer> storedLeaves)
+	{
+		int positions[] = new int[3];
+		Map<Vertex, Integer> ret = new HashMap<Vertex, Integer>(mesh.getNodes().size());
+		for(AbstractVertex av: mesh.getNodes())
+		{
+			Vertex vertex = (Vertex) av;
+			oemm.double2int(vertex.getUV(), positions);
+			Node n = null;
+			Integer nIdx = null;
+			try {
+				n = oemm.search(positions);
+				nIdx = Integer.valueOf(n.leafIndex);
+			} catch (IllegalArgumentException e) {
+				//ingore this - try move vertex more closer
+				logger.warn("A vertex has moved and requires a new leaf to be created");
+				n = createNewNode(oemm, positions);
+				nIdx = Integer.valueOf(n.leafIndex);
+				
+				storedLeaves.add(nIdx);
+			}
+			ret.put(vertex, nIdx);
+		}
+		return ret;
+	}
+	
+	/**
 	 * Stores vertices of the mesh into oemm structure on the disk. 
 	 * @param oemm
 	 * @param mesh
 	 * @param storedLeaves  set of leaves to store
 	 */
-	private static void storeVertices(OEMM oemm, Mesh mesh, Set<Integer> storedLeaves)
+	private static void storeVertices(OEMM oemm, Mesh mesh, Set<Integer> storedLeaves, Map<Vertex, Integer> mapVertexToLeafindex)
 	{
-		Map<Integer, List<Vertex>> nodemap = new HashMap<Integer, List<Vertex>>();
+		Map<Integer, List<Vertex>> mapLeafindexToVertexList = new HashMap<Integer, List<Vertex>>();
 		byte[] byteBuffer = new byte[256];
-		Map<Integer, VertexIndexHolder> old2newIndex = new HashMap<Integer,VertexIndexHolder>();
+		Map<Integer, VertexIndexHolder> old2newIndex = new HashMap<Integer, VertexIndexHolder>();
 		Map<Integer, Integer> new2oldIndex = new HashMap<Integer,Integer>();
 		Set<Integer> nodes4Update = new HashSet<Integer>();
 		Set<Integer> addedNeighbour = new HashSet<Integer>();
 		Set<Integer> movedVertices = new HashSet<Integer>();
 		int[] positions = new int[3];
 		for (Integer i: storedLeaves)
-			nodemap.put(i, new ArrayList<Vertex>());
+			mapLeafindexToVertexList.put(i, new ArrayList<Vertex>());
 		
-		collectAllVertices(oemm, mesh, nodemap, movedVertices, storedLeaves);
-		for(Entry<Integer, List<Vertex>> entry: nodemap.entrySet())
+		collectAllVertices(oemm, mesh, mapVertexToLeafindex, mapLeafindexToVertexList, movedVertices, storedLeaves);
+		for(Entry<Integer, List<Vertex>> entry: mapLeafindexToVertexList.entrySet())
 		{
 			Node node = oemm.leaves[entry.getKey().intValue()];
 			List<Vertex> vertexList = entry.getValue();
@@ -351,8 +388,15 @@ public class Storage
 					addedNeighbour.clear();
 					for (Vertex neighbour: vertex.getNeighboursNodes())
 					{
-						int nodeNumber = searchNode(oemm, neighbour, positions);
-						Integer InodeNumber = Integer.valueOf(nodeNumber);
+						int nodeNumber;
+						Integer InodeNumber = mapVertexToLeafindex.get(neighbour);
+						if (InodeNumber != null)
+							nodeNumber = InodeNumber.intValue();
+						else
+						{
+							nodeNumber = searchNode(oemm, neighbour, positions);
+							InodeNumber = Integer.valueOf(nodeNumber);
+						}
 						if (nodeNumber != node.leafIndex && !addedNeighbour.contains(InodeNumber))
 						{
 							if (!nodeIndex2adjIndex.containsKey(InodeNumber))
@@ -410,38 +454,23 @@ public class Storage
 	 * of contained vertices.
 	 * @param oemm
 	 * @param mesh
-	 * @param nodemap
+	 * @param mapLeafindexToVertexList
 	 * @param storedLeaves 
 	 * @param  
 	 */
-	private static void collectAllVertices(OEMM oemm, Mesh mesh, Map<Integer, List<Vertex>> nodemap, Set<Integer> movedVerticesSet, Set<Integer> storedLeaves)
+	private static void collectAllVertices(OEMM oemm, Mesh mesh, Map<Vertex, Integer> mapVertexToLeafindex, Map<Integer, List<Vertex>> mapLeafindexToVertexList, Set<Integer> movedVertices, Set<Integer> storedLeaves)
 	{
-		int positions[] = new int[3];
 		for(AbstractVertex av: mesh.getNodes())
 		{
 			Vertex vertex = (Vertex) av;
-			
-			oemm.double2int(vertex.getUV(), positions);
-			Node n = null;
-			Integer nIdx = null;
-			try {
-				
-				n = oemm.search(positions);
-				nIdx = Integer.valueOf(n.leafIndex);
-			} catch (IllegalArgumentException e) {
-				//ingore this - try move vertex more closer
-				n = createNewNode(oemm, positions);
-				nIdx = Integer.valueOf(n.leafIndex);
-				
-				storedLeaves.add(nIdx);
-				nodemap.put(nIdx, new ArrayList<Vertex>());	
-			}
-			List<Vertex> vertices = null;
-			vertices = nodemap.get(nIdx);
-			int label = vertex.getLabel();
+			Integer nIdx = mapVertexToLeafindex.get(vertex);
+			assert nIdx != null : vertex;
+			List<Vertex> vertices = mapLeafindexToVertexList.get(nIdx);
 			if (vertices == null) {
-				throw new UnsupportedOperationException("Cannot put vertex into octree node: "+n.leafIndex+". Node is not loaded!");
+				throw new UnsupportedOperationException("Cannot put vertex into octree node: "+nIdx+". Node is not loaded!");
 			}
+			Node n = oemm.leaves[nIdx.intValue()];
+			int label = vertex.getLabel();
 			if ((label >= n.minIndex && label <= (n.minIndex + Math.abs((n.maxIndex - n.minIndex)))) && 
 						(label - n.minIndex + 1) > n.vn ) {
 				System.out.println("Vertex: " + label + " added!!!");
@@ -459,7 +488,7 @@ public class Storage
 				int newLabel = n.minIndex + n.vn;
 				n.vn++;
 				vertex.setLabel(newLabel);
-				movedVerticesSet.add(Integer.valueOf(newLabel));
+				movedVertices.add(Integer.valueOf(newLabel));
 			}
 			vertices.add(vertex);
 		}
@@ -491,7 +520,7 @@ public class Storage
 			Map<Integer, VertexIndexHolder> old2newIndex,
 			Map<Integer, Integer> new2oldIndex)
 	{
-		assert node.vn == vertices.size();
+		//assert node.vn == vertices.size();
 		Vertex[] values = vertices.toArray(new Vertex[vertices.size()]);
 		vertices.clear();
 		int upperBound = values.length - 1;
@@ -566,19 +595,21 @@ public class Storage
 	private static void updateNonReadNodes(OEMM oemm,
 			Set<Integer> nodes4Update, Map<Integer, VertexIndexHolder> old2newIndex)
 	{
-		int []leaf = new int[3];
-		int []localIndices = new int[3];
+		int[] leaf = new int[3];
+		int[] localIndices = new int[3];
 		
 		ByteBuffer tbb = ByteBuffer.allocate(TRIANGLE_SIZE - 4);
 		IntBuffer tib = tbb.asIntBuffer();
 		tbb.limit(TRIANGLE_SIZE - 4);
-		for (Integer nodeIndex: nodes4Update) {
+		for (Integer nodeIndex: nodes4Update)
+		{
 			OEMM.Node node = oemm.leaves[nodeIndex.intValue()];
 			FileChannel fc = null;
 			try {
 				fc = new RandomAccessFile(getTrianglesFile(oemm, node),"rw").getChannel();
 				
-				for (int i = 0; i < node.tn; i++) {
+				for (int i = 0; i < node.tn; i++)
+				{
 					boolean modified_triangle = false;
 					final int filePosition = i * TRIANGLE_SIZE;
 					fc.position(filePosition);
@@ -589,7 +620,8 @@ public class Storage
 					tib.get(leaf);
 					tib.get(localIndices);
 					
-					for (int ii = 0; ii < 3; ii++) {
+					for (int ii = 0; ii < 3; ii++)
+					{
 						OEMM.Node oldNode = oemm.leaves[leaf[ii]];
 						Integer globalIndexOfNode = Integer.valueOf(oldNode.minIndex + localIndices[ii]);
 						if (!old2newIndex.containsKey(globalIndexOfNode)) {
@@ -604,7 +636,8 @@ public class Storage
 						assert 0 <= localIndices[ii] && localIndices[ii] <= newIndex.containedNode.vn;
 						
 					}
-					if (modified_triangle) {
+					if (modified_triangle)
+					{
 						tib.rewind();
 						tib.put(leaf);
 						tib.put(localIndices);
@@ -670,17 +703,17 @@ public class Storage
 	 * @param mesh
 	 * @param storedLeaves 
 	 */
-	private static void storeTriangles(OEMM oemm, Mesh mesh, Set<Integer> storedLeaves)
+	private static void storeTriangles(OEMM oemm, Mesh mesh, Set<Integer> storedLeaves, Map<Vertex, Integer> mapVertexToLeafindex)
 	{
-		Map<Integer, List<Triangle>> node2TrianglesMap = new HashMap<Integer, List<Triangle>>();
+		Map<Integer, List<Triangle>> mapLeafindexToTriangleList = new HashMap<Integer, List<Triangle>>();
 		int[] leaf = new int[3];
 		int[] pointIndex = new int[3];
 		int[] positions = new int[3];
 		for (Integer i: storedLeaves)
-			node2TrianglesMap.put(i, new ArrayList<Triangle>());
+			mapLeafindexToTriangleList.put(i, new ArrayList<Triangle>());
 
-		collectAllTriangles(oemm, mesh, node2TrianglesMap);
-		for(Entry<Integer, List<Triangle>> entry: node2TrianglesMap.entrySet())
+		collectAllTriangles(oemm, mesh, mapVertexToLeafindex, mapLeafindexToTriangleList);
+		for(Entry<Integer, List<Triangle>> entry: mapLeafindexToTriangleList.entrySet())
 		{
 			Node node = oemm.leaves[entry.getKey().intValue()];
 			List<Triangle> triangleList = entry.getValue();
@@ -729,9 +762,9 @@ public class Storage
 	 * of contained vertices.
 	 * @param oemm
 	 * @param mesh
-	 * @param nodemap
+	 * @param mapLeafindexToTriangleList
 	 */
-	private static void collectAllTriangles(OEMM oemm, Mesh mesh, Map<Integer, List<Triangle>> node2TrianglesMap)
+	private static void collectAllTriangles(OEMM oemm, Mesh mesh, Map<Vertex, Integer> mapVertexToLeafindex, Map<Integer, List<Triangle>> mapLeafindexToTriangleList)
 	{
 		int positions[] = new int[3];
 		for(AbstractTriangle at: mesh.getTriangles())
@@ -742,8 +775,21 @@ public class Storage
 			assert !hasOuterEdge && !tr.isOuter() || hasOuterEdge && tr.isOuter();
 			if (tr.isOuter())
 				continue;
-			int nodeNumber = searchNode(oemm, tr, positions);
-			List<Triangle> triangles = node2TrianglesMap.get(Integer.valueOf(nodeNumber));
+			// By convention, if T=(V1,V2,V3) and each Vi is contained in node Ni,
+			// then T belongs to min(Ni)
+			int nodeNumber = Integer.MAX_VALUE;
+			for(Vertex vert: tr.vertex)
+			{
+				int n;
+				Integer InodeNumber = mapVertexToLeafindex.get(vert);
+				if (InodeNumber != null)
+					n = InodeNumber.intValue();
+				else
+					n = searchNode(oemm, vert, positions);
+				if (n < nodeNumber)
+					nodeNumber = n;
+			}
+			List<Triangle> triangles = mapLeafindexToTriangleList.get(Integer.valueOf(nodeNumber));
 			if (triangles == null) {
 				throw new UnsupportedOperationException("Cannot put triangle into octree node: " 
 						+nodeNumber + ". Node is not loaded!");
@@ -870,26 +916,6 @@ public class Storage
 		return n;
 	}
 	
-	// By convention, if T=(V1,V2,V3) and each Vi is contained in node Ni,
-	// then T belongs to min(Ni)
-	private static int searchNode(OEMM oemm, Triangle tr, int[] positions)
-	{
-		int smallerIndexOfNode = Integer.MAX_VALUE;
-		//FakeNonReadVertex fnrv = null;
-		for(Vertex vert: tr.vertex) {
-			int index = searchNode(oemm, vert, positions);
-			if (smallerIndexOfNode > index) {
-				smallerIndexOfNode = index;
-			}
-		}
-		/*
-		if (fnrv != null && fnrv.getOEMMIndex() == smallerIndexOfNode) {
-			throw new RuntimeException("Cannot move triangle into not loaded octree node: " + smallerIndexOfNode);
-		}
-		*/
-		return smallerIndexOfNode;
-	}
-
 	private static int searchNode(OEMM oemm, Vertex vert, int[] positions)
 	{
 		if (vert instanceof FakeNonReadVertex) {
