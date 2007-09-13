@@ -348,7 +348,8 @@ public class Storage
 								node.adjLeaves.add(nodeNumber);
 								nodeIndex2adjIndex.put(InodeNumber, index);
 							}
-							byteBuffer[neighbours++] = nodeIndex2adjIndex.get(InodeNumber).byteValue();
+							byteBuffer[neighbours] = nodeIndex2adjIndex.get(InodeNumber).byteValue();
+							neighbours++;
 							addedNeighbour.add(InodeNumber);
 						}
 					}
@@ -361,7 +362,8 @@ public class Storage
 						{
 							if (!addedNeighbour.contains(adjacent)) {
 								addedNeighbour.add(adjacent);
-								byteBuffer[neighbours++] = nodeIndex2adjIndex.get(adjacent).byteValue();
+								byteBuffer[neighbours] = nodeIndex2adjIndex.get(adjacent).byteValue();
+								neighbours++;
 							}
 						}
 						if (new2oldIndex.containsKey(Ilabel)) {
