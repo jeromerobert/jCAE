@@ -290,7 +290,6 @@ public class Storage
 		Set<Integer> nodes4Update = new HashSet<Integer>();
 		Set<Integer> addedNeighbour = new HashSet<Integer>();
 		Set<Integer> movedVertices = new HashSet<Integer>();
-		int neighbours = 0;
 		int[] positions = new int[3];
 		for (Integer i: storedLeaves)
 			nodemap.put(i, new ArrayList<Vertex>());
@@ -304,45 +303,60 @@ public class Storage
 			
 			reindexVerticesInNode(node, vertexList, old2newIndex, new2oldIndex);
 			
-			List<List<Integer>> adjacencyFileWithoutLoadedNodes = readAdjacencyFile(oemm, node, nodemap.keySet());
+			List<List<Integer>> adjacencyFileWithoutLoadedNodes = readAdjacencyFile(oemm, node, storedLeaves);
 			removeLoadedAdjacentNodes(node, storedLeaves);
 			Map<Integer, Byte> nodeIndex2adjIndex = makeNodeIndex2adjIndexMap(node);
 			if (vertexList.size() > node.vn) {
 				throw new RuntimeException("Cannot add/delete vertex yet");
 			}
 			
+			// Write vertex coordinates
 			DataOutputStream fc;
-			DataOutputStream afc = null;
 			try {
 				fc = new DataOutputStream( new FileOutputStream(getVerticesFile(oemm, node)));
-			} catch (FileNotFoundException e1) {
-				logger.error("I/O error when reading indexed file "+getVerticesFile(oemm, node));
-				e1.printStackTrace();
-				throw new RuntimeException(e1);
+			} catch (FileNotFoundException e) {
+				logger.error("I/O error when writing file "+getVerticesFile(oemm, node));
+				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 			try {
-				
+				for (Vertex vertex: vertexList)
+					writeDoubleArray(fc, vertex.getUV());
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			} finally {
 				try {
-					afc = new DataOutputStream( new FileOutputStream(getAdjacencyFile(oemm, node)));
-				} catch (FileNotFoundException e1) {
-					logger.error("I/O error when reading indexed file "+getAdjacencyFile(oemm, node));
-					e1.printStackTrace();
-					throw new RuntimeException(e1);
+					fc.close();
+				} catch (IOException ex) {
+					//ignore this
 				}
-				
+			}
+			
+			// Write adjacency
+			DataOutputStream afc = null;
+			try {
+				afc = new DataOutputStream( new FileOutputStream(getAdjacencyFile(oemm, node)));
+			} catch (FileNotFoundException e) {
+				logger.error("I/O error when writing file "+getAdjacencyFile(oemm, node));
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			}
+			try {
 				int counter = 0;
 				for (Vertex vertex: vertexList) {
 					assert ((counter + node.minIndex) == vertex.getLabel());
-					writeDoubleArray(fc, vertex.getUV());
 					
-					neighbours = 0;
+					int neighbours = 0;
 					addedNeighbour.clear();
-					for(Object neighbour: vertex.getNeighboursNodes()){
-						Vertex vert = (Vertex) neighbour;
-						int nodeNumber = searchNode(oemm, vert , positions);
+					for (Vertex neighbour: vertex.getNeighboursNodes())
+					{
+						int nodeNumber = searchNode(oemm, neighbour, positions);
 						Integer InodeNumber = Integer.valueOf(nodeNumber);
-						if (nodeNumber != node.leafIndex && !addedNeighbour.contains(InodeNumber)) {
-							if (!nodeIndex2adjIndex.containsKey(InodeNumber)) {
+						if (nodeNumber != node.leafIndex && !addedNeighbour.contains(InodeNumber))
+						{
+							if (!nodeIndex2adjIndex.containsKey(InodeNumber))
+							{
 								//throw new UnsupportedOperationException ("Add adjacent nodes not implemented yet");
 								Byte index = Byte.valueOf((byte) (node.adjLeaves.size() & 0xff));
 								node.adjLeaves.add(nodeNumber);
@@ -367,7 +381,7 @@ public class Storage
 							}
 						}
 						if (new2oldIndex.containsKey(Ilabel)) {
-							addRequiredNodes4Update(node, nodemap.keySet(), nodes4Update, byteBuffer, neighbours);
+							addRequiredNodes4Update(node, storedLeaves, nodes4Update, byteBuffer, neighbours);
 						}
 					}
 					afc.writeByte(neighbours);
@@ -381,17 +395,9 @@ public class Storage
 				throw new RuntimeException(e);
 			} finally {
 				try {
-					fc.close();
+					afc.close();
 				} catch (IOException ex) {
 					//ignore this
-				}
-				if (afc != null) {
-					try {
-						afc.close();
-					} catch (IOException ex) {
-						//ignore this
-					}
-					
 				}
 			}
 		}
