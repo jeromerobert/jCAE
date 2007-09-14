@@ -35,16 +35,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import org.apache.log4j.Logger;
 
 /**
  * Decimates all cells of an OEMM.
  */
 public class MeshOEMMDecimate
 {
+	private static Logger logger=Logger.getLogger(MeshOEMMDecimate.class);
 	private static final int SIZE_OF_BUFFER = 20000024;
 	private final byte[] buffer = new byte[SIZE_OF_BUFFER];
 	
-	public static void main(String args[])
+	public static void main(String[] args)
 		throws IOException
 	{
 		if (args.length < 2)
@@ -62,18 +64,21 @@ public class MeshOEMMDecimate
 		}
 		if (args.length >= 4)
 		{
+			logger.info("Copy OEMM directory from "+args[0]+" into "+args[3]);
 			dir = args[3];
 			File decDir = new File(dir);
 			if (decDir.exists()) {
 				deleteFiles(decDir);
 			}
-			new MeshOEMMDecimate().copyFiles(args[0], dir);
+			new MeshOEMMDecimate().copyFiles(new File(args[0]), decDir);
 		}
 		
+		logger.info("Read OEMM structure");
 		OEMM oemm = Storage.readOEMMStructure(dir);
 		// Count triangles in non-leaf nodes
 		CountProcedure c_proc = new CountProcedure();
 		oemm.walk(c_proc);
+		logger.info("Decimate all octree nodes");
 		MeshReader reader = new MeshReader(oemm);
 		DecimateProcedure d_proc = new DecimateProcedure(reader, scale, minimalNumberOfTriangles);
 		oemm.walk(d_proc);
@@ -91,21 +96,15 @@ public class MeshOEMMDecimate
 		}
 	}
 
-	private void copyFiles(String strPath, String dstPath)
+	private void copyFiles(File src, File dest)
 		throws IOException
 	{
-		File src = new File(strPath);
-		File dest = new File(dstPath);
-
 		if (src.isDirectory()) {
 			dest.mkdirs();
-			String list[] = src.list();
+			String[] list = src.list();
 
-			for (int i = 0; i < list.length; i++) {
-				String dest1 = dest.getAbsolutePath() + File.separator + list[i];
-				String src1 = src.getAbsolutePath() + File.separator + list[i];
-				copyFiles(src1, dest1);
-			}
+			for (String strFile: list)
+				copyFiles(new File(src, strFile), new File(dest, strFile));
 		} else {
 			FileInputStream fin = new FileInputStream(src);
 			FileOutputStream fout = new FileOutputStream(dest);
