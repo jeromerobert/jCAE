@@ -586,66 +586,80 @@ public class Storage
 		int[] leaf = new int[3];
 		int[] localIndices = new int[3];
 		
-		ByteBuffer tbb = ByteBuffer.allocate(TRIANGLE_SIZE);
-		IntBuffer tib = tbb.asIntBuffer();
+		int maxTn = 0;
+		for (Integer nodeIndex: nodes4Update)
+		{
+			int tn = oemm.leaves[nodeIndex.intValue()].tn;
+			if (tn > maxTn)
+				maxTn = tn;
+		}
+		ByteBuffer bb = ByteBuffer.allocate(maxTn * TRIANGLE_SIZE);
 		for (Integer nodeIndex: nodes4Update)
 		{
 			OEMM.Node node = oemm.leaves[nodeIndex.intValue()];
 			FileChannel fc = null;
 			try {
 				fc = new RandomAccessFile(getTrianglesFile(oemm, node),"rw").getChannel();
-				
-				for (int i = 0; i < node.tn; i++)
-				{
-					boolean modified_triangle = false;
-					tbb.rewind();
-					fc.read(tbb);
-					tib.rewind();
-					
-					tib.get(leaf);
-					tib.get(localIndices);
-					
-					for (int ii = 0; ii < 3; ii++)
-					{
-						OEMM.Node oldNode = oemm.leaves[leaf[ii]];
-						Integer globalIndexOfNode = Integer.valueOf(oldNode.minIndex + localIndices[ii]);
-						if (!old2newIndex.containsKey(globalIndexOfNode)) {
-							assert 0 <= localIndices[ii] && localIndices[ii] <= oldNode.vn;
-							continue;
-						}
-						modified_triangle = true;
-						
-						VertexIndexHolder newIndex = old2newIndex.get(globalIndexOfNode);
-						leaf[ii] = newIndex.getContainedNode().leafIndex;
-						localIndices[ii] = newIndex.getLocalIndex();
-						assert 0 <= localIndices[ii] && localIndices[ii] <= newIndex.containedNode.vn;
-						
-					}
-					if (modified_triangle)
-					{
-						tib.rewind();
-						tib.put(leaf);
-						tib.put(localIndices);
-						tbb.rewind();
-						fc.position(i * TRIANGLE_SIZE);
-						fc.write(tbb);
-					}
-				}
-				
 			} catch (FileNotFoundException e) {
 				logger.error("Couldn't find file " + getTrianglesFile(oemm, node), e);
 				throw new RuntimeException(e);
+			}
+			
+			bb.clear();
+			IntBuffer bbI = bb.asIntBuffer();
+			try {
+				fc.read(bb);
 			} catch (IOException e) {
 				logger.error("I/O error in operation with file " + getTrianglesFile(oemm, node), e);
 				throw new RuntimeException(e);
 			}
-			try {
+			bb.flip();
+
+			boolean fileModified = false;
+			for (int i = 0; i < node.tn; i++)
+			{
+				boolean modified_triangle = false;
+				bbI.mark();
+				bbI.get(leaf);
+				bbI.get(localIndices);
+				int group = bbI.get();
 				
-			} finally {
+				for (int ii = 0; ii < 3; ii++)
+				{
+					OEMM.Node oldNode = oemm.leaves[leaf[ii]];
+					Integer globalIndexOfNode = Integer.valueOf(oldNode.minIndex + localIndices[ii]);
+					if (!old2newIndex.containsKey(globalIndexOfNode)) {
+						assert 0 <= localIndices[ii] && localIndices[ii] <= oldNode.vn;
+						continue;
+					}
+					modified_triangle = true;
+					
+					VertexIndexHolder newIndex = old2newIndex.get(globalIndexOfNode);
+					leaf[ii] = newIndex.getContainedNode().leafIndex;
+					localIndices[ii] = newIndex.getLocalIndex();
+					assert 0 <= localIndices[ii] && localIndices[ii] <= newIndex.containedNode.vn;
+				}
+				if (modified_triangle)
+				{
+					fileModified = true;
+					bbI.reset();
+					bbI.put(leaf);
+					bbI.put(localIndices);
+					bbI.put(group);
+				}
+			}
+			if (fileModified)
+			{
 				try {
+					fc.position(0L);
+					fc.write(bb);
 					fc.close();
+				} catch (FileNotFoundException e) {
+					logger.error("Couldn't find file " + getTrianglesFile(oemm, node), e);
+					throw new RuntimeException(e);
 				} catch (IOException e) {
-					//Ignore this
+					logger.error("I/O error in operation with file " + getTrianglesFile(oemm, node), e);
+					throw new RuntimeException(e);
 				}
 			}
 		}
