@@ -19,13 +19,14 @@
 
 package org.jcae.mesh.oemm;
 
-import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.ObjectInputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -165,7 +166,7 @@ public class Storage
 		}
 		ObjectOutputStream oos = null;
 		try {
-			oos = new ObjectOutputStream(new FileOutputStream(new File(oemm.getFileName())));
+			oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(new File(oemm.getFileName()))));
 			oos.writeObject(oemm);
 			oos.writeObject(new Integer(oemm.leaves.length));
 			for (OEMM.Node node : oemm.leaves) {
@@ -350,7 +351,7 @@ public class Storage
 			// Write vertex coordinates
 			DataOutputStream fc;
 			try {
-				fc = new DataOutputStream( new FileOutputStream(getVerticesFile(oemm, node)));
+				fc = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(getVerticesFile(oemm, node))));
 			} catch (FileNotFoundException e) {
 				logger.error("I/O error when writing file "+getVerticesFile(oemm, node));
 				e.printStackTrace();
@@ -373,7 +374,7 @@ public class Storage
 			// Write adjacency
 			DataOutputStream afc = null;
 			try {
-				afc = new DataOutputStream( new FileOutputStream(getAdjacencyFile(oemm, node)));
+				afc = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(getAdjacencyFile(oemm, node))));
 			} catch (FileNotFoundException e) {
 				logger.error("I/O error when writing file "+getAdjacencyFile(oemm, node));
 				e.printStackTrace();
@@ -719,7 +720,7 @@ public class Storage
 			
 			DataOutputStream fc;
 			try {
-				fc = new DataOutputStream( new FileOutputStream(getTrianglesFile(oemm, node)));
+				fc = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(getTrianglesFile(oemm, node))));
 			} catch (FileNotFoundException e1) {
 				logger.error("I/O error when reading indexed file "+getTrianglesFile(oemm, node));
 				e1.printStackTrace();
