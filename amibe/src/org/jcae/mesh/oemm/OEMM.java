@@ -131,7 +131,7 @@ public class OEMM implements Serializable
 	 */
 	public static class Node implements Serializable
 	{
-		private static final long serialVersionUID = 4559047657359540101L;
+		private static final long serialVersionUID = 4476583190604438556L;
 
 		/**
 		 * Integer coordinates of lower-left corner.

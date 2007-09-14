@@ -556,6 +556,7 @@ public class RawStorage
 			assert version == 1;
 			int nrleaves = bufIn.readInt();
 			int nrbytes = bufIn.readInt();
+			int nrT = 0;
 			byte [] name = new byte[nrbytes+1];
 			bufIn.read(name, 0, nrbytes);
 			ret = new OEMM(new String(name));
@@ -577,7 +578,10 @@ public class RawStorage
 				n.leafIndex = i;
 				n.isLeaf = true;
 				ret.leaves[i] = n;
+				nrT += n.tn;
 			}
+			// This value will be used by IndexInternalVerticesProcedure
+			ret.root.tn = nrT;
 			bufIn.close();
 		}
 		catch (FileNotFoundException ex)
@@ -675,7 +679,7 @@ public class RawStorage
 		public void init(OEMM oemm)
 		{
 			super.init(oemm);
-			room = ((1 << 31) - 3*oemm.root.tn) / oemm.getNumberOfLeaves();
+			room = (Integer.MAX_VALUE - 3*oemm.root.tn) / oemm.getNumberOfLeaves();
 		}
 		@Override
 		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
@@ -838,7 +842,7 @@ public class RawStorage
 					invMap.put(ind, cnt);
 					cnt++;
 				}
-				// tCount will be the nymber of triangles
+				// tCount will be the number of triangles
 				// written onto disk, but we still need the
 				// old value.
 				int tn = current.tn;
