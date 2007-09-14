@@ -23,8 +23,6 @@ package org.jcae.viewer3d.bg;
 import java.awt.Component;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Logger;
 import javax.media.j3d.*;
@@ -35,6 +33,7 @@ import org.jcae.viewer3d.SelectionListener;
 import org.jcae.viewer3d.ViewableAdaptor;
 import com.sun.j3d.utils.picking.PickIntersection;
 import gnu.trove.TIntObjectHashMap;
+import gnu.trove.TIntHashSet;
 
 /**
  * @author Jerome Robert
@@ -43,7 +42,7 @@ import gnu.trove.TIntObjectHashMap;
 public class ViewableBG extends ViewableAdaptor
 {
 	private BranchGroup branchGroup;
-	private Set leaves = new HashSet<Integer>();
+	private TIntHashSet leaves = new TIntHashSet();
 	private TIntObjectHashMap leavesGeometry = new TIntObjectHashMap();
 	private Shape3D selectedLeaves = new Shape3D();
 	private String name;
@@ -104,7 +103,7 @@ public class ViewableBG extends ViewableAdaptor
 		return new JPanel();
 	}
 
-	public Set<Integer> getResultSet()
+	public TIntHashSet getResultSet()
 	{
 		return leaves;
 	}
