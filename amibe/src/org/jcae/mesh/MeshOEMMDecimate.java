@@ -19,13 +19,15 @@
 
 package org.jcae.mesh;
 
-import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.Storage;
 import org.jcae.mesh.oemm.MeshReader;
 import org.jcae.mesh.oemm.TraversalProcedure;
 import org.jcae.mesh.oemm.OEMM.Node;
+import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.algos3d.DecimateHalfEdge;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -140,12 +142,18 @@ public class MeshOEMMDecimate
 		private final int minTN;
 		private final Set<Integer> leaves = new HashSet<Integer>();
 		private final Map<String, String> options = new HashMap<String, String>();
+		private final MeshTraitsBuilder mtb = new MeshTraitsBuilder();
 		
 		public DecimateProcedure(MeshReader mr, int s, int minimalNumberOfTriangles)
 		{
 			reader = mr;
 			scale = s;
 			minTN = minimalNumberOfTriangles;
+			TriangleTraitsBuilder ttb = new TriangleTraitsBuilder();
+			ttb.addHalfEdge();
+			mtb.add(ttb);
+			mtb.addTriangleSet();
+			mtb.addNodeSet();
 		}
 
 		@Override
@@ -193,7 +201,7 @@ public class MeshOEMMDecimate
 		}
 		private void process(OEMM oemm)
 		{
-			Mesh amesh = reader.buildMesh(leaves);
+			Mesh amesh = reader.buildMesh(mtb, leaves);
 			int nrT = DecimateHalfEdge.countInnerTriangles(amesh);
 			options.clear();
 			options.put("maxtriangles", ""+(nrT / scale));
