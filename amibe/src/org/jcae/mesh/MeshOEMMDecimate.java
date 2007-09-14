@@ -25,6 +25,7 @@ import org.jcae.mesh.oemm.Storage;
 import org.jcae.mesh.oemm.MeshReader;
 import org.jcae.mesh.oemm.TraversalProcedure;
 import org.jcae.mesh.oemm.OEMM.Node;
+import org.jcae.mesh.amibe.algos3d.DecimateHalfEdge;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -118,6 +119,7 @@ public class MeshOEMMDecimate
 
 	private static class CountProcedure extends TraversalProcedure
 	{
+		@Override
 		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
 			if (visit != POSTORDER)
@@ -146,6 +148,7 @@ public class MeshOEMMDecimate
 			minTN = minimalNumberOfTriangles;
 		}
 
+		@Override
 		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
 			if (current.tn <= minTN)
@@ -154,7 +157,7 @@ public class MeshOEMMDecimate
 			{
 				leaves.clear();
 				leaves.add(Integer.valueOf(current.leafIndex));
-				process(oemm, leaves);
+				process(oemm);
 				return OK;
 			}
 			else if (visit != POSTORDER )
@@ -170,28 +173,31 @@ public class MeshOEMMDecimate
 				return OK;
 			
 			leaves.clear();
-			getChildLeaves(current, leaves);
-			process(oemm, leaves);
+			getChildLeaves(current);
+			process(oemm);
 			return OK;
 		}
-		private void getChildLeaves(Node current, Set<Integer> leaves)
+		private void getChildLeaves(Node current)
 		{
 			for (OEMM.Node node: current.child)
 			{
-				if (node != null && node.isLeaf) {
-					leaves.add(node.leafIndex);
-				}	else if (node != null){
-					getChildLeaves(node, leaves);
+				if (node == null)
+					continue;
+				if (node.isLeaf) {
+					leaves.add(Integer.valueOf(node.leafIndex));
+				} else {
+					getChildLeaves(node);
 				}
 			}
 			
 		}
-		private void process(OEMM oemm, Set<Integer> leaves)
+		private void process(OEMM oemm)
 		{
 			Mesh amesh = reader.buildMesh(leaves);
+			int nrT = DecimateHalfEdge.countInnerTriangles(amesh);
 			options.clear();
-			options.put("maxtriangles", ""+(amesh.getTriangles().size() / scale));
-			new org.jcae.mesh.amibe.algos3d.DecimateHalfEdge(amesh, options).compute();
+			options.put("maxtriangles", ""+(nrT / scale));
+			new DecimateHalfEdge(amesh, options).compute();
 			Storage.saveNodes(oemm, amesh, leaves);
 		}
 	}
