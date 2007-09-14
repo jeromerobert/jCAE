@@ -567,17 +567,17 @@ public class Storage
 	 * It add leafIndex of nodes that are not loaded but it is necessary update 
 	 * index of vertices in triangles.
 	 * @param node
-	 * @param visitedNodes
+	 * @param storedLeaves
 	 * @param nodes4Update
 	 * @param byteBuffer
 	 * @param neighbours
 	 */
-	private static void addRequiredNodes4Update(OEMM.Node node, Set<Integer> visitedNodes,
+	private static void addRequiredNodes4Update(OEMM.Node node, Set<Integer> storedLeaves,
 			Set<Integer> nodes4Update, byte[] byteBuffer, int neighbours)
 	{
 		for (int i = 0; i < neighbours; i++) {
 			Integer nodeNumber = Integer.valueOf(node.adjLeaves.get(byteBuffer[i]));
-			if (!visitedNodes.contains(nodeNumber)) {
+			if (!storedLeaves.contains(nodeNumber)) {
 				nodes4Update.add(nodeNumber);
 			}
 		}
@@ -817,11 +817,11 @@ public class Storage
 	 * that are loaded. 
 	 * @param oemm  OEMM instance
 	 * @param node  OEMM node
-	 * @param visitedNodes  set of node indices being loaded
+	 * @param storedLeaves  set of node indices being loaded
 	 * @return a <code>List<List<Integer>></code> instance; for each vertex, returns indices of adjacent
 	 *      and non-loaded nodes
 	 */
-	protected static List<List<Integer>> readAdjacencyFile(OEMM oemm, Node node, Set<Integer> visitedNodes)
+	protected static List<List<Integer>> readAdjacencyFile(OEMM oemm, Node node, Set<Integer> storedLeaves)
 	{
 		List<List<Integer>> result = new ArrayList<List<Integer>>();
 		List<Integer> nullList = new ArrayList<Integer>();
@@ -846,7 +846,7 @@ public class Storage
 					{
 						byte adjacentLeave = dis.readByte();
 						Integer leafIndex = Integer.valueOf(node.adjLeaves.get(adjacentLeave));
-						if (visitedNodes == null || !visitedNodes.contains(leafIndex))
+						if (storedLeaves == null || !storedLeaves.contains(leafIndex))
 						{
 							if (row == null)
 								row = new ArrayList<Integer>(count-i);
