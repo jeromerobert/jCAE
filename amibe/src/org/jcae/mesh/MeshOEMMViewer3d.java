@@ -36,8 +36,7 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import gnu.trove.TIntHashSet;
 
 import javax.media.j3d.BoundingSphere;
 import javax.media.j3d.BranchGroup;
@@ -162,7 +161,7 @@ public class MeshOEMMViewer3d
 					}
 					else if (k == 's')
 					{
-						Set<Integer> leaves = octree.getResultSet();
+						TIntHashSet leaves = octree.getResultSet();
 						Mesh amesh = mr.buildMesh(leaves);
 						Storage.saveNodes(oemm, amesh, leaves);
 					}
@@ -173,7 +172,7 @@ public class MeshOEMMViewer3d
 					}
 					else if (k == 'c')
 					{
-						Set<Integer> leaves = octree.getResultSet();
+						TIntHashSet leaves = octree.getResultSet();
 						if (leaves.size() == 1)
 						{
 							int idx = leaves.iterator().next();

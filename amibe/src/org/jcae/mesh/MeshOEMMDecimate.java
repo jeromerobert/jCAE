@@ -31,8 +31,7 @@ import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.HashSet;
-import java.util.Set;
+import gnu.trove.TIntHashSet;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -140,7 +139,7 @@ public class MeshOEMMDecimate
 		private final MeshReader reader;
 		private final int scale;
 		private final int minTN;
-		private final Set<Integer> leaves = new HashSet<Integer>();
+		private final TIntHashSet leaves = new TIntHashSet();
 		private final Map<String, String> options = new HashMap<String, String>();
 		private final MeshTraitsBuilder mtb = new MeshTraitsBuilder();
 		
@@ -164,7 +163,7 @@ public class MeshOEMMDecimate
 			if (visit == LEAF)
 			{
 				leaves.clear();
-				leaves.add(Integer.valueOf(current.leafIndex));
+				leaves.add(current.leafIndex);
 				process(oemm);
 				return OK;
 			}
@@ -192,7 +191,7 @@ public class MeshOEMMDecimate
 				if (node == null)
 					continue;
 				if (node.isLeaf) {
-					leaves.add(Integer.valueOf(node.leafIndex));
+					leaves.add(node.leafIndex);
 				} else {
 					getChildLeaves(node);
 				}

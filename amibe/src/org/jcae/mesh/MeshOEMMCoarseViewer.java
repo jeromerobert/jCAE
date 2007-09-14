@@ -25,8 +25,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import gnu.trove.TIntHashSet;
+import gnu.trove.TIntIterator;
 
 import javax.media.j3d.BoundingBox;
 import javax.media.j3d.BoundingSphere;
@@ -158,18 +158,19 @@ public class MeshOEMMCoarseViewer
 					double[] tempD2 = new double[3];
 					double[] tempn1 = new double[3];
 					double[] tempn2 = new double[3];
-					Set<Integer> leaves = new HashSet<Integer>();
-					for (Integer I: octree.getResultSet())
+					TIntHashSet leaves = new TIntHashSet();
+					for (TIntIterator it = octree.getResultSet().iterator(); it.hasNext(); )
 					{
+						int i = it.next();
 						leaves.clear();
-						leaves.add(I);
+						leaves.add(i);
 						Mesh mesh = fineReader.buildMesh(leaves);
 						Mesh coarseMesh = coarseReader.buildMesh(leaves);
 						Triangle tf = (Triangle) mesh.getTriangles().iterator().next();
 						Matrix3D.computeNormal3D(tf.vertex[0].getUV(), tf.vertex[1].getUV(), tf.vertex[2].getUV(), tempD1, tempD2, tempn1);
 						Triangle tc = (Triangle) coarseMesh.getTriangles().iterator().next();
 						Matrix3D.computeNormal3D(tc.vertex[0].getUV(), tc.vertex[1].getUV(), tc.vertex[2].getUV(), tempD1, tempD2, tempn2);
-						System.out.println("Coarse normal for first triangle of leaf: " + I.intValue() + " [" 
+						System.out.println("Coarse normal for first triangle of leaf: " + i + " [" 
 								+ tempn1[0] + ", "+ tempn1[1] + ", "+ tempn1[2] + "] and fine " +
 								" [" 
 								+ tempn2[0] + ", "+ tempn2[1] + ", "+ tempn2[2] + "]" + " and "
@@ -178,8 +179,9 @@ public class MeshOEMMCoarseViewer
 				}
 				else if (k == 'c')
 				{
-					for (int i: octree.getResultSet())
+					for (TIntIterator it = octree.getResultSet().iterator(); it.hasNext(); )
 					{
+						int i = it.next();
 						Point3d vector = oemmBehavior.getVoxel(i);
 
 						if (logger.isInfoEnabled()) {
