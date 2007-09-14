@@ -204,7 +204,7 @@ public class Storage
 		removeNonReferencedVertices(mesh);
 		// For each Vertex, find its enclosing octant leaf.
 		// Side-effect: storedLeaves may be modified if new leaves have to be added.
-		Map<Vertex, Integer> mapVertexToLeafindex = locateAllVertices(oemm, mesh, storedLeaves);
+		Map<Vertex, Integer> mapVertexToLeafindex = getMapVertexToLeafindex(oemm, mesh, storedLeaves);
 		storeVertices(oemm, mesh, storedLeaves, mapVertexToLeafindex);
 		storeTriangles(oemm, mesh, storedLeaves, mapVertexToLeafindex);
 		
@@ -286,7 +286,7 @@ public class Storage
 	 * @param storedLeaves 
 	 * @param  
 	 */
-	private static Map<Vertex, Integer> locateAllVertices(OEMM oemm, Mesh mesh, Set<Integer> storedLeaves)
+	private static Map<Vertex, Integer> getMapVertexToLeafindex(OEMM oemm, Mesh mesh, Set<Integer> storedLeaves)
 	{
 		int positions[] = new int[3];
 		Map<Vertex, Integer> ret = new HashMap<Vertex, Integer>(mesh.getNodes().size());
