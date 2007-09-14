@@ -60,15 +60,12 @@ import java.io.Serializable;
  */
 public class Quadric3DError implements Serializable
 {
-	public Metric3D A = new Metric3D();
-	public double [] b = new double[3];
-	public double c;
-	public double area;
-
-	// Temporary arrays
-	public static double [] aTemp1 = new double[3];
-	public static double [] aTemp2 = new double[3];
-	public static Metric3D Mtemp = new Metric3D();
+	private final double [] A = new double[6];
+	private final double [] b = new double[3];
+	private double c;
+	private double area;
+	private double detA;
+	private boolean cachedDet = false;
 
 	/**
 	 * Optimal placement strategy, select the best vertex.
@@ -88,12 +85,6 @@ public class Quadric3DError implements Serializable
 	 */
 	public static final int POS_OPTIMAL = 3;
 	
-	public Quadric3DError()
-	{
-		// By default, A is null
-		A.reset();
-	}
-
 	// Add 2 quadrics
 	public void computeQuadric3DError(Quadric3DError q1, Quadric3DError q2)
 	{
@@ -101,20 +92,25 @@ public class Quadric3DError implements Serializable
 		assert q2.area > 0.0 : q2;
 		double l1 = q1.area / (q1.area + q2.area);
 		double l2 = q2.area / (q1.area + q2.area);
-		A.saxpby0(l1, q1.A, l2, q2.A);
+
+		for (int i = 0; i < 6; i++)
+			A[i] = l1 * q1.A[i] + l2 * q2.A[i];
+
 		for (int i = 0; i < 3; i++)
 			b[i] = l1 * q1.b[i] + l2 * q2.b[i];
+
 		c = l1 * q1.c + l2 * q2.c;
 		area = q1.area + q2.area;
 	}
 
-	// Warning: use aTemp1 temporary variable
 	public double value(double [] vect)
 	{
 		double ret = c;
 		ret += 2.0 * Matrix3D.prodSca(b, vect);
-		A.apply(vect, aTemp1);
-		ret += Matrix3D.prodSca(aTemp1, vect);
+		ret +=
+			(A[0] * vect[0] + A[1] * vect[1] + A[2] * vect[2]) * vect[0] +
+			(A[1] * vect[0] + A[3] * vect[1] + A[4] * vect[2]) * vect[1] +
+			(A[2] * vect[0] + A[4] * vect[1] + A[5] * vect[2]) * vect[2];
 		return ret;
 	}
 
@@ -123,11 +119,26 @@ public class Quadric3DError implements Serializable
 		for (int k = 0; k < 3; k++)
 		{
 			b[k] += d * normal[k];
-			for (int l = 0; l < 3; l++)
-				A.data[k+3*l] += normal[k]*normal[l];
+			A[k] += normal[0] * normal[k];
 		}
+
+		A[3] += normal[1] * normal[1];
+		A[4] += normal[1] * normal[2];
+		A[5] += normal[2] * normal[2];
+
 		c += d*d;
 		area += a;
+		cachedDet = false;
+	}
+
+	public double detA()
+	{
+		if (!cachedDet)
+		{
+			detA = A[0] * (A[3] * A[5] - A[4] * A[4]) + A[1] * (A[4] * A[2] - A[1] * A[5]) + A[2] * (A[1] * A[4] - A[3] * A[2]);
+			cachedDet = true;
+		}
+		return detA;
 	}
 
 	public void optimalPlacement(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2, int placement, Vertex ret)
@@ -149,36 +160,42 @@ public class Quadric3DError implements Serializable
 			// Keep a reference if there is one
 			if (placement == POS_OPTIMAL)
 			{
-				Mtemp.copy(A);
-				if (Mtemp.inv())
+				if (detA() > 1.e-20)
 				{
-					Mtemp.apply(b, aTemp2);
+					double cfxx = A[3] * A[5] - A[4] * A[4];
+					double cfxy = A[2] * A[4] - A[1] * A[5];
+					double cfxz = A[1] * A[4] - A[2] * A[3];
+					double cfyy = A[0] * A[5] - A[2] * A[2];
+					double cfyz = A[2] * A[1] - A[0] * A[4];
+					double cfzz = A[0] * A[3] - A[1] * A[1];
+					double dx = (cfxx * b[0] + cfxy * b[1] + cfxz * b[2]) / detA;
+					double dy = (cfxy * b[0] + cfyy * b[1] + cfyz * b[2]) / detA;
+					double dz = (cfxz * b[0] + cfyz * b[1] + cfzz * b[2]) / detA;
 					ret.copy(bestCandidateV1V2Ref(v1, v2, q1, q2));
-					ret.moveTo(-aTemp2[0], -aTemp2[1], -aTemp2[2]);
+					ret.moveTo(-dx, -dy, -dz);
 				}
 				else
+				{
 					ret.copy(bestCandidateV1V2(v1, v2, q1, q2));
+				}
 				return;
 			}
-			if (A.det() > 1.e-20)
+			// POS_EDGE
+			if (detA() > 1.e-20)
 			{
 				// Find M = v1 + s(v2-v1) which minimizes
 				//   q(M) = s^2 (v2-v1)A(v2-v1) + s(v1A(v2-v1)+(v2-v1)Av1+2b(v2-v1))+cte
 				//   q'(M) = 2 s (v2-v1)A(v2-v1) + 2(v1A(v2-v1)+b(v2-v1))
 				double [] p1 = v1.getUV();
 				double [] p2 = v2.getUV();
-				for (int i = 0; i < 3; i++)
-					aTemp2[i] = p2[i] - p1[i];
+				double dx = p2[0] - p1[0];
+				double dy = p2[1] - p1[1];
+				double dz = p2[2] - p1[2];
 				double den = 0.0;
-				double num = Matrix3D.prodSca(b, aTemp2);
-				for (int i = 0; i < 3; i++)
-				{
-					for (int j = 0; j < 3; j++)
-					{
-						den += A.data[i+3*j] * aTemp2[i] * aTemp2[j];
-						num += A.data[i+3*j] * aTemp2[i] * p1[j];
-					}
-				}
+
+				double num = b[0] * dx + b[1] * dy + b[2] * dz;
+				den += A[0] * dx * dx + 2.0 * A[1] * dx * dy + 2.0 * A[2] * dx * dz + A[3] * dy * dy + 2.0 * A[4] * dy * dz + A[5] * dz * dz;
+				num += A[0] * dx * p1[0] + A[1] * (dx * p1[1] + dy * p1[0]) + A[2] * (dx * p1[2] + dz * p1[0]) + A[3] * dy * p1[1] + A[4] * (dy * p1[2] + dz * p1[1]) + A[5] * dz * p1[2];
 				if (den > 1.0e-4 * Math.abs(num))
 				{
 					double s = - num / den;
@@ -187,7 +204,7 @@ public class Quadric3DError implements Serializable
 					else if (s > 1.0 - 1.0e-4)
 						s = 1.0;
 					ret.copy(bestCandidateV1V2Ref(v1, v2, q1, q2));
-					ret.moveTo(p1[0]+s*aTemp2[0], p1[1]+s*aTemp2[1], p1[2]+s*aTemp2[2]);
+					ret.moveTo(p1[0]+s*dx, p1[1]+s*dy, p1[2]+s*dz);
 					return;
 				}
 			}
@@ -195,7 +212,6 @@ public class Quadric3DError implements Serializable
 		}
 	}
 
-	// Warning: use aTemp1 temporary variable
 	private static Vertex bestCandidateV1V2(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2)
 	{
 		if (q1.value(v1.getUV()) + q2.value(v1.getUV()) < q1.value(v2.getUV()) + q2.value(v2.getUV()))
@@ -203,7 +219,6 @@ public class Quadric3DError implements Serializable
 		return v2;
 	}
 
-	// Warning: use aTemp1 temporary variable
 	private static Vertex bestCandidateV1V2Ref(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2)
 	{
 		if (v1.getRef() == 0 && v2.getRef() == 0)
@@ -219,7 +234,7 @@ public class Quadric3DError implements Serializable
 	@Override
 	public String toString()
 	{
-		return "A: "+A+"\n"+
+		return "A: data|0][]  "+A[0]+" "+A[1]+" "+A[2]+"\ndata|1][]  "+A[1]+" "+A[3]+" "+A[4]+"\ndata|2][]  "+A[2]+" "+A[4]+" "+A[5]+"\n"+
 		       " b: "+b[0]+" "+b[1]+" "+b[2]+"\n"+
 		       " c: "+c;
 	}

@@ -7,6 +7,8 @@ Fri Sep 14 09:34:47 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	to forbid use of wrongly computed minIndex and maxIndex values.
 	* src/org/jcae/mesh/oemm/Storage.java: Use buffered streams to speed
 	up OEMM writing.
+	* src/org/jcae/mesh/amibe/metrics/Quadric3DError.java: Let A member
+	be a double[] array instead of Metric3D to improve performance.
 
 Thu Sep 13 18:21:50 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
