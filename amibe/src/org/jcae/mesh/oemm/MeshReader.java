@@ -22,6 +22,7 @@ package org.jcae.mesh.oemm;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
@@ -57,6 +58,19 @@ public class MeshReader extends Storage
 	// Map between octant index and a list of vertices from adjacent triangles so that all triangles are readable
 	private Map<Integer, List<FakeNonReadVertex>> mapNodeToNonReadVertexList = null;
 
+	/**
+	 * Buffer size.  Vertices and triangles are read through buffers to improve
+	 * efficiency, buffer size must be a multiple of {@link #TRIANGLE_SIZE} and
+	 * {@link #VERTEX_SIZE}.
+	 */
+	private static final int bufferSize = 24 * VERTEX_SIZE * TRIANGLE_SIZE;
+	// bufferSize = 16128
+	
+	/**
+	 * Buffer to improve I/O efficiency.
+	 */
+	private static ByteBuffer bb = ByteBuffer.allocate(bufferSize);
+	
 	/**
 	 * Constructor.
 	 *

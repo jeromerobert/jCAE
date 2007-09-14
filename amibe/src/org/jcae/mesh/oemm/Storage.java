@@ -99,19 +99,6 @@ public class Storage
 	protected static final int VERTEX_SIZE = 24;
 
 	/**
-	 * Buffer size.  Vertices and triangles are read through buffers to improve
-	 * efficiency, buffer size must be a multiple of {@link #TRIANGLE_SIZE} and
-	 * {@link #VERTEX_SIZE}.
-	 */
-	protected static final int bufferSize = 24 * VERTEX_SIZE * TRIANGLE_SIZE;
-	// bufferSize = 16128
-	
-	/**
-	 * Buffer to improve I/O efficiency.
-	 */
-	protected static ByteBuffer bb = ByteBuffer.allocate(bufferSize);
-	
-	/**
 	 * Creates an {@link OEMM} instance from its disk representation.
 	 *
 	 * @param dir   directory containing disk representation
