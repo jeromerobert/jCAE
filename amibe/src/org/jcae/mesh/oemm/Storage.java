@@ -23,6 +23,7 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
+import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
@@ -828,8 +829,13 @@ public class Storage
 		List<Integer> nullList = new ArrayList<Integer>();
 		DataInputStream dis = null;
 		try {
-			dis= new DataInputStream(new FileInputStream(getAdjacencyFile(oemm, node)));
-			
+			dis= new DataInputStream(new BufferedInputStream(new FileInputStream(getAdjacencyFile(oemm, node))));
+		} catch (FileNotFoundException e) {
+			logger.error("Problem with opening " + getAdjacencyFile(oemm, node).getPath() + ". It may be new node.", e);
+			return result;
+		}
+		
+		try {
 			while (true)
 			{
 				int count;
@@ -859,20 +865,14 @@ public class Storage
 					result.add(row);
 				}
 			}
-		} catch (FileNotFoundException e) {
-			logger.error("Problem with opening " + getAdjacencyFile(oemm, node).getPath() + ". It may be new node.", e);
-			//throw new RuntimeException(e);
 		} catch (IOException e) {
 			logger.error("Problem with reading " + getAdjacencyFile(oemm, node).getPath(), e);
 			throw new RuntimeException(e);
 		} finally {
-			if (dis != null)
-			{
-				try {
-					dis.close();
-				} catch (IOException e) {
-					///ignore this
-				}
+			try {
+				dis.close();
+			} catch (IOException e) {
+				///ignore this
 			}
 		}
 		
