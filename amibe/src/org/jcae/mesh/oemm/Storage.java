@@ -471,11 +471,10 @@ public class Storage
 			}
 			Node n = oemm.leaves[nIdx.intValue()];
 			int label = vertex.getLabel();
-			if ((label >= n.minIndex && label <= (n.minIndex + Math.abs((n.maxIndex - n.minIndex)))) && 
-						(label - n.minIndex + 1) > n.vn ) {
+			if (label >= n.minIndex && label <= n.maxIndex && (label - n.minIndex + 1) > n.vn ) {
 				System.out.println("Vertex: " + label + " added!!!");
 			}
-			if (label < n.minIndex || label > (n.minIndex + Math.abs((n.maxIndex - n.minIndex)))) {
+			if (label < n.minIndex || label > n.maxIndex) {
 				//throw new RuntimeException("Cannot move vertex between leafs");
 				//experimental implementation
 				if (n.getMaxIndex() - n.minIndex < n.vn) {
