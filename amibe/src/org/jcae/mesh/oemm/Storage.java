@@ -331,7 +331,7 @@ public class Storage
 		for (Integer i: storedLeaves)
 			mapLeafindexToVertexList.put(i, new ArrayList<Vertex>());
 		
-		collectAllVertices(oemm, mesh, mapVertexToLeafindex, mapLeafindexToVertexList, movedVertices, storedLeaves);
+		collectAllVertices(oemm, mesh, mapVertexToLeafindex, mapLeafindexToVertexList, movedVertices);
 		for(Entry<Integer, List<Vertex>> entry: mapLeafindexToVertexList.entrySet())
 		{
 			Node node = oemm.leaves[entry.getKey().intValue()];
@@ -458,7 +458,7 @@ public class Storage
 	 * @param storedLeaves 
 	 * @param  
 	 */
-	private static void collectAllVertices(OEMM oemm, Mesh mesh, Map<Vertex, Integer> mapVertexToLeafindex, Map<Integer, List<Vertex>> mapLeafindexToVertexList, Set<Integer> movedVertices, Set<Integer> storedLeaves)
+	private static void collectAllVertices(OEMM oemm, Mesh mesh, Map<Vertex, Integer> mapVertexToLeafindex, Map<Integer, List<Vertex>> mapLeafindexToVertexList, Set<Integer> movedVertices)
 	{
 		for(AbstractVertex av: mesh.getNodes())
 		{
