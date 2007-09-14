@@ -586,9 +586,8 @@ public class Storage
 		int[] leaf = new int[3];
 		int[] localIndices = new int[3];
 		
-		ByteBuffer tbb = ByteBuffer.allocate(TRIANGLE_SIZE - 4);
+		ByteBuffer tbb = ByteBuffer.allocate(TRIANGLE_SIZE);
 		IntBuffer tib = tbb.asIntBuffer();
-		tbb.limit(TRIANGLE_SIZE - 4);
 		for (Integer nodeIndex: nodes4Update)
 		{
 			OEMM.Node node = oemm.leaves[nodeIndex.intValue()];
@@ -599,8 +598,6 @@ public class Storage
 				for (int i = 0; i < node.tn; i++)
 				{
 					boolean modified_triangle = false;
-					final int filePosition = i * TRIANGLE_SIZE;
-					fc.position(filePosition);
 					tbb.rewind();
 					fc.read(tbb);
 					tib.rewind();
@@ -630,7 +627,7 @@ public class Storage
 						tib.put(leaf);
 						tib.put(localIndices);
 						tbb.rewind();
-						fc.position(filePosition);
+						fc.position(i * TRIANGLE_SIZE);
 						fc.write(tbb);
 					}
 				}
