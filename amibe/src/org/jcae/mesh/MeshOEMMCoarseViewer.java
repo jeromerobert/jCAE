@@ -96,7 +96,8 @@ public class MeshOEMMCoarseViewer
 		final ViewableBG fps = new ViewableBG(fpsBG);
 
 		bgView.addBranchGroup(bg);
-		bgView.add(fps);
+		if (showFPS)
+			bgView.add(fps);
 
 		bgView.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent event)

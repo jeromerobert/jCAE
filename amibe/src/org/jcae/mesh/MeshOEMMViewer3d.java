@@ -96,7 +96,8 @@ public class MeshOEMMViewer3d
 		try
 		{
 			bgView.add(octree);
-			bgView.add(fps);
+			if (showFPS)
+				bgView.add(fps);
 
 			bgView.addKeyListener(new KeyAdapter() {
 				public void keyPressed(KeyEvent event)
