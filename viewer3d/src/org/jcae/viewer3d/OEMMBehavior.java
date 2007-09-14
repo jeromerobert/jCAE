@@ -32,8 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.WeakHashMap;
-import java.util.Map.Entry;
+import gnu.trove.TIntHashSet;
 
 
 import javax.media.j3d.*;
@@ -488,8 +487,8 @@ public class OEMMBehavior extends Behavior
 				logger.debug("finemesh node:" + arg0 + " is not loaded and I will load it.");
 			}
 			
-			Set<Integer> set = new HashSet<Integer>();
-			set.add(arg0);
+			TIntHashSet set = new TIntHashSet();
+			set.add(arg0.intValue());
 			Mesh mesh = fineReader.buildMesh(set);
 			vh = new ViewHolder(arg0, OEMMViewer.meshOEMM(mesh));
 			vh.nrTriangles = mesh.getTriangles().size();
