@@ -189,9 +189,7 @@ public class Storage
 	 */
 	public static void saveNodes(OEMM oemm, Mesh mesh, TIntHashSet storedLeaves)
 	{
-		if (logger.isInfoEnabled()) {
-			logger.info("saveNodes started");
-		}
+		logger.debug("saveNodes started");
 		removeNonReferencedVertices(mesh);
 		// For each Vertex, find its enclosing octant leaf.
 		// Side-effect: storedLeaves may be modified if new leaves have to be added.
@@ -200,9 +198,7 @@ public class Storage
 		storeTriangles(oemm, mesh, storedLeaves, mapVertexToLeafindex);
 		
 		storeOEMMStructure(oemm);
-		if (logger.isInfoEnabled()) {
-			logger.info("saveNodes ended");
-		}
+		logger.debug("saveNodes ended");
 	}
 	
 	/**
@@ -658,17 +654,17 @@ public class Storage
 				try {
 					fc.position(0L);
 					fc.write(bb);
-					fc.close();
-				} catch (FileNotFoundException e) {
-					logger.error("Couldn't find file " + getTrianglesFile(oemm, node), e);
-					throw new RuntimeException(e);
 				} catch (IOException e) {
 					logger.error("I/O error in operation with file " + getTrianglesFile(oemm, node), e);
 					throw new RuntimeException(e);
 				}
 			}
+			try {
+				fc.close();
+			} catch (IOException e) {
+				//ignore this
+			}
 		}
-		
 	}
 	
 	/**
