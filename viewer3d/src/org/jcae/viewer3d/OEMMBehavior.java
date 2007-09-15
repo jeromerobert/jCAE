@@ -121,7 +121,6 @@ public class OEMMBehavior extends Behavior
 			this.voxelIndex = voxelIndex;
 		}
 
-		@Override
 		public int compareTo(VoxelSortHelper o)
 		{
 			return Float.compare(this.distance, o.distance);
