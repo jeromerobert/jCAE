@@ -453,9 +453,8 @@ public class MeshReader extends Storage
 	 */
 	private static void sortFakeNonReadVertexList(List<FakeNonReadVertex> list)
 	{
-		Collections.sort(list, new Comparator<FakeNonReadVertex>() {
-
-			@Override
+		Collections.sort(list, new Comparator<FakeNonReadVertex>()
+		{
 			public int compare(FakeNonReadVertex o1, FakeNonReadVertex o2) {
 				return (o1.getLabel()<o2.getLabel() ? -1 : (o1.getLabel()==o2.getLabel() ? 0 : 1));
 			}

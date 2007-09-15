@@ -491,7 +491,6 @@ public class Storage
 	private static void sortVertexList(List<Vertex> list)
 	{
 		Collections.sort(list, new Comparator<Vertex>() {
-			@Override
 			public int compare(Vertex o1, Vertex o2) {
 				return (o1.getLabel()<o2.getLabel() ? -1 : (o1.getLabel()==o2.getLabel() ? 0 : 1));
 			}
@@ -913,8 +912,9 @@ public class Storage
 		StringBuilder sb = new StringBuilder();
 		getFile(oemm,n, sb);
 		n.file = sb.toString();
-		oemm.leaves = Arrays.copyOf(oemm.leaves, oemm.leaves.length + 1);
-		oemm.leaves[n.leafIndex] = n;
+		Node [] newLeaves = new Node[oemm.leaves.length + 1];
+		System.arraycopy(oemm.leaves, 0, newLeaves, 0, oemm.leaves.length + 1);
+		newLeaves[n.leafIndex] = n;
 		return n;
 	}
 	
