@@ -126,7 +126,7 @@ public abstract class QSortedTree implements Serializable
 		*/
 		public Node rotateL()
 		{
-			//logger.debug("Single left rotation");
+			//logger.debug("Single left rotation around "+this);
 			final Node right = child[1];
 			child[1] = right.child[0];
 			right.child[0] = this;
@@ -146,7 +146,7 @@ public abstract class QSortedTree implements Serializable
 		*/
 		public Node rotateR()
 		{
-			//logger.debug("Single right rotation");
+			//logger.debug("Single right rotation around "+this);
 			final Node left = child[0];
 			child[0] = left.child[1];
 			left.child[1] = this;
@@ -168,7 +168,7 @@ public abstract class QSortedTree implements Serializable
 		*/
 		public Node rotateRL()
 		{
-			//logger.debug("Right+left rotation");
+			//logger.debug("Right+left rotation around "+this);
 			final Node right = child[1];          // C
 			final Node newRoot = right.child[0];  // B
 			// Right rotation
@@ -199,7 +199,7 @@ public abstract class QSortedTree implements Serializable
 		*/
 		public Node rotateLR()
 		{
-			//logger.debug("Left+right rotation");
+			//logger.debug("Left+right rotation around "+this);
 			final Node left = child[0];         // A
 			final Node newRoot = left.child[1]; // B
 	

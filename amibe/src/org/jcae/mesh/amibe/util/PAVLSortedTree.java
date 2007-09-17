@@ -89,7 +89,6 @@ public class PAVLSortedTree extends QSortedTree
 		*/
 		public QSortedTree.Node rotateR()
 		{
-			//logger.debug("Single right rotation");
 			Node left = (Node) super.rotateR();
 			if (left.balanceFactor != 0)
 			{
