@@ -101,6 +101,7 @@ public class Quadric3DError implements Serializable
 
 		c = l1 * q1.c + l2 * q2.c;
 		area = q1.area + q2.area;
+		cachedDet = false;
 	}
 
 	public double value(double [] vect)
