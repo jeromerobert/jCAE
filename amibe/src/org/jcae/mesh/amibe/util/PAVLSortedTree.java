@@ -421,6 +421,18 @@ public class PAVLSortedTree extends QSortedTree
 				System.exit(1);
 			}
 		}
+		int n = 1000000;
+		try
+		{
+			tree.unitTest1(n);
+			tree.unitTestIterator(n);
+		}
+		catch (Exception ex)
+		{
+			System.out.println("Failed with length "+n);
+			ex.printStackTrace();
+			System.exit(1);
+		}
 		System.out.println("ok");
 	}
 }

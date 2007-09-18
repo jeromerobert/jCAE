@@ -536,6 +536,31 @@ public abstract class QSortedTree implements Serializable
 		return ret;
 	}
 	
+	protected void unitTestIterator(int n)
+	{
+		Integer [] iii = unitTestInit(n);
+		int i = 0;
+		for (Iterator<Node> it = iterator(); it.hasNext(); i++)
+		{
+			Node node = it.next();
+			if (!node.getData().equals(Integer.valueOf(i)))
+				throw new RuntimeException("Wrong iterator: "+i+" != "+node.getData());
+		}
+		if (i != n)
+			throw new RuntimeException("Wrong iterator: "+i+" < "+n);
+		i = n-1;
+		for (Iterator<Node> it = backwardIterator(); it.hasNext(); i--)
+		{
+			Node node = it.next();
+			if (!node.getData().equals(Integer.valueOf(i)))
+				throw new RuntimeException("Wrong iterator: "+i+" "+node.getData());
+		}
+		if (i != -1)
+			throw new RuntimeException("Wrong iterator: "+i+" > -1");
+		for (i = 0; i < iii.length; i++)
+			remove(iii[i]);
+	}
+	
 	protected void unitTest1(int n)
 	{
 		// Remove in ascending order
