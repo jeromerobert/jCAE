@@ -165,6 +165,15 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	public void preProcessAllHalfEdges()
 	{
 		final int roughNrNodes = mesh.getTriangles().size()/2;
+		// Edges are stored in binary tree via HalfEdge.notOriented()
+		// to store only one orientation.  But HalfEdge.notOriented()
+		// depends on hashcodes, so edge orientation changes after
+		// compiling and results may slightly change too.
+		// We set vertex labels and select an orientation in
+		// canProcessEdge() and processEdge() which does not depend
+		// on hashcodes.
+		// TODO: Check if HalfEdge.notOriented() is still needed.
+		int label = 1;
 		quadricMap = new HashMap<Vertex, Quadric3DError>(roughNrNodes);
 		for (AbstractTriangle af: mesh.getTriangles())
 		{
@@ -174,7 +183,14 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			{
 				final Vertex n = af.vertex[i];
 				if (!quadricMap.containsKey(n))
+				{
 					quadricMap.put(n, new Quadric3DError());
+					if (n.getLabel() == 0)
+					{
+						n.setLabel(label);
+						label++;
+					}
+				}
 			}
 		}
 		// Compute quadrics
@@ -290,9 +306,21 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		return ret;
 	}
 
-	@Override
-	public boolean canProcessEdge(final HalfEdge current)
+	/**
+	 * Ensure that edge orientation is fixed and does not depend on hashcodes.  This method
+	 * must be used when entering canProcessEdge() and processEdge().
+	 */
+	private static HalfEdge uniqueOrientation(HalfEdge current)
 	{
+		if (current.origin().getLabel() > current.destination().getLabel() && current.getAdj() != null)
+			return (HalfEdge) current.sym();
+		return current;
+	}
+
+	@Override
+	public boolean canProcessEdge(HalfEdge current)
+	{
+		current = uniqueOrientation(current);
 		final Vertex v1 = current.origin();
 		final Vertex v2 = current.destination();
 		assert v1 != v2 : current;
@@ -322,6 +350,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	@Override
 	public HalfEdge processEdge(HalfEdge current)
 	{
+		current = uniqueOrientation(current);
 		if (logger.isDebugEnabled())
 			logger.debug("Contract edge: "+current+" into "+v3);
 		final Triangle t1 = current.getTri();
