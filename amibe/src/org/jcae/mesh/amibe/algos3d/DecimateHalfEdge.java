@@ -107,7 +107,7 @@ import org.apache.log4j.Logger;
 public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 {
 	private static Logger logger=Logger.getLogger(DecimateHalfEdge.class);
-	private int placement = Quadric3DError.POS_EDGE;
+	private int placement = Quadric3DError.POS_OPTIMAL;
 	private HashMap<Vertex, Quadric3DError> quadricMap = null;
 	private Vertex v3;
 	private Quadric3DError q3 = new Quadric3DError();

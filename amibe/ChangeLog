@@ -3,6 +3,8 @@ Tue Sep 18 15:49:52 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java: Edge
 	orientation must not depend on hashcodes so that results are
 	reproducible.
+	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java: By default,
+	use Quadric3DError.POS_OPTIMAL placement.
 
 Fri Sep 14 09:34:47 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
