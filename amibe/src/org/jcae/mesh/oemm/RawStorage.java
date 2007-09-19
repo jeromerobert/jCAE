@@ -1010,7 +1010,8 @@ public class RawStorage
 			}
 			return OK;
 		}
-		public void finish()
+		@Override
+		public void finish(OEMM oemm)
 		{
 			logger.debug("Total number of leaves loaded: "+nr_ld_leaves);
 		}
