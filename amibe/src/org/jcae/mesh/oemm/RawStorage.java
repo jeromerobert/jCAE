@@ -38,6 +38,7 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.lang.ref.SoftReference;
 import gnu.trove.TIntIterator;
 import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntArrayList;
@@ -893,7 +894,7 @@ public class RawStorage
 		private FileChannel fc;
 		private int [] ijk = new int[3];
 		private PAVLTreeIntArrayDup [] vertices;
-		private boolean [] needed;
+		private SoftReference [] sr;
 		private int nr_ld_leaves = 0;
 		public IndexExternalVerticesProcedure(FileInputStream in)
 		{
@@ -903,7 +904,7 @@ public class RawStorage
 		public void init(OEMM oemm)
 		{
 			vertices = new PAVLTreeIntArrayDup[oemm.getNumberOfLeaves()];
-			needed = new boolean[vertices.length];
+			sr = new SoftReference[vertices.length];
 		}
 		@Override
 		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
@@ -912,36 +913,27 @@ public class RawStorage
 				return OK;
 			if (logger.isDebugEnabled())
 				logger.debug("Indexing external vertices of node "+(current.leafIndex+1)+"/"+oemm.getNumberOfLeaves());
-			int rc = OK;
-			try
+			return processIndexExternalVerticesProcedure(oemm, current);
+		}
+
+		private final void loadVerticesFromCache(OEMM oemm, int i)
+		{
+			assert vertices[i] == null;
+			if (sr[i] != null)
+				vertices[i] = (PAVLTreeIntArrayDup) sr[i].get();
+			if (vertices[i] == null)
 			{
-				rc = processIndexExternalVerticesProcedure(oemm, current);
+				vertices[i] = loadVerticesInAVLTreeDup(oemm.getDirectory(), oemm.leaves[i]);
+				sr[i] = new SoftReference(vertices[i]); 
+				nr_ld_leaves++;
 			}
-			catch (OutOfMemoryError ex)
-			{
-				for (int i = 0; i < needed.length; i++)
-				{
-					needed[i] = false;
-					vertices[i] = null;
-				}
-				rc = processIndexExternalVerticesProcedure(oemm, current);
-			}
-			return rc;
 		}
 
 		private final int processIndexExternalVerticesProcedure(OEMM oemm, OEMM.Node current)
 		{
-			needed[current.leafIndex] = true;
+			loadVerticesFromCache(oemm, current.leafIndex);
 			for (int i = 0; i < current.adjLeaves.size(); i++)
-				needed[current.adjLeaves.get(i)] = true;
-			for (int i = 0; i < vertices.length; i++)
-			{
-				if (needed[i] && vertices[i] == null)
-				{
-					nr_ld_leaves++;
-					vertices[i] = loadVerticesInAVLTreeDup(oemm.getDirectory(), oemm.leaves[i]);
-				}
-			}
+				loadVerticesFromCache(oemm, current.adjLeaves.get(i));
 			
 			try
 			{
@@ -1008,6 +1000,10 @@ public class RawStorage
 				ex.printStackTrace();
 				throw new RuntimeException(ex);
 			}
+			// Clear strong references
+			vertices[current.leafIndex] = null;
+			for (int i = 0; i < current.adjLeaves.size(); i++)
+				vertices[current.adjLeaves.get(i)] = null;
 			return OK;
 		}
 		@Override

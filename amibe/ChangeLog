@@ -7,6 +7,8 @@ Tue Sep 18 15:49:52 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	use Quadric3DError.POS_OPTIMAL placement.
 	* src/org/jcae/mesh/amibe/metrics/Quadric3DError.java: Let placement
 	member be an enum instead of an int.
+	* src/org/jcae/mesh/oemm/RawStorage.java (IndexExternalVerticesProcedure):
+	Use java.lang.ref.softReference for memory cache.
 
 Fri Sep 14 09:34:47 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
