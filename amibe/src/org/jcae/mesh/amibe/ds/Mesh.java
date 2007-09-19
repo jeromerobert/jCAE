@@ -27,8 +27,9 @@ import java.util.Collection;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Map;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.FileNotFoundException;
@@ -132,6 +133,7 @@ public class Mesh extends AbstractMesh implements Serializable
 			setWritable(false);
 		}
 
+		@Override
 		public String toString()
 		{
 			return "outer";
@@ -219,7 +221,7 @@ public class Mesh extends AbstractMesh implements Serializable
 			}
 			else
 			{
-				ArrayList adj = (ArrayList) e.getAdj();
+				LinkedHashMap<Triangle, Integer> adj = (LinkedHashMap<Triangle, Integer>) e.getAdj();
 				adj.clear();
 				e.setAdj(null);
 			}
@@ -357,9 +359,11 @@ public class Mesh extends AbstractMesh implements Serializable
 			for (int i = 0; i < 3; i++)
 			{
 				ot = ot.next();
-				if (!(ot.getAdj() instanceof ArrayList))
+				if (!(ot.getAdj() instanceof LinkedHashMap))
 					continue;
-				ArrayList list = (ArrayList) ot.getAdj();
+				// Create a virtual symmetric triangle, and put shared list 
+				// of adjacent triangles into this virtual triangle.
+				LinkedHashMap<Triangle, Integer> list = (LinkedHashMap<Triangle, Integer>) ot.getAdj();
 				Triangle adj = (Triangle) factory.createTriangle(outerVertex, ot.destination(), ot.origin());
 				newTri.add(adj);
 				adj.setOuter();
@@ -370,7 +374,7 @@ public class Mesh extends AbstractMesh implements Serializable
 				ot.setAttributes(AbstractHalfEdge.NONMANIFOLD);
 				sym.setAttributes(AbstractHalfEdge.NONMANIFOLD);
 				sym = sym.next();
-				// By convention, put ArrayList on next edge
+				// By convention, put LinkedHashMap on next edge
 				sym.setAdj(list);
 			}
 		}
@@ -433,11 +437,9 @@ public class Mesh extends AbstractMesh implements Serializable
 					}
 					sym = ot.sym(sym);
 					sym = sym.next();
-					ArrayList adj = (ArrayList) sym.getAdj();
-					for (Iterator it2 = adj.iterator(); it2.hasNext(); )
+					LinkedHashMap<Triangle, Integer> adj = (LinkedHashMap<Triangle, Integer>) sym.getAdj();
+					for (Triangle t2: adj.keySet())
 					{
-						Triangle t2 = (Triangle) it2.next();
-						it2.next();
 						for (int j = 0; j < 2; j++)
 						{
 							LinkedHashSet<Triangle> link = (LinkedHashSet<Triangle>) v[j].getLink();
@@ -533,7 +535,7 @@ public class Mesh extends AbstractMesh implements Serializable
 			// List of triangles incident to v2.
 			ArrayList<AbstractTriangle> neighTriV2List = tVertList.get(v2);
 			boolean manifold = true;
-			ArrayList adj = null;
+			LinkedHashMap<Triangle, Integer> adj = null;
 			for (AbstractTriangle at2: neighTriV2List)
 			{
 				Triangle t2 = (Triangle) at2;
@@ -565,15 +567,16 @@ public class Mesh extends AbstractMesh implements Serializable
 				// later in buildAdjacency.
 				// TODO: set final adjacency relations here.
 				//
-				// Collect all adjacent triangles into an ArrayList.
+				// We need to store adjacent triangles and local number
+				// of symmetric edge.  This can be achieved by an ArrayList,
+				// but we use a LinkedHashMap instead for type safety.
 				if (adj == null)
-					adj = new ArrayList();
+					adj = new LinkedHashMap<Triangle, Integer>();
 				if (ot.getAdj() == null)
 				{
-					// All adjacent edges share the same ArrayList,
+					// All adjacent edges share the same LinkedHashMap,
 					// thus put ot in it.
-					adj.add(t);
-					adj.add(int3[ot.getLocalNumber()]);
+					adj.put(t, int3[ot.getLocalNumber()]);
 					ot.setAdj(adj);
 				}
 				else if (ot.getAdj() instanceof Triangle)
@@ -581,15 +584,12 @@ public class Mesh extends AbstractMesh implements Serializable
 					sym = ot.sym(sym);
 					assert sym.getAdj() == t;
 					assert sym.getTri().getAdjLocalNumber(sym.getLocalNumber()) == ot.getLocalNumber();
-					adj.add(t);
-					adj.add(int3[ot.getLocalNumber()]);
-					adj.add(sym.getTri());
-					adj.add(int3[sym.getLocalNumber()]);
+					adj.put(t, int3[ot.getLocalNumber()]);
+					adj.put(sym.getTri(), int3[sym.getLocalNumber()]);
 					ot.setAdj(adj);
 					sym.setAdj(adj);
 				}
-				adj.add(t2);
-				adj.add(int3[ot2.getLocalNumber()]);
+				adj.put(t2, int3[ot2.getLocalNumber()]);
 				ot2.setAdj(adj);
 				if (logger.isDebugEnabled())
 					logger.debug("Non-manifold: "+v+" "+v2);
@@ -705,7 +705,7 @@ public class Mesh extends AbstractMesh implements Serializable
 				nodeset.add(t.vertex[2]);
 			}
 			int count = 0;
-			TObjectIntHashMap labels = new TObjectIntHashMap(nodeset.size());
+			TObjectIntHashMap<Vertex> labels = new TObjectIntHashMap<Vertex>(nodeset.size());
 			for(Vertex node: nodeset)
 			{
 				count++;
@@ -773,7 +773,7 @@ public class Mesh extends AbstractMesh implements Serializable
 				nodeset.add(t.vertex[2]);
 			}
 			int count = 0;
-			TObjectIntHashMap labels = new TObjectIntHashMap(nodeset.size());
+			TObjectIntHashMap<Vertex> labels = new TObjectIntHashMap<Vertex>(nodeset.size());
 			out.println("Vertices"+cr+nodeset.size());
 			for(Vertex node: nodeset)
 			{
@@ -944,11 +944,11 @@ public class Mesh extends AbstractMesh implements Serializable
 			{
 				// Check that all edges share the same adjacency
 				// list.
-				ArrayList adj = (ArrayList) ot.getAdj();
-				for (Iterator it2 = adj.iterator(); it2.hasNext(); )
+				LinkedHashMap<Triangle, Integer> adj = (LinkedHashMap<Triangle, Integer>) ot.getAdj();
+				for (Map.Entry<Triangle, Integer> entry: adj.entrySet())
 				{
-					Triangle t2 = (Triangle) it2.next();
-					int i2 = ((Integer) it2.next()).intValue();
+					Triangle t2 = entry.getKey();
+					int i2 = entry.getValue().intValue();
 					sym.bind(t2, i2);
 					sym = (VirtualHalfEdge) sym.sym();
 					sym = (VirtualHalfEdge) sym.next();
@@ -1017,11 +1017,11 @@ public class Mesh extends AbstractMesh implements Serializable
 			{
 				// Check that all edges share the same adjacency
 				// list.
-				ArrayList adj = (ArrayList) e.getAdj();
-				for (Iterator it2 = adj.iterator(); it2.hasNext(); )
+				LinkedHashMap<Triangle, Integer> adj = (LinkedHashMap<Triangle, Integer>) e.getAdj();
+				for (Map.Entry<Triangle, Integer> entry: adj.entrySet())
 				{
-					Triangle t2 = (Triangle) it2.next();
-					int i2 = ((Integer) it2.next()).intValue();
+					Triangle t2 = entry.getKey();
+					int i2 = entry.getValue().intValue();
 					HalfEdge f = (HalfEdge) t2.getAbstractHalfEdge();
 					for (; i2 > 0; i2--)
 						f = (HalfEdge) f.next();
