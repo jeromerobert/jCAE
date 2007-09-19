@@ -23,7 +23,6 @@ import org.jcae.mesh.amibe.traits.HalfEdgeTraitsBuilder;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import java.util.Collection;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.io.Serializable;
 import org.apache.log4j.Logger;
 
@@ -672,7 +671,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		//        following test triggers an error:
 		//    * mesh Scie_shell.brep with deflexion=0.2 aboslute
 		//    * decimate with length=6
-		Collection link = origin().getNeighboursNodes();
+		Collection<Vertex> link = origin().getNeighboursNodes();
 		link.retainAll(destination().getNeighboursNodes());
 		return link.size() < 3;
 	}
@@ -856,9 +855,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		assert checkVertices = true;
 		if (checkVertices)
 		{
-			for (Iterator it = m.getTriangles().iterator(); it.hasNext(); )
+			for (AbstractTriangle at: m.getTriangles())
 			{
-				Triangle t = (Triangle) it.next();
+				Triangle t = (Triangle) at;
 				assert t.vertex[0] != o && t.vertex[1] != o && t.vertex[2] != o : "Vertex "+o+" found in "+t;
 				assert t.vertex[0] != d && t.vertex[1] != d && t.vertex[2] != d : "Vertex "+d+" found in "+t;
 			}
@@ -992,11 +991,10 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			}
 			else
 			{
-				ArrayList list = (ArrayList) sym;
+				ArrayList<HalfEdge> list = (ArrayList<HalfEdge>) sym;
 				r.append("\nSym: [");
-				for (Iterator it = list.iterator(); it.hasNext(); )
+				for (HalfEdge e: list)
 				{
-					HalfEdge e = (HalfEdge) it.next();
 					r.append(e.tri.hashCode()+"["+e.localNumber+"]");
 				}
 				r.append("]");
@@ -1177,7 +1175,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		HalfEdge e = HalfEdge.find(v[0], v[4]);
 		e.HEswap();
 		assert m.isValid();
-		java.util.HashMap opts = new java.util.HashMap();
+		java.util.HashMap<String, String> opts = new java.util.HashMap<String, String>();
 		opts.put("size", "0.1");
 		new org.jcae.mesh.amibe.algos3d.DecimateHalfEdge(m, opts).compute();
 	}

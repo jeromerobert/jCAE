@@ -1317,14 +1317,14 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		Vertex o = origin();
 		Vertex d = destination();
 		Stack todo = new Stack();
-		HashSet seen = new HashSet();
+		HashSet<Triangle> seen = new HashSet<Triangle>();
 		todo.push(tri);
 		todo.push(int3[localNumber]);
 		swapVertices(seen, todo);
 		assert o == destination() : o+" "+d+" "+this;
 	}
 	
-	private static void swapVertices(HashSet seen, Stack todo)
+	private static void swapVertices(HashSet<Triangle> seen, Stack todo)
 	{
 		VirtualHalfEdge ot = new VirtualHalfEdge();
 		VirtualHalfEdge sym = new VirtualHalfEdge();
