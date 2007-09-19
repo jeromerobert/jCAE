@@ -5,6 +5,8 @@ Tue Sep 18 15:49:52 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	reproducible.
 	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java: By default,
 	use Quadric3DError.POS_OPTIMAL placement.
+	* src/org/jcae/mesh/amibe/metrics/Quadric3DError.java: Let placement
+	member be an enum instead of an int.
 
 Fri Sep 14 09:34:47 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
