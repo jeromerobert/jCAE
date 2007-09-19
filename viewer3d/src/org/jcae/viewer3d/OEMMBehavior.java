@@ -185,9 +185,9 @@ public class OEMMBehavior extends Behavior
 			Integer II = Integer.valueOf(i);
 			Mesh mesh = coarseReader.getMesh(i);
 			ViewHolder vh = new ViewHolder(i, mesh);
-			coarseOemmNodeId2BranchGroup.put(II, vh);
 			vh.setViewElem(OEMMViewer.meshOEMM(mesh));
-			addBranchGroup(vh, true);
+			coarseOemmNodeId2BranchGroup.put(II, vh);
+			addViewHolderToBranchGroup(II, coarseOemmNodeId2BranchGroup);
 		}
 		
 		setSchedulingBounds(new BoundingSphere(
@@ -382,13 +382,10 @@ public class OEMMBehavior extends Behavior
 			if (logger.isDebugEnabled()) {
 				logger.debug("We will show fine mesh for nodes: " + ids);
 			}
+			showCoarseNodes(ids);
 			if(ids.size()>0)
 			{
-				visibilityRevisionOfCoarseMesh(ids);
-			}
-			else
-			{
-				showAllHiddenCoarseNodes(null);
+				showFineNodes(ids);
 			}
 
 			fireChangeListenerStateChanged();
@@ -421,60 +418,50 @@ public class OEMMBehavior extends Behavior
 		return rectangle;
 	}
 	
-	private void addBranchGroup(ViewHolder vh, boolean coarse)
+	private void addViewHolderToBranchGroup(Integer id, Map<Integer, ViewHolder> map)
 	{
 		if (logger.isDebugEnabled()) {
-			logger.debug("addBranchGroup> id:" + vh.getId() + ", coarse:" + coarse);
+			logger.debug("addViewHolderToBranchGroup> id:" + id + ", coarse:" + (map == coarseOemmNodeId2BranchGroup));
 		}
-		Map<Integer, ViewHolder> map = coarse ? coarseOemmNodeId2BranchGroup : visibleFineOemmNodeId2BranchGroup;
+		ViewHolder vh = map.get(id);
 		BranchGroup branchGroup = vh.getViewElement();
 		if (!branchGroup.getCapability(BranchGroup.ALLOW_DETACH))
 			branchGroup.setCapability(BranchGroup.ALLOW_DETACH);
 		
 		visibleMeshBranchGroup.addChild(branchGroup);
-		
-		if (!coarse) {
-			map.put(vh.getId(), vh);
-		}
 	}
 	
-	private void removeBranchGroup(int id, boolean coarse)
+	private void removeViewHolderFromBranchGroup(Integer id, Map<Integer, ViewHolder> map)
 	{
 		if (logger.isDebugEnabled()) {
-			logger.debug("removeBranchGroup> id:" + id + ", coarse:" + coarse);
+			logger.debug("removeViewHolderFromBranchGroup> id:" + id + ", coarse:" + (map == coarseOemmNodeId2BranchGroup));
 		}
-		Map<Integer, ViewHolder> map = coarse ? coarseOemmNodeId2BranchGroup : visibleFineOemmNodeId2BranchGroup;
-		
 		//branchGroup.setCapability(BranchGroup.ALLOW_DETACH);
 		ViewHolder vh = map.get(id);
 		visibleMeshBranchGroup.removeChild(vh.getViewElement());
-		if (!coarse) {
-			map.remove(id);
-		}
 	}
 	
-	private void showAllHiddenCoarseNodes(Set<Integer> exceptSet)
+	private void showCoarseNodes(Set<Integer> exceptSet)
 	{
-		Set<Integer> hidedIs = new HashSet<Integer>( visibleFineOemmNodeId2BranchGroup.keySet());
-		
-		for (Integer arg0: hidedIs) {
-			if (exceptSet == null || !exceptSet.contains(arg0)) {
-				addBranchGroup(coarseOemmNodeId2BranchGroup.get(arg0), true);
-				removeBranchGroup(arg0, false);
+		for (Integer arg0: visibleFineOemmNodeId2BranchGroup.keySet())
+		{
+			if (!exceptSet.contains(arg0)) {
+				addViewHolderToBranchGroup(arg0, coarseOemmNodeId2BranchGroup);
+				removeViewHolderFromBranchGroup(arg0, visibleFineOemmNodeId2BranchGroup);
+				visibleFineOemmNodeId2BranchGroup.remove(arg0);
 			}
 		}
 	}
 
-	private void visibilityRevisionOfCoarseMesh(final Set<Integer> ids)
+	private void showFineNodes(final Set<Integer> ids)
 	{
-		showAllHiddenCoarseNodes(ids);
-		
 		int nrTriangles = 0;
 		for (Integer arg0: ids) {
 			ViewHolder vh = getFineMeshFromCache(arg0);
 			if (!visibleFineOemmNodeId2BranchGroup.containsKey(arg0)) {
-				addBranchGroup(vh, false);
-				removeBranchGroup(arg0, true);
+				visibleFineOemmNodeId2BranchGroup.put(arg0, vh);
+				addViewHolderToBranchGroup(arg0, visibleFineOemmNodeId2BranchGroup);
+				removeViewHolderFromBranchGroup(arg0, coarseOemmNodeId2BranchGroup);
 			}
 			nrTriangles += vh.nrTriangles;
 		}
