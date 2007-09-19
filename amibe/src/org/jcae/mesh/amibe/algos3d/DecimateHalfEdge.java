@@ -107,7 +107,7 @@ import org.apache.log4j.Logger;
 public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 {
 	private static Logger logger=Logger.getLogger(DecimateHalfEdge.class);
-	private int placement = Quadric3DError.POS_OPTIMAL;
+	private Quadric3DError.Placement placement = Quadric3DError.Placement.OPTIMAL;
 	private HashMap<Vertex, Quadric3DError> quadricMap = null;
 	private Vertex v3;
 	private Quadric3DError q3 = new Quadric3DError();
@@ -142,7 +142,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			}
 			else if (key.equals("placement"))
 			{
-				placement = Integer.valueOf(val).intValue();
+				placement = Quadric3DError.Placement.getByName(val);
 				logger.debug("Placement: "+placement);
 			}
 			else if (key.equals("maxtriangles"))

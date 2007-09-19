@@ -67,24 +67,37 @@ public class Quadric3DError implements Serializable
 	private double detA;
 	private boolean cachedDet = false;
 
-	/**
-	 * Optimal placement strategy, select the best vertex.
-	 */
-	public static final int POS_VERTEX = 0;
-	/**
-	 * Optimal placement strategy, contract an edge into its middle point.
-	 */
-	public static final int POS_MIDDLE = 1;
-	/**
-	 * Optimal placement strategy, the contracted point is on the edge.
-	 */
-	public static final int POS_EDGE = 2;
-	/**
-	 * Optimal placement strategy, the contracted point is the point which
-	 * minimizes error metric.
-	 */
-	public static final int POS_OPTIMAL = 3;
-	
+	public enum Placement {
+		// Select the best vertex
+		VERTEX("VERTEX"),
+		// Contract an edge into its middle point
+		MIDDLE("MIDDLE"),
+		// Find optimal point on segment
+		EDGE("EDGE"),
+		// Optimal point
+		OPTIMAL("OPTIMAL");
+		private String name;
+		Placement(String str)
+		{
+			this.name = str;
+		}
+		public static Placement getByName(String str)
+		{
+			String ustr = str.toUpperCase();
+			for (Placement p: Placement.values())
+			{
+				if (ustr.equals(p.name))
+					return p;
+			}
+			return null;
+		}
+		@Override
+		public String toString()
+		{
+			return name;
+		}
+	}
+
 	// Add 2 quadrics
 	public void computeQuadric3DError(Quadric3DError q1, Quadric3DError q2)
 	{
@@ -142,46 +155,44 @@ public class Quadric3DError implements Serializable
 		return detA;
 	}
 
-	public void optimalPlacement(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2, int placement, Vertex ret)
+	public void optimalPlacement(Vertex v1, Vertex v2, Quadric3DError q1, Quadric3DError q2, Placement p, Vertex ret)
 	{
 		/* FIXME: add an option so that boundary nodes may be frozen.  */
-		if (placement == POS_VERTEX)
+		switch(p)
+		{
+		case VERTEX:
 			ret.copy(bestCandidateV1V2(v1, v2, q1, q2));
-		else if (placement == POS_MIDDLE)
-		{
-			// Keep a reference if there is one
-			double [] p1 = v1.getUV();
-			double [] p2 = v2.getUV();
-			ret.copy(bestCandidateV1V2Ref(v1, v2, q1, q2));
-			ret.moveTo(0.5*(p1[0]+p2[0]), 0.5*(p1[1]+p2[1]), 0.5*(p1[2]+p2[2]));
-		}
-		else
-		{
-			// POS_EDGE and POS_OPTIMAL
-			// Keep a reference if there is one
-			if (placement == POS_OPTIMAL)
+			break;
+		case MIDDLE:
 			{
-				if (detA() > 1.e-20)
-				{
-					double cfxx = A[3] * A[5] - A[4] * A[4];
-					double cfxy = A[2] * A[4] - A[1] * A[5];
-					double cfxz = A[1] * A[4] - A[2] * A[3];
-					double cfyy = A[0] * A[5] - A[2] * A[2];
-					double cfyz = A[2] * A[1] - A[0] * A[4];
-					double cfzz = A[0] * A[3] - A[1] * A[1];
-					double dx = (cfxx * b[0] + cfxy * b[1] + cfxz * b[2]) / detA;
-					double dy = (cfxy * b[0] + cfyy * b[1] + cfyz * b[2]) / detA;
-					double dz = (cfxz * b[0] + cfyz * b[1] + cfzz * b[2]) / detA;
-					ret.copy(bestCandidateV1V2Ref(v1, v2, q1, q2));
-					ret.moveTo(-dx, -dy, -dz);
-				}
-				else
-				{
-					ret.copy(bestCandidateV1V2(v1, v2, q1, q2));
-				}
-				return;
+				// Keep a reference if there is one
+				double [] p1 = v1.getUV();
+				double [] p2 = v2.getUV();
+				ret.copy(bestCandidateV1V2Ref(v1, v2, q1, q2));
+				ret.moveTo(0.5*(p1[0]+p2[0]), 0.5*(p1[1]+p2[1]), 0.5*(p1[2]+p2[2]));
 			}
-			// POS_EDGE
+			break;
+		case OPTIMAL:
+			if (detA() > 1.e-20)
+			{
+				double cfxx = A[3] * A[5] - A[4] * A[4];
+				double cfxy = A[2] * A[4] - A[1] * A[5];
+				double cfxz = A[1] * A[4] - A[2] * A[3];
+				double cfyy = A[0] * A[5] - A[2] * A[2];
+				double cfyz = A[2] * A[1] - A[0] * A[4];
+				double cfzz = A[0] * A[3] - A[1] * A[1];
+				double dx = (cfxx * b[0] + cfxy * b[1] + cfxz * b[2]) / detA;
+				double dy = (cfxy * b[0] + cfyy * b[1] + cfyz * b[2]) / detA;
+				double dz = (cfxz * b[0] + cfyz * b[1] + cfzz * b[2]) / detA;
+				ret.copy(bestCandidateV1V2Ref(v1, v2, q1, q2));
+				ret.moveTo(-dx, -dy, -dz);
+			}
+			else
+			{
+				ret.copy(bestCandidateV1V2(v1, v2, q1, q2));
+			}
+			break;
+		case EDGE:
 			if (detA() > 1.e-20)
 			{
 				// Find M = v1 + s(v2-v1) which minimizes
@@ -210,6 +221,9 @@ public class Quadric3DError implements Serializable
 				}
 			}
 			ret.copy(bestCandidateV1V2(v1, v2, q1, q2));
+			break;
+		default:
+			throw new IllegalArgumentException("Unknown placement strategy: "+p);
 		}
 	}
 
