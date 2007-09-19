@@ -34,6 +34,7 @@ import java.io.PrintWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
+import gnu.trove.TObjectIntHashMap;
 import java.io.Serializable;
 import org.apache.log4j.Logger;
 
@@ -157,8 +158,8 @@ public class Mesh extends AbstractMesh implements Serializable
 		traitsBuilder.addNodeList();
 		
 		factory = new ElementFactory(traitsBuilder);
-		triangleList = new ArrayList();
-		nodeList = new ArrayList();
+		triangleList = new ArrayList<AbstractTriangle>();
+		nodeList = new ArrayList<AbstractVertex>();
 	}
 	
 	/**
@@ -169,7 +170,7 @@ public class Mesh extends AbstractMesh implements Serializable
 		super(mtb);
 		factory = new ElementFactory(mtb);
 		triangleList = mtb.getTriangles(traits);
-		nodeList  = mtb.getNodes(traits);
+		nodeList = mtb.getNodes(traits);
 	}
 	
 	public void scaleTolerance(double scale)
@@ -299,15 +300,14 @@ public class Mesh extends AbstractMesh implements Serializable
 		//  1. For each vertex, build the list of triangles
 		//     connected to this vertex.
 		logger.debug("Build the list of triangles connected to each vertex");
-		HashMap tVertList = new HashMap(vertices.length);
+		HashMap<Vertex, ArrayList<AbstractTriangle>> tVertList = new HashMap<Vertex, ArrayList<AbstractTriangle>>(vertices.length);
 		for (int i = 0; i < vertices.length; i++)
-			tVertList.put(vertices[i], new ArrayList(10));
-		for (Iterator it = triangleList.iterator(); it.hasNext(); )
+			tVertList.put(vertices[i], new ArrayList<AbstractTriangle>(10));
+		for (AbstractTriangle t: triangleList)
 		{
-			AbstractTriangle t = (AbstractTriangle) it.next();
 			for (int i = 0; i < 3; i++)
 			{
-				ArrayList list = (ArrayList) tVertList.get(t.vertex[i]);
+				ArrayList<AbstractTriangle> list = tVertList.get(t.vertex[i]);
 				list.add(t);
 			}
 		}
@@ -319,17 +319,17 @@ public class Mesh extends AbstractMesh implements Serializable
 		//  to help the garbage collector.
 		for (int i = 0; i < vertices.length; i++)
 		{
-			ArrayList list = (ArrayList) tVertList.get(vertices[i]);
+			ArrayList<AbstractTriangle> list = tVertList.get(vertices[i]);
 			list.clear();
 			tVertList.put(vertices[i], null);
 		}
 		tVertList.clear();
 		//  3. Mark boundary edges and bind them to virtual triangles.
 		logger.debug("Mark boundary edges");
-		ArrayList newTri = new ArrayList();
-		for (Iterator it = triangleList.iterator(); it.hasNext(); )
+		ArrayList<Triangle> newTri = new ArrayList<Triangle>();
+		for (AbstractTriangle at: triangleList)
 		{
-			Triangle t = (Triangle) it.next();
+			Triangle t = (Triangle) at;
 			AbstractHalfEdge ot = t.getAbstractHalfEdge();
 			for (int i = 0; i < 3; i++)
 			{
@@ -350,9 +350,9 @@ public class Mesh extends AbstractMesh implements Serializable
 		}
 		//  4. Mark non-manifold edges and bind them to virtual triangles.
 		logger.debug("Mark non-manifold edges");
-		for (Iterator it = triangleList.iterator(); it.hasNext(); )
+		for (AbstractTriangle at: triangleList)
 		{
-			Triangle t = (Triangle) it.next();
+			Triangle t = (Triangle) at;
 			AbstractHalfEdge ot = t.getAbstractHalfEdge();
 			for (int i = 0; i < 3; i++)
 			{
@@ -377,12 +377,12 @@ public class Mesh extends AbstractMesh implements Serializable
 		
 		//  5. Find the list of vertices which are on mesh boundary
 		logger.debug("Build the list of boundary nodes");
-		HashSet bndNodes = new HashSet();
+		HashSet<Vertex> bndNodes = new HashSet<Vertex>();
 		maxLabel = 0;
 		boolean [] found = new boolean[4];
-		for (Iterator it = triangleList.iterator(); it.hasNext(); )
+		for (AbstractTriangle at: triangleList)
 		{
-			Triangle t = (Triangle) it.next();
+			Triangle t = (Triangle) at;
 			AbstractHalfEdge ot = t.getAbstractHalfEdge();
 			for (int i = 0; i < found.length; i++)
 				found[i] = false;
@@ -410,9 +410,9 @@ public class Mesh extends AbstractMesh implements Serializable
 		//  6. Build links for non-manifold vertices
 		logger.debug("Compute links for non-manifold vertices");
 		Vertex [] v = new Vertex[2];
-		for (Iterator it = triangleList.iterator(); it.hasNext(); )
+		for (AbstractTriangle at: triangleList)
 		{
-			Triangle t = (Triangle) it.next();
+			Triangle t = (Triangle) at;
 			AbstractHalfEdge ot = t.getAbstractHalfEdge();
 			AbstractHalfEdge sym = t.getAbstractHalfEdge();
 			for (int i = 0; i < 3; i++)
@@ -451,9 +451,9 @@ public class Mesh extends AbstractMesh implements Serializable
 		// AbstractTriangle by fan.
 		int nrNM = 0;
 		int nrFE = 0;
-		for (Iterator it = triangleList.iterator(); it.hasNext(); )
+		for (AbstractTriangle at: triangleList)
 		{
-			Triangle t = (Triangle) it.next();
+			Triangle t = (Triangle) at;
 			AbstractHalfEdge ot = t.getAbstractHalfEdge();
 			for (int i = 0; i < 3; i++)
 			{
@@ -507,17 +507,17 @@ public class Mesh extends AbstractMesh implements Serializable
 		triangleList.addAll(newTri);
 	}
 	
-	private static final void checkNeighbours(Vertex v, HashMap tVertList)
+	private static final void checkNeighbours(Vertex v, HashMap<Vertex, ArrayList<AbstractTriangle>> tVertList)
 	{
 		//  Mark all triangles having v as vertex
-		ArrayList neighTriList = (ArrayList) tVertList.get(v);
+		ArrayList<AbstractTriangle> neighTriList = tVertList.get(v);
 		AbstractTriangle.List markedTri = new AbstractTriangle.List();
-		for (Iterator it = neighTriList.iterator(); it.hasNext(); )
-			markedTri.add((AbstractTriangle) it.next());
+		for (AbstractTriangle at: neighTriList)
+			markedTri.add(at);
 		//  Loop on all edges incident to v
-		for (Iterator it = neighTriList.iterator(); it.hasNext(); )
+		for (AbstractTriangle at: neighTriList)
 		{
-			Triangle t = (Triangle) it.next();
+			Triangle t = (Triangle) at;
 			AbstractHalfEdge ot = t.getAbstractHalfEdge();
 			AbstractHalfEdge sym = t.getAbstractHalfEdge();
 			if (ot.destination() == v)
@@ -531,12 +531,12 @@ public class Mesh extends AbstractMesh implements Serializable
 			Vertex v2 = ot.destination();
 			// Edge (v,v2) has not yet been processed.
 			// List of triangles incident to v2.
-			ArrayList neighTriV2List = (ArrayList) tVertList.get(v2);
+			ArrayList<AbstractTriangle> neighTriV2List = tVertList.get(v2);
 			boolean manifold = true;
 			ArrayList adj = null;
-			for (Iterator it2 = neighTriV2List.iterator(); it2.hasNext(); )
+			for (AbstractTriangle at2: neighTriV2List)
 			{
-				Triangle t2 = (Triangle) it2.next();
+				Triangle t2 = (Triangle) at2;
 				if (t == t2 || !markedTri.contains(t2))
 					continue;
 				// t2 contains v and v2, we now look for an edge
@@ -692,10 +692,10 @@ public class Mesh extends AbstractMesh implements Serializable
 			else
 				out = new PrintWriter(new FileOutputStream(file));
 			out.println("    -1"+cr+"  2411");
-			HashSet nodeset = new HashSet();
-			for(Iterator it=triangleList.iterator();it.hasNext();)
+			HashSet<Vertex> nodeset = new HashSet<Vertex>();
+			for (AbstractTriangle at: triangleList)
 			{
-				Triangle t = (Triangle) it.next();
+				Triangle t = (Triangle) at;
 				if (t.isOuter())
 					continue;
 				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
@@ -704,16 +704,14 @@ public class Mesh extends AbstractMesh implements Serializable
 				nodeset.add(t.vertex[1]);
 				nodeset.add(t.vertex[2]);
 			}
-			int count =  0;
-			HashMap labels = new HashMap(nodeset.size());
-			for(Iterator it=nodeset.iterator();it.hasNext();)
+			int count = 0;
+			TObjectIntHashMap labels = new TObjectIntHashMap(nodeset.size());
+			for(Vertex node: nodeset)
 			{
-				Vertex node = (Vertex) it.next();
 				count++;
-				Integer label = new Integer(count);
-				labels.put(node, label);
+				labels.put(node, count);
 				double [] uv = node.getUV();
-				out.println(label+"         1         1         1");
+				out.println(count+"         1         1         1");
 				if (uv.length == 2)
 					out.println(""+uv[0]+" "+uv[1]+" 0.0");
 				else
@@ -721,10 +719,10 @@ public class Mesh extends AbstractMesh implements Serializable
 			}
 			out.println("    -1");
 			out.println("    -1"+cr+"  2412");
-			count =  0;
-			for(Iterator it=triangleList.iterator();it.hasNext();)
+			count = 0;
+			for (AbstractTriangle at: triangleList)
 			{
-				Triangle t = (Triangle)it.next();
+				Triangle t = (Triangle) at;
 				if (t.isOuter())
 					continue;
 				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
@@ -733,8 +731,8 @@ public class Mesh extends AbstractMesh implements Serializable
 				out.println(""+count+"        91         1         1         1         3");
 				for(int i = 0; i < 3; i++)
 				{
-					Integer nodelabel =  (Integer) labels.get(t.vertex[i]);
-					out.print(" "+nodelabel.intValue());
+					int nodelabel = labels.get(t.vertex[i]);
+					out.print(" "+nodelabel);
 				}
 				out.println("");
 			}
@@ -762,10 +760,10 @@ public class Mesh extends AbstractMesh implements Serializable
 			else
 				out = new PrintWriter(new FileOutputStream(file));
 			out.println("MeshVersionFormatted 1"+cr+"Dimension"+cr+"3");
-			HashSet nodeset = new HashSet();
-			for(Iterator it=triangleList.iterator();it.hasNext();)
+			HashSet<Vertex> nodeset = new HashSet<Vertex>();
+			for(AbstractTriangle at: triangleList)
 			{
-				Triangle t = (Triangle) it.next();
+				Triangle t = (Triangle) at;
 				if (t.isOuter())
 					continue;
 				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
@@ -774,25 +772,23 @@ public class Mesh extends AbstractMesh implements Serializable
 				nodeset.add(t.vertex[1]);
 				nodeset.add(t.vertex[2]);
 			}
-			int count =  0;
-			HashMap labels = new HashMap(nodeset.size());
+			int count = 0;
+			TObjectIntHashMap labels = new TObjectIntHashMap(nodeset.size());
 			out.println("Vertices"+cr+nodeset.size());
-			for(Iterator it=nodeset.iterator();it.hasNext();)
+			for(Vertex node: nodeset)
 			{
-				Vertex node = (Vertex) it.next();
 				count++;
-				Integer label = new Integer(count);
-				labels.put(node, label);
+				labels.put(node, count);
 				double [] uv = node.getUV();
 				if (uv.length == 2)
 					out.println(""+uv[0]+" "+uv[1]+" 0.0 0");
 				else
 					out.println(""+uv[0]+" "+uv[1]+" "+uv[2]+" 0");
 			}
-			count =  0;
-			for(Iterator it=triangleList.iterator();it.hasNext();)
+			count = 0;
+			for(AbstractTriangle at: triangleList)
 			{
-				Triangle t = (Triangle)it.next();
+				Triangle t = (Triangle) at;
 				if (t.isOuter())
 					continue;
 				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
@@ -800,10 +796,10 @@ public class Mesh extends AbstractMesh implements Serializable
 				count++;
 			}
 			out.println(cr+"Triangles"+cr+count);
-			count =  0;
-			for(Iterator it=triangleList.iterator();it.hasNext();)
+			count = 0;
+			for(AbstractTriangle at: triangleList)
 			{
-				Triangle t = (Triangle)it.next();
+				Triangle t = (Triangle) at;
 				if (t.isOuter())
 					continue;
 				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
@@ -811,8 +807,8 @@ public class Mesh extends AbstractMesh implements Serializable
 				count++;
 				for(int i = 0; i < 3; i++)
 				{
-					Integer nodelabel =  (Integer) labels.get(t.vertex[i]);
-					out.print(nodelabel.intValue()+" ");
+					int nodelabel = labels.get(t.vertex[i]);
+					out.print(nodelabel+" ");
 				}
 				out.println("1");
 			}
@@ -850,9 +846,8 @@ public class Mesh extends AbstractMesh implements Serializable
 	 */
 	public boolean isValid(boolean constrained)
 	{
-		for (Iterator it = triangleList.iterator(); it.hasNext(); )
+		for (AbstractTriangle t: triangleList)
 		{
-			AbstractTriangle t = (AbstractTriangle) it.next();
 			if (t.vertex[0] == t.vertex[1] || t.vertex[1] == t.vertex[2] || t.vertex[2] == t.vertex[0])
 			{
 				logger.error("Duplicate vertices: "+t);
@@ -1045,8 +1040,8 @@ public class Mesh extends AbstractMesh implements Serializable
 	public void printMesh()
 	{
 		System.out.println("Mesh:");
-		for (Iterator it = triangleList.iterator(); it.hasNext(); )
-			System.out.println(""+it.next());
+		for (AbstractTriangle at: triangleList)
+			System.out.println(""+at);
 		System.out.println("Outer Vertex: "+outerVertex);
 	}
 	
