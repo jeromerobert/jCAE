@@ -19,8 +19,8 @@
 
 package org.jcae.mesh.amibe.ds;
 
-import java.util.Iterator;
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * A triangular element of the mesh.  Instances of this class carry up
@@ -304,12 +304,12 @@ public class AdjacencyVH implements AdjacencyWrapper
 		else
 		{
 			StringBuffer r = new StringBuffer("(");
-			ArrayList a = (ArrayList) adj[num];
+			LinkedHashMap<Triangle, Integer> a = (LinkedHashMap<Triangle, Integer>) adj[num];
 			boolean first = true;
-			for (Iterator it = a.iterator(); it.hasNext(); )
+			for (Map.Entry<Triangle, Integer> entry: a.entrySet())
 			{
-				Triangle t = (Triangle) it.next();
-				Integer i = (Integer) it.next();
+				Triangle t = entry.getKey();
+				int i = entry.getValue().intValue();
 				if (!first)
 					r.append(",");
 				r.append(t.hashCode()+"["+i+"]");
