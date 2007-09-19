@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.File;
 import java.util.Map;
 import java.util.HashMap;
+import gnu.trove.TObjectIntHashMap;
 import org.apache.log4j.Logger;
 
 /**
@@ -109,6 +110,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	private static Logger logger=Logger.getLogger(DecimateHalfEdge.class);
 	private Quadric3DError.Placement placement = Quadric3DError.Placement.OPTIMAL;
 	private HashMap<Vertex, Quadric3DError> quadricMap = null;
+	private TObjectIntHashMap labelMap = null;
 	private Vertex v3;
 	private Quadric3DError q3 = new Quadric3DError();
 	// vCostOpt and qCostOpt must be used only by cost() method.
@@ -173,8 +175,9 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		// canProcessEdge() and processEdge() which does not depend
 		// on hashcodes.
 		// TODO: Check if HalfEdge.notOriented() is still needed.
-		int label = 1;
+		int label = 0;
 		quadricMap = new HashMap<Vertex, Quadric3DError>(roughNrNodes);
+		labelMap = new TObjectIntHashMap(roughNrNodes);
 		for (AbstractTriangle af: mesh.getTriangles())
 		{
 			if (!af.isWritable())
@@ -185,11 +188,8 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 				if (!quadricMap.containsKey(n))
 				{
 					quadricMap.put(n, new Quadric3DError());
-					if (n.getLabel() == 0)
-					{
-						n.setLabel(label);
-						label++;
-					}
+					label++;
+					labelMap.put(n, label);
 				}
 			}
 		}
@@ -272,6 +272,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		throws IOException
 	{
 		out.writeObject(quadricMap);
+		out.writeObject(labelMap);
 	}
 
 	@Override
@@ -281,6 +282,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		try
 		{
 			quadricMap = (HashMap<Vertex, Quadric3DError>) q.readObject();
+			labelMap = (TObjectIntHashMap) q.readObject();
 		}
 		catch (final ClassNotFoundException ex)
 		{
@@ -310,9 +312,9 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	 * Ensure that edge orientation is fixed and does not depend on hashcodes.  This method
 	 * must be used when entering canProcessEdge() and processEdge().
 	 */
-	private static HalfEdge uniqueOrientation(HalfEdge current)
+	private HalfEdge uniqueOrientation(HalfEdge current)
 	{
-		if (current.origin().getLabel() > current.destination().getLabel() && current.getAdj() != null)
+		if (labelMap.get(current.origin()) > labelMap.get(current.destination()) && current.getAdj() != null)
 			return (HalfEdge) current.sym();
 		return current;
 	}
