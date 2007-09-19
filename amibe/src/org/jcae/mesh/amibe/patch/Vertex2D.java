@@ -652,6 +652,7 @@ public class Vertex2D extends Vertex
 		m2 = null;
 	}
 	
+	@Override
 	public String toString ()
 	{
 		StringBuffer r = new StringBuffer("UV:");

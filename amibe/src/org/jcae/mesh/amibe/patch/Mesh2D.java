@@ -70,6 +70,7 @@ public class Mesh2D extends Mesh
 		{
 			super(u, v);
 		}
+		@Override
 		public String toString()
 		{
 			return "outer";
@@ -455,6 +456,7 @@ public class Mesh2D extends Mesh
 		quadtree.walk(gproc);
 	}
 
+	@Override
 	public double distance2(Vertex start, Vertex end, Vertex vm)
 	{
 		double ret = distance(start, end, vm);
@@ -469,6 +471,7 @@ public class Mesh2D extends Mesh
 	 * @param vm  the vertex on which metrics is evaluated
 	 * @return the distance between nodes
 	 */
+	@Override
 	public double distance(Vertex start, Vertex end, Vertex vm)
 	{
 		return compGeom().distance((Vertex2D) start, (Vertex2D) end, (Vertex2D) vm);
@@ -483,6 +486,7 @@ public class Mesh2D extends Mesh
 	 * @param v  the vertex on which metrics is evaluated
 	 * @return the radius in 2D space.
 	 */
+	@Override
 	public double radius2d(Vertex v)
 	{
 		return compGeom().radius2d((Vertex2D) v);
@@ -531,6 +535,7 @@ public class Mesh2D extends Mesh
 		}
 	}
 	
+	@Override
 	public boolean isValid(boolean constrained)
 	{
 		if (!super.isValid(constrained))

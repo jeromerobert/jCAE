@@ -112,6 +112,7 @@ public abstract class QSortedTree implements Serializable
 			return data;
 		}
 	
+		@Override
 		public String toString()
 		{
 			return "Key: "+value+" obj. "+Integer.toHexString(data.hashCode());

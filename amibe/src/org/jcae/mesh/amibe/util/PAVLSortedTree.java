@@ -43,11 +43,13 @@ public class PAVLSortedTree extends QSortedTree
 			super(o, v);
 		}
 		
+		@Override
 		public QSortedTree.Node [] newChilds()
 		{
 			return new Node[2];
 		}
 
+		@Override
 		public void reset(double v)
 		{
 			super.reset(v);
@@ -61,6 +63,7 @@ public class PAVLSortedTree extends QSortedTree
 		     / \              / \
 		    T2 T3            T1 T2
 		*/
+		@Override
 		public QSortedTree.Node rotateL()
 		{
 			Node right = (Node) super.rotateL();
@@ -87,6 +90,7 @@ public class PAVLSortedTree extends QSortedTree
 		       / \                      / \
 		      T1 T2                    T2 T3
 		*/
+		@Override
 		public QSortedTree.Node rotateR()
 		{
 			Node left = (Node) super.rotateR();
@@ -115,6 +119,7 @@ public class PAVLSortedTree extends QSortedTree
 		    / \                        / \
 		   T2 T3                      T3 T4
 		*/
+		@Override
 		public QSortedTree.Node rotateRL()
 		{
 			Node newRoot = (Node) super.rotateRL();
@@ -151,6 +156,7 @@ public class PAVLSortedTree extends QSortedTree
 		     / \            / \
 		    T2 T3          T1 T2
 		*/
+		@Override
 		public QSortedTree.Node rotateLR()
 		{
 			Node newRoot = (Node) super.rotateLR();
@@ -180,17 +186,20 @@ public class PAVLSortedTree extends QSortedTree
 			return newRoot;
 		}
 
+		@Override
 		public String toString()
 		{
 			return super.toString()+" bal. "+balanceFactor;
 		}
 	}
 	
+	@Override
 	public final QSortedTree.Node newNode(Object o, double v)
 	{
 		return new Node(o, v);
 	}
 
+	@Override
 	public final boolean insertNode(QSortedTree.Node o)
 	{
 		Node node = (Node) o;
@@ -252,6 +261,7 @@ public class PAVLSortedTree extends QSortedTree
 		return true;
 	}
 	
+	@Override
 	public final QSortedTree.Node removeNode(QSortedTree.Node o)
 	{
 		assert o != null;

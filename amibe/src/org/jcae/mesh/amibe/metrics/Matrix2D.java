@@ -211,6 +211,7 @@ public class Matrix2D
 		return AinvB.eigenvectors();
 	}
 	
+	@Override
 	public String toString()
 	{
 		return "Matrix2D: ("+data[0][0]+", "+data[0][1]+", "+data[1][0]+", "+data[1][1]+")";

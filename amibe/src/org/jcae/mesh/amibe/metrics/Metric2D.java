@@ -250,6 +250,7 @@ public class Metric2D
 		return ""+(E/scaleX/scaleX)+" "+(F/scaleX/scaleY)+" "+(G/scaleY/scaleY);
 	}
 	
+	@Override
 	public String toString()
 	{
 		return "Metric2D: E="+E+" F="+F+" G="+G;

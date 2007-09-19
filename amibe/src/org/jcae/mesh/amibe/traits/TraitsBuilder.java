@@ -120,6 +120,7 @@ public class TraitsBuilder
 	{
 	}
 
+	@Override
 	public String toString()
 	{
 		return ""+Integer.toHexString(attributes);

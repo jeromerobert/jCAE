@@ -47,6 +47,7 @@ public class PRedBlackSortedTree extends QSortedTree
 	{
 		private boolean isRed;
 		
+		@Override
 		public QSortedTree.Node [] newChilds()
 		{
 			return new Node[2];
@@ -58,18 +59,21 @@ public class PRedBlackSortedTree extends QSortedTree
 			isRed = true;
 		}
 		
+		@Override
 		public void reset(double v)
 		{
 			super.reset(v);
 			isRed = true;
 		}
 
+		@Override
 		public String toString()
 		{
 			return super.toString()+" "+(isRed ? "red" : "black");
 		}
 	}
 
+	@Override
 	public final QSortedTree.Node newNode(Object o, double v)
 	{
 		return new Node(o, v);
@@ -81,6 +85,7 @@ public class PRedBlackSortedTree extends QSortedTree
 		return (x != null) && ((Node) x).isRed;
 	}
 	
+	@Override
 	public final boolean insertNode(QSortedTree.Node o)
 	{
 		Node p = (Node) o;
@@ -209,6 +214,7 @@ public class PRedBlackSortedTree extends QSortedTree
 		return true;
 	}
 	
+	@Override
 	public final QSortedTree.Node removeNode(QSortedTree.Node o)
 	{
 		Node p = (Node) o;
