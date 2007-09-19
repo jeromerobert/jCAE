@@ -21,7 +21,7 @@ package org.jcae.mesh.cad.occ;
 
 import org.jcae.opencascade.jni.Adaptor3d_Curve;
 import org.apache.log4j.Logger;
-import java.util.ArrayList;
+import gnu.trove.TIntArrayList;
 
 public class OCCDiscretizeCurve3D
 {
@@ -157,7 +157,7 @@ public class OCCDiscretizeCurve3D
 		nr = n;
 		int nsegments = n;
 		double [] xyz;
-		ArrayList abscissa = new ArrayList(nsegments);
+		TIntArrayList abscissa = new TIntArrayList(nsegments);
 		while (true)
 		{
 			nsegments *= 10;
@@ -189,7 +189,7 @@ public class OCCDiscretizeCurve3D
 				maxlen = 0.5 * (lmin + lmax);
 				int lastIndex = 0;
 				abscissa.clear();
-				abscissa.add(new Integer(0));
+				abscissa.add(0);
 				nr = 1;
 				for (int ns = 1; ns < nsegments; ns++)
 				{
@@ -201,11 +201,11 @@ public class OCCDiscretizeCurve3D
 					{
 						lastIndex = ns;
 						nr++;
-						abscissa.add(new Integer(ns));
+						abscissa.add(ns);
 					}
 				}
 				nr++;
-				abscissa.add(new Integer(nsegments));
+				abscissa.add(nsegments);
 				if (n == nr)
 					break;
 				else if (nr < n)
@@ -220,7 +220,7 @@ public class OCCDiscretizeCurve3D
 		}
 		for (int i = 0; i < nr; i++)
 		{
-			int ind = ((Integer) abscissa.get(i)).intValue();
+			int ind = abscissa.get(i);
 			if (ind != i)
 			{
 				a[i] = a[ind];
