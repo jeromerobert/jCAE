@@ -63,14 +63,14 @@ import org.apache.log4j.Logger;
  * <pre>
  *	public final class collectAllVerticesProcedure implements KdTreeProcedure
  *	{
- *		public ArrayList vertexList = new ArrayList();
+ *		public ArrayList<Vertex> vertexList = new ArrayList<Vertex>();
  *		public final int action(Object o, int s, int [] i0)
  *		{
  *			Cell self = (Cell) o;
  *			if (self.nItems > 0)
  *			{
  *				for (int i = 0; i &lt; self.nItems; i++)
- *					vertexList.add(self.subCell[i]);
+ *					vertexList.add((Vertex) self.subCell[i]);
  *			}
  *			return 0;
  *		}
@@ -432,10 +432,10 @@ public class KdTree
 
 	private static class GetAllVerticesProcedure implements KdTreeProcedure
 	{
-		public ArrayList nodelist = null;
+		public ArrayList<Vertex> nodelist = null;
 		public GetAllVerticesProcedure(int capacity)
 		{
-			nodelist = new ArrayList(capacity);
+			nodelist = new ArrayList<Vertex>(capacity);
 		}
 		public final int action(Object o, int s, final int [] i0)
 		{
@@ -443,7 +443,7 @@ public class KdTree
 			if (self.nItems > 0)
 			{
 				for (int i = 0; i < self.nItems; i++)
-					nodelist.add(self.subCell[i]);
+					nodelist.add((Vertex) self.subCell[i]);
 			}
 			return 0;
 		}
@@ -455,7 +455,7 @@ public class KdTree
 	 * @param capacity  initial capacity of the <code>ArrayList</code>.
 	 * @return a list containing all vertices.
 	 */
-	public ArrayList getAllVertices(int capacity)
+	public ArrayList<Vertex> getAllVertices(int capacity)
 	{
 		GetAllVerticesProcedure gproc = new GetAllVerticesProcedure(capacity);
 		walk(gproc);

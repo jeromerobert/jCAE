@@ -37,7 +37,7 @@ public class MGroup3D
 	private int id;
 	
 	//  Face list.
-	private Collection facelist = new ArrayList();
+	private Collection<AbstractTriangle> facelist = new ArrayList();
 	
 	/**
 	 * Creates a group.
@@ -45,17 +45,17 @@ public class MGroup3D
 	 * @param n  group name.
 	 * @param faces  set of faces.
 	 */
-	public MGroup3D(String n, Collection faces)
+	public MGroup3D(String n, Collection<AbstractTriangle> faces)
 	{
 		name = n;
-		facelist = new ArrayList(faces);
+		facelist = new ArrayList<AbstractTriangle>(faces);
 	}
 	
-	public MGroup3D(int i, String n, Collection faces)
+	public MGroup3D(int i, String n, Collection<AbstractTriangle> faces)
 	{
 		id = i;
 		name = n;
-		facelist = new ArrayList(faces);
+		facelist = new ArrayList<AbstractTriangle>(faces);
 	}
 	
 	/**
@@ -83,7 +83,7 @@ public class MGroup3D
 	 *
 	 * @return an iterator over the set of faces.
 	 */
-	public Iterator getFacesIterator()
+	public Iterator<AbstractTriangle> getFacesIterator()
 	{
 		return facelist.iterator();
 	}

@@ -333,7 +333,7 @@ public class Initial
 		while (oldHead != newHead)
 		{
 			oldHead = newHead;
-			for (Iterator it = tList.iterator(); it.hasNext(); )
+			for (Iterator<AbstractTriangle> it = tList.iterator(); it.hasNext(); )
 			{
 				t = (Triangle) it.next();
 				if (t == oldHead)

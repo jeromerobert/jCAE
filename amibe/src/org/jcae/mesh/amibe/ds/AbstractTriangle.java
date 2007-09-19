@@ -157,9 +157,9 @@ public class AbstractTriangle
 	 *        ...
 	 *     }
 	 *   //  Loop over collected triangles.
-	 *   for (Iterator it = tList.{@link List#iterator}; it.hasNext(); )
+	 *   for (Iterator<AbstractTriangle> it = tList.{@link List#iterator}; it.hasNext(); )
 	 *   {
-	 *     AbstractTriangle t = (AbstractTriangle) it.next();
+	 *     AbstractTriangle t = it.next();
 	 *     ...
 	 *   }
 	 *   //  When finished, remove all links between triangles
@@ -237,9 +237,9 @@ public class AbstractTriangle
 		 * Create an iterator over linked triangles.  Note that the list
 		 * can be extended while iterating over elements.
 		 */
-		public Iterator iterator()
+		public Iterator<AbstractTriangle> iterator()
 		{
-			return new Iterator()
+			return new Iterator<AbstractTriangle>()
 			{
 				private AbstractTriangle curr = listHead;
 				public boolean hasNext()
@@ -247,7 +247,7 @@ public class AbstractTriangle
 					return curr.listNext != listSentinel;
 				}
 				
-				public Object next()
+				public AbstractTriangle next()
 				{
 					if (!hasNext())
 						throw new NoSuchElementException();

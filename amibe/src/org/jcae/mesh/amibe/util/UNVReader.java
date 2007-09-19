@@ -53,8 +53,8 @@ public class UNVReader
 	
 	public static void readMesh(Mesh mesh, String file, double ridgeAngle)
 	{
-		TIntObjectHashMap nodesmap = null;
-		TIntObjectHashMap facesmap = null;
+		TIntObjectHashMap<Vertex> nodesmap = null;
+		TIntObjectHashMap<AbstractTriangle> facesmap = null;
 		double unit = 1.0;
 		String line = "";
 		try
@@ -140,9 +140,9 @@ public class UNVReader
 		return unit;
 	}
 
-	private static TIntObjectHashMap readNodes(Mesh m, BufferedReader rd, double unit)
+	private static TIntObjectHashMap<Vertex> readNodes(Mesh m, BufferedReader rd, double unit)
 	{
-		TIntObjectHashMap nodesmap = new TIntObjectHashMap();
+		TIntObjectHashMap<Vertex> nodesmap = new TIntObjectHashMap<Vertex>();
 		logger.debug("Reading nodes");
 		nodesmap.clear();
 		double x,y,z;
@@ -188,10 +188,10 @@ public class UNVReader
 		return nodesmap;
 	}
 
-	private static TIntObjectHashMap readFace(BufferedReader rd, Mesh mesh, TIntObjectHashMap nodesmap)
+	private static TIntObjectHashMap<AbstractTriangle> readFace(BufferedReader rd, Mesh mesh, TIntObjectHashMap<Vertex> nodesmap)
 	{
 		logger.debug("Reading triangles");
-		TIntObjectHashMap facesmap = new TIntObjectHashMap();
+		TIntObjectHashMap<AbstractTriangle> facesmap = new TIntObjectHashMap<AbstractTriangle>();
 		String line = "";
 		boolean quad = false;
 		
@@ -212,11 +212,11 @@ public class UNVReader
 					int p1 = Integer.valueOf(st.nextToken()).intValue();
 					int p2 = Integer.valueOf(st.nextToken()).intValue();
 					int p3 = Integer.valueOf(st.nextToken()).intValue();
-					Vertex n1 = (Vertex) nodesmap.get(p1);
+					Vertex n1 = nodesmap.get(p1);
 					assert n1 != null : p1;
-					Vertex n2 = (Vertex) nodesmap.get(p2);
+					Vertex n2 = nodesmap.get(p2);
 					assert n2 != null : p2;
-					Vertex n3 = (Vertex) nodesmap.get(p3);
+					Vertex n3 = nodesmap.get(p3);
 					assert n3 != null : p3;
 					AbstractTriangle f = mesh.factory.createTriangle(n1, n2, n3);
 					mesh.add(f);
@@ -236,13 +236,13 @@ public class UNVReader
 					int p2 = Integer.valueOf(st.nextToken()).intValue();
 					int p3 = Integer.valueOf(st.nextToken()).intValue();
 					int p4 = Integer.valueOf(st.nextToken()).intValue();
-					Vertex n1 = (Vertex) nodesmap.get(p1);
+					Vertex n1 = nodesmap.get(p1);
 					assert n1 != null : p1;
-					Vertex n2 = (Vertex) nodesmap.get(p2);
+					Vertex n2 = nodesmap.get(p2);
 					assert n2 != null : p2;
-					Vertex n3 = (Vertex) nodesmap.get(p3);
+					Vertex n3 = nodesmap.get(p3);
 					assert n3 != null : p3;
-					Vertex n4 = (Vertex) nodesmap.get(p4);
+					Vertex n4 = nodesmap.get(p4);
 					assert n4 != null : p4;
 					AbstractTriangle f = mesh.factory.createTriangle(n1, n2, n3);
 					mesh.add(f);
@@ -269,7 +269,7 @@ public class UNVReader
 		return facesmap;
 	}
 	
-	private static void readGroup(BufferedReader rd, Mesh mesh, TIntObjectHashMap facesmap)
+	private static void readGroup(BufferedReader rd, Mesh mesh, TIntObjectHashMap<AbstractTriangle> facesmap)
 	{
 		logger.debug("Reading groups");
 		String line = "";
@@ -293,7 +293,7 @@ public class UNVReader
 				*/
 				// Read group name
 				String title = rd.readLine().trim();
-				ArrayList facelist = new ArrayList();
+				ArrayList<AbstractTriangle> facelist = new ArrayList<AbstractTriangle>();
 				// read the group
 				while ((line= rd.readLine().trim()).startsWith("8"))
 				{
@@ -303,11 +303,10 @@ public class UNVReader
 					{
 						st.nextToken();
 						String index = st.nextToken();
-						int ind = new Integer(index).intValue();
+						int ind = Integer.valueOf(index).intValue();
 						if (ind != 0)
 						{
-							AbstractTriangle f1 = (AbstractTriangle)facesmap.get(ind);
-							facelist.add(f1);
+							facelist.add(facesmap.get(ind));
 						}
 					}
 				}

@@ -215,7 +215,7 @@ public class Vertex2D extends Vertex
 		if (current == null)
 		{
 			// First, try with neighbours
-			for (Iterator it = tList.iterator(); it.hasNext(); )
+			for (Iterator<AbstractTriangle> it = tList.iterator(); it.hasNext(); )
 			{
 				t = (Triangle) it.next();
 				start.bind(t);
@@ -239,9 +239,9 @@ public class Vertex2D extends Vertex
 		if (current == null)
 		{
 			// As a last resort, check with all triangles
-			for (Iterator it = mesh.getTriangles().iterator(); it.hasNext();)
+			for (AbstractTriangle at: mesh.getTriangles())
 			{
-				t = (Triangle) it.next();
+				t = (Triangle) at;
 				start.bind(t);
 				current = getSurroundingOTriangleStart(mesh, start, tList);
 				if (current != null)

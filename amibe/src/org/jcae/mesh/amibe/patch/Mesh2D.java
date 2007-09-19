@@ -22,6 +22,7 @@ package org.jcae.mesh.amibe.patch;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.InitialTriangulationException;
@@ -30,7 +31,6 @@ import org.jcae.mesh.amibe.util.KdTree;
 import org.jcae.mesh.amibe.util.KdTreeProcedure;
 import org.jcae.mesh.cad.*;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Stack;
 import org.apache.log4j.Logger;
 
@@ -52,7 +52,7 @@ public class Mesh2D extends Mesh
 	private transient CADGeomSurface surface;
 	
 	//  Stack of methods to compute geometrical values
-	private transient Stack compGeomStack = new Stack();
+	private transient Stack<Calculus> compGeomStack = new Stack<Calculus>();
 	
 	/**
 	 * Structure to fasten search of nearest vertices.
@@ -382,10 +382,10 @@ public class Mesh2D extends Mesh
 	{
 		//  Metrics are always reset by pushCompGeom.
 		//  Only reset them here when there is a change.
-		Object ret = compGeomStack.pop();
+		Calculus ret = compGeomStack.pop();
 		if (!compGeomStack.empty() && !ret.getClass().equals(compGeomStack.peek().getClass()))
 			clearAllMetrics();
-		return (Calculus) ret;
+		return ret;
 	}
 	
 	/**
@@ -401,7 +401,7 @@ public class Mesh2D extends Mesh
 	public Calculus popCompGeom(int i)
 		throws RuntimeException
 	{
-		Object ret = compGeomStack.pop();
+		Calculus ret = compGeomStack.pop();
 		if (compGeomStack.size() > 0 && !ret.getClass().equals(compGeomStack.peek().getClass()))
 			clearAllMetrics();
 		if (i == 2)
@@ -416,7 +416,7 @@ public class Mesh2D extends Mesh
 		}
 		else
 			throw new java.lang.IllegalArgumentException("pushCompGeom argument must be either 2 or 3, current value is: "+i);
-		return (Calculus) ret;
+		return ret;
 	}
 	
 	/**
@@ -428,7 +428,7 @@ public class Mesh2D extends Mesh
 	{
 		if (compGeomStack.empty())
 			return null;
-		return (Calculus) compGeomStack.peek();
+		return compGeomStack.peek();
 	}
 	
 	private static class ClearAllMetricsProcedure implements KdTreeProcedure
@@ -502,12 +502,12 @@ public class Mesh2D extends Mesh
 	{
 		logger.debug("Removing degenerated edges");
 		VirtualHalfEdge2D ot = new VirtualHalfEdge2D();
-		HashSet removedTriangles = new HashSet();
-		for (Iterator it = triangleList.iterator(); it.hasNext(); )
+		HashSet<AbstractTriangle> removedTriangles = new HashSet<AbstractTriangle>();
+		for (AbstractTriangle at: triangleList)
 		{
-			Triangle t = (Triangle) it.next();
-			if (removedTriangles.contains(t))
+			if (removedTriangles.contains(at))
 				continue;
+			Triangle t = (Triangle) at;
 			if (t.isOuter())
 				continue;
 			ot.bind(t);
@@ -528,11 +528,8 @@ public class Mesh2D extends Mesh
 				}
 			}
 		}
-		for (Iterator it = removedTriangles.iterator(); it.hasNext(); )
-		{
-			Triangle t = (Triangle) it.next();
-			triangleList.remove(t);
-		}
+		for (AbstractTriangle at: removedTriangles)
+			triangleList.remove(at);
 	}
 	
 	@Override
@@ -540,9 +537,8 @@ public class Mesh2D extends Mesh
 	{
 		if (!super.isValid(constrained))
 			return false;
-		for (Iterator it = triangleList.iterator(); it.hasNext(); )
+		for (AbstractTriangle t: triangleList)
 		{
-			Triangle t = (Triangle) it.next();
 			// We can not rely on t.isOuter() here, attributes
 			// may not have been set yet.
 			if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
