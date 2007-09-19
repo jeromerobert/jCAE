@@ -150,6 +150,7 @@ public abstract class Triangle extends AbstractTriangle implements Serializable
 	
 	public abstract AbstractHalfEdge getAbstractHalfEdge();
 
+	@Override
 	public String toString()
 	{
 		String r = super.toString();

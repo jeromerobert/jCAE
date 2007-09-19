@@ -29,6 +29,7 @@ public class TriangleVH extends Triangle
 		adj = new AdjacencyVH();
 	}
 
+	@Override
 	public AbstractHalfEdge getAbstractHalfEdge()
 	{
 		VirtualHalfEdge ot = new VirtualHalfEdge();

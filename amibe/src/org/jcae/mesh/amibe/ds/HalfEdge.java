@@ -69,6 +69,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *
 	 * @return the triangle tied to this object.
 	 */
+	@Override
 	public final Triangle getTri()
 	{
 		return tri;
@@ -79,6 +80,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *
 	 * @return the edge local number.
 	 */
+	@Override
 	public final int getLocalNumber()
 	{
 		return localNumber;
@@ -94,6 +96,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *
 	 * @param e  the edge tied to this object.
 	 */
+	@Override
 	public final void glue(AbstractHalfEdge e)
 	{
 		HEglue((HalfEdge) e);
@@ -116,6 +119,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	/**
 	 * Get the symmetric edge.
 	 */
+	@Override
 	public final Object getAdj()
 	{
 		return sym;
@@ -124,6 +128,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	/**
 	 * Set the sym link.
 	 */
+	@Override
 	public final void setAdj(Object e)
 	{
 		sym = e;
@@ -134,11 +139,13 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		return (HalfEdge) sym;
 	}
 
+	@Override
 	public final AbstractHalfEdge sym()
 	{
 		return (AbstractHalfEdge) sym;
 	}
 
+	@Override
 	public final AbstractHalfEdge sym(AbstractHalfEdge that)
 	{
 		that = (AbstractHalfEdge) sym;
@@ -148,11 +155,13 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	/**
 	 * Move to the next edge.
 	 */
+	@Override
 	public final AbstractHalfEdge next()
 	{
 		return next;
 	}
 	
+	@Override
 	public final AbstractHalfEdge next(AbstractHalfEdge that)
 	{
 		that = next;
@@ -162,11 +171,13 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	/**
 	 * Move to the previous edge.
 	 */
+	@Override
 	public final AbstractHalfEdge prev()
 	{
 		return next.next;
 	}
 	
+	@Override
 	public final AbstractHalfEdge prev(AbstractHalfEdge that)
 	{
 		that = next.next;
@@ -176,11 +187,13 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	/**
 	 * Move counterclockwise to the following edge with the same origin.
 	 */
+	@Override
 	public final AbstractHalfEdge nextOrigin()
 	{
 		return next.next.sym();
 	}
 	
+	@Override
 	public final AbstractHalfEdge nextOrigin(AbstractHalfEdge that)
 	{
 		that = next.next.sym();
@@ -306,6 +319,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @return <code>true</code> if this HalfEdge has all these
 	 * attributes set, <code>false</code> otherwise.
 	 */
+	@Override
 	public final boolean hasAttributes(int attr)
 	{
 		return (attributes & attr) != 0;
@@ -316,6 +330,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *
 	 * @param attr  the attribute of this edge.
 	 */
+	@Override
 	public final void setAttributes(int attr)
 	{
 		attributes |= attr;
@@ -326,6 +341,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *
 	 * @param attr   the attributes of this edge to clear out.
 	 */
+	@Override
 	public final void clearAttributes(int attr)
 	{
 		attributes &= ~attr;
@@ -336,6 +352,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *
 	 * @return the start vertex of this edge.
 	 */
+	@Override
 	public final Vertex origin()
 	{
 		return tri.vertex[next3[localNumber]];
@@ -346,6 +363,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *
 	 * @return the end vertex of this edge.
 	 */
+	@Override
 	public final Vertex destination()
 	{
 		return tri.vertex[prev3[localNumber]];
@@ -356,6 +374,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *
 	 * @return the apex of this edge.
 	 */
+	@Override
 	public final Vertex apex()
 	{
 		return tri.vertex[localNumber];
@@ -389,6 +408,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * If a boundary is reached, loop backward until another
 	 * boundary is found and start again from there.
 	 */
+	@Override
 	public final AbstractHalfEdge nextOriginLoop()
 	{
 		HalfEdge ret = this;
@@ -498,6 +518,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *          '                    '
 	 *          o                    o
 	 */
+	@Override
 	public final AbstractHalfEdge swap()
 	{
 		return HEswap();
@@ -583,6 +604,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @return the area of this triangle.
 	 * Warning: this method uses temp[0], temp[1] and temp[2] temporary arrays.
 	 */
+	@Override
 	public double area()
 	{
 		double [] p0 = origin().getUV();
@@ -606,6 +628,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *    an inverted triangle, <code>true</code> otherwise.
 	 * Warning: this method uses temp[0], temp[1], temp[2] and temp[3] temporary arrays.
 	 */
+	@Override
 	public final boolean checkNewRingNormals(double [] newpt)
 	{
 		//  Loop around apex to check that triangles will not be inverted
@@ -638,6 +661,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @param n the resulting vertex
 	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise.
 	 */
+	@Override
 	public final boolean canCollapse(AbstractVertex n)
 	{
 		if (!checkInversion((Vertex) n))
@@ -718,6 +742,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * TODO: Attributes are not checked.
 	 * @param n the resulting vertex
 	 */
+	@Override
 	public final AbstractHalfEdge collapse(AbstractMesh m, AbstractVertex n)
 	{
 		return HEcollapse((Mesh) m, (Vertex) n);
@@ -850,6 +875,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *
 	 * @param n the resulting vertex
 	 */
+	@Override
 	public final AbstractHalfEdge split(AbstractMesh m, AbstractVertex n)
 	{
 		HEsplit((Mesh) m, (Vertex) n);
@@ -950,6 +976,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		n2.clearAttributes(BOUNDARY | NONMANIFOLD);
 	}
 	
+	@Override
 	public String toString()
 	{
 		StringBuffer r = new StringBuffer();

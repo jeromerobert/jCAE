@@ -225,6 +225,7 @@ public class AdjacencyHE implements AdjacencyWrapper
 			return "xxx";
 	}
 
+	@Override
 	public String toString()
 	{
 		StringBuffer r = new StringBuffer(50);

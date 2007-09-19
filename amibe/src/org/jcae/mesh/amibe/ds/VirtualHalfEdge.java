@@ -210,6 +210,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *
 	 * @return the triangle tied to this object.
 	 */
+	@Override
 	public final Triangle getTri()
 	{
 		return tri;
@@ -220,6 +221,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *
 	 * @return the edge local number.
 	 */
+	@Override
 	public final int getLocalNumber()
 	{
 		return localNumber;
@@ -259,6 +261,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @return <code>true</code> if this VirtualHalfEdge has all these
 	 * attributes set, <code>false</code> otherwise.
 	 */
+	@Override
 	public final boolean hasAttributes(int attr)
 	{
 		return (attributes & attr) != 0;
@@ -269,6 +272,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *
 	 * @param attr  the attribute of this oriented triangle.
 	 */
+	@Override
 	public final void setAttributes(int attr)
 	{
 		attributes |= attr;
@@ -280,6 +284,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *
 	 * @param attr   the attributes of this oriented triangle to clear out.
 	 */
+	@Override
 	public final void clearAttributes(int attr)
 	{
 		attributes &= ~attr;
@@ -348,6 +353,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		that.pullAttributes();
 	}
 	
+	@Override
 	public final AbstractHalfEdge sym(AbstractHalfEdge that)
 	{
 		VirtualHalfEdge dest = (VirtualHalfEdge) that;
@@ -360,6 +366,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/**
 	 * Move to the symmetric edge.
 	 */
+	@Override
 	public final AbstractHalfEdge sym()
 	{
 		int neworient = tri.getAdjLocalNumber(localNumber);
@@ -384,6 +391,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		that.pullAttributes();
 	}
 	
+	@Override
 	public final AbstractHalfEdge next(AbstractHalfEdge that)
 	{
 		VirtualHalfEdge dest = (VirtualHalfEdge) that;
@@ -396,6 +404,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/**
 	 * Move to the counterclockwaise following edge.
 	 */
+	@Override
 	public final AbstractHalfEdge next()
 	{
 		localNumber = next3[localNumber];
@@ -418,6 +427,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		that.pullAttributes();
 	}
 	
+	@Override
 	public final AbstractHalfEdge prev(AbstractHalfEdge that)
 	{
 		VirtualHalfEdge dest = (VirtualHalfEdge) that;
@@ -430,6 +440,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/**
 	 * Move to the counterclockwaise previous edge.
 	 */
+	@Override
 	public final AbstractHalfEdge prev()
 	{
 		localNumber = prev3[localNumber];
@@ -444,6 +455,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
+	@Override
 	public final AbstractHalfEdge nextOrigin(AbstractHalfEdge that)
 	{
 		return prev(that).sym();
@@ -452,6 +464,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/**
 	 * Move counterclockwaise to the following edge with the same origin.
 	 */
+	@Override
 	public final AbstractHalfEdge nextOrigin()
 	{
 		return prev().sym();
@@ -590,6 +603,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * this is sometimes needed, as in VirtualHalfEdge2D.removeDegenerated().
 	 * They have to be explicitly filtered out by testing hasAttributes(OUTER).
 	 */
+	@Override
 	public final AbstractHalfEdge nextOriginLoop()
 	{
 		if (hasAttributes(OUTER) && hasAttributes(BOUNDARY | NONMANIFOLD))
@@ -614,6 +628,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *
 	 * @return the start vertex of this edge.
 	 */
+	@Override
 	public Vertex origin()
 	{
 		return tri.vertex[next3[localNumber]];
@@ -624,6 +639,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *
 	 * @return the end vertex of this edge.
 	 */
+	@Override
 	public Vertex destination()
 	{
 		return tri.vertex[prev3[localNumber]];
@@ -634,6 +650,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *
 	 * @return the apex of this edge.
 	 */
+	@Override
 	public Vertex apex()
 	{
 		return tri.vertex[localNumber];
@@ -678,6 +695,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *
 	 * @param sym  the triangle bond to this one.
 	 */
+	@Override
 	public final void glue(AbstractHalfEdge sym)
 	{
 		VHglue((VirtualHalfEdge) sym);
@@ -696,6 +714,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *
 	 * @return the triangle bond to this one if this edge is manifold, or an Object otherwise.
 	 */
+	@Override
 	public final Object getAdj()
 	{
 		return tri.getAdj(localNumber);
@@ -706,6 +725,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *
 	 * @param link  the triangle bond to this one if this edge is manifold, or an Object otherwise.
 	 */
+	@Override
 	public final void setAdj(Object link)
 	{
 		tri.setAdj(localNumber, link);
@@ -778,6 +798,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @return the area of this triangle.
 	 * Warning: this method uses tempD, tempD1 and tempD2 temporary arrays.
 	 */
+	@Override
 	public double area()
 	{
 		double [] p0 = origin().getUV();
@@ -876,6 +897,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *          '                    '
 	 *          o                    o
 	 */
+	@Override
 	public final AbstractHalfEdge swap()
 	{
 		VHswap();
@@ -951,6 +973,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *    an inverted triangle, <code>true</code> otherwise.
 	 * Warning: this method uses temp[0], temp[1], temp[2] and temp[3] temporary arrays.
 	 */
+	@Override
 	public final boolean checkNewRingNormals(double [] newpt)
 	{
 		//  Loop around apex to check that triangles will not be inverted
@@ -982,6 +1005,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @param n the resulting vertex
 	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise.
 	 */
+	@Override
 	public final boolean canCollapse(AbstractVertex n)
 	{
 		/*  
@@ -1100,6 +1124,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * TODO: Attributes are not checked.
 	 * @param n the resulting vertex
 	 */
+	@Override
 	public final AbstractHalfEdge collapse(AbstractMesh m, AbstractVertex n)
 	{
 		VHcollapse((Mesh) m, (Vertex) n);
@@ -1205,6 +1230,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *
 	 * @param n the resulting vertex
 	 */
+	@Override
 	public final AbstractHalfEdge split(AbstractMesh m, AbstractVertex n)
 	{
 		VHsplit((Mesh) m, (Vertex) n);
@@ -1351,6 +1377,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		return r;
 	}
 	
+	@Override
 	public String toString()
 	{
 		String r = "Local number: "+localNumber;

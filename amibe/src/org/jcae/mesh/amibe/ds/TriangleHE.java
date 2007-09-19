@@ -29,6 +29,7 @@ public class TriangleHE extends Triangle
 		adj = new AdjacencyHE();
 	}
 
+	@Override
 	public AbstractHalfEdge getAbstractHalfEdge()
 	{
 		return ((AdjacencyHE) adj).getHalfEdge(0);

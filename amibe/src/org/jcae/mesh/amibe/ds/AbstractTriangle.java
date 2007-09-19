@@ -112,6 +112,7 @@ public class AbstractTriangle
 		return writable;
 	}
 	
+	@Override
 	public String toString()
 	{
 		StringBuffer r = new StringBuffer();

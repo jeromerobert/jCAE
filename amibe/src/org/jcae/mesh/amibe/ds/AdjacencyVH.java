@@ -320,6 +320,7 @@ public class AdjacencyVH implements AdjacencyWrapper
 		}
 	}
 	
+	@Override
 	public String toString()
 	{
 		StringBuffer r = new StringBuffer();
