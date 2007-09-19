@@ -84,7 +84,6 @@ public class MeshOEMMViewer3d
 		FPSBehavior fpsB = new FPSBehavior();
 		fpsB.setSchedulingBounds(new BoundingSphere(new Point3d(), Double.MAX_VALUE));
 		fpsB.addPropertyChangeListener(new PropertyChangeListener() {
-			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
 				logger.info("FPS>" + evt.getNewValue());
 			}
