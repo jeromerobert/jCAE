@@ -222,7 +222,7 @@ public class MeshReader extends Storage
 			logger.debug("Reading "+current.vn+" vertices from "+getVerticesFile(oemm, current));
 			Vertex [] vert = new Vertex[current.vn];
 			double [] xyz = new double[3];
-			List<TIntArrayList> listAdjacentLeaves = (List<TIntArrayList>) readAdjacencyFile(oemm, current, leaves);
+			List<TIntArrayList> listAdjacentLeaves = readAdjacencyFile(oemm, current, leaves);
 			FileChannel fc = new FileInputStream(getVerticesFile(oemm, current)).getChannel();
 			bb.clear();
 			DoubleBuffer bbD = bb.asDoubleBuffer();

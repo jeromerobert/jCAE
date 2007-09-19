@@ -123,8 +123,8 @@ public class OCCShapeBuilder extends CADShapeBuilder
 	public CADShape newShape(CADShape o1, CADShape o2, char type)
 	{
 		CADShape res = null;
-		TopoDS_Shape s1 = (TopoDS_Shape) ((OCCShape) o1).getShape();
-		TopoDS_Shape s2 = (TopoDS_Shape) ((OCCShape) o2).getShape();
+		TopoDS_Shape s1 = ((OCCShape) o1).getShape();
+		TopoDS_Shape s2 = ((OCCShape) o2).getShape();
 /* With libOccJava
 		short t = -1;
 		if (type == 'u')
