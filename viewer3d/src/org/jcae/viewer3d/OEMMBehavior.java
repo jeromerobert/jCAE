@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.lang.ref.SoftReference;
 import gnu.trove.TIntHashSet;
 
 
@@ -53,8 +54,6 @@ import org.jcae.viewer3d.cad.ViewableCAD;
 import org.jcae.viewer3d.cad.occ.OCCProvider;
 import org.apache.log4j.Logger;
 
-import com.sun.jmx.remote.util.CacheMap;
-
 /**
  * Dynamically hide and show voxel in a OEMM viewer
  */
@@ -74,7 +73,7 @@ public class OEMMBehavior extends Behavior
 		private Mesh mesh;
 		private int nrTriangles;
 
-		public ViewHolder(Integer id, Mesh mesh)
+		public ViewHolder(int id, Mesh mesh)
 		{
 			super();
 			this.id = id;
@@ -82,7 +81,7 @@ public class OEMMBehavior extends Behavior
 			this.nrTriangles = mesh.getTriangles().size();
 		}
 
-		public ViewHolder(Integer id, BranchGroup viewElem)
+		public ViewHolder(int id, BranchGroup viewElem)
 		{
 			super();
 			this.viewElem = viewElem;
@@ -161,7 +160,7 @@ public class OEMMBehavior extends Behavior
 	
 	private Map<Integer, ViewHolder> visibleFineOemmNodeId2BranchGroup = new HashMap<Integer, ViewHolder>();
 	
-	private Map<Integer, ViewHolder> cacheOemmNodeId2BranchGroup ;
+	private SoftReference[] cacheOemmNodeId2BranchGroup ;
 	
 	private BranchGroup visibleMeshBranchGroup = new BranchGroup();
 	
@@ -170,7 +169,7 @@ public class OEMMBehavior extends Behavior
 		
 		visibleMeshBranchGroup.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
 		visibleMeshBranchGroup.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
-		cacheOemmNodeId2BranchGroup = new CacheMap(100);
+		cacheOemmNodeId2BranchGroup = new SoftReference[oemm.getNumberOfLeaves()];
 		canvas.add(new ViewableBG(visibleMeshBranchGroup));
 		boolean cloneBoundaryTriangles = Boolean.getBoolean("org.jcae.viewer3d.OEMMBehavior.cloneBoundaryTriangles");
 		
@@ -185,7 +184,7 @@ public class OEMMBehavior extends Behavior
 		{
 			Integer II = Integer.valueOf(i);
 			Mesh mesh = coarseReader.getMesh(i);
-			ViewHolder vh = new ViewHolder(II, mesh);
+			ViewHolder vh = new ViewHolder(i, mesh);
 			coarseOemmNodeId2BranchGroup.put(II, vh);
 			vh.setViewElem(OEMMViewer.meshOEMM(mesh));
 			addBranchGroup(vh, true);
@@ -372,7 +371,12 @@ public class OEMMBehavior extends Behavior
 		if (logger.isInfoEnabled()) {
 			logger.info("Fine occtree nodes> " + ids);
 		}
-		if(!getIds().containsAll(ids) || ids.size()==0)
+		boolean containsAll = (ids.size() > 0);
+		if (containsAll)
+		{
+			containsAll = getIds().containsAll(ids);
+		}
+		if(!containsAll)
 		{
 			oemmActive=ids.size()>0;
 			if (logger.isDebugEnabled()) {
@@ -478,21 +482,23 @@ public class OEMMBehavior extends Behavior
 	
 	}
 
-	private ViewHolder getFineMeshFromCache(Integer arg0)
+	private ViewHolder getFineMeshFromCache(int arg0)
 	{
-		ViewHolder vh = cacheOemmNodeId2BranchGroup.get(arg0);
+		ViewHolder vh = null;
+		if (cacheOemmNodeId2BranchGroup[arg0] != null)
+			vh = (ViewHolder) cacheOemmNodeId2BranchGroup[arg0].get();
 		if (vh == null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("finemesh node:" + arg0 + " is not loaded and I will load it.");
 			}
 			
 			TIntHashSet set = new TIntHashSet();
-			set.add(arg0.intValue());
+			set.add(arg0);
 			Mesh mesh = fineReader.buildMesh(set);
 			vh = new ViewHolder(arg0, OEMMViewer.meshOEMM(mesh));
 			vh.nrTriangles = mesh.getTriangles().size();
 
-			cacheOemmNodeId2BranchGroup.put(arg0, vh);
+			cacheOemmNodeId2BranchGroup[arg0] = new SoftReference(vh);
 		}
 		return vh;
 	}
@@ -536,7 +542,13 @@ public class OEMMBehavior extends Behavior
 
 	public int getNumberOfCacheNodes()
 	{
-		return cacheOemmNodeId2BranchGroup.size();
+		int ret = 0;
+		for (SoftReference sr: cacheOemmNodeId2BranchGroup)
+		{
+			if (sr != null && sr.get() != null)
+				ret++;
+		}
+		return ret;
 	}
 
 	public int getNumberOfVisibleFineElements()

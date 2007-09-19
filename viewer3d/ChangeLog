@@ -1,3 +1,8 @@
+2007-09-19 16:20 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/OEMMBehavior.java: Replace proprietary
+	com.sun.jmx.remote.util.CacheMap by an array of SoftReference.
+
 2007-09-06 10:07 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/OEMMViewer.java: Remove all
