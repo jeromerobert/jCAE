@@ -27,31 +27,24 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.lang.ref.SoftReference;
 import gnu.trove.TIntHashSet;
 
 
 import javax.media.j3d.*;
-import javax.swing.JFrame;
-import javax.swing.WindowConstants;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.metrics.Matrix3D;
+import org.jcae.mesh.amibe.ds.AbstractVertex;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.oemm.OEMM;
-import org.jcae.mesh.oemm.Storage;
 import org.jcae.mesh.oemm.MeshReader;
 import org.jcae.viewer3d.bg.ViewableBG;
-import org.jcae.viewer3d.cad.ViewableCAD;
-import org.jcae.viewer3d.cad.occ.OCCProvider;
 import org.apache.log4j.Logger;
 
 /**
@@ -138,7 +131,7 @@ public class OEMMBehavior extends Behavior
 	}
 	
 	/** Utility field holding list of ChangeListeners. */
-	private transient java.util.ArrayList changeListenerList;
+	private transient java.util.ArrayList<ChangeListener> changeListenerList;
 	
 	/**
 	 * The square of the minimal distance between the eye and a displayed
@@ -160,7 +153,7 @@ public class OEMMBehavior extends Behavior
 	
 	private Map<Integer, ViewHolder> visibleFineOemmNodeId2BranchGroup = new HashMap<Integer, ViewHolder>();
 	
-	private SoftReference[] cacheOemmNodeId2BranchGroup ;
+	private SoftReference<ViewHolder>[] cacheOemmNodeId2BranchGroup ;
 	
 	private BranchGroup visibleMeshBranchGroup = new BranchGroup();
 	
@@ -201,7 +194,7 @@ public class OEMMBehavior extends Behavior
 		wakeupFrame=new WakeupOnElapsedFrames(1);
 		wakeupTransf=new WakeupOnTransformChange(
 			view.getViewingPlatform().getViewPlatformTransform());
-		maxNumberOfTriangles = Long.getLong("org.jcae.viewer3d.OEMMBehavior.maxNumberOfTriangles", DEFAULT_MAX_TRIANGLES_NBR);
+		maxNumberOfTriangles = Long.getLong("org.jcae.viewer3d.OEMMBehavior.maxNumberOfTriangles", DEFAULT_MAX_TRIANGLES_NBR).longValue();
 		if (logger.isInfoEnabled()) {
 			logger.info("Maximal number of triangles: " + maxNumberOfTriangles);
 		}
@@ -225,8 +218,8 @@ public class OEMMBehavior extends Behavior
 //				(coords[n+0]+coords[n+6*4*3-6])/2,
 //				(coords[n+1]+coords[n+6*4*3-5])/2,
 //				(coords[n+2]+coords[n+6*4*3-4])/2);
-			ViewHolder vh = coarseOemmNodeId2BranchGroup.get(i);
-			Collection nodes = vh.mesh.getNodes();
+			ViewHolder vh = coarseOemmNodeId2BranchGroup.get(Integer.valueOf(i));
+			Collection<AbstractVertex> nodes = vh.mesh.getNodes();
 			if (getAveragePointForVertices(nodes, values)) {
 				voxels[i]=new Point3d(values[0], values[1], values[2]);
 			} else {
@@ -248,7 +241,7 @@ public class OEMMBehavior extends Behavior
 	public synchronized void addChangeListener(ChangeListener listener)
 	{
 		if (changeListenerList == null ) {
-			changeListenerList = new java.util.ArrayList ();
+			changeListenerList = new java.util.ArrayList<ChangeListener> ();
 		}
 		changeListenerList.add (listener);
 	}		
@@ -259,16 +252,16 @@ public class OEMMBehavior extends Behavior
 	 */
 	private void fireChangeListenerStateChanged()
 	{
-		java.util.ArrayList list;
+		java.util.ArrayList<ChangeListener> list;
 		synchronized (this) {
 			if (changeListenerList == null) return;
-			list = (java.util.ArrayList)changeListenerList.clone ();
+			list = (java.util.ArrayList<ChangeListener>)changeListenerList.clone ();
 		}
-		for (int i = 0; i < list.size (); i++) {
-			((ChangeListener)list.get (i)).stateChanged(this);
-		}
+		for (ChangeListener cl: list)
+			cl.stateChanged(this);
 	}
 
+	@Override
 	public void initialize()
 	{
 		d2limit=d2limit/Math.tan(view.getView().getFieldOfView()/2);
@@ -281,6 +274,7 @@ public class OEMMBehavior extends Behavior
 		return oemmActive;
 	}
 
+	@Override
 	public void processStimulus(Enumeration arg0)
 	{
 		if(arg0.nextElement() instanceof WakeupOnTransformChange)
@@ -313,7 +307,7 @@ public class OEMMBehavior extends Behavior
 					double distanceFromCenter_2 = distanceOfPointFromLine(vp.getStartPoint(), vp.getEye(), voxels[i]);
 					helper.add(new VoxelSortHelper((float) (distance_2 + distanceFromCenter_2 / distance_2), i));
 				} else {
-					ids.add(i);
+					ids.add(Integer.valueOf(i));
 				}
 			}
 		
@@ -324,7 +318,7 @@ public class OEMMBehavior extends Behavior
 				long newTotalNumber = totalNumberTriangles + oemm.leaves[voxel.voxelIndex].tn;
 				if (newTotalNumber < maxNumberOfTriangles ) {
 					totalNumberTriangles = newTotalNumber;
-					ids.add(voxel.voxelIndex);
+					ids.add(Integer.valueOf(voxel.voxelIndex));
 				} else {
 					break;
 				}
@@ -457,7 +451,7 @@ public class OEMMBehavior extends Behavior
 	{
 		int nrTriangles = 0;
 		for (Integer arg0: ids) {
-			ViewHolder vh = getFineMeshFromCache(arg0);
+			ViewHolder vh = getFineMeshFromCache(arg0.intValue());
 			if (!visibleFineOemmNodeId2BranchGroup.containsKey(arg0)) {
 				visibleFineOemmNodeId2BranchGroup.put(arg0, vh);
 				addViewHolderToBranchGroup(arg0, visibleFineOemmNodeId2BranchGroup);
@@ -473,7 +467,7 @@ public class OEMMBehavior extends Behavior
 	{
 		ViewHolder vh = null;
 		if (cacheOemmNodeId2BranchGroup[arg0] != null)
-			vh = (ViewHolder) cacheOemmNodeId2BranchGroup[arg0].get();
+			vh = cacheOemmNodeId2BranchGroup[arg0].get();
 		if (vh == null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("finemesh node:" + arg0 + " is not loaded and I will load it.");
@@ -485,7 +479,7 @@ public class OEMMBehavior extends Behavior
 			vh = new ViewHolder(arg0, OEMMViewer.meshOEMM(mesh));
 			vh.nrTriangles = mesh.getTriangles().size();
 
-			cacheOemmNodeId2BranchGroup[arg0] = new SoftReference(vh);
+			cacheOemmNodeId2BranchGroup[arg0] = new SoftReference<ViewHolder>(vh);
 		}
 		return vh;
 	}
@@ -496,27 +490,27 @@ public class OEMMBehavior extends Behavior
 	 * @param result vector for store result
 
 	 */
-	private boolean getAveragePointForVertices(Collection vertices, double[] result)
+	private boolean getAveragePointForVertices(Collection<AbstractVertex> vertices, double[] result)
 	{
 		int count = 0;
-		for (int ii = 0; ii < result.length; ii++) {
-			result[ii] = 0;
+		for (int i = 0; i < result.length; i++) {
+			result[i] = 0.0;
 		}
-		for (Iterator i = vertices.iterator(); i.hasNext();)
+		for (AbstractVertex av: vertices)
 		{
-			Vertex v = (Vertex) i.next();
+			Vertex v = (Vertex) av;
 			if (!v.isReadable())
 				continue;
 			count++;
 			double []coords = v.getUV();
-			for (int ii = 0; ii < result.length; ii++) {
-				result[ii] += coords[ii] ;
+			for (int i = 0; i < result.length; i++) {
+				result[i] += coords[i] ;
 			}
 		}
 		if (count > 0) {
 			double size = count;
-			for (int ii = 0; ii < result.length; ii++) {
-				result[ii] /= size;
+			for (int i = 0; i < result.length; i++) {
+				result[i] /= size;
 			}
 		}
 		return count > 0;
@@ -530,7 +524,7 @@ public class OEMMBehavior extends Behavior
 	public int getNumberOfCacheNodes()
 	{
 		int ret = 0;
-		for (SoftReference sr: cacheOemmNodeId2BranchGroup)
+		for (SoftReference<ViewHolder> sr: cacheOemmNodeId2BranchGroup)
 		{
 			if (sr != null && sr.get() != null)
 				ret++;
