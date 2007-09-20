@@ -48,7 +48,7 @@ public class MeshWriter
 	/**
 	 * Used by {@link writeObject}
 	 */
-	private static Element writeObjectNodes(Document document, ArrayList<Vertex> nodelist, Vertex outer, File nodesFile, File refFile, String baseDir, TObjectIntHashMap nodeIndex)
+	private static Element writeObjectNodes(Document document, ArrayList<Vertex> nodelist, Vertex outer, File nodesFile, File refFile, String baseDir, TObjectIntHashMap<Vertex> nodeIndex)
 		throws IOException
 	{
 		//save nodes
@@ -108,7 +108,7 @@ public class MeshWriter
 	/**
 	 * Used by {@link writeObject}
 	 */
-	private static Element writeObjectTriangles(Document document, Collection<AbstractTriangle> trianglelist, File trianglesFile, String baseDir, TObjectIntHashMap nodeIndex)
+	private static Element writeObjectTriangles(Document document, Collection<AbstractTriangle> trianglelist, File trianglesFile, String baseDir, TObjectIntHashMap<Vertex> nodeIndex)
 		throws IOException
 	{
 		//save triangles
@@ -137,13 +137,13 @@ public class MeshWriter
 	{
 		logger.debug("begin writing "+groupsFile);
 		int i=0;
-		TIntObjectHashMap groupMap = new TIntObjectHashMap();
+		TIntObjectHashMap<TIntArrayList> groupMap = new TIntObjectHashMap<TIntArrayList>();
 		for(AbstractTriangle f: trianglelist)
 		{
 			if (!f.isWritable())
 				continue;
 			int id = f.getGroupId();
-			TIntArrayList list = (TIntArrayList) groupMap.get(id);
+			TIntArrayList list = groupMap.get(id);
 			if (list == null)
 			{
 				list = new TIntArrayList(100);
@@ -162,7 +162,7 @@ public class MeshWriter
 		return wgp.getGroupsElement();
 	}
 	
-	private static final class WriteGroupProcedure implements TIntObjectProcedure {
+	private static final class WriteGroupProcedure implements TIntObjectProcedure<TIntArrayList> {
 		private DataOutputStream out;
 		private Document document;
 		private Element groups;
@@ -179,8 +179,7 @@ public class MeshWriter
 		{
 			return groups;
 		}
-		public final boolean execute(int key, Object value) {
-			TIntArrayList list = (TIntArrayList) value;
+		public final boolean execute(int key, TIntArrayList list) {
 			int nrTriangles = 0;
 			try
 			{
@@ -251,7 +250,7 @@ public class MeshWriter
 					}
 				}
 			}
-			TObjectIntHashMap nodeIndex=new TObjectIntHashMap(nodelist.size());
+			TObjectIntHashMap<Vertex> nodeIndex=new TObjectIntHashMap<Vertex>(nodelist.size());
 			
 			// Create and fill the DOM
 			Document document=JCAEXMLWriter.createJcaeDocument();
@@ -328,7 +327,7 @@ public class MeshWriter
 				}
 			}
 			nodeset.clear();
-			TObjectIntHashMap nodeIndex=new TObjectIntHashMap(nodelist.size());
+			TObjectIntHashMap<Vertex> nodeIndex=new TObjectIntHashMap<Vertex>(nodelist.size());
 			
 			// Create and fill the DOM
 			Document document=JCAEXMLWriter.createJcaeDocument();

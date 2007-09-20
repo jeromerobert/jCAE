@@ -39,7 +39,7 @@ public class MESHReader
 	public static Mesh readMesh(String file)
 	{
 		Mesh mesh = new Mesh();
-		TIntObjectHashMap nodesmap = null;
+		TIntObjectHashMap<Vertex> nodesmap = null;
 		String line = "";
 		try
 		{
@@ -61,10 +61,10 @@ public class MESHReader
 		return mesh;
 	}
 
-	private static TIntObjectHashMap readNodes(Mesh m, BufferedReader rd)
+	private static TIntObjectHashMap<Vertex> readNodes(Mesh m, BufferedReader rd)
 	{
 		logger.debug("Reading nodes");
-		TIntObjectHashMap nodesmap = null;
+		TIntObjectHashMap<Vertex> nodesmap = null;
 		double x,y,z;
 		String line = "";
 		int nrNodes = 0;
@@ -72,7 +72,7 @@ public class MESHReader
 		{
 			line = rd.readLine();
 			nrNodes = Integer.valueOf(line).intValue();
-			nodesmap = new TIntObjectHashMap(nrNodes);
+			nodesmap = new TIntObjectHashMap<Vertex>(nrNodes);
 			for (int i = 1; i <= nrNodes; i++)
 			{
 				line = rd.readLine();
@@ -100,7 +100,7 @@ public class MESHReader
 		return nodesmap;
 	}
 
-	private static void readFace(BufferedReader rd, Mesh mesh, TIntObjectHashMap nodesmap)
+	private static void readFace(BufferedReader rd, Mesh mesh, TIntObjectHashMap<Vertex> nodesmap)
 	{
 		logger.debug("Reading tetrahedra");
 		String line = "";
@@ -117,7 +117,7 @@ public class MESHReader
 				for (int j = 0; j < 4; j++)
 				{
 					int p = Integer.valueOf(st.nextToken()).intValue();
-					v[j] = (Vertex) nodesmap.get(p);
+					v[j] = nodesmap.get(p);
 					if (v[j] == null)
 						throw new RuntimeException();
 				}

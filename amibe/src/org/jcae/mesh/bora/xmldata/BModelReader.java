@@ -82,7 +82,7 @@ public class BModelReader
 			if (constraints != null)
 			{
 				NodeList hypList = (NodeList) xpath.evaluate("hypothesis", constraints, XPathConstants.NODESET);
-				TIntObjectHashMap hypIdMap = new TIntObjectHashMap(hypList.getLength());
+				TIntObjectHashMap<Hypothesis> hypIdMap = new TIntObjectHashMap<Hypothesis>(hypList.getLength());
 				for (int i = 0, n = hypList.getLength(); i < n; i++)
 				{
 					Node hypNode = hypList.item(i);
@@ -100,14 +100,14 @@ public class BModelReader
 						h.setDeflection(Double.parseDouble(deflection));
 				}
 				NodeList consList = (NodeList) xpath.evaluate("constraint", constraints, XPathConstants.NODESET);
-				TIntObjectHashMap consIdMap = new TIntObjectHashMap(consList.getLength());
+				TIntObjectHashMap<Constraint> consIdMap = new TIntObjectHashMap<Constraint>(consList.getLength());
 				for (int i = 0, n = consList.getLength(); i < n; i++)
 				{
 					Node consNode = consList.item(i);
 					int id = Integer.parseInt(xpath.evaluate("@id", consNode));
 					int cId = Integer.parseInt(xpath.evaluate("cadId/text()", consNode));
 					int hId = Integer.parseInt(xpath.evaluate("hypId/text()", consNode));
-					Constraint c = new Constraint(model.getGraph().getById(cId), (Hypothesis) hypIdMap.get(hId));
+					Constraint c = new Constraint(model.getGraph().getById(cId), hypIdMap.get(hId));
 					consIdMap.put(id, c);
 				}
 				NodeList subList = (NodeList) xpath.evaluate("submesh", constraints, XPathConstants.NODESET);
@@ -117,7 +117,7 @@ public class BModelReader
 					BSubMesh s = model.newMesh();
 					String [] c = subNode.getAttributes().getNamedItem("list").getNodeValue().split(",");
 					for (int j = 0; j < c.length; j++)
-						s.add((Constraint) consIdMap.get(Integer.parseInt(c[j])));
+						s.add(consIdMap.get(Integer.parseInt(c[j])));
 				}
 				model.computeConstraints();
 			}

@@ -110,7 +110,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	private static Logger logger=Logger.getLogger(DecimateHalfEdge.class);
 	private Quadric3DError.Placement placement = Quadric3DError.Placement.OPTIMAL;
 	private HashMap<Vertex, Quadric3DError> quadricMap = null;
-	private TObjectIntHashMap labelMap = null;
+	private TObjectIntHashMap<Vertex> labelMap = null;
 	private Vertex v3;
 	private Quadric3DError q3 = new Quadric3DError();
 	// vCostOpt and qCostOpt must be used only by cost() method.
@@ -177,7 +177,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		// TODO: Check if HalfEdge.notOriented() is still needed.
 		int label = 0;
 		quadricMap = new HashMap<Vertex, Quadric3DError>(roughNrNodes);
-		labelMap = new TObjectIntHashMap(roughNrNodes);
+		labelMap = new TObjectIntHashMap<Vertex>(roughNrNodes);
 		for (AbstractTriangle af: mesh.getTriangles())
 		{
 			if (!af.isWritable())
@@ -282,7 +282,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		try
 		{
 			quadricMap = (HashMap<Vertex, Quadric3DError>) q.readObject();
-			labelMap = (TObjectIntHashMap) q.readObject();
+			labelMap = (TObjectIntHashMap<Vertex>) q.readObject();
 		}
 		catch (final ClassNotFoundException ex)
 		{

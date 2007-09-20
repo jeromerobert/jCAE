@@ -50,9 +50,9 @@ public class MeshReader extends Storage
 	
 	private final OEMM oemm;
 	// Map between octant index and Mesh instance.
-	private TIntObjectHashMap mapNodeToMesh = null;
+	private TIntObjectHashMap<Mesh> mapNodeToMesh = null;
 	// Map between octant index and a list of vertices from adjacent triangles so that all triangles are readable
-	private TIntObjectHashMap mapNodeToNonReadVertexList = null;
+	private TIntObjectHashMap<List<FakeNonReadVertex>> mapNodeToNonReadVertexList = null;
 
 	/**
 	 * Buffer size.  Vertices and triangles are read through buffers to improve
@@ -89,7 +89,7 @@ public class MeshReader extends Storage
 	public void setLoadNonReadableTriangles(boolean loadNonReadableTriangles)
 	{
 		if (loadNonReadableTriangles)
-			mapNodeToNonReadVertexList = new TIntObjectHashMap();
+			mapNodeToNonReadVertexList = new TIntObjectHashMap<List<FakeNonReadVertex>>();
 		else
 			mapNodeToNonReadVertexList = null;
 	}
@@ -106,17 +106,17 @@ public class MeshReader extends Storage
 			mtb.addNodeList();
 		if (!mtb.hasTriangles())
 			mtb.addTriangleList();
-		mapNodeToMesh = new TIntObjectHashMap(oemm.getNumberOfLeaves());
+		mapNodeToMesh = new TIntObjectHashMap<Mesh>(oemm.getNumberOfLeaves());
 		for(OEMM.Node current: oemm.leaves)
 			mapNodeToMesh.put(current.leafIndex, new Mesh(mtb));
-		mapNodeToNonReadVertexList = new TIntObjectHashMap();
+		mapNodeToNonReadVertexList = new TIntObjectHashMap<List<FakeNonReadVertex>>();
 		TIntHashSet loadedLeaves = new TIntHashSet();
 		for(OEMM.Node current: oemm.leaves)
 		{
-			Mesh mesh = (Mesh) mapNodeToMesh.get(current.leafIndex);
+			Mesh mesh = mapNodeToMesh.get(current.leafIndex);
 			loadedLeaves.clear();
 			loadedLeaves.add(current.leafIndex);
-			TIntObjectHashMap vertMap = new TIntObjectHashMap();
+			TIntObjectHashMap<Vertex> vertMap = new TIntObjectHashMap<Vertex>();
 			readVertices(loadedLeaves, mesh, vertMap, current);
 			readTriangles(loadedLeaves, mesh, vertMap, current);
 			buildMeshAdjacency(mesh, vertMap);
@@ -136,7 +136,7 @@ public class MeshReader extends Storage
 	{
 		if (mapNodeToMesh == null)
 			throw new RuntimeException("Error: buildMeshes() must be called first!");
-		return (Mesh) mapNodeToMesh.get(leafIndex);
+		return mapNodeToMesh.get(leafIndex);
 	}
 
 	/**
@@ -195,7 +195,7 @@ public class MeshReader extends Storage
 		if (mapNodeToNonReadVertexList != null)
 			mapNodeToNonReadVertexList.clear();
 		
-		TIntObjectHashMap vertMap = new TIntObjectHashMap();
+		TIntObjectHashMap<Vertex> vertMap = new TIntObjectHashMap<Vertex>();
 		
 		TIntArrayList sortedLeaves = new TIntArrayList(leaves.toArray());
 		sortedLeaves.sort();
@@ -215,7 +215,7 @@ public class MeshReader extends Storage
 	/**
 	 * Reads vertex coordinates, create Vertex instances and store them into a map.
 	 */
-	private void readVertices(TIntHashSet leaves, Mesh mesh, TIntObjectHashMap vertMap, OEMM.Node current)
+	private void readVertices(TIntHashSet leaves, Mesh mesh, TIntObjectHashMap<Vertex> vertMap, OEMM.Node current)
 	{
 		try
 		{
@@ -264,7 +264,7 @@ public class MeshReader extends Storage
 	/**
 	 * Reads triangle file, create Triangle instances and store them into mesh.
 	 */
-	private void readTriangles(TIntHashSet leaves, Mesh mesh, TIntObjectHashMap vertMap, OEMM.Node current)
+	private void readTriangles(TIntHashSet leaves, Mesh mesh, TIntObjectHashMap<Vertex> vertMap, OEMM.Node current)
 	{
 		try
 		{
@@ -297,20 +297,20 @@ public class MeshReader extends Storage
 						int globalIndex = oemm.leaves[leaf[j]].minIndex + pointIndex[j];
 						if (leaves.contains(leaf[j]))
 						{
-							vert[j] = (Vertex) vertMap.get(globalIndex);
+							vert[j] = vertMap.get(globalIndex);
 							assert vert[j] != null;
 						}
 						else
 						{
 							writable = false;
-							vert[j] = (Vertex) vertMap.get(globalIndex);
+							vert[j] = vertMap.get(globalIndex);
 							if (vert[j] == null) {
 								vert[j] = new FakeNonReadVertex(oemm, leaf[j], pointIndex[j]);
 								vertMap.put(globalIndex, vert[j]);
 								if (mapNodeToNonReadVertexList != null)
 								{
 									FakeNonReadVertex vertex = (FakeNonReadVertex) vert[j];
-									List<FakeNonReadVertex> vertices = (List<FakeNonReadVertex>) mapNodeToNonReadVertexList.get(leaf[j]);
+									List<FakeNonReadVertex> vertices = mapNodeToNonReadVertexList.get(leaf[j]);
 									if (vertices == null) {
 										vertices = new ArrayList<FakeNonReadVertex>();
 										mapNodeToNonReadVertexList.put(leaf[j], vertices);
@@ -333,7 +333,7 @@ public class MeshReader extends Storage
 								FakeNonReadVertex fnrVertex = (FakeNonReadVertex) vert[j];
 								int leafIndex = fnrVertex.getOEMMIndex();
 								if (!processedNode.contains(leafIndex)) {
-									Mesh altMesh = (Mesh) mapNodeToMesh.get(leafIndex);
+									Mesh altMesh = mapNodeToMesh.get(leafIndex);
 									createTriangle(leafIndex, vert, false, false, altMesh);
 									processedNode.add(leafIndex);
 								}
@@ -367,25 +367,25 @@ public class MeshReader extends Storage
 	/**
 	 * Builds mesh adjacency.
 	 */
-	private static void buildMeshAdjacency(Mesh mesh, TIntObjectHashMap vertMap)
+	private static void buildMeshAdjacency(Mesh mesh, TIntObjectHashMap<Vertex> vertMap)
 	{
 		if (!mesh.factory.hasAdjacency())
 			return;
 		// Remove dangling vertices which are not connected to any triangle.
 		int nrv = 0;
-		for (TIntObjectIterator it = vertMap.iterator(); it.hasNext(); )
+		for (TIntObjectIterator<Vertex> it = vertMap.iterator(); it.hasNext(); )
 		{
 			it.advance();
-			Vertex v = (Vertex) it.value();
+			Vertex v = it.value();
 			if (v.getLink() != null)
 				nrv++;
 		}
 		Vertex [] vertices = new Vertex[nrv];
 		nrv = 0;
-		for (TIntObjectIterator it = vertMap.iterator(); it.hasNext(); )
+		for (TIntObjectIterator<Vertex> it = vertMap.iterator(); it.hasNext(); )
 		{
 			it.advance();
-			Vertex v = (Vertex) it.value();
+			Vertex v = it.value();
 			if (v.getLink() != null)
 			{
 				vertices[nrv] = v;
@@ -409,11 +409,11 @@ public class MeshReader extends Storage
 			bb.rewind();
 			DoubleBuffer dbb = bb.asDoubleBuffer();
 			
-			for (TIntObjectIterator it = mapNodeToNonReadVertexList.iterator(); it.hasNext(); )
+			for (TIntObjectIterator<List<FakeNonReadVertex>> it = mapNodeToNonReadVertexList.iterator(); it.hasNext(); )
 			{
 				it.advance();
 				OEMM.Node node = oemm.leaves[it.key()];
-				List<FakeNonReadVertex> list = (List<FakeNonReadVertex>) it.value();
+				List<FakeNonReadVertex> list = it.value();
 				sortFakeNonReadVertexList(list);
 				FileChannel fch = null;
 				try {

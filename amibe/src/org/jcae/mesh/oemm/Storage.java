@@ -36,7 +36,6 @@ import java.nio.IntBuffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -193,7 +192,7 @@ public class Storage
 		removeNonReferencedVertices(mesh);
 		// For each Vertex, find its enclosing octant leaf.
 		// Side-effect: storedLeaves may be modified if new leaves have to be added.
-		TObjectIntHashMap mapVertexToLeafindex = getMapVertexToLeafindex(oemm, mesh, storedLeaves);
+		TObjectIntHashMap<Vertex> mapVertexToLeafindex = getMapVertexToLeafindex(oemm, mesh, storedLeaves);
 		storeVertices(oemm, mesh, storedLeaves, mapVertexToLeafindex);
 		storeTriangles(oemm, mesh, storedLeaves, mapVertexToLeafindex);
 		
@@ -215,7 +214,7 @@ public class Storage
 		//actually we do not need create map (set is enough) but we index with label of vertex 
 		// - it should be faster. Also, we could control that there is 
 		// no different vertices with the same label.
-		TIntObjectHashMap referencedVertices = getMapLabelToVertex(mesh);
+		TIntObjectHashMap<Vertex> referencedVertices = getMapLabelToVertex(mesh);
 		
 		TIntHashSet processedVertIndex = new TIntHashSet(referencedVertices.size());
 		for (Object o: referencedVertices.getValues()) 
@@ -244,9 +243,9 @@ public class Storage
 	 * @return a map of vertex label into vertex.
 	 * @throws RuntimeException There are different vertices with the same label in the mesh.
 	 */
-	private static TIntObjectHashMap getMapLabelToVertex(Mesh mesh)
+	private static TIntObjectHashMap<Vertex> getMapLabelToVertex(Mesh mesh)
 	{
-		TIntObjectHashMap referencedVertices = new TIntObjectHashMap(mesh.getTriangles().size() / 2);
+		TIntObjectHashMap<Vertex> referencedVertices = new TIntObjectHashMap<Vertex>(mesh.getTriangles().size() / 2);
 		for(AbstractTriangle tr: mesh.getTriangles())
 		{
 			for (int i = 0; i < 3; i++)
@@ -257,7 +256,7 @@ public class Storage
 				}
 				//check that there are no different vertices with the same label
 				int label = vertex.getLabel();
-				Vertex oldVertex = (Vertex) referencedVertices.get(label);
+				Vertex oldVertex = referencedVertices.get(label);
 				if (oldVertex != vertex)
 				{
 					if (oldVertex != null)
@@ -277,10 +276,10 @@ public class Storage
 	 * @param storedLeaves 
 	 * @param  
 	 */
-	private static TObjectIntHashMap getMapVertexToLeafindex(OEMM oemm, Mesh mesh, TIntHashSet storedLeaves)
+	private static TObjectIntHashMap<Vertex> getMapVertexToLeafindex(OEMM oemm, Mesh mesh, TIntHashSet storedLeaves)
 	{
 		int positions[] = new int[3];
-		TObjectIntHashMap ret = new TObjectIntHashMap(mesh.getNodes().size());
+		TObjectIntHashMap<Vertex> ret = new TObjectIntHashMap<Vertex>(mesh.getNodes().size());
 		for(AbstractVertex av: mesh.getNodes())
 		{
 			Vertex vertex = (Vertex) av;
@@ -305,11 +304,11 @@ public class Storage
 	 * @param mesh
 	 * @param storedLeaves  set of leaves to store
 	 */
-	private static void storeVertices(OEMM oemm, Mesh mesh, TIntHashSet storedLeaves, TObjectIntHashMap mapVertexToLeafindex)
+	private static void storeVertices(OEMM oemm, Mesh mesh, TIntHashSet storedLeaves, TObjectIntHashMap<Vertex> mapVertexToLeafindex)
 	{
-		TIntObjectHashMap mapLeafindexToVertexList = new TIntObjectHashMap(storedLeaves.size());
+		TIntObjectHashMap<ArrayList<Vertex>> mapLeafindexToVertexList = new TIntObjectHashMap<ArrayList<Vertex>>(storedLeaves.size());
 		byte[] byteBuffer = new byte[256];
-		TIntObjectHashMap old2newIndex = new TIntObjectHashMap();
+		TIntObjectHashMap<VertexIndexHolder> old2newIndex = new TIntObjectHashMap<VertexIndexHolder>();
 		TIntIntHashMap new2oldIndex = new TIntIntHashMap();
 		TIntHashSet nodes4Update = new TIntHashSet();
 		TIntHashSet addedNeighbour = new TIntHashSet();
@@ -323,11 +322,11 @@ public class Storage
 		
 		collectAllVertices(oemm, mesh, mapVertexToLeafindex, mapLeafindexToVertexList, movedVertices);
 
-		for (TIntObjectIterator it = mapLeafindexToVertexList.iterator(); it.hasNext();)
+		for (TIntObjectIterator<ArrayList<Vertex>> it = mapLeafindexToVertexList.iterator(); it.hasNext();)
 		{
 			it.advance();
 			Node node = oemm.leaves[it.key()];
-			List<Vertex> vertexList = (List<Vertex>) it.value();
+			List<Vertex> vertexList = it.value();
 			sortVertexList(vertexList);
 			
 			reindexVerticesInNode(node, vertexList, old2newIndex, new2oldIndex);
@@ -448,7 +447,7 @@ public class Storage
 	 * @param storedLeaves 
 	 * @param  
 	 */
-	private static void collectAllVertices(OEMM oemm, Mesh mesh, TObjectIntHashMap mapVertexToLeafindex, TIntObjectHashMap mapLeafindexToVertexList, TIntHashSet movedVertices)
+	private static void collectAllVertices(OEMM oemm, Mesh mesh, TObjectIntHashMap<Vertex> mapVertexToLeafindex, TIntObjectHashMap<ArrayList<Vertex>> mapLeafindexToVertexList, TIntHashSet movedVertices)
 	{
 		for(AbstractVertex av: mesh.getNodes())
 		{
@@ -456,7 +455,7 @@ public class Storage
 			assert mapVertexToLeafindex.containsKey(vertex);
 			int index = mapVertexToLeafindex.get(vertex);
 			assert mapLeafindexToVertexList.contains(index);
-			List<Vertex> vertices = (List<Vertex>) mapLeafindexToVertexList.get(index);
+			List<Vertex> vertices = mapLeafindexToVertexList.get(index);
 			if (vertices == null) {
 				throw new UnsupportedOperationException("Cannot put vertex into octree node: "+index+". Node is not loaded!");
 			}
@@ -506,7 +505,7 @@ public class Storage
 	 * @param new2oldIndex map of new label to old label
 	 */
 	private static void reindexVerticesInNode(Node node, List<Vertex> vertices,
-			TIntObjectHashMap old2newIndex,
+			TIntObjectHashMap<VertexIndexHolder> old2newIndex,
 			TIntIntHashMap new2oldIndex)
 	{
 		//assert node.vn == vertices.size();
@@ -581,7 +580,7 @@ public class Storage
 	 * @param nodes4Update
 	 * @param old2newIndex
 	 */
-	private static void updateNonReadNodes(OEMM oemm, TIntHashSet nodes4Update, TIntObjectHashMap old2newIndex)
+	private static void updateNonReadNodes(OEMM oemm, TIntHashSet nodes4Update, TIntObjectHashMap<VertexIndexHolder> old2newIndex)
 	{
 		int[] leaf = new int[3];
 		int[] localIndices = new int[3];
@@ -634,7 +633,7 @@ public class Storage
 					}
 					modified_triangle = true;
 					
-					VertexIndexHolder newIndex = (VertexIndexHolder) old2newIndex.get(globalIndexOfNode);
+					VertexIndexHolder newIndex = old2newIndex.get(globalIndexOfNode);
 					leaf[ii] = newIndex.getContainedNode().leafIndex;
 					localIndices[ii] = newIndex.getLocalIndex();
 					assert 0 <= localIndices[ii] && localIndices[ii] <= newIndex.containedNode.vn;
@@ -702,9 +701,9 @@ public class Storage
 	 * @param mesh
 	 * @param storedLeaves 
 	 */
-	private static void storeTriangles(OEMM oemm, Mesh mesh, TIntHashSet storedLeaves, TObjectIntHashMap mapVertexToLeafindex)
+	private static void storeTriangles(OEMM oemm, Mesh mesh, TIntHashSet storedLeaves, TObjectIntHashMap<Vertex> mapVertexToLeafindex)
 	{
-		TIntObjectHashMap mapLeafindexToTriangleList = new TIntObjectHashMap();
+		TIntObjectHashMap<ArrayList<Triangle>> mapLeafindexToTriangleList = new TIntObjectHashMap<ArrayList<Triangle>>();
 		int[] leaf = new int[3];
 		int[] pointIndex = new int[3];
 		int[] positions = new int[3];
@@ -715,11 +714,11 @@ public class Storage
 		}
 
 		collectAllTriangles(oemm, mesh, mapVertexToLeafindex, mapLeafindexToTriangleList);
-		for (TIntObjectIterator it = mapLeafindexToTriangleList.iterator(); it.hasNext();)
+		for (TIntObjectIterator<ArrayList<Triangle>> it = mapLeafindexToTriangleList.iterator(); it.hasNext();)
 		{
 			it.advance();
 			Node node = oemm.leaves[it.key()];
-			List<Triangle> triangleList = (List<Triangle>) it.value();
+			List<Triangle> triangleList = it.value();
 			
 			DataOutputStream fc;
 			try {
@@ -767,7 +766,7 @@ public class Storage
 	 * @param mesh
 	 * @param mapLeafindexToTriangleList
 	 */
-	private static void collectAllTriangles(OEMM oemm, Mesh mesh, TObjectIntHashMap mapVertexToLeafindex, TIntObjectHashMap mapLeafindexToTriangleList)
+	private static void collectAllTriangles(OEMM oemm, Mesh mesh, TObjectIntHashMap<Vertex> mapVertexToLeafindex, TIntObjectHashMap<ArrayList<Triangle>> mapLeafindexToTriangleList)
 	{
 		int positions[] = new int[3];
 		for(AbstractTriangle at: mesh.getTriangles())
@@ -791,7 +790,7 @@ public class Storage
 				if (n < nodeNumber)
 					nodeNumber = n;
 			}
-			List<Triangle> triangles = (List<Triangle>) mapLeafindexToTriangleList.get(nodeNumber);
+			List<Triangle> triangles = mapLeafindexToTriangleList.get(nodeNumber);
 			if (triangles == null) {
 				throw new UnsupportedOperationException("Cannot put triangle into octree node: " 
 						+nodeNumber + ". Node is not loaded!");

@@ -42,9 +42,9 @@ public class BCADGraph
 	// Cell root
 	private BCADGraphCell root;
 	// Map between topological elements and graph cells
-	private THashMap cadShapeToGraphCell = new THashMap(keepOrientation);
+	private THashMap<CADShape, BCADGraphCell> cadShapeToGraphCell = new THashMap<CADShape, BCADGraphCell>(keepOrientation);
 	// Map between indices and graph cells or user-defined groups
-	private TIntObjectHashMap indexToCell = new TIntObjectHashMap();
+	private TIntObjectHashMap<BCADGraphCell> indexToCell = new TIntObjectHashMap<BCADGraphCell>();
 	// First free index
 	private int freeIndex;
 
@@ -52,16 +52,14 @@ public class BCADGraph
 	// We sometimes need to keep track of shape orientation in our graph, hash
 	// sets and maps can then use the keepOrientation instance as hashing
 	// strategy.
-	private static TObjectHashingStrategy keepOrientation = new TObjectHashingStrategy()
+	private static TObjectHashingStrategy<CADShape> keepOrientation = new TObjectHashingStrategy<CADShape>()
 	{
-		public int computeHashCode(Object o)
+		public int computeHashCode(CADShape o)
 		{
 			return o.hashCode();
 		}
-		public boolean equals(Object o1, Object o2)               
+		public boolean equals(CADShape s1, CADShape s2)               
 		{
-			CADShape s1 = (CADShape) o1;
-			CADShape s2 = (CADShape) o2;
 			return s1 != null && s1.equals(s2) && s1.orientation() == s2.orientation();
 		}
 	};
@@ -84,7 +82,7 @@ public class BCADGraph
 			root = new BCADGraphCell(this, shape, CADShapeEnum.COMPOUND);
 
 		// Build the whole graph
-		THashMap seen = new THashMap();
+		THashMap<CADShape, CADShape> seen = new THashMap<CADShape, CADShape>();
 		CADShapeBuilder factory = CADShapeBuilder.factory;
 		CADExplorer exp = factory.newExplorer();
 		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
@@ -97,10 +95,10 @@ public class BCADGraph
 					continue;
 				BCADGraphCell cell = new BCADGraphCell(this, sub, cse);
 				cadShapeToGraphCell.put(sub, cell);
-				CADShape r = (CADShape) seen.get(sub);
+				CADShape r = seen.get(sub);
 				if (r != null)
 				{
-					BCADGraphCell rev = (BCADGraphCell) cadShapeToGraphCell.get(r);
+					BCADGraphCell rev = cadShapeToGraphCell.get(r);
 					rev.bindReversed(cell);
 				}
 				seen.put(sub, sub);
@@ -116,7 +114,7 @@ public class BCADGraph
 			for (exp.init(shape, cse); exp.more(); exp.next())
 			{
 				CADShape s = exp.current();
-				BCADGraphCell c = (BCADGraphCell) cadShapeToGraphCell.get(s);
+				BCADGraphCell c = cadShapeToGraphCell.get(s);
 				if (c != null && c.getId() <= 0)
 				{
 					c.setId(i);
@@ -134,7 +132,7 @@ public class BCADGraph
 			for (exp.init(shape, cse); exp.more(); exp.next())
 			{
 				CADShape s = exp.current();
-				BCADGraphCell c = (BCADGraphCell) cadShapeToGraphCell.get(s);
+				BCADGraphCell c = cadShapeToGraphCell.get(s);
 				if (c == null)
 					continue;
 				Iterator it2 = CADShapeEnum.iterator(cse, CADShapeEnum.VERTEX);
@@ -145,7 +143,7 @@ public class BCADGraph
 					for (exp2.init(s, cse2); exp2.more(); exp2.next())
 					{
 						CADShape s2 = exp2.current();
-						BCADGraphCell c2 = (BCADGraphCell) cadShapeToGraphCell.get(s2);
+						BCADGraphCell c2 = cadShapeToGraphCell.get(s2);
 						if (c2 != null)
 							c2.addParent(c);
 					}
@@ -177,7 +175,7 @@ public class BCADGraph
 	 */
 	public BCADGraphCell getByShape(CADShape s)
 	{
-		return (BCADGraphCell) cadShapeToGraphCell.get(s);
+		return cadShapeToGraphCell.get(s);
 	}
 
 	/**
@@ -188,7 +186,7 @@ public class BCADGraph
 	 */
 	public BCADGraphCell getById(int i)
 	{
-		return (BCADGraphCell) indexToCell.get(i);
+		return indexToCell.get(i);
 	}
 
 	/**
@@ -202,7 +200,7 @@ public class BCADGraph
 		for (exp.init(root.getShape(), cse); exp.more(); exp.next())
 		{
 			CADShape s = exp.current();
-			BCADGraphCell c = (BCADGraphCell) cadShapeToGraphCell.get(s);
+			BCADGraphCell c = cadShapeToGraphCell.get(s);
 			if (ret.contains(c))
 				continue;
 			ret.add(c);

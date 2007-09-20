@@ -98,7 +98,7 @@ public class Storage
 			writeId(dir, edge.getId());
 			Collection nodelist = submesh.getNodes();
 			// Write node references and compute local indices
-			TObjectIntHashMap localIdx = write1dNodeReferences(dir, nodelist, edge);
+			TObjectIntHashMap<MNode1D> localIdx = write1dNodeReferences(dir, nodelist, edge);
 			// Write node coordinates
 			write1dCoordinates(dir, nodelist, CADShapeBuilder.factory.newCurve3D(E));
 			// Write edge connectivity
@@ -125,7 +125,7 @@ public class Storage
 			CADFace F = (CADFace) face.getShape();
 			Collection trianglelist = submesh.getTriangles();
 			Collection nodelist = submesh.quadtree.getAllVertices(trianglelist.size() / 2);
-			TObjectIntHashMap localIdx = write2dNodeReferences(dir, face.getId(), nodelist, submesh.outerVertex);
+			TObjectIntHashMap<Vertex> localIdx = write2dNodeReferences(dir, face.getId(), nodelist, submesh.outerVertex);
 			write2dCoordinates(dir, nodelist, submesh.outerVertex, F.getGeomSurface());
 			write2dTriangles(dir, trianglelist, localIdx);
 		}
@@ -148,7 +148,7 @@ public class Storage
 			File dir = new File(outDir);
 			writeId(dir, solid.getId());
 			Collection nodelist = submesh.getNodes();
-			TObjectIntHashMap localIdx = write2dNodeReferences(dir, solid.getId(), nodelist, submesh.outerVertex);
+			TObjectIntHashMap<Vertex> localIdx = write2dNodeReferences(dir, solid.getId(), nodelist, submesh.outerVertex);
 			write2dCoordinates(dir, nodelist, submesh.outerVertex, null);
 			write2dTriangles(dir, submesh.getTriangles(), localIdx);
 		}
@@ -168,7 +168,7 @@ public class Storage
 	public static Mesh readAllFaces(BCADGraphCell root)
 	{
 		Mesh m = new Mesh();
-		TIntObjectHashMap vertMap = new TIntObjectHashMap();
+		TIntObjectHashMap<Vertex> vertMap = new TIntObjectHashMap<Vertex>();
 		for (Iterator its = root.getGraph().getModel().getSubMeshIterator(); its.hasNext(); )
 		{
 			BSubMesh s = (BSubMesh) its.next();
@@ -188,7 +188,7 @@ public class Storage
 	public static Mesh readAllFaces(BCADGraphCell root, BSubMesh s)
 	{
 		Mesh m = new Mesh();
-		TIntObjectHashMap vertMap = new TIntObjectHashMap();
+		TIntObjectHashMap<Vertex> vertMap = new TIntObjectHashMap<Vertex>();
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 			readFace(m, (BCADGraphCell) it.next(), s, vertMap);
 		return m;
@@ -202,7 +202,7 @@ public class Storage
 	 * @param mapRefVertex    map between references and Vertex instances
 	 * @throws  RuntimeException if an error occurred
 	 */
-	public static void readFace(Mesh mesh, BCADGraphCell face, BSubMesh s, TIntObjectHashMap mapRefVertex)
+	public static void readFace(Mesh mesh, BCADGraphCell face, BSubMesh s, TIntObjectHashMap<Vertex> mapRefVertex)
 	{
 		assert face.getShape() instanceof CADFace;
 		BModel model = face.getGraph().getModel();
@@ -248,7 +248,7 @@ public class Storage
 	public static Mesh readAllVolumes(BCADGraphCell root, BSubMesh s)
 	{
 		Mesh m = new Mesh();
-		TIntObjectHashMap vertMap = new TIntObjectHashMap();
+		TIntObjectHashMap<Vertex> vertMap = new TIntObjectHashMap<Vertex>();
 		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
 			readVolume(m, (BCADGraphCell) it.next(), s, vertMap);
 		return m;
@@ -261,7 +261,7 @@ public class Storage
 	 * @param mapRefVertex    map between references and Vertex instances
 	 * @throws  RuntimeException if an error occurred
 	 */
-	public static void readVolume(Mesh mesh, BCADGraphCell volume, BSubMesh s, TIntObjectHashMap mapRefVertex)
+	public static void readVolume(Mesh mesh, BCADGraphCell volume, BSubMesh s, TIntObjectHashMap<Vertex> mapRefVertex)
 	{
 		assert volume.getShape() instanceof CADSolid;
 		BModel model = volume.getGraph().getModel();
@@ -297,7 +297,7 @@ public class Storage
 		logger.debug("end reading cell "+id);
 	}
 
-	private static TObjectIntHashMap write1dNodeReferences(File dir, Collection nodelist, BCADGraphCell edge)
+	private static TObjectIntHashMap<MNode1D> write1dNodeReferences(File dir, Collection nodelist, BCADGraphCell edge)
 		throws IOException, FileNotFoundException
 	{
 		File refFile = new File(dir, "r");
@@ -307,7 +307,7 @@ public class Storage
 		// Save references
 		logger.debug("begin writing "+refFile);
 		DataOutputStream refsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile, true)));
-		TObjectIntHashMap localIdx = new TObjectIntHashMap(nodelist.size());
+		TObjectIntHashMap<MNode1D> localIdx = new TObjectIntHashMap<MNode1D>(nodelist.size());
 
 		int i = 0;
 		for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
@@ -330,7 +330,7 @@ public class Storage
 		return localIdx;
 	}
 
-	private static TObjectIntHashMap write2dNodeReferences(File dir, int id, Collection nodelist, Vertex outer)
+	private static TObjectIntHashMap<Vertex> write2dNodeReferences(File dir, int id, Collection nodelist, Vertex outer)
 		throws IOException, FileNotFoundException
 	{
 		File refFile = new File(dir, "r");
@@ -341,7 +341,7 @@ public class Storage
 		logger.debug("begin writing "+refFile);
 		DataOutputStream refsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile, true)));
 
-		TObjectIntHashMap localIdx = new TObjectIntHashMap(nodelist.size());
+		TObjectIntHashMap<Vertex> localIdx = new TObjectIntHashMap<Vertex>(nodelist.size());
 		int i = 0;
 		for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
 		{
@@ -425,7 +425,7 @@ public class Storage
 		parasout.close();
 	}
 
-	private static void write1dEdges(File dir, Collection edgelist, TObjectIntHashMap localIdx)
+	private static void write1dEdges(File dir, Collection edgelist, TObjectIntHashMap<MNode1D> localIdx)
 		throws IOException, FileNotFoundException
 	{
 		File beamsFile=new File(dir, "b");
@@ -445,7 +445,7 @@ public class Storage
 		beamsout.close();
 	}
 
-	private static void write2dTriangles(File dir, Collection trianglelist, TObjectIntHashMap localIdx)
+	private static void write2dTriangles(File dir, Collection trianglelist, TObjectIntHashMap<Vertex> localIdx)
 		throws IOException, FileNotFoundException
 	{
 		File facesFile=new File(dir, "f");
@@ -482,7 +482,7 @@ public class Storage
 		return refs;
 	}
 
-	private static Vertex [] read2dCoordinates(File dir, Mesh mesh, int [] refs, TIntObjectHashMap mapRefVertex)
+	private static Vertex [] read2dCoordinates(File dir, Mesh mesh, int [] refs, TIntObjectHashMap<Vertex> mapRefVertex)
 		throws IOException, FileNotFoundException
 	{
 		File nodesFile = new File(dir, "n");
@@ -504,11 +504,11 @@ public class Storage
 		{
 			int ind = refs[2*i];
 			int label = refs[2*i+1];
-			Object o = mapRefVertex.get(label);
-			if (o == null)
+			Vertex v = mapRefVertex.get(label);
+			if (v == null)
 				mapRefVertex.put(label, nodelist[ind]);
 			else
-				nodelist[ind] = (Vertex) o;
+				nodelist[ind] = v;
 			nodelist[ind].setRef(label);
 		}
 		fcN.close();
