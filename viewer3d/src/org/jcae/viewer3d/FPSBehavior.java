@@ -50,6 +50,7 @@ public class FPSBehavior extends Behavior
 	 * Called to init the behavior
 	 * @see Behavior.initialize
 	 */
+	@Override
 	public void initialize()
 	{
 		numframes=-1;
@@ -61,6 +62,7 @@ public class FPSBehavior extends Behavior
 	 * Called every time the behavior is activated
 	 * @see Behavior.processStimulus
 	 */
+	@Override
 	public void processStimulus(java.util.Enumeration critera)
 	{	
 		long currtime=System.currentTimeMillis();

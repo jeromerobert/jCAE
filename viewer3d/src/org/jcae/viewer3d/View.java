@@ -56,6 +56,7 @@ public class View extends Canvas3D implements PositionListener
 	{
 		float offset=1.0f;
 		float offsetRel=1.0f;
+		@Override
 		public void keyPressed(KeyEvent e)
 		{
 			boolean found=true;
@@ -293,6 +294,7 @@ public class View extends Canvas3D implements PositionListener
 		addComponentListener(new ComponentAdapter()
 		{
 			private Transform3D myT3d=new Transform3D();
+			@Override
 			public void componentResized(ComponentEvent e)
 			{
 				if(getWidth()!=0)
@@ -375,6 +377,7 @@ public class View extends Canvas3D implements PositionListener
 	/* (non-Javadoc)
 	 * @see java.lang.Object#finalize()
 	 */
+	@Override
 	protected void finalize() throws Throwable
 	{
 		Viewable[] vs=getViewables();
@@ -885,6 +888,7 @@ public class View extends Canvas3D implements PositionListener
      * (selection rectangle)
      * @see takeSnapshot 
      */
+	@Override
 	public void postSwap()
 	{
 		super.postSwap();
@@ -1317,6 +1321,7 @@ public class View extends Canvas3D implements PositionListener
 		postRenderers.remove(runnable);
 	}
 	
+	@Override
 	final public void postRender()
 	{
 		for(int i=0; i<postRenderers.size(); i++)

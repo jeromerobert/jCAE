@@ -99,6 +99,7 @@ public  class ViewBehavior extends OrbitBehavior
 		changeRotationCenter=status;
 	}
 	
+	@Override
 	protected void processMouseEvent(MouseEvent evt)
 	{			
 		switch(mouseMode){
