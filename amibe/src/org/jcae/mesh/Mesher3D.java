@@ -84,7 +84,7 @@ public class Mesher3D
 			MeshReader.readObject3D(mesh, xmlDir, "jcae3d", ridgeAngle);
 		try
 		{
-			HashMap opts = new HashMap();
+			HashMap<String, String> opts = new HashMap<String, String>();
 			opts.put("iterations", "5");
 			opts.put("boundaries", "true");
 			new SmoothNodes3D(mesh, opts).compute();
@@ -136,7 +136,7 @@ public class Mesher3D
 	private static File relativize(File file, File reference)
 	{
 		File current=file;
-		Stack l=new Stack();
+		Stack<String> l=new Stack<String>();
 		while(current!=null && !current.equals(reference))
 		{
 			l.push(current.getName());

@@ -48,7 +48,7 @@ public class BModel
 	//   CAD graph
 	private BCADGraph cad;
 	//   List of submeshes
-	private Collection submesh = new ArrayList();
+	private Collection<BSubMesh> submesh = new ArrayList<BSubMesh>();
 	//   Geometry file
 	private String cadFile;
 	//   Output variables
@@ -56,7 +56,7 @@ public class BModel
 	private String xmlFile = "model";
 	private String xmlBrepDir;
 	//   List of all constraints
-	private Collection allConstraints = new LinkedHashSet();
+	private Collection<Constraint> allConstraints = new LinkedHashSet<Constraint>();
 	//   Internal state
 	private int state = INPUT;
 	//   Valid state values
@@ -145,7 +145,7 @@ public class BModel
 		return cad;
 	}
 
-	public Collection getConstraints()
+	public Collection<Constraint> getConstraints()
 	{
 		return allConstraints;
 	}
@@ -153,7 +153,7 @@ public class BModel
 	private static File relativize(File file, File reference)
 	{
 		File current = file;
-		Stack l = new Stack();
+		Stack<String> l = new Stack<String>();
 		while (current != null && !current.equals(reference))
 		{
 			l.push(current.getName());
@@ -181,7 +181,7 @@ public class BModel
 		return ret;
 	}
 
-	public Iterator getSubMeshIterator()
+	public Iterator<BSubMesh> getSubMeshIterator()
 	{
 		return submesh.iterator();
 	}
@@ -208,22 +208,22 @@ public class BModel
 	{
 		logger.info("Compute constraints");
 		BCADGraphCell root = cad.getRootCell();
-		for (Iterator its = root.shapesExplorer(CADShapeEnum.SOLID); its.hasNext(); )
+		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.SOLID); its.hasNext(); )
 		{
-			BCADGraphCell cell = (BCADGraphCell) its.next();
+			BCADGraphCell cell = its.next();
 			cell.addImplicitConstraints(CADShapeEnum.FACE, true);
 			cell.addImplicitConstraints(CADShapeEnum.EDGE, false);
 			cell.addImplicitConstraints(CADShapeEnum.VERTEX, false);
 		}
-		for (Iterator its = root.shapesExplorer(CADShapeEnum.FACE); its.hasNext(); )
+		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.FACE); its.hasNext(); )
 		{
-			BCADGraphCell cell = (BCADGraphCell) its.next();
+			BCADGraphCell cell = its.next();
 			cell.addImplicitConstraints(CADShapeEnum.EDGE, true);
 			cell.addImplicitConstraints(CADShapeEnum.VERTEX, false);
 		}
-		for (Iterator its = root.shapesExplorer(CADShapeEnum.EDGE); its.hasNext(); )
+		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.EDGE); its.hasNext(); )
 		{
-			BCADGraphCell cell = (BCADGraphCell) its.next();
+			BCADGraphCell cell = its.next();
 			cell.addImplicitConstraints(CADShapeEnum.VERTEX, true);
 		}
 		state = CONSTRAINTS;
@@ -241,44 +241,44 @@ public class BModel
 		else if (state != CONSTRAINTS)
 			throw new RuntimeException("Invalid state: "+state);
 		BCADGraphCell root = cad.getRootCell();
-		for (Iterator its = root.shapesExplorer(CADShapeEnum.VERTEX); its.hasNext(); )
+		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.VERTEX); its.hasNext(); )
 		{
-			BCADGraphCell cell = (BCADGraphCell) its.next();
-			for (Iterator itd = cell.discretizationIterator(); itd.hasNext(); )
+			BCADGraphCell cell = its.next();
+			for (Iterator<BDiscretization> itd = cell.discretizationIterator(); itd.hasNext(); )
 			{
-				BDiscretization d = (BDiscretization) itd.next();
+				BDiscretization d = itd.next();
 				d.discretize();
 			}
 		}
 		logger.info("Discretize edges");
-		for (Iterator its = root.shapesExplorer(CADShapeEnum.EDGE); its.hasNext(); )
+		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.EDGE); its.hasNext(); )
 		{
-			BCADGraphCell cell = (BCADGraphCell) its.next();
-			for (Iterator itd = cell.discretizationIterator(); itd.hasNext(); )
+			BCADGraphCell cell = its.next();
+			for (Iterator<BDiscretization> itd = cell.discretizationIterator(); itd.hasNext(); )
 			{
-				BDiscretization d = (BDiscretization) itd.next();
+				BDiscretization d = itd.next();
 				d.discretize();
 				Storage.writeEdge(d, getOutputDir(d));
 			}
 		}
 		logger.info("Discretize faces");
-		for (Iterator its = root.shapesExplorer(CADShapeEnum.FACE); its.hasNext(); )
+		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.FACE); its.hasNext(); )
 		{
-			BCADGraphCell cell = (BCADGraphCell) its.next();
-			for (Iterator itd = cell.discretizationIterator(); itd.hasNext(); )
+			BCADGraphCell cell = its.next();
+			for (Iterator<BDiscretization> itd = cell.discretizationIterator(); itd.hasNext(); )
 			{
-				BDiscretization d = (BDiscretization) itd.next();
+				BDiscretization d = itd.next();
 				d.discretize();
 				Storage.writeFace(d, getOutputDir(d));
 			}
 		}
 		logger.info("Discretize solids");
-		for (Iterator its = root.shapesExplorer(CADShapeEnum.SOLID); its.hasNext(); )
+		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.SOLID); its.hasNext(); )
 		{
-			BCADGraphCell cell = (BCADGraphCell) its.next();
-			for (Iterator itd = cell.discretizationIterator(); itd.hasNext(); )
+			BCADGraphCell cell = its.next();
+			for (Iterator<BDiscretization> itd = cell.discretizationIterator(); itd.hasNext(); )
 			{
-				BDiscretization d = (BDiscretization) itd.next();
+				BDiscretization d = itd.next();
 				d.discretize();
 				Storage.writeSolid(d, getOutputDir(d));
 			}
@@ -293,9 +293,9 @@ public class BModel
 	public void printAllHypothesis()
 	{
 		System.out.println("List of hypothesis");
-		for (Iterator it = allConstraints.iterator(); it.hasNext(); )
+		for (Iterator<Constraint> it = allConstraints.iterator(); it.hasNext(); )
 		{
-			Constraint cons = (Constraint) it.next();
+			Constraint cons = it.next();
 			Hypothesis h = cons.getHypothesis();
 			System.out.println(" + ("+Integer.toHexString(h.hashCode())+") "+h);
 		}
@@ -308,15 +308,12 @@ public class BModel
 	public void printSubmeshesConstraints()
 	{
 		System.out.println("List of submeshes");
-		for (Iterator it = submesh.iterator(); it.hasNext(); )
+		for (Iterator<BSubMesh> it = submesh.iterator(); it.hasNext(); )
 		{
-			BSubMesh subm = (BSubMesh) it.next();
+			BSubMesh subm = it.next();
 			System.out.println(" Submesh ("+subm.getId()+") ");
-			for (Iterator itc = subm.getConstraints().iterator(); itc.hasNext(); )
-			{
-				Constraint cons = (Constraint) itc.next();
-				System.out.println("    "+cons);
-			}
+			for (Iterator<Constraint> itc = subm.getConstraints().iterator(); itc.hasNext(); )
+				System.out.println("    "+itc.next());
 		}
 		System.out.println("End list");
 	}
@@ -327,9 +324,9 @@ public class BModel
 	public void printSubmeshesDiscretizations()
 	{
 		System.out.println("List of discretizations on submeshes");
-		for (Iterator it = submesh.iterator(); it.hasNext(); )
+		for (Iterator<BSubMesh> it = submesh.iterator(); it.hasNext(); )
 		{
-			BSubMesh subm = (BSubMesh) it.next();
+			BSubMesh subm = it.next();
 			System.out.println(" Discretizations used on submesh ("+subm.getId()+") ");
 			subm.printSubmeshDiscretizations();
 		}
@@ -344,9 +341,9 @@ public class BModel
 		System.out.println("List of discretizations");
 		BCADGraphCell root = cad.getRootCell();
 		StringBuffer indent = new StringBuffer();
-		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
+		for (Iterator<CADShapeEnum> itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
-			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			CADShapeEnum cse = itcse.next();
 			CADShapeEnum normalChildType;
 			if (cse == CADShapeEnum.EDGE)
 				normalChildType = CADShapeEnum.VERTEX;
@@ -362,13 +359,13 @@ public class BModel
 			    continue;
 
 			String tab = indent.toString();
-			for (Iterator itp = root.shapesExplorer(cse); itp.hasNext(); )
+			for (Iterator<BCADGraphCell> itp = root.shapesExplorer(cse); itp.hasNext(); )
 			{
-				BCADGraphCell pcell = (BCADGraphCell) itp.next();
+				BCADGraphCell pcell = itp.next();
 				System.out.println(tab+"Discretizations of shape "+pcell);
-				for (Iterator itpd = pcell.discretizationIterator(); itpd.hasNext(); )
+				for (Iterator<BDiscretization> itpd = pcell.discretizationIterator(); itpd.hasNext(); )
 				{
-					BDiscretization pd = (BDiscretization) itpd.next();
+					BDiscretization pd = itpd.next();
 					if (pcell == pd.getGraphCell())
 						System.out.println(tab+"    + "+"Used discretization: "+pd.getId()+" with orientation: forward;  element type : "+pd.getConstraint().getHypothesis().getElement()+" constraint : "+pd.getConstraint().getId()+" submesh list : "+pd.getSubmesh());
 					else if (pcell == pd.getGraphCell().getReversed() )
@@ -379,12 +376,12 @@ public class BModel
  					if (cse != CADShapeEnum.VERTEX)
  					{
  						System.out.println(tab+"    + "+"    + "+"discretizations of boundary shapes: ");
-						for (Iterator itc = pcell.shapesExplorer(normalChildType); itc.hasNext(); )
+						for (Iterator<BCADGraphCell> itc = pcell.shapesExplorer(normalChildType); itc.hasNext(); )
 						{
-							BCADGraphCell ccell = (BCADGraphCell) itc.next();
-							for (Iterator itcd = ccell.discretizationIterator(); itcd.hasNext(); )
+							BCADGraphCell ccell = itc.next();
+							for (Iterator<BDiscretization> itcd = ccell.discretizationIterator(); itcd.hasNext(); )
 							{
-								BDiscretization cd = (BDiscretization) itcd.next();
+								BDiscretization cd = itcd.next();
 								if (pd.contained(cd))
 								{
 									if (ccell == cd.getGraphCell())
@@ -400,17 +397,17 @@ public class BModel
 						boolean first = true;
  						if (cse != CADShapeEnum.EDGE)
 						{
-							for (Iterator itccse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, normalChildType); itccse.hasNext(); )
+							for (Iterator<CADShapeEnum> itccse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, normalChildType); itccse.hasNext(); )
 							{
-								CADShapeEnum ccse = (CADShapeEnum) itccse.next();
-								for (Iterator itc = pcell.shapesIterator(); itc.hasNext(); )
+								CADShapeEnum ccse = itccse.next();
+								for (Iterator<BCADGraphCell> itc = pcell.shapesIterator(); itc.hasNext(); )
 								{
-									BCADGraphCell ccell = (BCADGraphCell) itc.next();
+									BCADGraphCell ccell = itc.next();
 									if (ccell.getType() == ccse)
 									{
-										for (Iterator itcd = ccell.discretizationIterator(); itcd.hasNext(); )
+										for (Iterator<BDiscretization> itcd = ccell.discretizationIterator(); itcd.hasNext(); )
 										{
-											BDiscretization cd = (BDiscretization) itcd.next();
+											BDiscretization cd = itcd.next();
 											if (pd.contained(cd))
 											{
 												if (first)
@@ -446,17 +443,17 @@ public class BModel
 		System.out.println("List of constraints");
 		BCADGraphCell root = cad.getRootCell();
 		StringBuffer indent = new StringBuffer();
-		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
+		for (Iterator<CADShapeEnum> itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
-			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			CADShapeEnum cse = itcse.next();
 			String tab = indent.toString();
-			for (Iterator it = root.shapesExplorer(cse); it.hasNext(); )
+			for (Iterator<BCADGraphCell> it = root.shapesExplorer(cse); it.hasNext(); )
 			{
-				BCADGraphCell cell = (BCADGraphCell) it.next();
+				BCADGraphCell cell = it.next();
 				boolean first = true;
-				for (Iterator itd = cell.discretizationIterator(); itd.hasNext(); )
+				for (Iterator<BDiscretization> itd = cell.discretizationIterator(); itd.hasNext(); )
 				{
-					BDiscretization d = (BDiscretization) itd.next();
+					BDiscretization d = itd.next();
 					if (first)
 						System.out.println(tab+"Shape "+cell);
 					first = false;
@@ -476,16 +473,16 @@ public class BModel
 		System.out.println("List of constraints applied on submesh "+sm.getId());
 		BCADGraphCell root = cad.getRootCell();
 		StringBuffer indent = new StringBuffer();
-		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
+		for (Iterator<CADShapeEnum> itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
-			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			CADShapeEnum cse = itcse.next();
 			String tab = indent.toString();
-			for (Iterator it = root.shapesExplorer(cse); it.hasNext(); )
+			for (Iterator<BCADGraphCell> it = root.shapesExplorer(cse); it.hasNext(); )
 			{
-				BCADGraphCell cell = (BCADGraphCell) it.next();
-				for (Iterator itd = cell.discretizationIterator(); itd.hasNext(); )
+				BCADGraphCell cell = it.next();
+				for (Iterator<BDiscretization> itd = cell.discretizationIterator(); itd.hasNext(); )
 				{
-					BDiscretization d = (BDiscretization) itd.next();
+					BDiscretization d = itd.next();
 					if (d.contains(sm))
 					{
 						System.out.println(tab+"Shape "+cell);

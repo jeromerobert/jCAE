@@ -91,17 +91,17 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		d.setMesh(submesh1d);
 		logger.debug(""+this+"  shape: "+E);
 		
-		ArrayList edgelist = submesh1d.getEdges();
-		ArrayList nodelist = submesh1d.getNodes();
+		ArrayList<MEdge1D> edgelist = submesh1d.getEdges();
+		ArrayList<MNode1D> nodelist = submesh1d.getNodes();
 		if (edgelist.size() != 0 || nodelist.size() != 0)
 			return false;
 		edgelist.clear();
 		nodelist.clear();
 		BCADGraphCell [] child = new BCADGraphCell[2];
 		{
-			Iterator it = cell.shapesExplorer(CADShapeEnum.VERTEX);
-			child[0] = (BCADGraphCell) it.next();
-			child[1] = (BCADGraphCell) it.next();
+			Iterator<BCADGraphCell> it = cell.shapesExplorer(CADShapeEnum.VERTEX);
+			child[0] = it.next();
+			child[1] = it.next();
 		}
 		CADVertex [] V = E.vertices();
 		if (V[0].isSame(V[1]))
@@ -221,6 +221,7 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		return true;
 	}
 	
+	@Override
 	public String toString()
 	{
 		String ret = "Algo: "+getClass().getName();

@@ -24,19 +24,14 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.Arrays;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntIterator;
 
-import javax.media.j3d.BoundingBox;
 import javax.media.j3d.BoundingSphere;
 import javax.media.j3d.BranchGroup;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
@@ -49,8 +44,6 @@ import org.jcae.viewer3d.OEMMBehavior;
 import org.jcae.viewer3d.OEMMViewer;
 import org.jcae.viewer3d.View;
 import org.jcae.viewer3d.bg.ViewableBG;
-import org.jcae.viewer3d.cad.ViewableCAD;
-import org.jcae.viewer3d.cad.occ.OCCProvider;
 
 public class MeshOEMMCoarseViewer
 {
@@ -99,6 +92,7 @@ public class MeshOEMMCoarseViewer
 			bgView.add(fps);
 
 		bgView.addKeyListener(new KeyAdapter() {
+			@Override
 			public void keyPressed(KeyEvent event)
 			{
 				char k = event.getKeyChar();

@@ -200,7 +200,7 @@ public class ExtractShell
 	{
 		TIntHashSet inodes = new TIntHashSet();
 		logger.debug("Reading triangles");
-		HashMap facemap = new HashMap();
+		HashMap<Face, Face> facemap = new HashMap<Face, Face>();
 		String line = "";
 		
 		try
@@ -254,7 +254,7 @@ public class ExtractShell
 						else
 						{
 							inner++;
-							f[i] = (Face) facemap.get(f[i]);
+							f[i] = facemap.get(f[i]);
 						}
 						f[i].count++;
 					}
@@ -288,9 +288,9 @@ public class ExtractShell
 			System.exit(1);
 		}
 		int index = 0;
-		for (Iterator it = facemap.values().iterator(); it.hasNext(); )
+		for (Iterator<Face> it = facemap.values().iterator(); it.hasNext(); )
 		{
-			Face f = (Face) it.next();
+			Face f = it.next();
 			if (f.count != 1)
 				continue;
 			index++;
@@ -336,11 +336,13 @@ public class ExtractShell
 			}
 			assert v[0] < v[1] && v[1] < v[2];
 		}
+		@Override
 		public final int hashCode()
 		{
 			return v[0] + v[1] + v[2];
 		}
 		
+		@Override
 		public final boolean equals(Object o)
 		{
 			if (o == null)
@@ -357,6 +359,7 @@ public class ExtractShell
 		/* (non-Javadoc)
 		 * @see java.text.NumberFormat#format(double, java.lang.StringBuffer, java.text.FieldPosition)
 		 */
+		@Override
 		public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos)
 		{
 			return format((long)number, toAppendTo, pos);
@@ -365,6 +368,7 @@ public class ExtractShell
 		/* (non-Javadoc)
 		 * @see java.text.NumberFormat#format(long, java.lang.StringBuffer, java.text.FieldPosition)
 		 */
+		@Override
 		public StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos)
 		{
 			StringBuffer s=new StringBuffer();
@@ -382,6 +386,7 @@ public class ExtractShell
 		/* (non-Javadoc)
 		 * @see java.text.NumberFormat#parse(java.lang.String, java.text.ParsePosition)
 		 */
+		@Override
 		public Number parse(String source, ParsePosition parsePosition)
 		{
 			throw new UnsupportedOperationException();

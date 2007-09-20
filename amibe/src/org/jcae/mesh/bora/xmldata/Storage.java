@@ -22,7 +22,9 @@ package org.jcae.mesh.bora.xmldata;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.AbstractVertex;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.bora.ds.BSubMesh;
@@ -96,7 +98,7 @@ public class Storage
 		{
 			File dir = new File(outDir);
 			writeId(dir, edge.getId());
-			Collection nodelist = submesh.getNodes();
+			Collection<MNode1D> nodelist = submesh.getNodes();
 			// Write node references and compute local indices
 			TObjectIntHashMap<MNode1D> localIdx = write1dNodeReferences(dir, nodelist, edge);
 			// Write node coordinates
@@ -123,8 +125,8 @@ public class Storage
 			File dir = new File(outDir);
 			writeId(dir, face.getId());
 			CADFace F = (CADFace) face.getShape();
-			Collection trianglelist = submesh.getTriangles();
-			Collection nodelist = submesh.quadtree.getAllVertices(trianglelist.size() / 2);
+			Collection<AbstractTriangle> trianglelist = submesh.getTriangles();
+			Collection<AbstractVertex> nodelist = submesh.quadtree.getAllVertices(trianglelist.size() / 2);
 			TObjectIntHashMap<Vertex> localIdx = write2dNodeReferences(dir, face.getId(), nodelist, submesh.outerVertex);
 			write2dCoordinates(dir, nodelist, submesh.outerVertex, F.getGeomSurface());
 			write2dTriangles(dir, trianglelist, localIdx);
@@ -147,7 +149,7 @@ public class Storage
 		{
 			File dir = new File(outDir);
 			writeId(dir, solid.getId());
-			Collection nodelist = submesh.getNodes();
+			Collection<AbstractVertex> nodelist = submesh.getNodes();
 			TObjectIntHashMap<Vertex> localIdx = write2dNodeReferences(dir, solid.getId(), nodelist, submesh.outerVertex);
 			write2dCoordinates(dir, nodelist, submesh.outerVertex, null);
 			write2dTriangles(dir, submesh.getTriangles(), localIdx);
@@ -169,11 +171,11 @@ public class Storage
 	{
 		Mesh m = new Mesh();
 		TIntObjectHashMap<Vertex> vertMap = new TIntObjectHashMap<Vertex>();
-		for (Iterator its = root.getGraph().getModel().getSubMeshIterator(); its.hasNext(); )
+		for (Iterator<BSubMesh> its = root.getGraph().getModel().getSubMeshIterator(); its.hasNext(); )
 		{
-			BSubMesh s = (BSubMesh) its.next();
-			for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
-				readFace(m, (BCADGraphCell) it.next(), s, vertMap);
+			BSubMesh s = its.next();
+			for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
+				readFace(m, it.next(), s, vertMap);
 		}
 		return m;
 	}
@@ -189,8 +191,8 @@ public class Storage
 	{
 		Mesh m = new Mesh();
 		TIntObjectHashMap<Vertex> vertMap = new TIntObjectHashMap<Vertex>();
-		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
-			readFace(m, (BCADGraphCell) it.next(), s, vertMap);
+		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
+			readFace(m, it.next(), s, vertMap);
 		return m;
 	}
 
@@ -249,8 +251,8 @@ public class Storage
 	{
 		Mesh m = new Mesh();
 		TIntObjectHashMap<Vertex> vertMap = new TIntObjectHashMap<Vertex>();
-		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
-			readVolume(m, (BCADGraphCell) it.next(), s, vertMap);
+		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
+			readVolume(m, it.next(), s, vertMap);
 		return m;
 	}
 
@@ -297,7 +299,7 @@ public class Storage
 		logger.debug("end reading cell "+id);
 	}
 
-	private static TObjectIntHashMap<MNode1D> write1dNodeReferences(File dir, Collection nodelist, BCADGraphCell edge)
+	private static TObjectIntHashMap<MNode1D> write1dNodeReferences(File dir, Collection<MNode1D> nodelist, BCADGraphCell edge)
 		throws IOException, FileNotFoundException
 	{
 		File refFile = new File(dir, "r");
@@ -310,9 +312,9 @@ public class Storage
 		TObjectIntHashMap<MNode1D> localIdx = new TObjectIntHashMap<MNode1D>(nodelist.size());
 
 		int i = 0;
-		for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
+		for (Iterator<MNode1D> itn = nodelist.iterator(); itn.hasNext(); )
 		{
-			MNode1D n = (MNode1D) itn.next();
+			MNode1D n = itn.next();
 			// Set first index to 1; a null index in
 			// localIdx is thus an error
 			localIdx.put(n, i+1);
@@ -330,7 +332,7 @@ public class Storage
 		return localIdx;
 	}
 
-	private static TObjectIntHashMap<Vertex> write2dNodeReferences(File dir, int id, Collection nodelist, Vertex outer)
+	private static TObjectIntHashMap<Vertex> write2dNodeReferences(File dir, int id, Collection<AbstractVertex> nodelist, Vertex outer)
 		throws IOException, FileNotFoundException
 	{
 		File refFile = new File(dir, "r");
@@ -338,12 +340,12 @@ public class Storage
 			refFile.delete();
 
 		// Save references
-		logger.debug("begin writing "+refFile);
+		logger.debug("begin writing "+refFile+" face "+id);
 		DataOutputStream refsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile, true)));
 
 		TObjectIntHashMap<Vertex> localIdx = new TObjectIntHashMap<Vertex>(nodelist.size());
 		int i = 0;
-		for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
+		for (Iterator<AbstractVertex> itn = nodelist.iterator(); itn.hasNext(); )
 		{
 			Vertex n = (Vertex) itn.next();
 			if (n == outer)
@@ -363,7 +365,7 @@ public class Storage
 		return localIdx;
 	}
 
-	private static void write1dCoordinates(File dir, Collection nodelist, CADGeomCurve3D curve)
+	private static void write1dCoordinates(File dir, Collection<MNode1D> nodelist, CADGeomCurve3D curve)
 		throws IOException, FileNotFoundException
 	{
 		File nodesFile = new File(dir, "n");
@@ -376,9 +378,9 @@ public class Storage
 		logger.debug("begin writing "+nodesFile+" and "+parasFile);
 		DataOutputStream nodesout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile, true)));
 		DataOutputStream parasout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(parasFile, true)));
-		for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
+		for (Iterator<MNode1D> itn = nodelist.iterator(); itn.hasNext(); )
 		{
-			MNode1D n = (MNode1D)itn.next();
+			MNode1D n = itn.next();
 			double p = n.getParameter();
 			parasout.writeDouble(p);
 			double [] xyz = curve.value(p);
@@ -389,7 +391,7 @@ public class Storage
 		parasout.close();
 	}
 
-	private static void write2dCoordinates(File dir, Collection nodelist, Vertex outer, CADGeomSurface surface)
+	private static void write2dCoordinates(File dir, Collection<AbstractVertex> nodelist, Vertex outer, CADGeomSurface surface)
 		throws IOException, FileNotFoundException
 	{
 		File nodesFile = new File(dir, "n");
@@ -404,7 +406,7 @@ public class Storage
 		DataOutputStream nodesout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile, true)));
 		DataOutputStream parasout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(parasFile, true)));
 		double [] xyz;
-		for (Iterator itn = nodelist.iterator(); itn.hasNext(); )
+		for (Iterator<AbstractVertex> itn = nodelist.iterator(); itn.hasNext(); )
 		{
 			Vertex n = (Vertex) itn.next();
 			if (n == outer)
@@ -425,7 +427,7 @@ public class Storage
 		parasout.close();
 	}
 
-	private static void write1dEdges(File dir, Collection edgelist, TObjectIntHashMap<MNode1D> localIdx)
+	private static void write1dEdges(File dir, Collection<MEdge1D> edgelist, TObjectIntHashMap<MNode1D> localIdx)
 		throws IOException, FileNotFoundException
 	{
 		File beamsFile=new File(dir, "b");
@@ -434,9 +436,9 @@ public class Storage
 		
 		logger.debug("begin writing "+beamsFile);
 		DataOutputStream beamsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(beamsFile, true)));
-		for (Iterator ite = edgelist.iterator(); ite.hasNext(); )
+		for (Iterator<MEdge1D> ite = edgelist.iterator(); ite.hasNext(); )
 		{
-			MEdge1D e = (MEdge1D) ite.next();
+			MEdge1D e = ite.next();
 			MNode1D pt1 = e.getNodes1();
 			MNode1D pt2 = e.getNodes2();
 			beamsout.writeInt(localIdx.get(pt1));
@@ -445,7 +447,7 @@ public class Storage
 		beamsout.close();
 	}
 
-	private static void write2dTriangles(File dir, Collection trianglelist, TObjectIntHashMap<Vertex> localIdx)
+	private static void write2dTriangles(File dir, Collection<AbstractTriangle> trianglelist, TObjectIntHashMap<Vertex> localIdx)
 		throws IOException, FileNotFoundException
 	{
 		File facesFile=new File(dir, "f");
@@ -455,7 +457,7 @@ public class Storage
 		// Save faces
 		logger.debug("begin writing "+facesFile);
 		DataOutputStream facesout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(facesFile, true)));
-		for (Iterator itf = trianglelist.iterator(); itf.hasNext(); )
+		for (Iterator<AbstractTriangle> itf = trianglelist.iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
 			if (f.isOuter())

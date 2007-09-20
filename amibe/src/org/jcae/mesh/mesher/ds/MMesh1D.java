@@ -55,6 +55,10 @@ public class MMesh1D extends MMesh0D
 	private Map<CADEdge, SubMesh1D> mapTEdgeToSubMesh1D;
 	private Map<CADEdge, LinkedHashSet<CADFace>> mapTEdgeToFaces;
 	
+	// Ditto for bora data structure.
+	private Map<BDiscretization, SubMesh1D> mapDiscrToSubMesh1D;
+	private Map<BDiscretization, LinkedHashSet<BDiscretization>> mapDiscrToFaces;
+
 	/**
 	 * Creates a <code>MMesh1D</code> instance by discretizing all edges
 	 * of a given shape.
@@ -123,7 +127,7 @@ public class MMesh1D extends MMesh0D
 		if (edgediscrs == 0)
 			return;
 
-		Map<BDiscretization, SubMesh1D> mapDiscrToSubMesh1D = new LinkedHashMap<BDiscretization, SubMesh1D>(edgediscrs);
+		mapDiscrToSubMesh1D = new LinkedHashMap<BDiscretization, SubMesh1D>(edgediscrs);
 		edgediscrs = 0;
 		for (Iterator<BCADGraphCell> itn = root.shapesExplorer(CADShapeEnum.EDGE); itn.hasNext(); )
 		{
@@ -141,13 +145,12 @@ public class MMesh1D extends MMesh0D
 		}
 		System.out.println("Number of Edge discretizations created in MMesh1D: "+ edgediscrs);
 
-		Map<BDiscretization, LinkedHashSet<BDiscretization>> mapDiscrToFaces = new HashMap<BDiscretization, LinkedHashSet<BDiscretization>>(edgediscrs);
+		mapDiscrToFaces = new HashMap<BDiscretization, LinkedHashSet<BDiscretization>>(edgediscrs);
 		for (Iterator<BDiscretization> it = mapDiscrToSubMesh1D.keySet().iterator(); it.hasNext(); )
 		{
 			mapDiscrToFaces.put(it.next(), new LinkedHashSet<BDiscretization>());
 		}
 
-		LinkedHashSet<BDiscretization> set;
 		for (Iterator<BCADGraphCell> itp = root.shapesExplorer(CADShapeEnum.FACE); itp.hasNext(); )
 		{
 			BCADGraphCell pcell = itp.next();
@@ -164,7 +167,7 @@ public class MMesh1D extends MMesh0D
 						{
 							// here mapDiscrToFaces maps the parent discretizations on 
 							// the faces to the child discretizations on the edge
-							set = mapDiscrToFaces.get(cd);
+							LinkedHashSet<BDiscretization> set = mapDiscrToFaces.get(cd);
 							set.add(pd);
 						}
 					}
@@ -318,6 +321,11 @@ public class MMesh1D extends MMesh0D
 	public Iterator<CADEdge> getTEdgeIterator()
 	{
 		return mapTEdgeToSubMesh1D.keySet().iterator();
+	}
+	
+	public Iterator<BDiscretization> getBEdgeIterator()
+	{
+		return mapDiscrToSubMesh1D.keySet().iterator();
 	}
 	
 	/**

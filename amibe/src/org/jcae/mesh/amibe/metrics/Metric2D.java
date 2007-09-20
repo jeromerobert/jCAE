@@ -81,32 +81,21 @@ public class Metric2D
 			if (!m3dbis.deflection())
 				m3dbis = null;
 		}
-		if (m3d != null)
+		//  For efficiency reasons, restrict2D returns a static array
+		temp = m3d.restrict2D();
+		sym = 0.5 * (temp[0][1] + temp[1][0]);
+ 		if (m3dbis != null)
 		{
-			//  For efficiency reasons, restrict2D returns a static array
-			temp = m3d.restrict2D();
+			//  The curvature metrics is defined, so we can compute
+			//  its intersection with m3d.
+			Matrix2D m2d0 = new Matrix2D(temp[0][0], sym, sym, temp[1][1]);
+			temp = m3dbis.restrict2D();
 			sym = 0.5 * (temp[0][1] + temp[1][0]);
- 			if (m3dbis != null)
-			{
-				//  The curvature metrics is defined, so we can compute
-				//  its intersection with m3d.
-				Matrix2D m2d0 = new Matrix2D(temp[0][0], sym, sym, temp[1][1]);
-				temp = m3dbis.restrict2D();
-				sym = 0.5 * (temp[0][1] + temp[1][0]);
-				Matrix2D m2d1 = new Matrix2D(temp[0][0], sym, sym, temp[1][1]);
-				Matrix2D res = m2d0.intersection(m2d1);
-				temp[0][0] = res.data[0][0];
-				temp[1][1] = res.data[1][1];
-				sym = 0.5 * (res.data[0][1] + res.data[1][0]);
-			}
-		}
-		else
-		{
- 			if (m3dbis != null)
-			{
-				temp = m3dbis.restrict2D();
-				sym = 0.5 * (temp[0][1] + temp[1][0]);
-			}
+			Matrix2D m2d1 = new Matrix2D(temp[0][0], sym, sym, temp[1][1]);
+			Matrix2D res = m2d0.intersection(m2d1);
+			temp[0][0] = res.data[0][0];
+			temp[1][1] = res.data[1][1];
+			sym = 0.5 * (res.data[0][1] + res.data[1][0]);
 		}
 		E = temp[0][0];
 		F = sym;

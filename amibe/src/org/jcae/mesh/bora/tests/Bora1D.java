@@ -61,15 +61,15 @@ public class Bora1D
 		BCADGraphCell root = model.getGraph().getRootCell();
 		// Count edges
 		int nEdges = 0;
-		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
+		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
 		{
-			BCADGraphCell edge = (BCADGraphCell) it.next();
+			BCADGraphCell edge = it.next();
 			if (edge.getOrientation() != 0)
 			{
 				if (edge.getReversed() != null)
 					edge = edge.getReversed();
 			}
-			BDiscretization d = (BDiscretization) edge.discretizationIterator().next();
+			BDiscretization d = edge.discretizationIterator().next();
 			if (null == d)
 				continue;
 			File nodesfile = new File(model.getOutputDir(d)+File.separator+"1d", "n"+edge.getId());
@@ -86,15 +86,15 @@ public class Bora1D
 		nrNodes[0] = 0;
 		nrBeams[0] = 0;
 		nEdges = 0;
-		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
+		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
 		{
-			BCADGraphCell edge = (BCADGraphCell) it.next();
+			BCADGraphCell edge = it.next();
 			if (edge.getOrientation() != 0)
 			{
 				if (edge.getReversed() != null)
 					edge = edge.getReversed();
 			}
-			BDiscretization d = (BDiscretization) edge.discretizationIterator().next();
+			BDiscretization d = edge.discretizationIterator().next();
 			if (null == d)
 				continue;
 			File nodesfile = new File(model.getOutputDir(d)+File.separator+"1d", "n"+edge.getId());
@@ -121,15 +121,15 @@ public class Bora1D
 		CADShapeBuilder factory = CADShapeBuilder.factory;
 
 		nEdges = 0;
-		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
+		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )
 		{
-			BCADGraphCell edge = (BCADGraphCell) it.next();
+			BCADGraphCell edge = it.next();
 			if (edge.getOrientation() != 0)
 			{
 				if (edge.getReversed() != null)
 					edge = edge.getReversed();
 			}
-			BDiscretization d = (BDiscretization) edge.discretizationIterator().next();
+			BDiscretization d = edge.discretizationIterator().next();
 			if (null == d)
 				continue;
 			try
@@ -262,6 +262,7 @@ public class Bora1D
 			if (active[i])
 				view.add(viewList[i]);
 		view.addKeyListener(new KeyAdapter() {
+			@Override
 			public void keyPressed(KeyEvent event)
 			{
 				char k = event.getKeyChar();

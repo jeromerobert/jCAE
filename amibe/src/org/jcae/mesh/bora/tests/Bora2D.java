@@ -63,15 +63,15 @@ public class Bora2D
 		BCADGraphCell root = model.getGraph().getRootCell();
 		// Count faces
 		int nFaces = 0;
-		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
+		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 		{
-			BCADGraphCell face = (BCADGraphCell) it.next();
+			BCADGraphCell face = it.next();
 			if (face.getOrientation() != 0)
 			{
 				if (face.getReversed() != null)
 					face = face.getReversed();
 			}
-			BDiscretization d = (BDiscretization) face.discretizationIterator().next();
+			BDiscretization d = face.discretizationIterator().next();
 			if (null == d)
 				continue;
 			File nodesfile = new File(model.getOutputDir(d)+File.separator+"2d", "n"+face.getId());
@@ -88,15 +88,15 @@ public class Bora2D
 		nrNodes[0] = 0;
 		nrTria[0] = 0;
 		nFaces = 0;
-		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
+		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 		{
-			BCADGraphCell face = (BCADGraphCell) it.next();
+			BCADGraphCell face = it.next();
 			if (face.getOrientation() != 0)
 			{
 				if (face.getReversed() != null)
 					face = face.getReversed();
 			}
-			BDiscretization d = (BDiscretization) face.discretizationIterator().next();
+			BDiscretization d = face.discretizationIterator().next();
 			if (null == d)
 				continue;
 			File nodesfile = new File(model.getOutputDir(d)+File.separator+"2d", "n"+face.getId());
@@ -122,15 +122,15 @@ public class Bora2D
 		int [] trias = new int[3*nTrias];
 
 		nFaces = 0;
-		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
+		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 		{
-			BCADGraphCell face = (BCADGraphCell) it.next();
+			BCADGraphCell face = it.next();
 			if (face.getOrientation() != 0)
 			{
 				if (face.getReversed() != null)
 					face = face.getReversed();
 			}
-			BDiscretization d = (BDiscretization) face.discretizationIterator().next();
+			BDiscretization d = face.discretizationIterator().next();
 			if (null == d)
 				continue;
 			CADFace F = (CADFace) face.getShape();
@@ -277,6 +277,7 @@ public class Bora2D
 			if (active[i])
 				view.add(viewList[i]);
 		view.addKeyListener(new KeyAdapter() {
+			@Override
 			public void keyPressed(KeyEvent event)
 			{
 				char k = event.getKeyChar();

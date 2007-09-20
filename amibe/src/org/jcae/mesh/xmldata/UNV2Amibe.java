@@ -78,6 +78,7 @@ public class UNV2Amibe
 			super(line, in);
 		}
 
+		@Override
 		protected String parse(BufferedReader in) throws IOException
 		{
 			nodes=new int[2];
@@ -97,6 +98,7 @@ public class UNV2Amibe
 			super(line, in);
 		}
 
+		@Override
 		protected String parse(BufferedReader in) throws IOException
 		{
 			nodes=new int[6];
@@ -123,11 +125,11 @@ public class UNV2Amibe
 	private String unitBlock;
 		
 	private int numberOfNodes, numberOfTriangles;
-	private ArrayList groups=new ArrayList();
+	private ArrayList<Group> groups=new ArrayList<Group>();
 	private String stripedUnvFile;
 	
 	/** a list of 2412 elements which won't be store in the amibe file */
-	private ArrayList elements=new ArrayList();
+	private ArrayList<Element> elements=new ArrayList<Element>();
 	
 	public void importMesh(String input, String output) throws IOException
 	{
@@ -200,7 +202,7 @@ public class UNV2Amibe
 		
 		for(int i=0; i<groups.size(); i++)
 		{
-			Group g=(Group) groups.get(i);
+			Group g=groups.get(i);
 			writer.println("<group id=\""+i+"\">");
 			writer.println("<name>"+g.name+"</name>");
 			writer.println("<number>"+g.nbElement+"</number>");			
@@ -264,20 +266,20 @@ public class UNV2Amibe
 	/** List of nodes used in elements which are not written in the amibe file */
 	private int[] computeListOfNodes()
 	{
-		TreeSet hs=new TreeSet();
+		TreeSet<Integer> hs=new TreeSet<Integer>();
 		for(int i=0; i<elements.size(); i++)
 		{
-			Element e=(Element)elements.get(i);
+			Element e=elements.get(i);
 			for(int j=0; j<e.getNbNodes(); j++)
 				hs.add(Integer.valueOf(e.getNode(j)));					
 		}
 		
 		int[] toReturn=new int[hs.size()];
-		Iterator it=hs.iterator();
+		Iterator<Integer> it=hs.iterator();
 		
 		int k=0;
 		while(it.hasNext())
-			toReturn[k++]=((Integer)it.next()).intValue();
+			toReturn[k++]=it.next().intValue();
 		
 		return toReturn;
 	}
@@ -309,7 +311,7 @@ public class UNV2Amibe
 		stripedUnv.println("  2412");
 		for(int i=0; i<elements.size(); i++)
 		{
-			Element e=(Element)elements.get(i);
+			Element e=elements.get(i);
 			stripedUnv.println(e.buffer);
 		}
 		//write elements

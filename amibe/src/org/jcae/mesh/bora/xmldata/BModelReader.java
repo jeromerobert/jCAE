@@ -125,12 +125,12 @@ public class BModelReader
 				return model;
 			// Check consistency
 			String errmsg = "Error when parsing XML file "+xmlDir+File.separator+xmlFile;
-			for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.COMPOUND, CADShapeEnum.VERTEX); itcse.hasNext(); )
+			for (Iterator<CADShapeEnum> itcse = CADShapeEnum.iterator(CADShapeEnum.COMPOUND, CADShapeEnum.VERTEX); itcse.hasNext(); )
 			{
-				CADShapeEnum cse = (CADShapeEnum) itcse.next();
-				for (Iterator it = model.getGraph().getRootCell().shapesExplorer(cse); it.hasNext(); )
+				CADShapeEnum cse = itcse.next();
+				for (Iterator<BCADGraphCell> it = model.getGraph().getRootCell().shapesExplorer(cse); it.hasNext(); )
 				{
-					BCADGraphCell s = (BCADGraphCell) it.next();
+					BCADGraphCell s = it.next();
 					Node id = (Node) xpath.evaluate("/jcae/model/graph/cad[@id="+s.getId()+"]", document, XPathConstants.NODE);
 					if (id == null)
 					{
@@ -143,14 +143,14 @@ public class BModelReader
 						return null;
 					}
 					Node children = getChild(id, "children");
-					Iterator itc = s.shapesIterator();
+					Iterator<BCADGraphCell> itc = s.shapesIterator();
 					if (itc.hasNext())
 					{
-						BCADGraphCell c = (BCADGraphCell) itc.next();
+						BCADGraphCell c = itc.next();
 						StringBuffer sblist = new StringBuffer(""+c.getId());
 						while (itc.hasNext())
 						{
-							c = (BCADGraphCell) itc.next();
+							c = itc.next();
 							sblist.append(","+c.getId());
 						}
 						String list = sblist.toString();

@@ -21,6 +21,7 @@
 package org.jcae.mesh.amibe.algos2d;
 
 import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractVertex;
@@ -98,10 +99,10 @@ public class Insertion
 		while (true)
 		{
 			maxNodes = 0;
-			ArrayList nodes = new ArrayList();
+			ArrayList<Vertex2D> nodes = new ArrayList<Vertex2D>();
 			VirtualHalfEdge2D sym = new VirtualHalfEdge2D();
 			VirtualHalfEdge2D ot = new VirtualHalfEdge2D();
-			for(Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
+			for(Iterator<AbstractTriangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
 				Triangle t = (Triangle) it.next();
 				if (t.isOuter())
@@ -116,13 +117,13 @@ public class Insertion
 						ot.clearAttributes(AbstractHalfEdge.MARKED);
 				}
 			}
-			for(Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
+			for(Iterator<AbstractTriangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
 				Triangle t = (Triangle) it.next();
 				if (t.isOuter())
 					continue;
 				ot.bind(t);
-				ArrayList triNodes = new ArrayList();
+				ArrayList<Vertex2D> triNodes = new ArrayList<Vertex2D>();
 				int nrTriNodes = 0;
 				for (int i = 0; i < 3; i++)
 				{
@@ -182,7 +183,7 @@ public class Insertion
 					int index = imax / 2;
 					for (int i = 0; i < imax; i++)
 					{
-						Vertex2D v = (Vertex2D) triNodes.get(index);
+						Vertex2D v = triNodes.get(index);
 						Vertex2D n = (Vertex2D) mesh.getQuadTree().getNearestVertex(mesh, v);
 						assert n == mesh.getQuadTree().getNearestVertexDebug(mesh, v);
 						if (mesh.compGeom().distance(v, n) > minlen)
@@ -197,7 +198,7 @@ public class Insertion
 				}
 			}
 			//  Try to insert triangle centroid after all other points.
-			for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
+			for (Iterator<AbstractTriangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
 				Triangle t = (Triangle) it.next();
 				if (t.isOuter())
@@ -211,9 +212,9 @@ public class Insertion
 					nodes.add(v);
 				}
 			}
-			for (Iterator it = nodes.iterator(); it.hasNext(); )
+			for (Iterator<Vertex2D> it = nodes.iterator(); it.hasNext(); )
 			{
-				Vertex2D v = (Vertex2D) it.next();
+				Vertex2D v = it.next();
 				//  These vertiuces are not bound to any triangles, so
 				//  they must be removed, otherwise getSurroundingOTriangle
 				//  may return a null pointer.
@@ -232,7 +233,7 @@ public class Insertion
 			int skippedNodes = 0;
 			for (int i = 0; i < imax; i++)
 			{
-				Vertex2D v = (Vertex2D) nodes.get(index);
+				Vertex2D v = nodes.get(index);
 				VirtualHalfEdge2D vt = v.getSurroundingOTriangle(mesh);
 				if (!vt.split3(mesh, v, false))
 					skippedNodes++;

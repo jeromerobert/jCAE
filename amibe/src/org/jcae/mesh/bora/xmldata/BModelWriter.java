@@ -57,13 +57,13 @@ public class BModelWriter
 			shapeElement.appendChild(fileElement);
 			modelElement.appendChild(shapeElement);
 
-			Collection allConstraints = model.getConstraints();
+			Collection<Constraint> allConstraints = model.getConstraints();
 			if (allConstraints != null && allConstraints.size() > 0)
 			{
 				Element constraintsElement=document.createElement("constraints");
-				for (Iterator it = allConstraints.iterator(); it.hasNext(); )
+				for (Iterator<Constraint> it = allConstraints.iterator(); it.hasNext(); )
 				{
-					Constraint c = (Constraint) it.next();
+					Constraint c = it.next();
 					Hypothesis h = c.getHypothesis();
 					Element hypElement=document.createElement("hypothesis");
 					hypElement.setAttribute("id", ""+h.getId());
@@ -87,25 +87,25 @@ public class BModelWriter
 					}
 					constraintsElement.appendChild(hypElement);
 				}
-				for (Iterator it = allConstraints.iterator(); it.hasNext(); )
+				for (Iterator<Constraint> it = allConstraints.iterator(); it.hasNext(); )
 				{
-					Constraint c = (Constraint) it.next();
+					Constraint c = it.next();
 					constraintsElement.appendChild(
 						XMLHelper.parseXMLString(document, "<constraint id=\""+c.getId()+"\">"+
 							"<cadId>"+c.getGraphCell().getId()+"</cadId>"+
 							"<hypId>"+c.getHypothesis().getId()+"</hypId></constraint>"));
 				}
-				for (Iterator it = model.getSubMeshIterator(); it.hasNext(); )
+				for (Iterator<BSubMesh> it = model.getSubMeshIterator(); it.hasNext(); )
 				{
-					BSubMesh s = (BSubMesh) it.next();
-					Iterator itc = s.getConstraints().iterator();
+					BSubMesh s = it.next();
+					Iterator<Constraint> itc = s.getConstraints().iterator();
 					if (itc.hasNext())
 					{
-						Constraint c = (Constraint) itc.next();
+						Constraint c = itc.next();
 						StringBuffer sblist = new StringBuffer(""+c.getId());
 						while (itc.hasNext())
 						{
-							c = (Constraint) itc.next();
+							c = itc.next();
 							sblist.append(","+c.getId());
 						}
 						Element subElement=document.createElement("submesh");
@@ -117,26 +117,26 @@ public class BModelWriter
 				modelElement.appendChild(constraintsElement);
 			}
 			Element graphElement=document.createElement("graph");
-			for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.COMPOUND, CADShapeEnum.VERTEX); itcse.hasNext(); )
+			for (Iterator<CADShapeEnum> itcse = CADShapeEnum.iterator(CADShapeEnum.COMPOUND, CADShapeEnum.VERTEX); itcse.hasNext(); )
 			{
-				CADShapeEnum cse = (CADShapeEnum) itcse.next();
-				for (Iterator it = model.getGraph().getCellList(cse).iterator(); it.hasNext(); )
+				CADShapeEnum cse = itcse.next();
+				for (Iterator<BCADGraphCell> it = model.getGraph().getCellList(cse).iterator(); it.hasNext(); )
 				{
-					BCADGraphCell s = (BCADGraphCell) it.next();
+					BCADGraphCell s = it.next();
 					Element elt = document.createElement("cad");
 					elt.setAttribute("id", ""+s.getId());
 					elt.setAttribute("type", cse.toString());
 					elt.setAttribute("orientation", ""+s.getShape().orientation());
 					if (s.getReversed() != null)
 						elt.setAttribute("reversed", ""+s.getReversed().getId());
-					Iterator itc = s.shapesIterator();
+					Iterator<BCADGraphCell> itc = s.shapesIterator();
 					if (itc.hasNext())
 					{
-						BCADGraphCell c = (BCADGraphCell) itc.next();
+						BCADGraphCell c = itc.next();
 						StringBuffer sblist = new StringBuffer(""+c.getId());
 						while (itc.hasNext())
 						{
-							c = (BCADGraphCell) itc.next();
+							c = itc.next();
 							sblist.append(","+c.getId());
 						}
 						Element child = document.createElement("children");
@@ -147,9 +147,9 @@ public class BModelWriter
 					{
 						StringBuffer sblist = new StringBuffer();
 						boolean first = true;
-						for (Iterator itp = s.getParents().iterator(); itp.hasNext(); )
+						for (Iterator<BCADGraphCell> itp = s.getParents().iterator(); itp.hasNext(); )
 						{
-							BCADGraphCell p = (BCADGraphCell) itp.next();
+							BCADGraphCell p = itp.next();
 							if (!first)
 								sblist.append(",");
 							first = false;
@@ -159,14 +159,14 @@ public class BModelWriter
 						parent.setAttribute("list", ""+sblist.toString());
 						elt.appendChild(parent);
 					}
-					Iterator itp = s.discretizationIterator();
+					Iterator<BDiscretization> itp = s.discretizationIterator();
 					if (itp.hasNext())
 					{
 						StringBuffer sblist = new StringBuffer();
 						boolean first = true;
 						while (itp.hasNext())
 						{
-							BDiscretization d = (BDiscretization) itp.next();
+							BDiscretization d = itp.next();
 							if (!first)
 								sblist.append(",");
 							first = false;

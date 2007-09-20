@@ -85,9 +85,9 @@ public class BCADGraph
 		THashMap<CADShape, CADShape> seen = new THashMap<CADShape, CADShape>();
 		CADShapeBuilder factory = CADShapeBuilder.factory;
 		CADExplorer exp = factory.newExplorer();
-		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
+		for (Iterator<CADShapeEnum> itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
-			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			CADShapeEnum cse = itcse.next();
 			for (exp.init(shape, cse); exp.more(); exp.next())
 			{
 				CADShape sub = exp.current();
@@ -108,9 +108,9 @@ public class BCADGraph
 		// Add indices
 		int i = 1;
 		CADExplorer exp2 = factory.newExplorer();
-		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.COMPOUND, CADShapeEnum.VERTEX); itcse.hasNext(); )
+		for (Iterator<CADShapeEnum> itcse = CADShapeEnum.iterator(CADShapeEnum.COMPOUND, CADShapeEnum.VERTEX); itcse.hasNext(); )
 		{
-			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			CADShapeEnum cse = itcse.next();
 			for (exp.init(shape, cse); exp.more(); exp.next())
 			{
 				CADShape s = exp.current();
@@ -126,20 +126,20 @@ public class BCADGraph
 		freeIndex = i;
 
 		// Add backward links
-		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.COMPOUND, CADShapeEnum.VERTEX); itcse.hasNext(); )
+		for (Iterator<CADShapeEnum> itcse = CADShapeEnum.iterator(CADShapeEnum.COMPOUND, CADShapeEnum.VERTEX); itcse.hasNext(); )
 		{
-			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			CADShapeEnum cse = itcse.next();
 			for (exp.init(shape, cse); exp.more(); exp.next())
 			{
 				CADShape s = exp.current();
 				BCADGraphCell c = cadShapeToGraphCell.get(s);
 				if (c == null)
 					continue;
-				Iterator it2 = CADShapeEnum.iterator(cse, CADShapeEnum.VERTEX);
+				Iterator<CADShapeEnum> it2 = CADShapeEnum.iterator(cse, CADShapeEnum.VERTEX);
 				it2.next();
 				while (it2.hasNext())
 				{
-					CADShapeEnum cse2 = (CADShapeEnum) it2.next();
+					CADShapeEnum cse2 = it2.next();
 					for (exp2.init(s, cse2); exp2.more(); exp2.next())
 					{
 						CADShape s2 = exp2.current();
@@ -214,19 +214,19 @@ public class BCADGraph
 	public void printShapes()
 	{
 		System.out.println("List of geometrical entities");
-		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
+		for (Iterator<CADShapeEnum> itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
-			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			CADShapeEnum cse = itcse.next();
 			printShapes(cse, root.shapesExplorer(cse));
 		}
 		System.out.println("End list");
 	}
 
-	private static void printShapes(CADShapeEnum cse, Iterator it)
+	private static void printShapes(CADShapeEnum cse, Iterator<BCADGraphCell> it)
 	{
 		while (it.hasNext())
 		{
-			BCADGraphCell s = (BCADGraphCell) it.next();
+			BCADGraphCell s = it.next();
 			if (cse == CADShapeEnum.VERTEX)
 			{
 				CADVertex v = (CADVertex) s.getShape();
@@ -236,9 +236,9 @@ public class BCADGraph
 			else
 			{
 				System.out.println("Shape "+s+" ("+Integer.toHexString(s.hashCode())+"):");
-				for (Iterator it2 = s.allShapesIterator(); it2.hasNext(); )
+				for (Iterator<BCADGraphCell> it2 = s.allShapesIterator(); it2.hasNext(); )
 				{
-					BCADGraphCell c = (BCADGraphCell) it2.next();
+					BCADGraphCell c = it2.next();
 					System.out.println(" +> shape "+c+" ("+Integer.toHexString(c.hashCode())+")");
 				}
 			}

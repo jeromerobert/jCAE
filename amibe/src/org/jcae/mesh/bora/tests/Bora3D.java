@@ -61,15 +61,15 @@ public class Bora3D
 		BCADGraphCell root = model.getGraph().getRootCell();
 		// Count faces
 		int nFaces = 0;
-		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
+		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
 		{
-			BCADGraphCell solid = (BCADGraphCell) it.next();
+			BCADGraphCell solid = it.next();
 			if (solid.getOrientation() != 0)
 			{
 				if (solid.getReversed() != null)
 					solid = solid.getReversed();
 			}
-			BDiscretization d = (BDiscretization) solid.discretizationIterator().next();
+			BDiscretization d = solid.discretizationIterator().next();
 			if (null == d)
 				continue;
 			File nodesfile = new File(model.getOutputDir(d)+File.separator+"3d", "n"+solid.getId());
@@ -83,15 +83,15 @@ public class Bora3D
 		nrNodes[0] = 0;
 		nrTetra[0] = 0;
 		nFaces = 0;
-		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
+		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
 		{
-			BCADGraphCell solid = (BCADGraphCell) it.next();
+			BCADGraphCell solid = it.next();
 			if (solid.getOrientation() != 0)
 			{
 				if (solid.getReversed() != null)
 					solid = solid.getReversed();
 			}
-			BDiscretization d = (BDiscretization) solid.discretizationIterator().next();
+			BDiscretization d = solid.discretizationIterator().next();
 			if (null == d)
 				continue;
 			File nodesfile = new File(model.getOutputDir(d)+File.separator+"3d", "n"+solid.getId());
@@ -113,15 +113,15 @@ public class Bora3D
 		int [] trias = new int[3*4*nTetra];
 
 		nFaces = 0;
-		for (Iterator it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
+		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
 		{
-			BCADGraphCell solid = (BCADGraphCell) it.next();
+			BCADGraphCell solid = it.next();
 			if (solid.getOrientation() != 0)
 			{
 				if (solid.getReversed() != null)
 					solid = solid.getReversed();
 			}
-			BDiscretization d = (BDiscretization) solid.discretizationIterator().next();
+			BDiscretization d = solid.discretizationIterator().next();
 			if (null == d)
 				continue;
 			try
@@ -255,6 +255,7 @@ public class Bora3D
 			if (active[i])
 				view.add(viewList[i]);
 		view.addKeyListener(new KeyAdapter() {
+			@Override
 			public void keyPressed(KeyEvent event)
 			{
 				char k = event.getKeyChar();

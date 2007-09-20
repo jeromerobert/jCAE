@@ -88,7 +88,7 @@ public class MMesh1DReader
 		int i;
 		logger.debug("begin reading "+xmlDir+File.separator+xmlFile);
 		XPath xpath = XPathFactory.newInstance().newXPath();
-		HashMap map1DToMaster = new HashMap();
+		HashMap<CADVertex, MNode1D> map1DToMaster = new HashMap<CADVertex, MNode1D>();
 		try
 		{
 			Document document = XMLHelper.parseXML(new File(xmlDir, xmlFile));
@@ -131,7 +131,7 @@ public class MMesh1DReader
 			//  References are counted from 1; 0 means an inner
 			//  vertex.  Offset is thus set to 1.
 			int offset = 1;
-			HashSet setSeenEdges = new HashSet();
+			HashSet<CADEdge> setSeenEdges = new HashSet<CADEdge>();
 			CADExplorer expE = CADShapeBuilder.factory.newExplorer();
 			for (expE.init(shape, CADShapeEnum.EDGE); expE.more(); expE.next())
 			{
@@ -162,7 +162,7 @@ public class MMesh1DReader
 					{
 						CADVertex V = m1d.getGeometricalVertex(refs[iref+1]);
 						nodelist[i] = new MNode1D(nodesBuffer.get(), V);
-						MNode1D master = (MNode1D) map1DToMaster.get(V);
+						MNode1D master = map1DToMaster.get(V);
 						if (null == master)
 							map1DToMaster.put(V, nodelist[i]);
 						else

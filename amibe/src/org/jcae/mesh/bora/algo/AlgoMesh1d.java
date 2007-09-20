@@ -39,7 +39,6 @@ public class AlgoMesh1d
 	private MMesh1D mesh1d;
 	private UniformLengthDeflection algoUniformLengthDeflection;
 	private UniformLength           algoUniformLength;
-	private Compat1D2D              algoCompat1D2D;
 	
 	/**
 	 * Creates a <code>AlgoMesh1d</code> instance.
@@ -51,7 +50,7 @@ public class AlgoMesh1d
 		mesh1d = m;
 		algoUniformLengthDeflection = new UniformLengthDeflection(mesh1d);
 		algoUniformLength           = new UniformLength(mesh1d);
-		algoCompat1D2D              = new Compat1D2D(mesh1d);
+		new Compat1D2D(mesh1d);
 	}
 
 	/**
@@ -64,19 +63,19 @@ public class AlgoMesh1d
 		double currentDiscrLength;
 		double currentDiscrDeflec;
 		/* Explore the shape for each edge */
-		Iterator ite = mesh1d.getTEdgeIterator();
+		Iterator<BDiscretization> ite = mesh1d.getBEdgeIterator();
 		/*  First compute current nbNodes and nbEdges  */
 		while (ite.hasNext())
 		{
-		        BDiscretization discrE = (BDiscretization) ite.next();
+		        BDiscretization discrE = ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(discrE);
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
 		}
-		ite = mesh1d.getTEdgeIterator();
+		ite = mesh1d.getBEdgeIterator();
 		while (ite.hasNext())
 		{
-		        BDiscretization discrE = (BDiscretization) ite.next();
+		        BDiscretization discrE = ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(discrE);
 			nbNodes -= submesh1d.getNodes().size();
 			nbEdges -= submesh1d.getEdges().size();

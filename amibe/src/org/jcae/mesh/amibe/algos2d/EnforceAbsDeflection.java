@@ -22,13 +22,13 @@ package org.jcae.mesh.amibe.algos2d;
 
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import java.util.ArrayList;
-import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 /**
@@ -63,7 +63,6 @@ public class EnforceAbsDeflection
 		mesh.pushCompGeom(3);
 		logger.debug(" Enforcing absolute deflection");
 
-		Triangle t;
 		Vertex [] p = new Vertex[4];
 		double [] v1 = new double[3];
 		double [] v2 = new double[3];
@@ -75,10 +74,10 @@ public class EnforceAbsDeflection
 		do
 		{
 			redo = false;
-			ArrayList badTriangles = new ArrayList();
-			for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
+			ArrayList<Triangle> badTriangles = new ArrayList<Triangle>();
+			for (AbstractTriangle at: mesh.getTriangles())
 			{
-				t = (Triangle) it.next();
+				Triangle t = (Triangle) at;
 				if (t.isOuter())
 					continue;
 				double uv[] = Vertex2D.centroid(mesh, (Vertex2D[]) t.vertex).getUV();
@@ -110,9 +109,8 @@ public class EnforceAbsDeflection
 						badTriangles.add(t);
 				}
 			}
-			for (Iterator it = badTriangles.iterator(); it.hasNext(); )
+			for (Triangle t: badTriangles)
 			{
-				t = (Triangle) it.next();
 				if (!mesh.getTriangles().contains(t) || t.isBoundary())
 					continue;
 				double uv[] = Vertex2D.centroid(mesh, (Vertex2D[]) t.vertex).getUV();

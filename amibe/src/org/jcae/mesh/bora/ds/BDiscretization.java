@@ -32,7 +32,7 @@ public class BDiscretization
 	private static Logger logger=Logger.getLogger(BDiscretization.class);
 	private final BCADGraphCell graphCell;
 	// List of set of BSubMesh instances containing this BDiscretization.
-	private final Collection submesh = new LinkedHashSet();
+	private final Collection<BSubMesh> submesh = new LinkedHashSet<BSubMesh>();
 	private Constraint constraint;
 	private AlgoInterface algo;
 	private boolean computed = false;
@@ -74,7 +74,7 @@ public class BDiscretization
 		return constraint;
 	}
 
-	public Collection getSubmesh()
+	public Collection<BSubMesh> getSubmesh()
 	{
 		return submesh;
 	}
@@ -86,7 +86,7 @@ public class BDiscretization
 
 	public BSubMesh getFirstSubMesh()
 	{
-		return (BSubMesh) submesh.iterator().next();
+		return submesh.iterator().next();
 	}
 
 	/**
@@ -139,9 +139,9 @@ public class BDiscretization
 	 */
 	public boolean contained(BDiscretization that)
 	{
-		for (Iterator it = submesh.iterator(); it.hasNext(); )
+		for (Iterator<BSubMesh> it = submesh.iterator(); it.hasNext(); )
 		{
-			BSubMesh s = (BSubMesh) it.next();
+			BSubMesh s = it.next();
 			if (!(that.submesh.contains(s)))
 				return false;
 		}
@@ -157,9 +157,9 @@ public class BDiscretization
 	 */
 	public boolean emptyIntersection(BDiscretization that)
 	{
-		for (Iterator it = that.submesh.iterator(); it.hasNext(); )
+		for (Iterator<BSubMesh> it = that.submesh.iterator(); it.hasNext(); )
 		{
-			BSubMesh s = (BSubMesh) it.next();
+			BSubMesh s = it.next();
 			if (submesh.contains(s))
 				return false;
 		}
@@ -177,18 +177,18 @@ public class BDiscretization
 		if (!submesh.contains(that))
 			return false;
 		// loop on the constraints of the submesh
-		for (Iterator itc = that.getConstraints().iterator(); itc.hasNext(); )
+		for (Iterator<Constraint> itc = that.getConstraints().iterator(); itc.hasNext(); )
 		{
-			Constraint cons = (Constraint) itc.next();
+			Constraint cons = itc.next();
 			BCADGraphCell cell = cons.getGraphCell();
 			// loop on the childs of the graphcell of the constraint of the same type
-			for (Iterator it = cell.shapesExplorer(graphCell.getType()); it.hasNext(); )
+			for (Iterator<BCADGraphCell> it = cell.shapesExplorer(graphCell.getType()); it.hasNext(); )
 			{
-				BCADGraphCell child = (BCADGraphCell) it.next();
+				BCADGraphCell child = it.next();
 				// loop on the discretizations of the child
-				for (Iterator itd = child.discretizationIterator(); itd.hasNext(); )
+				for (Iterator<BDiscretization> itd = child.discretizationIterator(); itd.hasNext(); )
 				{
-					BDiscretization discr = (BDiscretization) itd.next();
+					BDiscretization discr = itd.next();
 
 					if (discr == this)
 					    return true;
@@ -222,6 +222,7 @@ public class BDiscretization
 		computed = true;
 	}
 
+	@Override
 	public String toString()
 	{
 		String ret = "Discretization: "+id;

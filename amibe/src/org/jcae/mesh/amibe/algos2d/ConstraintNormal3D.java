@@ -21,13 +21,13 @@
 package org.jcae.mesh.amibe.algos2d;
 
 import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
-import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 /**
@@ -87,9 +87,9 @@ public class ConstraintNormal3D
 			redo = false;
 			cnt = 0;
 			niter--;
-			for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
+			for (AbstractTriangle at: mesh.getTriangles())
 			{
-				t = (Triangle) it.next();
+				t = (Triangle) at;
 				ot.bind(t);
 				for (int i = 0; i < 3; i++)
 				{
@@ -98,9 +98,9 @@ public class ConstraintNormal3D
 				}
 			}
 			
-			for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
+			for (AbstractTriangle at: mesh.getTriangles())
 			{
-				t = (Triangle) it.next();
+				t = (Triangle) at;
 				ot.bind(t);
 				int l = -1;
 				double best = 0.0;

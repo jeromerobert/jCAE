@@ -189,7 +189,7 @@ public class MMesh1DWriter
 			meshElement.appendChild(shapeElement);
 			
 			int iEdge = 0;
-			HashSet setSeenEdges = new HashSet();
+			HashSet<CADEdge> setSeenEdges = new HashSet<CADEdge>();
 			CADExplorer expE = CADShapeBuilder.factory.newExplorer();
 			for (expE.init(shape, CADShapeEnum.EDGE); expE.more(); expE.next())
 			{

@@ -22,6 +22,7 @@ package org.jcae.mesh;
 
 import java.util.Iterator;
 import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.amibe.validation.*;
@@ -70,14 +71,9 @@ public class MeshValid2D
 				String xmlFile = "jcae2d."+iFace;
 				Mesh2D mesh = new Mesh2D(F);
 				MeshReader.readObject(mesh, xmlDir, xmlFile);
-				if (null == mesh)
-				{
-					logger.info("Face "+iFace+" ***");
-					continue;
-				}
 				QualityProcedure qproc = new AbsoluteDeflection2D(mesh);
 				data.setQualityProcedure(qproc);
-				for(Iterator it=mesh.getTriangles().iterator();it.hasNext();)
+				for(Iterator<AbstractTriangle> it=mesh.getTriangles().iterator();it.hasNext();)
 				{
 					Triangle f = (Triangle) it.next();
 					if (f.isOuter())

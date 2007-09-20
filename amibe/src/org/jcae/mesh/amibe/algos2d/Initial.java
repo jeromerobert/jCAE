@@ -181,7 +181,7 @@ public class Initial
 	private static Logger logger=Logger.getLogger(Initial.class);
 	private Mesh2D mesh = null;
 	private Vertex2D [] bNodes;
-	private Collection innerNodes = null;
+	private Collection<MNode1D> innerNodes = null;
 	
 	/**
 	 * Creates a <code>Initial</code> instance.
@@ -194,7 +194,7 @@ public class Initial
 		this(m, b, null);
 	}
 	
-	public Initial(Mesh2D m, Vertex2D [] b, Collection list)
+	public Initial(Mesh2D m, Vertex2D [] b, Collection<MNode1D> list)
 	{
 		mesh = m;
 		bNodes = b;
@@ -283,7 +283,7 @@ public class Initial
 		//  This cannot be performed in a single loop because
 		//  triangles are modified within this loop.
 		firstOnWire = null;
-		ArrayList saveList = new ArrayList();
+		ArrayList<VirtualHalfEdge2D> saveList = new ArrayList<VirtualHalfEdge2D>();
 		for (int i = 0; i < bNodes.length; i++)
 		{
 			if (firstOnWire == null)
@@ -369,7 +369,7 @@ public class Initial
 		assert (mesh.isValid());
 		
 		logger.debug(" Remove links to outer triangles");
-		for (Iterator it = mesh.getTriangles().iterator(); it.hasNext(); )
+		for (Iterator<AbstractTriangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 		{
 			t = (Triangle) it.next();
 			if (t.isOuter())
@@ -385,9 +385,8 @@ public class Initial
 		{
 			logger.debug(" Insert interior vertices");
 			CADFace face = (CADFace) mesh.getGeometry();
-			for (Iterator it = innerNodes.iterator(); it.hasNext(); )
+			for (MNode1D p1: innerNodes)
 			{
-				MNode1D p1 = (MNode1D) it.next();
 				v = Vertex2D.valueOf(p1, null, face);
 				ot = v.getSurroundingOTriangle(mesh);
 				ot.split3(mesh, v, true); 
@@ -404,9 +403,9 @@ public class Initial
 		{
 			redo = false;
 			--niter;
-			for (Iterator it = saveList.iterator(); it.hasNext(); )
+			for (Iterator<VirtualHalfEdge2D> it = saveList.iterator(); it.hasNext(); )
 			{
-				VirtualHalfEdge2D s = (VirtualHalfEdge2D) it.next();
+				VirtualHalfEdge2D s = it.next();
 				if (s.apex() == mesh.outerVertex)
 					s.sym();
 				s.next();

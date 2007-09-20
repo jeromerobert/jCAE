@@ -29,7 +29,7 @@ public class Constraint
 	private final BCADGraphCell graphCell;
 	private final Hypothesis hypothesis;
 	// List of BSubMesh instances containing this Constraint.
-	private final Collection submesh = new ArrayList();
+	private final Collection<BSubMesh> submesh = new ArrayList<BSubMesh>();
 	private Constraint origin;
 
 	// Unique identitier
@@ -118,6 +118,7 @@ public class Constraint
 		submesh.add(s);
 	}
 
+	@Override
 	public String toString()
 	{
 		String ret = "Constraint: "+id;

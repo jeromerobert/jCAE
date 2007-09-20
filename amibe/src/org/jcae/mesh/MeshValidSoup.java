@@ -64,7 +64,7 @@ public class MeshValidSoup
 			a1 *= 3.0 / Math.PI;
 			if (a1 < amin[group])
 				amin[group] = a1;
-			int index = (int) (a1 * (double) split);
+			int index = (int) (a1 * split);
 			nr[group][index]++;
 		}
 		public void printStats()

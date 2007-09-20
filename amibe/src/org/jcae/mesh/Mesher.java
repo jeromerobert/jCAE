@@ -40,6 +40,7 @@ import org.jcae.mesh.mesher.algos1d.*;
 import org.jcae.mesh.amibe.algos2d.*;
 import org.jcae.mesh.xmldata.*;
 import org.jcae.mesh.cad.*;
+
 import gnu.trove.TIntArrayList;
 import gnu.trove.THashSet;
 
@@ -446,7 +447,7 @@ public class Mesher
 			logger.debug("org.jcae.mesh.Mesher.maxFace="+maxFace);
 			logger.debug("org.jcae.mesh.Mesher.meshFace="+numFace);
 			int nrFaces = 0;
-			THashSet seen = new THashSet();
+			THashSet<CADShape> seen = new THashSet<CADShape>();
 			for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 				seen.add(expF.current());
 			nrFaces = seen.size();			
@@ -552,7 +553,7 @@ public class Mesher
 	private static File relativize(File file, File reference)
 	{
 		File current=file;
-		Stack l=new Stack();
+		Stack<String> l=new Stack<String>();
 		while(current!=null && !current.equals(reference))
 		{
 			l.push(current.getName());

@@ -94,10 +94,10 @@ public class Basic2d implements AlgoInterface
 		Metric3D.setIsotropic(isotropic);
 
 		// Insert interior vertices, if any
-		ArrayList innerV = new ArrayList();
-		for (Iterator it = cell.shapesIterator(); it.hasNext(); )
+		ArrayList<MNode1D> innerV = new ArrayList<MNode1D>();
+		for (Iterator<BCADGraphCell> it = cell.shapesIterator(); it.hasNext(); )
 		{
-			BCADGraphCell sub = (BCADGraphCell) it.next();
+			BCADGraphCell sub = it.next();
 			CADShape subV = sub.getShape();
 			if (subV instanceof CADVertex)
 			{
@@ -107,15 +107,15 @@ public class Basic2d implements AlgoInterface
 		}
 
 		// Boundary nodes. See org.jcae.mesh.mesher.ds.MMesh1D.boundaryNodes()
-		ArrayList bndV = new ArrayList();
+		ArrayList<Vertex2D> bndV = new ArrayList<Vertex2D>();
 		CADWireExplorer wexp = CADShapeBuilder.factory.newWireExplorer();
-		for (Iterator it = cell.shapesExplorer(CADShapeEnum.WIRE); it.hasNext(); )
+		for (Iterator<BCADGraphCell> it = cell.shapesExplorer(CADShapeEnum.WIRE); it.hasNext(); )
 		{
-			BCADGraphCell wire = (BCADGraphCell) it.next();
+			BCADGraphCell wire = it.next();
 			MNode1D p1 = null;
 			Vertex2D p20 = null, p2 = null, lastPoint = null;
 			double accumulatedLength = 0.0;
-			ArrayList nodesWire = new ArrayList();
+			ArrayList<Vertex2D> nodesWire = new ArrayList<Vertex2D>();
 			for (wexp.init((CADWire) wire.getShape(), F); wexp.more(); wexp.next())
 			{
 				CADEdge te = wexp.current();
@@ -124,21 +124,18 @@ public class Basic2d implements AlgoInterface
 				BDiscretization dc = cell.getGraph().getByShape(te).getDiscretizationSubMesh(d.getFirstSubMesh());
 
 				SubMesh1D submesh1d = (SubMesh1D) dc.getMesh();
-				ArrayList nodelist = submesh1d.getNodes();
-				Iterator itn = nodelist.iterator();
-				ArrayList saveList = new ArrayList();
+				ArrayList<MNode1D> nodelist = submesh1d.getNodes();
+				Iterator<MNode1D> itn = nodelist.iterator();
+				ArrayList<MNode1D> saveList = new ArrayList<MNode1D>();
 				while (itn.hasNext())
-				{
-					p1 = (MNode1D) itn.next();
-					saveList.add(p1);
-				}
+					saveList.add(itn.next());
 				if (!te.isOrientationForward())
 				{
 					//  Sort in reverse order
 					int size = saveList.size();
 					for (int i = 0; i < size/2; i++)
 					{
-						Object o = saveList.get(i);
+						MNode1D o = saveList.get(i);
 						saveList.set(i, saveList.get(size - i - 1));
 						saveList.set(size - i - 1, o);
 					}
@@ -147,7 +144,7 @@ public class Basic2d implements AlgoInterface
 				//  Except for the very first edge, the first
 				//  vertex is constrained to be the last one
 				//  of the previous edge.
-				p1 = (MNode1D) itn.next();
+				p1 = itn.next();
 				if (null == p2)
 				{
 					p2 = Vertex2D.valueOf(p1, c2d, F);
@@ -155,10 +152,10 @@ public class Basic2d implements AlgoInterface
 					p20 = p2;
 					lastPoint = p2;
 				}
-				ArrayList newNodes = new ArrayList(saveList.size());
+				ArrayList<Vertex2D> newNodes = new ArrayList<Vertex2D>(saveList.size());
 				while (itn.hasNext())
 				{
-					p1 = (MNode1D) itn.next();
+					p1 = itn.next();
 					p2 = Vertex2D.valueOf(p1, c2d, F);
 					newNodes.add(p2);
 				}
@@ -211,7 +208,7 @@ public class Basic2d implements AlgoInterface
 				bndV.addAll(nodesWire);
 			}
 		}
-		new Initial(m, (Vertex2D []) bndV.toArray(new Vertex2D[bndV.size()]), innerV).compute();
+		new Initial(m, bndV.toArray(new Vertex2D[bndV.size()]), innerV).compute();
 
 		m.pushCompGeom(3);
 		new Insertion(m, 16.0).compute();
@@ -229,6 +226,7 @@ public class Basic2d implements AlgoInterface
 		return true;
 	}
 	
+	@Override
 	public String toString()
 	{
 		String ret = "Algo: "+getClass().getName();

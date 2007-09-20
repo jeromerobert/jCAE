@@ -117,7 +117,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 		
 		xmlFile = new File(xmlDir, xmlOutFile);
 		File dir = new File(xmlDir, xmlOutFile+".files");
-		//create the directory if it does not exist
+		//create the directory if it does not exiswriteInit(PrintStream arg0)t
 		if(!dir.exists())
 			dir.mkdirs();
 		

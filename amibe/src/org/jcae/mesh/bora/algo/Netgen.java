@@ -108,6 +108,7 @@ public class Netgen implements AlgoInterface
 		return true;
 	}
 	
+	@Override
 	public String toString()
 	{
 		String ret = "Algo: "+getClass().getName();

@@ -75,21 +75,22 @@ public class Calculus3D implements Calculus
 		if (!accurateDistance || Math.abs(l1 - l2) < delta_max * lmax)
 			return lmax;
 		
-		Stack v = new Stack();
+		Stack<Vertex2D> v = new Stack<Vertex2D>();
+		Stack<Integer> l = new Stack<Integer>();
 		Vertex2D mid = Vertex2D.middle(start, end);
-		v.push(intArray[level_max]);
+		l.push(intArray[level_max]);
 		v.push(end);
 		v.push(mid);
-		v.push(intArray[level_max]);
+		l.push(intArray[level_max]);
 		v.push(mid);
 		v.push(start);
 		double ret = 0.0;
 		int level = level_max;
 		while (v.size() > 0)
 		{
-			Vertex2D pt1 = (Vertex2D) v.pop();
-			Vertex2D pt2 = (Vertex2D) v.pop();
-			level = ((Integer) v.pop()).intValue();
+			Vertex2D pt1 = v.pop();
+			Vertex2D pt2 = v.pop();
+			level = l.pop().intValue();
 			l1 = distance(pt1, pt2, pt1);
 			l2 = distance(pt1, pt2, pt2);
 			lmax = Math.max(l1, l2);
@@ -99,10 +100,10 @@ public class Calculus3D implements Calculus
 			{
 				level--;
 				mid = Vertex2D.middle(pt1, pt2);
-				v.push(intArray[level]);
+				l.push(intArray[level]);
 				v.push(pt2);
 				v.push(mid);
-				v.push(intArray[level]);
+				l.push(intArray[level]);
 				v.push(mid);
 				v.push(pt1);
 			}

@@ -21,11 +21,13 @@
 package org.jcae.mesh.amibe.algos2d;
 
 import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
+
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -71,16 +73,16 @@ public class CheckDelaunay
 
 		boolean redo = false;
 		int niter = mesh.getTriangles().size();
-		Collection oldList = mesh.getTriangles();
+		Collection<AbstractTriangle> oldList = mesh.getTriangles();
 		do {
 			redo = false;
 			cnt = 0;
 			ArrayList toSwap = new ArrayList();
-			HashSet newList = new HashSet();
+			HashSet<AbstractTriangle> newList = new HashSet<AbstractTriangle>();
 			niter--;
-			for (Iterator it = oldList.iterator(); it.hasNext(); )
+			for (AbstractTriangle at: oldList)
 			{
-				t = (Triangle) it.next();
+				t = (Triangle) at;
 				ot.bind(t);
 				for (int i = 0; i < 3; i++)
 				{
@@ -91,9 +93,9 @@ public class CheckDelaunay
 				}
 			}
 			
-			for (Iterator it = oldList.iterator(); it.hasNext(); )
+			for (AbstractTriangle at: oldList)
 			{
-				t = (Triangle) it.next();
+				t = (Triangle) at;
 				ot.bind(t);
 				ot.prev();
 				for (int i = 0; i < 3; i++)

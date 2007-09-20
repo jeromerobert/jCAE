@@ -25,10 +25,7 @@ import org.jcae.mesh.cad.CADShapeEnum;
 
 import java.util.Collection;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
-
 import org.apache.log4j.Logger;
 
 /*
@@ -67,21 +64,18 @@ public class BSubMesh
 	private static Logger logger=Logger.getLogger(BSubMesh.class);
 	//   Model
 	private BModel model;
-	//   First free index
-	private static int freeIndex = 0;
 	//   Unique identitier
 	private int id = -1;
 	//   List of user defined constraints
-	private Collection constraints = new ArrayList();
+	private Collection<Constraint> constraints = new ArrayList<Constraint>();
 
 	/**
 	 * Creates a root mesh.
 	 */
-	public BSubMesh(BModel m, int offset)
+	public BSubMesh(BModel m, int id)
 	{
 		model = m;
-		id = freeIndex;
-		freeIndex++;
+		this.id = id;
 	}
 	
 	public int getId()
@@ -89,7 +83,7 @@ public class BSubMesh
 		return id;
 	}
 
-	public Collection getConstraints()
+	public Collection<Constraint> getConstraints()
 	{
 		return constraints;
 	}
@@ -124,20 +118,20 @@ public class BSubMesh
 		BCADGraphCell root = model.getGraph().getRootCell();
 		StringBuffer indent = new StringBuffer();
 
-		for (Iterator itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
+		for (Iterator<CADShapeEnum> itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
-			CADShapeEnum cse = (CADShapeEnum) itcse.next();
+			CADShapeEnum cse = itcse.next();
 			String tab = indent.toString();
 			/* returns only one of the two shapes of the same orientation, but not
 			   necessarily the good one. */
 			// for (Iterator its = root.uniqueShapesExplorer(cse); its.hasNext(); )
 			/* may returns the two shapes of the same orientation */
- 		        for (Iterator its = root.shapesExplorer(cse); its.hasNext(); )
+ 		        for (Iterator<BCADGraphCell> its = root.shapesExplorer(cse); its.hasNext(); )
 			{
-				BCADGraphCell cell = (BCADGraphCell) its.next();
-				for (Iterator itd = cell.discretizationIterator(); itd.hasNext(); )
+				BCADGraphCell cell = its.next();
+				for (Iterator<BDiscretization> itd = cell.discretizationIterator(); itd.hasNext(); )
 				{
-					BDiscretization discr = (BDiscretization) itd.next();
+					BDiscretization discr = itd.next();
 					if (discr.contains(this) && discr.isSubmeshChild(this))
 					{
 						System.out.println(tab+"Shape "+cell);
@@ -156,10 +150,10 @@ public class BSubMesh
 
 		BModel model = new BModel(file, "out");
 		BCADGraphCell root = model.getGraph().getRootCell();
-		Iterator its = root.shapesExplorer(CADShapeEnum.SOLID);
+		Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.SOLID);
 		BCADGraphCell [] solids = new BCADGraphCell[2];
-		solids[0] = (BCADGraphCell) its.next();
-		solids[1] = (BCADGraphCell) its.next();
+		solids[0] = its.next();
+		solids[1] = its.next();
 		BCADGraphCell f0 = model.getGraph().getById(7);
 
 		Hypothesis h1 = new Hypothesis();

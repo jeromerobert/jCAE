@@ -219,7 +219,6 @@ public class Vertex2D extends Vertex
 			{
 				t = (Triangle) it.next();
 				start.bind(t);
-				current = null;
 				for (int i = 0; i < 3; i++)
 				{
 					start.next();
