@@ -113,7 +113,7 @@ public class CheckDelaunay
 					{
 						cnt++;
 						toSwap.add(t);
-						toSwap.add(new Integer(i));
+						toSwap.add(Integer.valueOf(i));
 					}
 				}
 			}

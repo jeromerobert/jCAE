@@ -33,7 +33,7 @@ public class Calculus3D implements Calculus
 	
 	private static final int level_max = 10;
 	private static final double delta_max = 0.5;
-	private static Integer [] intArray = new Integer[level_max+1];
+	private static final Integer [] intArray = new Integer[level_max+1];
 	private static boolean accurateDistance = false;
 
 	static {
@@ -45,7 +45,7 @@ public class Calculus3D implements Calculus
 		}
 		accurateDistance = accurateDistanceProp.equals("true");
 		for (int i = 0; i <= level_max; i++)
-			intArray[i] = new Integer(i);
+			intArray[i] = Integer.valueOf(i);
 	}
 	
 	/**

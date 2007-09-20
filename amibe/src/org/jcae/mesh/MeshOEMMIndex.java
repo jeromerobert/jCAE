@@ -74,8 +74,8 @@ public class MeshOEMMIndex
 		}
 		String soupDir = args[0];
 		String outDir = args[1];
-		Integer lmax = new Integer(args[2]);
-		Integer triangles_max = new Integer(args[3]);
+		Integer lmax = Integer.valueOf(args[2]);
+		Integer triangles_max = Integer.valueOf(args[3]);
 		
 		String filename=null;
 		if(args.length > 4)

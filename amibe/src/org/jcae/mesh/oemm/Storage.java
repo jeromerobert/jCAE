@@ -157,7 +157,7 @@ public class Storage
 		try {
 			oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(new File(oemm.getFileName()))));
 			oos.writeObject(oemm);
-			oos.writeObject(new Integer(oemm.leaves.length));
+			oos.writeObject(Integer.valueOf(oemm.leaves.length));
 			for (OEMM.Node node : oemm.leaves) {
 				oos.writeObject(node);
 			}

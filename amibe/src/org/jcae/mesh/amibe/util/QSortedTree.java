@@ -531,7 +531,7 @@ public abstract class QSortedTree implements Serializable
 		assert isEmpty();
 		Integer [] ret = new Integer[n];
 		for (int i = 0; i < ret.length; i++)
-			ret[i] = new Integer(i);
+			ret[i] = Integer.valueOf(i);
 		for (int i = 0; i < ret.length; i++)
 			insert(ret[i], i);
 		return ret;
@@ -627,7 +627,7 @@ public abstract class QSortedTree implements Serializable
 		int prime = gnu.trove.PrimeFinder.nextPrime(n);
 		Integer [] iii = new Integer[prime];
 		for (int i = 0; i < iii.length; i++)
-			iii[i] = new Integer(i);
+			iii[i] = Integer.valueOf(i);
 		int index = 1;
 		for (int i = 0; i < prime; i++)
 		{
