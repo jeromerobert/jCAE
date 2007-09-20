@@ -22,7 +22,6 @@ package org.jcae.viewer3d;
 
 import java.util.Map;
 import javax.media.j3d.Node;
-import com.sun.j3d.utils.picking.PickResult;
 
 /**
  * This class represents viewable object of a View
