@@ -42,7 +42,7 @@ public class Hypothesis
 	private int id = -1;
 	private static int nextId = -1;
 
-	private static Class [] innerClasses = Hypothesis.class.getDeclaredClasses();
+	private static Class<?> [] innerClasses = Hypothesis.class.getDeclaredClasses();
 	private static HypNone HypNoneInstance = new HypNone();
 
 	public Hypothesis()
@@ -266,6 +266,7 @@ public class Hypothesis
 		return true;
 	}
 
+	@Override
 	public String toString()
 	{
 		String ret = "Hyp. "+id+" elementType: "+hyp.getType();
@@ -306,32 +307,28 @@ public class Hypothesis
 		try {
 			if (cse == CADShapeEnum.VERTEX)
 			{
-				Class [] typeArgs = new Class[0];
-				Constructor cons = Vertex0d.class.getConstructor(typeArgs);
-				ret = (AlgoInterface) cons.newInstance(new Object[0]);
+				Constructor<Vertex0d> cons = Vertex0d.class.getConstructor();
+				ret = cons.newInstance();
 			}
 			else if (cse == CADShapeEnum.EDGE)
 			{
-				Class [] typeArgs = new Class[] {double.class, double.class, boolean.class};
-				Constructor cons = UniformLengthDeflection1d.class.getConstructor(typeArgs);
-				ret = (AlgoInterface) cons.newInstance(new Object [] {new Double(length), new Double(deflection), Boolean.valueOf(true)});
+				Constructor<UniformLengthDeflection1d> cons = UniformLengthDeflection1d.class.getConstructor(double.class, double.class, boolean.class);
+				ret = cons.newInstance(length, deflection, true);
 			}
 			else if (cse == CADShapeEnum.FACE)
 			{
-				Class [] typeArgs = new Class[] {double.class, double.class, boolean.class, boolean.class};
-				Constructor cons = Basic2d.class.getConstructor(typeArgs);
-				ret = (AlgoInterface) cons.newInstance(new Object [] {new Double(length), new Double(deflection), Boolean.valueOf(true), Boolean.valueOf(true)});
+				Constructor<Basic2d> cons = Basic2d.class.getConstructor(double.class, double.class, boolean.class, boolean.class);
+				ret = cons.newInstance(length, deflection, true, true);
 			}
 			else if (cse == CADShapeEnum.SOLID)
 			{
-				Class [] typeArgs = new Class[] {double.class};
-				Constructor cons = TetGen.class.getConstructor(typeArgs);
-				ret = (AlgoInterface) cons.newInstance(new Object [] {new Double(length)});
+				Constructor<TetGen> cons = TetGen.class.getConstructor(double.class);
+				ret = cons.newInstance(length);
 				if (!ret.isAvailable())
 					logger.error("TetGen not available!");
 				/*
-				Constructor cons = Netgen.class.getConstructor(typeArgs);
-				ret = (AlgoInterface) cons.newInstance(new Object [] {new Double(length)});
+				Constructor cons = Netgen.class.getConstructor(double.class);
+				ret = (AlgoInterface) cons.newInstance(length);
 				if (!ret.isAvailable())
 					logger.error("Netgen not available!");
 				*/
