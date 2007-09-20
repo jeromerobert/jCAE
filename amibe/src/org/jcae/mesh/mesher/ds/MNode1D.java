@@ -24,7 +24,7 @@ import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
-import java.util.HashMap;
+import gnu.trove.TObjectIntHashMap;
 
 /**
  * 1D node.
@@ -58,9 +58,9 @@ public class MNode1D
 	
 	//  ID used for debugging purpose
 	private static int id = 0;
-	private static HashMap<MNode1D, Integer> mapHashcodeToID;
+	private static TObjectIntHashMap<MNode1D> mapHashcodeToID;
 	//  Initialize mapHashcodeToID
-	static { assert(null != (mapHashcodeToID = new HashMap<MNode1D, Integer>())); }
+	static { assert(null != (mapHashcodeToID = new TObjectIntHashMap<MNode1D>())); }
 	
 	/**
 	 * Creates a <code>MNode1D</code> instance.
@@ -105,7 +105,7 @@ public class MNode1D
 	private boolean setID()
 	{
 		id++;
-		mapHashcodeToID.put(this, new Integer(id));
+		mapHashcodeToID.put(this, id);
 		return true;
 	}
 	
@@ -117,7 +117,7 @@ public class MNode1D
 	public int getID()
 	{
 		if (id > 0)
-			return mapHashcodeToID.get(this).intValue();
+			return mapHashcodeToID.get(this);
 		return hashCode();
 	}
 	

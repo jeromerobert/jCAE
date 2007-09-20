@@ -21,7 +21,7 @@
 package org.jcae.mesh.mesher.ds;
 
 import org.jcae.mesh.mesher.ds.MNode1D;
-import java.util.HashMap;
+import gnu.trove.TObjectIntHashMap;
 
 /**
  * 1D edge.
@@ -36,9 +36,9 @@ public class MEdge1D
 	private MNode1D pt2;
 	
 	private static int id = 0;
-	private static HashMap<MEdge1D, Integer> mapHashcodeToID;
+	private static TObjectIntHashMap<MEdge1D> mapHashcodeToID;
 	//  Initialize mapHashcodeToID
-	static { assert(null != (mapHashcodeToID = new HashMap<MEdge1D, Integer>())); }
+	static { assert(null != (mapHashcodeToID = new TObjectIntHashMap<MEdge1D>())); }
 	
 	/**
 	 * Creates an edge bounded by two <code>MNode1D</code> instances.
@@ -56,7 +56,7 @@ public class MEdge1D
 	private boolean setID()
 	{
 		id++;
-		mapHashcodeToID.put(this, new Integer(id));
+		mapHashcodeToID.put(this, id);
 		return true;
 	}
 	
@@ -68,7 +68,7 @@ public class MEdge1D
 	public int getID()
 	{
 		if (id > 0)
-			return mapHashcodeToID.get(this).intValue();
+			return mapHashcodeToID.get(this);
 		return hashCode();
 	}
 	
