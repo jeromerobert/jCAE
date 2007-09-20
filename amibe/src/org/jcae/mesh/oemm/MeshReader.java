@@ -209,7 +209,13 @@ public class MeshReader extends Storage
 			loadVerticesFromUnloadedNodes();
 		}
 		buildMeshAdjacency(mesh, vertMap);
-		logger.info("Nr. of triangles: "+mesh.getTriangles().size());
+		int cnt = 0;
+		for (AbstractTriangle af: mesh.getTriangles())
+		{
+			if (af.isWritable())
+				cnt++;
+		}
+		logger.info("Nr. of triangles: "+cnt);
 	}
 
 	/**
