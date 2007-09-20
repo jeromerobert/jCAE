@@ -209,7 +209,7 @@ public class UniformLengthDeflection1d implements AlgoInterface
 			n2 = new MNode1D(param, GPt);
 			n2.isDegenerated(isDegenerated);
 			nodelist.add(n2);
-			MEdge1D e=new MEdge1D(n1, n2, false);
+			MEdge1D e=new MEdge1D(n1, n2);
 			edgelist.add(e);
 			n1 = n2;
 		}

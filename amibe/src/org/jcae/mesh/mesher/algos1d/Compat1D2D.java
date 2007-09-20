@@ -31,7 +31,7 @@ import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADFace;
 import org.jcae.mesh.cad.CADShapeBuilder;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
@@ -58,14 +58,14 @@ public class Compat1D2D
 	{
 		int nbTEdges = 0, nbNodes = 0, nbEdges = 0;
 		/* Explore the shape for each edge */
-		Iterator ite = mesh1d.getTEdgeIterator();
+		Iterator<CADEdge> ite = mesh1d.getTEdgeIterator();
 		while (ite.hasNext())
 		{
-			CADEdge E = (CADEdge) ite.next();
+			CADEdge E = ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(E);
 			if (null == submesh1d)
 				continue;
-			Set faceset = mesh1d.getAdjacentFaces(E);
+			Set<CADFace> faceset = mesh1d.getAdjacentFaces(E);
 			if (null != faceset && computeEdge(submesh1d, faceset, mesh1d.getMaxDeflection(), relDefl))
 				nbTEdges++;
 			nbNodes += submesh1d.getNodes().size();
@@ -77,10 +77,10 @@ public class Compat1D2D
 		assert(mesh1d.isValid());
 	}
 
-	private boolean computeEdge(SubMesh1D submesh1d, Set faceset, double deflection, boolean relDefl)
+	private boolean computeEdge(SubMesh1D submesh1d, Set<CADFace> faceset, double deflection, boolean relDefl)
 	{
-		ArrayList edgelist = submesh1d.getEdges();
-		ArrayList nodelist = submesh1d.getNodes();
+		List<MEdge1D> edgelist = submesh1d.getEdges();
+		List<MNode1D> nodelist = submesh1d.getNodes();
 		double [] curvmax = new double[nodelist.size()];
 		for (int i = 0; i < curvmax.length; i++)
 			curvmax[i] = 0.0;
@@ -92,9 +92,9 @@ public class Compat1D2D
 		double [] coord = new double[3*curvmax.length];
 		double [] paramOnEdge = new double[curvmax.length];
 		int k = 0;
-		for (Iterator itn = nodelist.iterator(); itn.hasNext(); k++)
+		for (Iterator<MNode1D> itn = nodelist.iterator(); itn.hasNext(); k++)
 		{
-			MNode1D p1 = (MNode1D) itn.next();
+			MNode1D p1 = itn.next();
 			paramOnEdge[k] = p1.getParameter();
 			double [] xyz = curve3d.value(paramOnEdge[k]);
 			for (int j = 0; j < 3; j++)
@@ -102,9 +102,8 @@ public class Compat1D2D
 		}
 		curve3d.setDiscretization(paramOnEdge);
 		
-		for (Iterator itf = faceset.iterator(); itf.hasNext(); )
+		for (CADFace F: faceset)
 		{
-			CADFace F = (CADFace) itf.next();
 			CADGeomCurve2D curve2d = CADShapeBuilder.factory.newCurve2D(E, F);
 			if (curve2d == null)
 				continue;
@@ -179,7 +178,7 @@ public class Compat1D2D
 			GPt = null;
 
 		//  Other points
-		int nbPoints = curve3d.nbPoints();;
+		int nbPoints = curve3d.nbPoints();
 		for (int i = 0; i < nbPoints - 1; i++)
 		{
 			param = curve3d.parameter(i+2);
@@ -188,7 +187,7 @@ public class Compat1D2D
 			n2 = new MNode1D(param, GPt);
 			n2.isDegenerated(isDegenerated);
 			nodelist.add(n2);
-			MEdge1D e=new MEdge1D(n1, n2, false);
+			MEdge1D e=new MEdge1D(n1, n2);
 			edgelist.add(e);
 			n1 = n2;
 		}

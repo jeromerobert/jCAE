@@ -72,10 +72,10 @@ public class Refine
 			throw new java.lang.IllegalArgumentException("Division number must be > 1");
 
 		/* Explore the shape for each edge */
-		Iterator ite = mesh1d.getTEdgeIterator();
+		Iterator<CADEdge> ite = mesh1d.getTEdgeIterator();
 		while (ite.hasNext())
 		{
-			CADEdge E = (CADEdge) ite.next();
+			CADEdge E = ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(E);
 			nbNodes -= submesh1d.getNodes().size();
 			nbEdges -= submesh1d.getEdges().size();
@@ -110,17 +110,17 @@ public class Refine
 			//  Do noi refine degenerated edges
 			return false;
 		
-		ArrayList edgelist = submesh1d.getEdges();
-		ArrayList nodelist = submesh1d.getNodes();
+		ArrayList<MEdge1D> edgelist = submesh1d.getEdges();
+		ArrayList<MNode1D> nodelist = submesh1d.getNodes();
 		//  Copy edgelist to be able to iterate over it
 		//  Edges have to be sorted, not nodes
-		ArrayList oldedgelist = new ArrayList(edgelist);
+		ArrayList<MEdge1D> oldedgelist = new ArrayList<MEdge1D>(edgelist);
 		edgelist.clear();
-		Iterator ite = oldedgelist.iterator();
+		Iterator<MEdge1D> ite = oldedgelist.iterator();
 		while (ite.hasNext())
 		{
 			//  Add intermeediate nodes
-			MEdge1D edge = (MEdge1D) ite.next();
+			MEdge1D edge = ite.next();
 			MNode1D firstNode = edge.getNodes1();
 			MNode1D lastNode = edge.getNodes2();
 			MNode1D n1, n2;
@@ -134,11 +134,11 @@ public class Refine
 				//  any reason
 				n2.isDegenerated(n1.isDegenerated());
 				nodelist.add(n2);
-				MEdge1D e=new MEdge1D(n1, n2, false);
+				MEdge1D e=new MEdge1D(n1, n2);
 				edgelist.add(e);
 				n1 = n2;
 			}
-			MEdge1D e=new MEdge1D(n1, lastNode, false);
+			MEdge1D e=new MEdge1D(n1, lastNode);
 			edgelist.add(e);
 		}
 		assert(submesh1d.isValid());

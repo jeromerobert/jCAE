@@ -21,7 +21,6 @@ package org.jcae.mesh.cad.occ;
 
 import org.jcae.mesh.cad.CADGeomCurve3D;
 import org.jcae.mesh.cad.CADEdge;
-import org.jcae.opencascade.jni.Adaptor3d_Curve;
 import org.jcae.opencascade.jni.BRep_Tool;
 import org.jcae.opencascade.jni.Geom_Curve;
 import org.jcae.opencascade.jni.GeomAdaptor_Curve;
@@ -63,7 +62,7 @@ public class OCCGeomCurve3D implements CADGeomCurve3D
 	public void discretize(double maxlen, double deflection, boolean relDefl)
 	{
 		if (discret == null)
-			discret = new OCCDiscretizeCurve3D((Adaptor3d_Curve) myCurve, range[0], range[1]);
+			discret = new OCCDiscretizeCurve3D(myCurve, range[0], range[1]);
 		discret.discretizeMaxDeflection(deflection, relDefl);
 		if (maxlen > 0.0)
 		{
@@ -75,28 +74,28 @@ public class OCCGeomCurve3D implements CADGeomCurve3D
 	public void discretize(double maxlen)
 	{
 		if (discret == null)
-			discret = new OCCDiscretizeCurve3D((Adaptor3d_Curve) myCurve, range[0], range[1]);
+			discret = new OCCDiscretizeCurve3D(myCurve, range[0], range[1]);
 		discret.discretizeMaxLength(maxlen);
 	}
 	
 	public void discretize(int n)
 	{
 		if (discret == null)
-			discret = new OCCDiscretizeCurve3D((Adaptor3d_Curve) myCurve, range[0], range[1]);
+			discret = new OCCDiscretizeCurve3D(myCurve, range[0], range[1]);
 		discret.discretizeNrPoints(n);
 	}
 	
 	public void splitSubsegment(int numseg, int nrsub)
 	{
 		if (discret == null)
-			discret = new OCCDiscretizeCurve3D((Adaptor3d_Curve) myCurve, range[0], range[1]);
+			discret = new OCCDiscretizeCurve3D(myCurve, range[0], range[1]);
 		discret.splitSubsegment(numseg, nrsub);
 	}
 	
 	public void setDiscretization(double [] param)
 	{
 		if (discret == null)
-			discret = new OCCDiscretizeCurve3D((Adaptor3d_Curve) myCurve, range[0], range[1]);
+			discret = new OCCDiscretizeCurve3D(myCurve, range[0], range[1]);
 		discret.setDiscretization(param);
 	}
 	

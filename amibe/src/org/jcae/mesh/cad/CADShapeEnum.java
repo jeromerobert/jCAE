@@ -36,6 +36,7 @@ public abstract class CADShapeEnum
 		this.ordinal = nextOrdinal++;
 	}
 	public abstract Class asClass();
+	@Override
 	public String toString()
 	{
 		return name;
@@ -49,7 +50,7 @@ public abstract class CADShapeEnum
 	public static final CADShapeEnum SOLID = CADShapeBuilder.factory.getShapeEnumInstance("solid");
 	public static final CADShapeEnum COMPSOLID = CADShapeBuilder.factory.getShapeEnumInstance("compsolid");
 	public static final CADShapeEnum COMPOUND = CADShapeBuilder.factory.getShapeEnumInstance("compound");
-	public static Iterator iterator(CADShapeEnum start, CADShapeEnum end)
+	public static Iterator<CADShapeEnum> iterator(CADShapeEnum start, CADShapeEnum end)
 	{
 		return CADShapeBuilder.factory.newShapeEnumIterator(start, end);
 	}

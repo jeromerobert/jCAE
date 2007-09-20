@@ -25,6 +25,7 @@ import org.jcae.opencascade.jni.BRepBndLib;
 
 public class OCCFace extends OCCShape implements CADFace
 {
+	@Override
 	public double [] boundingBox()
 	{
 		Bnd_Box box = new Bnd_Box();

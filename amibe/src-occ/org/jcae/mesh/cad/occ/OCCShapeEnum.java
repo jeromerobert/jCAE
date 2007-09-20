@@ -42,27 +42,35 @@ public abstract class OCCShapeEnum extends CADShapeEnum
 	}
 
 	static final OCCShapeEnum VERTEX = new OCCShapeEnum("vertex", 7) {
+		@Override
 		public Class asClass() { return CADVertex.class; }
 	};
 	static final OCCShapeEnum EDGE = new OCCShapeEnum("edge", 6) {
+		@Override
 		public Class asClass() { return CADEdge.class; }
 	};
 	static final OCCShapeEnum WIRE = new OCCShapeEnum("wire", 5) {
+		@Override
 		public Class asClass() { return CADWire.class; }
 	};
 	static final OCCShapeEnum FACE = new OCCShapeEnum("face", 4) {
+		@Override
 		public Class asClass() { return CADFace.class; }
 	};
 	static final OCCShapeEnum SHELL = new OCCShapeEnum("shell", 3) {
+		@Override
 		public Class asClass() { return CADShell.class; }
 	};
 	static final OCCShapeEnum SOLID = new OCCShapeEnum("solid", 2) {
+		@Override
 		public Class asClass() { return CADSolid.class; }
 	};
 	static final OCCShapeEnum COMPSOLID = new OCCShapeEnum("compsolid", 1) {
+		@Override
 		public Class asClass() { return CADCompSolid.class; }
 	};
 	static final OCCShapeEnum COMPOUND = new OCCShapeEnum("compound", 0) {
+		@Override
 		public Class asClass() { return CADCompound.class; }
 	};
 	// Note: VALUES must contain items in the same order as they
@@ -74,21 +82,21 @@ public abstract class OCCShapeEnum extends CADShapeEnum
 	{
 		return ordinal;
 	}
-	static final Iterator newShapeEnumIterator(final OCCShapeEnum start, final OCCShapeEnum end)
+	static final Iterator<CADShapeEnum> newShapeEnumIterator(final OCCShapeEnum start, final OCCShapeEnum end)
 	{
 		final int iStep;
 		if (start.getOrdinal() > end.getOrdinal())
 			iStep = -1;
 		else
 			iStep = 1;
-		return new Iterator()
+		return new Iterator<CADShapeEnum>()
 		{
 			OCCShapeEnum current = null;
 			public boolean hasNext()
 			{
 				return current != end;
 			}
-			public Object next()
+			public CADShapeEnum next()
 			{
 				if (!hasNext())
 					throw new NoSuchElementException();

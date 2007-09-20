@@ -58,9 +58,9 @@ public class MNode1D
 	
 	//  ID used for debugging purpose
 	private static int id = 0;
-	private static HashMap mapHashcodeToID;
+	private static HashMap<MNode1D, Integer> mapHashcodeToID;
 	//  Initialize mapHashcodeToID
-	static { assert(null != (mapHashcodeToID = new HashMap())); };
+	static { assert(null != (mapHashcodeToID = new HashMap<MNode1D, Integer>())); }
 	
 	/**
 	 * Creates a <code>MNode1D</code> instance.
@@ -117,9 +117,8 @@ public class MNode1D
 	public int getID()
 	{
 		if (id > 0)
-			return ((Integer)mapHashcodeToID.get(this)).intValue();
-		else
-			return hashCode();
+			return mapHashcodeToID.get(this).intValue();
+		return hashCode();
 	}
 	
 	/**
@@ -228,6 +227,7 @@ public class MNode1D
 		return d;
 	}
 	
+	@Override
 	public String toString()
 	{
 		String r = "MNode1D: id="+getID()+" "+param;

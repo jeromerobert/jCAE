@@ -47,10 +47,10 @@ public class SubMesh1D
 	private BDiscretization discr;
 	
 	//  Edge list
-	private ArrayList edgelist = new ArrayList();
+	private ArrayList<MEdge1D> edgelist = new ArrayList<MEdge1D>();
 	
 	//  Node list
-	private ArrayList nodelist = new ArrayList();
+	private ArrayList<MNode1D> nodelist = new ArrayList<MNode1D>();
 	
 	/**
 	 * Creates a <code>SubMesh1D</code> instance and initializes it with
@@ -72,7 +72,7 @@ public class SubMesh1D
 		MNode1D n2 = new MNode1D(range[1], m0d.getGeometricalVertex(V[1]));
 		n1.isDegenerated(degenerated);
 		n2.isDegenerated(degenerated);
-		MEdge1D e=new MEdge1D(n1, n2, false);
+		MEdge1D e=new MEdge1D(n1, n2);
 		nodelist.add(n1);
 		nodelist.add(n2);
 		edgelist.add(e);
@@ -104,7 +104,7 @@ public class SubMesh1D
 		MNode1D n2 = new MNode1D(range[1], m0d.getChildDiscretization(V[1], cell, d));
 		n1.isDegenerated(degenerated);
 		n2.isDegenerated(degenerated);
-		MEdge1D e=new MEdge1D(n1, n2, false);
+		MEdge1D e=new MEdge1D(n1, n2);
 		nodelist.add(n1);
 		nodelist.add(n2);
 		edgelist.add(e);
@@ -136,7 +136,7 @@ public class SubMesh1D
 	 *
 	 * @return the list of edges.
 	 */
-	public ArrayList getEdges()
+	public ArrayList<MEdge1D> getEdges()
 	{
 		return edgelist;
 	}
@@ -146,7 +146,7 @@ public class SubMesh1D
 	 *
 	 * @return the list of nodes.
 	 */
-	public ArrayList getNodes()
+	public ArrayList<MNode1D> getNodes()
 	{
 		return nodelist;
 	}
@@ -156,7 +156,7 @@ public class SubMesh1D
 	 *
 	 * @return an iterator over the list of edges.
 	 */
-	public Iterator getEdgesIterator()
+	public Iterator<MEdge1D> getEdgesIterator()
 	{
 		return edgelist.iterator();
 	}
@@ -166,7 +166,7 @@ public class SubMesh1D
 	 *
 	 * @return an iterator over the list of nodes.
 	 */
-	public Iterator getNodesIterator()
+	public Iterator<MNode1D> getNodesIterator()
 	{
 		return nodelist.iterator();
 	}
@@ -181,11 +181,11 @@ public class SubMesh1D
 	 */
 	public boolean isValid()
 	{
-		HashSet tempset = new HashSet(nodelist);
-		Iterator ite = edgelist.iterator();
+		HashSet<MNode1D> tempset = new HashSet<MNode1D>(nodelist);
+		Iterator<MEdge1D> ite = edgelist.iterator();
 		while (ite.hasNext())
 		{
-			MEdge1D e = (MEdge1D) ite.next();
+			MEdge1D e = ite.next();
 			assert (nodelist.contains(e.getNodes1()));
 			assert (nodelist.contains(e.getNodes2()));
 			tempset.remove(e.getNodes1());
@@ -204,11 +204,11 @@ public class SubMesh1D
 		double minlen = -1.0, maxlen = 0.0,  avglen = 0.0;
 		CADGeomCurve3D c3d = CADShapeBuilder.factory.newCurve3D(edge);
 		
-		Iterator ite = edgelist.iterator();
+		Iterator<MEdge1D> ite = edgelist.iterator();
 		while (ite.hasNext())
 		{
 			n++;
-			MEdge1D e = (MEdge1D) ite.next();
+			MEdge1D e = ite.next();
 			double []pt1 = c3d.value(e.getNodes1().getParameter());
 			double []pt2 = c3d.value(e.getNodes2().getParameter());
 			double len = Math.sqrt(
@@ -231,21 +231,16 @@ public class SubMesh1D
 		logger.info("\tAverage length: "+avglen);
 	}
 	
+	@Override
 	public String toString()
 	{
 		String cr=System.getProperty("line.separator");
 		StringBuffer r = new StringBuffer("SubMesh1D"+cr);
 		logger.debug("Printing "+r.toString());
-		for(Iterator itn=nodelist.iterator();itn.hasNext();)
-		{
-			MNode1D node=(MNode1D)itn.next();
-			r.append(node+cr);
-		}
-		for(Iterator ite=edgelist.iterator();ite.hasNext();)
-		{
-			MEdge1D edge=(MEdge1D)ite.next();
-			r.append(edge+cr);
-		}
+		for(MNode1D n: nodelist)
+			r.append(n+cr);
+		for(MEdge1D e: edgelist)
+			r.append(e+cr);
 		logger.debug("...done");
 		return r.toString();
 	}

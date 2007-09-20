@@ -28,7 +28,7 @@ import org.jcae.mesh.cad.CADGeomCurve3D;
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADShapeBuilder;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
 
@@ -61,11 +61,11 @@ public class UniformLength
 	{
 		int nbTEdges = 0, nbNodes = 0, nbEdges = 0;
 		/* Explore the shape for each edge */
-		Iterator ite = mesh1d.getTEdgeIterator();
+		Iterator<CADEdge> ite = mesh1d.getTEdgeIterator();
 		/*  First compute current nbNodes and nbEdges  */
 		while (ite.hasNext())
 		{
-			CADEdge E = (CADEdge) ite.next();
+			CADEdge E = ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(E);
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
@@ -73,7 +73,7 @@ public class UniformLength
 		ite = mesh1d.getTEdgeIterator();
 		while (ite.hasNext())
 		{
-			CADEdge E = (CADEdge) ite.next();
+			CADEdge E = ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(E);
 			nbNodes -= submesh1d.getNodes().size();
 			nbEdges -= submesh1d.getEdges().size();
@@ -113,8 +113,8 @@ public class UniformLength
 		//if (BRep_Tool.degenerated(E))
 		//	return false;
 		
-		ArrayList edgelist = submesh1d.getEdges();
-		ArrayList nodelist = submesh1d.getNodes();
+		List<MEdge1D> edgelist = submesh1d.getEdges();
+		List<MNode1D> nodelist = submesh1d.getNodes();
 		if (edgelist.size() != 1 || nodelist.size() != 2)
 			return false;
 		edgelist.clear();
@@ -221,7 +221,7 @@ public class UniformLength
 			n2 = new MNode1D(param, GPt);
 			n2.isDegenerated(isDegenerated);
 			nodelist.add(n2);
-			MEdge1D e=new MEdge1D(n1, n2, false);
+			MEdge1D e=new MEdge1D(n1, n2);
 			edgelist.add(e);
 			n1 = n2;
 		}

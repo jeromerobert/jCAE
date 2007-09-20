@@ -46,6 +46,7 @@ public class OCCShapeBuilder extends CADShapeBuilder
 		return new OCCShapeBuilder();
 	}
 	
+	@Override
 	public CADShape newShape(Object o)
 	{
 		if (!(o instanceof TopoDS_Shape))
@@ -80,9 +81,10 @@ public class OCCShapeBuilder extends CADShapeBuilder
 				break;
 		}
 		shape.setShape(ts);
-		return (CADShape) shape;
+		return shape;
 	}
 	
+	@Override
 	public CADShape newShape (String fileName)
 	{
 		TopoDS_Shape brepShape;
@@ -120,6 +122,7 @@ public class OCCShapeBuilder extends CADShapeBuilder
 	/**
 	 * @param type 'u'=fuse 'n'=common '\\'=cut
 	 */
+	@Override
 	public CADShape newShape(CADShape o1, CADShape o2, char type)
 	{
 		CADShape res = null;
@@ -159,37 +162,43 @@ public class OCCShapeBuilder extends CADShapeBuilder
 		return res;
 	}
 	
+	@Override
 	public CADExplorer newExplorer()
 	{
-		return (CADExplorer) new OCCExplorer();
+		return new OCCExplorer();
 	}
 	
+	@Override
 	public CADWireExplorer newWireExplorer()
 	{
-		return (CADWireExplorer) new OCCWireExplorer();
+		return new OCCWireExplorer();
 	}
 
+	@Override
 	public CADIterator newIterator()
 	{
-		return (CADIterator) new OCCIterator();
+		return new OCCIterator();
 	}
 	
-	protected Iterator newShapeEnumIterator(CADShapeEnum start, CADShapeEnum end)
+	@Override
+	protected Iterator<CADShapeEnum> newShapeEnumIterator(CADShapeEnum start, CADShapeEnum end)
 	{
 		return OCCShapeEnum.newShapeEnumIterator((OCCShapeEnum) start, (OCCShapeEnum) end);
 	}
 
+	@Override
 	protected CADShapeEnum getShapeEnumInstance(String name)
 	{
-		return (CADShapeEnum) OCCShapeEnum.getSingleton(name);
+		return OCCShapeEnum.getSingleton(name);
 	}
 
+	@Override
 	public CADGeomCurve2D newCurve2D(CADEdge E, CADFace F)
 	{
 		CADGeomCurve2D curve = null;
 		try
 		{
-			curve = (CADGeomCurve2D) new OCCGeomCurve2D(E, F);
+			curve = new OCCGeomCurve2D(E, F);
 		}
 		catch (RuntimeException ex)
 		{
@@ -197,12 +206,13 @@ public class OCCShapeBuilder extends CADShapeBuilder
 		return curve;
 	}
 	
+	@Override
 	public CADGeomCurve3D newCurve3D(CADEdge E)
 	{
 		CADGeomCurve3D curve = null;
 		try
 		{
-			curve = (CADGeomCurve3D) new OCCGeomCurve3D(E);
+			curve = new OCCGeomCurve3D(E);
 		}
 		catch (RuntimeException ex)
 		{

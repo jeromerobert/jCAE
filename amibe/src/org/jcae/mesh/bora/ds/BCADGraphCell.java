@@ -62,26 +62,24 @@ public class BCADGraphCell
 	/**
 	 * List of parents.
 	 */
-	private Collection parents = new LinkedHashSet();
+	private Collection<BCADGraphCell> parents = new LinkedHashSet<BCADGraphCell>();
 	/**
 	 * List of discretizations.
 	 */
-	private Collection discrete = new ArrayList();
+	private Collection<BDiscretization> discrete = new ArrayList<BDiscretization>();
 
 	// In OccJava, two CADShape instances can be equal with different
 	// orientations.  We sometimes need to keep track of shape orientation
 	// in our graph, hash sets and maps can then use the keepOrientation
 	// instance as hashing strategy.
-	private static TObjectHashingStrategy keepOrientation = new TObjectHashingStrategy()
+	private static TObjectHashingStrategy<CADShape> keepOrientation = new TObjectHashingStrategy<CADShape>()
 	{
-		public int computeHashCode(Object o)
+		public int computeHashCode(CADShape o)
 		{
 			return o.hashCode();
 		}
-		public boolean equals(Object o1, Object o2)
+		public boolean equals(CADShape s1, CADShape s2)
 		{
-			CADShape s1 = ((CADShape) o1);
-			CADShape s2 = ((CADShape) o2);
 			return s1 != null && s1.equals(s2) && s1.orientation() == s2.orientation();
 		}
 	};
@@ -162,12 +160,12 @@ public class BCADGraphCell
 		return type;
 	}
 
-	public Collection getParents()
+	public Collection<BCADGraphCell> getParents()
 	{
 		return parents;
 	}
 
-	public void addParent(Object that)
+	public void addParent(BCADGraphCell that)
 	{
 		assert that != null;
 		parents.add(that);
@@ -198,9 +196,9 @@ public class BCADGraphCell
 	 * @param cse  CAD shape type
 	 * @returns iterator on geometrical elements.
 	 */
-	public Iterator shapesExplorer(CADShapeEnum cse)
+	public Iterator<BCADGraphCell> shapesExplorer(CADShapeEnum cse)
 	{
-		return shapesExplorer(cse, new THashSet(keepOrientation));
+		return shapesExplorer(cse, new THashSet<CADShape>(keepOrientation));
 	}
 
 	/**
@@ -212,9 +210,9 @@ public class BCADGraphCell
 	 * @param cse  CAD shape type
 	 * @returns iterator on unique geometrical elements.
 	 */
-	public Iterator uniqueShapesExplorer(CADShapeEnum cse)
+	public Iterator<BCADGraphCell> uniqueShapesExplorer(CADShapeEnum cse)
 	{
-		return shapesExplorer(cse, new THashSet());
+		return shapesExplorer(cse, new THashSet<CADShape>());
 	}
 
 	/**
@@ -225,25 +223,25 @@ public class BCADGraphCell
 	 * @param cse  CAD shape type
 	 * @returns iterator on all geometrical elements.
 	 */
-	public Iterator allShapesExplorer(CADShapeEnum cse)
+	public Iterator<BCADGraphCell> allShapesExplorer(CADShapeEnum cse)
 	{
 		return shapesExplorer(cse, null);
 	}
 
-	private Iterator shapesExplorer(final CADShapeEnum cse, final Collection cadShapeSet)
+	private Iterator<BCADGraphCell> shapesExplorer(final CADShapeEnum cse, final Collection<CADShape> cadShapeSet)
 	{
 		final CADExplorer exp = CADShapeBuilder.factory.newExplorer();
 		exp.init(shape, cse);
-		return new Iterator()
+		return new Iterator<BCADGraphCell>()
 		{
 			public boolean hasNext()
 			{
 				return exp.more();
 			}
-			public Object next()
+			public BCADGraphCell next()
 			{
 				CADShape curr = exp.current();
-				Object ret = graph.getByShape(curr);
+				BCADGraphCell ret = graph.getByShape(curr);
 				if (cadShapeSet == null)
 				{
 					if (exp.more())
@@ -274,9 +272,9 @@ public class BCADGraphCell
 	 *
 	 * @returns an iterator on immediate sub-shapes
 	 */
-	public Iterator shapesIterator()
+	public Iterator<BCADGraphCell> shapesIterator()
 	{
-		return shapesIterator(new THashSet(keepOrientation));
+		return shapesIterator(new THashSet<CADShape>(keepOrientation));
 	}
 
 	/**
@@ -286,9 +284,9 @@ public class BCADGraphCell
 	 *
 	 * @returns an iterator on immediate sub-shapes
 	 */
-	public Iterator uniqueShapesIterator()
+	public Iterator<BCADGraphCell> uniqueShapesIterator()
 	{
-		return shapesIterator(new THashSet());
+		return shapesIterator(new THashSet<CADShape>());
 	}
 
 	/**
@@ -296,25 +294,25 @@ public class BCADGraphCell
 	 *
 	 * @returns an iterator on all immediate sub-shapes
 	 */
-	public Iterator allShapesIterator()
+	public Iterator<BCADGraphCell> allShapesIterator()
 	{
 		return shapesIterator(null);
 	}
 
-	private Iterator shapesIterator(final Collection cadShapeSet)
+	private Iterator<BCADGraphCell> shapesIterator(final Collection<CADShape> cadShapeSet)
 	{
 		final CADIterator it = CADShapeBuilder.factory.newIterator();
 		it.initialize(shape);
-		return new Iterator()
+		return new Iterator<BCADGraphCell>()
 		{
 			public boolean hasNext()
 			{
 				return it.more();
 			}
-			public Object next()
+			public BCADGraphCell next()
 			{
 				CADShape curr = it.value();
-				Object ret = graph.getByShape(curr);
+				BCADGraphCell ret = graph.getByShape(curr);
 				if (cadShapeSet == null)
 				{
 					if (it.more())
@@ -346,9 +344,9 @@ public class BCADGraphCell
 	 */
 	public BDiscretization getDiscretizationSubMesh(BSubMesh sub)
 	{
-		for (Iterator it = discrete.iterator(); it.hasNext(); )
+		for (Iterator<BDiscretization> it = discrete.iterator(); it.hasNext(); )
 		{
-			BDiscretization discr = (BDiscretization) it.next();
+			BDiscretization discr = it.next();
 			if (discr.contains(sub))
 				return discr;
 		}
@@ -361,9 +359,9 @@ public class BCADGraphCell
 		if (discr != null)
 			throw new RuntimeException("Constraint "+cons+" cannot be applied to shape "+shape+", another constraint "+discr.getConstraint()+" is already defined");
 		BDiscretization found = null;
-		for (Iterator it = discrete.iterator(); it.hasNext(); )
+		for (Iterator<BDiscretization> it = discrete.iterator(); it.hasNext(); )
 		{
-			discr = (BDiscretization) it.next();
+			discr = it.next();
 			if (discr.getConstraint() == cons)
 			{
 				found = discr;
@@ -381,17 +379,17 @@ public class BCADGraphCell
 	/**
 	 * Returns an iterator on BDiscretization instances bound to this cell.
 	 */
-	public Iterator discretizationIterator()
+	public Iterator<BDiscretization> discretizationIterator()
 	{
 		return discrete.iterator();
 	}
 
 	public void addImplicitConstraints(CADShapeEnum cse, boolean recursive)
 	{
-		for (Iterator it = discrete.iterator(); it.hasNext(); )
+		for (Iterator<BDiscretization> it = discrete.iterator(); it.hasNext(); )
 		{
-			BDiscretization discr = (BDiscretization) it.next();
-			Iterator itc;
+			BDiscretization discr = it.next();
+			Iterator<BCADGraphCell> itc;
 			if (recursive)
 				itc = shapesExplorer(cse);
 			else
@@ -399,14 +397,14 @@ public class BCADGraphCell
 
 			while (itc.hasNext())
 			{
-				BCADGraphCell child = (BCADGraphCell) itc.next();
+				BCADGraphCell child = itc.next();
 				if (!recursive && child.getType() != cse)
 					continue;
 				boolean allIntersectionsEmpty = false;
 				BDiscretization discrChild = null;
-				for (Iterator itd = child.discrete.iterator(); itd.hasNext(); )
+				for (Iterator<BDiscretization> itd = child.discrete.iterator(); itd.hasNext(); )
 				{
-					discrChild = (BDiscretization) itd.next();
+					discrChild = itd.next();
 					if (!discr.emptyIntersection(discrChild))
 						break;
 					discrChild = null;
@@ -433,9 +431,9 @@ public class BCADGraphCell
 				 */
 				if (!allIntersectionsEmpty)
 				{
-					for (Iterator itd = child.discrete.iterator(); itd.hasNext(); )
+					for (Iterator<BDiscretization> itd = child.discrete.iterator(); itd.hasNext(); )
 					{
-						BDiscretization otherDiscrChild = (BDiscretization) itd.next();
+						BDiscretization otherDiscrChild = itd.next();
 						if ((otherDiscrChild != discrChild) && 
 						   (!discrChild.emptyIntersection(otherDiscrChild)))
 						{
@@ -449,6 +447,7 @@ public class BCADGraphCell
 		}
 	}
 
+	@Override
 	public String toString()
 	{
 		String ret = id+" "+shape+" "+shape.orientation()+" "+Integer.toHexString(hashCode());

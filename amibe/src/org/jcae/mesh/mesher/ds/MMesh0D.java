@@ -40,12 +40,12 @@ public class MMesh0D
 	//  Array of distinct geometric nodes
 	private CADVertex[] vnodelist;
 	private int vnodesize = 0;
-	private TObjectIntHashMap vnodeset;
+	private TObjectIntHashMap<CADVertex> vnodeset;
 
 	//  Array of distinct discretizations of geometric nodes
 	private BDiscretization[] vnodediscrlist;
 	private int vnodediscrsize = 0;
-	private TObjectIntHashMap vnodediscrset;
+	private TObjectIntHashMap<BDiscretization> vnodediscrset;
 	
 	/**
 	 * Creates a <code>MMesh0D</code> instance by merging all topological
@@ -62,7 +62,7 @@ public class MMesh0D
 
 		//  Merge topological vertices found at the same geometrical point
 		vnodelist = new CADVertex[nodes];
-		vnodeset = new TObjectIntHashMap(nodes);
+		vnodeset = new TObjectIntHashMap<CADVertex>(nodes);
 		for (expV.init(shape, CADShapeEnum.VERTEX); expV.more(); expV.next())
 			addGeometricalVertex((CADVertex) expV.current());
 	}
@@ -88,17 +88,17 @@ public class MMesh0D
 
 		//  Merge topological vertices found at the same geometrical point
 		vnodelist = new CADVertex[nodes];
-		vnodeset = new TObjectIntHashMap(nodes);
+		vnodeset = new TObjectIntHashMap<CADVertex>(nodes);
 		for (expV.init(shape, CADShapeEnum.VERTEX); expV.more(); expV.next())
 			addGeometricalVertex((CADVertex) expV.current());
 
 		// Processing of the found discretizations; is this necessary?
 		int nodediscrs = 0;
 		// estimation of the maximum number of nodes created on the vertices of the CAD
-		for (Iterator itn = root.shapesExplorer(CADShapeEnum.VERTEX); itn.hasNext(); )
+		for (Iterator<BCADGraphCell> itn = root.shapesExplorer(CADShapeEnum.VERTEX); itn.hasNext(); )
 		{
-			BCADGraphCell cell = (BCADGraphCell) itn.next();
-			for (Iterator itpd = cell.discretizationIterator(); itpd.hasNext(); itpd.next())
+			BCADGraphCell cell = itn.next();
+			for (Iterator<BDiscretization> itpd = cell.discretizationIterator(); itpd.hasNext(); itpd.next())
 			{
 				nodediscrs++;
 			}
@@ -106,14 +106,13 @@ public class MMesh0D
 
 		//  Merge nodes at the same discretization
 		vnodediscrlist = new BDiscretization[nodediscrs];
-		vnodediscrset = new TObjectIntHashMap(nodediscrs);
-		for (Iterator itn = root.shapesExplorer(CADShapeEnum.VERTEX); itn.hasNext();)
+		vnodediscrset = new TObjectIntHashMap<BDiscretization>(nodediscrs);
+		for (Iterator<BCADGraphCell> itn = root.shapesExplorer(CADShapeEnum.VERTEX); itn.hasNext();)
 		{
-			BCADGraphCell cell = (BCADGraphCell) itn.next();
-			for (Iterator itpd = cell.discretizationIterator(); itpd.hasNext(); )
+			BCADGraphCell cell = itn.next();
+			for (Iterator<BDiscretization> itpd = cell.discretizationIterator(); itpd.hasNext(); )
 			{
-				BDiscretization discr = (BDiscretization)  itpd.next();
-				addVertexDiscretization(discr);
+				addVertexDiscretization(itpd.next());
 			}
 		}
                 System.out.println("Number of Vertex discretizations created in MMesh0D: "+ vnodediscrsize);
@@ -186,15 +185,15 @@ public class MMesh0D
 	{
 		// Selection of the cell's child that has the same shape as V. The orientation of ccell
 		// is of no importance because both orientations share the same discretizations
-		for (Iterator itc = pcell.shapesExplorer(CADShapeEnum.VERTEX); itc.hasNext(); )
+		for (Iterator<BCADGraphCell> itc = pcell.shapesExplorer(CADShapeEnum.VERTEX); itc.hasNext(); )
 		{
-			BCADGraphCell ccell = (BCADGraphCell) itc.next();
+			BCADGraphCell ccell = itc.next();
 			if ( V.isSame(ccell.getShape()) )
 			{
 				// Selection of the child cell's discretization of parent pd
-				for (Iterator itcd = ccell.discretizationIterator(); itcd.hasNext(); )
+				for (Iterator<BDiscretization> itcd = ccell.discretizationIterator(); itcd.hasNext(); )
 				{
-					BDiscretization cd = (BDiscretization) itcd.next();
+					BDiscretization cd = itcd.next();
 					if (pd.contained(cd))
 						return getVertexDiscretization(cd); // equivalent to return cd if everything went right
 				}

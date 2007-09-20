@@ -49,10 +49,10 @@ public class OCCDiscretizeCurve3D
 		{
 			nsegments *= 10;
 			a = new double[nsegments+1];
-			double delta = (end - start) / ((double) nsegments);
+			double delta = (end - start) / nsegments;
 			xyz = new double[3*(nsegments+1)];
 			for (int i = 0; i < nsegments; i++)
-				xyz[3*i] = start + ((double) i) * delta;
+				xyz[3*i] = start + i * delta;
 			//  Avoid rounding errors
 			xyz[3*nsegments] = end;
 			curve.arrayValues(nsegments + 1, xyz);
@@ -62,7 +62,7 @@ public class OCCDiscretizeCurve3D
 			a[0] = start;
 			for (int ns = 1; ns < nsegments; ns++)
 			{
-				abscissa = start + ((double) ns) * delta;
+				abscissa = start + ns * delta;
 				dist = Math.sqrt(
 				  (xyz[3*nr-3] - xyz[3*ns  ]) * (xyz[3*nr-3] - xyz[3*ns  ]) +
 				  (xyz[3*nr-2] - xyz[3*ns+1]) * (xyz[3*nr-2] - xyz[3*ns+1]) +
@@ -109,9 +109,9 @@ public class OCCDiscretizeCurve3D
 	{
 		nr = n + 1;
 		a = new double[nr];
-		double delta = (end - start) / ((double) n);
+		double delta = (end - start) / n;
 		for (int i = 0; i < n; i++)
-			a[i] = start + ((double) i) * delta;
+			a[i] = start + i * delta;
 		
 		//  Avoid rounding errors
 		a[n] = end;
@@ -162,26 +162,26 @@ public class OCCDiscretizeCurve3D
 		{
 			nsegments *= 10;
 			a = new double[nsegments+1];
-			double delta = (end - start) / ((double) nsegments);
+			double delta = (end - start) / nsegments;
 			xyz = new double[3*(nsegments+1)];
 			for (int i = 0; i < nsegments; i++)
-				xyz[3*i] = start + ((double) i) * delta;
+				xyz[3*i] = start + i * delta;
 			//  Avoid rounding errors
 			xyz[3*nsegments] = end;
 			curve.arrayValues(nsegments + 1, xyz);
 			
 			a[0] = start;
 			//  Compute length, a[] and xyz[]
-			double length = 0.0;
+			double len = 0.0;
 			for (int ns = 1; ns <= nsegments; ns++)
 			{
 				a[ns] = start + ns * delta;
-				length += Math.sqrt(
+				len += Math.sqrt(
 				  (xyz[3*ns-3] - xyz[3*ns  ]) * (xyz[3*ns-3] - xyz[3*ns  ]) +
 				  (xyz[3*ns-2] - xyz[3*ns+1]) * (xyz[3*ns-2] - xyz[3*ns+1]) +
 				  (xyz[3*ns-1] - xyz[3*ns+2]) * (xyz[3*ns-1] - xyz[3*ns+2]));
 			}
-			double lmax = 2.0 * length / ((double) nr);
+			double lmax = 2.0 * len / nr;
 			double lmin = 0.0;
 			double maxlen, dist;
 			while (true)
@@ -246,10 +246,10 @@ public class OCCDiscretizeCurve3D
 		{
 			nsegments *= 10;
 			a = new double[nsegments+1];
-			double delta = (end - start) / ((double) nsegments);
+			double delta = (end - start) / nsegments;
 			xyz = new double[3*(nsegments+1)];
 			for (int i = 0; i < nsegments; i++)
-				xyz[3*i] = start + ((double) i) * delta;
+				xyz[3*i] = start + i * delta;
 			//  Avoid rounding errors
 			xyz[3*nsegments] = end;
 			curve.arrayValues(nsegments + 1, xyz);
@@ -262,7 +262,7 @@ public class OCCDiscretizeCurve3D
 			oldAbscissa = start;
 			for (int ns = 1; ns < nsegments; ns++)
 			{
-				newAbscissa = start + ((double) ns) * delta;
+				newAbscissa = start + ns * delta;
 				dist = Math.sqrt(
 				  (xyz[3*nr-3] - xyz[3*ns  ]) * (xyz[3*nr-3] - xyz[3*ns  ]) +
 				  (xyz[3*nr-2] - xyz[3*ns+1]) * (xyz[3*nr-2] - xyz[3*ns+1]) +
@@ -430,16 +430,16 @@ public class OCCDiscretizeCurve3D
 		return a[index-1];
 	}
 	
-	private double length(double start, double end, int nrsub)
+	private double length(double from, double to, int nrsub)
 	{
 		assert nr > 0;
-		double delta = (end - start) / ((double) nrsub);
+		double delta = (to - from) / nrsub;
 		double l = 0.0;
 		double [] xyz = new double[3*(nrsub+1)];
 		for (int i = 0; i < nrsub; i++)
-			xyz[3*i] = start + ((double) i) * delta;
+			xyz[3*i] = from + i * delta;
 		//  Avoid rounding errors
-		xyz[3*nrsub] = end;
+		xyz[3*nrsub] = to;
 		curve.arrayValues(nrsub + 1, xyz);
 		
 		for (int i = 0; i < 3 * nrsub; i+=3)

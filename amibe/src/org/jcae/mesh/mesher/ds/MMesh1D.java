@@ -28,6 +28,7 @@ import org.jcae.mesh.amibe.metrics.Metric3D;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -51,8 +52,8 @@ public class MMesh1D extends MMesh0D
 	private static double maxDeflection = 0.0;
 	
 	//  Edge map.
-	private LinkedHashMap mapTEdgeToSubMesh1D;
-	private HashMap mapTEdgeToFaces;
+	private Map<CADEdge, SubMesh1D> mapTEdgeToSubMesh1D;
+	private Map<CADEdge, LinkedHashSet<CADFace>> mapTEdgeToFaces;
 	
 	/**
 	 * Creates a <code>MMesh1D</code> instance by discretizing all edges
@@ -74,7 +75,7 @@ public class MMesh1D extends MMesh0D
 			edges++;
 		if (edges == 0)
 			return;
-		mapTEdgeToSubMesh1D = new LinkedHashMap(edges);
+		mapTEdgeToSubMesh1D = new LinkedHashMap<CADEdge, SubMesh1D>(edges);
 		
 		for (expE.init(shape, CADShapeEnum.EDGE); expE.more(); expE.next())
 		{
@@ -82,24 +83,21 @@ public class MMesh1D extends MMesh0D
 			//  Edges may get connected to several faces
 			if (mapTEdgeToSubMesh1D.containsKey(E))
 				continue;
-			SubMesh1D submesh1d = new SubMesh1D(E, (MMesh0D) this);
+			SubMesh1D submesh1d = new SubMesh1D(E, this);
 			mapTEdgeToSubMesh1D.put(E, submesh1d);
 		}
-		mapTEdgeToFaces = new HashMap(edges);
-		for (Iterator it = mapTEdgeToSubMesh1D.keySet().iterator(); it.hasNext(); )
-		{
-			CADEdge E = (CADEdge) it.next();
-			mapTEdgeToFaces.put(E, new LinkedHashSet());
-		}
+		mapTEdgeToFaces = new HashMap<CADEdge, LinkedHashSet<CADFace>>(edges);
+		for (Iterator<CADEdge> it = mapTEdgeToSubMesh1D.keySet().iterator(); it.hasNext(); )
+			mapTEdgeToFaces.put(it.next(), new LinkedHashSet<CADFace>());
 		CADExplorer expF = CADShapeBuilder.factory.newExplorer();
 		for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 		{
 			CADFace F = (CADFace) expF.current();
-			LinkedHashSet set;
+			LinkedHashSet<CADFace> set;
 			for (expE.init(F, CADShapeEnum.EDGE); expE.more(); expE.next())
 			{
 				CADEdge E = (CADEdge) expE.current();
-				set = (LinkedHashSet) mapTEdgeToFaces.get(E);
+				set = mapTEdgeToFaces.get(E);
 				set.add(F);
 			}
 		}
@@ -114,10 +112,10 @@ public class MMesh1D extends MMesh0D
 
 		int edgediscrs = 0;
 		// estimation of the maximum number of nodes created on the vertices of the CAD
-		for (Iterator itn = root.shapesExplorer(CADShapeEnum.EDGE); itn.hasNext(); )
+		for (Iterator<BCADGraphCell> itn = root.shapesExplorer(CADShapeEnum.EDGE); itn.hasNext(); )
 		{
-			BCADGraphCell cell = (BCADGraphCell) itn.next();
-			for (Iterator itpd = cell.discretizationIterator(); itpd.hasNext(); itpd.next())
+			BCADGraphCell cell = itn.next();
+			for (Iterator<BDiscretization> itpd = cell.discretizationIterator(); itpd.hasNext(); itpd.next())
 			{
 				edgediscrs++;
 			}
@@ -125,49 +123,48 @@ public class MMesh1D extends MMesh0D
 		if (edgediscrs == 0)
 			return;
 
-		mapTEdgeToSubMesh1D = new LinkedHashMap(edgediscrs);
+		Map<BDiscretization, SubMesh1D> mapDiscrToSubMesh1D = new LinkedHashMap<BDiscretization, SubMesh1D>(edgediscrs);
 		edgediscrs = 0;
-		for (Iterator itn = root.shapesExplorer(CADShapeEnum.EDGE); itn.hasNext(); )
+		for (Iterator<BCADGraphCell> itn = root.shapesExplorer(CADShapeEnum.EDGE); itn.hasNext(); )
 		{
-			BCADGraphCell cell = (BCADGraphCell) itn.next();
-			for (Iterator itpd = cell.discretizationIterator(); itpd.hasNext(); )
+			BCADGraphCell cell = itn.next();
+			for (Iterator<BDiscretization> itpd = cell.discretizationIterator(); itpd.hasNext(); )
 			{
-				BDiscretization discr = (BDiscretization)  itpd.next();
+				BDiscretization discr = itpd.next();
 				//  Edges may get connected to several faces
-				if (mapTEdgeToSubMesh1D.containsKey(discr))
+				if (mapDiscrToSubMesh1D.containsKey(discr))
 					continue;
-				SubMesh1D submesh1d = new SubMesh1D(discr, (MMesh0D) this);
-				mapTEdgeToSubMesh1D.put(discr, submesh1d);
+				SubMesh1D submesh1d = new SubMesh1D(discr, this);
+				mapDiscrToSubMesh1D.put(discr, submesh1d);
 				edgediscrs++;
 			}
 		}
 		System.out.println("Number of Edge discretizations created in MMesh1D: "+ edgediscrs);
 
-		mapTEdgeToFaces = new HashMap(edgediscrs);
-		for (Iterator it = mapTEdgeToSubMesh1D.keySet().iterator(); it.hasNext(); )
+		Map<BDiscretization, LinkedHashSet<BDiscretization>> mapDiscrToFaces = new HashMap<BDiscretization, LinkedHashSet<BDiscretization>>(edgediscrs);
+		for (Iterator<BDiscretization> it = mapDiscrToSubMesh1D.keySet().iterator(); it.hasNext(); )
 		{
-			BDiscretization discr = (BDiscretization) it.next();
-			mapTEdgeToFaces.put(discr, new LinkedHashSet());
+			mapDiscrToFaces.put(it.next(), new LinkedHashSet<BDiscretization>());
 		}
 
-		LinkedHashSet set;
-		for (Iterator itp = root.shapesExplorer(CADShapeEnum.FACE); itp.hasNext(); )
+		LinkedHashSet<BDiscretization> set;
+		for (Iterator<BCADGraphCell> itp = root.shapesExplorer(CADShapeEnum.FACE); itp.hasNext(); )
 		{
-			BCADGraphCell pcell = (BCADGraphCell) itp.next();
-			for (Iterator itpd = pcell.discretizationIterator(); itpd.hasNext(); )
+			BCADGraphCell pcell = itp.next();
+			for (Iterator<BDiscretization> itpd = pcell.discretizationIterator(); itpd.hasNext(); )
 			{
-				BDiscretization pd = (BDiscretization) itpd.next();
-				for (Iterator itc = pcell.shapesExplorer(CADShapeEnum.EDGE); itc.hasNext(); )
+				BDiscretization pd = itpd.next();
+				for (Iterator<BCADGraphCell> itc = pcell.shapesExplorer(CADShapeEnum.EDGE); itc.hasNext(); )
 				{
-					BCADGraphCell ccell = (BCADGraphCell) itc.next();
-					for (Iterator itcd = ccell.discretizationIterator(); itcd.hasNext(); )
+					BCADGraphCell ccell = itc.next();
+					for (Iterator<BDiscretization> itcd = ccell.discretizationIterator(); itcd.hasNext(); )
 					{
-						BDiscretization cd = (BDiscretization) itcd.next();
+						BDiscretization cd = itcd.next();
 						if (pd.contained(cd))
 						{
-							// here mapTEdgeToFaces maps the parent discretizations on 
+							// here mapDiscrToFaces maps the parent discretizations on 
 							// the faces to the child discretizations on the edge
-							set = (LinkedHashSet) mapTEdgeToFaces.get(cd);
+							set = mapDiscrToFaces.get(cd);
 							set.add(pd);
 						}
 					}
@@ -193,9 +190,9 @@ public class MMesh1D extends MMesh0D
 	 *
 	 * @return the set of faces containing this topological edge.
 	 */
-	public Set getAdjacentFaces(CADEdge E)
+	public Set<CADFace> getAdjacentFaces(CADEdge E)
 	{
-		Set ret = (Set) mapTEdgeToFaces.get(E);
+		Set<CADFace> ret = mapTEdgeToFaces.get(E);
 		// May be null for beams
 		return ret;
 	}
@@ -211,21 +208,18 @@ public class MMesh1D extends MMesh0D
 		for (expE.init(shape, CADShapeEnum.EDGE); expE.more(); expE.next())
 		{
 			CADEdge E = (CADEdge) expE.current();
-			SubMesh1D submesh1d = (SubMesh1D) mapTEdgeToSubMesh1D.get(E);
-			for (Iterator it = submesh1d.getNodesIterator(); it.hasNext(); )
-			{
-				MNode1D n = (MNode1D) it.next();
-				n.setLabel(0);
-			}
+			SubMesh1D submesh1d = mapTEdgeToSubMesh1D.get(E);
+			for (Iterator<MNode1D> it = submesh1d.getNodesIterator(); it.hasNext(); )
+				it.next().setLabel(0);
 		}
 		int i = 0;
 		for (expE.init(shape, CADShapeEnum.EDGE); expE.more(); expE.next())
 		{
 			CADEdge E = (CADEdge) expE.current();
-			SubMesh1D submesh1d = (SubMesh1D) mapTEdgeToSubMesh1D.get(E);
-			for (Iterator it = submesh1d.getNodesIterator(); it.hasNext(); )
+			SubMesh1D submesh1d = mapTEdgeToSubMesh1D.get(E);
+			for (Iterator<MNode1D> it = submesh1d.getNodesIterator(); it.hasNext(); )
 			{
-				MNode1D n = (MNode1D) it.next();
+				MNode1D n = it.next();
 				if (0 == n.getMaster().getLabel())
 				{
 					i++;
@@ -250,38 +244,38 @@ public class MMesh1D extends MMesh0D
 		int nVertex = 0;
 		for (expV.init(shape, CADShapeEnum.VERTEX); expV.more(); expV.next())
 			nVertex++;
-		HashMap vertex2Ref = new HashMap(nVertex);
+		HashMap<CADShape, ArrayList<MNode1D>> vertex2Ref = new HashMap<CADShape, ArrayList<MNode1D>>(nVertex);
 		for (expV.init(shape, CADShapeEnum.VERTEX); expV.more(); expV.next())
-			vertex2Ref.put(expV.current(), new ArrayList());
+			vertex2Ref.put(expV.current(), new ArrayList<MNode1D>());
 		
-		Iterator ite = mapTEdgeToSubMesh1D.values().iterator();
+		Iterator<SubMesh1D> ite = mapTEdgeToSubMesh1D.values().iterator();
 		while (ite.hasNext())
 		{
-			SubMesh1D submesh1d = (SubMesh1D) ite.next();
-			Iterator itn = submesh1d.getNodesIterator();
+			SubMesh1D submesh1d = ite.next();
+			Iterator<MNode1D> itn = submesh1d.getNodesIterator();
 			while (itn.hasNext())
 			{
-				MNode1D pt = (MNode1D) itn.next();
+				MNode1D pt = itn.next();
 				if (null != pt.getCADVertex())
-					((ArrayList) vertex2Ref.get(pt.getCADVertex())).add(pt);
+					vertex2Ref.get(pt.getCADVertex()).add(pt);
 			}
 		}
 		
-		LinkedHashSet seen = new LinkedHashSet();
+		LinkedHashSet<CADVertex> seen = new LinkedHashSet<CADVertex>();
 		for (expV.init(shape, CADShapeEnum.VERTEX); expV.more(); expV.next())
 		{
 			CADVertex V = (CADVertex) expV.current();
 			if (seen.contains(V))
 				continue;
 			seen.add(V);
-			ArrayList vnodelist = (ArrayList) vertex2Ref.get(V);
+			ArrayList<MNode1D> vnodelist = vertex2Ref.get(V);
 			if (vnodelist.size() <= 1)
 				continue;
 			// Make sure that all MNode1D objects share the same master.
-			MNode1D master = (MNode1D) vnodelist.get(0);
+			MNode1D master = vnodelist.get(0);
+			for (MNode1D pt: vnodelist)
+				pt.setMaster(master);
 			master.setMaster(null);
-			for (int i = 1; i<vnodelist.size(); i++)
-				((MNode1D) vnodelist.get(i)).setMaster(master);
 		}
 		assert(isValid());
 	}
@@ -321,7 +315,7 @@ public class MMesh1D extends MMesh0D
 	 *
 	 * @return the list of topological edges.
 	 */
-	public Iterator getTEdgeIterator()
+	public Iterator<CADEdge> getTEdgeIterator()
 	{
 		return mapTEdgeToSubMesh1D.keySet().iterator();
 	}
@@ -332,10 +326,10 @@ public class MMesh1D extends MMesh0D
 	 * @param E  a topological edge.
 	 * @return the list of nodes inserted on this edge.
 	 */
-	public ArrayList getNodelistFromMap(CADEdge E)
+	public ArrayList<MNode1D> getNodelistFromMap(CADEdge E)
 		throws NoSuchElementException
 	{
-		SubMesh1D submesh1d = (SubMesh1D) mapTEdgeToSubMesh1D.get(E);
+		SubMesh1D submesh1d = mapTEdgeToSubMesh1D.get(E);
 		if (null == submesh1d)
 			throw new NoSuchElementException("TEdge : "+E);
 		return submesh1d.getNodes();
@@ -347,10 +341,10 @@ public class MMesh1D extends MMesh0D
 	 * @param E  a topological edge.
 	 * @return the list of edges inserted on this edge.
 	 */
-	public ArrayList getEdgelistFromMap(CADEdge E)
+	public ArrayList<MEdge1D> getEdgelistFromMap(CADEdge E)
 	       throws NoSuchElementException
 	{
-		SubMesh1D submesh1d = (SubMesh1D) mapTEdgeToSubMesh1D.get(E);
+		SubMesh1D submesh1d = mapTEdgeToSubMesh1D.get(E);
 		if (null == submesh1d)
 			throw new NoSuchElementException("TEdge : "+E);
 		return submesh1d.getEdges();
@@ -364,9 +358,9 @@ public class MMesh1D extends MMesh0D
 	public int maximalNumberOfNodes()
 	{
 		int result = 0;
-		for(Iterator it=mapTEdgeToSubMesh1D.values().iterator();it.hasNext();)
+		for(Iterator<SubMesh1D> it=mapTEdgeToSubMesh1D.values().iterator();it.hasNext();)
 		{
-			SubMesh1D submesh1d = (SubMesh1D) it.next();
+			SubMesh1D submesh1d = it.next();
 			if (null != submesh1d)
 				result += submesh1d.getNodes().size();
 		}
@@ -385,7 +379,7 @@ public class MMesh1D extends MMesh0D
 	{
 		if (! mapTEdgeToSubMesh1D.containsKey(E))
 			throw new NoSuchElementException("TEdge : "+E);
-		return (SubMesh1D) mapTEdgeToSubMesh1D.get(E);
+		return mapTEdgeToSubMesh1D.get(E);
 	}
 	
 	/**
@@ -400,14 +394,14 @@ public class MMesh1D extends MMesh0D
 	{
 		if (! mapTEdgeToSubMesh1D.containsKey(discrE))
 			throw new NoSuchElementException("TEdge : "+discrE);
-		return (SubMesh1D) mapTEdgeToSubMesh1D.get(discrE);
+		return mapTEdgeToSubMesh1D.get(discrE);
 	}
 
 	public Vertex2D [] boundaryNodes(Mesh2D mesh)
 	{
 		//  Rough approximation of the final size
 		int roughSize = 10*maximalNumberOfNodes();
-		ArrayList result = new ArrayList(roughSize);
+		ArrayList<Vertex2D> result = new ArrayList<Vertex2D>(roughSize);
 		CADFace face = (CADFace) mesh.getGeometry();
 		CADExplorer expW = CADShapeBuilder.factory.newExplorer();
 		CADWireExplorer wexp = CADShapeBuilder.factory.newWireExplorer();
@@ -415,30 +409,27 @@ public class MMesh1D extends MMesh0D
 		for (expW.init(face, CADShapeEnum.WIRE); expW.more(); expW.next())
 		{
 			MNode1D p1 = null;
-			Vertex2D p20 = null, p2 = null, lastPoint = null;;
+			Vertex2D p20 = null, p2 = null, lastPoint = null;
 			double accumulatedLength = 0.0;
-			ArrayList nodesWire = new ArrayList(roughSize);
+			ArrayList<Vertex2D> nodesWire = new ArrayList<Vertex2D>(roughSize);
 			for (wexp.init((CADWire) expW.current(), face); wexp.more(); wexp.next())
 			{
 				CADEdge te = wexp.current();
 				CADGeomCurve2D c2d = CADShapeBuilder.factory.newCurve2D(te, face);
 				CADGeomCurve3D c3d = CADShapeBuilder.factory.newCurve3D(te);
 
-				ArrayList nodelist = getNodelistFromMap(te);
-				Iterator itn = nodelist.iterator();
-				ArrayList saveList = new ArrayList();
+				ArrayList<MNode1D> nodelist = getNodelistFromMap(te);
+				Iterator<MNode1D> itn = nodelist.iterator();
+				ArrayList<MNode1D> saveList = new ArrayList<MNode1D>();
 				while (itn.hasNext())
-				{
-					p1 = (MNode1D) itn.next();
-					saveList.add(p1);
-				}
+					saveList.add(itn.next());
 				if (!te.isOrientationForward())
 				{
 					//  Sort in reverse order
 					int size = saveList.size();
 					for (int i = 0; i < size/2; i++)
 					{
-						Object o = saveList.get(i);
+						MNode1D o = saveList.get(i);
 						saveList.set(i, saveList.get(size - i - 1));
 						saveList.set(size - i - 1, o);
 					}
@@ -447,7 +438,7 @@ public class MMesh1D extends MMesh0D
 				//  Except for the very first edge, the first
 				//  vertex is constrained to be the last one
 				//  of the previous edge.
-				p1 = (MNode1D) itn.next();
+				p1 = itn.next();
 				if (null == p2)
 				{
 					p2 = Vertex2D.valueOf(p1, c2d, face);
@@ -455,10 +446,10 @@ public class MMesh1D extends MMesh0D
 					p20 = p2;
 					lastPoint = p2;
 				}
-				ArrayList newNodes = new ArrayList(saveList.size());
+				ArrayList<Vertex2D> newNodes = new ArrayList<Vertex2D>(saveList.size());
 				while (itn.hasNext())
 				{
-					p1 = (MNode1D) itn.next();
+					p1 = itn.next();
 					p2 = Vertex2D.valueOf(p1, c2d, face);
 					newNodes.add(p2);
 				}
@@ -474,7 +465,7 @@ public class MMesh1D extends MMesh0D
 				{
 					//   3.  Edge length is smaller than epsilon
 					double edgelen = c3d.length();
-					canSkip = mesh.tooSmall(edgelen, accumulatedLength);;
+					canSkip = mesh.tooSmall(edgelen, accumulatedLength);
 					if (canSkip)
 						accumulatedLength += edgelen;
 					// 4.  Check whether deflection is valid.
@@ -512,7 +503,7 @@ public class MMesh1D extends MMesh0D
 			}
 		}
 		
-		return (Vertex2D []) result.toArray(new Vertex2D[result.size()]);
+		return result.toArray(new Vertex2D[result.size()]);
 	}
 	
 	/**
@@ -525,9 +516,9 @@ public class MMesh1D extends MMesh0D
 	 */
 	public boolean isValid()
 	{
-		for(Iterator it=mapTEdgeToSubMesh1D.values().iterator();it.hasNext();)
+		for(Iterator<SubMesh1D> it=mapTEdgeToSubMesh1D.values().iterator();it.hasNext();)
 		{
-			SubMesh1D submesh1d = (SubMesh1D) it.next();
+			SubMesh1D submesh1d = it.next();
 			if (null != submesh1d)
 				assert(submesh1d.isValid());
 		}
@@ -539,22 +530,23 @@ public class MMesh1D extends MMesh0D
 	 */
 	public void printInfos()
 	{
-		for(Iterator it=mapTEdgeToSubMesh1D.values().iterator();it.hasNext();)
+		for(Iterator<SubMesh1D> it=mapTEdgeToSubMesh1D.values().iterator();it.hasNext();)
 		{
-			SubMesh1D submesh1d = (SubMesh1D) it.next();
+			SubMesh1D submesh1d = it.next();
 			if (null != submesh1d)
 				submesh1d.printInfos();
 		}
 	}
 	
+	@Override
 	public String toString()
 	{
 		String cr=System.getProperty("line.separator");
 		StringBuffer r = new StringBuffer("MMesh1D"+cr);
 		logger.debug("Printing "+r.toString());
-		for(Iterator it=mapTEdgeToSubMesh1D.values().iterator();it.hasNext();)
+		for(Iterator<SubMesh1D> it=mapTEdgeToSubMesh1D.values().iterator();it.hasNext();)
 		{
-			SubMesh1D submesh1d = (SubMesh1D) it.next();
+			SubMesh1D submesh1d = it.next();
 			if (null != submesh1d)
 				r.append(submesh1d);
 		}

@@ -61,11 +61,11 @@ public class UniformLengthDeflection
 	{
 		int nbTEdges = 0, nbNodes = 0, nbEdges = 0;
 		/* Explore the shape for each edge */
-		Iterator ite = mesh1d.getTEdgeIterator();
+		Iterator<CADEdge> ite = mesh1d.getTEdgeIterator();
 		/*  First compute current nbNodes and nbEdges  */
 		while (ite.hasNext())
 		{
-			CADEdge E = (CADEdge) ite.next();
+			CADEdge E = ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(E);
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
@@ -73,7 +73,7 @@ public class UniformLengthDeflection
 		ite = mesh1d.getTEdgeIterator();
 		while (ite.hasNext())
 		{
-			CADEdge E = (CADEdge) ite.next();
+			CADEdge E = ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(E);
 			nbNodes -= submesh1d.getNodes().size();
 			nbEdges -= submesh1d.getEdges().size();
@@ -113,8 +113,8 @@ public class UniformLengthDeflection
 		//if (BRep_Tool.degenerated(E))
 		//	return false;
 		
-		ArrayList edgelist = submesh1d.getEdges();
-		ArrayList nodelist = submesh1d.getNodes();
+		ArrayList<MEdge1D> edgelist = submesh1d.getEdges();
+		ArrayList<MNode1D> nodelist = submesh1d.getNodes();
 		if (edgelist.size() != 1 || nodelist.size() != 2)
 			return false;
 		edgelist.clear();
@@ -199,7 +199,7 @@ public class UniformLengthDeflection
 			n2 = new MNode1D(param, GPt);
 			n2.isDegenerated(isDegenerated);
 			nodelist.add(n2);
-			MEdge1D e=new MEdge1D(n1, n2, false);
+			MEdge1D e=new MEdge1D(n1, n2);
 			edgelist.add(e);
 			n1 = n2;
 		}

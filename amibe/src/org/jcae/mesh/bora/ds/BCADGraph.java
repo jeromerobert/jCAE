@@ -192,11 +192,11 @@ public class BCADGraph
 	/**
 	 * Returns the list of cells for a given dimension.
 	 */
-	public Collection getCellList(CADShapeEnum cse)
+	public Collection<BCADGraphCell> getCellList(CADShapeEnum cse)
 	{
 		CADShapeBuilder factory = CADShapeBuilder.factory;
 		CADExplorer exp = factory.newExplorer();
-		Collection ret = new LinkedHashSet();
+		Collection<BCADGraphCell> ret = new LinkedHashSet<BCADGraphCell>();
 		for (exp.init(root.getShape(), cse); exp.more(); exp.next())
 		{
 			CADShape s = exp.current();

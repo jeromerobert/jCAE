@@ -76,7 +76,7 @@ public class OCCShape implements CADShape
 	{
 		OCCGeomSurface surface = new OCCGeomSurface();
 		surface.setSurface(BRep_Tool.surface(asTopoDS_Face()));
-		return (CADGeomSurface) surface;
+		return surface;
 	}
 	
 	public double [] boundingBox()
@@ -100,7 +100,7 @@ public class OCCShape implements CADShape
 		else
 			s = new OCCShape();
 		s.setShape(myShape.reversed());
-		return (CADShape) s;
+		return s;
 	}
 	
 	public int orientation()
@@ -113,6 +113,7 @@ public class OCCShape implements CADShape
 		return myShape.orientation() == TopAbs_Orientation.FORWARD;
 	}
 	
+	@Override
 	public boolean equals(Object o)
 	{
 		if (o == null)
@@ -134,6 +135,7 @@ public class OCCShape implements CADShape
   		BRepTools.write(myShape, filename);
 	}
 	
+	@Override
 	public int hashCode()
 	{
 		return myShape.hashCode();

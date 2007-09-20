@@ -36,19 +36,17 @@ public class MEdge1D
 	private MNode1D pt2;
 	
 	private static int id = 0;
-	private static HashMap mapHashcodeToID;
+	private static HashMap<MEdge1D, Integer> mapHashcodeToID;
 	//  Initialize mapHashcodeToID
-	static { assert(null != (mapHashcodeToID = new HashMap())); };
+	static { assert(null != (mapHashcodeToID = new HashMap<MEdge1D, Integer>())); }
 	
 	/**
 	 * Creates an edge bounded by two <code>MNode1D</code> instances.
 	 *
 	 * @param  begin   first end point,
 	 * @param  end     second end point,
-	 * @param  isFiniteElement  <code>true</code> if this edge is a 1D finite
-	 * element.
 	 */
-	public MEdge1D(MNode1D begin, MNode1D end, boolean isFiniteElement)
+	public MEdge1D(MNode1D begin, MNode1D end)
 	{
 		pt1 = begin;
 		pt2 = end;
@@ -70,9 +68,8 @@ public class MEdge1D
 	public int getID()
 	{
 		if (id > 0)
-			return ((Integer)mapHashcodeToID.get(this)).intValue();
-		else
-			return hashCode();
+			return mapHashcodeToID.get(this).intValue();
+		return hashCode();
 	}
 	
 	/**
@@ -95,6 +92,7 @@ public class MEdge1D
 		return pt2;
 	}
 	
+	@Override
 	public String toString()
 	{
 		String r = "MEdge1D: id="+getID()+

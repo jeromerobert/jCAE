@@ -182,7 +182,7 @@ public class MMesh1DReader
 				{
 					MNode1D pt1 = nodelist[edgesBuffer.get() - offset];
 					MNode1D pt2 = nodelist[edgesBuffer.get() - offset];
-					MEdge1D e = new MEdge1D(pt1, pt2, false);
+					MEdge1D e = new MEdge1D(pt1, pt2);
 					submesh.getEdges().add(e);
 				}
 				offset += numberOfNodes;

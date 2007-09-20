@@ -93,7 +93,7 @@ public abstract class CADShapeBuilder
 	 * This method is needed to initialize CADShapeEnum
 	 */
 	protected abstract CADShapeEnum getShapeEnumInstance(String name);
-	protected abstract Iterator newShapeEnumIterator(CADShapeEnum start, CADShapeEnum end);
+	protected abstract Iterator<CADShapeEnum> newShapeEnumIterator(CADShapeEnum start, CADShapeEnum end);
 
 	/**
 	 * Create a new CADIterator
