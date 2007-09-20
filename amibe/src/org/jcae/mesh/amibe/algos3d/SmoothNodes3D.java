@@ -267,7 +267,7 @@ public class SmoothNodes3D
 		mtb.add(ttb);
 		Mesh mesh = new Mesh(mtb);
 		MeshReader.readObject3D(mesh, args[0], args[1], -1);
-		Map opts = new HashMap();
+		Map<String, String> opts = new HashMap<String, String>();
 		opts.put("size", args[2]);
 		opts.put("iterations", args[3]);
 		new SmoothNodes3D(mesh, opts).compute();			

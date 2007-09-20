@@ -202,7 +202,7 @@ public class MeshOEMMViewer3d
 						if (decMesh != null)
 							bgView.remove(decMesh);
 						Mesh amesh = mr.buildMesh(octree.getResultSet());
-						HashMap opts = new HashMap();
+						HashMap<String, String> opts = new HashMap<String, String>();
 						opts.put("maxtriangles", Integer.toString(amesh.getTriangles().size() / 100));
 						new org.jcae.mesh.amibe.algos3d.DecimateHalfEdge(amesh, opts).compute();
 						String xmlDir = "dec-tmp";
