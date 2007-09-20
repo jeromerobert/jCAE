@@ -23,7 +23,9 @@ package org.jcae.mesh.amibe.algos3d;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
+import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.util.QSortedTree;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
@@ -68,9 +70,9 @@ public class SwapEdge
 	private void unmarkEdges()
 	{
 		VirtualHalfEdge ot = new VirtualHalfEdge();
-		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
+		for (AbstractTriangle at: mesh.getTriangles())
 		{
-			Triangle f = (Triangle) itf.next();
+			Triangle f = (Triangle) at;
 			if (f.isOuter())
 				continue;
 			ot.bind(f);
@@ -85,9 +87,9 @@ public class SwapEdge
 	private void computeTree(PAVLSortedTree tree)
 	{
 		//  Compute triangle quality
-		for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
+		for (AbstractTriangle at: mesh.getTriangles())
 		{
-			Triangle f = (Triangle) itf.next();
+			Triangle f = (Triangle) at;
 			if (f.isOuter())
 				continue;
 			tree.insert(f, cost(f));
@@ -103,9 +105,10 @@ public class SwapEdge
 		{
 			Triangle t = null;
 			int localNumber = -1;
-			for (Iterator itt = tree.iterator(); itt.hasNext(); )
+			for (Iterator<QSortedTree.Node> itt = tree.iterator(); itt.hasNext(); )
 			{
-				t = (Triangle) itt.next();
+				QSortedTree.Node q = itt.next();
+				t = (Triangle) q.getData();
 				if (t.isMarked())
 					continue;
 				double quality = -1.0;
