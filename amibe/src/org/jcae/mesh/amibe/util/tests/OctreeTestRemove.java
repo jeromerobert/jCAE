@@ -81,10 +81,10 @@ public class OctreeTestRemove extends OctreeTest
 			{
 				public void run()
 				{
-					double [] xyz = view.getLastClick();
-					if (null != xyz)
+					double [] xyzPick = view.getLastClick();
+					if (null != xyzPick)
 					{
-						Vertex vt = r.getNearVertex(mesh, (Vertex) mesh.factory.createVertex(xyz));
+						Vertex vt = r.getNearVertex(mesh, (Vertex) mesh.factory.createVertex(xyzPick));
 						r.remove(vt);
 						view.removeAllBranchGroup();
 						display(view, r);

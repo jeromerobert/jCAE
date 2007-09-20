@@ -42,6 +42,7 @@ public class DihedralAngle extends QualityProcedure
 		setType(QualityProcedure.FACE);
 	}
 	
+	@Override
 	public float quality(Object o)
 	{
 		if (!(o instanceof Triangle))

@@ -30,6 +30,7 @@ public class NodeConnectivity2D extends QualityProcedure
 		setType(QualityProcedure.NODE);
 	}
 	
+	@Override
 	public float quality(Object o)
 	{
 		if (!(o instanceof Vertex))
@@ -52,7 +53,7 @@ public class NodeConnectivity2D extends QualityProcedure
 				return 0.0f;
 			start.prev();
 			//  Do not consider boundary nodes
-			if (start == null || !start.isMutable())
+			if (!start.isMutable())
 				return 1.0f;
 			start.sym();
 			if (start.destination() == d)
@@ -60,9 +61,9 @@ public class NodeConnectivity2D extends QualityProcedure
 		}
 		
 		if (count <= 6)
-			return (((float) count) / 6.0f);
+			return (count / 6.0f);
 		else if (count <= 11)
-			return (2.0f - ((float) count) / 6.0f);
+			return (2.0f - count / 6.0f);
 		else
 			return 0.0f;
 	}

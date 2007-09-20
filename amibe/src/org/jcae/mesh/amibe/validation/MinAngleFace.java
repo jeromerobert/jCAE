@@ -34,12 +34,12 @@ public class MinAngleFace extends QualityProcedure
 		setType(QualityProcedure.FACE);
 	}
 	
+	@Override
 	public float quality(Object o)
 	{
 		if (o instanceof AbstractTriangle)
 			return quality((AbstractTriangle) o);
-		else
-			throw new IllegalArgumentException();
+		throw new IllegalArgumentException();
 	}
 	
 	private float quality(AbstractTriangle f)

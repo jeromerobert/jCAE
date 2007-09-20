@@ -63,8 +63,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	{
 		if ((attributes & TRIANGLES) != 0)
 			return (Collection<AbstractTriangle>) t.array[index[BITTRIANGLES]];
-		else
-			return null;
+		return null;
 	}
 
 	public void addNodeList()
@@ -83,8 +82,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	{
 		if ((attributes & NODES) != 0)
 			return (Collection<AbstractVertex>) t.array[index[BITNODES]];
-		else
-			return null;
+		return null;
 	}
 
 	public boolean hasNodes()
@@ -109,6 +107,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		return null;
 	}
 
+	@Override
 	protected void subInitTraits(Traits t)
 	{
 		if ((attributes & TRIANGLESET) != 0)

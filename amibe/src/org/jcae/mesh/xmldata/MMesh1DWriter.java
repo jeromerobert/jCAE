@@ -48,7 +48,7 @@ public class MMesh1DWriter
 	/**
 	 * Used by {@link writeObject}
 	 */
-	private static Element writeObjectNodes(Document document, Iterator nodesIterator, File nodesFile, File refFile, String baseDir, MMesh1D m1d)
+	private static Element writeObjectNodes(Document document, Iterator<MNode1D> nodesIterator, File nodesFile, File refFile, String baseDir, MMesh1D m1d)
 		throws IOException
 	{
 		//save nodes
@@ -60,7 +60,7 @@ public class MMesh1DWriter
 		int i=0, nref=0;
 		while(nodesIterator.hasNext())
 		{
-			MNode1D n=(MNode1D)nodesIterator.next();
+			MNode1D n=nodesIterator.next();
 			out.writeDouble(n.getParameter());
 			if (null != n.getCADVertex())
 			{
@@ -110,7 +110,7 @@ public class MMesh1DWriter
 	/**
 	 * Used by {@link writeObject}
 	 */
-	private static Element writeObjectBeams(Document document, Iterator edgesIterator, File beamsFile, String baseDir)
+	private static Element writeObjectBeams(Document document, Iterator<MEdge1D> edgesIterator, File beamsFile, String baseDir)
 		throws IOException
 	{
 		//save beams
@@ -120,7 +120,7 @@ public class MMesh1DWriter
 		int i=0;
 		while(edgesIterator.hasNext())
 		{
-			MEdge1D e=(MEdge1D)edgesIterator.next();
+			MEdge1D e=edgesIterator.next();
 			i++;
 			MNode1D pt1 = e.getNodes1();
 			MNode1D pt2 = e.getNodes2();

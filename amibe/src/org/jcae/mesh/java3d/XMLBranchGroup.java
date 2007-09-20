@@ -260,10 +260,7 @@ public class XMLBranchGroup
 			Geometry toReturn=gi.getGeometryArray();
 			return toReturn;
 		}
-		else
-		{
-			return geom;
-		}
+		return geom;
 	}
 	
 	private IndexedLineArray getGeomForWires(Node beamsDOM, float[] nodes)

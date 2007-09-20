@@ -38,13 +38,14 @@ import org.jcae.mesh.amibe.ds.Vertex;
 
 public class NodeConnectivity3D extends QualityProcedure
 {
-	private TObjectIntHashMap nodeMap = new TObjectIntHashMap();
+	private TObjectIntHashMap<Vertex> nodeMap = new TObjectIntHashMap<Vertex>();
 	
 	public NodeConnectivity3D()
 	{
 		setType(QualityProcedure.NODE);
 	}
 	
+	@Override
 	public float quality(Object o)
 	{
 		if (!(o instanceof AbstractTriangle))
@@ -64,6 +65,7 @@ public class NodeConnectivity3D extends QualityProcedure
 	 * by {@link #quality}, this method rearrange result values to have
 	 * the same node order as in mesh output.
 	 */
+	@Override
 	public void finish()
 	{
 		data.clear();
@@ -71,16 +73,16 @@ public class NodeConnectivity3D extends QualityProcedure
 		nodeMap.forEachEntry(proc);
 	}
 
-	private static class Count implements TObjectIntProcedure
+	private static class Count implements TObjectIntProcedure<Vertex>
 	{
 		private TFloatArrayList data;
 		public Count(final TFloatArrayList d)
 		{
 			data = d;
 		}
-		public boolean execute(Object a, int b)
+		public boolean execute(Vertex a, int b)
 		{
-			float q = ((float) b) / 6.0f;
+			float q = b / 6.0f;
 			if (b <= 6)
 				data.add(q);
 			else if (b <= 12)

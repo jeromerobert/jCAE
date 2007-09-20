@@ -155,10 +155,8 @@ public class Amibe2UNV
 		if (found)
 		{
 			return elt;
-		} else
-		{
-			return null;
 		}
+		return null;
 	}
 	
 	private void readGroups()

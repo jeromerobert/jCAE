@@ -65,6 +65,7 @@ public class ComputeEdgesConnectivity
 			return n2;
 		}
 		
+		@Override
 		public boolean equals(Object object)
 		{
 			if(object instanceof Edge)
@@ -72,14 +73,16 @@ public class ComputeEdgesConnectivity
 				Edge e=(Edge)object;
 				return ((e.n1==n1)&&(e.n2==n2))||((e.n1==n2)&&(e.n2==n1));
 			}
-			else return false;
+			return false;
 		}
 		
+		@Override
 		public int hashCode()
 		{
 			return n1+n2;
 		}
 		
+		@Override
 		public String toString()
 		{
 			return "Edge["+n1+","+n2+"]";
@@ -113,7 +116,7 @@ public class ComputeEdgesConnectivity
 		File freeEdgesFile=new File(subDir, "freeEdges.bin");
 		File multiEdgesFile=new File(subDir, "multiEdges.bin");
 		
-		TObjectIntHashMap edges=new TObjectIntHashMap();
+		TObjectIntHashMap<Edge> edges=new TObjectIntHashMap<Edge>();
 		DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(trianglesFile)));
 		Edge e1, e2, e3;
 		int n1, n2, n3;
@@ -133,7 +136,7 @@ public class ComputeEdgesConnectivity
 		
 		in.close();
 		
-		TObjectIntIterator it=edges.iterator();		
+		TObjectIntIterator<Edge> it=edges.iterator();		
 		DataOutputStream outFree=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(freeEdgesFile)));
 		DataOutputStream outMulti=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(multiEdgesFile)));
 		DataOutputStream current;
@@ -155,7 +158,7 @@ public class ComputeEdgesConnectivity
 			
 			if(current!=null)
 			{
-				Edge e=(Edge)it.key();
+				Edge e=it.key();
 				current.writeInt(e.getN1());
 				current.writeInt(e.getN2());
 			}					

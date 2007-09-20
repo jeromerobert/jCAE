@@ -55,10 +55,9 @@ public class ClassPathEntityResolver implements EntityResolver
 					System.err.println("WARNING: "+systemId+" not found");
 					return new InputSource(new StringReader(""));
 				}
-				else
-					return new InputSource(in);				
+				return new InputSource(in);				
 			}
-			else return null;
+			return null;
 		}
 		catch(URISyntaxException ex)
 		{

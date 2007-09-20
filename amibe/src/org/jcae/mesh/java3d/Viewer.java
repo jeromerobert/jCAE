@@ -52,6 +52,7 @@ public class Viewer extends JFrame
 		canvas3D=new Canvas3D(SimpleUniverse.getPreferredConfiguration());
 		canvas3D.addMouseListener(new java.awt.event.MouseAdapter()
 		{
+			@Override
 			public void mouseClicked(MouseEvent e)
 			{
 				canvas3D_mouseClicked(e);
@@ -59,6 +60,7 @@ public class Viewer extends JFrame
 		});
 		canvas3D.addKeyListener(new java.awt.event.KeyAdapter()
 		{
+			@Override
 			public void keyPressed(KeyEvent e)
 			{
 				canvas3D_keyPressed(e);

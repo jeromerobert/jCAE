@@ -140,8 +140,7 @@ public class QualityFloat
 		int nrTotal = data.size();
 		if (factor == 0.0f)
 			return;
-		else
-			factor = 1.0f/factor;
+		factor = 1.0f/factor;
 		for (int i = 0; i < nrTotal; i++)
 		{
 			float val = data.get(i);
@@ -181,7 +180,7 @@ public class QualityFloat
 		}
 		qmin = vmin;
 		qmax = vmax;
-		float delta = (vmax - vmin) / ((float) layers);
+		float delta = (vmax - vmin) / layers;
 		// In printLayers:
 		//   sorted[0]: number of points with value < vmin
 		//   sorted[layers+1]: number of points with value > vmax
@@ -220,7 +219,7 @@ public class QualityFloat
 			return;
 		int nrTotal = data.size();
 		//  The last cell is for v >= vmax
-		float delta = (vmax - vmin) / ((float) layers);
+		float delta = (vmax - vmin) / layers;
 		sorted = new int[layers+2];
 		for (int i = 0; i < layers+2; i++)
 			sorted[i] = 0;
@@ -257,15 +256,15 @@ public class QualityFloat
 			return;
 		}
 		int nrTotal = data.size();
-		float delta = (vmax - vmin) / ((float) layers);
+		float delta = (vmax - vmin) / layers;
 		if (sorted[0] > 0)
-			System.out.println(" < "+vmin+" "+sorted[0]+" ("+(((float) 100.0 * sorted[0])/((float) nrTotal))+"%)");
+			System.out.println(" < "+vmin+" "+sorted[0]+" ("+(((float) 100.0 * sorted[0])/nrTotal)+"%)");
 		for (int i = 0; i < layers; i++)
 		{
-			System.out.println(""+(vmin+i*delta)+" ; "+(vmin+(i+1)*delta)+" "+sorted[i+1]+" ("+(((float) 100.0 * sorted[i+1])/((float) nrTotal))+"%)");
+			System.out.println(""+(vmin+i*delta)+" ; "+(vmin+(i+1)*delta)+" "+sorted[i+1]+" ("+(((float) 100.0 * sorted[i+1])/nrTotal)+"%)");
 		}
 		if (sorted[layers+1] > 0)
-			System.out.println(" > "+vmax+" "+sorted[layers+1]+" ("+(((float) 100.0 * sorted[layers+1])/((float) nrTotal))+"%)");
+			System.out.println(" > "+vmax+" "+sorted[layers+1]+" ("+(((float) 100.0 * sorted[layers+1])/nrTotal)+"%)");
 		System.out.println("total: "+nrTotal);
 		System.out.println("qmin: "+qmin);
 		System.out.println("qmax: "+qmax);
