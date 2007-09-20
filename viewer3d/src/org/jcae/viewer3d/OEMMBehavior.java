@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Iterator;
 import java.lang.ref.SoftReference;
 import gnu.trove.TIntHashSet;
 
@@ -186,7 +187,7 @@ public class OEMMBehavior extends Behavior
 		setSchedulingBounds(new BoundingSphere(
 			new Point3d(), Double.MAX_VALUE));
 		double[] coords=oemm.getCoords(true);
-		computeVoxels(canvas, coarseOEMM, coords);
+		computeVoxels(canvas, coords);
 		
 		this.oemm=oemm;
 		
@@ -205,25 +206,18 @@ public class OEMMBehavior extends Behavior
 		return visibleFineOemmNodeId2BranchGroup.keySet();
 	}
 
-	private void computeVoxels(View canvas, OEMM coarseOEMM, double[] coords)
+	private void computeVoxels(View canvas, double[] coords)
 	{
 		final double[] values = new double[3];
-//		Collection<Integer> nodesWithoutVoxel = new ArrayList<Integer>();
 		view=canvas;
 		voxels=new Point3d[coords.length/6/4/3];
 		for(int i=0; i<voxels.length; i++)
 		{
-//			int n=6*4*3*i;
-//			voxels[i]=new Point3d(
-//				(coords[n+0]+coords[n+6*4*3-6])/2,
-//				(coords[n+1]+coords[n+6*4*3-5])/2,
-//				(coords[n+2]+coords[n+6*4*3-4])/2);
 			ViewHolder vh = coarseOemmNodeId2BranchGroup.get(Integer.valueOf(i));
 			Collection<AbstractVertex> nodes = vh.mesh.getNodes();
 			if (getAveragePointForVertices(nodes, values)) {
 				voxels[i]=new Point3d(values[0], values[1], values[2]);
 			} else {
-//				nodesWithoutVoxel.add(i);
 				int n=6*4*3*i;
 				voxels[i]=new Point3d(
 					(coords[n+0]+coords[n+6*4*3-6])/2,
@@ -437,12 +431,14 @@ public class OEMMBehavior extends Behavior
 	
 	private void showCoarseNodes(Set<Integer> exceptSet)
 	{
-		for (Integer arg0: visibleFineOemmNodeId2BranchGroup.keySet())
+		// Use an Iterator because visibleFineOemmNodeId2BranchGroup is modified within this loop,
+		for (Iterator<Map.Entry<Integer, ViewHolder>> it = visibleFineOemmNodeId2BranchGroup.entrySet().iterator(); it.hasNext(); )
 		{
+			Integer arg0 = it.next().getKey();
 			if (!exceptSet.contains(arg0)) {
 				addViewHolderToBranchGroup(arg0, coarseOemmNodeId2BranchGroup);
 				removeViewHolderFromBranchGroup(arg0, visibleFineOemmNodeId2BranchGroup);
-				visibleFineOemmNodeId2BranchGroup.remove(arg0);
+				it.remove();
 			}
 		}
 	}
