@@ -1,3 +1,11 @@
+Thu Sep 20 21:16:13 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/oemm/OEMM.java: Let OEMM.Node.adjLeaves member
+	be transient. In trove 2.0, TIntArrayList serialVersionUID has been
+	changed, thus OEMM instances stored on disk cannot be reloaded.
+	To avoid similar problems in the future, OEMM.Node.adjLeaves is
+	now stored as an int[] array.
+
 Tue Sep 18 15:49:52 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java: Edge

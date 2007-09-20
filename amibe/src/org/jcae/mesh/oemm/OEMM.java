@@ -131,7 +131,7 @@ public class OEMM implements Serializable
 	 */
 	public static class Node implements Serializable
 	{
-		private static final long serialVersionUID = 4476583190604438556L;
+		private static final long serialVersionUID = 7241788498142227257L;
 
 		/**
 		 * Integer coordinates of lower-left corner.
@@ -199,7 +199,7 @@ public class OEMM implements Serializable
 		/**
 		 * List of adjacent leaves.
 		 */
-		public TIntArrayList adjLeaves;
+		public transient TIntArrayList adjLeaves;
 		
 		/**
 		 * Creates a new leaf.
@@ -234,9 +234,18 @@ public class OEMM implements Serializable
 		        throws java.io.IOException, ClassNotFoundException
 		{
 			s.defaultReadObject();
+			int[] adj = (int[]) s.readObject();
+			adjLeaves = new TIntArrayList(adj);
 			child = new Node[8];
 			isLeaf = true;
 			updateFilename();
+		}
+
+		private void writeObject(java.io.ObjectOutputStream s)
+		        throws java.io.IOException
+		{
+			s.defaultWriteObject();
+			s.writeObject(adjLeaves.toNativeArray());
 		}
 
 		public void setPathComponents(ArrayList<String> dir, int octant)
