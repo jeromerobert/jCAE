@@ -228,7 +228,7 @@ public class AdjacencyHE implements AdjacencyWrapper
 	@Override
 	public String toString()
 	{
-		StringBuffer r = new StringBuffer(50);
+		StringBuilder r = new StringBuilder(50);
 		r.append("Halfedge: "+showHalfEdge(edge)+" "+showHalfEdge(edge.next())+" "+showHalfEdge(edge.prev()));
 		r.append("\nSym: "+showSym(edge)+" "+showSym(edge.next())+" "+showSym(edge.prev()));
 		r.append("\nEdge attributes:");

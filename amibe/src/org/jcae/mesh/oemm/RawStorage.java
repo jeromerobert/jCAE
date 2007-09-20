@@ -705,7 +705,7 @@ public class RawStorage
 			ijk[2] = current.k0;
 			if (path.size() > 0)
 			{
-				StringBuffer sbdir = new StringBuffer(path.get(0));
+				StringBuilder sbdir = new StringBuilder(path.get(0));
 				for (int i = 1; i < path.size(); i++)
 					sbdir.append(File.separator + path.get(i));
 				String dir = sbdir.toString();

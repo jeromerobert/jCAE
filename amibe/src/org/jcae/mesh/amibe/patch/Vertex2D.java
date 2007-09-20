@@ -654,7 +654,7 @@ public class Vertex2D extends Vertex
 	@Override
 	public String toString ()
 	{
-		StringBuffer r = new StringBuffer("UV:");
+		StringBuilder r = new StringBuilder("UV:");
 		for (int i = 0; i < param.length; i++)
 			r.append(" "+param[i]);
 		if (ref1d != 0)

@@ -134,7 +134,7 @@ public class XMLHelper
 			if (!redo)
 				break;
 		}
-		StringBuffer ret = new StringBuffer();
+		StringBuilder ret = new StringBuilder();
 		if (components[0].length() > 0)
 			ret.append(components[0]);
 		for (int i = 1; i < components.length; i++)

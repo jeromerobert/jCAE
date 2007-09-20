@@ -116,7 +116,7 @@ public class BSubMesh
 	public void printSubmeshDiscretizations()
 	{
 		BCADGraphCell root = model.getGraph().getRootCell();
-		StringBuffer indent = new StringBuffer();
+		StringBuilder indent = new StringBuilder();
 
 		for (Iterator<CADShapeEnum> itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{

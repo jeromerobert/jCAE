@@ -248,7 +248,7 @@ public class Matrix3D implements Serializable
 	@Override
 	public String toString()
 	{
-		StringBuffer ret = new StringBuffer();
+		StringBuilder ret = new StringBuilder();
 		for (int i = 0; i < 3; i++)
 		{
 			ret.append("data|"+i+"][] ");

@@ -115,7 +115,7 @@ public class AbstractTriangle
 	@Override
 	public String toString()
 	{
-		StringBuffer r = new StringBuffer();
+		StringBuilder r = new StringBuilder();
 		r.append("hashcode: "+hashCode());
 		if (!readable)
 			r.append(" !r");

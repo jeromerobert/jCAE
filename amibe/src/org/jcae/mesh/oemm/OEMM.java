@@ -257,7 +257,7 @@ public class OEMM implements Serializable
 		{
 			if (pathComponents == null || pathComponents.length == 0)
 				return;
-			StringBuffer buf = new StringBuffer();
+			StringBuilder buf = new StringBuilder();
 			for (String p: pathComponents)
 				buf.append(p+java.io.File.separator);
 			file = buf.substring(0, buf.length()-1);

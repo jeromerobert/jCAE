@@ -147,7 +147,7 @@ public class BModelReader
 					if (itc.hasNext())
 					{
 						BCADGraphCell c = itc.next();
-						StringBuffer sblist = new StringBuffer(""+c.getId());
+						StringBuilder sblist = new StringBuilder(""+c.getId());
 						while (itc.hasNext())
 						{
 							c = itc.next();

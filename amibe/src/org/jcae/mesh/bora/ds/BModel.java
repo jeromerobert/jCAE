@@ -340,7 +340,7 @@ public class BModel
 	{
 		System.out.println("List of discretizations");
 		BCADGraphCell root = cad.getRootCell();
-		StringBuffer indent = new StringBuffer();
+		StringBuilder indent = new StringBuilder();
 		for (Iterator<CADShapeEnum> itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
 			CADShapeEnum cse = itcse.next();
@@ -442,7 +442,7 @@ public class BModel
 	{
 		System.out.println("List of constraints");
 		BCADGraphCell root = cad.getRootCell();
-		StringBuffer indent = new StringBuffer();
+		StringBuilder indent = new StringBuilder();
 		for (Iterator<CADShapeEnum> itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
 			CADShapeEnum cse = itcse.next();
@@ -472,7 +472,7 @@ public class BModel
 	{
 		System.out.println("List of constraints applied on submesh "+sm.getId());
 		BCADGraphCell root = cad.getRootCell();
-		StringBuffer indent = new StringBuffer();
+		StringBuilder indent = new StringBuilder();
 		for (Iterator<CADShapeEnum> itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
 			CADShapeEnum cse = itcse.next();

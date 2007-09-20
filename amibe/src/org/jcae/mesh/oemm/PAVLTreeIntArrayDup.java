@@ -155,7 +155,7 @@ public class PAVLTreeIntArrayDup
 	
 	private static final String keyString(int [] data, int offKey)
 	{
-		StringBuffer ret = new StringBuffer();
+		StringBuilder ret = new StringBuilder();
 		for (int i = 0; i < nrInt; i++)
 			ret.append(" 0x"+Integer.toHexString(data[offKey+i]));
 		return ret.toString();
@@ -448,7 +448,7 @@ public class PAVLTreeIntArrayDup
 	
 	private void showNode(int current)
 	{
-		StringBuffer r = new StringBuffer("Key: "+keyString(work, work[current+POS_KEY])+"  bal. "+work[current+POS_BALANCE]);
+		StringBuilder r = new StringBuilder("Key: "+keyString(work, work[current+POS_KEY])+"  bal. "+work[current+POS_BALANCE]);
 		if (work[current+POS_CHILD] != POS_NIL)
 			r.append(" Left -> "+keyString(work, work[work[current+POS_CHILD]+POS_KEY]));
 		if (work[current+POS_CHILD+1] != POS_NIL)

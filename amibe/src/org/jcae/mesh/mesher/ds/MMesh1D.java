@@ -550,7 +550,7 @@ public class MMesh1D extends MMesh0D
 	public String toString()
 	{
 		String cr=System.getProperty("line.separator");
-		StringBuffer r = new StringBuffer("MMesh1D"+cr);
+		StringBuilder r = new StringBuilder("MMesh1D"+cr);
 		logger.debug("Printing "+r.toString());
 		for(Iterator<SubMesh1D> it=mapTEdgeToSubMesh1D.values().iterator();it.hasNext();)
 		{

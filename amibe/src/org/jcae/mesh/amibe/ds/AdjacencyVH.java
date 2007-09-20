@@ -303,7 +303,7 @@ public class AdjacencyVH implements AdjacencyWrapper
 		}
 		else
 		{
-			StringBuffer r = new StringBuffer("(");
+			StringBuilder r = new StringBuilder("(");
 			LinkedHashMap<Triangle, Integer> a = (LinkedHashMap<Triangle, Integer>) adj[num];
 			boolean first = true;
 			for (Map.Entry<Triangle, Integer> entry: a.entrySet())
@@ -323,7 +323,7 @@ public class AdjacencyVH implements AdjacencyWrapper
 	@Override
 	public String toString()
 	{
-		StringBuffer r = new StringBuffer();
+		StringBuilder r = new StringBuilder();
 		r.append("Adjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2));
 		r.append("\nEdge attributes:");
 		for (int i = 0; i < 3; i++)

@@ -102,7 +102,7 @@ public class BModelWriter
 					if (itc.hasNext())
 					{
 						Constraint c = itc.next();
-						StringBuffer sblist = new StringBuffer(""+c.getId());
+						StringBuilder sblist = new StringBuilder(""+c.getId());
 						while (itc.hasNext())
 						{
 							c = itc.next();
@@ -133,7 +133,7 @@ public class BModelWriter
 					if (itc.hasNext())
 					{
 						BCADGraphCell c = itc.next();
-						StringBuffer sblist = new StringBuffer(""+c.getId());
+						StringBuilder sblist = new StringBuilder(""+c.getId());
 						while (itc.hasNext())
 						{
 							c = itc.next();
@@ -145,7 +145,7 @@ public class BModelWriter
 					}
 					if (s.getParents().size() > 0)
 					{
-						StringBuffer sblist = new StringBuffer();
+						StringBuilder sblist = new StringBuilder();
 						boolean first = true;
 						for (Iterator<BCADGraphCell> itp = s.getParents().iterator(); itp.hasNext(); )
 						{
@@ -162,7 +162,7 @@ public class BModelWriter
 					Iterator<BDiscretization> itp = s.discretizationIterator();
 					if (itp.hasNext())
 					{
-						StringBuffer sblist = new StringBuffer();
+						StringBuilder sblist = new StringBuilder();
 						boolean first = true;
 						while (itp.hasNext())
 						{

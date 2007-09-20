@@ -235,7 +235,7 @@ public class SubMesh1D
 	public String toString()
 	{
 		String cr=System.getProperty("line.separator");
-		StringBuffer r = new StringBuffer("SubMesh1D"+cr);
+		StringBuilder r = new StringBuilder("SubMesh1D"+cr);
 		logger.debug("Printing "+r.toString());
 		for(MNode1D n: nodelist)
 			r.append(n+cr);
