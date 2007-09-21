@@ -722,31 +722,12 @@ public class OEMM implements Serializable
 	 */
 	public static final Node searchAdjacentNode(Node fromNode, int [] ijk)
 	{
-		int i1 = ijk[0];
-		if (i1 < 0 || i1 >= gridSize)
+		//  Check ijk against OEMM bounds
+		if (!checkBounds(ijk))
 			return null;
-		int j1 = ijk[1];
-		if (j1 < 0 || j1 >= gridSize)
-			return null;
-		int k1 = ijk[2];
-		if (k1 < 0 || k1 >= gridSize)
-			return null;
-		//  Neighbor octant is within OEMM bounds
-		//  First climb tree until an octant enclosing this
+		//  Climb tree until an octant enclosing this
 		//  point is encountered.
-		Node ret = fromNode;
-		int i2, j2, k2;
-		do
-		{
-			if (null == ret.parent)
-				break;
-			ret = ret.parent;
-			int mask = ~(ret.size - 1);
-			i2 = i1 & mask;
-			j2 = j1 & mask;
-			k2 = k1 & mask;
-		}
-		while (i2 != ret.i0 || j2 != ret.j0 || k2 != ret.k0);
+		Node ret = searchEnclosingNode(fromNode, ijk);
 		//  Now find the deepest matching octant.
 		int s = ret.size;
 		while (s > fromNode.size)
@@ -758,10 +739,32 @@ public class OEMM implements Serializable
 				return null;
 			ret = ret.child[ind];
 		}
-		assert (i1 == ret.i0 && j1 == ret.j0 && k1 == ret.k0);
+		assert (ijk[0] == ret.i0 && ijk[1] == ret.j0 && ijk[2] == ret.k0);
 		return ret;
 	}
+
+	private static boolean checkBounds(final int [] ijk)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			if (ijk[i] < 0 || ijk[i] >= gridSize)
+				return false;
+		}
+		return true;
+	}
 	
+	private static Node searchEnclosingNode(final Node fromNode,final  int [] ijk)
+	{
+		Node ret = fromNode;
+		while (null != ret.parent)
+		{
+			ret = ret.parent;
+			int mask = ~(ret.size - 1);
+			if ((ijk[0] & mask) == ret.i0 && (ijk[1] & mask) == ret.j0 && (ijk[2] & mask) == ret.k0)
+				return ret;
+		}
+		return ret;
+	}
 	/**
 	 * Returns coordinates of all cell corners.
 	 *
