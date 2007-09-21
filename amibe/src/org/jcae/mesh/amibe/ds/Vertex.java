@@ -218,6 +218,26 @@ public class Vertex extends AbstractVertex implements Serializable
 	}
 	
 	/**
+	 * Helper methods to avoid duplicated code.  Returns an edge starting from
+	 * current vertex.
+	 */
+	private AbstractHalfEdge getIncidentAbstractHalfEdge()
+	{
+		assert link instanceof Triangle;
+		return getIncidentAbstractHalfEdge((Triangle) link);
+	}
+	private AbstractHalfEdge getIncidentAbstractHalfEdge(Triangle t)
+	{
+		AbstractHalfEdge ot = t.getAbstractHalfEdge();
+		if (ot.origin() != this)
+			ot = ot.next();
+		if (ot.origin() != this)
+			ot = ot.next();
+		assert ot.origin() == this;
+		return ot;
+	}
+
+	/**
 	 * Set link to an array of Triangles.  This routine eliminates
 	 * duplicates to keep only one AbstractTriangle by fan.
 	 *
@@ -233,12 +253,7 @@ public class Vertex extends AbstractVertex implements Serializable
 				continue;
 			allTriangles.add(t);
 			res.add(t);
-			AbstractHalfEdge ot = t.getAbstractHalfEdge();
-			if (ot.destination() == this)
-				ot = ot.next();
-			else if (ot.apex() == this)
-				ot = ot.prev();
-			assert ot.origin() == this;
+			AbstractHalfEdge ot = getIncidentAbstractHalfEdge(t);
 			// Add all triangles of the same fan to allTriangles
 			Vertex d = ot.destination();
 			do
@@ -302,12 +317,7 @@ public class Vertex extends AbstractVertex implements Serializable
 	private void appendNeighboursTri(Triangle tri, Collection<Vertex> nodes)
 	{
 		assert tri.vertex[0] == this || tri.vertex[1] == this || tri.vertex[2] == this;
-		AbstractHalfEdge ot = tri.getAbstractHalfEdge();
-		if (ot.origin() != this)
-			ot = ot.next();
-		if (ot.origin() != this)
-			ot = ot.next();
-		assert ot.origin() == this : this+" not in "+ot;
+		AbstractHalfEdge ot = getIncidentAbstractHalfEdge(tri);
 		Vertex d = ot.destination();
 		do
 		{
@@ -414,23 +424,19 @@ public class Vertex extends AbstractVertex implements Serializable
 	{
 		for (int i = 0; i < 3; i++)
 			meanNormal[i] = 0.0;
-		assert link instanceof Triangle;
-		AbstractHalfEdge ot = ((Triangle) link).getAbstractHalfEdge();
-		if (ot.origin() != this)
-			ot = ot.next();
-		if (ot.origin() != this)
-			ot = ot.next();
-		assert ot.origin() == this;
 		double [] vect1 = new double[3];
 		double [] vect2 = new double[3];
 		double [] vect3 = new double[3];
 		double [] p0 = param;
 		double mixed = 0.0;
 		double gauss = 0.0;
+		AbstractHalfEdge ot = getIncidentAbstractHalfEdge();
 		Vertex d = ot.destination();
 		do
 		{
 			ot = ot.nextOriginLoop();
+			if (ot.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
 			if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
 			{
 				// FIXME: what to do when a boundary
@@ -440,8 +446,6 @@ public class Vertex extends AbstractVertex implements Serializable
 					meanNormal[i] = 0.0;
 				return 0.0;
 			}
-			if (ot.hasAttributes(AbstractHalfEdge.OUTER))
-				continue;
 			double [] p1 = ot.destination().getUV();
 			double [] p2 = ot.apex().getUV();
 			vect1[0] = p1[0] - p0[0];
@@ -490,42 +494,15 @@ public class Vertex extends AbstractVertex implements Serializable
 	 */
 	public boolean discreteCurvatureDirections(double [] normal, double[] t1, double [] t2)
 	{
-		discreteCurvatures(normal);
-		double n = Matrix3D.norm(normal);
-		if (n < 1.e-6)
-		{
-			// Either this is a saddle point, or surface is
-			// planar at this point.  Compute surface normal
-			// by averaging triangle normals.
-			if (!discreteAverageNormal(normal))
-				return false;
-		}
-		else
-		{
-			for (int i = 0; i < 3; i++)
-				normal[i] /= n;
-		}
-		// We are looking for eigenvectors of the curvature
-		// matrix B(a b; b c).  
-		// Firstly set (t1,t2) to be an arbitrary map of the
-		// tangent plane.
-		for (int i = 0; i < 3; i++)
-			t2[i] = 0.0;
-		if (Math.abs(normal[0]) < Math.abs(normal[1]))
-			t2[0] = 1.0;
-		else
-			t2[1] = 1.0;
-		Matrix3D.prodVect3D(normal, t2, t1);
-		n = Matrix3D.norm(t1);
-		if (n < 1.e-6)
+		if (!computeUnitNormal(normal))
 			return false;
-		for (int i = 0; i < 3; i++)
-			t1[i] /= n;
-		Matrix3D.prodVect3D(normal, t1, t2);
+		if (!computeTangentPlane(normal, t1, t2))
+			return false;
+
 		// To compute B eigenvectors, we search for the minimum of
 		//   E(a,b,c) = sum omega_ij (T(d_ij) B d_ij - kappa_ij)^2
 		// d_ij is the unit direction of the edge ij in the tangent
-		// plane, so it can be written in the (t1,t2) basis:
+		// plane, so it can be written in the (t1,t2) local frame:
 		//   d_ij = d1_ij t1 + d2_ij t2
 		// Then
 		//   T(d_ij) B d_ij = a d1_ij^2 + 2b d1_ij d2_ij + c d2_ij^2
@@ -537,12 +514,69 @@ public class Vertex extends AbstractVertex implements Serializable
 		// but we found that Kh is much less accurate than Kg on
 		// a sphere, so we do not use this identity.
 		//   (1/2) grad E = G (a b c) - H
-		AbstractHalfEdge ot = ((Triangle) link).getAbstractHalfEdge();
-		if (ot.origin() != this)
-			ot = ot.next();
-		if (ot.origin() != this)
-			ot = ot.next();
-		assert ot.origin() == this;
+		double [] vect1 = new double [3];
+		if (!findOptimalSolution(normal, t1, t2, vect1))
+			return false;
+		// We can eventually compute eigenvectors of B(a b; b c).  
+		// Let first compute the eigenvector associated to K1
+		double e1, e2;
+		if (Math.abs(vect1[1]) < 1.e-10)
+		{
+			if (Math.abs(vect1[0]) < Math.abs(vect1[2]))
+			{
+				e1 = 0.0;
+				e2 = 1.0;
+			}
+			else
+			{
+				e1 = 1.0;
+				e2 = 0.0;
+			}
+		}
+		else
+		{
+			e2 = 1.0;
+			double delta = Math.sqrt((vect1[0]-vect1[2])*(vect1[0]-vect1[2]) + 4.0*vect1[1]*vect1[1]);
+			double K1;
+			if (vect1[0] + vect1[2] < 0.0)
+				K1 = 0.5 * (vect1[0] + vect1[2] - delta);
+			else
+				K1 = 0.5 * (vect1[0] + vect1[2] + delta);
+			e1 = (K1 - vect1[0]) / vect1[1];
+			double n = Math.sqrt(e1 * e1 + e2 * e2);
+			e1 /= n;
+			e2 /= n;
+		}
+		for (int i = 0; i < 3; i++)
+		{
+			double temp = e1 * t1[i] + e2 * t2[i];
+			t2[i] = - e2 * t1[i] + e1 * t2[i];
+			t1[i] = temp;
+		}
+		return true;
+	}
+
+	private boolean computeTangentPlane(double [] normal, double[] t1, double [] t2)
+	{
+		for (int i = 0; i < 3; i++)
+			t2[i] = 0.0;
+		if (Math.abs(normal[0]) < Math.abs(normal[1]))
+			t2[0] = 1.0;
+		else
+			t2[1] = 1.0;
+		Matrix3D.prodVect3D(normal, t2, t1);
+		double n = Matrix3D.norm(t1);
+		if (n < 1.e-6)
+			return false;
+		for (int i = 0; i < 3; i++)
+			t1[i] /= n;
+		Matrix3D.prodVect3D(normal, t1, t2);
+		return true;
+	}
+	
+	private boolean findOptimalSolution(double [] normal, double[] t1, double [] t2, double [] ret)
+	{
+		AbstractHalfEdge ot = getIncidentAbstractHalfEdge();
 		double [] vect1 = new double[3];
 		double [] vect2 = new double[3];
 		double [] vect3 = new double[3];
@@ -577,7 +611,7 @@ public class Vertex extends AbstractVertex implements Serializable
 			double kappa = 2.0 * Matrix3D.prodSca(vect1, normal) / len2;
 			double d1 = Matrix3D.prodSca(vect1, t1);
 			double d2 = Matrix3D.prodSca(vect1, t2);
-			n = Math.sqrt(d1*d1 + d2*d2);
+			double n = Math.sqrt(d1*d1 + d2*d2);
 			if (n < 1.e-6)
 				continue;
 			d1 /= n;
@@ -594,49 +628,34 @@ public class Vertex extends AbstractVertex implements Serializable
 			h[2] += omega * kappa * d2 * d2;
 		}
 		while (ot.destination() != d);
-		// vect1, vect2 and vect3 can be reused
 		g1[0] = g0[1];
 		g2[0] = g0[2];
 		g2[1] = g1[2];
 		Metric3D G = new Metric3D(g0, g1, g2);
 		if (!G.inv())
 			return false;
-		G.apply(h, vect1);
-		// We can eventually compute eigenvectors of B(a b; b c).  
-		// Let first compute the eigenvector associated to K1
-		double e1, e2;
-		if (Math.abs(vect1[1]) < 1.e-10)
+		G.apply(h, ret);
+		return true;
+	}
+	
+	private boolean computeUnitNormal(double [] normal)
+	{
+		discreteCurvatures(normal);
+		double n = Matrix3D.norm(normal);
+		if (n < 1.e-6)
 		{
-			if (Math.abs(vect1[0]) < Math.abs(vect1[2]))
-			{
-				e1 = 0.0;
-				e2 = 1.0;
-			}
-			else
-			{
-				e1 = 1.0;
-				e2 = 0.0;
-			}
+			// Either this is a saddle point, or surface is
+			// planar at this point.  Compute surface normal
+			// by averaging triangle normals.
+			// Unlike discreteCurvatures(), discreteAverageNormal()
+			// ensures that normal vector has a unit length.
+			if (!discreteAverageNormal(normal))
+				return false;
 		}
 		else
 		{
-			e2 = 1.0;
-			double delta = Math.sqrt((vect1[0]-vect1[2])*(vect1[0]-vect1[2]) + 4.0*vect1[1]*vect1[1]);
-			double K1;
-			if (vect1[0] + vect1[2] < 0.0)
-				K1 = 0.5 * (vect1[0] + vect1[2] - delta);
-			else
-				K1 = 0.5 * (vect1[0] + vect1[2] + delta);
-			e1 = (K1 - vect1[0]) / vect1[1];
-			n = Math.sqrt(e1 * e1 + e2 * e2);
-			e1 /= n;
-			e2 /= n;
-		}
-		for (int i = 0; i < 3; i++)
-		{
-			double temp = e1 * t1[i] + e2 * t2[i];
-			t2[i] = - e2 * t1[i] + e1 * t2[i];
-			t1[i] = temp;
+			for (int i = 0; i < 3; i++)
+				normal[i] /= n;
 		}
 		return true;
 	}
@@ -646,13 +665,7 @@ public class Vertex extends AbstractVertex implements Serializable
 	{
 		for (int i = 0; i < 3; i++)
 			normal[i] = 0.0;
-		assert link instanceof Triangle;
-		AbstractHalfEdge ot = ((Triangle) link).getAbstractHalfEdge();
-		if (ot.origin() != this)
-			ot = ot.next();
-		if (ot.origin() != this)
-			ot = ot.next();
-		assert ot.origin() == this;
+		AbstractHalfEdge ot = getIncidentAbstractHalfEdge();
 		double [][] temp = new double[3][3];
 		Vertex d = ot.destination();
 		do
@@ -713,28 +726,12 @@ public class Vertex extends AbstractVertex implements Serializable
 		// tangent plane.
 		double [] t1 = new double[3];
 		double [] t2 = new double[3];
-		for (int i = 0; i < 3; i++)
-			t2[i] = 0.0;
-		if (Math.abs(normal[0]) < Math.abs(normal[1]))
-			t2[0] = 1.0;
-		else
-			t2[1] = 1.0;
-		Matrix3D.prodVect3D(normal, t2, t1);
-		double n = Matrix3D.norm(t1);
-		if (n < 1.e-6)
+		if (!computeTangentPlane(normal, t1, t2))
 			return false;
-		for (int i = 0; i < 3; i++)
-			t1[i] /= n;
-		Matrix3D.prodVect3D(normal, t1, t2);
 		// Transformation matrix
 		Matrix3D P = new Matrix3D(t1, t2, normal);
 		P.transp();
-		AbstractHalfEdge ot = ((Triangle) link).getAbstractHalfEdge();
-		if (ot.origin() != this)
-			ot = ot.next();
-		if (ot.origin() != this)
-			ot = ot.next();
-		assert ot.origin() == this;
+		AbstractHalfEdge ot = getIncidentAbstractHalfEdge();
 		double [] vect1 = new double[3];
 		double [] g0 = new double[3];
 		double [] g1 = new double[3];
@@ -797,18 +794,15 @@ public class Vertex extends AbstractVertex implements Serializable
 		if (ref1d != 0)
 			r.append(" ref1d: "+ref1d);
 		r.append(" hash: "+hashCode());
-		if (link != null)
+		if (link instanceof Triangle)
+			r.append(" link: "+link.hashCode());
+		else if (link instanceof Triangle[])
 		{
-			if (link instanceof Triangle)
-				r.append(" link: "+link.hashCode());
-			else if (link instanceof Triangle[])
-			{
-				Triangle [] list = (Triangle []) link;
-				r.append(" link: ["+list[0].hashCode());
-				for (int i = 1; i < list.length; i++)
-					r.append(","+list[i].hashCode());
-				r.append("]");
-			}
+			Triangle [] list = (Triangle []) link;
+			r.append(" link: ["+list[0].hashCode());
+			for (int i = 1; i < list.length; i++)
+				r.append(","+list[i].hashCode());
+			r.append("]");
 		}
 		if (!readable)
 			r.append(" !R");
