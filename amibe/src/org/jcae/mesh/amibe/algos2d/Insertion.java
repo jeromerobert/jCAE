@@ -96,12 +96,14 @@ public class Insertion
 	{
 		int maxNodes = 0;
 		logger.debug(" Insert inner nodes");
+		ArrayList<Vertex2D> nodes = new ArrayList<Vertex2D>();
+		ArrayList<Vertex2D> triNodes = new ArrayList<Vertex2D>();
+		VirtualHalfEdge2D sym = new VirtualHalfEdge2D();
+		VirtualHalfEdge2D ot = new VirtualHalfEdge2D();
 		while (true)
 		{
 			maxNodes = 0;
-			ArrayList<Vertex2D> nodes = new ArrayList<Vertex2D>();
-			VirtualHalfEdge2D sym = new VirtualHalfEdge2D();
-			VirtualHalfEdge2D ot = new VirtualHalfEdge2D();
+			nodes.clear();
 			for(Iterator<AbstractTriangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
 				Triangle t = (Triangle) it.next();
@@ -123,7 +125,7 @@ public class Insertion
 				if (t.isOuter())
 					continue;
 				ot.bind(t);
-				ArrayList<Vertex2D> triNodes = new ArrayList<Vertex2D>();
+				triNodes.clear();
 				int nrTriNodes = 0;
 				for (int i = 0; i < 3; i++)
 				{
