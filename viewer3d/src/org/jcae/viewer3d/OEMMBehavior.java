@@ -132,7 +132,7 @@ public class OEMMBehavior extends Behavior
 	}
 	
 	/** Utility field holding list of ChangeListeners. */
-	private transient java.util.ArrayList<ChangeListener> changeListenerList;
+	private transient ArrayList<ChangeListener> changeListenerList;
 	
 	/**
 	 * The square of the minimal distance between the eye and a displayed
@@ -236,7 +236,7 @@ public class OEMMBehavior extends Behavior
 	public synchronized void addChangeListener(ChangeListener listener)
 	{
 		if (changeListenerList == null ) {
-			changeListenerList = new java.util.ArrayList<ChangeListener> ();
+			changeListenerList = new ArrayList<ChangeListener> ();
 		}
 		changeListenerList.add (listener);
 	}		
@@ -247,10 +247,10 @@ public class OEMMBehavior extends Behavior
 	 */
 	private void fireChangeListenerStateChanged()
 	{
-		java.util.ArrayList<ChangeListener> list;
+		ArrayList<ChangeListener> list;
 		synchronized (this) {
 			if (changeListenerList == null) return;
-			list = (java.util.ArrayList<ChangeListener>)changeListenerList.clone ();
+			list = (ArrayList<ChangeListener>)changeListenerList.clone ();
 		}
 		for (ChangeListener cl: list)
 			cl.stateChanged(this);
