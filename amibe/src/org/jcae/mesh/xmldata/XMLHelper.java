@@ -25,6 +25,8 @@ import java.io.File;
 import java.io.StringReader;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
+import java.util.ArrayList;
+import java.util.ListIterator;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
@@ -97,7 +99,18 @@ public class XMLHelper
 		transformer.transform(new DOMSource(document), result);
 		result.getOutputStream().close();
 	}
-	
+
+	private static final String listToString(ArrayList<String> pathSpec)
+	{
+		if (pathSpec.isEmpty())
+			return "";
+		StringBuilder ret = new StringBuilder();
+		ret.append(pathSpec.get(0));
+		for (int i = 1, n = pathSpec.size(); i < n; i++)
+			ret.append(File.separator+pathSpec.get(i));
+		return ret.toString();
+	}
+
 	/** Removes useless path components.  */
 	public static String canonicalize(String path)
 	{
@@ -105,42 +118,45 @@ public class XMLHelper
 		if(pattern.equals("\\"))
 			pattern="\\\\";
 		
-		String [] components = path.split(pattern);
-		while (true)
+		String [] splitted = path.split(pattern);
+		ArrayList<String> pathSpec = new ArrayList<String>(splitted.length);
+		for (int i = 0; i < splitted.length; i++)
+			pathSpec.add(splitted[i]);
+		// Warning: these steps must be performed in this exact order!
+		// Step 1: Remove empty paths
+		for (ListIterator<String> it = pathSpec.listIterator(); it.hasNext(); )
 		{
-			String [] newpath = new String[components.length];
-			int j = 0;
-			boolean redo = false;
-			for (int i = 0; i < components.length; i++)
+			String c = it.next();
+			if (c.length() == 0 && it.previousIndex() > 0)
+				it.remove();
+		}
+		// Step 2: Remove all occurrences of "."
+		for (ListIterator<String> it = pathSpec.listIterator(); it.hasNext(); )
+		{
+			String c = it.next();
+			if (c.equals("."))
+				it.remove();
+		}
+		// Step 3: Remove all occurrences of "foo/.."
+		for (ListIterator<String> it = pathSpec.listIterator(); it.hasNext(); )
+		{
+			String c = it.next();
+			if (c.equals("..") && it.previousIndex() > 0)
 			{
-				if (components[i].equals("..") && i+2 < components.length && !components[i+1].equals(".."))
+				if (it.previousIndex() == 1 && pathSpec.get(0).length() == 0)
 				{
-					i++;
-					redo = true;
+					// "/.." is replaced by "/"
+					it.remove();
 				}
-				else if (components[i].equals("."))
-					redo = true;
-				else
+				else if (!pathSpec.get(it.previousIndex() - 1).equals(".."))
 				{
-					newpath[j] = components[i];
-					j++;
+					it.remove();
+					it.previous();
+					it.remove();
 				}
 			}
-	
-			if (j == 0)
-				return "";
-			components = new String[j];
-			System.arraycopy(newpath, 0, components, 0, j);
-			if (!redo)
-				break;
 		}
-		StringBuilder ret = new StringBuilder();
-		if (components[0].length() > 0)
-			ret.append(components[0]);
-		for (int i = 1; i < components.length; i++)
-	 		if (components[i].length() > 0)
-				ret.append(File.separator+components[i]);
-		return ret.toString();
+		return listToString(pathSpec);
 	}
 	
 	/** Removes useless path components.  */

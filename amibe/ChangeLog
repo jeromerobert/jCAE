@@ -1,3 +1,9 @@
+Fri Sep 21 15:13:28 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/XMLHelper.java: Fix a bug in
+	canonicalize(), foo/../bar/quux must return bar/quux and not
+	foo/quux. Use an ArrayList to avoid loops.
+
 Thu Sep 20 21:16:13 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/oemm/OEMM.java: Let OEMM.Node.adjLeaves member
