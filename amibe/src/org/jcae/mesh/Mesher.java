@@ -35,7 +35,6 @@ import org.jcae.mesh.mesher.ds.MMesh1D;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
-import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
 import org.jcae.mesh.mesher.algos1d.*;
 import org.jcae.mesh.amibe.algos2d.*;
 import org.jcae.mesh.xmldata.*;
@@ -414,13 +413,13 @@ public class Mesher
 			edgeLength *= 2.0;
 			//defl *= 2.0;
 		}
-		VertexTraitsBuilder vtb = new VertexTraitsBuilder();
-		vtb.addNormal();
+		//VertexTraitsBuilder vtb = new VertexTraitsBuilder();
+		//vtb.addNormal();
 		TriangleTraitsBuilder ttb = new TriangleTraitsBuilder();
 		ttb.addShallowHalfEdge();
 		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
 		mtb.addTriangleList();
-		mtb.add(vtb);
+		//mtb.add(vtb);
 		mtb.add(ttb);
 		if (processMesh1d) {
 			//  Step 1: Compute 1D mesh
