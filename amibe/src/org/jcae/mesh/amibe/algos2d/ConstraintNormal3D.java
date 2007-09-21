@@ -52,7 +52,7 @@ import org.apache.log4j.Logger;
 public class ConstraintNormal3D
 {
 	private static Logger logger=Logger.getLogger(ConstraintNormal3D.class);
-	private Mesh2D mesh = null;
+	private final Mesh2D mesh;
 	
 	/**
 	 * Creates a <code>ConstraintNormal3D</code> instance.

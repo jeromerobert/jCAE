@@ -179,8 +179,8 @@ import org.apache.log4j.Logger;
 public class Initial
 {
 	private static Logger logger=Logger.getLogger(Initial.class);
-	private Mesh2D mesh = null;
-	private Vertex2D [] bNodes;
+	private final Mesh2D mesh;
+	private final Vertex2D [] bNodes;
 	private Collection<MNode1D> innerNodes = null;
 	
 	/**
@@ -381,7 +381,7 @@ public class Initial
 			}
 		}
 		
-		if (innerNodes != null && innerNodes.size() > 0)
+		if (innerNodes != null && !innerNodes.isEmpty())
 		{
 			logger.debug(" Insert interior vertices");
 			CADFace face = (CADFace) mesh.getGeometry();

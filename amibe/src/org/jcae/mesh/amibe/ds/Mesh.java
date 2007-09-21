@@ -110,7 +110,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	protected Collection<AbstractTriangle> triangleList = null;
 	
 	//  Node list.
-	private Collection<AbstractVertex> nodeList = null;
+	private final Collection<AbstractVertex> nodeList;
 
 	//  Entity factory
 	public ElementFactoryInterface factory = null;
@@ -917,7 +917,7 @@ public class Mesh extends AbstractMesh implements Serializable
 					logger.error(" "+sym);
 					return false;
 				}
-				if (sym.getAdj() == null || !(sym.getAdj() instanceof Triangle))
+				if (!(sym.getAdj() instanceof Triangle))
 				{
 					logger.error("Wrong adjacency relation: ");
 					logger.error(" "+ot);
@@ -991,7 +991,7 @@ public class Mesh extends AbstractMesh implements Serializable
 					logger.error(" "+f);
 					return false;
 				}
-				if (f.getAdj() == null || !(f.getAdj() instanceof HalfEdge))
+				if (!(f.getAdj() instanceof HalfEdge))
 				{
 					logger.error("Wrong adjacency relation: ");
 					logger.error(" "+e);

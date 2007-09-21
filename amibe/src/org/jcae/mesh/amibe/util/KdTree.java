@@ -667,11 +667,12 @@ public class KdTree
 	private final class GetNearestVertexProcedure implements KdTreeProcedure
 	{
 		private final int [] ijk = new int[dimension];
+		private final double i2d;
 		private final Mesh mesh;
-		public Vertex nearestVertex;
 		public final Vertex fromVertex;
+		public Vertex nearestVertex;
 		private int idist;
-		private double dist, i2d;
+		private double dist;
 		public int searchedCells = 0;
 		public GetNearestVertexProcedure(Mesh m, Vertex from, Vertex v)
 		{

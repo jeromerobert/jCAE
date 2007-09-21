@@ -45,14 +45,14 @@ public class Mesh2D extends Mesh
 	private static Logger logger=Logger.getLogger(Mesh2D.class);
 	
 	//  Topological face on which mesh is applied
-	private transient CADShape face = null;
+	private transient final CADShape face;
 	
 	//  The geometrical surface describing the topological face, stored for
 	//  efficiency reason
-	private transient CADGeomSurface surface;
+	private transient final CADGeomSurface surface;
 	
 	//  Stack of methods to compute geometrical values
-	private transient Stack<Calculus> compGeomStack = new Stack<Calculus>();
+	private transient final Stack<Calculus> compGeomStack = new Stack<Calculus>();
 	
 	/**
 	 * Structure to fasten search of nearest vertices.
@@ -85,6 +85,8 @@ public class Mesh2D extends Mesh
 		super();
 		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
 		factory = new ElementPatchFactory(mtb);
+		face = null;
+		surface = null;
 		init();
 	}
 
@@ -92,6 +94,8 @@ public class Mesh2D extends Mesh
 	{
 		super(mtb);
 		factory = new ElementPatchFactory(mtb);
+		face = null;
+		surface = null;
 		init();
 	}
 
@@ -111,6 +115,7 @@ public class Mesh2D extends Mesh
 		super(mtb);
 		factory = new ElementPatchFactory(mtb);
 		face = f;
+		surface = ((CADFace) face).getGeomSurface();
 		init();
 	}
 
@@ -120,10 +125,11 @@ public class Mesh2D extends Mesh
 		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
 		factory = new ElementPatchFactory(mtb);
 		face = f;
+		surface = ((CADFace) face).getGeomSurface();
 		init();
 	}
 
-	private void init()
+	private final void init()
 	{
 		outerVertex = new OuterVertex2D();
 		String accumulateEpsilonProp = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon");
@@ -142,7 +148,7 @@ public class Mesh2D extends Mesh
 		Double absEpsilon = new Double(absEpsilonProp);
 		epsilon = absEpsilon.doubleValue();
 
-		if (face == null || !(face instanceof CADFace))
+		if (!(face instanceof CADFace))
 		{
 			if (epsilon < 0.0)
 				epsilon = 0.0;
@@ -150,7 +156,6 @@ public class Mesh2D extends Mesh
 		}
 
 		CADFace F = (CADFace) face;
-		surface = F.getGeomSurface();
 		double [] bb = F.boundingBox();
 		double diagonal = Math.sqrt(
 		    (bb[0] - bb[3]) * (bb[0] - bb[3]) +

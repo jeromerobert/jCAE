@@ -45,7 +45,7 @@ import org.apache.log4j.Logger;
 public class CheckDelaunay
 {
 	private static Logger logger=Logger.getLogger(CheckDelaunay.class);
-	private Mesh2D mesh = null;
+	private final Mesh2D mesh;
 	
 	/**
 	 * Creates a <code>CheckDelaunay</code> instance.

@@ -169,8 +169,8 @@ import org.jcae.mesh.amibe.patch.Mesh2D;
  */
 public class BasicMesh
 {
-	private Mesh2D mesh = null;
-	private MMesh1D mesh1d = null;
+	private final Mesh2D mesh;
+	private final MMesh1D mesh1d;
 	
 	/**
 	 * Creates a <code>BasicMesh</code> instance.

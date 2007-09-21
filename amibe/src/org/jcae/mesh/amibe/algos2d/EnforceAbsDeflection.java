@@ -43,7 +43,7 @@ import org.apache.log4j.Logger;
 public class EnforceAbsDeflection
 {
 	private static Logger logger=Logger.getLogger(EnforceAbsDeflection.class);
-	private Mesh2D mesh = null;
+	private final Mesh2D mesh;
 	
 	/**
 	 * Creates a <code>EnforceAbsDeflection</code> instance.

@@ -173,7 +173,7 @@ public class Insertion
 				}
 				if (nrTriNodes > maxNodes)
 					maxNodes = nrTriNodes;
-				if (triNodes.size() > 0)
+				if (!triNodes.isEmpty())
 				{
 					//  Process in pseudo-random order
 					int prime = PrimeFinder.nextPrime(nrTriNodes);
@@ -222,7 +222,7 @@ public class Insertion
 				//  may return a null pointer.
 				mesh.getQuadTree().remove(v);
 			}
-			if (nodes.size() == 0)
+			if (nodes.isEmpty())
 				break;
 			//  Process in pseudo-random order
 			int prime = PrimeFinder.nextPrime(maxNodes);

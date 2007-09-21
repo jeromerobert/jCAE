@@ -51,11 +51,11 @@ public class Metric2D
 	private static Logger logger=Logger.getLogger(Metric2D.class);
 	
 	//  First fundamental form
-	private double E, F, G;
+	private final double E, F, G;
 	private static CADGeomSurface cacheSurf = null;
 	private static double discr = 1.0;
 	// Static array to speed up orth() method
-	private static double [] orthRes = new double[2];
+	private static final double [] orthRes = new double[2];
 
 	/**
 	 * Creates a <code>Metric2D</code> instance at a given point.
