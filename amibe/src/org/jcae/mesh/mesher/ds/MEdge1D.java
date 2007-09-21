@@ -20,7 +20,6 @@
 
 package org.jcae.mesh.mesher.ds;
 
-import org.jcae.mesh.mesher.ds.MNode1D;
 import gnu.trove.TObjectIntHashMap;
 
 /**

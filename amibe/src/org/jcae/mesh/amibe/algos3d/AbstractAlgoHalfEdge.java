@@ -163,7 +163,7 @@ public abstract class AbstractAlgoHalfEdge
 				{
 					stackNotProcessedObject.push(current);
 					if (tolerance > 0.0)
-						stackNotProcessedValue.push(new Double(cost+0.7*(tolerance - cost)));
+						stackNotProcessedValue.push(Double.valueOf(cost+0.7*(tolerance - cost)));
 					else
 						// tolerance = cost = 0
 						stackNotProcessedValue.push(Double.valueOf(1.0));
@@ -174,7 +174,7 @@ public abstract class AbstractAlgoHalfEdge
 					double penalty = tree.getRootValue()*0.7;
 					if (penalty == 0.0)
 						penalty = 1.0;
-					stackNotProcessedValue.push(new Double(cost+penalty));
+					stackNotProcessedValue.push(Double.valueOf(cost+penalty));
 				}
 				current = null;
 			}
