@@ -229,13 +229,13 @@ public class Basic2d implements AlgoInterface
 	@Override
 	public String toString()
 	{
-		String ret = "Algo: "+getClass().getName();
-		ret += "\nTarget size: "+maxlen;
-		ret += "\nDeflection: "+deflection;
+		StringBuilder ret = new StringBuilder("Algo: "+getClass().getName());
+		ret.append("\nTarget size: "+maxlen);
+		ret.append("\nDeflection: "+deflection);
 		if (relDefl)
-			ret += " (relative)";
+			ret.append(" (relative)");
 		else
-			ret += " (absolute)";
-		return ret;
+			ret.append(" (absolute)");
+		return ret.toString();
 	}
 }

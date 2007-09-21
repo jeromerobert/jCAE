@@ -200,13 +200,13 @@ public class AdjacencyHE implements AdjacencyWrapper
 		HalfEdge e = (HalfEdge) a;
 		if (e == null)
 			return "null";
-		String ret = ""+e.hashCode()+"(";
+		StringBuilder ret = new StringBuilder(""+e.hashCode()+"(");
 		if (e.getAdj() == null)
-			ret += "null";
+			ret.append("null");
 		else
-			ret += e.getAdj().hashCode();
-		ret += ")";
-		return ret;
+			ret.append(e.getAdj().hashCode());
+		ret.append(")");
+		return ret.toString();
 	}
 
 	private static String showSym(AbstractHalfEdge a)

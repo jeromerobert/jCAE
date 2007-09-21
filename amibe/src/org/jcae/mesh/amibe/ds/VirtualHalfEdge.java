@@ -1368,27 +1368,27 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	{
 		if (!(tri.getAdj(num) instanceof Triangle))
 			return "N/A";
-		String r = "";
 		Triangle t = (Triangle) tri.getAdj(num);
+		StringBuilder ret = new StringBuilder();
 		if (t == null)
-			r+= "null";
+			ret.append("null");
 		else
-			r+= t.hashCode()+"["+tri.getAdjLocalNumber(num)+"]";
-		return r;
+			ret.append(t.hashCode()+"["+tri.getAdjLocalNumber(num)+"]");
+		return ret.toString();
 	}
 	
 	@Override
 	public String toString()
 	{
-		String r = "Local number: "+localNumber;
-		r += "\nTri hashcode: "+tri.hashCode();
-		r += "\nAdjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2);
-		r += "\nAttributes: "+Integer.toHexString(tri.getEdgeAttributes(0))+" "+Integer.toHexString(tri.getEdgeAttributes(1))+" "+Integer.toHexString(tri.getEdgeAttributes(2))+" => "+Integer.toHexString(attributes);
-		r += "\nVertices:";
-		r += "\n  Origin: "+origin();
-		r += "\n  Destination: "+destination();
-		r += "\n  Apex: "+apex();
-		return r;
+		StringBuilder r = new StringBuilder("Local number: "+localNumber);
+		r.append("\nTri hashcode: "+tri.hashCode());
+		r.append("\nAdjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2));
+		r.append("\nAttributes: "+Integer.toHexString(tri.getEdgeAttributes(0))+" "+Integer.toHexString(tri.getEdgeAttributes(1))+" "+Integer.toHexString(tri.getEdgeAttributes(2))+" => "+Integer.toHexString(attributes));
+		r.append("\nVertices:");
+		r.append("\n  Origin: "+origin());
+		r.append("\n  Destination: "+destination());
+		r.append("\n  Apex: "+apex());
+		return r.toString();
 	}
 
 	private static void unitTestBuildMesh(Mesh m, Vertex [] v)
