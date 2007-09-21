@@ -383,14 +383,14 @@ public abstract class QSortedTree implements Serializable
 	
 	private static void showNode(Node node)
 	{
-		String r = node.toString();
+		System.out.print(node.toString());
 		if (node.child[0] != null)
-			r += " Left -> "+node.child[0].getValue();
+			System.out.print(" Left -> "+node.child[0].getValue());
 		if (node.child[1] != null)
-			r += " Right -> "+node.child[1].getValue();
+			System.out.print(" Right -> "+node.child[1].getValue());
 		if (node.parent != null)
-			r += " Parent -> "+node.parent.getValue();
-		System.out.println(r);
+			System.out.print(" Parent -> "+node.parent.getValue());
+		System.out.println("");
 		if (node.child[0] != null)
 		{
 			assert node.child[0].parent == node : "Invalid parent pointer: "+node.child[0].parent+" != "+node;
