@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -155,7 +156,7 @@ public class KdTree
 	 * stored in the same place as vertices, and a cell can have at
 	 * most 4 children.  Its value is 10.
 	 */
-	protected int BUCKETSIZE = 10;
+	private final int BUCKETSIZE;
 		
 	public class Cell
 	{
@@ -201,18 +202,18 @@ public class KdTree
 		}
 	}
 	
-	protected final int dimension;
-	protected final int nrSub;
+	private final int dimension;
+	private final int nrSub;
 
 	// Integer coordinates (like gridSize) must be long if MAXLEVEL > 30
-	protected static final int MAXLEVEL = 30;
-	protected static final int gridSize = 1 << MAXLEVEL;
+	private static final int MAXLEVEL = 30;
+	private static final int gridSize = 1 << MAXLEVEL;
 	private static final double DGridSize = gridSize;
 	
 	/**
 	 * Root of the kd-tree.
 	 */
-	public Cell root;
+	protected final Cell root;
 	
 	/**
 	 * Number of cells.
@@ -233,9 +234,36 @@ public class KdTree
 	 */
 	public KdTree(int d, double [] bbmin, double [] bbmax)
 	{
+		BUCKETSIZE = 10;
 		dimension = d;
 		nrSub = 1 << dimension;
 		x0 = new double[dimension+1];
+		root = new Cell();
+		nCells++;
+		setup(bbmin, bbmax);
+	}
+	
+	/**
+	 * Create a new <code>KdTree</code> of the desired size.
+	 *
+	 * @param d   dimension (2 or 3)
+	 * @param bbmin  coordinates of bottom-left vertex
+	 * @param bbmax  coordinates of top-right vertex
+	 * @param bucketsize  bucket size
+	 */
+	public KdTree(int d, double [] bbmin, double [] bbmax, int bucketsize)
+	{
+		BUCKETSIZE = bucketsize;
+		dimension = d;
+		nrSub = 1 << dimension;
+		x0 = new double[dimension+1];
+		root = new Cell();
+		nCells++;
+		setup(bbmin, bbmax);
+	}
+	
+	private final void setup(double [] bbmin, double [] bbmax)
+	{
 		double maxDelta = 0.0;
 		for (int i = 0; i < dimension; i++)
 		{
@@ -246,8 +274,6 @@ public class KdTree
 		}
 		maxDelta *= 1.01;
 		x0[dimension] = DGridSize / maxDelta;
-		root = new Cell();
-		nCells++;
 	}
 	
 	/**
@@ -432,14 +458,14 @@ public class KdTree
 			last.subCell[lastPos] = null;
 	}
 
-	private static class GetAllVerticesProcedure implements KdTreeProcedure
+	private static final class GetAllVerticesProcedure implements KdTreeProcedure
 	{
 		public Collection<AbstractVertex> nodelist = null;
 		public GetAllVerticesProcedure(int capacity)
 		{
 			nodelist = new ArrayList<AbstractVertex>(capacity);
 		}
-		public final int action(Object o, int s, final int [] i0)
+		public int action(Object o, int s, final int [] i0)
 		{
 			Cell self = (Cell) o;
 			if (self.nItems > 0)
@@ -688,7 +714,7 @@ public class KdTree
 			if (idist > Integer.MAX_VALUE/2)
 				idist = Integer.MAX_VALUE/2;
 		}
-		public final int action(Object o, int s, final int [] i0)
+		public int action(Object o, int s, final int [] i0)
 		{
 			for (int k = 0; k < dimension; k++)
 				if ((ijk[k] < i0[k] - idist) || (ijk[k] > i0[k] + s + idist))
@@ -756,7 +782,7 @@ public class KdTree
 			mesh = m;
 			dist = mesh.distance(fromVertex, v, fromVertex);
 		}
-		public final int action(Object o, int s, final int [] i0)
+		public int action(Object o, int s, final int [] i0)
 		{
 			Cell self = (Cell) o;
 			searchedCells++;
@@ -802,27 +828,14 @@ public class KdTree
 		return ret;
 	}
 	
-	/**
-	 * Set bucket size.  This method must be called before adding vertices
-	 * into the octree.
-	 *
-	 * @param n  the desired bucket size.
-	 */
-	public final void setBucketSize(int n)
-	{
-		if (root.nItems != 0)
-			throw new RuntimeException("setBucketSize must be called before adding items!");
-		BUCKETSIZE = n;
-	}
-	
-	private static class GetMinSizeProcedure implements KdTreeProcedure
+	private static final class GetMinSizeProcedure implements KdTreeProcedure
 	{
 		public int searchedCells = 0;
 		public int minSize = gridSize;
 		public GetMinSizeProcedure()
 		{
 		}
-		public final int action(Object o, int s, final int [] i0)
+		public int action(Object o, int s, final int [] i0)
 		{
 			searchedCells++;
 			if (s < minSize)

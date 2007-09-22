@@ -108,11 +108,10 @@ public class OctreeTestDisplayPLY extends OctreeTest
 		logger.info("Bounding box:");
 		logger.info("  "+umin[0]+" "+umin[1]+" "+umin[2]);
 		logger.info("  "+umax[0]+" "+umax[1]+" "+umax[2]);
-		final OctreeTest r = new OctreeTest(umin, umax);
 		int bucketSize = 10;
 		if (args.length > 0)
 			bucketSize = Integer.parseInt(args[0]);
-		r.setBucketSize(bucketSize);
+		final OctreeTest r = new OctreeTest(umin, umax, bucketSize);
 		double [] xyz = new double[3];
 		for (int i = 0; i < nrNodes - nrDuplicates; i++)
 		{

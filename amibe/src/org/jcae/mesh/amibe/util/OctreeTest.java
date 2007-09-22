@@ -39,6 +39,11 @@ public class OctreeTest extends KdTree
 		super (3, umin, umax);
 	}
 	
+	public OctreeTest(double [] umin, double [] umax, int bucketsize)
+	{
+		super (3, umin, umax, bucketsize);
+	}
+	
 	private class CoordProcedure implements KdTreeProcedure
 	{
 		public final double [] coord;
