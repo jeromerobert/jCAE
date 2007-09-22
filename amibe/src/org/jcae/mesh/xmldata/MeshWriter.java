@@ -233,8 +233,8 @@ public class MeshWriter
 			File trianglesFile=new File(dir, JCAEXMLData.triangles2dFilename);
 			Collection<AbstractTriangle> trianglelist = submesh.getTriangles();
 			ArrayList<AbstractVertex> nodelist;
-			if (submesh.quadtree != null)
-				nodelist = submesh.quadtree.getAllVertices(trianglelist.size() / 2);
+			if (submesh.getQuadTree() != null)
+				nodelist = submesh.getQuadTree().getAllVertices(trianglelist.size() / 2);
 			else
 			{
 				HashSet<Vertex> nodeset = new HashSet<Vertex>();

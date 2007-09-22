@@ -57,7 +57,7 @@ public class Mesh2D extends Mesh
 	/**
 	 * Structure to fasten search of nearest vertices.
 	 */
-	public transient KdTree quadtree = null;
+	private transient KdTree quadtree = null;
 	
 	// Utility class to improve debugging output
 	private static class OuterVertex2D extends Vertex2D

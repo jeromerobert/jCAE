@@ -126,7 +126,7 @@ public class Storage
 			writeId(dir, face.getId());
 			CADFace F = (CADFace) face.getShape();
 			Collection<AbstractTriangle> trianglelist = submesh.getTriangles();
-			Collection<AbstractVertex> nodelist = submesh.quadtree.getAllVertices(trianglelist.size() / 2);
+			Collection<AbstractVertex> nodelist = submesh.getQuadTree().getAllVertices(trianglelist.size() / 2);
 			TObjectIntHashMap<Vertex> localIdx = write2dNodeReferences(dir, face.getId(), nodelist, submesh.outerVertex);
 			write2dCoordinates(dir, nodelist, submesh.outerVertex, F.getGeomSurface());
 			write2dTriangles(dir, trianglelist, localIdx);
