@@ -24,6 +24,7 @@ import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.AbstractVertex;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.jcae.mesh.amibe.metrics.Metric2D;
@@ -32,6 +33,7 @@ import org.jcae.mesh.amibe.util.KdTreeProcedure;
 import org.jcae.mesh.cad.*;
 import java.util.HashSet;
 import java.util.Stack;
+import java.util.Collection;
 import org.apache.log4j.Logger;
 
 /**
@@ -220,6 +222,19 @@ public class Mesh2D extends Mesh
 		quadtree = q;
 	}
 	
+	/**
+	 * Returns vertex list.  Note that this class does not rely on
+	 * {@link MeshTraitsBuilder}, but call {@link KdTree#getAllVertices}.
+	 *
+	 * @return vertex list.
+	 */
+	@Override
+	public Collection<AbstractVertex> getNodes()
+	{
+		if (quadtree == null)
+			return null;
+		return quadtree.getAllVertices(triangleList.size() / 2);
+	}
 	/**
 	 * Bootstraps node instertion by creating the first triangle.
 	 * This initial triangle is counter-clockwise oriented, and

@@ -49,7 +49,7 @@ public class MeshWriter
 	/**
 	 * Used by {@link writeObject}
 	 */
-	private static Element writeObjectNodes(Document document, ArrayList<AbstractVertex> nodelist, Vertex outer, File nodesFile, File refFile, String baseDir, TObjectIntHashMap<Vertex> nodeIndex)
+	private static Element writeObjectNodes(Document document, Collection<AbstractVertex> nodelist, Vertex outer, File nodesFile, File refFile, String baseDir, TObjectIntHashMap<Vertex> nodeIndex)
 		throws IOException
 	{
 		//save nodes
@@ -232,10 +232,8 @@ public class MeshWriter
 			File refFile = new File(dir, JCAEXMLData.ref1dFilename);
 			File trianglesFile=new File(dir, JCAEXMLData.triangles2dFilename);
 			Collection<AbstractTriangle> trianglelist = submesh.getTriangles();
-			ArrayList<AbstractVertex> nodelist;
-			if (submesh.getQuadTree() != null)
-				nodelist = submesh.getQuadTree().getAllVertices(trianglelist.size() / 2);
-			else
+			Collection<AbstractVertex> nodelist = submesh.getNodes();
+			if (nodelist == null)
 			{
 				HashSet<Vertex> nodeset = new HashSet<Vertex>();
 				nodelist = new ArrayList<AbstractVertex>();
@@ -315,7 +313,7 @@ public class MeshWriter
 			File groupsFile = new File(dir, JCAEXMLData.groupsFilename);
 			Collection<AbstractTriangle> trianglelist = submesh.getTriangles();
 			HashSet<Vertex> nodeset = new HashSet<Vertex>();
-			ArrayList<AbstractVertex> nodelist = new ArrayList<AbstractVertex>();
+			Collection<AbstractVertex> nodelist = new ArrayList<AbstractVertex>();
 			for (AbstractTriangle t: trianglelist)
 			{
 				if (!t.isWritable())
