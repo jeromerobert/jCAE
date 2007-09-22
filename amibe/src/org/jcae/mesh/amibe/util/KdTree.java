@@ -23,6 +23,7 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.AbstractVertex;
 import org.jcae.mesh.amibe.ds.Mesh;
 import java.util.ArrayList;
+import java.util.Collection;
 import org.apache.log4j.Logger;
 
 /**
@@ -64,7 +65,7 @@ import org.apache.log4j.Logger;
  * <pre>
  *	public final class collectAllVerticesProcedure implements KdTreeProcedure
  *	{
- *		public ArrayList<AbstractVertex> vertexList = new ArrayList<AbstractVertex>();
+ *		public Collection<AbstractVertex> vertexList = new ArrayList<AbstractVertex>();
  *		public final int action(Object o, int s, int [] i0)
  *		{
  *			Cell self = (Cell) o;
@@ -433,7 +434,7 @@ public class KdTree
 
 	private static class GetAllVerticesProcedure implements KdTreeProcedure
 	{
-		public ArrayList<AbstractVertex> nodelist = null;
+		public Collection<AbstractVertex> nodelist = null;
 		public GetAllVerticesProcedure(int capacity)
 		{
 			nodelist = new ArrayList<AbstractVertex>(capacity);
@@ -451,12 +452,12 @@ public class KdTree
 	}
 	
 	/**
-	 * Return a list of all vertices.
+	 * Return a collection of all vertices.
 	 *
-	 * @param capacity  initial capacity of the <code>ArrayList</code>.
-	 * @return a list containing all vertices.
+	 * @param capacity  initial capacity of the <code>Collection</code>.
+	 * @return a collection containing all vertices.
 	 */
-	public ArrayList<AbstractVertex> getAllVertices(int capacity)
+	public Collection<AbstractVertex> getAllVertices(int capacity)
 	{
 		GetAllVerticesProcedure gproc = new GetAllVerticesProcedure(capacity);
 		walk(gproc);
