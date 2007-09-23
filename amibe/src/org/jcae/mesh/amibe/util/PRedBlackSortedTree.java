@@ -20,6 +20,7 @@
 
 package org.jcae.mesh.amibe.util;
 
+import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 /**
@@ -396,8 +397,9 @@ public class PRedBlackSortedTree extends QSortedTree
 	{
 		if (root.child[0] == null)
 			return true;
-		for (Node current = (Node) root.child[0].firstNode(); current != null; current = (Node) current.nextNode())
+		for (Iterator<QSortedTree.Node> it = iterator(); it.hasNext(); )
 		{
+			QSortedTree.Node current = it.next();
 			if (current.child[0] != null && current.child[0].parent != current)
 				return false;
 			if (current.child[1] != null && current.child[1].parent != current)

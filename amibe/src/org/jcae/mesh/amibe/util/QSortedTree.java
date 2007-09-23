@@ -127,7 +127,8 @@ public abstract class QSortedTree implements Serializable
 		*/
 		public Node rotateL()
 		{
-			//logger.debug("Single left rotation around "+this);
+			//if (logger.isDebugEnabled())
+			//	logger.debug("Single left rotation around "+this);
 			final Node right = child[1];
 			child[1] = right.child[0];
 			right.child[0] = this;
@@ -147,7 +148,8 @@ public abstract class QSortedTree implements Serializable
 		*/
 		public Node rotateR()
 		{
-			//logger.debug("Single right rotation around "+this);
+			//if (logger.isDebugEnabled())
+			//	logger.debug("Single right rotation around "+this);
 			final Node left = child[0];
 			child[0] = left.child[1];
 			left.child[1] = this;
@@ -169,7 +171,8 @@ public abstract class QSortedTree implements Serializable
 		*/
 		public Node rotateRL()
 		{
-			//logger.debug("Right+left rotation around "+this);
+			//if (logger.isDebugEnabled())
+			//	logger.debug("Right+left rotation around "+this);
 			final Node right = child[1];          // C
 			final Node newRoot = right.child[0];  // B
 			// Right rotation
@@ -200,7 +203,8 @@ public abstract class QSortedTree implements Serializable
 		*/
 		public Node rotateLR()
 		{
-			//logger.debug("Left+right rotation around "+this);
+			//if (logger.isDebugEnabled())
+			//	logger.debug("Left+right rotation around "+this);
 			final Node left = child[0];         // A
 			final Node newRoot = left.child[1]; // B
 	
@@ -224,7 +228,7 @@ public abstract class QSortedTree implements Serializable
 	
 		// The following 4 methods are useful for tree traversal.
 		// A NullPointerException is raised if they are used on an empty tree!
-		public Node firstNode()
+		private Node firstNode()
 		{
 			Node current = this;
 			while (current.child[0] != null)
@@ -232,7 +236,7 @@ public abstract class QSortedTree implements Serializable
 			return current;
 		}
 	
-		public Node lastNode()
+		private Node lastNode()
 		{
 			Node current = this;
 			while (current.child[1] != null)
@@ -281,8 +285,11 @@ public abstract class QSortedTree implements Serializable
 		map = new HashMap<Object, Node>(nrNodes);
 		if (nrNodes == 0)
 			return;
-		for (Node current = root.child[0].firstNode(); current != null; current = current.nextNode())
+		for (Iterator<Node> it = iterator(); it.hasNext(); )
+		{
+			Node current = it.next();
 			map.put(current.getData(), current);
+		}
 	}
 
 	/**
