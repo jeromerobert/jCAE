@@ -67,6 +67,7 @@
 %include "BRepFilletAPI.i"
 %include "BRepCheck.i"
 %include "ShapeBuild.i"
+%include "XSControl.i"
 // This one require Opencascade 6.2
 %include "ShapeUpgrade.i"
 
@@ -284,41 +285,6 @@ enum IFSelect_ReturnStatus {
  IFSelect_RetStop
 };
  
-/**
- * XSControl_Reader
- */
- %{
-#include <STEPControl_Reader.hxx>
-#include <IGESControl_Reader.hxx>
- %}
-class XSControl_Reader
-{
-	XSControl_Reader()=0;
-	%rename(readFile) ReadFile;
-	%rename(transferRoots) TransferRoots;
-	%rename(clearShapes) ClearShapes;
-	%rename(nbRootsForTransfer) NbRootsForTransfer;
-	%rename(oneShape) OneShape;
-	public:
-	IFSelect_ReturnStatus ReadFile(const Standard_CString filename);
-	Standard_Integer TransferRoots() ;
-	void ClearShapes();
-	Standard_Integer NbRootsForTransfer();
-	TopoDS_Shape OneShape() const;
-};
-
-class STEPControl_Reader: public XSControl_Reader
-{
-	public:
-	STEPControl_Reader();
-};
-
-class IGESControl_Reader: public XSControl_Reader
-{
-	public:
-	IGESControl_Reader();
-};
-
 %{#include <ShapeAnalysis_FreeBounds.hxx>%}
 class ShapeAnalysis_FreeBounds
 {

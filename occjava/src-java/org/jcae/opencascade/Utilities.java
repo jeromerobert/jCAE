@@ -89,18 +89,20 @@ public class Utilities
 	public static TopoDS_Shape readFile(String fileName)
 	{
         TopoDS_Shape brepShape;
-        if (fileName.endsWith(".step"))
+        if (fileName.endsWith(".stp") || fileName.endsWith(".STP") ||
+        	fileName.endsWith(".step") || fileName.endsWith(".STEP"))
         {
             STEPControl_Reader aReader = new STEPControl_Reader();
-            aReader.readFile(fileName);
+            aReader.readFile(fileName.getBytes());
             aReader.nbRootsForTransfer();
             aReader.transferRoots();
             brepShape = aReader.oneShape();
         }
-        else if (fileName.endsWith(".igs"))
+        else if (fileName.endsWith(".igs") || fileName.endsWith(".IGS") ||
+        	fileName.endsWith(".iges") || fileName.endsWith(".IGES"))
         {
             IGESControl_Reader aReader = new IGESControl_Reader();
-            aReader.readFile(fileName);
+            aReader.readFile(fileName.getBytes());
             aReader.nbRootsForTransfer();
             aReader.transferRoots();
             brepShape = aReader.oneShape();
