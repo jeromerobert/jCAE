@@ -494,6 +494,11 @@ public class TextureFitter extends View
 		remove(textureViewable);
 		add(textureViewable);
 	}
+		
+	public void hideTexture()
+	{
+		remove(textureViewable);
+	}
 	
 	/** 
 	 * Move the texture. The projection is normalized.
