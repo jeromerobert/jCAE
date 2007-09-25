@@ -40,7 +40,7 @@ public class MeshOEMMIndex
 		final OEMM oemm = new OEMM(lmax);
 		if(brepfilename!=null)
 		{
-			CADShapeFactory factory = CADShapeFactory.factory;
+			CADShapeFactory factory = CADShapeFactory.getFactory();
 			CADShape shape = factory.newShape(brepfilename);
 			double [] bbox = shape.boundingBox();		
 			oemm.setBoundingBox(bbox);

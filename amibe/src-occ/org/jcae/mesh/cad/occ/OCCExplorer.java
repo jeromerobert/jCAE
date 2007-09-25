@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -51,6 +52,6 @@ public class OCCExplorer implements CADExplorer
 	
 	public CADShape current()
 	{
-		return OCCShapeFactory.factory.newShape(occExp.current());
+		return OCCShapeFactory.getFactory().newShape(occExp.current());
 	}
 }

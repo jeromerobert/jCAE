@@ -230,7 +230,7 @@ public class BCADGraphCell
 
 	private Iterator<BCADGraphCell> shapesExplorer(final CADShapeEnum cse, final Collection<CADShape> cadShapeSet)
 	{
-		final CADExplorer exp = CADShapeFactory.factory.newExplorer();
+		final CADExplorer exp = CADShapeFactory.getFactory().newExplorer();
 		exp.init(shape, cse);
 		return new Iterator<BCADGraphCell>()
 		{
@@ -301,7 +301,7 @@ public class BCADGraphCell
 
 	private Iterator<BCADGraphCell> shapesIterator(final Collection<CADShape> cadShapeSet)
 	{
-		final CADIterator it = CADShapeFactory.factory.newIterator();
+		final CADIterator it = CADShapeFactory.getFactory().newIterator();
 		it.initialize(shape);
 		return new Iterator<BCADGraphCell>()
 		{

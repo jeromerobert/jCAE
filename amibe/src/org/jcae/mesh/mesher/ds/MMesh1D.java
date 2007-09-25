@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -70,7 +71,7 @@ public class MMesh1D extends MMesh0D
 		super(s);
 		shape = s;
 
-		CADExplorer expE = CADShapeFactory.factory.newExplorer();
+		CADExplorer expE = CADShapeFactory.getFactory().newExplorer();
 		//  HashMap size will not be greater than the number of edges,
 		//  so allocate them after computing their maximal size, they
 		//  won't be resized.
@@ -93,7 +94,7 @@ public class MMesh1D extends MMesh0D
 		mapTEdgeToFaces = new HashMap<CADEdge, LinkedHashSet<CADFace>>(edges);
 		for (Iterator<CADEdge> it = mapTEdgeToSubMesh1D.keySet().iterator(); it.hasNext(); )
 			mapTEdgeToFaces.put(it.next(), new LinkedHashSet<CADFace>());
-		CADExplorer expF = CADShapeFactory.factory.newExplorer();
+		CADExplorer expF = CADShapeFactory.getFactory().newExplorer();
 		for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 		{
 			CADFace F = (CADFace) expF.current();
@@ -207,7 +208,7 @@ public class MMesh1D extends MMesh0D
 	{
 		logger.debug("Update node labels");
 		//  Resets all labels
-		CADExplorer expE = CADShapeFactory.factory.newExplorer();
+		CADExplorer expE = CADShapeFactory.getFactory().newExplorer();
 		for (expE.init(shape, CADShapeEnum.EDGE); expE.more(); expE.next())
 		{
 			CADEdge E = (CADEdge) expE.current();
@@ -241,7 +242,7 @@ public class MMesh1D extends MMesh0D
 	public void duplicateEdges()
 	{
 		logger.debug("Compute vertex references");
-		CADExplorer expV = CADShapeFactory.factory.newExplorer();
+		CADExplorer expV = CADShapeFactory.getFactory().newExplorer();
 		//  For each topological vertex, compute the list of
 		//  MNode1D objects which are bound to this vertex.
 		int nVertex = 0;
@@ -411,8 +412,8 @@ public class MMesh1D extends MMesh0D
 		int roughSize = 10*maximalNumberOfNodes();
 		ArrayList<Vertex2D> result = new ArrayList<Vertex2D>(roughSize);
 		CADFace face = (CADFace) mesh.getGeometry();
-		CADExplorer expW = CADShapeFactory.factory.newExplorer();
-		CADWireExplorer wexp = CADShapeFactory.factory.newWireExplorer();
+		CADExplorer expW = CADShapeFactory.getFactory().newExplorer();
+		CADWireExplorer wexp = CADShapeFactory.getFactory().newWireExplorer();
 		
 		for (expW.init(face, CADShapeEnum.WIRE); expW.more(); expW.next())
 		{
@@ -423,8 +424,8 @@ public class MMesh1D extends MMesh0D
 			for (wexp.init((CADWire) expW.current(), face); wexp.more(); wexp.next())
 			{
 				CADEdge te = wexp.current();
-				CADGeomCurve2D c2d = CADShapeFactory.factory.newCurve2D(te, face);
-				CADGeomCurve3D c3d = CADShapeFactory.factory.newCurve3D(te);
+				CADGeomCurve2D c2d = CADShapeFactory.getFactory().newCurve2D(te, face);
+				CADGeomCurve3D c3d = CADShapeFactory.getFactory().newCurve3D(te);
 
 				ArrayList<MNode1D> nodelist = getNodelistFromMap(te);
 				Iterator<MNode1D> itn = nodelist.iterator();

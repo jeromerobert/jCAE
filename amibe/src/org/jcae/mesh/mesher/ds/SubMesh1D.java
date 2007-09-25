@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -202,7 +203,7 @@ public class SubMesh1D
 	{
 		int n = 0;
 		double minlen = -1.0, maxlen = 0.0,  avglen = 0.0;
-		CADGeomCurve3D c3d = CADShapeFactory.factory.newCurve3D(edge);
+		CADGeomCurve3D c3d = CADShapeFactory.getFactory().newCurve3D(edge);
 		
 		Iterator<MEdge1D> ite = edgelist.iterator();
 		while (ite.hasNext())

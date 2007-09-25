@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -66,7 +67,7 @@ public class MeshToSoupConvert extends JCAEXMLData
 	 */
 	public static void main(String[] args)
 	{
-		meshToSoup(args[0], CADShapeFactory.factory.newShape(args[1]));
+		meshToSoup(args[0], CADShapeFactory.getFactory().newShape(args[1]));
 	}
 	
 	/**
@@ -76,7 +77,7 @@ public class MeshToSoupConvert extends JCAEXMLData
 	 */
 	public static void meshToSoup(String xmlDir, CADShape shape)
 	{
-		CADExplorer expF = CADShapeFactory.factory.newExplorer();		
+		CADExplorer expF = CADShapeFactory.getFactory().newExplorer();		
 		int numFace=Integer.getInteger("org.jcae.mesh.Mesher.meshFace", 0).intValue();
 		int minFace=Integer.getInteger("org.jcae.mesh.Mesher.minFace", 0).intValue();
 		int maxFace=Integer.getInteger("org.jcae.mesh.Mesher.maxFace", 0).intValue();

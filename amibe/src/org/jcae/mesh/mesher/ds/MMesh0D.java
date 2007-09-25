@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -55,7 +56,7 @@ public class MMesh0D
 	 */
 	public MMesh0D(CADShape shape)
 	{
-		CADExplorer expV = CADShapeFactory.factory.newExplorer();
+		CADExplorer expV = CADShapeFactory.getFactory().newExplorer();
 		int nodes = 0;
 		for (expV.init(shape, CADShapeEnum.VERTEX); expV.more(); expV.next())
 			nodes++;
@@ -81,7 +82,7 @@ public class MMesh0D
 
 		CADShape shape = root.getShape();
 		// This is a copy of the first method.
-		CADExplorer expV = CADShapeFactory.factory.newExplorer();
+		CADExplorer expV = CADShapeFactory.getFactory().newExplorer();
 		int nodes = 0;
 		for (expV.init(shape, CADShapeEnum.VERTEX); expV.more(); expV.next())
 			nodes++;

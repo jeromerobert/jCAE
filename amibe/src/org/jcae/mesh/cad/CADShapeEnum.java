@@ -1,7 +1,8 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-   (C) Copyright 2006, by EADS CRC
+    Copyright (C) 2006, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -42,17 +43,17 @@ public abstract class CADShapeEnum
 		return name;
 	}
 
-	public static final CADShapeEnum VERTEX = CADShapeFactory.factory.getShapeEnumInstance("vertex");
-	public static final CADShapeEnum EDGE = CADShapeFactory.factory.getShapeEnumInstance("edge");
-	public static final CADShapeEnum WIRE = CADShapeFactory.factory.getShapeEnumInstance("wire");
-	public static final CADShapeEnum FACE = CADShapeFactory.factory.getShapeEnumInstance("face");
-	public static final CADShapeEnum SHELL = CADShapeFactory.factory.getShapeEnumInstance("shell");
-	public static final CADShapeEnum SOLID = CADShapeFactory.factory.getShapeEnumInstance("solid");
-	public static final CADShapeEnum COMPSOLID = CADShapeFactory.factory.getShapeEnumInstance("compsolid");
-	public static final CADShapeEnum COMPOUND = CADShapeFactory.factory.getShapeEnumInstance("compound");
+	public static final CADShapeEnum VERTEX = CADShapeFactory.getFactory().getShapeEnumInstance("vertex");
+	public static final CADShapeEnum EDGE = CADShapeFactory.getFactory().getShapeEnumInstance("edge");
+	public static final CADShapeEnum WIRE = CADShapeFactory.getFactory().getShapeEnumInstance("wire");
+	public static final CADShapeEnum FACE = CADShapeFactory.getFactory().getShapeEnumInstance("face");
+	public static final CADShapeEnum SHELL = CADShapeFactory.getFactory().getShapeEnumInstance("shell");
+	public static final CADShapeEnum SOLID = CADShapeFactory.getFactory().getShapeEnumInstance("solid");
+	public static final CADShapeEnum COMPSOLID = CADShapeFactory.getFactory().getShapeEnumInstance("compsolid");
+	public static final CADShapeEnum COMPOUND = CADShapeFactory.getFactory().getShapeEnumInstance("compound");
 	public static Iterator<CADShapeEnum> iterator(CADShapeEnum start, CADShapeEnum end)
 	{
-		return CADShapeFactory.factory.newShapeEnumIterator(start, end);
+		return CADShapeFactory.getFactory().newShapeEnumIterator(start, end);
 	}
 
 }

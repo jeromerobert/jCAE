@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -190,7 +191,7 @@ public class MMesh1DWriter
 			
 			int iEdge = 0;
 			HashSet<CADEdge> setSeenEdges = new HashSet<CADEdge>();
-			CADExplorer expE = CADShapeFactory.factory.newExplorer();
+			CADExplorer expE = CADShapeFactory.getFactory().newExplorer();
 			for (expE.init(shape, CADShapeEnum.EDGE); expE.more(); expE.next())
 			{
 				CADEdge E = (CADEdge) expE.current();

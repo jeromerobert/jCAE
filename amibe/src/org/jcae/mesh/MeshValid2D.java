@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2003,2004,2005,2006, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -49,7 +50,7 @@ public class MeshValid2D
 	private static void check(String brepfilename, String xmlDir, float discr, float defl)
 	{
 		logger.info("Loading " + brepfilename);
-		CADShape shape = CADShapeFactory.factory.newShape(brepfilename);
+		CADShape shape = CADShapeFactory.getFactory().newShape(brepfilename);
 		try
 		{
 			int iFace = 0;
@@ -60,7 +61,7 @@ public class MeshValid2D
 				System.setProperty("org.jcae.mesh.Mesher.meshFace", numFaceProp);
 			}
 			int numFace = Integer.parseInt(numFaceProp);
-			CADExplorer expF = CADShapeFactory.factory.newExplorer();
+			CADExplorer expF = CADShapeFactory.getFactory().newExplorer();
 			QualityFloat data = new QualityFloat(1000);
 			for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 			{
@@ -107,7 +108,7 @@ public class MeshValid2D
 		String filename=args[0];
 		if (filename.endsWith(".step") || filename.endsWith(".igs"))
 		{
-			CADShape shape = CADShapeFactory.factory.newShape(filename);
+			CADShape shape = CADShapeFactory.getFactory().newShape(filename);
 			filename = filename.substring(0, filename.lastIndexOf('.')) + ".tmp.brep";
 			shape.writeNative(filename);
 		}

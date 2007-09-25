@@ -118,7 +118,7 @@ public class Bora1D
 		double [] x1 = new double[nVertices];
 		double [] x3d1 = new double[3*nVertices];
 		int [] beams = new int[2*nBeams];
-		CADShapeFactory factory = CADShapeFactory.factory;
+		CADShapeFactory factory = CADShapeFactory.getFactory();
 
 		nEdges = 0;
 		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )

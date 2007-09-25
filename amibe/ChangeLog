@@ -6,6 +6,8 @@ Wed Sep 26 00:27:45 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	  src-occ/org/jcae/mesh/cad/occ/OCCShapeFactory.java: Rename
 	  {CAD,OCC}ShapeBuilder classes into {CAD,OCC}ShapeFactory to
 	  be consistent with common design pattern names.
+	* src/org/jcae/mesh/cad/CADShapeFactory.java: Let factory member
+	be private, and add a getFactory() public method.
 
 Fri Sep 21 15:13:28 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

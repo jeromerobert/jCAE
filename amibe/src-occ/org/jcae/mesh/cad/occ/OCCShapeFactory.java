@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005, by EADS CRC
+    Copyright (C) 2007, by EADS CRC
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -36,15 +37,6 @@ import org.apache.log4j.Logger;
 public class OCCShapeFactory extends CADShapeFactory
 {
 	private static Logger logger=Logger.getLogger(OCCShapeFactory.class);
-	
-	public OCCShapeFactory ()
-	{
-	}
-	
-	public CADShapeFactory newInstance()
-	{
-		return new OCCShapeFactory();
-	}
 	
 	@Override
 	public CADShape newShape(Object o)

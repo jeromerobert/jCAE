@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2006, by EADS CRC
+    Copyright (C) 2007, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -102,7 +103,7 @@ public class Storage
 			// Write node references and compute local indices
 			TObjectIntHashMap<MNode1D> localIdx = write1dNodeReferences(dir, nodelist, edge);
 			// Write node coordinates
-			write1dCoordinates(dir, nodelist, CADShapeFactory.factory.newCurve3D(E));
+			write1dCoordinates(dir, nodelist, CADShapeFactory.getFactory().newCurve3D(E));
 			// Write edge connectivity
 			write1dEdges(dir, submesh.getEdges(), localIdx);
 		}

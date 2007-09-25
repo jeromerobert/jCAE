@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -28,7 +29,7 @@ import org.apache.log4j.Logger;
 public abstract class CADShapeFactory
 {
 	private static Logger logger=Logger.getLogger(CADShapeFactory.class);
-	public static final CADShapeFactory factory;
+	private static final CADShapeFactory factory;
 	static
 	{
 		String cadType = System.getProperty("org.jcae.mesh.cad");
@@ -50,8 +51,17 @@ public abstract class CADShapeFactory
 		factory = b;
 	}
 	
-	public CADShapeFactory ()
+	protected CADShapeFactory()
 	{
+	}
+	
+	/**
+	 * Return factory instance
+	 * @return factory instance
+	 */
+	public static CADShapeFactory getFactory()
+	{
+		return factory;
 	}
 	
 	/**

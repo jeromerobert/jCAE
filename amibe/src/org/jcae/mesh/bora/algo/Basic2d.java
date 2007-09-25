@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005,2006, by EADS CRC
+    Copyright (C) 2007, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -108,7 +109,7 @@ public class Basic2d implements AlgoInterface
 
 		// Boundary nodes. See org.jcae.mesh.mesher.ds.MMesh1D.boundaryNodes()
 		ArrayList<Vertex2D> bndV = new ArrayList<Vertex2D>();
-		CADWireExplorer wexp = CADShapeFactory.factory.newWireExplorer();
+		CADWireExplorer wexp = CADShapeFactory.getFactory().newWireExplorer();
 		for (Iterator<BCADGraphCell> it = cell.shapesExplorer(CADShapeEnum.WIRE); it.hasNext(); )
 		{
 			BCADGraphCell wire = it.next();
@@ -119,8 +120,8 @@ public class Basic2d implements AlgoInterface
 			for (wexp.init((CADWire) wire.getShape(), F); wexp.more(); wexp.next())
 			{
 				CADEdge te = wexp.current();
-				CADGeomCurve2D c2d = CADShapeFactory.factory.newCurve2D(te, F);
-				CADGeomCurve3D c3d = CADShapeFactory.factory.newCurve3D(te);
+				CADGeomCurve2D c2d = CADShapeFactory.getFactory().newCurve2D(te, F);
+				CADGeomCurve3D c3d = CADShapeFactory.getFactory().newCurve3D(te);
 				BDiscretization dc = cell.getGraph().getByShape(te).getDiscretizationSubMesh(d.getFirstSubMesh());
 
 				SubMesh1D submesh1d = (SubMesh1D) dc.getMesh();

@@ -73,7 +73,7 @@ public class BModel
 		if (logger.isDebugEnabled())
 			logger.debug("Building model "+id+" from "+brep+" into "+out);
 		freeIndex++;
-		CADShapeFactory factory = CADShapeFactory.factory;
+		CADShapeFactory factory = CADShapeFactory.getFactory();
 		xmlDir = out;
 		File xmlDirF = new File(xmlDir);
 		xmlDirF.mkdirs();

@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005,2006, by EADS CRC
+    Copyright (C) 2007, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -107,7 +108,7 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		if (V[0].isSame(V[1]))
 			isCircular=true;
 		
-		CADGeomCurve3D curve = CADShapeFactory.factory.newCurve3D(E);
+		CADGeomCurve3D curve = CADShapeFactory.getFactory().newCurve3D(E);
 		if (curve == null)
 		{
 			if (!E.isDegenerated())

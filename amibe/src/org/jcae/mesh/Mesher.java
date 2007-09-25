@@ -348,7 +348,7 @@ public class Mesher
 	protected void mesh3D(CADShape shape)
 	{
 		int iFace = 0;
-		CADExplorer expF = CADShapeFactory.factory.newExplorer();
+		CADExplorer expF = CADShapeFactory.getFactory().newExplorer();
 		MeshToMMesh3DConvert m2dTo3D = new MeshToMMesh3DConvert(outputDir);
 		m2dTo3D.exportUNV(exportUNV, unvName);
 		logger.info("Read informations on boundary nodes");
@@ -404,8 +404,8 @@ public class Mesher
 		
 		logger.info("Loading " + geometryFile);
 
-		CADShape shape = CADShapeFactory.factory.newShape(geometryFile);
-		CADExplorer expF = CADShapeFactory.factory.newExplorer();
+		CADShape shape = CADShapeFactory.getFactory().newShape(geometryFile);
+		CADExplorer expF = CADShapeFactory.getFactory().newExplorer();
 
 		if (minFace != 0 || maxFace != 0)
 			numFace=0;
@@ -602,7 +602,7 @@ public class Mesher
 	static private int countFaces(String brepfilename)
 	{
 		//count faces in the brep File 
-		CADShapeFactory factory = CADShapeFactory.factory;
+		CADShapeFactory factory = CADShapeFactory.getFactory();
 		CADShape shape = factory.newShape(brepfilename);
 		CADExplorer expF = factory.newExplorer();
 		int nrFaces = 0;
@@ -634,7 +634,7 @@ public class Mesher
 		
 		if (geometryFile.endsWith(".step") || geometryFile.endsWith(".stp") || geometryFile.endsWith(".igs"))
 		{
-			CADShape shape = CADShapeFactory.factory.newShape(geometryFile);
+			CADShape shape = CADShapeFactory.getFactory().newShape(geometryFile);
 			geometryFile = geometryFile.substring(0, geometryFile.lastIndexOf('.')) + ".tmp.brep";
 			shape.writeNative(geometryFile);
 		}

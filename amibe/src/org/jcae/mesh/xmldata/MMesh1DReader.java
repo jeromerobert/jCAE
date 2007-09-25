@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -98,7 +99,7 @@ public class MMesh1DReader
 			if(!new File(brepFile).isAbsolute())
 				brepFile = xmlDir+File.separator+brepFile;
 			
-			CADShape shape = CADShapeFactory.factory.newShape(brepFile);
+			CADShape shape = CADShapeFactory.getFactory().newShape(brepFile);
 			m1d = new MMesh1D(shape);
 			
 			String nodesFile = xpath.evaluate(
@@ -132,7 +133,7 @@ public class MMesh1DReader
 			//  vertex.  Offset is thus set to 1.
 			int offset = 1;
 			HashSet<CADEdge> setSeenEdges = new HashSet<CADEdge>();
-			CADExplorer expE = CADShapeFactory.factory.newExplorer();
+			CADExplorer expE = CADShapeFactory.getFactory().newExplorer();
 			for (expE.init(shape, CADShapeEnum.EDGE); expE.more(); expE.next())
 			{
 				CADEdge E = (CADEdge) expE.current();
