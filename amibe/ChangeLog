@@ -1,3 +1,12 @@
+Wed Sep 26 00:27:45 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/cad/CADShapeBuilder.java
+	  src/org/jcae/mesh/cad/CADShapeFactory.java
+	  src-occ/org/jcae/mesh/cad/occ/OCCShapeBuilder.java
+	  src-occ/org/jcae/mesh/cad/occ/OCCShapeFactory.java: Rename
+	  {CAD,OCC}ShapeBuilder classes into {CAD,OCC}ShapeFactory to
+	  be consistent with common design pattern names.
+
 Fri Sep 21 15:13:28 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/XMLHelper.java: Fix a bug in

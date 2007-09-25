@@ -49,7 +49,7 @@ public class MeshValid2D
 	private static void check(String brepfilename, String xmlDir, float discr, float defl)
 	{
 		logger.info("Loading " + brepfilename);
-		CADShape shape = CADShapeBuilder.factory.newShape(brepfilename);
+		CADShape shape = CADShapeFactory.factory.newShape(brepfilename);
 		try
 		{
 			int iFace = 0;
@@ -60,7 +60,7 @@ public class MeshValid2D
 				System.setProperty("org.jcae.mesh.Mesher.meshFace", numFaceProp);
 			}
 			int numFace = Integer.parseInt(numFaceProp);
-			CADExplorer expF = CADShapeBuilder.factory.newExplorer();
+			CADExplorer expF = CADShapeFactory.factory.newExplorer();
 			QualityFloat data = new QualityFloat(1000);
 			for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 			{
@@ -107,7 +107,7 @@ public class MeshValid2D
 		String filename=args[0];
 		if (filename.endsWith(".step") || filename.endsWith(".igs"))
 		{
-			CADShape shape = CADShapeBuilder.factory.newShape(filename);
+			CADShape shape = CADShapeFactory.factory.newShape(filename);
 			filename = filename.substring(0, filename.lastIndexOf('.')) + ".tmp.brep";
 			shape.writeNative(filename);
 		}

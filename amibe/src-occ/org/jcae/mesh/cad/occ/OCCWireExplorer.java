@@ -52,6 +52,6 @@ public class OCCWireExplorer implements CADWireExplorer
 	
 	public CADEdge current()
 	{
-		return (CADEdge) OCCShapeBuilder.factory.newShape(occWExp.current());
+		return (CADEdge) OCCShapeFactory.factory.newShape(occWExp.current());
 	}
 }

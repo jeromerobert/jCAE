@@ -30,7 +30,7 @@ import org.jcae.mesh.cad.CADGeomCurve3D;
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADFace;
-import org.jcae.mesh.cad.CADShapeBuilder;
+import org.jcae.mesh.cad.CADShapeFactory;
 import java.util.List;
 import java.util.Set;
 import java.util.Iterator;
@@ -86,7 +86,7 @@ public class Compat1D2D
 			curvmax[i] = 0.0;
 		
 		CADEdge E = submesh1d.getGeometry();
-		CADGeomCurve3D curve3d = CADShapeBuilder.factory.newCurve3D(E);
+		CADGeomCurve3D curve3d = CADShapeFactory.factory.newCurve3D(E);
 		if (curve3d == null)
 			return true;
 		double [] coord = new double[3*curvmax.length];
@@ -104,7 +104,7 @@ public class Compat1D2D
 		
 		for (CADFace F: faceset)
 		{
-			CADGeomCurve2D curve2d = CADShapeBuilder.factory.newCurve2D(E, F);
+			CADGeomCurve2D curve2d = CADShapeFactory.factory.newCurve2D(E, F);
 			if (curve2d == null)
 				continue;
 			

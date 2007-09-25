@@ -51,6 +51,6 @@ public class OCCExplorer implements CADExplorer
 	
 	public CADShape current()
 	{
-		return OCCShapeBuilder.factory.newShape(occExp.current());
+		return OCCShapeFactory.factory.newShape(occExp.current());
 	}
 }

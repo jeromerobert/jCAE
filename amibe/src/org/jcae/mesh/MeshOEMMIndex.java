@@ -23,7 +23,7 @@ package org.jcae.mesh;
 
 import org.jcae.mesh.oemm.*;
 import org.jcae.mesh.cad.CADShape;
-import org.jcae.mesh.cad.CADShapeBuilder;
+import org.jcae.mesh.cad.CADShapeFactory;
 import org.apache.log4j.Logger;
 import java.io.File;
 
@@ -40,7 +40,7 @@ public class MeshOEMMIndex
 		final OEMM oemm = new OEMM(lmax);
 		if(brepfilename!=null)
 		{
-			CADShapeBuilder factory = CADShapeBuilder.factory;
+			CADShapeFactory factory = CADShapeFactory.factory;
 			CADShape shape = factory.newShape(brepfilename);
 			double [] bbox = shape.boundingBox();		
 			oemm.setBoundingBox(bbox);

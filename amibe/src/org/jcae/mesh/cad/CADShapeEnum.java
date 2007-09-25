@@ -42,17 +42,17 @@ public abstract class CADShapeEnum
 		return name;
 	}
 
-	public static final CADShapeEnum VERTEX = CADShapeBuilder.factory.getShapeEnumInstance("vertex");
-	public static final CADShapeEnum EDGE = CADShapeBuilder.factory.getShapeEnumInstance("edge");
-	public static final CADShapeEnum WIRE = CADShapeBuilder.factory.getShapeEnumInstance("wire");
-	public static final CADShapeEnum FACE = CADShapeBuilder.factory.getShapeEnumInstance("face");
-	public static final CADShapeEnum SHELL = CADShapeBuilder.factory.getShapeEnumInstance("shell");
-	public static final CADShapeEnum SOLID = CADShapeBuilder.factory.getShapeEnumInstance("solid");
-	public static final CADShapeEnum COMPSOLID = CADShapeBuilder.factory.getShapeEnumInstance("compsolid");
-	public static final CADShapeEnum COMPOUND = CADShapeBuilder.factory.getShapeEnumInstance("compound");
+	public static final CADShapeEnum VERTEX = CADShapeFactory.factory.getShapeEnumInstance("vertex");
+	public static final CADShapeEnum EDGE = CADShapeFactory.factory.getShapeEnumInstance("edge");
+	public static final CADShapeEnum WIRE = CADShapeFactory.factory.getShapeEnumInstance("wire");
+	public static final CADShapeEnum FACE = CADShapeFactory.factory.getShapeEnumInstance("face");
+	public static final CADShapeEnum SHELL = CADShapeFactory.factory.getShapeEnumInstance("shell");
+	public static final CADShapeEnum SOLID = CADShapeFactory.factory.getShapeEnumInstance("solid");
+	public static final CADShapeEnum COMPSOLID = CADShapeFactory.factory.getShapeEnumInstance("compsolid");
+	public static final CADShapeEnum COMPOUND = CADShapeFactory.factory.getShapeEnumInstance("compound");
 	public static Iterator<CADShapeEnum> iterator(CADShapeEnum start, CADShapeEnum end)
 	{
-		return CADShapeBuilder.factory.newShapeEnumIterator(start, end);
+		return CADShapeFactory.factory.newShapeEnumIterator(start, end);
 	}
 
 }

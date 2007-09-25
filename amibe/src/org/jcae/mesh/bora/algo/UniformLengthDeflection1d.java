@@ -107,7 +107,7 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		if (V[0].isSame(V[1]))
 			isCircular=true;
 		
-		CADGeomCurve3D curve = CADShapeBuilder.factory.newCurve3D(E);
+		CADGeomCurve3D curve = CADShapeFactory.factory.newCurve3D(E);
 		if (curve == null)
 		{
 			if (!E.isDegenerated())

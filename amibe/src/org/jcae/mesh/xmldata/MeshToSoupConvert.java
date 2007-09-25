@@ -31,7 +31,7 @@ import java.nio.channels.FileChannel;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
-import org.jcae.mesh.cad.CADShapeBuilder;
+import org.jcae.mesh.cad.CADShapeFactory;
 import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.cad.CADExplorer;
 import org.jcae.mesh.cad.CADGeomSurface;
@@ -66,7 +66,7 @@ public class MeshToSoupConvert extends JCAEXMLData
 	 */
 	public static void main(String[] args)
 	{
-		meshToSoup(args[0], CADShapeBuilder.factory.newShape(args[1]));
+		meshToSoup(args[0], CADShapeFactory.factory.newShape(args[1]));
 	}
 	
 	/**
@@ -76,7 +76,7 @@ public class MeshToSoupConvert extends JCAEXMLData
 	 */
 	public static void meshToSoup(String xmlDir, CADShape shape)
 	{
-		CADExplorer expF = CADShapeBuilder.factory.newExplorer();		
+		CADExplorer expF = CADShapeFactory.factory.newExplorer();		
 		int numFace=Integer.getInteger("org.jcae.mesh.Mesher.meshFace", 0).intValue();
 		int minFace=Integer.getInteger("org.jcae.mesh.Mesher.minFace", 0).intValue();
 		int maxFace=Integer.getInteger("org.jcae.mesh.Mesher.maxFace", 0).intValue();

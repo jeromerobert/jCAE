@@ -36,7 +36,7 @@ import org.jcae.mesh.cad.CADFace;
 import org.jcae.mesh.cad.CADSolid;
 import org.jcae.mesh.cad.CADGeomCurve3D;
 import org.jcae.mesh.cad.CADGeomSurface;
-import org.jcae.mesh.cad.CADShapeBuilder;
+import org.jcae.mesh.cad.CADShapeFactory;
 import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.mesher.ds.SubMesh1D;
 import org.jcae.mesh.mesher.ds.MNode1D;
@@ -102,7 +102,7 @@ public class Storage
 			// Write node references and compute local indices
 			TObjectIntHashMap<MNode1D> localIdx = write1dNodeReferences(dir, nodelist, edge);
 			// Write node coordinates
-			write1dCoordinates(dir, nodelist, CADShapeBuilder.factory.newCurve3D(E));
+			write1dCoordinates(dir, nodelist, CADShapeFactory.factory.newCurve3D(E));
 			// Write edge connectivity
 			write1dEdges(dir, submesh.getEdges(), localIdx);
 		}

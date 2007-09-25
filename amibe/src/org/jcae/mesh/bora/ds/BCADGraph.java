@@ -83,7 +83,7 @@ public class BCADGraph
 
 		// Build the whole graph
 		THashMap<CADShape, CADShape> seen = new THashMap<CADShape, CADShape>();
-		CADShapeBuilder factory = CADShapeBuilder.factory;
+		CADShapeFactory factory = CADShapeFactory.factory;
 		CADExplorer exp = factory.newExplorer();
 		for (Iterator<CADShapeEnum> itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
 		{
@@ -194,7 +194,7 @@ public class BCADGraph
 	 */
 	public Collection<BCADGraphCell> getCellList(CADShapeEnum cse)
 	{
-		CADShapeBuilder factory = CADShapeBuilder.factory;
+		CADShapeFactory factory = CADShapeFactory.factory;
 		CADExplorer exp = factory.newExplorer();
 		Collection<BCADGraphCell> ret = new LinkedHashSet<BCADGraphCell>();
 		for (exp.init(root.getShape(), cse); exp.more(); exp.next())

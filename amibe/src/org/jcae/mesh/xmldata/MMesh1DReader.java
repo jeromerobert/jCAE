@@ -34,7 +34,7 @@ import javax.xml.xpath.XPathFactory;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADShape;
-import org.jcae.mesh.cad.CADShapeBuilder;
+import org.jcae.mesh.cad.CADShapeFactory;
 import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.cad.CADExplorer;
 import org.jcae.mesh.mesher.ds.MEdge1D;
@@ -98,7 +98,7 @@ public class MMesh1DReader
 			if(!new File(brepFile).isAbsolute())
 				brepFile = xmlDir+File.separator+brepFile;
 			
-			CADShape shape = CADShapeBuilder.factory.newShape(brepFile);
+			CADShape shape = CADShapeFactory.factory.newShape(brepFile);
 			m1d = new MMesh1D(shape);
 			
 			String nodesFile = xpath.evaluate(
@@ -132,7 +132,7 @@ public class MMesh1DReader
 			//  vertex.  Offset is thus set to 1.
 			int offset = 1;
 			HashSet<CADEdge> setSeenEdges = new HashSet<CADEdge>();
-			CADExplorer expE = CADShapeBuilder.factory.newExplorer();
+			CADExplorer expE = CADShapeFactory.factory.newExplorer();
 			for (expE.init(shape, CADShapeEnum.EDGE); expE.more(); expE.next())
 			{
 				CADEdge E = (CADEdge) expE.current();

@@ -33,17 +33,17 @@ import org.jcae.opencascade.jni.BRepAlgoAPI_Cut;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
 
-public class OCCShapeBuilder extends CADShapeBuilder
+public class OCCShapeFactory extends CADShapeFactory
 {
-	private static Logger logger=Logger.getLogger(OCCShapeBuilder.class);
+	private static Logger logger=Logger.getLogger(OCCShapeFactory.class);
 	
-	public OCCShapeBuilder ()
+	public OCCShapeFactory ()
 	{
 	}
 	
-	public CADShapeBuilder newInstance()
+	public CADShapeFactory newInstance()
 	{
-		return new OCCShapeBuilder();
+		return new OCCShapeFactory();
 	}
 	
 	@Override

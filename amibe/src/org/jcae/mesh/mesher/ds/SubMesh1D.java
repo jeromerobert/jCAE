@@ -202,7 +202,7 @@ public class SubMesh1D
 	{
 		int n = 0;
 		double minlen = -1.0, maxlen = 0.0,  avglen = 0.0;
-		CADGeomCurve3D c3d = CADShapeBuilder.factory.newCurve3D(edge);
+		CADGeomCurve3D c3d = CADShapeFactory.factory.newCurve3D(edge);
 		
 		Iterator<MEdge1D> ite = edgelist.iterator();
 		while (ite.hasNext())

@@ -26,7 +26,7 @@ import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADGeomCurve3D;
-import org.jcae.mesh.cad.CADShapeBuilder;
+import org.jcae.mesh.cad.CADShapeFactory;
 import org.jcae.mesh.cad.CADShapeEnum;
 import javax.media.j3d.Appearance;
 import javax.media.j3d.IndexedLineArray;
@@ -118,7 +118,7 @@ public class Bora1D
 		double [] x1 = new double[nVertices];
 		double [] x3d1 = new double[3*nVertices];
 		int [] beams = new int[2*nBeams];
-		CADShapeBuilder factory = CADShapeBuilder.factory;
+		CADShapeFactory factory = CADShapeFactory.factory;
 
 		nEdges = 0;
 		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.EDGE); it.hasNext(); )

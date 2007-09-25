@@ -23,7 +23,7 @@ package org.jcae.mesh.bora.ds;
 
 import org.jcae.mesh.bora.xmldata.BModelWriter;
 import org.jcae.mesh.bora.xmldata.Storage;
-import org.jcae.mesh.cad.CADShapeBuilder;
+import org.jcae.mesh.cad.CADShapeFactory;
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADShapeEnum;
 import java.util.Collection;
@@ -73,7 +73,7 @@ public class BModel
 		if (logger.isDebugEnabled())
 			logger.debug("Building model "+id+" from "+brep+" into "+out);
 		freeIndex++;
-		CADShapeBuilder factory = CADShapeBuilder.factory;
+		CADShapeFactory factory = CADShapeFactory.factory;
 		xmlDir = out;
 		File xmlDirF = new File(xmlDir);
 		xmlDirF.mkdirs();

@@ -49,6 +49,6 @@ public class OCCIterator implements CADIterator
 	
 	public CADShape value()
 	{
-		return OCCShapeBuilder.factory.newShape(occIt.value());
+		return OCCShapeFactory.factory.newShape(occIt.value());
 	}
 }

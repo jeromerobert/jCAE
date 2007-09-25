@@ -25,22 +25,22 @@ import org.apache.log4j.Logger;
 /**
  * Class to provide factory methods
  */
-public abstract class CADShapeBuilder
+public abstract class CADShapeFactory
 {
-	private static Logger logger=Logger.getLogger(CADShapeBuilder.class);
-	public static final CADShapeBuilder factory;
+	private static Logger logger=Logger.getLogger(CADShapeFactory.class);
+	public static final CADShapeFactory factory;
 	static
 	{
 		String cadType = System.getProperty("org.jcae.mesh.cad");
-		CADShapeBuilder b = null;
+		CADShapeFactory b = null;
 		if (cadType == null)
 		{
-			cadType = "org.jcae.mesh.cad.occ.OCCShapeBuilder";
+			cadType = "org.jcae.mesh.cad.occ.OCCShapeFactory";
 			System.setProperty("org.jcae.mesh.cad", cadType);
 		}
 		try
 		{
-			b = (CADShapeBuilder) Class.forName(cadType).newInstance();
+			b = (CADShapeFactory) Class.forName(cadType).newInstance();
 		}
 		catch (Exception e)
 		{
@@ -50,7 +50,7 @@ public abstract class CADShapeBuilder
 		factory = b;
 	}
 	
-	public CADShapeBuilder ()
+	public CADShapeFactory ()
 	{
 	}
 	

@@ -55,7 +55,7 @@ public class MMesh0D
 	 */
 	public MMesh0D(CADShape shape)
 	{
-		CADExplorer expV = CADShapeBuilder.factory.newExplorer();
+		CADExplorer expV = CADShapeFactory.factory.newExplorer();
 		int nodes = 0;
 		for (expV.init(shape, CADShapeEnum.VERTEX); expV.more(); expV.next())
 			nodes++;
@@ -81,7 +81,7 @@ public class MMesh0D
 
 		CADShape shape = root.getShape();
 		// This is a copy of the first method.
-		CADExplorer expV = CADShapeBuilder.factory.newExplorer();
+		CADExplorer expV = CADShapeFactory.factory.newExplorer();
 		int nodes = 0;
 		for (expV.init(shape, CADShapeEnum.VERTEX); expV.more(); expV.next())
 			nodes++;

@@ -22,7 +22,7 @@
 package org.jcae.mesh.bora.ds;
 
 import org.jcae.mesh.cad.CADShape;
-import org.jcae.mesh.cad.CADShapeBuilder;
+import org.jcae.mesh.cad.CADShapeFactory;
 import org.jcae.mesh.cad.CADShapeEnum;
 import org.jcae.mesh.cad.CADExplorer;
 import org.jcae.mesh.cad.CADIterator;
@@ -230,7 +230,7 @@ public class BCADGraphCell
 
 	private Iterator<BCADGraphCell> shapesExplorer(final CADShapeEnum cse, final Collection<CADShape> cadShapeSet)
 	{
-		final CADExplorer exp = CADShapeBuilder.factory.newExplorer();
+		final CADExplorer exp = CADShapeFactory.factory.newExplorer();
 		exp.init(shape, cse);
 		return new Iterator<BCADGraphCell>()
 		{
@@ -301,7 +301,7 @@ public class BCADGraphCell
 
 	private Iterator<BCADGraphCell> shapesIterator(final Collection<CADShape> cadShapeSet)
 	{
-		final CADIterator it = CADShapeBuilder.factory.newIterator();
+		final CADIterator it = CADShapeFactory.factory.newIterator();
 		it.initialize(shape);
 		return new Iterator<BCADGraphCell>()
 		{

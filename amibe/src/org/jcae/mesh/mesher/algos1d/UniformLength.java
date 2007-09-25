@@ -27,7 +27,7 @@ import org.jcae.mesh.mesher.ds.MMesh1D;
 import org.jcae.mesh.cad.CADGeomCurve3D;
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADEdge;
-import org.jcae.mesh.cad.CADShapeBuilder;
+import org.jcae.mesh.cad.CADShapeFactory;
 import java.util.List;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
@@ -123,7 +123,7 @@ public class UniformLength
 		if (V[0].isSame(V[1]))
 			isCircular=true;
 		
-		CADGeomCurve3D curve = CADShapeBuilder.factory.newCurve3D(E);
+		CADGeomCurve3D curve = CADShapeFactory.factory.newCurve3D(E);
 		if (curve == null)
 		{
 			if (!E.isDegenerated())
