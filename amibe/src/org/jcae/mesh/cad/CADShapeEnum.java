@@ -36,7 +36,7 @@ public abstract class CADShapeEnum
 		this.name = name;
 		this.ordinal = nextOrdinal++;
 	}
-	public abstract Class asClass();
+	public abstract Class<? extends CADShape> asClass();
 	@Override
 	public String toString()
 	{
