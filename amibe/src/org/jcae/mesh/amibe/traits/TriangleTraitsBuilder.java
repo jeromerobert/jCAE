@@ -29,7 +29,8 @@ public class TriangleTraitsBuilder extends TraitsBuilder
 	public static final int HALFEDGE         = 1 << BITHALFEDGE;
 
 	/**
-	 * Let {@link ElementFactory#createTriangle} create {@link TriangleVH} instances.
+	 * Let {@link org.jcae.mesh.amibe.ds.ElementFactory#createTriangle} create
+	 * {@link org.jcae.mesh.amibe.ds.TriangleVH} instances.
 	 *
 	 * @return  this instance
 	 */
@@ -40,7 +41,8 @@ public class TriangleTraitsBuilder extends TraitsBuilder
 	}
 
 	/**
-	 * Let {@link ElementFactory#createTriangle} create {@link TriangleHE} instances.
+	 * Let {@link org.jcae.mesh.amibe.ds.ElementFactory#createTriangle} create
+	 * {@link org.jcae.mesh.amibe.ds.TriangleHE} instances.
 	 *
 	 * @return  this instance
 	 */
