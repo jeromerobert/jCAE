@@ -227,7 +227,7 @@ public class Mesh2D extends Mesh
 		KdTree quadtree = traitsBuilder.getKdTree(traits);
 		if (quadtree == null)
 			return null;
-		return quadtree.getAllVertices(triangleList.size() / 2);
+		return quadtree.getAllVertices(getTriangles().size() / 2);
 	}
 	/**
 	 * Bootstraps node instertion by creating the first triangle.
@@ -519,7 +519,7 @@ public class Mesh2D extends Mesh
 		logger.debug("Removing degenerated edges");
 		VirtualHalfEdge2D ot = new VirtualHalfEdge2D();
 		HashSet<AbstractTriangle> removedTriangles = new HashSet<AbstractTriangle>();
-		for (AbstractTriangle at: triangleList)
+		for (AbstractTriangle at: getTriangles())
 		{
 			if (removedTriangles.contains(at))
 				continue;
@@ -545,7 +545,7 @@ public class Mesh2D extends Mesh
 			}
 		}
 		for (AbstractTriangle at: removedTriangles)
-			triangleList.remove(at);
+			getTriangles().remove(at);
 	}
 	
 	@Override
@@ -553,7 +553,7 @@ public class Mesh2D extends Mesh
 	{
 		if (!super.isValid(constrained))
 			return false;
-		for (AbstractTriangle t: triangleList)
+		for (AbstractTriangle t: getTriangles())
 		{
 			// We can not rely on t.isOuter() here, attributes
 			// may not have been set yet.

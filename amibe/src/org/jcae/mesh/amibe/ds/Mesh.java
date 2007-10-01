@@ -107,7 +107,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	public Vertex outerVertex = new OuterVertex();
 	
 	//  AbstractTriangle list
-	protected Collection<AbstractTriangle> triangleList = null;
+	private final Collection<AbstractTriangle> triangleList;
 	
 	//  Node list.
 	private final Collection<AbstractVertex> nodeList;
@@ -232,18 +232,6 @@ public class Mesh extends AbstractMesh implements Serializable
 	public Collection<AbstractTriangle> getTriangles()
 	{
 		return triangleList;
-	}
-
-	/**
-	 * Sets triangle list.
-	 *
-	 * @param l triangle list
-	 */
-	public void setTrianglesList(Collection<AbstractTriangle> l)
-	{
-		if (triangleList != null)
-			triangleList.clear();
-		triangleList = l;
 	}
 
 	/**
