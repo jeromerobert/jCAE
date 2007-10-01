@@ -21,6 +21,7 @@ package org.jcae.mesh.amibe.traits;
 
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.AbstractVertex;
+import org.jcae.mesh.amibe.util.KdTree;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Collection;
@@ -31,16 +32,20 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	private static final int BITTRIANGLES = 8;
 	private static final int BITNODES     = 9;
 	private static final int BITGROUPS    = 10;
+	private static final int BITKDTREE    = 11;
 
 	private static final int TRIANGLES        = 1 << BITTRIANGLES;
 	private static final int NODES            = 1 << BITNODES;
 	private static final int GROUPLIST        = 1 << BITGROUPS;
-	private static final int TRIANGLESET      = 1 << (BITTRIANGLES+3);
-	private static final int NODESET          = 1 << (BITNODES+3);
+	private static final int KDTREE           = 1 << BITKDTREE;
+	private static final int TRIANGLESET      = 30;
+	private static final int NODESET          = 31;
 
 	private VertexTraitsBuilder vertexTraitsBuilder = new VertexTraitsBuilder();
 	private HalfEdgeTraitsBuilder halfedgeTraitsBuilder = new HalfEdgeTraitsBuilder();
 	private TriangleTraitsBuilder triangleTraitsBuilder = new TriangleTraitsBuilder();
+
+	private int dimension;
 
 	public MeshTraitsBuilder()
 	{
@@ -101,6 +106,11 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		return hasCapability(TRIANGLES);
 	}
 
+	public boolean hasKdTree()
+	{
+		return hasCapability(KDTREE);
+	}
+
 	public MeshTraitsBuilder addGroupList()
 	{
 		attributes |= GROUPLIST;
@@ -111,6 +121,20 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	{
 		if ((attributes & GROUPLIST) != 0)
 			return (Collection) t.array[index[BITGROUPS]];
+		return null;
+	}
+
+	public MeshTraitsBuilder addKdTree(int d)
+	{
+		attributes |= KDTREE;
+		dimension = d;
+		return this;
+	}
+
+	public KdTree getKdTree(Traits t)
+	{
+		if ((attributes & KDTREE) != 0)
+			return (KdTree) t.array[index[BITKDTREE]];
 		return null;
 	}
 
@@ -127,6 +151,8 @@ public class MeshTraitsBuilder extends TraitsBuilder
 			t.array[index[BITNODES]] = new ArrayList<AbstractVertex>();
 		if ((attributes & GROUPLIST) != 0)
 			t.array[index[BITGROUPS]] = new ArrayList();
+		if ((attributes & KDTREE) != 0)
+			t.array[index[BITKDTREE]] = new KdTree(dimension);
 	}
 
 	public MeshTraitsBuilder add(TraitsBuilder t)

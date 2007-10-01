@@ -8,6 +8,9 @@ Mon Oct  1 12:44:03 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/amibe/traits/MeshTraitsBuilder.java
 	  src/org/jcae/mesh/amibe/traits/TriangleTraitsBuilder.java: Let all
 	add* methods return current instance so that they can be chained.
+	* src/org/jcae/mesh/amibe/patch/Mesh2D.java
+	  src/org/jcae/mesh/amibe/traits/MeshTraitsBuilder.java: Replace
+	quadtree member from Mesh2D by a builder into MeshTraitsBuilder.
 
 Wed Sep 26 00:27:45 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

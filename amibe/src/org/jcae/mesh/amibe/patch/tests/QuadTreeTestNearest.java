@@ -68,7 +68,7 @@ public class QuadTreeTestNearest extends QuadTreeTest
 		double [] bbmax = { 1.0, 1.0 };
 		final Mesh2D m = new Mesh2D();
 		m.pushCompGeom(2);
-		m.initQuadTree(bbmin, bbmax);
+		m.resetQuadTree(bbmin, bbmax);
 		final QuadTreeTestNearest r = new QuadTreeTestNearest(m.getQuadTree());
 		logger.debug("Start insertion");
 		for (int i = 0; i < 500; i++)

@@ -226,6 +226,19 @@ public class KdTree
 	public final double [] x0;
 	
 	/**
+	 * Dummy constructor.  This instance must be properly initialised by calling
+	 * {@link #setup} before putting elements into it.
+	 */
+	public KdTree(int d)
+	{
+		BUCKETSIZE = 10;
+		dimension = d;
+		nrSub = 1 << dimension;
+		x0 = new double[dimension+1];
+		root = new Cell();
+	}
+	
+	/**
 	 * Create a new <code>KdTree</code> of the desired size.
 	 *
 	 * @param bbox   coordinates of bottom-left vertex and upper-right vertices
@@ -237,7 +250,6 @@ public class KdTree
 		nrSub = 1 << dimension;
 		x0 = new double[dimension+1];
 		root = new Cell();
-		nCells++;
 		setup(bbox);
 	}
 	
@@ -256,12 +268,16 @@ public class KdTree
 		nrSub = 1 << dimension;
 		x0 = new double[dimension+1];
 		root = new Cell();
-		nCells++;
 		setup(bbox);
 	}
 	
-	private final void setup(double [] bbox)
+	public final void setup(double [] bbox)
 	{
+		if (bbox.length != 2*dimension)
+			throw new IllegalArgumentException();
+		if (nCells > 0)
+			throw new RuntimeException("KdTree.setup() cannot be called after KdTree has been modified");
+		nCells = 1;
 		double maxDelta = 0.0;
 		for (int i = 0; i < dimension; i++)
 		{
@@ -345,6 +361,8 @@ public class KdTree
 	 */
 	public void add(Vertex v)
 	{
+		if (nCells == 0)
+			throw new RuntimeException("KdTree.setup() must be called before KdTree.add()");
 		Cell current = root;
 		int s = gridSize;
 		int [] ij = new int[dimension];
@@ -414,6 +432,8 @@ public class KdTree
 	 */
 	public void remove(Vertex v)
 	{
+		if (nCells == 0)
+			throw new RuntimeException("KdTree.setup() must be called before KdTree.remove()");
 		Cell current = root;
 		Cell last = root;
 		Cell next;

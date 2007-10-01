@@ -231,7 +231,7 @@ public class Initial
 		}
 		if (bbmax[0] <= bbmin[0] || bbmax[1] <= bbmin[1])
 			throw new InvalidFaceException();
-		mesh.initQuadTree(bbmin, bbmax);
+		mesh.resetQuadTree(bbmin, bbmax);
 		//  Initial point insertion sometimes fail on 2D,
 		//  this needs to be investigated.
 		mesh.pushCompGeom(2);

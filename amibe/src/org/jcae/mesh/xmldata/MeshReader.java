@@ -135,7 +135,7 @@ public class MeshReader
 						bbmin[k] = coord[k];
 				}
 			}
-			mesh.initQuadTree(bbmin, bbmax);
+			mesh.resetQuadTree(bbmin, bbmax);
 			for (int i=0; i < numberOfNodes; i++)
 				mesh.getQuadTree().add(nodelist[i]);
 			
