@@ -24,9 +24,16 @@ import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 
 public class AbstractMesh
 {
-	//  User-defined traits
-	public final MeshTraitsBuilder traitsBuilder;
-	public final Traits traits;
+	/**
+	 * User-defined traits builder.
+	 */
+	protected final MeshTraitsBuilder traitsBuilder;
+
+	/**
+	 * User-defined traits
+	 */
+	protected final Traits traits;
+
 	public AbstractMesh(MeshTraitsBuilder builder)
 	{
 		traitsBuilder = builder;

@@ -45,8 +45,8 @@ public class AbstractTriangle
 	private AbstractTriangle listNext = null;
 	
 	//  User-defined traits
-	public final TriangleTraitsBuilder traitsBuilder;
-	public final Traits traits;
+	protected final TriangleTraitsBuilder traitsBuilder;
+	protected final Traits traits;
 
 	public AbstractTriangle()
 	{

@@ -25,8 +25,8 @@ import org.jcae.mesh.amibe.traits.HalfEdgeTraitsBuilder;
 public abstract class AbstractHalfEdge
 {
 	//  User-defined traits
-	public final HalfEdgeTraitsBuilder traitsBuilder;
-	public final Traits traits;
+	protected final HalfEdgeTraitsBuilder traitsBuilder;
+	protected final Traits traits;
 
 	public abstract void glue(AbstractHalfEdge e);
 	public abstract AbstractHalfEdge split(AbstractMesh m, AbstractVertex v);

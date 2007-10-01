@@ -21,8 +21,22 @@ package org.jcae.mesh.amibe.traits;
 
 public class Traits
 {
-	public final Object [] array;
-	public final int capabilities;
+	/**
+	 * Object array containing user-defined traits.
+	 */
+	protected final Object [] array;
+
+	/**
+	 * User-defined capabilities.
+	 */
+	protected final int capabilities;
+
+	/**
+	 * Creates a new <code>Traits</code> instance.
+	 *
+	 * @param n  number of objects stored in this instance
+	 * @param c  capabilities
+	 */
 	public Traits(int n, int c)
 	{
 		array = new Object[n];

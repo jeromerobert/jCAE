@@ -25,8 +25,9 @@ import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
 public class AbstractVertex
 {
 	//  User-defined traits
-	public final VertexTraitsBuilder traitsBuilder;
-	public final Traits traits;
+	protected final VertexTraitsBuilder traitsBuilder;
+	protected final Traits traits;
+
 	public AbstractVertex()
 	{
 		traitsBuilder = null;
