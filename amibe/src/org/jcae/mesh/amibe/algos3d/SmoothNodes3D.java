@@ -69,7 +69,7 @@ public class SmoothNodes3D
 	public SmoothNodes3D(Mesh m)
 	{
 		mesh = m;
-		c = (Vertex) mesh.factory.createVertex(0.0, 0.0, 0.0);
+		c = (Vertex) mesh.createVertex(0.0, 0.0, 0.0);
 	}
 	
 	/**
@@ -83,7 +83,7 @@ public class SmoothNodes3D
 	public SmoothNodes3D(final Mesh m, final Map<String, String> options)
 	{
 		mesh = m;
-		c = (Vertex) mesh.factory.createVertex(0.0, 0.0, 0.0);
+		c = (Vertex) mesh.createVertex(0.0, 0.0, 0.0);
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
 			final String key = opt.getKey();

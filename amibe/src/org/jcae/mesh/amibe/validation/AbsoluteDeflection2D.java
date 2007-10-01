@@ -48,12 +48,12 @@ public class AbsoluteDeflection2D extends QualityProcedure
 		AbstractTriangle t = (AbstractTriangle) o;
 		double [] uv = Vertex2D.centroid(mesh, (Vertex2D[]) t.vertex).getUV();
 		double [] xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
-		p[3] = (Vertex) mesh.factory.createVertex(xyz);
+		p[3] = (Vertex) mesh.createVertex(xyz);
 		for (int i = 0; i < 3; i++)
 		{
 			uv = t.vertex[i].getUV();
 			xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
-			p[i] = (Vertex) mesh.factory.createVertex(xyz);
+			p[i] = (Vertex) mesh.createVertex(xyz);
 		}
 		double [] xyz0 = p[0].getUV();
 		double [] xyz1 = p[1].getUV();

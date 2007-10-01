@@ -130,8 +130,8 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	public DecimateHalfEdge(final Mesh m, final Map<String, String> options)
 	{
 		super(m);
-		v3 = (Vertex) m.factory.createVertex(0.0, 0.0, 0.0);
-		vCostOpt = (Vertex) m.factory.createVertex(0.0, 0.0, 0.0);
+		v3 = (Vertex) m.createVertex(0.0, 0.0, 0.0);
+		vCostOpt = (Vertex) m.createVertex(0.0, 0.0, 0.0);
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
 			final String key = opt.getKey();

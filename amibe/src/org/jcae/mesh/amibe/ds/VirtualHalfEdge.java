@@ -1254,8 +1254,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		// this = (odV1)
 		Triangle t1 = tri;
 		Triangle t2 = (Triangle) tri.getAdj(localNumber);
-		Triangle t3 = (Triangle) m.factory.createTriangle(t1);
-		Triangle t4 = (Triangle) m.factory.createTriangle(t2);
+		Triangle t3 = (Triangle) m.createTriangle(t1);
+		Triangle t4 = (Triangle) m.createTriangle(t2);
 		m.add(t3);
 		m.add(t4);
 		copyOTri(this, work[1]);        // (odV1)
@@ -1414,14 +1414,14 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		 *   v5        v0       v1
 		 */
 		System.out.println("Building mesh...");
-		Triangle T = (Triangle) m.factory.createTriangle(v[0], v[1], v[2]);
+		Triangle T = (Triangle) m.createTriangle(v[0], v[1], v[2]);
 		m.add(T);
 		assert m.isValid();
 		// Outer triangles
 		Triangle [] O = new Triangle[3];
-		O[0] = (Triangle) m.factory.createTriangle(m.outerVertex, v[1], v[0]);
-		O[1] = (Triangle) m.factory.createTriangle(m.outerVertex, v[2], v[1]);
-		O[2] = (Triangle) m.factory.createTriangle(m.outerVertex, v[0], v[2]);
+		O[0] = (Triangle) m.createTriangle(m.outerVertex, v[1], v[0]);
+		O[1] = (Triangle) m.createTriangle(m.outerVertex, v[2], v[1]);
+		O[2] = (Triangle) m.createTriangle(m.outerVertex, v[0], v[2]);
 		for (int i = 0; i < 3; i++)
 		{
 			O[i].setOuter();
@@ -1557,12 +1557,12 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	{
 		Mesh m = new Mesh();
 		Vertex [] v = new Vertex[6];
-		v[0] = (Vertex) m.factory.createVertex(0.0, 0.0, 0.0);
-		v[1] = (Vertex) m.factory.createVertex(1.0, 0.0, 0.0);
-		v[2] = (Vertex) m.factory.createVertex(1.0, 1.0, 0.0);
-		v[3] = (Vertex) m.factory.createVertex(0.0, 1.0, 0.0);
-		v[4] = (Vertex) m.factory.createVertex(-1.0, 1.0, 0.0);
-		v[5] = (Vertex) m.factory.createVertex(-1.0, 0.0, 0.0);
+		v[0] = (Vertex) m.createVertex(0.0, 0.0, 0.0);
+		v[1] = (Vertex) m.createVertex(1.0, 0.0, 0.0);
+		v[2] = (Vertex) m.createVertex(1.0, 1.0, 0.0);
+		v[3] = (Vertex) m.createVertex(0.0, 1.0, 0.0);
+		v[4] = (Vertex) m.createVertex(-1.0, 1.0, 0.0);
+		v[5] = (Vertex) m.createVertex(-1.0, 0.0, 0.0);
 		unitTestBuildMesh(m, v);
 		assert m.isValid();
 		System.out.println("Checking loops...");

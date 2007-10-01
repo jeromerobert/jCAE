@@ -16,6 +16,11 @@ Mon Oct  1 12:44:03 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	implicitly by Mesh2D constructor, and the latter by Mesh constructor.
 	Note that getDefault3D() does not call addNodeList(), hence default
 	Mesh constructor does no more contain node collection.
+	* src/org/jcae/mesh/amibe/ds/ElementFactoryInterface.java: Remove
+	createVertex(), createVertex(double p) and createTriangle() methods.
+	* src/org/jcae/mesh/amibe/ds/Mesh.java: Let factory be a protected
+	member, and add createVertex(), createTriangle() and hasAdjacency()
+	methods which are delegates to factory member.
 
 Wed Sep 26 00:27:45 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

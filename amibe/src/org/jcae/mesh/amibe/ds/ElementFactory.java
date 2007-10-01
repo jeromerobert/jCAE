@@ -37,16 +37,6 @@ public class ElementFactory implements ElementFactoryInterface
 		triangleTraitsBuilder = mtb.getTriangleTraitsBuilder();
 	}
 
-	public AbstractVertex createVertex()
-	{
-		return new Vertex(vertexTraitsBuilder);
-	}
-
-	public AbstractVertex createVertex(double p)
-	{
-		throw new RuntimeException();
-	}
-
 	public AbstractVertex createVertex(double u, double v)
 	{
 		throw new RuntimeException();
@@ -68,7 +58,7 @@ public class ElementFactory implements ElementFactoryInterface
 		return new HalfEdge(halfedgeTraitsBuilder, t, orientation, attributes);
 	}
 
-	public AbstractTriangle createTriangle()
+	private AbstractTriangle createTriangle()
 	{
 		if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE))
 		{

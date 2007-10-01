@@ -106,7 +106,7 @@ public class UNVReader
 		{
 				e.printStackTrace();
 		}
-		if (mesh.factory.hasAdjacency())
+		if (mesh.hasAdjacency())
 		{
 			Vertex [] v = new Vertex[nodesmap.size()];
 			System.arraycopy(nodesmap.getValues(), 0, v, 0, v.length);
@@ -176,7 +176,7 @@ public class UNVReader
 				x = new Double(x1).doubleValue()/unit;
 				y = new Double(y1).doubleValue()/unit;
 				z = new Double(z1).doubleValue()/unit;
-				Vertex n = (Vertex) m.factory.createVertex(x,y,z);
+				Vertex n = (Vertex) m.createVertex(x,y,z);
 				nodesmap.put(index, n);
 			}
 		}
@@ -218,7 +218,7 @@ public class UNVReader
 					assert n2 != null : p2;
 					Vertex n3 = nodesmap.get(p3);
 					assert n3 != null : p3;
-					AbstractTriangle f = mesh.factory.createTriangle(n1, n2, n3);
+					AbstractTriangle f = mesh.createTriangle(n1, n2, n3);
 					mesh.add(f);
 					n1.setLink(f);
 					n2.setLink(f);
@@ -244,13 +244,13 @@ public class UNVReader
 					assert n3 != null : p3;
 					Vertex n4 = nodesmap.get(p4);
 					assert n4 != null : p4;
-					AbstractTriangle f = mesh.factory.createTriangle(n1, n2, n3);
+					AbstractTriangle f = mesh.createTriangle(n1, n2, n3);
 					mesh.add(f);
 					n1.setLink(f);
 					n2.setLink(f);
 					n3.setLink(f);
 					facesmap.put(ind, f);
-					f = mesh.factory.createTriangle(n1, n3, n4);
+					f = mesh.createTriangle(n1, n3, n4);
 					mesh.add(f);
 					n4.setLink(f);
 					facesmap.put(-ind, f);

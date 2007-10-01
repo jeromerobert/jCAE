@@ -165,7 +165,7 @@ public class Vertex2D extends Vertex
 	{
 		double x = 0.0, y = 0.0;
 		if (v.length == 0)
-			return (Vertex2D) m.factory.createVertex(0.0, 0.0);
+			return (Vertex2D) m.createVertex(0.0, 0.0);
 		for (int i = 0; i < v.length; i++)
 		{
 			double [] p = v[i].getUV();
@@ -174,7 +174,7 @@ public class Vertex2D extends Vertex
 		}
 		x /= v.length;
 		y /= v.length;
-		return (Vertex2D) m.factory.createVertex(x, y);
+		return (Vertex2D) m.createVertex(x, y);
 	}
 	
 	/**

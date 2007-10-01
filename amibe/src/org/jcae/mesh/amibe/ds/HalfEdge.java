@@ -901,8 +901,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		HalfEdge h2 = HEsym().next.next;// (v2do)
 		TriangleHE t1 = h1.tri;
 		TriangleHE t2 = h2.tri;
-		TriangleHE t3 = (TriangleHE) m.factory.createTriangle(t1);
-		TriangleHE t4 = (TriangleHE) m.factory.createTriangle(t2);
+		TriangleHE t3 = (TriangleHE) m.createTriangle(t1);
+		TriangleHE t4 = (TriangleHE) m.createTriangle(t2);
 		m.add(t3);
 		m.add(t4);
 		
@@ -1031,7 +1031,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		 *   v5        v0       v1
 		 */
 		logger.info("Building mesh...");
-		TriangleHE T = (TriangleHE) m.factory.createTriangle(v[0], v[1], v[2]);
+		TriangleHE T = (TriangleHE) m.createTriangle(v[0], v[1], v[2]);
 		v[0].setLink(T);
 		v[1].setLink(T);
 		v[2].setLink(T);
@@ -1124,12 +1124,12 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	{
 		Mesh m = new Mesh();
 		Vertex [] v = new Vertex[6];
-		v[0] = (Vertex) m.factory.createVertex(0.0, 0.0, 0.0);
-		v[1] = (Vertex) m.factory.createVertex(1.0, 0.0, 0.0);
-		v[2] = (Vertex) m.factory.createVertex(1.0, 1.0, 0.0);
-		v[3] = (Vertex) m.factory.createVertex(0.0, 1.0, 0.0);
-		v[4] = (Vertex) m.factory.createVertex(-1.0, 1.0, 0.0);
-		v[5] = (Vertex) m.factory.createVertex(-1.0, 0.0, 0.0);
+		v[0] = (Vertex) m.createVertex(0.0, 0.0, 0.0);
+		v[1] = (Vertex) m.createVertex(1.0, 0.0, 0.0);
+		v[2] = (Vertex) m.createVertex(1.0, 1.0, 0.0);
+		v[3] = (Vertex) m.createVertex(0.0, 1.0, 0.0);
+		v[4] = (Vertex) m.createVertex(-1.0, 1.0, 0.0);
+		v[5] = (Vertex) m.createVertex(-1.0, 0.0, 0.0);
 		unitTestBuildMesh(m, v);
 		assert m.isValid();
 		logger.info("Checking loops...");
@@ -1145,15 +1145,15 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		logger.info("Building non-manifold mesh...");
 		m = new Mesh();
 		Vertex [] nmv = new Vertex[6];
-		nmv[0] = (Vertex) m.factory.createVertex(0.0, 0.0, 0.0);
-		nmv[1] = (Vertex) m.factory.createVertex(0.0, 0.0, 3.0);
-		nmv[2] = (Vertex) m.factory.createVertex(1.0, 0.0, 0.0);
-		nmv[3] = (Vertex) m.factory.createVertex(0.0, 1.0, 0.0);
-		nmv[4] = (Vertex) m.factory.createVertex(-1.0, 0.0, 0.0);
-		nmv[5] = (Vertex) m.factory.createVertex(0.0, -1.0, 0.0);
+		nmv[0] = (Vertex) m.createVertex(0.0, 0.0, 0.0);
+		nmv[1] = (Vertex) m.createVertex(0.0, 0.0, 3.0);
+		nmv[2] = (Vertex) m.createVertex(1.0, 0.0, 0.0);
+		nmv[3] = (Vertex) m.createVertex(0.0, 1.0, 0.0);
+		nmv[4] = (Vertex) m.createVertex(-1.0, 0.0, 0.0);
+		nmv[5] = (Vertex) m.createVertex(0.0, -1.0, 0.0);
 		for (int i = 2; i < 6; i++)
 		{
-			TriangleHE T = (TriangleHE) m.factory.createTriangle(nmv[0], nmv[1], nmv[i]);
+			TriangleHE T = (TriangleHE) m.createTriangle(nmv[0], nmv[1], nmv[i]);
 			nmv[i].setLink(T);
 			if (i == 2)
 			{

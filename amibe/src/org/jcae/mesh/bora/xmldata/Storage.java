@@ -501,7 +501,7 @@ public class Storage
 		for (int i = 0; i < numberOfNodes; i++)
 		{
 			nodesBuffer.get(coord);
-			nodelist[i] = (Vertex) mesh.factory.createVertex(coord);
+			nodelist[i] = (Vertex) mesh.createVertex(coord);
 		}
 		for (int i = 0; i < numberOfReferences; i++)
 		{
@@ -542,7 +542,7 @@ public class Storage
 				pts[1] = pts[2];
 				pts[2] = temp;
 			}
-			face = (Triangle) mesh.factory.createTriangle(pts);
+			face = (Triangle) mesh.createTriangle(pts);
 			mesh.add(face);
 			face.setGroupId(id);
 			for (int j = 0; j < nr; j++)

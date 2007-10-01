@@ -122,7 +122,7 @@ public class OctreeTestDisplayPLY extends OctreeTest
 		for (int i = 0; i < nrNodes - nrDuplicates; i++)
 		{
 			System.arraycopy(coord, 3*i, xyz, 0, 3);
-			r.add((Vertex) mesh.factory.createVertex(xyz));
+			r.add((Vertex) mesh.createVertex(xyz));
 		}
 		logger.info("Max level: "+r.getMaxLevel());
 		logger.info("Number of cells: "+r.nCells);

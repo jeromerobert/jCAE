@@ -121,7 +121,7 @@ public class MeshReader
 			for (int i=0; i < numberOfNodes; i++)
 			{
 				nodesBuffer.get(coord);
-				nodelist[i] = (Vertex2D) mesh.factory.createVertex(coord);
+				nodelist[i] = (Vertex2D) mesh.createVertex(coord);
 				if (i < numberOfNodes - numberOfReferences)
 					label = 0;
 				else
@@ -148,7 +148,7 @@ public class MeshReader
 				Vertex2D pt1 = nodelist[trianglesBuffer.get()];
 				Vertex2D pt2 = nodelist[trianglesBuffer.get()];
 				Vertex2D pt3 = nodelist[trianglesBuffer.get()];
-				facelist[i] = mesh.factory.createTriangle(pt1, pt2, pt3);
+				facelist[i] = mesh.createTriangle(pt1, pt2, pt3);
 				mesh.add(facelist[i]);
 				pt1.setLink(facelist[i]);
 				pt2.setLink(facelist[i]);
@@ -244,7 +244,7 @@ public class MeshReader
 			for (int i=0; i < numberOfNodes; i++)
 			{
 				nodesBuffer.get(coord);
-				nodelist[i] = (Vertex) mesh.factory.createVertex(coord);
+				nodelist[i] = (Vertex) mesh.createVertex(coord);
 				if (i < numberOfNodes - numberOfReferences)
 					label = 0;
 				else
@@ -279,7 +279,7 @@ public class MeshReader
 				Vertex pt1 = nodelist[trianglesBuffer.get()];
 				Vertex pt2 = nodelist[trianglesBuffer.get()];
 				Vertex pt3 = nodelist[trianglesBuffer.get()];
-				facelist[i] = mesh.factory.createTriangle(pt1, pt2, pt3);
+				facelist[i] = mesh.createTriangle(pt1, pt2, pt3);
 				mesh.add(facelist[i]);
 				pt1.setLink(facelist[i]);
 				pt2.setLink(facelist[i]);
@@ -319,7 +319,7 @@ public class MeshReader
 			fcG.close();
 			MeshExporter.clean(bbG);
 			//  Build adjacency relations
-			if (mesh.factory.hasAdjacency())
+			if (mesh.hasAdjacency())
 			{
 				logger.debug("Build mesh adjacency");
 				mesh.buildAdjacency(nodelist, ridgeAngle);

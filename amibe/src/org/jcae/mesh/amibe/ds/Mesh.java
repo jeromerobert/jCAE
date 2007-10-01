@@ -70,11 +70,11 @@ import org.apache.log4j.Logger;
    mtb.add(ttb);
    // Create a new instance with these features
    Mesh mesh = new Mesh(mtb);
-   // Then each triangle created by mesh.factory.createTriangle
+   // Then each triangle created by mesh.createTriangle
    // will contain objects needed to store adjacency relations.
-   Triangle t = (Triangle) mesh.factory.createTriangle(...);
-   // Vertices must be created by mesh.factory.createVertex
-   Vertex v = (Vertex) mesh.factory.createVertex(...);
+   Triangle t = (Triangle) mesh.createTriangle(...);
+   // Vertices must be created by mesh.createVertex
+   Vertex v = (Vertex) mesh.createVertex(...);
  * </pre>
  * 
  */
@@ -95,7 +95,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	private final Collection<AbstractVertex> nodeList;
 
 	//  Entity factory
-	public ElementFactoryInterface factory = null;
+	protected ElementFactoryInterface factory = null;
 
 	protected int maxLabel = 0;
 	
@@ -263,6 +263,88 @@ public class Mesh extends AbstractMesh implements Serializable
 		return (len < epsilon);
 	}
 	
+	/**
+	 * Creates a triangle composed of three vertices.
+	 *
+	 * @param v0  first vertex
+	 * @param v1  second vertex
+	 * @param v2  third vertex
+	 * @return a new {@link AbstractTriangle} instance composed of three vertices
+	 */
+	public AbstractTriangle createTriangle(AbstractVertex v0, AbstractVertex v1, AbstractVertex v2)
+	{
+		return factory.createTriangle(v0, v1, v2);
+	}
+
+	/**
+	 * Creates a triangle composed of three vertices.
+	 *
+	 * @param v  array of three vertices
+	 * @return a new {@link AbstractTriangle} instance composed of three vertices
+	 */
+	public AbstractTriangle createTriangle(AbstractVertex [] v)
+	{
+		assert v.length == 3;
+		return factory.createTriangle(v);
+	}
+
+	/**
+	 * Clones a triangle.
+	 *
+	 * @param that  triangle to clone
+	 * @return a new {@link AbstractTriangle} instance
+	 */
+	public AbstractTriangle createTriangle(AbstractTriangle that)
+	{
+		return factory.createTriangle(that);
+	}
+
+	/**
+	 * Creates a 2D vertex.
+	 *
+	 * @param u  first coordinate
+	 * @param v  second coordinate
+	 * @return a new {@link AbstractVertex} instance with this location.
+	 */
+	public AbstractVertex createVertex(double u, double v)
+	{
+		return factory.createVertex(u, v);
+	}
+
+	/**
+	 * Creates a 3D vertex.
+	 *
+	 * @param x  first coordinate
+	 * @param y  second coordinate
+	 * @param z  third coordinate
+	 * @return a new {@link AbstractVertex} instance with this location.
+	 */
+	public AbstractVertex createVertex(double x, double y, double z)
+	{
+		return factory.createVertex(x, y, z);
+	}
+
+	/**
+	 * Creates a 2D or 3D vertex.
+	 *
+	 * @param p  coordinates
+	 * @return a new {@link AbstractVertex} instance with this location.
+	 */
+	public AbstractVertex createVertex(double [] p)
+	{
+		return factory.createVertex(p);
+	}
+
+	/**
+	 * Tells whether mesh contains adjacency relations.
+	 * @return <code>true</code> if mesh contains adjacency relations,
+	 *         <code>false</code> otherwise.
+	 */
+	public boolean hasAdjacency()
+	{
+		return factory.hasAdjacency();
+	}
+
 	/**
 	 * Build adjacency relations between triangles
 	 */

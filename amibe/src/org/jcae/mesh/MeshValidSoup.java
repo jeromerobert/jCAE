@@ -48,7 +48,7 @@ public class MeshValidSoup
 		}
 		public void processVertex(int i, double [] xyz)
 		{
-			n[i] = (Vertex) mesh.factory.createVertex(xyz[0], xyz[1], xyz[2]);
+			n[i] = (Vertex) mesh.createVertex(xyz[0], xyz[1], xyz[2]);
 		}
 		public void processTriangle(int group)
 		{

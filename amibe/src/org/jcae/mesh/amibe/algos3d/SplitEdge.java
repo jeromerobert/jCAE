@@ -123,7 +123,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		double [] p1 = current.destination().getUV();
 		for (int i = 0; i < 3; i++)
 			newXYZ[i] = 0.5*(p0[i]+p1[i]);
-		insertedVertex = (Vertex) mesh.factory.createVertex(newXYZ);
+		insertedVertex = (Vertex) mesh.createVertex(newXYZ);
 		if (current.hasAttributes(VirtualHalfEdge.BOUNDARY))
 		{
 			// FIXME: Check deflection

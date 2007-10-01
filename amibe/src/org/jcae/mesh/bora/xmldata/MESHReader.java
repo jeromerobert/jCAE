@@ -87,7 +87,7 @@ public class MESHReader
 				x = new Double(x1).doubleValue();
 				y = new Double(y1).doubleValue();
 				z = new Double(z1).doubleValue();
-				Vertex n = (Vertex) m.factory.createVertex(x,y,z);
+				Vertex n = (Vertex) m.createVertex(x,y,z);
 				m.add(n);
 				nodesmap.put(i, n);
 			}
@@ -121,7 +121,7 @@ public class MESHReader
 					if (v[j] == null)
 						throw new RuntimeException();
 				}
-				AbstractTriangle f = mesh.factory.createTriangle(v);
+				AbstractTriangle f = mesh.createTriangle(v);
 				mesh.add(f);
 			}
 		}

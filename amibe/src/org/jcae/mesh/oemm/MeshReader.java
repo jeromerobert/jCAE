@@ -246,7 +246,7 @@ public class MeshReader extends Storage
 				for(int nr = 0; nr < nf; nr ++)
 				{
 					bbD.get(xyz);
-					vert[index] = (Vertex) mesh.factory.createVertex(xyz);
+					vert[index] = (Vertex) mesh.createVertex(xyz);
 					vert[index].setLabel(current.minIndex + index);
 					vert[index].setReadable(true);
 					boolean writable = listAdjacentLeaves.get(index).isEmpty();
@@ -360,7 +360,7 @@ public class MeshReader extends Storage
 
 	private static void createTriangle(int groupId, Vertex[] vert, boolean readable, boolean writable, Mesh mesh)
 	{
-		AbstractTriangle t = mesh.factory.createTriangle(vert[0], vert[1], vert[2]);
+		AbstractTriangle t = mesh.createTriangle(vert[0], vert[1], vert[2]);
 		t.setGroupId(groupId);
 		vert[0].setLink(t);
 		vert[1].setLink(t);
@@ -375,7 +375,7 @@ public class MeshReader extends Storage
 	 */
 	private static void buildMeshAdjacency(Mesh mesh, TIntObjectHashMap<Vertex> vertMap)
 	{
-		if (!mesh.factory.hasAdjacency())
+		if (!mesh.hasAdjacency())
 			return;
 		// Remove dangling vertices which are not connected to any triangle.
 		int nrv = 0;

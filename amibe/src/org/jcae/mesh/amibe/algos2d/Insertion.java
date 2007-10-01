@@ -151,7 +151,7 @@ public class Insertion
 					int segments = (int) (2.0*l/lcrit) + 10;
 					AbstractVertex [] np = new AbstractVertex[segments-1];
 					for (int ns = 1; ns < segments; ns++)
-						np[ns-1] = mesh.factory.createVertex(xs[0]+ns*(xe[0]-xs[0])/segments, xs[1]+ns*(xe[1]-xs[1])/segments);
+						np[ns-1] = mesh.createVertex(xs[0]+ns*(xe[0]-xs[0])/segments, xs[1]+ns*(xe[1]-xs[1])/segments);
 					
 					Vertex2D last = start;
 					int nrNodes = 0;

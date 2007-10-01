@@ -114,7 +114,7 @@ public class EnforceAbsDeflection
 				if (!mesh.getTriangles().contains(t) || t.isBoundary())
 					continue;
 				double uv[] = Vertex2D.centroid(mesh, (Vertex2D[]) t.vertex).getUV();
-				Vertex2D v = (Vertex2D) mesh.factory.createVertex(uv[0], uv[1]);
+				Vertex2D v = (Vertex2D) mesh.createVertex(uv[0], uv[1]);
 				VirtualHalfEdge2D vt = v.getSurroundingOTriangle(mesh);
 				if (vt.split3(mesh, v, false))
 					redo = true;

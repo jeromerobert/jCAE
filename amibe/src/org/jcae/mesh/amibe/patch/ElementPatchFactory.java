@@ -39,16 +39,6 @@ public class ElementPatchFactory implements ElementFactoryInterface
 		triangleTraitsBuilder = mtb.getTriangleTraitsBuilder();
 	}
 
-	public AbstractVertex createVertex()
-	{
-		return new Vertex2D(vertexTraitsBuilder);
-	}
-
-	public AbstractVertex createVertex(double p)
-	{
-		throw new RuntimeException();
-	}
-
 	public AbstractVertex createVertex(double u, double v)
 	{
 		return new Vertex2D(vertexTraitsBuilder, u, v);
@@ -65,7 +55,7 @@ public class ElementPatchFactory implements ElementFactoryInterface
 		return createVertex(x[0], x[1]);
 	}
 
-	public AbstractTriangle createTriangle()
+	private AbstractTriangle createTriangle()
 	{
 		if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.SHALLOWHALFEDGE))
 			return new TriangleVH(triangleTraitsBuilder);
