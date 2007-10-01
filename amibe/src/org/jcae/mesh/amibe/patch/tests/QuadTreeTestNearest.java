@@ -20,6 +20,7 @@
 package org.jcae.mesh.amibe.patch.tests;
 
 import org.apache.log4j.Logger;
+import org.jcae.mesh.amibe.util.KdTree;
 import org.jcae.mesh.amibe.patch.QuadTreeTest;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.patch.Mesh2D;
@@ -43,12 +44,21 @@ public class QuadTreeTestNearest extends QuadTreeTest
 {
 	private static Logger logger=Logger.getLogger(QuadTreeTestNearest.class);	
 	
-	//  Dummy constructor
-	public QuadTreeTestNearest(double [] bbmin, double [] bbmax)
+	public QuadTreeTestNearest(KdTree q)
 	{
-		super (bbmin, bbmax);
+		super (q);
 	}
 	
+	public Vertex2D getNearVertex(Mesh2D mesh, Vertex2D n)
+	{
+		return (Vertex2D) quadtree.getNearVertex(mesh, n);
+	}
+
+	public Vertex2D getNearestVertex(Mesh2D mesh, Vertex2D n)
+	{
+		return (Vertex2D) quadtree.getNearestVertex(mesh, n);
+	}
+
 	public static void main(String args[])
 	{
 		double u, v;
@@ -56,17 +66,17 @@ public class QuadTreeTestNearest extends QuadTreeTest
 		Random rand = new Random(113L);
 		double [] bbmin = { 0.0, 0.0 };
 		double [] bbmax = { 1.0, 1.0 };
-		final QuadTreeTest r = new QuadTreeTest(bbmin, bbmax);
 		final Mesh2D m = new Mesh2D();
 		m.pushCompGeom(2);
-		m.setQuadTree(r);
+		m.initQuadTree(bbmin, bbmax);
+		final QuadTreeTestNearest r = new QuadTreeTestNearest(m.getQuadTree());
 		logger.debug("Start insertion");
 		for (int i = 0; i < 500; i++)
 		{
 			u = rand.nextDouble();
 			v = rand.nextDouble();
 			Vertex2D pt = (Vertex2D) m.factory.createVertex(u, v);
-			r.add(pt);
+			r.quadtree.add(pt);
 		}
 		//CheckCoordProcedure checkproc = new CheckCoordProcedure();
 		//r.walk(checkproc);

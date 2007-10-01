@@ -20,6 +20,7 @@
 package org.jcae.mesh.amibe.patch.tests;
 
 import org.apache.log4j.Logger;
+import org.jcae.mesh.amibe.util.KdTree;
 import org.jcae.mesh.amibe.patch.QuadTreeTest;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.patch.Mesh2D;
@@ -39,11 +40,21 @@ public class QuadTreeTestRemove extends QuadTreeTest
 {
 	private static Logger logger=Logger.getLogger(QuadTreeTestRemove.class);
 	
-	public QuadTreeTestRemove(double [] bbmin, double [] bbmax)
+	public QuadTreeTestRemove(KdTree q)
 	{
-		super (bbmin, bbmax);
+		super (q);
 	}
 	
+	public Vertex2D getNearVertex(Mesh2D mesh, Vertex2D n)
+	{
+		return (Vertex2D) quadtree.getNearVertex(mesh, n);
+	}
+
+	public Vertex2D getNearestVertex(Mesh2D mesh, Vertex2D n)
+	{
+		return (Vertex2D) quadtree.getNearestVertex(mesh, n);
+	}
+
 	public static void display(Viewer view, QuadTreeTest r)
 	{
 		view.addBranchGroup(r.bgQuadTree());
@@ -59,17 +70,17 @@ public class QuadTreeTestRemove extends QuadTreeTest
 		Random rand = new Random(113L);
 		double [] bbmin = { 0.0, 0.0 };
 		double [] bbmax = { 1.0, 1.0 };
-		final QuadTreeTest r = new QuadTreeTest(bbmin, bbmax);
 		final Mesh2D m = new Mesh2D();
 		m.pushCompGeom(2);
-		m.setQuadTree(r);
+		m.initQuadTree(bbmin, bbmax);
+		final QuadTreeTestRemove r = new QuadTreeTestRemove(m.getQuadTree());
 		logger.debug("Start insertion");
 		for (int i = 0; i < 500; i++)
 		{
 			u = rand.nextDouble();
 			v = rand.nextDouble();
 			Vertex2D pt = (Vertex2D) m.factory.createVertex(u, v);
-			r.add(pt);
+			r.quadtree.add(pt);
 		}
 		//CheckCoordProcedure checkproc = new CheckCoordProcedure();
 		//r.walk(checkproc);
@@ -87,7 +98,7 @@ public class QuadTreeTestRemove extends QuadTreeTest
 					if (null != xyz)
 					{
 						Vertex2D vt = (Vertex2D) r.getNearVertex(m, (Vertex2D) m.factory.createVertex(xyz[0], xyz[1]));
-						r.remove(vt);
+						r.quadtree.remove(vt);
 						view.removeAllBranchGroup();
 						display(view, r);
 					}

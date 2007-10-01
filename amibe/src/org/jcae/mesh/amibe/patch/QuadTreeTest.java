@@ -41,13 +41,14 @@ import org.apache.log4j.Logger;
 /**
  * Utility class to write unit tests for the QuadTree class.
  */
-public class QuadTreeTest extends KdTree
+public class QuadTreeTest
 {
 	private static Logger logger=Logger.getLogger(QuadTreeTest.class);	
+	protected final KdTree quadtree;
 	
-	public QuadTreeTest(double [] bbmin, double [] bbmax)
+	public QuadTreeTest(KdTree q)
 	{
-		super (2, bbmin, bbmax);
+		quadtree = q;
 	}
 	
 	private class CoordProcedure implements KdTreeProcedure
@@ -62,22 +63,22 @@ public class QuadTreeTest extends KdTree
 		{
 			int [] ii = { i0[0], i0[1] };
 			double [] p = new double[2];
-			int2double(ii, p);
+			quadtree.int2double(ii, p);
 			coord[index]   = p[0];
 			coord[index+1] = p[1];
 			index += 2;
 			ii[0] += s;
-			int2double(ii, p);
+			quadtree.int2double(ii, p);
 			coord[index]   = p[0];
 			coord[index+1] = p[1];
 			index += 2;
 			ii[1] += s;
-			int2double(ii, p);
+			quadtree.int2double(ii, p);
 			coord[index]   = p[0];
 			coord[index+1] = p[1];
 			index += 2;
 			ii[0] -= s;
-			int2double(ii, p);
+			quadtree.int2double(ii, p);
 			coord[index]   = p[0];
 			coord[index+1] = p[1];
 			index += 2;
@@ -90,19 +91,19 @@ public class QuadTreeTest extends KdTree
 	{
 		public final int action(Object o, int s, int i0, int j0)
 		{
-			Cell self = (Cell) o;
+			KdTree.Cell self = (KdTree.Cell) o;
 			if (self.nItems < 0)
 				return KdTreeProcedure.OK;
 			
 			double [] coord = new double[4];
 			int [] ii = { i0, j0 };
 			double [] p = new double[2];
-			int2double(ii, p);
+			quadtree.int2double(ii, p);
 			coord[0] = p[0];
 			coord[1] = p[1];
 			ii[0] += s;
 			ii[1] += s;
-			int2double(ii, p);
+			quadtree.int2double(ii, p);
 			coord[2] = p[0];
 			coord[3] = p[1];
 			for (int i = 0; i < self.nItems; i++)
@@ -130,7 +131,7 @@ public class QuadTreeTest extends KdTree
 		}
 		public final int action(Object o, int s, final int [] i0)
 		{
-			Cell self = (Cell) o;
+			KdTree.Cell self = (KdTree.Cell) o;
 			if (!self.isLeaf())
 				return KdTreeProcedure.OK;
 			for (int i = 0, n = self.count(); i < n; i++)
@@ -145,10 +146,21 @@ public class QuadTreeTest extends KdTree
 		}
 	}
 	
+	private static class CountVertProcedure implements KdTreeProcedure
+	{
+		private int count;
+		public final int action(Object o, int s, final int [] i0)
+		{
+			KdTree.Cell self = (KdTree.Cell) o;
+			count = self.count();
+			return KdTreeProcedure.ABORT;
+		}
+	}
+	
 	public void writeUNV(String file)
 	{
-		CoordProcedure proc = new CoordProcedure(nCells);
-		walk(proc);
+		CoordProcedure proc = new CoordProcedure(quadtree.nCells);
+		quadtree.walk(proc);
 		String cr=System.getProperty("line.separator");
 		PrintWriter out;
 		try {
@@ -157,14 +169,14 @@ public class QuadTreeTest extends KdTree
 			else
 				out = new PrintWriter(new FileOutputStream(file));
 			out.println("    -1"+cr+"  2411");
-			for(int i = 0; i < 4*nCells; i++)
+			for(int i = 0; i < 4*quadtree.nCells; i++)
 			{
 				out.println((i+1)+"         1         1         1");
 				out.println(""+proc.coord[2*i]+" "+proc.coord[2*i+1]+" "+0.0);
 			}
 			out.println("    -1");
 			out.println("    -1"+cr+"  2412");
-			for(int i = 0; i < nCells; i++)
+			for(int i = 0; i < quadtree.nCells; i++)
 			{
 				out.println(""+(i+1)+"        91         1         1         1         4");
 				for(int j = 0; j < 4; j++)
@@ -188,14 +200,14 @@ public class QuadTreeTest extends KdTree
 	{
 		BranchGroup bg=new BranchGroup();
 		
-		CoordProcedure proc = new CoordProcedure(nCells);
-		walk(proc);
-		QuadArray quad = new QuadArray(4*nCells, QuadArray.COORDINATES);
+		CoordProcedure proc = new CoordProcedure(quadtree.nCells);
+		quadtree.walk(proc);
+		QuadArray quad = new QuadArray(4*quadtree.nCells, QuadArray.COORDINATES);
 		quad.setCapability(QuadArray.ALLOW_FORMAT_READ);
 		quad.setCapability(QuadArray.ALLOW_COUNT_READ);
 		quad.setCapability(QuadArray.ALLOW_COORDINATE_READ);
-		double [] xc = new double[12*nCells];
-		for (int i = 0; i < 4*nCells; i++)
+		double [] xc = new double[12*quadtree.nCells];
+		for (int i = 0; i < 4*quadtree.nCells; i++)
 		{
 			xc[3*i]   = proc.coord[2*i];
 			xc[3*i+1] = proc.coord[2*i+1];
@@ -214,9 +226,11 @@ public class QuadTreeTest extends KdTree
 	public BranchGroup bgVertices()
 	{
 		BranchGroup bg=new BranchGroup();
-		int nVertices = root.count();
+		CountVertProcedure cproc = new CountVertProcedure();
+		quadtree.walk(cproc);
+		int nVertices = cproc.count;
 		CoordVertProcedure vproc = new CoordVertProcedure(nVertices);
-		walk(vproc);
+		quadtree.walk(vproc);
 		PointArray p = new PointArray(nVertices, PointArray.COORDINATES);
 		double [] xv = new double[3*nVertices];
 		for (int i = 0; i < nVertices; i++)

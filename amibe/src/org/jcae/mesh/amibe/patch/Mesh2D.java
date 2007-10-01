@@ -214,16 +214,6 @@ public class Mesh2D extends Mesh
 	}
 	
 	/**
-	 * Sets the quadtree associated with this mesh.
-	 *
-	 * @param q  the quadtree associated with this mesh.
-	 */
-	public void setQuadTree(KdTree q)
-	{
-		quadtree = q;
-	}
-	
-	/**
 	 * Returns vertex list.  Note that this class does not rely on
 	 * {@link MeshTraitsBuilder}, but call {@link KdTree#getAllVertices}.
 	 *
