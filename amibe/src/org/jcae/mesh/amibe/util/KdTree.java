@@ -228,6 +228,8 @@ public class KdTree
 	/**
 	 * Dummy constructor.  This instance must be properly initialised by calling
 	 * {@link #setup} before putting elements into it.
+	 *
+	 * @param d   dimension (2 or 3)
 	 */
 	public KdTree(int d)
 	{
@@ -256,9 +258,7 @@ public class KdTree
 	/**
 	 * Create a new <code>KdTree</code> of the desired size.
 	 *
-	 * @param d   dimension (2 or 3)
-	 * @param bbmin  coordinates of bottom-left vertex
-	 * @param bbmax  coordinates of top-right vertex
+	 * @param bbox   coordinates of bottom-left vertex and upper-right vertices
 	 * @param bucketsize  bucket size
 	 */
 	public KdTree(double [] bbox, int bucketsize)
@@ -271,6 +271,11 @@ public class KdTree
 		setup(bbox);
 	}
 	
+	/**
+	 * Computes {@link #x0} adapted to this bounding box.
+	 *
+	 * @param bbox   coordinates of bottom-left vertex and upper-right vertices
+	 */
 	public final void setup(double [] bbox)
 	{
 		if (bbox.length != 2*dimension)

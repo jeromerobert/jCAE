@@ -48,7 +48,7 @@ import org.apache.log4j.Logger;
  * box enclosing all these nodes in the 2D space is computed, and
  * a {@link org.jcae.mesh.amibe.util.KdTree} instance can then be
  * initialized by
- * {@link Mesh2D#initQuadTree(double [], double [])}.
+ * {@link Mesh2D#resetQuadTree(double [], double [])}.
  *
  * <p>
  * Some checks have been added to remove tiny edges and make sure that

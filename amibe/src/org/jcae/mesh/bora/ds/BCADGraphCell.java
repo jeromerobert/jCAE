@@ -194,7 +194,7 @@ public class BCADGraphCell
 	 * with different orientations may both be listed.
 	 *
 	 * @param cse  CAD shape type
-	 * @returns iterator on geometrical elements.
+	 * @return iterator on geometrical elements.
 	 */
 	public Iterator<BCADGraphCell> shapesExplorer(CADShapeEnum cse)
 	{
@@ -208,7 +208,7 @@ public class BCADGraphCell
 	 * different orientations are listed only once.
 	 *
 	 * @param cse  CAD shape type
-	 * @returns iterator on unique geometrical elements.
+	 * @return iterator on unique geometrical elements.
 	 */
 	public Iterator<BCADGraphCell> uniqueShapesExplorer(CADShapeEnum cse)
 	{
@@ -221,7 +221,7 @@ public class BCADGraphCell
 	 * given type are returned, even if they have already been seen.
 	 *
 	 * @param cse  CAD shape type
-	 * @returns iterator on all geometrical elements.
+	 * @return iterator on all geometrical elements.
 	 */
 	public Iterator<BCADGraphCell> allShapesExplorer(CADShapeEnum cse)
 	{
@@ -270,7 +270,7 @@ public class BCADGraphCell
 	 * There are no duplicates, but shapes with different orientations may
 	 * both be listed.
 	 *
-	 * @returns an iterator on immediate sub-shapes
+	 * @return an iterator on immediate sub-shapes
 	 */
 	public Iterator<BCADGraphCell> shapesIterator()
 	{
@@ -282,7 +282,7 @@ public class BCADGraphCell
 	 * There are no duplicates, shapes with different orientations are
 	 * listed only once.
 	 *
-	 * @returns an iterator on immediate sub-shapes
+	 * @return an iterator on immediate sub-shapes
 	 */
 	public Iterator<BCADGraphCell> uniqueShapesIterator()
 	{
@@ -292,7 +292,7 @@ public class BCADGraphCell
 	/**
 	 * Returns an iterator on all immediate sub-shapes.
 	 *
-	 * @returns an iterator on all immediate sub-shapes
+	 * @return an iterator on all immediate sub-shapes
 	 */
 	public Iterator<BCADGraphCell> allShapesIterator()
 	{
@@ -340,7 +340,7 @@ public class BCADGraphCell
 	 * Returns the BDiscretization instance corresponding to a given submesh.
 	 *
 	 * @param sub  submesh
-	 * @returns the discretization corresponding to a given submesh.
+	 * @return the discretization corresponding to a given submesh.
 	 */
 	public BDiscretization getDiscretizationSubMesh(BSubMesh sub)
 	{

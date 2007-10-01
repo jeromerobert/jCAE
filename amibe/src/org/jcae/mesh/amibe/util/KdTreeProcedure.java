@@ -47,7 +47,7 @@ public interface KdTreeProcedure
 	 * @param s  cell size.
 	 * @param i0  coordinates of the bottom left corner of this cell.
 	 * @return {@link #ABORT} if <code>walk</code> processing must
-	 * abort now, {@link SKIPCHILD} if node chikldren have to be ignored, and
+	 * abort now, {@link #SKIPCHILD} if node children have to be ignored, and
 	 * {@link #OK} to process node children recursively.
 	 */
 	public int action(Object o, int s, final int [] i0);
