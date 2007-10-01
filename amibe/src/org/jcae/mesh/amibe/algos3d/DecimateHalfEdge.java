@@ -275,6 +275,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		out.writeObject(labelMap);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void appendRestoreState(final ObjectInputStream q)
 		throws IOException

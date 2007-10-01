@@ -28,7 +28,6 @@ import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 
-import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Collection;
@@ -57,6 +56,18 @@ public class CheckDelaunay
 		mesh = m;
 	}
 	
+	private static final class FakeEdge
+	{
+		private final Triangle triangle;
+		private final int localNumber;
+
+		private FakeEdge(Triangle t, int l)
+		{
+			triangle = t;
+			localNumber = l;
+		}
+	}
+
 	/**
 	 * Swap edges which are not Delaunay.
 	 */
@@ -77,7 +88,7 @@ public class CheckDelaunay
 		do {
 			redo = false;
 			cnt = 0;
-			ArrayList toSwap = new ArrayList();
+			ArrayList<FakeEdge> toSwap = new ArrayList<FakeEdge>();
 			HashSet<AbstractTriangle> newList = new HashSet<AbstractTriangle>();
 			niter--;
 			for (AbstractTriangle at: oldList)
@@ -112,18 +123,15 @@ public class CheckDelaunay
 					if (!ot.isDelaunay(mesh, v))
 					{
 						cnt++;
-						toSwap.add(t);
-						toSwap.add(Integer.valueOf(i));
+						toSwap.add(new FakeEdge(t, i));
 					}
 				}
 			}
 			logger.debug(" Found "+cnt+" non-Delaunay triangles");
-			for (Iterator it = toSwap.iterator(); it.hasNext(); )
+			for (FakeEdge e: toSwap)
 			{
-				t = (Triangle) it.next();
-				int orient = ((Integer) it.next()).intValue();
-				ot.bind(t);
-				for (int i = 0; i < orient; i++)
+				ot.bind(e.triangle);
+				for (int i = 0; i < e.localNumber; i++)
 					ot.next();
 				if (ot.hasAttributes(AbstractHalfEdge.SWAPPED))
 				{
