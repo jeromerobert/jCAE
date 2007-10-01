@@ -30,71 +30,53 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.Map;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.zip.GZIPOutputStream;
-import gnu.trove.TObjectIntHashMap;
 import java.io.Serializable;
 import org.apache.log4j.Logger;
 
 /**
  * Mesh data structure.
  * A mesh is composed of triangles, edges and vertices.  There are
- * many data structures for representing meshes, and we focused on
- * the following constraints:
+ * many data structures to represent meshes, and we focused on the
+ * following constraints:
  * <ul>
  *   <li>Memory usage must be minimal in order to perform very large
  *       meshes.</li>
  *   <li>Mesh traversal must be cheap.</li>
  * </ul>
- * The selected data structure is as follows:
- * <ul>
- *   <li>A triangle is composed of three {@link Vertex}, pointers to
- *       adjacent triangles, and an integer which is explained below.</li>
- *   <li>A vertex contains a pointer to one of the triangles it is connected
- *       to.</li>
- *   <li>This class can be extended to help finding the nearest vertex,
- *       as in {@link org.jcae.mesh.amibe.patch.Mesh2D}.
- * </ul>
- * Example:
- * <pre>
+ * We decided to implement a triangle-based data structure which is known
+ * to be more memory efficient.  A {@link Triangle} is composed of three
+ * {@link Vertex}, three links to adjacent triangles, and each vertex
+ * contains a backward link to one of its incident triangles.  It is
+ * then possible to loop within triangles or around vertices.
+ * 
+ * But there is also a need for lighter data structures.  For instance,
+ * visualization does not need adjacency relations, we only need to
+ * store triangle vertices.
  *
- *                         W1
- *                      V0 +---------------. W0
- *                        / \      2      /
- *                       /   \           /
- *                 t2   /     \    t1   /
- *                     / 2   1 \ 0    1/
- *                    /    t    \     /
- *                   /           \   /
- *                  /      0      \ /
- *              V1 '---------------+ W2
- *                        t0      V2
- * </pre>
- * <p>
- *   The <code>t</code> {@link AbstractTriangle} has the following instance variables:
- * </p>
+ * {@link Mesh} constructor takes an optional {@link MeshTraitsBuilder}
+ * argument to fully describe the desired mesh data structure.  Once a
+ * {@link Mesh} instance is created, its features cannot be modified.
+ * With this argument, it is possible to specify if adjacent relations
+ * between triangles have to be computed, if an octree is needed to
+ * locate vertices, if triangles and/or nodes are stored in a list
+ * or a set, etc.  Example:
  * <pre>
- *       Vertex [] vertex = { V0, V1, V2 };
- *       AbstractTriangle [] adj  = { t0, t1, t2 };
- *       byte adjPos = 0b00??00??;
- *       byte [] edgeAttributes = { ??, 0, ?? };
+   MeshTraitsBuilder mtb = new MeshTraitsBuilder();
+   // Store triangles into a set
+   mtb.addTriangleSet();
+   TriangleTraitsBuilder ttb = new TriangleTraitsBuilder();
+   // Store adjacency relations with HalfEdge
+   ttb.addHalfEdge();
+   mtb.add(ttb);
+   // Create a new instance with these features
+   Mesh mesh = new Mesh(mtb);
+   // Then each triangle created by mesh.factory.createTriangle
+   // will contain objects needed to store adjacency relations.
+   Triangle t = (Triangle) mesh.factory.createTriangle(...);
+   // Vertices must be created by mesh.factory.createVertex
+   Vertex v = (Vertex) mesh.factory.createVertex(...);
  * </pre>
- * <p>
- *   By convention, edges are numbered so that edge <em>i</em> is the opposite 
- *   side of vertex <em>i</em>.  An edge is then fully characterized by a
- *   triangle and a local number between 0 and 2 inclusive.  Here, edge
- *   between <tt>V0</tt> and <tt>V2</tt> can be defined by <em>(t,1)</em> or
- *   <em>(t1,0)</em>.  The <code>adjPos</code> instance variable stores local
- *   numbers for adjacent edges, so that mesh traversal becomes very cheap. 
- * </p>
- * <p>
- *   <b>Note:</b>  <code>adjPos</code> contains values between 0 and 2,
- *   it can then be stored with 2 bits, and in practice the three values of
- *   a triangle are stored inside a single byte.
- * </p>
+ * 
  */
 
 public class Mesh extends AbstractMesh implements Serializable
@@ -140,6 +122,9 @@ public class Mesh extends AbstractMesh implements Serializable
 		}
 	}
 
+	/**
+	 * Stores Integer(0..2) into an array to reuse these immutable objects.
+	 */
 	private static final Integer [] int3 = new Integer[3];
 	static {
 		int3[0] = Integer.valueOf(0);
@@ -159,7 +144,9 @@ public class Mesh extends AbstractMesh implements Serializable
 	}
 	
 	/**
-	 * Creates an empty mesh.
+	 * Creates an empty mesh with specific features.
+	 *
+	 * @param mtb mesh traits builder
 	 */
 	public Mesh(MeshTraitsBuilder mtb)
 	{
@@ -658,150 +645,6 @@ public class Mesh extends AbstractMesh implements Serializable
 		return 1.0;
 	}
 	
-	// Useful for debugging
-	private void writeUNV(String file)
-	{
-		String cr=System.getProperty("line.separator");
-		PrintWriter out;
-		try {
-			if (file.endsWith(".gz") || file.endsWith(".GZ"))
-				out = new PrintWriter(new GZIPOutputStream(new FileOutputStream(file)));
-			else
-				out = new PrintWriter(new FileOutputStream(file));
-			out.println("    -1"+cr+"  2411");
-			HashSet<Vertex> nodeset = new HashSet<Vertex>();
-			for (AbstractTriangle at: triangleList)
-			{
-				Triangle t = (Triangle) at;
-				if (t.isOuter())
-					continue;
-				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
-					continue;
-				nodeset.add(t.vertex[0]);
-				nodeset.add(t.vertex[1]);
-				nodeset.add(t.vertex[2]);
-			}
-			int count = 0;
-			TObjectIntHashMap<Vertex> labels = new TObjectIntHashMap<Vertex>(nodeset.size());
-			for(Vertex node: nodeset)
-			{
-				count++;
-				labels.put(node, count);
-				double [] uv = node.getUV();
-				out.println(count+"         1         1         1");
-				if (uv.length == 2)
-					out.println(""+uv[0]+" "+uv[1]+" 0.0");
-				else
-					out.println(""+uv[0]+" "+uv[1]+" "+uv[2]);
-			}
-			out.println("    -1");
-			out.println("    -1"+cr+"  2412");
-			count = 0;
-			for (AbstractTriangle at: triangleList)
-			{
-				Triangle t = (Triangle) at;
-				if (t.isOuter())
-					continue;
-				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
-					continue;
-				count++;
-				out.println(""+count+"        91         1         1         1         3");
-				for(int i = 0; i < 3; i++)
-				{
-					int nodelabel = labels.get(t.vertex[i]);
-					out.print(" "+nodelabel);
-				}
-				out.println("");
-			}
-			out.println("    -1");
-			out.close();
-		} catch (FileNotFoundException e)
-		{
-			logger.fatal(e.toString());
-			e.printStackTrace();
-		} catch (IOException e)
-		{
-			logger.fatal(e.toString());
-			e.printStackTrace();
-		}
-	}
-	
-	// Useful for debugging
-	private void writeMesh(String file)
-	{
-		String cr=System.getProperty("line.separator");
-		PrintWriter out;
-		try {
-			if (file.endsWith(".gz") || file.endsWith(".GZ"))
-				out = new PrintWriter(new GZIPOutputStream(new FileOutputStream(file)));
-			else
-				out = new PrintWriter(new FileOutputStream(file));
-			out.println("MeshVersionFormatted 1"+cr+"Dimension"+cr+"3");
-			HashSet<Vertex> nodeset = new HashSet<Vertex>();
-			for(AbstractTriangle at: triangleList)
-			{
-				Triangle t = (Triangle) at;
-				if (t.isOuter())
-					continue;
-				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
-					continue;
-				nodeset.add(t.vertex[0]);
-				nodeset.add(t.vertex[1]);
-				nodeset.add(t.vertex[2]);
-			}
-			int count = 0;
-			TObjectIntHashMap<Vertex> labels = new TObjectIntHashMap<Vertex>(nodeset.size());
-			out.println("Vertices"+cr+nodeset.size());
-			for(Vertex node: nodeset)
-			{
-				count++;
-				labels.put(node, count);
-				double [] uv = node.getUV();
-				if (uv.length == 2)
-					out.println(""+uv[0]+" "+uv[1]+" 0.0 0");
-				else
-					out.println(""+uv[0]+" "+uv[1]+" "+uv[2]+" 0");
-			}
-			count = 0;
-			for(AbstractTriangle at: triangleList)
-			{
-				Triangle t = (Triangle) at;
-				if (t.isOuter())
-					continue;
-				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
-					continue;
-				count++;
-			}
-			out.println(cr+"Triangles"+cr+count);
-			count = 0;
-			for(AbstractTriangle at: triangleList)
-			{
-				Triangle t = (Triangle) at;
-				if (t.isOuter())
-					continue;
-				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
-					continue;
-				count++;
-				for(int i = 0; i < 3; i++)
-				{
-					int nodelabel = labels.get(t.vertex[i]);
-					out.print(nodelabel+" ");
-				}
-				out.println("1");
-			}
-			out.println(cr+"End");
-			out.close();
-		} catch (FileNotFoundException e)
-		{
-			logger.fatal(e.toString());
-			e.printStackTrace();
-		} catch (IOException e)
-		{
-			logger.fatal(e.toString());
-			e.printStackTrace();
-		}
-	}
-	
 	/**
 	 * Checks whether this mesh is valid.
 	 * This routine returns <code>isValid(true)</code>.
@@ -1014,6 +857,15 @@ public class Mesh extends AbstractMesh implements Serializable
 		return true;
 	}
 	
+	// Useful for debugging
+	/*  Following imports must be moved at top.
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.zip.GZIPOutputStream;
+import gnu.trove.TObjectIntHashMap;
+
 	public void printMesh()
 	{
 		System.out.println("Mesh:");
@@ -1021,5 +873,146 @@ public class Mesh extends AbstractMesh implements Serializable
 			System.out.println(""+at);
 		System.out.println("Outer Vertex: "+outerVertex);
 	}
+	public void writeUNV(String file)
+	{
+		String cr=System.getProperty("line.separator");
+		PrintWriter out;
+		try {
+			if (file.endsWith(".gz") || file.endsWith(".GZ"))
+				out = new PrintWriter(new GZIPOutputStream(new FileOutputStream(file)));
+			else
+				out = new PrintWriter(new FileOutputStream(file));
+			out.println("    -1"+cr+"  2411");
+			HashSet<Vertex> nodeset = new HashSet<Vertex>();
+			for (AbstractTriangle at: triangleList)
+			{
+				Triangle t = (Triangle) at;
+				if (t.isOuter())
+					continue;
+				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
+					continue;
+				nodeset.add(t.vertex[0]);
+				nodeset.add(t.vertex[1]);
+				nodeset.add(t.vertex[2]);
+			}
+			int count = 0;
+			TObjectIntHashMap<Vertex> labels = new TObjectIntHashMap<Vertex>(nodeset.size());
+			for(Vertex node: nodeset)
+			{
+				count++;
+				labels.put(node, count);
+				double [] uv = node.getUV();
+				out.println(count+"         1         1         1");
+				if (uv.length == 2)
+					out.println(""+uv[0]+" "+uv[1]+" 0.0");
+				else
+					out.println(""+uv[0]+" "+uv[1]+" "+uv[2]);
+			}
+			out.println("    -1");
+			out.println("    -1"+cr+"  2412");
+			count = 0;
+			for (AbstractTriangle at: triangleList)
+			{
+				Triangle t = (Triangle) at;
+				if (t.isOuter())
+					continue;
+				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
+					continue;
+				count++;
+				out.println(""+count+"        91         1         1         1         3");
+				for(int i = 0; i < 3; i++)
+				{
+					int nodelabel = labels.get(t.vertex[i]);
+					out.print(" "+nodelabel);
+				}
+				out.println("");
+			}
+			out.println("    -1");
+			out.close();
+		} catch (FileNotFoundException e)
+		{
+			logger.fatal(e.toString());
+			e.printStackTrace();
+		} catch (IOException e)
+		{
+			logger.fatal(e.toString());
+			e.printStackTrace();
+		}
+	}
+	public void writeMesh(String file)
+	{
+		String cr=System.getProperty("line.separator");
+		PrintWriter out;
+		try {
+			if (file.endsWith(".gz") || file.endsWith(".GZ"))
+				out = new PrintWriter(new GZIPOutputStream(new FileOutputStream(file)));
+			else
+				out = new PrintWriter(new FileOutputStream(file));
+			out.println("MeshVersionFormatted 1"+cr+"Dimension"+cr+"3");
+			HashSet<Vertex> nodeset = new HashSet<Vertex>();
+			for(AbstractTriangle at: triangleList)
+			{
+				Triangle t = (Triangle) at;
+				if (t.isOuter())
+					continue;
+				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
+					continue;
+				nodeset.add(t.vertex[0]);
+				nodeset.add(t.vertex[1]);
+				nodeset.add(t.vertex[2]);
+			}
+			int count = 0;
+			TObjectIntHashMap<Vertex> labels = new TObjectIntHashMap<Vertex>(nodeset.size());
+			out.println("Vertices"+cr+nodeset.size());
+			for(Vertex node: nodeset)
+			{
+				count++;
+				labels.put(node, count);
+				double [] uv = node.getUV();
+				if (uv.length == 2)
+					out.println(""+uv[0]+" "+uv[1]+" 0.0 0");
+				else
+					out.println(""+uv[0]+" "+uv[1]+" "+uv[2]+" 0");
+			}
+			count = 0;
+			for(AbstractTriangle at: triangleList)
+			{
+				Triangle t = (Triangle) at;
+				if (t.isOuter())
+					continue;
+				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
+					continue;
+				count++;
+			}
+			out.println(cr+"Triangles"+cr+count);
+			count = 0;
+			for(AbstractTriangle at: triangleList)
+			{
+				Triangle t = (Triangle) at;
+				if (t.isOuter())
+					continue;
+				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
+					continue;
+				count++;
+				for(int i = 0; i < 3; i++)
+				{
+					int nodelabel = labels.get(t.vertex[i]);
+					out.print(nodelabel+" ");
+				}
+				out.println("1");
+			}
+			out.println(cr+"End");
+			out.close();
+		} catch (FileNotFoundException e)
+		{
+			logger.fatal(e.toString());
+			e.printStackTrace();
+		} catch (IOException e)
+		{
+			logger.fatal(e.toString());
+			e.printStackTrace();
+		}
+	}
+	*/
 	
 }
