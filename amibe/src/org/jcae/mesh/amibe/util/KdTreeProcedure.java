@@ -24,6 +24,19 @@ package org.jcae.mesh.amibe.util;
  */
 public interface KdTreeProcedure
 {
+        /**
+	 * Continue tree traversal.
+	 */
+	public static final int OK  = 0;
+	/**
+	 * Abort tree traversal immediately.
+	 **/
+	public static final int ABORT = -1;
+	/**
+	 * Do not process children.
+	 **/
+	public static final int SKIPCHILD = 1;
+
 	/**
 	 * Perform an action on the given kdtree cell.
 	 * This method is called by {@link KdTree#walk(KdTreeProcedure)} on
@@ -32,9 +45,9 @@ public interface KdTreeProcedure
 	 * @param o  kd-tree cell.
 	 * @param s  cell size.
 	 * @param i0  coordinates of the bottom left corner of this cell.
-	 * @return <code>-1</code> if <code>walk</code> processing must
-	 * abort now, <code>1</code> if node chikldren have to be ignored, and
-	 * <code>0</code> to process node children recursively.
+	 * @return {@link #ABORT} if <code>walk</code> processing must
+	 * abort now, {@link SKIPCHILD} if node chikldren have to be ignored, and
+	 * {@link #OK} to process node children recursively.
 	 */
 	public int action(Object o, int s, final int [] i0);
 }

@@ -1,3 +1,9 @@
+Mon Oct  1 12:44:03 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/util/KdTreeProcedure.java: Define OK,
+	ABORT and SKIPCHILD static members as returned values for action()
+	method.
+
 Wed Sep 26 00:27:45 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/cad/CADShapeBuilder.java

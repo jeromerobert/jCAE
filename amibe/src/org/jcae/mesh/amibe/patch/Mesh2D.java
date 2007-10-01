@@ -461,7 +461,7 @@ public class Mesh2D extends Mesh
 				for (int i = 0, n = self.count(); i < n; i++)
 					((Vertex2D) self.getVertex(i)).clearMetrics();
 			}
-			return 0;
+			return KdTreeProcedure.OK;
 		}
 	}
 	

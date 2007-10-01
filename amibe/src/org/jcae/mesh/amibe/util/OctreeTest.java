@@ -117,7 +117,7 @@ public class OctreeTest extends KdTree
 				index += 3;
 				offset += ds;
 			}
-			return 0;
+			return KdTreeProcedure.OK;
 		}
 	}
 	
@@ -155,7 +155,7 @@ public class OctreeTest extends KdTree
 					System.out.println("Vertex "+v+" not in box ("+coord[0]+","+coord[1]+","+coord[2]+") : ("+coord[3]+","+coord[4]+","+coord[5]+")");
 				}
 			}
-			return 0;
+			return KdTreeProcedure.OK;
 		}
 	}
 	*/
@@ -172,7 +172,7 @@ public class OctreeTest extends KdTree
 		{
 			Cell self = (Cell) o;
 			if (!self.isLeaf())
-				return 0;
+				return KdTreeProcedure.OK;
 			for (int i = 0, n = self.count(); i < n; i++)
 			{
 				Vertex v = self.getVertex(i);
@@ -182,7 +182,7 @@ public class OctreeTest extends KdTree
 				coord[index+2] = param[2];
 				index += 3;
 			}
-			return 0;
+			return KdTreeProcedure.OK;
 		}
 	}
 	

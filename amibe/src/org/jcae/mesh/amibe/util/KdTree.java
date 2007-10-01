@@ -75,16 +75,16 @@ import org.apache.log4j.Logger;
  *				for (int i = 0; i &lt; self.nItems; i++)
  *					vertexList.add((Vertex) self.subCell[i]);
  *			}
- *			return 0;
+ *			return KdTreeProcedure.OK;
  *		}
  *	}
  * </pre>
  * <p>
  * This procedure is applied on all cells recursively in prefix order.  If it
- * returns <code>-1</code>, {@link #walk(KdTreeProcedure)} aborts its
- * processing immediately.  A null return value means that processing can
- * continue normally, and a non-null return value means that children nodes are
- * skipped.
+ * returns {@link KdTreeProcedure#ABORT}, {@link #walk(KdTreeProcedure)} aborts its
+ * processing immediately;  {@link KdTreeProcedure#OK} return value means that processing can
+ * continue normally, and {@link KdTreeProcedure#SKIPCHILD} return value means that children
+ * nodes are skipped.
  * </p>
  *
  * <p>
@@ -473,7 +473,7 @@ public class KdTree
 				for (int i = 0; i < self.nItems; i++)
 					nodelist.add((AbstractVertex) self.subCell[i]);
 			}
-			return 0;
+			return KdTreeProcedure.OK;
 		}
 	}
 	
@@ -514,9 +514,9 @@ public class KdTree
 		while (true)
 		{
 			int res = proc.action(cellStack[l], s, i0);
-			if (res == -1)
+			if (res == KdTreeProcedure.ABORT)
 				return false;
-			if (cellStack[l].nItems < 0 && res == 0)
+			if (cellStack[l].nItems < 0 && res == KdTreeProcedure.OK)
 			{
 				s >>= 1;
 				assert s > 0;
@@ -715,7 +715,7 @@ public class KdTree
 		{
 			for (int k = 0; k < dimension; k++)
 				if ((ijk[k] < i0[k] - idist) || (ijk[k] > i0[k] + s + idist))
-					return 1;
+					return KdTreeProcedure.SKIPCHILD;
 			Cell self = (Cell) o;
 			searchedCells++;
 			if (self.nItems > 0)
@@ -734,7 +734,7 @@ public class KdTree
 					}
 				}
 			}
-			return 0;
+			return KdTreeProcedure.OK;
 		}
 	}
 	
@@ -796,7 +796,7 @@ public class KdTree
 					}
 				}
 			}
-			return 0;
+			return KdTreeProcedure.OK;
 		}
 	}
 	
@@ -837,7 +837,7 @@ public class KdTree
 			searchedCells++;
 			if (s < minSize)
 				minSize = s;
-			return 0;
+			return KdTreeProcedure.OK;
 		}
 	}
 	

@@ -80,7 +80,7 @@ public class QuadTreeTest extends KdTree
 			coord[index]   = p[0];
 			coord[index+1] = p[1];
 			index += 2;
-			return 0;
+			return KdTreeProcedure.OK;
 		}
 	}
 	
@@ -91,7 +91,7 @@ public class QuadTreeTest extends KdTree
 		{
 			Cell self = (Cell) o;
 			if (self.nItems < 0)
-				return 0;
+				return KdTreeProcedure.OK;
 			
 			double [] coord = new double[4];
 			int [] ii = { i0, j0 };
@@ -114,7 +114,7 @@ public class QuadTreeTest extends KdTree
 					System.out.println("Vertex "+v+" not in box ("+coord[0]+","+coord[1]+") : ("+coord[2]+","+coord[3]+"_");
 				}
 			}
-			return 0;
+			return KdTreeProcedure.OK;
 		}
 	}
 	*/
@@ -131,7 +131,7 @@ public class QuadTreeTest extends KdTree
 		{
 			Cell self = (Cell) o;
 			if (!self.isLeaf())
-				return 0;
+				return KdTreeProcedure.OK;
 			for (int i = 0, n = self.count(); i < n; i++)
 			{
 				Vertex2D v = (Vertex2D) self.getVertex(i);
@@ -140,7 +140,7 @@ public class QuadTreeTest extends KdTree
 				coord[index+1] = param[1];
 				index += 2;
 			}
-			return 0;
+			return KdTreeProcedure.OK;
 		}
 	}
 	
