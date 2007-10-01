@@ -625,11 +625,11 @@ public class KdTree
 		
 		Vertex vQ = (Vertex) current.subCell[0];
 		Vertex ret = vQ;
-		double retdist = mesh.distance2(v, vQ, v);
+		double retdist = mesh.distance(v, vQ, v);
 		for (int i = 1; i < current.nItems; i++)
 		{
 			vQ = (Vertex) current.subCell[i];
-			double d = mesh.distance2(v, vQ, v);
+			double d = mesh.distance(v, vQ, v);
 			if (d < retdist)
 			{
 				retdist = d;
@@ -676,7 +676,7 @@ public class KdTree
 				for (int i = 0; i < cellStack[l].nItems; i++)
 				{
 					Vertex vQ = (Vertex) cellStack[l].subCell[i];
-					double d = mesh.distance2(v, vQ, v);
+					double d = mesh.distance(v, vQ, v);
 					if (d < dist || dist < 0.0)
 					{
 						dist = d;
@@ -722,7 +722,6 @@ public class KdTree
 			double2int(from.getUV(), ijk);
 			nearestVertex = v;
 			fromVertex = from;
-			dist = mesh.distance2(v, from, v);
 			i2d = 1.005 * x0[dimension] * mesh.radius2d(fromVertex);
 			dist = mesh.distance(fromVertex, nearestVertex, fromVertex);
 			idist = (int) (dist * i2d);

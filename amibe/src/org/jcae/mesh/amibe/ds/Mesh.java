@@ -247,7 +247,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	 *
 	 * @param v  vertex being removed.
 	 */
-	public void remove(Vertex v)
+	public void remove(AbstractVertex v)
 	{
 		nodeList.remove(v);
 	}
@@ -640,9 +640,9 @@ public class Mesh extends AbstractMesh implements Serializable
 	}
 	
 	/**
-	 * Returns the squared distance between 2 vertices.
+	 * Returns distance between 2 vertices.
 	 */
-	public double distance2(Vertex start, Vertex end, Vertex vm)
+	public double distance(Vertex start, Vertex end, Vertex vm)
 	{
 		double [] x1 = start.getUV();
 		double [] x2 = end.getUV();
@@ -650,12 +650,7 @@ public class Mesh extends AbstractMesh implements Serializable
 		double dx = x1[0] - x2[0];
 		double dy = x1[1] - x2[1];
 		double dz = x1[2] - x2[2];
-		return dx*dx + dy*dy + dz*dz;
-	}
-	
-	public double distance(Vertex start, Vertex end, Vertex vm)
-	{
-		return Math.sqrt(distance2(start, end, vm));
+		return Math.sqrt(dx*dx + dy*dy + dz*dz);
 	}
 	
 	public double radius2d(Vertex v)
@@ -664,7 +659,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	}
 	
 	// Useful for debugging
-	public void writeUNV(String file)
+	private void writeUNV(String file)
 	{
 		String cr=System.getProperty("line.separator");
 		PrintWriter out;
@@ -732,7 +727,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	}
 	
 	// Useful for debugging
-	public void writeMesh(String file)
+	private void writeMesh(String file)
 	{
 		String cr=System.getProperty("line.separator");
 		PrintWriter out;

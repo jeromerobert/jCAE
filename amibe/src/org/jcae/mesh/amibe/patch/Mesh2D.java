@@ -472,13 +472,6 @@ public class Mesh2D extends Mesh
 		quadtree.walk(gproc);
 	}
 
-	@Override
-	public double distance2(Vertex start, Vertex end, Vertex vm)
-	{
-		double ret = distance(start, end, vm);
-		return ret*ret;
-	}
-	
 	/**
 	 * Returns the Riemannian distance between nodes.
 	 *
