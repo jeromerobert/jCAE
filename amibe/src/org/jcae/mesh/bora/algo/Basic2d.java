@@ -85,6 +85,7 @@ public class Basic2d implements AlgoInterface
 		ttb.addShallowHalfEdge();
 		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
 		mtb.addTriangleList();
+		mtb.addKdTree(2);
 		mtb.add(ttb);
 		Mesh2D m = new Mesh2D(mtb, F);
 		d.setMesh(m);

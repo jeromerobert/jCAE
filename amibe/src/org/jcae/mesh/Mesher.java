@@ -419,6 +419,7 @@ public class Mesher
 		ttb.addShallowHalfEdge();
 		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
 		mtb.addTriangleList();
+		mtb.addKdTree(2);
 		//mtb.add(vtb);
 		mtb.add(ttb);
 		if (processMesh1d) {

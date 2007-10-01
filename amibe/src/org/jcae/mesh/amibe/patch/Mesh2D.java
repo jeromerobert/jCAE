@@ -90,8 +90,7 @@ public class Mesh2D extends Mesh
 
 	public Mesh2D(MeshTraitsBuilder mtb)
 	{
-		// Always build a quadtree
-		super(mtb.addKdTree(2));
+		super(mtb);
 		factory = new ElementPatchFactory(traitsBuilder);
 		face = null;
 		surface = null;
@@ -111,7 +110,7 @@ public class Mesh2D extends Mesh
 	 */
 	public Mesh2D(MeshTraitsBuilder mtb, CADShape f)
 	{
-		super(mtb.addKdTree(2));
+		super(mtb);
 		factory = new ElementPatchFactory(traitsBuilder);
 		face = f;
 		surface = ((CADFace) face).getGeomSurface();
