@@ -685,10 +685,7 @@ public class KdTree
 				cellStack[l] = (Cell) cellStack[l-1].subCell[posStack[l]];
 			}
 		}
-		if (logger.isDebugEnabled())
-			logger.debug("  search in "+searchedCells+"/"+nCells+" cells");
-		assert ret != null;
-		return ret;
+		throw new RuntimeException("Near vertex not found");
 	}
 	
 	private final class GetNearestVertexProcedure implements KdTreeProcedure
