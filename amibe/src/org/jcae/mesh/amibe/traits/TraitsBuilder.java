@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2006, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -31,21 +32,26 @@ public class TraitsBuilder
 	public static final int VECTORFIELD = 1 << BITVECTORFIELD;
 	public static final int SCALARFIELD = 1 << BITSCALARFIELD;
 
-	int attributes = 0;
-	final int [] index = new int[32];
+	protected int attributes = 0;
+	protected final int [] index = new int[32];
 
+	/**
+	 * Dummy constructor.
+	 */
 	public TraitsBuilder()
 	{
 	}
 
+	/**
+	 * Tells whether traits builder has a given feature.
+	 *
+	 * @param c  capability
+	 * @return <code>true</code> if traits builder contains this feature,
+	 * <code>false</code> otherwise.
+	 */
 	public boolean hasCapability(int c)
 	{
 		return ((attributes & c) != 0);
-	}
-
-	public void setCapability(int c)
-	{
-		attributes |= c;
 	}
 
 	public void addNormal()
@@ -88,6 +94,11 @@ public class TraitsBuilder
 		return (double []) t.array[index[BITSCALARFIELD]];
 	}
 
+	/**
+	 * Creates a {@link Traits} instance built from this traits builder.
+	 *
+	 * @return a {@link Traits} instance
+	 */
 	public Traits createTraits()
 	{
 		int n = 0;
@@ -116,6 +127,10 @@ public class TraitsBuilder
 		return t;
 	}
 
+	/**
+	 * Dummy method, overridden by subclasses.
+	 * @param t  traits
+	 */
 	protected void subInitTraits(Traits t)
 	{
 	}

@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2006, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -27,12 +28,22 @@ public class TriangleTraitsBuilder extends TraitsBuilder
 	public static final int SHALLOWHALFEDGE  = 1 << BITSHALLOWHALFEDGE;
 	public static final int HALFEDGE         = 1 << BITHALFEDGE;
 
+	/**
+	 * Let {@link ElementFactory#createTriangle} create {@link TriangleVH} instances.
+	 *
+	 * @return  this instance
+	 */
 	public TriangleTraitsBuilder addShallowHalfEdge()
 	{
 		attributes |= SHALLOWHALFEDGE;
 		return this;
 	}
 
+	/**
+	 * Let {@link ElementFactory#createTriangle} create {@link TriangleHE} instances.
+	 *
+	 * @return  this instance
+	 */
 	public TriangleTraitsBuilder addHalfEdge()
 	{
 		attributes |= HALFEDGE;

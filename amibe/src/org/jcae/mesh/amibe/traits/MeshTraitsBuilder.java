@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2006, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -47,11 +48,19 @@ public class MeshTraitsBuilder extends TraitsBuilder
 
 	private int dimension;
 
+	/**
+	 * Constructor.
+	 */
 	public MeshTraitsBuilder()
 	{
 		super();
 	}
 
+	/**
+	 * Adds triangle list to mesh traits.
+	 *
+	 * @return  this instance
+	 */
 	public MeshTraitsBuilder addTriangleList()
 	{
 		attributes |= TRIANGLES;
@@ -59,6 +68,11 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		return this;
 	}
 
+	/**
+	 * Adds triangle set to mesh traits.
+	 *
+	 * @return  this instance
+	 */
 	public MeshTraitsBuilder addTriangleSet()
 	{
 		attributes |= TRIANGLES;
@@ -66,6 +80,12 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		return this;
 	}
 
+	/**
+	 * Returns collection of triangles.
+	 *
+	 * @param t  mesh traits
+	 * @return collection of triangles
+	 */
 	@SuppressWarnings("unchecked")
 	public Collection<AbstractTriangle> getTriangles(Traits t)
 	{
@@ -74,6 +94,22 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		return null;
 	}
 
+	/**
+	 * Tells whether mesh traits stores collection of triangles.
+	 *
+	 * @return <code>true</code> if {@link #addTriangleList} or {@link #addTriangleSet}
+	 * was called, <code>false</code> otherwise.
+	 */
+	public boolean hasTriangles()
+	{
+		return hasCapability(TRIANGLES);
+	}
+
+	/**
+	 * Adds node list to mesh traits.
+	 *
+	 * @return  this instance
+	 */
 	public MeshTraitsBuilder addNodeList()
 	{
 		attributes |= NODES;
@@ -81,6 +117,11 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		return this;
 	}
 
+	/**
+	 * Adds node set to mesh traits.
+	 *
+	 * @return  this instance
+	 */
 	public MeshTraitsBuilder addNodeSet()
 	{
 		attributes |= NODES;
@@ -88,6 +129,12 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		return this;
 	}
 
+	/**
+	 * Returns collection of nodes.
+	 *
+	 * @param t  mesh traits
+	 * @return collection of nodes
+	 */
 	@SuppressWarnings("unchecked")
 	public Collection<AbstractVertex> getNodes(Traits t)
 	{
@@ -96,27 +143,34 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		return null;
 	}
 
+	/**
+	 * Tells whether mesh traits stores collection of nodes.
+	 *
+	 * @return <code>true</code> if {@link #addNodeList} or {@link #addNodeSet}
+	 * was called, <code>false</code> otherwise.
+	 */
 	public boolean hasNodes()
 	{
 		return hasCapability(NODES);
 	}
 
-	public boolean hasTriangles()
-	{
-		return hasCapability(TRIANGLES);
-	}
-
-	public boolean hasKdTree()
-	{
-		return hasCapability(KDTREE);
-	}
-
+	/**
+	 * Adds group list to mesh traits.
+	 *
+	 * @return  this instance
+	 */
 	public MeshTraitsBuilder addGroupList()
 	{
 		attributes |= GROUPLIST;
 		return this;
 	}
 
+	/**
+	 * Returns collection of groups.
+	 *
+	 * @param t  mesh traits
+	 * @return collection of groups
+	 */
 	public Collection getGroups(Traits t)
 	{
 		if ((attributes & GROUPLIST) != 0)
@@ -124,6 +178,11 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		return null;
 	}
 
+	/**
+	 * Adds {@link KdTree} instance to mesh traits.
+	 *
+	 * @return  this instance
+	 */
 	public MeshTraitsBuilder addKdTree(int d)
 	{
 		attributes |= KDTREE;
@@ -131,11 +190,28 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		return this;
 	}
 
+	/**
+	 * Returns {@link KdTree} instance.
+	 *
+	 * @param t  mesh traits
+	 * @return {@link KdTree} instance
+	 */
 	public KdTree getKdTree(Traits t)
 	{
 		if ((attributes & KDTREE) != 0)
 			return (KdTree) t.array[index[BITKDTREE]];
 		return null;
+	}
+
+	/**
+	 * Tells whether mesh traits stores a {@link KdTree} instance.
+	 *
+	 * @return <code>true</code> if {@link #addKdTree} was called,
+	 * <code>false</code> otherwise.
+	 */
+	public boolean hasKdTree()
+	{
+		return hasCapability(KDTREE);
 	}
 
 	@Override
@@ -155,6 +231,13 @@ public class MeshTraitsBuilder extends TraitsBuilder
 			t.array[index[BITKDTREE]] = new KdTree(dimension);
 	}
 
+	/**
+	 * Adds {@link VertexTraitsBuilder}, {@link HalfEdgeTraitsBuilder} or {@link TriangleTraitsBuilder}
+	 * instance to current mesh traits.
+	 *
+	 * @param t   traits builder
+	 * @return {@link KdTree} instance
+	 */
 	public MeshTraitsBuilder add(TraitsBuilder t)
 	{
 		if (t instanceof VertexTraitsBuilder)
@@ -168,16 +251,31 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		return this;
 	}
 
+	/**
+	 * Returns {@link VertexTraitsBuilder} instance.
+	 *
+	 * @return {@link VertexTraitsBuilder} instance
+	 */
 	public VertexTraitsBuilder getVertexTraitsBuilder()
 	{
 		return vertexTraitsBuilder;
 	}
 
+	/**
+	 * Returns {@link HalfEdgeTraitsBuilder} instance.
+	 *
+	 * @return {@link HalfEdgeTraitsBuilder} instance
+	 */
 	public HalfEdgeTraitsBuilder getHalfEdgeTraitsBuilder()
 	{
 		return halfedgeTraitsBuilder;
 	}
 
+	/**
+	 * Returns {@link TriangleTraitsBuilder} instance.
+	 *
+	 * @return {@link TriangleTraitsBuilder} instance
+	 */
 	public TriangleTraitsBuilder getTriangleTraitsBuilder()
 	{
 		return triangleTraitsBuilder;
