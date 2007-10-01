@@ -228,19 +228,17 @@ public class KdTree
 	/**
 	 * Create a new <code>KdTree</code> of the desired size.
 	 *
-	 * @param d   dimension (2 or 3)
-	 * @param bbmin  coordinates of bottom-left vertex
-	 * @param bbmax  coordinates of top-right vertex
+	 * @param bbox   coordinates of bottom-left vertex and upper-right vertices
 	 */
-	public KdTree(int d, double [] bbmin, double [] bbmax)
+	public KdTree(double [] bbox)
 	{
 		BUCKETSIZE = 10;
-		dimension = d;
+		dimension = bbox.length / 2;
 		nrSub = 1 << dimension;
 		x0 = new double[dimension+1];
 		root = new Cell();
 		nCells++;
-		setup(bbmin, bbmax);
+		setup(bbox);
 	}
 	
 	/**
@@ -251,24 +249,24 @@ public class KdTree
 	 * @param bbmax  coordinates of top-right vertex
 	 * @param bucketsize  bucket size
 	 */
-	public KdTree(int d, double [] bbmin, double [] bbmax, int bucketsize)
+	public KdTree(double [] bbox, int bucketsize)
 	{
 		BUCKETSIZE = bucketsize;
-		dimension = d;
+		dimension = bbox.length / 2;
 		nrSub = 1 << dimension;
 		x0 = new double[dimension+1];
 		root = new Cell();
 		nCells++;
-		setup(bbmin, bbmax);
+		setup(bbox);
 	}
 	
-	private final void setup(double [] bbmin, double [] bbmax)
+	private final void setup(double [] bbox)
 	{
 		double maxDelta = 0.0;
 		for (int i = 0; i < dimension; i++)
 		{
-			x0[i] = bbmin[i];
-			double delta = Math.abs(bbmax[i] - bbmin[i]);
+			x0[i] = bbox[i];
+			double delta = Math.abs(bbox[i+dimension] - bbox[i]);
 			if (delta > maxDelta)
 				maxDelta = delta;
 		}

@@ -35,14 +35,14 @@ import javax.media.j3d.PointAttributes;
  */
 public class OctreeTest extends KdTree
 {
-	public OctreeTest(double [] umin, double [] umax)
+	public OctreeTest(double [] bbox)
 	{
-		super (3, umin, umax);
+		super (bbox);
 	}
 	
-	public OctreeTest(double [] umin, double [] umax, int bucketsize)
+	public OctreeTest(double [] bbox, int bucketsize)
 	{
-		super (3, umin, umax, bucketsize);
+		super (bbox, bucketsize);
 	}
 	
 	private class CoordProcedure implements KdTreeProcedure

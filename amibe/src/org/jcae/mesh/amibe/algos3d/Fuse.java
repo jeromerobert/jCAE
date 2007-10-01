@@ -96,7 +96,13 @@ public class Fuse
 			else
 				bmax[i] *= 0.99;
 		}
-		KdTree octree = new KdTree(3, bmin, bmax);
+		double [] bbox = new double[6];
+		for (int i = 0; i < 3; i++)
+		{
+			bbox[i] = bmin[i];
+			bbox[i+3] = bmax[i];
+		}
+		KdTree octree = new KdTree(bbox);
 		HashMap<Vertex, Vertex> map = new HashMap<Vertex, Vertex>();
 		int nSubst = 0;
 		for (Iterator<AbstractVertex> it = mesh.getNodes().iterator(); it.hasNext(); )

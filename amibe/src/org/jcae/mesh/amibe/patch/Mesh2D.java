@@ -199,7 +199,13 @@ public class Mesh2D extends Mesh
 	 */
 	public void initQuadTree(double [] bbmin, double [] bbmax)
 	{
-		quadtree = new KdTree(2, bbmin, bbmax);
+		double [] bbox = new double[2*bbmin.length];
+		for (int i = 0; i < bbmin.length; i++)
+		{
+			bbox[i] = bbmin[i];
+			bbox[i+bbmin.length] = bbmax[i];
+		}
+		quadtree = new KdTree(bbox);
 		outerVertex = new OuterVertex2D((bbmin[0]+bbmax[0])*0.5, (bbmin[1]+bbmax[1])*0.5);
 	}
 	

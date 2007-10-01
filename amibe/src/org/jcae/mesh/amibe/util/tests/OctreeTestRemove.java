@@ -39,9 +39,9 @@ public class OctreeTestRemove extends OctreeTest
 {
 	private static Logger logger=Logger.getLogger(OctreeTestRemove.class);	
 	
-	public OctreeTestRemove(double [] umin, double [] umax)
+	public OctreeTestRemove(double [] bbox)
 	{
-		super (umin, umax);
+		super (bbox);
 	}
 	
 	public static void display(Viewer view, OctreeTest r)
@@ -56,10 +56,9 @@ public class OctreeTestRemove extends OctreeTest
 	{
 		boolean visu = true;
 		Random rand = new Random(113L);
-		double [] umin = { 0.0, 0.0, 0.0 };
-		double [] umax = { 1.0, 1.0, 1.0 };
+		double [] bbox = { 0.0, 0.0, 0.0, 1.0, 1.0, 1.0 };
 		final Mesh mesh = new Mesh();
-		final OctreeTest r = new OctreeTest(umin, umax);
+		final OctreeTest r = new OctreeTest(bbox);
 		logger.debug("Start insertion");
 		double [] xyz = new double[3];
 		for (int i = 0; i < 200; i++)

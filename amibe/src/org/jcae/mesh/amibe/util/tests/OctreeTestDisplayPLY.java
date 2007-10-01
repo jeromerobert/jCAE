@@ -41,9 +41,9 @@ public class OctreeTestDisplayPLY extends OctreeTest
 {
 	private static Logger logger=Logger.getLogger(OctreeTestDisplayPLY.class);	
 	
-	public OctreeTestDisplayPLY(double [] umin, double [] umax)
+	public OctreeTestDisplayPLY(double [] bbox)
 	{
-		super (umin, umax);
+		super (bbox);
 	}
 	
 	public static void main(String args[])
@@ -111,7 +111,13 @@ public class OctreeTestDisplayPLY extends OctreeTest
 		int bucketSize = 10;
 		if (args.length > 0)
 			bucketSize = Integer.parseInt(args[0]);
-		final OctreeTest r = new OctreeTest(umin, umax, bucketSize);
+		double [] bbox = new double[6];
+		for (int i = 0; i < 3; i++)
+		{
+			bbox[i] = umin[i];
+			bbox[i+3] = umax[i];
+		}
+		final OctreeTest r = new OctreeTest(bbox, bucketSize);
 		double [] xyz = new double[3];
 		for (int i = 0; i < nrNodes - nrDuplicates; i++)
 		{

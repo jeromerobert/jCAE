@@ -3,6 +3,8 @@ Mon Oct  1 12:44:03 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/amibe/util/KdTreeProcedure.java: Define OK,
 	ABORT and SKIPCHILD static members as returned values for action()
 	method.
+	* src/org/jcae/mesh/amibe/util/KdTree.java: In constructors, bbox
+	is passed via a single double array instead of two.
 
 Wed Sep 26 00:27:45 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
