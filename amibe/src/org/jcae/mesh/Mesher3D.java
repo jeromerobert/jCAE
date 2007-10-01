@@ -32,8 +32,6 @@ import java.text.SimpleDateFormat;
 
 import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
-import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 import org.jcae.mesh.amibe.algos3d.*;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;

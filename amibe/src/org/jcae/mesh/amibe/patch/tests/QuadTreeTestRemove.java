@@ -97,7 +97,7 @@ public class QuadTreeTestRemove extends QuadTreeTest
 					double [] xyz = view.getLastClick();
 					if (null != xyz)
 					{
-						Vertex2D vt = (Vertex2D) r.getNearVertex(m, (Vertex2D) m.factory.createVertex(xyz[0], xyz[1]));
+						Vertex2D vt = r.getNearVertex(m, (Vertex2D) m.factory.createVertex(xyz[0], xyz[1]));
 						r.quadtree.remove(vt);
 						view.removeAllBranchGroup();
 						display(view, r);

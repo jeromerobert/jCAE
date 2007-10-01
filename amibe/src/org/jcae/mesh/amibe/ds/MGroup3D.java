@@ -37,7 +37,7 @@ public class MGroup3D
 	private int id;
 	
 	//  Face list.
-	private Collection<AbstractTriangle> facelist = new ArrayList();
+	private Collection<AbstractTriangle> facelist = new ArrayList<AbstractTriangle>();
 	
 	/**
 	 * Creates a group.
