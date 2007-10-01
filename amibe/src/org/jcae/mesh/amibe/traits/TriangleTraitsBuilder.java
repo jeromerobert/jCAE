@@ -27,14 +27,16 @@ public class TriangleTraitsBuilder extends TraitsBuilder
 	public static final int SHALLOWHALFEDGE  = 1 << BITSHALLOWHALFEDGE;
 	public static final int HALFEDGE         = 1 << BITHALFEDGE;
 
-	public void addShallowHalfEdge()
+	public TriangleTraitsBuilder addShallowHalfEdge()
 	{
 		attributes |= SHALLOWHALFEDGE;
+		return this;
 	}
 
-	public void addHalfEdge()
+	public TriangleTraitsBuilder addHalfEdge()
 	{
 		attributes |= HALFEDGE;
+		return this;
 	}
 
 	// For performance reasons, adjacency relations are not stored in

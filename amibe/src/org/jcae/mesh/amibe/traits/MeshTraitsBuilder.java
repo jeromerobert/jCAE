@@ -47,16 +47,18 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		super();
 	}
 
-	public void addTriangleList()
+	public MeshTraitsBuilder addTriangleList()
 	{
 		attributes |= TRIANGLES;
 		attributes &= ~TRIANGLESET;
+		return this;
 	}
 
-	public void addTriangleSet()
+	public MeshTraitsBuilder addTriangleSet()
 	{
 		attributes |= TRIANGLES;
 		attributes |= TRIANGLESET;
+		return this;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -67,16 +69,18 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		return null;
 	}
 
-	public void addNodeList()
+	public MeshTraitsBuilder addNodeList()
 	{
 		attributes |= NODES;
 		attributes &= ~NODESET;
+		return this;
 	}
 
-	public void addNodeSet()
+	public MeshTraitsBuilder addNodeSet()
 	{
 		attributes |= NODES;
 		attributes |= NODESET;
+		return this;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -97,9 +101,10 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		return hasCapability(TRIANGLES);
 	}
 
-	public void addGroupList()
+	public MeshTraitsBuilder addGroupList()
 	{
 		attributes |= GROUPLIST;
+		return this;
 	}
 
 	public Collection getGroups(Traits t)
@@ -124,7 +129,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 			t.array[index[BITGROUPS]] = new ArrayList();
 	}
 
-	public void add(TraitsBuilder t)
+	public MeshTraitsBuilder add(TraitsBuilder t)
 	{
 		if (t instanceof VertexTraitsBuilder)
 			vertexTraitsBuilder = (VertexTraitsBuilder) t;
@@ -134,6 +139,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 			triangleTraitsBuilder = (TriangleTraitsBuilder) t;
 		else
 			throw new RuntimeException();
+		return this;
 	}
 
 	public VertexTraitsBuilder getVertexTraitsBuilder()

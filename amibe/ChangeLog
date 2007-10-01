@@ -5,6 +5,9 @@ Mon Oct  1 12:44:03 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	method.
 	* src/org/jcae/mesh/amibe/util/KdTree.java: In constructors, bbox
 	is passed via a single double array instead of two.
+	* src/org/jcae/mesh/amibe/traits/MeshTraitsBuilder.java
+	  src/org/jcae/mesh/amibe/traits/TriangleTraitsBuilder.java: Let all
+	add* methods return current instance so that they can be chained.
 
 Wed Sep 26 00:27:45 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
