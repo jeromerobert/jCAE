@@ -182,4 +182,38 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	{
 		return triangleTraitsBuilder;
 	}
+
+	/**
+	 * Returns default 2D <code>MeshTraitsBuilder</code> instance.  This instance
+	 * calls following methods: {@link #addTriangleList}, {@link #addKdTree}
+	 * and {@link TriangleTraitsBuilder#addShallowHalfEdge}. It is implicitly used when
+	 * calling {@link org.jcae.mesh.amibe.patch.Mesh2D} constructor without
+	 * {@link MeshTraitsBuilder} argument.
+	 */
+	public static final MeshTraitsBuilder getDefault2D()
+	{
+		MeshTraitsBuilder ret = new MeshTraitsBuilder();
+		ret.addTriangleList();
+		ret.addKdTree(2);
+		ret.triangleTraitsBuilder = new TriangleTraitsBuilder();
+		ret.triangleTraitsBuilder.addShallowHalfEdge();
+		return ret;
+	}
+
+	/**
+	 * Returns default 3D <code>MeshTraitsBuilder</code> instance.  This instance
+	 * calls following methods: {@link #addTriangleSet} and
+	 * {@link TriangleTraitsBuilder#addHalfEdge}.  It is implicitly used when
+	 * calling {@link org.jcae.mesh.amibe.ds.Mesh} constructor without
+	 * {@link MeshTraitsBuilder} argument.
+	 */
+	public static final MeshTraitsBuilder getDefault3D()
+	{
+		MeshTraitsBuilder ret = new MeshTraitsBuilder();
+		ret.addTriangleSet();
+		ret.triangleTraitsBuilder = new TriangleTraitsBuilder();
+		ret.triangleTraitsBuilder.addHalfEdge();
+		return ret;
+	}
+
 }

@@ -450,12 +450,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			return;
 		}
 		logger.info("Load geometry file");
-		final org.jcae.mesh.amibe.traits.TriangleTraitsBuilder ttb = new org.jcae.mesh.amibe.traits.TriangleTraitsBuilder();
-		ttb.addHalfEdge();
-		final org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = new org.jcae.mesh.amibe.traits.MeshTraitsBuilder();
-		mtb.addTriangleSet();
-		mtb.add(ttb);
-		final Mesh mesh = new Mesh(mtb);
+		final Mesh mesh = new Mesh();
 		MeshReader.readObject3D(mesh, args[0], "jcae3d", -1);
 		new DecimateHalfEdge(mesh, options).compute();
 		final File brepFile=new File(args[3]);

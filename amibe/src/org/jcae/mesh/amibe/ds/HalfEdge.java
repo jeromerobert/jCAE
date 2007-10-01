@@ -1122,12 +1122,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	
 	public static void main(String args[])
 	{
-		org.jcae.mesh.amibe.traits.TriangleTraitsBuilder ttb = new org.jcae.mesh.amibe.traits.TriangleTraitsBuilder();
-		ttb.addHalfEdge();
-		org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = new org.jcae.mesh.amibe.traits.MeshTraitsBuilder();
-		mtb.addTriangleList();
-		mtb.add(ttb);
-		Mesh m = new Mesh(mtb);
+		Mesh m = new Mesh();
 		Vertex [] v = new Vertex[6];
 		v[0] = (Vertex) m.factory.createVertex(0.0, 0.0, 0.0);
 		v[1] = (Vertex) m.factory.createVertex(1.0, 0.0, 0.0);
@@ -1148,7 +1143,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		logger.info("Done.");
 
 		logger.info("Building non-manifold mesh...");
-		m = new Mesh(mtb);
+		m = new Mesh();
 		Vertex [] nmv = new Vertex[6];
 		nmv[0] = (Vertex) m.factory.createVertex(0.0, 0.0, 0.0);
 		nmv[1] = (Vertex) m.factory.createVertex(0.0, 0.0, 3.0);
@@ -1170,7 +1165,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		m.buildAdjacency(nmv, -1.0);
 		assert m.isValid();
 
-		m = new Mesh(mtb);
+		m = new Mesh();
 		unitTestBuildMesh(m, v);
 		HalfEdge e = HalfEdge.find(v[0], v[4]);
 		e.HEswap();

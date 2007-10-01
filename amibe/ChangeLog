@@ -11,6 +11,11 @@ Mon Oct  1 12:44:03 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/amibe/patch/Mesh2D.java
 	  src/org/jcae/mesh/amibe/traits/MeshTraitsBuilder.java: Replace
 	quadtree member from Mesh2D by a builder into MeshTraitsBuilder.
+	* src/org/jcae/mesh/amibe/traits/MeshTraitsBuilder.java: New
+	getDefault2D() and getDefault3D() methods.  The former is used
+	implicitly by Mesh2D constructor, and the latter by Mesh constructor.
+	Note that getDefault3D() does not call addNodeList(), hence default
+	Mesh constructor does no more contain node collection.
 
 Wed Sep 26 00:27:45 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

@@ -209,11 +209,8 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 			return;
 		}
 		logger.info("Load geometry file");
-		org.jcae.mesh.amibe.traits.TriangleTraitsBuilder ttb = new org.jcae.mesh.amibe.traits.TriangleTraitsBuilder();
-		ttb.addHalfEdge();
-		org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = new org.jcae.mesh.amibe.traits.MeshTraitsBuilder();
+		org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = org.jcae.mesh.amibe.traits.MeshTraitsBuilder.getDefault3D();
 		mtb.addTriangleSet();
-		mtb.add(ttb);
 		Mesh mesh = new Mesh(mtb);
 		MeshReader.readObject3D(mesh, args[0], "jcae3d", -1);
 		new SplitEdge(mesh, options).compute();

@@ -152,13 +152,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	 */
 	public Mesh()
 	{
-		super(new MeshTraitsBuilder());
-		TriangleTraitsBuilder ttb = new TriangleTraitsBuilder();
-		ttb.addHalfEdge();
-		traitsBuilder.add(ttb);
-		traitsBuilder.addTriangleList();
-		traitsBuilder.addNodeList();
-		
+		super(MeshTraitsBuilder.getDefault3D());
 		factory = new ElementFactory(traitsBuilder);
 		triangleList = new ArrayList<AbstractTriangle>();
 		nodeList = new ArrayList<AbstractVertex>();
@@ -170,7 +164,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	public Mesh(MeshTraitsBuilder mtb)
 	{
 		super(mtb);
-		factory = new ElementFactory(mtb);
+		factory = new ElementFactory(traitsBuilder);
 		triangleList = mtb.getTriangles(traits);
 		nodeList = mtb.getNodes(traits);
 	}

@@ -64,13 +64,7 @@ public class Mesher3D
 		String brepFile = (new File(brepfilename)).getName();		
 		String xmlBrepDir = relativize(new File(brepfilename).getAbsoluteFile().getParentFile(),
 			new File(xmlDir).getAbsoluteFile()).getPath();
-		TriangleTraitsBuilder ttb = new TriangleTraitsBuilder();
-		ttb.addHalfEdge();
-		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
-		mtb.addTriangleSet();
-		mtb.addNodeList();
-		mtb.add(ttb);
-		Mesh mesh = new Mesh(mtb);
+		Mesh mesh = new Mesh();
 		String ridgeAngleProp = System.getProperty("org.jcae.mesh.xmldata.MeshReader.ridgeAngleDegre");
 		if (ridgeAngleProp == null)
 		{
