@@ -59,6 +59,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		attributes |= TRIANGLESET;
 	}
 
+	@SuppressWarnings("unchecked")
 	public Collection<AbstractTriangle> getTriangles(Traits t)
 	{
 		if ((attributes & TRIANGLES) != 0)
@@ -78,6 +79,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		attributes |= NODESET;
 	}
 
+	@SuppressWarnings("unchecked")
 	public Collection<AbstractVertex> getNodes(Traits t)
 	{
 		if ((attributes & NODES) != 0)
