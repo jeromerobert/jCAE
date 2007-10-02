@@ -9,6 +9,13 @@ Tue Oct  2 10:53:17 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	algorithm had been broken for a month.
 	* src/org/jcae/mesh/oemm/MeshReader.java (buildMesh(TIntHashSet)):
 	Add node list to MeshTraitsBuilder.
+	* build.xml build.properties
+	  src/org/jcae/mesh/amibe/ds/HalfEdgeTest.java
+	  src/org/jcae/mesh/amibe/ds/VirtualHalfEdgeTest.java
+	  src/org/jcae/mesh/amibe/ds/AbstractHalfEdgeTest.java
+	  src/org/jcae/mesh/amibe/util/PAVLSortedTreeTest.java: Add junit
+	tests.  Classes under **/tests/** are not unit tests but rather
+	prototypes which needs user interaction, they will be renamed later.
 
 Mon Oct  1 12:44:03 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
