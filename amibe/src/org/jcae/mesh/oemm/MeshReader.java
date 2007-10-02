@@ -158,11 +158,7 @@ public class MeshReader extends Storage
 	 */
 	public Mesh buildMesh(TIntHashSet leaves)
 	{
-		if (mapNodeToMesh != null)
-			throw new RuntimeException("Error: buildMesh() cannot be called after buildMeshes()!");
-		Mesh ret = new Mesh();
-		appendMesh(ret, leaves);
-		return ret;
+		return buildMesh(MeshTraitsBuilder.getDefault3D(), leaves);
 	}
 
 	/**
