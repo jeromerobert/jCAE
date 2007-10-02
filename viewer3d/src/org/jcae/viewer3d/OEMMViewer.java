@@ -101,7 +101,7 @@ public class OEMMViewer
 		Shape3D shapeLine = new Shape3D(tri, wireFrame);
 		shapeLine.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 		bg.addChild(shapeLine);
-		if (!mesh.factory.hasAdjacency())
+		if (!mesh.hasAdjacency())
 			return bg;
 
 		// Free edges
