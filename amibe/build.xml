@@ -12,7 +12,7 @@
 		<propertyfile file="${classes.dir}/timestamp.properties">
 			<entry key="build.time" type="date" pattern="yyyy-MM-dd HH:mm:ss" value="now" />
 		</propertyfile>
-		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}" excludes="${test.packages}">
+		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}" excludes="${test.packages} ${jcae.extra.viewer3d.packages}">
 			<compilerarg line="${compiler.arg}"/>
 			<classpath>
 				<pathelement location="${log4j.jar}"/>
@@ -28,9 +28,21 @@
 				<pathelement location="${trove.jar}"/>
 			</classpath>
 		</javac>
+		<antcall target="compile-extra-viewer3d"/>
 	</target>
 
-	<target name="compile-test" depends="init" description="Compile the tests" unless="skip.tests">
+	<target name="compile-extra-viewer3d" depends="init" description="Compile jcae with viewer3d bindings" if="build.extra.viewer3d">
+		<mkdir dir="${classes.dir}"/>
+		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}" includes="${jcae.extra.viewer3d.packages}">
+			<compilerarg line="${compiler.arg}"/>
+			<classpath>
+				<pathelement location="${log4j.jar}"/>
+				<pathelement location="${jcae-viewer3d.jar}"/>
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="compile-test" depends="init" description="Compile the tests" if="build.tests">
 		<mkdir dir="${classes.dir}"/>
 		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}" includes="${test.packages}">
 			<compilerarg line="${compiler.arg}"/>

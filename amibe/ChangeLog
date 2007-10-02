@@ -1,3 +1,10 @@
+Tue Oct  2 10:53:17 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* build.xml build.properties: Modify ant scripts to move classes
+	containing viewer3d calls from jcae-test.jar into jcae.jar.
+	Rename skip.tests property into build.tests and change its meaning
+	accordingly.
+
 Mon Oct  1 12:44:03 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/util/KdTreeProcedure.java: Define OK,
