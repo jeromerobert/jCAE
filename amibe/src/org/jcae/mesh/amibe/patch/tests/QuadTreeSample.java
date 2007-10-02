@@ -42,12 +42,12 @@ import org.apache.log4j.Logger;
 /**
  * Utility class to write unit tests for the QuadTree class.
  */
-public class QuadTreeTest
+public class QuadTreeSample
 {
-	private static Logger logger=Logger.getLogger(QuadTreeTest.class);	
+	private static Logger logger=Logger.getLogger(QuadTreeSample.class);	
 	protected final KdTree quadtree;
 	
-	public QuadTreeTest(KdTree q)
+	public QuadTreeSample(KdTree q)
 	{
 		quadtree = q;
 	}

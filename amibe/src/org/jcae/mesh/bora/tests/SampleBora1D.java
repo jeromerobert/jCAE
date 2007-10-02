@@ -54,7 +54,7 @@ import org.jcae.viewer3d.View;
 
 import java.util.Iterator;
 
-public class Bora1D
+public class SampleBora1D
 {
 	public static BranchGroup [] getBranchGroups(BModel model)
 	{

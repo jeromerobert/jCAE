@@ -27,23 +27,19 @@ import java.util.Random;
 import org.jcae.mesh.java3d.Viewer;
 
 /**
- * Unit test to check detection of near vertices.
+ * Unit test to check removal of vertices.
  * Run
  * <pre>
- *   QuadTreeTestNearest
+ *   QuadTreeSampleRemove
  * </pre>
  * to display an initial <code>QuadTree</code> with 500 vertices.
- * When clicking at a point, a yellow segment is displayed between this point
- * and the nearest point found in the same cell, returned by
- * {@link org.jcae.mesh.amibe.util.KdTree#getNearVertex(Mesh, Vertex)}.
- * If {@link org.jcae.mesh.amibe.util.KdTree#getNearestVertex(Mesh, Vertex)}
- * finds a nearest point, a blue segment is displayed.
+ * Click to remove vertices.
  */
-public class QuadTreeTestNearest extends QuadTreeTest
+public class QuadTreeSampleRemove extends QuadTreeSample
 {
-	private static Logger logger=Logger.getLogger(QuadTreeTestNearest.class);	
+	private static Logger logger=Logger.getLogger(QuadTreeSampleRemove.class);
 	
-	public QuadTreeTestNearest(KdTree q)
+	public QuadTreeSampleRemove(KdTree q)
 	{
 		super (q);
 	}
@@ -58,6 +54,14 @@ public class QuadTreeTestNearest extends QuadTreeTest
 		return (Vertex2D) quadtree.getNearestVertex(mesh, n);
 	}
 
+	public static void display(Viewer view, QuadTreeSample r)
+	{
+		view.addBranchGroup(r.bgQuadTree());
+		view.setVisible(true);
+		view.addBranchGroup(r.bgVertices());
+		view.setVisible(true);
+	}
+	
 	public static void main(String args[])
 	{
 		double u, v;
@@ -68,7 +72,7 @@ public class QuadTreeTestNearest extends QuadTreeTest
 		final Mesh2D m = new Mesh2D();
 		m.pushCompGeom(2);
 		m.resetQuadTree(bbmin, bbmax);
-		final QuadTreeTestNearest r = new QuadTreeTestNearest(m.getQuadTree());
+		final QuadTreeSampleRemove r = new QuadTreeSampleRemove(m.getQuadTree());
 		logger.debug("Start insertion");
 		for (int i = 0; i < 500; i++)
 		{
@@ -83,33 +87,8 @@ public class QuadTreeTestNearest extends QuadTreeTest
 		final Viewer view=new Viewer();
 		if (visu)
 		{
-			view.addBranchGroup(r.bgQuadTree());
+			display(view, r);
 			view.zoomTo(); 
-			view.setVisible(true);
-			view.addBranchGroup(r.bgVertices());
-			view.setVisible(true);
-		}
-		
-		for (int i = 0; i < 10; i++)
-		{
-			u = rand.nextDouble();
-			v = rand.nextDouble();
-			Vertex2D vt = (Vertex2D) m.createVertex(u, v);
-			if (visu)
-			{
-				view.addBranchGroup(r.segment(vt, r.getNearVertex(m, vt), 5.0f, 1, 1, 0));
-				view.setVisible(true);
-				view.addBranchGroup(r.segment(vt, r.getNearestVertex(m, vt), 0.0f, 0, 1, 1));
-				view.setVisible(true);
-			}
-			else
-			{
-				r.getNearVertex(m, vt);
-				r.getNearestVertex(m, vt);
-			}
-		}
-		if (visu)
-		{
 			view.callBack=new Runnable()
 			{
 				public void run()
@@ -117,15 +96,13 @@ public class QuadTreeTestNearest extends QuadTreeTest
 					double [] xyz = view.getLastClick();
 					if (null != xyz)
 					{
-						Vertex2D vt = (Vertex2D) m.createVertex(xyz[0], xyz[1]);
-						view.addBranchGroup(r.segment(vt, r.getNearVertex(m, vt), 5.0f, 1, 1, 0));
-						view.setVisible(true);
-						view.addBranchGroup(r.segment(vt, r.getNearestVertex(m, vt), 0.0f, 0, 1, 1));
-						view.setVisible(true);
+						Vertex2D vt = r.getNearVertex(m, (Vertex2D) m.createVertex(xyz[0], xyz[1]));
+						r.quadtree.remove(vt);
+						view.removeAllBranchGroup();
+						display(view, r);
 					}
 				}
 			};
-			view.setVisible(true);
 		}
 	}
 }

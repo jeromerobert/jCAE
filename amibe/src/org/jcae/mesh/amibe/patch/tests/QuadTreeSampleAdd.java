@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2004,2005,2006, by EADS CRC
+    Copyright (C) 2004,2005, by EADS CRC
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -27,34 +27,24 @@ import java.util.Random;
 import org.jcae.mesh.java3d.Viewer;
 
 /**
- * Unit test to check removal of vertices.
+ * Unit test to check insertion of vertices.
  * Run
  * <pre>
- *   QuadTreeTestRemove
+ *   QuadTreeSampleAdd
  * </pre>
  * to display an initial <code>QuadTree</code> with 500 vertices.
- * Click to remove vertices.
+ * Click to add vertices.
  */
-public class QuadTreeTestRemove extends QuadTreeTest
+public class QuadTreeSampleAdd extends QuadTreeSample
 {
-	private static Logger logger=Logger.getLogger(QuadTreeTestRemove.class);
+	private static Logger logger=Logger.getLogger(QuadTreeSampleAdd.class);	
 	
-	public QuadTreeTestRemove(KdTree q)
+	public QuadTreeSampleAdd(KdTree q)
 	{
 		super (q);
 	}
 	
-	public Vertex2D getNearVertex(Mesh2D mesh, Vertex2D n)
-	{
-		return (Vertex2D) quadtree.getNearVertex(mesh, n);
-	}
-
-	public Vertex2D getNearestVertex(Mesh2D mesh, Vertex2D n)
-	{
-		return (Vertex2D) quadtree.getNearestVertex(mesh, n);
-	}
-
-	public static void display(Viewer view, QuadTreeTest r)
+	public static void display(Viewer view, QuadTreeSample r)
 	{
 		view.addBranchGroup(r.bgQuadTree());
 		view.setVisible(true);
@@ -72,7 +62,7 @@ public class QuadTreeTestRemove extends QuadTreeTest
 		final Mesh2D m = new Mesh2D();
 		m.pushCompGeom(2);
 		m.resetQuadTree(bbmin, bbmax);
-		final QuadTreeTestRemove r = new QuadTreeTestRemove(m.getQuadTree());
+		final QuadTreeSampleAdd r = new QuadTreeSampleAdd(m.getQuadTree());
 		logger.debug("Start insertion");
 		for (int i = 0; i < 500; i++)
 		{
@@ -96,8 +86,8 @@ public class QuadTreeTestRemove extends QuadTreeTest
 					double [] xyz = view.getLastClick();
 					if (null != xyz)
 					{
-						Vertex2D vt = r.getNearVertex(m, (Vertex2D) m.createVertex(xyz[0], xyz[1]));
-						r.quadtree.remove(vt);
+						Vertex2D vt = (Vertex2D) m.createVertex(xyz[0], xyz[1]);
+						r.quadtree.add(vt);
 						view.removeAllBranchGroup();
 						display(view, r);
 					}

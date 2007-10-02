@@ -35,11 +35,11 @@ import javax.media.j3d.PointAttributes;
 /**
  * Utility class to write unit tests for the Octree class.
  */
-public class OctreeTest
+public class OctreeSample
 {
 	private KdTree octree;
 
-	public OctreeTest(KdTree o)
+	public OctreeSample(KdTree o)
 	{
 		octree = o;
 	}

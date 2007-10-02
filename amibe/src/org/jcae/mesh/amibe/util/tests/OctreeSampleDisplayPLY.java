@@ -34,12 +34,12 @@ import org.jcae.viewer3d.View;
  * Unit test to check the influence of <code>BUCKETSIZE</code>.
  * To display an octree with 100 points per cell, run
  * <pre>
- *   OctreeTestDisplayPLY 100 &lt; file.ply
+ *   OctreeSampleDisplayPLY 100 &lt; file.ply
  * </pre>
  */
-public class OctreeTestDisplayPLY extends OctreeTest
+public class OctreeSampleDisplayPLY extends OctreeSample
 {
-	public OctreeTestDisplayPLY(KdTree o)
+	public OctreeSampleDisplayPLY(KdTree o)
 	{
 		super(o);
 	}
@@ -111,7 +111,7 @@ public class OctreeTestDisplayPLY extends OctreeTest
 			bbox[i+3] = umax[i];
 		}
 		final KdTree r = new KdTree(bbox, bucketSize);
-		final OctreeTest t = new OctreeTest(r);
+		final OctreeSample t = new OctreeSample(r);
 		double [] xyz = new double[3];
 		for (int i = 0; i < nrNodes - nrDuplicates; i++)
 		{

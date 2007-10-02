@@ -16,6 +16,12 @@ Tue Oct  2 10:53:17 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	  src/org/jcae/mesh/amibe/util/PAVLSortedTreeTest.java: Add junit
 	tests.  Classes under **/tests/** are not unit tests but rather
 	prototypes which needs user interaction, they will be renamed later.
+	* src/org/jcae/mesh/bora/tests/*.java
+	  src/org/jcae/mesh/amibe/util/tests/*.java
+	  src/org/jcae/mesh/amibe/patch/tests/*.java: These classes implement
+	some test cases which require interaction from user.  In order to
+	distinguish from junit test cases, they are renamed to not contain
+	'Test' in their name.
 
 Mon Oct  1 12:44:03 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
