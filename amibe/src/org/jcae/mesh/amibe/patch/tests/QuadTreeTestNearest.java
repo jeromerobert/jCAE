@@ -21,7 +21,6 @@ package org.jcae.mesh.amibe.patch.tests;
 
 import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.util.KdTree;
-import org.jcae.mesh.amibe.patch.QuadTreeTest;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import java.util.Random;
