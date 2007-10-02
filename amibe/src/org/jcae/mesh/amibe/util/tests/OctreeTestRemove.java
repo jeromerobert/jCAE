@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -19,8 +20,7 @@
 
 package org.jcae.mesh.amibe.util.tests;
 
-import org.apache.log4j.Logger;
-import org.jcae.mesh.amibe.util.OctreeTest;
+import org.jcae.mesh.amibe.util.KdTree;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.Mesh;
 import java.util.Random;
@@ -37,18 +37,16 @@ import org.jcae.mesh.java3d.Viewer;
  */
 public class OctreeTestRemove extends OctreeTest
 {
-	private static Logger logger=Logger.getLogger(OctreeTestRemove.class);	
-	
-	public OctreeTestRemove(double [] bbox)
+	public OctreeTestRemove(KdTree o)
 	{
-		super (bbox);
+		super(o);
 	}
 	
-	public static void display(Viewer view, OctreeTest r)
+	public static void display(Viewer view, OctreeTest t)
 	{
-		view.addBranchGroup(r.bgOctree());
+		view.addBranchGroup(t.bgOctree());
 		view.setVisible(true);
-		view.addBranchGroup(r.bgVertices());
+		view.addBranchGroup(t.bgVertices());
 		view.setVisible(true);
 	}
 	
@@ -58,8 +56,8 @@ public class OctreeTestRemove extends OctreeTest
 		Random rand = new Random(113L);
 		double [] bbox = { 0.0, 0.0, 0.0, 1.0, 1.0, 1.0 };
 		final Mesh mesh = new Mesh();
-		final OctreeTest r = new OctreeTest(bbox);
-		logger.debug("Start insertion");
+		final KdTree r = new KdTree(bbox);
+		final OctreeTest t = new OctreeTest(r);
 		double [] xyz = new double[3];
 		for (int i = 0; i < 200; i++)
 		{
@@ -74,7 +72,7 @@ public class OctreeTestRemove extends OctreeTest
 		final Viewer view=new Viewer();
 		if (visu)
 		{
-			display(view, r);
+			display(view, t);
 			view.zoomTo(); 
 			view.callBack=new Runnable()
 			{
@@ -86,7 +84,7 @@ public class OctreeTestRemove extends OctreeTest
 						Vertex vt = r.getNearVertex(mesh, (Vertex) mesh.createVertex(xyzPick));
 						r.remove(vt);
 						view.removeAllBranchGroup();
-						display(view, r);
+						display(view, t);
 					}
 				}
 			};

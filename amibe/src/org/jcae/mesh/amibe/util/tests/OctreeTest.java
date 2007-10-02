@@ -18,8 +18,10 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-package org.jcae.mesh.amibe.util;
+package org.jcae.mesh.amibe.util.tests;
 
+import org.jcae.mesh.amibe.util.KdTree;
+import org.jcae.mesh.amibe.util.KdTreeProcedure;
 import org.jcae.mesh.amibe.ds.Vertex;
 import javax.media.j3d.Appearance;
 import javax.media.j3d.QuadArray;
@@ -33,16 +35,13 @@ import javax.media.j3d.PointAttributes;
 /**
  * Utility class to write unit tests for the Octree class.
  */
-public class OctreeTest extends KdTree
+public class OctreeTest
 {
-	public OctreeTest(double [] bbox)
+	private KdTree octree;
+
+	public OctreeTest(KdTree o)
 	{
-		super (bbox);
-	}
-	
-	public OctreeTest(double [] bbox, int bucketsize)
-	{
-		super (bbox, bucketsize);
+		octree = o;
 	}
 	
 	private class CoordProcedure implements KdTreeProcedure
@@ -58,9 +57,9 @@ public class OctreeTest extends KdTree
 			int [] ii = { i0[0], i0[1], i0[2] };
 			double [] p = new double[3];
 			double [] p2 = new double[3];
-			int2double(ii, p);
+			octree.int2double(ii, p);
 			ii[0] += s;
-			int2double(ii, p2);
+			octree.int2double(ii, p2);
 			double ds = p2[0] - p[0];
 			double offset = 0.0;
 			for (int i = 0; i < 2; i++)
@@ -127,21 +126,21 @@ public class OctreeTest extends KdTree
 	{
 		public final int action(Object o, int s, final int [] i0)
 		{
-			Cell self = (Cell) o;
+			KdTree.Cell self = (KdTree.Cell) o;
 			if (!self.isLeaf())
 				return 0;
 			
 			double [] coord = new double[6];
 			int [] ii = { i0[0], i0[1], i0[2] };
 			double [] p = new double[3];
-			int2double(ii, p);
+			octree.int2double(ii, p);
 			coord[0] = p[0];
 			coord[1] = p[1];
 			coord[2] = p[2];
 			ii[0] += s;
 			ii[1] += s;
 			ii[2] += s;
-			int2double(ii, p);
+			octree.int2double(ii, p);
 			coord[3] = p[0];
 			coord[4] = p[1];
 			coord[5] = p[2];
@@ -171,7 +170,7 @@ public class OctreeTest extends KdTree
 		}
 		public final int action(Object o, int s, final int [] i0)
 		{
-			Cell self = (Cell) o;
+			KdTree.Cell self = (KdTree.Cell) o;
 			if (!self.isLeaf())
 				return KdTreeProcedure.OK;
 			for (int i = 0, n = self.count(); i < n; i++)
@@ -186,14 +185,25 @@ public class OctreeTest extends KdTree
 			return KdTreeProcedure.OK;
 		}
 	}
-	
+
+	private static class CountVertProcedure implements KdTreeProcedure
+	{
+		private int count;
+		public final int action(Object o, int s, final int [] i0)
+		{
+			KdTree.Cell self = (KdTree.Cell) o;
+			count = self.count();
+			return KdTreeProcedure.ABORT;
+		}
+	}
+
 	public BranchGroup bgOctree()
 	{
 		BranchGroup bg=new BranchGroup();
 		
-		CoordProcedure proc = new CoordProcedure(nCells);
-		walk(proc);
-		QuadArray quad = new QuadArray(24*nCells, QuadArray.COORDINATES);
+		CoordProcedure proc = new CoordProcedure(octree.nCells);
+		octree.walk(proc);
+		QuadArray quad = new QuadArray(24*octree.nCells, QuadArray.COORDINATES);
 		quad.setCapability(QuadArray.ALLOW_FORMAT_READ);
 		quad.setCapability(QuadArray.ALLOW_COUNT_READ);
 		quad.setCapability(QuadArray.ALLOW_COORDINATE_READ);
@@ -210,9 +220,11 @@ public class OctreeTest extends KdTree
 	public BranchGroup bgVertices()
 	{
 		BranchGroup bg=new BranchGroup();
-		int nVertices = root.count();
+		CountVertProcedure cproc = new CountVertProcedure();
+		octree.walk(cproc);
+		int nVertices = cproc.count;
 		CoordVertProcedure vproc = new CoordVertProcedure(nVertices);
-		walk(vproc);
+		octree.walk(vproc);
 		PointArray p = new PointArray(nVertices, PointArray.COORDINATES);
 		p.setCoordinates(0, vproc.coord);
 		Appearance vertApp = new Appearance();

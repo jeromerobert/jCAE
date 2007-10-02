@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -19,8 +20,7 @@
 
 package org.jcae.mesh.amibe.util.tests;
 
-import org.apache.log4j.Logger;
-import org.jcae.mesh.amibe.util.OctreeTest;
+import org.jcae.mesh.amibe.util.KdTree;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.Mesh;
 import java.io.*;
@@ -39,11 +39,9 @@ import org.jcae.viewer3d.View;
  */
 public class OctreeTestDisplayPLY extends OctreeTest
 {
-	private static Logger logger=Logger.getLogger(OctreeTestDisplayPLY.class);	
-	
-	public OctreeTestDisplayPLY(double [] bbox)
+	public OctreeTestDisplayPLY(KdTree o)
 	{
-		super (bbox);
+		super(o);
 	}
 	
 	public static void main(String args[])
@@ -72,8 +70,6 @@ public class OctreeTestDisplayPLY extends OctreeTest
 		}
 		double [] umin = { Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE };
 		double [] umax = { Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE };
-		logger.info("Found "+nrNodes+" nodes");
-		logger.debug("Start insertion");
 		double [] coord = new double[3*nrNodes];
 		String oldLine = "foo";
 		int nrDuplicates = 0;
@@ -105,9 +101,6 @@ public class OctreeTestDisplayPLY extends OctreeTest
 			{
 			}
 		}
-		logger.info("Bounding box:");
-		logger.info("  "+umin[0]+" "+umin[1]+" "+umin[2]);
-		logger.info("  "+umax[0]+" "+umax[1]+" "+umax[2]);
 		int bucketSize = 10;
 		if (args.length > 0)
 			bucketSize = Integer.parseInt(args[0]);
@@ -117,15 +110,14 @@ public class OctreeTestDisplayPLY extends OctreeTest
 			bbox[i] = umin[i];
 			bbox[i+3] = umax[i];
 		}
-		final OctreeTest r = new OctreeTest(bbox, bucketSize);
+		final KdTree r = new KdTree(bbox, bucketSize);
+		final OctreeTest t = new OctreeTest(r);
 		double [] xyz = new double[3];
 		for (int i = 0; i < nrNodes - nrDuplicates; i++)
 		{
 			System.arraycopy(coord, 3*i, xyz, 0, 3);
 			r.add((Vertex) mesh.createVertex(xyz));
 		}
-		logger.info("Max level: "+r.getMaxLevel());
-		logger.info("Number of cells: "+r.nCells);
 		//CheckCoordProcedure checkproc = new CheckCoordProcedure();
 		//r.walk(checkproc);
 		
@@ -134,8 +126,8 @@ public class OctreeTestDisplayPLY extends OctreeTest
 		feFrame.setSize(800,600);
 		feFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-		view.add(new ViewableBG(r.bgOctree()));
-		view.add(new ViewableBG(r.bgVertices()));
+		view.add(new ViewableBG(t.bgOctree()));
+		view.add(new ViewableBG(t.bgVertices()));
 		view.fitAll(); 
 		feFrame.getContentPane().add(view);
 		feFrame.setVisible(true);
