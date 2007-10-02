@@ -4,6 +4,9 @@ Tue Oct  2 10:53:17 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	containing viewer3d calls from jcae-test.jar into jcae.jar.
 	Rename skip.tests property into build.tests and change its meaning
 	accordingly.
+	* src/org/jcae/mesh/amibe/algos2d/Initial.java: Call
+	Triangle.setOuter() method to also set 'writable' member.  This
+	algorithm had been broken for a month.
 
 Mon Oct  1 12:44:03 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

@@ -315,11 +315,7 @@ public class Initial
 		Vertex2D first = (Vertex2D) ot.origin();
 		do
 		{
-			for (int i = 0; i < 3; i++)
-			{
-				ot.setAttributes(AbstractHalfEdge.OUTER);
-				ot.next();
-			}
+			ot.getTri().setOuter();
 			tList.add(ot.getTri());
 			ot.nextApex();
 		}
