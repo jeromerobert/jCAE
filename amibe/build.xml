@@ -64,8 +64,8 @@
 	</target>
 
 	<target name="junit" depends="jar,jar-junit" description="Run JUnit tests">
-		<junit printsummary="yes">
-		  	<jvmarg value="-Dlog4j.configuration=file://${user.dir}/log4j.properties"/>
+		<junit printsummary="withOutAndErr">
+			<sysproperty key="log4j.configuration" value="file://${user.dir}/log4j.properties"/>
 			<formatter type="plain"/>
 			<classpath>
 				<pathelement location="${jcae.jar}"/>
