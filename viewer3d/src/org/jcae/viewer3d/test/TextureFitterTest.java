@@ -5,6 +5,8 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.LogManager;
+
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
@@ -13,6 +15,7 @@ import javax.vecmath.Point3d;
 import org.jcae.opencascade.Utilities;
 import org.jcae.opencascade.jni.*;
 import org.jcae.viewer3d.SelectionListener;
+import org.jcae.viewer3d.Viewable;
 import org.jcae.viewer3d.cad.CADSelection;
 import org.jcae.viewer3d.cad.ViewableCAD;
 import org.jcae.viewer3d.cad.occ.OCCProvider;
@@ -161,7 +164,10 @@ public class TextureFitterTest
 		{
 			//display the texture
 			image=ImageIO.read(
-				new File("/home/jerome/ndtkit/190887A.png"));
+				new File("/home/jerome/ndtkit/190887A.png"));			
+			Viewable v1 = view.displayTexture(faceShape, point2ds, point3ds, image, false);
+			Viewable v2 = view.displayTexture(faceShape, point2ds, point3ds, image, false);
+			view.removeTexture(v1);
 			view.displayTexture(faceShape, point2ds, point3ds, image, false);
 			Matrix4d m=TextureFitter.getTransform(point2ds, point3ds, false);
 			System.out.println("orthogonality: "+TextureFitter.getOrthogonality(m));
@@ -226,13 +232,19 @@ public class TextureFitterTest
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		view=new TextureFitter(frame);
 		
+		long time = System.currentTimeMillis();
+		long mem = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory(); 
 		//Display the geometry to allow selection of faces
-		fullShape=Utilities.readFile("/home/jerome/occ-shape-gal/66_shaver3.brep");
+		fullShape=Utilities.readFile("/home/jerome/ndtkit/19250L57110323000.igs");
+		//fullShape=Utilities.readFile("/home/jerome/ndtkit/יא.IGES");
+		//fullShape=Utilities.readFile("/home/jerome/ndtkit/x53p11431200.igs");
 		OCCProvider occProvider=new OCCProvider(fullShape);
 		fullViewable=new ViewableCAD(occProvider);
 		view.add(fullViewable);
 		frame.add(view);
-		
+		long mem2 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+		System.out.println("time to load: " + (System.currentTimeMillis()-time));
+		System.out.println("used memory: " + (mem2-mem));
 		//Fit the view to the geometry
 		view.fitAll();
 		frame.setVisible(true);

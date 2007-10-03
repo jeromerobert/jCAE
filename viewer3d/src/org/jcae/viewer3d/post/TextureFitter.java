@@ -21,6 +21,7 @@ import org.jcae.opencascade.jni.TopoDS_Face;
 import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.jcae.viewer3d.PickViewable;
 import org.jcae.viewer3d.View;
+import org.jcae.viewer3d.Viewable;
 import org.jcae.viewer3d.bg.ViewableBG;
 import org.jcae.viewer3d.cad.CADDomain;
 import org.jcae.viewer3d.cad.CADProvider;
@@ -467,10 +468,10 @@ public class TextureFitter extends View
 	 * @param image The image to display
 	 * @param true to normalize
 	 */
-	public void displayTexture(TopoDS_Shape shape,
+	public Viewable displayTexture(TopoDS_Shape shape,
 		Point3d[] triangle2d, Point3d[] triangle3d, BufferedImage image)
 	{
-		displayTexture(shape, triangle2d, triangle3d, image, true);
+		return displayTexture(shape, triangle2d, triangle3d, image, true);
 	}
 	
 	/** 
@@ -479,8 +480,9 @@ public class TextureFitter extends View
 	 * @param triangle3d The 3D points picked on the geometry
 	 * @param image The image to display
 	 * @param true to normalize
+	 * @return 
 	 */
-	public void displayTexture(TopoDS_Shape shape,
+	public Viewable displayTexture(TopoDS_Shape shape,
 		Point3d[] triangle2d, Point3d[] triangle3d, BufferedImage image,
 		boolean normalize)
 	{
@@ -490,14 +492,15 @@ public class TextureFitter extends View
 		shape3D.setAppearance(createAppearance(triangle2d, triangle3d, normalize));
 		BranchGroup bg=new BranchGroup();
 		bg.addChild(shape3D);
-		textureViewable=new ViewableBG(bg);
 		remove(textureViewable);
+		textureViewable=new ViewableBG(bg);
 		add(textureViewable);
+		return textureViewable;
 	}
 		
-	public void hideTexture()
+	public void removeTexture(Viewable viewable)
 	{
-		remove(textureViewable);
+		remove(viewable);
 	}
 	
 	/** 
