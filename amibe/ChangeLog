@@ -1,3 +1,11 @@
+Wed Oct  3 16:54:03 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/HalfEdge.java
+	  src/org/jcae/mesh/amibe/ds/VirtualHalfEdge.java (collapse): Throws
+	IllegalArgumentException if edge is outer.  Caller must call this
+	method on symmetric edge instead, but this is not done automatically
+	because caller could be confused by collapse() return value.
+
 Tue Oct  2 10:53:17 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* build.xml build.properties: Modify ant scripts to move classes

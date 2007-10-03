@@ -715,8 +715,13 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	
 	/**
 	 * Contract an edge.
-	 * TODO: Attributes are not checked.
+	 *
+	 * @param m mesh
 	 * @param n the resulting vertex
+	 * @return edge starting from <code>n</code> and pointing to original apex
+	 * @throws IllegalArgumentException if edge belongs to an outer triangle,
+	 * because there would be no valid return value.  User must then run this
+	 * method against symmetric edge, this is not done automatically.
 	 */
 	@Override
 	public final AbstractHalfEdge collapse(AbstractMesh m, AbstractVertex n)
@@ -725,9 +730,10 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	private HalfEdge HEcollapse(Mesh m, Vertex n)
 	{
+		if (apex() == m.outerVertex)
+			throw new IllegalArgumentException("Cannot contract "+this);
 		Vertex o = origin();
 		Vertex d = destination();
-		assert apex() != m.outerVertex : "Cannot contract "+this;
 		assert o.isWritable() && d.isWritable(): "Cannot contract "+this;
 		if (logger.isDebugEnabled())
 			logger.debug("contract ("+o+" "+d+")\ninto "+n);

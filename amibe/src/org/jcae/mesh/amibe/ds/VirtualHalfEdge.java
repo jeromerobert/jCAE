@@ -1121,8 +1121,13 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	
 	/**
 	 * Contract an edge.
-	 * TODO: Attributes are not checked.
+	 *
+	 * @param m mesh
 	 * @param n the resulting vertex
+	 * @return edge starting from <code>n</code> and pointing to original apex
+	 * @throws IllegalArgumentException if edge belongs to an outer triangle,
+	 * because there would be no valid return value.  User must then run this
+	 * method against symmetric edge, this is not done automatically.
 	 */
 	@Override
 	public final AbstractHalfEdge collapse(AbstractMesh m, AbstractVertex n)
@@ -1132,6 +1137,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	private final void VHcollapse(Mesh m, Vertex n)
 	{
+		if (apex() == m.outerVertex)
+			throw new IllegalArgumentException("Cannot contract "+this);
 		Vertex o = origin();
 		Vertex d = destination();
 		logger.debug("contract ("+o+" "+d+")\ninto "+n);
