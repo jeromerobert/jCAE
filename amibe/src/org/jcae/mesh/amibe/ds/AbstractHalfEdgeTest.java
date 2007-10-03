@@ -190,6 +190,16 @@ public abstract class AbstractHalfEdgeTest
 		return e;
 	}
 
+	protected void swap(Vertex o, Vertex d)
+	{
+		AbstractHalfEdge e = find(o, d);
+		Vertex a = e.apex();
+		e = e.swap();
+		assertTrue(mesh.isValid());
+		assertTrue(o == e.origin());
+		assertTrue(a == e.apex());
+	}
+
 	protected AbstractHalfEdge split(Vertex o, Vertex d, Vertex n)
 	{
 		AbstractHalfEdge e = find(o, d);

@@ -119,6 +119,22 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 		super.collapse(v[3], v[0], v[0]);
 	}
 	
+	@Test public void swap47()
+	{
+		buildMesh2();
+		super.swap(v[4], v[7]);
+	}
+	@Test(expected= IllegalArgumentException.class) public void swap36()
+	{
+		buildMesh2();
+		super.swap(v[3], v[6]);
+	}
+	@Test(expected= IllegalArgumentException.class) public void swap3Outer()
+	{
+		buildMesh2();
+		super.swap(v[3], mesh.outerVertex);
+	}
+
 	@Test public void split()
 	{
 		buildMesh2();
