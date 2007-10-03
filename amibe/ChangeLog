@@ -1,7 +1,7 @@
 Wed Oct  3 16:54:03 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/HalfEdge.java
-	  src/org/jcae/mesh/amibe/ds/VirtualHalfEdge.java (collapse): Throws
+	  src/org/jcae/mesh/amibe/ds/VirtualHalfEdge.java (collapse): Throw
 	IllegalArgumentException if edge is outer.  Caller must call this
 	method on symmetric edge instead, but this is not done automatically
 	because caller could be confused by collapse() return value.
@@ -9,6 +9,9 @@ Wed Oct  3 16:54:03 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	  src/org/jcae/mesh/amibe/ds/VirtualHalfEdge.java (canCollapse):
 	In order to be consistent with the change just above, returns false
 	if edge is outer.
+	* src/org/jcae/mesh/amibe/ds/HalfEdge.java
+	  src/org/jcae/mesh/amibe/ds/VirtualHalfEdge.java (swap): Also
+	throw IllegalArgumentException if edge cannot be swapped.
 
 Tue Oct  2 10:53:17 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

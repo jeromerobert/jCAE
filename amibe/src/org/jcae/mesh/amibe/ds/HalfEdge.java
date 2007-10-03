@@ -494,6 +494,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *         \|/                  \ /
 	 *          '                    '
 	 *          o                    o
+	 * @return swapped edge
+	 * @throws IllegalArgumentException if edge is on a boundary or belongs
+	 * to an outer triangle.
 	 */
 	@Override
 	public final AbstractHalfEdge swap()
@@ -502,6 +505,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	private final HalfEdge HEswap()
 	{
+		if (hasAttributes(OUTER | BOUNDARY | NONMANIFOLD))
+			throw new IllegalArgumentException("Cannot swap "+this);
 		Vertex o = origin();
 		Vertex d = destination();
 		Vertex a = apex();
@@ -520,7 +525,6 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		 */
 		// T1 = (oda)  --> (ona)
 		// T2 = (don)  --> (dan)
-		assert !hasAttributes(OUTER | BOUNDARY | NONMANIFOLD) : this;
 		HalfEdge [] e = new HalfEdge[6];
 		e[0] = next;
 		e[1] = next.next;

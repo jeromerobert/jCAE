@@ -897,6 +897,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *         \|/                  \ /
 	 *          '                    '
 	 *          o                    o
+	 * @return swapped edge
+	 * @throws IllegalArgumentException if edge is on a boundary or belongs
+	 * to an outer triangle.
 	 */
 	@Override
 	public final AbstractHalfEdge swap()
@@ -906,6 +909,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	private final void VHswap()
 	{
+		if (hasAttributes(OUTER | BOUNDARY | NONMANIFOLD))
+			throw new IllegalArgumentException("Cannot swap "+this);
 		Vertex o = origin();
 		Vertex d = destination();
 		Vertex a = apex();
@@ -924,7 +929,6 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		 */
 		// T1 = (oda)  --> (ona)
 		// T2 = (don)  --> (dan)
-		assert !hasAttributes(OUTER | BOUNDARY | NONMANIFOLD);
 		copyOTri(this, work[0]);        // (oda)
 		symOTri(this, work[1]);         // (don)
 		symOTri(this, work[2]);         // (don)
