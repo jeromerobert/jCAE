@@ -794,6 +794,8 @@ public class Vertex extends AbstractVertex implements Serializable
 		if (ref1d != 0)
 			r.append(" ref1d: "+ref1d);
 		r.append(" hash: "+hashCode());
+		if (label > 0)
+			r.append(" label: "+label);
 		if (link instanceof Triangle)
 			r.append(" link: "+link.hashCode());
 		else if (link instanceof Triangle[])
