@@ -379,29 +379,6 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		return tri.vertex[localNumber];
 	}
 	
-	private static HalfEdge find(Vertex v1, Vertex v2)
-	{
-		HalfEdge ret = ((TriangleHE) v1.getLink()).getHalfEdge();
-		if (ret == null)
-			return null;
-		if (ret.destination() == v1)
-			ret = ret.next;
-		else if (ret.apex() == v1)
-			ret = ret.next.next;
-		assert ret.origin() == v1 : v1+" not in "+ret.getTri();
-		Vertex d = ret.destination();
-		if (d == v2)
-			return ret;
-		do
-		{
-			ret = (HalfEdge) ret.nextOriginLoop();
-			if (ret.destination() == v2)
-				return ret;
-		}
-		while (ret.destination() != d);
-		return null;
-	}
-	
 	/**
 	 * Move counterclockwise to the following edge with the same origin.
 	 * If a boundary is reached, loop backward until another
