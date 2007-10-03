@@ -79,7 +79,12 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 	@Test public void canCollapse366()
 	{
 		buildMesh2();
-		super.canCollapse(v[3], v[6], v[6], true);
+		super.canCollapse(v[3], v[6], v[6], false);
+	}
+	@Test public void canCollapse636()
+	{
+		buildMesh2();
+		super.canCollapse(v[6], v[3], v[6], true);
 	}
 	@Test public void canCollapse133()
 	{
@@ -97,15 +102,21 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 		buildMesh2();
 		super.collapse(v[4], v[5], v[5]);
 	}
-	@Test public void collapse366()
+	@Test public void collapse636()
 	{
 		buildMesh2();
-		super.collapse(v[3], v[6], v[6]);
+		super.collapse(v[6], v[3], v[6]);
 	}
-	@Test public void collapse030()
+	@Test(expected= IllegalArgumentException.class) public void collapse366()
 	{
 		buildMesh2();
-		super.collapse(v[0], v[3], v[0]);
+		AbstractHalfEdge e = find(v[3], v[6]);
+		e.collapse(mesh, v[6]);
+	}
+	@Test public void collapse300()
+	{
+		buildMesh2();
+		super.collapse(v[3], v[0], v[0]);
 	}
 	
 	@Test public void split()
