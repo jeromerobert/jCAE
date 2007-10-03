@@ -66,12 +66,46 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 		super.nextOriginLoop();
 	}
 	
-	@Test public void contract()
+	@Test public void canCollapse474()
 	{
 		buildMesh2();
-		super.contract(v[4], v[7], v[4]);
-		super.contract(v[4], v[5], v[5]);
-		super.contract(v[0], v[3], v[0]);
+		super.canCollapse(v[4], v[7], v[4], true);
+	}
+	@Test public void canCollapse475()
+	{
+		buildMesh2();
+		super.canCollapse(v[4], v[7], v[5], false);
+	}
+	@Test public void canCollapse366()
+	{
+		buildMesh2();
+		super.canCollapse(v[3], v[6], v[6], true);
+	}
+	@Test public void canCollapse133()
+	{
+		buildMesh2();
+		super.canCollapse(v[1], v[3], v[3], false);
+	}
+
+	@Test public void collapse474()
+	{
+		buildMesh2();
+		super.collapse(v[4], v[7], v[4]);
+	}
+	@Test public void collapse455()
+	{
+		buildMesh2();
+		super.collapse(v[4], v[5], v[5]);
+	}
+	@Test public void collapse366()
+	{
+		buildMesh2();
+		super.collapse(v[3], v[6], v[6]);
+	}
+	@Test public void collapse030()
+	{
+		buildMesh2();
+		super.collapse(v[0], v[3], v[0]);
 	}
 	
 	@Test public void split()

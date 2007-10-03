@@ -170,7 +170,13 @@ public abstract class AbstractHalfEdgeTest
 		assertTrue(e.getTri() == T[2]);
 	}
 	
-	protected AbstractHalfEdge contract(Vertex o, Vertex d, Vertex n)
+	protected void canCollapse(Vertex o, Vertex d, Vertex n, boolean expected)
+	{
+		AbstractHalfEdge e = find(o, d);
+		assertTrue(expected == e.canCollapse(n));
+	}
+
+	protected AbstractHalfEdge collapse(Vertex o, Vertex d, Vertex n)
 	{
 		AbstractHalfEdge e = find(o, d);
 		Vertex a = e.apex();
