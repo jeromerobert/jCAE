@@ -98,6 +98,9 @@ public abstract class AbstractHalfEdgeTest
 			v[3*i+1] = (Vertex) mesh.factory.createVertex(1.0, i, 0.0);
 			v[3*i+2] = (Vertex) mesh.factory.createVertex(2.0, i, 0.0);
 		}
+		for (int i = 0; i < v.length; i++)
+			v[i].setLabel(i);
+
 		T = new Triangle[12];
 		for (int i = 0; i < 3; i++)
 		{
