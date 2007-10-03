@@ -315,6 +315,8 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	 */
 	private HalfEdge uniqueOrientation(HalfEdge current)
 	{
+		if (current.hasAttributes(AbstractHalfEdge.OUTER))
+			return (HalfEdge) current.sym();
 		if (labelMap.get(current.origin()) > labelMap.get(current.destination()) && current.getAdj() != null)
 			return (HalfEdge) current.sym();
 		return current;
@@ -391,8 +393,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		}
 		//  Contract (v1,v2) into v3
 		//  By convention, collapse() returns edge (v3, apex)
-		if (current.hasAttributes(AbstractHalfEdge.OUTER))
-			current = (HalfEdge) current.sym();
+		assert (!current.hasAttributes(AbstractHalfEdge.OUTER));
 		final Vertex apex = current.apex();
 		// v1 and v2 are removed from the mesh, they can be reused.
 		Vertex vFree = current.origin();

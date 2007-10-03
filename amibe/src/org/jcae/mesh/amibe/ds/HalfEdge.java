@@ -1,7 +1,8 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2006  EADS CRC
+    Copyright (C) 2006, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -640,6 +641,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	public final boolean canCollapse(AbstractVertex n)
 	{
+		// Be consistent with collapse()
+		if (hasAttributes(AbstractHalfEdge.OUTER))
+			return false;
 		if (!checkInversion((Vertex) n))
 			return false;
 		
@@ -730,7 +734,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	private HalfEdge HEcollapse(Mesh m, Vertex n)
 	{
-		if (apex() == m.outerVertex)
+		if (hasAttributes(AbstractHalfEdge.OUTER))
 			throw new IllegalArgumentException("Cannot contract "+this);
 		Vertex o = origin();
 		Vertex d = destination();

@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005,2006, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -1008,6 +1009,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	@Override
 	public final boolean canCollapse(AbstractVertex n)
 	{
+		// Be consistent with collapse()
+		if (hasAttributes(AbstractHalfEdge.OUTER))
+			return false;
 		/*  
 		 * Topology check:  (od) cannot be contracted with the pattern
 		 * below, because T1 and T2 are then connected to the same
@@ -1137,7 +1141,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	private final void VHcollapse(Mesh m, Vertex n)
 	{
-		if (apex() == m.outerVertex)
+		if (hasAttributes(AbstractHalfEdge.OUTER))
 			throw new IllegalArgumentException("Cannot contract "+this);
 		Vertex o = origin();
 		Vertex d = destination();
