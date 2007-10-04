@@ -141,4 +141,20 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 		Vertex n = (Vertex) mesh.factory.createVertex(1.0, 1.5, 0.0);
 		super.split(v[4], v[7], n);
 	}
+
+	@Test public void countFanIterator36()
+	{
+		buildMeshNM();
+		super.countFanIterator(v[3], v[6], 1);
+	}
+	@Test public void countFanIterator47()
+	{
+		buildMeshNM();
+		super.countFanIterator(v[4], v[7], 4);
+	}
+	@Test public void countFanIterator14()
+	{
+		buildMeshNM();
+		super.countFanIterator(v[1], v[4], 4);
+	}
 }

@@ -22,6 +22,7 @@ package org.jcae.mesh.amibe.ds;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import static org.junit.Assert.*;
+import java.util.Iterator;
 
 public abstract class AbstractHalfEdgeTest
 {
@@ -68,7 +69,7 @@ public abstract class AbstractHalfEdgeTest
 		mesh.buildAdjacency(v, -1.0);
 	}
 	
-	protected void buildMesh2()
+	private void create3x4Shell()
 	{
 		/*
 		 *  v9        v10        v11
@@ -94,9 +95,9 @@ public abstract class AbstractHalfEdgeTest
 		v = new Vertex[12];
 		for (int i = 0; i < 4; i++)
 		{
-			v[3*i]   = (Vertex) mesh.factory.createVertex(0.0, i, 0.0);
-			v[3*i+1] = (Vertex) mesh.factory.createVertex(1.0, i, 0.0);
-			v[3*i+2] = (Vertex) mesh.factory.createVertex(2.0, i, 0.0);
+			v[3*i]   = (Vertex) mesh.factory.createVertex(-1.0, i, 0.0);
+			v[3*i+1] = (Vertex) mesh.factory.createVertex(0.0, i, 0.0);
+			v[3*i+2] = (Vertex) mesh.factory.createVertex(1.0, i, 0.0);
 		}
 		for (int i = 0; i < v.length; i++)
 			v[i].setLabel(i);
@@ -117,7 +118,56 @@ public abstract class AbstractHalfEdgeTest
 		v[11].setLink(T[11]);
 		for (Triangle t: T)
 			mesh.add(t);
+	}
+	
+	protected void buildMesh2()
+	{
+		create3x4Shell();
 		mesh.buildAdjacency(v, -1.0);
+	}
+	
+	protected void buildMeshNM()
+	{
+		create3x4Shell();
+		// pi/2 clockwise rotation of vertices v around y
+		Vertex [] vy = new Vertex[12];
+		int label = 12;
+		for (int i = 0; i < v.length; i++)
+		{
+			if (i%3 == 1)
+				vy[i]   = v[i];
+			else
+			{
+				double [] xyz = v[i].getUV();
+				vy[i]   = (Vertex) mesh.factory.createVertex(-xyz[2], xyz[1], xyz[0]);
+				vy[i].setLabel(label);
+				label++;
+			}
+		}
+		Triangle [] Ty = new Triangle[12];
+		for (int i = 0; i < 3; i++)
+		{
+			Ty[4*i]   = (Triangle) mesh.factory.createTriangle(vy[3*i], vy[3*i+1], vy[3*i+3]);
+			Ty[4*i+1] = (Triangle) mesh.factory.createTriangle(vy[3*i+1], vy[3*i+4], vy[3*i+3]);
+			Ty[4*i+2] = (Triangle) mesh.factory.createTriangle(vy[3*i+5], vy[3*i+4], vy[3*i+1]);
+			Ty[4*i+3] = (Triangle) mesh.factory.createTriangle(vy[3*i+1], vy[3*i+2], vy[3*i+5]);
+			vy[3*i].setLink(Ty[4*i]);
+			vy[3*i+1].setLink(Ty[4*i]);
+			vy[3*i+2].setLink(Ty[4*i+3]);
+		}
+		vy[9].setLink(Ty[9]);
+		vy[10].setLink(Ty[9]);
+		vy[11].setLink(Ty[11]);
+		for (Triangle t: Ty)
+			mesh.add(t);
+		Vertex [] vTotal = new Vertex[20];
+		System.arraycopy(v, 0, vTotal, 0, v.length);
+		for (int i = 0; i < 4; i++)
+			vTotal[12+i] = vy[3*i];
+		for (int i = 0; i < 4; i++)
+			vTotal[16+i] = vy[3*i+2];
+		mesh.buildAdjacency(vTotal, -1.0);
+		assertTrue(mesh.isValid());
 	}
 	
 	protected void nextOriginLoop()
@@ -208,5 +258,14 @@ public abstract class AbstractHalfEdgeTest
 		assertTrue(o == e.origin());
 		assertTrue(n == e.destination());
 		return e;
+	}
+
+	protected void countFanIterator(Vertex o, Vertex d, int count)
+	{
+		AbstractHalfEdge e = find(o, d);
+		int n = 0;
+		for (Iterator<AbstractHalfEdge> it = e.fanIterator(); it.hasNext(); it.next())
+			n++;
+		assertTrue(n == count);
 	}
 }
