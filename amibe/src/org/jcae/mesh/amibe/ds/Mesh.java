@@ -431,33 +431,22 @@ public class Mesh extends AbstractMesh implements Serializable
 		}
 		
 		//  5. Find the list of vertices which are on mesh boundary
-		logger.debug("Build the list of boundary nodes");
+		logger.debug("Build the list of nodes on boundaries and non-manifold edges");
 		HashSet<Vertex> bndNodes = new HashSet<Vertex>();
 		maxLabel = 0;
-		boolean [] found = new boolean[4];
 		for (AbstractTriangle at: triangleList)
 		{
 			Triangle t = (Triangle) at;
 			AbstractHalfEdge ot = t.getAbstractHalfEdge();
-			for (int i = 0; i < found.length; i++)
-				found[i] = false;
 			for (int i = 0; i < 3; i++)
 			{
 				ot = ot.next();
-				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
-				{
-					found[i] = true;
-					found[i+1] = true;
-				}
-			}
-			found[0] |= found[3];
-			for (int i = 0; i < 3; i++)
-			{
-				ot = ot.next();
-				if (found[i])
+				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 				{
 					bndNodes.add(ot.origin());
 					maxLabel = Math.max(maxLabel, ot.origin().getRef());
+					bndNodes.add(ot.destination());
+					maxLabel = Math.max(maxLabel, ot.destination().getRef());
 				}
 			}
 		}
@@ -629,6 +618,15 @@ public class Mesh extends AbstractMesh implements Serializable
 					// thus put ot in it.
 					adj.put(t, int3[ot.getLocalNumber()]);
 					ot.setAdj(adj);
+				}
+				else if (ot.getAdj() instanceof HalfEdge)
+				{
+					sym = ot.sym(sym);
+					assert sym.getAdj() == ot;
+					adj.put(t, int3[ot.getLocalNumber()]);
+					adj.put(sym.getTri(), int3[sym.getLocalNumber()]);
+					ot.setAdj(adj);
+					sym.setAdj(adj);
 				}
 				else if (ot.getAdj() instanceof Triangle)
 				{
@@ -935,6 +933,26 @@ public class Mesh extends AbstractMesh implements Serializable
 						logger.error("Multiple edges: Wrong adjacency relation");
 						return false;
 					}
+				}
+				// Endpoints must link to at least 
+				Vertex o = e.origin();
+				Vertex a = e.apex();
+				if (!(o.getLink() instanceof Triangle[]) || !(a.getLink() instanceof Triangle[]))
+				{
+					logger.error("Endpoints must be non-manifold");
+					return false;
+				}
+				Triangle [] linkO = (Triangle[]) o.getLink();
+				if (linkO.length < adj.size())
+				{
+					logger.error("Origin linked to "+linkO.length+" triangles, less than "+adj.size());
+					return false;
+				}
+				Triangle [] linkA = (Triangle[]) a.getLink();
+				if (linkA.length < adj.size())
+				{
+					logger.error("Origin linked to "+linkA.length+" triangles, less than "+adj.size());
+					return false;
 				}
 			}
 		}
