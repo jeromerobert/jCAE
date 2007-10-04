@@ -264,10 +264,8 @@ public class Vertex extends AbstractVertex implements Serializable
 			}
 			while (ot.destination() != d);
 		}
-		Triangle [] lArray = new Triangle[res.size()];
-		for (int i = 0, n = res.size(); i < n; i++)
-			lArray[i] = res.get(i);
-		link = lArray;
+		link = new Triangle[res.size()];
+		res.toArray((Triangle[]) link);
 	}
 
 	public void setReadable(boolean r)
