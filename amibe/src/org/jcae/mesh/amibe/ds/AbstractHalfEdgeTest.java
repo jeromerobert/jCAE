@@ -167,7 +167,7 @@ public abstract class AbstractHalfEdgeTest
 		for (int i = 0; i < 4; i++)
 			vTotal[16+i] = vy[3*i+2];
 		mesh.buildAdjacency(vTotal, -1.0);
-		assertTrue(mesh.isValid());
+		assertTrue("Mesh is not valid", mesh.isValid());
 	}
 	
 	protected void nextOriginLoop()
@@ -234,9 +234,9 @@ public abstract class AbstractHalfEdgeTest
 		AbstractHalfEdge e = find(o, d);
 		Vertex a = e.apex();
 		e = e.collapse(mesh, n);
-		assertTrue(mesh.isValid());
-		assertTrue(n == e.origin());
-		assertTrue(a == e.destination());
+		assertTrue("Mesh is not valid", mesh.isValid());
+		assertTrue("Error in origin", n == e.origin());
+		assertTrue("Error in destination", a == e.destination());
 		return e;
 	}
 
@@ -245,27 +245,36 @@ public abstract class AbstractHalfEdgeTest
 		AbstractHalfEdge e = find(o, d);
 		Vertex a = e.apex();
 		e = e.swap();
-		assertTrue(mesh.isValid());
-		assertTrue(o == e.origin());
-		assertTrue(a == e.apex());
+		assertTrue("Mesh is not valid", mesh.isValid());
+		assertTrue("Error in origin", o == e.origin());
+		assertTrue("Error in apex", a == e.apex());
 	}
 
 	protected AbstractHalfEdge split(Vertex o, Vertex d, Vertex n)
 	{
 		AbstractHalfEdge e = find(o, d);
 		e = e.split(mesh, n);
-		assertTrue(mesh.isValid());
-		assertTrue(o == e.origin());
-		assertTrue(n == e.destination());
+		assertTrue("Mesh is not valid", mesh.isValid());
+		assertTrue("Error in origin", o == e.origin());
+		assertTrue("Error in destination", n == e.destination());
 		return e;
 	}
 
+	protected void countVertexLinks(Vertex o, int count)
+	{
+		int n = 0;
+		if (o.getLink() instanceof Triangle)
+			n = 1;
+		else
+			n = ((Triangle []) o.getLink()).length;
+		assertTrue("Found "+n+" links instead of "+count, n == count);
+	}
 	protected void countFanIterator(Vertex o, Vertex d, int count)
 	{
 		AbstractHalfEdge e = find(o, d);
 		int n = 0;
 		for (Iterator<AbstractHalfEdge> it = e.fanIterator(); it.hasNext(); it.next())
 			n++;
-		assertTrue(n == count);
+		assertTrue("Found "+n+" fans instead of "+count, n == count);
 	}
 }

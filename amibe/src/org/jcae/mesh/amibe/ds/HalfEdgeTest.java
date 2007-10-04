@@ -156,6 +156,22 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 		super.split(v[4], v[7], n);
 	}
 
+	@Test public void countVertexLinks0()
+	{
+		buildMeshNM();
+		super.countVertexLinks(v[0], 1);
+	}
+	@Test public void countVertexLinks1()
+	{
+		buildMeshNM();
+		super.countVertexLinks(v[1], 4);
+	}
+	@Test public void countVertexLinks4()
+	{
+		buildMeshNM();
+		super.countVertexLinks(v[4], 4);
+	}
+
 	@Test public void countFanIterator36()
 	{
 		buildMeshNM();
