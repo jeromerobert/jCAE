@@ -25,6 +25,8 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.io.Serializable;
 import org.apache.log4j.Logger;
@@ -1000,8 +1002,29 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		logger.debug("Non manifold fan iterator");
 		if (!e.hasAttributes(OUTER))
 			e = e.HEsym();
-		ArrayList<AbstractHalfEdge> list = (ArrayList<AbstractHalfEdge>) e.next.sym;
-		return list.iterator();
+		final LinkedHashMap<Triangle, Integer> list = (LinkedHashMap<Triangle, Integer>) e.next.sym;
+		return new Iterator<AbstractHalfEdge>()
+		{
+			private Iterator<Map.Entry<Triangle, Integer>> it = list.entrySet().iterator();
+			public boolean hasNext()
+			{
+				return it.hasNext();
+			}
+			public AbstractHalfEdge next()
+			{
+				Map.Entry<Triangle, Integer> entry = it.next();
+				HalfEdge f = (HalfEdge) entry.getKey().getAbstractHalfEdge();
+				int l = entry.getValue().intValue();
+				if (l == 1)
+					f = (HalfEdge) f.next;
+				else if (l == 2)
+					f = (HalfEdge) f.next.next;
+				return f;
+			}
+			public void remove()
+			{
+			}
+		};
 	}
 
 	@Override
