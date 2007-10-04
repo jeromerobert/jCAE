@@ -39,7 +39,21 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 	
 	protected AbstractHalfEdge find(Vertex v1, Vertex v2)
 	{
-		AbstractHalfEdge ret = ((TriangleHE) v1.getLink()).getHalfEdge();
+		if (v1.getLink() instanceof Triangle)
+			return findSameFan(v1, v2, (Triangle) v1.getLink());
+		Triangle [] tArray = (Triangle []) v1.getLink();
+		for (int i = 0, n = tArray.length; i < n; i++)
+		{
+			AbstractHalfEdge f = findSameFan(v1, v2, tArray[i]);
+			if (f != null)
+				return f;
+		}
+		throw new RuntimeException();
+	}
+
+	private AbstractHalfEdge findSameFan(Vertex v1, Vertex v2, Triangle start)
+	{
+		AbstractHalfEdge ret = ((TriangleHE) start).getHalfEdge();
 		if (ret == null)
 			throw new RuntimeException();
 		if (ret.destination() == v1)
