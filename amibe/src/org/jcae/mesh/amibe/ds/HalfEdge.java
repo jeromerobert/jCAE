@@ -24,6 +24,8 @@ import org.jcae.mesh.amibe.traits.HalfEdgeTraitsBuilder;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.io.Serializable;
 import org.apache.log4j.Logger;
 
@@ -966,6 +968,42 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		n2.clearAttributes(BOUNDARY | NONMANIFOLD);
 	}
 	
+	private final Iterator<AbstractHalfEdge> identityFanIterator()
+	{
+		final HalfEdge current = this;
+		logger.debug("Manifold fan iterator");
+		return new Iterator<AbstractHalfEdge>()
+		{
+			private boolean next = true;
+			public boolean hasNext()
+			{
+				return next;
+			}
+			public AbstractHalfEdge next()
+			{
+				if (!next)
+					throw new NoSuchElementException();
+				next = false;
+				return current;
+			}
+			public void remove()
+			{
+			}
+		};
+	}
+	
+	public final Iterator<AbstractHalfEdge> fanIterator()
+	{
+		if (!hasAttributes(NONMANIFOLD))
+			return identityFanIterator();
+		HalfEdge e = this;
+		logger.debug("Non manifold fan iterator");
+		if (!e.hasAttributes(OUTER))
+			e = e.HEsym();
+		ArrayList<AbstractHalfEdge> list = (ArrayList<AbstractHalfEdge>) e.next.sym;
+		return list.iterator();
+	}
+
 	@Override
 	public String toString()
 	{

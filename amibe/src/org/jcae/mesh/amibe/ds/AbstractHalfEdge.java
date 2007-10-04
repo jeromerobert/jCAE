@@ -22,6 +22,7 @@ package org.jcae.mesh.amibe.ds;
 
 import org.jcae.mesh.amibe.traits.Traits;
 import org.jcae.mesh.amibe.traits.HalfEdgeTraitsBuilder;
+import java.util.Iterator;
 
 public abstract class AbstractHalfEdge
 {
@@ -36,6 +37,7 @@ public abstract class AbstractHalfEdge
 	public abstract boolean checkNewRingNormals(double [] newpt);
 	public abstract boolean canCollapse(AbstractVertex v);
 	public abstract AbstractHalfEdge swap();
+	public abstract Iterator<AbstractHalfEdge> fanIterator();
 
 	/**
 	 * Numeric constants for edge attributes.  Set if edge is on

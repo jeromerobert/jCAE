@@ -1,3 +1,10 @@
+Thu Oct  4 11:05:49 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/AbstractHalfEdge.java
+	  src/org/jcae/mesh/amibe/ds/HalfEdge.java
+	  src/org/jcae/mesh/amibe/ds/VirtualHalfEdge.java: New fanIterator()
+	method for non-manifold meshes.
+
 Wed Oct  3 16:54:03 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/HalfEdge.java

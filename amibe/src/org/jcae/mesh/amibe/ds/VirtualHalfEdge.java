@@ -21,6 +21,8 @@
 package org.jcae.mesh.amibe.ds;
 
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Stack;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.apache.log4j.Logger;
@@ -1379,6 +1381,35 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		}
 	}
 	
+	private final Iterator<AbstractHalfEdge> identityFanIterator()
+	{
+		final VirtualHalfEdge current = this;
+		logger.debug("Manifold fan iterator");
+		return new Iterator<AbstractHalfEdge>()
+		{
+			private boolean next = true;
+			public boolean hasNext()
+			{
+				return next;
+			}
+			public AbstractHalfEdge next()
+			{
+				if (!next)
+					throw new NoSuchElementException();
+				next = false;
+				return current;
+			}
+			public void remove()
+			{
+			}
+		};
+	}
+	
+	public final Iterator<AbstractHalfEdge> fanIterator()
+	{
+		throw new RuntimeException("Not implemented yet");
+	}
+
 	private final String showAdj(int num)
 	{
 		if (!(tri.getAdj(num) instanceof Triangle))
