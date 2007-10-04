@@ -354,8 +354,8 @@ public class Mesh extends AbstractMesh implements Serializable
 		//     connected to this vertex.
 		logger.debug("Build the list of triangles connected to each vertex");
 		HashMap<Vertex, ArrayList<AbstractTriangle>> tVertList = new HashMap<Vertex, ArrayList<AbstractTriangle>>(vertices.length);
-		for (int i = 0; i < vertices.length; i++)
-			tVertList.put(vertices[i], new ArrayList<AbstractTriangle>(10));
+		for (Vertex v: vertices)
+			tVertList.put(v, new ArrayList<AbstractTriangle>(10));
 		for (AbstractTriangle t: triangleList)
 		{
 			for (int i = 0; i < 3; i++)
@@ -366,15 +366,15 @@ public class Mesh extends AbstractMesh implements Serializable
 		}
 		//  2. Connect all edges together
 		logger.debug("Connect triangles");
-		for (int i = 0; i < vertices.length; i++)
-			checkNeighbours(vertices[i], tVertList);
+		for (Vertex v: vertices)
+			checkNeighbours(v, tVertList);
 		//  tVertList is no more needed, remove all references
 		//  to help the garbage collector.
-		for (int i = 0; i < vertices.length; i++)
+		for (Vertex v: vertices)
 		{
-			ArrayList<AbstractTriangle> list = tVertList.get(vertices[i]);
+			ArrayList<AbstractTriangle> list = tVertList.get(v);
 			list.clear();
-			tVertList.put(vertices[i], null);
+			tVertList.put(v, null);
 		}
 		tVertList.clear();
 		//  3. Mark boundary edges and bind them to virtual triangles.
@@ -464,7 +464,7 @@ public class Mesh extends AbstractMesh implements Serializable
 
 		//  6. Build links for non-manifold vertices
 		logger.debug("Compute links for non-manifold vertices");
-		Vertex [] v = new Vertex[2];
+		Vertex [] endpoints = new Vertex[2];
 		for (AbstractTriangle at: triangleList)
 		{
 			Triangle t = (Triangle) at;
@@ -475,15 +475,15 @@ public class Mesh extends AbstractMesh implements Serializable
 				ot = ot.next();
 				if (ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 				{
-					v[0] = ot.origin();
-					v[1] = ot.destination();
+					endpoints[0] = ot.origin();
+					endpoints[1] = ot.destination();
 					for (int j = 0; j < 2; j++)
 					{
-						if (v[j].getLink() instanceof Triangle)
+						if (endpoints[j].getLink() instanceof Triangle)
 						{
 							LinkedHashSet<Triangle> link = new LinkedHashSet<Triangle>();
-							link.add((Triangle) v[j].getLink());
-							v[j].setLink(link);
+							link.add((Triangle) endpoints[j].getLink());
+							endpoints[j].setLink(link);
 						}
 					}
 					sym = ot.sym(sym);
@@ -493,7 +493,7 @@ public class Mesh extends AbstractMesh implements Serializable
 					{
 						for (int j = 0; j < 2; j++)
 						{
-							LinkedHashSet<Triangle> link = (LinkedHashSet<Triangle>) v[j].getLink();
+							LinkedHashSet<Triangle> link = (LinkedHashSet<Triangle>) endpoints[j].getLink();
 							link.add(t2);
 						}
 					}
@@ -521,7 +521,7 @@ public class Mesh extends AbstractMesh implements Serializable
 			}
 		}
 		if (nrNM > 0)
-			logger.debug("Found "+nrNM+" non manifold edges");
+			logger.debug("Found "+nrNM+" non manifold vertices");
 		if (nrFE > 0)
 			logger.debug("Found "+nrFE+" free edges");
 		//  7. If vertices are on inner boundaries and there is
@@ -532,30 +532,30 @@ public class Mesh extends AbstractMesh implements Serializable
 		if (minAngle < 0.0)
 			cosMinAngle = -2.0;
 		double [][] temp = new double[4][3];
-		for (int i = 0; i < vertices.length; i++)
+		for (Vertex v: vertices)
 		{
-			if (bndNodes.contains(vertices[i]))
+			if (bndNodes.contains(v))
 				continue;
-			int label = vertices[i].getRef();
-			if (vertices[i].getLink() instanceof Triangle[])
+			int label = v.getRef();
+			if (v.getLink() instanceof Triangle[])
 			{
 				nrJunctionPoints++;
 				if (label == 0)
 				{
 					maxLabel++;
-					vertices[i].setRef(maxLabel);
+					v.setRef(maxLabel);
 				}
 			}
 			else if (0 != label)
 			{
 				//  Check for ridges
-				Triangle t = (Triangle) vertices[i].getLink();
-				if (checkRidges(vertices[i], cosMinAngle, t, temp))
-					vertices[i].setRef(-label);
+				Triangle t = (Triangle) v.getLink();
+				if (checkRidges(v, cosMinAngle, t, temp))
+					v.setRef(-label);
 			}
 		}
 		if (nrJunctionPoints > 0)
-			logger.info("Found "+nrJunctionPoints+" non-manifold vertices");
+			logger.info("Found "+nrJunctionPoints+" junction points");
 		// Add outer triangles
 		triangleList.addAll(newTri);
 	}
@@ -642,9 +642,9 @@ public class Mesh extends AbstractMesh implements Serializable
 				}
 				adj.put(t2, int3[ot2.getLocalNumber()]);
 				ot2.setAdj(adj);
-				if (logger.isDebugEnabled())
-					logger.debug("Non-manifold: "+v+" "+v2);
 			}
+			if (logger.isDebugEnabled() && !manifold)
+				logger.debug("Non-manifold edge: "+v+" "+v2+" "+" connected to "+adj.size()+" fans");
 		}
 		//  Unmark adjacent triangles
 		markedTri.clear();
@@ -925,8 +925,10 @@ public class Mesh extends AbstractMesh implements Serializable
 					Triangle t2 = entry.getKey();
 					int i2 = entry.getValue().intValue();
 					HalfEdge f = (HalfEdge) t2.getAbstractHalfEdge();
-					for (; i2 > 0; i2--)
+					if (i2 == 1)
 						f = (HalfEdge) f.next();
+					else if (i2 == 2)
+						f = (HalfEdge) f.prev();
 					HalfEdge s = (HalfEdge) f.sym().next();
 					if (s.getAdj() != adj)
 					{
