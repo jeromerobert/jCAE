@@ -23,6 +23,7 @@ import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import static org.junit.Assert.*;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 
 public abstract class AbstractHalfEdgeTest
 {
@@ -269,6 +270,26 @@ public abstract class AbstractHalfEdgeTest
 			n = ((Triangle []) o.getLink()).length;
 		assertTrue("Found "+n+" links instead of "+count, n == count);
 	}
+
+	protected void countEdgeLinks(Vertex o, Vertex d, int count)
+	{
+		AbstractHalfEdge e = find(o, d);
+		int n = 0;
+		if (!e.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+		{
+			n++;
+			if (!e.hasAttributes(AbstractHalfEdge.BOUNDARY))
+				n++;
+		}
+		else
+		{
+			e = e.sym().next();
+			LinkedHashMap<Triangle, Integer> adj = (LinkedHashMap<Triangle, Integer>) e.getAdj();
+			n = adj.size();
+		}
+		assertTrue("Found "+n+" incident triangles instead of "+count, n == count);
+	}
+
 	protected void countFanIterator(Vertex o, Vertex d, int count)
 	{
 		AbstractHalfEdge e = find(o, d);

@@ -125,4 +125,57 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 		Vertex n = (Vertex) mesh.factory.createVertex(1.0, 1.5, 0.0);
 		super.split(v[4], v[7], n);
 	}
+
+	@Test public void countVertexLinks0()
+	{
+		buildMeshNM();
+		super.countVertexLinks(v[0], 1);
+	}
+	@Test public void countVertexLinks1()
+	{
+		buildMeshNM();
+		super.countVertexLinks(v[1], 4);
+	}
+	@Test public void countVertexLinks4()
+	{
+		buildMeshNM();
+		super.countVertexLinks(v[4], 4);
+	}
+
+	@Test public void countEdgeLinks36()
+	{
+		buildMeshNM();
+		super.countEdgeLinks(v[3], v[6], 1);
+	}
+	@Test public void countEdgeLinks46()
+	{
+		buildMeshNM();
+		super.countEdgeLinks(v[4], v[6], 2);
+	}
+	@Test public void countEdgeLinks47()
+	{
+		buildMeshNM();
+		super.countEdgeLinks(v[4], v[7], 4);
+	}
+	@Test public void countEdgeLinks14()
+	{
+		buildMeshNM();
+		super.countEdgeLinks(v[1], v[4], 4);
+	}
+
+	@Test public void countFanIterator36()
+	{
+		buildMeshNM();
+		super.countFanIterator(v[3], v[6], 1);
+	}
+	@Test public void countFanIterator47()
+	{
+		buildMeshNM();
+		super.countFanIterator(v[4], v[7], 4);
+	}
+	@Test public void countFanIterator14()
+	{
+		buildMeshNM();
+		super.countFanIterator(v[1], v[4], 4);
+	}
 }

@@ -40,11 +40,16 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 	protected AbstractHalfEdge find(Vertex v1, Vertex v2)
 	{
 		if (v1.getLink() instanceof Triangle)
-			return findSameFan(v1, v2, (Triangle) v1.getLink());
-		Triangle [] tArray = (Triangle []) v1.getLink();
-		for (int i = 0, n = tArray.length; i < n; i++)
 		{
-			AbstractHalfEdge f = findSameFan(v1, v2, tArray[i]);
+			AbstractHalfEdge ret = findSameFan(v1, v2, (Triangle) v1.getLink());
+			if (ret == null)
+				throw new RuntimeException();
+			return ret;
+		}
+		Triangle [] tArray = (Triangle []) v1.getLink();
+		for (Triangle start: tArray)
+		{
+			AbstractHalfEdge f = findSameFan(v1, v2, start);
 			if (f != null)
 				return f;
 		}
@@ -71,7 +76,7 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 				return ret;
 		}
 		while (ret.destination() != d);
-		throw new RuntimeException();
+		return null;
 	}
 	
 	@Test public void nextOriginLoop()
@@ -170,6 +175,27 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 	{
 		buildMeshNM();
 		super.countVertexLinks(v[4], 4);
+	}
+
+	@Test public void countEdgeLinks36()
+	{
+		buildMeshNM();
+		super.countEdgeLinks(v[3], v[6], 1);
+	}
+	@Test public void countEdgeLinks46()
+	{
+		buildMeshNM();
+		super.countEdgeLinks(v[4], v[6], 2);
+	}
+	@Test public void countEdgeLinks47()
+	{
+		buildMeshNM();
+		super.countEdgeLinks(v[4], v[7], 4);
+	}
+	@Test public void countEdgeLinks14()
+	{
+		buildMeshNM();
+		super.countEdgeLinks(v[1], v[4], 4);
 	}
 
 	@Test public void countFanIterator36()
