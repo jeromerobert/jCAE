@@ -178,15 +178,27 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 */
 	public boolean find(Vertex v1, Vertex v2)
 	{
-		if (v2.getLink() instanceof Triangle && v2.getLink() instanceof Triangle[])
+		if (v1.getLink() instanceof Triangle)
+			return findSameFan(v1, v2, (Triangle) v1.getLink());
+		else if (v2.getLink() instanceof Triangle)
 		{
-			boolean ret = find(v2, v1);
-			if (!ret)
-				return ret;
+			if (!findSameFan(v2, v1, (Triangle) v2.getLink()))
+				return false;
 			sym();
-			return !hasAttributes(OUTER);
+			return true;
 		}
-		bind((Triangle) v1.getLink());
+		Triangle [] tArray = (Triangle []) v1.getLink();
+		for (Triangle start: tArray)
+		{
+			if (findSameFan(v1, v2, start))
+				return true;
+		}
+		return false;
+	}
+
+	private boolean findSameFan(Vertex v1, Vertex v2, Triangle start)
+	{
+		bind(start);
 		assert tri.vertex[0] == v1 || tri.vertex[1] == v1 || tri.vertex[2] == v1 : v1+" "+tri;
 		if (destination() == v1)
 			next();
