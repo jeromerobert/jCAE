@@ -22,6 +22,8 @@ package org.jcae.mesh.amibe.ds;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Stack;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
@@ -1419,7 +1421,32 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	
 	public final Iterator<AbstractHalfEdge> fanIterator()
 	{
-		throw new RuntimeException("Not implemented yet");
+		if (!hasAttributes(NONMANIFOLD))
+			return identityFanIterator();
+		VirtualHalfEdge ot = new VirtualHalfEdge();
+		copyOTri(this, ot);
+		if (!ot.hasAttributes(OUTER))
+			ot.sym();
+		ot.next();
+		final LinkedHashMap<Triangle, Integer> list = (LinkedHashMap<Triangle, Integer>) ot.getAdj();
+		return new Iterator<AbstractHalfEdge>()
+		{
+			VirtualHalfEdge ret = new VirtualHalfEdge();
+			private Iterator<Map.Entry<Triangle, Integer>> it = list.entrySet().iterator();
+			public boolean hasNext()
+			{
+				return it.hasNext();
+			}
+			public AbstractHalfEdge next()
+			{
+				Map.Entry<Triangle, Integer> entry = it.next();
+				ret.bind(entry.getKey(), entry.getValue().intValue());
+				return ret;
+			}
+			public void remove()
+			{
+			}
+		};
 	}
 
 	private final String showAdj(int num)
