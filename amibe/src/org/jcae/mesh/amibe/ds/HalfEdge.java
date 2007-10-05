@@ -24,9 +24,11 @@ import org.jcae.mesh.amibe.traits.HalfEdgeTraitsBuilder;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import java.util.Collection;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.NoSuchElementException;
 import java.io.Serializable;
 import org.apache.log4j.Logger;
@@ -725,6 +727,50 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		return true;
 	}
 	
+	private void replaceEndpointsSameFan(Vertex n)
+	{
+		HalfEdge e = this;
+		Vertex d = destination();
+		do
+		{
+			e.setOrigin(n);
+			e = (HalfEdge) e.nextOriginLoop();
+		}
+		while (e.destination() != d);
+	}
+	private static final void replaceEndpointsNonManifold(Vertex o, Vertex n)
+	{
+		Triangle [] oList = (Triangle []) o.getLink();
+		for (Triangle t: oList)
+		{
+			TriangleHE tHE = (TriangleHE) t;
+			HalfEdge f = tHE.getHalfEdge();
+			if (f.origin() != o)
+				f = (HalfEdge) f.next();
+			if (f.origin() != o)
+				f = (HalfEdge) f.next();
+			assert f.origin() == o : ""+o+" not in "+f;
+			f.replaceEndpointsSameFan(n);
+		}
+	}
+	private static void replaceLinks(Vertex o, Triangle oldT1, Triangle oldT2, Triangle newT)
+	{
+		if (o.getLink() instanceof Triangle)
+			o.setLink(newT);
+		else
+		{
+			Triangle [] tArray = (Triangle []) o.getLink();
+			for (int i = 0; i < tArray.length; i++)
+			{
+				if (tArray[i] == oldT1 || tArray[i] == oldT2)
+				{
+					logger.debug("replaceLinks: "+newT);
+					tArray[i] = newT;
+				}
+			}
+		}
+	}
+	
 	/**
 	 * Contract an edge.
 	 *
@@ -738,17 +784,148 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	public final AbstractHalfEdge collapse(AbstractMesh m, AbstractVertex n)
 	{
-		return HEcollapse((Mesh) m, (Vertex) n);
-	}
-	private HalfEdge HEcollapse(Mesh m, Vertex n)
-	{
 		if (hasAttributes(AbstractHalfEdge.OUTER))
 			throw new IllegalArgumentException("Cannot contract "+this);
 		Vertex o = origin();
 		Vertex d = destination();
+		Vertex v = (Vertex) n;
 		assert o.isWritable() && d.isWritable(): "Cannot contract "+this;
 		if (logger.isDebugEnabled())
 			logger.debug("contract ("+o+" "+d+")\ninto "+n);
+		boolean ot = o.getLink() instanceof Triangle;
+		boolean dt = d.getLink() instanceof Triangle;
+		//  Prepare vertex links first
+		if (ot && dt)
+		{
+			v.setLink(d.getLink());
+		}
+		else if (ot)
+		{
+			Triangle [] dList = (Triangle []) d.getLink();
+			Triangle [] nList = new Triangle[dList.length];
+			System.arraycopy(dList, 0, nList, 0, dList.length);
+			v.setLink(nList);
+		}
+		else if (dt)
+		{
+			Triangle [] oList = (Triangle []) o.getLink();
+			Triangle [] nList = new Triangle [oList.length];
+			System.arraycopy(oList, 0, nList, 0, oList.length);
+			v.setLink(nList);
+		}
+		else
+		{
+			// Vertex.setLinkFan() cannot be called here because fans from
+			// o and d have to be merged.
+			Triangle [] oList = (Triangle []) o.getLink();
+			Triangle [] dList = (Triangle []) d.getLink();
+			Triangle [] nList = new Triangle[oList.length+dList.length];
+			System.arraycopy(oList, 0, nList, 0, oList.length);
+			System.arraycopy(dList, 0, nList, oList.length, dList.length);
+			ArrayList<Triangle> res = new ArrayList<Triangle>();
+			Set<Triangle> allTriangles = new HashSet<Triangle>();
+			for (Triangle t: nList)
+			{
+				if (allTriangles.contains(t))
+					continue;
+				allTriangles.add(t);
+				res.add(t);
+				AbstractHalfEdge h = t.getAbstractHalfEdge();
+				if (h.origin() != o)
+					h = h.next();
+				if (h.origin() != o)
+					h = h.next();
+				if (h.origin() == o)
+				{
+					// Add all triangles of the same fan to allTriangles
+					AbstractHalfEdge both = null;
+					Vertex end = h.destination();
+					do
+					{
+						h = h.nextOriginLoop();
+						allTriangles.add(h.getTri());
+						if (h.destination() == d)
+							both = h;
+					}
+					while (h.destination() != end);
+					if (both != null)
+					{
+						both = both.next();
+						end = both.destination();
+						do
+						{
+							both = both.nextOriginLoop();
+							allTriangles.add(both.getTri());
+						}
+						while (both.destination() != end);
+					}
+				}
+				if (h.origin() != d)
+					h = h.next();
+				if (h.origin() != d)
+					h = h.next();
+				if (h.origin() == d)
+				{
+					// Add all triangles of the same fan to allTriangles
+					AbstractHalfEdge both = null;
+					Vertex end = h.destination();
+					do
+					{
+						h = h.nextOriginLoop();
+						allTriangles.add(h.getTri());
+						if (h.destination() == o)
+							both = h;
+					}
+					while (h.destination() != end);
+					if (both != null)
+					{
+						both = both.next();
+						end = both.destination();
+						do
+						{
+							both = both.nextOriginLoop();
+							allTriangles.add(both.getTri());
+						}
+						while (both.destination() != end);
+					}
+				}
+			}
+			v.setLink(new Triangle[res.size()]);
+			res.toArray((Triangle[]) v.getLink());
+		}
+		HalfEdge e = this;
+		//  Replace o by n in all incident triangles
+		if (ot)
+			e.replaceEndpointsSameFan(v);
+		else
+			replaceEndpointsNonManifold(o, v);
+		//  Replace d by n in all incident triangles
+		e = e.HEsym();
+		if (dt)
+			e.replaceEndpointsSameFan(v);
+		else
+			replaceEndpointsNonManifold(d, v);
+
+		if (!e.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+			return HEcollapseSameFan((Mesh) m, v, true);
+		// Edge is non-manifold
+		assert e.hasAttributes(AbstractHalfEdge.OUTER);
+		// List of connected edges is modified when edge is contracted,
+		// it has to be copied.
+		LinkedHashMap<Triangle, Integer> list = (LinkedHashMap<Triangle, Integer>) e.next.sym;
+		LinkedHashMap<Triangle, Integer> copy = new LinkedHashMap<Triangle, Integer>(list);
+		AbstractHalfEdge ret = null;
+		for (Iterator<AbstractHalfEdge> it = fanIterator(copy); it.hasNext(); )
+		{
+			HalfEdge h = (HalfEdge) it.next();
+			assert !h.hasAttributes(AbstractHalfEdge.OUTER);
+			ret = h.HEcollapseSameFan((Mesh) m, v, false);
+		}
+		return ret;
+	}
+
+	private HalfEdge HEcollapseSameFan(Mesh m, Vertex n, boolean manifold)
+	{
 		/*
 		 *           V1                       V1
 		 *  V3+-------+-------+ V4   V3 +------+------+ V4
@@ -764,25 +941,14 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		 */
 		// this = (odV1)
 		
-		//  Replace o by n in all incident triangles
-		HalfEdge e, f, s;
-		e = this;
-		do
-		{
-			e.setOrigin(n);
-			e = (HalfEdge) e.nextOriginLoop();
-		}
-		while (e.destination() != d);
-		//  Replace d by n in all incident triangles
-		e = e.HEsym();
-		do
-		{
-			e.setOrigin(n);
-			e = (HalfEdge) e.nextOriginLoop();
-		}
-		while (e.destination() != n);
 		//  Update adjacency links.  For clarity, o and d are
 		//  written instead of n.
+		HalfEdge e, f, s;
+		e = this;
+		Triangle t1 = e.tri;
+		e = e.HEsym();
+		Triangle t2 = e.tri;
+		e = e.HEsym();
 		e = next;               // (dV1o)
 		int attr4 = e.attributes;
 		s = e.HEsym();          // (V1dV4)
@@ -803,51 +969,56 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			if (t34.isOuter())
 				t34 = s.tri;
 			assert !t34.isOuter() : s+"\n"+f;
-			f.destination().setLink(t34);
-			n.setLink(t34);
+			replaceLinks(f.destination(), t1, t2, t34);
+			replaceLinks(n, t1, t2, t34);
 		}
-		e = e.next;                     // (odV1)
-		e = e.HEsym();                  // (doV2)
-		e = e.next;                     // (oV2d)
-		int attr5 = e.attributes;
-		s = e.HEsym();                  // (V2oV5)
-		e = e.next;                     // (V2do)
-		int attr6 = e.attributes;
-		f = e.HEsym();                  // (dV2V6)
-		if (f != null)
-			f.HEglue(s);
-		else if (s != null)
-			s.HEglue(null);
-		if (f != null)
-			f.attributes |= attr5;
-		if (s != null)
-			s.attributes |= attr6;
-		if (!e.hasAttributes(AbstractHalfEdge.OUTER))
+		e = e.next;             // (odV1)
+		e = e.HEsym();          // (doV2)
+		if (manifold)
 		{
-			TriangleHE t56 = s.tri;
-			if (t56.isOuter())
-				t56 = f.tri;
-			assert !t56.isOuter();
-			s.origin().setLink(t56);
-			n.setLink(t56);
+			e = e.next;     // (oV2d)
+			int attr5 = e.attributes;
+			s = e.HEsym();  // (V2oV5)
+			e = e.next;     // (V2do)
+			int attr6 = e.attributes;
+			f = e.HEsym();  // (dV2V6)
+			if (f != null)
+				f.HEglue(s);
+			else if (s != null)
+				s.HEglue(null);
+			if (f != null)
+				f.attributes |= attr5;
+			if (s != null)
+				s.attributes |= attr6;
+			if (!e.hasAttributes(AbstractHalfEdge.OUTER))
+			{
+				TriangleHE t56 = s.tri;
+				if (t56.isOuter())
+					t56 = f.tri;
+				assert !t56.isOuter();
+				replaceLinks(s.origin(), t1, t2, t56);
+				replaceLinks(n, t1, t2, t56);
+			}
+			e = e.next;     // (doV2)
 		}
-		e = e.next;                     // (doV2)
+		else
+		{
+			assert e.hasAttributes(AbstractHalfEdge.OUTER);
+		}
 		// Must be called before T2 is removed
-		s = e.HEsym();                  // (odV1)
+		s = e.HEsym();                 // (odV1)
 		// Remove T2
-		e.clearAttributes(AbstractHalfEdge.MARKED);
 		m.remove(e.tri);
 		// Must be called before T1 is removed
 		e = s.next.HEsym().HEsym();    // (oV1V3)
 		// Remove T1
-		s.clearAttributes(AbstractHalfEdge.MARKED);
 		m.remove(s.tri);
+
 		// Check that all o and d instances have been removed
 		// This is costful, it is disabled by default but may
 		// be enabled when debugging.
 		/*
-		boolean checkVertices = false;
-		assert checkVertices = true;
+		boolean checkVertices = true;
 		if (checkVertices)
 		{
 			for (AbstractTriangle at: m.getTriangles())
@@ -973,7 +1144,6 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	private final Iterator<AbstractHalfEdge> identityFanIterator()
 	{
 		final HalfEdge current = this;
-		logger.debug("Manifold fan iterator");
 		return new Iterator<AbstractHalfEdge>()
 		{
 			private boolean next = true;
@@ -994,15 +1164,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		};
 	}
 	
-	public final Iterator<AbstractHalfEdge> fanIterator()
+	private final static Iterator<AbstractHalfEdge> fanIterator(final LinkedHashMap<Triangle, Integer> list)
 	{
-		if (!hasAttributes(NONMANIFOLD))
-			return identityFanIterator();
-		HalfEdge e = this;
-		logger.debug("Non manifold fan iterator");
-		if (!e.hasAttributes(OUTER))
-			e = e.HEsym();
-		final LinkedHashMap<Triangle, Integer> list = (LinkedHashMap<Triangle, Integer>) e.next.sym;
 		return new Iterator<AbstractHalfEdge>()
 		{
 			private Iterator<Map.Entry<Triangle, Integer>> it = list.entrySet().iterator();
@@ -1025,6 +1188,17 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			{
 			}
 		};
+	}
+
+	public final Iterator<AbstractHalfEdge> fanIterator()
+	{
+		if (!hasAttributes(NONMANIFOLD))
+			return identityFanIterator();
+		HalfEdge e = this;
+		logger.debug("Non manifold fan iterator");
+		if (!e.hasAttributes(AbstractHalfEdge.OUTER))
+			e = e.HEsym();
+		return fanIterator((LinkedHashMap<Triangle, Integer>) e.next.sym);
 	}
 
 	@Override
