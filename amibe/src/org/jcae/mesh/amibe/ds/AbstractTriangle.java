@@ -122,6 +122,8 @@ public class AbstractTriangle
 			r.append(" !r");
 		if (!writable)
 			r.append(" !w");
+		if (groupId >= 0)
+			r.append("\nGroup: "+groupId);
 		r.append("\nVertices:");
 		for (int i = 0; i < 3; i++)
 			r.append("\n  "+vertex[i]);

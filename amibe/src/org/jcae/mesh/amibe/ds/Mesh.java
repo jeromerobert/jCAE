@@ -937,9 +937,14 @@ public class Mesh extends AbstractMesh implements Serializable
 				// Endpoints must link to at least 
 				Vertex o = e.origin();
 				Vertex a = e.apex();
-				if (!(o.getLink() instanceof Triangle[]) || !(a.getLink() instanceof Triangle[]))
+				if (!(o.getLink() instanceof Triangle[]))
 				{
-					logger.error("Endpoints must be non-manifold");
+					logger.error("Endpoint must be non-manifold: "+o);
+					return false;
+				}
+				if (!(a.getLink() instanceof Triangle[]))
+				{
+					logger.error("Endpoint must be non-manifold: "+a);
 					return false;
 				}
 				Triangle [] linkO = (Triangle[]) o.getLink();
