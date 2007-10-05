@@ -39,8 +39,8 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	private static final int NODES            = 1 << BITNODES;
 	private static final int GROUPLIST        = 1 << BITGROUPS;
 	private static final int KDTREE           = 1 << BITKDTREE;
-	private static final int TRIANGLESET      = 30;
-	private static final int NODESET          = 31;
+	private static final int TRIANGLESET      = 1 << 30;
+	private static final int NODESET          = 1 << 31;
 
 	private VertexTraitsBuilder vertexTraitsBuilder = new VertexTraitsBuilder();
 	private HalfEdgeTraitsBuilder halfedgeTraitsBuilder = new HalfEdgeTraitsBuilder();
