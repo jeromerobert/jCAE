@@ -832,7 +832,7 @@ public class Mesh extends AbstractMesh implements Serializable
 					logger.error(""+sym.getAdj().getClass().getName());
 					return false;
 				}
-				if ((sym.hasAttributes(AbstractHalfEdge.BOUNDARY) && !ot.hasAttributes(AbstractHalfEdge.BOUNDARY)) || (!sym.hasAttributes(AbstractHalfEdge.BOUNDARY) && ot.hasAttributes(AbstractHalfEdge.BOUNDARY)))
+				if (sym.hasAttributes(AbstractHalfEdge.BOUNDARY) != ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
 				{
 					logger.error("Inconsistent boundary flag");
 					logger.error(" "+ot);
@@ -905,7 +905,7 @@ public class Mesh extends AbstractMesh implements Serializable
 					logger.error(" adj2: "+f);
 					return false;
 				}
-				if ((f.hasAttributes(AbstractHalfEdge.BOUNDARY) && !e.hasAttributes(AbstractHalfEdge.BOUNDARY)) || (!f.hasAttributes(AbstractHalfEdge.BOUNDARY) && e.hasAttributes(AbstractHalfEdge.BOUNDARY)))
+				if (f.hasAttributes(AbstractHalfEdge.BOUNDARY) != e.hasAttributes(AbstractHalfEdge.BOUNDARY))
 				{
 					logger.error("Inconsistent boundary flag");
 					logger.error(" "+e);
