@@ -116,13 +116,6 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	private static final int [] next3 = { 1, 2, 0 };
 	private static final int [] prev3 = { 2, 0, 1 };
 	
-	private static final Integer [] int3 = new Integer[3];
-	static {
-		int3[0] = Integer.valueOf(0);
-		int3[1] = Integer.valueOf(1);
-		int3[2] = Integer.valueOf(2);
-	}
-
 	private final double [] tempD = new double[3];
 	private final double [] tempD1 = new double[3];
 	private final double [] tempD2 = new double[3];

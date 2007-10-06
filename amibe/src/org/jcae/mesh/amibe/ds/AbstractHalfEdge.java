@@ -88,6 +88,13 @@ public abstract class AbstractHalfEdge
 	 */
 	public static final int NONMANIFOLD = 1 << 5;
 	
+	protected static final Integer [] int3 = new Integer[3];
+	static {
+		int3[0] = Integer.valueOf(0);
+		int3[1] = Integer.valueOf(1);
+		int3[2] = Integer.valueOf(2);
+	}
+
 	public AbstractHalfEdge()
 	{
 		traitsBuilder = null;
