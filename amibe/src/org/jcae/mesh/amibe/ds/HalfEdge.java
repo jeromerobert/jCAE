@@ -748,9 +748,6 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		assert o.isWritable() && d.isWritable(): "Cannot contract "+this;
 		if (logger.isDebugEnabled())
 			logger.debug("contract ("+o+" "+d+")");
-		deepCopyVertexLinks(o, d, v);
-		if (logger.isDebugEnabled())
-			logger.debug("new point: "+n);
 		//  Replace o by n in all incident triangles
 		if (o.getLink() instanceof Triangle)
 			replaceEndpointsSameFan(v);
@@ -762,6 +759,10 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			e.replaceEndpointsSameFan(v);
 		else
 			replaceEndpointsNonManifold(d, v);
+		//  Set v links
+		deepCopyVertexLinks(o, d, v);
+		if (logger.isDebugEnabled())
+			logger.debug("new point: "+v);
 
 		if (!hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 			return HEcollapseSameFan((Mesh) m, v, true);
