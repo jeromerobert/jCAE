@@ -21,7 +21,6 @@ package org.jcae.mesh.amibe.ds;
 
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,6 +37,7 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 		mesh = new Mesh(mtb);
 	}
 	
+	@Override
 	protected AbstractHalfEdge find(Vertex v1, Vertex v2)
 	{
 		if (!ot.find(v1, v2))
@@ -45,6 +45,7 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 		return ot;
 	}
 	
+	@Override
 	@Test public void nextOriginLoop()
 	{
 		buildMesh2();

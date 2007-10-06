@@ -19,8 +19,6 @@
 
 package org.jcae.mesh.amibe.ds;
 
-import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
-import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import static org.junit.Assert.*;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -119,6 +117,12 @@ public abstract class AbstractHalfEdgeTest
 		v[11].setLink(T[11]);
 		for (Triangle t: T)
 			mesh.add(t);
+		int cnt = 0;
+		for (Triangle t: T)
+		{
+			t.setGroupId(cnt);
+			cnt++;
+		}
 	}
 	
 	protected void buildMesh2()
@@ -161,6 +165,12 @@ public abstract class AbstractHalfEdgeTest
 		vy[11].setLink(Ty[11]);
 		for (Triangle t: Ty)
 			mesh.add(t);
+		int cnt = T.length;
+		for (Triangle t: Ty)
+		{
+			t.setGroupId(cnt);
+			cnt++;
+		}
 		Vertex [] vTotal = new Vertex[20];
 		System.arraycopy(v, 0, vTotal, 0, v.length);
 		for (int i = 0; i < 4; i++)
