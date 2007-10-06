@@ -2,6 +2,12 @@ Sat Oct  6 21:21:08 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/HalfEdge.java (collapse): Fix edge
 	collapse for non-manifold meshes.
+	* src/org/jcae/mesh/amibe/ds/Mesh.java: New canCollapseEdge(),
+	collapseEdge, splitEdge() and swapEdge() methods.
+	* src/org/jcae/mesh/amibe/ds/HalfEdge.java
+	  src/org/jcae/mesh/amibe/ds/AbstractHalfEdge.java
+	  src/org/jcae/mesh/amibe/ds/VirtualHalfEdge.java: Restrict access,
+	algorithms must now use methods added just above in Mesh.
 
 Thu Oct  4 11:05:49 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

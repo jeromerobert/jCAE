@@ -178,7 +178,7 @@ public class ConstraintNormal3D
 					ot.bind(t);
 					for (int i = 0; i <= l; i++)
 						ot.next();
-					ot.swap();
+					mesh.swapEdge(ot);
 					cnt++;
 				}
 			}

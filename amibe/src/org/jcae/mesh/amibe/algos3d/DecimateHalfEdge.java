@@ -342,7 +342,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		q3.computeQuadric3DError(q1, q2);
 		q3.optimalPlacement(v1, v2, q1, q2, placement, v3);
 		// For now, do not contract non manifold edges
-		return (!current.hasAttributes(AbstractHalfEdge.NONMANIFOLD) && current.canCollapse(v3));
+		return (!current.hasAttributes(AbstractHalfEdge.NONMANIFOLD) && mesh.canCollapseEdge(current, v3));
 	}
 
 	@Override
@@ -399,7 +399,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		Vertex vFree = current.origin();
 		Quadric3DError qFree = quadricMap.remove(vFree);
 		quadricMap.remove(current.destination());
-		current = (HalfEdge) current.collapse(mesh, v3);
+		current = (HalfEdge) mesh.collapseEdge(current, v3);
 		// Update edge costs
 		quadricMap.put(v3, q3);
 		assert current != null : v3+" not connected to "+apex;

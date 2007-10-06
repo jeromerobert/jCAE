@@ -30,13 +30,14 @@ public abstract class AbstractHalfEdge
 	protected final HalfEdgeTraitsBuilder traitsBuilder;
 	protected final Traits traits;
 
+	protected abstract AbstractHalfEdge swap();
+	protected abstract boolean canCollapse(AbstractVertex v);
+	protected abstract AbstractHalfEdge collapse(AbstractMesh m, AbstractVertex v);
+	protected abstract AbstractHalfEdge split(AbstractMesh m, AbstractVertex v);
+
 	public abstract void glue(AbstractHalfEdge e);
-	public abstract AbstractHalfEdge split(AbstractMesh m, AbstractVertex v);
-	public abstract AbstractHalfEdge collapse(AbstractMesh m, AbstractVertex v);
 	public abstract double area();
 	public abstract boolean checkNewRingNormals(double [] newpt);
-	public abstract boolean canCollapse(AbstractVertex v);
-	public abstract AbstractHalfEdge swap();
 	public abstract Iterator<AbstractHalfEdge> fanIterator();
 
 	/**

@@ -219,7 +219,7 @@ public abstract class AbstractAlgoHalfEdge
 						assert !tree.contains(sym.notOriented());
 					}
 					Vertex a = current.apex();
-					current = (HalfEdge) current.swap();
+					current = (HalfEdge) mesh.swapEdge(current);
 					swapped++;
 					// Now current = (ona)
 					assert a == current.apex();

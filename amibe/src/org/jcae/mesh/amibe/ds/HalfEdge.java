@@ -503,9 +503,10 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @return swapped edge
 	 * @throws IllegalArgumentException if edge is on a boundary or belongs
 	 * to an outer triangle.
+	 * @see Mesh#swapEdge
 	 */
 	@Override
-	public final AbstractHalfEdge swap()
+	protected final AbstractHalfEdge swap()
 	{
 		return HEswap();
 	}
@@ -647,9 +648,10 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *
 	 * @param n the resulting vertex
 	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise.
+	 * @see Mesh#canCollapseEdge
 	 */
 	@Override
-	public final boolean canCollapse(AbstractVertex n)
+	protected final boolean canCollapse(AbstractVertex n)
 	{
 		// Be consistent with collapse()
 		if (hasAttributes(AbstractHalfEdge.OUTER))
@@ -736,9 +738,10 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @throws IllegalArgumentException if edge belongs to an outer triangle,
 	 * because there would be no valid return value.  User must then run this
 	 * method against symmetric edge, this is not done automatically.
+	 * @see Mesh#collapseEdge
 	 */
 	@Override
-	public final AbstractHalfEdge collapse(AbstractMesh m, AbstractVertex n)
+	protected final AbstractHalfEdge collapse(AbstractMesh m, AbstractVertex n)
 	{
 		if (hasAttributes(AbstractHalfEdge.OUTER))
 			throw new IllegalArgumentException("Cannot contract "+this);
@@ -1088,12 +1091,14 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Split an edge.  This is the opposite of contract.
+	 * Split an edge.  This is the opposite of {@link #collapse}.
 	 *
+	 * @param m mesh
 	 * @param n the resulting vertex
+	 * @see Mesh#splitEdge
 	 */
 	@Override
-	public final AbstractHalfEdge split(AbstractMesh m, AbstractVertex n)
+	protected final AbstractHalfEdge split(AbstractMesh m, AbstractVertex n)
 	{
 		HEsplit((Mesh) m, (Vertex) n);
 		return this;

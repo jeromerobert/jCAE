@@ -726,6 +726,54 @@ public class Mesh extends AbstractMesh implements Serializable
 	}
 	
 	/**
+	 * Check whether an edge can be contracted.
+	 *
+	 * @param e   edge to be checked
+	 * @param v   the resulting vertex
+	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise.
+	 */
+	public boolean canCollapseEdge(AbstractHalfEdge e, AbstractVertex v)
+	{
+		return e.canCollapse(v);
+	}
+	
+	/**
+	 * Contract an edge.
+	 *
+	 * @param e   edge to contract
+	 * @param v   the resulting vertex
+	 * @return edge starting from <code>n</code> and pointing to original apex
+	 * @throws IllegalArgumentException if edge belongs to an outer triangle,
+	 * because there would be no valid return value.  User must then run this
+	 * method against symmetric edge, this is not done automatically.
+	 */
+	public AbstractHalfEdge collapseEdge(AbstractHalfEdge e, AbstractVertex v)
+	{
+		return e.collapse(this, v);
+	}
+	
+	/**
+	 * Split an edge.  This is the opposite of {@link #collapseEdge}.
+	 *
+	 * @param e   edge being splitted
+	 * @param v   the resulting vertex
+	 */
+	public AbstractHalfEdge splitEdge(AbstractHalfEdge e, AbstractVertex v)
+	{
+		return e.split(this, v);
+	}
+	
+	/**
+	 * Swap an edge.
+	 *
+	 * @param e  edge being swapped
+	 */
+	public AbstractHalfEdge swapEdge(AbstractHalfEdge e)
+	{
+		return e.swap();
+	}
+	
+	/**
 	 * Checks whether this mesh is valid.
 	 * This routine returns <code>isValid(true)</code>.
 	 *
