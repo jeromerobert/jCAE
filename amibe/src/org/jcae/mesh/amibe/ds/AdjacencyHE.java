@@ -223,7 +223,7 @@ public class AdjacencyHE implements AdjacencyWrapper
 			return ""+sym.getTri().hashCode()+"["+sym.getLocalNumber()+"]";
 		}
 		else
-			return "xxx";
+			return "NM";
 	}
 
 	@Override
