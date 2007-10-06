@@ -727,167 +727,6 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		return true;
 	}
 	
-	private void replaceEndpointsSameFan(Vertex n)
-	{
-		HalfEdge e = this;
-		Vertex d = destination();
-		do
-		{
-			e.setOrigin(n);
-			e = (HalfEdge) e.nextOriginLoop();
-		}
-		while (e.destination() != d);
-	}
-	private static final void replaceEndpointsNonManifold(Vertex o, Vertex n)
-	{
-		Triangle [] oList = (Triangle []) o.getLink();
-		for (Triangle t: oList)
-		{
-			TriangleHE tHE = (TriangleHE) t;
-			HalfEdge f = tHE.getHalfEdge();
-			if (f.origin() != o)
-				f = (HalfEdge) f.next();
-			if (f.origin() != o)
-				f = (HalfEdge) f.next();
-			assert f.origin() == o : ""+o+" not in "+f;
-			f.replaceEndpointsSameFan(n);
-		}
-	}
-	private static void replaceVertexLinks(Vertex o, Triangle oldT1, Triangle oldT2, Triangle newT)
-	{
-		if (o.getLink() instanceof Triangle)
-			o.setLink(newT);
-		else
-		{
-			Triangle [] tArray = (Triangle []) o.getLink();
-			for (int i = 0; i < tArray.length; i++)
-			{
-				if (tArray[i] == oldT1 || tArray[i] == oldT2)
-				{
-					logger.debug("replaceVertexLinks: "+tArray[i]+" --> "+newT);
-					tArray[i] = newT;
-				}
-			}
-		}
-	}
-	private static void deepCopyVertexLinks(Vertex o, Vertex d, Vertex v)
-	{
-		boolean ot = o.getLink() instanceof Triangle;
-		boolean dt = d.getLink() instanceof Triangle;
-		//  Prepare vertex links first
-		if (ot && dt)
-		{
-			v.setLink(d.getLink());
-		}
-		else if (ot)
-		{
-			Triangle [] dList = (Triangle []) d.getLink();
-			Triangle [] nList = new Triangle[dList.length];
-			System.arraycopy(dList, 0, nList, 0, dList.length);
-			v.setLink(nList);
-		}
-		else if (dt)
-		{
-			Triangle [] oList = (Triangle []) o.getLink();
-			Triangle [] nList = new Triangle [oList.length];
-			System.arraycopy(oList, 0, nList, 0, oList.length);
-			v.setLink(nList);
-		}
-		else
-		{
-			// Vertex.setLinkFan() cannot be called here because fans from
-			// o and d have to be merged.
-			Triangle [] oList = (Triangle []) o.getLink();
-			Triangle [] dList = (Triangle []) d.getLink();
-			Triangle [] nList = new Triangle[oList.length+dList.length];
-			System.arraycopy(oList, 0, nList, 0, oList.length);
-			System.arraycopy(dList, 0, nList, oList.length, dList.length);
-			ArrayList<Triangle> res = new ArrayList<Triangle>();
-			Set<Triangle> allTriangles = new HashSet<Triangle>();
-			for (Triangle t: nList)
-			{
-				if (allTriangles.contains(t))
-					continue;
-				allTriangles.add(t);
-				res.add(t);
-				AbstractHalfEdge h = t.getAbstractHalfEdge();
-				if (h.origin() != o)
-					h = h.next();
-				if (h.origin() != o)
-					h = h.next();
-				if (h.origin() == o)
-				{
-					// Add all triangles of the same fan to allTriangles
-					AbstractHalfEdge both = null;
-					Vertex end = h.destination();
-					do
-					{
-						h = h.nextOriginLoop();
-						allTriangles.add(h.getTri());
-						if (h.destination() == d)
-							both = h;
-					}
-					while (h.destination() != end);
-					if (both != null)
-					{
-						both = both.next();
-						end = both.destination();
-						do
-						{
-							both = both.nextOriginLoop();
-							allTriangles.add(both.getTri());
-						}
-						while (both.destination() != end);
-					}
-				}
-				if (h.origin() != d)
-					h = h.next();
-				if (h.origin() != d)
-					h = h.next();
-				if (h.origin() == d)
-				{
-					// Add all triangles of the same fan to allTriangles
-					AbstractHalfEdge both = null;
-					Vertex end = h.destination();
-					do
-					{
-						h = h.nextOriginLoop();
-						allTriangles.add(h.getTri());
-						if (h.destination() == o)
-							both = h;
-					}
-					while (h.destination() != end);
-					if (both != null)
-					{
-						both = both.next();
-						end = both.destination();
-						do
-						{
-							both = both.nextOriginLoop();
-							allTriangles.add(both.getTri());
-						}
-						while (both.destination() != end);
-					}
-				}
-			}
-			v.setLink(new Triangle[res.size()]);
-			res.toArray((Triangle[]) v.getLink());
-		}
-	}
-	private void replaceEdgeLinks(HalfEdge that)
-	{
-		// Current instance is a non-manifold edge which has been
-		// replaced by 'that'.  Replace all occurrences in adjacency
-		// list.
-		assert hasAttributes(AbstractHalfEdge.NONMANIFOLD) && !hasAttributes(AbstractHalfEdge.OUTER);
-		HalfEdge e = this;
-		final LinkedHashMap<Triangle, Integer> list = (LinkedHashMap<Triangle, Integer>) e.HEsym().next.sym;
-		Integer I = list.get(tri);
-		assert I != null && I.intValue() == localNumber;
-		list.remove(tri);
-		list.put(that.tri, int3[that.localNumber]);
-	}
-	
 	/**
 	 * Contract an edge.
 	 *
@@ -1084,6 +923,167 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		// This is why V1 cannot be m.outerVertex, otherwise we cannot
 		// ensure that return HalfEdge is (oV1V3)
 		return e;
+	}
+	
+	private void replaceEndpointsSameFan(Vertex n)
+	{
+		HalfEdge e = this;
+		Vertex d = destination();
+		do
+		{
+			e.setOrigin(n);
+			e = (HalfEdge) e.nextOriginLoop();
+		}
+		while (e.destination() != d);
+	}
+	private static final void replaceEndpointsNonManifold(Vertex o, Vertex n)
+	{
+		Triangle [] oList = (Triangle []) o.getLink();
+		for (Triangle t: oList)
+		{
+			TriangleHE tHE = (TriangleHE) t;
+			HalfEdge f = tHE.getHalfEdge();
+			if (f.origin() != o)
+				f = (HalfEdge) f.next();
+			if (f.origin() != o)
+				f = (HalfEdge) f.next();
+			assert f.origin() == o : ""+o+" not in "+f;
+			f.replaceEndpointsSameFan(n);
+		}
+	}
+	private static void replaceVertexLinks(Vertex o, Triangle oldT1, Triangle oldT2, Triangle newT)
+	{
+		if (o.getLink() instanceof Triangle)
+			o.setLink(newT);
+		else
+		{
+			Triangle [] tArray = (Triangle []) o.getLink();
+			for (int i = 0; i < tArray.length; i++)
+			{
+				if (tArray[i] == oldT1 || tArray[i] == oldT2)
+				{
+					logger.debug("replaceVertexLinks: "+tArray[i]+" --> "+newT);
+					tArray[i] = newT;
+				}
+			}
+		}
+	}
+	private static void deepCopyVertexLinks(Vertex o, Vertex d, Vertex v)
+	{
+		boolean ot = o.getLink() instanceof Triangle;
+		boolean dt = d.getLink() instanceof Triangle;
+		//  Prepare vertex links first
+		if (ot && dt)
+		{
+			v.setLink(d.getLink());
+		}
+		else if (ot)
+		{
+			Triangle [] dList = (Triangle []) d.getLink();
+			Triangle [] nList = new Triangle[dList.length];
+			System.arraycopy(dList, 0, nList, 0, dList.length);
+			v.setLink(nList);
+		}
+		else if (dt)
+		{
+			Triangle [] oList = (Triangle []) o.getLink();
+			Triangle [] nList = new Triangle [oList.length];
+			System.arraycopy(oList, 0, nList, 0, oList.length);
+			v.setLink(nList);
+		}
+		else
+		{
+			// Vertex.setLinkFan() cannot be called here because fans from
+			// o and d have to be merged.
+			Triangle [] oList = (Triangle []) o.getLink();
+			Triangle [] dList = (Triangle []) d.getLink();
+			Triangle [] nList = new Triangle[oList.length+dList.length];
+			System.arraycopy(oList, 0, nList, 0, oList.length);
+			System.arraycopy(dList, 0, nList, oList.length, dList.length);
+			ArrayList<Triangle> res = new ArrayList<Triangle>();
+			Set<Triangle> allTriangles = new HashSet<Triangle>();
+			for (Triangle t: nList)
+			{
+				if (allTriangles.contains(t))
+					continue;
+				allTriangles.add(t);
+				res.add(t);
+				AbstractHalfEdge h = t.getAbstractHalfEdge();
+				if (h.origin() != o)
+					h = h.next();
+				if (h.origin() != o)
+					h = h.next();
+				if (h.origin() == o)
+				{
+					// Add all triangles of the same fan to allTriangles
+					AbstractHalfEdge both = null;
+					Vertex end = h.destination();
+					do
+					{
+						h = h.nextOriginLoop();
+						allTriangles.add(h.getTri());
+						if (h.destination() == d)
+							both = h;
+					}
+					while (h.destination() != end);
+					if (both != null)
+					{
+						both = both.next();
+						end = both.destination();
+						do
+						{
+							both = both.nextOriginLoop();
+							allTriangles.add(both.getTri());
+						}
+						while (both.destination() != end);
+					}
+				}
+				if (h.origin() != d)
+					h = h.next();
+				if (h.origin() != d)
+					h = h.next();
+				if (h.origin() == d)
+				{
+					// Add all triangles of the same fan to allTriangles
+					AbstractHalfEdge both = null;
+					Vertex end = h.destination();
+					do
+					{
+						h = h.nextOriginLoop();
+						allTriangles.add(h.getTri());
+						if (h.destination() == o)
+							both = h;
+					}
+					while (h.destination() != end);
+					if (both != null)
+					{
+						both = both.next();
+						end = both.destination();
+						do
+						{
+							both = both.nextOriginLoop();
+							allTriangles.add(both.getTri());
+						}
+						while (both.destination() != end);
+					}
+				}
+			}
+			v.setLink(new Triangle[res.size()]);
+			res.toArray((Triangle[]) v.getLink());
+		}
+	}
+	private void replaceEdgeLinks(HalfEdge that)
+	{
+		// Current instance is a non-manifold edge which has been
+		// replaced by 'that'.  Replace all occurrences in adjacency
+		// list.
+		assert hasAttributes(AbstractHalfEdge.NONMANIFOLD) && !hasAttributes(AbstractHalfEdge.OUTER);
+		HalfEdge e = this;
+		final LinkedHashMap<Triangle, Integer> list = (LinkedHashMap<Triangle, Integer>) e.HEsym().next.sym;
+		Integer I = list.get(tri);
+		assert I != null && I.intValue() == localNumber;
+		list.remove(tri);
+		list.put(that.tri, int3[that.localNumber]);
 	}
 	
 	/**
