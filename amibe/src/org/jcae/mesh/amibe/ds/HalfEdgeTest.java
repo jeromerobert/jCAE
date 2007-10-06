@@ -80,7 +80,6 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 		return null;
 	}
 	
-	/*
 	@Override
 	@Test public void nextOriginLoop()
 	{
@@ -216,7 +215,6 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 		buildMeshNM();
 		super.countFanIterator(v[1], v[4], 4);
 	}
-	*/
 
 	@Test public void collapseNM474()
 	{
