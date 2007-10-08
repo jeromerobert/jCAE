@@ -399,7 +399,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		Vertex vFree = current.origin();
 		Quadric3DError qFree = quadricMap.remove(vFree);
 		quadricMap.remove(current.destination());
-		current = (HalfEdge) mesh.collapseEdge(current, v3);
+		current = (HalfEdge) mesh.edgeCollapse(current, v3);
 		// Update edge costs
 		quadricMap.put(v3, q3);
 		assert current != null : v3+" not connected to "+apex;

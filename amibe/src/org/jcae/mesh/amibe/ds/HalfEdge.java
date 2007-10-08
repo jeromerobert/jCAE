@@ -503,7 +503,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @return swapped edge
 	 * @throws IllegalArgumentException if edge is on a boundary or belongs
 	 * to an outer triangle.
-	 * @see Mesh#swapEdge
+	 * @see Mesh#edgeSwap
 	 */
 	@Override
 	protected final AbstractHalfEdge swap()
@@ -738,7 +738,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @throws IllegalArgumentException if edge belongs to an outer triangle,
 	 * because there would be no valid return value.  User must then run this
 	 * method against symmetric edge, this is not done automatically.
-	 * @see Mesh#collapseEdge
+	 * @see Mesh#edgeCollapse
 	 */
 	@Override
 	protected final AbstractHalfEdge collapse(AbstractMesh m, AbstractVertex n)
@@ -1095,7 +1095,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *
 	 * @param m mesh
 	 * @param n the resulting vertex
-	 * @see Mesh#splitEdge
+	 * @see Mesh#vertexSplit
 	 */
 	@Override
 	protected final AbstractHalfEdge split(AbstractMesh m, AbstractVertex n)

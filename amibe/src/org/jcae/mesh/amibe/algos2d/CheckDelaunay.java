@@ -139,7 +139,7 @@ public class CheckDelaunay
 					newList.add(ot.getTri());
 					VirtualHalfEdge.symOTri(ot, sym);
 					newList.add(sym.getTri());
-					mesh.swapEdge(ot);
+					mesh.edgeSwap(ot);
 					redo = true;
 				}
 			}

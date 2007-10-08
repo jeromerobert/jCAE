@@ -911,7 +911,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @return swapped edge
 	 * @throws IllegalArgumentException if edge is on a boundary or belongs
 	 * to an outer triangle.
-	 * @see Mesh#swapEdge
+	 * @see Mesh#edgeSwap
 	 */
 	@Override
 	protected final AbstractHalfEdge swap()

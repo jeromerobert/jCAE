@@ -164,7 +164,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		if (logger.isDebugEnabled())
 			logger.debug("Split edge: "+current+" by "+insertedVertex);
 		tree.remove(current.notOriented());
-		mesh.splitEdge(current, insertedVertex);
+		mesh.vertexSplit(current, insertedVertex);
 		assert current.destination() == insertedVertex : insertedVertex+" "+current;
 		assert mesh.isValid();
 		// Update edge length

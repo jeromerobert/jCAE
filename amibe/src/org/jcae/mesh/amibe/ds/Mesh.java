@@ -747,18 +747,18 @@ public class Mesh extends AbstractMesh implements Serializable
 	 * because there would be no valid return value.  User must then run this
 	 * method against symmetric edge, this is not done automatically.
 	 */
-	public AbstractHalfEdge collapseEdge(AbstractHalfEdge e, AbstractVertex v)
+	public AbstractHalfEdge edgeCollapse(AbstractHalfEdge e, AbstractVertex v)
 	{
 		return e.collapse(this, v);
 	}
 	
 	/**
-	 * Split an edge.  This is the opposite of {@link #collapseEdge}.
+	 * Split an edge.  This is the opposite of {@link #edgeCollapse}.
 	 *
 	 * @param e   edge being splitted
 	 * @param v   the resulting vertex
 	 */
-	public AbstractHalfEdge splitEdge(AbstractHalfEdge e, AbstractVertex v)
+	public AbstractHalfEdge vertexSplit(AbstractHalfEdge e, AbstractVertex v)
 	{
 		return e.split(this, v);
 	}
@@ -768,7 +768,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	 *
 	 * @param e  edge being swapped
 	 */
-	public AbstractHalfEdge swapEdge(AbstractHalfEdge e)
+	public AbstractHalfEdge edgeSwap(AbstractHalfEdge e)
 	{
 		return e.swap();
 	}

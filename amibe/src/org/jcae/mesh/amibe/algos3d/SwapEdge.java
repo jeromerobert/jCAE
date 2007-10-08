@@ -146,7 +146,7 @@ public class SwapEdge
 			tree.remove(t);
 			tree.remove(sym.getTri());
 			// Before: ot = (oda)   sym = (don)
-			mesh.swapEdge(ot);
+			mesh.edgeSwap(ot);
 			swapped++;
 			// After:  ot = (ona)   sym = (dan)
 			assert sym.apex() == ot.destination() : ot+" "+sym;
