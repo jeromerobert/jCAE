@@ -131,6 +131,12 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 		super.canCollapse(v[1], v[3], v[3], false);
 	}
 
+	@Test public void canCollapseTopo010()
+	{
+		buildMeshTopo();
+		super.canCollapse(v[0], v[1], v[0], false);
+	}
+
 	/**
 	 * Unit tests for {@link AbstractHalfEdge#collapse} on
 	 * manifold meshes.

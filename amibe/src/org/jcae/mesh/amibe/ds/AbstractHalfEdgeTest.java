@@ -50,6 +50,8 @@ public abstract class AbstractHalfEdgeTest
 		v[3] = (Vertex) mesh.factory.createVertex(0.0, 1.0, 0.0);
 		v[4] = (Vertex) mesh.factory.createVertex(-1.0, 1.0, 0.0);
 		v[5] = (Vertex) mesh.factory.createVertex(-1.0, 0.0, 0.0);
+		for (int i = 0; i < v.length; i++)
+			v[i].setLabel(i);
 		T = new Triangle[4];
 		T[0] = (Triangle) mesh.factory.createTriangle(v[0], v[1], v[2]);
 		T[1] = (Triangle) mesh.factory.createTriangle(v[2], v[3], v[0]);
@@ -61,10 +63,13 @@ public abstract class AbstractHalfEdgeTest
 		v[3].setLink(T[2]);
 		v[4].setLink(T[2]);
 		v[5].setLink(T[3]);
-		mesh.add(T[0]);
-		mesh.add(T[1]);
-		mesh.add(T[2]);
-		mesh.add(T[3]);
+		int cnt = 0;
+		for (Triangle t: T)
+		{
+			mesh.add(t);
+			t.setGroupId(cnt);
+			cnt++;
+		}
 		mesh.buildAdjacency(v, -1.0);
 	}
 	
@@ -115,11 +120,10 @@ public abstract class AbstractHalfEdgeTest
 		v[9].setLink(T[9]);
 		v[10].setLink(T[9]);
 		v[11].setLink(T[11]);
-		for (Triangle t: T)
-			mesh.add(t);
 		int cnt = 0;
 		for (Triangle t: T)
 		{
+			mesh.add(t);
 			t.setGroupId(cnt);
 			cnt++;
 		}
@@ -128,6 +132,55 @@ public abstract class AbstractHalfEdgeTest
 	protected void buildMesh2()
 	{
 		create3x4Shell();
+		mesh.buildAdjacency(v, -1.0);
+	}
+	
+	protected void buildMeshTopo()
+	{
+		/*
+		 *    This mesh is a prism, it can be unrolled as:
+		 *  v4        v3        v2        v4 
+		 *   +---------+---------+---------+
+		 *   | \       |       / |       / |
+		 *   |   \  T2 | T1  /   | T4  /   |
+		 *   |     \   |   /     |   /     |
+		 *   |  T3   \ | /   T0  | /  T5   |
+		 *   +---------+---------+---------+
+		 *   v5        v0       v1        v5
+		 *   Edge (v0,v1) cannot be collapsed because T3
+		 *   and T5 would then be glued together and
+		 *   edge (v4,v0) would become non-manifold.
+		 */
+		v = new Vertex[6];
+		v[0] = (Vertex) mesh.factory.createVertex(0.0, 0.0, 0.0);
+		v[1] = (Vertex) mesh.factory.createVertex(1.0, 0.0, 0.0);
+		v[2] = (Vertex) mesh.factory.createVertex(1.0, 1.0, 0.0);
+		v[3] = (Vertex) mesh.factory.createVertex(0.0, 1.0, 0.0);
+		v[4] = (Vertex) mesh.factory.createVertex(0.0, 1.0, 1.0);
+		v[5] = (Vertex) mesh.factory.createVertex(0.0, 0.0, 1.0);
+		for (int i = 0; i < v.length; i++)
+			v[i].setLabel(i);
+
+		T = new Triangle[6];
+		T[0] = (Triangle) mesh.factory.createTriangle(v[0], v[1], v[2]);
+		T[1] = (Triangle) mesh.factory.createTriangle(v[2], v[3], v[0]);
+		T[2] = (Triangle) mesh.factory.createTriangle(v[4], v[0], v[3]);
+		T[3] = (Triangle) mesh.factory.createTriangle(v[5], v[0], v[4]);
+		T[4] = (Triangle) mesh.factory.createTriangle(v[4], v[2], v[1]);
+		T[5] = (Triangle) mesh.factory.createTriangle(v[5], v[4], v[1]);
+		v[0].setLink(T[0]);
+		v[1].setLink(T[0]);
+		v[2].setLink(T[0]);
+		v[3].setLink(T[2]);
+		v[4].setLink(T[2]);
+		v[5].setLink(T[3]);
+		int cnt = 0;
+		for (Triangle t: T)
+		{
+			mesh.add(t);
+			t.setGroupId(cnt);
+			cnt++;
+		}
 		mesh.buildAdjacency(v, -1.0);
 	}
 	
