@@ -666,12 +666,11 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	{
 		HalfEdge f = next;
 		Vertex o = f.origin();
+		if (o.getLink() instanceof Triangle[])
+			return false;
 		double [] xa = f.apex().getUV();
 		do
 		{
-			//  TODO: allow contracting edges when a vertex is non manifold
-			if (f.origin().getLink() instanceof Triangle[])
-				return false;
 			if (f.tri != t1 && f.tri != t2 && !f.hasAttributes(OUTER))
 			{
 				double [] x1 = f.origin().getUV();
