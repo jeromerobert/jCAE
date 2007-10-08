@@ -1,7 +1,9 @@
 Mon Oct  8 14:46:45 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
-	* src/org/jcae/mesh/amibe/ds/Vertex.java (appendNeighboursTri): A
-	boundary point could be omitted in appendNeighboursTri().
+	* src/org/jcae/mesh/amibe/ds/Vertex.java (appendNeighboursTri): Do
+	not filter out mesh.outerVertex so that current check can also
+	prevent removing a non-boundary edge for which both endpoints are
+	on boundary.
 
 Sat Oct  6 21:21:08 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

@@ -195,6 +195,8 @@ public class SmoothNodes3D
 		double lmin = Double.MAX_VALUE;
 		for (Vertex v: n.getNeighboursNodes())
 		{
+			if (v == mesh.outerVertex)
+				continue;
 			nn++;
 			double l = n.distance3D(v);
 			if (l < lmin)

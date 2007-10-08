@@ -379,6 +379,8 @@ public class Storage
 					addedNeighbour.clear();
 					for (Vertex neighbour: vertex.getNeighboursNodes())
 					{
+						if (neighbour == mesh.outerVertex)
+							continue;
 						int nodeNumber;
 						if (mapVertexToLeafindex.containsKey(neighbour))
 							nodeNumber = mapVertexToLeafindex.get(neighbour);
