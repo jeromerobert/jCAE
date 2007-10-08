@@ -609,20 +609,6 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Checks that triangles are not inverted if origin vertex is moved.
-	 *
-	 * @param newpt  the new position to be checked.
-	 * @return <code>false</code> if the new position produces
-	 *    an inverted triangle, <code>true</code> otherwise.
-	 * Warning: this method uses temp[0], temp[1], temp[2] and temp[3] temporary arrays.
-	 */
-	@Override
-	public final boolean checkNewRingNormals(double [] newpt)
-	{
-		return checkNewRingNormals(newpt, null, null);
-	}
-	
-	/**
 	 * Check whether an edge can be contracted into a given vertex.
 	 *
 	 * @param n the resulting vertex
@@ -635,42 +621,123 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		// Be consistent with collapse()
 		if (hasAttributes(AbstractHalfEdge.OUTER))
 			return false;
-		HalfEdge s = HEsym();
+		double [] xn = ((Vertex) n).getUV();
+		if ((origin().getLink() instanceof Triangle) && (destination().getLink() instanceof Triangle))
+		{
+			// Mesh is locally manifold.  This is the most common
+			// case, do not create an HashSet to store only two
+			// triangles.
+			Triangle t1 = tri;
+			Triangle t2 = HEsym().tri;
+			// Check that origin vertex can be moved
+			if (!checkNewRingNormalsSameFan(xn, t1, t2))
+				return false;
+			// Check that destination vertex can be moved
+			if (!HEsym().checkNewRingNormalsSameFan(xn, t1, t2))
+				return false;
+			//  Topology check.
+			return canCollapseTopology();
+		}
+		
+		// At least one vertex is non manifold.  Store all triangles
+		// which will be removed in an HashSet so that they are
+		// ignored when checking for degenerated triangles.
+		Collection<Triangle> ignored = new HashSet<Triangle>();
+		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
+		{
+			HalfEdge f = (HalfEdge) it.next();
+			ignored.add(f.tri);
+			ignored.add(f.HEsym().tri);
+		}
+		
 		// Check that origin vertex can be moved
-		if (!checkInversionSameFan((Vertex) n, tri, s.tri))
+		if (!checkNewRingNormalsNonManifoldVertex(xn, ignored))
 			return false;
 		// Check that destination vertex can be moved
-		if (!next.checkInversionSameFan((Vertex) n, tri, s.tri))
+		if (!HEsym().checkNewRingNormalsNonManifoldVertex(xn, ignored))
 			return false;
+		ignored.clear();
 
 		//  Topology check.
 		//  See in AbstractHalfEdgeTest.buildMeshTopo() why this
 		//  check is needed.
-		Collection<Vertex> link = origin().getNeighboursNodes();
-		link.retainAll(destination().getNeighboursNodes());
-		return link.size() < 3;
+		//  When edge is non manifold, we do not use Vertex.getNeighboursNodes()
+		//  because checks have to be performed by fans.
+		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
+		{
+			HalfEdge f = (HalfEdge) it.next();
+			if (!f.canCollapseTopology())
+				return false;
+		}
+		return true;
 	}
-	
-	private final boolean checkInversionSameFan(Vertex n, Triangle t1, Triangle t2)
+
+	/**
+	 * Topology check.
+	 * See in AbstractHalfEdgeTest.buildMeshTopo() why this
+	 * check is needed.
+	 */
+	private final boolean canCollapseTopology()
 	{
-		//  If both adjacent edges are on a boundary, do not contract
-		if (next.hasAttributes(BOUNDARY | NONMANIFOLD) && next.next.hasAttributes(BOUNDARY | NONMANIFOLD))
-			return false;
-		double [] xn = n.getUV();
-		if (!checkNewRingNormals(n.getUV(), t1, t2))
-			return false;
+		Collection<Vertex> neighbours = new HashSet<Vertex>();
+		AbstractHalfEdge ot = this;
+		Vertex d = ot.destination();
+		do
+		{
+			// Warning: mesh.outerVertex is intentionnally not filtered out
+			neighbours.add(ot.destination());
+			ot = ot.nextOriginLoop();
+		}
+		while (ot.destination() != d);
+		ot = ot.sym();
+		int cnt = 0;
+		d = ot.destination();
+		do
+		{
+			// Warning: mesh.outerVertex is intentionnally not filtered out
+			if (neighbours.contains(ot.destination()))
+			{
+				if (cnt > 1)
+					return false;
+				cnt++;
+			}
+			ot = ot.nextOriginLoop();
+		}
+		while (ot.destination() != d);
 		return true;
 	}
 	
-	private final boolean checkNewRingNormals(double [] xn, Triangle t1, Triangle t2)
+	/**
+	 * Checks that triangles are not inverted if origin vertex is moved.
+	 *
+	 * @param newpt  the new position to be checked.
+	 * @return <code>false</code> if the new position produces
+	 *    an inverted triangle, <code>true</code> otherwise.
+	 * Warning: this method uses temp[0], temp[1], temp[2] and temp[3] temporary arrays.
+	 */
+	@Override
+	public final boolean checkNewRingNormals(double [] newpt)
 	{
 		Vertex o = origin();
 		if (o.getLink() instanceof Triangle)
-			return checkNewRingNormalsSameFan(xn, t1, t2);
-		return false;
+			return checkNewRingNormalsSameFan(newpt, null, null);
+		for (Triangle start: (Triangle []) o.getLink())
+		{
+			HalfEdge f = (HalfEdge) start.getAbstractHalfEdge();
+			if (f.destination() == o)
+				f = (HalfEdge) f.next();
+			else if (f.apex() == o)
+				f = (HalfEdge) f.prev();
+			assert f.origin() == o;
+			if (!f.checkNewRingNormalsSameFan(newpt, null, null))
+				return false;
+		}
+		return true;
 	}
-	private final boolean checkNewRingNormalsSameFan(double [] xn, Triangle t1, Triangle t2)
+
+	private final boolean checkNewRingNormalsSameFan(double [] newpt, Triangle t1, Triangle t2)
 	{
+		Triangle symTri = HEsym().tri;
 		// Loop around origin
 		HalfEdge f = this;
 		Vertex d = f.destination();
@@ -682,7 +749,51 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 				double [] x1 = f.destination().getUV();
 				double area  = Matrix3D.computeNormal3DT(x1, f.apex().getUV(), xo, temp[0], temp[1], temp[2]);
 				for (int i = 0; i < 3; i++)
-					temp[3][i] = xn[i] - x1[i];
+					temp[3][i] = newpt[i] - x1[i];
+				// Two triangles are removed when an edge is contracted.
+				// So normally triangle areas should increase.  If they
+				// decrease significantly, there may be a problem.
+				if (Matrix3D.prodSca(temp[3], temp[2]) >= - area)
+					return false;
+			}
+			f = (HalfEdge) f.nextOriginLoop();
+		}
+		while (f.destination() != d);
+		return true;
+	}
+
+	private final boolean checkNewRingNormalsNonManifoldVertex(double [] newpt, Collection<Triangle> ignored)
+	{
+		Vertex o = origin();
+		if (o.getLink() instanceof Triangle)
+			return checkNewRingNormalsSameFanNonManifoldVertex(newpt, ignored);
+		for (Triangle start: (Triangle []) o.getLink())
+		{
+			HalfEdge f = (HalfEdge) start.getAbstractHalfEdge();
+			if (f.destination() == o)
+				f = (HalfEdge) f.next();
+			else if (f.apex() == o)
+				f = (HalfEdge) f.prev();
+			assert f.origin() == o;
+			if (!f.checkNewRingNormalsSameFanNonManifoldVertex(newpt, ignored))
+				return false;
+		}
+		return true;
+	}
+	private final boolean checkNewRingNormalsSameFanNonManifoldVertex(double [] newpt, Collection<Triangle> ignored)
+	{
+		// Loop around origin
+		HalfEdge f = this;
+		Vertex d = f.destination();
+		double [] xo = origin().getUV();
+		do
+		{
+			if (!ignored.contains(f.tri) && !f.hasAttributes(OUTER))
+			{
+				double [] x1 = f.destination().getUV();
+				double area  = Matrix3D.computeNormal3DT(x1, f.apex().getUV(), xo, temp[0], temp[1], temp[2]);
+				for (int i = 0; i < 3; i++)
+					temp[3][i] = newpt[i] - x1[i];
 				// Two triangles are removed when an edge is contracted.
 				// So normally triangle areas should increase.  If they
 				// decrease significantly, there may be a problem.
