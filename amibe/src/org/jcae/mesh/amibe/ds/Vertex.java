@@ -320,7 +320,10 @@ public class Vertex extends AbstractVertex implements Serializable
 		Vertex d = ot.destination();
 		do
 		{
-			if (!ot.hasAttributes(AbstractHalfEdge.OUTER))
+			// Filter out Mesh.outerVertex.
+			// As we do not have access to Mesh.outerVertex here, use
+			// a workaround with edge attributes.
+			if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY) || !ot.hasAttributes(AbstractHalfEdge.OUTER))
 				nodes.add(ot.destination());
 			ot = ot.nextOriginLoop();
 			assert ot.origin() == this : ot+" should originate from "+this;
