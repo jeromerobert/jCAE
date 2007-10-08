@@ -179,4 +179,46 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 		buildMeshNM();
 		super.countFanIterator(v[1], v[4], 4);
 	}
+
+	@Test public void collapseNM474()
+	{
+		buildMeshNM();
+		super.collapse(v[4], v[7], v[4]);
+	}
+	@Test public void collapseNM455()
+	{
+		buildMeshNM();
+		super.collapse(v[4], v[5], v[5]);
+	}
+	@Test public void collapseNM545()
+	{
+		buildMeshNM();
+		super.collapse(v[5], v[4], v[5]);
+	}
+	@Test public void collapseNM433()
+	{
+		buildMeshNM();
+		super.collapse(v[4], v[3], v[3]);
+	}
+	@Test public void collapseNM343()
+	{
+		buildMeshNM();
+		super.collapse(v[3], v[4], v[3]);
+	}
+	@Test public void collapseNM636()
+	{
+		buildMeshNM();
+		super.collapse(v[6], v[3], v[6]);
+	}
+	@Test(expected= IllegalArgumentException.class) public void collapseNM366()
+	{
+		buildMeshNM();
+		AbstractHalfEdge e = find(v[3], v[6]);
+		e.collapse(mesh, v[6]);
+	}
+	@Test public void collapseNM300()
+	{
+		buildMeshNM();
+		super.collapse(v[3], v[0], v[0]);
+	}
 }
