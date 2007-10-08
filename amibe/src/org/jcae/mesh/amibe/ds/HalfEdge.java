@@ -635,33 +635,29 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		// Be consistent with collapse()
 		if (hasAttributes(AbstractHalfEdge.OUTER))
 			return false;
-		if (!checkInversionSameFan((Vertex) n))
+		HalfEdge s = HEsym();
+		// Check that origin vertex can be moved
+		if (!checkInversionSameFan((Vertex) n, tri, s.tri))
 			return false;
-		
-		//  Topology check
-		//  TODO: normally this check could be removed, but the
-		//        following test triggers an error:
-		//    * mesh Scie_shell.brep with deflexion=0.2 aboslute
-		//    * decimate with length=6
+		// Check that destination vertex can be moved
+		if (!s.hasAttributes(OUTER) && !s.checkInversionSameFan((Vertex) n, tri, s.tri))
+			return false;
+
+		//  Topology check.
+		//  See in AbstractHalfEdgeTest.buildMeshTopo() why this
+		//  check is needed.
 		Collection<Vertex> link = origin().getNeighboursNodes();
 		link.retainAll(destination().getNeighboursNodes());
 		return link.size() < 3;
 	}
 	
-	private final boolean checkInversionSameFan(Vertex n)
+	private final boolean checkInversionSameFan(Vertex n, Triangle t1, Triangle t2)
 	{
-		HalfEdge s = HEsym();
 		//  If both adjacent edges are on a boundary, do not contract
 		if (next.hasAttributes(BOUNDARY | NONMANIFOLD) && next.next.hasAttributes(BOUNDARY | NONMANIFOLD))
 			return false;
-		if (s.next.hasAttributes(BOUNDARY | NONMANIFOLD) && s.next.next.hasAttributes(BOUNDARY | NONMANIFOLD))
-			return false;
-		if (s.hasAttributes(NONMANIFOLD))
-			s = next;
 		double [] xn = n.getUV();
-		if (!checkNewRingNormals(xn, tri, s.tri))
-			return false;
-		if (!s.checkNewRingNormals(xn, tri, s.tri))
+		if (!checkNewRingNormals(n.getUV(), t1, t2))
 			return false;
 		return true;
 	}
