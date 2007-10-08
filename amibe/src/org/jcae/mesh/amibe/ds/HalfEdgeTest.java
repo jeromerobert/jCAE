@@ -131,6 +131,14 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 		super.canCollapse(v[1], v[3], v[3], false);
 	}
 
+	@Test public void canCollapseTopo030()
+	{
+		// With simple mesh from buildMesh(), vertices 0 and
+		// 3 must not be merged, otherwise a non-manifold vertex
+		// is created.
+		buildMesh();
+		super.canCollapse(v[0], v[3], v[0], false);
+	}
 	@Test public void canCollapseTopo010()
 	{
 		buildMeshTopo();
