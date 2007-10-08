@@ -1182,6 +1182,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	private final void HEsplit(Mesh m, Vertex n)
 	{
+		if (hasAttributes(AbstractHalfEdge.OUTER))
+			throw new IllegalArgumentException("Cannot split "+this);
+
 		/*
 		 *            V1                             V1
 		 *            /'\                            /|\
@@ -1197,21 +1200,44 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		 *            \,/                            \|/
 		 *            V2                             V2
 		 */
+		splitVertexAddOneTriangle(m, n);
+		HEsym().splitVertexAddOneTriangle(m, n);
+		// t1 is now glued to t4, it has to be glued to t2, and t3 to t4.
+		HalfEdge f = next;              // (nV1o)
+		f = (HalfEdge) f.prevOrigin();  // (ndV1)
+
+		HalfEdge g = HEsym();           // (dnV2)
+		f.HEglue(g);
+		g = (HalfEdge) g.prevDest();    // (V2no)
+		g = (HalfEdge) g.next();        // (noV2)
+		HEglue(g);
+		assert m.isValid();
+	}
+	
+	private final void splitVertexAddOneTriangle(Mesh m, Vertex n)
+	{
+		/*
+		 *            V1                             V1
+		 *            /'\                            /|\
+		 *          /     \                        /  |  \
+		 *        /      h1 \                    /  n1| h1 \
+		 *      /             \                /      |      \
+		 *    /       t1        \            /   t1   |  t3    \
+		 * o +-------------------+ d ---> o +---------+---------+ d
+		 */
 		HalfEdge h1 = next;             // (dV1o)
-		HalfEdge h2 = HEsym().next.next;// (v2do)
-		TriangleHE t1 = h1.tri;
-		TriangleHE t2 = h2.tri;
+		TriangleHE t1 = tri;
 		TriangleHE t3 = (TriangleHE) m.createTriangle(t1);
-		TriangleHE t4 = (TriangleHE) m.createTriangle(t2);
 		m.add(t3);
-		m.add(t4);
 		
 		// (dV1) is not modified by this operation, so we move
 		// h1 into t3 so that it does not need to be updated by
 		// the caller.
 		HalfEdge n1 = t3.getHalfEdge();
-		for (int i = h1.localNumber; i > 0; i--)
+		if (h1.localNumber == 1)
 			n1 = n1.next;
+		else if (h1.localNumber == 2)
+			n1 = n1.next.next;
 		// Update forward links
 		HalfEdge h1next = h1.next;
 		h1.next = n1.next;
@@ -1226,53 +1252,20 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		// Update Triangle links
 		n1.tri = t1;
 		h1.tri = t3;
-		// (dV2) is not modified by this operation, so we move
-		// h2 into t4 so that it does not need to be updated by
-		// the caller.
-		HalfEdge n2 = t4.getHalfEdge();
-		for (int i = h2.localNumber; i > 0; i--)
-			n2 = n2.next;
-		// Update links
-		HalfEdge h2next = h2.next;
-		h2.next = n2.next;
-		h2.next.next.next = h2;
-		n2.next = h2next;
-		n2.next.next.next = n2;
-		if (t2.getHalfEdge() == h2)
-		{
-			t2.setHalfEdge(n2);
-			t4.setHalfEdge(h2);
-		}
-		// Update Triangle links
-		n2.tri = t2;
-		h2.tri = t4;
 
 		// Update vertices
 		n1.setOrigin(n);
-		n2.setDestination(n);
 		h1.setApex(n);
-		h2.setApex(n);
-		if (t1.isOuter())
-		{
-			n.setLink(t2);
-			h1.origin().setLink(t4);
-		}
-		else
+		if (!t1.isOuter())
 		{
 			n.setLink(t1);
 			h1.origin().setLink(t3);
+			h1.next.HEglue(n1);
 		}
-
-		h1.next.HEglue(n1);
-		h2.next.next.HEglue(n2);
-		h2.next.HEglue(h1.next.next);
-		n2.next.HEglue(n1.next.next);
 
 		// Clear BOUNDARY and NONMANIFOLD flags on inner edges
 		h1.next.clearAttributes(BOUNDARY | NONMANIFOLD);
 		n1.clearAttributes(BOUNDARY | NONMANIFOLD);
-		h2.next.next.clearAttributes(BOUNDARY | NONMANIFOLD);
-		n2.clearAttributes(BOUNDARY | NONMANIFOLD);
 	}
 	
 	private final Iterator<AbstractHalfEdge> identityFanIterator()
