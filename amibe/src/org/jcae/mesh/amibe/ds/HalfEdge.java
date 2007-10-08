@@ -619,32 +619,11 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	public final boolean checkNewRingNormals(double [] newpt)
 	{
-		//  Loop around apex to check that triangles will not be inverted
-		Vertex d = destination();
-		HalfEdge f = next;
-		do
-		{
-			if (f.hasAttributes(OUTER))
-			{
-				f = f.nextApexLoop();
-				continue;
-			}
-			if (f.origin().getLink() instanceof Triangle[])
-				return false;
-			double area  = Matrix3D.computeNormal3DT(f.origin().getUV(), f.destination().getUV(), f.apex().getUV(), temp[0], temp[1], temp[2]);
-			double [] x1 = f.origin().getUV();
-			for (int i = 0; i < 3; i++)
-				temp[3][i] = newpt[i] - x1[i];
-			if (Matrix3D.prodSca(temp[3], temp[2]) >= - area)
-				return false;
-			f = f.nextApexLoop();
-		}
-		while (f.origin() != d);
-		return true;
+		return checkNewRingNormals(newpt, null, null);
 	}
 	
 	/**
-	 * Check whether an edge can be contracted.
+	 * Check whether an edge can be contracted into a given vertex.
 	 *
 	 * @param n the resulting vertex
 	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise.
@@ -656,7 +635,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		// Be consistent with collapse()
 		if (hasAttributes(AbstractHalfEdge.OUTER))
 			return false;
-		if (!checkInversion((Vertex) n))
+		if (!checkInversionSameFan((Vertex) n))
 			return false;
 		
 		//  Topology check
@@ -669,33 +648,38 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		return link.size() < 3;
 	}
 	
-	private final boolean checkInversion(Vertex n)
+	private final boolean checkInversionSameFan(Vertex n)
 	{
-		Vertex o = origin();
-		Vertex d = destination();
-		Vertex a = apex();
-		//  If both vertices are non-manifold, do not contract
-		//  TODO: allow contracting non-manifold edges
-		if (o.getLink() instanceof Triangle[] && d.getLink() instanceof Triangle[])
-			return false;
+		HalfEdge s = HEsym();
 		//  If both adjacent edges are on a boundary, do not contract
 		if (next.hasAttributes(BOUNDARY | NONMANIFOLD) && next.next.hasAttributes(BOUNDARY | NONMANIFOLD))
 			return false;
-		if (HEsym().next.hasAttributes(BOUNDARY | NONMANIFOLD) && HEsym().next.next.hasAttributes(BOUNDARY | NONMANIFOLD))
+		if (s.next.hasAttributes(BOUNDARY | NONMANIFOLD) && s.next.next.hasAttributes(BOUNDARY | NONMANIFOLD))
 			return false;
-		//  Loop around o to check that triangles will not be inverted
-		HalfEdge f = next;
-		HalfEdge g = HEsym();
+		if (s.hasAttributes(NONMANIFOLD))
+			s = next;
 		double [] xn = n.getUV();
+		if (!checkNewRingNormals(xn, tri, s.tri))
+			return false;
+		if (!s.checkNewRingNormals(xn, tri, s.tri))
+			return false;
+		return true;
+	}
+	
+	private final boolean checkNewRingNormals(double [] xn, Triangle t1, Triangle t2)
+	{
+		HalfEdge f = next;
+		Vertex o = f.origin();
+		double [] xa = f.apex().getUV();
 		do
 		{
 			//  TODO: allow contracting edges when a vertex is non manifold
 			if (f.origin().getLink() instanceof Triangle[])
 				return false;
-			if (f.tri != tri && f.tri != g.tri && !f.hasAttributes(OUTER))
+			if (f.tri != t1 && f.tri != t2 && !f.hasAttributes(OUTER))
 			{
-				double area  = Matrix3D.computeNormal3DT(f.origin().getUV(), f.destination().getUV(), f.apex().getUV(), temp[0], temp[1], temp[2]);
 				double [] x1 = f.origin().getUV();
+				double area  = Matrix3D.computeNormal3DT(x1, f.destination().getUV(), xa, temp[0], temp[1], temp[2]);
 				for (int i = 0; i < 3; i++)
 					temp[3][i] = xn[i] - x1[i];
 				// Two triangles are removed when an edge is contracted.
@@ -706,26 +690,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			}
 			f = f.nextApexLoop();
 		}
-		while (f.origin() != d);
-		//  Loop around d to check that triangles will not be inverted
-		f = next.next;
-		do
-		{
-			//  TODO: allow contracting edges when a vertex is non manifold
-			if (f.origin().getLink() instanceof Triangle[])
-				return false;
-			if (f.tri != tri && f.tri != g.tri && !f.hasAttributes(OUTER))
-			{
-				double area  = Matrix3D.computeNormal3DT(f.origin().getUV(), f.destination().getUV(), f.apex().getUV(), temp[0], temp[1], temp[2]);
-				double [] x1 = f.origin().getUV();
-				for (int i = 0; i < 3; i++)
-					temp[3][i] = xn[i] - x1[i];
-				if (Matrix3D.prodSca(temp[3], temp[2]) >= - area)
-					return false;
-			}
-			f = f.nextApexLoop();
-		}
-		while (f.origin() != a);
+		while (f.origin() != o);
 		return true;
 	}
 	
