@@ -640,7 +640,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		if (!checkInversionSameFan((Vertex) n, tri, s.tri))
 			return false;
 		// Check that destination vertex can be moved
-		if (!s.hasAttributes(OUTER) && !s.checkInversionSameFan((Vertex) n, tri, s.tri))
+		if (!next.checkInversionSameFan((Vertex) n, tri, s.tri))
 			return false;
 
 		//  Topology check.
@@ -664,17 +664,23 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	
 	private final boolean checkNewRingNormals(double [] xn, Triangle t1, Triangle t2)
 	{
-		HalfEdge f = next;
-		Vertex o = f.origin();
-		if (o.getLink() instanceof Triangle[])
-			return false;
-		double [] xa = f.apex().getUV();
+		Vertex o = origin();
+		if (o.getLink() instanceof Triangle)
+			return checkNewRingNormalsSameFan(xn, t1, t2);
+		return false;
+	}
+	private final boolean checkNewRingNormalsSameFan(double [] xn, Triangle t1, Triangle t2)
+	{
+		// Loop around origin
+		HalfEdge f = this;
+		Vertex d = f.destination();
+		double [] xo = origin().getUV();
 		do
 		{
 			if (f.tri != t1 && f.tri != t2 && !f.hasAttributes(OUTER))
 			{
-				double [] x1 = f.origin().getUV();
-				double area  = Matrix3D.computeNormal3DT(x1, f.destination().getUV(), xa, temp[0], temp[1], temp[2]);
+				double [] x1 = f.destination().getUV();
+				double area  = Matrix3D.computeNormal3DT(x1, f.apex().getUV(), xo, temp[0], temp[1], temp[2]);
 				for (int i = 0; i < 3; i++)
 					temp[3][i] = xn[i] - x1[i];
 				// Two triangles are removed when an edge is contracted.
@@ -683,9 +689,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 				if (Matrix3D.prodSca(temp[3], temp[2]) >= - area)
 					return false;
 			}
-			f = f.nextApexLoop();
+			f = (HalfEdge) f.nextOriginLoop();
 		}
-		while (f.origin() != o);
+		while (f.destination() != d);
 		return true;
 	}
 	
