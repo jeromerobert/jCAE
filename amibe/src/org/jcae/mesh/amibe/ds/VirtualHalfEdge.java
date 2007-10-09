@@ -1022,8 +1022,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		{
 			if (work[0].tri != t1 && work[0].tri != t2 && !work[0].hasAttributes(OUTER))
 			{
+				double [] x1 = work[0].destination().getUV();
 				work[0].next();
-				double [] x1 = work[0].origin().getUV();
 				double area  = work[0].computeNormal3DT();
 				double [] nu = work[0].getTempVector();
 				work[0].prev();
@@ -1145,8 +1145,10 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			if (!ignored.contains(work[0].tri) && !work[0].hasAttributes(OUTER))
 			{
 				double [] x1 = work[0].destination().getUV();
+				work[0].next();
 				double area  = work[0].computeNormal3DT();
 				double [] nu = work[0].getTempVector();
+				work[0].prev();
 				for (int i = 0; i < 3; i++)
 					tempD1[i] = newpt[i] - x1[i];
 				// Two triangles are removed when an edge is contracted.
