@@ -20,6 +20,7 @@
 
 package org.jcae.mesh.amibe.ds;
 
+import java.util.Collection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -988,31 +989,55 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @param newpt  the new position to be checked.
 	 * @return <code>false</code> if the new position produces
 	 *    an inverted triangle, <code>true</code> otherwise.
-	 * Warning: this method uses temp[0], temp[1], temp[2] and temp[3] temporary arrays.
+	 * Warning: this method uses work[0] and work[1] temporary arrays.
 	 */
 	@Override
 	public final boolean checkNewRingNormals(double [] newpt)
 	{
-		//  Loop around apex to check that triangles will not be inverted
+		Vertex o = origin();
+		if (o.getLink() instanceof Triangle)
+			return checkNewRingNormalsSameFan(newpt, null, null);
+		for (Triangle start: (Triangle []) o.getLink())
+		{
+			work[1].bind(start);
+			if (work[1].destination() == o)
+				work[1].next();
+			else if (work[1].apex() == o)
+				work[1].prev();
+			assert work[1].origin() == o;
+			if (!work[1].checkNewRingNormalsSameFan(newpt, null, null))
+				return false;
+		}
+		return true;
+	}
+	
+	/*
+	 * Warning: this method uses work[0] temporary array.
+	 */
+	private final boolean checkNewRingNormalsSameFan(double [] newpt, Triangle t1, Triangle t2)
+	{
 		Vertex d = destination();
-		nextOTri(this, work[0]);
+		copyOTri(this, work[0]);
 		do
 		{
-			if (work[0].hasAttributes(OUTER))
+			if (work[0].tri != t1 && work[0].tri != t2 && !work[0].hasAttributes(OUTER))
 			{
-				work[0].nextApexLoop();
-				continue;
+				work[0].next();
+				double [] x1 = work[0].origin().getUV();
+				double area  = work[0].computeNormal3DT();
+				double [] nu = work[0].getTempVector();
+				work[0].prev();
+				for (int i = 0; i < 3; i++)
+					tempD1[i] = newpt[i] - x1[i];
+				// Two triangles are removed when an edge is contracted.
+				// So normally triangle areas should increase.  If they
+				// decrease significantly, there may be a problem.
+				if (Matrix3D.prodSca(tempD1, nu) >= - area)
+					return false;
 			}
-			double area  = work[0].computeNormal3DT();
-			double [] nu = work[0].getTempVector();
-			double [] x1 = work[0].origin().getUV();
-			for (int i = 0; i < 3; i++)
-				tempD1[i] = newpt[i] - x1[i];
-			if (Matrix3D.prodSca(tempD1, nu) >= - area)
-				return false;
-			work[0].nextApexLoop();
+			work[0].nextOriginLoop();
 		}
-		while (work[0].origin() != d);
+		while (work[0].destination() != d);
 		return true;
 	}
 	
@@ -1022,6 +1047,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @param n the resulting vertex
 	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise.
 	 * @see Mesh#canCollapseEdge
+	 * Warning: this method uses work[0], work[1] and work[2] temporary arrays.
 	 */
 	@Override
 	protected final boolean canCollapse(AbstractVertex n)
@@ -1029,114 +1055,145 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		// Be consistent with collapse()
 		if (hasAttributes(AbstractHalfEdge.OUTER))
 			return false;
-		/*  
-		 * Topology check:  (od) cannot be contracted with the pattern
-		 * below, because T1 and T2 are then connected to the same
-		 * vertices.  This happens for instance when trying to remove
-		 * an edge from a tetrahedron.
-		 *
-		 *                 V
-		 *                 +
-		 *                /|\
-		 *               / | \
-		 *              /  |  \
-		 *             /  a|   \
-		 *            /    +    \
-		 *           / T1 / \ T2 \
-		 *          /   /     \   \
-		 *         /  /         \  \
-		 *        / /             \ \
-		 *     o +-------------------+ d
-		 */
-		nextOTri(this, work[0]);
-		prevOTri(this, work[1]);
-		if (!work[0].hasAttributes(OUTER) && work[0].getAdj() != null && work[1].getAdj() != null)
+		if (logger.isDebugEnabled())
+			logger.debug("can contract? ("+origin()+" "+destination()+") into "+n);
+		double [] xn = ((Vertex) n).getUV();
+		if ((origin().getLink() instanceof Triangle) && (destination().getLink() instanceof Triangle))
 		{
-			work[0].nextDest();
-			work[1].prevOrigin();
-			if (work[0].origin() == work[1].destination())
+			// Mesh is locally manifold.  This is the most common
+			// case, do not create an HashSet to store only two
+			// triangles.
+			Triangle t1 = tri;
+			symOTri(this, work[1]);
+			Triangle t2 = work[1].tri;
+			// Check that origin vertex can be moved
+			if (!checkNewRingNormalsSameFan(xn, t1, t2))
 				return false;
-		}
-		symOTri(this, work[0]);
-		prevOTri(work[0], work[1]);
-		work[0].next();
-		if (!work[0].hasAttributes(OUTER) && work[0].getAdj() != null && work[1].getAdj() != null)
-		{
-			work[0].nextDest();
-			work[1].prevOrigin();
-			if (work[0].origin() == work[1].destination())
+			// Check that destination vertex can be moved
+			if (!work[1].checkNewRingNormalsSameFan(xn, t1, t2))
 				return false;
+			//  Topology check.
+			return canCollapseTopology();
 		}
 
-		return checkInversion((Vertex) n);
+		// At least one vertex is non manifold.  Store all triangles
+		// which will be removed in an HashSet so that they are
+		// ignored when checking for degenerated triangles.
+		Collection<Triangle> ignored = new HashSet<Triangle>();
+		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
+		{
+			VirtualHalfEdge f = (VirtualHalfEdge) it.next();
+			ignored.add(f.tri);
+			symOTri(f, work[1]);
+			ignored.add(work[1].tri);
+		}
+		
+		// Check that origin vertex can be moved
+		if (!checkNewRingNormalsNonManifoldVertex(xn, ignored))
+			return false;
+		// Check that destination vertex can be moved
+		symOTri(this, work[2]);
+		if (!work[2].checkNewRingNormalsNonManifoldVertex(xn, ignored))
+			return false;
+		ignored.clear();
+
+		//  Topology check.
+		//  See in AbstractHalfEdgeTest.buildMeshTopo() why this
+		//  check is needed.
+		//  When edge is non manifold, we do not use Vertex.getNeighboursNodes()
+		//  because checks have to be performed by fans.
+		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
+		{
+			VirtualHalfEdge f = (VirtualHalfEdge) it.next();
+			if (!f.canCollapseTopology())
+				return false;
+		}
+		return true;
 	}
-	
-	private final boolean checkInversion(Vertex n)
+	/*
+	 * Warning: this method uses work[0] and work[1] temporary arrays.
+	 */
+	private final boolean checkNewRingNormalsNonManifoldVertex(double [] newpt, Collection<Triangle> ignored)
 	{
 		Vertex o = origin();
+		if (o.getLink() instanceof Triangle)
+			return checkNewRingNormalsSameFanNonManifoldVertex(newpt, ignored);
+		for (Triangle start: (Triangle []) o.getLink())
+		{
+			work[1].bind(start);
+			if (work[1].destination() == o)
+				work[1].next();
+			else if (work[1].apex() == o)
+				work[1].prev();
+			assert work[1].origin() == o;
+			if (!work[1].checkNewRingNormalsSameFanNonManifoldVertex(newpt, ignored))
+				return false;
+		}
+		return true;
+	}
+	/*
+	 * Warning: this method uses work[0] temporary array.
+	 */
+	private final boolean checkNewRingNormalsSameFanNonManifoldVertex(double [] newpt, Collection<Triangle> ignored)
+	{
+		// Loop around origin
+		copyOTri(this, work[0]);
 		Vertex d = destination();
-		Vertex a = apex();
-		nextOTri(this, work[0]);
-		prevOTri(this, work[1]);
-		//  If both vertices are non-manifold, do not contract
-		//  TODO: allow contracting non-manifold edges
-		if (o.getLink() instanceof Triangle[] && d.getLink() instanceof Triangle[])
-			return false;
-		//  If both adjacent edges are on a boundary, do not contract
-		if (work[0].hasAttributes(BOUNDARY | NONMANIFOLD) && work[1].hasAttributes(BOUNDARY | NONMANIFOLD))
-			return false;
-		symOTri(this, work[1]);
-		symOTri(this, work[0]);
-		work[0].prev();
-		work[1].next();
-		if (work[0].hasAttributes(BOUNDARY | NONMANIFOLD) && work[1].hasAttributes(BOUNDARY | NONMANIFOLD))
-			return false;
-		//  Loop around o to check that triangles will not be inverted
-		nextOTri(this, work[0]);
-		symOTri(this, work[1]);
-		double [] xn = n.getUV();
+		double [] xo = origin().getUV();
 		do
 		{
-			//  TODO: allow contracting edges when a vertex is non manifold
-			if (work[0].origin().getLink() instanceof Triangle[])
-				return false;
-			if (work[0].tri != tri && work[0].tri != work[1].tri && !work[0].hasAttributes(OUTER))
+			if (!ignored.contains(work[0].tri) && !work[0].hasAttributes(OUTER))
 			{
+				double [] x1 = work[0].destination().getUV();
 				double area  = work[0].computeNormal3DT();
 				double [] nu = work[0].getTempVector();
-				double [] x1 = work[0].origin().getUV();
 				for (int i = 0; i < 3; i++)
-					tempD1[i] = xn[i] - x1[i];
+					tempD1[i] = newpt[i] - x1[i];
 				// Two triangles are removed when an edge is contracted.
 				// So normally triangle areas should increase.  If they
 				// decrease significantly, there may be a problem.
 				if (Matrix3D.prodSca(tempD1, nu) >= - area)
 					return false;
 			}
-			work[0].nextApexLoop();
+			work[0].nextOriginLoop();
 		}
-		while (work[0].origin() != d);
-		//  Loop around d to check that triangles will not be inverted
+		while (work[0].destination() != d);
+		return true;
+	}
+	
+	/**
+	 * Topology check.
+	 * See in AbstractHalfEdgeTest.buildMeshTopo() why this
+	 * check is needed.
+	 * Warning: this method uses work[0] temporary array.
+	 */
+	private final boolean canCollapseTopology()
+	{
+		Collection<Vertex> neighbours = new HashSet<Vertex>();
 		copyOTri(this, work[0]);
-		work[0].prev();
+		Vertex d = work[0].destination();
 		do
 		{
-			//  TODO: allow contracting edges when a vertex is non manifold
-			if (work[0].origin().getLink() instanceof Triangle[])
-				return false;
-			if (work[0].tri != tri && work[0].tri != work[1].tri && !work[0].hasAttributes(OUTER))
-			{
-				double area  = work[0].computeNormal3DT();
-				double [] nu = work[0].getTempVector();
-				double [] x1 = work[0].origin().getUV();
-				for (int i = 0; i < 3; i++)
-					tempD1[i] = xn[i] - x1[i];
-				if (Matrix3D.prodSca(tempD1, nu) >= - area)
-					return false;
-			}
-			work[0].nextApexLoop();
+			// Warning: mesh.outerVertex is intentionnally not filtered out
+			neighbours.add(work[0].destination());
+			work[0].nextOriginLoop();
 		}
-		while (work[0].origin() != a);
+		while (work[0].destination() != d);
+		work[0].sym();
+		int cnt = 0;
+		d = work[0].destination();
+		do
+		{
+			// Warning: mesh.outerVertex is intentionnally not filtered out
+			if (neighbours.contains(work[0].destination()))
+			{
+				if (cnt > 1)
+					return false;
+				cnt++;
+			}
+			work[0].nextOriginLoop();
+		}
+		while (work[0].destination() != d);
 		return true;
 	}
 	
