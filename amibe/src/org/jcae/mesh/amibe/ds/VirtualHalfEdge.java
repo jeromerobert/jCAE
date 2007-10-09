@@ -1053,7 +1053,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	protected final boolean canCollapse(AbstractVertex n)
 	{
 		// Be consistent with collapse()
-		if (hasAttributes(AbstractHalfEdge.OUTER))
+		if (hasAttributes(OUTER))
 			return false;
 		if (logger.isDebugEnabled())
 			logger.debug("can contract? ("+origin()+" "+destination()+") into "+n);
@@ -1212,7 +1212,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	@Override
 	protected final AbstractHalfEdge collapse(AbstractMesh m, AbstractVertex n)
 	{
-		if (hasAttributes(AbstractHalfEdge.OUTER))
+		if (hasAttributes(OUTER))
 			throw new IllegalArgumentException("Cannot contract "+this);
 		Vertex o = origin();
 		Vertex d = destination();
@@ -1226,9 +1226,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		else
 			replaceEndpointsNonManifold(o, v);
 		//  Replace d by n in all incident triangles
-		symOTri(this, work[1]);
+		symOTri(this, work[2]);
 		if (d.getLink() instanceof Triangle)
-			work[1].replaceEndpointsSameFan(v);
+			work[2].replaceEndpointsSameFan(v);
 		else
 			replaceEndpointsNonManifold(d, v);
 		//  Set v links
@@ -1236,10 +1236,10 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		if (logger.isDebugEnabled())
 			logger.debug("new point: "+v);
 		
-		if (!hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+		if (!hasAttributes(NONMANIFOLD))
 			return VHcollapseSameFan((Mesh) m, v, true);
 		// Edge is non-manifold
-		assert hasAttributes(AbstractHalfEdge.OUTER);
+		assert work[2].hasAttributes(OUTER);
 		// VHcollapseSameFan may modify LinkedHashMap structure
 		// used by fanIterator(), we need a copy.
 		LinkedHashMap<Triangle, Integer> copy = new LinkedHashMap<Triangle, Integer>();
@@ -1254,22 +1254,25 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		{
 			Triangle t = entry.getKey();
 			int l = entry.getValue().intValue();
-			work[1].bind(t, l);
-			assert !work[1].hasAttributes(AbstractHalfEdge.OUTER);
+			work[2].bind(t, l);
+			assert !work[2].hasAttributes(OUTER);
 			if (t == tri)
 			{
-				work[1].VHcollapseSameFan((Mesh) m, v, false);
-				ret = work[1].tri;
-				num = work[1].localNumber;
+				work[2].VHcollapseSameFan((Mesh) m, v, false);
+				ret = work[2].tri;
+				num = work[2].localNumber;
 			}
 			else
-				work[1].VHcollapseSameFan((Mesh) m, v, false);
+				work[2].VHcollapseSameFan((Mesh) m, v, false);
 		}
 		assert ret != null;
 		bind(ret, num);
 		return this;
 	}
 
+	/*
+	 * Warning: this method uses work[0] and work[1] temporary arrays.
+	 */
 	private VirtualHalfEdge VHcollapseSameFan(Mesh m, Vertex n, boolean manifold)
 	{
 		/*
@@ -1298,14 +1301,14 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		next();                 // (V1od)
 		int attr3 = attributes;
 		symOTri(this, work[1]); // (oV1V3)
-		if (work[1].hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+		if (work[1].hasAttributes(NONMANIFOLD))
 		{
 			// this is listed in adjacency list and
 			// has to be replaced by s
 			replaceEdgeLinks(work[0]);
 			work[1].VHglue(work[0]);
 		}
-		else if (work[0].hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+		else if (work[0].hasAttributes(NONMANIFOLD))
 		{
 			// this is listed in adjacency list and
 			// has to be replaced by s
@@ -1322,18 +1325,18 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		work[1].attributes |= attr4;
 		work[0].pushAttributes();
 		work[1].pushAttributes();
-		if (work[0].hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+		if (!work[0].hasAttributes(OUTER))
 		{
 			Triangle t34 = work[1].tri;
 			if (t34.isOuter())
 				t34 = work[0].tri;
 			assert !t34.isOuter() : work[0]+"\n"+work[1];
-			work[1].destination().setLink(t34);
-			n.setLink(t34);
-			next();                 // (odV1)
+			replaceVertexLinks(work[1].destination(), t1, t2, t34);
+			replaceVertexLinks(n, t1, t2, t34);
 		}
+		next();                         // (odV1)
 		sym();                          // (doV2)
-		if (!hasAttributes(OUTER))
+		if (manifold && !hasAttributes(OUTER))
 		{
 			next();                 // (oV2d)
 			int attr5 = attributes;
@@ -1341,20 +1344,40 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			next();                 // (V2do)
 			int attr6 = attributes;
 			symOTri(this, work[1]); // (dV2V6)
-			work[0].VHglue(work[1]);
 			work[0].attributes |= attr6;
 			work[1].attributes |= attr5;
 			work[0].pushAttributes();
 			work[1].pushAttributes();
-			Triangle t56 = work[0].tri;
-			if (t56.isOuter())
-				t56 = work[1].tri;
-			assert !t56.isOuter();
-			work[0].origin().setLink(t56);
-			n.setLink(t56);
+			if (work[1].hasAttributes(NONMANIFOLD))
+			{
+				replaceEdgeLinks(work[0]);
+				work[1].VHglue(work[0]);
+			}
+			else if (work[0].hasAttributes(NONMANIFOLD))
+			{
+				prev();         // (oV2d)
+				replaceEdgeLinks(work[1]);
+				work[0].VHglue(work[1]);
+				next();         // (doV2)
+			}
+			else
+				work[0].VHglue(work[1]);
+			if (!hasAttributes(OUTER))
+			{
+				Triangle t56 = work[0].tri;
+				if (t56.isOuter())
+					t56 = work[1].tri;
+				assert !t56.isOuter();
+				replaceVertexLinks(work[0].origin(), t1, t2, t56);
+				replaceVertexLinks(n, t1, t2, t56);
+			}
 			next();                 // (doV2)
 		}
-		symOTri(this, work[0]);
+		else
+		{
+			assert hasAttributes(OUTER);
+		}
+		symOTri(this, work[0]);         // (odV1)
 		clearAttributes(MARKED);
 		pushAttributes();
 		m.remove(tri);
@@ -1447,69 +1470,82 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			System.arraycopy(dList, 0, nList, oList.length, dList.length);
 			ArrayList<Triangle> res = new ArrayList<Triangle>();
 			Set<Triangle> allTriangles = new HashSet<Triangle>();
+			// o and d have already been replaced by v
 			for (Triangle t: nList)
 			{
-				if (allTriangles.contains(t))
-					continue;
+				if (!allTriangles.contains(t))
+					res.add(t);
 				allTriangles.add(t);
-				res.add(t);
-				AbstractHalfEdge h = t.getAbstractHalfEdge();
-				if (h.origin() != o)
-					h = h.next();
-				if (h.origin() != o)
-					h = h.next();
-				if (h.origin() == o)
+				work[0].bind(t);
+				if (work[0].origin() != v)
+					work[0].next();
+				if (work[0].origin() != v)
+					work[0].next();
+				if (work[0].origin() == v)
 				{
 					// Add all triangles of the same fan to allTriangles
-					AbstractHalfEdge both = null;
-					Vertex end = h.destination();
+					boolean found = false;
+					Vertex end = work[0].destination();
 					do
 					{
-						h = h.nextOriginLoop();
-						allTriangles.add(h.getTri());
-						if (h.destination() == d)
-							both = h;
+						work[0].nextOriginLoop();
+						allTriangles.add(work[0].tri);
+						if (work[0].destination() == v)
+						{
+							found = true;
+							copyOTri(work[0], work[1]);
+						}
 					}
-					while (h.destination() != end);
-					if (both != null)
+					while (work[0].destination() != end);
+					if (found)
 					{
-						both = both.next();
-						end = both.destination();
+						work[1].next();
+						end = work[1].destination();
 						do
 						{
-							both = both.nextOriginLoop();
-							allTriangles.add(both.getTri());
+							work[1].nextOriginLoop();
+							allTriangles.add(work[1].tri);
 						}
-						while (both.destination() != end);
+						while (work[1].destination() != end);
 					}
 				}
-				if (h.origin() != d)
-					h = h.next();
-				if (h.origin() != d)
-					h = h.next();
-				if (h.origin() == d)
+				boolean found = false;
+				if (work[0].destination() == v)
+				{
+					found = true;
+					work[0].next();
+				}
+				else if (work[0].apex() == v)
+				{
+					found = true;
+					work[0].prev();
+				}
+				if (found)
 				{
 					// Add all triangles of the same fan to allTriangles
-					AbstractHalfEdge both = null;
-					Vertex end = h.destination();
+					found = false;
+					Vertex end = work[0].destination();
 					do
 					{
-						h = h.nextOriginLoop();
-						allTriangles.add(h.getTri());
-						if (h.destination() == o)
-							both = h;
+						work[0].nextOriginLoop();
+						allTriangles.add(work[0].tri);
+						if (work[0].destination() == v)
+						{
+							found = true;
+							copyOTri(work[0], work[1]);
+						}
 					}
-					while (h.destination() != end);
-					if (both != null)
+					while (work[0].destination() != end);
+					if (found)
 					{
-						both = both.next();
-						end = both.destination();
+						work[1].next();
+						end = work[1].destination();
 						do
 						{
-							both = both.nextOriginLoop();
-							allTriangles.add(both.getTri());
+							work[1].nextOriginLoop();
+							allTriangles.add(work[1].tri);
 						}
-						while (both.destination() != end);
+						while (work[1].destination() != end);
 					}
 				}
 			}
@@ -1522,7 +1558,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		// Current instance is a non-manifold edge which has been
 		// replaced by 'that'.  Replace all occurrences in adjacency
 		// list.
-		assert hasAttributes(AbstractHalfEdge.NONMANIFOLD) && !hasAttributes(AbstractHalfEdge.OUTER);
+		assert hasAttributes(NONMANIFOLD) && !hasAttributes(OUTER);
 		sym();
 		next();
 		final LinkedHashMap<Triangle, Integer> list = (LinkedHashMap<Triangle, Integer>) getAdj();
