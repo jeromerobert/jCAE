@@ -1,3 +1,8 @@
+Tue Oct  9 13:48:33 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/HalfEdge.java (split): Fix
+	method to also work for non-manifold meshes.
+
 Mon Oct  8 14:46:45 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Vertex.java (appendNeighboursTri): Do
