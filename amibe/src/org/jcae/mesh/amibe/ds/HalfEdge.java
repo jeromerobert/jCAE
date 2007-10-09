@@ -1158,7 +1158,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		// Current instance is a non-manifold edge which has been
 		// replaced by 'that'.  Replace all occurrences in adjacency
 		// list.
-		assert hasAttributes(AbstractHalfEdge.NONMANIFOLD) && !hasAttributes(AbstractHalfEdge.OUTER);
+		assert hasAttributes(NONMANIFOLD) && !hasAttributes(OUTER);
 		HalfEdge e = this;
 		final LinkedHashMap<Triangle, Integer> list = (LinkedHashMap<Triangle, Integer>) e.HEsym().next.sym;
 		Integer I = list.get(tri);
@@ -1177,12 +1177,35 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	protected final AbstractHalfEdge split(AbstractMesh m, AbstractVertex n)
 	{
-		HEsplit((Mesh) m, (Vertex) n);
+		if (logger.isDebugEnabled())
+			logger.debug("split edge "+this+" by adding vertex "+n);
+		Vertex v = (Vertex) n;
+		if (!hasAttributes(NONMANIFOLD))
+		{
+			v.setLink(tri);
+			HEsplitSameFan((Mesh) m, v);
+			return this;
+		}
+		// Set vertex links
+		ArrayList<Triangle> link = new ArrayList<Triangle>();
+		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
+		{
+			HalfEdge f = (HalfEdge) it.next();
+			link.add(f.tri);
+		}
+		v.setLink(new Triangle[link.size()]);
+		link.toArray((Triangle[]) v.getLink());
+		link.clear();
+		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
+		{
+			HalfEdge f = (HalfEdge) it.next();
+			f.HEsplitSameFan((Mesh) m, v);
+		}
 		return this;
 	}
-	private final void HEsplit(Mesh m, Vertex n)
+	private final void HEsplitSameFan(Mesh m, Vertex n)
 	{
-		if (hasAttributes(AbstractHalfEdge.OUTER))
+		if (hasAttributes(OUTER))
 			throw new IllegalArgumentException("Cannot split "+this);
 
 		/*
@@ -1202,16 +1225,29 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		 */
 		splitVertexAddOneTriangle(m, n);
 		HEsym().splitVertexAddOneTriangle(m, n);
+		
 		// t1 is now glued to t4, it has to be glued to t2, and t3 to t4.
 		HalfEdge f = next;              // (nV1o)
 		f = (HalfEdge) f.prevOrigin();  // (ndV1)
+		Triangle t3 = f.tri;
 
 		HalfEdge g = HEsym();           // (dnV2)
 		f.HEglue(g);
+		Triangle t4 = g.tri;
 		g = (HalfEdge) g.prevDest();    // (V2no)
 		g = (HalfEdge) g.next();        // (noV2)
 		HEglue(g);
-		assert m.isValid();
+		if (t4.isOuter())
+		{
+			// TODO: Remove links between t2 and t4
+		}
+
+		Triangle t34 = (t3.isOuter() ? t4 : t3);
+		Triangle t1 = tri;
+		Triangle t2 = g.tri;
+		//  Update vertex links
+		replaceVertexLinks(n, t1, t2, t34);
+		replaceVertexLinks(f.destination(), t1, t2, t34);
 	}
 	
 	private final void splitVertexAddOneTriangle(Mesh m, Vertex n)
@@ -1256,12 +1292,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		// Update vertices
 		n1.setOrigin(n);
 		h1.setApex(n);
-		if (!t1.isOuter())
-		{
-			n.setLink(t1);
-			h1.origin().setLink(t3);
-			h1.next.HEglue(n1);
-		}
+		h1.next.HEglue(n1);
 
 		// Clear BOUNDARY and NONMANIFOLD flags on inner edges
 		h1.next.clearAttributes(BOUNDARY | NONMANIFOLD);
