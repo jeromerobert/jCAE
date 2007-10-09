@@ -715,7 +715,6 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	private void VHglue(VirtualHalfEdge sym)
 	{
-		assert !(hasAttributes(NONMANIFOLD) || sym.hasAttributes(NONMANIFOLD)) : this+"\n"+sym;
 		tri.setAdj(localNumber, sym.tri);
 		tri.setAdjLocalNumber(localNumber, sym.localNumber);
 		sym.tri.setAdj(sym.localNumber, tri);
@@ -1344,10 +1343,6 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			next();                 // (V2do)
 			int attr6 = attributes;
 			symOTri(this, work[1]); // (dV2V6)
-			work[0].attributes |= attr6;
-			work[1].attributes |= attr5;
-			work[0].pushAttributes();
-			work[1].pushAttributes();
 			if (work[1].hasAttributes(NONMANIFOLD))
 			{
 				replaceEdgeLinks(work[0]);
@@ -1362,6 +1357,10 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			}
 			else
 				work[0].VHglue(work[1]);
+			work[0].attributes |= attr6;
+			work[1].attributes |= attr5;
+			work[0].pushAttributes();
+			work[1].pushAttributes();
 			if (!hasAttributes(OUTER))
 			{
 				Triangle t56 = work[0].tri;
@@ -1834,6 +1833,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	{
 		StringBuilder r = new StringBuilder("Local number: "+localNumber);
 		r.append("\nTri hashcode: "+tri.hashCode());
+		r.append("\nGroup: "+tri.getGroupId());
 		r.append("\nAdjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2));
 		r.append("\nAttributes: "+Integer.toHexString(tri.getEdgeAttributes(0))+" "+Integer.toHexString(tri.getEdgeAttributes(1))+" "+Integer.toHexString(tri.getEdgeAttributes(2))+" => "+Integer.toHexString(attributes));
 		r.append("\nVertices:");
