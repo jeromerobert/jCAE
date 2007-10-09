@@ -1241,7 +1241,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		{
 			// Remove links between t2 and t4
 			g = (HalfEdge) g.prev();// (V2no)
-			f = g.HEsym();         ;// (nV2d)
+			f = g.HEsym();          // (nV2d)
 			f.HEglue(null);
 			g.HEglue(null);
 			// Move f so that d == f.destination()
