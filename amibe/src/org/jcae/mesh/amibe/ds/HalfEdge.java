@@ -46,7 +46,6 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	// triangle, more specifically in sym.next.sym
 	// This is very handy because all HalfEdge of non-outer triangles
 	// can be considered as being manifold.
-	// TODO: replace ArrayList by HalfEdge[]
 	private Object sym = null;
 	private HalfEdge next = null;
 
@@ -426,7 +425,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			{
 				ret = (HalfEdge) ret.prevApex();
 			}
-			while (!ret.hasAttributes(AbstractHalfEdge.OUTER));
+			while (!ret.hasAttributes(OUTER));
 		}
 		else
 			ret = (HalfEdge) ret.nextApex();
@@ -542,8 +541,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		//  Clear SWAPPED flag for all edges of the 2 triangles
 		for (int i = 0; i < 6; i++)
 		{
-			e[i].clearAttributes(AbstractHalfEdge.SWAPPED);
-			e[i].HEsym().clearAttributes(AbstractHalfEdge.SWAPPED);
+			e[i].clearAttributes(SWAPPED);
+			e[i].HEsym().clearAttributes(SWAPPED);
 		}
 		//  Adjust vertices
 		Vertex n = e[5].apex();
@@ -578,8 +577,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		//  Mark new edges
 		e[4].attributes = 0;
 		e[5].attributes = 0;
-		e[4].setAttributes(AbstractHalfEdge.SWAPPED);
-		e[5].setAttributes(AbstractHalfEdge.SWAPPED);
+		e[4].setAttributes(SWAPPED);
+		e[5].setAttributes(SWAPPED);
 		//  Fix links to triangles
 		o.setLink(T1);
 		d.setLink(T2);
@@ -619,7 +618,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	protected final boolean canCollapse(AbstractVertex n)
 	{
 		// Be consistent with collapse()
-		if (hasAttributes(AbstractHalfEdge.OUTER))
+		if (hasAttributes(OUTER))
 			return false;
 		double [] xn = ((Vertex) n).getUV();
 		if ((origin().getLink() instanceof Triangle) && (destination().getLink() instanceof Triangle))
@@ -737,7 +736,6 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 
 	private final boolean checkNewRingNormalsSameFan(double [] newpt, Triangle t1, Triangle t2)
 	{
-		Triangle symTri = HEsym().tri;
 		// Loop around origin
 		HalfEdge f = this;
 		Vertex d = f.destination();
@@ -820,7 +818,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	protected final AbstractHalfEdge collapse(AbstractMesh m, AbstractVertex n)
 	{
-		if (hasAttributes(AbstractHalfEdge.OUTER))
+		if (hasAttributes(OUTER))
 			throw new IllegalArgumentException("Cannot contract "+this);
 		Vertex o = origin();
 		Vertex d = destination();
@@ -844,10 +842,10 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		if (logger.isDebugEnabled())
 			logger.debug("new point: "+v);
 
-		if (!hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+		if (!hasAttributes(NONMANIFOLD))
 			return HEcollapseSameFan((Mesh) m, v, true);
 		// Edge is non-manifold
-		assert e.hasAttributes(AbstractHalfEdge.OUTER);
+		assert e.hasAttributes(OUTER);
 		AbstractHalfEdge ret = null;
 		// HEcollapseSameFan may modify LinkedHashMap structure
 		// used by fanIterator(), we need a copy.
@@ -857,7 +855,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		for (AbstractHalfEdge ah: copy)
 		{
 			HalfEdge h = (HalfEdge) ah;
-			assert !h.hasAttributes(AbstractHalfEdge.OUTER);
+			assert !h.hasAttributes(OUTER);
 			if (h == this)
 				ret = h.HEcollapseSameFan((Mesh) m, v, false);
 			else
@@ -898,14 +896,14 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		e = e.next;             // (V1od)
 		int attr3 = e.attributes;
 		f = e.HEsym();          // (oV1V3)
-		if (f != null && f.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+		if (f != null && f.hasAttributes(NONMANIFOLD))
 		{
 			// e is listed in adjacency list and
 			// has to be replaced by s
 			e.replaceEdgeLinks(s);
 			f.HEglue(s);
 		}
-		else if (s != null && s.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+		else if (s != null && s.hasAttributes(NONMANIFOLD))
 		{
 			// s.HEsym() is listed in adjacency list and
 			// has to be replaced by f
@@ -920,7 +918,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			f.attributes |= attr4;
 		if (s != null)
 			s.attributes |= attr3;
-		if (!hasAttributes(AbstractHalfEdge.OUTER))
+		if (!hasAttributes(OUTER))
 		{
 			TriangleHE t34 = f.tri;
 			if (t34.isOuter())
@@ -939,14 +937,14 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			e = e.next;     // (V2do)
 			int attr6 = e.attributes;
 			f = e.HEsym();  // (dV2V6)
-			if (f != null && f.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+			if (f != null && f.hasAttributes(NONMANIFOLD))
 			{
 				// e is listed in adjacency list and
 				// has to be replaced by s
 				e.replaceEdgeLinks(s);
 				f.HEglue(s);
 			}
-			else if (s != null && s.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+			else if (s != null && s.hasAttributes(NONMANIFOLD))
 			{
 				// s.HEsym() is listed in adjacency list and
 				// has to be replaced by f
@@ -961,7 +959,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 				f.attributes |= attr5;
 			if (s != null)
 				s.attributes |= attr6;
-			if (!e.hasAttributes(AbstractHalfEdge.OUTER))
+			if (!e.hasAttributes(OUTER))
 			{
 				TriangleHE t56 = s.tri;
 				if (t56.isOuter())
@@ -974,7 +972,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		}
 		else
 		{
-			assert e.hasAttributes(AbstractHalfEdge.OUTER);
+			assert e.hasAttributes(OUTER);
 		}
 		// Must be called before T2 is removed
 		s = e.HEsym();                 // (odV1)
@@ -1343,7 +1341,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			return identityFanIterator();
 		HalfEdge e = this;
 		logger.debug("Non manifold fan iterator");
-		if (!e.hasAttributes(AbstractHalfEdge.OUTER))
+		if (!e.hasAttributes(OUTER))
 			e = e.HEsym();
 		final LinkedHashMap<Triangle, Integer> list = (LinkedHashMap<Triangle, Integer>) e.next.sym;
 		return new Iterator<AbstractHalfEdge>()
