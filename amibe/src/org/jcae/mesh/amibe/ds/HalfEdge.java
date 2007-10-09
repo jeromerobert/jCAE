@@ -1081,18 +1081,18 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			System.arraycopy(dList, 0, nList, oList.length, dList.length);
 			ArrayList<Triangle> res = new ArrayList<Triangle>();
 			Set<Triangle> allTriangles = new HashSet<Triangle>();
+			// o and d have already been replaced by v
 			for (Triangle t: nList)
 			{
-				if (allTriangles.contains(t))
-					continue;
+				if (!allTriangles.contains(t))
+					res.add(t);
 				allTriangles.add(t);
-				res.add(t);
 				AbstractHalfEdge h = t.getAbstractHalfEdge();
-				if (h.origin() != o)
+				if (h.origin() != v)
 					h = h.next();
-				if (h.origin() != o)
+				if (h.origin() != v)
 					h = h.next();
-				if (h.origin() == o)
+				if (h.origin() == v)
 				{
 					// Add all triangles of the same fan to allTriangles
 					AbstractHalfEdge both = null;
@@ -1101,7 +1101,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 					{
 						h = h.nextOriginLoop();
 						allTriangles.add(h.getTri());
-						if (h.destination() == d)
+						if (h.destination() == v)
 							both = h;
 					}
 					while (h.destination() != end);
@@ -1117,11 +1117,18 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 						while (both.destination() != end);
 					}
 				}
-				if (h.origin() != d)
+				boolean found = false;
+				if (h.destination() == v)
+				{
 					h = h.next();
-				if (h.origin() != d)
-					h = h.next();
-				if (h.origin() == d)
+					found = true;
+				}
+				else if (h.apex() == v)
+				{
+					h = h.prev();
+					found = true;
+				}
+				if (found)
 				{
 					// Add all triangles of the same fan to allTriangles
 					AbstractHalfEdge both = null;
@@ -1130,7 +1137,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 					{
 						h = h.nextOriginLoop();
 						allTriangles.add(h.getTri());
-						if (h.destination() == o)
+						if (h.destination() == v)
 							both = h;
 					}
 					while (h.destination() != end);
