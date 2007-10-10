@@ -2,6 +2,8 @@ Wed Oct 10 00:35:43 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/VirtualHalfEdge.java (collapse): Fix
 	method to also work for non-manifold meshes.
+	* src/org/jcae/mesh/amibe/ds/VirtualHalfEdge.java (split): Fix
+	method to also work for non-manifold meshes.
 
 Tue Oct  9 13:48:33 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
