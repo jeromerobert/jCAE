@@ -291,6 +291,7 @@ public class AdjacencyVH implements AdjacencyWrapper
 		edgeAttributes[num] = (byte) attributes;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private final String showAdj(int num)
 	{
 		if (adj[num] == null)

@@ -348,6 +348,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	/**
 	 * Build adjacency relations between triangles
 	 */
+	@SuppressWarnings("unchecked")
 	public void buildAdjacency(Vertex [] vertices, double minAngle)
 	{
 		//  1. For each vertex, build the list of triangles

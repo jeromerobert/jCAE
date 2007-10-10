@@ -1317,6 +1317,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			}
 		}
 	}
+	/*
+	 * Warning: this method uses work[0] and work[1] temporary arrays.
+	 */
 	private static void deepCopyVertexLinks(Vertex o, Vertex d, Vertex v)
 	{
 		boolean ot = o.getLink() instanceof Triangle;

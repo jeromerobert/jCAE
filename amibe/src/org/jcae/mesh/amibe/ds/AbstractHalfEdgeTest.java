@@ -21,7 +21,6 @@ package org.jcae.mesh.amibe.ds;
 
 import static org.junit.Assert.*;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 
 public class AbstractHalfEdgeTest
 {
@@ -386,9 +385,9 @@ public class AbstractHalfEdgeTest
 		}
 		else
 		{
-			e = e.sym().next();
-			LinkedHashMap<Triangle, Integer> adj = (LinkedHashMap<Triangle, Integer>) e.getAdj();
-			n = adj.size();
+			if (e.hasAttributes(AbstractHalfEdge.OUTER))
+				e = e.sym();
+			n = e.getAdjNonManifold().size();
 		}
 		assertTrue("Found "+n+" incident triangles instead of "+count, n == count);
 	}
