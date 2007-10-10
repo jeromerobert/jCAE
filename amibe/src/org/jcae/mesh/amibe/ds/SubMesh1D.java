@@ -58,7 +58,7 @@ public class SubMesh1D
 	 * vertices found in a <code>MMesh0D</code> instance.  The returned
 	 * <code>SubMesh1D</code> instance can be seen as a very rough
 	 * approximation of the geometrical edge, which can be refined via
-	 * algorithms found in {@link org.jcae.mesh.mesher.algos1d}.
+	 * algorithms found in <code>org.jcae.mesh.amibe.algos1d</code>.
 	 *
 	 * @param E  the topological edge being disretized,
 	 * @param m0d  the mesh containing all vertices
@@ -85,7 +85,7 @@ public class SubMesh1D
 	 * vertices found in a <code>MMesh0D</code> instance.  The returned
 	 * <code>SubMesh1D</code> instance can be seen as a very rough
 	 * approximation of the geometrical edge, which can be refined via
-	 * algorithms found in {@link org.jcae.mesh.mesher.algos1d}.
+	 * algorithms found in <code>org.jcae.mesh.amibe.algos1d</code>.
 	 *
 	 * @param d  container for the requested discretization
 	 * @param m0d  the mesh containing all vertices
