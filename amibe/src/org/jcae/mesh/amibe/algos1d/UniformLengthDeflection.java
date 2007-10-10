@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
  
-    Copyright (C) 2006, by EADS CRC
+    Copyright (C) 2003,2004,2005, by EADS CRC
     Copyright (C) 2007, by EADS France
  
     This library is free software; you can redistribute it and/or
@@ -19,47 +19,46 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-package org.jcae.mesh.mesher.algos1d;
+package org.jcae.mesh.amibe.algos1d;
 
-import org.jcae.mesh.mesher.ds.MEdge1D;
-import org.jcae.mesh.mesher.ds.MNode1D;
-import org.jcae.mesh.mesher.ds.SubMesh1D;
-import org.jcae.mesh.mesher.ds.MMesh1D;
+import org.jcae.mesh.amibe.ds.MEdge1D;
+import org.jcae.mesh.amibe.ds.MMesh1D;
+import org.jcae.mesh.amibe.ds.MNode1D;
+import org.jcae.mesh.amibe.ds.SubMesh1D;
 import org.jcae.mesh.cad.CADGeomCurve3D;
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADShapeFactory;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Random;
 import org.apache.log4j.Logger;
 
 /**
- * Computes a randomized discretization.
- * This is only useful when debugging, to check that adjacent faces
- * share the same 1D discretization.
+ * Computes a new discretization so that all edges have a uniform length.
+ * On each edge, compute the number of subdivisions so that all segments
+ * have the same length, which must be less than the given criterion.
+ * The previous discretization nodes and edges are deleted, and replaced
+ * by newer ones.
  */
-public class RandomLength
+public class UniformLengthDeflection
 {
-	private static Logger logger=Logger.getLogger(RandomLength.class);
-	private final MMesh1D mesh1d;
-	private final int nrSegments;
+	private static Logger logger=Logger.getLogger(UniformLengthDeflection.class);
+	private MMesh1D mesh1d;
 	
 	/**
-	 * Creates a <code>UniformLength</code> instance.
+	 * Creates a <code>UniformLengthDeflection</code> instance.
 	 *
 	 * @param m  the <code>MMesh1D</code> instance to refine.
 	 */
-	public RandomLength(MMesh1D m, int n)
+	public UniformLengthDeflection(MMesh1D m)
 	{
 		mesh1d = m;
-		nrSegments = n;
 	}
 
 	/**
 	 * Explores each edge of the mesh and calls the discretisation method.
 	 */
-	public void compute()
+	public void compute(boolean relDefl)
 	{
 		int nbTEdges = 0, nbNodes = 0, nbEdges = 0;
 		/* Explore the shape for each edge */
@@ -79,7 +78,7 @@ public class RandomLength
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(E);
 			nbNodes -= submesh1d.getNodes().size();
 			nbEdges -= submesh1d.getEdges().size();
-			if (computeEdge(submesh1d))
+			if (computeEdge(mesh1d.getMaxLength(), mesh1d.getMaxDeflection(), relDefl, submesh1d))
 				nbTEdges++;
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
@@ -90,7 +89,19 @@ public class RandomLength
 		assert(mesh1d.isValid());
 	}
 
-	private boolean computeEdge(SubMesh1D submesh1d)
+	/*
+	 * Discretizes a topological edge so that all edges have a uniform length.
+	 * For a given topological edge, its previous discretization is first
+	 * removed.  Then the number of segments is computed such that segment
+	 * length is inferior to the desired length.  The geometrical edge is then
+	 * divided into segments of uniform lengths.
+	 *
+	 * @param maxlen  the maximal length admitted,
+	 * @param submesh1d  the 1D mesh being updated.
+	 * @return <code>true</code> if this edge was successfully discretized,
+	 * <code>false</code> otherwise.
+	 */
+	public boolean computeEdge(double maxlen, double deflection, boolean relDefl, SubMesh1D submesh1d)
 	{
 		int nbPoints;
 		boolean isCircular = false;
@@ -103,8 +114,8 @@ public class RandomLength
 		//if (BRep_Tool.degenerated(E))
 		//	return false;
 		
-		List<MEdge1D> edgelist = submesh1d.getEdges();
-		List<MNode1D> nodelist = submesh1d.getNodes();
+		ArrayList<MEdge1D> edgelist = submesh1d.getEdges();
+		ArrayList<MNode1D> nodelist = submesh1d.getNodes();
 		if (edgelist.size() != 1 || nodelist.size() != 2)
 			return false;
 		edgelist.clear();
@@ -120,6 +131,11 @@ public class RandomLength
 				throw new java.lang.RuntimeException("Curve not defined on edge, but this  edge is not degenerated.  Something must be wrong.");
 			
 			isDegenerated = true;
+			/*
+			 * Degenerated edges should not be discretized, but then
+			 * their vertices have very low connectivity.  So let
+			 * discretize them until a solution is found.
+			 */
 			range = E.range();
 			nbPoints=2;
 			paramOnEdge = new double[nbPoints];
@@ -129,15 +145,38 @@ public class RandomLength
 		else
 		{
 			range = curve.getRange();
-			Random rand = new Random(67L);
-			nbPoints = nrSegments + 1;
+			curve.discretize(maxlen, deflection, relDefl);
+			nbPoints = curve.nbPoints();
+			int saveNbPoints =  nbPoints;
+			if (nbPoints <= 2 && !isCircular)
+			{
+				//  Compute the deflection
+				double mid1[], pnt1[], pnt2[];
+
+				mid1 = curve.value((range[0] + range[1])/2.0);
+				pnt1 = V[0].pnt();
+				pnt2 = V[1].pnt();
+				double d1 =
+					(mid1[0] - 0.5*(pnt1[0]+pnt2[0])) * (mid1[0] - 0.5*(pnt1[0]+pnt2[0])) +
+					(mid1[1] - 0.5*(pnt1[1]+pnt2[1])) * (mid1[1] - 0.5*(pnt1[1]+pnt2[1])) +
+					(mid1[2] - 0.5*(pnt1[2]+pnt2[2])) * (mid1[2] - 0.5*(pnt1[2]+pnt2[2]));
+				double d2 =
+					(pnt1[0] - pnt2[0]) * (pnt1[0] - pnt2[0]) +
+					(pnt1[1] - pnt2[1]) * (pnt1[1] - pnt2[1]) +
+					(pnt1[2] - pnt2[2]) * (pnt1[2] - pnt2[2]);
+				if (d1 > 0.01 * d2) {
+					nbPoints=3;
+				} else {
+					nbPoints=2;
+				}
+			}
+			else if (nbPoints <= 3 && isCircular)
+				nbPoints=4;
+			if (saveNbPoints != nbPoints)
+				curve.discretize(nbPoints);
 			paramOnEdge = new double[nbPoints];
-			paramOnEdge[0] = 0.0;
-			for (int i = 1; i < nbPoints; i++)
-				paramOnEdge[i] = paramOnEdge[i-1] + rand.nextDouble();
-			double scale = (range[1] - range[0]) / paramOnEdge[nbPoints-1];
 			for (int i = 0; i < nbPoints; i++)
-				paramOnEdge[i] = range[0] + scale*paramOnEdge[i];
+				paramOnEdge[i] = curve.parameter(i+1);
 		}
 
 		MNode1D n1, n2;

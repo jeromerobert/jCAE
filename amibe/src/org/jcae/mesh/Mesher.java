@@ -31,11 +31,11 @@ import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.jcae.mesh.amibe.InvalidFaceException;
 import org.jcae.mesh.amibe.metrics.*;
-import org.jcae.mesh.mesher.ds.MMesh1D;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
-import org.jcae.mesh.mesher.algos1d.*;
+import org.jcae.mesh.amibe.algos1d.*;
 import org.jcae.mesh.amibe.algos2d.*;
+import org.jcae.mesh.amibe.ds.MMesh1D;
 import org.jcae.mesh.xmldata.*;
 import org.jcae.mesh.cad.*;
 

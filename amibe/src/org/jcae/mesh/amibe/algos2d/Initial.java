@@ -21,7 +21,7 @@
 
 package org.jcae.mesh.amibe.algos2d;
 
-import org.jcae.mesh.mesher.ds.MNode1D;
+import org.jcae.mesh.amibe.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Triangle;

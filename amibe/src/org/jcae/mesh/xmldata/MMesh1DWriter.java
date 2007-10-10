@@ -21,10 +21,10 @@
 
 package org.jcae.mesh.xmldata;
 
-import org.jcae.mesh.mesher.ds.MMesh1D;
-import org.jcae.mesh.mesher.ds.SubMesh1D;
-import org.jcae.mesh.mesher.ds.MEdge1D;
-import org.jcae.mesh.mesher.ds.MNode1D;
+import org.jcae.mesh.amibe.ds.MEdge1D;
+import org.jcae.mesh.amibe.ds.MMesh1D;
+import org.jcae.mesh.amibe.ds.MNode1D;
+import org.jcae.mesh.amibe.ds.SubMesh1D;
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADShapeFactory;
 import org.jcae.mesh.cad.CADShapeEnum;

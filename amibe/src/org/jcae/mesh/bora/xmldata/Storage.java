@@ -21,7 +21,10 @@
 
 package org.jcae.mesh.bora.xmldata;
 
+import org.jcae.mesh.amibe.ds.MEdge1D;
+import org.jcae.mesh.amibe.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.SubMesh1D;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
@@ -39,9 +42,6 @@ import org.jcae.mesh.cad.CADGeomCurve3D;
 import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.mesh.cad.CADShapeFactory;
 import org.jcae.mesh.cad.CADShapeEnum;
-import org.jcae.mesh.mesher.ds.SubMesh1D;
-import org.jcae.mesh.mesher.ds.MNode1D;
-import org.jcae.mesh.mesher.ds.MEdge1D;
 import org.jcae.mesh.xmldata.MeshExporter;
 import java.io.File;
 import java.io.FileInputStream;

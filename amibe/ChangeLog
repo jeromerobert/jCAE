@@ -1,3 +1,9 @@
+Wed Oct 10 14:16:01 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/mesher/ds
+	  src/org/jcae/mesh/mesher/algos1d: Move remaining bits from ancient
+	data structure into src/org/jcae/mesh/amibe.
+
 Wed Oct 10 00:35:43 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/VirtualHalfEdge.java (collapse): Fix

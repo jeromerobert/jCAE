@@ -18,12 +18,12 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-package org.jcae.mesh.mesher.algos1d;
+package org.jcae.mesh.amibe.algos1d;
 
-import org.jcae.mesh.mesher.ds.MEdge1D;
-import org.jcae.mesh.mesher.ds.MNode1D;
-import org.jcae.mesh.mesher.ds.SubMesh1D;
-import org.jcae.mesh.mesher.ds.MMesh1D;
+import org.jcae.mesh.amibe.ds.MEdge1D;
+import org.jcae.mesh.amibe.ds.MMesh1D;
+import org.jcae.mesh.amibe.ds.MNode1D;
+import org.jcae.mesh.amibe.ds.SubMesh1D;
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADEdge;
 import java.util.ArrayList;

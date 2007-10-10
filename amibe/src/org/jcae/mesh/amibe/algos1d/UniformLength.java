@@ -19,17 +19,17 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-package org.jcae.mesh.mesher.algos1d;
+package org.jcae.mesh.amibe.algos1d;
 
-import org.jcae.mesh.mesher.ds.MEdge1D;
-import org.jcae.mesh.mesher.ds.MNode1D;
-import org.jcae.mesh.mesher.ds.SubMesh1D;
-import org.jcae.mesh.mesher.ds.MMesh1D;
+import org.jcae.mesh.amibe.ds.MEdge1D;
+import org.jcae.mesh.amibe.ds.MMesh1D;
+import org.jcae.mesh.amibe.ds.MNode1D;
+import org.jcae.mesh.amibe.ds.SubMesh1D;
 import org.jcae.mesh.cad.CADGeomCurve3D;
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADShapeFactory;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
 
@@ -40,17 +40,17 @@ import org.apache.log4j.Logger;
  * The previous discretization nodes and edges are deleted, and replaced
  * by newer ones.
  */
-public class UniformLengthDeflection
+public class UniformLength
 {
-	private static Logger logger=Logger.getLogger(UniformLengthDeflection.class);
+	private static Logger logger=Logger.getLogger(UniformLength.class);
 	private MMesh1D mesh1d;
 	
 	/**
-	 * Creates a <code>UniformLengthDeflection</code> instance.
+	 * Creates a <code>UniformLength</code> instance.
 	 *
 	 * @param m  the <code>MMesh1D</code> instance to refine.
 	 */
-	public UniformLengthDeflection(MMesh1D m)
+	public UniformLength(MMesh1D m)
 	{
 		mesh1d = m;
 	}
@@ -58,7 +58,7 @@ public class UniformLengthDeflection
 	/**
 	 * Explores each edge of the mesh and calls the discretisation method.
 	 */
-	public void compute(boolean relDefl)
+	public void compute()
 	{
 		int nbTEdges = 0, nbNodes = 0, nbEdges = 0;
 		/* Explore the shape for each edge */
@@ -78,7 +78,7 @@ public class UniformLengthDeflection
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(E);
 			nbNodes -= submesh1d.getNodes().size();
 			nbEdges -= submesh1d.getEdges().size();
-			if (computeEdge(mesh1d.getMaxLength(), mesh1d.getMaxDeflection(), relDefl, submesh1d))
+			if (computeEdge(mesh1d.getMaxLength(), submesh1d))
 				nbTEdges++;
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
@@ -101,7 +101,7 @@ public class UniformLengthDeflection
 	 * @return <code>true</code> if this edge was successfully discretized,
 	 * <code>false</code> otherwise.
 	 */
-	public boolean computeEdge(double maxlen, double deflection, boolean relDefl, SubMesh1D submesh1d)
+	public boolean computeEdge(double maxlen, SubMesh1D submesh1d)
 	{
 		int nbPoints;
 		boolean isCircular = false;
@@ -114,8 +114,8 @@ public class UniformLengthDeflection
 		//if (BRep_Tool.degenerated(E))
 		//	return false;
 		
-		ArrayList<MEdge1D> edgelist = submesh1d.getEdges();
-		ArrayList<MNode1D> nodelist = submesh1d.getNodes();
+		List<MEdge1D> edgelist = submesh1d.getEdges();
+		List<MNode1D> nodelist = submesh1d.getNodes();
 		if (edgelist.size() != 1 || nodelist.size() != 2)
 			return false;
 		edgelist.clear();
@@ -145,7 +145,7 @@ public class UniformLengthDeflection
 		else
 		{
 			range = curve.getRange();
-			curve.discretize(maxlen, deflection, relDefl);
+			curve.discretize(maxlen);
 			nbPoints = curve.nbPoints();
 			int saveNbPoints =  nbPoints;
 			if (nbPoints <= 2 && !isCircular)
@@ -164,7 +164,7 @@ public class UniformLengthDeflection
 					(pnt1[0] - pnt2[0]) * (pnt1[0] - pnt2[0]) +
 					(pnt1[1] - pnt2[1]) * (pnt1[1] - pnt2[1]) +
 					(pnt1[2] - pnt2[2]) * (pnt1[2] - pnt2[2]);
-				if (d1 > 0.01 * d2) {
+				if (d1 > 0.01 * d2 && d1 > 1.e-6 * maxlen * maxlen) {
 					nbPoints=3;
 				} else {
 					nbPoints=2;
@@ -172,11 +172,33 @@ public class UniformLengthDeflection
 			}
 			else if (nbPoints <= 3 && isCircular)
 				nbPoints=4;
+
 			if (saveNbPoints != nbPoints)
 				curve.discretize(nbPoints);
 			paramOnEdge = new double[nbPoints];
-			for (int i = 0; i < nbPoints; i++)
-				paramOnEdge[i] = curve.parameter(i+1);
+			// GCPnts_UniformAbscissa is not very accurate, force paramOnEdge
+			// to be in ascending order.
+			int offset = 0;
+			paramOnEdge[0] = curve.parameter(1);
+			if (range[0] < range[1])
+			{
+				for (int i = 1; i < nbPoints; i++)
+				{
+					paramOnEdge[i-offset] = curve.parameter(i+1);
+					if (paramOnEdge[i-offset] <= paramOnEdge[i-offset-1])
+						offset++;
+				}
+			}
+			else
+			{
+				for (int i = 1; i < nbPoints; i++)
+				{
+					paramOnEdge[i-offset] = curve.parameter(i+1);
+					if (paramOnEdge[i-offset] >= paramOnEdge[i-offset-1])
+						offset++;
+				}
+			}
+			nbPoints -= offset;
 		}
 
 		MNode1D n1, n2;

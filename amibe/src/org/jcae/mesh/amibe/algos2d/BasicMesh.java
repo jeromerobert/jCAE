@@ -21,7 +21,7 @@
 
 package org.jcae.mesh.amibe.algos2d;
 
-import org.jcae.mesh.mesher.ds.MMesh1D;
+import org.jcae.mesh.amibe.ds.MMesh1D;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 
 /**

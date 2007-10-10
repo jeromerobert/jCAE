@@ -29,8 +29,6 @@ import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
-import org.jcae.mesh.mesher.ds.SubMesh1D;
-import org.jcae.mesh.mesher.ds.MNode1D;
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADEdge;
@@ -42,6 +40,9 @@ import org.jcae.mesh.cad.CADWireExplorer;
 import org.jcae.mesh.cad.CADGeomCurve2D;
 import org.jcae.mesh.cad.CADGeomCurve3D;
 import org.jcae.mesh.amibe.algos2d.*;
+import org.jcae.mesh.amibe.ds.MNode1D;
+import org.jcae.mesh.amibe.ds.SubMesh1D;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import org.apache.log4j.Logger;

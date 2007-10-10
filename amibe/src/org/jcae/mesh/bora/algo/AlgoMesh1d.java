@@ -21,12 +21,12 @@
 
 package org.jcae.mesh.bora.algo;
 
+import org.jcae.mesh.amibe.algos1d.Compat1D2D;
+import org.jcae.mesh.amibe.algos1d.UniformLength;
+import org.jcae.mesh.amibe.algos1d.UniformLengthDeflection;
+import org.jcae.mesh.amibe.ds.MMesh1D;
+import org.jcae.mesh.amibe.ds.SubMesh1D;
 import org.jcae.mesh.bora.ds.BDiscretization;
-import org.jcae.mesh.mesher.algos1d.UniformLengthDeflection;
-import org.jcae.mesh.mesher.algos1d.UniformLength;
-import org.jcae.mesh.mesher.algos1d.Compat1D2D;
-import org.jcae.mesh.mesher.ds.SubMesh1D;
-import org.jcae.mesh.mesher.ds.MMesh1D;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
 
