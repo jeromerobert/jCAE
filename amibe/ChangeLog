@@ -4,6 +4,9 @@ Wed Oct 10 00:35:43 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	method to also work for non-manifold meshes.
 	* src/org/jcae/mesh/amibe/ds/VirtualHalfEdge.java (split): Fix
 	method to also work for non-manifold meshes.
+	* src/org/jcae/mesh/amibe/ds/AbstractHalfEdge.java: New
+	getAdjNonManifold() method to hide implementation of adjacency
+	relations in non-manifold meshes.
 
 Tue Oct  9 13:48:33 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

@@ -28,7 +28,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.NoSuchElementException;
-import java.util.Stack;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.apache.log4j.Logger;
 
@@ -594,6 +593,25 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
+	 * Gets adjacency list for non-manifold edges. 
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public final Map<Triangle, Integer> getAdjNonManifold()
+	{
+		assert hasAttributes(NONMANIFOLD) && !hasAttributes(OUTER);
+		// By convention, adjacency list is stored in a virtual triangle.
+		// Save current state to restore it before returning.
+		Triangle t = tri;
+		int l = localNumber;
+		sym();
+		next();
+		Map<Triangle, Integer> ret = (Map<Triangle, Integer>) tri.getAdj(localNumber);
+		bind(t, l);
+		return ret;
+	}
+
+	/**
 	 * Sets adjacency relation for an edge
 	 *
 	 * @param link  the triangle bond to this one if this edge is manifold, or an Object otherwise.
@@ -996,7 +1014,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 */
 	private final boolean checkNewRingNormalsSameFanNonManifoldVertex(double [] newpt, Collection<Triangle> ignored)
 	{
-		// Loop around origin
+		// Loop around origin.  We need to copy current instance
+		// into work[0] because loop may be interrupted.
 		copyOTri(this, work[0]);
 		Vertex d = destination();
 		do
@@ -1031,6 +1050,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	private final boolean canCollapseTopology()
 	{
 		Collection<Vertex> neighbours = new HashSet<Vertex>();
+		// We need to copy current instance into work[0]
+		// because second loop may be interrupted.
 		copyOTri(this, work[0]);
 		Vertex d = work[0].destination();
 		do
@@ -1413,18 +1434,12 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			res.toArray((Triangle[]) v.getLink());
 		}
 	}
-	/*
-	 * Warning: this method uses work[2] temporary array.
-	 */
 	private void replaceEdgeLinks(VirtualHalfEdge that)
 	{
 		// Current instance is a non-manifold edge which has been
 		// replaced by 'that'.  Replace all occurrences in adjacency
 		// list.
-		assert hasAttributes(NONMANIFOLD) && !hasAttributes(OUTER);
-		symOTri(this, work[2]);
-		work[2].next();
-		final LinkedHashMap<Triangle, Integer> list = (LinkedHashMap<Triangle, Integer>) work[2].getAdj();
+		final Map<Triangle, Integer> list = getAdjNonManifold();
 		Integer I = list.get(tri);
 		assert I != null && I.intValue() == localNumber;
 		list.remove(tri);
@@ -1579,61 +1594,6 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		prev();                         // (onV1)
 	}
 	
-	public void invertOrientationFace(boolean markLocked)
-	{
-		assert markLocked == true;
-		// Swap origin and destination, update adjacency relations and process
-		// neighbours
-		Vertex o = origin();
-		Vertex d = destination();
-		Stack todo = new Stack();
-		HashSet<Triangle> seen = new HashSet<Triangle>();
-		todo.push(tri);
-		todo.push(int3[localNumber]);
-		swapVertices(seen, todo);
-		assert o == destination() : o+" "+d+" "+this;
-	}
-	
-	private static void swapVertices(HashSet<Triangle> seen, Stack todo)
-	{
-		VirtualHalfEdge ot = new VirtualHalfEdge();
-		VirtualHalfEdge sym = new VirtualHalfEdge();
-		while (todo.size() > 0)
-		{
-			int o = ((Integer) todo.pop()).intValue();
-			Triangle t = (Triangle) todo.pop();
-			if (seen.contains(t))
-				continue;
-			seen.add(t);
-			// Swap vertices
-			Vertex tempV = t.vertex[next3[o]];
-			t.vertex[next3[o]] = t.vertex[prev3[o]];
-			t.vertex[prev3[o]] = tempV;
-			// Swap adjacent triangles
-			Object tempA = t.getAdj(next3[o]);
-			t.setAdj(next3[o], t.getAdj(prev3[o]));
-			t.setAdj(prev3[o], tempA);
-			// Swap edge attributes
-			int attr = t.getEdgeAttributes(next3[o]);
-			t.setEdgeAttributes(next3[o], t.getEdgeAttributes(prev3[o]));
-			t.setEdgeAttributes(prev3[o], attr);
-			// Fix adjacent triangles
-			ot.bind(t);
-			for (int i = 0; i < 3; i++)
-			{
-				ot.next();
-				if (!ot.hasAttributes(BOUNDARY) && !ot.hasAttributes(NONMANIFOLD))
-				{
-					VirtualHalfEdge.symOTri(ot, sym);
-					todo.push(sym.tri);
-					todo.push(int3[sym.localNumber]);
-					sym.tri.setAdj(sym.localNumber, ot.tri);
-					sym.tri.setAdjLocalNumber(sym.localNumber, ot.localNumber);
-				}
-			}
-		}
-	}
-	
 	private final Iterator<AbstractHalfEdge> identityFanIterator()
 	{
 		final VirtualHalfEdge current = this;
@@ -1658,16 +1618,12 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		};
 	}
 	
+	@Override
 	public final Iterator<AbstractHalfEdge> fanIterator()
 	{
 		if (!hasAttributes(NONMANIFOLD))
 			return identityFanIterator();
-		VirtualHalfEdge ot = new VirtualHalfEdge();
-		copyOTri(this, ot);
-		if (!ot.hasAttributes(OUTER))
-			ot.sym();
-		ot.next();
-		final LinkedHashMap<Triangle, Integer> list = (LinkedHashMap<Triangle, Integer>) ot.getAdj();
+		final Map<Triangle, Integer> list = getAdjNonManifold();
 		return new Iterator<AbstractHalfEdge>()
 		{
 			VirtualHalfEdge ret = new VirtualHalfEdge();

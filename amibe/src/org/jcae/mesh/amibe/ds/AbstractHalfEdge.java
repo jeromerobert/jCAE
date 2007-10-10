@@ -23,6 +23,7 @@ package org.jcae.mesh.amibe.ds;
 import org.jcae.mesh.amibe.traits.Traits;
 import org.jcae.mesh.amibe.traits.HalfEdgeTraitsBuilder;
 import java.util.Iterator;
+import java.util.Map;
 
 public abstract class AbstractHalfEdge
 {
@@ -123,6 +124,7 @@ public abstract class AbstractHalfEdge
 	public abstract int getLocalNumber();
 	public abstract Triangle getTri();
 	public abstract Object getAdj();
+	public abstract Map<Triangle, Integer> getAdjNonManifold();
 	public abstract void setAdj(Object link);
 	public abstract Vertex origin();
 	public abstract Vertex destination();

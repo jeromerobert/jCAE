@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.NoSuchElementException;
@@ -128,6 +127,18 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	public final Object getAdj()
 	{
 		return sym;
+	}
+
+	/**
+	 * Get adjacency list for non-manifold edges. 
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public final Map<Triangle, Integer> getAdjNonManifold()
+	{
+		assert hasAttributes(NONMANIFOLD) && !hasAttributes(OUTER);
+		// By convention, adjacency list is stored in a virtual triangle.
+		return (Map<Triangle, Integer>) HEsym().next.sym;
 	}
 
 	/**
@@ -1163,9 +1174,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		// Current instance is a non-manifold edge which has been
 		// replaced by 'that'.  Replace all occurrences in adjacency
 		// list.
-		assert hasAttributes(NONMANIFOLD) && !hasAttributes(OUTER);
-		HalfEdge e = this;
-		final LinkedHashMap<Triangle, Integer> list = (LinkedHashMap<Triangle, Integer>) e.HEsym().next.sym;
+		final Map<Triangle, Integer> list = getAdjNonManifold();
 		Integer I = list.get(tri);
 		assert I != null && I.intValue() == localNumber;
 		list.remove(tri);
@@ -1346,11 +1355,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	{
 		if (!hasAttributes(NONMANIFOLD))
 			return identityFanIterator();
-		HalfEdge e = this;
 		logger.debug("Non manifold fan iterator");
-		if (!e.hasAttributes(OUTER))
-			e = e.HEsym();
-		final LinkedHashMap<Triangle, Integer> list = (LinkedHashMap<Triangle, Integer>) e.next.sym;
+		final Map<Triangle, Integer> list = getAdjNonManifold();
 		return new Iterator<AbstractHalfEdge>()
 		{
 			private Iterator<Map.Entry<Triangle, Integer>> it = list.entrySet().iterator();
@@ -1364,9 +1370,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 				HalfEdge f = (HalfEdge) entry.getKey().getAbstractHalfEdge();
 				int l = entry.getValue().intValue();
 				if (l == 1)
-					f = (HalfEdge) f.next;
+					f = f.next;
 				else if (l == 2)
-					f = (HalfEdge) f.next.next;
+					f = f.next.next;
 				return f;
 			}
 			public void remove()
@@ -1375,6 +1381,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		};
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public String toString()
 	{
@@ -1392,7 +1399,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			}
 			else
 			{
-				LinkedHashMap<Triangle, Integer> list = (LinkedHashMap<Triangle, Integer>) sym;
+				Map<Triangle, Integer> list = (Map<Triangle, Integer>) sym;
 				r.append("\nSym: (");
 				for (Map.Entry<Triangle, Integer> entry: list.entrySet())
 					r.append(entry.getKey().hashCode()+"["+entry.getValue().intValue()+"],");
