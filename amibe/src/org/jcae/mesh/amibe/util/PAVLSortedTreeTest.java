@@ -25,8 +25,6 @@ import java.util.Iterator;
 
 public class PAVLSortedTreeTest
 {
-	private QSortedTree tree;
-
 	/* Single left rotation
 	    A                    B
 	   / \      ------>     / \

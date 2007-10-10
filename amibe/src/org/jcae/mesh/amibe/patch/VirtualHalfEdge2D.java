@@ -68,10 +68,12 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
+	/* Method never used
 	private final AbstractHalfEdge prevOrigin(AbstractHalfEdge that)
 	{
 		return sym(that).next();
 	}
+	*/
 	
 	/**
 	 * Move counterclockwise to the previous edge with same origin.
@@ -89,10 +91,12 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
+	/* Method never used
 	private final AbstractHalfEdge nextDest(AbstractHalfEdge that)
 	{
 		return sym(that).prev();
 	}
+	*/
 	
 	/**
 	 * Move counterclockwise to the following edge with same
@@ -111,20 +115,24 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
+	/* Method never used
 	private final AbstractHalfEdge prevDest(AbstractHalfEdge that)
 	{
 		return next(that).sym();
 	}
+	*/
 	
 	/**
 	 * Move counterclockwise to the previous edge with same
 	 * destination.
 	 * @return  current instance after its transformation
 	 */
+	/* Method never used
 	private final AbstractHalfEdge prevDest()
 	{
 		return next().sym();
 	}
+	*/
 	
 	/**
 	 * Copy current <code>VirtualHalfEdge</code> and move it to the counterclockwise
@@ -133,10 +141,12 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
+	/* Method never used
 	private final AbstractHalfEdge nextApex(AbstractHalfEdge that)
 	{
 		return next(that).sym().next();
 	}
+	*/
 	
 	/**
 	 * Move counterclockwise to the following edge with same apex.
@@ -155,10 +165,12 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
 	 *              copied
 	 */
+	/* Method never used
 	private final AbstractHalfEdge prevApex(AbstractHalfEdge that)
 	{
 		return prev(that).sym().prev();
 	}
+	*/
 	
 	private final AbstractHalfEdge prevApex()
 	{
