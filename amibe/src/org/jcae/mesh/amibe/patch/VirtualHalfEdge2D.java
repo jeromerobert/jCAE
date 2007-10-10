@@ -21,6 +21,7 @@
 package org.jcae.mesh.amibe.patch;
 
 import org.jcae.mesh.amibe.InvalidFaceException;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
 import java.util.Random;
@@ -58,6 +59,110 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 	public VirtualHalfEdge2D(Triangle t, int o)
 	{
 		super(t, o);
+	}
+	
+	/**
+	 * Copy current <code>VirtualHalfEdge</code> and move it to the counterclockwise
+	 * previous edge which has the same origin.
+	 *
+	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
+	 *              copied
+	 */
+	private final AbstractHalfEdge prevOrigin(AbstractHalfEdge that)
+	{
+		return sym(that).next();
+	}
+	
+	/**
+	 * Move counterclockwise to the previous edge with same origin.
+	 * @return  current instance after its transformation
+	 */
+	private final AbstractHalfEdge prevOrigin()
+	{
+		return sym().next();
+	}
+	
+	/**
+	 * Copy current <code>VirtualHalfEdge</code> and move it to the counterclockwise
+	 * following edge which has the same destination.
+	 *
+	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
+	 *              copied
+	 */
+	private final AbstractHalfEdge nextDest(AbstractHalfEdge that)
+	{
+		return sym(that).prev();
+	}
+	
+	/**
+	 * Move counterclockwise to the following edge with same
+	 * destination.
+	 * @return  current instance after its transformation
+	 */
+	private final AbstractHalfEdge nextDest()
+	{
+		return sym().prev();
+	}
+	
+	/**
+	 * Copy current <code>VirtualHalfEdge</code> and move it to the counterclockwise
+	 * previous edge which has the same destination.
+	 *
+	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
+	 *              copied
+	 */
+	private final AbstractHalfEdge prevDest(AbstractHalfEdge that)
+	{
+		return next(that).sym();
+	}
+	
+	/**
+	 * Move counterclockwise to the previous edge with same
+	 * destination.
+	 * @return  current instance after its transformation
+	 */
+	private final AbstractHalfEdge prevDest()
+	{
+		return next().sym();
+	}
+	
+	/**
+	 * Copy current <code>VirtualHalfEdge</code> and move it to the counterclockwise
+	 * following edge which has the same apex.
+	 *
+	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
+	 *              copied
+	 */
+	private final AbstractHalfEdge nextApex(AbstractHalfEdge that)
+	{
+		return next(that).sym().next();
+	}
+	
+	/**
+	 * Move counterclockwise to the following edge with same apex.
+	 * @return  current instance after its transformation
+	 */
+	private final AbstractHalfEdge nextApex()
+	{
+		return next().sym().next();
+	}
+	
+	/*
+	 * Copy an <code>VirtualHalfEdge</code> and move it to the clockwise
+	 * previous edge which has the same apex.
+	 *
+	 * @param o     source <code>VirtualHalfEdge</code>
+	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
+	 *              copied
+	 */
+	private final AbstractHalfEdge prevApex(AbstractHalfEdge that)
+	{
+		return prev(that).sym().prev();
+	}
+	
+	private final AbstractHalfEdge prevApex()
+	{
+		return prev().sym().prev();
 	}
 	
 	/**

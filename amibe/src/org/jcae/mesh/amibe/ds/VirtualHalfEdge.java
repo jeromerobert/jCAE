@@ -98,6 +98,9 @@ import org.apache.log4j.Logger;
  *    ot.prev();        // Moves (t,0) to (t,2)
  *    ot.sym();         // Moves (t,0) to (t1,2)
  *    ot.nextOrigin();  // Moves (t,0) to (t2,1)
+ * </pre>
+ * For convenience, following methods are also defined in VirtualHalfEdge2D:
+ * <pre>
  *    ot.prevOrigin();  // Moves (t,0) to (t1,0)
  *    ot.nextDest();    // Moves (t,0) to (t1,1)
  *    ot.prevDest();    // Moves (t,0) to (t0,2)
@@ -163,57 +166,6 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		tri = t;
 		localNumber = o;
 		pullAttributes();
-	}
-	
-	/**
-	 * Find the <code>VirtualHalfEdge</code> joining two given vertices
-	 * and move to it.
-	 *
-	 * @param v1  start point of the desired <code>VirtualHalfEdge</code>
-	 * @param v2  end point of the desired <code>VirtualHalfEdge</code>
-	 * @return <code>true</code> if an <code>VirtualHalfEdge</code> was
-	 *         found, <code>false</code> otherwise.
-	 */
-	public boolean find(Vertex v1, Vertex v2)
-	{
-		if (v1.getLink() instanceof Triangle)
-			return findSameFan(v1, v2, (Triangle) v1.getLink());
-		else if (v2.getLink() instanceof Triangle)
-		{
-			if (!findSameFan(v2, v1, (Triangle) v2.getLink()))
-				return false;
-			sym();
-			return true;
-		}
-		Triangle [] tArray = (Triangle []) v1.getLink();
-		for (Triangle start: tArray)
-		{
-			if (findSameFan(v1, v2, start))
-				return true;
-		}
-		return false;
-	}
-
-	private boolean findSameFan(Vertex v1, Vertex v2, Triangle start)
-	{
-		bind(start);
-		assert tri.vertex[0] == v1 || tri.vertex[1] == v1 || tri.vertex[2] == v1 : v1+" "+tri;
-		if (destination() == v1)
-			next();
-		else if (apex() == v1)
-			prev();
-		assert origin() == v1 : v1+" not in "+this;
-		Vertex d = destination();
-		if (d == v2)
-			return true;
-		do
-		{
-			nextOriginLoop();
-			if (destination() == v2)
-				return true;
-		}
-		while (destination() != d);
-		return false;
 	}
 	
 	// Section: accessors
@@ -305,13 +257,13 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	// Adjust tri.adjPos after attributes is modified.
-	public final void pushAttributes()
+	protected final void pushAttributes()
 	{
 		tri.setEdgeAttributes(localNumber, attributes);
 	}
 	
 	// Adjust attributes after tri.adjPos is modified.
-	public final void pullAttributes()
+	protected final void pullAttributes()
 	{
 		attributes = tri.getEdgeAttributes(localNumber);
 	}
@@ -329,43 +281,24 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	
 	// Section: geometrical primitives
 	
-	/**
-	 * Copy an <code>VirtualHalfEdge</code> into another <code>VirtualHalfEdge</code>.
-	 *
-	 * @param src   <code>VirtualHalfEdge</code> being duplicated
-	 * @param dest  already allocated <code>VirtualHalfEdge</code> where data are
-	 *              copied
-	 */
-	public static final void copyOTri(VirtualHalfEdge src, VirtualHalfEdge dest)
-	{
-		dest.tri = src.tri;
-		dest.localNumber = src.localNumber;
-		dest.attributes = src.attributes;
-	}
-	
-	//  These geometrical primitives have 2 signatures:
+	//  These geometrical primitives have 3 signatures:
+	//      fct()     transforms current object.
+	//      fct(that) copies current instance into 'that' and transforms it
 	//      fct(this, that)   applies fct to 'this' and stores result
 	//                        in an already allocated object 'that'.
-	//      fct() transforms current object.
 	//  This is definitely not an OO approach, but it is much more
 	//  efficient by preventing useless memory allocations.
 	//  They do not return any value to make clear that calling
 	//  these routines requires extra care.
 	
 	/**
-	 * Copy an <code>VirtualHalfEdge</code> and move to its symmetric edge.
+	 * Move to symmetric edge.
+	 * Copy into another instance, move it to its symmetric edge and
+	 * return this copy.
 	 *
-	 * @param o     source <code>VirtualHalfEdge</code>
-	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
-	 *              copied
+	 * @param  that  instance where transformed edge is stored
+	 * @return   argument after its transformation
 	 */
-	public static final void symOTri(VirtualHalfEdge o, VirtualHalfEdge that)
-	{
-		that.tri = (Triangle) o.tri.getAdj(o.localNumber);
-		that.localNumber = o.tri.getAdjLocalNumber(o.localNumber);
-		that.pullAttributes();
-	}
-	
 	@Override
 	public final AbstractHalfEdge sym(AbstractHalfEdge that)
 	{
@@ -377,7 +310,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Move to the symmetric edge.
+	 * Move to symmetric edge.
+	 * @return  current instance after its transformation
 	 */
 	@Override
 	public final AbstractHalfEdge sym()
@@ -390,20 +324,13 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Copy an <code>VirtualHalfEdge</code> and move it to the counterclockwaise
-	 * following edge.
+	 * Move counterclockwise to following edge.
+	 * Copy into another instance, move it counterclockwise to
+	 * following edge and return this copy.
 	 *
-	 * @param o     source <code>VirtualHalfEdge</code>
-	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
-	 *              copied
+	 * @param  that  instance where transformed edge is stored
+	 * @return   argument after its transformation
 	 */
-	public static final void nextOTri(VirtualHalfEdge o, VirtualHalfEdge that)
-	{
-		that.tri = o.tri;
-		that.localNumber = next3[o.localNumber];
-		that.pullAttributes();
-	}
-	
 	@Override
 	public final AbstractHalfEdge next(AbstractHalfEdge that)
 	{
@@ -415,7 +342,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Move to the counterclockwaise following edge.
+	 * Move counterclockwise to following edge.
+	 * @return  current instance after its transformation
 	 */
 	@Override
 	public final AbstractHalfEdge next()
@@ -426,20 +354,13 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Copy an <code>VirtualHalfEdge</code> and move it to the counterclockwaise
-	 * previous edge.
+	 * Move counterclockwise to previous edge.
+	 * Copy into another instance, move it counterclockwise to
+	 * previous edge and return this copy.
 	 *
-	 * @param o     source <code>VirtualHalfEdge</code>
-	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
-	 *              copied
+	 * @param  that  instance where transformed edge is stored
+	 * @return   argument after its transformation
 	 */
-	public static final void prevOTri(VirtualHalfEdge o, VirtualHalfEdge that)
-	{
-		that.tri = o.tri;
-		that.localNumber = prev3[o.localNumber];
-		that.pullAttributes();
-	}
-	
 	@Override
 	public final AbstractHalfEdge prev(AbstractHalfEdge that)
 	{
@@ -451,7 +372,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Move to the counterclockwaise previous edge.
+	 * Move counterclockwise to previous edge.
+	 * @return  current instance after its transformation
 	 */
 	@Override
 	public final AbstractHalfEdge prev()
@@ -462,11 +384,12 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Copy current <code>VirtualHalfEdge</code> and move it to the counterclockwaise
-	 * following edge which has the same origin.
+	 * Move counterclockwise to the following edge which has the same origin.
+	 * Copy into another instance, move it counterclockwise to
+	 * the following edge which has the same origin and return this copy.
 	 *
-	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
-	 *              copied
+	 * @param  that  instance where transformed edge is stored
+	 * @return   argument after its transformation
 	 */
 	@Override
 	public final AbstractHalfEdge nextOrigin(AbstractHalfEdge that)
@@ -475,7 +398,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Move counterclockwaise to the following edge with the same origin.
+	 * Move counterclockwise to the following edge with same origin.
+	 * @return  current instance after its transformation
 	 */
 	@Override
 	public final AbstractHalfEdge nextOrigin()
@@ -484,132 +408,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Copy current <code>VirtualHalfEdge</code> and move it to the counterclockwaise
-	 * previous edge which has the same origin.
-	 *
-	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
-	 *              copied
-	 */
-	public final AbstractHalfEdge prevOrigin(AbstractHalfEdge that)
-	{
-		return sym(that).next();
-	}
-	
-	/**
-	 * Move counterclockwaise to the previous edge with the same origin.
-	 */
-	public final AbstractHalfEdge prevOrigin()
-	{
-		return sym().next();
-	}
-	
-	/**
-	 * Copy current <code>VirtualHalfEdge</code> and move it to the counterclockwaise
-	 * following edge which has the same destination.
-	 *
-	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
-	 *              copied
-	 */
-	public final AbstractHalfEdge nextDest(AbstractHalfEdge that)
-	{
-		return sym(that).prev();
-	}
-	
-	/**
-	 * Move counterclockwaise to the following edge with the same
-	 * destination.
-	 */
-	public final AbstractHalfEdge nextDest()
-	{
-		return sym().prev();
-	}
-	
-	/**
-	 * Copy current <code>VirtualHalfEdge</code> and move it to the counterclockwaise
-	 * previous edge which has the same destination.
-	 *
-	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
-	 *              copied
-	 */
-	public final AbstractHalfEdge prevDest(AbstractHalfEdge that)
-	{
-		return next(that).sym();
-	}
-	
-	/**
-	 * Move counterclockwaise to the previous edge with the same
-	 * destination.
-	 */
-	public final AbstractHalfEdge prevDest()
-	{
-		return next().sym();
-	}
-	
-	/**
-	 * Copy current <code>VirtualHalfEdge</code> and move it to the counterclockwaise
-	 * following edge which has the same apex.
-	 *
-	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
-	 *              copied
-	 */
-	public final AbstractHalfEdge nextApex(AbstractHalfEdge that)
-	{
-		return next(that).sym().next();
-	}
-	
-	/**
-	 * Move counterclockwaise to the following edge with the same apex.
-	 */
-	public final AbstractHalfEdge nextApex()
-	{
-		return next().sym().next();
-	}
-	
-	/*
-	 * Copy an <code>VirtualHalfEdge</code> and move it to the clockwaise
-	 * previous edge which has the same apex.
-	 *
-	 * @param o     source <code>VirtualHalfEdge</code>
-	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
-	 *              copied
-	 */
-	/*
-	private static final void prevOTriApex(VirtualHalfEdge o, VirtualHalfEdge that)
-	{
-		prevOTri(o, that);
-		that.sym();
-		that.prev();
-	}
-	*/
-	
-	public final AbstractHalfEdge prevApex(AbstractHalfEdge that)
-	{
-		return prev(that).sym().prev();
-	}
-	
-	/**
-	 * Move clockwaise to the previous edge with the same apex.
-	 */
-	public final AbstractHalfEdge prevApex()
-	{
-		return prev().sym().prev();
-	}
-	
-	/**
-	 * Move counterclockwaise to the following edge with the same apex.
-	 * If a boundary is reached, loop backward until another
-	 * boundary is found and start again from there.
-	 */
-	public final AbstractHalfEdge nextApexLoop()
-	{
-		prev();
-		nextOriginLoop();
-		next();
-		return this;
-	}
-	
-	/**
-	 * Move counterclockwaise to the following edge with the same origin.
+	 * Move counterclockwise to the following edge with same origin.
 	 * If a boundary is reached, loop backward until another
 	 * boundary is found and start again from there.
 	 * Note: outer triangles are taken into account in this loop, because
@@ -625,13 +424,75 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			// and start again from there.
 			do
 			{
-				prevOrigin();
+				sym();
+				next();
 			}
 			while (!hasAttributes(OUTER));
 		}
 		else
 			nextOrigin();
 		return this;
+	}
+	
+	// Static methods for VirtualHalfEdge instances, only the most useful methods are defined
+	
+	/**
+	 * Copy a <code>VirtualHalfEdge</code> instance into another <code>VirtualHalfEdge</code>
+	 * instance.
+	 *
+	 * @param src   <code>VirtualHalfEdge</code> being duplicated
+	 * @param dest  already allocated <code>VirtualHalfEdge</code> where data are
+	 *              copied
+	 */
+	protected static final void copyOTri(VirtualHalfEdge src, VirtualHalfEdge dest)
+	{
+		dest.tri = src.tri;
+		dest.localNumber = src.localNumber;
+		dest.attributes = src.attributes;
+	}
+	
+	/**
+	 * Copy a <code>VirtualHalfEdge</code> instance and move to its symmetric edge.
+	 *
+	 * @param o     source <code>VirtualHalfEdge</code>
+	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
+	 *              copied
+	 */
+	protected static final void symOTri(VirtualHalfEdge o, VirtualHalfEdge that)
+	{
+		that.tri = (Triangle) o.tri.getAdj(o.localNumber);
+		that.localNumber = o.tri.getAdjLocalNumber(o.localNumber);
+		that.pullAttributes();
+	}
+	
+	/**
+	 * Copy a <code>VirtualHalfEdge</code> instance and move it counterclockwise to
+	 * following edge.
+	 *
+	 * @param o     source <code>VirtualHalfEdge</code>
+	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
+	 *              copied
+	 */
+	protected static final void nextOTri(VirtualHalfEdge o, VirtualHalfEdge that)
+	{
+		that.tri = o.tri;
+		that.localNumber = next3[o.localNumber];
+		that.pullAttributes();
+	}
+	
+	/**
+	 * Copy a <code>VirtualHalfEdge</code> instance and move it counterclockwise to
+	 * previous edge.
+	 *
+	 * @param o     source <code>VirtualHalfEdge</code>
+	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
+	 *              copied
+	 */
+	protected static final void prevOTri(VirtualHalfEdge o, VirtualHalfEdge that)
+	{
+		that.tri = o.tri;
+		that.localNumber = prev3[o.localNumber];
+		that.pullAttributes();
 	}
 	
 	// Section: vertex handling
@@ -1636,13 +1497,15 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		Triangle t1 = tri;
 		// t1 is still glued to t2, it has to be glued to t4, and t3 to t2.
 		nextOTri(this, work[1]);        // (nV1o)
-		work[1].prevOrigin();           // (ndV1)
+		work[1].sym();                  // (V1nd)
+		work[1].next();                 // (ndV1)
 		Triangle t3 = work[1].tri;
 
 		symOTri(this, work[0]);         // (dnV2)
 		work[0].VHglue(work[1]);
 		Triangle t2 = work[0].tri;
-		work[0].prevDest();             // (V2no)
+		work[0].next();                 // (nV2d)
+		work[0].sym();                  // (V2no)
 		work[0].next();                 // (noV2)
 		VHglue(work[0]);
 		Triangle t4 = work[0].tri;
