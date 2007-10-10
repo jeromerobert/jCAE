@@ -894,7 +894,7 @@ public class RawStorage
 		private FileChannel fc;
 		private int [] ijk = new int[3];
 		private PAVLTreeIntArrayDup [] vertices;
-		private SoftReference [] sr;
+		private SoftReference<PAVLTreeIntArrayDup> [] sr;
 		private int nr_ld_leaves = 0;
 		public IndexExternalVerticesProcedure(FileInputStream in)
 		{
@@ -920,11 +920,11 @@ public class RawStorage
 		{
 			assert vertices[i] == null;
 			if (sr[i] != null)
-				vertices[i] = (PAVLTreeIntArrayDup) sr[i].get();
+				vertices[i] = sr[i].get();
 			if (vertices[i] == null)
 			{
 				vertices[i] = loadVerticesInAVLTreeDup(oemm.getDirectory(), oemm.leaves[i]);
-				sr[i] = new SoftReference(vertices[i]); 
+				sr[i] = new SoftReference<PAVLTreeIntArrayDup>(vertices[i]); 
 				nr_ld_leaves++;
 			}
 		}
