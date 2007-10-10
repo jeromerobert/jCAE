@@ -58,7 +58,8 @@ public class DihedralAngle extends QualityProcedure
 				continue;
 			if (ot.getAdj() == null)
 				continue;
-			VirtualHalfEdge.symOTri(ot, sym);
+			sym.bind(ot.getTri(), ot.getLocalNumber());
+			sym.sym();
 			if (t.getGroupId() != sym.getTri().getGroupId())
 				continue;
 			ot.computeNormal3D();

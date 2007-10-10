@@ -142,7 +142,8 @@ public class SwapEdge
 			ot.bind(t, localNumber);
 			if (logger.isDebugEnabled())
 				logger.debug("Swap edge: "+ot);
-			VirtualHalfEdge.symOTri(ot, sym);
+			sym.bind(ot.getTri(), ot.getLocalNumber());
+			sym.sym();
 			tree.remove(t);
 			tree.remove(sym.getTri());
 			// Before: ot = (oda)   sym = (don)
@@ -155,7 +156,8 @@ public class SwapEdge
 			{
 				if (ot.getAdj() != null)
 				{
-					VirtualHalfEdge.symOTri(ot, sym);
+					sym.bind(ot.getTri(), ot.getLocalNumber());
+					sym.sym();
 					sym.getTri().unsetMarked();
 				}
 				ot.prev();
@@ -173,7 +175,8 @@ public class SwapEdge
 				ot.prev();
 				if (ot.getAdj() != null)
 				{
-					VirtualHalfEdge.symOTri(ot, sym);
+					sym.bind(ot.getTri(), ot.getLocalNumber());
+					sym.sym();
 					sym.getTri().unsetMarked();
 				}
 			}

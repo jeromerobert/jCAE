@@ -100,7 +100,8 @@ public class CheckDelaunay
 				{
 					ot.next();
 					ot.clearAttributes(AbstractHalfEdge.SWAPPED);
-					VirtualHalfEdge.symOTri(ot, sym);
+					sym.bind(ot.getTri(), ot.getLocalNumber());
+					sym.sym();
 					sym.clearAttributes(AbstractHalfEdge.SWAPPED);
 				}
 			}
@@ -115,7 +116,8 @@ public class CheckDelaunay
 					ot.next();
 					if (!ot.isMutable())
 						continue;
-					VirtualHalfEdge.symOTri(ot, sym);
+					sym.bind(ot.getTri(), ot.getLocalNumber());
+					sym.sym();
 					if (ot.hasAttributes(AbstractHalfEdge.SWAPPED) || sym.hasAttributes(AbstractHalfEdge.SWAPPED))
 						continue;
 					ot.setAttributes(AbstractHalfEdge.SWAPPED);
@@ -137,7 +139,8 @@ public class CheckDelaunay
 				if (ot.hasAttributes(AbstractHalfEdge.SWAPPED))
 				{
 					newList.add(ot.getTri());
-					VirtualHalfEdge.symOTri(ot, sym);
+					sym.bind(ot.getTri(), ot.getLocalNumber());
+					sym.sym();
 					newList.add(sym.getTri());
 					mesh.edgeSwap(ot);
 					redo = true;

@@ -344,7 +344,8 @@ public class Initial
 				for (int i = 0; i < 3; i++)
 				{
 					ot.next();
-					VirtualHalfEdge.symOTri(ot, sym);
+					sym.bind(ot.getTri(), ot.getLocalNumber());
+					sym.sym();
 					if (tList.contains(sym.getTri()))
 						continue;
 					newHead = sym.getTri();

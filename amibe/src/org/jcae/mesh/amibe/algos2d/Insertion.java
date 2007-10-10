@@ -134,7 +134,8 @@ public class Insertion
 					if (ot.hasAttributes(AbstractHalfEdge.MARKED))
 						continue;
 					ot.setAttributes(AbstractHalfEdge.MARKED);
-					VirtualHalfEdge.symOTri(ot, sym);
+					sym.bind(ot.getTri(), ot.getLocalNumber());
+					sym.sym();
 					if (sym.hasAttributes(AbstractHalfEdge.MARKED))
 						continue;
 					sym.setAttributes(AbstractHalfEdge.MARKED);

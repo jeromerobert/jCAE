@@ -110,7 +110,8 @@ public class ConstraintNormal3D
 					ot.next();
 					if (!ot.isMutable())
 						continue;
-					VirtualHalfEdge.symOTri(ot, sym);
+					sym.bind(ot.getTri(), ot.getLocalNumber());
+					sym.sym();
 					if (ot.hasAttributes(AbstractHalfEdge.SWAPPED) || sym.hasAttributes(AbstractHalfEdge.SWAPPED))
 						continue;
 					// Make sure that triangles are not
