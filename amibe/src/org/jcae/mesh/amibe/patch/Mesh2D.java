@@ -325,7 +325,8 @@ public class Mesh2D extends Mesh
 			if ((Vertex2D) s.destination() == dest || i > maxIter)
 				throw new InitialTriangulationException();
 		}
-		s.prevOrigin();
+		s.sym();
+		s.next();
 		dest = (Vertex2D) s.destination();
 		i = 0;
 		while (true)
@@ -335,7 +336,8 @@ public class Mesh2D extends Mesh
 				return s;
 			else if (d != outerVertex && start.onLeft(this, end, d) < 0L)
 				break;
-			s.prevOrigin();
+			s.sym();
+			s.next();
 			i++;
 			if (s.destination() == dest || i > maxIter)
 				throw new InitialTriangulationException();

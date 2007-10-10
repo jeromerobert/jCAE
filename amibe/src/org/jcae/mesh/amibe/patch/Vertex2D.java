@@ -323,12 +323,18 @@ public class Vertex2D extends Vertex
 			if (d1 < 0L && d2 < 0L)
 			{
 				if (rand.nextBoolean())
-					current.prevDest();     // (ad*)
+				{
+					current.next();         // (dao)
+					current.sym();          // (ad*)
+				}
 				else
 					current.nextOrigin();   // (oa*)
 			}
 			else if (d1 < 0L)
-				current.prevDest();             // (ad*)
+			{
+				current.next();                 // (dao)
+				current.sym();                  // (ad*)
+			}
 			else if (d2 < 0L)
 				current.nextOrigin();           // (oa*)
 			else

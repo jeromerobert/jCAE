@@ -318,7 +318,11 @@ public class Initial
 		{
 			ot.getTri().setOuter();
 			tList.add(ot.getTri());
-			ot.nextApex();
+			// Move counterclockwise to following edge with
+			// the same apex.
+			ot.next();
+			ot.sym();
+			ot.next();
 		}
 		while (ot.origin() != first);
 		
