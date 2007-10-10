@@ -82,6 +82,7 @@
   			<test name="org.jcae.mesh.amibe.ds.HalfEdgeTest"/>
   			<test name="org.jcae.mesh.amibe.ds.VirtualHalfEdgeTest"/>
   			<test name="org.jcae.mesh.oemm.PAVLTreeIntArrayDupTest"/>
+  			<test name="org.jcae.mesh.amibe.metrics.Matrix2DTest"/>
 		</junit>
 	</target>
 

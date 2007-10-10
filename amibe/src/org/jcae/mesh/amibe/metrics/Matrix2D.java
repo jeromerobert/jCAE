@@ -218,20 +218,4 @@ public class Matrix2D
 		return "Matrix2D: ("+data[0][0]+", "+data[0][1]+", "+data[1][0]+", "+data[1][1]+")";
 	}
 	
-	/*  Unit tests.  */
-	public static void main(String args[])
-	{
-		Matrix2D A, B, C;
-		A = new Matrix2D(4.0, 1.0, 1.0, 1.0);
-		System.out.println("A: "+A);
-		System.out.println("inv A: "+A.inv());
-		A = new Matrix2D(4.0, 0.0, 0.0, 2.0);
-		B = new Matrix2D(2.0, 0.0, 0.0, 1.0);
-		System.out.println("A: "+A);
-		System.out.println("B: "+B);
-		C = B.intersection(A);
-		System.out.println("C: "+C);
-		C = A.intersection(B);
-		System.out.println("C: "+C);
-	}
 }
