@@ -466,42 +466,4 @@ public class PRedBlackSortedTree extends QSortedTree
 		return true;
 	}
 
-	public static void main(String args[])
-	{
-		QSortedTree tree = new PRedBlackSortedTree();
-		// Check with various lengths
-		for (int n = 10; n < 100; n+=2)
-		{
-			try
-			{
-				tree.unitTest1(n);
-				tree.unitTest2(n);
-				tree.unitTest3(n);
-				tree.unitTest4(n);
-			}
-			catch (Exception ex)
-			{
-				System.out.println("Failed with length "+n);
-				ex.printStackTrace();
-				System.exit(1);
-			}
-		}
-		// Insert and remove in random order
-		for (int n = 3; n < 100; n+=2)
-		{
-			try
-			{
-				tree.unitTest5(200, n);
-				tree.unitTest6(200, n);
-			}
-			catch (Exception ex)
-			{
-				System.out.println("Failed with step "+n);
-				ex.printStackTrace();
-				System.exit(1);
-			}
-		}
-		System.out.println("ok");
-	}
-		
 }

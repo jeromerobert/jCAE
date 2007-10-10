@@ -59,6 +59,7 @@
 			<compilerarg line="${compiler.arg}"/>
 			<classpath>
 				<pathelement location="${junit.jar}"/>
+				<pathelement location="${trove.jar}"/>
 			</classpath>
 		</javac>
 	</target>
@@ -77,6 +78,7 @@
 				<enable package="org.jcae.mesh.amibe.ds"/>
 			</assertions>
   			<test name="org.jcae.mesh.amibe.util.PAVLSortedTreeTest"/>
+  			<test name="org.jcae.mesh.amibe.util.PRedBlackSortedTreeTest"/>
   			<test name="org.jcae.mesh.amibe.ds.HalfEdgeTest"/>
   			<test name="org.jcae.mesh.amibe.ds.VirtualHalfEdgeTest"/>
   			<test name="org.jcae.mesh.oemm.PAVLTreeIntArrayDupTest"/>

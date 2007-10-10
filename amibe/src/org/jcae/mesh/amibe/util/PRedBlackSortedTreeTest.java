@@ -24,11 +24,11 @@ import org.junit.Test;
 import org.junit.Before;
 import java.util.Iterator;
 
-public class PAVLSortedTreeTest extends QSortedTreeTest
+public class PRedBlackSortedTreeTest extends QSortedTreeTest
 {
 	@Before public void createTree()
 	{
-		tree = new PAVLSortedTree();
+		tree = new PRedBlackSortedTree();
 	}
 
 	/* Single left rotation
@@ -65,47 +65,6 @@ public class PAVLSortedTreeTest extends QSortedTreeTest
 		assertTrue(tree.getRootValue() == 2.0);
 	}
 
-	/* Right+left rotation
-	     A                      A                     B
-	    / \      ------>       / \      ------>     /   \
-	   T1  C                  T1  B                A     C
-	      / \                    / \              / \   / \
-	     B  T4                  T2  C            T1 T2 T3 T4
-	    / \                        / \
-	   T2 T3                      T3 T4
-	*/
-	@Test public void rotateRL()
-	{
-		tree.insert(Integer.valueOf(2), 2.0);
-		tree.insert(Integer.valueOf(1), 1.0);
-		tree.insert(Integer.valueOf(6), 6.0);
-		tree.insert(Integer.valueOf(4), 4.0);
-		tree.insert(Integer.valueOf(7), 7.0);
-		tree.insert(Integer.valueOf(5), 5.0);
-		tree.insert(Integer.valueOf(3), 3.0);
-		assertTrue(tree.getRootValue() == 4.0);
-	}
-
-	/*  Left+right rotation
-	      C                  C                    B
-	     / \    ------>     / \    ------>      /   \
-	    A  T4              B  T4               A     C
-	   / \                / \                 / \   / \
-	  T1  B              A  T3               T1 T2 T3 T4
-	     / \            / \
-	    T2 T3          T1 T2
-	*/
-	@Test public void rotateLR()
-	{
-		tree.insert(Integer.valueOf(6), 6.0);
-		tree.insert(Integer.valueOf(2), 2.0);
-		tree.insert(Integer.valueOf(7), 7.0);
-		tree.insert(Integer.valueOf(1), 1.0);
-		tree.insert(Integer.valueOf(4), 4.0);
-		tree.insert(Integer.valueOf(5), 5.0);
-		tree.insert(Integer.valueOf(3), 3.0);
-		assertTrue(tree.getRootValue() == 4.0);
-	}
 	@Test public void iterator()
 	{
 		tree.insert(Integer.valueOf(6), 6.0);
