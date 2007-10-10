@@ -23,14 +23,12 @@ import static org.junit.Assert.*;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
-public abstract class AbstractHalfEdgeTest
+public class AbstractHalfEdgeTest
 {
 	protected Mesh mesh;
 	protected Vertex [] v;
 	protected Triangle [] T;
 	
-	protected abstract AbstractHalfEdge find(Vertex v1, Vertex v2);
-
 	protected void buildMesh()
 	{
 		/*
@@ -232,6 +230,48 @@ public abstract class AbstractHalfEdgeTest
 			vTotal[16+i] = vy[3*i+2];
 		mesh.buildAdjacency(vTotal, -1.0);
 		assertTrue("Mesh is not valid", mesh.isValid());
+	}
+	
+	protected AbstractHalfEdge find(Vertex v1, Vertex v2)
+	{
+		if (v1.getLink() instanceof Triangle)
+		{
+			AbstractHalfEdge ret = findSameFan(v1, v2, (Triangle) v1.getLink());
+			if (ret == null)
+				throw new RuntimeException();
+			return ret;
+		}
+		Triangle [] tArray = (Triangle []) v1.getLink();
+		for (Triangle start: tArray)
+		{
+			AbstractHalfEdge f = findSameFan(v1, v2, start);
+			if (f != null)
+				return f;
+		}
+		throw new RuntimeException();
+	}
+
+	private AbstractHalfEdge findSameFan(Vertex v1, Vertex v2, Triangle start)
+	{
+		AbstractHalfEdge ret = start.getAbstractHalfEdge();
+		if (ret == null)
+			throw new RuntimeException();
+		if (ret.destination() == v1)
+			ret = ret.next();
+		else if (ret.apex() == v1)
+			ret = ret.prev();
+		assertTrue(ret.origin() == v1);
+		Vertex d = ret.destination();
+		if (d == v2)
+			return ret;
+		do
+		{
+			ret = ret.nextOriginLoop();
+			if (ret.destination() == v2)
+				return ret;
+		}
+		while (ret.destination() != d);
+		return null;
 	}
 	
 	protected void nextOriginLoop()

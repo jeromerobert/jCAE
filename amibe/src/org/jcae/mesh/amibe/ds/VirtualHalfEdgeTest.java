@@ -26,7 +26,6 @@ import org.junit.Test;
 
 public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 {
-	private VirtualHalfEdge ot = new VirtualHalfEdge();
 	@Before public void createMesh()
 	{
 		TriangleTraitsBuilder ttb = new TriangleTraitsBuilder();
@@ -35,14 +34,6 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 		mtb.addTriangleList();
 		mtb.add(ttb);
 		mesh = new Mesh(mtb);
-	}
-	
-	@Override
-	protected AbstractHalfEdge find(Vertex v1, Vertex v2)
-	{
-		if (!ot.find(v1, v2))
-			throw new RuntimeException();
-		return ot;
 	}
 	
 	@Override

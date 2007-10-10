@@ -21,7 +21,6 @@ package org.jcae.mesh.amibe.ds;
 
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,49 +34,6 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 		mtb.addTriangleList();
 		mtb.add(ttb);
 		mesh = new Mesh(mtb);
-	}
-	
-	@Override
-	protected AbstractHalfEdge find(Vertex v1, Vertex v2)
-	{
-		if (v1.getLink() instanceof Triangle)
-		{
-			AbstractHalfEdge ret = findSameFan(v1, v2, (Triangle) v1.getLink());
-			if (ret == null)
-				throw new RuntimeException();
-			return ret;
-		}
-		Triangle [] tArray = (Triangle []) v1.getLink();
-		for (Triangle start: tArray)
-		{
-			AbstractHalfEdge f = findSameFan(v1, v2, start);
-			if (f != null)
-				return f;
-		}
-		throw new RuntimeException();
-	}
-
-	private AbstractHalfEdge findSameFan(Vertex v1, Vertex v2, Triangle start)
-	{
-		AbstractHalfEdge ret = ((TriangleHE) start).getHalfEdge();
-		if (ret == null)
-			throw new RuntimeException();
-		if (ret.destination() == v1)
-			ret = ret.next();
-		else if (ret.apex() == v1)
-			ret = ret.prev();
-		assertTrue(ret.origin() == v1);
-		Vertex d = ret.destination();
-		if (d == v2)
-			return ret;
-		do
-		{
-			ret = ret.nextOriginLoop();
-			if (ret.destination() == v2)
-				return ret;
-		}
-		while (ret.destination() != d);
-		return null;
 	}
 	
 	@Override
