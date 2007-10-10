@@ -105,14 +105,4 @@ public class LongLong
 		return "hi: "+hi+" lo: "+lo;
 	}
 	
-	public static void main(String args[])
-	{
-		LongLong t1 = new LongLong(1L << 32, 1L << 32);
-		LongLong t2 = new LongLong(4L, -(1L << 31));
-		System.out.println(t1);
-		System.out.println(t2);
-		t1.add(t2);
-		System.out.println(t1);
-	}
-	
 }
