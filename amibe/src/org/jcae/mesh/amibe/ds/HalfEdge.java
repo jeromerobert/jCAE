@@ -591,8 +591,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		e[4].setAttributes(SWAPPED);
 		e[5].setAttributes(SWAPPED);
 		//  Fix links to triangles
-		o.setLink(T1);
-		d.setLink(T2);
+		replaceVertexLinks(o, T1, T2, T1);
+		replaceVertexLinks(d, T1, T2, T2);
 		// Be consistent with AbstractHalfEdge.swap()
 		return e[2];
 	}
