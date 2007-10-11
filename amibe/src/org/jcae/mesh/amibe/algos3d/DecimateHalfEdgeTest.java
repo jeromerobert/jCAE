@@ -136,8 +136,11 @@ public class DecimateHalfEdgeTest
 			vTotal[12+i] = vy[3*i];
 		for (int i = 0; i < 4; i++)
 			vTotal[16+i] = vy[3*i+2];
-		mesh.buildAdjacency(vTotal, -1.0);
-		assertTrue("Mesh is not valid", mesh.isValid());
+		v = vTotal;
+		Triangle [] TTotal = new Triangle[2*T.length];
+		System.arraycopy(T, 0, TTotal, 0, T.length);
+		System.arraycopy(Ty, 0, TTotal, T.length, T.length);
+		T = TTotal;
 	}
 	
 	@Test public void test1()
@@ -147,6 +150,7 @@ public class DecimateHalfEdgeTest
 		mesh = new Mesh();
 		create3x4Shell();
 		mesh.buildAdjacency(v, -1.0);
+		assertTrue("Mesh is not valid", mesh.isValid());
 		new DecimateHalfEdge(mesh, options).compute();
 		int res = DecimateHalfEdge.countInnerTriangles(mesh);
 		int expected = 2;
@@ -176,6 +180,7 @@ public class DecimateHalfEdgeTest
 			}
 		}
 		mesh.buildAdjacency(v, -1.0);
+		assertTrue("Mesh is not valid", mesh.isValid());
 		new DecimateHalfEdge(mesh, options).compute();
 		int res = DecimateHalfEdge.countInnerTriangles(mesh);
 		int expected = 4;
@@ -194,6 +199,8 @@ public class DecimateHalfEdgeTest
 		options.put("size", "0.1");
 		mesh = new Mesh();
 		buildMeshNM();
+		mesh.buildAdjacency(v, -1.0);
+		assertTrue("Mesh is not valid", mesh.isValid());
 		new DecimateHalfEdge(mesh, options).compute();
 		int res = DecimateHalfEdge.countInnerTriangles(mesh);
 		int expected = 8;
@@ -205,4 +212,38 @@ public class DecimateHalfEdgeTest
 		assertTrue("Mesh is not valid", mesh.isValid());
 		assertTrue("Final number of triangles: "+res, res == expected);
 	}
+	
+	@Test public void testNM3()
+	{
+		final Map<String, String> options = new HashMap<String, String>();
+		options.put("size", "0.1");
+		mesh = new Mesh();
+		buildMeshNM();
+		// Invert triangles at the right
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 2; j++)
+			{
+				Vertex temp = T[4*i+j].vertex[1];
+				T[4*i+j].vertex[1] = T[4*i+j].vertex[2];
+				T[4*i+j].vertex[2] = temp;
+				temp = T[4*i+j+12].vertex[1];
+				T[4*i+j+12].vertex[1] = T[4*i+j+12].vertex[2];
+				T[4*i+j+12].vertex[2] = temp;
+			}
+		}
+		mesh.buildAdjacency(v, -1.0);
+		assertTrue("Mesh is not valid", mesh.isValid());
+		new DecimateHalfEdge(mesh, options).compute();
+		int res = DecimateHalfEdge.countInnerTriangles(mesh);
+		int expected = 8;
+		if (res != expected)
+		{
+			new DecimateHalfEdge(mesh, options).compute();
+			res = DecimateHalfEdge.countInnerTriangles(mesh);
+		}
+		assertTrue("Mesh is not valid", mesh.isValid());
+		assertTrue("Final number of triangles: "+res, res == expected);
+	}
+
 }
