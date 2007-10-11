@@ -54,7 +54,7 @@ public abstract class AbstractAlgoHalfEdge
 	protected abstract void preProcessAllHalfEdges();
 	protected abstract void postProcessAllHalfEdges();
 	protected abstract boolean canProcessEdge(HalfEdge e);
-	protected abstract HalfEdge processEdge(HalfEdge e);
+	protected abstract HalfEdge processEdge(HalfEdge e, double cost);
 	protected abstract double cost(HalfEdge e);
 	protected abstract Logger thisLogger();
 	private static final String dumpFile = "/tmp/jcae.dump";
@@ -100,9 +100,8 @@ public abstract class AbstractAlgoHalfEdge
 			for (int i = 0; i < 3; i++)
 			{
 				e = (HalfEdge) e.next();
-				if (tree.contains(e.notOriented()))
-					continue;
-				addToTree(e);
+				if (!tree.contains(e.notOriented()))
+					addToTree(e);
 			}
 		}
 	}
@@ -128,6 +127,17 @@ public abstract class AbstractAlgoHalfEdge
 		// not be very useful.
 		if (nrFinal != 0 || val <= tolerance)
 			tree.insert(e.notOriented(), val);
+	}
+
+	protected void removeFromTree(final HalfEdge e)
+	{
+		for (Iterator<AbstractHalfEdge> it = e.fanIterator(); it.hasNext(); )
+		{
+			HalfEdge f = (HalfEdge) it.next();
+			if (!tree.remove(f.notOriented()))
+				notInTree++;
+			assert !tree.contains(f.notOriented());
+		}
 	}
 
 	private boolean processAllHalfEdges()
@@ -188,35 +198,29 @@ public abstract class AbstractAlgoHalfEdge
 				assert f == f.notOriented();
 				tree.update(f, newCost);
 			}
-			current = processEdge(current);
+			current = processEdge(current, cost);
 			processed++;
 
 			if (noSwap)
 				continue;
 			
-			if (current.hasAttributes(AbstractHalfEdge.OUTER | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
-				continue;
 			// Check if edges can be swapped
 			Vertex o = current.origin();
 			while(true)
 			{
-				if (current.checkSwap3D(0.95) >= 0.0)
+				if (!current.hasAttributes(AbstractHalfEdge.OUTER | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD) && current.checkSwap3D(0.95) >= 0.0)
 				{
 					// Swap edge
 					for (int i = 0; i < 3; i++)
 					{
 						current = (HalfEdge) current.next();
-						if (!tree.remove(current.notOriented()))
-							notInTree++;
-						assert !tree.contains(current.notOriented());
+						removeFromTree(current);
 					}
 					HalfEdge sym = (HalfEdge) current.sym();
 					for (int i = 0; i < 2; i++)
 					{
 						sym = (HalfEdge) sym.next();
-						if (!tree.remove(sym.notOriented()))
-							notInTree++;
-						assert !tree.contains(sym.notOriented());
+						removeFromTree(sym);
 					}
 					Vertex a = current.apex();
 					current = (HalfEdge) mesh.edgeSwap(current);
@@ -226,13 +230,21 @@ public abstract class AbstractAlgoHalfEdge
 					for (int i = 0; i < 3; i++)
 					{
 						current = (HalfEdge) current.next();
-						addToTree(current);
+						for (Iterator<AbstractHalfEdge> it = current.fanIterator(); it.hasNext(); )
+						{
+							HalfEdge e = (HalfEdge) it.next();
+							addToTree(e);
+						}
 					}
 					sym = (HalfEdge) ((HalfEdge) current.next()).sym();
 					for (int i = 0; i < 2; i++)
 					{
 						sym = (HalfEdge) sym.next();
-						addToTree(sym);
+						for (Iterator<AbstractHalfEdge> it = sym.fanIterator(); it.hasNext(); )
+						{
+							HalfEdge e = (HalfEdge) it.next();
+							addToTree(e);
+						}
 					}
 				}
 				else

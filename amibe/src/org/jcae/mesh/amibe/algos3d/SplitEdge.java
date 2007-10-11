@@ -159,7 +159,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 	}
 
 	@Override
-	public HalfEdge processEdge(HalfEdge current)
+	public HalfEdge processEdge(HalfEdge current, double costCurrent)
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("Split edge: "+current+" by "+insertedVertex);

@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.File;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Iterator;
 import gnu.trove.TObjectIntHashMap;
 import org.apache.log4j.Logger;
 
@@ -204,7 +205,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			final Triangle f = (Triangle) af;
 			double [] p0 = f.vertex[0].getUV();
 			double [] p1 = f.vertex[1].getUV();
-			final double [] p2 = f.vertex[2].getUV();
+			double [] p2 = f.vertex[2].getUV();
 			vect1[0] = p1[0] - p0[0];
 			vect1[1] = p1[1] - p0[1];
 			vect1[2] = p1[2] - p0[2];
@@ -213,14 +214,15 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			vect2[2] = p2[2] - p0[2];
 			// This is in fact 2*area, but that does not matter
 			Matrix3D.prodVect3D(vect1, vect2, normal);
-			final double norm = Matrix3D.norm(normal);
+			double norm = Matrix3D.norm(normal);
 			double area = norm;
 			if (tolerance > 0.0)
 				area /= tolerance;
 			if (norm > 1.e-20)
 			{
-				for (int i = 0; i < 3; i++)
-					normal[i] /=  norm;
+				norm = 1.0 / norm;
+				for (int k = 0; k < 3; k++)
+					normal[k] *=  norm;
 			}
 			double d = - Matrix3D.prodSca(normal, f.vertex[0].getUV());
 			for (int i = 0; i < 3; i++)
@@ -233,28 +235,44 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			for (int i = 0; i < 3; i++)
 			{
 				e = (HalfEdge) e.next();
-				if (e.hasAttributes(AbstractHalfEdge.BOUNDARY) || e.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+				if (e.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 				{
-					//  Add a virtual plane
-					//  In his dissertation, Garland suggests to
-					//  add a weight proportional to squared edge
-					//  length.
-					//  length(vect2) == length(e)
-					p0 = e.origin().getUV();
-					p1 = e.destination().getUV();
-					vect1[0] = p1[0] - p0[0];
-					vect1[1] = p1[1] - p0[1];
-					vect1[2] = p1[2] - p0[2];
-					Matrix3D.prodVect3D(vect1, normal, vect2);
-					for (int k = 0; k < 3; k++)
-						vect2[k] *= 100.0;
-					d = - Matrix3D.prodSca(vect2, e.origin().getUV());
-					final Quadric3DError q1 = quadricMap.get(e.origin());
-					final Quadric3DError q2 = quadricMap.get(e.destination());
-					//area = Matrix3D.norm(vect2) / tolerance;
-					area = 0.0;
-					q1.addError(vect2, d, area);
-					q2.addError(vect2, d, area);
+					for (Iterator<AbstractHalfEdge> it = e.fanIterator(); it.hasNext(); )
+					{
+						HalfEdge b = (HalfEdge) it.next();
+						//  Add a virtual plane
+						//  In his dissertation, Garland suggests to
+						//  add a weight proportional to squared edge
+						//  length.
+						//  length(vect2) == length(b)
+						p0 = b.origin().getUV();
+						p1 = b.destination().getUV();
+						p2 = b.apex().getUV();
+						vect1[0] = p1[0] - p0[0];
+						vect1[1] = p1[1] - p0[1];
+						vect1[2] = p1[2] - p0[2];
+						vect2[0] = p2[0] - p0[0];
+						vect2[1] = p2[1] - p0[1];
+						vect2[2] = p2[2] - p0[2];
+						Matrix3D.prodVect3D(vect1, vect2, normal);
+						norm = Matrix3D.norm(normal);
+						if (norm > 1.e-20)
+						{
+							norm = 1.0 / norm;
+							for (int k = 0; k < 3; k++)
+								normal[k] *=  norm;
+						}
+						Matrix3D.prodVect3D(vect1, normal, vect2);
+						for (int k = 0; k < 3; k++)
+							vect2[k] *= 100.0;
+						d = - Matrix3D.prodSca(vect2, b.origin().getUV());
+						final Quadric3DError q1 = quadricMap.get(b.origin());
+						final Quadric3DError q2 = quadricMap.get(b.destination());
+						//area = Matrix3D.norm(vect2) / tolerance;
+						area = 0.0;
+						q1.addError(vect2, d, area);
+						q2.addError(vect2, d, area);
+					}
 				}
 			}
 		}
@@ -353,27 +371,24 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	}
 
 	@Override
-	public HalfEdge processEdge(HalfEdge current)
+	public HalfEdge processEdge(HalfEdge current, double costCurrent)
 	{
 		current = uniqueOrientation(current);
 		if (logger.isDebugEnabled())
-			logger.debug("Contract edge: "+current+" into "+v3);
+			logger.debug("Contract edge: "+current+" into "+v3+"  cost="+costCurrent);
 		final Triangle t1 = current.getTri();
 		// HalfEdge instances on t1 and t2 will be deleted
 		// when edge is contracted, and we do not know whether
 		// they appear within tree or their symmetric ones,
 		// so remove them now.
-		if (!tree.remove(current.notOriented()))
-			notInTree++;
+		removeFromTree(current);
 		if (t1.isWritable())
 		{
 			nrTriangles--;
 			for (int i = 0; i < 2; i++)
 			{
 				current = (HalfEdge) current.next();
-				if (!tree.remove(current.notOriented()))
-					notInTree++;
-				assert !tree.contains(current.notOriented());
+				removeFromTree(current);
 			}
 			current = (HalfEdge) current.next();
 		}
@@ -385,9 +400,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			for (int i = 0; i < 2; i++)
 			{
 				sym = (HalfEdge) sym.next();
-				if (!tree.remove(sym.notOriented()))
-					notInTree++;
-				assert !tree.contains(sym.notOriented());
+				removeFromTree(sym);
 			}
 			sym = (HalfEdge) sym.next();
 		}
