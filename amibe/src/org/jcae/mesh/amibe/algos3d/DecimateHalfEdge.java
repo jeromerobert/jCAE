@@ -335,7 +335,9 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	{
 		if (current.hasAttributes(AbstractHalfEdge.OUTER))
 			return (HalfEdge) current.sym();
-		if (labelMap.get(current.origin()) > labelMap.get(current.destination()) && current.getAdj() != null)
+		if (current.getAdj() == null || current.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+			return current;
+		if (labelMap.get(current.origin()) > labelMap.get(current.destination()))
 			return (HalfEdge) current.sym();
 		return current;
 	}
@@ -355,12 +357,11 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		/* FIXME: add an option so that boundary nodes may be frozen. */
 		final Quadric3DError q1 = quadricMap.get(v1);
 		final Quadric3DError q2 = quadricMap.get(v2);
-		assert q1 != null : current;
-		assert q2 != null : current;
+		assert q1 != null : v1;
+		assert q2 != null : v2;
 		q3.computeQuadric3DError(q1, q2);
 		q3.optimalPlacement(v1, v2, q1, q2, placement, v3);
-		// For now, do not contract non manifold edges
-		return (!current.hasAttributes(AbstractHalfEdge.NONMANIFOLD) && mesh.canCollapseEdge(current, v3));
+		return (mesh.canCollapseEdge(current, v3));
 	}
 
 	@Override
@@ -408,10 +409,20 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		//  By convention, collapse() returns edge (v3, apex)
 		assert (!current.hasAttributes(AbstractHalfEdge.OUTER));
 		final Vertex apex = current.apex();
-		// v1 and v2 are removed from the mesh, they can be reused.
-		Vertex vFree = current.origin();
-		Quadric3DError qFree = quadricMap.remove(vFree);
-		quadricMap.remove(current.destination());
+		// If v1 and v2 are manifold, they are removed from the
+		// mesh and can be reused.
+		Vertex vFree = null;
+		Quadric3DError qFree = null;
+		if (current.origin().getLink() instanceof Triangle)
+		{
+			vFree = current.origin();
+			qFree = quadricMap.remove(vFree);
+		}
+		if (current.destination().getLink() instanceof Triangle)
+		{
+			vFree = current.destination();
+			qFree = quadricMap.remove(vFree);
+		}
 		current = (HalfEdge) mesh.edgeCollapse(current, v3);
 		// Update edge costs
 		quadricMap.put(v3, q3);
@@ -419,14 +430,42 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		assert current.origin() == v3 : ""+current+"\n"+v3+"\n"+apex;
 		assert current.destination() == apex : ""+current+"\n"+v3+"\n"+apex;
 		v3 = vFree;
+		if (v3 == null)
+			v3 = (Vertex) mesh.createVertex(0.0, 0.0, 0.0);
 		q3 = qFree;
-		do
+		if (q3 == null)
+			q3 = new Quadric3DError();
+		if (current.origin().getLink() instanceof Triangle)
 		{
-			current = (HalfEdge) current.nextOriginLoop();
-			if (current.destination() != mesh.outerVertex && current.destination().isReadable() && current.origin().isReadable())
-				tree.update(current.notOriented(), cost(current));
+			do
+			{
+				current = (HalfEdge) current.nextOriginLoop();
+				if (current.destination().isReadable() && current.origin().isReadable())
+					tree.update(current.notOriented(), cost(current));
+			}
+			while (current.destination() != apex);
+			return (HalfEdge) current.next();
 		}
-		while (current.destination() != apex);
+		Vertex o = current.origin();
+		Triangle [] list = (Triangle []) o.getLink();
+		for (Triangle t: list)
+		{
+			HalfEdge f = (HalfEdge) t.getAbstractHalfEdge();
+			if (f.destination() == o)
+				f = (HalfEdge) f.next();
+			else if (f.apex() == o)
+				f = (HalfEdge) f.prev();
+			assert f.origin() == o;
+			Vertex d = f.destination();
+			do
+			{
+				f = (HalfEdge) f.nextOriginLoop();
+				if (f.destination().isReadable() && f.origin().isReadable())
+					tree.update(f.notOriented(), cost(f));
+			}
+			while (f.destination() != d);
+			current = f;
+		}
 		return (HalfEdge) current.next();
 	}
 	
