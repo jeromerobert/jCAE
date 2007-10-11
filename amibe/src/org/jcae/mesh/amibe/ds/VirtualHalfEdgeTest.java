@@ -323,6 +323,41 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 	}
 	
 	/**
+	 * Unit tests for {@link AbstractHalfEdge#swap} on
+	 * non-manifold meshes.
+	 */
+	@Test(expected= IllegalArgumentException.class) public void swapNM47()
+	{
+		buildMeshNM();
+		super.swap(v[4], v[7]);
+	}
+	@Test(expected= IllegalArgumentException.class) public void swapNM36()
+	{
+		buildMeshNM();
+		super.swap(v[3], v[6]);
+	}
+	@Test(expected= IllegalArgumentException.class) public void swapNM3Outer()
+	{
+		buildMeshNM();
+		super.swap(v[3], mesh.outerVertex);
+	}
+	@Test public void swapNM15()
+	{
+		buildMeshNM();
+		super.swap(v[1], v[5]);
+	}
+	@Test public void swapNM34()
+	{
+		buildMeshNM();
+		super.swap(v[3], v[4]);
+	}
+	@Test public void swapNM43()
+	{
+		buildMeshNM();
+		super.swap(v[4], v[3]);
+	}
+
+	/**
 	 * Unit tests for {@link AbstractHalfEdge#split} on
 	 * non-manifold meshes.
 	 */
