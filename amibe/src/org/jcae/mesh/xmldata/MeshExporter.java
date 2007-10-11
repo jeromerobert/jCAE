@@ -727,7 +727,6 @@ abstract public class MeshExporter
 			fc.close();
 			fis.close();
 			clean(bb);
-			logger.info("Total number of nodes: "+count);
 			out.println("endsolid");
 			logger.info("Total number of triangles: "+count);
 		}
