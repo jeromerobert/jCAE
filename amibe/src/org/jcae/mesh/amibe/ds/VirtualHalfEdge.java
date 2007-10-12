@@ -834,6 +834,12 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		}
 		work[1].next();                 // (ond)
 		int attr3 = work[1].attributes;
+		if (work[1].hasAttributes(NONMANIFOLD))
+		{
+			// work[1] is listed in adjacency list and
+			// has to be replaced by work[0]
+			work[1].replaceEdgeLinks(work[0]);
+		}
 		work[1].sym();                  // a3 = (no*)
 		work[1].VHglue(work[0]);
 		work[0].attributes = attr3;
@@ -841,6 +847,12 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		work[0].next();                 // (dao)
 		copyOTri(work[0], work[1]);     // (dao)
 		int attr1 = work[1].attributes;
+		if (work[1].hasAttributes(NONMANIFOLD))
+		{
+			// work[1] is listed in adjacency list and
+			// has to be replaced by work[2]
+			work[1].replaceEdgeLinks(work[2]);
+		}
 		work[0].sym();                  // a1 = (ad*)
 		work[2].VHglue(work[0]);
 		work[2].attributes = attr1;
