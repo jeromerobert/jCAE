@@ -93,7 +93,7 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 		// 3 must not be merged, otherwise a non-manifold vertex
 		// is created.
 		buildMesh();
-		super.canCollapse(v[0], v[3], v[0], false);
+		super.canCollapse(v[1], v[4], v[1], false);
 	}
 	@Test public void canCollapseTopo010()
 	{
@@ -188,102 +188,102 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 	@Test public void countVertexLinks0()
 	{
 		buildMeshNM();
-		super.countVertexLinks(v[0], 1);
+		super.countVertexLinks(v[0], 4);
 	}
 	@Test public void countVertexLinks1()
 	{
 		buildMeshNM();
-		super.countVertexLinks(v[1], 4);
+		super.countVertexLinks(v[1], 1);
 	}
-	@Test public void countVertexLinks4()
+	@Test public void countVertexLinks2()
 	{
 		buildMeshNM();
-		super.countVertexLinks(v[4], 4);
+		super.countVertexLinks(v[2], 4);
 	}
 
 	/**
 	 * Verify that non-manifold edges are bound to expected
 	 * number of fans.
 	 */
-	@Test public void countEdgeLinks36()
+	@Test public void countEdgeLinks31()
 	{
 		buildMeshNM();
-		super.countEdgeLinks(v[3], v[6], 1);
+		super.countEdgeLinks(v[3], v[1], 1);
 	}
-	@Test public void countEdgeLinks46()
+	@Test public void countEdgeLinks12()
 	{
 		buildMeshNM();
-		super.countEdgeLinks(v[4], v[6], 2);
+		super.countEdgeLinks(v[1], v[2], 2);
 	}
-	@Test public void countEdgeLinks47()
+	@Test public void countEdgeLinks42()
 	{
 		buildMeshNM();
-		super.countEdgeLinks(v[4], v[7], 4);
+		super.countEdgeLinks(v[4], v[2], 4);
 	}
-	@Test public void countEdgeLinks14()
+	@Test public void countEdgeLinks20()
 	{
 		buildMeshNM();
-		super.countEdgeLinks(v[1], v[4], 4);
+		super.countEdgeLinks(v[2], v[0], 4);
 	}
 
 	/**
 	 * Unit tests for {@link AbstractHalfEdge#fanIterator} on
 	 * non-manifold meshes.
 	 */
-	@Test public void countFanIterator36()
+	@Test public void countFanIterator31()
 	{
 		buildMeshNM();
-		super.countFanIterator(v[3], v[6], 1);
+		super.countFanIterator(v[3], v[1], 1);
 	}
-	@Test public void countFanIterator47()
+	@Test public void countFanIterator42()
 	{
 		buildMeshNM();
-		super.countFanIterator(v[4], v[7], 4);
+		super.countFanIterator(v[4], v[2], 4);
 	}
-	@Test public void countFanIterator14()
+	@Test public void countFanIterator20()
 	{
 		buildMeshNM();
-		super.countFanIterator(v[1], v[4], 4);
+		super.countFanIterator(v[2], v[0], 4);
 	}
 
 	/**
 	 * Unit tests for {@link AbstractHalfEdge#canCollapse} on
 	 * non-manifold meshes.
 	 */
-	@Test public void canCollapseNM474()
+	@Test public void canCollapseNM424()
 	{
 		buildMeshNM();
-		super.canCollapse(v[4], v[7], v[4], true);
+		super.canCollapse(v[4], v[2], v[4], true);
 	}
-	@Test public void canCollapseNM475()
+	@Test public void canCollapseNM423()
 	{
 		buildMeshNM();
-		super.canCollapse(v[4], v[7], v[5], false);
+		super.canCollapse(v[4], v[2], v[3], false);
 	}
-	@Test public void canCollapseNM366()
+	@Test public void canCollapseNM355()
 	{
 		buildMeshNM();
-		super.canCollapse(v[3], v[6], v[6], false);
+		super.canCollapse(v[3], v[5], v[5], true);
 	}
-	@Test public void canCollapseNM636()
+	@Test public void canCollapseNM535()
 	{
 		buildMeshNM();
-		super.canCollapse(v[6], v[3], v[6], true);
+		super.canCollapse(v[5], v[3], v[5], false);
 	}
-	@Test public void canCollapseNM133()
+	@Test public void canCollapseNM565()
 	{
 		buildMeshNM();
-		super.canCollapse(v[1], v[3], v[3], false);
+		super.canCollapse(v[5], v[6], v[5], false);
 	}
 
 	/**
 	 * Unit tests for {@link AbstractHalfEdge#collapse} on
 	 * non-manifold meshes.
 	 */
-	@Test public void collapseNM474()
+	@Test public void collapseNM424()
 	{
 		buildMeshNM();
-		super.collapse(v[4], v[7], v[4]);
+		super.collapse(v[4], v[2], v[4]);
 	}
 	@Test public void collapseNM455()
 	{
@@ -295,94 +295,84 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 		buildMeshNM();
 		super.collapse(v[5], v[4], v[5]);
 	}
-	@Test public void collapseNM433()
+	@Test public void collapseNM353()
 	{
 		buildMeshNM();
-		super.collapse(v[4], v[3], v[3]);
+		super.collapse(v[3], v[5], v[3]);
 	}
-	@Test public void collapseNM343()
+	@Test(expected= IllegalArgumentException.class) public void collapseNM533()
 	{
 		buildMeshNM();
-		super.collapse(v[3], v[4], v[3]);
+		AbstractHalfEdge e = find(v[5], v[3]);
+		e.collapse(mesh, v[3]);
 	}
-	@Test public void collapseNM636()
+	@Test public void collapseNM131()
 	{
 		buildMeshNM();
-		super.collapse(v[6], v[3], v[6]);
-	}
-	@Test(expected= IllegalArgumentException.class) public void collapseNM366()
-	{
-		buildMeshNM();
-		AbstractHalfEdge e = find(v[3], v[6]);
-		e.collapse(mesh, v[6]);
-	}
-	@Test public void collapseNM300()
-	{
-		buildMeshNM();
-		super.collapse(v[3], v[0], v[0]);
+		super.collapse(v[1], v[3], v[1]);
 	}
 	
 	/**
 	 * Unit tests for {@link AbstractHalfEdge#swap} on
 	 * non-manifold meshes.
 	 */
-	@Test(expected= IllegalArgumentException.class) public void swapNM47()
+	@Test(expected= IllegalArgumentException.class) public void swapNM42()
 	{
 		buildMeshNM();
-		super.swap(v[4], v[7]);
+		super.swap(v[4], v[2]);
 	}
-	@Test(expected= IllegalArgumentException.class) public void swapNM36()
+	@Test(expected= IllegalArgumentException.class) public void swapNM53()
 	{
 		buildMeshNM();
-		super.swap(v[3], v[6]);
+		super.swap(v[5], v[3]);
 	}
 	@Test(expected= IllegalArgumentException.class) public void swapNM3Outer()
 	{
 		buildMeshNM();
 		super.swap(v[3], mesh.outerVertex);
 	}
-	@Test public void swapNM15()
+	@Test public void swapNM65()
 	{
 		buildMeshNM();
-		super.swap(v[1], v[5]);
+		super.swap(v[6], v[5]);
 	}
-	@Test public void swapNM34()
+	@Test public void swapNM32()
 	{
 		buildMeshNM();
-		super.swap(v[3], v[4]);
+		super.swap(v[3], v[2]);
 	}
-	@Test public void swapNM43()
+	@Test public void swapNM23()
 	{
 		buildMeshNM();
-		super.swap(v[4], v[3]);
+		super.swap(v[2], v[3]);
 	}
 
 	/**
 	 * Unit tests for {@link AbstractHalfEdge#split} on
 	 * non-manifold meshes.
 	 */
-	@Test public void splitNM47()
+	@Test public void splitNM42()
 	{
 		buildMeshNM();
 		Vertex n = (Vertex) mesh.factory.createVertex(0.0, 1.5, 0.0);
-		super.split(v[4], v[7], n);
+		super.split(v[4], v[2], n);
 	}
-	@Test public void splitNM63()
+	@Test public void splitNM35()
 	{
 		buildMeshNM();
 		Vertex n = (Vertex) mesh.factory.createVertex(-1.0, 1.5, 0.0);
-		super.split(v[6], v[3], n);
+		super.split(v[3], v[5], n);
 	}
-	@Test(expected= IllegalArgumentException.class) public void splitNM36()
+	@Test(expected= IllegalArgumentException.class) public void splitNM53()
 	{
 		buildMeshNM();
 		Vertex n = (Vertex) mesh.factory.createVertex(-1.0, 1.5, 0.0);
-		super.split(v[3], v[6], n);
+		super.split(v[5], v[3], n);
 	}
 	@Test public void splitNM45()
 	{
 		buildMeshNM();
-		Vertex n = (Vertex) mesh.factory.createVertex(0.5, 1.0, 0.0);
+		Vertex n = (Vertex) mesh.factory.createVertex(0.5, 2.0, 0.0);
 		super.split(v[4], v[5], n);
 	}
 

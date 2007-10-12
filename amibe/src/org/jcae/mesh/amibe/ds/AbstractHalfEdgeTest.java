@@ -27,48 +27,7 @@ public class AbstractHalfEdgeTest
 	protected Mesh mesh;
 	protected Vertex [] v;
 	protected Triangle [] T;
-	
-	protected void buildMesh()
-	{
-		/*
-		 *  v4        v3        v2
-		 *   +---------+---------+
-		 *   | \       |       / |
-		 *   |   \  T2 | T1  /   |
-		 *   |     \   |   /     |
-		 *   |  T3   \ | /   T0  |
-		 *   +---------+---------+
-		 *   v5        v0       v1
-		 */
-		v = new Vertex[6];
-		v[0] = (Vertex) mesh.factory.createVertex(0.0, 0.0, 0.0);
-		v[1] = (Vertex) mesh.factory.createVertex(1.0, 0.0, 0.0);
-		v[2] = (Vertex) mesh.factory.createVertex(1.0, 1.0, 0.0);
-		v[3] = (Vertex) mesh.factory.createVertex(0.0, 1.0, 0.0);
-		v[4] = (Vertex) mesh.factory.createVertex(-1.0, 1.0, 0.0);
-		v[5] = (Vertex) mesh.factory.createVertex(-1.0, 0.0, 0.0);
-		for (int i = 0; i < v.length; i++)
-			v[i].setLabel(i);
-		T = new Triangle[4];
-		T[0] = (Triangle) mesh.factory.createTriangle(v[0], v[1], v[2]);
-		T[1] = (Triangle) mesh.factory.createTriangle(v[2], v[3], v[0]);
-		T[2] = (Triangle) mesh.factory.createTriangle(v[4], v[0], v[3]);
-		T[3] = (Triangle) mesh.factory.createTriangle(v[5], v[0], v[4]);
-		v[0].setLink(T[0]);
-		v[1].setLink(T[0]);
-		v[2].setLink(T[0]);
-		v[3].setLink(T[2]);
-		v[4].setLink(T[2]);
-		v[5].setLink(T[3]);
-		int cnt = 0;
-		for (Triangle t: T)
-		{
-			mesh.add(t);
-			t.setGroupId(cnt);
-			cnt++;
-		}
-		mesh.buildAdjacency(v, -1.0);
-	}
+	private int vertexLabel = 0;
 	
 	private void create3x4Shell()
 	{
@@ -102,6 +61,7 @@ public class AbstractHalfEdgeTest
 		}
 		for (int i = 0; i < v.length; i++)
 			v[i].setLabel(i);
+		vertexLabel = v.length;
 
 		T = new Triangle[12];
 		for (int i = 0; i < 3; i++)
@@ -126,10 +86,88 @@ public class AbstractHalfEdgeTest
 		}
 	}
 	
+	// m Vertex on rows, n Vertex on columns
+	private void createMxNShell(int m, int n)
+	{
+		/*   v3       v4        v5 
+		 *   +---------+---------+
+		 *   | \       | \       |
+		 *   |   \  T1 |   \  T3 |
+		 *   |     \   |     \   |
+		 *   |  T0   \ |  T2   \ |
+		 *   +---------+---------+
+		 *   v0        v1       v2
+		 */
+		v = new Vertex[m*n];
+		for (int j = 0; j < n; j++)
+			for (int i = 0; i < m; i++)
+				v[m*j+i] = (Vertex) mesh.factory.createVertex(i, j, 0.0);
+		for (int i = 0; i < v.length; i++)
+			v[i].setLabel(i);
+		vertexLabel = v.length;
+		T = createMxNTriangles(m, n, v);
+	}
+
+	private Triangle [] createMxNTriangles(int m, int n, Vertex [] vv)
+	{
+		Triangle [] tt = new Triangle[2*(m-1)*(n-1)];
+		for (int j = 0; j < n-1; j++)
+		{
+			for (int i = 0; i < m-1; i++)
+			{
+				tt[2*(m-1)*j+2*i]   = (Triangle) mesh.factory.createTriangle(vv[m*j+i], vv[m*j+i+1], vv[m*(j+1)+i]);
+				tt[2*(m-1)*j+2*i+1] = (Triangle) mesh.factory.createTriangle(vv[m*j+i+1], vv[m*(j+1)+i+1], vv[m*(j+1)+i]);
+				vv[m*j+i].setLink(tt[2*(m-1)*j+2*i]);
+			}
+			vv[m*j+m-1].setLink(tt[2*(m-1)*j+2*m-3]);
+		}
+		// Last row
+		for (int i = 0; i < m-1; i++)
+			vv[m*(n-1)+i].setLink(tt[2*(m-1)*(n-2)+2*i]);
+		vv[m*n-1].setLink(tt[2*(m-1)*(n-1)-1]);
+		int cnt = mesh.getTriangles().size();
+		for (Triangle t: tt)
+		{
+			mesh.add(t);
+			t.setGroupId(cnt);
+			cnt++;
+		}
+		return tt;
+	}
+	
+	private void rotateMxNShellAroundY(int m, int n, double angle)
+	{
+		// Create new vertices and append them to current mesh
+		assert v.length == m*n;
+		Vertex [] vy = new Vertex[v.length];
+		vertexLabel = v.length;
+		double ct = Math.cos(angle*Math.PI / 180.0);
+		double st = Math.sin(angle*Math.PI / 180.0);
+		for (int i = 0; i < v.length; i++)
+		{
+			if (i%m == 0)
+				vy[i]   = v[i];
+			else
+			{
+				double [] xyz = v[i].getUV();
+				vy[i]   = (Vertex) mesh.factory.createVertex(ct*xyz[0]+st*xyz[2], xyz[1], -st*xyz[0]+ct*xyz[2]);
+				vy[i].setLabel(vertexLabel);
+				vertexLabel++;
+			}
+		}
+		createMxNTriangles(m, n, vy);
+	}
+	
+	protected void buildMesh()
+	{
+		createMxNShell(3, 2);
+		mesh.buildAdjacency();
+	}
+	
 	protected void buildMesh2()
 	{
 		create3x4Shell();
-		mesh.buildAdjacency(v, -1.0);
+		mesh.buildAdjacency();
 	}
 	
 	protected void buildMeshTopo()
@@ -178,56 +216,16 @@ public class AbstractHalfEdgeTest
 			t.setGroupId(cnt);
 			cnt++;
 		}
-		mesh.buildAdjacency(v, -1.0);
+		mesh.buildAdjacency();
 	}
 	
 	protected void buildMeshNM()
 	{
-		create3x4Shell();
-		// pi/2 clockwise rotation of vertices v around y
-		Vertex [] vy = new Vertex[12];
-		int label = 12;
-		for (int i = 0; i < v.length; i++)
-		{
-			if (i%3 == 1)
-				vy[i]   = v[i];
-			else
-			{
-				double [] xyz = v[i].getUV();
-				vy[i]   = (Vertex) mesh.factory.createVertex(-xyz[2], xyz[1], xyz[0]);
-				vy[i].setLabel(label);
-				label++;
-			}
-		}
-		Triangle [] Ty = new Triangle[12];
-		for (int i = 0; i < 3; i++)
-		{
-			Ty[4*i]   = (Triangle) mesh.factory.createTriangle(vy[3*i], vy[3*i+1], vy[3*i+3]);
-			Ty[4*i+1] = (Triangle) mesh.factory.createTriangle(vy[3*i+1], vy[3*i+4], vy[3*i+3]);
-			Ty[4*i+2] = (Triangle) mesh.factory.createTriangle(vy[3*i+5], vy[3*i+4], vy[3*i+1]);
-			Ty[4*i+3] = (Triangle) mesh.factory.createTriangle(vy[3*i+1], vy[3*i+2], vy[3*i+5]);
-			vy[3*i].setLink(Ty[4*i]);
-			vy[3*i+1].setLink(Ty[4*i]);
-			vy[3*i+2].setLink(Ty[4*i+3]);
-		}
-		vy[9].setLink(Ty[9]);
-		vy[10].setLink(Ty[9]);
-		vy[11].setLink(Ty[11]);
-		for (Triangle t: Ty)
-			mesh.add(t);
-		int cnt = T.length;
-		for (Triangle t: Ty)
-		{
-			t.setGroupId(cnt);
-			cnt++;
-		}
-		Vertex [] vTotal = new Vertex[20];
-		System.arraycopy(v, 0, vTotal, 0, v.length);
-		for (int i = 0; i < 4; i++)
-			vTotal[12+i] = vy[3*i];
-		for (int i = 0; i < 4; i++)
-			vTotal[16+i] = vy[3*i+2];
-		mesh.buildAdjacency(vTotal, -1.0);
+		createMxNShell(2, 4);
+		rotateMxNShellAroundY(2, 4, 90);
+		rotateMxNShellAroundY(2, 4, 180);
+		rotateMxNShellAroundY(2, 4, 270);
+		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
 	}
 	
