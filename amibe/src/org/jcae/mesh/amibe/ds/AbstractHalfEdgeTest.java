@@ -28,6 +28,7 @@ public class AbstractHalfEdgeTest
 	protected Vertex [] v;
 	protected Triangle [] T;
 	private int vertexLabel = 0;
+	protected boolean alterned = true;
 	
 	private void create3x4Shell()
 	{
@@ -55,9 +56,9 @@ public class AbstractHalfEdgeTest
 		v = new Vertex[12];
 		for (int i = 0; i < 4; i++)
 		{
-			v[3*i]   = (Vertex) mesh.factory.createVertex(-1.0, i, 0.0);
-			v[3*i+1] = (Vertex) mesh.factory.createVertex(0.0, i, 0.0);
-			v[3*i+2] = (Vertex) mesh.factory.createVertex(1.0, i, 0.0);
+			v[3*i]   = (Vertex) mesh.createVertex(-1.0, i, 0.0);
+			v[3*i+1] = (Vertex) mesh.createVertex(0.0, i, 0.0);
+			v[3*i+2] = (Vertex) mesh.createVertex(1.0, i, 0.0);
 		}
 		for (int i = 0; i < v.length; i++)
 			v[i].setLabel(i);
@@ -66,10 +67,10 @@ public class AbstractHalfEdgeTest
 		T = new Triangle[12];
 		for (int i = 0; i < 3; i++)
 		{
-			T[4*i]   = (Triangle) mesh.factory.createTriangle(v[3*i], v[3*i+1], v[3*i+3]);
-			T[4*i+1] = (Triangle) mesh.factory.createTriangle(v[3*i+1], v[3*i+4], v[3*i+3]);
-			T[4*i+2] = (Triangle) mesh.factory.createTriangle(v[3*i+5], v[3*i+4], v[3*i+1]);
-			T[4*i+3] = (Triangle) mesh.factory.createTriangle(v[3*i+1], v[3*i+2], v[3*i+5]);
+			T[4*i]   = (Triangle) mesh.createTriangle(v[3*i], v[3*i+1], v[3*i+3]);
+			T[4*i+1] = (Triangle) mesh.createTriangle(v[3*i+1], v[3*i+4], v[3*i+3]);
+			T[4*i+2] = (Triangle) mesh.createTriangle(v[3*i+5], v[3*i+4], v[3*i+1]);
+			T[4*i+3] = (Triangle) mesh.createTriangle(v[3*i+1], v[3*i+2], v[3*i+5]);
 			v[3*i].setLink(T[4*i]);
 			v[3*i+1].setLink(T[4*i]);
 			v[3*i+2].setLink(T[4*i+3]);
@@ -92,25 +93,59 @@ public class AbstractHalfEdgeTest
 		v = new Vertex[m*n];
 		for (int j = 0; j < n; j++)
 			for (int i = 0; i < m; i++)
-				v[m*j+i] = (Vertex) mesh.factory.createVertex(i, j, 0.0);
+				v[m*j+i] = (Vertex) mesh.createVertex(i, j, 0.0);
 		for (int i = 0; i < v.length; i++)
-			v[i].setLabel(i);
+		{
+			v[i].setLabel(vertexLabel);
+			vertexLabel++;
+		}
 		vertexLabel = v.length;
 		T = createMxNTriangles(m, n, v);
 	}
 
 	private Triangle [] createMxNTriangles(int m, int n, Vertex [] vv)
 	{
+		/*   v3       v4        v5 
+		 *   +---------+---------+
+		 *   | \       | \       |
+		 *   |   \  T1 |   \  T3 |
+		 *   |     \   |     \   |
+		 *   |  T0   \ |  T2   \ |
+		 *   +---------+---------+
+		 *   v0        v1       v2
+		 * or
+		 *   v3       v4        v5 
+		 *   +---------+---------+
+		 *   |       / |       / |
+		 *   | T0  /   | T2  /   |
+		 *   |   /     |   /     |
+		 *   | /   T1  | /   T3  |
+		 *   +---------+---------+
+		 *   v0        v1       v2
+		 */
 		Triangle [] tt = new Triangle[2*(m-1)*(n-1)];
 		for (int j = 0; j < n-1; j++)
 		{
-			for (int i = 0; i < m-1; i++)
+			if (j%2 == 0 || !alterned)
 			{
-				tt[2*(m-1)*j+2*i]   = (Triangle) mesh.factory.createTriangle(vv[m*j+i], vv[m*j+i+1], vv[m*(j+1)+i]);
-				tt[2*(m-1)*j+2*i+1] = (Triangle) mesh.factory.createTriangle(vv[m*j+i+1], vv[m*(j+1)+i+1], vv[m*(j+1)+i]);
-				vv[m*j+i].setLink(tt[2*(m-1)*j+2*i]);
+				for (int i = 0; i < m-1; i++)
+				{
+					tt[2*(m-1)*j+2*i]   = (Triangle) mesh.createTriangle(vv[m*j+i], vv[m*j+i+1], vv[m*(j+1)+i]);
+					tt[2*(m-1)*j+2*i+1] = (Triangle) mesh.createTriangle(vv[m*j+i+1], vv[m*(j+1)+i+1], vv[m*(j+1)+i]);
+					vv[m*j+i].setLink(tt[2*(m-1)*j+2*i]);
+				}
+				vv[m*j+m-1].setLink(tt[2*(m-1)*j+2*m-3]);
 			}
-			vv[m*j+m-1].setLink(tt[2*(m-1)*j+2*m-3]);
+			else
+			{
+				for (int i = 0; i < m-1; i++)
+				{
+					tt[2*(m-1)*j+2*i]   = (Triangle) mesh.createTriangle(vv[m*j+i], vv[m*(j+1)+i+1], vv[m*(j+1)+i]);
+					tt[2*(m-1)*j+2*i+1] = (Triangle) mesh.createTriangle(vv[m*j+i+1], vv[m*(j+1)+i+1], vv[m*j+i]);
+					vv[m*j+i].setLink(tt[2*(m-1)*j+2*i]);
+				}
+				vv[m*j+m-1].setLink(tt[2*(m-1)*j+2*m-3]);
+			}
 		}
 		// Last row
 		for (int i = 0; i < m-1; i++)
@@ -131,7 +166,6 @@ public class AbstractHalfEdgeTest
 		// Create new vertices and append them to current mesh
 		assert v.length == m*n;
 		Vertex [] vy = new Vertex[v.length];
-		vertexLabel = v.length;
 		double ct = Math.cos(angle*Math.PI / 180.0);
 		double st = Math.sin(angle*Math.PI / 180.0);
 		for (int i = 0; i < v.length; i++)
@@ -141,7 +175,7 @@ public class AbstractHalfEdgeTest
 			else
 			{
 				double [] xyz = v[i].getUV();
-				vy[i]   = (Vertex) mesh.factory.createVertex(ct*xyz[0]+st*xyz[2], xyz[1], -st*xyz[0]+ct*xyz[2]);
+				vy[i]   = (Vertex) mesh.createVertex(ct*xyz[0]+st*xyz[2], xyz[1], -st*xyz[0]+ct*xyz[2]);
 				vy[i].setLabel(vertexLabel);
 				vertexLabel++;
 			}
@@ -178,22 +212,22 @@ public class AbstractHalfEdgeTest
 		 *   edge (v4,v0) would become non-manifold.
 		 */
 		v = new Vertex[6];
-		v[0] = (Vertex) mesh.factory.createVertex(0.0, 0.0, 0.0);
-		v[1] = (Vertex) mesh.factory.createVertex(1.0, 0.0, 0.0);
-		v[2] = (Vertex) mesh.factory.createVertex(1.0, 1.0, 0.0);
-		v[3] = (Vertex) mesh.factory.createVertex(0.0, 1.0, 0.0);
-		v[4] = (Vertex) mesh.factory.createVertex(0.0, 1.0, 1.0);
-		v[5] = (Vertex) mesh.factory.createVertex(0.0, 0.0, 1.0);
+		v[0] = (Vertex) mesh.createVertex(0.0, 0.0, 0.0);
+		v[1] = (Vertex) mesh.createVertex(1.0, 0.0, 0.0);
+		v[2] = (Vertex) mesh.createVertex(1.0, 1.0, 0.0);
+		v[3] = (Vertex) mesh.createVertex(0.0, 1.0, 0.0);
+		v[4] = (Vertex) mesh.createVertex(0.0, 1.0, 1.0);
+		v[5] = (Vertex) mesh.createVertex(0.0, 0.0, 1.0);
 		for (int i = 0; i < v.length; i++)
 			v[i].setLabel(i);
 
 		T = new Triangle[6];
-		T[0] = (Triangle) mesh.factory.createTriangle(v[0], v[1], v[2]);
-		T[1] = (Triangle) mesh.factory.createTriangle(v[2], v[3], v[0]);
-		T[2] = (Triangle) mesh.factory.createTriangle(v[4], v[0], v[3]);
-		T[3] = (Triangle) mesh.factory.createTriangle(v[5], v[0], v[4]);
-		T[4] = (Triangle) mesh.factory.createTriangle(v[4], v[2], v[1]);
-		T[5] = (Triangle) mesh.factory.createTriangle(v[5], v[4], v[1]);
+		T[0] = (Triangle) mesh.createTriangle(v[0], v[1], v[2]);
+		T[1] = (Triangle) mesh.createTriangle(v[2], v[3], v[0]);
+		T[2] = (Triangle) mesh.createTriangle(v[4], v[0], v[3]);
+		T[3] = (Triangle) mesh.createTriangle(v[5], v[0], v[4]);
+		T[4] = (Triangle) mesh.createTriangle(v[4], v[2], v[1]);
+		T[5] = (Triangle) mesh.createTriangle(v[5], v[4], v[1]);
 		v[0].setLink(T[0]);
 		v[1].setLink(T[0]);
 		v[2].setLink(T[0]);
@@ -212,6 +246,25 @@ public class AbstractHalfEdgeTest
 	
 	protected void buildMeshNM()
 	{
+		/*  v6         v7
+		 *   +---------+
+		 *   | \       |
+		 *   |   \  T5 |
+		 *   |     \   |
+		 *   |  T4   \ |
+		 * v4+---------+ v5
+		 *   |       / |
+		 *   | T2  /   |
+		 *   |   /     |
+		 *   | /   T3  |
+		 * v2+---------+ v3
+		 *   | \       |
+		 *   |   \  T1 |
+		 *   |     \   |
+		 *   |  T0   \ |
+		 *   +---------+
+		 *  v0         v1
+		 */
 		createMxNShell(2, 4);
 		rotateMxNShellAroundY(2, 4, 90);
 		rotateMxNShellAroundY(2, 4, 180);
@@ -222,6 +275,21 @@ public class AbstractHalfEdgeTest
 	
 	protected void buildMeshNM43()
 	{
+		/*  v8         v9       v10        v11
+		 *   +---------+---------+---------+
+		 *   | \       | \       | \       |
+		 *   |   \  T7 |   \  T9 |   \  T11|
+		 *   |     \   |     \   |     \   |
+		 *   |  T6   \ |  T8   \ |  T10  \ |
+		 * v4+---------+---------+---------+v7
+		 *   | \     v5| \     v6| \       |
+		 *   |   \  T1 |   \  T3 |   \  T5 |
+		 *   |     \   |     \   |     \   |
+		 *   |  T0   \ |  T2   \ |  T4   \ |
+		 *   +---------+---------+---------+
+		 *  v0         v1        v2        v3
+		 */
+		alterned = false;
 		createMxNShell(4, 3);
 		rotateMxNShellAroundY(4, 3, 90);
 		rotateMxNShellAroundY(4, 3, 180);
@@ -232,6 +300,25 @@ public class AbstractHalfEdgeTest
 	
 	protected void buildMeshNM44()
 	{
+		/*  v12       v13       v14       v15
+		 *   +---------+---------+---------+
+		 *   | \     v5| \     v6| \       |
+		 *   |   \ T13 |   \ T15 |   \ T17 |
+		 *   |     \   |     \   |     \   |
+		 *   |  T12  \ |  T14  \ |  T16  \ |
+		 * v8+---------+---------+---------+v11
+		 *   |       / |v9     / |v10    / |
+		 *   | T6  /   | T8  /   | T10 /   |
+		 *   |   /     |   /     |   /     |
+		 *   | /   T7  | /   T9  | /   T11 |
+		 * v4+---------+---------+---------+v7
+		 *   | \     v5| \     v6| \       |
+		 *   |   \  T1 |   \  T3 |   \  T5 |
+		 *   |     \   |     \   |     \   |
+		 *   |  T0   \ |  T2   \ |  T4   \ |
+		 *   +---------+---------+---------+
+		 *  v0         v1        v2        v3
+		 */
 		createMxNShell(4, 4);
 		rotateMxNShellAroundY(4, 4, 90);
 		rotateMxNShellAroundY(4, 4, 180);

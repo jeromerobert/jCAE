@@ -263,28 +263,28 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 		super.collapse(v[8], v[4], v[8]);
 	}
 	// Check when non-manifold edge is prevOrigin()
-	@Test public void collapseNM858()
+	@Test public void collapseNM898()
 	{
 		buildMeshNM44();
-		super.collapse(v[8], v[5], v[8]);
+		super.collapse(v[8], v[9], v[8]);
 	}
 	// Check when non-manifold edge is nextDest()
-	@Test public void collapseNM544()
+	@Test public void collapseNM944()
 	{
 		buildMeshNM44();
-		super.collapse(v[5], v[4], v[4]);
+		super.collapse(v[9], v[4], v[4]);
 	}
 	// Check when non-manifold edge is next()
-	@Test public void collapseNM454()
+	@Test public void collapseNM494()
 	{
 		buildMeshNM44();
-		super.collapse(v[4], v[5], v[4]);
+		super.collapse(v[4], v[9], v[4]);
 	}
 	// Check when non-manifold edge is prev()
-	@Test public void collapseNM588()
+	@Test public void collapseNM988()
 	{
 		buildMeshNM44();
-		super.collapse(v[5], v[8], v[8]);
+		super.collapse(v[9], v[8], v[8]);
 	}
 	// Check when apical vertex is non-manifold
 	@Test public void collapseNM595()
@@ -296,57 +296,6 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 	@Test public void collapseNM959()
 	{
 		buildMeshNM44();
-		super.collapse(v[9], v[5], v[9]);
-	}
-	// Ditto with a smaller shell to reach boundaries
-	// Check when non-manifold edge is prevOrigin()
-	@Test public void collapseNMbis858()
-	{
-		buildMeshNM43();
-		super.collapse(v[8], v[5], v[8]);
-	}
-	// Check when non-manifold edge is nextDest()
-	@Test public void collapseNMbis544()
-	{
-		buildMeshNM43();
-		super.collapse(v[5], v[4], v[4]);
-	}
-	// Check when non-manifold edge is nextDest()
-	// and on a boundary
-	@Test public void collapseNMbis988()
-	{
-		buildMeshNM43();
-		super.collapse(v[9], v[8], v[8]);
-	}
-	// Check when non-manifold edge is next()
-	@Test public void collapseNMbis454()
-	{
-		buildMeshNM43();
-		super.collapse(v[4], v[5], v[4]);
-	}
-	// Check when non-manifold edge is next()
-	// and on a boundary
-	@Test public void collapseNMbis010()
-	{
-		buildMeshNM43();
-		super.collapse(v[0], v[1], v[0]);
-	}
-	// Check when non-manifold edge is prev()
-	@Test public void collapseNMbis588()
-	{
-		buildMeshNM43();
-		super.collapse(v[5], v[8], v[8]);
-	}
-	// Check when apical vertex is non-manifold
-	@Test public void collapseNMbis595()
-	{
-		buildMeshNM43();
-		super.collapse(v[5], v[9], v[5]);
-	}
-	// Check when symmetric apical vertex is non-manifold
-	@Test public void collapseNMbis959()
-	{
-		buildMeshNM43();
 		super.collapse(v[9], v[5], v[9]);
 	}
 	
