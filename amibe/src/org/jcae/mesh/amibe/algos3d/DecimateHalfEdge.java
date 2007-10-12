@@ -197,6 +197,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		// Compute quadrics
 		final double [] vect1 = new double[3];
 		final double [] vect2 = new double[3];
+		final double [] vect3 = new double[3];
 		final double [] normal = new double[3];
 		for (AbstractTriangle af: mesh.getTriangles())
 		{
@@ -247,22 +248,27 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 						//  length(vect2) == length(b)
 						p0 = b.origin().getUV();
 						p1 = b.destination().getUV();
-						p2 = b.apex().getUV();
 						vect1[0] = p1[0] - p0[0];
 						vect1[1] = p1[1] - p0[1];
 						vect1[2] = p1[2] - p0[2];
-						vect2[0] = p2[0] - p0[0];
-						vect2[1] = p2[1] - p0[1];
-						vect2[2] = p2[2] - p0[2];
-						Matrix3D.prodVect3D(vect1, vect2, normal);
-						norm = Matrix3D.norm(normal);
-						if (norm > 1.e-20)
+						if (e.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 						{
-							norm = 1.0 / norm;
-							for (int k = 0; k < 3; k++)
-								normal[k] *=  norm;
+							p2 = b.apex().getUV();
+							vect2[0] = p2[0] - p0[0];
+							vect2[1] = p2[1] - p0[1];
+							vect2[2] = p2[2] - p0[2];
+							Matrix3D.prodVect3D(vect1, vect2, vect3);
+							norm = Matrix3D.norm(vect3);
+							if (norm > 1.e-20)
+							{
+								norm = 1.0 / norm;
+								for (int k = 0; k < 3; k++)
+									vect3[k] *=  norm;
+							}
+							Matrix3D.prodVect3D(vect1, vect3, vect2);
 						}
-						Matrix3D.prodVect3D(vect1, normal, vect2);
+						else
+							Matrix3D.prodVect3D(vect1, normal, vect2);
 						for (int k = 0; k < 3; k++)
 							vect2[k] *= 100.0;
 						d = - Matrix3D.prodSca(vect2, b.origin().getUV());
