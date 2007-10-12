@@ -1,3 +1,10 @@
+Fri Oct 12 12:43:06 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Mesh.java: Current signature of
+	buildAdjacency() is not very intuitive, there is no reason to
+	pass a list of vertices.  Add methods with less arguments and
+	declare current method as being deprecated.
+
 Wed Oct 10 14:16:01 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/mesher/ds

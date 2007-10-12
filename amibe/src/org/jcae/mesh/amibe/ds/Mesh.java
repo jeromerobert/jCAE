@@ -348,13 +348,42 @@ public class Mesh extends AbstractMesh implements Serializable
 	/**
 	 * Build adjacency relations between triangles
 	 */
-	@SuppressWarnings("unchecked")
+	public void buildAdjacency()
+	{
+		buildAdjacency(-1.0);
+	}
+
+	/**
+	 * Build adjacency relations between triangles
+	 */
+	public void buildAdjacency(double minAngle)
+	{
+		LinkedHashSet<Vertex> vertices = new LinkedHashSet<Vertex>(triangleList.size()/2);
+		for (AbstractTriangle at: triangleList)
+			for (Vertex v: at.vertex)
+				vertices.add(v);
+		buildAdjacency(vertices, minAngle);
+	}
+
+	/**
+	 * Build adjacency relations between triangles
+	 * @deprecated
+	 */
 	public void buildAdjacency(Vertex [] vertices, double minAngle)
+	{
+		ArrayList list = new ArrayList<Vertex>(vertices.length);
+		for (Vertex v: vertices)
+			list.add(v);
+		buildAdjacency(list, minAngle);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void buildAdjacency(Collection<Vertex> vertices, double minAngle)
 	{
 		//  1. For each vertex, build the list of triangles
 		//     connected to this vertex.
 		logger.debug("Build the list of triangles connected to each vertex");
-		HashMap<Vertex, ArrayList<AbstractTriangle>> tVertList = new HashMap<Vertex, ArrayList<AbstractTriangle>>(vertices.length);
+		HashMap<Vertex, ArrayList<AbstractTriangle>> tVertList = new HashMap<Vertex, ArrayList<AbstractTriangle>>(vertices.size());
 		for (Vertex v: vertices)
 			tVertList.put(v, new ArrayList<AbstractTriangle>(10));
 		for (AbstractTriangle t: triangleList)
