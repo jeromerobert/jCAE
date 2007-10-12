@@ -136,7 +136,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	public final Map<Triangle, Integer> getAdjNonManifold()
 	{
-		assert hasAttributes(NONMANIFOLD) && !hasAttributes(OUTER) : this;
+		assert hasAttributes(NONMANIFOLD) && !hasAttributes(OUTER) : "Non-manifold edge: "+this;
 		// By convention, adjacency list is stored in a virtual triangle.
 		return (Map<Triangle, Integer>) HEsym().next.sym;
 	}
@@ -570,7 +570,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		{
 			// In T2, e[0] will be replaced by
 			// the successor of e[3]
-			e[2].replaceEdgeLinks(e[5]);
+			e[0].replaceEdgeLinks(e[5]);
 		}
 		//    T1: e[1] is unchanged
 		TriangleHE T1 = e[1].tri;
