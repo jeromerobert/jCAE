@@ -1218,7 +1218,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		work[1].attributes |= attr4;
 		work[0].pushAttributes();
 		work[1].pushAttributes();
-		if (!work[0].hasAttributes(OUTER))
+		if (!hasAttributes(OUTER))
 		{
 			Triangle t34 = work[1].tri;
 			if (t34.isOuter())
