@@ -287,10 +287,10 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 		super.collapse(v[4], v[2], v[4]);
 	}
 	// Check when non-manifold edge is prevOrigin()
-	@Test public void collapseNM656()
+	@Test public void collapseNM434()
 	{
 		buildMeshNM();
-		super.collapse(v[6], v[5], v[6]);
+		super.collapse(v[4], v[3], v[4]);
 	}
 	// Check when non-manifold edge is nextDest()
 	@Test public void collapseNM544()
