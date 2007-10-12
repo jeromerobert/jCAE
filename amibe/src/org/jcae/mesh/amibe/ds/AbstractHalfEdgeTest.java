@@ -89,15 +89,6 @@ public class AbstractHalfEdgeTest
 	// m Vertex on rows, n Vertex on columns
 	protected void createMxNShell(int m, int n)
 	{
-		/*   v3       v4        v5 
-		 *   +---------+---------+
-		 *   | \       | \       |
-		 *   |   \  T1 |   \  T3 |
-		 *   |     \   |     \   |
-		 *   |  T0   \ |  T2   \ |
-		 *   +---------+---------+
-		 *   v0        v1       v2
-		 */
 		v = new Vertex[m*n];
 		for (int j = 0; j < n; j++)
 			for (int i = 0; i < m; i++)
@@ -225,6 +216,26 @@ public class AbstractHalfEdgeTest
 		rotateMxNShellAroundY(2, 4, 90);
 		rotateMxNShellAroundY(2, 4, 180);
 		rotateMxNShellAroundY(2, 4, 270);
+		mesh.buildAdjacency();
+		assertTrue("Mesh is not valid", mesh.isValid());
+	}
+	
+	protected void buildMeshNM43()
+	{
+		createMxNShell(4, 3);
+		rotateMxNShellAroundY(4, 3, 90);
+		rotateMxNShellAroundY(4, 3, 180);
+		rotateMxNShellAroundY(4, 3, 270);
+		mesh.buildAdjacency();
+		assertTrue("Mesh is not valid", mesh.isValid());
+	}
+	
+	protected void buildMeshNM44()
+	{
+		createMxNShell(4, 4);
+		rotateMxNShellAroundY(4, 4, 90);
+		rotateMxNShellAroundY(4, 4, 180);
+		rotateMxNShellAroundY(4, 4, 270);
 		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
 	}
