@@ -87,7 +87,7 @@ public class AbstractHalfEdgeTest
 	}
 	
 	// m Vertex on rows, n Vertex on columns
-	private void createMxNShell(int m, int n)
+	protected void createMxNShell(int m, int n)
 	{
 		/*   v3       v4        v5 
 		 *   +---------+---------+
@@ -135,7 +135,7 @@ public class AbstractHalfEdgeTest
 		return tt;
 	}
 	
-	private void rotateMxNShellAroundY(int m, int n, double angle)
+	protected void rotateMxNShellAroundY(int m, int n, double angle)
 	{
 		// Create new vertices and append them to current mesh
 		assert v.length == m*n;

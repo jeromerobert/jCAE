@@ -280,25 +280,61 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 	 * Unit tests for {@link AbstractHalfEdge#collapse} on
 	 * non-manifold meshes.
 	 */
+	// Check collapsing non-manifold edge
 	@Test public void collapseNM424()
 	{
 		buildMeshNM();
 		super.collapse(v[4], v[2], v[4]);
 	}
-	@Test public void collapseNM455()
+	// Check when non-manifold edge is prevOrigin()
+	@Test public void collapseNM656()
 	{
 		buildMeshNM();
-		super.collapse(v[4], v[5], v[5]);
+		super.collapse(v[6], v[5], v[6]);
 	}
-	@Test public void collapseNM545()
+	// Check when non-manifold edge is nextDest()
+	@Test public void collapseNM544()
 	{
 		buildMeshNM();
-		super.collapse(v[5], v[4], v[5]);
+		super.collapse(v[5], v[4], v[4]);
 	}
+	// Check when non-manifold edge is next()
+	@Test public void collapseNM344()
+	{
+		buildMeshNM();
+		super.collapse(v[3], v[4], v[4]);
+	}
+	// Check when non-manifold edge is prev()
+	@Test public void collapseNM454()
+	{
+		buildMeshNM();
+		super.collapse(v[4], v[5], v[4]);
+	}
+	// Check when apical vertex is non-manifold
 	@Test public void collapseNM353()
 	{
 		buildMeshNM();
 		super.collapse(v[3], v[5], v[3]);
+	}
+	// Check when apical vertex is non-manifold
+	@Test public void collapseNM474()
+	{
+		createMxNShell(3, 3);
+		rotateMxNShellAroundY(3, 3, 90);
+		rotateMxNShellAroundY(3, 3, 180);
+		rotateMxNShellAroundY(3, 3, 270);
+		mesh.buildAdjacency();
+		super.collapse(v[4], v[7], v[4]);
+	}
+	// Check when symmetric apical vertex is non-manifold
+	@Test public void collapseNM744()
+	{
+		createMxNShell(3, 3);
+		rotateMxNShellAroundY(3, 3, 90);
+		rotateMxNShellAroundY(3, 3, 180);
+		rotateMxNShellAroundY(3, 3, 270);
+		mesh.buildAdjacency();
+		super.collapse(v[7], v[4], v[4]);
 	}
 	@Test(expected= IllegalArgumentException.class) public void collapseNM533()
 	{
@@ -321,6 +357,11 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 		buildMeshNM();
 		super.swap(v[4], v[2]);
 	}
+	@Test(expected= IllegalArgumentException.class) public void swapNM24()
+	{
+		buildMeshNM();
+		super.swap(v[2], v[4]);
+	}
 	@Test(expected= IllegalArgumentException.class) public void swapNM53()
 	{
 		buildMeshNM();
@@ -331,20 +372,49 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 		buildMeshNM();
 		super.swap(v[3], mesh.outerVertex);
 	}
+	// Check when non-manifold edge is prevOrigin()
 	@Test public void swapNM65()
 	{
 		buildMeshNM();
 		super.swap(v[6], v[5]);
 	}
-	@Test public void swapNM32()
+	// Check when non-manifold edge is nextDest()
+	@Test public void swapNM54()
 	{
 		buildMeshNM();
-		super.swap(v[3], v[2]);
+		super.swap(v[5], v[4]);
 	}
-	@Test public void swapNM23()
+	// Check when non-manifold edge is next()
+	@Test public void swapNM56()
 	{
 		buildMeshNM();
-		super.swap(v[2], v[3]);
+		super.swap(v[5], v[6]);
+	}
+	// Check when non-manifold edge is prev()
+	@Test public void swapNM45()
+	{
+		buildMeshNM();
+		super.swap(v[4], v[5]);
+	}
+	// Check when apical vertex is non-manifold
+	@Test public void swapNM47()
+	{
+		createMxNShell(3, 3);
+		rotateMxNShellAroundY(3, 3, 90);
+		rotateMxNShellAroundY(3, 3, 180);
+		rotateMxNShellAroundY(3, 3, 270);
+		mesh.buildAdjacency();
+		super.swap(v[4], v[7]);
+	}
+	// Check when symmetric apical vertex is non-manifold
+	@Test public void swapNM74()
+	{
+		createMxNShell(3, 3);
+		rotateMxNShellAroundY(3, 3, 90);
+		rotateMxNShellAroundY(3, 3, 180);
+		rotateMxNShellAroundY(3, 3, 270);
+		mesh.buildAdjacency();
+		super.swap(v[7], v[4]);
 	}
 
 	/**
