@@ -28,6 +28,7 @@ public class AbstractHalfEdgeTest
 	protected Vertex [] v;
 	protected Triangle [] T;
 	private int vertexLabel = 0;
+	private int originalVertexCount = 0;
 	protected boolean alterned = true;
 	
 	private void create3x4Shell()
@@ -63,6 +64,7 @@ public class AbstractHalfEdgeTest
 		for (int i = 0; i < v.length; i++)
 			v[i].setLabel(i);
 		vertexLabel = v.length;
+		originalVertexCount = v.length;
 
 		T = new Triangle[12];
 		for (int i = 0; i < 3; i++)
@@ -100,6 +102,7 @@ public class AbstractHalfEdgeTest
 			vertexLabel++;
 		}
 		vertexLabel = v.length;
+		originalVertexCount = v.length;
 		T = createMxNTriangles(m, n, v);
 	}
 
@@ -164,11 +167,11 @@ public class AbstractHalfEdgeTest
 	protected void rotateMxNShellAroundY(int m, int n, double angle)
 	{
 		// Create new vertices and append them to current mesh
-		assert v.length == m*n;
-		Vertex [] vy = new Vertex[v.length];
+		assert originalVertexCount == m*n;
+		Vertex [] vy = new Vertex[originalVertexCount];
 		double ct = Math.cos(angle*Math.PI / 180.0);
 		double st = Math.sin(angle*Math.PI / 180.0);
-		for (int i = 0; i < v.length; i++)
+		for (int i = 0; i < vy.length; i++)
 		{
 			if (i%m == 0)
 				vy[i]   = v[i];
@@ -180,6 +183,10 @@ public class AbstractHalfEdgeTest
 				vertexLabel++;
 			}
 		}
+		Vertex [] newV = new Vertex[v.length+vy.length];
+		System.arraycopy(v, 0, newV, 0, v.length);
+		System.arraycopy(vy, 0, newV, v.length, vy.length);
+		v = newV;
 		createMxNTriangles(m, n, vy);
 	}
 	
@@ -193,6 +200,7 @@ public class AbstractHalfEdgeTest
 	{
 		create3x4Shell();
 		mesh.buildAdjacency();
+		assertTrue("Mesh is not valid", mesh.isValid());
 	}
 	
 	protected void buildMeshTopo()
