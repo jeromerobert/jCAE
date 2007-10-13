@@ -849,24 +849,23 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		assert o.isWritable() && d.isWritable(): "Cannot contract "+this;
 		if (logger.isDebugEnabled())
 			logger.debug("contract ("+o+" "+d+")");
-		//  Replace o by n in all incident triangles
 		if (o.getLink() instanceof Triangle)
 			replaceEndpointsSameFan(v);
 		else
 			replaceEndpointsNonManifold(o, v);
-		//  Replace d by n in all incident triangles
 		HalfEdge e = HEsym();
 		if (d.getLink() instanceof Triangle)
 			e.replaceEndpointsSameFan(v);
 		else
 			replaceEndpointsNonManifold(d, v);
-		//  Set v links
 		deepCopyVertexLinks(o, d, v);
 		if (logger.isDebugEnabled())
 			logger.debug("new point: "+v);
-
 		if (!hasAttributes(NONMANIFOLD))
-			return HEcollapseSameFan((Mesh) m, v, true);
+		{
+			e.HEcollapseSameFan((Mesh) m, v);
+			return HEcollapseSameFan((Mesh) m, v);
+		}
 		// Edge is non-manifold
 		assert e.hasAttributes(OUTER);
 		AbstractHalfEdge ret = null;
@@ -879,50 +878,56 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		{
 			HalfEdge h = (HalfEdge) ah;
 			assert !h.hasAttributes(OUTER);
+			h.HEsym().HEcollapseSameFan((Mesh) m, v);
 			if (h == this)
-				ret = h.HEcollapseSameFan((Mesh) m, v, false);
+				ret = h.HEcollapseSameFan((Mesh) m, v);
 			else
-				h.HEcollapseSameFan((Mesh) m, v, false);
+				h.HEcollapseSameFan((Mesh) m, v);
 		}
 		assert ret != null;
 		return ret;
 	}
 
-	private HalfEdge HEcollapseSameFan(Mesh m, Vertex n, boolean manifold)
+	private HalfEdge HEcollapseSameFan(Mesh m, Vertex n)
 	{
 		/*
 		 *           V1                       V1
 		 *  V3+-------+-------+ V4   V3 +------+------+ V4
 		 *     \ t3  / \ t4  /           \  t3 | t4  /
-		 *      \   /   \   /              \   |   /
+		 *      \   /   \   /   ------>    \   |   /
 		 *       \ / t1  \ /                 \ | /
-		 *      o +-------+ d   ------>      n +
-		 *       / \ t2  / \                 / | \
-		 *      /   \   /   \              /   |   \
-		 *     / t5  \ / t6  \           /  t5 | t6  \
-		 *    +-------+-------+         +------+------+
-		 *  V5        V2       V6     V5       V2      V6
+		 *      o +-------+ d                n +
 		 */
 		// this = (odV1)
 		
+		if (hasAttributes(NONMANIFOLD) && hasAttributes(OUTER))
+		{
+			// All we have to do here is to remove t1
+			m.remove(tri);
+			return null;
+		}
 		//  Update adjacency links.  For clarity, o and d are
 		//  written instead of n.
 		HalfEdge e, f, s;
-		e = this;
-		Triangle t1 = e.tri;
-		e = e.HEsym();
-		Triangle t2 = e.tri;
-		e = e.HEsym();
 		e = next;               // (dV1o)
 		int attr4 = e.attributes;
 		s = e.HEsym();          // (V1dV4)
 		e = e.next;             // (V1od)
 		int attr3 = e.attributes;
 		f = e.HEsym();          // (oV1V3)
+		Triangle t34 = (f == null ? ( s == null ? null : s.tri ) : f.tri);
+		if (t34 != null)
+		{
+			if (t34.isOuter() && s != null)
+				t34 = s.tri;
+			replaceVertexLinks(apex(), tri, t34);
+			replaceVertexLinks(n, tri, t34);
+		}
 		if (f != null && f.hasAttributes(NONMANIFOLD))
 		{
 			// e is listed in adjacency list and
 			// has to be replaced by s
+			assert  s != null || !s.hasAttributes(NONMANIFOLD);
 			e.replaceEdgeLinks(s);
 			f.HEglue(s);
 		}
@@ -937,94 +942,17 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			f.HEglue(s);
 		else if (s != null)
 			s.HEglue(null);
+
 		if (f != null)
 			f.attributes |= attr4;
 		if (s != null)
 			s.attributes |= attr3;
-		if (!hasAttributes(OUTER))
-		{
-			TriangleHE t34 = f.tri;
-			if (t34.isOuter())
-				t34 = s.tri;
-			assert !t34.isOuter() : s+"\n"+f;
-			replaceVertexLinks(f.destination(), t1, t2, t34);
-			replaceVertexLinks(n, t1, t2, t34);
-		}
-		e = e.next;             // (odV1)
-		e = e.HEsym();          // (doV2)
-		if (manifold)
-		{
-			e = e.next;     // (oV2d)
-			int attr5 = e.attributes;
-			s = e.HEsym();  // (V2oV5)
-			e = e.next;     // (V2do)
-			int attr6 = e.attributes;
-			f = e.HEsym();  // (dV2V6)
-			if (f != null && f.hasAttributes(NONMANIFOLD))
-			{
-				// e is listed in adjacency list and
-				// has to be replaced by s
-				e.replaceEdgeLinks(s);
-				f.HEglue(s);
-			}
-			else if (s != null && s.hasAttributes(NONMANIFOLD))
-			{
-				// s.HEsym() is listed in adjacency list and
-				// has to be replaced by f
-				s.HEsym().replaceEdgeLinks(f);
-				s.HEglue(f);
-			}
-			else if (f != null)
-				f.HEglue(s);
-			else if (s != null)
-				s.HEglue(null);
-			if (f != null)
-				f.attributes |= attr5;
-			if (s != null)
-				s.attributes |= attr6;
-			if (!e.hasAttributes(OUTER))
-			{
-				TriangleHE t56 = s.tri;
-				if (t56.isOuter())
-					t56 = f.tri;
-				assert !t56.isOuter();
-				replaceVertexLinks(s.origin(), t1, t2, t56);
-				replaceVertexLinks(n, t1, t2, t56);
-			}
-			e = e.next;     // (doV2)
-		}
-		else
-		{
-			assert e.hasAttributes(OUTER);
-		}
-		// Must be called before T2 is removed
-		s = e.HEsym();                 // (odV1)
-		// Remove T2
-		m.remove(e.tri);
-		// Must be called before T1 is removed
-		e = s.next.HEsym().HEsym();    // (oV1V3)
-		// Remove T1
-		m.remove(s.tri);
-
-		// Check that all o and d instances have been removed
-		// This is costful, it is disabled by default but may
-		// be enabled when debugging.
-		/*
-		boolean checkVertices = true;
-		if (checkVertices)
-		{
-			for (AbstractTriangle at: m.getTriangles())
-			{
-				Triangle t = (Triangle) at;
-				assert t.vertex[0] != o && t.vertex[1] != o && t.vertex[2] != o : "Vertex "+o+" found in "+t;
-				assert t.vertex[0] != d && t.vertex[1] != d && t.vertex[2] != d : "Vertex "+d+" found in "+t;
-			}
-		}
-		*/
+		// Remove t1
+		m.remove(tri);
 		// By convention, edge is moved into (dV4V1), but this may change.
 		// This is why V1 cannot be m.outerVertex, otherwise we cannot
 		// ensure that return HalfEdge is (oV1V3)
-		return e;
+		return f;
 	}
 	
 	private void replaceEndpointsSameFan(Vertex n)
@@ -1064,8 +992,27 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			{
 				if (tArray[i] == oldT1 || tArray[i] == oldT2)
 				{
-					logger.debug("replaceVertexLinks: "+tArray[i]+" --> "+newT);
+					logger.debug("replaceVertexLinks: "+i+" "+o+" "+tArray[i]);
 					tArray[i] = newT;
+					logger.debug(" --> "+newT);
+				}
+			}
+		}
+	}
+	private static void replaceVertexLinks(Vertex o, Triangle oldT, Triangle newT)
+	{
+		if (o.getLink() instanceof Triangle)
+			o.setLink(newT);
+		else
+		{
+			Triangle [] tArray = (Triangle []) o.getLink();
+			for (int i = 0; i < tArray.length; i++)
+			{
+				if (tArray[i] == oldT)
+				{
+					logger.debug("replaceVertexLinks: "+i+" "+o+" "+tArray[i]);
+					tArray[i] = newT;
+					logger.debug(" --> "+newT);
 				}
 			}
 		}
