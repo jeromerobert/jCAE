@@ -145,25 +145,25 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 	@Test public void split47()
 	{
 		buildMesh2();
-		Vertex n = (Vertex) mesh.factory.createVertex(0.0, 1.5, 0.0);
+		Vertex n = (Vertex) mesh.createVertex(0.0, 1.5, 0.0);
 		super.split(v[4], v[7], n);
 	}
 	@Test public void split63()
 	{
 		buildMesh2();
-		Vertex n = (Vertex) mesh.factory.createVertex(-1.0, 1.5, 0.0);
+		Vertex n = (Vertex) mesh.createVertex(-1.0, 1.5, 0.0);
 		super.split(v[6], v[3], n);
 	}
 	@Test(expected= IllegalArgumentException.class) public void split36()
 	{
 		buildMesh2();
-		Vertex n = (Vertex) mesh.factory.createVertex(-1.0, 1.5, 0.0);
+		Vertex n = (Vertex) mesh.createVertex(-1.0, 1.5, 0.0);
 		super.split(v[3], v[6], n);
 	}
 	@Test public void split45()
 	{
 		buildMesh2();
-		Vertex n = (Vertex) mesh.factory.createVertex(0.5, 1.0, 0.0);
+		Vertex n = (Vertex) mesh.createVertex(0.5, 1.0, 0.0);
 		super.split(v[4], v[5], n);
 	}
 
@@ -383,25 +383,25 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 	@Test public void splitNM42()
 	{
 		buildMeshNM();
-		Vertex n = (Vertex) mesh.factory.createVertex(0.0, 1.5, 0.0);
+		Vertex n = (Vertex) mesh.createVertex(0.0, 1.5, 0.0);
 		super.split(v[4], v[2], n);
 	}
 	@Test public void splitNM35()
 	{
 		buildMeshNM();
-		Vertex n = (Vertex) mesh.factory.createVertex(-1.0, 1.5, 0.0);
+		Vertex n = (Vertex) mesh.createVertex(-1.0, 1.5, 0.0);
 		super.split(v[3], v[5], n);
 	}
 	@Test(expected= IllegalArgumentException.class) public void splitNM53()
 	{
 		buildMeshNM();
-		Vertex n = (Vertex) mesh.factory.createVertex(-1.0, 1.5, 0.0);
+		Vertex n = (Vertex) mesh.createVertex(-1.0, 1.5, 0.0);
 		super.split(v[5], v[3], n);
 	}
 	@Test public void splitNM45()
 	{
 		buildMeshNM();
-		Vertex n = (Vertex) mesh.factory.createVertex(0.5, 2.0, 0.0);
+		Vertex n = (Vertex) mesh.createVertex(0.5, 2.0, 0.0);
 		super.split(v[4], v[5], n);
 	}
 
