@@ -382,26 +382,39 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	{
 		current = uniqueOrientation(current);
 		if (logger.isDebugEnabled())
+		{
 			logger.debug("Contract edge: "+current+" into "+v3+"  cost="+costCurrent);
+			if (current.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+			{
+				logger.debug("Non-manifold edge:");
+				for (Iterator<AbstractHalfEdge> it = current.fanIterator(); it.hasNext(); )
+					logger.debug(" --> "+it.next());
+			}
+		}
 		final Triangle t1 = current.getTri();
 		// HalfEdge instances on t1 and t2 will be deleted
 		// when edge is contracted, and we do not know whether
 		// they appear within tree or their symmetric ones,
 		// so remove them now.
-		removeFromTree(current);
-		if (t1.isWritable())
+		for (Iterator<AbstractHalfEdge> it = current.fanIterator(); it.hasNext(); )
 		{
-			nrTriangles--;
-			for (int i = 0; i < 2; i++)
+			HalfEdge f = (HalfEdge) it.next();
+			if (!tree.remove(f.notOriented()))
+				notInTree++;
+			assert !tree.contains(f.notOriented());
+			if (f.getTri().isWritable())
 			{
-				current = (HalfEdge) current.next();
-				removeFromTree(current);
+				nrTriangles--;
+				for (int i = 0; i < 2; i++)
+				{
+					f = (HalfEdge) f.next();
+					removeFromTree(f);
+				}
+				f = (HalfEdge) f.next();
 			}
-			current = (HalfEdge) current.next();
 		}
 		HalfEdge sym = (HalfEdge) current.sym();
-		final Triangle t2 = sym.getTri();
-		if (t2.isWritable())
+		if (sym.getTri().isWritable())
 		{
 			nrTriangles--;
 			for (int i = 0; i < 2; i++)
@@ -446,6 +459,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			do
 			{
 				current = (HalfEdge) current.nextOriginLoop();
+				assert !current.hasAttributes(AbstractHalfEdge.NONMANIFOLD);
 				if (current.destination().isReadable() && current.origin().isReadable())
 					tree.update(current.notOriented(), cost(current));
 			}
