@@ -855,6 +855,25 @@ public class Mesh extends AbstractMesh implements Serializable
 						logger.error("Vertex "+v+" linked to "+t2);
 						return false;
 					}
+					if (!triangleList.contains(t2))
+					{
+						logger.error("Vertex "+v+" linked to a removed triangle");
+						return false;
+					}
+				}
+				else
+				{
+					// Check that all linked triangles are
+					// still present in mesh
+					Triangle [] links = (Triangle []) v.getLink();
+					for (Triangle t2: links)
+					{
+						if (!triangleList.contains(t2))
+						{
+							logger.error("Vertex "+v+" linked to a removed triangle");
+							return false;
+						}
+					}
 				}
 			}
 			if (!checkVirtualHalfEdges(t))
@@ -990,6 +1009,12 @@ public class Mesh extends AbstractMesh implements Serializable
 					logger.error(" "+f);
 					return false;
 				}
+				if (!triangleList.contains(f.getTri()))
+				{
+					logger.error("Triangle not present in mesh: "+f.getTri());
+					logger.error("Linked from "+e);
+					return false;
+				}
 			}
 			else
 			{
@@ -999,6 +1024,11 @@ public class Mesh extends AbstractMesh implements Serializable
 				for (Map.Entry<Triangle, Integer> entry: adj.entrySet())
 				{
 					Triangle t2 = entry.getKey();
+					if (!triangleList.contains(t2))
+					{
+						logger.error("Triangle does no more exist: "+t2);
+						return false;
+					}
 					int i2 = entry.getValue().intValue();
 					HalfEdge f = (HalfEdge) t2.getAbstractHalfEdge();
 					if (i2 == 1)
@@ -1006,6 +1036,11 @@ public class Mesh extends AbstractMesh implements Serializable
 					else if (i2 == 2)
 						f = (HalfEdge) f.prev();
 					HalfEdge s = (HalfEdge) f.sym().next();
+					if (!triangleList.contains(s.getTri()))
+					{
+						logger.error("Triangle not present in mesh: "+s.getTri());
+						logger.error("Linked from "+e);
+					}
 					if (s.getAdj() != adj)
 					{
 						logger.error("Multiple edges: Wrong adjacency relation");
