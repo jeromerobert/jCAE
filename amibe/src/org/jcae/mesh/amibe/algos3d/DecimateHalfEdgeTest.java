@@ -33,107 +33,126 @@ public class DecimateHalfEdgeTest
 	private Mesh mesh;
 	private Vertex [] v;
 	private Triangle [] T;
+	private int vertexLabel = 0;
 
-	private void create3xNShell(int n)
+	// m Vertex on rows, n Vertex on columns
+	private void createMxNShell(int m, int n)
 	{
-		/*
-		 *v6 +---------+---------+ v8
-		 *   | \       |v7     / |
-		 *   |   \  T5 | T6  /   |
-		 *   |     \   |   /     |
-		 *   |  T4   \ | /   T7  |
-		 *v3 +---------+---------+ v5
-		 *   | \       |v4     / |
-		 *   |   \  T1 | T2  /   |
-		 *   |     \   |   /     |
-		 *   |  T0   \ | /   T3  |
+		/*   v3       v4        v5 
+		 *   +---------+---------+
+		 *   | \       | \       |
+		 *   |   \  T1 |   \  T3 |
+		 *   |     \   |     \   |
+		 *   |  T0   \ |  T2   \ |
 		 *   +---------+---------+
 		 *   v0        v1       v2
-		 *
 		 */
-		v = new Vertex[3*n];
-		for (int i = 0; i < n; i++)
-		{
-			v[3*i]   = (Vertex) mesh.createVertex(-1.0, i, 0.0);
-			v[3*i+1] = (Vertex) mesh.createVertex(0.0, i, 0.0);
-			v[3*i+2] = (Vertex) mesh.createVertex(1.0, i, 0.0);
-		}
+		v = new Vertex[m*n];
+		for (int j = 0; j < n; j++)
+			for (int i = 0; i < m; i++)
+				v[m*j+i] = (Vertex) mesh.createVertex(i, j, 0.0);
 		for (int i = 0; i < v.length; i++)
 			v[i].setLabel(i);
+		vertexLabel = v.length;
+		T = createMxNTriangles(m, n, v);
+	}
 
-		T = new Triangle[4*(n-1)];
-		for (int i = 0; i < n-1; i++)
+	private Triangle [] createMxNTriangles(int m, int n, Vertex [] vv)
+	{
+		Triangle [] tt = new Triangle[2*(m-1)*(n-1)];
+		for (int j = 0; j < n-1; j++)
 		{
-			T[4*i]   = (Triangle) mesh.createTriangle(v[3*i], v[3*i+1], v[3*i+3]);
-			T[4*i+1] = (Triangle) mesh.createTriangle(v[3*i+1], v[3*i+4], v[3*i+3]);
-			T[4*i+2] = (Triangle) mesh.createTriangle(v[3*i+5], v[3*i+4], v[3*i+1]);
-			T[4*i+3] = (Triangle) mesh.createTriangle(v[3*i+1], v[3*i+2], v[3*i+5]);
-			v[3*i].setLink(T[4*i]);
-			v[3*i+1].setLink(T[4*i]);
-			v[3*i+2].setLink(T[4*i+3]);
+			for (int i = 0; i < m-1; i++)
+			{
+				tt[2*(m-1)*j+2*i]   = (Triangle) mesh.createTriangle(vv[m*j+i], vv[m*j+i+1], vv[m*(j+1)+i]);
+				tt[2*(m-1)*j+2*i+1] = (Triangle) mesh.createTriangle(vv[m*j+i+1], vv[m*(j+1)+i+1], vv[m*(j+1)+i]);
+				vv[m*j+i].setLink(tt[2*(m-1)*j+2*i]);
+			}
+			vv[m*j+m-1].setLink(tt[2*(m-1)*j+2*m-3]);
 		}
-		v[3*n-3].setLink(T[4*n-7]);
-		v[3*n-2].setLink(T[4*n-7]);
-		v[3*n-1].setLink(T[4*n-5]);
-		int cnt = 0;
-		for (Triangle t: T)
+		// Last row
+		for (int i = 0; i < m-1; i++)
+			vv[m*(n-1)+i].setLink(tt[2*(m-1)*(n-2)+2*i]);
+		vv[m*n-1].setLink(tt[2*(m-1)*(n-1)-1]);
+		int cnt = mesh.getTriangles().size();
+		for (Triangle t: tt)
 		{
 			mesh.add(t);
 			t.setGroupId(cnt);
 			cnt++;
 		}
+		return tt;
 	}
 	
-	private void rotateNM()
+	private void rotateMxNShellAroundY(int m, int n, double angle)
 	{
-		// pi/2 clockwise rotation of vertices v around y
+		// Create new vertices and append them to current mesh
+		assert v.length == m*n;
 		Vertex [] vy = new Vertex[v.length];
-		int label = v.length;
+		vertexLabel = v.length;
+		double ct = Math.cos(angle*Math.PI / 180.0);
+		double st = Math.sin(angle*Math.PI / 180.0);
 		for (int i = 0; i < v.length; i++)
 		{
-			if (i%3 == 1)
+			if (i%m == 0)
 				vy[i]   = v[i];
 			else
 			{
 				double [] xyz = v[i].getUV();
-				vy[i]   = (Vertex) mesh.createVertex(-xyz[2], xyz[1], xyz[0]);
-				vy[i].setLabel(label);
-				label++;
+				vy[i]   = (Vertex) mesh.createVertex(ct*xyz[0]+st*xyz[2], xyz[1], -st*xyz[0]+ct*xyz[2]);
+				vy[i].setLabel(vertexLabel);
+				vertexLabel++;
 			}
 		}
-		Triangle [] Ty = new Triangle[T.length];
-		for (int i = 0; i < T.length/4; i++)
+		createMxNTriangles(m, n, vy);
+	}
+	
+	private void testShell(int m, int n)
+	{
+		final Map<String, String> options = new HashMap<String, String>();
+		options.put("size", "0.1");
+		mesh = new Mesh();
+		createMxNShell(m, n);
+		mesh.buildAdjacency();
+		assertTrue("Mesh is not valid", mesh.isValid());
+		int expected = 2;
+		int res = Integer.MAX_VALUE;
+		while (res != expected)
 		{
-			Ty[4*i]   = (Triangle) mesh.createTriangle(vy[3*i],   vy[3*i+1], vy[3*i+3]);
-			Ty[4*i+1] = (Triangle) mesh.createTriangle(vy[3*i+1], vy[3*i+4], vy[3*i+3]);
-			Ty[4*i+2] = (Triangle) mesh.createTriangle(vy[3*i+5], vy[3*i+4], vy[3*i+1]);
-			Ty[4*i+3] = (Triangle) mesh.createTriangle(vy[3*i+1], vy[3*i+2], vy[3*i+5]);
-			vy[3*i].setLink(Ty[4*i]);
-			vy[3*i+1].setLink(Ty[4*i]);
-			vy[3*i+2].setLink(Ty[4*i+3]);
+			new DecimateHalfEdge(mesh, options).compute();
+			assertTrue("Mesh is not valid", mesh.isValid());
+			int newres = DecimateHalfEdge.countInnerTriangles(mesh);
+			if (newres >= res)
+				break;
+			res = newres;
 		}
-		vy[v.length-3].setLink(Ty[T.length-3]);
-		vy[v.length-2].setLink(Ty[T.length-3]);
-		vy[v.length-1].setLink(Ty[T.length-1]);
-		for (Triangle t: Ty)
-			mesh.add(t);
-		int cnt = T.length;
-		for (Triangle t: Ty)
+		assertTrue("Final number of triangles: "+res, res == expected);
+		assertTrue("Mesh is not valid", mesh.isValid());
+	}
+
+	private void testCross(int m, int n)
+	{
+		final Map<String, String> options = new HashMap<String, String>();
+		options.put("size", "0.1");
+		mesh = new Mesh();
+		createMxNShell(m, n);
+		rotateMxNShellAroundY(m, n, 90);
+		rotateMxNShellAroundY(m, n, 180);
+		rotateMxNShellAroundY(m, n, 270);
+		mesh.buildAdjacency();
+		assertTrue("Mesh is not valid", mesh.isValid());
+		int expected = 8;
+		int res = Integer.MAX_VALUE;
+		while (res != expected)
 		{
-			t.setGroupId(cnt);
-			cnt++;
+			new DecimateHalfEdge(mesh, options).compute();
+			assertTrue("Mesh is not valid", mesh.isValid());
+			int newres = DecimateHalfEdge.countInnerTriangles(mesh);
+			if (newres >= res)
+				break;
+			res = newres;
 		}
-		Vertex [] vTotal = new Vertex[5*v.length/3];
-		System.arraycopy(v, 0, vTotal, 0, v.length);
-		for (int i = 0; i < v.length/3; i++)
-			vTotal[v.length+i] = vy[3*i];
-		for (int i = 0; i < v.length/3; i++)
-			vTotal[4*v.length/3+i] = vy[3*i+2];
-		v = vTotal;
-		Triangle [] TTotal = new Triangle[2*T.length];
-		System.arraycopy(T, 0, TTotal, 0, T.length);
-		System.arraycopy(Ty, 0, TTotal, T.length, T.length);
-		T = TTotal;
+		assertTrue("Final number of triangles: "+res, res == expected);
 	}
 
 	@Test public void testNonManifold()
@@ -202,7 +221,7 @@ public class DecimateHalfEdgeTest
 			t.setGroupId(cnt);
 			cnt++;
 		}
-		mesh.buildAdjacency(v, -1.0);
+		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
 		new DecimateHalfEdge(mesh, options).compute();
 		int res = DecimateHalfEdge.countInnerTriangles(mesh);
@@ -246,7 +265,7 @@ public class DecimateHalfEdgeTest
 			t.setGroupId(cnt);
 			cnt++;
 		}
-		mesh.buildAdjacency(v, -1.0);
+		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
 		new DecimateHalfEdge(mesh, options).compute();
 		int res = DecimateHalfEdge.countInnerTriangles(mesh);
@@ -257,70 +276,32 @@ public class DecimateHalfEdgeTest
 
 	@Test public void testShell3()
 	{
-		final Map<String, String> options = new HashMap<String, String>();
-		options.put("size", "0.1");
-		mesh = new Mesh();
-		create3xNShell(4);
-		mesh.buildAdjacency(v, -1.0);
-		assertTrue("Mesh is not valid", mesh.isValid());
-		new DecimateHalfEdge(mesh, options).compute();
-		int res = DecimateHalfEdge.countInnerTriangles(mesh);
-		int expected = 2;
-		if (res != expected)
-		{
-			new DecimateHalfEdge(mesh, options).compute();
-			res = DecimateHalfEdge.countInnerTriangles(mesh);
-		}
-		assertTrue("Final number of triangles: "+res, res == expected);
-		assertTrue("Mesh is not valid", mesh.isValid());
+		testShell(3, 3);
+	}
+
+	@Test public void testShellLarge()
+	{
+		testShell(30, 30);
 	}
 
 	@Test public void testShellNM1()
 	{
-		final Map<String, String> options = new HashMap<String, String>();
-		options.put("size", "0.1");
-		mesh = new Mesh();
-		create3xNShell(2);
-		rotateNM();
-		mesh.buildAdjacency(v, -1.0);
-		assertTrue("Mesh is not valid", mesh.isValid());
-		new DecimateHalfEdge(mesh, options).compute();
-		int res = DecimateHalfEdge.countInnerTriangles(mesh);
-		int expected = 8;
-		assertTrue("Final number of triangles: "+res, res == expected);
-		assertTrue("Mesh is not valid", mesh.isValid());
+		testCross(3, 2);
 	}
 
 	@Test public void testShellNM2()
 	{
-		final Map<String, String> options = new HashMap<String, String>();
-		options.put("size", "0.1");
-		mesh = new Mesh();
-		create3xNShell(3);
-		rotateNM();
-		mesh.buildAdjacency(v, -1.0);
-		assertTrue("Mesh is not valid", mesh.isValid());
-		new DecimateHalfEdge(mesh, options).compute();
-		int res = DecimateHalfEdge.countInnerTriangles(mesh);
-		int expected = 8;
-		assertTrue("Final number of triangles: "+res, res == expected);
-		assertTrue("Mesh is not valid", mesh.isValid());
+		testCross(3, 3);
 	}
 
 	@Test public void testShellNM3()
 	{
-		final Map<String, String> options = new HashMap<String, String>();
-		options.put("size", "0.5");
-		mesh = new Mesh();
-		create3xNShell(4);
-		rotateNM();
-		mesh.buildAdjacency(v, -1.0);
-		assertTrue("Mesh is not valid", mesh.isValid());
-		new DecimateHalfEdge(mesh, options).compute();
-		int res = DecimateHalfEdge.countInnerTriangles(mesh);
-		int expected = 8;
-		assertTrue("Final number of triangles: "+res, res == expected);
-		assertTrue("Mesh is not valid", mesh.isValid());
+		testCross(3, 4);
+	}
+
+	@Test public void testShellNMLarge()
+	{
+		testCross(10, 10);
 	}
 
 	@Test public void testShellNM3Inverted()
@@ -328,26 +309,38 @@ public class DecimateHalfEdgeTest
 		final Map<String, String> options = new HashMap<String, String>();
 		options.put("size", "0.1");
 		mesh = new Mesh();
-		create3xNShell(4);
-		rotateNM();
+		int m = 3;
+		int n = 4;
+		createMxNShell(m, n);
+		rotateMxNShellAroundY(m, n, 90);
+		rotateMxNShellAroundY(m, n, 180);
+		rotateMxNShellAroundY(m, n, 270);
 		// Invert triangles at the right
-		for (int i = 0; i < 3; i++)
+		for (int j = 0; j < n-1; j++)
 		{
-			for (int j = 0; j < 2; j++)
+			for (int i = 0; i < m-1; i++)
 			{
-				Vertex temp = T[4*i+j].vertex[1];
-				T[4*i+j].vertex[1] = T[4*i+j].vertex[2];
-				T[4*i+j].vertex[2] = temp;
-				temp = T[4*i+j+12].vertex[1];
-				T[4*i+j+12].vertex[1] = T[4*i+j+12].vertex[2];
-				T[4*i+j+12].vertex[2] = temp;
+				Vertex temp = T[2*(m-1)*j+2*i].vertex[1];
+				T[2*(m-1)*j+2*i].vertex[1] = T[2*(m-1)*j+2*i].vertex[2];
+				T[2*(m-1)*j+2*i].vertex[2] = temp;
+				temp = T[2*(m-1)*j+2*i+1].vertex[1];
+				T[2*(m-1)*j+2*i+1].vertex[1] = T[2*(m-1)*j+2*i+1].vertex[2];
+				T[2*(m-1)*j+2*i+1].vertex[2] = temp;
 			}
 		}
-		mesh.buildAdjacency(v, -1.0);
+		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
-		new DecimateHalfEdge(mesh, options).compute();
-		int res = DecimateHalfEdge.countInnerTriangles(mesh);
+		int res = Integer.MAX_VALUE;
 		int expected = 8;
+		while (res != expected)
+		{
+			new DecimateHalfEdge(mesh, options).compute();
+			assertTrue("Mesh is not valid", mesh.isValid());
+			int newres = DecimateHalfEdge.countInnerTriangles(mesh);
+			if (newres >= res)
+				break;
+			res = newres;
+		}
 		assertTrue("Mesh is not valid", mesh.isValid());
 		assertTrue("Final number of triangles: "+res, res == expected);
 	}
