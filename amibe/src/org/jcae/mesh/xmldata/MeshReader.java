@@ -138,6 +138,11 @@ public class MeshReader
 			mesh.resetQuadTree(bbmin, bbmax);
 			for (int i=0; i < numberOfNodes; i++)
 				mesh.getQuadTree().add(nodelist[i]);
+			if (mesh.hasNodes())
+			{
+				for (int i=0; i < numberOfNodes; i++)
+					mesh.add(nodelist[i]);
+			}
 			
 			int numberOfTriangles = Integer.parseInt(
 				xpath.evaluate("number/text()", submeshTriangles));
@@ -161,7 +166,7 @@ public class MeshReader
 			fcR.close();
 			MeshExporter.clean(bbR);
 			//  Build adjacency relations
-			mesh.buildAdjacency(nodelist, -1.0);
+			mesh.buildAdjacency();
 		}
 		catch(Exception ex)
 		{
@@ -261,6 +266,12 @@ public class MeshReader
 			fcN.close();
 			MeshExporter.clean(bbN);
 			
+			if (mesh.hasNodes())
+			{
+				for (int i=0; i < numberOfNodes; i++)
+					mesh.add(nodelist[i]);
+			}
+
 			Node submeshTriangles = (Node) xpath.evaluate("triangles",
 				submeshElement, XPathConstants.NODE);
 			String trianglesFile = xpath.evaluate("file/@location",
@@ -322,7 +333,7 @@ public class MeshReader
 			if (mesh.hasAdjacency())
 			{
 				logger.debug("Build mesh adjacency");
-				mesh.buildAdjacency(nodelist, ridgeAngle);
+				mesh.buildAdjacency(ridgeAngle);
 			}
 		}
 		catch(Exception ex)

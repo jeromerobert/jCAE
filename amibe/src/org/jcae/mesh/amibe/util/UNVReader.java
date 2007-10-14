@@ -109,9 +109,7 @@ public class UNVReader
 		}
 		if (mesh.hasAdjacency())
 		{
-			Vertex [] v = new Vertex[nodesmap.size()];
-			System.arraycopy(nodesmap.getValues(), 0, v, 0, v.length);
-			mesh.buildAdjacency(v, ridgeAngle);
+			mesh.buildAdjacency(ridgeAngle);
 		}
 	}
 
@@ -179,6 +177,8 @@ public class UNVReader
 				z = new Double(z1).doubleValue()/unit;
 				Vertex n = (Vertex) m.createVertex(x,y,z);
 				nodesmap.put(index, n);
+				if (m.hasNodes())
+					m.add(n);
 			}
 		}
 		catch(Exception e)
