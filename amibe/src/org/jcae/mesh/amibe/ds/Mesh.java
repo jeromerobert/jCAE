@@ -133,7 +133,9 @@ public class Mesh extends AbstractMesh implements Serializable
 	}
 
 	/**
-	 * Creates an empty mesh.
+	 * Creates an empty mesh.  When no <code>MeshTraitsBuilder</code>
+	 * is passed, {@link MeshTraitsBuilder#getDefault3D} is called
+	 * implicitly.
 	 */
 	public Mesh()
 	{
@@ -166,8 +168,6 @@ public class Mesh extends AbstractMesh implements Serializable
 	
 	/**
 	 * Adds an existing triangle to triangle list.
-	 * This routine is useful when meshes are read from disk but not
-	 * computed by node insertion.
 	 *
 	 * @param t  triangle being added.
 	 */
@@ -248,20 +248,6 @@ public class Mesh extends AbstractMesh implements Serializable
 		return traitsBuilder.hasNodes();
 	}
 
-	/**
-	 * Checks whether a length is llower than a threshold.
-	 *
-	 * @param len   the length to be checked.
-	 * @return <code>true</code> if this length is too small to be considered,
-	 *         <code>false</code> otherwise.
-	 */
-	public boolean tooSmall(double len, double accumulatedLength)
-	{
-		if (accumulateEpsilon)
-			len += accumulatedLength;
-		return (len < epsilon);
-	}
-	
 	/**
 	 * Creates a triangle composed of three vertices.
 	 *
@@ -741,6 +727,20 @@ public class Mesh extends AbstractMesh implements Serializable
 	{
 		maxLabel++;
 		v.setRef(maxLabel);
+	}
+	
+	/**
+	 * Checks whether a length is lower than a threshold.
+	 *
+	 * @param len   the length to be checked.
+	 * @return <code>true</code> if this length is too small to be considered,
+	 *         <code>false</code> otherwise.
+	 */
+	public boolean tooSmall(double len, double accumulatedLength)
+	{
+		if (accumulateEpsilon)
+			len += accumulatedLength;
+		return (len < epsilon);
 	}
 	
 	/**
