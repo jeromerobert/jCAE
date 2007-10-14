@@ -69,7 +69,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Return the triangle tied to this object.
+	 * Returns the triangle tied to this object.
 	 *
 	 * @return the triangle tied to this object.
 	 */
@@ -80,7 +80,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Return the edge local number.
+	 * Returns the edge local number.
 	 *
 	 * @return the edge local number.
 	 */
@@ -96,9 +96,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Set the edge tied to this object.
+	 * Sets the edge tied to this object.
 	 *
-	 * @param e  the edge tied to this object.
+	 * @param e  the edge tied to this object
 	 */
 	@Override
 	public final void glue(AbstractHalfEdge e)
@@ -121,7 +121,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Get the symmetric edge.
+	 * Gets the symmetric edge.
 	 */
 	@Override
 	public final Object getAdj()
@@ -130,7 +130,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 
 	/**
-	 * Get adjacency list for non-manifold edges. 
+	 * Gets adjacency list for non-manifold edges. 
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -142,7 +142,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 
 	/**
-	 * Set the sym link.
+	 * Sets the sym link.
 	 */
 	@Override
 	public final void setAdj(Object e)
@@ -169,7 +169,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 
 	/**
-	 * Move to the next edge.
+	 * Moves to the next edge.
 	 */
 	@Override
 	public final AbstractHalfEdge next()
@@ -185,7 +185,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Move to the previous edge.
+	 * Moves to the previous edge.
 	 */
 	@Override
 	public final AbstractHalfEdge prev()
@@ -201,7 +201,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Move counterclockwise to the following edge with the same origin.
+	 * Moves counterclockwise to the following edge with the same origin.
 	 */
 	@Override
 	public final AbstractHalfEdge nextOrigin()
@@ -217,7 +217,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Move counterclockwise to the previous edge with the same origin.
+	 * Moves counterclockwise to the previous edge with the same origin.
 	 */
 	public final AbstractHalfEdge prevOrigin()
 	{
@@ -231,7 +231,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Move counterclockwise to the following edge with the same
+	 * Moves counterclockwise to the following edge with the same
 	 * destination.
 	 */
 	public final AbstractHalfEdge nextDest()
@@ -246,7 +246,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Move counterclockwise to the previous edge with the same
+	 * Moves counterclockwise to the previous edge with the same
 	 * destination.
 	 */
 	public final AbstractHalfEdge prevDest()
@@ -261,7 +261,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Move counterclockwise to the following edge with the same apex.
+	 * Moves counterclockwise to the following edge with the same apex.
 	 */
 	public final AbstractHalfEdge nextApex()
 	{
@@ -275,7 +275,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Move clockwise to the previous edge with the same apex.
+	 * Moves clockwise to the previous edge with the same apex.
 	 */
 	public final AbstractHalfEdge prevApex()
 	{
@@ -321,7 +321,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Set the next link.
+	 * Sets the next link.
 	 */
 	public final void setNext(HalfEdge e)
 	{
@@ -329,7 +329,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Check if some attributes of this edge are set.
+	 * Checks if some attributes of this edge are set.
 	 *
 	 * @param attr  the attributes to check
 	 * @return <code>true</code> if this HalfEdge has all these
@@ -342,7 +342,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Set attributes of this edge.
+	 * Sets attributes of this edge.
 	 *
 	 * @param attr  the attribute of this edge.
 	 */
@@ -353,7 +353,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Reset attributes of this edge.
+	 * Resets attributes of this edge.
 	 *
 	 * @param attr   the attributes of this edge to clear out.
 	 */
@@ -397,7 +397,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Move counterclockwise to the following edge with the same origin.
+	 * Moves counterclockwise to the following edge with the same origin.
 	 * If a boundary is reached, loop backward until another
 	 * boundary is found and start again from there.
 	 */
@@ -421,7 +421,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Move counterclockwise to the following edge with the same apex.
+	 * Moves counterclockwise to the following edge with the same apex.
 	 * If a boundary is reached, loop backward until another
 	 * boundary is found and start again from there.
 	 */
@@ -610,7 +610,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Return the area of this triangle.
+	 * Returns the area of this triangle.
 	 * @return the area of this triangle.
 	 * Warning: this method uses temp[0], temp[1] and temp[2] temporary arrays.
 	 */
@@ -631,7 +631,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Check whether an edge can be contracted into a given vertex.
+	 * Checks whether an edge can be contracted into a given vertex.
 	 *
 	 * @param n the resulting vertex
 	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise.
@@ -828,7 +828,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Contract an edge.
+	 * Contracts an edge.
 	 *
 	 * @param m mesh
 	 * @param n the resulting vertex
@@ -1148,7 +1148,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Split an edge.  This is the opposite of {@link #collapse}.
+	 * Splits an edge.  This is the opposite of {@link #collapse}.
 	 *
 	 * @param m mesh
 	 * @param n the resulting vertex

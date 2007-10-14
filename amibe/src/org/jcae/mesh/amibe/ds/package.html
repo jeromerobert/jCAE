@@ -1,10 +1,148 @@
 <body>
-Data structures for meshing.
+Mesh data structure.
+
+<h2>Introduction</h2>
+<p>
+A mesh is composed of triangles, edges and vertices.  There are
+many data structures to represent meshes, and we focused on the
+following constraints:
+</p>
+<ul>
+  <li>Memory usage must be minimal in order to perform very large
+      meshes.</li>
+  <li>Mesh traversal must be cheap.</li>
+</ul>
 
 <p>
-These classes are the data structures used when meshing a topological shape.
-They can be combined into three groups:
+We decided to implement a triangle-based data structure which is known
+to be more memory efficient.  A {@link org.jcae.mesh.amibe.ds.Triangle}
+is composed of three {@link org.jcae.mesh.amibe.ds.Vertex}, three links
+to adjacent triangles, and each vertex contains a backward link to one
+of its incident triangles.  It is then possible to loop within triangles
+or around vertices.
 </p>
+
+<p>
+But there is also a need for lighter data structures.  For instance,
+visualization does not need adjacency relations, we only need to
+store triangles.
+</p>
+ 
+<p>
+{@link org.jcae.mesh.amibe.ds.Mesh} constructor takes an optional
+{@link org.jcae.mesh.amibe.traits.MeshTraitsBuilder}
+argument to fully describe the desired mesh data structure.  Once a
+{@link org.jcae.mesh.amibe.ds.Mesh} instance is created, its features
+cannot be modified.  With this argument, it is possible to specify if
+adjacent relations between triangles have to be computed, if an octree
+is needed to locate vertices, if triangles and/or nodes are stored in
+a list or a set, etc.  Example:
+</p>
+<pre>
+   MeshTraitsBuilder mtb = new MeshTraitsBuilder();
+   // Store triangles into a set
+   mtb.addTriangleSet();
+   TriangleTraitsBuilder ttb = new TriangleTraitsBuilder();
+   // Store adjacency relations with HalfEdge
+   ttb.addHalfEdge();
+   mtb.add(ttb);
+   // Create a new instance with these features
+   Mesh mesh = new Mesh(mtb);
+   // Then each triangle created by mesh.createTriangle
+   // will contain objects needed to store adjacency relations.
+   Triangle t = (Triangle) mesh.createTriangle(...);
+   // Vertices must be created by mesh.createVertex
+   Vertex v = (Vertex) mesh.createVertex(...);
+</pre>
+  
+<p>
+When a {@link org.jcae.mesh.amibe.ds.Mesh} instance is created without
+specifying a {@link org.jcae.mesh.amibe.traits.MeshTraitsBuilder}
+instance, {@link org.jcae.mesh.amibe.traits.MeshTraitsBuilder#getDefault3D}
+is implicitly used.
+</p>
+
+<h2>Adjacency relations</h2>
+
+<p>
+When adjacency relations are not requested by
+{@link org.jcae.mesh.amibe.traits.MeshTraitsBuilder},
+{@link org.jcae.mesh.amibe.ds.Mesh#createTriangle} creates
+{@link org.jcae.mesh.amibe.ds.AbstractTriangle} instances
+which only contains vertices and no other data.
+</p>
+
+<p>
+Adjacency relations can be requested either with
+{@link org.jcae.mesh.amibe.traits.TriangleTraitsBuilder#addHalfEdge} or
+{@link org.jcae.mesh.amibe.traits.TriangleTraitsBuilder#addShallowHalfEdge}.
+With the former, {@link org.jcae.mesh.amibe.ds.Mesh#createTriangle} creates
+{@link org.jcae.mesh.amibe.ds.TriangleHE} instances and with the latter,
+{@link org.jcae.mesh.amibe.ds.Mesh#createTriangle} creates
+{@link org.jcae.mesh.amibe.ds.TriangleVH} instances.  Both classes inherits
+from {@link org.jcae.mesh.amibe.ds.Triangle} superclass, and in this class
+{@link org.jcae.mesh.amibe.ds.Triangle#adj} member is an
+{@link org.jcae.mesh.amibe.ds.AdjacencyWrapper} interface which is
+extended by {@link org.jcae.mesh.amibe.ds.AdjacencyHE} and
+{@link org.jcae.mesh.amibe.ds.AdjacencyVH}.
+</p>
+
+<h3>With {@link org.jcae.mesh.amibe.ds.AdjacencyHE}</h3>
+<p>
+An
+{@link org.jcae.mesh.amibe.ds.AdjacencyHE} instance contains a private
+{@link org.jcae.mesh.amibe.ds.HalfEdge} instance, which represents an
+edge of underlying triangle.  This edge is linked to the next edge
+in the same triangle; in fact
+{@link org.jcae.mesh.amibe.ds.Mesh#createTriangle} creates three edges
+which are linked together to form a cycle, so a single reference is
+needed to access these three edges.
+</p>
+
+<h3>With {@link org.jcae.mesh.amibe.ds.AdjacencyVH}</h3>
+<p>
+This is a more compact implementation of adjacency relations: edges are
+not created as distinct objects, but taken as a local number (with
+values 0, 1 or 2) of a triangle.
+</p>
+
+<p>
+An
+{@link org.jcae.mesh.amibe.ds.AdjacencyVH} instance contains three
+links to adjacent {@link org.jcae.mesh.amibe.ds.TriangleVH} instances,
+and {@link org.jcae.mesh.amibe.ds.AdjacencyVH#adjPos} member is a
+packed representation of local numbers in adjacent triangles.
+In order to handle non-manifold meshes,
+{@link org.jcae.mesh.amibe.ds.AdjacencyVH#adj} member is an array of
+<code>Object</code> instances instead of
+{@link org.jcae.mesh.amibe.ds.TriangleVH} instances.
+</p>
+
+<p>
+The downside is that edges are not physical objects but can be accessed
+only through handles.  For instance, if edges have to be sorted in order
+to be processed in a certain order (as in
+{@link org.jcae.mesh.amibe.algos3d.DecimateHalfEdge}),
+{@link org.jcae.mesh.amibe.ds.AdjacencyHE} must be used instead of
+{@link org.jcae.mesh.amibe.ds.AdjacencyVH}. 
+</p>
+
+<h2>Mesh traversal</h2>
+
+<p>
+For {@link org.jcae.mesh.amibe.ds.TriangleVH} instances,
+{@link org.jcae.mesh.amibe.ds.VirtualHalfEdge} are handles on edges.
+Both {@link org.jcae.mesh.amibe.ds.VirtualHalfEdge} and
+{@link org.jcae.mesh.amibe.ds.HalfEdge} inherits from
+{@link org.jcae.mesh.amibe.ds.AbstractHalfEdge}, thus algorithms
+can be written without code duplication for both
+{@link org.jcae.mesh.amibe.ds.TriangleHE} and
+{@link org.jcae.mesh.amibe.ds.TriangleVH} instances if they only
+refer to {@link org.jcae.mesh.amibe.ds.AbstractHalfEdge} and not
+their derived classes.
+</p>
+
+<!--
 <dl>
   <dt>{@link org.jcae.mesh.amibe.ds.MNode1D},
       {@link org.jcae.mesh.amibe.ds.MEdge1D},
@@ -83,5 +221,7 @@ contains a set of {@link org.jcae.mesh.amibe.ds.Triangle} instances and
 a {@link org.jcae.mesh.amibe.util.KdTree} data structure with
 {@link org.jcae.mesh.amibe.patch.Vertex2D} instances.
 </p>
+-->
 
 </body>
+

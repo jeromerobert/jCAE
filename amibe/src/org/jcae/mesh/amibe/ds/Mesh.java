@@ -238,6 +238,18 @@ public class Mesh extends AbstractMesh implements Serializable
 	}
 
 	/**
+	 * Creates a triangle composed of three vertices.
+	 *
+	 * @param v  array of three vertices
+	 * @return a new {@link AbstractTriangle} instance composed of three vertices
+	 */
+	public AbstractTriangle createTriangle(AbstractVertex [] v)
+	{
+		assert v.length == 3;
+		return factory.createTriangle(v);
+	}
+
+	/**
 	 * Tells whether nodes are stored.
 	 *
 	 * @return <code>true</code> if mesh was created with a <code>MeshTraitsBuilder</code>
@@ -262,26 +274,14 @@ public class Mesh extends AbstractMesh implements Serializable
 	}
 
 	/**
-	 * Creates a triangle composed of three vertices.
+	 * Creates a 2D or 3D vertex.
 	 *
-	 * @param v  array of three vertices
-	 * @return a new {@link AbstractTriangle} instance composed of three vertices
+	 * @param p  coordinates
+	 * @return a new {@link AbstractVertex} instance with this location.
 	 */
-	public AbstractTriangle createTriangle(AbstractVertex [] v)
+	public AbstractVertex createVertex(double [] p)
 	{
-		assert v.length == 3;
-		return factory.createTriangle(v);
-	}
-
-	/**
-	 * Clones a triangle.
-	 *
-	 * @param that  triangle to clone
-	 * @return a new {@link AbstractTriangle} instance
-	 */
-	public AbstractTriangle createTriangle(AbstractTriangle that)
-	{
-		return factory.createTriangle(that);
+		return factory.createVertex(p);
 	}
 
 	/**
@@ -307,17 +307,6 @@ public class Mesh extends AbstractMesh implements Serializable
 	public AbstractVertex createVertex(double x, double y, double z)
 	{
 		return factory.createVertex(x, y, z);
-	}
-
-	/**
-	 * Creates a 2D or 3D vertex.
-	 *
-	 * @param p  coordinates
-	 * @return a new {@link AbstractVertex} instance with this location.
-	 */
-	public AbstractVertex createVertex(double [] p)
-	{
-		return factory.createVertex(p);
 	}
 
 	/**
@@ -763,7 +752,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	}
 	
 	/**
-	 * Check whether an edge can be contracted.
+	 * Checks whether an edge can be contracted.
 	 *
 	 * @param e   edge to be checked
 	 * @param v   the resulting vertex
@@ -775,7 +764,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	}
 	
 	/**
-	 * Contract an edge.
+	 * Contracts an edge.
 	 *
 	 * @param e   edge to contract
 	 * @param v   the resulting vertex
@@ -790,7 +779,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	}
 	
 	/**
-	 * Split an edge.  This is the opposite of {@link #edgeCollapse}.
+	 * Splits an edge.  This is the opposite of {@link #edgeCollapse}.
 	 *
 	 * @param e   edge being splitted
 	 * @param v   the resulting vertex
@@ -801,7 +790,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	}
 	
 	/**
-	 * Swap an edge.
+	 * Swaps an edge.
 	 *
 	 * @param e  edge being swapped
 	 */

@@ -155,7 +155,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Create an object to handle data about a triangle.
+	 * Creates an object to handle data about a triangle.
 	 *
 	 * @param t  geometrical triangle.
 	 * @param o  a number between 0 and 2 determining an edge.
@@ -170,7 +170,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	// Section: accessors
 	
 	/**
-	 * Return the triangle tied to this object.
+	 * Returns the triangle tied to this object.
 	 *
 	 * @return the triangle tied to this object.
 	 */
@@ -181,7 +181,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Return the edge local number.
+	 * Returns the edge local number.
 	 *
 	 * @return the edge local number.
 	 */
@@ -192,7 +192,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Set the triangle tied to this object, and resets localNumber.
+	 * Sets the triangle tied to this object, and resets localNumber.
 	 *
 	 * @param t  the triangle tied to this object.
 	 */
@@ -204,7 +204,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Set the triangle tied to this object, and the localNumber.
+	 * Sets the triangle tied to this object, and the localNumber.
 	 *
 	 * @param t  the triangle tied to this object.
 	 * @param l  the local number.
@@ -219,7 +219,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	// Section: attributes handling
 	
 	/**
-	 * Check if some attributes of this oriented triangle are set.
+	 * Checks if some attributes of this oriented triangle are set.
 	 *
 	 * @param attr  the attributes to check
 	 * @return <code>true</code> if this VirtualHalfEdge has all these
@@ -232,7 +232,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Set attributes of this oriented triangle.
+	 * Sets attributes of this oriented triangle.
 	 *
 	 * @param attr  the attribute of this oriented triangle.
 	 */
@@ -244,7 +244,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Reset attributes of this oriented triangle.
+	 * Resets attributes of this oriented triangle.
 	 *
 	 * @param attr   the attributes of this oriented triangle to clear out.
 	 */
@@ -291,7 +291,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	//  these routines requires extra care.
 	
 	/**
-	 * Move to symmetric edge.
+	 * Moves to symmetric edge.
 	 * Copy into another instance, move it to its symmetric edge and
 	 * return this copy.
 	 *
@@ -309,7 +309,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Move to symmetric edge.
+	 * Moves to symmetric edge.
 	 * @return  current instance after its transformation
 	 */
 	@Override
@@ -323,7 +323,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Move counterclockwise to following edge.
+	 * Moves counterclockwise to following edge.
 	 * Copy into another instance, move it counterclockwise to
 	 * following edge and return this copy.
 	 *
@@ -341,7 +341,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Move counterclockwise to following edge.
+	 * Moves counterclockwise to following edge.
 	 * @return  current instance after its transformation
 	 */
 	@Override
@@ -353,7 +353,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Move counterclockwise to previous edge.
+	 * Moves counterclockwise to previous edge.
 	 * Copy into another instance, move it counterclockwise to
 	 * previous edge and return this copy.
 	 *
@@ -371,7 +371,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Move counterclockwise to previous edge.
+	 * Moves counterclockwise to previous edge.
 	 * @return  current instance after its transformation
 	 */
 	@Override
@@ -383,7 +383,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Move counterclockwise to the following edge which has the same origin.
+	 * Moves counterclockwise to the following edge which has the same origin.
 	 * Copy into another instance, move it counterclockwise to
 	 * the following edge which has the same origin and return this copy.
 	 *
@@ -397,7 +397,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Move counterclockwise to the following edge with same origin.
+	 * Moves counterclockwise to the following edge with same origin.
 	 * @return  current instance after its transformation
 	 */
 	@Override
@@ -407,7 +407,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Move counterclockwise to the following edge with same origin.
+	 * Moves counterclockwise to the following edge with same origin.
 	 * If a boundary is reached, loop backward until another
 	 * boundary is found and start again from there.
 	 * Note: outer triangles are taken into account in this loop, because
@@ -436,7 +436,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	// Static methods for VirtualHalfEdge instances, only the most useful methods are defined
 	
 	/**
-	 * Copy a <code>VirtualHalfEdge</code> instance into another <code>VirtualHalfEdge</code>
+	 * Copies a <code>VirtualHalfEdge</code> instance into another <code>VirtualHalfEdge</code>
 	 * instance.
 	 *
 	 * @param src   <code>VirtualHalfEdge</code> being duplicated
@@ -451,7 +451,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Copy a <code>VirtualHalfEdge</code> instance and move to its symmetric edge.
+	 * Copies a <code>VirtualHalfEdge</code> instance and move to its symmetric edge.
 	 *
 	 * @param o     source <code>VirtualHalfEdge</code>
 	 * @param that  already allocated <code>VirtualHalfEdge</code> where data are
@@ -465,7 +465,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Copy a <code>VirtualHalfEdge</code> instance and move it counterclockwise to
+	 * Copies a <code>VirtualHalfEdge</code> instance and move it counterclockwise to
 	 * following edge.
 	 *
 	 * @param o     source <code>VirtualHalfEdge</code>
@@ -480,7 +480,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Copy a <code>VirtualHalfEdge</code> instance and move it counterclockwise to
+	 * Copies a <code>VirtualHalfEdge</code> instance and move it counterclockwise to
 	 * previous edge.
 	 *
 	 * @param o     source <code>VirtualHalfEdge</code>
@@ -566,7 +566,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/**
 	 * Sets adjacency relations between two triangles.
 	 *
-	 * @param sym  the triangle bond to this one.
+	 * @param sym  the edge tied to this object
 	 */
 	@Override
 	public final void glue(AbstractHalfEdge sym)
@@ -625,7 +625,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	// Section: 3D geometrical routines
 	
 	/**
-	 * Compute the normal of an edge, in the triangle plane.
+	 * Computes the normal of an edge, in the triangle plane.
 	 * This vector is not normalized, it has the same length as
 	 * this edge.  The result is stored in the tempD temporary array.
 	 * @see #getTempVector
@@ -656,7 +656,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Compute the normal of this triangle.  The result is stored in
+	 * Computes the normal of this triangle.  The result is stored in
 	 * the tempD temporary array.
 	 * @see #getTempVector
 	 * @return the area of this triangle.
@@ -685,7 +685,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Return the area of this triangle.
+	 * Returns the area of this triangle.
 	 * @return the area of this triangle.
 	 * Warning: this method uses tempD, tempD1 and tempD2 temporary arrays.
 	 */
@@ -706,7 +706,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Return the temporary array TempD.
+	 * Returns the temporary array TempD.
 	 */
 	public double [] getTempVector()
 	{
@@ -932,7 +932,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Check whether an edge can be contracted.
+	 * Checks whether an edge can be contracted.
 	 *
 	 * @param n the resulting vertex
 	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise.
@@ -1092,7 +1092,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Contract an edge.
+	 * Contracts an edge.
 	 *
 	 * @param m mesh
 	 * @param n the resulting vertex
@@ -1468,7 +1468,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Split an edge.  This is the opposite of collapse.
+	 * Splits an edge.  This is the opposite of collapse.
 	 *
 	 * @param m  mesh
 	 * @param n  the resulting vertex

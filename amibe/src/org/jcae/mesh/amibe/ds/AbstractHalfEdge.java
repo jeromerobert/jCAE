@@ -25,20 +25,99 @@ import org.jcae.mesh.amibe.traits.HalfEdgeTraitsBuilder;
 import java.util.Iterator;
 import java.util.Map;
 
+/**
+ * Abstract class to define common methods on edges.
+ * We use an half-edge structure to perform
+ * mesh traversal.  Vertices can be obtained
+ * by {@link #origin}, {@link #destination} and
+ * {@link #apex}, and the triangle found at the
+ * left of an edge is given by {@link #getTri}.
+ */
 public abstract class AbstractHalfEdge
 {
 	//  User-defined traits
 	protected final HalfEdgeTraitsBuilder traitsBuilder;
 	protected final Traits traits;
 
+	/**
+	 * Swaps an edge.
+	 *
+	 * This routine swaps an edge (od) to (na).  (on) is returned
+	 * instead of (na), because this helps turning around o, eg.
+	 * at the end of {@link org.jcae.mesh.amibe.patch.VirtualHalfEdge2D#split3}.
+	 *
+	 *          d                    d
+	 *          .                    .
+	 *         /|\                  / \
+	 *        / | \                /   \
+	 *       /  |  \              /     \
+	 *    a +   |   + n  ---&gt;  a +-------+ n
+	 *       \  |  /              \     /
+	 *        \ | /                \   /
+	 *         \|/                  \ /
+	 *          '                    '
+	 *          o                    o
+	 * @return swapped edge
+	 * @throws IllegalArgumentException if edge is on a boundary or belongs
+	 * to an outer triangle.
+	 * @see Mesh#edgeSwap
+	 */
 	protected abstract AbstractHalfEdge swap();
-	protected abstract boolean canCollapse(AbstractVertex v);
-	protected abstract AbstractHalfEdge collapse(AbstractMesh m, AbstractVertex v);
-	protected abstract AbstractHalfEdge split(AbstractMesh m, AbstractVertex v);
 
-	public abstract void glue(AbstractHalfEdge e);
-	public abstract double area();
+	/**
+	 * Checks that triangles are not inverted if origin vertex is moved.
+	 *
+	 * @param newpt  the new position to be checked.
+	 * @return <code>false</code> if the new position produces
+	 *    an inverted triangle, <code>true</code> otherwise.
+	 */
 	public abstract boolean checkNewRingNormals(double [] newpt);
+
+	/**
+	 * Checks whether an edge can be contracted into a given vertex.
+	 *
+	 * @param n  the resulting vertex
+	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise.
+	 * @see Mesh#canCollapseEdge
+	 */
+	protected abstract boolean canCollapse(AbstractVertex n);
+
+	/**
+	 * Contracts an edge.
+	 *
+	 * @param m  mesh
+	 * @param n  the resulting vertex
+	 * @return edge starting from <code>n</code> and pointing to original apex
+	 * @throws IllegalArgumentException if edge belongs to an outer triangle,
+	 * because there would be no valid return value.  User must then run this
+	 * method against symmetric edge, this is not done automatically.
+	 * @see Mesh#edgeCollapse
+	 */
+	protected abstract AbstractHalfEdge collapse(AbstractMesh m, AbstractVertex n);
+
+	/**
+	 * Splits an edge.  This is the opposite of {@link #collapse}.
+	 *
+	 * @param m  mesh
+	 * @param n  the resulting vertex
+	 * @see Mesh#vertexSplit
+	 */
+	protected abstract AbstractHalfEdge split(AbstractMesh m, AbstractVertex n);
+
+	/**
+	 * Sets the edge tied to this object.
+	 *
+	 * @param e  the edge tied to this object
+	 */
+	public abstract void glue(AbstractHalfEdge e);
+
+	/**
+	 * Returns the area of this triangle.
+	 *
+	 * @return the area of this triangle.
+	 */
+	public abstract double area();
+
 	public abstract Iterator<AbstractHalfEdge> fanIterator();
 
 	/**

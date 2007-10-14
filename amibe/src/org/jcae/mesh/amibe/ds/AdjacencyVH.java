@@ -53,7 +53,7 @@ import java.util.Map;
  * <p>
  * As local numbers are integers between 0 and 2, a packed representation
  * is wanted to save space.
- * In his <a href="http://www.cs.cmu.edu/~quake/triangle.html">AbstractTriangle</a>
+ * In his <a href="http://www.cs.cmu.edu/~quake/triangle.html">Triangle</a>
  * program, Jonathan Richard Shewchuk uses word alignment of pointers to pack
  * this information into pointers themselves: they are respectively shifted
  * by 0, 1 or 2 bytes for edges 0, 1 and 2.  This very efficient trick
