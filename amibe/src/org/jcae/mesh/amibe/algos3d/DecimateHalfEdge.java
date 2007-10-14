@@ -391,7 +391,6 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 					logger.debug(" --> "+it.next());
 			}
 		}
-		final Triangle t1 = current.getTri();
 		// HalfEdge instances on t1 and t2 will be deleted
 		// when edge is contracted, and we do not know whether
 		// they appear within tree or their symmetric ones,
