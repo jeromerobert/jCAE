@@ -116,16 +116,9 @@ public class DecimateHalfEdgeTest
 		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
 		int expected = 2;
-		int res = Integer.MAX_VALUE;
-		while (res != expected)
-		{
-			new DecimateHalfEdge(mesh, options).compute();
-			assertTrue("Mesh is not valid", mesh.isValid());
-			int newres = DecimateHalfEdge.countInnerTriangles(mesh);
-			if (newres >= res)
-				break;
-			res = newres;
-		}
+		new DecimateHalfEdge(mesh, options).compute();
+		assertTrue("Mesh is not valid", mesh.isValid());
+		int res = DecimateHalfEdge.countInnerTriangles(mesh);
 		assertTrue("Final number of triangles: "+res, res == expected);
 		assertTrue("Mesh is not valid", mesh.isValid());
 	}
@@ -142,16 +135,9 @@ public class DecimateHalfEdgeTest
 		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
 		int expected = 8;
-		int res = Integer.MAX_VALUE;
-		while (res != expected)
-		{
-			new DecimateHalfEdge(mesh, options).compute();
-			assertTrue("Mesh is not valid", mesh.isValid());
-			int newres = DecimateHalfEdge.countInnerTriangles(mesh);
-			if (newres >= res)
-				break;
-			res = newres;
-		}
+		new DecimateHalfEdge(mesh, options).compute();
+		assertTrue("Mesh is not valid", mesh.isValid());
+		int res = DecimateHalfEdge.countInnerTriangles(mesh);
 		assertTrue("Final number of triangles: "+res, res == expected);
 	}
 
@@ -330,17 +316,10 @@ public class DecimateHalfEdgeTest
 		}
 		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
-		int res = Integer.MAX_VALUE;
 		int expected = 8;
-		while (res != expected)
-		{
-			new DecimateHalfEdge(mesh, options).compute();
-			assertTrue("Mesh is not valid", mesh.isValid());
-			int newres = DecimateHalfEdge.countInnerTriangles(mesh);
-			if (newres >= res)
-				break;
-			res = newres;
-		}
+		new DecimateHalfEdge(mesh, options).compute();
+		assertTrue("Mesh is not valid", mesh.isValid());
+		int res = DecimateHalfEdge.countInnerTriangles(mesh);
 		assertTrue("Mesh is not valid", mesh.isValid());
 		assertTrue("Final number of triangles: "+res, res == expected);
 	}
