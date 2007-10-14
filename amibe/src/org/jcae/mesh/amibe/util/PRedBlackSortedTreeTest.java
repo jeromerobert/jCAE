@@ -114,9 +114,10 @@ public class PRedBlackSortedTreeTest extends QSortedTreeTest
 		}
 	}
 
+	// This test is meant for timing purposes, one has then to increase n
 	@Test public void large()
 	{
-		int n = 100000;
+		int n = 1000;
 		unitTest1(n);
 		unitTestIterator(n);
 	}
