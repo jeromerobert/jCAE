@@ -1,7 +1,11 @@
+Sun Oct 14 16:47:52 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/MeshReader.java
 	  src/org/jcae/mesh/amibe/util/UNVReader.java: Add nodes to mesh
 	if its traitsBuilder requested it.  Update calls to buildAdjacency().
+	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java: Due to
+	the change in QSortedTree.update() at 31st August, we must know
+	call QSortedTree.insert() if edge is not present in tree.
 
 Sat Oct 13 22:52:30 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

@@ -460,7 +460,14 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 				current = (HalfEdge) current.nextOriginLoop();
 				assert !current.hasAttributes(AbstractHalfEdge.NONMANIFOLD);
 				if (current.destination().isReadable() && current.origin().isReadable())
-					tree.update(current.notOriented(), cost(current));
+				{
+					double newCost = cost(current);
+					HalfEdge h = current.notOriented();
+					if (tree.contains(h))
+						tree.update(h, newCost);
+					else
+						tree.insert(h, newCost);
+				}
 			}
 			while (current.destination() != apex);
 			return (HalfEdge) current.next();
@@ -480,7 +487,14 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			{
 				f = (HalfEdge) f.nextOriginLoop();
 				if (f.destination().isReadable() && f.origin().isReadable())
-					tree.update(f.notOriented(), cost(f));
+				{
+					double newCost = cost(f);
+					HalfEdge h = f.notOriented();
+					if (tree.contains(h))
+						tree.update(h, newCost);
+					else
+						tree.insert(h, newCost);
+				}
 			}
 			while (f.destination() != d);
 			current = f;
