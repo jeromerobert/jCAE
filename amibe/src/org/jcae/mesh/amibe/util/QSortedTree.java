@@ -426,12 +426,12 @@ public abstract class QSortedTree implements Serializable
 	
 	private static void showNodeValues(Node node)
 	{
-		System.out.println(node.toString());
 		if (node.child[0] != null)
 		{
 			assert node.child[0].parent == node;
 			showNodeValues(node.child[0]);
 		}
+		System.out.println("Key: "+node.getValue()+ "Obj: "+node.getData());
 		if (node.child[1] != null)
 		{
 			assert node.child[1].parent == node;
