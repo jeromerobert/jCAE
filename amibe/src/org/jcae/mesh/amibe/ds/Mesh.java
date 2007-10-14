@@ -238,18 +238,6 @@ public class Mesh extends AbstractMesh implements Serializable
 	}
 
 	/**
-	 * Creates a triangle composed of three vertices.
-	 *
-	 * @param v  array of three vertices
-	 * @return a new {@link AbstractTriangle} instance composed of three vertices
-	 */
-	public AbstractTriangle createTriangle(AbstractVertex [] v)
-	{
-		assert v.length == 3;
-		return factory.createTriangle(v);
-	}
-
-	/**
 	 * Tells whether nodes are stored.
 	 *
 	 * @return <code>true</code> if mesh was created with a <code>MeshTraitsBuilder</code>
@@ -263,6 +251,18 @@ public class Mesh extends AbstractMesh implements Serializable
 	/**
 	 * Creates a triangle composed of three vertices.
 	 *
+	 * @param v  array of three vertices
+	 * @return a new {@link AbstractTriangle} instance composed of three vertices
+	 */
+	public AbstractTriangle createTriangle(AbstractVertex [] v)
+	{
+		assert v.length == 3;
+		return factory.createTriangle(v);
+	}
+
+	/**
+	 * Creates a triangle composed of three vertices.
+	 *
 	 * @param v0  first vertex
 	 * @param v1  second vertex
 	 * @param v2  third vertex
@@ -271,6 +271,17 @@ public class Mesh extends AbstractMesh implements Serializable
 	public AbstractTriangle createTriangle(AbstractVertex v0, AbstractVertex v1, AbstractVertex v2)
 	{
 		return factory.createTriangle(v0, v1, v2);
+	}
+
+ 	/**
+	 * Clones a triangle.
+	 *
+	 * @param that  triangle to clone
+	 * @return a new {@link AbstractTriangle} instance
+	 */
+	public AbstractTriangle createTriangle(AbstractTriangle that)
+	{
+		return factory.createTriangle(that);
 	}
 
 	/**
