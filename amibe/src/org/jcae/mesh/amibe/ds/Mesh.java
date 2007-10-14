@@ -190,23 +190,7 @@ public class Mesh extends AbstractMesh implements Serializable
 		for (int i = 0; i < 3; i++)
 		{
 			e = (HalfEdge) e.next();
-			if (e.getAdj() == null)
-			{
-				// Do nothing
-			}
-			else if (e.getAdj() instanceof HalfEdge)
-			{
-				HalfEdge s = (HalfEdge) e.getAdj();
-				if (s.getAdj() == e)
-					s.setAdj(null);
-				e.setAdj(null);
-			}
-			else
-			{
-				LinkedHashMap<Triangle, Integer> adj = (LinkedHashMap<Triangle, Integer>) e.getAdj();
-				adj.clear();
-				e.setAdj(null);
-			}
+			e.setAdj(null);
 			last.setNext(null);
 			last = e;
 		}
@@ -882,6 +866,7 @@ public class Mesh extends AbstractMesh implements Serializable
 		return true;
 	}
 
+	@SuppressWarnings("unchecked")
 	private boolean checkVirtualHalfEdges(AbstractTriangle t)
 	{
 		if (!t.traitsBuilder.hasCapability(TriangleTraitsBuilder.SHALLOWHALFEDGE))
@@ -958,6 +943,7 @@ public class Mesh extends AbstractMesh implements Serializable
 		return true;
 	}
 
+	@SuppressWarnings("unchecked")
 	private boolean checkHalfEdges(AbstractTriangle t)
 	{
 		if (!t.traitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE))
