@@ -75,7 +75,7 @@
 				<pathelement location="${jcae.junit.jar}"/>
 			</classpath>
 			<assertions>
-				<enable package="org.jcae.mesh.amibe.ds"/>
+				<enable package="org.jcae.mesh.amibe"/>
 			</assertions>
   			<test name="org.jcae.mesh.amibe.util.PAVLSortedTreeTest"/>
   			<test name="org.jcae.mesh.amibe.util.PRedBlackSortedTreeTest"/>
@@ -83,6 +83,7 @@
   			<test name="org.jcae.mesh.amibe.ds.VirtualHalfEdgeTest"/>
   			<test name="org.jcae.mesh.oemm.PAVLTreeIntArrayDupTest"/>
   			<test name="org.jcae.mesh.amibe.metrics.Matrix2DTest"/>
+			<test name="org.jcae.mesh.amibe.algos3d.DecimateHalfEdgeTest"/>
 		</junit>
 	</target>
 
