@@ -192,6 +192,7 @@ public class Mesh extends AbstractMesh implements Serializable
 			e = (HalfEdge) e.next();
 			if (e.getAdj() == null)
 			{
+				// Do nothing
 			}
 			else if (e.getAdj() instanceof HalfEdge)
 			{
@@ -371,7 +372,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	 */
 	public void buildAdjacency(Vertex [] vertices, double minAngle)
 	{
-		ArrayList list = new ArrayList<Vertex>(vertices.length);
+		ArrayList<Vertex> list = new ArrayList<Vertex>(vertices.length);
 		for (Vertex v: vertices)
 			list.add(v);
 		buildAdjacency(list, minAngle);
@@ -488,7 +489,6 @@ public class Mesh extends AbstractMesh implements Serializable
 		{
 			Triangle t = (Triangle) at;
 			AbstractHalfEdge ot = t.getAbstractHalfEdge();
-			AbstractHalfEdge sym = t.getAbstractHalfEdge();
 			for (int i = 0; i < 3; i++)
 			{
 				ot = ot.next();
@@ -505,9 +505,7 @@ public class Mesh extends AbstractMesh implements Serializable
 							endpoints[j].setLink(link);
 						}
 					}
-					sym = ot.sym(sym);
-					sym = sym.next();
-					LinkedHashMap<Triangle, Integer> adj = (LinkedHashMap<Triangle, Integer>) sym.getAdj();
+					Map<Triangle, Integer> adj = ot.getAdjNonManifold();
 					for (Triangle t2: adj.keySet())
 					{
 						for (int j = 0; j < 2; j++)
