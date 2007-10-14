@@ -140,7 +140,10 @@ public class Mesh extends AbstractMesh implements Serializable
 		super(MeshTraitsBuilder.getDefault3D());
 		factory = new ElementFactory(traitsBuilder);
 		triangleList = new ArrayList<AbstractTriangle>();
-		nodeList = new ArrayList<AbstractVertex>();
+		if (traitsBuilder.hasNodes())
+			nodeList = new ArrayList<AbstractVertex>();
+		else
+			nodeList = null;
 	}
 	
 	/**
@@ -358,10 +361,10 @@ public class Mesh extends AbstractMesh implements Serializable
 	 */
 	public void buildAdjacency(double minAngle)
 	{
-		Collection<Vertex> vertices;
+		Collection<AbstractVertex> vertices;
 		if (nodeList == null)
 		{
-			vertices = new LinkedHashSet<Vertex>(triangleList.size()/2);
+			vertices = new LinkedHashSet<AbstractVertex>(triangleList.size()/2);
 			for (AbstractTriangle at: triangleList)
 				for (Vertex v: at.vertex)
 					vertices.add(v);
@@ -377,20 +380,20 @@ public class Mesh extends AbstractMesh implements Serializable
 	 */
 	public void buildAdjacency(Vertex [] vertices, double minAngle)
 	{
-		Collection<Vertex> list = new ArrayList<Vertex>(vertices.length);
+		Collection<AbstractVertex> list = new ArrayList<AbstractVertex>(vertices.length);
 		for (Vertex v: vertices)
 			list.add(v);
 		buildAdjacency(list, minAngle);
 	}
 
 	@SuppressWarnings("unchecked")
-	private void buildAdjacency(Collection<Vertex> vertices, double minAngle)
+	private void buildAdjacency(Collection<AbstractVertex> vertices, double minAngle)
 	{
 		//  1. For each vertex, build the list of triangles
 		//     connected to this vertex.
 		logger.debug("Build the list of triangles connected to each vertex");
-		HashMap<Vertex, ArrayList<AbstractTriangle>> tVertList = new HashMap<Vertex, ArrayList<AbstractTriangle>>(vertices.size());
-		for (Vertex v: vertices)
+		HashMap<AbstractVertex, ArrayList<AbstractTriangle>> tVertList = new HashMap<AbstractVertex, ArrayList<AbstractTriangle>>(vertices.size());
+		for (AbstractVertex v: vertices)
 			tVertList.put(v, new ArrayList<AbstractTriangle>(10));
 		for (AbstractTriangle t: triangleList)
 		{
@@ -402,11 +405,11 @@ public class Mesh extends AbstractMesh implements Serializable
 		}
 		//  2. Connect all edges together
 		logger.debug("Connect triangles");
-		for (Vertex v: vertices)
+		for (AbstractVertex v: vertices)
 			checkNeighbours(v, tVertList);
 		//  tVertList is no more needed, remove all references
 		//  to help the garbage collector.
-		for (Vertex v: vertices)
+		for (AbstractVertex v: vertices)
 		{
 			ArrayList<AbstractTriangle> list = tVertList.get(v);
 			list.clear();
@@ -554,10 +557,11 @@ public class Mesh extends AbstractMesh implements Serializable
 		if (minAngle < 0.0)
 			cosMinAngle = -2.0;
 		double [][] temp = new double[4][3];
-		for (Vertex v: vertices)
+		for (AbstractVertex av: vertices)
 		{
-			if (bndNodes.contains(v))
+			if (bndNodes.contains(av))
 				continue;
+			Vertex v = (Vertex) av;
 			int label = v.getRef();
 			if (v.getLink() instanceof Triangle[])
 			{
@@ -582,7 +586,7 @@ public class Mesh extends AbstractMesh implements Serializable
 		triangleList.addAll(newTri);
 	}
 	
-	private static final void checkNeighbours(Vertex v, HashMap<Vertex, ArrayList<AbstractTriangle>> tVertList)
+	private static final void checkNeighbours(AbstractVertex v, HashMap<AbstractVertex, ArrayList<AbstractTriangle>> tVertList)
 	{
 		//  Mark all triangles having v as vertex
 		ArrayList<AbstractTriangle> neighTriList = tVertList.get(v);
