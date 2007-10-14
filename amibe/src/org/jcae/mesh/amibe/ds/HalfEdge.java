@@ -927,7 +927,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		{
 			// e is listed in adjacency list and
 			// has to be replaced by s
-			assert  s != null || !s.hasAttributes(NONMANIFOLD);
+			assert  s != null && !s.hasAttributes(NONMANIFOLD);
 			e.replaceEdgeLinks(s);
 			f.HEglue(s);
 		}
