@@ -846,6 +846,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		Vertex o = origin();
 		Vertex d = destination();
 		Vertex v = (Vertex) n;
+		Mesh mesh = (Mesh) m;
 		assert o.isWritable() && d.isWritable(): "Cannot contract "+this;
 		if (logger.isDebugEnabled())
 			logger.debug("contract ("+o+" "+d+")");
@@ -861,10 +862,16 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		deepCopyVertexLinks(o, d, v);
 		if (logger.isDebugEnabled())
 			logger.debug("new point: "+v);
+		if (mesh.hasNodes())
+		{
+			mesh.remove(o);
+			mesh.remove(d);
+			mesh.add(v);
+		}
 		if (!hasAttributes(NONMANIFOLD))
 		{
-			e.HEcollapseSameFan((Mesh) m, v);
-			return HEcollapseSameFan((Mesh) m, v);
+			e.HEcollapseSameFan(mesh, v);
+			return HEcollapseSameFan(mesh, v);
 		}
 		// Edge is non-manifold
 		assert e.hasAttributes(OUTER);
@@ -878,11 +885,11 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		{
 			HalfEdge h = (HalfEdge) ah;
 			assert !h.hasAttributes(OUTER);
-			h.HEsym().HEcollapseSameFan((Mesh) m, v);
+			h.HEsym().HEcollapseSameFan(mesh, v);
 			if (h == this)
-				ret = h.HEcollapseSameFan((Mesh) m, v);
+				ret = h.HEcollapseSameFan(mesh, v);
 			else
-				h.HEcollapseSameFan((Mesh) m, v);
+				h.HEcollapseSameFan(mesh, v);
 		}
 		assert ret != null;
 		return ret;
@@ -1152,11 +1159,14 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("split edge ("+origin()+" "+destination()+") by adding vertex "+n);
+		Mesh mesh = (Mesh) m;
+		if (mesh.hasNodes())
+			mesh.add(n);
 		Vertex v = (Vertex) n;
 		if (!hasAttributes(NONMANIFOLD))
 		{
 			v.setLink(tri);
-			HEsplitSameFan((Mesh) m, v);
+			HEsplitSameFan(mesh, v);
 			return this;
 		}
 		// Set vertex links
@@ -1172,7 +1182,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
 		{
 			HalfEdge f = (HalfEdge) it.next();
-			f.HEsplitSameFan((Mesh) m, v);
+			f.HEsplitSameFan(mesh, v);
 		}
 		return this;
 	}

@@ -1110,6 +1110,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		Vertex o = origin();
 		Vertex d = destination();
 		Vertex v = (Vertex) n;
+		Mesh mesh = (Mesh) m;
 		assert o.isWritable() && d.isWritable(): "Cannot contract "+this;
 		if (logger.isDebugEnabled())
 			logger.debug("contract ("+o+" "+d+")");
@@ -1128,9 +1129,14 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		deepCopyVertexLinks(o, d, v);
 		if (logger.isDebugEnabled())
 			logger.debug("new point: "+v);
-		
+		if (mesh.hasNodes())
+		{
+			mesh.remove(o);
+			mesh.remove(d);
+			mesh.add(v);
+		}
 		if (!hasAttributes(NONMANIFOLD))
-			return VHcollapseSameFan((Mesh) m, v, true);
+			return VHcollapseSameFan(mesh, v, true);
 		// Edge is non-manifold
 		assert work[2].hasAttributes(OUTER);
 		// VHcollapseSameFan may modify LinkedHashMap structure
@@ -1151,12 +1157,12 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			assert !work[2].hasAttributes(OUTER);
 			if (t == tri)
 			{
-				work[2].VHcollapseSameFan((Mesh) m, v, false);
+				work[2].VHcollapseSameFan(mesh, v, false);
 				ret = work[2].tri;
 				num = work[2].localNumber;
 			}
 			else
-				work[2].VHcollapseSameFan((Mesh) m, v, false);
+				work[2].VHcollapseSameFan(mesh, v, false);
 		}
 		assert ret != null;
 		bind(ret, num);
@@ -1473,11 +1479,14 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("split edge ("+origin()+" "+destination()+") by adding vertex "+n);
+		Mesh mesh = (Mesh) m;
+		if (mesh.hasNodes())
+			mesh.add(n);
 		Vertex v = (Vertex) n;
 		if (!hasAttributes(NONMANIFOLD))
 		{
 			v.setLink(tri);
-			VHsplitSameFan((Mesh) m, v);
+			VHsplitSameFan(mesh, v);
 			return this;
 		}
 		// Set vertex links
@@ -1493,7 +1502,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
 		{
 			VirtualHalfEdge f = (VirtualHalfEdge) it.next();
-			f.VHsplitSameFan((Mesh) m, v);
+			f.VHsplitSameFan(mesh, v);
 		}
 		return this;
 	}
