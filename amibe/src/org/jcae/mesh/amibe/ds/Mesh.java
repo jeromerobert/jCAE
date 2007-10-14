@@ -235,6 +235,17 @@ public class Mesh extends AbstractMesh implements Serializable
 	}
 
 	/**
+	 * Tells whether nodes are stored.
+	 *
+	 * @return <code>true</code> if mesh was created with a <code>MeshTraitsBuilder</code>
+	 * instance defining nodes, and <code>false</code> otherwise.
+	 */
+	public boolean hasNodes()
+	{
+		return traitsBuilder.hasNodes();
+	}
+
+	/**
 	 * Checks whether a length is llower than a threshold.
 	 *
 	 * @param len   the length to be checked.
@@ -331,7 +342,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	}
 
 	/**
-	 * Build adjacency relations between triangles
+	 * Build adjacency relations between triangles.
 	 */
 	public void buildAdjacency()
 	{
@@ -339,14 +350,24 @@ public class Mesh extends AbstractMesh implements Serializable
 	}
 
 	/**
-	 * Build adjacency relations between triangles
+	 * Build adjacency relations between triangles.
+	 * @param minAngle  when an edge has a dihedral angle greater than this value,
+	 *   it is considered as a ridge and its endpoints are treated as if they
+	 *   belong to a CAD edge.  By convention, a negative value means that this
+	 *   check is not performed.
 	 */
 	public void buildAdjacency(double minAngle)
 	{
-		LinkedHashSet<Vertex> vertices = new LinkedHashSet<Vertex>(triangleList.size()/2);
-		for (AbstractTriangle at: triangleList)
-			for (Vertex v: at.vertex)
-				vertices.add(v);
+		Collection<Vertex> vertices;
+		if (nodeList == null)
+		{
+			vertices = new LinkedHashSet<Vertex>(triangleList.size()/2);
+			for (AbstractTriangle at: triangleList)
+				for (Vertex v: at.vertex)
+					vertices.add(v);
+		}
+		else
+			vertices = nodeList;
 		buildAdjacency(vertices, minAngle);
 	}
 
@@ -356,7 +377,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	 */
 	public void buildAdjacency(Vertex [] vertices, double minAngle)
 	{
-		ArrayList<Vertex> list = new ArrayList<Vertex>(vertices.length);
+		Collection<Vertex> list = new ArrayList<Vertex>(vertices.length);
 		for (Vertex v: vertices)
 			list.add(v);
 		buildAdjacency(list, minAngle);
