@@ -443,7 +443,7 @@ public class AbstractHalfEdgeTest
 		e = e.collapse(mesh, n);
 		assertTrue("Mesh is not valid", mesh.isValid());
 		assertTrue("Error in origin", n == e.origin());
-		assertTrue("Error in destination", a == e.destination());
+		assertTrue("Error in destination", a == e.apex());
 		return e;
 	}
 

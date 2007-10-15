@@ -594,22 +594,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	/**
 	 * Swaps an edge.
 	 *
-	 * This routine swaps an edge (od) to (na).  (on) is returned
-	 * instead of (na), because this helps turning around o, eg.
-	 * at the end of {@link org.jcae.mesh.amibe.patch.VirtualHalfEdge2D#split3}.
-	 *
-	 *          d                    d
-	 *          .                    .
-	 *         /|\                  / \
-	 *        / | \                /   \
-	 *       /  |  \              /     \
-	 *    a +   |   + n  ---&gt;  a +-------+ n
-	 *       \  |  /              \     /
-	 *        \ | /                \   /
-	 *         \|/                  \ /
-	 *          '                    '
-	 *          o                    o
-	 * @return swapped edge
+	 * @return swapped edge, origin and apical vertices are the same as in original edge
 	 * @throws IllegalArgumentException if edge is on a boundary or belongs
 	 * to an outer triangle.
 	 * @see Mesh#edgeSwap
@@ -931,7 +916,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *
 	 * @param m mesh
 	 * @param n the resulting vertex
-	 * @return edge starting from <code>n</code> and pointing to original apex
+	 * @return edge starting from <code>n</code> and with the same apex
 	 * @throws IllegalArgumentException if edge belongs to an outer triangle,
 	 * because there would be no valid return value.  User must then run this
 	 * method against symmetric edge, this is not done automatically.
@@ -1055,10 +1040,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			s.attributes |= attr3;
 		// Remove t1
 		m.remove(tri);
-		// By convention, edge is moved into (dV4V1), but this may change.
-		// This is why V1 cannot be m.outerVertex, otherwise we cannot
-		// ensure that return HalfEdge is (oV1V3)
-		return f;
+		// By convention, edge is moved into (dV4V1)
+		// If s is null, edge is outer and return value does not matter
+		return (s == null ? null : s.next);
 	}
 	
 	private void replaceEndpointsSameFan(Vertex n)
@@ -1249,9 +1233,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	/**
 	 * Splits an edge.  This is the opposite of {@link #collapse}.
 	 *
-	 * @param m mesh
-	 * @param n the resulting vertex
-	 * @return edge starting from <code>n</code> and pointing to original apex
+	 * @param m  mesh
+	 * @param n  vertex being inserted
+	 * @return edge starting from origin and pointing to <code>n</code>
 	 * @see Mesh#vertexSplit
 	 */
 	@Override

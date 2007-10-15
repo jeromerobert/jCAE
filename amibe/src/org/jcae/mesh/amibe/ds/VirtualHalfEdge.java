@@ -775,25 +775,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/**
 	 * Swaps an edge.
 	 *
-	 * This routine swaps an edge (od) to (na), updates
-	 * adjacency relations and backward links between vertices and
-	 * triangles.  Current object is transformed from (oda) to (ona)
-	 * and not (nao), because this helps turning around o, eg.
-	 * at the end of {@link org.jcae.mesh.amibe.patch.VirtualHalfEdge2D#split3}.
-	 *        
-	 *          d                    d
-	 *          .                    .
-	 *         /|\                  / \
-	 *        / | \                /   \   
-	 *       /  |  \              /     \
-	 *    a +   |   + n  ---&gt;  a +-------+ n
-	 *       \  |  /              \     /
-	 *        \ | /                \   /
-	 *         \|/                  \ /
-	 *          '                    '
-	 *          o                    o
-	 * @return swapped edge
-	 * @return edge starting from the same origin and pointing to original apex
+	 * @return swapped edge, origin and apical vertices are the same as in original edge
 	 * @throws IllegalArgumentException if edge is on a boundary or belongs
 	 * to an outer triangle.
 	 * @see Mesh#edgeSwap
@@ -1102,7 +1084,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *
 	 * @param m mesh
 	 * @param n the resulting vertex
-	 * @return edge starting from <code>n</code> and pointing to original apex
+	 * @return edge starting from <code>n</code> and with the same apex
 	 * @throws IllegalArgumentException if edge belongs to an outer triangle,
 	 * because there would be no valid return value.  User must then run this
 	 * method against symmetric edge, this is not done automatically.
@@ -1290,10 +1272,11 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		// We have to move before removing adjacency relations.
 		nextOTri(work[0], this);        // (dV1o)
 		sym();                          // (V1dV4)
-		sym();                          // (oV1V3)
+		next();                         // (dV4V1)
 		work[0].clearAttributes(MARKED);
 		work[0].pushAttributes();
 		m.remove(work[0].tri);
+		// By convention, edge is moved into (dV4V1)
 		return this;
 	}
 	
@@ -1477,8 +1460,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * Splits an edge.  This is the opposite of collapse.
 	 *
 	 * @param m  mesh
-	 * @param n  the resulting vertex
-	 * @return edge starting from <code>n</code> and pointing to original apex
+	 * @param n  vertex being inserted
+	 * @return edge starting from origin and pointing to <code>n</code>
 	 * @see Mesh#vertexSplit
 	 */
 	@Override

@@ -779,7 +779,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	 *
 	 * @param e   edge to contract
 	 * @param v   the resulting vertex
-	 * @return edge starting from <code>n</code> and pointing to original apex
+	 * @return edge starting from <code>n</code> and with the same apex
 	 * @throws IllegalArgumentException if edge belongs to an outer triangle,
 	 * because there would be no valid return value.  User must then run this
 	 * method against symmetric edge, this is not done automatically.
@@ -803,7 +803,9 @@ public class Mesh extends AbstractMesh implements Serializable
 	/**
 	 * Swaps an edge.
 	 *
-	 * @param e  edge being swapped
+	 * @return swapped edge, origin and apical vertices are the same as in original edge
+	 * @throws IllegalArgumentException if edge is on a boundary or belongs
+	 * to an outer triangle.
 	 */
 	public AbstractHalfEdge edgeSwap(AbstractHalfEdge e)
 	{

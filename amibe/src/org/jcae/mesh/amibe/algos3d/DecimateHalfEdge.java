@@ -442,11 +442,12 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			qFree = quadricMap.remove(vFree);
 		}
 		current = (HalfEdge) mesh.edgeCollapse(current, v3);
+		// Now current == (v3*a)
 		// Update edge costs
 		quadricMap.put(v3, q3);
 		assert current != null : v3+" not connected to "+apex;
 		assert current.origin() == v3 : ""+current+"\n"+v3+"\n"+apex;
-		assert current.destination() == apex : ""+current+"\n"+v3+"\n"+apex;
+		assert current.apex() == apex : ""+current+"\n"+v3+"\n"+apex;
 		v3 = vFree;
 		if (v3 == null)
 			v3 = (Vertex) mesh.createVertex(0.0, 0.0, 0.0);
@@ -469,7 +470,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 						tree.insert(h, newCost);
 				}
 			}
-			while (current.destination() != apex);
+			while (current.apex() != apex);
 			return (HalfEdge) current.next();
 		}
 		Vertex o = current.origin();

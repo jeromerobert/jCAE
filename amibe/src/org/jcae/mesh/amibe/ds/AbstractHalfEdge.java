@@ -111,6 +111,17 @@ import java.util.Map;
  *       sometimes costful.</p>
  *       <p align="center"><img src="doc-files/AbstractHalfEdge-2.png" alt="[Image showing edge collapse]"/></p>
  *   </dd>
+ * </dl>
+ * <p>
+ * Returned values have been chosen so that these methods always return an edge
+ * which has the same apical vertex.  As will be explained below, they gracefully
+ * work with boundaries and non-manifold meshes.
+ * </p>
+ *
+ * <p>
+ * These two methods may also be of interest when writing new algorithms:
+ * </p>
+ * <dl>
  *   <dt>{@link #canCollapse}</dt>
  *   <dd>Tells whether an edge can be collapsed and replaced by the given vertex.</dd>
  *   <dt>{@link #checkNewRingNormals}</dt>
@@ -314,7 +325,7 @@ public abstract class AbstractHalfEdge
 	 *
 	 * @param m  mesh
 	 * @param n  the resulting vertex
-	 * @return edge starting from <code>n</code> and pointing to original apex
+	 * @return edge starting from <code>n</code> and with the same apex
 	 * @throws IllegalArgumentException if edge belongs to an outer triangle,
 	 * because there would be no valid return value.  User must then run this
 	 * method against symmetric edge, this is not done automatically.
@@ -327,6 +338,7 @@ public abstract class AbstractHalfEdge
 	 *
 	 * @param m  mesh
 	 * @param n  the resulting vertex
+	 * @return edge starting from <code>n</code> and pointing to original apex
 	 * @see Mesh#vertexSplit
 	 */
 	protected abstract AbstractHalfEdge split(AbstractMesh m, AbstractVertex n);

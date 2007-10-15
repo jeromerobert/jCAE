@@ -1,3 +1,8 @@
+Mon Oct 15 16:35:55 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/AbstractHalfEdge.java (collapse): Modify
+	return value to make swap(), split() and collapse() more coherent.
+
 Sun Oct 14 16:47:52 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/MeshReader.java
