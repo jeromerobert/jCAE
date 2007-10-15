@@ -155,12 +155,25 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		return (HalfEdge) sym;
 	}
 
+	/**
+	 * Moves to symmetric edge.
+	 * @return  current instance after its transformation
+	 */
 	@Override
 	public final AbstractHalfEdge sym()
 	{
 		return (AbstractHalfEdge) sym;
 	}
 
+	/**
+	 * Moves to symmetric edge.
+	 * Make <code>that</code> instance be a copy of current
+	 * instance, move it to its symmetric edge and return
+	 * this instance.  Current instance is not modified.
+	 *
+	 * @param  that  instance where transformed edge is stored
+	 * @return   argument after its transformation
+	 */
 	@Override
 	public final AbstractHalfEdge sym(AbstractHalfEdge that)
 	{
@@ -169,7 +182,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 
 	/**
-	 * Moves to the next edge.
+	 * Moves counterclockwise to following edge.
+	 * @return  current instance after its transformation
 	 */
 	@Override
 	public final AbstractHalfEdge next()
@@ -177,6 +191,15 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		return next;
 	}
 	
+	/**
+	 * Moves counterclockwise to following edge.
+	 * Make <code>that</code> instance be a copy of current
+	 * instance, move it counterclockwise to next edge and
+	 * return this instance.  Current instance is not modified.
+	 *
+	 * @param  that  instance where transformed edge is stored
+	 * @return   argument after its transformation
+	 */
 	@Override
 	public final AbstractHalfEdge next(AbstractHalfEdge that)
 	{
@@ -185,7 +208,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Moves to the previous edge.
+	 * Moves counterclockwise to previous edge.
+	 * @return  current instance after its transformation
 	 */
 	@Override
 	public final AbstractHalfEdge prev()
@@ -193,6 +217,15 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		return next.next;
 	}
 	
+	/**
+	 * Moves counterclockwise to previous edge.
+	 * Make <code>that</code> instance be a copy of current
+	 * instance, move it counterclockwise to previous edge and
+	 * return this instance.  Current instance is not modified.
+	 *
+	 * @param  that  instance where transformed edge is stored
+	 * @return   argument after its transformation
+	 */
 	@Override
 	public final AbstractHalfEdge prev(AbstractHalfEdge that)
 	{
@@ -201,7 +234,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Moves counterclockwise to the following edge with the same origin.
+	 * Moves counterclockwise to the following edge which has the same origin.
+	 * @return  current instance after its transformation
 	 */
 	@Override
 	public final AbstractHalfEdge nextOrigin()
@@ -209,6 +243,16 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		return next.next.sym();
 	}
 	
+	/**
+	 * Moves counterclockwise to the following edge which has the same origin.
+	 * Make <code>that</code> instance be a copy of current
+	 * instance, move it counterclockwise to the following edge which
+	 * has the same origin and return this instance.  Current instance is
+	 * not modified.
+	 *
+	 * @param  that  instance where transformed edge is stored
+	 * @return   argument after its transformation
+	 */
 	@Override
 	public final AbstractHalfEdge nextOrigin(AbstractHalfEdge that)
 	{
@@ -217,13 +261,24 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Moves counterclockwise to the previous edge with the same origin.
+	 * Moves counterclockwise to the previous edge which has the same origin.
+	 * @return  current instance after its transformation
 	 */
 	public final AbstractHalfEdge prevOrigin()
 	{
 		return HEsym().next;
 	}
 	
+	/**
+	 * Moves counterclockwise to the previous edge which has the same origin.
+	 * Make <code>that</code> instance be a copy of current
+	 * instance, move it counterclockwise to the previous edge which
+	 * has the same origin and return this instance.  Current instance is
+	 * not modified.
+	 *
+	 * @param  that  instance where transformed edge is stored
+	 * @return   argument after its transformation
+	 */
 	public final AbstractHalfEdge prevOrigin(AbstractHalfEdge that)
 	{
 		that = HEsym().next;
@@ -231,14 +286,25 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Moves counterclockwise to the following edge with the same
+	 * Moves counterclockwise to the following edge which has the same
 	 * destination.
+	 * @return  current instance after its transformation
 	 */
 	public final AbstractHalfEdge nextDest()
 	{
 		return HEsym().prev();
 	}
 	
+	/**
+	 * Moves counterclockwise to the following edge which has the same destination.
+	 * Make <code>that</code> instance be a copy of current
+	 * instance, move it counterclockwise to the following edge which
+	 * has the same destination and return this instance.  Current instance is
+	 * not modified.
+	 *
+	 * @param  that  instance where transformed edge is stored
+	 * @return   argument after its transformation
+	 */
 	public final AbstractHalfEdge nextDest(AbstractHalfEdge that)
 	{
 		that = HEsym().prev();
@@ -246,14 +312,25 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Moves counterclockwise to the previous edge with the same
+	 * Moves counterclockwise to the previous edge which has the same
 	 * destination.
+	 * @return  current instance after its transformation
 	 */
 	public final AbstractHalfEdge prevDest()
 	{
 		return next.sym();
 	}
 	
+	/**
+	 * Moves counterclockwise to the previous edge which has the same destination.
+	 * Make <code>that</code> instance be a copy of current
+	 * instance, move it counterclockwise to the previous edge which
+	 * has the same destination and return this instance.  Current instance is
+	 * not modified.
+	 *
+	 * @param  that  instance where transformed edge is stored
+	 * @return   argument after its transformation
+	 */
 	public final AbstractHalfEdge prevDest(AbstractHalfEdge that)
 	{
 		that = next.sym();
@@ -261,13 +338,24 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Moves counterclockwise to the following edge with the same apex.
+	 * Moves counterclockwise to the following edge which has the same apex.
+	 * @return  current instance after its transformation
 	 */
 	public final AbstractHalfEdge nextApex()
 	{
 		return next.HEsym().next;
 	}
 	
+	/**
+	 * Moves counterclockwise to the following edge which has the same apex.
+	 * Make <code>that</code> instance be a copy of current
+	 * instance, move it counterclockwise to the following edge which
+	 * has the same apex and return this instance.  Current instance is
+	 * not modified.
+	 *
+	 * @param  that  instance where transformed edge is stored
+	 * @return   argument after its transformation
+	 */
 	public final AbstractHalfEdge nextApex(AbstractHalfEdge that)
 	{
 		that = next.HEsym().next;
@@ -275,13 +363,24 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Moves clockwise to the previous edge with the same apex.
+	 * Moves counterclockwise to the previous edge which has the same apex.
+	 * @return  current instance after its transformation
 	 */
 	public final AbstractHalfEdge prevApex()
 	{
 		return next.next.HEsym().prev();
 	}
 	
+	/**
+	 * Moves counterclockwise to the previous edge which has the same apex.
+	 * Make <code>that</code> instance be a copy of current
+	 * instance, move it counterclockwise to the previous edge which
+	 * has the same apex and return this instance.  Current instance is
+	 * not modified.
+	 *
+	 * @param  that  instance where transformed edge is stored
+	 * @return   argument after its transformation
+	 */
 	public final AbstractHalfEdge prevApex(AbstractHalfEdge that)
 	{
 		that = next.next.HEsym().prev();
@@ -397,7 +496,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Moves counterclockwise to the following edge with the same origin.
+	 * Moves counterclockwise to the following edge which has the same origin.
 	 * If a boundary is reached, loop backward until another
 	 * boundary is found and start again from there.
 	 */
@@ -421,7 +520,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Moves counterclockwise to the following edge with the same apex.
+	 * Moves counterclockwise to the following edge which has the same apex.
 	 * If a boundary is reached, loop backward until another
 	 * boundary is found and start again from there.
 	 */
@@ -1152,6 +1251,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 *
 	 * @param m mesh
 	 * @param n the resulting vertex
+	 * @return edge starting from <code>n</code> and pointing to original apex
 	 * @see Mesh#vertexSplit
 	 */
 	@Override

@@ -292,24 +292,6 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	
 	/**
 	 * Moves to symmetric edge.
-	 * Copy into another instance, move it to its symmetric edge and
-	 * return this copy.
-	 *
-	 * @param  that  instance where transformed edge is stored
-	 * @return   argument after its transformation
-	 */
-	@Override
-	public final AbstractHalfEdge sym(AbstractHalfEdge that)
-	{
-		VirtualHalfEdge dest = (VirtualHalfEdge) that;
-		dest.tri = (Triangle) tri.getAdj(localNumber);
-		dest.localNumber = tri.getAdjLocalNumber(localNumber);
-		dest.pullAttributes();
-		return dest;
-	}
-	
-	/**
-	 * Moves to symmetric edge.
 	 * @return  current instance after its transformation
 	 */
 	@Override
@@ -323,19 +305,20 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Moves counterclockwise to following edge.
-	 * Copy into another instance, move it counterclockwise to
-	 * following edge and return this copy.
+	 * Moves to symmetric edge.
+	 * Make <code>that</code> instance be a copy of current
+	 * instance, move it to its symmetric edge and return
+	 * this instance.  Current instance is not modified.
 	 *
 	 * @param  that  instance where transformed edge is stored
 	 * @return   argument after its transformation
 	 */
 	@Override
-	public final AbstractHalfEdge next(AbstractHalfEdge that)
+	public final AbstractHalfEdge sym(AbstractHalfEdge that)
 	{
 		VirtualHalfEdge dest = (VirtualHalfEdge) that;
-		dest.tri = tri;
-		dest.localNumber = next3[localNumber];
+		dest.tri = (Triangle) tri.getAdj(localNumber);
+		dest.localNumber = tri.getAdjLocalNumber(localNumber);
 		dest.pullAttributes();
 		return dest;
 	}
@@ -353,19 +336,20 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Moves counterclockwise to previous edge.
-	 * Copy into another instance, move it counterclockwise to
-	 * previous edge and return this copy.
+	 * Moves counterclockwise to following edge.
+	 * Make <code>that</code> instance be a copy of current
+	 * instance, move it counterclockwise to next edge and
+	 * return this instance.  Current instance is not modified.
 	 *
 	 * @param  that  instance where transformed edge is stored
 	 * @return   argument after its transformation
 	 */
 	@Override
-	public final AbstractHalfEdge prev(AbstractHalfEdge that)
+	public final AbstractHalfEdge next(AbstractHalfEdge that)
 	{
 		VirtualHalfEdge dest = (VirtualHalfEdge) that;
 		dest.tri = tri;
-		dest.localNumber = prev3[localNumber];
+		dest.localNumber = next3[localNumber];
 		dest.pullAttributes();
 		return dest;
 	}
@@ -383,9 +367,40 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
+	 * Moves counterclockwise to previous edge.
+	 * Make <code>that</code> instance be a copy of current
+	 * instance, move it counterclockwise to previous edge and
+	 * return this instance.  Current instance is not modified.
+	 *
+	 * @param  that  instance where transformed edge is stored
+	 * @return   argument after its transformation
+	 */
+	@Override
+	public final AbstractHalfEdge prev(AbstractHalfEdge that)
+	{
+		VirtualHalfEdge dest = (VirtualHalfEdge) that;
+		dest.tri = tri;
+		dest.localNumber = prev3[localNumber];
+		dest.pullAttributes();
+		return dest;
+	}
+	
+	/**
 	 * Moves counterclockwise to the following edge which has the same origin.
-	 * Copy into another instance, move it counterclockwise to
-	 * the following edge which has the same origin and return this copy.
+	 * @return  current instance after its transformation
+	 */
+	@Override
+	public final AbstractHalfEdge nextOrigin()
+	{
+		return prev().sym();
+	}
+	
+	/**
+	 * Moves counterclockwise to the following edge which has the same origin.
+	 * Make <code>that</code> instance be a copy of current
+	 * instance, move it counterclockwise to the following edge which
+	 * has the same origin and return this instance.  Current instance is
+	 * not modified.
 	 *
 	 * @param  that  instance where transformed edge is stored
 	 * @return   argument after its transformation
@@ -397,17 +412,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Moves counterclockwise to the following edge with same origin.
-	 * @return  current instance after its transformation
-	 */
-	@Override
-	public final AbstractHalfEdge nextOrigin()
-	{
-		return prev().sym();
-	}
-	
-	/**
-	 * Moves counterclockwise to the following edge with same origin.
+	 * Moves counterclockwise to the following edge which has the same origin.
 	 * If a boundary is reached, loop backward until another
 	 * boundary is found and start again from there.
 	 * Note: outer triangles are taken into account in this loop, because
@@ -788,6 +793,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *          '                    '
 	 *          o                    o
 	 * @return swapped edge
+	 * @return edge starting from the same origin and pointing to original apex
 	 * @throws IllegalArgumentException if edge is on a boundary or belongs
 	 * to an outer triangle.
 	 * @see Mesh#edgeSwap
@@ -1472,6 +1478,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *
 	 * @param m  mesh
 	 * @param n  the resulting vertex
+	 * @return edge starting from <code>n</code> and pointing to original apex
 	 * @see Mesh#vertexSplit
 	 */
 	@Override

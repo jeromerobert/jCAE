@@ -141,6 +141,12 @@
 				<pathelement location="${trove.jar}"/>
 			</classpath>
 		</javadoc>
+		<!-- It seems that doc-files/* are not copied if sourcepath is not present -->
+		<copy todir="${javadoc.dir}">
+			<fileset dir="${src.dir}">
+				<include name="**/doc-files/*.png"/>
+			</fileset>
+		</copy>
 	</target>
 	
 	<target name="clean" description="Clean all build products." depends="init">
