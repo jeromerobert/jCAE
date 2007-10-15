@@ -157,8 +157,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/**
 	 * Creates an object to handle data about a triangle.
 	 *
-	 * @param t  geometrical triangle.
-	 * @param o  a number between 0 and 2 determining an edge.
+	 * @param t  geometrical triangle
+	 * @param o  a number between 0 and 2 determining an edge
 	 */
 	public VirtualHalfEdge(Triangle t, int o)
 	{
@@ -170,9 +170,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	// Section: accessors
 	
 	/**
-	 * Returns the triangle tied to this object.
+	 * Returns triangle tied to this edge.
 	 *
-	 * @return the triangle tied to this object.
+	 * @return triangle tied to this edge
 	 */
 	@Override
 	public final Triangle getTri()
@@ -181,9 +181,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Returns the edge local number.
+	 * Returns edge local number.
 	 *
-	 * @return the edge local number.
+	 * @return edge local number
 	 */
 	@Override
 	public final int getLocalNumber()
@@ -192,9 +192,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Sets the triangle tied to this object, and resets localNumber.
+	 * Sets triangle tied to this object, and resets localNumber.
 	 *
-	 * @param t  the triangle tied to this object.
+	 * @param t  triangle tied to this object
 	 */
 	public final void bind(Triangle t)
 	{
@@ -206,8 +206,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/**
 	 * Sets the triangle tied to this object, and the localNumber.
 	 *
-	 * @param t  the triangle tied to this object.
-	 * @param l  the local number.
+	 * @param t  triangle tied to this object
+	 * @param l  local number
 	 */
 	public final void bind(Triangle t, int l)
 	{
@@ -221,9 +221,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/**
 	 * Checks if some attributes of this oriented triangle are set.
 	 *
-	 * @param attr  the attributes to check
-	 * @return <code>true</code> if this VirtualHalfEdge has all these
-	 * attributes set, <code>false</code> otherwise.
+	 * @param attr  attributes to check
+	 * @return <code>true</code> if this VirtualHalfEdge has one of
+	 * these attributes set, <code>false</code> otherwise
 	 */
 	@Override
 	public final boolean hasAttributes(int attr)
@@ -232,9 +232,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Sets attributes of this oriented triangle.
+	 * Sets attributes of this edge.
 	 *
-	 * @param attr  the attribute of this oriented triangle.
+	 * @param attr  attributes of this edge
 	 */
 	@Override
 	public final void setAttributes(int attr)
@@ -246,7 +246,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/**
 	 * Resets attributes of this oriented triangle.
 	 *
-	 * @param attr   the attributes of this oriented triangle to clear out.
+	 * @param attr   attributes of this oriented triangle to clear out
 	 */
 	@Override
 	public final void clearAttributes(int attr)
@@ -502,9 +502,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	// Section: vertex handling
 	
 	/**
-	 * Returns the start vertex of this edge.
+	 * Returns start vertex of this edge.
 	 *
-	 * @return the start vertex of this edge.
+	 * @return start vertex of this edge
 	 */
 	@Override
 	public Vertex origin()
@@ -513,9 +513,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Returns the end vertex of this edge.
+	 * Returns end vertex of this edge.
 	 *
-	 * @return the end vertex of this edge.
+	 * @return end vertex of this edge
 	 */
 	@Override
 	public Vertex destination()
@@ -524,9 +524,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Returns the apex of this edge.
+	 * Returns apex of this edge.
 	 *
-	 * @return the apex of this edge.
+	 * @return apex of this edge
 	 */
 	@Override
 	public Vertex apex()
@@ -537,9 +537,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	//  The following 3 methods change the underlying triangle.
 	//  So they also modify all VirtualHalfEdge bound to this one.
 	/**
-	 * Sets the start vertex of this edge.
+	 * Sets start vertex of this edge.
 	 *
-	 * @param v  the start vertex of this edge.
+	 * @param v  start vertex of this edge
 	 */
 	public final void setOrigin(Vertex v)
 	{
@@ -547,9 +547,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Sets the end vertex of this edge.
+	 * Sets end vertex of this edge.
 	 *
-	 * @param v  the end vertex of this edge.
+	 * @param v  end vertex of this edge
 	 */
 	public final void setDestination(Vertex v)
 	{
@@ -557,9 +557,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Sets the apex of this edge.
+	 * Sets apex of this edge.
 	 *
-	 * @param v  the apex of this edge.
+	 * @param v  apex of this edge
 	 */
 	public final void setApex(Vertex v)
 	{
@@ -589,7 +589,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/**
 	 * Gets adjacency relation for an edge
 	 *
-	 * @return the triangle bond to this one if this edge is manifold, or an Object otherwise.
+	 * @return the triangle bond to this one if this edge is manifold, or an Object otherwise
 	 */
 	@Override
 	public final Object getAdj()
@@ -619,7 +619,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/**
 	 * Sets adjacency relation for an edge
 	 *
-	 * @param link  the triangle bond to this one if this edge is manifold, or an Object otherwise.
+	 * @param link  the triangle bond to this one if this edge is manifold, or an Object otherwise
 	 */
 	@Override
 	public final void setAdj(Object link)
@@ -634,7 +634,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * This vector is not normalized, it has the same length as
 	 * this edge.  The result is stored in the tempD temporary array.
 	 * @see #getTempVector
-	 * @return the area of this triangle.
+	 * @return  triangle area
 	 * Warning: this method uses tempD, tempD1 and tempD2 temporary arrays.
 	 */
 	public double computeNormal3DT()
@@ -664,7 +664,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * Computes the normal of this triangle.  The result is stored in
 	 * the tempD temporary array.
 	 * @see #getTempVector
-	 * @return the area of this triangle.
+	 * @return  triangle area
 	 * Warning: this method uses tempD, tempD1 and tempD2 temporary arrays.
 	 */
 	public double computeNormal3D()
@@ -691,7 +691,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	
 	/**
 	 * Returns the area of this triangle.
-	 * @return the area of this triangle.
+	 * @return  triangle area
 	 * Warning: this method uses tempD, tempD1 and tempD2 temporary arrays.
 	 */
 	@Override
@@ -864,7 +864,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/**
 	 * Checks that triangles are not inverted if origin vertex is moved.
 	 *
-	 * @param newpt  the new position to be checked.
+	 * @param newpt  the new position to be checked
 	 * @return <code>false</code> if the new position produces
 	 *    an inverted triangle, <code>true</code> otherwise.
 	 * Warning: this method uses work[0] and work[1] temporary arrays.
@@ -923,7 +923,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * Checks whether an edge can be contracted.
 	 *
 	 * @param n the resulting vertex
-	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise.
+	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise
 	 * @see Mesh#canCollapseEdge
 	 * Warning: this method uses work[0], work[1] and work[2] temporary arrays.
 	 */

@@ -69,9 +69,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Returns the triangle tied to this object.
+	 * Returns triangle tied to this edge.
 	 *
-	 * @return the triangle tied to this object.
+	 * @return triangle tied to this edge
 	 */
 	@Override
 	public final Triangle getTri()
@@ -80,9 +80,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Returns the edge local number.
+	 * Returns edge local number.
 	 *
-	 * @return the edge local number.
+	 * @return edge local number
 	 */
 	@Override
 	public final int getLocalNumber()
@@ -390,9 +390,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	//  The following 3 methods change the underlying triangle.
 	//  So they also modify all HalfEdge bound to this one.
 	/**
-	 * Sets the start vertex of this edge.
+	 * Sets start vertex of this edge.
 	 *
-	 * @param v  the start vertex of this edge.
+	 * @param v  start vertex of this edge
 	 */
 	public final void setOrigin(Vertex v)
 	{
@@ -400,9 +400,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Sets the end vertex of this edge.
+	 * Sets end vertex of this edge.
 	 *
-	 * @param v  the end vertex of this edge.
+	 * @param v  end vertex of this edge
 	 */
 	public final void setDestination(Vertex v)
 	{
@@ -410,9 +410,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Sets the apex of this edge.
+	 * Sets apex of this edge.
 	 *
-	 * @param v  the apex of this edge.
+	 * @param v  apex of this edge
 	 */
 	public final void setApex(Vertex v)
 	{
@@ -420,7 +420,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Sets the next link.
+	 * Sets next link.
 	 */
 	public final void setNext(HalfEdge e)
 	{
@@ -430,9 +430,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	/**
 	 * Checks if some attributes of this edge are set.
 	 *
-	 * @param attr  the attributes to check
-	 * @return <code>true</code> if this HalfEdge has all these
-	 * attributes set, <code>false</code> otherwise.
+	 * @param attr  attributes to check
+	 * @return <code>true</code> if this HalfEdge has one of
+	 * these attributes set, <code>false</code> otherwise
 	 */
 	@Override
 	public final boolean hasAttributes(int attr)
@@ -443,7 +443,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	/**
 	 * Sets attributes of this edge.
 	 *
-	 * @param attr  the attribute of this edge.
+	 * @param attr  attributes of this edge
 	 */
 	@Override
 	public final void setAttributes(int attr)
@@ -454,7 +454,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	/**
 	 * Resets attributes of this edge.
 	 *
-	 * @param attr   the attributes of this edge to clear out.
+	 * @param attr   attributes of this edge to clear out
 	 */
 	@Override
 	public final void clearAttributes(int attr)
@@ -463,9 +463,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Returns the start vertex of this edge.
+	 * Returns start vertex of this edge.
 	 *
-	 * @return the start vertex of this edge.
+	 * @return start vertex of this edge
 	 */
 	@Override
 	public final Vertex origin()
@@ -474,9 +474,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Returns the end vertex of this edge.
+	 * Returns end vertex of this edge.
 	 *
-	 * @return the end vertex of this edge.
+	 * @return end vertex of this edge
 	 */
 	@Override
 	public final Vertex destination()
@@ -485,9 +485,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Returns the apex of this edge.
+	 * Returns apex of this edge.
 	 *
-	 * @return the apex of this edge.
+	 * @return apex of this edge
 	 */
 	@Override
 	public final Vertex apex()
@@ -695,7 +695,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	
 	/**
 	 * Returns the area of this triangle.
-	 * @return the area of this triangle.
+	 * @return triangle area
 	 * Warning: this method uses temp[0], temp[1] and temp[2] temporary arrays.
 	 */
 	@Override
@@ -718,7 +718,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * Checks whether an edge can be contracted into a given vertex.
 	 *
 	 * @param n the resulting vertex
-	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise.
+	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise
 	 * @see Mesh#canCollapseEdge
 	 */
 	@Override
@@ -816,7 +816,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	/**
 	 * Checks that triangles are not inverted if origin vertex is moved.
 	 *
-	 * @param newpt  the new position to be checked.
+	 * @param newpt  the new position to be checked
 	 * @return <code>false</code> if the new position produces
 	 *    an inverted triangle, <code>true</code> otherwise.
 	 * Warning: this method uses temp[0], temp[1], temp[2] and temp[3] temporary arrays.

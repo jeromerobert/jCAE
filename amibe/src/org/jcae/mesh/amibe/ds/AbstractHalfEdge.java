@@ -131,7 +131,30 @@ import java.util.Map;
  *
  * <h2>Boundaries</h2>
  *
- * <h2>Non-manifold meshes</h2>
+ * <p>
+ * In order to simplify mesh operations, outer triangles are added to opposite
+ * side of free edges, by linking vertices on boundary to a special vertex
+ * {@link Mesh#outerVertex} which represents a point at infinite.  With this
+ * convention, all mesh edges have a symmetric edge.  On the other hand, all edges 
+ * which have {@link Mesh#outerVertex} as an endpoint have no symmetric edges, so
+ * in this special triangles, there is only one edge with a symmetric edge.
+ * </p>
+ * <p align="center"><img src="doc-files/AbstractHalfEdge-5.png" alt="[Drawing to illustrate outer triangles]"/></p>
+ * <p>
+ * All <code>AbstractHalfEdge</code> subclasses allow to set attributes on edges.
+ * They are defined as bitwise OR values, these values being important:
+ * </p>
+ * <dl>
+ *   <dt><code>AbstractHalfEdge.BOUNDARY</code></dt>
+ *   <dd>This edge is on a mesh boundary (either part of an outer triangle or of
+ *       a regular triangle)
+ *   <dt><code>AbstractHalfEdge.OUTER</code></dt>
+ *   <dd>This edge is part of an outer triangle
+ *   <dt><code>AbstractHalfEdge.NONMANIFOLD</code></dt>
+ *   <dd>This edge is not manifold (see below)
+ * </dl>
+ *
+ * <h2>Non-manifold edges</h2>
  *
  */
 public abstract class AbstractHalfEdge
@@ -281,17 +304,69 @@ public abstract class AbstractHalfEdge
 
 	public abstract AbstractHalfEdge nextOriginLoop();
 
-	public abstract int getLocalNumber();
+	/**
+	 * Returns triangle tied to this edge.
+	 *
+	 * @return triangle tied to this edge
+	 */
 	public abstract Triangle getTri();
+
+	/**
+	 * Returns edge local number.
+	 *
+	 * @return edge local number
+	 */
+	public abstract int getLocalNumber();
+
 	public abstract Object getAdj();
 	public abstract Map<Triangle, Integer> getAdjNonManifold();
 	public abstract void setAdj(Object link);
+
+	/**
+	 * Returns start vertex of this edge.
+	 *
+	 * @return start vertex of this edge
+	 */
 	public abstract Vertex origin();
+
+	/**
+	 * Returns end vertex of this edge.
+	 *
+	 * @return end vertex of this edge
+	 */
 	public abstract Vertex destination();
+	
+	/**
+	 * Returns apex of this edge.
+	 *
+	 * @return apex of this edge
+	 */
 	public abstract Vertex apex();
+
+	/**
+	 * Sets attributes of this edge.
+	 *
+	 * @param attr  attributes of this edge
+	 */
 	public abstract void setAttributes(int attr);
+
+	/**
+	 * Resets attributes of this edge.
+	 *
+	 * @param attr   attributes of this edge to clear out
+	 */
 	public abstract void clearAttributes(int attr);
+
+	/**
+	 * Checks if some attributes of this edge are set.
+	 *
+	 * @param attr  attributes to check
+	 * @return <code>true</code> if this AbstractHalfEdge has
+	 *         one of these attributes set, <code>false</code>
+	 *         otherwise
+	 */
 	public abstract boolean hasAttributes(int attr);
+
 	/**
 	 * Swaps an edge.
 	 *
@@ -305,7 +380,7 @@ public abstract class AbstractHalfEdge
 	/**
 	 * Checks that triangles are not inverted if origin vertex is moved.
 	 *
-	 * @param newpt  the new position to be checked.
+	 * @param newpt  the new position to be checked
 	 * @return <code>false</code> if the new position produces
 	 *    an inverted triangle, <code>true</code> otherwise.
 	 */
@@ -315,7 +390,7 @@ public abstract class AbstractHalfEdge
 	 * Checks whether an edge can be contracted into a given vertex.
 	 *
 	 * @param n  the resulting vertex
-	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise.
+	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise
 	 * @see Mesh#canCollapseEdge
 	 */
 	protected abstract boolean canCollapse(AbstractVertex n);
@@ -353,7 +428,7 @@ public abstract class AbstractHalfEdge
 	/**
 	 * Returns the area of this triangle.
 	 *
-	 * @return the area of this triangle.
+	 * @return triangle area
 	 */
 	public abstract double area();
 
