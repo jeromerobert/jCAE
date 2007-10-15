@@ -137,12 +137,12 @@ import java.util.Map;
  * {@link Mesh#outerVertex} which represents a point at infinite.  With this
  * convention, all mesh edges have a symmetric edge.  On the other hand, all edges 
  * which have {@link Mesh#outerVertex} as an endpoint have no symmetric edges, so
- * in this special triangles, there is only one edge with a symmetric edge.
+ * in these special triangles, there is only one edge with a symmetric edge.
  * </p>
  * <p align="center"><img src="doc-files/AbstractHalfEdge-5.png" alt="[Drawing to illustrate outer triangles]"/></p>
  * <p>
  * All <code>AbstractHalfEdge</code> subclasses allow to set attributes on edges.
- * They are defined as bitwise OR values, these values being important:
+ * They are defined as bitwise OR values, these values are useful:
  * </p>
  * <dl>
  *   <dt><code>AbstractHalfEdge.BOUNDARY</code></dt>
@@ -153,6 +153,71 @@ import java.util.Map;
  *   <dt><code>AbstractHalfEdge.NONMANIFOLD</code></dt>
  *   <dd>This edge is not manifold (see below)
  * </dl>
+ *
+ * <p>For instance, image below is an excerpt of previous image into which edge attributes
+ * are displayed: <code>O</code> represents <code>AbstractHalfEdge.OUTER</code>
+ * attribute, <code>B</code> represents <code>AbstractHalfEdge.BOUNDARY</code> and <code>|</code>
+ * means that attributes are combined.
+ * </p>
+ * <p align="center"><img src="doc-files/AbstractHalfEdge-6.png" alt="[Drawing to illustrate edge attributes]"/></p>
+ *
+ * <p>
+ * Attributes are handled by these methods:
+ * </p>
+ * <dl>
+ *   <dt>{@link #setAttributes}</dt>
+ *   <dd>Combines edge attribute with method argument.</dd>
+ *   <dt>{@link #clearAttributes}</dt>
+ *   <dd>Combines edge attribute with 2-complement of method argument, which means that
+ *       attributes passed as argument are reset.</dd>
+ *   <dt>{@link #hasAttributes}</dt>
+ *   <dd>Checks whether edge attribute contains any of attributes passed as method argument.</dd>
+ * </dl>
+ *
+ * <p>
+ * With these outer triangles, we can also loop around vertices even on mesh boundaries.
+ * The {@link #nextOriginLoop} method behaves like {@link #nextOrigin} when edge is not
+ * outer, and when it is outer, it turns clockwise until boundary is reached.  For instance
+ * on image below, <code>a.nextOriginLoop()</code> returns <code>b</code>, 
+ * <code>b.nextOriginLoop()</code> returns <code>o</code>,
+ * <code>o.nextOriginLoop()</code> returns <code>d</code>,
+ * <code>d.nextOriginLoop()</code> returns <code>a</code>.
+ * </p>
+ * <p align="center"><img src="doc-files/AbstractHalfEdge-7.png" alt="[Drawing to illustrate nextOriginLoop method]"/></p>
+ * <p>
+ * With <code>nextOriginLoop</code>, it is easy to loop around a vertex without
+ * having to care about boundaries; a canonical way to process all inner triangles 
+ * by looping around edge origin is:
+ * </p>
+ * <pre>
+ *   Vertex d = e.destination();
+ *   do
+ *   {
+ *     if (!e.hasAttributes(AbstractHalfEdge.OUTER))
+ *     {
+ *       Triangle t = e.getTri();
+ *       // Do something with t
+ *     }
+ *     e = e.nextOriginLoop();
+ *   }
+ *   while (e.destination() != d);
+ * </pre>
+ * <p>
+ * Another common case is to process all vertex neighbors:
+ * </p>
+ * <pre>
+ *   Vertex d = e.destination();
+ *   do
+ *   {
+ *     if (!e.hasAttributes(AbstractHalfEdge.OUTER) || e.hasAttributes(AbstractHalfEdge.BOUNDARY))
+ *     {
+ *       Vertex v = e.destination();
+ *       // Do something with v
+ *     }
+ *     e = e.nextOriginLoop();
+ *   }
+ *   while (e.destination() != d);
+ * </pre>
  *
  * <h2>Non-manifold edges</h2>
  *
