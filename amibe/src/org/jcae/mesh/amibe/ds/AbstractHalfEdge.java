@@ -84,14 +84,14 @@ import java.util.Map;
  * </p>
  * <dl>
  *   <dt>{@link #swap}</dt>
- *   <dd>Swaps an edge.  Returned value has the same original and apical vertices as
+ *   <dd>Swaps an edge.  Return value has the same original and apical vertices as
  *       original edge.  Triangles and edges are modified, objects are not destroyed and
  *       inserted into mesh.
  *       <p align="center"><img src="doc-files/AbstractHalfEdge-4.png" alt="[Image showing edge swap]"/></p>
  *   </dd>
  *   <dt>{@link #split}</dt>
  *   <dd>Splits a vertex to create a new edge.  In figure below, <em>A</em> is duplicated into <em>N</em>,
- *       and two new triangles are created.  Returned value has the same original and apical vertices as
+ *       and two new triangles are created.  Return value has the same original and apical vertices as
  *       original edge, and its destination vertex is <em>N</em>.
  *       <p><strong>Warning:</strong> This method does not check that new triangles are not inverted.</p>
  *       <p align="center"><img src="doc-files/AbstractHalfEdge-3.png" alt="[Image showing vertex split]"/></p>
@@ -99,7 +99,7 @@ import java.util.Map;
  *   <dt>{@link #collapse}</dt>
  *   <dd>Collapses an edge into a new point.  Triangles, edges and vertices are removed from mesh
  *       and replaced by new objects.  New point may be origin or destination points.
- *       Returned value has the new point as its origin, and its apex is the same as in original edge.
+ *       Return value has the new point as its origin, and its apex is the same as in original edge.
  *       When <em>N</em> is <em>A</em>,
  *       <code><a href="#collapse(org.jcae.mesh.amibe.ds.AbstractMesh, org.jcae.mesh.amibe.ds.AbstractVertex)">collapse</a></code>
  *       is the opposite of 
@@ -113,7 +113,7 @@ import java.util.Map;
  *   </dd>
  * </dl>
  * <p>
- * Returned values have been chosen so that these methods always return an edge
+ * Return values have been chosen so that these methods always return an edge
  * which has the same apical vertex.  As will be explained below, they gracefully
  * work with boundaries and non-manifold meshes.
  * </p>
@@ -180,7 +180,7 @@ import java.util.Map;
  * outer, and when it is outer, it turns clockwise until boundary is reached.  For instance
  * on image below, <code>a.nextOriginLoop()</code> returns <code>b</code>, 
  * <code>b.nextOriginLoop()</code> returns <code>o</code>,
- * <code>o.nextOriginLoop()</code> returns <code>d</code>,
+ * <code>o.nextOriginLoop()</code> returns <code>d</code> and
  * <code>d.nextOriginLoop()</code> returns <code>a</code>.
  * </p>
  * <p align="center"><img src="doc-files/AbstractHalfEdge-7.png" alt="[Drawing to illustrate nextOriginLoop method]"/></p>
@@ -203,13 +203,22 @@ import java.util.Map;
  *   while (e.destination() != d);
  * </pre>
  * <p>
- * Another common case is to process all vertex neighbors:
+ * Here is a more complete example to show how to process all neighbors of a manifold vertex:
  * </p>
  * <pre>
+ *   // This sample code only works with manifold vertices!
+ *   Triangle t = (Triangle) o.getLink();
+ *   AbstractHalfEdge e = t.getAbstractHalfEdge();
+ *   if (e.destination() == o)
+ *     e = e.next();
+ *   else if (e.apex() == o)
+ *     e = e.prev();
+ *   // Now e is an edge starting from vertex o.
  *   Vertex d = e.destination();
  *   do
  *   {
- *     if (!e.hasAttributes(AbstractHalfEdge.OUTER) || e.hasAttributes(AbstractHalfEdge.BOUNDARY))
+ *     if (!e.hasAttributes(AbstractHalfEdge.OUTER)
+ *         || e.hasAttributes(AbstractHalfEdge.BOUNDARY|AbstractHalfEdge.NONMANIFOLD))
  *     {
  *       Vertex v = e.destination();
  *       // Do something with v
@@ -220,6 +229,15 @@ import java.util.Map;
  * </pre>
  *
  * <h2>Non-manifold edges</h2>
+ * <p>
+ * A non-manifold edge is bound to more than two triangles.  In image below, edges <code>(AB)</code>,
+ * <code>(BC)</code> and <code>(CD)</code> belong to four triangles.
+ * </p>
+ *       <p align="center"><img src="doc-files/AbstractHalfEdge-8.png" alt="[Image of a non-manifold mesh]"/></p>
+ * <p>
+ * Edge attributes are printed in blue for left shell:
+ * </p>
+ *       <p align="center"><img src="doc-files/AbstractHalfEdge-9.png" alt="[Image showing edge swap]"/></p>
  *
  */
 public abstract class AbstractHalfEdge
@@ -367,6 +385,12 @@ public abstract class AbstractHalfEdge
 	 */
 	public abstract AbstractHalfEdge nextOrigin(AbstractHalfEdge that);
 
+	/**
+	 * Moves counterclockwise to the following edge which has the same origin.
+	 * If a boundary is reached, loop backward until another
+	 * boundary is found and start again from there.
+	 * @return  current instance after its transformation
+	 */
 	public abstract AbstractHalfEdge nextOriginLoop();
 
 	/**
