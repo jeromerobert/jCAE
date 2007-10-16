@@ -28,11 +28,16 @@ public class AbstractVertex
 	//  User-defined traits
 	protected final VertexTraitsBuilder traitsBuilder;
 	protected final Traits traits;
+	/**
+	 * 2D or 3D coordinates.
+	 */
+	protected final double [] param;
 
 	public AbstractVertex()
 	{
 		traitsBuilder = null;
 		traits = null;
+		param = new double[2];
 	}
 	public AbstractVertex(VertexTraitsBuilder builder)
 	{
@@ -41,5 +46,60 @@ public class AbstractVertex
 			traits = builder.createTraits();
 		else
 			traits = null;
+		param = new double[2];
 	}
+	/**
+	 * Create a Vertex for a 3D mesh.
+	 *
+	 * @param x  first coordinate.
+	 * @param y  second coordinate.
+	 * @param z  third coordinate.
+	 */
+	public AbstractVertex(double x, double y, double z)
+	{
+		traitsBuilder = null;
+		traits = null;
+		param = new double[3];
+		param[0] = x;
+		param[1] = y;
+		param[2] = z;
+	}
+	
+	public AbstractVertex(VertexTraitsBuilder builder, double x, double y, double z)
+	{
+		traitsBuilder = builder;
+		if (builder != null)
+			traits = builder.createTraits();
+		else
+			traits = null;
+		param = new double[3];
+		param[0] = x;
+		param[1] = y;
+		param[2] = z;
+	}
+	
+	/**
+	 * Gets coordinates of this vertex.
+	 *
+	 * @return coordinates of this vertex
+	 */
+	public double [] getUV ()
+	{
+		return param;
+	}
+	
+	/**
+	 * Sets 3D coordinates of this vertex.
+	 *
+	 * @param x  first coordinate of the new position
+	 * @param y  second coordinate of the new position
+	 * @param z  third coordinate of the new position
+	 */
+	public void moveTo(double x, double y, double z)
+	{
+		param[0] = x;
+		param[1] = y;
+		param[2] = z;
+	}
+	
 }

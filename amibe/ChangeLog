@@ -6,6 +6,10 @@ Tue Oct 16 12:32:16 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	  src/org/jcae/mesh/amibe/ds/TriangleHE.java: Make AdjacencyVH an
 	inner class of TriangleVH and AdjacencyHE an inner class of
 	TriangleHE.
+	* src/org/jcae/mesh/amibe/ds/AbstractVertex.java
+	  src/org/jcae/mesh/amibe/ds/Vertex.java: Move param member and
+	getUV() method from Vertex into AbstractVertex, all vertex classes
+	need coordinates.
 
 Mon Oct 15 16:35:55 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

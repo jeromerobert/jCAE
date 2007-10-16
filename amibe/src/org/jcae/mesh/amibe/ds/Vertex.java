@@ -57,10 +57,6 @@ public class Vertex extends AbstractVertex implements Serializable
 {
 	private static Logger logger = Logger.getLogger(Vertex.class);
 	
-	/**
-	 * 2D or 3D coordinates.
-	 */
-	protected final double [] param;
 	//  link can be either:
 	//    1. an AbstractTriangle, for manifold vertices
 	//    2. an Object[2] array, zhere
@@ -83,13 +79,12 @@ public class Vertex extends AbstractVertex implements Serializable
 	 */
 	protected Vertex()
 	{
-		param = new double[2];
+		super();
 	}
 
 	protected Vertex(VertexTraitsBuilder vtb)
 	{
 		super(vtb);
-		param = new double[2];
 	}
 
 	/**
@@ -101,19 +96,12 @@ public class Vertex extends AbstractVertex implements Serializable
 	 */
 	public Vertex(double x, double y, double z)
 	{
-		param = new double[3];
-		param[0] = x;
-		param[1] = y;
-		param[2] = z;
+		super(x, y, z);
 	}
 	
 	public Vertex(VertexTraitsBuilder vtb, double x, double y, double z)
 	{
-		super(vtb);
-		param = new double[3];
-		param[0] = x;
-		param[1] = y;
-		param[2] = z;
+		super(vtb, x, y, z);
 	}
 	
 	/**
@@ -131,30 +119,6 @@ public class Vertex extends AbstractVertex implements Serializable
 		label = that.label;
 		readable = that.readable;
 		writable = that.writable;
-	}
-	
-	/**
-	 * Get coordinates of this Vertex.
-	 *
-	 * @return the coordinates of this Vertex.
-	 */
-	public double [] getUV ()
-	{
-		return param;
-	}
-	
-	/**
-	 * Set coordinates of this Vertex.
-	 *
-	 * @param x  first coordinate of the new position
-	 * @param y  second coordinate of the new position
-	 * @param z  third coordinate of the new position
-	 */
-	public void moveTo(double x, double y, double z)
-	{
-		param[0] = x;
-		param[1] = y;
-		param[2] = z;
 	}
 	
 	/**
