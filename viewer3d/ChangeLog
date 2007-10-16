@@ -1,3 +1,8 @@
+2007-10-16 17:02 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/OEMMViewer.java: Triangle.vertex is
+	now an AbstractVertex array in jcae.jar.
+
 2007-09-19 16:20 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/OEMMBehavior.java: Replace proprietary
