@@ -171,7 +171,9 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		for (int i = 0; i < 4; i++)
 		{
 			addToTree(current);
-			current = (HalfEdge) current.prevDest();
+			// Moves clockwise to the next edge with same destination
+			current = (HalfEdge) current.next();
+			current = (HalfEdge) current.sym();
 		}
 		return (HalfEdge) current.next();
 	}
