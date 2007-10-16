@@ -664,7 +664,7 @@ public class Mesh extends AbstractMesh implements Serializable
 				adj.put(t2, int3[ot2.getLocalNumber()]);
 				ot2.setAdj(adj);
 			}
-			if (logger.isDebugEnabled() && !manifold)
+			if (logger.isDebugEnabled() && adj != null)
 				logger.debug("Non-manifold edge: "+v+" "+v2+" "+" connected to "+adj.size()+" fans");
 		}
 		//  Unmark adjacent triangles
