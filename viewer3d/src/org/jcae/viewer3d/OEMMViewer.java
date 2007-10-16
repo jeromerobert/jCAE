@@ -25,7 +25,7 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
-import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
+import org.jcae.mesh.amibe.ds.Vertex;
 import java.util.Collection;
 import javax.media.j3d.Appearance;
 import javax.media.j3d.QuadArray;
@@ -188,7 +188,7 @@ public class OEMMViewer
 				e = e.next();
 				if (!e.origin().isWritable() && !e.destination().isWritable())
 					continue;
-				if (e.hasAttributes(VirtualHalfEdge.BOUNDARY))
+				if (e.hasAttributes(AbstractHalfEdge.BOUNDARY))
 					nrt++;
 			}
 		}
@@ -205,7 +205,7 @@ public class OEMMViewer
 				e = e.next();
 				if (!e.origin().isWritable() && !e.destination().isWritable())
 					continue;
-				if (e.hasAttributes(VirtualHalfEdge.BOUNDARY))
+				if (e.hasAttributes(AbstractHalfEdge.BOUNDARY))
 				{
 					ret[2*i] = e.origin().getLabel();
 					ret[2*i+1] = e.destination().getLabel();
