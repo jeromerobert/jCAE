@@ -447,7 +447,6 @@ public abstract class AbstractHalfEdge
 	public abstract int getLocalNumber();
 
 	public abstract Object getAdj();
-	abstract Map<Triangle, Integer> getAdjNonManifold();
 	public abstract void setAdj(Object link);
 
 	/**

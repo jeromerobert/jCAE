@@ -133,8 +133,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * Gets adjacency list for non-manifold edges. 
 	 */
 	@SuppressWarnings("unchecked")
-	@Override
-	final Map<Triangle, Integer> getAdjNonManifold()
+	private final Map<Triangle, Integer> getAdjNonManifold()
 	{
 		assert hasAttributes(NONMANIFOLD) && !hasAttributes(OUTER) : "Non-manifold edge: "+this;
 		// By convention, adjacency list is stored in a virtual triangle.
@@ -852,7 +851,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		// Edge is non-manifold
 		assert e.hasAttributes(OUTER);
 		AbstractHalfEdge ret = null;
-		// HEcollapseSameFan may modify LinkedHashMap structure
+		// HEcollapseSameFan may modify internal data structure
 		// used by fanIterator(), we need a copy.
 		ArrayList<AbstractHalfEdge> copy = new ArrayList<AbstractHalfEdge>();
 		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )

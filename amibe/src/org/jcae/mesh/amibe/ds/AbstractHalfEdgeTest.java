@@ -491,7 +491,8 @@ public class AbstractHalfEdgeTest
 		{
 			if (e.hasAttributes(AbstractHalfEdge.OUTER))
 				e = e.sym();
-			n = e.getAdjNonManifold().size();
+			for (Iterator<AbstractHalfEdge> it = e.fanIterator(); it.hasNext(); it.next())
+				n++;
 		}
 		assertTrue("Found "+n+" incident triangles instead of "+count, n == count);
 	}

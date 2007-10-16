@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Iterator;
 import java.io.Serializable;
 import org.apache.log4j.Logger;
 
@@ -501,9 +502,9 @@ public class Mesh extends AbstractMesh implements Serializable
 							endpoints[j].setLink(link);
 						}
 					}
-					Map<Triangle, Integer> adj = ot.getAdjNonManifold();
-					for (Triangle t2: adj.keySet())
+					for (Iterator<AbstractHalfEdge> it = ot.fanIterator(); it.hasNext(); )
 					{
+						Triangle t2 = it.next().getTri();
 						for (int j = 0; j < 2; j++)
 						{
 							LinkedHashSet<Triangle> link = (LinkedHashSet<Triangle>) endpoints[j].getLink();

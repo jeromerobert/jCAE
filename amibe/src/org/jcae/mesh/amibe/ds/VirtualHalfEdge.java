@@ -601,8 +601,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * Gets adjacency list for non-manifold edges. 
 	 */
 	@SuppressWarnings("unchecked")
-	@Override
-	final Map<Triangle, Integer> getAdjNonManifold()
+	private final Map<Triangle, Integer> getAdjNonManifold()
 	{
 		assert hasAttributes(NONMANIFOLD) && !hasAttributes(OUTER);
 		// By convention, adjacency list is stored in a virtual triangle.
