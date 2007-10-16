@@ -618,7 +618,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		// Be consistent with collapse()
 		if (hasAttributes(OUTER))
 			return false;
-		double [] xn = ((Vertex) n).getUV();
+		double [] xn = n.getUV();
 		if ((origin().getLink() instanceof Triangle) && (destination().getLink() instanceof Triangle))
 		{
 			// Mesh is locally manifold.  This is the most common
@@ -1194,7 +1194,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		f.HEglue(g);
 		Triangle t2 = g.tri;
 		g = (HalfEdge) g.next();        // (nV2d)
-		g = (HalfEdge) g.HEsym().next;  // (noV2)
+		g = g.HEsym().next;             // (noV2)
 		HEglue(g);
 		Triangle t4 = g.tri;
 		if (t2.isOuter())

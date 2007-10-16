@@ -935,7 +935,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			return false;
 		if (logger.isDebugEnabled())
 			logger.debug("can contract? ("+origin()+" "+destination()+") into "+n);
-		double [] xn = ((Vertex) n).getUV();
+		double [] xn = n.getUV();
 		if ((origin().getLink() instanceof Triangle) && (destination().getLink() instanceof Triangle))
 		{
 			// Mesh is locally manifold.  This is the most common
