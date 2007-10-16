@@ -83,14 +83,13 @@ With the former, {@link org.jcae.mesh.amibe.ds.Mesh#createTriangle} creates
 from {@link org.jcae.mesh.amibe.ds.Triangle} superclass, and in this class
 {@link org.jcae.mesh.amibe.ds.Triangle#adj} member is an
 {@link org.jcae.mesh.amibe.ds.AdjacencyWrapper} interface which is
-extended by {@link org.jcae.mesh.amibe.ds.AdjacencyHE} and
-{@link org.jcae.mesh.amibe.ds.AdjacencyVH}.
+extended by inner classes.
 </p>
 
-<h3>With {@link org.jcae.mesh.amibe.ds.AdjacencyHE}</h3>
+<h3>With {@link org.jcae.mesh.amibe.ds.TriangleHE.AdjacencyHE}</h3>
 <p>
 An
-{@link org.jcae.mesh.amibe.ds.AdjacencyHE} instance contains a private
+{@link org.jcae.mesh.amibe.ds.TriangleHE.AdjacencyHE} instance contains a private
 {@link org.jcae.mesh.amibe.ds.HalfEdge} instance, which represents an
 edge of underlying triangle.  This edge is linked to the next edge
 in the same triangle; in fact
@@ -99,7 +98,7 @@ which are linked together to form a cycle, so a single reference is
 needed to access these three edges.
 </p>
 
-<h3>With {@link org.jcae.mesh.amibe.ds.AdjacencyVH}</h3>
+<h3>With {@link org.jcae.mesh.amibe.ds.TriangleVH.AdjacencyVH}</h3>
 <p>
 This is a more compact implementation of adjacency relations: edges are
 not created as distinct objects, but taken as a local number (with
@@ -108,12 +107,12 @@ values 0, 1 or 2) of a triangle.
 
 <p>
 An
-{@link org.jcae.mesh.amibe.ds.AdjacencyVH} instance contains three
+{@link org.jcae.mesh.amibe.ds.TriangleVH.AdjacencyVH} instance contains three
 links to adjacent {@link org.jcae.mesh.amibe.ds.TriangleVH} instances,
-and {@link org.jcae.mesh.amibe.ds.AdjacencyVH#adjPos} member is a
+and {@link org.jcae.mesh.amibe.ds.TriangleVH.AdjacencyVH#adjPos} member is a
 packed representation of local numbers in adjacent triangles.
 In order to handle non-manifold meshes,
-{@link org.jcae.mesh.amibe.ds.AdjacencyVH#adj} member is an array of
+{@link org.jcae.mesh.amibe.ds.TriangleVH.AdjacencyVH#adj} member is an array of
 <code>Object</code> instances instead of
 {@link org.jcae.mesh.amibe.ds.TriangleVH} instances.
 </p>
@@ -123,8 +122,8 @@ The downside is that edges are not physical objects but can be accessed
 only through handles.  For instance, if edges have to be sorted in order
 to be processed in a certain order (as in
 {@link org.jcae.mesh.amibe.algos3d.DecimateHalfEdge}),
-{@link org.jcae.mesh.amibe.ds.AdjacencyHE} must be used instead of
-{@link org.jcae.mesh.amibe.ds.AdjacencyVH}. 
+{@link org.jcae.mesh.amibe.ds.TriangleHE.AdjacencyHE} must be used instead of
+{@link org.jcae.mesh.amibe.ds.TriangleVH.AdjacencyVH}. 
 </p>
 
 <h2>Mesh traversal</h2>
