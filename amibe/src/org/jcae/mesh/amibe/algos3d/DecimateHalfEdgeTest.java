@@ -306,10 +306,10 @@ public class DecimateHalfEdgeTest
 		{
 			for (int i = 0; i < m-1; i++)
 			{
-				Vertex temp = T[2*(m-1)*j+2*i].vertex[1];
+				Vertex temp = (Vertex) T[2*(m-1)*j+2*i].vertex[1];
 				T[2*(m-1)*j+2*i].vertex[1] = T[2*(m-1)*j+2*i].vertex[2];
 				T[2*(m-1)*j+2*i].vertex[2] = temp;
-				temp = T[2*(m-1)*j+2*i+1].vertex[1];
+				temp = (Vertex) T[2*(m-1)*j+2*i+1].vertex[1];
 				T[2*(m-1)*j+2*i+1].vertex[1] = T[2*(m-1)*j+2*i+1].vertex[2];
 				T[2*(m-1)*j+2*i+1].vertex[2] = temp;
 			}
