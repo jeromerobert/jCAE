@@ -134,7 +134,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public final Map<Triangle, Integer> getAdjNonManifold()
+	final Map<Triangle, Integer> getAdjNonManifold()
 	{
 		assert hasAttributes(NONMANIFOLD) && !hasAttributes(OUTER) : "Non-manifold edge: "+this;
 		// By convention, adjacency list is stored in a virtual triangle.
@@ -585,7 +585,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Returns the area of this triangle.
+	 * Returns the area of triangle bound to this edge.
+	 *
 	 * @return triangle area
 	 * Warning: this method uses temp[0], temp[1] and temp[2] temporary arrays.
 	 */
@@ -1294,6 +1295,15 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		};
 	}
 	
+	/**
+	 * Returns an iterator over triangle fans connected to this edge.  If edge is
+	 * manifold, this iterator contains a single value, which is this edge.
+	 * But if it is non-manifold and bound to <em>n</em> triangles, this iterator
+	 * returns successively the <em>n</em> edges contained in these triangles and
+	 * connected to the same endpoints.
+	 *
+	 * @return  iterator over triangle fans connected to this edge
+	 */
 	@Override
 	public final Iterator<AbstractHalfEdge> fanIterator()
 	{

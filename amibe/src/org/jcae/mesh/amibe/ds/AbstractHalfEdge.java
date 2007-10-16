@@ -153,6 +153,10 @@ import java.util.Map;
  *   <dt><code>AbstractHalfEdge.NONMANIFOLD</code></dt>
  *   <dd>This edge is not manifold (see below)
  * </dl>
+ * <p>
+ * Other values, namely <code>AbstractHalfEdge.MARKED</code>, <code>AbstractHalfEdge.SWAPPED</code>
+ * and <code>AbstractHalfEdge.QUAD</code> may be removed in future releases, please do not use them.
+ * </p>
  *
  * <p>For instance, image below is an excerpt of previous image into which edge attributes
  * are displayed: <code>O</code> represents <code>AbstractHalfEdge.OUTER</code>
@@ -237,7 +241,42 @@ import java.util.Map;
  * <p>
  * Edge attributes are printed in blue for left shell:
  * </p>
- *       <p align="center"><img src="doc-files/AbstractHalfEdge-9.png" alt="[Image showing edge swap]"/></p>
+ *       <p align="center"><img src="doc-files/AbstractHalfEdge-9.png" alt="[Image showing edge attributes for a non-manifold mesh]"/></p>
+ *
+ * <p>
+ * Virtual triangle added to the other side of non-manifold edge is not only useful for looping around vertices,
+ * but it also allows looping around this non-manifold edge.  We explained that the two outer edges are not connected
+ * to other triangles, so we have two free slots.  An elegant solution would be to use these two slots to build
+ * a circular doubly-linked list to iterate over all half-edges connected together, as is done with radial-edge data
+ * structure.  Unfortunately, we went another way and choose a dirty hack (feel free to send working patches).
+ * In the virtual triangle, edge next to the non-manifold one stores a <code>Map&lt;Triangle, Integer&gt;</code>
+ * instance which can iterate over all half-edges; this is exactly what {@link #fanIterator} is for.
+ * All connected edges share the same map, so addition or removal of an edge affects all edges.
+ * </p>
+ *
+ * <p>
+ * But how can we iterate over all neighbors of <code>A</code>?  If we look again at sample code just above,
+ * it is obvious that not all neighbors are caught.  We could try to ask non-manifold edges to the rescue,
+ * it does not seem trivial.  A simpler solution is to store a list of all triangles connected to each vertex,
+ * but it consumes lots of memory.  We call <em>triangle fan</em> the set of triangles which are visited
+ * when calling {@link #nextOriginLoop} iteratively.  If vertex is manifold, all neighbors are then reached.
+ * If not, we take another triangle which has not been visited yet, and repeat the same procedure until
+ * all neighbors have been reached.  A good compromise is to take a single triangle by triangle fans, and they
+ * are stored into a triangle array because topology is usually not modified and number of triangle fans does
+ * not change.  It is easy to modify sample code above, put it into a method taking a triangle as argument,
+ * call it with <code>o.getLink()</code> if it is a <code>Triangle</code> instance, otherwise loop over
+ * <code>Triangle[]</code> and call this method for each <code>Triangle</code> instance.
+ * </p>
+ *
+ * <p>
+ * Consider the same mesh, from which triangles <code>(ABE)</code>, <code>(CDF)</code> and their symmetric
+ * ones have been removed.  Edges <code>(AB)</code> and <code>(CD)</code> are manifold, but <code>(BC)</code> is not.
+ * Vertices <code>A</code> and <code>D</code> are manifold, but <code>B</code> and <code>C</code> and connected to
+ * three triangle fans, while edge <code>(BC)</code> is connected to four triangles.  All mesh operations described
+ * above can gracefully handle such geometries, the only problem is when we try to mesh a surface which is not
+ * orientable.
+ * </p>
+ *       <p align="center"><img src="doc-files/AbstractHalfEdge-10.png" alt="[Image showing a non-manifold edge bound to four triangles while its endpoints are bound to three triangle fans]"/></p>
  *
  */
 public abstract class AbstractHalfEdge
@@ -408,7 +447,7 @@ public abstract class AbstractHalfEdge
 	public abstract int getLocalNumber();
 
 	public abstract Object getAdj();
-	public abstract Map<Triangle, Integer> getAdjNonManifold();
+	abstract Map<Triangle, Integer> getAdjNonManifold();
 	public abstract void setAdj(Object link);
 
 	/**
@@ -515,12 +554,21 @@ public abstract class AbstractHalfEdge
 	public abstract void glue(AbstractHalfEdge e);
 
 	/**
-	 * Returns the area of this triangle.
+	 * Returns the area of triangle bound to this edge.
 	 *
 	 * @return triangle area
 	 */
 	public abstract double area();
 
+	/**
+	 * Returns an iterator over triangle fans connected to this edge.  If edge is
+	 * manifold, this iterator contains a single value, which is this edge.
+	 * But if it is non-manifold and bound to <em>n</em> triangles, this iterator
+	 * returns successively the <em>n</em> edges contained in these triangles and
+	 * connected to the same endpoints.
+	 *
+	 * @return  iterator over triangle fans connected to this edge
+	 */
 	public abstract Iterator<AbstractHalfEdge> fanIterator();
 
 }
