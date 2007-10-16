@@ -185,7 +185,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 				continue;
 			for (int i = 0; i < 3; i++)
 			{
-				final Vertex n = af.vertex[i];
+				final Vertex n = (Vertex) af.vertex[i];
 				if (!quadricMap.containsKey(n))
 				{
 					quadricMap.put(n, new Quadric3DError());

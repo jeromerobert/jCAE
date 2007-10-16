@@ -377,8 +377,9 @@ public class Initial
 				continue;
 			for (int i = 0; i < 3; i++)
 			{
-				if (t.vertex[i].getLink() instanceof Triangle)
-					t.vertex[i].setLink(t);
+				v = (Vertex2D) t.vertex[i];
+				if (v.getLink() instanceof Triangle)
+					v.setLink(t);
 			}
 		}
 		

@@ -49,7 +49,7 @@ public class MeshWriter
 	/**
 	 * Used by {@link writeObject}
 	 */
-	private static Element writeObjectNodes(Document document, Collection<AbstractVertex> nodelist, Vertex outer, File nodesFile, File refFile, String baseDir, TObjectIntHashMap<Vertex> nodeIndex)
+	private static Element writeObjectNodes(Document document, Collection<AbstractVertex> nodelist, AbstractVertex outer, File nodesFile, File refFile, String baseDir, TObjectIntHashMap<AbstractVertex> nodeIndex)
 		throws IOException
 	{
 		//save nodes
@@ -60,9 +60,9 @@ public class MeshWriter
 		int i = 0;
 		for(AbstractVertex av: nodelist)
 		{
-			Vertex n = (Vertex) av;
-			if (n == outer)
+			if (av == outer)
 				continue;
+			Vertex n = (Vertex) av;
 			int ref1d = n.getRef();
 			if (0 == ref1d)
 			{
@@ -78,9 +78,9 @@ public class MeshWriter
 		int nref = 0;
 		for(AbstractVertex av: nodelist)
 		{
-			Vertex n = (Vertex) av;
-			if (n == outer)
+			if (av == outer)
 				continue;
+			Vertex n = (Vertex) av;
 			int ref1d = n.getRef();
 			if (0 != ref1d)
 			{
@@ -111,7 +111,7 @@ public class MeshWriter
 	/**
 	 * Used by {@link writeObject}
 	 */
-	private static Element writeObjectTriangles(Document document, Collection<AbstractTriangle> trianglelist, File trianglesFile, String baseDir, TObjectIntHashMap<Vertex> nodeIndex)
+	private static Element writeObjectTriangles(Document document, Collection<AbstractTriangle> trianglelist, File trianglesFile, String baseDir, TObjectIntHashMap<AbstractVertex> nodeIndex)
 		throws IOException
 	{
 		//save triangles
@@ -235,7 +235,7 @@ public class MeshWriter
 			Collection<AbstractVertex> nodelist = submesh.getNodes();
 			if (nodelist == null)
 			{
-				HashSet<Vertex> nodeset = new HashSet<Vertex>();
+				HashSet<AbstractVertex> nodeset = new HashSet<AbstractVertex>();
 				nodelist = new ArrayList<AbstractVertex>();
 				for (AbstractTriangle t: trianglelist)
 				{
@@ -251,7 +251,7 @@ public class MeshWriter
 					}
 				}
 			}
-			TObjectIntHashMap<Vertex> nodeIndex=new TObjectIntHashMap<Vertex>(nodelist.size());
+			TObjectIntHashMap<AbstractVertex> nodeIndex=new TObjectIntHashMap<AbstractVertex>(nodelist.size());
 			
 			// Create and fill the DOM
 			Document document=JCAEXMLWriter.createJcaeDocument();
@@ -312,7 +312,7 @@ public class MeshWriter
 			File trianglesFile=new File(dir, JCAEXMLData.triangles3dFilename);
 			File groupsFile = new File(dir, JCAEXMLData.groupsFilename);
 			Collection<AbstractTriangle> trianglelist = submesh.getTriangles();
-			HashSet<Vertex> nodeset = new HashSet<Vertex>();
+			HashSet<AbstractVertex> nodeset = new HashSet<AbstractVertex>();
 			Collection<AbstractVertex> nodelist = new ArrayList<AbstractVertex>();
 			for (AbstractTriangle t: trianglelist)
 			{
@@ -328,7 +328,7 @@ public class MeshWriter
 				}
 			}
 			nodeset.clear();
-			TObjectIntHashMap<Vertex> nodeIndex=new TObjectIntHashMap<Vertex>(nodelist.size());
+			TObjectIntHashMap<AbstractVertex> nodeIndex=new TObjectIntHashMap<AbstractVertex>(nodelist.size());
 			
 			// Create and fill the DOM
 			Document document=JCAEXMLWriter.createJcaeDocument();

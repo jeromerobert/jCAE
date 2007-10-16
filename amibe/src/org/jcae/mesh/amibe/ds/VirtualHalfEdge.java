@@ -509,7 +509,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	@Override
 	public Vertex origin()
 	{
-		return tri.vertex[next3[localNumber]];
+		return (Vertex) tri.vertex[next3[localNumber]];
 	}
 	
 	/**
@@ -520,7 +520,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	@Override
 	public Vertex destination()
 	{
-		return tri.vertex[prev3[localNumber]];
+		return (Vertex) tri.vertex[prev3[localNumber]];
 	}
 	
 	/**
@@ -531,7 +531,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	@Override
 	public Vertex apex()
 	{
-		return tri.vertex[localNumber];
+		return (Vertex) tri.vertex[localNumber];
 	}
 	
 	//  The following 3 methods change the underlying triangle.

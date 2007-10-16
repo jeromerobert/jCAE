@@ -150,22 +150,22 @@ public class SmoothNodes3D
 				if (z01 < z12)
 				{
 					ot = ot.next();
-					n = f.vertex[2];
+					n = (Vertex) f.vertex[2];
 				}
 				else
 				{
 					ot = ot.prev();
-					n = f.vertex[0];
+					n = (Vertex) f.vertex[0];
 				}
 			}
 			else
 			{
 				if (z02 < z12)
-					n = f.vertex[1];
+					n = (Vertex) f.vertex[1];
 				else
 				{
 					ot = ot.prev();
-					n = f.vertex[0];
+					n = (Vertex) f.vertex[0];
 				}
 			}
 			assert ot.origin() == n;

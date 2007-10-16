@@ -250,7 +250,7 @@ public class Storage
 		{
 			for (int i = 0; i < 3; i++)
 			{
-				Vertex vertex = tr.vertex[i];
+				Vertex vertex = (Vertex) tr.vertex[i];
 				if (!vertex.isReadable() || vertex instanceof FakeNonReadVertex) {
 					continue;
 				}
@@ -732,13 +732,16 @@ public class Storage
 			}
 			try {
 				
-				for (Triangle triangle: triangleList) {
+				for (Triangle triangle: triangleList)
+				{
 					triangle.setGroupId(node.leafIndex);
-					for (int i = 0; i < 3; i++) {
-						Node foundNode = oemm.leaves[searchNode(oemm, triangle.vertex[i], positions)];
+					for (int i = 0; i < 3; i++)
+					{
+						Vertex v = (Vertex) triangle.vertex[i];
+						Node foundNode = oemm.leaves[searchNode(oemm, v, positions)];
 						leaf[i] = foundNode.leafIndex;
 						assert leaf[i] < oemm.leaves.length; 
-						pointIndex[i] = triangle.vertex[i].getLabel() - foundNode.minIndex;
+						pointIndex[i] = v.getLabel() - foundNode.minIndex;
 						assert pointIndex[i] < oemm.leaves[leaf[i]].vn; 
 					}
 					writeIntArray(fc, leaf);
@@ -782,9 +785,10 @@ public class Storage
 			// By convention, if T=(V1,V2,V3) and each Vi is contained in node Ni,
 			// then T belongs to min(Ni)
 			int nodeNumber = Integer.MAX_VALUE;
-			for(Vertex vert: tr.vertex)
+			for(AbstractVertex av: tr.vertex)
 			{
 				int n;
+				Vertex vert = (Vertex) av;
 				if (mapVertexToLeafindex.containsKey(vert))
 					n = mapVertexToLeafindex.get(vert);
 				else

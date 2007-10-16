@@ -21,7 +21,7 @@
 package org.jcae.mesh.amibe.validation;
 
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
-import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.AbstractVertex;
 
 /**
  * Compute minimal angle by triangle.
@@ -45,9 +45,9 @@ public class MinAngleFace extends QualityProcedure
 	
 	private float quality(AbstractTriangle f)
 	{
-		Vertex n1 = f.vertex[0];
-		Vertex n2 = f.vertex[1];
-		Vertex n3 = f.vertex[2];
+		AbstractVertex n1 = f.vertex[0];
+		AbstractVertex n2 = f.vertex[1];
+		AbstractVertex n3 = f.vertex[2];
 		double a1 = Math.abs(n1.angle3D(n2, n3));
 		double a2 = Math.abs(n2.angle3D(n3, n1));
 		double a3 = Math.abs(n3.angle3D(n1, n2));

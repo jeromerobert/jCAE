@@ -66,26 +66,28 @@ public class ElementPatchFactory implements ElementFactoryInterface
 	public AbstractTriangle createTriangle(AbstractVertex v0, AbstractVertex v1, AbstractVertex v2)
 	{
 		AbstractTriangle ret = createTriangle();
-		ret.vertex = new Vertex2D[3];
-		ret.vertex[0] = (Vertex2D) v0;
-		ret.vertex[1] = (Vertex2D) v1;
-		ret.vertex[2] = (Vertex2D) v2;
+		Vertex2D [] vArray = new Vertex2D[3];
+		vArray[0] = (Vertex2D) v0;
+		vArray[1] = (Vertex2D) v1;
+		vArray[2] = (Vertex2D) v2;
 		for (int i = 0; i < 3; i++)
-			if (ret.vertex[i].getLink() == null)
-				ret.vertex[i].setLink(ret);
+			if (vArray[i].getLink() == null)
+				vArray[i].setLink(ret);
+		ret.vertex = vArray;
 		return ret;
 	}
 
 	public AbstractTriangle createTriangle(AbstractVertex [] v)
 	{
 		AbstractTriangle ret = createTriangle();
-		ret.vertex = new Vertex2D[v.length];
+		Vertex2D [] vArray = new Vertex2D[3];
 		for (int i = 0; i < v.length; i++)
 		{
-			ret.vertex[i] = (Vertex2D) v[i];
-			if (ret.vertex[i].getLink() == null)
-				ret.vertex[i].setLink(ret);
+			vArray[i] = (Vertex2D) v[i];
+			if (vArray[i].getLink() == null)
+				vArray[i].setLink(ret);
 		}
+		ret.vertex = vArray;
 		return ret;
 	}
 

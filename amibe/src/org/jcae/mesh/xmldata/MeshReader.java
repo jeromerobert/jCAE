@@ -22,7 +22,7 @@ package org.jcae.mesh.xmldata;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
-import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.AbstractVertex;
 import org.jcae.mesh.amibe.ds.MGroup3D;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
@@ -155,9 +155,6 @@ public class MeshReader
 				Vertex2D pt3 = nodelist[trianglesBuffer.get()];
 				facelist[i] = mesh.createTriangle(pt1, pt2, pt3);
 				mesh.add(facelist[i]);
-				pt1.setLink(facelist[i]);
-				pt2.setLink(facelist[i]);
-				pt3.setLink(facelist[i]);
 			}
 			fcT.close();
 			MeshExporter.clean(bbT);
@@ -235,7 +232,7 @@ public class MeshReader
 			
 			int numberOfNodes = Integer.parseInt(
 				xpath.evaluate("number/text()", submeshNodes));
-			Vertex [] nodelist = new Vertex[numberOfNodes];
+			AbstractVertex [] nodelist = new AbstractVertex[numberOfNodes];
 			int label;
 			double [] coord = new double[3];
 			logger.debug("Reading "+numberOfNodes+" nodes");
@@ -249,7 +246,7 @@ public class MeshReader
 			for (int i=0; i < numberOfNodes; i++)
 			{
 				nodesBuffer.get(coord);
-				nodelist[i] = (Vertex) mesh.createVertex(coord);
+				nodelist[i] = mesh.createVertex(coord);
 				if (i < numberOfNodes - numberOfReferences)
 					label = 0;
 				else
@@ -287,14 +284,11 @@ public class MeshReader
 			AbstractTriangle [] facelist = new AbstractTriangle[numberOfTriangles];
 			for (int i=0; i < numberOfTriangles; i++)
 			{
-				Vertex pt1 = nodelist[trianglesBuffer.get()];
-				Vertex pt2 = nodelist[trianglesBuffer.get()];
-				Vertex pt3 = nodelist[trianglesBuffer.get()];
+				AbstractVertex pt1 = nodelist[trianglesBuffer.get()];
+				AbstractVertex pt2 = nodelist[trianglesBuffer.get()];
+				AbstractVertex pt3 = nodelist[trianglesBuffer.get()];
 				facelist[i] = mesh.createTriangle(pt1, pt2, pt3);
 				mesh.add(facelist[i]);
-				pt1.setLink(facelist[i]);
-				pt2.setLink(facelist[i]);
-				pt3.setLink(facelist[i]);
 			}
 			fcT.close();
 			MeshExporter.clean(bbT);

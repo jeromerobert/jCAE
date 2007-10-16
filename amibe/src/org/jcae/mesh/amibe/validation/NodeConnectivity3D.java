@@ -24,7 +24,7 @@ import gnu.trove.TObjectIntHashMap;
 import gnu.trove.TObjectIntProcedure;
 import gnu.trove.TFloatArrayList;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
-import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.AbstractVertex;
 
 /**
  * Compute node connectivity of 3D nodes.
@@ -39,7 +39,7 @@ import org.jcae.mesh.amibe.ds.Vertex;
 
 public class NodeConnectivity3D extends QualityProcedure
 {
-	private TObjectIntHashMap<Vertex> nodeMap = new TObjectIntHashMap<Vertex>();
+	private TObjectIntHashMap<AbstractVertex> nodeMap = new TObjectIntHashMap<AbstractVertex>();
 	
 	public NodeConnectivity3D()
 	{
@@ -54,7 +54,7 @@ public class NodeConnectivity3D extends QualityProcedure
 		AbstractTriangle f = (AbstractTriangle) o;
 		for (int i = 0; i < 3; i++)
 		{
-			Vertex n = f.vertex[i];
+			AbstractVertex n = f.vertex[i];
 			if (!nodeMap.increment(n))
 				nodeMap.put(n, 1);
 		}
@@ -74,14 +74,14 @@ public class NodeConnectivity3D extends QualityProcedure
 		nodeMap.forEachEntry(proc);
 	}
 
-	private static class Count implements TObjectIntProcedure<Vertex>
+	private static class Count implements TObjectIntProcedure<AbstractVertex>
 	{
 		private TFloatArrayList data;
 		public Count(final TFloatArrayList d)
 		{
 			data = d;
 		}
-		public boolean execute(Vertex a, int b)
+		public boolean execute(AbstractVertex a, int b)
 		{
 			float q = b / 6.0f;
 			if (b <= 6)

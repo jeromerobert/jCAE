@@ -45,13 +45,17 @@ public class ElementFactory implements ElementFactoryInterface
 
 	public AbstractVertex createVertex(double x, double y, double z)
 	{
-		return new Vertex(vertexTraitsBuilder, x, y, z);
+		if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE | TriangleTraitsBuilder.SHALLOWHALFEDGE))
+			return new Vertex(vertexTraitsBuilder, x, y, z);
+		return new AbstractVertex(vertexTraitsBuilder, x, y, z);
 	}
 
 	public AbstractVertex createVertex(double [] x)
 	{
 		assert x.length == 3;
-		return createVertex(x[0], x[1], x[2]);
+		if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE | TriangleTraitsBuilder.SHALLOWHALFEDGE))
+			return new Vertex(x[0], x[1], x[2]);
+		return new AbstractVertex(x[0], x[1], x[2]);
 	}
 
 	public AbstractHalfEdge createHalfEdge(TriangleHE t, byte orientation, byte attributes)
@@ -82,22 +86,18 @@ public class ElementFactory implements ElementFactoryInterface
 	public AbstractTriangle createTriangle(AbstractVertex v0, AbstractVertex v1, AbstractVertex v2)
 	{
 		AbstractTriangle ret = createTriangle();
-		ret.vertex[0] = (Vertex) v0;
-		ret.vertex[1] = (Vertex) v1;
-		ret.vertex[2] = (Vertex) v2;
+		ret.vertex[0] = v0;
+		ret.vertex[1] = v1;
+		ret.vertex[2] = v2;
 		return ret;
 	}
 
 	public AbstractTriangle createTriangle(AbstractVertex [] v)
 	{
 		AbstractTriangle ret = createTriangle();
-		ret.vertex = new Vertex[v.length];
+		ret.vertex = new AbstractVertex[v.length];
 		for (int i = 0; i < v.length; i++)
-		{
-			ret.vertex[i] = (Vertex) v[i];
-			if (ret.vertex[i].getLink() == null)
-				ret.vertex[i].setLink(ret);
-		}
+			ret.vertex[i] = v[i];
 		return ret;
 	}
 

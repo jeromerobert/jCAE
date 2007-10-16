@@ -31,7 +31,7 @@ public class AbstractTriangle
 	/**
 	 * Three vertices.
 	 */
-	public Vertex [] vertex;
+	public AbstractVertex [] vertex;
 	
 	// Group id
 	private int groupId = -1;

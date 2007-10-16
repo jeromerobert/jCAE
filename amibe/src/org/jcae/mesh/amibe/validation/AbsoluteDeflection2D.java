@@ -23,13 +23,13 @@ package org.jcae.mesh.amibe.validation;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
-import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.AbstractVertex;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 
 public class AbsoluteDeflection2D extends QualityProcedure
 {
 	private Mesh2D mesh;
-	private Vertex [] p = new Vertex[4];
+	private AbstractVertex [] p = new AbstractVertex[4];
 	private double [] v1 = new double[3];
 	private double [] v2 = new double[3];
 	private double [] v3 = new double[3];
@@ -49,12 +49,12 @@ public class AbsoluteDeflection2D extends QualityProcedure
 		AbstractTriangle t = (AbstractTriangle) o;
 		double [] uv = Vertex2D.centroid(mesh, (Vertex2D[]) t.vertex).getUV();
 		double [] xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
-		p[3] = (Vertex) mesh.createVertex(xyz);
+		p[3] = mesh.createVertex(xyz);
 		for (int i = 0; i < 3; i++)
 		{
 			uv = t.vertex[i].getUV();
 			xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
-			p[i] = (Vertex) mesh.createVertex(xyz);
+			p[i] = mesh.createVertex(xyz);
 		}
 		double [] xyz0 = p[0].getUV();
 		double [] xyz1 = p[1].getUV();

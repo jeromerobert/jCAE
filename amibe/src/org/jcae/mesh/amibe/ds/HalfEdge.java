@@ -361,7 +361,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	public final Vertex origin()
 	{
-		return tri.vertex[next3[localNumber]];
+		return (Vertex) tri.vertex[next3[localNumber]];
 	}
 	
 	/**
@@ -372,7 +372,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	public final Vertex destination()
 	{
-		return tri.vertex[prev3[localNumber]];
+		return (Vertex) tri.vertex[prev3[localNumber]];
 	}
 	
 	/**
@@ -383,7 +383,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	public final Vertex apex()
 	{
-		return tri.vertex[localNumber];
+		return (Vertex) tri.vertex[localNumber];
 	}
 	
 	/**

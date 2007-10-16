@@ -352,8 +352,8 @@ public class Mesh extends AbstractMesh implements Serializable
 		{
 			vertices = new LinkedHashSet<AbstractVertex>(triangleList.size()/2);
 			for (AbstractTriangle at: triangleList)
-				for (Vertex v: at.vertex)
-					vertices.add(v);
+				for (AbstractVertex av: at.vertex)
+					vertices.add(av);
 		}
 		else
 			vertices = nodeList;
@@ -367,7 +367,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	public void buildAdjacency(Vertex [] vertices, double minAngle)
 	{
 		Collection<AbstractVertex> list = new ArrayList<AbstractVertex>(vertices.length);
-		for (Vertex v: vertices)
+		for (AbstractVertex v: vertices)
 			list.add(v);
 		buildAdjacency(list, minAngle);
 	}
@@ -387,6 +387,8 @@ public class Mesh extends AbstractMesh implements Serializable
 			{
 				ArrayList<AbstractTriangle> list = tVertList.get(t.vertex[i]);
 				list.add(t);
+				for (AbstractVertex av: t.vertex)
+					((Vertex) av).setLink(t);
 			}
 		}
 		//  2. Connect all edges together
@@ -521,10 +523,11 @@ public class Mesh extends AbstractMesh implements Serializable
 			AbstractHalfEdge ot = t.getAbstractHalfEdge();
 			for (int i = 0; i < 3; i++)
 			{
-				if (t.vertex[i].getLink() instanceof LinkedHashSet)
+				Vertex v = (Vertex) t.vertex[i];
+				if (v.getLink() instanceof LinkedHashSet)
 				{
 					nrNM++;
-					t.vertex[i].setLinkFan((LinkedHashSet<Triangle>) t.vertex[i].getLink());
+					v.setLinkFan((LinkedHashSet<Triangle>) v.getLink());
 				}
 				ot = ot.next();
 				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
@@ -853,7 +856,7 @@ public class Mesh extends AbstractMesh implements Serializable
 			}
 			for (int i = 0; i < 3; i++)
 			{
-				Vertex v = t.vertex[i];
+				Vertex v = (Vertex) t.vertex[i];
 				if (v.getLink() == null)
 					continue;
 				if (v.getLink() instanceof AbstractTriangle)

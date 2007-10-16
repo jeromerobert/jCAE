@@ -1,3 +1,15 @@
+Tue Oct 16 16:28:26 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/AbstractTriangle.java: Let 'vertex'
+	member be an AbstractVertex array.
+	* src/org/jcae/mesh/amibe/ds/ElementFactory.java (createVertex): If
+	adjacency relations are requested, this method creates a Vertex
+	instance, otherwise an AbstractVertex instance is created.
+	* src/org/jcae/mesh/bora/xmldata/Storage.java
+	  src/org/jcae/mesh/xmldata/MeshReader.java
+	  src/org/jcae/mesh/amibe/ds/Mesh.java: When reading mesh from disk,
+	do not call Vertex.setLink(), this is now done by Mesh.buildAdjacency().
+
 Tue Oct 16 12:32:16 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/AdjacencyVH.java

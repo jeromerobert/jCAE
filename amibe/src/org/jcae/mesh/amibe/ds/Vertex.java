@@ -64,11 +64,6 @@ public class Vertex extends AbstractVertex implements Serializable
 	//         1: list of incident wires
 	protected Object link = null;
 	
-	//  ref1d > 0: link to the geometrical node
-	//  ref1d = 0: inner node
-	//  ref1d < 0: node on an inner boundary
-	//  
-	protected int ref1d = 0;
 	// Used in OEMM
 	protected int label = 0;
 	private boolean readable = true;
@@ -119,26 +114,6 @@ public class Vertex extends AbstractVertex implements Serializable
 		label = that.label;
 		readable = that.readable;
 		writable = that.writable;
-	}
-	
-	/**
-	 * Get 1D reference of this node.
-	 *
-	 * @return 1D reference of this node.
-	 */
-	public int getRef()
-	{
-		return ref1d;
-	}
-	
-	/**
-	 * Set 1D reference of this node.
-	 *
-	 * @param l  1D reference of this node.
-	 */
-	public void setRef(int l)
-	{
-		ref1d = l;
 	}
 	
 	/**
@@ -242,11 +217,13 @@ public class Vertex extends AbstractVertex implements Serializable
 		writable = w;
 	}
 	
+	@Override
 	public boolean isReadable()
 	{
 		return readable;
 	}
 	
+	@Override
 	public boolean isWritable()
 	{
 		return writable;
@@ -290,73 +267,6 @@ public class Vertex extends AbstractVertex implements Serializable
 			assert ot.origin() == this : ot+" should originate from "+this;
 		}
 		while (ot.destination() != d);
-	}
-	
-	/**
-	 * Returns the distance in 3D space.
-	 *
-	 * @param end  the node to which distance is computed.
-	 * @return the distance to <code>end</code>.
-	 **/
-	public double distance3D(Vertex end)
-	{
-		double x = param[0] - end.param[0];
-		double y = param[1] - end.param[1];
-		double z = param[2] - end.param[2];
-		return Math.sqrt(x*x+y*y+z*z);
-	}
-	
-	/**
-	 * Returns the angle at which a segment is seen.
-	 *
-	 * @param n1  first node
-	 * @param n2  second node
-	 * @return the angle at which the segment is seen.
-	 **/
-	public double angle3D(Vertex n1, Vertex n2)
-	{
-		double normPn1 = distance3D(n1);
-		double normPn2 = distance3D(n2);
-		if ((normPn1 == 0.0) || (normPn2 == 0.0))
-			return 0.0;
-		double normPn3 = n1.distance3D(n2);
-		double mu, alpha;
-		if (normPn1 < normPn2)
-		{
-			double temp = normPn1;
-			normPn1 = normPn2;
-			normPn2 = temp;
-		}
-		if (normPn2 < normPn3)
-			mu = normPn2 - (normPn1 - normPn3);
-		else
-			mu = normPn3 - (normPn1 - normPn2);
-		alpha = 2.0 * Math.atan(Math.sqrt(
-			((normPn1-normPn2)+normPn3)*mu/
-				((normPn1+(normPn2+normPn3))*((normPn1-normPn3)+normPn2))
-		));
-		return alpha;
-	}
-	
-	/**
-	 * Returns the outer product of two vectors.  This method
-	 * computes the outer product of two vectors starting from
-	 * the current vertex.
-	 *
-	 * @param n1  end point of the first vector
-	 * @param n2  end point of the second vector
-	 * @param ret array which will store the outer product of the two vectors
-	 */
-	public void outer3D(Vertex n1, Vertex n2, double [] ret)
-	{
-		double [] vect1 = new double[3];
-		double [] vect2 = new double[3];
-		for (int i = 0; i < 3; i++)
-		{
-			vect1[i] = n1.param[i] - param[i];
-			vect2[i] = n2.param[i] - param[i];
-		}
-		Matrix3D.prodVect3D(vect1, vect2, ret);
 	}
 	
 	/**

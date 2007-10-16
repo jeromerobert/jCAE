@@ -23,7 +23,7 @@ package org.jcae.mesh.amibe.util;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
-import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.AbstractVertex;
 import org.jcae.mesh.amibe.ds.MGroup3D;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -54,7 +54,7 @@ public class UNVReader
 	
 	public static void readMesh(Mesh mesh, String file, double ridgeAngle)
 	{
-		TIntObjectHashMap<Vertex> nodesmap = null;
+		TIntObjectHashMap<AbstractVertex> nodesmap = null;
 		TIntObjectHashMap<AbstractTriangle> facesmap = null;
 		double unit = 1.0;
 		String line = "";
@@ -139,9 +139,9 @@ public class UNVReader
 		return unit;
 	}
 
-	private static TIntObjectHashMap<Vertex> readNodes(Mesh m, BufferedReader rd, double unit)
+	private static TIntObjectHashMap<AbstractVertex> readNodes(Mesh m, BufferedReader rd, double unit)
 	{
-		TIntObjectHashMap<Vertex> nodesmap = new TIntObjectHashMap<Vertex>();
+		TIntObjectHashMap<AbstractVertex> nodesmap = new TIntObjectHashMap<AbstractVertex>();
 		logger.debug("Reading nodes");
 		nodesmap.clear();
 		double x,y,z;
@@ -175,7 +175,7 @@ public class UNVReader
 				x = new Double(x1).doubleValue()/unit;
 				y = new Double(y1).doubleValue()/unit;
 				z = new Double(z1).doubleValue()/unit;
-				Vertex n = (Vertex) m.createVertex(x,y,z);
+				AbstractVertex n = m.createVertex(x,y,z);
 				nodesmap.put(index, n);
 				if (m.hasNodes())
 					m.add(n);
@@ -189,7 +189,7 @@ public class UNVReader
 		return nodesmap;
 	}
 
-	private static TIntObjectHashMap<AbstractTriangle> readFace(BufferedReader rd, Mesh mesh, TIntObjectHashMap<Vertex> nodesmap)
+	private static TIntObjectHashMap<AbstractTriangle> readFace(BufferedReader rd, Mesh mesh, TIntObjectHashMap<AbstractVertex> nodesmap)
 	{
 		logger.debug("Reading triangles");
 		TIntObjectHashMap<AbstractTriangle> facesmap = new TIntObjectHashMap<AbstractTriangle>();
@@ -213,17 +213,14 @@ public class UNVReader
 					int p1 = Integer.valueOf(st.nextToken()).intValue();
 					int p2 = Integer.valueOf(st.nextToken()).intValue();
 					int p3 = Integer.valueOf(st.nextToken()).intValue();
-					Vertex n1 = nodesmap.get(p1);
+					AbstractVertex n1 = nodesmap.get(p1);
 					assert n1 != null : p1;
-					Vertex n2 = nodesmap.get(p2);
+					AbstractVertex n2 = nodesmap.get(p2);
 					assert n2 != null : p2;
-					Vertex n3 = nodesmap.get(p3);
+					AbstractVertex n3 = nodesmap.get(p3);
 					assert n3 != null : p3;
 					AbstractTriangle f = mesh.createTriangle(n1, n2, n3);
 					mesh.add(f);
-					n1.setLink(f);
-					n2.setLink(f);
-					n3.setLink(f);
 					// fill the map of faces
 					facesmap.put(ind, f);
 				}
@@ -237,23 +234,19 @@ public class UNVReader
 					int p2 = Integer.valueOf(st.nextToken()).intValue();
 					int p3 = Integer.valueOf(st.nextToken()).intValue();
 					int p4 = Integer.valueOf(st.nextToken()).intValue();
-					Vertex n1 = nodesmap.get(p1);
+					AbstractVertex n1 = nodesmap.get(p1);
 					assert n1 != null : p1;
-					Vertex n2 = nodesmap.get(p2);
+					AbstractVertex n2 = nodesmap.get(p2);
 					assert n2 != null : p2;
-					Vertex n3 = nodesmap.get(p3);
+					AbstractVertex n3 = nodesmap.get(p3);
 					assert n3 != null : p3;
-					Vertex n4 = nodesmap.get(p4);
+					AbstractVertex n4 = nodesmap.get(p4);
 					assert n4 != null : p4;
 					AbstractTriangle f = mesh.createTriangle(n1, n2, n3);
 					mesh.add(f);
-					n1.setLink(f);
-					n2.setLink(f);
-					n3.setLink(f);
 					facesmap.put(ind, f);
 					f = mesh.createTriangle(n1, n3, n4);
 					mesh.add(f);
-					n4.setLink(f);
 					facesmap.put(-ind, f);
 				}
 				else

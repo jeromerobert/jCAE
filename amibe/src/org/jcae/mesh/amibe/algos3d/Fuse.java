@@ -128,7 +128,7 @@ public class Fuse
 			Triangle face = (Triangle) it.next();
 			for (int j = 0; j < 4; j++)
 			{
-				Vertex n = face.vertex[j];
+				Vertex n = (Vertex) face.vertex[j];
 				Vertex p = map.get(n);
 				if (p != null)
 				{

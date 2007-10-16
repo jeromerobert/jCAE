@@ -26,7 +26,7 @@ import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
-import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.AbstractVertex;
 import java.util.StringTokenizer;
 import gnu.trove.TIntObjectHashMap;
 import org.apache.log4j.Logger;
@@ -40,7 +40,7 @@ public class MESHReader
 	public static Mesh readMesh(String file)
 	{
 		Mesh mesh = new Mesh();
-		TIntObjectHashMap<Vertex> nodesmap = null;
+		TIntObjectHashMap<AbstractVertex> nodesmap = null;
 		String line = "";
 		try
 		{
@@ -62,10 +62,10 @@ public class MESHReader
 		return mesh;
 	}
 
-	private static TIntObjectHashMap<Vertex> readNodes(Mesh m, BufferedReader rd)
+	private static TIntObjectHashMap<AbstractVertex> readNodes(Mesh m, BufferedReader rd)
 	{
 		logger.debug("Reading nodes");
-		TIntObjectHashMap<Vertex> nodesmap = null;
+		TIntObjectHashMap<AbstractVertex> nodesmap = null;
 		double x,y,z;
 		String line = "";
 		int nrNodes = 0;
@@ -73,7 +73,7 @@ public class MESHReader
 		{
 			line = rd.readLine();
 			nrNodes = Integer.valueOf(line).intValue();
-			nodesmap = new TIntObjectHashMap<Vertex>(nrNodes);
+			nodesmap = new TIntObjectHashMap<AbstractVertex>(nrNodes);
 			for (int i = 1; i <= nrNodes; i++)
 			{
 				line = rd.readLine();
@@ -88,7 +88,7 @@ public class MESHReader
 				x = new Double(x1).doubleValue();
 				y = new Double(y1).doubleValue();
 				z = new Double(z1).doubleValue();
-				Vertex n = (Vertex) m.createVertex(x,y,z);
+				AbstractVertex n = m.createVertex(x,y,z);
 				m.add(n);
 				nodesmap.put(i, n);
 			}
@@ -101,12 +101,12 @@ public class MESHReader
 		return nodesmap;
 	}
 
-	private static void readFace(BufferedReader rd, Mesh mesh, TIntObjectHashMap<Vertex> nodesmap)
+	private static void readFace(BufferedReader rd, Mesh mesh, TIntObjectHashMap<AbstractVertex> nodesmap)
 	{
 		logger.debug("Reading tetrahedra");
 		String line = "";
 		int nrTetrahedra = 0;
-		Vertex [] v = new Vertex[4];
+		AbstractVertex [] v = new AbstractVertex[4];
 		try
 		{
 			line = rd.readLine();
