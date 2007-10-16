@@ -118,7 +118,7 @@ public class SwapEdge
 				for (int i = 0; i < 3; i++)
 				{
 					ot.next();
-					if (ot.hasAttributes(VirtualHalfEdge.BOUNDARY))
+					if (ot.hasAttributes(VirtualHalfEdge.BOUNDARY | VirtualHalfEdge.NONMANIFOLD))
 						continue;
 					assert ot.getAdj() != null : ot;
 					double qnew = ot.checkSwap3D(planarMin);

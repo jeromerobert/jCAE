@@ -124,7 +124,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		for (int i = 0; i < 3; i++)
 			newXYZ[i] = 0.5*(p0[i]+p1[i]);
 		insertedVertex = (Vertex) mesh.createVertex(newXYZ);
-		if (current.hasAttributes(VirtualHalfEdge.BOUNDARY))
+		if (current.hasAttributes(VirtualHalfEdge.BOUNDARY | VirtualHalfEdge.NONMANIFOLD))
 		{
 			// FIXME: Check deflection
 			mesh.setRefVertexOnboundary(insertedVertex);
@@ -146,7 +146,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		if (tolerance <= 0.0)
 			return true;
 		double dapex = insertedVertex.distance3D(current.apex());
-		if (!current.hasAttributes(VirtualHalfEdge.BOUNDARY))
+		if (!current.hasAttributes(VirtualHalfEdge.BOUNDARY | VirtualHalfEdge.NONMANIFOLD))
 		{
 			current = (HalfEdge) current.sym();
 			dapex = Math.min(dapex, insertedVertex.distance3D(current.apex()));

@@ -21,6 +21,7 @@
 package org.jcae.mesh.amibe.validation;
 
 import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 
@@ -54,7 +55,7 @@ public class DihedralAngle extends QualityProcedure
 		for (int i = 0; i < 3; i++)
 		{
 			ot.next();
-			if (ot.hasAttributes(VirtualHalfEdge.BOUNDARY))
+			if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 				continue;
 			if (ot.getAdj() == null)
 				continue;

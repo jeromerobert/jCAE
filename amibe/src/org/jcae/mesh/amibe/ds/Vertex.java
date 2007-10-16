@@ -436,7 +436,7 @@ public class Vertex extends AbstractVertex implements Serializable
 			ot = ot.nextOriginLoop();
 			if (ot.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
+			if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 			{
 				// FIXME: what to do when a boundary
 				// is encountered?  For now, return
