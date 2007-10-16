@@ -1,3 +1,12 @@
+Tue Oct 16 12:32:16 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/AdjacencyVH.java
+	  src/org/jcae/mesh/amibe/ds/TriangleVH.java
+	  src/org/jcae/mesh/amibe/ds/AdjacencyHE.java
+	  src/org/jcae/mesh/amibe/ds/TriangleHE.java: Make AdjacencyVH an
+	inner class of TriangleVH and AdjacencyHE an inner class of
+	TriangleHE.
+
 Mon Oct 15 16:35:55 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/AbstractHalfEdge.java (collapse): Modify
