@@ -27,9 +27,7 @@ import java.util.Collection;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Iterator;
 import java.io.Serializable;
 import org.apache.log4j.Logger;
@@ -394,8 +392,9 @@ public class Mesh extends AbstractMesh implements Serializable
 		}
 		//  2. Connect all edges together
 		logger.debug("Connect triangles");
+		ArrayList<Triangle> newTri = new ArrayList<Triangle>();
 		for (AbstractVertex v: vertices)
-			checkNeighbours(v, tVertList);
+			checkNeighbours(v, tVertList, newTri);
 		//  tVertList is no more needed, remove all references
 		//  to help the garbage collector.
 		for (AbstractVertex v: vertices)
@@ -407,7 +406,6 @@ public class Mesh extends AbstractMesh implements Serializable
 		tVertList.clear();
 		//  3. Mark boundary edges and bind them to virtual triangles.
 		logger.debug("Mark boundary edges");
-		ArrayList<Triangle> newTri = new ArrayList<Triangle>();
 		for (AbstractTriangle at: triangleList)
 		{
 			Triangle t = (Triangle) at;
@@ -430,33 +428,7 @@ public class Mesh extends AbstractMesh implements Serializable
 			}
 		}
 		//  4. Mark non-manifold edges and bind them to virtual triangles.
-		logger.debug("Mark non-manifold edges");
-		for (AbstractTriangle at: triangleList)
-		{
-			Triangle t = (Triangle) at;
-			AbstractHalfEdge ot = t.getAbstractHalfEdge();
-			for (int i = 0; i < 3; i++)
-			{
-				ot = ot.next();
-				if (!(ot.getAdj() instanceof LinkedHashMap))
-					continue;
-				// Create a virtual symmetric triangle, and put shared list 
-				// of adjacent triangles into this virtual triangle.
-				LinkedHashMap<Triangle, Integer> list = (LinkedHashMap<Triangle, Integer>) ot.getAdj();
-				Triangle adj = (Triangle) factory.createTriangle(outerVertex, ot.destination(), ot.origin());
-				newTri.add(adj);
-				adj.setOuter();
-				adj.setReadable(false);
-				adj.setWritable(false);
-				AbstractHalfEdge sym = adj.getAbstractHalfEdge();
-				ot.glue(sym);
-				ot.setAttributes(AbstractHalfEdge.NONMANIFOLD);
-				sym.setAttributes(AbstractHalfEdge.NONMANIFOLD);
-				sym = sym.next();
-				// By convention, put LinkedHashMap on next edge
-				sym.setAdj(list);
-			}
-		}
+		//  This is now performed by checkNeighbours() above.
 		
 		//  5. Find the list of vertices which are on mesh boundary
 		logger.debug("Build the list of nodes on boundaries and non-manifold edges");
@@ -576,7 +548,7 @@ public class Mesh extends AbstractMesh implements Serializable
 		triangleList.addAll(newTri);
 	}
 	
-	private static final void checkNeighbours(AbstractVertex v, HashMap<AbstractVertex, ArrayList<AbstractTriangle>> tVertList)
+	private final void checkNeighbours(AbstractVertex v, HashMap<AbstractVertex, ArrayList<AbstractTriangle>> tVertList, ArrayList<Triangle> newTri)
 	{
 		//  Mark all triangles having v as vertex
 		ArrayList<AbstractTriangle> neighTriList = tVertList.get(v);
@@ -602,7 +574,6 @@ public class Mesh extends AbstractMesh implements Serializable
 			// List of triangles incident to v2.
 			ArrayList<AbstractTriangle> neighTriV2List = tVertList.get(v2);
 			boolean manifold = true;
-			LinkedHashMap<Triangle, Integer> adj = null;
 			for (AbstractTriangle at2: neighTriV2List)
 			{
 				Triangle t2 = (Triangle) at2;
@@ -628,48 +599,99 @@ public class Mesh extends AbstractMesh implements Serializable
 					ot2 = ot2.prev();
 				// We are sure now that ot2 == (v,v2) or (v2,v)
 				assert (v == ot2.origin() && v2 == ot2.destination()) || (v2 == ot2.origin() && v == ot2.destination());
-				// This edge is non manifold.  In this routine, we
-				// replace adjacency relation by a list of all adjacent
-				// triangles.  This adjacency relation will be modified
-				// later in buildAdjacency.
-				// TODO: set final adjacency relations here.
-				//
-				// We need to store adjacent triangles and local number
-				// of symmetric edge.  This can be achieved by an ArrayList,
-				// but we use a LinkedHashMap instead for type safety.
-				if (adj == null)
-					adj = new LinkedHashMap<Triangle, Integer>();
+				// This edge is non manifold.
 				if (ot.getAdj() == null)
 				{
-					// All adjacent edges share the same LinkedHashMap,
-					// thus put ot in it.
-					adj.put(t, int3[ot.getLocalNumber()]);
-					ot.setAdj(adj);
+					// Link ot to a virtual triangle
+					Triangle otVT = (Triangle) factory.createTriangle(outerVertex, ot.destination(), ot.origin());
+					newTri.add(otVT);
+					otVT.setOuter();
+					otVT.setReadable(false);
+					otVT.setWritable(false);
+					AbstractHalfEdge s = otVT.getAbstractHalfEdge();
+					ot.glue(s);
+					ot.setAttributes(AbstractHalfEdge.NONMANIFOLD);
+					s.setAttributes(AbstractHalfEdge.NONMANIFOLD);
+					// Create an empty cycle
+					// Use sym as a temporary variable
+					sym = s.prev(sym);
+					s.next().glue(sym);
 				}
-				else if (ot.getAdj() instanceof HalfEdge)
+				else if (!ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 				{
 					sym = ot.sym(sym);
-					assert sym.getAdj() == ot;
-					adj.put(t, int3[ot.getLocalNumber()]);
-					adj.put(sym.getTri(), int3[sym.getLocalNumber()]);
-					ot.setAdj(adj);
-					sym.setAdj(adj);
+					// ot and sym are inner edges, their adjacency
+					// relations have to be broken out.
+					// Link ot to a virtual triangle
+					Triangle otVT = (Triangle) factory.createTriangle(outerVertex, ot.destination(), ot.origin());
+					newTri.add(otVT);
+					otVT.setOuter();
+					otVT.setReadable(false);
+					otVT.setWritable(false);
+					AbstractHalfEdge otSym = otVT.getAbstractHalfEdge();
+					ot.glue(otSym);
+					ot.setAttributes(AbstractHalfEdge.NONMANIFOLD);
+					otSym.setAttributes(AbstractHalfEdge.NONMANIFOLD);
+					// Link sym to another virtual triangle
+					Triangle symVT = (Triangle) factory.createTriangle(outerVertex, sym.destination(), sym.origin());
+					newTri.add(symVT);
+					symVT.setOuter();
+					symVT.setReadable(false);
+					symVT.setWritable(false);
+					AbstractHalfEdge symSym = symVT.getAbstractHalfEdge();
+					sym.glue(symSym);
+					sym.setAttributes(AbstractHalfEdge.NONMANIFOLD);
+					symSym.setAttributes(AbstractHalfEdge.NONMANIFOLD);
+					// Create an inital cycle
+					symSym = symSym.next();
+					otSym = otSym.prev();
+					otSym.glue(symSym);
+					symSym = symSym.next();
+					otSym = otSym.prev();
+					otSym.glue(symSym);
 				}
-				else if (ot.getAdj() instanceof Triangle)
+				if (ot2.getAdj() == null)
 				{
-					sym = ot.sym(sym);
-					assert sym.getAdj() == t;
-					assert sym.getTri().getAdjLocalNumber(sym.getLocalNumber()) == ot.getLocalNumber();
-					adj.put(t, int3[ot.getLocalNumber()]);
-					adj.put(sym.getTri(), int3[sym.getLocalNumber()]);
-					ot.setAdj(adj);
-					sym.setAdj(adj);
+					// Link ot2 to a virtual triangle
+					Triangle ot2VT = (Triangle) factory.createTriangle(outerVertex, ot2.destination(), ot2.origin());
+					newTri.add(ot2VT);
+					ot2VT.setOuter();
+					ot2VT.setReadable(false);
+					ot2VT.setWritable(false);
+					AbstractHalfEdge s = ot2VT.getAbstractHalfEdge();
+					ot2.glue(s);
+					ot2.setAttributes(AbstractHalfEdge.NONMANIFOLD);
+					s.setAttributes(AbstractHalfEdge.NONMANIFOLD);
 				}
-				adj.put(t2, int3[ot2.getLocalNumber()]);
-				ot2.setAdj(adj);
+				else
+					throw new RuntimeException();
+				// Add ot2 to this cycle
+				AbstractHalfEdge symSym = t.getAbstractHalfEdge();
+				sym = ot.sym(sym);
+				sym = sym.next();
+				symSym = sym.sym(symSym);
+				ot2 = ot2.sym();
+				ot2 = ot2.prev();
+				ot2.glue(sym);
+				ot2 = ot2.prev();
+				ot2.glue(symSym);
 			}
-			if (logger.isDebugEnabled() && adj != null)
-				logger.debug("Non-manifold edge: "+v+" "+v2+" "+" connected to "+adj.size()+" fans");
+			if (logger.isDebugEnabled() && !manifold)
+			{
+				int cnt = 0;
+				sym = ot.sym(sym);
+				sym = sym.next();
+				ot = ot.sym();
+				ot = ot.next();
+				do
+				{
+					cnt++;
+					sym = sym.sym();
+					sym = sym.prev();
+				}
+				while (sym != ot);
+				logger.debug("Non-manifold edge: "+v+" "+v2+" "+" connected to "+cnt+" fans");
+			}
 		}
 		//  Unmark adjacent triangles
 		markedTri.clear();
@@ -951,25 +973,6 @@ public class Mesh extends AbstractMesh implements Serializable
 					return false;
 				}
 			}
-			else
-			{
-				// Check that all edges share the same adjacency
-				// list.
-				LinkedHashMap<Triangle, Integer> adj = (LinkedHashMap<Triangle, Integer>) ot.getAdj();
-				for (Map.Entry<Triangle, Integer> entry: adj.entrySet())
-				{
-					Triangle t2 = entry.getKey();
-					int i2 = entry.getValue().intValue();
-					sym.bind(t2, i2);
-					sym = (VirtualHalfEdge) sym.sym();
-					sym = (VirtualHalfEdge) sym.next();
-					if (sym.getAdj() != adj)
-					{
-						logger.error("Multiple edges: Wrong adjacency relation");
-						return false;
-					}
-				}
-			}
 		}
 		return true;
 	}
@@ -991,11 +994,38 @@ public class Mesh extends AbstractMesh implements Serializable
 			}
 			if (e.getAdj() == null)
 				continue;
-			if (e.getAdj() instanceof HalfEdge)
+			HalfEdge f = (HalfEdge) e.sym();
+			if (f.sym() != e)
 			{
-				Vertex v1 = e.origin();
-				Vertex v2 = e.destination();
-				HalfEdge f = (HalfEdge) e.sym();
+				logger.error("Wrong adjacency relation: ");
+				logger.error(" adj1: "+e);
+				logger.error(" adj2: "+f);
+				return false;
+			}
+			if (f.hasAttributes(AbstractHalfEdge.BOUNDARY) != e.hasAttributes(AbstractHalfEdge.BOUNDARY) || f.hasAttributes(AbstractHalfEdge.NONMANIFOLD) != e.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+			{
+				logger.error("Inconsistent boundary or nonmanifold flags");
+				logger.error(" "+e);
+				logger.error(" "+f);
+				return false;
+			}
+			if (e.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD) && f.hasAttributes(AbstractHalfEdge.OUTER) != !isOuter)
+			{
+				logger.error("Inconsistent outer flags");
+				logger.error(" "+e);
+				logger.error(" "+f);
+				return false;
+			}
+			if (!triangleList.contains(f.getTri()))
+			{
+				logger.error("Triangle not present in mesh: "+f.getTri());
+				logger.error("Linked from "+e);
+				return false;
+			}
+			Vertex v1 = e.origin();
+			Vertex v2 = e.destination();
+			if (!isOuter)
+			{
 				if (f.origin() != v2 || f.destination() != v1)
 				{
 					logger.error("Vertex mismatch in adjacency relation: ");
@@ -1003,88 +1033,93 @@ public class Mesh extends AbstractMesh implements Serializable
 					logger.error(" "+f);
 					return false;
 				}
-				if (!(f.getAdj() instanceof HalfEdge))
+				continue;
+			}
+			// triangle is outer
+			if (e.hasAttributes(AbstractHalfEdge.BOUNDARY))
+			{
+				// Edge e is manifold
+				// next() and prev() must not be linked to other edges
+				AbstractHalfEdge g = e.next();
+				if (g.getAdj() != null)
 				{
-					logger.error("Wrong adjacency relation: ");
-					logger.error(" "+e);
-					logger.error(" "+f);
+					logger.error("Outer edge: should not be linked to another edge: "+g);
 					return false;
 				}
-				if (f.sym() != e)
+				g = e.prev();
+				if (g.getAdj() != null)
 				{
-					logger.error("Wrong adjacency relation: ");
-					logger.error(" adj1: "+e);
-					logger.error(" adj2: "+f);
-					return false;
-				}
-				if (f.hasAttributes(AbstractHalfEdge.BOUNDARY) != e.hasAttributes(AbstractHalfEdge.BOUNDARY))
-				{
-					logger.error("Inconsistent boundary flag");
-					logger.error(" "+e);
-					logger.error(" "+f);
-					return false;
-				}
-				if (!triangleList.contains(f.getTri()))
-				{
-					logger.error("Triangle not present in mesh: "+f.getTri());
-					logger.error("Linked from "+e);
+					logger.error("Outer edge: should not be linked to another edge: "+g);
 					return false;
 				}
 			}
-			else
+			else if (e.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 			{
-				// Check that all edges share the same adjacency
-				// list.
-				LinkedHashMap<Triangle, Integer> adj = (LinkedHashMap<Triangle, Integer>) e.getAdj();
-				for (Map.Entry<Triangle, Integer> entry: adj.entrySet())
+				if (!(v1.getLink() instanceof Triangle[]))
 				{
-					Triangle t2 = entry.getKey();
-					if (!triangleList.contains(t2))
-					{
-						logger.error("Triangle does no more exist: "+t2);
-						return false;
-					}
-					int i2 = entry.getValue().intValue();
-					HalfEdge f = (HalfEdge) t2.getAbstractHalfEdge();
-					if (i2 == 1)
-						f = (HalfEdge) f.next();
-					else if (i2 == 2)
-						f = (HalfEdge) f.prev();
-					HalfEdge s = (HalfEdge) f.sym().next();
-					if (!triangleList.contains(s.getTri()))
-					{
-						logger.error("Triangle not present in mesh: "+s.getTri());
-						logger.error("Linked from "+e);
-					}
-					if (s.getAdj() != adj)
-					{
-						logger.error("Multiple edges: Wrong adjacency relation");
-						return false;
-					}
-				}
-				// Endpoints must link to at least 
-				Vertex o = e.origin();
-				Vertex a = e.apex();
-				if (!(o.getLink() instanceof Triangle[]))
-				{
-					logger.error("Endpoint must be non-manifold: "+o);
+					logger.error("Multiple edges: endpoint must be non-manifold: "+v1);
 					return false;
 				}
-				if (!(a.getLink() instanceof Triangle[]))
+				if (!(v2.getLink() instanceof Triangle[]))
 				{
-					logger.error("Endpoint must be non-manifold: "+a);
+					logger.error("Multiple edges: endpoint must be non-manifold: "+v2);
 					return false;
 				}
-				Triangle [] linkO = (Triangle[]) o.getLink();
-				if (linkO.length < adj.size())
+				// next() and prev() must point to other non-manifold edges
+				AbstractHalfEdge g = e.next();
+				if (g.getAdj() == null)
 				{
-					logger.error("Origin linked to "+linkO.length+" triangles, less than "+adj.size());
+					logger.error("Multiple edge: must be linked to another edge: "+g);
 					return false;
 				}
-				Triangle [] linkA = (Triangle[]) a.getLink();
-				if (linkA.length < adj.size())
+				AbstractHalfEdge h = e.prev();
+				if (h.getAdj() == null)
 				{
-					logger.error("Origin linked to "+linkA.length+" triangles, less than "+adj.size());
+					logger.error("Multiple edge: must be linked to another edge: "+h);
+					return false;
+				}
+				g = g.sym().next();
+				h = h.sym().prev();
+				if (!g.hasAttributes(AbstractHalfEdge.NONMANIFOLD) || !h.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+				{
+					logger.error("Multiple edges: linked to a non-manifold edge");
+					logger.error(" "+f);
+					logger.error(" "+g);
+					logger.error(" "+h);
+					return false;
+				}
+				if (!g.hasAttributes(AbstractHalfEdge.OUTER) || !h.hasAttributes(AbstractHalfEdge.OUTER))
+				{
+					logger.error("Multiple edges: linked to an inner edge");
+					logger.error(" "+f);
+					logger.error(" "+g);
+					logger.error(" "+h);
+					return false;
+				}
+				if (!triangleList.contains(g.getTri()))
+				{
+					logger.error("Multiple edges: Triangle not present in mesh: "+g.getTri());
+					logger.error("Linked from "+f);
+					return false;
+				}
+				if (!triangleList.contains(h.getTri()))
+				{
+					logger.error("Multiple edges: Triangle not present in mesh: "+h.getTri());
+					logger.error("Linked from "+f);
+					return false;
+				}
+				if (!((g.origin() == v1 && g.destination() == v2) || (g.origin() == v2 && g.destination() == v1)))
+				{
+					logger.error("Multiple edges: vertex mismatch in adjacency relation: ");
+					logger.error(" "+e);
+					logger.error(" "+g);
+					return false;
+				}
+				if (!((h.origin() == v1 && h.destination() == v2) || (h.origin() == v2 && h.destination() == v1)))
+				{
+					logger.error("Multiple edges: vertex mismatch in adjacency relation: ");
+					logger.error(" "+e);
+					logger.error(" "+h);
 					return false;
 				}
 			}

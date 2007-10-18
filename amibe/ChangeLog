@@ -1,3 +1,13 @@
+Thu Oct 18 18:13:12 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/amibe/ds/AbstractHalfEdge.java
+	  src/org/jcae/mesh/amibe/ds/HalfEdge.java: In HalfEdge, modify
+	implementation of non-manifold edges.  Non-manifold edges with the
+	same support are now linked through a circular doubly-linked list,
+	and no more with a LinkedHashMap.  This way, HalfEdge.sym member
+	can be an HalfEdge instance, which removes many special cases.
+
 Tue Oct 16 16:28:26 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/AbstractTriangle.java: Let 'vertex'

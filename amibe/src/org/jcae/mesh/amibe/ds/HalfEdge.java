@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.NoSuchElementException;
 import java.io.Serializable;
@@ -38,14 +37,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	private TriangleHE tri;
 	private byte localNumber = 8;
 	private int attributes = 8;
-	// For non manifold edges, a virtual triangle is added
-	//   Triangle(outerVertex, edge.origin(), edge.destination())
-	// and sym points to an edge of this triangle.  It is said to
-	// be outer.  The list of adjacent HalfEdge is stored in this
-	// triangle, more specifically in sym.next.sym
-	// This is very handy because all HalfEdge of non-outer triangles
-	// can be considered as being manifold.
-	private Object sym = null;
+	private HalfEdge sym = null;
 	private HalfEdge next = null;
 
 	private static final int [] next3 = { 1, 2, 0 };
@@ -114,9 +106,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	
 	public final HalfEdge notOriented()
 	{
-		assert sym instanceof HalfEdge;
 		if (sym != null && sym.hashCode() < hashCode())
-			return (HalfEdge) sym;
+			return sym;
 		return this;
 	}
 	
@@ -130,28 +121,12 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 
 	/**
-	 * Gets adjacency list for non-manifold edges. 
-	 */
-	@SuppressWarnings("unchecked")
-	private final Map<Triangle, Integer> getAdjNonManifold()
-	{
-		assert hasAttributes(NONMANIFOLD) && !hasAttributes(OUTER) : "Non-manifold edge: "+this;
-		// By convention, adjacency list is stored in a virtual triangle.
-		return (Map<Triangle, Integer>) HEsym().next.sym;
-	}
-
-	/**
 	 * Sets the sym link.
 	 */
 	@Override
 	public final void setAdj(Object e)
 	{
-		sym = e;
-	}
-
-	private final HalfEdge HEsym()
-	{
-		return (HalfEdge) sym;
+		sym = (HalfEdge) e;
 	}
 
 	/**
@@ -161,7 +136,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	public final AbstractHalfEdge sym()
 	{
-		return (AbstractHalfEdge) sym;
+		return sym;
 	}
 
 	/**
@@ -176,7 +151,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	public final AbstractHalfEdge sym(AbstractHalfEdge that)
 	{
-		that = (AbstractHalfEdge) sym;
+		that = sym;
 		return that;
 	}
 
@@ -239,7 +214,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	public final AbstractHalfEdge nextOrigin()
 	{
-		return next.next.sym();
+		return next.next.sym;
 	}
 	
 	/**
@@ -255,7 +230,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	public final AbstractHalfEdge nextOrigin(AbstractHalfEdge that)
 	{
-		that = next.next.sym();
+		that = next.next.sym;
 		return that;
 	}
 	
@@ -265,7 +240,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 */
 	private final AbstractHalfEdge nextApex()
 	{
-		return next.HEsym().next;
+		return next.sym.next;
 	}
 	
 	/**
@@ -274,7 +249,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 */
 	private final AbstractHalfEdge prevApex()
 	{
-		return next.next.HEsym().prev();
+		return next.next.sym.prev();
 	}
 	
 	//  The following 3 methods change the underlying triangle.
@@ -400,7 +375,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			// and start again from there.
 			do
 			{
-				ret = (HalfEdge) ret.HEsym().next();
+				ret = ret.sym.next;
 			}
 			while (!ret.hasAttributes(OUTER));
 		}
@@ -449,7 +424,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		if (hasAttributes(OUTER | BOUNDARY | NONMANIFOLD))
 			return invalid;
 		// Check for coplanarity
-		HalfEdge f = HEsym();
+		HalfEdge f = sym;
 		Vertex o = origin();
 		Vertex d = destination();
 		Vertex a = apex();
@@ -519,33 +494,20 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		HalfEdge [] e = new HalfEdge[6];
 		e[0] = next;
 		e[1] = next.next;
-		e[2] = HEsym().next;
-		e[3] = HEsym().next.next;
+		e[2] = sym.next;
+		e[3] = sym.next.next;
 		e[4] = this;
-		e[5] = HEsym();
+		e[5] = sym;
 		//  Clear SWAPPED flag for all edges of the 2 triangles
 		for (int i = 0; i < 6; i++)
 		{
 			e[i].clearAttributes(SWAPPED);
-			e[i].HEsym().clearAttributes(SWAPPED);
+			e[i].sym.clearAttributes(SWAPPED);
 		}
 		//  Adjust vertices
 		Vertex n = e[5].apex();
 		e[4].setDestination(n);           // (ona)
 		e[5].setDestination(a);           // (dan)
-		//  Adjust edge informations
-		if (e[2].hasAttributes(NONMANIFOLD))
-		{
-			// In T1, e[2] will be replaced by
-			// the successor of e[1]
-			e[2].replaceEdgeLinks(this);
-		}
-		if (e[0].hasAttributes(NONMANIFOLD))
-		{
-			// In T2, e[0] will be replaced by
-			// the successor of e[3]
-			e[0].replaceEdgeLinks(e[5]);
-		}
 		//    T1: e[1] is unchanged
 		TriangleHE T1 = e[1].tri;
 		e[1].next = e[2];
@@ -625,12 +587,12 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			// case, do not create an HashSet to store only two
 			// triangles.
 			Triangle t1 = tri;
-			Triangle t2 = HEsym().tri;
+			Triangle t2 = sym.tri;
 			// Check that origin vertex can be moved
 			if (!checkNewRingNormalsSameFan(xn, t1, t2))
 				return false;
 			// Check that destination vertex can be moved
-			if (!HEsym().checkNewRingNormalsSameFan(xn, t1, t2))
+			if (!sym.checkNewRingNormalsSameFan(xn, t1, t2))
 				return false;
 			//  Topology check.
 			return canCollapseTopology();
@@ -644,14 +606,14 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		{
 			HalfEdge f = (HalfEdge) it.next();
 			ignored.add(f.tri);
-			ignored.add(f.HEsym().tri);
+			ignored.add(f.sym.tri);
 		}
 		
 		// Check that origin vertex can be moved
 		if (!checkNewRingNormalsNonManifoldVertex(xn, ignored))
 			return false;
 		// Check that destination vertex can be moved
-		if (!HEsym().checkNewRingNormalsNonManifoldVertex(xn, ignored))
+		if (!sym.checkNewRingNormalsNonManifoldVertex(xn, ignored))
 			return false;
 		ignored.clear();
 
@@ -722,9 +684,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		{
 			HalfEdge f = (HalfEdge) start.getAbstractHalfEdge();
 			if (f.destination() == o)
-				f = (HalfEdge) f.next();
+				f = f.next;
 			else if (f.apex() == o)
-				f = (HalfEdge) f.prev();
+				f = f.next.next;
 			assert f.origin() == o;
 			if (!f.checkNewRingNormalsSameFan(newpt, null, null))
 				return false;
@@ -767,9 +729,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		{
 			HalfEdge f = (HalfEdge) start.getAbstractHalfEdge();
 			if (f.destination() == o)
-				f = (HalfEdge) f.next();
+				f = f.next;
 			else if (f.apex() == o)
-				f = (HalfEdge) f.prev();
+				f = f.next.next;
 			assert f.origin() == o;
 			if (!f.checkNewRingNormalsSameFanNonManifoldVertex(newpt, ignored))
 				return false;
@@ -829,7 +791,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			replaceEndpointsSameFan(v);
 		else
 			replaceEndpointsNonManifold(o, v);
-		HalfEdge e = HEsym();
+		HalfEdge e = sym;
 		if (d.getLink() instanceof Triangle)
 			e.replaceEndpointsSameFan(v);
 		else
@@ -860,7 +822,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		{
 			HalfEdge h = (HalfEdge) ah;
 			assert !h.hasAttributes(OUTER);
-			h.HEsym().HEcollapseSameFan(mesh, v);
+			h.sym.HEcollapseSameFan(mesh, v);
 			if (h == this)
 				ret = h.HEcollapseSameFan(mesh, v);
 			else
@@ -881,7 +843,6 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		 *      o +-------+ d                n +
 		 */
 		// this = (odV1)
-		
 		if (hasAttributes(NONMANIFOLD) && hasAttributes(OUTER))
 		{
 			// All we have to do here is to remove t1
@@ -893,10 +854,10 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		HalfEdge e, f, s;
 		e = next;               // (dV1o)
 		int attr4 = e.attributes;
-		s = e.HEsym();          // (V1dV4)
+		s = e.sym;              // (V1dV4)
 		e = e.next;             // (V1od)
 		int attr3 = e.attributes;
-		f = e.HEsym();          // (oV1V3)
+		f = e.sym;              // (oV1V3)
 		Triangle t34 = (f == null ? ( s == null ? null : s.tri ) : f.tri);
 		if (t34 != null)
 		{
@@ -906,24 +867,13 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			replaceVertexLinks(n, tri, t34);
 		}
 		if (f != null && f.hasAttributes(NONMANIFOLD))
-		{
-			// e is listed in adjacency list and
-			// has to be replaced by s
-			assert  s != null && !s.hasAttributes(NONMANIFOLD);
-			e.replaceEdgeLinks(s);
 			f.HEglue(s);
-		}
 		else if (s != null && s.hasAttributes(NONMANIFOLD))
-		{
-			// s.HEsym() is listed in adjacency list and
-			// has to be replaced by f
-			s.HEsym().replaceEdgeLinks(f);
 			s.HEglue(f);
-		}
 		else if (f != null)
 			f.HEglue(s);
 		else if (s != null)
-			s.HEglue(null);
+			s.sym = null;
 
 		if (f != null)
 			f.attributes |= attr4;
@@ -954,10 +904,10 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		{
 			TriangleHE tHE = (TriangleHE) t;
 			HalfEdge f = tHE.getHalfEdge();
-			if (f.origin() != o)
-				f = (HalfEdge) f.next();
-			if (f.origin() != o)
-				f = (HalfEdge) f.next();
+			if (f.destination() == o)
+				f = f.next;
+			else if (f.apex() == o)
+				f = f.next.next;
 			assert f.origin() == o : ""+o+" not in "+f;
 			f.replaceEndpointsSameFan(n);
 		}
@@ -1109,17 +1059,6 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			res.toArray((Triangle[]) v.getLink());
 		}
 	}
-	private void replaceEdgeLinks(HalfEdge that)
-	{
-		// Current instance is a non-manifold edge which has been
-		// replaced by 'that'.  Replace all occurrences in adjacency
-		// list.
-		final Map<Triangle, Integer> list = getAdjNonManifold();
-		Integer I = list.get(tri);
-		assert I != null && I.intValue() == localNumber;
-		list.remove(tri);
-		list.put(that.tri, int3[that.localNumber]);
-	}
 	
 	/**
 	 * Splits an edge.  This is the opposite of {@link #collapse}.
@@ -1144,24 +1083,42 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			HEsplitSameFan(mesh, v);
 			return this;
 		}
+		// HEsplitSameFan may modify internal data structure
+		// used by fanIterator(), we need a copy.
+		ArrayList<AbstractHalfEdge> copy = new ArrayList<AbstractHalfEdge>();
 		// Set vertex links
 		ArrayList<Triangle> link = new ArrayList<Triangle>();
 		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
 		{
 			HalfEdge f = (HalfEdge) it.next();
 			link.add(f.tri);
+			copy.add(f);
 		}
 		v.setLink(new Triangle[link.size()]);
 		link.toArray((Triangle[]) v.getLink());
 		link.clear();
-		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
+		HalfEdge newNMEdge = null;
+		for (AbstractHalfEdge ah: copy)
 		{
-			HalfEdge f = (HalfEdge) it.next();
-			f.HEsplitSameFan(mesh, v);
+			HalfEdge f = (HalfEdge) ah;
+			HalfEdge g = f.HEsplitSameFan(mesh, v);
+			if (newNMEdge == null)
+			{
+				// Initializes an empty cycle
+				newNMEdge = g;
+				newNMEdge.next.HEglue(g.next.next);
+			}
+			else
+			{
+				// Adds g to the cycle
+				HalfEdge oldSym = newNMEdge.next.sym;
+				newNMEdge.next.HEglue(g.next.next);
+				g.next.HEglue(oldSym);
+			}
 		}
 		return this;
 	}
-	private final void HEsplitSameFan(Mesh m, Vertex n)
+	private final HalfEdge HEsplitSameFan(Mesh m, Vertex n)
 	{
 		if (hasAttributes(OUTER))
 			throw new IllegalArgumentException("Cannot split "+this);
@@ -1175,45 +1132,54 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		 *    /       t1        \            /   t1   |  t3    \
 		 * o +-------------------+ d ---> o +---------+---------+ d
 		 *    \       t2        /            \   t4   |  t2    /
-		 *      \             /                \    n2|   h2 /
-		 *        \      h2 /                    \    |    /
+		 *      \             /                \      |n2    /
+		 *        \h2       /                    \h2  |    /
 		 *          \     /                        \  |  /
 		 *            \,/                            \|/
 		 *            V2                             V2
 		 */
 		splitVertexAddOneTriangle(m, n);
-		HEsym().splitVertexAddOneTriangle(m, n);
+		sym.splitVertexAddOneTriangle(m, n);
 		
+		// Now we must update links:
+		// 1. Link together t1/t4 and t2/t3.
 		Triangle t1 = tri;
-		// t1 is still glued to t2, it has to be glued to t4, and t3 to t2.
 		HalfEdge f = next;              // (nV1o)
-		f = (HalfEdge) f.HEsym().next();// (ndV1)
+		f = f.sym.next;                 // (ndV1)
 		Triangle t3 = f.tri;
 
-		HalfEdge g = HEsym();           // (dnV2)
+		HalfEdge g = sym;               // (dnV2)
 		f.HEglue(g);
 		Triangle t2 = g.tri;
-		g = (HalfEdge) g.next();        // (nV2d)
-		g = g.HEsym().next;             // (noV2)
-		HEglue(g);
-		Triangle t4 = g.tri;
+		f = g.next.sym.next;            // (noV2)
+		HEglue(f);
+		Triangle t4 = f.tri;
+		// 2. Remove links between outer triangles
 		if (t2.isOuter())
 		{
-			// Remove links between t2 and t4
-			g = (HalfEdge) g.prev();// (V2no)
-			f = g.HEsym();          // (nV2d)
-			f.HEglue(null);
-			g.HEglue(null);
-			// Move f so that d == f.destination()
-			f = (HalfEdge) f.next();// (V2dn)
+			// Remove links between t2 and t4,
+			// and link h2.next to n2.next.sym;
+			// it is null for manifold edges,
+			// and fixes links for non-manifold
+			// edges.
+			f = f.next.next;        // (V2no)
+			g = f.sym;              // (nV2d)
+			f.HEglue(g.next.sym);
+			g.sym = null;
+			g.next.sym = null;
+			// t4 now contains good links, t2 may need
+			// to be fixed.
+			// Move g to its previous value
+			g = g.next.next;             // (dnV2)
 		}
 
 		Triangle t14 = (t1.isOuter() ? t4 : t1);
 		Triangle t23 = (t2.isOuter() ? t3 : t2);
 		//  Update vertex links
 		replaceVertexLinks(n, t1, t2, t14);
-		replaceVertexLinks(f.destination(), t1, t2, t23);
+		replaceVertexLinks(g.origin(), t1, t2, t23);
 		replaceVertexLinks(origin(), t1, t2, t14);
+		return g;
 	}
 	
 	private final void splitVertexAddOneTriangle(Mesh m, Vertex n)
@@ -1236,17 +1202,20 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		// h1 into t3 so that it does not need to be updated by
 		// the caller.
 		HalfEdge n1 = t3.getHalfEdge();
+		boolean updateRefHalfEdge = true;
 		if (h1.localNumber == 1)
 			n1 = n1.next;
 		else if (h1.localNumber == 2)
 			n1 = n1.next.next;
+		else
+			updateRefHalfEdge = false;
 		// Update forward links
 		HalfEdge h1next = h1.next;
 		h1.next = n1.next;
 		h1.next.next.next = h1;
 		n1.next = h1next;
 		n1.next.next.next = n1;
-		if (t1.getHalfEdge() == h1)
+		if (updateRefHalfEdge)
 		{
 			t1.setHalfEdge(n1);
 			t3.setHalfEdge(h1);
@@ -1258,10 +1227,6 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		// Update vertices
 		n1.setOrigin(n);
 		h1.setApex(n);
-
-		// If h1 is non-manifold, update adjacency list
-		if (h1.hasAttributes(NONMANIFOLD))
-			n1.replaceEdgeLinks(h1);
 
 		// Inner edge
 		h1.next.HEglue(n1);
@@ -1309,24 +1274,20 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		if (!hasAttributes(NONMANIFOLD))
 			return identityFanIterator();
 		logger.debug("Non manifold fan iterator");
-		final Map<Triangle, Integer> list = getAdjNonManifold();
 		return new Iterator<AbstractHalfEdge>()
 		{
-			private Iterator<Map.Entry<Triangle, Integer>> it = list.entrySet().iterator();
+			private HalfEdge last = sym.next.next;
+			private HalfEdge current = null;
 			public boolean hasNext()
 			{
-				return it.hasNext();
+				return last != current;
 			}
 			public AbstractHalfEdge next()
 			{
-				Map.Entry<Triangle, Integer> entry = it.next();
-				HalfEdge f = (HalfEdge) entry.getKey().getAbstractHalfEdge();
-				int l = entry.getValue().intValue();
-				if (l == 1)
-					f = f.next;
-				else if (l == 2)
-					f = f.next.next;
-				return f;
+				if (current == null)
+					current = last;
+				current = current.next.next.sym;
+				return current.next.sym;
 			}
 			public void remove()
 			{
@@ -1344,21 +1305,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		r.append("\nGroup: "+tri.getGroupId());
 		r.append("\nLocal number: "+localNumber);
 		if (sym != null)
-		{
-			if (sym instanceof HalfEdge)
-			{
-				HalfEdge e = (HalfEdge) sym;
-				r.append("\nSym: "+e.tri.hashCode()+"["+e.localNumber+"]");
-			}
-			else
-			{
-				Map<Triangle, Integer> list = (Map<Triangle, Integer>) sym;
-				r.append("\nSym: (");
-				for (Map.Entry<Triangle, Integer> entry: list.entrySet())
-					r.append(entry.getKey().hashCode()+"["+entry.getValue().intValue()+"],");
-				r.setCharAt(r.length()-1, ')');
-			}
-		}
+			r.append("\nSym: "+sym.hashCode()+"   T="+sym.tri.hashCode()+"["+sym.localNumber+"]");
 		r.append("\nAttributes: "+Integer.toHexString(attributes));
 		r.append("\nVertices:");
 		r.append("\n  Origin: "+origin());

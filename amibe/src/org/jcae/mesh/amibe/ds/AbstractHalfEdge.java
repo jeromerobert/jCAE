@@ -23,7 +23,6 @@ package org.jcae.mesh.amibe.ds;
 import org.jcae.mesh.amibe.traits.Traits;
 import org.jcae.mesh.amibe.traits.HalfEdgeTraitsBuilder;
 import java.util.Iterator;
-import java.util.Map;
 
 /**
  * Abstract class to define common methods on edges.
@@ -246,12 +245,8 @@ import java.util.Map;
  * <p>
  * Virtual triangle added to the other side of non-manifold edge is not only useful for looping around vertices,
  * but it also allows looping around this non-manifold edge.  We explained that the two outer edges are not connected
- * to other triangles, so we have two free slots.  An elegant solution would be to use these two slots to build
- * a circular doubly-linked list to iterate over all half-edges connected together, as is done with radial-edge data
- * structure.  Unfortunately, we went another way and choose a dirty hack (feel free to send working patches).
- * In the virtual triangle, edge next to the non-manifold one stores a <code>Map&lt;Triangle, Integer&gt;</code>
- * instance which can iterate over all half-edges; this is exactly what {@link #fanIterator} is for.
- * All connected edges share the same map, so addition or removal of an edge affects all edges.
+ * to other triangles, so we have two free slots.  We use these two slots to build a circular doubly-linked list to
+ * iterate over all half-edges connected together, as is done with radial-edge data structure.
  * </p>
  *
  * <p>
