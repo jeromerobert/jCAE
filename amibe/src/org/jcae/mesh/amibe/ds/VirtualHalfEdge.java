@@ -582,8 +582,11 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	{
 		tri.setAdj(localNumber, sym.tri);
 		tri.setAdjLocalNumber(localNumber, sym.localNumber);
-		sym.tri.setAdj(sym.localNumber, tri);
-		sym.tri.setAdjLocalNumber(sym.localNumber, localNumber);
+		if (sym.tri != null)
+		{
+			sym.tri.setAdj(sym.localNumber, tri);
+			sym.tri.setAdjLocalNumber(sym.localNumber, localNumber);
+		}
 	}
 	
 	/**
@@ -597,24 +600,6 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		return tri.getAdj(localNumber);
 	}
 	
-	/**
-	 * Gets adjacency list for non-manifold edges. 
-	 */
-	@SuppressWarnings("unchecked")
-	private final Map<Triangle, Integer> getAdjNonManifold()
-	{
-		assert hasAttributes(NONMANIFOLD) && !hasAttributes(OUTER);
-		// By convention, adjacency list is stored in a virtual triangle.
-		// Save current state to restore it before returning.
-		Triangle t = tri;
-		int l = localNumber;
-		sym();
-		next();
-		Map<Triangle, Integer> ret = (Map<Triangle, Integer>) tri.getAdj(localNumber);
-		bind(t, l);
-		return ret;
-	}
-
 	/**
 	 * Sets adjacency relation for an edge
 	 *
@@ -822,12 +807,6 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		}
 		work[1].next();                 // (ond)
 		int attr3 = work[1].attributes;
-		if (work[1].hasAttributes(NONMANIFOLD))
-		{
-			// work[1] is listed in adjacency list and
-			// has to be replaced by work[0]
-			work[1].replaceEdgeLinks(work[0]);
-		}
 		work[1].sym();                  // a3 = (no*)
 		work[1].VHglue(work[0]);
 		work[0].attributes = attr3;
@@ -835,12 +814,6 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		work[0].next();                 // (dao)
 		copyOTri(work[0], work[1]);     // (dao)
 		int attr1 = work[1].attributes;
-		if (work[1].hasAttributes(NONMANIFOLD))
-		{
-			// work[1] is listed in adjacency list and
-			// has to be replaced by work[2]
-			work[1].replaceEdgeLinks(work[2]);
-		}
 		work[0].sym();                  // a1 = (ad*)
 		work[2].VHglue(work[0]);
 		work[2].attributes = attr1;
@@ -1124,12 +1097,15 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			mesh.add(v);
 		}
 		if (!hasAttributes(NONMANIFOLD))
-			return VHcollapseSameFan(mesh, v, true);
+		{
+			work[2].VHcollapseSameFan(mesh, v);
+			return VHcollapseSameFan(mesh, v);
+		}
 		// Edge is non-manifold
 		assert work[2].hasAttributes(OUTER);
-		// VHcollapseSameFan may modify LinkedHashMap structure
+		// VHcollapseSameFan may modify internal data structure
 		// used by fanIterator(), we need a copy.
-		LinkedHashMap<Triangle, Integer> copy = new LinkedHashMap<Triangle, Integer>();
+		Map<Triangle, Integer> copy = new LinkedHashMap<Triangle, Integer>();
 		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
 		{
 			VirtualHalfEdge h = (VirtualHalfEdge) it.next();
@@ -1143,14 +1119,18 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			int l = entry.getValue().intValue();
 			work[2].bind(t, l);
 			assert !work[2].hasAttributes(OUTER);
+			work[2].sym();
+			assert work[2].hasAttributes(OUTER);
+			work[2].VHcollapseSameFan(mesh, v);
+			work[2].bind(t, l);
 			if (t == tri)
 			{
-				work[2].VHcollapseSameFan(mesh, v, false);
+				work[2].VHcollapseSameFan(mesh, v);
 				ret = work[2].tri;
 				num = work[2].localNumber;
 			}
 			else
-				work[2].VHcollapseSameFan(mesh, v, false);
+				work[2].VHcollapseSameFan(mesh, v);
 		}
 		assert ret != null;
 		bind(ret, num);
@@ -1160,124 +1140,70 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/*
 	 * Warning: this method uses work[0] and work[1] temporary arrays.
 	 */
-	private VirtualHalfEdge VHcollapseSameFan(Mesh m, Vertex n, boolean manifold)
+	private VirtualHalfEdge VHcollapseSameFan(Mesh m, Vertex n)
 	{
 		/*
 		 *           V1                       V1
 		 *  V3+-------+-------+ V4   V3 +------+------+ V4
 		 *     \ t3  / \ t4  /           \  t3 | t4  / 
-		 *      \   /   \   /              \   |   /
+		 *      \   /   \   /   ------>    \   |   /
 		 *       \ / t1  \ /                 \ | /  
-		 *      o +-------+ d   ------>      n +
-		 *       / \ t2  / \                 / | \
-		 *      /   \   /   \              /   |   \
-		 *     / t5  \ / t6  \           /  t5 | t6  \
-		 *    +-------+-------+         +------+------+
-		 *  V5        V2       V6     V5       V2      V6
+		 *      o +-------+ d                n +
 		 */
 		// this = (odV1)
+		if (hasAttributes(NONMANIFOLD) && hasAttributes(OUTER))
+		{
+			// All we have to do here is to remove t1
+			m.remove(tri);
+			return null;
+		}
+		boolean manifold = !hasAttributes(NONMANIFOLD);
 		//  Update adjacency links.  For clarity, o and d are
 		//  written instead of n.
 		Triangle t1 = tri;
-		sym();
-		Triangle t2 = tri;
-		sym();
-		next();                 // (dV1o)
+		next();                         // (dV1o)
 		int attr4 = attributes;
-		symOTri(this, work[0]); // (V1dV4)
-		next();                 // (V1od)
+		VirtualHalfEdge vh4 = (getAdj() == null ? null : work[0]);
+		if (vh4 != null)
+			symOTri(this, vh4);     // (V1dV4)
+		next();                         // (V1od)
 		int attr3 = attributes;
-		symOTri(this, work[1]); // (oV1V3)
-		if (work[1].hasAttributes(NONMANIFOLD))
-		{
-			// this is listed in adjacency list and
-			// has to be replaced by s
-			replaceEdgeLinks(work[0]);
-			work[1].VHglue(work[0]);
-		}
-		else if (work[0].hasAttributes(NONMANIFOLD))
-		{
-			// this is listed in adjacency list and
-			// has to be replaced by s
-			prev();         // (dV1o)
-			replaceEdgeLinks(work[1]);
-			work[0].VHglue(work[1]);
-			next();         // (V1od)
-		}
-		else
-		{
-			work[0].VHglue(work[1]);
-		}
-		work[0].attributes |= attr3;
-		work[1].attributes |= attr4;
-		work[0].pushAttributes();
-		work[1].pushAttributes();
+		VirtualHalfEdge vh3 = (getAdj() == null ? null : work[1]);
+		if (vh3 != null)
+			symOTri(this, vh3);     // (oV1V3)
 		if (!hasAttributes(OUTER))
 		{
 			Triangle t34 = work[1].tri;
 			if (t34.isOuter())
 				t34 = work[0].tri;
 			assert !t34.isOuter() : work[0]+"\n"+work[1];
-			replaceVertexLinks(work[1].destination(), t1, t2, t34);
-			replaceVertexLinks(n, t1, t2, t34);
+			replaceVertexLinks(apex(), t1, t34);
+			replaceVertexLinks(n, t1, t34);
+		}
+		if (vh3 != null && vh3.hasAttributes(NONMANIFOLD))
+			vh3.VHglue(vh4);
+		else if (vh4 != null && vh4.hasAttributes(NONMANIFOLD))
+			vh4.VHglue(vh3);
+		else if (vh3 != null)
+			vh3.VHglue(vh4);
+		else if (vh4 != null)
+			vh4.VHglue(vh3);
+		if (vh3 != null)
+		{
+			vh3.attributes |= attr4;
+			vh3.pushAttributes();
+		}
+		if (vh4 != null)
+		{
+			vh4.attributes |= attr3;
+			vh4.pushAttributes();
 		}
 		next();                         // (odV1)
-		sym();                          // (doV2)
-		if (manifold && !hasAttributes(OUTER))
-		{
-			next();                 // (oV2d)
-			int attr5 = attributes;
-			symOTri(this, work[0]); // (V2oV5)
-			next();                 // (V2do)
-			int attr6 = attributes;
-			symOTri(this, work[1]); // (dV2V6)
-			if (work[1].hasAttributes(NONMANIFOLD))
-			{
-				replaceEdgeLinks(work[0]);
-				work[1].VHglue(work[0]);
-			}
-			else if (work[0].hasAttributes(NONMANIFOLD))
-			{
-				prev();         // (oV2d)
-				replaceEdgeLinks(work[1]);
-				work[0].VHglue(work[1]);
-				next();         // (doV2)
-			}
-			else
-				work[0].VHglue(work[1]);
-			work[0].attributes |= attr6;
-			work[1].attributes |= attr5;
-			work[0].pushAttributes();
-			work[1].pushAttributes();
-			if (!hasAttributes(OUTER))
-			{
-				Triangle t56 = work[0].tri;
-				if (t56.isOuter())
-					t56 = work[1].tri;
-				assert !t56.isOuter();
-				replaceVertexLinks(work[0].origin(), t1, t2, t56);
-				replaceVertexLinks(n, t1, t2, t56);
-			}
-			next();                 // (doV2)
-		}
-		else
-		{
-			assert hasAttributes(OUTER);
-		}
-		symOTri(this, work[0]);         // (odV1)
-		clearAttributes(MARKED);
-		pushAttributes();
+		// Remove t1
 		m.remove(tri);
-		// By convention, edge is moved into (oV1V3), but this may change.
-		// We have to move before removing adjacency relations.
-		nextOTri(work[0], this);        // (dV1o)
-		sym();                          // (V1dV4)
-		next();                         // (dV4V1)
-		work[0].clearAttributes(MARKED);
-		work[0].pushAttributes();
-		m.remove(work[0].tri);
-		// By convention, edge is moved into (dV4V1)
-		return this;
+		// By convention, edge is moved into (dV4V1), but this may change.
+		// If vh4 is null, edge is outer and return value does not matter
+		return (vh4 == null ? null : (VirtualHalfEdge) vh4.next());
 	}
 	
 	private void replaceEndpointsSameFan(Vertex n)
@@ -1320,6 +1246,24 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 				{
 					logger.debug("replaceVertexLinks: "+tArray[i]+" --> "+newT);
 					tArray[i] = newT;
+				}
+			}
+		}
+	}
+	private static void replaceVertexLinks(Vertex o, Triangle oldT, Triangle newT)
+	{
+		if (o.getLink() instanceof Triangle)
+			o.setLink(newT);
+		else
+		{
+			Triangle [] tArray = (Triangle []) o.getLink();
+			for (int i = 0; i < tArray.length; i++)
+			{
+				if (tArray[i] == oldT)
+				{
+					logger.debug("replaceVertexLinks: "+i+" "+o+" "+tArray[i]);
+					tArray[i] = newT;
+					logger.debug(" --> "+newT);
 				}
 			}
 		}
@@ -1444,17 +1388,6 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			res.toArray((Triangle[]) v.getLink());
 		}
 	}
-	private void replaceEdgeLinks(VirtualHalfEdge that)
-	{
-		// Current instance is a non-manifold edge which has been
-		// replaced by 'that'.  Replace all occurrences in adjacency
-		// list.
-		final Map<Triangle, Integer> list = getAdjNonManifold();
-		Integer I = list.get(tri);
-		assert I != null && I.intValue() == localNumber;
-		list.remove(tri);
-		list.put(that.tri, int3[that.localNumber]);
-	}
 	
 	/**
 	 * Splits an edge.  This is the opposite of collapse.
@@ -1479,20 +1412,51 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			VHsplitSameFan(mesh, v);
 			return this;
 		}
+		// VHsplitSameFan may modify internal data structure
+		// used by fanIterator(), we need a copy.
+		Map<Triangle, Integer> copy = new LinkedHashMap<Triangle, Integer>();
 		// Set vertex links
 		ArrayList<Triangle> link = new ArrayList<Triangle>();
 		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
 		{
 			VirtualHalfEdge f = (VirtualHalfEdge) it.next();
 			link.add(f.tri);
+			copy.put(f.tri, int3[f.localNumber]);
 		}
 		v.setLink(new Triangle[link.size()]);
 		link.toArray((Triangle[]) v.getLink());
 		link.clear();
-		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
+		Triangle f = null;
+		int fEdge = -1;
+		for (Map.Entry<Triangle, Integer> entry: copy.entrySet())
 		{
-			VirtualHalfEdge f = (VirtualHalfEdge) it.next();
-			f.VHsplitSameFan(mesh, v);
+			Triangle t = entry.getKey();
+			int l = entry.getValue().intValue();
+			work[3].bind(t, l);
+			work[3].VHsplitSameFan(mesh, v);
+			// New edge is in work[1]
+			if (f == null)
+			{
+				f = work[1].tri;
+				fEdge = work[1].localNumber;
+				// Initializes an empty cycle
+				nextOTri(work[1], work[3]);
+				work[1].prev();
+				work[1].VHglue(work[3]);
+			}
+			else
+			{
+				// Adds work[1] to the cycle
+				work[1].prev();
+				work[3].bind(f, fEdge);
+				work[3].next();
+				copyOTri(work[3], work[2]);
+				// Store old sym into work[3]
+				work[3].sym();
+				work[1].VHglue(work[2]);
+				work[1].prev();
+				work[1].VHglue(work[3]);
+			}
 		}
 		return this;
 	}
@@ -1513,8 +1477,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		 *    /       t1        \            /   t1   |  t3    \
 		 * o +-------------------+ d ---> o +---------+---------+ d
 		 *    \       t2        /            \   t4   |  t2    /
-		 *      \             /                \    n2|   h2 /
-		 *        \      h2 /                    \    |    /
+		 *      \             /                \      |n2    /
+		 *        \h2       /                    \h2  |    /
 		 *          \     /                        \  |  /
 		 *            \,/                            \|/
 		 *            V2                             V2
@@ -1523,37 +1487,54 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		symOTri(this, work[0]);
 		work[0].splitVertexAddOneTriangle(m, n);
 		
+		// Now we must update links:
+		// 1. Link together t1/t4 and t2/t3.
 		Triangle t1 = tri;
-		// t1 is still glued to t2, it has to be glued to t4, and t3 to t2.
-		nextOTri(this, work[1]);        // (nV1o)
-		work[1].sym();                  // (V1nd)
-		work[1].next();                 // (ndV1)
-		Triangle t3 = work[1].tri;
+		nextOTri(this, work[0]);        // (nV1o)
+		work[0].sym();                  // (V1nd)
+		work[0].next();                 // (ndV1)
+		Triangle t3 = work[0].tri;
 
-		symOTri(this, work[0]);         // (dnV2)
+		symOTri(this, work[1]);         // (dnV2)
 		work[0].VHglue(work[1]);
-		Triangle t2 = work[0].tri;
-		work[0].next();                 // (nV2d)
-		work[0].sym();                  // (V2no)
+		Triangle t2 = work[1].tri;
+		work[1].next();                 // (nV2d)
+		symOTri(work[1], work[0]);      // (V2no)
 		work[0].next();                 // (noV2)
 		VHglue(work[0]);
 		Triangle t4 = work[0].tri;
+		work[1].prev();                 // (dnV2)
+		// 2. Remove links between outer triangles
 		if (t2.isOuter())
 		{
-			// Remove links between t2 and t4
+			// Remove links between t2 and t4,
+			// and link h2.next to n2.next.sym.
 			work[0].prev();         // (V2no)
 			symOTri(work[0], work[1]);    // (nV2d)
-			work[0].setAdj(null);
-			work[1].setAdj(null);
-			// Move work[1] so that d == work[1].destination()
+			int l2 = work[1].localNumber;
 			work[1].next();         // (V2dn)
+			if (work[1].getAdj() != null)
+			{
+				work[1].sym();
+				work[0].VHglue(work[1]);
+			}
+			else
+				work[0].setAdj(null);
+			work[1].prev();         // (nV2d)
+			work[1].setAdj(null);
+			work[1].next();         // (V2dn)
+			work[1].setAdj(null);
+			// t4 now contains good links, t2 may need
+			// to be fixed.
+			// Move work[1] so that d == work[1].origin()
+			work[1].next();         // (dnV2)
 		}
 
 		Triangle t14 = (t1.isOuter() ? t4 : t1);
 		Triangle t23 = (t2.isOuter() ? t3 : t2);
 		//  Update vertex links
 		replaceVertexLinks(n, t1, t2, t14);
-		replaceVertexLinks(work[1].destination(), t1, t2, t23);
+		replaceVertexLinks(work[1].origin(), t1, t2, t23);
 		replaceVertexLinks(origin(), t1, t2, t14);
 	}
 	
@@ -1577,9 +1558,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		
 		if (!hasAttributes(OUTER))
 		{
-			nextOTri(this, work[2]);
-			symOTri(work[2], work[1]);
-			work[2].bind(t3, work[2].localNumber);
+			nextOTri(this, work[2]);                // (dV1o)
+			symOTri(work[2], work[1]);              // (V1d*)
+			work[2].bind(t3, work[2].localNumber);  // (dV1n)
 			work[1].VHglue(work[2]);
 		}
 
@@ -1594,12 +1575,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		setOrigin(n);
 		work[1].setApex(n);
 
-		// If h1 is non-manifold, update adjacency list
-		if (work[1].hasAttributes(NONMANIFOLD))
-			replaceEdgeLinks(work[1]);
-
 		// Inner edge
-		work[1].next();                 // (dV1n)
+		work[1].next();                 // (V1nd)
 		VHglue(work[1]);
 
 		// Clear BOUNDARY and NONMANIFOLD flags on inner edges
@@ -1614,16 +1591,16 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		logger.debug("Manifold fan iterator");
 		return new Iterator<AbstractHalfEdge>()
 		{
-			private boolean next = true;
+			private boolean nextFan = true;
 			public boolean hasNext()
 			{
-				return next;
+				return nextFan;
 			}
 			public AbstractHalfEdge next()
 			{
-				if (!next)
+				if (!nextFan)
 					throw new NoSuchElementException();
-				next = false;
+				nextFan = false;
 				return current;
 			}
 			public void remove()
@@ -1646,19 +1623,29 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	{
 		if (!hasAttributes(NONMANIFOLD))
 			return identityFanIterator();
-		final Map<Triangle, Integer> list = getAdjNonManifold();
+		logger.debug("Non manifold fan iterator");
 		return new Iterator<AbstractHalfEdge>()
 		{
+			private Triangle last = (Triangle) tri.getAdj(localNumber);
+			private int lastNumber = tri.getAdjLocalNumber(localNumber);
 			VirtualHalfEdge ret = new VirtualHalfEdge();
-			private Iterator<Map.Entry<Triangle, Integer>> it = list.entrySet().iterator();
+			VirtualHalfEdge current = new VirtualHalfEdge();
 			public boolean hasNext()
 			{
-				return it.hasNext();
+				return last != current.tri;
 			}
 			public AbstractHalfEdge next()
 			{
-				Map.Entry<Triangle, Integer> entry = it.next();
-				ret.bind(entry.getKey(), entry.getValue().intValue());
+				if (current.tri == null)
+				{
+					current.bind(last, lastNumber);
+					current.prev();
+				}
+				current.prev();
+				current.sym();
+				copyOTri(current, ret);
+				ret.next();
+				ret.sym();
 				return ret;
 			}
 			public void remove()
@@ -1667,27 +1654,17 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		};
 	}
 
-	private final String showAdj(int num)
-	{
-		if (!(tri.getAdj(num) instanceof Triangle))
-			return "N/A";
-		Triangle t = (Triangle) tri.getAdj(num);
-		StringBuilder ret = new StringBuilder();
-		if (t == null)
-			ret.append("null");
-		else
-			ret.append(t.hashCode()+"["+tri.getAdjLocalNumber(num)+"]");
-		return ret.toString();
-	}
-	
 	@Override
 	public String toString()
 	{
-		StringBuilder r = new StringBuilder("Local number: "+localNumber);
+		StringBuilder r = new StringBuilder();
+		r.append("hashCode: "+hashCode());
 		r.append("\nTri hashcode: "+tri.hashCode());
 		r.append("\nGroup: "+tri.getGroupId());
-		r.append("\nAdjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2));
-		r.append("\nAttributes: "+Integer.toHexString(tri.getEdgeAttributes(0))+" "+Integer.toHexString(tri.getEdgeAttributes(1))+" "+Integer.toHexString(tri.getEdgeAttributes(2))+" => "+Integer.toHexString(attributes));
+		r.append("\nLocal number: "+localNumber);
+		if (getAdj() != null)
+			r.append("\nSym: "+tri.getAdj(localNumber).hashCode()+"["+tri.getAdjLocalNumber(localNumber)+"]");
+		r.append("\nAttributes: "+Integer.toHexString(tri.getEdgeAttributes(localNumber)));
 		r.append("\nVertices:");
 		r.append("\n  Origin: "+origin());
 		r.append("\n  Destination: "+destination());
