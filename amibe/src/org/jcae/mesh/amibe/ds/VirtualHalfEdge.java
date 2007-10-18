@@ -829,8 +829,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		work[2].setOrigin(a);           // (and)
 		work[1].setOrigin(n);           // (nao)
 		//  Fix links to triangles
-		o.setLink(tri);
-		d.setLink(work[2].tri);
+		replaceVertexLinks(o, tri, work[2].tri, tri);
+		replaceVertexLinks(d, tri, work[2].tri, work[2].tri);
 		pullAttributes();
 	}
 	
@@ -1123,14 +1123,12 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			assert work[2].hasAttributes(OUTER);
 			work[2].VHcollapseSameFan(mesh, v);
 			work[2].bind(t, l);
+			work[2].VHcollapseSameFan(mesh, v);
 			if (t == tri)
 			{
-				work[2].VHcollapseSameFan(mesh, v);
-				ret = work[2].tri;
-				num = work[2].localNumber;
+				ret = work[0].tri;
+				num = work[0].localNumber;
 			}
-			else
-				work[2].VHcollapseSameFan(mesh, v);
 		}
 		assert ret != null;
 		bind(ret, num);
@@ -1157,7 +1155,6 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			m.remove(tri);
 			return null;
 		}
-		boolean manifold = !hasAttributes(NONMANIFOLD);
 		//  Update adjacency links.  For clarity, o and d are
 		//  written instead of n.
 		Triangle t1 = tri;
@@ -1225,10 +1222,10 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		for (Triangle t: oList)
 		{
 			work[0].bind(t);
-			if (work[0].origin() != o)
+			if (work[0].destination() == o)
 				work[0].next();
-			if (work[0].origin() != o)
-				work[0].next();
+			else if (work[0].apex() == o)
+				work[0].prev();
 			assert work[0].origin() == o : ""+o+" not in "+work[0];
 			work[0].replaceEndpointsSameFan(n);
 		}
@@ -1508,23 +1505,24 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		if (t2.isOuter())
 		{
 			// Remove links between t2 and t4,
-			// and link h2.next to n2.next.sym.
+			// and link h2.sym to n2.next.sym.
 			work[0].prev();         // (V2no)
 			symOTri(work[0], work[1]);    // (nV2d)
 			int l2 = work[1].localNumber;
 			work[1].next();         // (V2dn)
-			if (work[1].getAdj() != null)
+			work[0].prev();         // (oV2n)
+			if (work[0].getAdj() != null)
 			{
-				work[1].sym();
+				work[0].sym();
 				work[0].VHglue(work[1]);
 			}
 			else
-				work[0].setAdj(null);
-			work[1].prev();         // (nV2d)
+				work[1].setAdj(null);
+			work[1].bind(t2, l2);   // (nV2d)
 			work[1].setAdj(null);
 			work[1].next();         // (V2dn)
 			work[1].setAdj(null);
-			// t4 now contains good links, t2 may need
+			// t2 now contains good links, t4 may need
 			// to be fixed.
 			// Move work[1] so that d == work[1].origin()
 			work[1].next();         // (dnV2)

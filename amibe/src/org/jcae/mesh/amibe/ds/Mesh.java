@@ -1005,11 +1005,13 @@ public class Mesh extends AbstractMesh implements Serializable
 				if (!(v1.getLink() instanceof Triangle[]))
 				{
 					logger.error("Multiple edges: endpoint must be non-manifold: "+v1);
+					logger.error(" "+ot);
 					return false;
 				}
 				if (!(v2.getLink() instanceof Triangle[]))
 				{
 					logger.error("Multiple edges: endpoint must be non-manifold: "+v2);
+					logger.error(" "+ot);
 					return false;
 				}
 				// next() and prev() must point to other non-manifold edges
@@ -1169,11 +1171,13 @@ public class Mesh extends AbstractMesh implements Serializable
 				if (!(v1.getLink() instanceof Triangle[]))
 				{
 					logger.error("Multiple edges: endpoint must be non-manifold: "+v1);
+					logger.error(" "+e);
 					return false;
 				}
 				if (!(v2.getLink() instanceof Triangle[]))
 				{
 					logger.error("Multiple edges: endpoint must be non-manifold: "+v2);
+					logger.error(" "+e);
 					return false;
 				}
 				// next() and prev() must point to other non-manifold edges
