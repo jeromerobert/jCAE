@@ -35,10 +35,10 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 {
 	private static Logger logger = Logger.getLogger(HalfEdge.class);
 	private TriangleHE tri;
-	private byte localNumber = 8;
-	private int attributes = 8;
-	private HalfEdge sym = null;
-	private HalfEdge next = null;
+	private byte localNumber = 0;
+	private int attributes = 0;
+	private HalfEdge sym;
+	private HalfEdge next;
 
 	private static final int [] next3 = { 1, 2, 0 };
 	private static final int [] prev3 = { 2, 0, 1 };
