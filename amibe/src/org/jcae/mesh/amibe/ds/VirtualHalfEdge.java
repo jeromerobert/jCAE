@@ -1434,25 +1434,25 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			// New edge is in work[1]
 			if (f == null)
 			{
-				f = work[1].tri;
-				fEdge = work[1].localNumber;
+				f = work[0].tri;
+				fEdge = work[0].localNumber;
 				// Initializes an empty cycle
-				nextOTri(work[1], work[3]);
-				work[1].prev();
-				work[1].VHglue(work[3]);
+				nextOTri(work[0], work[3]);
+				work[0].prev();
+				work[0].VHglue(work[3]);
 			}
 			else
 			{
 				// Adds work[1] to the cycle
-				work[1].prev();
+				work[0].prev();
 				work[3].bind(f, fEdge);
 				work[3].next();
 				copyOTri(work[3], work[2]);
 				// Store old sym into work[3]
 				work[3].sym();
-				work[1].VHglue(work[2]);
-				work[1].prev();
-				work[1].VHglue(work[3]);
+				work[0].VHglue(work[2]);
+				work[0].prev();
+				work[0].VHglue(work[3]);
 			}
 		}
 		return this;
@@ -1505,27 +1505,34 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		if (t2.isOuter())
 		{
 			// Remove links between t2 and t4,
-			// and link h2.sym to n2.next.sym.
-			work[0].prev();         // (V2no)
+			// and link h2.sym to n2
+			work[0].next();         // (oV2n)
+			int l4 = work[0].localNumber;
+			work[0].next();         // (V2no)
 			symOTri(work[0], work[1]);    // (nV2d)
-			int l2 = work[1].localNumber;
-			work[1].next();         // (V2dn)
 			work[0].prev();         // (oV2n)
 			if (work[0].getAdj() != null)
 			{
 				work[0].sym();
 				work[0].VHglue(work[1]);
+				work[0].bind(t4, l4); // (oV2n)
+				work[0].setAdj(null);
+				work[0].next(); // (v2no)
+				work[0].setAdj(null);
 			}
 			else
+			{
+				work[0].next(); // (v2no)
+				work[0].setAdj(null);
 				work[1].setAdj(null);
-			work[1].bind(t2, l2);   // (nV2d)
-			work[1].setAdj(null);
-			work[1].next();         // (V2dn)
-			work[1].setAdj(null);
+				work[0].prev(); // (ov2n)
+			}
 			// t2 now contains good links, t4 may need
 			// to be fixed.
 			// Move work[1] so that d == work[1].origin()
-			work[1].next();         // (dnV2)
+			work[1].prev();         // (dnV2)
+			// Move work[0], this value will be used by split()
+			work[0].next();         // (noV2)
 		}
 
 		Triangle t14 = (t1.isOuter() ? t4 : t1);
