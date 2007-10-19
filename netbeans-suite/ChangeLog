@@ -2,6 +2,8 @@
 
 	* jcae-netbeans/src/org/jcae/netbeans/mesh/Groups.java: Update
 	to latest jcae-viewer3d.
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/OEMMViewAction.java: Fix
+	calls to OEMMViewer.
 
 2007-08-11 16:27 Denis Barbier <barbier@users.sourceforge.net>
 

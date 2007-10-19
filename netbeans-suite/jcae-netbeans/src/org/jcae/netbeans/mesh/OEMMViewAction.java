@@ -26,6 +26,8 @@ import java.util.Arrays;
 import javax.media.j3d.BranchGroup;
 import org.jcae.mesh.oemm.Storage;
 import org.jcae.mesh.oemm.OEMM;
+import org.jcae.mesh.oemm.MeshReader;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.netbeans.Utilities;
 import org.jcae.netbeans.viewer3d.SelectViewableAction;
 import org.jcae.netbeans.viewer3d.View3DManager;
@@ -47,12 +49,14 @@ public final class OEMMViewAction extends CookieAction
 		private View bgView;
 		private OEMM oemm;
 		private ViewableBG fe1;
+		private final MeshReader mr;
 		
 		public OEMMKeyListener(View view, OEMM oemm, ViewableBG viewable)
 		{
 			bgView=view;
 			this.oemm=oemm;
 			fe1=viewable;
+			mr = new MeshReader(oemm);
 		}
 		
 		public void keyPressed(KeyEvent event)
@@ -71,23 +75,8 @@ public final class OEMMViewAction extends CookieAction
 					bgView.remove(femesh);
 				if(fe1.getResultSet().size()>0)
 				{
-					BranchGroup mesh = OEMMViewer.meshOEMM(oemm, fe1.getResultSet());
-					mesh.setPickable(false);
-					femesh=new ViewableBG(mesh);
-					fe1.unselectAll();
-					bgView.add(femesh);
-				}
-			}
-			else if(event.getKeyChar()=='d')
-			{
-				if (femesh != null)
-					bgView.remove(femesh);
-				org.jcae.mesh.amibe.ds.Mesh amesh =
-					Storage.loadNodes(oemm, fe1.getResultSet(), false);
-				
-				if(fe1.getResultSet().size()>0)
-				{
-					BranchGroup mesh = OEMMViewer.meshOEMM(oemm, fe1.getResultSet());
+					// Adjacency relations are not needed, use an empty MeshTraitsBuilder instance
+					BranchGroup mesh = OEMMViewer.meshOEMM(mr.buildMesh(new MeshTraitsBuilder(), fe1.getResultSet()));
 					mesh.setPickable(false);
 					femesh=new ViewableBG(mesh);
 					fe1.unselectAll();
