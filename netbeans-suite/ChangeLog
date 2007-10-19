@@ -1,4 +1,9 @@
-Sat Aug 11 16:27:04 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+2007-10-19 12:27 Denis Barbier <barbier@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/Groups.java: Update
+	to latest jcae-viewer3d.
+
+2007-08-11 16:27 Denis Barbier <barbier@users.sourceforge.net>
 
 	* jcae-netbeans/src/org/jcae/netbeans/mesh/DecimateAction.java: Fix
 	  org.jcae.mesh.amibe.algos3d.DecimateHalfEdge arguments, they have

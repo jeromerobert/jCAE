@@ -71,7 +71,7 @@ public class Groups implements SelectionListener
 				if(viewable!=null && !breakhighLightingEvent)
 				{
 					Group g=(Group) evt.getSource();					
-					viewable.hightLight(g.getId(), ((Boolean)evt.getNewValue()).booleanValue());
+					viewable.highlight(g.getId(), ((Boolean)evt.getNewValue()).booleanValue());
 				}
 			}
 		}	
