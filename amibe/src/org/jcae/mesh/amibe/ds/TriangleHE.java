@@ -190,7 +190,7 @@ public class TriangleHE extends Triangle
 			r.append("\nSym: "+showSym(edge)+" "+showSym(edge.next())+" "+showSym(edge.prev()));
 			r.append("\nEdge attributes:");
 			for (int i = 0; i < 3; i++)
-				r.append(" "+Integer.toHexString(getHalfEdge(i).getAttributes()));
+				r.append(" "+getHalfEdge(i).getAttributes());
 			return r.toString();
 		}
 	}

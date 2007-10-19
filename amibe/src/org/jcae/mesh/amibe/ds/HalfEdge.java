@@ -1306,7 +1306,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		r.append("\nLocal number: "+localNumber);
 		if (sym != null)
 			r.append("\nSym: "+sym.hashCode()+"   T="+sym.tri.hashCode()+"["+sym.localNumber+"]");
-		r.append("\nAttributes: "+Integer.toHexString(attributes));
+		r.append("\nAttributes: "+attributes);
 		r.append("\nVertices:");
 		r.append("\n  Origin: "+origin());
 		r.append("\n  Destination: "+destination());
