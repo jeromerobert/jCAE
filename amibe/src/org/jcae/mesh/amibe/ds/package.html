@@ -47,11 +47,11 @@ store triangles.
 {@link org.jcae.mesh.amibe.ds.Mesh} constructor takes an optional
 {@link org.jcae.mesh.amibe.traits.MeshTraitsBuilder}
 argument to fully describe the desired mesh data structure.  Once a
-{@link org.jcae.mesh.amibe.ds.Mesh} instance is created, its features
-cannot be modified.  With this argument, it is possible to specify if
-adjacent relations between triangles have to be computed, if an octree
-is needed to locate vertices, if triangles and/or nodes are stored in
-a list or a set, etc.  Example:
+<code>Mesh</code> instance is created, its features cannot be modified.
+With this argument, it is possible to specify if adjacent relations
+between triangles have to be computed, if an octree is needed to
+locate vertices, if triangles and/or nodes are stored in a list or a set,
+etc.  Example:
 </p>
 <pre>
    MeshTraitsBuilder mtb = new MeshTraitsBuilder();
@@ -71,8 +71,8 @@ a list or a set, etc.  Example:
 </pre>
   
 <p>
-When a {@link org.jcae.mesh.amibe.ds.Mesh} instance is created without
-specifying a {@link org.jcae.mesh.amibe.traits.MeshTraitsBuilder}
+When a <code>Mesh</code> instance is created without
+specifying a <code>MeshTraitsBuilder</code>
 instance, {@link org.jcae.mesh.amibe.traits.MeshTraitsBuilder#getDefault3D}
 is implicitly used.
 </p>
@@ -80,9 +80,8 @@ is implicitly used.
 <h2>Adjacency relations</h2>
 
 <p>
-When adjacency relations are not requested by
-{@link org.jcae.mesh.amibe.traits.MeshTraitsBuilder},
-{@link org.jcae.mesh.amibe.ds.Mesh#createTriangle} creates
+When adjacency relations are not requested by <code>MeshTraitsBuilder<code>,
+<code>Mesh.createTriangle</code> creates
 {@link org.jcae.mesh.amibe.ds.AbstractTriangle} instances
 which only contains vertices and no other data.
 </p>
@@ -91,9 +90,9 @@ which only contains vertices and no other data.
 Adjacency relations can be requested either with
 {@link org.jcae.mesh.amibe.traits.TriangleTraitsBuilder#addHalfEdge} or
 {@link org.jcae.mesh.amibe.traits.TriangleTraitsBuilder#addVirtualHalfEdge}.
-With the former, {@link org.jcae.mesh.amibe.ds.Mesh#createTriangle} creates
+With the former, <code>Mesh.createTriangle</code> creates
 {@link org.jcae.mesh.amibe.ds.TriangleHE} instances and with the latter,
-{@link org.jcae.mesh.amibe.ds.Mesh#createTriangle} creates
+<code>Mesh.createTriangle</code> creates
 {@link org.jcae.mesh.amibe.ds.TriangleVH} instances.  Both classes inherits
 from {@link org.jcae.mesh.amibe.ds.Triangle} superclass, and in this class
 {@link org.jcae.mesh.amibe.ds.Triangle#adj} member is an
@@ -103,12 +102,11 @@ extended by inner classes.
 
 <h3>With {@link org.jcae.mesh.amibe.ds.TriangleHE.AdjacencyHE}</h3>
 <p>
-A {@link org.jcae.mesh.amibe.ds.TriangleHE.AdjacencyHE} instance contains a
-private {@link org.jcae.mesh.amibe.ds.HalfEdge} instance, which represents an
+A <code>TriangleHE.AdjacencyHE</code> instance contains a private
+{@link org.jcae.mesh.amibe.ds.HalfEdge} instance, which represents an
 edge of underlying triangle.  This edge is linked to the next edge
-in the same triangle; in fact
-{@link org.jcae.mesh.amibe.ds.Mesh#createTriangle} creates three edges
-which are linked together to form a cycle, so a single reference is
+in the same triangle; in fact <code>Mesh.createTriangle</code> creates three
+edges which are linked together to form a cycle, so a single reference is
 needed to access these three edges.
 </p>
 
@@ -120,10 +118,9 @@ values 0, 1 or 2) of a triangle.
 </p>
 
 <p>
-A
-{@link org.jcae.mesh.amibe.ds.TriangleVH.AdjacencyVH} instance contains three
-links to adjacent {@link org.jcae.mesh.amibe.ds.TriangleVH} instances,
-and {@link org.jcae.mesh.amibe.ds.TriangleVH.AdjacencyVH#adjPos} member is a
+A <code>TriangleVH.AdjacencyVH</code> instance contains three links to adjacent
+{@link org.jcae.mesh.amibe.ds.TriangleVH} instances, and
+{@link org.jcae.mesh.amibe.ds.TriangleVH.AdjacencyVH#adjPos} member is a
 packed representation of local numbers in adjacent triangles.
 </p>
 
@@ -132,23 +129,20 @@ The downside is that edges are not physical objects but can be accessed
 only through handles.  For instance, if edges have to be sorted in order
 to be processed in a certain order (as in
 {@link org.jcae.mesh.amibe.algos3d.DecimateHalfEdge}),
-{@link org.jcae.mesh.amibe.ds.TriangleHE.AdjacencyHE} must be used instead of
-{@link org.jcae.mesh.amibe.ds.TriangleVH.AdjacencyVH}. 
+<code>TriangleHE.AdjacencyHE</code> must be used instead of
+<code>TriangleVH.AdjacencyVH</code>.
 </p>
 
 <h2>Mesh traversal</h2>
 
 <p>
-For {@link org.jcae.mesh.amibe.ds.TriangleVH} instances,
+For <code>TriangleVH</code> instances,
 {@link org.jcae.mesh.amibe.ds.VirtualHalfEdge} are handles on edges.
-Both {@link org.jcae.mesh.amibe.ds.VirtualHalfEdge} and
-{@link org.jcae.mesh.amibe.ds.HalfEdge} inherits from
-{@link org.jcae.mesh.amibe.ds.AbstractHalfEdge}, thus algorithms
+Both <code>VirtualHalfEdge</code> and <code>HalfEdge</code> inherits
+from {@link org.jcae.mesh.amibe.ds.AbstractHalfEdge}, thus algorithms
 can be written without code duplication for both
-{@link org.jcae.mesh.amibe.ds.TriangleHE} and
-{@link org.jcae.mesh.amibe.ds.TriangleVH} instances if they only
-refer to {@link org.jcae.mesh.amibe.ds.AbstractHalfEdge} and not
-their derived classes.
+<code>TriangleHE</code> and <code>TriangleVH</code> instances if they
+only refer to <code>AbstractHalfEdge</code> and not their derived classes.
 </p>
 
 <!--
