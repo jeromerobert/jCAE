@@ -88,9 +88,8 @@ extended by inner classes.
 
 <h3>With {@link org.jcae.mesh.amibe.ds.TriangleHE.AdjacencyHE}</h3>
 <p>
-An
-{@link org.jcae.mesh.amibe.ds.TriangleHE.AdjacencyHE} instance contains a private
-{@link org.jcae.mesh.amibe.ds.HalfEdge} instance, which represents an
+An {@link org.jcae.mesh.amibe.ds.TriangleHE.AdjacencyHE} instance contains a
+private {@link org.jcae.mesh.amibe.ds.HalfEdge} instance, which represents an
 edge of underlying triangle.  This edge is linked to the next edge
 in the same triangle; in fact
 {@link org.jcae.mesh.amibe.ds.Mesh#createTriangle} creates three edges
@@ -100,8 +99,8 @@ needed to access these three edges.
 
 <h3>With {@link org.jcae.mesh.amibe.ds.TriangleVH.AdjacencyVH}</h3>
 <p>
-This is a more compact implementation of adjacency relations: edges are
-not created as distinct objects, but taken as a local number (with
+This is a more compact implementation (about 40% smaller) of adjacency relations:
+edges are not created as distinct objects, but taken as a local number (with
 values 0, 1 or 2) of a triangle.
 </p>
 
