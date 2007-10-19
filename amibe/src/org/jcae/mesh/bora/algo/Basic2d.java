@@ -83,7 +83,7 @@ public class Basic2d implements AlgoInterface
 		logger.debug(""+this+"  shape: "+F);
 
 		TriangleTraitsBuilder ttb = new TriangleTraitsBuilder();
-		ttb.addShallowHalfEdge();
+		ttb.addVirtualHalfEdge();
 		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
 		mtb.addTriangleList();
 		mtb.addKdTree(2);

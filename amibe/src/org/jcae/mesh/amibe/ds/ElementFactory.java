@@ -45,7 +45,7 @@ public class ElementFactory implements ElementFactoryInterface
 
 	public AbstractVertex createVertex(double x, double y, double z)
 	{
-		if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE | TriangleTraitsBuilder.SHALLOWHALFEDGE))
+		if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE | TriangleTraitsBuilder.VIRTUALHALFEDGE))
 			return new Vertex(vertexTraitsBuilder, x, y, z);
 		return new AbstractVertex(vertexTraitsBuilder, x, y, z);
 	}
@@ -53,7 +53,7 @@ public class ElementFactory implements ElementFactoryInterface
 	public AbstractVertex createVertex(double [] x)
 	{
 		assert x.length == 3;
-		if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE | TriangleTraitsBuilder.SHALLOWHALFEDGE))
+		if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE | TriangleTraitsBuilder.VIRTUALHALFEDGE))
 			return new Vertex(x[0], x[1], x[2]);
 		return new AbstractVertex(x[0], x[1], x[2]);
 	}
@@ -77,7 +77,7 @@ public class ElementFactory implements ElementFactoryInterface
 			ret.setHalfEdge(e0);
 			return ret;
 		}
-		else if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.SHALLOWHALFEDGE))
+		else if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.VIRTUALHALFEDGE))
 			return new TriangleVH(triangleTraitsBuilder);
 		else
 			return new AbstractTriangle(triangleTraitsBuilder);
@@ -116,7 +116,7 @@ public class ElementFactory implements ElementFactoryInterface
 
 	public boolean hasAdjacency()
 	{
-		return (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE | TriangleTraitsBuilder.SHALLOWHALFEDGE));
+		return (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE | TriangleTraitsBuilder.VIRTUALHALFEDGE));
 	}
 
 }

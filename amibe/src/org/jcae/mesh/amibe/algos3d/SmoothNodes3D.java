@@ -263,7 +263,7 @@ public class SmoothNodes3D
 	public static void main(String[] args)
 	{
 		org.jcae.mesh.amibe.traits.TriangleTraitsBuilder ttb = new org.jcae.mesh.amibe.traits.TriangleTraitsBuilder();
-		ttb.addShallowHalfEdge();
+		ttb.addVirtualHalfEdge();
 		org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = new org.jcae.mesh.amibe.traits.MeshTraitsBuilder();
 		mtb.addTriangleSet();
 		mtb.add(ttb);

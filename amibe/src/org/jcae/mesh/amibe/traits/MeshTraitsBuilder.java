@@ -284,7 +284,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	/**
 	 * Returns default 2D <code>MeshTraitsBuilder</code> instance.  This instance
 	 * calls following methods: {@link #addTriangleList}, {@link #addKdTree}
-	 * and {@link TriangleTraitsBuilder#addShallowHalfEdge}. It is implicitly used when
+	 * and {@link TriangleTraitsBuilder#addVirtualHalfEdge}. It is implicitly used when
 	 * calling {@link org.jcae.mesh.amibe.patch.Mesh2D} constructor without
 	 * {@link MeshTraitsBuilder} argument.
 	 */
@@ -294,7 +294,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		ret.addTriangleList();
 		ret.addKdTree(2);
 		ret.triangleTraitsBuilder = new TriangleTraitsBuilder();
-		ret.triangleTraitsBuilder.addShallowHalfEdge();
+		ret.triangleTraitsBuilder.addVirtualHalfEdge();
 		return ret;
 	}
 

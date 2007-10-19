@@ -58,7 +58,7 @@ public class ElementPatchFactory implements ElementFactoryInterface
 
 	private AbstractTriangle createTriangle()
 	{
-		if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.SHALLOWHALFEDGE))
+		if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.VIRTUALHALFEDGE))
 			return new TriangleVH(triangleTraitsBuilder);
 		return new AbstractTriangle(triangleTraitsBuilder);
 	}
@@ -107,7 +107,7 @@ public class ElementPatchFactory implements ElementFactoryInterface
 
 	public boolean hasAdjacency()
 	{
-		return (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE | TriangleTraitsBuilder.SHALLOWHALFEDGE));
+		return (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE | TriangleTraitsBuilder.VIRTUALHALFEDGE));
 	}
 
 }

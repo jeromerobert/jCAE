@@ -29,7 +29,7 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 	@Before public void createMesh()
 	{
 		TriangleTraitsBuilder ttb = new TriangleTraitsBuilder();
-		ttb.addShallowHalfEdge();
+		ttb.addVirtualHalfEdge();
 		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
 		mtb.addTriangleList();
 		mtb.add(ttb);

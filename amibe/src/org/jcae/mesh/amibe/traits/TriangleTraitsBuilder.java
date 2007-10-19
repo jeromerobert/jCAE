@@ -22,10 +22,10 @@ package org.jcae.mesh.amibe.traits;
 
 public class TriangleTraitsBuilder extends TraitsBuilder
 {
-	private static final int BITSHALLOWHALFEDGE = 13;
+	private static final int BITVIRTUALHALFEDGE = 13;
 	private static final int BITHALFEDGE     = 14;
 
-	public static final int SHALLOWHALFEDGE  = 1 << BITSHALLOWHALFEDGE;
+	public static final int VIRTUALHALFEDGE  = 1 << BITVIRTUALHALFEDGE;
 	public static final int HALFEDGE         = 1 << BITHALFEDGE;
 
 	/**
@@ -34,9 +34,9 @@ public class TriangleTraitsBuilder extends TraitsBuilder
 	 *
 	 * @return  this instance
 	 */
-	public TriangleTraitsBuilder addShallowHalfEdge()
+	public TriangleTraitsBuilder addVirtualHalfEdge()
 	{
-		attributes |= SHALLOWHALFEDGE;
+		attributes |= VIRTUALHALFEDGE;
 		return this;
 	}
 

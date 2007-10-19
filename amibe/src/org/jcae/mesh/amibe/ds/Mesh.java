@@ -922,7 +922,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	@SuppressWarnings("unchecked")
 	private boolean checkVirtualHalfEdges(AbstractTriangle t)
 	{
-		if (!t.traitsBuilder.hasCapability(TriangleTraitsBuilder.SHALLOWHALFEDGE))
+		if (!t.traitsBuilder.hasCapability(TriangleTraitsBuilder.VIRTUALHALFEDGE))
 			return true;
 		VirtualHalfEdge ot = new VirtualHalfEdge();
 		VirtualHalfEdge sym = new VirtualHalfEdge();
