@@ -1157,7 +1157,6 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		}
 		//  Update adjacency links.  For clarity, o and d are
 		//  written instead of n.
-		Triangle t1 = tri;
 		next();                         // (dV1o)
 		int attr4 = attributes;
 		VirtualHalfEdge vh4 = (getAdj() == null ? null : work[0]);
@@ -1174,8 +1173,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			if (t34.isOuter())
 				t34 = work[0].tri;
 			assert !t34.isOuter() : work[0]+"\n"+work[1];
-			replaceVertexLinks(apex(), t1, t34);
-			replaceVertexLinks(n, t1, t34);
+			// Update links of V1 and n
+			replaceVertexLinks(origin(), tri, t34);
+			replaceVertexLinks(n, tri, t34);
 		}
 		if (vh3 != null && vh3.hasAttributes(NONMANIFOLD))
 			vh3.VHglue(vh4);

@@ -892,7 +892,7 @@ public class Mesh extends AbstractMesh implements Serializable
 					}
 					if (!triangleList.contains(t2))
 					{
-						logger.error("Vertex "+v+" linked to a removed triangle");
+						logger.error("Vertex "+v+" linked to removed triangle: "+t2);
 						return false;
 					}
 				}
@@ -905,7 +905,7 @@ public class Mesh extends AbstractMesh implements Serializable
 					{
 						if (!triangleList.contains(t2))
 						{
-							logger.error("Vertex "+v+" linked to a removed triangle");
+							logger.error("Vertex "+v+" linked to removed triangle: "+t2);
 							return false;
 						}
 					}
