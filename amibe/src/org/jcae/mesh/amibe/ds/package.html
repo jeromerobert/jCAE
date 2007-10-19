@@ -16,10 +16,25 @@ following constraints:
 <p>
 We decided to implement a triangle-based data structure which is known
 to be more memory efficient.  A {@link org.jcae.mesh.amibe.ds.Triangle}
-is composed of three {@link org.jcae.mesh.amibe.ds.Vertex}, three links
-to adjacent triangles, and each vertex contains a backward link to one
-of its incident triangles.  It is then possible to loop within triangles
-or around vertices.
+is composed of three {@link org.jcae.mesh.amibe.ds.Vertex} and three
+half-edges.
+</p>
+
+<p align="center">
+<img src="doc-files/Mesh-1.png" alt="[Image of a simple mesh]"/>
+<img src="doc-files/Mesh-2.png" alt="[Same image with triangles and half-edges]"/>
+</p>
+
+<p>
+By convention, in each triangle, edge <em>i</em> is located at the opposite of
+vertex <em>i</em>.  Each half-edge (red arrows) has a link (black arrows) to its
+symmetric edge, and each vertex contains a backward link to one of its incident
+triangles.  It is then possible to loop within triangles or around vertices.
+Blue arrows show triangle orientation, by looping from vertex 0 to vertex 1 to
+vertex 2.  Meshing operations ensure that symmetric edges have opposite directions,
+and thus that resultant mesh is well oriented.  More details can be found
+in description of {@link org.jcae.mesh.amibe.ds.AbstractHalfEdge}, and in
+particular how this scheme is extended to non-manifold meshes.
 </p>
 
 <p>
@@ -88,7 +103,7 @@ extended by inner classes.
 
 <h3>With {@link org.jcae.mesh.amibe.ds.TriangleHE.AdjacencyHE}</h3>
 <p>
-An {@link org.jcae.mesh.amibe.ds.TriangleHE.AdjacencyHE} instance contains a
+A {@link org.jcae.mesh.amibe.ds.TriangleHE.AdjacencyHE} instance contains a
 private {@link org.jcae.mesh.amibe.ds.HalfEdge} instance, which represents an
 edge of underlying triangle.  This edge is linked to the next edge
 in the same triangle; in fact
@@ -105,15 +120,11 @@ values 0, 1 or 2) of a triangle.
 </p>
 
 <p>
-An
+A
 {@link org.jcae.mesh.amibe.ds.TriangleVH.AdjacencyVH} instance contains three
 links to adjacent {@link org.jcae.mesh.amibe.ds.TriangleVH} instances,
 and {@link org.jcae.mesh.amibe.ds.TriangleVH.AdjacencyVH#adjPos} member is a
 packed representation of local numbers in adjacent triangles.
-In order to handle non-manifold meshes,
-{@link org.jcae.mesh.amibe.ds.TriangleVH.AdjacencyVH#adj} member is an array of
-<code>Object</code> instances instead of
-{@link org.jcae.mesh.amibe.ds.TriangleVH} instances.
 </p>
 
 <p>
