@@ -111,7 +111,6 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	private static Logger logger=Logger.getLogger(DecimateHalfEdge.class);
 	private Quadric3DError.Placement placement = Quadric3DError.Placement.OPTIMAL;
 	private HashMap<Vertex, Quadric3DError> quadricMap = null;
-	private TObjectIntHashMap<Vertex> labelMap = null;
 	private Vertex v3;
 	private Quadric3DError q3 = new Quadric3DError();
 	// vCostOpt and qCostOpt must be used only by cost() method.
@@ -168,17 +167,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	public void preProcessAllHalfEdges()
 	{
 		final int roughNrNodes = mesh.getTriangles().size()/2;
-		// Edges are stored in binary tree via HalfEdge.notOriented()
-		// to store only one orientation.  But HalfEdge.notOriented()
-		// depends on hashcodes, so edge orientation changes after
-		// compiling and results may slightly change too.
-		// We set vertex labels and select an orientation in
-		// canProcessEdge() and processEdge() which does not depend
-		// on hashcodes.
-		// TODO: Check if HalfEdge.notOriented() is still needed.
-		int label = 0;
 		quadricMap = new HashMap<Vertex, Quadric3DError>(roughNrNodes);
-		labelMap = new TObjectIntHashMap<Vertex>(roughNrNodes);
 		for (AbstractTriangle af: mesh.getTriangles())
 		{
 			if (!af.isWritable())
@@ -187,11 +176,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			{
 				final Vertex n = (Vertex) af.vertex[i];
 				if (!quadricMap.containsKey(n))
-				{
 					quadricMap.put(n, new Quadric3DError());
-					label++;
-					labelMap.put(n, label);
-				}
 			}
 		}
 		// Compute quadrics
@@ -296,7 +281,6 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		throws IOException
 	{
 		out.writeObject(quadricMap);
-		out.writeObject(labelMap);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -307,7 +291,6 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		try
 		{
 			quadricMap = (HashMap<Vertex, Quadric3DError>) q.readObject();
-			labelMap = (TObjectIntHashMap<Vertex>) q.readObject();
 		}
 		catch (final ClassNotFoundException ex)
 		{
@@ -331,21 +314,6 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		// TODO: check why this assertion sometimes fail
 		// assert ret >= -1.e-2 : q1+"\n"+q2+"\n"+ret;
 		return ret;
-	}
-
-	/**
-	 * Ensure that edge orientation is fixed and does not depend on hashcodes.  This method
-	 * must be used when entering canProcessEdge() and processEdge().
-	 */
-	private HalfEdge uniqueOrientation(HalfEdge current)
-	{
-		if (current.hasAttributes(AbstractHalfEdge.OUTER))
-			return (HalfEdge) current.sym();
-		if (current.getAdj() == null || current.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
-			return current;
-		if (labelMap.get(current.origin()) > labelMap.get(current.destination()))
-			return (HalfEdge) current.sym();
-		return current;
 	}
 
 	@Override
@@ -398,9 +366,11 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		for (Iterator<AbstractHalfEdge> it = current.fanIterator(); it.hasNext(); )
 		{
 			HalfEdge f = (HalfEdge) it.next();
-			if (!tree.remove(f.notOriented()))
+			HalfEdge h = uniqueOrientation(f);
+			if (!tree.remove(h))
 				notInTree++;
-			assert !tree.contains(f.notOriented());
+			assert !tree.contains(h);
+			h.clearAttributes(AbstractHalfEdge.MARKED);
 			if (f.getTri().isWritable())
 			{
 				nrTriangles--;
@@ -463,11 +433,14 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 				if (current.destination().isReadable() && current.origin().isReadable())
 				{
 					double newCost = cost(current);
-					HalfEdge h = current.notOriented();
+					HalfEdge h = uniqueOrientation(current);
 					if (tree.contains(h))
 						tree.update(h, newCost);
 					else
+					{
 						tree.insert(h, newCost);
+						h.setAttributes(AbstractHalfEdge.MARKED);
+					}
 				}
 			}
 			while (current.apex() != apex);
@@ -490,11 +463,14 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 				if (f.destination().isReadable() && f.origin().isReadable())
 				{
 					double newCost = cost(f);
-					HalfEdge h = f.notOriented();
+					HalfEdge h = uniqueOrientation(f);
 					if (tree.contains(h))
 						tree.update(h, newCost);
 					else
+					{
 						tree.insert(h, newCost);
+						h.setAttributes(AbstractHalfEdge.MARKED);
+					}
 				}
 			}
 			while (f.destination() != d);

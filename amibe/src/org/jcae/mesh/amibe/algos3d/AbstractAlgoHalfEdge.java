@@ -24,6 +24,7 @@ package org.jcae.mesh.amibe.algos3d;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.HalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.TriangleHE;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
@@ -86,6 +87,19 @@ public abstract class AbstractAlgoHalfEdge
 		return ret;
 	}
 	
+	/**
+	 * Ensure that edge orientation is fixed and does not depend on hashcodes.  This method
+	 * must be used when entering canProcessEdge() and processEdge().
+	 */
+	protected static HalfEdge uniqueOrientation(HalfEdge current)
+	{
+		if (current.hasAttributes(AbstractHalfEdge.MARKED) || current.getAdj() == null)
+			return current;
+		if (current.sym().hasAttributes(AbstractHalfEdge.MARKED) || current.hasAttributes(AbstractHalfEdge.OUTER))
+			return (HalfEdge) current.sym();
+		return current;
+	}
+
 	private void computeTree()
 	{
 		//  Compute edge cost
@@ -94,14 +108,15 @@ public abstract class AbstractAlgoHalfEdge
 		{
 			if (!af.isWritable())
 				continue;
-			Triangle f = (Triangle) af;
+			TriangleHE f = (TriangleHE) af;
 			nrTriangles++;
-			HalfEdge e = (HalfEdge) f.getAbstractHalfEdge();
+			HalfEdge e = f.getHalfEdge();
 			for (int i = 0; i < 3; i++)
 			{
 				e = (HalfEdge) e.next();
-				if (!tree.contains(e.notOriented()))
-					addToTree(e);
+				HalfEdge h = uniqueOrientation(e);
+				if (!tree.contains(h))
+					addToTree(h);
 			}
 		}
 	}
@@ -126,7 +141,10 @@ public abstract class AbstractAlgoHalfEdge
 		// and output displayed by postProcessAllHalfEdges() may thus
 		// not be very useful.
 		if (nrFinal != 0 || val <= tolerance)
-			tree.insert(e.notOriented(), val);
+		{
+			tree.insert(e, val);
+			e.setAttributes(AbstractHalfEdge.MARKED);
+		}
 	}
 
 	protected void removeFromTree(final HalfEdge e)
@@ -134,9 +152,11 @@ public abstract class AbstractAlgoHalfEdge
 		for (Iterator<AbstractHalfEdge> it = e.fanIterator(); it.hasNext(); )
 		{
 			HalfEdge f = (HalfEdge) it.next();
-			if (!tree.remove(f.notOriented()))
+			HalfEdge h = uniqueOrientation(f);
+			if (!tree.remove(h))
 				notInTree++;
-			assert !tree.contains(f.notOriented());
+			h.clearAttributes(AbstractHalfEdge.MARKED);
+			assert !tree.contains(h);
 		}
 	}
 
@@ -195,7 +215,6 @@ public abstract class AbstractAlgoHalfEdge
 			{
 				double newCost = stackNotProcessedValue.pop().doubleValue();
 				HalfEdge f = stackNotProcessedObject.pop();
-				assert f == f.notOriented();
 				tree.update(f, newCost);
 			}
 			current = processEdge(current, cost);
@@ -232,7 +251,7 @@ public abstract class AbstractAlgoHalfEdge
 						current = (HalfEdge) current.next();
 						for (Iterator<AbstractHalfEdge> it = current.fanIterator(); it.hasNext(); )
 						{
-							HalfEdge e = (HalfEdge) it.next();
+							HalfEdge e = uniqueOrientation((HalfEdge) it.next());
 							addToTree(e);
 						}
 					}
@@ -242,7 +261,7 @@ public abstract class AbstractAlgoHalfEdge
 						sym = (HalfEdge) sym.next();
 						for (Iterator<AbstractHalfEdge> it = sym.fanIterator(); it.hasNext(); )
 						{
-							HalfEdge e = (HalfEdge) it.next();
+							HalfEdge e = uniqueOrientation((HalfEdge) it.next());
 							addToTree(e);
 						}
 					}

@@ -1,3 +1,8 @@
+Sat Oct 20 00:13:49 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java: Use MARKED
+	flag instead of HalfEdge.notOriented().
+
 Fri Oct 19 16:59:54 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/HalfEdge.java: Change 'attributes' type
