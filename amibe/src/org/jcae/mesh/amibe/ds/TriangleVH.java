@@ -21,8 +21,6 @@
 package org.jcae.mesh.amibe.ds;
 
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * A triangular element of the mesh.  Instances of this class carry up
@@ -71,11 +69,9 @@ import java.util.Map;
  *       flag, and symmetric edges have a {@link AbstractHalfEdge#BOUNDARY} flag.</li>
  *   <li>Non-manifold edges; a virtual AbstractTriangle(outerVertex, v1, v2) is
  *       also created, and linked to this edge.  This triangle has an
- *       {@link AbstractHalfEdge#OUTER} flag, and symmetric edges have a {@link
- *       AbstractHalfEdge#NONMANIFOLD} flag.  The outer triangle contains in
- *       <code>adj[i]</code> a list of all incident edges.  Thus all incident
- *       edges are linked to a different triangle, but all these triangles
- *       contain a pointer to the same list.
+ *       {@link AbstractHalfEdge#OUTER} flag, symmetric edge has a {@link
+ *       AbstractHalfEdge#NONMANIFOLD} flag, and other two edges are used to build
+ *       a circular doubly-linked list of all symmetric edges.</li>
  * </ul>
  */
 public class TriangleVH extends Triangle
@@ -99,7 +95,7 @@ public class TriangleVH extends Triangle
 		/**
 		 * Pointers to adjacent elements through edges.
 		 */
-		private Object [] adj = new Object[3];
+		private TriangleVH [] adj = new TriangleVH[3];
 		
 		/**
 		 * Packed representation of adjacent edge local numbers.
@@ -156,7 +152,7 @@ public class TriangleVH extends Triangle
 		@Override
 		public void setAdj(int num, Object link)
 		{
-			adj[num] = link;
+			adj[num] = (TriangleVH) link;
 		}
 		
 		/**
@@ -220,30 +216,7 @@ public class TriangleVH extends Triangle
 		{
 			if (adj[num] == null)
 				return "N/A";
-			else if (adj[num] instanceof Triangle)
-			{
-				Triangle t = (Triangle) adj[num];
-				if (t == null)
-					return "null";
-				return t.hashCode()+"["+getAdjLocalNumber(num)+"]";
-			}
-			else
-			{
-				StringBuilder r = new StringBuilder("(");
-				LinkedHashMap<Triangle, Integer> a = (LinkedHashMap<Triangle, Integer>) adj[num];
-				boolean first = true;
-				for (Map.Entry<Triangle, Integer> entry: a.entrySet())
-				{
-					Triangle t = entry.getKey();
-					int i = entry.getValue().intValue();
-					if (!first)
-						r.append(",");
-					r.append(t.hashCode()+"["+i+"]");
-					first = false;
-				}
-				r.append(")");
-				return r.toString();
-			}
+			return adj[num].hashCode()+"["+getAdjLocalNumber(num)+"]";
 		}
 		
 		@Override
