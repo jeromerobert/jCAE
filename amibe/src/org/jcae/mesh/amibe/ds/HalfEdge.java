@@ -36,7 +36,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	private static Logger logger = Logger.getLogger(HalfEdge.class);
 	private TriangleHE tri;
 	private byte localNumber = 0;
-	private int attributes = 0;
+	private byte attributes = 0;
 	private HalfEdge sym;
 	private HalfEdge next;
 
