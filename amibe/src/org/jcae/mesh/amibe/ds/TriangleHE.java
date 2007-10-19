@@ -53,6 +53,7 @@ public class TriangleHE extends Triangle
 		 */
 		private HalfEdge edge = null;
 	
+		@Override
 		public final void copy(AdjacencyWrapper that)
 		{
 			if (!(that instanceof AdjacencyHE))
@@ -68,7 +69,7 @@ public class TriangleHE extends Triangle
 			}
 		}
 		
-		public HalfEdge getHalfEdge(int num)
+		private HalfEdge getHalfEdge(int num)
 		{
 			if (num == 0)
 				return edge;
@@ -80,7 +81,7 @@ public class TriangleHE extends Triangle
 				throw new RuntimeException();
 		}
 	
-		public void setHalfEdge(int num, HalfEdge e)
+		private void setHalfEdge(int num, HalfEdge e)
 		{
 			if (num == 0)
 				edge = e;
@@ -92,32 +93,38 @@ public class TriangleHE extends Triangle
 				throw new RuntimeException();
 		}
 	
+		@Override
 		public Object getAdj(int num)
 		{
 			return getHalfEdge(num).getAdj();
 		}
 	
+		@Override
 		public void setAdj(int num, Object link)
 		{
 			getHalfEdge(num).setAdj(link);
 		}
 	
+		@Override
 		public int getAdjLocalNumber(int num)
 		{
 			return getHalfEdge(num).getLocalNumber();
 		}
 	
+		@Override
 		public void setAdjLocalNumber(int num, int pos)
 		{
 			throw new RuntimeException();
 		}
 	
 		// Helper functions
+		@Override
 		public boolean hasFlag(int flag)
 		{
 			return (edge.hasAttributes(flag) | edge.next().hasAttributes(flag) | edge.prev().hasAttributes(flag));
 		}
 	
+		@Override
 		public void setFlag(int flag)
 		{
 			edge.setAttributes(flag);
@@ -125,6 +132,7 @@ public class TriangleHE extends Triangle
 			edge.prev().setAttributes(flag);
 		}
 	
+		@Override
 		public void clearFlag(int flag)
 		{
 			edge.clearAttributes(flag);
@@ -132,91 +140,13 @@ public class TriangleHE extends Triangle
 			edge.prev().clearAttributes(flag);
 		}
 	
-		/**
-		 * Return the {@link AbstractHalfEdge#OUTER} attribute of its edges.
-		 *
-		 * @return <code>true</code> if the triangle is outer,
-		 * <code>false</code> otherwise.
-		 */
-		public boolean isOuter()
-		{
-			return hasFlag(AbstractHalfEdge.OUTER);
-		}
-		
-		/**
-		 * Set the {@link AbstractHalfEdge#OUTER} attribute of its three edges.
-		 */
-		public void setOuter()
-		{
-			setFlag(AbstractHalfEdge.OUTER);
-		}
-		
-		/**
-		 * Return the {@link AbstractHalfEdge#MARKED} attribute of its edges.
-		 *
-		 * @return <code>true</code> if an edge of this triangle has its
-		 * {@link AbstractHalfEdge#MARKED} attribute set, <code>false</code> otherwise.
-		 */
-		public boolean isMarked()
-		{
-			return hasFlag(AbstractHalfEdge.MARKED);
-		}
-		
-		/**
-		 * Set the {@link AbstractHalfEdge#MARKED} attribute of its three edges.
-		 */
-		public void setMarked()
-		{
-			setFlag(AbstractHalfEdge.MARKED);
-		}
-		
-		/**
-		 * Clear the {@link AbstractHalfEdge#MARKED} attribute of its three edges.
-		 */
-		public void unsetMarked()
-		{
-			edge.clearAttributes(AbstractHalfEdge.MARKED);
-			edge.next().clearAttributes(AbstractHalfEdge.MARKED);
-			edge.prev().clearAttributes(AbstractHalfEdge.MARKED);
-		}
-		
-		/**
-		 * Return the {@link AbstractHalfEdge#BOUNDARY} attribute of its edges.
-		 *
-		 * @return <code>true</code> if an edge of this triangle has its
-		 * {@link AbstractHalfEdge#BOUNDARY} attribute set, <code>false</code>
-		 * otherwise.
-		 */
-		public boolean isBoundary()
-		{
-			return hasFlag(AbstractHalfEdge.BOUNDARY);
-		}
-		
-		public boolean isReadable()
-		{
-			throw new RuntimeException("Not implemented yet");
-		}
-		
-		public boolean isWritable()
-		{
-			throw new RuntimeException("Not implemented yet");
-		}
-		
-		public void setReadable(boolean b)
-		{
-			throw new RuntimeException("Not implemented yet");
-		}
-		
-		public void setWritable(boolean b)
-		{
-			throw new RuntimeException("Not implemented yet");
-		}
-		
+		@Override
 		public int getEdgeAttributes(int num)
 		{
 			return getHalfEdge(num).getAttributes();
 		}
 		
+		@Override
 		public void setEdgeAttributes(int num, int attributes)
 		{
 			getHalfEdge(num).setAttributes((byte) attributes);

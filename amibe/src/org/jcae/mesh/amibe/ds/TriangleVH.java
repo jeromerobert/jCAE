@@ -118,6 +118,7 @@ public class TriangleVH extends Triangle
 		 */
 		private byte [] edgeAttributes = new byte[3];
 		
+		@Override
 		public final void copy(AdjacencyWrapper that)
 		{
 			AdjacencyVH src = (AdjacencyVH) that;
@@ -130,25 +131,6 @@ public class TriangleVH extends Triangle
 		}
 		
 		/**
-		 * Change the adjacency relation of an edge.
-		 * Only one relation is modified.  If both sides have to be modified,
-		 * then {@link AbstractHalfEdge#glue} should be used instead.
-		 *
-		 * @param num the local number of the edge on this AbstractTriangle.
-		 * @param that the AbstractTriangle attached to this edge.
-		 * @param thatnum the local number of the edge on the symmetric
-		 *        triangle.
-		 */
-		public void glue1(int num, Triangle that, int thatnum)
-		{
-			adj[num] = that;
-			//  Clear previous adjacent position ...
-			adjPos &= ~(3 << (2*num));
-			//  ... and set it right
-			adjPos |= (thatnum << (2*num));
-		}
-		
-		/**
 		 * Return the adjacent AbstractTriangle.
 		 * Note: this routine is not very helpful, caller can only check
 		 * whether the returned object is null or if its type is AbstractTriangle.
@@ -158,6 +140,7 @@ public class TriangleVH extends Triangle
 		 * @param num  the local number of this edge.
 		 * @return the adjacent AbstractTriangle.
 		 */
+		@Override
 		public Object getAdj(int num)
 		{
 			return adj[num];
@@ -182,11 +165,13 @@ public class TriangleVH extends Triangle
 		 * @param num  the local number of this edge.
 		 * @return the local number of symmetric edge in adjacent AbstractTriangle.
 		 */
+		@Override
 		public int getAdjLocalNumber(int num)
 		{
 			return (adjPos >> (2*num)) & 3;
 		}
 		
+		@Override
 		public void setAdjLocalNumber(int num, int pos)
 		{
 			//  Clear previous adjacent position ...
@@ -196,11 +181,13 @@ public class TriangleVH extends Triangle
 		}
 		
 		// Helper functions
+		@Override
 		public boolean hasFlag(int flag)
 		{
 			return ((edgeAttributes[0] | edgeAttributes[1] | edgeAttributes[2]) & flag) != 0;
 		}
 	
+		@Override
 		public void setFlag(int flag)
 		{
 			edgeAttributes[0] |= flag;
@@ -208,6 +195,7 @@ public class TriangleVH extends Triangle
 			edgeAttributes[2] |= flag;
 		}
 	
+		@Override
 		public void clearFlag(int flag)
 		{
 			edgeAttributes[0] &= ~flag;
@@ -215,95 +203,13 @@ public class TriangleVH extends Triangle
 			edgeAttributes[2] &= ~flag;
 		}
 	
-		/**
-		 * Return the {@link AbstractHalfEdge#OUTER} attribute of its edges.
-		 *
-		 * @return <code>true</code> if the triangle is outer,
-		 * <code>false</code> otherwise.
-		 */
-		public boolean isOuter()
-		{
-			return hasFlag(AbstractHalfEdge.OUTER);
-		}
-		
-		/**
-		 * Set the {@link AbstractHalfEdge#OUTER} attribute of its three edges.
-		 */
-		public void setOuter()
-		{
-			setFlag(AbstractHalfEdge.OUTER);
-		}
-		
-		/**
-		 * Return the {@link AbstractHalfEdge#MARKED} attribute of its edges.
-		 *
-		 * @return <code>true</code> if an edge of this triangle has its
-		 * {@link AbstractHalfEdge#MARKED} attribute set, <code>false</code> otherwise.
-		 */
-		public boolean isMarked()
-		{
-			return hasFlag(AbstractHalfEdge.MARKED);
-		}
-		
-		/**
-		 * Set the {@link AbstractHalfEdge#MARKED} attribute of its three edges.
-		 */
-		public void setMarked()
-		{
-			setFlag(AbstractHalfEdge.MARKED);
-		}
-		
-		/**
-		 * Clear the {@link AbstractHalfEdge#MARKED} attribute of its three edges.
-		 */
-		public void unsetMarked()
-		{
-			clearFlag(AbstractHalfEdge.MARKED);
-		}
-		
-		/**
-		 * Return the {@link AbstractHalfEdge#BOUNDARY} attribute of its edges.
-		 *
-		 * @return <code>true</code> if an edge of this triangle has its
-		 * {@link AbstractHalfEdge#BOUNDARY} attribute set, <code>false</code>
-		 * otherwise.
-		 */
-		public boolean isBoundary()
-		{
-			return hasFlag(AbstractHalfEdge.BOUNDARY);
-		}
-		
-		public boolean isReadable()
-		{
-			return (edgeAttributes[1] & 0x80) != 0;
-		}
-		
-		public boolean isWritable()
-		{
-			return (edgeAttributes[2] & 0x80) != 0;
-		}
-		
-		public void setReadable(boolean b)
-		{
-			if (b)
-				edgeAttributes[1] |= 0x80;
-			else
-				edgeAttributes[1] &= ~0x80;
-		}
-		
-		public void setWritable(boolean b)
-		{
-			if (b)
-				edgeAttributes[2] |= 0x80;
-			else
-				edgeAttributes[2] &= ~0x80;
-		}
-		
+		@Override
 		public int getEdgeAttributes(int num)
 		{
 			return edgeAttributes[num];
 		}
 		
+		@Override
 		public void setEdgeAttributes(int num, int attributes)
 		{
 			edgeAttributes[num] = (byte) attributes;
