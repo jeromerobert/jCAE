@@ -510,8 +510,12 @@ public abstract class AbstractHalfEdge
 	 */
 	public abstract int getLocalNumber();
 
-	public abstract Object getAdj();
-	public abstract void setAdj(Object link);
+	/**
+	 * Tells whether edge is connected to a symmetric edge.
+	 *
+	 * @return <code>true</code> if edge has a symmetric edge, <code>false</code> otherwise.
+	 */
+	public abstract boolean hasSymmetricEdge();
 
 	/**
 	 * Returns start vertex of this edge.

@@ -96,13 +96,13 @@ public class TriangleHE extends Triangle
 		@Override
 		public Object getAdj(int num)
 		{
-			return getHalfEdge(num).getAdj();
+			return getHalfEdge(num).sym();
 		}
 	
 		@Override
 		public void setAdj(int num, Object link)
 		{
-			getHalfEdge(num).setAdj(link);
+			getHalfEdge(num).glue((HalfEdge) link);
 		}
 	
 		// Helper functions
@@ -146,10 +146,10 @@ public class TriangleHE extends Triangle
 			if (e == null)
 				return "null";
 			StringBuilder ret = new StringBuilder(""+e.hashCode()+"(");
-			if (e.getAdj() == null)
+			if (!e.hasSymmetricEdge())
 				ret.append("null");
 			else
-				ret.append(e.getAdj().hashCode());
+				ret.append(e.sym().hashCode());
 			ret.append(")");
 			return ret.toString();
 		}
@@ -159,15 +159,13 @@ public class TriangleHE extends Triangle
 			HalfEdge e = (HalfEdge) a;
 			if (e == null)
 				return "null";
-			else if (e.getAdj() == null)
+			else if (!e.hasSymmetricEdge())
 				return "null";
-			else if (e.getAdj() instanceof HalfEdge)
+			else
 			{
 				HalfEdge sym = (HalfEdge) e.sym();
 				return ""+sym.getTri().hashCode()+"["+sym.getLocalNumber()+"]";
 			}
-			else
-				return "NM";
 		}
 	
 		@Override

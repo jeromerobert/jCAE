@@ -8,6 +8,8 @@ Sun Oct 21 20:41:07 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	TriangleVH.
 	* src/org/jcae/mesh/amibe/ds/VirtualHalfEdge.java: Let tri member be
 	a TriangleVH instance instance of Triangle.
+	* src/org/jcae/mesh/amibe/ds/AbstractHalfEdge.java: Remove getAdj()
+	and setAdj() methods, and add a new hasSymmetricEdge() method.
 
 Sat Oct 20 00:13:49 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

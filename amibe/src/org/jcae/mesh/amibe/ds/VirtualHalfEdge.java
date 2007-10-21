@@ -528,25 +528,24 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Gets adjacency relation for an edge
-	 *
-	 * @return the triangle bond to this one if this edge is manifold, or an Object otherwise
-	 */
-	@Override
-	public final Object getAdj()
-	{
-		return tri.getAdj(localNumber);
-	}
-	
-	/**
 	 * Sets adjacency relation for an edge
 	 *
 	 * @param link  the triangle bond to this one if this edge is manifold, or an Object otherwise
 	 */
-	@Override
-	public final void setAdj(Object link)
+	private final void setAdj(Object link)
 	{
 		tri.setAdj(localNumber, link);
+	}
+	
+	/**
+	 * Tells whether edge is connected to a symmetric edge.
+	 *
+	 * @return <code>true</code> if edge has a symmetric edge, <code>false</code> otherwise.
+	 */
+	@Override
+	public final boolean hasSymmetricEdge()
+	{
+		return tri.getAdj(localNumber) != null;
 	}
 	
 	// Section: 3D geometrical routines
@@ -1097,12 +1096,12 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		//  written instead of n.
 		next();                         // (dV1o)
 		int attr4 = attributes;
-		VirtualHalfEdge vh4 = (getAdj() == null ? null : work[0]);
+		VirtualHalfEdge vh4 = (hasSymmetricEdge() ? work[0] : null);
 		if (vh4 != null)
 			symOTri(this, vh4);     // (V1dV4)
 		next();                         // (V1od)
 		int attr3 = attributes;
-		VirtualHalfEdge vh3 = (getAdj() == null ? null : work[1]);
+		VirtualHalfEdge vh3 = (hasSymmetricEdge() ? work[1] : null);
 		if (vh3 != null)
 			symOTri(this, vh3);     // (oV1V3)
 		if (!hasAttributes(OUTER))
@@ -1449,7 +1448,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			work[0].next();         // (V2no)
 			symOTri(work[0], work[1]);    // (nV2d)
 			work[0].prev();         // (oV2n)
-			if (work[0].getAdj() != null)
+			if (work[0].hasSymmetricEdge())
 			{
 				work[0].sym();
 				work[0].VHglue(work[1]);
@@ -1605,7 +1604,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		r.append("\nTri hashcode: "+tri.hashCode());
 		r.append("\nGroup: "+tri.getGroupId());
 		r.append("\nLocal number: "+localNumber);
-		if (getAdj() != null)
+		if (hasSymmetricEdge())
 			r.append("\nSym: "+tri.getAdj(localNumber).hashCode()+"["+tri.getAdjLocalNumber(localNumber)+"]");
 		r.append("\nAttributes: "+Integer.toHexString(tri.getEdgeAttributes(localNumber)));
 		r.append("\nVertices:");

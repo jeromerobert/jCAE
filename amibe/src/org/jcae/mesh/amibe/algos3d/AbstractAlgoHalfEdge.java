@@ -93,7 +93,7 @@ public abstract class AbstractAlgoHalfEdge
 	 */
 	protected static HalfEdge uniqueOrientation(HalfEdge current)
 	{
-		if (current.hasAttributes(AbstractHalfEdge.MARKED) || current.getAdj() == null)
+		if (current.hasAttributes(AbstractHalfEdge.MARKED) || !current.hasSymmetricEdge())
 			return current;
 		if (current.sym().hasAttributes(AbstractHalfEdge.MARKED) || current.hasAttributes(AbstractHalfEdge.OUTER))
 			return (HalfEdge) current.sym();

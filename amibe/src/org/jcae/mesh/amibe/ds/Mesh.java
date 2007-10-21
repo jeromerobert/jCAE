@@ -192,7 +192,7 @@ public class Mesh extends AbstractMesh implements Serializable
 		for (int i = 0; i < 3; i++)
 		{
 			e = (HalfEdge) e.next();
-			e.setAdj(null);
+			e.glue(null);
 			last.setNext(null);
 			last = e;
 		}
@@ -413,7 +413,7 @@ public class Mesh extends AbstractMesh implements Serializable
 			for (int i = 0; i < 3; i++)
 			{
 				ot = ot.next();
-				if (ot.getAdj() == null)
+				if (!ot.hasSymmetricEdge())
 				{
 					ot.setAttributes(AbstractHalfEdge.BOUNDARY);
 					Triangle adj = (Triangle) factory.createTriangle(outerVertex, ot.destination(), ot.origin());
@@ -567,7 +567,7 @@ public class Mesh extends AbstractMesh implements Serializable
 				ot = ot.prev();
 			assert ot.origin() == v;
 			// Skip this edge if adjacency relations already exist, 
-			if (ot.getAdj() != null)
+			if (ot.hasSymmetricEdge())
 				continue;
 			Vertex v2 = ot.destination();
 			// Edge (v,v2) has not yet been processed.
@@ -586,7 +586,7 @@ public class Mesh extends AbstractMesh implements Serializable
 					ot2 = ot2.next();
 				else if (ot2.apex() == v2)
 					ot2 = ot2.prev();
-				if (manifold && ot2.destination() == v && ot.getAdj() == null && ot2.getAdj() == null)
+				if (manifold && ot2.destination() == v && !ot.hasSymmetricEdge() && !ot2.hasSymmetricEdge())
 				{
 					// This edge seems to be manifold.
 					// It may become non manifold later when
@@ -600,7 +600,7 @@ public class Mesh extends AbstractMesh implements Serializable
 				// We are sure now that ot2 == (v,v2) or (v2,v)
 				assert (v == ot2.origin() && v2 == ot2.destination()) || (v2 == ot2.origin() && v == ot2.destination());
 				// This edge is non manifold.
-				if (ot.getAdj() == null)
+				if (!ot.hasSymmetricEdge())
 				{
 					// Link ot to a virtual triangle
 					Triangle otVT = (Triangle) factory.createTriangle(outerVertex, ot.destination(), ot.origin());
@@ -650,7 +650,7 @@ public class Mesh extends AbstractMesh implements Serializable
 					otSym = otSym.prev();
 					otSym.glue(symSym);
 				}
-				if (ot2.getAdj() == null)
+				if (!ot2.hasSymmetricEdge())
 				{
 					// Link ot2 to a virtual triangle
 					Triangle ot2VT = (Triangle) factory.createTriangle(outerVertex, ot2.destination(), ot2.origin());
@@ -936,7 +936,7 @@ public class Mesh extends AbstractMesh implements Serializable
 				logger.error("Inconsistent outer state: "+ot);
 				return false;
 			}
-			if (ot.getAdj() == null)
+			if (!ot.hasSymmetricEdge())
 				continue;
 			sym = (VirtualHalfEdge) ot.sym(sym);
 			sym.sym();
@@ -987,13 +987,13 @@ public class Mesh extends AbstractMesh implements Serializable
 				// Edge is manifold
 				// next() and prev() must not be linked to other edges
 				ot.next();
-				if (ot.getAdj() != null)
+				if (ot.hasSymmetricEdge())
 				{
 					logger.error("Outer edge: should not be linked to another edge: "+ot);
 					return false;
 				}
 				ot.next();
-				if (ot.getAdj() != null)
+				if (ot.hasSymmetricEdge())
 				{
 					logger.error("Outer edge: should not be linked to another edge: "+ot);
 					return false;
@@ -1016,7 +1016,7 @@ public class Mesh extends AbstractMesh implements Serializable
 				}
 				// next() and prev() must point to other non-manifold edges
 				ot.next();
-				if (ot.getAdj() == null)
+				if (!ot.hasSymmetricEdge())
 				{
 					logger.error("Multiple edge: must be linked to another edge: "+ot);
 					return false;
@@ -1051,7 +1051,7 @@ public class Mesh extends AbstractMesh implements Serializable
 					return false;
 				}
 				ot.next();
-				if (ot.getAdj() == null)
+				if (!ot.hasSymmetricEdge())
 				{
 					logger.error("Multiple edge: must be linked to another edge: "+ot);
 					return false;
@@ -1105,7 +1105,7 @@ public class Mesh extends AbstractMesh implements Serializable
 				logger.error("Inconsistent outer state: "+e);
 				return false;
 			}
-			if (e.getAdj() == null)
+			if (!e.hasSymmetricEdge())
 				continue;
 			HalfEdge f = (HalfEdge) e.sym();
 			if (f.sym() != e)
@@ -1154,13 +1154,13 @@ public class Mesh extends AbstractMesh implements Serializable
 				// Edge e is manifold
 				// next() and prev() must not be linked to other edges
 				AbstractHalfEdge g = e.next();
-				if (g.getAdj() != null)
+				if (g.hasSymmetricEdge())
 				{
 					logger.error("Outer edge: should not be linked to another edge: "+g);
 					return false;
 				}
 				g = e.prev();
-				if (g.getAdj() != null)
+				if (g.hasSymmetricEdge())
 				{
 					logger.error("Outer edge: should not be linked to another edge: "+g);
 					return false;
@@ -1182,13 +1182,13 @@ public class Mesh extends AbstractMesh implements Serializable
 				}
 				// next() and prev() must point to other non-manifold edges
 				AbstractHalfEdge g = e.next();
-				if (g.getAdj() == null)
+				if (!g.hasSymmetricEdge())
 				{
 					logger.error("Multiple edge: must be linked to another edge: "+g);
 					return false;
 				}
 				AbstractHalfEdge h = e.prev();
-				if (h.getAdj() == null)
+				if (!h.hasSymmetricEdge())
 				{
 					logger.error("Multiple edge: must be linked to another edge: "+h);
 					return false;

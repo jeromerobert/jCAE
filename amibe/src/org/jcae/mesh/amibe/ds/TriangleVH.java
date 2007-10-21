@@ -103,7 +103,7 @@ public class TriangleVH extends Triangle
 		//  ... and set it right
 		that.adjPos |= (pos << (2*num));
 	}
-		
+
 	private static class AdjacencyVH implements AdjacencyWrapper
 	{
 		/**

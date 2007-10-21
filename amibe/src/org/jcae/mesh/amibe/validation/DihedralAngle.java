@@ -57,7 +57,7 @@ public class DihedralAngle extends QualityProcedure
 			ot.next();
 			if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 				continue;
-			if (ot.getAdj() == null)
+			if (!ot.hasSymmetricEdge())
 				continue;
 			sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
 			sym.sym();

@@ -120,7 +120,7 @@ public class SwapEdge
 					ot.next();
 					if (ot.hasAttributes(VirtualHalfEdge.BOUNDARY | VirtualHalfEdge.NONMANIFOLD))
 						continue;
-					assert ot.getAdj() != null : ot;
+					assert ot.hasSymmetricEdge() : ot;
 					double qnew = ot.checkSwap3D(planarMin);
 					if (qnew < 0.0)
 						continue;
@@ -154,7 +154,7 @@ public class SwapEdge
 			assert ot.destination() != mesh.outerVertex : ot+" "+sym;
 			for (int i = 0; i < 2; i++)
 			{
-				if (ot.getAdj() != null)
+				if (ot.hasSymmetricEdge())
 				{
 					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
 					sym.sym();
@@ -173,7 +173,7 @@ public class SwapEdge
 			for (int i = 0; i < 2; i++)
 			{
 				ot.prev();
-				if (ot.getAdj() != null)
+				if (ot.hasSymmetricEdge())
 				{
 					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
 					sym.sym();

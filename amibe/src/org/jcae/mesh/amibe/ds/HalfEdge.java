@@ -118,21 +118,14 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	
 	/**
-	 * Gets the symmetric edge.
+	 * Tells whether edge is connected to a symmetric edge.
+	 *
+	 * @return <code>true</code> if edge has a symmetric edge, <code>false</code> otherwise.
 	 */
 	@Override
-	public final Object getAdj()
+	public final boolean hasSymmetricEdge()
 	{
-		return sym;
-	}
-
-	/**
-	 * Sets the sym link.
-	 */
-	@Override
-	public final void setAdj(Object e)
-	{
-		sym = (HalfEdge) e;
+		return sym != null;
 	}
 
 	/**
