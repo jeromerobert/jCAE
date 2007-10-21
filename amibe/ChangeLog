@@ -1,3 +1,8 @@
+Sun Oct 21 20:41:07 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/traits/MeshTraitsBuilder.java: Always add
+	TRIANGLES attribute, we can do nothing if this attribute is unset.
+
 Sat Oct 20 00:13:49 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java: Use MARKED

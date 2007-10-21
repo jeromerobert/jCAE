@@ -54,6 +54,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	public MeshTraitsBuilder()
 	{
 		super();
+		attributes |= TRIANGLES;
 	}
 
 	/**
@@ -63,7 +64,6 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	 */
 	public MeshTraitsBuilder addTriangleList()
 	{
-		attributes |= TRIANGLES;
 		attributes &= ~TRIANGLESET;
 		return this;
 	}
@@ -75,7 +75,6 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	 */
 	public MeshTraitsBuilder addTriangleSet()
 	{
-		attributes |= TRIANGLES;
 		attributes |= TRIANGLESET;
 		return this;
 	}
@@ -89,20 +88,20 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	@SuppressWarnings("unchecked")
 	public Collection<AbstractTriangle> getTriangles(Traits t)
 	{
-		if ((attributes & TRIANGLES) != 0)
-			return (Collection<AbstractTriangle>) t.array[index[BITTRIANGLES]];
+		return (Collection<AbstractTriangle>) t.array[index[BITTRIANGLES]];
 		return null;
 	}
 
 	/**
-	 * Tells whether mesh traits stores collection of triangles.
+	 * Tells whether mesh traits stores collection of triangles.  This method
+	 * always returns <code>true</code> because our data structure is based on
+	 * triangles.
 	 *
-	 * @return <code>true</code> if {@link #addTriangleList} or {@link #addTriangleSet}
-	 * was called, <code>false</code> otherwise.
+	 * @return <code>true</code>
 	 */
 	public boolean hasTriangles()
 	{
-		return hasCapability(TRIANGLES);
+		return true;
 	}
 
 	/**
