@@ -89,7 +89,6 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	public Collection<AbstractTriangle> getTriangles(Traits t)
 	{
 		return (Collection<AbstractTriangle>) t.array[index[BITTRIANGLES]];
-		return null;
 	}
 
 	/**
