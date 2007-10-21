@@ -26,14 +26,43 @@ import java.util.Iterator;
 
 /**
  * Abstract class to define common methods on edges.
- * We use an half-edge structure to perform mesh traversal.  Vertices can be
- * obtained by {@link #origin}, {@link #destination} and {@link #apex}, and the
- * triangle found at the left of an edge is given by {@link #getTri}.
+ * We use an half-edge data structure to perform mesh traversal.  An half-edge
+ * (red arrows) contains a link (black arrows) to its symmetric half-edge, a
+ * link to the next half-edge in the same triangle, a link to its underlying
+ * triangle and a local number within this triangle.  A triangle contains an
+ * array of three vertices; by convention, in each triangle, edge <em>i</em> is
+ * located at the opposite of vertex <em>i</em>.  Thus even if half-edges have
+ * no links to vertices, they can be easily found; suppose that half-edge
+ * <code>e</code> has local number <code>l</code> in triangle <code>tri</code>:
+ * <ul>
+ *   <li><code>e.origin()</code> is <code>tri.vertex[(l+1)%3]</code></li>
+ *   <li><code>e.destination()</code> is <code>tri.vertex[(l-1)%3]</code></li>
+ *   <li><code>e.apex()</code> is <code>tri.vertex[l]</code></li>
+ * </ul>
+ * <p align="center"><img src="doc-files/Mesh-2.png" alt="[Image of a simple mesh with triangles and half-edges]"/></p>
+ *
+ * <p>
+ * For an half-edge <code>e</code>, <code>e.sym()</code> returns its symmetric
+ * half-edge, if it does exist.  In this case, <code>e.sym().sym()</code> is
+ * always <code>e</code>, and in images below a link between symmetric half-edges
+ * is represented by a single double-headed arrow instead of two arrows.
+ * Moreover, symmetric edges must have opposite directions (except for
+ * <a href="#non-manifold">non-manifold</a> edges), or in other words
+ * </p>
+ * <ul>
+ *    <li><code>e.origin() == e.sym().destination()</code></li>
+ *    <li><code>e.destination() == e.sym().origin()</code></li>
+ * </ul>
+ * <p>
+ * Image below shows two triangles which cannot be linked together because their common
+ * edge has the same direction in both triangles.
+ * </p>
+ * <p align="center"><img src="doc-files/AbstractHalfEdge-11.png" alt="[Image showing invalid symmetric edges]"/></p>
  *
  * <h2>Geometrical primitives</h2>
  *
  * <p>
- * Consider the <code>AbstractHalfEdge</code> edge <code>e</code> between vertices
+ * Consider <code>AbstractHalfEdge</code> edge <code>e</code> between vertices
  * <em>A</em> and <em>B</em>, starting from <em>A</em>, in image below:
  * </p>
  * <p align="center"><img src="doc-files/AbstractHalfEdge-1.png" alt="[Drawing to illustrate geometrical primitives]"/></p>
@@ -43,7 +72,7 @@ import java.util.Iterator;
  * <ul>
  *    <li><code>e.{@link #next}</code> and <code>e.{@link #prev}</code> get respectively next and previous
  *        edges in the same triangle <em>(ABC)</em> in a counterclockwise cycle.</li>
- *    <li><code>e.{@link #sym}</code> gets the opposite <code>AbstractHalfEdge</code>.</li>
+ *    <li><code>e.{@link #sym}</code> gets the opposite <code>AbstractHalfEdge</code>, in triangle <em>(BAF)</em>.</li>
  *    <li><code>e.{@link #nextOrigin}</code> returns next edge starting from the same origin <em>A</em>
  *        when cycling counterclockwise around <em>A</em>.</li>
  * </ul>
@@ -53,14 +82,14 @@ import java.util.Iterator;
  * another instance, so that current instance is not modified.
  * </p>
  * <ul>
- *    <li><code>e.<a href="#next(org.jcae.mesh.amibe.ds.AbstractHalfEdge)">next</a>(f)</code> and
- *        <code>e.<a href="#prev(org.jcae.mesh.amibe.ds.AbstractHalfEdge)">prev</a>(f)</code>
- *        move <code>f</code> respectively to next and previous edges in the same triangle <em>(ABC)</em>
+ *    <li><code>e.<a href="#next(org.jcae.mesh.amibe.ds.AbstractHalfEdge)">next</a>(f)</code> (resp.
+ *        <code>e.<a href="#prev(org.jcae.mesh.amibe.ds.AbstractHalfEdge)">prev</a>(f)</code>)
+ *        moves <code>f</code> to next (resp. previous) edge in the same triangle <em>(ABC)</em>
  *        in a counterclockwise cycle.</li>
  *    <li><code>e.<a href="#sym(org.jcae.mesh.amibe.ds.AbstractHalfEdge)">sym</a>(f)</code>
  *        moves <code>f</code> to opposite of <code>e</code>.</li>
  *    <li><code>e.<a href="#nextOrigin(org.jcae.mesh.amibe.ds.AbstractHalfEdge)">nextOrigin</a>(f)</code>
- *        moves <code>f</code> to the next edge starting from the same origin <em>A</em> when
+ *        moves <code>f</code> to next edge starting from the same origin <em>A</em> when
  *        cycling counterclockwise around <em>A</em>.</li>
  * </ul>
  *
@@ -71,15 +100,15 @@ import java.util.Iterator;
  * <ul>
  *    <li><code>e.prevOrigin()</code> moves counterclockwise to the previous edge
  *        starting from the same origin.</li>
- *    <li><code>e.nextDest()</code> and <code>e.prevDest()</code> move counterclockwise
- *        to the next (resp. previous) edge with the same destination vertex <em>B</em>.</li>
- *    <li><code>e.nextApex()</code> and <code>e.prevApex()</code> move counterclockwise
- *        to the next (resp. previous) edge with the same apical vertex <em>C</em>.</li>
+ *    <li><code>e.nextDest()</code> (resp. <code>e.prevDest()</code>) moves counterclockwise
+ *        to next (resp. previous) edge with the same destination vertex <em>B</em>.</li>
+ *    <li><code>e.nextApex()</code> (resp. <code>e.prevApex()</code>) moves counterclockwise
+ *        to next (resp. previous) edge with the same apical vertex <em>C</em>.</li>
  * </ul>
  *
  * <h2>Mesh Operations</h2>
  * <p>
- * These operations are abstract methods and are implemented by subclasses:
+ * These operations are abstract methods and are implemented by derived classes:
  * </p>
  * <dl>
  *   <dt>{@link #swap}</dt>
@@ -140,7 +169,7 @@ import java.util.Iterator;
  * </p>
  * <p align="center"><img src="doc-files/AbstractHalfEdge-5.png" alt="[Drawing to illustrate outer triangles]"/></p>
  * <p>
- * All <code>AbstractHalfEdge</code> subclasses allow to set attributes on edges.
+ * All <code>AbstractHalfEdge</code> derived classes allow to set attributes on edges.
  * They are defined as bitwise OR values, these values are useful:
  * </p>
  * <dl>
@@ -231,26 +260,40 @@ import java.util.Iterator;
  *   while (e.destination() != d);
  * </pre>
  *
- * <h2>Non-manifold edges</h2>
+ * <h2 id="non-manifold">Non-manifold edges</h2>
  * <p>
  * A non-manifold edge is bound to more than two triangles.  In image below, edges <code>(AB)</code>,
  * <code>(BC)</code> and <code>(CD)</code> belong to four triangles.
  * </p>
- *       <p align="center"><img src="doc-files/AbstractHalfEdge-8.png" alt="[Image of a non-manifold mesh]"/></p>
+ * <p align="center"><img src="doc-files/AbstractHalfEdge-8.png" alt="[Image of a non-manifold mesh]"/></p>
+ *
  * <p>
+ * As with free edges, virtual triangles are added so that non-manifold edge has only one symmetric edge,
+ * and this time it is tagged with <code>NONMANIFOLD</code> attribute.
  * Edge attributes are printed in blue for left shell:
  * </p>
- *       <p align="center"><img src="doc-files/AbstractHalfEdge-9.png" alt="[Image showing edge attributes for a non-manifold mesh]"/></p>
+ * <p align="center"><img src="doc-files/AbstractHalfEdge-9.png" alt="[Image showing edge attributes for a non-manifold mesh]"/></p>
  *
  * <p>
- * Virtual triangle added to the other side of non-manifold edge is not only useful for looping around vertices,
- * but it also allows looping around this non-manifold edge.  We explained that the two outer edges are not connected
- * to other triangles, so we have two free slots.  We use these two slots to build a circular doubly-linked list to
- * iterate over all half-edges connected together, as is done with radial-edge data structure.
+ * We explained that the two outer edges are not connected to other triangles,
+ * so we have two free slots.  We use these two slots to build a circular
+ * doubly-linked list to iterate over all half-edges connected together, as is
+ * done with radial-edge data structure.  Here is an example, with an edge connected to three triangles; virtual triangles
+ * are represented by dashed lines.
  * </p>
+ * <p align="center"><img src="doc-files/AbstractHalfEdge-13.png" alt="[Non-manifold edge connected to three triangles]"/></p>
+ * <p align="center"><img src="doc-files/AbstractHalfEdge-14.png" alt="[Virtual triangles and connections for a non-manifold edge connected to three triangles]"/></p>
+ * <p>
+ * All edges have only one symmetric edge.  But adjacency relations between virtual triangles (represented by dotted arrows)
+ * are special, these half-edges are the only ones which do not necesarily satisfy these identities:
+ * </p>
+ * <ul>
+ *    <li><code>e.origin() == e.sym().destination()</code></li>
+ *    <li><code>e.destination() == e.sym().origin()</code></li>
+ * </ul>
  *
  * <p>
- * But how can we iterate over all neighbors of <code>A</code>?  If we look again at sample code just above,
+ * How can we iterate over all neighbors of <code>A</code>?  If we look again at sample code above,
  * it is obvious that not all neighbors are caught.  We could try to ask non-manifold edges to the rescue,
  * it does not seem trivial.  A simpler solution is to store a list of all triangles connected to each vertex,
  * but it consumes lots of memory.  We call <em>triangle fan</em> the set of triangles which are visited
@@ -264,15 +307,25 @@ import java.util.Iterator;
  * </p>
  *
  * <p>
- * Consider the same mesh, from which triangles <code>(ABE)</code>, <code>(CDF)</code> and their symmetric
+ * Consider the same mesh as above, from which triangles <code>(ABE)</code>, <code>(CDF)</code> and their symmetric
  * ones have been removed.  Edges <code>(AB)</code> and <code>(CD)</code> are manifold, but <code>(BC)</code> is not.
  * Vertices <code>A</code> and <code>D</code> are manifold, but <code>B</code> and <code>C</code> and connected to
  * three triangle fans, while edge <code>(BC)</code> is connected to four triangles.  All mesh operations described
  * above can gracefully handle such geometries, the only problem is when we try to mesh a surface which is not
  * orientable.
  * </p>
- *       <p align="center"><img src="doc-files/AbstractHalfEdge-10.png" alt="[Image showing a non-manifold edge bound to four triangles while its endpoints are bound to three triangle fans]"/></p>
+ * <p align="center"><img src="doc-files/AbstractHalfEdge-10.png" alt="[Image showing a non-manifold edge bound to four triangles while its endpoints are bound to three triangle fans]"/></p>
  *
+ * <p>
+ * Non-manifold edges can also be used to handle ill-oriented meshes.  Two triangles which have opposite
+ * orientations, as already shown in this image
+ * </p>
+ * <p align="center"><img src="doc-files/AbstractHalfEdge-11.png" alt="[Image showing invalid symmetric edges]"/></p>
+ * <p>
+ * can be linked together if we state that common edge is non-manifold, add two virtual triangles and link
+ * these triangles as shown below:
+ * </p>
+ * <p align="center"><img src="doc-files/AbstractHalfEdge-12.png" alt="[Image showing how to use non-manifold edges to link ill-oriented triangles]"/></p>
  */
 public abstract class AbstractHalfEdge
 {
