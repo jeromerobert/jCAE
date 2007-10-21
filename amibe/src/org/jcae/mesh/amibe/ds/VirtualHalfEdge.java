@@ -152,6 +152,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 */
 	public VirtualHalfEdge()
 	{
+		super(null);
 	}
 	
 	/**
@@ -162,6 +163,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 */
 	public VirtualHalfEdge(Triangle t, int o)
 	{
+		super(null);
 		tri = t;
 		localNumber = o;
 		pullAttributes();

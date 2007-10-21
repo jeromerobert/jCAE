@@ -285,7 +285,7 @@ import java.util.Iterator;
  * <p align="center"><img src="doc-files/AbstractHalfEdge-14.png" alt="[Virtual triangles and connections for a non-manifold edge connected to three triangles]"/></p>
  * <p>
  * All edges have only one symmetric edge.  But adjacency relations between virtual triangles (represented by dotted arrows)
- * are special, these half-edges are the only ones which do not necesarily satisfy these identities:
+ * are special, these half-edges are the only ones which do not necessarily satisfy these identities:
  * </p>
  * <ul>
  *    <li><code>e.origin() == e.sym().destination()</code></li>
@@ -329,8 +329,13 @@ import java.util.Iterator;
  */
 public abstract class AbstractHalfEdge
 {
-	//  User-defined traits
+	/**
+	 * User-defined traits builder.
+	 */
 	protected final HalfEdgeTraitsBuilder traitsBuilder;
+	/**
+	 * User-defined traits.
+	 */
 	protected final Traits traits;
 
 	/**
@@ -382,6 +387,11 @@ public abstract class AbstractHalfEdge
 	 */
 	public static final int NONMANIFOLD = 1 << 5;
 	
+	/**
+	 * <code>Integer</code> array to store values for 0, 1 and 2.  These objects
+	 * may be useful when edge local numbers are put into <code>HashSet</code> or
+	 * <code>HashMap</code> structures.
+	 */
 	protected static final Integer [] int3 = new Integer[3];
 	static {
 		int3[0] = Integer.valueOf(0);
@@ -389,11 +399,10 @@ public abstract class AbstractHalfEdge
 		int3[2] = Integer.valueOf(2);
 	}
 
-	public AbstractHalfEdge()
-	{
-		traitsBuilder = null;
-		traits = null;
-	}
+	/**
+	 * Constructor.  Creates a new instance, and creates traits by
+	 * @param builder   half-edge traits builder
+	 */
 	public AbstractHalfEdge(HalfEdgeTraitsBuilder builder)
 	{
 		traitsBuilder = builder;
