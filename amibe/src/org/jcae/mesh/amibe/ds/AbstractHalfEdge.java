@@ -111,32 +111,32 @@ import java.util.Iterator;
  * These operations are abstract methods and are implemented by derived classes:
  * </p>
  * <dl>
- *   <dt>{@link #swap}</dt>
+ *   <dt><a href="#swap()"><code>swap</code></a></dt>
  *   <dd>Swaps an edge.  Return value has the same original and apical vertices as
  *       original edge.  Triangles and edges are modified, objects are not destroyed and
  *       inserted into mesh.
  *       <p align="center"><img src="doc-files/AbstractHalfEdge-4.png" alt="[Image showing edge swap]"/></p>
  *   </dd>
- *   <dt>{@link #split}</dt>
+ *   <dt><a href="#split(org.jcae.mesh.amibe.ds.AbstractMesh, org.jcae.mesh.amibe.ds.AbstractVertex)"><code>split</code></a></dt>
  *   <dd>Splits a vertex to create a new edge.  In figure below, <em>A</em> is duplicated into <em>N</em>,
  *       and two new triangles are created.  Return value has the same original and apical vertices as
  *       original edge, and its destination vertex is <em>N</em>.
  *       <p><strong>Warning:</strong> This method does not check that new triangles are not inverted.</p>
  *       <p align="center"><img src="doc-files/AbstractHalfEdge-3.png" alt="[Image showing vertex split]"/></p>
  *   </dd>
- *   <dt>{@link #collapse}</dt>
+ *   <dt><a href="#collapse(org.jcae.mesh.amibe.ds.AbstractMesh, org.jcae.mesh.amibe.ds.AbstractVertex)"><code>collapse</code></a></dt>
  *   <dd>Collapses an edge into a new point.  Triangles, edges and vertices are removed from mesh
- *       and replaced by new objects.  New point may be origin or destination points.
+ *       and replaced by new objects.  New point may be origin or destination points, or a new point.
  *       Return value has the new point as its origin, and its apex is the same as in original edge.
  *       When <em>N</em> is <em>A</em>,
  *       <code><a href="#collapse(org.jcae.mesh.amibe.ds.AbstractMesh, org.jcae.mesh.amibe.ds.AbstractVertex)">collapse</a></code>
  *       is the opposite of 
  *       <code><a href="#split(org.jcae.mesh.amibe.ds.AbstractMesh, org.jcae.mesh.amibe.ds.AbstractVertex)">split</a></code>.
  *       <p><strong>Warning:</strong> This method does not check that triangles are not inverted.
- *       Method {@link #canCollapse} <strong>must</strong> have been called to
- *       ensure that this edge collapse is possible, otherwise errors may
- *       occur.  This method is not called automatically because it is
- *       sometimes costful.</p>
+ *       Method <a href="#canCollapse(org.jcae.mesh.amibe.ds.AbstractVertex)"><code>canCollapse</code></a>
+ *       <strong>must</strong> have been called to ensure that this edge
+ *       collapse is possible, otherwise errors may occur.  This method is not
+ *       called automatically because it is sometimes costful.</p>
  *       <p align="center"><img src="doc-files/AbstractHalfEdge-2.png" alt="[Image showing edge collapse]"/></p>
  *   </dd>
  * </dl>
@@ -150,9 +150,9 @@ import java.util.Iterator;
  * These two methods may also be of interest when writing new algorithms:
  * </p>
  * <dl>
- *   <dt>{@link #canCollapse}</dt>
+ *   <dt><a href="#canCollapse(org.jcae.mesh.amibe.ds.AbstractVertex)"><code>canCollapse</code></a></dt>
  *   <dd>Tells whether an edge can be collapsed and replaced by the given vertex.</dd>
- *   <dt>{@link #checkNewRingNormals}</dt>
+ *   <dt><a href="#checkNewRingNormals(double[])"><code>checkNewRingNormals</code></a></dt>
  *   <dd>Tells whether triangles become inverted if origin point is moved at
  *       given location.</dd>
  * </dl>
@@ -291,6 +291,13 @@ import java.util.Iterator;
  *    <li><code>e.origin() == e.sym().destination()</code></li>
  *    <li><code>e.destination() == e.sym().origin()</code></li>
  * </ul>
+ *
+ * <p>
+ * The <a href="#fanIterator()"><code>fanIterator</code></a> method returns an iterator over all edges connected
+ * to this one through such virtual triangles.  By convention, this iterator returns half-edges which are not outer.
+ * In order to ease writing algorithms, this iterator is also defined on regular half-edges, and return only one
+ * value which is this half-edge.
+ * </p>
  *
  * <p>
  * How can we iterate over all neighbors of <code>A</code>?  If we look again at sample code above,

@@ -23,8 +23,14 @@ package org.jcae.mesh.amibe.ds;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 import java.io.Serializable;
 
+/**
+ * A triangle containing adjacency relations.
+ */
 public abstract class Triangle extends AbstractTriangle implements Serializable
 {
+	/**
+	 * Wrapper object to which mathods on adjacency relations are delegated.
+	 */
 	protected AdjacencyWrapper adj = null;
 
 	public Triangle(TriangleTraitsBuilder ttb)

@@ -31,6 +31,12 @@ import java.util.NoSuchElementException;
 import java.io.Serializable;
 import org.apache.log4j.Logger;
 
+/**
+ * Half-edge data structure.  This is a straightforward implementation of
+ * {@link AbstractHalfEdge}, an half-edge is represented by a local number
+ * (between 0 and 2) and a triangle.  It has a link to the next edge in the
+ * same triangle, and to its symmetric edge.
+ */
 public class HalfEdge extends AbstractHalfEdge implements Serializable
 {
 	private static Logger logger = Logger.getLogger(HalfEdge.class);
