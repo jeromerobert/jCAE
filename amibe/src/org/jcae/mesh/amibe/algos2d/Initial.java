@@ -24,7 +24,7 @@ package org.jcae.mesh.amibe.algos2d;
 import org.jcae.mesh.amibe.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
-import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
@@ -206,7 +206,7 @@ public class Initial
 	 */
 	public void compute()
 	{
-		Triangle t;
+		TriangleVH t;
 		VirtualHalfEdge2D ot;
 		Vertex2D v;
 		
@@ -303,7 +303,7 @@ public class Initial
 		mesh.popCompGeom(2);
 		
 		logger.debug(" Mark outer elements");
-		t = (Triangle) mesh.outerVertex.getLink();
+		t = (TriangleVH) mesh.outerVertex.getLink();
 		ot = new VirtualHalfEdge2D(t, 0);
 		if (ot.origin() == mesh.outerVertex)
 			ot.next();
@@ -328,14 +328,14 @@ public class Initial
 		logger.debug(" Mark holes");
 		VirtualHalfEdge2D sym = new VirtualHalfEdge2D();
 		// Dummy value to enter the loop
-		Triangle oldHead = t;
-		Triangle newHead = null;
+		TriangleVH oldHead = t;
+		TriangleVH newHead = null;
 		while (oldHead != newHead)
 		{
 			oldHead = newHead;
 			for (Iterator<AbstractTriangle> it = tList.iterator(); it.hasNext(); )
 			{
-				t = (Triangle) it.next();
+				t = (TriangleVH) it.next();
 				if (t == oldHead)
 					break;
 				ot.bind(t);
@@ -343,11 +343,11 @@ public class Initial
 				for (int i = 0; i < 3; i++)
 				{
 					ot.next();
-					sym.bind(ot.getTri(), ot.getLocalNumber());
+					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
 					sym.sym();
 					if (tList.contains(sym.getTri()))
 						continue;
-					newHead = sym.getTri();
+					newHead = (TriangleVH) sym.getTri();
 					tList.add(newHead);
 					if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
 					{
@@ -372,13 +372,13 @@ public class Initial
 		logger.debug(" Remove links to outer triangles");
 		for (Iterator<AbstractTriangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 		{
-			t = (Triangle) it.next();
+			t = (TriangleVH) it.next();
 			if (t.isOuter())
 				continue;
 			for (int i = 0; i < 3; i++)
 			{
 				v = (Vertex2D) t.vertex[i];
-				if (v.getLink() instanceof Triangle)
+				if (v.getLink() instanceof TriangleVH)
 					v.setLink(t);
 			}
 		}

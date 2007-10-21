@@ -24,9 +24,7 @@ public interface AdjacencyWrapper
 {
 
 	public Object getAdj(int num);
-	public int getAdjLocalNumber(int num);
 	public void setAdj(int num, Object link);
-	public void setAdjLocalNumber(int num, int pos);
 
 	public void setFlag(int attr);
 	public void clearFlag(int attr);

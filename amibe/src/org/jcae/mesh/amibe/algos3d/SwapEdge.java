@@ -24,7 +24,7 @@ package org.jcae.mesh.amibe.algos3d;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
-import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.util.QSortedTree;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import java.util.Iterator;
@@ -72,7 +72,7 @@ public class SwapEdge
 		VirtualHalfEdge ot = new VirtualHalfEdge();
 		for (AbstractTriangle at: mesh.getTriangles())
 		{
-			Triangle f = (Triangle) at;
+			TriangleVH f = (TriangleVH) at;
 			if (f.isOuter())
 				continue;
 			ot.bind(f);
@@ -89,7 +89,7 @@ public class SwapEdge
 		//  Compute triangle quality
 		for (AbstractTriangle at: mesh.getTriangles())
 		{
-			Triangle f = (Triangle) at;
+			TriangleVH f = (TriangleVH) at;
 			if (f.isOuter())
 				continue;
 			tree.insert(f, cost(f));
@@ -103,12 +103,12 @@ public class SwapEdge
 		VirtualHalfEdge sym = new VirtualHalfEdge();
 		while (!tree.isEmpty())
 		{
-			Triangle t = null;
+			TriangleVH t = null;
 			int localNumber = -1;
 			for (Iterator<QSortedTree.Node> itt = tree.iterator(); itt.hasNext(); )
 			{
 				QSortedTree.Node q = itt.next();
-				t = (Triangle) q.getData();
+				t = (TriangleVH) q.getData();
 				if (t.isMarked())
 					continue;
 				double quality = -1.0;
@@ -142,7 +142,7 @@ public class SwapEdge
 			ot.bind(t, localNumber);
 			if (logger.isDebugEnabled())
 				logger.debug("Swap edge: "+ot);
-			sym.bind(ot.getTri(), ot.getLocalNumber());
+			sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
 			sym.sym();
 			tree.remove(t);
 			tree.remove(sym.getTri());
@@ -156,18 +156,18 @@ public class SwapEdge
 			{
 				if (ot.getAdj() != null)
 				{
-					sym.bind(ot.getTri(), ot.getLocalNumber());
+					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
 					sym.sym();
 					sym.getTri().unsetMarked();
 				}
 				ot.prev();
 			}
 			// ot = (nao)
-			t = ot.getTri();
+			t = (TriangleVH) ot.getTri();
 			t.unsetMarked();
 			tree.insert(t, cost(t));
 			ot.sym();  // (and)
-			t = ot.getTri();
+			t = (TriangleVH) ot.getTri();
 			t.unsetMarked();
 			tree.insert(t, cost(t));
 			for (int i = 0; i < 2; i++)
@@ -175,7 +175,7 @@ public class SwapEdge
 				ot.prev();
 				if (ot.getAdj() != null)
 				{
-					sym.bind(ot.getTri(), ot.getLocalNumber());
+					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
 					sym.sym();
 					sym.getTri().unsetMarked();
 				}
@@ -186,7 +186,7 @@ public class SwapEdge
 		return swapped > 0;
 	}
 	
-	private double cost(Triangle f)
+	private double cost(TriangleVH f)
 	{
 		temp.bind(f);
 		assert f.vertex[0] != mesh.outerVertex && f.vertex[1] != mesh.outerVertex && f.vertex[2] != mesh.outerVertex : f;

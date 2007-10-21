@@ -31,88 +31,15 @@ import java.util.NoSuchElementException;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.apache.log4j.Logger;
 
-/*
- * This class is derived from Jonathan Richard Shewchuk's work
- * on AbstractTriangle, see
- *       http://www.cs.cmu.edu/~quake/triangle.html
- * His data structure is very compact, and similar ideas were
- * developed here, but due to Java constraints, this version is a
- * little bit less efficient than its C counterpart.
- *
- * Geometrical primitives and basic routines have been written from
- * scratch, but are in many cases very similar to those defined by
- * Shewchuk since data structures are almost equivalent and there
- * are few ways to achieve the same operations.
- *
- * Other ideas come from Bamg, written by Frederic Hecht
- *       http://www-rocq1.inria.fr/gamma/cdrom/www/bamg/eng.htm
- */
-
 /**
- * A handle to abstract edge instances.
- *
- * <p>
- *   Jonathan Richard Shewchuk
- *   <a href="http://www.cs.cmu.edu/~quake/triangle.html">explains</a>
- *   why triangle-based data structures are more efficient than their
- *   edge-based counterparts.  But mesh operations make heavy use of edges,
- *   and informations about adges are not stored in this data structure in
- *   order to be compact.
- * </p>
- *
- * <p>
- *   A triangle is composed of three edges, so a triangle and a number
- *   between 0 and 2 can represent an edge.  This <code>VirtualHalfEdge</code>
- *   class plays this role, it defines an <em>oriented triangle</em>, or
- *   in other words an oriented edge.  Instances of this class are tied to
- *   their underlying {@link AbstractTriangle} instances, so modifications are not
- *   local to this class!
- * </p>
- *
- * <p>
- *   The main goal of this class is to ease mesh traversal.
- *   Consider the <code>ot</code> {@link VirtualHalfEdge} with a null localNumber of
- *   {@link AbstractTriangle} <code>t</code> below.
- * </p>
- * <pre>
- *                        V2
- *     V5 _________________,_________________ V3
- *        \    &lt;----      / \     &lt;----     /
- *         \     0     _ /   \      1    _ /
- *          \\  t0     ///  /\\\   t1    //
- *           \\1     2///1   0\\\2     0//   t.vertex = { V0, V1, V2 }
- *            \V     //V   t   \\V     //   t0.vertex = { V2, V1, V3 }
- *             \     /           \     /    t1.vertex = { V5, V0, V2 }
- *              \   /      2      \   /     t2.vertex = { V0, V4, V1 }
- *               \ /     ----&gt;     \ /
- *             V0 +-----------------+ V1
- *                 \     &lt;----     /
- *                  \      1    _ /
- *                   \\   t2    //
- *                    \\2     0//
- * </pre>
- * The following methods can be applied to <code>ot</code>:
- * <pre>
- *    ot.next();        // Moves (t,0) to (t,1)
- *    ot.prev();        // Moves (t,0) to (t,2)
- *    ot.sym();         // Moves (t,0) to (t1,2)
- *    ot.nextOrigin();  // Moves (t,0) to (t2,1)
- * </pre>
- * For convenience, following methods are also defined in VirtualHalfEdge2D:
- * <pre>
- *    ot.prevOrigin();  // Moves (t,0) to (t1,0)
- *    ot.nextDest();    // Moves (t,0) to (t1,1)
- *    ot.prevDest();    // Moves (t,0) to (t0,2)
- *    ot.nextApex();    // Moves (t,0) to (t0,0)
- *    ot.prevApex();    // Moves (t,0) to (t2,0)
- * </pre>
- *
- * <p>
- * When an <code>VirtualHalfEdge</code> is traversing the mesh, its reference
- * is not modified, but its instance variables are updated.  In order
- * to prevent object allocations, we try to reuse <code>VirtualHalfEdge</code>
+ * A handle to abstract half-edge instances.  When triangles are instances of
+ * {@link TriangleHE} class, adjacency relations are contained within
+ * triangles.  This <code>VirtualHalfEdge</code> class is a handle to an edge,
+ * it has a link to a triangle and contains a local number.  When a
+ * <code>VirtualHalfEdge</code> instance is traversing the mesh, its reference
+ * is not modified, but its instance variables are updated.  In order to
+ * prevent object allocations, we try to reuse <code>VirtualHalfEdge</code>
  * objects as much as we can.
- * </p>
  */
 public class VirtualHalfEdge extends AbstractHalfEdge
 {
@@ -141,9 +68,18 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * Adjacent triangle is tri.adj[localNumber].tri and its localNumber
 	 * is ((tri.adjPos[0] >> (2*localNumber)) & 3)
 	 */
-	protected Triangle tri = null;
-	protected int localNumber = 0;
-	protected int attributes = 0;
+	/**
+	 * Triangle connected to this edge.
+	 */
+	protected TriangleVH tri;
+	/**
+	 * Local number of this edge in this triangle.
+	 */
+	protected int localNumber;
+	/**
+	 * Attributes of this edge.
+	 */
+	protected int attributes;
 	
 	// Section: constructors
 	
@@ -164,7 +100,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	public VirtualHalfEdge(Triangle t, int o)
 	{
 		super(null);
-		tri = t;
+		tri = (TriangleVH) t;
 		localNumber = o;
 		pullAttributes();
 	}
@@ -198,7 +134,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *
 	 * @param t  triangle tied to this object
 	 */
-	public final void bind(Triangle t)
+	public final void bind(TriangleVH t)
 	{
 		tri = t;
 		localNumber = 0;
@@ -211,7 +147,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @param t  triangle tied to this object
 	 * @param l  local number
 	 */
-	public final void bind(Triangle t, int l)
+	public final void bind(TriangleVH t, int l)
 	{
 		tri = t;
 		localNumber = l;
@@ -221,7 +157,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	// Section: attributes handling
 	
 	/**
-	 * Checks if some attributes of this oriented triangle are set.
+	 * Checks if some attributes of this edge are set.
 	 *
 	 * @param attr  attributes to check
 	 * @return <code>true</code> if this VirtualHalfEdge has one of
@@ -246,9 +182,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	/**
-	 * Resets attributes of this oriented triangle.
+	 * Resets attributes of this edge.
 	 *
-	 * @param attr   attributes of this oriented triangle to clear out
+	 * @param attr   attributes of this edge to clear out
 	 */
 	@Override
 	public final void clearAttributes(int attr)
@@ -277,7 +213,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 */
 	public final boolean isMutable()
 	{
-		return !(hasAttributes(BOUNDARY) || hasAttributes(NONMANIFOLD) || hasAttributes(OUTER));
+		return !hasAttributes(BOUNDARY | NONMANIFOLD | OUTER);
 	}
 	
 	// Section: geometrical primitives
@@ -300,7 +236,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	public final AbstractHalfEdge sym()
 	{
 		int neworient = tri.getAdjLocalNumber(localNumber);
-		tri = (Triangle) tri.getAdj(localNumber);
+		tri = (TriangleVH) tri.getAdj(localNumber);
 		localNumber = neworient;
 		pullAttributes();
 		return this;
@@ -319,7 +255,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	public final AbstractHalfEdge sym(AbstractHalfEdge that)
 	{
 		VirtualHalfEdge dest = (VirtualHalfEdge) that;
-		dest.tri = (Triangle) tri.getAdj(localNumber);
+		dest.tri = (TriangleVH) tri.getAdj(localNumber);
 		dest.localNumber = tri.getAdjLocalNumber(localNumber);
 		dest.pullAttributes();
 		return dest;
@@ -466,7 +402,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 */
 	protected static final void symOTri(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
-		that.tri = (Triangle) o.tri.getAdj(o.localNumber);
+		that.tri = (TriangleVH) o.tri.getAdj(o.localNumber);
 		that.localNumber = o.tri.getAdjLocalNumber(o.localNumber);
 		that.pullAttributes();
 	}
@@ -848,11 +784,11 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	public final boolean checkNewRingNormals(double [] newpt)
 	{
 		Vertex o = origin();
-		if (o.getLink() instanceof Triangle)
+		if (o.getLink() instanceof TriangleVH)
 			return checkNewRingNormalsSameFan(newpt, null, null);
 		for (Triangle start: (Triangle []) o.getLink())
 		{
-			work[1].bind(start);
+			work[1].bind((TriangleVH) start);
 			if (work[1].destination() == o)
 				work[1].next();
 			else if (work[1].apex() == o)
@@ -867,7 +803,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/*
 	 * Warning: this method uses work[0] temporary array.
 	 */
-	private final boolean checkNewRingNormalsSameFan(double [] newpt, Triangle t1, Triangle t2)
+	private final boolean checkNewRingNormalsSameFan(double [] newpt, TriangleVH t1, TriangleVH t2)
 	{
 		Vertex d = destination();
 		copyOTri(this, work[0]);
@@ -916,9 +852,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			// Mesh is locally manifold.  This is the most common
 			// case, do not create an HashSet to store only two
 			// triangles.
-			Triangle t1 = tri;
+			TriangleVH t1 = tri;
 			symOTri(this, work[1]);
-			Triangle t2 = work[1].tri;
+			TriangleVH t2 = work[1].tri;
 			// Check that origin vertex can be moved
 			if (!checkNewRingNormalsSameFan(xn, t1, t2))
 				return false;
@@ -932,7 +868,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		// At least one vertex is non manifold.  Store all triangles
 		// which will be removed in an HashSet so that they are
 		// ignored when checking for degenerated triangles.
-		Collection<Triangle> ignored = new HashSet<Triangle>();
+		Collection<TriangleVH> ignored = new HashSet<TriangleVH>();
 		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
 		{
 			VirtualHalfEdge f = (VirtualHalfEdge) it.next();
@@ -966,14 +902,14 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/*
 	 * Warning: this method uses work[0] and work[1] temporary arrays.
 	 */
-	private final boolean checkNewRingNormalsNonManifoldVertex(double [] newpt, Collection<Triangle> ignored)
+	private final boolean checkNewRingNormalsNonManifoldVertex(double [] newpt, Collection<TriangleVH> ignored)
 	{
 		Vertex o = origin();
-		if (o.getLink() instanceof Triangle)
+		if (o.getLink() instanceof TriangleVH)
 			return checkNewRingNormalsSameFanNonManifoldVertex(newpt, ignored);
 		for (Triangle start: (Triangle []) o.getLink())
 		{
-			work[1].bind(start);
+			work[1].bind((TriangleVH) start);
 			if (work[1].destination() == o)
 				work[1].next();
 			else if (work[1].apex() == o)
@@ -987,7 +923,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/*
 	 * Warning: this method uses work[0] temporary array.
 	 */
-	private final boolean checkNewRingNormalsSameFanNonManifoldVertex(double [] newpt, Collection<Triangle> ignored)
+	private final boolean checkNewRingNormalsSameFanNonManifoldVertex(double [] newpt, Collection<TriangleVH> ignored)
 	{
 		// Loop around origin.  We need to copy current instance
 		// into work[0] because loop may be interrupted.
@@ -1078,13 +1014,13 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		if (logger.isDebugEnabled())
 			logger.debug("contract ("+o+" "+d+")");
 		//  Replace o by n in all incident triangles
-		if (o.getLink() instanceof Triangle)
+		if (o.getLink() instanceof TriangleVH)
 			replaceEndpointsSameFan(v);
 		else
 			replaceEndpointsNonManifold(o, v);
 		//  Replace d by n in all incident triangles
 		symOTri(this, work[2]);
-		if (d.getLink() instanceof Triangle)
+		if (d.getLink() instanceof TriangleVH)
 			work[2].replaceEndpointsSameFan(v);
 		else
 			replaceEndpointsNonManifold(d, v);
@@ -1107,17 +1043,17 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		assert work[2].hasAttributes(OUTER);
 		// VHcollapseSameFan may modify internal data structure
 		// used by fanIterator(), we need a copy.
-		Map<Triangle, Integer> copy = new LinkedHashMap<Triangle, Integer>();
+		Map<TriangleVH, Integer> copy = new LinkedHashMap<TriangleVH, Integer>();
 		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
 		{
 			VirtualHalfEdge h = (VirtualHalfEdge) it.next();
 			copy.put(h.tri, int3[h.localNumber]);
 		}
-		Triangle ret = null;
+		TriangleVH ret = null;
 		int num = -1;
-		for (Map.Entry<Triangle, Integer> entry: copy.entrySet())
+		for (Map.Entry<TriangleVH, Integer> entry: copy.entrySet())
 		{
-			Triangle t = entry.getKey();
+			TriangleVH t = entry.getKey();
 			int l = entry.getValue().intValue();
 			work[2].bind(t, l);
 			assert !work[2].hasAttributes(OUTER);
@@ -1171,7 +1107,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			symOTri(this, vh3);     // (oV1V3)
 		if (!hasAttributes(OUTER))
 		{
-			Triangle t34 = work[1].tri;
+			TriangleVH t34 = work[1].tri;
 			if (t34.isOuter())
 				t34 = work[0].tri;
 			assert !t34.isOuter() : work[0]+"\n"+work[1];
@@ -1223,7 +1159,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		Triangle [] oList = (Triangle []) o.getLink();
 		for (Triangle t: oList)
 		{
-			work[0].bind(t);
+			work[0].bind((TriangleVH) t);
 			if (work[0].destination() == o)
 				work[0].next();
 			else if (work[0].apex() == o)
@@ -1232,9 +1168,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			work[0].replaceEndpointsSameFan(n);
 		}
 	}
-	private static void replaceVertexLinks(Vertex o, Triangle oldT1, Triangle oldT2, Triangle newT)
+	private static void replaceVertexLinks(Vertex o, TriangleVH oldT1, TriangleVH oldT2, TriangleVH newT)
 	{
-		if (o.getLink() instanceof Triangle)
+		if (o.getLink() instanceof TriangleVH)
 			o.setLink(newT);
 		else
 		{
@@ -1249,9 +1185,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			}
 		}
 	}
-	private static void replaceVertexLinks(Vertex o, Triangle oldT, Triangle newT)
+	private static void replaceVertexLinks(Vertex o, TriangleVH oldT, TriangleVH newT)
 	{
-		if (o.getLink() instanceof Triangle)
+		if (o.getLink() instanceof TriangleVH)
 			o.setLink(newT);
 		else
 		{
@@ -1272,8 +1208,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 */
 	private static void deepCopyVertexLinks(Vertex o, Vertex d, Vertex v)
 	{
-		boolean ot = o.getLink() instanceof Triangle;
-		boolean dt = d.getLink() instanceof Triangle;
+		boolean ot = o.getLink() instanceof TriangleVH;
+		boolean dt = d.getLink() instanceof TriangleVH;
 		//  Prepare vertex links first
 		if (ot && dt)
 		{
@@ -1310,7 +1246,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 				if (!allTriangles.contains(t))
 					res.add(t);
 				allTriangles.add(t);
-				work[0].bind(t);
+				work[0].bind((TriangleVH) t);
 				if (work[0].origin() != v)
 					work[0].next();
 				if (work[0].origin() != v)
@@ -1413,7 +1349,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		}
 		// VHsplitSameFan may modify internal data structure
 		// used by fanIterator(), we need a copy.
-		Map<Triangle, Integer> copy = new LinkedHashMap<Triangle, Integer>();
+		Map<TriangleVH, Integer> copy = new LinkedHashMap<TriangleVH, Integer>();
 		// Set vertex links
 		ArrayList<Triangle> link = new ArrayList<Triangle>();
 		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
@@ -1425,11 +1361,11 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		v.setLink(new Triangle[link.size()]);
 		link.toArray((Triangle[]) v.getLink());
 		link.clear();
-		Triangle f = null;
+		TriangleVH f = null;
 		int fEdge = -1;
-		for (Map.Entry<Triangle, Integer> entry: copy.entrySet())
+		for (Map.Entry<TriangleVH, Integer> entry: copy.entrySet())
 		{
-			Triangle t = entry.getKey();
+			TriangleVH t = entry.getKey();
 			int l = entry.getValue().intValue();
 			work[3].bind(t, l);
 			work[3].VHsplitSameFan(mesh, v);
@@ -1488,20 +1424,20 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		
 		// Now we must update links:
 		// 1. Link together t1/t4 and t2/t3.
-		Triangle t1 = tri;
+		TriangleVH t1 = tri;
 		nextOTri(this, work[0]);        // (nV1o)
 		work[0].sym();                  // (V1nd)
 		work[0].next();                 // (ndV1)
-		Triangle t3 = work[0].tri;
+		TriangleVH t3 = work[0].tri;
 
 		symOTri(this, work[1]);         // (dnV2)
 		work[0].VHglue(work[1]);
-		Triangle t2 = work[1].tri;
+		TriangleVH t2 = work[1].tri;
 		work[1].next();                 // (nV2d)
 		symOTri(work[1], work[0]);      // (V2no)
 		work[0].next();                 // (noV2)
 		VHglue(work[0]);
-		Triangle t4 = work[0].tri;
+		TriangleVH t4 = work[0].tri;
 		work[1].prev();                 // (dnV2)
 		// 2. Remove links between outer triangles
 		if (t2.isOuter())
@@ -1537,8 +1473,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			work[0].next();         // (noV2)
 		}
 
-		Triangle t14 = (t1.isOuter() ? t4 : t1);
-		Triangle t23 = (t2.isOuter() ? t3 : t2);
+		TriangleVH t14 = (t1.isOuter() ? t4 : t1);
+		TriangleVH t23 = (t2.isOuter() ? t3 : t2);
 		//  Update vertex links
 		replaceVertexLinks(n, t1, t2, t14);
 		replaceVertexLinks(work[1].origin(), t1, t2, t23);
@@ -1559,7 +1495,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		 *    /       t1        \            /   t1   |  t3    \
 		 * o +-------------------+ d ---> o +---------+---------+ d
 		 */
-		TriangleVH t1 = (TriangleVH) tri;
+		TriangleVH t1 = tri;
 		TriangleVH t3 = (TriangleVH) m.createTriangle(t1);
 		m.add(t3);
 		
@@ -1633,7 +1569,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		logger.debug("Non manifold fan iterator");
 		return new Iterator<AbstractHalfEdge>()
 		{
-			private Triangle last = (Triangle) tri.getAdj(localNumber);
+			private TriangleVH last = (TriangleVH) tri.getAdj(localNumber);
 			private int lastNumber = tri.getAdjLocalNumber(localNumber);
 			VirtualHalfEdge ret = new VirtualHalfEdge();
 			VirtualHalfEdge current = new VirtualHalfEdge();

@@ -926,7 +926,7 @@ public class Mesh extends AbstractMesh implements Serializable
 			return true;
 		VirtualHalfEdge ot = new VirtualHalfEdge();
 		VirtualHalfEdge sym = new VirtualHalfEdge();
-		ot.bind((Triangle) t);
+		ot.bind((TriangleVH) t);
 		boolean isOuter = ot.hasAttributes(AbstractHalfEdge.OUTER);
 		for (int i = 0; i < 3; i++)
 		{

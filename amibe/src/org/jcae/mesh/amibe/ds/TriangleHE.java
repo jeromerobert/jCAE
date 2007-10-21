@@ -105,18 +105,6 @@ public class TriangleHE extends Triangle
 			getHalfEdge(num).setAdj(link);
 		}
 	
-		@Override
-		public int getAdjLocalNumber(int num)
-		{
-			return getHalfEdge(num).getLocalNumber();
-		}
-	
-		@Override
-		public void setAdjLocalNumber(int num, int pos)
-		{
-			throw new RuntimeException();
-		}
-	
 		// Helper functions
 		@Override
 		public boolean hasFlag(int flag)

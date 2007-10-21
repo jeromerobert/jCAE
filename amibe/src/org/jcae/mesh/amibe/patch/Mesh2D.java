@@ -22,8 +22,8 @@ package org.jcae.mesh.amibe.patch;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
-import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.AbstractVertex;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
@@ -249,10 +249,10 @@ public class Mesh2D extends Mesh
 			v2 = v1;
 			v1 = temp;
 		}
-		Triangle first = (Triangle) factory.createTriangle(v0, v1, v2);
-		Triangle adj0 = (Triangle) factory.createTriangle(outerVertex, v2, v1);
-		Triangle adj1 = (Triangle) factory.createTriangle(outerVertex, v0, v2);
-		Triangle adj2 = (Triangle) factory.createTriangle(outerVertex, v1, v0);
+		TriangleVH first = (TriangleVH) factory.createTriangle(v0, v1, v2);
+		TriangleVH adj0 = (TriangleVH) factory.createTriangle(outerVertex, v2, v1);
+		TriangleVH adj1 = (TriangleVH) factory.createTriangle(outerVertex, v0, v2);
+		TriangleVH adj2 = (TriangleVH) factory.createTriangle(outerVertex, v1, v0);
 		VirtualHalfEdge2D ot = new VirtualHalfEdge2D(first, 0);
 		VirtualHalfEdge2D oa0 = new VirtualHalfEdge2D(adj0, 0);
 		VirtualHalfEdge2D oa1 = new VirtualHalfEdge2D(adj1, 0);
@@ -304,7 +304,7 @@ public class Mesh2D extends Mesh
 		throws InitialTriangulationException
 	{
 		assert (start != end);
-		Triangle t = (Triangle) start.getLink();
+		TriangleVH t = (TriangleVH) start.getLink();
 		VirtualHalfEdge2D s = new VirtualHalfEdge2D(t, 0);
 		if (s.origin() != start)
 			s.next();
@@ -518,7 +518,7 @@ public class Mesh2D extends Mesh
 		{
 			if (removedTriangles.contains(at))
 				continue;
-			Triangle t = (Triangle) at;
+			TriangleVH t = (TriangleVH) at;
 			if (t.isOuter())
 				continue;
 			ot.bind(t);

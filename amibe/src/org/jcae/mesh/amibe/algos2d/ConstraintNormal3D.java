@@ -21,7 +21,7 @@
 
 package org.jcae.mesh.amibe.algos2d;
 
-import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.patch.Mesh2D;
@@ -69,7 +69,7 @@ public class ConstraintNormal3D
 	 */
 	public void compute()
 	{
-		Triangle t;
+		TriangleVH t;
 		VirtualHalfEdge2D ot, sym;
 		int cnt = 0;
 		mesh.pushCompGeom(3);
@@ -89,7 +89,7 @@ public class ConstraintNormal3D
 			niter--;
 			for (AbstractTriangle at: mesh.getTriangles())
 			{
-				t = (Triangle) at;
+				t = (TriangleVH) at;
 				ot.bind(t);
 				for (int i = 0; i < 3; i++)
 				{
@@ -100,7 +100,7 @@ public class ConstraintNormal3D
 			
 			for (AbstractTriangle at: mesh.getTriangles())
 			{
-				t = (Triangle) at;
+				t = (TriangleVH) at;
 				ot.bind(t);
 				int l = -1;
 				double best = 0.0;
@@ -109,7 +109,7 @@ public class ConstraintNormal3D
 					ot.next();
 					if (!ot.isMutable())
 						continue;
-					sym.bind(ot.getTri(), ot.getLocalNumber());
+					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
 					sym.sym();
 					if (ot.hasAttributes(AbstractHalfEdge.SWAPPED) || sym.hasAttributes(AbstractHalfEdge.SWAPPED))
 						continue;

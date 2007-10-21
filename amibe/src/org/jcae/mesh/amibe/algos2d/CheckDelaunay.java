@@ -21,7 +21,7 @@
 
 package org.jcae.mesh.amibe.algos2d;
 
-import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.patch.Mesh2D;
@@ -58,10 +58,10 @@ public class CheckDelaunay
 	
 	private static final class FakeEdge
 	{
-		private final Triangle triangle;
+		private final TriangleVH triangle;
 		private final int localNumber;
 
-		private FakeEdge(Triangle t, int l)
+		private FakeEdge(TriangleVH t, int l)
 		{
 			triangle = t;
 			localNumber = l;
@@ -73,7 +73,7 @@ public class CheckDelaunay
 	 */
 	public void compute()
 	{
-		Triangle t;
+		TriangleVH t;
 		VirtualHalfEdge2D ot, sym;
 		Vertex2D v;
 		int cnt = 0;
@@ -93,13 +93,13 @@ public class CheckDelaunay
 			niter--;
 			for (AbstractTriangle at: oldList)
 			{
-				t = (Triangle) at;
+				t = (TriangleVH) at;
 				ot.bind(t);
 				for (int i = 0; i < 3; i++)
 				{
 					ot.next();
 					ot.clearAttributes(AbstractHalfEdge.SWAPPED);
-					sym.bind(ot.getTri(), ot.getLocalNumber());
+					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
 					sym.sym();
 					sym.clearAttributes(AbstractHalfEdge.SWAPPED);
 				}
@@ -107,7 +107,7 @@ public class CheckDelaunay
 			
 			for (AbstractTriangle at: oldList)
 			{
-				t = (Triangle) at;
+				t = (TriangleVH) at;
 				ot.bind(t);
 				ot.prev();
 				for (int i = 0; i < 3; i++)
@@ -115,7 +115,7 @@ public class CheckDelaunay
 					ot.next();
 					if (!ot.isMutable())
 						continue;
-					sym.bind(ot.getTri(), ot.getLocalNumber());
+					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
 					sym.sym();
 					if (ot.hasAttributes(AbstractHalfEdge.SWAPPED) || sym.hasAttributes(AbstractHalfEdge.SWAPPED))
 						continue;
@@ -138,7 +138,7 @@ public class CheckDelaunay
 				if (ot.hasAttributes(AbstractHalfEdge.SWAPPED))
 				{
 					newList.add(ot.getTri());
-					sym.bind(ot.getTri(), ot.getLocalNumber());
+					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
 					sym.sym();
 					newList.add(sym.getTri());
 					mesh.edgeSwap(ot);

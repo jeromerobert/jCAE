@@ -21,7 +21,7 @@
 
 package org.jcae.mesh.amibe.algos2d;
 
-import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractVertex;
@@ -106,7 +106,7 @@ public class Insertion
 			nodes.clear();
 			for(Iterator<AbstractTriangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
-				Triangle t = (Triangle) it.next();
+				TriangleVH t = (TriangleVH) it.next();
 				if (t.isOuter())
 					continue;
 				ot.bind(t);
@@ -121,7 +121,7 @@ public class Insertion
 			}
 			for(Iterator<AbstractTriangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
-				Triangle t = (Triangle) it.next();
+				TriangleVH t = (TriangleVH) it.next();
 				if (t.isOuter())
 					continue;
 				ot.bind(t);
@@ -133,7 +133,7 @@ public class Insertion
 					if (ot.hasAttributes(AbstractHalfEdge.MARKED))
 						continue;
 					ot.setAttributes(AbstractHalfEdge.MARKED);
-					sym.bind(ot.getTri(), ot.getLocalNumber());
+					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
 					sym.sym();
 					if (sym.hasAttributes(AbstractHalfEdge.MARKED))
 						continue;
@@ -203,7 +203,7 @@ public class Insertion
 			//  Try to insert triangle centroid after all other points.
 			for (Iterator<AbstractTriangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
-				Triangle t = (Triangle) it.next();
+				TriangleVH t = (TriangleVH) it.next();
 				if (t.isOuter())
 					continue;
 				Vertex2D v = Vertex2D.centroid(mesh, (Vertex2D[]) t.vertex);

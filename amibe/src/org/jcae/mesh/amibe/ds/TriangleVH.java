@@ -90,6 +90,20 @@ public class TriangleVH extends Triangle
 		return ot;
 	}
 
+	public int getAdjLocalNumber(int num)
+	{
+		return (((AdjacencyVH) adj).adjPos >> (2*num)) & 3;
+	}
+
+	public void setAdjLocalNumber(int num, int pos)
+	{
+		AdjacencyVH that = (AdjacencyVH) adj;
+		//  Clear previous adjacent position ...
+		that.adjPos &= ~(3 << (2*num));
+		//  ... and set it right
+		that.adjPos |= (pos << (2*num));
+	}
+		
 	private static class AdjacencyVH implements AdjacencyWrapper
 	{
 		/**
@@ -155,27 +169,6 @@ public class TriangleVH extends Triangle
 			adj[num] = (TriangleVH) link;
 		}
 		
-		/**
-		 * Return the local number of symmetric edge in adjacent AbstractTriangle.
-		 *
-		 * @param num  the local number of this edge.
-		 * @return the local number of symmetric edge in adjacent AbstractTriangle.
-		 */
-		@Override
-		public int getAdjLocalNumber(int num)
-		{
-			return (adjPos >> (2*num)) & 3;
-		}
-		
-		@Override
-		public void setAdjLocalNumber(int num, int pos)
-		{
-			//  Clear previous adjacent position ...
-			adjPos &= ~(3 << (2*num));
-			//  ... and set it right
-			adjPos |= (pos << (2*num));
-		}
-		
 		// Helper functions
 		@Override
 		public boolean hasFlag(int flag)
@@ -211,6 +204,11 @@ public class TriangleVH extends Triangle
 			edgeAttributes[num] = (byte) attributes;
 		}
 		
+		private int getAdjLocalNumber(int num)
+		{
+			return (adjPos >> (2*num)) & 3;
+		}
+
 		@SuppressWarnings("unchecked")
 		private final String showAdj(int num)
 		{

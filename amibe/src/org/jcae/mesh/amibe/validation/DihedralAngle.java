@@ -20,7 +20,7 @@
 
 package org.jcae.mesh.amibe.validation;
 
-import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
@@ -47,9 +47,9 @@ public class DihedralAngle extends QualityProcedure
 	@Override
 	public float quality(Object o)
 	{
-		if (!(o instanceof Triangle))
+		if (!(o instanceof TriangleVH))
 			throw new IllegalArgumentException();
-		Triangle t = (Triangle) o;
+		TriangleVH t = (TriangleVH) o;
 		ot.bind(t);
 		float ret = 1.0f;
 		for (int i = 0; i < 3; i++)
@@ -59,7 +59,7 @@ public class DihedralAngle extends QualityProcedure
 				continue;
 			if (ot.getAdj() == null)
 				continue;
-			sym.bind(ot.getTri(), ot.getLocalNumber());
+			sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
 			sym.sym();
 			if (t.getGroupId() != sym.getTri().getGroupId())
 				continue;

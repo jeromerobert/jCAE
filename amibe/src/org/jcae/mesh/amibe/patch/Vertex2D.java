@@ -24,7 +24,7 @@ import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
-import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
 import org.jcae.mesh.amibe.util.LongLong;
@@ -210,7 +210,7 @@ public class Vertex2D extends Vertex
 		if (logger.isDebugEnabled())
 			logger.debug("Searching for the triangle surrounding "+this);
 		AbstractTriangle.List tList = new AbstractTriangle.List();
-		Triangle t = (Triangle) mesh.getQuadTree().getNearestVertex(mesh, this).getLink();
+		TriangleVH t = (TriangleVH) mesh.getQuadTree().getNearestVertex(mesh, this).getLink();
 		VirtualHalfEdge2D start = new VirtualHalfEdge2D(t, 0);
 		VirtualHalfEdge2D current = getSurroundingOTriangleStart(mesh, start, tList);
 		if (current == null)
@@ -218,7 +218,7 @@ public class Vertex2D extends Vertex
 			// First, try with neighbours
 			for (Iterator<AbstractTriangle> it = tList.iterator(); it.hasNext(); )
 			{
-				t = (Triangle) it.next();
+				t = (TriangleVH) it.next();
 				start.bind(t);
 				for (int i = 0; i < 3; i++)
 				{
@@ -241,7 +241,7 @@ public class Vertex2D extends Vertex
 			// As a last resort, check with all triangles
 			for (AbstractTriangle at: mesh.getTriangles())
 			{
-				t = (Triangle) at;
+				t = (TriangleVH) at;
 				start.bind(t);
 				current = getSurroundingOTriangleStart(mesh, start, tList);
 				if (current != null)

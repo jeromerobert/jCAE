@@ -2,6 +2,12 @@ Sun Oct 21 20:41:07 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/traits/MeshTraitsBuilder.java: Always add
 	TRIANGLES attribute, we can do nothing if this attribute is unset.
+	* src/org/jcae/mesh/amibe/ds/AdjacencyWrapper.java
+	  src/org/jcae/mesh/amibe/ds/TriangleVH.java:  Move
+	{get,set}AdjLocalNumber() methods from AdjacencyWrapper into
+	TriangleVH.
+	* src/org/jcae/mesh/amibe/ds/VirtualHalfEdge.java: Let tri member be
+	a TriangleVH instance instance of Triangle.
 
 Sat Oct 20 00:13:49 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

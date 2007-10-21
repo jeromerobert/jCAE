@@ -44,11 +44,6 @@ public abstract class Triangle extends AbstractTriangle implements Serializable
 		adj.copy(src.adj);
 	}
 	
-	public void setAdjLocalNumber(int num, int pos)
-	{
-		adj.setAdjLocalNumber(num, pos);
-	}
-	
 	/**
 	 * Return the adjacent AbstractTriangle.
 	 * Note: this routine is not very helpful, caller can only check
@@ -73,17 +68,6 @@ public abstract class Triangle extends AbstractTriangle implements Serializable
 	public void setAdj(int num, Object link)
 	{
 		adj.setAdj(num, link);
-	}
-	
-	/**
-	 * Return the local number of symmetric edge in adjacent AbstractTriangle.
-	 *
-	 * @param num  the local number of this edge.
-	 * @return the local number of symmetric edge in adjacent AbstractTriangle.
-	 */
-	public int getAdjLocalNumber(int num)
-	{
-		return adj.getAdjLocalNumber(num);
 	}
 	
 	/**
