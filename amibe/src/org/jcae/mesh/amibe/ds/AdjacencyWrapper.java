@@ -66,22 +66,6 @@ public interface AdjacencyWrapper
 	public boolean hasAttributes(int attr);
 
 	/**
-	 * Gets attributes of an edge.
-	 *
-	 * @param num  edge local number
-	 * @return     attributes of this edge
-	 */
-	public int getEdgeAttributes(int num);
-
-	/**
-	 * Sets attributes of an edge.
-	 *
-	 * @param num   edge local number
-	 * @param attr  attributes to set on this edge
-	 */
-	public void setEdgeAttributes(int num, int attr);
-
-	/**
 	 * Deep copy of another <code>AdjacencyWrapper</code> into current instance.
 	 *
 	 * @param src   object being copied into current instance

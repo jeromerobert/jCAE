@@ -122,6 +122,16 @@ public class TriangleVH extends Triangle
 		that.adjPos |= (pos << (2*num));
 	}
 
+	public void setEdgeAttributes(int num, int attributes)
+	{
+		((AdjacencyVH) adj).edgeAttributes[num] = (byte) attributes;
+	}
+
+	public int getEdgeAttributes(int num)
+	{
+		return ((AdjacencyVH) adj).edgeAttributes[num];
+	}
+		
 	private static class AdjacencyVH implements AdjacencyWrapper
 	{
 		/**
@@ -227,18 +237,6 @@ public class TriangleVH extends Triangle
 			return ((edgeAttributes[0] | edgeAttributes[1] | edgeAttributes[2]) & attr) != 0;
 		}
 	
-		@Override
-		public int getEdgeAttributes(int num)
-		{
-			return edgeAttributes[num];
-		}
-		
-		@Override
-		public void setEdgeAttributes(int num, int attributes)
-		{
-			edgeAttributes[num] = (byte) attributes;
-		}
-		
 		private int getAdjLocalNumber(int num)
 		{
 			return (adjPos >> (2*num)) & 3;

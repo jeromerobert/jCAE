@@ -29,7 +29,7 @@ import java.io.Serializable;
 public abstract class Triangle extends AbstractTriangle implements Serializable
 {
 	/**
-	 * Wrapper object to which mathods on adjacency relations are delegated.
+	 * Wrapper object to which methods on adjacency relations are delegated.
 	 */
 	protected AdjacencyWrapper adj = null;
 
@@ -100,16 +100,6 @@ public abstract class Triangle extends AbstractTriangle implements Serializable
 	public boolean hasAttributes(int attr)
 	{
 		return adj.hasAttributes(attr);
-	}
-	
-	public int getEdgeAttributes(int num)
-	{
-		return adj.getEdgeAttributes(num);
-	}
-	
-	public void setEdgeAttributes(int num, int attributes)
-	{
-		adj.setEdgeAttributes(num, attributes);
 	}
 	
 	public abstract AbstractHalfEdge getAbstractHalfEdge();

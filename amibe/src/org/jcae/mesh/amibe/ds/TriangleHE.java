@@ -145,18 +145,6 @@ public class TriangleHE extends Triangle
 			return (edge.hasAttributes(attr) | edge.next().hasAttributes(attr) | edge.prev().hasAttributes(attr));
 		}
 	
-		@Override
-		public int getEdgeAttributes(int num)
-		{
-			return getHalfEdge(num).getAttributes();
-		}
-		
-		@Override
-		public void setEdgeAttributes(int num, int attributes)
-		{
-			getHalfEdge(num).setAttributes((byte) attributes);
-		}
-		
 		private static String showHalfEdge(AbstractHalfEdge a)
 		{
 			HalfEdge e = (HalfEdge) a;

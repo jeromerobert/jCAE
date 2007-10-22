@@ -7,6 +7,9 @@ Mon Oct 22 10:20:49 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	isOuter(), isMarked() and friends methods, and add setAttributes(),
 	clearAttributes() and hasAttributes() to have the same methods for
 	edges and triangles.
+	* src/org/jcae/mesh/amibe/ds/AdjacencyWrapper.java
+	  src/org/jcae/mesh/amibe/ds/TriangleVH.java: Move getEdgeAttributes()
+	and setEdgeAttributes() from AdjacencyWrapper into TriangleVH.
 
 Sun Oct 21 20:41:07 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
