@@ -90,11 +90,29 @@ public class TriangleVH extends Triangle
 		return ot;
 	}
 
+	/**
+	 * Gets local number of a symmetric edge.  With <code>TriangleVH</code>,
+	 * <code>adj.getAdj(int)</code> returns a <code>TriangleVH</code> instance,
+	 * but we also need the local number of symmetric edge in adjacent triangle.
+	 * This is performed by this method.
+	 *
+	 * @param num   edge local number
+	 * @return  local number of this symmetric edge
+	 */
 	public int getAdjLocalNumber(int num)
 	{
 		return (((AdjacencyVH) adj).adjPos >> (2*num)) & 3;
 	}
 
+	/**
+	 * Sets local number of a symmetric edge.  With <code>TriangleVH</code>,
+	 * <code>adj.setAdj(int, Object)</code> sets <code>TriangleVH</code> instance
+	 * adjacent to an edge, but we also need to store the local number of symmetric
+	 * edge in adjacent triangle.  This is performed by this method.
+	 *
+	 * @param num   edge local number
+	 * @param pos   local number of symmetric edge
+	 */
 	public void setAdjLocalNumber(int num, int pos)
 	{
 		AdjacencyVH that = (AdjacencyVH) adj;

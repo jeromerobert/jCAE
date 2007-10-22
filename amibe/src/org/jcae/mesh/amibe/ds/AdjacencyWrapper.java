@@ -20,10 +20,26 @@
 
 package org.jcae.mesh.amibe.ds;
 
+/**
+ * Interface describing adjacency relations between triangles.  This interface is
+ * used by {@link Triangle#adj} and implementations can be found in inner classes
+ * of {@link TriangleHE} and {@link TriangleVH}.
+ */
 public interface AdjacencyWrapper
 {
 
+	/**
+	 * Gets symmetric of edge <code>num</code>.
+	 *
+	 * @return  symmetric of edge <code>num</code>.
+	 */
 	public Object getAdj(int num);
+
+	/**
+	 * Sets symmetric of edge <code>num</code>.
+	 *
+	 * @param  link   object to link to edge <code>num</code>.
+	 */
 	public void setAdj(int num, Object link);
 
 	/**
@@ -49,8 +65,26 @@ public interface AdjacencyWrapper
 	 */
 	public boolean hasAttributes(int attr);
 
+	/**
+	 * Gets attributes of an edge.
+	 *
+	 * @param num  edge local number
+	 * @return     attributes of this edge
+	 */
 	public int getEdgeAttributes(int num);
-	public void setEdgeAttributes(int num, int attributes);
 
+	/**
+	 * Sets attributes of an edge.
+	 *
+	 * @param num   edge local number
+	 * @param attr  attributes to set on this edge
+	 */
+	public void setEdgeAttributes(int num, int attr);
+
+	/**
+	 * Deep copy of another <code>AdjacencyWrapper</code> into current instance.
+	 *
+	 * @param src   object being copied into current instance
+	 */
 	public void copy(AdjacencyWrapper src);
 }
