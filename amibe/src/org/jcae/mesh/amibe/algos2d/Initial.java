@@ -316,6 +316,7 @@ public class Initial
 		do
 		{
 			ot.getTri().setAttributes(AbstractHalfEdge.OUTER);
+			ot.getTri().setWritable(false);
 			tList.add(ot.getTri());
 			// Move counterclockwise to following edge with
 			// the same apex.
@@ -352,14 +353,20 @@ public class Initial
 					if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
 					{
 						if (!outer)
+						{
 							newHead.setAttributes(AbstractHalfEdge.OUTER);
+							newHead.setWritable(false);
+						}
 						else if (sym.hasAttributes(AbstractHalfEdge.OUTER))
 								throw new InitialTriangulationException();
 					}
 					else
 					{
 						if (outer)
+						{
 							newHead.setAttributes(AbstractHalfEdge.OUTER);
+							newHead.setWritable(false);
+						}
 						else if (sym.hasAttributes(AbstractHalfEdge.OUTER))
 								throw new InitialTriangulationException();
 					}
