@@ -107,10 +107,7 @@ public class ElementFactory implements ElementFactoryInterface
 	public AbstractTriangle createTriangle(AbstractTriangle that)
 	{
 		AbstractTriangle ret = createTriangle();
-		if (ret instanceof Triangle)
-			((Triangle) ret).copy((Triangle) that);
-		else
-			ret.copy(that);
+		ret.copy(that);
 		return ret;
 	}
 

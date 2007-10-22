@@ -29,6 +29,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
 import javax.media.j3d.Appearance;
+import javax.media.j3d.GeometryArray;
 import javax.media.j3d.QuadArray;
 import javax.media.j3d.LineArray;
 import javax.media.j3d.PointArray;
@@ -60,6 +61,7 @@ public class QuadTreeSample
 		{
 			coord = new double[8*n];
 		}
+		@Override
 		public final int action(Object o, int s, final int [] i0)
 		{
 			int [] ii = { i0[0], i0[1] };
@@ -90,6 +92,7 @@ public class QuadTreeSample
 	/*
 	private class CheckCoordProcedure implements KdTreeProcedure
 	{
+		@Override
 		public final int action(Object o, int s, int i0, int j0)
 		{
 			KdTree.Cell self = (KdTree.Cell) o;
@@ -130,6 +133,7 @@ public class QuadTreeSample
 		{
 			coord = new double[2*n];
 		}
+		@Override
 		public final int action(Object o, int s, final int [] i0)
 		{
 			KdTree.Cell self = (KdTree.Cell) o;
@@ -149,7 +153,11 @@ public class QuadTreeSample
 	
 	private static class CountVertProcedure implements KdTreeProcedure
 	{
-		private int count;
+		int count;
+		public CountVertProcedure()
+		{
+		}
+		@Override
 		public final int action(Object o, int s, final int [] i0)
 		{
 			KdTree.Cell self = (KdTree.Cell) o;
@@ -203,10 +211,10 @@ public class QuadTreeSample
 		
 		CoordProcedure proc = new CoordProcedure(quadtree.nCells);
 		quadtree.walk(proc);
-		QuadArray quad = new QuadArray(4*quadtree.nCells, QuadArray.COORDINATES);
-		quad.setCapability(QuadArray.ALLOW_FORMAT_READ);
-		quad.setCapability(QuadArray.ALLOW_COUNT_READ);
-		quad.setCapability(QuadArray.ALLOW_COORDINATE_READ);
+		QuadArray quad = new QuadArray(4*quadtree.nCells, GeometryArray.COORDINATES);
+		quad.setCapability(GeometryArray.ALLOW_FORMAT_READ);
+		quad.setCapability(GeometryArray.ALLOW_COUNT_READ);
+		quad.setCapability(GeometryArray.ALLOW_COORDINATE_READ);
 		double [] xc = new double[12*quadtree.nCells];
 		for (int i = 0; i < 4*quadtree.nCells; i++)
 		{
@@ -232,7 +240,7 @@ public class QuadTreeSample
 		int nVertices = cproc.count;
 		CoordVertProcedure vproc = new CoordVertProcedure(nVertices);
 		quadtree.walk(vproc);
-		PointArray p = new PointArray(nVertices, PointArray.COORDINATES);
+		PointArray p = new PointArray(nVertices, GeometryArray.COORDINATES);
 		double [] xv = new double[3*nVertices];
 		for (int i = 0; i < nVertices; i++)
 		{
@@ -254,7 +262,7 @@ public class QuadTreeSample
 	public BranchGroup segment(Vertex2D vt, Vertex2D vn, float depth, float r, float g, float b)
 	{
 		BranchGroup bg = new BranchGroup();
-		LineArray line = new LineArray(2, LineArray.COORDINATES | LineArray.COLOR_3);
+		LineArray line = new LineArray(2, GeometryArray.COORDINATES | GeometryArray.COLOR_3);
 		double [] xcoord = new double[6];
 		double [] pvt = vt.getUV();
 		double [] pvn = vn.getUV();

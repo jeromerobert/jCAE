@@ -28,6 +28,7 @@ import org.jcae.mesh.cad.CADFace;
 import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.mesh.cad.CADShapeEnum;
 import javax.media.j3d.Appearance;
+import javax.media.j3d.IndexedGeometryArray;
 import javax.media.j3d.IndexedTriangleArray;
 import javax.media.j3d.PointArray;
 import javax.media.j3d.GeometryArray;
@@ -199,7 +200,7 @@ public class SampleBora2D
 		l.setCapability(GeometryArray.ALLOW_COUNT_READ);
 		l.setCapability(GeometryArray.ALLOW_FORMAT_READ);
 		l.setCapability(GeometryArray.ALLOW_REF_DATA_READ);
-		l.setCapability(IndexedTriangleArray.ALLOW_COORDINATE_INDEX_READ);
+		l.setCapability(IndexedGeometryArray.ALLOW_COORDINATE_INDEX_READ);
 
 		Appearance triaApp = new Appearance();
 		triaApp.setPolygonAttributes(new PolygonAttributes(PolygonAttributes.POLYGON_LINE, PolygonAttributes.CULL_NONE, 0));
@@ -225,7 +226,7 @@ public class SampleBora2D
 		// 2D nodes
 		++iRet;
 		ret[iRet] = new BranchGroup();
-		PointArray p2 = new PointArray(nVertices, PointArray.COORDINATES);
+		PointArray p2 = new PointArray(nVertices, GeometryArray.COORDINATES);
 		p2.setCoordinates(0, x3d2);
 		Appearance vert2App = new Appearance();
 		vert2App.setPointAttributes(pa);
@@ -238,7 +239,7 @@ public class SampleBora2D
 		// 3D nodes
 		++iRet;
 		ret[iRet] = new BranchGroup();
-		PointArray p = new PointArray(nVertices, PointArray.COORDINATES);
+		PointArray p = new PointArray(nVertices, GeometryArray.COORDINATES);
 		p.setCoordinates(0, xyz);
 
 		Appearance vertApp = new Appearance();

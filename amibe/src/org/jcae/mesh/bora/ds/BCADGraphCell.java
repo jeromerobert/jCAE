@@ -46,7 +46,7 @@ public class BCADGraphCell
 	/**
 	 * Link to root graph.
 	 */
-	private BCADGraph graph;
+	BCADGraph graph;
 	/**
 	 * CAD shape.
 	 */

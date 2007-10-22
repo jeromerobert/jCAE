@@ -47,10 +47,10 @@ import org.jcae.viewer3d.bg.ViewableBG;
 
 public class MeshOEMMCoarseViewer
 {
-	private static boolean showOctree = false;
-	private static boolean showAxis = true;
-	private static boolean showFPS = true;
-	private static Logger logger = Logger.getLogger(MeshOEMMCoarseViewer.class);
+	static boolean showOctree = false;
+	static boolean showAxis = true;
+	static boolean showFPS = true;
+	static Logger logger = Logger.getLogger(MeshOEMMCoarseViewer.class);
 	/**
 	 * @param args
 	 */
@@ -200,7 +200,7 @@ public class MeshOEMMCoarseViewer
 		feFrame.setVisible(true);
 	}
 
-	private static final void printInteractiveUsage()
+	static final void printInteractiveUsage()
 	{
 		System.out.println("Key usage:");
 		System.out.println("  ?: Display this help message");
@@ -216,7 +216,7 @@ public class MeshOEMMCoarseViewer
 		System.out.println("  c: Print cache statistics");
 	}
 
-	private static final void printMeshStatistics(String header, OEMM oemm)
+	static final void printMeshStatistics(String header, OEMM oemm)
 	{
 		int triangles = 0;
 		int vertices = 0;

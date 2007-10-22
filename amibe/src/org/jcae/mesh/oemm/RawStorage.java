@@ -59,7 +59,7 @@ import org.apache.log4j.Logger;
  */
 public class RawStorage
 {
-	private static Logger logger = Logger.getLogger(RawStorage.class);	
+	static Logger logger = Logger.getLogger(RawStorage.class);	
 
 	//  In triangle soup, a triangle has 9 double coordinates and two ints.
 	private static final int TRIANGLE_SIZE_RAW = 80;
@@ -73,9 +73,9 @@ public class RawStorage
 	// As TRIANGLE_SIZE_RAW is 2*TRIANGLE_SIZE_DISPATCHED, the latter
 	// does not need to be taken into account
 	private static final int bufferSize = (TRIANGLE_SIZE_RAW * VERTEX_SIZE_INDEXED * TRIANGLE_SIZE_INDEXED);
-	private static ByteBuffer bb = ByteBuffer.allocate(bufferSize);
-	private static ByteBuffer bbt = ByteBuffer.allocate(bufferSize);
-	private static ByteBuffer bbpos = ByteBuffer.allocate(8);
+	static ByteBuffer bb = ByteBuffer.allocate(bufferSize);
+	static ByteBuffer bbt = ByteBuffer.allocate(bufferSize);
+	static ByteBuffer bbpos = ByteBuffer.allocate(8);
 
 	public static interface SoupReaderInterface
 	{
@@ -223,6 +223,7 @@ public class RawStorage
 				bbox[k+3] = Double.MIN_VALUE;
 			}
 		}
+		@Override
 		public void processVertex(int i, double [] xyz)
 		{
 			for (int k = 0; k < 3; k++)
@@ -238,6 +239,7 @@ public class RawStorage
 			else
 				cells[i] = oemm.search(ijk);
 		}
+		@Override
 		public void processTriangle(int group)
 		{
 			nrTriangles++;
@@ -344,6 +346,7 @@ public class RawStorage
 			fc = f;
 			buffers = m;
 		}
+		@Override
 		public void processVertex(int i, double [] xyz)
 		{
 			oemm.double2int(xyz, ijk9);
@@ -354,6 +357,7 @@ public class RawStorage
 					ijk9[3*i+3+j] = ijk9[j];
 			}
 		}
+		@Override
 		public void processTriangle(int group)
 		{
 			try
@@ -373,7 +377,7 @@ public class RawStorage
 		}
 	}
 
-	private static final void addToCell(FileChannel fc, OEMM.Node current, Map<OEMM.Node, ByteBuffer> buffers, int [] ijk, int attribute)
+	static final void addToCell(FileChannel fc, OEMM.Node current, Map<OEMM.Node, ByteBuffer> buffers, int [] ijk, int attribute)
 		throws IOException
 	{
 		assert current.counter <= fc.size();
@@ -408,6 +412,9 @@ public class RawStorage
 	private static final class ComputeOffsetProcedure extends TraversalProcedure
 	{
 		private long offset = 0L;
+		ComputeOffsetProcedure()
+		{
+		}
 		@Override
 		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
@@ -434,6 +441,9 @@ public class RawStorage
 	private static final class ComputeMinMaxIndicesProcedure extends TraversalProcedure
 	{
 		private int nrLeaves = 0;
+		ComputeMinMaxIndicesProcedure()
+		{
+		}
 		@Override
 		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
@@ -454,7 +464,7 @@ public class RawStorage
 	{
 		private FileChannel fc;
 		private Map<OEMM.Node, ByteBuffer> buffers;
-		public FlushBuffersProcedure(FileChannel channel, Map<OEMM.Node, ByteBuffer> m)
+		FlushBuffersProcedure(FileChannel channel, Map<OEMM.Node, ByteBuffer> m)
 		{
 			fc = channel;
 			buffers = m;
@@ -500,7 +510,7 @@ public class RawStorage
 	private static final class WriteStructureProcedure extends TraversalProcedure
 	{
 		private DataOutputStream out;
-		public WriteStructureProcedure(DataOutputStream outStream, String dataFile, int l, double [] x0)
+		WriteStructureProcedure(DataOutputStream outStream, String dataFile, int l, double [] x0)
 			throws IOException
 		{
 			out = outStream;
@@ -670,7 +680,7 @@ public class RawStorage
 		private ArrayList<String> path = new ArrayList<String>();
 		private int [] ijk = new int[3];
 		private int room = 0;
-		public IndexInternalVerticesProcedure(FileInputStream in, ObjectOutputStream headerOut, String dir)
+		IndexInternalVerticesProcedure(FileInputStream in, ObjectOutputStream headerOut, String dir)
 		{
 			fc = in.getChannel();
 			outDir = dir;
@@ -896,7 +906,7 @@ public class RawStorage
 		private PAVLTreeIntArrayDup [] vertices;
 		private SoftReference<PAVLTreeIntArrayDup> [] sr;
 		private int nr_ld_leaves = 0;
-		public IndexExternalVerticesProcedure(FileInputStream in)
+		IndexExternalVerticesProcedure(FileInputStream in)
 		{
 			fc = in.getChannel();
 		}
@@ -1017,6 +1027,9 @@ public class RawStorage
 	{
 		private int [] ijk = new int[3];
 		private double [] xyz = new double[3];
+		ConvertVertexCoordinatesProcedure()
+		{
+		}
 		@Override
 		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
@@ -1070,7 +1083,7 @@ public class RawStorage
 		}
 	}
 	
-	private static PAVLTreeIntArrayDup loadVerticesInAVLTreeDup(String outDir, OEMM.Node current)
+	static PAVLTreeIntArrayDup loadVerticesInAVLTreeDup(String outDir, OEMM.Node current)
 	{
 		PAVLTreeIntArrayDup ret = new PAVLTreeIntArrayDup();
 		int [] ijk = new int[3];

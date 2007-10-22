@@ -37,7 +37,7 @@ public class PAVLSortedTree extends QSortedTree
 	private static class Node extends QSortedTree.Node
 	{
 		//  balanceFactor = height(rightSubTree) - height(leftSubTree)
-		private int balanceFactor = 0;
+		int balanceFactor = 0;
 		
 		public Node(Object o, double v)
 		{

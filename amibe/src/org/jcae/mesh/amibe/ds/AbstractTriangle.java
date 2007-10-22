@@ -43,7 +43,7 @@ public class AbstractTriangle
 	// connectivity has been set up.  This can be achieved efficiently
 	// with a singly linked list.
 	// Reference to the next element in the singly linked list.
-	private AbstractTriangle listNext = null;
+	AbstractTriangle listNext = null;
 	
 	//  User-defined traits
 	protected final TriangleTraitsBuilder traitsBuilder;
@@ -176,9 +176,9 @@ public class AbstractTriangle
 	public static class List
 	{
 		//   Head of the list.  Triangles are linked from this instance.
-		private final AbstractTriangle listHead = new AbstractTriangle();
+		final AbstractTriangle listHead = new AbstractTriangle();
 		//   Sentinel.  This triangle is always the last triangle of the list.
-		private final AbstractTriangle listSentinel = new AbstractTriangle();
+		final AbstractTriangle listSentinel = new AbstractTriangle();
 		//   Reference to the last collected triangle.
 		private AbstractTriangle listTail = listHead;
 		//   Number of collected items (for debugging purpose, can be removed).

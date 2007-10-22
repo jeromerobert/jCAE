@@ -46,7 +46,7 @@ public class PRedBlackSortedTree extends QSortedTree
 	private static Logger logger = Logger.getLogger(PRedBlackSortedTree.class);	
 	private static class Node extends QSortedTree.Node
 	{
-		private boolean isRed;
+		boolean isRed;
 		
 		@Override
 		public QSortedTree.Node [] newChilds()

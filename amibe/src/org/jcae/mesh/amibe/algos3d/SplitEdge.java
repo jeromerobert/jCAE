@@ -21,9 +21,9 @@
 
 package org.jcae.mesh.amibe.algos3d;
 
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.HalfEdge;
-import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
@@ -124,7 +124,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		for (int i = 0; i < 3; i++)
 			newXYZ[i] = 0.5*(p0[i]+p1[i]);
 		insertedVertex = (Vertex) mesh.createVertex(newXYZ);
-		if (current.hasAttributes(VirtualHalfEdge.BOUNDARY | VirtualHalfEdge.NONMANIFOLD))
+		if (current.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 		{
 			// FIXME: Check deflection
 			mesh.setRefVertexOnboundary(insertedVertex);
@@ -146,7 +146,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		if (tolerance <= 0.0)
 			return true;
 		double dapex = insertedVertex.distance3D(current.apex());
-		if (!current.hasAttributes(VirtualHalfEdge.BOUNDARY | VirtualHalfEdge.NONMANIFOLD))
+		if (!current.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 		{
 			current = (HalfEdge) current.sym();
 			dapex = Math.min(dapex, insertedVertex.distance3D(current.apex()));

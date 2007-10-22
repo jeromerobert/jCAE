@@ -57,14 +57,14 @@ import org.jcae.viewer3d.View;
  */
 public class MeshOEMMViewer3d
 {
-	private static Logger logger=Logger.getLogger(MeshOEMMViewer3d.class);
-	private static ViewableBG fineMesh;
-	private static ViewableFE decMesh;
+	static Logger logger=Logger.getLogger(MeshOEMMViewer3d.class);
+	static ViewableBG fineMesh;
+	static ViewableFE decMesh;
 
-	private static boolean showOctree = true;
-	private static boolean showAxis = true;
-	private static boolean showFPS = false;
-	private static boolean showNonReadableTriangles = false;
+	static boolean showOctree = true;
+	static boolean showAxis = true;
+	static boolean showFPS = false;
+	static boolean showNonReadableTriangles = false;
 
 	public static void main(String args[])
 	{
@@ -249,7 +249,7 @@ public class MeshOEMMViewer3d
 		}
 	}
 
-	private static final void printInteractiveUsage()
+	static final void printInteractiveUsage()
 	{
 		System.out.println("Key usage:");
 		System.out.println("  ?: Display this help message");

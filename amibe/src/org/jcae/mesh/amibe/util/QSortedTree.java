@@ -79,6 +79,7 @@ public abstract class QSortedTree implements Serializable
 			value = v;
 		}
 		
+		@Override
 		public int compareTo(final Object o)
 		{
 			final Node that = (Node) o;
@@ -228,7 +229,7 @@ public abstract class QSortedTree implements Serializable
 	
 		// The following 4 methods are useful for tree traversal.
 		// A NullPointerException is raised if they are used on an empty tree!
-		private Node firstNode()
+		Node firstNode()
 		{
 			Node current = this;
 			while (current.child[0] != null)
@@ -236,7 +237,7 @@ public abstract class QSortedTree implements Serializable
 			return current;
 		}
 	
-		private Node lastNode()
+		Node lastNode()
 		{
 			Node current = this;
 			while (current.child[1] != null)

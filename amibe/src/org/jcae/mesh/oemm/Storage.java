@@ -958,7 +958,7 @@ public class Storage
 	 */
 	private static class VertexIndexHolder
 	{
-		private OEMM.Node containedNode;
+		OEMM.Node containedNode;
 		
 		private int localIndex;
 		

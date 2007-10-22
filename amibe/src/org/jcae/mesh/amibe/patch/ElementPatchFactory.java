@@ -22,7 +22,6 @@ package org.jcae.mesh.amibe.patch;
 
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.AbstractVertex;
-import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.ElementFactoryInterface;
 import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
@@ -40,16 +39,19 @@ public class ElementPatchFactory implements ElementFactoryInterface
 		triangleTraitsBuilder = mtb.getTriangleTraitsBuilder();
 	}
 
+	@Override
 	public AbstractVertex createVertex(double u, double v)
 	{
 		return new Vertex2D(vertexTraitsBuilder, u, v);
 	}
 
+	@Override
 	public AbstractVertex createVertex(double x, double y, double z)
 	{
 		throw new RuntimeException();
 	}
 
+	@Override
 	public AbstractVertex createVertex(double [] x)
 	{
 		assert x.length == 2;
@@ -63,6 +65,7 @@ public class ElementPatchFactory implements ElementFactoryInterface
 		return new AbstractTriangle(triangleTraitsBuilder);
 	}
 	
+	@Override
 	public AbstractTriangle createTriangle(AbstractVertex v0, AbstractVertex v1, AbstractVertex v2)
 	{
 		AbstractTriangle ret = createTriangle();
@@ -77,6 +80,7 @@ public class ElementPatchFactory implements ElementFactoryInterface
 		return ret;
 	}
 
+	@Override
 	public AbstractTriangle createTriangle(AbstractVertex [] v)
 	{
 		AbstractTriangle ret = createTriangle();
@@ -94,17 +98,16 @@ public class ElementPatchFactory implements ElementFactoryInterface
 	/**
 	 * Clone an existing triangle.
 	 */
+	@Override
 	public AbstractTriangle createTriangle(AbstractTriangle that)
 	{
 		AbstractTriangle ret = createTriangle();
 		ret.vertex = new Vertex2D[3];
-		if (ret instanceof Triangle)
-			((Triangle) ret).copy((Triangle) that);
-		else
-			ret.copy(that);
+		ret.copy(that);
 		return ret;
 	}
 
+	@Override
 	public boolean hasAdjacency()
 	{
 		return (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE | TriangleTraitsBuilder.VIRTUALHALFEDGE));

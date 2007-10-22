@@ -167,7 +167,7 @@ public class KdTree
 		 * Otherwise, it contains the number of vertices which are stored
 		 * in the {@link #subCell} array.
 		 */
-		private int nItems = 0;
+		int nItems = 0;
 		
 		/**
 		 * References to bound objects.  This variable either contains
@@ -176,7 +176,7 @@ public class KdTree
 		 * yo vertices.  This compact storage is needed to reduce memory
 		 * usage.
 		 */
-		private Object [] subCell = null;
+		Object [] subCell = null;
 
 		public Cell getSubCell(int [] ijk, int size)
 		{
@@ -202,7 +202,7 @@ public class KdTree
 		}
 	}
 	
-	private final int dimension;
+	final int dimension;
 	private final int nrSub;
 
 	// Integer coordinates (like gridSize) must be long if MAXLEVEL > 30
@@ -346,7 +346,7 @@ public class KdTree
 	 * @param size  cell size of children nodes.
 	 * @return the index of the child node containing this vertex.
 	 */
-	private int indexSubCell(int [] ijk, int size)
+	int indexSubCell(int [] ijk, int size)
 	{
 		int ret = 0;
 		if (size == 0)
@@ -488,6 +488,7 @@ public class KdTree
 		{
 			nodelist = new ArrayList<AbstractVertex>(capacity);
 		}
+		@Override
 		public int action(Object o, int s, final int [] i0)
 		{
 			Cell self = (Cell) o;
@@ -733,6 +734,7 @@ public class KdTree
 			if (idist > Integer.MAX_VALUE/2)
 				idist = Integer.MAX_VALUE/2;
 		}
+		@Override
 		public int action(Object o, int s, final int [] i0)
 		{
 			for (int k = 0; k < dimension; k++)
@@ -801,6 +803,7 @@ public class KdTree
 			mesh = m;
 			dist = mesh.distance(fromVertex, v, fromVertex);
 		}
+		@Override
 		public int action(Object o, int s, final int [] i0)
 		{
 			Cell self = (Cell) o;
@@ -854,6 +857,7 @@ public class KdTree
 		public GetMinSizeProcedure()
 		{
 		}
+		@Override
 		public int action(Object o, int s, final int [] i0)
 		{
 			searchedCells++;

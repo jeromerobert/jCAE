@@ -26,6 +26,7 @@ import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.cad.CADShapeEnum;
 import javax.media.j3d.Appearance;
+import javax.media.j3d.IndexedGeometryArray;
 import javax.media.j3d.IndexedTriangleArray;
 import javax.media.j3d.PointArray;
 import javax.media.j3d.GeometryArray;
@@ -190,7 +191,7 @@ public class SampleBora3D
 		l.setCapability(GeometryArray.ALLOW_COUNT_READ);
 		l.setCapability(GeometryArray.ALLOW_FORMAT_READ);
 		l.setCapability(GeometryArray.ALLOW_REF_DATA_READ);
-		l.setCapability(IndexedTriangleArray.ALLOW_COORDINATE_INDEX_READ);
+		l.setCapability(IndexedGeometryArray.ALLOW_COORDINATE_INDEX_READ);
 
 		Appearance triaApp = new Appearance();
 		triaApp.setPolygonAttributes(new PolygonAttributes(PolygonAttributes.POLYGON_LINE, PolygonAttributes.CULL_NONE, 0));
@@ -216,7 +217,7 @@ public class SampleBora3D
 		// 3D nodes
 		++iRet;
 		ret[iRet] = new BranchGroup();
-		PointArray p = new PointArray(nVertices, PointArray.COORDINATES);
+		PointArray p = new PointArray(nVertices, GeometryArray.COORDINATES);
 		p.setCoordinates(0, xyz);
 
 		Appearance vertApp = new Appearance();

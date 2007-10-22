@@ -24,6 +24,7 @@ import org.jcae.mesh.amibe.util.KdTree;
 import org.jcae.mesh.amibe.util.KdTreeProcedure;
 import org.jcae.mesh.amibe.ds.Vertex;
 import javax.media.j3d.Appearance;
+import javax.media.j3d.GeometryArray;
 import javax.media.j3d.QuadArray;
 import javax.media.j3d.PointArray;
 import javax.media.j3d.Shape3D;
@@ -37,7 +38,7 @@ import javax.media.j3d.PointAttributes;
  */
 public class OctreeSample
 {
-	private KdTree octree;
+	KdTree octree;
 
 	public OctreeSample(KdTree o)
 	{
@@ -52,6 +53,7 @@ public class OctreeSample
 		{
 			coord = new double[72*n];
 		}
+		@Override
 		public final int action(Object o, int s, final int [] i0)
 		{
 			int [] ii = { i0[0], i0[1], i0[2] };
@@ -124,6 +126,7 @@ public class OctreeSample
 	/*
 	private class CheckCoordProcedure implements KdTreeProcedure
 	{
+		@Override
 		public final int action(Object o, int s, final int [] i0)
 		{
 			KdTree.Cell self = (KdTree.Cell) o;
@@ -168,6 +171,7 @@ public class OctreeSample
 		{
 			coord = new double[3*n];
 		}
+		@Override
 		public final int action(Object o, int s, final int [] i0)
 		{
 			KdTree.Cell self = (KdTree.Cell) o;
@@ -188,7 +192,11 @@ public class OctreeSample
 
 	private static class CountVertProcedure implements KdTreeProcedure
 	{
-		private int count;
+		int count;
+		public CountVertProcedure()
+		{
+		}
+		@Override
 		public final int action(Object o, int s, final int [] i0)
 		{
 			KdTree.Cell self = (KdTree.Cell) o;
@@ -203,10 +211,10 @@ public class OctreeSample
 		
 		CoordProcedure proc = new CoordProcedure(octree.nCells);
 		octree.walk(proc);
-		QuadArray quad = new QuadArray(24*octree.nCells, QuadArray.COORDINATES);
-		quad.setCapability(QuadArray.ALLOW_FORMAT_READ);
-		quad.setCapability(QuadArray.ALLOW_COUNT_READ);
-		quad.setCapability(QuadArray.ALLOW_COORDINATE_READ);
+		QuadArray quad = new QuadArray(24*octree.nCells, GeometryArray.COORDINATES);
+		quad.setCapability(GeometryArray.ALLOW_FORMAT_READ);
+		quad.setCapability(GeometryArray.ALLOW_COUNT_READ);
+		quad.setCapability(GeometryArray.ALLOW_COORDINATE_READ);
 		quad.setCoordinates(0, proc.coord);
 		Appearance quadApp = new Appearance();
 		quadApp.setPolygonAttributes(new PolygonAttributes(PolygonAttributes.POLYGON_LINE, PolygonAttributes.CULL_NONE, 0));
@@ -225,7 +233,7 @@ public class OctreeSample
 		int nVertices = cproc.count;
 		CoordVertProcedure vproc = new CoordVertProcedure(nVertices);
 		octree.walk(vproc);
-		PointArray p = new PointArray(nVertices, PointArray.COORDINATES);
+		PointArray p = new PointArray(nVertices, GeometryArray.COORDINATES);
 		p.setCoordinates(0, vproc.coord);
 		Appearance vertApp = new Appearance();
 		vertApp.setPointAttributes(new PointAttributes());

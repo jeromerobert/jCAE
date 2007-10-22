@@ -25,6 +25,7 @@ import org.jcae.mesh.oemm.MeshReader;
 import org.jcae.mesh.oemm.TraversalProcedure;
 import org.jcae.mesh.oemm.OEMM.Node;
 import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.algos3d.AbstractAlgoHalfEdge;
 import org.jcae.mesh.amibe.algos3d.DecimateHalfEdge;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
@@ -120,6 +121,10 @@ public class MeshOEMMDecimate
 
 	private static class CountProcedure extends TraversalProcedure
 	{
+		// Add a public constructor to avoid synthetic access
+		public CountProcedure()
+		{
+		}
 		@Override
 		public final int action(OEMM oemm, OEMM.Node current, int octant, int visit)
 		{
@@ -201,7 +206,7 @@ public class MeshOEMMDecimate
 		private void process(OEMM oemm)
 		{
 			Mesh amesh = reader.buildMesh(mtb, leaves);
-			int nrT = DecimateHalfEdge.countInnerTriangles(amesh);
+			int nrT = AbstractAlgoHalfEdge.countInnerTriangles(amesh);
 			options.clear();
 			options.put("maxtriangles", ""+(nrT / scale));
 			new DecimateHalfEdge(amesh, options).compute();

@@ -21,6 +21,7 @@
 
 package org.jcae.mesh.amibe.algos3d;
 
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
@@ -73,13 +74,13 @@ public class SwapEdge
 		for (AbstractTriangle at: mesh.getTriangles())
 		{
 			TriangleVH f = (TriangleVH) at;
-			if (f.hasAttributes(VirtualHalfEdge.OUTER))
+			if (f.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			ot.bind(f);
 			for (int i = 0; i < 3; i++)
 			{
 				ot.next();
-				ot.clearAttributes(VirtualHalfEdge.MARKED);
+				ot.clearAttributes(AbstractHalfEdge.MARKED);
 			}
 		}
 	}
@@ -90,7 +91,7 @@ public class SwapEdge
 		for (AbstractTriangle at: mesh.getTriangles())
 		{
 			TriangleVH f = (TriangleVH) at;
-			if (f.hasAttributes(VirtualHalfEdge.OUTER))
+			if (f.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			tree.insert(f, cost(f));
 		}
@@ -109,7 +110,7 @@ public class SwapEdge
 			{
 				QSortedTree.Node q = itt.next();
 				t = (TriangleVH) q.getData();
-				if (t.hasAttributes(VirtualHalfEdge.MARKED))
+				if (t.hasAttributes(AbstractHalfEdge.MARKED))
 					continue;
 				double quality = -1.0;
 				// Find the best edge candidate
@@ -118,7 +119,7 @@ public class SwapEdge
 				for (int i = 0; i < 3; i++)
 				{
 					ot.next();
-					if (ot.hasAttributes(VirtualHalfEdge.BOUNDARY | VirtualHalfEdge.NONMANIFOLD))
+					if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 						continue;
 					assert ot.hasSymmetricEdge() : ot;
 					double qnew = ot.checkSwap3D(planarMin);
@@ -134,7 +135,7 @@ public class SwapEdge
 					break;
 				// Mark this triangle so that it is not
 				// processed again
-				t.setAttributes(VirtualHalfEdge.MARKED);
+				t.setAttributes(AbstractHalfEdge.MARKED);
 			}
 			if (t == null || localNumber == -1)
 				break;
@@ -158,17 +159,17 @@ public class SwapEdge
 				{
 					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
 					sym.sym();
-					sym.getTri().clearAttributes(VirtualHalfEdge.MARKED);
+					sym.getTri().clearAttributes(AbstractHalfEdge.MARKED);
 				}
 				ot.prev();
 			}
 			// ot = (nao)
 			t = (TriangleVH) ot.getTri();
-			t.clearAttributes(VirtualHalfEdge.MARKED);
+			t.clearAttributes(AbstractHalfEdge.MARKED);
 			tree.insert(t, cost(t));
 			ot.sym();  // (and)
 			t = (TriangleVH) ot.getTri();
-			t.clearAttributes(VirtualHalfEdge.MARKED);
+			t.clearAttributes(AbstractHalfEdge.MARKED);
 			tree.insert(t, cost(t));
 			for (int i = 0; i < 2; i++)
 			{
@@ -177,7 +178,7 @@ public class SwapEdge
 				{
 					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
 					sym.sym();
-					sym.getTri().clearAttributes(VirtualHalfEdge.MARKED);
+					sym.getTri().clearAttributes(AbstractHalfEdge.MARKED);
 				}
 			}
 		}

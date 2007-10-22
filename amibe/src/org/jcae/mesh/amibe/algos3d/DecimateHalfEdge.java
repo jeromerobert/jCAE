@@ -38,7 +38,6 @@ import java.io.File;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
-import gnu.trove.TObjectIntHashMap;
 import org.apache.log4j.Logger;
 
 /**

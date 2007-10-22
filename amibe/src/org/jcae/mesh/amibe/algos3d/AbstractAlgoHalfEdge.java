@@ -23,7 +23,6 @@ package org.jcae.mesh.amibe.algos3d;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.HalfEdge;
-import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.TriangleHE;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;

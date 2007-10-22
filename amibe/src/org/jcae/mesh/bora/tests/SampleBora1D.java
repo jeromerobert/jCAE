@@ -29,6 +29,7 @@ import org.jcae.mesh.cad.CADGeomCurve3D;
 import org.jcae.mesh.cad.CADShapeFactory;
 import org.jcae.mesh.cad.CADShapeEnum;
 import javax.media.j3d.Appearance;
+import javax.media.j3d.IndexedGeometryArray;
 import javax.media.j3d.IndexedLineArray;
 import javax.media.j3d.PointArray;
 import javax.media.j3d.GeometryArray;
@@ -197,7 +198,7 @@ public class SampleBora1D
 		l.setCapability(GeometryArray.ALLOW_COUNT_READ);
 		l.setCapability(GeometryArray.ALLOW_FORMAT_READ);
 		l.setCapability(GeometryArray.ALLOW_REF_DATA_READ);
-		l.setCapability(IndexedLineArray.ALLOW_COORDINATE_INDEX_READ);
+		l.setCapability(IndexedGeometryArray.ALLOW_COORDINATE_INDEX_READ);
 
 		Appearance lineApp = new Appearance();
 		lineApp.setLineAttributes(new LineAttributes(1,LineAttributes.PATTERN_SOLID,false));
@@ -211,7 +212,7 @@ public class SampleBora1D
 		// 1D nodes
 		iRet++;
 		ret[iRet] = new BranchGroup();
-		PointArray p1 = new PointArray(nVertices, PointArray.COORDINATES);
+		PointArray p1 = new PointArray(nVertices, GeometryArray.COORDINATES);
 		p1.setCoordinates(0, x3d1);
 		Appearance vert1App = new Appearance();
 		vert1App.setPointAttributes(pa);
@@ -224,7 +225,7 @@ public class SampleBora1D
 		// 3D nodes
 		iRet++;
 		ret[iRet] = new BranchGroup();
-		PointArray p = new PointArray(nVertices, PointArray.COORDINATES);
+		PointArray p = new PointArray(nVertices, GeometryArray.COORDINATES);
 		p.setCoordinates(0, xyz);
 
 		Appearance vertApp = new Appearance();
