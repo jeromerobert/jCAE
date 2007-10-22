@@ -28,67 +28,40 @@ import java.io.Serializable;
  */
 public abstract class Triangle extends AbstractTriangle implements Serializable
 {
-	/**
-	 * Wrapper object to which methods on adjacency relations are delegated.
-	 */
-	protected AdjacencyWrapper adj = null;
-
 	public Triangle(TriangleTraitsBuilder ttb)
 	{
 		super(ttb);
 	}
 
-	public final void copy(Triangle src)
-	{
-		super.copy(src);
-		adj.copy(src.adj);
-	}
-	
 	/**
-	 * Return the adjacent AbstractTriangle.
-	 * Note: this routine is not very helpful, caller can only check
-	 * whether the returned object is null or if its type is AbstractTriangle.
-	 * This can be performed by checking {@link AbstractHalfEdge#BOUNDARY}
-	 * and {@link AbstractHalfEdge#NONMANIFOLD} attributes.
+	 * Returns the adjacent AbstractTriangle.
 	 *
 	 * @param num  the local number of this edge.
 	 * @return the adjacent AbstractTriangle.
 	 */
-	public Object getAdj(int num)
-	{
-		return adj.getAdj(num);
-	}
+	public abstract AdjacencyWrapper getAdj(int num);
 	
 	/**
-	 * Set the AbstractTriangle adjacent to an edge.
+	 * Sets the AbstractTriangle adjacent to an edge.
 	 *
 	 * @param num  the local number of this edge.
 	 * @param link  the adjacent AbstractTriangle.
 	 */
-	public void setAdj(int num, Object link)
-	{
-		adj.setAdj(num, link);
-	}
+	public abstract void setAdj(int num, AdjacencyWrapper link);
 	
 	/**
 	 * Sets attributes for all edges of this triangle.
 	 *
 	 * @param attr  attributes to set on edges
 	 */
-	public void setAttributes(int attr)
-	{
-		adj.setAttributes(attr);
-	}
+	public abstract void setAttributes(int attr);
 	
 	/**
 	 * Resets attributes for all edges of this triangle.
 	 *
 	 * @param attr  attributes to reset on edges
 	 */
-	public void clearAttributes(int attr)
-	{
-		adj.clearAttributes(attr);
-	}
+	public abstract void clearAttributes(int attr);
 	
 	/**
 	 * Checks if some attributes of this triangle are set.
@@ -97,20 +70,8 @@ public abstract class Triangle extends AbstractTriangle implements Serializable
 	 * @return <code>true</code> if any edge of this triangle has
 	 * one of these attributes set, <code>false</code> otherwise
 	 */
-	public boolean hasAttributes(int attr)
-	{
-		return adj.hasAttributes(attr);
-	}
+	public abstract boolean hasAttributes(int attr);
 	
 	public abstract AbstractHalfEdge getAbstractHalfEdge();
-
-	@Override
-	public String toString()
-	{
-		String r = super.toString();
-		if (adj != null)
-			r +="\n"+adj.toString();
-		return r;
-	}
 
 }

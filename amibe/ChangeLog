@@ -10,6 +10,12 @@ Mon Oct 22 10:20:49 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/amibe/ds/AdjacencyWrapper.java
 	  src/org/jcae/mesh/amibe/ds/TriangleVH.java: Move getEdgeAttributes()
 	and setEdgeAttributes() from AdjacencyWrapper into TriangleVH.
+	* src/org/jcae/mesh/amibe/ds/Triangle.java: Remove adj member.
+	* src/org/jcae/mesh/amibe/ds/HalfEdge.java
+	  src/org/jcae/mesh/amibe/ds/TriangleVH.java:  HalfEdge and TriangleVH
+	implement AdjacencyWrapper.
+	* src/org/jcae/mesh/amibe/ds/AdjacencyWrapper.java: getAdj() and
+	setAdj() can work on AdjacencyWrapper instances.
 
 Sun Oct 21 20:41:07 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

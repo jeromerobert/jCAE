@@ -37,14 +37,14 @@ import org.apache.log4j.Logger;
  * (between 0 and 2) and a triangle.  It has a link to the next edge in the
  * same triangle, and to its symmetric edge.
  */
-public class HalfEdge extends AbstractHalfEdge implements Serializable
+public class HalfEdge extends AbstractHalfEdge implements Serializable, AdjacencyWrapper
 {
 	private static Logger logger = Logger.getLogger(HalfEdge.class);
 	private TriangleHE tri;
 	private byte localNumber;
 	private byte attributes;
-	private HalfEdge sym;
-	private HalfEdge next;
+	HalfEdge sym;
+	HalfEdge next;
 
 	private static final int [] next3 = { 1, 2, 0 };
 	private static final int [] prev3 = { 2, 0, 1 };
@@ -56,14 +56,6 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		this.tri = tri;
 		this.localNumber = localNumber;
 		this.attributes = attributes;
-	}
-	
-	public void copy(HalfEdge src)
-	{
-		// Do not override tri!
-		localNumber = src.localNumber;
-		attributes = src.attributes;
-		sym = src.sym;
 	}
 	
 	/**
@@ -1313,4 +1305,61 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		return r.toString();
 	}
 
+	/**
+	 * Methods needed by AdjacencyWrapper.
+	 */
+	
+	private void copyFields(HalfEdge src)
+	{
+		// Do not override tri!
+		localNumber = src.localNumber;
+		attributes = src.attributes;
+		sym = src.sym;
+	}
+	
+	public final void copy(HalfEdge that)
+	{
+		HalfEdge to = this;
+		for (int i = 0; i < 3; i++)
+		{
+			to.copyFields(that);
+			to = to.next;
+			that = that.next;
+		}
+	}
+	
+	private HalfEdge getHalfEdge(int num)
+	{
+		if (num == 0)
+			return this;
+		else if (num == 1)
+			return next;
+		else if (num == 2)
+			return next.next;
+		else
+			throw new RuntimeException();
+	}
+	
+	@Override
+	public AdjacencyWrapper getAdj(int num)
+	{
+		return getHalfEdge(num).sym;
+	}
+	
+	@Override
+	public void setAdj(int num, AdjacencyWrapper link)
+	{
+		getHalfEdge(num).glue((HalfEdge) link);
+	}
+	
+	/*
+	 * These methods are already defined
+	 *      public void setAttributes(int attr)
+	 *      public void clearAttributes(int attr)
+	 *      public boolean hasAttributes(int attr)
+	 * but with a different semantics and cannot be
+	 * implemented here.  Instead, TriangleHE redefines
+	 * these methods to avoid this conflict.
+	 */
+	
 }

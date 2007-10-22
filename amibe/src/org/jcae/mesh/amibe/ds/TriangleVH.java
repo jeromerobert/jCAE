@@ -74,14 +74,48 @@ import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
  *       a circular doubly-linked list of all symmetric edges.</li>
  * </ul>
  */
-public class TriangleVH extends Triangle
+public class TriangleVH extends Triangle implements AdjacencyWrapper
 {
+	/**
+	 * Pointers to adjacent elements through edges.
+	 */
+	private TriangleVH [] adjacentTriangles = new TriangleVH[3];
+	
+	/**
+	 * Packed representation of adjacent edge local numbers.
+	 * adjPos contains the local number of opposite edges in
+	 * their respective triangles:
+	 * <ul>
+	 *     <li>bits 0-1: local number for matte edge 0</li>
+	 *     <li>bits 2-3: local number for matte edge 1</li>
+	 *     <li>bits 4-5: local number for matte edge 2</li>
+	 * </ul>
+	*/
+	private byte adjPos = 0;
+
+	/**
+	 * Edge attributes.
+	 */
+	private byte [] edgeAttributes = new byte[3];
+		
 	public TriangleVH(TriangleTraitsBuilder ttb)
 	{
 		super(ttb);
-		adj = new AdjacencyVH();
 	}
 
+	@Override
+	public final void copy(AbstractTriangle that)
+	{
+		super.copy(that);
+		TriangleVH src = (TriangleVH) that;
+		for (int i = 0; i < 3; i++)
+			adjacentTriangles[i] = src.adjacentTriangles[i];
+		adjPos = src.adjPos;
+		edgeAttributes[0] = src.edgeAttributes[0];
+		edgeAttributes[1] = src.edgeAttributes[1];
+		edgeAttributes[2] = src.edgeAttributes[2];
+	}
+		
 	@Override
 	public AbstractHalfEdge getAbstractHalfEdge()
 	{
@@ -92,7 +126,7 @@ public class TriangleVH extends Triangle
 
 	/**
 	 * Gets local number of a symmetric edge.  With <code>TriangleVH</code>,
-	 * <code>adj.getAdj(int)</code> returns a <code>TriangleVH</code> instance,
+	 * <code>getAdj(int)</code> returns a <code>TriangleVH</code> instance,
 	 * but we also need the local number of symmetric edge in adjacent triangle.
 	 * This is performed by this method.
 	 *
@@ -101,12 +135,12 @@ public class TriangleVH extends Triangle
 	 */
 	public int getAdjLocalNumber(int num)
 	{
-		return (((AdjacencyVH) adj).adjPos >> (2*num)) & 3;
+		return (adjPos >> (2*num)) & 3;
 	}
 
 	/**
 	 * Sets local number of a symmetric edge.  With <code>TriangleVH</code>,
-	 * <code>adj.setAdj(int, Object)</code> sets <code>TriangleVH</code> instance
+	 * <code>setAdj(int, Object)</code> sets <code>TriangleVH</code> instance
 	 * adjacent to an edge, but we also need to store the local number of symmetric
 	 * edge in adjacent triangle.  This is performed by this method.
 	 *
@@ -115,151 +149,107 @@ public class TriangleVH extends Triangle
 	 */
 	public void setAdjLocalNumber(int num, int pos)
 	{
-		AdjacencyVH that = (AdjacencyVH) adj;
 		//  Clear previous adjacent position ...
-		that.adjPos &= ~(3 << (2*num));
+		adjPos &= ~(3 << (2*num));
 		//  ... and set it right
-		that.adjPos |= (pos << (2*num));
+		adjPos |= (pos << (2*num));
 	}
 
 	public void setEdgeAttributes(int num, int attributes)
 	{
-		((AdjacencyVH) adj).edgeAttributes[num] = (byte) attributes;
+		edgeAttributes[num] = (byte) attributes;
 	}
 
 	public int getEdgeAttributes(int num)
 	{
-		return ((AdjacencyVH) adj).edgeAttributes[num];
+		return edgeAttributes[num];
 	}
 		
-	private static class AdjacencyVH implements AdjacencyWrapper
-	{
-		/**
-		 * Pointers to adjacent elements through edges.
-		 */
-		private TriangleVH [] adj = new TriangleVH[3];
-		
-		/**
-		 * Packed representation of adjacent edge local numbers.
-		 * adjPos contains the local number of opposite edges in
-		 * their respective triangles:
-		 * <ul>
-		 *     <li>bits 0-1: local number for matte edge 0</li>
-		 *     <li>bits 2-3: local number for matte edge 1</li>
-		 *     <li>bits 4-5: local number for matte edge 2</li>
-		 * </ul>
-		*/
-		private byte adjPos = 0;
-	
-		/**
-		 * Edge attributes.
-		 */
-		private byte [] edgeAttributes = new byte[3];
-		
-		@Override
-		public final void copy(AdjacencyWrapper that)
-		{
-			AdjacencyVH src = (AdjacencyVH) that;
-			for (int i = 0; i < 3; i++)
-				adj[i] = src.adj[i];
-			adjPos = src.adjPos;
-			edgeAttributes[0] = src.edgeAttributes[0];
-			edgeAttributes[1] = src.edgeAttributes[1];
-			edgeAttributes[2] = src.edgeAttributes[2];
-		}
-		
-		/**
-		 * Return the adjacent AbstractTriangle.
-		 * Note: this routine is not very helpful, caller can only check
-		 * whether the returned object is null or if its type is AbstractTriangle.
-		 * This can be performed by checking {@link AbstractHalfEdge#BOUNDARY}
-		 * and {@link AbstractHalfEdge#NONMANIFOLD} attributes.
-		 *
-		 * @param num  the local number of this edge.
-		 * @return the adjacent AbstractTriangle.
-		 */
-		@Override
-		public Object getAdj(int num)
-		{
-			return adj[num];
-		}
-		
-		/**
-		 * Set the AbstractTriangle adjacent to an edge.
-		 * Note: this routine could certainly be replaced by {@link #glue1}.
-		 *
-		 * @param num  the local number of this edge.
-		 * @param link  the adjacent AbstractTriangle.
-		 */
-		@Override
-		public void setAdj(int num, Object link)
-		{
-			adj[num] = (TriangleVH) link;
-		}
-		
-		// Helper functions
-		/**
-		 * Sets attributes for all edges of this triangle.
-		 *
-		 * @param attr  attributes to set on edges
-		 */
-		@Override
-		public void setAttributes(int attr)
-		{
-			edgeAttributes[0] |= attr;
-			edgeAttributes[1] |= attr;
-			edgeAttributes[2] |= attr;
-		}
-	
-		/**
-		 * Resets attributes for all edges of this triangle.
-		 *
-		 * @param attr  attributes to reset on edges
-		 */
-		@Override
-		public void clearAttributes(int attr)
-		{
-			edgeAttributes[0] &= ~attr;
-			edgeAttributes[1] &= ~attr;
-			edgeAttributes[2] &= ~attr;
-		}
-	
-		/**
-		 * Checks if some attributes of this triangle are set.
-		 *
-		 * @param attr  attributes to check
-		 * @return <code>true</code> if any edge of this triangle has
-		 * one of these attributes set, <code>false</code> otherwise
-		 */
-		@Override
-		public boolean hasAttributes(int attr)
-		{
-			return ((edgeAttributes[0] | edgeAttributes[1] | edgeAttributes[2]) & attr) != 0;
-		}
-	
-		private int getAdjLocalNumber(int num)
-		{
-			return (adjPos >> (2*num)) & 3;
-		}
+	/**
+	 * Implement AdjacencyWrapper methods.
+	 */
 
-		@SuppressWarnings("unchecked")
-		private final String showAdj(int num)
-		{
-			if (adj[num] == null)
-				return "N/A";
-			return adj[num].hashCode()+"["+getAdjLocalNumber(num)+"]";
-		}
-		
-		@Override
-		public String toString()
-		{
-			StringBuilder r = new StringBuilder();
-			r.append("Adjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2));
-			r.append("\nEdge attributes:");
-			for (int i = 0; i < 3; i++)
-				r.append(" "+Integer.toHexString(edgeAttributes[i]));
-			return r.toString();
-		}
-	
+	/**
+	 * Returns the adjacent TriangleVH through an edge.
+	 *
+	 * @param num  the local number of this edge.
+	 * @return the adjacent TriangleVH
+	 */
+	@Override
+	public AdjacencyWrapper getAdj(int num)
+	{
+		return adjacentTriangles[num];
 	}
+	
+	/**
+	 * Sets TriangleVH adjacent to an edge.
+	 *
+	 * @param num  the local number of this edge
+	 * @param link  adjacent TriangleVH
+	 */
+	@Override
+	public void setAdj(int num, AdjacencyWrapper link)
+	{
+		adjacentTriangles[num] = (TriangleVH) link;
+	}
+	
+	// Helper functions
+	/**
+	 * Sets attributes for all edges of this triangle.
+	 *
+	 * @param attr  attributes to set on edges
+	 */
+	@Override
+	public void setAttributes(int attr)
+	{
+		edgeAttributes[0] |= attr;
+		edgeAttributes[1] |= attr;
+		edgeAttributes[2] |= attr;
+	}
+
+	/**
+	 * Resets attributes for all edges of this triangle.
+	 *
+	 * @param attr  attributes to reset on edges
+	 */
+	@Override
+	public void clearAttributes(int attr)
+	{
+		edgeAttributes[0] &= ~attr;
+		edgeAttributes[1] &= ~attr;
+		edgeAttributes[2] &= ~attr;
+	}
+
+	/**
+	 * Checks if some attributes of this triangle are set.
+	 *
+	 * @param attr  attributes to check
+	 * @return <code>true</code> if any edge of this triangle has
+	 * one of these attributes set, <code>false</code> otherwise
+	 */
+	@Override
+	public boolean hasAttributes(int attr)
+	{
+		return ((edgeAttributes[0] | edgeAttributes[1] | edgeAttributes[2]) & attr) != 0;
+	}
+
+	@SuppressWarnings("unchecked")
+	private final String showAdj(int num)
+	{
+		if (adjacentTriangles[num] == null)
+			return "N/A";
+		return adjacentTriangles[num].hashCode()+"["+getAdjLocalNumber(num)+"]";
+	}
+	
+	@Override
+	public String toString()
+	{
+		StringBuilder r = new StringBuilder(super.toString());
+		r.append("Adjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2));
+		r.append("\nEdge attributes:");
+		for (int i = 0; i < 3; i++)
+			r.append(" "+edgeAttributes[i]);
+		return r.toString();
+	}
+	
 }

@@ -33,14 +33,14 @@ public interface AdjacencyWrapper
 	 *
 	 * @return  symmetric of edge <code>num</code>.
 	 */
-	public Object getAdj(int num);
+	public AdjacencyWrapper getAdj(int num);
 
 	/**
 	 * Sets symmetric of edge <code>num</code>.
 	 *
 	 * @param  link   object to link to edge <code>num</code>.
 	 */
-	public void setAdj(int num, Object link);
+	public void setAdj(int num, AdjacencyWrapper link);
 
 	/**
 	 * Sets attributes for all edges of this triangle.
@@ -65,10 +65,4 @@ public interface AdjacencyWrapper
 	 */
 	public boolean hasAttributes(int attr);
 
-	/**
-	 * Deep copy of another <code>AdjacencyWrapper</code> into current instance.
-	 *
-	 * @param src   object being copied into current instance
-	 */
-	public void copy(AdjacencyWrapper src);
 }

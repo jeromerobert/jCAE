@@ -532,7 +532,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *
 	 * @param link  the triangle bond to this one if this edge is manifold, or an Object otherwise
 	 */
-	private final void setAdj(Object link)
+	private final void setAdj(AdjacencyWrapper link)
 	{
 		tri.setAdj(localNumber, link);
 	}
