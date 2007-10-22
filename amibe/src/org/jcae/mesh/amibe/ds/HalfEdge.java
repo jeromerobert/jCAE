@@ -1286,7 +1286,6 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable, Adjacenc
 		};
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public String toString()
 	{

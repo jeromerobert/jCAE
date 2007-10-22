@@ -27,38 +27,27 @@ import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
  * all topological information required for adjacency relations.  Their
  * vertices are contained in a {@link Vertex} array, and by convention
  * the local number of an edge is the index of its opposite vertex.  A
- * <code>AbstractTriangle</code> instance has a pointer to its three neighbours
+ * <code>TriangleVH</code> instance has a pointer to its three neighbours
  * through its edges, and knows the local number of opposite edges in
  * their respective triangles.
  *
- * <pre>
- *                        V2
- *     V5 _________________,_________________ V3
- *        \    &lt;----      / \     &lt;----     /
- *         \     0     _ /   \      1    _ /
- *          \\  t0     ///  /\\\   t1    //
- *           \\1     2///1   0\\\2     0//   t.vertex = { V0, V1, V2 }
- *            \V     //V   t   \\V     //       t.adj = { t1, t0, t2 }
- *             \     /           \     /    opposite edge local number:
- *              \   /      2      \   /         { 2, 2, 1}
- *               \ /     ----&gt;     \ /
- *             V0 +-----------------+ V1
- *                 \     &lt;----     /
- *                  \      1    _ /
- *                   \\   t2    //
- *                    \\2     0//
- * </pre>
- *
  * <p>
  * As local numbers are integers between 0 and 2, a packed representation
- * is wanted to save space.
- * In his <a href="http://www.cs.cmu.edu/~quake/triangle.html">Triangle</a>
- * program, Jonathan Richard Shewchuk uses word alignment of pointers to pack
- * this information into pointers themselves: they are respectively shifted
- * by 0, 1 or 2 bytes for edges 0, 1 and 2.  This very efficient trick
- * can not be performed with Java, and the three numbers are packed into
- * a single byte instead.
+ * is wanted to save space.  They can be stored within 6 bits, edge 0
+ * is stored in the two least significant bits, edge 1 in next two and edge
+ * 2 in next 2.
  * </p>
+ *
+ * <p align="center"><img src="doc-files/TriangleVH-1.png" alt="[Image showing adjacency symmetric edges]"/></p>
+ * <p>
+ * Vertices data are colored in black, edges in red and triangles in blue.
+ * Triangle <code>a</code> contains these members:
+ * </p>
+ * <ul>
+ *   <li><code>a.vertex = { A, B, C }</code></li>
+ *   <li><code>a.adjacentTriangles = { c, d, b }</code></li>
+ *   <li><code>a.adjPos = (0 &lt;&lt;  0) + (1 &lt;&lt;  2) + (0 &lt;&lt;  0)</li>
+ * </ul>
  *
  * <p>
  * There are two special cases:
@@ -66,12 +55,12 @@ import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
  * <ul>
  *   <li>Boundary edges; a virtual AbstractTriangle(outerVertex, v1, v2) is created,
  *       and linked to this edge.  This triangle has an {@link AbstractHalfEdge#OUTER}
- *       attribute, and symmetric edges have a {@link AbstractHalfEdge#BOUNDARY} attribute.</li>
+ *       attribute, and boundary edges have a {@link AbstractHalfEdge#BOUNDARY} attribute.</li>
  *   <li>Non-manifold edges; a virtual AbstractTriangle(outerVertex, v1, v2) is
  *       also created, and linked to this edge.  This triangle has an
- *       {@link AbstractHalfEdge#OUTER} attribute, symmetric edge has a {@link
- *       AbstractHalfEdge#NONMANIFOLD} attribute, and other two edges are used to build
- *       a circular doubly-linked list of all symmetric edges.</li>
+ *       {@link AbstractHalfEdge#OUTER} attribute, non-manifold edge and its symmetric edge
+ *       have a {@link AbstractHalfEdge#NONMANIFOLD} attribute, and other two edges are used
+ *       to build a circular doubly-linked list of all symmetric edges.</li>
  * </ul>
  */
 public class TriangleVH extends Triangle implements AdjacencyWrapper
@@ -98,6 +87,9 @@ public class TriangleVH extends Triangle implements AdjacencyWrapper
 	 */
 	private byte [] edgeAttributes = new byte[3];
 		
+	/**
+	 * Constructor.
+	 */
 	public TriangleVH(TriangleTraitsBuilder ttb)
 	{
 		super(ttb);
@@ -243,7 +235,6 @@ public class TriangleVH extends Triangle implements AdjacencyWrapper
 		return ((edgeAttributes[0] | edgeAttributes[1] | edgeAttributes[2]) & attr) != 0;
 	}
 
-	@SuppressWarnings("unchecked")
 	private final String showAdj(int num)
 	{
 		if (adjacentTriangles[num] == null)
