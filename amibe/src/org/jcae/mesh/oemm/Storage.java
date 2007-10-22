@@ -52,6 +52,7 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractVertex;
 import org.jcae.mesh.oemm.OEMM.Node;
 import org.apache.log4j.Logger;
@@ -777,10 +778,9 @@ public class Storage
 		for(AbstractTriangle at: mesh.getTriangles())
 		{
 			Triangle tr = (Triangle) at;
-			boolean hasOuterEdge = tr.vertex[0].getUV().length == 2 || tr.vertex[1].getUV().length == 2
-			|| tr.vertex[2].getUV().length == 2;
-			assert !hasOuterEdge && !tr.isOuter() || hasOuterEdge && tr.isOuter();
-			if (tr.isOuter())
+			boolean hasOuterEdge = tr.vertex[0].getUV().length == 2 || tr.vertex[1].getUV().length == 2 || tr.vertex[2].getUV().length == 2;
+			assert hasOuterEdge == tr.hasAttributes(AbstractHalfEdge.OUTER);
+			if (tr.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			// By convention, if T=(V1,V2,V3) and each Vi is contained in node Ni,
 			// then T belongs to min(Ni)

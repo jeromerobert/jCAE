@@ -66,11 +66,11 @@ import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
  * <ul>
  *   <li>Boundary edges; a virtual AbstractTriangle(outerVertex, v1, v2) is created,
  *       and linked to this edge.  This triangle has an {@link AbstractHalfEdge#OUTER}
- *       flag, and symmetric edges have a {@link AbstractHalfEdge#BOUNDARY} flag.</li>
+ *       attribute, and symmetric edges have a {@link AbstractHalfEdge#BOUNDARY} attribute.</li>
  *   <li>Non-manifold edges; a virtual AbstractTriangle(outerVertex, v1, v2) is
  *       also created, and linked to this edge.  This triangle has an
- *       {@link AbstractHalfEdge#OUTER} flag, symmetric edge has a {@link
- *       AbstractHalfEdge#NONMANIFOLD} flag, and other two edges are used to build
+ *       {@link AbstractHalfEdge#OUTER} attribute, symmetric edge has a {@link
+ *       AbstractHalfEdge#NONMANIFOLD} attribute, and other two edges are used to build
  *       a circular doubly-linked list of all symmetric edges.</li>
  * </ul>
  */
@@ -170,26 +170,43 @@ public class TriangleVH extends Triangle
 		}
 		
 		// Helper functions
+		/**
+		 * Sets attributes for all edges of this triangle.
+		 *
+		 * @param attr  attributes to set on edges
+		 */
 		@Override
-		public boolean hasFlag(int flag)
+		public void setAttributes(int attr)
 		{
-			return ((edgeAttributes[0] | edgeAttributes[1] | edgeAttributes[2]) & flag) != 0;
+			edgeAttributes[0] |= attr;
+			edgeAttributes[1] |= attr;
+			edgeAttributes[2] |= attr;
 		}
 	
+		/**
+		 * Resets attributes for all edges of this triangle.
+		 *
+		 * @param attr  attributes to reset on edges
+		 */
 		@Override
-		public void setFlag(int flag)
+		public void clearAttributes(int attr)
 		{
-			edgeAttributes[0] |= flag;
-			edgeAttributes[1] |= flag;
-			edgeAttributes[2] |= flag;
+			edgeAttributes[0] &= ~attr;
+			edgeAttributes[1] &= ~attr;
+			edgeAttributes[2] &= ~attr;
 		}
 	
+		/**
+		 * Checks if some attributes of this triangle are set.
+		 *
+		 * @param attr  attributes to check
+		 * @return <code>true</code> if any edge of this triangle has
+		 * one of these attributes set, <code>false</code> otherwise
+		 */
 		@Override
-		public void clearFlag(int flag)
+		public boolean hasAttributes(int attr)
 		{
-			edgeAttributes[0] &= ~flag;
-			edgeAttributes[1] &= ~flag;
-			edgeAttributes[2] &= ~flag;
+			return ((edgeAttributes[0] | edgeAttributes[1] | edgeAttributes[2]) & attr) != 0;
 		}
 	
 		@Override

@@ -1,3 +1,13 @@
+Mon Oct 22 10:20:49 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/AdjacencyWrapper.java: Rename setFlag(),
+	clearFlag() and hasFlag() methods into setAttributes(),
+	clearAttributes() and hasAttributes().
+	* src/org/jcae/mesh/amibe/ds/Triangle.java: Remove isBoundary(),
+	isOuter(), isMarked() and friends methods, and add setAttributes(),
+	clearAttributes() and hasAttributes() to have the same methods for
+	edges and triangles.
+
 Sun Oct 21 20:41:07 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/traits/MeshTraitsBuilder.java: Always add

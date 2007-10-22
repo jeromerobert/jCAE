@@ -79,7 +79,7 @@ public class EnforceAbsDeflection
 			for (AbstractTriangle at: mesh.getTriangles())
 			{
 				Triangle t = (Triangle) at;
-				if (t.isOuter())
+				if (t.hasAttributes(VirtualHalfEdge2D.OUTER))
 					continue;
 				double uv[] = Vertex2D.centroid(mesh, (Vertex2D[]) t.vertex).getUV();
 				double [] xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
@@ -112,7 +112,7 @@ public class EnforceAbsDeflection
 			}
 			for (Triangle t: badTriangles)
 			{
-				if (!mesh.getTriangles().contains(t) || t.isBoundary())
+				if (!mesh.getTriangles().contains(t) || t.hasAttributes(VirtualHalfEdge2D.BOUNDARY))
 					continue;
 				double uv[] = Vertex2D.centroid(mesh, (Vertex2D[]) t.vertex).getUV();
 				Vertex2D v = (Vertex2D) mesh.createVertex(uv[0], uv[1]);

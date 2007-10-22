@@ -71,62 +71,35 @@ public abstract class Triangle extends AbstractTriangle implements Serializable
 	}
 	
 	/**
-	 * Return the {@link AbstractHalfEdge#OUTER} attribute of its edges.
+	 * Sets attributes for all edges of this triangle.
 	 *
-	 * @return <code>true</code> if the triangle is outer,
-	 * <code>false</code> otherwise.
+	 * @param attr  attributes to set on edges
 	 */
-	public boolean isOuter()
+	public void setAttributes(int attr)
 	{
-		return adj.hasFlag(AbstractHalfEdge.OUTER);
+		adj.setAttributes(attr);
 	}
 	
 	/**
-	 * Set the {@link AbstractHalfEdge#OUTER} attribute of its three edges.
-	 */
-	public void setOuter()
-	{
-		adj.setFlag(AbstractHalfEdge.OUTER);
-		writable = false;
-	}
-	
-	/**
-	 * Return the {@link AbstractHalfEdge#MARKED} attribute of its edges.
+	 * Resets attributes for all edges of this triangle.
 	 *
-	 * @return <code>true</code> if an edge of this triangle has its
-	 * {@link AbstractHalfEdge#MARKED} attribute set, <code>false</code> otherwise.
+	 * @param attr  attributes to reset on edges
 	 */
-	public boolean isMarked()
+	public void clearAttributes(int attr)
 	{
-		return adj.hasFlag(AbstractHalfEdge.MARKED);
+		adj.clearAttributes(attr);
 	}
 	
 	/**
-	 * Set the {@link AbstractHalfEdge#MARKED} attribute of its three edges.
-	 */
-	public void setMarked()
-	{
-		adj.setFlag(AbstractHalfEdge.MARKED);
-	}
-	
-	/**
-	 * Clear the {@link AbstractHalfEdge#MARKED} attribute of its three edges.
-	 */
-	public void unsetMarked()
-	{
-		adj.clearFlag(AbstractHalfEdge.MARKED);
-	}
-	
-	/**
-	 * Return the {@link AbstractHalfEdge#BOUNDARY} attribute of its edges.
+	 * Checks if some attributes of this triangle are set.
 	 *
-	 * @return <code>true</code> if an edge of this triangle has its
-	 * {@link AbstractHalfEdge#BOUNDARY} attribute set, <code>false</code>
-	 * otherwise.
+	 * @param attr  attributes to check
+	 * @return <code>true</code> if any edge of this triangle has
+	 * one of these attributes set, <code>false</code> otherwise
 	 */
-	public boolean isBoundary()
+	public boolean hasAttributes(int attr)
 	{
-		return adj.hasFlag(AbstractHalfEdge.BOUNDARY);
+		return adj.hasAttributes(attr);
 	}
 	
 	public int getEdgeAttributes(int num)

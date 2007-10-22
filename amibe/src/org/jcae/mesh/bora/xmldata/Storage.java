@@ -26,6 +26,7 @@ import org.jcae.mesh.amibe.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.SubMesh1D;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractVertex;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.patch.Mesh2D;
@@ -460,7 +461,7 @@ public class Storage
 		for (Iterator<AbstractTriangle> itf = trianglelist.iterator(); itf.hasNext(); )
 		{
 			Triangle f = (Triangle) itf.next();
-			if (f.isOuter())
+			if (f.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			for (int j = 0, n = f.vertex.length; j < n; j++)
 				facesout.writeInt(localIdx.get(f.vertex[j]));

@@ -112,7 +112,7 @@ public class SmoothNodes3D
 		for (AbstractTriangle at: mesh.getTriangles())
 		{
 			Triangle f = (Triangle) at;
-			if (f.isOuter())
+			if (f.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			double val = cost(f);
 			if (val <= tolerance)

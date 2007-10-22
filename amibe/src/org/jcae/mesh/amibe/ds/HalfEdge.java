@@ -860,7 +860,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		Triangle t34 = (f == null ? ( s == null ? null : s.tri ) : f.tri);
 		if (t34 != null)
 		{
-			if (t34.isOuter() && s != null)
+			if (t34.hasAttributes(OUTER) && s != null)
 				t34 = s.tri;
 			replaceVertexLinks(apex(), tri, t34);
 			replaceVertexLinks(n, tri, t34);
@@ -1154,7 +1154,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		HEglue(f);
 		Triangle t4 = f.tri;
 		// 2. Remove links between outer triangles
-		if (t2.isOuter())
+		if (t2.hasAttributes(OUTER))
 		{
 			// Remove links between t2 and t4,
 			// and link h2.next to n2.next.sym;
@@ -1172,8 +1172,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			g = g.next.next;             // (dnV2)
 		}
 
-		Triangle t14 = (t1.isOuter() ? t4 : t1);
-		Triangle t23 = (t2.isOuter() ? t3 : t2);
+		Triangle t14 = (t1.hasAttributes(OUTER) ? t4 : t1);
+		Triangle t23 = (t2.hasAttributes(OUTER) ? t3 : t2);
 		//  Update vertex links
 		replaceVertexLinks(n, t1, t2, t14);
 		replaceVertexLinks(g.origin(), t1, t2, t23);

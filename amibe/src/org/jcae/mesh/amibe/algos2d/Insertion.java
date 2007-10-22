@@ -107,7 +107,7 @@ public class Insertion
 			for(Iterator<AbstractTriangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
 				TriangleVH t = (TriangleVH) it.next();
-				if (t.isOuter())
+				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
 				ot.bind(t);
 				for (int i = 0; i < 3; i++)
@@ -122,7 +122,7 @@ public class Insertion
 			for(Iterator<AbstractTriangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
 				TriangleVH t = (TriangleVH) it.next();
-				if (t.isOuter())
+				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
 				ot.bind(t);
 				triNodes.clear();
@@ -204,7 +204,7 @@ public class Insertion
 			for (Iterator<AbstractTriangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
 				TriangleVH t = (TriangleVH) it.next();
-				if (t.isOuter())
+				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
 				Vertex2D v = Vertex2D.centroid(mesh, (Vertex2D[]) t.vertex);
 				Vertex2D n = (Vertex2D) mesh.getQuadTree().getNearestVertex(mesh, v);

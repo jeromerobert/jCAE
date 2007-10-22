@@ -24,6 +24,7 @@ package org.jcae.mesh;
 import java.util.Iterator;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.amibe.validation.*;
@@ -77,7 +78,7 @@ public class MeshValid2D
 				for(Iterator<AbstractTriangle> it=mesh.getTriangles().iterator();it.hasNext();)
 				{
 					Triangle f = (Triangle) it.next();
-					if (f.isOuter())
+					if (f.hasAttributes(AbstractHalfEdge.OUTER))
 						continue;
 					data.compute(f);
 				}

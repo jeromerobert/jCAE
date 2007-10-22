@@ -519,7 +519,7 @@ public class Mesh2D extends Mesh
 			if (removedTriangles.contains(at))
 				continue;
 			TriangleVH t = (TriangleVH) at;
-			if (t.isOuter())
+			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			ot.bind(t);
 			for (int i = 0; i < 3; i++)
@@ -550,8 +550,8 @@ public class Mesh2D extends Mesh
 			return false;
 		for (AbstractTriangle t: getTriangles())
 		{
-			// We can not rely on t.isOuter() here, attributes
-			// may not have been set yet.
+			// We can not rely on t.hasAttributes(AbstractHalfEdge.OUTER) here,
+			// attributes may not have been set yet.
 			if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
 					continue;
 			Vertex2D tv0 = (Vertex2D) t.vertex[0];

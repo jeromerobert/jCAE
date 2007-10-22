@@ -418,7 +418,7 @@ public class Mesh extends AbstractMesh implements Serializable
 					ot.setAttributes(AbstractHalfEdge.BOUNDARY);
 					Triangle adj = (Triangle) factory.createTriangle(outerVertex, ot.destination(), ot.origin());
 					newTri.add(adj);
-					adj.setOuter();
+					adj.setAttributes(AbstractHalfEdge.OUTER);
 					adj.setReadable(false);
 					adj.setWritable(false);
 					AbstractHalfEdge sym = adj.getAbstractHalfEdge();
@@ -605,7 +605,7 @@ public class Mesh extends AbstractMesh implements Serializable
 					// Link ot to a virtual triangle
 					Triangle otVT = (Triangle) factory.createTriangle(outerVertex, ot.destination(), ot.origin());
 					newTri.add(otVT);
-					otVT.setOuter();
+					otVT.setAttributes(AbstractHalfEdge.OUTER);
 					otVT.setReadable(false);
 					otVT.setWritable(false);
 					AbstractHalfEdge s = otVT.getAbstractHalfEdge();
@@ -625,7 +625,7 @@ public class Mesh extends AbstractMesh implements Serializable
 					// Link ot to a virtual triangle
 					Triangle otVT = (Triangle) factory.createTriangle(outerVertex, ot.destination(), ot.origin());
 					newTri.add(otVT);
-					otVT.setOuter();
+					otVT.setAttributes(AbstractHalfEdge.OUTER);
 					otVT.setReadable(false);
 					otVT.setWritable(false);
 					AbstractHalfEdge otSym = otVT.getAbstractHalfEdge();
@@ -635,7 +635,7 @@ public class Mesh extends AbstractMesh implements Serializable
 					// Link sym to another virtual triangle
 					Triangle symVT = (Triangle) factory.createTriangle(outerVertex, sym.destination(), sym.origin());
 					newTri.add(symVT);
-					symVT.setOuter();
+					symVT.setAttributes(AbstractHalfEdge.OUTER);
 					symVT.setReadable(false);
 					symVT.setWritable(false);
 					AbstractHalfEdge symSym = symVT.getAbstractHalfEdge();
@@ -655,7 +655,7 @@ public class Mesh extends AbstractMesh implements Serializable
 					// Link ot2 to a virtual triangle
 					Triangle ot2VT = (Triangle) factory.createTriangle(outerVertex, ot2.destination(), ot2.origin());
 					newTri.add(ot2VT);
-					ot2VT.setOuter();
+					ot2VT.setAttributes(AbstractHalfEdge.OUTER);
 					ot2VT.setReadable(false);
 					ot2VT.setWritable(false);
 					AbstractHalfEdge s = ot2VT.getAbstractHalfEdge();
@@ -870,7 +870,7 @@ public class Mesh extends AbstractMesh implements Serializable
 			{
 				if (constrained && t instanceof Triangle)
 				{
-					if (!((Triangle) t).isOuter())
+					if (!((Triangle) t).hasAttributes(AbstractHalfEdge.OUTER))
 					{
 						logger.error("AbstractTriangle should be outer: "+t);
 						return false;

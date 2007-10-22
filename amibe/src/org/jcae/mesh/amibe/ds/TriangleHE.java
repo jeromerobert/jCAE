@@ -106,26 +106,43 @@ public class TriangleHE extends Triangle
 		}
 	
 		// Helper functions
+		/**
+		 * Sets attributes for all edges of this triangle.
+		 *
+		 * @param attr  attributes to set on edges
+		 */
 		@Override
-		public boolean hasFlag(int flag)
+		public void setAttributes(int attr)
 		{
-			return (edge.hasAttributes(flag) | edge.next().hasAttributes(flag) | edge.prev().hasAttributes(flag));
+			edge.setAttributes(attr);
+			edge.next().setAttributes(attr);
+			edge.prev().setAttributes(attr);
 		}
 	
+		/**
+		 * Resets attributes for all edges of this triangle.
+		 *
+		 * @param attr  attributes to reset on edges
+		 */
 		@Override
-		public void setFlag(int flag)
+		public void clearAttributes(int attr)
 		{
-			edge.setAttributes(flag);
-			edge.next().setAttributes(flag);
-			edge.prev().setAttributes(flag);
+			edge.clearAttributes(attr);
+			edge.next().clearAttributes(attr);
+			edge.prev().clearAttributes(attr);
 		}
 	
+		/**
+		 * Checks if some attributes of this triangle are set.
+		 *
+		 * @param attr  attributes to check
+		 * @return <code>true</code> if any edge of this triangle has
+		 * one of these attributes set, <code>false</code> otherwise
+		 */
 		@Override
-		public void clearFlag(int flag)
+		public boolean hasAttributes(int attr)
 		{
-			edge.clearAttributes(flag);
-			edge.next().clearAttributes(flag);
-			edge.prev().clearAttributes(flag);
+			return (edge.hasAttributes(attr) | edge.next().hasAttributes(attr) | edge.prev().hasAttributes(attr));
 		}
 	
 		@Override

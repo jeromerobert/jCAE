@@ -1107,9 +1107,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		if (!hasAttributes(OUTER))
 		{
 			TriangleVH t34 = work[1].tri;
-			if (t34.isOuter())
+			if (t34.hasAttributes(OUTER))
 				t34 = work[0].tri;
-			assert !t34.isOuter() : work[0]+"\n"+work[1];
+			assert !t34.hasAttributes(OUTER) : work[0]+"\n"+work[1];
 			// Update links of V1 and n
 			replaceVertexLinks(origin(), tri, t34);
 			replaceVertexLinks(n, tri, t34);
@@ -1439,7 +1439,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		TriangleVH t4 = work[0].tri;
 		work[1].prev();                 // (dnV2)
 		// 2. Remove links between outer triangles
-		if (t2.isOuter())
+		if (t2.hasAttributes(OUTER))
 		{
 			// Remove links between t2 and t4,
 			// and link h2.sym to n2
@@ -1472,8 +1472,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			work[0].next();         // (noV2)
 		}
 
-		TriangleVH t14 = (t1.isOuter() ? t4 : t1);
-		TriangleVH t23 = (t2.isOuter() ? t3 : t2);
+		TriangleVH t14 = (t1.hasAttributes(OUTER) ? t4 : t1);
+		TriangleVH t23 = (t2.hasAttributes(OUTER) ? t3 : t2);
 		//  Update vertex links
 		replaceVertexLinks(n, t1, t2, t14);
 		replaceVertexLinks(work[1].origin(), t1, t2, t23);

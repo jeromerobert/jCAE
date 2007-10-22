@@ -26,9 +26,28 @@ public interface AdjacencyWrapper
 	public Object getAdj(int num);
 	public void setAdj(int num, Object link);
 
-	public void setFlag(int attr);
-	public void clearFlag(int attr);
-	public boolean hasFlag(int attr);
+	/**
+	 * Sets attributes for all edges of this triangle.
+	 *
+	 * @param attr  attributes to set on edges
+	 */
+	public void setAttributes(int attr);
+
+	/**
+	 * Resets attributes for all edges of this triangle.
+	 *
+	 * @param attr  attributes to reset on edges
+	 */
+	public void clearAttributes(int attr);
+
+	/**
+	 * Checks if some attributes of this triangle are set.
+	 *
+	 * @param attr  attributes to check
+	 * @return <code>true</code> if any edge of this triangle has
+	 * one of these attributes set, <code>false</code> otherwise
+	 */
+	public boolean hasAttributes(int attr);
 
 	public int getEdgeAttributes(int num);
 	public void setEdgeAttributes(int num, int attributes);

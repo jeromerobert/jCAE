@@ -315,7 +315,7 @@ public class Initial
 		Vertex2D first = (Vertex2D) ot.origin();
 		do
 		{
-			ot.getTri().setOuter();
+			ot.getTri().setAttributes(AbstractHalfEdge.OUTER);
 			tList.add(ot.getTri());
 			// Move counterclockwise to following edge with
 			// the same apex.
@@ -352,14 +352,14 @@ public class Initial
 					if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
 					{
 						if (!outer)
-							newHead.setOuter();
+							newHead.setAttributes(AbstractHalfEdge.OUTER);
 						else if (sym.hasAttributes(AbstractHalfEdge.OUTER))
 								throw new InitialTriangulationException();
 					}
 					else
 					{
 						if (outer)
-							newHead.setOuter();
+							newHead.setAttributes(AbstractHalfEdge.OUTER);
 						else if (sym.hasAttributes(AbstractHalfEdge.OUTER))
 								throw new InitialTriangulationException();
 					}
@@ -373,7 +373,7 @@ public class Initial
 		for (Iterator<AbstractTriangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 		{
 			t = (TriangleVH) it.next();
-			if (t.isOuter())
+			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			for (int i = 0; i < 3; i++)
 			{
