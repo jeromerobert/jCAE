@@ -12,23 +12,14 @@ import javax.media.j3d.*;
 import javax.vecmath.*;
 
 import org.jcae.opencascade.Utilities;
-import org.jcae.opencascade.jni.BRep_Builder;
-import org.jcae.opencascade.jni.BRep_Tool;
-import org.jcae.opencascade.jni.GeomAPI_ProjectPointOnSurf;
-import org.jcae.opencascade.jni.Geom_Surface;
-import org.jcae.opencascade.jni.TopoDS_Compound;
-import org.jcae.opencascade.jni.TopoDS_Face;
-import org.jcae.opencascade.jni.TopoDS_Shape;
+import org.jcae.opencascade.jni.*;
 import org.jcae.viewer3d.PickViewable;
 import org.jcae.viewer3d.View;
 import org.jcae.viewer3d.Viewable;
 import org.jcae.viewer3d.bg.ViewableBG;
-import org.jcae.viewer3d.cad.CADDomain;
-import org.jcae.viewer3d.cad.CADProvider;
-import org.jcae.viewer3d.cad.CADSelection;
-import org.jcae.viewer3d.cad.FaceMesh;
-import org.jcae.viewer3d.cad.ViewableCAD;
+import org.jcae.viewer3d.cad.*;
 import org.jcae.viewer3d.cad.occ.OCCProvider;
+
 import com.sun.j3d.utils.image.TextureLoader;
 
 /**
@@ -111,7 +102,7 @@ public class TextureFitter extends View
 		//3D -> 2D matrix
 		Transform3D trsf1=normalizeTriangle(triangle2d);
 		trsf1.mulInverse(normalizeTriangle(triangle3d));
-
+		
 		//force orthogonal and uniform scale matrix		
 		if(normalize)
 		{
@@ -408,8 +399,6 @@ public class TextureFitter extends View
 
 	private TexCoordGeneration texCoordGeneration;
 	
-	private ViewableBG textureViewable;
-	
 	/**
 	 * @param frame the window owning the widget
 	 */
@@ -451,13 +440,17 @@ public class TextureFitter extends View
 				TextureLoader.ALLOW_NON_POWER_OF_TWO);
 		}
 		
-		int flags=TextureLoader.GENERATE_MIPMAP;
+		int flags=TextureLoader.GENERATE_MIPMAP|TextureLoader.Y_UP;
 		if(textureNonPowerOfTwoAvailable)
 			flags=flags|TextureLoader.ALLOW_NON_POWER_OF_TWO;
 		
 		tl=new TextureLoader(tl.getImage().getImage(), flags);
-				
-		return tl.getTexture();
+		
+		Texture toReturn = tl.getTexture();
+		toReturn.setBoundaryModeS(Texture.CLAMP_TO_BOUNDARY);
+		toReturn.setBoundaryModeT(Texture.CLAMP_TO_BOUNDARY);
+		
+		return toReturn;
 	}
 	
 	/** 
@@ -492,8 +485,7 @@ public class TextureFitter extends View
 		shape3D.setAppearance(createAppearance(triangle2d, triangle3d, normalize));
 		BranchGroup bg=new BranchGroup();
 		bg.addChild(shape3D);
-		remove(textureViewable);
-		textureViewable=new ViewableBG(bg);
+		Viewable textureViewable=new ViewableBG(bg);
 		add(textureViewable);
 		return textureViewable;
 	}
@@ -525,7 +517,7 @@ public class TextureFitter extends View
         
 		Matrix4f m=new Matrix4f();
         Transform3D trsf1=computeTransform(triangle2d, triangle3d,
-        	image.getWidth(), -image.getHeight(), normalize);
+        	image.getWidth(), image.getHeight(), normalize);
         trsf1.get(m);
         Vector4f vS=new Vector4f();
         Vector4f vT=new Vector4f();
