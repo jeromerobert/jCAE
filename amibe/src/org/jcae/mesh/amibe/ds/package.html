@@ -91,13 +91,11 @@ Adjacency relations can be requested either with
 {@link org.jcae.mesh.amibe.traits.TriangleTraitsBuilder#addHalfEdge} or
 {@link org.jcae.mesh.amibe.traits.TriangleTraitsBuilder#addVirtualHalfEdge}.
 With the former, <code>Mesh.createTriangle</code> creates
-{@link org.jcae.mesh.amibe.ds.TriangleHE} instances and with the latter,
+{@link org.jcae.mesh.amibe.ds.TriangleHE} instances and adjacency operations
+are performed by an {@link HalfEdge}.  With the latter,
 <code>Mesh.createTriangle</code> creates
-{@link org.jcae.mesh.amibe.ds.TriangleVH} instances.  Both classes inherits
-from {@link org.jcae.mesh.amibe.ds.Triangle} superclass, and in this class
-{@link org.jcae.mesh.amibe.ds.Triangle#adj} member is an
-{@link org.jcae.mesh.amibe.ds.AdjacencyWrapper} interface which is
-extended by inner classes.
+{@link org.jcae.mesh.amibe.ds.TriangleVH} instances which directly store
+adjacency relations.
 </p>
 
 <h3>With {@link org.jcae.mesh.amibe.ds.TriangleHE.AdjacencyHE}</h3>

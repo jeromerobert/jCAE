@@ -21,9 +21,7 @@
 package org.jcae.mesh.amibe.ds;
 
 /**
- * Interface describing adjacency relations between triangles.  This interface is
- * used by {@link Triangle#adj} and implementations can be found in inner classes
- * of {@link TriangleHE} and {@link TriangleVH}.
+ * Interface describing adjacency relations between triangles.
  */
 public interface AdjacencyWrapper
 {
