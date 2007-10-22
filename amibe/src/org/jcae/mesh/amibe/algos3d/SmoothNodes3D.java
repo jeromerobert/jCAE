@@ -109,12 +109,14 @@ public class SmoothNodes3D
 		logger.info("Run "+getClass().getName());
 		// First compute triangle quality
 		QSortedTree tree = new PAVLSortedTree();
+		AbstractHalfEdge ot = null;
 		for (AbstractTriangle at: mesh.getTriangles())
 		{
 			Triangle f = (Triangle) at;
 			if (f.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			double val = cost(f);
+			ot = f.getAbstractHalfEdge(ot);
+			double val = cost(ot);
 			if (val <= tolerance)
 				tree.insert(f, val);
 		}
@@ -130,6 +132,7 @@ public class SmoothNodes3D
 	private int computeMesh(QSortedTree tree)
 	{
 		int ret = 0;
+ 		AbstractHalfEdge ot = null;
 		Set<Vertex> nodeset = new HashSet<Vertex>(2*mesh.getTriangles().size());
 		for (Iterator<QSortedTree.Node> itt = tree.iterator(); itt.hasNext(); )
 		{
@@ -137,7 +140,7 @@ public class SmoothNodes3D
 			if (q.getValue() > tolerance)
 				break;
 			Triangle f = (Triangle) q.getData();
- 			AbstractHalfEdge ot = f.getAbstractHalfEdge();
+ 			ot = f.getAbstractHalfEdge(ot);
 			double l0 = f.vertex[1].distance3D(f.vertex[2]);
 			double l1 = f.vertex[2].distance3D(f.vertex[0]);
 			double l2 = f.vertex[0].distance3D(f.vertex[1]);
@@ -245,13 +248,13 @@ public class SmoothNodes3D
 		return true;
 	}
 	
-	private double cost(Triangle f)
+	private double cost(AbstractHalfEdge edge)
 	{
-		AbstractHalfEdge temp = f.getAbstractHalfEdge();
+		Triangle f = edge.getTri();
 		assert f.vertex[0] != mesh.outerVertex && f.vertex[1] != mesh.outerVertex && f.vertex[2] != mesh.outerVertex : f;
 		double p = f.vertex[0].distance3D(f.vertex[1]) + f.vertex[1].distance3D(f.vertex[2]) + f.vertex[2].distance3D(f.vertex[0]);
-		double area = temp.area();
-		double ret = scaleFactor * temp.area() * area / p / p;
+		double area = edge.area();
+		double ret = scaleFactor * edge.area() * area / p / p;
 		assert ret >= 0.0 && ret <= 1.01;
 		return ret;
 	}

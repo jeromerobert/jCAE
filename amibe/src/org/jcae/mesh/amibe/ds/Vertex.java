@@ -164,11 +164,14 @@ public class Vertex extends AbstractVertex implements Serializable
 	private AbstractHalfEdge getIncidentAbstractHalfEdge()
 	{
 		assert link instanceof Triangle;
-		return getIncidentAbstractHalfEdge((Triangle) link);
+		return getIncidentAbstractHalfEdge((Triangle) link, null);
 	}
-	private AbstractHalfEdge getIncidentAbstractHalfEdge(Triangle t)
+	private AbstractHalfEdge getIncidentAbstractHalfEdge(Triangle t, AbstractHalfEdge ot)
 	{
-		AbstractHalfEdge ot = t.getAbstractHalfEdge();
+		if (ot == null)
+			ot = t.getAbstractHalfEdge();
+		else
+			ot = t.getAbstractHalfEdge(ot);
 		if (ot.origin() != this)
 			ot = ot.next();
 		if (ot.origin() != this)
@@ -187,13 +190,14 @@ public class Vertex extends AbstractVertex implements Serializable
 	{
 		ArrayList<Triangle> res = new ArrayList<Triangle>();
 		Set<Triangle> allTriangles = new HashSet<Triangle>();
+		AbstractHalfEdge ot = null;
 		for (Triangle t: triangles)
 		{
 			if (allTriangles.contains(t))
 				continue;
 			allTriangles.add(t);
 			res.add(t);
-			AbstractHalfEdge ot = getIncidentAbstractHalfEdge(t);
+			ot = getIncidentAbstractHalfEdge(t, ot);
 			// Add all triangles of the same fan to allTriangles
 			Vertex d = ot.destination();
 			do
@@ -257,7 +261,7 @@ public class Vertex extends AbstractVertex implements Serializable
 	private void appendNeighboursTri(Triangle tri, Collection<Vertex> nodes)
 	{
 		assert tri.vertex[0] == this || tri.vertex[1] == this || tri.vertex[2] == this;
-		AbstractHalfEdge ot = getIncidentAbstractHalfEdge(tri);
+		AbstractHalfEdge ot = getIncidentAbstractHalfEdge(tri, null);
 		Vertex d = ot.destination();
 		do
 		{

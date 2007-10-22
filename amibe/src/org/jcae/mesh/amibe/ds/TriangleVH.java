@@ -124,6 +124,16 @@ public class TriangleVH extends Triangle implements AdjacencyWrapper
 		return ot;
 	}
 
+	@Override
+	public AbstractHalfEdge getAbstractHalfEdge(AbstractHalfEdge that)
+	{
+		if (that == null)
+			that = new VirtualHalfEdge();
+		VirtualHalfEdge ot = (VirtualHalfEdge) that;
+		ot.bind(this);
+		return ot;
+	}
+
 	/**
 	 * Gets local number of a symmetric edge.  With <code>TriangleVH</code>,
 	 * <code>getAdj(int)</code> returns a <code>TriangleVH</code> instance,

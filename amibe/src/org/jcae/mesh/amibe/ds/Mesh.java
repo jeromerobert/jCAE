@@ -406,10 +406,12 @@ public class Mesh extends AbstractMesh implements Serializable
 		tVertList.clear();
 		//  3. Mark boundary edges and bind them to virtual triangles.
 		logger.debug("Mark boundary edges");
+		AbstractHalfEdge ot = null;
+		AbstractHalfEdge sym = null;
 		for (AbstractTriangle at: triangleList)
 		{
 			Triangle t = (Triangle) at;
-			AbstractHalfEdge ot = t.getAbstractHalfEdge();
+			ot = t.getAbstractHalfEdge(ot);
 			for (int i = 0; i < 3; i++)
 			{
 				ot = ot.next();
@@ -421,7 +423,7 @@ public class Mesh extends AbstractMesh implements Serializable
 					adj.setAttributes(AbstractHalfEdge.OUTER);
 					adj.setReadable(false);
 					adj.setWritable(false);
-					AbstractHalfEdge sym = adj.getAbstractHalfEdge();
+					sym = adj.getAbstractHalfEdge(sym);
 					sym.setAttributes(AbstractHalfEdge.BOUNDARY);
 					ot.glue(sym);
 				}
@@ -437,7 +439,7 @@ public class Mesh extends AbstractMesh implements Serializable
 		for (AbstractTriangle at: triangleList)
 		{
 			Triangle t = (Triangle) at;
-			AbstractHalfEdge ot = t.getAbstractHalfEdge();
+			ot = t.getAbstractHalfEdge(ot);
 			for (int i = 0; i < 3; i++)
 			{
 				ot = ot.next();
@@ -457,7 +459,7 @@ public class Mesh extends AbstractMesh implements Serializable
 		for (AbstractTriangle at: triangleList)
 		{
 			Triangle t = (Triangle) at;
-			AbstractHalfEdge ot = t.getAbstractHalfEdge();
+			ot = t.getAbstractHalfEdge(ot);
 			for (int i = 0; i < 3; i++)
 			{
 				ot = ot.next();
@@ -493,7 +495,7 @@ public class Mesh extends AbstractMesh implements Serializable
 		for (AbstractTriangle at: triangleList)
 		{
 			Triangle t = (Triangle) at;
-			AbstractHalfEdge ot = t.getAbstractHalfEdge();
+			ot = t.getAbstractHalfEdge(ot);
 			for (int i = 0; i < 3; i++)
 			{
 				Vertex v = (Vertex) t.vertex[i];
@@ -556,11 +558,17 @@ public class Mesh extends AbstractMesh implements Serializable
 		for (AbstractTriangle at: neighTriList)
 			markedTri.add(at);
 		//  Loop on all edges incident to v
+		AbstractHalfEdge ot = null;
+		AbstractHalfEdge sym = null;
+		AbstractHalfEdge ot2 = null;
+		AbstractHalfEdge s = null;
+		AbstractHalfEdge symSym = null;
+		AbstractHalfEdge otSym = null;
 		for (AbstractTriangle at: neighTriList)
 		{
 			Triangle t = (Triangle) at;
-			AbstractHalfEdge ot = t.getAbstractHalfEdge();
-			AbstractHalfEdge sym = t.getAbstractHalfEdge();
+			ot = t.getAbstractHalfEdge(ot);
+			sym = t.getAbstractHalfEdge(sym);
 			if (ot.destination() == v)
 				ot = ot.next();
 			else if (ot.apex() == v)
@@ -581,7 +589,7 @@ public class Mesh extends AbstractMesh implements Serializable
 					continue;
 				// t2 contains v and v2, we now look for an edge
 				// (v,v2) or (v2,v)
-				AbstractHalfEdge ot2 = t2.getAbstractHalfEdge();
+				ot2 = t2.getAbstractHalfEdge(ot2);
 				if (ot2.destination() == v2)
 					ot2 = ot2.next();
 				else if (ot2.apex() == v2)
@@ -608,7 +616,7 @@ public class Mesh extends AbstractMesh implements Serializable
 					otVT.setAttributes(AbstractHalfEdge.OUTER);
 					otVT.setReadable(false);
 					otVT.setWritable(false);
-					AbstractHalfEdge s = otVT.getAbstractHalfEdge();
+					s = otVT.getAbstractHalfEdge(s);
 					ot.glue(s);
 					ot.setAttributes(AbstractHalfEdge.NONMANIFOLD);
 					s.setAttributes(AbstractHalfEdge.NONMANIFOLD);
@@ -628,7 +636,7 @@ public class Mesh extends AbstractMesh implements Serializable
 					otVT.setAttributes(AbstractHalfEdge.OUTER);
 					otVT.setReadable(false);
 					otVT.setWritable(false);
-					AbstractHalfEdge otSym = otVT.getAbstractHalfEdge();
+					otSym = otVT.getAbstractHalfEdge(otSym);
 					ot.glue(otSym);
 					ot.setAttributes(AbstractHalfEdge.NONMANIFOLD);
 					otSym.setAttributes(AbstractHalfEdge.NONMANIFOLD);
@@ -638,7 +646,7 @@ public class Mesh extends AbstractMesh implements Serializable
 					symVT.setAttributes(AbstractHalfEdge.OUTER);
 					symVT.setReadable(false);
 					symVT.setWritable(false);
-					AbstractHalfEdge symSym = symVT.getAbstractHalfEdge();
+					symSym = symVT.getAbstractHalfEdge(symSym);
 					sym.glue(symSym);
 					sym.setAttributes(AbstractHalfEdge.NONMANIFOLD);
 					symSym.setAttributes(AbstractHalfEdge.NONMANIFOLD);
@@ -658,7 +666,7 @@ public class Mesh extends AbstractMesh implements Serializable
 					ot2VT.setAttributes(AbstractHalfEdge.OUTER);
 					ot2VT.setReadable(false);
 					ot2VT.setWritable(false);
-					AbstractHalfEdge s = ot2VT.getAbstractHalfEdge();
+					s = ot2VT.getAbstractHalfEdge(s);
 					ot2.glue(s);
 					ot2.setAttributes(AbstractHalfEdge.NONMANIFOLD);
 					s.setAttributes(AbstractHalfEdge.NONMANIFOLD);
@@ -666,7 +674,7 @@ public class Mesh extends AbstractMesh implements Serializable
 				else
 					throw new RuntimeException();
 				// Add ot2 to this cycle
-				AbstractHalfEdge symSym = t.getAbstractHalfEdge();
+				symSym = t.getAbstractHalfEdge(symSym);
 				sym = ot.sym(sym);
 				sym = sym.next();
 				symSym = sym.sym(symSym);

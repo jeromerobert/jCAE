@@ -76,6 +76,12 @@ public class TriangleHE extends Triangle
 		return e0;
 	}
 
+	@Override
+	public AbstractHalfEdge getAbstractHalfEdge(AbstractHalfEdge that)
+	{
+		return e0;
+	}
+
 	public HalfEdge getHalfEdge()
 	{
 		return e0;
