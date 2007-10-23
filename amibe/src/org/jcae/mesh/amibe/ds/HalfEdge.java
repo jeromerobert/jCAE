@@ -37,7 +37,7 @@ import org.apache.log4j.Logger;
  * (between 0 and 2) and a triangle.  It has a link to the next edge in the
  * same triangle, and to its symmetric edge.
  */
-public class HalfEdge extends AbstractHalfEdge implements Serializable, AdjacencyWrapper
+public class HalfEdge extends AbstractHalfEdge implements Serializable
 {
 	private static Logger logger = Logger.getLogger(HalfEdge.class);
 	private TriangleHE tri;
@@ -1326,39 +1326,5 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable, Adjacenc
 			that = that.next;
 		}
 	}
-	
-	private HalfEdge getHalfEdge(int num)
-	{
-		if (num == 0)
-			return this;
-		else if (num == 1)
-			return next;
-		else if (num == 2)
-			return next.next;
-		else
-			throw new RuntimeException();
-	}
-	
-	@Override
-	public AdjacencyWrapper getAdj(int num)
-	{
-		return getHalfEdge(num).sym;
-	}
-	
-	@Override
-	public void setAdj(int num, AdjacencyWrapper link)
-	{
-		getHalfEdge(num).glue((HalfEdge) link);
-	}
-	
-	/*
-	 * These methods are already defined
-	 *      public void setAttributes(int attr)
-	 *      public void clearAttributes(int attr)
-	 *      public boolean hasAttributes(int attr)
-	 * but with a different semantics and cannot be
-	 * implemented here.  Instead, TriangleHE redefines
-	 * these methods to avoid this conflict.
-	 */
 	
 }

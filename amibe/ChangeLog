@@ -1,3 +1,8 @@
+Wed Oct 24 00:38:57 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/AdjacencyWrapper.java: File removed,
+	adjacency relations can be managed without this interface.
+
 Mon Oct 22 10:20:49 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/AdjacencyWrapper.java: Rename setFlag(),

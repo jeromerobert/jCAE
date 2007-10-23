@@ -64,7 +64,7 @@ import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
  *       to build a circular doubly-linked list of all symmetric edges.</li>
  * </ul>
  */
-public class TriangleVH extends Triangle implements AdjacencyWrapper
+public class TriangleVH extends Triangle
 {
 	/**
 	 * Pointers to adjacent elements through edges.
@@ -143,10 +143,29 @@ public class TriangleVH extends Triangle implements AdjacencyWrapper
 	}
 
 	/**
-	 * Gets local number of a symmetric edge.  With <code>TriangleVH</code>,
-	 * <code>getAdj(int)</code> returns a <code>TriangleVH</code> instance,
-	 * but we also need the local number of symmetric edge in adjacent triangle.
-	 * This is performed by this method.
+	 * Returns the adjacent TriangleVH through an edge.
+	 *
+	 * @param num  the local number of this edge.
+	 * @return the adjacent TriangleVH
+	 */
+	public TriangleVH getAdj(int num)
+	{
+		return adjacentTriangles[num];
+	}
+	
+	/**
+	 * Sets TriangleVH adjacent to an edge.
+	 *
+	 * @param num  the local number of this edge
+	 * @param link  adjacent TriangleVH
+	 */
+	public void setAdj(int num, TriangleVH link)
+	{
+		adjacentTriangles[num] = link;
+	}
+	
+	/**
+	 * Gets local number of a symmetric edge.
 	 *
 	 * @param num   edge local number
 	 * @return  local number of this symmetric edge
@@ -157,10 +176,7 @@ public class TriangleVH extends Triangle implements AdjacencyWrapper
 	}
 
 	/**
-	 * Sets local number of a symmetric edge.  With <code>TriangleVH</code>,
-	 * <code>setAdj(int, Object)</code> sets <code>TriangleVH</code> instance
-	 * adjacent to an edge, but we also need to store the local number of symmetric
-	 * edge in adjacent triangle.  This is performed by this method.
+	 * Sets local number of a symmetric edge.
 	 *
 	 * @param num   edge local number
 	 * @param pos   local number of symmetric edge
@@ -173,44 +189,28 @@ public class TriangleVH extends Triangle implements AdjacencyWrapper
 		adjPos |= (pos << (2*num));
 	}
 
-	public void setEdgeAttributes(int num, int attributes)
-	{
-		edgeAttributes[num] = (byte) attributes;
-	}
-
+	/**
+	 * Gets attributes of edge <code>num</code>.
+	 *
+	 * @param num  local edge number
+	 * @return  attributes of this edge
+	 */
 	public int getEdgeAttributes(int num)
 	{
 		return edgeAttributes[num];
 	}
-		
-	/**
-	 * Implement AdjacencyWrapper methods.
-	 */
 
 	/**
-	 * Returns the adjacent TriangleVH through an edge.
+	 * Sets attributes of edge <code>num</code>.
 	 *
-	 * @param num  the local number of this edge.
-	 * @return the adjacent TriangleVH
+	 * @param num   local edge number
+	 * @param attr  attributes to set on this edge
 	 */
-	@Override
-	public AdjacencyWrapper getAdj(int num)
+	public void setEdgeAttributes(int num, int attr)
 	{
-		return adjacentTriangles[num];
+		edgeAttributes[num] = (byte) attr;
 	}
-	
-	/**
-	 * Sets TriangleVH adjacent to an edge.
-	 *
-	 * @param num  the local number of this edge
-	 * @param link  adjacent TriangleVH
-	 */
-	@Override
-	public void setAdj(int num, AdjacencyWrapper link)
-	{
-		adjacentTriangles[num] = (TriangleVH) link;
-	}
-	
+
 	// Helper functions
 	/**
 	 * Sets attributes for all edges of this triangle.

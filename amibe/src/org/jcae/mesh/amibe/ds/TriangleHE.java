@@ -47,30 +47,6 @@ public class TriangleHE extends Triangle
 	}
 	
 	/**
-	 * Returns the adjacent AbstractTriangle.
-	 *
-	 * @param num  the local number of this edge.
-	 * @return the adjacent AbstractTriangle.
-	 */
-	@Override
-	public final AdjacencyWrapper getAdj(int num)
-	{
-		return e0.getAdj(num);
-	}
-
-	/**
-	 * Sets the AbstractTriangle adjacent to an edge.
-	 *
-	 * @param num  the local number of this edge.
-	 * @param link  the adjacent AbstractTriangle.
-	 */
-	@Override
-	public final void setAdj(int num, AdjacencyWrapper link)
-	{
-		e0.setAdj(num, link);
-	}
-	
-	/**
 	 * Gets an <code>AbstractHalfEdge</code> instance bound to this triangle.
 	 * This method returns <code>HalfEdge</code> 0.
 	 * @return  an <code>HalfEdge</code> instance bound to this triangle
@@ -93,12 +69,23 @@ public class TriangleHE extends Triangle
 		return e0;
 	}
 
+	/**
+	 * Gets an <code>HalfEdge</code> instance bound to this triangle.
+	 * This method returns <code>HalfEdge</code> 0.
+	 * @return  <code>HalfEdge</code> instance bound to this triangle
+	 */
 	public HalfEdge getHalfEdge()
 	{
 		return e0;
 	}
 
-	public void setHalfEdge(HalfEdge e)
+	/**
+	 * Sets <code>HalfEdge</code> 0 of this triangle.  This method must not
+	 * be called, it is meant to be used by {@link ElementFactory#createTriangle}.
+	 *
+	 * @param e  edge to set as edge 0 of this triangle
+	 */
+	void setHalfEdge(HalfEdge e)
 	{
 		e0 = e;
 	}

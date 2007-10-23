@@ -236,7 +236,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	public final AbstractHalfEdge sym()
 	{
 		int neworient = tri.getAdjLocalNumber(localNumber);
-		tri = (TriangleVH) tri.getAdj(localNumber);
+		tri = tri.getAdj(localNumber);
 		localNumber = neworient;
 		pullAttributes();
 		return this;
@@ -255,7 +255,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	public final AbstractHalfEdge sym(AbstractHalfEdge that)
 	{
 		VirtualHalfEdge dest = (VirtualHalfEdge) that;
-		dest.tri = (TriangleVH) tri.getAdj(localNumber);
+		dest.tri = tri.getAdj(localNumber);
 		dest.localNumber = tri.getAdjLocalNumber(localNumber);
 		dest.pullAttributes();
 		return dest;
@@ -402,7 +402,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 */
 	protected static final void symOTri(VirtualHalfEdge o, VirtualHalfEdge that)
 	{
-		that.tri = (TriangleVH) o.tri.getAdj(o.localNumber);
+		that.tri = o.tri.getAdj(o.localNumber);
 		that.localNumber = o.tri.getAdjLocalNumber(o.localNumber);
 		that.pullAttributes();
 	}
@@ -532,7 +532,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 *
 	 * @param link  the triangle bond to this one if this edge is manifold, or an Object otherwise
 	 */
-	private final void setAdj(AdjacencyWrapper link)
+	private final void setAdj(TriangleVH link)
 	{
 		tri.setAdj(localNumber, link);
 	}
@@ -1568,7 +1568,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		logger.debug("Non manifold fan iterator");
 		return new Iterator<AbstractHalfEdge>()
 		{
-			private TriangleVH last = (TriangleVH) tri.getAdj(localNumber);
+			private TriangleVH last = tri.getAdj(localNumber);
 			private int lastNumber = tri.getAdjLocalNumber(localNumber);
 			VirtualHalfEdge ret = new VirtualHalfEdge();
 			VirtualHalfEdge current = new VirtualHalfEdge();

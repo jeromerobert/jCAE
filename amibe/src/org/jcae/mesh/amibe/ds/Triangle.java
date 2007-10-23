@@ -34,22 +34,6 @@ public abstract class Triangle extends AbstractTriangle implements Serializable
 	}
 
 	/**
-	 * Returns the adjacent AbstractTriangle.
-	 *
-	 * @param num  the local number of this edge.
-	 * @return the adjacent AbstractTriangle.
-	 */
-	public abstract AdjacencyWrapper getAdj(int num);
-	
-	/**
-	 * Sets the AbstractTriangle adjacent to an edge.
-	 *
-	 * @param num  the local number of this edge.
-	 * @param link  the adjacent AbstractTriangle.
-	 */
-	public abstract void setAdj(int num, AdjacencyWrapper link);
-	
-	/**
 	 * Sets attributes for all edges of this triangle.
 	 *
 	 * @param attr  attributes to set on edges
