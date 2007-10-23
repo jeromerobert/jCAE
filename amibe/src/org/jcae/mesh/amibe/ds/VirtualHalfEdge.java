@@ -33,7 +33,7 @@ import org.apache.log4j.Logger;
 
 /**
  * A handle to abstract half-edge instances.  When triangles are instances of
- * {@link TriangleHE} class, adjacency relations are contained within
+ * {@link TriangleVH} class, adjacency relations are contained within
  * triangles.  This <code>VirtualHalfEdge</code> class is a handle to an edge,
  * it has a link to a triangle and contains a local number.  When a
  * <code>VirtualHalfEdge</code> instance is traversing the mesh, its reference

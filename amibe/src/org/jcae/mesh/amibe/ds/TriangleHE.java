@@ -70,12 +70,23 @@ public class TriangleHE extends Triangle
 		e0.setAdj(num, link);
 	}
 	
+	/**
+	 * Gets an <code>AbstractHalfEdge</code> instance bound to this triangle.
+	 * This method returns <code>HalfEdge</code> 0.
+	 * @return  an <code>HalfEdge</code> instance bound to this triangle
+	 */
 	@Override
 	public AbstractHalfEdge getAbstractHalfEdge()
 	{
 		return e0;
 	}
 
+	/**
+	 * Gets an <code>AbstractHalfEdge</code> instance bound to this triangle.
+	 * This method returns <code>HalfEdge</code> 0, argument is unused
+	 * @param  that   dummy argument
+	 * @return  an <code>HalfEdge</code> instance bound to this triangle
+	 */
 	@Override
 	public AbstractHalfEdge getAbstractHalfEdge(AbstractHalfEdge that)
 	{

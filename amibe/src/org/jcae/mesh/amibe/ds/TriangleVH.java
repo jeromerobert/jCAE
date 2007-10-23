@@ -29,13 +29,14 @@ import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
  * the local number of an edge is the index of its opposite vertex.  A
  * <code>TriangleVH</code> instance has a pointer to its three neighbours
  * through its edges, and knows the local number of opposite edges in
- * their respective triangles.
+ * their respective triangles.  It also stores as a byte array attributes
+ * of its three edges.
  *
  * <p>
  * As local numbers are integers between 0 and 2, a packed representation
  * is wanted to save space.  They can be stored within 6 bits, edge 0
  * is stored in the two least significant bits, edge 1 in next two and edge
- * 2 in next 2.
+ * 2 in next two, so <code>adjPos=(localNumberSymEdge0&lt;&lt;0)+(localNumberSymEdge1&lt;&lt;2)+(localNumberSymEdge2&lt;&lt;4)</code>.
  * </p>
  *
  * <p align="center"><img src="doc-files/TriangleVH-1.png" alt="[Image showing adjacency symmetric edges]"/></p>
@@ -46,7 +47,7 @@ import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
  * <ul>
  *   <li><code>a.vertex = { A, B, C }</code></li>
  *   <li><code>a.adjacentTriangles = { c, d, b }</code></li>
- *   <li><code>a.adjPos = (0 &lt;&lt;  0) + (1 &lt;&lt;  2) + (0 &lt;&lt;  0)</li>
+ *   <li><code>a.adjPos = (0 &lt;&lt;  0) + (1 &lt;&lt;  2) + (0 &lt;&lt;  0) = 2</li>
  * </ul>
  *
  * <p>
@@ -108,6 +109,12 @@ public class TriangleVH extends Triangle implements AdjacencyWrapper
 		edgeAttributes[2] = src.edgeAttributes[2];
 	}
 		
+	/**
+	 * Gets an <code>AbstractHalfEdge</code> instance bound to this triangle.
+	 * This method allocates a new {@link VirtualHalfEdge} instance and binds
+	 * it to this triangle.
+	 * @return  a new <code>VirtualHalfEdge</code> instance bound to this triangle
+	 */
 	@Override
 	public AbstractHalfEdge getAbstractHalfEdge()
 	{
@@ -116,6 +123,15 @@ public class TriangleVH extends Triangle implements AdjacencyWrapper
 		return ot;
 	}
 
+	/**
+	 * Gets an <code>AbstractHalfEdge</code> instance bound to this triangle.
+	 * If argument is null, this method behaves as if no argument was passed.
+	 * Otherwise, argument is an existing {@link VirtualHalfEdge} instance
+	 * which is bound to this triangle and returned.
+	 * @param  that   either <code>null</code> or an existing <code>VirtualHalfEdge</code>
+	 *                instance which is modified
+	 * @return  a <code>VirtualHalfEdge</code> instance bound to this triangle
+	 */
 	@Override
 	public AbstractHalfEdge getAbstractHalfEdge(AbstractHalfEdge that)
 	{

@@ -72,7 +72,14 @@ public abstract class Triangle extends AbstractTriangle implements Serializable
 	 */
 	public abstract boolean hasAttributes(int attr);
 	
+	/**
+	 * Gets an <code>AbstractHalfEdge</code> instance bound to this triangle.
+	 */
 	public abstract AbstractHalfEdge getAbstractHalfEdge();
+
+	/**
+	 * Gets an <code>AbstractHalfEdge</code> instance bound to this triangle.
+	 */
 	public abstract AbstractHalfEdge getAbstractHalfEdge(AbstractHalfEdge that);
 
 }
