@@ -128,6 +128,7 @@ public class Mesh2D extends Mesh
 	private final void init()
 	{
 		outerVertex = new OuterVertex2D();
+		outerTrianglesAreConnected = true;
 		String accumulateEpsilonProp = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon");
 		if (accumulateEpsilonProp == null)
 		{

@@ -96,6 +96,9 @@ public class Mesh extends AbstractMesh implements Serializable
 	//  Entity factory
 	protected ElementFactoryInterface factory = null;
 
+	//  Set to true by Mesh2D, this subclass connects outer triangles
+	protected boolean outerTrianglesAreConnected = false;
+	
 	protected int maxLabel = 0;
 	
 	//  Minimal topological edge length
@@ -990,7 +993,7 @@ public class Mesh extends AbstractMesh implements Serializable
 				continue;
 			}
 			// triangle is outer
-			if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
+			if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY) && !outerTrianglesAreConnected)
 			{
 				// Edge is manifold
 				// next() and prev() must not be linked to other edges
@@ -1157,7 +1160,7 @@ public class Mesh extends AbstractMesh implements Serializable
 				continue;
 			}
 			// triangle is outer
-			if (e.hasAttributes(AbstractHalfEdge.BOUNDARY))
+			if (e.hasAttributes(AbstractHalfEdge.BOUNDARY) && !outerTrianglesAreConnected)
 			{
 				// Edge e is manifold
 				// next() and prev() must not be linked to other edges
