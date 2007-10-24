@@ -25,7 +25,7 @@ import java.util.Iterator;
 import javax.vecmath.Point3f;
 import org.jcae.viewer3d.Domain;
 import org.jcae.viewer3d.Palette;
-import org.jcae.viewer3d.fe.FEDomainAdapter;
+import org.jcae.viewer3d.fe.FEDomainAdaptor;
 import org.jcae.viewer3d.fe.FEProvider;
 import com.sun.j3d.utils.geometry.GeometryInfo;
 
@@ -104,7 +104,7 @@ public class SquareMeshProvider implements FEProvider
 		final int[] indices=gi.getCoordinateIndices();
 		final float[] coordsn=pointToFloat(gi.getCoordinates());
 
-		return new FEDomainAdapter()
+		return new FEDomainAdaptor()
 		{
 			private Palette palette=new Palette(35);
 			public float[] getNodes()

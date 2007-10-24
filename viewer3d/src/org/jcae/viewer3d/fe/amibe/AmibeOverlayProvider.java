@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import org.jcae.viewer3d.Domain;
-import org.jcae.viewer3d.fe.FEDomainAdapter;
+import org.jcae.viewer3d.fe.FEDomainAdaptor;
 import org.jcae.viewer3d.fe.FEProvider;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -98,17 +98,17 @@ public class AmibeOverlayProvider implements FEProvider
 		catch (IOException e)
 		{
 			e.printStackTrace();
-			return new FEDomainAdapter();		
+			return new FEDomainAdaptor();		
 		}
 		catch(ParserConfigurationException ex)
 		{
 			ex.printStackTrace();
-			return new FEDomainAdapter();
+			return new FEDomainAdaptor();
 		}
 		catch (SAXException e)
 		{
 			e.printStackTrace();
-			return new FEDomainAdapter();
+			return new FEDomainAdaptor();
 		}
 	}
 }

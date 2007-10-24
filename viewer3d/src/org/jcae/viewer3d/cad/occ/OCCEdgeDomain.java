@@ -27,13 +27,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import org.jcae.opencascade.jni.*;
 import org.jcae.viewer3d.ColoredDomain;
-import org.jcae.viewer3d.cad.CADDomainAdapator;
+import org.jcae.viewer3d.cad.CADDomainAdaptor;
 
 /**
  * @author Jerome Robert
  *
  */
-public class OCCEdgeDomain extends CADDomainAdapator implements ColoredDomain
+public class OCCEdgeDomain extends CADDomainAdaptor implements ColoredDomain
 {
 	static class MyEdge extends TopoDS_Edge
 	{
@@ -182,7 +182,7 @@ public class OCCEdgeDomain extends CADDomainAdapator implements ColoredDomain
 		}		
 	}
 	/* (non-Javadoc)
-	 * @see org.jcae.viewer3d.cad.CADDomainAdapator#getEdgeIterator()
+	 * @see org.jcae.viewer3d.cad.CADDomainAdaptor#getEdgeIterator()
 	 */
 	@Override
 	public Iterator<float[]> getEdgeIterator()

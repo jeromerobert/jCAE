@@ -4,7 +4,7 @@ import java.awt.Color;
 import javax.swing.JFrame;
 import org.jcae.viewer3d.Domain;
 import org.jcae.viewer3d.View;
-import org.jcae.viewer3d.fe.FEDomainAdapter;
+import org.jcae.viewer3d.fe.FEDomainAdaptor;
 import org.jcae.viewer3d.fe.FEProvider;
 import org.jcae.viewer3d.fe.ViewableFE;
 
@@ -17,7 +17,7 @@ public class TestFEQuad implements FEProvider
 	 * This is a group of quad elements
 	 * @see FEDomain
 	 */
-	private static  class TestDomain extends FEDomainAdapter
+	private static  class TestDomain extends FEDomainAdaptor
 	{
 		private float[] nodes;
 		private int[] quads;

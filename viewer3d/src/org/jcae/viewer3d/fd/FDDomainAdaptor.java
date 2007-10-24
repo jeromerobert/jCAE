@@ -29,7 +29,7 @@ import java.util.Iterator;
  * @author Jerome Robert
  *
  */
-public class FDDomainAdapter implements FDDomain
+public class FDDomainAdaptor implements FDDomain
 {
 	static private class EmtpyIterator implements Iterator<int[]>
 	{

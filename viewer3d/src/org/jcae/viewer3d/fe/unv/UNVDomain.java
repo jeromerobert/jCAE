@@ -24,9 +24,9 @@ import gnu.trove.TIntHashSet;
 import gnu.trove.TIntIntHashMap;
 import java.awt.Color;
 import java.util.Iterator;
-import org.jcae.viewer3d.fe.FEDomainAdapter;
+import org.jcae.viewer3d.fe.FEDomainAdaptor;
 
-public class UNVDomain extends FEDomainAdapter
+public class UNVDomain extends FEDomainAdaptor
 {
 	private Color color;
 	private int id;
@@ -63,7 +63,7 @@ public class UNVDomain extends FEDomainAdapter
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getColor()
+	 * @see org.jcae.viewer3d.fe.FEDomainAdaptor#getColor()
 	 */
 	@Override
 	public Color getColor(){
@@ -71,7 +71,7 @@ public class UNVDomain extends FEDomainAdapter
 	}
 
 	/* (non-Javadoc)
-	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getID()
+	 * @see org.jcae.viewer3d.fe.FEDomainAdaptor#getID()
 	 */
 	@Override
 	public int getID(){
@@ -95,7 +95,7 @@ public class UNVDomain extends FEDomainAdapter
 	
 	/*
 	 * (non-Javadoc)
-	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getNumberOfTria3()
+	 * @see org.jcae.viewer3d.fe.FEDomainAdaptor#getNumberOfTria3()
 	 */
 	@Override
 	public int getNumberOfTria3(){
@@ -104,7 +104,7 @@ public class UNVDomain extends FEDomainAdapter
 			
 	/*
 	 * (non-Javadoc)
-	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getNumberOfTria3()
+	 * @see org.jcae.viewer3d.fe.FEDomainAdaptor#getNumberOfTria3()
 	 */
 	@Override
 	public int getNumberOfQuad4(){
@@ -139,7 +139,7 @@ public class UNVDomain extends FEDomainAdapter
 	
 	/*
 	 * (non-Javadoc)
-	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getTria3Iterator()
+	 * @see org.jcae.viewer3d.fe.FEDomainAdaptor#getTria3Iterator()
 	 */
 	@Override
 	public Iterator<int[]> getTria3Iterator()

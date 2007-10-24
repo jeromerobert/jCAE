@@ -26,7 +26,7 @@ import java.util.Iterator;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
 import org.jcae.opencascade.jni.*;
-import org.jcae.viewer3d.cad.CADDomainAdapator;
+import org.jcae.viewer3d.cad.CADDomainAdaptor;
 import org.jcae.viewer3d.cad.DefaultFaceMesh;
 import org.jcae.viewer3d.cad.FaceMesh;
 
@@ -42,7 +42,7 @@ import org.jcae.viewer3d.cad.FaceMesh;
  * @author Jerome Robert
  *
  */
-public class OCCFaceDomain extends CADDomainAdapator
+public class OCCFaceDomain extends CADDomainAdaptor
 {
 	private static int meshIter=3;
 	private ArrayList<FaceMesh> faceMeshes;
@@ -257,7 +257,7 @@ public class OCCFaceDomain extends CADDomainAdapator
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.jcae.viewer3d.cad.CADDomainAdapator#getFaceIterator()
+	 * @see org.jcae.viewer3d.cad.CADDomainAdaptor#getFaceIterator()
 	 */
 	@Override
 	public Iterator<FaceMesh> getFaceIterator()

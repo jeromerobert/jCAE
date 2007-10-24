@@ -31,10 +31,10 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.logging.Logger;
-import org.jcae.viewer3d.fe.FEDomainAdapter;
+import org.jcae.viewer3d.fe.FEDomainAdaptor;
 import org.w3c.dom.Element;
 
-public class AmibeBeanDomain extends FEDomainAdapter
+public class AmibeBeanDomain extends FEDomainAdaptor
 {
 	private Color color;
 	private int[] beam2;

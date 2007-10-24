@@ -35,7 +35,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Iterator;
 import java.util.logging.Logger;
-import org.jcae.viewer3d.fe.FEDomainAdapter;
+import org.jcae.viewer3d.fe.FEDomainAdaptor;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -46,7 +46,7 @@ import org.w3c.dom.NodeList;
  * @author Jerome Robert
  * @todo implement
  */
-public class AmibeDomain extends FEDomainAdapter
+public class AmibeDomain extends FEDomainAdaptor
 {
 	private File directory;
 	private Document document;
@@ -89,7 +89,7 @@ public class AmibeDomain extends FEDomainAdapter
 	}
 	/*
 	 * (non-Javadoc)
-	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getNumberOfNodes()
+	 * @see org.jcae.viewer3d.fe.FEDomainAdaptor#getNumberOfNodes()
 	 */
 	@Override
 	public int getNumberOfNodes()
@@ -99,7 +99,7 @@ public class AmibeDomain extends FEDomainAdapter
 	
 	/*
 	 * (non-Javadoc)
-	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getNumberOfTria3()
+	 * @see org.jcae.viewer3d.fe.FEDomainAdaptor#getNumberOfTria3()
 	 */
 	@Override
 	public int getNumberOfTria3()
@@ -109,7 +109,7 @@ public class AmibeDomain extends FEDomainAdapter
 	
 	/*
 	 * (non-Javadoc)
-	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getTria3Iterator()
+	 * @see org.jcae.viewer3d.fe.FEDomainAdaptor#getTria3Iterator()
 	 */
 	@Override
 	public Iterator<int[]> getTria3Iterator()
@@ -337,7 +337,7 @@ public class AmibeDomain extends FEDomainAdapter
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getColor()
+	 * @see org.jcae.viewer3d.fe.FEDomainAdaptor#getColor()
 	 */
 	public Color getColor()
 	{
@@ -345,7 +345,7 @@ public class AmibeDomain extends FEDomainAdapter
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getID()
+	 * @see org.jcae.viewer3d.fe.FEDomainAdaptor#getID()
 	 */
 	public int getID()
 	{

@@ -27,17 +27,17 @@ import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
 import org.jcae.opencascade.jni.TopExp_Explorer;
 import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.jcae.opencascade.jni.TopoDS_Vertex;
-import org.jcae.viewer3d.cad.CADDomainAdapator;
+import org.jcae.viewer3d.cad.CADDomainAdaptor;
 
 /**
  * @author Jerome Robert
  *
  */
-public class OCCVertexDomain extends CADDomainAdapator
+public class OCCVertexDomain extends CADDomainAdaptor
 {
 	float[] marks;
 	/* (non-Javadoc)
-	 * @see org.jcae.viewer3d.cad.CADDomainAdapator#getMarksTypes()
+	 * @see org.jcae.viewer3d.cad.CADDomainAdaptor#getMarksTypes()
 	 */
 	@Override
 	public Object[] getMarksTypes()
@@ -46,7 +46,7 @@ public class OCCVertexDomain extends CADDomainAdapator
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.jcae.viewer3d.cad.CADDomainAdapator#getMarks(java.lang.Object)
+	 * @see org.jcae.viewer3d.cad.CADDomainAdaptor#getMarks(java.lang.Object)
 	 */
 	@Override
 	public float[] getMarks(Object type)

@@ -28,7 +28,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.jcae.viewer3d.Domain;
 import org.jcae.viewer3d.Palette;
-import org.jcae.viewer3d.fe.FEDomainAdapter;
+import org.jcae.viewer3d.fe.FEDomainAdaptor;
 import org.jcae.viewer3d.fe.FEProvider;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -120,7 +120,7 @@ public class AmibeProvider implements FEProvider
 		catch (IOException e)
 		{
 			e.printStackTrace();
-			return new FEDomainAdapter();
+			return new FEDomainAdaptor();
 		}
 	}
 	

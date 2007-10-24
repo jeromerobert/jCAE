@@ -1,6 +1,12 @@
 2007-10-24 10:01 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d: Add Java generics and annotations.
+	* src/org/jcae/viewer3d/cad/CADDomainAdapator.java: Renamed into...
+	* src/org/jcae/viewer3d/cad/CADDomainAdaptor.java
+	* src/org/jcae/viewer3d/fd/FDDomainAdapter.java: Renamed into...
+	* src/org/jcae/viewer3d/fd/FDDomainAdaptor.java
+	* src/org/jcae/viewer3d/fe/FEDomainAdapter.java: Renamed into...
+	* src/org/jcae/viewer3d/fe/FEDomainAdaptor.java
 
 2007-10-16 17:02 Denis Barbier <barbier@users.sourceforge.net>
 

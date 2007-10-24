@@ -22,13 +22,13 @@
 package org.jcae.viewer3d.fd.piaf;
 
 import java.awt.Color;
-import org.jcae.viewer3d.fd.FDDomainAdapter;
+import org.jcae.viewer3d.fd.FDDomainAdaptor;
 
 /**
  * @author Jerome Robert
  *
  */
-public class PiafDomain extends FDDomainAdapter
+public class PiafDomain extends FDDomainAdaptor
 {
 
 	/* (non-Javadoc)

@@ -22,13 +22,13 @@
 package org.jcae.viewer3d.fd.pl02;
 
 import java.awt.Color;
-import org.jcae.viewer3d.fd.FDDomainAdapter;
+import org.jcae.viewer3d.fd.FDDomainAdaptor;
 
 /**
  * @author Jerome Robert
  *
  */
-public class PL02Domain extends FDDomainAdapter
+public class PL02Domain extends FDDomainAdaptor
 {
 
 	/* (non-Javadoc)

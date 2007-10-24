@@ -98,7 +98,7 @@ public class DefaultFDProvider implements FDProvider
 		switch(id)
 		{
 			case 0:
-				return new FDDomainAdapter()
+				return new FDDomainAdaptor()
 				{
 					@Override
 					public int getNumberOfXPlate()
@@ -107,7 +107,7 @@ public class DefaultFDProvider implements FDProvider
 					}
 					
 					/* (non-Javadoc)
-					 * @see org.jcae.viewer3d.fd.FDDomainAdapter#getXPlateIterator()
+					 * @see org.jcae.viewer3d.fd.FDDomainAdaptor#getXPlateIterator()
 					 */
 					@Override
 					public Iterator<int[]> getXPlateIterator()
@@ -118,10 +118,10 @@ public class DefaultFDProvider implements FDProvider
 					}
 				};				
 			case 1:
-				return new FDDomainAdapter()
+				return new FDDomainAdaptor()
 				{
 					/* (non-Javadoc)
-					 * @see org.jcae.viewer3d.fd.FDDomainAdapter#getNumberOfYWire()
+					 * @see org.jcae.viewer3d.fd.FDDomainAdaptor#getNumberOfYWire()
 					 */
 					@Override
 					public int getNumberOfYWire()
@@ -130,7 +130,7 @@ public class DefaultFDProvider implements FDProvider
 					}
 					
 					/* (non-Javadoc)
-					 * @see org.jcae.viewer3d.fd.FDDomainAdapter#getXPlateIterator()
+					 * @see org.jcae.viewer3d.fd.FDDomainAdaptor#getXPlateIterator()
 					 */
 					@Override
 					public Iterator<int[]> getYWireIterator()
@@ -141,7 +141,7 @@ public class DefaultFDProvider implements FDProvider
 					}
 					
 					/* (non-Javadoc)
-					 * @see org.jcae.viewer3d.fd.FDDomainAdapter#getMarksTypes()
+					 * @see org.jcae.viewer3d.fd.FDDomainAdaptor#getMarksTypes()
 					 */
 					@Override
 					public Object[] getMarksTypes()
@@ -150,7 +150,7 @@ public class DefaultFDProvider implements FDProvider
 					}
 					
 					/* (non-Javadoc)
-					 * @see org.jcae.viewer3d.fd.FDDomainAdapter#getMarks(java.lang.Object)
+					 * @see org.jcae.viewer3d.fd.FDDomainAdaptor#getMarks(java.lang.Object)
 					 */
 					@Override
 					public float[] getMarks(Object type)

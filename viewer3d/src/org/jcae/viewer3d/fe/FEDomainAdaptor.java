@@ -30,7 +30,7 @@ import java.util.Iterator;
  * @author Jerome Robert
  * @todo implements all methods
  */
-public class FEDomainAdapter implements FEDomain
+public class FEDomainAdaptor implements FEDomain
 {
 	static private class EmptyIterator implements Iterator
 	{

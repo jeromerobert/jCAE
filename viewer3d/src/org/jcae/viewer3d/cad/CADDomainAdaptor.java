@@ -27,7 +27,7 @@ import java.util.Iterator;
  * @author Jerome Robert
  *
  */
-public class CADDomainAdapator implements CADDomain
+public class CADDomainAdaptor implements CADDomain
 {
 	static private class EmptyIterator implements Iterator
 	{
