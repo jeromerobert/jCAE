@@ -143,11 +143,8 @@ public class Mesh extends AbstractMesh implements Serializable
 	{
 		super(MeshTraitsBuilder.getDefault3D());
 		factory = new ElementFactory(traitsBuilder);
-		triangleList = new ArrayList<AbstractTriangle>();
-		if (traitsBuilder.hasNodes())
-			nodeList = new ArrayList<AbstractVertex>();
-		else
-			nodeList = null;
+		triangleList = traitsBuilder.getTriangles(traits);
+		nodeList = traitsBuilder.getNodes(traits);
 	}
 	
 	/**
@@ -159,8 +156,8 @@ public class Mesh extends AbstractMesh implements Serializable
 	{
 		super(mtb);
 		factory = new ElementFactory(traitsBuilder);
-		triangleList = mtb.getTriangles(traits);
-		nodeList = mtb.getNodes(traits);
+		triangleList = traitsBuilder.getTriangles(traits);
+		nodeList = traitsBuilder.getNodes(traits);
 	}
 	
 	public void scaleTolerance(double scale)
