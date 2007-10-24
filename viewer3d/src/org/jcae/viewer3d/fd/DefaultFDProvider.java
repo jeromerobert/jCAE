@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.fd;
@@ -99,6 +100,7 @@ public class DefaultFDProvider implements FDProvider
 			case 0:
 				return new FDDomainAdapter()
 				{
+					@Override
 					public int getNumberOfXPlate()
 					{
 						return 1;
@@ -107,9 +109,10 @@ public class DefaultFDProvider implements FDProvider
 					/* (non-Javadoc)
 					 * @see org.jcae.viewer3d.fd.FDDomainAdapter#getXPlateIterator()
 					 */
-					public Iterator getXPlateIterator()
+					@Override
+					public Iterator<int[]> getXPlateIterator()
 					{
-						ArrayList a=new ArrayList();
+						ArrayList<int[]> a=new ArrayList<int[]>();
 						a.add(new int[]{5,2,3,8,7});
 						return a.iterator();
 					}
@@ -120,6 +123,7 @@ public class DefaultFDProvider implements FDProvider
 					/* (non-Javadoc)
 					 * @see org.jcae.viewer3d.fd.FDDomainAdapter#getNumberOfYWire()
 					 */
+					@Override
 					public int getNumberOfYWire()
 					{
 						return 1;
@@ -128,9 +132,10 @@ public class DefaultFDProvider implements FDProvider
 					/* (non-Javadoc)
 					 * @see org.jcae.viewer3d.fd.FDDomainAdapter#getXPlateIterator()
 					 */
-					public Iterator getYWireIterator()
+					@Override
+					public Iterator<int[]> getYWireIterator()
 					{
-						ArrayList a=new ArrayList();
+						ArrayList<int[]> a=new ArrayList<int[]>();
 						a.add(new int[]{1,1,1,9});
 						return a.iterator();
 					}
@@ -138,6 +143,7 @@ public class DefaultFDProvider implements FDProvider
 					/* (non-Javadoc)
 					 * @see org.jcae.viewer3d.fd.FDDomainAdapter#getMarksTypes()
 					 */
+					@Override
 					public Object[] getMarksTypes()
 					{
 						return new Object[]{"prout", new PointAttributes()};
@@ -146,12 +152,12 @@ public class DefaultFDProvider implements FDProvider
 					/* (non-Javadoc)
 					 * @see org.jcae.viewer3d.fd.FDDomainAdapter#getMarks(java.lang.Object)
 					 */
+					@Override
 					public float[] getMarks(Object type)
 					{
 						if(type instanceof String)						
 							return new float[]{0,0,0};
-						else
-							return new float[]{45,28,28};
+						return new float[]{45,28,28};
 					}
 				};
 			default:

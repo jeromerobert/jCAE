@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.fd.sd;
@@ -50,6 +51,7 @@ public abstract class Plate
 	}
 	
 	
+	@Override
 	public String toString()
 	{
 		return getStringPosition()+" "+min1+" "+max1+" "+min2+" "+max2+" "+position;

@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.cad;
@@ -129,12 +130,12 @@ public class ViewableCAD extends ViewableAdaptor
 	private CADProvider provider;
 	private BranchGroup branchGroup=new BranchGroup();
 	private List selectionListeners=new ArrayList();
-	private Map facesInfo;
-	private Map edgesInfo;
-	private Map verticesInfo;
-	private Collection selectedFaces=new HashSet();
-	private Collection selectedEdges=new HashSet();
-	private Collection selectedVertices=new HashSet();
+	private Map<Integer, FacePickingInfo> facesInfo;
+	private Map<Integer, EdgePickingInfo> edgesInfo;
+	private Map<Integer, VertexPickingInfo> verticesInfo;
+	private Collection<Integer> selectedFaces=new HashSet<Integer>();
+	private Collection<Integer> selectedEdges=new HashSet<Integer>();
+	private Collection<Integer> selectedVertices=new HashSet<Integer>();
 	private String name;
 	private LineAttributes lineAttributes=new LineAttributes();
 	private Node edgesNode;
@@ -155,6 +156,7 @@ public class ViewableCAD extends ViewableAdaptor
 	/* (non-Javadoc)
 	 * @see jcae.viewer3d.Viewable#domainsChanged(java.util.Collection)
 	 */
+	@Override
 	public void domainsChangedPerform(int[] domainId)
 	{
 		if(domainId==null)
@@ -183,6 +185,7 @@ public class ViewableCAD extends ViewableAdaptor
 	/* (non-Javadoc)
 	 * @see jcae.viewer3d.Viewable#getDomainProvider()
 	 */
+	@Override
 	public DomainProvider getDomainProvider()
 	{
 		return provider;
@@ -191,7 +194,8 @@ public class ViewableCAD extends ViewableAdaptor
 	/* (non-Javadoc)
 	 * @see jcae.viewer3d.Viewable#setDomainVisible(java.util.Map)
 	 */
-	public void setDomainVisible(Map map)
+	@Override
+	public void setDomainVisible(Map<Integer, Boolean> map)
 	{
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
@@ -266,6 +270,7 @@ public class ViewableCAD extends ViewableAdaptor
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.Viewable#pick(com.sun.j3d.utils.picking.PickResult)
 	 */
+	@Override
 	public void pick(PickViewable result)
 	{
 		Logger.getLogger("global").finest(
@@ -308,14 +313,14 @@ public class ViewableCAD extends ViewableAdaptor
 		return null;
 	}
 
-	static private int[] integerCollectionToArray(Collection collection)
+	static private int[] integerCollectionToArray(Collection<Integer> collection)
 	{
 		int[] toReturn=new int[collection.size()];
-		Iterator it=collection.iterator();
+		Iterator<Integer> it=collection.iterator();
 		int i=0;
 		while(it.hasNext())
 		{
-			Integer n=(Integer) it.next();
+			Integer n=it.next();
 			toReturn[i]=n.intValue();
 			i++;
 		}
@@ -339,7 +344,7 @@ public class ViewableCAD extends ViewableAdaptor
 	public void highlightFace(int faceID, boolean status,boolean fireListeners)
 	{
 		
-		FacePickingInfo fpi=(FacePickingInfo) facesInfo.get(new Integer(faceID));
+		FacePickingInfo fpi=facesInfo.get(new Integer(faceID));
 		setFaceSelected(fpi, status);
 		if(fireListeners) fireSelectionChanged();
 		
@@ -362,7 +367,7 @@ public class ViewableCAD extends ViewableAdaptor
 	 */
 	public void highlightEdge(int edgeID, boolean status,boolean fireListeners)
 	{
-			EdgePickingInfo epi=(EdgePickingInfo) edgesInfo.get(new Integer(edgeID));
+			EdgePickingInfo epi=edgesInfo.get(new Integer(edgeID));
 			setEdgeSelected(epi, status);
 			if(fireListeners) fireSelectionChanged();
 	}
@@ -374,7 +379,7 @@ public class ViewableCAD extends ViewableAdaptor
 
 	public void highlightVertex(int vertexID, boolean status,boolean fireListeners)
 	{
-		VertexPickingInfo epi=(VertexPickingInfo) verticesInfo.get(new Integer(vertexID));
+		VertexPickingInfo epi=verticesInfo.get(new Integer(vertexID));
 		setVertexSelected(epi, status);
 		if(fireListeners) fireSelectionChanged();
 	}
@@ -437,6 +442,7 @@ public class ViewableCAD extends ViewableAdaptor
 		
 	}
 	
+	@Override
 	protected void fireSelectionChanged()
 	{
 		
@@ -463,25 +469,25 @@ public class ViewableCAD extends ViewableAdaptor
 	
 	private Node createEdgesNode(CADDomain domain)
 	{
-		Iterator it=domain.getEdgeIterator();
+		Iterator<float[]> it=domain.getEdgeIterator();
 		BranchGroup toReturn=new BranchGroup();
 		toReturn.setCapability(BranchGroup.ALLOW_DETACH);
 		org.jcae.viewer3d.MarkUtils.setPickable(toReturn,true);
-		edgesInfo=new HashMap();
+		edgesInfo=new HashMap<Integer, EdgePickingInfo>();
 		int n=0;
 		
 		while(it.hasNext())
 		{
-			float[] coordinates=(float[])it.next();			
+			float[] coordinates=it.next();			
 			LineStripArray lsa=new LineStripArray(coordinates.length/3,
-				LineStripArray.COORDINATES,
+				GeometryArray.COORDINATES,
 				new int[]{coordinates.length/3});
 			
-			lsa.setCapability(LineStripArray.ALLOW_COLOR_READ);
-			lsa.setCapability(LineStripArray.ALLOW_COLOR_WRITE);
-			lsa.setCapability(LineStripArray.ALLOW_COORDINATE_READ);
-			lsa.setCapability(LineStripArray.ALLOW_COUNT_READ);
-			lsa.setCapability(LineStripArray.ALLOW_FORMAT_READ);
+			lsa.setCapability(GeometryArray.ALLOW_COLOR_READ);
+			lsa.setCapability(GeometryArray.ALLOW_COLOR_WRITE);
+			lsa.setCapability(GeometryArray.ALLOW_COORDINATE_READ);
+			lsa.setCapability(GeometryArray.ALLOW_COUNT_READ);
+			lsa.setCapability(GeometryArray.ALLOW_FORMAT_READ);
 			
 			lsa.setCoordinates(0, coordinates);
 			Shape3D shape3d=new Shape3D(lsa);
@@ -511,11 +517,11 @@ public class ViewableCAD extends ViewableAdaptor
 	
 	private Node createFacesNode(CADDomain domain)
 	{
-		Iterator it=domain.getFaceIterator();
+		Iterator<FaceMesh> it=domain.getFaceIterator();
 		BranchGroup toReturn=new BranchGroup();
 		toReturn.setCapability(BranchGroup.ALLOW_DETACH);
 		int n=0;
-		facesInfo=new HashMap();
+		facesInfo=new HashMap<Integer, FacePickingInfo>();
 		
 		float factorAbs=20.0f * Float.parseFloat(System.getProperty(
 			"javax.media.j3d.zFactorAbs", "20.0f"));
@@ -530,13 +536,13 @@ public class ViewableCAD extends ViewableAdaptor
 		polygonAttrBack.setPolygonOffsetFactor(factorRel);
 		polygonAttrNone.setPolygonOffsetFactor(factorRel);
 		
-		Vector materials=new Vector();//Vector to save Face Materials
+		Vector<Material> materials=new Vector<Material>();//Vector to save Face Materials
 		
 		while(it.hasNext())
 		{			
 			materials.clear();
 			
-			FaceMesh fm=(FaceMesh) it.next();
+			FaceMesh fm=it.next();
 			
 			//Case of an unmeshed face
 			if(fm.getNodes().length==0){
@@ -555,10 +561,10 @@ public class ViewableCAD extends ViewableAdaptor
 			st.stripify(gi);
 	        
 			GeometryArray g=gi.getGeometryArray();
-			g.setCapability(IndexedTriangleArray.ALLOW_COUNT_READ);
-			g.setCapability(IndexedTriangleArray.ALLOW_FORMAT_READ);
-			g.setCapability(IndexedTriangleArray.ALLOW_COORDINATE_READ);
-			g.setCapability(IndexedTriangleArray.ALLOW_COORDINATE_INDEX_READ);	
+			g.setCapability(GeometryArray.ALLOW_COUNT_READ);
+			g.setCapability(GeometryArray.ALLOW_FORMAT_READ);
+			g.setCapability(GeometryArray.ALLOW_COORDINATE_READ);
+			g.setCapability(IndexedGeometryArray.ALLOW_COORDINATE_INDEX_READ);	
 			
 			Color faceColor=null;
 			if(domain instanceof OCCFaceDomain)
@@ -593,7 +599,7 @@ public class ViewableCAD extends ViewableAdaptor
 				
 				//Build Picking Data
 				FacePickingInfo fpi = 
-					new FacePickingInfo(n,(Material[])materials.toArray(new Material[materials.size()]));
+					new FacePickingInfo(n,materials.toArray(new Material[materials.size()]));
 				facesInfo.put(new Integer(n), fpi); 
 				g.setUserData(fpi);
 			}
@@ -621,7 +627,7 @@ public class ViewableCAD extends ViewableAdaptor
 				
 				//Build Picking Data
 				FacePickingInfo fpi = 
-					new FacePickingInfo(n,(Material[])materials.toArray(new Material[materials.size()])
+					new FacePickingInfo(n,materials.toArray(new Material[materials.size()])
 							,color);
 				facesInfo.put(new Integer(n), fpi); 
 				g.setUserData(fpi);
@@ -638,7 +644,7 @@ public class ViewableCAD extends ViewableAdaptor
 		BranchGroup toReturn=new BranchGroup();
 		toReturn.setCapability(BranchGroup.ALLOW_DETACH);		
 		int n=0;
-		verticesInfo=new HashMap();
+		verticesInfo=new HashMap<Integer, VertexPickingInfo>();
 		PointAttributes pat=new PointAttributes(pointSize, false);
 		for(int i=0; i<points.length/3; i++)
 		{
@@ -670,6 +676,7 @@ public class ViewableCAD extends ViewableAdaptor
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.Viewable#getBranchGroup(org.jcae.viewer3d.View)
 	 */
+	@Override
 	public Node getJ3DNode()
 	{		
 		return branchGroup;
@@ -678,26 +685,27 @@ public class ViewableCAD extends ViewableAdaptor
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.Viewable#unselectAll()
 	 */
+	@Override
 	public void unselectAll()
 	{
 		int[] ids=integerCollectionToArray(selectedFaces);
 		for(int i=0; i<ids.length; i++)
 		{
-			FacePickingInfo fpi=(FacePickingInfo) facesInfo.get(new Integer(ids[i]));
+			FacePickingInfo fpi=facesInfo.get(new Integer(ids[i]));
 			setFaceSelected(fpi, false);
 		}
 		
 		ids=integerCollectionToArray(selectedEdges);
 		for(int i=0; i<ids.length; i++)
 		{
-			EdgePickingInfo epi=(EdgePickingInfo) edgesInfo.get(new Integer(ids[i]));
+			EdgePickingInfo epi=edgesInfo.get(new Integer(ids[i]));
 			setEdgeSelected(epi, false);
 		}
 		
 		ids=integerCollectionToArray(selectedVertices);
 		for(int i=0; i<ids.length; i++)
 		{
-			VertexPickingInfo epi=(VertexPickingInfo) verticesInfo.get(new Integer(ids[i]));
+			VertexPickingInfo epi=verticesInfo.get(new Integer(ids[i]));
 			setVertexSelected(epi, false);
 		}
 		fireSelectionChanged();
@@ -709,6 +717,7 @@ public class ViewableCAD extends ViewableAdaptor
 		this.name=name;
 	}
 	
+	@Override
 	public String toString()
 	{
 		return name;
@@ -717,6 +726,7 @@ public class ViewableCAD extends ViewableAdaptor
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.Viewable#addSelectionListener(org.jcae.viewer3d.SelectionListener)
 	 */
+	@Override
 	public void addSelectionListener(SelectionListener listener)
 	{
 		selectionListeners.add(listener);
@@ -725,6 +735,7 @@ public class ViewableCAD extends ViewableAdaptor
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.Viewable#removeSelectionListener(org.jcae.viewer3d.SelectionListener)
 	 */
+	@Override
 	public void removeSelectionListener(SelectionListener listener)
 	{
 		selectionListeners.remove(listener);

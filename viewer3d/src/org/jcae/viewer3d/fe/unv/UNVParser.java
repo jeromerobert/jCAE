@@ -18,10 +18,10 @@ public class UNVParser
 	private int[] tetra4Indices;
 	private TIntIntHashMap volumeIndicesMap;
 	private int[] hexa8Indices;	
-	private ArrayList tria3GroupNames=new ArrayList();
-	private ArrayList tria3Groups=new ArrayList();
-	private ArrayList quad4GroupNames=new ArrayList();
-	private ArrayList quad4Groups=new ArrayList();
+	private ArrayList<String> tria3GroupNames=new ArrayList<String>();
+	private ArrayList<int[]> tria3Groups=new ArrayList<int[]>();
+	private ArrayList<String> quad4GroupNames=new ArrayList<String>();
+	private ArrayList<int[]> quad4Groups=new ArrayList<int[]>();
 	private TIntArrayList tria3Indices=new TIntArrayList();
 	private TIntArrayList quad4Indices=new TIntArrayList();
 	private TIntIntHashMap tria3IndicesMap, tria6IndicesMap, beam2IndicesMap;
@@ -35,12 +35,12 @@ public class UNVParser
 
 	public String[] getTria3GroupNames()
 	{
-		return (String[]) tria3GroupNames.toArray(new String[0]);
+		return tria3GroupNames.toArray(new String[0]);
 	}
 
 	public int[][] getTria3Groups()
 	{
-		return (int[][]) tria3Groups.toArray(new int[0][]);
+		return tria3Groups.toArray(new int[0][]);
 	}
 	
 	public int[] getTria3Indices()
@@ -60,12 +60,12 @@ public class UNVParser
 
 	public String[] getQuad4GroupNames()
 	{
-		return (String[]) quad4GroupNames.toArray(new String[0]);
+		return quad4GroupNames.toArray(new String[0]);
 	}
 	
 	public int[][] getQuad4Groups()
 	{
-		return (int[][]) quad4Groups.toArray(new int[0][]);
+		return quad4Groups.toArray(new int[0][]);
 	}
 	
 	public int[] getQuad4Indices()

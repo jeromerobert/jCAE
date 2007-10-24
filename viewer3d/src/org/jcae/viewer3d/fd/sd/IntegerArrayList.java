@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 
@@ -30,11 +31,11 @@ public class IntegerArrayList
 {
 	private static int GRANULARITY=4*512;
 	private int subLastIndex=0;
-	LinkedList arrays;
+	LinkedList<int[]> arrays;
 	/** Creates a new instance of ArrayListExt */
 	public IntegerArrayList()
 	{
-		arrays=new LinkedList();
+		arrays=new LinkedList<int[]>();
 		arrays.add(new int[GRANULARITY]);
 	}
 	
@@ -45,7 +46,7 @@ public class IntegerArrayList
 			arrays.add(new int[GRANULARITY]);
 			subLastIndex=0;
 		}
-		int[] tf=(int[])arrays.getLast();
+		int[] tf=arrays.getLast();
 		tf[subLastIndex]=i1;
 		tf[subLastIndex+1]=i2;
 		tf[subLastIndex+2]=i3;
@@ -63,8 +64,8 @@ public class IntegerArrayList
 		int[] r=new int[getSize()];
 		int j=0;
 		for(int i=0; i<arrays.size()-1;j+=GRANULARITY,i++)
-			System.arraycopy((int[])arrays.get(i),0,r,j,GRANULARITY);
-		System.arraycopy((int[])arrays.getLast(),0,r,j,subLastIndex);
+			System.arraycopy(arrays.get(i),0,r,j,GRANULARITY);
+		System.arraycopy(arrays.getLast(),0,r,j,subLastIndex);
 		return r;
 	}
 }

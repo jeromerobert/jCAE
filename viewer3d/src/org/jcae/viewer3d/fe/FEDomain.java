@@ -16,13 +16,13 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.fe;
 
 import java.util.Iterator;
 import org.jcae.viewer3d.ColoredDomain;
-import org.jcae.viewer3d.Domain;
 import org.jcae.viewer3d.MarkDomain;
 
 /**
@@ -37,7 +37,7 @@ public interface FEDomain extends MarkDomain, ColoredDomain
 	int getNumberOfNodes();
 	
 	/** Return an iterator on a Collection of float[3] */ 
-	Iterator getNodesIterator();
+	Iterator<float[]> getNodesIterator();
 	
 	/** getNumberOfNodes and getNodesIterator are deprecated... Iterators sucks !*/
 	float[] getNodes();
@@ -74,7 +74,7 @@ public interface FEDomain extends MarkDomain, ColoredDomain
 	/** Return the number of 3 nodes triangles in the mesh*/
 	int getNumberOfTria3();	
 	/** Return an iterator on a Collection of int[3] */
-	Iterator getTria3Iterator();
+	Iterator<int[]> getTria3Iterator();
 	int getNumberOfTria3Comp();
 	Iterator getTria3Res();
 

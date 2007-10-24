@@ -17,12 +17,12 @@ import javax.vecmath.Point3d;
 public class CellManager
 {
 	private FDProvider provider;
-	private Map selMap=new HashMap();
-	private Map xWireGeomSelMap=new HashMap();
-	private Map yWireGeomSelMap=new HashMap();
-	private Map zWireGeomSelMap=new HashMap();
+	private Map<Integer, FDSelection> selMap=new HashMap<Integer, FDSelection>();
+	private Map<WireCellInfo, Geometry> xWireGeomSelMap=new HashMap<WireCellInfo, Geometry>();
+	private Map<WireCellInfo, Geometry> yWireGeomSelMap=new HashMap<WireCellInfo, Geometry>();
+	private Map<WireCellInfo, Geometry> zWireGeomSelMap=new HashMap<WireCellInfo, Geometry>();
 	
-	private Map slotGeomSelMap=new HashMap();
+	private Map<SlotCellInfo, Geometry> slotGeomSelMap=new HashMap<SlotCellInfo, Geometry>();
 
 	/**
 	 * @param provider a FDProvider used to get FD grid
@@ -37,7 +37,7 @@ public class CellManager
 	 */
 	public FDSelection[] getSelection()
 	{	
-		return (FDSelection[])selMap.values().toArray(new FDSelection[selMap.size()]);
+		return selMap.values().toArray(new FDSelection[selMap.size()]);
 	}
 
 	/**
@@ -122,11 +122,13 @@ public class CellManager
 			this.value = value;
 		}
 		
+		@Override
 		public boolean equals(Object obj){
 			SlotCellInfo scgi=(SlotCellInfo)obj;
 			return (type==scgi.type)&(value==scgi.value)&(cell==scgi.cell)&(domainId==scgi.domainId);
 		}
 		
+		@Override
 		public int hashCode(){
 			return value+cell+domainId;
 		}
@@ -272,11 +274,13 @@ public class CellManager
 			this.value = value;
 		}
 		
+		@Override
 		public boolean equals(Object obj){
 			WireCellInfo wcgi=(WireCellInfo)obj;
 			return (value==wcgi.value)&(cell==wcgi.cell)&(domainId==wcgi.domainId);
 		}
 		
+		@Override
 		public int hashCode(){
 			return value+cell+domainId;
 		}
@@ -507,7 +511,7 @@ public class CellManager
 			aFDSelection.setXWireCells(buffer);
 		}		
 		SlotCellInfo sci=new SlotCellInfo(type,aFDSelection.getDomainID(),value,cell);
-		Geometry toReturn=(Geometry) slotGeomSelMap.get(sci);
+		Geometry toReturn=slotGeomSelMap.get(sci);
 		slotGeomSelMap.remove(sci);
 		return toReturn;
 	}
@@ -543,7 +547,7 @@ public class CellManager
 			aFDSelection.setXWireCells(buffer);
 		}		
 		SlotCellInfo sci=new SlotCellInfo(type,aFDSelection.getDomainID(),value,cell);
-		Geometry toReturn=(Geometry) slotGeomSelMap.get(sci);
+		Geometry toReturn=slotGeomSelMap.get(sci);
 		slotGeomSelMap.remove(sci);
 		return toReturn;
 	}
@@ -579,7 +583,7 @@ public class CellManager
 			aFDSelection.setXWireCells(buffer);
 		}		
 		SlotCellInfo sci=new SlotCellInfo(type,aFDSelection.getDomainID(),value,cell);
-		Geometry toReturn=(Geometry) slotGeomSelMap.get(sci);
+		Geometry toReturn=slotGeomSelMap.get(sci);
 		slotGeomSelMap.remove(sci);
 		return toReturn;
 	}
@@ -657,12 +661,10 @@ public class CellManager
 	
 	private FDSelection getSelectedDomain(int domainId){
 		Integer key=new Integer(domainId);
-		if(selMap.containsKey(key)) return (FDSelection)selMap.get(key);
-		else {
-			FDSelection aFDSelection=new FDSelection(domainId);
-			selMap.put(key,aFDSelection);
-			return aFDSelection;
-		}
+		if(selMap.containsKey(key)) return selMap.get(key);
+		FDSelection aFDSelection=new FDSelection(domainId);
+		selMap.put(key,aFDSelection);
+		return aFDSelection;
 	}
 	
 	private boolean isXWireCellSelected(FDSelection aFDSelection,int value,int cell){
@@ -722,7 +724,7 @@ public class CellManager
 			aFDSelection.setXWireCells(buffer);
 		}		
 		WireCellInfo wci=new WireCellInfo(aFDSelection.getDomainID(),value,cell);
-		Geometry toReturn=(Geometry) xWireGeomSelMap.get(wci);
+		Geometry toReturn=xWireGeomSelMap.get(wci);
 		xWireGeomSelMap.remove(wci);
 		return toReturn;
 	}
@@ -760,7 +762,7 @@ public class CellManager
 			aFDSelection.setYWireCells(buffer);
 		}		
 		WireCellInfo wci=new WireCellInfo(aFDSelection.getDomainID(),value,cell);
-		Geometry toReturn=(Geometry) yWireGeomSelMap.get(wci);
+		Geometry toReturn=yWireGeomSelMap.get(wci);
 		yWireGeomSelMap.remove(wci);
 		return toReturn;
 	}
@@ -798,7 +800,7 @@ public class CellManager
 			aFDSelection.setZWireCells(buffer);
 		}		
 		WireCellInfo wci=new WireCellInfo(aFDSelection.getDomainID(),value,cell);
-		Geometry toReturn=(Geometry) zWireGeomSelMap.get(wci);
+		Geometry toReturn=zWireGeomSelMap.get(wci);
 		zWireGeomSelMap.remove(wci);
 		return toReturn;
 	}

@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.fd.sd;
@@ -27,6 +28,7 @@ public class WireY extends Wire
 	{
 	}
 
+	@Override
 	public float[] getCoordinates(float[][] grid)
 	{
 		float[] coords=new float[6];
@@ -39,11 +41,13 @@ public class WireY extends Wire
 		return coords;
 	}
 	
+	@Override
 	public String toString()
 	{
 		return "Wire Y: min="+min+", max="+max+", X="+position1+", Z="+position2;
 	}
 	
+	@Override
 	public float[] getCoordinates(float[][] grid, int i)
 	{
 		float[] result=new float[3];
@@ -53,6 +57,7 @@ public class WireY extends Wire
 		return result;
 	}
 
+	@Override
 	public int[] getXYZGridIndices(int i) {
 		return new int[] {position1, i, position2};
 	}

@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.cad.occ;
@@ -44,15 +45,17 @@ public class OCCEdgeDomain extends CADDomainAdapator implements ColoredDomain
 		/* (non-Javadoc)
 		 * @see org.jcae.opencascade.jni.TopoDS_Edge#equals(java.lang.Object)
 		 */
+		@Override
 		public boolean equals(Object o)
 		{
 			if(o instanceof MyEdge)
 				return delegate.isSame(((MyEdge)o).delegate);
-			else return false;
+			return false;
 		}
 		/* (non-Javadoc)
 		 * @see org.jcae.opencascade.jni.TopoDS_Shape#hashCode()
 		 */
+		@Override
 		public int hashCode()
 		{
 			return delegate.hashCode();
@@ -60,7 +63,7 @@ public class OCCEdgeDomain extends CADDomainAdapator implements ColoredDomain
 	}
 	
 	private TopoDS_Shape shape;
-	private ArrayList edges=new ArrayList();
+	private ArrayList<float[]> edges=new ArrayList<float[]>();
 	private Color color=Color.WHITE;
 	
 	/***
@@ -78,7 +81,6 @@ public class OCCEdgeDomain extends CADDomainAdapator implements ColoredDomain
 		toReturn[5]=Double.NEGATIVE_INFINITY;
 
 		TopExp_Explorer explorer = new TopExp_Explorer();
-		ArrayList points=new ArrayList();
         for (explorer.init(shape, TopAbs_ShapeEnum.VERTEX); explorer.more(); explorer.next())
         {
             TopoDS_Shape s = explorer.current();
@@ -101,7 +103,7 @@ public class OCCEdgeDomain extends CADDomainAdapator implements ColoredDomain
 	{	
 		this.shape=shape;
 		TopExp_Explorer explorer = new TopExp_Explorer();
-		HashSet alreadyDone=new HashSet();
+		HashSet<TopoDS_Edge> alreadyDone=new HashSet<TopoDS_Edge>();
 	    Bnd_Box box = new Bnd_Box(); 
 		BRepBndLib.add(shape,box);
 		double[] bbox = box.get();
@@ -157,7 +159,7 @@ public class OCCEdgeDomain extends CADDomainAdapator implements ColoredDomain
 				    // So, there is no curve, and the edge is not degenerated?
 				    // => draw lines between the vertices and ignore curvature  
 				    // best approximation we can do
-					ArrayList aa = new ArrayList(); // store points here
+					ArrayList<double[]> aa = new ArrayList<double[]>(); // store points here
 					for (TopExp_Explorer explorer2 = new TopExp_Explorer(s, TopAbs_ShapeEnum.VERTEX);
 						explorer2.more(); explorer2.next())
 					{
@@ -169,7 +171,7 @@ public class OCCEdgeDomain extends CADDomainAdapator implements ColoredDomain
 					array = new float[aa.size()*3];
 					for(int i=0, j=0; i<aa.size(); i++)
 					{
-						double[] f=(double[])aa.get(i);
+						double[] f=aa.get(i);
 						array[j++]=(float) f[0];
 						array[j++]=(float) f[1];
 						array[j++]=(float) f[2];
@@ -182,7 +184,8 @@ public class OCCEdgeDomain extends CADDomainAdapator implements ColoredDomain
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.cad.CADDomainAdapator#getEdgeIterator()
 	 */
-	public Iterator getEdgeIterator()
+	@Override
+	public Iterator<float[]> getEdgeIterator()
 	{
 		return edges.iterator();
 	}

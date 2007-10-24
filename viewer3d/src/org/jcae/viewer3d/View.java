@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d;
@@ -93,7 +94,7 @@ public class View extends Canvas3D implements PositionListener
 	private PickResult lastPickResult;
 	
 	private View navigationMaster;
-	private List positionListeners=Collections.synchronizedList(new ArrayList());
+	private List<PositionListener> positionListeners=Collections.synchronizedList(new ArrayList<PositionListener>());
 	
 	private transient BufferedImage snapShot;
 	private transient Object snapShotLock=new Object();
@@ -102,7 +103,7 @@ public class View extends Canvas3D implements PositionListener
 	
 	static private SimpleUniverse sharedUniverse;
 	private SimpleUniverse universe;
-	static private Map viewableToViewSpecificGroup=Collections.synchronizedMap(new HashMap());
+	static private Map<Viewable, ViewSpecificGroup> viewableToViewSpecificGroup=Collections.synchronizedMap(new HashMap<Viewable, ViewSpecificGroup>());
 	private ViewingPlatform viewingPlatform;
 	private BranchGroup axisBranchGroup=new BranchGroup();
 	private Viewable currentViewable;
@@ -114,7 +115,7 @@ public class View extends Canvas3D implements PositionListener
 	private BranchGroup unClipWidgetsBranchGroup;
 	private ClipBox clipBox=null;
 	private PrintWriter writer=null;
-	private List postRenderers=new ArrayList();
+	private List<Runnable> postRenderers=new ArrayList<Runnable>();
 		
     /**
      * From https://java3d.dev.java.net/issues/show_bug.cgi?id=89
@@ -160,8 +161,9 @@ public class View extends Canvas3D implements PositionListener
      * See https://java3d.dev.java.net/issues/show_bug.cgi?id=89
      * @deprecated Will cause a "java.lang.IllegalArgumentException: adding a
      * container to a container on a different GraphicsDevice" in dual screen
-     * mode. 
+     * mode.
      */
+	@Deprecated
 	public View()
 	{
 		this(null, false, true);
@@ -171,8 +173,9 @@ public class View extends Canvas3D implements PositionListener
      * See https://java3d.dev.java.net/issues/show_bug.cgi?id=89
      * @deprecated Will cause a "java.lang.IllegalArgumentException: adding a
      * container to a container on a different GraphicsDevice" in dual screen
-     * mode. 
+     * mode.
      */
+	@Deprecated
 	public View(boolean offscreen)
 	{
 		this(null, offscreen, true);
@@ -184,6 +187,7 @@ public class View extends Canvas3D implements PositionListener
      * container to a container on a different GraphicsDevice" in dual screen
      * mode. 
      */
+	@Deprecated
 	public View(boolean offscreen, boolean isSharedUniverse)
 	{
 		this(null, offscreen, isSharedUniverse);
@@ -440,7 +444,7 @@ public class View extends Canvas3D implements PositionListener
 	/** Add a Viewable to the current view */
 	public void add(Viewable viewable)
 	{
-		ViewSpecificGroup vsg=(ViewSpecificGroup) viewableToViewSpecificGroup.get(viewable);
+		ViewSpecificGroup vsg=viewableToViewSpecificGroup.get(viewable);
 		if(vsg==null)
 		{
 			Node node=viewable.getJ3DNode();
@@ -741,10 +745,10 @@ public class View extends Canvas3D implements PositionListener
 
 	protected void firePositionChanged()
 	{
-		Iterator it=positionListeners.iterator();
+		Iterator<PositionListener> it=positionListeners.iterator();
 		while(it.hasNext())
 		{
-			PositionListener p=(PositionListener)it.next();
+			PositionListener p=it.next();
 			p.positionChanged();
 		}
 	}
@@ -795,11 +799,11 @@ public class View extends Canvas3D implements PositionListener
 	
 	protected BoundingSphere getBound()
 	{
-		Iterator it=viewableToViewSpecificGroup.values().iterator();
-		ArrayList bounds=new ArrayList();		
+		Iterator<ViewSpecificGroup> it=viewableToViewSpecificGroup.values().iterator();
+		ArrayList<Bounds> bounds=new ArrayList<Bounds>();		
 		while(it.hasNext())
 		{
-			ViewSpecificGroup bg=(ViewSpecificGroup) it.next();
+			ViewSpecificGroup bg=it.next();
 			if(bg.indexOfView(getView())!=-1)
 			{
 				Bounds b=bg.getBounds();
@@ -814,7 +818,7 @@ public class View extends Canvas3D implements PositionListener
 		if(bounds.size()>0)
 		{
 			bs=(BoundingSphere) bounds.get(0);
-			bs.combine((Bounds[]) bounds.toArray(new Bounds[bounds.size()]));
+			bs.combine(bounds.toArray(new Bounds[bounds.size()]));
 		}
 		else
 			bs=new BoundingSphere();
@@ -831,7 +835,7 @@ public class View extends Canvas3D implements PositionListener
 	 */
 	protected BranchGroup getBranchGroup(Viewable viewable)
 	{
-		ViewSpecificGroup vsp=(ViewSpecificGroup) viewableToViewSpecificGroup.get(viewable);
+		ViewSpecificGroup vsp=viewableToViewSpecificGroup.get(viewable);
 		if(vsp==null) return null;
 		return (BranchGroup)vsp.getUserData();
 	}	
@@ -839,19 +843,19 @@ public class View extends Canvas3D implements PositionListener
 	/** Return viewables shown in this view */
 	public Viewable[] getViewables()
 	{
-		ArrayList toReturn=new ArrayList();
-		Iterator it=viewableToViewSpecificGroup.entrySet().iterator();
+		ArrayList<Viewable> toReturn=new ArrayList<Viewable>();
+		Iterator<Map.Entry<Viewable, ViewSpecificGroup>> it=viewableToViewSpecificGroup.entrySet().iterator();
 		while(it.hasNext())
 		{
-			Map.Entry e=(Entry) it.next();
-			Viewable v=(Viewable) e.getKey();
-			ViewSpecificGroup vsg=(ViewSpecificGroup) e.getValue();
+			Map.Entry<Viewable, ViewSpecificGroup> e=it.next();
+			Viewable v=e.getKey();
+			ViewSpecificGroup vsg=e.getValue();
 			if(vsg.indexOfView(getView())!=-1)
 			{
 				toReturn.add(v);
 			}
 		}		
-		return (Viewable[])toReturn.toArray(new Viewable[toReturn.size()]);
+		return toReturn.toArray(new Viewable[toReturn.size()]);
 	}
 	
 	public Viewable getCurrentViewable()
@@ -935,7 +939,7 @@ public class View extends Canvas3D implements PositionListener
 	/** Remove a viewable from this view */
 	public void remove(Viewable viewable)
 	{	
-		ViewSpecificGroup vsg=(ViewSpecificGroup) viewableToViewSpecificGroup.get(viewable);
+		ViewSpecificGroup vsg=viewableToViewSpecificGroup.get(viewable);
 		if(vsg!=null)
 		{
 			vsg.removeView(getView());			
@@ -960,7 +964,7 @@ public class View extends Canvas3D implements PositionListener
 	
 	/** inform if the view contains the viewable*/
 	public boolean contains(Viewable viewable){
-		ViewSpecificGroup vsg=(ViewSpecificGroup) viewableToViewSpecificGroup.get(viewable);
+		ViewSpecificGroup vsg=viewableToViewSpecificGroup.get(viewable);
 		if(vsg==null) return false;
 		
 		Enumeration e=vsg.getAllViews();
@@ -1049,6 +1053,7 @@ public class View extends Canvas3D implements PositionListener
 	// it would block the AWT event thread. Then AWT would never notify the
 	// J3D rendering thread and snapShotLock.wait() would never return
 	
+	@Deprecated
 	public BufferedImage takeSnapshot()
 	{
 		takeSnapShot=true;
@@ -1248,7 +1253,7 @@ public class View extends Canvas3D implements PositionListener
 	}
 	
 	public static void viewableChanged(Viewable viewable){
-		ViewSpecificGroup vsg=(ViewSpecificGroup) viewableToViewSpecificGroup.get(viewable);
+		ViewSpecificGroup vsg=viewableToViewSpecificGroup.get(viewable);
 		if(vsg!=null){
 			Enumeration e=vsg.getAllViews();
 			while(e.hasMoreElements()){
@@ -1267,7 +1272,7 @@ public class View extends Canvas3D implements PositionListener
 	}
 	
 	public static void stopRenderer(Viewable viewable){
-		ViewSpecificGroup vsg=(ViewSpecificGroup) viewableToViewSpecificGroup.get(viewable);
+		ViewSpecificGroup vsg=viewableToViewSpecificGroup.get(viewable);
 		if(vsg!=null){
 			Enumeration e=vsg.getAllViews();
 			while(e.hasMoreElements()){
@@ -1286,7 +1291,7 @@ public class View extends Canvas3D implements PositionListener
 	}
 	
 	public static void startRenderer(Viewable viewable){
-		ViewSpecificGroup vsg=(ViewSpecificGroup) viewableToViewSpecificGroup.get(viewable);
+		ViewSpecificGroup vsg=viewableToViewSpecificGroup.get(viewable);
 		if(vsg!=null){
 			Enumeration e=vsg.getAllViews();
 			while(e.hasMoreElements()){
@@ -1326,7 +1331,7 @@ public class View extends Canvas3D implements PositionListener
 	{
 		for(int i=0; i<postRenderers.size(); i++)
 		{
-			Runnable r = (Runnable) postRenderers.get(i);
+			Runnable r = postRenderers.get(i);
 			r.run();
 		}
 	}

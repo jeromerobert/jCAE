@@ -73,42 +73,50 @@ public class QuadPostViewable extends ViewableAdaptor
 		quadArray.setColors(0, colorMapper.getPalette());
 	}
 	
+	@Override
 	public void domainsChangedPerform(int[] domainId)
 	{
 		//nothing
 	}
 
+	@Override
 	public DomainProvider getDomainProvider()
 	{
 		return null;
 	}
 
-	public void setDomainVisible(Map map)
+	@Override
+	public void setDomainVisible(Map<Integer, Boolean> map)
 	{
 		//nothing
 	}
 
+	@Override
 	public Node getJ3DNode()
 	{
 		System.out.println(branchGroup.getBounds());
 		return branchGroup;
 	}
 
+	@Override
 	public void pick(PickViewable result)
 	{
 		//nothing
 	}
 
+	@Override
 	public void unselectAll()
 	{
 		//nothing
 	}
 
+	@Override
 	public void addSelectionListener(SelectionListener listener)
 	{
 		//nothing
 	}
 
+	@Override
 	public void removeSelectionListener(SelectionListener listener)
 	{
 		//nothing

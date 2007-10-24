@@ -92,6 +92,7 @@ public class AxisBehavior extends Behavior {
      * Initialize local variables and set the initial wakeup
      * condition. Called when the behavior is first made live.
      */
+    @Override
     public void initialize() {
 	// Initiialize to identity (no rotation)
 	lastTransform.setIdentity();
@@ -106,6 +107,7 @@ public class AxisBehavior extends Behavior {
      * Extract the rotation from the view platform transform (if it has
      * changed) and update the target transform with its inverse.
      */
+    @Override
     public void processStimulus(Enumeration criteria) {
 	viewPlatformTG.getTransform(t1);
 

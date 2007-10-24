@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.fe.unv;
@@ -64,6 +65,7 @@ public class UNVDomain extends FEDomainAdapter
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getColor()
 	 */
+	@Override
 	public Color getColor(){
 		return color;
 	}
@@ -71,10 +73,12 @@ public class UNVDomain extends FEDomainAdapter
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getID()
 	 */
+	@Override
 	public int getID(){
 		return id;
 	}
 	
+	@Override
 	public float[] getNodes()
 	{
 		return nodes;
@@ -82,8 +86,9 @@ public class UNVDomain extends FEDomainAdapter
 	
 	/*
 	 * (non-Javadoc)
-	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getNumberOfNodes()
+	 * @see org.jcae.viewer3dgetQuad4().fe.FEDomainAdapter#getNumberOfNodes()
 	 */
+	@Override
 	public int getNumberOfNodes(){
 		return nodes.length/3;
 	}
@@ -92,6 +97,7 @@ public class UNVDomain extends FEDomainAdapter
 	 * (non-Javadoc)
 	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getNumberOfTria3()
 	 */
+	@Override
 	public int getNumberOfTria3(){
 		return tria3.length/3;
 	}
@@ -100,27 +106,32 @@ public class UNVDomain extends FEDomainAdapter
 	 * (non-Javadoc)
 	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getNumberOfTria3()
 	 */
+	@Override
 	public int getNumberOfQuad4(){
 		return quad4.length/3;
 	}
 	
+	@Override
 	public int getNumberOfBeam2()
 	{
 		System.out.println("beam2: "+beam2.length);
 		return beam2.length;
 	}
 	
+	@Override
 	public int[] getBeam2Indices()
 	{
 		return beam2;
 	}
 	
+	@Override
 	public int getNumberOfTria6()
 	{
 		System.out.println("tria6: "+tria6.length);
 		return tria6.length;
 	}
 	
+	@Override
 	public int[] getTria6()
 	{
 		return tria6;
@@ -130,9 +141,10 @@ public class UNVDomain extends FEDomainAdapter
 	 * (non-Javadoc)
 	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getTria3Iterator()
 	 */
-	public Iterator getTria3Iterator()
+	@Override
+	public Iterator<int[]> getTria3Iterator()
 	{
-		return new Iterator()
+		return new Iterator<int[]>()
 		{
 			private int index=0;
 			public boolean hasNext()
@@ -140,7 +152,7 @@ public class UNVDomain extends FEDomainAdapter
 				return index<tria3.length;
 			}
 
-			public Object next()
+			public int[] next()
 			{
 				int[] toReturn=new int[3];
 				System.arraycopy(tria3, index, toReturn, 0, 3);
@@ -156,6 +168,7 @@ public class UNVDomain extends FEDomainAdapter
 		};
 	}
 	
+	@Override
 	public int[] getQuad4()
 	{
 		return quad4;

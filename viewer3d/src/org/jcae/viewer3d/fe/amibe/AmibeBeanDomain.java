@@ -96,26 +96,31 @@ public class AmibeBeanDomain extends FEDomainAdapter
 		return toReturn;
 	}
 
+	@Override
 	public float[] getNodes()
 	{
 		return nodes;
 	}
 	
+	@Override
 	public int[] getBeam2Indices()
 	{
 		return beam2;
 	}
 	
+	@Override
 	public Color getColor()
 	{
 		return color;
 	}
 	
+	@Override
 	public int getNumberOfNodes()
 	{
 		return nodes.length/3;
 	}
 	
+	@Override
 	public int getNumberOfBeam2()
 	{
 		return beam2.length/2;

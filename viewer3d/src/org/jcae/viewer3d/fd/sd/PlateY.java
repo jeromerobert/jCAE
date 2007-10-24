@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.fd.sd;
@@ -32,6 +33,7 @@ public class PlateY extends Plate
 	{
 	}
 
+	@Override
 	public float[] getCoordinates(float[][] grid)
 	{
 		float[] coords=new float[12];
@@ -54,11 +56,13 @@ public class PlateY extends Plate
 		return coords;
 	}
 	
+	@Override
 	protected String getStringPosition()
 	{
 		return "Y";
 	}
 	
+	@Override
 	public float[] getCoordinates(float[][] grid, int i, int j)
 	{
 		float[] result=new float[3];
@@ -68,6 +72,7 @@ public class PlateY extends Plate
 		return result;
 	}
 
+	@Override
 	public int[] getXYZGridIndices(int i, int j) {
 		return new int[] {i, position, j};
 	}	

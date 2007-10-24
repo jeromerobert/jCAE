@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.fe;
@@ -210,7 +211,7 @@ public class FEDomainAdapter implements FEDomain
 	/* (non-Javadoc)
 	 * @see jcae.viewer3d.fe.FEDomain#getTria3Iterator()
 	 */
-	public Iterator getTria3Iterator()
+	public Iterator<int[]> getTria3Iterator()
 	{
 		return EmptyIterator.instance;
 	}

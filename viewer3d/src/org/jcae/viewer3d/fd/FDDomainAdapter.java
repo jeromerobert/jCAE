@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.fd;
@@ -30,7 +31,7 @@ import java.util.Iterator;
  */
 public class FDDomainAdapter implements FDDomain
 {
-	static private class EmtpyIterator implements Iterator
+	static private class EmtpyIterator implements Iterator<int[]>
 	{
 		private final static EmtpyIterator instance=new EmtpyIterator();
 		public void remove()
@@ -42,12 +43,12 @@ public class FDDomainAdapter implements FDDomain
 			return false;
 		}
 
-		public Object next()
+		public int[] next()
 		{
 			throw new UnsupportedOperationException();
 		}	
 		
-		static public Iterator getDefault()
+		static public Iterator<int[]> getDefault()
 		{
 			return instance;
 		}
@@ -113,7 +114,7 @@ public class FDDomainAdapter implements FDDomain
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.fd.FDDomain#getXPlateIterator()
 	 */
-	public Iterator getXPlateIterator()
+	public Iterator<int[]> getXPlateIterator()
 	{
 		return EmtpyIterator.getDefault();
 	}
@@ -121,7 +122,7 @@ public class FDDomainAdapter implements FDDomain
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.fd.FDDomain#getYPlateIterator()
 	 */
-	public Iterator getYPlateIterator()
+	public Iterator<int[]> getYPlateIterator()
 	{
 		return EmtpyIterator.getDefault();
 	}
@@ -129,7 +130,7 @@ public class FDDomainAdapter implements FDDomain
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.fd.FDDomain#getZPlateIterator()
 	 */
-	public Iterator getZPlateIterator()
+	public Iterator<int[]> getZPlateIterator()
 	{
 		return EmtpyIterator.getDefault();
 	}
@@ -137,7 +138,7 @@ public class FDDomainAdapter implements FDDomain
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.fd.FDDomain#getXWireIterator()
 	 */
-	public Iterator getXWireIterator()
+	public Iterator<int[]> getXWireIterator()
 	{
 		return EmtpyIterator.getDefault();
 	}
@@ -145,7 +146,7 @@ public class FDDomainAdapter implements FDDomain
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.fd.FDDomain#getYWireIterator()
 	 */
-	public Iterator getYWireIterator()
+	public Iterator<int[]> getYWireIterator()
 	{
 		return EmtpyIterator.getDefault();
 	}
@@ -153,7 +154,7 @@ public class FDDomainAdapter implements FDDomain
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.fd.FDDomain#getZWireIterator()
 	 */
-	public Iterator getZWireIterator()
+	public Iterator<int[]> getZWireIterator()
 	{
 		return EmtpyIterator.getDefault();
 	}
@@ -161,7 +162,7 @@ public class FDDomainAdapter implements FDDomain
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.fd.FDDomain#getSolidIterator()
 	 */
-	public Iterator getSolidIterator()
+	public Iterator<int[]> getSolidIterator()
 	{
 		return EmtpyIterator.getDefault();
 	}
@@ -201,7 +202,7 @@ public class FDDomainAdapter implements FDDomain
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.fd.FDDomain#getSlotIterator()
 	 */
-	public Iterator getSlotIterator(byte type)
+	public Iterator<?> getSlotIterator(byte type)
 	{
 		return EmtpyIterator.getDefault();
 	}

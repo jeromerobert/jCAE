@@ -1,3 +1,7 @@
+2007-10-24 10:01 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d: Add Java generics and annotations.
+
 2007-10-16 17:02 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/OEMMViewer.java: Triangle.vertex is

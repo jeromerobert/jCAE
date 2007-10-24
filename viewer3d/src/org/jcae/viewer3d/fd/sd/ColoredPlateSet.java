@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.fd.sd;
@@ -44,24 +45,27 @@ public class ColoredPlateSet
 			z=az;
 		}
 		
+		@Override
 		public int hashCode()
 		{
 			return Float.floatToRawIntBits(x)+Float.floatToRawIntBits(y)+Float.floatToRawIntBits(z);
 		}
 		
+		@Override
 		public boolean equals(Object o)
 		{
 			if(o instanceof Node3d)
 			{
 				Node3d n=(Node3d)o;
 				return (n.x==x)&&((n.y==y)&&(n.z==z));
-			} else return false;
+			}
+			return false;
 		}
 	}
 
-	private ArrayList plates;
+	private ArrayList<Plate> plates;
 	private float[][] grid;
-	private HashMap coordinates=new HashMap();
+	private HashMap<Node3d, Integer> coordinates=new HashMap<Node3d, Integer>();
 	private int currentIndex=0;	
 	private IntegerArrayList indices=new IntegerArrayList();
 	private IntegerArrayList colorIndices=new IntegerArrayList();
@@ -80,7 +84,7 @@ public class ColoredPlateSet
 	}
 
 	/** Creates a new instance of ColoredPlateSet */
-	public ColoredPlateSet(ArrayList plates, float[][] grid)
+	public ColoredPlateSet(ArrayList<Plate> plates, float[][] grid)
 	{
 		this.plates=plates;
 		this.grid=grid;
@@ -90,12 +94,12 @@ public class ColoredPlateSet
 	{
 		if(!processed) process();
 		float[] r=new float[coordinates.size()*3];
-		Iterator i=coordinates.entrySet().iterator();
+		Iterator<Map.Entry<Node3d, Integer>> i=coordinates.entrySet().iterator();
 		while(i.hasNext())
 		{
-			Map.Entry e=(Map.Entry)i.next();
-			int id=((Integer)e.getValue()).intValue();
-			Node3d n=(Node3d)(e.getKey());
+			Map.Entry<Node3d, Integer> e=i.next();
+			int id=e.getValue().intValue();
+			Node3d n=e.getKey();
 			id=id*3;
 			r[id]=n.x;
 			r[id+1]=n.y;
@@ -122,7 +126,7 @@ public class ColoredPlateSet
 		float value;
 		for(int plateId=0;plateId<plates.size();plateId++)
 		{
-			Plate p=(Plate)(plates.get(plateId));
+			Plate p=plates.get(plateId);
 			valueIndex=0;
 			for(int j=p.min2;j<p.max2;j++)
 			for(int i=p.min1;i<p.max1;i++)			
@@ -147,7 +151,7 @@ public class ColoredPlateSet
 	{
 		Node3d nd=new Node3d(node[0],node[1],node[2]);
 		if(coordinates.containsKey(nd))
-			return  ((Integer)coordinates.get(nd)).intValue();
+			return  coordinates.get(nd).intValue();
 		coordinates.put(nd,new Integer(currentIndex));
 		currentIndex++;
 		return currentIndex-1;

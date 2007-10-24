@@ -22,16 +22,19 @@ public abstract class SelectionRectangle
 			super(view);
 		}
 		
+		@Override
 		public void setColor(Color color)
 		{
 			this.color=color;
 		}
 
+		@Override
 		protected void draw(Point anchor, Point point)
 		{
 			//nothing
 		}
 
+		@Override
 		public void setVisible(boolean b)
 		{
 			this.visible=b;
@@ -49,6 +52,7 @@ public abstract class SelectionRectangle
 			g.flush(true);
 		}
 
+		@Override
 		public boolean isVisible()
 		{
 			return visible;
@@ -94,6 +98,7 @@ public abstract class SelectionRectangle
 			coloringAttributes.setCapability(ColoringAttributes.ALLOW_COLOR_WRITE);		
 		}
 		
+		@Override
 		public void setVisible(boolean b)
 		{
 			if(b && !isVisible())
@@ -102,16 +107,19 @@ public abstract class SelectionRectangle
 				platformGeometry.removeChild(branchGroup);
 		}
 		
+		@Override
 		public boolean isVisible()
 		{
 			return platformGeometry.indexOfChild(branchGroup)>=0;
 		}
 
+		@Override
 		public void setColor(Color color)
 		{
 			coloringAttributes.setColor(new Color3f(color));
 		}
 
+		@Override
 		protected void draw(Point anchor, Point point)
 		{
 			view.getPixelLocationInImagePlate(anchor.x, anchor.y, p3d1);

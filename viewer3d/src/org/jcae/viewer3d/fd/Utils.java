@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.fd;
@@ -30,9 +31,9 @@ import java.util.Iterator;
  */
 public class Utils
 {
-	static public Collection intArrayToCollection(int[] array)
+	static public Collection<Integer> intArrayToCollection(int[] array)
 	{
-		Collection toReturn=new ArrayList(array.length);
+		Collection<Integer> toReturn=new ArrayList<Integer>(array.length);
 		for(int i=0; i<array.length; i++)
 		{
 			toReturn.add(new Integer(array[i]));
@@ -40,13 +41,13 @@ public class Utils
 		return toReturn;
 	}
 	
-	static public int[] collectionToIntArray(Collection c)
+	static public int[] collectionToIntArray(Collection<Integer> c)
 	{
 		int[] toReturn = new int[c.size()];
-		Iterator it = c.iterator();
+		Iterator<Integer> it = c.iterator();
 		for (int i = 0; i < toReturn.length; i++)
 		{
-			toReturn[i] = ((Integer) it.next()).intValue();
+			toReturn[i] = it.next().intValue();
 		}
 		return toReturn;
 	}

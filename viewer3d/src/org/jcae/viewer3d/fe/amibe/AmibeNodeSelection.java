@@ -1,6 +1,5 @@
 package org.jcae.viewer3d.fe.amibe;
 
-import gnu.trove.TIntArrayList;
 import java.io.*;
 import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
@@ -83,6 +82,7 @@ public class AmibeNodeSelection implements NodeSelection
 		return nodeIDs[id];
 	}
 
+	@Override
 	public Object clone()
 	{
 		try
@@ -96,6 +96,7 @@ public class AmibeNodeSelection implements NodeSelection
 		}
 	}
 	
+	@Override
 	public String toString()
 	{
 		String toReturn="";

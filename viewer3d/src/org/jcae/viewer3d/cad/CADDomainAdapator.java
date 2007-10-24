@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.cad;
@@ -60,7 +61,7 @@ public class CADDomainAdapator implements CADDomain
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.cad.CADDomain#getEdgeIterator()
 	 */
-	public Iterator getEdgeIterator()
+	public Iterator<float[]> getEdgeIterator()
 	{
 		return EmptyIterator.instance;
 	}
@@ -68,7 +69,7 @@ public class CADDomainAdapator implements CADDomain
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.cad.CADDomain#getVertexIterator()
 	 */
-	public Iterator getVertexIterator()
+	public Iterator<float[]> getVertexIterator()
 	{
 		return EmptyIterator.instance;
 	}
@@ -76,7 +77,7 @@ public class CADDomainAdapator implements CADDomain
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.cad.CADDomain#getFaceIterator()
 	 */
-	public Iterator getFaceIterator()
+	public Iterator<FaceMesh> getFaceIterator()
 	{
 		return EmptyIterator.instance;
 	}

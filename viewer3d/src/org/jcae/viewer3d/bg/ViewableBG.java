@@ -21,7 +21,6 @@
 package org.jcae.viewer3d.bg;
 
 import java.awt.Component;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -43,7 +42,7 @@ public class ViewableBG extends ViewableAdaptor
 {
 	private BranchGroup branchGroup;
 	private TIntHashSet leaves = new TIntHashSet();
-	private TIntObjectHashMap leavesGeometry = new TIntObjectHashMap();
+	private TIntObjectHashMap<QuadArray> leavesGeometry = new TIntObjectHashMap<QuadArray>();
 	private Shape3D selectedLeaves = new Shape3D();
 	private String name;
 	
@@ -72,20 +71,25 @@ public class ViewableBG extends ViewableAdaptor
 		branchGroup.addChild(selectedLeaves);
 	}
 	
+	@Override
 	public DomainProvider getDomainProvider()
 	{
 		return null;
 	}		
 	
+	/*
 	public void setSelectionFilter(Collection types)
 	{
 	}
+	*/
 
+	@Override
 	public void domainsChangedPerform(int[] ids)
 	{
 	}
 
-	public void setDomainVisible(Map map)
+	@Override
+	public void setDomainVisible(Map<Integer, Boolean> map)
 	{
 	}
 	
@@ -108,6 +112,7 @@ public class ViewableBG extends ViewableAdaptor
 		return leaves;
 	}
 
+	@Override
 	public void pick(PickViewable result)
 	{		
 		if(result != null && result.getIntersection() != null &&
@@ -135,7 +140,7 @@ public class ViewableBG extends ViewableAdaptor
 		}
 		else
 		{
-			selectedLeaves.removeGeometry((QuadArray) leavesGeometry.get(solidID));
+			selectedLeaves.removeGeometry(leavesGeometry.get(solidID));
 			leavesGeometry.remove(solidID);
 			leaves.remove(solidID);
 		}
@@ -178,11 +183,13 @@ public class ViewableBG extends ViewableAdaptor
 		}
 	}
 		
+	@Override
 	public Node getJ3DNode()
 	{
 		return branchGroup;
 	}
 
+	@Override
 	public void unselectAll()
 	{
 		selectedLeaves.removeAllGeometries();
@@ -195,20 +202,22 @@ public class ViewableBG extends ViewableAdaptor
 		this.name=name;
 	}
 	
+	@Override
 	public String toString()
 	{
 		if(name==null)
 			return super.toString();
-		else
-			return name;
+		return name;
 	}
 	
+	@Override
 	public void addSelectionListener(SelectionListener listener)
 	{
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public void removeSelectionListener(SelectionListener listener)
 	{
 		// TODO Auto-generated method stub

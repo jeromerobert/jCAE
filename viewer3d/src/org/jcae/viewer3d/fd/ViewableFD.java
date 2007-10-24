@@ -176,12 +176,12 @@ public class ViewableFD extends ViewableAdaptor
 	private Shape3D selectedPlates;
 	private Shape3D selectedWires, selectedJunctions;
 	private SelectionManager selectionManager;
-	private Map domainToBranchGroup=new HashMap();
-	private Collection plates=new ArrayList();
-	private Collection wires=new ArrayList();
-	private Collection slots=new ArrayList();
-	private Collection solids=new ArrayList();
-	private Collection marks=new ArrayList();
+	private Map<Integer, BranchGroup> domainToBranchGroup=new HashMap<Integer, BranchGroup>();
+	private Collection<Shape3D> plates=new ArrayList<Shape3D>();
+	private Collection<Shape3D> wires=new ArrayList<Shape3D>();
+	private Collection<Shape3D> slots=new ArrayList<Shape3D>();
+	private Collection<Shape3D> solids=new ArrayList<Shape3D>();
+	private Collection<Node> marks=new ArrayList<Node>();
 	
 	private boolean platePickable;
 	private boolean wirePickable;
@@ -526,7 +526,7 @@ public class ViewableFD extends ViewableAdaptor
 	 */
 	private void createSlotArray(
 		FDDomain domain,
-		Collection toReturn,
+		Collection<LineArray> toReturn,
 		byte type,
 		CoordinatesComputer coordinatesComputer)
 	{
@@ -562,14 +562,14 @@ public class ViewableFD extends ViewableAdaptor
 	 */
 	private LineArray[] createSlotArray(FDDomain domain)
 	{		
-		Collection toReturn=new ArrayList();
+		Collection<LineArray> toReturn=new ArrayList<LineArray>();
 		createSlotArray(domain, toReturn, FDDomain.XZ_SLOT, new CoordinatesComputerXZ());
 		createSlotArray(domain, toReturn, FDDomain.XY_SLOT, new CoordinatesComputerXY());
 		createSlotArray(domain, toReturn, FDDomain.YZ_SLOT, new CoordinatesComputerYZ());
 		createSlotArray(domain, toReturn, FDDomain.YX_SLOT, new CoordinatesComputerYX());
 		createSlotArray(domain, toReturn, FDDomain.ZY_SLOT, new CoordinatesComputerZY());
 		createSlotArray(domain, toReturn, FDDomain.ZX_SLOT, new CoordinatesComputerZX());		
-		return (LineArray[]) toReturn.toArray(new LineArray[toReturn.size()]);
+		return toReturn.toArray(new LineArray[toReturn.size()]);
 	}
 
 	private static BoundingBox computeBounds(GeometryArray array)
@@ -612,9 +612,10 @@ public class ViewableFD extends ViewableAdaptor
 	/* (non-Javadoc)
 	 * @see jcae.viewer3d.Viewable#domainsChanged(java.util.Collection)
 	 */
+	@Override
 	synchronized public void domainsChangedPerform(int[] domainId)
 	{			
-		Set ids=new HashSet(Utils.intArrayToCollection(provider.getDomainIDs()));
+		Set<Integer> ids=new HashSet<Integer>(Utils.intArrayToCollection(provider.getDomainIDs()));
 		for(int d=0; d<domainId.length; d++)
 		{	
 			Integer iDomainId=new Integer(domainId[d]);
@@ -622,7 +623,7 @@ public class ViewableFD extends ViewableAdaptor
 			logger.finest("Create BranchGroup for domain nr"+
 				Integer.toHexString(domainId[d])+ "provider="+provider+" ids="+ids);
 			
-			BranchGroup old=(BranchGroup)domainToBranchGroup.get(iDomainId);
+			BranchGroup old=domainToBranchGroup.get(iDomainId);
 			if(old!=null)
 			{
 				old.detach();
@@ -660,7 +661,7 @@ public class ViewableFD extends ViewableAdaptor
 	 */
 	private void createSolids(Integer domainId, BranchGroup domainBg, FDDomain domain)
 	{
-		Iterator it=domain.getSolidIterator();
+		Iterator<int[]> it=domain.getSolidIterator();
 		int[] indices=new int[domain.getNumberOfSolid()*24];
 		if(indices.length==0)
 			return;
@@ -668,7 +669,7 @@ public class ViewableFD extends ViewableAdaptor
 		int index=0, indexi=0;
 		while(it.hasNext())
 		{
-			int[] array=(int[])it.next();
+			int[] array=it.next();
 			createSolidCube(array, indexi, index, indices, coordinates);			
 			index+=8; //8 nodes in a cube
 			indexi+=6; //6 faces in a cube
@@ -726,10 +727,10 @@ public class ViewableFD extends ViewableAdaptor
 	{
 		logger.finest("enable="+enable);
 		markPickable=enable;
-		Iterator it=marks.iterator();
+		Iterator<Node> it=marks.iterator();
 		while(it.hasNext())
 		{
-			Node n=(Node) it.next();
+			Node n=it.next();
 			MarkUtils.setPickable(n, enable);			
 		}		
 	}
@@ -737,6 +738,7 @@ public class ViewableFD extends ViewableAdaptor
 	/* (non-Javadoc)
 	 * @see jcae.viewer3d.Viewable#getDomainProvider()
 	 */
+	@Override
 	public DomainProvider getDomainProvider()
 	{
 		return provider;
@@ -745,7 +747,7 @@ public class ViewableFD extends ViewableAdaptor
 	/* (non-Javadoc)
 	 * @see jcae.viewer3d.Viewable#setDomainVisible(java.util.Map)
 	 */
-	public void setDomainVisible(Map map)
+	public void setDomainVisible(Map<Integer, Boolean> map)
 	{
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
@@ -755,7 +757,7 @@ public class ViewableFD extends ViewableAdaptor
 	{
 		logger.finest("domainID="+Integer.toHexString(domainID)
 			+" enable="+enable);
-		BranchGroup bg=(BranchGroup) domainToBranchGroup.get(new Integer(domainID));
+		BranchGroup bg=domainToBranchGroup.get(new Integer(domainID));
 		if(bg==null)
 		{
 			logger.info("domain 0x"+Integer.toHexString(domainID)+
@@ -785,10 +787,10 @@ public class ViewableFD extends ViewableAdaptor
 	{
 		logger.finest("enable="+enable);
 		platePickable=enable;
-		Iterator it=plates.iterator();
+		Iterator<Shape3D> it=plates.iterator();
 		while(it.hasNext())
 		{
-			Node n=(Node) it.next();
+			Node n=it.next();
 			n.setPickable(enable);
 		}
 	}
@@ -797,10 +799,10 @@ public class ViewableFD extends ViewableAdaptor
 	{
 		logger.finest("enable="+enable);
 		wirePickable=enable;
-		Iterator it=wires.iterator();
+		Iterator<Shape3D> it=wires.iterator();
 		while(it.hasNext())
 		{
-			Node n=(Node) it.next();
+			Node n=it.next();
 			n.setPickable(enable);
 		}
 	}
@@ -809,10 +811,10 @@ public class ViewableFD extends ViewableAdaptor
 	{
 		logger.finest("enable="+enable);
 		slotPickable=enable;
-		Iterator it=slots.iterator();
+		Iterator<Shape3D> it=slots.iterator();
 		while(it.hasNext())
 		{
-			Node n=(Node) it.next();			
+			Node n=it.next();			
 			n.setPickable(enable);
 		}
 	}
@@ -821,6 +823,7 @@ public class ViewableFD extends ViewableAdaptor
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.Viewable#pick(com.sun.j3d.utils.picking.PickResult)
 	 */
+	@Override
 	public void pick(PickViewable result)
 	{				
 		if(result==null)
@@ -1129,6 +1132,7 @@ public class ViewableFD extends ViewableAdaptor
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.Viewable#getBranchGroup(org.jcae.viewer3d.View)
 	 */
+	@Override
 	public Node getJ3DNode()
 	{		
 		return parentBranchGroup;
@@ -1137,6 +1141,7 @@ public class ViewableFD extends ViewableAdaptor
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.Viewable#unselectAll()
 	 */
+	@Override
 	public void unselectAll()
 	{
 		selectionManager.unselectAll();
@@ -1149,12 +1154,12 @@ public class ViewableFD extends ViewableAdaptor
 		
 	private LineArray[] createLineArray(FDDomain domain)
 	{
-		Iterator it=domain.getXWireIterator();
-		Collection toReturn=new ArrayList();
+		Iterator<int[]> it=domain.getXWireIterator();
+		Collection<LineArray> toReturn=new ArrayList<LineArray>();
 		int k=0;
 		while(it.hasNext())
 		{
-			int[] wire=(int[])it.next();
+			int[] wire=it.next();
 			float[] coordinates=new float[6];
 			coordinates[0]=(float) provider.getXGrid(wire[0]);
 			coordinates[1]=(float) provider.getYGrid(wire[1]);
@@ -1175,7 +1180,7 @@ public class ViewableFD extends ViewableAdaptor
 		it=domain.getYWireIterator();		
 		while(it.hasNext())
 		{			
-			int[] wire=(int[])it.next();
+			int[] wire=it.next();
 			float[] coordinates=new float[6];
 			coordinates[0]=(float) provider.getXGrid(wire[0]);
 			coordinates[1]=(float) provider.getYGrid(wire[1]);
@@ -1196,7 +1201,7 @@ public class ViewableFD extends ViewableAdaptor
 		it=domain.getZWireIterator();		
 		while(it.hasNext())
 		{
-			int[] wire=(int[])it.next();
+			int[] wire=it.next();
 			float[] coordinates=new float[6];
 			coordinates[0]=(float) provider.getXGrid(wire[0]);
 			coordinates[1]=(float) provider.getYGrid(wire[1]);
@@ -1213,7 +1218,7 @@ public class ViewableFD extends ViewableAdaptor
 			k++;
 		}
 		
-		return (LineArray[]) toReturn.toArray(new LineArray[toReturn.size()]);
+		return toReturn.toArray(new LineArray[toReturn.size()]);
 	}
 
 	private static void printFloatDebug(float[] f)
@@ -1241,11 +1246,11 @@ public class ViewableFD extends ViewableAdaptor
 	{
 		int numberOfPlates=domain.getNumberOfXPlate()+domain.getNumberOfYPlate()+domain.getNumberOfZPlate();
 		float[] coordinates=new float[numberOfPlates*12];
-		Iterator it=domain.getXPlateIterator();
+		Iterator<int[]> it=domain.getXPlateIterator();
 		int k=0;
 		while(it.hasNext())
 		{
-			int[] plate=(int[])it.next();
+			int[] plate=it.next();
 			float x=(float)provider.getXGrid(plate[0]);
 			float y1=(float)provider.getYGrid(plate[1]);
 			float z1=(float)provider.getZGrid(plate[2]);
@@ -1272,7 +1277,7 @@ public class ViewableFD extends ViewableAdaptor
 		it=domain.getYPlateIterator();
 		while(it.hasNext())
 		{
-			int[] plate=(int[])it.next();
+			int[] plate=it.next();
 			float y=(float)provider.getYGrid(plate[0]);
 			float x1=(float)provider.getXGrid(plate[1]);
 			float z1=(float)provider.getZGrid(plate[2]);
@@ -1298,7 +1303,7 @@ public class ViewableFD extends ViewableAdaptor
 		it=domain.getZPlateIterator();
 		while(it.hasNext())
 		{
-			int[] plate=(int[])it.next();
+			int[] plate=it.next();
 			float z=(float)provider.getZGrid(plate[0]);
 			float x1=(float)provider.getXGrid(plate[1]);
 			float y1=(float)provider.getYGrid(plate[2]);
@@ -1328,8 +1333,7 @@ public class ViewableFD extends ViewableAdaptor
 	{
 		if(cellPicking)
 			return cellManager.getSelection();
-		else
-			return selectionManager.getSelection();
+		return selectionManager.getSelection();
 	}
 
 	/**

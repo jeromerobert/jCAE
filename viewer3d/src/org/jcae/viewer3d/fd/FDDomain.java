@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.fd;
@@ -25,7 +26,7 @@ import org.jcae.viewer3d.ColoredDomain;
 import org.jcae.viewer3d.MarkDomain;
 
 /**
- * A domain of a finit difference mesh.
+ * A domain of a finite difference mesh.
  * @author Jerome Robert
  */
 public interface FDDomain extends ColoredDomain, MarkDomain
@@ -54,22 +55,22 @@ public interface FDDomain extends ColoredDomain, MarkDomain
 	int getNumberOfSolid();
 
 	/** Return an iterator on {i, j1, k1, j2, k2} arrays, describing X plates */
-	Iterator getXPlateIterator();
+	Iterator<int[]> getXPlateIterator();
 	
 	/** Return an iterator on {j, i1, k1, i2, k2} arrays, describing Y plates */
-	Iterator getYPlateIterator();
+	Iterator<int[]> getYPlateIterator();
 	
 	/** Return an iterator on {k, i1, j1, i2, j2} arrays, describing Z plates */
-	Iterator getZPlateIterator();
+	Iterator<int[]> getZPlateIterator();
 
 	/** Return an iterator on {i, j, k, i2} arrays, describing X wires */
-	Iterator getXWireIterator();
+	Iterator<int[]> getXWireIterator();
 	
 	/** Return an iterator on {i, j, k, j2} arrays, describing Y wires */
-	Iterator getYWireIterator();
+	Iterator<int[]> getYWireIterator();
 	
 	/** Return an iterator on {i, j, k, k2} arrays, describing Z wires */
-	Iterator getZWireIterator();
+	Iterator<int[]> getZWireIterator();
 	
 	/**
 	 * Return an iterator on int[]{i1, i2, j, k}, describing XY and XZ slots<br>	
@@ -77,8 +78,8 @@ public interface FDDomain extends ColoredDomain, MarkDomain
 	 * Return an iterator on int[]{k1, k2, i, j}, describing ZY and ZX slots or<br>
 	 * float[]{x0, y0, z0, z1, y1, z1}
 	 */	 
-	Iterator getSlotIterator(byte type);
+	Iterator<?> getSlotIterator(byte type);
 	
-	/** Return an iteraotr on {i1, j1, k1, i2, j2, k2} arrays, describing volumes*/
-	Iterator getSolidIterator();	
+	/** Return an iterator on {i1, j1, k1, i2, j2, k2} arrays, describing volumes*/
+	Iterator<int[]> getSolidIterator();	
 }

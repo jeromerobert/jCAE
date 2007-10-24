@@ -20,6 +20,7 @@
 
 package org.jcae.viewer3d;
 
+import java.beans.PropertyChangeListener;
 import javax.media.j3d.Behavior;
 import javax.media.j3d.WakeupOnElapsedFrames;
 
@@ -90,7 +91,7 @@ public class FPSBehavior extends Behavior
 	/**
 	 * Utility field holding list of PropertyChangeListeners.
 	 */
-	private transient java.util.ArrayList propertyChangeListenerList;
+	private transient java.util.ArrayList<PropertyChangeListener> propertyChangeListenerList;
 
 	/**
 	 * Registers PropertyChangeListener to receive events.
@@ -99,7 +100,7 @@ public class FPSBehavior extends Behavior
 	public synchronized void addPropertyChangeListener(java.beans.PropertyChangeListener listener)
 	{
 		if (propertyChangeListenerList == null ) {
-			propertyChangeListenerList = new java.util.ArrayList ();
+			propertyChangeListenerList = new java.util.ArrayList<PropertyChangeListener> ();
 		}
 		propertyChangeListenerList.add (listener);
 	}
@@ -125,14 +126,14 @@ public class FPSBehavior extends Behavior
 	 */
 	private void firePropertyChangeListenerPropertyChange(java.lang.Object object, java.lang.String string, java.lang.Object object0, java.lang.Object object1)
 	{
-		java.util.ArrayList list;
+		java.util.ArrayList<PropertyChangeListener> list;
 		java.beans.PropertyChangeEvent e = new java.beans.PropertyChangeEvent (object, string, object0, object1);
 		synchronized (this) {
 			if (propertyChangeListenerList == null) return;
-			list = (java.util.ArrayList)propertyChangeListenerList.clone ();
+			list = (java.util.ArrayList<PropertyChangeListener>)propertyChangeListenerList.clone ();
 		}
 		for (int i = 0; i < list.size (); i++) {
-			((java.beans.PropertyChangeListener)list.get (i)).propertyChange (e);
+			list.get (i).propertyChange (e);
 		}
 	}
 

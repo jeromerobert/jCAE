@@ -28,6 +28,7 @@ import javax.vecmath.Point3d;
 import org.jcae.opencascade.jni.*;
 import org.jcae.viewer3d.cad.CADDomainAdapator;
 import org.jcae.viewer3d.cad.DefaultFaceMesh;
+import org.jcae.viewer3d.cad.FaceMesh;
 
 /**
  * Meshing parameters were taken from Opencascade sources. See
@@ -44,14 +45,14 @@ import org.jcae.viewer3d.cad.DefaultFaceMesh;
 public class OCCFaceDomain extends CADDomainAdapator
 {
 	private static int meshIter=3;
-	private ArrayList faceMeshes;
+	private ArrayList<FaceMesh> faceMeshes;
 	private Color[] facesColors;
 	private static boolean debug=false;
 	public OCCFaceDomain(TopoDS_Shape shape)
 	{	
 		TopExp_Explorer explorer = new TopExp_Explorer();
 		TopLoc_Location loc = new TopLoc_Location();
-		faceMeshes=new ArrayList();
+		faceMeshes=new ArrayList<FaceMesh>();
 				
 		for (explorer.init(shape, TopAbs_ShapeEnum.FACE); explorer.more(); explorer.next())
 		{						
@@ -258,7 +259,8 @@ public class OCCFaceDomain extends CADDomainAdapator
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.cad.CADDomainAdapator#getFaceIterator()
 	 */
-	public Iterator getFaceIterator()
+	@Override
+	public Iterator<FaceMesh> getFaceIterator()
 	{
 		return faceMeshes.iterator();
 	}

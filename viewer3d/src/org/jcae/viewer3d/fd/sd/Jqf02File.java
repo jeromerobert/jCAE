@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.fd.sd;
@@ -55,7 +56,7 @@ public class Jqf02File
 		return maxValue;
 	}
 
-	public void readValue(int iteration, List plates, int valueType) throws IOException
+	public void readValue(int iteration, List<Plate> plates, int valueType) throws IOException
 	{
 		long offset=headerSize+iteration*iterationBlockSize+12;
 		DataInputStream in=new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
@@ -63,9 +64,9 @@ public class Jqf02File
 		minValue=Float.MAX_VALUE;
 		maxValue=-Float.MAX_VALUE;
 		logger.debug("offset is "+offset);
-		for(Iterator it=plates.iterator();it.hasNext();)
+		for(Iterator<Plate> it=plates.iterator();it.hasNext();)
 		{
-			Plate p=(Plate)it.next();
+			Plate p=it.next();
 			int nbcells=p.numberOfCells();
 			p.values=new float[nbcells];
 			//logger.debug(p);

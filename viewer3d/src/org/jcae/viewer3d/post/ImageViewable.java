@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.post;
@@ -69,31 +70,37 @@ public class ImageViewable extends ViewableAdaptor
 		branchGroup.addChild(shape3D);
 	}
 
+	@Override
 	public void addSelectionListener(SelectionListener listener)
 	{
 		// nothing
 	}
 
+	@Override
 	public void domainsChangedPerform(int[] domainId)
 	{
 		// nothing
 	}
 
+	@Override
 	public DomainProvider getDomainProvider()
 	{
 		return null;
 	}
 
+	@Override
 	public Node getJ3DNode()
 	{
 		return branchGroup;
 	}
 
+	@Override
 	public void pick(PickViewable result)
 	{
 		// nothing
 	}
 
+	@Override
 	public void removeSelectionListener(SelectionListener listener)
 	{
 		// nothing
@@ -104,7 +111,8 @@ public class ImageViewable extends ViewableAdaptor
 		colorMapper = cm;
 	}
 
-	public void setDomainVisible(Map map)
+	@Override
+	public void setDomainVisible(Map<Integer, Boolean> map)
 	{
 		// nothing
 	}
@@ -188,6 +196,7 @@ public class ImageViewable extends ViewableAdaptor
 		return (int) Math.pow(2, p);
 	}
 
+	@Override
 	public void unselectAll()
 	{
 		// nothing

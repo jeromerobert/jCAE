@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.fd;
@@ -128,7 +129,7 @@ public class FDSelection
 	 * is its order in the array returned by <code>MarkDomain.getMarks</code>
 	 * @return
 	 */
-	public Map getMarks()
+	public Map<Integer, int[]> getMarks()
 	{
 		//TODO
 		return null;
@@ -138,6 +139,7 @@ public class FDSelection
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString()
 	{
 		return "Domain id: "+domainID+CR+

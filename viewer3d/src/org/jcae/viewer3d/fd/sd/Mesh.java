@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.fd.sd;
@@ -37,17 +38,19 @@ public class Mesh
 {
 	private static Logger logger=Logger.getLogger(Mesh.class);
 	private float[][] grid;
-	private HashMap plates, wires;
+	private HashMap<Integer, ArrayList<Plate>> plates;
+	private HashMap<Integer, Wire> wires;
 	public int texturingThreshold=150;
 
 	//used to keep the order of the plates in the plate file. It's used when
 	//reading the jf02 file
-	private ArrayList orderedPlates;
+	private ArrayList<Plate> orderedPlates;
 
 	// for preprocessing rendering
-	private HashMap colors;
+	private HashMap<Integer, Color> colors;
 	// for post processsing rendering
-	private HashMap texturedPlates, coloredPlates;
+	private HashMap<Integer, ArrayList<Plate>> texturedPlates;
+	private HashMap<Integer, ColoredPlateSet> coloredPlates;
 	public float minValue, maxValue;
 
 	public void logarithm()
@@ -58,7 +61,7 @@ public class Mesh
 		float cst=(float)Math.log(maxValue-minValue+delta);
 		for(int i=0;i<orderedPlates.size();i++)
 		{
-			Plate p=(Plate)orderedPlates.get(i);
+			Plate p=orderedPlates.get(i);
 			for(int j=0;j<p.values.length;j++)
 			{
 				if(p.values[j]>maxValue) p.values[j]=maxValue;
@@ -79,23 +82,23 @@ public class Mesh
 	public int[] getGroupsIDs()
 	{
 		int[] ids=new int[plates.size()];
-		Iterator it=plates.keySet().iterator();
+		Iterator<Integer> it=plates.keySet().iterator();
 		for(int i=0;it.hasNext();i++)
 		{
-			ids[i]=((Integer)it.next()).intValue();
+			ids[i]=it.next().intValue();
 		}
 		return ids;
 	}
 	
 	public int getNumberOfTexturedPlates(int groupId)
 	{
-		ArrayList a=(ArrayList)(texturedPlates.get(new Integer(groupId)));
+		ArrayList a=(texturedPlates.get(new Integer(groupId)));
 		return a.size();
 	}
 
 	public int[] getTexture(int groupId, int plateID)
 	{
-		ArrayList a=(ArrayList)(texturedPlates.get(new Integer(groupId)));
+		ArrayList a=(texturedPlates.get(new Integer(groupId)));
 		Plate plate=(Plate)(a.get(plateID));
 		float[] values=plate.values;
 		int[] texture=new int[values.length+2];
@@ -121,7 +124,7 @@ public class Mesh
 	{
 		if((currentPreprocessPlateSet==null)||(currentPreprocessPlateSetId!=groupId))
 		{
-			ArrayList a=(ArrayList)(plates.get(new Integer(groupId)));
+			ArrayList a=(plates.get(new Integer(groupId)));
 			currentPreprocessPlateSet=new PreprocessPlateSet(a, grid);
 			currentPreprocessPlateSetId=groupId;
 		}		
@@ -137,7 +140,7 @@ public class Mesh
 	{
 		if((currentPreprocessPlateSet==null)||(currentPreprocessPlateSetId!=groupId))
 		{
-			ArrayList a=(ArrayList)(plates.get(new Integer(groupId)));
+			ArrayList a=(plates.get(new Integer(groupId)));
 			currentPreprocessPlateSet=new PreprocessPlateSet(a, grid);
 			currentPreprocessPlateSetId=groupId;
 		}		
@@ -146,19 +149,19 @@ public class Mesh
 	
 	public float[] getTexturedPlateCoordinates(int groupId, int plateID)
 	{
-		ArrayList a=(ArrayList)(texturedPlates.get(new Integer(groupId)));
+		ArrayList a=(texturedPlates.get(new Integer(groupId)));
 		return ((Plate)a.get(plateID)).getCoordinates(grid);
 	}
 
 	public float[] getColoredPlateCoordinates(int groupId)
 	{
-		ColoredPlateSet a=(ColoredPlateSet )(coloredPlates.get(new Integer(groupId)));
+		ColoredPlateSet a=(coloredPlates.get(new Integer(groupId)));
 		return a.getColoredPlateCoordinates();
 	}
 
 	public int[] getColoredPlateCoordinatesIndices(int groupId)
 	{
-		ColoredPlateSet a=(ColoredPlateSet )(coloredPlates.get(new Integer(groupId)));
+		ColoredPlateSet a=(coloredPlates.get(new Integer(groupId)));
 		return a.getColoredPlateCoordinatesIndices();
 	}
 
@@ -177,21 +180,21 @@ public class Mesh
 
 	public int[] getColoredPlateColorsIndices(int groupId)
 	{
-		ColoredPlateSet a=(ColoredPlateSet )(coloredPlates.get(new Integer(groupId)));
+		ColoredPlateSet a=(coloredPlates.get(new Integer(groupId)));
 		return a.getColoredPlateColorsIndices();
 	}
 
 	public void prepareForDisplay()
 	{		
 		int numberOfCells,maxPlateSize=0; //for debugging purpose
-		texturedPlates=new HashMap();
-		coloredPlates=new HashMap();
-		for(Iterator it=plates.keySet().iterator();it.hasNext();)
+		texturedPlates=new HashMap<Integer, ArrayList<Plate>>();
+		coloredPlates=new HashMap<Integer, ColoredPlateSet>();
+		for(Iterator<Integer> it=plates.keySet().iterator();it.hasNext();)
 		{
-			int attribut=((Integer)it.next()).intValue();
-			ArrayList a=(ArrayList)plates.get(new Integer(attribut));
-			ArrayList texturedPlatesA=new ArrayList();
-			ArrayList coloredPlatesA=new ArrayList();
+			int attribut=it.next().intValue();
+			ArrayList a=plates.get(new Integer(attribut));
+			ArrayList<Plate> texturedPlatesA=new ArrayList<Plate>();
+			ArrayList<Plate> coloredPlatesA=new ArrayList<Plate>();
 			texturedPlates.put(new Integer(attribut),texturedPlatesA);			
 			for(int i=0;i<a.size();i++)
 			{
@@ -245,7 +248,7 @@ public class Mesh
 	
 	public void loadWi02File(File f) throws Exception
 	{
-		wires = new HashMap();
+		wires = new HashMap<Integer, Wire>();
 		int keyWord;
 		StreamTokenizerExt in=new StreamTokenizerExt(f);
 		in.readWord("WIRES");
@@ -292,8 +295,8 @@ public class Mesh
 	
 	public void loadPl22File(File f) throws Exception 
 	{
-		plates=new HashMap();
-		orderedPlates=new ArrayList();
+		plates=new HashMap<Integer, ArrayList<Plate>>();
+		orderedPlates=new ArrayList<Plate>();
 		int keyWord;
 		StreamTokenizerExt in=new StreamTokenizerExt(f);
 		in.readWord("PLATES");
@@ -327,10 +330,10 @@ public class Mesh
 				p.position=in.readInteger();
 				in.readWord();					
 				Integer att=new Integer(in.readInteger());
-				ArrayList a=(ArrayList)plates.get(att);
+				ArrayList<Plate> a=plates.get(att);
 				if(a==null)
 				{
-					a=new ArrayList();
+					a=new ArrayList<Plate>();
 					plates.put(att, a);
 				}
 				a.add(p);
@@ -343,8 +346,8 @@ public class Mesh
 	
 	public void loadPl02File(File f) throws Exception
 	{
-		plates=new HashMap();
-		orderedPlates=new ArrayList();
+		plates=new HashMap<Integer, ArrayList<Plate>>();
+		orderedPlates=new ArrayList<Plate>();
 		StreamTokenizerExt in=new StreamTokenizerExt(f);
 		
 		int[] numberOfPlate=new int[3];
@@ -373,10 +376,10 @@ public class Mesh
 				p.max2=in.readInteger();
 				p.position=in.readInteger();
 				Integer att=new Integer(in.readInteger());
-				ArrayList a=(ArrayList)plates.get(att);
+				ArrayList<Plate> a=plates.get(att);
 				if(a==null)
 				{
-					a=new ArrayList();
+					a=new ArrayList<Plate>();
 					plates.put(att, a);
 				}
 				a.add(p);
@@ -388,23 +391,19 @@ public class Mesh
 	
 	private void assignGroupColors()
 	{
-		colors=new HashMap();
+		colors=new HashMap<Integer, Color>();
 		Palette p=new Palette();
 		p.addColor(Color.RED);
 		p.addColor(Color.GREEN);
 		p.addColor(Color.BLUE);		
 		p.computeNewColors(plates.size());
-		Iterator i=plates.keySet().iterator();
+		Iterator<Integer> i=plates.keySet().iterator();
 		int j=0;
 		while(i.hasNext())
 		{
 			colors.put(i.next(), p.getColor(j));
 			j++;
 		}
-	}
-	public float[] getGroupColor(int groupId)
-	{
-		return (float[])colors.get(new Integer(groupId));
 	}
 	
 	public static void main(String [] args)
@@ -421,19 +420,19 @@ public class Mesh
 		}
 	}
 	
-	public ArrayList getPlates(int groupId) {
-		return (ArrayList)plates.get(new Integer(groupId));
+	public ArrayList<Plate> getPlates(int groupId) {
+		return plates.get(new Integer(groupId));
 	}
 
 	public Plate getPlate(int groupId, int plateId) {
-		return (Plate)((ArrayList)plates.get(new Integer(groupId))).get(plateId);
+		return plates.get(new Integer(groupId)).get(plateId);
 	}
 	
 	public float[][] getGrid() {
 		return grid;
 	}
 	
-	public HashMap getWires() {
+	public HashMap<Integer, Wire> getWires() {
 		return wires;
 	}
 }

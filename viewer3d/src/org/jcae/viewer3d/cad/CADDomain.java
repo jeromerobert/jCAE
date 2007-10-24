@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d.cad;
@@ -30,11 +31,11 @@ import org.jcae.viewer3d.MarkDomain;
 public interface CADDomain extends MarkDomain
 {
 	/** Iterator on array of float[3*number of nodes] */
-	Iterator getEdgeIterator();
+	Iterator<float[]> getEdgeIterator();
 	
 	/** Iterator on array float[3] */
-	Iterator getVertexIterator();
+	Iterator<float[]> getVertexIterator();
 	
 	/** Iterator on FaceMesh objects*/
-	Iterator getFaceIterator();
+	Iterator<FaceMesh> getFaceIterator();
 }

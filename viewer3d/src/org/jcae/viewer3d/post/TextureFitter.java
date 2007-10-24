@@ -55,6 +55,7 @@ public class TextureFitter extends View
 			this.shape=shape;
 		}
 		
+		@Override
 		public void pick(PickViewable result)
 		{
 			Object o=getPickUserData(result);
@@ -79,17 +80,17 @@ public class TextureFitter extends View
 				GeomAPI_ProjectPointOnSurf proj=new GeomAPI_ProjectPointOnSurf(point, geom);
 				if(proj.nbPoints()>0)
 					return proj.point(1);
-				else
-					return point;
+				return point;
 			}
-			else
-				return null;
+			return null;
 		}
 		
+		@Override
 		public void setSelectionMode(short mode) {
 			throw new UnsupportedOperationException();
 		}
 		
+		@Override
 		public void unselectAll()
 		{
 			//do nothing, particularly do not fire event about unselecting
@@ -129,15 +130,15 @@ public class TextureFitter extends View
 
 		int nbint=0;
 		int nbfl=0;
-		ArrayList meshes=new ArrayList();
+		ArrayList<FaceMesh> meshes=new ArrayList<FaceMesh>();
 		for(int i=0; i<ids.length; i++)
 		{
 			CADDomain d = (CADDomain) occProvider.getDomain(i);
-			Iterator it = d.getFaceIterator();
+			Iterator<FaceMesh> it = d.getFaceIterator();
 			if(it!=null)
 			while(it.hasNext())
 			{
-				FaceMesh fm=(FaceMesh) it.next();
+				FaceMesh fm=it.next();
 				nbint += fm.getMesh().length;
 				nbfl+=fm.getNodes().length;
 				meshes.add(fm);
@@ -149,7 +150,7 @@ public class TextureFitter extends View
 		int destPosInt=0, destPosFl=0;
 		for(int i=0; i<meshes.size(); i++)
 		{
-			FaceMesh fm=(FaceMesh) meshes.get(i);
+			FaceMesh fm=meshes.get(i);
 			int[] m=fm.getMesh();
 			float[] n=fm.getNodes();
 			System.arraycopy(n, 0, nodes, destPosFl, n.length);
@@ -179,7 +180,7 @@ public class TextureFitter extends View
 	public static TopoDS_Compound getSelectFaces(ViewableCAD viewable, TopoDS_Shape shape)
 	{
 		CADSelection[] ss=viewable.getSelection();
-		ArrayList faces=new ArrayList();
+		ArrayList<TopoDS_Face> faces=new ArrayList<TopoDS_Face>();
 		for(int i=0; i<ss.length; i++)
 		{
 			int[] ids=ss[i].getFaceIDs();
@@ -194,12 +195,11 @@ public class TextureFitter extends View
 			bb.makeCompound(compound);
 			
 			for(int i=0; i<faces.size(); i++)
-				bb.add(compound, (TopoDS_Shape) faces.get(i));
+				bb.add(compound, faces.get(i));
 			
 			return compound;
 		}
-		else
-			return null;
+		return null;
 	}
 
 	/**

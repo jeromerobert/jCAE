@@ -82,6 +82,7 @@ public class AmibeDomain extends FEDomainAdapter
 		return new File(directory, a);
 	}
 	
+	@Override
 	public float[] getNodes()
 	{
 		return nodes;
@@ -90,6 +91,7 @@ public class AmibeDomain extends FEDomainAdapter
 	 * (non-Javadoc)
 	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getNumberOfNodes()
 	 */
+	@Override
 	public int getNumberOfNodes()
 	{
 		return nodes.length/3;
@@ -99,6 +101,7 @@ public class AmibeDomain extends FEDomainAdapter
 	 * (non-Javadoc)
 	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getNumberOfTria3()
 	 */
+	@Override
 	public int getNumberOfTria3()
 	{
 		return tria3.length/3;
@@ -108,9 +111,10 @@ public class AmibeDomain extends FEDomainAdapter
 	 * (non-Javadoc)
 	 * @see org.jcae.viewer3d.fe.FEDomainAdapter#getTria3Iterator()
 	 */
-	public Iterator getTria3Iterator()
+	@Override
+	public Iterator<int[]> getTria3Iterator()
 	{
-		return new Iterator()
+		return new Iterator<int[]>()
 		{
 			private int index=0;
 			public void remove()
@@ -124,7 +128,7 @@ public class AmibeDomain extends FEDomainAdapter
 				return index<tria3.length;
 			}
 
-			public Object next()
+			public int[] next()
 			{
 				int[] toReturn=new int[3];
 				System.arraycopy(tria3, index, toReturn, 0, 3);

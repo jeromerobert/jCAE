@@ -20,7 +20,8 @@ public class Legend extends JPanel
 			String s1=f1.format(d);
 			String s2=f2.format(d);
 			if(s1.length()>=s2.length() && !s2.equals("0") && !s2.equals("-0"))
-				return s2; else return s1;
+				return s2;
+			return s1;
 		}
 	}
 	
@@ -34,6 +35,7 @@ public class Legend extends JPanel
 		/* (non-Javadoc)
 	 * @see java.awt.Component#getPreferredSize()
 	 */
+	@Override
 	public Dimension getPreferredSize()
 	{
 		return new Dimension(100, 0);
@@ -61,6 +63,7 @@ public class Legend extends JPanel
 	/* (non-Javadoc)
 	 * @see javax.swing.JComponent#paint(java.awt.Graphics)
 	 */
+	@Override
 	public void paint(Graphics g)
 	{
 		super.paint(g);

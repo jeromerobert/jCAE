@@ -50,6 +50,7 @@ public class SelectionManager
 		/* (non-Javadoc)
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
+		@Override
 		public boolean equals(Object obj)
 		{
 			IntegerPair other=(IntegerPair) obj;
@@ -59,6 +60,7 @@ public class SelectionManager
 		/* (non-Javadoc)
 		 * @see java.lang.Object#hashCode()
 		 */
+		@Override
 		public int hashCode()
 		{
 			return first+second;
@@ -91,6 +93,7 @@ public class SelectionManager
 		/* (non-Javadoc)
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
+		@Override
 		public boolean equals(Object obj)
 		{
 			IntegerPairTyped other=(IntegerPairTyped) obj;
@@ -100,6 +103,7 @@ public class SelectionManager
 		/* (non-Javadoc)
 		 * @see java.lang.Object#hashCode()
 		 */
+		@Override
 		public int hashCode()
 		{
 			return first+second+type;
@@ -121,17 +125,17 @@ public class SelectionManager
 	
 	private static class Selection
 	{
-		private int domainID;
-		private Collection xPlates=new HashSet();
-		private Collection yPlates=new HashSet();
-		private Collection zPlates=new HashSet();
+		int domainID;
+		Collection<Integer> xPlates=new HashSet<Integer>();
+		Collection<Integer> yPlates=new HashSet<Integer>();
+		Collection<Integer> zPlates=new HashSet<Integer>();
 
-		private Collection xWires=new HashSet();
-		private Collection yWires=new HashSet();
-		private Collection zWires=new HashSet();
-		private Collection[] slots=new Collection[FDDomain.SLOT_LAST+1];
-		private Collection solids=new HashSet();
-		private Map marks=new HashMap();
+		Collection<Integer> xWires=new HashSet<Integer>();
+		Collection<Integer> yWires=new HashSet<Integer>();
+		Collection<Integer> zWires=new HashSet<Integer>();
+		Collection<Integer>[] slots=new Collection[FDDomain.SLOT_LAST+1];
+		Collection<Integer> solids=new HashSet<Integer>();
+		Map<Integer, Collection<Integer>> marks=new HashMap<Integer, Collection<Integer>>();
 		/**
 		 * @param domainID
 		 */
@@ -140,7 +144,7 @@ public class SelectionManager
 			this.domainID=domainID;
 			for(int i=0; i<slots.length; i++)
 			{
-				slots[i]=new HashSet();
+				slots[i]=new HashSet<Integer>();
 			}
 		}
 
@@ -208,6 +212,7 @@ public class SelectionManager
 				/* (non-Javadoc)
 				 * @see org.jcae.viewer3d.fd.FDSelection#getXPlates()
 				 */
+				@Override
 				public int[] getXPlates()
 				{
 					return Utils.collectionToIntArray(xPlates);
@@ -216,6 +221,7 @@ public class SelectionManager
 				/* (non-Javadoc)
 				 * @see org.jcae.viewer3d.fd.FDSelection#getYPlates()
 				 */
+				@Override
 				public int[] getYPlates()
 				{
 					return Utils.collectionToIntArray(yPlates);
@@ -224,6 +230,7 @@ public class SelectionManager
 				/* (non-Javadoc)
 				 * @see org.jcae.viewer3d.fd.FDSelection#getZPlates()
 				 */
+				@Override
 				public int[] getZPlates()
 				{
 					return Utils.collectionToIntArray(zPlates);
@@ -232,6 +239,7 @@ public class SelectionManager
 				/* (non-Javadoc)
 				 * @see org.jcae.viewer3d.fd.FDSelection#getXWires()
 				 */
+				@Override
 				public int[] getXWires()
 				{
 					return Utils.collectionToIntArray(xWires);
@@ -240,6 +248,7 @@ public class SelectionManager
 				/* (non-Javadoc)
 				 * @see org.jcae.viewer3d.fd.FDSelection#getXWires()
 				 */
+				@Override
 				public int[] getYWires()
 				{
 					return Utils.collectionToIntArray(yWires);
@@ -248,6 +257,7 @@ public class SelectionManager
 				/* (non-Javadoc)
 				 * @see org.jcae.viewer3d.fd.FDSelection#getXWires()
 				 */
+				@Override
 				public int[] getZWires()
 				{
 					return Utils.collectionToIntArray(zWires);
@@ -256,23 +266,26 @@ public class SelectionManager
 				/* (non-Javadoc)
 				 * @see org.jcae.viewer3d.fd.FDSelection#getSlots(byte)
 				 */
+				@Override
 				public int[] getSlots(byte type)
 				{
 					return Utils.collectionToIntArray(slots[type]);
 				}
 				
-				public Map getMarks()
+				@Override
+				public Map<Integer, int[]> getMarks()
 				{
-					Map toReturn=new HashMap();
-					Iterator it=marks.entrySet().iterator();
+					Map<Integer, int[]> toReturn=new HashMap<Integer, int[]>();
+					Iterator<Map.Entry<Integer, Collection<Integer>>> it=marks.entrySet().iterator();
 					while(it.hasNext())				
 					{
-						Map.Entry e=(Map.Entry)it.next();
-						toReturn.put(e.getKey(), Utils.collectionToIntArray((Collection)e.getValue()));
+						Map.Entry<Integer, Collection<Integer>> e=it.next();
+						toReturn.put(e.getKey(), Utils.collectionToIntArray(e.getValue()));
 					}				
 					return toReturn;
 				}
 				
+				@Override
 				public int[] getSolids()
 				{
 					return Utils.collectionToIntArray(solids);
@@ -411,7 +424,7 @@ public class SelectionManager
 		 */
 		public boolean containsMark(int typeId, int markID)
 		{			
-			Collection c=(Collection) marks.get(new Integer(typeId));
+			Collection<Integer> c=marks.get(new Integer(typeId));
 			if(c==null)
 				return false;
 			return c.contains(new Integer(markID));
@@ -424,10 +437,10 @@ public class SelectionManager
 		public void addMark(int typeId, int markID)
 		{
 			Integer i=new Integer(typeId);			
-			Collection c=(Collection) marks.get(i);
+			Collection<Integer> c=marks.get(i);
 			if(c==null)
 			{
-				c=new ArrayList();
+				c=new ArrayList<Integer>();
 				marks.put(i,c);
 			}
 			c.add(new Integer(markID));
@@ -439,7 +452,7 @@ public class SelectionManager
 		 */
 		public void removeMark(int typeId, int markID)
 		{
-			((Collection)marks.get(new Integer(typeId))).remove(new Integer(markID));
+			marks.get(new Integer(typeId)).remove(new Integer(markID));
 		}
 
 		
@@ -459,15 +472,15 @@ public class SelectionManager
 		}				
 	}
 		
-	private Map domainToSelection=new HashMap();
+	private Map<Integer, Selection> domainToSelection=new HashMap<Integer, Selection>();
 	private FDProvider provider;
-	private Map plateIDToQuadArray=new HashMap();
-	private Map xWireToLineArray=new HashMap();
-	private Map yWireToLineArray=new HashMap();
-	private Map zWireToLineArray=new HashMap();
-	private Map slotToLineArray=new HashMap();
-	private Map solidIDToQuadArray=new HashMap();
-	private Map markToGeometryArray=new HashMap();
+	private Map<IntegerPair, QuadArray> plateIDToQuadArray=new HashMap<IntegerPair, QuadArray>();
+	private Map<IntegerPair, LineArray> xWireToLineArray=new HashMap<IntegerPair, LineArray>();
+	private Map<IntegerPair, LineArray> yWireToLineArray=new HashMap<IntegerPair, LineArray>();
+	private Map<IntegerPair, LineArray> zWireToLineArray=new HashMap<IntegerPair, LineArray>();
+	private Map<IntegerPairTyped, LineArray> slotToLineArray=new HashMap<IntegerPairTyped, LineArray>();
+	private Map<IntegerPair, QuadArray> solidIDToQuadArray=new HashMap<IntegerPair, QuadArray>();
+	private Map<MarkInfo, PointArray> markToGeometryArray=new HashMap<MarkInfo, PointArray>();
 	
 	/**
 	 * 
@@ -479,13 +492,13 @@ public class SelectionManager
 	
 	public FDSelection[] getSelection()
 	{
-		Collection ss = domainToSelection.values();
+		Collection<Selection> ss = domainToSelection.values();
 		FDSelection[] toReturn=new FDSelection[ss.size()];
-		Iterator it=ss.iterator();
+		Iterator<Selection> it=ss.iterator();
 		int i=0;
 		while(it.hasNext())
 		{
-			Selection sct=(Selection)it.next();
+			Selection sct=it.next();
 			toReturn[i++]=sct.toFDSelection();
 		}
 		return toReturn;
@@ -493,7 +506,7 @@ public class SelectionManager
 	
 	private Selection getSelection(int domainID)
 	{
-		Selection s=(Selection) domainToSelection.get(new Integer(domainID));
+		Selection s=domainToSelection.get(new Integer(domainID));
 		if(s==null)
 		{
 			s=new Selection(domainID);
@@ -555,7 +568,7 @@ public class SelectionManager
 	public boolean unselectPlate(int plateID, int domainID)
 	{
 		FDDomain d=(FDDomain) provider.getDomain(domainID);
-		Selection s=(Selection) domainToSelection.get(new Integer(domainID));
+		Selection s=domainToSelection.get(new Integer(domainID));
 		boolean removed=false;
 		if(s!=null)
 		{
@@ -602,7 +615,7 @@ public class SelectionManager
 	 */
 	public Geometry getGeometryForPlate(int domainID, int plateID)
 	{
-		return (Geometry) plateIDToQuadArray.get(
+		return plateIDToQuadArray.get(
 			new IntegerPair(domainID, plateID));
 	}
 
@@ -683,7 +696,7 @@ public class SelectionManager
 	 */
 	public Geometry getGeometryForXWire(int domainId, int value)
 	{
-		return (Geometry) xWireToLineArray.get(new IntegerPair(domainId, value));
+		return xWireToLineArray.get(new IntegerPair(domainId, value));
 	}
 
 	/**
@@ -702,7 +715,7 @@ public class SelectionManager
 	 */
 	public Geometry getGeometryForYWire(int domainId, int value)
 	{
-		return (Geometry) yWireToLineArray.get(new IntegerPair(domainId, value));
+		return yWireToLineArray.get(new IntegerPair(domainId, value));
 	}
 
 	/**
@@ -721,7 +734,7 @@ public class SelectionManager
 	 */
 	public Geometry getGeometryForZWire(int domainId, int value)
 	{
-		return (Geometry) zWireToLineArray.get(new IntegerPair(domainId, value));
+		return zWireToLineArray.get(new IntegerPair(domainId, value));
 	}
 
 	
@@ -767,7 +780,7 @@ public class SelectionManager
 	 */
 	public Geometry getGeometryForSlot(byte type, int domainId, int value)
 	{
-		return (Geometry) slotToLineArray.get(new IntegerPairTyped(type, domainId, value));
+		return slotToLineArray.get(new IntegerPairTyped(type, domainId, value));
 	}
 
 	class MarkInfo {
@@ -781,11 +794,13 @@ public class SelectionManager
 			typeId = id2;
 		}
 		
+		@Override
 		public boolean equals(Object obj){
 			MarkInfo mi=(MarkInfo)obj;
 			return (domainId==mi.domainId)&(markID==mi.markID)&(typeId==mi.typeId);
 		}
 		
+		@Override
 		public int hashCode(){
 			return domainId+typeId+markID;
 		}
@@ -820,7 +835,7 @@ public class SelectionManager
 	 */
 	public Geometry getGeometryForMark(int domainId, int typeId, int markID)
 	{
-		return (Geometry) markToGeometryArray.get(new MarkInfo(domainId,typeId,markID));
+		return markToGeometryArray.get(new MarkInfo(domainId,typeId,markID));
 	}
 
 	/**
@@ -849,13 +864,13 @@ public class SelectionManager
 
 	public Geometry getGeometryForSolid(int domainID, int solidID)
 	{
-		return (Geometry) solidIDToQuadArray.get(
+		return solidIDToQuadArray.get(
 			new IntegerPair(domainID, solidID));
 	}
 
 	public void unselectSolid(int solidID, int domainID)
 	{	
-		Selection s=(Selection) domainToSelection.get(new Integer(domainID));
+		Selection s=domainToSelection.get(new Integer(domainID));
 		s.removeSolid(solidID);		
 		plateIDToQuadArray.remove(new IntegerPair(domainID, solidID));		
 	}		

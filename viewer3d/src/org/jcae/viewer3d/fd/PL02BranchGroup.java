@@ -44,19 +44,19 @@ public class PL02BranchGroup extends BranchGroup
 {
 	private static Logger logger=Logger.getLogger("global");
 	protected FDProvider provider;
-	protected HashSet currentSelection;
-	protected ArrayList allEdgeShapes;
+	//private HashSet currentSelection;
+	protected ArrayList<Shape3D> allEdgeShapes;
 	// one of the values above
 	protected static final int PICK_FACES = 0;
 	protected static final int PICK_EDGES = 1;
 	protected static final int PICK_VERTICES = 2;
 	protected int pickType;
 	// Maintain a list of selected quads and edges
-	protected ArrayList selection = new ArrayList();
-	protected ArrayList edgeSelection = new ArrayList();
+	protected ArrayList<SelectionQuad> selection = new ArrayList<SelectionQuad>();
+	protected ArrayList<SelectionEdge> edgeSelection = new ArrayList<SelectionEdge>();
 	protected Shape3D selectionShape, edgeSelectionShape;
 	float[][] grid;
-	private Map baseColor=new HashMap();
+	private Map<Integer, Color> baseColor=new HashMap<Integer, Color>();
 	
 	public PL02BranchGroup(FDProvider provider)
 	{						
@@ -74,8 +74,8 @@ public class PL02BranchGroup extends BranchGroup
 		removeAllChildren();
 		setPickable(true);
 
-		currentSelection = new HashSet();
-		allEdgeShapes = new ArrayList();
+		//currentSelection = new HashSet();
+		allEdgeShapes = new ArrayList<Shape3D>();
 		
 		grid=new float[3][];
 		grid[0]=new float[provider.getXGridCount()];
@@ -108,11 +108,11 @@ public class PL02BranchGroup extends BranchGroup
 		logger.finest("number of plates in domain is "+n);
 		Plate[] plates=new Plate[n];
 		
-		Iterator it=domain.getXPlateIterator();
+		Iterator<int[]> it=domain.getXPlateIterator();
 		int i=0;
 		while(it.hasNext())
 		{			
-			int[] indices=(int[])it.next();
+			int[] indices=it.next();
 			Plate p=new PlateX();			
 			p.position=indices[0];
 			p.min1=indices[1];
@@ -129,7 +129,7 @@ public class PL02BranchGroup extends BranchGroup
 		it=domain.getYPlateIterator();	
 		while(it.hasNext())
 		{
-			int[] indices=(int[])it.next();
+			int[] indices=it.next();
 			Plate p=new PlateY();			
 			p.position=indices[0];
 			p.min1=indices[1];
@@ -147,7 +147,7 @@ public class PL02BranchGroup extends BranchGroup
 		it=domain.getZPlateIterator();
 		while(it.hasNext())
 		{
-			int[] indices=(int[])it.next();
+			int[] indices=it.next();
 			Plate p=new PlateZ();			
 			p.position=indices[0];
 			p.min1=indices[1];
@@ -180,9 +180,9 @@ public class PL02BranchGroup extends BranchGroup
 			logger.finest("generating java3d tree for group number "+groupID[g]);
 			// Set of EdgeLine objects. Overlapping edges on the same line are
 			// merged together
-			HashMap externalEdges = new HashMap();
+			HashMap<EdgeLine, EdgeLine> externalEdges = new HashMap<EdgeLine, EdgeLine>();
 			// Same trick for internal edges.
-			HashMap internalEdges = new HashMap();
+			HashMap<EdgeLine, EdgeLine> internalEdges = new HashMap<EdgeLine, EdgeLine>();
 			FDDomain fdDomain=(FDDomain) provider.getDomain(groupID[g]);
 			baseColor.put(new Integer(g), fdDomain.getColor());
 			Plate[] plates = domainToPlates(fdDomain);
@@ -246,9 +246,9 @@ public class PL02BranchGroup extends BranchGroup
 			
 			// Create edge shapes directly, don't make them appear in graph
 			int nInternalEdges = 0;
-			for (Iterator it = internalEdges.keySet().iterator(); it.hasNext();)
+			for (Iterator<EdgeLine> it = internalEdges.keySet().iterator(); it.hasNext();)
 			{
-				EdgeLine el = (EdgeLine) it.next();
+				EdgeLine el = it.next();
 				nInternalEdges += el.getNumberOfEdges();
 			}
 			if (nInternalEdges > 0)
@@ -257,10 +257,10 @@ public class PL02BranchGroup extends BranchGroup
 					nInternalEdges * 2 * 3 * 8).order(ByteOrder.nativeOrder())
 					.asDoubleBuffer();
 				// create edge coords
-				for (Iterator it = internalEdges.keySet().iterator(); it
+				for (Iterator<EdgeLine> it = internalEdges.keySet().iterator(); it
 					.hasNext();)
 				{
-					EdgeLine el = (EdgeLine) it.next();
+					EdgeLine el = it.next();
 					nioInternalEdges.put(el.getCoords(grid));
 				}
 				LineArray la = new NioLineArray(nInternalEdges * 2,
@@ -300,9 +300,9 @@ public class PL02BranchGroup extends BranchGroup
 			}
 			// Now, create external edge
 			int nExternalEdges = 0;
-			for (Iterator it = externalEdges.keySet().iterator(); it.hasNext();)
+			for (Iterator<EdgeLine> it = externalEdges.keySet().iterator(); it.hasNext();)
 			{
-				EdgeLine el = (EdgeLine) it.next();
+				EdgeLine el = it.next();
 				nExternalEdges += el.getNumberOfEdges();
 			}
 			if (nExternalEdges > 0)
@@ -311,10 +311,10 @@ public class PL02BranchGroup extends BranchGroup
 					nExternalEdges * 2 * 3 * 8).order(ByteOrder.nativeOrder())
 					.asDoubleBuffer();
 				// create edge coords
-				for (Iterator it = externalEdges.keySet().iterator(); it
+				for (Iterator<EdgeLine> it = externalEdges.keySet().iterator(); it
 					.hasNext();)
 				{
-					EdgeLine el = (EdgeLine) it.next();
+					EdgeLine el = it.next();
 					nioExternalEdges.put(el.getCoords(grid));
 				}
 				LineArray la = new NioLineArray(nExternalEdges * 2,
@@ -368,9 +368,9 @@ public class PL02BranchGroup extends BranchGroup
 	 * @param j
 	 *            second grid index for the nex edge on this line
 	 */
-	protected void addEdge(HashMap edges, EdgeLine line, int i, int j)
+	protected void addEdge(HashMap<EdgeLine, EdgeLine> edges, EdgeLine line, int i, int j)
 	{
-		EdgeLine el = (EdgeLine) edges.get(line);
+		EdgeLine el = edges.get(line);
 		if (el == null) edges.put(line, line);
 		else line = el;
 		line.add(i, j);
@@ -421,6 +421,7 @@ public class PL02BranchGroup extends BranchGroup
 				| GeometryArray.USE_NIO_BUFFER);
 		}
 
+		@Override
 		public double[] getCoordRefDouble()
 		{			
 			float[] fs=getCoordRefFloat();
@@ -436,6 +437,7 @@ public class PL02BranchGroup extends BranchGroup
 		 * 
 		 * @see javax.media.j3d.GeometryArray#getCoordRefDouble()
 		 */
+		@Override
 		public float[] getCoordRefFloat()
 		{
 			// Get ref to Nio buffer, of type Float by construction in the
@@ -462,6 +464,7 @@ public class PL02BranchGroup extends BranchGroup
 			return array;
 		}
 
+		@Override
 		public void setCoordRefBuffer(J3DBuffer buffer)
 		{
 			super.setCoordRefBuffer(buffer);
@@ -485,6 +488,7 @@ public class PL02BranchGroup extends BranchGroup
 				| GeometryArray.USE_NIO_BUFFER);
 		}
 		
+		@Override
 		public double[] getCoordRefDouble()
 		{			
 			float[] fs=getCoordRefFloat();
@@ -501,6 +505,7 @@ public class PL02BranchGroup extends BranchGroup
 		 * 
 		 * @see javax.media.j3d.GeometryArray#getCoordRefDouble()
 		 */
+		@Override
 		public float[] getCoordRefFloat()
 		{
 			// Get ref to Nio buffer, of type Float by construction in the
@@ -564,7 +569,7 @@ public class PL02BranchGroup extends BranchGroup
 				
 		float s,h;
 		float b = 1.0f;
-		Color c=(Color) baseColor.get(new Integer(order));
+		Color c=baseColor.get(new Integer(order));
 		float[] hsb=Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), null);
 		h=hsb[0];
 		s=hsb[1];
@@ -771,7 +776,7 @@ public class PL02BranchGroup extends BranchGroup
 
 		for (int i = 0; i < coords.length; i += 12)
 		{
-			SelectionQuad quad = (SelectionQuad) selection.get(i / 12);
+			SelectionQuad quad = selection.get(i / 12);
 			quad.updateCoords(grid, coords, i);
 			quad.updateColors(colors, i);
 		}
@@ -809,6 +814,7 @@ public class PL02BranchGroup extends BranchGroup
 		 * 
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */
+		@Override
 		public boolean equals(Object obj)
 		{
 			if (!(obj instanceof SelectionQuad)) return false;
@@ -904,7 +910,7 @@ public class PL02BranchGroup extends BranchGroup
 
 		for (int i = 0; i < coords.length; i += 6)
 		{
-			SelectionEdge edge = (SelectionEdge) edgeSelection.get(i / 6);
+			SelectionEdge edge = edgeSelection.get(i / 6);
 			edge.updateCoords(grid, coords, i);
 			edge.updateColors(colors, i);
 		}
@@ -982,6 +988,7 @@ public class PL02BranchGroup extends BranchGroup
 			coords[i + 5] = grid[2][end2[2]];
 		}
 
+		@Override
 		public boolean equals(Object obj)
 		{
 			if (!(obj instanceof SelectionEdge)) return false;
@@ -1113,7 +1120,7 @@ public class PL02BranchGroup extends BranchGroup
 		 * The edges on this line. Each edge end is written in turn, in a sorted
 		 * order.
 		 */
-		LinkedList edges;
+		LinkedList<Integer> edges;
 
 		/**
 		 * @param c1
@@ -1129,7 +1136,7 @@ public class PL02BranchGroup extends BranchGroup
 			this.c1 = c1;
 			this.c2 = c2;
 			this.direction = direction;
-			edges = new LinkedList();
+			edges = new LinkedList<Integer>();
 		}
 
 		/**
@@ -1140,13 +1147,13 @@ public class PL02BranchGroup extends BranchGroup
 		public double[] getCoords(float[][] grid)
 		{
 			double[] ret = new double[edges.size() * 3];
-			Iterator it = edges.iterator();
+			Iterator<Integer> it = edges.iterator();
 			switch (direction)
 			{
 				case 0 :
 					for (int i = 0; i < ret.length; i += 3)
 					{
-						ret[i + 0] = grid[0][((Integer) it.next()).intValue()];
+						ret[i + 0] = grid[0][it.next().intValue()];
 						ret[i + 1] = grid[1][c1];
 						ret[i + 2] = grid[2][c2];
 					}
@@ -1155,7 +1162,7 @@ public class PL02BranchGroup extends BranchGroup
 					for (int i = 0; i < ret.length; i += 3)
 					{
 						ret[i + 0] = grid[0][c1];
-						ret[i + 1] = grid[1][((Integer) it.next()).intValue()];
+						ret[i + 1] = grid[1][it.next().intValue()];
 						ret[i + 2] = grid[2][c2];
 					}
 					break;
@@ -1164,7 +1171,7 @@ public class PL02BranchGroup extends BranchGroup
 					{
 						ret[i + 0] = grid[0][c1];
 						ret[i + 1] = grid[1][c2];
-						ret[i + 2] = grid[2][((Integer) it.next()).intValue()];
+						ret[i + 2] = grid[2][it.next().intValue()];
 					}
 					break;
 			}
@@ -1205,7 +1212,7 @@ public class PL02BranchGroup extends BranchGroup
 			boolean inMerge = false;
 			for (int i = 0; i < edges.size(); ++i)
 			{
-				int end = ((Integer) edges.get(i)).intValue();
+				int end = edges.get(i).intValue();
 				// wait till newsegment match this interval in edges list order
 				if (e1 > end)
 				{
@@ -1286,6 +1293,7 @@ public class PL02BranchGroup extends BranchGroup
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 * @see hashCode()
 		 */
+		@Override
 		public boolean equals(Object obj)
 		{
 			if (!(obj instanceof EdgeLine)) return false;
@@ -1301,6 +1309,7 @@ public class PL02BranchGroup extends BranchGroup
 		 * 
 		 * @see java.lang.Object#hashCode()
 		 */
+		@Override
 		public int hashCode()
 		{
 			return ((direction & 3) << 30) | ((c1 & 0x7F) << 15) | (c2 & 0x7f);
@@ -1327,10 +1336,10 @@ public class PL02BranchGroup extends BranchGroup
 		for(int i=0; i<ids.length; i++)
 		{
 			FDDomain domain=(FDDomain)provider.getDomain(ids[i]);
-			Iterator it=domain.getXWireIterator();
+			Iterator<int[]> it=domain.getXWireIterator();
 			while(it.hasNext())
 			{
-				int[] indices=(int[])it.next();
+				int[] indices=it.next();
 				Wire w=new WireX();
 				w.position1=indices[1];
 				w.position2=indices[2];
@@ -1344,7 +1353,7 @@ public class PL02BranchGroup extends BranchGroup
 			it=domain.getYWireIterator();
 			while(it.hasNext())
 			{
-				int[] indices=(int[])it.next();
+				int[] indices=it.next();
 				Wire w=new WireY();
 				w.position1=indices[0];
 				w.position2=indices[2];
@@ -1358,7 +1367,7 @@ public class PL02BranchGroup extends BranchGroup
 			it=domain.getZWireIterator();
 			while(it.hasNext())
 			{
-				int[] indices=(int[])it.next();
+				int[] indices=it.next();
 				Wire w=new WireZ();
 				w.position1=indices[0];
 				w.position2=indices[1];
@@ -1422,4 +1431,4 @@ public class PL02BranchGroup extends BranchGroup
 		addChild(s3d);
 		allEdgeShapes.add(s3d);
 	}
-};
+}

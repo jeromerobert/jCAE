@@ -23,7 +23,6 @@ package org.jcae.viewer3d.fe;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.logging.Logger;
 import javax.media.j3d.*;
 import javax.swing.JPanel;
@@ -48,12 +47,12 @@ public class ViewableFE extends ViewableAdaptor
 	public static final byte PICK_DOMAIN = 2;
 	public static final byte PICK_NODE = 1;
 	private FEProvider provider;
-	private Map visibleDomain;
+	private Map<Integer, Boolean> visibleDomain;
 	private BranchGroup branchGroup;
 	private Shape3D nodeSelectionShape=new Shape3D();
-	private Map nodeSelections=new HashMap();
-	private Map domainIDToBranchGroup=new HashMap();	
-	private Collection selectedDomains=new HashSet();
+	private Map<Integer, NodeSelectionImpl> nodeSelections=new HashMap<Integer, NodeSelectionImpl>();
+	private Map<Integer, BranchGroup> domainIDToBranchGroup=new HashMap<Integer, BranchGroup>();	
+	private Collection<Integer> selectedDomains=new HashSet<Integer>();
 	private String name;
 	private short pickingMode=PICK_DOMAIN;
 	private boolean showShapeLine=true;
@@ -76,7 +75,7 @@ public class ViewableFE extends ViewableAdaptor
 	public ViewableFE(FEProvider provider)
 	{
 		this.provider=provider;
-		visibleDomain=new HashMap();
+		visibleDomain=new HashMap<Integer, Boolean>();
 		int[] ids=provider.getDomainIDs();
 		for(int i=0; i<ids.length; i++)
 		{
@@ -95,6 +94,7 @@ public class ViewableFE extends ViewableAdaptor
 	/* (non-Javadoc)
 	 * @see jcae.viewer3d.mesh.ViewableMesh#getDomainProvider()
 	 */
+	@Override
 	public DomainProvider getDomainProvider()
 	{
 		return provider;
@@ -103,6 +103,7 @@ public class ViewableFE extends ViewableAdaptor
 	/* (non-Javadoc)
 	 * @see jcae.viewer3d.Viewable#domainsChanged(java.util.Collection)
 	 */
+	@Override
 	public void domainsChangedPerform(int[] ids)
 	{
 		if(ids!=null)
@@ -111,7 +112,7 @@ public class ViewableFE extends ViewableAdaptor
 			{
 				
 				//If the domain already exists remove it before readding it
-				BranchGroup dbg=(BranchGroup) domainIDToBranchGroup.get(new Integer(ids[i]));
+				BranchGroup dbg=domainIDToBranchGroup.get(new Integer(ids[i]));
 				if(dbg!=null)
 				{
 					branchGroup.removeChild(dbg);
@@ -119,7 +120,7 @@ public class ViewableFE extends ViewableAdaptor
 				}
 				
 				//If the domain is not visible do not readd it
-				Boolean b=(Boolean) visibleDomain.get(new Integer(ids[i]));
+				Boolean b=visibleDomain.get(new Integer(ids[i]));
 				if(b==null)
 				{
 					visibleDomain.put(new Integer(ids[i]), Boolean.TRUE);
@@ -140,7 +141,7 @@ public class ViewableFE extends ViewableAdaptor
 			ids=getDomainProvider().getDomainIDs();
 			for(int i=0; i<ids.length; i++)
 			{
-				Boolean b=(Boolean) visibleDomain.get(new Integer(ids[i]));
+				Boolean b=visibleDomain.get(new Integer(ids[i]));
 				if(b==null)
 				{
 					visibleDomain.put(new Integer(ids[i]), Boolean.TRUE);
@@ -218,7 +219,6 @@ public class ViewableFE extends ViewableAdaptor
 	{
 		float[] min=new float[]{Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE};
 		float[] max=new float[]{-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE};
-		float x, y, z;
 		for(int i=0; i<nodes.length; i+=3)
 		{
 			for(int j=0; j<3; j++)
@@ -262,21 +262,22 @@ public class ViewableFE extends ViewableAdaptor
 	/* (non-Javadoc)
 	 * @see jcae.viewer3d.Viewable#setDomainVisible(java.util.Map)
 	 */
-	public void setDomainVisible(Map map)
+	@Override
+	public void setDomainVisible(Map<Integer, Boolean> map)
 	{
-		Iterator it=map.entrySet().iterator();
+		Iterator<Map.Entry<Integer, Boolean>> it=map.entrySet().iterator();
 		while(it.hasNext())
 		{			
-			Map.Entry entry= (Entry) it.next();
-			Boolean newStatus=(Boolean) entry.getValue();
-			Boolean oldStatus=(Boolean) visibleDomain.get(entry.getKey());
+			Map.Entry<Integer, Boolean> entry= it.next();
+			Boolean newStatus=entry.getValue();
+			Boolean oldStatus=visibleDomain.get(entry.getKey());
 			
 			if(oldStatus==null)
 				oldStatus=Boolean.FALSE;
 			
 			if(!newStatus.booleanValue() && oldStatus.booleanValue())
 			{
-				BranchGroup dbg=(BranchGroup) domainIDToBranchGroup.get(entry.getKey());
+				BranchGroup dbg=domainIDToBranchGroup.get(entry.getKey());
 				if(dbg!=null)
 				{
 					branchGroup.removeChild(dbg);					
@@ -284,14 +285,14 @@ public class ViewableFE extends ViewableAdaptor
 			}
 			else if(newStatus.booleanValue() && !oldStatus.booleanValue())
 			{
-				BranchGroup dbg=(BranchGroup) domainIDToBranchGroup.get(entry.getKey());
+				BranchGroup dbg=domainIDToBranchGroup.get(entry.getKey());
 				if(dbg!=null)
 				{
 					branchGroup.addChild(dbg);
 				}
 				else
 				{
-					FEDomain d=(FEDomain) provider.getDomain(((Integer)entry.getKey()).intValue());
+					FEDomain d=(FEDomain) provider.getDomain(entry.getKey().intValue());
 					createBranchGroup(d);
 				}
 			}
@@ -322,6 +323,7 @@ public class ViewableFE extends ViewableAdaptor
 	 * (non-Javadoc)
 	 * @see org.jcae.viewer3d.Viewable#pick(com.sun.j3d.utils.picking.PickResult)
 	 */
+	@Override
 	public void pick(PickViewable result)
 	{
 		System.out.println("picked node=" + result.getObject());
@@ -351,7 +353,7 @@ public class ViewableFE extends ViewableAdaptor
 	private void pickdNode(int triaID, byte nodeID, Point3d point3d,
 		int domainID)
 	{
-		NodeSelectionImpl ns = (NodeSelectionImpl) nodeSelections
+		NodeSelectionImpl ns = nodeSelections
 			.get(new Integer(domainID));
 		if (ns == null)
 		{
@@ -362,7 +364,7 @@ public class ViewableFE extends ViewableAdaptor
 		if (toSelect)
 		{
 			ns.addNode(triaID, nodeID);
-			PointArray pa = new PointArray(1, PointArray.COORDINATES);
+			PointArray pa = new PointArray(1, GeometryArray.COORDINATES);
 			nodeSelectionShape.addGeometry(pa);
 			fireSelectionChanged();
 		} else
@@ -377,15 +379,14 @@ public class ViewableFE extends ViewableAdaptor
 	{
 		if(selected)
 		{
-			NodeSelectionImpl ns=(NodeSelectionImpl)
-				nodeSelections.get(new Integer(domainID));
+			NodeSelectionImpl ns=nodeSelections.get(new Integer(domainID));
 			if(ns==null)
 			{
 				ns=new NodeSelectionImpl(domainID);
 				nodeSelections.put(new Integer(domainID), ns);
 			}
 			ns.addNode(triaID, nodeID);
-			PointArray pa=new PointArray(1, PointArray.COORDINATES);
+			PointArray pa=new PointArray(1, GeometryArray.COORDINATES);
 			nodeSelectionShape.addGeometry(pa);
 			fireSelectionChanged();
 		}
@@ -406,7 +407,7 @@ public class ViewableFE extends ViewableAdaptor
 		
 	private void setSelectedDomain(int domainID, boolean selected)
 	{
-		BranchGroup bg=(BranchGroup) domainIDToBranchGroup.get(new Integer(domainID));
+		BranchGroup bg=domainIDToBranchGroup.get(new Integer(domainID));
 		
 		if(bg==null) //test for empty groups
 			return;
@@ -441,10 +442,10 @@ public class ViewableFE extends ViewableAdaptor
 			int[] tria3=new int[domain.getNumberOfTria3()*3];
 			
 			int i=0;
-			Iterator it=domain.getTria3Iterator();
+			Iterator<int[]> it=domain.getTria3Iterator();
 			while(it.hasNext())
 			{
-				int[] f=(int[]) it.next();
+				int[] f=it.next();
 				System.arraycopy(f, 0, tria3, i, 3);
 				i+=3;
 			}
@@ -488,13 +489,13 @@ public class ViewableFE extends ViewableAdaptor
 		return geom;
 	}
 
-	private float[] iteratorToArray(Iterator it, int numberOfNodes)
+	private float[] iteratorToArray(Iterator<float[]> it, int numberOfNodes)
 	{
 		float[] toReturn = new float[numberOfNodes*3]; 
 		int i=0;
 		while(it.hasNext())
 		{
-			float[] f=(float[]) it.next();
+			float[] f=it.next();
 			System.arraycopy(f, 0, toReturn, i, 3);
 			i+=3;
 		}
@@ -513,7 +514,7 @@ public class ViewableFE extends ViewableAdaptor
 		if(nodes==null)
 			nodes=iteratorToArray(domain.getNodesIterator(), domain.getNumberOfNodes());
 		
-		//bouding box computed from GeomInfo are buggy so we do it ourself
+		//bounding box computed from GeomInfo are buggy so we do it ourself
 		BoundingBox bb=computeBoundingBox(nodes);
 		IndexedTriangleArray geom = getGeomForTrianglesGroup(domain, nodes, parabolic);
 
@@ -575,6 +576,7 @@ public class ViewableFE extends ViewableAdaptor
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.Viewable#getBranchGroup()
 	 */
+	@Override
 	public Node getJ3DNode()
 	{
 		if(branchGroup.numChildren()==0)
@@ -582,14 +584,14 @@ public class ViewableFE extends ViewableAdaptor
 		return branchGroup;
 	}
 
-	static private int[] integerCollectionToArray(Collection collection)
+	static private int[] integerCollectionToArray(Collection<Integer> collection)
 	{
 		int[] toReturn=new int[collection.size()];
-		Iterator it=collection.iterator();
+		Iterator<Integer> it=collection.iterator();
 		int i=0;
 		while(it.hasNext())
 		{
-			Integer n=(Integer) it.next();
+			Integer n=it.next();
 			toReturn[i]=n.intValue();
 			i++;
 		}
@@ -599,6 +601,7 @@ public class ViewableFE extends ViewableAdaptor
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.Viewable#unselectAll()
 	 */
+	@Override
 	public void unselectAll()
 	{
 		int[] ids=integerCollectionToArray(selectedDomains);
@@ -616,6 +619,7 @@ public class ViewableFE extends ViewableAdaptor
 		this.name=name;
 	}
 	
+	@Override
 	public String toString()
 	{
 		return name;
@@ -630,11 +634,11 @@ public class ViewableFE extends ViewableAdaptor
 	public NodeSelection[] getSelectedNodes()
 	{
 		NodeSelection[] toReturn=new NodeSelection[nodeSelections.size()];
-		Iterator it=nodeSelections.values().iterator();
+		Iterator<NodeSelectionImpl> it=nodeSelections.values().iterator();
 		int i=0;
 		while(it.hasNext())
 		{
-			toReturn[i++]=(NodeSelection) ((NodeSelectionImpl)it.next()).clone();
+			toReturn[i++]=(NodeSelection) it.next().clone();
 		}
 		return toReturn;
 	}

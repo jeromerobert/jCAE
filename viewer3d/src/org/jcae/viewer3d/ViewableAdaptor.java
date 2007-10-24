@@ -10,7 +10,7 @@ import javax.media.j3d.Node;
 
 public abstract class ViewableAdaptor implements Viewable {
 	
-	private Collection listeners=Collections.synchronizedCollection(new ArrayList());
+	private Collection<SelectionListener> listeners=Collections.synchronizedCollection(new ArrayList<SelectionListener>());
 
 	/**Method called by the integrator
 	 * This fires the views that the viewable has changed
@@ -30,7 +30,7 @@ public abstract class ViewableAdaptor implements Viewable {
 	
 	public abstract DomainProvider getDomainProvider();
 
-	public abstract void setDomainVisible(Map map);
+	public abstract void setDomainVisible(Map<Integer, Boolean> map);
 
 	public abstract Node getJ3DNode();
 
@@ -56,10 +56,10 @@ public abstract class ViewableAdaptor implements Viewable {
 	
 	protected void fireSelectionChanged()
 	{
-		Iterator it = listeners.iterator();
+		Iterator<SelectionListener> it = listeners.iterator();
 		while (it.hasNext())
 		{
-			SelectionListener s = (SelectionListener) it.next();
+			SelectionListener s = it.next();
 			s.selectionChanged();
 		}
 	}

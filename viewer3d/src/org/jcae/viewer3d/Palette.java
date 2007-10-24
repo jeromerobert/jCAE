@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.viewer3d;
@@ -27,7 +28,7 @@ import java.util.*;
  */
 public class Palette
 {
-	HashSet colors=new HashSet();
+	HashSet<Color> colors=new HashSet<Color>();
 	
 	/** Create an empty palette. You must use addColor to add base color to the
 	 palette */
@@ -68,7 +69,7 @@ public class Palette
 	public void computeNewColors()
 	{
 		Color[] cs=new Color[colors.size()];
-		cs=(Color[])colors.toArray(cs);
+		cs=colors.toArray(cs);
 		for(int i=0;i<cs.length;i++)
 		{
 			for(int j=i+1;j<cs.length;j++)
@@ -98,10 +99,10 @@ public class Palette
 	
 	public void removeDarkestColors(float s)
 	{
-		Iterator i=colors.iterator();
+		Iterator<Color> i=colors.iterator();
 		while(i.hasNext())
 		{
-			Color c=(Color)i.next();
+			Color c=i.next();
 			float cs=(c.getRed()+c.getGreen()+c.getBlue())/3;
 			if(cs<s) i.remove();
 		}
