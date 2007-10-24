@@ -193,7 +193,7 @@ public class RasterTextLabel extends Shape3D
         graphics.dispose();
 
         ImageComponent2D img_comp =
-            new ImageComponent2D(ImageComponent2D.FORMAT_RGBA, tmp_img);
+            new ImageComponent2D(ImageComponent.FORMAT_RGBA, tmp_img);
 
         Point3f origin = new Point3f(x, y, z);
 

@@ -26,6 +26,7 @@ import javax.media.j3d.Appearance;
 import javax.media.j3d.BoundingBox;
 import javax.media.j3d.BoundingPolytope;
 import javax.media.j3d.Canvas3D;
+import javax.media.j3d.GeometryArray;
 import javax.media.j3d.IndexedQuadArray;
 import javax.media.j3d.PolygonAttributes;
 import javax.media.j3d.Shape3D;
@@ -244,7 +245,7 @@ public class ViewPyramid extends BoundingPolytope
 	 */
 	public Shape3D getShape3D()
 	{
-		IndexedQuadArray geom=new IndexedQuadArray(8,IndexedQuadArray.COORDINATES,24);;
+		IndexedQuadArray geom=new IndexedQuadArray(8,GeometryArray.COORDINATES,24);
 		geom.setCoordinates(0, getPrismVertices(rectangle));
 		geom.setCoordinateIndices(0, new int[]{
 			0,1,2,3,

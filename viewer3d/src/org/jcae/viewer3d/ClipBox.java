@@ -1,6 +1,7 @@
 package org.jcae.viewer3d;
 
 import javax.media.j3d.BranchGroup;
+import javax.media.j3d.GeometryArray;
 import javax.media.j3d.LineArray;
 import javax.media.j3d.Shape3D;
 import javax.vecmath.Color3f;
@@ -38,7 +39,7 @@ public class ClipBox {
 		if(branchGroup==null){
 			double[][] ptValues=new double[2][3];
 			getMinMax(ptValues[0],ptValues[1],0);
-			LineArray la=new LineArray(24,LineArray.COORDINATES | LineArray.COLOR_3);
+			LineArray la=new LineArray(24,GeometryArray.COORDINATES | GeometryArray.COLOR_3);
 			int[][] w=new int[][]{{0,0,0},{1,1,0},{1,0,1},{0,1,1}};
 			Color3f color=new Color3f(1,0,0);
 			for(int i=0;i<4;i++){

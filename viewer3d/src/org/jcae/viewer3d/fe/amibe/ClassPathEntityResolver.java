@@ -45,11 +45,10 @@ public class ClassPathEntityResolver implements EntityResolver
 				Logger.getLogger("global").fine("resolve "+systemId+" from CLASSPATH at "+path);
 				InputStream in= ClassLoader.getSystemResourceAsStream(path);
 				if(in==null)
-					return new InputSource(new StringReader("")); 
-				else
-					return new InputSource(in);
+					return new InputSource(new StringReader(""));
+				return new InputSource(in);
 			}
-			else return null;
+			return null;
 		}
 		catch(URISyntaxException ex)
 		{

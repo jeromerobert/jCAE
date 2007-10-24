@@ -25,7 +25,6 @@ import java.util.NoSuchElementException;
 import org.jcae.opencascade.Utilities;
 import org.jcae.opencascade.jni.*;
 import org.jcae.viewer3d.Domain;
-import org.jcae.viewer3d.cad.CADDomainAdapator;
 import org.jcae.viewer3d.cad.CADProvider;
 
 /**

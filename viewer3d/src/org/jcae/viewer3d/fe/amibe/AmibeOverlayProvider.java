@@ -74,8 +74,7 @@ public class AmibeOverlayProvider implements FEProvider
 	{
 		if(subMesh==null)
 			return new int[0];
-		else
-			return new int[]{0};
+		return new int[]{0};
 	}
 
 	
@@ -83,8 +82,7 @@ public class AmibeOverlayProvider implements FEProvider
 	{
 		if(MULTI_EDGE==flag)
 			return MULTI_EDGE_COLOR;
-		else
-			return FREE_EDGE_COLOR;
+		return FREE_EDGE_COLOR;
 	}
 	/* (non-Javadoc)
 	 * @see jcae.viewer3d.DomainProvider#getDomain(int)

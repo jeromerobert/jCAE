@@ -52,8 +52,7 @@ public class GridUtil {
 	private boolean checkInside(int type,double p){
 		double max=getCellValue(getCellCount(type)-1,type);
 		double min=getCellValue(0,type);
-		if((min<=p)&(max>=p)) return true;
-		else return false;
+		return (min<=p && max>=p);
 	}
 	/*
 	 * Returns the cell number of the point p
@@ -62,7 +61,7 @@ public class GridUtil {
 	 */
 	private void getCell(int type,int[] range,double p){
 
-		int posi=(int)Math.floor(((double)(range[0]+range[1]))/2.);		
+		int posi=(int)Math.floor((range[0]+range[1])/2.);		
 		double posd=getCellValue(posi,type);
 		 
 		if(p<posd) range[1]=posi;
@@ -73,7 +72,7 @@ public class GridUtil {
 		}
 		
 		if((range[1]-range[0])<=1) return;
-		else getCell(type,range,p);
+		getCell(type,range,p);
 		return;
 	}
 	
