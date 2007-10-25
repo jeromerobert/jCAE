@@ -101,6 +101,8 @@ public class TraitsBuilder
 	 */
 	public Traits createTraits()
 	{
+		if (attributes == 0)
+			return null;
 		int n = 0;
 		int k = 1;
 		for (int i = 0; i < index.length; i++)

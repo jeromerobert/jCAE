@@ -1,3 +1,8 @@
+Thu Oct 25 15:51:57 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/traits/TraitsBuilder.java: Create a Traits
+	instance only if it is needed.
+
 Wed Oct 24 00:38:57 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/AdjacencyWrapper.java: File removed,
