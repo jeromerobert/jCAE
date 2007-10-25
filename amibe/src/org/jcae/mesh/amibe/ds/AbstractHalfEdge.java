@@ -413,9 +413,11 @@ public abstract class AbstractHalfEdge
 	public AbstractHalfEdge(HalfEdgeTraitsBuilder builder)
 	{
 		traitsBuilder = builder;
+		/* For now, there are no traits bound to HalfEdge instances
 		if (builder != null)
 			traits = builder.createTraits();
 		else
+		*/
 			traits = null;
 	}
 
