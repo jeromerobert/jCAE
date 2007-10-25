@@ -180,18 +180,18 @@ public class AbstractVertex
 	 *
 	 * @param n1  end point of the first vector
 	 * @param n2  end point of the second vector
+	 * @param work1  double[3] temporary array
+	 * @param work2  double[3] temporary array
 	 * @param ret array which will store the outer product of the two vectors
 	 */
-	public void outer3D(AbstractVertex n1, AbstractVertex n2, double [] ret)
+	public void outer3D(AbstractVertex n1, AbstractVertex n2, double [] work1, double [] work2, double [] ret)
 	{
-		double [] vect1 = new double[3];
-		double [] vect2 = new double[3];
 		for (int i = 0; i < 3; i++)
 		{
-			vect1[i] = n1.param[i] - param[i];
-			vect2[i] = n2.param[i] - param[i];
+			work1[i] = n1.param[i] - param[i];
+			work2[i] = n2.param[i] - param[i];
 		}
-		Matrix3D.prodVect3D(vect1, vect2, ret);
+		Matrix3D.prodVect3D(work1, work2, ret);
 	}
 	
 	public boolean isReadable()

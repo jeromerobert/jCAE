@@ -426,11 +426,11 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		// Check for quality improvement
 		Vertex n = f.apex();
 		// Check for inverted triangles
-		o.outer3D(n, a, temp[0]);
+		o.outer3D(n, a, temp[1], temp[3], temp[0]);
 		double s3 = 0.5 * Matrix3D.prodSca(temp[2], temp[0]);
 		if (s3 <= 0.0)
 			return invalid;
-		d.outer3D(a, n, temp[0]);
+		d.outer3D(a, n, temp[1], temp[3], temp[0]);
 		double s4 = 0.5 * Matrix3D.prodSca(temp[2], temp[0]);
 		if (s4 <= 0.0)
 			return invalid;

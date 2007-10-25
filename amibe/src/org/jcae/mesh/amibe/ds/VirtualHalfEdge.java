@@ -671,11 +671,11 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		Vertex a = apex();
 		Vertex n = work[0].apex();
 		// Check for inverted triangles
-		o.outer3D(n, a, n2);
+		o.outer3D(n, a, tempD1, tempD2, n2);
 		double s3 = 0.5 * Matrix3D.prodSca(n1, n2);
 		if (s3 <= 0.0)
 			return invalid;
-		d.outer3D(a, n, n2);
+		d.outer3D(a, n, tempD1, tempD2, n2);
 		double s4 = 0.5 * Matrix3D.prodSca(n1, n2);
 		if (s4 <= 0.0)
 			return invalid;
