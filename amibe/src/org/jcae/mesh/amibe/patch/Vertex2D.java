@@ -49,7 +49,7 @@ public class Vertex2D extends Vertex
 {
 	private static Logger logger = Logger.getLogger(Vertex2D.class);
 	private static final Random rand = new Random(139L);
-	private static Vertex2D circumcenter = new Vertex2D(0.0, 0.0);
+	private static Vertex2D circumcenter = new Vertex2D(null, 0.0, 0.0);
 	
 	//  These 2 integer arrays are temporary workspaces
 	private static final int [] i0 = new int[2];
@@ -58,11 +58,6 @@ public class Vertex2D extends Vertex
 	//  Metrics at this location
 	private transient Metric2D m2 = null;
 	
-	protected Vertex2D()
-	{
-		super();
-	}
-
 	protected Vertex2D(VertexTraitsBuilder vtb)
 	{
 		super(vtb);
@@ -71,19 +66,13 @@ public class Vertex2D extends Vertex
 	/**
 	 * Create a Vertex for a 2D mesh.
 	 *
+	 * @param vtb  traits builder
 	 * @param u  first coordinate.
 	 * @param v  second coordinate.
 	 */
 	public Vertex2D(VertexTraitsBuilder vtb, double u, double v)
 	{
 		super(vtb);
-		param[0] = u;
-		param[1] = v;
-	}
-	
-	public Vertex2D(double u, double v)
-	{
-		super();
 		param[0] = u;
 		param[1] = v;
 	}
@@ -96,7 +85,7 @@ public class Vertex2D extends Vertex
 	 */
 	public static Vertex2D middle(Vertex2D pt1, Vertex2D pt2)
 	{
-		return new Vertex2D(
+		return new Vertex2D(null,
 			0.5 * (pt1.param[0] + pt2.param[0]),
 			0.5 * (pt1.param[1] + pt2.param[1])
 		);
@@ -111,7 +100,7 @@ public class Vertex2D extends Vertex
 	 */
 	public static Vertex2D valueOf(MNode1D pt, CADGeomCurve2D C2d, CADFace F)
 	{
-		Vertex2D ret = new Vertex2D(0.0, 0.0);
+		Vertex2D ret = new Vertex2D(null, 0.0, 0.0);
 		ret.ref1d = pt.getMaster().getLabel();
 		if (null != C2d)
 		{

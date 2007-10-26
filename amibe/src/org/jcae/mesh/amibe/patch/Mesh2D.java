@@ -60,13 +60,9 @@ public class Mesh2D extends Mesh
 	// Utility class to improve debugging output
 	private static class OuterVertex2D extends Vertex2D
 	{
-		public OuterVertex2D()
-		{
-			super();
-		}
 		public OuterVertex2D(double u, double v)
 		{
-			super(u, v);
+			super(null, u, v);
 		}
 		@Override
 		public String toString()
@@ -127,7 +123,7 @@ public class Mesh2D extends Mesh
 
 	private final void init()
 	{
-		outerVertex = new OuterVertex2D();
+		outerVertex = new OuterVertex2D(0.0, 0.0);
 		outerTrianglesAreConnected = true;
 		String accumulateEpsilonProp = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon");
 		if (accumulateEpsilonProp == null)

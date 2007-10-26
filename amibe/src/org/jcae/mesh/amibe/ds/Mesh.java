@@ -112,7 +112,7 @@ public class Mesh extends AbstractMesh implements Serializable
 		
 		public OuterVertex()
 		{
-			super();
+			super(null);
 			setReadable(false);
 			setWritable(false);
 		}
@@ -141,10 +141,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	 */
 	public Mesh()
 	{
-		super(MeshTraitsBuilder.getDefault3D());
-		factory = new ElementFactory(traitsBuilder);
-		triangleList = traitsBuilder.getTriangles(traits);
-		nodeList = traitsBuilder.getNodes(traits);
+		this(MeshTraitsBuilder.getDefault3D());
 	}
 	
 	/**

@@ -38,12 +38,6 @@ public class AbstractVertex
 	//  ref1d < 0: node on an inner boundary
 	protected int ref1d = 0;
 
-	public AbstractVertex()
-	{
-		traitsBuilder = null;
-		traits = null;
-		param = new double[2];
-	}
 	public AbstractVertex(VertexTraitsBuilder builder)
 	{
 		traitsBuilder = builder;
@@ -53,23 +47,15 @@ public class AbstractVertex
 			traits = null;
 		param = new double[2];
 	}
+
 	/**
 	 * Creates a vertex for a 3D mesh.
 	 *
+	 * @param vtb  traits builder
 	 * @param x  first coordinate.
 	 * @param y  second coordinate.
 	 * @param z  third coordinate.
 	 */
-	public AbstractVertex(double x, double y, double z)
-	{
-		traitsBuilder = null;
-		traits = null;
-		param = new double[3];
-		param[0] = x;
-		param[1] = y;
-		param[2] = z;
-	}
-	
 	public AbstractVertex(VertexTraitsBuilder builder, double x, double y, double z)
 	{
 		traitsBuilder = builder;

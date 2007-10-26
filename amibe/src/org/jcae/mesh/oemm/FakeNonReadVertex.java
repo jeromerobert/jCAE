@@ -34,7 +34,7 @@ public class FakeNonReadVertex extends Vertex
 
 	public FakeNonReadVertex(OEMM oemm, int leaf, int localNumber)
 	{
-		super(0.0, 0.0, 0.0);
+		super(null, 0.0, 0.0, 0.0);
 		containingNode = oemm.leaves[leaf];
 		setLabel(containingNode.minIndex + localNumber);
 		/*

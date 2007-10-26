@@ -54,8 +54,8 @@ public class ElementFactory implements ElementFactoryInterface
 	{
 		assert x.length == 3;
 		if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE | TriangleTraitsBuilder.VIRTUALHALFEDGE))
-			return new Vertex(x[0], x[1], x[2]);
-		return new AbstractVertex(x[0], x[1], x[2]);
+			return new Vertex(vertexTraitsBuilder, x[0], x[1], x[2]);
+		return new AbstractVertex(vertexTraitsBuilder, x[0], x[1], x[2]);
 	}
 
 	public AbstractHalfEdge createHalfEdge(TriangleHE t, byte orientation, byte attributes)

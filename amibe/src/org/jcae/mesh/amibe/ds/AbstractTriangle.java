@@ -49,12 +49,6 @@ public class AbstractTriangle
 	protected final TriangleTraitsBuilder traitsBuilder;
 	protected final Traits traits;
 
-	public AbstractTriangle()
-	{
-		traitsBuilder = null;
-		traits = null;
-		vertex = new Vertex[3];
-	}
 	public AbstractTriangle(TriangleTraitsBuilder builder)
 	{
 		traitsBuilder = builder;
@@ -176,9 +170,9 @@ public class AbstractTriangle
 	public static class List
 	{
 		//   Head of the list.  Triangles are linked from this instance.
-		final AbstractTriangle listHead = new AbstractTriangle();
+		final AbstractTriangle listHead = new AbstractTriangle(null);
 		//   Sentinel.  This triangle is always the last triangle of the list.
-		final AbstractTriangle listSentinel = new AbstractTriangle();
+		final AbstractTriangle listSentinel = new AbstractTriangle(null);
 		//   Reference to the last collected triangle.
 		private AbstractTriangle listTail = listHead;
 		//   Number of collected items (for debugging purpose, can be removed).

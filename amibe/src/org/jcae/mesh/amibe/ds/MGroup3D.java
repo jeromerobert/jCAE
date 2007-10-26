@@ -48,8 +48,7 @@ public class MGroup3D
 	 */
 	public MGroup3D(String n, Collection<AbstractTriangle> faces)
 	{
-		name = n;
-		facelist = new ArrayList<AbstractTriangle>(faces);
+		this(0, n, faces);
 	}
 	
 	public MGroup3D(int i, String n, Collection<AbstractTriangle> faces)

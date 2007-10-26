@@ -70,13 +70,8 @@ public class Vertex extends AbstractVertex implements Serializable
 	private boolean writable = true;
 	
 	/**
-	 * Constructor called by Vertex2D.
+	 * Constructor.
 	 */
-	protected Vertex()
-	{
-		super();
-	}
-
 	protected Vertex(VertexTraitsBuilder vtb)
 	{
 		super(vtb);
@@ -85,15 +80,11 @@ public class Vertex extends AbstractVertex implements Serializable
 	/**
 	 * Create a Vertex for a 3D mesh.
 	 *
+	 * @param vtb  traits builder
 	 * @param x  first coordinate.
 	 * @param y  second coordinate.
 	 * @param z  third coordinate.
 	 */
-	public Vertex(double x, double y, double z)
-	{
-		super(x, y, z);
-	}
-	
 	public Vertex(VertexTraitsBuilder vtb, double x, double y, double z)
 	{
 		super(vtb, x, y, z);

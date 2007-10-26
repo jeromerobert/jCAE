@@ -84,12 +84,14 @@ public class EnforceAbsDeflection
 					continue;
 				double uv[] = Vertex2D.centroid(mesh, (Vertex2D[]) t.vertex).getUV();
 				double [] xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
-				p[3] = new Vertex(xyz[0], xyz[1], xyz[2]);
+				// mesh.createVertex() cannot be used because mesh is a
+				// Mesh2D instance and we want to create 3D instances.
+				p[3] = new Vertex(null, xyz[0], xyz[1], xyz[2]);
 				for (int i = 0; i < 3; i++)
 				{
 					uv = t.vertex[i].getUV();
 					xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
-					p[i] = new Vertex(xyz[0], xyz[1], xyz[2]);
+					p[i] = new Vertex(null, xyz[0], xyz[1], xyz[2]);
 				}
 				double [] xyz0 = p[0].getUV();
 				double [] xyz1 = p[1].getUV();
