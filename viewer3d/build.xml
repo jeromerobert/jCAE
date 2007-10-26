@@ -38,7 +38,7 @@
 		<mkdir dir="${jar.dir}"/>
 		<jar compress="true" jarfile="${jar.dir}/${jcae-viewer3d.jar}">
 			<manifest>
-				<attribute name="Main-Class" value="org.jcae.viewer3d.test.Main"/>
+				<attribute name="Main-Class" value="org.jcae.viewer3d.test.TextureFitterTest"/>
 				<attribute name="Class-Path" value="trove.jar jcae.jar occjava.jar"/>
 			</manifest>
 			<fileset dir="${classes.dir}" includes="org/jcae/viewer3d/**"/>
@@ -89,16 +89,8 @@
 		</zip>
 	</target>
 
-	<target name="random-test" description="random test" depends="jar">
-		<java classname="jdistfs.RandomTest" fork="yes">
-			<classpath>
-				<pathelement location="lib/jdistfs.jar"/>
-			</classpath>
-			<jvmarg value="${test.jvmarg}"/>
-		</java>
-	</target>
 	<target name="test" description="test" depends="jar">
-		<java jar="${jar}" fork="yes">
+		<java jar="${jar.dir}/${jcae-viewer3d.jar}" fork="yes">
 			<jvmarg value="${test.jvmarg}"/>
 		</java>
 	</target>
