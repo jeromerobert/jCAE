@@ -5,7 +5,6 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.LogManager;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -37,7 +36,7 @@ public class TextureFitterTest
 	private int step=0;
 	private BufferedImage image;
 	
-	private static Point3d[] point3ds=new Point3d[]{
+	/*private static Point3d[] point3ds=new Point3d[]{
 		new Point3d(105.876103680699, 154.355112438377, 444.233449262934),
 		new Point3d(15649.9293772451, 170.548470749469, 494.066332188722),
 		new Point3d(5504.83546309108, 31.9677707249711, 67.6028607292355)};
@@ -45,7 +44,7 @@ public class TextureFitterTest
 	private static Point3d[] point2ds=new Point3d[]{
 		new Point3d(7836, 408, 0),
 		new Point3d(66, 380, 0),
-		new Point3d(5137, 605, 0)};
+		new Point3d(5137, 605, 0)};*/
 
 	/*private static Point3d[] point3ds=new Point3d[]{
 		new Point3d(15425.4735650595, 101.630084521872, 281.979264993215),
@@ -56,6 +55,18 @@ public class TextureFitterTest
 		new Point3d(178, 491, 0),
 		new Point3d(4405, 505, 0),
 		new Point3d(7474, 378, 0)};*/
+	
+	private static Point3d[] point2ds=new Point3d[]{
+		new Point3d(80, 40, 0),
+		new Point3d(460, 110, 0),
+		new Point3d(48, 640, 0)};
+
+	private static Point3d[] point3ds=new Point3d[]{
+		new Point3d(5317, -907, 1692),
+		new Point3d(5206, -1471, 1207),
+		new Point3d(4292, -784, 1615)};
+	private Viewable viewable;
+
 
 	/**
 	 * Add interactions with the view.
@@ -120,7 +131,7 @@ public class TextureFitterTest
 			{				
 				System.out.println("Point "+currentPoint+" : "+
 					point2ds[currentPoint].x +" "+point2ds[currentPoint].y);
-				view.updateTexture(point2ds, point3ds);
+				view.updateTexture(viewable, point2ds, point3ds);
 				TextureFitter.displayMatrixInfo(
 					TextureFitter.getTransform(point2ds, point3ds));
 
@@ -134,8 +145,8 @@ public class TextureFitterTest
 	private void firstStep()
 	{
 		//Get selected faces
-		faceShape=TextureFitter.getSelectFaces(fullViewable, fullShape);
-		
+		//faceShape=TextureFitter.getSelectFaces(fullViewable, fullShape);
+		faceShape=fullShape;
 		//save it for later
 		BRepTools.write(faceShape, "toto.brep");
 		
@@ -164,11 +175,9 @@ public class TextureFitterTest
 		{
 			//display the texture
 			image=ImageIO.read(
-				new File("/home/jerome/ndtkit/190887A.png"));			
-			Viewable v1 = view.displayTexture(faceShape, point2ds, point3ds, image, false);
-			Viewable v2 = view.displayTexture(faceShape, point2ds, point3ds, image, false);
-			view.removeTexture(v1);
-			view.displayTexture(faceShape, point2ds, point3ds, image, false);
+				new File("/home/jerome/ndtkit/DC2-Amp-bis.bmp"));
+				//new File("/home/jerome/ndtkit/190887A.png"));			
+			viewable = view.displayTexture(faceShape, point2ds, point3ds, image, false);
 			Matrix4d m=TextureFitter.getTransform(point2ds, point3ds, false);
 			System.out.println("orthogonality: "+TextureFitter.getOrthogonality(m));
 			System.out.println("scaling: "+TextureFitter.getScaling(m));
@@ -227,24 +236,31 @@ public class TextureFitterTest
 	
 	public TextureFitterTest()
 	{
-		JFrame frame=new JFrame();
-		frame.setSize(800,600);
+		JFrame frame = new JFrame();
+		frame.setSize(800, 600);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		view=new TextureFitter(frame);
-		
+		view = new TextureFitter(frame);
+
 		long time = System.currentTimeMillis();
-		long mem = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory(); 
-		//Display the geometry to allow selection of faces
-		fullShape=Utilities.readFile("/home/jerome/ndtkit/19250L57110323000.igs");
-		//fullShape=Utilities.readFile("/home/jerome/ndtkit/יא.IGES");
+		long mem =
+			Runtime.getRuntime().totalMemory() -
+			Runtime.getRuntime().freeMemory();
+
+		//fullShape=Utilities.readFile("/home/jerome/ndtkit/19250L57110323000.igs");
+		fullShape =
+			Utilities.readFile("/home/jerome/ndtkit/x53p11420200_mod.iges");
+		//fullShape=Utilities.readFile("/home/jerome/ndtkit/??.IGES");
 		//fullShape=Utilities.readFile("/home/jerome/ndtkit/x53p11431200.igs");
-		OCCProvider occProvider=new OCCProvider(fullShape);
-		fullViewable=new ViewableCAD(occProvider);
+		OCCProvider occProvider = new OCCProvider(fullShape);
+		fullViewable = new ViewableCAD(occProvider);
 		view.add(fullViewable);
 		frame.add(view);
-		long mem2 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-		System.out.println("time to load: " + (System.currentTimeMillis()-time));
-		System.out.println("used memory: " + (mem2-mem));
+		long mem2 =
+			Runtime.getRuntime().totalMemory() -
+			Runtime.getRuntime().freeMemory();
+		System.out.println("time to load: " +
+			(System.currentTimeMillis() - time));
+		System.out.println("used memory: " + (mem2 - mem));
 		//Fit the view to the geometry
 		view.fitAll();
 		frame.setVisible(true);

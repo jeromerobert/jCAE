@@ -1,5 +1,6 @@
 package org.jcae.viewer3d.post;
 
+import java.awt.Graphics2D;
 import java.awt.Window;
 import java.awt.image.BufferedImage;
 import java.io.PrintStream;
@@ -21,6 +22,7 @@ import org.jcae.viewer3d.cad.*;
 import org.jcae.viewer3d.cad.occ.OCCProvider;
 
 import com.sun.j3d.utils.image.TextureLoader;
+import java.util.HashMap;
 
 /**
  * A special View which allows to fit a texture on a given geometry.
@@ -98,8 +100,22 @@ public class TextureFitter extends View
 	}
 
 	private static Transform3D computeTransform(
-		Point3d[] triangle2d, Point3d[] triangle3d, int width, int height, boolean normalize)
+		Point3d[] triangle2d, Point3d[] triangle3d, int width, int height,
+		boolean normalize, boolean haveBorder)
 	{
+		if(haveBorder)
+		{
+			Point3d[] tmp = new Point3d[3];
+			for(int i=0; i<3; i++)
+			{
+				tmp[i]=new Point3d(triangle2d[i]);
+				tmp[i].x++;
+				tmp[i].y++;
+				tmp[i].z++;
+			}
+			triangle2d = tmp;
+		}
+		
 		//3D -> 2D matrix
 		Transform3D trsf1=normalizeTriangle(triangle2d);
 		trsf1.mulInverse(normalizeTriangle(triangle3d));
@@ -221,7 +237,7 @@ public class TextureFitter extends View
 	public static Matrix4d getTransform(Point3d[] dst, Point3d[] src, boolean normalize)
 	{		
 	    Matrix4d m=new Matrix4d();
-        Transform3D trsf1=computeTransform(dst, src, 1, 1, normalize);
+        Transform3D trsf1=computeTransform(dst, src, 1, 1, normalize, false);
         trsf1.get(m);
         return m;
 	}
@@ -395,9 +411,8 @@ public class TextureFitter extends View
 		return toReturn;		
 	}
 
-	private BufferedImage image;
-
-	private TexCoordGeneration texCoordGeneration;
+	private Map texCoordMap = new HashMap();
+	private Map imageMap = new HashMap();
 	
 	/**
 	 * @param frame the window owning the widget
@@ -407,24 +422,20 @@ public class TextureFitter extends View
 		super(frame, false, true);
 	}
 	
-	private Appearance createAppearance(Point3d[] triangle2d, Point3d[] triangle3d,
-		boolean normalize)
-	{		
-		Appearance toReturn=new Appearance();
-		Texture theTexture = createTexture(image);				
-		texCoordGeneration = new TexCoordGeneration(
-        	TexCoordGeneration.EYE_LINEAR,
-        	TexCoordGeneration.TEXTURE_COORDINATE_2);
-		texCoordGeneration.setCapability(TexCoordGeneration.ALLOW_PLANE_WRITE);
-		updateTexture(triangle2d, triangle3d, normalize);
-        toReturn.setTexture(theTexture);
-        toReturn.setTexCoordGeneration(texCoordGeneration);                
+	private static BufferedImage addTransparentBorder(BufferedImage image)
+	{
+		BufferedImage toReturn = new BufferedImage(
+			image.getWidth()+2, image.getHeight()+2, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = toReturn.createGraphics();
+		g.drawImage(image, 1, 1, null);
 		return toReturn;
 	}
 	
 	private Texture createTexture(BufferedImage image)
 	{
-		TextureLoader tl=new TextureLoader(image, TextureLoader.ALLOW_NON_POWER_OF_TWO);
+		TextureLoader tl=new TextureLoader(addTransparentBorder(image),
+			TextureLoader.ALLOW_NON_POWER_OF_TWO);
+		
 		Map map=queryProperties();
 		int textureWidthMax=((Integer)map.get("textureWidthMax")).intValue();
 		int textureHeightMax=((Integer)map.get("textureHeightMax")).intValue();
@@ -447,9 +458,9 @@ public class TextureFitter extends View
 		tl=new TextureLoader(tl.getImage().getImage(), flags);
 		
 		Texture toReturn = tl.getTexture();
-		toReturn.setBoundaryModeS(Texture.CLAMP_TO_BOUNDARY);
-		toReturn.setBoundaryModeT(Texture.CLAMP_TO_BOUNDARY);
-		
+		toReturn.setBoundaryModeS(Texture.CLAMP);
+		toReturn.setBoundaryModeT(Texture.CLAMP);
+
 		return toReturn;
 	}
 	
@@ -478,20 +489,41 @@ public class TextureFitter extends View
 	public Viewable displayTexture(TopoDS_Shape shape,
 		Point3d[] triangle2d, Point3d[] triangle3d, BufferedImage image,
 		boolean normalize)
-	{
-		this.image=image;
+	{				
+		BranchGroup bg=new BranchGroup();
+		Viewable textureViewable=new ViewableBG(bg);
+
 		OCCProvider occProvider=new OCCProvider(shape);
 		Shape3D shape3D=new Shape3D(createGeometry(occProvider));
-		shape3D.setAppearance(createAppearance(triangle2d, triangle3d, normalize));
-		BranchGroup bg=new BranchGroup();
-		bg.addChild(shape3D);
-		Viewable textureViewable=new ViewableBG(bg);
+				
+		Appearance app=new Appearance();
+		Texture theTexture = createTexture(image);				
+		TexCoordGeneration texCoordGeneration = new TexCoordGeneration(
+        	TexCoordGeneration.EYE_LINEAR,
+        	TexCoordGeneration.TEXTURE_COORDINATE_2);
+		texCoordGeneration.setCapability(TexCoordGeneration.ALLOW_PLANE_WRITE);
+
+		texCoordMap.put(textureViewable, texCoordGeneration);
+		imageMap.put(textureViewable, image);
+
+		updateTexture(textureViewable, triangle2d, triangle3d, normalize);
+        app.setTexture(theTexture);
+        app.setTexCoordGeneration(texCoordGeneration);		
+		TransparencyAttributes trA= new TransparencyAttributes();
+		trA.setTransparencyMode(TransparencyAttributes.FASTEST);
+		app.setTransparencyAttributes(trA);
+		shape3D.setAppearance(app);		
+		
+		bg.addChild(shape3D);		
+				
 		add(textureViewable);
 		return textureViewable;
 	}
 		
 	public void removeTexture(Viewable viewable)
 	{
+		texCoordMap.remove(viewable);
+		imageMap.remove(viewable);
 		remove(viewable);
 	}
 	
@@ -500,9 +532,10 @@ public class TextureFitter extends View
 	 * @param triangle2d The 2D points (z=0) picked on the bitmap
 	 * @param triangle3d The 3D points picked on the geometry
 	 */
-	public void updateTexture(Point3d[] triangle2d, Point3d[] triangle3d)
+	public void updateTexture(Viewable viewable, Point3d[] triangle2d,
+		Point3d[] triangle3d)
 	{
-		updateTexture(triangle2d, triangle3d, true);
+		updateTexture(viewable, triangle2d, triangle3d, true);
 	}
 
 	/** 
@@ -511,13 +544,17 @@ public class TextureFitter extends View
 	 * @param triangle3d The 3D points picked on the geometry
 	 * @param true to normalize
 	 */
-	public void updateTexture(Point3d[] triangle2d, Point3d[] triangle3d,
-		boolean normalize)
+	public void updateTexture(Viewable viewable, Point3d[] triangle2d,
+		Point3d[] triangle3d, boolean normalize)
 	{
-        
+        BufferedImage image = (BufferedImage) imageMap.get(viewable);
+		
+		TexCoordGeneration texCoordGeneration =
+			(TexCoordGeneration) texCoordMap.get(viewable);
+		
 		Matrix4f m=new Matrix4f();
         Transform3D trsf1=computeTransform(triangle2d, triangle3d,
-        	image.getWidth(), image.getHeight(), normalize);
+        	image.getWidth(), image.getHeight(), normalize, true);
         trsf1.get(m);
         Vector4f vS=new Vector4f();
         Vector4f vT=new Vector4f();
