@@ -6,6 +6,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
@@ -66,6 +68,7 @@ public class TextureFitterTest
 		new Point3d(5206, -1471, 1207),
 		new Point3d(4292, -784, 1615)};
 	private Viewable viewable;
+	private String bitmap;
 
 
 	/**
@@ -145,8 +148,8 @@ public class TextureFitterTest
 	private void firstStep()
 	{
 		//Get selected faces
-		//faceShape=TextureFitter.getSelectFaces(fullViewable, fullShape);
-		faceShape=fullShape;
+		faceShape=TextureFitter.getSelectFaces(fullViewable, fullShape);
+		//faceShape=fullShape;
 		//save it for later
 		BRepTools.write(faceShape, "toto.brep");
 		
@@ -174,9 +177,7 @@ public class TextureFitterTest
 		try
 		{
 			//display the texture
-			image=ImageIO.read(
-				new File("/home/jerome/ndtkit/DC2-Amp-bis.bmp"));
-				//new File("/home/jerome/ndtkit/190887A.png"));			
+			image=ImageIO.read(new File(bitmap));
 			viewable = view.displayTexture(faceShape, point2ds, point3ds, image, false);
 			Matrix4d m=TextureFitter.getTransform(point2ds, point3ds, false);
 			System.out.println("orthogonality: "+TextureFitter.getOrthogonality(m));
@@ -233,9 +234,13 @@ public class TextureFitterTest
 		}		
 	}
 
-	
-	public TextureFitterTest()
+	// CAD: /home/jerome/ndtkit/19250L57110323000.igs
+	// CAD: /home/jerome/ndtkit/x53p11431200.igs
+	// BMP: /home/jerome/ndtkit/DC2-Amp-bis.bmp
+	// BMP: /home/jerome/ndtkit/190887A.png
+	public TextureFitterTest(String cad, String bitmap) throws IOException
 	{
+		this.bitmap = bitmap;
 		JFrame frame = new JFrame();
 		frame.setSize(800, 600);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -246,11 +251,11 @@ public class TextureFitterTest
 			Runtime.getRuntime().totalMemory() -
 			Runtime.getRuntime().freeMemory();
 
-		//fullShape=Utilities.readFile("/home/jerome/ndtkit/19250L57110323000.igs");
-		fullShape =
-			Utilities.readFile("/home/jerome/ndtkit/x53p11420200_mod.iges");
-		//fullShape=Utilities.readFile("/home/jerome/ndtkit/??.IGES");
-		//fullShape=Utilities.readFile("/home/jerome/ndtkit/x53p11431200.igs");
+		if(!new File(cad).canRead())
+			throw new IOException("Cannot read "+cad);
+		
+		fullShape = Utilities.readFile(cad);
+		
 		OCCProvider occProvider = new OCCProvider(fullShape);
 		fullViewable = new ViewableCAD(occProvider);
 		view.add(fullViewable);
@@ -267,10 +272,20 @@ public class TextureFitterTest
 		view.setOriginAxisVisible(true);
 		view.addKeyListener(new MyKeyListener());
 		view.print3DProperties(System.out);
+		view.drawPoint(0, 0, 0);
+		view.drawPoint(1000, 1000, 1000);
 	}
 
 	public static void main(String[] args)
 	{
-		new TextureFitterTest();
+		try
+		{
+			new TextureFitterTest(args[0], args[1]);
+		}
+		catch (IOException ex)
+		{
+			Logger.getLogger(TextureFitterTest.class.getName()).
+				log(Level.SEVERE, null, ex);
+		}
 	}
 }

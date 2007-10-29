@@ -14,6 +14,7 @@ import javax.vecmath.*;
 
 import org.jcae.opencascade.Utilities;
 import org.jcae.opencascade.jni.*;
+import org.jcae.viewer3d.DomainProvider;
 import org.jcae.viewer3d.PickViewable;
 import org.jcae.viewer3d.View;
 import org.jcae.viewer3d.Viewable;
@@ -22,7 +23,9 @@ import org.jcae.viewer3d.cad.*;
 import org.jcae.viewer3d.cad.occ.OCCProvider;
 
 import com.sun.j3d.utils.image.TextureLoader;
+import java.awt.Color;
 import java.util.HashMap;
+import org.jcae.viewer3d.ViewableAdaptor;
 
 /**
  * A special View which allows to fit a texture on a given geometry.
@@ -512,7 +515,11 @@ public class TextureFitter extends View
 		TransparencyAttributes trA= new TransparencyAttributes();
 		trA.setTransparencyMode(TransparencyAttributes.FASTEST);
 		app.setTransparencyAttributes(trA);
-		shape3D.setAppearance(app);		
+		shape3D.setAppearance(app);
+		
+		PolygonAttributes pa = new PolygonAttributes();
+		pa.setCullFace(PolygonAttributes.CULL_NONE);
+		app.setPolygonAttributes(pa);
 		
 		bg.addChild(shape3D);		
 				
@@ -578,5 +585,34 @@ public class TextureFitter extends View
 			Entry e = (Entry)it.next();
 			System.out.println(e.getKey()+" "+e.getValue());
 		}
-	}	
+	}
+	
+	public Viewable drawPoint(final double x, final double y, final double z)
+	{
+		Viewable toReturn = new ViewableAdaptor() 
+		{
+			//TODO so many empty methods probably means that ViewableAdaptor sucks
+			public void domainsChangedPerform(int[] domainId){}			
+			public DomainProvider getDomainProvider(){return null;}
+			public void setDomainVisible(Map<Integer, Boolean> map){}
+			public void pick(PickViewable result){}
+			public void unselectAll(){}
+
+			public Node getJ3DNode()
+			{
+				ColoringAttributes ca=new ColoringAttributes();
+				ca.setColor(new Color3f(Color.YELLOW));
+				PointAttributes pat=new PointAttributes(5f, false);
+				PointArray pa=new PointArray(1, GeometryArray.COORDINATES);
+				pa.setCoordinates(0, new double[]{x, y, z});
+				Appearance a=new Appearance();			
+				a.setPointAttributes(pat);
+				a.setColoringAttributes(ca);
+				Shape3D s3d = new Shape3D(pa, a);		
+				return s3d;
+			}
+		};
+		add(toReturn);
+		return toReturn;
+	}
 }
