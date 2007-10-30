@@ -30,10 +30,8 @@ try
 {
 	MeshReader.readObject3D(mesh3D, xmlDir, xmlFile);
 }
-catch (RuntimeException ex)
+catch (IOException ex)
 {
-	// Err, MeshReader.readObject3D traps exceptions and raises RuntimeException
-	// The most common error is that jcae3d file does not exist
 	println("File "+xmlDir+File.separator+"jcae3d does not exist!");
 	usage();
 }
