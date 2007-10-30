@@ -49,7 +49,7 @@ public class ClassPathEntityResolver implements EntityResolver
 				//remove leading "/"
 				path=path.substring(1);
 				logger.debug("resolve "+systemId+" from CLASSPATH at "+path);
-				InputStream in= ClassLoader.getSystemResourceAsStream(path);
+				InputStream in= ClassPathEntityResolver.class.getClassLoader().getResourceAsStream(path);
 				if(in==null)
 				{
 					System.err.println("WARNING: "+systemId+" not found");
