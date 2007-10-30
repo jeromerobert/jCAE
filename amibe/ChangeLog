@@ -3,6 +3,9 @@ Tue Oct 30 13:58:05 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/xmldata/ClassPathEntityResolver.java (resolveEntity):
 	Replace getSystemResourceAsStream by getResourceAsStream, the former
 	confuses groovy and netbeans class loaders.
+	* src/org/jcae/mesh/amibe/validation/QualityFloat.java (split): New
+	split() signature with a list of float arguments to have a finer
+	control on quality bounds.
 
 Thu Oct 25 15:51:57 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

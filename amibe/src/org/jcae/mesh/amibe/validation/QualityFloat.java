@@ -60,8 +60,8 @@ public class QualityFloat
 	private TFloatArrayList data;
 	private QualityProcedure qproc;
 	private int [] sorted;
+	private float [] bounds;
 	private int layers = 0;
-	private float vmin, vmax;
 	private float qmin, qmax, qavg;
 
 	public QualityFloat()
@@ -167,8 +167,8 @@ public class QualityFloat
 			return;
 		int nrTotal = data.size();
 		//  min() and max() methods are buggy in trove 1.0.2
-		vmin = Float.MAX_VALUE;
-		vmax = Float.MIN_VALUE;
+		float vmin = Float.MAX_VALUE;
+		float vmax = Float.MIN_VALUE;
 		qavg = 0.0f;
 		for (int i = 0; i < nrTotal; i++)
 		{
@@ -186,8 +186,9 @@ public class QualityFloat
 		//   sorted[0]: number of points with value < vmin
 		//   sorted[layers+1]: number of points with value > vmax
 		sorted = new int[layers+2];
-		for (int i = 0; i < layers + 2; i++)
-			sorted[i] = 0;
+		bounds = new float[layers+1];
+		for (int i = 0; i < bounds.length; i++)
+			bounds[i] = vmin + i * delta;
 		for (int i = 0; i < nrTotal; i++)
 		{
 			float val = data.get(i);
@@ -211,8 +212,8 @@ public class QualityFloat
 	public void split(float v1, float v2, int n)
 	{
 		layers = n;
-		vmin = v1;
-		vmax = v2;
+		float vmin = v1;
+		float vmax = v2;
 		qavg = 0.0f;
 		qmin = Float.MAX_VALUE;
 		qmax = Float.MIN_VALUE;
@@ -222,8 +223,9 @@ public class QualityFloat
 		//  The last cell is for v >= vmax
 		float delta = (vmax - vmin) / layers;
 		sorted = new int[layers+2];
-		for (int i = 0; i < layers+2; i++)
-			sorted[i] = 0;
+		bounds = new float[layers+1];
+		for (int i = 0; i < bounds.length; i++)
+			bounds[i] = vmin + i * delta;
 		for (int i = 0; i < nrTotal; i++)
 		{
 			float val = data.get(i);
@@ -246,6 +248,38 @@ public class QualityFloat
 		}
 	}
 	
+	public void split(float... v)
+	{
+		layers = -1;
+		for (float f: v)
+			layers++;
+		if (layers <= 0)
+			return;
+		bounds = new float[layers+1];
+		int cnt = 0;
+		for (float f: v)
+			bounds[cnt++] = f;
+		qavg = 0.0f;
+		qmin = Float.MAX_VALUE;
+		qmax = Float.MIN_VALUE;
+		sorted = new int[layers+2];
+		int nrTotal = data.size();
+		for (int i = 0; i < nrTotal; i++)
+		{
+			float val = data.get(i);
+			if (qmin > val)
+				qmin = val;
+			if (qmax < val)
+				qmax = val;
+			qavg += val / nrTotal;
+			int cell = 0;
+			for (; cell < bounds.length; cell++)
+				if (val < bounds[cell])
+					break;
+			sorted[cell]++;
+		}
+	}
+	
 	/**
 	 * Display statistics about quality values.
 	 */
@@ -257,15 +291,14 @@ public class QualityFloat
 			return;
 		}
 		int nrTotal = data.size();
-		float delta = (vmax - vmin) / layers;
 		if (sorted[0] > 0)
-			System.out.println(" < "+vmin+" "+sorted[0]+" ("+(((float) 100.0 * sorted[0])/nrTotal)+"%)");
+			System.out.println(" < "+bounds[0]+" "+sorted[0]+" ("+(((float) 100.0 * sorted[0])/nrTotal)+"%)");
 		for (int i = 0; i < layers; i++)
 		{
-			System.out.println(""+(vmin+i*delta)+" ; "+(vmin+(i+1)*delta)+" "+sorted[i+1]+" ("+(((float) 100.0 * sorted[i+1])/nrTotal)+"%)");
+			System.out.println(""+bounds[i]+" ; "+bounds[i+1]+" "+sorted[i+1]+" ("+(((float) 100.0 * sorted[i+1])/nrTotal)+"%)");
 		}
 		if (sorted[layers+1] > 0)
-			System.out.println(" > "+vmax+" "+sorted[layers+1]+" ("+(((float) 100.0 * sorted[layers+1])/nrTotal)+"%)");
+			System.out.println(" > "+bounds[layers]+" "+sorted[layers+1]+" ("+(((float) 100.0 * sorted[layers+1])/nrTotal)+"%)");
 		System.out.println("total: "+nrTotal);
 		System.out.println("qmin: "+qmin);
 		System.out.println("qmax: "+qmax);
