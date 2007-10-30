@@ -250,7 +250,7 @@ public class QualityFloat
 	
 	public void split(float... v)
 	{
-		layers = v.length;
+		layers = v.length - 1;
 		if (layers <= 0)
 			return;
 		bounds = new float[layers+1];
@@ -293,7 +293,7 @@ public class QualityFloat
 			System.out.println(" < "+bounds[0]+" "+sorted[0]+" ("+(((float) 100.0 * sorted[0])/nrTotal)+"%)");
 		for (int i = 0; i < layers; i++)
 		{
-			System.out.println(""+bounds[i]+" ; "+bounds[i+1]+" "+sorted[i+1]+" ("+(((float) 100.0 * sorted[i+1])/nrTotal)+"%)");
+			System.out.println("   "+bounds[i]+" ; "+bounds[i+1]+" "+sorted[i+1]+" ("+(((float) 100.0 * sorted[i+1])/nrTotal)+"%)");
 		}
 		if (sorted[layers+1] > 0)
 			System.out.println(" > "+bounds[layers]+" "+sorted[layers+1]+" ("+(((float) 100.0 * sorted[layers+1])/nrTotal)+"%)");
