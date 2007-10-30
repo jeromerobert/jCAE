@@ -95,7 +95,7 @@ public abstract class AbstractAlgoHalfEdge
 		if (current.hasAttributes(AbstractHalfEdge.MARKED) || !current.hasSymmetricEdge())
 			return current;
 		if (current.sym().hasAttributes(AbstractHalfEdge.MARKED) || current.hasAttributes(AbstractHalfEdge.OUTER))
-			return (HalfEdge) current.sym();
+			return current.sym();
 		return current;
 	}
 
@@ -112,7 +112,7 @@ public abstract class AbstractAlgoHalfEdge
 			HalfEdge e = f.getAbstractHalfEdge();
 			for (int i = 0; i < 3; i++)
 			{
-				e = (HalfEdge) e.next();
+				e = e.next();
 				HalfEdge h = uniqueOrientation(e);
 				if (!tree.contains(h))
 					addToTree(h);
@@ -231,13 +231,13 @@ public abstract class AbstractAlgoHalfEdge
 					// Swap edge
 					for (int i = 0; i < 3; i++)
 					{
-						current = (HalfEdge) current.next();
+						current = current.next();
 						removeFromTree(current);
 					}
-					HalfEdge sym = (HalfEdge) current.sym();
+					HalfEdge sym = current.sym();
 					for (int i = 0; i < 2; i++)
 					{
-						sym = (HalfEdge) sym.next();
+						sym = sym.next();
 						removeFromTree(sym);
 					}
 					Vertex a = current.apex();
@@ -247,17 +247,17 @@ public abstract class AbstractAlgoHalfEdge
 					assert a == current.apex();
 					for (int i = 0; i < 3; i++)
 					{
-						current = (HalfEdge) current.next();
+						current = current.next();
 						for (Iterator<AbstractHalfEdge> it = current.fanIterator(); it.hasNext(); )
 						{
 							HalfEdge e = uniqueOrientation((HalfEdge) it.next());
 							addToTree(e);
 						}
 					}
-					sym = (HalfEdge) ((HalfEdge) current.next()).sym();
+					sym = current.next().sym();
 					for (int i = 0; i < 2; i++)
 					{
-						sym = (HalfEdge) sym.next();
+						sym = sym.next();
 						for (Iterator<AbstractHalfEdge> it = sym.fanIterator(); it.hasNext(); )
 						{
 							HalfEdge e = uniqueOrientation((HalfEdge) it.next());
