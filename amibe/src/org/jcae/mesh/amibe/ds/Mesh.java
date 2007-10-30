@@ -184,11 +184,11 @@ public class Mesh extends AbstractMesh implements Serializable
 			return;
 		TriangleHE that = (TriangleHE) t;
 		// Remove links to help the garbage collector
-		HalfEdge e = (HalfEdge) that.getAbstractHalfEdge();
+		HalfEdge e = that.getAbstractHalfEdge();
 		HalfEdge last = e;
 		for (int i = 0; i < 3; i++)
 		{
-			e = (HalfEdge) e.next();
+			e = e.next();
 			e.glue(null);
 			last.setNext(null);
 			last = e;
@@ -943,7 +943,7 @@ public class Mesh extends AbstractMesh implements Serializable
 			}
 			if (!ot.hasSymmetricEdge())
 				continue;
-			sym = (VirtualHalfEdge) ot.sym(sym);
+			sym = ot.sym(sym);
 			sym.sym();
 			if (sym.getTri() != ot.getTri())
 			{
@@ -1104,7 +1104,7 @@ public class Mesh extends AbstractMesh implements Serializable
 		boolean isOuter = e.hasAttributes(AbstractHalfEdge.OUTER);
 		for (int i = 0; i < 3; i++)
 		{
-			e = (HalfEdge) e.next();
+			e = e.next();
 			if (isOuter != e.hasAttributes(AbstractHalfEdge.OUTER))
 			{
 				logger.error("Inconsistent outer state: "+e);
@@ -1112,7 +1112,7 @@ public class Mesh extends AbstractMesh implements Serializable
 			}
 			if (!e.hasSymmetricEdge())
 				continue;
-			HalfEdge f = (HalfEdge) e.sym();
+			HalfEdge f = e.sym();
 			if (f.sym() != e)
 			{
 				logger.error("Wrong adjacency relation: ");

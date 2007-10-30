@@ -52,7 +52,7 @@ public class TriangleHE extends Triangle
 	 * @return  an <code>HalfEdge</code> instance bound to this triangle
 	 */
 	@Override
-	public AbstractHalfEdge getAbstractHalfEdge()
+	public HalfEdge getAbstractHalfEdge()
 	{
 		return e0;
 	}
@@ -64,17 +64,7 @@ public class TriangleHE extends Triangle
 	 * @return  an <code>HalfEdge</code> instance bound to this triangle
 	 */
 	@Override
-	public AbstractHalfEdge getAbstractHalfEdge(AbstractHalfEdge that)
-	{
-		return e0;
-	}
-
-	/**
-	 * Gets an <code>HalfEdge</code> instance bound to this triangle.
-	 * This method returns <code>HalfEdge</code> 0.
-	 * @return  <code>HalfEdge</code> instance bound to this triangle
-	 */
-	public HalfEdge getHalfEdge()
+	public HalfEdge getAbstractHalfEdge(AbstractHalfEdge that)
 	{
 		return e0;
 	}

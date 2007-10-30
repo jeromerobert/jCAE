@@ -125,7 +125,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @return  current instance after its transformation
 	 */
 	@Override
-	public final AbstractHalfEdge sym()
+	public final HalfEdge sym()
 	{
 		return sym;
 	}
@@ -151,7 +151,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @return  current instance after its transformation
 	 */
 	@Override
-	public final AbstractHalfEdge next()
+	public final HalfEdge next()
 	{
 		return next;
 	}
@@ -177,7 +177,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @return  current instance after its transformation
 	 */
 	@Override
-	public final AbstractHalfEdge prev()
+	public final HalfEdge prev()
 	{
 		return next.next;
 	}
@@ -203,7 +203,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @return  current instance after its transformation
 	 */
 	@Override
-	public final AbstractHalfEdge nextOrigin()
+	public final HalfEdge nextOrigin()
 	{
 		return next.next.sym;
 	}
@@ -229,7 +229,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * Moves counterclockwise to the following edge which has the same apex.
 	 * @return  current instance after its transformation
 	 */
-	private final AbstractHalfEdge nextApex()
+	private final HalfEdge nextApex()
 	{
 		return next.sym.next;
 	}
@@ -238,7 +238,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * Moves counterclockwise to the previous edge which has the same apex.
 	 * @return  current instance after its transformation
 	 */
-	private final AbstractHalfEdge prevApex()
+	private final HalfEdge prevApex()
 	{
 		return next.next.sym.prev();
 	}
@@ -357,7 +357,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * boundary is found and start again from there.
 	 */
 	@Override
-	public final AbstractHalfEdge nextOriginLoop()
+	public final HalfEdge nextOriginLoop()
 	{
 		HalfEdge ret = this;
 		if (ret.hasAttributes(OUTER) && ret.hasAttributes(BOUNDARY | NONMANIFOLD))
@@ -371,7 +371,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			while (!ret.hasAttributes(OUTER));
 		}
 		else
-			ret = (HalfEdge) ret.nextOrigin();
+			ret = ret.nextOrigin();
 		return ret;
 	}
 	
@@ -389,12 +389,12 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			// and start again from there.
 			do
 			{
-				ret = (HalfEdge) ret.prevApex();
+				ret = ret.prevApex();
 			}
 			while (!ret.hasAttributes(OUTER));
 		}
 		else
-			ret = (HalfEdge) ret.nextApex();
+			ret = ret.nextApex();
 		return ret;
 	}
 	
@@ -456,7 +456,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @see Mesh#edgeSwap
 	 */
 	@Override
-	protected final AbstractHalfEdge swap()
+	protected final HalfEdge swap()
 	{
 		return HEswap();
 	}
@@ -705,7 +705,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 				if (Matrix3D.prodSca(temp[3], temp[2]) >= - area)
 					return false;
 			}
-			f = (HalfEdge) f.nextOriginLoop();
+			f = f.nextOriginLoop();
 		}
 		while (f.destination() != d);
 		return true;
@@ -749,7 +749,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 				if (Matrix3D.prodSca(temp[3], temp[2]) >= - area)
 					return false;
 			}
-			f = (HalfEdge) f.nextOriginLoop();
+			f = f.nextOriginLoop();
 		}
 		while (f.destination() != d);
 		return true;
@@ -767,7 +767,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @see Mesh#edgeCollapse
 	 */
 	@Override
-	protected final AbstractHalfEdge collapse(AbstractMesh m, AbstractVertex n)
+	protected final HalfEdge collapse(AbstractMesh m, AbstractVertex n)
 	{
 		if (hasAttributes(OUTER))
 			throw new IllegalArgumentException("Cannot contract "+this);
@@ -803,7 +803,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		}
 		// Edge is non-manifold
 		assert e.hasAttributes(OUTER);
-		AbstractHalfEdge ret = null;
+		HalfEdge ret = null;
 		// HEcollapseSameFan may modify internal data structure
 		// used by fanIterator(), we need a copy.
 		ArrayList<AbstractHalfEdge> copy = new ArrayList<AbstractHalfEdge>();
@@ -884,7 +884,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		do
 		{
 			e.setOrigin(n);
-			e = (HalfEdge) e.nextOriginLoop();
+			e = e.nextOriginLoop();
 		}
 		while (e.destination() != d);
 	}
@@ -894,7 +894,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		for (Triangle t: oList)
 		{
 			TriangleHE tHE = (TriangleHE) t;
-			HalfEdge f = tHE.getHalfEdge();
+			HalfEdge f = tHE.getAbstractHalfEdge();
 			if (f.destination() == o)
 				f = f.next;
 			else if (f.apex() == o)
@@ -1060,7 +1060,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @see Mesh#vertexSplit
 	 */
 	@Override
-	protected final AbstractHalfEdge split(AbstractMesh m, AbstractVertex n)
+	protected final HalfEdge split(AbstractMesh m, AbstractVertex n)
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("split edge ("+origin()+" "+destination()+") by adding vertex "+n);
@@ -1192,7 +1192,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		// (dV1) is not modified by this operation, so we move
 		// h1 into t3 so that it does not need to be updated by
 		// the caller.
-		HalfEdge n1 = t3.getHalfEdge();
+		HalfEdge n1 = t3.getAbstractHalfEdge();
 		boolean updateRefHalfEdge = true;
 		if (h1.localNumber == 1)
 			n1 = n1.next;

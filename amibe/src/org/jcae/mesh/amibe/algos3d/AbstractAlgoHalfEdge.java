@@ -109,7 +109,7 @@ public abstract class AbstractAlgoHalfEdge
 				continue;
 			TriangleHE f = (TriangleHE) af;
 			nrTriangles++;
-			HalfEdge e = f.getHalfEdge();
+			HalfEdge e = f.getAbstractHalfEdge();
 			for (int i = 0; i < 3; i++)
 			{
 				e = (HalfEdge) e.next();

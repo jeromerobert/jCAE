@@ -233,7 +233,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @return  current instance after its transformation
 	 */
 	@Override
-	public final AbstractHalfEdge sym()
+	public final VirtualHalfEdge sym()
 	{
 		int neworient = tri.getAdjLocalNumber(localNumber);
 		tri = tri.getAdj(localNumber);
@@ -252,7 +252,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @return   argument after its transformation
 	 */
 	@Override
-	public final AbstractHalfEdge sym(AbstractHalfEdge that)
+	public final VirtualHalfEdge sym(AbstractHalfEdge that)
 	{
 		VirtualHalfEdge dest = (VirtualHalfEdge) that;
 		dest.tri = tri.getAdj(localNumber);
@@ -266,7 +266,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @return  current instance after its transformation
 	 */
 	@Override
-	public final AbstractHalfEdge next()
+	public final VirtualHalfEdge next()
 	{
 		localNumber = next3[localNumber];
 		pullAttributes();
@@ -283,7 +283,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @return   argument after its transformation
 	 */
 	@Override
-	public final AbstractHalfEdge next(AbstractHalfEdge that)
+	public final VirtualHalfEdge next(AbstractHalfEdge that)
 	{
 		VirtualHalfEdge dest = (VirtualHalfEdge) that;
 		dest.tri = tri;
@@ -297,7 +297,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @return  current instance after its transformation
 	 */
 	@Override
-	public final AbstractHalfEdge prev()
+	public final VirtualHalfEdge prev()
 	{
 		localNumber = prev3[localNumber];
 		pullAttributes();
@@ -314,7 +314,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @return   argument after its transformation
 	 */
 	@Override
-	public final AbstractHalfEdge prev(AbstractHalfEdge that)
+	public final VirtualHalfEdge prev(AbstractHalfEdge that)
 	{
 		VirtualHalfEdge dest = (VirtualHalfEdge) that;
 		dest.tri = tri;
@@ -328,7 +328,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @return  current instance after its transformation
 	 */
 	@Override
-	public final AbstractHalfEdge nextOrigin()
+	public final VirtualHalfEdge nextOrigin()
 	{
 		return prev().sym();
 	}
@@ -344,7 +344,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @return   argument after its transformation
 	 */
 	@Override
-	public final AbstractHalfEdge nextOrigin(AbstractHalfEdge that)
+	public final VirtualHalfEdge nextOrigin(AbstractHalfEdge that)
 	{
 		return prev(that).sym();
 	}
@@ -358,7 +358,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * They have to be explicitly filtered out by testing hasAttributes(OUTER).
 	 */
 	@Override
-	public final AbstractHalfEdge nextOriginLoop()
+	public final VirtualHalfEdge nextOriginLoop()
 	{
 		if (hasAttributes(OUTER) && hasAttributes(BOUNDARY | NONMANIFOLD))
 		{
@@ -703,7 +703,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @see Mesh#edgeSwap
 	 */
 	@Override
-	protected final AbstractHalfEdge swap()
+	protected final VirtualHalfEdge swap()
 	{
 		VHswap();
 		return this;
@@ -1001,7 +1001,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @see Mesh#edgeCollapse
 	 */
 	@Override
-	protected final AbstractHalfEdge collapse(AbstractMesh m, AbstractVertex n)
+	protected final VirtualHalfEdge collapse(AbstractMesh m, AbstractVertex n)
 	{
 		if (hasAttributes(OUTER))
 			throw new IllegalArgumentException("Cannot contract "+this);
@@ -1332,7 +1332,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @see Mesh#vertexSplit
 	 */
 	@Override
-	protected final AbstractHalfEdge split(AbstractMesh m, AbstractVertex n)
+	protected final VirtualHalfEdge split(AbstractMesh m, AbstractVertex n)
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("split edge ("+origin()+" "+destination()+") by adding vertex "+n);

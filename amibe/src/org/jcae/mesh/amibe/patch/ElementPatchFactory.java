@@ -40,19 +40,19 @@ public class ElementPatchFactory implements ElementFactoryInterface
 	}
 
 	@Override
-	public AbstractVertex createVertex(double u, double v)
+	public Vertex2D createVertex(double u, double v)
 	{
 		return new Vertex2D(vertexTraitsBuilder, u, v);
 	}
 
 	@Override
-	public AbstractVertex createVertex(double x, double y, double z)
+	public Vertex2D createVertex(double x, double y, double z)
 	{
 		throw new RuntimeException();
 	}
 
 	@Override
-	public AbstractVertex createVertex(double [] x)
+	public Vertex2D createVertex(double [] x)
 	{
 		assert x.length == 2;
 		return createVertex(x[0], x[1]);

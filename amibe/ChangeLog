@@ -6,6 +6,14 @@ Tue Oct 30 13:58:05 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/amibe/validation/QualityFloat.java (split): New
 	split() signature with a list of float arguments to have a finer
 	control on quality bounds.
+	* src/org/jcae/mesh/amibe/patch/ElementPatchFactory.java
+	  src/org/jcae/mesh/amibe/ds/HalfEdge.java
+	  src/org/jcae/mesh/amibe/ds/TriangleVH.java
+	  src/org/jcae/mesh/amibe/ds/VirtualHalfEdge.java
+	  src/org/jcae/mesh/amibe/ds/TriangleHE.java
+	  src/org/jcae/mesh/amibe/ds/Mesh.java
+	  src/org/jcae/mesh/amibe/algos3d/AbstractAlgoHalfEdge.java: Use Java
+	1.5 ability to override return types.
 
 Thu Oct 25 15:51:57 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

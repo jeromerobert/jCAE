@@ -110,13 +110,13 @@ public class TriangleVH extends Triangle
 	}
 		
 	/**
-	 * Gets an <code>AbstractHalfEdge</code> instance bound to this triangle.
+	 * Gets a <code>VirtualHalfEdge</code> instance bound to this triangle.
 	 * This method allocates a new {@link VirtualHalfEdge} instance and binds
 	 * it to this triangle.
 	 * @return  a new <code>VirtualHalfEdge</code> instance bound to this triangle
 	 */
 	@Override
-	public AbstractHalfEdge getAbstractHalfEdge()
+	public VirtualHalfEdge getAbstractHalfEdge()
 	{
 		VirtualHalfEdge ot = new VirtualHalfEdge();
 		ot.bind(this);
@@ -124,7 +124,7 @@ public class TriangleVH extends Triangle
 	}
 
 	/**
-	 * Gets an <code>AbstractHalfEdge</code> instance bound to this triangle.
+	 * Gets a <code>VirtualHalfEdge</code> instance bound to this triangle.
 	 * If argument is null, this method behaves as if no argument was passed.
 	 * Otherwise, argument is an existing {@link VirtualHalfEdge} instance
 	 * which is bound to this triangle and returned.
@@ -133,7 +133,7 @@ public class TriangleVH extends Triangle
 	 * @return  a <code>VirtualHalfEdge</code> instance bound to this triangle
 	 */
 	@Override
-	public AbstractHalfEdge getAbstractHalfEdge(AbstractHalfEdge that)
+	public VirtualHalfEdge getAbstractHalfEdge(AbstractHalfEdge that)
 	{
 		if (that == null)
 			that = new VirtualHalfEdge();
