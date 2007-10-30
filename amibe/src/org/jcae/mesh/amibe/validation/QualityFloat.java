@@ -250,9 +250,7 @@ public class QualityFloat
 	
 	public void split(float... v)
 	{
-		layers = -1;
-		for (float f: v)
-			layers++;
+		layers = v.length;
 		if (layers <= 0)
 			return;
 		bounds = new float[layers+1];
