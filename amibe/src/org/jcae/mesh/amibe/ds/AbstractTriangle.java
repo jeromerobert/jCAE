@@ -56,7 +56,7 @@ public class AbstractTriangle
 			traits = builder.createTraits();
 		else
 			traits = null;
-		vertex = new Vertex[3];
+		vertex = new AbstractVertex[3];
 	}
 
 	public void copy(AbstractTriangle src)
