@@ -24,7 +24,6 @@ import gnu.trove.TObjectIntHashMap;
 import gnu.trove.TObjectIntIterator;
 import java.io.*;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -101,7 +100,7 @@ public class ComputeEdgesConnectivity
 	}
 	
 	public void compute() throws XPathExpressionException, ParserConfigurationException,
-		SAXException, IOException, TransformerException
+		SAXException, IOException
 	{
 		XPath xpath=XPathFactory.newInstance().newXPath();
 		document=XMLHelper.parseXML(xmlFile);

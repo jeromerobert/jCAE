@@ -72,17 +72,28 @@ public class XMLHelper
 	
 	/** Write a DOM to a file. */
 	public static void writeXML(Document document, File file)
-		throws IOException, FileNotFoundException, TransformerConfigurationException, TransformerException
+		throws IOException, FileNotFoundException
 	{
 		// save the DOM to file
 		StreamResult result = new StreamResult(new BufferedOutputStream(new FileOutputStream(file)));
 		TransformerFactory transFactory = TransformerFactory.newInstance();
-		Transformer transformer = transFactory.newTransformer();
-		transformer.setOutputProperty("indent", "yes");
-		// hack from http://java.sun.com/xml/jaxp/dist/1.1/docs/tutorial/xslt/2_write.html
-		// to keep DOCTYPE field			
-		transformer.setOutputProperty(javax.xml.transform.OutputKeys.DOCTYPE_SYSTEM, document.getDoctype().getSystemId());
-		transformer.transform(new DOMSource(document), result);
+		try
+		{
+			Transformer transformer = transFactory.newTransformer();
+			transformer.setOutputProperty("indent", "yes");
+			// hack from http://java.sun.com/xml/jaxp/dist/1.1/docs/tutorial/xslt/2_write.html
+			// to keep DOCTYPE field			
+			transformer.setOutputProperty(javax.xml.transform.OutputKeys.DOCTYPE_SYSTEM, document.getDoctype().getSystemId());
+			transformer.transform(new DOMSource(document), result);
+		}
+		catch (TransformerConfigurationException ex)
+		{
+			throw new IOException(ex);
+		}
+		catch (TransformerException ex)
+		{
+			throw new IOException(ex);
+		}
 		result.getOutputStream().close();
 	}
 

@@ -92,7 +92,13 @@ public class TetGen implements AlgoInterface
 		BSubMesh s = d.getFirstSubMesh();
 		Mesh m = Storage.readAllFaces(d.getGraphCell(), s);
 		String outDir = "tetgen.tmp"+File.separator+"s"+s.getId();
-		MeshWriter.writeObject3D(m, outDir, "jcae3d", "brep", d.getGraphCell().getGraph().getModel().getCADFile());
+		try
+		{
+			MeshWriter.writeObject3D(m, outDir, "jcae3d", "brep", d.getGraphCell().getGraph().getModel().getCADFile());
+		} catch (java.io.IOException ex) {
+			ex.printStackTrace();
+			return false;
+		}
 		String pfx = "tetgen-"+d.getId();
 		new MeshExporter.POLY(outDir).write(pfx+".poly");
 		try {

@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Stack;
@@ -80,14 +81,13 @@ public class Mesher3D
 			opts.put("iterations", "5");
 			opts.put("boundaries", "true");
 			new SmoothNodes3D(mesh, opts).compute();
+			MeshWriter.writeObject3D(mesh, xmlDir, "jcae3d", xmlBrepDir, brepFile);
 		}
-		catch(java.io.IOException ex)
+		catch(IOException ex)
 		{
 			logger.warn(ex.getMessage());
 			ex.printStackTrace();
 		}
-		
-		MeshWriter.writeObject3D(mesh, xmlDir, "jcae3d", xmlBrepDir, brepFile);
 	}
 	
 	private static void report(String brepfilename, String xmlDir, double discr, double defl, String startDate)
@@ -120,7 +120,7 @@ public class Mesher3D
 			sys.list(out);
 			out.close();
 		}
-		catch (java.io.IOException ex)
+		catch (IOException ex)
 		{
 		}
 	}

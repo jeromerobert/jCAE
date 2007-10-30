@@ -21,13 +21,16 @@
 
 package org.jcae.mesh;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.io.InputStream;
 import java.util.Properties;
 import java.util.Stack;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
-import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.jcae.mesh.amibe.InvalidFaceException;
 import org.jcae.mesh.amibe.metrics.*;
@@ -38,6 +41,7 @@ import org.jcae.mesh.amibe.algos2d.*;
 import org.jcae.mesh.amibe.ds.MMesh1D;
 import org.jcae.mesh.xmldata.*;
 import org.jcae.mesh.cad.*;
+import org.apache.log4j.Logger;
 
 import gnu.trove.TIntArrayList;
 import gnu.trove.THashSet;
@@ -295,7 +299,15 @@ public class Mesher
 			{
 				logger.warn("Face "+iFace+" is invalid, skipping...");
 				mesh = new Mesh2D(mtb, face); 
-				MeshWriter.writeObject(mesh, outputDir, "jcae2d."+iFace, xmlBrepDir, brepFile, iFace);
+				try
+				{
+					// Write an empty mesh
+					MeshWriter.writeObject(mesh, outputDir, "jcae2d."+iFace, xmlBrepDir, brepFile, iFace);
+				}
+				catch(IOException e)
+				{
+					// Do nothing
+				}
 				toReturn=false;
 			}
 			catch(Exception ex)
@@ -310,7 +322,14 @@ public class Mesher
 			logger.error("Face "+iFace+" cannot be triangulated, skipping...");
 			toReturn=false;
 			mesh = new Mesh2D(mtb, face); 
-			MeshWriter.writeObject(mesh, outputDir, "jcae2d."+iFace, xmlBrepDir, brepFile, iFace);
+			try
+			{
+				MeshWriter.writeObject(mesh, outputDir, "jcae2d."+iFace, xmlBrepDir, brepFile, iFace);
+			}
+			catch(IOException ex)
+			{
+				// Do nothing
+			}
 		}
 		return toReturn;
 	}
@@ -529,7 +548,7 @@ public class Mesher
 			sys.list(out);
 			out.close();
 		}
-		catch (java.io.IOException ex)
+		catch (IOException ex)
 		{
 			ex.printStackTrace();
 		}

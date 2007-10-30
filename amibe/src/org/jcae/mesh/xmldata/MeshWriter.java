@@ -239,44 +239,45 @@ public class MeshWriter
 	 * @param index        shape index
 	 */
 	public static void writeObject(Mesh2D submesh, String xmlDir, String xmlFile, String brepDir, String brepFile, int index)
+		throws IOException
 	{
-		try
-		{
-			File file = new File(xmlDir, xmlFile);
-			File dir = new File(xmlDir, xmlFile+".files");
-			
-			//create the directory if it does not exist
-			if(!dir.exists())
-				dir.mkdirs();
+		File file = new File(xmlDir, xmlFile);
+		File dir = new File(xmlDir, xmlFile+".files");
+		
+		//create the directory if it does not exist
+		if(!dir.exists())
+			dir.mkdirs();
 
-			File nodesFile=new File(dir, JCAEXMLData.nodes2dFilename);
-			File refFile = new File(dir, JCAEXMLData.ref1dFilename);
-			File trianglesFile=new File(dir, JCAEXMLData.triangles2dFilename);
-			Collection<AbstractTriangle> trianglelist = submesh.getTriangles();
-			Collection<AbstractVertex> nodelist = submesh.getNodes();
-			if (nodelist == null)
+		File nodesFile=new File(dir, JCAEXMLData.nodes2dFilename);
+		File refFile = new File(dir, JCAEXMLData.ref1dFilename);
+		File trianglesFile=new File(dir, JCAEXMLData.triangles2dFilename);
+		Collection<AbstractTriangle> trianglelist = submesh.getTriangles();
+		Collection<AbstractVertex> nodelist = submesh.getNodes();
+		if (nodelist == null)
+		{
+			HashSet<AbstractVertex> nodeset = new HashSet<AbstractVertex>();
+			nodelist = new ArrayList<AbstractVertex>();
+			for (AbstractTriangle t: trianglelist)
 			{
-				HashSet<AbstractVertex> nodeset = new HashSet<AbstractVertex>();
-				nodelist = new ArrayList<AbstractVertex>();
-				for (AbstractTriangle t: trianglelist)
+				if (!t.isWritable())
+					continue;
+				for (int j = 0; j < 3; j++)
 				{
-					if (!t.isWritable())
-						continue;
-					for (int j = 0; j < 3; j++)
+					if (!nodeset.contains(t.vertex[j]))
 					{
-						if (!nodeset.contains(t.vertex[j]))
-						{
-							nodeset.add(t.vertex[j]);
-							nodelist.add(t.vertex[j]);
-						}
+						nodeset.add(t.vertex[j]);
+						nodelist.add(t.vertex[j]);
 					}
 				}
 			}
-			TObjectIntHashMap<AbstractVertex> nodeIndex=new TObjectIntHashMap<AbstractVertex>(nodelist.size());
+		}
+		TObjectIntHashMap<AbstractVertex> nodeIndex=new TObjectIntHashMap<AbstractVertex>(nodelist.size());
 			
+		try
+		{
 			// Create and fill the DOM
 			Document document=JCAEXMLWriter.createJcaeDocument();
-			
+		
 			Element jcaeElement=document.getDocumentElement();
 			Element meshElement=document.createElement("mesh");
 			Element shapeElement=XMLHelper.parseXMLString(document, "<shape>"+
@@ -302,9 +303,13 @@ public class MeshWriter
 			// save the DOM to file
 			XMLHelper.writeXML(document, file);
 		}
-		catch(Exception ex)
+		catch (ParserConfigurationException ex)
 		{
-			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+		catch (SAXException ex)
+		{
+			throw new RuntimeException(ex);
 		}
 	}
 	
@@ -318,6 +323,7 @@ public class MeshWriter
 	 * @param brepFile     basename of the brep file
 	 */
 	public static void writeObject3D(Mesh submesh, String xmlDir, String xmlFile, String brepDir, String brepFile)
+		throws IOException
 	{
 		try
 		{
@@ -369,9 +375,13 @@ public class MeshWriter
 			// save the DOM to file
 			XMLHelper.writeXML(document, file);
 		}
-		catch(Exception ex)
+		catch (ParserConfigurationException ex)
 		{
-			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+		catch (SAXException ex)
+		{
+			throw new RuntimeException(ex);
 		}
 	}
 }

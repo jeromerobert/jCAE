@@ -87,7 +87,13 @@ public class Netgen implements AlgoInterface
 		BSubMesh s = d.getFirstSubMesh();
 		Mesh m = Storage.readAllFaces(d.getGraphCell(), s);
 		String outDir = "netgen.tmp"+File.separator+"s"+s.getId();
-		MeshWriter.writeObject3D(m, outDir, "jcae3d", "brep", d.getGraphCell().getGraph().getModel().getCADFile());
+		try
+		{
+			MeshWriter.writeObject3D(m, outDir, "jcae3d", "brep", d.getGraphCell().getGraph().getModel().getCADFile());
+		} catch (java.io.IOException ex) {
+			ex.printStackTrace();
+			return false;
+		}
 		String pfx = "netgen-"+d.getId();
 		new MeshExporter.STL(outDir).write(pfx+".stl");
 		try {
