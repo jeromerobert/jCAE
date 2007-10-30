@@ -57,40 +57,50 @@ public class MeshWriter
 		DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile)));
 		DataOutputStream refout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile)));
 		//  Write interior nodes first
+		int nref = 0;
 		int i = 0;
 		for(AbstractVertex av: nodelist)
 		{
 			if (av == outer)
 				continue;
-			Vertex n = (Vertex) av;
-			int ref1d = n.getRef();
+			int ref1d = 0;
+			if (av instanceof Vertex)
+			{
+				Vertex n = (Vertex) av;
+				ref1d = n.getRef();
+			}
 			if (0 == ref1d)
 			{
-				double [] p = n.getUV();
+				double [] p = av.getUV();
 				for (int d = 0; d < p.length; d++)
 					out.writeDouble(p[d]);
-				nodeIndex.put(n, i);
+				nodeIndex.put(av, i);
 				i++;
 			}
+			else
+				nref++;
 		}
 		
 		//  Write boundary nodes and 1D references
-		int nref = 0;
-		for(AbstractVertex av: nodelist)
+		if (nref > 0)
 		{
-			if (av == outer)
-				continue;
-			Vertex n = (Vertex) av;
-			int ref1d = n.getRef();
-			if (0 != ref1d)
+			nref = 0;
+			for(AbstractVertex av: nodelist)
 			{
-				double [] p = n.getUV();
-				for (int d = 0; d < p.length; d++)
-					out.writeDouble(p[d]);
-				refout.writeInt(Math.abs(ref1d));
-				nodeIndex.put(n, i);
-				i++;
-				nref++;
+				if (av == outer)
+					continue;
+				Vertex n = (Vertex) av;
+				int ref1d = n.getRef();
+				if (0 != ref1d)
+				{
+					double [] p = n.getUV();
+					for (int d = 0; d < p.length; d++)
+						out.writeDouble(p[d]);
+					refout.writeInt(Math.abs(ref1d));
+					nodeIndex.put(n, i);
+					i++;
+					nref++;
+				}
 			}
 		}
 		out.close();
