@@ -25,6 +25,7 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshExporter;
 import org.jcae.mesh.amibe.validation.*;
+import java.io.IOException;
 import org.apache.log4j.Logger;
 
 /**
@@ -39,7 +40,15 @@ public class MeshValid3D
 		logger.info("Reading 3D mesh");
 		String xmlFile = "jcae3d";
 		Mesh mesh3D = new Mesh();
-		MeshReader.readObject3D(mesh3D, xmlDir, xmlFile);
+		try
+		{
+			MeshReader.readObject3D(mesh3D, xmlDir, xmlFile);
+		}
+		catch (IOException ex)
+		{
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
 		//MinLengthFace qproc = new MinLengthFace();
 		MinAngleFace qproc = new MinAngleFace();
 		QualityFloat data = new QualityFloat(1000);

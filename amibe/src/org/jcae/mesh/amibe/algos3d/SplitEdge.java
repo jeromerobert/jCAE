@@ -28,6 +28,7 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;
 import org.apache.log4j.Logger;
@@ -214,7 +215,15 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = org.jcae.mesh.amibe.traits.MeshTraitsBuilder.getDefault3D();
 		mtb.addTriangleSet();
 		Mesh mesh = new Mesh(mtb);
-		MeshReader.readObject3D(mesh, args[0], "jcae3d", -1);
+		try
+		{
+			MeshReader.readObject3D(mesh, args[0], "jcae3d", -1);
+		}
+		catch (IOException ex)
+		{
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
 		new SplitEdge(mesh, options).compute();
 		File brepFile=new File(args[3]);
 		MeshWriter.writeObject3D(mesh, args[4], "jcae3d", brepFile.getParent(), brepFile.getName());

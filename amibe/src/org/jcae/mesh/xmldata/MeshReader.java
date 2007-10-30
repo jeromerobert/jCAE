@@ -32,6 +32,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
@@ -42,10 +43,13 @@ import java.util.Iterator;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 import gnu.trove.TIntIntHashMap;
 import org.apache.log4j.Logger;
 
@@ -62,13 +66,27 @@ public class MeshReader
 	 * @param xmlFile  basename of the main XML file
 	 */
 	public static void readObject(Mesh2D mesh, String xmlDir, String xmlFile)
+		throws IOException
 	{
 		logger.debug("begin reading "+xmlDir+File.separator+xmlFile);
 		XPath xpath = XPathFactory.newInstance().newXPath();
+		Document document;
 		
 		try
 		{
-			Document document = XMLHelper.parseXML(new File(xmlDir, xmlFile));
+			document = XMLHelper.parseXML(new File(xmlDir, xmlFile));
+		}
+		catch (ParserConfigurationException ex)
+		{
+			throw new IOException(ex);
+		}
+		catch (SAXException ex)
+		{
+			throw new IOException(ex);
+		}
+
+		try
+		{
 			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh",
 				document, XPathConstants.NODE);
 			Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement,
@@ -165,10 +183,9 @@ public class MeshReader
 			//  Build adjacency relations
 			mesh.buildAdjacency();
 		}
-		catch(Exception ex)
+		catch(XPathExpressionException ex)
 		{
-			ex.printStackTrace();
-			throw new RuntimeException(ex);
+			throw new IOException(ex);
 		}
 		logger.debug("end reading "+xmlFile);
 	}
@@ -181,6 +198,7 @@ public class MeshReader
 	 * @param xmlFile  basename of the main XML file
 	 */
 	public static void readObject3D(Mesh mesh, String xmlDir, String xmlFile)
+		throws IOException
 	{
 		readObject3D(mesh, xmlDir, xmlFile, 0.0);
 
@@ -195,12 +213,26 @@ public class MeshReader
 	 * @param ridgeAngle  an edge with a dihedral angle lower than this value is considered as a sharp edge which has to be preserved.
 	 */
 	public static void readObject3D(Mesh mesh, String xmlDir, String xmlFile, double ridgeAngle)
+		throws IOException
 	{
 		logger.debug("begin reading "+xmlDir+File.separator+xmlFile);
 		XPath xpath = XPathFactory.newInstance().newXPath();
+		Document document;
 		try
 		{
-			Document document = XMLHelper.parseXML(new File(xmlDir, xmlFile));
+			document = XMLHelper.parseXML(new File(xmlDir, xmlFile));
+		}
+		catch (ParserConfigurationException ex)
+		{
+			throw new IOException(ex);
+		}
+		catch (SAXException ex)
+		{
+			throw new IOException(ex);
+		}
+
+		try
+		{
 			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh", document, XPathConstants.NODE);
 			Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement, XPathConstants.NODE);
 			String refFile = xpath.evaluate("references/file/@location", submeshNodes);
@@ -330,10 +362,9 @@ public class MeshReader
 				mesh.buildAdjacency(ridgeAngle);
 			}
 		}
-		catch(Exception ex)
+		catch(XPathExpressionException ex)
 		{
-			ex.printStackTrace();
-			throw new RuntimeException(ex);
+			throw new IOException(ex);
 		}
 		logger.debug("end reading "+xmlFile);
 	}

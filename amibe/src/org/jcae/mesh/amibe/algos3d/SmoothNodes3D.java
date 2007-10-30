@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Iterator;
+import java.io.IOException;
 import org.apache.log4j.Logger;
 
 /**
@@ -271,7 +272,15 @@ public class SmoothNodes3D
 		mtb.addTriangleSet();
 		mtb.add(ttb);
 		Mesh mesh = new Mesh(mtb);
-		MeshReader.readObject3D(mesh, args[0], args[1], -1);
+		try
+		{
+			MeshReader.readObject3D(mesh, args[0], args[1], -1);
+		}
+		catch (IOException ex)
+		{
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
 		Map<String, String> opts = new HashMap<String, String>();
 		opts.put("size", args[2]);
 		opts.put("iterations", args[3]);

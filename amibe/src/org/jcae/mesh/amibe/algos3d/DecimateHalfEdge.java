@@ -513,7 +513,15 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		}
 		logger.info("Load geometry file");
 		final Mesh mesh = new Mesh();
-		MeshReader.readObject3D(mesh, args[0], "jcae3d", -1);
+		try
+		{
+			MeshReader.readObject3D(mesh, args[0], "jcae3d", -1);
+		}
+		catch (IOException ex)
+		{
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
 		new DecimateHalfEdge(mesh, options).compute();
 		final File brepFile=new File(args[3]);
 		MeshWriter.writeObject3D(mesh, args[4], "jcae3d", brepFile.getParent(), brepFile.getName());

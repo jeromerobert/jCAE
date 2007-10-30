@@ -70,18 +70,18 @@ public class Mesher3D
 			System.setProperty("org.jcae.mesh.xmldata.MeshReader.ridgeAngleDegre", ridgeAngleProp);
 		}
 		double ridgeAngle = Double.parseDouble(ridgeAngleProp);
-		if (brepFile.endsWith(".unv"))
-			org.jcae.mesh.amibe.util.UNVReader.readMesh(mesh, brepFile, ridgeAngle);
-		else
-			MeshReader.readObject3D(mesh, xmlDir, "jcae3d", ridgeAngle);
 		try
 		{
+			if (brepFile.endsWith(".unv"))
+				org.jcae.mesh.amibe.util.UNVReader.readMesh(mesh, brepFile, ridgeAngle);
+			else
+				MeshReader.readObject3D(mesh, xmlDir, "jcae3d", ridgeAngle);
 			HashMap<String, String> opts = new HashMap<String, String>();
 			opts.put("iterations", "5");
 			opts.put("boundaries", "true");
 			new SmoothNodes3D(mesh, opts).compute();
 		}
-		catch(Exception ex)
+		catch(java.io.IOException ex)
 		{
 			logger.warn(ex.getMessage());
 			ex.printStackTrace();

@@ -39,6 +39,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
 import org.apache.log4j.Logger;
 
 
@@ -50,7 +52,7 @@ public class MeshWriter
 	 * Used by {@link writeObject}
 	 */
 	private static Element writeObjectNodes(Document document, Collection<AbstractVertex> nodelist, AbstractVertex outer, File nodesFile, File refFile, String baseDir, TObjectIntHashMap<AbstractVertex> nodeIndex)
-		throws IOException
+		throws ParserConfigurationException, SAXException, IOException
 	{
 		//save nodes
 		logger.debug("begin writing "+nodesFile);
@@ -122,7 +124,7 @@ public class MeshWriter
 	 * Used by {@link writeObject}
 	 */
 	private static Element writeObjectTriangles(Document document, Collection<AbstractTriangle> trianglelist, File trianglesFile, String baseDir, TObjectIntHashMap<AbstractVertex> nodeIndex)
-		throws IOException
+		throws ParserConfigurationException, SAXException, IOException
 	{
 		//save triangles
 		logger.debug("begin writing "+trianglesFile);
@@ -175,7 +177,8 @@ public class MeshWriter
 		return wgp.getGroupsElement();
 	}
 	
-	private static final class WriteGroupProcedure implements TIntObjectProcedure<TIntArrayList> {
+	private static final class WriteGroupProcedure implements TIntObjectProcedure<TIntArrayList>
+	{
 		private DataOutputStream out;
 		private Document document;
 		private Element groups;
@@ -201,17 +204,25 @@ public class MeshWriter
 					out.writeInt(list.get(i));
 					nrTriangles++;
 				}
+				groups.appendChild(
+					XMLHelper.parseXMLString(document, "<group id=\""+key+"\">"+
+						"<name>"+(key+1)+"</name>"+
+						"<number>"+nrTriangles+"</number>"+					
+						"<file format=\"integerstream\" location=\""+filename+"\""+
+						" offset=\""+offset+"\"/></group>"));
 			}
 			catch(IOException ex)
 			{
 				ex.printStackTrace();
 			}
-			groups.appendChild(
-				XMLHelper.parseXMLString(document, "<group id=\""+key+"\">"+
-					"<name>"+(key+1)+"</name>"+
-					"<number>"+nrTriangles+"</number>"+					
-					"<file format=\"integerstream\" location=\""+filename+"\""+
-					" offset=\""+offset+"\"/></group>"));
+			catch(ParserConfigurationException ex)
+			{
+				ex.printStackTrace();
+			}
+			catch(SAXException ex)
+			{
+				ex.printStackTrace();
+			}
 			offset += nrTriangles;
 			return true;
 		}

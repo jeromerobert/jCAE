@@ -14,6 +14,10 @@ Tue Oct 30 13:58:05 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	  src/org/jcae/mesh/amibe/ds/Mesh.java
 	  src/org/jcae/mesh/amibe/algos3d/AbstractAlgoHalfEdge.java: Use Java
 	1.5 ability to override return types.
+	* src/org/jcae/mesh/xmldata/XMLHelper.java (parseXMLString): Throws
+	ParserConfigurationException, SAXException, IOException.
+	* src/org/jcae/mesh/xmldata/MeshReader.java (readObject, readObject3D):
+	Throws IOException.
 
 Thu Oct 25 15:51:57 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
 

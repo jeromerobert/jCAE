@@ -61,27 +61,13 @@ public class XMLHelper
 	
 	/** Parse a valid xml string and return the Element representing this string. */	
 	public static Element parseXMLString(Document document, String string)
+		throws ParserConfigurationException, SAXException, IOException
 	{
-		try
-		{
-			DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
-			DocumentBuilder builder=factory.newDocumentBuilder();
-			Document subDoc=builder.parse(new InputSource(new StringReader(string)));
-			Element e=subDoc.getDocumentElement();		
-			return (Element)document.importNode(e, true);
-		} catch(ParserConfigurationException ex)
-		{
-			ex.printStackTrace();			
-		}
-		catch(SAXException ex)
-		{
-			ex.printStackTrace();
-		}
-		catch(IOException ex)
-		{
-			ex.printStackTrace();
-		}
-		return null;
+		DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder=factory.newDocumentBuilder();
+		Document subDoc=builder.parse(new InputSource(new StringReader(string)));
+		Element e=subDoc.getDocumentElement();		
+		return (Element)document.importNode(e, true);
 	}
 	
 	/** Write a DOM to a file. */
