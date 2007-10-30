@@ -39,6 +39,7 @@ public class JCAEXMLWriter
 		DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
 		factory.setValidating(true);
 		DocumentBuilder builder=factory.newDocumentBuilder();
+		builder.setEntityResolver(new ClassPathEntityResolver());
 		DOMImplementation domImpl=builder.getDOMImplementation();
 		DocumentType docType=domImpl.createDocumentType("jcae", null,
 			"classpath:///org/jcae/mesh/xmldata/jcae.dtd");
@@ -54,6 +55,7 @@ public class JCAEXMLWriter
 		DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
 		factory.setValidating(true);
 		DocumentBuilder builder=factory.newDocumentBuilder();
+		builder.setEntityResolver(new ClassPathEntityResolver());
 		DOMImplementation domImpl=builder.getDOMImplementation();
 		DocumentType docType=domImpl.createDocumentType("jcae", null,
 			"classpath:///org/jcae/mesh/xmldata/jcaebora.dtd");
