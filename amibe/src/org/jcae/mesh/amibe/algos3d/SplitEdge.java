@@ -149,7 +149,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		double dapex = insertedVertex.distance3D(current.apex());
 		if (!current.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 		{
-			current = (HalfEdge) current.sym();
+			current = current.sym();
 			dapex = Math.min(dapex, insertedVertex.distance3D(current.apex()));
 		}
 		if (dapex * dapex * tolerance * 16.0 > 1.0)
@@ -173,10 +173,10 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		{
 			addToTree(current);
 			// Moves clockwise to the next edge with same destination
-			current = (HalfEdge) current.next();
-			current = (HalfEdge) current.sym();
+			current = current.next();
+			current = current.sym();
 		}
-		return (HalfEdge) current.next();
+		return current.next();
 	}
 	
 	@Override

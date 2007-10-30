@@ -219,7 +219,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			HalfEdge e = (HalfEdge) f.getAbstractHalfEdge();
 			for (int i = 0; i < 3; i++)
 			{
-				e = (HalfEdge) e.next();
+				e = e.next();
 				if (e.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 				{
 					for (Iterator<AbstractHalfEdge> it = e.fanIterator(); it.hasNext(); )
@@ -375,22 +375,22 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 				nrTriangles--;
 				for (int i = 0; i < 2; i++)
 				{
-					f = (HalfEdge) f.next();
+					f = f.next();
 					removeFromTree(f);
 				}
-				f = (HalfEdge) f.next();
+				f = f.next();
 			}
 		}
-		HalfEdge sym = (HalfEdge) current.sym();
+		HalfEdge sym = current.sym();
 		if (sym.getTri().isWritable())
 		{
 			nrTriangles--;
 			for (int i = 0; i < 2; i++)
 			{
-				sym = (HalfEdge) sym.next();
+				sym = sym.next();
 				removeFromTree(sym);
 			}
-			sym = (HalfEdge) sym.next();
+			sym = sym.next();
 		}
 		//  Contract (v1,v2) into v3
 		//  By convention, collapse() returns edge (v3, apex)
@@ -427,7 +427,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		{
 			do
 			{
-				current = (HalfEdge) current.nextOriginLoop();
+				current = current.nextOriginLoop();
 				assert !current.hasAttributes(AbstractHalfEdge.NONMANIFOLD);
 				if (current.destination().isReadable() && current.origin().isReadable())
 				{
@@ -443,7 +443,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 				}
 			}
 			while (current.apex() != apex);
-			return (HalfEdge) current.next();
+			return current.next();
 		}
 		Vertex o = current.origin();
 		Triangle [] list = (Triangle []) o.getLink();
@@ -451,14 +451,14 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		{
 			HalfEdge f = (HalfEdge) t.getAbstractHalfEdge();
 			if (f.destination() == o)
-				f = (HalfEdge) f.next();
+				f = f.next();
 			else if (f.apex() == o)
-				f = (HalfEdge) f.prev();
+				f = f.prev();
 			assert f.origin() == o;
 			Vertex d = f.destination();
 			do
 			{
-				f = (HalfEdge) f.nextOriginLoop();
+				f = f.nextOriginLoop();
 				if (f.destination().isReadable() && f.origin().isReadable())
 				{
 					double newCost = cost(f);
@@ -475,7 +475,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			while (f.destination() != d);
 			current = f;
 		}
-		return (HalfEdge) current.next();
+		return current.next();
 	}
 	
 	@Override
