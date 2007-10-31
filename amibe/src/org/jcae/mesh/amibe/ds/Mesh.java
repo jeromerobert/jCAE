@@ -360,6 +360,7 @@ public class Mesh extends AbstractMesh implements Serializable
 	 * Build adjacency relations between triangles
 	 * @deprecated
 	 */
+	@Deprecated
 	public void buildAdjacency(Vertex [] vertices, double minAngle)
 	{
 		Collection<AbstractVertex> list = new ArrayList<AbstractVertex>(vertices.length);

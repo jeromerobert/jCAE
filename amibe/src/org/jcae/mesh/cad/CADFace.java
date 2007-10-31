@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,19 +21,19 @@
 package org.jcae.mesh.cad;
 
 /**
- * Describe a topological face
+ * Describe a topological face.
  */
 public interface CADFace extends CADShape
 {
-    /**
-     * Return the bounding box of this face in an array like {Xmin, Ymin, Zmin, Xmax,
-     * Ymax, Zmax}.
-     * @return the bounding box of this face
-     */    
+	/**
+	 * Returns the bounding box of this face in an array like {Xmin, Ymin, Zmin, Xmax,
+	 * Ymax, Zmax}.
+	 * @return the bounding box of this face
+	 */    
 	public double [] boundingBox();
-    /**
-     * Return the geometry of this face
-     * @return the geometry of this face
-     */    
+	/**
+	 * Returns the geometry of this face
+	 * @return the geometry of this face
+	 */    
 	public CADGeomSurface getGeomSurface();
 }
