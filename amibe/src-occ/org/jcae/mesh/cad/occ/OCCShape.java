@@ -20,12 +20,9 @@
 package org.jcae.mesh.cad.occ;
 
 import org.jcae.mesh.cad.CADShape;
-import org.jcae.mesh.cad.CADGeomSurface;
-import org.jcae.opencascade.jni.BRep_Tool;
 import org.jcae.opencascade.jni.BRepTools;
 import org.jcae.opencascade.jni.TopoDS_Vertex;
 import org.jcae.opencascade.jni.TopoDS_Edge;
-import org.jcae.opencascade.jni.TopoDS_Wire;
 import org.jcae.opencascade.jni.TopoDS_Face;
 import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.jcae.opencascade.jni.TopoDS_Solid;
@@ -37,7 +34,7 @@ public class OCCShape implements CADShape
 {
 	protected TopoDS_Shape myShape = null;
 	
-	public OCCShape()
+	protected OCCShape()
 	{
 	}
 	
@@ -51,34 +48,6 @@ public class OCCShape implements CADShape
 		return myShape;
 	}
 	
-	// Specialized types, useful to avoid casts
-	protected TopoDS_Face asTopoDS_Face()
-	{
-		return (TopoDS_Face) myShape;
-	}
-	
-	protected TopoDS_Edge asTopoDS_Edge()
-	{
-		return (TopoDS_Edge) myShape;
-	}
-	
-	protected TopoDS_Wire asTopoDS_Wire()
-	{
-		return (TopoDS_Wire) myShape;
-	}
-	
-	protected TopoDS_Vertex asTopoDS_Vertex()
-	{
-		return (TopoDS_Vertex) myShape;
-	}
-	
-	public CADGeomSurface getGeomSurface()
-	{
-		OCCGeomSurface surface = new OCCGeomSurface();
-		surface.setSurface(BRep_Tool.surface(asTopoDS_Face()));
-		return surface;
-	}
-	
 	public double [] boundingBox()
 	{
 		Bnd_Box box = new Bnd_Box();
@@ -86,7 +55,7 @@ public class OCCShape implements CADShape
 		return box.get();
 	}
 	
-	public CADShape reversed()
+	public OCCShape reversed()
 	{
 		OCCShape s;
 		if (myShape instanceof TopoDS_Vertex)

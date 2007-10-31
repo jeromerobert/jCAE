@@ -27,17 +27,23 @@ import org.jcae.opencascade.jni.BRep_Tool;
 
 public class OCCVertex extends OCCShape implements CADVertex
 {
+	@Override
+	protected TopoDS_Vertex getShape()
+	{
+		return (TopoDS_Vertex) myShape;
+	}
+
 	public double [] parameters(CADFace o)
 	{
 		OCCFace face = (OCCFace) o;
-		TopoDS_Face F = face.asTopoDS_Face();
-		TopoDS_Vertex V = asTopoDS_Vertex();
+		TopoDS_Face F = face.getShape();
+		TopoDS_Vertex V = getShape();
 		return BRep_Tool.parameters(V, F);
 	}
 	
 	public double [] pnt()
 	{
-		return BRep_Tool.pnt(asTopoDS_Vertex());
+		return BRep_Tool.pnt(getShape());
 	}
 	
 }

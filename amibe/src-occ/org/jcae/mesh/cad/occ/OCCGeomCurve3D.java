@@ -39,7 +39,7 @@ public class OCCGeomCurve3D implements CADGeomCurve3D
 		if (!(E instanceof OCCEdge))
 			throw new IllegalArgumentException();
 		OCCEdge occEdge = (OCCEdge) E;
-		Geom_Curve curve = BRep_Tool.curve(occEdge.asTopoDS_Edge(), range);
+		Geom_Curve curve = BRep_Tool.curve(occEdge.getShape(), range);
 		if (curve == null)
 			throw new RuntimeException();
 		myCurve = new GeomAdaptor_Curve(curve);

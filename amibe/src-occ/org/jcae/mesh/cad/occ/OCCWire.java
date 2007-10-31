@@ -22,9 +22,16 @@ package org.jcae.mesh.cad.occ;
 import org.jcae.mesh.cad.CADWire;
 import org.jcae.opencascade.jni.GProp_GProps;
 import org.jcae.opencascade.jni.BRepGProp;
+import org.jcae.opencascade.jni.TopoDS_Wire;
 
 public class OCCWire extends OCCShape implements CADWire
 {
+	@Override
+	protected TopoDS_Wire getShape()
+	{
+		return (TopoDS_Wire) myShape;
+	}
+
 	public double length()
 	{
 		GProp_GProps myProps = new GProp_GProps();

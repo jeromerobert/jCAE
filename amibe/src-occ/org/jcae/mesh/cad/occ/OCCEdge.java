@@ -22,19 +22,26 @@ package org.jcae.mesh.cad.occ;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.opencascade.jni.TopoDS_Vertex;
+import org.jcae.opencascade.jni.TopoDS_Edge;
 import org.jcae.opencascade.jni.TopExp;
 import org.jcae.opencascade.jni.BRep_Tool;
 
 public class OCCEdge extends OCCShape implements CADEdge
 {
+	@Override
+	protected TopoDS_Edge getShape()
+	{
+		return (TopoDS_Edge) myShape;
+	}
+
 	public boolean isDegenerated()
 	{
-		return BRep_Tool.degenerated(asTopoDS_Edge());
+		return BRep_Tool.degenerated(getShape());
 	}
 	
 	public double [] range()
 	{
-		return BRep_Tool.range(asTopoDS_Edge());
+		return BRep_Tool.range(getShape());
 	}
 	
 	public CADVertex [] vertices()
@@ -43,7 +50,7 @@ public class OCCEdge extends OCCShape implements CADEdge
 		//  A CADExplorer must not be used here because it
 		//  does not necessarily return vertices in the same order.
 		//  TopExp.vertices takes care of edge orientation.
-		TopoDS_Vertex [] tv = TopExp.vertices(asTopoDS_Edge());
+		TopoDS_Vertex [] tv = TopExp.vertices(getShape());
 		for (int i = 0; i < 2; i++)
 		{
 			OCCVertex occVertex=new OCCVertex();

@@ -40,8 +40,8 @@ public class OCCGeomCurve2D implements CADGeomCurve2D
 		OCCEdge occEdge = (OCCEdge) E;
 		OCCFace occFace = (OCCFace) F;
 		Geom2d_Curve curve = BRep_Tool.curveOnSurface(
-			occEdge.asTopoDS_Edge(),
-			occFace.asTopoDS_Face(), range);
+			occEdge.getShape(),
+			occFace.getShape(), range);
 		if (curve == null)
 			throw new RuntimeException();
 		myCurve = new Geom2dAdaptor_Curve(curve);

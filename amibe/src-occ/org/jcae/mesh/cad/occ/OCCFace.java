@@ -22,9 +22,17 @@ package org.jcae.mesh.cad.occ;
 import org.jcae.mesh.cad.CADFace;
 import org.jcae.opencascade.jni.Bnd_Box;
 import org.jcae.opencascade.jni.BRepBndLib;
+import org.jcae.opencascade.jni.TopoDS_Face;
+import org.jcae.opencascade.jni.BRep_Tool;
 
 public class OCCFace extends OCCShape implements CADFace
 {
+	@Override
+	protected TopoDS_Face getShape()
+	{
+		return (TopoDS_Face) myShape;
+	}
+
 	@Override
 	public double [] boundingBox()
 	{
@@ -32,4 +40,12 @@ public class OCCFace extends OCCShape implements CADFace
 		BRepBndLib.add(myShape, box);
 		return box.get();
 	}
+
+	public OCCGeomSurface getGeomSurface()
+	{
+		OCCGeomSurface surface = new OCCGeomSurface();
+		surface.setSurface(BRep_Tool.surface(getShape()));
+		return surface;
+	}
+
 }

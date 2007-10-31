@@ -38,7 +38,7 @@ public class OCCWireExplorer implements CADWireExplorer
 	{
 		OCCWire occWire = (OCCWire) w;
 		OCCFace occFace = (OCCFace) f;
-		occWExp.init(occWire.asTopoDS_Wire(), occFace.asTopoDS_Face());
+		occWExp.init(occWire.getShape(), occFace.getShape());
 	}
 	
 	public boolean more()
