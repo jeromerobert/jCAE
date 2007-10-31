@@ -37,6 +37,7 @@ import java.io.DataOutputStream;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Arrays;
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 import javax.xml.parsers.ParserConfigurationException;
@@ -151,7 +152,7 @@ public class MeshWriter
 		throws IOException
 	{
 		logger.debug("begin writing "+groupsFile);
-		int i=0;
+		int cnt=0;
 		TIntObjectHashMap<TIntArrayList> groupMap = new TIntObjectHashMap<TIntArrayList>();
 		for(AbstractTriangle f: trianglelist)
 		{
@@ -164,49 +165,33 @@ public class MeshWriter
 				list = new TIntArrayList(100);
 				groupMap.put(id, list);
 			}
-			list.add(i);
-			i++;
+			list.add(cnt);
+			cnt++;
 		}
-		// FIXME: sort group ids
+		String filename = XMLHelper.canonicalize(baseDir, groupsFile.toString());
 		DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(groupsFile)));
-		WriteGroupProcedure wgp = new WriteGroupProcedure(out, document, XMLHelper.canonicalize(baseDir, groupsFile.toString()));
-		groupMap.forEachEntry(wgp);
-		out.close();
-		logger.debug("end writing "+groupsFile);
-		
-		return wgp.getGroupsElement();
-	}
-	
-	private static final class WriteGroupProcedure implements TIntObjectProcedure<TIntArrayList>
-	{
-		private DataOutputStream out;
-		private Document document;
-		private Element groups;
-		private String filename;
-		private int offset = 0;
-		public WriteGroupProcedure(DataOutputStream out, Document document, String filename)
+		Element groups = document.createElement("groups");
+
+		// Sort group ids
+		int [] sortedKeys = new int[groupMap.size()];
+		System.arraycopy(groupMap.keys(), 0, sortedKeys, 0, sortedKeys.length);
+		Arrays.sort(sortedKeys);
+
+		int offset = 0;
+		for (int id: sortedKeys)
 		{
-			this.out = out;
-			this.document = document;
-			this.filename = filename;
-			groups = document.createElement("groups");
-		}
-		public final Element getGroupsElement()
-		{
-			return groups;
-		}
-		public final boolean execute(int key, TIntArrayList list) {
 			int nrTriangles = 0;
+			TIntArrayList list = groupMap.get(id);
 			try
 			{
-				for(int i = 0; i < list.size(); i++)
+				for(int i = 0, n = list.size(); i < n; i++)
 				{
 					out.writeInt(list.get(i));
 					nrTriangles++;
 				}
 				groups.appendChild(
-					XMLHelper.parseXMLString(document, "<group id=\""+key+"\">"+
-						"<name>"+(key+1)+"</name>"+
+					XMLHelper.parseXMLString(document, "<group id=\""+id+"\">"+
+						"<name>"+(id+1)+"</name>"+
 						"<number>"+nrTriangles+"</number>"+					
 						"<file format=\"integerstream\" location=\""+filename+"\""+
 						" offset=\""+offset+"\"/></group>"));
@@ -224,8 +209,11 @@ public class MeshWriter
 				ex.printStackTrace();
 			}
 			offset += nrTriangles;
-			return true;
 		}
+		out.close();
+		logger.debug("end writing "+groupsFile);
+		
+		return groups;
 	}
 	
 	/**
