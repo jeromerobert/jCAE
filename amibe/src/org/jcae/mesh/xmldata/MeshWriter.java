@@ -23,7 +23,6 @@ package org.jcae.mesh.xmldata;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
-import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.AbstractVertex;
 import gnu.trove.TObjectIntHashMap;
 import gnu.trove.TIntObjectHashMap;
@@ -66,12 +65,7 @@ public class MeshWriter
 		{
 			if (av == outer)
 				continue;
-			int ref1d = 0;
-			if (av instanceof Vertex)
-			{
-				Vertex n = (Vertex) av;
-				ref1d = n.getRef();
-			}
+			int ref1d = av.getRef();
 			if (0 == ref1d)
 			{
 				double [] p = av.getUV();
@@ -92,15 +86,14 @@ public class MeshWriter
 			{
 				if (av == outer)
 					continue;
-				Vertex n = (Vertex) av;
-				int ref1d = n.getRef();
+				int ref1d = av.getRef();
 				if (0 != ref1d)
 				{
-					double [] p = n.getUV();
+					double [] p = av.getUV();
 					for (int d = 0; d < p.length; d++)
 						out.writeDouble(p[d]);
 					refout.writeInt(Math.abs(ref1d));
-					nodeIndex.put(n, i);
+					nodeIndex.put(av, i);
 					i++;
 					nref++;
 				}
