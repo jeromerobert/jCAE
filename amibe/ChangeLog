@@ -2,6 +2,8 @@ Wed Oct 31 15:13:39 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/MeshWriter.java (writeObjectGroups): Sort
 	groups according to their identifier.
+	* src/org/jcae/mesh/amibe/util/UNVReader.java (readGroup): Set groupId
+	on triangles.
 
 Tue Oct 30 13:58:05 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 

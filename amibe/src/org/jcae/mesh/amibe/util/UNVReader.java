@@ -267,6 +267,7 @@ public class UNVReader
 	{
 		logger.debug("Reading groups");
 		String line = "";
+		int groupIdx = 0;
 		try
 		{
 			line = rd.readLine();
@@ -300,11 +301,14 @@ public class UNVReader
 						int ind = Integer.valueOf(index).intValue();
 						if (ind != 0)
 						{
-							facelist.add(facesmap.get(ind));
+							AbstractTriangle f = facesmap.get(ind);
+							facelist.add(f);
+							f.setGroupId(groupIdx);
 						}
 					}
 				}
-				new MGroup3D(title, facelist);
+				new MGroup3D(groupIdx, title, facelist);
+				groupIdx++;
 			}
 		}
 		catch(Exception e)
