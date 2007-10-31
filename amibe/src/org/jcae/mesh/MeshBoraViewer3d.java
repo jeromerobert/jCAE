@@ -50,7 +50,15 @@ public class MeshBoraViewer3d
 		BModel model = BModelReader.readObject(boraDir);
 		model = BModelReader.readObject(boraDir);
 		Mesh m = Storage.readAllFaces(model.getGraph().getRootCell());
-		MeshWriter.writeObject3D(m, tmpDir, "jcae3d", ".", "temp.brep");
+		try
+		{
+			MeshWriter.writeObject3D(m, tmpDir, "jcae3d", ".", "temp.brep");
+		}
+		catch (java.io.IOException ex)
+		{
+			ex.printStackTrace();
+			System.exit(1);
+		}
 
 		JFrame feFrame=new JFrame("jCAE Demo");
 		feFrame.setSize(800,600);
