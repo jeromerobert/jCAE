@@ -1193,13 +1193,14 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		// h1 into t3 so that it does not need to be updated by
 		// the caller.
 		HalfEdge n1 = t3.getAbstractHalfEdge();
-		boolean updateRefHalfEdge = true;
+		boolean updateRefHalfEdge = false;
 		if (h1.localNumber == 1)
 			n1 = n1.next;
 		else if (h1.localNumber == 2)
 			n1 = n1.next.next;
 		else
-			updateRefHalfEdge = false;
+			updateRefHalfEdge = true;
+		assert h1.localNumber == n1.localNumber : "Wrong local numbers: "+n1+"\n"+h1;
 		// Update forward links
 		HalfEdge h1next = h1.next;
 		h1.next = n1.next;
