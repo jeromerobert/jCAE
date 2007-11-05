@@ -405,5 +405,28 @@ public class HalfEdgeTest extends AbstractHalfEdgeTest
 		super.split(v[4], v[5], n);
 	}
 
+	@Test public void splitNM20Inverted()
+	{
+		int m = 2;
+		int n = 2;
+		createMxNShell(m, n);
+		rotateMxNShellAroundY(m, n, 180);
+		rotateMxNShellAroundY(m, n, 270);
+		// Invert triangles at the right
+		for (int j = 0; j < n-1; j++)
+		{
+			for (int i = 0; i < m-1; i++)
+			{
+				Vertex temp = (Vertex) T[2*(m-1)*j+2*i].vertex[1];
+				T[2*(m-1)*j+2*i].vertex[1] = T[2*(m-1)*j+2*i].vertex[2];
+				T[2*(m-1)*j+2*i].vertex[2] = temp;
+				temp = (Vertex) T[2*(m-1)*j+2*i+1].vertex[1];
+				T[2*(m-1)*j+2*i+1].vertex[1] = T[2*(m-1)*j+2*i+1].vertex[2];
+				T[2*(m-1)*j+2*i+1].vertex[2] = temp;
+			}
+		}
+		mesh.buildAdjacency();
+		super.split(v[2], v[0], (Vertex) mesh.createVertex(0.0, 0.5, 0.0));
+	}
 
 }
