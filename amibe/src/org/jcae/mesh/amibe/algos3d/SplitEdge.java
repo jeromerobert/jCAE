@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 /**
@@ -119,6 +120,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 	@Override
 	public boolean canProcessEdge(HalfEdge current)
 	{
+		current = uniqueOrientation(current);
 		// New point
 		double [] p0 = current.origin().getUV();
 		double [] p1 = current.destination().getUV();
@@ -159,24 +161,83 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		return false;
 	}
 
+	private void updateTree(HalfEdge current)
+	{
+		if (!current.origin().isReadable() || !current.destination().isReadable())
+			return;
+		double newCost = cost(current);
+		if (nrFinal == 0 && newCost > tolerance)
+			return;
+		HalfEdge h = uniqueOrientation(current);
+		if (tree.contains(h))
+			tree.update(h, newCost);
+		else
+		{
+			tree.insert(h, newCost);
+			h.setAttributes(AbstractHalfEdge.MARKED);
+		}
+	}
+
 	@Override
 	public HalfEdge processEdge(HalfEdge current, double costCurrent)
 	{
+		current = uniqueOrientation(current);
 		if (logger.isDebugEnabled())
-			logger.debug("Split edge: "+current+" by "+insertedVertex);
-		tree.remove(current.notOriented());
+		{
+			logger.debug("Split edge: "+current+" by "+insertedVertex+"  cost="+costCurrent);
+			if (current.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+			{
+				logger.debug("Non-manifold edge:");
+				for (Iterator<AbstractHalfEdge> it = current.fanIterator(); it.hasNext(); )
+					logger.debug(" --> "+it.next());
+			}
+		}
+		if (current.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+		{
+			for (Iterator<AbstractHalfEdge> it = current.fanIterator(); it.hasNext(); )
+			{
+				HalfEdge f = (HalfEdge) it.next();
+				if (!tree.remove(uniqueOrientation(f)))
+					notInTree++;
+			}
+		}
+		else
+			if (!tree.remove(current))
+				notInTree++;
+		current.clearAttributes(AbstractHalfEdge.MARKED);
+		assert !tree.contains(current);
 		mesh.vertexSplit(current, insertedVertex);
 		assert current.destination() == insertedVertex : insertedVertex+" "+current;
 		assert mesh.isValid();
-		// Update edge length
-		for (int i = 0; i < 4; i++)
+		HalfEdge ret = current.next();
+		// Update edge lengths
+		if (current.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 		{
-			addToTree(current);
-			// Moves clockwise to the next edge with same destination
+			for (Iterator<AbstractHalfEdge> it = current.fanIterator(); it.hasNext(); )
+			{
+				HalfEdge f = (HalfEdge) it.next();
+				f = f.next();
+				updateTree(f);
+			}
+			updateTree(current);
 			current = current.next();
 			current = current.sym();
+			current = current.next();
+			updateTree(current);
 		}
-		return current.next();
+		else
+		{
+			current = current.sym();
+			Vertex d = current.destination();
+			do
+			{
+				if (current.destination() != mesh.outerVertex)
+					updateTree(current);
+				current = current.nextOriginLoop();
+			}
+			while (current.destination() != d);
+		}
+		return ret;
 	}
 	
 	@Override
@@ -185,6 +246,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		logger.info("Number of splitted edges: "+processed);
 		logger.info("Total number of edges not splitted during processing: "+notProcessed);
 		logger.info("Total number of edges swapped to increase quality: "+swapped);
+		//logger.info("Number of edges which were not in the binary tree before being removed: "+notInTree);
 		logger.info("Number of edges still present in the binary tree: "+tree.size());
 	}
 
