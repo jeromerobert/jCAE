@@ -21,27 +21,27 @@
 
 package org.jcae.mesh.amibe.algos3d;
 
-import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
-import org.jcae.mesh.amibe.ds.TriangleVH;
-import org.jcae.mesh.amibe.util.QSortedTree;
-import org.jcae.mesh.amibe.util.PAVLSortedTree;
-import java.util.Iterator;
+import org.jcae.mesh.amibe.ds.HalfEdge;
+import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
+import org.jcae.mesh.xmldata.MeshReader;
+import org.jcae.mesh.xmldata.MeshWriter;
+import java.io.IOException;
+import java.io.File;
+import java.util.Map;
+import java.util.HashMap;
 import org.apache.log4j.Logger;
 
 /**
  * Laplacian smoothing.
  */
 
-public class SwapEdge
+public class SwapEdge extends AbstractAlgoHalfEdge
 {
 	private static Logger logger=Logger.getLogger(SwapEdge.class);
-	private Mesh mesh;
 	private double planarMin = 0.95;
-	// Used by cost()
-	private static VirtualHalfEdge temp = new VirtualHalfEdge();
+	private int counter = 0;
 	
 	/**
 	 * Creates a <code>SwapEdge</code> instance.
@@ -50,151 +50,129 @@ public class SwapEdge
 	 * @param p  an edge is swapped only if the dot product of the two
 	 *           adjacent triangles is greater than this coefficient.
 	 */
-	public SwapEdge(Mesh m, double p)
+	public SwapEdge(final Mesh m, final Map<String, String> options)
 	{
-		mesh = m;
-		planarMin = p;
+		super(m);
+		for (final Map.Entry<String, String> opt: options.entrySet())
+		{
+			final String key = opt.getKey();
+			final String val = opt.getValue();
+			if (key.equals("angle"))
+			{
+				planarMin = new Double(val).doubleValue();
+				logger.debug("Planar angle: "+planarMin);
+			}
+			else
+				throw new RuntimeException("Unknown option: "+key);
+		}
+		counter = m.getTriangles().size() * 3;
 	}
 	
+	@Override
+	public Logger thisLogger()
+	{
+		return logger;
+	}
+
+	@Override
+	public void preProcessAllHalfEdges()
+	{
+	}
+
+	@Override
+	public double cost(final HalfEdge e)
+	{
+		return - e.checkSwap3D(planarMin);
+	}
+	
+	@Override
+	public boolean canProcessEdge(HalfEdge current)
+	{
+		return counter > 0 && !current.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD);
+	}
+
+	@Override
+	public HalfEdge processEdge(HalfEdge current, double costCurrent)
+	{
+		if (logger.isDebugEnabled())
+			logger.debug("Swap edge: "+current+"  cost="+costCurrent);
+		counter --;
+		for (int i = 0; i < 3; i++)
+		{
+			HalfEdge h = uniqueOrientation(current);
+			if (!tree.remove(uniqueOrientation(current)))
+				notInTree++;
+			assert !tree.contains(h);
+			h.clearAttributes(AbstractHalfEdge.MARKED);
+			current = current.next();
+		}
+		HalfEdge sym = current.sym();
+		for (int i = 0; i < 2; i++)
+		{
+			sym = sym.next();
+			HalfEdge h = uniqueOrientation(sym);
+			if (!tree.remove(h))
+				notInTree++;
+			h.clearAttributes(AbstractHalfEdge.MARKED);
+		}
+		current = (HalfEdge) mesh.edgeSwap(current);
+		// Update edge costs
+		for (int i = 0; i < 2; i++)
+		{
+			current = current.prev();
+			addToTree(uniqueOrientation(current));
+		}
+		for (int i = 0; i < 2; i++)
+		{
+			current = current.prev();
+			addToTree(uniqueOrientation(current));
+		}
+		return current.prev();
+	}
+	
+	@Override
+	public void postProcessAllHalfEdges()
+	{
+		logger.info("Number of swapped edges: "+processed);
+		//logger.info("Number of edges which were not in the binary tree before being removed: "+notInTree);
+		logger.info("Number of edges still present in the binary tree: "+tree.size());
+	}
+
+	private final static String usageString = "<xmlDir> <brepFile> <outputDir>";
+
 	/**
-	 * Moves all nodes until all iterations are done.
+	 * 
+	 * @param args xmlDir, -t tolerance | -n triangle, brepFile, output
 	 */
-	public void compute()
+	public static void main(final String[] args)
 	{
-		logger.info("Run "+getClass().getName());
-		PAVLSortedTree tree = new PAVLSortedTree();
-		unmarkEdges();
-		computeTree(tree);
-		processAllTriangles(tree);
-	}
-	
-	private void unmarkEdges()
-	{
-		VirtualHalfEdge ot = new VirtualHalfEdge();
-		for (AbstractTriangle at: mesh.getTriangles())
+		final HashMap<String, String> options = new HashMap<String, String>();
+		if(args.length != 3)
 		{
-			TriangleVH f = (TriangleVH) at;
-			if (f.hasAttributes(AbstractHalfEdge.OUTER))
-				continue;
-			ot.bind(f);
-			for (int i = 0; i < 3; i++)
-			{
-				ot.next();
-				ot.clearAttributes(AbstractHalfEdge.MARKED);
-			}
+			System.out.println(usageString);
+			return;
+		}
+		logger.info("Load geometry file");
+		final Mesh mesh = new Mesh();
+		try
+		{
+			MeshReader.readObject3D(mesh, args[0], "jcae3d", -1);
+		}
+		catch (IOException ex)
+		{
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
+		}
+		new SwapEdge(mesh, options).compute();
+		final File brepFile=new File(args[1]);
+		try
+		{
+			MeshWriter.writeObject3D(mesh, args[2], "jcae3d", brepFile.getParent(), brepFile.getName());
+		}
+		catch (IOException ex)
+		{
+			ex.printStackTrace();
+			throw new RuntimeException(ex);
 		}
 	}
-	
-	private void computeTree(PAVLSortedTree tree)
-	{
-		//  Compute triangle quality
-		for (AbstractTriangle at: mesh.getTriangles())
-		{
-			TriangleVH f = (TriangleVH) at;
-			if (f.hasAttributes(AbstractHalfEdge.OUTER))
-				continue;
-			tree.insert(f, cost(f));
-		}
-	}
-	
-	private boolean processAllTriangles(PAVLSortedTree tree)
-	{
-		int swapped = 0;
-		VirtualHalfEdge ot = new VirtualHalfEdge();
-		VirtualHalfEdge sym = new VirtualHalfEdge();
-		while (!tree.isEmpty())
-		{
-			TriangleVH t = null;
-			int localNumber = -1;
-			for (Iterator<QSortedTree.Node> itt = tree.iterator(); itt.hasNext(); )
-			{
-				QSortedTree.Node q = itt.next();
-				t = (TriangleVH) q.getData();
-				if (t.hasAttributes(AbstractHalfEdge.MARKED))
-					continue;
-				double quality = -1.0;
-				// Find the best edge candidate
-				ot.bind(t);
-				localNumber = -1;
-				for (int i = 0; i < 3; i++)
-				{
-					ot.next();
-					if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
-						continue;
-					assert ot.hasSymmetricEdge() : ot;
-					double qnew = ot.checkSwap3D(planarMin);
-					if (qnew < 0.0)
-						continue;
-					if (qnew > quality)
-					{
-						localNumber = ot.getLocalNumber();
-						quality = qnew;
-					}
-				}
-				if (quality >= 0.0)
-					break;
-				// Mark this triangle so that it is not
-				// processed again
-				t.setAttributes(AbstractHalfEdge.MARKED);
-			}
-			if (t == null || localNumber == -1)
-				break;
-			
-			ot.bind(t, localNumber);
-			if (logger.isDebugEnabled())
-				logger.debug("Swap edge: "+ot);
-			sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
-			sym.sym();
-			tree.remove(t);
-			tree.remove(sym.getTri());
-			// Before: ot = (oda)   sym = (don)
-			mesh.edgeSwap(ot);
-			swapped++;
-			// After:  ot = (ona)   sym = (dan)
-			assert sym.apex() == ot.destination() : ot+" "+sym;
-			assert ot.destination() != mesh.outerVertex : ot+" "+sym;
-			for (int i = 0; i < 2; i++)
-			{
-				if (ot.hasSymmetricEdge())
-				{
-					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
-					sym.sym();
-					sym.getTri().clearAttributes(AbstractHalfEdge.MARKED);
-				}
-				ot.prev();
-			}
-			// ot = (nao)
-			t = (TriangleVH) ot.getTri();
-			t.clearAttributes(AbstractHalfEdge.MARKED);
-			tree.insert(t, cost(t));
-			ot.sym();  // (and)
-			t = (TriangleVH) ot.getTri();
-			t.clearAttributes(AbstractHalfEdge.MARKED);
-			tree.insert(t, cost(t));
-			for (int i = 0; i < 2; i++)
-			{
-				ot.prev();
-				if (ot.hasSymmetricEdge())
-				{
-					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
-					sym.sym();
-					sym.getTri().clearAttributes(AbstractHalfEdge.MARKED);
-				}
-			}
-		}
-		assert mesh.isValid();
-		logger.info("Number of swapped edges: "+swapped);
-		return swapped > 0;
-	}
-	
-	private double cost(TriangleVH f)
-	{
-		temp.bind(f);
-		assert f.vertex[0] != mesh.outerVertex && f.vertex[1] != mesh.outerVertex && f.vertex[2] != mesh.outerVertex : f;
-		double p = f.vertex[0].distance3D(f.vertex[1]) + f.vertex[1].distance3D(f.vertex[2]) + f.vertex[2].distance3D(f.vertex[0]);
-		double area = temp.area();
-		// No need to multiply by 12.0 * Math.sqrt(3.0)
-		return area/p/p;
-	}
-	
 }
