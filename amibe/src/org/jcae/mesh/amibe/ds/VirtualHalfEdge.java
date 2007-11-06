@@ -1344,56 +1344,78 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		{
 			v.setLink(tri);
 			VHsplitSameFan(mesh, v);
+			if (work[1].hasAttributes(OUTER))
+			{
+				// Remove links between t2 and t4
+				work[1].next();                 // (nV2d)
+				symOTri(work[1], work[3]);      // (V2no)
+				work[1].setAdj(null);
+				work[3].setAdj(null);
+			}
 			return this;
 		}
 		// VHsplitSameFan may modify internal data structure
 		// used by fanIterator(), we need a copy.
 		Map<TriangleVH, Integer> copy = new LinkedHashMap<TriangleVH, Integer>();
 		// Set vertex links
+		int cnt = 0;
 		ArrayList<Triangle> link = new ArrayList<Triangle>();
 		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
 		{
 			VirtualHalfEdge f = (VirtualHalfEdge) it.next();
 			link.add(f.tri);
 			copy.put(f.tri, int3[f.localNumber]);
+			cnt++;
 		}
-		v.setLink(new Triangle[link.size()]);
+		v.setLink(new Triangle[cnt]);
 		link.toArray((Triangle[]) v.getLink());
 		link.clear();
-		TriangleVH f = null;
-		int fEdge = -1;
+		// Rebuild circular linked lists.
+		// TODO: Avoid these allocations.
+		VirtualHalfEdge [] hOuter = new VirtualHalfEdge[2*cnt];
+		for (int i = 0; i < hOuter.length; i++)
+			hOuter[i] = new VirtualHalfEdge();
+		cnt = 0;
+		Vertex o = origin();
 		for (Map.Entry<TriangleVH, Integer> entry: copy.entrySet())
 		{
 			TriangleVH t = entry.getKey();
 			int l = entry.getValue().intValue();
 			work[3].bind(t, l);
 			work[3].VHsplitSameFan(mesh, v);
-			// New edge is in work[1]
-			if (f == null)
+			if (work[3].origin() == o)
 			{
-				f = work[0].tri;
-				fEdge = work[0].localNumber;
-				// Initializes an empty cycle
-				nextOTri(work[0], work[3]);
-				work[0].prev();
-				work[0].VHglue(work[3]);
+				symOTri(work[3], hOuter[2*cnt]);
+				copyOTri(work[1], hOuter[2*cnt+1]);
 			}
 			else
 			{
-				// Adds work[1] to the cycle
-				work[0].prev();
-				work[3].bind(f, fEdge);
-				work[3].next();
-				copyOTri(work[3], work[2]);
-				// Store old sym into work[3]
-				work[3].sym();
-				work[0].VHglue(work[2]);
-				work[0].prev();
-				work[0].VHglue(work[3]);
+				copyOTri(work[1], hOuter[2*cnt]);
+				symOTri(work[3], hOuter[2*cnt+1]);
+			}
+			assert hOuter[2*cnt].origin() == o || hOuter[2*cnt].destination() == o;
+			cnt++;
+		}
+		for (int j = 0; j < 2; j++)
+		{
+			// Initializes an empty cycle
+			nextOTri(hOuter[j], work[3]);
+			nextOTri(work[3], work[0]);
+			work[3].VHglue(work[0]);
+			for (int i = 1; i < cnt; i++)
+			{
+				// Store old sym into work[0]
+				symOTri(work[3], work[0]);
+				// Adds hOuter[2*i+j] to current cycle
+				prevOTri(hOuter[2*i+j], work[2]);
+				work[3].VHglue(work[2]);
+				work[2].prev();
+				work[2].VHglue(work[0]);
 			}
 		}
 		return this;
 	}
+
 	/*
 	 * Warning: this method uses work[0], work[1] and work[2] temporary arrays.
 	 */
@@ -1422,7 +1444,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		work[0].splitVertexAddOneTriangle(m, n);
 		
 		// Now we must update links:
-		// 1. Link together t1/t4 and t2/t3.
+		// Link together t1/t4 and t2/t3.
 		TriangleVH t1 = tri;
 		nextOTri(this, work[0]);        // (nV1o)
 		work[0].sym();                  // (V1nd)
@@ -1438,39 +1460,6 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		VHglue(work[0]);
 		TriangleVH t4 = work[0].tri;
 		work[1].prev();                 // (dnV2)
-		// 2. Remove links between outer triangles
-		if (t2.hasAttributes(OUTER))
-		{
-			// Remove links between t2 and t4,
-			// and link h2.sym to n2
-			work[0].next();         // (oV2n)
-			int l4 = work[0].localNumber;
-			work[0].next();         // (V2no)
-			symOTri(work[0], work[1]);    // (nV2d)
-			work[0].prev();         // (oV2n)
-			if (work[0].hasSymmetricEdge())
-			{
-				work[0].sym();
-				work[0].VHglue(work[1]);
-				work[0].bind(t4, l4); // (oV2n)
-				work[0].setAdj(null);
-				work[0].next(); // (v2no)
-				work[0].setAdj(null);
-			}
-			else
-			{
-				work[0].next(); // (v2no)
-				work[0].setAdj(null);
-				work[1].setAdj(null);
-				work[0].prev(); // (ov2n)
-			}
-			// t2 now contains good links, t4 may need
-			// to be fixed.
-			// Move work[1] so that d == work[1].origin()
-			work[1].prev();         // (dnV2)
-			// Move work[0], this value will be used by split()
-			work[0].next();         // (noV2)
-		}
 
 		TriangleVH t14 = (t1.hasAttributes(OUTER) ? t4 : t1);
 		TriangleVH t23 = (t2.hasAttributes(OUTER) ? t3 : t2);
