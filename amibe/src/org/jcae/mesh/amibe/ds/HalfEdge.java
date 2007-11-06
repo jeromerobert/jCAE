@@ -1071,12 +1071,12 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		if (!hasAttributes(NONMANIFOLD))
 		{
 			v.setLink(tri);
-			HalfEdge f = HEsplitSameFan(mesh, v);
-			if (f.hasAttributes(OUTER))
+			HalfEdge g = HEsplitSameFan(mesh, v);
+			if (g.hasAttributes(OUTER))
 			{
 				// Remove links between t2 and t4
-				f = f.next;             // (nV2d)
-				HalfEdge g = f.sym;     // (V2no)
+				g = g.next;             // (nV2d)
+				HalfEdge f = g.sym;     // (V2no)
 				f.sym = null;
 				g.sym = null;
 			}
@@ -1099,7 +1099,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		link.toArray((Triangle[]) v.getLink());
 		link.clear();
 		// Rebuild circular linked lists.
-		// TODO: Avoid these allocations.
+		// TODO: Use a better algorithm to avoid array allocation
 		HalfEdge [] hOuter = new HalfEdge[2*cnt];
 		cnt = 0;
 		Vertex o = origin();
