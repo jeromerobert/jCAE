@@ -87,7 +87,7 @@ public class SplitEdgeTest
 		return tt;
 	}
 	
-	private void rotateMxNShellAroundY(int m, int n, double angle)
+	private Triangle [] rotateMxNShellAroundY(int m, int n, double angle)
 	{
 		// Create new vertices and append them to current mesh
 		assert v.length == m*n;
@@ -107,9 +107,19 @@ public class SplitEdgeTest
 				vertexLabel++;
 			}
 		}
-		createMxNTriangles(m, n, vy);
+		return createMxNTriangles(m, n, vy);
 	}
 	
+	private void invertTriangles(Triangle [] tArray)
+	{
+		for (Triangle t: tArray)
+		{
+			AbstractVertex temp = t.vertex[1];
+			t.vertex[1] = t.vertex[2];
+			t.vertex[2] = temp;
+		}
+	}
+
 	private void addVertexRefs()
 	{
 		int ref = 0;
@@ -158,7 +168,8 @@ public class SplitEdgeTest
 		createMxNShell(m, n);
 		rotateMxNShellAroundY(m, n, 90);
 		rotateMxNShellAroundY(m, n, 180);
-		rotateMxNShellAroundY(m, n, 270);
+		Triangle [] tt = rotateMxNShellAroundY(m, n, 270);
+		invertTriangles(tt);
 		mesh.buildAdjacency();
 		addVertexRefs();
 		assertTrue("Mesh is not valid", mesh.isValid());
@@ -217,7 +228,7 @@ public class SplitEdgeTest
 		assertTrue("Mesh is not valid", mesh.isValid());
 	}
 
-	@Test public void testShell3()
+	@Test public void testShell33()
 	{
 		testShell(3, 3);
 	}
@@ -227,17 +238,12 @@ public class SplitEdgeTest
 		testShell(10, 10);
 	}
 
-	@Test public void testShellNM1()
+	@Test public void testShellNM22()
 	{
 		testCross(2, 2);
 	}
 
-	@Test public void testShellNM2()
-	{
-		testCross(3, 3);
-	}
-
-	@Test public void testShellNM3()
+	@Test public void testShellNM34()
 	{
 		testCross(3, 4);
 	}
@@ -245,43 +251,6 @@ public class SplitEdgeTest
 	@Test public void testShellNMLarge()
 	{
 		testCross(10, 10);
-	}
-
-	@Test public void testShellNM3Inverted()
-	{
-		final Map<String, String> options = new HashMap<String, String>();
-		double length = 0.8;
-		options.put("size", ""+length);
-		mesh = new Mesh();
-		int m = 2;
-		int n = 2;
-		createMxNShell(m, n);
-		rotateMxNShellAroundY(m, n, 90);
-		rotateMxNShellAroundY(m, n, 180);
-		rotateMxNShellAroundY(m, n, 270);
-		// Invert triangles at the right
-		for (int j = 0; j < n-1; j++)
-		{
-			for (int i = 0; i < m-1; i++)
-			{
-				Vertex temp = (Vertex) T[2*(m-1)*j+2*i].vertex[1];
-				T[2*(m-1)*j+2*i].vertex[1] = T[2*(m-1)*j+2*i].vertex[2];
-				T[2*(m-1)*j+2*i].vertex[2] = temp;
-				temp = (Vertex) T[2*(m-1)*j+2*i+1].vertex[1];
-				T[2*(m-1)*j+2*i+1].vertex[1] = T[2*(m-1)*j+2*i+1].vertex[2];
-				T[2*(m-1)*j+2*i+1].vertex[2] = temp;
-			}
-		}
-		mesh.buildAdjacency();
-		addVertexRefs();
-		assertTrue("Mesh is not valid", mesh.isValid());
-		int p = 2-((int) (Math.log(length*length)/Math.log(2.0)));
-		int expected = 4*(m-1)*(n-1)*(2 << p);
-		new SplitEdge(mesh, options).compute();
-		assertTrue("Mesh is not valid", mesh.isValid());
-		int res = AbstractAlgoHalfEdge.countInnerTriangles(mesh);
-		assertTrue("Mesh is not valid", mesh.isValid());
-		assertTrue("Final number of triangles: "+res, res == expected);
 	}
 
 }
