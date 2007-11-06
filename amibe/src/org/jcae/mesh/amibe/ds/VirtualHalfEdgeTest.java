@@ -171,17 +171,17 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 	// number of fans.
 	@Test public void countVertexLinks0()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.countVertexLinks(v[0], 4);
 	}
 	@Test public void countVertexLinks1()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.countVertexLinks(v[1], 1);
 	}
 	@Test public void countVertexLinks2()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.countVertexLinks(v[2], 4);
 	}
 
@@ -189,22 +189,22 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 	// number of fans.
 	@Test public void countEdgeLinks31()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.countEdgeLinks(v[3], v[1], 1);
 	}
 	@Test public void countEdgeLinks12()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.countEdgeLinks(v[1], v[2], 2);
 	}
 	@Test public void countEdgeLinks42()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.countEdgeLinks(v[4], v[2], 4);
 	}
 	@Test public void countEdgeLinks20()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.countEdgeLinks(v[2], v[0], 4);
 	}
 
@@ -212,17 +212,17 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 	// non-manifold meshes.
 	@Test public void countFanIterator31()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.countFanIterator(v[3], v[1], 1);
 	}
 	@Test public void countFanIterator42()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.countFanIterator(v[4], v[2], 4);
 	}
 	@Test public void countFanIterator20()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.countFanIterator(v[2], v[0], 4);
 	}
 
@@ -230,27 +230,27 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 	// non-manifold meshes.
 	@Test public void canCollapseNM424()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.canCollapse(v[4], v[2], v[4], true);
 	}
 	@Test public void canCollapseNM423()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.canCollapse(v[4], v[2], v[3], false);
 	}
 	@Test public void canCollapseNM355()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.canCollapse(v[3], v[5], v[5], true);
 	}
 	@Test public void canCollapseNM535()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.canCollapse(v[5], v[3], v[5], false);
 	}
 	@Test public void canCollapseNM565()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.canCollapse(v[5], v[6], v[5], false);
 	}
 
@@ -259,55 +259,55 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 	// Check collapsing non-manifold edge
 	@Test public void collapseNM848()
 	{
-		buildMeshNM44();
+		buildMeshNM(4, 4, true);
 		super.collapse(v[8], v[4], v[8]);
 	}
 	// Check when non-manifold edge is prevOrigin()
 	@Test public void collapseNM898()
 	{
-		buildMeshNM44();
+		buildMeshNM(4, 4, true);
 		super.collapse(v[8], v[9], v[8]);
 	}
 	// Check when non-manifold edge is nextDest()
 	@Test public void collapseNM944()
 	{
-		buildMeshNM44();
+		buildMeshNM(4, 4, true);
 		super.collapse(v[9], v[4], v[4]);
 	}
 	// Check when non-manifold edge is next()
 	@Test public void collapseNM494()
 	{
-		buildMeshNM44();
+		buildMeshNM(4, 4, true);
 		super.collapse(v[4], v[9], v[4]);
 	}
 	// Check when non-manifold edge is prev()
 	@Test public void collapseNM988()
 	{
-		buildMeshNM44();
+		buildMeshNM(4, 4, true);
 		super.collapse(v[9], v[8], v[8]);
 	}
 	// Check when apical vertex is non-manifold
 	@Test public void collapseNM595()
 	{
-		buildMeshNM44();
+		buildMeshNM(4, 4, true);
 		super.collapse(v[5], v[9], v[5]);
 	}
 	// Check when symmetric apical vertex is non-manifold
 	@Test public void collapseNM959()
 	{
-		buildMeshNM44();
+		buildMeshNM(4, 4, true);
 		super.collapse(v[9], v[5], v[9]);
 	}
 	
 	@Test(expected= IllegalArgumentException.class) public void collapseNM533()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		AbstractHalfEdge e = find(v[5], v[3]);
 		e.collapse(mesh, v[3]);
 	}
 	@Test public void collapseNM131()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.collapse(v[1], v[3], v[1]);
 	}
 	
@@ -315,66 +315,58 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 	// non-manifold meshes.
 	@Test(expected= IllegalArgumentException.class) public void swapNM42()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.swap(v[4], v[2]);
 	}
 	@Test(expected= IllegalArgumentException.class) public void swapNM24()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.swap(v[2], v[4]);
 	}
 	@Test(expected= IllegalArgumentException.class) public void swapNM53()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.swap(v[5], v[3]);
 	}
 	@Test(expected= IllegalArgumentException.class) public void swapNM3Outer()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.swap(v[3], mesh.outerVertex);
 	}
 	// Check when non-manifold edge is prevOrigin()
 	@Test public void swapNM65()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.swap(v[6], v[5]);
 	}
 	// Check when non-manifold edge is nextDest()
 	@Test public void swapNM54()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.swap(v[5], v[4]);
 	}
 	// Check when non-manifold edge is next()
 	@Test public void swapNM56()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.swap(v[5], v[6]);
 	}
 	// Check when non-manifold edge is prev()
 	@Test public void swapNM45()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		super.swap(v[4], v[5]);
 	}
 	// Check when apical vertex is non-manifold
 	@Test public void swapNM47()
 	{
-		createMxNShell(3, 3);
-		rotateMxNShellAroundY(3, 3, 90);
-		rotateMxNShellAroundY(3, 3, 180);
-		rotateMxNShellAroundY(3, 3, 270);
-		mesh.buildAdjacency();
+		buildMeshNM(3, 3, true);
 		super.swap(v[4], v[7]);
 	}
 	// Check when symmetric apical vertex is non-manifold
 	@Test public void swapNM74()
 	{
-		createMxNShell(3, 3);
-		rotateMxNShellAroundY(3, 3, 90);
-		rotateMxNShellAroundY(3, 3, 180);
-		rotateMxNShellAroundY(3, 3, 270);
-		mesh.buildAdjacency();
+		buildMeshNM(3, 3, true);
 		super.swap(v[7], v[4]);
 	}
 
@@ -382,28 +374,27 @@ public class VirtualHalfEdgeTest extends AbstractHalfEdgeTest
 	// non-manifold meshes.
 	@Test public void splitNM42()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		Vertex n = (Vertex) mesh.createVertex(0.0, 1.5, 0.0);
 		super.split(v[4], v[2], n);
 	}
 	@Test public void splitNM35()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		Vertex n = (Vertex) mesh.createVertex(-1.0, 1.5, 0.0);
 		super.split(v[3], v[5], n);
 	}
 	@Test(expected= IllegalArgumentException.class) public void splitNM53()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		Vertex n = (Vertex) mesh.createVertex(-1.0, 1.5, 0.0);
 		super.split(v[5], v[3], n);
 	}
 	@Test public void splitNM45()
 	{
-		buildMeshNM();
+		buildMeshNM(2, 4, true);
 		Vertex n = (Vertex) mesh.createVertex(0.5, 2.0, 0.0);
 		super.split(v[4], v[5], n);
 	}
-
 
 }

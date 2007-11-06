@@ -90,7 +90,7 @@ public class AbstractHalfEdgeTest
 	}
 	
 	// m Vertex on rows, n Vertex on columns
-	protected void createMxNShell(int m, int n)
+	private void createMxNShell(int m, int n)
 	{
 		v = new Vertex[m*n];
 		for (int j = 0; j < n; j++)
@@ -164,7 +164,7 @@ public class AbstractHalfEdgeTest
 		return tt;
 	}
 	
-	protected void rotateMxNShellAroundY(int m, int n, double angle)
+	protected Triangle [] rotateMxNShellAroundY(int m, int n, double angle)
 	{
 		// Create new vertices and append them to current mesh
 		assert originalVertexCount == m*n;
@@ -187,9 +187,19 @@ public class AbstractHalfEdgeTest
 		System.arraycopy(v, 0, newV, 0, v.length);
 		System.arraycopy(vy, 0, newV, v.length, vy.length);
 		v = newV;
-		createMxNTriangles(m, n, vy);
+		return createMxNTriangles(m, n, vy);
 	}
 	
+	private void invertTriangles(Triangle [] tArray)
+	{
+		for (Triangle t: tArray)
+		{
+			AbstractVertex temp = t.vertex[1];
+			t.vertex[1] = t.vertex[2];
+			t.vertex[2] = temp;
+		}
+	}
+
 	protected void buildMesh()
 	{
 		createMxNShell(3, 2);
@@ -252,85 +262,34 @@ public class AbstractHalfEdgeTest
 		mesh.buildAdjacency();
 	}
 	
-	protected void buildMeshNM()
+	protected void buildMeshNM(int m, int n, boolean alterned)
 	{
-		/*  v6         v7
-		 *   +---------+
-		 *   | \       |
-		 *   |   \  T5 |
-		 *   |     \   |
-		 *   |  T4   \ |
-		 * v4+---------+ v5
-		 *   |       / |
-		 *   | T2  /   |
-		 *   |   /     |
-		 *   | /   T3  |
-		 * v2+---------+ v3
-		 *   | \       |
-		 *   |   \  T1 |
-		 *   |     \   |
-		 *   |  T0   \ |
-		 *   +---------+
-		 *  v0         v1
+		/*  (2, 4, true)           (4, 4, true)
+		 *  v6         v7      v12       v13       v14       v15
+		 *   +---------+        +---------+---------+---------+
+		 *   | \       |        | \     v5| \     v6| \       |
+		 *   |   \  T5 |        |   \ T13 |   \ T15 |   \ T17 |
+		 *   |     \   |        |     \   |     \   |     \   |
+		 *   |  T4   \ |        |  T12  \ |  T14  \ |  T16  \ |
+		 * v4+---------+ v5   v8+---------+---------+---------+v11
+		 *   |       / |        |       / |v9     / |v10    / |
+		 *   | T2  /   |        | T6  /   | T8  /   | T10 /   |
+		 *   |   /     |        |   /     |   /     |   /     |
+		 *   | /   T3  |        | /   T7  | /   T9  | /   T11 |
+		 * v2+---------+ v3   v4+---------+---------+---------+v7
+		 *   | \       |        | \     v5| \     v6| \       |
+		 *   |   \  T1 |        |   \  T1 |   \  T3 |   \  T5 |
+		 *   |     \   |        |     \   |     \   |     \   |
+		 *   |  T0   \ |        |  T0   \ |  T2   \ |  T4   \ |
+		 *   +---------+        +---------+---------+---------+
+		 *  v0         v1      v0         v1        v2        v3
 		 */
-		createMxNShell(2, 4);
-		rotateMxNShellAroundY(2, 4, 90);
-		rotateMxNShellAroundY(2, 4, 180);
-		rotateMxNShellAroundY(2, 4, 270);
-		mesh.buildAdjacency();
-		assertTrue("Mesh is not valid", mesh.isValid());
-	}
-	
-	protected void buildMeshNM43()
-	{
-		/*  v8         v9       v10        v11
-		 *   +---------+---------+---------+
-		 *   | \       | \       | \       |
-		 *   |   \  T7 |   \  T9 |   \  T11|
-		 *   |     \   |     \   |     \   |
-		 *   |  T6   \ |  T8   \ |  T10  \ |
-		 * v4+---------+---------+---------+v7
-		 *   | \     v5| \     v6| \       |
-		 *   |   \  T1 |   \  T3 |   \  T5 |
-		 *   |     \   |     \   |     \   |
-		 *   |  T0   \ |  T2   \ |  T4   \ |
-		 *   +---------+---------+---------+
-		 *  v0         v1        v2        v3
-		 */
-		alterned = false;
-		createMxNShell(4, 3);
-		rotateMxNShellAroundY(4, 3, 90);
-		rotateMxNShellAroundY(4, 3, 180);
-		rotateMxNShellAroundY(4, 3, 270);
-		mesh.buildAdjacency();
-		assertTrue("Mesh is not valid", mesh.isValid());
-	}
-	
-	protected void buildMeshNM44()
-	{
-		/*  v12       v13       v14       v15
-		 *   +---------+---------+---------+
-		 *   | \     v5| \     v6| \       |
-		 *   |   \ T13 |   \ T15 |   \ T17 |
-		 *   |     \   |     \   |     \   |
-		 *   |  T12  \ |  T14  \ |  T16  \ |
-		 * v8+---------+---------+---------+v11
-		 *   |       / |v9     / |v10    / |
-		 *   | T6  /   | T8  /   | T10 /   |
-		 *   |   /     |   /     |   /     |
-		 *   | /   T7  | /   T9  | /   T11 |
-		 * v4+---------+---------+---------+v7
-		 *   | \     v5| \     v6| \       |
-		 *   |   \  T1 |   \  T3 |   \  T5 |
-		 *   |     \   |     \   |     \   |
-		 *   |  T0   \ |  T2   \ |  T4   \ |
-		 *   +---------+---------+---------+
-		 *  v0         v1        v2        v3
-		 */
-		createMxNShell(4, 4);
-		rotateMxNShellAroundY(4, 4, 90);
-		rotateMxNShellAroundY(4, 4, 180);
-		rotateMxNShellAroundY(4, 4, 270);
+		this.alterned = alterned;
+		createMxNShell(m, n);
+		rotateMxNShellAroundY(m, n, 90);
+		rotateMxNShellAroundY(m, n, 180);
+		Triangle [] tt = rotateMxNShellAroundY(m, n, 270);
+		//invertTriangles(tt);
 		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
 	}
