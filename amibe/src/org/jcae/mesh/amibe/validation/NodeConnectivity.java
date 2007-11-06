@@ -20,13 +20,11 @@
 
 package org.jcae.mesh.amibe.validation;
 
-import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
-import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 
-public class NodeConnectivity2D extends QualityProcedure
+public class NodeConnectivity extends QualityProcedure
 {
-	public NodeConnectivity2D()
+	public NodeConnectivity()
 	{
 		setType(QualityProcedure.NODE);
 	}
@@ -37,30 +35,7 @@ public class NodeConnectivity2D extends QualityProcedure
 		if (!(o instanceof Vertex))
 			throw new IllegalArgumentException();
 		Vertex n = (Vertex) o;
-		VirtualHalfEdge start = new VirtualHalfEdge((Triangle) n.getLink(), 0);
-		if (n == start.destination())
-			start.next();
-		else if (n == start.apex())
-			start.prev();
-		if (!start.isMutable())
-			return 1.0f;
-		Vertex d = start.destination();
-		//  Loop around n
-		int count = 0;
-		while (true)
-		{
-			count++;
-			if (count >= 12)
-				return 0.0f;
-			start.prev();
-			//  Do not consider boundary nodes
-			if (!start.isMutable())
-				return 1.0f;
-			start.sym();
-			if (start.destination() == d)
-				break;
-		}
-		
+		int count = n.getNeighboursNodes().size();
 		if (count <= 6)
 			return (count / 6.0f);
 		else if (count <= 11)
