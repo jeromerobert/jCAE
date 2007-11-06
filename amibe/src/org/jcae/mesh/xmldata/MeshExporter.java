@@ -416,24 +416,24 @@ abstract public class MeshExporter
 		if(groupIds==null)
 			groupIds=getAllGroupIDs();
 		readGroups();
-		int[] triangle=readTriangles();
+		int[] nodeIDs=readTriangles();
 		TIntIntHashMap amibeNodeToUNVNode=new TIntIntHashMap();
 		writeInit(out);
-		TIntHashSet nodeset = new TIntHashSet(triangle);
+		TIntHashSet nodeset = new TIntHashSet(nodeIDs);
 		TIntArrayList nodelist = new TIntArrayList(nodeset.toArray());
 		nodelist.sort();
 		writeNodes(out, nodelist.toNativeArray(), amibeNodeToUNVNode);
 		TIntIntHashMap amibeTriaToUNVTria=new TIntIntHashMap();
-		writeTriangles(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
+		writeTriangles(out, nodeIDs, amibeNodeToUNVNode, amibeTriaToUNVTria);
 		try
 		{
 			// Do not complain if normals had not been written
-			writeNormals(out, triangle, amibeNodeToUNVNode, amibeTriaToUNVTria);
+			writeNormals(out, nodeIDs, amibeNodeToUNVNode, amibeTriaToUNVTria);
 		}
 		catch (IOException ex)
 		{
 		}
-		triangle=null;
+		nodeIDs=null;
 		amibeNodeToUNVNode=null;
 		writeGroups(out, amibeTriaToUNVTria);
 		writeFinish(out);

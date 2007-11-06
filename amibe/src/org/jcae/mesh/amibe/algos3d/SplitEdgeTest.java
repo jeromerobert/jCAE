@@ -128,12 +128,12 @@ public class SplitEdgeTest
 			Triangle t = (Triangle) at;
 			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 			{
-				for (AbstractVertex v: t.vertex)
+				for (AbstractVertex av: t.vertex)
 				{
-					if (0 == v.getRef())
+					if (0 == av.getRef())
 					{
 						ref++;
-						v.setRef(ref);
+						av.setRef(ref);
 					}
 				}
 			}
