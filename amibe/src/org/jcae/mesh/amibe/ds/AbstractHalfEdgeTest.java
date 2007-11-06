@@ -262,7 +262,7 @@ public class AbstractHalfEdgeTest
 		mesh.buildAdjacency();
 	}
 	
-	protected void buildMeshNM(int m, int n, boolean alterned)
+	protected void buildMeshNM(int m, int n, boolean alt)
 	{
 		/*  (2, 4, true)           (4, 4, true)
 		 *  v6         v7      v12       v13       v14       v15
@@ -284,12 +284,14 @@ public class AbstractHalfEdgeTest
 		 *   +---------+        +---------+---------+---------+
 		 *  v0         v1      v0         v1        v2        v3
 		 */
-		this.alterned = alterned;
+		this.alterned = alt;
 		createMxNShell(m, n);
 		rotateMxNShellAroundY(m, n, 90);
 		rotateMxNShellAroundY(m, n, 180);
 		Triangle [] tt = rotateMxNShellAroundY(m, n, 270);
-		//invertTriangles(tt);
+		// Invert a set of triangles so that triangles in fans have
+		// different orientations.
+		invertTriangles(tt);
 		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
 	}
@@ -308,7 +310,11 @@ public class AbstractHalfEdgeTest
 		{
 			AbstractHalfEdge f = findSameFan(v1, v2, start);
 			if (f != null)
+			{
+				if (f.hasAttributes(AbstractHalfEdge.OUTER))
+					return f.sym();
 				return f;
+			}
 		}
 		throw new RuntimeException();
 	}
@@ -419,10 +425,19 @@ public class AbstractHalfEdgeTest
 	protected AbstractHalfEdge split(Vertex o, Vertex d, Vertex n)
 	{
 		AbstractHalfEdge e = find(o, d);
+		boolean reversed = (e.origin() != o);
 		e = e.split(mesh, n);
 		assertTrue("Mesh is not valid", mesh.isValid());
-		assertTrue("Error in origin", o == e.origin());
-		assertTrue("Error in destination", n == e.destination());
+		if (reversed)
+		{
+			assertTrue("Error in origin", d == e.origin());
+			assertTrue("Error in destination", n == e.destination());
+		}
+		else
+		{
+			assertTrue("Error in origin", o == e.origin());
+			assertTrue("Error in destination", n == e.destination());
+		}
 		return e;
 	}
 
