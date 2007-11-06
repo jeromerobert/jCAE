@@ -1071,7 +1071,15 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		if (!hasAttributes(NONMANIFOLD))
 		{
 			v.setLink(tri);
-			HEsplitSameFan(mesh, v);
+			HalfEdge f = HEsplitSameFan(mesh, v);
+			if (f.hasAttributes(OUTER))
+			{
+				// Remove links between t2 and t4
+				f = f.next;             // (nV2d)
+				HalfEdge g = f.sym;     // (V2no)
+				f.sym = null;
+				g.sym = null;
+			}
 			return this;
 		}
 		// HEsplitSameFan may modify internal data structure
@@ -1079,36 +1087,62 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		ArrayList<AbstractHalfEdge> copy = new ArrayList<AbstractHalfEdge>();
 		// Set vertex links
 		ArrayList<Triangle> link = new ArrayList<Triangle>();
+		int cnt = 0;
 		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
 		{
 			HalfEdge f = (HalfEdge) it.next();
 			link.add(f.tri);
 			copy.add(f);
+			cnt++;
 		}
-		v.setLink(new Triangle[link.size()]);
+		v.setLink(new Triangle[cnt]);
 		link.toArray((Triangle[]) v.getLink());
 		link.clear();
-		HalfEdge newNMEdge = null;
+		// Rebuild circular linked lists.
+		// TODO: Avoid these allocations.
+		HalfEdge [] hOuter = new HalfEdge[2*cnt];
+		cnt = 0;
+		Vertex o = origin();
 		for (AbstractHalfEdge ah: copy)
 		{
 			HalfEdge f = (HalfEdge) ah;
 			HalfEdge g = f.HEsplitSameFan(mesh, v);
-			if (newNMEdge == null)
+			if (f.origin() == o)
 			{
-				// Initializes an empty cycle
-				newNMEdge = g;
-				newNMEdge.next.HEglue(g.next.next);
+				hOuter[2*cnt] = f.sym;
+				hOuter[2*cnt+1] = g;
 			}
 			else
 			{
-				// Adds g to the cycle
-				HalfEdge oldSym = newNMEdge.next.sym;
-				newNMEdge.next.HEglue(g.next.next);
-				g.next.HEglue(oldSym);
+				hOuter[2*cnt] = g;
+				hOuter[2*cnt+1] = f.sym;
+			}
+			assert hOuter[2*cnt].origin() == o || hOuter[2*cnt].destination() == o;
+			cnt++;
+		}
+		for (int j = 0; j < 2; j++)
+		{
+			HalfEdge newNMEdge = null;
+			for (int i = 0; i < cnt; i++)
+			{
+				if (newNMEdge == null)
+				{
+					// Initializes an empty cycle
+					newNMEdge = hOuter[2*i+j];
+					newNMEdge.next.HEglue(newNMEdge.next.next);
+				}
+				else
+				{
+					// Adds hOuter[2*i+j] to current cycle
+					HalfEdge oldSym = newNMEdge.next.sym;
+					newNMEdge.next.HEglue(hOuter[2*i+j].next.next);
+					hOuter[2*i+j].next.HEglue(oldSym);
+				}
 			}
 		}
 		return this;
 	}
+
 	private final HalfEdge HEsplitSameFan(Mesh m, Vertex n)
 	{
 		if (hasAttributes(OUTER))
@@ -1145,24 +1179,6 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		f = g.next.sym.next;            // (noV2)
 		HEglue(f);
 		Triangle t4 = f.tri;
-		// 2. Remove links between outer triangles
-		if (t2.hasAttributes(OUTER))
-		{
-			// Remove links between t2 and t4,
-			// and link h2.next to n2.next.sym;
-			// it is null for manifold edges,
-			// and fixes links for non-manifold
-			// edges.
-			f = f.next.next;        // (V2no)
-			g = f.sym;              // (nV2d)
-			f.HEglue(g.next.sym);
-			g.sym = null;
-			g.next.sym = null;
-			// t4 now contains good links, t2 may need
-			// to be fixed.
-			// Move g to its previous value
-			g = g.next.next;             // (dnV2)
-		}
 
 		Triangle t14 = (t1.hasAttributes(OUTER) ? t4 : t1);
 		Triangle t23 = (t2.hasAttributes(OUTER) ? t3 : t2);
