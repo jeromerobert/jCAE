@@ -1274,11 +1274,11 @@ import gnu.trove.TObjectIntHashMap;
 			else
 				out = new PrintWriter(new FileOutputStream(file));
 			out.println("    -1"+cr+"  2411");
-			HashSet<Vertex> nodeset = new HashSet<Vertex>();
+			HashSet<AbstractVertex> nodeset = new HashSet<AbstractVertex>();
 			for (AbstractTriangle at: triangleList)
 			{
 				Triangle t = (Triangle) at;
-				if (t.isOuter())
+				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
 				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
 					continue;
@@ -1287,8 +1287,8 @@ import gnu.trove.TObjectIntHashMap;
 				nodeset.add(t.vertex[2]);
 			}
 			int count = 0;
-			TObjectIntHashMap<Vertex> labels = new TObjectIntHashMap<Vertex>(nodeset.size());
-			for(Vertex node: nodeset)
+			TObjectIntHashMap<AbstractVertex> labels = new TObjectIntHashMap<AbstractVertex>(nodeset.size());
+			for(AbstractVertex node: nodeset)
 			{
 				count++;
 				labels.put(node, count);
@@ -1305,7 +1305,7 @@ import gnu.trove.TObjectIntHashMap;
 			for (AbstractTriangle at: triangleList)
 			{
 				Triangle t = (Triangle) at;
-				if (t.isOuter())
+				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
 				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
 					continue;
@@ -1340,11 +1340,11 @@ import gnu.trove.TObjectIntHashMap;
 			else
 				out = new PrintWriter(new FileOutputStream(file));
 			out.println("MeshVersionFormatted 1"+cr+"Dimension"+cr+"3");
-			HashSet<Vertex> nodeset = new HashSet<Vertex>();
+			HashSet<AbstractVertex> nodeset = new HashSet<AbstractVertex>();
 			for(AbstractTriangle at: triangleList)
 			{
 				Triangle t = (Triangle) at;
-				if (t.isOuter())
+				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
 				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
 					continue;
@@ -1353,9 +1353,9 @@ import gnu.trove.TObjectIntHashMap;
 				nodeset.add(t.vertex[2]);
 			}
 			int count = 0;
-			TObjectIntHashMap<Vertex> labels = new TObjectIntHashMap<Vertex>(nodeset.size());
+			TObjectIntHashMap<AbstractVertex> labels = new TObjectIntHashMap<AbstractVertex>(nodeset.size());
 			out.println("Vertices"+cr+nodeset.size());
-			for(Vertex node: nodeset)
+			for(AbstractVertex node: nodeset)
 			{
 				count++;
 				labels.put(node, count);
@@ -1369,7 +1369,7 @@ import gnu.trove.TObjectIntHashMap;
 			for(AbstractTriangle at: triangleList)
 			{
 				Triangle t = (Triangle) at;
-				if (t.isOuter())
+				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
 				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
 					continue;
@@ -1380,7 +1380,7 @@ import gnu.trove.TObjectIntHashMap;
 			for(AbstractTriangle at: triangleList)
 			{
 				Triangle t = (Triangle) at;
-				if (t.isOuter())
+				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
 				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
 					continue;
