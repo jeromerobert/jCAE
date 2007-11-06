@@ -199,6 +199,8 @@ public class UniformLength
 				}
 			}
 			nbPoints -= offset;
+			if (logger.isDebugEnabled())
+				logger.debug("curve length: "+curve.length()+"  nr. points: "+nbPoints);
 		}
 
 		MNode1D n1, n2;
