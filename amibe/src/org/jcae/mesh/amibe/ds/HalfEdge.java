@@ -1122,22 +1122,15 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		}
 		for (int j = 0; j < 2; j++)
 		{
-			HalfEdge newNMEdge = null;
-			for (int i = 0; i < cnt; i++)
+			// Initializes an empty cycle
+			HalfEdge head = hOuter[j].next;
+			head.HEglue(head.next);
+			for (int i = 1; i < cnt; i++)
 			{
-				if (newNMEdge == null)
-				{
-					// Initializes an empty cycle
-					newNMEdge = hOuter[2*i+j];
-					newNMEdge.next.HEglue(newNMEdge.next.next);
-				}
-				else
-				{
-					// Adds hOuter[2*i+j] to current cycle
-					HalfEdge oldSym = newNMEdge.next.sym;
-					newNMEdge.next.HEglue(hOuter[2*i+j].next.next);
-					hOuter[2*i+j].next.HEglue(oldSym);
-				}
+				// Adds hOuter[2*i+j] to current cycle
+				HalfEdge oldSym = head.sym;
+				head.HEglue(hOuter[2*i+j].next.next);
+				hOuter[2*i+j].next.HEglue(oldSym);
 			}
 		}
 		return this;
