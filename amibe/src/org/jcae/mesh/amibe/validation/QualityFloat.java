@@ -61,7 +61,8 @@ public class QualityFloat
 	private QualityProcedure qproc;
 	private int [] sorted;
 	private float [] bounds;
-	private int layers = 0;
+	private int layers = -1;
+	private float scaleFactor = 1.0f;
 	private float qmin, qmax, qavg;
 
 	public QualityFloat()
@@ -88,6 +89,7 @@ public class QualityFloat
 	{
 		qproc = q;
 		qproc.bindResult(data);
+		scaleFactor = qproc.getScaleFactor();
 	}
 	
 	/**
@@ -138,16 +140,7 @@ public class QualityFloat
 	 */
 	public void setTarget(float factor)
 	{
-		int nrTotal = data.size();
-		if (factor == 0.0f)
-			return;
-		factor = 1.0f/factor;
-		for (int i = 0; i < nrTotal; i++)
-		{
-			float val = data.get(i);
-			val *= factor;
-			data.set(i, val);
-		}
+		scaleFactor = 1.0f / factor;
 	}
 	
 	/**
@@ -170,6 +163,11 @@ public class QualityFloat
 		float vmin = Float.MAX_VALUE;
 		float vmax = Float.MIN_VALUE;
 		qavg = 0.0f;
+		for (int i = 0; i < nrTotal; i++)
+		{
+			float val = data.get(i) * scaleFactor;
+			data.set(i, val);
+		}
 		for (int i = 0; i < nrTotal; i++)
 		{
 			float val = data.get(i);
@@ -228,12 +226,17 @@ public class QualityFloat
 			bounds[i] = vmin + i * delta;
 		for (int i = 0; i < nrTotal; i++)
 		{
+			float val = data.get(i) * scaleFactor;
+			data.set(i, val);
+		}
+		for (int i = 0; i < nrTotal; i++)
+		{
 			float val = data.get(i);
 			if (qmin > val)
 				qmin = val;
 			if (qmax < val)
 				qmax = val;
-			qavg += data.get(i) / nrTotal;
+			qavg += val / nrTotal;
 			int cell = (int) ((val - vmin) / delta + 1.001f);
 			if (cell < 0)
 				cell = 0;
@@ -251,7 +254,7 @@ public class QualityFloat
 	public void split(float... v)
 	{
 		layers = v.length - 1;
-		if (layers <= 0)
+		if (layers < 0)
 			return;
 		bounds = new float[layers+1];
 		int cnt = 0;
@@ -262,6 +265,11 @@ public class QualityFloat
 		qmax = Float.MIN_VALUE;
 		sorted = new int[layers+2];
 		int nrTotal = data.size();
+		for (int i = 0; i < nrTotal; i++)
+		{
+			float val = data.get(i) * scaleFactor;
+			data.set(i, val);
+		}
 		for (int i = 0; i < nrTotal; i++)
 		{
 			float val = data.get(i);
@@ -283,7 +291,7 @@ public class QualityFloat
 	 */
 	public void printLayers()
 	{
-		if (layers <= 0)
+		if (layers < 0)
 		{
 			logger.error("split() method must be called before printLayers()");
 			return;

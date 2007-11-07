@@ -19,6 +19,7 @@
 
 package org.jcae.mesh.amibe.validation;
 
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import gnu.trove.TFloatArrayList;
 
 /**
@@ -47,6 +48,22 @@ public abstract class QualityProcedure
 	 * Returns quality factor.
 	 */
 	public abstract float quality(Object o);
+	
+	/**
+	 * Returns default scale factor.
+	 */
+	protected float getScaleFactor()
+	{
+		return 1.0f;
+	}
+	
+	/**
+	 * Returns <code>MeshTraitsBuilder</code> instance needed by this class.
+	 */
+	protected MeshTraitsBuilder getMeshTraitsBuilder()
+	{
+		return new MeshTraitsBuilder();
+	}
 	
 	/**
 	 * Finish quality computations.
