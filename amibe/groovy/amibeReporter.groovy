@@ -3,11 +3,10 @@
  */
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
-import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshExporter;
-import org.jcae.mesh.amibe.validation.MinAngleFace;
-import org.jcae.mesh.amibe.validation.QualityFloat;
+import org.jcae.mesh.amibe.validation.*;
+import java.lang.reflect.Constructor;
 import java.io.File;
 import gnu.trove.TIntHashSet;
 import org.apache.commons.cli.*;
@@ -45,6 +44,16 @@ options.addOption(
 		.withDescription("creates <BASE>.mesh and <BASE>.bb MEDIT files")
 		.withLongOpt("output")
 		.create('o'));
+options.addOption(
+	OptionBuilder.withArgName("CLASS").hasArg()
+		.withDescription("criterion (default: MinAngleFace)")
+		.withLongOpt("criterion")
+		.create('c'));
+options.addOption(
+	OptionBuilder.withArgName("NUMBER").hasArg()
+		.withDescription("scale factor (default: 1.0)")
+		.withLongOpt("scale")
+		.create('s'));
 CommandLineParser parser = new GnuParser();
 CommandLine cmd = parser.parse(options, args, true);
 if (cmd.hasOption('h'))
@@ -64,12 +73,18 @@ Float [] bounds = new Float[sBounds.length];
 for (int i = 0; i < bounds.length; i++)
 	bounds[i] = Float.parseFloat(sBounds[i]);
 
-// Use an empty MeshTraitsBuilder to lower memory usage
-MeshTraitsBuilder mtb = new MeshTraitsBuilder();
-Mesh mesh3D = new Mesh(mtb);
+String crit=cmd.getOptionValue('c', "MinAngleFace");
+Constructor cons = Class.forName("org.jcae.mesh.amibe.validation."+crit).getConstructor();
+QualityProcedure qproc = cons.newInstance();
+if (qproc.getType() != QualityProcedure.FACE)
+	throw new IllegalArgumentException("amibeReporter only accepts criterion on faces");
+
+float scaleFactor=Float.parseFloat(cmd.getOptionValue('s', "1.0")).floatValue();
+
+Mesh mesh = new Mesh(qproc.getMeshTraitsBuilder());
 try
 {
-	MeshReader.readObject3D(mesh3D, xmlDir, xmlFile);
+	MeshReader.readObject3D(mesh, xmlDir, xmlFile);
 }
 catch (IOException ex)
 {
@@ -77,12 +92,11 @@ catch (IOException ex)
 	usage();
 }
 // Compute mesh quality
-MinAngleFace qproc = new MinAngleFace();
 int nrFaces = 1;
 if (detailed)
 {
-	TIntHashSet groups = new TIntHashSet(mesh3D.getTriangles().size());
-	for (AbstractTriangle f: mesh3D.getTriangles())
+	TIntHashSet groups = new TIntHashSet(mesh.getTriangles().size());
+	for (AbstractTriangle f: mesh.getTriangles())
 	{
 		if (f.isWritable())
 		{
@@ -94,13 +108,14 @@ if (detailed)
 	nrFaces = groups.size();
 }
 QualityFloat [] data = new QualityFloat[nrFaces];
-int mean = mesh3D.getTriangles().size() / nrFaces;
+int mean = mesh.getTriangles().size() / nrFaces;
 for (int i = 0; i < data.length; i++)
 {
 	data[i] = new QualityFloat(mean);
 	data[i].setQualityProcedure(qproc);
+	data[i].setTarget(scaleFactor);
 }
-for (AbstractTriangle f: mesh3D.getTriangles())
+for (AbstractTriangle f: mesh.getTriangles())
 {
 	if (f.isWritable())
 	{
@@ -110,11 +125,9 @@ for (AbstractTriangle f: mesh3D.getTriangles())
 		data[i].compute(f);
 	}
 }
-float target = (float) Math.PI/3.0f;
 for (int i = 0; i < data.length; i++)
 {
 	data[i].finish();
-	data[i].setTarget(target);
 	data[i].split(bounds);
 	// Prints histogram on console
 	if (detailed)
