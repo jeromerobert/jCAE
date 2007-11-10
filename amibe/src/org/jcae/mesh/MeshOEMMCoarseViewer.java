@@ -159,9 +159,9 @@ public class MeshOEMMCoarseViewer
 						leaves.add(i);
 						Mesh mesh = fineReader.buildMesh(leaves);
 						Mesh coarseMesh = coarseReader.buildMesh(leaves);
-						Triangle tf = (Triangle) mesh.getTriangles().iterator().next();
+						Triangle tf = mesh.getTriangles().iterator().next();
 						Matrix3D.computeNormal3D(tf.vertex[0].getUV(), tf.vertex[1].getUV(), tf.vertex[2].getUV(), tempD1, tempD2, tempn1);
-						Triangle tc = (Triangle) coarseMesh.getTriangles().iterator().next();
+						Triangle tc = coarseMesh.getTriangles().iterator().next();
 						Matrix3D.computeNormal3D(tc.vertex[0].getUV(), tc.vertex[1].getUV(), tc.vertex[2].getUV(), tempD1, tempD2, tempn2);
 						System.out.println("Coarse normal for first triangle of leaf: " + i + " [" 
 								+ tempn1[0] + ", "+ tempn1[1] + ", "+ tempn1[2] + "] and fine " +

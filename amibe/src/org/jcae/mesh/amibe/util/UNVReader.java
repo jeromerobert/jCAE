@@ -22,7 +22,7 @@
 package org.jcae.mesh.amibe.util;
 
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.MGroup3D;
 import java.io.BufferedReader;
@@ -55,7 +55,7 @@ public class UNVReader
 	public static void readMesh(Mesh mesh, String file, double ridgeAngle)
 	{
 		TIntObjectHashMap<Vertex> nodesmap = null;
-		TIntObjectHashMap<AbstractTriangle> facesmap = null;
+		TIntObjectHashMap<Triangle> facesmap = null;
 		double unit = 1.0;
 		String line = "";
 		try
@@ -189,10 +189,10 @@ public class UNVReader
 		return nodesmap;
 	}
 
-	private static TIntObjectHashMap<AbstractTriangle> readFace(BufferedReader rd, Mesh mesh, TIntObjectHashMap<Vertex> nodesmap)
+	private static TIntObjectHashMap<Triangle> readFace(BufferedReader rd, Mesh mesh, TIntObjectHashMap<Vertex> nodesmap)
 	{
 		logger.debug("Reading triangles");
-		TIntObjectHashMap<AbstractTriangle> facesmap = new TIntObjectHashMap<AbstractTriangle>();
+		TIntObjectHashMap<Triangle> facesmap = new TIntObjectHashMap<Triangle>();
 		String line = "";
 		boolean quad = false;
 		
@@ -219,7 +219,7 @@ public class UNVReader
 					assert n2 != null : p2;
 					Vertex n3 = nodesmap.get(p3);
 					assert n3 != null : p3;
-					AbstractTriangle f = mesh.createTriangle(n1, n2, n3);
+					Triangle f = mesh.createTriangle(n1, n2, n3);
 					mesh.add(f);
 					// fill the map of faces
 					facesmap.put(ind, f);
@@ -242,7 +242,7 @@ public class UNVReader
 					assert n3 != null : p3;
 					Vertex n4 = nodesmap.get(p4);
 					assert n4 != null : p4;
-					AbstractTriangle f = mesh.createTriangle(n1, n2, n3);
+					Triangle f = mesh.createTriangle(n1, n2, n3);
 					mesh.add(f);
 					facesmap.put(ind, f);
 					f = mesh.createTriangle(n1, n3, n4);
@@ -263,7 +263,7 @@ public class UNVReader
 		return facesmap;
 	}
 	
-	private static void readGroup(BufferedReader rd, Mesh mesh, TIntObjectHashMap<AbstractTriangle> facesmap)
+	private static void readGroup(BufferedReader rd, Mesh mesh, TIntObjectHashMap<Triangle> facesmap)
 	{
 		logger.debug("Reading groups");
 		String line = "";
@@ -288,7 +288,7 @@ public class UNVReader
 				*/
 				// Read group name
 				String title = rd.readLine().trim();
-				ArrayList<AbstractTriangle> facelist = new ArrayList<AbstractTriangle>();
+				ArrayList<Triangle> facelist = new ArrayList<Triangle>();
 				// read the group
 				while ((line= rd.readLine().trim()).startsWith("8"))
 				{
@@ -301,7 +301,7 @@ public class UNVReader
 						int ind = Integer.valueOf(index).intValue();
 						if (ind != 0)
 						{
-							AbstractTriangle f = facesmap.get(ind);
+							Triangle f = facesmap.get(ind);
 							facelist.add(f);
 							f.setGroupId(groupIdx);
 						}

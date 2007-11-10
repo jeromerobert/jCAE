@@ -24,7 +24,6 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import java.util.Map;
 import java.util.HashMap;
 import static org.junit.Assert.*;
@@ -66,8 +65,8 @@ public class SplitEdgeTest
 		{
 			for (int i = 0; i < m-1; i++)
 			{
-				tt[2*(m-1)*j+2*i]   = (Triangle) mesh.createTriangle(vv[m*j+i], vv[m*j+i+1], vv[m*(j+1)+i]);
-				tt[2*(m-1)*j+2*i+1] = (Triangle) mesh.createTriangle(vv[m*j+i+1], vv[m*(j+1)+i+1], vv[m*(j+1)+i]);
+				tt[2*(m-1)*j+2*i]   = mesh.createTriangle(vv[m*j+i], vv[m*j+i+1], vv[m*(j+1)+i]);
+				tt[2*(m-1)*j+2*i+1] = mesh.createTriangle(vv[m*j+i+1], vv[m*(j+1)+i+1], vv[m*(j+1)+i]);
 				vv[m*j+i].setLink(tt[2*(m-1)*j+2*i]);
 			}
 			vv[m*j+m-1].setLink(tt[2*(m-1)*j+2*m-3]);
@@ -122,17 +121,16 @@ public class SplitEdgeTest
 	private void addVertexRefs()
 	{
 		int ref = 0;
-		for (AbstractTriangle at: mesh.getTriangles())
+		for (Triangle t: mesh.getTriangles())
 		{
-			Triangle t = (Triangle) at;
 			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 			{
-				for (Vertex v: t.vertex)
+				for (Vertex vv: t.vertex)
 				{
-					if (0 == v.getRef())
+					if (0 == vv.getRef())
 					{
 						ref++;
-						v.setRef(ref);
+						vv.setRef(ref);
 					}
 				}
 			}
@@ -203,8 +201,8 @@ public class SplitEdgeTest
 			v[i].setLabel(i);
 
 		T = new Triangle[2];
-		T[0] = (Triangle) mesh.createTriangle(v[0], v[1], v[2]);
-		T[1] = (Triangle) mesh.createTriangle(v[3], v[2], v[1]);
+		T[0] = mesh.createTriangle(v[0], v[1], v[2]);
+		T[1] = mesh.createTriangle(v[3], v[2], v[1]);
 		v[0].setLink(T[0]);
 		v[1].setLink(T[0]);
 		v[2].setLink(T[0]);

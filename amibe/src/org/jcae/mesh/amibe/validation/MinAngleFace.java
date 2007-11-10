@@ -20,7 +20,7 @@
 
 package org.jcae.mesh.amibe.validation;
 
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 
 /**
@@ -38,12 +38,12 @@ public class MinAngleFace extends QualityProcedure
 	@Override
 	public float quality(Object o)
 	{
-		if (o instanceof AbstractTriangle)
-			return quality((AbstractTriangle) o);
+		if (o instanceof Triangle)
+			return quality((Triangle) o);
 		throw new IllegalArgumentException();
 	}
 	
-	private float quality(AbstractTriangle f)
+	private float quality(Triangle f)
 	{
 		Vertex n1 = f.vertex[0];
 		Vertex n2 = f.vertex[1];

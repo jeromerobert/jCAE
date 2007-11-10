@@ -20,7 +20,7 @@
 
 package org.jcae.mesh;
 
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshExporter;
@@ -53,7 +53,7 @@ public class MeshValid3D
 		MinAngleFace qproc = new MinAngleFace();
 		QualityFloat data = new QualityFloat(1000);
 		data.setQualityProcedure(qproc);
-		for (AbstractTriangle f: mesh3D.getTriangles())
+		for (Triangle f: mesh3D.getTriangles())
 			data.compute(f);
 		data.finish();
 		data.setTarget((float) Math.PI/3.0f);

@@ -64,8 +64,8 @@ public class DecimateHalfEdgeTest
 		{
 			for (int i = 0; i < m-1; i++)
 			{
-				tt[2*(m-1)*j+2*i]   = (Triangle) mesh.createTriangle(vv[m*j+i], vv[m*j+i+1], vv[m*(j+1)+i]);
-				tt[2*(m-1)*j+2*i+1] = (Triangle) mesh.createTriangle(vv[m*j+i+1], vv[m*(j+1)+i+1], vv[m*(j+1)+i]);
+				tt[2*(m-1)*j+2*i]   = mesh.createTriangle(vv[m*j+i], vv[m*j+i+1], vv[m*(j+1)+i]);
+				tt[2*(m-1)*j+2*i+1] = mesh.createTriangle(vv[m*j+i+1], vv[m*(j+1)+i+1], vv[m*(j+1)+i]);
 				vv[m*j+i].setLink(tt[2*(m-1)*j+2*i]);
 			}
 			vv[m*j+m-1].setLink(tt[2*(m-1)*j+2*m-3]);
@@ -175,18 +175,18 @@ public class DecimateHalfEdgeTest
 			v[i].setLabel(i);
 
 		T = new Triangle[12];
-		T[0] = (Triangle) mesh.createTriangle(v[0], v[1], v[6]);
-		T[1] = (Triangle) mesh.createTriangle(v[6], v[3], v[0]);
-		T[2] = (Triangle) mesh.createTriangle(v[3], v[6], v[4]);
-		T[3] = (Triangle) mesh.createTriangle(v[2], v[1], v[6]);
-		T[4] = (Triangle) mesh.createTriangle(v[5], v[2], v[6]);
-		T[5] = (Triangle) mesh.createTriangle(v[5], v[6], v[4]);
-		T[6] = (Triangle) mesh.createTriangle(v[7], v[1], v[6]);
-		T[7] = (Triangle) mesh.createTriangle(v[6], v[4], v[8]);
-		T[8] = (Triangle) mesh.createTriangle(v[7], v[6], v[8]);
-		T[9] = (Triangle) mesh.createTriangle(v[9], v[1], v[6]);
-		T[10] = (Triangle) mesh.createTriangle(v[10], v[9], v[6]);
-		T[11] = (Triangle) mesh.createTriangle(v[10], v[6], v[4]);
+		T[0] = mesh.createTriangle(v[0], v[1], v[6]);
+		T[1] = mesh.createTriangle(v[6], v[3], v[0]);
+		T[2] = mesh.createTriangle(v[3], v[6], v[4]);
+		T[3] = mesh.createTriangle(v[2], v[1], v[6]);
+		T[4] = mesh.createTriangle(v[5], v[2], v[6]);
+		T[5] = mesh.createTriangle(v[5], v[6], v[4]);
+		T[6] = mesh.createTriangle(v[7], v[1], v[6]);
+		T[7] = mesh.createTriangle(v[6], v[4], v[8]);
+		T[8] = mesh.createTriangle(v[7], v[6], v[8]);
+		T[9] = mesh.createTriangle(v[9], v[1], v[6]);
+		T[10] = mesh.createTriangle(v[10], v[9], v[6]);
+		T[11] = mesh.createTriangle(v[10], v[6], v[4]);
 		v[0].setLink(T[0]);
 		v[1].setLink(T[0]);
 		v[2].setLink(T[3]);
@@ -238,8 +238,8 @@ public class DecimateHalfEdgeTest
 			v[i].setLabel(i);
 
 		T = new Triangle[2];
-		T[0] = (Triangle) mesh.createTriangle(v[0], v[1], v[2]);
-		T[1] = (Triangle) mesh.createTriangle(v[3], v[2], v[1]);
+		T[0] = mesh.createTriangle(v[0], v[1], v[2]);
+		T[1] = mesh.createTriangle(v[3], v[2], v[1]);
 		v[0].setLink(T[0]);
 		v[1].setLink(T[0]);
 		v[2].setLink(T[0]);

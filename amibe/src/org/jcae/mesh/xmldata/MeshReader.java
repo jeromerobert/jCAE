@@ -21,7 +21,7 @@
 package org.jcae.mesh.xmldata;
 
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.MGroup3D;
 import org.jcae.mesh.amibe.patch.Mesh2D;
@@ -165,7 +165,7 @@ public class MeshReader
 			int numberOfTriangles = Integer.parseInt(
 				xpath.evaluate("number/text()", submeshTriangles));
 			logger.debug("Reading "+numberOfTriangles+" elements");
-			AbstractTriangle [] facelist = new AbstractTriangle[numberOfTriangles];
+			Triangle [] facelist = new Triangle[numberOfTriangles];
 			for (int i=0; i < numberOfTriangles; i++)
 			{
 				Vertex2D pt1 = nodelist[trianglesBuffer.get()];
@@ -313,7 +313,7 @@ public class MeshReader
 			int numberOfTriangles = Integer.parseInt(
 				xpath.evaluate("number/text()", submeshTriangles));
 			logger.debug("Reading "+numberOfTriangles+" elements");
-			AbstractTriangle [] facelist = new AbstractTriangle[numberOfTriangles];
+			Triangle [] facelist = new Triangle[numberOfTriangles];
 			for (int i=0; i < numberOfTriangles; i++)
 			{
 				Vertex pt1 = nodelist[trianglesBuffer.get()];

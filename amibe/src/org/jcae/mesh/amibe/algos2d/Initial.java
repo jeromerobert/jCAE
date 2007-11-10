@@ -23,7 +23,7 @@ package org.jcae.mesh.amibe.algos2d;
 
 import org.jcae.mesh.amibe.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.patch.Mesh2D;
@@ -75,9 +75,9 @@ import org.apache.log4j.Logger;
  * triangulation.  The nearest vertex already inserted in the mesh is retrieved
  * with {@link org.jcae.mesh.amibe.util.KdTree#getNearestVertex(Mesh, Vertex)}.
  * It has a reference to a triangle containing this vertex.  From this starting
- * point, we search for the {@link AbstractTriangle} containing this boundary node by
+ * point, we search for the {@link Triangle} containing this boundary node by
  * looking for adjacent triangles into the right direction.  This
- * <code>AbstractTriangle</code> is splitted into three triangles (even if the vertex
+ * <code>Triangle</code> is splitted into three triangles (even if the vertex
  * is inserted on an edge), and edges are swapped if they are not Delaunay.
  * (This criterion also applied with our Euclidian 2D metric)
  * </p>
@@ -92,7 +92,7 @@ import org.apache.log4j.Logger;
  * </p>
  *
  * <p>
- * We know that the {@link AbstractTriangle} bound to {@link Mesh#outerVertex} is an
+ * We know that the {@link Triangle} bound to {@link Mesh#outerVertex} is an
  * outer triangle.  Triangles adjacent through a boundary edge are interior
  * triangles, and triangles adjacent through non-boundary edges are also
  * outer triangles.  All triangles of the mesh are visited, and outer
@@ -311,7 +311,7 @@ public class Initial
 			ot.prev();
 		assert ot.apex() == mesh.outerVertex : ot;
 		
-		AbstractTriangle.List tList = new AbstractTriangle.List();
+		Triangle.List tList = new Triangle.List();
 		Vertex2D first = (Vertex2D) ot.origin();
 		do
 		{
@@ -334,7 +334,7 @@ public class Initial
 		while (oldHead != newHead)
 		{
 			oldHead = newHead;
-			for (Iterator<AbstractTriangle> it = tList.iterator(); it.hasNext(); )
+			for (Iterator<Triangle> it = tList.iterator(); it.hasNext(); )
 			{
 				t = (TriangleVH) it.next();
 				if (t == oldHead)
@@ -377,7 +377,7 @@ public class Initial
 		assert (mesh.isValid());
 		
 		logger.debug(" Remove links to outer triangles");
-		for (Iterator<AbstractTriangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
+		for (Iterator<Triangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 		{
 			t = (TriangleVH) it.next();
 			if (t.hasAttributes(AbstractHalfEdge.OUTER))

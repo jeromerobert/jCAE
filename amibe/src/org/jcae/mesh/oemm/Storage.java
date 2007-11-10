@@ -51,9 +51,7 @@ import gnu.trove.TIntByteHashMap;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
-import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.oemm.OEMM.Node;
 import org.apache.log4j.Logger;
 
@@ -246,11 +244,11 @@ public class Storage
 	private static TIntObjectHashMap<Vertex> getMapLabelToVertex(Mesh mesh)
 	{
 		TIntObjectHashMap<Vertex> referencedVertices = new TIntObjectHashMap<Vertex>(mesh.getTriangles().size() / 2);
-		for(AbstractTriangle tr: mesh.getTriangles())
+		for(Triangle tr: mesh.getTriangles())
 		{
 			for (int i = 0; i < 3; i++)
 			{
-				Vertex vertex = (Vertex) tr.vertex[i];
+				Vertex vertex = tr.vertex[i];
 				if (!vertex.isReadable() || vertex instanceof FakeNonReadVertex) {
 					continue;
 				}
@@ -735,7 +733,7 @@ public class Storage
 					triangle.setGroupId(node.leafIndex);
 					for (int i = 0; i < 3; i++)
 					{
-						Vertex v = (Vertex) triangle.vertex[i];
+						Vertex v = triangle.vertex[i];
 						Node foundNode = oemm.leaves[searchNode(oemm, v, positions)];
 						leaf[i] = foundNode.leafIndex;
 						assert leaf[i] < oemm.leaves.length; 
@@ -772,9 +770,8 @@ public class Storage
 	private static void collectAllTriangles(OEMM oemm, Mesh mesh, TObjectIntHashMap<Vertex> mapVertexToLeafindex, TIntObjectHashMap<ArrayList<Triangle>> mapLeafindexToTriangleList)
 	{
 		int positions[] = new int[3];
-		for(AbstractTriangle at: mesh.getTriangles())
+		for(Triangle tr: mesh.getTriangles())
 		{
-			Triangle tr = (Triangle) at;
 			boolean hasOuterEdge = tr.vertex[0].getUV().length == 2 || tr.vertex[1].getUV().length == 2 || tr.vertex[2].getUV().length == 2;
 			assert hasOuterEdge == tr.hasAttributes(AbstractHalfEdge.OUTER);
 			if (tr.hasAttributes(AbstractHalfEdge.OUTER))

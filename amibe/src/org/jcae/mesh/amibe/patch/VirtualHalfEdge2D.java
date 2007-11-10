@@ -255,7 +255,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("Split VirtualHalfEdge2D "+this+"\nat Vertex "+v);
-		Triangle backup = (Triangle) mesh.createTriangle(tri);
+		Triangle backup = mesh.createTriangle(tri);
 		// Aliases
 		VirtualHalfEdge2D oldLeft = work[0];
 		VirtualHalfEdge2D oldRight = work[1];
@@ -275,8 +275,8 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 		assert d != mesh.outerVertex;
 		Vertex2D a = (Vertex2D) apex();
 		
-		Triangle t1 = (Triangle) mesh.createTriangle(a, o, v);
-		Triangle t2 = (Triangle) mesh.createTriangle(d, a, v);
+		Triangle t1 = mesh.createTriangle(a, o, v);
+		Triangle t2 = mesh.createTriangle(d, a, v);
 		VirtualHalfEdge2D newLeft  = new VirtualHalfEdge2D(t1, 2);
 		VirtualHalfEdge2D newRight = new VirtualHalfEdge2D(t2, 2);
 		if (oldLeft.attributes != 0)

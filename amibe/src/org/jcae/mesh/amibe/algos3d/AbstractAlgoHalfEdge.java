@@ -25,7 +25,7 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.HalfEdge;
 import org.jcae.mesh.amibe.ds.TriangleHE;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.util.QSortedTree;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
@@ -78,7 +78,7 @@ public abstract class AbstractAlgoHalfEdge
 	public static int countInnerTriangles(final Mesh mesh)
 	{
 		int ret = 0;
-		for (AbstractTriangle af: mesh.getTriangles())
+		for (Triangle af: mesh.getTriangles())
 		{
 			if (af.isWritable())
 				ret++;
@@ -103,7 +103,7 @@ public abstract class AbstractAlgoHalfEdge
 	{
 		//  Compute edge cost
 		nrTriangles = 0;
-		for (AbstractTriangle af: mesh.getTriangles())
+		for (Triangle af: mesh.getTriangles())
 		{
 			if (!af.isWritable())
 				continue;

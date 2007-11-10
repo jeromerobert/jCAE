@@ -25,7 +25,7 @@ import org.jcae.mesh.amibe.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.TriangleVH;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
 import org.jcae.mesh.amibe.util.LongLong;
 import org.jcae.mesh.amibe.metrics.Metric2D;
@@ -198,14 +198,14 @@ public class Vertex2D extends Vertex
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("Searching for the triangle surrounding "+this);
-		AbstractTriangle.List tList = new AbstractTriangle.List();
+		Triangle.List tList = new Triangle.List();
 		TriangleVH t = (TriangleVH) mesh.getQuadTree().getNearestVertex(mesh, this).getLink();
 		VirtualHalfEdge2D start = new VirtualHalfEdge2D(t, 0);
 		VirtualHalfEdge2D current = getSurroundingOTriangleStart(mesh, start, tList);
 		if (current == null)
 		{
 			// First, try with neighbours
-			for (Iterator<AbstractTriangle> it = tList.iterator(); it.hasNext(); )
+			for (Iterator<Triangle> it = tList.iterator(); it.hasNext(); )
 			{
 				t = (TriangleVH) it.next();
 				start.bind(t);
@@ -228,7 +228,7 @@ public class Vertex2D extends Vertex
 		if (current == null)
 		{
 			// As a last resort, check with all triangles
-			for (AbstractTriangle at: mesh.getTriangles())
+			for (Triangle at: mesh.getTriangles())
 			{
 				t = (TriangleVH) at;
 				start.bind(t);
@@ -242,7 +242,7 @@ public class Vertex2D extends Vertex
 		return current;
 	}
 	
-	private VirtualHalfEdge2D getSurroundingOTriangleStart(Mesh2D mesh, VirtualHalfEdge2D current, AbstractTriangle.List tList)
+	private VirtualHalfEdge2D getSurroundingOTriangleStart(Mesh2D mesh, VirtualHalfEdge2D current, Triangle.List tList)
 	{
 		boolean redo = false;
 		Vertex2D o = (Vertex2D) current.origin();

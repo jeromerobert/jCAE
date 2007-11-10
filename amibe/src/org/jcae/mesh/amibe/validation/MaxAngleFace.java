@@ -20,7 +20,7 @@
 
 package org.jcae.mesh.amibe.validation;
 
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 
 /**
@@ -38,9 +38,9 @@ public class MaxAngleFace extends QualityProcedure
 	@Override
 	public float quality(Object o)
 	{
-		if (!(o instanceof AbstractTriangle))
+		if (!(o instanceof Triangle))
 			throw new IllegalArgumentException();
-		AbstractTriangle f = (AbstractTriangle) o;
+		Triangle f = (Triangle) o;
 		
 		Vertex n1 = f.vertex[0];
 		Vertex n2 = f.vertex[1];

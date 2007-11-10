@@ -25,7 +25,7 @@ import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.Storage;
 import org.jcae.mesh.oemm.MeshReader;
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.xmldata.MeshWriter;
 import org.jcae.mesh.amibe.validation.*;
 import org.apache.log4j.Logger;
@@ -181,7 +181,7 @@ public class MeshOEMMViewer3d
 							MinAngleFace qproc = new MinAngleFace();
 							QualityFloat data = new QualityFloat(amesh.getTriangles().size());
 							data.setQualityProcedure(qproc);
-							for (AbstractTriangle f: amesh.getTriangles())
+							for (Triangle f: amesh.getTriangles())
 							{
 								if (f.getGroupId() == idx)
 									data.compute(f);

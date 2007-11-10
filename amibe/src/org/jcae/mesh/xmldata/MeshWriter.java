@@ -22,11 +22,10 @@ package org.jcae.mesh.xmldata;
 
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import gnu.trove.TObjectIntHashMap;
 import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TIntObjectProcedure;
 import gnu.trove.TIntArrayList;
 import java.io.IOException;
 import java.io.File;
@@ -117,14 +116,14 @@ public class MeshWriter
 	/**
 	 * Used by {@link writeObject}
 	 */
-	private static Element writeObjectTriangles(Document document, Collection<AbstractTriangle> trianglelist, File trianglesFile, String baseDir, TObjectIntHashMap<Vertex> nodeIndex)
+	private static Element writeObjectTriangles(Document document, Collection<Triangle> trianglelist, File trianglesFile, String baseDir, TObjectIntHashMap<Vertex> nodeIndex)
 		throws ParserConfigurationException, SAXException, IOException
 	{
 		//save triangles
 		logger.debug("begin writing "+trianglesFile);
 		DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(trianglesFile)));
 		int nrTriangles=0;
-		for(AbstractTriangle f: trianglelist)
+		for(Triangle f: trianglelist)
 		{
 			if (!f.isWritable())
 				continue;
@@ -141,13 +140,13 @@ public class MeshWriter
 			"</triangles>");
 	}
 
-	private static Element writeObjectGroups(Document document, Collection<AbstractTriangle> trianglelist, File groupsFile, String baseDir)
+	private static Element writeObjectGroups(Document document, Collection<Triangle> trianglelist, File groupsFile, String baseDir)
 		throws IOException
 	{
 		logger.debug("begin writing "+groupsFile);
 		int cnt=0;
 		TIntObjectHashMap<TIntArrayList> groupMap = new TIntObjectHashMap<TIntArrayList>();
-		for(AbstractTriangle f: trianglelist)
+		for(Triangle f: trianglelist)
 		{
 			if (!f.isWritable())
 				continue;
@@ -232,13 +231,13 @@ public class MeshWriter
 		File nodesFile=new File(dir, JCAEXMLData.nodes2dFilename);
 		File refFile = new File(dir, JCAEXMLData.ref1dFilename);
 		File trianglesFile=new File(dir, JCAEXMLData.triangles2dFilename);
-		Collection<AbstractTriangle> trianglelist = submesh.getTriangles();
+		Collection<Triangle> trianglelist = submesh.getTriangles();
 		Collection<Vertex> nodelist = submesh.getNodes();
 		if (nodelist == null)
 		{
 			HashSet<Vertex> nodeset = new HashSet<Vertex>();
 			nodelist = new ArrayList<Vertex>();
-			for (AbstractTriangle t: trianglelist)
+			for (Triangle t: trianglelist)
 			{
 				if (!t.isWritable())
 					continue;
@@ -319,10 +318,10 @@ public class MeshWriter
 			File refFile = new File(dir, JCAEXMLData.ref1dFilename);
 			File trianglesFile=new File(dir, JCAEXMLData.triangles3dFilename);
 			File groupsFile = new File(dir, JCAEXMLData.groupsFilename);
-			Collection<AbstractTriangle> trianglelist = submesh.getTriangles();
+			Collection<Triangle> trianglelist = submesh.getTriangles();
 			HashSet<Vertex> nodeset = new HashSet<Vertex>();
 			Collection<Vertex> nodelist = new ArrayList<Vertex>();
-			for (AbstractTriangle t: trianglelist)
+			for (Triangle t: trianglelist)
 			{
 				if (!t.isWritable())
 					continue;

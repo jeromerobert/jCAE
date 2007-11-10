@@ -25,7 +25,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import java.util.StringTokenizer;
 import gnu.trove.TIntObjectHashMap;
@@ -122,7 +122,7 @@ public class MESHReader
 					if (v[j] == null)
 						throw new RuntimeException();
 				}
-				AbstractTriangle f = mesh.createTriangle(v);
+				Triangle f = mesh.createTriangle(v);
 				mesh.add(f);
 			}
 		}

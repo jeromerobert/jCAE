@@ -22,7 +22,7 @@
 package org.jcae.mesh.amibe.algos2d;
 
 import org.jcae.mesh.amibe.ds.TriangleVH;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
@@ -84,14 +84,14 @@ public class CheckDelaunay
 
 		boolean redo = false;
 		int niter = mesh.getTriangles().size();
-		Collection<AbstractTriangle> oldList = mesh.getTriangles();
+		Collection<Triangle> oldList = mesh.getTriangles();
 		do {
 			redo = false;
 			cnt = 0;
 			ArrayList<FakeEdge> toSwap = new ArrayList<FakeEdge>();
-			HashSet<AbstractTriangle> newList = new HashSet<AbstractTriangle>();
+			HashSet<Triangle> newList = new HashSet<Triangle>();
 			niter--;
-			for (AbstractTriangle at: oldList)
+			for (Triangle at: oldList)
 			{
 				t = (TriangleVH) at;
 				ot.bind(t);
@@ -105,7 +105,7 @@ public class CheckDelaunay
 				}
 			}
 			
-			for (AbstractTriangle at: oldList)
+			for (Triangle at: oldList)
 			{
 				t = (TriangleVH) at;
 				ot.bind(t);

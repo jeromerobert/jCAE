@@ -20,7 +20,7 @@
 
 package org.jcae.mesh.amibe.traits;
 
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.util.KdTree;
 import java.util.ArrayList;
@@ -86,9 +86,9 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	 * @return collection of triangles
 	 */
 	@SuppressWarnings("unchecked")
-	public Collection<AbstractTriangle> getTriangles(Traits t)
+	public Collection<Triangle> getTriangles(Traits t)
 	{
-		return (Collection<AbstractTriangle>) t.array[index[BITTRIANGLES]];
+		return (Collection<Triangle>) t.array[index[BITTRIANGLES]];
 	}
 
 	/**
@@ -216,9 +216,9 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	protected void subInitTraits(Traits t)
 	{
 		if ((attributes & TRIANGLESET) != 0)
-			t.array[index[BITTRIANGLES]] = new LinkedHashSet<AbstractTriangle>();
+			t.array[index[BITTRIANGLES]] = new LinkedHashSet<Triangle>();
 		else if ((attributes & TRIANGLES) != 0)
-			t.array[index[BITTRIANGLES]] = new ArrayList<AbstractTriangle>();
+			t.array[index[BITTRIANGLES]] = new ArrayList<Triangle>();
 		if ((attributes & NODESET) != 0)
 			t.array[index[BITNODES]] = new LinkedHashSet<Vertex>();
 		else if ((attributes & NODES) != 0)

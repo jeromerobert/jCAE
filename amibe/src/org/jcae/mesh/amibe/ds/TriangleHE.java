@@ -40,7 +40,7 @@ public class TriangleHE extends Triangle
 	}
 
 	@Override
-	public final void copy(AbstractTriangle src)
+	public final void copy(Triangle src)
 	{
 		super.copy(src);
 		e0.copy(((TriangleHE) src).e0);

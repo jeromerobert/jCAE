@@ -23,7 +23,6 @@ package org.jcae.mesh.amibe.algos2d;
 
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
@@ -77,9 +76,8 @@ public class EnforceAbsDeflection
 		{
 			redo = false;
 			ArrayList<Triangle> badTriangles = new ArrayList<Triangle>();
-			for (AbstractTriangle at: mesh.getTriangles())
+			for (Triangle t: mesh.getTriangles())
 			{
-				Triangle t = (Triangle) at;
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
 				double uv[] = Vertex2D.centroid(mesh, (Vertex2D[]) t.vertex).getUV();

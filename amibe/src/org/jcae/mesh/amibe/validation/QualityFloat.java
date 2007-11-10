@@ -43,7 +43,7 @@ import org.apache.log4j.Logger;
  *    data.setQualityProcedure(new DihedralAngle());
  *    for (Iterator itf = mesh.getTriangles().iterator(); itf.hasNext(); )
  *    {
- *        AbstractTriangle f = (AbstractTriangle) itf.next();
+ *        Triangle f = (Triangle) itf.next();
  *        data.compute(f);
  *    }
  *    //  Print all results in the BB mesh format.

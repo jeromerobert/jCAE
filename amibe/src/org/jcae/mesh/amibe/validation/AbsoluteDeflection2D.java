@@ -22,7 +22,7 @@ package org.jcae.mesh.amibe.validation;
 
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 
@@ -44,9 +44,9 @@ public class AbsoluteDeflection2D extends QualityProcedure
 	@Override
 	public float quality(Object o)
 	{
-		if (!(o instanceof AbstractTriangle))
+		if (!(o instanceof Triangle))
 			throw new IllegalArgumentException();
-		AbstractTriangle t = (AbstractTriangle) o;
+		Triangle t = (Triangle) o;
 		double [] uv = Vertex2D.centroid(mesh, (Vertex2D[]) t.vertex).getUV();
 		double [] xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
 		p[3] = mesh.createVertex(xyz);

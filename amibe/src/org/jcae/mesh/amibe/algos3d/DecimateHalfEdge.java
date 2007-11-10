@@ -23,7 +23,6 @@ package org.jcae.mesh.amibe.algos3d;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.HalfEdge;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
@@ -167,7 +166,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	{
 		final int roughNrNodes = mesh.getTriangles().size()/2;
 		quadricMap = new HashMap<Vertex, Quadric3DError>(roughNrNodes);
-		for (AbstractTriangle af: mesh.getTriangles())
+		for (Triangle af: mesh.getTriangles())
 		{
 			if (!af.isWritable())
 				continue;
@@ -183,11 +182,10 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		final double [] vect2 = new double[3];
 		final double [] vect3 = new double[3];
 		final double [] normal = new double[3];
-		for (AbstractTriangle af: mesh.getTriangles())
+		for (Triangle f: mesh.getTriangles())
 		{
-			if (!af.isWritable())
+			if (!f.isWritable())
 				continue;
-			final Triangle f = (Triangle) af;
 			double [] p0 = f.vertex[0].getUV();
 			double [] p1 = f.vertex[1].getUV();
 			double [] p2 = f.vertex[2].getUV();

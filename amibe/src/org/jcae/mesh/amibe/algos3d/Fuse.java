@@ -23,10 +23,8 @@ package org.jcae.mesh.amibe.algos3d;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.util.KdTree;
-import java.util.Iterator;
 import java.util.HashMap;
 import org.apache.log4j.Logger;
 
@@ -74,9 +72,8 @@ public class Fuse
 			bmin[i] = Double.MAX_VALUE;
 			bmax[i] = Double.MIN_VALUE;
 		}
-		for (Iterator<Vertex> it=mesh.getNodes().iterator(); it.hasNext(); )
+		for (Vertex n: mesh.getNodes())
 		{
-			Vertex n = it.next();
 			double [] oldp = n.getUV();
 			for (int i = 0; i < 3; i++)
 			{
@@ -105,9 +102,8 @@ public class Fuse
 		KdTree octree = new KdTree(bbox);
 		HashMap<Vertex, Vertex> map = new HashMap<Vertex, Vertex>();
 		int nSubst = 0;
-		for (Iterator<Vertex> it = mesh.getNodes().iterator(); it.hasNext(); )
+		for (Vertex n: mesh.getNodes())
 		{
-			Vertex n = it.next();
 			if (n.isMutable())
 				continue;
 			Vertex p = octree.getNearestVertex(mesh, n);
@@ -122,16 +118,15 @@ public class Fuse
 			}
 		}
 		logger.debug(""+nSubst+" node(s) are removed");
-		for (Iterator<AbstractTriangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
+		for (Triangle t: mesh.getTriangles())
 		{
-			Triangle face = (Triangle) it.next();
 			for (int j = 0; j < 4; j++)
 			{
-				Vertex n = face.vertex[j];
+				Vertex n = t.vertex[j];
 				Vertex p = map.get(n);
 				if (p != null)
 				{
-					face.vertex[j] = p;
+					t.vertex[j] = p;
 					mesh.remove(n);
 				}
 			}

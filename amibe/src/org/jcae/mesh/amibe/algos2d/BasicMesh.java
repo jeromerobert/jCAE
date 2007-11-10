@@ -63,9 +63,9 @@ import org.jcae.mesh.amibe.patch.Mesh2D;
  * triangulation.  The nearest vertex already inserted in the mesh is retrieved
  * with {@link org.jcae.mesh.amibe.util.KdTree#getNearestVertex(Mesh,Vertex)}.
  * It has a reference to a triangle containing this vertex.  From this starting
- * point, we search for the {@link org.jcae.mesh.amibe.ds.AbstractTriangle} containing
+ * point, we search for the {@link org.jcae.mesh.amibe.ds.Triangle} containing
  * this boundary node by looking for adjacent triangles into the right
- * direction.  This <code>AbstractTriangle</code> is splitted into three triangles
+ * direction.  This <code>Triangle</code> is splitted into three triangles
  * (even if the vertex is inserted on an edge), and edges are swapped if they
  * are not Delaunay.
  * (This criterion also applied with our Euclidian 2D metric)
@@ -82,7 +82,7 @@ import org.jcae.mesh.amibe.patch.Mesh2D;
  * </p>
  *
  * <p>
- * We know that the {@link org.jcae.mesh.amibe.ds.AbstractTriangle} bound to
+ * We know that the {@link org.jcae.mesh.amibe.ds.Triangle} bound to
  * {@link org.jcae.mesh.amibe.ds.Mesh#outerVertex} is an outer triangle.
  * Triangles adjacent through a boundary edge are interior triangles, and
  * triangles adjacent through non-boundary edges are also outer triangles.  All

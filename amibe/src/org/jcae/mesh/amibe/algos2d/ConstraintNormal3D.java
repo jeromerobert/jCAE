@@ -22,7 +22,7 @@
 package org.jcae.mesh.amibe.algos2d;
 
 import org.jcae.mesh.amibe.ds.TriangleVH;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
@@ -87,7 +87,7 @@ public class ConstraintNormal3D
 			redo = false;
 			cnt = 0;
 			niter--;
-			for (AbstractTriangle at: mesh.getTriangles())
+			for (Triangle at: mesh.getTriangles())
 			{
 				t = (TriangleVH) at;
 				ot.bind(t);
@@ -98,7 +98,7 @@ public class ConstraintNormal3D
 				}
 			}
 			
-			for (AbstractTriangle at: mesh.getTriangles())
+			for (Triangle at: mesh.getTriangles())
 			{
 				t = (TriangleVH) at;
 				ot.bind(t);

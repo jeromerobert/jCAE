@@ -20,7 +20,7 @@
 
 package org.jcae.mesh.amibe.validation;
 
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 
 /**
@@ -42,9 +42,9 @@ public class Area extends QualityProcedure
 	@Override
 	public float quality(Object o)
 	{
-		if (!(o instanceof AbstractTriangle))
+		if (!(o instanceof Triangle))
 			throw new IllegalArgumentException();
-		AbstractTriangle f = (AbstractTriangle) o;
+		Triangle f = (Triangle) o;
 		double [] p1 = f.vertex[0].getUV();
 		double [] p2 = f.vertex[1].getUV();
 		double [] p3 = f.vertex[2].getUV();

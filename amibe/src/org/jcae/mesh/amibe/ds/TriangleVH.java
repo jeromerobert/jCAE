@@ -54,10 +54,10 @@ import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
  * There are two special cases:
  * </p>
  * <ul>
- *   <li>Boundary edges; a virtual AbstractTriangle(outerVertex, v1, v2) is created,
+ *   <li>Boundary edges; a virtual Triangle(outerVertex, v1, v2) is created,
  *       and linked to this edge.  This triangle has an {@link AbstractHalfEdge#OUTER}
  *       attribute, and boundary edges have a {@link AbstractHalfEdge#BOUNDARY} attribute.</li>
- *   <li>Non-manifold edges; a virtual AbstractTriangle(outerVertex, v1, v2) is
+ *   <li>Non-manifold edges; a virtual Triangle(outerVertex, v1, v2) is
  *       also created, and linked to this edge.  This triangle has an
  *       {@link AbstractHalfEdge#OUTER} attribute, non-manifold edge and its symmetric edge
  *       have a {@link AbstractHalfEdge#NONMANIFOLD} attribute, and other two edges are used
@@ -97,7 +97,7 @@ public class TriangleVH extends Triangle
 	}
 
 	@Override
-	public final void copy(AbstractTriangle that)
+	public final void copy(Triangle that)
 	{
 		super.copy(that);
 		TriangleVH src = (TriangleVH) that;

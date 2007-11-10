@@ -20,7 +20,7 @@
 
 package org.jcae.mesh.amibe.patch;
 
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.ElementFactoryInterface;
@@ -58,17 +58,17 @@ public class ElementPatchFactory implements ElementFactoryInterface
 		return createVertex(x[0], x[1]);
 	}
 
-	private AbstractTriangle createTriangle()
+	private Triangle createTriangle()
 	{
 		if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.VIRTUALHALFEDGE))
 			return new TriangleVH(triangleTraitsBuilder);
-		return new AbstractTriangle(triangleTraitsBuilder);
+		return new Triangle(triangleTraitsBuilder);
 	}
 	
 	@Override
-	public AbstractTriangle createTriangle(Vertex v0, Vertex v1, Vertex v2)
+	public Triangle createTriangle(Vertex v0, Vertex v1, Vertex v2)
 	{
-		AbstractTriangle ret = createTriangle();
+		Triangle ret = createTriangle();
 		Vertex2D [] vArray = new Vertex2D[3];
 		vArray[0] = (Vertex2D) v0;
 		vArray[1] = (Vertex2D) v1;
@@ -81,9 +81,9 @@ public class ElementPatchFactory implements ElementFactoryInterface
 	}
 
 	@Override
-	public AbstractTriangle createTriangle(Vertex [] v)
+	public Triangle createTriangle(Vertex [] v)
 	{
-		AbstractTriangle ret = createTriangle();
+		Triangle ret = createTriangle();
 		Vertex2D [] vArray = new Vertex2D[3];
 		for (int i = 0; i < v.length; i++)
 		{
@@ -99,9 +99,9 @@ public class ElementPatchFactory implements ElementFactoryInterface
 	 * Clone an existing triangle.
 	 */
 	@Override
-	public AbstractTriangle createTriangle(AbstractTriangle that)
+	public Triangle createTriangle(Triangle that)
 	{
-		AbstractTriangle ret = createTriangle();
+		Triangle ret = createTriangle();
 		ret.vertex = new Vertex2D[3];
 		ret.copy(that);
 		return ret;

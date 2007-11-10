@@ -63,7 +63,7 @@ public class ElementFactory implements ElementFactoryInterface
 		return new HalfEdge(halfedgeTraitsBuilder, t, orientation, attributes);
 	}
 
-	private AbstractTriangle createTriangle()
+	private Triangle createTriangle()
 	{
 		if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE))
 		{
@@ -80,21 +80,21 @@ public class ElementFactory implements ElementFactoryInterface
 		else if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.VIRTUALHALFEDGE))
 			return new TriangleVH(triangleTraitsBuilder);
 		else
-			return new AbstractTriangle(triangleTraitsBuilder);
+			return new Triangle(triangleTraitsBuilder);
 	}
 
-	public AbstractTriangle createTriangle(Vertex v0, Vertex v1, Vertex v2)
+	public Triangle createTriangle(Vertex v0, Vertex v1, Vertex v2)
 	{
-		AbstractTriangle ret = createTriangle();
+		Triangle ret = createTriangle();
 		ret.vertex[0] = v0;
 		ret.vertex[1] = v1;
 		ret.vertex[2] = v2;
 		return ret;
 	}
 
-	public AbstractTriangle createTriangle(Vertex [] v)
+	public Triangle createTriangle(Vertex [] v)
 	{
-		AbstractTriangle ret = createTriangle();
+		Triangle ret = createTriangle();
 		ret.vertex = new Vertex[v.length];
 		for (int i = 0; i < v.length; i++)
 			ret.vertex[i] = v[i];
@@ -104,9 +104,9 @@ public class ElementFactory implements ElementFactoryInterface
 	/**
 	 * Clone an existing triangle.
 	 */
-	public AbstractTriangle createTriangle(AbstractTriangle that)
+	public Triangle createTriangle(Triangle that)
 	{
-		AbstractTriangle ret = createTriangle();
+		Triangle ret = createTriangle();
 		ret.copy(that);
 		return ret;
 	}

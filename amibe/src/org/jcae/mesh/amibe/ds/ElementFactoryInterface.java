@@ -25,8 +25,8 @@ public interface ElementFactoryInterface
 	public Vertex createVertex(double u, double v);
 	public Vertex createVertex(double x, double y, double z);
 	public Vertex createVertex(double [] x);
-	public AbstractTriangle createTriangle(Vertex v0, Vertex v1, Vertex v2);
-	public AbstractTriangle createTriangle(Vertex [] v);
-	public AbstractTriangle createTriangle(AbstractTriangle that);
+	public Triangle createTriangle(Vertex v0, Vertex v1, Vertex v2);
+	public Triangle createTriangle(Vertex [] v);
+	public Triangle createTriangle(Triangle that);
 	public boolean hasAdjacency();
 }

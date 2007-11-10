@@ -23,7 +23,6 @@ package org.jcae.mesh.amibe.algos3d;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.util.QSortedTree;
@@ -111,9 +110,8 @@ public class SmoothNodes3D
 		// First compute triangle quality
 		QSortedTree tree = new PAVLSortedTree();
 		AbstractHalfEdge ot = null;
-		for (AbstractTriangle at: mesh.getTriangles())
+		for (Triangle f: mesh.getTriangles())
 		{
-			Triangle f = (Triangle) at;
 			if (f.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			ot = f.getAbstractHalfEdge(ot);

@@ -20,32 +20,76 @@
 
 package org.jcae.mesh.amibe.ds;
 
+import org.jcae.mesh.amibe.traits.Traits;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
+import java.util.Iterator;
+import java.util.ConcurrentModificationException;
+import java.util.NoSuchElementException;
 import java.io.Serializable;
 
 /**
  * A triangle containing adjacency relations.
  */
-public abstract class Triangle extends AbstractTriangle implements Serializable
+public class Triangle implements Serializable
 {
-	public Triangle(TriangleTraitsBuilder ttb)
+	//  User-defined traits
+	protected final TriangleTraitsBuilder traitsBuilder;
+	protected final Traits traits;
+
+	/**
+	 * Three vertices.
+	 */
+	public Vertex [] vertex;
+	
+	// Group id
+	private int groupId = -1;
+	
+	protected boolean readable = true;
+	protected boolean writable = true;
+
+	// We sometimes need to process lists of triangles before mesh
+	// connectivity has been set up.  This can be achieved efficiently
+	// with a singly linked list.
+	// Reference to the next element in the singly linked list.
+	Triangle listNext = null;
+	
+	public Triangle(TriangleTraitsBuilder builder)
 	{
-		super(ttb);
+		traitsBuilder = builder;
+		if (builder != null)
+			traits = builder.createTraits();
+		else
+			traits = null;
+		vertex = new Vertex[3];
 	}
 
+	public void copy(Triangle src)
+	{
+		for (int i = 0; i < 3; i++)
+			vertex[i] = src.vertex[i];
+		readable = src.readable;
+		writable = src.writable;
+	}
+	
 	/**
 	 * Sets attributes for all edges of this triangle.
 	 *
 	 * @param attr  attributes to set on edges
 	 */
-	public abstract void setAttributes(int attr);
+	public void setAttributes(int attr)
+	{
+		throw new RuntimeException();
+	}
 	
 	/**
 	 * Resets attributes for all edges of this triangle.
 	 *
 	 * @param attr  attributes to reset on edges
 	 */
-	public abstract void clearAttributes(int attr);
+	public void clearAttributes(int attr)
+	{
+		throw new RuntimeException();
+	}
 	
 	/**
 	 * Checks if some attributes of this triangle are set.
@@ -54,16 +98,216 @@ public abstract class Triangle extends AbstractTriangle implements Serializable
 	 * @return <code>true</code> if any edge of this triangle has
 	 * one of these attributes set, <code>false</code> otherwise
 	 */
-	public abstract boolean hasAttributes(int attr);
+	public boolean hasAttributes(int attr)
+	{
+		throw new RuntimeException();
+	}
 	
 	/**
 	 * Gets an <code>AbstractHalfEdge</code> instance bound to this triangle.
 	 */
-	public abstract AbstractHalfEdge getAbstractHalfEdge();
+	public AbstractHalfEdge getAbstractHalfEdge()
+	{
+		throw new RuntimeException();
+	}
 
 	/**
 	 * Gets an <code>AbstractHalfEdge</code> instance bound to this triangle.
 	 */
-	public abstract AbstractHalfEdge getAbstractHalfEdge(AbstractHalfEdge that);
+	public AbstractHalfEdge getAbstractHalfEdge(AbstractHalfEdge that)
+	{
+		throw new RuntimeException();
+	}
 
+	/**
+	 * Return the group identifier of this triangle.
+	 *
+	 * @return the group identifier of this triangle.
+	 */
+	public int getGroupId()
+	{
+		return groupId;
+	}
+	
+	/**
+	 * Set the group identifier of this triangle.
+	 *
+	 * @param g  the group identifier of this triangle.
+	 */
+	public void setGroupId(int g)
+	{
+		groupId = g;
+	}
+	
+	public void setReadable(boolean b)
+	{
+		readable = b;
+	}
+	
+	public void setWritable(boolean b)
+	{
+		writable = b;
+	}
+	
+	public boolean isReadable()
+	{
+		return readable;
+	}
+	
+	public boolean isWritable()
+	{
+		return writable;
+	}
+	
+	@Override
+	public String toString()
+	{
+		StringBuilder r = new StringBuilder();
+		r.append("hashcode: "+hashCode());
+		if (!readable)
+			r.append(" !r");
+		if (!writable)
+			r.append(" !w");
+		if (groupId >= 0)
+			r.append("\nGroup: "+groupId);
+		r.append("\nVertices:");
+		for (int i = 0; i < 3; i++)
+			r.append("\n  "+vertex[i]);
+		if (listNext != null)
+			r.append("\nLink next: "+listNext.hashCode());
+		return r.toString();
+	}
+
+	/**
+	 * Singly linked list of triangles.
+	 * We sometimes need to process lists of triangles before mesh
+	 * connectivity has been set up.  This can be achieved efficiently
+	 * with a singly linked list, but there are few caveats.
+	 * <ul>
+	 *  <li>A Triangle can appear in one list only, trying to insert it
+	 *      twice will throw a ConcurrentModificationException exception.</li>
+	 *  <li>Lists have to be cleared out by calling the {@link #clear} method
+	 *      before being freed, otherwise Triangle can not be inserted into
+	 *      other lists.</li>
+	 * </ul>
+	 * <p>
+	 * Here is an example:
+	 * </p>
+	 *   <pre>
+	 *   //  Begin a new list
+	 *   Triangle.List tList = new Triangle.List();
+	 *   ...
+	 *   //  In a loop, add triangles to this list.
+	 *     tList.{@link List#add}(tri);
+	 *   //  Check whether a triangle is contained in this list.
+	 *   //  This is very fast because it tests if its link pointer
+	 *   //  is <code>null</code> or not.
+	 *     if (tList.{@link List#contains}(tri)) {
+	 *        ...
+	 *     }
+	 *   //  Loop over collected triangles.
+	 *   for (Iterator<Triangle> it = tList.{@link List#iterator}; it.hasNext(); )
+	 *   {
+	 *     Triangle t = it.next();
+	 *     ...
+	 *   }
+	 *   //  When finished, remove all links between triangles
+	 *   tList.{@link List#clear};
+	 *   </pre>
+	 * <p>
+	 * New elements are added at the end of the list so that {@link List#add} can
+	 * be called while {@link List#iterator} is in action.
+	 * </p>
+	 */
+	public static class List
+	{
+		//   Head of the list.  Triangles are linked from this instance.
+		final Triangle listHead = new Triangle(null);
+		//   Sentinel.  This triangle is always the last triangle of the list.
+		final Triangle listSentinel = new Triangle(null);
+		//   Reference to the last collected triangle.
+		private Triangle listTail = listHead;
+		//   Number of collected items (for debugging purpose, can be removed).
+		private int listSize = 0;
+
+		/**
+		 * Initialize a triangle linked list.
+		 */
+		public List()
+		{
+			listTail.listNext = listSentinel;
+		}
+	
+		/**
+		 * Unmark triangles.  This method must be called before freeing
+		 * the list.
+		 */
+		public void clear()
+		{
+			Triangle next;
+			for (Triangle start = listHead; start != listSentinel; start = next)
+			{
+				next = start.listNext;
+				start.listNext = null;
+				listSize--;
+			}
+			listSize++;
+			assert listSize == 0;
+			listTail = listHead;
+			listTail.listNext = listSentinel;
+		}
+	
+		/**
+		 * Add the current triangle to the end of the list.
+		 * @throws ConcurrentModificationException if this element is
+		 * already linked.
+		 */
+		public final void add(Triangle o)
+		{
+			assert listTail != null;
+			assert listTail.listNext == listSentinel : listTail;
+			if (o.listNext != null)
+				throw new ConcurrentModificationException();
+			listTail.listNext = o;
+			listTail = o;
+			o.listNext = listSentinel;
+			listSize++;
+		}
+
+		/**
+		 * Check whether this element appears in the list.
+		 */
+		public boolean contains(Triangle o)
+		{
+			return o.listNext != null;
+		}
+	
+		/**
+		 * Create an iterator over linked triangles.  Note that the list
+		 * can be extended while iterating over elements.
+		 */
+		public Iterator<Triangle> iterator()
+		{
+			return new Iterator<Triangle>()
+			{
+				private Triangle curr = listHead;
+				public boolean hasNext()
+				{
+					return curr.listNext != listSentinel;
+				}
+				
+				public Triangle next()
+				{
+					if (!hasNext())
+						throw new NoSuchElementException();
+					curr = curr.listNext;
+					return curr;
+				}
+				public void remove()
+				{
+				}
+			};
+		}
+	}
+	
 }

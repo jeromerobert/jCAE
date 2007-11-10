@@ -2,7 +2,7 @@
  * Sample class to print quality statistics about an amibe mesh.
  */
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshExporter;
 import org.jcae.mesh.amibe.validation.*;
@@ -96,7 +96,7 @@ int nrFaces = 1;
 if (detailed)
 {
 	TIntHashSet groups = new TIntHashSet(mesh.getTriangles().size());
-	for (AbstractTriangle f: mesh.getTriangles())
+	for (Triangle f: mesh.getTriangles())
 	{
 		if (f.isWritable())
 		{
@@ -115,7 +115,7 @@ for (int i = 0; i < data.length; i++)
 	data[i].setQualityProcedure(qproc);
 	data[i].setTarget(scaleFactor);
 }
-for (AbstractTriangle f: mesh.getTriangles())
+for (Triangle f: mesh.getTriangles())
 {
 	if (f.isWritable())
 	{

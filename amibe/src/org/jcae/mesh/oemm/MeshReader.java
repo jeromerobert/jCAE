@@ -37,7 +37,7 @@ import gnu.trove.TIntHashSet;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.apache.log4j.Logger;
 
@@ -206,7 +206,7 @@ public class MeshReader extends Storage
 		}
 		buildMeshAdjacency(mesh, vertMap);
 		int cnt = 0;
-		for (AbstractTriangle af: mesh.getTriangles())
+		for (Triangle af: mesh.getTriangles())
 		{
 			if (af.isWritable())
 				cnt++;
@@ -356,7 +356,7 @@ public class MeshReader extends Storage
 
 	private static void createTriangle(int groupId, Vertex[] vert, boolean readable, boolean writable, Mesh mesh)
 	{
-		AbstractTriangle t = mesh.createTriangle(vert[0], vert[1], vert[2]);
+		Triangle t = mesh.createTriangle(vert[0], vert[1], vert[2]);
 		t.setGroupId(groupId);
 		vert[0].setLink(t);
 		vert[1].setLink(t);

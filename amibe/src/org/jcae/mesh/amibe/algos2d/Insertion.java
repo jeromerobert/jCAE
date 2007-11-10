@@ -22,7 +22,7 @@
 package org.jcae.mesh.amibe.algos2d;
 
 import org.jcae.mesh.amibe.ds.TriangleVH;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.patch.Mesh2D;
@@ -57,7 +57,7 @@ import org.apache.log4j.Logger;
  * </p>
  *
  * <p>
- * AbstractTriangle centroids are also inserted if they are not too near of
+ * Triangle centroids are also inserted if they are not too near of
  * existing vertices.  This was added to try to improve triangle
  * quality, but is a bad idea.  Bad triangles should instead be sorted
  * (with {@link org.jcae.mesh.amibe.util.PAVLSortedTree}) and their
@@ -104,7 +104,7 @@ public class Insertion
 		{
 			maxNodes = 0;
 			nodes.clear();
-			for(Iterator<AbstractTriangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
+			for(Iterator<Triangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
 				TriangleVH t = (TriangleVH) it.next();
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
@@ -119,7 +119,7 @@ public class Insertion
 						ot.clearAttributes(AbstractHalfEdge.MARKED);
 				}
 			}
-			for(Iterator<AbstractTriangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
+			for(Iterator<Triangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
 				TriangleVH t = (TriangleVH) it.next();
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
@@ -201,7 +201,7 @@ public class Insertion
 				}
 			}
 			//  Try to insert triangle centroid after all other points.
-			for (Iterator<AbstractTriangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
+			for (Iterator<Triangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
 				TriangleVH t = (TriangleVH) it.next();
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))

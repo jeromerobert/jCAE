@@ -98,8 +98,8 @@ public class Mesh implements Serializable
 	 */
 	public Vertex outerVertex = new OuterVertex();
 	
-	//  AbstractTriangle list
-	private final Collection<AbstractTriangle> triangleList;
+	//  Triangle list
+	private final Collection<Triangle> triangleList;
 	
 	//  Node list.
 	private final Collection<Vertex> nodeList;
@@ -182,7 +182,7 @@ public class Mesh implements Serializable
 	 *
 	 * @param t  triangle being added.
 	 */
-	public void add(AbstractTriangle t)
+	public void add(Triangle t)
 	{
 		triangleList.add(t);
 	}
@@ -192,7 +192,7 @@ public class Mesh implements Serializable
 	 *
 	 * @param t  triangle being removed.
 	 */
-	public void remove(AbstractTriangle t)
+	public void remove(Triangle t)
 	{
 		triangleList.remove(t);
 		if (!(t instanceof TriangleHE))
@@ -215,7 +215,7 @@ public class Mesh implements Serializable
 	 *
 	 * @return triangle list.
 	 */
-	public Collection<AbstractTriangle> getTriangles()
+	public Collection<Triangle> getTriangles()
 	{
 		return triangleList;
 	}
@@ -263,9 +263,9 @@ public class Mesh implements Serializable
 	 * Creates a triangle composed of three vertices.
 	 *
 	 * @param v  array of three vertices
-	 * @return a new {@link AbstractTriangle} instance composed of three vertices
+	 * @return a new {@link Triangle} instance composed of three vertices
 	 */
-	public AbstractTriangle createTriangle(Vertex [] v)
+	public Triangle createTriangle(Vertex [] v)
 	{
 		assert v.length == 3;
 		return factory.createTriangle(v);
@@ -277,9 +277,9 @@ public class Mesh implements Serializable
 	 * @param v0  first vertex
 	 * @param v1  second vertex
 	 * @param v2  third vertex
-	 * @return a new {@link AbstractTriangle} instance composed of three vertices
+	 * @return a new {@link Triangle} instance composed of three vertices
 	 */
-	public AbstractTriangle createTriangle(Vertex v0, Vertex v1, Vertex v2)
+	public Triangle createTriangle(Vertex v0, Vertex v1, Vertex v2)
 	{
 		return factory.createTriangle(v0, v1, v2);
 	}
@@ -288,9 +288,9 @@ public class Mesh implements Serializable
 	 * Clones a triangle.
 	 *
 	 * @param that  triangle to clone
-	 * @return a new {@link AbstractTriangle} instance
+	 * @return a new {@link Triangle} instance
 	 */
-	public AbstractTriangle createTriangle(AbstractTriangle that)
+	public Triangle createTriangle(Triangle that)
 	{
 		return factory.createTriangle(that);
 	}
@@ -362,8 +362,8 @@ public class Mesh implements Serializable
 		if (nodeList == null)
 		{
 			vertices = new LinkedHashSet<Vertex>(triangleList.size()/2);
-			for (AbstractTriangle at: triangleList)
-				for (Vertex v: at.vertex)
+			for (Triangle t: triangleList)
+				for (Vertex v: t.vertex)
 					vertices.add(v);
 		}
 		else
@@ -390,14 +390,14 @@ public class Mesh implements Serializable
 		//  1. For each vertex, build the list of triangles
 		//     connected to this vertex.
 		logger.debug("Build the list of triangles connected to each vertex");
-		HashMap<Vertex, ArrayList<AbstractTriangle>> tVertList = new HashMap<Vertex, ArrayList<AbstractTriangle>>(vertices.size());
+		HashMap<Vertex, ArrayList<Triangle>> tVertList = new HashMap<Vertex, ArrayList<Triangle>>(vertices.size());
 		for (Vertex v: vertices)
-			tVertList.put(v, new ArrayList<AbstractTriangle>(10));
-		for (AbstractTriangle t: triangleList)
+			tVertList.put(v, new ArrayList<Triangle>(10));
+		for (Triangle t: triangleList)
 		{
 			for (int i = 0; i < 3; i++)
 			{
-				ArrayList<AbstractTriangle> list = tVertList.get(t.vertex[i]);
+				ArrayList<Triangle> list = tVertList.get(t.vertex[i]);
 				list.add(t);
 				for (Vertex v: t.vertex)
 					v.setLink(t);
@@ -412,7 +412,7 @@ public class Mesh implements Serializable
 		//  to help the garbage collector.
 		for (Vertex v: vertices)
 		{
-			ArrayList<AbstractTriangle> list = tVertList.get(v);
+			ArrayList<Triangle> list = tVertList.get(v);
 			list.clear();
 			tVertList.put(v, null);
 		}
@@ -421,9 +421,8 @@ public class Mesh implements Serializable
 		logger.debug("Mark boundary edges");
 		AbstractHalfEdge ot = null;
 		AbstractHalfEdge sym = null;
-		for (AbstractTriangle at: triangleList)
+		for (Triangle t: triangleList)
 		{
-			Triangle t = (Triangle) at;
 			ot = t.getAbstractHalfEdge(ot);
 			for (int i = 0; i < 3; i++)
 			{
@@ -431,7 +430,7 @@ public class Mesh implements Serializable
 				if (!ot.hasSymmetricEdge())
 				{
 					ot.setAttributes(AbstractHalfEdge.BOUNDARY);
-					Triangle adj = (Triangle) factory.createTriangle(outerVertex, ot.destination(), ot.origin());
+					Triangle adj = factory.createTriangle(outerVertex, ot.destination(), ot.origin());
 					newTri.add(adj);
 					adj.setAttributes(AbstractHalfEdge.OUTER);
 					adj.setReadable(false);
@@ -449,9 +448,8 @@ public class Mesh implements Serializable
 		logger.debug("Build the list of nodes on boundaries and non-manifold edges");
 		HashSet<Vertex> bndNodes = new HashSet<Vertex>();
 		maxLabel = 0;
-		for (AbstractTriangle at: triangleList)
+		for (Triangle t: triangleList)
 		{
-			Triangle t = (Triangle) at;
 			ot = t.getAbstractHalfEdge(ot);
 			for (int i = 0; i < 3; i++)
 			{
@@ -469,9 +467,8 @@ public class Mesh implements Serializable
 		//  6. Build links for non-manifold vertices
 		logger.debug("Compute links for non-manifold vertices");
 		Vertex [] endpoints = new Vertex[2];
-		for (AbstractTriangle at: triangleList)
+		for (Triangle t: triangleList)
 		{
-			Triangle t = (Triangle) at;
 			ot = t.getAbstractHalfEdge(ot);
 			for (int i = 0; i < 3; i++)
 			{
@@ -501,13 +498,12 @@ public class Mesh implements Serializable
 				}
 			}
 		}
-		// Replace LinkedHashSet by AbstractTriangle[], and keep only one
-		// AbstractTriangle by fan.
+		// Replace LinkedHashSet by Triangle[], and keep only one
+		// Triangle by fan.
 		int nrNM = 0;
 		int nrFE = 0;
-		for (AbstractTriangle at: triangleList)
+		for (Triangle t: triangleList)
 		{
-			Triangle t = (Triangle) at;
 			ot = t.getAbstractHalfEdge(ot);
 			for (int i = 0; i < 3; i++)
 			{
@@ -562,13 +558,13 @@ public class Mesh implements Serializable
 		triangleList.addAll(newTri);
 	}
 	
-	private final void checkNeighbours(Vertex v, HashMap<Vertex, ArrayList<AbstractTriangle>> tVertList, ArrayList<Triangle> newTri)
+	private final void checkNeighbours(Vertex v, HashMap<Vertex, ArrayList<Triangle>> tVertList, ArrayList<Triangle> newTri)
 	{
 		//  Mark all triangles having v as vertex
-		ArrayList<AbstractTriangle> neighTriList = tVertList.get(v);
-		AbstractTriangle.List markedTri = new AbstractTriangle.List();
-		for (AbstractTriangle at: neighTriList)
-			markedTri.add(at);
+		ArrayList<Triangle> neighTriList = tVertList.get(v);
+		Triangle.List markedTri = new Triangle.List();
+		for (Triangle t: neighTriList)
+			markedTri.add(t);
 		//  Loop on all edges incident to v
 		AbstractHalfEdge ot = null;
 		AbstractHalfEdge sym = null;
@@ -576,9 +572,8 @@ public class Mesh implements Serializable
 		AbstractHalfEdge s = null;
 		AbstractHalfEdge symSym = null;
 		AbstractHalfEdge otSym = null;
-		for (AbstractTriangle at: neighTriList)
+		for (Triangle t: neighTriList)
 		{
-			Triangle t = (Triangle) at;
 			ot = t.getAbstractHalfEdge(ot);
 			sym = t.getAbstractHalfEdge(sym);
 			if (ot.destination() == v)
@@ -592,11 +587,10 @@ public class Mesh implements Serializable
 			Vertex v2 = ot.destination();
 			// Edge (v,v2) has not yet been processed.
 			// List of triangles incident to v2.
-			ArrayList<AbstractTriangle> neighTriV2List = tVertList.get(v2);
+			ArrayList<Triangle> neighTriV2List = tVertList.get(v2);
 			boolean manifold = true;
-			for (AbstractTriangle at2: neighTriV2List)
+			for (Triangle t2: neighTriV2List)
 			{
-				Triangle t2 = (Triangle) at2;
 				if (t == t2 || !markedTri.contains(t2))
 					continue;
 				// t2 contains v and v2, we now look for an edge
@@ -623,7 +617,7 @@ public class Mesh implements Serializable
 				if (!ot.hasSymmetricEdge())
 				{
 					// Link ot to a virtual triangle
-					Triangle otVT = (Triangle) factory.createTriangle(outerVertex, ot.destination(), ot.origin());
+					Triangle otVT = factory.createTriangle(outerVertex, ot.destination(), ot.origin());
 					newTri.add(otVT);
 					otVT.setAttributes(AbstractHalfEdge.OUTER);
 					otVT.setReadable(false);
@@ -643,7 +637,7 @@ public class Mesh implements Serializable
 					// ot and sym are inner edges, their adjacency
 					// relations have to be broken out.
 					// Link ot to a virtual triangle
-					Triangle otVT = (Triangle) factory.createTriangle(outerVertex, ot.destination(), ot.origin());
+					Triangle otVT = factory.createTriangle(outerVertex, ot.destination(), ot.origin());
 					newTri.add(otVT);
 					otVT.setAttributes(AbstractHalfEdge.OUTER);
 					otVT.setReadable(false);
@@ -653,7 +647,7 @@ public class Mesh implements Serializable
 					ot.setAttributes(AbstractHalfEdge.NONMANIFOLD);
 					otSym.setAttributes(AbstractHalfEdge.NONMANIFOLD);
 					// Link sym to another virtual triangle
-					Triangle symVT = (Triangle) factory.createTriangle(outerVertex, sym.destination(), sym.origin());
+					Triangle symVT = factory.createTriangle(outerVertex, sym.destination(), sym.origin());
 					newTri.add(symVT);
 					symVT.setAttributes(AbstractHalfEdge.OUTER);
 					symVT.setReadable(false);
@@ -673,7 +667,7 @@ public class Mesh implements Serializable
 				if (!ot2.hasSymmetricEdge())
 				{
 					// Link ot2 to a virtual triangle
-					Triangle ot2VT = (Triangle) factory.createTriangle(outerVertex, ot2.destination(), ot2.origin());
+					Triangle ot2VT = factory.createTriangle(outerVertex, ot2.destination(), ot2.origin());
 					newTri.add(ot2VT);
 					ot2VT.setAttributes(AbstractHalfEdge.OUTER);
 					ot2VT.setReadable(false);
@@ -879,7 +873,7 @@ public class Mesh implements Serializable
 	 */
 	public boolean isValid(boolean constrained)
 	{
-		for (AbstractTriangle t: triangleList)
+		for (Triangle t: triangleList)
 		{
 			if (t.vertex[0] == t.vertex[1] || t.vertex[1] == t.vertex[2] || t.vertex[2] == t.vertex[0])
 			{
@@ -888,11 +882,11 @@ public class Mesh implements Serializable
 			}
 			if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
 			{
-				if (constrained && t instanceof Triangle)
+				if (constrained && factory.hasAdjacency())
 				{
-					if (!((Triangle) t).hasAttributes(AbstractHalfEdge.OUTER))
+					if (!t.hasAttributes(AbstractHalfEdge.OUTER))
 					{
-						logger.error("AbstractTriangle should be outer: "+t);
+						logger.error("Triangle should be outer: "+t);
 						return false;
 					}
 				}
@@ -902,9 +896,9 @@ public class Mesh implements Serializable
 				Vertex v = t.vertex[i];
 				if (v.getLink() == null)
 					continue;
-				if (v.getLink() instanceof AbstractTriangle)
+				if (v.getLink() instanceof Triangle)
 				{
-					AbstractTriangle t2 = (AbstractTriangle) v.getLink();
+					Triangle t2 = (Triangle) v.getLink();
 					if (t2.vertex[0] != v && t2.vertex[1] != v && t2.vertex[2] != v)
 					{
 						logger.error("Vertex "+v+" linked to "+t2);
@@ -940,7 +934,7 @@ public class Mesh implements Serializable
 	}
 
 	@SuppressWarnings("unchecked")
-	private boolean checkVirtualHalfEdges(AbstractTriangle t)
+	private boolean checkVirtualHalfEdges(Triangle t)
 	{
 		if (!t.traitsBuilder.hasCapability(TriangleTraitsBuilder.VIRTUALHALFEDGE))
 			return true;
@@ -1111,11 +1105,11 @@ public class Mesh implements Serializable
 	}
 
 	@SuppressWarnings("unchecked")
-	private boolean checkHalfEdges(AbstractTriangle t)
+	private boolean checkHalfEdges(Triangle t)
 	{
 		if (!t.traitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE))
 			return true;
-		HalfEdge e = (HalfEdge) ((Triangle) t).getAbstractHalfEdge();
+		HalfEdge e = (HalfEdge) t.getAbstractHalfEdge();
 		boolean isOuter = e.hasAttributes(AbstractHalfEdge.OUTER);
 		for (int i = 0; i < 3; i++)
 		{
@@ -1274,8 +1268,8 @@ import gnu.trove.TObjectIntHashMap;
 	public void printMesh()
 	{
 		System.out.println("Mesh:");
-		for (AbstractTriangle at: triangleList)
-			System.out.println(""+at);
+		for (Triangle t: triangleList)
+			System.out.println(""+t);
 		System.out.println("Outer Vertex: "+outerVertex);
 	}
 	public void writeUNV(String file)
@@ -1289,9 +1283,8 @@ import gnu.trove.TObjectIntHashMap;
 				out = new PrintWriter(new FileOutputStream(file));
 			out.println("    -1"+cr+"  2411");
 			HashSet<Vertex> nodeset = new HashSet<Vertex>();
-			for (AbstractTriangle at: triangleList)
+			for (Triangle t: triangleList)
 			{
-				Triangle t = (Triangle) at;
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
 				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
@@ -1316,9 +1309,8 @@ import gnu.trove.TObjectIntHashMap;
 			out.println("    -1");
 			out.println("    -1"+cr+"  2412");
 			count = 0;
-			for (AbstractTriangle at: triangleList)
+			for (Triangle t: triangleList)
 			{
-				Triangle t = (Triangle) at;
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
 				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
@@ -1355,9 +1347,8 @@ import gnu.trove.TObjectIntHashMap;
 				out = new PrintWriter(new FileOutputStream(file));
 			out.println("MeshVersionFormatted 1"+cr+"Dimension"+cr+"3");
 			HashSet<Vertex> nodeset = new HashSet<Vertex>();
-			for(AbstractTriangle at: triangleList)
+			for(Triangle t: triangleList)
 			{
-				Triangle t = (Triangle) at;
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
 				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
@@ -1380,9 +1371,8 @@ import gnu.trove.TObjectIntHashMap;
 					out.println(""+uv[0]+" "+uv[1]+" "+uv[2]+" 0");
 			}
 			count = 0;
-			for(AbstractTriangle at: triangleList)
+			for(Triangle t: triangleList)
 			{
-				Triangle t = (Triangle) at;
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
 				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
@@ -1391,9 +1381,8 @@ import gnu.trove.TObjectIntHashMap;
 			}
 			out.println(cr+"Triangles"+cr+count);
 			count = 0;
-			for(AbstractTriangle at: triangleList)
+			for(Triangle t: triangleList)
 			{
-				Triangle t = (Triangle) at;
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
 				if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)

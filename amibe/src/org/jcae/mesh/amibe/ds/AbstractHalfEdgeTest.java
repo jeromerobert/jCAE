@@ -69,10 +69,10 @@ public class AbstractHalfEdgeTest
 		T = new Triangle[12];
 		for (int i = 0; i < 3; i++)
 		{
-			T[4*i]   = (Triangle) mesh.createTriangle(v[3*i], v[3*i+1], v[3*i+3]);
-			T[4*i+1] = (Triangle) mesh.createTriangle(v[3*i+1], v[3*i+4], v[3*i+3]);
-			T[4*i+2] = (Triangle) mesh.createTriangle(v[3*i+5], v[3*i+4], v[3*i+1]);
-			T[4*i+3] = (Triangle) mesh.createTriangle(v[3*i+1], v[3*i+2], v[3*i+5]);
+			T[4*i]   = mesh.createTriangle(v[3*i], v[3*i+1], v[3*i+3]);
+			T[4*i+1] = mesh.createTriangle(v[3*i+1], v[3*i+4], v[3*i+3]);
+			T[4*i+2] = mesh.createTriangle(v[3*i+5], v[3*i+4], v[3*i+1]);
+			T[4*i+3] = mesh.createTriangle(v[3*i+1], v[3*i+2], v[3*i+5]);
 			v[3*i].setLink(T[4*i]);
 			v[3*i+1].setLink(T[4*i]);
 			v[3*i+2].setLink(T[4*i+3]);
@@ -133,8 +133,8 @@ public class AbstractHalfEdgeTest
 			{
 				for (int i = 0; i < m-1; i++)
 				{
-					tt[2*(m-1)*j+2*i]   = (Triangle) mesh.createTriangle(vv[m*j+i], vv[m*j+i+1], vv[m*(j+1)+i]);
-					tt[2*(m-1)*j+2*i+1] = (Triangle) mesh.createTriangle(vv[m*j+i+1], vv[m*(j+1)+i+1], vv[m*(j+1)+i]);
+					tt[2*(m-1)*j+2*i]   = mesh.createTriangle(vv[m*j+i], vv[m*j+i+1], vv[m*(j+1)+i]);
+					tt[2*(m-1)*j+2*i+1] = mesh.createTriangle(vv[m*j+i+1], vv[m*(j+1)+i+1], vv[m*(j+1)+i]);
 					vv[m*j+i].setLink(tt[2*(m-1)*j+2*i]);
 				}
 				vv[m*j+m-1].setLink(tt[2*(m-1)*j+2*m-3]);
@@ -143,8 +143,8 @@ public class AbstractHalfEdgeTest
 			{
 				for (int i = 0; i < m-1; i++)
 				{
-					tt[2*(m-1)*j+2*i]   = (Triangle) mesh.createTriangle(vv[m*j+i], vv[m*(j+1)+i+1], vv[m*(j+1)+i]);
-					tt[2*(m-1)*j+2*i+1] = (Triangle) mesh.createTriangle(vv[m*j+i+1], vv[m*(j+1)+i+1], vv[m*j+i]);
+					tt[2*(m-1)*j+2*i]   = mesh.createTriangle(vv[m*j+i], vv[m*(j+1)+i+1], vv[m*(j+1)+i]);
+					tt[2*(m-1)*j+2*i+1] = mesh.createTriangle(vv[m*j+i+1], vv[m*(j+1)+i+1], vv[m*j+i]);
 					vv[m*j+i].setLink(tt[2*(m-1)*j+2*i]);
 				}
 				vv[m*j+m-1].setLink(tt[2*(m-1)*j+2*m-3]);
@@ -240,12 +240,12 @@ public class AbstractHalfEdgeTest
 			v[i].setLabel(i);
 
 		T = new Triangle[6];
-		T[0] = (Triangle) mesh.createTriangle(v[0], v[1], v[2]);
-		T[1] = (Triangle) mesh.createTriangle(v[2], v[3], v[0]);
-		T[2] = (Triangle) mesh.createTriangle(v[4], v[0], v[3]);
-		T[3] = (Triangle) mesh.createTriangle(v[5], v[0], v[4]);
-		T[4] = (Triangle) mesh.createTriangle(v[4], v[2], v[1]);
-		T[5] = (Triangle) mesh.createTriangle(v[5], v[4], v[1]);
+		T[0] = mesh.createTriangle(v[0], v[1], v[2]);
+		T[1] = mesh.createTriangle(v[2], v[3], v[0]);
+		T[2] = mesh.createTriangle(v[4], v[0], v[3]);
+		T[3] = mesh.createTriangle(v[5], v[0], v[4]);
+		T[4] = mesh.createTriangle(v[4], v[2], v[1]);
+		T[5] = mesh.createTriangle(v[5], v[4], v[1]);
 		v[0].setLink(T[0]);
 		v[1].setLink(T[0]);
 		v[2].setLink(T[0]);

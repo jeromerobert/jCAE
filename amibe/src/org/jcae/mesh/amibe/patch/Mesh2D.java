@@ -22,7 +22,7 @@ package org.jcae.mesh.amibe.patch;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
@@ -514,8 +514,8 @@ public class Mesh2D extends Mesh
 	{
 		logger.debug("Removing degenerated edges");
 		VirtualHalfEdge2D ot = new VirtualHalfEdge2D();
-		HashSet<AbstractTriangle> removedTriangles = new HashSet<AbstractTriangle>();
-		for (AbstractTriangle at: getTriangles())
+		HashSet<Triangle> removedTriangles = new HashSet<Triangle>();
+		for (Triangle at: getTriangles())
 		{
 			if (removedTriangles.contains(at))
 				continue;
@@ -540,8 +540,8 @@ public class Mesh2D extends Mesh
 				}
 			}
 		}
-		for (AbstractTriangle at: removedTriangles)
-			getTriangles().remove(at);
+		for (Triangle t: removedTriangles)
+			getTriangles().remove(t);
 	}
 	
 	@Override
@@ -549,7 +549,7 @@ public class Mesh2D extends Mesh
 	{
 		if (!super.isValid(constrained))
 			return false;
-		for (AbstractTriangle t: getTriangles())
+		for (Triangle t: getTriangles())
 		{
 			// We can not rely on t.hasAttributes(AbstractHalfEdge.OUTER) here,
 			// attributes may not have been set yet.

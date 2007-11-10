@@ -5,6 +5,12 @@ Sat Nov 10 19:22:37 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/amibe/ds/AbstractVertex.java: Class removed, it is
 	merged into Vertex.  This class was useful for visualization when
 	adjacency relations are not needed, but overhead was very small.
+	* src/org/jcae/mesh/amibe/ds/AbstractTriangle.java: Class removed, it
+	is merged into Triangle which is no more an abstract class.  Methods
+	which were previously abstract now return an exception, they are
+	defined only if adjacency relations are requested.  This is not a
+	problem because such situations would have returned
+	ClassCastException.
 
 Wed Oct 31 15:13:39 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 

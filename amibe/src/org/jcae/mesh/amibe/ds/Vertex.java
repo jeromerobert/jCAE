@@ -47,10 +47,10 @@ import java.io.Serializable;
  * </p>
  *
  * <p>
- * Each vertex has a pointer to an incident <code>AbstractTriangle</code>,
+ * Each vertex has a pointer to an incident <code>Triangle</code>,
  * which allows to find any other incident <code>VirtualHalfEdge</code> or
- * <code>AbstractTriangle</code>.  For non-manifold vertices, this link points
- * to a <code>AbstractTriangle []</code> array, which can be used to retrieve
+ * <code>Triangle</code>.  For non-manifold vertices, this link points
+ * to a <code>Triangle []</code> array, which can be used to retrieve
  * all incident triangles through their adjacency relations.
  * </p>
  */
@@ -71,7 +71,7 @@ public class Vertex implements Serializable
 	protected int ref1d = 0;
 
 	//  link can be either:
-	//    1. an AbstractTriangle, for manifold vertices
+	//    1. an Triangle, for manifold vertices
 	//    2. an Object[2] array, zhere
 	//         0: list of head triangles
 	//         1: list of incident wires
@@ -267,8 +267,8 @@ public class Vertex implements Serializable
 	/**
 	 * Get a finite element containing this Vertex.
 	 *
-	 * @return a <code>AbstractTriangle</code> instance for manifold vertices,
-	 * and a <code>AbstractTriangle []</code> array otherwise.
+	 * @return a <code>Triangle</code> instance for manifold vertices,
+	 * and a <code>Triangle []</code> array otherwise.
 	 */
 	public Object getLink()
 	{
@@ -310,7 +310,7 @@ public class Vertex implements Serializable
 
 	/**
 	 * Set link to an array of Triangles.  This routine eliminates
-	 * duplicates to keep only one AbstractTriangle by fan.
+	 * duplicates to keep only one Triangle by fan.
 	 *
 	 * @param triangles  initial set of adjacent triangles.
 	 */

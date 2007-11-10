@@ -25,10 +25,9 @@ import org.jcae.mesh.amibe.ds.MEdge1D;
 import org.jcae.mesh.amibe.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.SubMesh1D;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.bora.ds.BSubMesh;
@@ -126,7 +125,7 @@ public class Storage
 			File dir = new File(outDir);
 			writeId(dir, face.getId());
 			CADFace F = (CADFace) face.getShape();
-			Collection<AbstractTriangle> trianglelist = submesh.getTriangles();
+			Collection<Triangle> trianglelist = submesh.getTriangles();
 			Collection<Vertex> nodelist = submesh.getNodes();
 			TObjectIntHashMap<Vertex> localIdx = write2dNodeReferences(dir, face.getId(), nodelist, submesh.outerVertex);
 			write2dCoordinates(dir, nodelist, submesh.outerVertex, F.getGeomSurface());
@@ -448,7 +447,7 @@ public class Storage
 		beamsout.close();
 	}
 
-	private static void write2dTriangles(File dir, Collection<AbstractTriangle> trianglelist, TObjectIntHashMap<Vertex> localIdx)
+	private static void write2dTriangles(File dir, Collection<Triangle> trianglelist, TObjectIntHashMap<Vertex> localIdx)
 		throws IOException, FileNotFoundException
 	{
 		File facesFile=new File(dir, "f");
@@ -458,9 +457,8 @@ public class Storage
 		// Save faces
 		logger.debug("begin writing "+facesFile);
 		DataOutputStream facesout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(facesFile, true)));
-		for (Iterator<AbstractTriangle> itf = trianglelist.iterator(); itf.hasNext(); )
+		for (Triangle f: trianglelist)
 		{
-			Triangle f = (Triangle) itf.next();
 			if (f.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			for (int j = 0, n = f.vertex.length; j < n; j++)
@@ -542,7 +540,7 @@ public class Storage
 				pts[1] = pts[2];
 				pts[2] = temp;
 			}
-			face = (Triangle) mesh.createTriangle(pts);
+			face = mesh.createTriangle(pts);
 			mesh.add(face);
 			face.setGroupId(id);
 		}
