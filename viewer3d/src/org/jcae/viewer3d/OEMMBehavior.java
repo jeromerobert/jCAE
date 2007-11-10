@@ -41,7 +41,6 @@ import javax.vecmath.Vector3d;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.ds.AbstractVertex;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.MeshReader;
@@ -215,7 +214,7 @@ public class OEMMBehavior extends Behavior
 		for(int i=0; i<voxels.length; i++)
 		{
 			ViewHolder vh = coarseOemmNodeId2BranchGroup.get(Integer.valueOf(i));
-			Collection<AbstractVertex> nodes = vh.mesh.getNodes();
+			Collection<Vertex> nodes = vh.mesh.getNodes();
 			if (getAveragePointForVertices(nodes, values)) {
 				voxels[i]=new Point3d(values[0], values[1], values[2]);
 			} else {
@@ -487,15 +486,14 @@ public class OEMMBehavior extends Behavior
 	 * @param result vector for store result
 
 	 */
-	private boolean getAveragePointForVertices(Collection<AbstractVertex> vertices, double[] result)
+	private boolean getAveragePointForVertices(Collection<Vertex> vertices, double[] result)
 	{
 		int count = 0;
 		for (int i = 0; i < result.length; i++) {
 			result[i] = 0.0;
 		}
-		for (AbstractVertex av: vertices)
+		for (Vertex v: vertices)
 		{
-			Vertex v = (Vertex) av;
 			if (!v.isReadable())
 				continue;
 			count++;

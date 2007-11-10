@@ -24,7 +24,6 @@ import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
-import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import java.util.Collection;
 import javax.media.j3d.Appearance;
@@ -131,11 +130,11 @@ public class OEMMViewer
 	private static final double [] meshCoord(Mesh mesh)
 	{
 		
-		Collection<AbstractTriangle> triList = mesh.getTriangles();
+		Collection<Triangle> triList = mesh.getTriangles();
 		boolean [] isViewable = new boolean[triList.size()];
 		int nrt = 0;
 		int i = 0;
-		for (AbstractTriangle t: triList)
+		for (Triangle t: triList)
 		{
 			isViewable[i] = isViewable(t);
 			if (isViewable[i])
@@ -145,7 +144,7 @@ public class OEMMViewer
 		double [] coord = new double[9*nrt];
 		nrt = 0;
 		i = 0;
-		for (AbstractTriangle t: triList)
+		for (Triangle t: triList)
 		{
 			if (isViewable[i])
 			{
@@ -168,20 +167,19 @@ public class OEMMViewer
 		return coord;
 	}
 
-	private static boolean isViewable(AbstractTriangle t)
+	private static boolean isViewable(Triangle t)
 	{
 		return t.isReadable() && t.vertex[0].isReadable() && t.vertex[1].isReadable() && t.vertex[2].isReadable();
 	}
 
 	private static final int [] meshFreeEdges(Mesh mesh)
 	{
-		Collection<AbstractTriangle> triList = mesh.getTriangles();
+		Collection<Triangle> triList = mesh.getTriangles();
 		int nrt = 0;
-		for (AbstractTriangle at: triList)
+		for (Triangle t: triList)
 		{
-			if (!at.isReadable())
+			if (!t.isReadable())
 				continue;
-			Triangle t = (Triangle) at;
 			AbstractHalfEdge e = t.getAbstractHalfEdge();
 			for (int j = 0; j < 3; j++)
 			{
@@ -194,11 +192,10 @@ public class OEMMViewer
 		}
 		int [] ret = new int[2*nrt];
 		int i = 0;
-		for (AbstractTriangle at: triList)
+		for (Triangle t: triList)
 		{
-			if (!at.isReadable())
+			if (!t.isReadable())
 				continue;
-			Triangle t = (Triangle) at;
 			AbstractHalfEdge e = t.getAbstractHalfEdge();
 			for (int j = 0; j < 3; j++)
 			{
