@@ -23,7 +23,6 @@ package org.jcae.mesh.amibe.algos3d;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.ds.AbstractVertex;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import java.util.Map;
@@ -53,7 +52,7 @@ public class SplitEdgeTest
 		v = new Vertex[m*n];
 		for (int j = 0; j < n; j++)
 			for (int i = 0; i < m; i++)
-				v[m*j+i] = (Vertex) mesh.createVertex(i, j, 0.0);
+				v[m*j+i] = mesh.createVertex(i, j, 0.0);
 		for (int i = 0; i < v.length; i++)
 			v[i].setLabel(i);
 		vertexLabel = v.length;
@@ -102,7 +101,7 @@ public class SplitEdgeTest
 			else
 			{
 				double [] xyz = v[i].getUV();
-				vy[i]   = (Vertex) mesh.createVertex(ct*xyz[0]+st*xyz[2], xyz[1], -st*xyz[0]+ct*xyz[2]);
+				vy[i]   = mesh.createVertex(ct*xyz[0]+st*xyz[2], xyz[1], -st*xyz[0]+ct*xyz[2]);
 				vy[i].setLabel(vertexLabel);
 				vertexLabel++;
 			}
@@ -114,7 +113,7 @@ public class SplitEdgeTest
 	{
 		for (Triangle t: tArray)
 		{
-			AbstractVertex temp = t.vertex[1];
+			Vertex temp = t.vertex[1];
 			t.vertex[1] = t.vertex[2];
 			t.vertex[2] = temp;
 		}
@@ -128,12 +127,12 @@ public class SplitEdgeTest
 			Triangle t = (Triangle) at;
 			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 			{
-				for (AbstractVertex av: t.vertex)
+				for (Vertex v: t.vertex)
 				{
-					if (0 == av.getRef())
+					if (0 == v.getRef())
 					{
 						ref++;
-						av.setRef(ref);
+						v.setRef(ref);
 					}
 				}
 			}
@@ -196,10 +195,10 @@ public class SplitEdgeTest
 		//   +---------+
 		//  v0         v1
 		v = new Vertex[4];
-		v[0] = (Vertex) mesh.createVertex(0.0, 0.0, 0.0);
-		v[1] = (Vertex) mesh.createVertex(1.0, 0.0, 0.0);
-		v[2] = (Vertex) mesh.createVertex(0.0, 1.0, 0.0);
-		v[3] = (Vertex) mesh.createVertex(1.0, 1.0, 0.0);
+		v[0] = mesh.createVertex(0.0, 0.0, 0.0);
+		v[1] = mesh.createVertex(1.0, 0.0, 0.0);
+		v[2] = mesh.createVertex(0.0, 1.0, 0.0);
+		v[3] = mesh.createVertex(1.0, 1.0, 0.0);
 		for (int i = 0; i < v.length; i++)
 			v[i].setLabel(i);
 

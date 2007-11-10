@@ -326,7 +326,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	public final Vertex origin()
 	{
-		return (Vertex) tri.vertex[next3[localNumber]];
+		return tri.vertex[next3[localNumber]];
 	}
 	
 	/**
@@ -337,7 +337,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	public final Vertex destination()
 	{
-		return (Vertex) tri.vertex[prev3[localNumber]];
+		return tri.vertex[prev3[localNumber]];
 	}
 	
 	/**
@@ -348,7 +348,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	public final Vertex apex()
 	{
-		return (Vertex) tri.vertex[localNumber];
+		return tri.vertex[localNumber];
 	}
 	
 	/**
@@ -561,17 +561,17 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	/**
 	 * Checks whether an edge can be contracted into a given vertex.
 	 *
-	 * @param n the resulting vertex
+	 * @param v the resulting vertex
 	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise
 	 * @see Mesh#canCollapseEdge
 	 */
 	@Override
-	protected final boolean canCollapse(AbstractVertex n)
+	protected final boolean canCollapse(Vertex v)
 	{
 		// Be consistent with collapse()
 		if (hasAttributes(OUTER))
 			return false;
-		double [] xn = n.getUV();
+		double [] xn = v.getUV();
 		if ((origin().getLink() instanceof Triangle) && (destination().getLink() instanceof Triangle))
 		{
 			// Mesh is locally manifold.  This is the most common
@@ -759,7 +759,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * Contracts an edge.
 	 *
 	 * @param m mesh
-	 * @param n the resulting vertex
+	 * @param v the resulting vertex
 	 * @return edge starting from <code>n</code> and with the same apex
 	 * @throws IllegalArgumentException if edge belongs to an outer triangle,
 	 * because there would be no valid return value.  User must then run this
@@ -767,13 +767,12 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @see Mesh#edgeCollapse
 	 */
 	@Override
-	protected final HalfEdge collapse(Mesh m, AbstractVertex n)
+	protected final HalfEdge collapse(Mesh m, Vertex v)
 	{
 		if (hasAttributes(OUTER))
 			throw new IllegalArgumentException("Cannot contract "+this);
 		Vertex o = origin();
 		Vertex d = destination();
-		Vertex v = (Vertex) n;
 		assert o.isWritable() && d.isWritable(): "Cannot contract "+this;
 		if (logger.isDebugEnabled())
 			logger.debug("contract ("+o+" "+d+")");
@@ -1054,18 +1053,17 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * Splits an edge.  This is the opposite of {@link #collapse}.
 	 *
 	 * @param m  mesh
-	 * @param n  vertex being inserted
+	 * @param v  vertex being inserted
 	 * @return edge starting from origin and pointing to <code>n</code>
 	 * @see Mesh#vertexSplit
 	 */
 	@Override
-	protected final HalfEdge split(Mesh m, AbstractVertex n)
+	protected final HalfEdge split(Mesh m, Vertex v)
 	{
 		if (logger.isDebugEnabled())
-			logger.debug("split edge ("+origin()+" "+destination()+") by adding vertex "+n);
+			logger.debug("split edge ("+origin()+" "+destination()+") by adding vertex "+v);
 		if (m.hasNodes())
-			m.add(n);
-		Vertex v = (Vertex) n;
+			m.add(v);
 		if (!hasAttributes(NONMANIFOLD))
 		{
 			v.setLink(tri);

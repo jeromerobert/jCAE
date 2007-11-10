@@ -25,7 +25,6 @@ import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.ds.AbstractVertex;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.jcae.mesh.amibe.metrics.Metric2D;
@@ -219,7 +218,7 @@ public class Mesh2D extends Mesh
 	 * @return vertex list.
 	 */
 	@Override
-	public Collection<AbstractVertex> getNodes()
+	public Collection<Vertex> getNodes()
 	{
 		KdTree quadtree = traitsBuilder.getKdTree(traits);
 		if (quadtree == null)

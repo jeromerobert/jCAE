@@ -25,7 +25,6 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.ds.AbstractVertex;
 import org.jcae.mesh.amibe.util.KdTree;
 import java.util.Iterator;
 import java.util.HashMap;
@@ -75,9 +74,9 @@ public class Fuse
 			bmin[i] = Double.MAX_VALUE;
 			bmax[i] = Double.MIN_VALUE;
 		}
-		for (Iterator<AbstractVertex> it=mesh.getNodes().iterator(); it.hasNext(); )
+		for (Iterator<Vertex> it=mesh.getNodes().iterator(); it.hasNext(); )
 		{
-			Vertex n = (Vertex) it.next();
+			Vertex n = it.next();
 			double [] oldp = n.getUV();
 			for (int i = 0; i < 3; i++)
 			{
@@ -106,9 +105,9 @@ public class Fuse
 		KdTree octree = new KdTree(bbox);
 		HashMap<Vertex, Vertex> map = new HashMap<Vertex, Vertex>();
 		int nSubst = 0;
-		for (Iterator<AbstractVertex> it = mesh.getNodes().iterator(); it.hasNext(); )
+		for (Iterator<Vertex> it = mesh.getNodes().iterator(); it.hasNext(); )
 		{
-			Vertex n = (Vertex) it.next();
+			Vertex n = it.next();
 			if (n.isMutable())
 				continue;
 			Vertex p = octree.getNearestVertex(mesh, n);
@@ -128,7 +127,7 @@ public class Fuse
 			Triangle face = (Triangle) it.next();
 			for (int j = 0; j < 4; j++)
 			{
-				Vertex n = (Vertex) face.vertex[j];
+				Vertex n = face.vertex[j];
 				Vertex p = map.get(n);
 				if (p != null)
 				{

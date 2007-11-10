@@ -50,7 +50,7 @@ public class DecimateHalfEdgeTest
 		v = new Vertex[m*n];
 		for (int j = 0; j < n; j++)
 			for (int i = 0; i < m; i++)
-				v[m*j+i] = (Vertex) mesh.createVertex(i, j, 0.0);
+				v[m*j+i] = mesh.createVertex(i, j, 0.0);
 		for (int i = 0; i < v.length; i++)
 			v[i].setLabel(i);
 		vertexLabel = v.length;
@@ -99,7 +99,7 @@ public class DecimateHalfEdgeTest
 			else
 			{
 				double [] xyz = v[i].getUV();
-				vy[i]   = (Vertex) mesh.createVertex(ct*xyz[0]+st*xyz[2], xyz[1], -st*xyz[0]+ct*xyz[2]);
+				vy[i]   = mesh.createVertex(ct*xyz[0]+st*xyz[2], xyz[1], -st*xyz[0]+ct*xyz[2]);
 				vy[i].setLabel(vertexLabel);
 				vertexLabel++;
 			}
@@ -160,17 +160,17 @@ public class DecimateHalfEdgeTest
 		//   +---------+---------+
 		//  v0         v1        v2
 		v = new Vertex[11];
-		v[0] = (Vertex) mesh.createVertex(-1.0, 0.0, 0.0);
-		v[1] = (Vertex) mesh.createVertex(0.0, 0.0, 0.0);
-		v[2] = (Vertex) mesh.createVertex(1.0, 0.0, 0.0);
-		v[3] = (Vertex) mesh.createVertex(-1.0, 2.0, 0.0);
-		v[4] = (Vertex) mesh.createVertex(0.0, 2.0, 0.0);
-		v[5] = (Vertex) mesh.createVertex(1.0, 2.0, 0.0);
-		v[6] = (Vertex) mesh.createVertex(0.0, 1.0, 0.0);
-		v[7] = (Vertex) mesh.createVertex(0.0, 0.0, 1.0);
-		v[8] = (Vertex) mesh.createVertex(0.0, 2.0, 1.0);
-		v[9] = (Vertex) mesh.createVertex(0.0, 0.0, -1.0);
-		v[10] = (Vertex) mesh.createVertex(0.0, 2.0, -1.0);
+		v[0] = mesh.createVertex(-1.0, 0.0, 0.0);
+		v[1] = mesh.createVertex(0.0, 0.0, 0.0);
+		v[2] = mesh.createVertex(1.0, 0.0, 0.0);
+		v[3] = mesh.createVertex(-1.0, 2.0, 0.0);
+		v[4] = mesh.createVertex(0.0, 2.0, 0.0);
+		v[5] = mesh.createVertex(1.0, 2.0, 0.0);
+		v[6] = mesh.createVertex(0.0, 1.0, 0.0);
+		v[7] = mesh.createVertex(0.0, 0.0, 1.0);
+		v[8] = mesh.createVertex(0.0, 2.0, 1.0);
+		v[9] = mesh.createVertex(0.0, 0.0, -1.0);
+		v[10] = mesh.createVertex(0.0, 2.0, -1.0);
 		for (int i = 0; i < v.length; i++)
 			v[i].setLabel(i);
 
@@ -230,10 +230,10 @@ public class DecimateHalfEdgeTest
 		//   +---------+
 		//  v0         v1
 		v = new Vertex[4];
-		v[0] = (Vertex) mesh.createVertex(0.0, 0.0, 0.0);
-		v[1] = (Vertex) mesh.createVertex(1.0, 0.0, 0.0);
-		v[2] = (Vertex) mesh.createVertex(0.0, 1.0, 0.0);
-		v[3] = (Vertex) mesh.createVertex(1.0, 1.0, 0.0);
+		v[0] = mesh.createVertex(0.0, 0.0, 0.0);
+		v[1] = mesh.createVertex(1.0, 0.0, 0.0);
+		v[2] = mesh.createVertex(0.0, 1.0, 0.0);
+		v[3] = mesh.createVertex(1.0, 1.0, 0.0);
 		for (int i = 0; i < v.length; i++)
 			v[i].setLabel(i);
 
@@ -306,10 +306,10 @@ public class DecimateHalfEdgeTest
 		{
 			for (int i = 0; i < m-1; i++)
 			{
-				Vertex temp = (Vertex) T[2*(m-1)*j+2*i].vertex[1];
+				Vertex temp = T[2*(m-1)*j+2*i].vertex[1];
 				T[2*(m-1)*j+2*i].vertex[1] = T[2*(m-1)*j+2*i].vertex[2];
 				T[2*(m-1)*j+2*i].vertex[2] = temp;
-				temp = (Vertex) T[2*(m-1)*j+2*i+1].vertex[1];
+				temp = T[2*(m-1)*j+2*i+1].vertex[1];
 				T[2*(m-1)*j+2*i+1].vertex[1] = T[2*(m-1)*j+2*i+1].vertex[2];
 				T[2*(m-1)*j+2*i+1].vertex[2] = temp;
 			}

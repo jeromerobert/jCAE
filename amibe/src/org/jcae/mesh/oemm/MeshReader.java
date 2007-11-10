@@ -242,7 +242,7 @@ public class MeshReader extends Storage
 				for(int nr = 0; nr < nf; nr ++)
 				{
 					bbD.get(xyz);
-					vert[index] = (Vertex) mesh.createVertex(xyz);
+					vert[index] = mesh.createVertex(xyz);
 					vert[index].setLabel(current.minIndex + index);
 					vert[index].setReadable(true);
 					boolean writable = listAdjacentLeaves.get(index).isEmpty();

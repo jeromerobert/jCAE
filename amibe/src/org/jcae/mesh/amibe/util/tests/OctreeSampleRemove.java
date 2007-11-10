@@ -64,7 +64,7 @@ public class OctreeSampleRemove extends OctreeSample
 			xyz[0] = rand.nextDouble();
 			xyz[1] = rand.nextDouble();
 			xyz[2] = rand.nextDouble();
-			r.add((Vertex) mesh.createVertex(xyz));
+			r.add(mesh.createVertex(xyz));
 		}
 		//CheckCoordProcedure checkproc = new CheckCoordProcedure();
 		//r.walk(checkproc);
@@ -81,7 +81,7 @@ public class OctreeSampleRemove extends OctreeSample
 					double [] xyzPick = view.getLastClick();
 					if (null != xyzPick)
 					{
-						Vertex vt = r.getNearVertex(mesh, (Vertex) mesh.createVertex(xyzPick));
+						Vertex vt = r.getNearVertex(mesh, mesh.createVertex(xyzPick));
 						r.remove(vt);
 						view.removeAllBranchGroup();
 						display(view, t);

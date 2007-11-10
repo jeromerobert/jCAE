@@ -102,7 +102,7 @@ public class Mesh implements Serializable
 	private final Collection<AbstractTriangle> triangleList;
 	
 	//  Node list.
-	private final Collection<AbstractVertex> nodeList;
+	private final Collection<Vertex> nodeList;
 
 	//  Entity factory
 	protected ElementFactoryInterface factory = null;
@@ -223,7 +223,7 @@ public class Mesh implements Serializable
 	/**
 	 *  Adds a vertex to vertex list.
 	 */
-	public void add(AbstractVertex vertex)
+	public void add(Vertex vertex)
 	{
 		nodeList.add(vertex);
 	}
@@ -233,7 +233,7 @@ public class Mesh implements Serializable
 	 *
 	 * @param v  vertex being removed.
 	 */
-	public void remove(AbstractVertex v)
+	public void remove(Vertex v)
 	{
 		nodeList.remove(v);
 	}
@@ -243,7 +243,7 @@ public class Mesh implements Serializable
 	 *
 	 * @return vertex list.
 	 */
-	public Collection<AbstractVertex> getNodes()
+	public Collection<Vertex> getNodes()
 	{
 		return nodeList;
 	}
@@ -265,7 +265,7 @@ public class Mesh implements Serializable
 	 * @param v  array of three vertices
 	 * @return a new {@link AbstractTriangle} instance composed of three vertices
 	 */
-	public AbstractTriangle createTriangle(AbstractVertex [] v)
+	public AbstractTriangle createTriangle(Vertex [] v)
 	{
 		assert v.length == 3;
 		return factory.createTriangle(v);
@@ -279,7 +279,7 @@ public class Mesh implements Serializable
 	 * @param v2  third vertex
 	 * @return a new {@link AbstractTriangle} instance composed of three vertices
 	 */
-	public AbstractTriangle createTriangle(AbstractVertex v0, AbstractVertex v1, AbstractVertex v2)
+	public AbstractTriangle createTriangle(Vertex v0, Vertex v1, Vertex v2)
 	{
 		return factory.createTriangle(v0, v1, v2);
 	}
@@ -299,9 +299,9 @@ public class Mesh implements Serializable
 	 * Creates a 2D or 3D vertex.
 	 *
 	 * @param p  coordinates
-	 * @return a new {@link AbstractVertex} instance with this location.
+	 * @return a new {@link Vertex} instance with this location.
 	 */
-	public AbstractVertex createVertex(double [] p)
+	public Vertex createVertex(double [] p)
 	{
 		return factory.createVertex(p);
 	}
@@ -311,9 +311,9 @@ public class Mesh implements Serializable
 	 *
 	 * @param u  first coordinate
 	 * @param v  second coordinate
-	 * @return a new {@link AbstractVertex} instance with this location.
+	 * @return a new {@link Vertex} instance with this location.
 	 */
-	public AbstractVertex createVertex(double u, double v)
+	public Vertex createVertex(double u, double v)
 	{
 		return factory.createVertex(u, v);
 	}
@@ -324,9 +324,9 @@ public class Mesh implements Serializable
 	 * @param x  first coordinate
 	 * @param y  second coordinate
 	 * @param z  third coordinate
-	 * @return a new {@link AbstractVertex} instance with this location.
+	 * @return a new {@link Vertex} instance with this location.
 	 */
-	public AbstractVertex createVertex(double x, double y, double z)
+	public Vertex createVertex(double x, double y, double z)
 	{
 		return factory.createVertex(x, y, z);
 	}
@@ -358,13 +358,13 @@ public class Mesh implements Serializable
 	 */
 	public void buildAdjacency(double minAngle)
 	{
-		Collection<AbstractVertex> vertices;
+		Collection<Vertex> vertices;
 		if (nodeList == null)
 		{
-			vertices = new LinkedHashSet<AbstractVertex>(triangleList.size()/2);
+			vertices = new LinkedHashSet<Vertex>(triangleList.size()/2);
 			for (AbstractTriangle at: triangleList)
-				for (AbstractVertex av: at.vertex)
-					vertices.add(av);
+				for (Vertex v: at.vertex)
+					vertices.add(v);
 		}
 		else
 			vertices = nodeList;
@@ -378,20 +378,20 @@ public class Mesh implements Serializable
 	@Deprecated
 	public void buildAdjacency(Vertex [] vertices, double minAngle)
 	{
-		Collection<AbstractVertex> list = new ArrayList<AbstractVertex>(vertices.length);
-		for (AbstractVertex v: vertices)
+		Collection<Vertex> list = new ArrayList<Vertex>(vertices.length);
+		for (Vertex v: vertices)
 			list.add(v);
 		buildAdjacency(list, minAngle);
 	}
 
 	@SuppressWarnings("unchecked")
-	private void buildAdjacency(Collection<AbstractVertex> vertices, double minAngle)
+	private void buildAdjacency(Collection<Vertex> vertices, double minAngle)
 	{
 		//  1. For each vertex, build the list of triangles
 		//     connected to this vertex.
 		logger.debug("Build the list of triangles connected to each vertex");
-		HashMap<AbstractVertex, ArrayList<AbstractTriangle>> tVertList = new HashMap<AbstractVertex, ArrayList<AbstractTriangle>>(vertices.size());
-		for (AbstractVertex v: vertices)
+		HashMap<Vertex, ArrayList<AbstractTriangle>> tVertList = new HashMap<Vertex, ArrayList<AbstractTriangle>>(vertices.size());
+		for (Vertex v: vertices)
 			tVertList.put(v, new ArrayList<AbstractTriangle>(10));
 		for (AbstractTriangle t: triangleList)
 		{
@@ -399,18 +399,18 @@ public class Mesh implements Serializable
 			{
 				ArrayList<AbstractTriangle> list = tVertList.get(t.vertex[i]);
 				list.add(t);
-				for (AbstractVertex av: t.vertex)
-					((Vertex) av).setLink(t);
+				for (Vertex v: t.vertex)
+					v.setLink(t);
 			}
 		}
 		//  2. Connect all edges together
 		logger.debug("Connect triangles");
 		ArrayList<Triangle> newTri = new ArrayList<Triangle>();
-		for (AbstractVertex v: vertices)
+		for (Vertex v: vertices)
 			checkNeighbours(v, tVertList, newTri);
 		//  tVertList is no more needed, remove all references
 		//  to help the garbage collector.
-		for (AbstractVertex v: vertices)
+		for (Vertex v: vertices)
 		{
 			ArrayList<AbstractTriangle> list = tVertList.get(v);
 			list.clear();
@@ -511,7 +511,7 @@ public class Mesh implements Serializable
 			ot = t.getAbstractHalfEdge(ot);
 			for (int i = 0; i < 3; i++)
 			{
-				Vertex v = (Vertex) t.vertex[i];
+				Vertex v = t.vertex[i];
 				if (v.getLink() instanceof LinkedHashSet)
 				{
 					nrNM++;
@@ -534,11 +534,10 @@ public class Mesh implements Serializable
 		if (minAngle < 0.0)
 			cosMinAngle = -2.0;
 		double [][] temp = new double[4][3];
-		for (AbstractVertex av: vertices)
+		for (Vertex v: vertices)
 		{
-			if (bndNodes.contains(av))
+			if (bndNodes.contains(v))
 				continue;
-			Vertex v = (Vertex) av;
 			int label = v.getRef();
 			if (v.getLink() instanceof Triangle[])
 			{
@@ -563,7 +562,7 @@ public class Mesh implements Serializable
 		triangleList.addAll(newTri);
 	}
 	
-	private final void checkNeighbours(AbstractVertex v, HashMap<AbstractVertex, ArrayList<AbstractTriangle>> tVertList, ArrayList<Triangle> newTri)
+	private final void checkNeighbours(Vertex v, HashMap<Vertex, ArrayList<AbstractTriangle>> tVertList, ArrayList<Triangle> newTri)
 	{
 		//  Mark all triangles having v as vertex
 		ArrayList<AbstractTriangle> neighTriList = tVertList.get(v);
@@ -816,7 +815,7 @@ public class Mesh implements Serializable
 	 * @param v   the resulting vertex
 	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise.
 	 */
-	public boolean canCollapseEdge(AbstractHalfEdge e, AbstractVertex v)
+	public boolean canCollapseEdge(AbstractHalfEdge e, Vertex v)
 	{
 		return e.canCollapse(v);
 	}
@@ -831,7 +830,7 @@ public class Mesh implements Serializable
 	 * because there would be no valid return value.  User must then run this
 	 * method against symmetric edge, this is not done automatically.
 	 */
-	public AbstractHalfEdge edgeCollapse(AbstractHalfEdge e, AbstractVertex v)
+	public AbstractHalfEdge edgeCollapse(AbstractHalfEdge e, Vertex v)
 	{
 		return e.collapse(this, v);
 	}
@@ -842,7 +841,7 @@ public class Mesh implements Serializable
 	 * @param e   edge being splitted
 	 * @param v   the resulting vertex
 	 */
-	public AbstractHalfEdge vertexSplit(AbstractHalfEdge e, AbstractVertex v)
+	public AbstractHalfEdge vertexSplit(AbstractHalfEdge e, Vertex v)
 	{
 		return e.split(this, v);
 	}
@@ -900,7 +899,7 @@ public class Mesh implements Serializable
 			}
 			for (int i = 0; i < 3; i++)
 			{
-				Vertex v = (Vertex) t.vertex[i];
+				Vertex v = t.vertex[i];
 				if (v.getLink() == null)
 					continue;
 				if (v.getLink() instanceof AbstractTriangle)
@@ -1289,7 +1288,7 @@ import gnu.trove.TObjectIntHashMap;
 			else
 				out = new PrintWriter(new FileOutputStream(file));
 			out.println("    -1"+cr+"  2411");
-			HashSet<AbstractVertex> nodeset = new HashSet<AbstractVertex>();
+			HashSet<Vertex> nodeset = new HashSet<Vertex>();
 			for (AbstractTriangle at: triangleList)
 			{
 				Triangle t = (Triangle) at;
@@ -1302,8 +1301,8 @@ import gnu.trove.TObjectIntHashMap;
 				nodeset.add(t.vertex[2]);
 			}
 			int count = 0;
-			TObjectIntHashMap<AbstractVertex> labels = new TObjectIntHashMap<AbstractVertex>(nodeset.size());
-			for(AbstractVertex node: nodeset)
+			TObjectIntHashMap<Vertex> labels = new TObjectIntHashMap<Vertex>(nodeset.size());
+			for(Vertex node: nodeset)
 			{
 				count++;
 				labels.put(node, count);
@@ -1355,7 +1354,7 @@ import gnu.trove.TObjectIntHashMap;
 			else
 				out = new PrintWriter(new FileOutputStream(file));
 			out.println("MeshVersionFormatted 1"+cr+"Dimension"+cr+"3");
-			HashSet<AbstractVertex> nodeset = new HashSet<AbstractVertex>();
+			HashSet<Vertex> nodeset = new HashSet<Vertex>();
 			for(AbstractTriangle at: triangleList)
 			{
 				Triangle t = (Triangle) at;
@@ -1368,9 +1367,9 @@ import gnu.trove.TObjectIntHashMap;
 				nodeset.add(t.vertex[2]);
 			}
 			int count = 0;
-			TObjectIntHashMap<AbstractVertex> labels = new TObjectIntHashMap<AbstractVertex>(nodeset.size());
+			TObjectIntHashMap<Vertex> labels = new TObjectIntHashMap<Vertex>(nodeset.size());
 			out.println("Vertices"+cr+nodeset.size());
-			for(AbstractVertex node: nodeset)
+			for(Vertex node: nodeset)
 			{
 				count++;
 				labels.put(node, count);

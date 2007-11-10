@@ -21,6 +21,7 @@
 package org.jcae.mesh.amibe.ds;
 
 import org.apache.log4j.Logger;
+import org.jcae.mesh.amibe.traits.Traits;
 import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
@@ -53,10 +54,22 @@ import java.io.Serializable;
  * all incident triangles through their adjacency relations.
  * </p>
  */
-public class Vertex extends AbstractVertex implements Serializable
+public class Vertex implements Serializable
 {
 	private static Logger logger = Logger.getLogger(Vertex.class);
 	
+	//  User-defined traits
+	protected final VertexTraitsBuilder traitsBuilder;
+	protected final Traits traits;
+	/**
+	 * 2D or 3D coordinates.
+	 */
+	protected final double [] param;
+	//  ref1d > 0: link to the geometrical node
+	//  ref1d = 0: inner node
+	//  ref1d < 0: node on an inner boundary
+	protected int ref1d = 0;
+
 	//  link can be either:
 	//    1. an AbstractTriangle, for manifold vertices
 	//    2. an Object[2] array, zhere
@@ -74,7 +87,12 @@ public class Vertex extends AbstractVertex implements Serializable
 	 */
 	protected Vertex(VertexTraitsBuilder vtb)
 	{
-		super(vtb);
+		traitsBuilder = vtb;
+		if (traitsBuilder != null)
+			traits = traitsBuilder.createTraits();
+		else
+			traits = null;
+		param = new double[2];
 	}
 
 	/**
@@ -87,7 +105,15 @@ public class Vertex extends AbstractVertex implements Serializable
 	 */
 	public Vertex(VertexTraitsBuilder vtb, double x, double y, double z)
 	{
-		super(vtb, x, y, z);
+		traitsBuilder = vtb;
+		if (traitsBuilder != null)
+			traits = traitsBuilder.createTraits();
+		else
+			traits = null;
+		param = new double[3];
+		param[0] = x;
+		param[1] = y;
+		param[2] = z;
 	}
 	
 	/**
@@ -105,6 +131,117 @@ public class Vertex extends AbstractVertex implements Serializable
 		label = that.label;
 		readable = that.readable;
 		writable = that.writable;
+	}
+	
+	/**
+	 * Gets 1D reference of this node.
+	 *
+	 * @return 1D reference of this node
+	 */
+	public int getRef()
+	{
+		return ref1d;
+	}
+	
+	/**
+	 * Sets 1D reference of this node.
+	 *
+	 * @param l  1D reference of this node
+	 */
+	public void setRef(int l)
+	{
+		ref1d = l;
+	}
+	
+	/**
+	 * Gets coordinates of this vertex.
+	 *
+	 * @return coordinates of this vertex
+	 */
+	public double [] getUV ()
+	{
+		return param;
+	}
+	
+	/**
+	 * Sets 3D coordinates of this vertex.
+	 *
+	 * @param x  first coordinate of the new position
+	 * @param y  second coordinate of the new position
+	 * @param z  third coordinate of the new position
+	 */
+	public void moveTo(double x, double y, double z)
+	{
+		param[0] = x;
+		param[1] = y;
+		param[2] = z;
+	}
+	
+	/**
+	 * Returns the distance in 3D space.
+	 *
+	 * @param end  the node to which distance is computed.
+	 * @return the distance to <code>end</code>.
+	 **/
+	public double distance3D(Vertex end)
+	{
+		double x = param[0] - end.param[0];
+		double y = param[1] - end.param[1];
+		double z = param[2] - end.param[2];
+		return Math.sqrt(x*x+y*y+z*z);
+	}
+	
+	/**
+	 * Returns the angle at which a segment is seen.
+	 *
+	 * @param n1  first node
+	 * @param n2  second node
+	 * @return the angle at which the segment is seen.
+	 **/
+	public double angle3D(Vertex n1, Vertex n2)
+	{
+		double normPn1 = distance3D(n1);
+		double normPn2 = distance3D(n2);
+		if ((normPn1 == 0.0) || (normPn2 == 0.0))
+			return 0.0;
+		double normPn3 = n1.distance3D(n2);
+		double mu, alpha;
+		if (normPn1 < normPn2)
+		{
+			double temp = normPn1;
+			normPn1 = normPn2;
+			normPn2 = temp;
+		}
+		if (normPn2 < normPn3)
+			mu = normPn2 - (normPn1 - normPn3);
+		else
+			mu = normPn3 - (normPn1 - normPn2);
+		alpha = 2.0 * Math.atan(Math.sqrt(
+			((normPn1-normPn2)+normPn3)*mu/
+				((normPn1+(normPn2+normPn3))*((normPn1-normPn3)+normPn2))
+		));
+		return alpha;
+	}
+	
+	/**
+	 * Returns the outer product of two vectors.  This method
+	 * computes the outer product of two vectors starting from
+	 * the current vertex.
+	 *
+	 * @param n1  end point of the first vector
+	 * @param n2  end point of the second vector
+	 * @param work1  double[3] temporary array
+	 * @param work2  double[3] temporary array
+	 * @param ret array which will store the outer product of the two vectors
+	 */
+	public void outer3D(Vertex n1, Vertex n2, double [] work1, double [] work2, double [] ret)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			work1[i] = n1.param[i] - param[i];
+			work2[i] = n2.param[i] - param[i];
+		}
+		Matrix3D.prodVect3D(work1, work2, ret);
 	}
 	
 	/**
@@ -212,13 +349,11 @@ public class Vertex extends AbstractVertex implements Serializable
 		writable = w;
 	}
 	
-	@Override
 	public boolean isReadable()
 	{
 		return readable;
 	}
 	
-	@Override
 	public boolean isWritable()
 	{
 		return writable;

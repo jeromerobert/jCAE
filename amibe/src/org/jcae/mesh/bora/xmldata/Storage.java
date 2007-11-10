@@ -27,7 +27,7 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.SubMesh1D;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
-import org.jcae.mesh.amibe.ds.AbstractVertex;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.bora.ds.BModel;
@@ -127,8 +127,8 @@ public class Storage
 			writeId(dir, face.getId());
 			CADFace F = (CADFace) face.getShape();
 			Collection<AbstractTriangle> trianglelist = submesh.getTriangles();
-			Collection<AbstractVertex> nodelist = submesh.getNodes();
-			TObjectIntHashMap<AbstractVertex> localIdx = write2dNodeReferences(dir, face.getId(), nodelist, submesh.outerVertex);
+			Collection<Vertex> nodelist = submesh.getNodes();
+			TObjectIntHashMap<Vertex> localIdx = write2dNodeReferences(dir, face.getId(), nodelist, submesh.outerVertex);
 			write2dCoordinates(dir, nodelist, submesh.outerVertex, F.getGeomSurface());
 			write2dTriangles(dir, trianglelist, localIdx);
 		}
@@ -150,8 +150,8 @@ public class Storage
 		{
 			File dir = new File(outDir);
 			writeId(dir, solid.getId());
-			Collection<AbstractVertex> nodelist = submesh.getNodes();
-			TObjectIntHashMap<AbstractVertex> localIdx = write2dNodeReferences(dir, solid.getId(), nodelist, submesh.outerVertex);
+			Collection<Vertex> nodelist = submesh.getNodes();
+			TObjectIntHashMap<Vertex> localIdx = write2dNodeReferences(dir, solid.getId(), nodelist, submesh.outerVertex);
 			write2dCoordinates(dir, nodelist, submesh.outerVertex, null);
 			write2dTriangles(dir, submesh.getTriangles(), localIdx);
 		}
@@ -171,7 +171,7 @@ public class Storage
 	public static Mesh readAllFaces(BCADGraphCell root)
 	{
 		Mesh m = new Mesh();
-		TIntObjectHashMap<AbstractVertex> vertMap = new TIntObjectHashMap<AbstractVertex>();
+		TIntObjectHashMap<Vertex> vertMap = new TIntObjectHashMap<Vertex>();
 		for (Iterator<BSubMesh> its = root.getGraph().getModel().getSubMeshIterator(); its.hasNext(); )
 		{
 			BSubMesh s = its.next();
@@ -191,7 +191,7 @@ public class Storage
 	public static Mesh readAllFaces(BCADGraphCell root, BSubMesh s)
 	{
 		Mesh m = new Mesh();
-		TIntObjectHashMap<AbstractVertex> vertMap = new TIntObjectHashMap<AbstractVertex>();
+		TIntObjectHashMap<Vertex> vertMap = new TIntObjectHashMap<Vertex>();
 		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 			readFace(m, it.next(), s, vertMap);
 		return m;
@@ -202,10 +202,10 @@ public class Storage
 	 * @param mesh    original mesh
 	 * @param face    cell graph containing a CAD face
 	 * @param s       consider discretizations only if they appear in this BSubMesh instance
-	 * @param mapRefVertex    map between references and AbstractVertex instances
+	 * @param mapRefVertex    map between references and Vertex instances
 	 * @throws  RuntimeException if an error occurred
 	 */
-	public static void readFace(Mesh mesh, BCADGraphCell face, BSubMesh s, TIntObjectHashMap<AbstractVertex> mapRefVertex)
+	public static void readFace(Mesh mesh, BCADGraphCell face, BSubMesh s, TIntObjectHashMap<Vertex> mapRefVertex)
 	{
 		assert face.getShape() instanceof CADFace;
 		BModel model = face.getGraph().getModel();
@@ -225,9 +225,9 @@ public class Storage
 			File dir = new File(model.getOutputDir(d));
 			// Read vertex references
 			int [] refs = read2dNodeReferences(dir);
-			// Create a AbstractVertex array, amd insert new references
+			// Create a Vertex array, amd insert new references
 			// into mapRefVertex.
-			AbstractVertex [] nodelist = read2dCoordinates(dir, mesh, refs, mapRefVertex);
+			Vertex [] nodelist = read2dCoordinates(dir, mesh, refs, mapRefVertex);
 			// Read triangles and appends them to the mesh.
 			read2dTriangles(dir, id, 3, mesh, reversed, nodelist);
 		}
@@ -251,7 +251,7 @@ public class Storage
 	public static Mesh readAllVolumes(BCADGraphCell root, BSubMesh s)
 	{
 		Mesh m = new Mesh();
-		TIntObjectHashMap<AbstractVertex> vertMap = new TIntObjectHashMap<AbstractVertex>();
+		TIntObjectHashMap<Vertex> vertMap = new TIntObjectHashMap<Vertex>();
 		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
 			readVolume(m, it.next(), s, vertMap);
 		return m;
@@ -261,10 +261,10 @@ public class Storage
 	 * Append a discretized solid into a Mesh instance.
 	 * @param mesh    original mesh
 	 * @param volume    cell graph containing a CAD solid
-	 * @param mapRefVertex    map between references and AbstractVertex instances
+	 * @param mapRefVertex    map between references and Vertex instances
 	 * @throws  RuntimeException if an error occurred
 	 */
-	public static void readVolume(Mesh mesh, BCADGraphCell volume, BSubMesh s, TIntObjectHashMap<AbstractVertex> mapRefVertex)
+	public static void readVolume(Mesh mesh, BCADGraphCell volume, BSubMesh s, TIntObjectHashMap<Vertex> mapRefVertex)
 	{
 		assert volume.getShape() instanceof CADSolid;
 		BModel model = volume.getGraph().getModel();
@@ -284,9 +284,9 @@ public class Storage
 			File dir = new File(model.getOutputDir(d));
 			// Read vertex references
 			int [] refs = read2dNodeReferences(dir);
-			// Create a AbstractVertex array, amd insert new references
+			// Create a Vertex array, amd insert new references
 			// into mapRefVertex.
-			AbstractVertex [] nodelist = read2dCoordinates(dir, mesh, refs, mapRefVertex);
+			Vertex [] nodelist = read2dCoordinates(dir, mesh, refs, mapRefVertex);
 			for (int i = 0, n = nodelist.length; i < n; i++)
 				mesh.add(nodelist[i]);
 			// Read triangles and appends them to the mesh.
@@ -333,7 +333,7 @@ public class Storage
 		return localIdx;
 	}
 
-	private static TObjectIntHashMap<AbstractVertex> write2dNodeReferences(File dir, int id, Collection<AbstractVertex> nodelist, AbstractVertex outer)
+	private static TObjectIntHashMap<Vertex> write2dNodeReferences(File dir, int id, Collection<Vertex> nodelist, Vertex outer)
 		throws IOException, FileNotFoundException
 	{
 		File refFile = new File(dir, "r");
@@ -344,11 +344,11 @@ public class Storage
 		logger.debug("begin writing "+refFile+" face "+id);
 		DataOutputStream refsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile, true)));
 
-		TObjectIntHashMap<AbstractVertex> localIdx = new TObjectIntHashMap<AbstractVertex>(nodelist.size());
+		TObjectIntHashMap<Vertex> localIdx = new TObjectIntHashMap<Vertex>(nodelist.size());
 		int i = 0;
-		for (Iterator<AbstractVertex> itn = nodelist.iterator(); itn.hasNext(); )
+		for (Iterator<Vertex> itn = nodelist.iterator(); itn.hasNext(); )
 		{
-			AbstractVertex n = itn.next();
+			Vertex n = itn.next();
 			if (n == outer)
 				continue;
 			// Set first index to 1; a null index in
@@ -392,7 +392,7 @@ public class Storage
 		parasout.close();
 	}
 
-	private static void write2dCoordinates(File dir, Collection<AbstractVertex> nodelist, AbstractVertex outer, CADGeomSurface surface)
+	private static void write2dCoordinates(File dir, Collection<Vertex> nodelist, Vertex outer, CADGeomSurface surface)
 		throws IOException, FileNotFoundException
 	{
 		File nodesFile = new File(dir, "n");
@@ -407,9 +407,9 @@ public class Storage
 		DataOutputStream nodesout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile, true)));
 		DataOutputStream parasout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(parasFile, true)));
 		double [] xyz;
-		for (Iterator<AbstractVertex> itn = nodelist.iterator(); itn.hasNext(); )
+		for (Iterator<Vertex> itn = nodelist.iterator(); itn.hasNext(); )
 		{
-			AbstractVertex n = itn.next();
+			Vertex n = itn.next();
 			if (n == outer)
 				continue;
 			if (surface == null)
@@ -448,7 +448,7 @@ public class Storage
 		beamsout.close();
 	}
 
-	private static void write2dTriangles(File dir, Collection<AbstractTriangle> trianglelist, TObjectIntHashMap<AbstractVertex> localIdx)
+	private static void write2dTriangles(File dir, Collection<AbstractTriangle> trianglelist, TObjectIntHashMap<Vertex> localIdx)
 		throws IOException, FileNotFoundException
 	{
 		File facesFile=new File(dir, "f");
@@ -485,7 +485,7 @@ public class Storage
 		return refs;
 	}
 
-	private static AbstractVertex [] read2dCoordinates(File dir, Mesh mesh, int [] refs, TIntObjectHashMap<AbstractVertex> mapRefVertex)
+	private static Vertex [] read2dCoordinates(File dir, Mesh mesh, int [] refs, TIntObjectHashMap<Vertex> mapRefVertex)
 		throws IOException, FileNotFoundException
 	{
 		File nodesFile = new File(dir, "n");
@@ -495,7 +495,7 @@ public class Storage
 		
 		int numberOfNodes = (int) nodesFile.length() / 24;
 		int numberOfReferences = refs.length / 2;
-		AbstractVertex [] nodelist = new AbstractVertex[numberOfNodes];
+		Vertex [] nodelist = new Vertex[numberOfNodes];
 		double [] coord = new double[3];
 		logger.debug("Reading "+numberOfNodes+" nodes");
 		for (int i = 0; i < numberOfNodes; i++)
@@ -507,7 +507,7 @@ public class Storage
 		{
 			int ind = refs[2*i];
 			int label = refs[2*i+1];
-			AbstractVertex v = mapRefVertex.get(label);
+			Vertex v = mapRefVertex.get(label);
 			if (v == null)
 				mapRefVertex.put(label, nodelist[ind]);
 			else
@@ -520,7 +520,7 @@ public class Storage
 		return nodelist;
 	}
 
-	private static void read2dTriangles(File dir, int id, int nr, Mesh mesh, boolean reversed, AbstractVertex [] nodelist)
+	private static void read2dTriangles(File dir, int id, int nr, Mesh mesh, boolean reversed, Vertex [] nodelist)
 		throws IOException, FileNotFoundException
 	{
 		File trianglesFile = new File(dir, "f");
@@ -531,14 +531,14 @@ public class Storage
 		int numberOfTriangles = (int) trianglesFile.length() / (4*nr);
 		logger.debug("Reading "+numberOfTriangles+" elements");
 		Triangle face;
-		AbstractVertex [] pts = new AbstractVertex[nr];
+		Vertex [] pts = new Vertex[nr];
 		for (int i = 0; i < numberOfTriangles; i++)
 		{
 			for (int j = 0; j < nr; j++)
 				pts[j] = nodelist[trianglesBuffer.get()-1];
 			if (reversed)
 			{
-				AbstractVertex temp = pts[1];
+				Vertex temp = pts[1];
 				pts[1] = pts[2];
 				pts[2] = temp;
 			}

@@ -53,7 +53,7 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
-import org.jcae.mesh.amibe.ds.AbstractVertex;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.oemm.OEMM.Node;
 import org.apache.log4j.Logger;
 
@@ -208,7 +208,7 @@ public class Storage
 	 */
 	private static void removeNonReferencedVertices(Mesh mesh)
 	{
-		List<AbstractVertex> tempCollection = new ArrayList<AbstractVertex>();
+		List<Vertex> tempCollection = new ArrayList<Vertex>();
 		tempCollection.addAll(mesh.getNodes());
 		mesh.getNodes().clear();
 		
@@ -224,15 +224,14 @@ public class Storage
 			mesh.add(v);
 			processedVertIndex.add(v.getLabel());
 		}
-		for (AbstractVertex av: tempCollection)
+		for (Vertex v: tempCollection)
 		{
-			Vertex vert = (Vertex) av;
-			int label = vert.getLabel();
+			int label = v.getLabel();
 			if (processedVertIndex.contains(label))
 				continue;
 			processedVertIndex.add(label);
-			if (!vert.isWritable()) {
-				mesh.add(vert);
+			if (!v.isWritable()) {
+				mesh.add(v);
 			}
 		}
 	}
@@ -281,10 +280,9 @@ public class Storage
 	{
 		int positions[] = new int[3];
 		TObjectIntHashMap<Vertex> ret = new TObjectIntHashMap<Vertex>(mesh.getNodes().size());
-		for(AbstractVertex av: mesh.getNodes())
+		for(Vertex v: mesh.getNodes())
 		{
-			Vertex vertex = (Vertex) av;
-			oemm.double2int(vertex.getUV(), positions);
+			oemm.double2int(v.getUV(), positions);
 			Node n = null;
 			try {
 				n = oemm.search(positions);
@@ -294,7 +292,7 @@ public class Storage
 				n = createNewNode(oemm, positions);
 				storedLeaves.add(n.leafIndex);
 			}
-			ret.put(vertex, n.leafIndex);
+			ret.put(v, n.leafIndex);
 		}
 		return ret;
 	}
@@ -452,9 +450,8 @@ public class Storage
 	 */
 	private static void collectAllVertices(OEMM oemm, Mesh mesh, TObjectIntHashMap<Vertex> mapVertexToLeafindex, TIntObjectHashMap<ArrayList<Vertex>> mapLeafindexToVertexList, TIntHashSet movedVertices)
 	{
-		for(AbstractVertex av: mesh.getNodes())
+		for(Vertex vertex: mesh.getNodes())
 		{
-			Vertex vertex = (Vertex) av;
 			assert mapVertexToLeafindex.containsKey(vertex);
 			int index = mapVertexToLeafindex.get(vertex);
 			assert mapLeafindexToVertexList.contains(index);
@@ -785,14 +782,13 @@ public class Storage
 			// By convention, if T=(V1,V2,V3) and each Vi is contained in node Ni,
 			// then T belongs to min(Ni)
 			int nodeNumber = Integer.MAX_VALUE;
-			for(AbstractVertex av: tr.vertex)
+			for(Vertex v: tr.vertex)
 			{
 				int n;
-				Vertex vert = (Vertex) av;
-				if (mapVertexToLeafindex.containsKey(vert))
-					n = mapVertexToLeafindex.get(vert);
+				if (mapVertexToLeafindex.containsKey(v))
+					n = mapVertexToLeafindex.get(v);
 				else
-					n = searchNode(oemm, vert, positions);
+					n = searchNode(oemm, v, positions);
 				if (n < nodeNumber)
 					nodeNumber = n;
 			}

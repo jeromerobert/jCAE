@@ -57,9 +57,9 @@ public class AbstractHalfEdgeTest
 		v = new Vertex[12];
 		for (int i = 0; i < 4; i++)
 		{
-			v[3*i]   = (Vertex) mesh.createVertex(-1.0, i, 0.0);
-			v[3*i+1] = (Vertex) mesh.createVertex(0.0, i, 0.0);
-			v[3*i+2] = (Vertex) mesh.createVertex(1.0, i, 0.0);
+			v[3*i]   = mesh.createVertex(-1.0, i, 0.0);
+			v[3*i+1] = mesh.createVertex(0.0, i, 0.0);
+			v[3*i+2] = mesh.createVertex(1.0, i, 0.0);
 		}
 		for (int i = 0; i < v.length; i++)
 			v[i].setLabel(i);
@@ -95,7 +95,7 @@ public class AbstractHalfEdgeTest
 		v = new Vertex[m*n];
 		for (int j = 0; j < n; j++)
 			for (int i = 0; i < m; i++)
-				v[m*j+i] = (Vertex) mesh.createVertex(i, j, 0.0);
+				v[m*j+i] = mesh.createVertex(i, j, 0.0);
 		for (int i = 0; i < v.length; i++)
 		{
 			v[i].setLabel(vertexLabel);
@@ -178,7 +178,7 @@ public class AbstractHalfEdgeTest
 			else
 			{
 				double [] xyz = v[i].getUV();
-				vy[i]   = (Vertex) mesh.createVertex(ct*xyz[0]+st*xyz[2], xyz[1], -st*xyz[0]+ct*xyz[2]);
+				vy[i]   = mesh.createVertex(ct*xyz[0]+st*xyz[2], xyz[1], -st*xyz[0]+ct*xyz[2]);
 				vy[i].setLabel(vertexLabel);
 				vertexLabel++;
 			}
@@ -194,7 +194,7 @@ public class AbstractHalfEdgeTest
 	{
 		for (Triangle t: tArray)
 		{
-			AbstractVertex temp = t.vertex[1];
+			Vertex temp = t.vertex[1];
 			t.vertex[1] = t.vertex[2];
 			t.vertex[2] = temp;
 		}
@@ -230,12 +230,12 @@ public class AbstractHalfEdgeTest
 		 *   edge (v4,v0) would become non-manifold.
 		 */
 		v = new Vertex[6];
-		v[0] = (Vertex) mesh.createVertex(0.0, 0.0, 0.0);
-		v[1] = (Vertex) mesh.createVertex(1.0, 0.0, 0.0);
-		v[2] = (Vertex) mesh.createVertex(1.0, 1.0, 0.0);
-		v[3] = (Vertex) mesh.createVertex(0.0, 1.0, 0.0);
-		v[4] = (Vertex) mesh.createVertex(0.0, 1.0, 1.0);
-		v[5] = (Vertex) mesh.createVertex(0.0, 0.0, 1.0);
+		v[0] = mesh.createVertex(0.0, 0.0, 0.0);
+		v[1] = mesh.createVertex(1.0, 0.0, 0.0);
+		v[2] = mesh.createVertex(1.0, 1.0, 0.0);
+		v[3] = mesh.createVertex(0.0, 1.0, 0.0);
+		v[4] = mesh.createVertex(0.0, 1.0, 1.0);
+		v[5] = mesh.createVertex(0.0, 0.0, 1.0);
 		for (int i = 0; i < v.length; i++)
 			v[i].setLabel(i);
 

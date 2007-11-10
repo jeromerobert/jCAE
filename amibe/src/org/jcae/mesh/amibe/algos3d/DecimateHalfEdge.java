@@ -129,8 +129,8 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	public DecimateHalfEdge(final Mesh m, final Map<String, String> options)
 	{
 		super(m);
-		v3 = (Vertex) m.createVertex(0.0, 0.0, 0.0);
-		vCostOpt = (Vertex) m.createVertex(0.0, 0.0, 0.0);
+		v3 = m.createVertex(0.0, 0.0, 0.0);
+		vCostOpt = m.createVertex(0.0, 0.0, 0.0);
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
 			final String key = opt.getKey();
@@ -173,7 +173,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 				continue;
 			for (int i = 0; i < 3; i++)
 			{
-				final Vertex n = (Vertex) af.vertex[i];
+				final Vertex n = af.vertex[i];
 				if (!quadricMap.containsKey(n))
 					quadricMap.put(n, new Quadric3DError());
 			}
@@ -419,7 +419,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 		assert current.apex() == apex : ""+current+"\n"+v3+"\n"+apex;
 		v3 = vFree;
 		if (v3 == null)
-			v3 = (Vertex) mesh.createVertex(0.0, 0.0, 0.0);
+			v3 = mesh.createVertex(0.0, 0.0, 0.0);
 		q3 = qFree;
 		if (q3 == null)
 			q3 = new Quadric3DError();

@@ -21,7 +21,7 @@
 package org.jcae.mesh.amibe.validation;
 
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
-import org.jcae.mesh.amibe.ds.AbstractVertex;
+import org.jcae.mesh.amibe.ds.Vertex;
 
 /**
  * Compute maximal edge length by triangle.
@@ -43,9 +43,9 @@ public class MinLengthFace extends QualityProcedure
 			throw new IllegalArgumentException();
 		double l1, l2, l3;
 		AbstractTriangle f = (AbstractTriangle) o;
-		AbstractVertex n1 = f.vertex[0];
-		AbstractVertex n2 = f.vertex[1];
-		AbstractVertex n3 = f.vertex[2];
+		Vertex n1 = f.vertex[0];
+		Vertex n2 = f.vertex[1];
+		Vertex n3 = f.vertex[2];
 		l1 = n1.distance3D(n2);
 		l2 = n2.distance3D(n3);
 		l3 = n3.distance3D(n1);

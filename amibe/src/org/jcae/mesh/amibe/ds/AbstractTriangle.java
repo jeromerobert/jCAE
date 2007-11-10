@@ -31,7 +31,7 @@ public class AbstractTriangle
 	/**
 	 * Three vertices.
 	 */
-	public AbstractVertex [] vertex;
+	public Vertex [] vertex;
 	
 	// Group id
 	private int groupId = -1;
@@ -56,7 +56,7 @@ public class AbstractTriangle
 			traits = builder.createTraits();
 		else
 			traits = null;
-		vertex = new AbstractVertex[3];
+		vertex = new Vertex[3];
 	}
 
 	public void copy(AbstractTriangle src)

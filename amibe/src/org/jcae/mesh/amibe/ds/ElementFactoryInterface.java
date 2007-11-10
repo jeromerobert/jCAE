@@ -22,11 +22,11 @@ package org.jcae.mesh.amibe.ds;
 
 public interface ElementFactoryInterface
 {
-	public AbstractVertex createVertex(double u, double v);
-	public AbstractVertex createVertex(double x, double y, double z);
-	public AbstractVertex createVertex(double [] x);
-	public AbstractTriangle createTriangle(AbstractVertex v0, AbstractVertex v1, AbstractVertex v2);
-	public AbstractTriangle createTriangle(AbstractVertex [] v);
+	public Vertex createVertex(double u, double v);
+	public Vertex createVertex(double x, double y, double z);
+	public Vertex createVertex(double [] x);
+	public AbstractTriangle createTriangle(Vertex v0, Vertex v1, Vertex v2);
+	public AbstractTriangle createTriangle(Vertex [] v);
 	public AbstractTriangle createTriangle(AbstractTriangle that);
 	public boolean hasAdjacency();
 }

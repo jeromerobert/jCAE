@@ -21,7 +21,7 @@
 package org.jcae.mesh.amibe.patch;
 
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
-import org.jcae.mesh.amibe.ds.AbstractVertex;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.ElementFactoryInterface;
 import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
@@ -66,7 +66,7 @@ public class ElementPatchFactory implements ElementFactoryInterface
 	}
 	
 	@Override
-	public AbstractTriangle createTriangle(AbstractVertex v0, AbstractVertex v1, AbstractVertex v2)
+	public AbstractTriangle createTriangle(Vertex v0, Vertex v1, Vertex v2)
 	{
 		AbstractTriangle ret = createTriangle();
 		Vertex2D [] vArray = new Vertex2D[3];
@@ -81,7 +81,7 @@ public class ElementPatchFactory implements ElementFactoryInterface
 	}
 
 	@Override
-	public AbstractTriangle createTriangle(AbstractVertex [] v)
+	public AbstractTriangle createTriangle(Vertex [] v)
 	{
 		AbstractTriangle ret = createTriangle();
 		Vertex2D [] vArray = new Vertex2D[3];

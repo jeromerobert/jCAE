@@ -21,7 +21,7 @@
 package org.jcae.mesh.amibe.traits;
 
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
-import org.jcae.mesh.amibe.ds.AbstractVertex;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.util.KdTree;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -134,10 +134,10 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	 * @return collection of nodes
 	 */
 	@SuppressWarnings("unchecked")
-	public Collection<AbstractVertex> getNodes(Traits t)
+	public Collection<Vertex> getNodes(Traits t)
 	{
 		if ((attributes & NODES) != 0)
-			return (Collection<AbstractVertex>) t.array[index[BITNODES]];
+			return (Collection<Vertex>) t.array[index[BITNODES]];
 		return null;
 	}
 
@@ -220,9 +220,9 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		else if ((attributes & TRIANGLES) != 0)
 			t.array[index[BITTRIANGLES]] = new ArrayList<AbstractTriangle>();
 		if ((attributes & NODESET) != 0)
-			t.array[index[BITNODES]] = new LinkedHashSet<AbstractVertex>();
+			t.array[index[BITNODES]] = new LinkedHashSet<Vertex>();
 		else if ((attributes & NODES) != 0)
-			t.array[index[BITNODES]] = new ArrayList<AbstractVertex>();
+			t.array[index[BITNODES]] = new ArrayList<Vertex>();
 		if ((attributes & GROUPLIST) != 0)
 			t.array[index[BITGROUPS]] = new ArrayList();
 		if ((attributes & KDTREE) != 0)

@@ -24,7 +24,7 @@ package org.jcae.mesh.amibe.algos2d;
 import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
-import org.jcae.mesh.amibe.ds.AbstractVertex;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
@@ -150,7 +150,7 @@ public class Insertion
 					double [] xs = start.getUV();
 					double [] xe = end.getUV();
 					int segments = (int) (2.0*l/lcrit) + 10;
-					AbstractVertex [] np = new AbstractVertex[segments-1];
+					Vertex [] np = new Vertex[segments-1];
 					for (int ns = 1; ns < segments; ns++)
 						np[ns-1] = mesh.createVertex(xs[0]+ns*(xe[0]-xs[0])/segments, xs[1]+ns*(xe[1]-xs[1])/segments);
 					

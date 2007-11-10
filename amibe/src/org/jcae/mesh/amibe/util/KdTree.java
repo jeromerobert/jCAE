@@ -21,7 +21,6 @@
 package org.jcae.mesh.amibe.util;
 
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.ds.AbstractVertex;
 import org.jcae.mesh.amibe.ds.Mesh;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -66,7 +65,7 @@ import org.apache.log4j.Logger;
  * <pre>
  *	public final class collectAllVerticesProcedure implements KdTreeProcedure
  *	{
- *		public Collection<AbstractVertex> vertexList = new ArrayList<AbstractVertex>();
+ *		public Collection<Vertex> vertexList = new ArrayList<Vertex>();
  *		public final int action(Object o, int s, int [] i0)
  *		{
  *			Cell self = (Cell) o;
@@ -483,10 +482,10 @@ public class KdTree
 
 	private static final class GetAllVerticesProcedure implements KdTreeProcedure
 	{
-		public Collection<AbstractVertex> nodelist = null;
+		public Collection<Vertex> nodelist = null;
 		public GetAllVerticesProcedure(int capacity)
 		{
-			nodelist = new ArrayList<AbstractVertex>(capacity);
+			nodelist = new ArrayList<Vertex>(capacity);
 		}
 		@Override
 		public int action(Object o, int s, final int [] i0)
@@ -495,7 +494,7 @@ public class KdTree
 			if (self.nItems > 0)
 			{
 				for (int i = 0; i < self.nItems; i++)
-					nodelist.add((AbstractVertex) self.subCell[i]);
+					nodelist.add((Vertex) self.subCell[i]);
 			}
 			return KdTreeProcedure.OK;
 		}
@@ -507,7 +506,7 @@ public class KdTree
 	 * @param capacity  initial capacity of the <code>Collection</code>.
 	 * @return a collection containing all vertices.
 	 */
-	public Collection<AbstractVertex> getAllVertices(int capacity)
+	public Collection<Vertex> getAllVertices(int capacity)
 	{
 		GetAllVerticesProcedure gproc = new GetAllVerticesProcedure(capacity);
 		walk(gproc);

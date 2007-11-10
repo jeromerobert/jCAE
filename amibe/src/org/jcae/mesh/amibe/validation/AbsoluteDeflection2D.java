@@ -23,13 +23,13 @@ package org.jcae.mesh.amibe.validation;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
-import org.jcae.mesh.amibe.ds.AbstractVertex;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 
 public class AbsoluteDeflection2D extends QualityProcedure
 {
 	private Mesh2D mesh;
-	private AbstractVertex [] p = new AbstractVertex[4];
+	private Vertex [] p = new Vertex[4];
 	private double [] v1 = new double[3];
 	private double [] v2 = new double[3];
 	private double [] v3 = new double[3];

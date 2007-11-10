@@ -70,7 +70,7 @@ public class SmoothNodes3D
 	public SmoothNodes3D(Mesh m)
 	{
 		mesh = m;
-		c = (Vertex) mesh.createVertex(0.0, 0.0, 0.0);
+		c = mesh.createVertex(0.0, 0.0, 0.0);
 	}
 	
 	/**
@@ -84,7 +84,7 @@ public class SmoothNodes3D
 	public SmoothNodes3D(final Mesh m, final Map<String, String> options)
 	{
 		mesh = m;
-		c = (Vertex) mesh.createVertex(0.0, 0.0, 0.0);
+		c = mesh.createVertex(0.0, 0.0, 0.0);
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
 			final String key = opt.getKey();
@@ -154,22 +154,22 @@ public class SmoothNodes3D
 				if (z01 < z12)
 				{
 					ot = ot.next();
-					n = (Vertex) f.vertex[2];
+					n = f.vertex[2];
 				}
 				else
 				{
 					ot = ot.prev();
-					n = (Vertex) f.vertex[0];
+					n = f.vertex[0];
 				}
 			}
 			else
 			{
 				if (z02 < z12)
-					n = (Vertex) f.vertex[1];
+					n = f.vertex[1];
 				else
 				{
 					ot = ot.prev();
-					n = (Vertex) f.vertex[0];
+					n = f.vertex[0];
 				}
 			}
 			assert ot.origin() == n;

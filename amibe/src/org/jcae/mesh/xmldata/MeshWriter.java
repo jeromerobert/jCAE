@@ -23,7 +23,7 @@ package org.jcae.mesh.xmldata;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.AbstractTriangle;
-import org.jcae.mesh.amibe.ds.AbstractVertex;
+import org.jcae.mesh.amibe.ds.Vertex;
 import gnu.trove.TObjectIntHashMap;
 import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TIntObjectProcedure;
@@ -51,7 +51,7 @@ public class MeshWriter
 	/**
 	 * Used by {@link writeObject}
 	 */
-	private static Element writeObjectNodes(Document document, Collection<AbstractVertex> nodelist, AbstractVertex outer, File nodesFile, File refFile, String baseDir, TObjectIntHashMap<AbstractVertex> nodeIndex)
+	private static Element writeObjectNodes(Document document, Collection<Vertex> nodelist, Vertex outer, File nodesFile, File refFile, String baseDir, TObjectIntHashMap<Vertex> nodeIndex)
 		throws ParserConfigurationException, SAXException, IOException
 	{
 		//save nodes
@@ -61,17 +61,17 @@ public class MeshWriter
 		//  Write interior nodes first
 		int nref = 0;
 		int i = 0;
-		for(AbstractVertex av: nodelist)
+		for(Vertex v: nodelist)
 		{
-			if (av == outer)
+			if (v == outer)
 				continue;
-			int ref1d = av.getRef();
+			int ref1d = v.getRef();
 			if (0 == ref1d)
 			{
-				double [] p = av.getUV();
+				double [] p = v.getUV();
 				for (int d = 0; d < p.length; d++)
 					out.writeDouble(p[d]);
-				nodeIndex.put(av, i);
+				nodeIndex.put(v, i);
 				i++;
 			}
 			else
@@ -82,18 +82,18 @@ public class MeshWriter
 		if (nref > 0)
 		{
 			nref = 0;
-			for(AbstractVertex av: nodelist)
+			for(Vertex v: nodelist)
 			{
-				if (av == outer)
+				if (v == outer)
 					continue;
-				int ref1d = av.getRef();
+				int ref1d = v.getRef();
 				if (0 != ref1d)
 				{
-					double [] p = av.getUV();
+					double [] p = v.getUV();
 					for (int d = 0; d < p.length; d++)
 						out.writeDouble(p[d]);
 					refout.writeInt(Math.abs(ref1d));
-					nodeIndex.put(av, i);
+					nodeIndex.put(v, i);
 					i++;
 					nref++;
 				}
@@ -117,7 +117,7 @@ public class MeshWriter
 	/**
 	 * Used by {@link writeObject}
 	 */
-	private static Element writeObjectTriangles(Document document, Collection<AbstractTriangle> trianglelist, File trianglesFile, String baseDir, TObjectIntHashMap<AbstractVertex> nodeIndex)
+	private static Element writeObjectTriangles(Document document, Collection<AbstractTriangle> trianglelist, File trianglesFile, String baseDir, TObjectIntHashMap<Vertex> nodeIndex)
 		throws ParserConfigurationException, SAXException, IOException
 	{
 		//save triangles
@@ -233,11 +233,11 @@ public class MeshWriter
 		File refFile = new File(dir, JCAEXMLData.ref1dFilename);
 		File trianglesFile=new File(dir, JCAEXMLData.triangles2dFilename);
 		Collection<AbstractTriangle> trianglelist = submesh.getTriangles();
-		Collection<AbstractVertex> nodelist = submesh.getNodes();
+		Collection<Vertex> nodelist = submesh.getNodes();
 		if (nodelist == null)
 		{
-			HashSet<AbstractVertex> nodeset = new HashSet<AbstractVertex>();
-			nodelist = new ArrayList<AbstractVertex>();
+			HashSet<Vertex> nodeset = new HashSet<Vertex>();
+			nodelist = new ArrayList<Vertex>();
 			for (AbstractTriangle t: trianglelist)
 			{
 				if (!t.isWritable())
@@ -252,7 +252,7 @@ public class MeshWriter
 				}
 			}
 		}
-		TObjectIntHashMap<AbstractVertex> nodeIndex=new TObjectIntHashMap<AbstractVertex>(nodelist.size());
+		TObjectIntHashMap<Vertex> nodeIndex=new TObjectIntHashMap<Vertex>(nodelist.size());
 			
 		try
 		{
@@ -320,8 +320,8 @@ public class MeshWriter
 			File trianglesFile=new File(dir, JCAEXMLData.triangles3dFilename);
 			File groupsFile = new File(dir, JCAEXMLData.groupsFilename);
 			Collection<AbstractTriangle> trianglelist = submesh.getTriangles();
-			HashSet<AbstractVertex> nodeset = new HashSet<AbstractVertex>();
-			Collection<AbstractVertex> nodelist = new ArrayList<AbstractVertex>();
+			HashSet<Vertex> nodeset = new HashSet<Vertex>();
+			Collection<Vertex> nodelist = new ArrayList<Vertex>();
 			for (AbstractTriangle t: trianglelist)
 			{
 				if (!t.isWritable())
@@ -336,7 +336,7 @@ public class MeshWriter
 				}
 			}
 			nodeset.clear();
-			TObjectIntHashMap<AbstractVertex> nodeIndex=new TObjectIntHashMap<AbstractVertex>(nodelist.size());
+			TObjectIntHashMap<Vertex> nodeIndex=new TObjectIntHashMap<Vertex>(nodelist.size());
 			
 			// Create and fill the DOM
 			Document document=JCAEXMLWriter.createJcaeDocument();

@@ -447,7 +447,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	@Override
 	public Vertex origin()
 	{
-		return (Vertex) tri.vertex[next3[localNumber]];
+		return tri.vertex[next3[localNumber]];
 	}
 	
 	/**
@@ -458,7 +458,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	@Override
 	public Vertex destination()
 	{
-		return (Vertex) tri.vertex[prev3[localNumber]];
+		return tri.vertex[prev3[localNumber]];
 	}
 	
 	/**
@@ -469,7 +469,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	@Override
 	public Vertex apex()
 	{
-		return (Vertex) tri.vertex[localNumber];
+		return tri.vertex[localNumber];
 	}
 	
 	//  The following 3 methods change the underlying triangle.
@@ -838,7 +838,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * Warning: this method uses work[0], work[1] and work[2] temporary arrays.
 	 */
 	@Override
-	protected final boolean canCollapse(AbstractVertex n)
+	protected final boolean canCollapse(Vertex n)
 	{
 		// Be consistent with collapse()
 		if (hasAttributes(OUTER))
@@ -993,7 +993,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * Contracts an edge.
 	 *
 	 * @param m mesh
-	 * @param n the resulting vertex
+	 * @param v the resulting vertex
 	 * @return edge starting from <code>n</code> and with the same apex
 	 * @throws IllegalArgumentException if edge belongs to an outer triangle,
 	 * because there would be no valid return value.  User must then run this
@@ -1001,13 +1001,12 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @see Mesh#edgeCollapse
 	 */
 	@Override
-	protected final VirtualHalfEdge collapse(Mesh m, AbstractVertex n)
+	protected final VirtualHalfEdge collapse(Mesh m, Vertex v)
 	{
 		if (hasAttributes(OUTER))
 			throw new IllegalArgumentException("Cannot contract "+this);
 		Vertex o = origin();
 		Vertex d = destination();
-		Vertex v = (Vertex) n;
 		assert o.isWritable() && d.isWritable(): "Cannot contract "+this;
 		if (logger.isDebugEnabled())
 			logger.debug("contract ("+o+" "+d+")");
@@ -1326,18 +1325,17 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * Splits an edge.  This is the opposite of collapse.
 	 *
 	 * @param m  mesh
-	 * @param n  vertex being inserted
+	 * @param v  vertex being inserted
 	 * @return edge starting from origin and pointing to <code>n</code>
 	 * @see Mesh#vertexSplit
 	 */
 	@Override
-	protected final VirtualHalfEdge split(Mesh m, AbstractVertex n)
+	protected final VirtualHalfEdge split(Mesh m, Vertex v)
 	{
 		if (logger.isDebugEnabled())
-			logger.debug("split edge ("+origin()+" "+destination()+") by adding vertex "+n);
+			logger.debug("split edge ("+origin()+" "+destination()+") by adding vertex "+v);
 		if (m.hasNodes())
-			m.add(n);
-		Vertex v = (Vertex) n;
+			m.add(v);
 		if (!hasAttributes(NONMANIFOLD))
 		{
 			v.setLink(tri);

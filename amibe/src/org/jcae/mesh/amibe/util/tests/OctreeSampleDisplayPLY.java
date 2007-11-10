@@ -21,7 +21,6 @@
 package org.jcae.mesh.amibe.util.tests;
 
 import org.jcae.mesh.amibe.util.KdTree;
-import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.Mesh;
 import java.io.*;
 import java.util.StringTokenizer;
@@ -116,7 +115,7 @@ public class OctreeSampleDisplayPLY extends OctreeSample
 		for (int i = 0; i < nrNodes - nrDuplicates; i++)
 		{
 			System.arraycopy(coord, 3*i, xyz, 0, 3);
-			r.add((Vertex) mesh.createVertex(xyz));
+			r.add(mesh.createVertex(xyz));
 		}
 		//CheckCoordProcedure checkproc = new CheckCoordProcedure();
 		//r.walk(checkproc);

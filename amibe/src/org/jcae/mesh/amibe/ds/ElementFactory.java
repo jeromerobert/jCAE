@@ -38,24 +38,24 @@ public class ElementFactory implements ElementFactoryInterface
 		triangleTraitsBuilder = mtb.getTriangleTraitsBuilder();
 	}
 
-	public AbstractVertex createVertex(double u, double v)
+	public Vertex createVertex(double u, double v)
 	{
 		throw new RuntimeException();
 	}
 
-	public AbstractVertex createVertex(double x, double y, double z)
+	public Vertex createVertex(double x, double y, double z)
 	{
 		if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE | TriangleTraitsBuilder.VIRTUALHALFEDGE))
 			return new Vertex(vertexTraitsBuilder, x, y, z);
-		return new AbstractVertex(vertexTraitsBuilder, x, y, z);
+		return new Vertex(vertexTraitsBuilder, x, y, z);
 	}
 
-	public AbstractVertex createVertex(double [] x)
+	public Vertex createVertex(double [] x)
 	{
 		assert x.length == 3;
 		if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE | TriangleTraitsBuilder.VIRTUALHALFEDGE))
 			return new Vertex(vertexTraitsBuilder, x[0], x[1], x[2]);
-		return new AbstractVertex(vertexTraitsBuilder, x[0], x[1], x[2]);
+		return new Vertex(vertexTraitsBuilder, x[0], x[1], x[2]);
 	}
 
 	public AbstractHalfEdge createHalfEdge(TriangleHE t, byte orientation, byte attributes)
@@ -83,7 +83,7 @@ public class ElementFactory implements ElementFactoryInterface
 			return new AbstractTriangle(triangleTraitsBuilder);
 	}
 
-	public AbstractTriangle createTriangle(AbstractVertex v0, AbstractVertex v1, AbstractVertex v2)
+	public AbstractTriangle createTriangle(Vertex v0, Vertex v1, Vertex v2)
 	{
 		AbstractTriangle ret = createTriangle();
 		ret.vertex[0] = v0;
@@ -92,10 +92,10 @@ public class ElementFactory implements ElementFactoryInterface
 		return ret;
 	}
 
-	public AbstractTriangle createTriangle(AbstractVertex [] v)
+	public AbstractTriangle createTriangle(Vertex [] v)
 	{
 		AbstractTriangle ret = createTriangle();
-		ret.vertex = new AbstractVertex[v.length];
+		ret.vertex = new Vertex[v.length];
 		for (int i = 0; i < v.length; i++)
 			ret.vertex[i] = v[i];
 		return ret;

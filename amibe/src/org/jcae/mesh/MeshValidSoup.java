@@ -21,7 +21,7 @@
 package org.jcae.mesh;
 
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.AbstractVertex;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.oemm.*;
 import org.apache.log4j.Logger;
 
@@ -34,7 +34,7 @@ public class MeshValidSoup
 
 	public static class ComputeTriangleQuality implements RawStorage.SoupReaderInterface
 	{
-		AbstractVertex [] n = new AbstractVertex[3];
+		Vertex [] n = new Vertex[3];
 		int nrgroup = 0;
 		final int maxgroup = 5000;
 		final int split = 10;
