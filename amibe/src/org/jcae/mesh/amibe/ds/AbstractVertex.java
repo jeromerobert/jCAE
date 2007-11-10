@@ -51,7 +51,7 @@ public class AbstractVertex
 	/**
 	 * Creates a vertex for a 3D mesh.
 	 *
-	 * @param vtb  traits builder
+	 * @param builder  traits builder
 	 * @param x  first coordinate.
 	 * @param y  second coordinate.
 	 * @param z  third coordinate.

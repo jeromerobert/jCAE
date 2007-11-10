@@ -46,9 +46,9 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 	/**
 	 * Creates a <code>SwapEdge</code> instance.
 	 *
-	 * @param m  the <code>Mesh</code> instance to refine.
-	 * @param p  an edge is swapped only if the dot product of the two
-	 *           adjacent triangles is greater than this coefficient.
+	 * @param m  the <code>Mesh</code> instance to modify
+	 * @param options  map containing key-value pairs to modify algorithm
+	 *        behaviour.  Valid key is <code>angle</code>.
 	 */
 	public SwapEdge(final Mesh m, final Map<String, String> options)
 	{
