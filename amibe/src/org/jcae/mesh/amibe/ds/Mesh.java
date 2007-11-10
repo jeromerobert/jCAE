@@ -21,6 +21,7 @@
 package org.jcae.mesh.amibe.ds;
 
 import org.jcae.mesh.amibe.metrics.Matrix3D;
+import org.jcae.mesh.amibe.traits.Traits;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 import java.util.Collection;
@@ -78,10 +79,20 @@ import org.apache.log4j.Logger;
  * 
  */
 
-public class Mesh extends AbstractMesh implements Serializable
+public class Mesh implements Serializable
 {
 	private static Logger logger=Logger.getLogger(Mesh.class);
 	
+	/**
+	 * User-defined traits builder.
+	 */
+	protected final MeshTraitsBuilder traitsBuilder;
+
+	/**
+	 * User-defined traits
+	 */
+	protected final Traits traits;
+
 	/**
 	 * Vertex at infinite.
 	 */
@@ -147,11 +158,15 @@ public class Mesh extends AbstractMesh implements Serializable
 	/**
 	 * Creates an empty mesh with specific features.
 	 *
-	 * @param mtb mesh traits builder
+	 * @param builder mesh traits builder
 	 */
-	public Mesh(MeshTraitsBuilder mtb)
+	public Mesh(MeshTraitsBuilder builder)
 	{
-		super(mtb);
+		traitsBuilder = builder;
+		if (builder != null)
+			traits = builder.createTraits();
+		else
+			traits = null;
 		factory = new ElementFactory(traitsBuilder);
 		triangleList = traitsBuilder.getTriangles(traits);
 		nodeList = traitsBuilder.getNodes(traits);

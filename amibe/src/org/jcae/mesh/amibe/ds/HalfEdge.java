@@ -767,14 +767,13 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @see Mesh#edgeCollapse
 	 */
 	@Override
-	protected final HalfEdge collapse(AbstractMesh m, AbstractVertex n)
+	protected final HalfEdge collapse(Mesh m, AbstractVertex n)
 	{
 		if (hasAttributes(OUTER))
 			throw new IllegalArgumentException("Cannot contract "+this);
 		Vertex o = origin();
 		Vertex d = destination();
 		Vertex v = (Vertex) n;
-		Mesh mesh = (Mesh) m;
 		assert o.isWritable() && d.isWritable(): "Cannot contract "+this;
 		if (logger.isDebugEnabled())
 			logger.debug("contract ("+o+" "+d+")");
@@ -790,16 +789,16 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		deepCopyVertexLinks(o, d, v);
 		if (logger.isDebugEnabled())
 			logger.debug("new point: "+v);
-		if (mesh.hasNodes())
+		if (m.hasNodes())
 		{
-			mesh.remove(o);
-			mesh.remove(d);
-			mesh.add(v);
+			m.remove(o);
+			m.remove(d);
+			m.add(v);
 		}
 		if (!hasAttributes(NONMANIFOLD))
 		{
-			e.HEcollapseSameFan(mesh, v);
-			return HEcollapseSameFan(mesh, v);
+			e.HEcollapseSameFan(m, v);
+			return HEcollapseSameFan(m, v);
 		}
 		// Edge is non-manifold
 		assert e.hasAttributes(OUTER);
@@ -813,11 +812,11 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		{
 			HalfEdge h = (HalfEdge) ah;
 			assert !h.hasAttributes(OUTER);
-			h.sym.HEcollapseSameFan(mesh, v);
+			h.sym.HEcollapseSameFan(m, v);
 			if (h == this)
-				ret = h.HEcollapseSameFan(mesh, v);
+				ret = h.HEcollapseSameFan(m, v);
 			else
-				h.HEcollapseSameFan(mesh, v);
+				h.HEcollapseSameFan(m, v);
 		}
 		assert ret != null;
 		return ret;
@@ -1060,18 +1059,17 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @see Mesh#vertexSplit
 	 */
 	@Override
-	protected final HalfEdge split(AbstractMesh m, AbstractVertex n)
+	protected final HalfEdge split(Mesh m, AbstractVertex n)
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("split edge ("+origin()+" "+destination()+") by adding vertex "+n);
-		Mesh mesh = (Mesh) m;
-		if (mesh.hasNodes())
-			mesh.add(n);
+		if (m.hasNodes())
+			m.add(n);
 		Vertex v = (Vertex) n;
 		if (!hasAttributes(NONMANIFOLD))
 		{
 			v.setLink(tri);
-			HalfEdge g = HEsplitSameFan(mesh, v);
+			HalfEdge g = HEsplitSameFan(m, v);
 			if (g.hasAttributes(OUTER))
 			{
 				// Remove links between t2 and t4
@@ -1106,7 +1104,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		for (AbstractHalfEdge ah: copy)
 		{
 			HalfEdge f = (HalfEdge) ah;
-			HalfEdge g = f.HEsplitSameFan(mesh, v);
+			HalfEdge g = f.HEsplitSameFan(m, v);
 			if (f.origin() == o)
 			{
 				hOuter[2*cnt] = f.sym;

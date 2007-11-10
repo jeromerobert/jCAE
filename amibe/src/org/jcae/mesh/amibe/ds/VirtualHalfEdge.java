@@ -1001,14 +1001,13 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @see Mesh#edgeCollapse
 	 */
 	@Override
-	protected final VirtualHalfEdge collapse(AbstractMesh m, AbstractVertex n)
+	protected final VirtualHalfEdge collapse(Mesh m, AbstractVertex n)
 	{
 		if (hasAttributes(OUTER))
 			throw new IllegalArgumentException("Cannot contract "+this);
 		Vertex o = origin();
 		Vertex d = destination();
 		Vertex v = (Vertex) n;
-		Mesh mesh = (Mesh) m;
 		assert o.isWritable() && d.isWritable(): "Cannot contract "+this;
 		if (logger.isDebugEnabled())
 			logger.debug("contract ("+o+" "+d+")");
@@ -1027,16 +1026,16 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		deepCopyVertexLinks(o, d, v);
 		if (logger.isDebugEnabled())
 			logger.debug("new point: "+v);
-		if (mesh.hasNodes())
+		if (m.hasNodes())
 		{
-			mesh.remove(o);
-			mesh.remove(d);
-			mesh.add(v);
+			m.remove(o);
+			m.remove(d);
+			m.add(v);
 		}
 		if (!hasAttributes(NONMANIFOLD))
 		{
-			work[2].VHcollapseSameFan(mesh, v);
-			return VHcollapseSameFan(mesh, v);
+			work[2].VHcollapseSameFan(m, v);
+			return VHcollapseSameFan(m, v);
 		}
 		// Edge is non-manifold
 		assert work[2].hasAttributes(OUTER);
@@ -1058,9 +1057,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			assert !work[2].hasAttributes(OUTER);
 			work[2].sym();
 			assert work[2].hasAttributes(OUTER);
-			work[2].VHcollapseSameFan(mesh, v);
+			work[2].VHcollapseSameFan(m, v);
 			work[2].bind(t, l);
-			work[2].VHcollapseSameFan(mesh, v);
+			work[2].VHcollapseSameFan(m, v);
 			if (t == tri)
 			{
 				ret = work[0].tri;
@@ -1332,18 +1331,17 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @see Mesh#vertexSplit
 	 */
 	@Override
-	protected final VirtualHalfEdge split(AbstractMesh m, AbstractVertex n)
+	protected final VirtualHalfEdge split(Mesh m, AbstractVertex n)
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("split edge ("+origin()+" "+destination()+") by adding vertex "+n);
-		Mesh mesh = (Mesh) m;
-		if (mesh.hasNodes())
-			mesh.add(n);
+		if (m.hasNodes())
+			m.add(n);
 		Vertex v = (Vertex) n;
 		if (!hasAttributes(NONMANIFOLD))
 		{
 			v.setLink(tri);
-			VHsplitSameFan(mesh, v);
+			VHsplitSameFan(m, v);
 			if (work[1].hasAttributes(OUTER))
 			{
 				// Remove links between t2 and t4
@@ -1382,7 +1380,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			TriangleVH t = entry.getKey();
 			int l = entry.getValue().intValue();
 			work[3].bind(t, l);
-			work[3].VHsplitSameFan(mesh, v);
+			work[3].VHsplitSameFan(m, v);
 			if (work[3].origin() == o)
 			{
 				symOTri(work[3], hOuter[2*cnt]);

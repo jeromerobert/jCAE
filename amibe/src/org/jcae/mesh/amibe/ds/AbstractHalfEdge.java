@@ -117,21 +117,21 @@ import java.util.Iterator;
  *       inserted into mesh.
  *       <p align="center"><img src="doc-files/AbstractHalfEdge-4.png" alt="[Image showing edge swap]"/></p>
  *   </dd>
- *   <dt><a href="#split(org.jcae.mesh.amibe.ds.AbstractMesh, org.jcae.mesh.amibe.ds.AbstractVertex)"><code>split</code></a></dt>
+ *   <dt><a href="#split(org.jcae.mesh.amibe.ds.Mesh, org.jcae.mesh.amibe.ds.AbstractVertex)"><code>split</code></a></dt>
  *   <dd>Splits a vertex to create a new edge.  In figure below, <em>A</em> is duplicated into <em>N</em>,
  *       and two new triangles are created.  Return value has the same original and apical vertices as
  *       original edge, and its destination vertex is <em>N</em>.
  *       <p><strong>Warning:</strong> This method does not check that new triangles are not inverted.</p>
  *       <p align="center"><img src="doc-files/AbstractHalfEdge-3.png" alt="[Image showing vertex split]"/></p>
  *   </dd>
- *   <dt><a href="#collapse(org.jcae.mesh.amibe.ds.AbstractMesh, org.jcae.mesh.amibe.ds.AbstractVertex)"><code>collapse</code></a></dt>
+ *   <dt><a href="#collapse(org.jcae.mesh.amibe.ds.Mesh, org.jcae.mesh.amibe.ds.AbstractVertex)"><code>collapse</code></a></dt>
  *   <dd>Collapses an edge into a new point.  Triangles, edges and vertices are removed from mesh
  *       and replaced by new objects.  New point may be origin or destination points, or a new point.
  *       Return value has the new point as its origin, and its apex is the same as in original edge.
  *       When <em>N</em> is <em>A</em>,
- *       <code><a href="#collapse(org.jcae.mesh.amibe.ds.AbstractMesh, org.jcae.mesh.amibe.ds.AbstractVertex)">collapse</a></code>
+ *       <code><a href="#collapse(org.jcae.mesh.amibe.ds.Mesh, org.jcae.mesh.amibe.ds.AbstractVertex)">collapse</a></code>
  *       is the opposite of 
- *       <code><a href="#split(org.jcae.mesh.amibe.ds.AbstractMesh, org.jcae.mesh.amibe.ds.AbstractVertex)">split</a></code>.
+ *       <code><a href="#split(org.jcae.mesh.amibe.ds.Mesh, org.jcae.mesh.amibe.ds.AbstractVertex)">split</a></code>.
  *       <p><strong>Warning:</strong> This method does not check that triangles are not inverted.
  *       Method <a href="#canCollapse(org.jcae.mesh.amibe.ds.AbstractVertex)"><code>canCollapse</code></a>
  *       <strong>must</strong> have been called to ensure that this edge
@@ -601,7 +601,7 @@ public abstract class AbstractHalfEdge
 	 * method against symmetric edge, this is not done automatically.
 	 * @see Mesh#edgeCollapse
 	 */
-	protected abstract AbstractHalfEdge collapse(AbstractMesh m, AbstractVertex n);
+	protected abstract AbstractHalfEdge collapse(Mesh m, AbstractVertex n);
 
 	/**
 	 * Splits an edge.  This is the opposite of {@link #collapse}.
@@ -611,7 +611,7 @@ public abstract class AbstractHalfEdge
 	 * @return edge starting from <code>n</code> and pointing to original apex
 	 * @see Mesh#vertexSplit
 	 */
-	protected abstract AbstractHalfEdge split(AbstractMesh m, AbstractVertex n);
+	protected abstract AbstractHalfEdge split(Mesh m, AbstractVertex n);
 
 	/**
 	 * Sets the edge tied to this object.
