@@ -1,3 +1,11 @@
+2007-11-11 00:13 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/OEMMBehavior.java
+	  src/org/jcae/viewer3d/OEMMViewer.java: Files are removed
+	and put into a new viewer3d-amibe module.  This way there is
+	no dependency between viewer3d and amibe modules, and
+	build.properties does not have to be tweaked when compiling.
+
 2007-11-10 22:32 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/OEMMBehavior.java

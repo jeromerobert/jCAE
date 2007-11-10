@@ -1,0 +1,10 @@
+2007-11-11 00:13 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/OEMMBehavior.java
+	  src/org/jcae/viewer3d/OEMMViewer.java
+	  src/org/jcae/mesh/MeshOEMMView.java
+	  src/org/jcae/mesh/MeshBoraViewer3d.java
+	  src/org/jcae/mesh/MeshOEMMViewer3d.java
+	  src/org/jcae/mesh/MeshOEMMCoarseViewer.java: New viewer3d-amibe
+	module to remove dependencies between viewer3d and amibe modules.
+

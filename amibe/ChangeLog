@@ -1,3 +1,13 @@
+Sun Nov 11 01:45:43 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/MeshOEMMView.java
+	  src/org/jcae/mesh/MeshBoraViewer3d.java
+	  src/org/jcae/mesh/MeshOEMMViewer3d.java
+	  src/org/jcae/mesh/MeshOEMMCoarseViewer.java: Files are removed
+	and put into a new viewer3d-amibe module.  This way there is no
+	dependency between viewer3d and amibe modules, and build.properties
+	does not have to be tweaked when compiling.
+
 Sat Nov 10 19:22:37 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/AbstractMesh.java: Class removed, it is

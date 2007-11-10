@@ -12,7 +12,7 @@
 		<propertyfile file="${classes.dir}/timestamp.properties">
 			<entry key="build.time" type="date" pattern="yyyy-MM-dd HH:mm:ss" value="now" />
 		</propertyfile>
-		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}" excludes="${test.packages} ${jcae.junit.packages} ${jcae.extra.viewer3d.packages}">
+		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}" excludes="${test.packages} ${jcae.junit.packages}">
 			<compilerarg line="${compiler.arg}"/>
 			<classpath>
 				<pathelement location="${log4j.jar}"/>
@@ -28,21 +28,9 @@
 				<pathelement location="${trove.jar}"/>
 			</classpath>
 		</javac>
-		<antcall target="compile-extra-viewer3d"/>
 	</target>
 
-	<target name="compile-extra-viewer3d" depends="init" description="Compile jcae with viewer3d bindings" if="build.extra.viewer3d">
-		<mkdir dir="${classes.dir}"/>
-		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}" includes="${jcae.extra.viewer3d.packages}">
-			<compilerarg line="${compiler.arg}"/>
-			<classpath>
-				<pathelement location="${log4j.jar}"/>
-				<pathelement location="${jcae-viewer3d.jar}"/>
-			</classpath>
-		</javac>
-	</target>
-
-	<target name="compile-test" depends="init" description="Compile the tests" if="build.tests">
+	<target name="compile-test" depends="init" description="Compile the tests">
 		<mkdir dir="${classes.dir}"/>
 		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}" includes="${test.packages}">
 			<compilerarg line="${compiler.arg}"/>
@@ -53,7 +41,7 @@
 		</javac>
 	</target>
 
-	<target name="compile-junit" depends="init" description="Compile junit tests">
+	<target name="compile-junit" depends="init,jar" description="Compile junit tests">
 		<mkdir dir="${classes.dir}"/>
 		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}" includes="${jcae.junit.packages}">
 			<compilerarg line="${compiler.arg}"/>
@@ -88,9 +76,7 @@
 		</junit>
 	</target>
 
-	<target name="jar" depends="jar-main,jar-test" description="jar"/>
-	
-	<target name="jar-main" depends="compile" description="jar">
+	<target name="jar" depends="compile" description="jar">
 		<mkdir dir="lib"/>
 		<jar basedir="${classes.dir}" excludes="${test.packages} ${jcae.junit.packages} **/occ/*" compress="true" jarfile="${jar}">
 			<manifest>
@@ -107,22 +93,14 @@
 		</jar>
 	</target>
 	
-	<target name="jar-test" depends="compile-test" description="jar" if="build.tests">
+	<target name="jar-test" depends="compile-test" description="jar">
 		<mkdir dir="lib"/>
-		<jar basedir="${classes.dir}" includes="${test.packages}" compress="true" jarfile="${test.jar}">
-			<manifest>
-				<attribute name="Class-Path" value="${test.jar.dependencies}"/>
-			</manifest>
-		</jar>
+		<jar basedir="${classes.dir}" includes="${test.packages}" compress="true" jarfile="${test.jar}"/>
 	</target>
 	
 	<target name="jar-junit" depends="compile-junit" description="jar">
 		<mkdir dir="lib"/>
-		<jar basedir="${classes.dir}" includes="${jcae.junit.packages}" compress="true" jarfile="${jcae.junit.jar}">
-			<manifest>
-				<attribute name="Class-Path" value="${test.jar.dependencies}"/>
-			</manifest>
-		</jar>
+		<jar basedir="${classes.dir}" includes="${jcae.junit.packages}" compress="true" jarfile="${jcae.junit.jar}"/>
 	</target>
 	
 	<target name="all" depends="dist-bin" description="Build everything."/>
@@ -133,7 +111,6 @@
 			<fileset dir="${src.dir}">
 				<include name="**/*.java"/>
 				<exclude name="**/*Test.java"/>
-				<exclude name="${jcae.extra.viewer3d.packages}"/>
 			</fileset>
 			<tag name="todo" scope="all" description="To do:" />
 			<classpath>
