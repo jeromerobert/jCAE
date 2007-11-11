@@ -214,20 +214,20 @@ public class Metric2D
 	}
 	
 	/**
-	 * Returns the distance between two points with this metrics.
+	 * Returns square distance between two points with this metrics.
 	 *
 	 * @param p1  coordinates of the first node
 	 * @param p2  coordinates of the second node
-	 * @return the distance between two points with this metrics.
+	 * @return square distance between two points with this metrics.
 	 */
-	public double distance(double []p1, double []p2)
+	public double distance2(double [] p1, double [] p2)
 	{
 		double u = p2[0] - p1[0];
 		double v = p2[1] - p1[1];
 		double temp = E * u * u + 2.0 * F * u * v + G * v * v;
 		if (temp < 0.0)
 			temp = 0.0;
-		return Math.sqrt(temp);
+		return temp;
 	}
 	
 	public String stringCoefs()

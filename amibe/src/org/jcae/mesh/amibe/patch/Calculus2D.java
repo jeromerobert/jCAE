@@ -38,17 +38,21 @@ public class Calculus2D implements Calculus
 	}
 
 	/**
-	 * Returns the 2D distance to another <code>Vertex2D</code> instance.
+	 * Returns square distance to another <code>Vertex2D</code> instance.
 	 *
 	 * @param start  the first node
 	 * @param end  the node to which distance is computed.
 	 * @param vm  the node at which metrics is evaluated (unused)
-	 * @return the distance between the two nodes.
+	 * @return square distance between the two nodes.
 	 */
 	@Override
-	public double distance(Vertex2D start, Vertex2D end, Vertex2D vm)
+	public double distance2(Vertex2D start, Vertex2D end, Vertex2D vm)
 	{
-		return distance(start, end);
+		double [] x0 = start.getUV();
+		double [] x1 = end.getUV();
+		double dx = x0[0] - x1[0];
+		double dy = x0[1] - x1[1];
+		return dx*dx + dy*dy;
 	}
 	
 	/**
@@ -61,11 +65,7 @@ public class Calculus2D implements Calculus
 	@Override
 	public double distance(Vertex2D start, Vertex2D end)
 	{
-		double [] x0 = start.getUV();
-		double [] x1 = end.getUV();
-		double dx = x0[0] - x1[0];
-		double dy = x0[1] - x1[1];
-		return Math.sqrt(dx*dx + dy*dy);
+		return Math.sqrt(distance2(start, end, null));
 	}
 	
 	/**

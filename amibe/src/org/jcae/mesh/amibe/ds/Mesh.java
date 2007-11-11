@@ -784,9 +784,9 @@ public class Mesh implements Serializable
 	}
 	
 	/**
-	 * Returns distance between 2 vertices.
+	 * Returns square distance between 2 vertices.
 	 */
-	public double distance(Vertex start, Vertex end, Vertex vm)
+	public double distance2(Vertex start, Vertex end, Vertex vm)
 	{
 		double [] x1 = start.getUV();
 		double [] x2 = end.getUV();
@@ -794,7 +794,7 @@ public class Mesh implements Serializable
 		double dx = x1[0] - x2[0];
 		double dy = x1[1] - x2[1];
 		double dz = x1[2] - x2[2];
-		return Math.sqrt(dx*dx + dy*dy + dz*dz);
+		return dx*dx + dy*dy + dz*dz;
 	}
 	
 	public double radius2d(Vertex v)

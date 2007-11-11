@@ -486,17 +486,17 @@ public class Mesh2D extends Mesh
 	}
 
 	/**
-	 * Returns the Riemannian distance between nodes.
+	 * Returns Riemannian square distance between nodes.
 	 *
 	 * @param start  the start node
 	 * @param end  the end node
 	 * @param vm  the vertex on which metrics is evaluated
-	 * @return the distance between nodes
+	 * @return square distance between nodes
 	 */
 	@Override
-	public double distance(Vertex start, Vertex end, Vertex vm)
+	public double distance2(Vertex start, Vertex end, Vertex vm)
 	{
-		return compGeomCurrent.distance((Vertex2D) start, (Vertex2D) end, (Vertex2D) vm);
+		return compGeomCurrent.distance2((Vertex2D) start, (Vertex2D) end, (Vertex2D) vm);
 	}
 	
 	/**

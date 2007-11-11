@@ -630,11 +630,11 @@ public class KdTree
 		
 		Vertex vQ = (Vertex) current.subCell[0];
 		Vertex ret = vQ;
-		double retdist = mesh.distance(v, vQ, v);
+		double retdist = mesh.distance2(v, vQ, v);
 		for (int i = 1; i < current.nItems; i++)
 		{
 			vQ = (Vertex) current.subCell[i];
-			double d = mesh.distance(v, vQ, v);
+			double d = mesh.distance2(v, vQ, v);
 			if (d < retdist)
 			{
 				retdist = d;
@@ -681,7 +681,7 @@ public class KdTree
 				for (int i = 0; i < cellStack[l].nItems; i++)
 				{
 					Vertex vQ = (Vertex) cellStack[l].subCell[i];
-					double d = mesh.distance(v, vQ, v);
+					double d = mesh.distance2(v, vQ, v);
 					if (d < dist || dist < 0.0)
 					{
 						dist = d;
@@ -728,8 +728,8 @@ public class KdTree
 			nearestVertex = v;
 			fromVertex = from;
 			i2d = 1.005 * x0[dimension] * mesh.radius2d(fromVertex);
-			dist = mesh.distance(fromVertex, nearestVertex, fromVertex);
-			idist = (int) (dist * i2d);
+			dist = mesh.distance2(fromVertex, nearestVertex, fromVertex);
+			idist = (int) (Math.sqrt(dist) * i2d);
 			if (idist > Integer.MAX_VALUE/2)
 				idist = Integer.MAX_VALUE/2;
 		}
@@ -746,12 +746,12 @@ public class KdTree
 				for (int i = 0; i < self.nItems; i++)
 				{
 					Vertex vtest = (Vertex) self.subCell[i];
-					double retdist = mesh.distance(fromVertex, vtest, fromVertex);
+					double retdist = mesh.distance2(fromVertex, vtest, fromVertex);
 					if (retdist < dist)
 					{
 						dist = retdist;
 						nearestVertex = vtest;
-						idist = (int) (dist * i2d);
+						idist = (int) (Math.sqrt(dist) * i2d);
 						if (idist > Integer.MAX_VALUE/2)
 							idist = Integer.MAX_VALUE/2;
 					}
@@ -800,7 +800,7 @@ public class KdTree
 			nearestVertex = v;
 			fromVertex = from;
 			mesh = m;
-			dist = mesh.distance(fromVertex, v, fromVertex);
+			dist = mesh.distance2(fromVertex, v, fromVertex);
 		}
 		@Override
 		public int action(Object o, int s, final int [] i0)
@@ -812,7 +812,7 @@ public class KdTree
 				for (int i = 0; i < self.nItems; i++)
 				{
 					Vertex vtest = (Vertex) self.subCell[i];
-					double retdist = mesh.distance(fromVertex, vtest, fromVertex);
+					double retdist = mesh.distance2(fromVertex, vtest, fromVertex);
 					if (retdist < dist)
 					{
 						dist = retdist;
