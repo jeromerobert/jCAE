@@ -72,6 +72,7 @@ public class EnforceAbsDeflection
 		boolean redo = false;
 		int niter = mesh.getTriangles().size();
 		double defl = Metric3D.getDeflection();
+		Vertex2D c = (Vertex2D) mesh.createVertex(0.0, 0.0);
 		do
 		{
 			redo = false;
@@ -80,7 +81,8 @@ public class EnforceAbsDeflection
 			{
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
-				double uv[] = Vertex2D.centroid(mesh, (Vertex2D[]) t.vertex).getUV();
+				c.centroid((Vertex2D[]) t.vertex);
+				double uv[] = c.getUV();
 				double [] xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
 				// mesh.createVertex() cannot be used because mesh is a
 				// Mesh2D instance and we want to create 3D instances.
@@ -115,7 +117,8 @@ public class EnforceAbsDeflection
 			{
 				if (!mesh.getTriangles().contains(t) || t.hasAttributes(AbstractHalfEdge.BOUNDARY))
 					continue;
-				double uv[] = Vertex2D.centroid(mesh, (Vertex2D[]) t.vertex).getUV();
+				c.centroid((Vertex2D[]) t.vertex);
+				double uv[] = c.getUV();
 				Vertex2D v = (Vertex2D) mesh.createVertex(uv[0], uv[1]);
 				VirtualHalfEdge2D vt = v.getSurroundingOTriangle(mesh);
 				if (vt.split3(mesh, v, false))

@@ -205,18 +205,22 @@ public class Insertion
 				}
 			}
 			//  Try to insert triangle centroid after all other points.
+			Vertex2D c = null;
 			for (Iterator<Triangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
 				TriangleVH t = (TriangleVH) it.next();
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
-				Vertex2D v = Vertex2D.centroid(mesh, (Vertex2D[]) t.vertex);
-				Vertex2D n = (Vertex2D) mesh.getQuadTree().getNearestVertex(mesh, v);
-				assert n == mesh.getQuadTree().getNearestVertexDebug(mesh, v);
-				if (mesh.compGeom().distance(v, n) > minlen)
+				if (c == null)
+					c = (Vertex2D) mesh.createVertex(0.0, 0.0);
+				c.centroid((Vertex2D[]) t.vertex);
+				Vertex2D n = (Vertex2D) mesh.getQuadTree().getNearestVertex(mesh, c);
+				assert n == mesh.getQuadTree().getNearestVertexDebug(mesh, c);
+				if (mesh.compGeom().distance(c, n) > minlen)
 				{
-					mesh.getQuadTree().add(v);
-					nodes.add(v);
+					mesh.getQuadTree().add(c);
+					nodes.add(c);
+					c = null;
 				}
 				else
 					tooNearNodes++;

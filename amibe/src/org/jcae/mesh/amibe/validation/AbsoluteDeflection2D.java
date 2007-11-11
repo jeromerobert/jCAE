@@ -34,10 +34,12 @@ public class AbsoluteDeflection2D extends QualityProcedure
 	private double [] v2 = new double[3];
 	private double [] v3 = new double[3];
 	private double [] v4 = new double[3];
+	private final Vertex2D c;
 	
 	public AbsoluteDeflection2D(Mesh2D m)
 	{
 		mesh = m;
+		c = (Vertex2D) mesh.createVertex(0.0, 0.0);
 		setType(QualityProcedure.FACE);
 	}
 	
@@ -47,7 +49,8 @@ public class AbsoluteDeflection2D extends QualityProcedure
 		if (!(o instanceof Triangle))
 			throw new IllegalArgumentException();
 		Triangle t = (Triangle) o;
-		double [] uv = Vertex2D.centroid(mesh, (Vertex2D[]) t.vertex).getUV();
+		c.centroid((Vertex2D[]) t.vertex);
+		double [] uv = c.getUV();
 		double [] xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
 		p[3] = mesh.createVertex(xyz);
 		for (int i = 0; i < 3; i++)

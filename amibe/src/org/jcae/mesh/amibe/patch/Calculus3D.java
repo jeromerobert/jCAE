@@ -124,7 +124,6 @@ public class Calculus3D implements Calculus
 	@Override
 	public double distance2(Vertex2D start, Vertex2D end, Vertex2D vm)
 	{
-		double ret;
 		Metric2D m = vm.getMetrics(mesh);
 		return m.distance2(start.getUV(), end.getUV());
 	}
