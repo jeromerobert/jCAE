@@ -95,6 +95,8 @@ public class Insertion
 	public void compute()
 	{
 		int maxNodes = 0;
+		int tooNearNodes = 0;
+		int kdtreeSplit = 0;
 		logger.debug(" Insert inner nodes");
 		ArrayList<Vertex2D> nodes = new ArrayList<Vertex2D>();
 		ArrayList<Vertex2D> triNodes = new ArrayList<Vertex2D>();
@@ -194,6 +196,8 @@ public class Insertion
 							mesh.getQuadTree().add(v);
 							nodes.add(v);
 						}
+						else
+							tooNearNodes++;
 						index += prime;
 						if (index >= imax)
 							index -= imax;
@@ -214,17 +218,19 @@ public class Insertion
 					mesh.getQuadTree().add(v);
 					nodes.add(v);
 				}
+				else
+					tooNearNodes++;
 			}
+			if (nodes.isEmpty())
+				break;
 			for (Iterator<Vertex2D> it = nodes.iterator(); it.hasNext(); )
 			{
 				Vertex2D v = it.next();
-				//  These vertiuces are not bound to any triangles, so
+				//  These vertices are not bound to any triangles, so
 				//  they must be removed, otherwise getSurroundingOTriangle
 				//  may return a null pointer.
 				mesh.getQuadTree().remove(v);
 			}
-			if (nodes.isEmpty())
-				break;
 			//  Process in pseudo-random order
 			int prime = PrimeFinder.nextPrime(maxNodes);
 			int imax = nodes.size();
@@ -247,7 +253,15 @@ public class Insertion
 			if (skippedNodes == nodes.size())
 				break;
 			if (logger.isDebugEnabled())
+			{
 				logger.debug((nodes.size()-skippedNodes)+" nodes added");
+				if (tooNearNodes > 0)
+					logger.debug(tooNearNodes+" nodes are too near from existing vertices and cannot be inserted");
+				if (skippedNodes > 0)
+					logger.debug(skippedNodes+" nodes cannot be inserted");
+				if (kdtreeSplit > 0)
+					logger.debug(kdtreeSplit+" quadtree cells split");
+			}
 		}
 	}
 	
