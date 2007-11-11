@@ -362,11 +362,13 @@ public class KdTree
 	 * Add a vertex to the kd-tree.
 	 *
 	 * @param v  the vertex being added.
+	 * @return <code>true</code> if cell was full and had to be split, <code>false</code> otherwise.
 	 */
-	public void add(Vertex v)
+	public boolean add(Vertex v)
 	{
 		if (nCells == 0)
 			throw new RuntimeException("KdTree.setup() must be called before KdTree.add()");
+		boolean ret = false;
 		Cell current = root;
 		int s = gridSize;
 		int [] ij = new int[dimension];
@@ -394,6 +396,7 @@ public class KdTree
 		{
 			s >>= 1;
 			assert s > 0;
+			ret = true;
 			Cell [] newSubQuads = new Cell[nrSub];
 			//  Move points to their respective subcells.
 			for (int i = 0; i < BUCKETSIZE; i++)
@@ -412,7 +415,7 @@ public class KdTree
 				target.nItems++;
 			}
 			current.subCell = newSubQuads;
-			//  current will point to another cell, afjust it now.
+			//  current will point to another cell, adjust it now.
 			current.nItems = - BUCKETSIZE - 1;
 			int ind = indexSubCell(ij, s);
 			if (null == current.subCell[ind])
@@ -427,6 +430,7 @@ public class KdTree
 			current.subCell = new Vertex[BUCKETSIZE];
 		current.subCell[current.nItems] = v;
 		current.nItems++;
+		return ret;
 	}
 	
 	/**
