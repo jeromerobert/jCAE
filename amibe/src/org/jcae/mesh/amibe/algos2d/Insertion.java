@@ -97,6 +97,7 @@ public class Insertion
 		int maxNodes = 0;
 		int tooNearNodes = 0;
 		int kdtreeSplit = 0;
+		int checked = 0;
 		logger.debug(" Insert inner nodes");
 		ArrayList<Vertex2D> nodes = new ArrayList<Vertex2D>();
 		ArrayList<Vertex2D> triNodes = new ArrayList<Vertex2D>();
@@ -173,6 +174,7 @@ public class Insertion
 					}
 					if (nrNodes > nrTriNodes)
 						nrTriNodes = nrNodes;
+					checked++;
 				}
 				if (nrTriNodes > maxNodes)
 					maxNodes = nrTriNodes;
@@ -254,11 +256,13 @@ public class Insertion
 				if (index >= imax)
 					index -= imax;
 			}
-			if (skippedNodes == nodes.size())
-				break;
 			if (logger.isDebugEnabled())
 			{
-				logger.debug((nodes.size()-skippedNodes)+" nodes added");
+				logger.debug("Mesh now contains "+mesh.getTriangles().size()+" triangles");
+				if (checked > 0)
+					logger.debug(checked+" edges checked");
+				if (imax - skippedNodes > 0)
+					logger.debug((imax-skippedNodes)+" nodes added");
 				if (tooNearNodes > 0)
 					logger.debug(tooNearNodes+" nodes are too near from existing vertices and cannot be inserted");
 				if (skippedNodes > 0)
@@ -266,6 +270,8 @@ public class Insertion
 				if (kdtreeSplit > 0)
 					logger.debug(kdtreeSplit+" quadtree cells split");
 			}
+			if (skippedNodes == nodes.size())
+				break;
 		}
 	}
 	
