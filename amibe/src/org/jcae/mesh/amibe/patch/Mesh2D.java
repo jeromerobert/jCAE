@@ -56,6 +56,9 @@ public class Mesh2D extends Mesh
 	//  Stack of methods to compute geometrical values
 	private transient final Stack<Calculus> compGeomStack = new Stack<Calculus>();
 	
+	//  Current top value of compGeomStack
+	private transient Calculus compGeomCurrent = null;
+	
 	// Utility class to improve debugging output
 	private static class OuterVertex2D extends Vertex2D
 	{
@@ -376,11 +379,12 @@ public class Mesh2D extends Mesh
 	public void pushCompGeom(int i)
 	{
 		if (i == 2)
-			compGeomStack.push(new Calculus2D(this));
+			compGeomCurrent = new Calculus2D(this);
 		else if (i == 3)
-			compGeomStack.push(new Calculus3D(this));
+			compGeomCurrent = new Calculus3D(this);
 		else
 			throw new java.lang.IllegalArgumentException("pushCompGeom argument must be either 2 or 3, current value is: "+i);
+		compGeomStack.push(compGeomCurrent);
 		clearAllMetrics();
 	}
 	
@@ -398,6 +402,10 @@ public class Mesh2D extends Mesh
 		Calculus ret = compGeomStack.pop();
 		if (!compGeomStack.empty() && !ret.getClass().equals(compGeomStack.peek().getClass()))
 			clearAllMetrics();
+		if (compGeomStack.empty())
+			compGeomCurrent = null;
+		else
+			compGeomCurrent = compGeomStack.peek();
 		return ret;
 	}
 	
@@ -415,7 +423,7 @@ public class Mesh2D extends Mesh
 		throws RuntimeException
 	{
 		Calculus ret = compGeomStack.pop();
-		if (compGeomStack.size() > 0 && !ret.getClass().equals(compGeomStack.peek().getClass()))
+		if (!compGeomStack.empty() && !ret.getClass().equals(compGeomStack.peek().getClass()))
 			clearAllMetrics();
 		if (i == 2)
 		{
@@ -429,6 +437,10 @@ public class Mesh2D extends Mesh
 		}
 		else
 			throw new java.lang.IllegalArgumentException("pushCompGeom argument must be either 2 or 3, current value is: "+i);
+		if (compGeomStack.empty())
+			compGeomCurrent = null;
+		else
+			compGeomCurrent = compGeomStack.peek();
 		return ret;
 	}
 	
@@ -439,9 +451,7 @@ public class Mesh2D extends Mesh
 	 */
 	public Calculus compGeom()
 	{
-		if (compGeomStack.empty())
-			return null;
-		return compGeomStack.peek();
+		return compGeomCurrent;
 	}
 	
 	private static class ClearAllMetricsProcedure implements KdTreeProcedure
@@ -486,7 +496,7 @@ public class Mesh2D extends Mesh
 	@Override
 	public double distance(Vertex start, Vertex end, Vertex vm)
 	{
-		return compGeom().distance((Vertex2D) start, (Vertex2D) end, (Vertex2D) vm);
+		return compGeomCurrent.distance((Vertex2D) start, (Vertex2D) end, (Vertex2D) vm);
 	}
 	
 	/**
@@ -501,7 +511,7 @@ public class Mesh2D extends Mesh
 	@Override
 	public double radius2d(Vertex v)
 	{
-		return compGeom().radius2d((Vertex2D) v);
+		return compGeomCurrent.radius2d((Vertex2D) v);
 	}
 	
 	/**

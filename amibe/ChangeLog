@@ -1,3 +1,9 @@
+Sun Nov 11 22:53:19 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/patch/Mesh2D.java: Store compGeomStack
+	top value into a private member to avoid many calls to
+	compGeomStack.peek().
+
 Sun Nov 11 01:45:43 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/MeshOEMMView.java
