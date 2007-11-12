@@ -275,11 +275,36 @@ public class Triangle implements Serializable
 		}
 
 		/**
+		 * Add the current triangle to the end of the list.  This method
+		 * does nothing if this element is already linked.
+		 */
+		public final void addAllowDuplicates(Triangle o)
+		{
+			assert listTail != null;
+			assert listTail.listNext == listSentinel : listTail;
+			if (o.listNext == null)
+			{
+				listTail.listNext = o;
+				listTail = o;
+				o.listNext = listSentinel;
+				listSize++;
+			}
+		}
+
+		/**
 		 * Check whether this element appears in the list.
 		 */
 		public boolean contains(Triangle o)
 		{
 			return o.listNext != null;
+		}
+	
+		/**
+		 * Return list size.
+		 */
+		public int size()
+		{
+			return listSize;
 		}
 	
 		/**
