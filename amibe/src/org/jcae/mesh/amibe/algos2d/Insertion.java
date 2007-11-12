@@ -94,6 +94,7 @@ public class Insertion
 	 */
 	public void compute()
 	{
+		int nrIter = 0;
 		int maxNodes = 0;
 		int tooNearNodes = 0;
 		int kdtreeSplit = 0;
@@ -105,6 +106,7 @@ public class Insertion
 		VirtualHalfEdge2D ot = new VirtualHalfEdge2D();
 		while (true)
 		{
+			nrIter++;
 			maxNodes = 0;
 			nodes.clear();
 			for(Iterator<Triangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
@@ -273,6 +275,7 @@ public class Insertion
 			if (skippedNodes == nodes.size())
 				break;
 		}
+		logger.debug("Number of iterations to insert all nodes: "+nrIter);
 	}
 	
 }
