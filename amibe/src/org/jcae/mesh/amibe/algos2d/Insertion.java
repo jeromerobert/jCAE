@@ -95,7 +95,6 @@ public class Insertion
 	public void compute()
 	{
 		int nrIter = 0;
-		int maxNodes = 0;
 		int tooNearNodes = 0;
 		int kdtreeSplit = 0;
 		int checked = 0;
@@ -104,10 +103,34 @@ public class Insertion
 		ArrayList<Vertex2D> triNodes = new ArrayList<Vertex2D>();
 		VirtualHalfEdge2D sym = new VirtualHalfEdge2D();
 		VirtualHalfEdge2D ot = new VirtualHalfEdge2D();
+		// We do not want to split boundary edges.
+		for(Iterator<Triangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
+		{
+			TriangleVH t = (TriangleVH) it.next();
+			if (t.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+			ot.bind(t);
+			for (int i = 0; i < 3; i++)
+			{
+				ot.next();
+				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
+					ot.setAttributes(AbstractHalfEdge.MARKED);
+				else
+					ot.clearAttributes(AbstractHalfEdge.MARKED);
+			}
+		}
+		// We try to insert new nodes by splitting large edges.  As edge collapse
+		// is costful, nodes are inserted only if it does not create small edges,
+		// which means that nodes are not deleted.
+		// We iterate over all edges, and put candidate nodes into triNodes.
+		// If an edge has no candidates, either because it is small or because no
+		// nodes can be inserted, it is tagged and will not have to be checked
+		// during next iterations.
 		while (true)
 		{
 			nrIter++;
-			maxNodes = 0;
+			// Maximal number of nodes which are inserted on an edge
+			int maxNodes = 0;
 			nodes.clear();
 			for(Iterator<Triangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
@@ -115,37 +138,34 @@ public class Insertion
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
 				ot.bind(t);
-				for (int i = 0; i < 3; i++)
-				{
-					ot.next();
-					if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
-						ot.setAttributes(AbstractHalfEdge.MARKED);
-					else
-						ot.clearAttributes(AbstractHalfEdge.MARKED);
-				}
-			}
-			for(Iterator<Triangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
-			{
-				TriangleVH t = (TriangleVH) it.next();
-				if (t.hasAttributes(AbstractHalfEdge.OUTER))
-					continue;
-				ot.bind(t);
 				triNodes.clear();
+				// Maximal number of nodes which are inserted on edges of this triangle
 				int nrTriNodes = 0;
 				for (int i = 0; i < 3; i++)
 				{
 					ot.next();
 					if (ot.hasAttributes(AbstractHalfEdge.MARKED))
+					{
+						// This edge has already been checked and cannot be split
 						continue;
-					ot.setAttributes(AbstractHalfEdge.MARKED);
+					}
 					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
 					sym.sym();
 					if (sym.hasAttributes(AbstractHalfEdge.MARKED))
+					{
+						// This edge has already been checked and cannot be split
 						continue;
-					sym.setAttributes(AbstractHalfEdge.MARKED);
+					}
 					double l = mesh.compGeom().length(ot);
 					if (l < maxlen)
+					{
+						// This edge is smaller than target size and is not split
+						ot.setAttributes(AbstractHalfEdge.MARKED);
+						sym.setAttributes(AbstractHalfEdge.MARKED);
 						continue;
+					}
+					// Tag symmetric edge so that edges are checked only once
+					sym.setAttributes(AbstractHalfEdge.MARKED);
 					//  Long edges are discretized, but do not create more than 4 subsegments
 					double lcrit = 1.0;
 					if (l > 4.0)
@@ -175,7 +195,13 @@ public class Insertion
 						}
 					}
 					if (nrNodes > nrTriNodes)
+					{
 						nrTriNodes = nrNodes;
+					}
+					else if (nrNodes == 0)
+					{
+						ot.setAttributes(AbstractHalfEdge.MARKED);
+					}
 					checked++;
 				}
 				if (nrTriNodes > maxNodes)
@@ -239,7 +265,9 @@ public class Insertion
 				//  may return a null pointer.
 				mesh.getQuadTree().remove(v);
 			}
-			//  Process in pseudo-random order
+			//  Process in pseudo-random order.  There is at most maxNodes nodes
+			//  on an edge, we choose an increment step greater than this value
+			//  to try to split all edges.
 			int prime = PrimeFinder.nextPrime(maxNodes);
 			int imax = nodes.size();
 			while (imax % prime == 0)

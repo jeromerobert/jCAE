@@ -1,3 +1,9 @@
+Mon Nov 12 13:14:47 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos2d/Insertion.java: Use MARKED flag to
+	tag edges which cannot be split, they can be skipped during next
+	iterations.
+
 Sun Nov 11 22:53:19 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/patch/Mesh2D.java: Store compGeomStack
