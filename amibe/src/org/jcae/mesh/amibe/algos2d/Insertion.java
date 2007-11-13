@@ -95,8 +95,6 @@ public class Insertion
 	public void compute()
 	{
 		int nrIter = 0;
-		int tooNearNodes = 0;
-		int kdtreeSplit = 0;
 		logger.debug(" Insert inner nodes");
 		ArrayList<Vertex2D> nodes = new ArrayList<Vertex2D>();
 		ArrayList<Vertex2D> triNodes = new ArrayList<Vertex2D>();
@@ -132,6 +130,10 @@ public class Insertion
 			int maxNodes = 0;
 			// Number of checked edges
 			int checked = 0;
+			// Number of nodes which are too near from existing vertices
+			int tooNearNodes = 0;
+			// Number of quadtree cells split
+			int kdtreeSplit = 0;
 			nodes.clear();
 			for(Iterator<Triangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
