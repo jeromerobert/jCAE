@@ -14,6 +14,9 @@ Tue Nov 13 13:42:27 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	element into jcae3d XML file, as in other jcae[12]d files.
 	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java: Rename into
 	* src/org/jcae/mesh/amibe/algos3d/QEMDecimateHalfEdge.java:  ...this
+	* src/org/jcae/mesh/amibe/algos3d/LengthDecimateHalfEdge.java: New
+	method to decimate edges, they are removed iteratively depending on
+	their length.
 
 Mon Nov 12 13:14:47 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
