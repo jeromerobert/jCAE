@@ -12,6 +12,8 @@ Tue Nov 13 13:42:27 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	This is useful for debug messages.
 	* src/org/jcae/mesh/xmldata/MeshToMMesh3DConvert.java: Write <shape>
 	element into jcae3d XML file, as in other jcae[12]d files.
+	* src/org/jcae/mesh/amibe/algos3d/DecimateHalfEdge.java: Rename into
+	* src/org/jcae/mesh/amibe/algos3d/QEMDecimateHalfEdge.java:  ...this
 
 Mon Nov 12 13:14:47 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 

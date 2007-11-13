@@ -26,7 +26,7 @@ import org.jcae.mesh.oemm.TraversalProcedure;
 import org.jcae.mesh.oemm.OEMM.Node;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.algos3d.AbstractAlgoHalfEdge;
-import org.jcae.mesh.amibe.algos3d.DecimateHalfEdge;
+import org.jcae.mesh.amibe.algos3d.QEMDecimateHalfEdge;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 
@@ -209,7 +209,7 @@ public class MeshOEMMDecimate
 			int nrT = AbstractAlgoHalfEdge.countInnerTriangles(amesh);
 			options.clear();
 			options.put("maxtriangles", ""+(nrT / scale));
-			new DecimateHalfEdge(amesh, options).compute();
+			new QEMDecimateHalfEdge(amesh, options).compute();
 			Storage.saveNodes(oemm, amesh, leaves);
 		}
 	}

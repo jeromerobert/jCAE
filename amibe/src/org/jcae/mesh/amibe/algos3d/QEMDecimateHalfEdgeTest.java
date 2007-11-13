@@ -28,7 +28,7 @@ import java.util.HashMap;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-public class DecimateHalfEdgeTest
+public class QEMDecimateHalfEdgeTest
 {
 	private Mesh mesh;
 	private Vertex [] v;
@@ -116,7 +116,7 @@ public class DecimateHalfEdgeTest
 		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
 		int expected = 2;
-		new DecimateHalfEdge(mesh, options).compute();
+		new QEMDecimateHalfEdge(mesh, options).compute();
 		assertTrue("Mesh is not valid", mesh.isValid());
 		int res = AbstractAlgoHalfEdge.countInnerTriangles(mesh);
 		assertTrue("Final number of triangles: "+res, res == expected);
@@ -135,7 +135,7 @@ public class DecimateHalfEdgeTest
 		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
 		int expected = 8;
-		new DecimateHalfEdge(mesh, options).compute();
+		new QEMDecimateHalfEdge(mesh, options).compute();
 		assertTrue("Mesh is not valid", mesh.isValid());
 		int res = AbstractAlgoHalfEdge.countInnerTriangles(mesh);
 		assertTrue("Final number of triangles: "+res, res == expected);
@@ -209,7 +209,7 @@ public class DecimateHalfEdgeTest
 		}
 		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
-		new DecimateHalfEdge(mesh, options).compute();
+		new QEMDecimateHalfEdge(mesh, options).compute();
 		int res = AbstractAlgoHalfEdge.countInnerTriangles(mesh);
 		int expected = 8;
 		assertTrue("Final number of triangles: "+res, res == expected);
@@ -253,7 +253,7 @@ public class DecimateHalfEdgeTest
 		}
 		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
-		new DecimateHalfEdge(mesh, options).compute();
+		new QEMDecimateHalfEdge(mesh, options).compute();
 		int res = AbstractAlgoHalfEdge.countInnerTriangles(mesh);
 		int expected = 2;
 		assertTrue("Final number of triangles: "+res, res == expected);
@@ -317,7 +317,7 @@ public class DecimateHalfEdgeTest
 		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
 		int expected = 8;
-		new DecimateHalfEdge(mesh, options).compute();
+		new QEMDecimateHalfEdge(mesh, options).compute();
 		assertTrue("Mesh is not valid", mesh.isValid());
 		int res = AbstractAlgoHalfEdge.countInnerTriangles(mesh);
 		assertTrue("Mesh is not valid", mesh.isValid());

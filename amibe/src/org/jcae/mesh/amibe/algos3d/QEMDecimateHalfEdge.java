@@ -104,9 +104,9 @@ import org.apache.log4j.Logger;
  *       <a href="http://www.lis.inpg.fr/pages_perso/attali/DEA-IVR/PAPERS/frey00.ps">About Surface Remeshing</a>.</li>
  * </ol>
  */
-public class DecimateHalfEdge extends AbstractAlgoHalfEdge
+public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 {
-	private static Logger logger=Logger.getLogger(DecimateHalfEdge.class);
+	private static Logger logger=Logger.getLogger(QEMDecimateHalfEdge.class);
 	private Quadric3DError.Placement placement = Quadric3DError.Placement.OPTIMAL;
 	private HashMap<Vertex, Quadric3DError> quadricMap = null;
 	private Vertex v3;
@@ -118,14 +118,14 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 	private static final boolean testDump = false;
 	
 	/**
-	 * Creates a <code>DecimateHalfEdge</code> instance.
+	 * Creates a <code>QEMDecimateHalfEdge</code> instance.
 	 *
 	 * @param m  the <code>Mesh</code> instance to refine.
 	 * @param options  map containing key-value pairs to modify algorithm
 	 *        behaviour.  Valid keys are <code>size</code>,
 	 *        <code>placement</code> and <code>maxtriangles</code>.
 	 */
-	public DecimateHalfEdge(final Mesh m, final Map<String, String> options)
+	public QEMDecimateHalfEdge(final Mesh m, final Map<String, String> options)
 	{
 		super(m);
 		v3 = m.createVertex(0.0, 0.0, 0.0);
@@ -520,7 +520,7 @@ public class DecimateHalfEdge extends AbstractAlgoHalfEdge
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
-		new DecimateHalfEdge(mesh, options).compute();
+		new QEMDecimateHalfEdge(mesh, options).compute();
 		final File brepFile=new File(args[3]);
 		try
 		{
