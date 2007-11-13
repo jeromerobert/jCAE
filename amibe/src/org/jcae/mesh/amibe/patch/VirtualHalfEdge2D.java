@@ -362,28 +362,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 		Vertex2D first = (Vertex2D) origin();
 		while (true)
 		{
-			boolean toSwap = false;
-			if (!hasAttributes(BOUNDARY) && !hasAttributes(NONMANIFOLD) && !hasAttributes(OUTER))
-			{
-				Vertex2D o = (Vertex2D) origin();
-				Vertex2D d = (Vertex2D) destination();
-				symOTri(this, sym);
-				Vertex2D a = (Vertex2D) sym.apex();
-				if (o == mesh.outerVertex)
-					toSwap = (v.onLeft(mesh, d, a) < 0L);
-				else if (d == mesh.outerVertex)
-					toSwap = (v.onLeft(mesh, a, o) < 0L);
-				else if (a == mesh.outerVertex)
-					toSwap = (v.onLeft(mesh, o, d) == 0L);
-				else if (isMutable())
-				{
-					if (!smallerDiag)
-						toSwap = !isDelaunay(mesh, a);
-					else
-						toSwap = !a.isSmallerDiagonale(mesh, this);
-				}
-			}
-			if (toSwap)
+			if (canSwap(mesh, v, smallerDiag, sym))
 			{
 				swap();
 				nrSwap++;
@@ -394,18 +373,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 				// This routine may be called before boundaries
 				// are recreated, so VirtualHalfEdge.nextApexLoop
 				// is not relevant here.
-				if (destination() == mesh.outerVertex)
-				{
-					// Loop clockwise to another boundary
-					// and start again from there.
-					do
-					{
-						prevApex();
-					}
-					while (origin() != mesh.outerVertex);
-				}
-				else
-					nextApex();
+				nextApexLoopNoBoundaries(mesh);
 				if ((Vertex2D) origin() == first)
 				{
 					if (nrSwap == 0)
@@ -417,6 +385,41 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 		return totNrSwap;
 	}
 	
+	private final boolean canSwap(Mesh2D mesh, Vertex2D v, boolean smallerDiag, VirtualHalfEdge2D sym)
+	{
+		if (hasAttributes(BOUNDARY | NONMANIFOLD | OUTER))
+			return false;
+		Vertex2D o = (Vertex2D) origin();
+		Vertex2D d = (Vertex2D) destination();
+		symOTri(this, sym);
+		Vertex2D a = (Vertex2D) sym.apex();
+		if (o == mesh.outerVertex)
+			return (v.onLeft(mesh, d, a) < 0L);
+		if (d == mesh.outerVertex)
+			return (v.onLeft(mesh, a, o) < 0L);
+		if (a == mesh.outerVertex)
+			return (v.onLeft(mesh, o, d) == 0L);
+		if (!smallerDiag)
+			return !isDelaunay(mesh, a);
+		return !a.isSmallerDiagonale(mesh, this);
+	}
+	
+	private final void nextApexLoopNoBoundaries(Mesh2D mesh)
+	{
+		if (destination() == mesh.outerVertex)
+		{
+			// Loop clockwise to another boundary
+			// and start again from there.
+			do
+			{
+				prevApex();
+			}
+			while (origin() != mesh.outerVertex);
+		}
+		else
+			nextApex();
+	}
+
 	/**
 	 * Tries to rebuild a boundary edge by swapping edges.
 	 *
