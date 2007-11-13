@@ -63,7 +63,7 @@ public class QualityFloat
 	private float [] bounds;
 	private int layers = -1;
 	private float scaleFactor = 1.0f;
-	private float qmin, qmax, qavg;
+	private float qmin, qmax, qavg, qavg2;
 
 	public QualityFloat()
 	{
@@ -163,6 +163,7 @@ public class QualityFloat
 		float vmin = Float.MAX_VALUE;
 		float vmax = Float.MIN_VALUE;
 		qavg = 0.0f;
+		qavg2 = 0.0f;
 		for (int i = 0; i < nrTotal; i++)
 		{
 			float val = data.get(i) * scaleFactor;
@@ -172,6 +173,7 @@ public class QualityFloat
 		{
 			float val = data.get(i);
 			qavg += val / nrTotal;
+			qavg2 += val * val / nrTotal;
 			if (vmin > val)
 				vmin = val;
 			if (vmax < val)
@@ -213,6 +215,7 @@ public class QualityFloat
 		float vmin = v1;
 		float vmax = v2;
 		qavg = 0.0f;
+		qavg2 = 0.0f;
 		qmin = Float.MAX_VALUE;
 		qmax = Float.MIN_VALUE;
 		if (layers <= 0)
@@ -237,6 +240,7 @@ public class QualityFloat
 			if (qmax < val)
 				qmax = val;
 			qavg += val / nrTotal;
+			qavg2 += val * val / nrTotal;
 			int cell = (int) ((val - vmin) / delta + 1.001f);
 			if (cell < 0)
 				cell = 0;
@@ -261,6 +265,7 @@ public class QualityFloat
 		for (float f: v)
 			bounds[cnt++] = f;
 		qavg = 0.0f;
+		qavg2 = 0.0f;
 		qmin = Float.MAX_VALUE;
 		qmax = Float.MIN_VALUE;
 		sorted = new int[layers+2];
@@ -278,6 +283,7 @@ public class QualityFloat
 			if (qmax < val)
 				qmax = val;
 			qavg += val / nrTotal;
+			qavg2 += val * val / nrTotal;
 			int cell = 0;
 			for (; cell < bounds.length; cell++)
 				if (val < bounds[cell])
@@ -287,7 +293,7 @@ public class QualityFloat
 	}
 	
 	/**
-	 * Display statistics about quality values.
+	 * Display histogram about quality values.
 	 */
 	public void printLayers()
 	{
@@ -309,6 +315,20 @@ public class QualityFloat
 		System.out.println("qmin: "+qmin);
 		System.out.println("qmax: "+qmax);
 		System.out.println("qavg: "+qavg);
+		System.out.println("qdev: "+Math.sqrt(qavg2 - qavg*qavg));
+	}
+	
+	/**
+	 * Display statistics about quality values.
+	 */
+	public void printStatistics()
+	{
+		int nrTotal = data.size();
+		System.out.println("total: "+nrTotal);
+		System.out.println("qmin: "+qmin);
+		System.out.println("qmax: "+qmax);
+		System.out.println("qavg: "+qavg);
+		System.out.println("qdev: "+Math.sqrt(qavg2 - qavg*qavg));
 	}
 	
 	/**

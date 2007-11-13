@@ -17,6 +17,8 @@ Tue Nov 13 13:42:27 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/amibe/algos3d/LengthDecimateHalfEdge.java: New
 	method to decimate edges, they are removed iteratively depending on
 	their length.
+	* src/org/jcae/mesh/amibe/validation/QualityFloat.java: Also print
+	standard deviation.
 
 Mon Nov 12 13:14:47 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
