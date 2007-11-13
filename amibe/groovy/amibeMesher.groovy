@@ -219,7 +219,7 @@ if (phases[2])
 if (phases[3])
 {
 	expl = factory.newExplorer()
-	m2dto3d = new MeshToMMesh3DConvert(outdir)
+	m2dto3d = new MeshToMMesh3DConvert(outdir, '.', brepfile)
 	m2dto3d.exportUNV(unvName != null, unvName);
 	
 	iface = 0
