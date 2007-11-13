@@ -30,6 +30,8 @@ import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.HashSet;
 import gnu.trove.PrimeFinder;
 import org.apache.log4j.Logger;
 
@@ -100,6 +102,9 @@ public class Insertion
 		ArrayList<Vertex2D> triNodes = new ArrayList<Vertex2D>();
 		VirtualHalfEdge2D sym = new VirtualHalfEdge2D();
 		VirtualHalfEdge2D ot = new VirtualHalfEdge2D();
+		HashSet<Triangle> trianglesToCheck = new HashSet<Triangle>(mesh.getTriangles().size());
+		// We use a LinkedHashSet instance below to keep triangle order
+		LinkedHashSet<Triangle> oldTrianglesToCheck = new LinkedHashSet<Triangle>(mesh.getTriangles().size());
 		// We do not want to split boundary edges.
 		for(Iterator<Triangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 		{
@@ -107,6 +112,7 @@ public class Insertion
 			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			ot.bind(t);
+			oldTrianglesToCheck.add(t);
 			for (int i = 0; i < 3; i++)
 			{
 				ot.next();
@@ -123,6 +129,8 @@ public class Insertion
 		// If an edge has no candidates, either because it is small or because no
 		// nodes can be inserted, it is tagged and will not have to be checked
 		// during next iterations.
+		// For triangle centroids, this is a little bit more difficult, we need to
+		// keep track of triangles which have been modified at previous iteration.
 		while (true)
 		{
 			nrIter++;
@@ -135,6 +143,7 @@ public class Insertion
 			// Number of quadtree cells split
 			int kdtreeSplit = 0;
 			nodes.clear();
+			logger.debug("Check all edges");
 			for(Iterator<Triangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
 				TriangleVH t = (TriangleVH) it.next();
@@ -237,9 +246,14 @@ public class Insertion
 					}
 				}
 			}
-			//  Try to insert triangle centroid after all other points.
+			//  Try to insert triangle centroids after other points.
+			//  We scan triangles for which centroid have already
+			//  proven to be valid, and all triangles which have been
+			//  modified by vertex insertion.
 			Vertex2D c = null;
-			for (Iterator<Triangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
+			trianglesToCheck.clear();
+			logger.debug("Check triangle centroids for "+oldTrianglesToCheck.size()+" triangles");
+			for (Iterator<Triangle> it = oldTrianglesToCheck.iterator(); it.hasNext(); )
 			{
 				TriangleVH t = (TriangleVH) it.next();
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
@@ -253,6 +267,7 @@ public class Insertion
 				{
 					mesh.getQuadTree().add(c);
 					nodes.add(c);
+					trianglesToCheck.add(t);
 					c = null;
 				}
 				else
@@ -268,6 +283,7 @@ public class Insertion
 				//  may return a null pointer.
 				mesh.getQuadTree().remove(v);
 			}
+			logger.debug("Try to insert "+nodes.size()+" nodes");
 			//  Process in pseudo-random order.  There is at most maxNodes nodes
 			//  on an edge, we choose an increment step greater than this value
 			//  to try to split all edges.
@@ -279,12 +295,16 @@ public class Insertion
 				prime = 1;
 			int index = imax / 2;
 			int skippedNodes = 0;
+			int totNrSwap = 0;
 			for (int i = 0; i < imax; i++)
 			{
 				Vertex2D v = nodes.get(index);
 				VirtualHalfEdge2D vt = v.getSurroundingOTriangle(mesh);
-				if (!vt.split3(mesh, v, false))
+				int nrSwap = vt.split3(mesh, v, trianglesToCheck, false);
+				if (0 == nrSwap)
 					skippedNodes++;
+				else
+					totNrSwap += nrSwap;
 				index += prime;
 				if (index >= imax)
 					index -= imax;
@@ -300,11 +320,24 @@ public class Insertion
 					logger.debug(tooNearNodes+" nodes are too near from existing vertices and cannot be inserted");
 				if (skippedNodes > 0)
 					logger.debug(skippedNodes+" nodes cannot be inserted");
+				if (totNrSwap > 0)
+					logger.debug(totNrSwap+" edges have been swapped during processing");
 				if (kdtreeSplit > 0)
 					logger.debug(kdtreeSplit+" quadtree cells split");
 			}
 			if (skippedNodes == nodes.size())
 				break;
+
+			// Copy trianglesToCheck into oldTrianglesToCheck and keep original
+			// order from mesh.getTriangles().  This is to make sure that this
+			// use of trianglesToCheck does not modify result.
+			oldTrianglesToCheck.clear();
+			for(Iterator<Triangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
+			{
+				Triangle t = it.next();
+				if (trianglesToCheck.contains(t))
+					oldTrianglesToCheck.add(t);
+			}
 		}
 		logger.debug("Number of iterations to insert all nodes: "+nrIter);
 	}

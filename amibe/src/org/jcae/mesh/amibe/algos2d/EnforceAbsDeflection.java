@@ -121,7 +121,7 @@ public class EnforceAbsDeflection
 				double uv[] = c.getUV();
 				Vertex2D v = (Vertex2D) mesh.createVertex(uv[0], uv[1]);
 				VirtualHalfEdge2D vt = v.getSurroundingOTriangle(mesh);
-				if (vt.split3(mesh, v, false))
+				if (vt.split3(mesh, v, null, false) != 0)
 					redo = true;
 			}
 			niter--;

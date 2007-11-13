@@ -25,6 +25,7 @@ import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
 import java.util.Random;
+import java.util.Set;
 import org.apache.log4j.Logger;
 
 /**
@@ -247,11 +248,12 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 	 * getSurroundingTriangle().  If apex is Mesh.outerVertex, then
 	 * getSurroundingTriangle() ensures that v.onLeft(o,d) &gt; 0.
 	 *
-	 * @param v  the vertex being inserted.
+	 * @param v  vertex being inserted.
+	 * @param modifiedTriangles  if not null, this set of triangles is updated by adding all triangles modified during this operation.
 	 * @param force  if <code>false</code>, the vertex is inserted only if some edges were swapped after its insertion.  If <code>true</code>, the vertex is unconditionnally inserted.
-	 * @return <code>true</code> if vertex was successfully added, <code>false</code> otherwise.
+	 * @return number of edges swapped during insertion.  If it is 0, vertex has not been inserted.
 	 */
-	public final boolean split3(Mesh2D mesh, Vertex2D v, boolean force)
+	public final int split3(Mesh2D mesh, Vertex2D v, Set<Triangle> modifiedTriangles, boolean force)
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("Split VirtualHalfEdge2D "+this+"\nat Vertex "+v);
@@ -318,9 +320,9 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 		Triangle newTri2 = newRight.tri;
 		if (logger.isDebugEnabled())
 			logger.debug("New triangles:\n"+this+"\n"+newRight+"\n"+newLeft);
-		if (force)
-			newLeft.checkAndSwap(mesh, false);
-		else if (0 == newLeft.checkAndSwap(mesh, false))
+		// newRight is reused
+		int ret = newLeft.checkAndSwap(mesh, modifiedTriangles, false, newRight);
+		if (!force && 0 == ret)
 		{
 			//  v has been inserted and no edges are swapped,
 			//  thus global quality has been decreased.
@@ -333,12 +335,18 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 			oldLeft.glue(oldSymRight);
 			oldLeft.next();                  // = (aod)
 			oldLeft.glue(oldSymLeft);
-			return false;
+			return ret;
 		}
 		mesh.add(newTri1);
 		mesh.add(newTri2);
+		if (modifiedTriangles != null)
+		{
+			modifiedTriangles.add(tri);
+			modifiedTriangles.add(newTri1);
+			modifiedTriangles.add(newTri2);
+		}
 		mesh.getQuadTree().add(v);
-		return true;
+		return ret;
 	}
 	
 	//  Called from BasicMesh to improve initial mesh
@@ -347,23 +355,28 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 		//  As checkAndSwap modifies its arguments, 'this'
 		//  must be protected.
 		VirtualHalfEdge2D ot1 = new VirtualHalfEdge2D();
+		VirtualHalfEdge2D sym = new VirtualHalfEdge2D();
 		copyOTri(this, ot1);
-		return ot1.checkAndSwap(mesh, true);
+		return ot1.checkAndSwap(mesh, null, true, sym);
 	}
 	
-	private int checkAndSwap(Mesh2D mesh, boolean smallerDiag)
+	private int checkAndSwap(Mesh2D mesh, Set<Triangle> modifiedTriangles, boolean smallerDiag, VirtualHalfEdge2D sym)
 	{
 		int nrSwap = 0;
 		int totNrSwap = 0;
 		Vertex2D v = (Vertex2D) apex();
 		assert v != mesh.outerVertex;
-		VirtualHalfEdge2D sym = new VirtualHalfEdge2D();
 		//  Loops around v
 		Vertex2D first = (Vertex2D) origin();
 		while (true)
 		{
 			if (canSwap(mesh, v, smallerDiag, sym))
 			{
+				if (modifiedTriangles != null)
+				{
+					modifiedTriangles.add(tri);
+					modifiedTriangles.add(sym.tri);
+				}
 				swap();
 				nrSwap++;
 				totNrSwap++;
@@ -376,6 +389,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 				nextApexLoopNoBoundaries(mesh);
 				if ((Vertex2D) origin() == first)
 				{
+					// If no swap has been performed, processing is over
 					if (nrSwap == 0)
 						break;
 					nrSwap = 0;

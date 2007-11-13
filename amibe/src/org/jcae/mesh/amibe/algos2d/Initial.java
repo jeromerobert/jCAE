@@ -267,7 +267,7 @@ public class Initial
 				else
 				{
 					ot = v.getSurroundingOTriangle(mesh);
-					ot.split3(mesh, v, true); 
+					ot.split3(mesh, v, null, true); 
 					if (firstOnWire == null)
 						firstOnWire = v;
 				}
@@ -398,7 +398,7 @@ public class Initial
 			{
 				v = Vertex2D.valueOf(p1, null, face);
 				ot = v.getSurroundingOTriangle(mesh);
-				ot.split3(mesh, v, true); 
+				ot.split3(mesh, v, null, true); 
 			}
 		}
 

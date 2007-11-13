@@ -1,3 +1,16 @@
+Tue Nov 13 13:42:27 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos2d/Insertion.java: Edge checks have
+	been optimized yesterday, but insertion of triangle centroids can
+	also be optimized to check only triangles which have been modified
+	during previous iteration.  This improves performance for very
+	large patches.
+	* src/org/jcae/mesh/amibe/patch/VirtualHalfEdge2D.java (split3):
+	Add an argument to collect the set of triangles which are modified
+	by this method.  This method now returns the total number of edges
+	swapped during processing, and 0 when vertex had not been inserted.
+	This is useful for debug messages.
+
 Mon Nov 12 13:14:47 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos2d/Insertion.java: Use MARKED flag to
