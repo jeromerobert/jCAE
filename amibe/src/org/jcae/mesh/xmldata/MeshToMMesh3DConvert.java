@@ -54,15 +54,19 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 	private double [] coordRefs = null;
 	private DataOutputStream nodesOut, refsOut, normalsOut, trianglesOut, groupsOut;
 	private String xmlDir;
+	private String brepDir;
+	private String brepFile;
 	private File xmlFile;
 	private File nodesFile, refFile, normalsFile, trianglesFile, groupsFile;
 	private Document documentOut;
 	private Element groupsElement;
 	private MeshToUNVConvert unv = null;
 	
-	public MeshToMMesh3DConvert (String dir)
+	public MeshToMMesh3DConvert (String dir, String bDir, String bFile)
 	{
 		xmlDir = dir;
+		brepDir = bDir;
+		brepFile = bFile;
 	}
 	
 	public void exportUNV(boolean b, String unvName)
@@ -173,6 +177,9 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			// Write jcae3d
 			Element jcaeElement = documentOut.getDocumentElement();
 			Element meshElement = documentOut.createElement("mesh");
+			Element shapeElement=XMLHelper.parseXMLString(documentOut, "<shape>"+
+				"<file format=\"brep\" location=\""+brepDir+File.separator+brepFile+"\"/>"+"</shape>");
+			meshElement.appendChild(shapeElement);
 			Element subMeshElement = documentOut.createElement("submesh");
 			Element nodesElement = XMLHelper.parseXMLString(documentOut,
 				"<nodes>"+

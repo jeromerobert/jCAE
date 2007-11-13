@@ -10,6 +10,8 @@ Tue Nov 13 13:42:27 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	by this method.  This method now returns the total number of edges
 	swapped during processing, and 0 when vertex had not been inserted.
 	This is useful for debug messages.
+	* src/org/jcae/mesh/xmldata/MeshToMMesh3DConvert.java: Write <shape>
+	element into jcae3d XML file, as in other jcae[12]d files.
 
 Mon Nov 12 13:14:47 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 

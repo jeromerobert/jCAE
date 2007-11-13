@@ -363,11 +363,11 @@ public class Mesher
 	 * Read 2D meshes and compute 3D mesh
 	 * @param shape
 	 */
-	protected void mesh3D(CADShape shape)
+	protected void mesh3D(CADShape shape, String xmlBrepDir, String brepFile)
 	{
 		int iFace = 0;
 		CADExplorer expF = CADShapeFactory.getFactory().newExplorer();
-		MeshToMMesh3DConvert m2dTo3D = new MeshToMMesh3DConvert(outputDir);
+		MeshToMMesh3DConvert m2dTo3D = new MeshToMMesh3DConvert(outputDir, xmlBrepDir, brepFile);
 		m2dTo3D.exportUNV(exportUNV, unvName);
 		logger.info("Read informations on boundary nodes");
 		for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
@@ -486,7 +486,7 @@ public class Mesher
 			// Step 3: Read 2D meshes and compute 3D mesh
 			try
 			{
-				mesh3D(shape);
+				mesh3D(shape, xmlBrepDir, brepFile);
 			}
 			catch(Exception ex)
 			{
