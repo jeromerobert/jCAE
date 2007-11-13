@@ -1,3 +1,9 @@
+2007-11-13 18:32 Denis Barbier <barbier@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/DecimateAction.java: Fix
+	decimation, org.jcae.mesh.amibe.algos3d.DecimateHalfEdge has been
+	renamed into org.jcae.mesh.amibe.algos3d.QEMDecimateHalfEdge.
+
 2007-10-19 12:27 Denis Barbier <barbier@users.sourceforge.net>
 
 	* jcae-netbeans/src/org/jcae/netbeans/mesh/Groups.java: Update
