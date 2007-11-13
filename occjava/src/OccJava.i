@@ -68,6 +68,7 @@
 %include "BRepCheck.i"
 %include "ShapeBuild.i"
 %include "XSControl.i"
+%include "ShapeFix.i"
 // This one require Opencascade 6.2
 %include "ShapeUpgrade.i"
 
