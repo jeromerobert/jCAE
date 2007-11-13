@@ -34,11 +34,13 @@ options.addOption(
 		.withDescription("reports statistics by face")
 		.withLongOpt("detailed")
 		.create('d'));
+/*
 options.addOption(
 	OptionBuilder.withArgName("LIST").hasArg()
 		.withDescription("comma separated list of faces (default: all faces)")
 		.withLongOpt("faces")
 		.create('f'));
+*/
 options.addOption(
 	OptionBuilder.withArgName("BASE").hasArg()
 		.withDescription("creates <BASE>.mesh and <BASE>.bb MEDIT files")
