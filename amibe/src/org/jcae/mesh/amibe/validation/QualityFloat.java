@@ -64,6 +64,7 @@ public class QualityFloat
 	private int layers = -1;
 	private float scaleFactor = 1.0f;
 	private float qmin, qmax, qavg, qavg2;
+	private int imin, imax;
 
 	public QualityFloat()
 	{
@@ -134,9 +135,15 @@ public class QualityFloat
 			qavg += val / n;
 			qavg2 += val * val / n;
 			if (qmin > val)
+			{
 				qmin = val;
+				imin = i;
+			}
 			if (qmax < val)
+			{
 				qmax = val;
+				imax = i;
+			}
 		}
 	}
 	
@@ -347,11 +354,7 @@ public class QualityFloat
 		}
 		if (sorted[layers+1] > 0)
 			System.out.println(" > "+bounds[layers]+" "+sorted[layers+1]+" ("+(((float) 100.0 * sorted[layers+1])/nrTotal)+"%)");
-		System.out.println("total: "+nrTotal);
-		System.out.println("qmin: "+qmin);
-		System.out.println("qmax: "+qmax);
-		System.out.println("qavg: "+qavg);
-		System.out.println("qdev: "+Math.sqrt(qavg2 - qavg*qavg));
+		printStatistics();
 	}
 	
 	/**
@@ -361,8 +364,8 @@ public class QualityFloat
 	{
 		int nrTotal = data.size();
 		System.out.println("total: "+nrTotal);
-		System.out.println("qmin: "+qmin);
-		System.out.println("qmax: "+qmax);
+		System.out.println("qmin: "+qmin+"   (index="+imin+" starting from 0)");
+		System.out.println("qmax: "+qmax+"   (index="+imax+" starting from 0)");
 		System.out.println("qavg: "+qavg);
 		System.out.println("qdev: "+Math.sqrt(qavg2 - qavg*qavg));
 	}
