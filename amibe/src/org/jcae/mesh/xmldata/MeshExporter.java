@@ -973,7 +973,7 @@ abstract public class MeshExporter
 	 */
 	public static class VTK extends MeshExporter
 	{
-		private boolean dummyData = true;
+		private boolean dummyData = false;
 		
 		public VTK(File directory, int[] groupIds)
 		{
