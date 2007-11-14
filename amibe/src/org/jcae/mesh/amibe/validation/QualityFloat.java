@@ -119,6 +119,96 @@ public class QualityFloat
 	public void finish()
 	{
 		qproc.finish();
+		qmin = Float.MAX_VALUE;
+		qmax = Float.MIN_VALUE;
+		qavg = 0.0f;
+		qavg2 = 0.0f;
+		for (int i = 0, n = data.size(); i < n; i++)
+		{
+			float val = data.get(i) * scaleFactor;
+			data.set(i, val);
+		}
+		for (int i = 0, n = data.size(); i < n; i++)
+		{
+			float val = data.get(i);
+			qavg += val / n;
+			qavg2 += val * val / n;
+			if (qmin > val)
+				qmin = val;
+			if (qmax < val)
+				qmax = val;
+		}
+	}
+	
+	/**
+	 * Return value by its distribution index.  Returned value is
+	 * such that there are <code>p*N</code> values below it, where
+	 * <code>N</code> is the total number of values.  For instance,
+	 * <code>getValueByPercent(0.0)</code> (resp. 1 and 0.5) returns
+	 * minimum value (resp. maximum value and median value).
+	 *
+	 * @param p  number between 0 and 1
+	 * @return  value associated to this distribution index
+	 */
+	public float getValueByPercent(double p)
+	{
+		if (p <= 0.0)
+			return qmin;
+		if (p >= 1.0)
+			return qmax;
+		float [] values = new float[1000];
+		int [] number = new int[values.length+1];
+		int target = (int) (p * data.size());
+		return getValueByPercentPrivate(target, qmin, qmax, values, number);
+	}
+	
+	private float getValueByPercentPrivate(int target, float q1, float q2, float [] values, int [] number)
+	{
+		float delta = (q2 - q1) / values.length;
+		if (delta <= 0.0f)
+			throw new IllegalArgumentException();
+		for (int i = 0; i < values.length; i++)
+			values[i] = q1 + i * delta;
+		for (int i = 0, n = data.size(); i < n; i++)
+		{
+			float val = data.get(i);
+			int cell = (int) ((val - q1) / delta + 1.001f);
+			if (cell <= 0)
+				number[0]++;
+			else if (cell < number.length)
+				number[cell]++;
+		}
+		int sum = number[0];
+		for (int i = 1; i <= number.length; i++)
+		{
+			if (sum == target)
+				return values[i-1];
+			else if (sum > target)
+			{
+				if (number[i] == 1)
+					return values[i-1];
+				else
+					return getValueByPercentPrivate(target, values[i-1], values[i], values, number);
+			}
+			sum += number[i];
+		}
+		throw new RuntimeException();
+	}
+
+	/**
+	 * Return mean value
+	 */
+	public float getMeanValue()
+	{
+		return qavg;
+	}
+	
+	/**
+	 * Return standard deviation
+	 */
+	public float getStandardDeviation()
+	{
+		return (float) Math.sqrt(qavg2 - qavg*qavg);
 	}
 	
 	/**
@@ -151,48 +241,26 @@ public class QualityFloat
 	 * computed.  These numbers can then be displayed by
 	 * {@link #printLayers}.
 	 *
-	 * @param n  the desired number of subsegments.
+	 * @param nr  the desired number of subsegments.
 	 */
-	public void split(int n)
+	public void split(int nr)
 	{
-		layers = n;
+		layers = nr;
 		if (layers <= 0)
 			return;
-		int nrTotal = data.size();
 		//  min() and max() methods are buggy in trove 1.0.2
-		float vmin = Float.MAX_VALUE;
-		float vmax = Float.MIN_VALUE;
-		qavg = 0.0f;
-		qavg2 = 0.0f;
-		for (int i = 0; i < nrTotal; i++)
-		{
-			float val = data.get(i) * scaleFactor;
-			data.set(i, val);
-		}
-		for (int i = 0; i < nrTotal; i++)
-		{
-			float val = data.get(i);
-			qavg += val / nrTotal;
-			qavg2 += val * val / nrTotal;
-			if (vmin > val)
-				vmin = val;
-			if (vmax < val)
-				vmax = val;
-		}
-		qmin = vmin;
-		qmax = vmax;
-		float delta = (vmax - vmin) / layers;
+		float delta = (qmax - qmin) / layers;
 		// In printLayers:
-		//   sorted[0]: number of points with value < vmin
-		//   sorted[layers+1]: number of points with value > vmax
+		//   sorted[0]: number of points with value < qmin
+		//   sorted[layers+1]: number of points with value > qmax
 		sorted = new int[layers+2];
 		bounds = new float[layers+1];
 		for (int i = 0; i < bounds.length; i++)
-			bounds[i] = vmin + i * delta;
-		for (int i = 0; i < nrTotal; i++)
+			bounds[i] = qmin + i * delta;
+		for (int i = 0, n = data.size(); i < n; i++)
 		{
 			float val = data.get(i);
-			int cell = (int) ((val - vmin) / delta + 1.001f);
+			int cell = (int) ((val - qmin) / delta + 1.001f);
 			assert cell > 0 && cell <= layers;
 			sorted[cell]++;
 		}
@@ -200,47 +268,31 @@ public class QualityFloat
 	
 	/**
 	 * Split quality values into buckets.  The range between minimal
-	 * and maximal quality values is divided into <code>n</code>
+	 * and maximal quality values is divided into <code>nr</code>
 	 * subsegments of equal length, and the number of quality values
 	 * for each subsegment is computed.  These numbers can then be
 	 * displayed by {@link #printLayers}.
 	 *
 	 * @param v1  minimal value to consider.
 	 * @param v2  maximal value to consider.
-	 * @param n  the desired number of subsegments.
+	 * @param nr  the desired number of subsegments.
 	 */
-	public void split(float v1, float v2, int n)
+	public void split(float v1, float v2, int nr)
 	{
-		layers = n;
+		layers = nr;
 		float vmin = v1;
 		float vmax = v2;
-		qavg = 0.0f;
-		qavg2 = 0.0f;
-		qmin = Float.MAX_VALUE;
-		qmax = Float.MIN_VALUE;
 		if (layers <= 0)
 			return;
-		int nrTotal = data.size();
 		//  The last cell is for v >= vmax
 		float delta = (vmax - vmin) / layers;
 		sorted = new int[layers+2];
 		bounds = new float[layers+1];
 		for (int i = 0; i < bounds.length; i++)
 			bounds[i] = vmin + i * delta;
-		for (int i = 0; i < nrTotal; i++)
-		{
-			float val = data.get(i) * scaleFactor;
-			data.set(i, val);
-		}
-		for (int i = 0; i < nrTotal; i++)
+		for (int i = 0, n = data.size(); i < n; i++)
 		{
 			float val = data.get(i);
-			if (qmin > val)
-				qmin = val;
-			if (qmax < val)
-				qmax = val;
-			qavg += val / nrTotal;
-			qavg2 += val * val / nrTotal;
 			int cell = (int) ((val - vmin) / delta + 1.001f);
 			if (cell < 0)
 				cell = 0;
@@ -264,26 +316,10 @@ public class QualityFloat
 		int cnt = 0;
 		for (float f: v)
 			bounds[cnt++] = f;
-		qavg = 0.0f;
-		qavg2 = 0.0f;
-		qmin = Float.MAX_VALUE;
-		qmax = Float.MIN_VALUE;
 		sorted = new int[layers+2];
-		int nrTotal = data.size();
-		for (int i = 0; i < nrTotal; i++)
-		{
-			float val = data.get(i) * scaleFactor;
-			data.set(i, val);
-		}
-		for (int i = 0; i < nrTotal; i++)
+		for (int i = 0, n = data.size(); i < n; i++)
 		{
 			float val = data.get(i);
-			if (qmin > val)
-				qmin = val;
-			if (qmax < val)
-				qmax = val;
-			qavg += val / nrTotal;
-			qavg2 += val * val / nrTotal;
 			int cell = 0;
 			for (; cell < bounds.length; cell++)
 				if (val < bounds[cell])
