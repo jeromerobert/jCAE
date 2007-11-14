@@ -57,8 +57,9 @@ public class SmoothNodes3D
 	private int nloop = 10;
 	private double tolerance = 2.0;
 	private boolean preserveBoundaries = false;
+	private int progressBarStatus = 10000;
 	private static final double scaleFactor = 12.0 * Math.sqrt(3.0);
-	private static double speed = 0.2;
+	private static double speed = 0.6;
 	private final Vertex c;
 	
 	/**
@@ -101,6 +102,11 @@ public class SmoothNodes3D
 		}
 	}
 	
+	public void setProgressBarStatus(int n)
+	{
+		progressBarStatus = n;
+	}
+
 	/**
 	 * Moves all nodes until all iterations are done.
 	 */
@@ -178,14 +184,14 @@ public class SmoothNodes3D
 					continue;
 				if (n.getRef() != 0 && preserveBoundaries)
 					continue;
-				if (smoothNode(ot))
+				if (smoothNode(ot, ret))
 					ret++;
 			}
 		}
 		return ret;
 	}
 	
-	private boolean smoothNode(AbstractHalfEdge ot)
+	private boolean smoothNode(AbstractHalfEdge ot, int processed)
 	{
 		Vertex n = ot.origin();
 		double[] oldp3 = n.getUV();
@@ -244,6 +250,8 @@ public class SmoothNodes3D
 		if (!n.discreteProject(c))
 			return false;
 		n.moveTo(centroid3[0], centroid3[1], centroid3[2]);
+		if (processed > 0 && (processed % progressBarStatus) == 0)
+			logger.info("Vertices processed: "+processed);
 		return true;
 	}
 	

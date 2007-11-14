@@ -49,6 +49,7 @@ public abstract class AbstractAlgoHalfEdge
 	protected int swapped = 0;
 	protected int notProcessed = 0;
 	protected int notInTree = 0;
+	private int progressBarStatus = 10000;
 	protected QSortedTree tree = new PAVLSortedTree();
 	
 	protected abstract void preProcessAllHalfEdges();
@@ -73,6 +74,11 @@ public abstract class AbstractAlgoHalfEdge
 		thisLogger().info("Initial number of triangles: "+countInnerTriangles(mesh));
 		processAllHalfEdges();
 		thisLogger().info("Final number of triangles: "+countInnerTriangles(mesh));
+	}
+
+	public void setProgressBarStatus(int n)
+	{
+		progressBarStatus = n;
 	}
 
 	public static int countInnerTriangles(final Mesh mesh)
@@ -170,7 +176,7 @@ public abstract class AbstractAlgoHalfEdge
 			preProcessEdge();
 			HalfEdge current = null;
 			Iterator<QSortedTree.Node> itt = tree.iterator();
-			if (processed > 0 && (processed % 10000) == 0)
+			if (processed > 0 && (processed % progressBarStatus) == 0)
 				thisLogger().info("Edges processed: "+processed);
 			while (itt.hasNext())
 			{
