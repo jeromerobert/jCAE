@@ -1,5 +1,7 @@
 /**
  * Sample class to print quality statistics about an amibe mesh.
+ * Example: to print histogram about minimum angles:
+ *  amibeReporter.groovy -c MinAngleFace -s .0174532925199432957 -b 6,12,18,24,30,36,42,48,54
  */
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
@@ -26,9 +28,14 @@ options.addOption(
 		.create('h'));
 options.addOption(
 	OptionBuilder.withArgName("LIST").hasArg()
-		.withDescription("comma separated list of values (default: 0.2,0.4,0.6,0.8)")
+		.withDescription("comma separated list of values, implies -H (default: 0.2,0.4,0.6,0.8)")
 		.withLongOpt("bounds")
 		.create('b'));
+options.addOption(
+	OptionBuilder.hasArg(false)
+		.withDescription("prints histogram")
+		.withLongOpt("histogram")
+		.create('H'));
 options.addOption(
 	OptionBuilder.hasArg(false)
 		.withDescription("reports statistics by face")
@@ -69,6 +76,7 @@ String xmlDir = remaining[0]
 String xmlFile = "jcae3d";
 String outBasename=cmd.getOptionValue('o');
 boolean detailed = cmd.hasOption('d');
+boolean histogram = cmd.hasOption('H') || cmd.hasOption('b');
 
 String [] sBounds=cmd.getOptionValue('b', "0.2,0.4,0.6,0.8").split(",");
 Float [] bounds = new Float[sBounds.length];
@@ -134,7 +142,10 @@ for (int i = 0; i < data.length; i++)
 	// Prints histogram on console
 	if (detailed)
 		println("Face "+(i+1));
-	data[i].printLayers();
+	if (histogram)
+		data[i].printLayers();
+	else
+		data[i].printStatistics();
 }
 if (null != outBasename)
 {
