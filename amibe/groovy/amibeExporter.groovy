@@ -46,8 +46,8 @@ String [] remaining = cmd.getArgs();
 if (remaining.length != 2)
 	usage(1, options);
 
-String xmlDir = args[0]
-String filename = args[1]
+String xmlDir = remaining[0]
+String filename = remaining[1]
 
 String format = null;
 if (cmd.hasOption('f'))
