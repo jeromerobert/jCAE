@@ -488,11 +488,13 @@ abstract public class MeshExporter
 		TIntIntHashMap amibeTriaToUNVTria) throws IOException;
 	
 	protected void writeInit(PrintStream out)
+		throws IOException
 	{
 		//To be implemented by instanciating class
 	}
 	
 	protected void writeFinish(PrintStream out)
+		throws IOException
 	{
 		//To be implemented by instanciating class
 	}
@@ -564,6 +566,7 @@ abstract public class MeshExporter
 		
 		@Override
 		public void writeInit(PrintStream arg0)
+			throws IOException
 		{
 			arg0.println("    -1");
 			arg0.println("   164");
@@ -752,11 +755,13 @@ abstract public class MeshExporter
 		
 		@Override
 		public void writeInit(PrintStream out)
+			throws IOException
 		{
 			out.println("\nMeshVersionFormatted 1\n\nDimension\n3");
 		}
 		@Override
 		public void writeFinish(PrintStream out)
+			throws IOException
 		{
 			out.println("\nEnd");
 		}
@@ -887,6 +892,7 @@ abstract public class MeshExporter
 		
 		@Override
 		public void writeFinish(PrintStream out)
+			throws IOException
 		{
 			out.println("# Part 3 - hole list");
 			out.println("0");
