@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.DataOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
@@ -283,7 +284,7 @@ abstract public class MeshExporter
 		return new File(directory, a);
 	}
 	
-	private File getTriaFile()
+	protected File getTriaFile()
 	{
 		Element xmlNodes = (Element) document.getElementsByTagName(
 			"triangles").item(0);
@@ -960,4 +961,211 @@ abstract public class MeshExporter
 			}
 		}
 	}
+
+	/**
+	 * Convert an Amibe mesh to a VTK file.
+	 * Output file extension should be <cite>.vtp</cite>.
+	 * The documentation of the file format may be found here:
+	 * <a href="http://www.vtk.org/pdf/file-formats.pdf">
+	 * http://www.vtk.org/pdf/file-formats.pdf</a>
+	 * @todo output one VTK piece by mesh group, support VTK parellel files.
+	 * @author Jerome Robert
+	 */
+	public static class VTK extends MeshExporter
+	{
+		private boolean dummyData = true;
+		
+		public VTK(File directory, int[] groupIds)
+		{
+			super(directory, groupIds);
+		}
+		
+		public VTK(String file)
+		{
+			super(file);
+		}
+
+		/**
+		 * Write VTK header file
+		 * @param out The stream to write on 
+		 */
+		@Override
+		public void writeInit(PrintStream out)
+			throws IOException
+		{
+			long numberOfNodes=getNodeFile().length()/8/3;
+			long numberOfTriangles=getTriaFile().length()/4/3;
+			//This is Java so we write in big endian		
+			out.println("<VTKFile type=\"PolyData\" version=\"0.1\" byte_order=\"BigEndian\">");
+			out.println("<PolyData>");
+			
+			//Everything in one piece
+			//TODO write one piece by group
+			out.println("<Piece NumberOfPoints=\""+numberOfNodes+
+				"\" NumberOfPolys=\""+numberOfTriangles+"\">");
+			
+			out.println("<Points><DataArray type=\"Float64\" NumberOfComponents=\"3\" "+
+				"format=\"appended\" offset=\"0\"/></Points>");		
+			long offset=4+(numberOfNodes*8*3);		
+			
+			out.println("<Polys><DataArray type=\"Int32\" Name=\"connectivity\""+
+				" format=\"appended\" offset=\""+offset+"\"/>");
+			offset+=4+numberOfTriangles*4*3;
+			
+			out.println("<DataArray type=\"Int32\" Name=\"offsets\" format=\"appended\"" +
+				" offset=\""+offset+"\"/></Polys>");		
+			offset+=4+numberOfTriangles*4;
+			
+			if(dummyData)
+			{
+				out.println("<CellData Scalars=\"Dummy\">");
+				out.println("\t<DataArray type=\"Float64\" Name=\"Dummy\" format=\"appended\" offset=\""
+					+offset+"\"/>");
+				offset += 4+numberOfTriangles * 8;
+		
+				out.println("\t<DataArray type=\"Float64\" Name=\"Dummy x Dummy\" format=\"appended\" offset=\""
+					+offset+"\"/>");
+				//always keep track of offset in case we want to add thins to the
+				//file
+				offset += 4+numberOfTriangles * 8;
+				
+				out.println("\t<DataArray type=\"Float64\" Name=\"Dummy vector\" NumberOfComponents=\"3\""+
+					" format=\"appended\" offset=\""+offset+"\"/>");
+				//always keep track of offset in case we want to add thins to the
+				//file
+				offset += 4+numberOfTriangles*8*3;			
+				out.println("</CellData>");
+			}
+			
+			out.println("</Piece></PolyData>");
+			out.print("<AppendedData encoding=\"raw\"> _");
+			out.flush();
+		}
+	
+		/**
+		 * Write nodes nodes of the mesh
+		 * @param out stream to write on
+		 * @throws IOException
+		 */
+		@Override
+		protected void writeNodes(PrintStream out, int[] nodesID, TIntIntHashMap amibeToUNV)
+			throws IOException
+		{
+			DataOutputStream dos=new DataOutputStream(new BufferedOutputStream(out));
+			//Write the size of the array in octets
+			dos.writeInt((int) nodesID.length*8*3);
+			File f=getNodeFile();
+			// Open the file and then get a channel from the stream
+			FileInputStream fis = new FileInputStream(f);
+			FileChannel fc = fis.getChannel();
+			
+			// Map the file into memory
+			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
+			DoubleBuffer nodesBuffer=bb.asDoubleBuffer();
+			
+			int count =  0;
+			double x,y,z;
+			for(int i=0; i<nodesID.length; i++)
+			{
+				int iid=nodesID[i]*3;
+				x=nodesBuffer.get(iid);
+				y=nodesBuffer.get(iid+1);
+				z=nodesBuffer.get(iid+2);
+				amibeToUNV.put(nodesID[i], count);
+				dos.writeDouble(x);
+				dos.writeDouble(y);
+				dos.writeDouble(z);
+				count++;
+			}
+			fc.close();
+			fis.close();
+			clean(bb);
+			logger.info("Total number of nodes: "+count);
+			dos.flush();
+			out.flush();
+		}
+		 
+		/**
+		 * Write triangle connectivity
+		 * @param out the stream to write on
+		 * @throws IOException
+		 */
+		@Override
+		protected void writeTriangles(PrintStream out, int[] triangles,
+			TIntIntHashMap amibeNodeToUNVNode, TIntIntHashMap amibeTriaToUNVTria)
+			throws IOException
+		{
+			DataOutputStream dos=new DataOutputStream(new BufferedOutputStream(out));
+			//Write the size of the array in octets
+			int nbt = triangles.length/3;
+			dos.writeInt((int) nbt*4*3);
+			int count=0;
+			int triaIndex=0;
+			for(int i=0; i<groups.length; i++)
+			{
+				for(int j=0; j<groups[i].length; j++)
+				{
+					amibeTriaToUNVTria.put(groups[i][j], count);
+					dos.writeInt(amibeNodeToUNVNode.get(triangles[triaIndex++]));
+					dos.writeInt(amibeNodeToUNVNode.get(triangles[triaIndex++]));
+					dos.writeInt(amibeNodeToUNVNode.get(triangles[triaIndex++]));
+					count++;
+				}
+			}
+			logger.info("Total number of triangles: "+count);
+			//Write the size of the array in octets
+			dos.writeInt((int) nbt*4);
+			//Write the offset of each cells (in our case triangles) in the
+			//connectivity array
+			for(int i=1; i<=nbt; i++)
+				dos.writeInt(3*i);
+			dos.flush();
+			out.flush();
+		}
+		
+		@Override
+		protected void writeFinish(PrintStream out)
+			throws IOException
+		{
+			DataOutputStream dos=new DataOutputStream(new BufferedOutputStream(out));
+			if(dummyData)
+			{
+				long nbt=getTriaFile().length()/4/3;
+				//Write the size of the array in octets
+				dos.writeInt((int) nbt*8);		
+				for(int i=0; i<nbt; i++)
+					dos.writeDouble(i);
+				
+				dos.writeInt((int) nbt*8);
+				for(int i=0; i<nbt; i++)
+					dos.writeDouble((double)i*i);
+				dos.writeInt((int) nbt*8*3);
+				for(int i=0; i<nbt; i++)
+				{
+					dos.writeDouble(i);
+					dos.writeDouble(i);
+					dos.writeDouble(i);
+				}
+			}
+			dos.flush();
+			out.println("</AppendedData></VTKFile>");
+			out.flush();
+		}
+		
+		public boolean isDummyData()
+		{
+			return dummyData;
+		}
+		
+		/**
+		 * Write data cell associated to triangles
+		 * It's a scalar double value which is the ID of the triangle.
+		 * It won't help you much, it's just to have the code somewhere?
+		 */
+		public void setDummyData(boolean dummyData)
+		{
+			this.dummyData = dummyData;
+		}
+	}
+	
 }
