@@ -736,15 +736,42 @@ public class Vertex implements Serializable
 		P.transp();
 		AbstractHalfEdge ot = getIncidentAbstractHalfEdge();
 		double [] vect1 = new double[3];
+		double [] h = new double[3];
 		double [] g0 = new double[3];
+		boolean isPlanar = true;
+		Vertex d = ot.destination();
+		// First, use centroid if triangles are coplanar
+		// TODO: this particular case is handled here because quadric
+		// produced incorrect results on quasi-coplanar triangles if
+		// there are only 4 incident triangles.  This case should be
+		// investigated.
+		do
+		{
+			ot = ot.nextOriginLoop();
+			if (ot.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+			double [] p1 = ot.destination().getUV();
+			double [] p2 = ot.apex().getUV();
+			for (int i = 0; i < 3; i++)
+				vect1[i] = p1[i] - param[i];
+			for (int i = 0; i < 3; i++)
+				g0[i] = p2[i] - param[i];
+			Matrix3D.prodVect3D(vect1, g0, h);
+			if (Matrix3D.prodSca(h, normal) < 0.98 * Matrix3D.norm(h))
+			{
+				isPlanar = false;
+				break;
+			}
+		}
+		while (ot.destination() != d);
+		if (isPlanar)
+			return true;
 		double [] g1 = new double[3];
 		double [] g2 = new double[3];
-		double [] h = new double[3];
-		double dmin = Double.MAX_VALUE;
+		double [] loc = new double[3];
 		for (int i = 0; i < 3; i++)
 			g0[i] = g1[i] = g2[i] = h[i] = 0.0;
-		Vertex d = ot.destination();
-		double [] loc = new double[3];
+		d = ot.destination();
 		do
 		{
 			ot = ot.nextOriginLoop();
@@ -753,12 +780,13 @@ public class Vertex implements Serializable
 			double [] p1 = ot.destination().getUV();
 			for (int i = 0; i < 3; i++)
 				vect1[i] = p1[i] - param[i];
-			dmin = Math.min(dmin, Matrix3D.norm(vect1));
 			// Find coordinates in the local frame (t1,t2,n)
 			P.apply(vect1, loc);
+			// Compute right hand side
 			h[0] += loc[2] * loc[0] * loc[0];
 			h[1] += loc[2] * loc[0] * loc[1];
 			h[2] += loc[2] * loc[1] * loc[1];
+			// Matrix assembly
 			g0[0] += loc[0] * loc[0] * loc[0] * loc[0];
 			g0[1] += loc[0] * loc[0] * loc[0] * loc[1];
 			g0[2] += loc[0] * loc[0] * loc[1] * loc[1];
@@ -771,6 +799,7 @@ public class Vertex implements Serializable
 		g1[0] = g0[1];
 		g2[0] = g0[2];
 		g2[1] = g1[2];
+		// G = tA A
 		Metric3D G = new Metric3D(g0, g1, g2);
 		if (!G.inv())
 			return false;
@@ -778,7 +807,7 @@ public class Vertex implements Serializable
 		for (int i = 0; i < 3; i++)
 			vect1[i] = pt.param[i] - param[i];
 		P.apply(vect1, loc);
-		// Reuse vect1
+		// Reuse vect1 to store our solution (a,b,c)
 		G.apply(h, vect1);
 		loc[2] = vect1[0] * loc[0] * loc[0] + vect1[1] * loc[0] * loc[1] + vect1[2] * loc[1] * loc[1];
 		// Reuse vect1

@@ -1,3 +1,10 @@
+Thu Nov 15 01:45:26 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Vertex.java (discreteProject): Current
+	projection does not work if a vertex has four coplanar incident
+	triangles.  We now detect coplanar triangles and keep vertex
+	unmodified.
+
 Wed Nov 14 11:27:10 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/MeshExporter.java: Copy Amibe2VTK class
