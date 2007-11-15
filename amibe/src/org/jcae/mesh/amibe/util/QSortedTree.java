@@ -34,55 +34,55 @@ import org.apache.log4j.Logger;
  * that duplicate quality factors are allowed.  See examples in algorithms from
  * {@link org.jcae.mesh.amibe.algos3d}.
  */
-public abstract class QSortedTree implements Serializable
+public abstract class QSortedTree<E> implements Serializable
 {
 	private static Logger logger = Logger.getLogger(QSortedTree.class);	
-	protected final Node root = newNode(null, Double.MAX_VALUE);
+	protected final Node<E> root = newNode(null, Double.MAX_VALUE);
 	// Mapping between objects and tree nodes
-	private transient HashMap<Object, Node> map = new HashMap<Object, Node>();
+	private transient HashMap<E, Node<E>> map = new HashMap<E, Node<E>>();
 	private int nrNodes = 0;
 	
 	/**
 	 * Constructor to cast new nodes into subclass type.
 	 */
-	protected abstract Node newNode(Object o, double v);
+	protected abstract Node<E> newNode(E o, double v);
 
 	/**
 	 * Insert a new note into the binary tree.  This method always returns
 	 * <code>true</code>.
 	 */
-	protected abstract boolean insertNode(Node node);
+	protected abstract boolean insertNode(Node<E> node);
 
 	/**
 	 * Remove a note from the binary tree.  Some algorithms may remove
 	 * another node (for instance PRedBlackSortedTree), this method
 	 * returns the node which has been removed.
 	 */
-	protected abstract Node removeNode(Node p);
+	protected abstract Node<E> removeNode(Node<E> p);
 
 	@SuppressWarnings("serial")
-	public static class Node implements Comparable<Object>, Serializable
+	public static class Node<E> implements Comparable<Node<E>>, Serializable
 	{
-		private Object data;
+		private E data;
 		private double value;
-		protected final Node [] child = newChilds();
-		protected Node parent = null;
+		protected final Node<E> [] child = newChilds();
+		protected Node<E> parent = null;
 		
-		public Node [] newChilds()
+		@SuppressWarnings("unchecked")
+		protected Node<E> [] newChilds()
 		{
 			return new Node[2];
 		}
 	
-		public Node(final Object o, final double v)
+		public Node(final E o, final double v)
 		{
 			data = o;
 			value = v;
 		}
 		
 		@Override
-		public int compareTo(final Object o)
+		public int compareTo(final Node<E> that)
 		{
-			final Node that = (Node) o;
 			if (value < that.value)
 				return -1;
 			return +1;
@@ -94,9 +94,9 @@ public abstract class QSortedTree implements Serializable
 			value = v;
 		}
 		
-		public void swap(final Node that)
+		public void swap(final Node<E> that)
 		{
-			final Object temp = that.data;
+			final E temp = that.data;
 			that.data = data;
 			data = temp;
 			// For now there is no reason to swap values
@@ -108,7 +108,7 @@ public abstract class QSortedTree implements Serializable
 			return value;
 		}
 	
-		public Object getData()
+		public E getData()
 		{
 			return data;
 		}
@@ -126,11 +126,11 @@ public abstract class QSortedTree implements Serializable
 		     / \              / \
 		    T2 T3            T1 T2
 		*/
-		public Node rotateL()
+		public Node<E> rotateL()
 		{
 			//if (logger.isDebugEnabled())
 			//	logger.debug("Single left rotation around "+this);
-			final Node right = child[1];
+			final Node<E> right = child[1];
 			child[1] = right.child[0];
 			right.child[0] = this;
 			right.parent = parent;
@@ -147,11 +147,11 @@ public abstract class QSortedTree implements Serializable
 		       / \                      / \
 		      T1 T2                    T2 T3
 		*/
-		public Node rotateR()
+		public Node<E> rotateR()
 		{
 			//if (logger.isDebugEnabled())
 			//	logger.debug("Single right rotation around "+this);
-			final Node left = child[0];
+			final Node<E> left = child[0];
 			child[0] = left.child[1];
 			left.child[1] = this;
 			left.parent = parent;
@@ -170,12 +170,12 @@ public abstract class QSortedTree implements Serializable
 		  / \                     / \
 		 T2 T3                   T3 T4
 		*/
-		public Node rotateRL()
+		public Node<E> rotateRL()
 		{
 			//if (logger.isDebugEnabled())
 			//	logger.debug("Right+left rotation around "+this);
-			final Node right = child[1];          // C
-			final Node newRoot = right.child[0];  // B
+			final Node<E> right = child[1];          // C
+			final Node<E> newRoot = right.child[0];  // B
 			// Right rotation
 			right.child[0] = newRoot.child[1];
 			newRoot.child[1] = right;
@@ -202,12 +202,12 @@ public abstract class QSortedTree implements Serializable
 		   / \              / \
 		  T2 T3            T1 T2
 		*/
-		public Node rotateLR()
+		public Node<E> rotateLR()
 		{
 			//if (logger.isDebugEnabled())
 			//	logger.debug("Left+right rotation around "+this);
-			final Node left = child[0];         // A
-			final Node newRoot = left.child[1]; // B
+			final Node<E> left = child[0];         // A
+			final Node<E> newRoot = left.child[1]; // B
 	
 			assert newRoot != null;
 			// Left rotation
@@ -229,25 +229,25 @@ public abstract class QSortedTree implements Serializable
 	
 		// The following 4 methods are useful for tree traversal.
 		// A NullPointerException is raised if they are used on an empty tree!
-		Node firstNode()
+		Node<E> firstNode()
 		{
-			Node current = this;
+			Node<E> current = this;
 			while (current.child[0] != null)
 				current = current.child[0];
 			return current;
 		}
 	
-		Node lastNode()
+		Node<E> lastNode()
 		{
-			Node current = this;
+			Node<E> current = this;
 			while (current.child[1] != null)
 				current = current.child[1];
 			return current;
 		}
 	
-		public Node previousNode()
+		public Node<E> previousNode()
 		{
-			Node current = this;
+			Node<E> current = this;
 			if (current.child[0] != null)
 			{
 				current = current.child[0];
@@ -260,9 +260,9 @@ public abstract class QSortedTree implements Serializable
 			return current.parent;
 		}
 	
-		public Node nextNode()
+		public Node<E> nextNode()
 		{
-			Node current = this;
+			Node<E> current = this;
 			if (current.child[1] != null)
 			{
 				current = current.child[1];
@@ -283,12 +283,12 @@ public abstract class QSortedTree implements Serializable
 		throws java.io.IOException, ClassNotFoundException
 	{
 		s.defaultReadObject();
-		map = new HashMap<Object, Node>(nrNodes);
+		map = new HashMap<E, Node<E>>(nrNodes);
 		if (nrNodes == 0)
 			return;
-		for (Iterator<Node> it = iterator(); it.hasNext(); )
+		for (Iterator<Node<E>> it = iterator(); it.hasNext(); )
 		{
-			Node current = it.next();
+			Node<E> current = it.next();
 			map.put(current.getData(), current);
 		}
 	}
@@ -307,10 +307,10 @@ public abstract class QSortedTree implements Serializable
 	 * @param o      object
 	 * @param value  quality factor
 	 */
-	public final void insert(Object o, double value)
+	public final void insert(E o, double value)
 	{
 		assert map.get(o) == null : "Object already in tree: "+o;
-		Node node = newNode(o, value);
+		Node<E> node = newNode(o, value);
 		if (logger.isDebugEnabled())
 			logger.debug("Insert "+node+" "+" value: "+value+" "+o);
 		map.put(o, node);
@@ -324,16 +324,16 @@ public abstract class QSortedTree implements Serializable
 	 * @return  <code>true</code> if node was present in tree,
 	 * </code>false</code> otherwise.
 	 */
-	public final boolean remove(Object o)
+	public final boolean remove(E o)
 	{
-		Node p = map.get(o);
+		Node<E> p = map.get(o);
 		if (logger.isDebugEnabled())
 			logger.debug("Remove "+p+" "+o);
 		if (p == null)
 			return false;
 		nrNodes--;
 		map.remove(o);
-		Node r = removeNode(p);
+		Node<E> r = removeNode(p);
 		// PRedBlackSortedTree implementation may swap p
 		// and r nodes and remove r, we then need to
 		// update map.
@@ -354,14 +354,14 @@ public abstract class QSortedTree implements Serializable
 	 * @return <code>true</code> if object was present in tree,
 	 *         <code>false</code> otherwise.
 	 */
-	public final boolean update(Object o, double value)
+	public final boolean update(E o, double value)
 	{
-		Node p = map.get(o);
+		Node<E> p = map.get(o);
 		if (logger.isDebugEnabled())
 			logger.debug("Update "+p+" content to "+value);
 		if (p == null)
 			return false;
-		Node r = removeNode(p);
+		Node<E> r = removeNode(p);
 		// PRedBlackSortedTree implementation may swap p
 		// and r nodes and remove r, we then need to
 		// update map.
@@ -389,7 +389,7 @@ public abstract class QSortedTree implements Serializable
 		showNode(root.child[0]);
 	}
 	
-	private static void showNode(Node node)
+	private void showNode(Node<E> node)
 	{
 		System.out.print(node.toString());
 		if (node.child[0] != null)
@@ -425,7 +425,7 @@ public abstract class QSortedTree implements Serializable
 		showNodeValues(root.child[0]);
 	}
 	
-	private static void showNodeValues(Node node)
+	private void showNodeValues(Node<E> node)
 	{
 		if (node.child[0] != null)
 		{
@@ -446,7 +446,7 @@ public abstract class QSortedTree implements Serializable
 	 * @return <code>true</code> if this tree contains this object,
 	 *   <code>false</code> otherwise.
 	 */
-	public final boolean contains(Object o)
+	public final boolean contains(E o)
 	{
 		return map.containsKey(o);
 	}
@@ -471,26 +471,26 @@ public abstract class QSortedTree implements Serializable
 		return root.child[0].getValue();
 	}
 	
-	private static Iterator<Node> nullIterator = new Iterator<Node>()
+	private Iterator<Node<E>> nullIterator = new Iterator<Node<E>>()
 	{
 		public boolean hasNext() { return false; }
-		public Node next() { throw new NoSuchElementException(); }
+		public Node<E> next() { throw new NoSuchElementException(); }
 		public void remove() { throw new RuntimeException(); }
 	};
 
-	public Iterator<Node> iterator()
+	public Iterator<Node<E>> iterator()
 	{
 		if (nrNodes == 0)
 			return nullIterator;
-		return new Iterator<Node>()
+		return new Iterator<Node<E>>()
 		{
-			private Node current = root;
-			private Node next = root.child[0].firstNode();
+			private Node<E> current = root;
+			private Node<E> next = root.child[0].firstNode();
 			public boolean hasNext()
 			{
 				return next != null;
 			}
-			public Node next()
+			public Node<E> next()
 			{
 				current = next;
 				if (current == null)
@@ -506,19 +506,19 @@ public abstract class QSortedTree implements Serializable
 		};
 	}
 	
-	public Iterator<Node> backwardIterator()
+	public Iterator<Node<E>> backwardIterator()
 	{
 		if (nrNodes == 0)
 			return nullIterator;
-		return new Iterator<Node>()
+		return new Iterator<Node<E>>()
 		{
-			private Node current = root;
-			private Node next = root.child[0].lastNode();
+			private Node<E> current = root;
+			private Node<E> next = root.child[0].lastNode();
 			public boolean hasNext()
 			{
 				return next != null;
 			}
-			public Node next()
+			public Node<E> next()
 			{
 				current = next;
 				if (current == null)

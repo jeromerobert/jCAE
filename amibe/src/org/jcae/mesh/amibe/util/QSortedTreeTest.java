@@ -25,7 +25,7 @@ import java.util.Iterator;
 
 public class QSortedTreeTest
 {
-	protected QSortedTree tree;
+	protected QSortedTree<Integer> tree;
 
 	private Integer [] unitTestInit(int n)
 	{
@@ -42,16 +42,16 @@ public class QSortedTreeTest
 	{
 		Integer [] iii = unitTestInit(n);
 		int i = 0;
-		for (Iterator<QSortedTree.Node> it = tree.iterator(); it.hasNext(); i++)
+		for (Iterator<QSortedTree.Node<Integer>> it = tree.iterator(); it.hasNext(); i++)
 		{
-			QSortedTree.Node node = it.next();
+			QSortedTree.Node<Integer> node = it.next();
 			assertTrue("Wrong iterator: "+i+" != "+node.getData(), node.getData().equals(Integer.valueOf(i)));
 		}
 		assertTrue("Wrong iterator", i == n);
 		i = n-1;
-		for (Iterator<QSortedTree.Node> it = tree.backwardIterator(); it.hasNext(); i--)
+		for (Iterator<QSortedTree.Node<Integer>> it = tree.backwardIterator(); it.hasNext(); i--)
 		{
-			QSortedTree.Node node = it.next();
+			QSortedTree.Node<Integer> node = it.next();
 			assertTrue("Wrong backward iterator: "+i+" != "+node.getData(), node.getData().equals(Integer.valueOf(i)));
 		}
 		assertTrue("Wrong backward iterator", i == -1);

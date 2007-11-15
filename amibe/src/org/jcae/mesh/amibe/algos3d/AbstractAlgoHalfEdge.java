@@ -50,7 +50,7 @@ public abstract class AbstractAlgoHalfEdge
 	protected int notProcessed = 0;
 	protected int notInTree = 0;
 	private int progressBarStatus = 10000;
-	protected QSortedTree tree = new PAVLSortedTree();
+	protected QSortedTree<HalfEdge> tree = new PAVLSortedTree<HalfEdge>();
 	
 	protected abstract void preProcessAllHalfEdges();
 	protected abstract void postProcessAllHalfEdges();
@@ -175,13 +175,13 @@ public abstract class AbstractAlgoHalfEdge
 		{
 			preProcessEdge();
 			HalfEdge current = null;
-			Iterator<QSortedTree.Node> itt = tree.iterator();
+			Iterator<QSortedTree.Node<HalfEdge>> itt = tree.iterator();
 			if (processed > 0 && (processed % progressBarStatus) == 0)
 				thisLogger().info("Edges processed: "+processed);
 			while (itt.hasNext())
 			{
-				QSortedTree.Node q = itt.next();
-				current = (HalfEdge) q.getData();
+				QSortedTree.Node<HalfEdge> q = itt.next();
+				current = q.getData();
 				cost = q.getValue();
 				if (nrFinal == 0 && cost > tolerance)
 					break;
@@ -306,6 +306,7 @@ public abstract class AbstractAlgoHalfEdge
 	{
 	}
 
+	@SuppressWarnings("unchecked")
 	protected final boolean restoreState()
 	{
 		try
@@ -314,7 +315,7 @@ public abstract class AbstractAlgoHalfEdge
 			ObjectInputStream q = new ObjectInputStream(istream);
 			System.out.println("Loading restored state");
 			mesh = (Mesh) q.readObject();
-			tree = (QSortedTree) q.readObject();
+			tree = (QSortedTree<HalfEdge>) q.readObject();
 			appendRestoreState(q);
 			System.out.println("... Done.");
 			q.close();

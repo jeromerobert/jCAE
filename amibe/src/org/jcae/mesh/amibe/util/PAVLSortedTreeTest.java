@@ -28,7 +28,7 @@ public class PAVLSortedTreeTest extends QSortedTreeTest
 {
 	@Before public void createTree()
 	{
-		tree = new PAVLSortedTree();
+		tree = new PAVLSortedTree<Integer>();
 	}
 
 	/* Single left rotation
@@ -116,7 +116,7 @@ public class PAVLSortedTreeTest extends QSortedTreeTest
 		tree.insert(Integer.valueOf(5), 5.0);
 		tree.insert(Integer.valueOf(3), 3.0);
 		int i = 1;
-		for (Iterator<QSortedTree.Node> it = tree.iterator(); it.hasNext(); i++)
+		for (Iterator<QSortedTree.Node<Integer>> it = tree.iterator(); it.hasNext(); i++)
 			assertTrue(it.next().getData().equals(Integer.valueOf(i)));
 	}
 	@Test public void backwardIterator()
@@ -129,7 +129,7 @@ public class PAVLSortedTreeTest extends QSortedTreeTest
 		tree.insert(Integer.valueOf(5), 5.0);
 		tree.insert(Integer.valueOf(3), 3.0);
 		int i = 7;
-		for (Iterator<QSortedTree.Node> it = tree.backwardIterator(); it.hasNext(); i--)
+		for (Iterator<QSortedTree.Node<Integer>> it = tree.backwardIterator(); it.hasNext(); i--)
 			assertTrue(it.next().getData().equals(Integer.valueOf(i)));
 	}
 

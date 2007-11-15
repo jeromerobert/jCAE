@@ -41,20 +41,21 @@ import org.apache.log4j.Logger;
  * and removal.  Node insertions and removals are explained in detail at
  * <a href="http://en.wikipedia.org/wiki/Red-Black_tree">wikipedia</a>.
  */
-public class PRedBlackSortedTree extends QSortedTree
+public class PRedBlackSortedTree<E> extends QSortedTree<E>
 {
 	private static Logger logger = Logger.getLogger(PRedBlackSortedTree.class);	
-	private static class Node extends QSortedTree.Node
+	private static class Node<E> extends QSortedTree.Node<E>
 	{
 		boolean isRed;
 		
+		@SuppressWarnings("unchecked")
 		@Override
-		public QSortedTree.Node [] newChilds()
+		protected Node<E> [] newChilds()
 		{
 			return new Node[2];
 		}
 
-		public Node(Object o, double v)
+		public Node(E o, double v)
 		{
 			super(o, v);
 			isRed = true;
@@ -75,23 +76,23 @@ public class PRedBlackSortedTree extends QSortedTree
 	}
 
 	@Override
-	public final QSortedTree.Node newNode(Object o, double v)
+	public final QSortedTree.Node<E> newNode(E o, double v)
 	{
-		return new Node(o, v);
+		return new Node<E>(o, v);
 	}
 
 	// Helper function
-	private static final boolean isRedNode(QSortedTree.Node x)
+	private final boolean isRedNode(QSortedTree.Node<E> x)
 	{
-		return (x != null) && ((Node) x).isRed;
+		return (x != null) && ((Node<E>) x).isRed;
 	}
 	
 	@Override
-	public final boolean insertNode(QSortedTree.Node o)
+	public final boolean insertNode(QSortedTree.Node<E> o)
 	{
-		Node p = (Node) o;
-		Node current = (Node) root.child[0];
-		Node q = (Node) root;
+		Node<E> p = (Node<E>) o;
+		Node<E> current = (Node<E>) root.child[0];
+		Node<E> q = (Node<E>) root;
 		int lastDir = 0;
 		while (current != null)
 		{
@@ -100,7 +101,7 @@ public class PRedBlackSortedTree extends QSortedTree
 			else
 				lastDir = 1;
 			q = current;
-			current = (Node) current.child[lastDir];
+			current = (Node<E>) current.child[lastDir];
 		}
 		// Insert node
 		q.child[lastDir] = p;
@@ -115,31 +116,31 @@ public class PRedBlackSortedTree extends QSortedTree
 			// other cases below.
 			logger.debug("Case I1");
 			p.isRed = false;
-			assert !((Node) root.child[0]).isRed;
+			assert !((Node<E>) root.child[0]).isRed;
 			return true;
 		}
 		for (; p != root.child[0]; )
 		{
-			q = (Node) p.parent;
+			q = (Node<E>) p.parent;
 			// If parent is black, property 2 is preserved,
 			// everything is fine.
 			// Case I2: parent is black
 			if (!q.isRed)
 			{
 				logger.debug("Case I2");
-				assert !((Node) root.child[0]).isRed;
+				assert !((Node<E>) root.child[0]).isRed;
 				return true;
 			}
 			// Parent is red, so it cannot be the root tree,
 			// and grandparent is black.
-			Node grandparent = (Node) q.parent;
+			Node<E> grandparent = (Node<E>) q.parent;
 			assert grandparent != root;
 			if (grandparent.child[0] == q)
 				lastDir = 0;
 			else
 				lastDir = 1;
 			int sibDir = 1 - lastDir;
-			Node uncle = (Node) grandparent.child[sibDir];
+			Node<E> uncle = (Node<E>) grandparent.child[sibDir];
 			if (isRedNode(uncle))
 			{
 				// Case I3: uncle is red
@@ -175,7 +176,7 @@ public class PRedBlackSortedTree extends QSortedTree
 					else
 						grandparent.child[1] = q.rotateR();
 					p = q;
-					q = (Node) p.parent;
+					q = (Node<E>) p.parent;
 				}
 				/* Rotate on opposite way and recolor.  Either
 				   uncle is null, or we come from case 3 and
@@ -194,7 +195,7 @@ public class PRedBlackSortedTree extends QSortedTree
 				  p.child[0] != null && p.child[1] != null);
 				logger.debug("Case I5");
 
-				Node greatgrandparent = (Node) grandparent.parent;
+				Node<E> greatgrandparent = (Node<E>) grandparent.parent;
 				grandparent.isRed = true;
 				q.isRed = false;
 				if (greatgrandparent.child[0] == grandparent)
@@ -206,21 +207,21 @@ public class PRedBlackSortedTree extends QSortedTree
 					greatgrandparent.child[lastDir] = grandparent.rotateR();
 				else
 					greatgrandparent.child[lastDir] = grandparent.rotateL();
-				assert !((Node) root.child[0]).isRed;
+				assert !((Node<E>) root.child[0]).isRed;
 				return true;
 			}
 		}
-		((Node) root.child[0]).isRed = false;
+		((Node<E>) root.child[0]).isRed = false;
 		assert isValid();
 		return true;
 	}
 	
 	@Override
-	public final QSortedTree.Node removeNode(QSortedTree.Node o)
+	public final QSortedTree.Node<E> removeNode(QSortedTree.Node<E> o)
 	{
-		Node p = (Node) o;
-		Node ret = p;
-		Node q = (Node) p.parent;
+		Node<E> p = (Node<E>) o;
+		Node<E> ret = p;
+		Node<E> q = (Node<E>) p.parent;
 		int lastDir = 0;
 		if (q.child[1] == p)
 			lastDir = 1;
@@ -234,11 +235,11 @@ public class PRedBlackSortedTree extends QSortedTree
 		{
 			// p has a right child.  Replace p by its
 			// successor, and update q and lastDir.
-			Node r = (Node) p.nextNode();
+			Node<E> r = (Node<E>) p.nextNode();
 			// Do not modify p's color!
 			p.swap(r);
 			p = r;
-			q = (Node) p.parent;
+			q = (Node<E>) p.parent;
 			if (q.child[0] == p)
 				lastDir = 0;
 			else
@@ -258,7 +259,7 @@ public class PRedBlackSortedTree extends QSortedTree
 		// sibling.
 		for (;;)
 		{
-			p = (Node) q.child[lastDir];
+			p = (Node<E>) q.child[lastDir];
 			if (isRedNode(p))
 			{
 				p.isRed = false;
@@ -273,11 +274,11 @@ public class PRedBlackSortedTree extends QSortedTree
 				break;
 			}
 			int sibDir = 1 - lastDir;
-			Node grandparent = (Node) q.parent;
+			Node<E> grandparent = (Node<E>) q.parent;
 			int gLastDir = 0;
 			if (grandparent.child[1] == q)
 				gLastDir = 1;
-			Node sibling = (Node) q.child[sibDir];
+			Node<E> sibling = (Node<E>) q.child[sibDir];
 			// A black node is removed, so its sibling cannot
 			// be null.
 			assert sibling != null : q.toString();
@@ -303,7 +304,7 @@ public class PRedBlackSortedTree extends QSortedTree
 					grandparent.child[gLastDir] = q.rotateR();
 				grandparent = sibling;
 				gLastDir = lastDir;
-				sibling = (Node) q.child[sibDir];
+				sibling = (Node<E>) q.child[sibDir];
 			}
 			// Now sibling is black
 			assert !sibling.isRed;
@@ -334,7 +335,7 @@ public class PRedBlackSortedTree extends QSortedTree
 					// Rotate at sibling and paint nodes
 					// so that sibling.child[sibDir] is red.
 					logger.debug("Case R5");
-					Node y = (Node) sibling.child[lastDir];
+					Node<E> y = (Node<E>) sibling.child[lastDir];
 					y.isRed = false;
 					sibling.isRed = true;
 					if (lastDir == 0)
@@ -367,7 +368,7 @@ public class PRedBlackSortedTree extends QSortedTree
 				assert !isRedNode(sibling) && isRedNode(sibling.child[sibDir]);
 				sibling.isRed = q.isRed;
 				q.isRed = false;
-				((Node) sibling.child[sibDir]).isRed = false;
+				((Node<E>) sibling.child[sibDir]).isRed = false;
 				if (lastDir == 0)
 					grandparent.child[gLastDir] = q.rotateL();
 				else
@@ -378,7 +379,7 @@ public class PRedBlackSortedTree extends QSortedTree
 				lastDir = 0;
 			else
 				lastDir = 1;
-			q = (Node) q.parent;
+			q = (Node<E>) q.parent;
 		}
 		assert isValid();
 		return ret;
@@ -397,9 +398,9 @@ public class PRedBlackSortedTree extends QSortedTree
 	{
 		if (root.child[0] == null)
 			return true;
-		for (Iterator<QSortedTree.Node> it = iterator(); it.hasNext(); )
+		for (Iterator<QSortedTree.Node<E>> it = iterator(); it.hasNext(); )
 		{
-			QSortedTree.Node current = it.next();
+			QSortedTree.Node<E> current = it.next();
 			if (current.child[0] != null && current.child[0].parent != current)
 				return false;
 			if (current.child[1] != null && current.child[1].parent != current)
@@ -410,7 +411,7 @@ public class PRedBlackSortedTree extends QSortedTree
 
 	public boolean debugIsValid()
 	{
-		Node current = (Node) root.child[0];
+		Node<E> current = (Node<E>) root.child[0];
 		if (isRedNode(current))
 			return false;
 		if (current == null)
@@ -420,7 +421,7 @@ public class PRedBlackSortedTree extends QSortedTree
 		{
 			if (!isRedNode(current))
 				blackNodes++;
-			current = (Node) current.child[0];
+			current = (Node<E>) current.child[0];
 		}
 		// Now traverse the tree
 		while (current != root)
@@ -435,14 +436,14 @@ public class PRedBlackSortedTree extends QSortedTree
 				return false;
 			if (current.child[1] != null)
 			{
-				current = (Node) current.child[1];
+				current = (Node<E>) current.child[1];
 				if (!isRedNode(current))
 					blackNodes++;
 				else if (isRedNode(current.child[0]) || isRedNode(current.child[1]))
 					return false;
 				while (current.child[0] != null)
 				{
-					current = (Node) current.child[0];
+					current = (Node<E>) current.child[0];
 					if (!isRedNode(current))
 						blackNodes++;
 					else if (isRedNode(current.child[0]) || isRedNode(current.child[1]))
@@ -458,9 +459,9 @@ public class PRedBlackSortedTree extends QSortedTree
 						blackNodes--;
 					else if (isRedNode(current.child[0]) || isRedNode(current.child[1]))
 						return false;
-					current = (Node) current.parent;
+					current = (Node<E>) current.parent;
 				}
-				current = (Node) current.parent;
+				current = (Node<E>) current.parent;
 			}
 		}
 		return true;

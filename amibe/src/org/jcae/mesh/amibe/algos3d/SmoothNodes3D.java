@@ -61,7 +61,7 @@ public class SmoothNodes3D
 	private static final double scaleFactor = 12.0 * Math.sqrt(3.0);
 	private static double speed = 0.6;
 	private final Vertex c;
-	private final QSortedTree tree = new PAVLSortedTree();
+	private final QSortedTree<Triangle> tree = new PAVLSortedTree<Triangle>();
 	int processed = 0;
 	int notProcessed = 0;
 	
@@ -141,12 +141,12 @@ public class SmoothNodes3D
 	{
  		AbstractHalfEdge ot = null;
 		nodeset.clear();
-		for (Iterator<QSortedTree.Node> itt = tree.iterator(); itt.hasNext(); )
+		for (Iterator<QSortedTree.Node<Triangle>> itt = tree.iterator(); itt.hasNext(); )
 		{
-			QSortedTree.Node q = itt.next();
+			QSortedTree.Node<Triangle> q = itt.next();
 			if (q.getValue() > tolerance)
 				break;
-			Triangle f = (Triangle) q.getData();
+			Triangle f = q.getData();
  			ot = f.getAbstractHalfEdge(ot);
 			double l0 = f.vertex[1].distance3D(f.vertex[2]);
 			double l1 = f.vertex[2].distance3D(f.vertex[0]);
