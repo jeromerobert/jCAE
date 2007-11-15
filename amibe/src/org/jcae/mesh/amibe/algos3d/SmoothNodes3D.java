@@ -32,7 +32,7 @@ import org.jcae.mesh.xmldata.MeshWriter;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.Collection;
 import java.util.Iterator;
 import java.io.IOException;
 import org.apache.log4j.Logger;
@@ -61,6 +61,9 @@ public class SmoothNodes3D
 	private static final double scaleFactor = 12.0 * Math.sqrt(3.0);
 	private static double speed = 0.6;
 	private final Vertex c;
+	private final QSortedTree tree = new PAVLSortedTree();
+	int processed = 0;
+	int notProcessed = 0;
 	
 	/**
 	 * Creates a <code>SmoothNodes3D</code> instance.
@@ -114,7 +117,6 @@ public class SmoothNodes3D
 	{
 		logger.info("Run "+getClass().getName());
 		// First compute triangle quality
-		QSortedTree tree = new PAVLSortedTree();
 		AbstractHalfEdge ot = null;
 		for (Triangle f: mesh.getTriangles())
 		{
@@ -125,20 +127,20 @@ public class SmoothNodes3D
 			if (val <= tolerance)
 				tree.insert(f, val);
 		}
-		int cnt = 0;
+		Collection<Vertex> nodeset = new HashSet<Vertex>(mesh.getTriangles().size()/2);
 		for (int i = 0; i < nloop; i++)
-			cnt += computeMesh(tree);
-		logger.info("Number of moved points: "+cnt);
+			processAllTriangles(nodeset);
+		logger.info("Number of moved points: "+processed);
+		logger.info("Total number of points not moved during processing: "+notProcessed);
 	}
 	
 	/*
 	 * Moves all nodes using a modified Laplacian smoothing.
 	 */
-	private int computeMesh(QSortedTree tree)
+	private void processAllTriangles(Collection<Vertex> nodeset)
 	{
-		int ret = 0;
  		AbstractHalfEdge ot = null;
-		Set<Vertex> nodeset = new HashSet<Vertex>(2*mesh.getTriangles().size());
+		nodeset.clear();
 		for (Iterator<QSortedTree.Node> itt = tree.iterator(); itt.hasNext(); )
 		{
 			QSortedTree.Node q = itt.next();
@@ -180,18 +182,19 @@ public class SmoothNodes3D
 			if (!nodeset.contains(n))
 			{
 				nodeset.add(n);
-				if (!n.isMutable())
+				if (!n.isMutable() || !n.isManifold())
 					continue;
 				if (n.getRef() != 0 && preserveBoundaries)
 					continue;
-				if (smoothNode(ot, ret))
-					ret++;
+				if (smoothNode(ot))
+					processed++;
+				else
+					notProcessed++;
 			}
 		}
-		return ret;
 	}
 	
-	private boolean smoothNode(AbstractHalfEdge ot, int processed)
+	private boolean smoothNode(AbstractHalfEdge ot)
 	{
 		Vertex n = ot.origin();
 		double[] oldp3 = n.getUV();
@@ -201,38 +204,44 @@ public class SmoothNodes3D
 		double[] centroid3 = c.getUV();
 		centroid3[0] = centroid3[1] = centroid3[2] = 0.;
 		double lmin = Double.MAX_VALUE;
-		for (Vertex v: n.getNeighboursNodes())
+		assert n.isManifold();
+		Vertex d = ot.destination();
+		do
 		{
-			if (v == mesh.outerVertex)
-				continue;
-			nn++;
-			double l = n.distance3D(v);
-			if (l < lmin)
-				lmin = l;
-			double[] newp3 = v.getUV();
-			if (sizeTarget > 0.0)
+			ot = ot.nextOriginLoop();
+			Vertex v = ot.destination();
+			if (v != mesh.outerVertex)
 			{
-				// Find the point on this edge which has the
-				// desired length
-				if (l <= 0.0)
+				nn++;
+				double l = n.distance3D(v);
+				if (l < lmin)
+					lmin = l;
+				double[] newp3 = v.getUV();
+				if (sizeTarget > 0.0)
 				{
-					nn--;
-					continue;
+					// Find the point on this edge which has the
+					// desired length
+					if (l <= 0.0)
+					{
+						nn--;
+						continue;
+					}
+					l = sizeTarget / l;
+					if (l > 2.0)
+						l = 2.0;
+					else if (l < 0.5)
+						l = 0.5;
+					for (int i = 0; i < 3; i++)
+						centroid3[i] += newp3[i] + l * (oldp3[i] - newp3[i]);
 				}
-				l = sizeTarget / l;
-				if (l > 2.0)
-					l = 2.0;
-				else if (l < 0.5)
-					l = 0.5;
-				for (int i = 0; i < 3; i++)
-					centroid3[i] += newp3[i] + l * (oldp3[i] - newp3[i]);
-			}
-			else
-			{
-				for (int i = 0; i < 3; i++)
-					centroid3[i] += newp3[i];
+				else
+				{
+					for (int i = 0; i < 3; i++)
+						centroid3[i] += newp3[i];
+				}
 			}
 		}
+		while (ot.destination() != d);
 		assert (nn > 0);
 		for (int i = 0; i < 3; i++)
 			centroid3[i] /= nn;
