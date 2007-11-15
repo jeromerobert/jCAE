@@ -389,7 +389,7 @@ public abstract class QSortedTree<E> implements Serializable
 		showNode(root.child[0]);
 	}
 	
-	private void showNode(Node<E> node)
+	private static <E> void showNode(Node<E> node)
 	{
 		System.out.print(node.toString());
 		if (node.child[0] != null)
@@ -425,7 +425,7 @@ public abstract class QSortedTree<E> implements Serializable
 		showNodeValues(root.child[0]);
 	}
 	
-	private void showNodeValues(Node<E> node)
+	private static <E> void showNodeValues(Node<E> node)
 	{
 		if (node.child[0] != null)
 		{

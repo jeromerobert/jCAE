@@ -82,7 +82,7 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 	}
 
 	// Helper function
-	private final boolean isRedNode(QSortedTree.Node<E> x)
+	private final static <E> boolean isRedNode(QSortedTree.Node<E> x)
 	{
 		return (x != null) && ((Node<E>) x).isRed;
 	}
