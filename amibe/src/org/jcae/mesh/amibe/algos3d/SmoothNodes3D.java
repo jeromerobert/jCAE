@@ -183,9 +183,15 @@ public class SmoothNodes3D
 			{
 				nodeset.add(n);
 				if (!n.isMutable() || !n.isManifold())
+				{
+					notProcessed++;
 					continue;
+				}
 				if (n.getRef() != 0 && preserveBoundaries)
+				{
+					notProcessed++;
 					continue;
+				}
 				if (smoothNode(ot))
 					processed++;
 				else
