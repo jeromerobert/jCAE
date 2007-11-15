@@ -1,3 +1,8 @@
+Thu Nov 15 12:58:24 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Vertex.java (discreteProject): Remove
+	previous workaround and instead detect degenerated cases.
+
 Thu Nov 15 01:45:26 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Vertex.java (discreteProject): Current

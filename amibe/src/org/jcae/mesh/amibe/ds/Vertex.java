@@ -725,8 +725,21 @@ public class Vertex implements Serializable
 		// We search for the quadric
 		//   F(x,y) = a x^2 + b xy + c y^2 - z
 		// which fits best for all neighbour vertices.
-		// Firstly set (t1,t2) to be an arbitrary map of the
-		// tangent plane.
+		// First set (t1,t2) to be an arbitrary map of the
+		// tangent plane.  In this local frame, each neighbor
+		// has coordinates (u[i], v[i], w[i]).  We want to find (a,b,c)
+		// to minimize
+		//   sum (a u[i]^2 + b u[i] v[i] + c v[i]^2 - w[i], i=1...m)
+		// In matricial form, we solve this usually overdetermined system
+		//      / u[1]^2    u[1] v[1]   v[1]^2 \           / w[1]\
+		//     |  u[2]^2    u[2] v[2]   v[2]^2  |  /a\    |  w[2] |
+		//     |  u[3]^2    u[3] v[3]   v[3]^2  | | b | = |  w[3] |
+		//     |   ...         ...       ...    |  \c/    |   ... |
+		//      \ u[m]^2    u[m] v[m]   v[m]^2 /           \ w[m]/
+		//                   A                      X   =     b
+		// by multiplying by tA to the left
+		//    tA A X = tA b
+		// If G = tA A is not singular, X = inv(tA A) tA b
 		double [] t1 = new double[3];
 		double [] t2 = new double[3];
 		if (!computeTangentPlane(normal, t1, t2))
@@ -738,40 +751,12 @@ public class Vertex implements Serializable
 		double [] vect1 = new double[3];
 		double [] h = new double[3];
 		double [] g0 = new double[3];
-		boolean isPlanar = true;
-		Vertex d = ot.destination();
-		// First, use centroid if triangles are coplanar
-		// TODO: this particular case is handled here because quadric
-		// produced incorrect results on quasi-coplanar triangles if
-		// there are only 4 incident triangles.  This case should be
-		// investigated.
-		do
-		{
-			ot = ot.nextOriginLoop();
-			if (ot.hasAttributes(AbstractHalfEdge.OUTER))
-				continue;
-			double [] p1 = ot.destination().getUV();
-			double [] p2 = ot.apex().getUV();
-			for (int i = 0; i < 3; i++)
-				vect1[i] = p1[i] - param[i];
-			for (int i = 0; i < 3; i++)
-				g0[i] = p2[i] - param[i];
-			Matrix3D.prodVect3D(vect1, g0, h);
-			if (Matrix3D.prodSca(h, normal) < 0.98 * Matrix3D.norm(h))
-			{
-				isPlanar = false;
-				break;
-			}
-		}
-		while (ot.destination() != d);
-		if (isPlanar)
-			return true;
 		double [] g1 = new double[3];
 		double [] g2 = new double[3];
 		double [] loc = new double[3];
 		for (int i = 0; i < 3; i++)
 			g0[i] = g1[i] = g2[i] = h[i] = 0.0;
-		d = ot.destination();
+		Vertex d = ot.destination();
 		do
 		{
 			ot = ot.nextOriginLoop();
@@ -794,22 +779,31 @@ public class Vertex implements Serializable
 			g2[2] += loc[1] * loc[1] * loc[1] * loc[1];
 		}
 		while (ot.destination() != d);
-		// vect1 can be reused
 		g1[1] = g0[2];
 		g1[0] = g0[1];
 		g2[0] = g0[2];
 		g2[1] = g1[2];
+		// If g0, g1 and g2 are colinear, our linear system is not determined.
+		// This happens when triangles are almost coplanar, so we can return
+		// true.
+		// We do not use G.det() here to not create G if it is not needed.
+		Matrix3D.prodVect3D(g0, g1, vect1);
+		double det = Matrix3D.prodSca(g2, vect1);
+		if (det*det < 1.e-12 * Matrix3D.prodSca(g0,g0)*Matrix3D.prodSca(g1,g1)*Matrix3D.prodSca(g2,g2))
+			return true;
 		// G = tA A
 		Metric3D G = new Metric3D(g0, g1, g2);
 		if (!G.inv())
 			return false;
+		// Reuse g0 to store our solution (a,b,c)
+		G.apply(h, g0);
 		// Now project pt onto this quadric
 		for (int i = 0; i < 3; i++)
 			vect1[i] = pt.param[i] - param[i];
+		// Local coordinates
 		P.apply(vect1, loc);
-		// Reuse vect1 to store our solution (a,b,c)
-		G.apply(h, vect1);
-		loc[2] = vect1[0] * loc[0] * loc[0] + vect1[1] * loc[0] * loc[1] + vect1[2] * loc[1] * loc[1];
+		// Compute z = a x^2 + b xy + c y^2
+		loc[2] = g0[0] * loc[0] * loc[0] + g0[1] * loc[0] * loc[1] + g0[2] * loc[1] * loc[1];
 		// Reuse vect1
 		P.transp();
 		P.apply(loc, vect1);
