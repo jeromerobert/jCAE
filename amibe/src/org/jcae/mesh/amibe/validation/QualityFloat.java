@@ -172,7 +172,9 @@ public class QualityFloat
 	private float getValueByPercentPrivate(int target, float q1, float q2, float [] values, int [] number)
 	{
 		float delta = (q2 - q1) / values.length;
-		if (delta <= 0.0f)
+		if (delta == 0.0f)
+			return q1;
+		if (delta < 0.0f)
 			throw new IllegalArgumentException();
 		for (int i = 0; i < values.length; i++)
 			values[i] = q1 + i * delta;
