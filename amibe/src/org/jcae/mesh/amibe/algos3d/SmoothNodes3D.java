@@ -261,7 +261,7 @@ public class SmoothNodes3D
 		assert f.vertex[0] != mesh.outerVertex && f.vertex[1] != mesh.outerVertex && f.vertex[2] != mesh.outerVertex : f;
 		double p = f.vertex[0].distance3D(f.vertex[1]) + f.vertex[1].distance3D(f.vertex[2]) + f.vertex[2].distance3D(f.vertex[0]);
 		double area = edge.area();
-		double ret = scaleFactor * edge.area() * area / p / p;
+		double ret = scaleFactor * area / p / p;
 		assert ret >= 0.0 && ret <= 1.01;
 		return ret;
 	}
