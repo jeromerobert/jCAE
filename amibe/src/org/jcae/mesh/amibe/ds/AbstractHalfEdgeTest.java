@@ -298,7 +298,7 @@ public class AbstractHalfEdgeTest
 	
 	protected AbstractHalfEdge find(Vertex v1, Vertex v2)
 	{
-		if (v1.getLink() instanceof Triangle)
+		if (v1.isManifold())
 		{
 			AbstractHalfEdge ret = findSameFan(v1, v2, (Triangle) v1.getLink());
 			if (ret == null)
@@ -444,7 +444,7 @@ public class AbstractHalfEdgeTest
 	protected void countVertexLinks(Vertex o, int count)
 	{
 		int n = 0;
-		if (o.getLink() instanceof Triangle)
+		if (o.isManifold())
 			n = 1;
 		else
 			n = ((Triangle []) o.getLink()).length;

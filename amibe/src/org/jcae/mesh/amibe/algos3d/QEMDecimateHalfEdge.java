@@ -398,12 +398,12 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		// mesh and can be reused.
 		Vertex vFree = null;
 		Quadric3DError qFree = null;
-		if (current.origin().getLink() instanceof Triangle)
+		if (current.origin().isManifold())
 		{
 			vFree = current.origin();
 			qFree = quadricMap.remove(vFree);
 		}
-		if (current.destination().getLink() instanceof Triangle)
+		if (current.destination().isManifold())
 		{
 			vFree = current.destination();
 			qFree = quadricMap.remove(vFree);
@@ -421,7 +421,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		q3 = qFree;
 		if (q3 == null)
 			q3 = new Quadric3DError();
-		if (current.origin().getLink() instanceof Triangle)
+		if (current.origin().isManifold())
 		{
 			do
 			{

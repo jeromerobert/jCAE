@@ -385,7 +385,7 @@ public class Initial
 			for (int i = 0; i < 3; i++)
 			{
 				v = (Vertex2D) t.vertex[i];
-				if (v.getLink() instanceof TriangleVH)
+				if (v.isManifold())
 					v.setLink(t);
 			}
 		}

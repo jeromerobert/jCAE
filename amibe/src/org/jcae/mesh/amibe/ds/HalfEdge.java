@@ -572,7 +572,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		if (hasAttributes(OUTER))
 			return false;
 		double [] xn = v.getUV();
-		if ((origin().getLink() instanceof Triangle) && (destination().getLink() instanceof Triangle))
+		if (origin().isManifold() && destination().isManifold())
 		{
 			// Mesh is locally manifold.  This is the most common
 			// case, do not create an HashSet to store only two
@@ -669,7 +669,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	public final boolean checkNewRingNormals(double [] newpt)
 	{
 		Vertex o = origin();
-		if (o.getLink() instanceof Triangle)
+		if (o.isManifold())
 			return checkNewRingNormalsSameFan(newpt, null, null);
 		for (Triangle start: (Triangle []) o.getLink())
 		{
@@ -714,7 +714,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	private final boolean checkNewRingNormalsNonManifoldVertex(double [] newpt, Collection<Triangle> ignored)
 	{
 		Vertex o = origin();
-		if (o.getLink() instanceof Triangle)
+		if (o.isManifold())
 			return checkNewRingNormalsSameFanNonManifoldVertex(newpt, ignored);
 		for (Triangle start: (Triangle []) o.getLink())
 		{
@@ -776,12 +776,12 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		assert o.isWritable() && d.isWritable(): "Cannot contract "+this;
 		if (logger.isDebugEnabled())
 			logger.debug("contract ("+o+" "+d+")");
-		if (o.getLink() instanceof Triangle)
+		if (o.isManifold())
 			replaceEndpointsSameFan(v);
 		else
 			replaceEndpointsNonManifold(o, v);
 		HalfEdge e = sym;
-		if (d.getLink() instanceof Triangle)
+		if (d.isManifold())
 			e.replaceEndpointsSameFan(v);
 		else
 			replaceEndpointsNonManifold(d, v);
@@ -903,7 +903,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	private static void replaceVertexLinks(Vertex o, Triangle oldT1, Triangle oldT2, Triangle newT)
 	{
-		if (o.getLink() instanceof Triangle)
+		if (o.isManifold())
 			o.setLink(newT);
 		else
 		{
@@ -921,7 +921,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	private static void replaceVertexLinks(Vertex o, Triangle oldT, Triangle newT)
 	{
-		if (o.getLink() instanceof Triangle)
+		if (o.isManifold())
 			o.setLink(newT);
 		else
 		{
@@ -939,8 +939,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	}
 	private static void deepCopyVertexLinks(Vertex o, Vertex d, Vertex v)
 	{
-		boolean ot = o.getLink() instanceof Triangle;
-		boolean dt = d.getLink() instanceof Triangle;
+		boolean ot = o.isManifold();
+		boolean dt = d.isManifold();
 		//  Prepare vertex links first
 		if (ot && dt)
 		{

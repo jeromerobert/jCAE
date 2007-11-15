@@ -783,7 +783,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	public final boolean checkNewRingNormals(double [] newpt)
 	{
 		Vertex o = origin();
-		if (o.getLink() instanceof TriangleVH)
+		if (o.isManifold())
 			return checkNewRingNormalsSameFan(newpt, null, null);
 		for (Triangle start: (Triangle []) o.getLink())
 		{
@@ -846,7 +846,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		if (logger.isDebugEnabled())
 			logger.debug("can contract? ("+origin()+" "+destination()+") into "+n);
 		double [] xn = n.getUV();
-		if ((origin().getLink() instanceof Triangle) && (destination().getLink() instanceof Triangle))
+		if (origin().isManifold() && destination().isManifold())
 		{
 			// Mesh is locally manifold.  This is the most common
 			// case, do not create an HashSet to store only two
@@ -904,7 +904,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	private final boolean checkNewRingNormalsNonManifoldVertex(double [] newpt, Collection<TriangleVH> ignored)
 	{
 		Vertex o = origin();
-		if (o.getLink() instanceof TriangleVH)
+		if (o.isManifold())
 			return checkNewRingNormalsSameFanNonManifoldVertex(newpt, ignored);
 		for (Triangle start: (Triangle []) o.getLink())
 		{
@@ -1011,13 +1011,13 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		if (logger.isDebugEnabled())
 			logger.debug("contract ("+o+" "+d+")");
 		//  Replace o by n in all incident triangles
-		if (o.getLink() instanceof TriangleVH)
+		if (o.isManifold())
 			replaceEndpointsSameFan(v);
 		else
 			replaceEndpointsNonManifold(o, v);
 		//  Replace d by n in all incident triangles
 		symOTri(this, work[2]);
-		if (d.getLink() instanceof TriangleVH)
+		if (d.isManifold())
 			work[2].replaceEndpointsSameFan(v);
 		else
 			replaceEndpointsNonManifold(d, v);
@@ -1167,7 +1167,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	private static void replaceVertexLinks(Vertex o, TriangleVH oldT1, TriangleVH oldT2, TriangleVH newT)
 	{
-		if (o.getLink() instanceof TriangleVH)
+		if (o.isManifold())
 			o.setLink(newT);
 		else
 		{
@@ -1184,7 +1184,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	private static void replaceVertexLinks(Vertex o, TriangleVH oldT, TriangleVH newT)
 	{
-		if (o.getLink() instanceof TriangleVH)
+		if (o.isManifold())
 			o.setLink(newT);
 		else
 		{
@@ -1205,8 +1205,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 */
 	private static void deepCopyVertexLinks(Vertex o, Vertex d, Vertex v)
 	{
-		boolean ot = o.getLink() instanceof TriangleVH;
-		boolean dt = d.getLink() instanceof TriangleVH;
+		boolean ot = o.isManifold();
+		boolean dt = d.isManifold();
 		//  Prepare vertex links first
 		if (ot && dt)
 		{

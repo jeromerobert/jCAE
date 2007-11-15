@@ -360,6 +360,16 @@ public class Vertex implements Serializable
 	}
 	
 	/**
+	 * Tells whether this vertex is manifold.
+	 *
+	 * @return <code>true</code> if vertex is manifold, <code>false</code> otherwise
+	 */
+	public final boolean isManifold()
+	{
+		return link instanceof Triangle;
+	}
+	
+	/**
 	 * Get the list of adjacent vertices.
 	 * Note: this method works also with non-manifold meshes.
 	 *

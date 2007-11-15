@@ -172,7 +172,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 		assert current != null : v3+" not connected to "+apex;
 		assert current.origin() == v3 : ""+current+"\n"+v3+"\n"+apex;
 		assert current.apex() == apex : ""+current+"\n"+v3+"\n"+apex;
-		if (current.origin().getLink() instanceof Triangle)
+		if (current.origin().isManifold())
 		{
 			do
 			{
