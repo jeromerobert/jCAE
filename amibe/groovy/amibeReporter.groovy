@@ -138,12 +138,14 @@ for (Triangle f: mesh.getTriangles())
 for (int i = 0; i < data.length; i++)
 {
 	data[i].finish();
-	data[i].split(bounds);
-	// Prints histogram on console
 	if (detailed)
 		println("Face "+(i+1));
 	if (histogram)
+	{
+		// Prints histogram on console
+		data[i].split(bounds);
 		data[i].printLayers();
+	}
 	else
 		data[i].printStatistics();
 }
