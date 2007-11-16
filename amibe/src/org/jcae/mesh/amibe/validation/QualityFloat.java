@@ -196,8 +196,7 @@ public class QualityFloat
 			{
 				if (number[i] == 1)
 					return values[i-1];
-				else
-					return getValueByPercentPrivate(target, values[i-1], values[i], values, number);
+				return getValueByPercentPrivate(target, values[i-1], values[i], values, number);
 			}
 			sum += number[i];
 		}

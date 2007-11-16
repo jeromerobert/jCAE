@@ -215,7 +215,7 @@ public class MeshReader
 	public static void readObject3D(Mesh mesh, String xmlDir, String xmlFile, double ridgeAngle)
 		throws IOException
 	{
-		logger.debug("begin reading "+xmlDir+File.separator+xmlFile);
+		logger.info("Read mesh from "+xmlDir+File.separator+xmlFile);
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		Document document;
 		try
