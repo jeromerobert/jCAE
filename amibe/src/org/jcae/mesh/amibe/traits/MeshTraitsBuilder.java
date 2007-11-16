@@ -215,6 +215,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 	@Override
 	protected void subInitTraits(Traits t)
 	{
+		// These methods must be synchronized with ensureCapacity()
 		if ((attributes & TRIANGLESET) != 0)
 			t.array[index[BITTRIANGLES]] = new LinkedHashSet<Triangle>();
 		else if ((attributes & TRIANGLES) != 0)
@@ -227,6 +228,84 @@ public class MeshTraitsBuilder extends TraitsBuilder
 			t.array[index[BITGROUPS]] = new ArrayList();
 		if ((attributes & KDTREE) != 0)
 			t.array[index[BITKDTREE]] = new KdTree(dimension);
+	}
+
+	/**
+	 * Resizes internal collections of vertices and triangles.
+	 *
+	 * @param triangles  desired number of triangles
+	 * @param t  mesh traits
+	 */
+	public void ensureCapacity(int triangles, Traits t)
+	{
+		// These methods must be synchronized with subInitTraits()
+		if ((attributes & TRIANGLESET) != 0)
+		{
+			Collection<Triangle> oldList = (Collection<Triangle>) t.array[index[BITTRIANGLES]];
+			if (oldList.size() < triangles)
+			{
+				LinkedHashSet<Triangle> newList = new LinkedHashSet<Triangle>(triangles);
+				newList.addAll(oldList);
+				t.array[index[BITTRIANGLES]] = newList;
+			}
+		}
+		else if ((attributes & TRIANGLES) != 0)
+		{
+			ArrayList<Triangle> oldList = (ArrayList<Triangle>) t.array[index[BITTRIANGLES]];
+			oldList.ensureCapacity(triangles);
+		}
+		int nodes = (int) (0.51 * triangles);
+		if ((attributes & NODESET) != 0)
+		{
+			Collection<Vertex> oldList = (Collection<Vertex>) t.array[index[BITNODES]];
+			if (oldList.size() < nodes)
+			{
+				LinkedHashSet<Vertex> newList = new LinkedHashSet<Vertex>(nodes);
+				newList.addAll(oldList);
+				t.array[index[BITNODES]] = newList;
+			}
+		}
+		else if ((attributes & NODES) != 0)
+		{
+			ArrayList<Triangle> oldList = (ArrayList<Triangle>) t.array[index[BITTRIANGLES]];
+			oldList.ensureCapacity(nodes);
+		}
+	}
+
+	/**
+	 * Resizes internal collections of vertices and triangles.
+	 *
+	 * @param triangles  desired number of triangles
+	 * @param t  mesh traits
+	 */
+	public void ensureCapacity(int triangles, Traits t)
+	{
+		// These methods must be synchronized with subInitTraits()
+		if ((attributes & TRIANGLESET) != 0)
+		{
+			Collection<Triangle> oldList = (Collection<Triangle>) t.array[index[BITTRIANGLES]];
+			LinkedHashSet<Triangle> newList = new LinkedHashSet<Triangle>(triangles);
+			newList.addAll(oldList);
+			t.array[index[BITTRIANGLES]] = newList;
+		}
+		else if ((attributes & TRIANGLES) != 0)
+		{
+			ArrayList<Triangle> oldList = (ArrayList<Triangle>) t.array[index[BITTRIANGLES]];
+			oldList.ensureCapacity(triangles);
+		}
+		int nodes = (int) (0.6 * triangles);
+		if ((attributes & NODESET) != 0)
+		{
+			Collection<Vertex> oldList = (Collection<Vertex>) t.array[index[BITNODES]];
+			LinkedHashSet<Vertex> newList = new LinkedHashSet<Vertex>(nodes);
+			newList.addAll(oldList);
+			t.array[index[BITNODES]] = newList;
+		}
+		else if ((attributes & NODES) != 0)
+		{
+			ArrayList<Triangle> oldList = (ArrayList<Triangle>) t.array[index[BITTRIANGLES]];
+			oldList.ensureCapacity(nodes);
+		}
 	}
 
 	/**

@@ -153,6 +153,7 @@ public class MeshReader
 						bbmin[k] = coord[k];
 				}
 			}
+			mesh.ensureCapacity(2*numberOfNodes);
 			mesh.resetQuadTree(bbmin, bbmax);
 			for (int i=0; i < numberOfNodes; i++)
 				mesh.getQuadTree().add(nodelist[i]);
@@ -201,7 +202,6 @@ public class MeshReader
 		throws IOException
 	{
 		readObject3D(mesh, xmlDir, xmlFile, 0.0);
-
 	}
 
 	/**
@@ -275,6 +275,8 @@ public class MeshReader
 				bbmin[j] = Double.MAX_VALUE;
 				bbmax[j] = Double.MIN_VALUE;
 			}
+
+			mesh.ensureCapacity(2*numberOfNodes);
 			for (int i=0; i < numberOfNodes; i++)
 			{
 				nodesBuffer.get(coord);

@@ -496,10 +496,12 @@ public class Storage
 		Vertex [] nodelist = new Vertex[numberOfNodes];
 		double [] coord = new double[3];
 		logger.debug("Reading "+numberOfNodes+" nodes");
+		mesh.ensureCapacity(2*numberOfNodes);
 		for (int i = 0; i < numberOfNodes; i++)
 		{
 			nodesBuffer.get(coord);
 			nodelist[i] = mesh.createVertex(coord);
+			mesh.add(nodelist[i]);
 		}
 		for (int i = 0; i < numberOfReferences; i++)
 		{
@@ -528,6 +530,7 @@ public class Storage
 
 		int numberOfTriangles = (int) trianglesFile.length() / (4*nr);
 		logger.debug("Reading "+numberOfTriangles+" elements");
+		mesh.ensureCapacity(numberOfTriangles);
 		Triangle face;
 		Vertex [] pts = new Vertex[nr];
 		for (int i = 0; i < numberOfTriangles; i++)

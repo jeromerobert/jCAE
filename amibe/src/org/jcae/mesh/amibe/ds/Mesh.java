@@ -221,6 +221,16 @@ public class Mesh implements Serializable
 	}
 
 	/**
+	 * Resizes internal collections of vertices and triangles.
+	 *
+	 * @param triangles  desired number of triangles
+	 */
+	public void ensureCapacity(int triangles)
+	{
+		traitsBuilder.ensureCapacity(triangles, traits);
+	}
+
+	/**
 	 *  Adds a vertex to vertex list.
 	 */
 	public void add(Vertex vertex)

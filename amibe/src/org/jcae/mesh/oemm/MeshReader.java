@@ -222,6 +222,7 @@ public class MeshReader extends Storage
 		try
 		{
 			logger.debug("Reading "+current.vn+" vertices from "+getVerticesFile(oemm, current));
+			mesh.ensureCapacity(2*current.vn);
 			Vertex [] vert = new Vertex[current.vn];
 			double [] xyz = new double[3];
 			List<TIntArrayList> listAdjacentLeaves = readAdjacencyFile(oemm, current, leaves);
@@ -276,6 +277,7 @@ public class MeshReader extends Storage
 			TIntHashSet processedNode = new TIntHashSet();
 			int [] leaf = new int[3];
 			int [] pointIndex = new int[3];
+			mesh.ensureCapacity(current.tn);
 			int remaining = current.tn;
 			bb.clear();
 			IntBuffer bbI = bb.asIntBuffer();

@@ -73,6 +73,7 @@ public class MESHReader
 		{
 			line = rd.readLine();
 			nrNodes = Integer.valueOf(line).intValue();
+			m.ensureCapacity(2*nrNodes);
 			nodesmap = new TIntObjectHashMap<Vertex>(nrNodes);
 			for (int i = 1; i <= nrNodes; i++)
 			{
@@ -111,6 +112,7 @@ public class MESHReader
 		{
 			line = rd.readLine();
 			nrTetrahedra = Integer.valueOf(line).intValue();
+			mesh.ensureCapacity(nrTetrahedra);
 			for (int i = 0; i < nrTetrahedra; i++)
 			{
 				line = rd.readLine();
