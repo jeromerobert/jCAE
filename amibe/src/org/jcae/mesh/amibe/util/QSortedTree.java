@@ -20,7 +20,8 @@
 
 package org.jcae.mesh.amibe.util;
 
-import java.util.HashMap;
+import gnu.trove.THashMap;
+import java.util.Map;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.io.Serializable;
@@ -39,7 +40,7 @@ public abstract class QSortedTree<E> implements Serializable
 	private static Logger logger = Logger.getLogger(QSortedTree.class);	
 	protected final Node<E> root = newNode(null, Double.MAX_VALUE);
 	// Mapping between objects and tree nodes
-	private transient HashMap<E, Node<E>> map = new HashMap<E, Node<E>>();
+	private transient Map<E, Node<E>> map = new THashMap<E, Node<E>>();
 	private int nrNodes = 0;
 	
 	/**
@@ -283,7 +284,7 @@ public abstract class QSortedTree<E> implements Serializable
 		throws java.io.IOException, ClassNotFoundException
 	{
 		s.defaultReadObject();
-		map = new HashMap<E, Node<E>>(nrNodes);
+		map = new THashMap<E, Node<E>>(nrNodes);
 		if (nrNodes == 0)
 			return;
 		for (Iterator<Node<E>> it = iterator(); it.hasNext(); )
