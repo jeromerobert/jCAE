@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.io.IOException;
+import gnu.trove.TObjectDoubleHashMap;
 import org.apache.log4j.Logger;
 
 /**
@@ -61,9 +62,11 @@ public class SmoothNodes3D
 	private static final double scaleFactor = 12.0 * Math.sqrt(3.0);
 	private static double speed = 0.6;
 	private final Vertex c;
-	private final QSortedTree<Triangle> tree = new PAVLSortedTree<Triangle>();
+	private QSortedTree<Vertex> tree;
 	int processed = 0;
 	int notProcessed = 0;
+	TObjectDoubleHashMap<Triangle> qualityMap;
+	Collection<Vertex> nodeset;
 	
 	/**
 	 * Creates a <code>SmoothNodes3D</code> instance.
@@ -113,23 +116,39 @@ public class SmoothNodes3D
 	/**
 	 * Moves all nodes until all iterations are done.
 	 */
-	public void compute()
+	private void computeTriangleQuality()
 	{
-		logger.info("Run "+getClass().getName());
-		// First compute triangle quality
-		AbstractHalfEdge ot = null;
+ 		AbstractHalfEdge ot = null;
 		for (Triangle f: mesh.getTriangles())
 		{
 			if (f.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			ot = f.getAbstractHalfEdge(ot);
-			double val = cost(ot);
-			if (val <= tolerance)
-				tree.insert(f, val);
+			double val = triangleQuality(ot);
+			qualityMap.put(f, val);
 		}
-		Collection<Vertex> nodeset = new HashSet<Vertex>(mesh.getTriangles().size()/2);
+	}
+	public void compute()
+	{
+		logger.info("Run "+getClass().getName());
+		// First compute triangle quality
+		qualityMap = new TObjectDoubleHashMap<Triangle>(mesh.getTriangles().size());
+		computeTriangleQuality();
+
+		nodeset = mesh.getNodes();
+		if (nodeset == null)
+		{
+			nodeset = new HashSet<Vertex>(mesh.getTriangles().size() / 2);
+			for (Triangle f: mesh.getTriangles())
+			{
+				if (f.hasAttributes(AbstractHalfEdge.OUTER))
+					continue;
+				for (Vertex v: f.vertex)
+					nodeset.add(v);
+			}
+		}
 		for (int i = 0; i < nloop; i++)
-			processAllTriangles(nodeset);
+			processAllNodes();
 		logger.info("Number of moved points: "+processed);
 		logger.info("Total number of points not moved during processing: "+notProcessed);
 	}
@@ -137,78 +156,69 @@ public class SmoothNodes3D
 	/*
 	 * Moves all nodes using a modified Laplacian smoothing.
 	 */
-	private void processAllTriangles(Collection<Vertex> nodeset)
+	private void processAllNodes()
 	{
  		AbstractHalfEdge ot = null;
-		nodeset.clear();
-		for (Iterator<QSortedTree.Node<Triangle>> itt = tree.iterator(); itt.hasNext(); )
+		// First compute vertex quality
+		tree = new PAVLSortedTree<Vertex>();
+		for (Vertex v: nodeset)
 		{
-			QSortedTree.Node<Triangle> q = itt.next();
+			if (!v.isManifold())
+				continue;
+			Triangle f = (Triangle) v.getLink();
+			ot = f.getAbstractHalfEdge(ot);
+			if (ot.destination() == v)
+				ot = ot.next();
+			else if (ot.apex() == v)
+				ot = ot.prev();
+			assert ot.origin() == v;
+			double qv = vertexQuality(ot);
+			if (qv <= tolerance)
+				tree.insert(v, qv);
+		}
+		// Now smooth nodes iteratively
+		for (Iterator<QSortedTree.Node<Vertex>> itt = tree.iterator(); itt.hasNext(); )
+		{
+			QSortedTree.Node<Vertex> q = itt.next();
 			if (q.getValue() > tolerance)
 				break;
-			Triangle f = q.getData();
- 			ot = f.getAbstractHalfEdge(ot);
-			double l0 = f.vertex[1].distance3D(f.vertex[2]);
-			double l1 = f.vertex[2].distance3D(f.vertex[0]);
-			double l2 = f.vertex[0].distance3D(f.vertex[1]);
-			double z01 = Math.abs(l0 - l1);
-			double z02 = Math.abs(l0 - l2);
-			double z12 = Math.abs(l1 - l2);
-			Vertex n;
-			if (z01 < z02)
+			Vertex v = q.getData();
+			if (!v.isManifold() || !v.isMutable())
 			{
-				if (z01 < z12)
-				{
-					ot = ot.next();
-					n = f.vertex[2];
-				}
-				else
-				{
-					ot = ot.prev();
-					n = f.vertex[0];
-				}
+				notProcessed++;
+				continue;
+			}
+			if (v.getRef() != 0 && preserveBoundaries)
+			{
+				notProcessed++;
+				continue;
+			}
+			if (smoothNode(v, ot, q.getValue()))
+			{
+				processed++;
+				if (processed > 0 && (processed % progressBarStatus) == 0)
+					logger.info("Vertices processed: "+processed);
 			}
 			else
-			{
-				if (z02 < z12)
-					n = f.vertex[1];
-				else
-				{
-					ot = ot.prev();
-					n = f.vertex[0];
-				}
-			}
-			assert ot.origin() == n;
-			if (!nodeset.contains(n))
-			{
-				nodeset.add(n);
-				if (!n.isMutable() || !n.isManifold())
-				{
-					notProcessed++;
-					continue;
-				}
-				if (n.getRef() != 0 && preserveBoundaries)
-				{
-					notProcessed++;
-					continue;
-				}
-				if (smoothNode(ot))
-					processed++;
-				else
-					notProcessed++;
-			}
+				notProcessed++;
 		}
 	}
 	
-	private boolean smoothNode(AbstractHalfEdge ot)
+	private boolean smoothNode(Vertex n, AbstractHalfEdge ot, double quality)
 	{
-		Vertex n = ot.origin();
-		double[] oldp3 = n.getUV();
+		Triangle f = (Triangle) n.getLink();
+ 		ot = f.getAbstractHalfEdge(ot);
+		if (ot.destination() == n)
+			ot = ot.next();
+		else if (ot.apex() == n)
+			ot = ot.prev();
+		assert ot.origin() == n;
+		double [] oldp3 = n.getUV();
 		
 		//  Compute 3D coordinates centroid
 		int nn = 0;
-		double[] centroid3 = c.getUV();
-		centroid3[0] = centroid3[1] = centroid3[2] = 0.;
+		double [] centroid3 = c.getUV();
+		centroid3[0] = centroid3[1] = centroid3[2] = 0.0;
 		double lmin = Double.MAX_VALUE;
 		assert n.isManifold();
 		Vertex d = ot.destination();
@@ -264,13 +274,20 @@ public class SmoothNodes3D
 			return false;
 		if (!n.discreteProject(c))
 			return false;
+		double saveX = oldp3[0];
+		double saveY = oldp3[1];
+		double saveZ = oldp3[2];
 		n.moveTo(centroid3[0], centroid3[1], centroid3[2]);
-		if (processed > 0 && (processed % progressBarStatus) == 0)
-			logger.info("Vertices processed: "+processed);
+		// Check that quality has not been degraded
+		if (vertexQuality(ot) < quality)
+		{
+			n.moveTo(saveX, saveY, saveZ);
+			return false;
+		}
 		return true;
 	}
 	
-	private double cost(AbstractHalfEdge edge)
+	private double triangleQuality(AbstractHalfEdge edge)
 	{
 		Triangle f = edge.getTri();
 		assert f.vertex[0] != mesh.outerVertex && f.vertex[1] != mesh.outerVertex && f.vertex[2] != mesh.outerVertex : f;
@@ -278,6 +295,23 @@ public class SmoothNodes3D
 		double area = edge.area();
 		double ret = scaleFactor * area / p / p;
 		assert ret >= 0.0 && ret <= 1.01;
+		return ret;
+	}
+
+	private double vertexQuality(AbstractHalfEdge edge)
+	{
+		Vertex d = edge.destination();
+		double ret = Double.MAX_VALUE;
+		do
+		{
+			edge = edge.nextOriginLoop();
+			if (edge.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+			double qt = triangleQuality(edge);
+			if (qt < ret)
+				ret = qt;
+		}
+		while (edge.destination() != d);
 		return ret;
 	}
 
