@@ -63,7 +63,7 @@ public abstract class QSortedTree<E> implements Serializable
 	@SuppressWarnings("serial")
 	public static class Node<E> implements Comparable<Node<E>>, Serializable
 	{
-		private E data;
+		protected E data;
 		private double value;
 		protected final Node<E> [] child = newChilds();
 		protected Node<E> parent = null;
@@ -373,6 +373,23 @@ public abstract class QSortedTree<E> implements Serializable
 		r.reset(value);
 		insertNode(r);
 		return true;
+	}
+	
+	/**
+	 * Clear this tree.
+	 */
+	public void clear()
+	{
+		// Unlink all nodes to help garbage collector
+		for (Node<E> p: map.values())
+		{
+			p.data = null;
+			p.child[0] = p.child[1] = null;
+			p.parent = null;
+		}
+		map.clear();
+		root.child[0] = root.child[1] = null;
+		nrNodes = 0;
 	}
 	
 	/**
