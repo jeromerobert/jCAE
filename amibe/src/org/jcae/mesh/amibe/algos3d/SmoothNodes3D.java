@@ -56,13 +56,14 @@ public class SmoothNodes3D
 	private Mesh mesh;
 	private double sizeTarget = -1.0;
 	private int nloop = 10;
-	private double tolerance = 2.0;
+	private double tolerance = Double.MAX_VALUE / 2.0;
 	private boolean preserveBoundaries = false;
 	private int progressBarStatus = 10000;
 	private static final double scaleFactor = 12.0 * Math.sqrt(3.0);
-	private static double speed = 0.6;
+	private double relaxation = 0.6;
 	private final Vertex c;
-	private QSortedTree<Vertex> tree;
+	private QSortedTree<Vertex> tree = new PAVLSortedTree<Vertex>();
+	private boolean refresh = false;
 	int processed = 0;
 	int notProcessed = 0;
 	TObjectDoubleHashMap<Triangle> qualityMap;
@@ -103,8 +104,22 @@ public class SmoothNodes3D
 				preserveBoundaries = Boolean.valueOf(val).booleanValue();
 			else if (key.equals("tolerance"))
 				tolerance = Double.valueOf(val).doubleValue();
+			else if (key.equals("refresh"))
+				refresh = true;
+			else if (key.equals("relaxation"))
+				relaxation = Double.valueOf(val).doubleValue();
 			else
 				throw new RuntimeException("Unknown option: "+key);
+		}
+		if (logger.isDebugEnabled())
+		{
+			if (sizeTarget > 0.0)
+				logger.debug("Size: "+sizeTarget);
+			logger.debug("Iterations: "+nloop);
+			logger.debug("Refresh: "+refresh);
+			logger.debug("Relaxation: "+relaxation);
+			logger.debug("Tolerance: "+tolerance);
+			logger.debug("Preserve boundaries: "+preserveBoundaries);
 		}
 	}
 	
@@ -159,8 +174,8 @@ public class SmoothNodes3D
 	private void processAllNodes()
 	{
  		AbstractHalfEdge ot = null;
-		// First compute vertex quality
-		tree = new PAVLSortedTree<Vertex>();
+		// Compute vertex quality
+		tree.clear();
 		for (Vertex v: nodeset)
 		{
 			if (!v.isManifold())
@@ -177,12 +192,14 @@ public class SmoothNodes3D
 				tree.insert(v, qv);
 		}
 		// Now smooth nodes iteratively
-		for (Iterator<QSortedTree.Node<Vertex>> itt = tree.iterator(); itt.hasNext(); )
+		while (!tree.isEmpty())
 		{
+			Iterator<QSortedTree.Node<Vertex>> itt = tree.iterator();
 			QSortedTree.Node<Vertex> q = itt.next();
 			if (q.getValue() > tolerance)
 				break;
 			Vertex v = q.getData();
+			tree.remove(v);
 			if (!v.isManifold() || !v.isMutable())
 			{
 				notProcessed++;
@@ -198,6 +215,41 @@ public class SmoothNodes3D
 				processed++;
 				if (processed > 0 && (processed % progressBarStatus) == 0)
 					logger.info("Vertices processed: "+processed);
+				if (!refresh)
+					continue;
+				assert ot != null;
+				// Update triangle quality
+				Vertex d = ot.destination();
+				do
+				{
+					ot = ot.nextOriginLoop();
+					if (ot.hasAttributes(AbstractHalfEdge.OUTER))
+						continue;
+					double qt = triangleQuality(ot);
+					qualityMap.put(ot.getTri(), qt);
+				}
+				while (ot.destination() != d);
+				// Update neighbor vertex quality
+				do
+				{
+					ot = ot.nextOriginLoop();
+					Vertex n = ot.destination();
+					if (n == mesh.outerVertex || !n.isManifold() || !tree.contains(n))
+						continue;
+					if (ot.hasAttributes(AbstractHalfEdge.OUTER))
+						continue;
+					ot = ot.next();
+					double qv = vertexQuality(ot);
+					ot = ot.prev();
+					if (qv <= tolerance)
+						tree.update(n, qv);
+					else
+					{
+						tree.remove(n);
+						notProcessed++;
+					}
+				}
+				while (ot.destination() != d);
 			}
 			else
 				notProcessed++;
@@ -269,7 +321,7 @@ public class SmoothNodes3D
 		else
 			l = 1.0;
 		for (int i = 0; i < 3; i++)
-			centroid3[i] = oldp3[i] + speed * l * (centroid3[i] - oldp3[i]);
+			centroid3[i] = oldp3[i] + relaxation * l * (centroid3[i] - oldp3[i]);
 		if (!ot.checkNewRingNormals(centroid3))
 			return false;
 		if (!n.discreteProject(c))
@@ -315,34 +367,61 @@ public class SmoothNodes3D
 		return ret;
 	}
 
+	private static void usage(int rc)
+	{
+		System.out.println("Usage: SmoothNodes3D [options] xmlDir outDir");
+		System.out.println("Options:");
+		System.out.println(" -h, --help         Display this message and exit");
+		System.out.println(" --iterations <n>   Iterate <n> times over all nodes");
+		System.out.println(" --size <s>         Set target size");
+		System.out.println(" --tolerance <t>    Consider only nodes with quality lower than <t>");
+		System.out.println(" --relaxation <r>   Set relaxation factor");
+		System.out.println(" --refresh          Update vertex quality before each iteration");
+		System.exit(rc);
+	}
+
 	/**
 	 * 
-	 * @param args xmlDir, xmlFile, element size, number of iteration, brepDir, brepFile
+	 * @param args [options] xmlDir outDir
 	 */
 	public static void main(String[] args)
 	{
-		org.jcae.mesh.amibe.traits.TriangleTraitsBuilder ttb = new org.jcae.mesh.amibe.traits.TriangleTraitsBuilder();
-		ttb.addVirtualHalfEdge();
-		org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = new org.jcae.mesh.amibe.traits.MeshTraitsBuilder();
-		mtb.addTriangleSet();
-		mtb.add(ttb);
-		Mesh mesh = new Mesh(mtb);
+		Mesh mesh = new Mesh();
+		Map<String, String> opts = new HashMap<String, String>();
+		int argc = 0;
+		for (String arg: args)
+			if (arg.equals("--help") || arg.equals("-h"))
+				usage(0);
+		while (argc < args.length-1)
+		{
+			if (args[argc].length() < 2 || args[argc].charAt(0) != '-' || args[argc].charAt(1) != '-')
+				break;
+			if (args[argc].equals("--refresh") || args[argc].equals("--boundaries"))
+			{
+				opts.put(args[argc].substring(2), "true");
+				argc++;
+			}
+			else
+			{
+				opts.put(args[argc].substring(2), args[argc+1]);
+				argc += 2;
+			}
+		}
+		if (argc + 2 != args.length)
+			usage(1);
 		try
 		{
-			MeshReader.readObject3D(mesh, args[0], args[1], -1);
+			MeshReader.readObject3D(mesh, args[argc], "jcae3d");
 		}
 		catch (IOException ex)
 		{
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
-		Map<String, String> opts = new HashMap<String, String>();
-		opts.put("size", args[2]);
-		opts.put("iterations", args[3]);
 		new SmoothNodes3D(mesh, opts).compute();			
 		try
 		{
-			MeshWriter.writeObject3D(mesh, args[0], args[1], args[4], args[5]);
+			MeshWriter.writeObject3D(mesh, args[argc+1], "jcae3d", ".", "dummy.brep");
 		}
 		catch (IOException ex)
 		{
