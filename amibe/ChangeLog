@@ -1,3 +1,8 @@
+Sat Nov 17 21:56:02 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos3d/SmoothNodes3D.java: Quality is
+	checked now, so there is no more need to constrain nodes.
+
 Fri Nov 16 12:24:10 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos3d/SmoothNodes3D.java: Loop on vertices

@@ -271,7 +271,6 @@ public class SmoothNodes3D
 		int nn = 0;
 		double [] centroid3 = c.getUV();
 		centroid3[0] = centroid3[1] = centroid3[2] = 0.0;
-		double lmin = Double.MAX_VALUE;
 		assert n.isManifold();
 		Vertex d = ot.destination();
 		do
@@ -282,8 +281,6 @@ public class SmoothNodes3D
 			{
 				nn++;
 				double l = n.distance3D(v);
-				if (l < lmin)
-					lmin = l;
 				double[] newp3 = v.getUV();
 				if (sizeTarget > 0.0)
 				{
@@ -295,10 +292,6 @@ public class SmoothNodes3D
 						continue;
 					}
 					l = sizeTarget / l;
-					if (l > 2.0)
-						l = 2.0;
-					else if (l < 0.5)
-						l = 0.5;
 					for (int i = 0; i < 3; i++)
 						centroid3[i] += newp3[i] + l * (oldp3[i] - newp3[i]);
 				}
@@ -313,15 +306,8 @@ public class SmoothNodes3D
 		assert (nn > 0);
 		for (int i = 0; i < 3; i++)
 			centroid3[i] /= nn;
-		double l = n.distance3D(c);
-		// Move c within a sphere of radius lmin/2
-		lmin *= 0.5;
-		if (l > lmin && lmin > 0.0)
-			l = lmin / l;
-		else
-			l = 1.0;
 		for (int i = 0; i < 3; i++)
-			centroid3[i] = oldp3[i] + relaxation * l * (centroid3[i] - oldp3[i]);
+			centroid3[i] = oldp3[i] + relaxation * (centroid3[i] - oldp3[i]);
 		if (!ot.checkNewRingNormals(centroid3))
 			return false;
 		if (!n.discreteProject(c))
