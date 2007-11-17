@@ -36,19 +36,24 @@ options.addOption(
 		.create('s'));
 options.addOption(
 	OptionBuilder.withArgName("FLOAT").hasArg()
-		.withDescription("???")
+		.withDescription("process only nodes with quality lower than this value")
 		.withLongOpt("tolerance")
 		.create('t'));
+options.addOption(
+	OptionBuilder.withArgName("FLOAT").hasArg()
+		.withDescription("new position = old + r * (new - old)")
+		.withLongOpt("relaxation")
+		.create('r'));
 options.addOption(
 	OptionBuilder.hasArg(false)
 		.withDescription("do not try to preserve patch boundaries")
 		.withLongOpt("no-boundaries")
-		.create('n'));
+		.create('N'));
 options.addOption(
 	OptionBuilder.hasArg(false)
 		.withDescription("update triangle quality within loop")
 		.withLongOpt("refresh")
-		.create('r'));
+		.create('R'));
 CommandLineParser parser = new GnuParser();
 CommandLine cmd = parser.parse(options, args, true);
 if (cmd.hasOption('h'))
@@ -65,7 +70,8 @@ String xmlFile = "jcae3d";
 String sIter=cmd.getOptionValue('i', "5");
 String sSize=cmd.getOptionValue('s', "-1.0");
 String sTolerance=cmd.getOptionValue('t', "2.0");
-String sRefresh=String.valueOf(cmd.hasOption('r'));
+String sRelaxation=cmd.getOptionValue('r', "0.6");
+String sRefresh=String.valueOf(cmd.hasOption('R'));
 boolean bnd=!cmd.hasOption('n');
 
 Mesh mesh = new Mesh();
@@ -87,6 +93,7 @@ opts.put("iterations", sIter);
 opts.put("boundaries", ""+bnd);
 opts.put("size", sSize);
 opts.put("tolerance", sTolerance);
+opts.put("relaxation", sRelaxation);
 opts.put("refresh", sRefresh);
 SmoothNodes3D sm = new SmoothNodes3D(mesh, opts)
 sm.setProgressBarStatus(10000);
