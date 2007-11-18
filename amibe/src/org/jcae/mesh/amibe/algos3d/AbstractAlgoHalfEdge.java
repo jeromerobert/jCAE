@@ -50,6 +50,7 @@ public abstract class AbstractAlgoHalfEdge
 	protected int notProcessed = 0;
 	protected int notInTree = 0;
 	private int progressBarStatus = 10000;
+	protected boolean noSwapAfterProcessing = false;
 	protected QSortedTree<HalfEdge> tree = new PAVLSortedTree<HalfEdge>();
 	
 	protected abstract void preProcessAllHalfEdges();
@@ -167,7 +168,6 @@ public abstract class AbstractAlgoHalfEdge
 
 	private boolean processAllHalfEdges()
 	{
-		boolean noSwap = false;
 		Stack<HalfEdge> stackNotProcessedObject = new Stack<HalfEdge>();
 		Stack<Double> stackNotProcessedValue = new Stack<Double>();
 		double cost = -1.0;
@@ -225,7 +225,7 @@ public abstract class AbstractAlgoHalfEdge
 			current = processEdge(current, cost);
 			processed++;
 
-			if (noSwap)
+			if (noSwapAfterProcessing)
 				continue;
 			
 			// Check if edges can be swapped
