@@ -767,40 +767,53 @@ public class Vertex implements Serializable
 		for (int i = 0; i < 3; i++)
 			g0[i] = g1[i] = g2[i] = h[i] = 0.0;
 		Vertex d = ot.destination();
-		do
+		for (int pass = 0; pass < 2; pass++)
 		{
-			ot = ot.nextOriginLoop();
-			if (ot.hasAttributes(AbstractHalfEdge.OUTER))
-				continue;
-			double [] p1 = ot.destination().getUV();
-			for (int i = 0; i < 3; i++)
-				vect1[i] = p1[i] - param[i];
-			// Find coordinates in the local frame (t1,t2,n)
-			P.apply(vect1, loc);
-			// Compute right hand side
-			h[0] += loc[2] * loc[0] * loc[0];
-			h[1] += loc[2] * loc[0] * loc[1];
-			h[2] += loc[2] * loc[1] * loc[1];
-			// Matrix assembly
-			g0[0] += loc[0] * loc[0] * loc[0] * loc[0];
-			g0[1] += loc[0] * loc[0] * loc[0] * loc[1];
-			g0[2] += loc[0] * loc[0] * loc[1] * loc[1];
-			g1[2] += loc[0] * loc[1] * loc[1] * loc[1];
-			g2[2] += loc[1] * loc[1] * loc[1] * loc[1];
+			do
+			{
+				ot = ot.nextOriginLoop();
+				assert !ot.hasAttributes(AbstractHalfEdge.OUTER);
+				if (pass == 0)
+				{
+					// Destination point
+					double [] p1 = ot.destination().getUV();
+					for (int i = 0; i < 3; i++)
+						vect1[i] = p1[i] - param[i];
+				}
+				else
+				{
+					// Middle point of opposite edge
+					double [] p1 = ot.destination().getUV();
+					double [] p2 = ot.apex().getUV();
+					for (int i = 0; i < 3; i++)
+						vect1[i] = 0.5*(p1[i] + p2[i])- param[i];
+				}
+				// Find coordinates in the local frame (t1,t2,n)
+				P.apply(vect1, loc);
+				// Compute right hand side
+				h[0] += loc[2] * loc[0] * loc[0];
+				h[1] += loc[2] * loc[0] * loc[1];
+				h[2] += loc[2] * loc[1] * loc[1];
+				// Matrix assembly
+				g0[0] += loc[0] * loc[0] * loc[0] * loc[0];
+				g0[1] += loc[0] * loc[0] * loc[0] * loc[1];
+				g0[2] += loc[0] * loc[0] * loc[1] * loc[1];
+				g1[2] += loc[0] * loc[1] * loc[1] * loc[1];
+				g2[2] += loc[1] * loc[1] * loc[1] * loc[1];
+			}
+			while (ot.destination() != d);
+			if (h[1] * h[1] < 4.0 * h[0] * h[2])
+				break;
+			// We do not want F to be hyperbolic, projected point may
+			// be very far from other points.  Middle points are also
+			// added to find another approximation.
+			if (pass > 0)
+				return false;
 		}
-		while (ot.destination() != d);
 		g1[1] = g0[2];
 		g1[0] = g0[1];
 		g2[0] = g0[2];
 		g2[1] = g1[2];
-		// If g0, g1 and g2 are colinear, our linear system is not determined.
-		// This happens when triangles are almost coplanar, so we can return
-		// true.
-		// We do not use G.det() here to not create G if it is not needed.
-		Matrix3D.prodVect3D(g0, g1, vect1);
-		double det = Matrix3D.prodSca(g2, vect1);
-		if (det*det < 1.e-12 * Matrix3D.prodSca(g0,g0)*Matrix3D.prodSca(g1,g1)*Matrix3D.prodSca(g2,g2))
-			return true;
 		// G = tA A
 		Metric3D G = new Metric3D(g0, g1, g2);
 		if (!G.inv())
