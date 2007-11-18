@@ -403,9 +403,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * Warning: this method uses temp[0], temp[1], temp[2] and temp[3] temporary arrays.
 	 *
 	 * @param minCos  if the dot product of the normals to adjacent
-	 *    triangles is lower than monCos, then <code>-1.0</code> is
+	 *    triangles is lower than minCos, then <code>-1.0</code> is
 	 *    returned.
-	 * @return the minimum quality of the two trianglles generated
+	 * @return the minimum quality of the two triangles generated
 	 *    by swapping this edge.
 	 */
 	public final double checkSwap3D(double minCos)
