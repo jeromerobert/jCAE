@@ -118,12 +118,13 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 		// Update edge costs
 		for (int i = 0; i < 2; i++)
 		{
-			current = current.prev();
 			addToTree(uniqueOrientation(current));
+			current = current.prev();
 		}
+		current = current.sym();
 		for (int i = 0; i < 2; i++)
 		{
-			current = current.prev();
+			current = current.next();
 			addToTree(uniqueOrientation(current));
 		}
 		return current.prev();
