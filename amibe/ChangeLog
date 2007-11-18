@@ -1,3 +1,7 @@
+Sun Nov 18 23:46:48 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos3d/ImproveConnectivity.java: New class.
+
 Sat Nov 17 21:56:02 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos3d/SmoothNodes3D.java: Quality is
