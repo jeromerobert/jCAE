@@ -206,7 +206,7 @@ public class Matrix3D implements Serializable
 		ret[2] = v1[0] * v2[1] - v1[1] * v2[0];
 	}
 	
-	public static final double computeNormal3D(double [] p0, double [] p1, double [] p2, double [] tempD1, double [] tempD2, double [] tempD3)
+	public static final double computeNormal3D(double [] p0, double [] p1, double [] p2, double [] tempD1, double [] tempD2, double [] ret)
 	{
 		tempD1[0] = p1[0] - p0[0];
 		tempD1[1] = p1[1] - p0[1];
@@ -214,26 +214,26 @@ public class Matrix3D implements Serializable
 		tempD2[0] = p2[0] - p0[0];
 		tempD2[1] = p2[1] - p0[1];
 		tempD2[2] = p2[2] - p0[2];
-		prodVect3D(tempD1, tempD2, tempD3);
-		double norm = norm(tempD3);
+		prodVect3D(tempD1, tempD2, ret);
+		double norm = norm(ret);
 		if (norm != 0.0)
 		{
-			tempD3[0] /= norm;
-			tempD3[1] /= norm;
-			tempD3[2] /= norm;
+			ret[0] /= norm;
+			ret[1] /= norm;
+			ret[2] /= norm;
 		}
 		return 0.5 * norm;
 	}
 
-	public static final double computeNormal3DT(double [] p0, double [] p1, double [] p2, double [] tempD1, double [] tempD2, double [] tempD3)
+	public static final double computeNormal3DT(double [] p0, double [] p1, double [] p2, double [] tempD1, double [] tempD2, double [] ret)
 	{
 		tempD1[0] = p1[0] - p0[0];
 		tempD1[1] = p1[1] - p0[1];
 		tempD1[2] = p1[2] - p0[2];
-		tempD3[0] = p2[0] - p0[0];
-		tempD3[1] = p2[1] - p0[1];
-		tempD3[2] = p2[2] - p0[2];
-		prodVect3D(tempD1, tempD3, tempD2);
+		ret[0] = p2[0] - p0[0];
+		ret[1] = p2[1] - p0[1];
+		ret[2] = p2[2] - p0[2];
+		prodVect3D(tempD1, ret, tempD2);
 		double norm = norm(tempD2);
 		if (norm != 0.0)
 		{
@@ -241,7 +241,7 @@ public class Matrix3D implements Serializable
 			tempD2[1] /= norm;
 			tempD2[2] /= norm;
 		}
-		prodVect3D(tempD1, tempD2, tempD3);
+		prodVect3D(tempD1, tempD2, ret);
 		return 0.5*norm;
 	}
 	
