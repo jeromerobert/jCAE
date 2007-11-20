@@ -39,11 +39,14 @@ public class DihedralAngle extends QualityProcedure
 	private VirtualHalfEdge ot = new VirtualHalfEdge();
 	private VirtualHalfEdge sym = new VirtualHalfEdge();
 	
-	public DihedralAngle()
+	@Override
+	protected void setValidationFeatures()
 	{
-		setType(QualityProcedure.FACE);
+		usageStr = new String[]{"DihedralAngle", "smallest dot product of normals with adjacent triangles"};
+		type = QualityProcedure.FACE;
 	}
-	
+
+
 	@Override
 	public float quality(Object o)
 	{

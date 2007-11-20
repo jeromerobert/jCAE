@@ -40,9 +40,15 @@ public class AbsoluteDeflection2D extends QualityProcedure
 	{
 		mesh = m;
 		c = (Vertex2D) mesh.createVertex(0.0, 0.0);
-		setType(QualityProcedure.FACE);
 	}
 	
+	@Override
+	protected void setValidationFeatures()
+	{
+		usageStr = new String[]{"AbsoluteDeflection2D", "absolute deflection for 2D parameterized meshes"};
+		type = QualityProcedure.FACE;
+	}
+
 	@Override
 	public float quality(Object o)
 	{

@@ -24,18 +24,20 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 
 /**
- * Compute maximal edge length by triangle.
+ * Compute minimal edge length by triangle.
  * This class implements the {@link QualityProcedure#quality(Object)}
  * method to compute minimal edge length of triangles.
  */
 
 public class MinLengthFace extends QualityProcedure
 {
-	public MinLengthFace()
+	@Override
+	protected void setValidationFeatures()
 	{
-		setType(QualityProcedure.FACE);
+		usageStr = new String[]{"MinLengthFace", "minimum length for 3 edges"};
+		type = QualityProcedure.FACE;
 	}
-	
+
 	@Override
 	public float quality(Object o)
 	{

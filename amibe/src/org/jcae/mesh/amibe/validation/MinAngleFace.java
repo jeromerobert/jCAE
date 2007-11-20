@@ -30,11 +30,13 @@ import org.jcae.mesh.amibe.ds.Vertex;
  */
 public class MinAngleFace extends QualityProcedure
 {
-	public MinAngleFace()
+	@Override
+	protected void setValidationFeatures()
 	{
-		setType(QualityProcedure.FACE);
+		usageStr = new String[]{"MinAngleFace", "minimum angle for 3 edges"};
+		type = QualityProcedure.FACE;
 	}
-	
+
 	@Override
 	public float quality(Object o)
 	{

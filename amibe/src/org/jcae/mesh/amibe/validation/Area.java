@@ -34,11 +34,13 @@ public class Area extends QualityProcedure
 	private static final double [] v2 = new double[3];
 	private static final double [] v3 = new double[3];
 	
-	public Area()
+	@Override
+	protected void setValidationFeatures()
 	{
-		setType(QualityProcedure.FACE);
+		usageStr = new String[]{"Area", "triangle area"};
+		type = QualityProcedure.FACE;
 	}
-	
+
 	@Override
 	public float quality(Object o)
 	{

@@ -30,11 +30,13 @@ import org.jcae.mesh.amibe.ds.Vertex;
  */
 public class MaxAngleFace extends QualityProcedure
 {
-	public MaxAngleFace()
+	@Override
+	protected void setValidationFeatures()
 	{
-		setType(QualityProcedure.FACE);
+		usageStr = new String[]{"MaxAngleFace", "maximum angle for 3 edges"};
+		type = QualityProcedure.FACE;
 	}
-	
+
 	@Override
 	public float quality(Object o)
 	{

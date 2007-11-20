@@ -24,11 +24,13 @@ import org.jcae.mesh.amibe.ds.Vertex;
 
 public class NodeConnectivity extends QualityProcedure
 {
-	public NodeConnectivity()
+	@Override
+	protected void setValidationFeatures()
 	{
-		setType(QualityProcedure.NODE);
+		usageStr = new String[]{"NodeConnectivity", "node connectivity, normalized to 1"};
+		type = QualityProcedure.NODE;
 	}
-	
+
 	@Override
 	public float quality(Object o)
 	{

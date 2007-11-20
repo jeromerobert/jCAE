@@ -30,11 +30,13 @@ import org.jcae.mesh.amibe.ds.Vertex;
  */
 public class MaxLengthFace extends QualityProcedure
 {
-	public MaxLengthFace()
+	@Override
+	protected void setValidationFeatures()
 	{
-		setType(QualityProcedure.FACE);
+		usageStr = new String[]{"MaxLengthFace", "maximum length for 3 edges"};
+		type = QualityProcedure.FACE;
 	}
-	
+
 	@Override
 	public float quality(Object o)
 	{

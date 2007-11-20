@@ -21,6 +21,8 @@ package org.jcae.mesh.amibe.validation;
 
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import gnu.trove.TFloatArrayList;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Abstract class to compute quality criteria.
@@ -38,8 +40,70 @@ public abstract class QualityProcedure
 	protected static final int NODE = 2;
 	
 	// By default, values are computed by faces.
-	private int type = FACE;
+	protected int type = FACE;
+	protected String [] usageStr;
 	protected TFloatArrayList data;
+	
+	private static Class<QualityProcedure> [] subClasses = new Class[]{
+		// AbsoluteDeflection2D.class,  Disabled for now
+		Area.class,
+		DihedralAngle.class,
+		MaxAngleFace.class,
+		MaxLengthFace.class,
+		MinAngleFace.class,
+		MinLengthFace.class,
+		// NodeConnectivity.class,
+		null
+	};
+
+	public static String [] getListSubClasses()
+	{
+		String [] ret = new String[2*subClasses.length-2];
+		int idx = 0;
+		try
+		{
+			for (Class<QualityProcedure> c: subClasses)
+			{
+				if (c == null)
+					break;
+				Constructor<QualityProcedure> cons = c.getConstructor();
+				QualityProcedure qproc = cons.newInstance();
+				String [] str = qproc.usageStr;
+				ret[2*idx] = str[0];
+				ret[2*idx+1] = str[1];
+				idx++;
+			}
+		}
+		catch (NoSuchMethodException ex)
+		{
+		}
+		catch (IllegalAccessException ex)
+		{
+		}
+		catch (InstantiationException ex)
+		{
+		}
+		catch (InvocationTargetException ex)
+		{
+		}
+		return ret;
+	}
+
+	protected abstract void setValidationFeatures();
+	public QualityProcedure()
+	{
+		setValidationFeatures();
+	}
+
+	/**
+	 * Return element type.
+	 *
+	 * @return element type
+	 */
+	protected final int getType()
+	{
+		return type;
+	}
 	
 	/**
 	 * Return the quality factor for a given object.
@@ -72,30 +136,6 @@ public abstract class QualityProcedure
 	 */
 	public void finish()
 	{
-	}
-	
-	/**
-	 * Return element type.
-	 *
-	 * @return element type.
-	 */
-	protected final int getType()
-	{
-		return type;
-	}
-	
-	/**
-	 * Set the element type.  Valid values are {@link #FACE} and
-	 * {@link #NODE}.  By default, type is <code>FACE</code>.
-	 * Quality procedures which compute values on nodes need to
-	 * call this function, otherwise the data file written by
-	 * {@link QualityFloat#printMeshBB(String)}
-	 *
-	 * @param t  the element type.
-	 */
-	protected final void setType(int t)
-	{
-		type = t;
 	}
 	
 	/**
