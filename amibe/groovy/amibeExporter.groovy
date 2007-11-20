@@ -35,10 +35,10 @@ if (cmd.hasOption('h'))
 if (cmd.hasOption('F'))
 {
 	println("List of supported file formats:")
-	println("\tUNV: I-DEAS Universal file format (suffix: .unv)")
-	println("\tMESH: Medit format (suffix: .mesh)")
-	println("\tSTL: STL (suffix: .stl)")
-	println("\tVTK: VTK (suffix: .vtp)")
+	println("\tUNV: I-DEAS Universal file format (default suffix: .unv)")
+	println("\tMESH: Medit format (default suffix: .mesh)")
+	println("\tSTL: STL (default suffix: .stl)")
+	println("\tVTK: VTK (default suffix: .vtp)")
 	System.exit(0);
 }
 

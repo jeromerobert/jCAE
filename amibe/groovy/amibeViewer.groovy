@@ -7,8 +7,32 @@ import javax.swing.WindowConstants;
 import org.jcae.viewer3d.fe.amibe.AmibeProvider;
 import org.jcae.viewer3d.fe.ViewableFE;
 import org.jcae.viewer3d.View;
+import org.apache.commons.cli.*;
 
-String xmlDir = args[0]
+void usage(int rc, Options options)
+{
+	HelpFormatter formatter = new HelpFormatter();
+	formatter.printHelp("groovy amibeViewer.groovy xmlDir", "Launch a view to display mesh stored in xmlDir directory", options, "");
+	System.exit(rc);
+}
+
+Options options = new Options();
+options.addOption(
+	OptionBuilder.hasArg(false)
+		.withDescription("usage information")
+		.withLongOpt("help")
+		.create('h'));
+CommandLineParser parser = new GnuParser();
+CommandLine cmd = parser.parse(options, args, true);
+if (cmd.hasOption('h'))
+	usage(0, options);
+
+String [] remaining = cmd.getArgs();
+if (remaining.length != 1)
+	usage(1, options);
+
+String xmlDir = remaining[0]
+String xmlFile = "jcae3d";
 
 JFrame feFrame=new JFrame("jCAE Demo");
 feFrame.setSize(800,600);

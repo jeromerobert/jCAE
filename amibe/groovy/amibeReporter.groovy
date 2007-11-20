@@ -16,7 +16,7 @@ import org.apache.commons.cli.*;
 void usage(int rc, Options options)
 {
 	HelpFormatter formatter = new HelpFormatter();
-	formatter.printHelp("groovy amibeReporter.groovy [options] xmlDir", options);
+	formatter.printHelp("groovy amibeReporter.groovy [options] xmlDir", "Prints statistics about mesh stored in xmlDir directory", options, "");
 	System.exit(rc);
 }
 
@@ -59,6 +59,11 @@ options.addOption(
 		.withLongOpt("criterion")
 		.create('c'));
 options.addOption(
+	OptionBuilder.hasArg(false)
+		.withDescription("lists all available criteria")
+		.withLongOpt("list-criteria")
+		.create('C'));
+options.addOption(
 	OptionBuilder.withArgName("NUMBER").hasArg()
 		.withDescription("scale factor (default: 1.0)")
 		.withLongOpt("scale")
@@ -67,6 +72,17 @@ CommandLineParser parser = new GnuParser();
 CommandLine cmd = parser.parse(options, args, true);
 if (cmd.hasOption('h'))
 	usage(0, options);
+if (cmd.hasOption('C'))
+{
+	String [] listStr = QualityProcedure.getListSubClasses();
+	println("List of available criteria for -c option:");
+	for (int idx = 0; idx < listStr.length; idx += 2)
+	{
+		println(" "+listStr[idx]);
+		println("   "+listStr[idx+1]);
+	}
+	System.exit(0);
+}
 
 String [] remaining = cmd.getArgs();
 if (remaining.length != 1)
@@ -99,7 +115,7 @@ try
 catch (IOException ex)
 {
 	println("File "+xmlDir+File.separator+"jcae3d does not exist!");
-	usage();
+	usage(0, options);
 }
 // Compute mesh quality
 int nrFaces = 1;
