@@ -29,9 +29,10 @@ options.addOption(
 		.withDescription("usage information")
 		.withLongOpt("help")
 		.create('h'));
+/* These options are for experts only!
 options.addOption(
 	OptionBuilder.withArgName("NUMBER").hasArg()
-		.withDescription("eliminates edges smaller than this value (default: patch size/1000)")
+		.withDescription("tries to eliminate edges smaller than this value (default: patch size/1000)")
 		.withLongOpt("epsilon")
 		.create('e'));
 options.addOption(
@@ -39,6 +40,7 @@ options.addOption(
 		.withDescription("tries to merge small edges together")
 		.withLongOpt("cumulativeEpsilon")
 		.create('E'));
+*/
 options.addOption(
 	OptionBuilder.withArgName("FILE").hasArg()
 		.withDescription("exports UNV file (for phase 3)")
@@ -88,9 +90,9 @@ for (String str: sPhases)
 	phases[p] = true
 }
 
-String sEpsilon = cmd.getOptionValue('e', "-1.0");
-System.setProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon", sEpsilon);
-System.setProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon", ""+cmd.hasOption('E'));
+//String sEpsilon = cmd.getOptionValue('e', "-1.0");
+System.setProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon", "0.0);
+System.setProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon", "false");
 
 String unvName = null
 if (cmd.hasOption('o'))
