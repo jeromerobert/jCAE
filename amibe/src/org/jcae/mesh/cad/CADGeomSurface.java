@@ -89,4 +89,10 @@ public interface CADGeomSurface
 	 * @return An array: {Xmax, Ymax, Zmax, Xmin, Ymin, Zmin}
 	 */    
 	public double [] curvatureDirections();
+	/**
+	 * Return distance of a point to this surface
+	 * @param p  3-d point
+	 * @return distance between this point and the surface
+	 */    
+	public double lowerDistance(double [] p);
 }

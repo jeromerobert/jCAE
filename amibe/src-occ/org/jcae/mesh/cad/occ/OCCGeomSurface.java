@@ -22,6 +22,7 @@ package org.jcae.mesh.cad.occ;
 import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.opencascade.jni.Geom_Surface;
 import org.jcae.opencascade.jni.GeomLProp_SLProps;
+import org.jcae.opencascade.jni.GeomAPI_ProjectPointOnSurf;
 
 public class OCCGeomSurface implements CADGeomSurface
 {
@@ -125,4 +126,10 @@ public class OCCGeomSurface implements CADGeomSurface
 		return myLprop.curvatureDirections();
 	}
 	
+	public double lowerDistance(double [] p)
+	{
+		GeomAPI_ProjectPointOnSurf pps = new GeomAPI_ProjectPointOnSurf(p, mySurface);
+		return pps.lowerDistance();
+	}
+
 }

@@ -1,3 +1,9 @@
+Tue Nov 20 11:32:34 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/cad/CADGeomSurface.java
+	  src-occ/org/jcae/mesh/cad/occ/OCCGeomSurface.java: New
+	lowerDistance() method.
+
 Sun Nov 18 23:46:48 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos3d/ImproveConnectivity.java: New class.
