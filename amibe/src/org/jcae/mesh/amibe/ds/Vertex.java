@@ -728,10 +728,55 @@ public class Vertex implements Serializable
 	 */
 	public boolean discreteProject(Vertex pt)
 	{
+		// Transformation matrix
+		Matrix3D P = getMatrix3DLocalFrame();
+		if (P == null)
+			return false;
+		double [] q = getLocalQuadric(P);
+		if (q == null)
+			return false;
+		pt.projectQuadric(param, P, q);
+		return true;
+	}
+	
+	public void projectQuadric(double [] origin, Matrix3D P, double [] q)
+	{
+		double [] glob = new double[3];
+		for (int i = 0; i < 3; i++)
+			glob[i] = param[i] - origin[i];
+		
+		// Local coordinates
+		double [] loc = new double[3];
+		P.apply(glob, loc);
+		// Compute z = a x^2 + b xy + c y^2
+		loc[2] = q[0] * loc[0] * loc[0] + q[1] * loc[0] * loc[1] + q[2] * loc[1] * loc[1];
+		// Reuse glob
+		P.transp();
+		P.apply(loc, glob);
+		P.transp();
+		moveTo(origin[0] + glob[0], origin[1] + glob[1], origin[2] + glob[2]);
+	}
+	
+	public Matrix3D getMatrix3DLocalFrame()
+	{
 		double [] normal = new double[3];
 		// TODO: Check why discreteCurvatures(normal) does not work well
 		if (!discreteAverageNormal(normal))
-			return false;
+			return null;
+		double [] t1 = new double[3];
+		double [] t2 = new double[3];
+		if (!computeTangentPlane(normal, t1, t2))
+			return null;
+		// Transformation matrix
+		Matrix3D P = new Matrix3D(t1, t2, normal);
+		P.transp();
+		return P;
+	}
+	
+	public double [] getLocalQuadric(Matrix3D P)
+	{
+		if (P == null)
+			return null;
 		// We search for the quadric
 		//   F(x,y) = a x^2 + b xy + c y^2 - z
 		// which fits best for all neighbour vertices.
@@ -750,14 +795,6 @@ public class Vertex implements Serializable
 		// by multiplying by tA to the left
 		//    tA A X = tA b
 		// If G = tA A is not singular, X = inv(tA A) tA b
-		double [] t1 = new double[3];
-		double [] t2 = new double[3];
-		if (!computeTangentPlane(normal, t1, t2))
-			return false;
-		// Transformation matrix
-		Matrix3D P = new Matrix3D(t1, t2, normal);
-		P.transp();
-		AbstractHalfEdge ot = getIncidentAbstractHalfEdge();
 		double [] vect1 = new double[3];
 		double [] h = new double[3];
 		double [] g0 = new double[3];
@@ -766,6 +803,8 @@ public class Vertex implements Serializable
 		double [] loc = new double[3];
 		for (int i = 0; i < 3; i++)
 			g0[i] = g1[i] = g2[i] = h[i] = 0.0;
+
+		AbstractHalfEdge ot = getIncidentAbstractHalfEdge();
 		Vertex d = ot.destination();
 		for (int pass = 0; pass < 2; pass++)
 		{
@@ -808,7 +847,7 @@ public class Vertex implements Serializable
 			// be very far from other points.  Middle points are also
 			// added to find another approximation.
 			if (pass > 0)
-				return false;
+				return null;
 		}
 		g1[1] = g0[2];
 		g1[0] = g0[1];
@@ -817,21 +856,10 @@ public class Vertex implements Serializable
 		// G = tA A
 		Metric3D G = new Metric3D(g0, g1, g2);
 		if (!G.inv())
-			return false;
+			return null;
 		// Reuse g0 to store our solution (a,b,c)
 		G.apply(h, g0);
-		// Now project pt onto this quadric
-		for (int i = 0; i < 3; i++)
-			vect1[i] = pt.param[i] - param[i];
-		// Local coordinates
-		P.apply(vect1, loc);
-		// Compute z = a x^2 + b xy + c y^2
-		loc[2] = g0[0] * loc[0] * loc[0] + g0[1] * loc[0] * loc[1] + g0[2] * loc[1] * loc[1];
-		// Reuse vect1
-		P.transp();
-		P.apply(loc, vect1);
-		pt.moveTo(param[0] + vect1[0], param[1] + vect1[1], param[2] + vect1[2]);
-		return true;
+		return g0;
 	}
 	
 	@Override
