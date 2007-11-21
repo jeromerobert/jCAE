@@ -25,6 +25,7 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.util.QSortedTree;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import org.jcae.mesh.xmldata.MeshReader;
@@ -39,17 +40,15 @@ import gnu.trove.TObjectDoubleHashMap;
 import org.apache.log4j.Logger;
 
 /**
- * 3D node smoothing.  Triangles are sorted according to their quality,
- * They are processed iteratively beginning with the worst triangle.
- * Its three vertices are moved if they have not already been moved
- * when processing a previous triangle.  A modified Laplacian smoothing
- * is performed, as briefly explained in
+ * Node smoothing.  Triangle quality is computed for all triangles,
+ * and vertex quality is the lowest value of its incident triangles.
+ * Vertices are sorted according to their quality, and processed
+ * iteratively by beginning with worst vertex.  A modified Laplacian
+ * smoothing is performed, as briefly explained in
  * <a href="http://www.ann.jussieu.fr/~frey/publications/ijnme4198.pdf">Adaptive Triangular-Quadrilateral Mesh Generation</a>, by Houman Borouchaky and
  * Pascal J. Frey.
- * If the final position do not invert triangles, the point is moved.
+ * If final position improves vertex quality, point is moved.
  */
-// Note 1: alternatives should be tested.
-// Note 2: the point should be moved only if triangle quality is improved.
 public class SmoothNodes3D
 {
 	private static Logger logger=Logger.getLogger(SmoothNodes3D.class);
@@ -67,6 +66,7 @@ public class SmoothNodes3D
 	int processed = 0;
 	int notProcessed = 0;
 	TObjectDoubleHashMap<Triangle> qualityMap;
+	Map<Vertex, QuadricProjection> nodeProjection;
 	Collection<Vertex> nodeset;
 	
 	/**
@@ -86,7 +86,9 @@ public class SmoothNodes3D
 	 * @param m  the <code>Mesh</code> instance to refine.
 	 * @param options  map containing key-value pairs to modify algorithm
 	 *        behaviour.  Valid keys are <code>size</code>,
-	 *        <code>iterations</code> and <code>boundaries</code>.
+	 *        <code>iterations</code>, <code>boundaries</code>,
+	 *        <code>tolerance</code>, <code>refresh</code> and
+	 *        <code>relaxation</code>.
 	 */
 	public SmoothNodes3D(final Mesh m, final Map<String, String> options)
 	{
@@ -123,6 +125,20 @@ public class SmoothNodes3D
 		}
 	}
 	
+	private static class QuadricProjection
+	{
+		final Matrix3D localFrameTransform;
+		final double [] origin = new double[3];
+		final double [] quadric;
+		public QuadricProjection(double [] o, Matrix3D P, double [] q)
+		{
+			for (int i = 0; i < 3; i++)
+				origin[i] = o[i];
+			localFrameTransform = P;
+			quadric = q;
+		}
+	}
+
 	public void setProgressBarStatus(int n)
 	{
 		progressBarStatus = n;
@@ -151,6 +167,7 @@ public class SmoothNodes3D
 		computeTriangleQuality();
 
 		nodeset = mesh.getNodes();
+		nodeProjection = new HashMap<Vertex, QuadricProjection>(mesh.getTriangles().size() / 2);
 		if (nodeset == null)
 		{
 			nodeset = new HashSet<Vertex>(mesh.getTriangles().size() / 2);
@@ -159,7 +176,18 @@ public class SmoothNodes3D
 				if (f.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
 				for (Vertex v: f.vertex)
+				{
+					if (nodeset.contains(v))
+						continue;
 					nodeset.add(v);
+					Matrix3D P = v.getMatrix3DLocalFrame();
+					if (P == null)
+						continue;
+					double [] q = v.getLocalQuadric(P);
+					if (q == null)
+						continue;
+					nodeProjection.put(v, new QuadricProjection(v.getUV(), P, q));
+				}
 			}
 		}
 		for (int i = 0; i < nloop; i++)
@@ -310,8 +338,11 @@ public class SmoothNodes3D
 			centroid3[i] = oldp3[i] + relaxation * (centroid3[i] - oldp3[i]);
 		if (!ot.checkNewRingNormals(centroid3))
 			return false;
-		if (!n.discreteProject(c))
+		QuadricProjection tr = nodeProjection.get(n);
+		if (tr == null)
 			return false;
+		c.projectQuadric(tr.origin, tr.localFrameTransform, tr.quadric);
+
 		double saveX = oldp3[0];
 		double saveY = oldp3[1];
 		double saveZ = oldp3[2];
