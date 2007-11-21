@@ -284,8 +284,6 @@ public class Mesher
 				new CheckDelaunay(mesh).compute();
 				if (deflection > 0.0 && !relDefl)
 					new EnforceAbsDeflection(mesh).compute();
-				mesh.removeDegeneratedEdges();
-				MeshWriter.writeObject(mesh, outputDir, "jcae2d."+iFace, xmlBrepDir, brepFile, iFace);
 			}
 			catch(InitialTriangulationException ex)
 			{
@@ -322,14 +320,18 @@ public class Mesher
 			logger.error("Face "+iFace+" cannot be triangulated, skipping...");
 			toReturn=false;
 			mesh = new Mesh2D(mtb, face); 
-			try
-			{
-				MeshWriter.writeObject(mesh, outputDir, "jcae2d."+iFace, xmlBrepDir, brepFile, iFace);
-			}
-			catch(IOException ex)
-			{
-				// Do nothing
-			}
+		}
+		else
+		{
+			mesh.removeDegeneratedEdges();
+		}
+		try
+		{
+			MeshWriter.writeObject(mesh, outputDir, "jcae2d."+iFace, xmlBrepDir, brepFile, iFace);
+		}
+		catch(IOException ex)
+		{
+			ex.printStackTrace();
 		}
 		return toReturn;
 	}
