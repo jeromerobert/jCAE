@@ -91,7 +91,7 @@ for (String str: sPhases)
 }
 
 //String sEpsilon = cmd.getOptionValue('e', "-1.0");
-System.setProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon", "0.0);
+System.setProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon", "0.0");
 System.setProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon", "false");
 
 String unvName = null
@@ -182,9 +182,6 @@ if (phases[2])
 			while (go) {
 				try {
 					new BasicMesh(mesh, mesh1d).compute()
-					new CheckDelaunay(mesh).compute()
-					mesh.removeDegeneratedEdges()
-					MeshWriter.writeObject(mesh, outdir, "jcae2d."+iface, brepdir, brepfile, iface)
 					go = false
 				}
 				catch(InitialTriangulationException ex) {
@@ -194,25 +191,31 @@ if (phases[2])
 					ntry ++
 				}
 				catch(InvalidFaceException ex) {
-					println "Face #${iface} is invalid"
+					println "Face #${iface} is invalid. Skipping ..."
 					success = false
 				}
 				catch(Exception ex) {
 					ex.printStackTrace()
+					println "Unexpected error when triangulating face #${iface}. Skipping ..."
 					success = false
 				}
-				if (ntry == 20) success = false
+				if (ntry == 20) {
+					println "Cannot triangulate face #${iface}. Skipping ..."
+					success = false
+				}
 				if (! success) go = false
 			}
 	
 			if (! success) {
-				println "Cannot triangulate face #${iface}. Skipping ..."
 				bads << iface
 				BRepTools.write(face.getShape(), "error.brep")
-				exit
+				mesh = new Mesh2D(mtb, face); 
 			} else {
+				new CheckDelaunay(mesh).compute()
+				mesh.removeDegeneratedEdges()
 				println "Face #${iface} has been meshed"
 			}
+			MeshWriter.writeObject(mesh, outdir, "jcae2d."+iface, brepdir, brepfile, iface)
 		}
 	}
 }
