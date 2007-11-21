@@ -1,0 +1,372 @@
+/* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
+   modeler, Finite element mesher, Plugin architecture.
+
+    Copyright (C) 2007, by EADS France
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
+package org.jcae.mesh.amibe.algos2d;
+
+import org.jcae.mesh.amibe.ds.TriangleVH;
+import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
+import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.patch.Mesh2D;
+import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
+import org.jcae.mesh.amibe.patch.Vertex2D;
+import org.jcae.mesh.amibe.metrics.Matrix3D;
+import org.jcae.mesh.amibe.util.QSortedTree;
+import org.jcae.mesh.amibe.util.PAVLSortedTree;
+import org.jcae.mesh.cad.CADGeomSurface;
+import java.util.Map;
+import java.util.HashSet;
+import java.util.Collection;
+import java.util.Iterator;
+import gnu.trove.TObjectDoubleHashMap;
+import org.apache.log4j.Logger;
+
+/**
+ * Node smoothing.  Triangle quality is computed for all triangles,
+ * and vertex quality is the lowest value of its incident triangles.
+ * Vertices are sorted according to their quality, and processed
+ * iteratively by beginning with worst vertex.  A modified Laplacian
+ * smoothing is performed, as briefly explained in
+ * <a href="http://www.ann.jussieu.fr/~frey/publications/ijnme4198.pdf">Adaptive Triangular-Quadrilateral Mesh Generation</a>, by Houman Borouchaky and
+ * Pascal J. Frey.
+ * If final position improves vertex quality, point is moved.
+ */
+public class SmoothNodes2D
+{
+	private static Logger logger=Logger.getLogger(SmoothNodes2D.class);
+	private Mesh2D mesh;
+	private CADGeomSurface surface;
+	private boolean modifiedLaplacian = false;
+	private int nloop = 5;
+	private double tolerance = Double.MAX_VALUE / 2.0;
+	private int progressBarStatus = 10000;
+	private double relaxation = 0.6;
+	private final Vertex2D c;
+	private boolean refresh = false;
+	private QSortedTree<Vertex2D> tree = new PAVLSortedTree<Vertex2D>();
+
+	int processed = 0;
+	int notProcessed = 0;
+	TObjectDoubleHashMap<Triangle> qualityMap;
+	Collection<Vertex> nodeset;
+	
+	/**
+	 * Creates a <code>SmoothNodes2D</code> instance.
+	 *
+	 * @param m  the <code>Mesh2D</code> instance to refine.
+	 */
+	public SmoothNodes2D(Mesh2D m)
+	{
+		mesh = m;
+		surface = mesh.getGeomSurface();
+		c = (Vertex2D) mesh.createVertex(0.0, 0.0);
+	}
+	
+	/**
+	 * Creates a <code>SmoothNodes2D</code> instance.
+	 *
+	 * @param m  the <code>Mesh2D</code> instance to refine.
+	 * @param options  map containing key-value pairs to modify algorithm
+	 *        behaviour.  Valid keys are <code>size</code>,
+	 *        <code>iterations</code> and <code>boundaries</code>.
+	 */
+	public SmoothNodes2D(final Mesh2D m, final Map<String, String> options)
+	{
+		mesh = m;
+		surface = mesh.getGeomSurface();
+		c = (Vertex2D) mesh.createVertex(0.0, 0.0);
+		for (final Map.Entry<String, String> opt: options.entrySet())
+		{
+			final String key = opt.getKey();
+			final String val = opt.getValue();
+			if (key.equals("modifiedLaplacian"))
+				modifiedLaplacian = Boolean.valueOf(val).booleanValue();
+			else if (key.equals("iterations"))
+				nloop = Integer.valueOf(val).intValue();
+			else if (key.equals("tolerance"))
+				tolerance = Double.valueOf(val).doubleValue();
+			else if (key.equals("refresh"))
+				refresh = Boolean.valueOf(val).booleanValue();
+			else if (key.equals("relaxation"))
+				relaxation = Double.valueOf(val).doubleValue();
+			else
+				throw new RuntimeException("Unknown option: "+key);
+		}
+		if (logger.isDebugEnabled())
+		{
+			if (modifiedLaplacian)
+				logger.debug("Modified Laplacian smoothing");
+			logger.debug("Iterations: "+nloop);
+			logger.debug("Refresh: "+refresh);
+			logger.debug("Relaxation: "+relaxation);
+			logger.debug("Tolerance: "+tolerance);
+		}
+	}
+	
+	public void setProgressBarStatus(int n)
+	{
+		progressBarStatus = n;
+	}
+
+	/**
+	 * Moves all nodes until all iterations are done.
+	 */
+	private void computeTriangleQuality()
+	{
+		VirtualHalfEdge2D ot = new VirtualHalfEdge2D();
+		for (Triangle f: mesh.getTriangles())
+		{
+			if (f.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+			ot.bind((TriangleVH) f);
+			double val = triangleQuality(ot);
+			qualityMap.put(f, val);
+		}
+	}
+	public void compute()
+	{
+		logger.debug("Run "+getClass().getName());
+		mesh.pushCompGeom(3);
+		// First compute triangle quality
+		qualityMap = new TObjectDoubleHashMap<Triangle>(mesh.getTriangles().size());
+		computeTriangleQuality();
+
+		nodeset = mesh.getNodes();
+		if (nodeset == null)
+		{
+			nodeset = new HashSet<Vertex>(mesh.getTriangles().size() / 2);
+			for (Triangle f: mesh.getTriangles())
+			{
+				if (f.hasAttributes(AbstractHalfEdge.OUTER))
+					continue;
+				for (Vertex v: f.vertex)
+					nodeset.add(v);
+			}
+		}
+		for (int i = 0; i < nloop; i++)
+			processAllNodes();
+		logger.debug("Number of moved points: "+processed);
+		logger.debug("Total number of points not moved during processing: "+notProcessed);
+		mesh.popCompGeom(3);
+	}
+	
+	/*
+	 * Moves all nodes using a modified Laplacian smoothing.
+	 */
+	private void processAllNodes()
+	{
+		VirtualHalfEdge2D ot = new VirtualHalfEdge2D();
+		// Compute vertex quality
+		tree.clear();
+		for (Vertex av: nodeset)
+		{
+			Vertex2D v = (Vertex2D) av;
+			TriangleVH f = (TriangleVH) v.getLink();
+			if (f.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+			ot.bind(f);
+			if (ot.destination() == v)
+				ot.next();
+			else if (ot.apex() == v)
+				ot.prev();
+			assert ot.origin() == v;
+			double qv = vertexQuality(ot);
+			if (qv <= tolerance)
+				tree.insert(v, qv);
+		}
+		// Now smooth nodes iteratively
+		while (!tree.isEmpty())
+		{
+			Iterator<QSortedTree.Node<Vertex2D>> itt = tree.iterator();
+			QSortedTree.Node<Vertex2D> q = itt.next();
+			if (q.getValue() > tolerance)
+				break;
+			Vertex2D v = q.getData();
+			tree.remove(v);
+			if (v.getRef() != 0)
+			{
+				notProcessed++;
+				continue;
+			}
+			if (smoothNode(v, ot, q.getValue()))
+			{
+				processed++;
+				if (processed > 0 && (processed % progressBarStatus) == 0)
+					logger.debug("Vertices processed: "+processed);
+				if (!refresh)
+					continue;
+				// Update triangle quality
+				Vertex2D d = (Vertex2D) ot.destination();
+				do
+				{
+					ot.nextOrigin();
+					if (ot.hasAttributes(AbstractHalfEdge.OUTER))
+						continue;
+					double qt = triangleQuality(ot);
+					qualityMap.put(ot.getTri(), qt);
+				}
+				while (ot.destination() != d);
+				// Update neighbor vertex quality
+				do
+				{
+					ot.nextOrigin();
+					Vertex2D n = (Vertex2D) ot.destination();
+					if (!tree.contains(n))
+						continue;
+					ot.next();
+					double qv = vertexQuality(ot);
+					ot.prev();
+					if (qv <= tolerance)
+						tree.update(n, qv);
+					else
+					{
+						tree.remove(n);
+						notProcessed++;
+					}
+				}
+				while (ot.destination() != d);
+			}
+			else
+				notProcessed++;
+		}
+	}
+	
+	private boolean smoothNode(Vertex2D n, VirtualHalfEdge2D ot, double quality)
+	{
+		TriangleVH f = (TriangleVH) n.getLink();
+		ot.bind(f);
+		if (ot.destination() == n)
+			ot.next();
+		else if (ot.apex() == n)
+			ot.prev();
+		assert ot.origin() == n;
+		double [] oldp2 = n.getUV();
+		
+		//  Compute 2D coordinates centroid.
+		//  Metrics are not interpolated; these computations
+		//  are not accurate, but we check that quality is improved
+		//  before moving vertices, so we are safe.
+		int nn = 0;
+		double [] centroid2 = c.getUV();
+		centroid2[0] = centroid2[1] = 0.0;
+		Vertex2D d = (Vertex2D) ot.destination();
+		do
+		{
+			ot.nextOrigin();
+			assert !ot.hasAttributes(AbstractHalfEdge.OUTER);
+			Vertex2D v = (Vertex2D) ot.destination();
+			nn++;
+			double l = mesh.compGeom().distance2(n, v, v);
+			double[] newp2 = v.getUV();
+			if (modifiedLaplacian)
+			{
+				// Find the point on this edge which has the
+				// desired length
+				if (l <= 0.0)
+				{
+					nn--;
+					continue;
+				}
+				l = 1.0 / Math.sqrt(l);
+				for (int i = 0; i < 2; i++)
+					centroid2[i] += newp2[i] + l * (oldp2[i] - newp2[i]);
+			}
+			else
+			{
+				for (int i = 0; i < 2; i++)
+					centroid2[i] += newp2[i];
+			}
+		}
+		while (ot.destination() != d);
+		assert (nn > 0);
+		for (int i = 0; i < 2; i++)
+			centroid2[i] /= nn;
+		for (int i = 0; i < 2; i++)
+			centroid2[i] = oldp2[i] + relaxation * (centroid2[i] - oldp2[i]);
+		do
+		{
+			ot.nextOrigin();
+			if (c.onLeft(mesh, (Vertex2D) ot.destination(), (Vertex2D) ot.apex()) < 0L)
+				return false;
+		}
+		while (ot.destination() != d);
+
+		double saveX = oldp2[0];
+		double saveY = oldp2[1];
+		n.moveTo(centroid2[0], centroid2[1]);
+		// Check that quality has not been degraded
+		double newQuality = vertexQuality(ot);
+		if (newQuality < quality)
+		{
+			n.moveTo(saveX, saveY);
+			return false;
+		}
+		return true;
+	}
+	
+	private double triangleQuality(VirtualHalfEdge2D edge)
+	{
+		Triangle f = edge.getTri();
+		assert f.vertex[0] != mesh.outerVertex && f.vertex[1] != mesh.outerVertex && f.vertex[2] != mesh.outerVertex : f;
+		Vertex2D v0 = (Vertex2D) f.vertex[0];
+		Vertex2D v1 = (Vertex2D) f.vertex[1];
+		Vertex2D v2 = (Vertex2D) f.vertex[2];
+
+		double l01 = mesh.compGeom().distance2(v0, v1, v0);
+		double l12 = mesh.compGeom().distance2(v1, v2, v1);
+		double l20 = mesh.compGeom().distance2(v2, v0, v2);
+
+		double lmin, lmax;
+		if (l01 > l20)
+		{
+			lmin = l20;
+			lmax = l01;
+		}
+		else
+		{
+			lmax = l20;
+			lmin = l01;
+		}
+		if (l20 < lmin)
+			lmin = l20;
+		else if (l20 > lmax)
+			lmax = l20;
+		assert lmax > 0.0;
+		return lmin / lmax;
+	}
+
+	private double vertexQuality(VirtualHalfEdge2D edge)
+	{
+		Vertex2D d = (Vertex2D) edge.destination();
+		double ret = Double.MAX_VALUE;
+		do
+		{
+			edge.nextOrigin();
+			if (edge.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+			double qt = triangleQuality(edge);
+			if (qt < ret)
+				ret = qt;
+		}
+		while (edge.destination() != d);
+		return ret;
+	}
+
+}
