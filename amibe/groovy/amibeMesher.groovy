@@ -181,7 +181,7 @@ if (phases[2])
 			success = true
 			while (go) {
 				try {
-					new BasicMesh(mesh, mesh1d).compute()
+					new Initial(mesh, mesh1d.boundaryNodes(mesh)).compute();
 					go = false
 				}
 				catch(InitialTriangulationException ex) {
@@ -211,6 +211,7 @@ if (phases[2])
 				BRepTools.write(face.getShape(), "error.brep")
 				mesh = new Mesh2D(mtb, face); 
 			} else {
+				new BasicMesh(mesh).compute()
 				new CheckDelaunay(mesh).compute()
 				mesh.removeDegeneratedEdges()
 				println "Face #${iface} has been meshed"

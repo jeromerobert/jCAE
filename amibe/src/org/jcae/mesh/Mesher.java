@@ -280,7 +280,7 @@ public class Mesher
 		{
 			try
 			{
-				new BasicMesh(mesh, mesh1D).compute();
+				new Initial(mesh, mesh1D.boundaryNodes(mesh)).compute();
 			}
 			catch(InitialTriangulationException ex)
 			{
@@ -310,6 +310,7 @@ public class Mesher
 		}
 		else if (toReturn)
 		{
+			new BasicMesh(mesh).compute();
 			new CheckDelaunay(mesh).compute();
 			if (deflection > 0.0 && !relDefl)
 				new EnforceAbsDeflection(mesh).compute();

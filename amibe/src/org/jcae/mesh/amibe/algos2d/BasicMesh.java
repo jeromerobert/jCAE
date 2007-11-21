@@ -171,18 +171,15 @@ import org.jcae.mesh.amibe.patch.Mesh2D;
 public class BasicMesh
 {
 	private final Mesh2D mesh;
-	private final MMesh1D mesh1d;
 	
 	/**
 	 * Creates a <code>BasicMesh</code> instance.
 	 *
 	 * @param m  the data structure in which the mesh will be stored.
-	 * @param m1d  discretization of edges.
 	 */
-	public BasicMesh(Mesh2D m, MMesh1D m1d)
+	public BasicMesh(Mesh2D m)
 	{
 		mesh = m;
-		mesh1d = m1d;
 	}
 	
 	/**
@@ -190,7 +187,6 @@ public class BasicMesh
 	 */
 	public void compute()
 	{
-		new Initial(mesh, mesh1d.boundaryNodes(mesh)).compute();
 		mesh.pushCompGeom(3);
 		new Insertion(mesh, 16.0).compute();
 		new ConstraintNormal3D(mesh).compute();
