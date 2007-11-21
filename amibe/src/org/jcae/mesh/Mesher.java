@@ -281,9 +281,6 @@ public class Mesher
 			try
 			{
 				new BasicMesh(mesh, mesh1D).compute();
-				new CheckDelaunay(mesh).compute();
-				if (deflection > 0.0 && !relDefl)
-					new EnforceAbsDeflection(mesh).compute();
 			}
 			catch(InitialTriangulationException ex)
 			{
@@ -296,16 +293,6 @@ public class Mesher
 			catch(InvalidFaceException ex)
 			{
 				logger.warn("Face "+iFace+" is invalid, skipping...");
-				mesh = new Mesh2D(mtb, face); 
-				try
-				{
-					// Write an empty mesh
-					MeshWriter.writeObject(mesh, outputDir, "jcae2d."+iFace, xmlBrepDir, brepFile, iFace);
-				}
-				catch(IOException e)
-				{
-					// Do nothing
-				}
 				toReturn=false;
 			}
 			catch(Exception ex)
@@ -321,9 +308,17 @@ public class Mesher
 			toReturn=false;
 			mesh = new Mesh2D(mtb, face); 
 		}
+		else if (toReturn)
+		{
+			new CheckDelaunay(mesh).compute();
+			if (deflection > 0.0 && !relDefl)
+				new EnforceAbsDeflection(mesh).compute();
+			mesh.removeDegeneratedEdges();
+		}
 		else
 		{
-			mesh.removeDegeneratedEdges();
+			// Creates an empty mesh to not break 3d conversion when some faces are missing
+			mesh = new Mesh2D(mtb, face);
 		}
 		try
 		{
