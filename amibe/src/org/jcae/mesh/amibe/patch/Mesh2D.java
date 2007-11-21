@@ -53,6 +53,11 @@ public class Mesh2D extends Mesh
 	//  efficiency reason
 	private transient final CADGeomSurface surface;
 	
+	//  Minimal topological edge length
+	private double epsilon = 1.;
+	
+	private boolean accumulateEpsilon = false;
+	
 	//  Stack of methods to compute geometrical values
 	private transient final Stack<Calculus> compGeomStack = new Stack<Calculus>();
 	
@@ -127,6 +132,7 @@ public class Mesh2D extends Mesh
 	{
 		outerVertex = new OuterVertex2D(0.0, 0.0);
 		outerTrianglesAreConnected = true;
+
 		String accumulateEpsilonProp = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon");
 		if (accumulateEpsilonProp == null)
 		{
@@ -134,6 +140,7 @@ public class Mesh2D extends Mesh
 			System.setProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon", accumulateEpsilonProp);
 		}
 		accumulateEpsilon = accumulateEpsilonProp.equals("true");
+
 		String absEpsilonProp = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon");
 		if (absEpsilonProp == null)
 		{
@@ -512,6 +519,21 @@ public class Mesh2D extends Mesh
 	public double radius2d(Vertex v)
 	{
 		return compGeomCurrent.radius2d((Vertex2D) v);
+	}
+	
+	public double getEpsilon()
+	{
+		return epsilon;
+	}
+	
+	public boolean canAccumulateEpsilon()
+	{
+		return accumulateEpsilon;
+	}
+	
+	public void scaleTolerance(double scale)
+	{
+		epsilon *= scale;
 	}
 	
 	/**

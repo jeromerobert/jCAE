@@ -89,6 +89,7 @@ public class Mesher
 	private boolean processMesh2d=true;
 	private boolean processMesh1d=true;
 	private boolean quadrangles;
+	private boolean accumulateEpsilon;
 	private boolean relDefl=true;
 	private boolean isotropic=true;
 	private int minFace=0;
@@ -228,6 +229,14 @@ public class Mesher
 			System.setProperty("org.jcae.mesh.Mesher.quadrangles", quadranglesProp);
 		}
 		quadrangles=quadranglesProp.equals("true");
+
+		String accumulateEpsilonProp = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon");
+		if (accumulateEpsilonProp == null)
+		{
+			accumulateEpsilonProp = "false";
+			System.setProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon", accumulateEpsilonProp);
+		}
+		accumulateEpsilon = accumulateEpsilonProp.equals("true");
 	}
 	
 	/**
@@ -280,7 +289,8 @@ public class Mesher
 		{
 			try
 			{
-				new Initial(mesh, mesh1D.boundaryNodes(mesh)).compute();
+				// mesh.getEpsilon() may return a value which depends on face
+				new Initial(mesh, mesh1D.boundaryNodes(face, mesh.getEpsilon(), accumulateEpsilon)).compute();
 			}
 			catch(InitialTriangulationException ex)
 			{

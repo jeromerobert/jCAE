@@ -24,7 +24,6 @@ package org.jcae.mesh.amibe.ds;
 import org.jcae.mesh.bora.ds.*;
 import org.jcae.mesh.cad.*;
 import org.jcae.mesh.amibe.patch.Vertex2D;
-import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import java.util.Iterator;
 import java.util.ArrayList;
@@ -406,12 +405,11 @@ public class MMesh1D extends MMesh0D
 		return mapTEdgeToSubMesh1D.get(discrE);
 	}
 
-	public Vertex2D [] boundaryNodes(Mesh2D mesh)
+	public Vertex2D [] boundaryNodes(CADFace face, double epsilon, boolean accumulateEpsilon)
 	{
 		//  Rough approximation of the final size
 		int roughSize = 10*maximalNumberOfNodes();
 		ArrayList<Vertex2D> result = new ArrayList<Vertex2D>(roughSize);
-		CADFace face = (CADFace) mesh.getGeometry();
 		CADExplorer expW = CADShapeFactory.getFactory().newExplorer();
 		CADWireExplorer wexp = CADShapeFactory.getFactory().newWireExplorer();
 		
@@ -474,16 +472,19 @@ public class MMesh1D extends MMesh0D
 				{
 					//   3.  Edge length is smaller than epsilon
 					double edgelen = c3d.length();
-					canSkip = mesh.tooSmall(edgelen, accumulatedLength);
+					if (accumulateEpsilon)
+						canSkip = edgelen + accumulatedLength < epsilon;
+					else
+						canSkip = edgelen < epsilon;
 					if (canSkip)
 						accumulatedLength += edgelen;
 					// 4.  Check whether deflection is valid.
 					if (canSkip && Metric3D.hasDeflection())
 					{
 						double [] uv = lastPoint.getUV();
-						double [] start = mesh.getGeomSurface().value(uv[0], uv[1]);
+						double [] start = face.getGeomSurface().value(uv[0], uv[1]);
 						uv = p2.getUV();
-						double [] end = mesh.getGeomSurface().value(uv[0], uv[1]);
+						double [] end = face.getGeomSurface().value(uv[0], uv[1]);
 						double dist = Math.sqrt(
 						  (start[0] - end[0]) * (start[0] - end[0]) +
 						  (start[1] - end[1]) * (start[1] - end[1]) +

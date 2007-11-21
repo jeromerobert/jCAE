@@ -112,11 +112,6 @@ public class Mesh implements Serializable
 	
 	protected int maxLabel = 0;
 	
-	//  Minimal topological edge length
-	protected double epsilon = 1.;
-	
-	protected boolean accumulateEpsilon = false;
-	
 	// Utility class to improve debugging output
 	private static class OuterVertex extends Vertex
 	{
@@ -170,11 +165,6 @@ public class Mesh implements Serializable
 		factory = new ElementFactory(traitsBuilder);
 		triangleList = traitsBuilder.getTriangles(traits);
 		nodeList = traitsBuilder.getNodes(traits);
-	}
-	
-	public void scaleTolerance(double scale)
-	{
-		epsilon *= scale;
 	}
 	
 	/**
@@ -777,20 +767,6 @@ public class Mesh implements Serializable
 	{
 		maxLabel++;
 		v.setRef(maxLabel);
-	}
-	
-	/**
-	 * Checks whether a length is lower than a threshold.
-	 *
-	 * @param len   the length to be checked.
-	 * @return <code>true</code> if this length is too small to be considered,
-	 *         <code>false</code> otherwise.
-	 */
-	public boolean tooSmall(double len, double accumulatedLength)
-	{
-		if (accumulateEpsilon)
-			len += accumulatedLength;
-		return (len < epsilon);
 	}
 	
 	/**

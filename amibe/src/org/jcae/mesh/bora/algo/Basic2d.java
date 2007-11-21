@@ -95,6 +95,8 @@ public class Basic2d implements AlgoInterface
 		Metric3D.setDeflection(deflection);
 		Metric3D.setRelativeDeflection(relDefl);
 		Metric3D.setIsotropic(isotropic);
+		boolean accumulateEpsilon = m.canAccumulateEpsilon();
+		double epsilon = m.getEpsilon();
 
 		// Insert interior vertices, if any
 		ArrayList<MNode1D> innerV = new ArrayList<MNode1D>();
@@ -174,7 +176,10 @@ public class Basic2d implements AlgoInterface
 				{
 					//   3.  Edge length is smaller than epsilon
 					double edgelen = c3d.length();
-					canSkip = m.tooSmall(edgelen, accumulatedLength);
+					if (accumulateEpsilon)
+						canSkip = edgelen + accumulatedLength < epsilon;
+					else
+						canSkip = edgelen < epsilon;
 					if (canSkip)
 						accumulatedLength += edgelen;
 					// 4.  Check whether deflection is valid.
