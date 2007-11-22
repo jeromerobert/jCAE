@@ -35,6 +35,9 @@ import org.apache.log4j.Logger;
 
 /**
  * Swaps edge to try to have all vertices have six neighbors.
+ *
+ * TODO:
+ * In <a href="www.cs.technion.ac.il/~gotsman/AmendedPubl/SGP/SGP03.pdf">Explicit Surface Remeshing</a>, Vitaly Surazhsky and Craig Gotsman proposes an interesting algorithm.
  */
 
 public class ImproveConnectivity extends AbstractAlgoHalfEdge
