@@ -243,20 +243,20 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 		surface.dinit(1);
 		try
 		{
-			String nodesFile = xpath.evaluate(
+			String nodesFileInput = xpath.evaluate(
 				"/jcae/mesh/submesh/nodes/file/@location", documentIn);
-			FileChannel fcN = new FileInputStream(xmlDir+File.separator+nodesFile).getChannel();
+			FileChannel fcN = new FileInputStream(xmlDir+File.separator+nodesFileInput).getChannel();
 			MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
 			DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
-			String refFile = xpath.evaluate(
+			String refFileInput = xpath.evaluate(
 				"/jcae/mesh/submesh/nodes/references/file/@location",
 				documentIn);
-			FileChannel fcR = new FileInputStream(xmlDir+File.separator+refFile).getChannel();
+			FileChannel fcR = new FileInputStream(xmlDir+File.separator+refFileInput).getChannel();
 			MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L, fcR.size());
 			IntBuffer refsBuffer = bbR.asIntBuffer();
-			String trianglesFile = xpath.evaluate(
+			String trianglesFileInput = xpath.evaluate(
 				"/jcae/mesh/submesh/triangles/file/@location", documentIn);
-			FileChannel fcT = new FileInputStream(xmlDir+File.separator+trianglesFile).getChannel();
+			FileChannel fcT = new FileInputStream(xmlDir+File.separator+trianglesFileInput).getChannel();
 			MappedByteBuffer bbT = fcT.map(FileChannel.MapMode.READ_ONLY, 0L, fcT.size());
 			IntBuffer trianglesBuffer = bbT.asIntBuffer();
 			

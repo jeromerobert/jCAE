@@ -84,7 +84,7 @@ public class MeshWriter
 			//  Duplicate nodes, which are endpoints of 2D degenerated edges,
 			//  are written at the end so that indices of regular vertices
 			//  do not have to be modified during 2D->3D conversion.
-			ArrayList<Vertex> duplicate3DNodes = new ArrayList();
+			ArrayList<Vertex> duplicate3DNodes = new ArrayList<Vertex>();
 			TIntHashSet refs = new TIntHashSet(nref);
 			nref = 0;
 			for(Vertex v: nodelist)
