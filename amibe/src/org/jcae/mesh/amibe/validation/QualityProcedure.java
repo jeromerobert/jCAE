@@ -38,6 +38,7 @@ public abstract class QualityProcedure
 {
 	protected static final int FACE = 1;
 	protected static final int NODE = 2;
+	protected static final int EDGE = 3;
 	
 	// By default, values are computed by faces.
 	protected int type = FACE;
