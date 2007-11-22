@@ -1,3 +1,8 @@
+Thu Nov 22 23:22:30 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/Mesher.java: Move detection of invalid CAD faces
+	into src/org/jcae/mesh/amibe/algos2d/Initial.java
+
 Thu Nov 22 12:37:13 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/patch/Calculus.java (distance2): Modify

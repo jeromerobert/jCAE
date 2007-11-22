@@ -32,9 +32,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.text.SimpleDateFormat;
 
-import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.jcae.mesh.amibe.InvalidFaceException;
-import org.jcae.mesh.amibe.metrics.*;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.algos1d.*;
@@ -91,9 +89,6 @@ public class Mesher
 	private boolean processMesh2d=true;
 	private boolean processMesh1d=true;
 	private boolean quadrangles;
-	private boolean accumulateEpsilon;
-	private boolean relDefl=true;
-	private boolean isotropic=true;
 	private int minFace=0;
 	private int maxFace=0;
 	private int numFace=0;
@@ -112,14 +107,6 @@ public class Mesher
 		//here they are set, only to be read in the report method.
 		//System.getProperty can take a parameter which is the default property
 		//value.
-		String relDeflProp = System.getProperty("org.jcae.mesh.amibe.ds.Metric3D.relativeDeflection");
-		if (relDeflProp == null)
-		{			
-			relDeflProp="true";
-			System.setProperty("org.jcae.mesh.amibe.ds.Metric3D.relativeDeflection", relDeflProp);
-		}
-		relDefl=relDeflProp.equals("true");
-		
 		String numFaceProp = System.getProperty("org.jcae.mesh.Mesher.meshFace");
 		if (numFaceProp == null)
 		{
@@ -167,14 +154,6 @@ public class Mesher
 			System.setProperty("org.jcae.mesh.Mesher.mesh3d", processMesh3dProp);
 		}
 		processMesh3d=processMesh3dProp.equals("true");
-		
-		String isotropicMeshProp = System.getProperty("org.jcae.mesh.Mesher.isotropic");
-		if (isotropicMeshProp == null)
-		{
-			isotropicMeshProp = "true";
-			System.setProperty("org.jcae.mesh.Mesher.isotropic", isotropicMeshProp);
-		}
-		isotropic=isotropicMeshProp.equals("true");
 		
 		String exportTriangleSoupProp = System.getProperty("org.jcae.mesh.Mesher.triangleSoup");
 		if (exportTriangleSoupProp == null)
@@ -231,14 +210,6 @@ public class Mesher
 			System.setProperty("org.jcae.mesh.Mesher.quadrangles", quadranglesProp);
 		}
 		quadrangles=quadranglesProp.equals("true");
-
-		String accumulateEpsilonProp = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon");
-		if (accumulateEpsilonProp == null)
-		{
-			accumulateEpsilonProp = "false";
-			System.setProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon", accumulateEpsilonProp);
-		}
-		accumulateEpsilon = accumulateEpsilonProp.equals("true");
 	}
 	
 	/**
@@ -253,14 +224,15 @@ public class Mesher
 		MMesh1D mesh1D = new MMesh1D(shape);
 		HashMap<String, String> options1d = new HashMap<String, String>();
 		options1d.put("size", ""+edgeLength);
+		options1d.put("deflection", ""+deflection);
+		MeshParameters mp = new MeshParameters(options1d);
 		if (deflection <= 0.0)
 			new UniformLength(mesh1D, options1d).compute();
 		else
 		{
 			options1d.put("deflection", ""+deflection);
-			options1d.put("relativeDeflection", ""+relDefl);
 			new UniformLengthDeflection(mesh1D, options1d).compute();
-			if (isotropic)
+			if (mp.isIsotropic())
 				new Compat1D2D(mesh1D, options1d).compute();
 		}
 		//  Store the 1D mesh onto disk
@@ -280,51 +252,30 @@ public class Mesher
 	protected boolean mesh2D(int iFace, CADFace face, MMesh1D mesh1D, MeshParameters mp,
 		String xmlBrepDir, String brepFile, MeshTraitsBuilder mtb)
 	{
-		int nTryMax = 20;
-		
 		if(Boolean.getBoolean("org.jcae.mesh.Mesher.explodeBrep"))
 			face.writeNative("face."+iFace+".brep");
 		Mesh2D mesh = new Mesh2D(mtb, mp, face);
-		int nTry = 0;
 		boolean toReturn=true;
-		while (nTry < nTryMax)
+		try
 		{
-			try
-			{
-				// mesh.getEpsilon() may return a value which depends on face
-				new Initial(mesh, mesh1D.boundaryNodes(face, mp)).compute();
-			}
-			catch(InitialTriangulationException ex)
-			{
-				logger.warn("Face "+iFace+" cannot be triangulated, trying again with a larger tolerance...");
-				mp.scaleTolerance(10.);
-				mesh = new Mesh2D(mtb, mp, face);
-				nTry++;
-				continue;				
-			}
-			catch(InvalidFaceException ex)
-			{
-				logger.warn("Face "+iFace+" is invalid, skipping...");
-				toReturn=false;
-			}
-			catch(Exception ex)
-			{
-				ex.printStackTrace();
-				nTry=nTryMax;
-			}
-			break;
+			new Initial(mesh, mtb, mesh1D).compute();
 		}
-		if (nTry == nTryMax)
+		catch(InvalidFaceException ex)
 		{
-			logger.error("Face "+iFace+" cannot be triangulated, skipping...");
+			logger.warn("Face "+iFace+" is invalid, skipping...");
 			toReturn=false;
-			mesh = new Mesh2D(mtb, mp, face); 
 		}
-		else if (toReturn)
+		catch(Exception ex)
+		{
+			logger.error("Unexpected error when triangulating face "+iFace+", skipping...");
+			ex.printStackTrace();
+			toReturn=false;
+		}
+		if (toReturn)
 		{
 			new BasicMesh(mesh).compute();
 			new CheckDelaunay(mesh).compute();
-			if (deflection > 0.0 && !relDefl)
+			if (mp.hasDeflection() && !mp.hasRelativeDeflection())
 				new EnforceAbsDeflection(mesh).compute();
 		}
 		else
@@ -457,8 +408,6 @@ public class Mesher
 			HashMap<String, String> options2d = new HashMap<String, String>();
 			options2d.put("size", ""+edgeLength);
 			options2d.put("deflection", ""+deflection);
-			options2d.put("relativeDeflection", ""+relDefl);
-			options2d.put("isotropic", ""+isotropic);
 
 			int iFace = 0;
 

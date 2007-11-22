@@ -175,40 +175,23 @@ if (phases[2])
 			face.writeNative("face."+iface+".brep");
 		if (! (face in seen)) {
 			seen << face
-			ntry = 0
 	
 			MeshParameters mp = new MeshParameters(options2d);
 			Mesh2D mesh = new Mesh2D(mtb, mp, face);
 	
-			go = true
 			success = true
-			while (go) {
-				try {
-					new Initial(mesh, mesh1d.boundaryNodes(face, mp)).compute();
-					go = false
-				}
-				catch(InitialTriangulationException ex) {
-					mp.scaleTolerance(10.0)
-					mesh = new Mesh2D(mtb, mp, face)
-					println "Scaling tolerance for face #${iface}"
-					ntry ++
-				}
-				catch(InvalidFaceException ex) {
-					println "Face #${iface} is invalid. Skipping ..."
-					success = false
-				}
-				catch(Exception ex) {
-					ex.printStackTrace()
-					println "Unexpected error when triangulating face #${iface}. Skipping ..."
-					success = false
-				}
-				if (ntry == 20) {
-					println "Cannot triangulate face #${iface}. Skipping ..."
-					success = false
-				}
-				if (! success) go = false
+			try {
+				new Initial(mesh, mtb, mesh1d).compute();
 			}
-	
+			catch(InvalidFaceException ex) {
+				println "Face #${iface} is invalid. Skipping ..."
+				success = false
+			}
+			catch(Exception ex) {
+				ex.printStackTrace()
+				println "Unexpected error when triangulating face #${iface}. Skipping ..."
+				success = false
+			}
 			if (! success) {
 				bads << iface
 				BRepTools.write(face.getShape(), "error.brep")

@@ -21,11 +21,14 @@
 
 package org.jcae.mesh.amibe.algos2d;
 
+import org.jcae.mesh.amibe.ds.MMesh1D;
 import org.jcae.mesh.amibe.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.MeshParameters;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
@@ -179,26 +182,35 @@ import org.apache.log4j.Logger;
 public class Initial
 {
 	private static Logger logger=Logger.getLogger(Initial.class);
-	private final Mesh2D mesh;
-	private final Vertex2D [] bNodes;
+	private Mesh2D mesh;
+	private final CADFace face;
+	private final MMesh1D mesh1D;
+	private final MeshTraitsBuilder meshTraitsBuilder;
 	private Collection<MNode1D> innerNodes = null;
+	int nTryMax = 20;
 	
 	/**
 	 * Creates a <code>Initial</code> instance.
 	 *
 	 * @param m  the data structure in which the mesh will be stored.
-	 * @param b  ordered list of boundary nodes
+	 * @param m1d  1D mesh
 	 */
-	public Initial(Mesh2D m, Vertex2D [] b)
-	{
-		this(m, b, null);
-	}
-	
-	public Initial(Mesh2D m, Vertex2D [] b, Collection<MNode1D> list)
+	public Initial(Mesh2D m, MeshTraitsBuilder mtb, MMesh1D m1d)
 	{
 		mesh = m;
-		bNodes = b;
+		mesh1D = m1d;
+		meshTraitsBuilder = mtb;
+		innerNodes = null;
+		face = (CADFace) mesh.getGeometry();
+	}
+	
+	public Initial(Mesh2D m, MeshTraitsBuilder mtb, Collection<MNode1D> list)
+	{
+		mesh = m;
+		mesh1D = null;
+		meshTraitsBuilder = mtb;
 		innerNodes = list;
+		face = (CADFace) mesh.getGeometry();
 	}
 	
 	/**
@@ -206,10 +218,33 @@ public class Initial
 	 */
 	public void compute()
 	{
+		int nTry = 0;
+		while (nTry < nTryMax)
+		{
+			try
+			{
+				// mesh.getEpsilon() may return a value which depends on face
+				Vertex2D [] bNodes = mesh1D.boundaryNodes(face, mesh.getMeshParameters());
+				computeFromBoundaryNodes(bNodes);
+				return;
+			}
+			catch(InitialTriangulationException ex)
+			{
+				logger.warn("Face cannot be triangulated, trying again with a larger tolerance...");
+				MeshParameters mp = mesh.getMeshParameters();
+				mp.scaleTolerance(10.);
+				mesh = new Mesh2D(meshTraitsBuilder, mp, face);
+				nTry++;
+			}
+		}
+	}
+
+	public void computeFromBoundaryNodes(Vertex2D [] bNodes)
+	{
 		TriangleVH t;
 		VirtualHalfEdge2D ot;
 		Vertex2D v;
-		
+
 		if (bNodes.length < 3)
 		{
 			logger.warn("Boundary face contains less than 3 points, it is skipped...");
@@ -393,7 +428,6 @@ public class Initial
 		if (innerNodes != null && !innerNodes.isEmpty())
 		{
 			logger.debug(" Insert interior vertices");
-			CADFace face = (CADFace) mesh.getGeometry();
 			for (MNode1D p1: innerNodes)
 			{
 				v = Vertex2D.valueOf(p1, null, face);
