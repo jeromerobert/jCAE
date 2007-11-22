@@ -28,6 +28,7 @@ import org.jcae.mesh.amibe.ds.MMesh1D;
 import org.jcae.mesh.amibe.ds.SubMesh1D;
 import org.jcae.mesh.bora.ds.BDiscretization;
 import java.util.Iterator;
+import java.util.HashMap;
 import org.apache.log4j.Logger;
 
 /**
@@ -38,8 +39,6 @@ public class AlgoMesh1d
 {
 	private static Logger logger=Logger.getLogger(AlgoMesh1d.class);
 	private MMesh1D mesh1d;
-	private UniformLengthDeflection algoUniformLengthDeflection;
-	private UniformLength           algoUniformLength;
 	
 	/**
 	 * Creates a <code>AlgoMesh1d</code> instance.
@@ -49,9 +48,6 @@ public class AlgoMesh1d
 	public AlgoMesh1d(MMesh1D m)
 	{
 		mesh1d = m;
-		algoUniformLengthDeflection = new UniformLengthDeflection(mesh1d);
-		algoUniformLength           = new UniformLength(mesh1d);
-		new Compat1D2D(mesh1d);
 	}
 
 	/**
@@ -83,15 +79,19 @@ public class AlgoMesh1d
 
 			currentDiscrLength = discrE.getConstraint().getHypothesis().getLength();
 			currentDiscrDeflec = discrE.getConstraint().getHypothesis().getDeflection();
+			HashMap<String, String> options1d = new HashMap<String, String>();
+			options1d.put("size", ""+currentDiscrLength);
+			options1d.put("deflection", ""+currentDiscrDeflec);
+			options1d.put("relativeDeflection", ""+relDefl);
 
 			if (currentDiscrDeflec <= 0.0)
 			{
-				if (algoUniformLength.computeEdge(currentDiscrLength, submesh1d))
+				if (new UniformLength(mesh1d, options1d).computeEdge(submesh1d))
 					nbTEdges++;
 			}
 			else
 			{
-				if (algoUniformLengthDeflection.computeEdge(currentDiscrLength, currentDiscrDeflec, relDefl, submesh1d))
+				if (new UniformLengthDeflection(mesh1d, options1d).computeEdge(submesh1d))
 				{
 					nbTEdges++;
 					// Feature not available yet!

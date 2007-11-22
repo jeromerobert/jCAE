@@ -6,6 +6,9 @@ Thu Nov 22 12:37:13 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/amibe/ds/Mesh.java: into getKdTree()...
 	* src/org/jcae/mesh/amibe/patch/Mesh2D.java: Rename resetQuadTree()...
 	* src/org/jcae/mesh/amibe/ds/Mesh.java: into resetKdTree()...
+	* src/org/jcae/mesh/amibe/ds/MMesh1D.java: Remove maxLength and
+	maxDeflection members, mesh specifications are now passed to 1D
+	algorithms through a Map.
 
 Thu Nov 22 10:53:13 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 

@@ -47,10 +47,6 @@ public class MMesh1D extends MMesh0D
 
 	private CADShape shape;
 	
-	//  Length criterion.
-	private static double maxLength;
-	private static double maxDeflection = 0.0;
-	
 	//  Edge map.
 	private Map<CADEdge, SubMesh1D> mapTEdgeToSubMesh1D;
 	private Map<CADEdge, LinkedHashSet<CADFace>> mapTEdgeToFaces;
@@ -281,36 +277,6 @@ public class MMesh1D extends MMesh0D
 			master.setMaster(null);
 		}
 		assert(isValid());
-	}
-	
-	/**
-	 * Returns the maximal desired length.
-	 *
-	 * @return the maximal desired length.
-	 */
-	public double getMaxLength()
-	{
-		return maxLength;
-	}
-	
-	public double getMaxDeflection()
-	{
-		return maxDeflection;
-	}
-	
-	/**
-	 * Sets the maximal desired length.
-	 *
-	 * @param length  the maximal desired length.
-	 */
-	public void setMaxLength(double length)
-	{
-		maxLength = length;
-	}
-	
-	public void setMaxDeflection(double deflection)
-	{
-		maxDeflection = deflection;
 	}
 	
 	/**

@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.Stack;
 import java.util.Date;
+import java.util.HashMap;
 import java.text.SimpleDateFormat;
 
 import org.jcae.mesh.amibe.InitialTriangulationException;
@@ -249,15 +250,17 @@ public class Mesher
 	{
 		logger.info("1D mesh");
 		MMesh1D mesh1D = new MMesh1D(shape);
-		mesh1D.setMaxLength(edgeLength);
+		HashMap<String, String> options1d = new HashMap<String, String>();
+		options1d.put("size", ""+edgeLength);
 		if (deflection <= 0.0)
-			new UniformLength(mesh1D).compute();
+			new UniformLength(mesh1D, options1d).compute();
 		else
 		{
-			mesh1D.setMaxDeflection(deflection);
-			new UniformLengthDeflection(mesh1D).compute(relDefl);
+			options1d.put("deflection", ""+deflection);
+			options1d.put("relativeDeflection", ""+relDefl);
+			new UniformLengthDeflection(mesh1D, options1d).compute();
 			if (isotropic)
-				new Compat1D2D(mesh1D).compute(relDefl);
+				new Compat1D2D(mesh1D, options1d).compute();
 		}
 		//  Store the 1D mesh onto disk
 		MMesh1DWriter.writeObject(mesh1D, outputDir, "jcae1d", xmlBrepDir, brepFile);
@@ -447,7 +450,6 @@ public class Mesher
 			//  Step 2: Read the 1D mesh and compute 2D meshes
 			mesh1D = MMesh1DReader.readObject(outputDir, "jcae1d");
 			shape = mesh1D.getGeometry();
-			mesh1D.setMaxLength(edgeLength);
 			Metric3D.setLength(edgeLength);
 			Metric3D.setDeflection(deflection);
 			Metric3D.setRelativeDeflection(relDefl);

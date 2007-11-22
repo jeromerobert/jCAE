@@ -31,6 +31,7 @@ import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADShapeFactory;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Map;
 import org.apache.log4j.Logger;
 
 /**
@@ -44,21 +45,39 @@ public class UniformLengthDeflection
 {
 	private static Logger logger=Logger.getLogger(UniformLengthDeflection.class);
 	private MMesh1D mesh1d;
+	private double maxlen = -1.0;
+	private double deflection = 1.0;
+	private boolean relativeDeflection = false;
 	
 	/**
 	 * Creates a <code>UniformLengthDeflection</code> instance.
 	 *
 	 * @param m  the <code>MMesh1D</code> instance to refine.
 	 */
-	public UniformLengthDeflection(MMesh1D m)
+	public UniformLengthDeflection(MMesh1D m, final Map<String, String> options)
 	{
 		mesh1d = m;
+
+		for (final Map.Entry<String, String> opt: options.entrySet())
+		{
+			final String key = opt.getKey();
+			final String val = opt.getValue();
+			if (key.equals("deflection"))
+				deflection = Double.valueOf(val).doubleValue();
+			else if (key.equals("relativeDeflection"))
+				relativeDeflection = Boolean.valueOf(val).booleanValue();
+			else if (key.equals("size"))
+				maxlen = Double.valueOf(val).doubleValue();
+			else
+				throw new RuntimeException("Unknown option: "+key);
+		}
 	}
+
 
 	/**
 	 * Explores each edge of the mesh and calls the discretisation method.
 	 */
-	public void compute(boolean relDefl)
+	public void compute()
 	{
 		int nbTEdges = 0, nbNodes = 0, nbEdges = 0;
 		/* Explore the shape for each edge */
@@ -78,7 +97,7 @@ public class UniformLengthDeflection
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(E);
 			nbNodes -= submesh1d.getNodes().size();
 			nbEdges -= submesh1d.getEdges().size();
-			if (computeEdge(mesh1d.getMaxLength(), mesh1d.getMaxDeflection(), relDefl, submesh1d))
+			if (computeEdge(submesh1d))
 				nbTEdges++;
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
@@ -101,7 +120,7 @@ public class UniformLengthDeflection
 	 * @return <code>true</code> if this edge was successfully discretized,
 	 * <code>false</code> otherwise.
 	 */
-	public boolean computeEdge(double maxlen, double deflection, boolean relDefl, SubMesh1D submesh1d)
+	public boolean computeEdge(SubMesh1D submesh1d)
 	{
 		int nbPoints;
 		boolean isCircular = false;
@@ -145,7 +164,7 @@ public class UniformLengthDeflection
 		else
 		{
 			range = curve.getRange();
-			curve.discretize(maxlen, deflection, relDefl);
+			curve.discretize(maxlen, deflection, relativeDeflection);
 			nbPoints = curve.nbPoints();
 			int saveNbPoints =  nbPoints;
 			if (nbPoints <= 2 && !isCircular)

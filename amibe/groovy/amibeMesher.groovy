@@ -10,6 +10,7 @@ import org.jcae.mesh.amibe.traits.MeshTraitsBuilder
 import org.jcae.mesh.amibe.ds.MMesh1D
 import org.jcae.mesh.amibe.algos1d.*
 import org.jcae.mesh.xmldata.*
+import org.jcae.opencascade.jni.BRepTools
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -91,8 +92,8 @@ for (String str: sPhases)
 }
 
 //String sEpsilon = cmd.getOptionValue('e', "-1.0");
-System.setProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon", "0.0");
-System.setProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon", "false");
+double epsilon = 0.0;
+boolean accumulateEpsilon = false;
 
 String unvName = null
 if (cmd.hasOption('o'))
@@ -109,14 +110,15 @@ if (phases[1])
 {
 	shape = factory.newShape(file)
 	mesh1d = new MMesh1D(shape)
-	mesh1d.setMaxLength(leng)
-	
+	HashMap<String, String> options1d = new HashMap<String, String>();
+	options1d.put("size", ""+leng);
 	if (defl <= 0.0) {
-		new UniformLength(mesh1d).compute()
+		new UniformLength(mesh1d, options1d).compute()
 	} else {
-		mesh1d.setMaxDeflection(defl)
-		new UniformLengthDeflection(mesh1d).compute(true)
-		new Compat1D2D(mesh1d).compute(true)
+		options1d.put("deflection", ""+defl);
+		options1d.put("relativeDeflection", "true");
+		new UniformLengthDeflection(mesh1d, options1d).compute()
+		new Compat1D2D(mesh1d, options1d).compute()
 	}
 	
 	MMesh1DWriter.writeObject(mesh1d, outdir, "jcae1d", brepdir, brepfile)
@@ -145,7 +147,6 @@ else
 {
 	mesh1d = MMesh1DReader.readObject(outdir, "jcae1d");
 	shape = mesh1d.getGeometry();
-	mesh1d.setMaxLength(leng);
 }
 
 // Mesh 2D
@@ -181,7 +182,7 @@ if (phases[2])
 			success = true
 			while (go) {
 				try {
-					new Initial(mesh, mesh1d.boundaryNodes(mesh)).compute();
+					new Initial(mesh, mesh1d.boundaryNodes(face, epsilon, accumulateEpsilon)).compute();
 					go = false
 				}
 				catch(InitialTriangulationException ex) {

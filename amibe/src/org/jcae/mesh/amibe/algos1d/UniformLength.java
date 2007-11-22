@@ -31,6 +31,7 @@ import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADShapeFactory;
 import java.util.List;
 import java.util.Iterator;
+import java.util.Map;
 import org.apache.log4j.Logger;
 
 /**
@@ -44,15 +45,26 @@ public class UniformLength
 {
 	private static Logger logger=Logger.getLogger(UniformLength.class);
 	private MMesh1D mesh1d;
+	private double maxlen = -1.0;
 	
 	/**
 	 * Creates a <code>UniformLength</code> instance.
 	 *
 	 * @param m  the <code>MMesh1D</code> instance to refine.
 	 */
-	public UniformLength(MMesh1D m)
+	public UniformLength(MMesh1D m, final Map<String, String> options)
 	{
 		mesh1d = m;
+
+		for (final Map.Entry<String, String> opt: options.entrySet())
+		{
+			final String key = opt.getKey();
+			final String val = opt.getValue();
+			if (key.equals("size"))
+				maxlen = Double.valueOf(val).doubleValue();
+			else
+				throw new RuntimeException("Unknown option: "+key);
+		}
 	}
 
 	/**
@@ -78,7 +90,7 @@ public class UniformLength
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(E);
 			nbNodes -= submesh1d.getNodes().size();
 			nbEdges -= submesh1d.getEdges().size();
-			if (computeEdge(mesh1d.getMaxLength(), submesh1d))
+			if (computeEdge(submesh1d))
 				nbTEdges++;
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
@@ -96,12 +108,11 @@ public class UniformLength
 	 * length is inferior to the desired length.  The geometrical edge is then
 	 * divided into segments of uniform lengths.
 	 *
-	 * @param maxlen  the maximal length admitted,
 	 * @param submesh1d  the 1D mesh being updated.
 	 * @return <code>true</code> if this edge was successfully discretized,
 	 * <code>false</code> otherwise.
 	 */
-	public boolean computeEdge(double maxlen, SubMesh1D submesh1d)
+	public boolean computeEdge(SubMesh1D submesh1d)
 	{
 		int nbPoints;
 		boolean isCircular = false;

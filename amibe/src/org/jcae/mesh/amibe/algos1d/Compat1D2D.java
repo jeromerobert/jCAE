@@ -34,6 +34,7 @@ import org.jcae.mesh.cad.CADFace;
 import org.jcae.mesh.cad.CADShapeFactory;
 import java.util.List;
 import java.util.Set;
+import java.util.Map;
 import java.util.Iterator;
 import org.apache.log4j.Logger;
 
@@ -41,21 +42,40 @@ public class Compat1D2D
 {
 	private static Logger logger=Logger.getLogger(Compat1D2D.class);
 	private MMesh1D mesh1d;
+	private double deflection = 1.0;
+	private boolean relativeDeflection = false;
 	
 	/**
 	 * Creates a <code>Compat1D2D</code> instance.
 	 *
 	 * @param m  the <code>MMesh1D</code> instance to refine.
 	 */
-	public Compat1D2D(MMesh1D m)
+	public Compat1D2D(MMesh1D m, final Map<String, String> options)
 	{
 		mesh1d = m;
+
+		for (final Map.Entry<String, String> opt: options.entrySet())
+		{
+			final String key = opt.getKey();
+			final String val = opt.getValue();
+			if (key.equals("deflection"))
+				deflection = Double.valueOf(val).doubleValue();
+			else if (key.equals("relativeDeflection"))
+				relativeDeflection = Boolean.valueOf(val).booleanValue();
+			else if (key.equals("size"))
+			{
+				// Do nothing, this is just to not barf when the same map
+				// is used for all 1d algorithms.
+			}
+			else
+				throw new RuntimeException("Unknown option: "+key);
+		}
 	}
 
 	/**
 	 * Explores each edge of the mesh and calls the discretisation method.
 	 */
-	public void compute(boolean relDefl)
+	public void compute()
 	{
 		int nbTEdges = 0, nbNodes = 0, nbEdges = 0;
 		/* Explore the shape for each edge */
@@ -67,7 +87,7 @@ public class Compat1D2D
 			if (null == submesh1d)
 				continue;
 			Set<CADFace> faceset = mesh1d.getAdjacentFaces(E);
-			if (null != faceset && computeEdge(submesh1d, faceset, mesh1d.getMaxDeflection(), relDefl))
+			if (null != faceset && computeEdge(submesh1d, faceset))
 				nbTEdges++;
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
@@ -78,7 +98,7 @@ public class Compat1D2D
 		assert(mesh1d.isValid());
 	}
 
-	private boolean computeEdge(SubMesh1D submesh1d, Set<CADFace> faceset, double deflection, boolean relDefl)
+	private boolean computeEdge(SubMesh1D submesh1d, Set<CADFace> faceset)
 	{
 		List<MEdge1D> edgelist = submesh1d.getEdges();
 		List<MNode1D> nodelist = submesh1d.getNodes();
@@ -145,7 +165,7 @@ public class Compat1D2D
 				(coord[3*i+1] - coord[3*i+4]) * (coord[3*i+1] - coord[3*i+4]) +
 				(coord[3*i+2] - coord[3*i+5]) * (coord[3*i+2] - coord[3*i+5]);
 			double epsilon = deflection;
-			if (!relDefl)
+			if (!relativeDeflection)
 				epsilon *= meanCurv;
 			if (epsilon < 1.0)
 			{
