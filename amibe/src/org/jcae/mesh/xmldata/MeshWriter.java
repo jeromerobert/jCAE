@@ -34,7 +34,7 @@ import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.util.Collection;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Arrays;
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
@@ -235,19 +235,15 @@ public class MeshWriter
 		Collection<Vertex> nodelist = submesh.getNodes();
 		if (nodelist == null)
 		{
-			HashSet<Vertex> nodeset = new HashSet<Vertex>();
-			nodelist = new ArrayList<Vertex>();
+			nodelist = new LinkedHashSet<Vertex>(trianglelist.size() / 2);
 			for (Triangle t: trianglelist)
 			{
 				if (!t.isWritable())
 					continue;
 				for (int j = 0; j < 3; j++)
 				{
-					if (!nodeset.contains(t.vertex[j]))
-					{
-						nodeset.add(t.vertex[j]);
+					if (!nodelist.contains(t.vertex[j]))
 						nodelist.add(t.vertex[j]);
-					}
 				}
 			}
 		}
@@ -319,22 +315,21 @@ public class MeshWriter
 			File trianglesFile=new File(dir, JCAEXMLData.triangles3dFilename);
 			File groupsFile = new File(dir, JCAEXMLData.groupsFilename);
 			Collection<Triangle> trianglelist = submesh.getTriangles();
-			HashSet<Vertex> nodeset = new HashSet<Vertex>();
-			Collection<Vertex> nodelist = new ArrayList<Vertex>();
-			for (Triangle t: trianglelist)
+			Collection<Vertex> nodelist = submesh.getNodes();
+			if (nodelist == null)
 			{
-				if (!t.isWritable())
-					continue;
-				for (int j = 0; j < 3; j++)
+				nodelist = new LinkedHashSet<Vertex>(trianglelist.size() / 2);
+				for (Triangle t: trianglelist)
 				{
-					if (!nodeset.contains(t.vertex[j]))
+					if (!t.isWritable())
+						continue;
+					for (int j = 0; j < 3; j++)
 					{
-						nodeset.add(t.vertex[j]);
-						nodelist.add(t.vertex[j]);
+						if (!nodelist.contains(t.vertex[j]))
+							nodelist.add(t.vertex[j]);
 					}
 				}
 			}
-			nodeset.clear();
 			TObjectIntHashMap<Vertex> nodeIndex=new TObjectIntHashMap<Vertex>(nodelist.size());
 			
 			// Create and fill the DOM

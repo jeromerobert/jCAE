@@ -1,3 +1,9 @@
+Thu Nov 22 10:53:13 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/MeshWriter.java: In writeObject() and
+	writeObject3D() methods, replace HashSet+ArrayList pair by a
+	LinkedHashSet instance.
+
 Wed Nov 21 12:29:30 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos2d/SmoothNodes2D.java: New algorithm to
