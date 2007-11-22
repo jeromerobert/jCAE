@@ -21,7 +21,6 @@
 package org.jcae.mesh.amibe.patch;
 
 import org.jcae.mesh.amibe.ds.Mesh;
-import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.Vertex;
@@ -31,7 +30,6 @@ import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.amibe.util.KdTree;
 import org.jcae.mesh.amibe.util.KdTreeProcedure;
 import org.jcae.mesh.cad.*;
-import java.util.HashSet;
 import java.util.Stack;
 import java.util.Collection;
 import org.apache.log4j.Logger;
