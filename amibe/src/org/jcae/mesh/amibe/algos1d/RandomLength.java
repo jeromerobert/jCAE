@@ -31,6 +31,7 @@ import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADShapeFactory;
 import java.util.List;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Random;
 import org.apache.log4j.Logger;
 
@@ -43,17 +44,26 @@ public class RandomLength
 {
 	private static Logger logger=Logger.getLogger(RandomLength.class);
 	private final MMesh1D mesh1d;
-	private final int nrSegments;
+	private int divisions;
 	
 	/**
 	 * Creates a <code>UniformLength</code> instance.
 	 *
 	 * @param m  the <code>MMesh1D</code> instance to refine.
 	 */
-	public RandomLength(MMesh1D m, int n)
+	public RandomLength(MMesh1D m, final Map<String, String> options)
 	{
 		mesh1d = m;
-		nrSegments = n;
+
+		for (final Map.Entry<String, String> opt: options.entrySet())
+		{
+			final String key = opt.getKey();
+			final String val = opt.getValue();
+			if (key.equals("divisions"))
+				divisions = Integer.valueOf(val).intValue();
+			else
+				throw new RuntimeException("Unknown option: "+key);
+		}
 	}
 
 	/**
@@ -130,7 +140,7 @@ public class RandomLength
 		{
 			range = curve.getRange();
 			Random rand = new Random(67L);
-			nbPoints = nrSegments + 1;
+			nbPoints = divisions + 1;
 			paramOnEdge = new double[nbPoints];
 			paramOnEdge[0] = 0.0;
 			for (int i = 1; i < nbPoints; i++)

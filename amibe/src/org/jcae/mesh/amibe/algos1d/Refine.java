@@ -28,6 +28,7 @@ import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADEdge;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Map;
 import org.apache.log4j.Logger;
 
 /**
@@ -44,23 +45,21 @@ public class Refine
 	 *
 	 * @param m  the <code>MMesh1D</code> instance to refine.
 	 */
-	public Refine(MMesh1D m)
+	public Refine(MMesh1D m, final Map<String, String> options)
 	{
 		mesh1d = m;
+
+		for (final Map.Entry<String, String> opt: options.entrySet())
+		{
+			final String key = opt.getKey();
+			final String val = opt.getValue();
+			if (key.equals("divisions"))
+				divisions = Integer.valueOf(val).intValue();
+			else
+				throw new RuntimeException("Unknown option: "+key);
+		}
 	}
 
-	/**
-	 * Sets the desired number of divisions for each edge.
-	 *
-	 * @param n  the desired number of divisions for each edge.
-	 * @return the current instance.
-	 */
-	public Refine setParameters(int n)
-	{
-		divisions = n;
-		return this;
-	}
-	
 	/**
 	 * Explores each edge of the mesh and divides it into the same number of
 	 * divisions.
@@ -79,7 +78,7 @@ public class Refine
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(E);
 			nbNodes -= submesh1d.getNodes().size();
 			nbEdges -= submesh1d.getEdges().size();
-			if (computeEdge(divisions, submesh1d))
+			if (computeEdge(submesh1d))
 				nbTEdges++;
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
@@ -100,7 +99,7 @@ public class Refine
 	 * @return <code>true</code> if this edge was successfully discretized,
 	 * <code>false</code> otherwise.
 	 */
-	private static boolean computeEdge(int divisions, SubMesh1D submesh1d)
+	private boolean computeEdge(SubMesh1D submesh1d)
 	{
 		if (divisions < 2)
 			throw new java.lang.IllegalArgumentException("Division number must be > 1");
