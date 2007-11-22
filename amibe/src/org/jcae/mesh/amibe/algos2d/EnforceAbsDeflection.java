@@ -27,19 +27,18 @@ import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
-import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 /**
  * Split triangles with an absolute deflection greater than
- * requirements.  As explained in {@link Metric3D}, the geometric error
- * may exceed the desired value if triangles are too far away from local
- * tangent planes.  This algorithm computes the deflection of triangle
- * centroids, and if it is larger than the requested value, this
- * centroid is inserted into the mesh and incident edges are swapped
- * if they are not Delaunay.
+ * requirements.  As explained in {@link org.jcae.mesh.amibe.metrics.Metric3D},
+ * the geometric error may exceed the desired value if triangles are too far
+ * away from local tangent planes.  This algorithm computes the deflection of
+ * triangle centroids, and if it is larger than the requested value, this
+ * centroid is inserted into the mesh and incident edges are swapped if they
+ * are not Delaunay.
  */
 public class EnforceAbsDeflection
 {
@@ -71,7 +70,7 @@ public class EnforceAbsDeflection
 		double [] v4 = new double[3];
 		boolean redo = false;
 		int niter = mesh.getTriangles().size();
-		double defl = Metric3D.getDeflection();
+		double defl = mesh.getMeshParameters().getDeflection();
 		Vertex2D c = (Vertex2D) mesh.createVertex(0.0, 0.0);
 		do
 		{

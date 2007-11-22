@@ -23,6 +23,7 @@ package org.jcae.mesh.amibe.metrics;
 
 import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.MeshParameters;
 import org.apache.log4j.Logger;
 
 /**
@@ -54,7 +55,6 @@ public class Metric2D
 	//  First fundamental form
 	private final double E, F, G;
 	private static CADGeomSurface cacheSurf = null;
-	private static double discr = 1.0;
 	// Static array to speed up orth() method
 	private static final double [] orthRes = new double[2];
 
@@ -64,7 +64,7 @@ public class Metric2D
 	 * @param surf  geometrical surface
 	 * @param pt  node where metrics is computed.
 	 */
-	public Metric2D(CADGeomSurface surf, Vertex pt)
+	public Metric2D(CADGeomSurface surf, Vertex pt, MeshParameters mp)
 	{
 		if (!surf.equals(cacheSurf))
 		{
@@ -75,11 +75,12 @@ public class Metric2D
 		double sym = 0.0;
 		Metric3D m3dbis = null;
 		Metric3D m3d = new Metric3D(surf, pt);
+		double discr = mp.getLength();
 		m3d.iso(discr);
-		if (Metric3D.hasDeflection())
+		if (mp.hasDeflection())
 		{
 			m3dbis = new Metric3D(surf, pt);
-			if (!m3dbis.deflection())
+			if (!m3dbis.deflection(mp))
 				m3dbis = null;
 		}
 		//  For efficiency reasons, restrict2D returns a static array
@@ -191,26 +192,6 @@ public class Metric2D
 	{
 		double epsilon = 0.001;
 		return (E > 0.0 && Math.abs(F) < epsilon * E && Math.abs(E-G) < epsilon * E);
-	}
-	
-	/**
-	 * Set the desired edge length.
-	 *
-	 * @param l  edge length
-	 */
-	public static void setLength(double l)
-	{
-		discr = l;
-	}
-	
-	/**
-	 * Get the desired edge length.
-	 *
-	 * @return  edge length
-	 */
-	public static double getLength()
-	{
-		return discr;
 	}
 	
 	/**

@@ -21,12 +21,12 @@
 package org.jcae.mesh.amibe.patch;
 
 import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.MeshParameters;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.InitialTriangulationException;
-import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.amibe.util.KdTree;
 import org.jcae.mesh.amibe.util.KdTreeProcedure;
 import org.jcae.mesh.cad.*;
@@ -50,11 +50,6 @@ public class Mesh2D extends Mesh
 	//  The geometrical surface describing the topological face, stored for
 	//  efficiency reason
 	private transient final CADGeomSurface surface;
-	
-	//  Minimal topological edge length
-	private double epsilon = 1.;
-	
-	private boolean accumulateEpsilon = false;
 	
 	//  Stack of methods to compute geometrical values
 	private transient final Stack<Calculus> compGeomStack = new Stack<Calculus>();
@@ -81,11 +76,7 @@ public class Mesh2D extends Mesh
 	 */
 	public Mesh2D()
 	{
-		super(MeshTraitsBuilder.getDefault2D());
-		factory = new ElementPatchFactory(traitsBuilder);
-		face = null;
-		surface = null;
-		init();
+		this(MeshTraitsBuilder.getDefault2D());
 	}
 
 	public Mesh2D(MeshTraitsBuilder mtb)
@@ -100,17 +91,17 @@ public class Mesh2D extends Mesh
 	/**
 	 * Creates an empty mesh bounded to the topological surface.
 	 * This constructor also initializes tolerance values.  If length
-	 * criterion is null, {@link Metric2D#setLength} is called with
+	 * criterion is null, {@link MeshParameters#setLength} is called with
 	 * the diagonal length of face bounding box as argument.
-	 * If property <code>org.jcae.mesh.amibe.ds.Mesh.epsilon</code> is
-	 * not set, epsilon is computed as being the maximal value between
-	 * length criterion by 100 and diagonal length by 1000.
+	 * If {@link MeshParameters#epsilon} is not set, epsilon is computed as
+	 * being the maximal value between length criterion by 100 and diagonal
+	 * length by 1000.
 	 *
 	 * @param f   topological surface
 	 */
-	public Mesh2D(MeshTraitsBuilder mtb, CADShape f)
+	public Mesh2D(MeshTraitsBuilder mtb, MeshParameters mp, CADShape f)
 	{
-		super(mtb);
+		super(mtb, mp);
 		factory = new ElementPatchFactory(traitsBuilder);
 		face = f;
 		surface = ((CADFace) face).getGeomSurface();
@@ -119,11 +110,7 @@ public class Mesh2D extends Mesh
 
 	public Mesh2D(CADShape f)
 	{
-		super(MeshTraitsBuilder.getDefault2D());
-		factory = new ElementPatchFactory(traitsBuilder);
-		face = f;
-		surface = ((CADFace) face).getGeomSurface();
-		init();
+		this(MeshTraitsBuilder.getDefault2D(), new MeshParameters(), f);
 	}
 
 	private final void init()
@@ -131,29 +118,10 @@ public class Mesh2D extends Mesh
 		outerVertex = new OuterVertex2D(0.0, 0.0);
 		outerTrianglesAreConnected = true;
 
-		String accumulateEpsilonProp = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon");
-		if (accumulateEpsilonProp == null)
-		{
-			accumulateEpsilonProp = "false";
-			System.setProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon", accumulateEpsilonProp);
-		}
-		accumulateEpsilon = accumulateEpsilonProp.equals("true");
-
-		String absEpsilonProp = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon");
-		if (absEpsilonProp == null)
-		{
-			absEpsilonProp = "-1.0";
-			System.setProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon", absEpsilonProp);
-		}
-		Double absEpsilon = new Double(absEpsilonProp);
-		epsilon = absEpsilon.doubleValue();
+		double epsilon = meshParameters.getEpsilon();
 
 		if (!(face instanceof CADFace))
-		{
-			if (epsilon < 0.0)
-				epsilon = 0.0;
 			return;
-		}
 
 		CADFace F = (CADFace) face;
 		double [] bb = F.boundingBox();
@@ -161,10 +129,11 @@ public class Mesh2D extends Mesh
 		    (bb[0] - bb[3]) * (bb[0] - bb[3]) +
 		    (bb[1] - bb[4]) * (bb[1] - bb[4]) +
 		    (bb[2] - bb[5]) * (bb[2] - bb[5]));
-		if (Metric2D.getLength() == 0.0)
-			Metric2D.setLength(diagonal);
+		if (meshParameters.getLength() == 0.0)
+			meshParameters.setLength(diagonal);
 		if (epsilon < 0)
-			epsilon = Math.max(diagonal/1000.0, Metric2D.getLength() / 100.0);
+			epsilon = Math.max(diagonal/1000.0, meshParameters.getLength() / 100.0);
+		meshParameters.setEpsilon(epsilon);
 		logger.debug("Bounding box diagonal: "+diagonal);
 		logger.debug("Epsilon: "+epsilon);
 	}
@@ -487,21 +456,6 @@ public class Mesh2D extends Mesh
 	public double radius2d(Vertex v)
 	{
 		return compGeomCurrent.radius2d((Vertex2D) v);
-	}
-	
-	public double getEpsilon()
-	{
-		return epsilon;
-	}
-	
-	public boolean canAccumulateEpsilon()
-	{
-		return accumulateEpsilon;
-	}
-	
-	public void scaleTolerance(double scale)
-	{
-		epsilon *= scale;
 	}
 	
 	@Override

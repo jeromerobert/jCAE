@@ -25,8 +25,6 @@ import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
-import org.jcae.mesh.amibe.metrics.Metric2D;
-import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.cad.CADShape;
@@ -42,9 +40,11 @@ import org.jcae.mesh.cad.CADGeomCurve3D;
 import org.jcae.mesh.amibe.algos2d.*;
 import org.jcae.mesh.amibe.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.SubMesh1D;
+import org.jcae.mesh.amibe.ds.MeshParameters;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.HashMap;
 import org.apache.log4j.Logger;
 
 /**
@@ -88,15 +88,17 @@ public class Basic2d implements AlgoInterface
 		mtb.addTriangleList();
 		mtb.addKdTree(2);
 		mtb.add(ttb);
-		Mesh2D m = new Mesh2D(mtb, F);
+
+		HashMap options = new HashMap();
+		options.put("size", ""+maxlen);
+		options.put("deflection", ""+deflection);
+		options.put("relativeDeflection", ""+relDefl);
+		options.put("isotropic", ""+isotropic);
+		MeshParameters mp = new MeshParameters(options);
+		Mesh2D m = new Mesh2D(mtb, mp, F);
 		d.setMesh(m);
-		Metric2D.setLength(maxlen);
-		Metric3D.setLength(maxlen);
-		Metric3D.setDeflection(deflection);
-		Metric3D.setRelativeDeflection(relDefl);
-		Metric3D.setIsotropic(isotropic);
-		boolean accumulateEpsilon = m.canAccumulateEpsilon();
-		double epsilon = m.getEpsilon();
+		boolean accumulateEpsilon = mp.hasCumulativeEpsilon();
+		double epsilon = mp.getEpsilon();
 
 		// Insert interior vertices, if any
 		ArrayList<MNode1D> innerV = new ArrayList<MNode1D>();
@@ -183,7 +185,7 @@ public class Basic2d implements AlgoInterface
 					if (canSkip)
 						accumulatedLength += edgelen;
 					// 4.  Check whether deflection is valid.
-					if (canSkip && Metric3D.hasDeflection())
+					if (canSkip && mp.hasDeflection())
 					{
 						double [] uv = lastPoint.getUV();
 						double [] start = m.getGeomSurface().value(uv[0], uv[1]);
@@ -193,8 +195,8 @@ public class Basic2d implements AlgoInterface
 						  (start[0] - end[0]) * (start[0] - end[0]) +
 						  (start[1] - end[1]) * (start[1] - end[1]) +
 						  (start[2] - end[2]) * (start[2] - end[2]));
-						double dmax = Metric3D.getDeflection();
-						if (Metric3D.hasRelativeDeflection())
+						double dmax = m.getMeshParameters().getDeflection();
+						if (m.getMeshParameters().hasRelativeDeflection())
 							dmax *= accumulatedLength;
 						if (accumulatedLength - dist > dmax)
 							canSkip = false;

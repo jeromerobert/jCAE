@@ -4,10 +4,10 @@
 import org.jcae.mesh.cad.*
 import org.jcae.mesh.amibe.*
 import org.jcae.mesh.amibe.algos2d.*
-import org.jcae.mesh.amibe.metrics.*
 import org.jcae.mesh.amibe.patch.Mesh2D
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder
 import org.jcae.mesh.amibe.ds.MMesh1D
+import org.jcae.mesh.amibe.ds.MeshParameters
 import org.jcae.mesh.amibe.algos1d.*
 import org.jcae.mesh.xmldata.*
 import org.jcae.opencascade.jni.BRepTools
@@ -156,7 +156,12 @@ if (phases[2])
 	mesh1d.duplicateEdges()
 	mesh1d.updateNodeLabels()
 	
-	Metric2D.setLength(leng)
+	HashMap<String, String> options2d = new HashMap<String, String>();
+	options2d.put("size", ""+leng);
+	options2d.put("deflection", ""+defl);
+	options2d.put("relativeDeflection", "true");
+	options2d.put("isotropic", "true");
+
 	MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault2D()
 	
 	expl = factory.newExplorer()
@@ -172,22 +177,19 @@ if (phases[2])
 			seen << face
 			ntry = 0
 	
-			Metric3D.setLength(leng)
-			Metric3D.setDeflection(defl)
-			Metric3D.setRelativeDeflection(true)
-			Metric3D.setIsotropic(true)
-			Mesh2D mesh = new Mesh2D(mtb, face)
+			MeshParameters mp = new MeshParameters(options2d);
+			Mesh2D mesh = new Mesh2D(mtb, mp, face);
 	
 			go = true
 			success = true
 			while (go) {
 				try {
-					new Initial(mesh, mesh1d.boundaryNodes(face, epsilon, accumulateEpsilon)).compute();
+					new Initial(mesh, mesh1d.boundaryNodes(face, mp)).compute();
 					go = false
 				}
 				catch(InitialTriangulationException ex) {
-					mesh = new Mesh2D(mtb, face)
-					mesh.scaleTolerance(10.0)
+					mp.scaleTolerance(10.0)
+					mesh = new Mesh2D(mtb, mp, face)
 					println "Scaling tolerance for face #${iface}"
 					ntry ++
 				}
@@ -210,7 +212,7 @@ if (phases[2])
 			if (! success) {
 				bads << iface
 				BRepTools.write(face.getShape(), "error.brep")
-				mesh = new Mesh2D(mtb, face); 
+				mesh = new Mesh2D(mtb, mp, face); 
 			} else {
 				new BasicMesh(mesh).compute()
 				new CheckDelaunay(mesh).compute()

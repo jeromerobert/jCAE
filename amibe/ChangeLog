@@ -9,6 +9,9 @@ Thu Nov 22 12:37:13 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/amibe/ds/MMesh1D.java: Remove maxLength and
 	maxDeflection members, mesh specifications are now passed to 1D
 	algorithms through a Map.
+	* src/org/jcae/mesh/amibe/ds/MeshParameters.java: New class, this is
+	a container for mesh parameters.  Static members have been removed
+	from Mesh, Metric2D and Metric3D classes and gathered into this one.
 
 Thu Nov 22 10:53:13 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 

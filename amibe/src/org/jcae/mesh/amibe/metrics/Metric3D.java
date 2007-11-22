@@ -23,6 +23,7 @@ package org.jcae.mesh.amibe.metrics;
 
 import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.MeshParameters;
 import org.apache.log4j.Logger;
 
 /**
@@ -80,10 +81,6 @@ public class Metric3D extends Matrix3D
 	//  Cached variables to improve performance
 	private static CADGeomSurface cacheSurf = null;
 	
-	private static double discr = 1.0;
-	private static double defl = 0.0;
-	private static boolean relDefl = true;
-	private static boolean isotropic = true;
 	private static double [] c0 = new double[3];
 	private static double [] c1 = new double[3];
 	private static double [] c2 = new double[3];
@@ -139,101 +136,6 @@ public class Metric3D extends Matrix3D
 	public void copy(Metric3D that)
 	{
 		System.arraycopy(that.data, 0, data, 0, 9);
-	}
-	
-	/**
-	 * Check whether deflection is requested.
-	 *
-	 * @return <code>true</code> if deflection is requested,
-	 * <code>false</code> otherwise.
-	 */
-	public static boolean hasDeflection()
-	{
-		return (defl > 0.0);
-	}
-	
-	/**
-	 * Check whether deflection is relative or absolute.
-	 *
-	 * @return <code>true</code> if deflection is relative,
-	 * <code>false</code> otherwise.
-	 */
-	public static boolean hasRelativeDeflection()
-	{
-		return relDefl;
-	}
-	
-	/**
-	 * Select relative or absolute deflection.
-	 *
-	 * @param b if <code>true</code>, deflection is relative,
-	 * otherwise it is absolute.
-	 */
-	public static void setRelativeDeflection(boolean b)
-	{
-		relDefl = b;
-	}
-	
-	/**
-	 * Select isotropic or anisotropic discretization.
-	 *
-	 * @param b if <code>true</code>, discretization is isotropic,
-	 * otherwise it is anisotropic.
-	 */
-	public static void setIsotropic(boolean b)
-	{
-		isotropic = b;
-	}
-	
-	/**
-	 * Check whether a length criterion is requested.
-	 *
-	 * @return <code>true</code> if a length criterion is requested,
-	 * <code>false</code> otherwise.
-	 */
-	public static boolean hasLength()
-	{
-		return (discr > 0.0);
-	}
-	
-	/**
-	 * Set the desired edge length.
-	 *
-	 * @param l  the desired edge length.
-	 */
-	public static void setLength(double l)
-	{
-		discr = l;
-	}
-	
-	/**
-	 * Get the desired edge length.
-	 *
-	 * @return  the desired edge length.
-	 */
-	public static double getLength()
-	{
-		return discr;
-	}
-	
-	/**
-	 * Set the desired deflection.
-	 *
-	 * @param l  the desired deflection.
-	 */
-	public static void setDeflection(double l)
-	{
-		defl = l;
-	}
-	
-	/**
-	 * Get the desired deflection.
-	 *
-	 * @return  the desired deflection.
-	 */
-	public static double getDeflection()
-	{
-		return defl;
 	}
 	
 	/**
@@ -306,14 +208,14 @@ public class Metric3D extends Matrix3D
 	 * @return <code>true</code> if this metrics has been successfully
 	 * computed, <code>false</code> otherwise.
 	 */
-	public boolean deflection()
+	public boolean deflection(MeshParameters mp)
 	{
-		if (relDefl)
-			return relDeflection();
-		return absDeflection();
+		if (mp.hasRelativeDeflection())
+			return relDeflection(mp.isIsotropic(), mp.getDeflection(), mp.getLength());
+		return absDeflection(mp.isIsotropic(), mp.getDeflection());
 	}
 	
-	private boolean relDeflection()
+	private boolean relDeflection(boolean isotropic, double deflection, double edgeLength)
 	{
 		double cmin = Math.abs(cacheSurf.minCurvature());
 		double cmax = Math.abs(cacheSurf.maxCurvature());
@@ -345,7 +247,7 @@ public class Metric3D extends Matrix3D
 		}
 		prodVect3D(dcurvmax, dcurvmin, c2);
 		Matrix3D A = new Matrix3D(dcurvmax, dcurvmin, c2);
-		double epsilon = defl;
+		double epsilon = deflection;
 		if (epsilon > 1.0)
 			epsilon = 1.0;
 		//  In org.jcae.mesh.amibe.algos2d.Insertion, mean lengths are
@@ -361,7 +263,7 @@ public class Metric3D extends Matrix3D
 			if (epsilon > 1.0)
 				epsilon = 1.0;
 			alpha2 = 4.0 * epsilon * (2.0 - epsilon) / 2.0;
-			setDiagonal(diag, cmin*cmin / alpha2, 1.0/discr/discr);
+			setDiagonal(diag, cmin*cmin / alpha2, 1.0/edgeLength/edgeLength);
 		}
 		A.transp();
 		Matrix3D temp = this.multL(A);
@@ -371,7 +273,7 @@ public class Metric3D extends Matrix3D
 		return true;
 	}
 	
-	private boolean absDeflection()
+	private boolean absDeflection(boolean isotropic, double deflection)
 	{
 		double cmin = Math.abs(cacheSurf.minCurvature());
 		double cmax = Math.abs(cacheSurf.maxCurvature());
@@ -385,10 +287,10 @@ public class Metric3D extends Matrix3D
 			logger.debug("Null curvature");
 			return false;
 		}
-		if (defl * cmax >= 1.0 || defl * cmin >= 1.0)
+		if (deflection * cmax >= 1.0 || deflection * cmin >= 1.0)
 		{
 			logger.debug("Curvature too large");
-			iso(defl);
+			iso(deflection);
 			return true;
 		}
 		double [] dcurv = cacheSurf.curvatureDirections();
@@ -409,7 +311,7 @@ public class Metric3D extends Matrix3D
 		}
 		prodVect3D(dcurvmax, dcurvmin, c2);
 		Matrix3D A = new Matrix3D(dcurvmax, dcurvmin, c2);
-		double epsilon = defl * cmax;
+		double epsilon = deflection * cmax;
 		//  In org.jcae.mesh.amibe.algos2d.Insertion, mean lengths are
 		//  targeted, and there is a sqrt(2) factor.  Division by 2
 		//  provides a maximal deflection, 

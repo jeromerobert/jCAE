@@ -641,7 +641,7 @@ public class Vertex2D extends Vertex
 			if (curr instanceof Calculus2D)
 				m2 = new Metric2D();
 			else
-				m2 = new Metric2D(mesh.getGeomSurface(), this);
+				m2 = new Metric2D(mesh.getGeomSurface(), this, mesh.getMeshParameters());
 		}
 		return m2;
 	}

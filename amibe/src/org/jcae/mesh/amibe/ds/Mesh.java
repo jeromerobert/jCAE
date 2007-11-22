@@ -95,6 +95,11 @@ public class Mesh implements Serializable
 	protected final Traits traits;
 
 	/**
+	 * User-defined mesh parameters.
+	 */
+	protected final MeshParameters meshParameters;
+
+	/**
 	 * Vertex at infinite.
 	 */
 	public Vertex outerVertex = new OuterVertex();
@@ -148,7 +153,12 @@ public class Mesh implements Serializable
 	 */
 	public Mesh()
 	{
-		this(MeshTraitsBuilder.getDefault3D());
+		this(MeshTraitsBuilder.getDefault3D(), new MeshParameters());
+	}
+	
+	public Mesh(MeshTraitsBuilder builder)
+	{
+		this(builder, new MeshParameters());
 	}
 	
 	/**
@@ -156,7 +166,7 @@ public class Mesh implements Serializable
 	 *
 	 * @param builder mesh traits builder
 	 */
-	public Mesh(MeshTraitsBuilder builder)
+	public Mesh(MeshTraitsBuilder builder, MeshParameters mp)
 	{
 		traitsBuilder = builder;
 		if (builder != null)
@@ -166,6 +176,12 @@ public class Mesh implements Serializable
 		factory = new ElementFactory(traitsBuilder);
 		triangleList = traitsBuilder.getTriangles(traits);
 		nodeList = traitsBuilder.getNodes(traits);
+		meshParameters = mp;
+	}
+	
+	public MeshParameters getMeshParameters()
+	{
+		return meshParameters;
 	}
 	
 	/**

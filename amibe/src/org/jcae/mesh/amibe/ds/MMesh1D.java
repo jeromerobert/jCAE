@@ -24,7 +24,6 @@ package org.jcae.mesh.amibe.ds;
 import org.jcae.mesh.bora.ds.*;
 import org.jcae.mesh.cad.*;
 import org.jcae.mesh.amibe.patch.Vertex2D;
-import org.jcae.mesh.amibe.metrics.Metric3D;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -371,8 +370,14 @@ public class MMesh1D extends MMesh0D
 		return mapTEdgeToSubMesh1D.get(discrE);
 	}
 
-	public Vertex2D [] boundaryNodes(CADFace face, double epsilon, boolean accumulateEpsilon)
+	public Vertex2D [] boundaryNodes(CADFace face, MeshParameters mp)
 	{
+		double epsilon = mp.getEpsilon();
+		boolean accumulateEpsilon = mp.hasCumulativeEpsilon();
+		double deflection = mp.getDeflection();
+		boolean hasRelativeDeflection = mp.hasRelativeDeflection();
+		boolean hasDeflection = mp.hasDeflection();
+
 		//  Rough approximation of the final size
 		int roughSize = 10*maximalNumberOfNodes();
 		ArrayList<Vertex2D> result = new ArrayList<Vertex2D>(roughSize);
@@ -445,7 +450,7 @@ public class MMesh1D extends MMesh0D
 					if (canSkip)
 						accumulatedLength += edgelen;
 					// 4.  Check whether deflection is valid.
-					if (canSkip && Metric3D.hasDeflection())
+					if (canSkip && hasDeflection)
 					{
 						double [] uv = lastPoint.getUV();
 						double [] start = face.getGeomSurface().value(uv[0], uv[1]);
@@ -455,8 +460,8 @@ public class MMesh1D extends MMesh0D
 						  (start[0] - end[0]) * (start[0] - end[0]) +
 						  (start[1] - end[1]) * (start[1] - end[1]) +
 						  (start[2] - end[2]) * (start[2] - end[2]));
-						double dmax = Metric3D.getDeflection();
-						if (Metric3D.hasRelativeDeflection())
+						double dmax = deflection;
+						if (hasRelativeDeflection)
 							dmax *= accumulatedLength;
 						if (accumulatedLength - dist > dmax)
 							canSkip = false;

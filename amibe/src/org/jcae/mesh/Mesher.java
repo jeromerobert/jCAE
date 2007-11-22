@@ -40,6 +40,7 @@ import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.algos1d.*;
 import org.jcae.mesh.amibe.algos2d.*;
 import org.jcae.mesh.amibe.ds.MMesh1D;
+import org.jcae.mesh.amibe.ds.MeshParameters;
 import org.jcae.mesh.xmldata.*;
 import org.jcae.mesh.cad.*;
 import org.apache.log4j.Logger;
@@ -276,16 +277,14 @@ public class Mesher
 	 * @param mtb container for 2D mesh traits
 	 * @return <code>true</code> if face had been successfully meshed, <code>false</code> otherwise.
 	 */
-	protected boolean mesh2D(int iFace, CADFace face, MMesh1D mesh1D, 
+	protected boolean mesh2D(int iFace, CADFace face, MMesh1D mesh1D, MeshParameters mp,
 		String xmlBrepDir, String brepFile, MeshTraitsBuilder mtb)
 	{
 		int nTryMax = 20;
 		
-		//  This variable can be modified, thus reset it
-		Metric2D.setLength(edgeLength);
 		if(Boolean.getBoolean("org.jcae.mesh.Mesher.explodeBrep"))
 			face.writeNative("face."+iFace+".brep");
-		Mesh2D mesh = new Mesh2D(mtb, face); 
+		Mesh2D mesh = new Mesh2D(mtb, mp, face);
 		int nTry = 0;
 		boolean toReturn=true;
 		while (nTry < nTryMax)
@@ -293,13 +292,13 @@ public class Mesher
 			try
 			{
 				// mesh.getEpsilon() may return a value which depends on face
-				new Initial(mesh, mesh1D.boundaryNodes(face, mesh.getEpsilon(), accumulateEpsilon)).compute();
+				new Initial(mesh, mesh1D.boundaryNodes(face, mp)).compute();
 			}
 			catch(InitialTriangulationException ex)
 			{
 				logger.warn("Face "+iFace+" cannot be triangulated, trying again with a larger tolerance...");
-				mesh = new Mesh2D(mtb, face);
-				mesh.scaleTolerance(10.);
+				mp.scaleTolerance(10.);
+				mesh = new Mesh2D(mtb, mp, face);
 				nTry++;
 				continue;				
 			}
@@ -319,7 +318,7 @@ public class Mesher
 		{
 			logger.error("Face "+iFace+" cannot be triangulated, skipping...");
 			toReturn=false;
-			mesh = new Mesh2D(mtb, face); 
+			mesh = new Mesh2D(mtb, mp, face); 
 		}
 		else if (toReturn)
 		{
@@ -331,7 +330,7 @@ public class Mesher
 		else
 		{
 			// Creates an empty mesh to not break 3d conversion when some faces are missing
-			mesh = new Mesh2D(mtb, face);
+			mesh = new Mesh2D(mtb, mp, face);
 		}
 		try
 		{
@@ -449,17 +448,18 @@ public class Mesher
 		if (processMesh2d) {
 			//  Step 2: Read the 1D mesh and compute 2D meshes
 			mesh1D = MMesh1DReader.readObject(outputDir, "jcae1d");
-			shape = mesh1D.getGeometry();
-			Metric3D.setLength(edgeLength);
-			Metric3D.setDeflection(deflection);
-			Metric3D.setRelativeDeflection(relDefl);
-			Metric3D.setIsotropic(isotropic);
-	
 			//  Prepare 2D discretization
 			mesh1D.duplicateEdges();
 			//  Compute node labels shared by all 2D and 3D meshes
 			mesh1D.updateNodeLabels();
 			
+			shape = mesh1D.getGeometry();
+			HashMap<String, String> options2d = new HashMap<String, String>();
+			options2d.put("size", ""+edgeLength);
+			options2d.put("deflection", ""+deflection);
+			options2d.put("relativeDeflection", ""+relDefl);
+			options2d.put("isotropic", ""+isotropic);
+
 			int iFace = 0;
 
 			logger.debug("org.jcae.mesh.Mesher.minFace="+minFace);
@@ -486,7 +486,8 @@ public class Mesher
 					continue;
 				seen.add(face);
 				logger.info("Meshing face " + iFace+"/"+nrFaces);
-				if(!mesh2D(iFace, face, mesh1D, xmlBrepDir, brepFile, mtb))
+				MeshParameters mp = new MeshParameters(options2d);
+				if(!mesh2D(iFace, face, mesh1D, mp, xmlBrepDir, brepFile, mtb))
 					badGroups.add(iFace);
 			}
 		}
