@@ -344,7 +344,7 @@ public class Metric3D extends Matrix3D
 			System.arraycopy(dcurv, 3, dcurvmax, 0, 3);
 		}
 		prodVect3D(dcurvmax, dcurvmin, c2);
-		Metric3D A = new Metric3D(dcurvmax, dcurvmin, c2);
+		Matrix3D A = new Matrix3D(dcurvmax, dcurvmin, c2);
 		double epsilon = defl;
 		if (epsilon > 1.0)
 			epsilon = 1.0;
@@ -408,7 +408,7 @@ public class Metric3D extends Matrix3D
 			System.arraycopy(dcurv, 3, dcurvmax, 0, 3);
 		}
 		prodVect3D(dcurvmax, dcurvmin, c2);
-		Metric3D A = new Metric3D(dcurvmax, dcurvmin, c2);
+		Matrix3D A = new Matrix3D(dcurvmax, dcurvmin, c2);
 		double epsilon = defl * cmax;
 		//  In org.jcae.mesh.amibe.algos2d.Insertion, mean lengths are
 		//  targeted, and there is a sqrt(2) factor.  Division by 2

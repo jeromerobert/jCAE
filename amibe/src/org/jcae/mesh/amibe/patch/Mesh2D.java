@@ -501,7 +501,7 @@ public class Mesh2D extends Mesh
 	@Override
 	public double distance2(Vertex start, Vertex end, Vertex vm)
 	{
-		return compGeomCurrent.distance2((Vertex2D) start, (Vertex2D) end, (Vertex2D) vm);
+		return compGeomCurrent.distance2((Vertex2D) start, (Vertex2D) end, ((Vertex2D) vm).getMetrics(this));
 	}
 	
 	/**

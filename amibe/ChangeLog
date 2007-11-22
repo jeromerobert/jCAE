@@ -1,3 +1,8 @@
+Thu Nov 22 12:37:13 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/patch/Calculus.java (distance2): Modify
+	signature, this may be needed to improve SmoothNodes2D.
+
 Thu Nov 22 10:53:13 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/MeshWriter.java: In writeObject() and

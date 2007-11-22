@@ -27,6 +27,7 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
+import org.jcae.mesh.amibe.metrics.Metric2D;
 import org.jcae.mesh.amibe.util.QSortedTree;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import java.util.Map;
@@ -269,8 +270,9 @@ public class SmoothNodes2D
 			ot.nextOrigin();
 			assert !ot.hasAttributes(AbstractHalfEdge.OUTER);
 			Vertex2D v = (Vertex2D) ot.destination();
+			Metric2D m2 = v.getMetrics(mesh);
 			nn++;
-			double l = mesh.compGeom().distance2(n, v, v);
+			double l = mesh.compGeom().distance2(n, v, m2);
 			double[] newp2 = v.getUV();
 			if (modifiedLaplacian)
 			{
@@ -325,10 +327,13 @@ public class SmoothNodes2D
 		Vertex2D v0 = (Vertex2D) f.vertex[0];
 		Vertex2D v1 = (Vertex2D) f.vertex[1];
 		Vertex2D v2 = (Vertex2D) f.vertex[2];
+		Metric2D m0 = v0.getMetrics(mesh);
+		Metric2D m1 = v1.getMetrics(mesh);
+		Metric2D m2 = v2.getMetrics(mesh);
 
-		double l01 = mesh.compGeom().distance2(v0, v1, v0);
-		double l12 = mesh.compGeom().distance2(v1, v2, v1);
-		double l20 = mesh.compGeom().distance2(v2, v0, v2);
+		double l01 = mesh.compGeom().distance2(v0, v1, m0);
+		double l12 = mesh.compGeom().distance2(v1, v2, m1);
+		double l20 = mesh.compGeom().distance2(v2, v0, m2);
 
 		double lmin, lmax;
 		if (l01 > l12)

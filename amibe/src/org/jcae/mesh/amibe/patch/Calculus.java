@@ -21,6 +21,8 @@
 
 package org.jcae.mesh.amibe.patch;
 
+import org.jcae.mesh.amibe.metrics.Metric2D;
+
 public interface Calculus
 {
 	/**
@@ -43,12 +45,12 @@ public interface Calculus
 	 * Returns square distance between two points.
 	 * This distance is evaluated by using metrics at a given point.
 	 *
-	 * @param start  the start node
-	 * @param end  the end node
-	 * @param vm  the vertex on which metrics is evaluated
+	 * @param start  start node
+	 * @param end  end node
+	 * @param m2  Riemannian metrics
 	 * @return square distance between these two points.
 	 */
-	public double distance2(Vertex2D start, Vertex2D end, Vertex2D vm);
+	public double distance2(Vertex2D start, Vertex2D end, Metric2D m2);
 	
 	/**
 	 * Returns the 2D radius of the unit ball centered at a point.

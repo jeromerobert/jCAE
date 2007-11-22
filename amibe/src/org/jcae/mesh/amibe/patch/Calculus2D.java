@@ -21,6 +21,8 @@
 
 package org.jcae.mesh.amibe.patch;
 
+import org.jcae.mesh.amibe.metrics.Metric2D;
+
 /**
  * Distance computations in 2D Euclidian space.
  * This class is called from {@link org.jcae.mesh.amibe.algos2d.BasicMesh}
@@ -40,13 +42,13 @@ public class Calculus2D implements Calculus
 	/**
 	 * Returns square distance to another <code>Vertex2D</code> instance.
 	 *
-	 * @param start  the first node
-	 * @param end  the node to which distance is computed.
-	 * @param vm  the node at which metrics is evaluated (unused)
+	 * @param start  first node
+	 * @param end  end node
+	 * @param m2  metrics (unused)
 	 * @return square distance between the two nodes.
 	 */
 	@Override
-	public double distance2(Vertex2D start, Vertex2D end, Vertex2D vm)
+	public double distance2(Vertex2D start, Vertex2D end, Metric2D m2)
 	{
 		double [] x0 = start.getUV();
 		double [] x1 = end.getUV();

@@ -540,13 +540,15 @@ public class Vertex2D extends Vertex
 		
 		try {
 			Vertex2D C3 = va3.circumcenter(mesh, vc1, vc2, va3);
+			Metric2D mA = getMetrics(mesh);
+			Metric2D mB = va3.getMetrics(mesh);
 			double ret = Math.sqrt(
-				mesh.compGeom().distance2(C3, this, va3) /
-				mesh.compGeom().distance2(C3, va3, va3));
+				mesh.compGeom().distance2(C3, this, mB) /
+				mesh.compGeom().distance2(C3, va3, mB));
 			Vertex2D C0 = circumcenter(mesh, vc1, vc2, va3);
 			ret += Math.sqrt(
-				mesh.compGeom().distance2(C0, this, this) /
-				mesh.compGeom().distance2(C0, va3, this));
+				mesh.compGeom().distance2(C0, this, mA) /
+				mesh.compGeom().distance2(C0, va3, mA));
 			return (ret < 2.0);
 		}
 		catch (RuntimeException ex)
@@ -556,13 +558,15 @@ public class Vertex2D extends Vertex
 			// Test the swapped edge
 			// this -> vc2   vc1 -> this   vc2 -> va3  va3 -> vc1
 			Vertex2D C3 = vc1.circumcenter(mesh, this, va3, vc1);
+			Metric2D mA = vc2.getMetrics(mesh);
+			Metric2D mB = vc1.getMetrics(mesh);
 			double ret = Math.sqrt(
-				mesh.compGeom().distance2(C3, vc2, vc1) /
-				mesh.compGeom().distance2(C3, vc1, vc1));
+				mesh.compGeom().distance2(C3, vc2, mB) /
+				mesh.compGeom().distance2(C3, vc1, mB));
 			Vertex2D C0 = circumcenter(mesh, this, va3, vc1);
 			ret += Math.sqrt(
-				mesh.compGeom().distance2(C0, vc2, vc2) /
-				mesh.compGeom().distance2(C0, vc1, vc2));
+				mesh.compGeom().distance2(C0, vc2, mA) /
+				mesh.compGeom().distance2(C0, vc1, mA));
 			return (ret > 2.0);
 		}
 		catch (RuntimeException ex)
@@ -589,10 +593,14 @@ public class Vertex2D extends Vertex
 		
 		//  Add a 0.5 factor so that edges are swapped only if
 		//  there is a significant gain.
-		return (Math.sqrt(mesh.compGeom().distance2(va3, this, vc1)) +
-		        Math.sqrt(mesh.compGeom().distance2(va3, this, vc2)) > 0.5 * (
-		        Math.sqrt(mesh.compGeom().distance2(vc1, vc2, va3)) +
-		        Math.sqrt(mesh.compGeom().distance2(vc1, vc2, this))));
+		Metric2D mc1 = vc1.getMetrics(mesh);
+		Metric2D mc2 = vc2.getMetrics(mesh);
+		Metric2D ma3 = va3.getMetrics(mesh);
+		Metric2D m0 = getMetrics(mesh);
+		return (Math.sqrt(mesh.compGeom().distance2(va3, this, mc1)) +
+		        Math.sqrt(mesh.compGeom().distance2(va3, this, mc2)) > 0.5 * (
+		        Math.sqrt(mesh.compGeom().distance2(vc1, vc2, ma3)) +
+		        Math.sqrt(mesh.compGeom().distance2(vc1, vc2, m0))));
 	}
 	
 	public boolean isPseudoIsotropic(Mesh2D mesh)

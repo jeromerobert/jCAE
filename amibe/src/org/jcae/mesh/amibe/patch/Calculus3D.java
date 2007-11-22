@@ -71,8 +71,10 @@ public class Calculus3D implements Calculus
 	@Override
 	public double distance(Vertex2D start, Vertex2D end)
 	{
-		double l1 = Math.sqrt(distance2(start, end, start));
-		double l2 = Math.sqrt(distance2(start, end, end));
+		Metric2D ms = start.getMetrics(mesh);
+		Metric2D me = end.getMetrics(mesh);
+		double l1 = Math.sqrt(distance2(start, end, ms));
+		double l2 = Math.sqrt(distance2(start, end, me));
 		double lmax = Math.max(l1, l2);
 		if (!accurateDistance || Math.abs(l1 - l2) < delta_max * lmax)
 			return lmax;
@@ -93,8 +95,10 @@ public class Calculus3D implements Calculus
 			Vertex2D pt1 = v.pop();
 			Vertex2D pt2 = v.pop();
 			level = l.pop().intValue();
-			l1 = Math.sqrt(distance2(pt1, pt2, pt1));
-			l2 = Math.sqrt(distance2(pt1, pt2, pt2));
+			ms = pt1.getMetrics(mesh);
+			me = pt2.getMetrics(mesh);
+			l1 = Math.sqrt(distance2(pt1, pt2, ms));
+			l2 = Math.sqrt(distance2(pt1, pt2, me));
 			lmax = Math.max(l1, l2);
 			if (Math.abs(l1 - l2) < delta_max * lmax || level == 0)
 				ret += lmax;
@@ -116,16 +120,15 @@ public class Calculus3D implements Calculus
 	/**
 	 * Returns Riemannian square distance between nodes.
 	 *
-	 * @param start  the start node
-	 * @param end  the end node
-	 * @param vm  the vertex on which metrics is evaluated
+	 * @param start  start node
+	 * @param end  end node
+	 * @param m2  Riemannian metrics
 	 * @return square distance between nodes
 	 **/
 	@Override
-	public double distance2(Vertex2D start, Vertex2D end, Vertex2D vm)
+	public double distance2(Vertex2D start, Vertex2D end, Metric2D m2)
 	{
-		Metric2D m = vm.getMetrics(mesh);
-		return m.distance2(start.getUV(), end.getUV());
+		return m2.distance2(start.getUV(), end.getUV());
 	}
 	
 	/**
