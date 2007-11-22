@@ -27,10 +27,8 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
-import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.util.QSortedTree;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
-import org.jcae.mesh.cad.CADGeomSurface;
 import java.util.Map;
 import java.util.HashSet;
 import java.util.Collection;
@@ -52,7 +50,6 @@ public class SmoothNodes2D
 {
 	private static Logger logger=Logger.getLogger(SmoothNodes2D.class);
 	private Mesh2D mesh;
-	private CADGeomSurface surface;
 	private boolean modifiedLaplacian = false;
 	private int nloop = 5;
 	private double tolerance = Double.MAX_VALUE / 2.0;
@@ -75,7 +72,7 @@ public class SmoothNodes2D
 	public SmoothNodes2D(Mesh2D m)
 	{
 		mesh = m;
-		surface = mesh.getGeomSurface();
+		mesh.getGeomSurface();
 		c = (Vertex2D) mesh.createVertex(0.0, 0.0);
 	}
 	
@@ -90,7 +87,7 @@ public class SmoothNodes2D
 	public SmoothNodes2D(final Mesh2D m, final Map<String, String> options)
 	{
 		mesh = m;
-		surface = mesh.getGeomSurface();
+		mesh.getGeomSurface();
 		c = (Vertex2D) mesh.createVertex(0.0, 0.0);
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
@@ -334,14 +331,14 @@ public class SmoothNodes2D
 		double l20 = mesh.compGeom().distance2(v2, v0, v2);
 
 		double lmin, lmax;
-		if (l01 > l20)
+		if (l01 > l12)
 		{
-			lmin = l20;
+			lmin = l12;
 			lmax = l01;
 		}
 		else
 		{
-			lmax = l20;
+			lmax = l12;
 			lmin = l01;
 		}
 		if (l20 < lmin)
