@@ -27,6 +27,7 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import gnu.trove.TObjectIntHashMap;
 import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TIntArrayList;
+import gnu.trove.TIntHashSet;
 import java.io.IOException;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -80,14 +81,22 @@ public class MeshWriter
 		//  Write boundary nodes and 1D references
 		if (nref > 0)
 		{
+			//  Duplicate nodes, which are endpoints of 2D degenerated edges,
+			//  are written at the end so that indices of regular vertices
+			//  do not have to be modified during 2D->3D conversion.
+			ArrayList<Vertex> duplicate3DNodes = new ArrayList();
+			TIntHashSet refs = new TIntHashSet(nref);
 			nref = 0;
 			for(Vertex v: nodelist)
 			{
 				if (v == outer)
 					continue;
 				int ref1d = v.getRef();
-				if (0 != ref1d)
+				if (0 == ref1d)
+					continue;
+				if (!refs.contains(ref1d))
 				{
+					refs.add(ref1d);
 					double [] p = v.getUV();
 					for (int d = 0; d < p.length; d++)
 						out.writeDouble(p[d]);
@@ -96,6 +105,18 @@ public class MeshWriter
 					i++;
 					nref++;
 				}
+				else
+					duplicate3DNodes.add(v);
+			}
+			for (Vertex v: duplicate3DNodes)
+			{
+				double [] p = v.getUV();
+				for (int d = 0; d < p.length; d++)
+					out.writeDouble(p[d]);
+				refout.writeInt(Math.abs(v.getRef()));
+				nodeIndex.put(v, i);
+				i++;
+				nref++;
 			}
 		}
 		out.close();

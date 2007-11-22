@@ -536,46 +536,6 @@ public class Mesh2D extends Mesh
 		epsilon *= scale;
 	}
 	
-	/**
-	 * Remove degenerted edges.
-	 * Degenerated edges are present in 2D mesh, and have to be
-	 * removed in the 2D -&gt; 3D transformation.  Triangles and
-	 * vertices must then be updated too.
-	 */
-	public void removeDegeneratedEdges()
-	{
-		logger.debug("Removing degenerated edges");
-		VirtualHalfEdge2D ot = new VirtualHalfEdge2D();
-		HashSet<Triangle> removedTriangles = new HashSet<Triangle>();
-		for (Triangle at: getTriangles())
-		{
-			if (removedTriangles.contains(at))
-				continue;
-			TriangleVH t = (TriangleVH) at;
-			if (t.hasAttributes(AbstractHalfEdge.OUTER))
-				continue;
-			ot.bind(t);
-			for (int i = 0; i < 3; i++)
-			{
-				ot.next();
-				if (!ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
-					continue;
-				int ref1 = ot.origin().getRef();
-				int ref2 = ot.destination().getRef();
-				if (ref1 != 0 && ref2 != 0 && ref1 == ref2)
-				{
-					if (logger.isDebugEnabled())
-						logger.debug("  Collapsing "+ot);
-					removedTriangles.add(ot.getTri());
-					ot.removeDegenerated(this);
-					break;
-				}
-			}
-		}
-		for (Triangle t: removedTriangles)
-			getTriangles().remove(t);
-	}
-	
 	@Override
 	public boolean isValid(boolean constrained)
 	{

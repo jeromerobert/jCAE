@@ -178,44 +178,6 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 		return prev().sym().prev();
 	}
 	
-	/**
-	 * Collapse an edge and update adjacency relations.
-	 * Its start and end points must have the same location.
-	 */
-	public final void removeDegenerated(Mesh2D mesh)
-	{
-		Vertex2D o = (Vertex2D) origin();
-		Vertex2D d = (Vertex2D) destination();
-		assert o.getRef() != 0 && d.getRef() != 0 && o.getRef() ==  d.getRef();
-		
-		//  Replace o by d in all triangles
-		copyOTri(this, work[0]);
-		do
-		{
-			// This routine is called when 2D meshing is over and
-			// before it is written onto disk, we can then call
-			// VirtualHalfEdge.nextOriginLoop() without trouble.
-			work[0].nextOriginLoop();
-			for (int i = 0; i < 3; i++)
-			{
-				if (work[0].tri.vertex[i] == o)
-				{
-					work[0].tri.vertex[i] = d;
-					break;
-				}
-			}
-		}
-		while (work[0].destination() != d);
-		mesh.getQuadTree().remove(o);
-		
-		//  Glue triangles
-		nextOTri(this, work[0]);
-		prevOTri(this, work[1]);
-		work[0].sym();
-		work[1].sym();
-		work[0].glue(work[1]);
-	}
-	
 	/*
 	 *                         a
 	 *                         ,

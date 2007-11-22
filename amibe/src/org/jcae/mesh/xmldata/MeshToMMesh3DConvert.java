@@ -238,7 +238,6 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
-		int i;
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		CADGeomSurface surface = F.getGeomSurface();
 		surface.dinit(1);
@@ -275,7 +274,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			logger.debug("Reading "+numberOfNodes+" nodes");
 			double [] normals = new double[3*numberOfNodes];
 			//  Interior nodes
-			for (i = 0; i < numberOfNodes - numberOfReferences; i++)
+			for (int i = 0; i < numberOfNodes - numberOfReferences; i++)
 			{
 				double u = nodesBuffer.get();
 				double v = nodesBuffer.get();
@@ -291,7 +290,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			}
 			//  Boundary nodes
 			refsBuffer.get(refs);
-			for (i = 0; i < numberOfReferences; i++)
+			for (int i = 0; i < numberOfReferences; i++)
 			{
 				double u = nodesBuffer.get();
 				double v = nodesBuffer.get();
@@ -316,31 +315,41 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				"number/text()", submeshFaces));
 			logger.debug("Reading "+numberOfFaces+" faces");
 			int ind [] = new int[3];
-			for (i=0; i < numberOfFaces; i++)
+			int indLoc [] = new int[3];
+			int cntTriangles = 0;
+			for (int i = 0; i < numberOfFaces; i++)
 			{
 				for (int j = 0; j < 3; j++)
 				{
 					// Local node number for this group
-					int indLoc = trianglesBuffer.get();
-					// Write normals
-					if (normalsOut != null)
+					indLoc[j] = trianglesBuffer.get();
+					// Global node number
+					if (indLoc[j] < numberOfNodes - numberOfReferences)
+						ind[j] = indLoc[j] + nodeOffset;
+					else
+						ind[j] = xrefs.get(refs[indLoc[j] - numberOfNodes + numberOfReferences]) + nrIntNodes;
+				}
+				if (ind[0] == ind[1] || ind[1] == ind[2] || ind[2] == ind[0])
+				{
+					logger.debug("Triangle bound from a degenerated edge skipped");
+					continue;
+				}
+				if (normalsOut != null)
+				{
+					for (int j = 0; j < 3; j++)
 					{
+						// Write normals
 						if (F.isOrientationForward())
 						{
 							for (int k = 0; k < 3; k++)
-								normalsOut.writeDouble(normals[3*indLoc+k]);
+								normalsOut.writeDouble(normals[3*indLoc[j]+k]);
 						}
 						else
 						{
 							for (int k = 0; k < 3; k++)
-								normalsOut.writeDouble(- normals[3*indLoc+k]);
+								normalsOut.writeDouble(- normals[3*indLoc[j]+k]);
 						}
 					}
-					// Global node number
-					if (indLoc < numberOfNodes - numberOfReferences)
-						ind[j] = indLoc + nodeOffset;
-					else
-						ind[j] = xrefs.get(refs[indLoc - numberOfNodes + numberOfReferences]) + nrIntNodes;
 				}
 				if (F.isOrientationForward())
 				{
@@ -351,24 +360,25 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				for (int j = 0; j < 3; j++)
 					trianglesOut.writeInt(ind[j]);
 				if (unv != null)
-					unv.writeTriangle(i+nrTriangles, ind);
+					unv.writeTriangle(cntTriangles+nrTriangles, ind);
+				cntTriangles++;
 			}
 			logger.debug("End reading");
 			
-			for (i=0; i < numberOfFaces; i++)
+			for (int i=0; i < cntTriangles; i++)
 				groupsOut.writeInt(i+nrTriangles);
 			if (unv != null)
-				unv.writeGroup(""+groupId, nrTriangles, numberOfFaces);
+				unv.writeGroup(""+groupId, nrTriangles, cntTriangles);
 			groupsElement.appendChild(XMLHelper.parseXMLString(documentOut,
 				"<group id=\""+(groupId-1)+"\">"+
 				"<name>"+groupId+"</name>"+
-				"<number>"+numberOfFaces+"</number>"+ 
+				"<number>"+cntTriangles+"</number>"+ 
 				"<file format=\"integerstream\" location=\""+
 				XMLHelper.canonicalize(xmlDir, groupsFile.toString())+"\""+
 				" offset=\""+nrTriangles+"\"/></group>"));
 			
 			nodeOffset += numberOfNodes - numberOfReferences;
-			nrTriangles += numberOfFaces;
+			nrTriangles += cntTriangles;
 			fcT.close();
 			MeshExporter.clean(bbT);
 			fcN.close();

@@ -324,7 +324,6 @@ public class Mesher
 			new CheckDelaunay(mesh).compute();
 			if (deflection > 0.0 && !relDefl)
 				new EnforceAbsDeflection(mesh).compute();
-			mesh.removeDegeneratedEdges();
 		}
 		else
 		{

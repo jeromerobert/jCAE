@@ -230,7 +230,6 @@ public class Basic2d implements AlgoInterface
 		new CheckDelaunay(m).compute();
 		if (deflection > 0.0 && !relDefl)
 			new EnforceAbsDeflection(m).compute();
-		m.removeDegeneratedEdges();
 		return true;
 	}
 	

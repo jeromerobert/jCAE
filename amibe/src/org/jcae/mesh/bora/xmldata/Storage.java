@@ -537,6 +537,25 @@ public class Storage
 		{
 			for (int j = 0; j < nr; j++)
 				pts[j] = nodelist[trianglesBuffer.get()-1];
+			// Remove triangles incident to degenerated edges.
+			// These triangles are only useful in parameter space.
+			boolean degenerated = false;
+			for (int j = 0; j < nr; j++)
+			{
+				if (pts[j].getRef() == 0)
+					continue;
+				for (int k = j + 1; k < nr; k++)
+				{
+					if (pts[j] == pts[k])
+					{
+						j = nr;
+						k = nr;
+						degenerated = true;
+					}
+				}
+			}
+			if (degenerated)
+				continue;
 			if (reversed)
 			{
 				Vertex temp = pts[1];

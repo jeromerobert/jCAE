@@ -213,7 +213,6 @@ if (phases[2])
 			} else {
 				new BasicMesh(mesh).compute()
 				new CheckDelaunay(mesh).compute()
-				mesh.removeDegeneratedEdges()
 				println "Face #${iface} has been meshed"
 			}
 			MeshWriter.writeObject(mesh, outdir, "jcae2d."+iface, brepdir, brepfile, iface)
