@@ -190,36 +190,6 @@ public class Mesh2D extends Mesh
 	}
 	
 	/**
-	 * Returns the quadtree associated with this mesh.
-	 *
-	 * @return the quadtree associated with this mesh.
-	 */
-	public KdTree getQuadTree()
-	{
-		return traitsBuilder.getKdTree(traits);
-	}
-	
-	/**
-	 * Initializes quadtree with a given bounding box.  This method must be called before putting
-	 * any vertex into this quadtree.
-	 *
-	 * @param bbmin  coordinates of bottom-left vertex
-	 * @param bbmax  coordinates of top-right vertex
-	 */
-	public void resetQuadTree(double [] bbmin, double [] bbmax)
-	{
-		double [] bbox = new double[2*bbmin.length];
-		for (int i = 0; i < bbmin.length; i++)
-		{
-			bbox[i] = bbmin[i];
-			bbox[i+bbmin.length] = bbmax[i];
-		}
-		KdTree quadtree = traitsBuilder.getKdTree(traits);
-		quadtree.setup(bbox);
-		outerVertex = new OuterVertex2D((bbmin[0]+bbmax[0])*0.5, (bbmin[1]+bbmax[1])*0.5);
-	}
-	
-	/**
 	 * Returns vertex list.  Note that this class does not rely on
 	 * {@link MeshTraitsBuilder}, but call {@link KdTree#getAllVertices}.
 	 *

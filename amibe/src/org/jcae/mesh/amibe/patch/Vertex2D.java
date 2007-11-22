@@ -198,7 +198,7 @@ public class Vertex2D extends Vertex
 		if (logger.isDebugEnabled())
 			logger.debug("Searching for the triangle surrounding "+this);
 		Triangle.List tList = new Triangle.List();
-		TriangleVH t = (TriangleVH) mesh.getQuadTree().getNearestVertex(mesh, this).getLink();
+		TriangleVH t = (TriangleVH) mesh.getKdTree().getNearestVertex(mesh, this).getLink();
 		VirtualHalfEdge2D start = new VirtualHalfEdge2D(t, 0);
 		VirtualHalfEdge2D current = getSurroundingOTriangleStart(mesh, start, tList);
 		if (current == null)
@@ -360,11 +360,11 @@ public class Vertex2D extends Vertex
 		assert this != mesh.outerVertex;
 		assert v1 != mesh.outerVertex;
 		assert v2 != mesh.outerVertex;
-		mesh.getQuadTree().double2int(param, i0);
-		mesh.getQuadTree().double2int(v1.param, i1);
+		mesh.getKdTree().double2int(param, i0);
+		mesh.getKdTree().double2int(v1.param, i1);
 		long x01 = i1[0] - i0[0];
 		long y01 = i1[1] - i0[1];
-		mesh.getQuadTree().double2int(v2.param, i1);
+		mesh.getKdTree().double2int(v2.param, i1);
 		long x02 = i1[0] - i0[0];
 		long y02 = i1[1] - i0[1];
 		return x01 * y02 - x02 * y01;
@@ -611,15 +611,15 @@ public class Vertex2D extends Vertex
 	
 	public final long distance2(Mesh2D mesh, Vertex2D that)
 	{
-		mesh.getQuadTree().double2int(param, i0);
-		mesh.getQuadTree().double2int(that.param, i1);
+		mesh.getKdTree().double2int(param, i0);
+		mesh.getKdTree().double2int(that.param, i1);
 		long dx = i0[0] - i1[0];
 		long dy = i0[1] - i1[1];
 		return dx * dx + dy * dy;
 	}
 	private final long distance2cached(Mesh2D mesh, Vertex2D that)
 	{
-		mesh.getQuadTree().double2int(that.param, i1);
+		mesh.getKdTree().double2int(that.param, i1);
 		long dx = i0[0] - i1[0];
 		long dy = i0[1] - i1[1];
 		return dx * dx + dy * dy;

@@ -307,7 +307,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 			modifiedTriangles.add(newTri1);
 			modifiedTriangles.add(newTri2);
 		}
-		mesh.getQuadTree().add(v);
+		mesh.getKdTree().add(v);
 		return ret;
 	}
 	

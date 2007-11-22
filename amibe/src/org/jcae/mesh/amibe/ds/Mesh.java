@@ -24,6 +24,7 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.traits.Traits;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
+import org.jcae.mesh.amibe.util.KdTree;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -259,6 +260,35 @@ public class Mesh implements Serializable
 		return traitsBuilder.hasNodes();
 	}
 
+	/**
+	 * Returns the Kd-tree associated with this mesh.
+	 *
+	 * @return the Kd-tree associated with this mesh.
+	 */
+	public KdTree getKdTree()
+	{
+		return traitsBuilder.getKdTree(traits);
+	}
+	
+	/**
+	 * Initializes Kd-tree with a given bounding box.  This method must be called before
+	 * putting any vertex into this Kd-tree.
+	 *
+	 * @param bbmin  coordinates of bottom-left vertex
+	 * @param bbmax  coordinates of top-right vertex
+	 */
+	public void resetKdTree(double [] bbmin, double [] bbmax)
+	{
+		double [] bbox = new double[2*bbmin.length];
+		for (int i = 0; i < bbmin.length; i++)
+		{
+			bbox[i] = bbmin[i];
+			bbox[i+bbmin.length] = bbmax[i];
+		}
+		KdTree kdtree = traitsBuilder.getKdTree(traits);
+		kdtree.setup(bbox);
+	}
+	
 	/**
 	 * Creates a triangle composed of three vertices.
 	 *

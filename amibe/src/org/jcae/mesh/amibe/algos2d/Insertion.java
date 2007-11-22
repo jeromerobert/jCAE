@@ -231,11 +231,11 @@ public class Insertion
 					for (int i = 0; i < imax; i++)
 					{
 						Vertex2D v = triNodes.get(index);
-						Vertex2D n = (Vertex2D) mesh.getQuadTree().getNearestVertex(mesh, v);
-						assert n == mesh.getQuadTree().getNearestVertexDebug(mesh, v);
+						Vertex2D n = (Vertex2D) mesh.getKdTree().getNearestVertex(mesh, v);
+						assert n == mesh.getKdTree().getNearestVertexDebug(mesh, v);
 						if (mesh.compGeom().distance(v, n) > minlen)
 						{
-							mesh.getQuadTree().add(v);
+							mesh.getKdTree().add(v);
 							nodes.add(v);
 						}
 						else
@@ -261,11 +261,11 @@ public class Insertion
 				if (c == null)
 					c = (Vertex2D) mesh.createVertex(0.0, 0.0);
 				c.centroid((Vertex2D[]) t.vertex);
-				Vertex2D n = (Vertex2D) mesh.getQuadTree().getNearestVertex(mesh, c);
-				assert n == mesh.getQuadTree().getNearestVertexDebug(mesh, c);
+				Vertex2D n = (Vertex2D) mesh.getKdTree().getNearestVertex(mesh, c);
+				assert n == mesh.getKdTree().getNearestVertexDebug(mesh, c);
 				if (mesh.compGeom().distance(c, n) > minlen)
 				{
-					mesh.getQuadTree().add(c);
+					mesh.getKdTree().add(c);
 					nodes.add(c);
 					trianglesToCheck.add(t);
 					c = null;
@@ -281,7 +281,7 @@ public class Insertion
 				//  These vertices are not bound to any triangles, so
 				//  they must be removed, otherwise getSurroundingOTriangle
 				//  may return a null pointer.
-				mesh.getQuadTree().remove(v);
+				mesh.getKdTree().remove(v);
 			}
 			logger.debug("Try to insert "+nodes.size()+" nodes");
 			//  Process in pseudo-random order.  There is at most maxNodes nodes

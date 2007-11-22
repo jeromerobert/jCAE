@@ -154,9 +154,9 @@ public class MeshReader
 				}
 			}
 			mesh.ensureCapacity(2*numberOfNodes);
-			mesh.resetQuadTree(bbmin, bbmax);
+			mesh.resetKdTree(bbmin, bbmax);
 			for (int i=0; i < numberOfNodes; i++)
-				mesh.getQuadTree().add(nodelist[i]);
+				mesh.getKdTree().add(nodelist[i]);
 			if (mesh.hasNodes())
 			{
 				for (int i=0; i < numberOfNodes; i++)

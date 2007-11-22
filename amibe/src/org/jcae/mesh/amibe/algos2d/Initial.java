@@ -48,7 +48,7 @@ import org.apache.log4j.Logger;
  * box enclosing all these nodes in the 2D space is computed, and
  * a {@link org.jcae.mesh.amibe.util.KdTree} instance can then be
  * initialized by
- * {@link Mesh2D#resetQuadTree(double [], double [])}.
+ * {@link Mesh2D#resetKdTree(double [], double [])}.
  *
  * <p>
  * Some checks have been added to remove tiny edges and make sure that
@@ -231,7 +231,7 @@ public class Initial
 		}
 		if (bbmax[0] <= bbmin[0] || bbmax[1] <= bbmin[1])
 			throw new InvalidFaceException();
-		mesh.resetQuadTree(bbmin, bbmax);
+		mesh.resetKdTree(bbmin, bbmax);
 		//  Initial point insertion sometimes fail on 2D,
 		//  this needs to be investigated.
 		mesh.pushCompGeom(2);

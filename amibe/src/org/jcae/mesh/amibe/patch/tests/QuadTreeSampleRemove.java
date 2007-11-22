@@ -71,8 +71,8 @@ public class QuadTreeSampleRemove extends QuadTreeSample
 		double [] bbmax = { 1.0, 1.0 };
 		final Mesh2D m = new Mesh2D();
 		m.pushCompGeom(2);
-		m.resetQuadTree(bbmin, bbmax);
-		final QuadTreeSampleRemove r = new QuadTreeSampleRemove(m.getQuadTree());
+		m.resetKdTree(bbmin, bbmax);
+		final QuadTreeSampleRemove r = new QuadTreeSampleRemove(m.getKdTree());
 		logger.debug("Start insertion");
 		for (int i = 0; i < 500; i++)
 		{
