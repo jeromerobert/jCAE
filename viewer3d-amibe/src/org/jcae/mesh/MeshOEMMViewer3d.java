@@ -205,13 +205,13 @@ public class MeshOEMMViewer3d
 						Mesh amesh = mr.buildMesh(octree.getResultSet());
 						HashMap<String, String> opts = new HashMap<String, String>();
 						opts.put("maxtriangles", Integer.toString(amesh.getTriangles().size() / 100));
-						new org.jcae.mesh.amibe.algos3d.DecimateHalfEdge(amesh, opts).compute();
+						new org.jcae.mesh.amibe.algos3d.QEMDecimateHalfEdge(amesh, opts).compute();
 						String xmlDir = "dec-tmp";
 						String xmlFile = "jcae3d";
 						octree.unselectAll();
 						try
 						{
-							MeshWriter.writeObject3D(amesh, xmlDir, xmlFile, ".", "tmp.brep");
+							MeshWriter.writeObject3D(amesh, xmlDir, xmlFile, "dummy.brep");
 							AmibeProvider ap = new AmibeProvider(new File(xmlDir));
 							decMesh = new ViewableFE(ap);
 							int [] ids = ap.getDomainIDs();
