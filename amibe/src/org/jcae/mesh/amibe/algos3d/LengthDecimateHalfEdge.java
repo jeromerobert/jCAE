@@ -39,6 +39,8 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 {
 	private static Logger logger=Logger.getLogger(LengthDecimateHalfEdge.class);
 	private Vertex v3;
+	private boolean freeEdgeOnly = false;
+
 	/**
 	 * Creates a <code>LengthDecimateHalfEdge</code> instance.
 	 *
@@ -58,14 +60,18 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			final String val = opt.getValue();
 			if (key.equals("size"))
 			{
-				final double sizeTarget = new Double(val).doubleValue();
-				tolerance = sizeTarget * sizeTarget;
+				tolerance = new Double(val).doubleValue();
 				logger.debug("Tolerance: "+tolerance);
 			}
 			else if (key.equals("maxtriangles"))
 			{
 				nrFinal = Integer.valueOf(val).intValue();
 				logger.debug("Nr max triangles: "+nrFinal);
+			}
+			else if (key.equals("freeEdgeOnly"))
+			{
+				freeEdgeOnly = new Boolean(val).booleanValue();
+				logger.debug("freeEdgeOnly: "+freeEdgeOnly);
 			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
@@ -86,12 +92,16 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	@Override
 	public double cost(final HalfEdge e)
 	{
+		if (freeEdgeOnly && !e.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+			return 2.0 * tolerance;
 		return e.origin().distance3D(e.destination());
 	}
 
 	@Override
 	public boolean canProcessEdge(HalfEdge current)
 	{
+		if (freeEdgeOnly && !current.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+				return false;
 		current = uniqueOrientation(current);
 		final Vertex v1 = current.origin();
 		final Vertex v2 = current.destination();
@@ -107,9 +117,9 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 
 	private Vertex optimalPlacement(Vertex v1, Vertex v2)
 	{
-		if (v1.getRef() == 0 && v2.getRef() == 0)
+		if (v1.getRef() > 0)
 			return v1;
-		else if (v1.getRef() == 0)
+		else if (v2.getRef() != 0)
 			return v2;
 		return v1;
 	}
