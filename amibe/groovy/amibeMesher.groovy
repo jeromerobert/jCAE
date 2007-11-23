@@ -204,6 +204,14 @@ if (phases[2])
 			} else {
 				new BasicMesh(mesh).compute()
 				new CheckDelaunay(mesh).compute()
+
+				HashMap<String, String> smoothOptions2d = new HashMap<String, String>();
+				options2d.put("iterations", "5");
+				options2d.put("tolerance", "1");
+				options2d.put("modifiedLaplacian", "true");
+				options2d.put("refresh", "false");
+				options2d.put("relaxation", "0.6");
+				new SmoothNodes2D(mesh, smoothOptions2d).compute()
 				println "Face #${iface} has been meshed"
 			}
 			MeshWriter.writeObject(mesh, outputDir, "jcae2d."+iface, brepfile, iface)
