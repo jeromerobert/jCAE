@@ -206,7 +206,7 @@ public class SmoothNodes3D
 		tree.clear();
 		for (Vertex v: nodeset)
 		{
-			if (!v.isManifold())
+			if (!v.isManifold() || !v.isMutable())
 				continue;
 			Triangle f = (Triangle) v.getLink();
 			ot = f.getAbstractHalfEdge(ot);
@@ -228,11 +228,6 @@ public class SmoothNodes3D
 				break;
 			Vertex v = q.getData();
 			tree.remove(v);
-			if (!v.isManifold() || !v.isMutable())
-			{
-				notProcessed++;
-				continue;
-			}
 			if (v.getRef() != 0 && preserveBoundaries)
 			{
 				notProcessed++;
@@ -262,7 +257,7 @@ public class SmoothNodes3D
 				{
 					ot = ot.nextOriginLoop();
 					Vertex n = ot.destination();
-					if (n == mesh.outerVertex || !n.isManifold() || !tree.contains(n))
+					if (n == mesh.outerVertex || !tree.contains(n))
 						continue;
 					if (ot.hasAttributes(AbstractHalfEdge.OUTER))
 						continue;
