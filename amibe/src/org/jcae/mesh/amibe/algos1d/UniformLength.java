@@ -62,6 +62,10 @@ public class UniformLength
 			final String val = opt.getValue();
 			if (key.equals("size"))
 				maxlen = Double.valueOf(val).doubleValue();
+			else if (key.equals("deflection") || key.equals("relativeDeflection"))
+			{
+				// Do nothing
+			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
 		}
