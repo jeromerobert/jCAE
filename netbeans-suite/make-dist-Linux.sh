@@ -1,7 +1,7 @@
 #! /bin/sh -xe
 
 # Change this to your own OpenCASCADE installation
-CASROOT=/home/jerome/OpenCASCADE6.2.0/ros
+: ${CASROOT=/home/jerome/OpenCASCADE6.2.0/ros}
 
 # Name of the Java directory in the final bundle
 JAVA_NAME=jre-6
