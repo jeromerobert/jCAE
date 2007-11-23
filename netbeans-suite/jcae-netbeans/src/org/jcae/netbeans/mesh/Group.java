@@ -174,13 +174,21 @@ public class Group
 	public Element createXMLGroup(Document xmlDoc, java.io.File groupFile,
 		String baseDir)
 	{
-		Element newElt = org.jcae.mesh.xmldata.XMLHelper.parseXMLString(xmlDoc,
-			"<group id=\"" + id + "\">"
-			+ "<name>" + name + "</name>" 
-			+ "<number>" + number + "</number>"
-			+ "<file format=\"integerstream\" location=\""
-			+ XMLHelper.canonicalize(baseDir, groupFile.toString())
-			+ "\" offset=\"" + offset + "\"/>" + "</group>");
+		Element newElt = null;
+		try
+		{
+			newElt = org.jcae.mesh.xmldata.XMLHelper.parseXMLString(xmlDoc,
+				"<group id=\"" + id + "\">"
+				+ "<name>" + name + "</name>" 
+				+ "<number>" + number + "</number>"
+				+ "<file format=\"integerstream\" location=\""
+				+ XMLHelper.canonicalize(baseDir, groupFile.toString())
+				+ "\" offset=\"" + offset + "\"/>" + "</group>");
+		}
+		catch (Exception e)
+		{
+			org.openide.ErrorManager.getDefault().notify(e);
+		}
 		return newElt;
 	}
 

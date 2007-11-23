@@ -1,3 +1,9 @@
+2007-11-23 13:36 Denis Barbier <barbier@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/AbstractEdgesAction.java
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/Group.java: Updated,
+	exception handling has been modified in XMLHelper.
+
 2007-11-13 18:32 Denis Barbier <barbier@users.sourceforge.net>
 
 	* jcae-netbeans/src/org/jcae/netbeans/mesh/DecimateAction.java: Fix

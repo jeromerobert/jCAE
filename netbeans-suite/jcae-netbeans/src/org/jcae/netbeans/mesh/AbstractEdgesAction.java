@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import javax.media.j3d.BranchGroup;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
 import org.jcae.mesh.java3d.ComputeEdgesConnectivity;
 import org.jcae.mesh.java3d.XMLBranchGroup;
@@ -56,10 +55,6 @@ public abstract class AbstractEdgesAction extends CookieAction
 			ErrorManager.getDefault().notify(ex);
 		}
 		catch (IOException ex)
-		{
-			ErrorManager.getDefault().notify(ex);
-		}
-		catch (TransformerException ex)
 		{
 			ErrorManager.getDefault().notify(ex);
 		}
