@@ -186,19 +186,21 @@ public class QualityFloat
 				number[0]++;
 			else if (cell < number.length)
 				number[cell]++;
+			else
+				number[number.length - 1]++;
 		}
-		int sum = number[0];
-		for (int i = 1; i <= number.length; i++)
+		for (int i = 1; i < number.length; i++)
+			number[i] += number[i-1];
+		for (int i = 1; i < number.length; i++)
 		{
-			if (sum == target)
+			if (number[i] == target)
 				return values[i-1];
-			else if (sum > target)
+			else if (number[i] > target)
 			{
-				if (number[i] == 1)
+				if (number[i]-number[i-1] <= 1 || i == number.length - 1)
 					return values[i-1];
 				return getValueByPercentPrivate(target, values[i-1], values[i], values, number);
 			}
-			sum += number[i];
 		}
 		throw new RuntimeException();
 	}
