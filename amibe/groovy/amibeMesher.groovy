@@ -68,7 +68,7 @@ if (remaining.length != 4)
 	usage(1, options);
 
 String brepfile = remaining[0]
-String outdir = remaining[1]
+String outputDir = remaining[1]
 leng = Double.parseDouble(remaining[2])
 defl = Double.parseDouble(remaining[3])
 
@@ -79,7 +79,6 @@ if (brepfile.indexOf((int) File.separatorChar) >= 0)
 	brepdir = brepfile.substring(0, idx);
 	brepfile = brepfile.substring(idx+1);
 }
-String file = brepdir+File.separator+brepfile
 
 String [] sPhases=cmd.getOptionValue('p', "1,2,3").split(",");
 boolean [] phases=new boolean[4]
@@ -108,20 +107,21 @@ CADShapeFactory factory = CADShapeFactory.getFactory()
 
 if (phases[1])
 {
-	if (geometryFile.endsWith(".step") || geometryFile.endsWith(".stp") || geometryFile.endsWith(".igs"))
+	shape = null;
+	if (brepfile.endsWith(".step") || brepfile.endsWith(".stp") || brepfile.endsWith(".igs"))
 	{
-		CADShape shape = CADShapeFactory.getFactory().newShape(geometryDir+File.separator+geometryFile);
-		geometryFile = geometryFile.substring(0, geometryFile.lastIndexOf('.')) + ".tmp.brep";
-		shape.writeNative(outputDir+File.separator+geometryFile);
+		shape = CADShapeFactory.getFactory().newShape(brepdir+File.separator+brepfile);
+		brepfile = brepfile.substring(0, brepfile.lastIndexOf('.')) + ".tmp.brep";
+		shape.writeNative(outputDir+File.separator+brepfile);
 	}
-	else if (!geometryDir.equals(outputDir))
+	else if (!brepdir.equals(outputDir))
 	{
 		FileInputStream is = null;
 		FileOutputStream os = null;
 		try {
-			is = new FileInputStream(geometryDir+File.separator+geometryFile);
+			is = new FileInputStream(brepdir+File.separator+brepfile);
 			FileChannel iChannel = is.getChannel();
-			os = new FileOutputStream(new File(outputDir, geometryFile), false);
+			os = new FileOutputStream(new File(outputDir, brepfile), false);
 			FileChannel oChannel = os.getChannel();
 			oChannel.transferFrom(iChannel, 0, iChannel.size());
 		}
@@ -132,7 +132,8 @@ if (phases[1])
 				os.close();
 		}
 	}
-	shape = factory.newShape(file)
+	if (shape == null)
+		shape = factory.newShape(outputDir+File.separator+brepfile)
 	mesh1d = new MMesh1D(shape)
 	HashMap<String, String> options1d = new HashMap<String, String>();
 	options1d.put("size", ""+leng);
@@ -145,11 +146,11 @@ if (phases[1])
 		new Compat1D2D(mesh1d, options1d).compute()
 	}
 	
-	MMesh1DWriter.writeObject(mesh1d, outdir, "jcae1d", brepfile)
+	MMesh1DWriter.writeObject(mesh1d, outputDir, "jcae1d", brepfile)
 }
 else
 {
-	mesh1d = MMesh1DReader.readObject(outdir, "jcae1d");
+	mesh1d = MMesh1DReader.readObject(outputDir, "jcae1d");
 	shape = mesh1d.getGeometry();
 }
 
@@ -205,7 +206,7 @@ if (phases[2])
 				new CheckDelaunay(mesh).compute()
 				println "Face #${iface} has been meshed"
 			}
-			MeshWriter.writeObject(mesh, outdir, "jcae2d."+iface, brepfile, iface)
+			MeshWriter.writeObject(mesh, outputDir, "jcae2d."+iface, brepfile, iface)
 		}
 	}
 }
@@ -214,7 +215,7 @@ if (phases[2])
 if (phases[3])
 {
 	expl = factory.newExplorer()
-	m2dto3d = new MeshToMMesh3DConvert(outdir, brepfile)
+	m2dto3d = new MeshToMMesh3DConvert(outputDir, brepfile)
 	m2dto3d.exportUNV(unvName != null, unvName);
 	
 	iface = 0

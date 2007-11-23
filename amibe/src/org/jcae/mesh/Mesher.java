@@ -625,6 +625,7 @@ public class Mesher
 					os.close();
 			}
 		}
+		geometryFile = outputDir+File.separator+geometryFile;
 		
 		edgeLength=Double.parseDouble(args[2]);
 		deflection=Double.parseDouble(args[3]);		
