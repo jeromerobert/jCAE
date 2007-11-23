@@ -89,7 +89,7 @@ public class Basic2d implements AlgoInterface
 		mtb.addKdTree(2);
 		mtb.add(ttb);
 
-		HashMap options = new HashMap();
+		HashMap<String, String> options = new HashMap<String, String>();
 		options.put("size", ""+maxlen);
 		options.put("deflection", ""+deflection);
 		options.put("relativeDeflection", ""+relDefl);
