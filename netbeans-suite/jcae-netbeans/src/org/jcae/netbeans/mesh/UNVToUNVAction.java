@@ -32,7 +32,7 @@ public final class UNVToUNVAction extends CookieAction
 			File tmpDir=File.createTempFile("jcae", null);
 			tmpDir.delete();
 			tmpDir.mkdirs();
-			MeshWriter.writeObject3D(m, tmpDir.getPath(), "jcae3d", null, null);			
+			MeshWriter.writeObject3D(m, tmpDir.getPath(), "jcae3d", null);			
 			
 			// Write the new UNV to a temporary place
 			File newUNVFile=File.createTempFile("jcae", null);
