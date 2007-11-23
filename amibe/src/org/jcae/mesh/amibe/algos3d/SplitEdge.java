@@ -290,7 +290,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		File brepFile=new File(args[3]);
 		try
 		{
-			MeshWriter.writeObject3D(mesh, args[4], "jcae3d", brepFile.getParent(), brepFile.getName());
+			MeshWriter.writeObject3D(mesh, args[4], "jcae3d", brepFile.getName());
 		}
 		catch (IOException ex)
 		{

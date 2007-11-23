@@ -1,3 +1,12 @@
+Fri Nov 23 11:10:14 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/Mesher.java: Copy CAD file into output directory.
+	Output directory is then consistent and can be moved or copied into
+	into another location.
+	* src/org/jcae/mesh/xmldata/MMesh1DWriter.java
+	  src/org/jcae/mesh/xmldata/MeshWriter.java: Remove brep directory
+	from arguments of writeObject() and writeObject3D() methods.
+
 Thu Nov 22 23:22:30 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/Mesher.java: Move detection of invalid CAD faces

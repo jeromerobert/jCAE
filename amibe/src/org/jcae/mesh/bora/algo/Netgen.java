@@ -89,7 +89,7 @@ public class Netgen implements AlgoInterface
 		String outDir = "netgen.tmp"+File.separator+"s"+s.getId();
 		try
 		{
-			MeshWriter.writeObject3D(m, outDir, "jcae3d", "brep", d.getGraphCell().getGraph().getModel().getCADFile());
+			MeshWriter.writeObject3D(m, outDir, "jcae3d", d.getGraphCell().getGraph().getModel().getCADFile());
 		} catch (java.io.IOException ex) {
 			ex.printStackTrace();
 			return false;

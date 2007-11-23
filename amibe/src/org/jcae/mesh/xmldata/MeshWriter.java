@@ -235,11 +235,10 @@ public class MeshWriter
 	 * @param submesh      mesh to be written on disk
 	 * @param xmlDir       name of the XML file
 	 * @param xmlFile      basename of the main XML file
-	 * @param brepDir      path to brep file, relative to xmlDir
 	 * @param brepFile     basename of the brep file
 	 * @param index        shape index
 	 */
-	public static void writeObject(Mesh2D submesh, String xmlDir, String xmlFile, String brepDir, String brepFile, int index)
+	public static void writeObject(Mesh2D submesh, String xmlDir, String xmlFile, String brepFile, int index)
 		throws IOException
 	{
 		File file = new File(xmlDir, xmlFile);
@@ -278,7 +277,7 @@ public class MeshWriter
 			Element jcaeElement=document.getDocumentElement();
 			Element meshElement=document.createElement("mesh");
 			Element shapeElement=XMLHelper.parseXMLString(document, "<shape>"+
-				"<file format=\"brep\" location=\""+brepDir+File.separator+brepFile+"\"/>"+"</shape>");
+				"<file format=\"brep\" location=\""+brepFile+"\"/>"+"</shape>");
 			meshElement.appendChild(shapeElement);
 			Element subMeshElement=document.createElement("submesh");
 			
@@ -316,10 +315,9 @@ public class MeshWriter
 	 * @param submesh      mesh to be written on disk
 	 * @param xmlDir       name of the XML file
 	 * @param xmlFile      basename of the main XML file
-	 * @param brepDir      path to brep file, relative to xmlDir
 	 * @param brepFile     basename of the brep file
 	 */
-	public static void writeObject3D(Mesh submesh, String xmlDir, String xmlFile, String brepDir, String brepFile)
+	public static void writeObject3D(Mesh submesh, String xmlDir, String xmlFile, String brepFile)
 		throws IOException
 	{
 		try
@@ -359,7 +357,7 @@ public class MeshWriter
 			Element jcaeElement=document.getDocumentElement();
 			Element meshElement=document.createElement("mesh");
 			Element shapeElement=XMLHelper.parseXMLString(document, "<shape>"+
-				"<file format=\"brep\" location=\""+brepDir+File.separator+brepFile+"\"/>"+"</shape>");
+				"<file format=\"brep\" location=\""+brepFile+"\"/>"+"</shape>");
 			meshElement.appendChild(shapeElement);
 			Element subMeshElement=document.createElement("submesh");
 			subMeshElement.appendChild(writeObjectNodes(document, nodelist, submesh.outerVertex, nodesFile, refFile, xmlDir, nodeIndex));

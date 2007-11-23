@@ -38,4 +38,4 @@ String unvFile = remaining[0];
 String outDir = cmd.getOptionValue('o', '.');
 Mesh mesh = new Mesh(new MeshTraitsBuilder());
 UNVReader.readMesh(mesh, unvFile);
-MeshWriter.writeObject3D(mesh, outDir, "jcae3d", ".", "dummy.brep");
+MeshWriter.writeObject3D(mesh, outDir, "jcae3d", "dummy.brep");

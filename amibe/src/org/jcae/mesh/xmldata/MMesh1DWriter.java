@@ -152,10 +152,9 @@ public class MMesh1DWriter
 	 * have links to the binary files.
 	 * @param xmlDir       name of the XML file
 	 * @param xmlFilename  basename of the main XML file
-	 * @param brepDir      path to brep file, relative to xmlDir
-	 * @param brepFile     basename of the brep file
+	 * @param brepFile     brep file
 	 */
-	public static void writeObject(MMesh1D m1d, String xmlDir, String xmlFilename, String brepDir, String brepFile)
+	public static void writeObject(MMesh1D m1d, String xmlDir, String xmlFilename, String brepFile)
 	{
 		//  Compute node labels
 		m1d.updateNodeLabels();
@@ -186,7 +185,7 @@ public class MMesh1DWriter
 			Element jcaeElement=document.getDocumentElement();
 			Element meshElement=document.createElement("mesh");
 			Element shapeElement=XMLHelper.parseXMLString(document, "<shape>"+
-				"<file format=\"brep\" location=\""+XMLHelper.canonicalize(brepDir+File.separator+brepFile)+"\"/>"+"</shape>");
+				"<file format=\"brep\" location=\""+brepFile+"\"/>"+"</shape>");
 			meshElement.appendChild(shapeElement);
 			
 			int iEdge = 0;

@@ -108,6 +108,30 @@ CADShapeFactory factory = CADShapeFactory.getFactory()
 
 if (phases[1])
 {
+	if (geometryFile.endsWith(".step") || geometryFile.endsWith(".stp") || geometryFile.endsWith(".igs"))
+	{
+		CADShape shape = CADShapeFactory.getFactory().newShape(geometryDir+File.separator+geometryFile);
+		geometryFile = geometryFile.substring(0, geometryFile.lastIndexOf('.')) + ".tmp.brep";
+		shape.writeNative(outputDir+File.separator+geometryFile);
+	}
+	else if (!geometryDir.equals(outputDir))
+	{
+		FileInputStream is = null;
+		FileOutputStream os = null;
+		try {
+			is = new FileInputStream(geometryDir+File.separator+geometryFile);
+			FileChannel iChannel = is.getChannel();
+			os = new FileOutputStream(new File(outputDir, geometryFile), false);
+			FileChannel oChannel = os.getChannel();
+			oChannel.transferFrom(iChannel, 0, iChannel.size());
+		}
+		finally {
+			if (is != null)
+				is.close();
+			if (os != null)
+				os.close();
+		}
+	}
 	shape = factory.newShape(file)
 	mesh1d = new MMesh1D(shape)
 	HashMap<String, String> options1d = new HashMap<String, String>();
@@ -121,27 +145,7 @@ if (phases[1])
 		new Compat1D2D(mesh1d, options1d).compute()
 	}
 	
-	MMesh1DWriter.writeObject(mesh1d, outdir, "jcae1d", brepdir, brepfile)
-	if(cmd.hasOption('p'))
-	{
-		// --phase option has been specified, it is likely that
-		// this script will be run for different phases.
-		// Copy CAD file into outdir so that this file will be
-		// found by next runs
-		FileInputStream is = null;
-		FileOutputStream os = null;
-		try {
-			is = new FileInputStream(brepfile);
-			FileChannel iChannel = is.getChannel();
-			os = new FileOutputStream(new File(outdir, brepfile), false);
-			FileChannel oChannel = os.getChannel();
-			oChannel.transferFrom(iChannel, 0, iChannel.size());
-		}
-		finally {
-			if (is != null) is.close();
-			if (os != null) os.close();
-		}
-	}
+	MMesh1DWriter.writeObject(mesh1d, outdir, "jcae1d", brepfile)
 }
 else
 {
@@ -201,7 +205,7 @@ if (phases[2])
 				new CheckDelaunay(mesh).compute()
 				println "Face #${iface} has been meshed"
 			}
-			MeshWriter.writeObject(mesh, outdir, "jcae2d."+iface, brepdir, brepfile, iface)
+			MeshWriter.writeObject(mesh, outdir, "jcae2d."+iface, brepfile, iface)
 		}
 	}
 }
@@ -210,7 +214,7 @@ if (phases[2])
 if (phases[3])
 {
 	expl = factory.newExplorer()
-	m2dto3d = new MeshToMMesh3DConvert(outdir, '.', brepfile)
+	m2dto3d = new MeshToMMesh3DConvert(outdir, brepfile)
 	m2dto3d.exportUNV(unvName != null, unvName);
 	
 	iface = 0

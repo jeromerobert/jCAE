@@ -99,7 +99,7 @@ SmoothNodes3D sm = new SmoothNodes3D(mesh, opts)
 sm.setProgressBarStatus(10000);
 sm.compute();
 
-MeshWriter.writeObject3D(mesh, outDir, "jcae3d", ".", "dummy.brep");
+MeshWriter.writeObject3D(mesh, outDir, "jcae3d", "dummy.brep");
 
 QualityFloat data = new QualityFloat(mesh.getTriangles().size());
 data.setQualityProcedure(new MaxLengthFace());

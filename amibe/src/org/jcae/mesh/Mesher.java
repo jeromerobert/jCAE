@@ -26,8 +26,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.io.InputStream;
+import java.io.FileInputStream;
+import java.nio.channels.FileChannel;
 import java.util.Properties;
-import java.util.Stack;
 import java.util.Date;
 import java.util.HashMap;
 import java.text.SimpleDateFormat;
@@ -215,10 +216,9 @@ public class Mesher
 	/**
 	 * Compute 1D mesh
 	 * @param shape The geometry to be meshed
-	 * @param xmlBrepDir path to BRep file, relative to the output directory
 	 * @param brepFile basename of the BRep file
 	 */
-	protected void mesh1D(CADShape shape, String xmlBrepDir, String brepFile)
+	protected void mesh1D(CADShape shape, String brepFile)
 	{
 		logger.info("1D mesh");
 		MMesh1D mesh1D = new MMesh1D(shape);
@@ -236,7 +236,7 @@ public class Mesher
 				new Compat1D2D(mesh1D, options1d).compute();
 		}
 		//  Store the 1D mesh onto disk
-		MMesh1DWriter.writeObject(mesh1D, outputDir, "jcae1d", xmlBrepDir, brepFile);
+		MMesh1DWriter.writeObject(mesh1D, outputDir, "jcae1d", brepFile);
 	}
 	
 	/**
@@ -244,13 +244,12 @@ public class Mesher
 	 * @param iFace the id of the face to be meshed
 	 * @param face topological face
 	 * @param mesh1D the boundary mesh used to create this 2D mesh
-	 * @param xmlBrepDir path to BRep file, relative to the output directory
 	 * @param brepFile basename of the BRep file
 	 * @param mtb container for 2D mesh traits
 	 * @return <code>true</code> if face had been successfully meshed, <code>false</code> otherwise.
 	 */
 	protected boolean mesh2D(int iFace, CADFace face, MMesh1D mesh1D, MeshParameters mp,
-		String xmlBrepDir, String brepFile, MeshTraitsBuilder mtb)
+		String brepFile, MeshTraitsBuilder mtb)
 	{
 		if(Boolean.getBoolean("org.jcae.mesh.Mesher.explodeBrep"))
 			face.writeNative("face."+iFace+".brep");
@@ -285,7 +284,7 @@ public class Mesher
 		}
 		try
 		{
-			MeshWriter.writeObject(mesh, outputDir, "jcae2d."+iFace, xmlBrepDir, brepFile, iFace);
+			MeshWriter.writeObject(mesh, outputDir, "jcae2d."+iFace, brepFile, iFace);
 		}
 		catch(IOException ex)
 		{
@@ -323,11 +322,11 @@ public class Mesher
 	 * Read 2D meshes and compute 3D mesh
 	 * @param shape
 	 */
-	protected void mesh3D(CADShape shape, String xmlBrepDir, String brepFile)
+	protected void mesh3D(CADShape shape, String brepFile)
 	{
 		int iFace = 0;
 		CADExplorer expF = CADShapeFactory.getFactory().newExplorer();
-		MeshToMMesh3DConvert m2dTo3D = new MeshToMMesh3DConvert(outputDir, xmlBrepDir, brepFile);
+		MeshToMMesh3DConvert m2dTo3D = new MeshToMMesh3DConvert(outputDir, brepFile);
 		m2dTo3D.exportUNV(exportUNV, unvName);
 		logger.info("Read informations on boundary nodes");
 		for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
@@ -369,7 +368,6 @@ public class Mesher
 		//  Declare all variables here
 		//  xmlDir:      absolute path name where XML files are stored
 		//  xmlFile:     basename of the main XML file
-		//  xmlBrepDir:  path to brep file, relative to xmlDir
 		//  brepFile:    basename of the brep file
 		
 		String brepFile = (new File(geometryFile)).getName();		
@@ -377,9 +375,6 @@ public class Mesher
 		MMesh1D mesh1D;
 		TIntArrayList badGroups = new TIntArrayList();
 						
-		String xmlBrepDir = relativize(new File(geometryFile).getAbsoluteFile().getParentFile(),
-			new File(outputDir).getAbsoluteFile()).getPath();
-		
 		logger.info("Loading " + geometryFile);
 
 		CADShape shape = CADShapeFactory.getFactory().newShape(geometryFile);
@@ -394,7 +389,7 @@ public class Mesher
 		MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault2D();
 		if (processMesh1d) {
 			//  Step 1: Compute 1D mesh
-			mesh1D(shape, xmlBrepDir, brepFile);
+			mesh1D(shape, brepFile);
 		}
 		if (processMesh2d) {
 			//  Step 2: Read the 1D mesh and compute 2D meshes
@@ -436,7 +431,7 @@ public class Mesher
 				seen.add(face);
 				logger.info("Meshing face " + iFace+"/"+nrFaces);
 				MeshParameters mp = new MeshParameters(options2d);
-				if(!mesh2D(iFace, face, mesh1D, mp, xmlBrepDir, brepFile, mtb))
+				if(!mesh2D(iFace, face, mesh1D, mp, brepFile, mtb))
 					badGroups.add(iFace);
 			}
 		}
@@ -445,7 +440,7 @@ public class Mesher
 			// Step 3: Read 2D meshes and compute 3D mesh
 			try
 			{
-				mesh3D(shape, xmlBrepDir, brepFile);
+				mesh3D(shape, brepFile);
 			}
 			catch(Exception ex)
 			{
@@ -514,36 +509,6 @@ public class Mesher
 	}
 
 	/**
-	 * Create a relative path from a reference and an absolute path
-	 * @param file The path to create a relative path from
-	 * @param reference The reference of the created relative path
-	 * @return
-	 */
-	private static File relativize(File file, File reference)
-	{
-		File current=file;
-		Stack<String> l=new Stack<String>();
-		while(current!=null && !current.equals(reference))
-		{
-			l.push(current.getName());
-			current=current.getParentFile();
-		}
-		if(l.isEmpty())
-			return new File(".");
-		else if(current==null)
-			return file;
-		else
-		{
-			current=new File(l.pop().toString());
-			while(!l.isEmpty())
-			{
-				current=new File(current, l.pop().toString());
-			}
-			return current;
-		}
-	}
-
-	/**
 	 * Delete a directory
 	 * @param path The directory to be deleted
 	 * @param avoid A file name (possibly null) which will not be deleted
@@ -593,28 +558,11 @@ public class Mesher
 			System.exit(0);
 		}
 		geometryFile=args[0];
-		unvName=System.getProperty("org.jcae.mesh.unv.name");
-		
-		if(unvName==null)
-		{
-			unvName=geometryFile.substring(0, geometryFile.lastIndexOf('.'))+".unv";
-			if(!Boolean.getBoolean("org.jcae.mesh.unv.nogz"))
-				unvName += ".gz";
-		}
-		
-		if (geometryFile.endsWith(".step") || geometryFile.endsWith(".stp") || geometryFile.endsWith(".igs"))
-		{
-			CADShape shape = CADShapeFactory.getFactory().newShape(geometryFile);
-			geometryFile = geometryFile.substring(0, geometryFile.lastIndexOf('.')) + ".tmp.brep";
-			shape.writeNative(geometryFile);
-		}
-		
 		// if what we want is just the mesh count, print it and exit
 		if(Boolean.getBoolean("org.jcae.mesh.countFaces"))
 			System.exit(countFaces(geometryFile));
 		
 		//Init xmlDir
-		
 		if(Boolean.getBoolean("org.jcae.mesh.tmpDir.auto"))
 		{
 			File f=File.createTempFile("jcae","");
@@ -636,12 +584,54 @@ public class Mesher
 			return;
 		}
 		
+		unvName=System.getProperty("org.jcae.mesh.unv.name");
+		if(unvName==null)
+		{
+			unvName=geometryFile.substring(0, geometryFile.lastIndexOf('.'))+".unv";
+			if(!Boolean.getBoolean("org.jcae.mesh.unv.nogz"))
+				unvName += ".gz";
+		}
+		
+		// Copy CAD file into xmlDir
+		String geometryDir = ".";
+		if (geometryFile.indexOf(File.separatorChar) >= 0)
+		{
+			int idx = geometryFile.lastIndexOf(File.separatorChar);
+			geometryDir = geometryFile.substring(0, idx);
+			geometryFile = geometryFile.substring(idx+1);
+		}
+
+		if (geometryFile.endsWith(".step") || geometryFile.endsWith(".stp") || geometryFile.endsWith(".igs"))
+		{
+			CADShape shape = CADShapeFactory.getFactory().newShape(geometryDir+File.separator+geometryFile);
+			geometryFile = geometryFile.substring(0, geometryFile.lastIndexOf('.')) + ".tmp.brep";
+			shape.writeNative(outputDir+File.separator+geometryFile);
+		}
+		else if (!geometryDir.equals(outputDir))
+		{
+			FileInputStream is = null;
+			FileOutputStream os = null;
+			try {
+				is = new FileInputStream(geometryDir+File.separator+geometryFile);
+				FileChannel iChannel = is.getChannel();
+				os = new FileOutputStream(new File(outputDir, geometryFile), false);
+				FileChannel oChannel = os.getChannel();
+				oChannel.transferFrom(iChannel, 0, iChannel.size());
+			}
+			finally {
+				if (is != null)
+					is.close();
+				if (os != null)
+					os.close();
+			}
+		}
+		
 		edgeLength=Double.parseDouble(args[2]);
 		deflection=Double.parseDouble(args[3]);		
 	}
 	
 	/**
-	 * main method, reads 2 arguments and calls mesh() method
+	 * main method, reads arguments and calls mesh() method
 	 * @param args an array of String, filename, algorithm type and constraint
 	 * value
 	 */

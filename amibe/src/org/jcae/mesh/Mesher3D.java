@@ -27,7 +27,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Properties;
-import java.util.Stack;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
@@ -57,12 +56,9 @@ public class Mesher3D
 		//  Declare all variables here
 		//  xmlDir:      absolute path name where XML files are stored
 		//  xmlFile:     basename of the main XML file
-		//  xmlBrepDir:  path to brep file, relative to xmlDir
 		//  brepFile:    basename of the brep file
 		
 		String brepFile = (new File(brepfilename)).getName();		
-		String xmlBrepDir = relativize(new File(brepfilename).getAbsoluteFile().getParentFile(),
-			new File(xmlDir).getAbsoluteFile()).getPath();
 		Mesh mesh = new Mesh();
 		String ridgeAngleProp = System.getProperty("org.jcae.mesh.xmldata.MeshReader.ridgeAngleDegre");
 		if (ridgeAngleProp == null)
@@ -81,7 +77,7 @@ public class Mesher3D
 			opts.put("iterations", "5");
 			opts.put("boundaries", "true");
 			new SmoothNodes3D(mesh, opts).compute();
-			MeshWriter.writeObject3D(mesh, xmlDir, "jcae3d", xmlBrepDir, brepFile);
+			MeshWriter.writeObject3D(mesh, xmlDir, "jcae3d", brepFile);
 		}
 		catch(IOException ex)
 		{
@@ -122,30 +118,6 @@ public class Mesher3D
 		}
 		catch (IOException ex)
 		{
-		}
-	}
-
-	private static File relativize(File file, File reference)
-	{
-		File current=file;
-		Stack<String> l=new Stack<String>();
-		while(current!=null && !current.equals(reference))
-		{
-			l.push(current.getName());
-			current=current.getParentFile();
-		}
-		if(l.isEmpty())
-			return new File(".");
-		else if(current==null)
-			return file;
-		else
-		{
-			current=new File(l.pop().toString());
-			while(!l.isEmpty())
-			{
-				current=new File(current, l.pop().toString());
-			}
-			return current;
 		}
 	}
 
