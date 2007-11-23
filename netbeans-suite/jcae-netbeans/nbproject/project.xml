@@ -184,6 +184,10 @@
                 <package>org.jcae.netbeans.viewer3d</package>
             </public-packages>
             <class-path-extension>
+                <runtime-relative-path>ext/jcae-viewer3d-amibe.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jcae-viewer3d-amibe.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
                 <runtime-relative-path>ext/jcae-viewer3d.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/jcae-viewer3d.jar</binary-origin>
             </class-path-extension>

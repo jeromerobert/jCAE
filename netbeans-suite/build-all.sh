@@ -28,24 +28,27 @@ cd $JCAE_ROOT/amibe/lib
 ln -sf $LOG4J log4j.jar
 ln -sf $TROVE trove.jar
 ln -sf ../../occjava/lib/occjava.jar
-ln -sf ../../viewer3d/lib/jcae-viewer3d.jar
 cd ..
-ant -Dskip.tests=true jar
+ant jar
 
 echo Build viewer3d
 mkdir $JCAE_ROOT/viewer3d/lib || true
 cd $JCAE_ROOT/viewer3d/lib
 ln -sf ../../occjava/lib/occjava.jar
+ln -sf ../../amibe/lib/jcae.jar
 ln -sf $LOG4J log4j.jar
 ln -sf $TROVE trove.jar
-ln -sf ../../amibe/lib/jcae.jar
 cd ..
 ant jar
 
-#dirty workaround because of dirty cross dependencies
-cd $JCAE_ROOT/viewer3d
-ant -Dbuild.oemm=true jar
-cd $JCAE_ROOT/amibe
+echo Build viewer3d with support for other amibe formats
+mkdir $JCAE_ROOT/viewer3d-amibe/lib || true
+cd $JCAE_ROOT/viewer3d-amibe/lib
+ln -sf ../../viewer3d/lib/jcae-viewer3d.jar
+ln -sf ../../amibe/lib/jcae.jar
+ln -sf $LOG4J log4j.jar
+ln -sf $TROVE trove.jar
+cd ..
 ant jar
 
 echo Configure netbeans-suite
@@ -53,6 +56,7 @@ cd $JCAE_ROOT/netbeans-suite/jcae-netbeans/release/modules/ext/
 ln -sf ../../../../../amibe/lib/jcae.jar
 ln -sf ../../../../../amibe/lib/jcae-mesherocc.jar
 ln -sf ../../../../../viewer3d/lib/jcae-viewer3d.jar
+ln -sf ../../../../../viewer3d-amibe/lib/jcae-viewer3d-amibe.jar
 ln -sf $LOG4J log4j.jar
 ln -sf $TROVE trove.jar
 cd $JCAE_ROOT/netbeans-suite/occjava/release/modules/lib/

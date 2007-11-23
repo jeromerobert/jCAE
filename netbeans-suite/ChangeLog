@@ -5,6 +5,8 @@
 	exception handling has been modified in XMLHelper.
 	* jcae-netbeans/src/org/jcae/netbeans/mesh/UNVToUNVAction.java:
 	Updated, MeshWriter.writeObject3D() signature has changed.
+	* jcae-netbeans/nbproject/project.xml: Add jcae-viewer3d-amibe.jar
+	to classpath.
 
 2007-11-13 18:32 Denis Barbier <barbier@users.sourceforge.net>
 
