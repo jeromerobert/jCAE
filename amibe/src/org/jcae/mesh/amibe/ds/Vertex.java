@@ -67,7 +67,7 @@ public class Vertex implements Serializable
 	protected final double [] param;
 	//  ref1d > 0: link to the geometrical node
 	//  ref1d = 0: inner node
-	//  ref1d < 0: node on an inner boundary
+	//  ref1d < 0: node on an inner boundary  (FIXME: unused for now)
 	protected int ref1d = 0;
 
 	//  link can be either:

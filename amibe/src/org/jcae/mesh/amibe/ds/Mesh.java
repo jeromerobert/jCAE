@@ -572,10 +572,12 @@ public class Mesh implements Serializable
 		//     no ridge, change their label.
 		logger.debug("Set interior nodes mutable");
 		int nrJunctionPoints = 0;
+		/*
 		double cosMinAngle = Math.cos(Math.PI*minAngle/180.0);
 		if (minAngle < 0.0)
 			cosMinAngle = -2.0;
 		double [][] temp = new double[4][3];
+		*/
 		for (Vertex v: vertices)
 		{
 			if (bndNodes.contains(v))
@@ -590,6 +592,7 @@ public class Mesh implements Serializable
 					v.setRef(maxLabel);
 				}
 			}
+			/*
 			else if (0 != label)
 			{
 				//  Check for ridges
@@ -597,6 +600,7 @@ public class Mesh implements Serializable
 				if (checkRidges(v, cosMinAngle, t, temp))
 					v.setRef(-label);
 			}
+			*/
 		}
 		if (nrJunctionPoints > 0)
 			logger.info("Found "+nrJunctionPoints+" junction points");
