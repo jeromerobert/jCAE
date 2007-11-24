@@ -82,18 +82,17 @@ public class MMesh1DReader
 	 * Write the current object to a XML file and binary files. The XML file
 	 * have links to the binary files.
 	 * @param xmlDir       name of the XML file
-	 * @param xmlFile      basename of the main XML file
 	 */
-	public static MMesh1D readObject(String xmlDir, String xmlFile)
+	public static MMesh1D readObject(String xmlDir)
 	{
 		MMesh1D m1d = null;
 		int i;
-		logger.debug("begin reading "+xmlDir+File.separator+xmlFile);
+		logger.debug("begin reading "+xmlDir+File.separator+JCAEXMLData.xml1dFilename);
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		HashMap<CADVertex, MNode1D> map1DToMaster = new HashMap<CADVertex, MNode1D>();
 		try
 		{
-			Document document = XMLHelper.parseXML(new File(xmlDir, xmlFile));
+			Document document = XMLHelper.parseXML(new File(xmlDir, JCAEXMLData.xml1dFilename));
 			String brepFile = xpath.evaluate("/jcae/mesh/shape/file/@location",
 				document);
 			
@@ -201,7 +200,7 @@ public class MMesh1DReader
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
-		logger.debug("end reading "+xmlFile);
+		logger.debug("end reading "+JCAEXMLData.xml1dFilename);
 		return m1d;
 	}
 }

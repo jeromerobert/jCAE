@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005,2006, by EADS CRC
+    Copyright (C) 2007, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -234,15 +235,14 @@ public class MeshWriter
 	 *
 	 * @param submesh      mesh to be written on disk
 	 * @param xmlDir       name of the XML file
-	 * @param xmlFile      basename of the main XML file
 	 * @param brepFile     basename of the brep file
 	 * @param index        shape index
 	 */
-	public static void writeObject(Mesh2D submesh, String xmlDir, String xmlFile, String brepFile, int index)
+	public static void writeObject(Mesh2D submesh, String xmlDir, String brepFile, int index)
 		throws IOException
 	{
-		File file = new File(xmlDir, xmlFile);
-		File dir = new File(xmlDir, xmlFile+".files");
+		File file = new File(xmlDir, JCAEXMLData.xml2dFilename+index);
+		File dir = new File(xmlDir, JCAEXMLData.xml2dFilename+index+".files");
 		
 		//create the directory if it does not exist
 		if(!dir.exists())
@@ -314,16 +314,15 @@ public class MeshWriter
 	 *
 	 * @param submesh      mesh to be written on disk
 	 * @param xmlDir       name of the XML file
-	 * @param xmlFile      basename of the main XML file
 	 * @param brepFile     basename of the brep file
 	 */
-	public static void writeObject3D(Mesh submesh, String xmlDir, String xmlFile, String brepFile)
+	public static void writeObject3D(Mesh submesh, String xmlDir, String brepFile)
 		throws IOException
 	{
 		try
 		{
-			File file = new File(xmlDir, xmlFile);
-			File dir = new File(xmlDir, xmlFile+".files");
+			File file = new File(xmlDir, JCAEXMLData.xml3dFilename);
+			File dir = new File(xmlDir, JCAEXMLData.xml3dFilename+".files");
 			
 			//create the directory if it does not exist
 			if(!dir.exists())

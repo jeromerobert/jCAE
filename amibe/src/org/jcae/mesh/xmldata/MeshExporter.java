@@ -241,7 +241,7 @@ abstract public class MeshExporter
 	}
 	
 	/**
-	 * @param directory The directory which contain the jcae3d file
+	 * @param directory The directory which contains 3d files
 	 * @param groupIds The list of ids of groups to convert
 	 */
 	protected MeshExporter(File directory, int[] groupIds)
@@ -256,7 +256,7 @@ abstract public class MeshExporter
 
 	/**
 	 * Convert all groups to UNV
-	 * @param directory The directory which contain the jcae3d file
+	 * @param directory The directory which contains 3d files
 	 */
 	protected MeshExporter(String directory)
 	{
@@ -413,7 +413,7 @@ abstract public class MeshExporter
 	
 	public void write(PrintStream out) throws ParserConfigurationException, SAXException, IOException
 	{
-		document=XMLHelper.parseXML(new File(directory,"jcae3d"));
+		document=XMLHelper.parseXML(new File(directory, JCAEXMLData.xml3dFilename));
 		if(groupIds==null)
 			groupIds=getAllGroupIDs();
 		readGroups();

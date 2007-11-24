@@ -32,7 +32,6 @@ if (remaining.length != 1)
 	usage(1, options);
 
 String xmlDir = remaining[0]
-String xmlFile = "jcae3d";
 
 JFrame feFrame=new JFrame("jCAE Demo");
 feFrame.setSize(800,600);

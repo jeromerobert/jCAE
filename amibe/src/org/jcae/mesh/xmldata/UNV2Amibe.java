@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2007, by EADS
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.mesh.xmldata;
@@ -146,7 +146,7 @@ public class UNV2Amibe
 	public void importMesh(BufferedReader in, File outputDir) throws IOException
 	{
 		outputDir.mkdirs();
-		File dir3d=new File(outputDir, "jcae3d.files");
+		File dir3d=new File(outputDir, JCAEXMLData.xml3dFilename+".files");
 		dir3d.mkdirs();
 		File fnode=new File(dir3d, "nodes3d.bin");
 		File ftria=new File(dir3d, "triangles3d.bin");
@@ -159,7 +159,7 @@ public class UNV2Amibe
 		cnode.close();
 		ctria.close();
 		cgroups.close();
-		PrintWriter xml=new PrintWriter(new File(outputDir,"jcae3d"));
+		PrintWriter xml=new PrintWriter(new File(outputDir,JCAEXMLData.xml3dFilename));
 		writeXML(xml);		
 		xml.close();
 	}
@@ -194,10 +194,10 @@ public class UNV2Amibe
 		writer.println("<!DOCTYPE jcae SYSTEM \"classpath:///org/jcae/mesh/xmldata/jcae.dtd\">");
 		writer.println("<jcae><mesh><submesh><nodes>");
 		writer.println("<number>"+numberOfNodes+"</number>");
-		writer.println("<file format=\"doublestream\" location=\"jcae3d.files/nodes3d.bin\"/>");
+		writer.println("<file format=\"doublestream\" location=\""+JCAEXMLData.xml3dFilename+".files/nodes3d.bin\"/>");
 		writer.println("</nodes><triangles>");
 		writer.println("<number>"+numberOfTriangles+"</number>");
-		writer.println("<file format=\"integerstream\" location=\"jcae3d.files/triangles3d.bin\"/>");
+		writer.println("<file format=\"integerstream\" location=\""+JCAEXMLData.xml3dFilename+".files/triangles3d.bin\"/>");
 		writer.println("</triangles><groups>");
 		
 		for(int i=0; i<groups.size(); i++)
@@ -207,7 +207,7 @@ public class UNV2Amibe
 			writer.println("<name>"+g.name+"</name>");
 			writer.println("<number>"+g.nbElement+"</number>");			
 			writer.println(
-				"<file format=\"integerstream\" location=\"jcae3d.files/groups.bin\" offset=\""+
+				"<file format=\"integerstream\" location=\""+JCAEXMLData.xml3dFilename+".files/groups.bin\" offset=\""+
 				g.offset+"\"/>");
 			writer.println("</group>");	
 		}

@@ -94,8 +94,7 @@ public class MeshToSoupConvert extends JCAEXMLData
 				continue;
 			if (maxFace != 0 && iFace > maxFace)
 				continue;
-			String xmlFile = "jcae2d."+iFace;
-			m2dTo3D.computeRefs(xmlFile);
+			m2dTo3D.computeRefs(iFace);
 		}
 		m2dTo3D.initialize("soup", false);
 		iFace = 0;
@@ -109,9 +108,8 @@ public class MeshToSoupConvert extends JCAEXMLData
 				continue;
 			if (maxFace != 0 && iFace > maxFace)
 				continue;
-			String xmlFile = "jcae2d."+iFace;
 			logger.info("Importing face "+iFace);
-			m2dTo3D.convert(xmlFile, iFace, F);
+			m2dTo3D.convert(iFace, F);
 		}
 		m2dTo3D.finish();
 	}
@@ -121,12 +119,12 @@ public class MeshToSoupConvert extends JCAEXMLData
 		xmlDir = dir;
 	}
 	
-	public void computeRefs(String xmlInFile)
+	public void computeRefs(int iFace)
 	{
 		Document document;
 		try
 		{
-			document = XMLHelper.parseXML(new File(xmlDir, xmlInFile));
+			document = XMLHelper.parseXML(new File(xmlDir, JCAEXMLData.xml2dFilename+iFace));
 		}
 		catch(FileNotFoundException ex)
 		{
@@ -175,12 +173,12 @@ public class MeshToSoupConvert extends JCAEXMLData
 		logger.info("Total number of triangles: "+nrTriangles);
 	}
 	
-	public void convert(String xmlInFile, int groupId, CADFace F)
+	public void convert(int iFace, CADFace F)
 	{
 		Document documentIn;
 		try
 		{
-			documentIn = XMLHelper.parseXML(new File(xmlDir, xmlInFile));
+			documentIn = XMLHelper.parseXML(new File(xmlDir, JCAEXMLData.xml2dFilename+iFace));
 		}
 		catch(FileNotFoundException ex)
 		{
@@ -332,7 +330,7 @@ public class MeshToSoupConvert extends JCAEXMLData
 					}
 					//  Align om 64bit
 					bbo.position(8*bboD.position());
-					bbo.putInt(groupId);
+					bbo.putInt(iFace);
 					bbo.putInt(0);
 					bboD.position(1+bboD.position());
 				}

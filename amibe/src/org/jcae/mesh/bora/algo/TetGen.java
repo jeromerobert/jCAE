@@ -94,7 +94,7 @@ public class TetGen implements AlgoInterface
 		String outDir = "tetgen.tmp"+File.separator+"s"+s.getId();
 		try
 		{
-			MeshWriter.writeObject3D(m, outDir, "jcae3d", d.getGraphCell().getGraph().getModel().getCADFile());
+			MeshWriter.writeObject3D(m, outDir, d.getGraphCell().getGraph().getModel().getCADFile());
 		} catch (java.io.IOException ex) {
 			ex.printStackTrace();
 			return false;

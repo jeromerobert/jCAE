@@ -423,7 +423,7 @@ public class SmoothNodes3D
 			usage(1);
 		try
 		{
-			MeshReader.readObject3D(mesh, args[argc], "jcae3d");
+			MeshReader.readObject3D(mesh, args[argc]);
 		}
 		catch (IOException ex)
 		{
@@ -433,7 +433,7 @@ public class SmoothNodes3D
 		new SmoothNodes3D(mesh, opts).compute();			
 		try
 		{
-			MeshWriter.writeObject3D(mesh, args[argc+1], "jcae3d", "dummy.brep");
+			MeshWriter.writeObject3D(mesh, args[argc+1], "dummy.brep");
 		}
 		catch (IOException ex)
 		{

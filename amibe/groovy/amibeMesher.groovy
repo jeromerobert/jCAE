@@ -98,6 +98,14 @@ String unvName = null
 if (cmd.hasOption('o'))
 	unvName = cmd.getOptionValue('o');
 
+File xmlDirF=new File(outputDir);
+xmlDirF.mkdirs();
+if(!xmlDirF.exists() || !xmlDirF.isDirectory())
+{
+	println("Cannot write to "+outputDir);
+	System.exit(1);
+}
+
 // Mesh 1D
 // This method takes as
 //    Input : shape (the shape to be meshed)
@@ -146,11 +154,11 @@ if (phases[1])
 		new Compat1D2D(mesh1d, options1d).compute()
 	}
 	
-	MMesh1DWriter.writeObject(mesh1d, outputDir, "jcae1d", brepfile)
+	MMesh1DWriter.writeObject(mesh1d, outputDir, brepfile)
 }
 else
 {
-	mesh1d = MMesh1DReader.readObject(outputDir, "jcae1d");
+	mesh1d = MMesh1DReader.readObject(outputDir);
 	shape = mesh1d.getGeometry();
 }
 
@@ -206,15 +214,15 @@ if (phases[2])
 				new CheckDelaunay(mesh).compute()
 
 				HashMap<String, String> smoothOptions2d = new HashMap<String, String>();
-				options2d.put("iterations", "5");
-				options2d.put("tolerance", "1");
-				options2d.put("modifiedLaplacian", "true");
-				options2d.put("refresh", "false");
-				options2d.put("relaxation", "0.6");
+				smoothOptions2d.put("iterations", "5");
+				smoothOptions2d.put("tolerance", "1");
+				smoothOptions2d.put("modifiedLaplacian", "true");
+				smoothOptions2d.put("refresh", "false");
+				smoothOptions2d.put("relaxation", "0.6");
 				new SmoothNodes2D(mesh, smoothOptions2d).compute()
 				println "Face #${iface} has been meshed"
 			}
-			MeshWriter.writeObject(mesh, outputDir, "jcae2d."+iface, brepfile, iface)
+			MeshWriter.writeObject(mesh, outputDir, brepfile, iface)
 		}
 	}
 }
@@ -229,14 +237,14 @@ if (phases[3])
 	iface = 0
 	for (expl.init(shape, CADShapeEnum.FACE); expl.more(); expl.next()) {
 		iface ++
-		m2dto3d.computeRefs("jcae2d."+iface)
+		m2dto3d.computeRefs(iface)
 	}
-	m2dto3d.initialize("jcae3d", false)
+	m2dto3d.initialize(false)
 	iface = 0
 	for (expl.init(shape, CADShapeEnum.FACE); expl.more(); expl.next()) {
 		face = expl.current()
 		iface ++
-		m2dto3d.convert("jcae2d."+iface, iface, face)
+		m2dto3d.convert(iface, face)
 	}
 	m2dto3d.finish()
 }

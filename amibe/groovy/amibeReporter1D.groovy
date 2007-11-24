@@ -42,7 +42,6 @@ if (remaining.length != 1)
 	usage(1, options);
 
 String xmlDir = remaining[0]
-String xmlFile = "jcae1d";
 boolean histogram = cmd.hasOption('H') || cmd.hasOption('b');
 
 String [] sBounds=cmd.getOptionValue('b', "0.2,0.4,0.6,0.8").split(",");
@@ -55,7 +54,7 @@ EdgeLength1D qproc = new EdgeLength1D();
 QualityFloat data = new QualityFloat();
 data.setQualityProcedure(qproc);
 
-MMesh1D mesh = MMesh1DReader.readObject(xmlDir, xmlFile)
+MMesh1D mesh = MMesh1DReader.readObject(xmlDir)
 Iterator<CADEdge> it = mesh.getTEdgeIterator();
 while (it.hasNext())
 {

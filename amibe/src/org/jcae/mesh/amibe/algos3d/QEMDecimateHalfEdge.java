@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2003,2006 by EADS CRC
-    Copyright (C) 2007 by EADS France
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -513,7 +513,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		final Mesh mesh = new Mesh();
 		try
 		{
-			MeshReader.readObject3D(mesh, args[0], "jcae3d", -1);
+			MeshReader.readObject3D(mesh, args[0]);
 		}
 		catch (IOException ex)
 		{
@@ -524,7 +524,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		final File brepFile=new File(args[3]);
 		try
 		{
-			MeshWriter.writeObject3D(mesh, args[4], "jcae3d", brepFile.getName());
+			MeshWriter.writeObject3D(mesh, args[4], brepFile.getName());
 		}
 		catch (IOException ex)
 		{

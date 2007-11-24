@@ -156,7 +156,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 		final Mesh mesh = new Mesh();
 		try
 		{
-			MeshReader.readObject3D(mesh, args[0], "jcae3d", -1);
+			MeshReader.readObject3D(mesh, args[0]);
 		}
 		catch (IOException ex)
 		{
@@ -167,7 +167,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 		final File brepFile=new File(args[1]);
 		try
 		{
-			MeshWriter.writeObject3D(mesh, args[2], "jcae3d", brepFile.getName());
+			MeshWriter.writeObject3D(mesh, args[2], brepFile.getName());
 		}
 		catch (IOException ex)
 		{

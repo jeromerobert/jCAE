@@ -236,7 +236,7 @@ public class Mesher
 				new Compat1D2D(mesh1D, options1d).compute();
 		}
 		//  Store the 1D mesh onto disk
-		MMesh1DWriter.writeObject(mesh1D, outputDir, "jcae1d", brepFile);
+		MMesh1DWriter.writeObject(mesh1D, outputDir, brepFile);
 	}
 	
 	/**
@@ -284,7 +284,7 @@ public class Mesher
 		}
 		try
 		{
-			MeshWriter.writeObject(mesh, outputDir, "jcae2d."+iFace, brepFile, iFace);
+			MeshWriter.writeObject(mesh, outputDir, brepFile, iFace);
 		}
 		catch(IOException ex)
 		{
@@ -338,9 +338,9 @@ public class Mesher
 				continue;
 			if (maxFace != 0 && iFace > maxFace)
 				continue;
-			m2dTo3D.computeRefs("jcae2d."+iFace);
+			m2dTo3D.computeRefs(iFace);
 		}
-		m2dTo3D.initialize("jcae3d", writeNormals);
+		m2dTo3D.initialize(writeNormals);
 		iFace = 0;
 		for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
 		{
@@ -353,7 +353,7 @@ public class Mesher
 			if (maxFace != 0 && iFace > maxFace)
 				continue;
 			logger.info("Importing face "+iFace);
-			m2dTo3D.convert("jcae2d."+iFace, iFace, F);
+			m2dTo3D.convert(iFace, F);
 		}
 		m2dTo3D.finish();
 	}
@@ -393,7 +393,7 @@ public class Mesher
 		}
 		if (processMesh2d) {
 			//  Step 2: Read the 1D mesh and compute 2D meshes
-			mesh1D = MMesh1DReader.readObject(outputDir, "jcae1d");
+			mesh1D = MMesh1DReader.readObject(outputDir);
 			//  Prepare 2D discretization
 			mesh1D.duplicateEdges();
 			//  Compute node labels shared by all 2D and 3D meshes
@@ -483,7 +483,7 @@ public class Mesher
 			Properties prop = new Properties();
 			prop.load(in);
 			String buildDate = prop.getProperty("build.time");
-			int [] res = MeshReader.getInfos(outputDir, "jcae3d");
+			int [] res = MeshReader.getInfos(outputDir);
 			out.println("MESH REPORT");
 			out.println("===========");
 			out.println("Start date: "+startDate);

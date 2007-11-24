@@ -1,5 +1,5 @@
 /**
- * Read jcae3d file and export mesh into another format.
+ * Read 3d file and export mesh into another format.
  */
 import org.jcae.mesh.xmldata.MeshExporter
 import java.lang.reflect.Constructor;

@@ -65,7 +65,6 @@ if (remaining.length != 2)
 
 String xmlDir = remaining[0]
 String outDir = remaining[1]
-String xmlFile = "jcae3d";
 
 String sIter=cmd.getOptionValue('i', "5");
 String sSize=cmd.getOptionValue('s', "-1.0");
@@ -77,7 +76,7 @@ boolean bnd=!cmd.hasOption('n');
 Mesh mesh = new Mesh();
 try
 {
-	MeshReader.readObject3D(mesh, xmlDir, xmlFile);
+	MeshReader.readObject3D(mesh, xmlDir);
 }
 catch (IOException ex)
 {
@@ -99,7 +98,7 @@ SmoothNodes3D sm = new SmoothNodes3D(mesh, opts)
 sm.setProgressBarStatus(10000);
 sm.compute();
 
-MeshWriter.writeObject3D(mesh, outDir, "jcae3d", "dummy.brep");
+MeshWriter.writeObject3D(mesh, outDir, "dummy.brep");
 
 QualityFloat data = new QualityFloat(mesh.getTriangles().size());
 data.setQualityProcedure(new MaxLengthFace());

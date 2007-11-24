@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2007, by EADS
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.mesh.xmldata;
@@ -65,7 +65,7 @@ public class Amibe2VTK
 	private Document document;
 	private boolean dummyData;
 	
-	/** @param directory The directory which contain the jcae3d file */
+	/** @param directory The directory which contain 3d files */
 	public Amibe2VTK(File directory)
 	{
 		this.directory=directory;
@@ -98,7 +98,7 @@ public class Amibe2VTK
 	public void write(OutputStream out)
 		throws ParserConfigurationException, SAXException, IOException
 	{
-		document=XMLHelper.parseXML(new File(directory,"jcae3d"));
+		document=XMLHelper.parseXML(new File(directory, JCAEXMLData.xml3dFilename));
 
 		PrintStream os=new PrintStream(out);
 		File nodeFile=getNodeFile();

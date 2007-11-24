@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -22,6 +23,10 @@ package org.jcae.mesh.xmldata;
 
 public class JCAEXMLData
 {
+	final static String xml1dFilename = "jcae1d";
+	final static String xml2dFilename = "jcae2d.";  // Face number is appended to this string
+	final static String xml3dFilename = "jcae3d";
+
 	final static String nodes1dFilename = "nodes1d.bin";
 	final static String ref1dFilename = "nodes1dref.bin";
 	final static String beams1dFilename = "beams1d.bin";

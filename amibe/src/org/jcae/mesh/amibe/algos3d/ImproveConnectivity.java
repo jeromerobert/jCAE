@@ -308,7 +308,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 		final Mesh mesh = new Mesh();
 		try
 		{
-			MeshReader.readObject3D(mesh, args[argc], "jcae3d");
+			MeshReader.readObject3D(mesh, args[argc]);
 		}
 		catch (IOException ex)
 		{
@@ -318,7 +318,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 		new ImproveConnectivity(mesh, options).compute();
 		try
 		{
-			MeshWriter.writeObject3D(mesh, args[argc+1], "jcae3d", "dummy.brep");
+			MeshWriter.writeObject3D(mesh, args[argc+1], "dummy.brep");
 		}
 		catch (IOException ex)
 		{

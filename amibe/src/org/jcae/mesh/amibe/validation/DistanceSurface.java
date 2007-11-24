@@ -99,7 +99,7 @@ public class DistanceSurface extends QualityProcedure
 		Mesh mesh = new Mesh(qproc.getMeshTraitsBuilder());
 		try
 		{
-			MeshReader.readObject3D(mesh, args[0], "jcae3d");
+			MeshReader.readObject3D(mesh, args[0]);
 		}
 		catch (IOException ex)
 		{

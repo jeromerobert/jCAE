@@ -151,17 +151,16 @@ public class MMesh1DWriter
 	 * Write the current object to a XML file and binary files. The XML file
 	 * have links to the binary files.
 	 * @param xmlDir       name of the XML file
-	 * @param xmlFilename  basename of the main XML file
 	 * @param brepFile     brep file
 	 */
-	public static void writeObject(MMesh1D m1d, String xmlDir, String xmlFilename, String brepFile)
+	public static void writeObject(MMesh1D m1d, String xmlDir, String brepFile)
 	{
 		//  Compute node labels
 		m1d.updateNodeLabels();
 		try
 		{
-			File xmlFile = new File(xmlDir, xmlFilename);
-			File dir = new File(xmlDir, xmlFilename+".files");
+			File xmlFile = new File(xmlDir, JCAEXMLData.xml1dFilename);
+			File dir = new File(xmlDir, JCAEXMLData.xml1dFilename+".files");
 
 			//create the output directory if it does not exist
 			if(!dir.exists())

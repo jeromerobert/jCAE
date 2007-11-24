@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2005,2006, by EADS CRC
+    Copyright (C) 2007, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -63,18 +64,18 @@ public class MeshReader
 	 *
 	 * @param mesh     data structure updated when reading files
 	 * @param xmlDir   directory containing XML files
-	 * @param xmlFile  basename of the main XML file
+	 * @param iFace  face number
 	 */
-	public static void readObject(Mesh2D mesh, String xmlDir, String xmlFile)
+	public static void readObject(Mesh2D mesh, String xmlDir, int iFace)
 		throws IOException
 	{
-		logger.debug("begin reading "+xmlDir+File.separator+xmlFile);
+		logger.debug("begin reading "+xmlDir+File.separator+JCAEXMLData.xml2dFilename+iFace);
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		Document document;
 		
 		try
 		{
-			document = XMLHelper.parseXML(new File(xmlDir, xmlFile));
+			document = XMLHelper.parseXML(new File(xmlDir, JCAEXMLData.xml2dFilename+iFace));
 		}
 		catch (ParserConfigurationException ex)
 		{
@@ -188,7 +189,7 @@ public class MeshReader
 		{
 			throw new IOException(ex);
 		}
-		logger.debug("end reading "+xmlFile);
+		logger.debug("end reading "+JCAEXMLData.xml2dFilename+iFace);
 	}
 	
 	/**
@@ -196,12 +197,11 @@ public class MeshReader
 	 *
 	 * @param mesh     data structure updated when reading files
 	 * @param xmlDir   directory containing XML files
-	 * @param xmlFile  basename of the main XML file
 	 */
-	public static void readObject3D(Mesh mesh, String xmlDir, String xmlFile)
+	public static void readObject3D(Mesh mesh, String xmlDir)
 		throws IOException
 	{
-		readObject3D(mesh, xmlDir, xmlFile, 0.0);
+		readObject3D(mesh, xmlDir, 0.0);
 	}
 
 	/**
@@ -209,18 +209,17 @@ public class MeshReader
 	 *
 	 * @param mesh     data structure updated when reading files
 	 * @param xmlDir   directory containing XML files
-	 * @param xmlFile  basename of the main XML file
 	 * @param ridgeAngle  an edge with a dihedral angle lower than this value is considered as a sharp edge which has to be preserved.
 	 */
-	public static void readObject3D(Mesh mesh, String xmlDir, String xmlFile, double ridgeAngle)
+	public static void readObject3D(Mesh mesh, String xmlDir, double ridgeAngle)
 		throws IOException
 	{
-		logger.info("Read mesh from "+xmlDir+File.separator+xmlFile);
+		logger.info("Read mesh from "+xmlDir+File.separator+JCAEXMLData.xml3dFilename);
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		Document document;
 		try
 		{
-			document = XMLHelper.parseXML(new File(xmlDir, xmlFile));
+			document = XMLHelper.parseXML(new File(xmlDir, JCAEXMLData.xml3dFilename));
 		}
 		catch (ParserConfigurationException ex)
 		{
@@ -368,17 +367,17 @@ public class MeshReader
 		{
 			throw new IOException(ex);
 		}
-		logger.debug("end reading "+xmlFile);
+		logger.debug("end reading "+JCAEXMLData.xml3dFilename);
 	}
 
 	// Method previously in MMesh3DReader, remove it?
-	public static int [] getInfos(String xmlDir, String xmlFile)
+	public static int [] getInfos(String xmlDir)
 	{
 		int [] ret = new int[3];
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		try
 		{
-			Document document = XMLHelper.parseXML(new File(xmlDir, xmlFile));
+			Document document = XMLHelper.parseXML(new File(xmlDir, JCAEXMLData.xml3dFilename));
 			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh",
 				document, XPathConstants.NODE);
 			Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement,
@@ -407,12 +406,12 @@ public class MeshReader
 		return ret;
 	}
 
-	public static void mergeGroups(String xmlDir, String xmlInFile, String xmlGroupsFile)
+	public static void mergeGroups(String xmlDir, String xmlGroupsFile)
 	{
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		try
 		{
-			File oldXmlFile = new File(xmlDir, xmlInFile);
+			File oldXmlFile = new File(xmlDir, JCAEXMLData.xml3dFilename);
 			Document document = XMLHelper.parseXML(oldXmlFile);
 			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh",
 				document, XPathConstants.NODE);
@@ -507,7 +506,7 @@ public class MeshReader
 			out.close();
 			// Replace <groups> element
 			submeshElement.replaceChild(newGroups, groupsElement);
-			File newXmlFile = new File(xmlDir, xmlInFile+"-tmp");
+			File newXmlFile = new File(xmlDir, JCAEXMLData.xml3dFilename+"-tmp");
 			XMLHelper.writeXML(document, newXmlFile);
 			if (!newXmlFile.renameTo(oldXmlFile))
 				throw new RuntimeException("Cannot rename "+newXmlFile+" into "+oldXmlFile);

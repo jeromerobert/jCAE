@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -73,12 +74,12 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			unv = new MeshToUNVConvert(unvName);
 	}
 	
-	public void computeRefs(String xmlInFile)
+	public void computeRefs(int iFace)
 	{
 		Document document;
 		try
 		{
-			document = XMLHelper.parseXML(new File(xmlDir, xmlInFile));
+			document = XMLHelper.parseXML(new File(xmlDir, JCAEXMLData.xml2dFilename+iFace));
 		}
 		catch(FileNotFoundException ex)
 		{
@@ -112,13 +113,13 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 		logger.debug("Total: "+nrRefs+" references");
 	}
 	
-	public void initialize(String xmlOutFile, boolean writeNormal)
+	public void initialize(boolean writeNormal)
 	{
 		coordRefs = new double[3*nrRefs];
 		xrefs = new TIntIntHashMap(nrRefs);
 		
-		xmlFile = new File(xmlDir, xmlOutFile);
-		File dir = new File(xmlDir, xmlOutFile+".files");
+		xmlFile = new File(xmlDir, JCAEXMLData.xml3dFilename);
+		File dir = new File(xmlDir, JCAEXMLData.xml3dFilename+".files");
 		//create the directory if it does not exiswriteInit(PrintStream arg0)t
 		if(!dir.exists())
 			dir.mkdirs();
@@ -172,7 +173,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			if (unv != null)
 				unv.finish(nrRefs, nrIntNodes, nrTriangles, coordRefs);
 			
-			// Write jcae3d
+			// Write 3d files
 			Element jcaeElement = documentOut.getDocumentElement();
 			Element meshElement = documentOut.createElement("mesh");
 			Element shapeElement=XMLHelper.parseXMLString(documentOut, "<shape>"+
@@ -216,16 +217,15 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 	
 	/**
 	 * Convert 2D files to 3D files.
-	 * @param xmlInFile The name of the XML file
 	 * @param groupId Group number of this 2D mesh
 	 * @param F Topological face
 	 */
-	public void convert(String xmlInFile, int groupId, CADFace F)
+	public void convert(int groupId, CADFace F)
 	{
 		Document documentIn;
 		try
 		{
-			documentIn = XMLHelper.parseXML(new File(xmlDir, xmlInFile));
+			documentIn = XMLHelper.parseXML(new File(xmlDir, JCAEXMLData.xml2dFilename+groupId));
 		}
 		catch(FileNotFoundException ex)
 		{

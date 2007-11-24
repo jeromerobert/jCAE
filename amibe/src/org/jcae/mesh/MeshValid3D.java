@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -38,11 +39,10 @@ public class MeshValid3D
 	private static void check(String brepfilename, String xmlDir, float discr, float defl)
 	{
 		logger.info("Reading 3D mesh");
-		String xmlFile = "jcae3d";
 		Mesh mesh3D = new Mesh();
 		try
 		{
-			MeshReader.readObject3D(mesh3D, xmlDir, xmlFile);
+			MeshReader.readObject3D(mesh3D, xmlDir);
 		}
 		catch (IOException ex)
 		{

@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2007, by EADS
+ * (C) Copyright 2007, by EADS France
  */
 
 package org.jcae.mesh.xmldata;
@@ -46,7 +46,7 @@ public class Mesh3dToSoupConvert
 	public static void convert(String meshDirectory) throws XPathExpressionException, ParserConfigurationException, SAXException, IOException
 	{
 		Document document = XMLHelper.parseXML(
-			new File(meshDirectory, "jcae3d"));
+			new File(meshDirectory, JCAEXMLData.xml3dFilename));
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		String fnodes = (String) xpath.evaluate(
 			"/jcae/mesh/submesh/nodes/file/@location", document,

@@ -89,7 +89,6 @@ if (remaining.length != 1)
 	usage(1, options);
 
 String xmlDir = remaining[0]
-String xmlFile = "jcae3d";
 String outBasename=cmd.getOptionValue('o');
 boolean detailed = cmd.hasOption('d');
 boolean histogram = cmd.hasOption('H') || cmd.hasOption('b');
@@ -110,7 +109,7 @@ float scaleFactor=Float.parseFloat(cmd.getOptionValue('s', "1.0")).floatValue();
 Mesh mesh = new Mesh(qproc.getMeshTraitsBuilder());
 try
 {
-	MeshReader.readObject3D(mesh, xmlDir, xmlFile);
+	MeshReader.readObject3D(mesh, xmlDir);
 }
 catch (IOException ex)
 {

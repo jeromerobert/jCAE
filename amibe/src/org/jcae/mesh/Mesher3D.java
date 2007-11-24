@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2003,2004,2005, by EADS CRC
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -72,12 +73,12 @@ public class Mesher3D
 			if (brepFile.endsWith(".unv"))
 				org.jcae.mesh.amibe.util.UNVReader.readMesh(mesh, brepFile, ridgeAngle);
 			else
-				MeshReader.readObject3D(mesh, xmlDir, "jcae3d", ridgeAngle);
+				MeshReader.readObject3D(mesh, xmlDir, ridgeAngle);
 			HashMap<String, String> opts = new HashMap<String, String>();
 			opts.put("iterations", "5");
 			opts.put("boundaries", "true");
 			new SmoothNodes3D(mesh, opts).compute();
-			MeshWriter.writeObject3D(mesh, xmlDir, "jcae3d", brepFile);
+			MeshWriter.writeObject3D(mesh, xmlDir, brepFile);
 		}
 		catch(IOException ex)
 		{
@@ -100,7 +101,7 @@ public class Mesher3D
 			Properties prop = new Properties();
 			prop.load(in);
 			String buildDate = prop.getProperty("build.time");
-			int [] res = MeshReader.getInfos(xmlDir, "jcae3d");
+			int [] res = MeshReader.getInfos(xmlDir);
 			out.println("MESH REPORT");
 			out.println("===========");
 			out.println("Start date: "+startDate);
