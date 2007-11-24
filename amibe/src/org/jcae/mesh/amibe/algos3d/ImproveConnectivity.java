@@ -318,7 +318,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 		new ImproveConnectivity(mesh, options).compute();
 		try
 		{
-			MeshWriter.writeObject3D(mesh, args[argc+1], "dummy.brep");
+			MeshWriter.writeObject3D(mesh, args[argc+1], null);
 		}
 		catch (IOException ex)
 		{

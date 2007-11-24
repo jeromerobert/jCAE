@@ -3,6 +3,8 @@ Sat Nov 24 12:12:25 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	* **/*.java: 1d, 2d and 3d XML file names are hardcoded, so define
 	them into JCAEXMLData.java and remove xml file name from mesh readers
 	and writers.
+	* src/org/jcae/mesh/xmldata/MeshWriter.java (writeObject3D): If 
+	brepFile is null, do not write <shape> element.
 
 Fri Nov 23 11:10:14 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 

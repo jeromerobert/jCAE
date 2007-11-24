@@ -355,9 +355,12 @@ public class MeshWriter
 			
 			Element jcaeElement=document.getDocumentElement();
 			Element meshElement=document.createElement("mesh");
-			Element shapeElement=XMLHelper.parseXMLString(document, "<shape>"+
-				"<file format=\"brep\" location=\""+brepFile+"\"/>"+"</shape>");
-			meshElement.appendChild(shapeElement);
+			if (brepFile != null)
+			{
+				Element shapeElement=XMLHelper.parseXMLString(document, "<shape>"+
+					"<file format=\"brep\" location=\""+brepFile+"\"/>"+"</shape>");
+				meshElement.appendChild(shapeElement);
+			}
 			Element subMeshElement=document.createElement("submesh");
 			subMeshElement.appendChild(writeObjectNodes(document, nodelist, submesh.outerVertex, nodesFile, refFile, xmlDir, nodeIndex));
 			subMeshElement.appendChild(writeObjectTriangles(document, trianglelist, trianglesFile, xmlDir, nodeIndex));
