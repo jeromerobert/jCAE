@@ -52,7 +52,7 @@ public class MeshBoraViewer3d
 		Mesh m = Storage.readAllFaces(model.getGraph().getRootCell());
 		try
 		{
-			MeshWriter.writeObject3D(m, tmpDir, "jcae3d", "dummy.brep");
+			MeshWriter.writeObject3D(m, tmpDir, "dummy.brep");
 		}
 		catch (java.io.IOException ex)
 		{

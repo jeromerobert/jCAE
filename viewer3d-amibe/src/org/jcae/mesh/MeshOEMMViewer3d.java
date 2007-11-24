@@ -207,11 +207,10 @@ public class MeshOEMMViewer3d
 						opts.put("maxtriangles", Integer.toString(amesh.getTriangles().size() / 100));
 						new org.jcae.mesh.amibe.algos3d.QEMDecimateHalfEdge(amesh, opts).compute();
 						String xmlDir = "dec-tmp";
-						String xmlFile = "jcae3d";
 						octree.unselectAll();
 						try
 						{
-							MeshWriter.writeObject3D(amesh, xmlDir, xmlFile, "dummy.brep");
+							MeshWriter.writeObject3D(amesh, xmlDir, "dummy.brep");
 							AmibeProvider ap = new AmibeProvider(new File(xmlDir));
 							decMesh = new ViewableFE(ap);
 							int [] ids = ap.getDomainIDs();
