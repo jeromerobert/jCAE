@@ -21,6 +21,7 @@
 package org.jcae.mesh.amibe.util;
 
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Mesh;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -773,15 +774,43 @@ public class KdTree
 	 */
 	public final Vertex getNearestVertex(Mesh mesh, Vertex v)
 	{
-		Vertex ret = getNearVertex(mesh, v);
-		if (ret == null)
+		Vertex near = getNearVertex(mesh, v);
+		if (v.getLink() instanceof Triangle)
+		{
+			// Triangle vertices may be better candidates
+			Triangle t = (Triangle) v.getLink();
+			double target = mesh.distance2(v, near, v);
+			for (int j = 0; j < 3; j++)
+			{
+				Vertex testVertex = t.vertex[j];
+				double tdist = mesh.distance2(v, testVertex, v);
+				if (tdist < target)
+				{
+					near = testVertex;
+					target = tdist;
+				}
+			}
+		}
+		return getNearestVertex(mesh, v, near);
+	}
+
+	/**
+	 * Return the nearest vertex stored in this <code>Octree</code>.
+	 *
+	 * @param v  the node to check.
+	 * @param start  initial start point near to expected vertex.
+	 * @return the nearest vertex.
+	 */
+	private final Vertex getNearestVertex(Mesh mesh, Vertex v, Vertex start)
+	{
+		if (start == null)
 			return null;
 		if (logger.isDebugEnabled())
 			logger.debug("Nearest point of "+v);
 		
-		GetNearestVertexProcedure gproc = new GetNearestVertexProcedure(mesh, v, ret);
+		GetNearestVertexProcedure gproc = new GetNearestVertexProcedure(mesh, v, start);
 		walk(gproc);
-		ret = gproc.nearestVertex;
+		Vertex ret = gproc.nearestVertex;
 		if (logger.isDebugEnabled())
 		{
 			logger.debug("  search in "+gproc.searchedCells+"/"+nCells+" cells");

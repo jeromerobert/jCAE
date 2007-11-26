@@ -3,6 +3,10 @@ Mon Nov 26 15:22:22 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/amibe/algos2d/Insertion.java: Check triangle
 	centroid only if at least one edge is large to avoid many useless
 	computations.
+	* src/org/jcae/mesh/amibe/util/KdTree.java (getNearestVertex):
+	If vertex is linked to a triangle, its vertices may be better
+	candidates than the one returned by getNearVertex().  This
+	dramatically speeds up getNearestVertex() with very large trees.
 
 Sat Nov 24 12:12:25 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
