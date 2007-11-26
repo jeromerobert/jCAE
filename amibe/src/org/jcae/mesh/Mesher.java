@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.text.SimpleDateFormat;
 
+import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.jcae.mesh.amibe.InvalidFaceException;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
@@ -259,9 +260,14 @@ public class Mesher
 		{
 			new Initial(mesh, mtb, mesh1D).compute();
 		}
+		catch(InitialTriangulationException ex)
+		{
+			logger.error("Face "+iFace+" cannot be triangulated, skipping...");
+			toReturn=false;
+		}
 		catch(InvalidFaceException ex)
 		{
-			logger.warn("Face "+iFace+" is invalid, skipping...");
+			logger.error("Face "+iFace+" is invalid, skipping...");
 			toReturn=false;
 		}
 		catch(Exception ex)

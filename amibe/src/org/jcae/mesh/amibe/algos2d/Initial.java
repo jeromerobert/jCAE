@@ -219,24 +219,29 @@ public class Initial
 	public void compute()
 	{
 		int nTry = 0;
+		MeshParameters mp = mesh.getMeshParameters();
 		while (nTry < nTryMax)
 		{
 			try
 			{
-				// mesh.getEpsilon() may return a value which depends on face
-				Vertex2D [] bNodes = mesh1D.boundaryNodes(face, mesh.getMeshParameters());
+				Vertex2D [] bNodes = mesh1D.boundaryNodes(face, mp);
 				computeFromBoundaryNodes(bNodes);
-				return;
 			}
 			catch(InitialTriangulationException ex)
 			{
-				logger.warn("Face cannot be triangulated, trying again with a larger tolerance...");
-				MeshParameters mp = mesh.getMeshParameters();
-				mp.scaleTolerance(10.);
-				mesh = new Mesh2D(meshTraitsBuilder, mp, face);
-				nTry++;
+				if (mp.getEpsilon() > 0.0)
+				{
+					logger.warn("Face cannot be triangulated, trying again with a larger tolerance...");
+					mp.scaleTolerance(10.);
+					mesh = new Mesh2D(meshTraitsBuilder, mp, face);
+					nTry++;
+				}
+				else
+					nTry = nTryMax;
 			}
 		}
+		if (nTry == nTryMax)
+			throw new InitialTriangulationException();
 	}
 
 	public void computeFromBoundaryNodes(Vertex2D [] bNodes)
