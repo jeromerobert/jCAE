@@ -58,6 +58,14 @@ public class MeshParameters
 		}
 		cumulativeEpsilon = accumulateEpsilonProp.equals("true");
 
+		String epsilonProp = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon");
+		if (epsilonProp == null)
+		{
+			epsilonProp = "-1.0";
+			System.setProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon", epsilonProp);
+		}
+		epsilon = Double.valueOf(epsilonProp);
+
 		// Next process arguments
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
