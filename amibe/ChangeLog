@@ -1,3 +1,9 @@
+Mon Nov 26 15:22:22 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos2d/Insertion.java: Check triangle
+	centroid only if at least one edge is large to avoid many useless
+	computations.
+
 Sat Nov 24 12:12:25 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* **/*.java: 1d, 2d and 3d XML file names are hardcoded, so define

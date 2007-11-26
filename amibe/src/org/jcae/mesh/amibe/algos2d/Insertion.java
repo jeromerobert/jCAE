@@ -65,6 +65,16 @@ import org.apache.log4j.Logger;
  * (with {@link org.jcae.mesh.amibe.util.PAVLSortedTree}) and their
  * circumcenter added to the mesh if the overall quality is improved, 
  * </p>
+ *
+ * <p>
+ * The {@link AbstractHalfEdge#MARKED} flag has two purposes: half-edges
+ * must be processed once, and when a small edge has been found, it will
+ * never be processed, so there is no need to compute its length again
+ * and again.  By convention, if an half-edge and its symmetric half-edge
+ * has both been tagged with <code>AbstractHalfEdge.MARKED</code>, this
+ * means that this edge is small.  If either an half-edge ot its symmetric
+ * half-edge is tagged, this edge has already been processed.
+ * </p>
  */
 public class Insertion
 {
@@ -117,7 +127,12 @@ public class Insertion
 			{
 				ot.next();
 				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
+				{
 					ot.setAttributes(AbstractHalfEdge.MARKED);
+					sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
+					sym.sym();
+					sym.setAttributes(AbstractHalfEdge.MARKED);
+				}
 				else
 					ot.clearAttributes(AbstractHalfEdge.MARKED);
 			}
@@ -257,6 +272,24 @@ public class Insertion
 			{
 				TriangleVH t = (TriangleVH) it.next();
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
+					continue;
+				// Check triangle centroid only if at least one edge is large
+				boolean tooSmall = true;
+				ot.bind(t);
+				for (int j = 0; tooSmall && j < 3; j++)
+				{
+					ot.next();
+					if (ot.hasAttributes(AbstractHalfEdge.MARKED))
+					{
+						sym.bind((TriangleVH) ot.getTri(), ot.getLocalNumber());
+						sym.sym();
+						if (!sym.hasAttributes(AbstractHalfEdge.MARKED))
+							tooSmall = false;
+					}
+					else
+						tooSmall = false;
+				}
+				if (tooSmall)
 					continue;
 				if (c == null)
 					c = (Vertex2D) mesh.createVertex(0.0, 0.0);
