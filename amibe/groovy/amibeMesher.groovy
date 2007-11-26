@@ -113,9 +113,10 @@ if(!xmlDirF.exists() || !xmlDirF.isDirectory())
 
 CADShapeFactory factory = CADShapeFactory.getFactory()
 
+MMesh1D mesh1d = null
+CADShape shape = null;
 if (phases[1])
 {
-	shape = null;
 	if (brepfile.endsWith(".step") || brepfile.endsWith(".stp") || brepfile.endsWith(".igs"))
 	{
 		shape = CADShapeFactory.getFactory().newShape(brepdir+File.separator+brepfile);
@@ -156,16 +157,15 @@ if (phases[1])
 	
 	MMesh1DWriter.writeObject(mesh1d, outputDir, brepfile)
 }
-else
-{
-	mesh1d = MMesh1DReader.readObject(outputDir);
-	shape = mesh1d.getGeometry();
-}
 
 // Mesh 2D
 if (phases[2])
 {
-	
+	if (mesh1d == null)
+	{
+		mesh1d = MMesh1DReader.readObject(outputDir);
+		shape = mesh1d.getGeometry();
+	}
 	mesh1d.duplicateEdges()
 	mesh1d.updateNodeLabels()
 	
@@ -230,6 +230,8 @@ if (phases[2])
 // Mesh 3D
 if (phases[3])
 {
+	if (shape == null)
+		shape = factory.newShape(outputDir+File.separator+brepfile)
 	expl = factory.newExplorer()
 	m2dto3d = new MeshToMMesh3DConvert(outputDir, brepfile)
 	m2dto3d.exportUNV(unvName != null, unvName);
