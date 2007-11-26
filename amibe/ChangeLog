@@ -7,6 +7,8 @@ Mon Nov 26 15:22:22 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	If vertex is linked to a triangle, its vertices may be better
 	candidates than the one returned by getNearVertex().  This
 	dramatically speeds up getNearestVertex() with very large trees.
+	* src/org/jcae/mesh/amibe/algos2d/Insertion.java: Link candidate
+	vertices to their surrounding triangle to speed up getNearestVertex().
 
 Sat Nov 24 12:12:25 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 

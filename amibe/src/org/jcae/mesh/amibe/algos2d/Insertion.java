@@ -216,6 +216,12 @@ public class Insertion
 						if (l > lcrit)
 						{
 							last = (Vertex2D) np[ns];
+							// Link to surrounding triangle to speed up
+							// mesh.getKdTree().getNearestVertex()
+							if (mesh.distance2(last, sym.apex(), last) < mesh.distance2(last, ot.apex(), last))
+								last.setLink(sym.getTri());
+							else
+								last.setLink(t);
 							triNodes.add(last);
 							l = 0.0;
 							nrNodes++;
@@ -294,6 +300,10 @@ public class Insertion
 				if (c == null)
 					c = (Vertex2D) mesh.createVertex(0.0, 0.0);
 				c.centroid((Vertex2D[]) t.vertex);
+				// Link to surrounding triangle to speed up
+				// mesh.getKdTree().getNearestVertex() and thus
+				// v.getSurroundingOTriangle() below.
+				c.setLink(t);
 				Vertex2D n = (Vertex2D) mesh.getKdTree().getNearestVertex(mesh, c);
 				assert n == mesh.getKdTree().getNearestVertexDebug(mesh, c);
 				if (mesh.compGeom().distance(c, n) > minlen)
