@@ -30,10 +30,10 @@ public class MeshParameters
 	// if size has not been set.
 	public double edgeLength = 0.0;
 	public double deflection = -1.0;
-	public boolean relativeDeflection = true;
-	public boolean isotropic = true;
-	public double epsilon = -1.0;
-	public boolean cumulativeEpsilon = false;
+	public boolean relativeDeflection;
+	public boolean isotropic;
+	public double epsilon;
+	public boolean cumulativeEpsilon;
 
 	public MeshParameters()
 	{
@@ -42,29 +42,37 @@ public class MeshParameters
 	public MeshParameters(final Map<String, String> options)
 	{
 		// First process system properties
-		String relDeflProp = System.getProperty("org.jcae.mesh.amibe.ds.Metric3D.relativeDeflection");
-		if (relDeflProp == null)
+		String relativeDeflectionProperty = System.getProperty("org.jcae.mesh.amibe.ds.Metric3D.relativeDeflection");
+		if (relativeDeflectionProperty == null)
 		{
-			relDeflProp="true";
-			System.setProperty("org.jcae.mesh.amibe.ds.Metric3D.relativeDeflection", relDeflProp);
+			relativeDeflectionProperty = "true";
+			System.setProperty("org.jcae.mesh.amibe.ds.Metric3D.relativeDeflection", relativeDeflectionProperty);
 		}
-		relativeDeflection = relDeflProp.equals("true");
+		relativeDeflection = relativeDeflectionProperty.equals("true");
 
-		String accumulateEpsilonProp = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon");
-		if (accumulateEpsilonProp == null)
+		String cumulativeEpsilonProperty = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon");
+		if (cumulativeEpsilonProperty == null)
 		{
-			accumulateEpsilonProp = "false";
-			System.setProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon", accumulateEpsilonProp);
+			cumulativeEpsilonProperty = "false";
+			System.setProperty("org.jcae.mesh.amibe.ds.Mesh.cumulativeEpsilon", cumulativeEpsilonProperty);
 		}
-		cumulativeEpsilon = accumulateEpsilonProp.equals("true");
+		cumulativeEpsilon = cumulativeEpsilonProperty.equals("true");
 
-		String epsilonProp = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon");
-		if (epsilonProp == null)
+		String epsilonProperty = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon");
+		if (epsilonProperty == null)
 		{
-			epsilonProp = "-1.0";
-			System.setProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon", epsilonProp);
+			epsilonProperty = "-1.0";
+			System.setProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon", epsilonProperty);
 		}
-		epsilon = Double.valueOf(epsilonProp);
+		epsilon = Double.valueOf(epsilonProperty);
+
+		String isotropicProperty = System.getProperty("org.jcae.mesh.Mesher.isotropic");
+		if (isotropicProperty == null)
+		{
+			isotropicProperty = "true";
+			System.setProperty("org.jcae.mesh.Mesher.isotropic", isotropicProperty);
+		}
+		isotropic = isotropicProperty.equals("true");
 
 		// Next process arguments
 		for (final Map.Entry<String, String> opt: options.entrySet())
