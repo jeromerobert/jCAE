@@ -63,4 +63,6 @@ public interface Calculus
 	 * @return the radius in 2D space.
 	 */
 	public double radius2d(Vertex2D vm);
+	
+	public double [] getBounds2D(Vertex2D vm);
 }

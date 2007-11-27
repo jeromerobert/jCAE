@@ -1,3 +1,12 @@
+Tue Nov 27 18:47:15 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/metrics/Metric2D.java: New getBounds2D()
+	method to compute the bounding box of this ellipse.
+	* src/org/jcae/mesh/amibe/ds/Mesh.java: New getBounds() method
+	to return the bounding box of a metric at a given vertex.
+	* src/org/jcae/mesh/amibe/util/KdTree.java: Use Mesh.getBounds()
+	in getNearestVertex() to reduce the number of cells considered.
+
 Mon Nov 26 15:22:22 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos2d/Insertion.java: Check triangle

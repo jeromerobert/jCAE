@@ -838,6 +838,12 @@ public class Mesh implements Serializable
 		return 1.0;
 	}
 	
+	public double [] getBounds(Vertex v)
+	{
+		double [] ret = new double[]{1.0, 1.0, 1.0};
+		return ret;
+	}
+	
 	/**
 	 * Checks whether an edge can be contracted.
 	 *

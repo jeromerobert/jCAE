@@ -148,6 +148,13 @@ public class Calculus3D implements Calculus
 		return 1.0 / Math.sqrt(m.minEV());
 	}
 	
+	@Override
+	public double [] getBounds2D(Vertex2D vm)
+	{
+		Metric2D m = vm.getMetrics(mesh);
+		return m.getBounds2D();
+	}
+
 	/**
 	 * Returns the length of an edge.
 	 *

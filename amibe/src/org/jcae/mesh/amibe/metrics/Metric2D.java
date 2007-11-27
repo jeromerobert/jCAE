@@ -150,6 +150,29 @@ public class Metric2D
 	}
 	
 	/**
+	 * Return width and height of surrounding bounding box.
+	 *
+	 * @return width and height of surrounding bounding box.
+	 */
+	public double [] getBounds2D()
+	{
+		double [] ret = new double[2];
+		double d = det();
+		if (d < 1.e-20)
+		{
+			// We take safe values
+			ret[0] = 1.0 / Math.sqrt(minEV());
+			ret[1] = ret[0];
+		}
+		else
+		{
+			ret[0] = Math.sqrt(G / d);
+			ret[1] = Math.sqrt(E / d);
+		}
+		return ret;
+	}
+
+	/**
 	 * Return the dot product of two vectors in this Riemannian metrics.
 	 *
 	 * @param x0 first coordinate of the first vector.
@@ -183,7 +206,7 @@ public class Metric2D
 	}
 	
 	/**
-	 * Test whether this matrics is Euclidian.
+	 * Test whether this metrics is Euclidian.
 	 *
 	 * @return <code>true</code> if this metrics is quasi-Euclidian,
 	 * <code>false</code> otherwise.

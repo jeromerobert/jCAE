@@ -94,4 +94,11 @@ public class Calculus2D implements Calculus
 		return 1.0;
 	}
 	
+	@Override
+	public double [] getBounds2D(Vertex2D vm)
+	{
+		double [] ret = new double[]{1.0, 1.0, 1.0};
+		return ret;
+	}
+	
 }

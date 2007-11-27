@@ -293,6 +293,25 @@ public class KdTree
 		}
 		maxDelta *= 1.01;
 		x0[dimension] = DGridSize / maxDelta;
+		if (logger.isDebugEnabled())
+		{
+			StringBuilder sb = new StringBuilder("New KdTree int<--->double conversion vector; scale=");
+			sb.append(x0[dimension]);
+			sb.append("  origin=(");
+			sb.append(x0[0]);
+			for (int i = 1; i < dimension; i++)
+				sb.append(","+x0[i]);
+			sb.append(")\nBounding box:\n");
+			for (int i = 0; i < dimension; i++)
+			{
+				sb.append(bbox[i]);
+				sb.append(" <= x[");
+				sb.append(i);
+				sb.append("] <= ");
+				sb.append(bbox[i+dimension]);
+			}
+			logger.debug(sb.toString());
+		}
 	}
 	
 	/**
@@ -719,11 +738,11 @@ public class KdTree
 	private final class GetNearestVertexProcedure implements KdTreeProcedure
 	{
 		private final int [] ijk = new int[dimension];
-		private final double i2d;
 		private final Mesh mesh;
 		public final Vertex fromVertex;
 		public Vertex nearestVertex;
-		private int idist;
+		private final double [] i2d = new double[dimension];
+		private final int [] idist = new int[dimension];
 		private double dist;
 		public int searchedCells = 0;
 		public GetNearestVertexProcedure(Mesh m, Vertex from, Vertex v)
@@ -732,22 +751,27 @@ public class KdTree
 			double2int(from.getUV(), ijk);
 			nearestVertex = v;
 			fromVertex = from;
-			i2d = 1.005 * x0[dimension] * mesh.radius2d(fromVertex);
 			dist = mesh.distance2(fromVertex, nearestVertex, fromVertex);
-			idist = (int) (Math.sqrt(dist) * i2d);
-			if (idist > Integer.MAX_VALUE/2)
-				idist = Integer.MAX_VALUE/2;
+			double [] r = mesh.getBounds(fromVertex);
+			for (int k = 0; k < dimension; k++)
+			{
+				i2d[k] = 1.005 * x0[dimension] * r[k];
+				idist[k] = (int) (Math.sqrt(dist) * i2d[k]);
+				if (idist[k] > Integer.MAX_VALUE/2)
+					idist[k] = Integer.MAX_VALUE/2;
+			}
 		}
 		@Override
 		public int action(Object o, int s, final int [] i0)
 		{
 			for (int k = 0; k < dimension; k++)
-				if ((ijk[k] < i0[k] - idist) || (ijk[k] > i0[k] + s + idist))
+				if ((ijk[k] < i0[k] - idist[k]) || (ijk[k] > i0[k] + s + idist[k]))
 					return KdTreeProcedure.SKIPCHILD;
 			Cell self = (Cell) o;
 			searchedCells++;
 			if (self.nItems > 0)
 			{
+				boolean updated = false;
 				for (int i = 0; i < self.nItems; i++)
 				{
 					Vertex vtest = (Vertex) self.subCell[i];
@@ -756,9 +780,16 @@ public class KdTree
 					{
 						dist = retdist;
 						nearestVertex = vtest;
-						idist = (int) (Math.sqrt(dist) * i2d);
-						if (idist > Integer.MAX_VALUE/2)
-							idist = Integer.MAX_VALUE/2;
+						updated = true;
+					}
+				}
+				if (updated)
+				{
+					for (int k = 0; k < dimension; k++)
+					{
+						idist[k] = (int) (Math.sqrt(dist) * i2d[k]);
+						if (idist[k] > Integer.MAX_VALUE/2)
+							idist[k] = Integer.MAX_VALUE/2;
 					}
 				}
 			}

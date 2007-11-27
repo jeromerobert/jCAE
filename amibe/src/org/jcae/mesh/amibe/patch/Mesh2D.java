@@ -459,6 +459,12 @@ public class Mesh2D extends Mesh
 	}
 	
 	@Override
+	public double [] getBounds(Vertex v)
+	{
+		return compGeomCurrent.getBounds2D((Vertex2D) v);
+	}
+	
+	@Override
 	public boolean isValid(boolean constrained)
 	{
 		if (!super.isValid(constrained))
