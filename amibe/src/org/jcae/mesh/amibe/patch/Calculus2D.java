@@ -83,17 +83,16 @@ public class Calculus2D implements Calculus
 	}
 	
 	/**
-	 * Returns the radius of unit ball in 2D.
+	 * Returns bounds of unit ellipse centered at a point.
+	 * This routine returns a double array which represents enclosing bounding box
+	 * of unit ellipse.  This method is used by
+	 * {@link org.jcae.mesh.amibe.util.KdTree#getNearestVertex}; if an octant
+	 * does not intersect this bounding box, it does also not intersect
+	 * unit ellipse.
 	 *
-	 * @param vm  the node at which metrics is evaluated (unused)
-	 * @return this routine always returns 1.0.
+	 * @param vm  the vertex on which metrics is evaluated
+	 * @return bounding box of unit ellipse
 	 */
-	@Override
-	public double radius2d(Vertex2D vm)
-	{
-		return 1.0;
-	}
-	
 	@Override
 	public double [] getBounds2D(Vertex2D vm)
 	{

@@ -132,22 +132,16 @@ public class Calculus3D implements Calculus
 	}
 	
 	/**
-	 * Returns the 2D radius of the 3D unit ball centered at a point.
-	 * This routine returns a radius such that the 2D circle centered
-	 * at a given vertex will have a distance lower than 1 in 3D.
-	 * This method is used by
-	 * {@link org.jcae.mesh.amibe.util.KdTree#getNearestVertex}
+	 * Returns bounds of unit ellipse centered at a point.
+	 * This routine returns a double array which represents enclosing bounding box
+	 * of unit ellipse.  This method is used by
+	 * {@link org.jcae.mesh.amibe.util.KdTree#getNearestVertex}; if an octant
+	 * does not intersect this bounding box, it does also not intersect
+	 * unit ellipse.
 	 *
 	 * @param vm  the vertex on which metrics is evaluated
-	 * @return the radius in 2D space.
+	 * @return bounding box of unit ellipse
 	 */
-	@Override
-	public double radius2d(Vertex2D vm)
-	{
-		Metric2D m = vm.getMetrics(mesh);
-		return 1.0 / Math.sqrt(m.minEV());
-	}
-	
 	@Override
 	public double [] getBounds2D(Vertex2D vm)
 	{

@@ -64,7 +64,7 @@ public class MeshParameters
 			epsilonProperty = "-1.0";
 			System.setProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon", epsilonProperty);
 		}
-		epsilon = Double.valueOf(epsilonProperty);
+		epsilon = Double.valueOf(epsilonProperty).doubleValue();
 
 		String isotropicProperty = System.getProperty("org.jcae.mesh.Mesher.isotropic");
 		if (isotropicProperty == null)

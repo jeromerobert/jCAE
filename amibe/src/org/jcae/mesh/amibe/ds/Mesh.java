@@ -833,11 +833,6 @@ public class Mesh implements Serializable
 		return dx*dx + dy*dy + dz*dz;
 	}
 	
-	public double radius2d(Vertex v)
-	{
-		return 1.0;
-	}
-	
 	public double [] getBounds(Vertex v)
 	{
 		double [] ret = new double[]{1.0, 1.0, 1.0};

@@ -130,26 +130,6 @@ public class Metric2D
 	}
 	
 	/**
-	 * Return the smallest eigenvalue.
-	 *
-	 * @return the smallest eigenvalue.
-	 */
-	public double minEV()
-	{
-		return 0.5 * (E+G - Math.sqrt((E-G)*(E-G)+4.0*F*F));
-	}
-	
-	/**
-	 * Return the largest eigenvalue.
-	 *
-	 * @return the largest eigenvalue.
-	 */
-	public double maxEV()
-	{
-		return 0.5 * (E+G + Math.sqrt((E-G)*(E-G)+4.0*F*F));
-	}
-	
-	/**
 	 * Return width and height of surrounding bounding box.
 	 *
 	 * @return width and height of surrounding bounding box.
@@ -161,11 +141,22 @@ public class Metric2D
 		if (d < 1.e-20)
 		{
 			// We take safe values
-			ret[0] = 1.0 / Math.sqrt(minEV());
+			double minEV = 0.5 * (E+G - Math.sqrt((E-G)*(E-G)+4.0*F*F));
+			// double maxEV = 0.5 * (E+G + Math.sqrt((E-G)*(E-G)+4.0*F*F));
+			ret[0] = 1.0 / Math.sqrt(minEV);
 			ret[1] = ret[0];
 		}
 		else
 		{
+			/*
+			 * Unit ellipse is governed by equation: q(u,v) = E u*u + 2 F u*v + G v*v - 1 = 0
+			 * We want U and V such that for all (u,v) on this unit ellipse,
+			 * -U <= u <= U and -V <= v <= V.
+			 *  When v is fixed, q(u,v) is a 2nd order polynom,
+			 *    delta = F*F*v*v - E (G*v*v - 1) = E - (E G - F F) v*v
+			 *  Extrema is found if V = Math.sqrt(E / (E G - F F))
+			 *  By symmetry, U = Math.sqrt(G / (E G - F F))
+			 */
 			ret[0] = Math.sqrt(G / d);
 			ret[1] = Math.sqrt(E / d);
 		}

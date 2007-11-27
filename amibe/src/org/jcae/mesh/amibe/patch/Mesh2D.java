@@ -453,12 +453,6 @@ public class Mesh2D extends Mesh
 	 * @return the radius in 2D space.
 	 */
 	@Override
-	public double radius2d(Vertex v)
-	{
-		return compGeomCurrent.radius2d((Vertex2D) v);
-	}
-	
-	@Override
 	public double [] getBounds(Vertex v)
 	{
 		return compGeomCurrent.getBounds2D((Vertex2D) v);
