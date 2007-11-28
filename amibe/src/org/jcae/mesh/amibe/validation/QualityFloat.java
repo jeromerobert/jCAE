@@ -357,13 +357,13 @@ public class QualityFloat
 		}
 		int nrTotal = data.size();
 		if (sorted[0] > 0)
-			System.out.println(" < "+bounds[0]+" "+sorted[0]+" ("+(((float) 100.0 * sorted[0])/nrTotal)+"%)");
+			System.out.printf(" < %g %d (%.4g%%)%n", bounds[0], sorted[0], (((float) 100.0 * sorted[0])/nrTotal));
 		for (int i = 0; i < layers; i++)
 		{
-			System.out.println("   "+bounds[i]+" ; "+bounds[i+1]+" "+sorted[i+1]+" ("+(((float) 100.0 * sorted[i+1])/nrTotal)+"%)");
+			System.out.printf(" %g ; %g %d (%.4g%%)%n", bounds[i], bounds[i+1], sorted[i+1], (((float) 100.0 * sorted[i+1])/nrTotal));
 		}
 		if (sorted[layers+1] > 0)
-			System.out.println(" > "+bounds[layers]+" "+sorted[layers+1]+" ("+(((float) 100.0 * sorted[layers+1])/nrTotal)+"%)");
+			System.out.printf(" > %g %d (%.4g%%)%n", bounds[layers], sorted[layers+1], (((float) 100.0 * sorted[layers+1])/nrTotal));
 		printStatistics();
 	}
 	
@@ -374,10 +374,10 @@ public class QualityFloat
 	{
 		int nrTotal = data.size();
 		System.out.println("total: "+nrTotal);
-		System.out.println("qmin: "+qmin+"   (index="+imin+" starting from 0)");
-		System.out.println("qmax: "+qmax+"   (index="+imax+" starting from 0)");
-		System.out.println("qavg: "+qavg);
-		System.out.println("qdev: "+Math.sqrt(qavg2 - qavg*qavg));
+		System.out.printf("qmin: %.6g (index=%d starting from 0)%n", qmin, imin);
+		System.out.printf("qmax: %.6g (index=%d starting from 0)%n", qmax, imax);
+		System.out.printf("qavg: %.6g%n", qavg);
+		System.out.printf("qdev: %.6g%n", Math.sqrt(qavg2 - qavg*qavg));
 	}
 	
 	/**
