@@ -23,6 +23,7 @@ package org.jcae.mesh.cad.occ;
 import org.jcae.mesh.cad.CADExplorer;
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADShapeEnum;
+import org.jcae.mesh.cad.CADShapeFactory;
 import org.jcae.opencascade.jni.TopExp_Explorer;
 
 public class OCCExplorer implements CADExplorer
@@ -52,6 +53,6 @@ public class OCCExplorer implements CADExplorer
 	
 	public CADShape current()
 	{
-		return OCCShapeFactory.getFactory().newShape(occExp.current());
+		return CADShapeFactory.getFactory().newShape(occExp.current());
 	}
 }

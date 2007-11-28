@@ -83,7 +83,7 @@ public abstract class OCCShapeEnum extends CADShapeEnum
 	};
 	// Note: VALUES must contain items in the same order as they
 	// have been declared in this file!
-	private static final OCCShapeEnum [] VALUES = { VERTEX, EDGE, WIRE, FACE, SHELL, SOLID, COMPSOLID, COMPOUND };
+	static final OCCShapeEnum [] VALUES = { VERTEX, EDGE, WIRE, FACE, SHELL, SOLID, COMPSOLID, COMPOUND };
 
 	// Export ordinal to newShapeEnumIterator
 	int getOrdinal()

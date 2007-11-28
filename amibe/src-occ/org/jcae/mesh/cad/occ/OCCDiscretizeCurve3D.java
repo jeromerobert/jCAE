@@ -26,11 +26,11 @@ import gnu.trove.TIntArrayList;
 public class OCCDiscretizeCurve3D
 {
 	private static Logger logger=Logger.getLogger(OCCDiscretizeCurve3D.class);
-	private Adaptor3d_Curve curve = null;
+	Adaptor3d_Curve curve = null;
 	// Number of points
 	private int nr = 0;
 	private double length = -1.0;
-	private double [] a;
+	double [] a;
 	private double start, end;
 	
 	public OCCDiscretizeCurve3D(Adaptor3d_Curve myCurve, double s, double e)
@@ -331,7 +331,7 @@ public class OCCDiscretizeCurve3D
 		boolean move(int i, double [] xyz);
 	}
 	
-	private class CheckRatioLength implements CheckRatio
+	class CheckRatioLength implements CheckRatio
 	{
 		public boolean move(int i, double [] xyz)
 		{
@@ -371,7 +371,7 @@ public class OCCDiscretizeCurve3D
 		}
 	}
 	
-	private class CheckRatioDeflection implements CheckRatio
+	class CheckRatioDeflection implements CheckRatio
 	{
 		public boolean move(int i, double [] xyz)
 		{
@@ -430,7 +430,7 @@ public class OCCDiscretizeCurve3D
 		return a[index-1];
 	}
 	
-	private double length(double from, double to, int nrsub)
+	double length(double from, double to, int nrsub)
 	{
 		assert nr > 0;
 		double delta = (to - from) / nrsub;

@@ -20,6 +20,7 @@
 
 package org.jcae.mesh.cad.occ;
 
+import org.jcae.mesh.cad.CADShapeFactory;
 import org.jcae.mesh.cad.CADWireExplorer;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADFace;
@@ -53,6 +54,6 @@ public class OCCWireExplorer implements CADWireExplorer
 	
 	public CADEdge current()
 	{
-		return (CADEdge) OCCShapeFactory.getFactory().newShape(occWExp.current());
+		return (CADEdge) CADShapeFactory.getFactory().newShape(occWExp.current());
 	}
 }

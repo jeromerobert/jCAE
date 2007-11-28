@@ -22,6 +22,7 @@ package org.jcae.mesh.cad.occ;
 
 import org.jcae.mesh.cad.CADIterator;
 import org.jcae.mesh.cad.CADShape;
+import org.jcae.mesh.cad.CADShapeFactory;
 import org.jcae.opencascade.jni.TopoDS_Iterator;
 
 public class OCCIterator implements CADIterator
@@ -50,6 +51,6 @@ public class OCCIterator implements CADIterator
 	
 	public CADShape value()
 	{
-		return OCCShapeFactory.getFactory().newShape(occIt.value());
+		return CADShapeFactory.getFactory().newShape(occIt.value());
 	}
 }
