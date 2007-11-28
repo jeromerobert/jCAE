@@ -63,7 +63,7 @@ import org.apache.log4j.Logger;
  */
 abstract public class MeshExporter
 {
-	private static Logger logger=Logger.getLogger(MeshExporter.class);
+	static Logger logger=Logger.getLogger(MeshExporter.class);
 	
 	public static class FormatD25_16 extends DecimalFormat
 	{
@@ -181,9 +181,9 @@ abstract public class MeshExporter
 		}
 	}
 	
-	private final static String CR=System.getProperty("line.separator");
+	final static String CR=System.getProperty("line.separator");
 	private final static NumberFormat FORMAT_D25_16=new FormatD25_16();
-	private final static NumberFormat FORMAT_I10=new FormatI10();
+	final static NumberFormat FORMAT_I10=new FormatI10();
 	
 	private File directory;
 	private Document document;
@@ -1053,7 +1053,7 @@ abstract public class MeshExporter
 		{
 			DataOutputStream dos=new DataOutputStream(new BufferedOutputStream(out));
 			//Write the size of the array in octets
-			dos.writeInt((int) nodesID.length*8*3);
+			dos.writeInt(nodesID.length*8*3);
 			File f=getNodeFile();
 			// Open the file and then get a channel from the stream
 			FileInputStream fis = new FileInputStream(f);
@@ -1098,7 +1098,7 @@ abstract public class MeshExporter
 			DataOutputStream dos=new DataOutputStream(new BufferedOutputStream(out));
 			//Write the size of the array in octets
 			int nbt = triangles.length/3;
-			dos.writeInt((int) nbt*4*3);
+			dos.writeInt(nbt*4*3);
 			int count=0;
 			int triaIndex=0;
 			for(int i=0; i<groups.length; i++)
@@ -1114,7 +1114,7 @@ abstract public class MeshExporter
 			}
 			logger.info("Total number of triangles: "+count);
 			//Write the size of the array in octets
-			dos.writeInt((int) nbt*4);
+			dos.writeInt(nbt*4);
 			//Write the offset of each cells (in our case triangles) in the
 			//connectivity array
 			for(int i=1; i<=nbt; i++)
