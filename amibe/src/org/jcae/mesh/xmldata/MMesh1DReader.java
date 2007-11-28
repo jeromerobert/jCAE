@@ -93,14 +93,13 @@ public class MMesh1DReader
 		try
 		{
 			Document document = XMLHelper.parseXML(new File(xmlDir, JCAEXMLData.xml1dFilename));
-			String brepFile = xpath.evaluate("/jcae/mesh/shape/file/@location",
-				document);
+			String brepFile = xpath.evaluate("/jcae/mesh/shape/file/@location", document);
 			
 			if(!new File(brepFile).isAbsolute())
 				brepFile = xmlDir+File.separator+brepFile;
 			
-			CADShape shape = CADShapeFactory.getFactory().newShape(brepFile);
-			m1d = new MMesh1D(shape);
+			m1d = new MMesh1D(brepFile);
+			CADShape shape = m1d.getGeometry();
 			
 			String nodesFile = xpath.evaluate(
 				"/jcae/mesh/submesh/nodes/file/@location", document);

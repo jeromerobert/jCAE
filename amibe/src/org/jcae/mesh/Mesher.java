@@ -75,6 +75,9 @@ public class Mesher
 	
 	/** The geometry file to be meshed */
 	protected String geometryFile;
+
+	/** CAD shape */
+	protected CADShape shape;
 	
 	/** The file where to export the mesh in UNV format */
 	protected String unvName;
@@ -216,13 +219,12 @@ public class Mesher
 	
 	/**
 	 * Compute 1D mesh
-	 * @param shape The geometry to be meshed
 	 * @param brepFile basename of the BRep file
 	 */
-	protected void mesh1D(CADShape shape, String brepFile)
+	protected MMesh1D mesh1D(String brepFile)
 	{
 		logger.info("1D mesh");
-		MMesh1D mesh1D = new MMesh1D(shape);
+		MMesh1D mesh1D = new MMesh1D(brepFile);
 		HashMap<String, String> options1d = new HashMap<String, String>();
 		options1d.put("size", ""+edgeLength);
 		options1d.put("deflection", ""+deflection);
@@ -238,6 +240,7 @@ public class Mesher
 		}
 		//  Store the 1D mesh onto disk
 		MMesh1DWriter.writeObject(mesh1D, outputDir, brepFile);
+		return mesh1D;
 	}
 	
 	/**
@@ -328,7 +331,7 @@ public class Mesher
 	 * Read 2D meshes and compute 3D mesh
 	 * @param shape
 	 */
-	protected void mesh3D(CADShape shape, String brepFile)
+	protected void mesh3D(String brepFile)
 	{
 		int iFace = 0;
 		CADExplorer expF = CADShapeFactory.getFactory().newExplorer();
@@ -378,12 +381,11 @@ public class Mesher
 		
 		String brepFile = (new File(geometryFile)).getName();		
 
-		MMesh1D mesh1D;
+		MMesh1D mesh1D = null;
 		TIntArrayList badGroups = new TIntArrayList();
 						
 		logger.info("Loading " + geometryFile);
 
-		CADShape shape = CADShapeFactory.getFactory().newShape(geometryFile);
 		CADExplorer expF = CADShapeFactory.getFactory().newExplorer();
 
 		if (minFace != 0 || maxFace != 0)
@@ -395,11 +397,12 @@ public class Mesher
 		MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault2D();
 		if (processMesh1d) {
 			//  Step 1: Compute 1D mesh
-			mesh1D(shape, brepFile);
+			mesh1D = mesh1D(brepFile);
 		}
 		if (processMesh2d) {
 			//  Step 2: Read the 1D mesh and compute 2D meshes
-			mesh1D = MMesh1DReader.readObject(outputDir);
+			if (mesh1D == null)
+				mesh1D = MMesh1DReader.readObject(outputDir);
 			//  Prepare 2D discretization
 			mesh1D.duplicateEdges();
 			//  Compute node labels shared by all 2D and 3D meshes
@@ -443,10 +446,16 @@ public class Mesher
 		}
 
 		if (processMesh3d) {
+			if (shape == null)
+			{
+				mesh1D = MMesh1DReader.readObject(outputDir);
+				shape = mesh1D.getGeometry();
+			}
+
 			// Step 3: Read 2D meshes and compute 3D mesh
 			try
 			{
-				mesh3D(shape, brepFile);
+				mesh3D(brepFile);
 			}
 			catch(Exception ex)
 			{

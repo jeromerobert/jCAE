@@ -38,6 +38,7 @@ import gnu.trove.TObjectIntHashMap;
 
 public class MMesh0D
 {
+	protected CADShape shape;
 	//  Array of distinct geometric nodes
 	private CADVertex[] vnodelist;
 	private int vnodesize = 0;
@@ -54,8 +55,9 @@ public class MMesh0D
 	 *
 	 * @param shape  topological shape
 	 */
-	public MMesh0D(CADShape shape)
+	public MMesh0D(CADShape s)
 	{
+		shape = s;
 		CADExplorer expV = CADShapeFactory.getFactory().newExplorer();
 		int nodes = 0;
 		for (expV.init(shape, CADShapeEnum.VERTEX); expV.more(); expV.next())
@@ -80,7 +82,7 @@ public class MMesh0D
 	{
 		BCADGraphCell root = model.getGraph().getRootCell();
 
-		CADShape shape = root.getShape();
+		shape = root.getShape();
 		// This is a copy of the first method.
 		CADExplorer expV = CADShapeFactory.getFactory().newExplorer();
 		int nodes = 0;

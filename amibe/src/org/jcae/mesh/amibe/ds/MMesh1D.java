@@ -44,7 +44,7 @@ public class MMesh1D extends MMesh0D
 {
 	private static Logger logger = Logger.getLogger(MMesh1D.class);	
 
-	private CADShape shape;
+	private String filename;
 	
 	//  Edge map.
 	private Map<CADEdge, SubMesh1D> mapTEdgeToSubMesh1D;
@@ -58,12 +58,12 @@ public class MMesh1D extends MMesh0D
 	 * Creates a <code>MMesh1D</code> instance by discretizing all edges
 	 * of a given shape.
 	 *
-	 * @param s  topological shape
+	 * @param cadFile  file containing CAD shape
 	 */
-	public MMesh1D(CADShape s)
+	public MMesh1D(String cadFile)
 	{
-		super(s);
-		shape = s;
+		super(CADShapeFactory.getFactory().newShape(cadFile));
+		filename = cadFile;
 
 		CADExplorer expE = CADShapeFactory.getFactory().newExplorer();
 		//  HashMap size will not be greater than the number of edges,
@@ -181,6 +181,16 @@ public class MMesh1D extends MMesh0D
 	public CADShape getGeometry()
 	{
 		return shape;
+	}
+	
+	/**
+	 * Returns the file name containing the topological shape.
+	 *
+	 * @return the file name containing the topological shape.
+	 */
+	public String getGeometryFilename()
+	{
+		return filename;
 	}
 	
 	/**

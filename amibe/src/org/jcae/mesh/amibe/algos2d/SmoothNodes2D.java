@@ -37,6 +37,16 @@ import java.util.Iterator;
 import gnu.trove.TObjectDoubleHashMap;
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
+import java.util.HashMap;
+import org.jcae.mesh.amibe.ds.MMesh1D;
+import org.jcae.mesh.amibe.ds.MeshParameters;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import org.jcae.mesh.cad.*;
+import org.jcae.mesh.xmldata.MMesh1DReader;
+import org.jcae.mesh.xmldata.MeshReader;
+import org.jcae.mesh.xmldata.MeshWriter;
+
 /**
  * Node smoothing.  Triangle quality is computed for all triangles,
  * and vertex quality is the lowest value of its incident triangles.
@@ -73,7 +83,6 @@ public class SmoothNodes2D
 	public SmoothNodes2D(Mesh2D m)
 	{
 		mesh = m;
-		mesh.getGeomSurface();
 		c = (Vertex2D) mesh.createVertex(0.0, 0.0);
 	}
 	
@@ -88,7 +97,6 @@ public class SmoothNodes2D
 	public SmoothNodes2D(final Mesh2D m, final Map<String, String> options)
 	{
 		mesh = m;
-		mesh.getGeomSurface();
 		c = (Vertex2D) mesh.createVertex(0.0, 0.0);
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
@@ -214,7 +222,7 @@ public class SmoothNodes2D
 				Vertex2D d = (Vertex2D) ot.destination();
 				do
 				{
-					ot.nextOrigin();
+					ot.nextOriginLoop();
 					if (ot.hasAttributes(AbstractHalfEdge.OUTER))
 						continue;
 					double qt = triangleQuality(ot);
@@ -224,7 +232,7 @@ public class SmoothNodes2D
 				// Update neighbor vertex quality
 				do
 				{
-					ot.nextOrigin();
+					ot.nextOriginLoop();
 					Vertex2D n = (Vertex2D) ot.destination();
 					if (!tree.contains(n))
 						continue;
@@ -267,7 +275,7 @@ public class SmoothNodes2D
 		Vertex2D d = (Vertex2D) ot.destination();
 		do
 		{
-			ot.nextOrigin();
+			ot.nextOriginLoop();
 			assert !ot.hasAttributes(AbstractHalfEdge.OUTER);
 			Vertex2D v = (Vertex2D) ot.destination();
 			Metric2D m2 = v.getMetrics(mesh);
@@ -301,7 +309,7 @@ public class SmoothNodes2D
 			centroid2[i] = oldp2[i] + relaxation * (centroid2[i] - oldp2[i]);
 		do
 		{
-			ot.nextOrigin();
+			ot.nextOriginLoop();
 			if (c.onLeft(mesh, (Vertex2D) ot.destination(), (Vertex2D) ot.apex()) < 0L)
 				return false;
 		}
@@ -360,7 +368,7 @@ public class SmoothNodes2D
 		double ret = Double.MAX_VALUE;
 		do
 		{
-			edge.nextOrigin();
+			edge.nextOriginLoop();
 			if (edge.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			double qt = triangleQuality(edge);
@@ -371,4 +379,67 @@ public class SmoothNodes2D
 		return ret;
 	}
 
+	private static void usage(int rc)
+	{
+		System.out.println("Usage: SmoothNodes2D [options] xmlDir outDir");
+		System.out.println("Options:");
+		System.out.println(" -h, --help         Display this message and exit");
+		System.out.println(" --iterations <n>   Iterate <n> times over all nodes");
+		System.out.println(" --tolerance <t>    Consider only nodes with quality lower than <t>");
+		System.out.println(" --relaxation <r>   Set relaxation factor");
+		System.out.println(" --refresh          Update vertex quality before each iteration");
+		System.exit(rc);
+	}
+
+	/**
+	 * 
+	 * @param args [options] xmlDir outDir
+	 */
+	public static void main(String[] args)
+	{
+		Map<String, String> opts = new HashMap<String, String>();
+		int argc = 0;
+		for (String arg: args)
+			if (arg.equals("--help") || arg.equals("-h"))
+				usage(0);
+		while (argc < args.length-1)
+		{
+			if (args[argc].length() < 2 || args[argc].charAt(0) != '-' || args[argc].charAt(1) != '-')
+				break;
+			else
+			{
+				opts.put(args[argc].substring(2), args[argc+1]);
+				argc += 2;
+			}
+		}
+		if (argc + 2 != args.length)
+			usage(1);
+
+		HashMap<String, String> options2d = new HashMap<String, String>();
+
+		MMesh1D mesh1D = MMesh1DReader.readObject(args[argc]);
+		CADShape shape = mesh1D.getGeometry();
+		CADExplorer expF = CADShapeFactory.getFactory().newExplorer();
+
+		MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault2D();
+
+		int iFace = 0;
+		for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
+		{
+			CADFace face = (CADFace) expF.current();
+			iFace++;
+			MeshParameters mp = new MeshParameters(options2d);
+			Mesh2D mesh = new Mesh2D(mtb, mp, face);
+			try
+			{
+				MeshReader.readObject(mesh, args[argc], iFace);
+				new SmoothNodes2D(mesh, opts).compute();			
+				MeshWriter.writeObject(mesh, args[argc+1], null, iFace);
+			}
+			catch(IOException ex)
+			{
+				ex.printStackTrace();
+			}
+		}
+	}
 }
