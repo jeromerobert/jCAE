@@ -3,6 +3,18 @@ Wed Nov 28 12:27:25 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/amibe/validation/QualityFloat.java: Let qavg and
 	qavg2 members be double values, otherwise standard deviation may be
 	miscomputed with very large data collections.
+	* src/org/jcae/mesh/amibe/patch/Vertex2D.java (getSurroundingOTriangle):
+	As was mentioned in a comment, this method had been modified a long
+	time ago to handle meshes without outer triangles, in order to deal
+	with 3D meshes read from existing mesh files.
+	These changes were intrusive and made the code more difficult to
+	maintain, and are no more needed because our Mesh2D data structure
+	now always contain outer triangles.
+	It appears that getSurroundingOTriangle() could be very slow when
+	patches contain holes, so it is eventually reverted to its old
+	version, with one minor change: KdTree.getNearVertex() is called
+	instead of KdTree.getNearestVertex() because it is much easier to
+	traverse mesh than finding the nearest vertex in a KdTree instance.
 
 Tue Nov 27 18:47:15 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 

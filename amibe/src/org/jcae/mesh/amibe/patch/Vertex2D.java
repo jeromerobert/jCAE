@@ -182,14 +182,6 @@ public class Vertex2D extends Vertex
 	 * Origin and destination points are always different from
 	 * {@link org.jcae.mesh.amibe.ds.Mesh#outerVertex}.
 	 *
-	 * Note that this algorithm had been initially written to take outer
-	 * triangles into account.  Later on, <code>BasicMesh</code> had been
-	 * rewritten to work without outer triangles, this method had then
-	 * to be adapted too, and was much heavier.  Eventually changes
-	 * in <code>BasicMesh</code> had been reverted and outer triangles
-	 * are back, but this routine has not been modified.  It should be
-	 * cleaned up.
-	 *
 	 * @return a triangle containing this point.
 	 * @see VirtualHalfEdge2D#split3
 	 */
@@ -197,52 +189,8 @@ public class Vertex2D extends Vertex
 	{
 		if (logger.isDebugEnabled())
 			logger.debug("Searching for the triangle surrounding "+this);
-		Triangle.List tList = new Triangle.List();
-		TriangleVH t = (TriangleVH) mesh.getKdTree().getNearestVertex(mesh, this).getLink();
-		VirtualHalfEdge2D start = new VirtualHalfEdge2D(t, 0);
-		VirtualHalfEdge2D current = getSurroundingOTriangleStart(mesh, start, tList);
-		if (current == null)
-		{
-			// First, try with neighbours
-			for (Iterator<Triangle> it = tList.iterator(); it.hasNext(); )
-			{
-				t = (TriangleVH) it.next();
-				start.bind(t);
-				for (int i = 0; i < 3; i++)
-				{
-					start.next();
-					if (!start.hasAttributes(AbstractHalfEdge.BOUNDARY))
-					{
-						start.sym();
-						current = getSurroundingOTriangleStart(mesh, start, tList);
-						if (current != null)
-							break;
-						start.sym();
-					}
-				}
-				if (current != null)
-					break;
-			}
-		}
-		if (current == null)
-		{
-			// As a last resort, check with all triangles
-			for (Triangle at: mesh.getTriangles())
-			{
-				t = (TriangleVH) at;
-				start.bind(t);
-				current = getSurroundingOTriangleStart(mesh, start, tList);
-				if (current != null)
-					break;
-			}
-		}
-		tList.clear();
-		assert current != null;
-		return current;
-	}
-	
-	private VirtualHalfEdge2D getSurroundingOTriangleStart(Mesh2D mesh, VirtualHalfEdge2D current, Triangle.List tList)
-	{
+		TriangleVH t = (TriangleVH) mesh.getKdTree().getNearVertex(mesh, this).getLink();
+		VirtualHalfEdge2D current = new VirtualHalfEdge2D(t, 0);
 		boolean redo = false;
 		Vertex2D o = (Vertex2D) current.origin();
 		Vertex2D d = (Vertex2D) current.destination();
@@ -260,23 +208,17 @@ public class Vertex2D extends Vertex
 		if (o == mesh.outerVertex)
 		{
 			current.next();
-			if (current.hasAttributes(AbstractHalfEdge.BOUNDARY))
-				return null;
 			current.sym();
 			redo = true;
 		}
 		else if (d == mesh.outerVertex)
 		{
 			current.prev();
-			if (current.hasAttributes(AbstractHalfEdge.BOUNDARY))
-				return null;
 			current.sym();
 			redo = true;
 		}
 		else if (a == mesh.outerVertex)
 		{
-			if (current.hasAttributes(AbstractHalfEdge.BOUNDARY))
-				return null;
 			current.sym();
 			redo = true;
 		}
@@ -284,8 +226,6 @@ public class Vertex2D extends Vertex
 		//  be outerVertex again, but this is case 3 above.
 		if (onLeft(mesh, (Vertex2D) current.origin(), (Vertex2D) current.destination()) < 0L)
 		{
-			if (current.hasAttributes(AbstractHalfEdge.BOUNDARY) && !redo)
-				return null;
 			current.sym();
 			redo = true;
 		}
@@ -301,9 +241,6 @@ public class Vertex2D extends Vertex
 			assert d != mesh.outerVertex;
 			if (a == mesh.outerVertex)
 				break;
-			if (tList.contains(current.getTri()))
-				return null;
-			tList.add(current.getTri());
 			long d1 = onLeft(mesh, d, a);
 			long d2 = onLeft(mesh, a, o);
 			//  Note that for all cases, new origin and destination
@@ -331,11 +268,10 @@ public class Vertex2D extends Vertex
 			o = (Vertex2D) current.origin();
 			d = (Vertex2D) current.destination();
 			a = (Vertex2D) current.apex();
-			if (current.hasAttributes(AbstractHalfEdge.BOUNDARY))
-				return null;
 		}
 		if (logger.isDebugEnabled())
 			logger.debug("Found: "+current);
+		assert current != null;
 		return current;
 	}
 	
