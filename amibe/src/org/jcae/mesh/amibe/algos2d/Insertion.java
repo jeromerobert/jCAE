@@ -253,7 +253,7 @@ public class Insertion
 					{
 						Vertex2D v = triNodes.get(index);
 						Vertex2D n = (Vertex2D) mesh.getKdTree().getNearestVertex(mesh, v);
-						assert n == mesh.getKdTree().getNearestVertexDebug(mesh, v);
+						assert checkNearestVertex(mesh, v, n);
 						if (mesh.compGeom().distance(v, n) > minlen)
 						{
 							mesh.getKdTree().add(v);
@@ -385,4 +385,12 @@ public class Insertion
 		logger.debug("Number of iterations to insert all nodes: "+nrIter);
 	}
 	
+	private final boolean checkNearestVertex(Mesh2D mesh, Vertex v, Vertex n)
+	{
+		double d1 = mesh.distance2(v, n, v);
+		Vertex debug = mesh.getKdTree().getNearestVertexDebug(mesh, v);
+		double d2 = mesh.distance2(v, debug, v);
+		assert d1 == d2 : ""+n+" is at a distance "+mesh.distance2(v, n, v)+" but nearest point is "+debug+" at distance "+mesh.distance2(v, debug, v);
+		return true;
+	}
 }
