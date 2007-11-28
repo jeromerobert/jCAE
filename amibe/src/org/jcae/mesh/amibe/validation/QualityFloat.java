@@ -63,7 +63,11 @@ public class QualityFloat
 	private float [] bounds;
 	private int layers = -1;
 	private float scaleFactor = 1.0f;
-	private float qmin, qmax, qavg, qavg2;
+	private float qmin, qmax;
+	// qavg and qavg2 have to be stored into doubles, otherwise
+	// standard deviation may be miscomputed with very large data
+	// collections.
+	private double qavg, qavg2;
 	private int imin, imax;
 
 	public QualityFloat()
@@ -122,8 +126,8 @@ public class QualityFloat
 		qproc.finish();
 		qmin = Float.MAX_VALUE;
 		qmax = Float.MIN_VALUE;
-		qavg = 0.0f;
-		qavg2 = 0.0f;
+		qavg = 0.0;
+		qavg2 = 0.0;
 		for (int i = 0, n = data.size(); i < n; i++)
 		{
 			float val = data.get(i) * scaleFactor;
@@ -132,8 +136,9 @@ public class QualityFloat
 		for (int i = 0, n = data.size(); i < n; i++)
 		{
 			float val = data.get(i);
-			qavg += val / n;
-			qavg2 += val * val / n;
+			double dval = val;
+			qavg += dval ;
+			qavg2 += dval * dval;
 			if (qmin > val)
 			{
 				qmin = val;
@@ -145,6 +150,8 @@ public class QualityFloat
 				imax = i;
 			}
 		}
+		qavg /= data.size();
+		qavg2 /= data.size();
 	}
 	
 	/**
@@ -210,7 +217,7 @@ public class QualityFloat
 	 */
 	public float getMeanValue()
 	{
-		return qavg;
+		return (float) qavg;
 	}
 	
 	/**
