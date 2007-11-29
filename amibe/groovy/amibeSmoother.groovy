@@ -71,7 +71,7 @@ String sSize=cmd.getOptionValue('s', "-1.0");
 String sTolerance=cmd.getOptionValue('t', "2.0");
 String sRelaxation=cmd.getOptionValue('r', "0.6");
 String sRefresh=String.valueOf(cmd.hasOption('R'));
-boolean bnd=!cmd.hasOption('n');
+boolean bnd=!cmd.hasOption('N');
 
 Mesh mesh = new Mesh();
 try
