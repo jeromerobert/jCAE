@@ -61,8 +61,8 @@ org.jcae.mesh.amibe.util.UNVReader.readMesh(mesh, filename);
       <answer>
         <p>
         When a <code>Mesh</code> instance is created, a list of traits (=features) is passed to the
-        constructor.  The list of defined traits cannot be modified afterwards.  For instance if
-        we need adjacency relations, we have to write something like:
+        constructor.  The list of defined traits cannot be modified afterwards.  For instance we can
+        request adjacency relations if needed with the following code:
         </p>
         <source>
 TriangleTraitsBuilder ttb = new org.jcae.mesh.amibe.traits.TriangleTraitsBuilder();
@@ -71,6 +71,7 @@ ttb.addHalfEdge();
 //   ttb.addShallowHalfEdge();
 // if mesh operations can be performed on cheaper VirtualHalfEdge data structure.
 MeshTraitsBuilder mtb = new org.jcae.mesh.amibe.traits.MeshTraitsBuilder();
+Mesh mesh = new Mesh(mtb);
         </source>
       </answer>
     </faq>
@@ -169,7 +170,7 @@ for (int i = 0; i &lt; 3; i++)
         </source>
         <warning>
           The following example does not work, because if triangle adjacency is obtained through
-          <code>VirtualHalfEdge</code>, <code>e</code> and <code>start</code> references then the
+          <code>VirtualHalfEdge</code>, <code>e</code> and <code>start</code> then reference the
           exact same object.
         </warning>
         <source>
