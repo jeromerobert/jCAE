@@ -224,7 +224,7 @@ public class Mesher
 	protected MMesh1D mesh1D(String brepFile)
 	{
 		logger.info("1D mesh");
-		MMesh1D mesh1D = new MMesh1D(brepFile);
+		MMesh1D mesh1D = new MMesh1D(geometryFile);
 		HashMap<String, String> options1d = new HashMap<String, String>();
 		options1d.put("size", ""+edgeLength);
 		options1d.put("deflection", ""+deflection);

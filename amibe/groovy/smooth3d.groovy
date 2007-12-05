@@ -4,17 +4,19 @@
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
-import org.jcae.mesh.amibe.algos3d.*;
+import org.jcae.mesh.amibe.algos3d.SmoothNodes3D;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.cli.*;
-import org.jcae.mesh.amibe.validation.*
-import org.jcae.mesh.amibe.ds.Triangle;
+
+cmd=["smooth3d", "Perform vertex smoothing on 3D mesh"]
+usage="<inputDir> <outputDir>"
 
 void usage(int rc, Options options)
 {
 	HelpFormatter formatter = new HelpFormatter();
-	formatter.printHelp("groovy amibeSmoother.groovy [options] inDir outDir", options);
+	formatter.printHelp("amibebatch "+cmd[0].trim()+" [OPTIONS] "+usage, cmd[1], options, "");
 	System.exit(rc);
 }
 
@@ -26,7 +28,7 @@ options.addOption(
 		.create('h'));
 options.addOption(
 	OptionBuilder.withArgName("NUMBER").hasArg()
-		.withDescription("number of iterations (default: 5)")
+		.withDescription("number of iterations (default: 1)")
 		.withLongOpt("iterations")
 		.create('i'));
 options.addOption(
@@ -66,14 +68,16 @@ if (remaining.length != 2)
 String xmlDir = remaining[0]
 String outDir = remaining[1]
 
-String sIter=cmd.getOptionValue('i', "5");
+String sIter=cmd.getOptionValue('i', "1");
 String sSize=cmd.getOptionValue('s', "-1.0");
 String sTolerance=cmd.getOptionValue('t', "2.0");
 String sRelaxation=cmd.getOptionValue('r', "0.6");
 String sRefresh=String.valueOf(cmd.hasOption('R'));
 boolean bnd=!cmd.hasOption('N');
 
-Mesh mesh = new Mesh();
+MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D()
+mtb.addNodeList()
+Mesh mesh = new Mesh(mtb);
 try
 {
 	MeshReader.readObject3D(mesh, xmlDir);
@@ -83,8 +87,8 @@ catch (IOException ex)
 	println("File "+xmlDir+File.separator+"jcae3d does not exist!");
 	usage();
 }
-HashMap<String, String> decOptions = new HashMap<String, String>();
-decOptions.put("size", "1");
+//HashMap<String, String> decOptions = new HashMap<String, String>();
+//decOptions.put("size", "1");
 //new LengthDecimateHalfEdge(mesh, decOptions).compute();
 
 HashMap<String, String> opts = new HashMap<String, String>();
@@ -100,21 +104,3 @@ sm.compute();
 
 MeshWriter.writeObject3D(mesh, outDir, null);
 
-QualityFloat data = new QualityFloat(mesh.getTriangles().size());
-data.setQualityProcedure(new MaxLengthFace());
-for (Triangle f: mesh.getTriangles())
-{
-	if (f.isWritable())
-		data.compute(f);
-}
-data.finish();
-data.printStatistics();
-float lmin = data.getValueByPercent(0.0);
-float lmax = data.getValueByPercent(1.0);
-
-float c = 340.0f;
-float fmax = 1000.0f * c/lmax/6.0f
-println("Max frequency: "+fmax+"Hz ("+lmax+"mm)")
-float l2 = data.getValueByPercent(0.98);
-float f2 = 1000.0f * c/l2/10.0f
-println("Frequency for 2% criterion: "+f2+"Hz ("+l2+"mm)")

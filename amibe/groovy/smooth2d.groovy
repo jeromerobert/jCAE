@@ -18,10 +18,14 @@ import org.apache.commons.cli.*;
 import org.jcae.mesh.amibe.validation.*
 import org.jcae.mesh.amibe.ds.Triangle;
 
+// line indented to prevent smooth2d from being listed as an amibebatch command
+  cmd=["smooth2d", "Perform vertex smoothing on 2D mesh"]
+usage="<inputDir> <outputDir>"
+
 void usage(int rc, Options options)
 {
 	HelpFormatter formatter = new HelpFormatter();
-	formatter.printHelp("groovy amibeSmoother2D.groovy [options] inDir outDir", options);
+	formatter.printHelp("amibebatch "+cmd[0].trim()+" [OPTIONS] "+usage, cmd[1], options, "");
 	System.exit(rc);
 }
 
@@ -53,6 +57,11 @@ options.addOption(
 		.create('r'));
 options.addOption(
 	OptionBuilder.hasArg(false)
+		.withDescription("use interpolated metrics for distance computations")
+		.withLongOpt("interpolate")
+		.create('I'));
+options.addOption(
+	OptionBuilder.hasArg(false)
 		.withDescription("update triangle quality within loop")
 		.withLongOpt("refresh")
 		.create('R'));
@@ -72,6 +81,7 @@ String sIter=cmd.getOptionValue('i', "5");
 String sSize=cmd.getOptionValue('s', "-1.0");
 String sTolerance=cmd.getOptionValue('t', "2.0");
 String sRelaxation=cmd.getOptionValue('r', "0.6");
+String sInterpolate=String.valueOf(cmd.hasOption('I'));
 String sRefresh=String.valueOf(cmd.hasOption('R'));
 
 CADShapeFactory factory = CADShapeFactory.getFactory()

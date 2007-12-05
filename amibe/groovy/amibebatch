@@ -1,0 +1,136 @@
+#! /bin/sh
+
+reldir=$(dirname $0)
+dir=$(cd $reldir && pwd)
+cmd=
+
+usage()
+{
+	echo "usage: amibebatch [GLOBAL_OPTIONS] COMMAND [OPTIONS]" >&2
+	echo "Global options:" >&2
+	echo "  -h,--help                   Print this help message" >&2
+	echo "  -j,--javahome=PATH          Path to JVM" >&2
+	echo "  -g,--groovyhome=PATH        Path to groovy jars" >&2
+	echo "  -c,--jcaehome=PATH          Path to jCAE" >&2
+	echo "  -l,--log4j-properties=FILE  Path to log4j.properties file" >&2
+	echo "  -m,--memory=MEM             Set maximum Java memory via -Xmx flag" >&2
+	echo "Available list of commands:" >&2
+	for f in $dir/*.groovy
+	do
+    		grep ^cmd= $f | sed -e 's/cmd=\[/	/' -e 's/,/	/' -e 's/[]"]//g' >&2
+	done
+	echo "Run" >&2
+	echo "  amibebatch COMMAND -h" >&2
+	echo "for help about a specific command" >&2
+	exit $1
+}
+
+memory=7000m
+jcaehome=
+javahome=
+groovyhome=
+log4jproperties=
+
+prev=
+for option
+do
+  if test -n "$prev"; then
+    eval $prev=\$option
+    prev=
+    shift
+    continue
+  fi
+
+  optarg=
+  case $option in
+    *=*)
+	optarg=$(expr "X$option" : '[^=]*=\(.*\)') ;;
+  esac
+
+  case $option in
+  "-?" | -h | -help | --help )
+	usage 0 ;;
+
+  -m | -memory | --memory )
+	prev=memory
+	shift ;;
+  -memory=* | --memory=* )
+	memory=$optarg
+	shift ;;
+
+  -j | -javahome | --javahome )
+	prev=javahome
+	shift ;;
+  -javahome=* | --javahome=* )
+	javahome=$optarg
+	shift ;;
+
+  -g | -groovyhome | --groovyhome )
+	prev=groovyhome
+	shift ;;
+  -groovyhome=* | --groovyhome=* )
+	groovyhome=$optarg
+	shift ;;
+
+  -c | -jcaehome | --jcaehome )
+	prev=jcaehome
+	shift ;;
+  -jcaehome=* | --jcaehome=* )
+	jcaehome=$optarg
+	shift ;;
+
+  -l | -log4jproperties )
+	prev=log4jproperties
+	shift ;;
+  -log4jproperties=* | --log4jproperties=* )
+	log4jproperties=$optarg
+	shift ;;
+
+  -* )
+	echo "ERROR: unknown option: $option" >&2
+	echo "ERROR: Please run 'amibebatch -h'" >&2
+	exit 1 ;;
+  * )
+	cmd=$option
+	shift
+	if ! test -f $dir/$cmd && ! test -f $dir/$cmd.groovy
+	then
+		echo "ERROR: unknown command: $cmd" >&2
+		echo "ERROR: Please run 'amibebatch -h'" >&2
+		exit 1
+	fi
+	break ;;
+  esac
+done
+
+test -n "$cmd" || usage 1
+
+test -n "$jcaehome" || jcaehome=${JCAE_HOME:-$dir/..}
+test -n "$javahome" || javahome=${JAVA_HOME:-$jcaehome/jre-6}
+test -n "$groovyhome" || groovyhome=${GROOVY_HOME:-$jcaehome/groovy-1.1-beta-2}
+if test -n "$log4jproperties"
+then
+	case $log4jproperties in
+	  /* ) ;;
+	  * )  log4jproperties="$(pwd)/$log4jproperties" ;;
+	esac
+else
+	log4jproperties=$jcaehome/jcae/etc/log4j.properties
+fi
+
+# Run command
+
+export MMGT_OPT=0
+JAVA_OPTS="-Xms512m -Xmx$memory -Dlog4j.configuration=file://$log4jproperties"
+
+export LD_LIBRARY_PATH=\
+$jcaehome/OpenCASCADE6.2.0/ros/Linux/lib:\
+$jcaehome/jcae/modules/lib\
+${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+
+Gall=$(echo $groovyhome/embeddable/groovy-all*.jar)
+Gcli=$(echo $groovyhome/lib/commons-cli*.jar)
+jcae=$jcaehome/jcae/modules/ext/jcae.jar
+
+$javahome/bin/java $JAVA_OPTS -cp $Gall:$Gcli:$jcae groovy.ui.GroovyMain $dir/$cmd "$@"
+

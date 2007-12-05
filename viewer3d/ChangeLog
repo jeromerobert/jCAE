@@ -1,3 +1,8 @@
+2007-11-30 00:22 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/fe/unv/UNVParser.java (readGroup): Parse
+	failed when a group name begins with 8.
+
 2007-11-11 00:13 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/OEMMBehavior.java

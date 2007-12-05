@@ -53,7 +53,7 @@ public class Metric2D
 	private static Logger logger=Logger.getLogger(Metric2D.class);
 	
 	//  First fundamental form
-	private final double E, F, G;
+	private double E, F, G;
 	private static CADGeomSurface cacheSurf = null;
 	// Static array to speed up orth() method
 	private static final double [] orthRes = new double[2];
@@ -127,6 +127,53 @@ public class Metric2D
 			ret = 0.0;
 		}
 		return ret;
+	}
+	
+	/**
+	 * Compute inverse matrix and stores result into its argument.
+	 *
+	 * @return <code>false</code> if metric is singular, <code>true</code> otherwise.
+	 */
+	public boolean inv(Metric2D ret)
+	{
+		double d = det();
+		if (d == 0.0)
+		{
+			ret = null;
+			return false;
+		}
+		ret.E = G / d;
+		ret.G = E / d;
+		ret.F = - F / d;
+		return true;
+	}
+	
+	/**
+	 * Compute interpolation between two metrics.  If M(A) and M(B) are metrics at point
+	 * a and b, we want to compute inv((inv(M(A)) + inv(M(B)))/2).  This method is called
+	 * by <code>SmoothNodes2D</code> with A fixed and B being iteratively A's neighbours.
+	 *
+	 * @param mFirstInv  inverse metric at first point
+	 * @param mSecond  metric at second point
+	 * @param mRet  allocated metric to store result
+	 * @return <code>true</code> if interpolated metric can be computed, <code>false</code> otherwise
+	 */
+	public static boolean interpolateSpecial(Metric2D mFirstInv, Metric2D mSecond, Metric2D mRet)
+	{
+		double d = mSecond.det();
+		if (d == 0.0)
+			return false;
+		mRet.E = 0.5 * (mSecond.G / d + mFirstInv.E);
+		mRet.G = 0.5 * (mSecond.E / d + mFirstInv.G);
+		mRet.F = 0.5 * (- mSecond.F / d + mFirstInv.F);
+		d = mRet.det();
+		if (d == 0.0)
+			return false;
+		double temp = mRet.G / d;
+		mRet.G = mRet.E / d;
+		mRet.F = - mRet.F / d;
+		mRet.E = temp;
+		return true;
 	}
 	
 	/**

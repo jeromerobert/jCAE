@@ -4,15 +4,22 @@
 import java.io.File;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
+import org.jcae.viewer3d.fe.FEProvider;
 import org.jcae.viewer3d.fe.amibe.AmibeProvider;
+import org.jcae.viewer3d.fe.unv.UNVProvider;
 import org.jcae.viewer3d.fe.ViewableFE;
+import org.jcae.viewer3d.cad.ViewableCAD;
+import org.jcae.viewer3d.cad.occ.OCCProvider;
 import org.jcae.viewer3d.View;
 import org.apache.commons.cli.*;
+
+cmd=["view    ", "Display CAD (brep, stp or iges files) or mesh (Amibe or UNV format)"]
+usage="<dir|file>"
 
 void usage(int rc, Options options)
 {
 	HelpFormatter formatter = new HelpFormatter();
-	formatter.printHelp("groovy amibeViewer.groovy xmlDir", "Launch a view to display mesh stored in xmlDir directory", options, "");
+	formatter.printHelp("amibebatch "+cmd[0].trim()+" [OPTIONS] "+usage, cmd[1], options, "");
 	System.exit(rc);
 }
 
@@ -38,8 +45,13 @@ feFrame.setSize(800,600);
 feFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 View bgView=new View(feFrame);
-AmibeProvider ap = new AmibeProvider(new File(xmlDir));
-bgView.add(new ViewableFE(ap));
+File handle = new File(xmlDir);
+if (handle.isDirectory())
+	bgView.add(new ViewableFE(new AmibeProvider(handle)));
+else if (xmlDir.endsWith(".unv"))
+	bgView.add(new ViewableFE(new UNVProvider(handle)));
+else
+	bgView.add(new ViewableCAD(new OCCProvider(xmlDir)));
 bgView.fitAll();
 feFrame.getContentPane().add(bgView);
 feFrame.setVisible(true);

@@ -61,7 +61,7 @@ public class MeshParameters
 		String epsilonProperty = System.getProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon");
 		if (epsilonProperty == null)
 		{
-			epsilonProperty = "-1.0";
+			epsilonProperty = "0.0";
 			System.setProperty("org.jcae.mesh.amibe.ds.Mesh.epsilon", epsilonProperty);
 		}
 		epsilon = Double.valueOf(epsilonProperty).doubleValue();

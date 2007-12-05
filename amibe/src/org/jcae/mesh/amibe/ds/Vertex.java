@@ -841,6 +841,10 @@ public class Vertex implements Serializable
 				g2[2] += loc[1] * loc[1] * loc[1] * loc[1];
 			}
 			while (ot.destination() != d);
+			// On a plane, h[0] = h[1] = h[2] = 0.
+			// We do not need to compute G, g0 will be 0.
+			if (h[0] == 0.0 && h[1] == 0.0 && h[2] == 0.0)
+				return h;
 			if (h[1] * h[1] < 4.0 * h[0] * h[2])
 				break;
 			// We do not want F to be hyperbolic, projected point may

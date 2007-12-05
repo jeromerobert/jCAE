@@ -305,7 +305,7 @@ public class Insertion
 				// v.getSurroundingOTriangle() below.
 				c.setLink(t);
 				Vertex2D n = (Vertex2D) mesh.getKdTree().getNearestVertex(mesh, c);
-				assert n == mesh.getKdTree().getNearestVertexDebug(mesh, c);
+				assert checkNearestVertex(mesh, c, n);
 				if (mesh.compGeom().distance(c, n) > minlen)
 				{
 					mesh.getKdTree().add(c);

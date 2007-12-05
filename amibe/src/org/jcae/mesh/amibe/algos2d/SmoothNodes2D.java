@@ -62,6 +62,9 @@ public class SmoothNodes2D
 	private static Logger logger=Logger.getLogger(SmoothNodes2D.class);
 	private Mesh2D mesh;
 	private boolean modifiedLaplacian = false;
+	// If interpolate is false, distance(a,b) is computed with metric at point b.
+	// Otherwise, it is computed with an interpolation of both metrics.
+	private boolean interpolate = false;
 	private int nloop = 5;
 	private double tolerance = Double.MAX_VALUE / 2.0;
 	private int progressBarStatus = 10000;
@@ -112,6 +115,8 @@ public class SmoothNodes2D
 				refresh = Boolean.valueOf(val).booleanValue();
 			else if (key.equals("relaxation"))
 				relaxation = Double.valueOf(val).doubleValue();
+			else if (key.equals("interpolate"))
+				interpolate = Boolean.valueOf(val).booleanValue();
 			else
 				throw new RuntimeException("Unknown option: "+key);
 		}
@@ -123,6 +128,7 @@ public class SmoothNodes2D
 			logger.debug("Refresh: "+refresh);
 			logger.debug("Relaxation: "+relaxation);
 			logger.debug("Tolerance: "+tolerance);
+			logger.debug("Interpolate: "+interpolate);
 		}
 	}
 	
@@ -149,28 +155,31 @@ public class SmoothNodes2D
 	public void compute()
 	{
 		logger.debug("Run "+getClass().getName());
-		mesh.pushCompGeom(3);
-		// First compute triangle quality
-		qualityMap = new TObjectDoubleHashMap<Triangle>(mesh.getTriangles().size());
-		computeTriangleQuality();
-
-		nodeset = mesh.getNodes();
-		if (nodeset == null)
+		if (nloop > 0)
 		{
-			nodeset = new HashSet<Vertex>(mesh.getTriangles().size() / 2);
-			for (Triangle f: mesh.getTriangles())
+			mesh.pushCompGeom(3);
+			// First compute triangle quality
+			qualityMap = new TObjectDoubleHashMap<Triangle>(mesh.getTriangles().size());
+			computeTriangleQuality();
+
+			nodeset = mesh.getNodes();
+			if (nodeset == null)
 			{
-				if (f.hasAttributes(AbstractHalfEdge.OUTER))
-					continue;
-				for (Vertex v: f.vertex)
-					nodeset.add(v);
+				nodeset = new HashSet<Vertex>(mesh.getTriangles().size() / 2);
+				for (Triangle f: mesh.getTriangles())
+				{
+					if (f.hasAttributes(AbstractHalfEdge.OUTER))
+						continue;
+					for (Vertex v: f.vertex)
+						nodeset.add(v);
+				}
 			}
+			for (int i = 0; i < nloop; i++)
+				processAllNodes();
+			mesh.popCompGeom(3);
 		}
-		for (int i = 0; i < nloop; i++)
-			processAllNodes();
 		logger.debug("Number of moved points: "+processed);
 		logger.debug("Total number of points not moved during processing: "+notProcessed);
-		mesh.popCompGeom(3);
 	}
 	
 	/*
@@ -184,6 +193,8 @@ public class SmoothNodes2D
 		for (Vertex av: nodeset)
 		{
 			Vertex2D v = (Vertex2D) av;
+			if (!v.isMutable())
+				continue;
 			TriangleVH f = (TriangleVH) v.getLink();
 			if (f.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
@@ -222,7 +233,7 @@ public class SmoothNodes2D
 				Vertex2D d = (Vertex2D) ot.destination();
 				do
 				{
-					ot.nextOriginLoop();
+					ot.nextOrigin();
 					if (ot.hasAttributes(AbstractHalfEdge.OUTER))
 						continue;
 					double qt = triangleQuality(ot);
@@ -232,7 +243,7 @@ public class SmoothNodes2D
 				// Update neighbor vertex quality
 				do
 				{
-					ot.nextOriginLoop();
+					ot.nextOrigin();
 					Vertex2D n = (Vertex2D) ot.destination();
 					if (!tree.contains(n))
 						continue;
@@ -273,27 +284,55 @@ public class SmoothNodes2D
 		double [] centroid2 = c.getUV();
 		centroid2[0] = centroid2[1] = 0.0;
 		Vertex2D d = (Vertex2D) ot.destination();
+		Metric2D m0 = n.getMetrics(mesh);
+		Metric2D mInterpolate = null;
+		Metric2D mInv0 = null;
+		if (interpolate)
+		{
+			// If interpolate is true, distance is computed with metric
+			//    M = inv((inv(metric(n)) + inv(metric(d)))/2)
+			// otherwise
+			//    M = metric(d)
+			// First, compute mInv0 = inv(metric(n))
+			mInv0 = new Metric2D();
+			m0.inv(mInv0);
+			if (mInv0 != null)
+				mInterpolate = new Metric2D();
+		}
 		do
 		{
-			ot.nextOriginLoop();
+			ot.nextOrigin();
 			assert !ot.hasAttributes(AbstractHalfEdge.OUTER);
+			Metric2D m1;
 			Vertex2D v = (Vertex2D) ot.destination();
 			Metric2D m2 = v.getMetrics(mesh);
+			if (mInv0 != null)
+			{
+				if (Metric2D.interpolateSpecial(mInv0, m2, mInterpolate))
+					m1 = mInterpolate;
+				else
+					m1 = m2;
+			}
+			else
+				m1 = m2;
 			nn++;
-			double l = mesh.compGeom().distance2(n, v, m2);
+			double l = mesh.compGeom().distance2(n, v, m1);
 			double[] newp2 = v.getUV();
 			if (modifiedLaplacian)
 			{
-				// Find the point on this edge which has the
-				// desired length
-				if (l <= 0.0)
+				if (l > 1.0)
 				{
-					nn--;
-					continue;
+					// Find the point on this edge which has the
+					// desired length
+					l = 1.0 / Math.sqrt(l);
+					for (int i = 0; i < 2; i++)
+						centroid2[i] += newp2[i] + l * (oldp2[i] - newp2[i]);
 				}
-				l = 1.0 / Math.sqrt(l);
-				for (int i = 0; i < 2; i++)
-					centroid2[i] += newp2[i] + l * (oldp2[i] - newp2[i]);
+				else
+				{
+					for (int i = 0; i < 2; i++)
+						centroid2[i] += oldp2[i];
+				}
 			}
 			else
 			{
@@ -309,7 +348,7 @@ public class SmoothNodes2D
 			centroid2[i] = oldp2[i] + relaxation * (centroid2[i] - oldp2[i]);
 		do
 		{
-			ot.nextOriginLoop();
+			ot.nextOrigin();
 			if (c.onLeft(mesh, (Vertex2D) ot.destination(), (Vertex2D) ot.apex()) < 0L)
 				return false;
 		}
@@ -368,7 +407,7 @@ public class SmoothNodes2D
 		double ret = Double.MAX_VALUE;
 		do
 		{
-			edge.nextOriginLoop();
+			edge.nextOrigin();
 			if (edge.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			double qt = triangleQuality(edge);

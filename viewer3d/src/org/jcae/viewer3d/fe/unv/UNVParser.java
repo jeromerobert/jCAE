@@ -235,6 +235,14 @@ public class UNVParser
 					String index = st.nextToken();
 					int id=tria3IndicesMap.get(Integer.parseInt(index));
 					facelist.add(id);
+					nbelem--;
+					st.nextToken();
+					st.nextToken();
+				}
+				if  (nbelem <= 0)
+				{
+					line = rd.readLine();
+					break;
 				}
 			}
 			tria3Groups.add(facelist.toNativeArray());			

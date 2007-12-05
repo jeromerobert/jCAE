@@ -32,7 +32,7 @@ import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.io.IOException;
@@ -162,36 +162,40 @@ public class SmoothNodes3D
 	public void compute()
 	{
 		logger.info("Run "+getClass().getName());
-		// First compute triangle quality
-		qualityMap = new TObjectDoubleHashMap<Triangle>(mesh.getTriangles().size());
-		computeTriangleQuality();
-
-		nodeset = mesh.getNodes();
-		nodeProjection = new HashMap<Vertex, QuadricProjection>(mesh.getTriangles().size() / 2);
-		if (nodeset == null)
+		if (nloop > 0)
 		{
-			nodeset = new HashSet<Vertex>(mesh.getTriangles().size() / 2);
-			for (Triangle f: mesh.getTriangles())
+			// First compute triangle quality
+			qualityMap = new TObjectDoubleHashMap<Triangle>(mesh.getTriangles().size());
+			computeTriangleQuality();
+	
+			nodeset = mesh.getNodes();
+			nodeProjection = new HashMap<Vertex, QuadricProjection>(mesh.getTriangles().size() / 2);
+			if (nodeset == null)
 			{
-				if (f.hasAttributes(AbstractHalfEdge.OUTER))
-					continue;
-				for (Vertex v: f.vertex)
+				nodeset = new LinkedHashSet<Vertex>(mesh.getTriangles().size() / 2);
+				for (Triangle f: mesh.getTriangles())
 				{
-					if (nodeset.contains(v))
+					if (f.hasAttributes(AbstractHalfEdge.OUTER))
 						continue;
-					nodeset.add(v);
-					Matrix3D P = v.getMatrix3DLocalFrame();
-					if (P == null)
-						continue;
-					double [] q = v.getLocalQuadric(P);
-					if (q == null)
-						continue;
-					nodeProjection.put(v, new QuadricProjection(v.getUV(), P, q));
+					for (Vertex v: f.vertex)
+						nodeset.add(v);
 				}
 			}
+			for (Vertex v: nodeset)
+			{
+				if (!v.isManifold() || !v.isMutable())
+					continue;
+				Matrix3D P = v.getMatrix3DLocalFrame();
+				if (P == null)
+					continue;
+				double [] q = v.getLocalQuadric(P);
+				if (q == null)
+					continue;
+				nodeProjection.put(v, new QuadricProjection(v.getUV(), P, q));
+			}
+			for (int i = 0; i < nloop; i++)
+				processAllNodes();
 		}
-		for (int i = 0; i < nloop; i++)
-			processAllNodes();
 		logger.info("Number of moved points: "+processed);
 		logger.info("Total number of points not moved during processing: "+notProcessed);
 	}
@@ -307,16 +311,19 @@ public class SmoothNodes3D
 				double[] newp3 = v.getUV();
 				if (sizeTarget > 0.0)
 				{
-					// Find the point on this edge which has the
-					// desired length
-					if (l <= 0.0)
+					if (l > 1.0)
 					{
-						nn--;
-						continue;
+						// Find the point on this edge which has the
+						// desired length
+						l = sizeTarget / l;
+						for (int i = 0; i < 3; i++)
+							centroid3[i] += newp3[i] + l * (oldp3[i] - newp3[i]);
 					}
-					l = sizeTarget / l;
-					for (int i = 0; i < 3; i++)
-						centroid3[i] += newp3[i] + l * (oldp3[i] - newp3[i]);
+					else
+					{
+						for (int i = 0; i < 3; i++)
+							centroid3[i] += oldp3[i];
+					}
 				}
 				else
 				{
@@ -398,7 +405,9 @@ public class SmoothNodes3D
 	 */
 	public static void main(String[] args)
 	{
-		Mesh mesh = new Mesh();
+		org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = org.jcae.mesh.amibe.traits.MeshTraitsBuilder.getDefault3D();
+		mtb.addNodeList();
+		Mesh mesh = new Mesh(mtb);
 		Map<String, String> opts = new HashMap<String, String>();
 		int argc = 0;
 		for (String arg: args)

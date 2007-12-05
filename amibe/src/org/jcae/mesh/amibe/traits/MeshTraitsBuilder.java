@@ -267,7 +267,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		}
 		else if ((attributes & NODES) != 0)
 		{
-			ArrayList<Triangle> oldList = (ArrayList<Triangle>) t.array[index[BITTRIANGLES]];
+			ArrayList<Triangle> oldList = (ArrayList<Triangle>) t.array[index[BITNODES]];
 			oldList.ensureCapacity(nodes);
 		}
 	}

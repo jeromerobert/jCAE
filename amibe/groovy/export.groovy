@@ -5,10 +5,13 @@ import org.jcae.mesh.xmldata.MeshExporter
 import java.lang.reflect.Constructor;
 import org.apache.commons.cli.*;
 
+cmd=["export  ", "Export Amibe mesh into other file format"]
+usage="<xmlDir> <filename>"
+
 void usage(int rc, Options options)
 {
 	HelpFormatter formatter = new HelpFormatter();
-	formatter.printHelp("groovy amibeExporter.groovy [options] xmlDir filename", options);
+	formatter.printHelp("amibebatch "+cmd[0].trim()+" [OPTIONS] "+usage, cmd[1], options, "");
 	System.exit(rc);
 }
 

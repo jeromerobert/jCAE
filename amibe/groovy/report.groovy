@@ -1,7 +1,7 @@
 /**
  * Sample class to print quality statistics about an amibe mesh.
  * Example: to print histogram about minimum angles:
- *  amibeReporter.groovy -c MinAngleFace -s .0174532925199432957 -b 6,12,18,24,30,36,42,48,54
+ *  amibebatch report -c MinAngleFace -s .0174532925199432957 -b 6,12,18,24,30,36,42,48,54
  */
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
@@ -13,10 +13,13 @@ import java.io.File;
 import gnu.trove.TIntHashSet;
 import org.apache.commons.cli.*;
 
+cmd=["report  ", "Print statistics about mesh quality"]
+usage="<dir>"
+
 void usage(int rc, Options options)
 {
 	HelpFormatter formatter = new HelpFormatter();
-	formatter.printHelp("groovy amibeReporter.groovy [options] xmlDir", "Prints statistics about mesh stored in xmlDir directory", options, "");
+	formatter.printHelp("amibebatch "+cmd[0].trim()+" [OPTIONS] "+usage, cmd[1], options, "");
 	System.exit(rc);
 }
 

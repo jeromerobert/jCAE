@@ -1,3 +1,31 @@
+Tue Dec  4 10:10:19 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/MeshParameters.java: Change default value
+	for org.jcae.mesh.amibe.ds.Mesh.epsilon property to 0.
+	* src/org/jcae/mesh/amibe/traits/MeshTraitsBuilder.java: addNodeList()
+	was unusable.
+	* src/org/jcae/mesh/amibe/algos3d/SmoothNodes3D.java: Smoothing was
+	not performed if MeshTraitsBuilder.addNodeList() had been called.
+	* src/org/jcae/mesh/amibe/algos2d/SmoothNodes2D.java
+	  src/org/jcae/mesh/amibe/algos3d/SmoothNodes3D.java: As mentioned
+	in quoted paper, smoothed vertex is moved within region delimited
+	by incident triangles.
+	* src/org/jcae/mesh/amibe/algos2d/SmoothNodes2D.java: New 'interpolate'
+	option, set to false by default because results do not seem to be
+	significantly improved.  If set to true, metric used to compute
+	distance is interpolated between its two endpoints, otherwise metric
+	of destination point is used.
+	* src/org/jcae/mesh/amibe/metrics/Metric2D.java: New inv() and
+	interpolateSpecial() methods.
+
+Mon Dec  3 23:14:23 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos3d/SmoothNodes3D.java: Do not try to
+	move boundary vertices.
+	* src/org/jcae/mesh/amibe/ds/Vertex.java (getLocalQuadric): Local
+	quadric was not computed on a planar surface and thus vertices could
+	not be moved.
+
 Wed Nov 28 12:27:25 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/validation/QualityFloat.java: Let qavg and

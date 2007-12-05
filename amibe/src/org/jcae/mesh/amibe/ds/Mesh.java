@@ -546,7 +546,8 @@ public class Mesh implements Serializable
 		}
 		// Replace LinkedHashSet by Triangle[], and keep only one
 		// Triangle by fan.
-		int nrNM = 0;
+		int nrNMV = 0;
+		int nrNME = 0;
 		int nrFE = 0;
 		for (Triangle t: triangleList)
 		{
@@ -556,16 +557,20 @@ public class Mesh implements Serializable
 				Vertex v = t.vertex[i];
 				if (v.getLink() instanceof LinkedHashSet)
 				{
-					nrNM++;
+					nrNMV++;
 					v.setLinkFan((LinkedHashSet<Triangle>) v.getLink());
 				}
 				ot = ot.next();
 				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
 					nrFE++;
+				else if (ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+					nrNME++;
 			}
 		}
-		if (nrNM > 0)
-			logger.debug("Found "+nrNM+" non manifold vertices");
+		if (nrNMV > 0)
+			logger.debug("Found "+nrNMV+" non manifold vertices");
+		if (nrNME > 0)
+			logger.debug("Found "+nrNME+" non manifold edges");
 		if (nrFE > 0)
 			logger.debug("Found "+nrFE+" free edges");
 		//  7. If vertices are on inner boundaries and there is
