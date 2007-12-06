@@ -69,3 +69,13 @@ A default mesh object is defined in the mesh module. This mesh object has three 
 <p>Final 3D view of the mesh.</p>
 <img src="jcae-0.8-mesh2.png"/>
 
+	<h1>Troubleshooting</h1>
+	<p>A user kindly <a href="http://sourceforge.net/forum/forum.php?thread_id=1842792&forum_id=253750">reported</a> problems with his configuration due to memory limitations, and <a href="http://5axes.free.fr/IGES_to_STL.htm">explained</a> (in French) how to fix it.  The mesher is launched into a separate JVM, and default maximum memory is set to 1500MB.  The reason is that jCAE is primarily designed to work with very large meshes for finite element applications, and it is quite logical to have lots of RAM.  We checked on Linux systems that computers with less RAM (1GB) are not affected by these settings, but it seems that Windows refuses to launch a JVM in these conditions.  If you see messages like</p>
+<pre>
+	Error occurred during initialization of VM
+	Could not reserve enough space for object heap
+	Could not create the Java virtual machine.
+</pre>
+<p>on your console, you need to modify <code>maximumMemory</code> property in <code>Window/Options/Mesher settings</code> tab.</p>
+   
+
