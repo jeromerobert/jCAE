@@ -11,15 +11,15 @@
 	<p>To start jCAE on Microsoft Windows double click on the <code>jcae.bat</code>
 		file in the root directory of jCAE. On Linux run the <code>jcae.sh</code>
 		script. You get the following screen:</p>
-	<img src="jcae-0.8-start.png"/>
+	<img src="jcae-0.15-start.png"/>
 	<p>One has to start a new jCAE project, through the File|New menu. You get a wizard project in which you have to mention the project name and the storage location as presented in the next figures.</p>
-	<img src="jcae-0.8-newWizard.png"/>
+	<img src="jcae-0.15-newWizard.png"/>
 	<p>Select the name and the location of the project:</p>
-	<img src="jcae-0.8-newWizard2.png"/></p>
+	<img src="jcae-0.15-newWizard2.png"/></p>
 <p>Then click on the finish button. The basic structure of a project is generated in the upper leftmost tree. A project is composed of two basic modules: the CAD module and the meshing module.</p>
 	<h1>Meshing from an existing CAD file</h1>
 <p>First, one has to import a CAD file in the CAD module by selecting the <cite>Import geometry</cite> in the file menu. 3 types of CAD format are supported: the native OpenCascade format (Brep) and the standard IGES and STEP formats. Select a CAD file:</p>
-<img src="jcae-0.8-openGeom.png"/>
+<img src="jcae-0.15-openGeom.png"/>
 <p>A new CAD object is created ; this terminates the CAD operations. The final geometry step is presented in Figure 7.
 
 A default mesh object is defined in the mesh module. This mesh object has three default meshing hypothesis. Hypothesis can be of two kinds: algorithms and parameters. The three default hypothesis are the following:</p>
@@ -30,22 +30,23 @@ A default mesh object is defined in the mesh module. This mesh object has three 
 	<li>the deflexion parameter</li>
 </ol>
 <p>To display the geometry, right click on it and click <cite>View</cite>.</p>
-<img src="jcae-0.8-f1.png"/>
-	<p>At this point, the default mesh object has no associated geometry. One need to link the previously loaded geometry to the mesh object. Currently, this is done through the copy/paste operation presented hereafter.</p>
+<img src="jcae-0.15-f1.png"/>
+	<p>At this point, the default mesh object has no associated geometry. One need to create a new mesh, then link the previously loaded geometry to the mesh object. Currently, this is done through the copy/paste operation presented hereafter.</p>
 <table style="width: 100%; border-style: none">
 	<tr style="border-style: none;">
-		<td style="border-style: none; vertical-align: center;text-align: center;"><img src="jcae-0.8-copy.png"/></td>
-		<td style="border-style: none; vertical-align: center;text-align: center;"><img src="jcae-0.8-paste.png"/></td>
+		<td style="border-style: none; vertical-align: center;text-align: center;"><img src="jcae-0.15-addMesh.png"/></td>
+		<td style="border-style: none; vertical-align: center;text-align: center;"><img src="jcae-0.15-copy.png"/></td>
+		<td style="border-style: none; vertical-align: center;text-align: center;"><img src="jcae-0.15-paste.png"/></td>
 	</tr>
 </table>
 <p>Then you may modify the parameters (edge length and deflexion) through the lower leftmost properties panel as shown below.</p>
-<img src="jcae-0.8-editLength.png"/>
+<img src="jcae-0.15-editLength.png"/>
 <p>Once the parameter values are set, you can compute the mesh through the pop-up menu as shown below.</p>
-<img src="jcae-0.8-compute.png"/>
-<p>One can follow the mesh generation phase by expanding the standard output window located at the bottom of the workspace (Output - jCAE Mesher 1)</p>
-<img src="jcae-0.8-meshLog.png"/>
+<img src="jcae-0.15-compute.png"/>
+<p>One can follow the mesh generation phase by displaying output window (from window menu)</p>
+<img src="jcae-0.15-meshLog.png"/>
 <p>Once the mesh is generated, the view operation (pop-up menu) can be selected to get the 3D representation of the mesh.</p>
-<img src="jcae-0.8-mesh.png"/>
+<img src="jcae-0.15-mesh.png"/>
 <h1>Generating a geometry</h1>
 <p>Creation of a new geometry.</p>
 <img src="jcae-0.8-createGeom.png"/>
