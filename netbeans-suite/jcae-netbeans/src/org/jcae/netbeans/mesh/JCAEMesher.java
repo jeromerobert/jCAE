@@ -65,7 +65,6 @@ public class JCAEMesher implements Runnable, Cancellable
 			try
 			{
 				String buffer=reader.readLine();
-				System.out.println(buffer);
 				while(buffer!=null)
 				{
 					ow.println(buffer);

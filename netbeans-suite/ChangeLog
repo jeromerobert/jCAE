@@ -1,3 +1,8 @@
+2007-12-06 15:11 Denis Barbier <barbier@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/JCAEMesher.java: Remove
+	null messages sent to console.
+
 2007-11-23 13:36 Denis Barbier <barbier@users.sourceforge.net>
 
 	* jcae-netbeans/src/org/jcae/netbeans/mesh/AbstractEdgesAction.java
