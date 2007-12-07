@@ -17,6 +17,19 @@ usage()
 	echo "Available list of commands:" >&2
 	for f in $dir/*.groovy
 	do
+		case $f in
+		  "$dir/*.groovy" )
+			# Oops, we cannot find groovy scripts.  Try in jCAE location
+			if test -n "$jcaehome"
+			then
+				for f in $jcaehome/jcae/groovy/*.groovy
+				do
+    					grep ^cmd= $f | sed -e 's/cmd=\[/	/' -e 's/,/	/' -e 's/[]"]//g' >&2
+				done
+			fi
+			break
+			;;
+		esac
     		grep ^cmd= $f | sed -e 's/cmd=\[/	/' -e 's/,/	/' -e 's/[]"]//g' >&2
 	done
 	echo "Run" >&2
@@ -32,6 +45,7 @@ groovyhome=
 log4jproperties=
 
 prev=
+rc=1
 for option
 do
   if test -n "$prev"; then
@@ -49,7 +63,8 @@ do
 
   case $option in
   "-?" | -h | -help | --help )
-	usage 0 ;;
+	rc=0
+	break ;;
 
   -m | -memory | --memory )
 	prev=memory
@@ -103,11 +118,10 @@ do
   esac
 done
 
-test -n "$cmd" || usage 1
-
 test -n "$jcaehome" || jcaehome=${JCAE_HOME:-$dir/..}
 test -n "$javahome" || javahome=${JAVA_HOME:-$jcaehome/jre-6}
 test -n "$groovyhome" || groovyhome=${GROOVY_HOME:-$jcaehome/groovy-1.1-beta-2}
+test -n "$cmd" || usage $rc
 if test -n "$log4jproperties"
 then
 	case $log4jproperties in
