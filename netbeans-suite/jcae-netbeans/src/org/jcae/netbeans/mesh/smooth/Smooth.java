@@ -43,7 +43,7 @@ public final class Smooth extends CookieAction
 			cmdLine[i++]="--iterations";
 			cmdLine[i++]=Integer.toString(bean.getIterationNumber());
 
-			cmdLine[i++]="--tolerance";
+			cmdLine[i++]="--size";
 			cmdLine[i++]=Double.toString(bean.getElementSize());
 
 			cmdLine[i++]=xmlDir;
