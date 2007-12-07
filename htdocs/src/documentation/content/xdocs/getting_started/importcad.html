@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta content="text/html; charset=iso-8859-15" http-equiv="CONTENT-TYPE">
+</head>
+<body>
+	<h1>Getting Started &mdash; Meshing from an existing CAD file</h1>
+<p>First, one has to import a CAD file in the CAD module by selecting <cite>Import geometry</cite> in File menu. 3 CAD formats are supported: native OpenCascade format (Brep) and standard IGES and STEP formats. Select a CAD file:</p>
+<img src="jcae-0.15-openGeom.png"/>
+<p>A new CAD object is created.  To display this geometry, right click on it and click <cite>View</cite>.</p>
+<img src="jcae-0.15-f1.png"/>
+<p>This terminates the CAD operations.  We now create a new mesh, then link the previously loaded geometry to the mesh object. Currently, this is done through the copy/paste operation presented hereafter.</p>
+<table style="width: 80%; border-style: none">
+	<tr style="border-style: none;">
+		<td style="border-style: none; vertical-align: center;text-align: center;"><img src="jcae-0.15-addMesh.png"/></td>
+		<td style="border-style: none; vertical-align: center;text-align: center;"><img src="jcae-0.15-copy.png"/></td>
+		<td style="border-style: none; vertical-align: center;text-align: center;"><img src="jcae-0.15-paste.png"/></td>
+	</tr>
+</table>
+<p>Then you may modify meshing parameters (edge length and deflexion) through the lower leftmost properties panel as shown below.</p>
+<img src="jcae-0.15-editLength.png"/>
+<p>Once parameter values are set, you can compute mesh through the pop-up menu as shown below.</p>
+<img src="jcae-0.15-compute.png"/>
+<p>One can follow the mesh generation phase by displaying output window (from window menu)</p>
+<img src="jcae-0.15-meshLog.png"/>
+<p>Once mesh is generated, <cite>View</cite> operation (pop-up menu) can be selected to get its 3D representation.</p>
+<img src="jcae-0.15-mesh.png"/>
+</body>
+</html>

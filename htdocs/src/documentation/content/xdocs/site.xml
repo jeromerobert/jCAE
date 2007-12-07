@@ -40,7 +40,12 @@ See http://forrest.apache.org/docs/linking.html for more info
 		<forums label="Forums" href="http://sourceforge.net/forum/?group_id=74334"/>
 	</about>
 	<doc label="Documentation">
-		<started label="Getting started" href="getting_started/index.html"/>
+		<started label="Getting started">
+			<started-chap label="Installation" href="getting_started/installation.html"/>
+			<started-chap label="Mesh Imported CAD" href="getting_started/importcad.html"/>
+			<started-chap label="Mesh Generated CAD" href="getting_started/generatecad.html"/>
+			<started-chap label="Troubleshouting" href="getting_started/troubleshouting.html"/>
+		</started>
 		<nbm label="Installation of NetBeans Modules" href="inst-nbm/index.html"/>
 		<occjava label="OccJava">
 			<occjava-faq label="Overview" href="occjava.html"/>
