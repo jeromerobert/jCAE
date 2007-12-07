@@ -54,9 +54,10 @@ mkdir -p OpenCASCADE6.2.0/ros/Linux/
 ln -s $CASROOT/../LICENSE OpenCASCADE6.2.0/LICENSE
 ln -s $CASCADE_LIB OpenCASCADE6.2.0/ros/Linux/lib
 unzip -q ../dist/jcae.zip
-mkdir jcae/groovy
-sed -e 's/^memory=7000m/memory=7000m/' ../../amibe/groovy/amibebatch > jcae/bin/amibebatch
-cp ../../amibe/groovy/*.groovy jcae/groovy
+mkdir jcae/jcae/groovy
+sed -e 's/^memory=7000m/memory=500m/' ../../amibe/groovy/amibebatch > jcae/bin/amibebatch
+cp ../../amibe/groovy/*.groovy jcae/jcae/groovy
+chmod a+x jcae/jcae/groovy/*.groovy jcae/bin/amibebatch
 mv jcae tmp
 mv tmp/* .
 rmdir tmp
