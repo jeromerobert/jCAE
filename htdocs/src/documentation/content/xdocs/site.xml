@@ -51,7 +51,7 @@ See http://forrest.apache.org/docs/linking.html for more info
 			<occjava-faq label="Overview" href="occjava.html"/>
 			<occjava-faq label="FAQ" href="occjava-questions.html"/>
 			<occjava-script label="Scripting" href="occjava-script.html"/>
-			<occjava-api label="API" href="occjava-doc/"/>
+			<occjava-api label="API" href="occjava-doc/index.html"/>
 		</occjava>
 		<viewer3d label="Viewer3d" href="viewer3d.html"/>
 		<architecture label="Architecture" href="architecture.html"/>
@@ -59,11 +59,11 @@ See http://forrest.apache.org/docs/linking.html for more info
 			<amibe-format label="Overview" href="amibe.html"/>
 			<amibe-format label="File Formats" href="amibe.html#Amibe+file+format"/>
 			<amibe-oemm label="OEMM" href="amibe-oemm.html"/>
-			<amibe-api label="API" href="amibe-doc/"/>
+			<amibe-api label="API" href="amibe-doc/index.html"/>
 			<amibe-faq label="FAQ" href="amibe-faq.html"/>
 		</amibe>
 		<developers label="Developers" href="developers.html"/>
-		<oldies label="Oldies" href="oldies/">
+		<oldies label="Oldies">
 			<jcae06 label="jCAE 0.6" href="jcae-0.6.html"/>
 			<jcae07 label="jCAE 0.7" href="jcae-0.7.html"/>
 		</oldies>
