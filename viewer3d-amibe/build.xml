@@ -24,7 +24,7 @@
 		<mkdir dir="${jar.dir}"/>
 		<jar compress="true" jarfile="${jar.dir}/${jcae-viewer3d-amibe.jar}">
 			<manifest>
-				<attribute name="Class-Path" value="trove.jar jcae.jar jcae-viewer3d.jar"/>
+				<attribute name="Class-Path" value="${jcae-viewer3d-amibe.jar.dependencies}"/>
 			</manifest>
 			<fileset dir="${classes.dir}" includes="org/jcae/viewer3d/**"/>
 		</jar>
