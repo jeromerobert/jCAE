@@ -31,9 +31,6 @@ public final class Smooth extends CookieAction
 			String xmlDir=Utilities.absoluteFileName(
 				c.getMesh().getMeshFile(), reference);
 			
-			File brepFile=new File(Utilities.absoluteFileName(
-				c.getMesh().getGeometryFile(), reference));
-			
 			String className="org.jcae.mesh.amibe.algos3d.SmoothNodes3D";
 			String[] cmdLinePre=Settings.getDefault().getCommandLineAlgo();
 			String[] cmdLine=new String[cmdLinePre.length+7];
