@@ -53,7 +53,7 @@ public class MMesh0D
 	 * Creates a <code>MMesh0D</code> instance by merging all topological
 	 * vertices which have the same location.
 	 *
-	 * @param shape  topological shape
+	 * @param s  topological shape
 	 */
 	public MMesh0D(CADShape s)
 	{

@@ -329,7 +329,7 @@ public class Mesher
 	
 	/**
 	 * Read 2D meshes and compute 3D mesh
-	 * @param shape
+	 * @param brepFile
 	 */
 	protected void mesh3D(String brepFile)
 	{
