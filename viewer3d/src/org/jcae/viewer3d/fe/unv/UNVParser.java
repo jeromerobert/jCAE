@@ -103,7 +103,7 @@ public class UNVParser
 					break;
 				case 2435:
 				case 2430:
-					readGroup(rd);
+					readGroup(rd, blockID);
 					break;
 				case 790:
 					readLoadSets(rd);
@@ -207,7 +207,7 @@ public class UNVParser
 		return (id & ELEMENT_MASK) == HEXA8_MASK;
 	}
 
-	private void readGroup(BufferedReader rd) throws IOException
+	private void readGroup(BufferedReader rd, int blockID) throws IOException
 	{		
 		String line = rd.readLine();
 		while (!line.trim().equals("-1"))
@@ -236,8 +236,11 @@ public class UNVParser
 					int id=tria3IndicesMap.get(Integer.parseInt(index));
 					facelist.add(id);
 					nbelem--;
-					st.nextToken();
-					st.nextToken();
+					if (blockID == 2435)
+					{
+						st.nextToken();
+						st.nextToken();
+					}
 				}
 				if  (nbelem <= 0)
 				{
