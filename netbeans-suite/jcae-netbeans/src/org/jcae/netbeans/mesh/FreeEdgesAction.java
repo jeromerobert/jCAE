@@ -31,5 +31,10 @@ public final class FreeEdgesAction extends AbstractEdgesAction
 	{
 		return "CTL_FreeEdgesAction";
 	}	
+
+	public String getViewSuffix()
+	{
+		return "free edges";
+	}
 }
 

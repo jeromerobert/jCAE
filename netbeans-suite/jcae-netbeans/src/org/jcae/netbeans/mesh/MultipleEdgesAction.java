@@ -31,5 +31,10 @@ public final class MultipleEdgesAction extends AbstractEdgesAction
 	{
 		return "CTL_MultiEdgesAction";
 	}	
+
+	public String getViewSuffix()
+	{
+		return "multiple edges";
+	}
 }
 

@@ -2,6 +2,11 @@
 
 	* jcae-netbeans/src/org/jcae/netbeans/mesh/smooth/Smooth.java: Fix
 	call to SmoothNodes3D.
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/AbstractEdgesAction.java
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/FreeEdgesAction.java
+	  jcae-netbeans/src/org/jcae/netbeans/mesh/MultipleEdgesAction.java:
+	New getViewSuffix() method to print a relevant label in list of
+	viewables.  Previously, multiple edges had a "free edges" label.
 
 2007-12-06 15:11 Denis Barbier <barbier@users.sourceforge.net>
 

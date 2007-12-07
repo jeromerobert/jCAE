@@ -23,6 +23,7 @@ public abstract class AbstractEdgesAction extends CookieAction
 {
 	public abstract String getBranchGroupLabel();
 	public abstract String getActionLabel();
+	public abstract String getViewSuffix();
 	
 	protected void performAction(Node[] activatedNodes)
 	{
@@ -45,7 +46,7 @@ public abstract class AbstractEdgesAction extends CookieAction
 			BranchGroup bg=xbg.getBranchGroup(getBranchGroupLabel());
 			View bgView=View3DManager.getDefault().getView3D().getView();			
 			ViewableBG fe1 = new ViewableBG(bg);
-			fe1.setName(activatedNodes[0].getName()+" free edges");
+			fe1.setName(activatedNodes[0].getName()+" "+getViewSuffix());
 			bgView.add(fe1);			
 			bgView.setCurrentViewable(fe1);
 			
@@ -75,7 +76,7 @@ public abstract class AbstractEdgesAction extends CookieAction
 	
 	public String getName()
 	{
-		return NbBundle.getMessage(FreeEdgesAction.class, getActionLabel());
+		return NbBundle.getMessage(getClass(), getActionLabel());
 	}
 	
 	protected Class[] cookieClasses()
