@@ -1,7 +1,7 @@
-#! /bin/sh -xe
+#! /bin/sh
 
 # Change this to your own OpenCASCADE installation
-CASROOT=/home/jerome/OpenCASCADE6.2.0-win32/ros
+: ${CASROOT=/home/jerome/OpenCASCADE6.2.0/ros}
 
 # Name of the Java directory in the final bundle
 JAVA_NAME=jre-6
@@ -21,18 +21,19 @@ set PATH=%jcaeHome%OpenCASCADE6.2.0/ros/win32/bin;%jcaeHome%jcae/modules/lib/;%P
 EOF
 
 test -z "$JRE_HOME" && JRE_HOME=../jre-6-win32
-CASCADE_LIB=$CASROOT/win32-jcae/bin
-test ! -d "$CASCADE_LIB" && CASCADE_LIB=$CASROOT/win32/bin
+test -d "$JRE_HOME" || JRE_HOME=$(readlink -f $(dirname $(readlink -f $(which java)))/..)	
+if [ ! -d "$JRE_HOME" ]; then
+	echo "Invalid JRE directory. Cannot find $JRE_HOME"
+	exit 0
+fi
 
+CASCADE_LIB=$CASROOT/win32-jcae/bin
+test -d "$CASCADE_LIB" || CASCADE_LIB=$CASROOT/win32/bin
 if [ ! -d "$CASCADE_LIB" ]; then
 	echo "Invalid OpenCASCADE directory. Cannot find $CASCADE_LIB"
 	exit 0
 fi
 
-if [ ! -d "$JRE_HOME" ]; then
-	echo "Invalid JRE directory. Cannot find $JRE_HOME"
-	exit 0
-fi
 
 ln -s $JRE_HOME $JAVA_NAME
 rm -rf $JAVA_NAME/plugin $JAVA_NAME/javaw $JAVA_NAME/lib/i386/client/classes.jsa || true
