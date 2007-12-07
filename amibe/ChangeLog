@@ -1,3 +1,9 @@
+Fri Dec  7 18:35:04 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/UNV2Amibe.java
+	  src/org/jcae/mesh/amibe/util/UNVReader.java: Fix import of UNV files
+	when there are more than 8 groups.
+
 Tue Dec  4 10:10:19 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/MeshParameters.java: Change default value

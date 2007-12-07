@@ -85,7 +85,7 @@ public class UNVReader
 					else if ( (line.trim().equals("2430")) || (line.trim().equals("2435")) )
 					{
 						// read groups
-						readGroup(rd, mesh, facesmap);
+						readGroup(rd, line.trim(), mesh, facesmap);
 					}
 					else if (line.trim().equals("2414"))
 					{
@@ -263,7 +263,7 @@ public class UNVReader
 		return facesmap;
 	}
 	
-	private static void readGroup(BufferedReader rd, Mesh mesh, TIntObjectHashMap<Triangle> facesmap)
+	private static void readGroup(BufferedReader rd, String type, Mesh mesh, TIntObjectHashMap<Triangle> facesmap)
 	{
 		logger.debug("Reading groups");
 		String line = "";
@@ -275,7 +275,6 @@ public class UNVReader
 			{
 				// read the number of elements to read in the last number of the line
 				StringTokenizer st = new StringTokenizer(line);
-				/*
 				String snb = "";
 				// Block number
 				st.nextToken();
@@ -285,7 +284,6 @@ public class UNVReader
 				}
 				// Number of elements
 				int nbelem = Integer.valueOf(snb).intValue();
-				*/
 				// Read group name
 				String title = rd.readLine().trim();
 				ArrayList<Triangle> facelist = new ArrayList<Triangle>();
@@ -305,6 +303,17 @@ public class UNVReader
 							facelist.add(f);
 							f.setGroupId(groupIdx);
 						}
+						nbelem--;
+						if (type.equals("2435"))
+						{
+							st.nextToken();
+							st.nextToken();
+						}
+					}
+					if  (nbelem <= 0)
+					{
+						line = rd.readLine();
+						break;
 					}
 				}
 				new MGroup3D(groupIdx, title, facelist);

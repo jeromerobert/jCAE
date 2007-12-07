@@ -245,7 +245,7 @@ public class UNV2Amibe
 				else if ( (line.trim().equals("2430")) || (line.trim().equals("2435")) )
 				{
 					// read groups
-					convertGroups(in, groupChannel);
+					convertGroups(in, line.trim(), groupChannel);
 				}
 				/*else if (line.trim().equals("2414"))
 				{
@@ -326,7 +326,7 @@ public class UNV2Amibe
 	 * @return ArrayList of Group
 	 * @throws IOException
 	 */
-	private void convertGroups(BufferedReader in, FileChannel gChannel) throws IOException
+	private void convertGroups(BufferedReader in, String type, FileChannel gChannel) throws IOException
 	{
 		String line = in.readLine();
 		long offset=0;
@@ -335,6 +335,15 @@ public class UNV2Amibe
 		{
 			// read the number of elements to read in the last number of the line
 			StringTokenizer st = new StringTokenizer(line);
+			String snb = "";
+			// Block number
+			st.nextToken();
+			while(st.hasMoreTokens())
+			{
+				snb = st.nextToken();
+			}
+			// Number of elements
+			int nbelem = Integer.valueOf(snb).intValue();
 			Group g=new Group();
 			// Read group name
 			g.name = in.readLine().trim();
@@ -357,6 +366,17 @@ public class UNV2Amibe
 						gChannel.write(bb);
 						bb.rewind();
 					}
+					nbelem--;
+					if (type.equals("2435"))
+					{
+						st.nextToken();
+						st.nextToken();
+					}
+				}
+				if  (nbelem <= 0)
+				{
+					line = in.readLine();
+					break;
 				}
 			}
 			groups.add(g);
