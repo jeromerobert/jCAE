@@ -42,18 +42,20 @@ public final class Smooth extends CookieAction
 			int i=cmdLinePre.length;
 
 			cmdLine[i++]=className;
-			cmdLine[i++]=xmlDir;
-			cmdLine[i++]="jcae3d";
-			
-			cmdLine[i++]=Double.toString(bean.getElementSize());
+
+			cmdLine[i++]="--iterations";
 			cmdLine[i++]=Integer.toString(bean.getIterationNumber());
+
+			cmdLine[i++]="--tolerance";
+			cmdLine[i++]=Double.toString(bean.getElementSize());
+
+			cmdLine[i++]=xmlDir;
+			// Override current directory
+			cmdLine[i++]=xmlDir;
 			
-			cmdLine[i++]=brepFile.getParent();
-			cmdLine[i++]=brepFile.getName();
-				
 			// level_max tri_max outDir brep soupDir
 			ProcessExecutor pe=new ProcessExecutor(cmdLine);
-			pe.setName("Decimate");
+			pe.setName("Smooth");
 			pe.start();
 		}		
 	}

@@ -1,3 +1,8 @@
+2007-12-07 17:14 Denis Barbier <barbier@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/mesh/smooth/Smooth.java: Fix
+	call to SmoothNodes3D.
+
 2007-12-06 15:11 Denis Barbier <barbier@users.sourceforge.net>
 
 	* jcae-netbeans/src/org/jcae/netbeans/mesh/JCAEMesher.java: Remove
