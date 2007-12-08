@@ -124,7 +124,7 @@ public class MESHReader
 					if (v[j] == null)
 						throw new RuntimeException();
 				}
-				Triangle f = mesh.createTriangle(v);
+				Triangle f = mesh.createTetrahedron(v);
 				mesh.add(f);
 			}
 		}

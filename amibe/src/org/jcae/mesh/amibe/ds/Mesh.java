@@ -318,6 +318,18 @@ public class Mesh implements Serializable
 	}
 
 	/**
+	 * Creates a triangle composed of four vertices, to emulate a tetrahedron.
+	 *
+	 * @param v  array of four vertices
+	 * @return a new {@link Triangle} instance composed of four vertices
+	 */
+	public Triangle createTetrahedron(Vertex [] v)
+	{
+		assert v.length == 4;
+		return factory.createTriangle(v);
+	}
+
+	/**
 	 * Creates a triangle composed of three vertices.
 	 *
 	 * @param v0  first vertex

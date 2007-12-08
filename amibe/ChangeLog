@@ -1,3 +1,10 @@
+Sat Dec  8 20:52:45 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Mesh.java: New createTetrahedron()
+	method, to avoid assertion failure.
+	* src/org/jcae/mesh/bora/xmldata/MESHReader.java: Call it when
+	reading tetrahedra.
+
 Fri Dec  7 18:35:04 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/UNV2Amibe.java
