@@ -37,9 +37,8 @@ public class MESHReader
 
 	private static Logger logger=Logger.getLogger(MESHReader.class);
 	
-	public static Mesh readMesh(String file)
+	public static void readMesh(Mesh mesh, String file)
 	{
-		Mesh mesh = new Mesh();
 		TIntObjectHashMap<Vertex> nodesmap = null;
 		String line = "";
 		try
@@ -59,7 +58,6 @@ public class MESHReader
 		{
 				e.printStackTrace();
 		}
-		return mesh;
 	}
 
 	private static TIntObjectHashMap<Vertex> readNodes(Mesh m, BufferedReader rd)
@@ -90,7 +88,8 @@ public class MESHReader
 				y = new Double(y1).doubleValue();
 				z = new Double(z1).doubleValue();
 				Vertex n = m.createVertex(x,y,z);
-				m.add(n);
+				if (m.hasNodes())
+					m.add(n);
 				nodesmap.put(i, n);
 			}
 		}

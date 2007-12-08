@@ -4,6 +4,10 @@ Sat Dec  8 20:52:45 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	method, to avoid assertion failure.
 	* src/org/jcae/mesh/bora/xmldata/MESHReader.java: Call it when
 	reading tetrahedra.
+	* src/org/jcae/mesh/bora/xmldata/Storage.java
+	  src/org/jcae/mesh/bora/xmldata/MESHReader.java:  Modify bora
+	readers, Mesh instance is passed as an argument so that caller can
+	define its traits.
 
 Fri Dec  7 18:35:04 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 

@@ -24,6 +24,7 @@ package org.jcae.mesh.bora.algo;
 import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.bora.ds.BSubMesh;
 import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.bora.xmldata.Storage;
 import org.jcae.mesh.bora.xmldata.MESHReader;
 import org.jcae.mesh.xmldata.MeshExporter;
@@ -85,7 +86,10 @@ public class Netgen implements AlgoInterface
 	{
 		logger.info("Running Netgen "+banner);
 		BSubMesh s = d.getFirstSubMesh();
-		Mesh m = Storage.readAllFaces(d.getGraphCell(), s);
+		MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
+		mtb.addNodeList();
+		Mesh m = new Mesh(mtb);
+		Storage.readAllFaces(m, d.getGraphCell(), s);
 		String outDir = "netgen.tmp"+File.separator+"s"+s.getId();
 		try
 		{
@@ -102,7 +106,9 @@ public class Netgen implements AlgoInterface
 			if (p.exitValue() != 0)
 				return false;
 			// Import volume mesh...
-			d.setMesh(MESHReader.readMesh(pfx+".mesh"));
+			m = new Mesh(mtb);
+			MESHReader.readMesh(m, pfx+".mesh");
+			d.setMesh(m);
 			// ... and store it on disk
 			Storage.writeSolid(d, d.getGraphCell().getGraph().getModel().getOutputDir(d));
 			// Remove temporary files

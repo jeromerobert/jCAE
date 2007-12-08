@@ -162,14 +162,13 @@ public class Storage
 	}
 
 	/**
-	 * Creates a Mesh instance by reading all faces.
+	 * Populates a Mesh instance by reading all faces.
+	 * @param m       <code>Mesh</code> instance
 	 * @param root    root shape
-	 * @return a Mesh instance
 	 * @throws  RuntimeException if an error occurred
 	 */
-	public static Mesh readAllFaces(BCADGraphCell root)
+	public static void readAllFaces(Mesh m, BCADGraphCell root)
 	{
-		Mesh m = new Mesh();
 		TIntObjectHashMap<Vertex> vertMap = new TIntObjectHashMap<Vertex>();
 		for (Iterator<BSubMesh> its = root.getGraph().getModel().getSubMeshIterator(); its.hasNext(); )
 		{
@@ -177,23 +176,20 @@ public class Storage
 			for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 				readFace(m, it.next(), s, vertMap);
 		}
-		return m;
 	}
 
 	/**
-	 * Creates a Mesh instance by reading all faces.
+	 * Populates a Mesh instance by reading all faces.
+	 * @param m       <code>Mesh</code> instance
 	 * @param root    root shape
 	 * @param s       consider discretizations only if they appear in this BSubMesh instance
-	 * @return a Mesh instance
 	 * @throws  RuntimeException if an error occurred
 	 */
-	public static Mesh readAllFaces(BCADGraphCell root, BSubMesh s)
+	public static void readAllFaces(Mesh m, BCADGraphCell root, BSubMesh s)
 	{
-		Mesh m = new Mesh();
 		TIntObjectHashMap<Vertex> vertMap = new TIntObjectHashMap<Vertex>();
 		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 			readFace(m, it.next(), s, vertMap);
-		return m;
 	}
 
 	/**
@@ -224,7 +220,7 @@ public class Storage
 			File dir = new File(model.getOutputDir(d));
 			// Read vertex references
 			int [] refs = read2dNodeReferences(dir);
-			// Create a Vertex array, amd insert new references
+			// Create a Vertex array, and insert new references
 			// into mapRefVertex.
 			Vertex [] nodelist = read2dCoordinates(dir, mesh, refs, mapRefVertex);
 			// Read triangles and appends them to the mesh.
@@ -242,18 +238,16 @@ public class Storage
 	}
 
 	/**
-	 * Creates a Mesh instance by reading all volumes.
+	 * Populates a Mesh instance by reading all volumes.
+	 * @param m       <code>Mesh</code> instance
 	 * @param root    root shape
-	 * @return a Mesh instance
 	 * @throws  RuntimeException if an error occurred
 	 */
-	public static Mesh readAllVolumes(BCADGraphCell root, BSubMesh s)
+	public static void readAllVolumes(Mesh m, BCADGraphCell root, BSubMesh s)
 	{
-		Mesh m = new Mesh();
 		TIntObjectHashMap<Vertex> vertMap = new TIntObjectHashMap<Vertex>();
 		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
 			readVolume(m, it.next(), s, vertMap);
-		return m;
 	}
 
 	/**
@@ -283,11 +277,14 @@ public class Storage
 			File dir = new File(model.getOutputDir(d));
 			// Read vertex references
 			int [] refs = read2dNodeReferences(dir);
-			// Create a Vertex array, amd insert new references
+			// Create a Vertex array, and insert new references
 			// into mapRefVertex.
 			Vertex [] nodelist = read2dCoordinates(dir, mesh, refs, mapRefVertex);
-			for (int i = 0, n = nodelist.length; i < n; i++)
-				mesh.add(nodelist[i]);
+			if (mesh.hasNodes())
+			{
+				for (int i = 0, n = nodelist.length; i < n; i++)
+					mesh.add(nodelist[i]);
+			}
 			// Read triangles and appends them to the mesh.
 			read2dTriangles(dir, id, 4, mesh, reversed, nodelist);
 		}
@@ -501,7 +498,11 @@ public class Storage
 		{
 			nodesBuffer.get(coord);
 			nodelist[i] = mesh.createVertex(coord);
-			mesh.add(nodelist[i]);
+		}
+		if (mesh.hasNodes())
+		{
+			for (int i=0; i < numberOfNodes; i++)
+				mesh.add(nodelist[i]);
 		}
 		for (int i = 0; i < numberOfReferences; i++)
 		{
