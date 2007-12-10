@@ -1,3 +1,8 @@
+2007-12-10 18:49 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/MeshBoraViewer3d.java: Updated.
+	Storage.readAllFaces() signature has been modified.
+
 2007-11-24 12:19 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/MeshOEMMViewer3d.java

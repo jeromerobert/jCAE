@@ -22,6 +22,7 @@ package org.jcae.mesh;
 
 import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.xmldata.MeshWriter;
 import org.jcae.mesh.bora.xmldata.Storage;
 import org.jcae.mesh.bora.xmldata.BModelReader;
@@ -49,7 +50,10 @@ public class MeshBoraViewer3d
 		String tmpDir = args[1];
 		BModel model = BModelReader.readObject(boraDir);
 		model = BModelReader.readObject(boraDir);
-		Mesh m = Storage.readAllFaces(model.getGraph().getRootCell());
+		MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
+		mtb.addNodeList();
+		Mesh m = new Mesh(mtb);
+		Storage.readAllFaces(m, model.getGraph().getRootCell());
 		try
 		{
 			MeshWriter.writeObject3D(m, tmpDir, "dummy.brep");
