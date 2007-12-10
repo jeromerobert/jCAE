@@ -391,10 +391,7 @@ public class ViewableFE extends ViewableAdaptor
 		{
 			return domain.getTria6();
 		}
-		else
-		{
-			return domain.getTria3();
-		}
+		return domain.getTria3();
 	}
 	
 	private IndexedTriangleArray getGeomForTrianglesGroup(FEDomain domain, float[] nodes,

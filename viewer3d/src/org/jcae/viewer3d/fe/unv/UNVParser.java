@@ -188,9 +188,6 @@ public class UNVParser
 	
 	private void readFace(BufferedReader rd) throws IOException
 	{			
-		TIntArrayList tetra4=new TIntArrayList();
-		TIntArrayList hexa8=new TIntArrayList();
-		
 		String line;
 
 		while (!(line = rd.readLine().trim()).equals("-1"))
