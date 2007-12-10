@@ -104,11 +104,11 @@ public class UNVDomain extends FEDomainAdaptor
 			
 	/*
 	 * (non-Javadoc)
-	 * @see org.jcae.viewer3d.fe.FEDomainAdaptor#getNumberOfTria3()
+	 * @see org.jcae.viewer3d.fe.FEDomainAdaptor#getNumberOfQuad4()
 	 */
 	@Override
 	public int getNumberOfQuad4(){
-		return quad4.length/3;
+		return quad4.length/4;
 	}
 	
 	@Override
