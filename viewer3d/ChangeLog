@@ -1,5 +1,7 @@
 2007-12-10 17:35 Denis Barbier <barbier@users.sourceforge.net>
 
+	* src/org/jcae/viewer3d/fe/FEDomain.java: Remove many unimplemented
+	methods, and replace some iterators by arrays for consistency reasons.
 	* src/org/jcae/viewer3d/fe/unv/UNVDomain.java
 	  src/org/jcae/viewer3d/fe/unv/UNVProvider.java
 	  src/org/jcae/viewer3d/fe/unv/UNVParser.java: Allow mixing

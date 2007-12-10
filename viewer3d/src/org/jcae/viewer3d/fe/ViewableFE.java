@@ -199,7 +199,7 @@ public class ViewableFE extends ViewableAdaptor
 			GeometryArray.COORDINATES,
 			d.getNumberOfBeam2()*2);
 		ila.setCoordinates(0, d.getNodes());
-		ila.setCoordinateIndices(0, d.getBeam2Indices());
+		ila.setCoordinateIndices(0, d.getBeam2());
 		Appearance app=new Appearance();
 		LineAttributes la=new LineAttributes(3f, LineAttributes.PATTERN_SOLID, false);
 		
@@ -393,17 +393,7 @@ public class ViewableFE extends ViewableAdaptor
 		}
 		else
 		{
-			int[] tria3=new int[domain.getNumberOfTria3()*3];
-			
-			int i=0;
-			Iterator<int[]> it=domain.getTria3Iterator();
-			while(it.hasNext())
-			{
-				int[] f=it.next();
-				System.arraycopy(f, 0, tria3, i, 3);
-				i+=3;
-			}
-			return tria3;
+			return domain.getTria3();
 		}
 	}
 	
@@ -484,19 +474,6 @@ public class ViewableFE extends ViewableAdaptor
 		return geom;
 	}
 
-	private float[] iteratorToArray(Iterator<float[]> it, int numberOfNodes)
-	{
-		float[] toReturn = new float[numberOfNodes*3]; 
-		int i=0;
-		while(it.hasNext())
-		{
-			float[] f=it.next();
-			System.arraycopy(f, 0, toReturn, i, 3);
-			i+=3;
-		}
-		return toReturn;
-	}
-
 	/**
 	 * Creates a Java3D BranchGroup whcih represents a group.
 	 * It creates two Java3D Shapes3D : one for polygons, one for edges.
@@ -505,9 +482,6 @@ public class ViewableFE extends ViewableAdaptor
 	private BranchGroup createTriaBranchGroup(FEDomain domain, boolean parabolic)
 	{
 		float[] nodes=domain.getNodes();
-		if(nodes==null)
-			nodes=iteratorToArray(domain.getNodesIterator(), domain.getNumberOfNodes());
-		
 		//bounding box computed from GeomInfo are buggy so we do it ourself
 		BoundingBox bb=computeBoundingBox(nodes);
 		IndexedTriangleArray geom = getGeomForTrianglesGroup(domain, nodes, parabolic);
@@ -520,9 +494,6 @@ public class ViewableFE extends ViewableAdaptor
 	private BranchGroup createQuadBranchGroup(FEDomain domain, boolean parabolic)
 	{
 		float[] nodes=domain.getNodes();
-		if(nodes==null)
-			nodes=iteratorToArray(domain.getNodesIterator(), domain.getNumberOfNodes());
-		
 		//bounding box computed from GeomInfo are buggy so we do it ourself
 		BoundingBox bb=computeBoundingBox(nodes);
 		IndexedQuadArray geom = getGeomForQuadsGroup(domain, nodes, parabolic);

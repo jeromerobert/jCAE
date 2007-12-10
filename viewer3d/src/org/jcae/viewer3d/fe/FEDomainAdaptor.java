@@ -32,49 +32,12 @@ import java.util.Iterator;
  */
 public class FEDomainAdaptor implements FEDomain
 {
-	static private class EmptyIterator implements Iterator
-	{
-		public static EmptyIterator instance;
-		/* (non-Javadoc)
-		 * @see java.util.Iterator#remove()
-		 */
-		public void remove()
-		{
-			// TODO Auto-generated method stub
-			throw new UnsupportedOperationException();
-		}
-
-		/* (non-Javadoc)
-		 * @see java.util.Iterator#hasNext()
-		 */
-		public boolean hasNext()
-		{
-			return false;
-		}
-
-		/* (non-Javadoc)
-		 * @see java.util.Iterator#next()
-		 */
-		public Object next()
-		{
-			return null;
-		}		
-	}
-	
 	/* (non-Javadoc)
 	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfNodes()
 	 */
 	public int getNumberOfNodes()
 	{
 		return 0;
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNodesIterator()
-	 */
-	public Iterator getNodesIterator()
-	{
-		return EmptyIterator.instance;
 	}
 
 	/* (non-Javadoc)
@@ -104,11 +67,12 @@ public class FEDomainAdaptor implements FEDomain
 	}
 
 	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getVerticesIterator()
+	 * @see jcae.viewer3d.fe.FEDomain#Vertices()
 	 */
-	public Iterator getVerticesIterator()
+	public int[] getVertices()
 	{
-		return EmptyIterator.instance;
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException();
 	}
 
 	/* (non-Javadoc)
@@ -135,15 +99,6 @@ public class FEDomainAdaptor implements FEDomain
 	public int getNumberOfBeam2()
 	{
 		return 0;
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getBeam2Iterator()
-	 */
-	public Iterator getBeam2Iterator()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
 	}
 
 	/* (non-Javadoc)
@@ -176,7 +131,7 @@ public class FEDomainAdaptor implements FEDomain
 	/* (non-Javadoc)
 	 * @see jcae.viewer3d.fe.FEDomain#getBeam3Iterator()
 	 */
-	public Iterator getBeam3Iterator()
+	public int[] getBeam3()
 	{
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
@@ -209,11 +164,11 @@ public class FEDomainAdaptor implements FEDomain
 	}
 
 	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getTria3Iterator()
+	 * @see jcae.viewer3d.fe.FEDomain#getTria3()
 	 */
-	public Iterator<int[]> getTria3Iterator()
+	public int[] getTria3()
 	{
-		return EmptyIterator.instance;
+		return new int[0];
 	}
 
 	/* (non-Javadoc)
@@ -305,9 +260,9 @@ public class FEDomainAdaptor implements FEDomain
 	}
 
 	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getQuad8Iterator()
+	 * @see jcae.viewer3d.fe.FEDomain#getQuad8()
 	 */
-	public Iterator getQuad8Iterator()
+	public int[] getQuad8()
 	{
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
@@ -332,42 +287,6 @@ public class FEDomainAdaptor implements FEDomain
 	}
 
 	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfPoly()
-	 */
-	public int getNumberOfPoly()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getPolyIterator()
-	 */
-	public Iterator getPolyIterator()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfPolyComp()
-	 */
-	public int getNumberOfPolyComp()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getPolyRes()
-	 */
-	public Iterator getPolyRes()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
 	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfTetra4()
 	 */
 	public int getNumberOfTetra4()
@@ -377,9 +296,9 @@ public class FEDomainAdaptor implements FEDomain
 	}
 
 	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getTetra4Iterator()
+	 * @see jcae.viewer3d.fe.FEDomain#getTetra4()
 	 */
-	public Iterator getTetra4Iterator()
+	public int[] getTetra4()
 	{
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
@@ -404,114 +323,6 @@ public class FEDomainAdaptor implements FEDomain
 	}
 
 	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfTetra10()
-	 */
-	public int getNumberOfTetra10()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getTetra10Iterator()
-	 */
-	public Iterator getTetra10Iterator()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfTetra10Comp()
-	 */
-	public int getNumberOfTetra10Comp()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getTetra10Res()
-	 */
-	public Iterator getTetra10Res()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfPyra5()
-	 */
-	public int getNumberOfPyra5()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getPyra5Iterator()
-	 */
-	public Iterator getPyra5Iterator()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfPyra5Comp()
-	 */
-	public int getNumberOfPyra5Comp()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getPyra5Res()
-	 */
-	public Iterator getPyra5Res()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfPyra13()
-	 */
-	public int getNumberOfPyra13()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getPyra13Iterator()
-	 */
-	public Iterator getPyra13Iterator()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfPyra13Comp()
-	 */
-	public int getNumberOfPyra13Comp()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getPyra13Res()
-	 */
-	public Iterator getPyra13Res()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
 	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfHexa8()
 	 */
 	public int getNumberOfHexa8()
@@ -521,9 +332,9 @@ public class FEDomainAdaptor implements FEDomain
 	}
 
 	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getHexa8Iterator()
+	 * @see jcae.viewer3d.fe.FEDomain#getHexa8()
 	 */
-	public Iterator getHexa8Iterator()
+	public int[] getHexa8()
 	{
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
@@ -542,114 +353,6 @@ public class FEDomainAdaptor implements FEDomain
 	 * @see jcae.viewer3d.fe.FEDomain#getHexa8Res()
 	 */
 	public Iterator getHexa8Res()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfHexa20()
-	 */
-	public int getNumberOfHexa20()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getHexa20Iterator()
-	 */
-	public Iterator getHexa20Iterator()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfHexa20Comp()
-	 */
-	public int getNumberOfHexa20Comp()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getHexa20Res()
-	 */
-	public Iterator getHexa20Res()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfPenta6()
-	 */
-	public int getNumberOfPenta6()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getPenta6Iterator()
-	 */
-	public Iterator getPenta6Iterator()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfPenta6Comp()
-	 */
-	public int getNumberOfPenta6Comp()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getPenta6Res()
-	 */
-	public Iterator getPenta6Res()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfPenta15()
-	 */
-	public int getNumberOfPenta15()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getPenta15Iterator()
-	 */
-	public Iterator getPenta15Iterator()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfPenta15Comp()
-	 */
-	public int getNumberOfPenta15Comp()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getPenta15Res()
-	 */
-	public Iterator getPenta15Res()
 	{
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
@@ -695,7 +398,7 @@ public class FEDomainAdaptor implements FEDomain
 		return new float[0];
 	}
 
-	public int[] getBeam2Indices()
+	public int[] getBeam2()
 	{
 		return new int[0];
 	}

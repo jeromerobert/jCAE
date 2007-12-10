@@ -103,7 +103,7 @@ public class AmibeBeanDomain extends FEDomainAdaptor
 	}
 	
 	@Override
-	public int[] getBeam2Indices()
+	public int[] getBeam2()
 	{
 		return beam2;
 	}

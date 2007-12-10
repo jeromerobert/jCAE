@@ -36,9 +36,6 @@ public interface FEDomain extends MarkDomain, ColoredDomain
 	/** Return the number of nodes in the mesh*/
 	int getNumberOfNodes();
 	
-	/** Return an iterator on a Collection of float[3] */ 
-	Iterator<float[]> getNodesIterator();
-	
 	/** getNumberOfNodes and getNodesIterator are deprecated... Iterators sucks !*/
 	float[] getNodes();
 	
@@ -57,24 +54,22 @@ public interface FEDomain extends MarkDomain, ColoredDomain
 	Iterator getNodesRes();
 	
 	int getNumberOfVertices();
-	Iterator getVerticesIterator();
+	int[] getVertices();
 	int getNumberOfVerticesComp();
 	Iterator getNumberOfVerticesRes();
 			
-	int[] getBeam2Indices();
 	int getNumberOfBeam2();
+	int[] getBeam2();
 	int getNumberOfBeam2Comp();
 	Iterator getBeam2Res();
 
 	int getNumberOfBeam3();	
-	Iterator getBeam3Iterator();
+	int[] getBeam3();
 	int getNumberOfBeam3Comp();
 	Iterator getBeam3Res();
 	
-	/** Return the number of 3 nodes triangles in the mesh*/
 	int getNumberOfTria3();	
-	/** Return an iterator on a Collection of int[3] */
-	Iterator<int[]> getTria3Iterator();
+	int[] getTria3();
 	int getNumberOfTria3Comp();
 	Iterator getTria3Res();
 
@@ -89,54 +84,19 @@ public interface FEDomain extends MarkDomain, ColoredDomain
 	Iterator getQuad4Res();
 
 	int getNumberOfQuad8();	
-	Iterator getQuad8Iterator();
+	int[] getQuad8();
 	int getNumberOfQuad8Comp();
 	Iterator getQuad8Res();
 
-	int getNumberOfPoly();	
-	Iterator getPolyIterator();
-	int getNumberOfPolyComp();
-	Iterator getPolyRes();
-	
 	int getNumberOfTetra4();	
-	Iterator getTetra4Iterator();
+	int[] getTetra4();
 	int getNumberOfTetra4Comp();
 	Iterator getTetra4Res();
 
-	int getNumberOfTetra10();	
-	Iterator getTetra10Iterator();
-	int getNumberOfTetra10Comp();
-	Iterator getTetra10Res();
-	
-	int getNumberOfPyra5();	
-	Iterator getPyra5Iterator();
-	int getNumberOfPyra5Comp();
-	Iterator getPyra5Res();
-
-	int getNumberOfPyra13();	
-	Iterator getPyra13Iterator();
-	int getNumberOfPyra13Comp();
-	Iterator getPyra13Res();
-
 	int getNumberOfHexa8();	
-	Iterator getHexa8Iterator();
+	int[] getHexa8();
 	int getNumberOfHexa8Comp();
 	Iterator getHexa8Res();
 
-	int getNumberOfHexa20();	
-	Iterator getHexa20Iterator();
-	int getNumberOfHexa20Comp();
-	Iterator getHexa20Res();
-
-	int getNumberOfPenta6();	
-	Iterator getPenta6Iterator();
-	int getNumberOfPenta6Comp();
-	Iterator getPenta6Res();
-
-	int getNumberOfPenta15();	
-	Iterator getPenta15Iterator();
-	int getNumberOfPenta15Comp();
-	Iterator getPenta15Res();
-	
 	int getID();
 }

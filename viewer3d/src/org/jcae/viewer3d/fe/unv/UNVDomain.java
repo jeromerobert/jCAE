@@ -143,12 +143,6 @@ public class UNVDomain extends FEDomainAdaptor
 	}
 	
 	@Override
-	public int[] getBeam2Indices()
-	{
-		return beam2;
-	}
-	
-	@Override
 	public int getNumberOfTria6()
 	{
 		//System.out.println("tria6: "+tria6.length);
@@ -156,40 +150,21 @@ public class UNVDomain extends FEDomainAdaptor
 	}
 	
 	@Override
+	public int[] getBeam2()
+	{
+		return beam2;
+	}
+	
+	@Override
+	public int[] getTria3()
+	{
+		return tria3;
+	}
+	
+	@Override
 	public int[] getTria6()
 	{
 		return tria6;
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * @see org.jcae.viewer3d.fe.FEDomainAdaptor#getTria3Iterator()
-	 */
-	@Override
-	public Iterator<int[]> getTria3Iterator()
-	{
-		return new Iterator<int[]>()
-		{
-			private int index=0;
-			public boolean hasNext()
-			{
-				return index<tria3.length;
-			}
-
-			public int[] next()
-			{
-				int[] toReturn=new int[3];
-				System.arraycopy(tria3, index, toReturn, 0, 3);
-				index+=3;
-				return toReturn;
-			}
-
-			public void remove()
-			{
-				// TODO Auto-generated method stub
-				throw new UnsupportedOperationException();
-			}
-		};
 	}
 	
 	@Override

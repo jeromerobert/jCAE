@@ -109,33 +109,12 @@ public class AmibeDomain extends FEDomainAdaptor
 	
 	/*
 	 * (non-Javadoc)
-	 * @see org.jcae.viewer3d.fe.FEDomainAdaptor#getTria3Iterator()
+	 * @see org.jcae.viewer3d.fe.FEDomainAdaptor#getTria3()
 	 */
 	@Override
-	public Iterator<int[]> getTria3Iterator()
+	public int[] getTria3()
 	{
-		return new Iterator<int[]>()
-		{
-			private int index=0;
-			public void remove()
-			{
-				// TODO Auto-generated method stub
-				throw new UnsupportedOperationException();
-			}
-
-			public boolean hasNext()
-			{
-				return index<tria3.length;
-			}
-
-			public int[] next()
-			{
-				int[] toReturn=new int[3];
-				System.arraycopy(tria3, index, toReturn, 0, 3);
-				index+=3;
-				return toReturn;
-			}
-		};
+		return tria3;
 	}
 	
 	private File getTriaFile()
