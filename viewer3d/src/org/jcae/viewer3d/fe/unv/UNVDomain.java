@@ -23,7 +23,6 @@ package org.jcae.viewer3d.fe.unv;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntIntHashMap;
 import java.awt.Color;
-import java.util.Iterator;
 import org.jcae.viewer3d.fe.FEDomainAdaptor;
 
 public class UNVDomain extends FEDomainAdaptor
@@ -171,21 +170,6 @@ public class UNVDomain extends FEDomainAdaptor
 	public int[] getQuad4()
 	{
 		return quad4;
-	}
-	
-	/**
-	 * Create the list of needed nodes for a triangle array
-	 * @param trias the triangles which require nodes
-	 * @return the nodes id
-	 */
-	private int[] makeNodeIDArray(int[] trias)
-	{		
-		TIntHashSet set=new TIntHashSet(trias.length/2);
-		for(int i=0; i<trias.length; i++)
-		{
-			set.add(trias[i]);
-		}
-		return set.toArray();
 	}
 	
 	private float[] readNodes(int[] nodesID, float[] allNodes)

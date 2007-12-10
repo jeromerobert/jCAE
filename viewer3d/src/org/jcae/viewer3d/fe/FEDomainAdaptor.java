@@ -22,7 +22,6 @@
 package org.jcae.viewer3d.fe;
 
 import java.awt.Color;
-import java.util.Iterator;
 
 /**
  * A consistant FEDomain that contain no elements.
@@ -38,24 +37,6 @@ public class FEDomainAdaptor implements FEDomain
 	public int getNumberOfNodes()
 	{
 		return 0;
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfNodeComp()
-	 */
-	public int getNumberOfNodeComp()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNodesRes()
-	 */
-	public Iterator getNodesRes()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
 	}
 
 	/* (non-Javadoc)
@@ -76,47 +57,11 @@ public class FEDomainAdaptor implements FEDomain
 	}
 
 	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfVerticesComp()
-	 */
-	public int getNumberOfVerticesComp()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfVerticesRes()
-	 */
-	public Iterator getNumberOfVerticesRes()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
 	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfBeam2()
 	 */
 	public int getNumberOfBeam2()
 	{
 		return 0;
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfBeam2Comp()
-	 */
-	public int getNumberOfBeam2Comp()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getBeam2Res()
-	 */
-	public Iterator getBeam2Res()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
 	}
 
 	/* (non-Javadoc)
@@ -132,24 +77,6 @@ public class FEDomainAdaptor implements FEDomain
 	 * @see jcae.viewer3d.fe.FEDomain#getBeam3Iterator()
 	 */
 	public int[] getBeam3()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfBeam3Comp()
-	 */
-	public int getNumberOfBeam3Comp()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getBeam3Res()
-	 */
-	public Iterator getBeam3Res()
 	{
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
@@ -172,24 +99,6 @@ public class FEDomainAdaptor implements FEDomain
 	}
 
 	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfTria3Comp()
-	 */
-	public int getNumberOfTria3Comp()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getTria3Res()
-	 */
-	public Iterator getTria3Res()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
 	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfTria6()
 	 */
 	public int getNumberOfTria6()
@@ -206,24 +115,6 @@ public class FEDomainAdaptor implements FEDomain
 	}
 
 	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfTria6Comp()
-	 */
-	public int getNumberOfTria6Comp()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getTria6Res()
-	 */
-	public Iterator getTria6Res()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
 	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfQuad4()
 	 */
 	public int getNumberOfQuad4()
@@ -231,24 +122,6 @@ public class FEDomainAdaptor implements FEDomain
 		return 0;
 	}
 	
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfQuad4Comp()
-	 */
-	public int getNumberOfQuad4Comp()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getQuad4Res()
-	 */
-	public Iterator getQuad4Res()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
 
 	/* (non-Javadoc)
 	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfQuad8()
@@ -263,24 +136,6 @@ public class FEDomainAdaptor implements FEDomain
 	 * @see jcae.viewer3d.fe.FEDomain#getQuad8()
 	 */
 	public int[] getQuad8()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfQuad8Comp()
-	 */
-	public int getNumberOfQuad8Comp()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getQuad8Res()
-	 */
-	public Iterator getQuad8Res()
 	{
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();
@@ -305,24 +160,6 @@ public class FEDomainAdaptor implements FEDomain
 	}
 
 	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfTetra4Comp()
-	 */
-	public int getNumberOfTetra4Comp()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getTetra4Res()
-	 */
-	public Iterator getTetra4Res()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
 	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfHexa8()
 	 */
 	public int getNumberOfHexa8()
@@ -335,24 +172,6 @@ public class FEDomainAdaptor implements FEDomain
 	 * @see jcae.viewer3d.fe.FEDomain#getHexa8()
 	 */
 	public int[] getHexa8()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getNumberOfHexa8Comp()
-	 */
-	public int getNumberOfHexa8Comp()
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
-
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.fe.FEDomain#getHexa8Res()
-	 */
-	public Iterator getHexa8Res()
 	{
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException();

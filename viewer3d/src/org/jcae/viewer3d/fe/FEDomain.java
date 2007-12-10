@@ -21,7 +21,6 @@
 
 package org.jcae.viewer3d.fe;
 
-import java.util.Iterator;
 import org.jcae.viewer3d.ColoredDomain;
 import org.jcae.viewer3d.MarkDomain;
 
@@ -36,67 +35,35 @@ public interface FEDomain extends MarkDomain, ColoredDomain
 	/** Return the number of nodes in the mesh*/
 	int getNumberOfNodes();
 	
-	/** getNumberOfNodes and getNodesIterator are deprecated... Iterators sucks !*/
+	/** Node coordinates*/
 	float[] getNodes();
-	
-	/** Return the number of result component.
-	 * <ul>
-	 * <li>0 mean no result. In this case the viewer will display a color from getColor</li>
-	 * <li>1 mean a scalar value. In this case the viewer will compute a color
-	 * map matching these values</li>
-	 * <li>3 mean a vector value. In this case the viewer will display vectors</li>
-	 * </ul>
-	 * @return
-	 */
-	int getNumberOfNodeComp();
-	
-	/** Return an iterator on a Collection of float[getNumberOfNodeComp()] */
-	Iterator getNodesRes();
 	
 	int getNumberOfVertices();
 	int[] getVertices();
-	int getNumberOfVerticesComp();
-	Iterator getNumberOfVerticesRes();
-			
+	
 	int getNumberOfBeam2();
 	int[] getBeam2();
-	int getNumberOfBeam2Comp();
-	Iterator getBeam2Res();
 
 	int getNumberOfBeam3();	
 	int[] getBeam3();
-	int getNumberOfBeam3Comp();
-	Iterator getBeam3Res();
 	
 	int getNumberOfTria3();	
 	int[] getTria3();
-	int getNumberOfTria3Comp();
-	Iterator getTria3Res();
 
 	int getNumberOfTria6();	
 	int[] getTria6();
-	int getNumberOfTria6Comp();
-	Iterator getTria6Res();
 	
 	int getNumberOfQuad4();	
 	int[] getQuad4();
-	int getNumberOfQuad4Comp();
-	Iterator getQuad4Res();
 
 	int getNumberOfQuad8();	
 	int[] getQuad8();
-	int getNumberOfQuad8Comp();
-	Iterator getQuad8Res();
 
 	int getNumberOfTetra4();	
 	int[] getTetra4();
-	int getNumberOfTetra4Comp();
-	Iterator getTetra4Res();
 
 	int getNumberOfHexa8();	
 	int[] getHexa8();
-	int getNumberOfHexa8Comp();
-	Iterator getHexa8Res();
 
 	int getID();
 }
