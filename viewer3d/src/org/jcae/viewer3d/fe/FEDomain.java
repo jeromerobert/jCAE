@@ -26,8 +26,8 @@ import org.jcae.viewer3d.ColoredDomain;
 import org.jcae.viewer3d.MarkDomain;
 
 /**
- * This interace represent a finite element mesh domain.
- * It extends MarkDomain to display vertices of the mesh.
+ * This interface represents a finite element mesh domain.
+ * It extends MarkDomain to display mesh vertices.
  * @author Jerome Robert
  *
  */
