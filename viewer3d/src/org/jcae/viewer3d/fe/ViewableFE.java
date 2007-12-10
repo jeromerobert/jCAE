@@ -164,57 +164,12 @@ public class ViewableFE extends ViewableAdaptor
 		if(d.getNumberOfTria6()>0)
 			branchGroup.addChild(createTriaBranchGroup(d, true));		
 		if(d.getNumberOfQuad4()>0)
-			branchGroup.addChild(createQuadBranchGroup(d));
+			branchGroup.addChild(createQuadBranchGroup(d, false));
 		else if(d.getNumberOfBeam2()>0)
 			branchGroup.addChild(createBeamBranchGroup(d));		
 	}
 	
-	private Node createQuadBranchGroup(FEDomain d)
-	{
-		BranchGroup bg=new BranchGroup();
-
-		IndexedQuadArray ila;
-		Appearance app = new Appearance();
-		if(showShapeLine)
-		{
-			app.setColoringAttributes(new ColoringAttributes(
-				new Color3f(d.getColor()), ColoringAttributes.FASTEST));
-			
-			ila = new IndexedQuadArray(d.getNumberOfNodes(),
-				GeometryArray.COORDINATES, d.getNumberOfQuad4()*4);
-			ila.setCoordinateIndices(0, d.getQuad4());
-			ila.setCoordinates(0, d.getNodes());
-			app.setPolygonAttributes(LINE_POLYGON_ATTR);
-		}
-		else
-		{
-			GeometryInfo gi=new GeometryInfo(GeometryInfo.QUAD_ARRAY);
-			gi.setCoordinates(d.getNodes());
-			gi.setCoordinateIndices(d.getQuad4());
-			NormalGenerator ng=new NormalGenerator(0);
-			ng.generateNormals(gi);
-			ila=(IndexedQuadArray) gi.getIndexedGeometryArray();
-
-			app.setPolygonAttributes(FILL_POLYGON_ATTR);
-			Material m=new Material();
-			m.setAmbientColor(new Color3f(d.getColor()));
-			app.setMaterial(m);
-			app.setCapability(Shape3D.ALLOW_APPEARANCE_READ);
-			app.setCapability(Appearance.ALLOW_COLORING_ATTRIBUTES_READ);
-		}
-				
-		Shape3D s3d=new Shape3D(ila, app);
-		s3d.setBoundsAutoCompute(false);
-		s3d.setBounds(computeBoundingBox(d.getNodes()));
-		
-		s3d.setPickable(false);
-		bg.addChild(s3d);
-
-		domainIDToBranchGroup.put(new Integer(d.getID()), bg);	
-		return bg;
-	}
-
-	/** Workaround to buggy auto bouding box of GeomInfo */
+	/** Workaround to buggy auto bounding box of GeomInfo */
 	public static BoundingBox computeBoundingBox(float[] nodes)
 	{
 		float[] min=new float[]{Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE};
@@ -342,8 +297,7 @@ public class ViewableFE extends ViewableAdaptor
 					domainID);
 				break;
 			case PICK_DOMAIN :
-				boolean toSelect = !selectedDomains.contains(new Integer(
-					domainID));
+				boolean toSelect = !selectedDomains.contains(new Integer(domainID));
 				setSelectedDomain(domainID, toSelect);
 				fireSelectionChanged();
 				break;
@@ -489,6 +443,47 @@ public class ViewableFE extends ViewableAdaptor
 		return geom;
 	}
 
+	private int[] getQuadIndices(FEDomain domain, boolean parabolic)
+	{
+		if(parabolic)
+			throw new IllegalArgumentException("Parabolic quad not yet supported");
+		return domain.getQuad4();
+	}
+	
+	private IndexedQuadArray getGeomForQuadsGroup(FEDomain domain, float[] nodes, boolean parabolic)
+	{
+		if(domain.getNumberOfNodes()==0 ||
+			((domain.getNumberOfQuad4()==0) != parabolic))
+			return null;
+		
+		int[] quad4=getQuadIndices(domain, parabolic);
+		IndexedQuadArray geom;
+		if(showShapeLine)
+		{
+			geom = new IndexedQuadArray(nodes.length / 3,
+				GeometryArray.COORDINATES, quad4.length);
+			geom.setCoordinateIndices(0, quad4);
+			geom.setCoordinates(0, nodes);			
+		}
+		else
+		{
+			GeometryInfo gi=new GeometryInfo(GeometryInfo.QUAD_ARRAY);
+			gi.setCoordinates(nodes);
+			gi.setCoordinateIndices(quad4);
+			NormalGenerator ng=new NormalGenerator(0);
+			ng.generateNormals(gi);
+			geom=(IndexedQuadArray) gi.getIndexedGeometryArray();
+		}				
+		
+		geom.setCapability(GeometryArray.ALLOW_COUNT_READ);
+		geom.setCapability(GeometryArray.ALLOW_FORMAT_READ);
+		geom.setCapability(GeometryArray.ALLOW_COORDINATE_READ);
+		geom.setCapability(IndexedGeometryArray.ALLOW_COORDINATE_INDEX_READ);
+		
+		geom.setUserData(new Integer(domain.getID()));
+		return geom;
+	}
+
 	private float[] iteratorToArray(Iterator<float[]> it, int numberOfNodes)
 	{
 		float[] toReturn = new float[numberOfNodes*3]; 
@@ -509,7 +504,6 @@ public class ViewableFE extends ViewableAdaptor
 	 */
 	private BranchGroup createTriaBranchGroup(FEDomain domain, boolean parabolic)
 	{
-		BranchGroup toReturn = new BranchGroup();
 		float[] nodes=domain.getNodes();
 		if(nodes==null)
 			nodes=iteratorToArray(domain.getNodesIterator(), domain.getNumberOfNodes());
@@ -517,14 +511,30 @@ public class ViewableFE extends ViewableAdaptor
 		//bounding box computed from GeomInfo are buggy so we do it ourself
 		BoundingBox bb=computeBoundingBox(nodes);
 		IndexedTriangleArray geom = getGeomForTrianglesGroup(domain, nodes, parabolic);
-
-		//free nodes array because it may be large.
-		nodes=null;
 		if(geom==null)
-		{
-			return toReturn;
-		}
+			return new BranchGroup();
 		
+		return createIndexedBranchGroup(domain, geom, bb, parabolic);
+	}
+
+	private BranchGroup createQuadBranchGroup(FEDomain domain, boolean parabolic)
+	{
+		float[] nodes=domain.getNodes();
+		if(nodes==null)
+			nodes=iteratorToArray(domain.getNodesIterator(), domain.getNumberOfNodes());
+		
+		//bounding box computed from GeomInfo are buggy so we do it ourself
+		BoundingBox bb=computeBoundingBox(nodes);
+		IndexedQuadArray geom = getGeomForQuadsGroup(domain, nodes, parabolic);
+		if(geom==null)
+			return new BranchGroup();
+		
+		return createIndexedBranchGroup(domain, geom, bb, parabolic);
+	}
+
+	private BranchGroup createIndexedBranchGroup(FEDomain domain, IndexedGeometryArray geom, BoundingBox bb, boolean parabolic)
+	{
+		BranchGroup toReturn = new BranchGroup();
 		Appearance shapeFillAppearance = new Appearance();
 		shapeFillAppearance.setPolygonAttributes(FILL_POLYGON_ATTR);
 		Shape3D shapeFill = new Shape3D(geom, shapeFillAppearance);
@@ -584,31 +594,14 @@ public class ViewableFE extends ViewableAdaptor
 		return branchGroup;
 	}
 
-	static private int[] integerCollectionToArray(Collection<Integer> collection)
-	{
-		int[] toReturn=new int[collection.size()];
-		Iterator<Integer> it=collection.iterator();
-		int i=0;
-		while(it.hasNext())
-		{
-			Integer n=it.next();
-			toReturn[i]=n.intValue();
-			i++;
-		}
-		return toReturn;
-	}
-	
 	/* (non-Javadoc)
 	 * @see org.jcae.viewer3d.Viewable#unselectAll()
 	 */
 	@Override
 	public void unselectAll()
 	{
-		int[] ids=integerCollectionToArray(selectedDomains);
-		for(int i=0; i<ids.length; i++)
-		{
-			setSelectedDomain(ids[i], false);
-		}
+		for(Integer Id: selectedDomains)
+			setSelectedDomain(Id.intValue(), false);
 		nodeSelections.clear();
 		nodeSelectionShape.removeAllGeometries();
 		fireSelectionChanged();
@@ -628,7 +621,14 @@ public class ViewableFE extends ViewableAdaptor
 	
 	public int[] getSelectedDomains()
 	{
-		return integerCollectionToArray(selectedDomains);
+		int[] toReturn=new int[selectedDomains.size()];
+		int i=0;
+		for (Integer Id: selectedDomains)
+		{
+			toReturn[i]=Id.intValue();
+			i++;
+		}
+		return toReturn;
 	}
 	
 	public NodeSelection[] getSelectedNodes()

@@ -4,6 +4,9 @@
 	  src/org/jcae/viewer3d/fe/unv/UNVProvider.java
 	  src/org/jcae/viewer3d/fe/unv/UNVParser.java: Allow mixing
 	triangles and quadrangles in a group.
+	* src/org/jcae/viewer3d/fe/ViewableFE.java: Handle quadrangles like
+	triangles.  This should fix
+	  http://sourceforge.net/tracker/index.php?func=detail&aid=1800977&group_id=74334&atid=540660
 
 2007-12-07 18:37 Denis Barbier <barbier@users.sourceforge.net>
 
