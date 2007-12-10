@@ -40,26 +40,48 @@ public class UNVDomain extends FEDomainAdaptor
 	{
 		this.id=id;
 		this.color=color;
-		if(id==UNVProvider.OTHERS_GROUP)
+		TIntHashSet nodeset=new TIntHashSet();
+		tria3=parser.getTria3FromGroup(id);
+		if (tria3.length > 0)
 		{
-			nodes=parser.getNodesCoordinates();
-			beam2=parser.getBeam2Indices();
-			tria6=parser.getTria6Indices();	
+			nodeset.ensureCapacity(tria3.length);
+			nodeset.addAll(tria3);
 		}
-		else if(id<parser.getTria3GroupNames().length)
+		quad4=parser.getQuad4FromGroup(id);
+		if (quad4.length > 0)
 		{
-			tria3=readTria3(parser);
-			int[] nodesID=makeNodeIDArray(tria3);
-			nodes=readNodes(nodesID, parser.getNodesCoordinates());
-			renumberArray(tria3, nodesID);
+			nodeset.ensureCapacity(nodeset.size() + quad4.length);
+			nodeset.addAll(quad4);
 		}
-		else
+		beam2=parser.getBeam2FromGroup(id);
+		if (beam2.length > 0)
 		{
-			quad4=readQuad4(parser);
-			int[] nodesID=makeNodeIDArray(quad4);
-			nodes=readNodes(nodesID, parser.getNodesCoordinates());
-			renumberArray(quad4, nodesID);			
-		}		
+			nodeset.ensureCapacity(nodeset.size() + beam2.length);
+			nodeset.addAll(beam2);
+		}
+		tria6=parser.getTria6FromGroup(id);
+		if (tria6.length > 0)
+		{
+			nodeset.ensureCapacity(nodeset.size() + tria6.length);
+			nodeset.addAll(tria6);
+		}
+
+		int[] nodesID=nodeset.toArray();
+		nodes=readNodes(nodesID, parser.getNodesCoordinates());
+
+		// Compute inverse relation
+		TIntIntHashMap map=new TIntIntHashMap(nodesID.length);
+		for(int i=0; i<nodesID.length; i++)
+			map.put(nodesID[i], i);
+
+		for (int i = 0; i < tria3.length; i++)
+			tria3[i] = map.get(tria3[i]);
+		for (int i = 0; i < quad4.length; i++)
+			quad4[i] = map.get(quad4[i]);
+		for (int i = 0; i < beam2.length; i++)
+			beam2[i] = map.get(beam2[i]);
+		for (int i = 0; i < tria6.length; i++)
+			tria6[i] = map.get(tria6[i]);
 	}
 	
 	/* (non-Javadoc)
@@ -99,6 +121,7 @@ public class UNVDomain extends FEDomainAdaptor
 	 */
 	@Override
 	public int getNumberOfTria3(){
+		//System.out.println("tria3: "+(tria3.length/3));
 		return tria3.length/3;
 	}
 			
@@ -108,13 +131,14 @@ public class UNVDomain extends FEDomainAdaptor
 	 */
 	@Override
 	public int getNumberOfQuad4(){
+		//System.out.println("quad4: "+(quad4.length/4));
 		return quad4.length/4;
 	}
 	
 	@Override
 	public int getNumberOfBeam2()
 	{
-		System.out.println("beam2: "+beam2.length);
+		//System.out.println("beam2: "+(beam2.length/2));
 		return beam2.length;
 	}
 	
@@ -127,7 +151,7 @@ public class UNVDomain extends FEDomainAdaptor
 	@Override
 	public int getNumberOfTria6()
 	{
-		System.out.println("tria6: "+tria6.length);
+		//System.out.println("tria6: "+tria6.length);
 		return tria6.length;
 	}
 	
@@ -204,54 +228,6 @@ public class UNVDomain extends FEDomainAdaptor
 		
 		return toReturn;
 	}
-
-	private int[] readQuad4(UNVParser parser)
-	{
-		int[] elids=parser.getQuad4Groups()[id-parser.getTria3GroupNames().length];
-		int[] toReturn=new int[elids.length*4];
-		int[] tri=parser.getQuad4Indices();		
-		for(int i=0; i<elids.length; i++)
-		{
-			int ii=i*4;
-			int iid=elids[i]*4;
-			toReturn[ii++]=tri[iid++];
-			toReturn[ii++]=tri[iid++];
-			toReturn[ii++]=tri[iid++];
-			toReturn[ii++]=tri[iid++];
-		}
-		
-		return toReturn;
-	}
-	
-	private int[] readTria3(UNVParser parser)
-	{
-		int[] elids=parser.getTria3Groups()[id];
-		int[] toReturn=new int[elids.length*3];
-		int[] tri=parser.getTria3Indices();
-		for(int i=0; i<elids.length; i++)
-		{
-			int ii=i*3;
-			int iid=elids[i]*3;
-			toReturn[ii++]=tri[iid++];
-			toReturn[ii++]=tri[iid++];
-			toReturn[ii++]=tri[iid++];
-		}
-		
-		return toReturn;
-	}
-	
-	private void renumberArray(int[] arrayToRenumber, int[] newIndices)
-	{
-		TIntIntHashMap map=new TIntIntHashMap(newIndices.length);
-		for(int i=0; i<newIndices.length; i++)
-		{
-			map.put(newIndices[i], i);
-		}
-		for(int i=0; i<arrayToRenumber.length; i++)
-		{
-			arrayToRenumber[i]=map.get(arrayToRenumber[i]);
-		}
-	}		
 
 }
 

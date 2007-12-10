@@ -9,24 +9,22 @@ import java.util.StringTokenizer;
 
 public class UNVParser
 {
-	private static final int TETRA4_MASK = 0x20000000;
-	private static final int HEXA8_MASK = 0x40000000;
-	private static final int ELEMENT_MASK = 0x70000000;
-	
+	private static final int TETRA4_MASK  = 0x10000000;
+	private static final int HEXA8_MASK   = 0x20000000;
+
+	private static final int TRIA3_MASK   = 0x10000000;
+	private static final int TRIA6_MASK   = 0x20000000;
+	private static final int QUAD4_MASK   = 0x40000000;
+
 	private float[] nodesCoordinates;
 	private TIntIntHashMap nodesIndicesMap;
-	private int[] tetra4Indices;
-	private TIntIntHashMap volumeIndicesMap;
-	private int[] hexa8Indices;	
-	private ArrayList<String> tria3GroupNames=new ArrayList<String>();
-	private ArrayList<int[]> tria3Groups=new ArrayList<int[]>();
-	private ArrayList<String> quad4GroupNames=new ArrayList<String>();
-	private ArrayList<int[]> quad4Groups=new ArrayList<int[]>();
-	private TIntArrayList tria3Indices=new TIntArrayList();
-	private TIntArrayList quad4Indices=new TIntArrayList();
-	private TIntIntHashMap tria3IndicesMap, tria6IndicesMap, beam2IndicesMap;
-	private TIntArrayList tria6Indices=new TIntArrayList(); 
-	private TIntArrayList beam2Indices=new TIntArrayList();
+	private boolean hasBeam2, hasTria3, hasTria6, hasQuad4, hasTetra4, hasHexa8;
+	private ArrayList<String> surfaceGroupNames=new ArrayList<String>();
+	private ArrayList<int[]> surfaceGroups=new ArrayList<int[]>();
+	private TIntArrayList beamIndices=new TIntArrayList();
+	private TIntArrayList surfaceIndices=new TIntArrayList();
+	private TIntArrayList volumeIndices=new TIntArrayList();
+	private TIntIntHashMap elementBeamIndicesMap, elementSurfaceIndicesMap, elementVolumeIndicesMap;
 
 	public float[] getNodesCoordinates()
 	{
@@ -35,54 +33,108 @@ public class UNVParser
 
 	public String[] getTria3GroupNames()
 	{
-		return tria3GroupNames.toArray(new String[0]);
+		return surfaceGroupNames.toArray(new String[0]);
 	}
 
-	public int[][] getTria3Groups()
+	public int[] getTria3FromGroup(int groupId)
 	{
-		return tria3Groups.toArray(new int[0][]);
+		int[] elids=surfaceGroups.get(groupId);
+		int cnt = 0;
+		for(int val: elids)
+		{
+			if ((val & TRIA3_MASK) != 0)
+				cnt++;
+		}
+		int[] toReturn=new int[cnt*3];
+		cnt = 0;
+		for(int val: elids)
+		{
+			if ((val & TRIA3_MASK) == 0)
+				continue;
+			int iid=(val & ~TRIA3_MASK);
+			toReturn[cnt++]=surfaceIndices.get(iid++);
+			toReturn[cnt++]=surfaceIndices.get(iid++);
+			toReturn[cnt++]=surfaceIndices.get(iid++);
+		}
+		return toReturn;
 	}
 	
-	public int[] getTria3Indices()
+	public int[] getQuad4FromGroup(int groupId)
 	{
-		return tria3Indices.toNativeArray();
+		int[] elids=surfaceGroups.get(groupId);
+		int cnt = 0;
+		for(int val: elids)
+		{
+			if ((val & QUAD4_MASK) != 0)
+				cnt++;
+		}
+		int[] toReturn=new int[cnt*4];
+		cnt = 0;
+		for(int val: elids)
+		{
+			if ((val & QUAD4_MASK) == 0)
+				continue;
+			int iid=(val & ~QUAD4_MASK);
+			toReturn[cnt++]=surfaceIndices.get(iid++);
+			toReturn[cnt++]=surfaceIndices.get(iid++);
+			toReturn[cnt++]=surfaceIndices.get(iid++);
+			toReturn[cnt++]=surfaceIndices.get(iid++);
+		}
+		return toReturn;
+	}
+	
+	public int[] getBeam2FromGroup(int groupId)
+	{
+		if (groupId == UNVProvider.OTHERS_GROUP)
+			return beamIndices.toNativeArray();
+		return new int[0];
 	}
 
-	public int[] getTria6Indices()
+	public int[] getTria6FromGroup(int groupId)
 	{
-		return tria6Indices.toNativeArray();
+		int[] elids=surfaceGroups.get(groupId);
+		int cnt = 0;
+		for(int val: elids)
+		{
+			if ((val & TRIA6_MASK) != 0)
+				cnt++;
+		}
+		int[] toReturn=new int[cnt*6];
+		cnt = 0;
+		for(int val: elids)
+		{
+			if ((val & TRIA6_MASK) == 0)
+				continue;
+			int iid=(val & ~TRIA6_MASK);
+			toReturn[cnt++]=surfaceIndices.get(iid++);
+			toReturn[cnt++]=surfaceIndices.get(iid++);
+			toReturn[cnt++]=surfaceIndices.get(iid++);
+			toReturn[cnt++]=surfaceIndices.get(iid++);
+			toReturn[cnt++]=surfaceIndices.get(iid++);
+			toReturn[cnt++]=surfaceIndices.get(iid++);
+		}
+		return toReturn;
 	}
 
-	public int[] getBeam2Indices()
+	public boolean hasBeam2()
 	{
-		return beam2Indices.toNativeArray();
+		return hasBeam2;
 	}
 
-	public String[] getQuad4GroupNames()
+	public boolean hasTria6()
 	{
-		return quad4GroupNames.toArray(new String[0]);
+		return hasTria6;
 	}
-	
-	public int[][] getQuad4Groups()
-	{
-		return quad4Groups.toArray(new int[0][]);
-	}
-	
-	public int[] getQuad4Indices()
-	{
-		return quad4Indices.toNativeArray();
-	}
-	
+
 	public void parse(BufferedReader rd) throws IOException
 	{
 		double unit = 1.0;
 		String line;
 		
+		elementBeamIndicesMap=new TIntIntHashMap();
+		elementSurfaceIndicesMap=new TIntIntHashMap();
+		elementVolumeIndicesMap=new TIntIntHashMap();
 		nodesIndicesMap=new TIntIntHashMap();
-		tria3IndicesMap=new TIntIntHashMap();
-		tria6IndicesMap=new TIntIntHashMap();
-		beam2IndicesMap=new TIntIntHashMap();
-		volumeIndicesMap=new TIntIntHashMap();
 		
 		while ((line = rd.readLine()) != null)
 		{
@@ -114,25 +166,24 @@ public class UNVParser
 		}
 		
 		//If there are triangles but no groups
-		if(tria3GroupNames.size()==0 && tria3Indices.size()>0)
+		if(surfaceGroupNames.size()==0 && surfaceIndices.size()>0)
 		{
-			tria3GroupNames.add("");
-			int[] group=new int[tria3Indices.size()/3];
-			for(int i=0; i<group.length; i++)
+			surfaceGroupNames.add("");
+			int[] group=new int[surfaceIndices.size()];
+			int i = 0;
+			for(int val: elementSurfaceIndicesMap.getValues())
 			{
-				group[i]=i;
+				group[i]=val;
+				i++;
 			}
-			tria3Groups.add(group);
+			surfaceGroups.add(group);
 		}
 		
 		//free indices maps.
 		nodesIndicesMap=null;
-		tria3IndicesMap=null;
-		volumeIndicesMap=null;
-		tria6IndicesMap=null;
-		beam2IndicesMap=null;
-		tetra4Indices=null;
-		hexa8Indices=null;		
+		elementBeamIndicesMap=null;
+		elementSurfaceIndicesMap=null;
+		elementVolumeIndicesMap=null;
 	}
 	
 	private void readFace(BufferedReader rd) throws IOException
@@ -153,60 +204,58 @@ public class UNVParser
 			
 			switch(type)
 			{
-				case 74:
-				case 91:
-				case 41:
-					// triangle
-					st = new StringTokenizer(line);	
-					tria3IndicesMap.put(ind, tria3Indices.size()/3);
-					for(int i=0; i<3; i++)
-						tria3Indices.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken()))); 									
-					break;
-				case 111:
-					st = new StringTokenizer(line);	
-					volumeIndicesMap.put(ind, TETRA4_MASK | (tetra4.size()/4) );
-					for(int i=0; i<4; i++)
-						tetra4.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken())));   
-					break;
-				case 115:
-					st = new StringTokenizer(line);	
-					volumeIndicesMap.put(ind, HEXA8_MASK | (hexa8.size()/8) );				
-					for(int i=0; i<8; i++)
-						hexa8.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken())));   
-					break;
-				case 21:
+				case 21: // Linear beam
 					line=rd.readLine(); //skip          0         1         1
 					st = new StringTokenizer(line);	
-					beam2IndicesMap.put(ind, beam2Indices.size()/2);
+					elementBeamIndicesMap.put(ind, beamIndices.size());
 					for(int i=0; i<2; i++)
-						beam2Indices.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken())));
+						beamIndices.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken())));
+					hasBeam2 = true;
 					break;
-				case 92:
+				case 74:  // Membrane Linear Triangle
+				case 91:  // Thin Shell Linear Triangle
+				case 41:  // Plane Stress Linear Triangle
 					st = new StringTokenizer(line);	
-					tria6IndicesMap.put(ind, tria6Indices.size()/3);
+					elementSurfaceIndicesMap.put(ind, TRIA3_MASK | surfaceIndices.size());
+					for(int i=0; i<3; i++)
+						surfaceIndices.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken()))); 									
+					hasTria3 = true;
+					break;
+				case 92: // Thin Shell Parabolic Triangle
+					st = new StringTokenizer(line);	
+					elementSurfaceIndicesMap.put(ind, TRIA6_MASK | surfaceIndices.size());
 					for(int i=0; i<3; i++)
 					{
-						tria6Indices.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken())));
+						surfaceIndices.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken())));
 						st.nextToken(); //keep only vertex nodes
 					}
+					hasTria6 = true;
+					break;
+				case 94: // Thin Shell Linear Quadrilateral
+					st = new StringTokenizer(line);	
+					elementSurfaceIndicesMap.put(ind, QUAD4_MASK | surfaceIndices.size());
+					for(int i=0; i<4; i++)
+						surfaceIndices.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken())));
+					hasQuad4 = true;
+					break;
+				case 111: // Solid Linear Tetrahedron
+					st = new StringTokenizer(line);	
+					elementVolumeIndicesMap.put(ind, TETRA4_MASK | volumeIndices.size());
+					for(int i=0; i<4; i++)
+						volumeIndices.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken())));   
+					hasTetra4 = true;
+					break;
+				case 115: // Solid Linear Brick
+					st = new StringTokenizer(line);	
+					elementVolumeIndicesMap.put(ind, HEXA8_MASK | volumeIndices.size());
+					for(int i=0; i<8; i++)
+						volumeIndices.add(nodesIndicesMap.get(Integer.parseInt(st.nextToken())));   
+					hasHexa8 = true;
 					break;
 			}
 		}
-		
-		tetra4Indices=tetra4.toNativeArray();
-		hexa8Indices=hexa8.toNativeArray();		
 	}
 	
-	private boolean isTetra4(int id)
-	{
-		return (id & ELEMENT_MASK) == TETRA4_MASK;
-	}
-	
-	private boolean isHexa8(int id)
-	{
-		return (id & ELEMENT_MASK) == HEXA8_MASK;
-	}
-
 	private void readGroup(BufferedReader rd, int blockID) throws IOException
 	{		
 		String line = rd.readLine();
@@ -222,7 +271,7 @@ public class UNVParser
 			}
 			int nbelem = Integer.parseInt(snb);			
 			// Read group name
-			tria3GroupNames.add(rd.readLine().trim());
+			surfaceGroupNames.add(rd.readLine().trim());
 			
 			TIntArrayList facelist = new TIntArrayList();
 			while ((line = rd.readLine().trim()).startsWith("8"))
@@ -233,7 +282,7 @@ public class UNVParser
 				while (st.hasMoreTokens()) {
 					st.nextToken();
 					String index = st.nextToken();
-					int id=tria3IndicesMap.get(Integer.parseInt(index));
+					int id=elementSurfaceIndicesMap.get(Integer.parseInt(index));
 					facelist.add(id);
 					nbelem--;
 					if (blockID == 2435)
@@ -248,40 +297,39 @@ public class UNVParser
 					break;
 				}
 			}
-			tria3Groups.add(facelist.toNativeArray());			
+			surfaceGroups.add(facelist.toNativeArray());			
 		}
 	}
 	
 	private void readTetra4LoadSet(int element, int faceId, TIntArrayList group)
 	{
-		element*=4;
-		int p1=tetra4Indices[element++];
-		int p2=tetra4Indices[element++];
-		int p3=tetra4Indices[element++];
-		int p4=tetra4Indices[element++];
+		int p1=volumeIndices.get(element++);
+		int p2=volumeIndices.get(element++);
+		int p3=volumeIndices.get(element++);
+		int p4=volumeIndices.get(element++);
 		
-		group.add(tria3Indices.size()/3);
+		group.add(surfaceIndices.size());
 		switch(faceId)
 		{
 			case 1:
-				tria3Indices.add(p1);
-				tria3Indices.add(p2);
-				tria3Indices.add(p3);
+				surfaceIndices.add(p1);
+				surfaceIndices.add(p2);
+				surfaceIndices.add(p3);
 				break;
 			case 2:
-				tria3Indices.add(p1);
-				tria3Indices.add(p2);
-				tria3Indices.add(p4);
+				surfaceIndices.add(p1);
+				surfaceIndices.add(p2);
+				surfaceIndices.add(p4);
 				break;
 			case 3:
-				tria3Indices.add(p2);
-				tria3Indices.add(p3);
-				tria3Indices.add(p4);
+				surfaceIndices.add(p2);
+				surfaceIndices.add(p3);
+				surfaceIndices.add(p4);
 				break;
 			case 4:
-				tria3Indices.add(p1);
-				tria3Indices.add(p3);
-				tria3Indices.add(p4);
+				surfaceIndices.add(p1);
+				surfaceIndices.add(p3);
+				surfaceIndices.add(p4);
 				break;
 			default:
 				throw new IllegalStateException("Face ID should be 1,2,3 or 4");
@@ -290,54 +338,53 @@ public class UNVParser
 
 	private void readHexa8LoadSet(int element, int faceId, TIntArrayList group)
 	{
-		element*=8;
-		int p1=hexa8Indices[element++];
-		int p2=hexa8Indices[element++];
-		int p3=hexa8Indices[element++];
-		int p4=hexa8Indices[element++];
-		int p5=hexa8Indices[element++];
-		int p6=hexa8Indices[element++];
-		int p7=hexa8Indices[element++];
-		int p8=hexa8Indices[element++];
+		int p1=volumeIndices.get(element++);
+		int p2=volumeIndices.get(element++);
+		int p3=volumeIndices.get(element++);
+		int p4=volumeIndices.get(element++);
+		int p5=volumeIndices.get(element++);
+		int p6=volumeIndices.get(element++);
+		int p7=volumeIndices.get(element++);
+		int p8=volumeIndices.get(element++);
 		
-		group.add(quad4Indices.size()/4);
+		group.add(surfaceIndices.size());
 		switch(faceId)
 		{
 			case 1:
-				quad4Indices.add(p1);
-				quad4Indices.add(p2);
-				quad4Indices.add(p3);
-				quad4Indices.add(p4);
+				surfaceIndices.add(p1);
+				surfaceIndices.add(p2);
+				surfaceIndices.add(p3);
+				surfaceIndices.add(p4);
 				break;
 			case 2:
-				quad4Indices.add(p5);
-				quad4Indices.add(p6);
-				quad4Indices.add(p7);
-				quad4Indices.add(p8);
+				surfaceIndices.add(p5);
+				surfaceIndices.add(p6);
+				surfaceIndices.add(p7);
+				surfaceIndices.add(p8);
 				break;
 			case 3:
-				quad4Indices.add(p1);
-				quad4Indices.add(p2);
-				quad4Indices.add(p6);
-				quad4Indices.add(p5);
+				surfaceIndices.add(p1);
+				surfaceIndices.add(p2);
+				surfaceIndices.add(p6);
+				surfaceIndices.add(p5);
 				break;
 			case 4:
-				quad4Indices.add(p2);
-				quad4Indices.add(p3);
-				quad4Indices.add(p7);
-				quad4Indices.add(p6);
+				surfaceIndices.add(p2);
+				surfaceIndices.add(p3);
+				surfaceIndices.add(p7);
+				surfaceIndices.add(p6);
 				break;
 			case 5:
-				quad4Indices.add(p3);
-				quad4Indices.add(p4);
-				quad4Indices.add(p8);
-				quad4Indices.add(p7);
+				surfaceIndices.add(p3);
+				surfaceIndices.add(p4);
+				surfaceIndices.add(p8);
+				surfaceIndices.add(p7);
 				break;
 			case 6:
-				quad4Indices.add(p1);
-				quad4Indices.add(p4);
-				quad4Indices.add(p8);
-				quad4Indices.add(p5);
+				surfaceIndices.add(p1);
+				surfaceIndices.add(p4);
+				surfaceIndices.add(p8);
+				surfaceIndices.add(p5);
 				break;
 			default:
 				throw new IllegalStateException("Face ID should be 1,2,3,4,5 or 6");
@@ -358,17 +405,16 @@ public class UNVParser
 			// first line: type of object
 			StringTokenizer st = new StringTokenizer(line);
 			st.nextToken(); //skip face pressure load label
-			int element=volumeIndicesMap.get(Integer.parseInt(st.nextToken()));
+			int element=elementVolumeIndicesMap.get(Integer.parseInt(st.nextToken()));
 
 			int faceId=Integer.parseInt(st.nextToken());
-			if(isTetra4(element))
+			if((element & TETRA4_MASK) != 0)
 			{
-				readTetra4LoadSet(element & (~ELEMENT_MASK), faceId, groupTetra4);
+				readTetra4LoadSet(element & (~TETRA4_MASK), faceId, groupTetra4);
 			}
-			else if(isHexa8(element))
+			else if((element & HEXA8_MASK) != 0)
 			{
-				//System.out.println(element+" : "+(element & (~ELEMENT_MASK)) );
-				readHexa8LoadSet(element & (~ELEMENT_MASK), faceId, groupHexa8);
+				readHexa8LoadSet(element & (~HEXA8_MASK), faceId, groupHexa8);
 			}
 				
 			rd.readLine(); //RECORD 4
@@ -377,14 +423,14 @@ public class UNVParser
 		
 		if(!groupTetra4.isEmpty())
 		{
-			tria3GroupNames.add(name);
-			tria3Groups.add(groupTetra4.toNativeArray());
+			surfaceGroupNames.add(name);
+			surfaceGroups.add(groupTetra4.toNativeArray());
 		}
 
 		if(!groupHexa8.isEmpty())
 		{
-			quad4GroupNames.add(name);
-			quad4Groups.add(groupHexa8.toNativeArray());
+			surfaceGroupNames.add(name);
+			surfaceGroups.add(groupHexa8.toNativeArray());
 		}
 		
 		return;
@@ -460,7 +506,7 @@ public class UNVParser
 		{
 			UNVParser unvp=new UNVParser();
 			unvp.parse(new BufferedReader(new FileReader("/home/jerome/cassiope/resources/example/tecplot50x50x50.unv")));
-			System.out.println(unvp.getQuad4Indices().length);			
+			System.out.println(unvp.getQuad4FromGroup(0).length);
 		}
 		catch(Exception ex)
 		{

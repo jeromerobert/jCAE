@@ -1,3 +1,10 @@
+2007-12-10 17:35 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/fe/unv/UNVDomain.java
+	  src/org/jcae/viewer3d/fe/unv/UNVProvider.java
+	  src/org/jcae/viewer3d/fe/unv/UNVParser.java: Allow mixing
+	triangles and quadrangles in a group.
+
 2007-12-07 18:37 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/fe/unv/UNVParser.java (readGroup): Fix

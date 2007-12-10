@@ -67,22 +67,17 @@ public class UNVProvider implements FEProvider
 	 */
 	public int[] getDomainIDs()
 	{		
-		int l=parser.getTria3GroupNames().length;
-		int l4=parser.getQuad4GroupNames().length;
-		int s=l+l4;
-		boolean b=parser.getBeam2Indices().length>0 || parser.getTria6Indices().length>0;
-		if(b) s++;
+		int s=parser.getTria3GroupNames().length;
+		boolean b=parser.hasBeam2() || parser.hasTria6();
+		if(b)
+			s++;
 		
 		int[] toReturn=new int[s];
 
-		for(int i=0; i<l; i++)
+		for(int i=0; i<s; i++)
 			toReturn[i]=i;
-
-		for(int i=0; i<l4; i++)
-			toReturn[l+i]=l+i;
-		
 		if(b)
-			toReturn[l+l4]=OTHERS_GROUP;
+			toReturn[s]=OTHERS_GROUP;
 		return toReturn;
 	}
 
