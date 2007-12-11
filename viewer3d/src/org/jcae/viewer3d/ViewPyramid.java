@@ -224,10 +224,10 @@ public class ViewPyramid extends BoundingPolytope
 	{
 		Vector4d[] vs=new Vector4d[getNumPlanes()];
 		getPlanes(vs);
-		planes[0]=vs[1];
-		planes[1]=vs[2];
-		planes[2]=vs[3];
-		planes[3]=vs[4];
+		planes[0]=vs[2];
+		planes[1]=vs[3];
+		planes[2]=vs[4];
+		planes[3]=vs[5];
 	}
 
 	/**

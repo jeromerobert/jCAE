@@ -1,3 +1,8 @@
+2007-12-11 11:30 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/ViewPyramid.java (getsidePlanes): Fix
+	clipping.
+
 2007-12-10 17:35 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/fe/FEDomain.java: Remove many unimplemented
