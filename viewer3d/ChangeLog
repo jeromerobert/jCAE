@@ -2,6 +2,8 @@
 
 	* src/org/jcae/viewer3d/ViewPyramid.java (getsidePlanes): Fix
 	clipping.
+	* src/org/jcae/viewer3d/View.java (println): Flush stream after
+	writing a line.
 
 2007-12-10 17:35 Denis Barbier <barbier@users.sourceforge.net>
 

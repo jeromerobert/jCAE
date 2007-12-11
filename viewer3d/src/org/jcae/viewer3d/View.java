@@ -405,7 +405,10 @@ public class View extends Canvas3D implements PositionListener
 	/** print a line in the PrintWriter*/
 	public void println(String line){
 		if(writer!=null)
+		{
 			writer.println(line);
+			writer.flush();
+		}
 	}
 	public TransformGroup getOriginAxisTransformGroup()
 	{
