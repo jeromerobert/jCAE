@@ -1,3 +1,9 @@
+2007-12-11 12:41 Denis Barbier <barbier@users.sourceforge.net>
+
+	* jcae-netbeans/src/org/jcae/netbeans/viewer3d/actions/ClipRectangleAction.java
+	  jcae-netbeans/src/org/jcae/netbeans/viewer3d/actions/DefaultModeAction.java:
+	Fix tooltips, keybindings are not defined.
+
 2007-12-07 17:14 Denis Barbier <barbier@users.sourceforge.net>
 
 	* jcae-netbeans/src/org/jcae/netbeans/mesh/smooth/Smooth.java: Fix

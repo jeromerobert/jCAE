@@ -14,8 +14,8 @@ public class ClipRectangleAction extends AbstractViewAction
 	 */
 	public ClipRectangleAction()
 	{						
-		putValue(Action.NAME, "Create a clip rectangle (or press shift key)");
-		putValue(Action.SHORT_DESCRIPTION, "Create a clip rectangle (or press shift key)");
+		putValue(Action.NAME, "Create a clip rectangle");
+		putValue(Action.SHORT_DESCRIPTION, "Create a clip rectangle");
 		putValue(Action.SMALL_ICON, icon);
 		setIcon(icon);
 	}

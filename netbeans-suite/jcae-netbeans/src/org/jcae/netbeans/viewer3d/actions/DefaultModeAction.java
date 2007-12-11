@@ -15,8 +15,8 @@ public class DefaultModeAction extends AbstractViewAction
 	 */
 	public DefaultModeAction()
 	{						
-		putValue(Action.NAME, "Restore default viewer mode (or press space key)");
-		putValue(Action.SHORT_DESCRIPTION, "Restore default viewer mode (or press space key)");
+		putValue(Action.NAME, "Restore default viewer mode");
+		putValue(Action.SHORT_DESCRIPTION, "Restore default viewer mode");
 		putValue(Action.SMALL_ICON, icon);
 		setIcon(icon);
 	}
