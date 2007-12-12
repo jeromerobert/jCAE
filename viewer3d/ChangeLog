@@ -1,3 +1,10 @@
+2007-12-12 12:14 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/viewer3d/View.java: Add cheat code '@' to reset
+	ViewableCAD polygon offset.
+	* src/org/jcae/viewer3d/View.java: Avoid overflow/underflow
+	computations when modifying polygon offset values.
+
 2007-12-11 11:30 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/ViewPyramid.java (getsidePlanes): Fix

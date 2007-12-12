@@ -52,21 +52,25 @@ import com.sun.j3d.utils.universe.ViewingPlatform;
  */
 public class View extends Canvas3D implements PositionListener
 {
+	private static final float zFactorAbs=Float.parseFloat(System.getProperty("javax.media.j3d.zFactorAbs", "1.0f"));
+	private static final float zFactorRel=Float.parseFloat(System.getProperty("javax.media.j3d.zFactorRel", "1.0f"));
+
 	/** Cheat codes to change polygon offset on CAD */
 	private class PAKeyListener extends KeyAdapter
 	{
-		float offset=1.0f;
-		float offsetRel=1.0f;
+		float offset=zFactorAbs;
+		float offsetRel=zFactorRel;
 		@Override
 		public void keyPressed(KeyEvent e)
 		{
 			boolean found=true;
 			switch(e.getKeyChar())
 			{
-				case ']': offset *= 2; break;
-				case '[': offset /= 2; break;
-				case '}': offsetRel *= 2; break;
-				case '{': offsetRel /= 2; break;
+				case ']': offset = checkBounds(2.0f * offset, offset); break;
+				case '[': offset = checkBounds(0.5f * offset, offset); break;
+				case '}': offsetRel = checkBounds(2.0f * offsetRel, offsetRel); break;
+				case '{': offsetRel = checkBounds(0.5f * offsetRel, offsetRel); break;
+				case '@': offset=zFactorAbs; offsetRel=zFactorRel; break;
 				default: found=false;
 			}
 			if(found)
@@ -80,6 +84,21 @@ public class View extends Canvas3D implements PositionListener
 				ViewableCAD.polygonAttrNone.setPolygonOffsetFactor(offsetRel);
 				System.out.println("polygon offset: "+offset+" polygon offset factor: "+offsetRel);
 			}
+		}
+		public final float checkBounds(float x, float old)
+		{
+			if (x == 0.0f)
+			{
+				if (old > 0.0f)
+					return Float.MIN_VALUE;
+				else
+					return - Float.MIN_VALUE;
+			}
+			else if (x == Float.POSITIVE_INFINITY)
+				return Float.MAX_VALUE;
+			else if (x == Float.NEGATIVE_INFINITY)
+				return - Float.MAX_VALUE;
+			return x;
 		}
 	}
 	
