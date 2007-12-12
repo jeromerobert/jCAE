@@ -82,7 +82,7 @@ public class View extends Canvas3D implements PositionListener
 				ViewableCAD.polygonAttrFront.setPolygonOffsetFactor(offsetRel);
 				ViewableCAD.polygonAttrBack.setPolygonOffsetFactor(offsetRel);
 				ViewableCAD.polygonAttrNone.setPolygonOffsetFactor(offsetRel);
-				System.out.println("polygon offset: "+offset+" polygon offset factor: "+offsetRel);
+				System.out.println("zFactorAbs: "+offset+" zFactorRel: "+offsetRel);
 			}
 		}
 		public final float checkBounds(float x, float old)
