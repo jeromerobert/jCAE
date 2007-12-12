@@ -3,24 +3,43 @@
 <html>
 <head>
 	<meta content="text/html; charset=iso-8859-15" http-equiv="CONTENT-TYPE">
+	<title>Getting Started &mdash; View Features</title>
 </head>
 <body>
-	<h1>Getting Started &mdash; View Features</h1>
+	<h1>Combined View</h1>
+<p>Several objects can be displayed on a single view.  For instance, if CAD shape is displayed and you select <cite>View</cite> in mesh menu, you will obtain this image:</p>
+<p><img src="jcae-0.15-view-cadmesh.png"/></p>
+<p>This image is not very useful, but there is no way to undo this action from mesh menu.  Fortunately this can be done, but directly from <code>View</code> object.  Select the object to delete in scrolling list, and click on <cite>remove</cite> icon.
+<p><img src="jcae-0.15-view-cadremovemesh.png"/></p>
+<p>Maybe you wanted to display only one face, you can expand the <cite>Groups</cite> node and display a single face.
+<p><img src="jcae-0.15-view-cadmeshface.png"/></p>
 
-	<h2>Clipping</h2>
+	<h1>Multiple Views</h1>
+<p>It is also possible to display several views at the same time.  Click on <cite>New 3D view</cite> icon.</p>
+<p><img src="jcae-0.15-view-newview.png"/></p>
+<p>Selection <cite>View</cite> from mesh menu will then display mesh in this new view.</p>
+<p><img src="jcae-0.15-view-cadmesh2.png"/></p>
+<p>Views can be rearranged, for instance you can select this new view and move it at the right side, a red framed rectangle shows where this view will be moved on.</p>
+<p><img src="jcae-0.15-view-moveview.png"/></p>
+<p>Here is the result:</p>
+<p><img src="jcae-0.15-view-moveview2.png"/></p>
+<p>You can move separators between views, and with little practice obtain this result:</p>
+<p><img src="jcae-0.15-view-moveview3.png"/></p>
+
+	<h1>Clipping</h1>
 <p>Imagine that you want to view display the interior of a volume.  One could explode geometry shape into faces, and display only desired faces.  But this is very unpractical with large CAD shapes.  An alternative is to use clipping, as described below.  First action is to put shape in a position to ease clipping, this is often achieved by selecting one of the predefined views:</p>
-<p> <img src="jcae-0.15-view-front.png"/></p>
+<p><img src="jcae-0.15-view-front.png"/></p>
 <p>Click on <cite>Create a clip rectangle</cite> icon</p>
-<p> <img src="jcae-0.15-view-clip1.png"/></p>
+<p><img src="jcae-0.15-view-clip1.png"/></p>
 <p>and select a region:</p>
-<p> <img src="jcae-0.15-view-clip2.png"/></p>
+<p><img src="jcae-0.15-view-clip2.png"/></p>
 <p>Everything outside selected region is hidden.  You need to click on <cite>Restore default viewer mode</cite> icon to be able to move camera again.</p>
-<p> <img src="jcae-0.15-view-clip3.png"/></p>
+<p><img src="jcae-0.15-view-clip3.png"/></p>
 <p>This view allows to see inside closed volumes.</p>
-<p> <img src="jcae-0.15-view-clip4.png"/></p>
+<p><img src="jcae-0.15-view-clip4.png"/></p>
 <p>To see the whole shape again, click on <cite>Remove clip rectangle or clip box</cite> icon.
-<p> <img src="jcae-0.15-view-removeclip.png"/></p>
+<p><img src="jcae-0.15-view-removeclip.png"/></p>
 <p><cite>Fit All</cite> icon adjusts camera position to ensure that whole shape is visible.
-<p> <img src="jcae-0.15-view-fitall.png"/></p>
+<p><img src="jcae-0.15-view-fitall.png"/></p>
 </body>
 </html>
