@@ -65,9 +65,6 @@
 				<attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.UNVToUNVAction"/>
 			</file>
 			<file name="org-jcae-netbeans-mesh-ViewUNV.instance"/>
-            <file name="org-jcae-netbeans-mesh-smooth-Smooth.instance">
-				<attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.smooth.Smooth"/>
-			</file>
 			<file name="org-jcae-netbeans-mesh-BuidOEMMAction.instance">
 				<attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.BuidOEMMAction"/>
 			</file>

@@ -25,6 +25,7 @@ import javax.swing.Action;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
+import org.jcae.netbeans.mesh.smooth.Smooth;
 import org.openide.awt.Actions;
 import org.openide.awt.Mnemonics;
 import org.openide.util.HelpCtx;
@@ -39,7 +40,7 @@ public class ExpertMenu extends SystemAction implements Presenter.Popup
 	
 	public String getName()
 	{
-		return "Expert";
+		return "Experimental";
 	}
 
 	public HelpCtx getHelpCtx()
@@ -77,6 +78,11 @@ public class ExpertMenu extends SystemAction implements Presenter.Popup
 		item = new JMenuItem();
 		Mnemonics.setLocalizedText(item, item.getText());
 		Actions.connect(item, (Action)SystemAction.get(DecimateAction.class), true);
+		menu.add(item);
+
+		item = new JMenuItem();
+		Mnemonics.setLocalizedText(item, item.getText());
+		Actions.connect(item, (Action)SystemAction.get(Smooth.class), true);
 		menu.add(item);
 		
 		return menu;			
