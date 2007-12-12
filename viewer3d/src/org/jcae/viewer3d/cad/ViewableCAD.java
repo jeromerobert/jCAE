@@ -41,20 +41,24 @@ import com.sun.j3d.utils.geometry.Stripifier;
  */
 public class ViewableCAD extends ViewableAdaptor 
 {	
+	private static final float zFactorAbs=Float.parseFloat(System.getProperty(
+		"javax.media.j3d.zFactorAbs", "20.0f"));
+	private static final float zFactorRel=Float.parseFloat(System.getProperty(
+		"javax.media.j3d.zFactorRel", "2.0f"));
 	public final static PolygonAttributes polygonAttrFront =
-		new PolygonAttributes();
+		new PolygonAttributes(PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_FRONT,
+				20.0f * zFactorAbs, false, zFactorRel);
 	public final static PolygonAttributes polygonAttrBack =
-		new PolygonAttributes();
+		new PolygonAttributes(PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_BACK,
+				20.0f * zFactorAbs, false, zFactorRel);
 	public final static PolygonAttributes polygonAttrNone =
-		new PolygonAttributes();
-	
+		new PolygonAttributes(PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE,
+				20.0f * zFactorAbs, false, zFactorRel);
+
 	static
 	{
-		polygonAttrFront.setCullFace(PolygonAttributes.CULL_FRONT);
 		polygonAttrFront.setCapability(PolygonAttributes.ALLOW_OFFSET_WRITE);
-		polygonAttrBack.setCullFace(PolygonAttributes.CULL_BACK);
 		polygonAttrBack.setCapability(PolygonAttributes.ALLOW_OFFSET_WRITE);
-		polygonAttrNone.setCullFace(PolygonAttributes.CULL_NONE);
 		polygonAttrNone.setCapability(PolygonAttributes.ALLOW_OFFSET_WRITE);
 	}
 	
@@ -522,19 +526,6 @@ public class ViewableCAD extends ViewableAdaptor
 		toReturn.setCapability(BranchGroup.ALLOW_DETACH);
 		int n=0;
 		facesInfo=new HashMap<Integer, FacePickingInfo>();
-		
-		float factorAbs=20.0f * Float.parseFloat(System.getProperty(
-			"javax.media.j3d.zFactorAbs", "20.0f"));
-		float factorRel=Float.parseFloat(System.getProperty(
-			"javax.media.j3d.zFactorRel", "2.0f"));
-		
-		polygonAttrFront.setPolygonOffset(factorAbs);
-		polygonAttrBack.setPolygonOffset(factorAbs);
-		polygonAttrNone.setPolygonOffset(factorAbs);
-
-		polygonAttrFront.setPolygonOffsetFactor(factorRel);
-		polygonAttrBack.setPolygonOffsetFactor(factorRel);
-		polygonAttrNone.setPolygonOffsetFactor(factorRel);
 		
 		Vector<Material> materials=new Vector<Material>();//Vector to save Face Materials
 		

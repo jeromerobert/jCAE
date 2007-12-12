@@ -55,26 +55,22 @@ public class ViewableFD extends ViewableAdaptor
 	private static Logger logger=Logger.getLogger("global");
 	public final static byte SELECT_PLATE=1;
 
+	private static final float zFactorAbs=Float.parseFloat(System.getProperty(
+		"javax.media.j3d.zFactorAbs", "20.0f"));
+	private static final float zFactorRel=Float.parseFloat(System.getProperty(
+		"javax.media.j3d.zFactorRel", "2.0f"));
+
 	private final static PolygonAttributes PLATE_POLYGON_ATTRIBUTE=new PolygonAttributes(
 		PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE,
-		3.0f * Float.parseFloat(System.getProperty(
-			"javax.media.j3d.zFactorAbs", "20.0f")), false, 2*Float
-			.parseFloat(System.getProperty("javax.media.j3d.zFactorRel",
-				"2.0f")));
+		3.0f * zFactorAbs, false, 2.0f * zFactorRel);
 
 	private final static PolygonAttributes BORDER_POLYGON_ATTRIBUTE=new PolygonAttributes(
 		PolygonAttributes.POLYGON_LINE, PolygonAttributes.CULL_NONE,
-		2.0f * Float.parseFloat(System.getProperty(
-			"javax.media.j3d.zFactorAbs", "20.0f")), false, Float
-			.parseFloat(System.getProperty("javax.media.j3d.zFactorRel",
-				"2.0f")));
+		2.0f * zFactorAbs, false, zFactorRel);
 
 	private final static PolygonAttributes SELECT_POLYGON_ATTRIBUTE=new PolygonAttributes(
 		PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE,
-		1.0f * Float.parseFloat(System.getProperty(
-			"javax.media.j3d.zFactorAbs", "20.0f")), false, Float
-			.parseFloat(System.getProperty("javax.media.j3d.zFactorRel",
-				"2.0f")));
+		zFactorAbs, false, zFactorRel);
 
 	private final static LineAttributes SLOT_ATTRIBUTE=new LineAttributes();
 	

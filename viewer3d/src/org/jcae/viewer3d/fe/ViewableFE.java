@@ -56,6 +56,7 @@ public class ViewableFE extends ViewableAdaptor
 	private String name;
 	private short pickingMode=PICK_DOMAIN;
 	private boolean showShapeLine=true;
+
 	private static final float zFactorAbs=Float.parseFloat(System.getProperty(
 		"javax.media.j3d.zFactorAbs", "20.0f"));
 	private static final float zFactorRel=Float.parseFloat(System.getProperty(
@@ -66,9 +67,7 @@ public class ViewableFE extends ViewableAdaptor
 		2.0f * zFactorAbs, true, zFactorRel);
 	
 	final private static PolygonAttributes LINE_POLYGON_ATTR=new PolygonAttributes(
-		PolygonAttributes.POLYGON_LINE, PolygonAttributes.CULL_NONE, Float
-			.parseFloat(System.getProperty("javax.media.j3d.zFactorAbs",
-				"20.0f")));
+		PolygonAttributes.POLYGON_LINE, PolygonAttributes.CULL_NONE, zFactorAbs);
 	/**
 	 * 
 	 */

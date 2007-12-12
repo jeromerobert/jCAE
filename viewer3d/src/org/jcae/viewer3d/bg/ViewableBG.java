@@ -46,12 +46,13 @@ public class ViewableBG extends ViewableAdaptor
 	private Shape3D selectedLeaves = new Shape3D();
 	private String name;
 	
+	private static final float zFactorAbs=Float.parseFloat(System.getProperty(
+		"javax.media.j3d.zFactorAbs", "20.0f"));
+	private static final float zFactorRel=Float.parseFloat(System.getProperty(
+		"javax.media.j3d.zFactorRel", "2.0f"));
 	private final static PolygonAttributes SELECT_POLYGON_ATTRIBUTE=new PolygonAttributes(
 		PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE,
-		1.0f * Float.parseFloat(System.getProperty(
-			"javax.media.j3d.zFactorAbs", "20.0f")), false, Float
-			.parseFloat(System.getProperty("javax.media.j3d.zFactorRel",
-				"2.0f")));
+		zFactorAbs, false, zFactorRel);
 
 	public ViewableBG(BranchGroup bg)
 	{
