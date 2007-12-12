@@ -41,7 +41,7 @@ See http://forrest.apache.org/docs/linking.html for more info
 	</about>
 	<doc label="Documentation">
 		<started label="Getting started">
-			<started-chap label="Installation" href="getting_started/installation.html"/>
+			<started-chap label="Installation" href="getting_started/index.html"/>
 			<started-chap label="Mesh Imported CAD" href="getting_started/importcad.html"/>
 			<started-chap label="Mesh Generated CAD" href="getting_started/generatecad.html"/>
 			<started-chap label="View Features" href="getting_started/view.html"/>
