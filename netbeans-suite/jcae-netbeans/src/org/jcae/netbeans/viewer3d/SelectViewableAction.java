@@ -138,6 +138,7 @@ public class SelectViewableAction extends CallableSystemAction
 	public Component getToolbarPresenter()
 	{		
 		box.setMaximumSize(new Dimension(200, Integer.MAX_VALUE));
+		box.setLightWeightPopupEnabled(false);
 		return box;
 	}
 	/* (non-Javadoc)
