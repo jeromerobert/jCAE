@@ -1,3 +1,8 @@
+2007-12-13 01:21 Denis Barbier <barbier@users.sourceforge.net>
+
+	* make-dist-Linux.sh  make-dist-Win32.sh: Copy getting_started docs
+	into tarballs.
+
 2007-12-11 12:41 Denis Barbier <barbier@users.sourceforge.net>
 
 	* jcae-netbeans/src/org/jcae/netbeans/viewer3d/actions/ClipRectangleAction.java

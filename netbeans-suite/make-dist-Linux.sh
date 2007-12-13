@@ -61,6 +61,8 @@ chmod a+x jcae/jcae/groovy/*.groovy jcae/bin/amibebatch
 mv jcae tmp
 mv tmp/* .
 rmdir tmp
+mkdir -p docs/getting_started
+cp ../../htdocs/src/documentation/content/xdocs/getting_started/*.{html,png} docs/getting_started/
 
 cd ..
 rm $VERSION-Linux.tar.bz2 || true

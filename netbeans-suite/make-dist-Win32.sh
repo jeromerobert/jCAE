@@ -44,6 +44,8 @@ unzip ../dist/jcae.zip
 mv jcae tmp
 mv tmp/* .
 rmdir tmp
+mkdir -p docs/getting_started
+cp ../../htdocs/src/documentation/content/xdocs/getting_started/*.{html,png} docs/getting_started/
 
 cd ..
 
