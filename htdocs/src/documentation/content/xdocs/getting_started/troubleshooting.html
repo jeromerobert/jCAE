@@ -16,7 +16,12 @@
 <p>on your console, you need to modify <code>maximumMemory</code> property in <code>Window/Options/Mesher settings</code> tab.</p>
 
 	<h1>Display Artifacts</h1>
+	<p>OpenGL FAQ gives some hints about <a href="http://www.opengl.org/resources/faq/technical/#indx0130">drawing Lines over polygons</a>.  We could not find a way to define polygon offsets which work well for all graphic cards, so you may experience display artifacts as shown below:</p>
 <p><img src="jcae-0.15-trouble-zfactor.png"/> <img src="jcae-0.15-trouble-zfactor2.png"/></p>
+<p>If you experience such troubles, you can type on square and curly bracket keys (<code>[]{}</code>) to interactively change polygon offset values, and <code>@</code> to reset default values.  Values are printed onto console, and you can put right values for your card into launcher script (<code>jcae.sh</code> or <code>jcae.bat</code>).  We are very interested to know if there are better ways to deal with this problem!
+
+	<h1>Reporting Bugs</h1>
+	<p>If you have trouble using jCAE, please tell us on our <a href="http://sourceforge.net/forum/?group_id=74334">forums</a> or file a <a href="http://sourceforge.net/tracker/?group_id=74334&atid=540660">bug report</a>.  Thanks for your help.</p>
 
 <p><a href="view.html">Prev: View Features</a></p>
 </body>
