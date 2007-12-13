@@ -264,10 +264,10 @@ if (phases[2])
 				mesh = new Mesh2D(mtb, mp, face); 
 			} else {
 				new BasicMesh(mesh).compute()
+				new SmoothNodes2D(mesh, smoothOptions2d).compute()
 				new ConstraintNormal3D(mesh).compute();
 				new CheckDelaunay(mesh).compute()
 
-				new SmoothNodes2D(mesh, smoothOptions2d).compute()
 				logger.info("Face #${iface} has been meshed")
 			}
 			MeshWriter.writeObject(mesh, outputDir, brepfile, iface)
