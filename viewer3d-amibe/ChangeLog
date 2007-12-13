@@ -1,3 +1,7 @@
+2007-13-10 15:48 Denis Barbier <barbier@users.sourceforge.net>
+
+	* build.xml: Also put org.jcae.mesh.* classes into jar file.
+
 2007-12-10 18:49 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/MeshBoraViewer3d.java: Updated.
