@@ -226,9 +226,9 @@ public class Basic2d implements AlgoInterface
 		new Insertion(m, 4.0).compute();
 		new ConstraintNormal3D(m).compute();
 		new Insertion(m).compute();
-		new ConstraintNormal3D(m).compute();
 		m.popCompGeom(3);
 		
+		new ConstraintNormal3D(m).compute();
 		new CheckDelaunay(m).compute();
 		if (deflection > 0.0 && !relDefl)
 			new EnforceAbsDeflection(m).compute();
