@@ -72,10 +72,12 @@ public class MeshReader
 		logger.debug("begin reading "+xmlDir+File.separator+JCAEXMLData.xml2dFilename+iFace);
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		Document document;
+		File xmlFile2d = null;
 		
 		try
 		{
-			document = XMLHelper.parseXML(new File(xmlDir, JCAEXMLData.xml2dFilename+iFace));
+			xmlFile2d = new File(xmlDir, JCAEXMLData.xml2dFilename+iFace);
+			document = XMLHelper.parseXML(xmlFile2d);
 		}
 		catch (ParserConfigurationException ex)
 		{
@@ -88,6 +90,9 @@ public class MeshReader
 
 		try
 		{
+			String formatVersion = xpath.evaluate("/jcae/@version", document);
+			if (formatVersion != null && formatVersion.length() > 0)
+				throw new RuntimeException("File "+xmlFile2d+" has been written by a newer version of jCAE and cannot be re-read");
 			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh",
 				document, XPathConstants.NODE);
 			Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement,
@@ -217,9 +222,11 @@ public class MeshReader
 		logger.info("Read mesh from "+xmlDir+File.separator+JCAEXMLData.xml3dFilename);
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		Document document;
+		File xmlFile3d = null;
 		try
 		{
-			document = XMLHelper.parseXML(new File(xmlDir, JCAEXMLData.xml3dFilename));
+			xmlFile3d = new File(xmlDir, JCAEXMLData.xml3dFilename);
+			document = XMLHelper.parseXML(xmlFile3d);
 		}
 		catch (ParserConfigurationException ex)
 		{
@@ -232,6 +239,9 @@ public class MeshReader
 
 		try
 		{
+			String formatVersion = xpath.evaluate("/jcae/@version", document);
+			if (formatVersion != null && formatVersion.length() > 0)
+				throw new RuntimeException("File "+xmlFile3d+" has been written by a newer version of jCAE and cannot be re-read");
 			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh", document, XPathConstants.NODE);
 			Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement, XPathConstants.NODE);
 			String refFile = xpath.evaluate("references/file/@location", submeshNodes);

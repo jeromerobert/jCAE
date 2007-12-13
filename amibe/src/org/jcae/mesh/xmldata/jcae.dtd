@@ -1,6 +1,9 @@
 <!-- Root element of a jCAE mesh file -->
 <!ELEMENT jcae (mesh)+>
 
+<!-- not used yet -->
+<!ATTLIST jcae version CDATA #IMPLIED>
+
 <!-- Root element of a mesh -->
 <!ELEMENT mesh (shape?,submesh+)>
 

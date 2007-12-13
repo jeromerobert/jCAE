@@ -1,3 +1,11 @@
+Thu Dec 13 09:36:41 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/jcae.dtd: Add a 'version' attribute to
+	<jcae> root element.  Writers do not set it; thus if readers found
+	one, it means that files had been written by a newer version.
+	An error message is reported and an exception is raised, to avoid
+	hard to debug problems.
+
 Sat Dec  8 20:52:45 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Mesh.java: New createTetrahedron()

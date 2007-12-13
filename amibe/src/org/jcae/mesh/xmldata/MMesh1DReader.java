@@ -87,12 +87,16 @@ public class MMesh1DReader
 	{
 		MMesh1D m1d = null;
 		int i;
-		logger.debug("begin reading "+xmlDir+File.separator+JCAEXMLData.xml1dFilename);
+		File xmlFile1d = new File(xmlDir, JCAEXMLData.xml1dFilename);
+		logger.debug("begin reading "+xmlFile1d);
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		HashMap<CADVertex, MNode1D> map1DToMaster = new HashMap<CADVertex, MNode1D>();
 		try
 		{
-			Document document = XMLHelper.parseXML(new File(xmlDir, JCAEXMLData.xml1dFilename));
+			Document document = XMLHelper.parseXML(xmlFile1d);
+			String formatVersion = xpath.evaluate("/jcae/@version", document);
+			if (formatVersion != null && formatVersion.length() > 0)
+				throw new RuntimeException("File "+xmlFile1d+" has been written by a newer version of jCAE and cannot be re-read");
 			String brepFile = xpath.evaluate("/jcae/mesh/shape/file/@location", document);
 			
 			if(!new File(brepFile).isAbsolute())

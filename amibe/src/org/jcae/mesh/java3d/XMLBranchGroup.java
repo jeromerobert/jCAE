@@ -104,6 +104,18 @@ public class XMLBranchGroup
 	public void parseXML() throws ParserConfigurationException, SAXException, IOException
 	{
 		document=XMLHelper.parseXML(xmlFile);
+		try
+		{
+			String formatVersion = xpath.evaluate("/jcae/@version", document);
+			if (formatVersion != null && formatVersion.length() > 0)
+				throw new RuntimeException("File "+xmlFile+" has been written by a newer version of jCAE and cannot be re-read");
+		}
+		catch (XPathExpressionException ex)
+		{
+			// Should never happen
+			ex.printStackTrace();
+			throw new RuntimeException("Fatal error");
+		}
 	}
 	
 	private float[] readFloat(String filename, int number) throws IOException

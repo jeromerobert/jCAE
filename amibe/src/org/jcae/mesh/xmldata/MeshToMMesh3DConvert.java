@@ -56,7 +56,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 	private DataOutputStream nodesOut, refsOut, normalsOut, trianglesOut, groupsOut;
 	private String xmlDir;
 	private String brepFile;
-	private File xmlFile;
+	private File xmlFile3d;
 	private File nodesFile, refFile, normalsFile, trianglesFile, groupsFile;
 	private Document documentOut;
 	private Element groupsElement;
@@ -77,9 +77,11 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 	public void computeRefs(int iFace)
 	{
 		Document document;
+		File xmlFile2d = null;
 		try
 		{
-			document = XMLHelper.parseXML(new File(xmlDir, JCAEXMLData.xml2dFilename+iFace));
+			xmlFile2d = new File(xmlDir, JCAEXMLData.xml2dFilename+iFace);
+			document = XMLHelper.parseXML(xmlFile2d);
 		}
 		catch(FileNotFoundException ex)
 		{
@@ -93,6 +95,9 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		try
 		{
+			String formatVersion = xpath.evaluate("/jcae/@version", document);
+			if (formatVersion != null && formatVersion.length() > 0)
+				throw new RuntimeException("File "+xmlFile2d+" has been written by a newer version of jCAE and cannot be re-read");
 			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh",
 				document, XPathConstants.NODE);
 			Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement,
@@ -118,7 +123,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 		coordRefs = new double[3*nrRefs];
 		xrefs = new TIntIntHashMap(nrRefs);
 		
-		xmlFile = new File(xmlDir, JCAEXMLData.xml3dFilename);
+		xmlFile3d = new File(xmlDir, JCAEXMLData.xml3dFilename);
 		File dir = new File(xmlDir, JCAEXMLData.xml3dFilename+".files");
 		//create the directory if it does not exiswriteInit(PrintStream arg0)t
 		if(!dir.exists())
@@ -204,7 +209,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			meshElement.appendChild(subMeshElement);
 			jcaeElement.appendChild(meshElement);
 
-			XMLHelper.writeXML(documentOut, xmlFile);
+			XMLHelper.writeXML(documentOut, xmlFile3d);
 			logger.info("Total number of nodes: "+nrNodes);
 			logger.info("Total number of triangles: "+nrTriangles);
 		}
@@ -223,9 +228,11 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 	public void convert(int groupId, CADFace F)
 	{
 		Document documentIn;
+		File xmlFile2d = null;
 		try
 		{
-			documentIn = XMLHelper.parseXML(new File(xmlDir, JCAEXMLData.xml2dFilename+groupId));
+			xmlFile2d = new File(xmlDir, JCAEXMLData.xml2dFilename+groupId);
+			documentIn = XMLHelper.parseXML(xmlFile2d);
 		}
 		catch(FileNotFoundException ex)
 		{
@@ -241,6 +248,9 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 		surface.dinit(1);
 		try
 		{
+			String formatVersion = xpath.evaluate("/jcae/@version", documentIn);
+			if (formatVersion != null && formatVersion.length() > 0)
+				throw new RuntimeException("File "+xmlFile2d+" has been written by a newer version of jCAE and cannot be re-read");
 			String nodesFileInput = xpath.evaluate(
 				"/jcae/mesh/submesh/nodes/file/@location", documentIn);
 			FileChannel fcN = new FileInputStream(xmlDir+File.separator+nodesFileInput).getChannel();

@@ -45,9 +45,12 @@ public class Mesh3dToSoupConvert
 {
 	public static void convert(String meshDirectory) throws XPathExpressionException, ParserConfigurationException, SAXException, IOException
 	{
-		Document document = XMLHelper.parseXML(
-			new File(meshDirectory, JCAEXMLData.xml3dFilename));
 		XPath xpath = XPathFactory.newInstance().newXPath();
+		File xmlFile3d = new File(meshDirectory, JCAEXMLData.xml3dFilename);
+		Document document = XMLHelper.parseXML(xmlFile3d);
+		String formatVersion = xpath.evaluate("/jcae/@version", document);
+		if (formatVersion != null && formatVersion.length() > 0)
+			throw new RuntimeException("File "+xmlFile3d+" has been written by a newer version of jCAE and cannot be re-read");
 		String fnodes = (String) xpath.evaluate(
 			"/jcae/mesh/submesh/nodes/file/@location", document,
 			XPathConstants.STRING);

@@ -122,9 +122,11 @@ public class MeshToSoupConvert extends JCAEXMLData
 	public void computeRefs(int iFace)
 	{
 		Document document;
+		File xmlFile2d = null;
 		try
 		{
-			document = XMLHelper.parseXML(new File(xmlDir, JCAEXMLData.xml2dFilename+iFace));
+			xmlFile2d = new File(xmlDir, JCAEXMLData.xml2dFilename+iFace);
+			document = XMLHelper.parseXML(xmlFile2d);
 		}
 		catch(FileNotFoundException ex)
 		{
@@ -138,6 +140,9 @@ public class MeshToSoupConvert extends JCAEXMLData
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		try
 		{
+			String formatVersion = xpath.evaluate("/jcae/@version", document);
+			if (formatVersion != null && formatVersion.length() > 0)
+				throw new RuntimeException("File "+xmlFile2d+" has been written by a newer version of jCAE and cannot be re-read");
 			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh",
 				document, XPathConstants.NODE);
 			Node submeshNodes = (Node) xpath.evaluate("nodes", submeshElement,

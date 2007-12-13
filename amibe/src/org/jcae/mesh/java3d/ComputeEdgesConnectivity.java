@@ -104,6 +104,9 @@ public class ComputeEdgesConnectivity
 	{
 		XPath xpath=XPathFactory.newInstance().newXPath();
 		document=XMLHelper.parseXML(xmlFile);
+		String formatVersion = xpath.evaluate("/jcae/@version", document);
+		if (formatVersion != null && formatVersion.length() > 0)
+			throw new RuntimeException("File "+xmlFile+" has been written by a newer version of jCAE and cannot be re-read: ");
 		
 		String trianglesFileName=(String) xpath.evaluate(
 			"/jcae/mesh/submesh/triangles/file/@location", document, XPathConstants.STRING);

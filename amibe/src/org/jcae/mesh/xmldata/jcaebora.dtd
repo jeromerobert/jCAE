@@ -1,6 +1,9 @@
 <!-- The root element of a jCAE model file -->
 <!ELEMENT jcae (model)+>
 
+<!-- not used yet -->
+<!ATTLIST jcae version CDATA #IMPLIED>
+
 <!-- Model -->
 <!ELEMENT model (shape,constraints?,graph)>
 
