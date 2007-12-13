@@ -295,8 +295,7 @@ public class SmoothNodes2D
 			//    M = metric(d)
 			// First, compute mInv0 = inv(metric(n))
 			mInv0 = new Metric2D();
-			m0.inv(mInv0);
-			if (mInv0 != null)
+			if (m0.inv(mInv0))
 				mInterpolate = new Metric2D();
 		}
 		do
@@ -306,7 +305,7 @@ public class SmoothNodes2D
 			Metric2D m1;
 			Vertex2D v = (Vertex2D) ot.destination();
 			Metric2D m2 = v.getMetrics(mesh);
-			if (mInv0 != null)
+			if (mInterpolate != null)
 			{
 				if (Metric2D.interpolateSpecial(mInv0, m2, mInterpolate))
 					m1 = mInterpolate;
@@ -445,11 +444,8 @@ public class SmoothNodes2D
 		{
 			if (args[argc].length() < 2 || args[argc].charAt(0) != '-' || args[argc].charAt(1) != '-')
 				break;
-			else
-			{
-				opts.put(args[argc].substring(2), args[argc+1]);
-				argc += 2;
-			}
+			opts.put(args[argc].substring(2), args[argc+1]);
+			argc += 2;
 		}
 		if (argc + 2 != args.length)
 			usage(1);
