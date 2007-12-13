@@ -217,11 +217,8 @@ public class SmoothNodes2D
 				break;
 			Vertex2D v = q.getData();
 			tree.remove(v);
-			if (v.getRef() != 0)
-			{
-				notProcessed++;
+			if (!v.isMutable())
 				continue;
-			}
 			if (smoothNode(v, ot, q.getValue()))
 			{
 				processed++;
