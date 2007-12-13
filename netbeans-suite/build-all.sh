@@ -1,8 +1,8 @@
 #! /bin/sh -e
 
 # Configure you path
-CASROOT=/home/jerome/home2/OpenCASCADE6.2.0/ros
-LOG4J=/usr/share/java/log4j-1.2.13.jar
+: ${CASROOT=/home/jerome/home2/OpenCASCADE6.2.0/ros}
+LOG4J=/usr/share/java/log4j-1.2.jar
 TROVE=/home/jerome/home2/JAVA/trove-2.0/lib/trove.jar
 # G++ 3.3 compiler (required by opencascade)
 CXX33=g++-3.3
