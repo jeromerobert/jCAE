@@ -462,6 +462,7 @@ public class MMesh1D extends MMesh0D
 					// 4.  Check whether deflection is valid.
 					if (canSkip && hasDeflection)
 					{
+						assert lastPoint != null;
 						double [] uv = lastPoint.getUV();
 						double [] start = face.getGeomSurface().value(uv[0], uv[1]);
 						uv = p2.getUV();

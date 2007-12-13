@@ -23,9 +23,7 @@ package org.jcae.mesh.amibe.patch;
 import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.TriangleVH;
-import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
 import org.jcae.mesh.amibe.util.LongLong;
 import org.jcae.mesh.amibe.metrics.Metric2D;
@@ -34,7 +32,6 @@ import org.jcae.mesh.cad.CADFace;
 import org.jcae.mesh.cad.CADGeomCurve2D;
 import org.jcae.mesh.cad.CADGeomSurface;
 import java.util.Random;
-import java.util.Iterator;
 
 /**
  * Vertex of a mesh.
@@ -271,7 +268,6 @@ public class Vertex2D extends Vertex
 		}
 		if (logger.isDebugEnabled())
 			logger.debug("Found: "+current);
-		assert current != null;
 		return current;
 	}
 	
