@@ -64,7 +64,6 @@ public class BasicMesh
 		new Insertion(mesh, 4.0).compute();
 		new ConstraintNormal3D(mesh).compute();
 		new Insertion(mesh).compute();
-		new ConstraintNormal3D(mesh).compute();
 		mesh.popCompGeom(3);
 		
 		assert (mesh.isValid());

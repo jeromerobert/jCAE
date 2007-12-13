@@ -282,6 +282,7 @@ public class Mesher
 		if (toReturn)
 		{
 			new BasicMesh(mesh).compute();
+			new ConstraintNormal3D(mesh).compute();
 			new CheckDelaunay(mesh).compute();
 			if (mp.hasDeflection() && !mp.hasRelativeDeflection())
 				new EnforceAbsDeflection(mesh).compute();

@@ -5,6 +5,10 @@ Thu Dec 13 09:36:41 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	one, it means that files had been written by a newer version.
 	An error message is reported and an exception is raised, to avoid
 	hard to debug problems.
+	* src/org/jcae/mesh/amibe/algos2d/BasicMesh.java
+	  src/org/jcae/mesh/Mesher.java: Move call to ConstraintNormal3D
+	from BasicMesh into Mesher.
+
 
 Sat Dec  8 20:52:45 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
