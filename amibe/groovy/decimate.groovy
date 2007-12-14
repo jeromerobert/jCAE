@@ -83,9 +83,9 @@ String algo=cmd.getOptionValue('a', "LengthDecimateHalfEdge");
 Constructor cons = Class.forName("org.jcae.mesh.amibe.algos3d."+algo).getConstructor(Mesh.class, Map.class);
 
 Mesh mesh = new Mesh()
-MeshReader.readObject3D(mesh, xmldir, "jcae3d")
+MeshReader.readObject3D(mesh, xmldir)
 
 cons.newInstance(mesh, algoOptions).compute();
 
-MeshWriter.writeObject3D(mesh, outDir, "jcae3d", "dummy.brep")
+MeshWriter.writeObject3D(mesh, outDir, null)
 
