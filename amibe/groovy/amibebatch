@@ -2,6 +2,13 @@
 
 reldir=$(dirname $0)
 dir=$(cd $reldir && pwd)
+parentdir=$(dirname $dir)
+memory=500m
+jcaehome=
+javahome=
+groovyhome=
+log4jproperties=
+scriptdir=$dir
 cmd=
 
 usage()
@@ -15,21 +22,8 @@ usage()
 	echo "  -l,--log4j-properties=FILE  Path to log4j.properties file" >&2
 	echo "  -m,--memory=MEM             Set maximum Java memory via -Xmx flag" >&2
 	echo "Available list of commands:" >&2
-	for f in $dir/*.groovy
+	for f in $scriptdir/*.groovy
 	do
-		case $f in
-		  "$dir/*.groovy" )
-			# Oops, we cannot find groovy scripts.  Try in jCAE location
-			if test -n "$jcaehome"
-			then
-				for f in $jcaehome/jcae/groovy/*.groovy
-				do
-    					grep ^cmd= $f | sed -e 's/cmd=\[/	/' -e 's/,/	/' -e 's/[]"]//g' >&2
-				done
-			fi
-			break
-			;;
-		esac
     		grep ^cmd= $f | sed -e 's/cmd=\[/	/' -e 's/,/	/' -e 's/[]"]//g' >&2
 	done
 	echo "Run" >&2
@@ -37,12 +31,6 @@ usage()
 	echo "for help about a specific command" >&2
 	exit $1
 }
-
-memory=7000m
-jcaehome=
-javahome=
-groovyhome=
-log4jproperties=
 
 prev=
 rc=1
@@ -108,7 +96,7 @@ do
   * )
 	cmd=$option
 	shift
-	if ! test -f $dir/$cmd && ! test -f $dir/$cmd.groovy
+	if ! test -f $scriptdir/$cmd && ! test -f $scriptdir/$cmd.groovy
 	then
 		echo "ERROR: unknown command: $cmd" >&2
 		echo "ERROR: Please run 'amibebatch -h'" >&2
@@ -118,7 +106,7 @@ do
   esac
 done
 
-test -n "$jcaehome" || jcaehome=${JCAE_HOME:-$dir/..}
+test -n "$jcaehome" || jcaehome=${JCAE_HOME:-$parentdir}
 test -n "$javahome" || javahome=${JAVA_HOME:-$jcaehome/jre-6}
 test -n "$groovyhome" || groovyhome=${GROOVY_HOME:-$jcaehome/groovy-1.1-beta-2}
 test -n "$cmd" || usage $rc
@@ -135,7 +123,7 @@ fi
 # Run command
 
 export MMGT_OPT=0
-JAVA_OPTS="-Xms512m -Xmx$memory -Dlog4j.configuration=file://$log4jproperties"
+JAVA_OPTS="-Xmx$memory -Dlog4j.configuration=file://$log4jproperties"
 
 export LD_LIBRARY_PATH=\
 $jcaehome/OpenCASCADE6.2.0/ros/Linux/lib:\
@@ -144,7 +132,8 @@ ${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
 Gall=$(echo $groovyhome/embeddable/groovy-all*.jar)
 Gcli=$(echo $groovyhome/lib/commons-cli*.jar)
-jcae=$jcaehome/jcae/modules/ext/jcae.jar
+#  jcae-viewer3d-amibe.jar depends on jcae.jar, the latter can thus be omitted
+jcae="$jcaehome/jcae/modules/ext/jcae-viewer3d-amibe.jar:$jcaehome/jcae/modules/ext/occjava.jar"
 
-$javahome/bin/java $JAVA_OPTS -cp $Gall:$Gcli:$jcae groovy.ui.GroovyMain $dir/$cmd "$@"
+$javahome/bin/java $JAVA_OPTS -cp $Gall:$Gcli:$jcae groovy.ui.GroovyMain $scriptdir/$cmd "$@"
 
