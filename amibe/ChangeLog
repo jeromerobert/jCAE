@@ -1,3 +1,5 @@
+Release jCAE 0.15.0
+
 Thu Dec 13 09:36:41 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/jcae.dtd: Add a 'version' attribute to
