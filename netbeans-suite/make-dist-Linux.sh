@@ -49,7 +49,9 @@ fi
 
 ln -s $JRE_HOME $JAVA_NAME
 rm -rf $JAVA_NAME/plugin $JAVA_NAME/javaw $JAVA_NAME/lib/i386/client/classes.jsa || true
-ln -s $GROOVY_HOME $GROOVY_NAME
+mkdir -p $GROOVY_NAME/embeddable $GROOVY_NAME/lib
+ln -s $GROOVY_HOME/embeddable/groovy-all-*.jar $GROOVY_NAME/embeddable/
+ln -s $GROOVY_HOME/lib/commons-cli*.jar $GROOVY_NAME/lib/
 mkdir -p OpenCASCADE6.2.0/ros/Linux/
 ln -s $CASROOT/../LICENSE OpenCASCADE6.2.0/LICENSE
 ln -s $CASCADE_LIB OpenCASCADE6.2.0/ros/Linux/lib
