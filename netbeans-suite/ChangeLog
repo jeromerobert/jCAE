@@ -1,3 +1,7 @@
+2007-12-14 13:40 Denis Barbier <barbier@users.sourceforge.net>
+
+	* make-dist-Linux.sh: Fix paths in amibebatch when it is copied.
+
 2007-12-13 01:21 Denis Barbier <barbier@users.sourceforge.net>
 
 	* make-dist-Linux.sh  make-dist-Win32.sh: Copy getting_started docs
