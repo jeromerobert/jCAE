@@ -8,7 +8,9 @@ Version 0.15.0 (2007-12-14)
 * Include a "Getting Started" document in the distribution
 * Upgrade to GNU Trove 2.0
 * Fix bug 1800977: No black faces in ViewableFE
+* Fix bug 1756713: Smooth and Decimate are broken
 * Fix bug 1488762: update getting started
+* Fix bug 1203582: NullPointerException when meshing 2d elsewhere than 1d
  
 Version 0.14.3 (2007-07-20)
 
