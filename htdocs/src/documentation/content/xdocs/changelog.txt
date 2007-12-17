@@ -1,3 +1,15 @@
+Version 0.15.0 (2007-12-14)
+
+* Improved performance for cylindrical patches, meshing time is linear against the number of triangles.
+* Full support for non-manifold meshes.
+* Initial support for scripting.  A new jcae/groovy/ directory contains groovy scripts which can be used as-is or modified to fit special needs.  They are for now only available in Linux tarballs or from SVN (under amibe/groovy).
+* Code cleanup in Amibe, in the hope that methods useful within Groovy scripts will not change.
+* New amd64 tarball with full 64bit support.
+* Include a "Getting Started" document in the distribution
+* Upgrade to GNU Trove 2.0
+* Fix bug 1800977: No black faces in ViewableFE
+* Fix bug 1488762: update getting started
+ 
 Version 0.14.3 (2007-07-20)
 
 * Fix decimation and OEMM
