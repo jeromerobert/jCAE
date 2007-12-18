@@ -5,6 +5,17 @@ Tue Dec 18 12:20:34 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/amibe/ds/MMesh1D.java: Store only filename
 	component into 'filename' member, geometry file is always copied
 	into output directory.
+	* src/org/jcae/mesh/xmldata/MeshWriter.java: triangles2d.bin file
+	format is modified, but in a backward compatible way.
+	Outer triangles are also written onto disk; by convention, vertex
+	indices are negated for outer triangles, and outer vertex has a
+	special index.  2D meshes can now be read from disk and updated.
+	* src/org/jcae/mesh/xmldata/MeshToSoupConvert.java
+	  src/org/jcae/mesh/xmldata/MeshReader.java
+	  src/org/jcae/mesh/xmldata/MeshToMMesh3DConvert.java: Update
+	mesh readers accordingly.
+	* src/org/jcae/mesh/amibe/ds/Mesh.java (buildAdjacency): Outer
+	triangles may now be found in mesh list.
 
 Release jCAE 0.15.0
 
