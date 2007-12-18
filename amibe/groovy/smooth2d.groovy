@@ -21,8 +21,7 @@ import org.apache.commons.cli.*;
 import org.jcae.mesh.amibe.validation.*
 import org.jcae.mesh.amibe.ds.Triangle;
 
-// line indented to prevent smooth2d from being listed as an amibebatch command
-  cmd=["smooth2d", "Perform vertex smoothing on 2D mesh"]
+cmd=["smooth2d", "Perform vertex smoothing on 2D mesh"]
 usage="<inputDir> <outputDir>"
 
 void usage(int rc, Options options)
@@ -81,7 +80,6 @@ String xmlDir = remaining[0]
 String outputDir = remaining[1]
 
 String sIter=cmd.getOptionValue('i', "5");
-String sSize=cmd.getOptionValue('s', "-1.0");
 String sTolerance=cmd.getOptionValue('t', "2.0");
 String sRelaxation=cmd.getOptionValue('r', "0.6");
 String sInterpolate=String.valueOf(cmd.hasOption('I'));
@@ -100,11 +98,11 @@ HashMap<String, String> options2d = new HashMap<String, String>();
 options2d.put("isotropic", "true");
 
 HashMap<String, String> smoothOptions2d = new HashMap<String, String>();
-smoothOptions2d.put("iterations", "5");
-smoothOptions2d.put("tolerance", "1");
-smoothOptions2d.put("modifiedLaplacian", "true");
-smoothOptions2d.put("refresh", "false");
-smoothOptions2d.put("relaxation", "0.6");
+smoothOptions2d.put("iterations", sIter);
+smoothOptions2d.put("tolerance", sTolerance);
+smoothOptions2d.put("interpolate", sInterpolate);
+smoothOptions2d.put("refresh", sRefresh);
+smoothOptions2d.put("relaxation", sRelaxation);
 
 MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault2D()
 CADExplorer expl = factory.newExplorer()
