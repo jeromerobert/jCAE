@@ -1,3 +1,8 @@
+Tue Dec 18 12:20:34 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/algos2d/SmoothNodes2D.java (main): Copy
+	geometry file into output directory.
+
 Release jCAE 0.15.0
 
 Thu Dec 13 09:36:41 CET 2007 Denis Barbier <barbier@users.sourceforge.net>

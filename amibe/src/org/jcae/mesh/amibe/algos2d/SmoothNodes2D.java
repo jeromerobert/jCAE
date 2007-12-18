@@ -37,7 +37,11 @@ import java.util.Iterator;
 import gnu.trove.TObjectDoubleHashMap;
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.nio.channels.FileChannel;
 import java.util.HashMap;
 import org.jcae.mesh.amibe.ds.MMesh1D;
 import org.jcae.mesh.amibe.ds.MeshParameters;
@@ -422,6 +426,7 @@ public class SmoothNodes2D
 		System.out.println(" --iterations <n>   Iterate <n> times over all nodes");
 		System.out.println(" --tolerance <t>    Consider only nodes with quality lower than <t>");
 		System.out.println(" --relaxation <r>   Set relaxation factor");
+		System.out.println(" --interpolate      Interpolate metrics");
 		System.out.println(" --refresh          Update vertex quality before each iteration");
 		System.exit(rc);
 	}
@@ -449,9 +454,12 @@ public class SmoothNodes2D
 
 		HashMap<String, String> options2d = new HashMap<String, String>();
 
-		MMesh1D mesh1D = MMesh1DReader.readObject(args[argc]);
+		String inputDir = args[argc];
+		String outputDir = args[argc+1];
+		MMesh1D mesh1D = MMesh1DReader.readObject(inputDir);
 		CADShape shape = mesh1D.getGeometry();
 		CADExplorer expF = CADShapeFactory.getFactory().newExplorer();
+		String brepFile = mesh1D.getGeometryFilename();
 
 		MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault2D();
 
@@ -464,9 +472,20 @@ public class SmoothNodes2D
 			Mesh2D mesh = new Mesh2D(mtb, mp, face);
 			try
 			{
-				MeshReader.readObject(mesh, args[argc], iFace);
+				MeshReader.readObject(mesh, inputDir, iFace);
 				new SmoothNodes2D(mesh, opts).compute();			
-				MeshWriter.writeObject(mesh, args[argc+1], null, iFace);
+				MeshWriter.writeObject(mesh, outputDir, brepFile, iFace);
+
+				// Copy geometry file
+				FileInputStream is = new FileInputStream(inputDir+File.separator+brepFile);
+				FileChannel iChannel = is.getChannel();
+				FileOutputStream os = new FileOutputStream(new File(outputDir, brepFile), false);
+				FileChannel oChannel = os.getChannel();
+				oChannel.transferFrom(iChannel, 0, iChannel.size());
+				if (is != null)
+					is.close();
+				if (os != null)
+					os.close();
 			}
 			catch(IOException ex)
 			{

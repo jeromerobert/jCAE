@@ -14,6 +14,9 @@ import org.jcae.mesh.xmldata.MeshToMMesh3DConvert;
 import org.jcae.mesh.amibe.algos2d.SmoothNodes2D;
 import java.io.File;
 import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.nio.channels.FileChannel;
 import org.apache.commons.cli.*;
 import org.jcae.mesh.amibe.validation.*
 import org.jcae.mesh.amibe.ds.Triangle;
@@ -120,6 +123,17 @@ for (expl.init(shape, CADShapeEnum.FACE); expl.more(); expl.next()) {
 		MeshReader.readObject(mesh, xmlDir, iface)
 		new SmoothNodes2D(mesh, smoothOptions2d).compute()
 		MeshWriter.writeObject(mesh, outputDir, brepfile, iface)
+
+		// Copy geometry file
+		FileInputStream is = new FileInputStream(xmlDir+File.separator+brepfile);
+		FileChannel iChannel = is.getChannel();
+		FileOutputStream os = new FileOutputStream(new File(outputDir, brepfile), false);
+		FileChannel oChannel = os.getChannel();
+		oChannel.transferFrom(iChannel, 0, iChannel.size());
+		if (is != null)
+			is.close();
+		if (os != null)
+			os.close();
 	}
 }
 
