@@ -132,8 +132,7 @@ ${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
 Gall=$(echo $groovyhome/embeddable/groovy-all*.jar)
 Gcli=$(echo $groovyhome/lib/commons-cli*.jar)
-#  jcae-viewer3d-amibe.jar depends on jcae.jar, the latter can thus be omitted
-jcae="$jcaehome/jcae/modules/ext/jcae-viewer3d-amibe.jar:$jcaehome/jcae/modules/ext/occjava.jar"
+jcae="$jcaehome/jcae/modules/ext/jcae.jar:$jcaehome/jcae/modules/ext/jcae-viewer3d-amibe.jar"
 
 $javahome/bin/java $JAVA_OPTS -cp $Gall:$Gcli:$jcae groovy.ui.GroovyMain $scriptdir/$cmd "$@"
 
