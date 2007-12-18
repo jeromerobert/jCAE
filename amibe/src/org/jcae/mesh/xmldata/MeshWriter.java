@@ -120,6 +120,9 @@ public class MeshWriter
 				nref++;
 			}
 		}
+		// Eventually add outer vertex.  It is not written onto disk, but its
+		// index may be used by outer triangles.
+		nodeIndex.put(outer, i);
 		out.close();
 		refout.close();
 		logger.debug("end writing "+nodesFile);
@@ -145,12 +148,22 @@ public class MeshWriter
 		logger.debug("begin writing "+trianglesFile);
 		DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(trianglesFile)));
 		int nrTriangles=0;
+		// First write inner triangles
 		for(Triangle f: trianglelist)
 		{
 			if (!f.isWritable())
 				continue;
 			for (int j = 0; j < 3; j++)
 				out.writeInt(nodeIndex.get(f.vertex[j]));
+			nrTriangles++;
+		}
+		// Next write outer triangles
+		for(Triangle f: trianglelist)
+		{
+			if (f.isWritable())
+				continue;
+			for (int j = 0; j < 3; j++)
+				out.writeInt(-nodeIndex.get(f.vertex[j]));
 			nrTriangles++;
 		}
 		out.close();

@@ -497,6 +497,18 @@ public class Mesh implements Serializable
 					sym.setAttributes(AbstractHalfEdge.BOUNDARY);
 					ot.glue(sym);
 				}
+				else if (ot.hasAttributes(AbstractHalfEdge.OUTER))
+				{
+					ot = ot.sym();
+					if (!ot.hasAttributes(AbstractHalfEdge.OUTER))
+					{
+						ot.setAttributes(AbstractHalfEdge.BOUNDARY);
+						ot = ot.sym();
+						ot.setAttributes(AbstractHalfEdge.BOUNDARY);
+					}
+					else
+						ot = ot.sym();
+				}
 			}
 		}
 		//  4. Mark non-manifold edges and bind them to virtual triangles.

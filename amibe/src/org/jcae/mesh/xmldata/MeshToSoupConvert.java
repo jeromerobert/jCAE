@@ -318,6 +318,11 @@ public class MeshToSoupConvert extends JCAEXMLData
 				for(int nr = 0; nr < nf; nr ++)
 				{
 					bbI.get(ind);
+					if (ind[0] < 0 || ind[1] < 0 || ind[2] < 0)
+					{
+						// Outer triangle
+						continue;
+					}
 					for (int j = 0; j < 3; j++)
 						for (int k = 0; k < 3; k++)
 							c[3*j+k] = coord[3*ind[j]+k];

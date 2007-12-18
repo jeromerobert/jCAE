@@ -331,6 +331,14 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				{
 					// Local node number for this group
 					indLoc[j] = trianglesBuffer.get();
+				}
+				if (indLoc[0] < 0 || indLoc[1] < 0 || indLoc[2] < 0)
+				{
+					// Skip outer triangles
+					continue;
+				}
+				for (int j = 0; j < 3; j++)
+				{
 					// Global node number
 					if (indLoc[j] < numberOfNodes - numberOfReferences)
 						ind[j] = indLoc[j] + nodeOffset;

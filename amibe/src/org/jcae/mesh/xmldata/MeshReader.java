@@ -23,6 +23,7 @@ package org.jcae.mesh.xmldata;
 
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
+import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.MGroup3D;
 import org.jcae.mesh.amibe.patch.Mesh2D;
@@ -136,7 +137,8 @@ public class MeshReader
 			
 			int numberOfNodes = Integer.parseInt(
 				xpath.evaluate("number/text()", submeshNodes));
-			Vertex2D [] nodelist = new Vertex2D[numberOfNodes];
+			Vertex2D [] nodelist = new Vertex2D[numberOfNodes+1];
+			nodelist[numberOfNodes] = (Vertex2D) mesh.outerVertex;
 			int label;
 			double [] coord = new double[2];
 			logger.debug("Reading "+numberOfNodes+" nodes");
@@ -173,12 +175,28 @@ public class MeshReader
 				xpath.evaluate("number/text()", submeshTriangles));
 			logger.debug("Reading "+numberOfTriangles+" elements");
 			Triangle [] facelist = new Triangle[numberOfTriangles];
+			int [] ind = new int[3];
+			Vertex2D [] pts = new Vertex2D[3];
 			for (int i=0; i < numberOfTriangles; i++)
 			{
-				Vertex2D pt1 = nodelist[trianglesBuffer.get()];
-				Vertex2D pt2 = nodelist[trianglesBuffer.get()];
-				Vertex2D pt3 = nodelist[trianglesBuffer.get()];
-				facelist[i] = mesh.createTriangle(pt1, pt2, pt3);
+				boolean outer = false;
+				for (int j = 0; j < 3; j++)
+				{
+					ind[j] = trianglesBuffer.get();
+					if (ind[j] < 0)
+					{
+						ind[j] = - ind[j];
+						outer = true;
+					}
+					pts[j] = nodelist[ind[j]];
+				}
+				facelist[i] = mesh.createTriangle(pts[0], pts[1], pts[2]);
+				if (outer)
+				{
+					facelist[i].setAttributes(AbstractHalfEdge.OUTER);
+					facelist[i].setReadable(false);
+					facelist[i].setWritable(false);
+				}
 				mesh.add(facelist[i]);
 			}
 			fcT.close();
