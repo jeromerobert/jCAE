@@ -305,7 +305,7 @@ public class UNVParser
 		int p3=volumeIndices.get(element++);
 		int p4=volumeIndices.get(element++);
 		
-		group.add(surfaceIndices.size());
+		group.add(TRIA3_MASK | surfaceIndices.size());
 		switch(faceId)
 		{
 			case 1:
@@ -344,7 +344,7 @@ public class UNVParser
 		int p7=volumeIndices.get(element++);
 		int p8=volumeIndices.get(element++);
 		
-		group.add(surfaceIndices.size());
+		group.add(QUAD4_MASK | surfaceIndices.size());
 		switch(faceId)
 		{
 			case 1:
