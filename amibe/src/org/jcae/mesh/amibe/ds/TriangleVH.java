@@ -262,7 +262,7 @@ public class TriangleVH extends Triangle
 	public String toString()
 	{
 		StringBuilder r = new StringBuilder(super.toString());
-		r.append("Adjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2));
+		r.append("\nAdjacency: "+showAdj(0)+" "+showAdj(1)+" "+showAdj(2));
 		r.append("\nEdge attributes:");
 		for (int i = 0; i < 3; i++)
 			r.append(" "+edgeAttributes[i]);
