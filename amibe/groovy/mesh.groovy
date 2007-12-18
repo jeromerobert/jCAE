@@ -283,8 +283,8 @@ if (phases[3])
 		logger.warn("Phase 3 is invoked without phase 1, argument ${brepfile} is ignored")
 		mesh1d = MMesh1DReader.readObject(outputDir);
 		shape = mesh1d.getGeometry();
-		logger.warn("Geometry shape is instead read from "+mesh1d.getGeometryFilename())
-		brepfile = new File(mesh1d.getGeometryFilename()).getName()
+		brepfile = mesh1d.getGeometryFilename()
+		logger.warn("Geometry shape is instead read from "+brepfile)
 	}
 	expl = factory.newExplorer()
 	m2dto3d = new MeshToMMesh3DConvert(outputDir, brepfile)

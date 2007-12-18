@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
+import java.io.File;
 import org.apache.log4j.Logger;
 
 /**
@@ -63,7 +64,7 @@ public class MMesh1D extends MMesh0D
 	public MMesh1D(String cadFile)
 	{
 		super(CADShapeFactory.getFactory().newShape(cadFile));
-		filename = cadFile;
+		filename = new File(cadFile).getName();
 
 		CADExplorer expE = CADShapeFactory.getFactory().newExplorer();
 		//  HashMap size will not be greater than the number of edges,

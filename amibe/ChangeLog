@@ -2,6 +2,9 @@ Tue Dec 18 12:20:34 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos2d/SmoothNodes2D.java (main): Copy
 	geometry file into output directory.
+	* src/org/jcae/mesh/amibe/ds/MMesh1D.java: Store only filename
+	component into 'filename' member, geometry file is always copied
+	into output directory.
 
 Release jCAE 0.15.0
 
