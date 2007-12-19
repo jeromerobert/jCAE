@@ -808,6 +808,7 @@ public class Vertex implements Serializable
 		Vertex d = ot.destination();
 		for (int pass = 0; pass < 2; pass++)
 		{
+			boolean coplanar = true;
 			do
 			{
 				ot = ot.nextOriginLoop();
@@ -833,6 +834,9 @@ public class Vertex implements Serializable
 				h[0] += loc[2] * loc[0] * loc[0];
 				h[1] += loc[2] * loc[0] * loc[1];
 				h[2] += loc[2] * loc[1] * loc[1];
+				// Flag to check if all incident triangles are coplanar
+				if (coplanar && loc[2] * loc[2] > 1.e-60 * (loc[0] * loc[0] + loc[1] * loc[1]))
+					coplanar = false;
 				// Matrix assembly
 				g0[0] += loc[0] * loc[0] * loc[0] * loc[0];
 				g0[1] += loc[0] * loc[0] * loc[0] * loc[1];
@@ -842,7 +846,7 @@ public class Vertex implements Serializable
 			}
 			while (ot.destination() != d);
 			// On a plane, h[0] = h[1] = h[2] = 0.
-			// We do not need to compute G, g0 will be 0.
+			// We do not need to compute G, return value will be 0.
 			if (h[0] == 0.0 && h[1] == 0.0 && h[2] == 0.0)
 				return h;
 			if (h[1] * h[1] < 4.0 * h[0] * h[2])
@@ -851,7 +855,14 @@ public class Vertex implements Serializable
 			// be very far from other points.  Middle points are also
 			// added to find another approximation.
 			if (pass > 0)
+			{
+				if (coplanar)
+				{
+					g0[0] = g0[1] = g0[2] = 0.0;
+					return g0;
+				}
 				return null;
+			}
 		}
 		g1[1] = g0[2];
 		g1[0] = g0[1];
