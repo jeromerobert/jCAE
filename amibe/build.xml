@@ -5,6 +5,7 @@
 		<tstamp/>
 		<property name="version" value="${DSTAMP}"/>	
 		<property file="build.properties"/>
+		<property environment="env"/>
 	</target>
 	
 	<target name="compile" depends="init">
@@ -84,7 +85,9 @@
 		<available file="log4j.properties" property="log4j.configuration.present" value="file://${user.dir}/junit.log4j.properties"/>
 		<mkdir dir="${test.dir}/results"/>
 		<junit printsummary="withOutAndErr" fork="yes" failureProperty="test.failure">
-			<jvmarg value="-Xmx1200m"/>
+			<jvmarg value="-Xmx800m"/>
+			<env key="MMGT_OPT" value="0"/>
+			<env key="LD_LIBRARY_PATH" path="lib:${env.LD_LIBRARY_PATH}" />
 			<sysproperty key="log4j.configuration" value="${log4j.configuration.present}"/>
 			<sysproperty key="test.dir" value="${test.dir}"/>
 			<formatter type="xml"/>
