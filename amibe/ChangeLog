@@ -1,3 +1,9 @@
+Thu Dec 20 18:00:07 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/MeshToSoupConvert.java: This class
+	should have been updated at November 22nd to remove degenerated
+	triangles from triangle soup.
+
 Wed Dec 19 10:19:10 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Vertex.java (getLocalQuadric): Another

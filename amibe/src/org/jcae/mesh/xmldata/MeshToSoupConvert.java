@@ -51,7 +51,6 @@ public class MeshToSoupConvert extends JCAEXMLData
 	private int nrIntNodes = 0;
 	private int nrNodes = 0;
 	private int nrRefs = 0;
-	private int offsetBnd = 0;
 	private String xmlDir;
 	private File rawFile;
 	private TIntIntHashMap xrefs = null;
@@ -274,10 +273,10 @@ public class MeshToSoupConvert extends JCAEXMLData
 						if (!xrefs.contains(ref))
 						{
 							double [] p3 = surface.value(u, v);
-							xrefs.put(ref, offsetBnd);
+							xrefs.put(ref, nrNodes);
 							for (int j = 0; j < 3; j++)
-								coordRefs[3*offsetBnd+j] = p3[j];
-							offsetBnd++;
+								coordRefs[3*nrNodes+j] = p3[j];
+							nrNodes++;
 						}
 						ref = xrefs.get(ref);
 						for (int j = 0; j < 3; j++)
@@ -301,6 +300,7 @@ public class MeshToSoupConvert extends JCAEXMLData
 			ByteBuffer bbo = ByteBuffer.allocate(bufferSize * 80 / 12);
 			DoubleBuffer bboD = bbo.asDoubleBuffer();
 			int ind [] = new int[3];
+			int indRef [] = new int[3];
 			double [] c = new double[9];
 			remaining = numberOfFaces;
 			nf = bufferSize / 12;
@@ -311,9 +311,10 @@ public class MeshToSoupConvert extends JCAEXMLData
 				else if (remaining < nf)
 					nf = remaining;
 				remaining -= nf;
-				bb.rewind();
+				bb.clear();
 				fcT.read(bb);
 				bbI.rewind();
+				bbo.clear();
 				bboD.rewind();
 				for(int nr = 0; nr < nf; nr ++)
 				{
@@ -323,6 +324,19 @@ public class MeshToSoupConvert extends JCAEXMLData
 						// Outer triangle
 						continue;
 					}
+					for (int j = 0; j < 3; j++)
+					{
+						if (ind[j] < numberOfNodes - numberOfReferences)
+							indRef[j] = - j - 1;
+						else
+							indRef[j] = xrefs.get(refs[ind[j] - numberOfNodes + numberOfReferences]);
+					}
+					if (indRef[0] == indRef[1] || indRef[1] == indRef[2] || indRef[2] == indRef[0])
+					{
+						// Triangle bound from a degenerated edge
+						continue;
+					}
+					nrTriangles++;
 					for (int j = 0; j < 3; j++)
 						for (int k = 0; k < 3; k++)
 							c[3*j+k] = coord[3*ind[j]+k];
@@ -338,7 +352,7 @@ public class MeshToSoupConvert extends JCAEXMLData
 							for (int k = 0; k < 3; k++)
 								bboD.put(c[3*j+k]);
 					}
-					//  Align om 64bit
+					//  Align on 64bit
 					bbo.position(8*bboD.position());
 					bbo.putInt(iFace);
 					bbo.putInt(0);
@@ -350,8 +364,6 @@ public class MeshToSoupConvert extends JCAEXMLData
 			fcT.close();
 			fcO.close();
 			logger.debug("End reading");
-			nrNodes += numberOfNodes;
-			nrTriangles += numberOfFaces;
 		}
 		catch(Exception ex)
 		{
