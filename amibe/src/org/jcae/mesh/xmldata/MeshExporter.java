@@ -706,7 +706,7 @@ abstract public class MeshExporter
 			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
 			DoubleBuffer nodesBuffer=bb.asDoubleBuffer();
 			
-			out.println("solid");
+			out.println("solid export");
 			int count=0;
 			double x,y,z;
 			for(int i=0; i<groups.length; i++)
@@ -731,7 +731,7 @@ abstract public class MeshExporter
 			fc.close();
 			fis.close();
 			clean(bb);
-			out.println("endsolid");
+			out.println("endsolid export");
 			logger.info("Total number of triangles: "+count);
 		}
 
