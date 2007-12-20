@@ -6,6 +6,11 @@ Thu Dec 20 18:00:07 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/MesherTest.java: Unlike other junit tests,
 	this class is meant to run large tests and detect regressions on
 	a set of defined scenarios.
+	* build.xml: New 'test-large' target to run MesherTest.
+	In 'junit' target, replace <test> by <batchtest>, and detect
+	compilation failures.  Output files are moved into test/results/
+	and XML formatted, so that test results can be parsed by testing
+	tools like cruisecontrol.
 
 Wed Dec 19 10:19:10 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
