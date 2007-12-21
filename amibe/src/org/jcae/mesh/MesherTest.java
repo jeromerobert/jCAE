@@ -301,7 +301,10 @@ public class MesherTest
 		String outDir = dir + File.separator + "output" + File.separator + "test-"+type+"."+counter;
 		Mesher.main(new String[] {geoFile, outDir, ""+length, "0.0"});
 		checkNumberOfTriangles(outDir, nrTriangles, 0.1);
-		checkMeshQuality(outDir, minAngleDeg, 4.0*length);
+		if (nrTriangles < 100000)
+			checkMeshQuality(outDir, minAngleDeg, 4.0*length);
+		else
+			checkLargeMeshQuality(outDir, minAngleDeg, 4.0*length);
 		Document doc = stopLogger();
 		long time = getMesherRuntimeMillis(doc);
 		assertTrue("Mesher took too long: max time (ms): "+(seconds * timerScale)+" Effective time (ms): "+time, time < seconds * timerScale);
@@ -340,28 +343,28 @@ public class MesherTest
 	
 	@Test public void cylinder_0_05()
 	{
-		runSingleTest("cylinder", 0.05, 30000, 10.0, 3L);
+		runSingleTest("cylinder", 0.05, 30000, 20.0, 3L);
 	}
 
 	@Test public void cylinder_0_01()
 	{
-		runSingleTest("cylinder", 0.01, 800000, 10.0, 80L);
+		runSingleTest("cylinder", 0.01, 800000, 20.0, 80L);
 	}
 
 	// cylinder1000 is different, radius is multiplied by 1000 but height by 600
 	@Test public void cylinder1000_50()
 	{
-		runSingleTest("cylinder1000", 50.0, 3000, 10.0, 1L);
+		runSingleTest("cylinder1000", 50.0, 3000, 20.0, 1L);
 	}
 
 	@Test public void cylinder1000_10()
 	{
-		runSingleTest("cylinder1000", 10.0, 80000, 10.0, 10L);
+		runSingleTest("cylinder1000", 10.0, 80000, 20.0, 10L);
 	}
 
 	@Test public void cylinder1000_5()
 	{
-		runSingleTest("cylinder1000", 5.0, 320000, 10.0, 45L);
+		runSingleTest("cylinder1000", 5.0, 320000, 20.0, 45L);
 	}
 
 	@Test public void cone_0_01()
@@ -371,7 +374,12 @@ public class MesherTest
 
 	@Test public void torus_0_01()
 	{
-		runSingleTest("torus", 0.01, 250000, 10.0, 30L);
+		runSingleTest("torus", 0.01, 250000, 20.0, 30L);
+	}
+
+	@Test public void shellHole()
+	{
+		runSingleTest("shell_hole", 0.5, 250000, 20.0, 30L);
 	}
 
 }
