@@ -80,9 +80,9 @@ import org.apache.log4j.LogManager;
 public class MesherTest
 {
 	private Logger root;
-	private FileAppender app = null;
 	private static final String dir = System.getProperty("test.dir", "test");
 	private static int counter = 0;
+	private static FileAppender app = null;
 	// Hopefully test timing depends linearly on CPU power,
 	private static final long timerScale = Long.parseLong(System.getProperty("org.jcae.mesh.timerScale", "1000"));
 
@@ -293,7 +293,7 @@ public class MesherTest
 		}
 	}
 
-	private void runSingleTest(String type, double length, int nrTriangles, double minAngleDeg, long seconds)
+	private void runSingleTest(String type, double length, int nrTriangles, double minAngleDeg)
 	{
 		startLogger();
 		root.info("Running "+type+" test with length: "+length);
@@ -305,6 +305,10 @@ public class MesherTest
 			checkMeshQuality(outDir, minAngleDeg, 4.0*length);
 		else
 			checkLargeMeshQuality(outDir, minAngleDeg, 4.0*length);
+	}
+
+	private void runSingleTestTimer(String type, long seconds)
+	{
 		Document doc = stopLogger();
 		long time = getMesherRuntimeMillis(doc);
 		assertTrue("Mesher took too long: max time (ms): "+(seconds * timerScale)+" Effective time (ms): "+time, time < seconds * timerScale);
@@ -312,74 +316,143 @@ public class MesherTest
 
 	@Test public void sphere_0_05()
 	{
-		runSingleTest("sphere", 0.05, 10000, 10.0, 2L);
+		runSingleTest("sphere", 0.05, 10000, 10.0);
+	}
+	@Test public void timer_sphere_0_05()
+	{
+		runSingleTestTimer("sphere", 2L);
 	}
 
 	@Test public void sphere_0_01()
 	{
-		runSingleTest("sphere", 0.01, 250000, 10.0, 50L);
+		runSingleTest("sphere", 0.01, 250000, 10.0);
+	}
+
+	@Test public void timer_sphere_0_01()
+	{
+		runSingleTestTimer("sphere", 50L);
 	}
 
 	@Test public void sphere_0_005()
 	{
-		runSingleTest("sphere", 0.005, 1000000, 10.0, 200L);
+		runSingleTest("sphere", 0.005, 1000000, 10.0);
+	}
+
+	@Test public void timer_sphere_0_005()
+	{
+		runSingleTestTimer("sphere", 200L);
 	}
 
 	// Results should be similar with sphere1000
 	@Test public void sphere1000_50()
 	{
-		runSingleTest("sphere1000", 50.0, 10000, 10.0, 2L);
+		runSingleTest("sphere1000", 50.0, 10000, 10.0);
+	}
+
+	@Test public void timer_sphere1000_50()
+	{
+		runSingleTestTimer("sphere1000", 2L);
 	}
 
 	@Test public void sphere1000_10()
 	{
-		runSingleTest("sphere1000", 10.0, 250000, 10.0, 50L);
+		runSingleTest("sphere1000", 10.0, 250000, 10.0);
+	}
+
+	@Test public void timer_sphere1000_10()
+	{
+		runSingleTestTimer("sphere1000", 50L);
 	}
 
 	@Test public void sphere1000_5()
 	{
-		runSingleTest("sphere1000", 5, 1000000, 10.0, 200L);
+		runSingleTest("sphere1000", 5, 1000000, 10.0);
+	}
+	
+	@Test public void timer_sphere1000_5()
+	{
+		runSingleTestTimer("sphere1000", 200L);
 	}
 	
 	@Test public void cylinder_0_05()
 	{
-		runSingleTest("cylinder", 0.05, 30000, 20.0, 3L);
+		runSingleTest("cylinder", 0.05, 30000, 20.0);
+	}
+
+	@Test public void timer_cylinder_0_05()
+	{
+		runSingleTestTimer("cylinder", 3L);
 	}
 
 	@Test public void cylinder_0_01()
 	{
-		runSingleTest("cylinder", 0.01, 800000, 20.0, 80L);
+		runSingleTest("cylinder", 0.01, 800000, 20.0);
+	}
+
+	@Test public void timer_cylinder_0_01()
+	{
+		runSingleTestTimer("cylinder", 80L);
 	}
 
 	// cylinder1000 is different, radius is multiplied by 1000 but height by 600
 	@Test public void cylinder1000_50()
 	{
-		runSingleTest("cylinder1000", 50.0, 3000, 20.0, 1L);
+		runSingleTest("cylinder1000", 50.0, 3000, 20.0);
+	}
+
+	@Test public void timer_cylinder1000_50()
+	{
+		runSingleTestTimer("cylinder1000", 1L);
 	}
 
 	@Test public void cylinder1000_10()
 	{
-		runSingleTest("cylinder1000", 10.0, 80000, 20.0, 10L);
+		runSingleTest("cylinder1000", 10.0, 80000, 20.0);
+	}
+
+	@Test public void timer_cylinder1000_10()
+	{
+		runSingleTestTimer("cylinder1000", 10L);
 	}
 
 	@Test public void cylinder1000_5()
 	{
-		runSingleTest("cylinder1000", 5.0, 320000, 20.0, 45L);
+		runSingleTest("cylinder1000", 5.0, 320000, 20.0);
+	}
+
+	@Test public void timer_cylinder1000_5()
+	{
+		runSingleTestTimer("cylinder1000", 45L);
 	}
 
 	@Test public void cone_0_01()
 	{
-		runSingleTest("cone", 0.01, 150000, 10.0, 20L);
+		runSingleTest("cone", 0.01, 150000, 10.0);
+	}
+
+	@Test public void timer_cone_0_01()
+	{
+		runSingleTestTimer("cone", 20L);
 	}
 
 	@Test public void torus_0_01()
 	{
-		runSingleTest("torus", 0.01, 250000, 20.0, 30L);
+		runSingleTest("torus", 0.01, 250000, 20.0);
+	}
+
+	@Test public void timer_torus_0_01()
+	{
+		runSingleTestTimer("torus", 30L);
 	}
 
 	@Test public void shellHole()
 	{
-		runSingleTest("shell_hole", 0.5, 250000, 20.0, 30L);
+		runSingleTest("shell_hole", 0.5, 250000, 20.0);
+	}
+
+	@Test public void timer_shellHole()
+	{
+		runSingleTestTimer("shell_hole", 30L);
 	}
 
 }
