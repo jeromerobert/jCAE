@@ -213,6 +213,7 @@ public class MesherTest
 		DocumentBuilderFactory dbf = null;
 		try {
 			dbf = DocumentBuilderFactory.newInstance();
+			dbf.setIgnoringElementContentWhitespace(true);
 		} catch(FactoryConfigurationError fce) {
 			throw fce;
 		}
@@ -273,33 +274,23 @@ public class MesherTest
 	private long getMesherRuntimeMillis(Document doc)
 	{
 		XPath xpath = XPathFactory.newInstance().newXPath();
-		long t1 = 0L;
-		long t2 = 0L;
-
 		try
 		{
-			XPathExpression xpathMsg = xpath.compile("//message[contains(string(), 'Meshing face')]");
 			XPathExpression xpathTimestamp = xpath.compile("@timestamp");
-			NodeList logEventList = (NodeList) xpath.evaluate("//message/text()", doc, XPathConstants.NODESET);
-			for (int i = 0; i < logEventList.getLength(); i++)
-			{
-				Node e = logEventList.item(i);
-				if (e.getNodeValue().startsWith("Meshing face"))
-				{
-					Node p = e.getParentNode().getParentNode();
-					t1 = Long.parseLong(xpathTimestamp.evaluate(p));
-					// Ignore whitespace
-					Node s = p.getNextSibling().getNextSibling();
-					t2 = Long.parseLong(xpathTimestamp.evaluate(s));
-					return t2 - t1;
-				}
-			}
+			// Find first <log4j:message> containing "Meshing face" message
+			Node content = (Node) xpath.evaluate("//message/text()[contains(string(), 'Meshing face')]", doc, XPathConstants.NODE);
+			// Enclosing <log4j:event> element
+			Node event = content.getParentNode().getParentNode();
+			long t1 = Long.parseLong(xpathTimestamp.evaluate(event));
+			// Next <log4j:event> element
+			Node s = event.getNextSibling();
+			long t2 = Long.parseLong(xpathTimestamp.evaluate(s));
+			return t2 - t1;
 		}
 		catch (XPathExpressionException ex)
 		{
 			throw new RuntimeException();
 		}
-		throw new RuntimeException();
 	}
 
 	private void runSingleTest(String type, double length, int nrTriangles, double minAngleDeg, long seconds)
