@@ -34,9 +34,6 @@ import org.jcae.mesh.oemm.RawStorage;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import java.io.File;
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Reader;
 import java.io.FileInputStream;
@@ -50,7 +47,6 @@ import java.util.Collections;
 import java.util.ArrayList;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -67,9 +63,6 @@ import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
@@ -162,7 +155,6 @@ public class MesherTest
 		MMesh1D mesh1d =  MMesh1DReader.readObject(outputDir);
 		// Create a outputDir/soup file
 		MeshToSoupConvert.meshToSoup(outputDir, mesh1d.getGeometry());
-		Mesh mesh = new Mesh(new MeshTraitsBuilder());
 		QualityProcedure qprocAngle = new MinAngleFace();
 		QualityFloat dataAngle = new QualityFloat(100000);
 		dataAngle.setQualityProcedure(qprocAngle);
