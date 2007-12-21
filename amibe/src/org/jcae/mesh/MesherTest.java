@@ -83,6 +83,8 @@ public class MesherTest
 	private FileAppender app = null;
 	private static final String dir = System.getProperty("test.dir", "test");
 	private static int counter = 0;
+	// Hopefully test timing depends linearly on CPU power,
+	private static final long timerScale = Long.parseLong(System.getProperty("org.jcae.mesh.timerScale", "1000"));
 
 	private void checkNumberOfTriangles(String outputDir, int target, double delta)
 	{
@@ -295,7 +297,7 @@ public class MesherTest
 		throw new RuntimeException();
 	}
 
-	private void runSingleTest(String type, double length, int nrTriangles, double minAngleDeg, long mesherTime)
+	private void runSingleTest(String type, double length, int nrTriangles, double minAngleDeg, long seconds)
 	{
 		startLogger();
 		root.info("Running "+type+" test with length: "+length);
@@ -306,74 +308,74 @@ public class MesherTest
 		checkMeshQuality(outDir, minAngleDeg, 4.0*length);
 		Document doc = stopLogger();
 		long time = getMesherRuntimeMillis(doc);
-		assertTrue("Mesher took too long: "+time+"ms", time < mesherTime);
+		assertTrue("Mesher took too long: "+time+"ms", time < seconds * timerScale);
 	}
 
 	@Test public void sphere_0_05()
 	{
-		runSingleTest("sphere", 0.05, 10000, 10.0, 2000);
+		runSingleTest("sphere", 0.05, 10000, 10.0, 2L);
 	}
 
 	@Test public void sphere_0_01()
 	{
-		runSingleTest("sphere", 0.01, 250000, 10.0, 50000);
+		runSingleTest("sphere", 0.01, 250000, 10.0, 50L);
 	}
 
 	@Test public void sphere_0_005()
 	{
-		runSingleTest("sphere", 0.005, 1000000, 10.0, 200000);
+		runSingleTest("sphere", 0.005, 1000000, 10.0, 200L);
 	}
 
 	// Results should be similar with sphere1000
 	@Test public void sphere1000_50()
 	{
-		runSingleTest("sphere1000", 50.0, 10000, 10.0, 2000);
+		runSingleTest("sphere1000", 50.0, 10000, 10.0, 2L);
 	}
 
 	@Test public void sphere1000_10()
 	{
-		runSingleTest("sphere1000", 10.0, 250000, 10.0, 50000);
+		runSingleTest("sphere1000", 10.0, 250000, 10.0, 50L);
 	}
 
 	@Test public void sphere1000_5()
 	{
-		runSingleTest("sphere1000", 5, 1000000, 10.0, 200000);
+		runSingleTest("sphere1000", 5, 1000000, 10.0, 200L);
 	}
 	
 	@Test public void cylinder_0_05()
 	{
-		runSingleTest("cylinder", 0.05, 30000, 10.0, 3000);
+		runSingleTest("cylinder", 0.05, 30000, 10.0, 3L);
 	}
 
 	@Test public void cylinder_0_01()
 	{
-		runSingleTest("cylinder", 0.01, 800000, 10.0, 80000);
+		runSingleTest("cylinder", 0.01, 800000, 10.0, 80L);
 	}
 
 	// cylinder1000 is different, radius is multiplied by 1000 but height by 600
 	@Test public void cylinder1000_50()
 	{
-		runSingleTest("cylinder1000", 50.0, 3000, 10.0, 400);
+		runSingleTest("cylinder1000", 50.0, 3000, 10.0, 1L);
 	}
 
 	@Test public void cylinder1000_10()
 	{
-		runSingleTest("cylinder1000", 10.0, 80000, 10.0, 10000);
+		runSingleTest("cylinder1000", 10.0, 80000, 10.0, 10L);
 	}
 
 	@Test public void cylinder1000_5()
 	{
-		runSingleTest("cylinder1000", 5.0, 320000, 10.0, 45000);
+		runSingleTest("cylinder1000", 5.0, 320000, 10.0, 45L);
 	}
 
 	@Test public void cone_0_01()
 	{
-		runSingleTest("cone", 0.01, 150000, 10.0, 20000);
+		runSingleTest("cone", 0.01, 150000, 10.0, 20L);
 	}
 
 	@Test public void torus_0_01()
 	{
-		runSingleTest("torus", 0.01, 250000, 10.0, 30000);
+		runSingleTest("torus", 0.01, 250000, 10.0, 30L);
 	}
 
 }
