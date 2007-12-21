@@ -190,7 +190,12 @@ public class MesherTest
 		counter++;
 		try
 		{
-			app = new FileAppender(xmlLayout, "test."+counter+".xml", false);
+			File logDir = new File(dir, "logs");
+			logDir.mkdirs();
+			if(!logDir.exists() || !logDir.isDirectory())
+				throw new RuntimeException("Unable to create directory "+logDir.getPath());
+			File logFile = new File(logDir, "test."+counter+".xml");
+			app = new FileAppender(xmlLayout, logFile.getPath(), false);
 			root.addAppender(app);
 		}
 		catch (IOException ex)
