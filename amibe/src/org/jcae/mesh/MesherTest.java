@@ -89,7 +89,7 @@ public class MesherTest
 	private void checkNumberOfTriangles(String outputDir, int target, double delta)
 	{
 		int [] res = MeshReader.getInfos(outputDir);
-		assertTrue("Number of triangles out of range: "+res[1], res[1] >= target*(1.0-delta) && res[1] <= target*(1.0+delta));
+		assertTrue("Number of triangles out of range ["+(target*(1.0-delta))+" - "+(target*(1.0+delta))+"]: "+res[1], res[1] >= target*(1.0-delta) && res[1] <= target*(1.0+delta));
 	}
 
 	private void checkMeshQuality(String outputDir, double minAngleDeg, double maxEdgeLength)
@@ -123,9 +123,9 @@ public class MesherTest
 		dataEdgeLength.finish();
 
 		double resAngle = dataAngle.getValueByPercent(0.0) * 180.0 / 3.14159265358979323844;
-		assertTrue("Min angle too low: "+resAngle, minAngleDeg < resAngle);
+		assertTrue("Min angle too low; expected: "+minAngleDeg+" found: "+resAngle, minAngleDeg < resAngle);
 		double resEdgeLength = dataEdgeLength.getValueByPercent(1.0);
-		assertTrue("Max edge length too large: "+resEdgeLength, maxEdgeLength > resEdgeLength);
+		assertTrue("Max edge length too large; expected: "+maxEdgeLength+" found: "+resEdgeLength, maxEdgeLength > resEdgeLength);
 	}
 
 	public static class ComputeTriangleQuality implements RawStorage.SoupReaderInterface
@@ -173,9 +173,9 @@ public class MesherTest
 		dataEdgeLength.finish();
 
 		double resAngle = dataAngle.getValueByPercent(0.0) * 180.0 / 3.14159265358979323844;
-		assertTrue("Min angle too low: "+resAngle, minAngleDeg < resAngle);
+		assertTrue("Min angle too low; expected: "+minAngleDeg+" found: "+resAngle, minAngleDeg < resAngle);
 		double resEdgeLength = dataEdgeLength.getValueByPercent(1.0);
-		assertTrue("Max edge length too large: "+resEdgeLength, maxEdgeLength > resEdgeLength);
+		assertTrue("Max edge length too large; expected: "+maxEdgeLength+" found: "+resEdgeLength, maxEdgeLength > resEdgeLength);
 	}
 
 	private void startLogger()
@@ -313,7 +313,7 @@ public class MesherTest
 		checkMeshQuality(outDir, minAngleDeg, 4.0*length);
 		Document doc = stopLogger();
 		long time = getMesherRuntimeMillis(doc);
-		assertTrue("Mesher took too long: "+time+"ms", time < seconds * timerScale);
+		assertTrue("Mesher took too long: max time (ms): "+(seconds * timerScale)+" Effective time (ms): "+time, time < seconds * timerScale);
 	}
 
 	@Test public void sphere_0_05()
