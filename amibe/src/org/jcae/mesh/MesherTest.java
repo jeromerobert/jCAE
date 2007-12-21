@@ -34,11 +34,62 @@ import org.jcae.mesh.oemm.RawStorage;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import java.io.File;
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Reader;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.ByteArrayInputStream;
+import java.io.SequenceInputStream;
 import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.util.Collections;
+import java.util.ArrayList;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.FactoryConfigurationError;
+import javax.xml.parsers.ParserConfigurationException;
+
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.Result;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+
+import org.apache.log4j.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.xml.XMLLayout;
+import org.apache.log4j.xml.SAXErrorHandler;
+import org.apache.log4j.xml.Log4jEntityResolver;
+import org.apache.log4j.LogManager;
 
 public class MesherTest
 {
+	private Logger root;
+	private FileAppender app = null;
 	private static final String dir = System.getProperty("test.dir", "test");
+	private static int counter = 0;
 
 	private void checkNumberOfTriangles(String outputDir, int target, double delta)
 	{
@@ -133,21 +184,204 @@ public class MesherTest
 		assertTrue("Max edge length too large: "+resEdgeLength, maxEdgeLength > resEdgeLength);
 	}
 
-	@Test public void sphere0_05()
+	private void startLogger()
 	{
-		String geoFile = dir + File.separator + "input" + File.separator + "sphere.brep";
-		String outDir = dir + File.separator + "output" + File.separator + "test-sphere";
-		Mesher.main(new String[] {geoFile, outDir, "0.05", "0.0"});
-		checkNumberOfTriangles(outDir, 10000, 0.1);
-		checkMeshQuality(outDir, 10.0, 0.2);
+		LogManager.resetConfiguration();
+		root = LogManager.getRootLogger();
+		root.removeAllAppenders();
+
+		XMLLayout xmlLayout = new XMLLayout();
+		xmlLayout.setLocationInfo(true);
+		root.setLevel(Level.INFO);
+		counter++;
+		try
+		{
+			app = new FileAppender(xmlLayout, "test."+counter+".xml", false);
+			root.addAppender(app);
+		}
+		catch (IOException ex)
+		{
+			throw new RuntimeException();
+		}
 	}
 
-	@Test public void sphere0_01()
+	private Document stopLogger()
 	{
-		String geoFile = dir + File.separator + "input" + File.separator + "sphere.brep";
-		String outDir = dir + File.separator + "output" + File.separator + "test-sphere";
-		Mesher.main(new String[] {geoFile, outDir, "0.01", "0.0"});
-		checkNumberOfTriangles(outDir, 250000, 0.1);
-		checkLargeMeshQuality(outDir, 10.0, 0.1);
+		String logFile = app.getFile();
+		app.close();
+		app = null;
+
+		DocumentBuilderFactory dbf = null;
+		try {
+			dbf = DocumentBuilderFactory.newInstance();
+		} catch(FactoryConfigurationError fce) {
+			throw fce;
+		}
+
+		String xmlProlog =
+		    "<?xml version=\"1.0\" ?>\n" +
+		    "<!DOCTYPE log4j:eventSet SYSTEM \"log4j.dtd\">\n" +
+		    "<log4j:eventSet version=\"1.2\" xmlns:log4j=\"http://jakarta.apache.org/log4j/\">\n";
+		String xmlEpilog = "</log4j:eventSet>";
+
+		ArrayList<InputStream> inputStreams = new ArrayList<InputStream>();
+		inputStreams.add(new ByteArrayInputStream(xmlProlog.getBytes()));
+		try {
+			inputStreams.add(new FileInputStream(logFile));
+		} catch (FileNotFoundException ex)
+		{
+			throw new RuntimeException();
+		}
+		inputStreams.add(new ByteArrayInputStream(xmlEpilog.getBytes()));
+		Reader sr = new InputStreamReader(new SequenceInputStream(Collections.enumeration(inputStreams)));
+
+		try {
+			dbf.setValidating(true);
+			DocumentBuilder docBuilder = dbf.newDocumentBuilder();
+			docBuilder.setErrorHandler(new SAXErrorHandler());
+			docBuilder.setEntityResolver(new Log4jEntityResolver());
+			return docBuilder.parse(new InputSource(sr));
+		} catch (ParserConfigurationException ex) {
+			ex.printStackTrace();
+			throw new RuntimeException();
+		} catch (SAXException ex) {
+			ex.printStackTrace();
+			throw new RuntimeException();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+			throw new RuntimeException();
+		}
 	}
+
+	private String DomToString(Document document)
+	{
+		try
+		{
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Source source = new DOMSource(document);
+			StringWriter sw = new StringWriter();
+			Result result = new StreamResult(sw);
+			Transformer xformer = transformerFactory.newTransformer();
+			xformer.transform(source, result);
+			return sw.toString();
+		}
+		catch (Exception ex)
+		{
+			throw new RuntimeException();
+		}
+	}
+
+	private long getMesherRuntimeMillis(Document doc)
+	{
+		XPath xpath = XPathFactory.newInstance().newXPath();
+		long t1 = 0L;
+		long t2 = 0L;
+
+		try
+		{
+			XPathExpression xpathMsg = xpath.compile("//message[contains(string(), 'Meshing face')]");
+			XPathExpression xpathTimestamp = xpath.compile("@timestamp");
+			NodeList logEventList = (NodeList) xpath.evaluate("//message/text()", doc, XPathConstants.NODESET);
+			for (int i = 0; i < logEventList.getLength(); i++)
+			{
+				Node e = logEventList.item(i);
+				if (e.getNodeValue().startsWith("Meshing face"))
+				{
+					Node p = e.getParentNode().getParentNode();
+					t1 = Long.parseLong(xpathTimestamp.evaluate(p));
+					// Ignore whitespace
+					Node s = p.getNextSibling().getNextSibling();
+					t2 = Long.parseLong(xpathTimestamp.evaluate(s));
+					return t2 - t1;
+				}
+			}
+		}
+		catch (XPathExpressionException ex)
+		{
+			throw new RuntimeException();
+		}
+		throw new RuntimeException();
+	}
+
+	private void runSingleTest(String type, double length, int nrTriangles, double minAngleDeg, long mesherTime)
+	{
+		startLogger();
+		root.info("Running "+type+" test with length: "+length);
+		String geoFile = dir + File.separator + "input" + File.separator + type +".brep";
+		String outDir = dir + File.separator + "output" + File.separator + "test-"+type+"."+counter;
+		Mesher.main(new String[] {geoFile, outDir, ""+length, "0.0"});
+		checkNumberOfTriangles(outDir, nrTriangles, 0.1);
+		checkMeshQuality(outDir, minAngleDeg, 4.0*length);
+		Document doc = stopLogger();
+		long time = getMesherRuntimeMillis(doc);
+		assertTrue("Mesher took too long: "+time+"ms", time < mesherTime);
+	}
+
+	@Test public void sphere_0_05()
+	{
+		runSingleTest("sphere", 0.05, 10000, 10.0, 2000);
+	}
+
+	@Test public void sphere_0_01()
+	{
+		runSingleTest("sphere", 0.01, 250000, 10.0, 50000);
+	}
+
+	@Test public void sphere_0_005()
+	{
+		runSingleTest("sphere", 0.005, 1000000, 10.0, 200000);
+	}
+
+	// Results should be similar with sphere1000
+	@Test public void sphere1000_50()
+	{
+		runSingleTest("sphere1000", 50.0, 10000, 10.0, 2000);
+	}
+
+	@Test public void sphere1000_10()
+	{
+		runSingleTest("sphere1000", 10.0, 250000, 10.0, 50000);
+	}
+
+	@Test public void sphere1000_5()
+	{
+		runSingleTest("sphere1000", 5, 1000000, 10.0, 200000);
+	}
+	
+	@Test public void cylinder_0_05()
+	{
+		runSingleTest("cylinder", 0.05, 30000, 10.0, 3000);
+	}
+
+	@Test public void cylinder_0_01()
+	{
+		runSingleTest("cylinder", 0.01, 800000, 10.0, 80000);
+	}
+
+	// cylinder1000 is different, radius is multiplied by 1000 but height by 600
+	@Test public void cylinder1000_50()
+	{
+		runSingleTest("cylinder1000", 50.0, 3000, 10.0, 400);
+	}
+
+	@Test public void cylinder1000_10()
+	{
+		runSingleTest("cylinder1000", 10.0, 80000, 10.0, 10000);
+	}
+
+	@Test public void cylinder1000_5()
+	{
+		runSingleTest("cylinder1000", 5.0, 320000, 10.0, 45000);
+	}
+
+	@Test public void cone_0_01()
+	{
+		runSingleTest("cone", 0.01, 150000, 10.0, 20000);
+	}
+
+	@Test public void torus_0_01()
+	{
+		runSingleTest("torus", 0.01, 250000, 10.0, 30000);
+	}
+
 }
