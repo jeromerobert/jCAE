@@ -278,9 +278,7 @@ public class MesherTest
 		{
 			XPathExpression xpathTimestamp = xpath.compile("@timestamp");
 			// Find first <log4j:message> containing "Meshing face" message
-			Node content = (Node) xpath.evaluate("//message/text()[contains(string(), 'Meshing face')]", doc, XPathConstants.NODE);
-			// Enclosing <log4j:event> element
-			Node event = content.getParentNode().getParentNode();
+			Node event = (Node) xpath.evaluate("//message/text()[contains(string(), 'Meshing face')]/ancestor::event", doc, XPathConstants.NODE);
 			long t1 = Long.parseLong(xpathTimestamp.evaluate(event));
 			// Next <log4j:event> element
 			Node s = event.getNextSibling();
@@ -318,6 +316,7 @@ public class MesherTest
 	{
 		runSingleTest("sphere", 0.05, 10000, 10.0);
 	}
+
 	@Test public void timer_sphere_0_05()
 	{
 		runSingleTestTimer("sphere", 2L);
