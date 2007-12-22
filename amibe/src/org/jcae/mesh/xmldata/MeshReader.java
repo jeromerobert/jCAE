@@ -358,26 +358,26 @@ public class MeshReader
 				XPathConstants.NODE);
 			NodeList groupsList = (NodeList) xpath.evaluate("group",
 				groupsElement, XPathConstants.NODESET);
-			int numberOfGroups = groupsList.getLength();
 			String groupsFile = xpath.evaluate("file/@location", groupsList.item(0));
 			if (groupsFile.charAt(0) != File.separatorChar)
 				groupsFile = xmlDir+File.separator+groupsFile;
 			FileChannel fcG = new FileInputStream(groupsFile).getChannel();
 			MappedByteBuffer bbG = fcG.map(FileChannel.MapMode.READ_ONLY, 0L, fcG.size());
 			IntBuffer groupsBuffer = bbG.asIntBuffer();
-			// FIXME: Why is it much faster to build node lists than to iterate over
-			//        group nodes and extract XPath expressions?
-			NodeList groupNumberList = (NodeList) xpath.evaluate("group/number/text()",
-				groupsElement, XPathConstants.NODESET);
-			NodeList groupOffsetList = (NodeList) xpath.evaluate("group/file/@offset",
-				groupsElement, XPathConstants.NODESET);
-			NodeList groupIdList = (NodeList) xpath.evaluate("group/@id",
-				groupsElement, XPathConstants.NODESET);
-			for (int i=0; i < numberOfGroups; i++)
+			// WARNING: xpath.evaluate() scans the whole XML document and not context
+			// node only, which is very counter-intuitive.  This will dramatically slow
+			// down processing if there are thousands of groups.
+			// A workaround is to use
+			//     Node current = groupsList.item(i).cloneNode(true);
+			// to clone all nodes below context node and pass this node to xpath.evaluate().
+			// This works well, but nodes have to be cloned.  Direct access to nodes is
+			// faster.
+			for (int i=0, n = groupsList.getLength(); i < n; i++)
 			{
-				int numberOfElements = Integer.parseInt(groupNumberList.item(i).getTextContent());
-				int fileOffset = Integer.parseInt(groupOffsetList.item(i).getTextContent());
-				int id = Integer.parseInt(groupIdList.item(i).getTextContent());
+				Element groupNode = (Element) groupsList.item(i);
+				int numberOfElements = Integer.parseInt(groupNode.getElementsByTagName("number").item(0).getTextContent());
+				int fileOffset = Integer.parseInt(((Element) groupNode.getElementsByTagName("file").item(0)).getAttribute("offset"));
+				int id = Integer.parseInt(groupNode.getAttribute("id"));
 				logger.debug("Group "+id+": reading "+numberOfElements+" elements");
 				for (int j=0; j < numberOfElements; j++)
 					facelist[groupsBuffer.get(fileOffset+j)].setGroupId(id);
@@ -461,15 +461,12 @@ public class MeshReader
 			TIntIntHashMap numGroups = new TIntIntHashMap(numberOfGroups);
 			for (int i=0; i < numberOfGroups; i++)
 			{
-				Node groupNode = groupsList.item(i);
-				
-				int numberOfElements = Integer.parseInt(
-					xpath.evaluate("number/text()", groupNode));
-				int fileOffset = Integer.parseInt(
-					xpath.evaluate("file/@offset", groupNode));
-				int id = Integer.parseInt(xpath.evaluate("@id", groupNode));
+				Element groupNode = (Element) groupsList.item(i);
+				int numberOfElements = Integer.parseInt(groupNode.getElementsByTagName("number").item(0).getTextContent());
+				int fileOffset = Integer.parseInt(((Element) groupNode.getElementsByTagName("file").item(0)).getAttribute("offset"));
+				int id = Integer.parseInt(groupNode.getAttribute("id"));
 				numGroups.put(id, i);
-				String name = xpath.evaluate("name/text()", groupNode);
+				String name = groupNode.getElementsByTagName("name").item(0).getTextContent();
 				logger.debug("Group "+name+": reading "+numberOfElements+" elements");
 				maxId = Math.max(maxId, id);
 				Collection newfacelist = new ArrayList(numberOfElements);
@@ -549,5 +546,17 @@ public class MeshReader
 		}
 	}
 	
+	public static void main(String [] args)
+	{
+		Mesh mesh = new Mesh();
+		try
+		{
+			readObject3D(mesh, args[0]);
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	}
 }
 

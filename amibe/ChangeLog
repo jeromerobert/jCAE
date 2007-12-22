@@ -1,3 +1,13 @@
+Sat Dec 22 23:56:44 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/MeshReader.java (readObject3D): Another
+	try to optimize XPath expressions.  It seems that xpath.evaluate()
+	scans the whole XML document and not context node only, which is
+	very counter-intuitive but explains why patch committed on Sep 3rd
+	makes processing much faster with thousands of groups.  Modify
+	last change to call Element methods directly.
+	Apply the same changes in mergeGroups() too.
+
 Thu Dec 20 18:00:07 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/MeshToSoupConvert.java: This class
