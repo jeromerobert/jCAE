@@ -319,7 +319,7 @@ public class MesherTest
 
 	@Test public void timer_sphere_0_05()
 	{
-		runSingleTestTimer("sphere", 2L);
+		runSingleTestTimer("sphere", 3L);
 	}
 
 	@Test public void sphere_0_01()
@@ -350,7 +350,7 @@ public class MesherTest
 
 	@Test public void timer_sphere1000_50()
 	{
-		runSingleTestTimer("sphere1000", 2L);
+		runSingleTestTimer("sphere1000", 3L);
 	}
 
 	@Test public void sphere1000_10()
