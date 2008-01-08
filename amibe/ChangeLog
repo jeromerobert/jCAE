@@ -149,7 +149,7 @@ Sat Nov 24 12:12:25 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	* **/*.java: 1d, 2d and 3d XML file names are hardcoded, so define
 	them into JCAEXMLData.java and remove xml file name from mesh readers
 	and writers.
-	* src/org/jcae/mesh/xmldata/MeshWriter.java (writeObject3D): If 
+	* src/org/jcae/mesh/xmldata/MeshWriter.java (writeObject3D): If
 	brepFile is null, do not write <shape> element.
 
 Fri Nov 23 11:10:14 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
@@ -192,7 +192,7 @@ Thu Nov 22 10:53:13 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 	  src/org/jcae/mesh/bora/algo/Basic2d.java: Do not call
 	Mesh2D.removeDegeneratedEdges() before writing jcae2d files.
 	All 2D algorithms can safely be applied to meshes loaded from disk.
-	* src/org/jcae/mesh/xmldata/MeshWriter.java (writeObjectNodes): 
+	* src/org/jcae/mesh/xmldata/MeshWriter.java (writeObjectNodes):
 	Due to change just above, 2D nodes which represent the same
 	topological vertex are now all written onto disk.  But these
 	duplicates are written at the end of the file so that they
@@ -840,7 +840,7 @@ Tue Jun 12 14:13:00 CEST 2007 Ahmed Bennani <ahmed_b@users.sourceforge.net>
 	  src/org/jcae/mesh/mesher/ds/MMesh0D.java
 	  src/org/jcae/mesh/mesher/ds/MMesh1D.java
 	  src/org/jcae/mesh/mesher/ds/SubMesh1D.java
-	Creation of a MMesh0D and a MMesh1D using the discretizations' 
+	Creation of a MMesh0D and a MMesh1D using the discretizations'
 	definition found in a model
 
 Thu Jun  7 15:24:38 CEST 2007 Denis Barbier <barbier@users.sourceforge.net>
@@ -2277,13 +2277,19 @@ Wed Nov 24 15:39:03 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
 Tue Nov 23 10:19:22 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
-	* src/org/jcae/mesh/Mesher.java:  Change argument order, and accept a new argument for deflection.  This needs to be synchronized with jcae-netbeans-mesh.
-	* src/org/jcae/mesh/amibe/metrics/Metric3D.java:  Metrics can now be changed at run-time.  If deflection is null, computeMetric3DIso() is called for efficiency reasons.  Otherwise, metrics are computed by computeMetric3DCurvIso().
+	* src/org/jcae/mesh/Mesher.java:  Change argument order, and accept a
+	new argument for deflection.  This needs to be synchronized with jcae-netbeans-mesh.
+	* src/org/jcae/mesh/amibe/metrics/Metric3D.java:  Metrics can now be
+	changed at run-time.  If deflection is null, computeMetric3DIso() is
+	called for efficiency reasons.  Otherwise, metrics are computed by
+	computeMetric3DCurvIso().
 
 Fri Nov 19 18:04:51 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/Mesher.java
-	  src/org/jcae/mesh/mesher/algos2d/RefineFace1.java: Call org.jcae.mesh.amibe.algos2d.Insertion instead of TargetSize, which means that all 2d algos now belong to amibe.
+	  src/org/jcae/mesh/mesher/algos2d/RefineFace1.java: Call
+	org.jcae.mesh.amibe.algos2d.Insertion instead of TargetSize, which
+	means that all 2d algos now belong to amibe.
 
 Fri Nov 19 16:51:29 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
