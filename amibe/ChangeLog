@@ -2243,22 +2243,28 @@ Mon Dec  6 11:58:12 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 	  src/org/jcae/mesh/cad/occ/OCCGeomCurve2D.java:  New getRange() method.
 
 	* src/org/jcae/mesh/cad/CADShape.java
-	  src/org/jcae/mesh/cad/occ/OCCShape.java:  New writeNative() method to save shape into the native format.
+	  src/org/jcae/mesh/cad/occ/OCCShape.java:  New writeNative() method
+	to save shape into the native format.
 
 	* src/org/jcae/mesh/Mesher.java
-	  src/org/jcae/mesh/TestMetrics.java:  Replace all references to org.jcae.opencascade.jni routines by generic org.jcae.mesh.cad ones.
+	  src/org/jcae/mesh/TestMetrics.java:  Replace all references to
+	org.jcae.opencascade.jni routines by generic org.jcae.mesh.cad ones.
 
 Fri Nov 26 15:45:37 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
-	* src/org/jcae/mesh/amibe/algos2d/Insertion.java:  Curve length do not have to be very precise, so compute less intermediate nodes.
+	* src/org/jcae/mesh/amibe/algos2d/Insertion.java:  Curve length do not
+	have to be very precise, so compute less intermediate nodes.
 
 Fri Nov 26 15:34:32 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
-	* src/org/jcae/mesh/amibe/ds/tools/Calculus3D.java:  In distance(), do not subdivide into smaller segments.  This was very time consuming, and for unknow reasons gave worse meshes.
+	* src/org/jcae/mesh/amibe/ds/tools/Calculus3D.java:  In distance(), do
+	not subdivide into smaller segments.  This was very time consuming,
+	and for unknow reasons gave worse meshes.
 
 Fri Nov 26 10:35:22 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
-	* src/org/jcae/mesh/amibe/algos2d/Insertion.java:  Do not insert more than 3 nodes on long edges, in order to prevent flat triangles.
+	* src/org/jcae/mesh/amibe/algos2d/Insertion.java:  Do not insert more
+	than 3 nodes on long edges, in order to prevent flat triangles.
 
 Thu Nov 25 15:24:00 CET 2004 Denis Barbier <barbier@users.sourceforge.net>
 
