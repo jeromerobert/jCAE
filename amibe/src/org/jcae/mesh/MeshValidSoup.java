@@ -46,12 +46,10 @@ public class MeshValidSoup
 			for (int i = 0; i < maxgroup; i++)
 				amin[i] = 1.0;
 		}
-		@Override
 		public void processVertex(int i, double [] xyz)
 		{
 			n[i] = mesh.createVertex(xyz[0], xyz[1], xyz[2]);
 		}
-		@Override
 		public void processTriangle(int group)
 		{
 			if (group > nrgroup)

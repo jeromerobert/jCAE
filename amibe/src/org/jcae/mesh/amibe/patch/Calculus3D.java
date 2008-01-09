@@ -68,7 +68,6 @@ public class Calculus3D implements Calculus
 	 * @param end  the end node
 	 * @return the distance between nodes
 	 **/
-	@Override
 	public double distance(Vertex2D start, Vertex2D end)
 	{
 		Metric2D ms = start.getMetrics(mesh);
@@ -125,7 +124,6 @@ public class Calculus3D implements Calculus
 	 * @param m2  Riemannian metrics
 	 * @return square distance between nodes
 	 **/
-	@Override
 	public double distance2(Vertex2D start, Vertex2D end, Metric2D m2)
 	{
 		return m2.distance2(start.getUV(), end.getUV());
@@ -142,7 +140,6 @@ public class Calculus3D implements Calculus
 	 * @param vm  the vertex on which metrics is evaluated
 	 * @return bounding box of unit ellipse
 	 */
-	@Override
 	public double [] getBounds2D(Vertex2D vm)
 	{
 		Metric2D m = vm.getMetrics(mesh);
@@ -155,7 +152,6 @@ public class Calculus3D implements Calculus
 	 * @param ot  the edge being evaluated
 	 * @return the distance between its two endpoints.
 	 */
-	@Override
 	public double length(VirtualHalfEdge2D ot)
 	{
 		return distance((Vertex2D) ot.origin(), (Vertex2D) ot.destination());

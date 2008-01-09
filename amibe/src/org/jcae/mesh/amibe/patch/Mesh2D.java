@@ -404,7 +404,6 @@ public class Mesh2D extends Mesh
 		public ClearAllMetricsProcedure()
 		{
 		}
-		@Override
 		public final int action(Object o, int s, final int [] i0)
 		{
 			KdTree.Cell self = (KdTree.Cell) o;

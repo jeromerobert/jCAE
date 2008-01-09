@@ -511,7 +511,6 @@ public class KdTree
 		{
 			nodelist = new ArrayList<Vertex>(capacity);
 		}
-		@Override
 		public int action(Object o, int s, final int [] i0)
 		{
 			Cell self = (Cell) o;
@@ -761,7 +760,6 @@ public class KdTree
 					idist[k] = Integer.MAX_VALUE/2;
 			}
 		}
-		@Override
 		public int action(Object o, int s, final int [] i0)
 		{
 			for (int k = 0; k < dimension; k++)
@@ -866,7 +864,6 @@ public class KdTree
 			mesh = m;
 			dist = mesh.distance2(fromVertex, v, fromVertex);
 		}
-		@Override
 		public int action(Object o, int s, final int [] i0)
 		{
 			Cell self = (Cell) o;
@@ -920,7 +917,6 @@ public class KdTree
 		public GetMinSizeProcedure()
 		{
 		}
-		@Override
 		public int action(Object o, int s, final int [] i0)
 		{
 			searchedCells++;

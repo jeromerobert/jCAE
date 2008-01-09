@@ -39,19 +39,16 @@ public class ElementPatchFactory implements ElementFactoryInterface
 		triangleTraitsBuilder = mtb.getTriangleTraitsBuilder();
 	}
 
-	@Override
 	public Vertex2D createVertex(double u, double v)
 	{
 		return new Vertex2D(vertexTraitsBuilder, u, v);
 	}
 
-	@Override
 	public Vertex2D createVertex(double x, double y, double z)
 	{
 		throw new RuntimeException();
 	}
 
-	@Override
 	public Vertex2D createVertex(double [] x)
 	{
 		assert x.length == 2;
@@ -65,7 +62,6 @@ public class ElementPatchFactory implements ElementFactoryInterface
 		return new Triangle(triangleTraitsBuilder);
 	}
 	
-	@Override
 	public Triangle createTriangle(Vertex v0, Vertex v1, Vertex v2)
 	{
 		Triangle ret = createTriangle();
@@ -80,7 +76,6 @@ public class ElementPatchFactory implements ElementFactoryInterface
 		return ret;
 	}
 
-	@Override
 	public Triangle createTriangle(Vertex [] v)
 	{
 		Triangle ret = createTriangle();
@@ -98,7 +93,6 @@ public class ElementPatchFactory implements ElementFactoryInterface
 	/**
 	 * Clone an existing triangle.
 	 */
-	@Override
 	public Triangle createTriangle(Triangle that)
 	{
 		Triangle ret = createTriangle();
@@ -107,7 +101,6 @@ public class ElementPatchFactory implements ElementFactoryInterface
 		return ret;
 	}
 
-	@Override
 	public boolean hasAdjacency()
 	{
 		return (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE | TriangleTraitsBuilder.VIRTUALHALFEDGE));

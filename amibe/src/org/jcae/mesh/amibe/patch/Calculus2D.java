@@ -47,7 +47,6 @@ public class Calculus2D implements Calculus
 	 * @param m2  metrics (unused)
 	 * @return square distance between the two nodes.
 	 */
-	@Override
 	public double distance2(Vertex2D start, Vertex2D end, Metric2D m2)
 	{
 		double [] x0 = start.getUV();
@@ -64,7 +63,6 @@ public class Calculus2D implements Calculus
 	 * @param end  the node to which distance is computed.
 	 * @return the distance between the two nodes.
 	 */
-	@Override
 	public double distance(Vertex2D start, Vertex2D end)
 	{
 		return Math.sqrt(distance2(start, end, null));
@@ -76,7 +74,6 @@ public class Calculus2D implements Calculus
 	 * @param ot  the edge being evaluated
 	 * @return the distance between its two endpoints.
 	 */
-	@Override
 	public double length(VirtualHalfEdge2D ot)
 	{
 		return distance((Vertex2D) ot.origin(), (Vertex2D) ot.destination());
@@ -93,7 +90,6 @@ public class Calculus2D implements Calculus
 	 * @param vm  the vertex on which metrics is evaluated
 	 * @return bounding box of unit ellipse
 	 */
-	@Override
 	public double [] getBounds2D(Vertex2D vm)
 	{
 		double [] ret = new double[]{1.0, 1.0, 1.0};

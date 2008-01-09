@@ -4,6 +4,17 @@ Wed Jan  9 10:38:47 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 	  src/org/jcae/mesh/xmldata/MeshReader.java: IOException(Throwable)
 	constructor has been introduced in Java 6, replace it by
 	IOException(String) to allow compilation with Java 5.
+	* src/org/jcae/mesh/oemm/RawStorage.java
+	  src/org/jcae/mesh/MeshValidSoup.java
+	  src/org/jcae/mesh/MesherTest.java
+	  src/org/jcae/mesh/amibe/patch/Calculus2D.java
+	  src/org/jcae/mesh/amibe/patch/ElementPatchFactory.java
+	  src/org/jcae/mesh/amibe/patch/Calculus3D.java
+	  src/org/jcae/mesh/amibe/patch/Mesh2D.java
+	  src/org/jcae/mesh/amibe/util/QSortedTree.java
+	  src/org/jcae/mesh/amibe/util/KdTree.java: Remove @Override
+	annotations for methods implementing an interface, this is not
+	supported by Java 5.
 
 Sat Dec 22 23:56:44 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 

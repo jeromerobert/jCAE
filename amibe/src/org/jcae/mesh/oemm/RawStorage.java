@@ -223,7 +223,6 @@ public class RawStorage
 				bbox[k+3] = Double.MIN_VALUE;
 			}
 		}
-		@Override
 		public void processVertex(int i, double [] xyz)
 		{
 			for (int k = 0; k < 3; k++)
@@ -239,7 +238,6 @@ public class RawStorage
 			else
 				cells[i] = oemm.search(ijk);
 		}
-		@Override
 		public void processTriangle(int group)
 		{
 			nrTriangles++;
@@ -346,7 +344,6 @@ public class RawStorage
 			fc = f;
 			buffers = m;
 		}
-		@Override
 		public void processVertex(int i, double [] xyz)
 		{
 			oemm.double2int(xyz, ijk9);
@@ -357,7 +354,6 @@ public class RawStorage
 					ijk9[3*i+3+j] = ijk9[j];
 			}
 		}
-		@Override
 		public void processTriangle(int group)
 		{
 			try

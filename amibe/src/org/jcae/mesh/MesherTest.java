@@ -138,12 +138,10 @@ public class MesherTest
 		{
 			data = qdata;
 		}
-		@Override
 		public void processVertex(int i, double [] xyz)
 		{
 			n[i] = mesh.createVertex(xyz[0], xyz[1], xyz[2]);
 		}
-		@Override
 		public void processTriangle(int group)
 		{
 			Triangle t = mesh.createTriangle(n);

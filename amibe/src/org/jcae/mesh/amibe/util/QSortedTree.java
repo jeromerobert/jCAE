@@ -81,7 +81,6 @@ public abstract class QSortedTree<E> implements Serializable
 			value = v;
 		}
 		
-		@Override
 		public int compareTo(final Node<E> that)
 		{
 			if (value < that.value)
