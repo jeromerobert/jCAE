@@ -45,7 +45,7 @@ public class UNV2Amibe
 	/** A 2412 element which won't be stored into the amibe file */
 	private abstract class Element
 	{
-		private String buffer;
+		String buffer;
 		protected int[] nodes;
 				
 		protected abstract String parse(BufferedReader in) throws IOException;

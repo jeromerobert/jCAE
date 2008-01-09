@@ -482,10 +482,8 @@ public class SmoothNodes2D
 				FileOutputStream os = new FileOutputStream(new File(outputDir, brepFile), false);
 				FileChannel oChannel = os.getChannel();
 				oChannel.transferFrom(iChannel, 0, iChannel.size());
-				if (is != null)
-					is.close();
-				if (os != null)
-					os.close();
+				is.close();
+				os.close();
 			}
 			catch(IOException ex)
 			{

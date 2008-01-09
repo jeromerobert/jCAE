@@ -311,7 +311,10 @@ public class MeshReader
 				if (i < numberOfNodes - numberOfReferences)
 					label = 0;
 				else
+				{
+					assert refs != null;
 					label = refs[i+numberOfReferences-numberOfNodes];
+				}
 				nodelist[i].setRef(label);
 				for (int j = 0; j < 3; j++)
 				{
