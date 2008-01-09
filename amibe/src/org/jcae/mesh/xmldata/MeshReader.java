@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2005,2006, by EADS CRC
-    Copyright (C) 2007, by EADS France
+    Copyright (C) 2007,2008, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -82,11 +82,11 @@ public class MeshReader
 		}
 		catch (ParserConfigurationException ex)
 		{
-			throw new IOException(ex);
+			throw new IOException(ex.getMessage());
 		}
 		catch (SAXException ex)
 		{
-			throw new IOException(ex);
+			throw new IOException(ex.getMessage());
 		}
 
 		try
@@ -210,7 +210,7 @@ public class MeshReader
 		}
 		catch(XPathExpressionException ex)
 		{
-			throw new IOException(ex);
+			throw new IOException(ex.getMessage());
 		}
 		logger.debug("end reading "+JCAEXMLData.xml2dFilename+iFace);
 	}
@@ -248,11 +248,11 @@ public class MeshReader
 		}
 		catch (ParserConfigurationException ex)
 		{
-			throw new IOException(ex);
+			throw new IOException(ex.getMessage());
 		}
 		catch (SAXException ex)
 		{
-			throw new IOException(ex);
+			throw new IOException(ex.getMessage());
 		}
 
 		try
@@ -393,7 +393,7 @@ public class MeshReader
 		}
 		catch(XPathExpressionException ex)
 		{
-			throw new IOException(ex);
+			throw new IOException(ex.getMessage());
 		}
 		logger.debug("end reading "+JCAEXMLData.xml3dFilename);
 	}

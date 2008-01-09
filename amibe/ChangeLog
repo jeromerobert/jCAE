@@ -1,3 +1,10 @@
+Wed Jan  9 10:38:47 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/XMLHelper.java
+	  src/org/jcae/mesh/xmldata/MeshReader.java: IOException(Throwable)
+	constructor has been introduced in Java 6, replace it by
+	IOException(String) to allow compilation with Java 5.
+
 Sat Dec 22 23:56:44 CET 2007 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/MeshReader.java (readObject3D): Another

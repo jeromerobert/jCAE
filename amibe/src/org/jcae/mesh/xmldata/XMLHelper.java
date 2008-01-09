@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005, by EADS CRC
+    Copyright (C) 2008, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -88,11 +89,11 @@ public class XMLHelper
 		}
 		catch (TransformerConfigurationException ex)
 		{
-			throw new IOException(ex);
+			throw new IOException(ex.getMessage());
 		}
 		catch (TransformerException ex)
 		{
-			throw new IOException(ex);
+			throw new IOException(ex.getMessage());
 		}
 		result.getOutputStream().close();
 	}
