@@ -294,16 +294,14 @@ public class Vertex implements Serializable
 		assert link instanceof Triangle;
 		return getIncidentAbstractHalfEdge((Triangle) link, null);
 	}
-	private AbstractHalfEdge getIncidentAbstractHalfEdge(Triangle t, AbstractHalfEdge ot)
+
+	public AbstractHalfEdge getIncidentAbstractHalfEdge(Triangle t, AbstractHalfEdge ot)
 	{
-		if (ot == null)
-			ot = t.getAbstractHalfEdge();
-		else
-			ot = t.getAbstractHalfEdge(ot);
-		if (ot.origin() != this)
+		ot = t.getAbstractHalfEdge(ot);
+		if (ot.destination() == this)
 			ot = ot.next();
-		if (ot.origin() != this)
-			ot = ot.next();
+		else if (ot.apex() == this)
+			ot = ot.prev();
 		assert ot.origin() == this;
 		return ot;
 	}
