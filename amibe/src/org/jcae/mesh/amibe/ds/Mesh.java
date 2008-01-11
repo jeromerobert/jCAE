@@ -646,39 +646,31 @@ public class Mesh implements Serializable
 			markedTri.add(t);
 		//  Loop on all edges incident to v
 		AbstractHalfEdge ot = null;
-		AbstractHalfEdge sym = null;
 		AbstractHalfEdge ot2 = null;
-		AbstractHalfEdge s = null;
-		AbstractHalfEdge symSym = null;
-		AbstractHalfEdge otSym = null;
+		AbstractHalfEdge [] work = new AbstractHalfEdge[3];
 		for (Triangle t: neighTriList)
 		{
-			ot = t.getAbstractHalfEdge(ot);
-			sym = t.getAbstractHalfEdge(sym);
-			if (ot.destination() == v)
-				ot = ot.next();
-			else if (ot.apex() == v)
-				ot = ot.prev();
-			assert ot.origin() == v;
+			ot = v.getIncidentAbstractHalfEdge(t, ot);
 			// Skip this edge if adjacency relations already exist, 
 			if (ot.hasSymmetricEdge())
 				continue;
 			Vertex v2 = ot.destination();
 			// Edge (v,v2) has not yet been processed.
 			// List of triangles incident to v2.
-			ArrayList<Triangle> neighTriV2List = tVertList.get(v2);
 			boolean manifold = true;
-			for (Triangle t2: neighTriV2List)
+			// Ensure that work[0] and work[1] are non null to avoid
+			// tests in glueNonManifoldHalfEdges
+			if (work[0] == null)
+				work[0] = t.getAbstractHalfEdge(work[0]);
+			if (work[1] == null)
+				work[1] = t.getAbstractHalfEdge(work[1]);
+			for (Triangle t2: tVertList.get(v2))
 			{
 				if (t == t2 || !markedTri.contains(t2))
 					continue;
 				// t2 contains v and v2, we now look for an edge
 				// (v,v2) or (v2,v)
-				ot2 = t2.getAbstractHalfEdge(ot2);
-				if (ot2.destination() == v2)
-					ot2 = ot2.next();
-				else if (ot2.apex() == v2)
-					ot2 = ot2.prev();
+				ot2 = v2.getIncidentAbstractHalfEdge(t2, ot2);
 				if (manifold && ot2.destination() == v && !ot.hasSymmetricEdge() && !ot2.hasSymmetricEdge())
 				{
 					// This edge seems to be manifold.
@@ -691,135 +683,98 @@ public class Mesh implements Serializable
 				if (ot2.destination() != v)
 					ot2 = ot2.prev();
 				// We are sure now that ot2 == (v,v2) or (v2,v)
-				assert (v == ot2.origin() && v2 == ot2.destination()) || (v2 == ot2.origin() && v == ot2.destination());
-				// This edge is non manifold.
-				if (!ot.hasSymmetricEdge())
-				{
-					// Link ot to a virtual triangle
-					Triangle otVT = factory.createTriangle(outerVertex, ot.destination(), ot.origin());
-					newTri.add(otVT);
-					otVT.setAttributes(AbstractHalfEdge.OUTER);
-					otVT.setReadable(false);
-					otVT.setWritable(false);
-					s = otVT.getAbstractHalfEdge(s);
-					ot.glue(s);
-					ot.setAttributes(AbstractHalfEdge.NONMANIFOLD);
-					s.setAttributes(AbstractHalfEdge.NONMANIFOLD);
-					// Create an empty cycle
-					// Use sym as a temporary variable
-					sym = s.prev(sym);
-					s.next().glue(sym);
-				}
-				else if (!ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
-				{
-					sym = ot.sym(sym);
-					// ot and sym are inner edges, their adjacency
-					// relations have to be broken out.
-					// Link ot to a virtual triangle
-					Triangle otVT = factory.createTriangle(outerVertex, ot.destination(), ot.origin());
-					newTri.add(otVT);
-					otVT.setAttributes(AbstractHalfEdge.OUTER);
-					otVT.setReadable(false);
-					otVT.setWritable(false);
-					otSym = otVT.getAbstractHalfEdge(otSym);
-					ot.glue(otSym);
-					ot.setAttributes(AbstractHalfEdge.NONMANIFOLD);
-					otSym.setAttributes(AbstractHalfEdge.NONMANIFOLD);
-					// Link sym to another virtual triangle
-					Triangle symVT = factory.createTriangle(outerVertex, sym.destination(), sym.origin());
-					newTri.add(symVT);
-					symVT.setAttributes(AbstractHalfEdge.OUTER);
-					symVT.setReadable(false);
-					symVT.setWritable(false);
-					symSym = symVT.getAbstractHalfEdge(symSym);
-					sym.glue(symSym);
-					sym.setAttributes(AbstractHalfEdge.NONMANIFOLD);
-					symSym.setAttributes(AbstractHalfEdge.NONMANIFOLD);
-					// Create an inital cycle
-					symSym = symSym.next();
-					otSym = otSym.prev();
-					otSym.glue(symSym);
-					symSym = symSym.next();
-					otSym = otSym.prev();
-					otSym.glue(symSym);
-				}
-				if (!ot2.hasSymmetricEdge())
-				{
-					// Link ot2 to a virtual triangle
-					Triangle ot2VT = factory.createTriangle(outerVertex, ot2.destination(), ot2.origin());
-					newTri.add(ot2VT);
-					ot2VT.setAttributes(AbstractHalfEdge.OUTER);
-					ot2VT.setReadable(false);
-					ot2VT.setWritable(false);
-					s = ot2VT.getAbstractHalfEdge(s);
-					ot2.glue(s);
-					ot2.setAttributes(AbstractHalfEdge.NONMANIFOLD);
-					s.setAttributes(AbstractHalfEdge.NONMANIFOLD);
-				}
-				else
-					throw new RuntimeException();
-				// Add ot2 to this cycle
-				symSym = t.getAbstractHalfEdge(symSym);
-				sym = ot.sym(sym);
-				sym = sym.next();
-				symSym = sym.sym(symSym);
-				ot2 = ot2.sym();
-				ot2 = ot2.prev();
-				ot2.glue(sym);
-				ot2 = ot2.prev();
-				ot2.glue(symSym);
+				glueNonManifoldHalfEdges(v, v2, ot, ot2, work, newTri);
 			}
 			if (logger.isDebugEnabled() && !manifold)
 			{
 				int cnt = 0;
-				sym = ot.sym(sym);
-				sym = sym.next();
-				ot = ot.sym();
-				ot = ot.next();
-				do
-				{
+				for (Iterator<AbstractHalfEdge> it = ot.fanIterator(); it.hasNext(); it.next())
 					cnt++;
-					sym = sym.sym();
-					sym = sym.prev();
-				}
-				while (sym != ot);
 				logger.debug("Non-manifold edge: "+v+" "+v2+" "+" connected to "+cnt+" fans");
 			}
 		}
 		//  Unmark adjacent triangles
 		markedTri.clear();
 	}
+
+	private final void glueNonManifoldHalfEdges(Vertex v, Vertex v2, AbstractHalfEdge ot, AbstractHalfEdge ot2, AbstractHalfEdge [] work, ArrayList<Triangle> newTri)
+	{
+		assert v == ot.origin() && v2 == ot.destination();
+		assert (v == ot2.origin() && v2 == ot2.destination()) || (v2 == ot2.origin() && v == ot2.destination());
+		if (!ot.hasSymmetricEdge())
+		{
+			// ot has no symmetric edge yet; this happens only if this edge has
+			// not been processed yet and ot and ot2 have incompatible orientations,
+			// i.e. ot2 = (v, v2)
+			assert v == ot2.origin() && v2 == ot2.destination();
+			// Link ot to a virtual triangle.
+			work[0] = bindToVirtualTriangle(ot, work[0]);
+			newTri.add(work[0].getTri());
+			// Create an empty cycle
+			work[1] = work[0].prev(work[1]);
+			work[0].next().glue(work[1]);
+		}
+		else if (!ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+		{
+			// ot was already linked to another edge, but it is in fact a
+			// non-manifold edge.  Previous adjacency relation is removed
+			// and both triangles are linked to virtual triangles.
+			// First, store symmetric edge in work[0]
+			work[0] = ot.sym(work[0]);
+
+			// Link ot to a virtual triangle
+			work[1] = bindToVirtualTriangle(ot, work[1]);
+			newTri.add(work[1].getTri());
+			// Link work[0] to another virtual triangle
+			work[2] = bindToVirtualTriangle(work[0], work[2]);
+			newTri.add(work[2].getTri());
+			// Create an initial cycle
+			work[2] = work[2].next();
+			work[1] = work[1].prev();
+			work[1].glue(work[2]);
+			work[2] = work[2].next();
+			work[1] = work[1].prev();
+			work[1].glue(work[2]);
+		}
+
+		assert !ot2.hasSymmetricEdge();
+		// Link ot2 to a virtual triangle
+		work[0] = bindToVirtualTriangle(ot2, work[0]);
+		newTri.add(work[0].getTri());
+		// Add ot2 to existing cycle
+		work[0] = ot.sym(work[0]);
+		work[0] = work[0].next();
+		work[1] = work[0].sym(work[1]);
+		ot2 = ot2.sym();
+		ot2 = ot2.prev();
+		ot2.glue(work[0]);
+		ot2 = ot2.prev();
+		ot2.glue(work[1]);
+	}
 	
+	private final AbstractHalfEdge bindToVirtualTriangle(AbstractHalfEdge ot, AbstractHalfEdge sym)
+	{
+		Triangle t = factory.createTriangle(outerVertex, ot.destination(), ot.origin());
+		t.setAttributes(AbstractHalfEdge.OUTER);
+		t.setReadable(false);
+		t.setWritable(false);
+		sym = t.getAbstractHalfEdge(sym);
+		ot.glue(sym);
+		ot.setAttributes(AbstractHalfEdge.NONMANIFOLD);
+		sym.setAttributes(AbstractHalfEdge.NONMANIFOLD);
+		return sym;
+	}
+
 	private final boolean detectRidge(Vertex v, double cosMinAngle, Triangle t, double [][] temp)
 	{
-		AbstractHalfEdge ot = t.getAbstractHalfEdge();
+		AbstractHalfEdge ot = v.getIncidentAbstractHalfEdge(t, null);
 		AbstractHalfEdge sym = t.getAbstractHalfEdge();
-		if (ot.origin() != v)
-			ot = ot.next();
-		if (ot.origin() != v)
-			ot = ot.next();
-		assert ot.origin() == v;
-		Vertex first = ot.destination();
-		int id = ot.getTri().getGroupId();
-		// First check that all triangles belong to the same group
-		while (true)
-		{
-			Vertex d = ot.destination();
-			if (d != outerVertex && 0 != d.getRef())
-			{
-				if (id != ot.getTri().getGroupId())
-					return false;
-				sym = ot.sym(sym);
-				if (id != sym.getTri().getGroupId())
-					return false;
-			}
-			ot = ot.nextOrigin();
-			if (ot.destination() == first)
-				break;
-		}
+		if (!sameGroup(ot, sym))
+			return false;
 		// Now check for coplanarity
 		if (cosMinAngle < -1.0)
 			return true;
+		Vertex first = ot.destination();
 		while (true)
 		{
 			Vertex d = ot.destination();
@@ -830,6 +785,29 @@ public class Mesh implements Serializable
 				Matrix3D.computeNormal3D(d.getUV(), v.getUV(), sym.apex().getUV(), temp[0], temp[1], temp[3]);
 				double angle = Matrix3D.prodSca(temp[2], temp[3]);
 				if (angle > -cosMinAngle)
+					return false;
+			}
+			ot = ot.nextOrigin();
+			if (ot.destination() == first)
+				break;
+		}
+		return true;
+	}
+
+	// Check that all incident triangles belong to the same group
+	private final boolean sameGroup(AbstractHalfEdge ot, AbstractHalfEdge sym)
+	{
+		Vertex first = ot.destination();
+		int id = ot.getTri().getGroupId();
+		while (true)
+		{
+			Vertex d = ot.destination();
+			if (d != outerVertex && 0 != d.getRef())
+			{
+				if (id != ot.getTri().getGroupId())
+					return false;
+				sym = ot.sym(sym);
+				if (id != sym.getTri().getGroupId())
 					return false;
 			}
 			ot = ot.nextOrigin();
