@@ -34,7 +34,6 @@ import org.jcae.mesh.oemm.RawStorage;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import java.io.File;
-import java.io.StringWriter;
 import java.io.Reader;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -48,7 +47,6 @@ import java.util.ArrayList;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -57,12 +55,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
 
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.Result;
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
@@ -247,24 +239,6 @@ public class MesherTest
 			throw new RuntimeException();
 		} catch (IOException ex) {
 			ex.printStackTrace();
-			throw new RuntimeException();
-		}
-	}
-
-	private String DomToString(Document document)
-	{
-		try
-		{
-			TransformerFactory transformerFactory = TransformerFactory.newInstance();
-			Source source = new DOMSource(document);
-			StringWriter sw = new StringWriter();
-			Result result = new StreamResult(sw);
-			Transformer xformer = transformerFactory.newTransformer();
-			xformer.transform(source, result);
-			return sw.toString();
-		}
-		catch (Exception ex)
-		{
 			throw new RuntimeException();
 		}
 	}

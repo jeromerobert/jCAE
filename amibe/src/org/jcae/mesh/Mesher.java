@@ -619,9 +619,9 @@ public class Mesher
 
 		if (geometryFile.endsWith(".step") || geometryFile.endsWith(".stp") || geometryFile.endsWith(".igs"))
 		{
-			CADShape shape = CADShapeFactory.getFactory().newShape(geometryDir+File.separator+geometryFile);
+			CADShape s = CADShapeFactory.getFactory().newShape(geometryDir+File.separator+geometryFile);
 			geometryFile = geometryFile.substring(0, geometryFile.lastIndexOf('.')) + ".tmp.brep";
-			shape.writeNative(outputDir+File.separator+geometryFile);
+			s.writeNative(outputDir+File.separator+geometryFile);
 		}
 		else if (!geometryDir.equals(outputDir))
 		{
