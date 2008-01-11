@@ -465,7 +465,7 @@ public class Mesh implements Serializable
 		logger.debug("Connect triangles");
 		ArrayList<Triangle> newTri = new ArrayList<Triangle>();
 		for (Vertex v: vertices)
-			checkNeighbours(v, tVertList, newTri);
+			glueIncidentHalfEdges(v, tVertList, newTri);
 		//  tVertList is no more needed, remove all references
 		//  to help the garbage collector.
 		for (Vertex v: vertices)
@@ -512,7 +512,7 @@ public class Mesh implements Serializable
 			}
 		}
 		//  4. Mark non-manifold edges and bind them to virtual triangles.
-		//  This is now performed by checkNeighbours() above.
+		//  This is now performed by glueIncidentHalfEdges() above.
 		
 		//  5. Find the list of vertices which are on mesh boundary
 		logger.debug("Build the list of nodes on boundaries and non-manifold edges");
@@ -626,7 +626,7 @@ public class Mesh implements Serializable
 			{
 				//  Check for ridges
 				Triangle t = (Triangle) v.getLink();
-				if (checkRidges(v, cosMinAngle, t, temp))
+				if (detectRidge(v, cosMinAngle, t, temp))
 					v.setRef(-label);
 			}
 			*/
@@ -637,7 +637,7 @@ public class Mesh implements Serializable
 		triangleList.addAll(newTri);
 	}
 	
-	private final void checkNeighbours(Vertex v, HashMap<Vertex, ArrayList<Triangle>> tVertList, ArrayList<Triangle> newTri)
+	private final void glueIncidentHalfEdges(Vertex v, HashMap<Vertex, ArrayList<Triangle>> tVertList, ArrayList<Triangle> newTri)
 	{
 		//  Mark all triangles having v as vertex
 		ArrayList<Triangle> neighTriList = tVertList.get(v);
@@ -790,7 +790,7 @@ public class Mesh implements Serializable
 		markedTri.clear();
 	}
 	
-	private final boolean checkRidges(Vertex v, double cosMinAngle, Triangle t, double [][] temp)
+	private final boolean detectRidge(Vertex v, double cosMinAngle, Triangle t, double [][] temp)
 	{
 		AbstractHalfEdge ot = t.getAbstractHalfEdge();
 		AbstractHalfEdge sym = t.getAbstractHalfEdge();
