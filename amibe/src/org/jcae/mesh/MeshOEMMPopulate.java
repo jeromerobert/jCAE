@@ -23,12 +23,15 @@ package org.jcae.mesh;
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.RawStorage;
 import org.jcae.mesh.oemm.Storage;
+import org.apache.log4j.Logger;
 
 /**
  * This class fills an OEMM structure with a new triangle soup.
  */
 public class MeshOEMMPopulate
 {
+	private static Logger logger=Logger.getLogger(MeshOEMMPopulate.class);
+
 	public static void main(String args[])
 	{
 		if (args.length < 3)
@@ -40,6 +43,7 @@ public class MeshOEMMPopulate
 		String outOEMM  = args[1];
 		String soupFile = args[2];
 		// Read initial OEMM structure
+		logger.info("Start processing");
 		OEMM oemm = Storage.readOEMMStructure(inOEMM);
 		// Count triangles for this new triangle soup
 		int save_nrLeaves = oemm.getNumberOfLeaves();
@@ -50,6 +54,7 @@ public class MeshOEMMPopulate
 		RawStorage.dispatch(oemm, soupFile, "dispatched", "dispatched.data");
 		// Convert intermediate OEMM file into final OEMM
 		RawStorage.indexOEMM("dispatched", outOEMM);
+		logger.info("End processing");
 	}
 
 }
