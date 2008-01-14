@@ -46,7 +46,7 @@ import java.util.Collections;
 import java.util.ArrayList;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -144,9 +144,14 @@ public class MesherTest
 
 	private void checkLargeMeshQuality(String outputDir, double minAngleDeg, double maxEdgeLength)
 	{
-		MMesh1D mesh1d =  MMesh1DReader.readObject(outputDir);
-		// Create a outputDir/soup file
-		MeshToSoupConvert.meshToSoup(outputDir, mesh1d.getGeometry());
+		String soupFile = outputDir+java.io.File.separator+"soup";
+		if (!(new File(soupFile)).exists())
+		{
+			// Create a outputDir/soup file
+			MMesh1D mesh1d =  MMesh1DReader.readObject(outputDir);
+			MeshToSoupConvert.meshToSoup(outputDir, mesh1d.getGeometry());
+		}
+
 		QualityProcedure qprocAngle = new MinAngleFace();
 		QualityFloat dataAngle = new QualityFloat(100000);
 		dataAngle.setQualityProcedure(qprocAngle);
@@ -157,7 +162,7 @@ public class MesherTest
 
 		// Read triangle soup
 		ComputeTriangleQuality ctq = new ComputeTriangleQuality(new QualityFloat[] { dataAngle, dataEdgeLength });
-		RawStorage.readSoup(outputDir+java.io.File.separator+"soup", ctq);
+		RawStorage.readSoup(soupFile, ctq);
 
 		dataAngle.finish();
 		dataEdgeLength.finish();
@@ -250,11 +255,10 @@ public class MesherTest
 		{
 			XPathExpression xpathTimestamp = xpath.compile("@timestamp");
 			// Find first <log4j:message> containing "Meshing face" message
-			Node event = (Node) xpath.evaluate("//message/text()[contains(string(), 'Meshing face')]/ancestor::event", doc, XPathConstants.NODE);
-			long t1 = Long.parseLong(xpathTimestamp.evaluate(event));
-			// Next <log4j:event> element
-			Node s = event.getNextSibling();
-			long t2 = Long.parseLong(xpathTimestamp.evaluate(s));
+			NodeList events = (NodeList) xpath.evaluate("//message/text()[contains(string(), 'Meshing face')]/ancestor::event", doc, XPathConstants.NODESET);
+			long t1 = Long.parseLong(xpathTimestamp.evaluate(events.item(0)));
+			// <log4j:event> element after last 'Meshing face' message
+			long t2 = Long.parseLong(xpathTimestamp.evaluate(events.item(events.getLength() - 1).getNextSibling()));
 			return t2 - t1;
 		}
 		catch (XPathExpressionException ex)
@@ -270,11 +274,16 @@ public class MesherTest
 		String geoFile = dir + File.separator + "input" + File.separator + type +".brep";
 		String outDir = dir + File.separator + "output" + File.separator + "test-"+type+"."+counter;
 		Mesher.main(new String[] {geoFile, outDir, ""+length, "0.0"});
-		checkNumberOfTriangles(outDir, nrTriangles, 0.1);
-		if (nrTriangles < 100000)
-			checkMeshQuality(outDir, minAngleDeg, 4.0*length);
-		else
-			checkLargeMeshQuality(outDir, minAngleDeg, 4.0*length);
+		if (nrTriangles > 0)
+			checkNumberOfTriangles(outDir, nrTriangles, 0.1);
+		if (minAngleDeg > 0)
+		{
+			int [] res = MeshReader.getInfos(outDir);
+			if (res[1] < 100000)
+				checkMeshQuality(outDir, minAngleDeg, 4.0*length);
+			else
+				checkLargeMeshQuality(outDir, minAngleDeg, 4.0*length);
+		}
 	}
 
 	private void runSingleTestTimer(String type, long seconds)
