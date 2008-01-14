@@ -119,7 +119,8 @@ public class MeshReader extends Storage
 			TIntObjectHashMap<Vertex> vertMap = new TIntObjectHashMap<Vertex>();
 			readVertices(loadedLeaves, mesh, vertMap, current);
 			readTriangles(loadedLeaves, mesh, vertMap, current);
-			buildMeshAdjacency(mesh, vertMap);
+			if (mesh.hasAdjacency())
+				mesh.buildAdjacency();
 		}
 		if (mapNodeToNonReadVertexList != null) {
 			loadVerticesFromUnloadedNodes();
@@ -204,7 +205,8 @@ public class MeshReader extends Storage
 		if (mapNodeToNonReadVertexList != null) {
 			loadVerticesFromUnloadedNodes();
 		}
-		buildMeshAdjacency(mesh, vertMap);
+		if (mesh.hasAdjacency())
+			mesh.buildAdjacency();
 		int cnt = 0;
 		for (Triangle af: mesh.getTriangles())
 		{
@@ -368,37 +370,6 @@ public class MeshReader extends Storage
 		mesh.add(t);
 	}
 
-	/**
-	 * Builds mesh adjacency.
-	 */
-	private static void buildMeshAdjacency(Mesh mesh, TIntObjectHashMap<Vertex> vertMap)
-	{
-		if (!mesh.hasAdjacency())
-			return;
-		// Remove dangling vertices which are not connected to any triangle.
-		int nrv = 0;
-		for (TIntObjectIterator<Vertex> it = vertMap.iterator(); it.hasNext(); )
-		{
-			it.advance();
-			Vertex v = it.value();
-			if (v.getLink() != null)
-				nrv++;
-		}
-		Vertex [] vertices = new Vertex[nrv];
-		nrv = 0;
-		for (TIntObjectIterator<Vertex> it = vertMap.iterator(); it.hasNext(); )
-		{
-			it.advance();
-			Vertex v = it.value();
-			if (v.getLink() != null)
-			{
-				vertices[nrv] = v;
-				nrv++;
-			}
-		}
-		mesh.buildAdjacency(vertices, -1.0);
-	}
-	
 	/**
 	 * This method reads coordinates of non-readable vertices. These vertices are
 	 * set as readable after that.

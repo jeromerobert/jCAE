@@ -425,21 +425,10 @@ public class Mesh implements Serializable
 					vertices.add(v);
 		}
 		else
+		{
 			vertices = nodeList;
+		}
 		buildAdjacency(vertices, minAngle);
-	}
-
-	/**
-	 * Build adjacency relations between triangles
-	 * @deprecated
-	 */
-	@Deprecated
-	public void buildAdjacency(Vertex [] vertices, double minAngle)
-	{
-		Collection<Vertex> list = new ArrayList<Vertex>(vertices.length);
-		for (Vertex v: vertices)
-			list.add(v);
-		buildAdjacency(list, minAngle);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -455,10 +444,15 @@ public class Mesh implements Serializable
 		{
 			for (int i = 0; i < 3; i++)
 			{
-				ArrayList<Triangle> list = tVertList.get(t.vertex[i]);
-				list.add(t);
-				for (Vertex v: t.vertex)
-					v.setLink(t);
+				Vertex v = t.vertex[i];
+				ArrayList<Triangle> list = tVertList.get(v);
+				if (list != null)
+				{
+					// When reading OEMM leaves, triangle vertices may
+					// not belong to "vertices" collection.
+					list.add(t);
+				}
+				v.setLink(t);
 			}
 		}
 		//  2. Connect all edges together
@@ -641,6 +635,8 @@ public class Mesh implements Serializable
 	{
 		//  Mark all triangles having v as vertex
 		ArrayList<Triangle> neighTriList = tVertList.get(v);
+		if (neighTriList == null)
+			return;
 		Triangle.List markedTri = new Triangle.List();
 		for (Triangle t: neighTriList)
 			markedTri.add(t);
@@ -655,6 +651,9 @@ public class Mesh implements Serializable
 			if (ot.hasSymmetricEdge())
 				continue;
 			Vertex v2 = ot.destination();
+			ArrayList<Triangle> neighTriList2 = tVertList.get(v2);
+			if (neighTriList2 == null)
+				continue;
 			// Edge (v,v2) has not yet been processed.
 			// List of triangles incident to v2.
 			boolean manifold = true;
@@ -664,7 +663,7 @@ public class Mesh implements Serializable
 				work[0] = t.getAbstractHalfEdge(work[0]);
 			if (work[1] == null)
 				work[1] = t.getAbstractHalfEdge(work[1]);
-			for (Triangle t2: tVertList.get(v2))
+			for (Triangle t2: neighTriList2)
 			{
 				if (t == t2 || !markedTri.contains(t2))
 					continue;
