@@ -25,7 +25,6 @@ import org.jcae.mesh.xmldata.MeshToSoupConvert;
 import org.jcae.mesh.xmldata.MMesh1DReader;
 import org.jcae.mesh.amibe.ds.MMesh1D;
 import org.jcae.mesh.amibe.validation.*;
-import org.jcae.mesh.Mesher;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
@@ -263,17 +262,46 @@ public class MesherTest
 		}
 		catch (XPathExpressionException ex)
 		{
-			throw new RuntimeException();
+			throw new RuntimeException(ex.getCause());
 		}
 	}
 
-	private void runSingleTest(String type, double length, int nrTriangles, double minAngleDeg)
+	// A timer for classes with a main method which calls logger.info() at start and end.
+	private void checkMainRuntimeMillis(Document doc, String klass, long seconds)
+	{
+		XPath xpath = XPathFactory.newInstance().newXPath();
+		try
+		{
+			NodeList events = (NodeList) xpath.evaluate("//event[@logger='"+klass+"']/@timestamp", doc, XPathConstants.NODESET);
+			assertTrue(events.getLength() == 2);
+			long t1 = Long.parseLong(events.item(0).getNodeValue());
+			long t2 = Long.parseLong(events.item(events.getLength() - 1).getNodeValue());
+			long time = t2 - t1;
+			assertTrue(""+klass+" too long: max time (ms): "+(seconds * timerScale)+" Effective time (ms): "+time, time < seconds * timerScale);
+		}
+		catch (XPathExpressionException ex)
+		{
+			throw new RuntimeException(ex.getCause());
+		}
+	}
+
+	private static final String getGeometryFile(String type)
+	{
+		return dir + File.separator + "input" + File.separator + type +".brep";
+	}
+
+	private static final String getOutputDirectory(String type, int cnt)
+	{
+		return dir + File.separator + "output" + File.separator + "test-"+type+"."+cnt;
+	}
+
+	private String runSingleTest(String type, double length, int nrTriangles, double minAngleDeg)
 	{
 		startLogger();
 		root.info("Running "+type+" test with length: "+length);
-		String geoFile = dir + File.separator + "input" + File.separator + type +".brep";
-		String outDir = dir + File.separator + "output" + File.separator + "test-"+type+"."+counter;
-		Mesher.main(new String[] {geoFile, outDir, ""+length, "0.0"});
+		String geoFile = getGeometryFile(type);
+		String outDir = getOutputDirectory(type, counter);
+		org.jcae.mesh.Mesher.main(new String[] {geoFile, outDir, ""+length, "0.0"});
 		if (nrTriangles > 0)
 			checkNumberOfTriangles(outDir, nrTriangles, 0.1);
 		if (minAngleDeg > 0)
@@ -284,6 +312,7 @@ public class MesherTest
 			else
 				checkLargeMeshQuality(outDir, minAngleDeg, 4.0*length);
 		}
+		return outDir;
 	}
 
 	private void runSingleTestTimer(String type, long seconds)
@@ -433,6 +462,28 @@ public class MesherTest
 	@Test public void timer_shellHole()
 	{
 		runSingleTestTimer("shell_hole", 30L);
+	}
+
+	@Test public void oemm()
+	{
+		String geoFile = getGeometryFile("15_cylinder_head");
+		if (!(new File(geoFile).exists()))
+		{
+			throw new RuntimeException("Missing brep file; you must download, uncompress http://www.opencascade.org/ex/att/15_cylinder_head.brep.gz and copy it into "+geoFile);
+		}
+		System.setProperty("org.jcae.mesh.Mesher.triangleSoup", "true");
+		String coarseDir = runSingleTest("15_cylinder_head", 5.0, 37000 , 0.0);
+		runSingleTestTimer("15_cylinder_head", 30L);
+		String fineDir = runSingleTest("15_cylinder_head", 1.2, 460000 , 0.0);
+		runSingleTestTimer("15_cylinder_head", 100L);
+		System.setProperty("org.jcae.mesh.Mesher.triangleSoup", "false");
+
+		startLogger();
+		org.jcae.mesh.MeshOEMMIndex.main(new String[] {fineDir, fineDir+"-oemm", "4", "10000", geoFile});
+		org.jcae.mesh.MeshOEMMPopulate.main(new String[] {fineDir+"-oemm", coarseDir+"-oemm", coarseDir+java.io.File.separator+"soup"});
+		Document doc = stopLogger();
+		checkMainRuntimeMillis(doc, "org.jcae.mesh.MeshOEMMIndex", 40L);
+		checkMainRuntimeMillis(doc, "org.jcae.mesh.MeshOEMMPopulate", 5L);
 	}
 
 }
