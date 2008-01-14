@@ -173,7 +173,7 @@ public class MeshToSoupConvert extends JCAEXMLData
 	
 	public void finish()
 	{
-		logger.info("Total number of nodes: "+nrNodes);
+		logger.info("Total number of nodes: "+(nrNodes+nrIntNodes));
 		logger.info("Total number of triangles: "+nrTriangles);
 	}
 	
