@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005,2006, by EADS CRC
-    Copyright (C) 2007 by EADS France
+    Copyright (C) 2007,2008 by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -28,6 +28,7 @@ import org.jcae.mesh.amibe.util.KdTree;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -445,11 +446,9 @@ public class Mesh implements Serializable
 			for (int i = 0; i < 3; i++)
 			{
 				Vertex v = t.vertex[i];
-				ArrayList<Triangle> list = tVertList.get(v);
-				if (list != null)
+				if (v.isReadable())
 				{
-					// When reading OEMM leaves, triangle vertices may
-					// not belong to "vertices" collection.
+					ArrayList<Triangle> list = tVertList.get(v);
 					list.add(t);
 				}
 				v.setLink(t);
@@ -493,15 +492,14 @@ public class Mesh implements Serializable
 				}
 				else if (ot.hasAttributes(AbstractHalfEdge.OUTER))
 				{
-					ot = ot.sym();
-					if (!ot.hasAttributes(AbstractHalfEdge.OUTER))
+					if (sym == null)
+						sym = t.getAbstractHalfEdge(sym);
+					sym = ot.sym(sym);
+					if (!sym.hasAttributes(AbstractHalfEdge.OUTER))
 					{
 						ot.setAttributes(AbstractHalfEdge.BOUNDARY);
-						ot = ot.sym();
-						ot.setAttributes(AbstractHalfEdge.BOUNDARY);
+						sym.setAttributes(AbstractHalfEdge.BOUNDARY);
 					}
-					else
-						ot = ot.sym();
 				}
 			}
 		}
@@ -531,6 +529,9 @@ public class Mesh implements Serializable
 		//  6. Build links for non-manifold vertices
 		logger.debug("Compute links for non-manifold vertices");
 		Vertex [] endpoints = new Vertex[2];
+		LinkedHashMap<Vertex, LinkedHashSet<Triangle>> mapNMVertexLinks = new LinkedHashMap<Vertex, LinkedHashSet<Triangle>>();
+		int nrNME = 0;
+		int nrFE = 0;
 		for (Triangle t: triangleList)
 		{
 			ot = t.getAbstractHalfEdge(ot);
@@ -539,15 +540,16 @@ public class Mesh implements Serializable
 				ot = ot.next();
 				if (ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 				{
+					nrNME++;
 					endpoints[0] = ot.origin();
 					endpoints[1] = ot.destination();
 					for (int j = 0; j < 2; j++)
 					{
-						if (endpoints[j].getLink() instanceof Triangle)
+						if (!mapNMVertexLinks.containsKey(endpoints[j]))
 						{
 							LinkedHashSet<Triangle> link = new LinkedHashSet<Triangle>();
 							link.add((Triangle) endpoints[j].getLink());
-							endpoints[j].setLink(link);
+							mapNMVertexLinks.put(endpoints[j], link);
 						}
 					}
 					for (Iterator<AbstractHalfEdge> it = ot.fanIterator(); it.hasNext(); )
@@ -555,36 +557,29 @@ public class Mesh implements Serializable
 						Triangle t2 = it.next().getTri();
 						for (int j = 0; j < 2; j++)
 						{
-							LinkedHashSet<Triangle> link = (LinkedHashSet<Triangle>) endpoints[j].getLink();
+							LinkedHashSet<Triangle> link = mapNMVertexLinks.get(endpoints[j]);
 							link.add(t2);
 						}
 					}
 				}
-			}
-		}
-		// Replace LinkedHashSet by Triangle[], and keep only one
-		// Triangle by fan.
-		int nrNMV = 0;
-		int nrNME = 0;
-		int nrFE = 0;
-		for (Triangle t: triangleList)
-		{
-			ot = t.getAbstractHalfEdge(ot);
-			for (int i = 0; i < 3; i++)
-			{
-				Vertex v = t.vertex[i];
-				if (v.getLink() instanceof LinkedHashSet)
-				{
-					nrNMV++;
-					v.setLinkFan((LinkedHashSet<Triangle>) v.getLink());
-				}
-				ot = ot.next();
 				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY))
 					nrFE++;
-				else if (ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
-					nrNME++;
 			}
 		}
+		int nrNMV = mapNMVertexLinks.size();
+		// Replace LinkedHashSet by Triangle[], and keep only one
+		// Triangle by fan. As mapNMVertexLinks is no more needed
+		// after this loop, remove all references to help the
+		// garbage collector.
+		for (Vertex v: mapNMVertexLinks.keySet())
+		{
+			nrNMV++;
+			LinkedHashSet<Triangle> link = mapNMVertexLinks.get(v);
+			v.setLinkFan(link);
+			link.clear();
+			mapNMVertexLinks.put(v, null);
+		}
+		mapNMVertexLinks.clear();
 		if (nrNMV > 0)
 			logger.debug("Found "+nrNMV+" non manifold vertices");
 		if (nrNME > 0)
