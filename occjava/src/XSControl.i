@@ -39,6 +39,10 @@
  %{
 #include <STEPControl_Reader.hxx>
 #include <IGESControl_Reader.hxx>
+#include <XSControl_WorkSession.hxx>
+#include <XSControl_TransferReader.hxx>
+#include <StepRepr_RepresentationItem.hxx>
+#include <TCollection_HAsciiString.hxx>
  %}
 class XSControl_Reader
 {
@@ -59,7 +63,7 @@ class XSControl_Reader
 
 %extend XSControl_Reader
 {
-    //A workaround for charset encoding problems
+	//A workaround for charset encoding problems
 	IFSelect_ReturnStatus readFile(jbyte filename[])
 	{
 		return self->ReadFile((char*)filename);
@@ -70,6 +74,42 @@ class STEPControl_Reader: public XSControl_Reader
 {
 	public:
 	STEPControl_Reader();
+};
+
+%extend STEPControl_Reader
+{
+//dirty quick implementation of label step reading
+//find how to generalize this to IGES
+	char * getLabel(TopoDS_Shape * theShape)
+	{
+		const Handle(XSControl_WorkSession)& theSession = self->WS();
+		const Handle(XSControl_TransferReader)& aReader = theSession->TransferReader();
+		Handle(Standard_Transient) anEntity = aReader->EntityFromShapeResult(*theShape, 1);
+        if (anEntity.IsNull()) {
+            // as just mapped
+            anEntity = aReader->EntityFromShapeResult (*theShape,-1);
+        }
+        else if (anEntity.IsNull()) {
+            // as anything
+            anEntity = aReader->EntityFromShapeResult (*theShape,4);
+        }
+        else if (anEntity.IsNull()) {
+            cout<<"Warning: XSInterface_STEPReader::ReadAttributes() entity not found"<<endl;
+            return NULL;
+        }
+        else 
+        {
+            Handle(StepRepr_RepresentationItem) aReprItem;
+            aReprItem = Handle(StepRepr_RepresentationItem)::DownCast(anEntity);
+
+            if (aReprItem.IsNull()) {
+                cout<<"Error: STEPReader::ReadAttributes(): StepRepr_RepresentationItem Is NULL"<<endl;
+                return NULL;
+            }
+            else 
+                return aReprItem->Name()->ToCString();
+        }
+    }
 };
 
 class IGESControl_Reader: public XSControl_Reader
