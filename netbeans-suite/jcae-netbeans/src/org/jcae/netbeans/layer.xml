@@ -325,41 +325,27 @@
 			<file name="org-openide-actions-PrintAction.instance_hidden"/>
 		</folder>
 
-		<folder name="Window">
-			<attr name="org-jcae-netbeans-ShowMainFSAction.instance/ShowMainFSAction.java" boolvalue="true"/>
-			<!--file name="org-netbeans-modules-options-OptionsWindowAction.shadow">
-			<attr name="originalFile" stringvalue="Actions/Window/org-netbeans-modules-options-OptionsWindowAction.instance"/>
-			</file-->
-			<attr name="ShowMainFSAction.java/org-netbeans-core-actions-OptionsAction.instance" boolvalue="true"/>
-			<attr name="MaximizeWindowAction.shadow/Separator3_1.instance" boolvalue="true"/>
-			<attr name="oldRootsEnd.txt/org-netbeans-core-actions-OptionsAction.instance" boolvalue="true"/>
-			<file name="org-netbeans-core-actions-OptionsAction.instance"/>
-			<attr name="org-netbeans-core-actions-OptionsAction.instance/org-netbeans-modules-autoupdate-UpdateAction.instance" boolvalue="true"/>
-			<attr name="org-netbeans-core-output2-OutputWindowAction.instance/org-netbeans-modules-autoupdate-catalog-ModuleCatalogAction.instance" boolvalue="false"/>
-			<attr name="org-netbeans-core-actions-OptionsAction.instance/org-netbeans-modules-project-ui-logical-tab-action.shadow" boolvalue="true"/>
-			<attr name="org-netbeans-core-actions-OptionsAction.instance/Separator3_1.instance" boolvalue="true"/>
-			<attr name="ViewFavoritesTabAction.shadow/org-netbeans-core-output2-OutputWindowAction.instance" boolvalue="false"/>
-			<attr name="org-netbeans-modules-project-ui-physical-tab-action.shadow/ViewFavoritesTabAction.shadow" boolvalue="false"/>
-			<attr name="org-netbeans-core-actions-OptionsAction.instance/org-netbeans-modules-autoupdate-catalog-ModuleCatalogAction.instance" boolvalue="true"/>
-			<attr name="org-netbeans-modules-project-ui-physical-tab-action.shadow/Separator3_1.instance" boolvalue="true"/>
-			<file name="Separator3_1.instance" url="Separator3_1.instance">
-				<attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
-			</file>
-			<attr name="Separator3_1.instance/org-netbeans-modules-autoupdate-catalog-ModuleCatalogAction.instance" boolvalue="true"/>
-			<attr name="Separator3_1.instance/Separator4.instance" boolvalue="false"/>
-			<attr name="org-netbeans-core-actions-OptionsAction.instance/org-netbeans-core-output2-OutputWindowAction.instance" boolvalue="true"/>
-			<attr name="ViewFavoritesTabAction.shadow/org-netbeans-modules-autoupdate-catalog-ModuleCatalogAction.instance" boolvalue="true"/>
-			<file name="org-netbeans-modules-autoupdate-catalog-ModuleCatalogAction.instance" url="org-netbeans-modules-autoupdate-catalog-ModuleCatalogAction.instance"/>
-			<attr name="org-netbeans-modules-autoupdate-catalog-ModuleCatalogAction.instance/org-netbeans-modules-autoupdate-UpdateAction.instance" boolvalue="true"/>
-			<attr name="ViewFavoritesTabAction.shadow/org-netbeans-modules-autoupdate-UpdateAction.instance" boolvalue="true"/>
-			<file name="org-netbeans-modules-autoupdate-UpdateAction.instance" url="org-netbeans-modules-autoupdate-UpdateAction.instance"/>
-			<attr name="org-netbeans-modules-autoupdate-UpdateAction.instance/org-netbeans-modules-project-ui-logical-tab-action.shadow" boolvalue="false"/>
-			<file name="ViewRuntimeTabAction.shadow_hidden"/>
-			<file name="org-netbeans-modules-navigator-ShowNavigatorAction.instance_hidden"/>
-		</folder>
-
 		<folder name="GoTo_hidden"/>
-	</folder>
+	    <folder name="Window">
+            <file name="CloneDocumentAction.shadow_hidden"/>
+            <file name="CloseAllButThisAction.shadow_hidden"/>
+            <file name="CloseAllDocumentsAction.shadow_hidden"/>
+            <file name="DocumentsAction.shadow_hidden"/>
+            <file name="Navigator_hidden"/>
+            <file name="Output_hidden"/>
+            <file name="ProgressListAction.shadow_hidden"/>
+            <file name="Separator4.instance_hidden"/>
+            <file name="SwitchToRecentDocumentAction.shadow_hidden"/>
+            <file name="ViewRuntimeTabAction.shadow_hidden"/>
+            <file name="org-netbeans-core-output2-OutputWindowAction.instance">
+                <attr name="instanceClass" stringvalue="org.netbeans.core.output2.OutputWindowAction"/>
+            </file>
+			<file name="org-netbeans-core-actions-OptionsAction.instance"/>
+			<file name="org-netbeans-modules-autoupdate-ui-actions-PluginManagerAction.instance">
+				<attr name="position" intvalue="1400"/>
+			</file>
+        </folder>
+    </folder>
 
 	<folder name="Templates">
 		<folder name="Project">

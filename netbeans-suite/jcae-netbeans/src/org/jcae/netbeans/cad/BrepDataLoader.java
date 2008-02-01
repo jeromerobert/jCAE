@@ -42,7 +42,7 @@ public class BrepDataLoader extends MultiFileLoader
 	
 	public BrepDataLoader()
 	{
-		super("org.jcae.netbeans.cad.BrepDataLoader");
+		super("org.jcae.netbeans.cad.BrepDataObject");
 		setDisplayName("CAD file");
 	}
 
@@ -82,5 +82,5 @@ public class BrepDataLoader extends MultiFileLoader
 	{
 		System.out.println("createSecondaryEntry "+arg1);
 		return new FileEntry(arg0, arg1);
-	}	
+	}
 }
