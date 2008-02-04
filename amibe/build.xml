@@ -111,7 +111,7 @@
 
 	<target name="jar" depends="compile" description="jar">
 		<mkdir dir="lib"/>
-		<jar basedir="${classes.dir}" excludes="${test.packages} ${jcae.junit.packages} **/occ/*" compress="true" jarfile="${jar}">
+		<jar basedir="${classes.dir}" excludes="${test.packages} ${jcae.junit.packages} **/occ/*" compress="true" jarfile="${amibe.jar}">
 			<manifest>
 				<attribute name="Main-Class" value="org.jcae.mesh.Mesher"/>
 				<attribute name="Class-Path" value="${jar.dependencies}"/>
@@ -166,7 +166,7 @@
 		<delete dir="${test.dir}/results"/>
 		<delete dir="${test.dir}/output"/>
 		<delete dir="${test.dir}/logs"/>
-		<delete file="${jar}"/>
+		<delete file="${amibe.jar}"/>
 		<delete file="${test.jar}"/>
 		<delete file="${jcae.junit.jar}"/>
 		<delete file="${mesherocc.jar}"/>
@@ -203,7 +203,7 @@
 	</target>
 
 	<target name="debug" depends="jar, debug-netbeans" description="Debug Project">
-		<java fork="true" jar="${jar}">
+		<java fork="true" jar="${amibe.jar}">
 			<jvmarg value="-Xdebug"/>
 			<jvmarg value="-Xnoagent"/>
 			<jvmarg value="-Djava.compiler=none"/>
