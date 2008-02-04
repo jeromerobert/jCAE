@@ -63,7 +63,7 @@
 			<sysproperty key="log4j.configuration" value="${log4j.configuration.present}"/>
 			<formatter type="xml"/>
 			<classpath>
-				<pathelement location="${jcae.jar}"/>
+				<pathelement location="${amibe.jar}"/>
 				<pathelement location="${junit.jar}"/>
 				<pathelement location="${jcae.junit.jar}"/>
 			</classpath>
@@ -91,7 +91,7 @@
 			<sysproperty key="test.dir" value="${test.dir}"/>
 			<formatter type="xml"/>
 			<classpath>
-				<pathelement location="${jcae.jar}"/>
+				<pathelement location="${amibe.jar}"/>
 				<pathelement location="${junit.jar}"/>
 				<pathelement location="${jcae.junit.jar}"/>
 			</classpath>
@@ -147,7 +147,7 @@
 			</fileset>
 			<tag name="todo" scope="all" description="To do:" />
 			<classpath>
-				<pathelement location="${jcae.jar}"/>
+				<pathelement location="${amibe.jar}"/>
 				<pathelement location="${log4j.jar}"/>
 				<pathelement location="${trove.jar}"/>
 			</classpath>

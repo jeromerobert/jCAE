@@ -513,7 +513,7 @@ public class Mesher
 			out.println("Number of groups which cannot be meshed: "+badGroups.size());
 			if (badGroups.size() > 0)
 				out.println(""+badGroups);
-			out.println("jcae.jar build time: "+buildDate);
+			out.println("amibe.jar build time: "+buildDate);
 			Properties sys = System.getProperties();
 			sys.list(out);
 			out.close();

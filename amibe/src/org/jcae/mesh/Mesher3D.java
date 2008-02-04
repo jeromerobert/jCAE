@@ -112,7 +112,7 @@ public class Mesher3D
 			out.println("Number of nodes: "+res[0]);
 			out.println("Number of triangles: "+res[1]);
 			out.println("Number of groups: "+res[2]);
-			out.println("jcae.jar build time: "+buildDate);
+			out.println("amibe.jar build time: "+buildDate);
 			Properties sys = System.getProperties();
 			sys.list(out);
 			out.close();
