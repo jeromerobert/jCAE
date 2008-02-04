@@ -5,4 +5,28 @@
 <project name="org.jcae.opencascade.jni" default="netbeans" basedir=".">
     <description>Builds, tests, and runs the project org.jcae.opencascade.jni.</description>
     <import file="nbproject/build-impl.xml"/>
+	<!-- from http://wiki.netbeans.org/DevFaqWrapperModules -->
+	<property name="original.project.dir" value="../occjava"/>
+	<property name="original.project.jar" value="${original.project.dir}/dist/occjava.jar"/>
+	<property name="original.project.so" value="../../occjava/src/.libs/libOccJava.so"/>
+	<property name="original.project.dll" value="../../occjava/Release/OccJava.dll"/>
+
+	<target name="release">
+		<echo message="Building ${original.project.dir}"/>
+		<ant dir="${original.project.dir}"
+			 target="jar" inheritall="false" inheritrefs="false"/>
+		<echo message="Done building ${original.project.dir}"/>
+
+		<copy todir="${cluster}/modules/ext" file="${original.project.jar}"/>
+		<copy todir="${cluster}/modules/lib" failonerror="false" file="${original.project.so}"/>
+		<copy todir="${cluster}/modules/lib" failonerror="false" file="${original.project.dll}"/>
+	</target>
+
+
+	<target name="clean" depends="projectized-common.clean">
+		<echo message="Cleaning ${original.project.dir}"/>
+		<ant dir="${original.project.dir}"
+			 target="clean" inheritall="false" inheritrefs="false"/>
+		<echo message="Done cleaning ${original.project.dir}"/>
+	</target>
 </project>

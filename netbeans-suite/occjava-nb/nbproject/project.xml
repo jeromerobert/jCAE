@@ -12,7 +12,7 @@
             </public-packages>
             <class-path-extension>
                 <runtime-relative-path>ext/occjava.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/occjava.jar</binary-origin>
+                <binary-origin>../occjava/dist/occjava.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>

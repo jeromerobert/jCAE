@@ -1,5 +1,6 @@
-Required files:
-release/modules/lib/OccJava.dll
-release/modules/lib/libOccJava.so
-release/modules/ext/occjava.jar
+occjava native libraries are expected to be in the ../occjava directory.
+See build.xml if you want to change this.
+
+If the OccJava.dll or libOccJava.so are not found the building will only
+issue a warning, so check your build !
 
