@@ -185,7 +185,7 @@
             </public-packages>
             <class-path-extension>
                 <runtime-relative-path>ext/jcae-viewer3d-amibe.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/jcae-viewer3d-amibe.jar</binary-origin>
+                <binary-origin>../viewer3d-amibe/dist/jcae-viewer3d-amibe.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/jcae-viewer3d.jar</runtime-relative-path>
@@ -197,15 +197,15 @@
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/log4j.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/log4j.jar</binary-origin>
+                <binary-origin>build/tmp/log4j.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/jcae-mesherocc.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/jcae-mesherocc.jar</binary-origin>
+                <binary-origin>../amibe/dist/jcae-mesherocc.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/trove.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/trove.jar</binary-origin>
+                <binary-origin>build/tmp/trove.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>
