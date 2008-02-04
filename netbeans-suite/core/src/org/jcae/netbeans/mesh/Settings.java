@@ -15,20 +15,17 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2008, by EADS France
  */
 
 package org.jcae.netbeans.mesh;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.jcae.mesh.Mesher;
 import org.openide.ErrorManager;
-import org.openide.modules.InstalledFileLocator;
 import org.openide.options.SystemOption;
 import org.openide.util.Lookup;
 
@@ -44,7 +41,6 @@ public class Settings extends SystemOption
 		return (Settings)Lookup.getDefault().lookup(Settings.class);
 	}
 	private String javaVirtualMachine;
-	private URL log4jConfigurationFile;
 	private String maximumMemory="1500m";	
 	private String mesherJar;
 	private String[] customJVMParameters=new String[0];
@@ -55,13 +51,9 @@ public class Settings extends SystemOption
 	{	
 		try
 		{
-			mesherJar=new File(Mesher.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
-			log4jConfigurationFile=InstalledFileLocator.getDefault().locate(
-				"etc/log4j.properties", "org.jcae.netbeans", false).toURI().toURL();
-		}
-		catch (MalformedURLException e)
-		{
-			ErrorManager.getDefault().notify(e);
+			mesherJar=new File(
+				Mesher.class.getProtectionDomain().getCodeSource().
+				getLocation().toURI()).getPath();
 		}
 		catch (URISyntaxException e)
 		{
@@ -88,7 +80,7 @@ public class Settings extends SystemOption
 		ArrayList toReturn=new ArrayList();
 		toReturn.add(javaExe);
 		toReturn.add("-Xmx"+maximumMemory);
-		toReturn.add("-Dlog4j.configuration="+log4jConfigurationFile);
+		toReturn.add("-Dlog4j.configuration="+System.getProperty("log4j.configuration"));
 		toReturn.addAll(Arrays.asList(getCustomJVMParameters()));
 		toReturn.add("-jar");
 		toReturn.add(mesherJar);
@@ -104,7 +96,7 @@ public class Settings extends SystemOption
 		ArrayList toReturn=new ArrayList();
 		toReturn.add(javaExe);
 		toReturn.add("-Xmx"+maximumMemory);
-		toReturn.add("-Dlog4j.configuration="+log4jConfigurationFile);
+		toReturn.add("-Dlog4j.configuration="+System.getProperty("log4j.configuration"));
 		toReturn.addAll(Arrays.asList(getCustomJVMParameters()));
 		toReturn.add("-classpath");
 		toReturn.add(mesherJar);
@@ -115,11 +107,6 @@ public class Settings extends SystemOption
 	public String getJavaVirtualMachine()
 	{
 		return javaVirtualMachine;
-	}
-	
-	public String getLog4jConfigurationFile()
-	{
-		return log4jConfigurationFile.toString();
 	}
 	
 	public String getMaximumMemory()
@@ -136,17 +123,6 @@ public class Settings extends SystemOption
 	public void setJavaVirtualMachine(String javaVirtualMachine)
 	{
 		this.javaVirtualMachine = javaVirtualMachine;
-	}
-	
-	public void setLog4jConfigurationFile(String log4jConfigurationFile)
-	{
-		try
-		{
-			this.log4jConfigurationFile = new URL(log4jConfigurationFile);
-		} catch (MalformedURLException e)
-		{
-			ErrorManager.getDefault().notify(e);
-		}
 	}
 	
 	public void setMaximumMemory(String maximumMemory)
