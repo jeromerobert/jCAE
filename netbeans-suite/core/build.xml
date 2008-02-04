@@ -2,7 +2,46 @@
 <!-- You may freely edit this file. See harness/README in the NetBeans platform -->
 <!-- for some information on what you could do (e.g. targets to override). -->
 <!-- If you delete this file and reopen the project it will be recreated. -->
-<project name="org.jcae.netbeans" default="netbeans" basedir=".">
-    <description>Builds, tests, and runs the project org.jcae.netbeans.</description>
+<project name="org.jcae.opencascade.jni" default="netbeans" basedir=".">
+    <description>Builds, tests, and runs the project org.jcae.opencascade.jni.</description>
     <import file="nbproject/build-impl.xml"/>
+	<!-- from http://wiki.netbeans.org/DevFaqWrapperModules -->
+	<property name="amibe.project.dir" value="../amibe"/>
+	<property name="viewer3d.project.dir" value="../viewer3d"/>
+	<property name="va.project.dir" value="../viewer3d-amibe"/>
+	<target name="-release.files">
+		<!-- build amibe -->
+		<echo message="Building ${amibe.project.dir}"/>
+		<ant dir="${amibe.project.dir}" target="jar" inheritall="false" inheritrefs="false"/>
+		<echo message="Done building ${amibe.project.dir}"/>
+
+		<copy todir="${cluster}/modules/ext" file="${amibe.project.dir}/dist/amibe.jar"/>
+		<copy todir="${cluster}/modules/ext" file="${amibe.project.dir}/dist/jcae-mesherocc.jar"/>
+
+		<!-- build viewer3d -->
+		<echo message="Building ${viewer3d.project.dir}"/>
+		<ant dir="${viewer3d.project.dir}" target="jar" inheritall="false" inheritrefs="false"/>
+		<echo message="Done building ${viewer3d.project.dir}"/>
+
+		<copy todir="${cluster}/modules/ext" file="${viewer3d.project.dir}/dist/jcae-viewer3d.jar"/>
+		<!-- build viewer3d-amibe -->
+		<echo message="Building ${va.project.dir}"/>
+		<ant dir="${va.project.dir}" target="jar" inheritall="false" inheritrefs="false"/>
+		<echo message="Done building ${va.project.dir}"/>
+
+		<copy todir="${cluster}/modules/ext" file="${va.project.dir}/dist/jcae-viewer3d-amibe.jar"/>
+		<!-- other libs -->
+		<copy tofile="release/modules/ext/log4j.jar" file="${libs.Log4j.classpath}"/>
+		<copy tofile="release/modules/ext/trove.jar" file="${libs.trove.classpath}"/>
+	</target>
+
+	<target name="clean" depends="projectized-common.clean">
+		<echo message="Cleaning ${amibe.project.dir}"/>
+		<ant dir="${amibe.project.dir}" target="clean" inheritall="false" inheritrefs="false"/>
+		<echo message="Done cleaning ${amibe.project.dir}"/>
+
+		<echo message="Cleaning ${viewer3d.project.dir}"/>
+		<ant dir="${viewer3d.project.dir}" target="clean" inheritall="false" inheritrefs="false"/>
+		<echo message="Done cleaning ${viewer3d.project.dir}"/>
+	</target>
 </project>

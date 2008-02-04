@@ -189,11 +189,11 @@
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/jcae-viewer3d.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/jcae-viewer3d.jar</binary-origin>
+                <binary-origin>../viewer3d/dist/jcae-viewer3d.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/jcae.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/jcae.jar</binary-origin>
+                <runtime-relative-path>ext/amibe.jar</runtime-relative-path>
+                <binary-origin>../amibe/dist/amibe.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/log4j.jar</runtime-relative-path>
@@ -207,10 +207,6 @@
                 <runtime-relative-path>ext/trove.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/trove.jar</binary-origin>
             </class-path-extension>
-            <!--class-path-extension>
-				<runtime-relative-path>ext/xalan.jar</runtime-relative-path>
-				<binary-origin>release/modules/ext/xalan.jar</binary-origin>
-			</class-path-extension-->
         </data>
     </configuration>
 </project>
