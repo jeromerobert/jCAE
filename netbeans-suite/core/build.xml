@@ -37,16 +37,7 @@
 		<copy file="${libs.trove.classpath}" tofile="${cluster}/modules/ext/trove.jar"/>
 
 		<copy file="../../amibe/log4j.properties" tofile="${cluster}/etc/log4j.properties"/>
-		<!-- Get the ant.jar file from netbeans distrib, just to build the ant task required
-		for the project. It will not be part of the final distribution -->
-		<copy file="${netbeans.dest.dir}/java1/ant/lib/ant.jar" tofile="build/tmp/ant.jar"/>
-
-		<!-- set the version -->
-		<echo message="${build.classes.dir}"/>
-		<taskdef name="jcaeVersion" classname="org.jcae.netbeans.ant.AntVersion" classpath="build/classes"/>
-		<jcaeVersion version="0.17"/>
 	</target>
-
 	<target name="clean" depends="projectized-common.clean">
 		<echo message="Cleaning ${amibe.project.dir}"/>
 		<ant dir="${amibe.project.dir}" target="clean" inheritall="false" inheritrefs="false"/>

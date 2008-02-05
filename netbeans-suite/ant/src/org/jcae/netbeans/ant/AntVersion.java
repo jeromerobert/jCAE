@@ -27,6 +27,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.jar.Manifest;
+import java.util.jar.Attributes.Name;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 	
@@ -42,7 +43,7 @@ public class AntVersion extends Task
 	{
 		try
 		{
-			File root = getProject().getBaseDir().getParentFile();
+			File root = getProject().getBaseDir();
 			setProperty(root,
 				"branding/core/core.jar/org/netbeans/core/startup/Bundle.properties",
 				"currentVersion", version);
@@ -56,8 +57,6 @@ public class AntVersion extends Task
 				"branding/modules/org-netbeans-core-windows.jar/org/netbeans/core/windows/view/ui/Bundle.properties",
 				"CTL_MainWindow_Title_No_Project");
 			setProperty(root, "nbproject/project.properties", "app.title");
-			Manifest m = new Manifest(new FileInputStream(new File(root, "core/manifest.mf")));
-			m.getMainAttributes().put("OpenIDE-Module-Specification-Version", version);
 			setManifestVersion(root, "core/manifest.mf");
 			setManifestVersion(root, "occjava-nb/manifest.mf");
 		}
@@ -73,7 +72,7 @@ public class AntVersion extends Task
 		FileInputStream in = new FileInputStream(f);
 		Manifest m = new Manifest(in);
 		in.close();
-		m.getMainAttributes().put("OpenIDE-Module-Specification-Version", version);
+		m.getMainAttributes().put(new Name("OpenIDE-Module-Specification-Version"), version);
 		FileOutputStream out = new FileOutputStream(f);
 		m.write(out);
 		out.close();

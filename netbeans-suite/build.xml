@@ -5,4 +5,15 @@
 <project name="jcae-netbeans-suite" basedir=".">
     <description>Builds the module suite jcae-netbeans-suite.</description>
     <import file="nbproject/build-impl.xml"/>
+	<!-- We don't have any release dir so we can hack to use this target -->
+	<target name="-release.dir">
+		<!-- Get the ant.jar file from netbeans distrib, just to build the ant task required
+		for the project. It will not be part of the final distribution -->
+		<copy file="${netbeans.dest.dir}/java1/ant/lib/ant.jar" tofile="build/tmp/ant.jar"/>
+		<mkdir dir="build/tmp/classes"/>
+		<javac srcdir="ant/src" destdir="build/tmp/classes" includes="org/jcae/netbeans/ant/AntVersion.java"/>
+		<!-- set the version -->
+		<taskdef name="jcaeVersion" classname="org.jcae.netbeans.ant.AntVersion" classpath="build/tmp/classes"/>
+		<jcaeVersion version="0.16"/>
+	</target>
 </project>

@@ -68,6 +68,7 @@ public class ComputeMeshAction extends CookieAction
 
 	protected void performAction(Node[] arg0)
 	{
+		WindowManager.getDefault().findTopComponent("output").open();
 		LifecycleManager.getDefault().saveAll();
 		for (int i = 0; i < arg0.length; i++)
 		{

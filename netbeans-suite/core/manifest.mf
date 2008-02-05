@@ -1,18 +1,20 @@
 Manifest-Version: 1.0
 OpenIDE-Module: org.jcae.netbeans
-OpenIDE-Module-Install: org/jcae/netbeans/Installer.class
-OpenIDE-Module-Layer: org/jcae/netbeans/layer.xml
 OpenIDE-Module-Localizing-Bundle: org/jcae/netbeans/Bundle.properties
-OpenIDE-Module-Specification-Version: @JCAE_VERSION@
+OpenIDE-Module-Layer: org/jcae/netbeans/layer.xml
+OpenIDE-Module-Specification-Version: 0.16
+OpenIDE-Module-Install: org/jcae/netbeans/Installer.class
+
+Name: org/jcae/netbeans/mesh/MeshDataLoader.class
+OpenIDE-Module-Class: Loader
+Install-Before: org.openide.loaders.XMLDataObject, org.netbeans.module
+ s.xml.core.XMLDataObject
 
 Name: org/jcae/netbeans/cad/BrepDataLoader.class
 OpenIDE-Module-Class: Loader
-Install-Before: org.openide.loaders.XMLDataObject, org.netbeans.modules.xml.core.XMLDataObject
+Install-Before: org.openide.loaders.XMLDataObject, org.netbeans.module
+ s.xml.core.XMLDataObject
 
 Name: org/jcae/netbeans/mesh/UNVDataLoader.class
-OpenIDE-Module-Class: Loader
-
-Name: org/jcae/netbeans/mesh/MeshDataLoader.class
-Install-Before: org.openide.loaders.XMLDataObject, org.netbeans.modules.xml.core.XMLDataObject
 OpenIDE-Module-Class: Loader
 
