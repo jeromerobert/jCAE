@@ -46,12 +46,12 @@ public class BrepNode extends DataNode implements Node.Cookie
 	public BrepNode(DataObject arg0)
 	{
 		super(arg0, new ShapeChildren());
+		setIconBaseWithExtension("org/jcae/netbeans/cad/BRepNode.png");
 		getCookieSet().add(this);
 		getCookieSet().add(new ShapePool());		
 		getCookieSet().add(new ShapeOperationCookie(this));
 		getCookieSet().add((Cookie) getChildren());
-		updateChildren();
-		
+		updateChildren();		
 	}
 
 	public void updateChildren()

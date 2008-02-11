@@ -102,6 +102,7 @@ public class ShapeNode extends AbstractNode implements ShapeCookie
 	public ShapeNode(String name, TopoDS_Shape shape, ShapePool pool)
 	{		
 		super(new ShapeChildren());
+		setIconBaseWithExtension("org/jcae/netbeans/cad/ShapeNode.png");
 		this.shape=shape;
 		getCookieSet().add(this);
 		getCookieSet().add(pool);
