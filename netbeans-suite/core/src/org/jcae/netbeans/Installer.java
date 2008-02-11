@@ -19,8 +19,10 @@
  */
 package org.jcae.netbeans;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import javax.swing.filechooser.FileSystemView;
 import org.openide.modules.InstalledFileLocator;
 import org.openide.modules.ModuleInstall;
 import org.openide.util.Exceptions;
@@ -34,6 +36,7 @@ public class Installer extends ModuleInstall
 	@Override
 	public void restored()
 	{
+		//Load default log4j configuration
 		try
 		{
 			String l4jp = System.getProperty("log4j.configuration");
@@ -50,5 +53,11 @@ public class Installer extends ModuleInstall
 		{
 			Exceptions.printStackTrace(ex);
 		}
+		
+		//Set default project directory
+		File defaultDir = FileSystemView.getFileSystemView().getDefaultDirectory();
+		if (defaultDir != null && defaultDir.exists() && defaultDir.isDirectory()) {
+			System.setProperty("netbeans.projects.dir", defaultDir.getPath());
+		}					
 	}
 }
