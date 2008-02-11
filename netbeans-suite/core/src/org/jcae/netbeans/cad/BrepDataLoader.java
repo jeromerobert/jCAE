@@ -80,7 +80,6 @@ public class BrepDataLoader extends MultiFileLoader
 
 	protected Entry createSecondaryEntry(MultiDataObject arg0, FileObject arg1)
 	{
-		System.out.println("createSecondaryEntry "+arg1);
 		return new FileEntry(arg0, arg1);
 	}
 }

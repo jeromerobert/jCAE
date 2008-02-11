@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2008, by EADS France
  */
 
 package org.jcae.netbeans.cad;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Set;
+import org.jcae.opencascade.Utilities;
 import org.jcae.opencascade.jni.*;
 import org.openide.ErrorManager;
 import org.openide.cookies.SaveCookie;
@@ -42,11 +44,13 @@ import org.xml.sax.SAXException;
 
 public class BrepDataObject extends MultiDataObject implements ShapeCookie, SaveCookie
 {
-	public BrepDataObject(FileObject arg0, MultiFileLoader arg1) throws DataObjectExistsException
+	public BrepDataObject(FileObject arg0, MultiFileLoader arg1)
+		throws DataObjectExistsException
 	{
 		super(arg0, arg1);
 	}
 
+	@Override
 	protected Node createNodeDelegate()
 	{
 		return new BrepNode(this);
@@ -57,8 +61,9 @@ public class BrepDataObject extends MultiDataObject implements ShapeCookie, Save
 	
 	public TopoDS_Shape getShape()
 	{
-		if(shape==null)
-			open();
+		if(!isLoaded())
+			throw new IllegalStateException(
+				"BRep file not loaded. Call BrepataObject.load() first");
 		return shape;
 	}
 
@@ -73,13 +78,13 @@ public class BrepDataObject extends MultiDataObject implements ShapeCookie, Save
 				BRepTools.write(shape, fileName);
 			}
 			Set set = secondaryEntries();
-			if(set.size()>0)
+			if(!set.isEmpty())
 			{
 				FileEntry fe=(FileEntry) set.toArray()[0];
 				FileObject fo = fe.getFile();
 				FileLock lock = fo.lock();
 				OutputStream os = fo.getOutputStream(lock);
-				XMLUtil.write(metaDocument, os,"UTF-8");
+				XMLUtil.write(getMetaDocument(), os,"UTF-8");
 				os.close();
 				lock.releaseLock();
 			}
@@ -91,35 +96,23 @@ public class BrepDataObject extends MultiDataObject implements ShapeCookie, Save
 		}
 	}
 	
-	protected void open()
+	public void load()
 	{		
 		String fileName = FileUtil.toFile(getPrimaryFile()).getPath();
-        
-        if (fileName.endsWith("step") || fileName.endsWith("stp"))
-        {
-            STEPControl_Reader aReader = new STEPControl_Reader();
-            aReader.readFile(fileName);
-            aReader.nbRootsForTransfer();
-            aReader.transferRoots();
-            shape = aReader.oneShape();
-        }
-        else if (fileName.endsWith("iges") || fileName.endsWith("igs"))
-        {
-            IGESControl_Reader aReader = new IGESControl_Reader();
-            aReader.readFile(fileName);
-            aReader.nbRootsForTransfer();
-            aReader.transferRoots();
-            shape = aReader.oneShape();
-        }
-        else
-        	shape = BRepTools.read(fileName, new BRep_Builder());
-        
+        shape = Utilities.readFile(fileName);
         if(shape==null)
         {
         	TopoDS_Compound c=new TopoDS_Compound();
         	new BRep_Builder().makeCompound(c);
         	shape=c;
-        }        
+        }
+		//TODO wipe this out (but check that close still work)
+		getMetaDocument();
+	}
+	
+	public void unload()
+	{
+		shape = null;
 	}
 	
 	public Document getMetaDocument()
@@ -129,7 +122,7 @@ public class BrepDataObject extends MultiDataObject implements ShapeCookie, Save
 			try
 			{
 				Set set=secondaryEntries();
-				if(set.size()==0)
+				if(set.isEmpty())
 				{
 					return null;
 				}
@@ -137,6 +130,7 @@ public class BrepDataObject extends MultiDataObject implements ShapeCookie, Save
 				FileEntry fe=(FileEntry) set.toArray()[0];
 				InputStream in=fe.getFile().getInputStream();
 				metaDocument=XMLUtil.parse(new InputSource(in), false, false, null, null);
+				in.close();
 			}
 			catch (IOException e)
 			{
@@ -152,5 +146,10 @@ public class BrepDataObject extends MultiDataObject implements ShapeCookie, Save
 			}
 		}			
 		return metaDocument;
-	}	
+	}
+	
+	public boolean isLoaded()
+	{
+		return shape!=null;
+	}
 }
