@@ -22,6 +22,7 @@ package org.jcae.netbeans;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.jcae.opencascade.jni.BRep_Builder;
 import javax.swing.filechooser.FileSystemView;
 import org.openide.modules.InstalledFileLocator;
 import org.openide.modules.ModuleInstall;
@@ -36,6 +37,8 @@ public class Installer extends ModuleInstall
 	@Override
 	public void restored()
 	{
+		//load opencascade libraries
+		new BRep_Builder();
 		//Load default log4j configuration
 		try
 		{
