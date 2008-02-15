@@ -238,8 +238,6 @@ public class View extends Canvas3D implements PositionListener
 				sharedUniverse=new SimpleUniverse(this);
 				universe=View.sharedUniverse;
 				viewingPlatform=universe.getViewingPlatform();			
-				universe.addBranchGraph(
-					createLights(new BoundingSphere(new Point3d(),Double.MAX_VALUE)));
 			}
 			else
 			{
@@ -253,17 +251,17 @@ public class View extends Canvas3D implements PositionListener
 		{
 			universe=new SimpleUniverse(this);
 			viewingPlatform=universe.getViewingPlatform();			
-			universe.addBranchGraph(createLights(new BoundingSphere(new Point3d(),Double.MAX_VALUE)));
 		}
 
 				
 		PlatformGeometry platformGeometry = new PlatformGeometry();
+		platformGeometry.addChild(createLights());
 		platformGeometry.setCapability(Group.ALLOW_CHILDREN_WRITE);
 		platformGeometry.setCapability(Group.ALLOW_CHILDREN_EXTEND);	
 		viewingPlatform.setPlatformGeometry(platformGeometry);		
 		orbit = new ViewBehavior(this);
 		orbit.setCapability(Node.ALLOW_BOUNDS_WRITE);
-		viewingPlatform.setViewPlatformBehavior(orbit);
+		viewingPlatform.setViewPlatformBehavior(orbit);		
 		
 		originAxisSwitch.setCapability(Switch.ALLOW_SWITCH_READ);
 		originAxisSwitch.setCapability(Switch.ALLOW_SWITCH_WRITE);
@@ -720,31 +718,25 @@ public class View extends Canvas3D implements PositionListener
 		return s3d;
 	}
 
-	private BranchGroup createLights(Bounds bounds)
-	{
-	    BranchGroup gp=new BranchGroup();
-		// Set up the ambient light
-		Color3f	ambientColor = new Color3f(0.1f, 0.1f, 0.1f);
-		AmbientLight ambientLightNode = new AmbientLight(ambientColor);
-		ambientLightNode.setInfluencingBounds(bounds);
-		gp.addChild(ambientLightNode);
-
-		// Set up the directional lights
-		Color3f	light1Color = new Color3f(1.0f, 1.0f, 0.9f);
-		Vector3f light1Direction = new Vector3f(1.0f, 1.0f, 1.0f);
-		DirectionalLight light1 = new DirectionalLight(light1Color, light1Direction);
-		light1.setInfluencingBounds(bounds);
-		gp.addChild(light1);
-
-		Color3f	light2Color = new Color3f(1.0f, 1.0f, 1.0f);
-		Vector3f light2Direction = new Vector3f(-1.0f, -1.0f, -1.0f);
-		DirectionalLight light2 = new DirectionalLight(light2Color, light2Direction);
-		light2.setInfluencingBounds(bounds);
-		light2.setCapability(Light.ALLOW_INFLUENCING_BOUNDS_WRITE);
-		light2.setCapability(Light.ALLOW_INFLUENCING_BOUNDS_READ);
-		gp.addChild(light2);
-		return gp;
+	private Node createLights()
+	{	
+		Group toReturn = new Group();
+		Color3f cl = new Color3f(1f, 1f, 1f);
+		//Color3f cd = new Color3f(0.4f, 0.4f, 0.4f);
+		BoundingSphere bs = new BoundingSphere(new Point3d(0,0,-10), Double.MAX_VALUE/2);
+		DirectionalLight l1 = new DirectionalLight(cl, new Vector3f(0,0,1f));
+		l1.setInfluencingBounds(bs);
+		DirectionalLight l2 = new DirectionalLight(cl, new Vector3f(0,0,-1f));
+		l2.setInfluencingBounds(bs);
+		//Light l3 = new DirectionalLight(cd, new Vector3f(0,1f,0));
+		l2.setInfluencingBounds(bs);
+		toReturn.addChild(l1);
+		toReturn.addChild(l2);
+		//toReturn.addChild(l3);
+		toReturn.addChild(new AmbientLight(new Color3f(0.7f, 0.7f, 0.7f)));
+		return toReturn;
 	}
+	
 	private void displayTransform3d(Transform3D transform)
 	{
 		if(textPane==null)
