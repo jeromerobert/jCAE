@@ -110,7 +110,7 @@ public  class ViewBehavior extends OrbitBehavior
 			clipBoxMode(evt);
 			break;
 		case RECTANGLE_MODE :
-			//rectangleMode(evt);
+			rectangleMode(evt);
 			break;
 		case DEFAULT_MODE:
 		default :
@@ -421,6 +421,7 @@ public  class ViewBehavior extends OrbitBehavior
 	protected void startRectangleDrawing(MouseEvent evt, Color color)
 	{
 		anchor = evt.getPoint();
+		selectionRectangle3D.setGeometry(anchor, anchor);
 		selectionRectangle3D.setColor(color);
 		selectionRectangle3D.setVisible(true);
 	}
