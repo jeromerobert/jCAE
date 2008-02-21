@@ -114,9 +114,9 @@ public class Settings extends SystemOption
 		return maximumMemory;
 	}
 	
-	public String getMesherJar()
+	public File getMesherJar()
 	{
-		return mesherJar;
+		return new File(mesherJar);
 	}
 	
 	
@@ -130,9 +130,9 @@ public class Settings extends SystemOption
 		this.maximumMemory = maximumMemory;
 	}
 	
-	public void setMesherJar(String mesherJar)
+	public void setMesherJar(File mesherJar)
 	{
-		this.mesherJar = mesherJar;
+		this.mesherJar = mesherJar.getPath();
 	}
 	public boolean isRunInSameJVM()
 	{
