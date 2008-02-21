@@ -1,3 +1,37 @@
+2008-01-31 15:33  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src/XSControl.i: Implement STEPControl_Reader.getLabel to
+	  retreive STEP labels
+
+2007-11-13 12:50  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src-java/org/jcae/opencascade/test/FixSmallEdges.java,
+	  src/Makefile.am, src/OccJava.i, src/ShapeFix.i: Add classes to
+	  remove small edges
+
+2007-09-28 08:33  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src-java/org/jcae/opencascade/test/CircleExtrudeQuilt.java: Write
+	  the output file to the system dependent temporary directory.
+
+2007-09-24 15:48  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* src-java/org/jcae/opencascade/Utilities.java, src/Makefile.am,
+	  src/OccJava.i, src/XSControl.i: Fix charset encoding problems
+	  when reading STEP or IGES files
+
+2007-08-22 09:40  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* configure.ac: Link to required libTKFillet.so
+
+	* src/gp.i: Add gp_Pln typemap. It allows to easily add method
+	  which use gp_Pln as input or output. gp_Pln is mapped to
+	  double[4].
+
+2007-07-19 09:49  Jerome Robert <jeromerobert@users.sourceforge.net>
+
+	* README: Add list of required OCC libraries
+
 2007-06-29 15:18  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* src-java/org/jcae/opencascade/test/NativeStream.java: Test
