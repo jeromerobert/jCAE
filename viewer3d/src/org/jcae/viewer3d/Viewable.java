@@ -21,7 +21,9 @@
 
 package org.jcae.viewer3d;
 
+import com.sun.j3d.utils.picking.PickResult;
 import java.util.Map;
+import javax.media.j3d.Bounds;
 import javax.media.j3d.Node;
 
 /**
@@ -49,6 +51,13 @@ public interface Viewable
 	Node getJ3DNode();
 	
 	void pick(PickViewable result);
+	
+	/**
+	 * Called when an area is picked
+	 * @param result the result of the picking
+	 * @param bound the volume used to do the picking
+	 */
+	void pickArea(PickResult[] result, Bounds bound);
 	
 	void unselectAll();
 	

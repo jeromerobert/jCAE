@@ -1,11 +1,13 @@
 package org.jcae.viewer3d;
 
+import com.sun.j3d.utils.picking.PickResult;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.media.j3d.Bounds;
 import javax.media.j3d.Node;
 
 public abstract class ViewableAdaptor implements Viewable {
@@ -64,4 +66,8 @@ public abstract class ViewableAdaptor implements Viewable {
 		}
 	}
 
+	/** Default implementation which does nothing */
+	public void pickArea(PickResult[] result, Bounds bound) {
+		
+	}
 }

@@ -21,6 +21,7 @@
 
 package org.jcae.viewer3d.cad;
 
+import com.sun.j3d.utils.picking.PickResult;
 import java.awt.Color;
 import java.util.*;
 import java.util.logging.Logger;
@@ -290,42 +291,47 @@ public class ViewableCAD extends ViewableAdaptor
 		Logger.getLogger("global").finest(
 			"result.getGeometryArray().getUserData()=" +
 			result.getGeometryArray().getUserData());
-
-		Object o=getPickUserData(result);
+		pick(result.getGeometryArray());
+	}
+	
+	private void pick(GeometryArray geom)
+	{
+		if(geom == null)
+			return;
+		
+		Object o=geom.getUserData();
 		if((o instanceof FacePickingInfo)&(selectionMode==FACE_SELECTION))
 		{
 			FacePickingInfo fpi=(FacePickingInfo) o;
-			boolean toSelect=!selectedFaces.contains(new Integer(fpi.id));
+			boolean toSelect=!selectedFaces.contains(Integer.valueOf(fpi.id));
 			setFaceSelected(fpi, toSelect);
 			fireSelectionChanged();
 		}
 		else if((o instanceof EdgePickingInfo)&(selectionMode==EDGE_SELECTION))
 		{
 			EdgePickingInfo epi=(EdgePickingInfo) o;
-			boolean toSelect=!selectedEdges.contains(new Integer(epi.id));
+			boolean toSelect=!selectedEdges.contains(Integer.valueOf(epi.id));
 			setEdgeSelected(epi, toSelect);
 			fireSelectionChanged();
 		}
 		else if((o instanceof VertexPickingInfo)&(selectionMode==VERTEX_SELECTION))
 		{
 			VertexPickingInfo epi=(VertexPickingInfo) o;
-			boolean toSelect=!selectedVertices.contains(new Integer(epi.id));
+			boolean toSelect=!selectedVertices.contains(Integer.valueOf(epi.id));
 			setVertexSelected(epi, toSelect);
 			fireSelectionChanged();
 		}
 	}
 	
-	
-	protected static Object getPickUserData(PickViewable result){
-		SceneGraphObject sgo;
-		sgo=result.getGeometryArray();
-		if(sgo!=null){
-			Object o=sgo.getUserData();
-			if(o instanceof CADPickingInfo)
-				return o;
-		}
-		return null;
-	}
+	@Override
+	public void pickArea(PickResult[] result, Bounds bound) 
+	{
+		HashSet<GeometryArray> as = new HashSet();
+		for(PickResult r: result)
+			as.add(r.getGeometryArray());
+		for(GeometryArray a: as)
+			pick(a);
+	}	
 
 	static private int[] integerCollectionToArray(Collection<Integer> collection)
 	{
@@ -750,5 +756,5 @@ public class ViewableCAD extends ViewableAdaptor
 	public void setLineWidth(float lineWidth)
 	{
 		lineAttributes.setLineWidth(lineWidth);
-	}
+	}	
 }

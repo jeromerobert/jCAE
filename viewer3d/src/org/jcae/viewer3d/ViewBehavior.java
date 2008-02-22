@@ -449,27 +449,32 @@ public  class ViewBehavior extends OrbitBehavior
 	protected void pickRectangle(MouseEvent evt)
 	{
 		Viewable cv = view.getCurrentViewable();
-		if (cv == null) return;
-//		if (!evt.isControlDown())
-//		{
-//			Logger.global.finest("Ctrl is up so everything is unselected");
-//			cv.unselectAll();
-//		}
-		PickCanvas pickCanvas = new PickCanvas(view, view.getBranchGroup(cv));
+		if (cv == null)
+			return;
 
-		ViewPyramid shape = new ViewPyramid(view, selectionRectangle3D.getGeometry2D());
+		PickCanvas pickCanvas = new PickCanvas(view, view.getBranchGroup(cv));
+		
+		ViewPyramid shape =
+			new ViewPyramid(view, selectionRectangle3D.getGeometry2D());
+		
 		Vector4d[] v = new Vector4d[4];
-		for (int i = 0; i < 4; i++)
-			v[i] = new Vector4d();
 		shape.getPlanes(v);
 		pickCanvas.setMode(PickTool.GEOMETRY_INTERSECT_INFO);
 		pickCanvas.setShapeBounds(shape, shape.getStartPoint());
-		long time = System.currentTimeMillis();
-		PickViewable result = pickPoint(pickCanvas.pickAllSorted());
-		long time2 = System.currentTimeMillis();
-		logger.finest("picked viewable is " + cv + " in "
-			+ (time2 - time) + " ms");		
-		if (result != null) cv.pick(result);
+		try
+		{
+			PickResult[] result = pickCanvas.pickAllSorted();
+			if (result != null && result.length > 0)
+				cv.pickArea(result, shape);
+		}
+		catch(RuntimeException ex)
+		{
+			if(ex.getMessage().startsWith("TODO: must make polytope"))
+				throw new RuntimeException(
+					"Error: see https://java3d.dev.java.net/issues/show_bug.cgi?id=570",
+					ex);
+			else throw ex;
+		}
 	}
 
 	private void fixOriginAxis(Transform3D t3d)
