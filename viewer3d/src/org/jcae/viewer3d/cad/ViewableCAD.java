@@ -292,33 +292,35 @@ public class ViewableCAD extends ViewableAdaptor
 		Logger.getLogger("global").finest(
 			"result.getGeometryArray().getUserData()=" +
 			result.getGeometryArray().getUserData());
-		pick(result.getGeometryArray());
+		if(pick(result.getGeometryArray()))
+			fireSelectionChanged();
 	}
 	
-	private void pick(Geometry geom)
+	private boolean pick(Geometry geom)
 	{
 		if(geom == null)
-			return;
+			return false;
 		
 		Object o=geom.getUserData();
 		if((o instanceof FacePickingInfo)&(selectionMode==FACE_SELECTION))
 		{
 			FacePickingInfo fpi=(FacePickingInfo) o;
 			setFaceSelected(fpi, checkToSelect(selectedFaces, fpi));
-			fireSelectionChanged();
+			return true;
 		}
 		else if((o instanceof EdgePickingInfo)&(selectionMode==EDGE_SELECTION))
 		{
 			EdgePickingInfo epi=(EdgePickingInfo) o;			
 			setEdgeSelected(epi, checkToSelect(selectedEdges, epi));
-			fireSelectionChanged();
+			return true;
 		}
 		else if((o instanceof VertexPickingInfo)&(selectionMode==VERTEX_SELECTION))
 		{
 			VertexPickingInfo epi=(VertexPickingInfo) o;
 			setVertexSelected(epi, checkToSelect(selectedVertices, epi));
-			fireSelectionChanged();
+			return true;
 		}
+		return false;
 	}
 	
 	private boolean checkToSelect(Collection selected, CADPickingInfo info)
@@ -342,8 +344,11 @@ public class ViewableCAD extends ViewableAdaptor
 				as.add(((Shape3D)n).getGeometry());
 		}
 
+		boolean b = false;
 		for(Geometry a: as)
-			pick(a);
+			b = b || pick(a);
+		if(b)
+			fireSelectionChanged();
 	}	
 
 	static private int[] integerCollectionToArray(Collection<Integer> collection)
