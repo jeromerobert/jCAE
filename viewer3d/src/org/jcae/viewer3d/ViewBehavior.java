@@ -452,29 +452,20 @@ public  class ViewBehavior extends OrbitBehavior
 		if (cv == null)
 			return;
 
-		PickCanvas pickCanvas = new PickCanvas(view, view.getBranchGroup(cv));
+		com.sun.j3d.utils.pickfast.PickCanvas pickCanvas =
+			new com.sun.j3d.utils.pickfast.PickCanvas(
+			view, view.getBranchGroup(cv));
 		
 		ViewPyramid shape =
 			new ViewPyramid(view, selectionRectangle3D.getGeometry2D());
 		
 		Vector4d[] v = new Vector4d[4];
 		shape.getPlanes(v);
-		pickCanvas.setMode(PickTool.GEOMETRY_INTERSECT_INFO);
+		pickCanvas.setMode(PickInfo.PICK_GEOMETRY);		
 		pickCanvas.setShapeBounds(shape, shape.getStartPoint());
-		try
-		{
-			PickResult[] result = pickCanvas.pickAllSorted();
-			if (result != null && result.length > 0)
-				cv.pickArea(result, shape);
-		}
-		catch(RuntimeException ex)
-		{
-			if(ex.getMessage().startsWith("TODO: must make polytope"))
-				throw new RuntimeException(
-					"Error: see https://java3d.dev.java.net/issues/show_bug.cgi?id=570",
-					ex);
-			else throw ex;
-		}
+		PickInfo[] result = pickCanvas.pickAllSorted();
+		if (result != null && result.length > 0)
+			cv.pickArea(result, shape);
 	}
 
 	private void fixOriginAxis(Transform3D t3d)

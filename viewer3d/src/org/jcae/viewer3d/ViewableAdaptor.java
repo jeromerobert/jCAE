@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.media.j3d.Bounds;
 import javax.media.j3d.Node;
+import javax.media.j3d.PickInfo;
 
 public abstract class ViewableAdaptor implements Viewable {
 	
@@ -67,7 +68,7 @@ public abstract class ViewableAdaptor implements Viewable {
 	}
 
 	/** Default implementation which does nothing */
-	public void pickArea(PickResult[] result, Bounds bound) {
+	public void pickArea(PickInfo[] result, Bounds bound) {
 		
 	}
 }

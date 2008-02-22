@@ -294,7 +294,7 @@ public class ViewableCAD extends ViewableAdaptor
 		pick(result.getGeometryArray());
 	}
 	
-	private void pick(GeometryArray geom)
+	private void pick(Geometry geom)
 	{
 		if(geom == null)
 			return;
@@ -324,12 +324,17 @@ public class ViewableCAD extends ViewableAdaptor
 	}
 	
 	@Override
-	public void pickArea(PickResult[] result, Bounds bound) 
+	public void pickArea(PickInfo[] result, Bounds bound) 
 	{
-		HashSet<GeometryArray> as = new HashSet();
-		for(PickResult r: result)
-			as.add(r.getGeometryArray());
-		for(GeometryArray a: as)
+		HashSet<Geometry> as = new HashSet();
+		for(PickInfo pickInfo: result)
+		{
+			Node n = pickInfo.getNode();
+			if(n instanceof Shape3D)
+				as.add(((Shape3D)n).getGeometry());
+		}
+
+		for(Geometry a: as)
 			pick(a);
 	}	
 
