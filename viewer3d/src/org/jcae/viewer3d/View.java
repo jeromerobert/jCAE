@@ -1138,10 +1138,7 @@ public class View extends Canvas3D implements PositionListener
 		orbit.setSchedulingBounds(new BoundingSphere(c,b.getRadius()*100));
 		axisBehavior.setSchedulingBounds(orbit.getSchedulingBounds());
 		
-		getView().setFrontClipDistance(FrontClipDistanceFactor*radius);
-		getView().setBackClipDistance(BackClipDistanceFactor*radius);
-		//getView().setWindowResizePolicy(javax.media.j3d.View.VIRTUAL_WORLD);
-				
+		//getView().setWindowResizePolicy(javax.media.j3d.View.VIRTUAL_WORLD);				
 		Transform3D t3d = new Transform3D();
 		viewingPlatform.getViewPlatformTransform().getTransform(t3d);
 		//calculate the translation vector for a identity rotation matrix
@@ -1153,7 +1150,10 @@ public class View extends Canvas3D implements PositionListener
 		correction.add(new Vector3f(x,y,z));
 		t3d.setTranslation(correction);		
 		viewingPlatform.getViewPlatformTransform().setTransform(t3d);
-		//orbit.setViewingPlatform(viewingPlatform);
+		
+		double backClipDistance = radius*(1/focal+1);
+		getView().setFrontClipDistance(backClipDistance/2000);
+		getView().setBackClipDistance(backClipDistance);	
 	}
 	
 	public double[] getRotationCenter()
