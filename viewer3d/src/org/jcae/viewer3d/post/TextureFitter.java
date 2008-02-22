@@ -53,7 +53,7 @@ public class TextureFitter extends View
 	{
 		private Point3d pickingPoint;
 		private int faceID;
-		private TopoDS_Shape shape;
+		private final TopoDS_Shape shape;
 		public PickViewableCAD(CADProvider provider, TopoDS_Shape shape)
 		{		
 			super(provider);
@@ -63,13 +63,16 @@ public class TextureFitter extends View
 		@Override
 		public void pick(PickViewable result)
 		{
-			Object o=getPickUserData(result);
-			if((o instanceof ViewableCAD.FacePickingInfo))
+			if(result != null && result.getGeometryArray() != null)
 			{
-				FacePickingInfo fpi=(FacePickingInfo) o;
-				pickingPoint = result.getIntersection().getPointCoordinates();
-				faceID=fpi.id;
-				fireSelectionChanged();
+				Object o=result.getGeometryArray().getUserData();
+				if(o instanceof ViewableCAD.FacePickingInfo)
+				{
+					FacePickingInfo fpi=(FacePickingInfo) o;
+					pickingPoint = result.getIntersection().getPointCoordinates();
+					faceID=fpi.id;
+					fireSelectionChanged();
+				}
 			}
 		}
 		
