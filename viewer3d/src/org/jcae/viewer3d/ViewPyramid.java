@@ -25,6 +25,8 @@ import java.awt.Rectangle;
 import javax.media.j3d.Appearance;
 import javax.media.j3d.BoundingBox;
 import javax.media.j3d.BoundingPolytope;
+import javax.media.j3d.BoundingSphere;
+import javax.media.j3d.Bounds;
 import javax.media.j3d.Canvas3D;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.IndexedQuadArray;
@@ -52,6 +54,7 @@ public class ViewPyramid extends BoundingPolytope
 	private Point3d startPoint=new Point3d();
 	private Point3d eye;
 	private Rectangle rectangle;
+	private BoundingSphere bounds;
 
 	public ViewPyramid(Canvas3D canvas)
 	{
@@ -60,8 +63,14 @@ public class ViewPyramid extends BoundingPolytope
 
 	public ViewPyramid(Canvas3D canvas, Rectangle rectangle)
 	{
+		this(canvas, rectangle, null);
+	}
+
+	public ViewPyramid(Canvas3D canvas, Rectangle rectangle, BoundingSphere bounds)
+	{
 		this.canvas=canvas;
 		this.rectangle=rectangle;
+		this.bounds=bounds;
 		setPlanes(computeRectangleProjection(rectangle));
 	}
 	
@@ -176,11 +185,23 @@ public class ViewPyramid extends BoundingPolytope
 	 */
 	private Point3d[] getPrismVertices(Rectangle rectangle)
 	{
-		double farClip = canvas.getView().getBackClipDistance();
-		double frontClip = canvas.getView().getFrontClipDistance();		
 		Point3d[] pyramid = getPyramVertex(rectangle);
 		eye = pyramid[5];
 		startPoint = pyramid[4];
+
+		double frontClip = canvas.getView().getFrontClipDistance();	
+		double farClip;
+		if(bounds == null)
+			farClip = canvas.getView().getBackClipDistance();
+		else
+		{	
+			double osDistance = objectScreenDistance();
+			double frontBound = osDistance - bounds.getRadius();
+			farClip = osDistance + bounds.getRadius();
+			if(frontClip<frontBound)
+				frontClip=frontBound;
+		}
+		
 		double frontFactor = computeClipFactor(eye, startPoint, frontClip);
 		double backFactor = computeClipFactor(eye, startPoint, farClip);
 		Point3d[] toReturn = new Point3d[8];
@@ -190,7 +211,21 @@ public class ViewPyramid extends BoundingPolytope
 			toReturn[i+4] = computePrismPoint(backFactor, eye, pyramid[i]);
 		}
 		return toReturn;
-	}	
+	}
+	
+	/** Compute the distance between the bouding sphere and the screen */
+	private double objectScreenDistance()
+	{
+		Vector3d eyeScreen = new Vector3d(eye);
+		eyeScreen.sub(startPoint);
+		Vector3d eyeCenter = new Vector3d(eye);
+		Point3d center = new Point3d();
+		bounds.getCenter(center);
+		eyeCenter.sub(center);
+		
+		double eyeScreenNorm = eyeScreen.length();		
+		return eyeCenter.dot(eyeScreen)/eyeScreenNorm-eyeScreenNorm;
+	}
 	
 	private Point3d computePrismPoint(double factor, Point3d pyramidTop,
 		Point3d pyramidBasePoint)

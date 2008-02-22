@@ -456,8 +456,8 @@ public  class ViewBehavior extends OrbitBehavior
 			new com.sun.j3d.utils.pickfast.PickCanvas(
 			view, view.getBranchGroup(cv));
 		
-		ViewPyramid shape =
-			new ViewPyramid(view, selectionRectangle3D.getGeometry2D());
+		ViewPyramid shape = new ViewPyramid(view,
+			selectionRectangle3D.getGeometry2D(), view.getBound());
 		
 		Vector4d[] v = new Vector4d[4];
 		shape.getPlanes(v);

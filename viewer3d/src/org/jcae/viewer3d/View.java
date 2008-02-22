@@ -811,7 +811,7 @@ public class View extends Canvas3D implements PositionListener
 		getView().setBackClipDistance(d);
 	}
 	
-	protected BoundingSphere getBound()
+	public BoundingSphere getBound()
 	{
 		Iterator<ViewSpecificGroup> it=viewableToViewSpecificGroup.values().iterator();
 		ArrayList<Bounds> bounds=new ArrayList<Bounds>();		
@@ -829,7 +829,7 @@ public class View extends Canvas3D implements PositionListener
 			bounds.add(originAxisTransformGroup.getBounds());
 		
 		BoundingSphere bs;
-		if(bounds.size()>0)
+		if(!bounds.isEmpty())
 		{
 			bs=(BoundingSphere) bounds.get(0);
 			bs.combine(bounds.toArray(new Bounds[bounds.size()]));

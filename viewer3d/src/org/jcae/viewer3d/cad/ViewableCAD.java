@@ -328,7 +328,6 @@ public class ViewableCAD extends ViewableAdaptor
 			toReturn = !selected.contains(Integer.valueOf(info.id));
 		else
 			toReturn = selectionAction == SELECTION_ADD;
-		System.out.println(info + " " + toReturn);
 		return toReturn;
 	}
 	
