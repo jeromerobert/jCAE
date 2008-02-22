@@ -21,7 +21,6 @@
 
 package org.jcae.viewer3d.cad;
 
-import com.sun.j3d.utils.picking.PickResult;
 import java.awt.Color;
 import java.util.*;
 import java.util.logging.Logger;
@@ -65,11 +64,12 @@ public class ViewableCAD extends ViewableAdaptor
 		polygonAttrNone.setCapability(PolygonAttributes.ALLOW_OFFSET_WRITE);
 	}
 	
-	protected static interface CADPickingInfo{}
-	
-	protected static class FacePickingInfo implements CADPickingInfo
-	{
+	protected static abstract class CADPickingInfo{
 		public int id;
+	}
+	
+	protected static class FacePickingInfo extends CADPickingInfo
+	{		
 		Material[] materials;
 		Color3f[] oldColor;
 		/**
@@ -81,8 +81,7 @@ public class ViewableCAD extends ViewableAdaptor
 		}
 
 		public FacePickingInfo(int id, Material[] material,Color3f oldColor)
-		{
-			this.id = id;
+		{		
 			this.materials = material;
 			this.oldColor=new Color3f[]{oldColor};
 		}
@@ -95,9 +94,8 @@ public class ViewableCAD extends ViewableAdaptor
 		}
 	}  
 	
-	protected static class EdgePickingInfo implements CADPickingInfo
+	protected static class EdgePickingInfo extends CADPickingInfo
 	{
-		int id;
 		Appearance appearance;
 		ColoringAttributes coloringAttributes;
 		/**
@@ -107,15 +105,13 @@ public class ViewableCAD extends ViewableAdaptor
 		 * @param coloringAttributes
 		 */
 		public EdgePickingInfo(int id,Appearance appearance,ColoringAttributes coloringAttributes)
-		{
-			super();
-			this.id = id;
+		{				
 			this.appearance = appearance;
 			this.coloringAttributes = coloringAttributes;
 		}
 	}
 		
-	protected static class VertexPickingInfo implements CADPickingInfo
+	protected static class VertexPickingInfo extends CADPickingInfo
 	{
 		int id;
 		Appearance appearance;
@@ -141,7 +137,12 @@ public class ViewableCAD extends ViewableAdaptor
 	public final static short VERTEX_SELECTION=4;
 	public final static short MULTI_SELECTION=5;
 	
+	public final static int SELECTION_INVERT=0;
+	public final static int SELECTION_ADD=1;
+	public final static int SELECTION_REMOVE=2;
+	
 	private short selectionMode=FACE_SELECTION;
+	private int selectionAction;
 	private CADProvider provider;
 	private BranchGroup branchGroup=new BranchGroup();
 	private List selectionListeners=new ArrayList();
@@ -303,24 +304,32 @@ public class ViewableCAD extends ViewableAdaptor
 		if((o instanceof FacePickingInfo)&(selectionMode==FACE_SELECTION))
 		{
 			FacePickingInfo fpi=(FacePickingInfo) o;
-			boolean toSelect=!selectedFaces.contains(Integer.valueOf(fpi.id));
-			setFaceSelected(fpi, toSelect);
+			setFaceSelected(fpi, checkToSelect(selectedFaces, fpi));
 			fireSelectionChanged();
 		}
 		else if((o instanceof EdgePickingInfo)&(selectionMode==EDGE_SELECTION))
 		{
-			EdgePickingInfo epi=(EdgePickingInfo) o;
-			boolean toSelect=!selectedEdges.contains(Integer.valueOf(epi.id));
-			setEdgeSelected(epi, toSelect);
+			EdgePickingInfo epi=(EdgePickingInfo) o;			
+			setEdgeSelected(epi, checkToSelect(selectedEdges, epi));
 			fireSelectionChanged();
 		}
 		else if((o instanceof VertexPickingInfo)&(selectionMode==VERTEX_SELECTION))
 		{
 			VertexPickingInfo epi=(VertexPickingInfo) o;
-			boolean toSelect=!selectedVertices.contains(Integer.valueOf(epi.id));
-			setVertexSelected(epi, toSelect);
+			setVertexSelected(epi, checkToSelect(selectedVertices, epi));
 			fireSelectionChanged();
 		}
+	}
+	
+	private boolean checkToSelect(Collection selected, CADPickingInfo info)
+	{
+		boolean toReturn;
+		if(selectionAction==SELECTION_INVERT)
+			toReturn = !selected.contains(Integer.valueOf(info.id));
+		else
+			toReturn = selectionAction == SELECTION_ADD;
+		System.out.println(info + " " + toReturn);
+		return toReturn;
 	}
 	
 	@Override
@@ -762,4 +771,15 @@ public class ViewableCAD extends ViewableAdaptor
 	{
 		lineAttributes.setLineWidth(lineWidth);
 	}	
+	
+	/** @param s SELECTION_INVERT, SELECTION_ADD, SELECTION_REMOVE */
+	public void setSelectionAction(int s)
+	{
+		selectionAction = s;
+	}
+	
+	public int getSelectionAction()
+	{
+		return selectionAction;
+	}
 }
