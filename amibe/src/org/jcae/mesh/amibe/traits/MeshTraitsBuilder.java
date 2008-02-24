@@ -246,6 +246,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 			{
 				LinkedHashSet<Triangle> newList = new LinkedHashSet<Triangle>(triangles);
 				newList.addAll(oldList);
+				oldList.clear();
 				t.array[index[BITTRIANGLES]] = newList;
 			}
 		}
@@ -262,6 +263,7 @@ public class MeshTraitsBuilder extends TraitsBuilder
 			{
 				LinkedHashSet<Vertex> newList = new LinkedHashSet<Vertex>(nodes);
 				newList.addAll(oldList);
+				oldList.clear();
 				t.array[index[BITNODES]] = newList;
 			}
 		}

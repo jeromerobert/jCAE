@@ -119,7 +119,7 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 			assert !((Node<E>) root.child[0]).isRed;
 			return true;
 		}
-		for (; p != root.child[0]; )
+		while (p != root.child[0])
 		{
 			q = (Node<E>) p.parent;
 			// If parent is black, property 2 is preserved,
@@ -257,7 +257,7 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 		// p is a black node, so q is no more balanced, its
 		// lastDir child of q has 1 black node less than its
 		// sibling.
-		for (;;)
+		while (true)
 		{
 			p = (Node<E>) q.child[lastDir];
 			if (isRedNode(p))
