@@ -24,7 +24,7 @@ import org.jcae.mesh.amibe.util.KdTree;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.Mesh;
 import java.util.Random;
-import org.jcae.mesh.java3d.Viewer;
+import org.jcae.mesh.amibe.patch.tests.Viewer;
 
 /**
  * Unit test to check removal of vertices.
