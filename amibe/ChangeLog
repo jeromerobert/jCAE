@@ -3,6 +3,11 @@ Sun Feb 24 18:40:59 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/JCAEFormatter.java: Replace log4j by
 	java.util.logging.Logger in all java files.  This new class is
 	designed to produce log output similar to log4j.
+	* src/org/jcae/mesh/MeshView.java
+	  src/org/jcae/mesh/java3d/Viewer.java
+	  src/org/jcae/mesh/java3d/ComputeEdgesConnectivity.java
+	  src/org/jcae/mesh/java3d/XMLBranchGroup.java: Files removed,
+	they have been superseeded by viewer3d a long time ago.
 
 Wed Jan 16 11:25:53 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 
