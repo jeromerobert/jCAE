@@ -40,12 +40,12 @@ import gnu.trove.TIntIntHashMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 
 public class MeshToMMesh3DConvert extends JCAEXMLData
 {
-	private static Logger logger=Logger.getLogger(MeshToMMesh3DConvert.class);
+	private static Logger logger=Logger.getLogger(MeshToMMesh3DConvert.class.getName());
 	private int nrRefs = 0;
 	private int nrIntNodes = 0;
 	private int nrTriangles = 0;
@@ -115,7 +115,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
-		logger.debug("Total: "+nrRefs+" references");
+		logger.fine("Total: "+nrRefs+" references");
 	}
 	
 	public void initialize(boolean writeNormal)
@@ -164,7 +164,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 		//  of duplicates
 		nrRefs = offsetBnd;
 		int nrNodes = nrIntNodes + nrRefs;
-		logger.debug("Append coordinates of "+nrRefs+" nodes");
+		logger.fine("Append coordinates of "+nrRefs+" nodes");
 		try
 		{
 			for (int i = 0; i < 3*nrRefs; i++)
@@ -276,10 +276,10 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			int numberOfReferences = Integer.parseInt(
 				xpath.evaluate("references/number/text()", submeshNodes));
 			int [] refs = new int[numberOfReferences];
-			logger.debug("Reading "+numberOfReferences+" references");
+			logger.fine("Reading "+numberOfReferences+" references");
 			int numberOfNodes = Integer.parseInt(
 				xpath.evaluate("number/text()", submeshNodes));
-			logger.debug("Reading "+numberOfNodes+" nodes");
+			logger.fine("Reading "+numberOfNodes+" nodes");
 			double [] normals = new double[3*numberOfNodes];
 			//  Interior nodes
 			for (int i = 0; i < numberOfNodes - numberOfReferences; i++)
@@ -321,7 +321,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				submeshElement, XPathConstants.NODE);
 			int numberOfFaces = Integer.parseInt(xpath.evaluate(
 				"number/text()", submeshFaces));
-			logger.debug("Reading "+numberOfFaces+" faces");
+			logger.fine("Reading "+numberOfFaces+" faces");
 			int ind [] = new int[3];
 			int indLoc [] = new int[3];
 			int cntTriangles = 0;
@@ -347,7 +347,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				}
 				if (ind[0] == ind[1] || ind[1] == ind[2] || ind[2] == ind[0])
 				{
-					logger.debug("Triangle bound from a degenerated edge skipped");
+					logger.fine("Triangle bound from a degenerated edge skipped");
 					continue;
 				}
 				if (normalsOut != null)
@@ -379,7 +379,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 					unv.writeTriangle(cntTriangles+nrTriangles, ind);
 				cntTriangles++;
 			}
-			logger.debug("End reading");
+			logger.fine("End reading");
 			
 			for (int i=0; i < cntTriangles; i++)
 				groupsOut.writeInt(i+nrTriangles);

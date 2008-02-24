@@ -20,12 +20,12 @@
 package org.jcae.mesh.cad.occ;
 
 import org.jcae.opencascade.jni.Adaptor3d_Curve;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import gnu.trove.TIntArrayList;
 
 public class OCCDiscretizeCurve3D
 {
-	private static Logger logger=Logger.getLogger(OCCDiscretizeCurve3D.class);
+	private static Logger logger=Logger.getLogger(OCCDiscretizeCurve3D.class.getName());
 	Adaptor3d_Curve curve = null;
 	// Number of points
 	private int nr = 0;
@@ -42,7 +42,7 @@ public class OCCDiscretizeCurve3D
 	
 	public void discretizeMaxLength(double len)
 	{
-		logger.debug("Discretize with max length: "+len);
+		logger.fine("Discretize with max length: "+len);
 		int nsegments = 10;
 		double [] xyz;
 		while (true)
@@ -91,7 +91,7 @@ public class OCCDiscretizeCurve3D
 			if (nr * 10 < nsegments)
 				break;
 		}
-		logger.debug("(length) Number of points: "+nr);
+		logger.fine("(length) Number of points: "+nr);
 		length = -1.0;
 		adjustAbscissas(xyz, new CheckRatioLength());
 	}
@@ -297,7 +297,7 @@ public class OCCDiscretizeCurve3D
 			if (nr * 10 < nsegments)
 				break;
 		}
-		logger.debug("(deflection) Number of points: "+nr);
+		logger.fine("(deflection) Number of points: "+nr);
 		length = -1.0;
 		adjustAbscissas(xyz, new CheckRatioDeflection());
 	}

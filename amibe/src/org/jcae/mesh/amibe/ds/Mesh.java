@@ -33,7 +33,8 @@ import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.io.Serializable;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Mesh data structure.
@@ -83,7 +84,7 @@ import org.apache.log4j.Logger;
 
 public class Mesh implements Serializable
 {
-	private static Logger logger=Logger.getLogger(Mesh.class);
+	private static Logger logger=Logger.getLogger(Mesh.class.getName());
 	
 	/**
 	 * User-defined traits builder.
@@ -437,7 +438,7 @@ public class Mesh implements Serializable
 	{
 		//  1. For each vertex, build the list of triangles
 		//     connected to this vertex.
-		logger.debug("Build the list of triangles connected to each vertex");
+		logger.fine("Build the list of triangles connected to each vertex");
 		HashMap<Vertex, ArrayList<Triangle>> tVertList = new HashMap<Vertex, ArrayList<Triangle>>(vertices.size());
 		for (Vertex v: vertices)
 			tVertList.put(v, new ArrayList<Triangle>(10));
@@ -455,7 +456,7 @@ public class Mesh implements Serializable
 			}
 		}
 		//  2. Connect all edges together
-		logger.debug("Connect triangles");
+		logger.fine("Connect triangles");
 		ArrayList<Triangle> newTri = new ArrayList<Triangle>();
 		for (Vertex v: vertices)
 			glueIncidentHalfEdges(v, tVertList, newTri);
@@ -469,7 +470,7 @@ public class Mesh implements Serializable
 		}
 		tVertList.clear();
 		//  3. Mark boundary edges and bind them to virtual triangles.
-		logger.debug("Mark boundary edges");
+		logger.fine("Mark boundary edges");
 		AbstractHalfEdge ot = null;
 		AbstractHalfEdge sym = null;
 		for (Triangle t: triangleList)
@@ -507,7 +508,7 @@ public class Mesh implements Serializable
 		//  This is now performed by glueIncidentHalfEdges() above.
 		
 		//  5. Find the list of vertices which are on mesh boundary
-		logger.debug("Build the list of nodes on boundaries and non-manifold edges");
+		logger.fine("Build the list of nodes on boundaries and non-manifold edges");
 		HashSet<Vertex> bndNodes = new HashSet<Vertex>();
 		maxLabel = 0;
 		for (Triangle t: triangleList)
@@ -527,7 +528,7 @@ public class Mesh implements Serializable
 		}
 
 		//  6. Build links for non-manifold vertices
-		logger.debug("Compute links for non-manifold vertices");
+		logger.fine("Compute links for non-manifold vertices");
 		Vertex [] endpoints = new Vertex[2];
 		LinkedHashMap<Vertex, LinkedHashSet<Triangle>> mapNMVertexLinks = new LinkedHashMap<Vertex, LinkedHashSet<Triangle>>();
 		int nrNME = 0;
@@ -581,14 +582,14 @@ public class Mesh implements Serializable
 		}
 		mapNMVertexLinks.clear();
 		if (nrNMV > 0)
-			logger.debug("Found "+nrNMV+" non manifold vertices");
+			logger.fine("Found "+nrNMV+" non manifold vertices");
 		if (nrNME > 0)
-			logger.debug("Found "+nrNME+" non manifold edges");
+			logger.fine("Found "+nrNME+" non manifold edges");
 		if (nrFE > 0)
-			logger.debug("Found "+nrFE+" free edges");
+			logger.fine("Found "+nrFE+" free edges");
 		//  7. If vertices are on inner boundaries and there is
 		//     no ridge, change their label.
-		logger.debug("Set interior nodes mutable");
+		logger.fine("Set interior nodes mutable");
 		int nrJunctionPoints = 0;
 		/*
 		double cosMinAngle = Math.cos(Math.PI*minAngle/180.0);
@@ -679,12 +680,12 @@ public class Mesh implements Serializable
 				// We are sure now that ot2 == (v,v2) or (v2,v)
 				glueNonManifoldHalfEdges(v, v2, ot, ot2, work, newTri);
 			}
-			if (logger.isDebugEnabled() && !manifold)
+			if (logger.isLoggable(Level.FINE) && !manifold)
 			{
 				int cnt = 0;
 				for (Iterator<AbstractHalfEdge> it = ot.fanIterator(); it.hasNext(); it.next())
 					cnt++;
-				logger.debug("Non-manifold edge: "+v+" "+v2+" "+" connected to "+cnt+" fans");
+				logger.fine("Non-manifold edge: "+v+" "+v2+" "+" connected to "+cnt+" fans");
 			}
 		}
 		//  Unmark adjacent triangles
@@ -915,7 +916,7 @@ public class Mesh implements Serializable
 		{
 			if (t.vertex[0] == t.vertex[1] || t.vertex[1] == t.vertex[2] || t.vertex[2] == t.vertex[0])
 			{
-				logger.error("Duplicate vertices: "+t);
+				logger.severe("Duplicate vertices: "+t);
 				return false;
 			}
 			if (t.vertex[0] == outerVertex || t.vertex[1] == outerVertex || t.vertex[2] == outerVertex)
@@ -924,7 +925,7 @@ public class Mesh implements Serializable
 				{
 					if (!t.hasAttributes(AbstractHalfEdge.OUTER))
 					{
-						logger.error("Triangle should be outer: "+t);
+						logger.severe("Triangle should be outer: "+t);
 						return false;
 					}
 				}
@@ -939,12 +940,12 @@ public class Mesh implements Serializable
 					Triangle t2 = (Triangle) v.getLink();
 					if (t2.vertex[0] != v && t2.vertex[1] != v && t2.vertex[2] != v)
 					{
-						logger.error("Vertex "+v+" linked to "+t2);
+						logger.severe("Vertex "+v+" linked to "+t2);
 						return false;
 					}
 					if (!triangleList.contains(t2))
 					{
-						logger.error("Vertex "+v+" linked to removed triangle: "+t2);
+						logger.severe("Vertex "+v+" linked to removed triangle: "+t2);
 						return false;
 					}
 				}
@@ -957,7 +958,7 @@ public class Mesh implements Serializable
 					{
 						if (!triangleList.contains(t2))
 						{
-							logger.error("Vertex "+v+" linked to removed triangle: "+t2);
+							logger.severe("Vertex "+v+" linked to removed triangle: "+t2);
 							return false;
 						}
 					}
@@ -985,7 +986,7 @@ public class Mesh implements Serializable
 			ot.next();
 			if (isOuter != ot.hasAttributes(AbstractHalfEdge.OUTER))
 			{
-				logger.error("Inconsistent outer state: "+ot);
+				logger.severe("Inconsistent outer state: "+ot);
 				return false;
 			}
 			if (!ot.hasSymmetricEdge())
@@ -994,30 +995,30 @@ public class Mesh implements Serializable
 			sym.sym();
 			if (sym.getTri() != ot.getTri())
 			{
-				logger.error("Wrong adjacency relation: ");
-				logger.error(" adj1: "+ot);
-				logger.error(" adj2: "+sym);
+				logger.severe("Wrong adjacency relation: ");
+				logger.severe(" adj1: "+ot);
+				logger.severe(" adj2: "+sym);
 				return false;
 			}
 			sym.sym();
 			if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY) != sym.hasAttributes(AbstractHalfEdge.BOUNDARY) || ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD) != sym.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 			{
-				logger.error("Inconsistent boundary or nonmanifold flags");
-				logger.error(" "+ot);
-				logger.error(" "+sym);
+				logger.severe("Inconsistent boundary or nonmanifold flags");
+				logger.severe(" "+ot);
+				logger.severe(" "+sym);
 				return false;
 			}
 			if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD) && sym.hasAttributes(AbstractHalfEdge.OUTER) != !isOuter)
 			{
-				logger.error("Inconsistent outer flags");
-				logger.error(" "+ot);
-				logger.error(" "+sym);
+				logger.severe("Inconsistent outer flags");
+				logger.severe(" "+ot);
+				logger.severe(" "+sym);
 				return false;
 			}
 			if (!triangleList.contains(sym.getTri()))
 			{
-				logger.error("Triangle not present in mesh: "+sym.getTri());
-				logger.error("Linked from "+ot);
+				logger.severe("Triangle not present in mesh: "+sym.getTri());
+				logger.severe("Linked from "+ot);
 				return false;
 			}
 			Vertex v1 = ot.origin();
@@ -1026,9 +1027,9 @@ public class Mesh implements Serializable
 			{
 				if (sym.origin() != v2 || sym.destination() != v1)
 				{
-					logger.error("Vertex mismatch in adjacency relation: ");
-					logger.error(" "+ot);
-					logger.error(" "+sym);
+					logger.severe("Vertex mismatch in adjacency relation: ");
+					logger.severe(" "+ot);
+					logger.severe(" "+sym);
 					return false;
 				}
 				continue;
@@ -1041,13 +1042,13 @@ public class Mesh implements Serializable
 				ot.next();
 				if (ot.hasSymmetricEdge())
 				{
-					logger.error("Outer edge: should not be linked to another edge: "+ot);
+					logger.severe("Outer edge: should not be linked to another edge: "+ot);
 					return false;
 				}
 				ot.next();
 				if (ot.hasSymmetricEdge())
 				{
-					logger.error("Outer edge: should not be linked to another edge: "+ot);
+					logger.severe("Outer edge: should not be linked to another edge: "+ot);
 					return false;
 				}
 				ot.next();
@@ -1056,85 +1057,85 @@ public class Mesh implements Serializable
 			{
 				if (!(v1.getLink() instanceof Triangle[]))
 				{
-					logger.error("Multiple edges: endpoint must be non-manifold: "+v1);
-					logger.error(" "+ot);
+					logger.severe("Multiple edges: endpoint must be non-manifold: "+v1);
+					logger.severe(" "+ot);
 					return false;
 				}
 				if (!(v2.getLink() instanceof Triangle[]))
 				{
-					logger.error("Multiple edges: endpoint must be non-manifold: "+v2);
-					logger.error(" "+ot);
+					logger.severe("Multiple edges: endpoint must be non-manifold: "+v2);
+					logger.severe(" "+ot);
 					return false;
 				}
 				// next() and prev() must point to other non-manifold edges
 				ot.next();
 				if (!ot.hasSymmetricEdge())
 				{
-					logger.error("Multiple edge: must be linked to another edge: "+ot);
+					logger.severe("Multiple edge: must be linked to another edge: "+ot);
 					return false;
 				}
 				VirtualHalfEdge.symOTri(ot, sym);
 				sym.next();
 				if (!sym.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 				{
-					logger.error("Multiple edges: linked to a non-manifold edge");
-					logger.error(" "+ot);
-					logger.error(" "+sym);
+					logger.severe("Multiple edges: linked to a non-manifold edge");
+					logger.severe(" "+ot);
+					logger.severe(" "+sym);
 					return false;
 				}
 				if (!ot.hasAttributes(AbstractHalfEdge.OUTER) || !sym.hasAttributes(AbstractHalfEdge.OUTER))
 				{
-					logger.error("Multiple edges: linked to an inner edge");
-					logger.error(" "+ot);
-					logger.error(" "+sym);
+					logger.severe("Multiple edges: linked to an inner edge");
+					logger.severe(" "+ot);
+					logger.severe(" "+sym);
 					return false;
 				}
 				if (!triangleList.contains(sym.getTri()))
 				{
-					logger.error("Multiple edges: Triangle not present in mesh: "+sym.getTri());
-					logger.error("Linked from "+this);
+					logger.severe("Multiple edges: Triangle not present in mesh: "+sym.getTri());
+					logger.severe("Linked from "+this);
 					return false;
 				}
 				if (!((sym.origin() == v1 && sym.destination() == v2) || (sym.origin() == v2 && sym.destination() == v1)))
 				{
-					logger.error("Multiple edges: vertex mismatch in adjacency relation: ");
-					logger.error(" "+ot);
-					logger.error(" "+sym);
+					logger.severe("Multiple edges: vertex mismatch in adjacency relation: ");
+					logger.severe(" "+ot);
+					logger.severe(" "+sym);
 					return false;
 				}
 				ot.next();
 				if (!ot.hasSymmetricEdge())
 				{
-					logger.error("Multiple edge: must be linked to another edge: "+ot);
+					logger.severe("Multiple edge: must be linked to another edge: "+ot);
 					return false;
 				}
 				VirtualHalfEdge.symOTri(ot, sym);
 				sym.prev();
 				if (!sym.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 				{
-					logger.error("Multiple edges: linked to a non-manifold edge");
-					logger.error(" "+ot);
-					logger.error(" "+sym);
+					logger.severe("Multiple edges: linked to a non-manifold edge");
+					logger.severe(" "+ot);
+					logger.severe(" "+sym);
 					return false;
 				}
 				if (!ot.hasAttributes(AbstractHalfEdge.OUTER) || !sym.hasAttributes(AbstractHalfEdge.OUTER))
 				{
-					logger.error("Multiple edges: linked to an inner edge");
-					logger.error(" "+ot);
-					logger.error(" "+sym);
+					logger.severe("Multiple edges: linked to an inner edge");
+					logger.severe(" "+ot);
+					logger.severe(" "+sym);
 					return false;
 				}
 				if (!triangleList.contains(sym.getTri()))
 				{
-					logger.error("Multiple edges: Triangle not present in mesh: "+sym.getTri());
-					logger.error("Linked from "+this);
+					logger.severe("Multiple edges: Triangle not present in mesh: "+sym.getTri());
+					logger.severe("Linked from "+this);
 					return false;
 				}
 				if (!((sym.origin() == v1 && sym.destination() == v2) || (sym.origin() == v2 && sym.destination() == v1)))
 				{
-					logger.error("Multiple edges: vertex mismatch in adjacency relation: ");
-					logger.error(" "+ot);
-					logger.error(" "+sym);
+					logger.severe("Multiple edges: vertex mismatch in adjacency relation: ");
+					logger.severe(" "+ot);
+					logger.severe(" "+sym);
 					return false;
 				}
 			}
@@ -1154,7 +1155,7 @@ public class Mesh implements Serializable
 			e = e.next();
 			if (isOuter != e.hasAttributes(AbstractHalfEdge.OUTER))
 			{
-				logger.error("Inconsistent outer state: "+e);
+				logger.severe("Inconsistent outer state: "+e);
 				return false;
 			}
 			if (!e.hasSymmetricEdge())
@@ -1162,29 +1163,29 @@ public class Mesh implements Serializable
 			HalfEdge f = e.sym();
 			if (f.sym() != e)
 			{
-				logger.error("Wrong adjacency relation: ");
-				logger.error(" adj1: "+e);
-				logger.error(" adj2: "+f);
+				logger.severe("Wrong adjacency relation: ");
+				logger.severe(" adj1: "+e);
+				logger.severe(" adj2: "+f);
 				return false;
 			}
 			if (f.hasAttributes(AbstractHalfEdge.BOUNDARY) != e.hasAttributes(AbstractHalfEdge.BOUNDARY) || f.hasAttributes(AbstractHalfEdge.NONMANIFOLD) != e.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 			{
-				logger.error("Inconsistent boundary or nonmanifold flags");
-				logger.error(" "+e);
-				logger.error(" "+f);
+				logger.severe("Inconsistent boundary or nonmanifold flags");
+				logger.severe(" "+e);
+				logger.severe(" "+f);
 				return false;
 			}
 			if (e.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD) && f.hasAttributes(AbstractHalfEdge.OUTER) != !isOuter)
 			{
-				logger.error("Inconsistent outer flags");
-				logger.error(" "+e);
-				logger.error(" "+f);
+				logger.severe("Inconsistent outer flags");
+				logger.severe(" "+e);
+				logger.severe(" "+f);
 				return false;
 			}
 			if (!triangleList.contains(f.getTri()))
 			{
-				logger.error("Triangle not present in mesh: "+f.getTri());
-				logger.error("Linked from "+e);
+				logger.severe("Triangle not present in mesh: "+f.getTri());
+				logger.severe("Linked from "+e);
 				return false;
 			}
 			Vertex v1 = e.origin();
@@ -1193,9 +1194,9 @@ public class Mesh implements Serializable
 			{
 				if (f.origin() != v2 || f.destination() != v1)
 				{
-					logger.error("Vertex mismatch in adjacency relation: ");
-					logger.error(" "+e);
-					logger.error(" "+f);
+					logger.severe("Vertex mismatch in adjacency relation: ");
+					logger.severe(" "+e);
+					logger.severe(" "+f);
 					return false;
 				}
 				continue;
@@ -1208,13 +1209,13 @@ public class Mesh implements Serializable
 				AbstractHalfEdge g = e.next();
 				if (g.hasSymmetricEdge())
 				{
-					logger.error("Outer edge: should not be linked to another edge: "+g);
+					logger.severe("Outer edge: should not be linked to another edge: "+g);
 					return false;
 				}
 				g = e.prev();
 				if (g.hasSymmetricEdge())
 				{
-					logger.error("Outer edge: should not be linked to another edge: "+g);
+					logger.severe("Outer edge: should not be linked to another edge: "+g);
 					return false;
 				}
 			}
@@ -1222,71 +1223,71 @@ public class Mesh implements Serializable
 			{
 				if (!(v1.getLink() instanceof Triangle[]))
 				{
-					logger.error("Multiple edges: endpoint must be non-manifold: "+v1);
-					logger.error(" "+e);
+					logger.severe("Multiple edges: endpoint must be non-manifold: "+v1);
+					logger.severe(" "+e);
 					return false;
 				}
 				if (!(v2.getLink() instanceof Triangle[]))
 				{
-					logger.error("Multiple edges: endpoint must be non-manifold: "+v2);
-					logger.error(" "+e);
+					logger.severe("Multiple edges: endpoint must be non-manifold: "+v2);
+					logger.severe(" "+e);
 					return false;
 				}
 				// next() and prev() must point to other non-manifold edges
 				AbstractHalfEdge g = e.next();
 				if (!g.hasSymmetricEdge())
 				{
-					logger.error("Multiple edge: must be linked to another edge: "+g);
+					logger.severe("Multiple edge: must be linked to another edge: "+g);
 					return false;
 				}
 				AbstractHalfEdge h = e.prev();
 				if (!h.hasSymmetricEdge())
 				{
-					logger.error("Multiple edge: must be linked to another edge: "+h);
+					logger.severe("Multiple edge: must be linked to another edge: "+h);
 					return false;
 				}
 				g = g.sym().next();
 				h = h.sym().prev();
 				if (!g.hasAttributes(AbstractHalfEdge.NONMANIFOLD) || !h.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 				{
-					logger.error("Multiple edges: linked to a non-manifold edge");
-					logger.error(" "+f);
-					logger.error(" "+g);
-					logger.error(" "+h);
+					logger.severe("Multiple edges: linked to a non-manifold edge");
+					logger.severe(" "+f);
+					logger.severe(" "+g);
+					logger.severe(" "+h);
 					return false;
 				}
 				if (!g.hasAttributes(AbstractHalfEdge.OUTER) || !h.hasAttributes(AbstractHalfEdge.OUTER))
 				{
-					logger.error("Multiple edges: linked to an inner edge");
-					logger.error(" "+f);
-					logger.error(" "+g);
-					logger.error(" "+h);
+					logger.severe("Multiple edges: linked to an inner edge");
+					logger.severe(" "+f);
+					logger.severe(" "+g);
+					logger.severe(" "+h);
 					return false;
 				}
 				if (!triangleList.contains(g.getTri()))
 				{
-					logger.error("Multiple edges: Triangle not present in mesh: "+g.getTri());
-					logger.error("Linked from "+f);
+					logger.severe("Multiple edges: Triangle not present in mesh: "+g.getTri());
+					logger.severe("Linked from "+f);
 					return false;
 				}
 				if (!triangleList.contains(h.getTri()))
 				{
-					logger.error("Multiple edges: Triangle not present in mesh: "+h.getTri());
-					logger.error("Linked from "+f);
+					logger.severe("Multiple edges: Triangle not present in mesh: "+h.getTri());
+					logger.severe("Linked from "+f);
 					return false;
 				}
 				if (!((g.origin() == v1 && g.destination() == v2) || (g.origin() == v2 && g.destination() == v1)))
 				{
-					logger.error("Multiple edges: vertex mismatch in adjacency relation: ");
-					logger.error(" "+e);
-					logger.error(" "+g);
+					logger.severe("Multiple edges: vertex mismatch in adjacency relation: ");
+					logger.severe(" "+e);
+					logger.severe(" "+g);
 					return false;
 				}
 				if (!((h.origin() == v1 && h.destination() == v2) || (h.origin() == v2 && h.destination() == v1)))
 				{
-					logger.error("Multiple edges: vertex mismatch in adjacency relation: ");
-					logger.error(" "+e);
-					logger.error(" "+h);
+					logger.severe("Multiple edges: vertex mismatch in adjacency relation: ");
+					logger.severe(" "+e);
+					logger.severe(" "+h);
 					return false;
 				}
 			}
@@ -1366,11 +1367,11 @@ import gnu.trove.TObjectIntHashMap;
 			out.close();
 		} catch (FileNotFoundException e)
 		{
-			logger.fatal(e.toString());
+			logger.severe(e.toString());
 			e.printStackTrace();
 		} catch (IOException e)
 		{
-			logger.fatal(e.toString());
+			logger.severe(e.toString());
 			e.printStackTrace();
 		}
 	}
@@ -1437,11 +1438,11 @@ import gnu.trove.TObjectIntHashMap;
 			out.close();
 		} catch (FileNotFoundException e)
 		{
-			logger.fatal(e.toString());
+			logger.severe(e.toString());
 			e.printStackTrace();
 		} catch (IOException e)
 		{
-			logger.fatal(e.toString());
+			logger.severe(e.toString());
 			e.printStackTrace();
 		}
 	}

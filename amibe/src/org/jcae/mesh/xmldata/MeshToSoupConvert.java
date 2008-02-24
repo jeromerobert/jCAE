@@ -41,12 +41,12 @@ import org.jcae.mesh.cad.CADFace;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import gnu.trove.TIntIntHashMap;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 
 public class MeshToSoupConvert extends JCAEXMLData
 {
-	private static Logger logger=Logger.getLogger(MeshToSoupConvert.class);
+	private static Logger logger=Logger.getLogger(MeshToSoupConvert.class.getName());
 	private int nrTriangles = 0;
 	private int nrIntNodes = 0;
 	private int nrNodes = 0;
@@ -159,7 +159,7 @@ public class MeshToSoupConvert extends JCAEXMLData
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
-		logger.debug("Total: "+nrRefs+" references");
+		logger.fine("Total: "+nrRefs+" references");
 	}
 	
 	public void initialize(String xmlOutFile, boolean writeNormal)
@@ -211,7 +211,7 @@ public class MeshToSoupConvert extends JCAEXMLData
 			int numberOfReferences = Integer.parseInt(
 				xpath.evaluate("references/number/text()", submeshNodes));
 			int [] refs = new int[numberOfReferences];
-			logger.debug("Reading "+numberOfReferences+" references");
+			logger.fine("Reading "+numberOfReferences+" references");
 			bb.clear();
 			bbI.clear();
 			int remaining = numberOfReferences;
@@ -238,7 +238,7 @@ public class MeshToSoupConvert extends JCAEXMLData
 			int numberOfNodes = Integer.parseInt(xpath.evaluate(
 				"number/text()", submeshNodes));
 
-			logger.debug("Reading " + numberOfNodes + " nodes");
+			logger.fine("Reading " + numberOfNodes + " nodes");
 			String nodesFile = xpath.evaluate("file/@location", submeshNodes);
 			FileChannel fcN = new FileInputStream(xmlDir+File.separator+nodesFile).getChannel();
 			double [] coord = new double[3*numberOfNodes];
@@ -290,7 +290,7 @@ public class MeshToSoupConvert extends JCAEXMLData
 			
 			int numberOfFaces = Integer.parseInt(xpath.evaluate(
 				"number/text()", submeshFaces));
-			logger.debug("Reading " + numberOfFaces + " faces");
+			logger.fine("Reading " + numberOfFaces + " faces");
 			String trianglesFile = xpath.evaluate("file/@location",
 				submeshFaces);
 			FileChannel fcT = new FileInputStream(xmlDir+File.separator+trianglesFile).getChannel();
@@ -363,7 +363,7 @@ public class MeshToSoupConvert extends JCAEXMLData
 			}
 			fcT.close();
 			fcO.close();
-			logger.debug("End reading");
+			logger.fine("End reading");
 		}
 		catch(Exception ex)
 		{

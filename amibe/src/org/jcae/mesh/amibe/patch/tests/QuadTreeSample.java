@@ -38,14 +38,14 @@ import javax.media.j3d.BranchGroup;
 import javax.media.j3d.PolygonAttributes;
 import javax.media.j3d.ColoringAttributes;
 import javax.media.j3d.PointAttributes;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * Utility class to write unit tests for the QuadTree class.
  */
 public class QuadTreeSample
 {
-	private static Logger logger=Logger.getLogger(QuadTreeSample.class);	
+	private static Logger logger=Logger.getLogger(QuadTreeSample.class.getName());	
 	protected final KdTree quadtree;
 	
 	public QuadTreeSample(KdTree q)
@@ -196,11 +196,11 @@ public class QuadTreeSample
 			out.close();
 		} catch (FileNotFoundException e)
 		{
-			logger.fatal(e.toString());
+			logger.severe(e.toString());
 			e.printStackTrace();
 		} catch (IOException e)
 		{
-			logger.fatal(e.toString());
+			logger.severe(e.toString());
 			e.printStackTrace();
 		}
 	}

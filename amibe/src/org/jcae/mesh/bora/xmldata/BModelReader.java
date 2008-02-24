@@ -34,11 +34,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 public class BModelReader
 {
-	private static Logger logger=Logger.getLogger(BModelReader.class);
+	private static Logger logger=Logger.getLogger(BModelReader.class.getName());
 
 	/** Return the first child element of with the given tag name */
 	private static Node getChild(Node e, String tagName)
@@ -135,12 +135,12 @@ public class BModelReader
 					Node id = (Node) xpath.evaluate("/jcae/model/graph/cad[@id="+s.getId()+"]", document, XPathConstants.NODE);
 					if (id == null)
 					{
-						logger.error(errmsg+", shape id "+s.getId()+" not found");
+						logger.severe(errmsg+", shape id "+s.getId()+" not found");
 						return null;
 					}
 					if (!id.getAttributes().getNamedItem("orientation").getNodeValue().equals(""+s.getOrientation()))
 					{
-						logger.error(errmsg+", wrong orientation for shape id "+s.getId()+". Expected result was: orientation=\""+s.getOrientation()+"\"");
+						logger.severe(errmsg+", wrong orientation for shape id "+s.getId()+". Expected result was: orientation=\""+s.getOrientation()+"\"");
 						return null;
 					}
 					Node children = getChild(id, "children");
@@ -157,7 +157,7 @@ public class BModelReader
 						String list = sblist.toString();
 						if (!children.getAttributes().getNamedItem("list").getNodeValue().equals(list))
 						{
-							logger.error(errmsg+", wrong children for shape id "+s.getId()+". Expected result was: list=\""+list+"\"");
+							logger.severe(errmsg+", wrong children for shape id "+s.getId()+". Expected result was: list=\""+list+"\"");
 							return null;
 						}
 					}

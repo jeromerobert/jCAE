@@ -16,7 +16,6 @@
 		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}" excludes="${test.packages} ${jcae.junit.packages}">
 			<compilerarg line="${compiler.arg}"/>
 			<classpath>
-				<pathelement location="${log4j.jar}"/>
 				<pathelement location="${trove.jar}"/>
 				<pathelement location="${xml-apis.jar}"/>
 			</classpath>
@@ -25,7 +24,6 @@
 			<compilerarg line="${compiler.arg}"/>
 			<classpath>
 				<pathelement location="${occjava.jar}"/>
-				<pathelement location="${log4j.jar}"/>
 				<pathelement location="${trove.jar}"/>
 			</classpath>
 		</javac>
@@ -36,7 +34,6 @@
 		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}" includes="${test.packages}">
 			<compilerarg line="${compiler.arg}"/>
 			<classpath>
-				<pathelement location="${log4j.jar}"/>
 				<pathelement location="${jcae-viewer3d.jar}"/>
 			</classpath>
 		</javac>
@@ -49,7 +46,6 @@
 			<classpath>
 				<pathelement location="${junit.jar}"/>
 				<pathelement location="${trove.jar}"/>
-				<pathelement location="${log4j.jar}"/>
 			</classpath>
 		</javac>
 	</target>
@@ -57,10 +53,10 @@
 	<target name="test" depends="junit,test-large" description="Run all tests"/>
 
 	<target name="junit" depends="jar,jar-junit" description="Run JUnit tests">
-		<available file="log4j.properties" property="log4j.configuration.present" value="file://${user.dir}/junit.log4j.properties"/>
+		<available file="logging.properties" property="logging.configuration.present" value="file://${user.dir}/junit.logging.properties"/>
 		<mkdir dir="${test.dir}/results"/>
 		<junit printsummary="withOutAndErr" fork="yes" failureProperty="test.failure">
-			<sysproperty key="log4j.configuration" value="${log4j.configuration.present}"/>
+			<sysproperty key="logging.configuration" value="${logging.configuration.present}"/>
 			<formatter type="xml"/>
 			<classpath>
 				<pathelement location="${amibe.jar}"/>
@@ -148,7 +144,6 @@
 			<tag name="todo" scope="all" description="To do:" />
 			<classpath>
 				<pathelement location="${amibe.jar}"/>
-				<pathelement location="${log4j.jar}"/>
 				<pathelement location="${trove.jar}"/>
 			</classpath>
 		</javadoc>

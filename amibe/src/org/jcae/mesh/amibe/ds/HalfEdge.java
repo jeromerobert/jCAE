@@ -29,7 +29,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.NoSuchElementException;
 import java.io.Serializable;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Half-edge data structure.  This is a straightforward implementation of
@@ -39,7 +40,7 @@ import org.apache.log4j.Logger;
  */
 public class HalfEdge extends AbstractHalfEdge implements Serializable
 {
-	private static Logger logger = Logger.getLogger(HalfEdge.class);
+	private static Logger logger=Logger.getLogger(HalfEdge.class.getName());
 	private TriangleHE tri;
 	private byte localNumber;
 	private byte attributes;
@@ -774,8 +775,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		Vertex o = origin();
 		Vertex d = destination();
 		assert o.isWritable() && d.isWritable(): "Cannot contract "+this;
-		if (logger.isDebugEnabled())
-			logger.debug("contract ("+o+" "+d+")");
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("contract ("+o+" "+d+")");
 		if (o.isManifold())
 			replaceEndpointsSameFan(v);
 		else
@@ -786,8 +787,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		else
 			replaceEndpointsNonManifold(d, v);
 		deepCopyVertexLinks(o, d, v);
-		if (logger.isDebugEnabled())
-			logger.debug("new point: "+v);
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("new point: "+v);
 		if (m.hasNodes())
 		{
 			m.remove(o);
@@ -912,9 +913,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			{
 				if (tArray[i] == oldT1 || tArray[i] == oldT2)
 				{
-					logger.debug("replaceVertexLinks: "+i+" "+o+" "+tArray[i]);
+					logger.fine("replaceVertexLinks: "+i+" "+o+" "+tArray[i]);
 					tArray[i] = newT;
-					logger.debug(" --> "+newT);
+					logger.fine(" --> "+newT);
 				}
 			}
 		}
@@ -930,9 +931,9 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 			{
 				if (tArray[i] == oldT)
 				{
-					logger.debug("replaceVertexLinks: "+i+" "+o+" "+tArray[i]);
+					logger.fine("replaceVertexLinks: "+i+" "+o+" "+tArray[i]);
 					tArray[i] = newT;
-					logger.debug(" --> "+newT);
+					logger.fine(" --> "+newT);
 				}
 			}
 		}
@@ -1060,8 +1061,8 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	@Override
 	protected final HalfEdge split(Mesh m, Vertex v)
 	{
-		if (logger.isDebugEnabled())
-			logger.debug("split edge ("+origin()+" "+destination()+") by adding vertex "+v);
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("split edge ("+origin()+" "+destination()+") by adding vertex "+v);
 		if (m.hasNodes())
 			m.add(v);
 		if (!hasAttributes(NONMANIFOLD))
@@ -1270,7 +1271,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	{
 		if (!hasAttributes(NONMANIFOLD))
 			return identityFanIterator();
-		logger.debug("Non manifold fan iterator");
+		logger.fine("Non manifold fan iterator");
 		return new Iterator<AbstractHalfEdge>()
 		{
 			private HalfEdge last = sym.next.next;

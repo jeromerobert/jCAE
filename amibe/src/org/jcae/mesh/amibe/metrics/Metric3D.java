@@ -24,7 +24,7 @@ package org.jcae.mesh.amibe.metrics;
 import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.MeshParameters;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * 3D metrics computed on a CAD surface.  This class provides 3D metrics at a
@@ -76,7 +76,7 @@ import org.apache.log4j.Logger;
  */
 public class Metric3D extends Matrix3D
 {
-	private static Logger logger=Logger.getLogger(Metric3D.class);
+	private static Logger logger=Logger.getLogger(Metric3D.class.getName());
 	
 	//  Cached variables to improve performance
 	private static CADGeomSurface cacheSurf = null;
@@ -221,12 +221,12 @@ public class Metric3D extends Matrix3D
 		double cmax = Math.abs(cacheSurf.maxCurvature());
 		if (Double.isNaN(cmin) || Double.isNaN(cmax))
 		{
-			logger.debug("Undefined curvature");
+			logger.fine("Undefined curvature");
 			return false;
 		}
 		if (cmin == 0.0 && cmax == 0.0)
 		{
-			logger.debug("Infinite curvature");
+			logger.fine("Infinite curvature");
 			return false;
 		}
 		double [] dcurv = cacheSurf.curvatureDirections();
@@ -279,17 +279,17 @@ public class Metric3D extends Matrix3D
 		double cmax = Math.abs(cacheSurf.maxCurvature());
 		if (Double.isNaN(cmin) || Double.isNaN(cmax))
 		{
-			logger.debug("Undefined curvature");
+			logger.fine("Undefined curvature");
 			return false;
 		}
 		if (cmin == 0.0 && cmax == 0.0)
 		{
-			logger.debug("Null curvature");
+			logger.fine("Null curvature");
 			return false;
 		}
 		if (deflection * cmax >= 1.0 || deflection * cmin >= 1.0)
 		{
-			logger.debug("Curvature too large");
+			logger.fine("Curvature too large");
 			iso(deflection);
 			return true;
 		}
@@ -348,7 +348,7 @@ public class Metric3D extends Matrix3D
 		// Check whether there is a tangent plane
 		prodVect3D(d1U, d1V, c0);
 		if (norm(c0) <= 0.0)
-			logger.debug("Unable to compute normal vector");
+			logger.fine("Unable to compute normal vector");
 		
 		// B = (d1U,d1V,c0) is the local frame.
 		// The metrics induced by M3 on the tangent plane is tB M3 B

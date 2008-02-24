@@ -20,7 +20,7 @@
 
 package org.jcae.mesh.amibe.ds;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.jcae.mesh.amibe.traits.Traits;
 import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
 import org.jcae.mesh.amibe.metrics.Metric3D;
@@ -56,7 +56,7 @@ import java.io.Serializable;
  */
 public class Vertex implements Serializable
 {
-	private static Logger logger = Logger.getLogger(Vertex.class);
+	private static Logger logger=Logger.getLogger(Vertex.class.getName());
 	
 	//  User-defined traits
 	protected final VertexTraitsBuilder traitsBuilder;
@@ -384,7 +384,7 @@ public class Vertex implements Serializable
 		else
 		{
 			// Non-manifold vertex
-			logger.debug("Non-manifold vertex: "+this);
+			logger.fine("Non-manifold vertex: "+this);
 			Triangle [] t = (Triangle []) link;
 			for (int i = 0; i < t.length; i++)
 				appendNeighboursTri(t[i], ret);

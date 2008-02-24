@@ -25,7 +25,8 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Mesh;
 import java.util.ArrayList;
 import java.util.Collection;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Quadtree structure to store 2D vertices.  When adjacent relations have not
@@ -142,7 +143,7 @@ import org.apache.log4j.Logger;
  */
 public class KdTree
 {
-	private static Logger logger=Logger.getLogger(KdTree.class);	
+	private static Logger logger=Logger.getLogger(KdTree.class.getName());	
 	/**
 	 * Cell of a {@link KdTree}.  Each cell contains either four children nodes
 	 * or up to <code>BUCKETSIZE</code> vertices.  When this number is exceeded,
@@ -293,7 +294,7 @@ public class KdTree
 		}
 		maxDelta *= 1.01;
 		x0[dimension] = DGridSize / maxDelta;
-		if (logger.isDebugEnabled())
+		if (logger.isLoggable(Level.FINE))
 		{
 			StringBuilder sb = new StringBuilder("New KdTree int<--->double conversion vector; scale=");
 			sb.append(x0[dimension]);
@@ -310,7 +311,7 @@ public class KdTree
 				sb.append("] <= ");
 				sb.append(bbox[i+dimension]);
 			}
-			logger.debug(sb.toString());
+			logger.fine(sb.toString());
 		}
 	}
 	
@@ -638,8 +639,8 @@ public class KdTree
 		int [] ijk = new int[dimension];
 		double2int(v.getUV(), ijk);
 		int searchedCells = 0;
-		if (logger.isDebugEnabled())
-			logger.debug("Near point: "+v);
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("Near point: "+v);
 		while (null != current && current.nItems < 0)
 		{
 			last = current;
@@ -664,8 +665,8 @@ public class KdTree
 				ret = vQ;
 			}
 		}
-		if (logger.isDebugEnabled())
-			logger.debug("  search in "+searchedCells+"/"+nCells+" cells");
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("  search in "+searchedCells+"/"+nCells+" cells");
 		return ret;
 	}
 	
@@ -675,8 +676,8 @@ public class KdTree
 		int [] ijk = new int[dimension];
 		double dist = -1.0;
 		double2int(v.getUV(), ijk);
-		if (logger.isDebugEnabled())
-			logger.debug("Near point in suboctrees: "+v);
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("Near point in suboctrees: "+v);
 		int l = 0;
 		int [] posStack = new int[MAXLEVEL];
 		posStack[l] = 0;
@@ -713,8 +714,8 @@ public class KdTree
 				}
 				if (null != ret)
 				{
-					if (logger.isDebugEnabled())
-						logger.debug("  search in "+searchedCells+"/"+nCells+" cells");
+					if (logger.isLoggable(Level.FINE))
+						logger.fine("  search in "+searchedCells+"/"+nCells+" cells");
 					return ret;
 				}
 				//  Search in siblings
@@ -834,16 +835,16 @@ public class KdTree
 	{
 		if (start == null)
 			return null;
-		if (logger.isDebugEnabled())
-			logger.debug("Nearest point of "+v);
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("Nearest point of "+v);
 		
 		GetNearestVertexProcedure gproc = new GetNearestVertexProcedure(mesh, v, start);
 		walk(gproc);
 		Vertex ret = gproc.nearestVertex;
-		if (logger.isDebugEnabled())
+		if (logger.isLoggable(Level.FINE))
 		{
-			logger.debug("  search in "+gproc.searchedCells+"/"+nCells+" cells");
-			logger.debug("  result: "+ret);
+			logger.fine("  search in "+gproc.searchedCells+"/"+nCells+" cells");
+			logger.fine("  result: "+ret);
 		}
 		return ret;
 	}
@@ -896,16 +897,16 @@ public class KdTree
 	{
 		Vertex ret = getNearVertex(mesh, v);
 		assert ret != null;
-		if (logger.isDebugEnabled())
-			logger.debug("(debug) Nearest point of "+v);
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("(debug) Nearest point of "+v);
 		
 		GetNearestVertexDebugProcedure gproc = new GetNearestVertexDebugProcedure(mesh, v, ret);
 		walk(gproc);
 		ret = gproc.nearestVertex;
-		if (logger.isDebugEnabled())
+		if (logger.isLoggable(Level.FINE))
 		{
-			logger.debug("  search in "+gproc.searchedCells+"/"+nCells+" cells");
-			logger.debug("  result: "+ret);
+			logger.fine("  search in "+gproc.searchedCells+"/"+nCells+" cells");
+			logger.fine("  result: "+ret);
 		}
 		return ret;
 	}
@@ -931,10 +932,10 @@ public class KdTree
 		GetMinSizeProcedure gproc = new GetMinSizeProcedure();
 		walk(gproc);
 		int ret = gproc.minSize;
-		if (logger.isDebugEnabled())
+		if (logger.isLoggable(Level.FINE))
 		{
-			logger.debug("  search in "+gproc.searchedCells+"/"+nCells+" cells");
-			logger.debug("  result: "+ret);
+			logger.fine("  search in "+gproc.searchedCells+"/"+nCells+" cells");
+			logger.fine("  result: "+ret);
 		}
 		return ret;
 	}

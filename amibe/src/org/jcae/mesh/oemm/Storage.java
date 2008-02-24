@@ -53,7 +53,8 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.oemm.OEMM.Node;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class converts between disk and memory formats.
@@ -80,7 +81,7 @@ import org.apache.log4j.Logger;
  */
 public class Storage
 {
-	private static Logger logger = Logger.getLogger(Storage.class);	
+	private static Logger logger=Logger.getLogger(Storage.class.getName());	
 	
 	/**
 	 * Number of bytes per triangle.  On disk a triangle is represented by
@@ -129,13 +130,13 @@ public class Storage
 		}
 		catch (IOException ex)
 		{
-			logger.error("I/O error when reading indexed file in "+dir);
+			logger.severe("I/O error when reading indexed file in "+dir);
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
 		catch (ClassNotFoundException ex)
 		{
-			logger.error("I/O error when reading indexed file in "+dir);
+			logger.severe("I/O error when reading indexed file in "+dir);
 			ex.printStackTrace();
 			throw new RuntimeException();
 		}
@@ -149,7 +150,7 @@ public class Storage
 	 */
 	public static void storeOEMMStructure(OEMM oemm)
 	{
-		if (logger.isInfoEnabled()) {
+		if (logger.isLoggable(Level.INFO)) {
 			logger.info("storeOEMMStructure");
 		}
 		ObjectOutputStream oos = null;
@@ -162,7 +163,7 @@ public class Storage
 			}
 			
 		} catch (IOException e) {
-			logger.error("I/O error when reading indexed file in " + oemm.getDirectory());
+			logger.severe("I/O error when reading indexed file in " + oemm.getDirectory());
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		} finally {
@@ -187,7 +188,7 @@ public class Storage
 	 */
 	public static void saveNodes(OEMM oemm, Mesh mesh, TIntHashSet storedLeaves)
 	{
-		logger.debug("saveNodes started");
+		logger.fine("saveNodes started");
 		removeNonReferencedVertices(mesh);
 		// For each Vertex, find its enclosing octant leaf.
 		// Side-effect: storedLeaves may be modified if new leaves have to be added.
@@ -196,7 +197,7 @@ public class Storage
 		storeTriangles(oemm, mesh, storedLeaves, mapVertexToLeafindex);
 		
 		storeOEMMStructure(oemm);
-		logger.debug("saveNodes ended");
+		logger.fine("saveNodes ended");
 	}
 	
 	/**
@@ -286,7 +287,7 @@ public class Storage
 				n = oemm.search(positions);
 			} catch (IllegalArgumentException e) {
 				//ingore this - try move vertex more closer
-				logger.warn("A vertex has moved and requires a new leaf to be created");
+				logger.warning("A vertex has moved and requires a new leaf to be created");
 				n = createNewNode(oemm, positions);
 				storedLeaves.add(n.leafIndex);
 			}
@@ -340,7 +341,7 @@ public class Storage
 			try {
 				fc = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(getVerticesFile(oemm, node))));
 			} catch (FileNotFoundException e) {
-				logger.error("I/O error when writing file "+getVerticesFile(oemm, node));
+				logger.severe("I/O error when writing file "+getVerticesFile(oemm, node));
 				e.printStackTrace();
 				throw new RuntimeException(e);
 			}
@@ -363,7 +364,7 @@ public class Storage
 			try {
 				afc = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(getAdjacencyFile(oemm, node))));
 			} catch (FileNotFoundException e) {
-				logger.error("I/O error when writing file "+getAdjacencyFile(oemm, node));
+				logger.severe("I/O error when writing file "+getAdjacencyFile(oemm, node));
 				e.printStackTrace();
 				throw new RuntimeException(e);
 			}
@@ -598,7 +599,7 @@ public class Storage
 			try {
 				fc = new RandomAccessFile(getTrianglesFile(oemm, node),"rw").getChannel();
 			} catch (FileNotFoundException e) {
-				logger.error("Couldn't find file " + getTrianglesFile(oemm, node), e);
+				logger.log(Level.SEVERE, "Couldn't find file " + getTrianglesFile(oemm, node), e);
 				throw new RuntimeException(e);
 			}
 			
@@ -607,7 +608,7 @@ public class Storage
 			try {
 				fc.read(bb);
 			} catch (IOException e) {
-				logger.error("I/O error in operation with file " + getTrianglesFile(oemm, node), e);
+				logger.log(Level.SEVERE, "I/O error in operation with file " + getTrianglesFile(oemm, node), e);
 				throw new RuntimeException(e);
 			}
 			bb.flip();
@@ -651,7 +652,7 @@ public class Storage
 					fc.position(0L);
 					fc.write(bb);
 				} catch (IOException e) {
-					logger.error("I/O error in operation with file " + getTrianglesFile(oemm, node), e);
+					logger.log(Level.SEVERE, "I/O error in operation with file " + getTrianglesFile(oemm, node), e);
 					throw new RuntimeException(e);
 				}
 			}
@@ -722,7 +723,7 @@ public class Storage
 			try {
 				fc = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(getTrianglesFile(oemm, node))));
 			} catch (FileNotFoundException e1) {
-				logger.error("I/O error when reading indexed file "+getTrianglesFile(oemm, node));
+				logger.severe("I/O error when reading indexed file "+getTrianglesFile(oemm, node));
 				e1.printStackTrace();
 				throw new RuntimeException(e1);
 			}
@@ -747,7 +748,7 @@ public class Storage
 				node.tn = triangleList.size();
 			
 			} catch (IOException e) {
-				logger.error("Error in saving to " + getTrianglesFile(oemm, node), e);
+				logger.log(Level.SEVERE, "Error in saving to " + getTrianglesFile(oemm, node), e);
 				e.printStackTrace();
 				throw new RuntimeException(e);
 			} finally {
@@ -830,7 +831,7 @@ public class Storage
 		try {
 			dis= new DataInputStream(new BufferedInputStream(new FileInputStream(getAdjacencyFile(oemm, node))));
 		} catch (FileNotFoundException e) {
-			logger.error("Problem with opening " + getAdjacencyFile(oemm, node).getPath() + ". It may be new node.", e);
+			logger.log(Level.SEVERE, "Problem with opening " + getAdjacencyFile(oemm, node).getPath() + ". It may be new node.", e);
 			return result;
 		}
 		
@@ -865,7 +866,7 @@ public class Storage
 				}
 			}
 		} catch (IOException e) {
-			logger.error("Problem with reading " + getAdjacencyFile(oemm, node).getPath(), e);
+			logger.log(Level.SEVERE, "Problem with reading " + getAdjacencyFile(oemm, node).getPath(), e);
 			throw new RuntimeException(e);
 		} finally {
 			try {

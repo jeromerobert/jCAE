@@ -37,7 +37,8 @@ import java.io.File;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Decimates a mesh.  This method is based on Michael Garland's work on
@@ -106,7 +107,7 @@ import org.apache.log4j.Logger;
  */
 public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 {
-	private static Logger logger=Logger.getLogger(QEMDecimateHalfEdge.class);
+	private static Logger logger=Logger.getLogger(QEMDecimateHalfEdge.class.getName());
 	private Quadric3DError.Placement placement = Quadric3DError.Placement.OPTIMAL;
 	private HashMap<Vertex, Quadric3DError> quadricMap = null;
 	private Vertex v3;
@@ -138,17 +139,17 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 			{
 				final double sizeTarget = new Double(val).doubleValue();
 				tolerance = sizeTarget * sizeTarget;
-				logger.debug("Tolerance: "+tolerance);
+				logger.fine("Tolerance: "+tolerance);
 			}
 			else if (key.equals("placement"))
 			{
 				placement = Quadric3DError.Placement.getByName(val);
-				logger.debug("Placement: "+placement);
+				logger.fine("Placement: "+placement);
 			}
 			else if (key.equals("maxtriangles"))
 			{
 				nrFinal = Integer.valueOf(val).intValue();
-				logger.debug("Nr max triangles: "+nrFinal);
+				logger.fine("Nr max triangles: "+nrFinal);
 			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
@@ -346,14 +347,14 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 	public HalfEdge processEdge(HalfEdge current, double costCurrent)
 	{
 		current = uniqueOrientation(current);
-		if (logger.isDebugEnabled())
+		if (logger.isLoggable(Level.FINE))
 		{
-			logger.debug("Contract edge: "+current+" into "+v3+"  cost="+costCurrent);
+			logger.fine("Contract edge: "+current+" into "+v3+"  cost="+costCurrent);
 			if (current.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 			{
-				logger.debug("Non-manifold edge:");
+				logger.fine("Non-manifold edge:");
 				for (Iterator<AbstractHalfEdge> it = current.fanIterator(); it.hasNext(); )
-					logger.debug(" --> "+it.next());
+					logger.fine(" --> "+it.next());
 			}
 		}
 		// HalfEdge instances on t1 and t2 will be deleted

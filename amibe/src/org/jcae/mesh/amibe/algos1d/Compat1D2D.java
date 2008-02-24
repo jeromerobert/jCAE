@@ -36,11 +36,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.Map;
 import java.util.Iterator;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 public class Compat1D2D
 {
-	private static Logger logger=Logger.getLogger(Compat1D2D.class);
+	private static Logger logger=Logger.getLogger(Compat1D2D.class.getName());
 	private MMesh1D mesh1d;
 	private double deflection = 1.0;
 	private boolean relativeDeflection = false;
@@ -92,9 +92,9 @@ public class Compat1D2D
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
 		}
-		logger.debug("Discretized TopoEdges: "+nbTEdges);
-		logger.debug("Edges   "+nbEdges);
-		logger.debug("Nodes   "+nbNodes);
+		logger.fine("Discretized TopoEdges: "+nbTEdges);
+		logger.fine("Edges   "+nbEdges);
+		logger.fine("Nodes   "+nbNodes);
 		assert(mesh1d.isValid());
 	}
 
@@ -139,7 +139,7 @@ public class Compat1D2D
 				double cmax = Math.abs(surface.maxCurvature());
 				if (Double.isNaN(cmin) || Double.isNaN(cmax))
 				{
-					logger.debug("Undefined curvature");
+					logger.fine("Undefined curvature");
 					//  Try with a near point
 					if (i == 0)
 						uv = curve2d.value(paramOnEdge[0] + 0.01 * (paramOnEdge[1] - paramOnEdge[0]));

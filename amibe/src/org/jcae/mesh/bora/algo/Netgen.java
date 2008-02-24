@@ -32,7 +32,7 @@ import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * Run the Netgen 3D mesher.
@@ -43,7 +43,7 @@ import org.apache.log4j.Logger;
  */
 public class Netgen implements AlgoInterface
 {
-	private static Logger logger=Logger.getLogger(Netgen.class);
+	private static Logger logger=Logger.getLogger(Netgen.class.getName());
 	private double maxlen;
 	private static boolean available = true;
 	private static String banner = null;

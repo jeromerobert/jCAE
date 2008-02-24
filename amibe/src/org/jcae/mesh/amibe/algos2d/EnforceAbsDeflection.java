@@ -29,7 +29,8 @@ import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import java.util.ArrayList;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Split triangles with an absolute deflection greater than
@@ -42,7 +43,7 @@ import org.apache.log4j.Logger;
  */
 public class EnforceAbsDeflection
 {
-	private static Logger logger=Logger.getLogger(EnforceAbsDeflection.class);
+	private static Logger logger=Logger.getLogger(EnforceAbsDeflection.class.getName());
 	private final Mesh2D mesh;
 	
 	/**
@@ -61,7 +62,7 @@ public class EnforceAbsDeflection
 	public void compute()
 	{
 		mesh.pushCompGeom(3);
-		logger.debug(" Enforcing absolute deflection");
+		logger.fine(" Enforcing absolute deflection");
 
 		Vertex [] p = new Vertex[4];
 		double [] v1 = new double[3];
@@ -124,8 +125,8 @@ public class EnforceAbsDeflection
 					redo = true;
 			}
 			niter--;
-			if (logger.isDebugEnabled())
-				logger.debug(" Found "+badTriangles.size()+" non-conforming triangles");
+			if (logger.isLoggable(Level.FINE))
+				logger.fine(" Found "+badTriangles.size()+" non-conforming triangles");
 		} while (redo && niter > 0);
 		mesh.popCompGeom(3);
 	}

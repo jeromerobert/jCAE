@@ -23,14 +23,14 @@ package org.jcae.mesh;
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.RawStorage;
 import org.jcae.mesh.oemm.Storage;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * This class fills an OEMM structure with a new triangle soup.
  */
 public class MeshOEMMPopulate
 {
-	private static Logger logger=Logger.getLogger(MeshOEMMPopulate.class);
+	private static Logger logger=Logger.getLogger(MeshOEMMPopulate.class.getName());
 
 	public static void main(String args[])
 	{

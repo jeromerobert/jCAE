@@ -21,14 +21,14 @@
 package org.jcae.mesh.cad;
 
 import java.util.Iterator;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * Class to provide factory methods
  */
 public abstract class CADShapeFactory
 {
-	private static Logger logger=Logger.getLogger(CADShapeFactory.class);
+	private static Logger logger=Logger.getLogger(CADShapeFactory.class.getName());
 	private static final CADShapeFactory factory;
 	static
 	{
@@ -45,7 +45,7 @@ public abstract class CADShapeFactory
 		}
 		catch (Exception e)
 		{
-			logger.error("Class "+cadType+" not found");
+			logger.severe("Class "+cadType+" not found");
 			System.exit(1);
 		}
 		factory = b;

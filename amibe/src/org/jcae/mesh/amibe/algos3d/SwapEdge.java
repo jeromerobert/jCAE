@@ -30,7 +30,8 @@ import java.io.IOException;
 import java.io.File;
 import java.util.Map;
 import java.util.HashMap;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Laplacian smoothing.
@@ -38,7 +39,7 @@ import org.apache.log4j.Logger;
 
 public class SwapEdge extends AbstractAlgoHalfEdge
 {
-	private static Logger logger=Logger.getLogger(SwapEdge.class);
+	private static Logger logger=Logger.getLogger(SwapEdge.class.getName());
 	private double planarMin = 0.95;
 	private int counter = 0;
 	
@@ -59,7 +60,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 			if (key.equals("angle"))
 			{
 				planarMin = new Double(val).doubleValue();
-				logger.debug("Planar angle: "+planarMin);
+				logger.fine("Planar angle: "+planarMin);
 			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
@@ -93,8 +94,8 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 	@Override
 	public HalfEdge processEdge(HalfEdge current, double costCurrent)
 	{
-		if (logger.isDebugEnabled())
-			logger.debug("Swap edge: "+current+"  cost="+costCurrent);
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("Swap edge: "+current+"  cost="+costCurrent);
 		counter --;
 		for (int i = 0; i < 3; i++)
 		{

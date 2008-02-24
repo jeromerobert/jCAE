@@ -32,7 +32,7 @@ import org.jcae.mesh.cad.CADShapeFactory;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * Computes a new discretization so that all edges have a uniform length.
@@ -43,7 +43,7 @@ import org.apache.log4j.Logger;
  */
 public class UniformLengthDeflection
 {
-	private static Logger logger=Logger.getLogger(UniformLengthDeflection.class);
+	private static Logger logger=Logger.getLogger(UniformLengthDeflection.class.getName());
 	private MMesh1D mesh1d;
 	private double maxlen = -1.0;
 	private double deflection = 1.0;
@@ -102,9 +102,9 @@ public class UniformLengthDeflection
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
 		}
-		logger.debug("TopoEdges discretisees "+nbTEdges);
-		logger.debug("Edges   "+nbEdges);
-		logger.debug("Nodes   "+nbNodes);
+		logger.fine("TopoEdges discretisees "+nbTEdges);
+		logger.fine("Edges   "+nbEdges);
+		logger.fine("Nodes   "+nbNodes);
 		assert(mesh1d.isValid());
 	}
 

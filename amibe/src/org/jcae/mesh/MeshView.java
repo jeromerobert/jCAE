@@ -22,14 +22,14 @@ package org.jcae.mesh;
 
 import javax.media.j3d.BranchGroup;
 import org.jcae.mesh.java3d.*;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * This class MeshView allows to view a generated mesh.
  */
 public class MeshView
 {
-	private static Logger logger=Logger.getLogger(MeshView.class);
+	private static Logger logger=Logger.getLogger(MeshView.class.getName());
 
 	public static void main(String args[])
 	{

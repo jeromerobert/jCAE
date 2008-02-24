@@ -37,7 +37,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.io.IOException;
 import gnu.trove.TObjectDoubleHashMap;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Node smoothing.  Triangle quality is computed for all triangles,
@@ -51,7 +52,7 @@ import org.apache.log4j.Logger;
  */
 public class SmoothNodes3D
 {
-	private static Logger logger=Logger.getLogger(SmoothNodes3D.class);
+	private static Logger logger=Logger.getLogger(SmoothNodes3D.class.getName());
 	private Mesh mesh;
 	private double sizeTarget = -1.0;
 	private int nloop = 10;
@@ -113,15 +114,15 @@ public class SmoothNodes3D
 			else
 				throw new RuntimeException("Unknown option: "+key);
 		}
-		if (logger.isDebugEnabled())
+		if (logger.isLoggable(Level.FINE))
 		{
 			if (sizeTarget > 0.0)
-				logger.debug("Size: "+sizeTarget);
-			logger.debug("Iterations: "+nloop);
-			logger.debug("Refresh: "+refresh);
-			logger.debug("Relaxation: "+relaxation);
-			logger.debug("Tolerance: "+tolerance);
-			logger.debug("Preserve boundaries: "+preserveBoundaries);
+				logger.fine("Size: "+sizeTarget);
+			logger.fine("Iterations: "+nloop);
+			logger.fine("Refresh: "+refresh);
+			logger.fine("Relaxation: "+relaxation);
+			logger.fine("Tolerance: "+tolerance);
+			logger.fine("Preserve boundaries: "+preserveBoundaries);
 		}
 	}
 	

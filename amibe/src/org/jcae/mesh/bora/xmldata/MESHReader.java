@@ -29,13 +29,13 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import java.util.StringTokenizer;
 import gnu.trove.TIntObjectHashMap;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 
 public class MESHReader
 {
 
-	private static Logger logger=Logger.getLogger(MESHReader.class);
+	private static Logger logger=Logger.getLogger(MESHReader.class.getName());
 	
 	public static void readMesh(Mesh mesh, String file)
 	{
@@ -62,7 +62,7 @@ public class MESHReader
 
 	private static TIntObjectHashMap<Vertex> readNodes(Mesh m, BufferedReader rd)
 	{
-		logger.debug("Reading nodes");
+		logger.fine("Reading nodes");
 		TIntObjectHashMap<Vertex> nodesmap = null;
 		double x,y,z;
 		String line = "";
@@ -97,13 +97,13 @@ public class MESHReader
 		{
 			e.printStackTrace();
 		}
-		logger.debug("Found "+nrNodes+" nodes");
+		logger.fine("Found "+nrNodes+" nodes");
 		return nodesmap;
 	}
 
 	private static void readFace(BufferedReader rd, Mesh mesh, TIntObjectHashMap<Vertex> nodesmap)
 	{
-		logger.debug("Reading tetrahedra");
+		logger.fine("Reading tetrahedra");
 		String line = "";
 		int nrTetrahedra = 0;
 		Vertex [] v = new Vertex[4];
@@ -131,7 +131,7 @@ public class MESHReader
 		{
 			e.printStackTrace();
 		}
-		logger.debug("Found "+nrTetrahedra+" tetrahedra");
+		logger.fine("Found "+nrTetrahedra+" tetrahedra");
 	}
 	
 }

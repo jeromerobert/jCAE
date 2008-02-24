@@ -21,7 +21,7 @@
 package org.jcae.mesh.amibe.util;
 
 import java.util.Iterator;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * Red-black binary trees to store quality factors.
@@ -43,7 +43,7 @@ import org.apache.log4j.Logger;
  */
 public class PRedBlackSortedTree<E> extends QSortedTree<E>
 {
-	private static Logger logger = Logger.getLogger(PRedBlackSortedTree.class);	
+	private static Logger logger=Logger.getLogger(PRedBlackSortedTree.class.getName());	
 	private static class Node<E> extends QSortedTree.Node<E>
 	{
 		boolean isRed;
@@ -114,7 +114,7 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 		{
 			// We enforce root node to be black, this eases
 			// other cases below.
-			logger.debug("Case I1");
+			logger.fine("Case I1");
 			p.isRed = false;
 			assert !((Node<E>) root.child[0]).isRed;
 			return true;
@@ -127,7 +127,7 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 			// Case I2: parent is black
 			if (!q.isRed)
 			{
-				logger.debug("Case I2");
+				logger.fine("Case I2");
 				assert !((Node<E>) root.child[0]).isRed;
 				return true;
 			}
@@ -151,7 +151,7 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 				    \                 \
 				    pR                pR
 				*/
-				logger.debug("Case I3");
+				logger.fine("Case I3");
 				q.isRed = false;
 				uncle.isRed = false;
 				grandparent.isRed = true;
@@ -170,7 +170,7 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 					    \           /
 					    pR         qR
 					*/
-					logger.debug("Case I4");
+					logger.fine("Case I4");
 					if (lastDir == 0)
 						grandparent.child[0] = q.rotateL();
 					else
@@ -193,7 +193,7 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 				  p.child[0] == null && p.child[1] == null) ||
 				 (uncle != null && q.child[sibDir] != null &&
 				  p.child[0] != null && p.child[1] != null);
-				logger.debug("Case I5");
+				logger.fine("Case I5");
 
 				Node<E> greatgrandparent = (Node<E>) grandparent.parent;
 				grandparent.isRed = true;
@@ -263,14 +263,14 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 			if (isRedNode(p))
 			{
 				p.isRed = false;
-				logger.debug("Red node :-)");
+				logger.fine("Red node :-)");
 				break;
 			}
 			// Case R1: root tree
 			if (q == root)
 			{
 				// All paths have one less black node
-				logger.debug("Case R1");
+				logger.fine("Case R1");
 				break;
 			}
 			int sibDir = 1 - lastDir;
@@ -285,7 +285,7 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 			if (sibling.isRed)
 			{
 				// Case R2: sibling is red
-				logger.debug("Case R2");
+				logger.fine("Case R2");
 				sibling.isRed = false;
 				q.isRed = true;
 				assert sibling.child[0] != null;
@@ -312,7 +312,7 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 			{
 				// Case R3: parent, sibling and sibling's
 				// children are black
-				logger.debug("Case R3");
+				logger.fine("Case R3");
 				sibling.isRed = true;
 			}
 			else
@@ -323,7 +323,7 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 					// children are black, but parent is
 					// red.
 					assert q.isRed;
-					logger.debug("Case R4");
+					logger.fine("Case R4");
 					sibling.isRed = true;
 					q.isRed = false;
 					break;
@@ -334,7 +334,7 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 					// red and right child is black.
 					// Rotate at sibling and paint nodes
 					// so that sibling.child[sibDir] is red.
-					logger.debug("Case R5");
+					logger.fine("Case R5");
 					Node<E> y = (Node<E>) sibling.child[lastDir];
 					y.isRed = false;
 					sibling.isRed = true;
@@ -353,7 +353,7 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 					aB bB        bB  zB
 					*/
 				}
-				logger.debug("Case R6");
+				logger.fine("Case R6");
 				// Case R6: sibling is black and its right child
 				// is red.
 				/*

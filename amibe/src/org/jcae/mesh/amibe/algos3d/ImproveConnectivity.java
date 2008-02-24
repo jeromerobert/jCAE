@@ -31,7 +31,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;
 import gnu.trove.TObjectIntHashMap;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Swaps edge to try to have all vertices have six neighbors.
@@ -42,7 +43,7 @@ import org.apache.log4j.Logger;
 
 public class ImproveConnectivity extends AbstractAlgoHalfEdge
 {
-	private static Logger logger=Logger.getLogger(ImproveConnectivity.class);
+	private static Logger logger=Logger.getLogger(ImproveConnectivity.class.getName());
 	private double planarMin = 0.95;
 	private TObjectIntHashMap<Vertex> map;
 	
@@ -63,7 +64,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 			if (key.equals("coplanar"))
 			{
 				planarMin = new Double(val).doubleValue();
-				logger.debug("Coplanar value: "+planarMin);
+				logger.fine("Coplanar value: "+planarMin);
 			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
@@ -174,10 +175,10 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 		Vertex a = current.apex();
 		Vertex n = current.sym().apex();
 
-		if (logger.isDebugEnabled())
+		if (logger.isLoggable(Level.FINE))
 		{
-			logger.debug("Swap edge: "+current+"  cost="+costCurrent);
-			logger.debug(" Connections before swap: o="+map.get(o)+" d="+map.get(d)+" a="+map.get(a)+" n="+map.get(n));
+			logger.fine("Swap edge: "+current+"  cost="+costCurrent);
+			logger.fine(" Connections before swap: o="+map.get(o)+" d="+map.get(d)+" a="+map.get(a)+" n="+map.get(n));
 		}
 
 		assert costCurrent == cost(current) : costCurrent+" != "+cost(current);

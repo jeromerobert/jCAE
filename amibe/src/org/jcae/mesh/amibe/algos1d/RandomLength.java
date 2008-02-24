@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * Computes a randomized discretization.
@@ -42,7 +42,7 @@ import org.apache.log4j.Logger;
  */
 public class RandomLength
 {
-	private static Logger logger=Logger.getLogger(RandomLength.class);
+	private static Logger logger=Logger.getLogger(RandomLength.class.getName());
 	private final MMesh1D mesh1d;
 	private int divisions;
 	
@@ -94,9 +94,9 @@ public class RandomLength
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
 		}
-		logger.debug("TopoEdges discretisees "+nbTEdges);
-		logger.debug("Edges   "+nbEdges);
-		logger.debug("Nodes   "+nbNodes);
+		logger.fine("TopoEdges discretisees "+nbTEdges);
+		logger.fine("Edges   "+nbEdges);
+		logger.fine("Nodes   "+nbNodes);
 		assert(mesh1d.isValid());
 	}
 

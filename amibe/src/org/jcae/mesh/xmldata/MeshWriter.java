@@ -42,12 +42,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 
 public class MeshWriter
 {
-	private static Logger logger=Logger.getLogger(MeshWriter.class);
+	private static Logger logger=Logger.getLogger(MeshWriter.class.getName());
 
 	/**
 	 * Used by {@link writeObject}
@@ -56,7 +56,7 @@ public class MeshWriter
 		throws ParserConfigurationException, SAXException, IOException
 	{
 		//save nodes
-		logger.debug("begin writing "+nodesFile);
+		logger.fine("begin writing "+nodesFile);
 		DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile)));
 		DataOutputStream refout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile)));
 		//  Write interior nodes first
@@ -125,7 +125,7 @@ public class MeshWriter
 		nodeIndex.put(outer, i);
 		out.close();
 		refout.close();
-		logger.debug("end writing "+nodesFile);
+		logger.fine("end writing "+nodesFile);
 
 		// Create the <nodes> element
 		return XMLHelper.parseXMLString(document, "<nodes>"+
@@ -145,7 +145,7 @@ public class MeshWriter
 		throws ParserConfigurationException, SAXException, IOException
 	{
 		//save triangles
-		logger.debug("begin writing "+trianglesFile);
+		logger.fine("begin writing "+trianglesFile);
 		DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(trianglesFile)));
 		int nrTriangles=0;
 		// First write inner triangles
@@ -167,7 +167,7 @@ public class MeshWriter
 			nrTriangles++;
 		}
 		out.close();
-		logger.debug("end writing "+trianglesFile);
+		logger.fine("end writing "+trianglesFile);
 		
 		return XMLHelper.parseXMLString(document, "<triangles>"+
 			"<number>"+nrTriangles+"</number>"+
@@ -178,7 +178,7 @@ public class MeshWriter
 	private static Element writeObjectGroups(Document document, Collection<Triangle> trianglelist, File groupsFile, String baseDir)
 		throws IOException
 	{
-		logger.debug("begin writing "+groupsFile);
+		logger.fine("begin writing "+groupsFile);
 		int cnt=0;
 		TIntObjectHashMap<TIntArrayList> groupMap = new TIntObjectHashMap<TIntArrayList>();
 		for(Triangle f: trianglelist)
@@ -238,7 +238,7 @@ public class MeshWriter
 			offset += nrTriangles;
 		}
 		out.close();
-		logger.debug("end writing "+groupsFile);
+		logger.fine("end writing "+groupsFile);
 		
 		return groups;
 	}

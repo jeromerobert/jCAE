@@ -32,7 +32,7 @@ import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * Run the Tetgen 3D mesher.
@@ -44,7 +44,7 @@ import org.apache.log4j.Logger;
  */
 public class TetGen implements AlgoInterface
 {
-	private static Logger logger=Logger.getLogger(TetGen.class);
+	private static Logger logger=Logger.getLogger(TetGen.class.getName());
 	private static final String tetgenCmd = "tetgen";
 	private double volume;
 	private static boolean available = true;

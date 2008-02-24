@@ -30,7 +30,7 @@ import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.*;
 import org.w3c.dom.Node;
 import org.jcae.mesh.xmldata.*;
-import org.apache.log4j.*;
+import java.util.logging.Logger;
 import com.sun.j3d.utils.geometry.GeometryInfo;
 import com.sun.j3d.utils.geometry.Stripifier;
 
@@ -42,7 +42,7 @@ import com.sun.j3d.utils.geometry.Stripifier;
 
 public class XMLBranchGroup
 {
-	private static Logger logger=Logger.getLogger(XMLBranchGroup.class);
+	private static Logger logger=Logger.getLogger(XMLBranchGroup.class.getName());
 	private final static float absOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorAbs", "20.0f"));
 	private final static float relOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorRel", "2.0f"));
 	private static XPath xpath=XPathFactory.newInstance().newXPath();
@@ -121,7 +121,7 @@ public class XMLBranchGroup
 	private float[] readFloat(String filename, int number) throws IOException
 	{
 		float[] result=new float[number];
-		logger.debug("reading "+number+" double from "+filename);
+		logger.fine("reading "+number+" double from "+filename);
 		File file=new File(xmlFile.getParent(), filename);
 		DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
 		for(int i=0; i<number; i++) 		
@@ -133,7 +133,7 @@ public class XMLBranchGroup
 	private int[] readInteger(String filename, int number) throws IOException
 	{
 		int[] result=new int[number];
-		logger.debug("reading "+number+" int from "+filename);
+		logger.fine("reading "+number+" int from "+filename);
 		File file=new File(xmlFile.getParent(), filename);
 		DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
 		for(int i=0; i<number; i++)
@@ -180,7 +180,7 @@ public class XMLBranchGroup
 		
 		if(flagDOM!=null) flag=flagDOM.getNodeValue();
 		
-		logger.debug("Computing BranchGroup for a subMesh with flag="+flag);
+		logger.fine("Computing BranchGroup for a subMesh with flag="+flag);
 		
 		if(nodesDOM!=null)
 		{
@@ -268,7 +268,7 @@ public class XMLBranchGroup
 			GeometryInfo gi=new GeometryInfo(geom);			
 			Stripifier s=new Stripifier(Stripifier.COLLECT_STATS );
 			s.stripify(gi);
-			logger.info(s.getStripifierStats());
+			logger.info(""+s.getStripifierStats());
 			Geometry toReturn=gi.getGeometryArray();
 			return toReturn;
 		}

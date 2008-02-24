@@ -37,7 +37,8 @@ import java.io.ObjectInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public abstract class AbstractAlgoHalfEdge
 {
@@ -187,8 +188,8 @@ public abstract class AbstractAlgoHalfEdge
 					break;
 				if (canProcessEdge(current))
 					break;
-				if (thisLogger().isDebugEnabled())
-					thisLogger().debug("Edge not processed: "+current);
+				if (thisLogger().isLoggable(Level.FINE))
+					thisLogger().fine("Edge not processed: "+current);
 				notProcessed++;
 				// Add a penalty to edges which could not have been
 				// processed.  This has to be done outside this loop,

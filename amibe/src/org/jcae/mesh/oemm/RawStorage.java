@@ -43,7 +43,8 @@ import gnu.trove.TIntIterator;
 import gnu.trove.TIntIntHashMap;
 import gnu.trove.TIntArrayList;
 import gnu.trove.TIntHashSet;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Convert a triangle soup into an OEMM data structure.  The different steps
@@ -59,7 +60,7 @@ import org.apache.log4j.Logger;
  */
 public class RawStorage
 {
-	static Logger logger = Logger.getLogger(RawStorage.class);	
+	static Logger logger=Logger.getLogger(RawStorage.class.getName());	
 
 	//  In triangle soup, a triangle has 9 double coordinates and two ints.
 	private static final int TRIANGLE_SIZE_RAW = 80;
@@ -127,13 +128,13 @@ public class RawStorage
 		}
 		catch (FileNotFoundException ex)
 		{
-			logger.error("File "+file+" not found");
+			logger.severe("File "+file+" not found");
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
 		catch (IOException ex)
 		{
-			logger.error("I/O error when reading "+file);
+			logger.severe("I/O error when reading "+file);
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
@@ -179,11 +180,11 @@ public class RawStorage
 	{
 		if (tree == null)
 		{
-			logger.error("OEMM not created!");
+			logger.severe("OEMM not created!");
 			return false;
 		}
 		logger.info("Count triangles");
-		logger.debug("Reading "+soupFile+" and count triangles");
+		logger.fine("Reading "+soupFile+" and count triangles");
 		CountTriangles ct = new CountTriangles(tree, build);
 		readSoup(soupFile, ct);
 		logger.info("Number of triangles: "+ct.getTriangleCount());
@@ -281,21 +282,21 @@ public class RawStorage
 	{
 		if (tree == null)
 		{
-			logger.error("OEMM not initialized!");
+			logger.severe("OEMM not initialized!");
 			return;
 		}
 		logger.info("Put triangles into a linearized octree");
-		logger.debug("Raw OEMM: compute global offset for raw file");
+		logger.fine("Raw OEMM: compute global offset for raw file");
 		//  For each octant, compute its index and its offset in
 		//  output file.
 		ComputeOffsetProcedure co_proc = new ComputeOffsetProcedure();
 		tree.walk(co_proc);
 		long outputFileSize = co_proc.getOffset();
-		logger.debug("Raw OEMM: compute min/max indices");
+		logger.fine("Raw OEMM: compute min/max indices");
 		ComputeMinMaxIndicesProcedure cmmi_proc = new ComputeMinMaxIndicesProcedure();
 		tree.walk(cmmi_proc);
 		
-		logger.debug("Raw OEMM: dispatch triangles into raw OEMM");
+		logger.fine("Raw OEMM: dispatch triangles into raw OEMM");
 		try
 		{
 			RandomAccessFile raf = new RandomAccessFile(dataFile, "rw");
@@ -306,7 +307,7 @@ public class RawStorage
 			DispatchTriangles dt = new DispatchTriangles(tree, fc, buffers);
 			readSoup(soupFile, dt);
 
-			logger.debug("Raw OEMM: flush buffers");
+			logger.fine("Raw OEMM: flush buffers");
 			FlushBuffersProcedure fb_proc = new FlushBuffersProcedure(fc, buffers);
 			tree.walk(fb_proc);
 			raf.close();
@@ -319,13 +320,13 @@ public class RawStorage
 		}
 		catch (FileNotFoundException ex)
 		{
-			logger.error("File "+soupFile+" not found");
+			logger.severe("File "+soupFile+" not found");
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
 		catch (IOException ex)
 		{
-			logger.error("I/O error when reading file  "+soupFile);
+			logger.severe("I/O error when reading file  "+soupFile);
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
@@ -366,7 +367,7 @@ public class RawStorage
 			}
 			catch (IOException ex)
 			{
-				logger.error("I/O error when writing dispatched file");
+				logger.severe("I/O error when writing dispatched file");
 				ex.printStackTrace();
 				throw new RuntimeException(ex);
 			}
@@ -483,7 +484,7 @@ public class RawStorage
 				}
 				catch (IOException ex)
 				{
-					logger.error("I/O error when writing file");
+					logger.severe("I/O error when writing file");
 				}
 				return OK;
 			}
@@ -497,7 +498,7 @@ public class RawStorage
 			}
 			catch (IOException ex)
 			{
-				logger.error("I/O error when writing file");
+				logger.severe("I/O error when writing file");
 			}
 			return OK;
 		}
@@ -544,7 +545,7 @@ public class RawStorage
 			}
 			catch (IOException ex)
 			{
-				logger.error("I/O error when writing intermediate raw OEMM");
+				logger.severe("I/O error when writing intermediate raw OEMM");
 			}
 			return OK;
 		}
@@ -553,7 +554,7 @@ public class RawStorage
 	// TODO: This method may surely be replaced by Storage.readOEMMStructure()
 	private static OEMM readDispatchedStructure(String structFile)
 	{
-		logger.debug("Loading dispatched OEMM structure from "+structFile);
+		logger.fine("Loading dispatched OEMM structure from "+structFile);
 		OEMM ret = new OEMM("(null)");
 		try
 		{
@@ -593,11 +594,11 @@ public class RawStorage
 		}
 		catch (FileNotFoundException ex)
 		{
-			logger.error("File "+structFile+" not found");
+			logger.severe("File "+structFile+" not found");
 		}
 		catch (IOException ex)
 		{
-			logger.error("I/O error when reading file "+structFile);
+			logger.severe("I/O error when reading file "+structFile);
 		}
 		//  Adjust minIndex and maxIndex values
 		ComputeMinMaxIndicesProcedure cmmi_proc = new ComputeMinMaxIndicesProcedure();
@@ -616,18 +617,18 @@ public class RawStorage
 		try
 		{
 			OEMM ret = readDispatchedStructure(structFile);
-			if (logger.isDebugEnabled())
+			if (logger.isLoggable(Level.FINE))
 				ret.printInfos();
 			logger.info("Write octree cells onto disk");
 			OEMM fake = new OEMM(outDir);
-			logger.debug("Store data header on disk");
+			logger.fine("Store data header on disk");
 			new File(outDir).mkdirs();
 			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File(fake.getFileName())));
 			oos.writeObject(ret);
 			oos.writeObject(Integer.valueOf(ret.getNumberOfLeaves()));
 			
 			//  Index internal vertices
-			logger.debug("Index internal vertices");
+			logger.fine("Index internal vertices");
 			FileInputStream fis = new FileInputStream(ret.getFileName());
 			IndexInternalVerticesProcedure iiv_proc = new IndexInternalVerticesProcedure(fis, oos, outDir);
 			ret.walk(iiv_proc);
@@ -635,7 +636,7 @@ public class RawStorage
 			oos.close();
 			
 			//  Index external vertices
-			logger.debug("Index external vertices");
+			logger.fine("Index external vertices");
 			fis = new FileInputStream(ret.getFileName());
 			//  We have a handle on triangle soup, which will be
 			//  no more read, we can now set output diirectory
@@ -646,7 +647,7 @@ public class RawStorage
 			fis.close();
 			
 			//  Transform vertex coordinates into doubles
-			logger.debug("Transform vertex coordinates into doubles");
+			logger.fine("Transform vertex coordinates into doubles");
 			ConvertVertexCoordinatesProcedure cvc_proc = new ConvertVertexCoordinatesProcedure();
 			ret.walk(cvc_proc);
 			
@@ -655,13 +656,13 @@ public class RawStorage
 		}
 		catch (FileNotFoundException ex)
 		{
-			logger.error("File "+structFile+" not found");
+			logger.severe("File "+structFile+" not found");
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
 		catch (IOException ex)
 		{
-			logger.error("I/O error when reading file  "+structFile);
+			logger.severe("I/O error when reading file  "+structFile);
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
@@ -704,8 +705,8 @@ public class RawStorage
 				return OK;
 			}
 			
-			if (logger.isDebugEnabled())
-				logger.debug("Indexing internal vertices of node "+(current.leafIndex+1)+"/"+oemm.getNumberOfLeaves());
+			if (logger.isLoggable(Level.FINE))
+				logger.fine("Indexing internal vertices of node "+(current.leafIndex+1)+"/"+oemm.getNumberOfLeaves());
 			ijk[0] = current.i0;
 			ijk[1] = current.j0;
 			ijk[2] = current.k0;
@@ -884,13 +885,13 @@ public class RawStorage
 			}
 			catch (IOException ex)
 			{
-				logger.error("I/O error when reading intermediate file");
+				logger.severe("I/O error when reading intermediate file");
 				ex.printStackTrace();
 				throw new RuntimeException(ex);
 			}
-			logger.debug("number of internal vertices: "+index);
-			logger.debug("number of external vertices: "+nrExternal);
-			logger.debug("number of duplicated vertices: "+nrDuplicates);
+			logger.fine("number of internal vertices: "+index);
+			logger.fine("number of external vertices: "+nrExternal);
+			logger.fine("number of duplicated vertices: "+nrDuplicates);
 			return OK;
 		}
 	}
@@ -917,8 +918,8 @@ public class RawStorage
 		{
 			if (visit != LEAF)
 				return OK;
-			if (logger.isDebugEnabled())
-				logger.debug("Indexing external vertices of node "+(current.leafIndex+1)+"/"+oemm.getNumberOfLeaves());
+			if (logger.isLoggable(Level.FINE))
+				logger.fine("Indexing external vertices of node "+(current.leafIndex+1)+"/"+oemm.getNumberOfLeaves());
 			return processIndexExternalVerticesProcedure(oemm, current);
 		}
 
@@ -1002,7 +1003,7 @@ public class RawStorage
 			}
 			catch (IOException ex)
 			{
-				logger.error("I/O error when reading intermediate file");
+				logger.severe("I/O error when reading intermediate file");
 				ex.printStackTrace();
 				throw new RuntimeException(ex);
 			}
@@ -1015,7 +1016,7 @@ public class RawStorage
 		@Override
 		public void finish(OEMM oemm)
 		{
-			logger.debug("Total number of leaves loaded: "+nr_ld_leaves);
+			logger.fine("Total number of leaves loaded: "+nr_ld_leaves);
 		}
 	}
 	
@@ -1031,8 +1032,8 @@ public class RawStorage
 		{
 			if (visit != LEAF)
 				return OK;
-			if (logger.isDebugEnabled())
-				logger.debug("Converting coordinates of node "+(current.leafIndex+1)+"/"+oemm.getNumberOfLeaves());
+			if (logger.isLoggable(Level.FINE))
+				logger.fine("Converting coordinates of node "+(current.leafIndex+1)+"/"+oemm.getNumberOfLeaves());
 			
 			try
 			{
@@ -1071,7 +1072,7 @@ public class RawStorage
 			}
 			catch (IOException ex)
 			{
-				logger.error("I/O error when converting coordinates file");
+				logger.severe("I/O error when converting coordinates file");
 				ex.printStackTrace();
 				throw new RuntimeException(ex);
 			}
@@ -1110,7 +1111,7 @@ public class RawStorage
 		}
 		catch (IOException ex)
 		{
-			logger.error("I/O error when reading indexed file "+outDir+File.separator+current.file+"i");
+			logger.severe("I/O error when reading indexed file "+outDir+File.separator+current.file+"i");
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}

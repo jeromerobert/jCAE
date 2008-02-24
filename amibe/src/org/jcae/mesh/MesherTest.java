@@ -60,7 +60,7 @@ import javax.xml.xpath.XPathFactory;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.apache.log4j.Level;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.xml.XMLLayout;

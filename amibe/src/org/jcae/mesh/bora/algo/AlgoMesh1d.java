@@ -28,7 +28,7 @@ import org.jcae.mesh.amibe.ds.SubMesh1D;
 import org.jcae.mesh.bora.ds.BDiscretization;
 import java.util.Iterator;
 import java.util.HashMap;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * Computes a new discretization of the edges using the local definition
@@ -36,7 +36,7 @@ import org.apache.log4j.Logger;
  */
 public class AlgoMesh1d
 {
-	private static Logger logger=Logger.getLogger(AlgoMesh1d.class);
+	private static Logger logger=Logger.getLogger(AlgoMesh1d.class.getName());
 	private MMesh1D mesh1d;
 	
 	/**
@@ -103,9 +103,9 @@ public class AlgoMesh1d
 			nbEdges += submesh1d.getEdges().size();
 			System.out.println(discrE+": nbNodes = "+submesh1d.getNodes().size()+" nbEdges = "+submesh1d.getEdges().size());
 		}
-		logger.debug("TopoEdges discretisees "+nbTEdges);
-		logger.debug("Edges   "+nbEdges);
-		logger.debug("Nodes   "+nbNodes);
+		logger.fine("TopoEdges discretisees "+nbTEdges);
+		logger.fine("Edges   "+nbEdges);
+		logger.fine("Nodes   "+nbNodes);
 		assert(mesh1d.isValid());
 	}
 

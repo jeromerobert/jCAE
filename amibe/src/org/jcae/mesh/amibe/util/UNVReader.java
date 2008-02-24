@@ -31,7 +31,7 @@ import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 import java.util.ArrayList;
 import gnu.trove.TIntObjectHashMap;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 
 /**
@@ -45,7 +45,7 @@ import org.apache.log4j.Logger;
 public class UNVReader
 {
 
-	private static Logger logger=Logger.getLogger(UNVReader.class);
+	private static Logger logger=Logger.getLogger(UNVReader.class.getName());
 	
 	public static void readMesh(Mesh mesh, String file)
 	{
@@ -142,7 +142,7 @@ public class UNVReader
 	private static TIntObjectHashMap<Vertex> readNodes(Mesh m, BufferedReader rd, double unit)
 	{
 		TIntObjectHashMap<Vertex> nodesmap = new TIntObjectHashMap<Vertex>();
-		logger.debug("Reading nodes");
+		logger.fine("Reading nodes");
 		nodesmap.clear();
 		double x,y,z;
 		String line = "";
@@ -185,13 +185,13 @@ public class UNVReader
 		{
 			e.printStackTrace();
 		}
-		logger.debug("Found "+nodesmap.size()+" nodes");
+		logger.fine("Found "+nodesmap.size()+" nodes");
 		return nodesmap;
 	}
 
 	private static TIntObjectHashMap<Triangle> readFace(BufferedReader rd, Mesh mesh, TIntObjectHashMap<Vertex> nodesmap)
 	{
-		logger.debug("Reading triangles");
+		logger.fine("Reading triangles");
 		TIntObjectHashMap<Triangle> facesmap = new TIntObjectHashMap<Triangle>();
 		String line = "";
 		boolean quad = false;
@@ -257,15 +257,15 @@ public class UNVReader
 		{
 			e.printStackTrace();
 		}
-		logger.debug("Found "+facesmap.size()+" triangles");
+		logger.fine("Found "+facesmap.size()+" triangles");
 		if (quad)
-			logger.error("Quadrangles have been detected and converted into triangles.  If errors occur, convert this UNV file to only use triangles!");
+			logger.severe("Quadrangles have been detected and converted into triangles.  If errors occur, convert this UNV file to only use triangles!");
 		return facesmap;
 	}
 	
 	private static void readGroup(BufferedReader rd, String type, Mesh mesh, TIntObjectHashMap<Triangle> facesmap)
 	{
-		logger.debug("Reading groups");
+		logger.fine("Reading groups");
 		String line = "";
 		int groupIdx = 0;
 		try

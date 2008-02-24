@@ -39,12 +39,12 @@ import java.util.Iterator;
 import java.util.HashSet;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 
 public class MMesh1DWriter
 {
-	private static Logger logger=Logger.getLogger(MMesh1DWriter.class);
+	private static Logger logger=Logger.getLogger(MMesh1DWriter.class.getName());
 	
 	/**
 	 * Used by {@link writeObject}
@@ -53,7 +53,7 @@ public class MMesh1DWriter
 		throws IOException
 	{
 		//save nodes
-		logger.debug("begin writing "+nodesFile);
+		logger.fine("begin writing "+nodesFile);
 		DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile, true)));
 		DataOutputStream refout=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile, true)));
 		long offsetNodes = nodesFile.length();
@@ -96,7 +96,7 @@ public class MMesh1DWriter
 		nodes.appendChild(file);
 		nodes.appendChild(references);
 		
-		logger.debug("end writing "+nodesFile);
+		logger.fine("end writing "+nodesFile);
 		return nodes;
 /*		// Append elements to <nodes>
 		return XMLHelper.parseXMLString(document, "<nodes>"+
@@ -115,7 +115,7 @@ public class MMesh1DWriter
 		throws IOException
 	{
 		//save beams
-		logger.debug("begin writing "+beamsFile);
+		logger.fine("begin writing "+beamsFile);
 		DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(beamsFile, true)));
 		long offsetBeams = beamsFile.length();
 		int i=0;
@@ -129,7 +129,7 @@ public class MMesh1DWriter
 			out.writeInt(pt2.getLabel());
 		}
 		out.close();
-		logger.debug("end writing "+beamsFile);
+		logger.fine("end writing "+beamsFile);
 		
 		Element beams=document.createElement("beams");
 		Element number=document.createElement("number");

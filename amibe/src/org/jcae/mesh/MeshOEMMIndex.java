@@ -24,7 +24,7 @@ package org.jcae.mesh;
 import org.jcae.mesh.oemm.*;
 import org.jcae.mesh.cad.CADShape;
 import org.jcae.mesh.cad.CADShapeFactory;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import java.io.File;
 
 /**
@@ -32,7 +32,7 @@ import java.io.File;
  */
 public class MeshOEMMIndex
 {
-	private static Logger logger=Logger.getLogger(MeshOEMMIndex.class);
+	private static Logger logger=Logger.getLogger(MeshOEMMIndex.class.getName());
 
 	private static void check(String brepfilename, int lmax, int triangles_max, String soupDir, String outDir)
 	{

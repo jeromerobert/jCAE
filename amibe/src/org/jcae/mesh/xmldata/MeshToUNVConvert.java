@@ -30,12 +30,12 @@ import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.zip.GZIPOutputStream;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 
 public class MeshToUNVConvert extends JCAEXMLData
 {
-	private static Logger logger=Logger.getLogger(MeshToUNVConvert.class);
+	private static Logger logger=Logger.getLogger(MeshToUNVConvert.class.getName());
 	private String unvFile;
 	private PrintStream streamN, streamT, streamG;
 	private final static String CR=System.getProperty("line.separator");
@@ -94,7 +94,7 @@ public class MeshToUNVConvert extends JCAEXMLData
 	public void finish(int nr, int nrIntNodes, int nrTriangles, double [] coordRefs)
 	{
 		int nrNodes = nrIntNodes + nr;
-		logger.debug("Append coordinates of "+nr+" nodes");
+		logger.fine("Append coordinates of "+nr+" nodes");
 		for (int i = 0; i < nr; i++)
 			MeshExporter.writeSingleNodeUNV(streamN, i+nrIntNodes+1, coordRefs[3*i], coordRefs[3*i+1], coordRefs[3*i+2]);
 		try

@@ -38,14 +38,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * Decimates all cells of an OEMM.
  */
 public class MeshOEMMDecimate
 {
-	private static Logger logger=Logger.getLogger(MeshOEMMDecimate.class);
+	private static Logger logger=Logger.getLogger(MeshOEMMDecimate.class.getName());
 	private static final int SIZE_OF_BUFFER = 20000024;
 	private final byte[] buffer = new byte[SIZE_OF_BUFFER];
 	

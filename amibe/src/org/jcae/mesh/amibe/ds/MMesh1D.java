@@ -33,7 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 import java.io.File;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * 1D discretization of the whole shape.
@@ -43,7 +43,7 @@ import org.apache.log4j.Logger;
 
 public class MMesh1D extends MMesh0D
 {
-	private static Logger logger = Logger.getLogger(MMesh1D.class);	
+	private static Logger logger=Logger.getLogger(MMesh1D.class.getName());	
 
 	private String filename;
 	
@@ -211,7 +211,7 @@ public class MMesh1D extends MMesh0D
 	 */
 	public void updateNodeLabels()
 	{
-		logger.debug("Update node labels");
+		logger.fine("Update node labels");
 		//  Resets all labels
 		CADExplorer expE = CADShapeFactory.getFactory().newExplorer();
 		for (expE.init(shape, CADShapeEnum.EDGE); expE.more(); expE.next())
@@ -246,7 +246,7 @@ public class MMesh1D extends MMesh0D
 	 */
 	public void duplicateEdges()
 	{
-		logger.debug("Compute vertex references");
+		logger.fine("Compute vertex references");
 		CADExplorer expV = CADShapeFactory.getFactory().newExplorer();
 		//  For each topological vertex, compute the list of
 		//  MNode1D objects which are bound to this vertex.
@@ -536,14 +536,14 @@ public class MMesh1D extends MMesh0D
 	{
 		String cr=System.getProperty("line.separator");
 		StringBuilder r = new StringBuilder("MMesh1D"+cr);
-		logger.debug("Printing "+r.toString());
+		logger.fine("Printing "+r.toString());
 		for(Iterator<SubMesh1D> it=mapTEdgeToSubMesh1D.values().iterator();it.hasNext();)
 		{
 			SubMesh1D submesh1d = it.next();
 			if (null != submesh1d)
 				r.append(submesh1d);
 		}
-		logger.debug("...done");
+		logger.fine("...done");
 		return r.toString();
 	}
 }

@@ -26,14 +26,14 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.util.KdTree;
 import java.util.HashMap;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * (Obsolete) Fuse near nodes in a <code>MMesh3D</code> instance.
  */
 public class Fuse
 {
-	private static Logger logger=Logger.getLogger(Fuse.class);
+	private static Logger logger=Logger.getLogger(Fuse.class.getName());
 	private Mesh mesh;
 	private double tolerance = 0.0;
 	
@@ -64,7 +64,7 @@ public class Fuse
 	 */
 	public void compute()
 	{
-		logger.debug("Running Fuse");
+		logger.fine("Running Fuse");
 		double [] bmin = new double[3];
 		double [] bmax = new double[3];
 		for (int i = 0; i < 3; i++)
@@ -111,13 +111,13 @@ public class Fuse
 				octree.add(n);
 			else
 			{
-				logger.debug("Node "+n+" is removed, it is too close from "+p);
+				logger.fine("Node "+n+" is removed, it is too close from "+p);
 				nSubst++;
 				map.put(n, p);
 				n.setRef(0);
 			}
 		}
-		logger.debug(""+nSubst+" node(s) are removed");
+		logger.fine(""+nSubst+" node(s) are removed");
 		for (Triangle t: mesh.getTriangles())
 		{
 			for (int j = 0; j < 4; j++)

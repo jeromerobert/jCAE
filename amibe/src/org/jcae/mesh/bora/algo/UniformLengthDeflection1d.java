@@ -29,7 +29,8 @@ import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.cad.*;
 import java.util.ArrayList;
 import java.util.Iterator;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Computes a new discretization so that all edges have a uniform length.
@@ -40,7 +41,7 @@ import org.apache.log4j.Logger;
  */
 public class UniformLengthDeflection1d implements AlgoInterface
 {
-	private static Logger logger=Logger.getLogger(UniformLengthDeflection1d.class);
+	private static Logger logger=Logger.getLogger(UniformLengthDeflection1d.class.getName());
 	private double maxlen;
 	private double deflection;
 	private boolean relDefl;
@@ -90,7 +91,7 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		CADEdge E = (CADEdge) cell.getShape();
 		SubMesh1D submesh1d = new SubMesh1D(E);
 		d.setMesh(submesh1d);
-		logger.debug(""+this+"  shape: "+E);
+		logger.fine(""+this+"  shape: "+E);
 		
 		ArrayList<MEdge1D> edgelist = submesh1d.getEdges();
 		ArrayList<MNode1D> nodelist = submesh1d.getNodes();
@@ -214,10 +215,10 @@ public class UniformLengthDeflection1d implements AlgoInterface
 			edgelist.add(e);
 			n1 = n2;
 		}
-		if (logger.isDebugEnabled())
+		if (logger.isLoggable(Level.FINE))
 		{
-			logger.debug("  Edges   "+edgelist.size());
-			logger.debug("  Nodes   "+nodelist.size());
+			logger.fine("  Edges   "+edgelist.size());
+			logger.fine("  Nodes   "+nodelist.size());
 		}
 		return true;
 	}

@@ -1,3 +1,9 @@
+Sun Feb 24 18:40:59 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/JCAEFormatter.java: Replace log4j by
+	java.util.logging.Logger in all java files.  This new class is
+	designed to produce log output similar to log4j.
+
 Wed Jan 16 11:25:53 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Mesh.java (buildAdjacency): Use an

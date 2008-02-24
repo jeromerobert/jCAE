@@ -29,14 +29,14 @@ import gnu.trove.THashMap;
 import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TObjectHashingStrategy;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * Mesh graph.
  */
 public class BCADGraph
 {
-	private static Logger logger=Logger.getLogger(BCADGraph.class);
+	private static Logger logger=Logger.getLogger(BCADGraph.class.getName());
 	// Backward link to the model
 	private BModel model;
 	// Cell root
@@ -102,7 +102,7 @@ public class BCADGraph
 					rev.bindReversed(cell);
 				}
 				seen.put(sub, sub);
-				logger.debug("  Add submesh: "+sub+" "+cell);
+				logger.fine("  Add submesh: "+sub+" "+cell);
 			}
 		}
 		// Add indices

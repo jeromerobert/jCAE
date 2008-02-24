@@ -45,14 +45,14 @@ import org.jcae.mesh.amibe.ds.MeshParameters;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.HashMap;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * @see org.jcae.mesh.amibe.algos2d.BasicMesh
  */
 public class Basic2d implements AlgoInterface
 {
-	private static Logger logger=Logger.getLogger(Basic2d.class);
+	private static Logger logger=Logger.getLogger(Basic2d.class.getName());
 	private double maxlen;
 	private double deflection;
 	private boolean relDefl;
@@ -80,7 +80,7 @@ public class Basic2d implements AlgoInterface
 	{
 		BCADGraphCell cell = d.getGraphCell();
 		CADFace F = (CADFace) cell.getShape();
-		logger.debug(""+this+"  shape: "+F);
+		logger.fine(""+this+"  shape: "+F);
 
 		TriangleTraitsBuilder ttb = new TriangleTraitsBuilder();
 		ttb.addVirtualHalfEdge();

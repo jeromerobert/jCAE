@@ -26,7 +26,7 @@ import java.nio.channels.FileChannel;
 import java.text.NumberFormat;
 import java.util.zip.GZIPOutputStream;
 import javax.xml.parsers.ParserConfigurationException;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -43,7 +43,7 @@ public class Amibe2UNV
 {
 	private final static String CR=System.getProperty("line.separator");			
 	private final static NumberFormat FORMAT_I10=new MeshExporter.FormatI10();	
-	private static Logger logger=Logger.getLogger(MeshExporter.class);
+	private static Logger logger=Logger.getLogger(MeshExporter.class.getName());
 	public final static int UNIT_METER=1;
 	public final static int UNIT_MM=5;
 	

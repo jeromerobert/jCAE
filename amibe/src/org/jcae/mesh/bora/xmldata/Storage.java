@@ -58,11 +58,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import gnu.trove.TObjectIntHashMap;
 import gnu.trove.TIntObjectHashMap;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 public class Storage
 {
-	private static Logger logger=Logger.getLogger(Storage.class);
+	private static Logger logger=Logger.getLogger(Storage.class.getName());
 
 	public static void writeId(File dir, int id)
 	{
@@ -234,7 +234,7 @@ public class Storage
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
-		logger.debug("end reading cell "+id);
+		logger.fine("end reading cell "+id);
 	}
 
 	/**
@@ -293,7 +293,7 @@ public class Storage
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
-		logger.debug("end reading cell "+id);
+		logger.fine("end reading cell "+id);
 	}
 
 	private static TObjectIntHashMap<MNode1D> write1dNodeReferences(File dir, Collection<MNode1D> nodelist, BCADGraphCell edge)
@@ -304,7 +304,7 @@ public class Storage
 			refFile.delete();
 		
 		// Save references
-		logger.debug("begin writing "+refFile);
+		logger.fine("begin writing "+refFile);
 		DataOutputStream refsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile, true)));
 		TObjectIntHashMap<MNode1D> localIdx = new TObjectIntHashMap<MNode1D>(nodelist.size());
 
@@ -337,7 +337,7 @@ public class Storage
 			refFile.delete();
 
 		// Save references
-		logger.debug("begin writing "+refFile+" face "+id);
+		logger.fine("begin writing "+refFile+" face "+id);
 		DataOutputStream refsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile, true)));
 
 		TObjectIntHashMap<Vertex> localIdx = new TObjectIntHashMap<Vertex>(nodelist.size());
@@ -372,7 +372,7 @@ public class Storage
 		if(parasFile.exists())
 			parasFile.delete();
 		
-		logger.debug("begin writing "+nodesFile+" and "+parasFile);
+		logger.fine("begin writing "+nodesFile+" and "+parasFile);
 		DataOutputStream nodesout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile, true)));
 		DataOutputStream parasout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(parasFile, true)));
 		for (Iterator<MNode1D> itn = nodelist.iterator(); itn.hasNext(); )
@@ -399,7 +399,7 @@ public class Storage
 			parasFile.delete();
 
 		// Save nodes
-		logger.debug("begin writing "+nodesFile+" and "+parasFile);
+		logger.fine("begin writing "+nodesFile+" and "+parasFile);
 		DataOutputStream nodesout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile, true)));
 		DataOutputStream parasout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(parasFile, true)));
 		double [] xyz;
@@ -431,7 +431,7 @@ public class Storage
 		if(beamsFile.exists())
 			beamsFile.delete();
 		
-		logger.debug("begin writing "+beamsFile);
+		logger.fine("begin writing "+beamsFile);
 		DataOutputStream beamsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(beamsFile, true)));
 		for (Iterator<MEdge1D> ite = edgelist.iterator(); ite.hasNext(); )
 		{
@@ -452,7 +452,7 @@ public class Storage
 			facesFile.delete();
 
 		// Save faces
-		logger.debug("begin writing "+facesFile);
+		logger.fine("begin writing "+facesFile);
 		DataOutputStream facesout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(facesFile, true)));
 		for (Triangle f: trianglelist)
 		{
@@ -492,7 +492,7 @@ public class Storage
 		int numberOfReferences = refs.length / 2;
 		Vertex [] nodelist = new Vertex[numberOfNodes];
 		double [] coord = new double[3];
-		logger.debug("Reading "+numberOfNodes+" nodes");
+		logger.fine("Reading "+numberOfNodes+" nodes");
 		mesh.ensureCapacity(2*numberOfNodes);
 		for (int i = 0; i < numberOfNodes; i++)
 		{
@@ -517,7 +517,7 @@ public class Storage
 		}
 		fcN.close();
 		MeshExporter.clean(bbN);
-		logger.debug("end reading "+dir+File.separator+"n");
+		logger.fine("end reading "+dir+File.separator+"n");
 		return nodelist;
 	}
 
@@ -530,7 +530,7 @@ public class Storage
 		IntBuffer trianglesBuffer = bbT.asIntBuffer();
 
 		int numberOfTriangles = (int) trianglesFile.length() / (4*nr);
-		logger.debug("Reading "+numberOfTriangles+" elements");
+		logger.fine("Reading "+numberOfTriangles+" elements");
 		mesh.ensureCapacity(numberOfTriangles);
 		Triangle face;
 		Vertex [] pts = new Vertex[nr];

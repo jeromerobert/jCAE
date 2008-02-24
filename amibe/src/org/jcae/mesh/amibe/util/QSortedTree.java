@@ -25,7 +25,8 @@ import java.util.Map;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.io.Serializable;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Binary trees to store quality factors.
@@ -37,7 +38,7 @@ import org.apache.log4j.Logger;
  */
 public abstract class QSortedTree<E> implements Serializable
 {
-	private static Logger logger = Logger.getLogger(QSortedTree.class);	
+	private static Logger logger=Logger.getLogger(QSortedTree.class.getName());	
 	protected final Node<E> root = newNode(null, Double.MAX_VALUE);
 	// Mapping between objects and tree nodes
 	private transient Map<E, Node<E>> map = new THashMap<E, Node<E>>();
@@ -128,8 +129,8 @@ public abstract class QSortedTree<E> implements Serializable
 		*/
 		public Node<E> rotateL()
 		{
-			//if (logger.isDebugEnabled())
-			//	logger.debug("Single left rotation around "+this);
+			//if (logger.isLoggable(Level.FINE))
+			//	logger.fine("Single left rotation around "+this);
 			final Node<E> right = child[1];
 			child[1] = right.child[0];
 			right.child[0] = this;
@@ -149,8 +150,8 @@ public abstract class QSortedTree<E> implements Serializable
 		*/
 		public Node<E> rotateR()
 		{
-			//if (logger.isDebugEnabled())
-			//	logger.debug("Single right rotation around "+this);
+			//if (logger.isLoggable(Level.FINE))
+			//	logger.fine("Single right rotation around "+this);
 			final Node<E> left = child[0];
 			child[0] = left.child[1];
 			left.child[1] = this;
@@ -172,8 +173,8 @@ public abstract class QSortedTree<E> implements Serializable
 		*/
 		public Node<E> rotateRL()
 		{
-			//if (logger.isDebugEnabled())
-			//	logger.debug("Right+left rotation around "+this);
+			//if (logger.isLoggable(Level.FINE))
+			//	logger.fine("Right+left rotation around "+this);
 			final Node<E> right = child[1];          // C
 			final Node<E> newRoot = right.child[0];  // B
 			// Right rotation
@@ -204,8 +205,8 @@ public abstract class QSortedTree<E> implements Serializable
 		*/
 		public Node<E> rotateLR()
 		{
-			//if (logger.isDebugEnabled())
-			//	logger.debug("Left+right rotation around "+this);
+			//if (logger.isLoggable(Level.FINE))
+			//	logger.fine("Left+right rotation around "+this);
 			final Node<E> left = child[0];         // A
 			final Node<E> newRoot = left.child[1]; // B
 	
@@ -311,8 +312,8 @@ public abstract class QSortedTree<E> implements Serializable
 	{
 		assert map.get(o) == null : "Object already in tree: "+o;
 		Node<E> node = newNode(o, value);
-		if (logger.isDebugEnabled())
-			logger.debug("Insert "+node+" "+" value: "+value+" "+o);
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("Insert "+node+" "+" value: "+value+" "+o);
 		map.put(o, node);
 		nrNodes++;
 		insertNode(node);
@@ -327,8 +328,8 @@ public abstract class QSortedTree<E> implements Serializable
 	public final boolean remove(E o)
 	{
 		Node<E> p = map.get(o);
-		if (logger.isDebugEnabled())
-			logger.debug("Remove "+p+" "+o);
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("Remove "+p+" "+o);
 		if (p == null)
 			return false;
 		nrNodes--;
@@ -357,8 +358,8 @@ public abstract class QSortedTree<E> implements Serializable
 	public final boolean update(E o, double value)
 	{
 		Node<E> p = map.get(o);
-		if (logger.isDebugEnabled())
-			logger.debug("Update "+p+" content to "+value);
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("Update "+p+" content to "+value);
 		if (p == null)
 			return false;
 		Node<E> r = removeNode(p);

@@ -20,7 +20,8 @@
 
 package org.jcae.mesh.amibe.util;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * PAVL binary trees to store quality factors.
@@ -32,7 +33,7 @@ import org.apache.log4j.Logger;
  */
 public class PAVLSortedTree<E> extends QSortedTree<E>
 {
-	private static Logger logger = Logger.getLogger(PAVLSortedTree.class);	
+	private static Logger logger=Logger.getLogger(PAVLSortedTree.class.getName());	
 	
 	private static class Node<E> extends QSortedTree.Node<E>
 	{
@@ -273,8 +274,8 @@ public class PAVLSortedTree<E> extends QSortedTree<E>
 		assert o != null;
 		Node<E> p = (Node<E>) o;
 		Node<E> ret = p;
-		if (logger.isDebugEnabled())
-			logger.debug("Value: "+ret);
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("Value: "+ret);
 		int lastDir = 0;
 		Node<E> q = (Node<E>) p.parent;
 		if (q.child[1] == p)

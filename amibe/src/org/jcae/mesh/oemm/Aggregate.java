@@ -22,8 +22,8 @@ package org.jcae.mesh.oemm;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Merge adjacent octree nodes.
@@ -34,7 +34,7 @@ import org.apache.log4j.Logger;
 */
 public class Aggregate
 {
-	private static Logger logger = Logger.getLogger(Aggregate.class);	
+	private static Logger logger=Logger.getLogger(Aggregate.class.getName());	
 	
 	// Maximum level difference between adjacent cells.
 	// With a difference of N, a node has at most
@@ -145,7 +145,7 @@ public class Aggregate
 		for (int level = nonLeaves.length - 1; level >= 0; level--)
 		{
 			int merged = 0;
-			logger.debug(" Checking neighbors at level "+level);
+			logger.fine(" Checking neighbors at level "+level);
 			for (OEMM.Node current: nonLeaves[level])
 			{
 				assert !current.isLeaf;
@@ -163,7 +163,7 @@ public class Aggregate
 				}
 			}
 			nonLeaves[level] = null;
-			logger.debug(" Merged octree cells: "+merged);
+			logger.fine(" Merged octree cells: "+merged);
 			ret += merged;
 		}
 		logger.info("Octree cells merged: "+ret);
@@ -175,8 +175,8 @@ public class Aggregate
 		// If an adjacent node has a size lower than minSize, children
 		// nodes must not be merged
 		int minSize = current.size >> MAX_DELTA_LEVEL;
-		if (logger.isDebugEnabled())
-			logger.debug("Checking neighbors of "+current);
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("Checking neighbors of "+current);
 		int [] ijk = new int[3];
 		for (int i = 0; i < neighborOffset.length/3; i++)
 		{
@@ -187,8 +187,8 @@ public class Aggregate
 			if (n == null || n.isLeaf)
 				continue;
 			assert n.size == current.size;
-			if (logger.isDebugEnabled())
-				logger.debug("Node "+n+" contains "+Integer.toHexString(ijk[0])+" "+Integer.toHexString(ijk[1])+" " +Integer.toHexString(ijk[2]));
+			if (logger.isLoggable(Level.FINE))
+				logger.fine("Node "+n+" contains "+Integer.toHexString(ijk[0])+" "+Integer.toHexString(ijk[1])+" " +Integer.toHexString(ijk[2]));
 			//  We found the adjacent node with same size,
 			//  and have now to find all its children which are
 			//  adjacent to current node.
@@ -204,8 +204,8 @@ public class Aggregate
 				{
 					if (c.size < minSize)
 					{
-						if (logger.isDebugEnabled())
-							logger.debug("Found too deep neighbor: "+c+"    "+c.tn);
+						if (logger.isLoggable(Level.FINE))
+							logger.fine("Found too deep neighbor: "+c+"    "+c.tn);
 						return false;
 					}
 					continue;

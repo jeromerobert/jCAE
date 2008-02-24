@@ -29,12 +29,12 @@ import java.text.ParsePosition;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import gnu.trove.TIntHashSet;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 
 public class ExtractShell
 {
-	private static Logger logger=Logger.getLogger(ExtractShell.class);
+	private static Logger logger=Logger.getLogger(ExtractShell.class.getName());
 	private static int lineno = 0;
 	private static String CR = System.getProperty("line.separator");
 	private final static NumberFormat FORMAT_I10=new FormatI10();
@@ -162,7 +162,7 @@ public class ExtractShell
 
 	private static void readNodes(BufferedReader rd, PrintStream outNodes, TIntHashSet inodes)
 	{
-		logger.debug("Reading nodes");
+		logger.fine("Reading nodes");
 		String line = "";
 		int count = 0;
 		int inner = 0;
@@ -199,7 +199,7 @@ public class ExtractShell
 	private static TIntHashSet readFace(BufferedReader rd, PrintStream outFaces)
 	{
 		TIntHashSet inodes = new TIntHashSet();
-		logger.debug("Reading triangles");
+		logger.fine("Reading triangles");
 		HashMap<Face, Face> facemap = new HashMap<Face, Face>();
 		String line = "";
 		

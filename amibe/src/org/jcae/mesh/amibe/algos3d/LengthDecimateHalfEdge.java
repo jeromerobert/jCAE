@@ -33,11 +33,12 @@ import java.io.File;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 {
-	private static Logger logger=Logger.getLogger(LengthDecimateHalfEdge.class);
+	private static Logger logger=Logger.getLogger(LengthDecimateHalfEdge.class.getName());
 	private Vertex v3;
 	private boolean freeEdgeOnly = false;
 
@@ -61,17 +62,17 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			if (key.equals("size"))
 			{
 				tolerance = new Double(val).doubleValue();
-				logger.debug("Tolerance: "+tolerance);
+				logger.fine("Tolerance: "+tolerance);
 			}
 			else if (key.equals("maxtriangles"))
 			{
 				nrFinal = Integer.valueOf(val).intValue();
-				logger.debug("Nr max triangles: "+nrFinal);
+				logger.fine("Nr max triangles: "+nrFinal);
 			}
 			else if (key.equals("freeEdgeOnly"))
 			{
 				freeEdgeOnly = new Boolean(val).booleanValue();
-				logger.debug("freeEdgeOnly: "+freeEdgeOnly);
+				logger.fine("freeEdgeOnly: "+freeEdgeOnly);
 			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
@@ -128,14 +129,14 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	public HalfEdge processEdge(HalfEdge current, double costCurrent)
 	{
 		current = uniqueOrientation(current);
-		if (logger.isDebugEnabled())
+		if (logger.isLoggable(Level.FINE))
 		{
-			logger.debug("Contract edge: "+current+" into "+v3+"  cost="+costCurrent);
+			logger.fine("Contract edge: "+current+" into "+v3+"  cost="+costCurrent);
 			if (current.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 			{
-				logger.debug("Non-manifold edge:");
+				logger.fine("Non-manifold edge:");
 				for (Iterator<AbstractHalfEdge> it = current.fanIterator(); it.hasNext(); )
-					logger.debug(" --> "+it.next());
+					logger.fine(" --> "+it.next());
 			}
 		}
 		// HalfEdge instances on t1 and t2 will be deleted

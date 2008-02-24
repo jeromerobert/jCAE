@@ -28,7 +28,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.jcae.mesh.xmldata.XMLHelper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -42,7 +42,7 @@ import org.xml.sax.SAXException;
 
 public class ComputeEdgesConnectivity
 {
-	private static Logger logger=Logger.getLogger(ComputeEdgesConnectivity.class);
+	private static Logger logger=Logger.getLogger(ComputeEdgesConnectivity.class.getName());
 	
 	private static class Edge
 	{
@@ -134,7 +134,7 @@ public class ComputeEdgesConnectivity
 			edges.put(e2, edges.get(e2)+1);
 			edges.put(e3, edges.get(e3)+1);
 		}
-		logger.debug("Number of imported edges: "+edges.size());		
+		logger.fine("Number of imported edges: "+edges.size());		
 		
 		in.close();
 		

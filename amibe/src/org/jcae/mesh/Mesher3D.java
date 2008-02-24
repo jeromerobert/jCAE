@@ -31,7 +31,7 @@ import java.util.Properties;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.algos3d.*;
 import org.jcae.mesh.xmldata.MeshReader;
@@ -42,7 +42,7 @@ import org.jcae.mesh.xmldata.MeshWriter;
  */
 public class Mesher3D
 {
-	private static Logger logger=Logger.getLogger(Mesher3D.class);
+	private static Logger logger=Logger.getLogger(Mesher3D.class.getName());
 
 	/** 
 	 * Mesh a CAD surface.
@@ -82,7 +82,7 @@ public class Mesher3D
 		}
 		catch(IOException ex)
 		{
-			logger.warn(ex.getMessage());
+			logger.warning(ex.getMessage());
 			ex.printStackTrace();
 		}
 	}

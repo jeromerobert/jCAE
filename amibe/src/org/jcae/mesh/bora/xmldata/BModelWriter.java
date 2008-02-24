@@ -29,11 +29,11 @@ import java.util.Iterator;
 import java.util.Collection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 public class BModelWriter
 {
-	private static Logger logger=Logger.getLogger(BModelWriter.class);
+	private static Logger logger=Logger.getLogger(BModelWriter.class.getName());
 
 	/**
 	 * Write the current object to a XML file and binary files. The XML file
@@ -45,7 +45,7 @@ public class BModelWriter
 		try
 		{
 			File file = new File(model.getOutputDir(), model.getOutputFile());
-			logger.debug("Writing file "+file);
+			logger.fine("Writing file "+file);
 
 			// Create and fill the DOM
 			Document document=JCAEXMLWriter.createJcaeBoraDocument();

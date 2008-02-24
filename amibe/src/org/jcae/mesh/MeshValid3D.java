@@ -27,14 +27,14 @@ import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshExporter;
 import org.jcae.mesh.amibe.validation.*;
 import java.io.IOException;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * This class illustrates how to perform quality checks.
  */
 public class MeshValid3D
 {
-	private static Logger logger=Logger.getLogger(MeshValid3D.class);
+	private static Logger logger=Logger.getLogger(MeshValid3D.class.getName());
 
 	private static void check(String brepfilename, String xmlDir, float discr, float defl)
 	{

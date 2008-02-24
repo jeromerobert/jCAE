@@ -23,7 +23,8 @@ package org.jcae.mesh.oemm;
 import java.util.ArrayList;
 import gnu.trove.TIntArrayList;
 import java.io.Serializable;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class represents an empty OEMM.
@@ -41,7 +42,7 @@ public class OEMM implements Serializable
 {
 	private static final long serialVersionUID = -8244900407797088903L;
 
-	private static Logger logger = Logger.getLogger(OEMM.class);	
+	private static Logger logger=Logger.getLogger(OEMM.class.getName());	
 	
 	/**
 	 * Maximal tree depth.
@@ -115,12 +116,12 @@ public class OEMM implements Serializable
 		depth = l;
 		if (depth > MAXLEVEL)
 		{
-			logger.error("Max. level too high");
+			logger.severe("Max. level too high");
 			depth = MAXLEVEL;
 		}
 		else if (depth < 1)
 		{
-			logger.error("Max. level too low");
+			logger.severe("Max. level too low");
 			depth = 1;
 		}
 	}
@@ -333,7 +334,7 @@ public class OEMM implements Serializable
 			x0[i] -= 0.005*dmax;
 		dmax *= 1.01;
 		x0[3] = dGridSize / dmax;
-		logger.debug("Lower left corner : ("+x0[0]+", "+x0[1]+", "+x0[2]+")   Bounding box length: "+dmax);
+		logger.fine("Lower left corner : ("+x0[0]+", "+x0[1]+", "+x0[2]+")   Bounding box length: "+dmax);
 	}
 
 	/**
@@ -456,8 +457,8 @@ public class OEMM implements Serializable
 	 */
 	public final boolean walk(TraversalProcedure proc)
 	{
-		if (logger.isDebugEnabled())
-			logger.debug("walk: init "+proc.getClass().getName());
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("walk: init "+proc.getClass().getName());
 		int s = gridSize;
 		int l = 0;
 		int i0 = 0;
@@ -472,10 +473,10 @@ public class OEMM implements Serializable
 		{
 			int res = 0;
 			int visit = octreeStack[l].isLeaf ? TraversalProcedure.LEAF : TraversalProcedure.PREORDER;
-			if (logger.isDebugEnabled())
-				logger.debug("Found "+(octreeStack[l].isLeaf ? "LEAF" : "PREORDER")+Integer.toHexString(s)+" "+Integer.toHexString(i0)+" "+Integer.toHexString(j0)+" "+Integer.toHexString(k0)+" "+octreeStack[l]);
+			if (logger.isLoggable(Level.FINE))
+				logger.fine("Found "+(octreeStack[l].isLeaf ? "LEAF" : "PREORDER")+Integer.toHexString(s)+" "+Integer.toHexString(i0)+" "+Integer.toHexString(j0)+" "+Integer.toHexString(k0)+" "+octreeStack[l]);
 			res = proc.action(this, octreeStack[l], posStack[l], visit);
-			logger.debug("  Res; "+res);
+			logger.fine("  Res; "+res);
 			if (res == TraversalProcedure.ABORT)
 				return false;
 			if (!octreeStack[l].isLeaf && res == TraversalProcedure.OK)
@@ -492,7 +493,7 @@ public class OEMM implements Serializable
 						posStack[l] = i;
 						break;
 					}
-					logger.debug("Empty node skipped: pos="+i);
+					logger.fine("Empty node skipped: pos="+i);
 				}
 				if ((posStack[l] & 1) != 0)
 					i0 += s;
@@ -526,17 +527,17 @@ public class OEMM implements Serializable
 					{
 						s <<= 1;
 						l--;
-						if (logger.isDebugEnabled())
-							logger.debug("Found POSTORDER: "+Integer.toHexString(s)+" "+Integer.toHexString(i0)+" "+Integer.toHexString(j0)+" "+Integer.toHexString(k0)+" "+octreeStack[l]);
+						if (logger.isLoggable(Level.FINE))
+							logger.fine("Found POSTORDER: "+Integer.toHexString(s)+" "+Integer.toHexString(i0)+" "+Integer.toHexString(j0)+" "+Integer.toHexString(k0)+" "+octreeStack[l]);
 						res = proc.action(this, octreeStack[l], posStack[l], TraversalProcedure.POSTORDER);
-						logger.debug("  Res; "+res);
+						logger.fine("  Res; "+res);
 					}
 					else
 					{
 						if (null != octreeStack[l-1].child[posStack[l]])
 							break;
-						if (logger.isDebugEnabled())
-							logger.debug("Empty node skipped: pos="+posStack[l]);
+						if (logger.isLoggable(Level.FINE))
+							logger.fine("Empty node skipped: pos="+posStack[l]);
 					}
 				}
 				if (l == 0)

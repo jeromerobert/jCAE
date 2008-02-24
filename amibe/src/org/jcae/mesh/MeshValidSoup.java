@@ -23,14 +23,14 @@ package org.jcae.mesh;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.oemm.*;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * This class illustrates how to perform quality checks.
  */
 public class MeshValidSoup
 {
-	private static Logger logger=Logger.getLogger(MeshValidSoup.class);
+	private static Logger logger=Logger.getLogger(MeshValidSoup.class.getName());
 
 	public static class ComputeTriangleQuality implements RawStorage.SoupReaderInterface
 	{

@@ -24,7 +24,7 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.*;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 
 /**
@@ -121,7 +121,7 @@ public class UNV2Amibe
 		int nbElement;
 	}
 	
-	private static Logger logger=Logger.getLogger(UNV2Amibe.class);
+	private static Logger logger=Logger.getLogger(UNV2Amibe.class.getName());
 	private String unitBlock;
 		
 	private int numberOfNodes, numberOfTriangles;
@@ -448,7 +448,7 @@ public class UNV2Amibe
 
 	private void convertFaces(BufferedReader rd, FileChannel faceChannel) throws IOException
 	{
-		logger.debug("Reading triangles");
+		logger.fine("Reading triangles");
 		String line = "";
 
 		ByteBuffer bb=ByteBuffer.allocate(3*4);

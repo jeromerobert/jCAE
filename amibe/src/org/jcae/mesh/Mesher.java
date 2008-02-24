@@ -43,7 +43,7 @@ import org.jcae.mesh.amibe.ds.MMesh1D;
 import org.jcae.mesh.amibe.ds.MeshParameters;
 import org.jcae.mesh.xmldata.*;
 import org.jcae.mesh.cad.*;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import gnu.trove.TIntArrayList;
 import gnu.trove.THashSet;
@@ -63,7 +63,7 @@ import gnu.trove.THashSet;
  */
 public class Mesher
 {
-	private static Logger logger=Logger.getLogger(Mesher.class);
+	private static Logger logger=Logger.getLogger(Mesher.class.getName());
 	private static SimpleDateFormat DATE_FORMAT =
 		new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
@@ -265,17 +265,17 @@ public class Mesher
 		}
 		catch(InitialTriangulationException ex)
 		{
-			logger.error("Face "+iFace+" cannot be triangulated, skipping...");
+			logger.severe("Face "+iFace+" cannot be triangulated, skipping...");
 			toReturn=false;
 		}
 		catch(InvalidFaceException ex)
 		{
-			logger.error("Face "+iFace+" is invalid, skipping...");
+			logger.severe("Face "+iFace+" is invalid, skipping...");
 			toReturn=false;
 		}
 		catch(Exception ex)
 		{
-			logger.error("Unexpected error when triangulating face "+iFace+", skipping...");
+			logger.severe("Unexpected error when triangulating face "+iFace+", skipping...");
 			ex.printStackTrace();
 			toReturn=false;
 		}
@@ -416,9 +416,9 @@ public class Mesher
 
 			int iFace = 0;
 
-			logger.debug("org.jcae.mesh.Mesher.minFace="+minFace);
-			logger.debug("org.jcae.mesh.Mesher.maxFace="+maxFace);
-			logger.debug("org.jcae.mesh.Mesher.meshFace="+numFace);
+			logger.fine("org.jcae.mesh.Mesher.minFace="+minFace);
+			logger.fine("org.jcae.mesh.Mesher.maxFace="+maxFace);
+			logger.fine("org.jcae.mesh.Mesher.meshFace="+numFace);
 			int nrFaces = 0;
 			THashSet<CADShape> seen = new THashSet<CADShape>();
 			for (expF.init(shape, CADShapeEnum.FACE); expF.more(); expF.next())
@@ -460,7 +460,7 @@ public class Mesher
 			}
 			catch(Exception ex)
 			{
-				logger.warn(ex.getMessage());
+				logger.warning(ex.getMessage());
 				ex.printStackTrace();
 			}
 			exportMesh();

@@ -31,7 +31,7 @@ import org.jcae.mesh.amibe.patch.Vertex2D;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Collection;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * Swap edges which are not Delaunay.  In an Euclidian 2D metrics, there
@@ -43,7 +43,7 @@ import org.apache.log4j.Logger;
  */
 public class CheckDelaunay
 {
-	private static Logger logger=Logger.getLogger(CheckDelaunay.class);
+	private static Logger logger=Logger.getLogger(CheckDelaunay.class.getName());
 	private final Mesh2D mesh;
 	
 	/**
@@ -78,7 +78,7 @@ public class CheckDelaunay
 		Vertex2D v;
 		int cnt = 0;
 		mesh.pushCompGeom(3);
-		logger.debug(" Checking Delaunay criterion");
+		logger.fine(" Checking Delaunay criterion");
 		ot = new VirtualHalfEdge2D();
 		sym = new VirtualHalfEdge2D();
 
@@ -129,7 +129,7 @@ public class CheckDelaunay
 					}
 				}
 			}
-			logger.debug(" Found "+cnt+" non-Delaunay triangles");
+			logger.fine(" Found "+cnt+" non-Delaunay triangles");
 			for (FakeEdge e: toSwap)
 			{
 				ot.bind(e.triangle);

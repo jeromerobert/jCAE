@@ -53,12 +53,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import gnu.trove.TIntIntHashMap;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 
 public class MeshReader
 {
-	private static Logger logger=Logger.getLogger(MeshReader.class);
+	private static Logger logger=Logger.getLogger(MeshReader.class.getName());
 	
 	/**
 	 * Loads an Amibe 2D XML file into an existing Mesh2D instance.
@@ -70,7 +70,7 @@ public class MeshReader
 	public static void readObject(Mesh2D mesh, String xmlDir, int iFace)
 		throws IOException
 	{
-		logger.debug("begin reading "+xmlDir+File.separator+JCAEXMLData.xml2dFilename+iFace);
+		logger.fine("begin reading "+xmlDir+File.separator+JCAEXMLData.xml2dFilename+iFace);
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		Document document;
 		File xmlFile2d = null;
@@ -131,7 +131,7 @@ public class MeshReader
 
 			int numberOfReferences = Integer.parseInt(
 				xpath.evaluate("references/number/text()", submeshNodes));
-			logger.debug("Reading "+numberOfReferences+" references");
+			logger.fine("Reading "+numberOfReferences+" references");
 			int [] refs = new int[numberOfReferences];
 			refsBuffer.get(refs);
 			
@@ -141,7 +141,7 @@ public class MeshReader
 			nodelist[numberOfNodes] = (Vertex2D) mesh.outerVertex;
 			int label;
 			double [] coord = new double[2];
-			logger.debug("Reading "+numberOfNodes+" nodes");
+			logger.fine("Reading "+numberOfNodes+" nodes");
 			double [] bbmin = { Double.MAX_VALUE, Double.MAX_VALUE };
 			double [] bbmax = { Double.MIN_VALUE, Double.MIN_VALUE };
 			for (int i=0; i < numberOfNodes; i++)
@@ -173,7 +173,7 @@ public class MeshReader
 			
 			int numberOfTriangles = Integer.parseInt(
 				xpath.evaluate("number/text()", submeshTriangles));
-			logger.debug("Reading "+numberOfTriangles+" elements");
+			logger.fine("Reading "+numberOfTriangles+" elements");
 			Triangle [] facelist = new Triangle[numberOfTriangles];
 			int [] ind = new int[3];
 			Vertex2D [] pts = new Vertex2D[3];
@@ -212,7 +212,7 @@ public class MeshReader
 		{
 			throw new IOException(ex.getMessage());
 		}
-		logger.debug("end reading "+JCAEXMLData.xml2dFilename+iFace);
+		logger.fine("end reading "+JCAEXMLData.xml2dFilename+iFace);
 	}
 	
 	/**
@@ -275,7 +275,7 @@ public class MeshReader
 				IntBuffer refsBuffer = bbR.asIntBuffer();
 				numberOfReferences = Integer.parseInt(
 					xpath.evaluate("references/number/text()", submeshNodes));
-				logger.debug("Reading "+numberOfReferences+" references");
+				logger.fine("Reading "+numberOfReferences+" references");
 				refs = new int[numberOfReferences];
 				refsBuffer.get(refs);
 				fcR.close();
@@ -294,7 +294,7 @@ public class MeshReader
 			Vertex [] nodelist = new Vertex[numberOfNodes];
 			int label;
 			double [] coord = new double[3];
-			logger.debug("Reading "+numberOfNodes+" nodes");
+			logger.fine("Reading "+numberOfNodes+" nodes");
 			double [] bbmin = new double[3];
 			double [] bbmax = new double[3];
 			for (int j = 0; j < 3; j++)
@@ -344,7 +344,7 @@ public class MeshReader
 			IntBuffer trianglesBuffer = bbT.asIntBuffer();
 			int numberOfTriangles = Integer.parseInt(
 				xpath.evaluate("number/text()", submeshTriangles));
-			logger.debug("Reading "+numberOfTriangles+" elements");
+			logger.fine("Reading "+numberOfTriangles+" elements");
 			Triangle [] facelist = new Triangle[numberOfTriangles];
 			for (int i=0; i < numberOfTriangles; i++)
 			{
@@ -381,7 +381,7 @@ public class MeshReader
 				int numberOfElements = Integer.parseInt(groupNode.getElementsByTagName("number").item(0).getTextContent());
 				int fileOffset = Integer.parseInt(((Element) groupNode.getElementsByTagName("file").item(0)).getAttribute("offset"));
 				int id = Integer.parseInt(groupNode.getAttribute("id"));
-				logger.debug("Group "+id+": reading "+numberOfElements+" elements");
+				logger.fine("Group "+id+": reading "+numberOfElements+" elements");
 				for (int j=0; j < numberOfElements; j++)
 					facelist[groupsBuffer.get(fileOffset+j)].setGroupId(id);
 			}
@@ -390,7 +390,7 @@ public class MeshReader
 			//  Build adjacency relations
 			if (mesh.hasAdjacency())
 			{
-				logger.debug("Build mesh adjacency");
+				logger.fine("Build mesh adjacency");
 				mesh.buildAdjacency(ridgeAngle);
 			}
 		}
@@ -398,7 +398,7 @@ public class MeshReader
 		{
 			throw new IOException(ex.getMessage());
 		}
-		logger.debug("end reading "+JCAEXMLData.xml3dFilename);
+		logger.fine("end reading "+JCAEXMLData.xml3dFilename);
 	}
 
 	// Method previously in MMesh3DReader, remove it?
@@ -470,7 +470,7 @@ public class MeshReader
 				int id = Integer.parseInt(groupNode.getAttribute("id"));
 				numGroups.put(id, i);
 				String name = groupNode.getElementsByTagName("name").item(0).getTextContent();
-				logger.debug("Group "+name+": reading "+numberOfElements+" elements");
+				logger.fine("Group "+name+": reading "+numberOfElements+" elements");
 				maxId = Math.max(maxId, id);
 				Collection newfacelist = new ArrayList(numberOfElements);
 				for (int j=0; j < numberOfElements; j++)
@@ -500,7 +500,7 @@ public class MeshReader
 				NodeList oldGroupsList = (NodeList) xpath.evaluate("oldgroup",
 					newGroupNode, XPathConstants.NODESET);
 				int numberOfOldGroups = oldGroupsList.getLength();
-				logger.debug("Group "+name+": merging "+numberOfOldGroups+" groups");
+				logger.fine("Group "+name+": merging "+numberOfOldGroups+" groups");
 				for (int j=0; j < numberOfOldGroups; j++)
 				{
 					Node oldGroupNode = oldGroupsList.item(j);

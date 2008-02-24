@@ -32,15 +32,15 @@ import java.util.LinkedHashSet;
 import java.util.Stack;
 import java.util.Iterator;
 import java.io.File;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * CAD object.
  */
 public class BModel
 {
-	private static Logger logger=Logger.getLogger(BModel.class);
+	private static Logger logger=Logger.getLogger(BModel.class.getName());
 	//   Next available index
 	private static int freeIndex = 1;
 	//   Model number
@@ -70,8 +70,8 @@ public class BModel
 	public BModel (String brep, String out)
 	{
 		id = freeIndex;
-		if (logger.isDebugEnabled())
-			logger.debug("Building model "+id+" from "+brep+" into "+out);
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("Building model "+id+" from "+brep+" into "+out);
 		freeIndex++;
 		CADShapeFactory factory = CADShapeFactory.getFactory();
 		xmlDir = out;

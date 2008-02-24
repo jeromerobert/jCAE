@@ -32,11 +32,11 @@ import org.jcae.opencascade.jni.BRepAlgoAPI_Fuse;
 import org.jcae.opencascade.jni.BRepAlgoAPI_Common;
 import org.jcae.opencascade.jni.BRepAlgoAPI_Cut;
 import java.util.Iterator;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 public class OCCShapeFactory extends CADShapeFactory
 {
-	private static Logger logger=Logger.getLogger(OCCShapeFactory.class);
+	private static Logger logger=Logger.getLogger(OCCShapeFactory.class.getName());
 	
 	@Override
 	public CADShape newShape(Object o)
@@ -82,31 +82,31 @@ public class OCCShapeFactory extends CADShapeFactory
 		TopoDS_Shape brepShape;
 		if (fileName.endsWith(".step") || fileName.endsWith(".stp"))
 		{
-			logger.debug("Read STEP file: "+fileName);
+			logger.fine("Read STEP file: "+fileName);
 			STEPControl_Reader aReader = new STEPControl_Reader();
 			aReader.readFile(fileName);
-			logger.debug("Transfer roots into shape...");
+			logger.fine("Transfer roots into shape...");
 			aReader.nbRootsForTransfer();
 			aReader.transferRoots();
 			brepShape = aReader.oneShape();
-			logger.debug("... done");
+			logger.fine("... done");
 		}
 		else if (fileName.endsWith(".igs"))
 		{
-			logger.debug("Read IGES file: "+fileName);
+			logger.fine("Read IGES file: "+fileName);
 			IGESControl_Reader aReader = new IGESControl_Reader();
 			aReader.readFile(fileName);
-			logger.debug("Transfer roots into shape...");
+			logger.fine("Transfer roots into shape...");
 			aReader.nbRootsForTransfer();
 			aReader.transferRoots();
 			brepShape = aReader.oneShape();
-			logger.debug("... done");
+			logger.fine("... done");
 		}
 		else
 		{
-			logger.debug("Read BREP file: "+fileName);
+			logger.fine("Read BREP file: "+fileName);
 			brepShape = BRepTools.read(fileName, new BRep_Builder());
-			logger.debug("... done");
+			logger.fine("... done");
 		}
 		return newShape(brepShape);
 	}

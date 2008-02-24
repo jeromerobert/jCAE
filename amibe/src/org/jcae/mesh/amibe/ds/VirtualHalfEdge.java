@@ -29,7 +29,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.NoSuchElementException;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A handle to abstract half-edge instances.  When triangles are instances of
@@ -43,7 +44,7 @@ import org.apache.log4j.Logger;
  */
 public class VirtualHalfEdge extends AbstractHalfEdge
 {
-	private static Logger logger = Logger.getLogger(VirtualHalfEdge.class);
+	private static Logger logger=Logger.getLogger(VirtualHalfEdge.class.getName());
 	
 	private static final int [] next3 = { 1, 2, 0 };
 	private static final int [] prev3 = { 2, 0, 1 };
@@ -843,8 +844,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		// Be consistent with collapse()
 		if (hasAttributes(OUTER))
 			return false;
-		if (logger.isDebugEnabled())
-			logger.debug("can contract? ("+origin()+" "+destination()+") into "+n);
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("can contract? ("+origin()+" "+destination()+") into "+n);
 		double [] xn = n.getUV();
 		if (origin().isManifold() && destination().isManifold())
 		{
@@ -1008,8 +1009,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		Vertex o = origin();
 		Vertex d = destination();
 		assert o.isWritable() && d.isWritable(): "Cannot contract "+this;
-		if (logger.isDebugEnabled())
-			logger.debug("contract ("+o+" "+d+")");
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("contract ("+o+" "+d+")");
 		//  Replace o by n in all incident triangles
 		if (o.isManifold())
 			replaceEndpointsSameFan(v);
@@ -1023,8 +1024,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			replaceEndpointsNonManifold(d, v);
 		//  Set v links
 		deepCopyVertexLinks(o, d, v);
-		if (logger.isDebugEnabled())
-			logger.debug("new point: "+v);
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("new point: "+v);
 		if (m.hasNodes())
 		{
 			m.remove(o);
@@ -1176,7 +1177,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			{
 				if (tArray[i] == oldT1 || tArray[i] == oldT2)
 				{
-					logger.debug("replaceVertexLinks: "+tArray[i]+" --> "+newT);
+					logger.fine("replaceVertexLinks: "+tArray[i]+" --> "+newT);
 					tArray[i] = newT;
 				}
 			}
@@ -1193,9 +1194,9 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 			{
 				if (tArray[i] == oldT)
 				{
-					logger.debug("replaceVertexLinks: "+i+" "+o+" "+tArray[i]);
+					logger.fine("replaceVertexLinks: "+i+" "+o+" "+tArray[i]);
 					tArray[i] = newT;
-					logger.debug(" --> "+newT);
+					logger.fine(" --> "+newT);
 				}
 			}
 		}
@@ -1332,8 +1333,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	@Override
 	protected final VirtualHalfEdge split(Mesh m, Vertex v)
 	{
-		if (logger.isDebugEnabled())
-			logger.debug("split edge ("+origin()+" "+destination()+") by adding vertex "+v);
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("split edge ("+origin()+" "+destination()+") by adding vertex "+v);
 		if (m.hasNodes())
 			m.add(v);
 		if (!hasAttributes(NONMANIFOLD))
@@ -1515,7 +1516,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	private final Iterator<AbstractHalfEdge> identityFanIterator()
 	{
 		final VirtualHalfEdge current = this;
-		logger.debug("Manifold fan iterator");
+		logger.fine("Manifold fan iterator");
 		return new Iterator<AbstractHalfEdge>()
 		{
 			private boolean nextFan = true;
@@ -1550,7 +1551,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	{
 		if (!hasAttributes(NONMANIFOLD))
 			return identityFanIterator();
-		logger.debug("Non manifold fan iterator");
+		logger.fine("Non manifold fan iterator");
 		return new Iterator<AbstractHalfEdge>()
 		{
 			private TriangleVH last = tri.getAdj(localNumber);

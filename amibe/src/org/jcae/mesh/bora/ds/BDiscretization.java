@@ -25,11 +25,11 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Iterator;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 public class BDiscretization
 {
-	private static Logger logger=Logger.getLogger(BDiscretization.class);
+	private static Logger logger=Logger.getLogger(BDiscretization.class.getName());
 	private final BCADGraphCell graphCell;
 	// List of set of BSubMesh instances containing this BDiscretization.
 	private final Collection<BSubMesh> submesh = new LinkedHashSet<BSubMesh>();
@@ -218,7 +218,7 @@ public class BDiscretization
 		if (algo == null || !algo.isAvailable())
 			return;
 		if (!algo.compute(this))
-			logger.warn("Failed! "+algo);
+			logger.warning("Failed! "+algo);
 		computed = true;
 	}
 

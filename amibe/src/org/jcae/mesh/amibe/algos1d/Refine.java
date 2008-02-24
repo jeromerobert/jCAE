@@ -29,14 +29,14 @@ import org.jcae.mesh.cad.CADEdge;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * Refines all edges by a given number.
  */
 public class Refine
 {
-	private static Logger logger=Logger.getLogger(Refine.class);
+	private static Logger logger=Logger.getLogger(Refine.class.getName());
 	private MMesh1D mesh1d;
 	private int divisions = 2;
 	
@@ -84,9 +84,9 @@ public class Refine
 			nbEdges += submesh1d.getEdges().size();
 		}
 
-		logger.debug("TopoEdges discretisees "+nbTEdges);
-		logger.debug("Edges   "+nbEdges);
-		logger.debug("Nodes   "+nbNodes);
+		logger.fine("TopoEdges discretisees "+nbTEdges);
+		logger.fine("Edges   "+nbEdges);
+		logger.fine("Nodes   "+nbNodes);
 		assert(mesh1d.isValid());
 	}
 	

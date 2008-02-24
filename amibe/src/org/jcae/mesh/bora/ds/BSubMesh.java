@@ -26,7 +26,8 @@ import org.jcae.mesh.cad.CADShapeEnum;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Iterator;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /*
  * Here is an example with 2 connected faces.
@@ -61,7 +62,7 @@ import org.apache.log4j.Logger;
  */
 public class BSubMesh
 {
-	private static Logger logger=Logger.getLogger(BSubMesh.class);
+	private static Logger logger=Logger.getLogger(BSubMesh.class.getName());
 	//   Model
 	private BModel model;
 	//   Unique identitier
@@ -95,8 +96,8 @@ public class BSubMesh
 	 */
 	public void add(Constraint cons)
 	{
-		if (logger.isDebugEnabled())
-			logger.debug("Add constraint "+cons+" to submesh "+id);
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("Add constraint "+cons+" to submesh "+id);
 		model.addConstraint(cons);
 		constraints.add(cons);
 		// Add this Constraint to the CAD cell

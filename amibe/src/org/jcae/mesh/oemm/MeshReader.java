@@ -39,14 +39,15 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class builds a mesh from disk.
  */
 public class MeshReader extends Storage
 {
-	private static Logger logger = Logger.getLogger(MeshReader.class);	
+	private static Logger logger=Logger.getLogger(MeshReader.class.getName());	
 	
 	private final OEMM oemm;
 	// Map between octant index and Mesh instance.
@@ -184,7 +185,7 @@ public class MeshReader extends Storage
 
 	private void appendMesh(Mesh mesh, TIntHashSet leaves)
 	{
-		logger.debug("Loading nodes");
+		logger.fine("Loading nodes");
 
 		// Reset maps between consecutive calls to buildMesh()
 		if (mapNodeToMesh != null)
@@ -223,7 +224,7 @@ public class MeshReader extends Storage
 	{
 		try
 		{
-			logger.debug("Reading "+current.vn+" vertices from "+getVerticesFile(oemm, current));
+			logger.fine("Reading "+current.vn+" vertices from "+getVerticesFile(oemm, current));
 			mesh.ensureCapacity(2*current.vn);
 			Vertex [] vert = new Vertex[current.vn];
 			double [] xyz = new double[3];
@@ -260,7 +261,7 @@ public class MeshReader extends Storage
 		}
 		catch (IOException ex)
 		{
-			logger.error("I/O error when reading file "+getVerticesFile(oemm, current));
+			logger.severe("I/O error when reading file "+getVerticesFile(oemm, current));
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
@@ -273,7 +274,7 @@ public class MeshReader extends Storage
 	{
 		try
 		{
-			logger.debug("Reading "+current.tn+" triangles from "+getTrianglesFile(oemm, current));
+			logger.fine("Reading "+current.tn+" triangles from "+getTrianglesFile(oemm, current));
 			FileChannel fc = new FileInputStream(getTrianglesFile(oemm, current)).getChannel();
 			Vertex [] vert = new Vertex[3];
 			TIntHashSet processedNode = new TIntHashSet();
@@ -352,7 +353,7 @@ public class MeshReader extends Storage
 		}
 		catch (IOException ex)
 		{
-			logger.error("I/O error when reading indexed file "+getTrianglesFile(oemm, current));
+			logger.severe("I/O error when reading indexed file "+getTrianglesFile(oemm, current));
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
@@ -403,10 +404,10 @@ public class MeshReader extends Storage
 						vertex.setReadable(true);
 					}
 				} catch (FileNotFoundException e) {
-					logger.error("Cannot find file: " + getTrianglesFile(oemm, node).getAbsolutePath(), e);
+					logger.log(Level.SEVERE, "Cannot find file: " + getTrianglesFile(oemm, node).getAbsolutePath(), e);
 					throw new RuntimeException(e);
 				} catch (IOException e) {
-					logger.error("Cannot operate with file: " + getTrianglesFile(oemm, node).getAbsolutePath(), e);
+					logger.log(Level.SEVERE, "Cannot operate with file: " + getTrianglesFile(oemm, node).getAbsolutePath(), e);
 					throw new RuntimeException(e);
 				} finally {
 					if (fch != null) {

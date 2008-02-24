@@ -51,7 +51,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * Extract groups from the full mesh and write them to a UNV file.
@@ -63,7 +63,7 @@ import org.apache.log4j.Logger;
  */
 abstract public class MeshExporter
 {
-	static Logger logger=Logger.getLogger(MeshExporter.class);
+	static Logger logger=Logger.getLogger(MeshExporter.class.getName());
 	
 	public static class FormatD25_16 extends DecimalFormat
 	{

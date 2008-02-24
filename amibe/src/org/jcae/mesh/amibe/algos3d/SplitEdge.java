@@ -32,7 +32,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Split long edges.  Edges are sorted and splitted in turn, the longest edge
@@ -62,7 +63,7 @@ import org.apache.log4j.Logger;
  */
 public class SplitEdge extends AbstractAlgoHalfEdge
 {
-	private static Logger logger=Logger.getLogger(SplitEdge.class);
+	private static Logger logger=Logger.getLogger(SplitEdge.class.getName());
 	private double [] newXYZ = new double[3];
 	private Vertex insertedVertex = null;
 	
@@ -141,8 +142,8 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 			vm = current.destination();
 		if (vm.getRef() == 0 && !vm.discreteProject(insertedVertex))
 		{
-			if (logger.isDebugEnabled())
-				logger.debug("Point "+vm+" cannot be projected onto discrete surface!");
+			if (logger.isLoggable(Level.FINE))
+				logger.fine("Point "+vm+" cannot be projected onto discrete surface!");
 			return false;
 		}
 
@@ -156,8 +157,8 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		}
 		if (dapex * dapex * tolerance * 16.0 > 1.0)
 			return true;
-		if (logger.isDebugEnabled())
-			logger.debug("Point "+vm+" too near from apical vertex");
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("Point "+vm+" too near from apical vertex");
 		return false;
 	}
 
@@ -182,14 +183,14 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 	public HalfEdge processEdge(HalfEdge current, double costCurrent)
 	{
 		current = uniqueOrientation(current);
-		if (logger.isDebugEnabled())
+		if (logger.isLoggable(Level.FINE))
 		{
-			logger.debug("Split edge: "+current+" by "+insertedVertex+"  cost="+costCurrent);
+			logger.fine("Split edge: "+current+" by "+insertedVertex+"  cost="+costCurrent);
 			if (current.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 			{
-				logger.debug("Non-manifold edge:");
+				logger.fine("Non-manifold edge:");
 				for (Iterator<AbstractHalfEdge> it = current.fanIterator(); it.hasNext(); )
-					logger.debug(" --> "+it.next());
+					logger.fine(" --> "+it.next());
 			}
 		}
 		if (current.hasAttributes(AbstractHalfEdge.NONMANIFOLD))

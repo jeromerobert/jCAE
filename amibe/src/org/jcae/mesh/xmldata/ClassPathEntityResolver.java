@@ -28,14 +28,14 @@ import java.net.URISyntaxException;
 import org.xml.sax.InputSource;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.SAXException;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * @author Jerome Robert
  */
 public class ClassPathEntityResolver implements EntityResolver
 {
-	private static Logger logger=Logger.getLogger(ClassPathEntityResolver.class);
+	private static Logger logger=Logger.getLogger(ClassPathEntityResolver.class.getName());
 	
 	public InputSource resolveEntity(String publicId, String systemId)
 		throws SAXException, IOException
@@ -48,7 +48,7 @@ public class ClassPathEntityResolver implements EntityResolver
 				String path=uri.getPath();
 				//remove leading "/"
 				path=path.substring(1);
-				logger.debug("resolve "+systemId+" from CLASSPATH at "+path);
+				logger.fine("resolve "+systemId+" from CLASSPATH at "+path);
 				InputStream in= ClassPathEntityResolver.class.getClassLoader().getResourceAsStream(path);
 				if(in==null)
 				{

@@ -32,7 +32,7 @@ import org.jcae.mesh.amibe.util.KdTreeProcedure;
 import org.jcae.mesh.cad.*;
 import java.util.Stack;
 import java.util.Collection;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * Mesh data structure for parameterized surfaces.
@@ -42,7 +42,7 @@ import org.apache.log4j.Logger;
  */
 public class Mesh2D extends Mesh
 {
-	private static Logger logger=Logger.getLogger(Mesh2D.class);
+	private static Logger logger=Logger.getLogger(Mesh2D.class.getName());
 	
 	//  Topological face on which mesh is applied
 	private transient final CADShape face;
@@ -134,8 +134,8 @@ public class Mesh2D extends Mesh
 		if (epsilon < 0)
 			epsilon = Math.max(diagonal/1000.0, meshParameters.getLength() / 100.0);
 		meshParameters.setEpsilon(epsilon);
-		logger.debug("Bounding box diagonal: "+diagonal);
-		logger.debug("Epsilon: "+epsilon);
+		logger.fine("Bounding box diagonal: "+diagonal);
+		logger.fine("Epsilon: "+epsilon);
 	}
 	
 	/**
@@ -292,7 +292,7 @@ public class Mesh2D extends Mesh
 		while (true)
 		{
 			int inter = s.forceBoundaryEdge(this, end);
-			logger.debug("Intersectionss: "+inter);
+			logger.fine("Intersectionss: "+inter);
 			//  s is modified by forceBoundaryEdge, it now has 'end'
 			//  as its origin point, its destination point is to the
 			//  right side of (end,start) and its apex is to the left
@@ -474,7 +474,7 @@ public class Mesh2D extends Mesh
 			double l = tv0.onLeft(this, tv1, tv2);
 			if (l <= 0L)
 			{
-				logger.error("Wrong orientation: "+l+" "+t);
+				logger.severe("Wrong orientation: "+l+" "+t);
 				return false;
 			}
 		}

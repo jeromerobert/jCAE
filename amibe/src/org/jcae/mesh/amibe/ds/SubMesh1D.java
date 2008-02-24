@@ -27,7 +27,7 @@ import org.jcae.mesh.bora.ds.BCADGraphCell;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.HashSet;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * 1D discretization of a single topological edge.
@@ -39,7 +39,7 @@ import org.apache.log4j.Logger;
 
 public class SubMesh1D
 {
-	private static Logger logger = Logger.getLogger(SubMesh1D.class);	
+	private static Logger logger=Logger.getLogger(SubMesh1D.class.getName());	
 
 	//  Topological edge being discretized
 	private CADEdge edge;
@@ -237,12 +237,12 @@ public class SubMesh1D
 	{
 		String cr=System.getProperty("line.separator");
 		StringBuilder r = new StringBuilder("SubMesh1D"+cr);
-		logger.debug("Printing "+r.toString());
+		logger.fine("Printing "+r.toString());
 		for(MNode1D n: nodelist)
 			r.append(n+cr);
 		for(MEdge1D e: edgelist)
 			r.append(e+cr);
-		logger.debug("...done");
+		logger.fine("...done");
 		return r.toString();
 	}
 }

@@ -47,12 +47,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 
 public class MMesh1DReader
 {
-	private static Logger logger=Logger.getLogger(MMesh1DReader.class);
+	private static Logger logger=Logger.getLogger(MMesh1DReader.class.getName());
 	
 	/** Return the first child element of with the given tag name */
 	private static Node getChild(Node e, String tagName)
@@ -88,7 +88,7 @@ public class MMesh1DReader
 		MMesh1D m1d = null;
 		int i;
 		File xmlFile1d = new File(xmlDir, JCAEXMLData.xml1dFilename);
-		logger.debug("begin reading "+xmlFile1d);
+		logger.fine("begin reading "+xmlFile1d);
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		HashMap<CADVertex, MNode1D> map1DToMaster = new HashMap<CADVertex, MNode1D>();
 		try
@@ -203,7 +203,7 @@ public class MMesh1DReader
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
-		logger.debug("end reading "+JCAEXMLData.xml1dFilename);
+		logger.fine("end reading "+JCAEXMLData.xml1dFilename);
 		return m1d;
 	}
 }

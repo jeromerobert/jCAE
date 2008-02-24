@@ -28,7 +28,7 @@ import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * Swap edges if the normals to its adjacent triangles are too different
@@ -51,7 +51,7 @@ import org.apache.log4j.Logger;
  */
 public class ConstraintNormal3D
 {
-	private static Logger logger=Logger.getLogger(ConstraintNormal3D.class);
+	private static Logger logger=Logger.getLogger(ConstraintNormal3D.class.getName());
 	private final Mesh2D mesh;
 	
 	/**
@@ -73,7 +73,7 @@ public class ConstraintNormal3D
 		VirtualHalfEdge2D ot, sym;
 		int cnt = 0;
 		mesh.pushCompGeom(3);
-		logger.debug(" Checking inverted triangles");
+		logger.fine(" Checking inverted triangles");
 		ot = new VirtualHalfEdge2D();
 		sym = new VirtualHalfEdge2D();
 		double [] vect1 = new double[3];
@@ -182,7 +182,7 @@ public class ConstraintNormal3D
 					cnt++;
 				}
 			}
-			logger.debug(" Found "+cnt+" inverted triangles");
+			logger.fine(" Found "+cnt+" inverted triangles");
 			//  The niter variable is introduced to prevent loops.
 			//  With large meshes. its initial value may be too large,
 			//  so we lower it now.

@@ -19,7 +19,7 @@
 
 package org.jcae.mesh.amibe.patch.tests;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.jcae.mesh.amibe.util.KdTree;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.patch.Mesh2D;
@@ -41,7 +41,7 @@ import org.jcae.mesh.java3d.Viewer;
  */
 public class QuadTreeSampleNearest extends QuadTreeSample
 {
-	private static Logger logger=Logger.getLogger(QuadTreeSampleNearest.class);	
+	private static Logger logger=Logger.getLogger(QuadTreeSampleNearest.class.getName());	
 	
 	public QuadTreeSampleNearest(KdTree q)
 	{
@@ -69,7 +69,7 @@ public class QuadTreeSampleNearest extends QuadTreeSample
 		m.pushCompGeom(2);
 		m.resetKdTree(bbmin, bbmax);
 		final QuadTreeSampleNearest r = new QuadTreeSampleNearest(m.getKdTree());
-		logger.debug("Start insertion");
+		logger.fine("Start insertion");
 		for (int i = 0; i < 500; i++)
 		{
 			u = rand.nextDouble();

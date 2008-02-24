@@ -27,7 +27,7 @@ import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.PrintStream;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * Manage statistics for quality values.
@@ -56,7 +56,7 @@ import org.apache.log4j.Logger;
  */
 public class QualityFloat
 {
-	private static Logger logger=Logger.getLogger(QualityFloat.class);
+	private static Logger logger=Logger.getLogger(QualityFloat.class.getName());
 	private TFloatArrayList data;
 	private QualityProcedure qproc;
 	private int [] sorted;
@@ -352,7 +352,7 @@ public class QualityFloat
 	{
 		if (layers < 0)
 		{
-			logger.error("split() method must be called before printLayers()");
+			logger.severe("split() method must be called before printLayers()");
 			return;
 		}
 		int nrTotal = data.size();
@@ -401,7 +401,7 @@ public class QualityFloat
 		}
 		catch (FileNotFoundException ex)
 		{
-			logger.error("Cannot write into: "+file);
+			logger.severe("Cannot write into: "+file);
 		}
 	}
 
@@ -422,11 +422,11 @@ public class QualityFloat
 		}
 		catch (FileNotFoundException ex)
 		{
-			logger.error("Cannot write into: "+file);
+			logger.severe("Cannot write into: "+file);
 		}
 		catch (IOException ex)
 		{
-			logger.error("Error when writing data into "+file);
+			logger.severe("Error when writing data into "+file);
 		}
 	}
 }

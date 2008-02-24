@@ -27,7 +27,7 @@ import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.amibe.validation.*;
 import org.jcae.mesh.cad.*;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * This class MeshValid allows to load a file, construct the mesh structure and read mesh hypothesis.
@@ -39,7 +39,7 @@ import org.apache.log4j.Logger;
  */
 public class MeshValid2D
 {
-	private static Logger logger=Logger.getLogger(MeshValid2D.class);
+	private static Logger logger=Logger.getLogger(MeshValid2D.class.getName());
 
 	/** 
 	 * Reads the file, the algorithm type and the constraint value for meshing
@@ -86,7 +86,7 @@ public class MeshValid2D
 		}
 		catch(Exception ex)
 		{
-			logger.warn(ex.getMessage());
+			logger.warning(ex.getMessage());
 			ex.printStackTrace();
 		}
 	}

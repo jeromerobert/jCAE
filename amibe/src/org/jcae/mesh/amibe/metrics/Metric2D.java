@@ -24,7 +24,7 @@ package org.jcae.mesh.amibe.metrics;
 import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.MeshParameters;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /**
  * 2D metrics.  This class provides metrics on the tangent plane.
@@ -50,7 +50,7 @@ import org.apache.log4j.Logger;
  */
 public class Metric2D
 {
-	private static Logger logger=Logger.getLogger(Metric2D.class);
+	private static Logger logger=Logger.getLogger(Metric2D.class.getName());
 	
 	//  First fundamental form
 	private double E, F, G;
@@ -123,7 +123,7 @@ public class Metric2D
 		double ret = E * G - F * F;
 		if (ret < 0.0)
 		{
-			logger.debug("Singular matrix");
+			logger.fine("Singular matrix");
 			ret = 0.0;
 		}
 		return ret;

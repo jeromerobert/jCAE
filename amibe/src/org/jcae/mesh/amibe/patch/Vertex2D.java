@@ -20,7 +20,6 @@
 
 package org.jcae.mesh.amibe.patch;
 
-import org.apache.log4j.Logger;
 import org.jcae.mesh.amibe.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.TriangleVH;
@@ -32,6 +31,8 @@ import org.jcae.mesh.cad.CADFace;
 import org.jcae.mesh.cad.CADGeomCurve2D;
 import org.jcae.mesh.cad.CADGeomSurface;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Vertex of a mesh.
@@ -44,7 +45,7 @@ import java.util.Random;
  */
 public class Vertex2D extends Vertex
 {
-	private static Logger logger = Logger.getLogger(Vertex2D.class);
+	private static Logger logger=Logger.getLogger(Vertex2D.class.getName());
 	private static final Random rand = new Random(139L);
 	private static Vertex2D circumcenter = new Vertex2D(null, 0.0, 0.0);
 	
@@ -184,8 +185,8 @@ public class Vertex2D extends Vertex
 	 */
 	public VirtualHalfEdge2D getSurroundingOTriangle(Mesh2D mesh)
 	{
-		if (logger.isDebugEnabled())
-			logger.debug("Searching for the triangle surrounding "+this);
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("Searching for the triangle surrounding "+this);
 		TriangleVH t = (TriangleVH) mesh.getKdTree().getNearVertex(mesh, this).getLink();
 		VirtualHalfEdge2D current = new VirtualHalfEdge2D(t, 0);
 		boolean redo = false;
@@ -266,8 +267,8 @@ public class Vertex2D extends Vertex
 			d = (Vertex2D) current.destination();
 			a = (Vertex2D) current.apex();
 		}
-		if (logger.isDebugEnabled())
-			logger.debug("Found: "+current);
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("Found: "+current);
 		return current;
 	}
 	

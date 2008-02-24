@@ -27,7 +27,7 @@ import javax.vecmath.*;
 import com.sun.j3d.utils.universe.*;
 import com.sun.j3d.utils.picking.*;
 import com.sun.j3d.utils.behaviors.vp.*;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 /** This is the panel which include the J3DCanvas for 3D display. It should be set
  * in an independant Windows (JDialog, JFrame), to avoid averlaping with swing
@@ -37,7 +37,7 @@ import org.apache.log4j.Logger;
 
 public class Viewer extends JFrame
 {	
-	private static Logger logger=Logger.getLogger(Viewer.class);
+	private static Logger logger=Logger.getLogger(Viewer.class.getName());
 	private BorderLayout borderLayout = new BorderLayout();
 	private Canvas3D canvas3D;
 	private SimpleUniverse universe;
@@ -113,7 +113,7 @@ public class Viewer extends JFrame
 					}
 				}
 				PickIntersection pi=pr.getIntersection(closest);
-				logger.debug("closest vertex index="+closest);
+				logger.fine("closest vertex index="+closest);
 				Point3d pickPoint=pi.getPointCoordinates();
 				lastClick = new double[3];
 				lastClick[0] = pickPoint.x;

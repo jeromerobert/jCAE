@@ -23,12 +23,12 @@ package org.jcae.mesh.bora.ds;
 
 import org.jcae.mesh.bora.algo.*;
 import org.jcae.mesh.cad.CADShapeEnum;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import java.lang.reflect.Constructor;
 
 public class Hypothesis
 {
-	private static Logger logger = Logger.getLogger(Hypothesis.class);
+	private static Logger logger=Logger.getLogger(Hypothesis.class.getName());
 	protected HypInterface hyp = HypNoneInstance;
 	// Now, length is the target length and is the variable that is used;
 	// In the near future we will want to enforce a maximum length lengthMax 
@@ -72,7 +72,7 @@ public class Hypothesis
 	{
 		checkLock();
 		hyp = getAlgo(e);
-		logger.debug("("+Integer.toHexString(this.hashCode())+") Setting element type to "+e+"  "+hyp.getClass().getName());
+		logger.fine("("+Integer.toHexString(this.hashCode())+") Setting element type to "+e+"  "+hyp.getClass().getName());
 	}
 
 	/**
@@ -117,7 +117,7 @@ public class Hypothesis
 	public void setLength(double l, boolean b)
 	{
 		checkLock();
-		logger.debug("("+Integer.toHexString(this.hashCode())+") Setting length to "+l+"; strong constraint: "+b);
+		logger.fine("("+Integer.toHexString(this.hashCode())+") Setting length to "+l+"; strong constraint: "+b);
 		length = l;
 		lengthBool = b;
 	}
@@ -153,7 +153,7 @@ public class Hypothesis
 	public void setLength(double l1, double l2, boolean b)
 	{
 		checkLock();
-		logger.debug("("+Integer.toHexString(this.hashCode())+") Setting length; min="+l1+" max="+l2+"; strong constraint: "+b);
+		logger.fine("("+Integer.toHexString(this.hashCode())+") Setting length; min="+l1+" max="+l2+"; strong constraint: "+b);
 		lengthMin = l1;
 		lengthMax = l2;
 		lengthBool = b;
@@ -167,7 +167,7 @@ public class Hypothesis
 	public void setDeflection(double d)
 	{
 		checkLock();
-		logger.debug("("+Integer.toHexString(this.hashCode())+") Setting deflection to "+d);
+		logger.fine("("+Integer.toHexString(this.hashCode())+") Setting deflection to "+d);
 		deflection = d;
 	}
 
@@ -190,7 +190,7 @@ public class Hypothesis
 	public void setNumber(int n, boolean b)
 	{
 		checkLock();
-		logger.debug("("+Integer.toHexString(this.hashCode())+") Setting number of discretized points to "+n+"; strong constraint: "+b);
+		logger.fine("("+Integer.toHexString(this.hashCode())+") Setting number of discretized points to "+n+"; strong constraint: "+b);
 		numberMin = n;
 		numberMax = n;
 		numberBool = b;
@@ -217,7 +217,7 @@ public class Hypothesis
 	public void setNumber(int n1, int n2, boolean b)
 	{
 		checkLock();
-		logger.debug("("+Integer.toHexString(this.hashCode())+") Setting number of discretized points; min="+n1+" max="+n2+"; strong constraint: "+b);
+		logger.fine("("+Integer.toHexString(this.hashCode())+") Setting number of discretized points; min="+n1+" max="+n2+"; strong constraint: "+b);
 		numberMin = n1;
 		numberMax = n2;
 		numberBool = b;
@@ -325,12 +325,12 @@ public class Hypothesis
 				Constructor<TetGen> cons = TetGen.class.getConstructor(double.class);
 				ret = cons.newInstance(length);
 				if (!ret.isAvailable())
-					logger.error("TetGen not available!");
+					logger.severe("TetGen not available!");
 				/*
 				Constructor cons = Netgen.class.getConstructor(double.class);
 				ret = (AlgoInterface) cons.newInstance(length);
 				if (!ret.isAvailable())
-					logger.error("Netgen not available!");
+					logger.severe("Netgen not available!");
 				*/
 			}
 		} catch (Exception ex)

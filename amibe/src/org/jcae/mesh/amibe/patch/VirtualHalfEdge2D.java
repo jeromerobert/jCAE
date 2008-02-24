@@ -26,7 +26,8 @@ import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
 import java.util.Random;
 import java.util.Set;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A handle to abstract edge objects for initial 2D mesh.
@@ -38,7 +39,7 @@ import org.apache.log4j.Logger;
  */
 public class VirtualHalfEdge2D extends VirtualHalfEdge
 {
-	private static Logger logger = Logger.getLogger(VirtualHalfEdge2D.class);
+	private static Logger logger=Logger.getLogger(VirtualHalfEdge2D.class.getName());
 	private static final Random rand = new Random(139L);
 	private static VirtualHalfEdge2D [] work = new VirtualHalfEdge2D[4];
 	static {
@@ -217,8 +218,8 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 	 */
 	public final int split3(Mesh2D mesh, Vertex2D v, Set<Triangle> modifiedTriangles, boolean force)
 	{
-		if (logger.isDebugEnabled())
-			logger.debug("Split VirtualHalfEdge2D "+this+"\nat Vertex "+v);
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("Split VirtualHalfEdge2D "+this+"\nat Vertex "+v);
 		Triangle backup = mesh.createTriangle(tri);
 		// Aliases
 		VirtualHalfEdge2D oldLeft = work[0];
@@ -280,8 +281,8 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 		newLeft.next();                  // = (aov)
 		Triangle newTri1 = newLeft.tri;
 		Triangle newTri2 = newRight.tri;
-		if (logger.isDebugEnabled())
-			logger.debug("New triangles:\n"+this+"\n"+newRight+"\n"+newLeft);
+		if (logger.isLoggable(Level.FINE))
+			logger.fine("New triangles:\n"+this+"\n"+newRight+"\n"+newLeft);
 		// newRight is reused
 		int ret = newLeft.checkAndSwap(mesh, modifiedTriangles, false, newRight);
 		if (!force && 0 == ret)
