@@ -28,6 +28,7 @@ public class JCAEFormatter extends Formatter
 {
 	private static final long startDate = new Date().getTime();
 	private static final String lineSep = System.getProperty("line.separator");
+	@Override
 	public String format(LogRecord record)
 	{
 		String loggerName = record.getLoggerName();
