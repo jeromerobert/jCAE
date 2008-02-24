@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2007, by EADS France
+    Copyright (C) 2007,2008, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -33,21 +33,13 @@ import org.jcae.mesh.oemm.RawStorage;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import java.io.File;
-import java.io.Reader;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ByteArrayInputStream;
-import java.io.SequenceInputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
-import java.util.Collections;
-import java.util.ArrayList;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.EntityResolver;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -61,21 +53,31 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 
 import java.util.logging.Logger;
-import org.apache.log4j.Level;
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.xml.XMLLayout;
-import org.apache.log4j.xml.SAXErrorHandler;
-import org.apache.log4j.xml.Log4jEntityResolver;
-import org.apache.log4j.LogManager;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.FileHandler;
+import java.util.logging.XMLFormatter;
 
 public class MesherTest
 {
 	private Logger root;
 	private static final String dir = System.getProperty("test.dir", "test");
 	private static int counter = 0;
-	private static FileAppender app = null;
+	private static FileHandler app = null;
+	private static final XMLFormatter xmlLayout = new XMLFormatter();
+	private static File logFile = null;
+	private static EntityResolver myEntityResolver = new FakeEntityResolver();
 	// Hopefully test timing depends linearly on CPU power,
 	private static final long timerScale = Long.parseLong(System.getProperty("org.jcae.mesh.timerScale", "1000"));
+
+	// This EntityResolver avoids FileNotFoundException when parsing XML output since logger.dtd is unavailable.
+	public static class FakeEntityResolver implements EntityResolver
+	{
+		public InputSource resolveEntity(String publicId, String systemId)
+		{
+			return new InputSource(new java.io.ByteArrayInputStream(new byte[0]));
+		}
+	}
 
 	private void checkNumberOfTriangles(String outputDir, int target, double delta)
 	{
@@ -174,13 +176,9 @@ public class MesherTest
 
 	private void startLogger()
 	{
-		LogManager.resetConfiguration();
-		root = LogManager.getRootLogger();
-		root.removeAllAppenders();
+		LogManager.getLogManager().reset();
+		root = Logger.getLogger("");
 
-		XMLLayout xmlLayout = new XMLLayout();
-		xmlLayout.setLocationInfo(true);
-		root.setLevel(Level.INFO);
 		counter++;
 		try
 		{
@@ -188,9 +186,11 @@ public class MesherTest
 			logDir.mkdirs();
 			if(!logDir.exists() || !logDir.isDirectory())
 				throw new RuntimeException("Unable to create directory "+logDir.getPath());
-			File logFile = new File(logDir, "test."+counter+".xml");
-			app = new FileAppender(xmlLayout, logFile.getPath(), false);
-			root.addAppender(app);
+			logFile = new File(logDir, "test."+counter+".xml");
+			app = new FileHandler(logFile.getPath(), false);
+			app.setFormatter(xmlLayout);
+			app.setLevel(Level.INFO);
+			root.addHandler(app);
 		}
 		catch (IOException ex)
 		{
@@ -200,7 +200,6 @@ public class MesherTest
 
 	private Document stopLogger()
 	{
-		String logFile = app.getFile();
 		app.close();
 		app = null;
 
@@ -208,37 +207,22 @@ public class MesherTest
 		try {
 			dbf = DocumentBuilderFactory.newInstance();
 			dbf.setIgnoringElementContentWhitespace(true);
+			dbf.setValidating(false);
 		} catch(FactoryConfigurationError fce) {
 			throw fce;
 		}
 
-		String xmlProlog =
-		    "<?xml version=\"1.0\" ?>\n" +
-		    "<!DOCTYPE log4j:eventSet SYSTEM \"log4j.dtd\">\n" +
-		    "<log4j:eventSet version=\"1.2\" xmlns:log4j=\"http://jakarta.apache.org/log4j/\">\n";
-		String xmlEpilog = "</log4j:eventSet>";
-
-		ArrayList<InputStream> inputStreams = new ArrayList<InputStream>();
-		inputStreams.add(new ByteArrayInputStream(xmlProlog.getBytes()));
 		try {
-			inputStreams.add(new FileInputStream(logFile));
-		} catch (FileNotFoundException ex)
-		{
-			throw new RuntimeException();
-		}
-		inputStreams.add(new ByteArrayInputStream(xmlEpilog.getBytes()));
-		Reader sr = new InputStreamReader(new SequenceInputStream(Collections.enumeration(inputStreams)));
-
-		try {
-			dbf.setValidating(true);
 			DocumentBuilder docBuilder = dbf.newDocumentBuilder();
-			docBuilder.setErrorHandler(new SAXErrorHandler());
-			docBuilder.setEntityResolver(new Log4jEntityResolver());
-			return docBuilder.parse(new InputSource(sr));
+			docBuilder.setEntityResolver(myEntityResolver);
+			return docBuilder.parse(logFile);
 		} catch (ParserConfigurationException ex) {
 			ex.printStackTrace();
 			throw new RuntimeException();
 		} catch (SAXException ex) {
+			ex.printStackTrace();
+			throw new RuntimeException();
+		} catch (FileNotFoundException ex) {
 			ex.printStackTrace();
 			throw new RuntimeException();
 		} catch (IOException ex) {
@@ -252,11 +236,11 @@ public class MesherTest
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		try
 		{
-			XPathExpression xpathTimestamp = xpath.compile("@timestamp");
-			// Find first <log4j:message> containing "Meshing face" message
-			NodeList events = (NodeList) xpath.evaluate("//message/text()[contains(string(), 'Meshing face')]/ancestor::event", doc, XPathConstants.NODESET);
+			XPathExpression xpathTimestamp = xpath.compile("//millis/text()");
+			// Find first <message> containing "Meshing face" message
+			NodeList events = (NodeList) xpath.evaluate("//message/text()[contains(string(), 'Meshing face')]/ancestor::record", doc, XPathConstants.NODESET);
 			long t1 = Long.parseLong(xpathTimestamp.evaluate(events.item(0)));
-			// <log4j:event> element after last 'Meshing face' message
+			// <record> element after last 'Meshing face' message
 			long t2 = Long.parseLong(xpathTimestamp.evaluate(events.item(events.getLength() - 1).getNextSibling()));
 			return t2 - t1;
 		}
@@ -272,7 +256,7 @@ public class MesherTest
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		try
 		{
-			NodeList events = (NodeList) xpath.evaluate("//event[@logger='"+klass+"']/@timestamp", doc, XPathConstants.NODESET);
+			NodeList events = (NodeList) xpath.evaluate("//record[class='"+klass+"']/millis/text()", doc, XPathConstants.NODESET);
 			assertTrue(events.getLength() == 2);
 			long t1 = Long.parseLong(events.item(0).getNodeValue());
 			long t2 = Long.parseLong(events.item(events.getLength() - 1).getNodeValue());
