@@ -120,7 +120,6 @@ public class JCAEMesher implements Runnable, Cancellable
 				thread=Thread.currentThread();
 				Mesher.main(new String[]{brepName, xmlDir, ""+mesh.getEdgeLength(), ""+mesh.getDeflection()});
 				thread=null;
-				a.close();
 			}
 			else
 			{											
@@ -148,6 +147,7 @@ public class JCAEMesher implements Runnable, Cancellable
 		}
 	}			
 	
+	@Override
 	public String toString()
 	{
 		return "jCAE triangle mesher";
