@@ -436,25 +436,6 @@ public class Mesh implements Serializable
 
 	private void buildAdjacency(Collection<Vertex> vertices, double minAngle)
 	{
-		//  For each vertex, build the list of triangles
-		//  connected to this vertex.
-		logger.fine("Build the list of triangles connected to each vertex");
-		HashMap<Vertex, ArrayList<Triangle>> tVertList = new HashMap<Vertex, ArrayList<Triangle>>(vertices.size());
-		for (Vertex v: vertices)
-			tVertList.put(v, new ArrayList<Triangle>(10));
-		for (Triangle t: triangleList)
-		{
-			for (int i = 0; i < 3; i++)
-			{
-				Vertex v = t.vertex[i];
-				if (v.isReadable())
-				{
-					ArrayList<Triangle> list = tVertList.get(v);
-					list.add(t);
-				}
-				v.setLink(t);
-			}
-		}
 		//  Connect all edges together
 		logger.fine("Connect triangles");
 		ArrayList<Triangle> newTri = new ArrayList<Triangle>();
