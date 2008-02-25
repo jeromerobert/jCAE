@@ -23,14 +23,14 @@ package org.jcae.viewer3d.fd.sd;
 import java.io.*;
 import java.util.Iterator;
 import java.util.List;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 /**
  *
  * @author  Jerome Robert
  */
 public class Jqf02File
 {	
-	private static Logger logger=Logger.getLogger(Jqf02File.class);
+	private static Logger logger=Logger.getLogger(Jqf02File.class.getName());
 	private File file;
 	private float version;
 	private float[] iterations;
@@ -63,13 +63,13 @@ public class Jqf02File
 		in.skip(offset);
 		minValue=Float.MAX_VALUE;
 		maxValue=-Float.MAX_VALUE;
-		logger.debug("offset is "+offset);
+		logger.fine("offset is "+offset);
 		for(Iterator<Plate> it=plates.iterator();it.hasNext();)
 		{
 			Plate p=it.next();
 			int nbcells=p.numberOfCells();
 			p.values=new float[nbcells];
-			//logger.debug(p);
+			//logger.fine(p);
 			for(int ip=0;ip<nbcells;ip++)
 			{
 				in.readInt(); offset+=4;
@@ -79,7 +79,7 @@ public class Jqf02File
 					offset+=4;
 				}
 				p.values[ip]=in.readFloat(); offset+=4;				
-				//logger.debug("readValue "+p.values[ip]+" at "+(offset-4));
+				//logger.fine("readValue "+p.values[ip]+" at "+(offset-4));
 				if(p.values[ip]>maxValue) maxValue=p.values[ip];
 				if(p.values[ip]<minValue) minValue=p.values[ip];
 				for(int j=valueType+1;j<3;j++)

@@ -1,3 +1,7 @@
+2008-02-25 11:48 Denis Barbier <barbier@users.sourceforge.net>
+
+	* Replace log4j by java.util.logging.Logger.
+
 2007-12-18 13:48 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/viewer3d/fe/unv/UNVParser.java: Fix parsing of

@@ -13,7 +13,6 @@
 			<compilerarg line="${compiler.arg}"/>
 			<classpath>
 				<pathelement location="${occjava.jar}"/>
-				<pathelement location="${log4j.jar}"/>
 				<pathelement location="${trove.jar}"/>
 			</classpath>
 		</javac>
@@ -69,7 +68,6 @@
 			<zipfileset prefix="${project.name}-${version}" file="doc/api"/>
 			<zipfileset prefix="${project.name}-${version}" file="${jar.dir}/${jcae-viewer3d.jar}"/>
 			<zipfileset prefix="${project.name}-${version}" file="${occjava.jar}"/>
-			<zipfileset prefix="${project.name}-${version}" file="${log4j.jar}"/>
 			<zipfileset prefix="${project.name}-${version}" file="${trove.jar}"/>
 		</zip>
 	</target>

@@ -28,7 +28,7 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.jcae.viewer3d.Palette;
 /**
  *
@@ -36,7 +36,7 @@ import org.jcae.viewer3d.Palette;
  */
 public class Mesh
 {
-	private static Logger logger=Logger.getLogger(Mesh.class);
+	private static Logger logger=Logger.getLogger(Mesh.class.getName());
 	private float[][] grid;
 	private HashMap<Integer, ArrayList<Plate>> plates;
 	private HashMap<Integer, Wire> wires;
@@ -107,7 +107,7 @@ public class Mesh
 		for(int i=0;i<values.length;i++)
 		{
 			texture[i+2]=Color.HSBtoRGB((maxValue-values[i])/(maxValue-minValue)*170f/255f,1.0f,1.0f);
-			//logger.debug("texture["+(i+2)+"]="+Integer.toHexString(texture[i+2]));
+			//logger.fine("texture["+(i+2)+"]="+Integer.toHexString(texture[i+2]));
 		}
 		return texture;
 	}
@@ -224,7 +224,7 @@ public class Mesh
 
 	public void loadGr02File(File f) throws IOException, FileNotFoundException
 	{
-		logger.debug("loadGr02File");
+		logger.fine("loadGr02File");
 		StreamTokenizerExt in=new StreamTokenizerExt(f);
 		grid=new float[3][];
 		grid[0]=new float[in.readInteger()];
@@ -236,7 +236,7 @@ public class Mesh
 
 	public void loadJqf02File(File f, int iteration, int valueType) throws IOException
 	{
-		logger.debug("loadJqf02File");
+		logger.fine("loadJqf02File");
 		Jqf02File infile=new Jqf02File();
 		infile.init(f);
 		float[] iterations=infile.getIterations();
@@ -255,7 +255,7 @@ public class Mesh
 
 		while(in.readWords(new String[]{"WIRE","END"})==0)
 		{
-			logger.debug("loadWi02File "+in.lineno());
+			logger.fine("loadWi02File "+in.lineno());
 			int orientation=in.readWords(new String[]{"X","Y","Z"});
 			Class clazz=null;
 
@@ -269,7 +269,7 @@ public class Mesh
 
 			while(!in.readWord().equals("END"))
 			{
-				if(in.lineno()%1000==0) logger.debug("loadWi02File "+in.lineno());
+				if(in.lineno()%1000==0) logger.fine("loadWi02File "+in.lineno());
 				Wire w=(Wire)constructor.newInstance(new Class[0]);
 				int code = in.readInteger();
 				in.readWord();
@@ -303,7 +303,7 @@ public class Mesh
 
 		while(in.readWords(new String[]{"PLATE","END"})==0)
 		{
-			logger.debug("loadPl22File "+in.lineno());
+			logger.fine("loadPl22File "+in.lineno());
 			int orientation=in.readWords(new String[]{"X","Y","Z"});
 			Class clazz=null;
 
@@ -317,7 +317,7 @@ public class Mesh
 
 			while(!in.readWord().equals("END"))
 			{
-				if(in.lineno()%1000==0) logger.debug("loadPl22File "+in.lineno());
+				if(in.lineno()%1000==0) logger.fine("loadPl22File "+in.lineno());
 				Plate p=(Plate)constructor.newInstance(new Class[0]);
 				p.min1=in.readInteger();
 				in.readWord();
@@ -368,7 +368,7 @@ public class Mesh
 			Constructor constructor=clazz.getConstructor(new Class[0]);
 			for(int i=0;i<numberOfPlate[orientation];i++)
 			{
-				if(in.lineno()%1000==0) logger.debug("loadPl02File "+in.lineno());
+				if(in.lineno()%1000==0) logger.fine("loadPl02File "+in.lineno());
 				Plate p=(Plate)constructor.newInstance(new Class[0]);
 				p.min1=in.readInteger();
 				p.max1=in.readInteger();
