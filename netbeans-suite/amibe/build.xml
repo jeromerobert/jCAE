@@ -82,7 +82,7 @@
 		<jar basedir="${build.classes.dir}" excludes="**/tests/** **/*Test* **/occ/*" compress="true" jarfile="${dist.jar}">
 			<manifest>
 				<attribute name="Main-Class" value="org.jcae.mesh.Mesher"/>
-				<attribute name="Class-Path" value="jcae-mesherocc.jar log4j.jar trove.jar"/>
+				<attribute name="Class-Path" value="jcae-mesherocc.jar trove.jar"/>
 			</manifest>
 			<fileset dir="${src.src.dir}" includes="**/*.properties"/>
 			<fileset dir="${src.src.dir}" includes="**/*.dtd"/>
