@@ -31,6 +31,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.HashSet;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Iterator;
 import java.io.Serializable;
 import java.util.logging.Level;
@@ -433,11 +434,10 @@ public class Mesh implements Serializable
 		buildAdjacency(vertices, minAngle);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void buildAdjacency(Collection<Vertex> vertices, double minAngle)
 	{
-		//  1. For each vertex, build the list of triangles
-		//     connected to this vertex.
+		//  For each vertex, build the list of triangles
+		//  connected to this vertex.
 		logger.fine("Build the list of triangles connected to each vertex");
 		HashMap<Vertex, ArrayList<Triangle>> tVertList = new HashMap<Vertex, ArrayList<Triangle>>(vertices.size());
 		for (Vertex v: vertices)
@@ -455,62 +455,20 @@ public class Mesh implements Serializable
 				v.setLink(t);
 			}
 		}
-		//  2. Connect all edges together
+		//  Connect all edges together
 		logger.fine("Connect triangles");
 		ArrayList<Triangle> newTri = new ArrayList<Triangle>();
-		for (Vertex v: vertices)
-			glueIncidentHalfEdges(v, tVertList, newTri);
-		//  tVertList is no more needed, remove all references
-		//  to help the garbage collector.
-		for (Vertex v: vertices)
-		{
-			ArrayList<Triangle> list = tVertList.get(v);
-			list.clear();
-			tVertList.put(v, null);
-		}
-		tVertList.clear();
-		//  3. Mark boundary edges and bind them to virtual triangles.
-		logger.fine("Mark boundary edges");
-		AbstractHalfEdge ot = null;
-		AbstractHalfEdge sym = null;
-		for (Triangle t: triangleList)
-		{
-			ot = t.getAbstractHalfEdge(ot);
-			for (int i = 0; i < 3; i++)
-			{
-				ot = ot.next();
-				if (!ot.hasSymmetricEdge())
-				{
-					ot.setAttributes(AbstractHalfEdge.BOUNDARY);
-					Triangle adj = factory.createTriangle(outerVertex, ot.destination(), ot.origin());
-					newTri.add(adj);
-					adj.setAttributes(AbstractHalfEdge.OUTER);
-					adj.setReadable(false);
-					adj.setWritable(false);
-					sym = adj.getAbstractHalfEdge(sym);
-					sym.setAttributes(AbstractHalfEdge.BOUNDARY);
-					ot.glue(sym);
-				}
-				else if (ot.hasAttributes(AbstractHalfEdge.OUTER))
-				{
-					if (sym == null)
-						sym = t.getAbstractHalfEdge(sym);
-					sym = ot.sym(sym);
-					if (!sym.hasAttributes(AbstractHalfEdge.OUTER))
-					{
-						ot.setAttributes(AbstractHalfEdge.BOUNDARY);
-						sym.setAttributes(AbstractHalfEdge.BOUNDARY);
-					}
-				}
-			}
-		}
-		//  4. Mark non-manifold edges and bind them to virtual triangles.
-		//  This is now performed by glueIncidentHalfEdges() above.
+		connectTriangles(vertices, newTri);
+
+		//  Mark boundary edges and bind them to virtual triangles.
+		logger.fine("Connect boundary triangles");
+		connectBoundaryTriangles(newTri);
 		
-		//  5. Find the list of vertices which are on mesh boundary
+		//  Find the list of vertices which are on mesh boundary
 		logger.fine("Build the list of nodes on boundaries and non-manifold edges");
 		HashSet<Vertex> bndNodes = new HashSet<Vertex>();
 		maxLabel = 0;
+		AbstractHalfEdge ot = null;
 		for (Triangle t: triangleList)
 		{
 			ot = t.getAbstractHalfEdge(ot);
@@ -527,7 +485,7 @@ public class Mesh implements Serializable
 			}
 		}
 
-		//  6. Build links for non-manifold vertices
+		//  Build links for non-manifold vertices
 		logger.fine("Compute links for non-manifold vertices");
 		Vertex [] endpoints = new Vertex[2];
 		LinkedHashMap<Vertex, LinkedHashSet<Triangle>> mapNMVertexLinks = new LinkedHashMap<Vertex, LinkedHashSet<Triangle>>();
@@ -587,8 +545,8 @@ public class Mesh implements Serializable
 			logger.fine("Found "+nrNME+" non manifold edges");
 		if (nrFE > 0)
 			logger.fine("Found "+nrFE+" free edges");
-		//  7. If vertices are on inner boundaries and there is
-		//     no ridge, change their label.
+		//  If vertices are on inner boundaries and there is
+		//  no ridge, change their label.
 		logger.fine("Set interior nodes mutable");
 		int nrJunctionPoints = 0;
 		/*
@@ -627,69 +585,141 @@ public class Mesh implements Serializable
 		triangleList.addAll(newTri);
 	}
 	
-	private final void glueIncidentHalfEdges(Vertex v, HashMap<Vertex, ArrayList<Triangle>> tVertList, ArrayList<Triangle> newTri)
+	private void connectTriangles(Collection<Vertex> vertices, ArrayList<Triangle> newTri)
 	{
-		//  Mark all triangles having v as vertex
-		ArrayList<Triangle> neighTriList = tVertList.get(v);
-		if (neighTriList == null)
-			return;
+		//  For each vertex, build the list of triangles
+		//  connected to this vertex.
+		HashMap<Vertex, ArrayList<Triangle>> tVertList = new HashMap<Vertex, ArrayList<Triangle>>(vertices.size());
+		for (Vertex v: vertices)
+			tVertList.put(v, new ArrayList<Triangle>(10));
+		for (Triangle t: triangleList)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				Vertex v = t.vertex[i];
+				if (v.isReadable())
+				{
+					ArrayList<Triangle> list = tVertList.get(v);
+					list.add(t);
+				}
+				v.setLink(t);
+			}
+		}
+		//  Connect all edges together
+		glueIncidentHalfEdges(tVertList, newTri);
+		//  Remove all references to help the garbage collector.
+		for (Vertex v: vertices)
+		{
+			ArrayList<Triangle> list = tVertList.get(v);
+			list.clear();
+			tVertList.put(v, null);
+		}
+	}
+	
+	private void connectBoundaryTriangles(ArrayList<Triangle> newTri)
+	{
+		AbstractHalfEdge ot = null;
+		AbstractHalfEdge sym = null;
+		for (Triangle t: triangleList)
+		{
+			ot = t.getAbstractHalfEdge(ot);
+			for (int i = 0; i < 3; i++)
+			{
+				ot = ot.next();
+				if (!ot.hasSymmetricEdge())
+				{
+					ot.setAttributes(AbstractHalfEdge.BOUNDARY);
+					Triangle adj = factory.createTriangle(outerVertex, ot.destination(), ot.origin());
+					newTri.add(adj);
+					adj.setAttributes(AbstractHalfEdge.OUTER);
+					adj.setReadable(false);
+					adj.setWritable(false);
+					sym = adj.getAbstractHalfEdge(sym);
+					sym.setAttributes(AbstractHalfEdge.BOUNDARY);
+					ot.glue(sym);
+				}
+				else if (ot.hasAttributes(AbstractHalfEdge.OUTER))
+				{
+					if (sym == null)
+						sym = t.getAbstractHalfEdge(sym);
+					sym = ot.sym(sym);
+					if (!sym.hasAttributes(AbstractHalfEdge.OUTER))
+					{
+						ot.setAttributes(AbstractHalfEdge.BOUNDARY);
+						sym.setAttributes(AbstractHalfEdge.BOUNDARY);
+					}
+				}
+			}
+		}
+	}
+
+	private final void glueIncidentHalfEdges(HashMap<Vertex, ArrayList<Triangle>> tVertList, ArrayList<Triangle> newTri)
+	{
 		Triangle.List markedTri = new Triangle.List();
-		for (Triangle t: neighTriList)
-			markedTri.add(t);
-		//  Loop on all edges incident to v
 		AbstractHalfEdge ot = null;
 		AbstractHalfEdge ot2 = null;
 		AbstractHalfEdge [] work = new AbstractHalfEdge[3];
-		for (Triangle t: neighTriList)
+		for (Map.Entry<Vertex, ArrayList<Triangle>> e: tVertList.entrySet())
 		{
-			ot = v.getIncidentAbstractHalfEdge(t, ot);
-			// Skip this edge if adjacency relations already exist, 
-			if (ot.hasSymmetricEdge())
+			//  Mark all triangles having v as vertex
+			Vertex v = e.getKey();
+			ArrayList<Triangle> neighTriList = e.getValue();
+			if (neighTriList == null)
 				continue;
-			Vertex v2 = ot.destination();
-			ArrayList<Triangle> neighTriList2 = tVertList.get(v2);
-			if (neighTriList2 == null)
-				continue;
-			// Edge (v,v2) has not yet been processed.
-			// List of triangles incident to v2.
-			boolean manifold = true;
-			// Ensure that work[0] and work[1] are non null to avoid
-			// tests in glueNonManifoldHalfEdges
-			if (work[0] == null)
-				work[0] = t.getAbstractHalfEdge(work[0]);
-			if (work[1] == null)
-				work[1] = t.getAbstractHalfEdge(work[1]);
-			for (Triangle t2: neighTriList2)
+			for (Triangle t: neighTriList)
+				markedTri.add(t);
+			//  Loop on all edges incident to v
+			for (Triangle t: neighTriList)
 			{
-				if (t == t2 || !markedTri.contains(t2))
+				ot = v.getIncidentAbstractHalfEdge(t, ot);
+				// Skip this edge if adjacency relations already exist, 
+				if (ot.hasSymmetricEdge())
 					continue;
-				// t2 contains v and v2, we now look for an edge
-				// (v,v2) or (v2,v)
-				ot2 = v2.getIncidentAbstractHalfEdge(t2, ot2);
-				if (manifold && ot2.destination() == v && !ot.hasSymmetricEdge() && !ot2.hasSymmetricEdge())
+				Vertex v2 = ot.destination();
+				ArrayList<Triangle> neighTriList2 = tVertList.get(v2);
+				if (neighTriList2 == null)
+					continue;
+				// Edge (v,v2) has not yet been processed.
+				// List of triangles incident to v2.
+				boolean manifold = true;
+				// Ensure that work[0] and work[1] are non null to avoid
+				// tests in glueNonManifoldHalfEdges
+				if (work[0] == null)
+					work[0] = t.getAbstractHalfEdge(work[0]);
+				if (work[1] == null)
+					work[1] = t.getAbstractHalfEdge(work[1]);
+				for (Triangle t2: neighTriList2)
 				{
-					// This edge seems to be manifold.
-					// It may become non manifold later when
-					// other neighbours are processed.
-					ot.glue(ot2);
-					continue;
+					if (t == t2 || !markedTri.contains(t2))
+						continue;
+					// t2 contains v and v2, we now look for an edge
+					// (v,v2) or (v2,v)
+					ot2 = v2.getIncidentAbstractHalfEdge(t2, ot2);
+					if (manifold && ot2.destination() == v && !ot.hasSymmetricEdge() && !ot2.hasSymmetricEdge())
+					{
+						// This edge seems to be manifold.
+						// It may become non manifold later when
+						// other neighbours are processed.
+						ot.glue(ot2);
+						continue;
+					}
+					manifold = false;
+					if (ot2.destination() != v)
+						ot2 = ot2.prev();
+					// We are sure now that ot2 == (v,v2) or (v2,v)
+					glueNonManifoldHalfEdges(v, v2, ot, ot2, work, newTri);
 				}
-				manifold = false;
-				if (ot2.destination() != v)
-					ot2 = ot2.prev();
-				// We are sure now that ot2 == (v,v2) or (v2,v)
-				glueNonManifoldHalfEdges(v, v2, ot, ot2, work, newTri);
+				if (logger.isLoggable(Level.FINE) && !manifold)
+				{
+					int cnt = 0;
+					for (Iterator<AbstractHalfEdge> it = ot.fanIterator(); it.hasNext(); it.next())
+						cnt++;
+					logger.fine("Non-manifold edge: "+v+" "+v2+" "+" connected to "+cnt+" fans");
+				}
 			}
-			if (logger.isLoggable(Level.FINE) && !manifold)
-			{
-				int cnt = 0;
-				for (Iterator<AbstractHalfEdge> it = ot.fanIterator(); it.hasNext(); it.next())
-					cnt++;
-				logger.fine("Non-manifold edge: "+v+" "+v2+" "+" connected to "+cnt+" fans");
-			}
+			//  Unmark adjacent triangles
+			markedTri.clear();
 		}
-		//  Unmark adjacent triangles
-		markedTri.clear();
 	}
 
 	private final void glueNonManifoldHalfEdges(Vertex v, Vertex v2, AbstractHalfEdge ot, AbstractHalfEdge ot2, AbstractHalfEdge [] work, ArrayList<Triangle> newTri)
