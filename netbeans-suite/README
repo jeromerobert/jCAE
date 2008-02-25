@@ -1,0 +1,9 @@
+This suite require 2 libraries:
+- Gnu Trove (http://trove4j.sourceforge.net)
+- Log4j (http://logging.apache.org/log4j)
+
+They must be declared as libraries in netbeans under the name "trove" and "Log4j". 
+This can be done either by using the IDE (menu Tools, Libraries) or by setting this properties:
+- libs.trove.classpath
+- libs.Log4j.classpath
+in $HOME/.netbeans/6.0/build.properties
