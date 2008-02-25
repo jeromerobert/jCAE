@@ -26,8 +26,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import org.apache.log4j.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.Formatter;
+import java.util.logging.Handler;
 import org.jcae.mesh.Mesher;
+import org.jcae.mesh.JCAEFormatter;
 import org.jcae.netbeans.Utilities;
 import org.openide.ErrorManager;
 import org.openide.util.Cancellable;
@@ -106,9 +110,13 @@ public class JCAEMesher implements Runnable, Cancellable
 			final OutputWriter ow=io.getOut();
 			if(Settings.getDefault().isRunInSameJVM())
 			{				
-				final Appender a=new WriterAppender(new PatternLayout("%-4r [%-5p] %c- %m%n"), ow);
-				BasicConfigurator.configure(a);
-				Logger.getRootLogger().setLevel(Level.INFO);
+				Logger root = Logger.getLogger("");
+				root.setLevel(Level.INFO);
+				Formatter jcaeFormatter = new JCAEFormatter();
+				for (Handler h: root.getHandlers())
+				{
+					h.setFormatter(jcaeFormatter);
+				}
 				thread=Thread.currentThread();
 				Mesher.main(new String[]{brepName, xmlDir, ""+mesh.getEdgeLength(), ""+mesh.getDeflection()});
 				thread=null;

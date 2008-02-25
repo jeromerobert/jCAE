@@ -196,10 +196,6 @@
                 <binary-origin>../amibe/dist/amibe.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/log4j.jar</runtime-relative-path>
-                <binary-origin>build/tmp/log4j.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/jcae-mesherocc.jar</runtime-relative-path>
                 <binary-origin>../amibe/dist/jcae-mesherocc.jar</binary-origin>
             </class-path-extension>

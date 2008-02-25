@@ -80,7 +80,7 @@ public class Settings extends SystemOption
 		ArrayList toReturn=new ArrayList();
 		toReturn.add(javaExe);
 		toReturn.add("-Xmx"+maximumMemory);
-		toReturn.add("-Dlog4j.configuration="+System.getProperty("log4j.configuration"));
+		toReturn.add("-Djava.util.logging.config.file="+System.getProperty("java.util.logging.config.file"));
 		toReturn.addAll(Arrays.asList(getCustomJVMParameters()));
 		toReturn.add("-jar");
 		toReturn.add(mesherJar);
@@ -96,7 +96,7 @@ public class Settings extends SystemOption
 		ArrayList toReturn=new ArrayList();
 		toReturn.add(javaExe);
 		toReturn.add("-Xmx"+maximumMemory);
-		toReturn.add("-Dlog4j.configuration="+System.getProperty("log4j.configuration"));
+		toReturn.add("-Djava.util.logging.config.file="+System.getProperty("java.util.logging.config.file"));
 		toReturn.addAll(Arrays.asList(getCustomJVMParameters()));
 		toReturn.add("-classpath");
 		toReturn.add(mesherJar);

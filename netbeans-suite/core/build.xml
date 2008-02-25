@@ -31,12 +31,10 @@
 
 		<copy todir="${cluster}/modules/ext" file="${va.project.dir}/dist/jcae-viewer3d-amibe.jar"/>
 		<!-- other libs -->
-		<copy file="${libs.Log4j.classpath}" tofile="build/tmp/log4j.jar"/>
-		<copy file="${libs.Log4j.classpath}" tofile="${cluster}/modules/ext/log4j.jar"/>
 		<copy file="${libs.trove.classpath}" tofile="build/tmp/trove.jar"/>
 		<copy file="${libs.trove.classpath}" tofile="${cluster}/modules/ext/trove.jar"/>
 
-		<copy file="../../amibe/log4j.properties" tofile="${cluster}/etc/log4j.properties"/>
+		<copy file="../../amibe/logging.properties" tofile="${cluster}/etc/logging.properties"/>
 	</target>
 	<target name="clean" depends="projectized-common.clean">
 		<echo message="Cleaning ${amibe.project.dir}"/>

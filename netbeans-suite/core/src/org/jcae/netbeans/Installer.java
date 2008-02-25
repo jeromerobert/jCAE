@@ -39,17 +39,17 @@ public class Installer extends ModuleInstall
 	{
 		//load opencascade libraries
 		new BRep_Builder();
-		//Load default log4j configuration
+		//Load default log configuration
 		try
 		{
-			String l4jp = System.getProperty("log4j.configuration");
-			if(l4jp == null || l4jp.isEmpty())
+			String logp = System.getProperty("java.util.logging.config.file");
+			if(logp == null || logp.isEmpty())
 			{
-				URL l4jURL =
+				URL logURL =
 					InstalledFileLocator.getDefault().
-					locate("etc/log4j.properties", "org.jcae.netbeans", false).
+					locate("etc/logging.properties", "org.jcae.netbeans", false).
 					toURI().toURL();
-				System.setProperty("log4j.configuration", l4jURL.toString());
+				System.setProperty("java.util.logging.config.file", logURL.toString());
 			}			
 		}
 		catch (MalformedURLException ex)
