@@ -47,6 +47,7 @@ public class ViewableCAD extends ViewableAdaptor
 		"javax.media.j3d.zFactorRel", "2.0f"));
 	private final static Color3f BACK_FACE_COLOR=new Color3f(0.5f,1f,0.5f);
 	private final static Color3f FRONT_FACE_COLOR=new Color3f(0.5f,0.5f,1f);
+	private final static Color3f SELECTED_FACE_COLOR=new Color3f(1.0f, 0, 0);
 	public final static PolygonAttributes polygonAttrFront =
 		new PolygonAttributes(PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_FRONT,
 				20.0f * zFactorAbs, false, zFactorRel);
@@ -64,34 +65,67 @@ public class ViewableCAD extends ViewableAdaptor
 		polygonAttrNone.setCapability(PolygonAttributes.ALLOW_OFFSET_WRITE);
 	}
 	
-	protected static abstract class CADPickingInfo{
-		public int id;
+	protected static abstract class CADPickingInfo
+	{
+		private int id;
+		
+		public int getID()
+		{
+			return id;
+		}
+		
+		protected CADPickingInfo(int id)
+		{
+			this.id = id;
+		}
 	}
 	
 	protected static class FacePickingInfo extends CADPickingInfo
 	{		
-		Material[] materials;
-		Color3f[] oldColor;
-		/**
-		 * @param id
-		 * @param coloringAttributes
-		 */
-		public FacePickingInfo(int id, Material[] material){
-			this(id,material,new Color3f(Color.WHITE));
-		}
+		Material material1, material2;
+		Color3f oldColor1, oldColor2;
 
-		public FacePickingInfo(int id, Material[] material,Color3f oldColor)
-		{		
-			this.materials = material;
-			this.oldColor=new Color3f[]{oldColor};
-		}
-
-		public FacePickingInfo(int id, Material[] material,Color3f oldColor1, Color3f oldColor2)
+		public FacePickingInfo(int id)
 		{
-			this.id = id;
-			this.materials = material;
-			this.oldColor=new Color3f[]{oldColor1, oldColor2};
+			super(id);
 		}
+
+		public FacePickingInfo(int id, Material m1, Color3f color)
+		{
+			super(id);
+			material1 = m1;
+			oldColor1 = color;
+		}
+
+		public FacePickingInfo(int id, Material m1, Material m2,
+			Color3f c1, Color3f c2)
+		{
+			super(id);
+			material1 = m1;
+			material2 = m2;
+			oldColor1 = c1;
+			oldColor2 = c2;
+		}
+
+		public Material getMaterial1()
+		{
+			return material1;
+		}
+		
+		public Material getMaterial2()
+		{
+			return material2;
+		}
+		
+		public Color3f getColor1()
+		{
+			return oldColor1;
+		}
+		
+		public Color3f getColor2()
+		{
+			return oldColor2;
+		}		
 	}  
 	
 	protected static class EdgePickingInfo extends CADPickingInfo
@@ -105,15 +139,15 @@ public class ViewableCAD extends ViewableAdaptor
 		 * @param coloringAttributes
 		 */
 		public EdgePickingInfo(int id,Appearance appearance,ColoringAttributes coloringAttributes)
-		{				
+		{		
+			super(id);
 			this.appearance = appearance;
 			this.coloringAttributes = coloringAttributes;
 		}
 	}
 		
 	protected static class VertexPickingInfo extends CADPickingInfo
-	{
-		int id;
+	{	
 		Appearance appearance;
 		Shape3D shape3D;
 		/**
@@ -124,7 +158,7 @@ public class ViewableCAD extends ViewableAdaptor
 		 */
 		public VertexPickingInfo(int id, Appearance appearance, Shape3D shape3D)
 		{
-			this.id = id;
+			super(id);
 			this.appearance = appearance;
 			this.shape3D = shape3D;
 		}
@@ -327,7 +361,7 @@ public class ViewableCAD extends ViewableAdaptor
 	{
 		boolean toReturn;
 		if(selectionAction==SELECTION_INVERT)
-			toReturn = !selected.contains(Integer.valueOf(info.id));
+			toReturn = !selected.contains(info.id);
 		else
 			toReturn = selectionAction == SELECTION_ADD;
 		return toReturn;
@@ -346,7 +380,9 @@ public class ViewableCAD extends ViewableAdaptor
 
 		boolean b = false;
 		for(Geometry a: as)
-			b = b || pick(a);
+			if(pick(a))
+				b = true;
+		
 		if(b)
 			fireSelectionChanged();
 	}	
@@ -422,24 +458,22 @@ public class ViewableCAD extends ViewableAdaptor
 		if(fireListeners) fireSelectionChanged();
 	}
 	
-	private void setFaceSelected(FacePickingInfo fpi, boolean selected)
-	{
-		Color3f[] colorToSet=new Color3f[fpi.materials.length];
+	protected void setFaceSelected(FacePickingInfo fpi, boolean selected)
+	{		
 		if(selected)
 		{
-			Arrays.fill(colorToSet, new Color3f(Color.RED));
-			selectedFaces.add(Integer.valueOf(fpi.id));
+			fpi.getMaterial1().setDiffuseColor(SELECTED_FACE_COLOR);
+			if(fpi.getMaterial2() != null)
+				fpi.getMaterial2().setDiffuseColor(SELECTED_FACE_COLOR);
+			selectedFaces.add(fpi.getID());
 		}
 		else
 		{
-			colorToSet=fpi.oldColor;
-			selectedFaces.remove(Integer.valueOf(fpi.id));
-		}
-		
-		for(int i=0; i<fpi.materials.length; i++)
-		{
-			fpi.materials[i].setDiffuseColor(colorToSet[i]);
-		}
+			fpi.getMaterial1().setDiffuseColor(fpi.getColor1());
+			if(fpi.getMaterial2() != null)
+				fpi.getMaterial2().setDiffuseColor(fpi.getColor2());			
+			selectedFaces.remove(fpi.getID());
+		}		
 	}
 	
 	private void setEdgeSelected(EdgePickingInfo epi, boolean selected)
@@ -449,12 +483,12 @@ public class ViewableCAD extends ViewableAdaptor
 			ColoringAttributes ca=new ColoringAttributes();
 			ca.setColor(new Color3f(Color.RED));
 			epi.appearance.setColoringAttributes(ca);
-			selectedEdges.add(new Integer(epi.id));
+			selectedEdges.add(epi.getID());
 		}
 		else
 		{
 			epi.appearance.setColoringAttributes(epi.coloringAttributes);
-			selectedEdges.remove(new Integer(epi.id));
+			selectedEdges.remove(epi.getID());
 		}
 		
 	}
@@ -470,12 +504,12 @@ public class ViewableCAD extends ViewableAdaptor
 			a.setPointAttributes(pa);
 			a.setColoringAttributes(ca);
 			epi.shape3D.setAppearance(a);
-			selectedVertices.add(new Integer(epi.id));
+			selectedVertices.add(epi.getID());
 		}
 		else
 		{
 			epi.shape3D.setAppearance(epi.appearance);
-			selectedVertices.remove(new Integer(epi.id));
+			selectedVertices.remove(epi.getID());
 		}
 		
 	}
@@ -561,19 +595,13 @@ public class ViewableCAD extends ViewableAdaptor
 		int n=0;
 		facesInfo=new HashMap<Integer, FacePickingInfo>();
 		
-		Vector<Material> materials=new Vector<Material>();//Vector to save Face Materials
-		
 		while(it.hasNext())
 		{			
-			materials.clear();
-			
 			FaceMesh fm=it.next();
 			
 			//Case of an unmeshed face
 			if(fm.getNodes().length==0){
-				FacePickingInfo fpi = 
-					new FacePickingInfo(n,new Material[0]);
-				facesInfo.put(Integer.valueOf(n), fpi);
+				facesInfo.put(n, new FacePickingInfo(n));
 				n++;
 				continue;
 			}
@@ -609,7 +637,6 @@ public class ViewableCAD extends ViewableAdaptor
 				shape3d.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 				shape3d.setCapability(Node.ALLOW_PICKABLE_WRITE);
 				toReturn.addChild(shape3d);
-				materials.add(m1);
 				
 				shape3d=new Shape3D(g);
 				a=new Appearance();
@@ -624,13 +651,11 @@ public class ViewableCAD extends ViewableAdaptor
 				shape3d.setCapability(Shape3D.ALLOW_GEOMETRY_READ);	
 				shape3d.setCapability(Node.ALLOW_PICKABLE_WRITE);
 				toReturn.addChild(shape3d);	
-				materials.add(m2);
 				
 				//Build Picking Data
-				FacePickingInfo fpi =  new FacePickingInfo(n,
-					materials.toArray(new Material[materials.size()]),
+				FacePickingInfo fpi =  new FacePickingInfo(n, m1, m2,
 					FRONT_FACE_COLOR, BACK_FACE_COLOR);
-				facesInfo.put(Integer.valueOf(n), fpi); 
+				facesInfo.put(n, fpi); 
 				g.setUserData(fpi);
 			}
 			else {
@@ -653,13 +678,10 @@ public class ViewableCAD extends ViewableAdaptor
 				shape3d.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 				shape3d.setCapability(Node.ALLOW_PICKABLE_WRITE);
 				toReturn.addChild(shape3d);
-				materials.add(m1);
 				
 				//Build Picking Data
-				FacePickingInfo fpi = 
-					new FacePickingInfo(n,materials.toArray(new Material[materials.size()])
-							,color);
-				facesInfo.put(Integer.valueOf(n), fpi); 
+				FacePickingInfo fpi = new FacePickingInfo(n, m1 ,color);
+				facesInfo.put(n, fpi); 
 				g.setUserData(fpi);
 			}			
 			n++;
