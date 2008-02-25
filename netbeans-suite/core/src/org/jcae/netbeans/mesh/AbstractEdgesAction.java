@@ -1,16 +1,15 @@
 package org.jcae.netbeans.mesh;
 
+import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import javax.media.j3d.BranchGroup;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 import org.jcae.mesh.java3d.ComputeEdgesConnectivity;
-import org.jcae.mesh.java3d.XMLBranchGroup;
 import org.jcae.netbeans.Utilities;
 import org.jcae.netbeans.viewer3d.View3DManager;
 import org.jcae.viewer3d.View;
-import org.jcae.viewer3d.bg.ViewableBG;
+import org.jcae.viewer3d.fe.ViewableFE;
+import org.jcae.viewer3d.fe.amibe.AmibeOverlayProvider;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
@@ -41,11 +40,9 @@ public abstract class AbstractEdgesAction extends CookieAction
 				new ComputeEdgesConnectivity(xmlDir, xmlFile);
 
 			computeEdgesConnectivity.compute();			
-			XMLBranchGroup xbg=new XMLBranchGroup(xmlDir, xmlFile);
-			xbg.parseXML();
-			BranchGroup bg=xbg.getBranchGroup(getBranchGroupLabel());
 			View bgView=View3DManager.getDefault().getView3D().getView();			
-			ViewableBG fe1 = new ViewableBG(bg);
+			ViewableFE fe1 = new ViewableFE(
+				new AmibeOverlayProvider(new File(xmlDir), getBranchGroupLabel()));
 			fe1.setName(activatedNodes[0].getName()+" "+getViewSuffix());
 			bgView.add(fe1);			
 			bgView.setCurrentViewable(fe1);
