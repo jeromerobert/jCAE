@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2005, by EADS CRC
-    Copyright (C) 2007, by EADS France
+    Copyright (C) 2007,2008, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -37,11 +37,11 @@ import javax.media.j3d.IndexedLineArray;
 import javax.media.j3d.IndexedGeometryArray;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.LineAttributes;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 public class OEMMViewer
 {
-	private static Logger logger = Logger.getLogger(OEMMViewer.class);	
+	private static Logger logger = Logger.getLogger(OEMMViewer.class.getName());
 	private final static float absOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorAbs", "20.0f"));
 	private final static float relOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorRel", "2.0f"));
 

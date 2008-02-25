@@ -1,8 +1,8 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finit element mesher, Plugin architecture.
 
-    Copyright (C) 2005
-                  Jerome Robert <jeromerobert@users.sourceforge.net>
+    Copyright (C) 2005 Jerome Robert <jeromerobert@users.sourceforge.net>
+    Copyright (C) 2008, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,6 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.xmldata.MeshWriter;
 import org.jcae.mesh.amibe.validation.*;
-import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.awt.event.KeyAdapter;
@@ -37,6 +36,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import gnu.trove.TIntHashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.media.j3d.BoundingSphere;
 import javax.media.j3d.BranchGroup;
@@ -57,7 +58,7 @@ import org.jcae.viewer3d.View;
  */
 public class MeshOEMMViewer3d
 {
-	static Logger logger=Logger.getLogger(MeshOEMMViewer3d.class);
+	static Logger logger=Logger.getLogger(MeshOEMMViewer3d.class.getName());
 	static ViewableBG fineMesh;
 	static ViewableFE decMesh;
 
@@ -167,7 +168,7 @@ public class MeshOEMMViewer3d
 					}
 					else if (k == 'i')
 					{
-						if (logger.isInfoEnabled())
+						if (logger.isLoggable(Level.INFO))
 							logger.info("Selected: " + octree.getResultSet());
 					}
 					else if (k == 'c')
@@ -193,7 +194,7 @@ public class MeshOEMMViewer3d
 						}
 						else
 						{
-							logger.error("Only one node must be selected!");
+							logger.severe("Only one node must be selected!");
 						}
 					}
 					else if (k == 'd')

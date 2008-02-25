@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2005, by EADS CRC
+    Copyright (C) 2008, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -32,7 +33,8 @@ import javax.media.j3d.BranchGroup;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 import javax.vecmath.Point3d;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
@@ -50,7 +52,7 @@ public class MeshOEMMCoarseViewer
 	static boolean showOctree = false;
 	static boolean showAxis = true;
 	static boolean showFPS = true;
-	static Logger logger = Logger.getLogger(MeshOEMMCoarseViewer.class);
+	static Logger logger = Logger.getLogger(MeshOEMMCoarseViewer.class.getName());
 	/**
 	 * @param args
 	 */
@@ -129,7 +131,7 @@ public class MeshOEMMCoarseViewer
 				}
 				else if (k == 'i')
 				{
-					if (logger.isInfoEnabled())
+					if (logger.isLoggable(Level.INFO))
 						logger.info("Selected: " + octree.getResultSet());
 				}
 				else if (k == 'v')
@@ -177,11 +179,11 @@ public class MeshOEMMCoarseViewer
 						int i = it.next();
 						Point3d vector = oemmBehavior.getVoxel(i);
 
-						if (logger.isInfoEnabled()) {
+						if (logger.isLoggable(Level.INFO)) {
 							logger.info("Node: " + i + ", vector: [" + vector.x + ", " + vector.y + ", " + vector.z + "]");
 						}
 					}
-					if (logger.isInfoEnabled()) {
+					if (logger.isLoggable(Level.INFO)) {
 						logger.info("Visible oemm nodes: " + oemmBehavior.getNumberOfVisibleFineElements() + ", cache: " + oemmBehavior.getNumberOfCacheNodes());
 					}
 				}

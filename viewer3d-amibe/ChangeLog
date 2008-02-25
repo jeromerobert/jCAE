@@ -1,3 +1,10 @@
+2008-02-25 11:48 Denis Barbier <barbier@users.sourceforge.net>
+
+	* Replace log4j by java.util.logging.Logger.
+	* build.properties: Mesher jar has been renamed into amibe.jar
+	* src/org/jcae/mesh/MeshOEMMView.java: File removed, support
+	for org.jcae.mesh.java3d has been dropped from amibe.jar.
+
 2007-13-10 15:48 Denis Barbier <barbier@users.sourceforge.net>
 
 	* build.xml: Also put org.jcae.mesh.* classes into jar file.

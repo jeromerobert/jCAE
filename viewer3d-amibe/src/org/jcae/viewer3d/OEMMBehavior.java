@@ -1,22 +1,21 @@
-/*
- * Project Info:  http://jcae.sourceforge.net
- * 
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation; either version 2.1 of the License, or (at your option)
- * any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation, Inc.,
- * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
- *
- * (C) Copyright 2007, by EADS France
- */
+/* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
+   modeler, Finite element mesher, Plugin architecture.
+
+    Copyright (C) 2007,2008, by EADS France
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
 package org.jcae.viewer3d;
 
@@ -45,14 +44,15 @@ import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.MeshReader;
 import org.jcae.viewer3d.bg.ViewableBG;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Dynamically hide and show voxel in a OEMM viewer
  */
 public class OEMMBehavior extends Behavior
 {
-	private static Logger logger = Logger.getLogger(OEMMBehavior.class);
+	private static Logger logger = Logger.getLogger(OEMMBehavior.class.getName());
 	private static final int DEFAULT_MAX_TRIANGLES_NBR = -1;
 	private boolean frozen = false;
 	private MeshReader coarseReader;
@@ -196,7 +196,7 @@ public class OEMMBehavior extends Behavior
 		wakeupTransf=new WakeupOnTransformChange(
 			view.getViewingPlatform().getViewPlatformTransform());
 		maxNumberOfTriangles = Long.getLong("org.jcae.viewer3d.OEMMBehavior.maxNumberOfTriangles", DEFAULT_MAX_TRIANGLES_NBR).longValue();
-		if (logger.isInfoEnabled()) {
+		if (logger.isLoggable(Level.INFO)) {
 			logger.info("Maximal number of triangles: " + maxNumberOfTriangles);
 		}
 	}
@@ -356,7 +356,7 @@ public class OEMMBehavior extends Behavior
 
 	private void showFineMesh(final Set<Integer> ids)
 	{
-		if (logger.isInfoEnabled()) {
+		if (logger.isLoggable(Level.INFO)) {
 			logger.info("Fine occtree nodes> " + ids);
 		}
 		boolean containsAll = (ids.size() > 0);
@@ -367,8 +367,8 @@ public class OEMMBehavior extends Behavior
 		if(!containsAll)
 		{
 			oemmActive=ids.size()>0;
-			if (logger.isDebugEnabled()) {
-				logger.debug("We will show fine mesh for nodes: " + ids);
+			if (logger.isLoggable(Level.FINE)) {
+				logger.fine("We will show fine mesh for nodes: " + ids);
 			}
 			showCoarseNodes(ids);
 			if(ids.size()>0)
@@ -408,8 +408,8 @@ public class OEMMBehavior extends Behavior
 	
 	private void addViewHolderToBranchGroup(Integer id, Map<Integer, ViewHolder> map)
 	{
-		if (logger.isDebugEnabled()) {
-			logger.debug("addViewHolderToBranchGroup> id:" + id + ", coarse:" + (map == coarseOemmNodeId2BranchGroup));
+		if (logger.isLoggable(Level.FINE)) {
+			logger.fine("addViewHolderToBranchGroup> id:" + id + ", coarse:" + (map == coarseOemmNodeId2BranchGroup));
 		}
 		ViewHolder vh = map.get(id);
 		BranchGroup branchGroup = vh.getViewElement();
@@ -421,8 +421,8 @@ public class OEMMBehavior extends Behavior
 	
 	private void removeViewHolderFromBranchGroup(Integer id, Map<Integer, ViewHolder> map)
 	{
-		if (logger.isDebugEnabled()) {
-			logger.debug("removeViewHolderFromBranchGroup> id:" + id + ", coarse:" + (map == coarseOemmNodeId2BranchGroup));
+		if (logger.isLoggable(Level.FINE)) {
+			logger.fine("removeViewHolderFromBranchGroup> id:" + id + ", coarse:" + (map == coarseOemmNodeId2BranchGroup));
 		}
 		//branchGroup.setCapability(BranchGroup.ALLOW_DETACH);
 		ViewHolder vh = map.get(id);
@@ -465,8 +465,8 @@ public class OEMMBehavior extends Behavior
 		if (cacheOemmNodeId2BranchGroup[arg0] != null)
 			vh = cacheOemmNodeId2BranchGroup[arg0].get();
 		if (vh == null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("finemesh node:" + arg0 + " is not loaded and I will load it.");
+			if (logger.isLoggable(Level.FINE)) {
+				logger.fine("finemesh node:" + arg0 + " is not loaded and I will load it.");
 			}
 			
 			TIntHashSet set = new TIntHashSet();
