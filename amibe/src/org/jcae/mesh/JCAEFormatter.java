@@ -26,7 +26,7 @@ import java.util.logging.LogRecord;
 
 public class JCAEFormatter extends Formatter
 {
-	private static final long startDate = new Date().getTime();
+	private static long startDate = -1L;
 	private static final String lineSep = System.getProperty("line.separator");
 	@Override
 	public String format(LogRecord record)
@@ -35,6 +35,10 @@ public class JCAEFormatter extends Formatter
 		if(loggerName == null)
 		{
 			loggerName = "root";
+		}
+		if (startDate < 0L)
+		{
+			startDate = record.getMillis();
 		}
 		StringBuilder output = new StringBuilder()
 			.append(record.getMillis() - startDate)
