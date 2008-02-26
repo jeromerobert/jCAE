@@ -20,13 +20,10 @@
 package org.jcae.netbeans;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import org.jcae.opencascade.jni.BRep_Builder;
 import javax.swing.filechooser.FileSystemView;
 import org.openide.modules.InstalledFileLocator;
 import org.openide.modules.ModuleInstall;
-import org.openide.util.Exceptions;
 
 /**
  * Manages a module's lifecycle. Remember that an installer is optional and
@@ -40,21 +37,14 @@ public class Installer extends ModuleInstall
 		//load opencascade libraries
 		new BRep_Builder();
 		//Load default log configuration
-		try
+		String logp = System.getProperty("java.util.logging.config.file");
+		if(logp == null || logp.isEmpty())
 		{
-			String logp = System.getProperty("java.util.logging.config.file");
-			if(logp == null || logp.isEmpty())
-			{
-				URL logURL =
-					InstalledFileLocator.getDefault().
-					locate("etc/logging.properties", "org.jcae.netbeans", false).
-					toURI().toURL();
-				System.setProperty("java.util.logging.config.file", logURL.toString());
-			}			
-		}
-		catch (MalformedURLException ex)
-		{
-			Exceptions.printStackTrace(ex);
+			String logPath =
+				InstalledFileLocator.getDefault().
+				locate("etc/logging.properties", "org.jcae.netbeans", false).
+				getAbsolutePath();
+			System.setProperty("java.util.logging.config.file", logPath);
 		}
 		
 		//Set default project directory
