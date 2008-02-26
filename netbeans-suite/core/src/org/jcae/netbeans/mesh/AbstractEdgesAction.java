@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
-import org.jcae.mesh.java3d.ComputeEdgesConnectivity;
+import org.jcae.mesh.xmldata.ComputeEdgesConnectivity;
 import org.jcae.netbeans.Utilities;
 import org.jcae.netbeans.viewer3d.View3DManager;
 import org.jcae.viewer3d.View;
