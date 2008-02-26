@@ -70,7 +70,7 @@ public class TextureFitter extends View
 				{
 					FacePickingInfo fpi=(FacePickingInfo) o;
 					pickingPoint = result.getIntersection().getPointCoordinates();
-					faceID=fpi.id;
+					faceID=fpi.getID();
 					fireSelectionChanged();
 				}
 			}

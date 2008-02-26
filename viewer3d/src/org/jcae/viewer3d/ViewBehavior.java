@@ -32,6 +32,7 @@ import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
 import com.sun.j3d.utils.picking.PickCanvas;
 import com.sun.j3d.utils.picking.PickResult;
 import com.sun.j3d.utils.picking.PickTool;
+import org.jcae.viewer3d.cad.ViewableCAD;
 
 public  class ViewBehavior extends OrbitBehavior
 {
@@ -84,7 +85,7 @@ public  class ViewBehavior extends OrbitBehavior
 	private int mouseMode=DEFAULT_MODE;
 	
 	private BranchGroup firstClipBoxPointGroup=null;
-	private Point3d firstClipBoxPoint3d=null;
+	private Point3d firstClipBoxPoint3d=null;	
 	
 	public ViewBehavior(View view)
 	{
@@ -101,7 +102,7 @@ public  class ViewBehavior extends OrbitBehavior
 	
 	@Override
 	protected void processMouseEvent(MouseEvent evt)
-	{			
+	{		
 		switch(mouseMode){
 		case CLIP_RECTANGLE_MODE :
 			 rectangleClipMode(evt);
@@ -465,7 +466,22 @@ public  class ViewBehavior extends OrbitBehavior
 		pickCanvas.setShapeBounds(shape, shape.getStartPoint());
 		PickInfo[] result = pickCanvas.pickAllSorted();
 		if (result != null && result.length > 0)
+		{
 			cv.pickArea(result, shape);
+			//Workaround for a bug in java3d. It does not fire all material
+			//attribute changes so we force it in the next frame
+			view.addPostRenderer(new Runnable()
+			{				
+				public void run()
+				{					
+					ViewableCAD.polygonAttrFront.setPolygonOffset(
+						ViewableCAD.polygonAttrFront.getPolygonOffset());
+					ViewableCAD.polygonAttrBack.setPolygonOffset(
+						ViewableCAD.polygonAttrBack.getPolygonOffset());
+					view.removePostRenderer(this);
+				}
+			});
+		}
 	}
 
 	private void fixOriginAxis(Transform3D t3d)
