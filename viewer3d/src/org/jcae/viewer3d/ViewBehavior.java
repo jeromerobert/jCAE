@@ -212,7 +212,7 @@ public  class ViewBehavior extends OrbitBehavior
 	
 	/** Defines what to do for the RECTANGLE_MODE*/	
 	private void rectangleMode(MouseEvent evt){
-		if (evt.getButton() == MouseEvent.BUTTON1
+		if (anchor == null && evt.getButton() == MouseEvent.BUTTON1
 				&& evt.getID() == MouseEvent.MOUSE_PRESSED)
 		{
 			startRectangleDrawing(evt, Color.WHITE);
