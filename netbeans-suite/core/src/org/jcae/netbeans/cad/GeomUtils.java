@@ -61,13 +61,23 @@ public class GeomUtils
 	 */
 	static public TopoDS_Shape getShape(Node n)
 	{
-		if(n==null)
-			return null;
-		ShapeCookie sc=(ShapeCookie) n.getCookie(ShapeCookie.class);
-		if(sc!=null)
-			return sc.getShape();
-		else
-			return null; 
+		TopoDS_Shape toReturn = null;
+		if(n != null)
+		{
+			BrepDataObject b = n.getLookup().lookup(BrepDataObject.class);
+			if(b != null)
+			{
+				if(b.isLoaded())
+					toReturn = b.getShape();
+			}
+			else
+			{
+				ShapeCookie sc = n.getLookup().lookup(ShapeCookie.class);
+				if(sc != null)
+					toReturn = sc.getShape();
+			}
+		}
+		return toReturn;
 	}
 	
 	/**

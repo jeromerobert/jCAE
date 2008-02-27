@@ -96,16 +96,10 @@ public class ShapeOperationCookie implements ViewCookie
 		}
 	}
 	
-	private Node node;
+	private final Node node;
 	public ShapeOperationCookie(Node node)
 	{
 		this.node=node;
-	}
-	
-	private TopoDS_Shape getShape()
-	{
-		ShapeCookie sc=(ShapeCookie) node.getCookie(ShapeCookie.class);
-		return sc.getShape();
 	}
 	
 	private ShapePool getPool()
@@ -115,7 +109,7 @@ public class ShapeOperationCookie implements ViewCookie
 	
 	public void explode(int type)
 	{
-		TopoDS_Shape shape = getShape();
+		TopoDS_Shape shape = GeomUtils.getShape(node);
 		if(shape==null)
 			return;
 		TopExp_Explorer explorer = new TopExp_Explorer();
@@ -140,7 +134,7 @@ public class ShapeOperationCookie implements ViewCookie
 	
 	public void view()
 	{
-		TopoDS_Shape shape = getShape();
+		TopoDS_Shape shape = GeomUtils.getShape(node);
 		View3D v=View3DManager.getDefault().getView3D();
 		ViewableCAD viewable = new ViewableCAD(new OCCProvider(shape));
 		viewable.addSelectionListener(new MySelectionListener(viewable));
@@ -151,7 +145,8 @@ public class ShapeOperationCookie implements ViewCookie
 
 	private TopoDS_Face getSubFace(int id)
 	{
-		TopExp_Explorer exp=new TopExp_Explorer(getShape(), TopAbs_ShapeEnum.FACE);
+		TopExp_Explorer exp=new TopExp_Explorer(GeomUtils.getShape(node),
+			TopAbs_ShapeEnum.FACE);
 		for(int i=0; i<id; i++)
 			exp.next();
 		return (TopoDS_Face) exp.current();
