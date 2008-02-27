@@ -78,7 +78,7 @@ public final class RemoveHoles extends CookieAction
 	
 	protected void performAction(Node[] activatedNodes)
 	{
-		ShapeCookie c = (ShapeCookie) activatedNodes[0].getCookie(ShapeCookie.class);
+		ShapeCookie c = activatedNodes[0].getCookie(ShapeCookie.class);
 		ShapeUpgrade_RemoveInternalWires riw=new ShapeUpgrade_RemoveInternalWires(c.getShape());
 		RHPanel panel=new RHPanel();
 		if(panel.showDialog())

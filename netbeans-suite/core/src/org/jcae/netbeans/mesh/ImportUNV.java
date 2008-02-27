@@ -20,9 +20,8 @@ public final class ImportUNV extends CookieAction
 		JFileChooser chooser=new JFileChooser();
 		if(chooser.showOpenDialog(null)==JFileChooser.APPROVE_OPTION)
 		{
-			MeshNode meshNode = (MeshNode) activatedNodes[0].getCookie(MeshNode.class);	
-			MeshDataObject c = (MeshDataObject) activatedNodes[0].getCookie(MeshDataObject.class);
-			Mesh m=c.getMesh();
+			MeshNode meshNode = activatedNodes[0].getCookie(MeshNode.class);	
+			MeshDataObject c = activatedNodes[0].getCookie(MeshDataObject.class);			
 			
 			String reference = FileUtil.toFile(
 				c.getPrimaryFile().getParent()).getPath();

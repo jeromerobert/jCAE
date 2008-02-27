@@ -49,15 +49,16 @@ import org.openide.util.lookup.Lookups;
 
 public class JCAEProject implements Project, LogicalViewProvider, ActionProvider
 {
-	private static String  MIME_UNKNOWN="content/unknown";
+	private final static String  MIME_UNKNOWN="content/unknown";
 	
 	private class ProjectChildren extends Children.Keys implements FileChangeListener
 	{		
 		private FileObject directory;
-		private ModuleNode cadNode=new ModuleNode(JCAEProject.this);
-		private org.jcae.netbeans.mesh.ModuleNode meshNode=
+		private final ModuleNode cadNode=new ModuleNode(JCAEProject.this);
+		private final org.jcae.netbeans.mesh.ModuleNode meshNode=
 			new org.jcae.netbeans.mesh.ModuleNode(JCAEProject.this);
-		private java.util.Map loaderToMNode=new HashMap();
+		private final java.util.Map<Class, Node> loaderToMNode=
+			new HashMap<Class, Node>();
 		
 		public ProjectChildren(FileObject directory)
 		{		
@@ -80,10 +81,11 @@ public class JCAEProject implements Project, LogicalViewProvider, ActionProvider
 			}
 		}
 		
+		@Override
 		protected void addNotify()
 		{			
 			FileObject[] os=directory.getChildren();
-			HashSet l=new HashSet();
+			HashSet<Node> l=new HashSet<Node>();
 			clearMNodes();
 			for(int i=0; i<os.length; i++)
 			{
@@ -95,7 +97,7 @@ public class JCAEProject implements Project, LogicalViewProvider, ActionProvider
 					{					
 						DataObject dObj = DataObject.find(os[i]);						
 						DataLoader loader=dObj.getLoader();
-						Node mNode=(Node)loaderToMNode.get(loader.getClass());						
+						Node mNode=loaderToMNode.get(loader.getClass());						
 						if(mNode==null)
 						{
 							mNode=new AbstractNode(new Children.Array());
@@ -155,7 +157,7 @@ public class JCAEProject implements Project, LogicalViewProvider, ActionProvider
 		}		
 	}	
 	
-	private FileObject projectDirectory;
+	private final FileObject projectDirectory;
 	public JCAEProject(FileObject projectDirectory, ProjectState state)
 	{
 		this.projectDirectory=projectDirectory;

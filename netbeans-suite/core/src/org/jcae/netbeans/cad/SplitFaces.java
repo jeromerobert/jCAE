@@ -68,7 +68,7 @@ public final class SplitFaces extends CookieAction
 	
 	protected void performAction(Node[] activatedNodes)
 	{
-		ShapeCookie c = (ShapeCookie) activatedNodes[0].getCookie(ShapeCookie.class);
+		ShapeCookie c = activatedNodes[0].getCookie(ShapeCookie.class);
 		ShapeUpgrade_ShapeDivideArea riw=new ShapeUpgrade_ShapeDivideArea(c.getShape());
 		RHPanel panel=new RHPanel();
 		if(panel.showDialog())

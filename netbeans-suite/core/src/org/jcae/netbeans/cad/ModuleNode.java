@@ -80,7 +80,7 @@ public class ModuleNode extends AbstractNode
 			try
 			{
 				FileObject[] os=directory.getChildren();
-				ArrayList l=new ArrayList();
+				ArrayList<DataObject> l=new ArrayList<DataObject>();
 				for(int i=0; i<os.length; i++)
 				{
 					if(os[i].getExt().equalsIgnoreCase("brep"))
@@ -164,7 +164,7 @@ public class ModuleNode extends AbstractNode
 		{
 			public void create() throws IOException
 			{
-				Project p=(Project) getLookup().lookup(Project.class);
+				Project p=getLookup().lookup(Project.class);
 				FileObject fo=p.getProjectDirectory();
 				fo.createData(Utilities.getFreeName(fo,"Geometry",".brep"));
 			}
@@ -176,17 +176,17 @@ public class ModuleNode extends AbstractNode
 		}};
 	}
 
-	protected void createPasteTypes(Transferable t, List ls)
+	protected void createPasteTypes(Transferable t, List<PasteType> ls)
 	{
 		final Node[] ns = NodeTransfer.nodes(t, NodeTransfer.COPY|NodeTransfer.MOVE);
 		if (ns != null && ns.length==1)
 		{
-			final ShapeNode n=(ShapeNode) ns[0].getCookie(ShapeNode.class);
+			final ShapeNode n=ns[0].getCookie(ShapeNode.class);
 			if(n!=null) ls.add(new PasteType()
 			{
 				public Transferable paste()
 				{
-					Project p=(Project) getLookup().lookup(Project.class);
+					Project p=getLookup().lookup(Project.class);
 					FileObject fo=p.getProjectDirectory();
 					String s = Utilities.getFreeName(fo, n.getName(), ".brep");					
 					String fileName=new File(FileUtil.toFile(fo), s).getPath();

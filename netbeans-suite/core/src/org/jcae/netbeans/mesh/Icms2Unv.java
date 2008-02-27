@@ -138,8 +138,8 @@ public class Icms2Unv
 		}
 	}
 
-	public static void readICMS(BufferedReader in, Collection nodes,
-		Collection triangles, Collection names) throws IOException
+	public static void readICMS(BufferedReader in, Collection<double[]> nodes,
+		Collection<int[]> triangles, Collection<String> names) throws IOException
 	{
 		String st = null;
 		int offset = 0;
@@ -256,7 +256,6 @@ public class Icms2Unv
 	{
 		out.println("    -1" + CR + "  2412");
 		int count = 0;
-		int triaIndex = 0;
 		Iterator it = triangles.iterator();
 		while (it.hasNext())
 		{
@@ -274,9 +273,9 @@ public class Icms2Unv
 		}
 		out.println("    -1");
 	}
-	private Collection names = new ArrayList();
-	private Collection nodes = new ArrayList();
-	private Collection triangles = new ArrayList();
+	private final Collection<String> names = new ArrayList<String>();
+	private final Collection<double[]> nodes = new ArrayList<double[]>();
+	private final Collection<int[]> triangles = new ArrayList<int[]>();
 
 	public void readICMS(BufferedReader in) throws IOException
 	{

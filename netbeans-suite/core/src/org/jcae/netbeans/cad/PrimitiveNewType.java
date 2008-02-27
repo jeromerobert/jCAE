@@ -41,16 +41,16 @@ public class PrimitiveNewType extends NewType
 	
 	protected static TopoDS_Shape getShape(Node n)
 	{
-		ShapeCookie sc=(ShapeCookie) n.getCookie(ShapeCookie.class);
+		ShapeCookie sc=n.getCookie(ShapeCookie.class);
 		return sc.getShape();
 	}
 	
 	protected void insertPrimitive(TopoDS_Shape newShape, int id)
 	{
 		new BRep_Builder().add(getShape(node), newShape);		
-		ShapePool sp=(ShapePool) node.getCookie(ShapePool.class);
+		ShapePool sp=node.getCookie(ShapePool.class);
 		sp.putName(newShape, getName());
-		ShapeChildren sc=(ShapeChildren) node.getCookie(ShapeChildren.class);
+		ShapeChildren sc=node.getCookie(ShapeChildren.class);
 		sc.addShapes(Collections.singleton(newShape));
 		GeomUtils.getParentBrep(node).getDataObject().setModified(true);
 	}

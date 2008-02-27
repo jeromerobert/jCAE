@@ -38,7 +38,7 @@ public class Settings extends SystemOption
 	static final long serialVersionUID = 2437343054662293472L;
 	static public Settings getDefault()
 	{
-		return (Settings)Lookup.getDefault().lookup(Settings.class);
+		return Lookup.getDefault().lookup(Settings.class);
 	}
 	private String javaVirtualMachine;
 	private String maximumMemory="1500m";	
@@ -77,14 +77,14 @@ public class Settings extends SystemOption
 	public String[] getCommandLine()
 	{		
 		String javaExe=new File(new File(javaVirtualMachine, "bin"), "java").getPath();
-		ArrayList toReturn=new ArrayList();
+		ArrayList<String> toReturn=new ArrayList<String>();
 		toReturn.add(javaExe);
 		toReturn.add("-Xmx"+maximumMemory);
 		toReturn.add("-Djava.util.logging.config.file="+System.getProperty("java.util.logging.config.file"));
 		toReturn.addAll(Arrays.asList(getCustomJVMParameters()));
 		toReturn.add("-jar");
 		toReturn.add(mesherJar);
-		return (String[])toReturn.toArray(new String[toReturn.size()]);
+		return toReturn.toArray(new String[toReturn.size()]);
 	}
 
 	/**
@@ -93,14 +93,14 @@ public class Settings extends SystemOption
 	public String[] getCommandLineAlgo()
 	{		
 		String javaExe=new File(new File(javaVirtualMachine, "bin"), "java").getPath();
-		ArrayList toReturn=new ArrayList();
+		ArrayList<String> toReturn=new ArrayList<String>();
 		toReturn.add(javaExe);
 		toReturn.add("-Xmx"+maximumMemory);
 		toReturn.add("-Djava.util.logging.config.file="+System.getProperty("java.util.logging.config.file"));
 		toReturn.addAll(Arrays.asList(getCustomJVMParameters()));
 		toReturn.add("-classpath");
 		toReturn.add(mesherJar);
-		return (String[])toReturn.toArray(new String[toReturn.size()]);
+		return toReturn.toArray(new String[toReturn.size()]);
 	}
 	
 	

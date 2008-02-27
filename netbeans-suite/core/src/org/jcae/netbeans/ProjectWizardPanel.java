@@ -66,7 +66,7 @@ public class ProjectWizardPanel
 		getComponent();
 		return component.valid(wizardDescriptor);
 	}
-	private final Set/*<ChangeListener>*/listeners = new HashSet(1);
+	private final Set<ChangeListener> listeners = new HashSet<ChangeListener>(1);
 
 	public final void addChangeListener(ChangeListener l)
 	{

@@ -34,9 +34,8 @@ import org.openide.loaders.MultiDataObject.Entry;
 
 public class BrepDataLoader extends MultiFileLoader
 {
-	final private static Collection EXTENSION=new HashSet(Arrays.asList(new String[]{
-		"brep", "step", "igs", "iges"  
-	}));
+	final private static Collection<String> EXTENSION=new HashSet<String>(
+		Arrays.asList(new String[]{"brep", "step", "igs", "iges"}));
 	
 	private final static String META_EXTENSION=".xml";
 	

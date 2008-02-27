@@ -24,6 +24,7 @@ import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Collection;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -38,14 +39,14 @@ import org.openide.NotifyDescriptor;
  */
 public class PanelFuse implements ActionListener
 {
-    protected Groups groups = null;
+    protected Groups groups;
     protected DialogDescriptor descriptor;
     protected JPanel innerPane = new JPanel();
     protected boolean cancel = true;
     protected JLabel labelGroup = new JLabel("select groups to fuse : ");
-    protected JList listGroup = null;
-    protected JScrollPane scrollpane = null;
-    protected ArrayList selectedGroups = new ArrayList();
+    protected JList listGroup;
+    protected JScrollPane scrollpane;
+    protected Collection<Group> selectedGroups = new ArrayList<Group>();
     
     /** 
      * Creates a new instance of PanelFuse.
@@ -65,7 +66,7 @@ public class PanelFuse implements ActionListener
     /**
      *
      */
-    public void initPanel()
+    private void initPanel()
     {
         innerPane.setLayout(null);
         
@@ -82,7 +83,7 @@ public class PanelFuse implements ActionListener
     /**
      *
      */
-    public ArrayList getSelectedGroups()
+    public Collection<Group> getSelectedGroups()
     {
         return selectedGroups;
     }
@@ -104,11 +105,10 @@ public class PanelFuse implements ActionListener
             // Ok was pressed;
             if (!listGroup.isSelectionEmpty())
             {
-                for (int i=0;i<listGroup.getSelectedValues().length;i++)
-                {
-                    selectedGroups.add(listGroup.getSelectedValues()[i]);
-                }
-                cancel = false;
+                for(Object s:listGroup.getSelectedValues())
+					selectedGroups.add((Group)s);
+
+				cancel = false;
             }
         }
         else if (e.getSource()==NotifyDescriptor.CANCEL_OPTION)

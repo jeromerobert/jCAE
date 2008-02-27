@@ -209,14 +209,16 @@ public class MeshNode extends DataNode implements ViewCookie
 	}
 
 	public Mesh getMesh() {
-		return ((MeshDataObject)getCookie(MeshDataObject.class)).getMesh();
+		return getCookie(MeshDataObject.class).getMesh();
 	}
 	
+	@Override
 	public String getDisplayName()
 	{
 		return getName();
 	}
 
+	@Override
 	public void setName(String arg0)
 	{	
 		try
@@ -273,11 +275,12 @@ public class MeshNode extends DataNode implements ViewCookie
 		}
 	}*/
 	
-	protected void createPasteTypes(Transferable t, List ls)
+	@Override
+	protected void createPasteTypes(Transferable t, List<PasteType> ls)
 	{
 		final Node[] ns = NodeTransfer.nodes(t, NodeTransfer.COPY|NodeTransfer.MOVE);
 		if (ns != null && ns.length==1) {
-			final BrepNode n=(BrepNode) ns[0].getCookie(BrepNode.class);
+			final BrepNode n=ns[0].getCookie(BrepNode.class);
 			if(n!=null)
 			ls.add(new PasteType()
 			{

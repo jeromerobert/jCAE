@@ -110,6 +110,6 @@ public class View3D extends TopComponent
 	{
 		getView().add(viewable);
 		getView().setCurrentViewable(viewable);
-		((SelectViewableAction)SystemAction.get(SelectViewableAction.class)).refresh();
+		SystemAction.get(SelectViewableAction.class).refresh();
 	}
 }

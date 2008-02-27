@@ -22,7 +22,7 @@ public final class ViewUNV extends CookieAction
 		{
 			try
 			{
-				UNVDataObject c = (UNVDataObject) activatedNodes[i].getCookie(UNVDataObject.class);
+				UNVDataObject c = activatedNodes[i].getCookie(UNVDataObject.class);
 				File file = FileUtil.toFile(c.getPrimaryFile());
 				View3D v=View3DManager.getDefault().getView3D();
 				UNVProvider unvp=new UNVProvider(file);

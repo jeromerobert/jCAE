@@ -24,8 +24,6 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 import org.jcae.mesh.xmldata.Mesh3dToSoupConvert;
-import org.jcae.mesh.xmldata.MeshToSoupConvert;
-import org.jcae.netbeans.ProcessExecutor;
 import org.jcae.netbeans.Utilities;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileUtil;
@@ -39,7 +37,7 @@ public final class BuildSoupAction extends CookieAction
 {	
 	protected void performAction(Node[] activatedNodes)
 	{
-		MeshDataObject c = (MeshDataObject) activatedNodes[0].getCookie(MeshDataObject.class);
+		MeshDataObject c = activatedNodes[0].getCookie(MeshDataObject.class);
 		
 		String reference = FileUtil.toFile(
 			c.getPrimaryFile().getParent()).getPath();

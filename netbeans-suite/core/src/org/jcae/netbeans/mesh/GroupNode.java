@@ -21,12 +21,9 @@
 package org.jcae.netbeans.mesh;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
 import javax.swing.Action;
-import org.jcae.netbeans.viewer3d.View3D;
 import org.openide.actions.PropertiesAction;
 import org.openide.actions.RenameAction;
-import org.openide.actions.ViewAction;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node.Cookie;
@@ -35,27 +32,27 @@ import org.openide.util.actions.SystemAction;
 
 public class GroupNode extends AbstractNode implements Cookie
 {
-	private class IDProperty extends PropertySupport.ReadOnly
+	private class IDProperty extends PropertySupport.ReadOnly<Integer>
 	{
 		public IDProperty()
 		{
 			super("ID", Integer.class, "group ID", "group ID");
 		}
 
-		public Object getValue() throws IllegalAccessException, InvocationTargetException {
-			return new Integer(group.getId());
+		public Integer getValue() throws IllegalAccessException, InvocationTargetException {
+			return group.getId();
 		}
 	}
 
-	private class NumberProperty extends PropertySupport.ReadOnly
+	private class NumberProperty extends PropertySupport.ReadOnly<Integer>
 	{
 		public NumberProperty()
 		{
 			super("Number", Integer.class, "Number of elements", "Number of elements");
 		}
 
-		public Object getValue() throws IllegalAccessException, InvocationTargetException {
-			return new Integer(group.getNumberOfElements());
+		public Integer getValue() throws IllegalAccessException, InvocationTargetException {
+			return group.getNumberOfElements();
 		}
 	}
 	

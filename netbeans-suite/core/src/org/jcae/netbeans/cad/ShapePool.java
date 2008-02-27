@@ -30,9 +30,11 @@ import org.openide.nodes.Node;
 /** map shape to face nodes */
 public class ShapePool implements Node.Cookie
 {
-	private Map nodeMap=new WeakHashMap();
-	private Set names=new HashSet();
-	private Map shapeToNames=new WeakHashMap();
+	private final Map<TopoDS_Shape, Node> nodeMap=
+		new WeakHashMap<TopoDS_Shape, Node>();
+	private final Set<String> names=new HashSet<String>();
+	private final Map<TopoDS_Shape, String> shapeToNames=
+		new WeakHashMap<TopoDS_Shape, String>();
 	
 	public void putNode(TopoDS_Shape shape, Node node)
 	{
@@ -41,7 +43,7 @@ public class ShapePool implements Node.Cookie
 	
 	public Node getNode(TopoDS_Shape shape)
 	{
-		return (Node) nodeMap.get(shape);
+		return nodeMap.get(shape);
 	}
 
 	public void removeNode(ShapeNode node)
@@ -52,11 +54,11 @@ public class ShapePool implements Node.Cookie
 	public void putName(TopoDS_Shape key, String value)
 	{
 		int id=0;
-		String name=value.toString()+id;
+		String name=value+id;
 		while(names.contains(name))
 		{
 			id++;
-			name=value.toString()+id;
+			name=value+id;
 		}
 		shapeToNames.put(key, name);
 		names.add(name);
@@ -69,7 +71,7 @@ public class ShapePool implements Node.Cookie
 
 	public String getName(TopoDS_Shape shape)
 	{
-		return (String) shapeToNames.get(shape);
+		return shapeToNames.get(shape);
 	}
 	
 	public final static String[] SHAPE_LABEL=

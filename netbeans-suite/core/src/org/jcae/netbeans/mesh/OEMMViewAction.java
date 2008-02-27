@@ -83,14 +83,14 @@ public final class OEMMViewAction extends CookieAction
 					bgView.add(femesh);
 				}
 			}
-			((SelectViewableAction)SystemAction.get(SelectViewableAction.class)).refresh();
+			SystemAction.get(SelectViewableAction.class).refresh();
 		}
 		
 	}
 	
 	protected void performAction(Node[] activatedNodes)
 	{
-		MeshDataObject c = (MeshDataObject) activatedNodes[0].getCookie(MeshDataObject.class);
+		MeshDataObject c = activatedNodes[0].getCookie(MeshDataObject.class);
 		
 		String reference = FileUtil.toFile(
 			c.getPrimaryFile().getParent()).getPath();
@@ -101,7 +101,7 @@ public final class OEMMViewAction extends CookieAction
 
 	public static void view(String dir, String viewableName)
 	{
-		final OEMM oemm = Storage.readOEMMStructure(dir);
+		OEMM oemm = Storage.readOEMMStructure(dir);
 		boolean onlyLeaves = true;
 		View bgView=View3DManager.getDefault().getView3D().getView();
 		BranchGroup octree = OEMMViewer.bgOEMM(oemm, onlyLeaves);
@@ -110,7 +110,7 @@ public final class OEMMViewAction extends CookieAction
 		bgView.add(fe1);
 		bgView.addKeyListener(new OEMMKeyListener(bgView, oemm, fe1));
 		bgView.setCurrentViewable(fe1);
-		((SelectViewableAction)SystemAction.get(SelectViewableAction.class)).refresh();
+		SystemAction.get(SelectViewableAction.class).refresh();
 	}	
 	
 	protected int mode()

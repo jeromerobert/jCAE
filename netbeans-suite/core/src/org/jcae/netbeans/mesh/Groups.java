@@ -61,8 +61,8 @@ public class Groups implements SelectionListener
 				if(viewable!=null)
 				{
 					Group g=(Group) evt.getSource();					
-					Map map=new HashMap();
-					map.put(new Integer(g.getId()), evt.getNewValue());
+					Map<Integer, Boolean> map=new HashMap<Integer, Boolean>();
+					map.put(g.getId(), (Boolean)evt.getNewValue());
 					viewable.setDomainVisible(map);
 				}
 			}
@@ -77,7 +77,7 @@ public class Groups implements SelectionListener
 		}	
 	};
 	protected boolean firstView = true;
-	private ArrayList groups = new ArrayList();
+	private final ArrayList<Group> groups = new ArrayList<Group>();
 	
 	/** The absolute path to the mesh directory */
 	protected String meshFile = null;
@@ -135,7 +135,7 @@ public class Groups implements SelectionListener
 	 * @param the list of groups to display.
 	 * @param the View3D in which the Groups are displayed.
 	 */
-	public void displayGroups(String meshName, Collection groupsToDisplay,
+	public void displayGroups(String meshName, Collection<Group> groupsToDisplay,
 		View3D view)
 	{
 		try
@@ -144,20 +144,18 @@ public class Groups implements SelectionListener
 			viewable = new ViewableFE(provider);
 			viewable.addSelectionListener(this);
 						
-			Map map=new HashMap();
-			for(int i=0; i<groups.size(); i++)
-			{
-				Group g=(Group)groups.get(i);
-				map.put(new Integer(g.getId()), Boolean.FALSE);
-			}
+			Map<Integer, Boolean> map=new HashMap<Integer, Boolean>();
 			
-			Iterator it=groupsToDisplay.iterator();
+			for(Group g:groups)
+				map.put(g.getId(), false);
+			
+			Iterator<Group> it=groupsToDisplay.iterator();
 			String sb="";
 			boolean full=false;
 			while(it.hasNext())
 			{
-				Group g=(Group)it.next();
-				map.put(new Integer(g.getId()), Boolean.TRUE);
+				Group g=it.next();
+				map.put(g.getId(), true);
 				
 				if(sb.length()<20)
 					sb=sb+" "+g.getName();
@@ -205,8 +203,7 @@ public class Groups implements SelectionListener
 		PanelFuse panel = new PanelFuse(this);
 		if (!panel.cancel())
 		{
-			ArrayList groupsToFuse = panel.getSelectedGroups();
-			fuse(groupsToFuse);
+			fuse(panel.getSelectedGroups());
 		}
 	}
 
@@ -220,7 +217,7 @@ public class Groups implements SelectionListener
 	 * @throws SAXException
 	 * @throws ParserConfigurationException
 	 */
-	public Group fuse(ArrayList listGroup) throws TransformerConfigurationException, TransformerException, ParserConfigurationException, SAXException, IOException
+	public Group fuse(Collection<Group> listGroup) throws TransformerConfigurationException, TransformerException, ParserConfigurationException, SAXException, IOException
 	{
 		String xmlDir=getXmlDir();
 		System.err.println(Groups.class+": fusing groups");
@@ -232,17 +229,17 @@ public class Groups implements SelectionListener
 		
 		for (int k = 0; k < groups.size(); k++)
 		{
-			Group g = (Group) groups.get(k);
+			Group g = groups.get(k);
 			System.err.println("lecture initiale : " + g.getName());
 			trianglesNumber = trianglesNumber + g.getNumberOfElements();
 		}
 		
 		String fileGroups = "jcae3d.files/groups.bin";
-		HashMap map = new HashMap(groups.size());
-		Iterator it = groups.iterator();
+		HashMap<Group, int[]> map = new HashMap<Group, int[]>(groups.size());
+		Iterator<Group> it = groups.iterator();
 		while (it.hasNext())
 		{
-			Group g = (Group) it.next();
+			Group g = it.next();
 			int[] tri = this.readTrianglesGroup(new File(xmlDir, fileGroups), g);
 			map.put(g, tri);
 		}
@@ -252,24 +249,20 @@ public class Groups implements SelectionListener
 		DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(
 			tmpGroupsBin)));
 		
-		ArrayList listTriFuse = new ArrayList();
-		for (int i = 0; i < listGroup.size(); i++)
+		ArrayList<Integer> listTriFuse = new ArrayList<Integer>();
+		for(Group g:listGroup)
 		{
-			number = number
-				+ ((Group) listGroup.get(i)).getNumberOfElements();
-			if (groups.contains(listGroup.get(i)))
+			number = number + g.getNumberOfElements();
+			if (groups.contains(g))
 			{
-				groups.remove(listGroup.get(i));
+				groups.remove(g);
 			}
-			int[] tri = (int[]) map.get(listGroup.get(i));
-			for (int k = 0; k < tri.length; k++)
-			{
-				listTriFuse.add(new Integer(tri[k]));
-			}
+			for(int tri:map.get(g))
+				listTriFuse.add(tri);
 		}
 		for (int i = 0; i < groups.size(); i++)
 		{
-			Group g = (Group) groups.get(i);
+			Group g = groups.get(i);
 			if (g.getId() > id)
 			{
 				id = g.getId();
@@ -279,11 +272,11 @@ public class Groups implements SelectionListener
 				g.setOffset(0);
 			} else
 			{
-				Group previousGroup = (Group) groups.get(i - 1);
+				Group previousGroup = groups.get(i - 1);
 				g.setOffset(previousGroup.getOffset()
 					+ previousGroup.getNumberOfElements());
 			}
-			int[] tri = (int[]) map.get(g);
+			int[] tri = map.get(g);
 			for (int k = 0; k < tri.length; k++)
 			{
 				out.writeInt(tri[k]);
@@ -301,7 +294,7 @@ public class Groups implements SelectionListener
 		
 		if (!groups.isEmpty())
 		{
-			Group lastGroup = (Group) groups.get(groups.size() - 1);
+			Group lastGroup = groups.get(groups.size() - 1);
 			offset = lastGroup.getOffset()
 				+ lastGroup.getNumberOfElements();
 		} else
@@ -424,7 +417,7 @@ public class Groups implements SelectionListener
 				}
 				for (int i = 0; i < groups.size(); i++)
 				{
-					Group g = (Group) groups.get(i);
+					Group g = groups.get(i);
 					eltGroups.appendChild(g.createXMLGroup(xmlDoc, groupFile,
 						baseDir));
 				}
@@ -538,11 +531,11 @@ public class Groups implements SelectionListener
 	public void elementsSelected(Map selection)
 	{
 		Set ids=selection.keySet();
-		ArrayList sg=new ArrayList();
+		ArrayList<Group> sg=new ArrayList<Group>();
 		for(int i=0; i<groups.size(); i++)
 		{
-			Group g=(Group) groups.get(i);
-			if(ids.contains(new Integer(g.getId())))
+			Group g=groups.get(i);
+			if(ids.contains(Integer.valueOf(g.getId())))
 				sg.add(g);
 		}
 		synchronized(hightLightEventLock)

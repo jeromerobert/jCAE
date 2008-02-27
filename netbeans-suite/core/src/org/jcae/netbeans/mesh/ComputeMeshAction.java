@@ -77,7 +77,7 @@ public class ComputeMeshAction extends CookieAction
 		LifecycleManager.getDefault().saveAll();
 		for (int i = 0; i < arg0.length; i++)
 		{
-			MeshNode m = (MeshNode) arg0[0].getCookie(MeshNode.class);			
+			MeshNode m = arg0[0].getCookie(MeshNode.class);			
 			String ref = FileUtil.toFile(
 				m.getDataObject().getPrimaryFile().getParent()).getPath();
 

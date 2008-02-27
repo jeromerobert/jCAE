@@ -48,18 +48,16 @@ public class GroupFaceAction extends CookieAction
 		try
 		{
 			//check the all nodes are under the same brep
-			HashSet set=new HashSet();
-			for(int i=0; i<arg0.length; i++)
-			{
-				set.add(GeomUtils.getParentBrep(arg0[i]));
-			}
+			HashSet<BrepNode> set=new HashSet<BrepNode>();
+			for(Node n:arg0)
+				set.add(GeomUtils.getParentBrep(n));
 			
 			if(set.size()>1)
 			{
 				JOptionPane.showMessageDialog(null, "Can only group shapes from a lonely geometry");
 			}
 			
-			BrepNode brepNode=(BrepNode) set.toArray()[0];
+			BrepNode brepNode=set.iterator().next();
 			//get the xml Node related to the .brep
 			MetaNode mn=brepNode.getMetaNode();
 			if(mn==null)

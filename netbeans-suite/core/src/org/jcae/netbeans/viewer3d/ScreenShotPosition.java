@@ -43,7 +43,7 @@ public class ScreenShotPosition implements ScreenshotListener {
 		s.scale(scale,scale);
 		//translate transform to center the image
 		AffineTransform t=new AffineTransform();
-		t.setToTranslation(((double)(width-scale*w))/2,((double)(height-scale*h))/2);
+		t.setToTranslation((width-scale*w)/2.0,(height-scale*h)/2.0);
 		t.concatenate(s);
 		
 		Graphics2D g2D=buffer.createGraphics();

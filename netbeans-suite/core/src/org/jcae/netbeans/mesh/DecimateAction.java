@@ -20,7 +20,6 @@
 
 package org.jcae.netbeans.mesh;
 
-import java.io.File;
 import org.jcae.netbeans.ProcessExecutor;
 import org.jcae.netbeans.Utilities;
 import org.openide.filesystems.FileUtil;
@@ -37,7 +36,7 @@ public final class DecimateAction extends CookieAction
 		DecimateParameter bean=new DecimateParameter();
 		if(Utilities.showEditBeanDialog(bean))
 		{
-			MeshDataObject c = (MeshDataObject)
+			MeshDataObject c = 
 				activatedNodes[0].getCookie(MeshDataObject.class);
 
 			String reference = FileUtil.toFile(
@@ -73,8 +72,7 @@ public final class DecimateAction extends CookieAction
 			cmdLine[i++]=brepFile;
 			cmdLine[i++]=xmlDir;
 				
-			final MeshNode m =
-				(MeshNode) activatedNodes[0].getCookie(MeshNode.class);
+			final MeshNode m = activatedNodes[0].getCookie(MeshNode.class);
 
 			// level_max tri_max outDir brep soupDir
 			ProcessExecutor pe=new ProcessExecutor(cmdLine)

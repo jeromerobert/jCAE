@@ -50,12 +50,11 @@ public class FuseGroupAction extends CookieAction{
 		try
 		{
 			//A set to ensure all nodes are from the same mesh
-			HashSet set=new HashSet();
-			ArrayList list=new ArrayList();
+			HashSet<Groups> set=new HashSet<Groups>();
+			ArrayList<Group> list=new ArrayList<Group>();
 			for(int i=0; i<arg0.length; i++)
 			{
-				GroupNode n=(GroupNode) arg0[i]
-					.getCookie(GroupNode.class);
+				GroupNode n=arg0[i].getCookie(GroupNode.class);
 				set.add(n.getGroups());
 				list.add(n.getGroup());
 			}
@@ -69,7 +68,7 @@ public class FuseGroupAction extends CookieAction{
 			
 			Groups groups=(Groups) set.toArray()[0];
 			groups.fuse(list);
-			MeshNode mn=(MeshNode) arg0[0].getParentNode().getParentNode().getCookie(MeshNode.class);
+			MeshNode mn=arg0[0].getParentNode().getParentNode().getCookie(MeshNode.class);
 			mn.refreshGroups();			
 		}
 		catch(IOException ex)

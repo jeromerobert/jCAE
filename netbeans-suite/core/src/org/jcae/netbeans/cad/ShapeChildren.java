@@ -31,14 +31,11 @@ public class ShapeChildren extends Children.Array implements Node.Cookie
 {			
 	public void addShapes(Collection shapes)
 	{
-		Node[] subNodes = getNodes();
-		HashSet names=new HashSet();
-		for(int i=0; i<subNodes.length; i++)
-		{
-			names.add(subNodes[i].getName());
-		}
+		HashSet<String> names=new HashSet<String>();
+		for(Node n:getNodes())
+			names.add(n.getName());
 
-		ShapePool sp=(ShapePool) getNode().getCookie(ShapePool.class);
+		ShapePool sp = getNode().getCookie(ShapePool.class);
 		Iterator it=shapes.iterator();
 		while(it.hasNext())
 		{

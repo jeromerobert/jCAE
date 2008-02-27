@@ -43,27 +43,30 @@ public class ViewGroupAction extends CookieAction
 
 	protected void performAction(Node[] arg0)
 	{
-		HashMap groups2Group=new HashMap();
+		HashMap<Groups, Collection<Group>> groups2Group =
+			new HashMap<Groups, Collection<Group>>();
 		for(int i=0; i<arg0.length; i++)
 		{
-			GroupNode gn=(GroupNode) arg0[i].getCookie(GroupNode.class);
-			Collection c=(Collection) groups2Group.get(gn.getGroups());
+			GroupNode gn=arg0[i].getCookie(GroupNode.class);
+			Collection<Group> c=groups2Group.get(gn.getGroups());
 			if(c==null)
 			{
-				c=new ArrayList();
+				c=new ArrayList<Group>();
 				groups2Group.put(gn.getGroups(), c);
 			}
 			c.add(gn.getGroup());
 		}
 	
 		View3D v = View3DManager.getDefault().getView3D();
-		Iterator it=groups2Group.entrySet().iterator();
+		Iterator<Entry<Groups, Collection<Group>>> it =
+			groups2Group.entrySet().iterator();
+
 		while(it.hasNext())
 		{
-			Map.Entry e=(Entry) it.next();
-			((Groups)e.getKey()).displayGroups(
+			Entry<Groups, Collection<Group>> e=it.next();
+			e.getKey().displayGroups(
 				arg0[0].getParentNode().getParentNode().getName(),
-				(Collection) e.getValue(), v);
+				e.getValue(), v);
 		}
 	}
 

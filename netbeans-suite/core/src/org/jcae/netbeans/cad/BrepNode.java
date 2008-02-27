@@ -119,9 +119,10 @@ public class BrepNode extends DataNode implements Node.Cookie, OpenCookie
 		}		
 	}
 	
+	@Override
 	public Action[] getActions(boolean arg0)
 	{
-		ArrayList l=new ArrayList();
+		ArrayList<Action> l=new ArrayList<Action>();
 		if(isLoaded())
 		{			
 			l.add(SystemAction.get(ExplodeAction.class));
@@ -151,7 +152,7 @@ public class BrepNode extends DataNode implements Node.Cookie, OpenCookie
 			l.add(null);
 			l.add(closeAction);
 		}
-		return (Action[]) l.toArray(new Action[l.size()]);
+		return l.toArray(new Action[l.size()]);
 	}
 
 	@Override
@@ -212,19 +213,20 @@ public class BrepNode extends DataNode implements Node.Cookie, OpenCookie
 		return metaNode;
 	}
 	
+	@Override
 	public Sheet createSheet()
 	{
 		Sheet sheet=super.createSheet();
 		if(isLoaded())
 		{
 			Sheet.Set set=new Sheet.Set();
-			set.put(new PropertySupport.ReadOnly(
+			set.put(new PropertySupport.ReadOnly<Double>(
 				"tolerance", Double.class, "tolerance", "tolerance")
 				{	
-					public Object getValue()
+					public Double getValue()
 					{
 						TopoDS_Shape s= ((BrepDataObject)getDataObject()).getShape();
-						return Double.valueOf(Utilities.tolerance(s));
+						return Utilities.tolerance(s);
 					};
 				});
 			set.setName("Geometry");

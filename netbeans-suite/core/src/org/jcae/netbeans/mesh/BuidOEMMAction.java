@@ -36,8 +36,7 @@ public final class BuidOEMMAction extends CookieAction
 		OEMMParameters bean=new OEMMParameters();
 		if(Utilities.showEditBeanDialog(bean))
 		{
-			MeshDataObject c = (MeshDataObject)
-				activatedNodes[0].getCookie(MeshDataObject.class);
+			MeshDataObject c = activatedNodes[0].getCookie(MeshDataObject.class);
 
 			String reference = FileUtil.toFile(
 				c.getPrimaryFile().getParent()).getPath();

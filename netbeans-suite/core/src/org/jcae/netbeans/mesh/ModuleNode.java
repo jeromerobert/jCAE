@@ -61,7 +61,7 @@ public class ModuleNode extends AbstractNode
 			try
 			{
 				FileObject[] os=directory.getChildren();
-				ArrayList l=new ArrayList();
+				ArrayList<DataObject> l=new ArrayList<DataObject>();
 				for(int i=0; i<os.length; i++)
 				{
 					if(os[i].getNameExt().endsWith("_mesh.xml"))
@@ -134,7 +134,7 @@ public class ModuleNode extends AbstractNode
 		{
 			public void create() throws IOException
 			{
-				Project p=(Project) getLookup().lookup(Project.class);
+				Project p=getLookup().lookup(Project.class);
 				FileObject fo=p.getProjectDirectory();
 				FileObject m=fo.createData(Utilities.getFreeName(fo,"new","_mesh.xml"));
 				MeshDataObject mdo=(MeshDataObject) DataObject.find(m);

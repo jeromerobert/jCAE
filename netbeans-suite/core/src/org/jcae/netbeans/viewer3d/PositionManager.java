@@ -6,7 +6,7 @@ import org.jcae.viewer3d.View;
 public class PositionManager
 {		
 	private static PositionManager singleton=new PositionManager();
-	Vector shots=new Vector();
+	private Vector<ScreenShotPosition> shots=new Vector<ScreenShotPosition>();
 	
 	public void savePosition(View view)
 	{
@@ -16,8 +16,7 @@ public class PositionManager
 	}
 	
 	public void goToPosition(View view, int index){
-		ScreenShotPosition ssp=(ScreenShotPosition)shots.get(index);
-		view.move(ssp.getPosition());
+		view.move(shots.get(index).getPosition());
 	}
 	
 	public int getPositionCount(){
@@ -25,7 +24,7 @@ public class PositionManager
 	}
 	
 	public ScreenShotPosition getPosition(int index){
-		return (ScreenShotPosition)shots.get(index);
+		return shots.get(index);
 	}
 	
 	public void removePosition(int index){
@@ -39,7 +38,7 @@ public class PositionManager
 
 	public void goTo(View view)
 	{
-		if(shots.size()>0)
+		if(!shots.isEmpty())
 			new ViewList(this, view).setVisible(true);
 	}
 }

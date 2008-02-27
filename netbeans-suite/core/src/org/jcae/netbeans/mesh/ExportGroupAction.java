@@ -73,15 +73,16 @@ public class ExportGroupAction extends CookieAction
 		return new Class[]{GroupNode.class};
 	}
 
+	@Override
 	protected void performAction(Node[] arg0)
 	{
 		try
 		{
-			HashSet set=new HashSet();			
+			HashSet<String> set=new HashSet<String>();
 			MeshNode meshNode=null;
 			for(int i=0; i<arg0.length; i++)
 			{
-				meshNode=(MeshNode) arg0[i].getParentNode().getParentNode()
+				meshNode=arg0[i].getParentNode().getParentNode()
 					.getCookie(MeshNode.class);
 				set.add(meshNode.getMeshDirectory());
 			}
@@ -106,7 +107,7 @@ public class ExportGroupAction extends CookieAction
 				int[] ids=new int[arg0.length];
 				for(int i=0; i<arg0.length; i++)
 				{
-					GroupNode n=(GroupNode) arg0[i].getCookie(GroupNode.class);
+					GroupNode n=arg0[i].getCookie(GroupNode.class);
 					ids[i]=n.getGroup().getId();
 				}			
 				String unvFile=jfc.getSelectedFile().getPath();

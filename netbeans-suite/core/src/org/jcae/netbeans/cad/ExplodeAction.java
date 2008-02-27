@@ -57,12 +57,9 @@ public class ExplodeAction extends CookieAction
 		
 		if(dd.getValue()==NotifyDescriptor.OK_OPTION)
 		{			
-			for(int i=0; i<arg0.length; i++)
-			{
-				ShapeOperationCookie sc=(ShapeOperationCookie)
-					arg0[i].getCookie(ShapeOperationCookie.class);
-				sc.explode(box.getSelectedIndex()+maxType);
-			}
+			for(Node n:arg0)
+				n.getCookie(ShapeOperationCookie.class).explode(
+					box.getSelectedIndex()+maxType);
 		}
 	}
 	

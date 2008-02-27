@@ -21,8 +21,7 @@ public final class UNVToUNVAction extends CookieAction
 		FileLock newFileLock=null;
 		try
 		{
-			UNVDataObject c = (UNVDataObject) activatedNodes[0].getCookie(
-				UNVDataObject.class);
+			UNVDataObject c = activatedNodes[0].getCookie(UNVDataObject.class);
 			FileObject oldUnv=c.getPrimaryFile();
 			// Read the mesh
 			org.jcae.mesh.amibe.ds.Mesh m=new org.jcae.mesh.amibe.ds.Mesh();

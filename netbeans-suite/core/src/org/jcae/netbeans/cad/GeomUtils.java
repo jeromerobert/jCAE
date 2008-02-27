@@ -84,9 +84,9 @@ public class GeomUtils
 	 * Find ShapeCookie nodes which have the same shapes than 'n' and
 	 * which are under the node 'where'
 	 */
-	static public Collection findNode(Node where, Node n)
+	static public Collection<Node> findNode(Node where, Node n)
 	{		
-		ArrayList toReturn=new ArrayList();
+		ArrayList<Node> toReturn=new ArrayList<Node>();
 		
 		if(where.getClass().getName().equals("org.netbeans.modules.favorites.Favorites"))
 		{
@@ -134,11 +134,9 @@ public class GeomUtils
 		if (shape != null)
 		{
 			new BRep_Builder().add(shape, newShape);
-			ShapePool sp = (ShapePool) node
-				.getCookie(ShapePool.class);
+			ShapePool sp = node.getCookie(ShapePool.class);
 			sp.putName(newShape, newName);
-			ShapeChildren sc = (ShapeChildren) node
-				.getCookie(ShapeChildren.class);
+			ShapeChildren sc = node.getCookie(ShapeChildren.class);
 			sc.addShapes(Collections.singleton(newShape));
 		} else
 		{
@@ -181,24 +179,24 @@ public class GeomUtils
 		if(arg0.length==0)
 			return toReturn;
 		TopoDS_Shape rootShape=getShape(getParentBrep(arg0[0]));
-		HashMap map=new HashMap();
+		HashMap<TopoDS_Shape, Integer> map=new HashMap<TopoDS_Shape, Integer>();
 		for(int i=0; i<arg0.length; i++)
 		{
-			map.put(getShape(arg0[i]), new Integer(-1));
+			map.put(getShape(arg0[i]), -1);
 		}
 		
 		TopExp_Explorer exp=new TopExp_Explorer(rootShape, TopAbs_ShapeEnum.FACE);
 		for(int k=0; exp.more(); exp.next(), k++)
 		{
 			TopoDS_Shape s = exp.current();
-			Integer id=(Integer) map.get(s);
+			Integer id=map.get(s);
 			if(id!=null && id.intValue()==-1)
-				map.put(s, new Integer(k));
+				map.put(s, k);
 		}
 		
 		for(int i=0; i<arg0.length; i++)
 		{
-			toReturn[i]=((Integer)map.get(getShape(arg0[i]))).intValue();
+			toReturn[i]=map.get(getShape(arg0[i]));
 		}
 		
 		return toReturn;

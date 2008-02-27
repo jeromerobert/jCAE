@@ -74,7 +74,7 @@ public class ProjectWizardIterator
 
 	public Set instantiate() throws IOException
 	{
-		Set resultSet = new LinkedHashSet();
+		Set<FileObject> resultSet = new LinkedHashSet<FileObject>();
 		File dirF = FileUtil.normalizeFile((File) wiz.getProperty("projdir"));
 		dirF.mkdirs();
 		//String name = (String) wiz.getProperty("name");
@@ -122,8 +122,7 @@ public class ProjectWizardIterator
 			{ // assume Swing components
 				JComponent jc = (JComponent) c;
 				// Step #.
-				jc.putClientProperty("WizardPanel_contentSelectedIndex",
-					new Integer(i)); // NOI18N
+				jc.putClientProperty("WizardPanel_contentSelectedIndex",i); // NOI18N
 				// Step name (actually the whole list for reference).
 				jc.putClientProperty("WizardPanel_contentData", steps); // NOI18N
 			}
@@ -140,8 +139,7 @@ public class ProjectWizardIterator
 
 	public String name()
 	{
-		return MessageFormat.format("{0} of {1}",
-			new Object[]{new Integer(index + 1), new Integer(panels.length)});
+		return MessageFormat.format("{0} of {1}", index + 1, panels.length);
 	}
 
 	public boolean hasNext()

@@ -123,14 +123,14 @@ public class JCAEMesher implements Runnable, Cancellable
 			}
 			else
 			{											
-				ArrayList array=new ArrayList();
+				ArrayList<String> array=new ArrayList<String>();
 				array.addAll(Arrays.asList(Settings.getDefault().getCommandLine()));
 				array.add(brepName);
 				array.add(xmlDir);
 				array.add(""+mesh.getEdgeLength());
 				array.add(""+mesh.getDeflection());
 				array.addAll(Arrays.asList(Settings.getDefault().getCustomMesherParameters()));
-				String[] cmdLine = (String[]) array.toArray(new String[array.size()]);
+				String[] cmdLine = array.toArray(new String[array.size()]);
 				System.err.println("jcae-netbeans-mesh: Running command line "+array);					
 				process=Runtime.getRuntime().exec(cmdLine);										
 				new Thread(new Redirector(process.getInputStream(), ow)).start();

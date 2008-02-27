@@ -105,9 +105,9 @@ public class GeomMeta
 	/** 
 	 * @return A Collection of int[]
 	 */
-	public Collection getFaceGroups()
+	public Collection<int[]> getFaceGroups()
 	{
-		ArrayList toReturn=new ArrayList();
+		ArrayList<int[]> toReturn=new ArrayList<int[]>();
 		Element g=getGeomMetaNode();
 		Node n=g.getFirstChild();
 		while(n!=null)

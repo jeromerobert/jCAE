@@ -95,7 +95,7 @@ public class ShapeNode extends AbstractNode implements ShapeCookie
 		}
 	}
 		
-	private String name;
+	private final String name;
 	
 	protected TopoDS_Shape shape;
 	
@@ -112,9 +112,10 @@ public class ShapeNode extends AbstractNode implements ShapeCookie
 		pool.putNode(shape, this);
 	}
 	
+	@Override
 	public Action[] getActions(boolean arg0)
 	{
-		ArrayList toReturn=new ArrayList();		
+		ArrayList<Action> toReturn=new ArrayList<Action>();		
 		toReturn.add(SystemAction.get(ExplodeAction.class));
 		toReturn.add(SystemAction.get(ViewAction.class));
 		toReturn.add(SystemAction.get(RemoveAction.class));
@@ -128,14 +129,16 @@ public class ShapeNode extends AbstractNode implements ShapeCookie
 			toReturn.add(SystemAction.get(ReverseAction.class));
 		toReturn.add(null);
 		toReturn.add(SystemAction.get(CopyAction.class));
-		return (Action[]) toReturn.toArray(new Action[0]); 
+		return toReturn.toArray(new Action[toReturn.size()]); 
 	}
 
+	@Override
 	public String getDisplayName()
 	{
 		return name;
 	}
 
+	@Override
 	public String getName()
 	{
 		return name;
@@ -146,6 +149,7 @@ public class ShapeNode extends AbstractNode implements ShapeCookie
 		return shape;
 	}
 
+	@Override
 	public boolean canDestroy()
 	{
 		return true;
@@ -157,21 +161,23 @@ public class ShapeNode extends AbstractNode implements ShapeCookie
 		getParentNode().getChildren().remove(new Node[]{this});
 	}*/
 	
+	@Override
 	public NewType[] getNewTypes()
 	{
 		return PrimitiveNewType.getNewType(this);		
 	}
 
+	@Override
 	public Sheet createSheet()
 	{
 		Sheet sheet=super.createSheet();
 		Sheet.Set set=new Sheet.Set();
-		set.put(new PropertySupport.ReadOnly(
+		set.put(new PropertySupport.ReadOnly<Double>(
 			"tolerance", Double.class, "tolerance", "tolerance")
 			{	
-				public Object getValue()
+				public Double getValue()
 				{
-					return Double.valueOf(Utilities.tolerance(getShape()));
+					return Utilities.tolerance(getShape());
 				};
 			});
 		set.setName("Geometry");
@@ -179,6 +185,7 @@ public class ShapeNode extends AbstractNode implements ShapeCookie
 		return sheet;
 	}
 
+	@Override
 	public boolean canCopy()
 	{
 		return true;

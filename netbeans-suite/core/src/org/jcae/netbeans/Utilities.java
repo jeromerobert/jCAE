@@ -42,7 +42,7 @@ public class Utilities
 	public static String getFreeName(FileObject object, String prefix, String suffix)
 	{
 		FileObject[] fos=object.getChildren();
-		Set names=new HashSet();
+		Set<String> names=new HashSet<String>();
 		for(int i=0; i<fos.length; i++)
 		{
 			names.add(fos[i].getNameExt());

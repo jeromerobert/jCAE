@@ -52,7 +52,7 @@ public class View3DManager
 	
 	public View3D[] getAllView3D()
 	{
-		ArrayList v3ds=new ArrayList();
+		ArrayList<View3D> v3ds=new ArrayList<View3D>();
 		Iterator it=WindowManager.getDefault().getModes().iterator();
 		while(it.hasNext())
 		{		
@@ -60,10 +60,11 @@ public class View3DManager
 			TopComponent[] t=mode.getTopComponents();		
 			
 			for(int i=0; i<t.length; i++)
-				if(t[i] instanceof View3D) v3ds.add(t[i]);
+				if(t[i] instanceof View3D)
+					v3ds.add((View3D)t[i]);
 		}
 		
-		return (View3D[])v3ds.toArray(new View3D[0]);
+		return v3ds.toArray(new View3D[v3ds.size()]);
 	}
 	
 	/**

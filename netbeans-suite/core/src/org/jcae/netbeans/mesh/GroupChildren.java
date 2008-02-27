@@ -23,20 +23,22 @@ package org.jcae.netbeans.mesh;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.openide.nodes.Children.Array;
+import org.openide.nodes.Node;
 
 public class GroupChildren extends Array {
 
-	private Groups groups;
+	private final Groups groups;
 
 	public GroupChildren(Groups groups)
 	{
 		this.groups=groups;
 	}
 
-	protected Collection initCollection()
+	@Override
+	protected Collection<Node> initCollection()
 	{
 		Group[] gps=groups.getGroups();
-		ArrayList toReturn=new ArrayList(gps.length);
+		ArrayList<Node> toReturn = new ArrayList<Node>(gps.length);
 		for(int i=0; i<gps.length; i++)
 		{
 			toReturn.add(new GroupNode(gps[i], groups));

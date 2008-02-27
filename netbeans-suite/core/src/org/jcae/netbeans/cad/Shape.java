@@ -59,8 +59,10 @@ public class Shape
 		public String name;
 	}
 	
-	private final static Map<Class, String> TYPE_MAP_XML = new HashMap();
-	private final static Map<Class, String> TYPE_MAP_NAME = new HashMap();
+	private final static Map<Class, String> TYPE_MAP_XML =
+		new HashMap<Class, String>();
+	private final static Map<Class, String> TYPE_MAP_NAME =
+		new HashMap<Class, String>();
 
 	static
 	{
@@ -94,14 +96,14 @@ public class Shape
 
 	public Shape(TopoDS_Shape shape)
 	{
-		this(shape, new HashMap(), null);
+		this(shape, new HashMap<TopoDS_Shape, Shape>(), null);
 	}
 
 	private Shape(TopoDS_Shape shape, Map<TopoDS_Shape, Shape> map, Shape parent)
 	{
 		this.impl = shape;
 		this.parent = parent;
-		List<Shape> cs = new ArrayList();
+		List<Shape> cs = new ArrayList<Shape>();
 		TopoDS_Iterator it = new TopoDS_Iterator(shape);
 		while (it.more())
 		{
@@ -131,7 +133,7 @@ public class Shape
 	{
 		int[] ids = new int[TopAbs_ShapeEnum.SHAPE];
 		Arrays.fill(ids, 1);
-		dump(writer, new HashSet(), ids);
+		dump(writer, new HashSet<Shape>(), ids);
 	}
 
 	private void dump(PrintWriter writer, Set<Shape> shapeSet, int[] id)
@@ -150,7 +152,7 @@ public class Shape
 	public int getID(Shape rootShape)
 	{
 		int[] ids = new int[]{0};
-		if (getID(rootShape, new HashSet(), ids, impl.getClass()))
+		if (getID(rootShape, new HashSet<Shape>(), ids, impl.getClass()))
 			return ids[0];
 		else
 			throw new NoSuchElementException("Cannot find " + impl + " in " +

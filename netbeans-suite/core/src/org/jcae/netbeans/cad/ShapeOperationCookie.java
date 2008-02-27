@@ -53,7 +53,7 @@ public class ShapeOperationCookie implements ViewCookie
 		public void selectionChanged()
 		{
 			ShapePool p=getPool();
-			final ArrayList<Node> nodes=new ArrayList();
+			final ArrayList<Node> nodes=new ArrayList<Node>();
 			CADSelection[] selection=viewable.getSelection();
 			for(int j=0; j<selection.length; j++)
 			{
@@ -72,7 +72,7 @@ public class ShapeOperationCookie implements ViewCookie
 				{
 					for(ExplorerManager exm:getExplorerManagers())
 					{
-						ArrayList<Node> nnodes=new ArrayList();
+						ArrayList<Node> nnodes=new ArrayList<Node>();
 						for(Node n:nodes)
 							for(Node mn:findModuleNodes(exm))
 								nnodes.addAll(GeomUtils.findNode(mn, n));
@@ -100,7 +100,7 @@ public class ShapeOperationCookie implements ViewCookie
 	
 	private ShapePool getPool()
 	{
-		return (ShapePool) node.getCookie(ShapePool.class);
+		return node.getCookie(ShapePool.class);
 	}
 	
 	public void explode(int type)
@@ -109,8 +109,7 @@ public class ShapeOperationCookie implements ViewCookie
 		if(shape==null)
 			return;
 		TopExp_Explorer explorer = new TopExp_Explorer();
-		TopLoc_Location loc = new TopLoc_Location();					
-		Collection l=new ArrayList();
+		Collection<TopoDS_Shape> l=new ArrayList<TopoDS_Shape>();
 		ShapePool shapePool=getPool();
 		for (explorer.init(shape, type); explorer.more(); explorer.next())
 		{
@@ -150,27 +149,21 @@ public class ShapeOperationCookie implements ViewCookie
 	
 	private static ExplorerManager[] getExplorerManagers()
 	{
-		ArrayList al=new ArrayList();
+		ArrayList<ExplorerManager> al=new ArrayList<ExplorerManager>();
 		
-		Mode[] ms=(Mode[]) WindowManager.getDefault().getModes()
-			.toArray(new Mode[0]);
-		
-		for(int i=0; i<ms.length; i++)
+		for(Mode m:WindowManager.getDefault().getModes().toArray(new Mode[0]))
 		{
-			TopComponent[] ts = ms[i].getTopComponents();
-			for(int j=0; j<ts.length; j++)
-			{
-				if(ts[j] instanceof ExplorerManager.Provider)
-					al.add(((ExplorerManager.Provider)ts[j]).getExplorerManager());
-			}			
+			for(TopComponent t:m.getTopComponents())
+				if(t instanceof ExplorerManager.Provider)
+					al.add(((ExplorerManager.Provider)t).getExplorerManager());
 		}
-		return (ExplorerManager[]) al.toArray(new ExplorerManager[al.size()]);
+		return al.toArray(new ExplorerManager[al.size()]);
 	}
 
 	/** Return all ModuleNode */
 	static public Collection<Node> findModuleNodes(ExplorerManager exm)
 	{
-		ArrayList toReturn = new ArrayList();
+		ArrayList<Node> toReturn = new ArrayList<Node>();
 		for(Node n:exm.getRootContext().getChildren().getNodes())
 		{
 			for(Node nn:n.getChildren().getNodes())

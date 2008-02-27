@@ -24,6 +24,7 @@ import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Collection;
 import javax.swing.*;
 import org.jcae.netbeans.viewer3d.View3D;
 import org.jcae.netbeans.viewer3d.View3DManager;
@@ -37,17 +38,17 @@ import org.openide.NotifyDescriptor;
  */
 public class PanelView implements ActionListener
 {
-    protected Groups groups = null;
+    protected Groups groups;
     protected DialogDescriptor descriptor;
     protected JPanel innerPane = new JPanel();
     protected boolean cancel = true;
     protected JLabel labelGroup = new JLabel("select groups to display : ");
-    protected JList listGroup = null;
-    protected JScrollPane scrollpane = null;
-    protected ArrayList selectedGroups = new ArrayList();
+    protected JList listGroup;
+    protected JScrollPane scrollpane;
+    protected Collection<Group> selectedGroups = new ArrayList<Group>();
     protected JLabel labelView = new JLabel("select a view");
-    protected JComboBox comboboxView = null;
-    protected View3D selectedView = null;
+    protected JComboBox comboboxView;
+    protected View3D selectedView;
     protected JButton buttonSelectAllGroups=new JButton("Select All");
     
     /** 
@@ -68,7 +69,7 @@ public class PanelView implements ActionListener
     /**
      *
      */
-    public void initPanel()
+    private void initPanel()
     {
         innerPane.setLayout(null);
         
@@ -96,7 +97,7 @@ public class PanelView implements ActionListener
     /**
      *
      */
-    public ArrayList getSelectedGroups()
+    public Collection<Group> getSelectedGroups()
     {
         return selectedGroups;
     }
@@ -135,10 +136,8 @@ public class PanelView implements ActionListener
             // Ok was pressed;
             if (!listGroup.isSelectionEmpty())
             {
-                for (int i=0;i<listGroup.getSelectedValues().length;i++)
-                {
-                    selectedGroups.add(listGroup.getSelectedValues()[i]);
-                }
+                for(Object o:listGroup.getSelectedValues())
+					selectedGroups.add((Group)o);
                 selectedView = (View3D)comboboxView.getSelectedItem();
                 cancel = false;
             }
