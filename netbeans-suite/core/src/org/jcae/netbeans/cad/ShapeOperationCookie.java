@@ -53,7 +53,7 @@ public class ShapeOperationCookie implements ViewCookie
 		public void selectionChanged()
 		{
 			ShapePool p=getPool();
-			final ArrayList nodes=new ArrayList();
+			final ArrayList<Node> nodes=new ArrayList();
 			CADSelection[] selection=viewable.getSelection();
 			for(int j=0; j<selection.length; j++)
 			{
@@ -66,24 +66,21 @@ public class ShapeOperationCookie implements ViewCookie
 				}
 			}
 
-			Runnable r=new Runnable()
+			SwingUtilities.invokeLater(new Runnable()
 			{
 				public void run()
 				{
-					ExplorerManager[] exs=getExplorerManagers();
-					for(int i=0; i<exs.length; i++)
+					for(ExplorerManager exm:getExplorerManagers())
 					{
-						ArrayList nnodes=new ArrayList();
-						for(int j=0; j<nodes.size(); j++)
-						{
-							Node n=(Node) nodes.get(j);
-							Collection nn=GeomUtils.findNode(exs[i].getRootContext(), n);
-							nnodes.addAll(nn);
-						}
+						ArrayList<Node> nnodes=new ArrayList();
+						for(Node n:nodes)
+							for(Node mn:findModuleNodes(exm))
+								nnodes.addAll(GeomUtils.findNode(mn, n));
 						
 						try
 						{
-							exs[i].setSelectedNodes((Node[]) nnodes.toArray(new Node[nnodes.size()]));						
+							exm.setSelectedNodes(nnodes.toArray(
+								new Node[nnodes.size()]));				
 						}
 						catch (PropertyVetoException e)
 						{					
@@ -91,8 +88,7 @@ public class ShapeOperationCookie implements ViewCookie
 						}
 					}
 				}
-			};
-			SwingUtilities.invokeLater(r);		
+			});
 		}
 	}
 	
@@ -171,5 +167,22 @@ public class ShapeOperationCookie implements ViewCookie
 		return (ExplorerManager[]) al.toArray(new ExplorerManager[al.size()]);
 	}
 
-
+	/** Return all ModuleNode */
+	static public Collection<Node> findModuleNodes(ExplorerManager exm)
+	{
+		ArrayList toReturn = new ArrayList();
+		for(Node n:exm.getRootContext().getChildren().getNodes())
+		{
+			for(Node nn:n.getChildren().getNodes())
+			{
+				ModuleNode mn = nn.getLookup().lookup(ModuleNode.class);
+				if(mn != null)
+				{
+					toReturn.add(nn);
+					break;
+				}
+			}
+		}
+		return toReturn;
+	}
 }

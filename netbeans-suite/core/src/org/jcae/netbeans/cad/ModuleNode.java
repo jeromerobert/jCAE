@@ -40,11 +40,13 @@ import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.openide.nodes.NodeTransfer;
+import org.openide.util.Lookup;
 import org.openide.util.RequestProcessor;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.NewType;
 import org.openide.util.datatransfer.PasteType;
 import org.openide.util.lookup.Lookups;
+import org.openide.util.lookup.ProxyLookup;
 
 public class ModuleNode extends AbstractNode
 {	
@@ -130,9 +132,18 @@ public class ModuleNode extends AbstractNode
 		}		
 	}
 	
+	private static class MyLookup extends ProxyLookup
+	{		
+		public void setDelegates(Lookup... lookups) 
+		{
+			setLookups(lookups);
+		}
+	}
+	
 	public ModuleNode(Project project)
 	{
-		super(new ModuleChildren(project.getProjectDirectory()), Lookups.singleton(project));		
+		super(new ModuleChildren(project.getProjectDirectory()), new MyLookup());
+		((MyLookup)getLookup()).setDelegates(Lookups.fixed(project, this));
 	}
 	
 	public String getName()
