@@ -44,5 +44,9 @@
 		<echo message="Cleaning ${viewer3d.project.dir}"/>
 		<ant dir="${viewer3d.project.dir}" target="clean" inheritall="false" inheritrefs="false"/>
 		<echo message="Done cleaning ${viewer3d.project.dir}"/>
+
+		<echo message="Cleaning ${va.project.dir}"/>
+		<ant dir="${va.project.dir}" target="clean" inheritall="false" inheritrefs="false"/>
+		<echo message="Done cleaning ${va.project.dir}"/>
 	</target>
 </project>
