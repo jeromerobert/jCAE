@@ -85,31 +85,33 @@ class STEPControl_Reader: public XSControl_Reader
 		const Handle(XSControl_WorkSession)& theSession = self->WS();
 		const Handle(XSControl_TransferReader)& aReader = theSession->TransferReader();
 		Handle(Standard_Transient) anEntity = aReader->EntityFromShapeResult(*theShape, 1);
-        if (anEntity.IsNull()) {
-            // as just mapped
-            anEntity = aReader->EntityFromShapeResult (*theShape,-1);
-        }
-        else if (anEntity.IsNull()) {
-            // as anything
-            anEntity = aReader->EntityFromShapeResult (*theShape,4);
-        }
-        else if (anEntity.IsNull()) {
-            cout<<"Warning: XSInterface_STEPReader::ReadAttributes() entity not found"<<endl;
-            return NULL;
-        }
-        else 
-        {
-            Handle(StepRepr_RepresentationItem) aReprItem;
-            aReprItem = Handle(StepRepr_RepresentationItem)::DownCast(anEntity);
+		if (anEntity.IsNull()) {
+			// as just mapped
+			anEntity = aReader->EntityFromShapeResult (*theShape,-1);
+		}
 
-            if (aReprItem.IsNull()) {
-                cout<<"Error: STEPReader::ReadAttributes(): StepRepr_RepresentationItem Is NULL"<<endl;
-                return NULL;
-            }
-            else 
-                return aReprItem->Name()->ToCString();
-        }
-    }
+		if (anEntity.IsNull()) {
+			// as anything
+			anEntity = aReader->EntityFromShapeResult (*theShape,4);
+		}
+
+		if (anEntity.IsNull()) {
+			cout<<"Warning: XSInterface_STEPReader::ReadAttributes() entity not found"<<endl;
+			return NULL;
+		}
+		else 
+		{
+			Handle(StepRepr_RepresentationItem) aReprItem;
+			aReprItem = Handle(StepRepr_RepresentationItem)::DownCast(anEntity);
+
+			if (aReprItem.IsNull()) {
+				cout<<"Error: STEPReader::ReadAttributes(): StepRepr_RepresentationItem Is NULL"<<endl;
+				return NULL;
+			}
+			else 
+				return aReprItem->Name()->ToCString();
+		}
+	}
 };
 
 class IGESControl_Reader: public XSControl_Reader
