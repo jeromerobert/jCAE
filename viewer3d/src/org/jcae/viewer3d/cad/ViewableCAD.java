@@ -174,6 +174,7 @@ public class ViewableCAD extends ViewableAdaptor
 	public final static int SELECTION_INVERT=0;
 	public final static int SELECTION_ADD=1;
 	public final static int SELECTION_REMOVE=2;
+	public final static int SELECTION_INTERSECT=3;
 	
 	private short selectionMode=FACE_SELECTION;
 	private int selectionAction;
@@ -326,11 +327,11 @@ public class ViewableCAD extends ViewableAdaptor
 		Logger.getLogger("global").finest(
 			"result.getGeometryArray().getUserData()=" +
 			result.getGeometryArray().getUserData());
-		if(pick(result.getGeometryArray()))
+		if(pick(result.getGeometryArray(), null))
 			fireSelectionChanged();
 	}
 	
-	private boolean pick(Geometry geom)
+	private boolean pick(Geometry geom, Collection<Integer> previousSel)
 	{
 		if(geom == null)
 			return false;
@@ -339,31 +340,53 @@ public class ViewableCAD extends ViewableAdaptor
 		if((o instanceof FacePickingInfo)&(selectionMode==FACE_SELECTION))
 		{
 			FacePickingInfo fpi=(FacePickingInfo) o;
-			setFaceSelected(fpi, checkToSelect(selectedFaces, fpi));
+			setFaceSelected(fpi, checkToSelect(selectedFaces, fpi, previousSel));
 			return true;
 		}
 		else if((o instanceof EdgePickingInfo)&(selectionMode==EDGE_SELECTION))
 		{
 			EdgePickingInfo epi=(EdgePickingInfo) o;			
-			setEdgeSelected(epi, checkToSelect(selectedEdges, epi));
+			setEdgeSelected(epi, checkToSelect(selectedEdges, epi, previousSel));
 			return true;
 		}
 		else if((o instanceof VertexPickingInfo)&(selectionMode==VERTEX_SELECTION))
 		{
 			VertexPickingInfo epi=(VertexPickingInfo) o;
-			setVertexSelected(epi, checkToSelect(selectedVertices, epi));
+			setVertexSelected(epi, checkToSelect(selectedVertices, epi, previousSel));
 			return true;
 		}
 		return false;
 	}
 	
-	private boolean checkToSelect(Collection selected, CADPickingInfo info)
+	/**
+	 * Check if an element must be selected or unselected
+	 * @param selected the current selection list of the current type
+	 * @param info the identifier to select or unselect
+	 * @param previousSel the list of selected element in the previous selection
+	 * event. This must be sepecified for SELECTION_INTERSECT mode and should be
+	 * null in other case.
+	 */
+	private boolean checkToSelect(Collection selected, CADPickingInfo info,
+		Collection<Integer> previousSel)
 	{
 		boolean toReturn;
-		if(selectionAction==SELECTION_INVERT)
-			toReturn = !selected.contains(info.id);
-		else
-			toReturn = selectionAction == SELECTION_ADD;
+		switch(selectionAction)
+		{
+			case SELECTION_INVERT:
+				toReturn = !selected.contains(info.id);
+				break;
+			case SELECTION_INTERSECT:
+				toReturn = previousSel.contains(info.id);
+				break;
+			case SELECTION_ADD:
+				toReturn = true;
+				break;
+			case SELECTION_REMOVE:
+				toReturn = false;
+				break;
+			default:
+				throw new IllegalStateException();
+		}
 		return toReturn;
 	}
 	
@@ -377,10 +400,19 @@ public class ViewableCAD extends ViewableAdaptor
 			if(n instanceof Shape3D)
 				as.add(((Shape3D)n).getGeometry());
 		}
-
+		
+		Collection<Integer> previousSelection = null;
+		
+		//TODO dirty hack to implement selection intersection.
+		//like this it will only work for faces
+		if(selectionAction == SELECTION_INTERSECT)
+		{
+			previousSelection=new HashSet(selectedFaces);
+			unselectAll();
+		}
 		boolean b = false;
 		for(Geometry a: as)
-			if(pick(a))
+			if(pick(a, previousSelection))
 				b = true;
 		
 		if(b)

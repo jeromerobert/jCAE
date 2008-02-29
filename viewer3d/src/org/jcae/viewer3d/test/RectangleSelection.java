@@ -30,15 +30,15 @@ public class RectangleSelection
 			feFrame.setVisible(true);
 	
 			// let's add a CAD viewable loaded from an Opencascade file.
-			final ViewableCAD fcad=
-				new ViewableCAD(new OCCProvider("/home/jerome/Models/lego.brep"));
+			final ViewableCAD fcad=				
+				new ViewableCAD(new OCCProvider("/home/jerome/Models/lego.brep"));				
 			feView.add(fcad);
 
 			// Fit again as we have added a new object
 			feView.fitAll();
 			feView.addKeyListener(new KeyAdapter() {
 				public void keyPressed(KeyEvent e)
-				{
+				{					
 					if(e.getKeyChar()=='r')
 						feView.setMouseMode(ViewBehavior.RECTANGLE_MODE);
 					if(e.getKeyChar()=='n')
@@ -49,6 +49,8 @@ public class RectangleSelection
 						fcad.setSelectionAction(ViewableCAD.SELECTION_REMOVE);
 					if(e.getKeyChar()=='i')
 						fcad.setSelectionAction(ViewableCAD.SELECTION_INVERT);
+					if(e.getKeyChar()=='t')
+						fcad.setSelectionAction(ViewableCAD.SELECTION_INTERSECT);
 					if(e.getKeyChar()=='v')
 						fcad.setSelectionMode(ViewableCAD.VERTEX_SELECTION);
 					if(e.getKeyChar()=='f')
