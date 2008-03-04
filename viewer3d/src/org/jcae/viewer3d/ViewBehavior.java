@@ -85,7 +85,8 @@ public  class ViewBehavior extends OrbitBehavior
 	private int mouseMode=DEFAULT_MODE;
 	
 	private BranchGroup firstClipBoxPointGroup=null;
-	private Point3d firstClipBoxPoint3d=null;	
+	private Point3d firstClipBoxPoint3d=null;
+	private boolean locked;
 	
 	public ViewBehavior(View view)
 	{
@@ -100,23 +101,36 @@ public  class ViewBehavior extends OrbitBehavior
 		changeRotationCenter=status;
 	}
 	
+	/** Let this ignore mouse events */
+	public void lock()
+	{
+		this.locked = true;
+	}
+	
+	/** @see unlock */
+	public void unlock()
+	{
+		this.locked = false;
+	}
+	
 	@Override
-	protected void processMouseEvent(MouseEvent evt)
-	{		
-		switch(mouseMode){
-		case CLIP_RECTANGLE_MODE :
-			 rectangleClipMode(evt);
-			break;
-		case CLIP_BOX_MODE :
-			clipBoxMode(evt);
-			break;
-		case RECTANGLE_MODE :
-			rectangleMode(evt);
-			break;
-		case DEFAULT_MODE:
-		default :
-			defaultMode(evt);
-		}
+	protected void processMouseEvent(MouseEvent evt)	
+	{
+		if(!locked)
+			switch(mouseMode){
+			case CLIP_RECTANGLE_MODE :
+				 rectangleClipMode(evt);
+				break;
+			case CLIP_BOX_MODE :
+				clipBoxMode(evt);
+				break;
+			case RECTANGLE_MODE :
+				rectangleMode(evt);
+				break;
+			case DEFAULT_MODE:
+			default :
+				defaultMode(evt);
+			}
 	}
 	
 	private void clipBoxMode(MouseEvent evt) {

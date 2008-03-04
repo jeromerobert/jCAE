@@ -27,7 +27,6 @@ import java.awt.image.BufferedImage;
 import java.io.PrintWriter;
 import java.util.*;
 import java.util.List;
-import java.util.Map.Entry;
 import javax.media.j3d.*;
 import javax.swing.JDialog;
 import javax.swing.JTextPane;
@@ -35,7 +34,6 @@ import javax.vecmath.*;
 
 import org.jcae.viewer3d.cad.ViewableCAD;
 import org.jdesktop.j3d.utils.behaviors.vp.AxisBehavior;
-import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
 import com.sun.j3d.utils.picking.PickResult;
 import com.sun.j3d.utils.universe.PlatformGeometry;
 import com.sun.j3d.utils.universe.SimpleUniverse;
@@ -126,7 +124,7 @@ public class View extends Canvas3D implements PositionListener
 	private ViewingPlatform viewingPlatform;
 	private BranchGroup axisBranchGroup=new BranchGroup();
 	private Viewable currentViewable;
-	protected OrbitBehavior orbit;
+	protected ViewBehavior orbit;
 	private AxisBehavior axisBehavior;
 	ModelClip modelClip;
 	private boolean isModelClip=false;
@@ -135,7 +133,8 @@ public class View extends Canvas3D implements PositionListener
 	private ClipBox clipBox=null;
 	private PrintWriter writer=null;
 	private List<Runnable> postRenderers=new ArrayList<Runnable>();
-		
+	private boolean locked;
+	
     /**
      * From https://java3d.dev.java.net/issues/show_bug.cgi?id=89
      * Finds the preferred <code>GraphicsConfiguration</code> object
@@ -290,6 +289,7 @@ public class View extends Canvas3D implements PositionListener
 		
 		zoomTo(0,0,0,1.0f);	
 		addKeyListener(new PAKeyListener());
+		setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
     }	
 		
 	private void createFixedAxis()
@@ -591,15 +591,15 @@ public class View extends Canvas3D implements PositionListener
 	 * Warning : all shared viewables will be clipped in other views !!
 	 * */
 	public void setClipPlanes(Vector4d[] planes){
-		ModelClip modelClip=new ModelClip();
-		modelClip.setEnables(new boolean[]{false, false, false, false, false, false});
+		ModelClip mc=new ModelClip();
+		mc.setEnables(new boolean[]{false, false, false, false, false, false});
 		for(int ii=0;ii<planes.length;ii++){
-			modelClip.setPlane(ii,planes[ii]);
-			modelClip.setEnable(ii,true);
+			mc.setPlane(ii,planes[ii]);
+			mc.setEnable(ii,true);
 		}
 	
-		modelClip.setInfluencingBounds(new BoundingSphere(new Point3d(),Double.MAX_VALUE));
-		setModelClip(modelClip);
+		mc.setInfluencingBounds(new BoundingSphere(new Point3d(),Double.MAX_VALUE));
+		setModelClip(mc);
 	}
 	
 	/** create a clip Box and remove the previous modelclip
@@ -672,50 +672,6 @@ public class View extends Canvas3D implements PositionListener
 		transformGroup.addChild(new RasterTextLabel("z", Color.WHITE, 0, 0, 1.1f));
 		transformGroup.setCapability(Node.ALLOW_BOUNDS_READ);
 		return transformGroup;		
-	}
-	
-	private Node createLabel(String label, float x, float y, float z, Color color, Font font)
-	{
-		//Compute the size of the string
-		/*BufferedImage image=new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g2d=(Graphics2D) image.getGraphics();
-		Rectangle2D dim=font.getStringBounds(label, g2d.getFontRenderContext());		
-		System.out.println(dim);*/
-		//Create the image
-		BufferedImage image=new BufferedImage(8, 15, BufferedImage.TYPE_INT_ARGB_PRE);		
-		Graphics2D g2d=(Graphics2D) image.getGraphics();
-		g2d.setFont(font);
-		g2d.drawString(label, 0, 11);
-		
-		/*try
-		{
-			ImageIO.write(image, "png", new File("/tmp/raster"+label+".png"));
-		} catch (IOException e)
-		{
-			e.printStackTrace();
-		}*/
-		
-		float[] data=new float[image.getWidth()*image.getHeight()];
-		Arrays.fill(data, 1.0f);		
-		DepthComponentFloat dcf=new DepthComponentFloat(image.getWidth(), image.getHeight());
-		dcf.setDepthData(data);
-		
-		Raster ras = new Raster();
-		ras.setSize(image.getWidth(), image.getHeight());
-		ras.setImage(new ImageComponent2D(ImageComponent.FORMAT_RGBA, image));			
-		ras.setPosition(new Point3f(x,y,z));
-		ras.setDepthComponent(dcf);
-		Dimension dim=new Dimension();
-		ras.getSize(dim);
-		System.out.println(dim);
-		Shape3D s3d=new Shape3D();
-		TransparencyAttributes ta = new TransparencyAttributes(
-			TransparencyAttributes.BLENDED, 0 );
-		Appearance app=new Appearance();
-		app.setTransparencyAttributes(ta);		
-		s3d.addGeometry(ras);		
-		s3d.setAppearance(app);
-		return s3d;
 	}
 
 	private Node createLights()
@@ -1348,5 +1304,35 @@ public class View extends Canvas3D implements PositionListener
 			Runnable r = postRenderers.get(i);
 			r.run();
 		}
+	}
+	
+	/** Let this view ignore all input (mouse and keyboard) events */
+	public void lock()
+	{
+		this.locked = true;
+		orbit.lock();
+		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+	}
+	
+	/** @see lock */
+	public void unlock()
+	{
+		this.locked = false;
+		orbit.unlock();
+		setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+	}
+
+	@Override
+	protected void processKeyEvent(KeyEvent e)
+	{
+		if(!locked)
+			super.processKeyEvent(e);
+	}
+
+	@Override
+	protected void processMouseEvent(MouseEvent e)
+	{
+		if(!locked)
+			super.processMouseEvent(e);
 	}
 }
