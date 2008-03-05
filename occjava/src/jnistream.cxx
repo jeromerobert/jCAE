@@ -45,8 +45,8 @@ jnistreambuf::jnistreambuf(JNIEnv * env, jobject jstream, int bufferSize):
 	readMID = env->GetMethodID(inputStreamClass, "read","(Ljava/nio/ByteBuffer;)I");  
 	writeMID = env->GetMethodID(outputStreamClass, "write","(Ljava/nio/ByteBuffer;)I");  
 	
-	bool in=env->IsInstanceOf(jstream, inputStreamClass);
-	bool out=env->IsInstanceOf(jstream, outputStreamClass);
+	bool in=env->IsInstanceOf(jstream, inputStreamClass)!=0;
+	bool out=env->IsInstanceOf(jstream, outputStreamClass)!=0;
 
 	if(in)
 	{

@@ -88,6 +88,6 @@ class ShapeFix_Wireframe: public ShapeFix_Root
 	}
 	bool getDropSmallEdges()
 	{
-        return self->ModeDropSmallEdges();
+        return self->ModeDropSmallEdges()!=0;
 	}
 };
