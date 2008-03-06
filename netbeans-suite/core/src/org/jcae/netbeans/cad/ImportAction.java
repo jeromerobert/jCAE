@@ -26,6 +26,8 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 import org.jcae.netbeans.Utilities;
 import org.jcae.opencascade.jni.*;
+import org.netbeans.api.progress.ProgressHandle;
+import org.netbeans.api.progress.ProgressHandleFactory;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.project.ui.support.MainProjectSensitiveActions;
 import org.netbeans.spi.project.ui.support.ProjectActionPerformer;
@@ -86,6 +88,7 @@ public class ImportAction extends CallableSystemAction
 	
 	public void importGeometry(FileObject outputDir)
 	{
+		ProgressHandle h;
 		try
 		{
 			JFileChooser chooser = new JFileChooser();
@@ -95,8 +98,10 @@ public class ImportAction extends CallableSystemAction
 			int ret = chooser.showOpenDialog(null);
 			boolean warnUnit=false;
 			if (ret == JFileChooser.APPROVE_OPTION)
-			{
+			{				
 				String fileName = chooser.getSelectedFile().getPath();
+				h = ProgressHandleFactory.createHandle("Reading "+fileName);
+				h.start();
 		        TopoDS_Shape brepShape;
 		        if (stepFileFilter.accept(chooser.getSelectedFile()))
 		        {
@@ -117,7 +122,8 @@ public class ImportAction extends CallableSystemAction
 					warnUnit=true;
 		        }
 		        else
-		            brepShape = BRepTools.read(fileName, new BRep_Builder());
+		            brepShape = BRepTools.read(fileName, new BRep_Builder());				
+				h.finish();
 				
 		        String outputName=Utilities.getFreeName(
 					outputDir,
@@ -129,7 +135,7 @@ public class ImportAction extends CallableSystemAction
 				if(warnUnit)
 				{
 					JOptionPane.showMessageDialog(
-						WindowManager.getDefault().getMainWindow(),
+						null,
 						"The geometry has been converted to millimeter."+
 						"Use the bounding box command to know its new dimensions.",
 						"Geometry converted to mm",
@@ -167,5 +173,11 @@ public class ImportAction extends CallableSystemAction
 	public HelpCtx getHelpCtx()
 	{
 		return null;
+	}
+
+	@Override
+	protected boolean asynchronous()
+	{
+		return true;
 	}
 }
