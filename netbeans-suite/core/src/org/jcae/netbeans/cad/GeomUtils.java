@@ -21,6 +21,7 @@
 package org.jcae.netbeans.cad;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,6 +30,8 @@ import org.jcae.opencascade.jni.*;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
+import org.openide.nodes.PropertySupport;
+import org.openide.nodes.Sheet;
 
 public class GeomUtils
 {	
@@ -120,4 +123,39 @@ public class GeomUtils
 			toReturn = getParentBrep(node.getParentNode());
 		return toReturn;
 	}
+	
+	public static Sheet.Set createSheetSet(final Node node)
+	{
+		Sheet.Set set=new Sheet.Set();
+		final NbShape shape = GeomUtils.getShape(node);
+		set.put(new PropertySupport.ReadWrite<String> (
+			"userTags", String.class, "User tags", "User tags")
+		{
+			@Override
+			public String getValue() throws IllegalAccessException,
+				InvocationTargetException
+			{
+				return shape.getTags();
+			}
+
+			@Override
+			public void setValue(String val) throws IllegalAccessException,
+				IllegalArgumentException, InvocationTargetException
+			{
+				shape.setTags(val);
+				GeomUtils.getParentBrep(node).getDataObject().setModified(true);
+			}
+		});
+		
+		set.put(new PropertySupport.ReadOnly<Double>(
+			"tolerance", Double.class, "Tolerance", "Tolerance")
+			{	
+				public Double getValue()
+				{
+					return shape.getTolerance();
+				}
+			});			
+		set.setName("Geometry");
+		return set;
+	}	
 }

@@ -22,6 +22,7 @@
 package org.jcae.netbeans.cad;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -33,10 +34,13 @@ import org.openide.filesystems.FileLock;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataObjectExistsException;
-import org.openide.loaders.FileEntry;
 import org.openide.loaders.MultiDataObject;
 import org.openide.loaders.MultiFileLoader;
 import org.openide.nodes.Node;
+import org.openide.xml.XMLUtil;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 public class BrepDataObject extends MultiDataObject implements SaveCookie
 {
@@ -66,24 +70,21 @@ public class BrepDataObject extends MultiDataObject implements SaveCookie
 	{
 		try
 		{
+			FileObject pf = getPrimaryFile();
 			if(shape!=null)
 			{		
-				String fileName = FileUtil.toFile(getPrimaryFile()
-					).getPath();
-				BRepTools.write(shape.getImpl(), fileName);
+				String fileName = FileUtil.toFile(pf).getPath();
+				shape.saveImpl(fileName);
 			}
-			Set set = secondaryEntries();
-			if(!set.isEmpty())
-			{
-				FileEntry fe=(FileEntry) set.toArray()[0];
-				FileObject fo = fe.getFile();
-				FileLock lock = fo.lock();
-				OutputStream os = fo.getOutputStream(lock);
-				PrintWriter pw = new PrintWriter(new OutputStreamWriter(os, "UTF-8"));
-				shape.dump(pw);
-				pw.close();
-				lock.releaseLock();
-			}
+			FileObject fo = pf.getParent().getFileObject(pf.getNameExt(), "xml");
+			if(fo == null)
+				fo = pf.getParent().createData(pf.getNameExt(), "xml");
+			FileLock lock = fo.lock();
+			OutputStream os = fo.getOutputStream(lock);
+			PrintWriter pw = new PrintWriter(new OutputStreamWriter(os, "UTF-8"));
+			shape.dump(pw);
+			pw.close();
+			lock.releaseLock();
 			setModified(false);
 		}
 		catch(IOException ex)
@@ -92,11 +93,23 @@ public class BrepDataObject extends MultiDataObject implements SaveCookie
 		}
 	}
 	
-	public void load()
+	public void load() throws IOException, SAXException
 	{		
 		String fileName = FileUtil.toFile(getPrimaryFile()).getPath();
-		shape = new NbShape(fileName);
-		shape.setNode(getNodeDelegate());
+		NbShape aShape = new NbShape(fileName);
+		aShape.setNode(getNodeDelegate());		
+		Set<MultiDataObject.Entry> se = secondaryEntries();
+		if(!se.isEmpty())
+		{
+			InputStream in = se.iterator().next().getFile().getInputStream();			
+			Document d = XMLUtil.parse(new InputSource(in), false, false, null, null);
+			d.normalizeDocument();
+			aShape.load(d.getDocumentElement());
+			in.close();			
+		}
+		//Do the affectation at the end, to ensure that if a error occure nothing
+		//is done
+		shape=aShape;
 	}
 	
 	public void unload()

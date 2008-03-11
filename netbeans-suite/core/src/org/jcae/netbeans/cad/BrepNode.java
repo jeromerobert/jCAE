@@ -34,14 +34,15 @@ import org.openide.cookies.OpenCookie;
 import org.openide.loaders.DataNode;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
-import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.NewType;
 import org.openide.util.lookup.AbstractLookup;
 import org.openide.util.lookup.InstanceContent;
 import org.openide.util.lookup.ProxyLookup;
+import org.xml.sax.SAXException;
 
 public class BrepNode extends DataNode implements Node.Cookie, OpenCookie
 {		
@@ -200,18 +201,7 @@ public class BrepNode extends DataNode implements Node.Cookie, OpenCookie
 		Sheet sheet=super.createSheet();
 		if(isLoaded())
 		{
-			Sheet.Set set=new Sheet.Set();
-			set.put(new PropertySupport.ReadOnly<Double>(
-				"tolerance", Double.class, "tolerance", "tolerance")
-				{	
-					public Double getValue()
-					{
-						NbShape s= ((BrepDataObject)getDataObject()).getShape();
-						return s.getTolerance();
-					}
-				});
-			set.setName("Geometry");
-			sheet.put(set);
+			sheet.put(GeomUtils.createSheetSet(this));
 		}
 		return sheet;
 	}
@@ -222,10 +212,23 @@ public class BrepNode extends DataNode implements Node.Cookie, OpenCookie
 		fireOpenedIconChange();
 		setSheet(createSheet());
 	}
+	
 	public void open() {
-		getLookup().lookup(BrepDataObject.class).load();
-		instanceContent.add(getLookup().lookup(BrepDataObject.class).getShape());
-		fireStateChange();
+		try
+		{
+			getLookup().lookup(BrepDataObject.class).load();
+			instanceContent.add(getLookup().
+				lookup(BrepDataObject.class).getShape());
+			fireStateChange();
+		}
+		catch (IOException ex)
+		{
+			Exceptions.printStackTrace(ex);
+		}
+		catch (SAXException ex)
+		{
+			Exceptions.printStackTrace(ex);
+		}
 	}
 
 	/*public Transferable clipboardCopy() throws IOException

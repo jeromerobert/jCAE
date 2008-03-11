@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.logging.Level;
@@ -48,6 +49,9 @@ import org.jcae.opencascade.jni.TopoDS_Shell;
 import org.jcae.opencascade.jni.TopoDS_Solid;
 import org.jcae.opencascade.jni.TopoDS_Vertex;
 import org.jcae.opencascade.jni.TopoDS_Wire;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * A abstraction level over TopoDS_Shape to easily decorate and serialize the
@@ -55,17 +59,14 @@ import org.jcae.opencascade.jni.TopoDS_Wire;
  * @author Jerome Robert
  */
 public class Shape<T extends Shape> implements Comparable< Shape<T> >
-{
-	public static class Attribute
-	{
-		public String userTag;
-		public String meshType;
-		public String name;
-	}
-	
-	private final static Map<Class, String> TYPE_MAP_XML;
-	private final static Map<Class, String> TYPE_MAP_NAME;
-	private final static Class[] TYPE= new Class[]{
+{	
+	/** map TopoDS_Compound.class to "co" */
+	protected final static Map<Class, String> TYPE_MAP_XML;
+	/** map "co" to TopoDS_Compound.class */
+	protected final static Map<String, Class> TYPE_MAP_XML_INV;
+	/** map TopoDS_Compound.class to "Compound" */
+	protected final static Map<Class, String> TYPE_MAP_NAME;
+	protected final static Class[] TYPE= new Class[]{
 		TopoDS_Compound.class,
 		TopoDS_CompSolid.class,
 		TopoDS_Solid.class,
@@ -103,14 +104,25 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		for(int i=0; i<TYPE.length; i++)
 			mm.put(TYPE[i], TYPE_LABEL[i]);
 		TYPE_MAP_NAME=Collections.unmodifiableMap(mm);
+		
+		HashMap<String, Class> mmi = new HashMap<String, Class>();
+		for(Entry<Class, String> e:TYPE_MAP_XML.entrySet())
+			mmi.put(e.getValue(), e.getKey());
+		TYPE_MAP_XML_INV=Collections.unmodifiableMap(mmi);
 	}
 	
-	public interface Factory<T>
+	protected interface Attributes
+	{
+		String toXML();
+		void fromXML(Element node);
+	}
+	
+	protected interface Factory<T>
 	{
 		T create(TopoDS_Shape shape, Map<TopoDS_Shape, Shape> map, Shape[] parents);
 	}
 	
-	public final static Factory DEFAULT_FACTORY=new Factory<Shape>()
+	protected final static Factory DEFAULT_FACTORY=new Factory<Shape>()
 	{
 		public Shape create(TopoDS_Shape shape, Map<TopoDS_Shape, Shape> map, Shape[] parents)
 		{
@@ -120,8 +132,8 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	
 	protected TopoDS_Shape impl;
 	private Shape[] children;
-	private Attribute attribute;
 	private Shape[] parents;
+
 	protected final static Shape[] NOPARENT=new Shape[0];
 
 	public Shape(String fileName)
@@ -210,7 +222,9 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	{
 		int[] ids = new int[TopAbs_ShapeEnum.SHAPE];
 		Arrays.fill(ids, 1);
+		writer.println("<geometry>");
 		dump(writer, new HashSet<Shape>(), ids);
+		writer.println("</geometry>");
 	}
 
 	private void dump(PrintWriter writer, Set<Shape> shapeSet, int[] id)
@@ -219,13 +233,38 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		{
 			int type = getType();
 			shapeSet.add(this);
-			writer.println("<" + TYPE_MAP_XML.get(impl.getClass()) + " id=\"" +
-				(id[type]++) + "\">");
+			if(getAttributes()!=null)
+			{
+				String e = TYPE_MAP_XML.get(impl.getClass());
+				writer.println("<" + e + " id=\"" + id[type] + "\">");
+				writer.println(getAttributes().toXML());
+				writer.println("</"+e+">");
+			}
+			id[type]++;
 			for (Shape s : children)
 				s.dump(writer, shapeSet, id);
 		}
 	}
 
+	public void load(Node node)
+	{
+		NodeList nodes = node.getChildNodes();
+		for(int i = 0; i<nodes.getLength(); i++)
+		{
+			Node n = nodes.item(i);
+			if(n.getNodeType() == Node.ELEMENT_NODE)
+			{
+				Class type = TYPE_MAP_XML_INV.get(n.getNodeName());
+				Element e = (Element)n;
+				int id = Integer.parseInt(e.getAttribute("id"));
+				Shape s = getShapeFromID(id, type);
+				if(s.getAttributes()==null)
+					s.createAttributes();
+				s.getAttributes().fromXML(e);
+			}			
+		}
+	}
+	
 	private int getID(Shape rootShape)
 	{
 		int[] ids = new int[]{0};
@@ -301,26 +340,6 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		return toReturn;
 	}
 	
-	public String getName()
-	{
-		return getName(getRootShape());
-	}
-	
-	private String getName(Shape rootShape)
-	{
-		if(attribute == null || attribute.name == null)
-			return TYPE_MAP_NAME.get(impl.getClass())+getID(rootShape);
-		else
-			return attribute.name;
-	}
-	
-	public void setName(String name)
-	{
-		if(attribute == null)
-			attribute = new Attribute();
-		attribute.name = name;
-	}
-	
 	public T getRootShape()
 	{
 		Shape aparent = this;
@@ -336,10 +355,20 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	 */
 	public T getShapeFromID(int id, int type)
 	{
-		ArrayList<T> toReturn = new ArrayList<T>();
-		explore(toReturn, TYPE[type], id);
-		return toReturn.get(id-1);		
+		return getShapeFromID(id, TYPE[type]);
 	}
+	
+	/**
+	 * @param id from 1 to n
+	 * @param type
+	 * @return
+	 */
+	private T getShapeFromID(int id, Class type)
+	{
+		ArrayList<T> toReturn = new ArrayList<T>();
+		explore(toReturn, type, id);
+		return toReturn.get(id-1);		
+	}	
 	
 	/**
 	 * Return the closest parent shape which is a Compound
@@ -374,30 +403,35 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		return box.get();
 	}
 	
-	@Override
-	public String toString()
+	/**
+	 * return the attributes of this nodes.
+	 * Can be null if it as no attributes (default values)
+	 */
+	protected Attributes getAttributes()
 	{
-		StringBuilder sb = new StringBuilder();
-		toString("", sb);
-		return sb.toString();
+		return null;
 	}
-	
-	private void toString(String spacer, StringBuilder sb)
+
+	/**
+	 * Initialise the attributes. Ones called getAttributes will not return
+	 * null.
+	 */
+	protected void createAttributes()
 	{
-		sb.append(spacer);
-		sb.append(getName());
-		for (Shape s : children)
-		{
-			sb.append('\n');
-			sb.append(spacer);
-			s.toString(spacer+" ", sb);
-		}
 	}
-	
+
 	public void saveImpl(String fileName)
 	{
 		BRepTools.write(impl, fileName);
 	}
+	
+	public int compareTo(Shape<T> o)
+	{
+		int r = getType()-o.getType();
+		if( r == 0 )
+			r = getID() - o.getID();
+		return r;
+	}	
 	
 	/** For debugging */
 	private static void dumpTopExp(TopoDS_Shape shape)
@@ -444,13 +478,5 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		{
 			Logger.getLogger(Shape.class.getName()).log(Level.SEVERE, null, ex);
 		}	
-	}
-
-	public int compareTo(Shape<T> o)
-	{
-		int r = getType()-o.getType();
-		if( r == 0 )
-			r = getID() - o.getID();
-		return r;
 	}
 }

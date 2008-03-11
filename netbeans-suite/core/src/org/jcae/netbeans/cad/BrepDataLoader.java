@@ -20,13 +20,10 @@
 
 package org.jcae.netbeans.cad;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import org.openide.filesystems.FileObject;
-import org.openide.filesystems.FileUtil;
-import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.FileEntry;
 import org.openide.loaders.MultiDataObject;
 import org.openide.loaders.MultiFileLoader;
@@ -34,10 +31,11 @@ import org.openide.loaders.MultiDataObject.Entry;
 
 public class BrepDataLoader extends MultiFileLoader
 {
-	final private static Collection<String> EXTENSION=new HashSet<String>(
-		Arrays.asList("brep", "step", "igs", "iges"));
+	public final static Collection<String> EXTENSION=new HashSet<String>(
+		Arrays.asList("brep", "step", "igs", "iges", "stp","BREP", "STEP",
+		"STP", "IGS", "IGES"));
 	
-	private final static String META_EXTENSION=".xml";
+	private final static String META_EXTENSION="xml";
 	
 	public BrepDataLoader()
 	{
@@ -51,19 +49,17 @@ public class BrepDataLoader extends MultiFileLoader
 		return new BrepDataObject(primaryFile, this);
 	}
 	
-	protected FileObject findPrimaryFile(FileObject arg0) {
-		if(EXTENSION.contains(arg0.getExt()))
-			return arg0;
-		else if(arg0.getNameExt().endsWith(META_EXTENSION))
+	protected FileObject findPrimaryFile(FileObject fileObject) {
+		FileObject toReturn = null;
+		if(EXTENSION.contains(fileObject.getExt()))
+			toReturn = fileObject;
+		else if(fileObject.getExt().equals(META_EXTENSION))
 		{
-			File f=FileUtil.toFile(arg0);
-			if(f==null)
-				return null;
-			String n=f.getPath();			
-			n=n.substring(0, n.length()-META_EXTENSION.length());
-			return FileUtil.toFileObject(new File(n));
+			FileObject f = fileObject.getParent().getFileObject(fileObject.getName());
+			if(f != null && EXTENSION.contains(f.getExt()))
+				toReturn = f;
 		}
-		else return null;
+		return toReturn;
 	}
 
 	protected Entry createPrimaryEntry(MultiDataObject arg0, FileObject arg1)

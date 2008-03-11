@@ -32,7 +32,6 @@ import org.openide.awt.Mnemonics;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Node;
 import org.openide.nodes.Node.Cookie;
-import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.NodeAction;
@@ -139,12 +138,6 @@ public class ShapeNode extends AbstractNode
 		return true;
 	}
 	
-	/*public void destroy() throws IOException
-	{
-		ShapePool sp=(ShapePool) getCookie(ShapePool.class);
-		getParentNode().getChildren().remove(new Node[]{this});
-	}*/
-	
 	@Override
 	public NewType[] getNewTypes()
 	{
@@ -155,17 +148,7 @@ public class ShapeNode extends AbstractNode
 	public Sheet createSheet()
 	{
 		Sheet sheet=super.createSheet();
-		Sheet.Set set=new Sheet.Set();
-		set.put(new PropertySupport.ReadOnly<Double>(
-			"tolerance", Double.class, "tolerance", "tolerance")
-			{	
-				public Double getValue()
-				{
-					return GeomUtils.getShape(ShapeNode.this).getTolerance();
-				}
-			});
-		set.setName("Geometry");
-		sheet.put(set);
+		sheet.put(GeomUtils.createSheetSet(this));		
 		return sheet;
 	}
 

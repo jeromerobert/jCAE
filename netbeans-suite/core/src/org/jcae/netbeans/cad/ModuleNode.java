@@ -83,7 +83,7 @@ public class ModuleNode extends AbstractNode
 				ArrayList<DataObject> l=new ArrayList<DataObject>();
 				for (FileObject o1 : os)
 				{
-					if (o1.getExt().equalsIgnoreCase("brep"))
+					if(BrepDataLoader.EXTENSION.contains(o1.getExt()))					
 						l.add(DataObject.find(o1));
 				}
 				Object[] o=l.toArray();

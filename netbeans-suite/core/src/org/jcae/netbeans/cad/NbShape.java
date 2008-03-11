@@ -34,6 +34,25 @@ import org.openide.nodes.Node.Cookie;
  */
 public class NbShape extends Shape<NbShape> implements Cookie
 {
+	public static class NbAttributes implements Attributes
+	{
+		public String userTag="";
+		public String meshType;
+		public String name="";
+
+		public String toXML()
+		{
+			return "<tag>"+userTag+"</tag>\n"+
+				"<name>"+name+"</name>";
+		}
+
+		public void fromXML(org.w3c.dom.Element element)
+		{
+			userTag = element.getElementsByTagName("tag").item(0).getTextContent();
+			name = element.getElementsByTagName("name").item(0).getTextContent();
+		}
+	}
+	
 	private final static Factory FACTORY=new Factory<NbShape>()
 	{
 		public NbShape create(TopoDS_Shape shape,
@@ -44,6 +63,7 @@ public class NbShape extends Shape<NbShape> implements Cookie
 	};
 
 	private Node node;
+	private NbAttributes attributes;
 	
 	public NbShape(String fileName)
 	{
@@ -82,5 +102,46 @@ public class NbShape extends Shape<NbShape> implements Cookie
 	public TopoDS_Shape getImpl()
 	{
 		return impl;
-	}	
+	}
+	
+	public String getName()
+	{
+		if(attributes == null || attributes.name.length()==0)
+			return TYPE_MAP_NAME.get(impl.getClass())+getID();
+		else
+			return attributes.name+getID();
+	}
+	
+	public void setName(String name)
+	{
+		if(attributes == null)
+			attributes = new NbAttributes();
+		attributes.name = name;
+	}
+	
+	public String getTags()
+	{
+		if( attributes != null && attributes.userTag != null)
+			return attributes.userTag;
+		else return "";
+	}
+	
+	public void setTags(String tags)
+	{
+		if(attributes == null)
+			attributes = new NbAttributes();
+		attributes.userTag = tags;
+	}
+	
+	@Override
+	protected NbAttributes getAttributes()
+	{
+		return attributes;
+	}
+
+	@Override
+	protected void createAttributes()
+	{
+		attributes = new NbAttributes();
+	}
 }
