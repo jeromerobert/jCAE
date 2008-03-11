@@ -17,11 +17,13 @@
  *
  * (C) Copyright 2008, by EADS France
  */
-package org.jcae.netbeans.cad;
+package org.jcae.opencascade;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,9 +32,10 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jcae.opencascade.Utilities;
+import org.jcae.opencascade.jni.BRepBndLib;
 import org.jcae.opencascade.jni.BRepTools;
 import org.jcae.opencascade.jni.BRep_Builder;
+import org.jcae.opencascade.jni.Bnd_Box;
 import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
 import org.jcae.opencascade.jni.TopExp_Explorer;
 import org.jcae.opencascade.jni.TopoDS_CompSolid;
@@ -47,10 +50,11 @@ import org.jcae.opencascade.jni.TopoDS_Vertex;
 import org.jcae.opencascade.jni.TopoDS_Wire;
 
 /**
- *
+ * A abstraction level over TopoDS_Shape to easily decorate and serialize the
+ * Opencascade shape graph.
  * @author Jerome Robert
  */
-public class Shape
+public class Shape<T extends Shape> implements Comparable< Shape<T> >
 {
 	public static class Attribute
 	{
@@ -59,36 +63,67 @@ public class Shape
 		public String name;
 	}
 	
-	private final static Map<Class, String> TYPE_MAP_XML =
-		new HashMap<Class, String>();
-	private final static Map<Class, String> TYPE_MAP_NAME =
-		new HashMap<Class, String>();
+	private final static Map<Class, String> TYPE_MAP_XML;
+	private final static Map<Class, String> TYPE_MAP_NAME;
+	private final static Class[] TYPE= new Class[]{
+		TopoDS_Compound.class,
+		TopoDS_CompSolid.class,
+		TopoDS_Solid.class,
+		TopoDS_Shell.class,
+		TopoDS_Face.class,
+		TopoDS_Wire.class,
+		TopoDS_Edge.class,
+		TopoDS_Vertex.class,
+		TopoDS_Shape.class};
 
+	public final static String[] TYPE_LABEL= new String[]{
+		"Compound",
+		"CompSolid",
+		"Solid",
+		"Shell",
+		"Face",
+		"Wire",
+		"Edge",
+		"Vertex",
+		"Shape"};
+	
 	static
 	{
-		TYPE_MAP_XML.put(TopoDS_Compound.class, "co");
-		TYPE_MAP_XML.put(TopoDS_CompSolid.class, "cs");
-		TYPE_MAP_XML.put(TopoDS_Solid.class, "so");
-		TYPE_MAP_XML.put(TopoDS_Shell.class, "sh");
-		TYPE_MAP_XML.put(TopoDS_Face.class, "f");
-		TYPE_MAP_XML.put(TopoDS_Wire.class, "w");
-		TYPE_MAP_XML.put(TopoDS_Edge.class, "e");
-		TYPE_MAP_XML.put(TopoDS_Vertex.class, "v");
-		TYPE_MAP_NAME.put(TopoDS_Compound.class, "Compound");
-		TYPE_MAP_NAME.put(TopoDS_CompSolid.class, "CompSolid");
-		TYPE_MAP_NAME.put(TopoDS_Solid.class, "Solid");
-		TYPE_MAP_NAME.put(TopoDS_Shell.class, "Shell");
-		TYPE_MAP_NAME.put(TopoDS_Face.class, "Face");
-		TYPE_MAP_NAME.put(TopoDS_Wire.class, "Wire");
-		TYPE_MAP_NAME.put(TopoDS_Edge.class, "Edge");
-		TYPE_MAP_NAME.put(TopoDS_Vertex.class, "Vertex");		
+		HashMap<Class, String> m = new HashMap<Class, String>();
+		m.put(TopoDS_Compound.class, "co");
+		m.put(TopoDS_CompSolid.class, "cs");
+		m.put(TopoDS_Solid.class, "so");
+		m.put(TopoDS_Shell.class, "sh");
+		m.put(TopoDS_Face.class, "f");
+		m.put(TopoDS_Wire.class, "w");
+		m.put(TopoDS_Edge.class, "e");
+		m.put(TopoDS_Vertex.class, "v");
+		TYPE_MAP_XML=Collections.unmodifiableMap(m);
+		HashMap<Class, String> mm = new HashMap<Class, String>();
+		for(int i=0; i<TYPE.length; i++)
+			mm.put(TYPE[i], TYPE_LABEL[i]);
+		TYPE_MAP_NAME=Collections.unmodifiableMap(mm);
 	}
 	
-	private TopoDS_Shape impl;
+	public interface Factory<T>
+	{
+		T create(TopoDS_Shape shape, Map<TopoDS_Shape, Shape> map, Shape[] parents);
+	}
+	
+	public final static Factory DEFAULT_FACTORY=new Factory<Shape>()
+	{
+		public Shape create(TopoDS_Shape shape, Map<TopoDS_Shape, Shape> map, Shape[] parents)
+		{
+			return new Shape(shape, map, parents, this);
+		}
+	};
+	
+	protected TopoDS_Shape impl;
 	private Shape[] children;
 	private Attribute attribute;
-	private Shape parent;
-	
+	private Shape[] parents;
+	protected final static Shape[] NOPARENT=new Shape[0];
+
 	public Shape(String fileName)
 	{
 		this(Utilities.readFile(fileName));
@@ -96,21 +131,29 @@ public class Shape
 
 	public Shape(TopoDS_Shape shape)
 	{
-		this(shape, new HashMap<TopoDS_Shape, Shape>(), null);
+		this(shape, new HashMap<TopoDS_Shape, Shape>(), NOPARENT, DEFAULT_FACTORY);
 	}
-
-	private Shape(TopoDS_Shape shape, Map<TopoDS_Shape, Shape> map, Shape parent)
+	
+	protected Shape(TopoDS_Shape shape, Map<TopoDS_Shape, Shape> map,
+		Shape[] parents, Factory<T> factory)
 	{
-		this.impl = shape;
-		this.parent = parent;
+		if(shape == null)
+		{
+			TopoDS_Compound c =new TopoDS_Compound();
+			new BRep_Builder().makeCompound(c);
+			this.impl = c;
+		}
+		else
+			this.impl = shape;
+		this.parents = parents;
 		List<Shape> cs = new ArrayList<Shape>();
-		TopoDS_Iterator it = new TopoDS_Iterator(shape);
+		TopoDS_Iterator it = new TopoDS_Iterator(impl);
 		while (it.more())
 		{
 			TopoDS_Shape tds = it.value();
 			Shape css = map.get(tds);
 			if (css == null)
-				css = new Shape(tds, map, this);
+				css = factory.create(tds, map, new Shape[]{this});
 
 			cs.add(css);
 			it.next();
@@ -125,8 +168,42 @@ public class Shape
 		Shape[] nc = new Shape[children.length + 1];
 		System.arraycopy(children, 0, nc, 0, children.length);
 		nc[nc.length - 1] = newShape;
-		children = nc;
-		newShape.parent = this;
+		children = nc;		
+		newShape.addParent(this);
+	}
+	
+	/** Remove this shape from its parents */
+	public void remove()
+	{
+		BRep_Builder bb = new BRep_Builder();
+		for(Shape parent:parents)
+		{
+			ArrayList<Shape> set = new ArrayList<Shape>(Arrays.asList(parent.children));
+			if(set.contains(this))
+			{						
+				bb.remove(parent.impl, impl);
+				set.remove(this);
+				parent.children = set.toArray(new Shape[set.size()]);
+			}
+		}
+		parents=NOPARENT;
+	}
+	
+	public void reverse()
+	{
+		Shape[] parentSav = parents.clone();
+		remove();
+		impl.reverse();
+		for(Shape s: parentSav)
+			s.add(this);
+	}
+	
+	private void addParent(Shape parent)
+	{
+		Shape[] n = new Shape[parents.length+1];
+		System.arraycopy(parents, 0, n, 0, parents.length);
+		n[parents.length]=parent;
+		parents = n;
 	}
 	
 	public void dump(PrintWriter writer)
@@ -149,7 +226,7 @@ public class Shape
 		}
 	}
 
-	public int getID(Shape rootShape)
+	private int getID(Shape rootShape)
 	{
 		int[] ids = new int[]{0};
 		if (getID(rootShape, new HashSet<Shape>(), ids, impl.getClass()))
@@ -159,13 +236,11 @@ public class Shape
 				rootShape.impl);
 	}
 
-	/**
-	 * @param rootShape the shape in witch we look for this
-	 * @param shapeSet keep track of already visited shape
-	 * @param number of shape of the same type already visited
-	 * @param wantedType optimisation proxy for this.getType()
-	 * @return true if we found this
-	 */
+	public int getID()
+	{
+		return getID(getRootShape());
+	}	
+	
 	private boolean getID(Shape rootShape, Set<Shape> shapeSet, int[] number,
 		Class wantedType)
 	{	
@@ -197,8 +272,35 @@ public class Shape
 						return true;
 		}
 		return false;
+	}	
+	
+	/**
+	 * @param result will contains the found shapes
+	 * @param wantedType the type of shape to return
+	 * @param maxsize the maximum number of returned shapes
+	 */
+	private void explore(Collection<T> result, Class wantedType, int maxsize)
+	{
+		if(impl.getClass().equals(wantedType))
+		{
+			result.add((T)this);
+			if(result.size()>=maxsize)
+				return;
+		}
+		for(Shape s:children)
+			s.explore(result, wantedType, maxsize);
 	}
-
+	
+	/**
+	 * Return the children of this shape whose type is type
+	 */
+	public Collection<T> explore(int type)
+	{
+		ArrayList<T> toReturn = new ArrayList<T>();
+		explore(toReturn, TYPE[type], Integer.MAX_VALUE);
+		return toReturn;
+	}
+	
 	public String getName()
 	{
 		return getName(getRootShape());
@@ -219,12 +321,39 @@ public class Shape
 		attribute.name = name;
 	}
 	
-	private Shape getRootShape()
+	public T getRootShape()
 	{
 		Shape aparent = this;
-		while(aparent.parent!=null)
-			aparent = aparent.parent;
-		return aparent;
+		while(aparent.parents.length!=0)
+			aparent = aparent.parents[0];
+		return (T)aparent;
+	}
+	
+	/**
+	 * @param id from 1 to n
+	 * @param type
+	 * @return
+	 */
+	public T getShapeFromID(int id, int type)
+	{
+		ArrayList<T> toReturn = new ArrayList<T>();
+		explore(toReturn, TYPE[type], id);
+		return toReturn.get(id-1);		
+	}
+	
+	/**
+	 * Return the closest parent shape which is a Compound
+	 * @param n
+	 * @return
+	 */
+	public T getCompound()
+	{
+		if(impl instanceof TopoDS_Compound)
+			return (T)this;
+		else if(parents.length>0)
+			return (T)parents[0].getCompound();
+		else
+			return null;
 	}
 	
 	public double getTolerance()
@@ -235,6 +364,14 @@ public class Shape
 	public int getType()
 	{
 		return impl.shapeType();
+	}
+
+	/**return {xmin, ymin, zmin, xmax, ymax, zmax} */ 
+	public double[] getBounds()
+	{
+		Bnd_Box box = new Bnd_Box(); 			
+		BRepBndLib.add(impl,box);			
+		return box.get();
 	}
 	
 	@Override
@@ -307,5 +444,13 @@ public class Shape
 		{
 			Logger.getLogger(Shape.class.getName()).log(Level.SEVERE, null, ex);
 		}	
+	}
+
+	public int compareTo(Shape<T> o)
+	{
+		int r = getType()-o.getType();
+		if( r == 0 )
+			r = getID() - o.getID();
+		return r;
 	}
 }

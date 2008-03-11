@@ -22,36 +22,27 @@ package org.jcae.netbeans.cad;
 
 import java.util.Collections;
 import org.jcae.netbeans.Utilities;
-import org.jcae.opencascade.jni.BRep_Builder;
 import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
-import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.openide.nodes.Node;
 import org.openide.util.datatransfer.NewType;
 
 public class PrimitiveNewType extends NewType
 {
-	protected Node node;
-	private Class primitiveClass;
-	static private int counter;
+	protected final Node node;
+	private final Class primitiveClass;
+	
 	public PrimitiveNewType(Node n, Class primitiveClass)
 	{
 		this.node=n;
 		this.primitiveClass=primitiveClass;
 	}
 	
-	protected static TopoDS_Shape getShape(Node n)
+	protected void insertPrimitive(NbShape newShape)
 	{
-		ShapeCookie sc=n.getCookie(ShapeCookie.class);
-		return sc.getShape();
-	}
-	
-	protected void insertPrimitive(TopoDS_Shape newShape, int id)
-	{
-		new BRep_Builder().add(getShape(node), newShape);		
-		ShapePool sp=node.getCookie(ShapePool.class);
-		sp.putName(newShape, getName());
+		GeomUtils.getShape(node).add(newShape);
+		newShape.setName(getName());		
 		ShapeChildren sc=node.getCookie(ShapeChildren.class);
-		sc.addShapes(Collections.singleton(newShape));
+		sc.addShapes(Collections.singleton(newShape));		
 		GeomUtils.getParentBrep(node).getDataObject().setModified(true);
 	}
 	
@@ -61,7 +52,7 @@ public class PrimitiveNewType extends NewType
 		{
 			Primitive bean = (Primitive) primitiveClass.newInstance();
 			if(Utilities.showEditBeanDialog(bean))		
-				insertPrimitive(bean.rebuild(), counter++);		
+				insertPrimitive(new NbShape(bean.rebuild()));
 		}
 		catch (InstantiationException e)
 		{
@@ -75,7 +66,7 @@ public class PrimitiveNewType extends NewType
 	
 	public static NewType[] getNewType(Node node)
 	{
-		if(getShape(node).shapeType()<=TopAbs_ShapeEnum.COMPSOLID)
+		if(GeomUtils.getShape(node).getType()<=TopAbs_ShapeEnum.COMPSOLID)
 		{
 			return new NewType[]{
 				new PrimitiveNewType(node, Cone.class),
@@ -93,7 +84,7 @@ public class PrimitiveNewType extends NewType
 	{
 		try
 		{
-			return  ((Primitive) primitiveClass.newInstance()).toString();
+			return  primitiveClass.newInstance().toString();
 		}
 		catch (InstantiationException e)
 		{

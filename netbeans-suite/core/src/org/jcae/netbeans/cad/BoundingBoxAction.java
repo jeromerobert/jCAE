@@ -20,11 +20,7 @@
 
 package org.jcae.netbeans.cad;
 
-import java.util.ArrayList;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import org.jcae.opencascade.jni.BRepBndLib;
-import org.jcae.opencascade.jni.Bnd_Box;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.nodes.Node;
@@ -34,14 +30,6 @@ import org.openide.util.actions.CookieAction;
 public class BoundingBoxAction extends CookieAction
 {
 	private static final String CR=System.getProperty("line.separator");
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args)
-	{
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
-	}
 	
 	protected int mode()
 	{
@@ -50,14 +38,12 @@ public class BoundingBoxAction extends CookieAction
 	
 	protected Class[] cookieClasses()
 	{
-		return new Class[] { ShapeCookie.class } ;
+		return new Class[] { NbShape.class } ;
 	}
 	
 	protected void performAction(Node[] arg0)
 	{
-		Bnd_Box box = new Bnd_Box(); 			
-		BRepBndLib.add(GeomUtils.getShape(arg0[0]),box);			
-		double[] bbox = box.get();
+		double[] bbox = GeomUtils.getShape(arg0[0]).getBounds();
 		String text="Xmin="+bbox[0]+CR;
 		text+="Ymin="+bbox[1]+CR;
 		text+="Zmin="+bbox[2]+CR;

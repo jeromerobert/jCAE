@@ -21,29 +21,54 @@
 package org.jcae.netbeans.cad;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import org.jcae.opencascade.jni.TopoDS_Shape;
+import java.util.TreeSet;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 
 public class ShapeChildren extends Children.Array implements Node.Cookie
 {			
-	public void addShapes(Collection shapes)
+	private static class SortedNode implements Comparable<SortedNode>
 	{
-		HashSet<String> names=new HashSet<String>();
-		for(Node n:getNodes())
-			names.add(n.getName());
+		private final NbShape shape;
+		private Node node;
 
-		ShapePool sp = getNode().getCookie(ShapePool.class);
-		Iterator it=shapes.iterator();
-		while(it.hasNext())
+		public SortedNode(Node node)
 		{
-			TopoDS_Shape s=(TopoDS_Shape) it.next();
-			String name=sp.getName(s);
-			if(!names.contains(name))
-				nodes.add(new ShapeNode(name, s, sp));
+			this.shape = GeomUtils.getShape(node);
+			this.node = node;
 		}
+
+		public SortedNode(NbShape shape)
+		{
+			this.shape = shape;			
+		}
+		
+		public int compareTo(SortedNode o)
+		{
+			return shape.compareTo(o.shape);
+		}
+		
+		public Node getNode()
+		{
+			if(node == null)
+				node = new ShapeNode(shape);
+			return node;
+		}
+	}
+	
+	public void addShapes(Collection<NbShape> shapes)
+	{
+		TreeSet<SortedNode> set = new TreeSet<SortedNode>();
+		for(Node n:getNodes())
+			set.add(new SortedNode(n));
+
+		for(NbShape s:shapes)
+			set.add(new SortedNode(s));
+				
+		nodes.clear();
+		for(SortedNode s:set)
+			nodes.add(s.getNode());
+		
 		refresh();
 	}	
 }

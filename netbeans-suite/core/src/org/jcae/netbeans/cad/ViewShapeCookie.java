@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2008, by EADS France
  */
 
 package org.jcae.netbeans.cad;
@@ -39,28 +39,28 @@ import org.openide.windows.Mode;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
-public class ShapeOperationCookie implements ViewCookie
+public class ViewShapeCookie implements ViewCookie
 {	
 	private class MySelectionListener implements SelectionListener
 	{
-		private ViewableCAD viewable;
+		private final ViewableCAD viewable;
+		private final NbShape shape;
 		
-		public MySelectionListener(ViewableCAD viewable)
+		public MySelectionListener(ViewableCAD viewable, NbShape shape)
 		{
 			this.viewable=viewable;
+			this.shape = shape.getRootShape();
 		}
 		
 		public void selectionChanged()
 		{
-			ShapePool p=getPool();
 			final ArrayList<Node> nodes=new ArrayList<Node>();
-			CADSelection[] selection=viewable.getSelection();
-			for(int j=0; j<selection.length; j++)
+			for(CADSelection cs:viewable.getSelection())
 			{
-				int[] ids=selection[0].getFaceIDs();
-				for(int i=0; i<ids.length; i++)
-				{				
-					Node n=p.getNode(getSubFace(ids[i]));
+				for(int i:cs.getFaceIDs())
+				{
+					NbShape s = shape.getShapeFromID(i+1, TopAbs_ShapeEnum.FACE);
+					Node n = s.getNode();
 					if(n!=null)
 						nodes.add(n);
 				}
@@ -93,65 +93,27 @@ public class ShapeOperationCookie implements ViewCookie
 	}
 	
 	private final Node node;
-	public ShapeOperationCookie(Node node)
+	public ViewShapeCookie(Node node)
 	{
 		this.node=node;
 	}
 	
-	private ShapePool getPool()
-	{
-		return node.getCookie(ShapePool.class);
-	}
-	
-	public void explode(int type)
-	{
-		TopoDS_Shape shape = GeomUtils.getShape(node);
-		if(shape==null)
-			return;
-		TopExp_Explorer explorer = new TopExp_Explorer();
-		Collection<TopoDS_Shape> l=new ArrayList<TopoDS_Shape>();
-		ShapePool shapePool=getPool();
-		for (explorer.init(shape, type); explorer.more(); explorer.next())
-		{
-			TopoDS_Shape s=explorer.current();
-			String label=shapePool.getName(s);
-			if(label==null)
-			{
-				shapePool.putName(s);
-			}
-			l.add(s);
-		}
-		
-		// ensure there are no doublons
-		ShapeChildren mc=(ShapeChildren) node.getChildren();
-		mc.addShapes(l);
-	}
-	
 	public void view()
 	{
-		TopoDS_Shape shape = GeomUtils.getShape(node);
+		NbShape nbShape = GeomUtils.getShape(node);
 		View3D v=View3DManager.getDefault().getView3D();
-		ViewableCAD viewable = new ViewableCAD(new OCCProvider(shape));
-		viewable.addSelectionListener(new MySelectionListener(viewable));
+		ViewableCAD viewable = new ViewableCAD(new OCCProvider(nbShape.getImpl()));
+		viewable.addSelectionListener(new MySelectionListener(viewable, nbShape));
 		viewable.setName(node.getName());
 		v.add(viewable);
 		v.getView().fitAll();
-	}
-
-	private TopoDS_Face getSubFace(int id)
-	{
-		TopExp_Explorer exp=new TopExp_Explorer(GeomUtils.getShape(node),
-			TopAbs_ShapeEnum.FACE);
-		for(int i=0; i<id; i++)
-			exp.next();
-		return (TopoDS_Face) exp.current();
 	}
 	
 	private static ExplorerManager[] getExplorerManagers()
 	{
 		ArrayList<ExplorerManager> al=new ArrayList<ExplorerManager>();
 		
-		for(Mode m:WindowManager.getDefault().getModes().toArray(new Mode[0]))
+		for(Mode m:WindowManager.getDefault().getModes())
 		{
 			for(TopComponent t:m.getTopComponents())
 				if(t instanceof ExplorerManager.Provider)
@@ -160,8 +122,10 @@ public class ShapeOperationCookie implements ViewCookie
 		return al.toArray(new ExplorerManager[al.size()]);
 	}
 
-	/** Return all ModuleNode */
-	static public Collection<Node> findModuleNodes(ExplorerManager exm)
+	/** Return all ModuleNode
+	 * @param exm
+	 * @return*/
+	private static Collection<Node> findModuleNodes(ExplorerManager exm)
 	{
 		ArrayList<Node> toReturn = new ArrayList<Node>();
 		for(Node n:exm.getRootContext().getChildren().getNodes())

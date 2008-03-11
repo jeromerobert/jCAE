@@ -22,10 +22,10 @@
 package org.jcae.netbeans.cad;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.Set;
-import org.jcae.opencascade.Utilities;
 import org.jcae.opencascade.jni.*;
 import org.openide.ErrorManager;
 import org.openide.cookies.SaveCookie;
@@ -37,12 +37,8 @@ import org.openide.loaders.FileEntry;
 import org.openide.loaders.MultiDataObject;
 import org.openide.loaders.MultiFileLoader;
 import org.openide.nodes.Node;
-import org.openide.xml.XMLUtil;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-public class BrepDataObject extends MultiDataObject implements ShapeCookie, SaveCookie
+public class BrepDataObject extends MultiDataObject implements SaveCookie
 {
 	public BrepDataObject(FileObject arg0, MultiFileLoader arg1)
 		throws DataObjectExistsException
@@ -52,15 +48,14 @@ public class BrepDataObject extends MultiDataObject implements ShapeCookie, Save
 
 	@Override
 	protected Node createNodeDelegate()
-	{
+	{	
 		return new BrepNode(this);
 	}
 
-	protected TopoDS_Shape shape;
-	private Document metaDocument;
+	protected NbShape shape;	
 	
-	public TopoDS_Shape getShape()
-	{
+	public NbShape getShape()
+	{		
 		if(!isLoaded())
 			throw new IllegalStateException(
 				"BRep file not loaded. Call BrepataObject.load() first");
@@ -75,7 +70,7 @@ public class BrepDataObject extends MultiDataObject implements ShapeCookie, Save
 			{		
 				String fileName = FileUtil.toFile(getPrimaryFile()
 					).getPath();
-				BRepTools.write(shape, fileName);
+				BRepTools.write(shape.getImpl(), fileName);
 			}
 			Set set = secondaryEntries();
 			if(!set.isEmpty())
@@ -84,8 +79,9 @@ public class BrepDataObject extends MultiDataObject implements ShapeCookie, Save
 				FileObject fo = fe.getFile();
 				FileLock lock = fo.lock();
 				OutputStream os = fo.getOutputStream(lock);
-				XMLUtil.write(getMetaDocument(), os,"UTF-8");
-				os.close();
+				PrintWriter pw = new PrintWriter(new OutputStreamWriter(os, "UTF-8"));
+				shape.dump(pw);
+				pw.close();
 				lock.releaseLock();
 			}
 			setModified(false);
@@ -99,53 +95,13 @@ public class BrepDataObject extends MultiDataObject implements ShapeCookie, Save
 	public void load()
 	{		
 		String fileName = FileUtil.toFile(getPrimaryFile()).getPath();
-        shape = Utilities.readFile(fileName);
-        if(shape==null)
-        {
-        	TopoDS_Compound c=new TopoDS_Compound();
-        	new BRep_Builder().makeCompound(c);
-        	shape=c;
-        }
-		//TODO wipe this out (but check that close still work)
-		getMetaDocument();
+		shape = new NbShape(fileName);
+		shape.setNode(getNodeDelegate());
 	}
 	
 	public void unload()
 	{
 		shape = null;
-	}
-	
-	public Document getMetaDocument()
-	{
-		if(metaDocument==null)
-		{
-			try
-			{
-				Set set=secondaryEntries();
-				if(set.isEmpty())
-				{
-					return null;
-				}
-				
-				FileEntry fe=(FileEntry) set.toArray()[0];
-				InputStream in=fe.getFile().getInputStream();
-				metaDocument=XMLUtil.parse(new InputSource(in), false, false, null, null);
-				in.close();
-			}
-			catch (IOException e)
-			{
-				ErrorManager.getDefault().notify(e);
-			}
-			catch (SAXException e)
-			{
-				ErrorManager.getDefault().log(getClass()+" "+e.getMessage());
-			}
-			finally
-			{
-				metaDocument=XMLUtil.createDocument("jcae", null, null, null);
-			}
-		}			
-		return metaDocument;
 	}
 	
 	public boolean isLoaded()

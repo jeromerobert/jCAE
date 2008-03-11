@@ -35,7 +35,7 @@ import org.openide.loaders.MultiDataObject.Entry;
 public class BrepDataLoader extends MultiFileLoader
 {
 	final private static Collection<String> EXTENSION=new HashSet<String>(
-		Arrays.asList(new String[]{"brep", "step", "igs", "iges"}));
+		Arrays.asList("brep", "step", "igs", "iges"));
 	
 	private final static String META_EXTENSION=".xml";
 	
@@ -46,15 +46,9 @@ public class BrepDataLoader extends MultiFileLoader
 	}
 
 	protected MultiDataObject createMultiObject(FileObject primaryFile)
-		throws DataObjectExistsException, java.io.IOException
+		throws java.io.IOException
 	{
 		return new BrepDataObject(primaryFile, this);
-	}
-
-	public static String getMetaFile(FileObject geomFile)
-	{
-		String n=geomFile.getNameExt();
-		return n+META_EXTENSION;		
 	}
 	
 	protected FileObject findPrimaryFile(FileObject arg0) {

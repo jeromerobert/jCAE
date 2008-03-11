@@ -19,7 +19,7 @@ public final class SplitFaces extends CookieAction
 {
 	private class RHPanel extends JPanel
 	{
-		private JTextField minAreaField = new JTextField("100.0");
+		private final JTextField minAreaField = new JTextField("100.0");
 
 		public RHPanel()
 		{
@@ -68,8 +68,8 @@ public final class SplitFaces extends CookieAction
 	
 	protected void performAction(Node[] activatedNodes)
 	{
-		ShapeCookie c = activatedNodes[0].getCookie(ShapeCookie.class);
-		ShapeUpgrade_ShapeDivideArea riw=new ShapeUpgrade_ShapeDivideArea(c.getShape());
+		NbShape c = GeomUtils.getShape(activatedNodes[0]);
+		ShapeUpgrade_ShapeDivideArea riw=new ShapeUpgrade_ShapeDivideArea(c.getImpl());
 		RHPanel panel=new RHPanel();
 		if(panel.showDialog())
 		{
@@ -95,7 +95,7 @@ public final class SplitFaces extends CookieAction
 	protected Class[] cookieClasses()
 	{
 		return new Class[] {
-			ShapeCookie.class
+			NbShape.class
 		};
 	}
 	

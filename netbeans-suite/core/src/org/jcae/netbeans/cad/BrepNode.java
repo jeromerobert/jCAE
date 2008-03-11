@@ -25,52 +25,62 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import org.jcae.opencascade.Utilities;
 import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
-import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.openide.ErrorManager;
 import org.openide.actions.*;
 import org.openide.cookies.OpenCookie;
 import org.openide.loaders.DataNode;
 import org.openide.loaders.DataObject;
-import org.openide.loaders.FileEntry;
 import org.openide.nodes.Node;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
+import org.openide.util.Lookup;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.NewType;
+import org.openide.util.lookup.AbstractLookup;
+import org.openide.util.lookup.InstanceContent;
+import org.openide.util.lookup.ProxyLookup;
 
 public class BrepNode extends DataNode implements Node.Cookie, OpenCookie
 {		
-	private MetaNode metaNode;
-	
 	private final AbstractAction closeAction = new AbstractAction("Close")
 	{		
 		public void actionPerformed(ActionEvent e) 
 		{
 			BrepDataObject o = getLookup().lookup(BrepDataObject.class);
+			instanceContent.remove(o.getShape());
 			o.save();
 			o.unload();
 			ShapeChildren sc = getLookup().lookup(ShapeChildren.class);
-			sc.remove(sc.getNodes());
+			sc.remove(sc.getNodes());			
 			fireStateChange();
 		}
 	};
 	
+	private static class MyLookup extends ProxyLookup
+	{		
+		public void setDelegates(Lookup... lookups) 
+		{
+			setLookups(lookups);
+		}
+	}
+	
+	private final InstanceContent instanceContent = new InstanceContent();
 	public BrepNode(DataObject arg0)
 	{
-		super(arg0, new ShapeChildren());
+		super(arg0, new ShapeChildren(), new MyLookup());
+		((MyLookup)getLookup()).setDelegates(new AbstractLookup(instanceContent));
 		setIconBaseWithExtension("org/jcae/netbeans/cad/BRepNode.png");
-		getCookieSet().add(this);
-		getCookieSet().add(new ShapePool());		
-		getCookieSet().add(new ShapeOperationCookie(this));
-		getCookieSet().add((Cookie) getChildren());		
+		instanceContent.add(this);
+		instanceContent.add(new ViewShapeCookie(this));
+		instanceContent.add(getChildren());
+		instanceContent.add(arg0);
 	}
 
-	/** just a short cut */
+	/** just a short cut
+	 * @return*/
 	private boolean isLoaded()
 	{
 		return getLookup().lookup(BrepDataObject.class).isLoaded();
@@ -93,32 +103,6 @@ public class BrepNode extends DataNode implements Node.Cookie, OpenCookie
 		return getIcon(arg0);
 	}
 	
-	public void updateChildren()
-	{
-		DataObject dob=getDataObject();
-		if(dob instanceof BrepDataObject)
-		{
-			BrepDataObject mob = (BrepDataObject)dob;
-			Set entries=mob.secondaryEntries();
-			if(entries.size()>0 && metaNode==null)
-			{
-				FileEntry fe=(FileEntry) entries.toArray()[0];
-				Node[] ns=getChildren().getNodes();
-				getChildren().remove(ns);
-				metaNode=new MetaNode(mob, fe.getFile());
-				Node[] ns2=new Node[ns.length+1];
-				System.arraycopy(ns, 0, ns2, 1, ns.length);
-				ns2[0]=metaNode;
-				getChildren().add(ns2);
-			}
-			else if(entries.size()==0 && metaNode!=null)
-			{
-				Node[] toRemove=new Node[]{getChildren().getNodes()[0]};
-				getChildren().remove(toRemove);
-			}
-		}		
-	}
-	
 	@Override
 	public Action[] getActions(boolean arg0)
 	{
@@ -134,9 +118,8 @@ public class BrepNode extends DataNode implements Node.Cookie, OpenCookie
 			l.add(SystemAction.get(FreeBoundsAction.class));
 			l.add(SystemAction.get(BoundingBoxAction.class));
 
-			if(GeomUtils.getShape(this).shapeType()==TopAbs_ShapeEnum.FACE)
+			if(GeomUtils.getShape(this).getType()==TopAbs_ShapeEnum.FACE)
 			{
-				l.add(SystemAction.get(GroupFaceAction.class));
 				l.add(SystemAction.get(ReverseAction.class));
 			}
 		}
@@ -199,18 +182,16 @@ public class BrepNode extends DataNode implements Node.Cookie, OpenCookie
 		}
 	}
 	
+	@Override
 	public String getName()
 	{
 		return getDataObject().getPrimaryFile().getName();
 	}
 	
+	@Override
 	public String getDisplayName()
 	{
 		return getDataObject().getPrimaryFile().getName();
-	}
-
-	public MetaNode getMetaNode() {
-		return metaNode;
 	}
 	
 	@Override
@@ -225,9 +206,9 @@ public class BrepNode extends DataNode implements Node.Cookie, OpenCookie
 				{	
 					public Double getValue()
 					{
-						TopoDS_Shape s= ((BrepDataObject)getDataObject()).getShape();
-						return Utilities.tolerance(s);
-					};
+						NbShape s= ((BrepDataObject)getDataObject()).getShape();
+						return s.getTolerance();
+					}
 				});
 			set.setName("Geometry");
 			sheet.put(set);
@@ -243,6 +224,7 @@ public class BrepNode extends DataNode implements Node.Cookie, OpenCookie
 	}
 	public void open() {
 		getLookup().lookup(BrepDataObject.class).load();
+		instanceContent.add(getLookup().lookup(BrepDataObject.class).getShape());
 		fireStateChange();
 	}
 

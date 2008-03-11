@@ -36,7 +36,7 @@ public class Cone extends Primitive
     private double axisY = 1;
     private double axisZ = 0;
     private double radius1 = 1;
-    private double radius2 = 0.01;
+    private double radius2 = 0;
     private double height = 2;	
 
 	public Cone()

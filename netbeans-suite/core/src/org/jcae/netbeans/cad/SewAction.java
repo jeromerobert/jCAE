@@ -35,10 +35,13 @@ public class SewAction extends CookieAction
 {
 	private static class SewingPanel extends JPanel
 	{
-		private JCheckBox checkBoxOption= new JCheckBox("Analysis of degenerated shapes");
-		private JCheckBox checkBoxCutting= new JCheckBox("Cutting or not shared edges");
-		private JCheckBox checkBoxNonManifold= new JCheckBox("Non manifold processing");	
-		private JTextField toleranceField = new JTextField("1E-6");
+		private final JCheckBox checkBoxOption =
+			new JCheckBox("Analysis of degenerated shapes");
+		private final JCheckBox checkBoxCutting =
+			new JCheckBox("Cutting or not shared edges");
+		private final JCheckBox checkBoxNonManifold =
+			new JCheckBox("Non manifold processing");	
+		private final JTextField toleranceField = new JTextField("1E-6");
 		/**
 		 * 
 		 */
@@ -100,7 +103,7 @@ public class SewAction extends CookieAction
 	 */
 	protected Class[] cookieClasses()
 	{
-		return new Class[]{ShapeCookie.class};
+		return new Class[]{NbShape.class};
 	}
 
 	/* (non-Javadoc)
@@ -117,10 +120,8 @@ public class SewAction extends CookieAction
 			sewer.init(spanel.getTolerance(), spanel.getOption(),
 				spanel.getCutting(), spanel.getNonManifold());
 			
-			for(int i=0; i<activatedNodes.length; i++)
-			{				
-				sewer.add(GeomUtils.getShape(activatedNodes[i]));
-			}
+			for(Node n: activatedNodes)
+				sewer.add(GeomUtils.getShape(n).getImpl());
 			
 			sewer.perform();
 			GeomUtils.insertShape(sewer.sewedShape(),
@@ -144,5 +145,11 @@ public class SewAction extends CookieAction
 	{
         // Update with real help when ready:
         return HelpCtx.DEFAULT_HELP;
+	}
+
+	@Override
+	protected boolean asynchronous()
+	{
+		return false;
 	}
 }

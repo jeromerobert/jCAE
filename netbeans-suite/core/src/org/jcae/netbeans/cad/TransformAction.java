@@ -154,7 +154,7 @@ public abstract class TransformAction extends CookieAction
 
 	protected Class[] cookieClasses()
 	{
-		return new Class[]{ShapeCookie.class};
+		return new Class[]{NbShape.class};
 	}
 
 	public HelpCtx getHelpCtx()
@@ -170,21 +170,20 @@ public abstract class TransformAction extends CookieAction
 		return CookieAction.MODE_ALL;
 	}
 
-	protected void performAction(Node[] arg0)
+	protected void performAction(Node[] nodes)
 	{
 		Object param = getParameters();
 		if (Utilities.showEditBeanDialog(param))
 		{
 			GP_Trsf trsf = getTrsf(param);
-			for (int i = 0; i < arg0.length; i++)
+			for (Node node: nodes)
 			{
-				TopoDS_Shape s = GeomUtils.getShape(arg0[i]);
+				TopoDS_Shape s = GeomUtils.getShape(node).getImpl();
 				BRepBuilderAPI_Transform bt = new BRepBuilderAPI_Transform(s,
 					trsf, true);
 				TopoDS_Shape newShape=bt.shape();
-				GeomUtils.insertShape(newShape, getName(),
-					arg0[i].getParentNode());
-				GeomUtils.getParentBrep(arg0[i]).getDataObject().setModified(true);
+				GeomUtils.insertShape(newShape, getName(), node.getParentNode());
+				GeomUtils.getParentBrep(node).getDataObject().setModified(true);
 			}
 		}
 	}

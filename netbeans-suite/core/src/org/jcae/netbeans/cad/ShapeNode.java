@@ -24,12 +24,7 @@ import java.util.ArrayList;
 import javax.swing.Action;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import org.jcae.netbeans.cad.BooleanAction.Common;
-import org.jcae.netbeans.cad.BooleanAction.Cut;
-import org.jcae.netbeans.cad.BooleanAction.Section;
-import org.jcae.opencascade.Utilities;
 import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
-import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.openide.actions.CopyAction;
 import org.openide.actions.ViewAction;
 import org.openide.awt.Actions;
@@ -44,11 +39,12 @@ import org.openide.util.actions.NodeAction;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.NewType;
 
-public class ShapeNode extends AbstractNode implements ShapeCookie
+public class ShapeNode extends AbstractNode
 {	
 	static public class UpgradeActions extends NodeAction
 	{
-		public javax.swing.JMenuItem getMenuPresenter() 
+		@Override
+		public JMenuItem getMenuPresenter() 
 		{
 			JMenu menu = new JMenu();		
 			Mnemonics.setLocalizedText(menu, getName());		
@@ -71,7 +67,8 @@ public class ShapeNode extends AbstractNode implements ShapeCookie
 			return menu;
 		}
 
-	    public javax.swing.JMenuItem getPopupPresenter() {
+		@Override
+	    public JMenuItem getPopupPresenter() {
 	    	return getMenuPresenter();
 	    }
 
@@ -93,23 +90,16 @@ public class ShapeNode extends AbstractNode implements ShapeCookie
 		{
 			return null;
 		}
-	}
-		
-	private final String name;
+	}	
 	
-	protected TopoDS_Shape shape;
-	
-	public ShapeNode(String name, TopoDS_Shape shape, ShapePool pool)
+	public ShapeNode(NbShape shape)
 	{		
 		super(new ShapeChildren());
+		shape.setNode(this);
 		setIconBaseWithExtension("org/jcae/netbeans/cad/ShapeNode.png");
-		this.shape=shape;
-		getCookieSet().add(this);
-		getCookieSet().add(pool);
-		getCookieSet().add(new ShapeOperationCookie(this));
+		getCookieSet().add(new ViewShapeCookie(this));
 		getCookieSet().add((Cookie) getChildren());
-		this.name=name;
-		pool.putNode(shape, this);
+		getCookieSet().add(shape);
 	}
 	
 	@Override
@@ -122,10 +112,9 @@ public class ShapeNode extends AbstractNode implements ShapeCookie
 		toReturn.add(SystemAction.get(BooleanAction.AllActions.class));
 		toReturn.add(SystemAction.get(TransformAction.AllActions.class));
 		toReturn.add(SystemAction.get(UpgradeActions.class));
-		toReturn.add(SystemAction.get(GroupFaceAction.class));
 		toReturn.add(SystemAction.get(FreeBoundsAction.class));
 		toReturn.add(SystemAction.get(BoundingBoxAction.class));
-		if(getShape().shapeType()==TopAbs_ShapeEnum.FACE)
+		if(GeomUtils.getShape(this).getType()==TopAbs_ShapeEnum.FACE)
 			toReturn.add(SystemAction.get(ReverseAction.class));
 		toReturn.add(null);
 		toReturn.add(SystemAction.get(CopyAction.class));
@@ -135,18 +124,13 @@ public class ShapeNode extends AbstractNode implements ShapeCookie
 	@Override
 	public String getDisplayName()
 	{
-		return name;
+		return GeomUtils.getShape(this).getName();
 	}
 
 	@Override
 	public String getName()
 	{
-		return name;
-	}
-	
-	public TopoDS_Shape getShape()
-	{
-		return shape;
+		return GeomUtils.getShape(this).getName();
 	}
 
 	@Override
@@ -177,8 +161,8 @@ public class ShapeNode extends AbstractNode implements ShapeCookie
 			{	
 				public Double getValue()
 				{
-					return Utilities.tolerance(getShape());
-				};
+					return GeomUtils.getShape(ShapeNode.this).getTolerance();
+				}
 			});
 		set.setName("Geometry");
 		sheet.put(set);

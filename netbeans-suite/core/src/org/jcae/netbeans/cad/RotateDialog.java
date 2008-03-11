@@ -28,7 +28,6 @@ import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
-import org.openide.util.NbBundle;
 import org.openide.util.actions.CookieAction;
 
 /**
@@ -51,7 +50,7 @@ public class RotateDialog extends javax.swing.JPanel
 		protected Class[] cookieClasses()
 		{
 			return new Class[] {
-				ShapeCookie.class
+				NbShape.class
 			};
 		}
 
@@ -67,27 +66,27 @@ public class RotateDialog extends javax.swing.JPanel
 			return HelpCtx.DEFAULT_HELP;
 		}
 
+		@Override
 		protected boolean asynchronous()
 		{
 			return false;
 		}
 
-		protected void performAction(Node[] arg0)
+		protected void performAction(Node[] nodes)
 		{
 			RotateDialog dialog=new RotateDialog();
 			if (dialog.showDialog())
 			{
 				GP_Trsf trsf = new GP_Trsf();
 				trsf.setRotation(dialog.getAxis(), dialog.getAngle()*Math.PI/180);
-				for (int i = 0; i < arg0.length; i++)
+				for (Node n:nodes)
 				{
-					TopoDS_Shape s = GeomUtils.getShape(arg0[i]);
+					TopoDS_Shape s = GeomUtils.getShape(n).getImpl();
 					BRepBuilderAPI_Transform bt = new BRepBuilderAPI_Transform(s,
 						trsf, true);
 					TopoDS_Shape newShape=bt.shape();
-					GeomUtils.insertShape(newShape, getName(),
-						arg0[i].getParentNode());
-					GeomUtils.getParentBrep(arg0[i]).getDataObject().setModified(true);
+					GeomUtils.insertShape(newShape, getName(), n.getParentNode());
+					GeomUtils.getParentBrep(n).getDataObject().setModified(true);
 				}
 			}
 		}	

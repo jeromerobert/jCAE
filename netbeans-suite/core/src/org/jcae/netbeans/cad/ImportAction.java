@@ -36,11 +36,10 @@ import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CallableSystemAction;
-import org.openide.windows.WindowManager;
 
 public class ImportAction extends CallableSystemAction
 {
-	private static FileFilter brepFileFilter=new FileFilter()
+	private static final FileFilter brepFileFilter=new FileFilter()
 	{
 		public boolean accept(File f)
 		{
@@ -54,7 +53,7 @@ public class ImportAction extends CallableSystemAction
 		}
 	};
 
-	private static FileFilter igesFileFilter=new FileFilter()
+	private static final FileFilter igesFileFilter=new FileFilter()
 	{
 	   public boolean accept(File f)
 	   {
@@ -70,7 +69,7 @@ public class ImportAction extends CallableSystemAction
 	   }
    };
    
-	private static FileFilter stepFileFilter = new FileFilter()
+	private static final FileFilter stepFileFilter = new FileFilter()
 	{
 		public boolean accept(File f)
 		{

@@ -23,6 +23,7 @@ package org.jcae.netbeans.cad;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import org.jcae.opencascade.Shape;
 import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
@@ -33,7 +34,6 @@ import org.openide.util.actions.CookieAction;
 
 public class ExplodeAction extends CookieAction
 {
-	private static Class[] COOKIE_CLASSES=new Class[]{ShapeOperationCookie.class};
 	protected int mode()
 	{
 		return CookieAction.MODE_ONE;
@@ -41,25 +41,29 @@ public class ExplodeAction extends CookieAction
 
 	protected Class[] cookieClasses()
 	{
-		return COOKIE_CLASSES;
+		return new Class[] { ViewShapeCookie.class };
 	}
 
-	protected void performAction(Node[] arg0)
+	protected void performAction(Node[] nodes)
 	{
 		JPanel panel=new JPanel();
 		panel.add(new JLabel("Shape type"));
-		int maxType=getMaxType(arg0);
+		int maxType=getMaxType(nodes);
 		JComboBox box=createCombo(maxType);
 		panel.add(box);
 		
 		DialogDescriptor dd=new DialogDescriptor(panel, "Explode");
 		DialogDisplayer.getDefault().createDialog(dd).setVisible(true);
-		
+				
 		if(dd.getValue()==NotifyDescriptor.OK_OPTION)
 		{			
-			for(Node n:arg0)
-				n.getCookie(ShapeOperationCookie.class).explode(
-					box.getSelectedIndex()+maxType);
+			int type = box.getSelectedIndex()+maxType;
+			for(Node n:nodes)
+			{				
+				NbShape shape = GeomUtils.getShape(n);
+				n.getLookup().lookup(ShapeChildren.class).addShapes(
+					shape.explore(type));
+			}
 		}
 	}
 	
@@ -68,7 +72,7 @@ public class ExplodeAction extends CookieAction
 		Object[] toReturn=new Object[TopAbs_ShapeEnum.SHAPE-type+1];
 		for(int i=type; i<=TopAbs_ShapeEnum.SHAPE; i++)
 		{
-			toReturn[i-type]=ShapePool.SHAPE_LABEL[i];
+			toReturn[i-type]=Shape.TYPE_LABEL[i];
 		}
 		return new JComboBox(toReturn);
 	}
@@ -76,11 +80,11 @@ public class ExplodeAction extends CookieAction
 	private static int getMaxType(Node[] node)
 	{
 		int maxType=0;
-		for(int i=0; i<node.length; i++)
+		for (Node aNode : node)
 		{
-			int type=GeomUtils.getShape(node[i]).shapeType();
-			if(type>maxType)
-				maxType=type;
+			int type = GeomUtils.getShape(aNode).getType();
+			if (type > maxType)
+				maxType = type;
 		}
 		return maxType;
 	}
@@ -95,6 +99,7 @@ public class ExplodeAction extends CookieAction
 		return null;
 	}
 	
+	@Override
 	protected boolean asynchronous()
 	{
 		return false;

@@ -29,7 +29,6 @@ import java.util.Comparator;
 import java.util.List;
 import javax.swing.Action;
 import org.jcae.netbeans.Utilities;
-import org.jcae.opencascade.jni.BRepTools;
 import org.netbeans.api.project.Project;
 import org.openide.actions.NewAction;
 import org.openide.actions.PasteAction;
@@ -52,7 +51,7 @@ public class ModuleNode extends AbstractNode
 {	
 	private static class ModuleChildren extends Children.Keys implements FileChangeListener
 	{
-		private FileObject directory;
+		private final FileObject directory;
 
 		private final static Comparator DATAOBJECT_COMPARATOR=new Comparator()
 		{
@@ -75,16 +74,17 @@ public class ModuleNode extends AbstractNode
 			return new Node[]{((DataObject) arg0).getNodeDelegate()};
 		}
 		
+		@Override
 		protected void addNotify()
 		{
 			try
 			{
 				FileObject[] os=directory.getChildren();
 				ArrayList<DataObject> l=new ArrayList<DataObject>();
-				for(int i=0; i<os.length; i++)
+				for (FileObject o1 : os)
 				{
-					if(os[i].getExt().equalsIgnoreCase("brep"))
-						l.add(DataObject.find(os[i]));						
+					if (o1.getExt().equalsIgnoreCase("brep"))
+						l.add(DataObject.find(o1));
 				}
 				Object[] o=l.toArray();
 				Arrays.sort(o, DATAOBJECT_COMPARATOR);
@@ -146,11 +146,13 @@ public class ModuleNode extends AbstractNode
 		((MyLookup)getLookup()).setDelegates(Lookups.fixed(project, this));
 	}
 	
+	@Override
 	public String getName()
 	{
 		return "Geometries";
 	}
 	
+	@Override
 	public Action[] getActions(boolean arg0)
 	{
 		return new Action[]{
@@ -158,6 +160,7 @@ public class ModuleNode extends AbstractNode
 			SystemAction.get(PasteAction.class)};
 	}
 	
+	@Override
 	public NewType[] getNewTypes()
 	{
 		return new NewType[]{new NewType()
@@ -169,6 +172,7 @@ public class ModuleNode extends AbstractNode
 				fo.createData(Utilities.getFreeName(fo,"Geometry",".brep"));
 			}
 			
+			@Override
 			public String getName()
 			{
 				return "Geometry";
@@ -176,22 +180,22 @@ public class ModuleNode extends AbstractNode
 		}};
 	}
 
+	@Override
 	protected void createPasteTypes(Transferable t, List<PasteType> ls)
 	{
-		final Node[] ns = NodeTransfer.nodes(t, NodeTransfer.COPY|NodeTransfer.MOVE);
+		Node[] ns = NodeTransfer.nodes(t, NodeTransfer.COPY|NodeTransfer.MOVE);
 		if (ns != null && ns.length==1)
 		{
-			final ShapeNode n=ns[0].getCookie(ShapeNode.class);
-			if(n!=null) ls.add(new PasteType()
+			final NbShape shape = GeomUtils.getShape(ns[0]);
+			if(shape!=null) ls.add(new PasteType()
 			{
 				public Transferable paste()
 				{
 					Project p=getLookup().lookup(Project.class);
 					FileObject fo=p.getProjectDirectory();
-					String s = Utilities.getFreeName(fo, n.getName(), ".brep");					
+					String s = Utilities.getFreeName(fo, shape.getName(), ".brep");					
 					String fileName=new File(FileUtil.toFile(fo), s).getPath();
-					System.out.println("write to "+fileName);
-					BRepTools.write(n.getShape(), fileName);
+					shape.saveImpl(fileName);
 					return null;
 				}
 			});

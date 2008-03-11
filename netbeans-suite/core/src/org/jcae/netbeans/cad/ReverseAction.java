@@ -19,19 +19,13 @@
  */
 
 package org.jcae.netbeans.cad;
-import java.util.Arrays;
-import org.jcae.opencascade.jni.BRep_Builder;
-import org.jcae.opencascade.jni.TopExp_Explorer;
-import org.jcae.opencascade.jni.TopoDS_Iterator;
-import org.jcae.opencascade.jni.TopoDS_Shape;
+
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CookieAction;
 
-public class ReverseAction extends CookieAction implements Node.Cookie
-{
-	private static Class[] COOKIE_CLASSES=new Class[]{ShapeCookie.class};
-	
+public class ReverseAction extends CookieAction
+{	
 	protected int mode()
 	{
 		return CookieAction.MODE_ONE;
@@ -39,44 +33,16 @@ public class ReverseAction extends CookieAction implements Node.Cookie
 
 	protected Class[] cookieClasses()
 	{
-		return COOKIE_CLASSES;
+		return new Class[]{NbShape.class};
 	}
 
-	protected void performAction(Node[] arg0)
+	protected void performAction(Node[] nodes)
 	{
-		for(int i=0; i<arg0.length; i++)
+		for(Node node: nodes)
 		{
-			TopoDS_Shape toRev = GeomUtils.getShape(arg0[i]);
-			TopoDS_Shape parent = GeomUtils.getShape(arg0[i].getParentNode());
-			parent=findParent(parent, toRev);			
-			BRep_Builder bb = new BRep_Builder();
-			bb.remove(parent, toRev);
-			toRev.reverse();
-			bb.add(parent, toRev);
-			GeomUtils.getParentBrep(arg0[i]).getDataObject().setModified(true);
+			GeomUtils.getShape(node).reverse();
+			GeomUtils.getParentBrep(node).getDataObject().setModified(true);
 		}
-	}
-
-	protected TopoDS_Shape findParent(TopoDS_Shape where, TopoDS_Shape child)
-	{
-		System.out.println("where: "+where+" child: "+child);
-		TopoDS_Iterator it=new TopoDS_Iterator(where);
-		while(it.more())
-		{
-			TopoDS_Shape shape = it.value();
-			
-			if(shape.equals(child))
-				return where;
-			
-			if(shape.shapeType()<child.shapeType())
-			{
-				shape = findParent(shape, child);
-				if(shape!=null)
-					return shape;
-			}
-			it.next();
-		}
-		return null;		
 	}
 	
 	public String getName()
@@ -89,11 +55,13 @@ public class ReverseAction extends CookieAction implements Node.Cookie
 		return null;
 	}
 	
+	@Override
 	protected boolean asynchronous()
 	{
 		return false;
 	}
 	
+	@Override
 	protected String iconResource()
 	{
 		return "org/jcae/netbeans/cad/reverse.gif";

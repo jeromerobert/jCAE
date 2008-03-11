@@ -21,23 +21,13 @@
 package org.jcae.netbeans.cad;
 
 import java.io.IOException;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import org.jcae.opencascade.jni.BRep_Builder;
-import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
-import org.jcae.opencascade.jni.TopoDS_Shape;
-import org.openide.DialogDescriptor;
-import org.openide.DialogDisplayer;
 import org.openide.ErrorManager;
-import org.openide.NotifyDescriptor;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CookieAction;
 
 public class RemoveAction extends CookieAction
 {
-	private static Class[] COOKIE_CLASSES=new Class[]{ShapeCookie.class};
 	protected int mode()
 	{
 		return CookieAction.MODE_ANY;
@@ -45,28 +35,18 @@ public class RemoveAction extends CookieAction
 
 	protected Class[] cookieClasses()
 	{
-		return COOKIE_CLASSES;
+		return new Class[]{NbShape.class};
 	}
 
-	protected void performAction(Node[] arg0)
+	protected void performAction(Node[] nodes)
 	{
-		for(int i=0; i<arg0.length; i++)
+		for(Node n: nodes)
 		{
-			Node parent=arg0[i].getParentNode();			
-			TopoDS_Shape shape=GeomUtils.getShape(arg0[i]);
-			TopoDS_Shape parentShape=
-				GeomUtils.getParentShape(GeomUtils.getShape(parent), shape);
-			
-			if(shape!=null && parentShape!=null)
-			{
-				BRep_Builder bb = new BRep_Builder();				
-				bb.remove(parentShape, shape);
-			}
-			
-			GeomUtils.getParentBrep(arg0[i]).getDataObject().setModified(true);
+			GeomUtils.getShape(n).remove();
+			GeomUtils.getParentBrep(n).getDataObject().setModified(true);
 			try
 			{
-				arg0[i].destroy();
+				n.destroy();
 			}
 			catch (IOException ex)
 			{
@@ -85,6 +65,7 @@ public class RemoveAction extends CookieAction
 		return HelpCtx.DEFAULT_HELP;
 	}
 	
+	@Override
 	protected boolean asynchronous()
 	{
 		return false;

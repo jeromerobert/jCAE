@@ -21,8 +21,8 @@ public final class RemoveHoles extends CookieAction
 	
 	private class RHPanel extends JPanel
 	{
-		private JCheckBox checkBox = new JCheckBox("Remove faces");
-		private JTextField minAreaField = new JTextField("1.0");
+		private final JCheckBox checkBox = new JCheckBox("Remove faces");
+		private final JTextField minAreaField = new JTextField("1.0");
 
 		public RHPanel()
 		{
@@ -78,8 +78,8 @@ public final class RemoveHoles extends CookieAction
 	
 	protected void performAction(Node[] activatedNodes)
 	{
-		ShapeCookie c = activatedNodes[0].getCookie(ShapeCookie.class);
-		ShapeUpgrade_RemoveInternalWires riw=new ShapeUpgrade_RemoveInternalWires(c.getShape());
+		NbShape s = GeomUtils.getShape(activatedNodes[0]);
+		ShapeUpgrade_RemoveInternalWires riw=new ShapeUpgrade_RemoveInternalWires(s.getImpl());
 		RHPanel panel=new RHPanel();
 		if(panel.showDialog())
 		{
@@ -106,7 +106,7 @@ public final class RemoveHoles extends CookieAction
 	protected Class[] cookieClasses()
 	{
 		return new Class[] {
-			ShapeCookie.class
+			NbShape.class
 		};
 	}
 	

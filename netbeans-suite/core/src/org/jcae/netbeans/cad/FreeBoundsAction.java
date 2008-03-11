@@ -42,25 +42,25 @@ public class FreeBoundsAction extends CookieAction
 
 	protected Class[] cookieClasses()
 	{
-		return new Class[]{ShapeCookie.class};
+		return new Class[]{NbShape.class};
 	}
 
 	protected void performAction(Node[] arg0)
 	{
 		BRep_Builder bb = new BRep_Builder();
 		TopoDS_Compound tc=new TopoDS_Compound();
-		bb.makeCompound(tc);		
-		for(int i=0; i<arg0.length; i++)
+		bb.makeCompound(tc);
+		for (Node anArg0 : arg0)
 		{
-			TopoDS_Shape shape = GeomUtils.getShape(arg0[i]);
-			ShapeAnalysis_FreeBounds safb=new ShapeAnalysis_FreeBounds(shape);
-			TopoDS_Compound closedWires=safb.getClosedWires();
-			TopoDS_Compound openWires=safb.getOpenWires();
-			
-			if(closedWires!=null)
+			TopoDS_Shape shape = GeomUtils.getShape(anArg0).getImpl();
+			ShapeAnalysis_FreeBounds safb = new ShapeAnalysis_FreeBounds(shape);
+			TopoDS_Compound closedWires = safb.getClosedWires();
+			TopoDS_Compound openWires = safb.getOpenWires();
+
+			if (closedWires != null)
 				bb.add(tc, closedWires);
-			
-			if(openWires!=null)
+
+			if (openWires != null)
 				bb.add(tc, openWires);
 		}
 		View3D v=View3DManager.getDefault().getView3D();

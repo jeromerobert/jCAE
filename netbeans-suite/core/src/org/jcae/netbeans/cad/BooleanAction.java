@@ -23,6 +23,7 @@ package org.jcae.netbeans.cad;
 import javax.swing.Action;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import org.jcae.opencascade.Shape;
 import org.jcae.opencascade.jni.BRepAlgoAPI_BooleanOperation;
 import org.jcae.opencascade.jni.BRepAlgoAPI_Common;
 import org.jcae.opencascade.jni.BRepAlgoAPI_Cut;
@@ -153,7 +154,7 @@ public abstract class BooleanAction extends CookieAction
 
 	protected Class[] cookieClasses()
 	{
-		return new Class[]{ShapeCookie.class};
+		return new Class[]{Shape.class};
 	}
 	
 	protected boolean enable(Node[] arg0)
@@ -177,8 +178,8 @@ public abstract class BooleanAction extends CookieAction
 	{
 		if(arg0.length==2)
 		{
-			TopoDS_Shape shape1 = GeomUtils.getShape(arg0[0]);
-			TopoDS_Shape shape2 = GeomUtils.getShape(arg0[1]);
+			TopoDS_Shape shape1 = GeomUtils.getShape(arg0[0]).getImpl();
+			TopoDS_Shape shape2 = GeomUtils.getShape(arg0[1]).getImpl();
 			BRepAlgoAPI_BooleanOperation bt=getTransformation(shape1, shape2);			
 			GeomUtils.insertShape(bt.shape(), getName(),
 				arg0[0].getParentNode());
