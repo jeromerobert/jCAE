@@ -42,7 +42,7 @@ public class ActionRemove  extends CallableSystemAction
 		View3D v3d=View3DManager.getDefault().getSelectedView3D();
 		if(v3d!=null)
 		{
-			v3d.getView().remove(v3d.getView().getCurrentViewable());
+			v3d.remove(v3d.getView().getCurrentViewable());
 			SystemAction.get(SelectViewableAction.class).refresh();
 		}		
 	}

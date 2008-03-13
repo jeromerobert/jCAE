@@ -19,11 +19,15 @@
  */
 package org.jcae.netbeans;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import org.jcae.opencascade.jni.BRep_Builder;
 import javax.swing.filechooser.FileSystemView;
+import org.openide.explorer.ExplorerManager;
 import org.openide.modules.InstalledFileLocator;
 import org.openide.modules.ModuleInstall;
+import org.openide.windows.WindowManager;
 
 /**
  * Manages a module's lifecycle. Remember that an installer is optional and
@@ -51,6 +55,18 @@ public class Installer extends ModuleInstall
 		File defaultDir = FileSystemView.getFileSystemView().getDefaultDirectory();
 		if (defaultDir != null && defaultDir.exists() && defaultDir.isDirectory()) {
 			System.setProperty("netbeans.projects.dir", defaultDir.getPath());
-		}					
+		}
+		
+		WindowManager.getDefault().addPropertyChangeListener(new PropertyChangeListener()
+		{
+			public void propertyChange(PropertyChangeEvent evt)
+			{
+				for(ExplorerManager em:Utilities.getExplorerManagers())
+				{
+					em.removePropertyChangeListener(NodeSelectionManager.getDefault());
+					em.addPropertyChangeListener(NodeSelectionManager.getDefault());
+				}				
+			}
+		});
 	}
 }

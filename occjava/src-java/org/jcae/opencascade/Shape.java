@@ -265,19 +265,27 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		}
 	}
 	
-	private int getID(Shape rootShape)
+	/**
+	 * Return the ID of this shape, concidering it's in a given root shape
+	 * @return the ID of this shape or -1 if this shape is not a child of
+	 * rootShape
+	 */
+	public int getID(Shape rootShape)
 	{
 		int[] ids = new int[]{0};
 		if (getID(rootShape, new HashSet<Shape>(), ids, impl.getClass()))
 			return ids[0];
 		else
-			throw new NoSuchElementException("Cannot find " + impl + " in " +
-				rootShape.impl);
+			return -1;
 	}
-
+	
 	public int getID()
 	{
-		return getID(getRootShape());
+		Shape r = getRootShape();
+		int id = getID(r);
+		if(id<0)
+			throw new NoSuchElementException("Cannot find " + impl + " in " + r);
+		return id;
 	}	
 	
 	private boolean getID(Shape rootShape, Set<Shape> shapeSet, int[] number,

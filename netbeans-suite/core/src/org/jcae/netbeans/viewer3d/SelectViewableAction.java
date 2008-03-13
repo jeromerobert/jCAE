@@ -22,15 +22,8 @@ package org.jcae.netbeans.viewer3d;
 
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import javax.swing.AbstractAction;
-import javax.swing.AbstractButton;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
-import javax.swing.SwingUtilities;
-import org.jcae.viewer3d.View;
 import org.jcae.viewer3d.Viewable;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CallableSystemAction;
@@ -114,7 +107,7 @@ public class SelectViewableAction extends CallableSystemAction
 	// comboBoxModel in refresh().
 	private static MyComboBoxModel comboBoxModel=new MyComboBoxModel();
 	
-	private JComboBox box=new JComboBox(comboBoxModel);
+	private final JComboBox box=new JComboBox(comboBoxModel);
 	
 	/* (non-Javadoc)
 	 * @see org.openide.util.HelpCtx.Provider#getHelpCtx()

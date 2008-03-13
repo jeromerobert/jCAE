@@ -20,42 +20,72 @@
 
 package org.jcae.netbeans.cad;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.swing.SwingUtilities;
+import org.jcae.netbeans.Utilities;
 import org.jcae.netbeans.viewer3d.View3D;
 import org.jcae.netbeans.viewer3d.View3DManager;
-import org.jcae.opencascade.jni.*;
+import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
 import org.jcae.viewer3d.cad.CADSelection;
 import org.jcae.viewer3d.SelectionListener;
 import org.jcae.viewer3d.cad.ViewableCAD;
-import org.jcae.viewer3d.cad.occ.OCCProvider;
 import org.openide.ErrorManager;
 import org.openide.cookies.ViewCookie;
 import org.openide.explorer.ExplorerManager;
 import org.openide.nodes.Node;
-import org.openide.windows.Mode;
-import org.openide.windows.TopComponent;
-import org.openide.windows.WindowManager;
 
 public class ViewShapeCookie implements ViewCookie
 {	
-	private class MySelectionListener implements SelectionListener
+	public static class Viewable extends ViewableCAD
+		implements PropertyChangeListener, SelectionListener
 	{
-		private final ViewableCAD viewable;
 		private final NbShape shape;
-		
-		public MySelectionListener(ViewableCAD viewable, NbShape shape)
+		private boolean selectionLock;
+		protected Viewable(NbShape shape)
 		{
-			this.viewable=viewable;
-			this.shape = shape.getRootShape();
+			super(shape.getOCCProvider());
+			this.shape = shape;
+			addSelectionListener(this);
 		}
 		
+		public NbShape getShape()
+		{
+			return shape;
+		}
+
+		public void propertyChange(PropertyChangeEvent evt)
+		{
+			if(evt.getPropertyName().equals(ExplorerManager.PROP_SELECTED_NODES)
+				&& evt.getNewValue() instanceof Node[] && !selectionLock)
+			{
+				selectionLock = true;
+				unselectAll();
+				Node[] nodes = (Node[]) evt.getNewValue();
+				for(Node n:nodes)
+				{
+					NbShape s = GeomUtils.getShape(n);
+					if(s != null && s.getType()==TopAbs_ShapeEnum.FACE)
+					{
+						int id = s.getID(shape);
+						if(id>0)
+							highlightFace(id-1, true);
+					}
+				}
+				selectionLock = false;
+			}
+		}
+
 		public void selectionChanged()
 		{
+			if(selectionLock)
+				return;
+			selectionLock = true;
 			final ArrayList<Node> nodes=new ArrayList<Node>();
-			for(CADSelection cs:viewable.getSelection())
+			for(CADSelection cs:getSelection())
 			{
 				for(int i:cs.getFaceIDs())
 				{
@@ -70,7 +100,7 @@ public class ViewShapeCookie implements ViewCookie
 			{
 				public void run()
 				{
-					for(ExplorerManager exm:getExplorerManagers())
+					for(ExplorerManager exm:Utilities.getExplorerManagers())
 					{
 						ArrayList<Node> nnodes=new ArrayList<Node>();
 						for(Node n:nodes)
@@ -89,8 +119,10 @@ public class ViewShapeCookie implements ViewCookie
 					}
 				}
 			});
-		}
+			selectionLock = false;
+		}		
 	}
+
 	
 	private final Node node;
 	public ViewShapeCookie(Node node)
@@ -102,24 +134,10 @@ public class ViewShapeCookie implements ViewCookie
 	{
 		NbShape nbShape = GeomUtils.getShape(node);
 		View3D v=View3DManager.getDefault().getView3D();
-		ViewableCAD viewable = new ViewableCAD(new OCCProvider(nbShape.getImpl()));
-		viewable.addSelectionListener(new MySelectionListener(viewable, nbShape));
+		ViewableCAD viewable = new Viewable(nbShape);	
 		viewable.setName(node.getName());
 		v.add(viewable);
 		v.getView().fitAll();
-	}
-	
-	private static ExplorerManager[] getExplorerManagers()
-	{
-		ArrayList<ExplorerManager> al=new ArrayList<ExplorerManager>();
-		
-		for(Mode m:WindowManager.getDefault().getModes())
-		{
-			for(TopComponent t:m.getTopComponents())
-				if(t instanceof ExplorerManager.Provider)
-					al.add(((ExplorerManager.Provider)t).getExplorerManager());
-		}
-		return al.toArray(new ExplorerManager[al.size()]);
 	}
 
 	/** Return all ModuleNode

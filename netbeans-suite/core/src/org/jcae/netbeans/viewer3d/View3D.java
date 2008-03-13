@@ -21,6 +21,8 @@
 package org.jcae.netbeans.viewer3d;
 
 import java.awt.BorderLayout;
+import java.beans.PropertyChangeListener;
+import org.jcae.netbeans.NodeSelectionManager;
 import org.jcae.viewer3d.View;
 import org.jcae.viewer3d.Viewable;
 import org.openide.util.actions.SystemAction;
@@ -34,7 +36,6 @@ import org.openide.windows.WindowManager;
 public class View3D extends TopComponent
 {	
 	protected View canvas;
-	private boolean activated;	
 	public View3D()
 	{
 		View3DManager.getDefault().counter++;		
@@ -44,34 +45,26 @@ public class View3D extends TopComponent
 		canvas.setOriginAxisVisible(true);
 	}
 	
+	@Override
 	public int getPersistenceType()
 	{
 		return TopComponent.PERSISTENCE_NEVER;
 	}
-    
-	/*public void setVisible(boolean b)
-    {
-        if(b)
-        {
-        	if(canvas.getParent()!=this)
-        		this.add(canvas, BorderLayout.CENTER);
-        }
-        else
-        {
-        	if(canvas.getParent()==this)
-        		this.remove(canvas);
-        }
-        super.setVisible(b);
-    }*/
 	
 	public View getView()
 	{
 		return canvas;
 	}
+
+	public void remove(Viewable viewable)
+	{
+		canvas.remove(viewable);
+		if(viewable instanceof PropertyChangeListener)
+			NodeSelectionManager.getDefault().removePropertyChangeListener(
+				(PropertyChangeListener)viewable);
+	}
         
-	/**
-	 *
-	 */
+	@Override
 	protected void componentClosed()
 	{
 		canvas.setVisible(false);
@@ -81,35 +74,33 @@ public class View3D extends TopComponent
 	    super.componentClosed();
 	}
 	
-	/**
-	 *
+	/* (non-Javadoc)
+	 * @see org.openide.windows.TopComponent#componentActivated()
 	 */
+	@Override
+	protected void componentActivated()
+	{		
+		View3DManager.getDefault().activeView=this;
+	}
+	
+	@Override
 	public String toString()
 	{
 	    return this.getName();
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.openide.windows.TopComponent#componentActivated()
-	 */
-	protected void componentActivated()
-	{	
-		activated=true;
-		View3DManager.getDefault().activeView=this;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.openide.windows.TopComponent#componentDeactivated()
-	 */
-	protected void componentDeactivated()
-	{	
-		activated=false;
-	}	
 
+	/**
+	 * Add a viewable to this view and make it current. If viewable implements
+	 * PropertyChangeListener it will be notified when the global node selection
+	 * changes.
+	 */
 	public void add(Viewable viewable)
 	{
 		getView().add(viewable);
 		getView().setCurrentViewable(viewable);
+		if(viewable instanceof PropertyChangeListener)
+			NodeSelectionManager.getDefault().addPropertyChangeListener(
+				(PropertyChangeListener)viewable);		
 		SystemAction.get(SelectViewableAction.class).refresh();
 	}
 }

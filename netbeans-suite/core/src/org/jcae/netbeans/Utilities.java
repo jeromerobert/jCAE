@@ -24,18 +24,22 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.io.File;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import org.netbeans.api.project.Project;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
+import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.propertysheet.PropertySheet;
 import org.openide.filesystems.FileObject;
 import org.openide.nodes.BeanNode;
 import org.openide.nodes.Node;
 import org.openide.nodes.Sheet;
+import org.openide.windows.Mode;
+import org.openide.windows.TopComponent;
+import org.openide.windows.WindowManager;
 
 public class Utilities
 {
@@ -108,10 +112,10 @@ public class Utilities
 	
 	static public String pretty (String s)
 	{
-		StringBuffer res;
+		StringBuilder res;
 		if (s.indexOf (' ') == -1 && s.length () > 0)
 		{
-			res = new StringBuffer ();
+			res = new StringBuilder ();
 			res.insert (0, Character.toUpperCase (s.charAt (0)));
 			for (int k = 1; k < s.length (); k++)
 			{
@@ -131,4 +135,17 @@ public class Utilities
 		int i=fileName.lastIndexOf('.');
 		return fileName.substring(0, i);
 	}
+	
+	public static ExplorerManager[] getExplorerManagers()
+	{
+		ArrayList<ExplorerManager> al=new ArrayList<ExplorerManager>();
+		
+		for(Mode m:WindowManager.getDefault().getModes())
+		{
+			for(TopComponent t:m.getTopComponents())
+				if(t instanceof ExplorerManager.Provider)
+					al.add(((ExplorerManager.Provider)t).getExplorerManager());
+		}
+		return al.toArray(new ExplorerManager[al.size()]);
+	}	
 }
