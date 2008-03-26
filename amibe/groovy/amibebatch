@@ -7,7 +7,7 @@ memory=500m
 jcaehome=
 javahome=
 groovyhome=
-log4jproperties=
+logproperties=
 scriptdir=$dir
 cmd=
 
@@ -15,12 +15,12 @@ usage()
 {
 	echo "usage: amibebatch [GLOBAL_OPTIONS] COMMAND [OPTIONS]" >&2
 	echo "Global options:" >&2
-	echo "  -h,--help                   Print this help message" >&2
-	echo "  -j,--javahome=PATH          Path to JVM" >&2
-	echo "  -g,--groovyhome=PATH        Path to groovy jars" >&2
-	echo "  -c,--jcaehome=PATH          Path to jCAE" >&2
-	echo "  -l,--log4j-properties=FILE  Path to log4j.properties file" >&2
-	echo "  -m,--memory=MEM             Set maximum Java memory via -Xmx flag" >&2
+	echo "  -h,--help                    Print this help message" >&2
+	echo "  -j,--javahome=PATH           Path to JVM" >&2
+	echo "  -g,--groovyhome=PATH         Path to groovy jars" >&2
+	echo "  -c,--jcaehome=PATH           Path to jCAE" >&2
+	echo "  -l,--logging-properties=FILE Path to logging.properties file" >&2
+	echo "  -m,--memory=MEM              Set maximum Java memory via -Xmx flag" >&2
 	echo "Available list of commands:" >&2
 	for f in $scriptdir/*.groovy
 	do
@@ -82,11 +82,11 @@ do
 	jcaehome=$optarg
 	shift ;;
 
-  -l | -log4jproperties )
-	prev=log4jproperties
+  -l | -logging-properties )
+	prev=logging-properties
 	shift ;;
-  -log4jproperties=* | --log4jproperties=* )
-	log4jproperties=$optarg
+  -logging-properties=* | --logging-properties=* )
+	logproperties=$optarg
 	shift ;;
 
   -* )
@@ -108,22 +108,22 @@ done
 
 test -n "$jcaehome" || jcaehome=${JCAE_HOME:-$parentdir}
 test -n "$javahome" || javahome=${JAVA_HOME:-$jcaehome/jre-6}
-test -n "$groovyhome" || groovyhome=${GROOVY_HOME:-$jcaehome/groovy-1.1-beta-2}
+test -n "$groovyhome" || groovyhome=${GROOVY_HOME:-$jcaehome/groovy-1.5.1}
 test -n "$cmd" || usage $rc
-if test -n "$log4jproperties"
+if test -n "$logproperties"
 then
-	case $log4jproperties in
+	case $logproperties in
 	  /* ) ;;
-	  * )  log4jproperties="$(pwd)/$log4jproperties" ;;
+	  * )  logproperties="$(pwd)/$logproperties" ;;
 	esac
 else
-	log4jproperties=$jcaehome/jcae/etc/log4j.properties
+	logproperties=$jcaehome/jcae/etc/logging.properties
 fi
 
 # Run command
 
 export MMGT_OPT=0
-JAVA_OPTS="-Xmx$memory -Dlog4j.configuration=file://$log4jproperties"
+JAVA_OPTS="-Xmx$memory -Djava.util.logging.config.file=$logproperties"
 
 export LD_LIBRARY_PATH=\
 $jcaehome/OpenCASCADE6.2.0/ros/Linux/lib:\
