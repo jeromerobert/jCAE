@@ -291,7 +291,8 @@ public class MeshReader
 			
 			int numberOfNodes = Integer.parseInt(
 				xpath.evaluate("number/text()", submeshNodes));
-			Vertex [] nodelist = new Vertex[numberOfNodes];
+			Vertex [] nodelist = new Vertex[numberOfNodes+1];
+			nodelist[numberOfNodes] = mesh.outerVertex;
 			int label;
 			double [] coord = new double[3];
 			logger.fine("Reading "+numberOfNodes+" nodes");
@@ -346,13 +347,26 @@ public class MeshReader
 				xpath.evaluate("number/text()", submeshTriangles));
 			logger.fine("Reading "+numberOfTriangles+" elements");
 			Triangle [] facelist = new Triangle[numberOfTriangles];
+			int [] ind = new int[3];
+			Vertex [] pts = new Vertex[3];
 			for (int i=0; i < numberOfTriangles; i++)
 			{
-				Vertex pt1 = nodelist[trianglesBuffer.get()];
-				Vertex pt2 = nodelist[trianglesBuffer.get()];
-				Vertex pt3 = nodelist[trianglesBuffer.get()];
-				facelist[i] = mesh.createTriangle(pt1, pt2, pt3);
-				mesh.add(facelist[i]);
+				boolean outer = false;
+				for (int j = 0; j < 3; j++)
+				{
+					ind[j] = trianglesBuffer.get();
+					if (ind[j] < 0)
+					{
+						ind[j] = - ind[j];
+						outer = true;
+					}
+					pts[j] = nodelist[ind[j]];
+				}
+				if (!outer)
+				{
+					facelist[i] = mesh.createTriangle(pts[0], pts[1], pts[2]);
+					mesh.add(facelist[i]);
+				}
 			}
 			fcT.close();
 			MeshExporter.clean(bbT);

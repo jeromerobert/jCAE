@@ -1,3 +1,9 @@
+Wed Mar 26 13:26:57 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/MeshReader.java (readObject3D): Discard
+	outer triangles when reading, they will be created by
+	Mesh.buildAdjacency() if needed.
+
 Sun Feb 24 18:40:59 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/JCAEFormatter.java: Replace log4j by
