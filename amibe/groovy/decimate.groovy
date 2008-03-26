@@ -35,6 +35,11 @@ options.addOption(
 		.withLongOpt("targetTriangles")
 		.create('n'));
 options.addOption(
+	OptionBuilder.withArgName("VALUE").hasArg()
+		.withDescription("no edges longer than this value are created")
+		.withLongOpt("maxlength")
+		.create('m'));
+options.addOption(
 	OptionBuilder.hasArg(false)
 		.withDescription("removes only free edges (for LengthDecimateHalfEdge only)")
 		.withLongOpt("freeEdgeOnly")
@@ -79,6 +84,8 @@ else if (cmd.hasOption('n'))
 	algoOptions.put("maxtriangles", cmd.getOptionValue('n'));
 if (cmd.hasOption('O'))
 	algoOptions.put("freeEdgeOnly", "true");
+if (cmd.hasOption('m'))
+	algoOptions.put("maxlength", cmd.getOptionValue('m'));
 String algo=cmd.getOptionValue('a', "LengthDecimateHalfEdge");
 Constructor cons = Class.forName("org.jcae.mesh.amibe.algos3d."+algo).getConstructor(Mesh.class, Map.class);
 
