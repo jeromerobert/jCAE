@@ -5,6 +5,8 @@ Wed Mar 26 13:26:57 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 	Mesh.buildAdjacency() if needed.
 	* src/org/jcae/mesh/amibe/ds/Vertex.java (getLocalQuadric): Return
 	null on boundary nodes, we do not know yet what to do in this case.
+	* src/org/jcae/mesh/amibe/algos3d/ImproveConnectivity.java: Fix
+	NullPointerException with open surfaces.
 
 Sun Feb 24 18:40:59 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 

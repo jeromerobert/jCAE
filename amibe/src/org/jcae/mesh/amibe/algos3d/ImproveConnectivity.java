@@ -243,7 +243,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 		do
 		{
 			HalfEdge h = uniqueOrientation(current);
-			if (!tree.contains(h))
+			if (!h.hasAttributes(AbstractHalfEdge.OUTER | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD) && !tree.contains(h))
 			{
 				double val = cost(h);
 				if (val <= tolerance)
@@ -253,7 +253,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 				}
 			}
 			h = uniqueOrientation(current.next());
-			if (!tree.contains(h))
+			if (!h.hasAttributes(AbstractHalfEdge.OUTER | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD) && !tree.contains(h))
 			{
 				double val = cost(h);
 				if (val <= tolerance)
