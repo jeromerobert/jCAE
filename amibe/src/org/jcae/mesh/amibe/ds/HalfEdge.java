@@ -411,21 +411,26 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 */
 	public final double checkSwap3D(double minCos)
 	{
+		return checkSwap3D(minCos, 0.0);
+	}
+	public final double checkSwap3D(double minCos, double maxLength)
+	{
 		double invalid = -1.0;
 		// Check if there is an adjacent edge
 		if (hasAttributes(OUTER | BOUNDARY | NONMANIFOLD))
 			return invalid;
 		// Check for coplanarity
-		HalfEdge f = sym;
 		Vertex o = origin();
 		Vertex d = destination();
 		Vertex a = apex();
+		Vertex n = sym.apex();
+		if (maxLength > 0.0 && a.distance3D(n) > maxLength)
+			return invalid;
 		double s1 = Matrix3D.computeNormal3D(o.getUV(), d.getUV(), a.getUV(), temp[0], temp[1], temp[2]);
-		double s2 = Matrix3D.computeNormal3D(f.tri.vertex[0].getUV(), f.tri.vertex[1].getUV(), f.tri.vertex[2].getUV(), temp[0], temp[1], temp[3]);
+		double s2 = Matrix3D.computeNormal3D(d.getUV(), o.getUV(), n.getUV(), temp[0], temp[1], temp[3]);
 		if (Matrix3D.prodSca(temp[2], temp[3]) < minCos)
 			return invalid;
 		// Check for quality improvement
-		Vertex n = f.apex();
 		// Check for inverted triangles
 		o.outer3D(n, a, temp[1], temp[3], temp[0]);
 		double s3 = 0.5 * Matrix3D.prodSca(temp[2], temp[0]);

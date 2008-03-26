@@ -654,6 +654,10 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 */
 	public final double checkSwap3D(double minCos)
 	{
+		return checkSwap3D(minCos, 0.0);
+	}
+	public final double checkSwap3D(double minCos, double maxLength)
+	{
 		double invalid = -1.0;
 		// Check if there is an adjacent edge
 		if (hasAttributes(OUTER | BOUNDARY | NONMANIFOLD))
@@ -671,6 +675,8 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		Vertex d = destination();
 		Vertex a = apex();
 		Vertex n = work[0].apex();
+		if (maxLength > 0.0 && a.distance3D(n) > maxLength)
+			return invalid;
 		// Check for inverted triangles
 		o.outer3D(n, a, tempD1, tempD2, n2);
 		double s3 = 0.5 * Matrix3D.prodSca(n1, n2);

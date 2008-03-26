@@ -10,6 +10,9 @@ Wed Mar 26 13:26:57 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/amibe/algos3d/LengthDecimateHalfEdge.java
 	  src/org/jcae/mesh/amibe/algos3d/QEMDecimateHalfEdge.java: New
 	maxlength argument to not create long edges.
+	* src/org/jcae/mesh/amibe/ds/HalfEdge.java
+	  src/org/jcae/mesh/amibe/ds/VirtualHalfEdge.java (checkSwap3D): Add
+	an argument to not create edges longer than this value.
 
 Sun Feb 24 18:40:59 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 
