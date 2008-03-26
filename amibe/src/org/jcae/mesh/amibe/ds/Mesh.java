@@ -575,9 +575,8 @@ public class Mesh implements Serializable
 			tVertList.put(v, new ArrayList<Triangle>(10));
 		for (Triangle t: triangleList)
 		{
-			for (int i = 0; i < 3; i++)
+			for (Vertex v: t.vertex)
 			{
-				Vertex v = t.vertex[i];
 				if (v.isReadable())
 				{
 					ArrayList<Triangle> list = tVertList.get(v);
