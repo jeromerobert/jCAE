@@ -7,6 +7,9 @@ Wed Mar 26 13:26:57 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 	null on boundary nodes, we do not know yet what to do in this case.
 	* src/org/jcae/mesh/amibe/algos3d/ImproveConnectivity.java: Fix
 	NullPointerException with open surfaces.
+	* src/org/jcae/mesh/amibe/algos3d/LengthDecimateHalfEdge.java
+	  src/org/jcae/mesh/amibe/algos3d/QEMDecimateHalfEdge.java: New
+	maxlength argument to not create long edges.
 
 Sun Feb 24 18:40:59 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 

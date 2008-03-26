@@ -109,6 +109,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 {
 	private static Logger logger=Logger.getLogger(QEMDecimateHalfEdge.class.getName());
 	private Quadric3DError.Placement placement = Quadric3DError.Placement.OPTIMAL;
+	private double maxEdgeLength = -1.0;
 	private HashMap<Vertex, Quadric3DError> quadricMap = null;
 	private Vertex v3;
 	private Quadric3DError q3 = new Quadric3DError();
@@ -150,6 +151,11 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 			{
 				nrFinal = Integer.valueOf(val).intValue();
 				logger.fine("Nr max triangles: "+nrFinal);
+			}
+			else if (key.equals("maxlength"))
+			{
+				maxEdgeLength = new Double(val).doubleValue();
+				logger.fine("Max edge length: "+maxEdgeLength);
 			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
@@ -333,7 +339,22 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 		assert q2 != null : v2;
 		q3.computeQuadric3DError(q1, q2);
 		q3.optimalPlacement(v1, v2, q1, q2, placement, v3);
-		return (mesh.canCollapseEdge(current, v3));
+		if (!mesh.canCollapseEdge(current, v3))
+			return false;
+		if (maxEdgeLength > 0.0)
+		{
+			for (Vertex n: v1.getNeighboursNodes())
+			{
+				if (n != mesh.outerVertex && v3.distance3D(n) > maxEdgeLength)
+					return false;
+			}
+			for (Vertex n: v2.getNeighboursNodes())
+			{
+				if (n != mesh.outerVertex && v3.distance3D(n) > maxEdgeLength)
+					return false;
+			}
+		}
+		return true;
 	}
 
 	@Override

@@ -40,6 +40,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 {
 	private static Logger logger=Logger.getLogger(LengthDecimateHalfEdge.class.getName());
 	private Vertex v3;
+	private double maxEdgeLength = -1.0;
 	private boolean freeEdgeOnly = false;
 
 	/**
@@ -68,6 +69,11 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			{
 				nrFinal = Integer.valueOf(val).intValue();
 				logger.fine("Nr max triangles: "+nrFinal);
+			}
+			else if (key.equals("maxlength"))
+			{
+				maxEdgeLength = new Double(val).doubleValue();
+				logger.fine("Max edge length: "+maxEdgeLength);
 			}
 			else if (key.equals("freeEdgeOnly"))
 			{
@@ -113,7 +119,22 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 		if (!v1.isWritable() || !v2.isWritable())
 			return false;
 		v3 = optimalPlacement(v1, v2);
-		return (mesh.canCollapseEdge(current, v3));
+		if (!mesh.canCollapseEdge(current, v3))
+			return false;
+		if (maxEdgeLength > 0.0)
+		{
+			for (Vertex n: v1.getNeighboursNodes())
+			{
+				if (n != mesh.outerVertex && v3.distance3D(n) > maxEdgeLength)
+					return false;
+			}
+			for (Vertex n: v2.getNeighboursNodes())
+			{
+				if (n != mesh.outerVertex && v3.distance3D(n) > maxEdgeLength)
+					return false;
+			}
+		}
+		return true;
 	}
 
 	private Vertex optimalPlacement(Vertex v1, Vertex v2)
