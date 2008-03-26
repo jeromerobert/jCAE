@@ -85,7 +85,7 @@ try
 catch (IOException ex)
 {
 	println("File "+xmlDir+File.separator+"jcae3d does not exist!");
-	usage();
+	usage(1, options);
 }
 //HashMap<String, String> decOptions = new HashMap<String, String>();
 //decOptions.put("size", "1");
