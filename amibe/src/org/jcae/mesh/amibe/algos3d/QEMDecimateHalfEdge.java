@@ -109,7 +109,6 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 {
 	private static Logger logger=Logger.getLogger(QEMDecimateHalfEdge.class.getName());
 	private Quadric3DError.Placement placement = Quadric3DError.Placement.OPTIMAL;
-	private double maxEdgeLength = -1.0;
 	private HashMap<Vertex, Quadric3DError> quadricMap = null;
 	private Vertex v3;
 	private Quadric3DError q3 = new Quadric3DError();

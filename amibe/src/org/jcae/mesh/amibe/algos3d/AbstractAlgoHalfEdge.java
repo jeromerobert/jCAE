@@ -46,6 +46,7 @@ public abstract class AbstractAlgoHalfEdge
 	protected int nrFinal = 0;
 	protected int nrTriangles = 0;
 	protected double tolerance = 0.0;
+	protected double maxEdgeLength = -1.0;
 	protected int processed = 0;
 	protected int swapped = 0;
 	protected int notProcessed = 0;
@@ -233,7 +234,7 @@ public abstract class AbstractAlgoHalfEdge
 			Vertex o = current.origin();
 			while(true)
 			{
-				if (!current.hasAttributes(AbstractHalfEdge.OUTER | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD) && current.checkSwap3D(0.95) >= 0.0)
+				if (!current.hasAttributes(AbstractHalfEdge.OUTER | AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD) && current.checkSwap3D(0.95, maxEdgeLength) >= 0.0)
 				{
 					// Swap edge
 					for (int i = 0; i < 3; i++)

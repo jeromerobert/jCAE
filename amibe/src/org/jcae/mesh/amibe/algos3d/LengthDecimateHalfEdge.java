@@ -40,7 +40,6 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 {
 	private static Logger logger=Logger.getLogger(LengthDecimateHalfEdge.class.getName());
 	private Vertex v3;
-	private double maxEdgeLength = -1.0;
 	private boolean freeEdgeOnly = false;
 
 	/**
