@@ -3,6 +3,8 @@ Wed Mar 26 13:26:57 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 	* src/org/jcae/mesh/xmldata/MeshReader.java (readObject3D): Discard
 	outer triangles when reading, they will be created by
 	Mesh.buildAdjacency() if needed.
+	* src/org/jcae/mesh/amibe/ds/Vertex.java (getLocalQuadric): Return
+	null on boundary nodes, we do not know yet what to do in this case.
 
 Sun Feb 24 18:40:59 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 

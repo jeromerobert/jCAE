@@ -810,7 +810,9 @@ public class Vertex implements Serializable
 			do
 			{
 				ot = ot.nextOriginLoop();
-				assert !ot.hasAttributes(AbstractHalfEdge.OUTER);
+				// TODO: Handle boundary nodes
+				if (ot.hasAttributes(AbstractHalfEdge.OUTER))
+					return null;
 				if (pass == 0)
 				{
 					// Destination point
