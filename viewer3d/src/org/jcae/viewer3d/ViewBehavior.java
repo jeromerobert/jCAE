@@ -205,7 +205,7 @@ public  class ViewBehavior extends OrbitBehavior
 	
 	/** Defines what to do for the BOX_MODE*/
 	private void rectangleClipMode(MouseEvent evt){		
-		if (evt.getButton() == MouseEvent.BUTTON1
+		if (anchor == null && evt.getButton() == MouseEvent.BUTTON1
 				&& evt.getID() == MouseEvent.MOUSE_PRESSED)
 		{
 			startRectangleDrawing(evt, Color.MAGENTA);
