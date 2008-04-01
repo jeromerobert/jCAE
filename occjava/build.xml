@@ -10,7 +10,7 @@
 
     <target name="compile" depends="init" description="Compile">
         <mkdir dir="${classes.dir}"/>
-        <javac source="1.4" target="1.4" debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}">
+        <javac source="1.5" target="1.5" debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}">
 			<include name="org/jcae/opencascade/**"/>
 		</javac>
     </target>
