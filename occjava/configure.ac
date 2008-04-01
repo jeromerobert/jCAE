@@ -81,7 +81,7 @@ then
 fi
 
 AC_MSG_CHECKING([if we can link with Opencascade])
-AC_LINK_IFELSE(AC_LANG_PROGRAM([#include <gp.hxx>],[gp::Resolution]),AC_MSG_RESULT(yes),AC_MSG_FAILURE("Cannot link with Opencascade"))
+AC_LINK_IFELSE(AC_LANG_PROGRAM([#include <gp.hxx>],[gp::Resolution]),AC_MSG_RESULT(yes),AC_MSG_FAILURE("Cannot link with Opencascade. Use --with-occ flag or set CASROOT environment variable."))
 
 # back to gcc
 AC_LANG_POP
