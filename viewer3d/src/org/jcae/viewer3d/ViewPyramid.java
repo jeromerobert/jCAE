@@ -26,7 +26,6 @@ import javax.media.j3d.Appearance;
 import javax.media.j3d.BoundingBox;
 import javax.media.j3d.BoundingPolytope;
 import javax.media.j3d.BoundingSphere;
-import javax.media.j3d.Bounds;
 import javax.media.j3d.Canvas3D;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.IndexedQuadArray;
@@ -189,21 +188,26 @@ public class ViewPyramid extends BoundingPolytope
 		eye = pyramid[5];
 		startPoint = pyramid[4];
 
-		double frontClip = canvas.getView().getFrontClipDistance();	
+		double frontClip;
 		double farClip;
 		if(bounds == null)
+		{
 			farClip = canvas.getView().getBackClipDistance();
+			frontClip = canvas.getView().getFrontClipDistance();
+		}
 		else
-		{	
-			double osDistance = objectScreenDistance();
-			double frontBound = osDistance - bounds.getRadius();
+		{			
+			double osDistance = objectScreenDistance();		
+			frontClip = osDistance - bounds.getRadius();
 			farClip = osDistance + bounds.getRadius();
-			if(frontClip<frontBound)
-				frontClip=frontBound;
 		}
 		
 		double frontFactor = computeClipFactor(eye, startPoint, frontClip);
 		double backFactor = computeClipFactor(eye, startPoint, farClip);
+		if(frontFactor<0)
+			frontFactor = 0;
+		if(backFactor<0)
+			backFactor = 0;
 		Point3d[] toReturn = new Point3d[8];
 		for(int i=0; i<4; i++)
 		{
@@ -276,7 +280,7 @@ public class ViewPyramid extends BoundingPolytope
 	
 	/**
 	 * Return a shape3D representing the current pyramid.
-	 * This method aims to be used for debugging.
+	 * This method aims at being used for debugging.
 	 */
 	public Shape3D getShape3D()
 	{
