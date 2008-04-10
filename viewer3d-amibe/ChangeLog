@@ -1,3 +1,9 @@
+2008-04-10 16:48 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/MeshOEMMViewer3d.java: Add a 'S' keystroke
+	to print the whole mesh into 'WholeMesh' directory.  This is
+	useful to convert a triangle soup back into Amibe mesh format.
+
 2008-02-25 11:48 Denis Barbier <barbier@users.sourceforge.net>
 
 	* Replace log4j by java.util.logging.Logger.

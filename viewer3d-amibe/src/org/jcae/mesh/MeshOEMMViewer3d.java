@@ -30,6 +30,7 @@ import org.jcae.mesh.xmldata.MeshWriter;
 import org.jcae.mesh.amibe.validation.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
@@ -166,6 +167,19 @@ public class MeshOEMMViewer3d
 						Mesh amesh = mr.buildMesh(leaves);
 						Storage.saveNodes(oemm, amesh, leaves);
 					}
+					else if (k == 'S')
+					{
+						Mesh amesh = mr.buildWholeMesh();
+						try
+						{
+							MeshWriter.writeObject3D(amesh, "WholeMesh", null);
+							logger.info("Mesh successfully written into 'WholeMesh' directory");
+						}
+						catch(IOException ex)
+						{
+							logger.severe("Unable to print mesh into 'WholeMesh' directory");
+						}
+					}
 					else if (k == 'i')
 					{
 						if (logger.isLoggable(Level.INFO))
@@ -261,6 +275,7 @@ public class MeshOEMMViewer3d
 		System.out.println("  a: Toggle axis display");
 		System.out.println("  F: Toggle FPS display");
 		System.out.println("  s: Load selected octree nodes and store them back to disk");
+		System.out.println("  S: Save whole mesh in Amibe format into 'WholeMesh' directory");
 		System.out.println("  i: Print selected nodes");
 		System.out.println("  c: When a single octree node is selected, compute its mesh quality");
 		System.out.println("  d: Decimate selected octree nodes into dec-tmp directory");
