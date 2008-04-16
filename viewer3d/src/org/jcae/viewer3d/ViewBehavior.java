@@ -36,7 +36,12 @@ import org.jcae.viewer3d.cad.ViewableCAD;
 
 public  class ViewBehavior extends OrbitBehavior
 {
-	private static Logger logger=Logger.getLogger("global");
+	private final static Logger LOGGER=
+		Logger.getLogger(ViewBehavior.class.getName());
+	/** For debugging (display the selection polytope) */
+	private final static boolean DEBUG_SEL_POLYTOPE = true;
+		//Boolean.getBoolean("org.jcae.viewer3d.showPolytope");
+
 	// dirty workaround for bug
 	// https://java3d.dev.java.net/issues/show_bug.cgi?id=179
 	// because xtrans, ytrans and ztrans should be protected not private
@@ -72,9 +77,12 @@ public  class ViewBehavior extends OrbitBehavior
 		FIELD_ROTATETRANSFORM=rotateTransform;
 	}
 	
+	/** For debugging (display the selection polytope) */
+	private BranchGroup selectionPolytope;
+
 	private Point anchor;
-	private View view;
-	private SelectionRectangle selectionRectangle3D; 
+	private final View view;
+	private final SelectionRectangle selectionRectangle3D; 
 	private boolean changeRotationCenter;
 	
 	//Viewer mouse modes
@@ -376,7 +384,7 @@ public  class ViewBehavior extends OrbitBehavior
 			return null;
 		if (!evt.isControlDown())
 		{
-			logger.finest("Ctrl is up so everything is unselected");
+			LOGGER.finest("Ctrl is up so everything is unselected");
 			cv.unselectAll();
 		}
 		PickCanvas pickCanvas = new PickCanvas(view, view.getBranchGroup(cv));
@@ -387,7 +395,7 @@ public  class ViewBehavior extends OrbitBehavior
 		PickViewable result = pickPoint(pickCanvas.pickAllSorted());
 		//PickViewable result=new PickViewable(pickCanvas.pickClosest(), 0);
 		long time2 = System.currentTimeMillis();
-		logger.finest("picked viewable is " + cv + " in "
+		LOGGER.finest("picked viewable is " + cv + " in "
 			+ (time2 - time) + " ms");
 		return result;
 	}
@@ -461,6 +469,27 @@ public  class ViewBehavior extends OrbitBehavior
 		view.setClipPlanes(planes);
 	}
 
+	/** For debugging */
+	private void showSelectionPolytope(ViewPyramid shape)		
+	{
+		if(DEBUG_SEL_POLYTOPE)
+		{
+			if(selectionPolytope==null)
+			{
+				selectionPolytope = new BranchGroup();
+				selectionPolytope.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
+				selectionPolytope.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
+				selectionPolytope.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
+				view.addBranchGroup(selectionPolytope);
+			}
+			selectionPolytope.removeAllChildren();
+			BranchGroup bg = new BranchGroup();
+			bg.setCapability(BranchGroup.ALLOW_DETACH);
+			bg.addChild(shape.getShape3D());
+			selectionPolytope.addChild(bg);
+		}
+	}
+	
 	protected void pickRectangle(MouseEvent evt)
 	{
 		Viewable cv = view.getCurrentViewable();
@@ -474,6 +503,7 @@ public  class ViewBehavior extends OrbitBehavior
 		ViewPyramid shape = new ViewPyramid(view,
 			selectionRectangle3D.getGeometry2D(), view.getBound());
 		
+		showSelectionPolytope(shape);
 		Vector4d[] v = new Vector4d[4];
 		shape.getPlanes(v);
 		pickCanvas.setMode(PickInfo.PICK_GEOMETRY);		
