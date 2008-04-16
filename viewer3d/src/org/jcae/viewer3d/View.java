@@ -1144,7 +1144,7 @@ public class View extends Canvas3D implements PositionListener
 		((ViewBehavior)orbit).setMouseMode(mode);
 	}
 	
-	protected int getMouseMode(){
+	public int getMouseMode(){
 		return ((ViewBehavior)orbit).getMouseMode();
 	}
 	
