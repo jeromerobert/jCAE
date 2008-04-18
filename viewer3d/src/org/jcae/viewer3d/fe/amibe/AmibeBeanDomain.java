@@ -47,7 +47,7 @@ public class AmibeBeanDomain extends FEDomainAdaptor
 		beam2=readBeam2(subMesh, directory);
 		int[] nodesID=makeNodeIDArray(beam2);
 		nodes=readNodes(nodesID, directory, subMesh);
-		Logger.getLogger("global").finest( "number of nodes=" + nodes.length +
+		Logger.getLogger(AmibeBeanDomain.class.getName()).finest( "number of nodes=" + nodes.length +
 			"," + "number of beams="+beam2.length/2.0);
 		renumberArray(beam2, nodesID);		
 	}

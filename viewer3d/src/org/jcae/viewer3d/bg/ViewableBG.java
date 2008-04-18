@@ -136,7 +136,7 @@ public class ViewableBG extends ViewableAdaptor
 		selected = !leaves.contains(solidID);
 		if(selected)
 		{
-			Logger.getLogger("global").finest("cellid= "+solidID);
+			Logger.getLogger(ViewableBG.class.getName()).finest("cellid= "+solidID);
 			highlightNode(solidID, pi.getGeometryArray());
 		}
 		else

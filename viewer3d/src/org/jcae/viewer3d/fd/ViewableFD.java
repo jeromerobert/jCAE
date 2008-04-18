@@ -52,7 +52,7 @@ import com.sun.j3d.utils.picking.PickIntersection;
  */
 public class ViewableFD extends ViewableAdaptor
 {
-	private static Logger logger=Logger.getLogger("global");
+	private final static Logger LOGGER=Logger.getLogger(ViewableFD.class.getName());
 	public final static byte SELECT_PLATE=1;
 
 	private static final float zFactorAbs=Float.parseFloat(System.getProperty(
@@ -280,7 +280,7 @@ public class ViewableFD extends ViewableAdaptor
 		s3d=new Shape3D(geom, a);
 		s3d.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 		s3d.setPickable(false);
-		logger.finest("Plates bounds="+s3d.getBounds());
+		LOGGER.finest("Plates bounds="+s3d.getBounds());
 		platesBg.addChild(s3d);
 	}
 	
@@ -306,7 +306,7 @@ public class ViewableFD extends ViewableAdaptor
 		s3d.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 		s3d.setCapability(Node.ALLOW_PICKABLE_WRITE);
 		s3d.setUserData(new WireDomainID(iDomainId.intValue()));
-		logger.finest("Wires bounds="+s3d.getBounds());
+		LOGGER.finest("Wires bounds="+s3d.getBounds());
 		platesBg.addChild(s3d);
 		wires.add(s3d);
 	}
@@ -616,7 +616,7 @@ public class ViewableFD extends ViewableAdaptor
 		{	
 			Integer iDomainId=new Integer(domainId[d]);
 			
-			logger.finest("Create BranchGroup for domain nr"+
+			LOGGER.finest("Create BranchGroup for domain nr"+
 				Integer.toHexString(domainId[d])+ "provider="+provider+" ids="+ids);
 			
 			BranchGroup old=domainToBranchGroup.get(iDomainId);
@@ -721,7 +721,7 @@ public class ViewableFD extends ViewableAdaptor
 	 */
 	public void setMarkPicking(boolean enable)
 	{
-		logger.finest("enable="+enable);
+		LOGGER.finest("enable="+enable);
 		markPickable=enable;
 		Iterator<Node> it=marks.iterator();
 		while(it.hasNext())
@@ -751,12 +751,12 @@ public class ViewableFD extends ViewableAdaptor
 	
 	public void setDomainPickable(int domainID, boolean enable)
 	{
-		logger.finest("domainID="+Integer.toHexString(domainID)
+		LOGGER.finest("domainID="+Integer.toHexString(domainID)
 			+" enable="+enable);
 		BranchGroup bg=domainToBranchGroup.get(new Integer(domainID));
 		if(bg==null)
 		{
-			logger.info("domain 0x"+Integer.toHexString(domainID)+
+			LOGGER.info("domain 0x"+Integer.toHexString(domainID)+
 				" is empty. Cannot change pickable status");
 			return;
 		}
@@ -765,15 +765,15 @@ public class ViewableFD extends ViewableAdaptor
 		while(e.hasMoreElements())
 		{
 			Node n=(Node) e.nextElement();			
-			logger.finest(""+n.getUserData());
+			LOGGER.finest(""+n.getUserData());
 			if(n.getUserData()==MarkUtils.MARK_IDENTIFIER)
 			{
-				logger.finest("MarkUtils.setPickable("+n+","+enable);
+				LOGGER.finest("MarkUtils.setPickable("+n+","+enable);
 				MarkUtils.setPickable(n, enable);
 			}
 			else if(n.getUserData()!=null)
 			{
-				logger.finest("setPickable("+n+","+enable);
+				LOGGER.finest("setPickable("+n+","+enable);
 				n.setPickable(enable);
 			}				
 		}
@@ -781,7 +781,7 @@ public class ViewableFD extends ViewableAdaptor
 	
 	public void setPlatePicking(boolean enable)
 	{
-		logger.finest("enable="+enable);
+		LOGGER.finest("enable="+enable);
 		platePickable=enable;
 		Iterator<Shape3D> it=plates.iterator();
 		while(it.hasNext())
@@ -793,7 +793,7 @@ public class ViewableFD extends ViewableAdaptor
 
 	public void setWirePicking(boolean enable)
 	{
-		logger.finest("enable="+enable);
+		LOGGER.finest("enable="+enable);
 		wirePickable=enable;
 		Iterator<Shape3D> it=wires.iterator();
 		while(it.hasNext())
@@ -805,7 +805,7 @@ public class ViewableFD extends ViewableAdaptor
 	
 	public void setSlotPicking(boolean enable)
 	{
-		logger.finest("enable="+enable);
+		LOGGER.finest("enable="+enable);
 		slotPickable=enable;
 		Iterator<Shape3D> it=slots.iterator();
 		while(it.hasNext())
@@ -1066,8 +1066,8 @@ public class ViewableFD extends ViewableAdaptor
 		if(toSelect)
 		{
 			Point3d[] pc=pi.getPrimitiveCoordinates();
-			logger.finest("domainID: "+domainID);		
-			logger.finest("coordinates: "+Arrays.asList(pc));
+			LOGGER.finest("domainID: "+domainID);		
+			LOGGER.finest("coordinates: "+Arrays.asList(pc));
 			
 			QuadArray qa=new QuadArray(4, GeometryArray.COORDINATES);
 			qa.setCoordinates(0, pi.getPrimitiveCoordinates());
@@ -1097,8 +1097,8 @@ public class ViewableFD extends ViewableAdaptor
 		boolean toSelect=!selectionManager.isSolidSelected(solidID, domainID);
 		if(toSelect)
 		{
-			logger.finest("cellid= "+idx[0]/24);
-			logger.finest("domainID: "+domainID);					
+			LOGGER.finest("cellid= "+idx[0]/24);
+			LOGGER.finest("domainID: "+domainID);					
 			IndexedGeometryArray iga=(IndexedGeometryArray)pi.getGeometryArray();
 			int[] indices=new int[24];
 			iga.getCoordinateIndices(solidID*24, indices);

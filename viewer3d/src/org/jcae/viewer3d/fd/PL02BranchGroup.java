@@ -42,7 +42,7 @@ import com.sun.j3d.utils.picking.PickTool;
  */
 public class PL02BranchGroup extends BranchGroup
 {
-	private static Logger logger=Logger.getLogger("global");
+	private final static Logger LOGGER=Logger.getLogger(PL02BranchGroup.class.getName());
 	protected FDProvider provider;
 	//private HashSet currentSelection;
 	protected ArrayList<Shape3D> allEdgeShapes;
@@ -103,9 +103,9 @@ public class PL02BranchGroup extends BranchGroup
 	
 	private Plate[] domainToPlates(FDDomain domain)
 	{
-		logger.finest("<creating plates >");
+		LOGGER.finest("<creating plates >");
 		int n=domain.getNumberOfXPlate()+domain.getNumberOfYPlate()+domain.getNumberOfZPlate();
-		logger.finest("number of plates in domain is "+n);
+		LOGGER.finest("number of plates in domain is "+n);
 		Plate[] plates=new Plate[n];
 		
 		Iterator<int[]> it=domain.getXPlateIterator();
@@ -161,7 +161,7 @@ public class PL02BranchGroup extends BranchGroup
 		if(i!=n)
 			throw new IllegalStateException(i+"!="+n);
 		
-		logger.finest("</creating plates>");
+		LOGGER.finest("</creating plates>");
 		return plates;
 	}
 	
@@ -177,7 +177,7 @@ public class PL02BranchGroup extends BranchGroup
 		
 		for (int g = 0; g < groupID.length; ++g)
 		{
-			logger.finest("generating java3d tree for group number "+groupID[g]);
+			LOGGER.finest("generating java3d tree for group number "+groupID[g]);
 			// Set of EdgeLine objects. Overlapping edges on the same line are
 			// merged together
 			HashMap<EdgeLine, EdgeLine> externalEdges = new HashMap<EdgeLine, EdgeLine>();
@@ -747,7 +747,7 @@ public class PL02BranchGroup extends BranchGroup
 	 */
 	protected void toggleSelectedQuad(boolean on, SelectionQuad sq)
 	{
-		logger.finest("on="+on+" selectionQuad="+sq);
+		LOGGER.finest("on="+on+" selectionQuad="+sq);
 		if (on)
 		{
 			// add the given quad to the list
@@ -1319,7 +1319,7 @@ public class PL02BranchGroup extends BranchGroup
 	private Wire[] createWireList()
 	{
 		int[] ids=provider.getDomainIDs();
-		logger.finest("computing wires for "+ids.length+" domain.");
+		LOGGER.finest("computing wires for "+ids.length+" domain.");
 		int numberOfWire=0;
 
 		for(int i=0; i<ids.length; i++)
@@ -1329,7 +1329,7 @@ public class PL02BranchGroup extends BranchGroup
 			numberOfWire+=domain.getNumberOfYWire();
 			numberOfWire+=domain.getNumberOfZWire();
 		}
-		logger.finest("found "+numberOfWire+" wires.");
+		LOGGER.finest("found "+numberOfWire+" wires.");
 		
 		Wire[] wires=new Wire[numberOfWire];
 		int iw=0;

@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  */
 public class Jqf02File
 {	
-	private static Logger logger=Logger.getLogger(Jqf02File.class.getName());
+	private final static Logger LOGGER=Logger.getLogger(Jqf02File.class.getName());
 	private File file;
 	private float version;
 	private float[] iterations;
@@ -63,13 +63,13 @@ public class Jqf02File
 		in.skip(offset);
 		minValue=Float.MAX_VALUE;
 		maxValue=-Float.MAX_VALUE;
-		logger.fine("offset is "+offset);
+		LOGGER.fine("offset is "+offset);
 		for(Iterator<Plate> it=plates.iterator();it.hasNext();)
 		{
 			Plate p=it.next();
 			int nbcells=p.numberOfCells();
 			p.values=new float[nbcells];
-			//logger.fine(p);
+			//LOGGER.fine(p);
 			for(int ip=0;ip<nbcells;ip++)
 			{
 				in.readInt(); offset+=4;
@@ -79,7 +79,7 @@ public class Jqf02File
 					offset+=4;
 				}
 				p.values[ip]=in.readFloat(); offset+=4;				
-				//logger.fine("readValue "+p.values[ip]+" at "+(offset-4));
+				//LOGGER.fine("readValue "+p.values[ip]+" at "+(offset-4));
 				if(p.values[ip]>maxValue) maxValue=p.values[ip];
 				if(p.values[ip]<minValue) minValue=p.values[ip];
 				for(int j=valueType+1;j<3;j++)
@@ -91,8 +91,8 @@ public class Jqf02File
 				/*in.skip(16); offset+=16;*/
 			}
 		}
-		logger.info("maximum value= "+maxValue);
-		logger.info("minimum value= "+minValue);
+		LOGGER.info("maximum value= "+maxValue);
+		LOGGER.info("minimum value= "+minValue);
 	}
 	
 	/** Creates a new instance of Jqf02File */
@@ -115,7 +115,7 @@ public class Jqf02File
 		// solver version number
 		in.readInt();
 		version=in.readFloat();
-		logger.info("Version "+version);
+		LOGGER.info("Version "+version);
 		in.readInt();
 		
 		// number of iterations
@@ -132,7 +132,7 @@ public class Jqf02File
 		nfx=in.readInt();
 		nfy=in.readInt();
 		nfz=in.readInt();
-		logger.info("Surface cell x,y,z : "+nfx+" "+nfy+" "+nfz);
+		LOGGER.info("Surface cell x,y,z : "+nfx+" "+nfy+" "+nfz);
 		in.readInt();
 
 		headerSize=(3+3+iterations.length+2+5)*4;

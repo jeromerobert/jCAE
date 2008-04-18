@@ -53,13 +53,13 @@ import org.xml.sax.SAXException;
  */
 public class Main
 {
-	private static Logger logger=Logger.getLogger("global");
+	private final static Logger LOGGER=Logger.getLogger(Main.class.getName());
 	static
 	{
-		logger.setLevel(Level.ALL);
+		LOGGER.setLevel(Level.ALL);
 		ConsoleHandler cd=new ConsoleHandler();
 		cd.setLevel(Level.ALL);
-		logger.addHandler(cd);
+		LOGGER.addHandler(cd);
 	}
 	
 	public static void testCAD()

@@ -33,7 +33,7 @@ import javax.media.j3d.QuadArray;
  */
 public class SelectionManager
 {
-	private static Logger logger=Logger.getLogger("global");
+	private final static Logger LOGGER=Logger.getLogger(SelectionManager.class.getName());
 	private static class IntegerPair
 	{
 		private int first, second;
@@ -756,7 +756,7 @@ public class SelectionManager
 	 */
 	public void selectSlot(byte type, int domainId, int value, LineArray la)
 	{
-		logger.finest("type="+type+" domainId="+domainId+" value="+value);
+		LOGGER.finest("type="+type+" domainId="+domainId+" value="+value);
 		getSelection(domainId).addSlot(type, value);
 		slotToLineArray.put(new IntegerPairTyped(type, domainId, value), la);
 	}

@@ -1,3 +1,8 @@
+2008-04-18 14:05 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/*: Let each class use its own logger instead of the global one.
+	  Rename 'logger' variable into 'LOGGER' and declare it as final.
+
 2008-02-25 11:48 Denis Barbier <barbier@users.sourceforge.net>
 
 	* Replace log4j by java.util.logging.Logger.

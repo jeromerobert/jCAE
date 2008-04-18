@@ -43,7 +43,7 @@ import com.sun.j3d.utils.picking.PickIntersection;
  */
 public class ViewableFE extends ViewableAdaptor
 {
-	private static Logger logger=Logger.getLogger("global");
+	private final static Logger LOGGER=Logger.getLogger(ViewableFE.class.getName());
 	public static final byte PICK_DOMAIN = 2;
 	public static final byte PICK_NODE = 1;
 	private FEProvider provider;
@@ -127,9 +127,9 @@ public class ViewableFE extends ViewableAdaptor
 				}
 				if(b.booleanValue())
 				{
-					logger.finest("<Loading domain "+ids[i]+">");
+					LOGGER.finest("<Loading domain "+ids[i]+">");
 					createBranchGroup((FEDomain)provider.getDomain(ids[i]));
-					logger.finest("</Loading domain "+ids[i]+">");
+					LOGGER.finest("</Loading domain "+ids[i]+">");
 				}
 			}
 		}
@@ -148,9 +148,9 @@ public class ViewableFE extends ViewableAdaptor
 				}
 				if(b.booleanValue())
 				{
-					logger.finest("<Loading domain "+ids[i]+">");
+					LOGGER.finest("<Loading domain "+ids[i]+">");
 					createBranchGroup((FEDomain)provider.getDomain(ids[i]));
-					logger.finest("</Loading domain "+ids[i]+">");
+					LOGGER.finest("</Loading domain "+ids[i]+">");
 				}				
 			}
 		}
@@ -281,8 +281,8 @@ public class ViewableFE extends ViewableAdaptor
 	public void pick(PickViewable result)
 	{
 		System.out.println("picked node=" + result.getObject());
-		logger.finest("result=" + result);
-		logger.finest("result.getGeometryArray().getUserData()="
+		LOGGER.finest("result=" + result);
+		LOGGER.finest("result.getGeometryArray().getUserData()="
 			+ result.getGeometryArray().getUserData());
 		Integer o = (Integer) result.getGeometryArray().getUserData();
 		int domainID = o.intValue();
@@ -367,7 +367,7 @@ public class ViewableFE extends ViewableAdaptor
 		
 		if(showShapeLine)
 		{
-			logger.finest("Changing color of domain nr"+domainID+" to red. bg="+bg);
+			LOGGER.finest("Changing color of domain nr"+domainID+" to red. bg="+bg);
 			Color colorToSet;
 			if(selected)
 			{

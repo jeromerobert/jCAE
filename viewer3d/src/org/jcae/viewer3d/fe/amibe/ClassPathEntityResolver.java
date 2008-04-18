@@ -42,7 +42,7 @@ public class ClassPathEntityResolver implements EntityResolver
 				String path=uri.getPath();
 				//remove leading "/"
 				path=path.substring(1);
-				Logger.getLogger("global").fine("resolve "+systemId+" from CLASSPATH at "+path);
+				Logger.getLogger(ClassPathEntityResolver.class.getName()).fine("resolve "+systemId+" from CLASSPATH at "+path);
 				InputStream in= ClassLoader.getSystemResourceAsStream(path);
 				if(in==null)
 					return new InputSource(new StringReader(""));

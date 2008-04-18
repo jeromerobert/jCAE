@@ -36,7 +36,7 @@ import org.jcae.viewer3d.Palette;
  */
 public class Mesh
 {
-	private static Logger logger=Logger.getLogger(Mesh.class.getName());
+	private final static Logger LOGGER=Logger.getLogger(Mesh.class.getName());
 	private float[][] grid;
 	private HashMap<Integer, ArrayList<Plate>> plates;
 	private HashMap<Integer, Wire> wires;
@@ -107,7 +107,7 @@ public class Mesh
 		for(int i=0;i<values.length;i++)
 		{
 			texture[i+2]=Color.HSBtoRGB((maxValue-values[i])/(maxValue-minValue)*170f/255f,1.0f,1.0f);
-			//logger.fine("texture["+(i+2)+"]="+Integer.toHexString(texture[i+2]));
+			//LOGGER.fine("texture["+(i+2)+"]="+Integer.toHexString(texture[i+2]));
 		}
 		return texture;
 	}
@@ -216,15 +216,15 @@ public class Mesh
 			cps.setMaxValue(maxValue);
 			cps.setMinValue(minValue);
 			coloredPlates.put(new Integer(attribut),cps);
-			logger.info("Biggest plate size : "+maxPlateSize);
-			logger.info("Number of textured plates : "+texturedPlatesA.size());
-			logger.info("Number of colored plates : "+coloredPlatesA.size());
+			LOGGER.info("Biggest plate size : "+maxPlateSize);
+			LOGGER.info("Number of textured plates : "+texturedPlatesA.size());
+			LOGGER.info("Number of colored plates : "+coloredPlatesA.size());
 		}		
 	}
 
 	public void loadGr02File(File f) throws IOException, FileNotFoundException
 	{
-		logger.fine("loadGr02File");
+		LOGGER.fine("loadGr02File");
 		StreamTokenizerExt in=new StreamTokenizerExt(f);
 		grid=new float[3][];
 		grid[0]=new float[in.readInteger()];
@@ -236,7 +236,7 @@ public class Mesh
 
 	public void loadJqf02File(File f, int iteration, int valueType) throws IOException
 	{
-		logger.fine("loadJqf02File");
+		LOGGER.fine("loadJqf02File");
 		Jqf02File infile=new Jqf02File();
 		infile.init(f);
 		float[] iterations=infile.getIterations();
@@ -255,7 +255,7 @@ public class Mesh
 
 		while(in.readWords(new String[]{"WIRE","END"})==0)
 		{
-			logger.fine("loadWi02File "+in.lineno());
+			LOGGER.fine("loadWi02File "+in.lineno());
 			int orientation=in.readWords(new String[]{"X","Y","Z"});
 			Class clazz=null;
 
@@ -269,7 +269,7 @@ public class Mesh
 
 			while(!in.readWord().equals("END"))
 			{
-				if(in.lineno()%1000==0) logger.fine("loadWi02File "+in.lineno());
+				if(in.lineno()%1000==0) LOGGER.fine("loadWi02File "+in.lineno());
 				Wire w=(Wire)constructor.newInstance(new Class[0]);
 				int code = in.readInteger();
 				in.readWord();
@@ -285,7 +285,7 @@ public class Mesh
 				wires.put(new Integer(att*1000+code),w);
 			}// while
 		}// while
-		logger.info("Number of wires : "+wires.size());
+		LOGGER.info("Number of wires : "+wires.size());
 
 		// TODO : load junction points
 		
@@ -303,7 +303,7 @@ public class Mesh
 
 		while(in.readWords(new String[]{"PLATE","END"})==0)
 		{
-			logger.fine("loadPl22File "+in.lineno());
+			LOGGER.fine("loadPl22File "+in.lineno());
 			int orientation=in.readWords(new String[]{"X","Y","Z"});
 			Class clazz=null;
 
@@ -317,7 +317,7 @@ public class Mesh
 
 			while(!in.readWord().equals("END"))
 			{
-				if(in.lineno()%1000==0) logger.fine("loadPl22File "+in.lineno());
+				if(in.lineno()%1000==0) LOGGER.fine("loadPl22File "+in.lineno());
 				Plate p=(Plate)constructor.newInstance(new Class[0]);
 				p.min1=in.readInteger();
 				in.readWord();
@@ -340,7 +340,7 @@ public class Mesh
 				orderedPlates.add(p);
 			}// while
 		}// while
-		logger.info("Number of plates : "+orderedPlates.size());
+		LOGGER.info("Number of plates : "+orderedPlates.size());
 		assignGroupColors();
 	}// loadPl02File
 	
@@ -368,7 +368,7 @@ public class Mesh
 			Constructor constructor=clazz.getConstructor(new Class[0]);
 			for(int i=0;i<numberOfPlate[orientation];i++)
 			{
-				if(in.lineno()%1000==0) logger.fine("loadPl02File "+in.lineno());
+				if(in.lineno()%1000==0) LOGGER.fine("loadPl02File "+in.lineno());
 				Plate p=(Plate)constructor.newInstance(new Class[0]);
 				p.min1=in.readInteger();
 				p.max1=in.readInteger();

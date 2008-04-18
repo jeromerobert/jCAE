@@ -70,7 +70,7 @@ public class AmibeDomain extends FEDomainAdaptor
 		tria3=readTria3();
 		int[] nodesID=makeNodeIDArray(tria3);
 		nodes=readNodes(nodesID);
-		Logger.getLogger("global").finest("number of nodes="+nodes.length+", number of tria3="+tria3.length/3.0);
+		Logger.getLogger(AmibeDomain.class.getName()).finest("number of nodes="+nodes.length+", number of tria3="+tria3.length/3.0);
 		renumberArray(tria3, nodesID);		
 	}
 	

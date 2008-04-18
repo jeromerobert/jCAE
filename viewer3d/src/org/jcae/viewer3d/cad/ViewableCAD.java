@@ -324,7 +324,7 @@ public class ViewableCAD extends ViewableAdaptor
 	@Override
 	public void pick(PickViewable result)
 	{
-		Logger.getLogger("global").finest(
+		Logger.getLogger(ViewableCAD.class.getName()).finest(
 			"result.getGeometryArray().getUserData()=" +
 			result.getGeometryArray().getUserData());
 		if(pick(result.getGeometryArray(), null))
