@@ -20,6 +20,7 @@
 package org.jcae.opencascade;
 
 import java.io.PrintWriter;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -322,20 +323,32 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	}	
 	
 	/**
-	 * @param result will contains the found shapes
+	 * @param result will contains the found shapes. Use a HashSet to get unique
+	 * shapes (getFromID) and ArrayList to get doublon (explore)
 	 * @param wantedType the type of shape to return
 	 * @param maxsize the maximum number of returned shapes
+	 * @param shape exploration will end when this shape will be found
 	 */
-	private void explore(Collection<T> result, Class wantedType, int maxsize)
+	private T explore(Collection<T> result, Class wantedType, int maxsize,
+		TopoDS_Shape shape)
 	{
 		if(impl.getClass().equals(wantedType))
 		{
 			result.add((T)this);
 			if(result.size()>=maxsize)
-				return;
+				return (T)this;
+			if(impl.equals(shape))
+				return (T)this;
 		}
+		
 		for(Shape s:children)
-			s.explore(result, wantedType, maxsize);
+		{
+			T toReturn = (T) s.explore(result, wantedType, maxsize, shape);
+			if(toReturn != null)
+				return toReturn;
+		}
+		
+		return null;
 	}
 	
 	/**
@@ -344,7 +357,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	public Collection<T> explore(int type)
 	{
 		ArrayList<T> toReturn = new ArrayList<T>();
-		explore(toReturn, TYPE[type], Integer.MAX_VALUE);
+		explore(toReturn, TYPE[type], Integer.MAX_VALUE, null);
 		return toReturn;
 	}
 	
@@ -372,11 +385,36 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	 * @return
 	 */
 	private T getShapeFromID(int id, Class type)
+	{		
+		Collection<T> result = new HashSet<T>();
+		T toReturn = explore(result, type, id, null);
+		if(toReturn == null)
+		{
+			throw new ArrayIndexOutOfBoundsException("This shape contains only "
+				+result.size()+" elements of type "+type);
+		}
+		return toReturn;
+	}
+	
+	public T getShapeFromImpl(TopoDS_Shape shape)
 	{
-		ArrayList<T> toReturn = new ArrayList<T>();
-		explore(toReturn, type, id);
-		return toReturn.get(id-1);		
-	}	
+		Collection<T> dummy = new AbstractList<T>()
+		{
+			public void add(int index, T element) {}			
+			@Override
+			public T get(int index)
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public int size()
+			{
+				return 0;
+			}
+		};
+		return explore(dummy, shape.getClass(), Integer.MAX_VALUE, shape);
+	}
 	
 	/**
 	 * Return the closest parent shape which is a Compound
@@ -462,7 +500,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		{
 			Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 			long t1 = System.nanoTime();
-			TopoDS_Shape rootShape = Utilities.readFile("/home/jerome/Models/ecoul2.brep");
+			TopoDS_Shape rootShape = Utilities.readFile("/home/jerome/Models/F1.brep");
 			long t2 = System.nanoTime();
 			logger.info("Time to load brep: " + (t2 - t1) / 1E9);
 			System.gc();
@@ -478,9 +516,16 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 				(Runtime.getRuntime().totalMemory() -
 				Runtime.getRuntime().freeMemory()) / 1E6 + " Mb");
 			logger.info(rootShapeJ.toString());
-			/*PrintWriter pw = new PrintWriter(System.out);
-			rootShapeJ.dump(pw);
-			pw.flush();*/
+			t1 = System.nanoTime();
+			Shape s = rootShapeJ.getShapeFromID(330, TopAbs_ShapeEnum.EDGE);
+			t2 = System.nanoTime();
+			Shape ss = rootShapeJ.getShapeFromImpl(s.impl);
+			long t3 = System.nanoTime();
+			int id = ss.getID();
+			long t4 = System.nanoTime();
+			System.out.println("time for getShapeFromID: "+(t2-t1)/1E9);
+			System.out.println("time for getShapeFromImpl: "+(t3-t2)/1E9);
+			System.out.println("time for getID: "+(t4-t3)/1E9);
 		}
 		catch (Exception ex)
 		{
