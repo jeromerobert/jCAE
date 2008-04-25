@@ -86,14 +86,16 @@ public class GeomUtils
 		return toReturn;
 	}
 	
-	/** Insert newShape under node
-	 * @param newShape
-	 * @param newName
-	 * @param node*/
-	static public void insertShape(TopoDS_Shape newShape, String newName, Node node)
+	/**
+	 * Insert newShape under node
+	 * @param newShape The shape to insert
+	 * @param newName The name of the shape to insert
+	 * @param node The node where it should be inserted
+	 */
+	public static void insertShape(TopoDS_Shape newShape, String newName, Node node)
 	{
 		
-		NbShape shape = getShape(node).getCompound();
+		NbShape shape = getShape(node);		
 		if (shape == null)
 		{
 			FileObject objDir = Utilities.getProject(node).getProjectDirectory();
@@ -105,7 +107,7 @@ public class GeomUtils
 		{
 			NbShape s = new NbShape(newShape);
 			s.setName(newName);
-			shape.add(s);
+			shape.getCompound().add(s);
 			ShapeChildren sc = node.getCookie(ShapeChildren.class);
 			sc.addShapes(Collections.singleton(s));
 		}
