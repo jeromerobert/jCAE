@@ -51,6 +51,8 @@
 	}
 %}
 
+%catches(Standard_NoSuchObject) BRep_Tool::Parameters;
+
 class BRep_Tool
 {
 	%rename(pnt) Pnt;

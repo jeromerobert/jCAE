@@ -47,7 +47,7 @@ AC_CHECK_HEADERS([limits.h] [iostream])
 if test -z "$CASROOT" ; then AC_MSG_FAILURE("Opencascade not found"); fi
 occinc="$CASROOT/inc"
 occlib="$CASROOT/`uname -s`/lib"
-CPPFLAGS="${CPPFLAGS} -I$occinc -DLIN -DNO_CXX_EXCEPTION"
+CPPFLAGS="${CPPFLAGS} -I$occinc -DLIN"
 LDFLAGS="${LDFLAGS} -L$occlib"
 # OpenCascade libraries have no -rpath information, set
 # LD_RUN_PATH (or LD_LIBRARY_PATH) so that we can set LIBS
