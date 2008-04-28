@@ -30,6 +30,12 @@ options.addOption(
 		.withLongOpt("tolerance")
 		.create('t'));
 options.addOption(
+	OptionBuilder.withArgName("VALUE").hasArg()
+		.withDescription("Decimate free edges whose length is smaller than tolerance."+
+			" -t value is used if not specified. (for LengthDecimateHalfEdge only)")
+		.withLongOpt("freeEdgeTol")
+		.create('f'));
+options.addOption(
 	OptionBuilder.withArgName("NUMBER").hasArg()
 		.withDescription("stops iterations when mesh contains this number of triangles")
 		.withLongOpt("targetTriangles")
@@ -84,6 +90,8 @@ else if (cmd.hasOption('n'))
 	algoOptions.put("maxtriangles", cmd.getOptionValue('n'));
 if (cmd.hasOption('O'))
 	algoOptions.put("freeEdgeOnly", "true");
+if (cmd.hasOption('f'))
+	algoOptions.put("freeEdgeTol", cmd.getOptionValue('f'));
 if (cmd.hasOption('m'))
 	algoOptions.put("maxlength", cmd.getOptionValue('m'));
 String algo=cmd.getOptionValue('a', "LengthDecimateHalfEdge");
@@ -92,7 +100,14 @@ Constructor cons = Class.forName("org.jcae.mesh.amibe.algos3d."+algo).getConstru
 Mesh mesh = new Mesh()
 MeshReader.readObject3D(mesh, xmldir)
 
-cons.newInstance(mesh, algoOptions).compute();
+try
+{
+	cons.newInstance(mesh, algoOptions).compute();
+	MeshWriter.writeObject3D(mesh, outDir, null)
+}
+catch(Exception ex)
+{
+	ex.printStackTrace();
+}
 
-MeshWriter.writeObject3D(mesh, outDir, null)
 

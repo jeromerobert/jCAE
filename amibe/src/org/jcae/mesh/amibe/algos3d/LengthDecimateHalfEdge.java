@@ -41,6 +41,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	private static Logger logger=Logger.getLogger(LengthDecimateHalfEdge.class.getName());
 	private Vertex v3;
 	private boolean freeEdgeOnly = false;
+	private final double freeEdgeFactor;
 
 	/**
 	 * Creates a <code>LengthDecimateHalfEdge</code> instance.
@@ -55,6 +56,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 		super(m);
 		v3 = null;
 		m.createVertex(0.0, 0.0, 0.0);
+		double freeEdgeTol = Double.NaN;
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
 			final String key = opt.getKey();
@@ -79,9 +81,17 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 				freeEdgeOnly = new Boolean(val).booleanValue();
 				logger.fine("freeEdgeOnly: "+freeEdgeOnly);
 			}
+			else if ("freeEdgeTol".equals(key))
+			{
+				freeEdgeTol = Double.parseDouble(val);
+			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
 		}
+		if(Double.isNaN(freeEdgeTol))
+			freeEdgeFactor = 1.0;
+		else
+			freeEdgeFactor = tolerance / freeEdgeTol;
 	}
 	
 	@Override
@@ -100,6 +110,13 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	{
 		if (freeEdgeOnly && !e.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 			return 2.0 * tolerance;
+		if(freeEdgeFactor != 1.0)
+		{
+			Vertex v1 = e.origin();
+			Vertex v2 = e.destination();
+			if(v1.getRef()>0 && v2.getRef()>0)
+				return e.origin().distance3D(e.destination())*freeEdgeFactor;
+		}
 		return e.origin().distance3D(e.destination());
 	}
 
