@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 
 public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 {
-	private static Logger logger=Logger.getLogger(LengthDecimateHalfEdge.class.getName());
+	private final static Logger logger=Logger.getLogger(LengthDecimateHalfEdge.class.getName());
 	private Vertex v3;
 	private boolean freeEdgeOnly = false;
 	private final double freeEdgeFactor;
@@ -59,26 +59,26 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 		double freeEdgeTol = Double.NaN;
 		for (final Map.Entry<String, String> opt: options.entrySet())
 		{
-			final String key = opt.getKey();
-			final String val = opt.getValue();
-			if (key.equals("size"))
+			String key = opt.getKey();
+			String val = opt.getValue();
+			if ("size".equals(key))
 			{
-				tolerance = new Double(val).doubleValue();
+				tolerance = Double.parseDouble(val);
 				logger.fine("Tolerance: "+tolerance);
 			}
-			else if (key.equals("maxtriangles"))
+			else if ("maxtriangles".equals(key))
 			{
-				nrFinal = Integer.valueOf(val).intValue();
+				nrFinal = Integer.parseInt(val);
 				logger.fine("Nr max triangles: "+nrFinal);
 			}
-			else if (key.equals("maxlength"))
+			else if ("maxlength".equals(key))
 			{
-				maxEdgeLength = new Double(val).doubleValue();
+				maxEdgeLength = Double.parseDouble(val);
 				logger.fine("Max edge length: "+maxEdgeLength);
 			}
-			else if (key.equals("freeEdgeOnly"))
+			else if ("freeEdgeOnly".equals(key))
 			{
-				freeEdgeOnly = new Boolean(val).booleanValue();
+				freeEdgeOnly = Boolean.parseBoolean(val);
 				logger.fine("freeEdgeOnly: "+freeEdgeOnly);
 			}
 			else if ("freeEdgeTol".equals(key))
@@ -86,7 +86,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 				freeEdgeTol = Double.parseDouble(val);
 			}
 			else
-				throw new RuntimeException("Unknown option: "+key);
+				throw new IllegalArgumentException("Unknown option: "+key);
 		}
 		if(Double.isNaN(freeEdgeTol))
 			freeEdgeFactor = 1.0;
@@ -108,26 +108,30 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	@Override
 	public double cost(final HalfEdge e)
 	{
-		if (freeEdgeOnly && !e.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+		//Ensure that boundary and non manifold edges are never processed
+		if (freeEdgeOnly && !e.hasAttributes(AbstractHalfEdge.BOUNDARY |
+			AbstractHalfEdge.NONMANIFOLD))
 			return 2.0 * tolerance;
-		if(freeEdgeFactor != 1.0)
-		{
-			Vertex v1 = e.origin();
-			Vertex v2 = e.destination();
-			if(v1.getRef()>0 && v2.getRef()>0)
-				return e.origin().distance3D(e.destination())*freeEdgeFactor;
-		}
-		return e.origin().distance3D(e.destination());
+		
+		double toReturn = e.origin().distance3D(e.destination());
+		
+		//Handle the case of specific tolerance for free edges
+		if(freeEdgeFactor != 1.0 &&
+			e.origin().getRef()>0 && e.destination().getRef()>0)
+			toReturn = toReturn * freeEdgeFactor;
+
+		return toReturn;
 	}
 
 	@Override
 	public boolean canProcessEdge(HalfEdge current)
 	{
-		if (freeEdgeOnly && !current.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
-				return false;
+		if (freeEdgeOnly && !current.hasAttributes(AbstractHalfEdge.BOUNDARY |
+			AbstractHalfEdge.NONMANIFOLD))
+			return false;
 		current = uniqueOrientation(current);
-		final Vertex v1 = current.origin();
-		final Vertex v2 = current.destination();
+		Vertex v1 = current.origin();
+		Vertex v2 = current.destination();
 		assert v1 != v2 : current;
 		// If an endpoint is not writable, its neighborhood is
 		// not fully determined and contraction must not be
@@ -213,7 +217,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 		//  Contract (v1,v2) into v3
 		//  By convention, collapse() returns edge (v3, apex)
 		assert (!current.hasAttributes(AbstractHalfEdge.OUTER));
-		final Vertex apex = current.apex();
+		Vertex apex = current.apex();
 		current = (HalfEdge) mesh.edgeCollapse(current, v3);
 		// Now current == (v3*a)
 		// Update edge costs
@@ -293,7 +297,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	 */
 	public static void main(final String[] args)
 	{
-		final HashMap<String, String> options = new HashMap<String, String>();
+		HashMap<String, String> options = new HashMap<String, String>();
 		if(args.length != 5)
 		{
 			System.out.println(usageString);
@@ -309,7 +313,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			return;
 		}
 		logger.info("Load geometry file");
-		final Mesh mesh = new Mesh();
+		Mesh mesh = new Mesh();
 		try
 		{
 			MeshReader.readObject3D(mesh, args[0]);
@@ -320,7 +324,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			throw new RuntimeException(ex);
 		}
 		new LengthDecimateHalfEdge(mesh, options).compute();
-		final File brepFile=new File(args[3]);
+		File brepFile=new File(args[3]);
 		try
 		{
 			MeshWriter.writeObject3D(mesh, args[4], brepFile.getName());
