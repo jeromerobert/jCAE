@@ -135,7 +135,8 @@ public class Vertex implements Serializable
 	
 	/**
 	 * Gets 1D reference of this node.
-	 *
+	 * Reference is positive for node of free edges, zero for internal points,
+	 * and positive for nodes of group borders.
 	 * @return 1D reference of this node
 	 */
 	public int getRef()
