@@ -181,13 +181,14 @@ import java.util.logging.Logger;
  */
 public class Initial
 {
-	private static Logger logger=Logger.getLogger(Initial.class.getName());
+	private final static Logger logger=Logger.getLogger(Initial.class.getName());
 	private Mesh2D mesh;
 	private final CADFace face;
 	private final MMesh1D mesh1D;
 	private final MeshTraitsBuilder meshTraitsBuilder;
+	private final Vertex2D [] boundaryNodes;
 	private Collection<MNode1D> innerNodes = null;
-	int nTryMax = 20;
+	private final static int N_TRY_MAX = 20;
 	
 	/**
 	 * Creates a <code>Initial</code> instance.
@@ -197,20 +198,33 @@ public class Initial
 	 */
 	public Initial(Mesh2D m, MeshTraitsBuilder mtb, MMesh1D m1d)
 	{
+		this(m, mtb, m1d, null, null);
+	}
+
+	/** A constructor to insert constrain some points in the mesh */
+	public Initial(Mesh2D m, MeshTraitsBuilder mtb, MMesh1D m1d,
+		Collection<MNode1D> innerNodes)
+	{
+		this(m, mtb, m1d, null, innerNodes);
+	}
+
+	/** A constructor for Bora, which use it's own Mesh1D */
+	public Initial(Mesh2D m, MeshTraitsBuilder mtb,
+		Vertex2D[] boundaryNodes, Collection<MNode1D> innerNodes)
+	{
+		this(m, mtb, null, boundaryNodes, innerNodes);
+	}
+
+	
+	private Initial(Mesh2D m, MeshTraitsBuilder mtb, MMesh1D m1d,
+		Vertex2D [] boundaryNodes, Collection<MNode1D> list)
+	{
 		mesh = m;
 		mesh1D = m1d;
 		meshTraitsBuilder = mtb;
-		innerNodes = null;
-		face = (CADFace) mesh.getGeometry();
-	}
-	
-	public Initial(Mesh2D m, MeshTraitsBuilder mtb, Collection<MNode1D> list)
-	{
-		mesh = m;
-		mesh1D = null;
-		meshTraitsBuilder = mtb;
 		innerNodes = list;
 		face = (CADFace) mesh.getGeometry();
+		this.boundaryNodes = boundaryNodes;
 	}
 	
 	/**
@@ -218,31 +232,37 @@ public class Initial
 	 */
 	public void compute()
 	{
-		MeshParameters mp = mesh.getMeshParameters();
-		for (int nTry = 0; nTry < nTryMax; nTry++)
+		if(boundaryNodes==null)
 		{
-			try
+			MeshParameters mp = mesh.getMeshParameters();
+			for (int nTry = 0; nTry < N_TRY_MAX; nTry++)
 			{
-				Vertex2D [] bNodes = mesh1D.boundaryNodes(face, mp);
-				computeFromBoundaryNodes(bNodes);
-				return;
-			}
-			catch(InitialTriangulationException ex)
-			{
-				if (mp.getEpsilon() > 0.0)
+				try
 				{
-					logger.warning("Face cannot be triangulated, trying again with a larger tolerance...");
-					mp.scaleTolerance(10.);
-					mesh = new Mesh2D(meshTraitsBuilder, mp, face);
+					Vertex2D [] bNodes = mesh1D.boundaryNodes(face, mp);
+					computeFromBoundaryNodes(bNodes);
+					return;
 				}
-				else
-					nTry = nTryMax;
+				catch(InitialTriangulationException ex)
+				{
+					if (mp.getEpsilon() > 0.0)
+					{
+						logger.warning("Face cannot be triangulated, trying"+
+							"again with a larger tolerance...");
+						mp.scaleTolerance(10.);
+						mesh = new Mesh2D(meshTraitsBuilder, mp, face);
+					}
+					else
+						nTry = N_TRY_MAX;
+				}
 			}
+			throw new InitialTriangulationException();
 		}
-		throw new InitialTriangulationException();
+		else
+			computeFromBoundaryNodes(boundaryNodes);
 	}
 
-	public void computeFromBoundaryNodes(Vertex2D [] bNodes)
+	private void computeFromBoundaryNodes(Vertex2D [] bNodes)
 	{
 		TriangleVH t;
 		VirtualHalfEdge2D ot;

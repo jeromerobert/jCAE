@@ -218,7 +218,7 @@ public class Basic2d implements AlgoInterface
 				bndV.addAll(nodesWire);
 			}
 		}
-		new Initial(m, mtb, innerV).computeFromBoundaryNodes(bndV.toArray(new Vertex2D[bndV.size()]));
+		new Initial(m, mtb, bndV.toArray(new Vertex2D[bndV.size()]), innerV).compute();
 
 		m.pushCompGeom(3);
 		new Insertion(m, 16.0).compute();
