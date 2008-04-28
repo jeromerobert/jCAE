@@ -119,4 +119,12 @@ public class TriangleHE extends Triangle
 		return e0.hasAttributes(attr) || e0.next().hasAttributes(attr) || e0.prev().hasAttributes(attr);
 	}
 	
+	@Override
+	public String toString()
+	{
+		StringBuilder r = new StringBuilder(super.toString());
+		r.append("\nEdge attributes: "+e0.getAttributes()+" "+e0.next().getAttributes()+" "+e0.prev().getAttributes());
+		return r.toString();
+	}
+
 }
