@@ -38,7 +38,10 @@ import org.jcae.opencascade.jni.BRepBndLib;
 import org.jcae.opencascade.jni.BRepBuilderAPI_MakeVertex;
 import org.jcae.opencascade.jni.BRepTools;
 import org.jcae.opencascade.jni.BRep_Builder;
+import org.jcae.opencascade.jni.BRep_Tool;
 import org.jcae.opencascade.jni.Bnd_Box;
+import org.jcae.opencascade.jni.GeomAPI_ProjectPointOnSurf;
+import org.jcae.opencascade.jni.Geom_Surface;
 import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
 import org.jcae.opencascade.jni.TopExp_Explorer;
 import org.jcae.opencascade.jni.TopoDS_CompSolid;
@@ -197,10 +200,23 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	 */
 	public T addVertex(double x, double y, double z)
 	{
+		double[] coords = new double[]{x, y, z};
 		TopoDS_Vertex v = (TopoDS_Vertex) new BRepBuilderAPI_MakeVertex(
-			new double[]{x, y, z}).shape();
+			coords).shape();
 		T vs = getFactory().create(v, new HashMap<TopoDS_Shape, Shape>(), NOPARENT);
 		add(vs);
+		if(impl instanceof TopoDS_Face)
+		{
+			TopoDS_Face face = (TopoDS_Face) impl;
+			//Project p5 on surface
+			double [] uv = new double[2];
+			Geom_Surface surface = BRep_Tool.surface(face);
+			GeomAPI_ProjectPointOnSurf proj = new GeomAPI_ProjectPointOnSurf(coords, surface);
+			proj.lowerDistanceParameters(uv);
+			double tolerance = proj.lowerDistance();
+			new BRep_Builder().updateVertex(v, uv[0], uv[1], face, tolerance);
+		}
+		
 		return vs;
 	}
 	

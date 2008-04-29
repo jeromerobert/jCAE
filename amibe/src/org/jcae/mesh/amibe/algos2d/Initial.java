@@ -451,12 +451,14 @@ public class Initial
 		if (innerNodes != null && !innerNodes.isEmpty())
 		{
 			logger.fine(" Insert interior vertices");
+			mesh.pushCompGeom(2);
 			for (MNode1D p1: innerNodes)
 			{
 				v = Vertex2D.valueOf(p1, null, face);
 				ot = v.getSurroundingOTriangle(mesh);
 				ot.split3(mesh, v, null, true); 
 			}
+			mesh.popCompGeom(2);
 		}
 
 		logger.fine(" Select 3D smaller diagonals");
