@@ -550,15 +550,35 @@ public class Mesh implements Serializable
 					v.setRef(maxLabel);
 				}
 			}
-			/*
 			else if (0 != label)
 			{
-				//  Check for ridges
+				/*
+				//  Check for ridges: DOES NOT WORK
 				Triangle t = (Triangle) v.getLink();
 				if (detectRidge(v, cosMinAngle, t, temp))
 					v.setRef(-label);
+				*/
+
+				/*
+				//  Negate references of vertices which are part of
+				//  inter-patch boundaries only so that they
+				//  become mutable.
+				Triangle t = (Triangle) v.getLink();
+				ot = v.getIncidentAbstractHalfEdge(t, ot);
+				Vertex first = ot.destination();
+				while (true)
+				{
+					if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.OUTER))
+						break;
+					ot = ot.nextOrigin();
+					if (ot.destination() == first)
+					{
+						v.setRef(-label);
+						break;
+					}
+				}
+				*/
 			}
-			*/
 		}
 		if (nrJunctionPoints > 0)
 			logger.info("Found "+nrJunctionPoints+" junction points");
