@@ -76,11 +76,17 @@ public class NbShape extends Shape<NbShape> implements Cookie
 		this(shape, new HashMap<TopoDS_Shape, Shape>(),
 			NOPARENT, FACTORY);
 	}
-	
+
+	@Override
+	protected Factory<NbShape> getFactory()
+	{
+		return FACTORY;
+	}
+		
 	protected NbShape(TopoDS_Shape shape, Map<TopoDS_Shape, Shape> map,
 		Shape[] parents, Factory<NbShape> f)
 	{
-		super(shape, map, parents, f);
+		super(shape, map, parents);
 	}
 	
 	public void setNode(Node node)

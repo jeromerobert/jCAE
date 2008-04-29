@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.opencascade.jni.BRepBndLib;
+import org.jcae.opencascade.jni.BRepBuilderAPI_MakeVertex;
 import org.jcae.opencascade.jni.BRepTools;
 import org.jcae.opencascade.jni.BRep_Builder;
 import org.jcae.opencascade.jni.Bnd_Box;
@@ -127,7 +128,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	{
 		public Shape create(TopoDS_Shape shape, Map<TopoDS_Shape, Shape> map, Shape[] parents)
 		{
-			return new Shape(shape, map, parents, this);
+			return new Shape(shape, map, parents);
 		}
 	};
 	
@@ -144,11 +145,11 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 
 	public Shape(TopoDS_Shape shape)
 	{
-		this(shape, new HashMap<TopoDS_Shape, Shape>(), NOPARENT, DEFAULT_FACTORY);
+		this(shape, new HashMap<TopoDS_Shape, Shape>(), NOPARENT);
 	}
 	
 	protected Shape(TopoDS_Shape shape, Map<TopoDS_Shape, Shape> map,
-		Shape[] parents, Factory<T> factory)
+		Shape[] parents)
 	{
 		if(shape == null)
 		{
@@ -166,7 +167,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 			TopoDS_Shape tds = it.value();
 			Shape css = map.get(tds);
 			if (css == null)
-				css = factory.create(tds, map, new Shape[]{this});
+				css = getFactory().create(tds, map, new Shape[]{this});
 
 			cs.add(css);
 			it.next();
@@ -175,6 +176,11 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		map.put(shape, this);
 	}
 
+	protected Factory<T> getFactory()
+	{
+		return DEFAULT_FACTORY;
+	}
+	
 	public void add(Shape newShape)
 	{
 		new BRep_Builder().add(impl, newShape.impl);
@@ -183,6 +189,19 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		nc[nc.length - 1] = newShape;
 		children = nc;		
 		newShape.addParent(this);
+	}
+	
+	/**
+	 * Add a Vertex to this shape
+	 * @return the created vertex
+	 */
+	public T addVertex(double x, double y, double z)
+	{
+		TopoDS_Vertex v = (TopoDS_Vertex) new BRepBuilderAPI_MakeVertex(
+			new double[]{x, y, z}).shape();
+		T vs = getFactory().create(v, new HashMap<TopoDS_Shape, Shape>(), NOPARENT);
+		add(vs);
+		return vs;
 	}
 	
 	/** Remove this shape from its parents */
