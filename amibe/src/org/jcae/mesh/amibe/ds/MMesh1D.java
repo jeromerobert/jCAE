@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 
 public class MMesh1D extends MMesh0D
 {
-	private static Logger logger=Logger.getLogger(MMesh1D.class.getName());	
+	private final static Logger logger=Logger.getLogger(MMesh1D.class.getName());	
 
 	private String filename;
 	
@@ -53,8 +53,8 @@ public class MMesh1D extends MMesh0D
 	
 	// Ditto for bora data structure.
 	private Map<BDiscretization, SubMesh1D> mapDiscrToSubMesh1D;
-	private Map<BDiscretization, LinkedHashSet<BDiscretization>> mapDiscrToFaces;
 
+	
 	/**
 	 * Creates a <code>MMesh1D</code> instance by discretizing all edges
 	 * of a given shape.
@@ -62,10 +62,20 @@ public class MMesh1D extends MMesh0D
 	 * @param cadFile  file containing CAD shape
 	 */
 	public MMesh1D(String cadFile)
-	{
-		super(CADShapeFactory.getFactory().newShape(cadFile));
+	{		
+		this(CADShapeFactory.getFactory().newShape(cadFile));
 		filename = new File(cadFile).getName();
-
+	}
+	
+	/**
+	 * Creates a <code>MMesh1D</code> instance by discretizing all edges
+	 * of a given shape.
+	 *
+	 * @param cadFile  file containing CAD shape
+	 */
+	public MMesh1D(CADShape shape)
+	{
+		super(shape);
 		CADExplorer expE = CADShapeFactory.getFactory().newExplorer();
 		//  HashMap size will not be greater than the number of edges,
 		//  so allocate them after computing their maximal size, they
@@ -141,7 +151,8 @@ public class MMesh1D extends MMesh0D
 		}
 		System.out.println("Number of Edge discretizations created in MMesh1D: "+ edgediscrs);
 
-		mapDiscrToFaces = new HashMap<BDiscretization, LinkedHashSet<BDiscretization>>(edgediscrs);
+		Map<BDiscretization, LinkedHashSet<BDiscretization>> mapDiscrToFaces =
+			new HashMap<BDiscretization, LinkedHashSet<BDiscretization>>(edgediscrs);
 		for (Iterator<BDiscretization> it = mapDiscrToSubMesh1D.keySet().iterator(); it.hasNext(); )
 		{
 			mapDiscrToFaces.put(it.next(), new LinkedHashSet<BDiscretization>());
@@ -186,7 +197,8 @@ public class MMesh1D extends MMesh0D
 	
 	/**
 	 * Returns the file name containing the topological shape.
-	 *
+	 * Return null is this MMesh1D has been created from a CADShape and not from
+	 * a file
 	 * @return the file name containing the topological shape.
 	 */
 	public String getGeometryFilename()
