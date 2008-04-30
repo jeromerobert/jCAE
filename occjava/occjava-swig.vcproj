@@ -71,7 +71,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;TKBO.lib TKShHealing.lib TKGeomAlgo.lib TKBRep.lib TKBool.lib TKG2d.lib TKG3d.lib TKGeomBase.lib TKIGES.lib TKSTEP.lib TKMath.lib TKOffset.lib TKXSBase.lib TKernel.lib TKPrim.lib TKTopAlgo.lib TKMesh.lib TKFillet.lib $(NOINHERIT)"
+				AdditionalDependencies="&quot;TKBO.lib TKShHealing.lib TKGeomAlgo.lib TKBRep.lib TKBool.lib TKG2d.lib TKG3d.lib TKGeomBase.lib TKIGES.lib TKSTEPBase.lib TKSTEP.lib TKMath.lib TKOffset.lib TKXSBase.lib TKernel.lib TKPrim.lib TKTopAlgo.lib TKMesh.lib TKFillet.lib $(NOINHERIT)"
 				OutputFile="$(OutDir)\OccJava.dll"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
@@ -152,7 +152,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;TKBO.lib TKShHealing.lib TKGeomAlgo.lib TKBRep.lib TKBool.lib TKG2d.lib TKG3d.lib TKGeomBase.lib TKIGES.lib TKSTEP.lib TKMath.lib TKOffset.lib TKXSBase.lib TKernel.lib TKPrim.lib TKTopAlgo.lib TKMesh.lib TKFillet.lib $(NOINHERIT)"
+				AdditionalDependencies="&quot;TKBO.lib TKShHealing.lib TKGeomAlgo.lib TKBRep.lib TKBool.lib TKG2d.lib TKG3d.lib TKGeomBase.lib TKIGES.lib TKSTEPBase.lib TKSTEP.lib TKMath.lib TKOffset.lib TKXSBase.lib TKernel.lib TKPrim.lib TKTopAlgo.lib TKMesh.lib TKFillet.lib $(NOINHERIT)"
 				OutputFile="$(OutDir)\OccJava.dll"
 				LinkIncremental="1"
 				GenerateManifest="false"
