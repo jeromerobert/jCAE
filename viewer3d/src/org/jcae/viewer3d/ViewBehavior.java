@@ -39,8 +39,8 @@ public  class ViewBehavior extends OrbitBehavior
 	private final static Logger LOGGER=
 		Logger.getLogger(ViewBehavior.class.getName());
 	/** For debugging (display the selection polytope) */
-	private final static boolean DEBUG_SEL_POLYTOPE = true;
-		//Boolean.getBoolean("org.jcae.viewer3d.showPolytope");
+	private final static boolean DEBUG_SEL_POLYTOPE =
+		Boolean.getBoolean("org.jcae.viewer3d.showPolytope");
 
 	// dirty workaround for bug
 	// https://java3d.dev.java.net/issues/show_bug.cgi?id=179
