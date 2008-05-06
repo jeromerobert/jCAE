@@ -134,7 +134,8 @@ public class View extends Canvas3D implements PositionListener
 	private PrintWriter writer=null;
 	private List<Runnable> postRenderers=new ArrayList<Runnable>();
 	private boolean locked;
-	
+	private Cursor unlockedCursor;
+		
     /**
      * From https://java3d.dev.java.net/issues/show_bug.cgi?id=89
      * Finds the preferred <code>GraphicsConfiguration</code> object
@@ -1309,17 +1310,24 @@ public class View extends Canvas3D implements PositionListener
 	/** Let this view ignore all input (mouse and keyboard) events */
 	public void lock()
 	{
-		this.locked = true;
-		orbit.lock();
-		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		if(!locked)
+		{
+			locked = true;
+			orbit.lock();
+			unlockedCursor = getCursor();
+			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		}
 	}
 	
 	/** @see lock */
 	public void unlock()
 	{
-		this.locked = false;
-		orbit.unlock();
-		setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+		if(locked)
+		{
+			locked = false;
+			orbit.unlock();
+			setCursor(unlockedCursor);
+		}
 	}
 
 	@Override
