@@ -43,6 +43,12 @@
 #include <XSControl_TransferReader.hxx>
 #include <StepRepr_RepresentationItem.hxx>
 #include <TCollection_HAsciiString.hxx>
+#include <IGESData_IGESEntity.hxx>
+#include <TransferBRep.hxx>
+#include <Transfer_Binder.hxx>
+#include <Transfer_TransientProcess.hxx>
+#include <Interface_InterfaceModel.hxx>
+#include <iostream>
  %}
 class XSControl_Reader
 {
@@ -120,4 +126,86 @@ class IGESControl_Reader: public XSControl_Reader
 	IGESControl_Reader();
 };
 
+%extend IGESControl_Reader 
+{
+	//dirty quick implementation of label iges reading 
+	const char * getLabel(TopoDS_Shape theShape) 
+	{
+		const Handle(XSControl_WorkSession)& theSession = self->WS();
+		const Handle(Interface_InterfaceModel)& theModel = theSession->Model();
+		const Handle(XSControl_TransferReader)& aReader = theSession->TransferReader();
+		const Handle(Transfer_TransientProcess)& tp = aReader->TransientProcess();
+		Standard_Integer nb = theModel->NbEntities(); 
+		for(Standard_Integer i=1; i<=nb; i++) 
+		{
+			Handle(IGESData_IGESEntity) ent = Handle(IGESData_IGESEntity)::DownCast(theModel->Value(i));
 
+			if (ent.IsNull())
+				continue;
+
+			Handle(Transfer_Binder) binder = tp->Find(ent); 
+
+			if (binder.IsNull())
+				continue;
+			TopoDS_Shape oneShape = TransferBRep::ShapeResult(binder);
+			if (oneShape.IsNull())
+				continue;
+			if (oneShape.IsEqual(theShape))
+			{
+				if (ent->HasName())
+					return ent->NameValue()->String().ToCString();
+				else
+					return NULL; 
+			}
+		}
+		return NULL; 
+	}
+
+	//get shape for label 
+	TopoDS_Shape getShape(char* shapeName)
+	{
+		const TCollection_AsciiString ascShapeName(shapeName);
+		const Handle(XSControl_WorkSession)& theSession = self->WS();
+		const Handle(Interface_InterfaceModel)& theModel = theSession->Model();
+		const Handle(XSControl_TransferReader)& aReader = theSession->TransferReader();
+		const Handle(Transfer_TransientProcess)& tp = aReader->TransientProcess();
+		Standard_Integer nb = theModel->NbEntities();
+		TopoDS_Shape retShape; 
+		for(Standard_Integer i=1; i<=nb; i++)
+		{
+			Handle(IGESData_IGESEntity) ent = Handle(IGESData_IGESEntity)::DownCast(theModel->Value(i));
+
+			if (ent.IsNull())
+				continue;
+			Handle(Transfer_Binder) binder = tp->Find(ent);
+
+			if (binder.IsNull())
+				continue;
+			TopoDS_Shape oneShape = TransferBRep::ShapeResult(binder);
+
+			if (oneShape.IsNull())
+				continue;
+
+			if (ent->HasName() && ent->NameValue()->String().IsEqual(ascShapeName))
+				retShape = oneShape;
+		}
+		return retShape; 
+	}
+
+	//dump all labels 
+	void dumpLabels()
+	{
+		const Handle(XSControl_WorkSession)& theSession = self->WS();
+		const Handle(Interface_InterfaceModel)& theModel = theSession->Model();
+		Standard_Integer nb = theModel->NbEntities();
+		for(Standard_Integer i=1; i<=nb; i++)
+		{
+			Handle(IGESData_IGESEntity) ent = Handle(IGESData_IGESEntity)::DownCast(theModel->Value(i));
+			if (ent.IsNull()) continue;
+			if (ent->HasName())
+			{
+				std::cout << ent->NameValue()->String().ToCString() << std::endl;
+			}
+		}
+	}
+};
