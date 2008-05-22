@@ -205,6 +205,12 @@ public class MeshReader extends Storage
 		}
 		if (mapNodeToNonReadVertexList != null) {
 			loadVerticesFromUnloadedNodes();
+			for (TIntObjectIterator<List<FakeNonReadVertex>> it = mapNodeToNonReadVertexList.iterator(); it.hasNext(); )
+			{
+				it.advance();
+				for (FakeNonReadVertex vertex: it.value())
+					mesh.add(vertex);
+			}
 		}
 		if (mesh.hasAdjacency())
 			mesh.buildAdjacency();
