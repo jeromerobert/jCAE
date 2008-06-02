@@ -6,6 +6,7 @@ parentdir=$(dirname $dir)
 memory=500m
 jcaehome=
 javahome=
+groovy=
 groovyhome=
 logproperties=
 scriptdir=$dir
@@ -17,8 +18,8 @@ usage()
 	echo "Global options:" >&2
 	echo "  -h,--help                    Print this help message" >&2
 	echo "  -j,--javahome=PATH           Path to JVM" >&2
-	echo "  -g,--groovyhome=PATH         Path to groovy jars" >&2
 	echo "  -c,--jcaehome=PATH           Path to jCAE" >&2
+	echo "     --groovy=PATH             Path to external groovy executable" >&2
 	echo "  -l,--logging-properties=FILE Path to logging.properties file" >&2
 	echo "  -m,--memory=MEM              Set maximum Java memory via -Xmx flag" >&2
 	echo "Available list of commands:" >&2
@@ -66,6 +67,13 @@ do
 	shift ;;
   -javahome=* | --javahome=* )
 	javahome=$optarg
+	shift ;;
+
+  -groovy | --groovy )
+	prev=groovy
+	shift ;;
+  -groovy=* | --groovy=* )
+	groovy=$optarg
 	shift ;;
 
   -g | -groovyhome | --groovyhome )
@@ -130,9 +138,15 @@ $jcaehome/OpenCASCADE6.2.0/ros/Linux/lib:\
 $jcaehome/jcae/modules/lib\
 ${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
-Gall=$(echo $groovyhome/embeddable/groovy-all*.jar)
-Gcli=$(echo $groovyhome/lib/commons-cli*.jar)
 jcae="$jcaehome/jcae/modules/ext/amibe.jar:$jcaehome/jcae/modules/ext/jcae-viewer3d-amibe.jar"
 
-$javahome/bin/java $JAVA_OPTS -cp $Gall:$Gcli:$jcae groovy.ui.GroovyMain $scriptdir/$cmd "$@"
+if test -n "$groovy"; then
+	export JAVA_OPTS
+	$groovy -cp "$jcae" "$scriptdir/$cmd" "$@"
+else
+	Gall=$(echo $groovyhome/embeddable/groovy-all*.jar)
+	Gcli=$(echo $groovyhome/lib/commons-cli*.jar)
 
+	"$javahome"/bin/java $JAVA_OPTS -cp "$Gall:$Gcli:$jcae" groovy.ui.GroovyMain "$scriptdir/$cmd" "$@"
+fi
+exit 0
