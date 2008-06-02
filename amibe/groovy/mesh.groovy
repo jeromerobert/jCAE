@@ -15,7 +15,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.nio.channels.FileChannel
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import org.apache.commons.cli.*;
 
 cmd=["mesh    ", "Mesh a CAD file"]
@@ -93,7 +93,7 @@ String outputDir = remaining[1]
 leng = Double.parseDouble(remaining[2])
 defl = Double.parseDouble(remaining[3])
 
-Logger logger=Logger.getRootLogger()
+Logger logger=Logger.getLogger("mesh")
 String brepdir = ".";
 if (brepfile.indexOf((int) File.separatorChar) >= 0)
 {
