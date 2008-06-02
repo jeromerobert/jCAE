@@ -83,7 +83,7 @@ do
 	shift ;;
 
   -l | -logging-properties )
-	prev=logging-properties
+	prev=logproperties
 	shift ;;
   -logging-properties=* | --logging-properties=* )
 	logproperties=$optarg
