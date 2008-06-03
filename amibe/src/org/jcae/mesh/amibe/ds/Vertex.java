@@ -26,10 +26,10 @@ import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.LinkedHashSet;
 import java.io.Serializable;
 
 /**
@@ -368,44 +368,181 @@ public class Vertex implements Serializable
 		return link instanceof Triangle;
 	}
 	
+	private class NeighbourIterator
+	{
+		protected AbstractHalfEdge next;
+		protected final Vertex start;
+		protected boolean started;
+		NeighbourIterator(Triangle tri)
+		{
+			next = getIncidentAbstractHalfEdge(tri, null);
+			start = next.destination();
+		}
+		public final boolean hasNext()
+		{
+			return !started || next.apex() != start;
+		}
+		protected final AbstractHalfEdge advance()
+		{
+			if (started)
+				next = next.nextOriginLoop();
+			else
+				started = true;
+			return next;
+		}
+		public final void remove()
+		{
+			throw new RuntimeException("NeighbourIterator.remove not implemented!");
+		}
+	}
+
+	private final class NeighbourIteratorVertex extends NeighbourIterator implements Iterator<Vertex>
+	{
+		NeighbourIteratorVertex(Triangle tri)
+		{
+			super(tri);
+		}
+		public final Vertex next()
+		{
+			return advance().destination();
+		}
+	}
+
+	private final class NeighbourIteratorAbstractHalfEdge extends NeighbourIterator implements Iterator<AbstractHalfEdge>
+	{
+		NeighbourIteratorAbstractHalfEdge(Triangle tri)
+		{
+			super(tri);
+		}
+		public final AbstractHalfEdge next()
+		{
+			return advance();
+		}
+	}
+
+	private final class NeighbourIteratorTriangle extends NeighbourIterator implements Iterator<Triangle>
+	{
+		NeighbourIteratorTriangle(Triangle tri)
+		{
+			super(tri);
+		}
+		public final Triangle next()
+		{
+			return advance().getTri();
+		}
+	}
+
+	private final class EmptyIterator<E> implements Iterator<E>
+	{
+		public final E next()
+		{
+			throw new RuntimeException();
+		}
+		public final boolean hasNext()
+		{
+			return false;
+		}
+		public final void remove()
+		{
+			throw new RuntimeException("NeighbourIterator.remove not implemented!");
+		}
+	}
+
+	private final class ChainIterator<E> implements Iterator<E>
+	{
+		private int index;
+		private Iterator<E> current;
+		private Iterator<E>[] iterators;
+		ChainIterator(Iterator<E>[] it)
+		{
+			iterators = it;
+			// Backward processing to avoid comparison with iterators.length
+			index   = iterators.length - 1;
+			current = iterators[index];
+		}
+		public final E next()
+		{
+			if (!current.hasNext())
+			{
+				index--;
+				current = iterators[index];
+			}
+			return current.next();
+		}
+		public final boolean hasNext()
+		{
+			return index > 0 || current.hasNext();
+		}
+		public final void remove()
+		{
+			throw new RuntimeException("NeighbourIterator.remove not implemented!");
+		}
+	}
+
 	/**
-	 * Get the list of adjacent vertices.
+	 * Return an iterator over adjacent vertices.
 	 * Note: this method works also with non-manifold meshes.
 	 *
-	 * @return the list of adjacent vertices.
+	 * @return an iterator over adjacent vertices
 	 */
-	public Collection<Vertex> getNeighboursNodes()
+	public Iterator<Vertex> getNeighbourIteratorVertex()
 	{
-		Collection<Vertex> ret = new LinkedHashSet<Vertex>();
 		//if the vertex has no link then we return empty list
 		if (link == null)
-			return ret;
+			return new EmptyIterator<Vertex>();
 		if (link instanceof Triangle)
-			appendNeighboursTri((Triangle) link, ret);
-		else
-		{
-			// Non-manifold vertex
-			logger.fine("Non-manifold vertex: "+this);
-			Triangle [] t = (Triangle []) link;
-			for (int i = 0; i < t.length; i++)
-				appendNeighboursTri(t[i], ret);
-		}
-		return ret;
+			return new NeighbourIteratorVertex((Triangle) link);
+		// Non-manifold vertex
+		logger.fine("Non-manifold vertex: "+this);
+		Triangle [] t = (Triangle []) link;
+		Iterator<Vertex> [] iterators = new NeighbourIteratorVertex[t.length];
+		for (int i = 0; i < t.length; i++)
+			iterators[i] = new NeighbourIteratorVertex(t[i]);
+		return new ChainIterator<Vertex>(iterators);
 	}
 	
-	private void appendNeighboursTri(Triangle tri, Collection<Vertex> nodes)
+	/**
+	 * Return an iterator over incident triangles.
+	 * Note: this method works also with non-manifold meshes.
+	 *
+	 * @return an iterator over incident triangles
+	 */
+	public Iterator<Triangle> getNeighbourIteratorTriangle()
 	{
-		assert tri.vertex[0] == this || tri.vertex[1] == this || tri.vertex[2] == this;
-		AbstractHalfEdge ot = getIncidentAbstractHalfEdge(tri, null);
-		Vertex d = ot.destination();
-		do
-		{
-			// Warning: mesh.outerVertex is intentionnally not filtered out
-			nodes.add(ot.destination());
-			ot = ot.nextOriginLoop();
-			assert ot.origin() == this : ot+" should originate from "+this;
-		}
-		while (ot.destination() != d);
+		//if the vertex has no link then we return empty list
+		if (link == null)
+			return new EmptyIterator<Triangle>();
+		if (link instanceof Triangle)
+			return new NeighbourIteratorTriangle((Triangle) link);
+		// Non-manifold vertex
+		logger.fine("Non-manifold vertex: "+this);
+		Triangle [] t = (Triangle []) link;
+		Iterator<Triangle> [] iterators = new NeighbourIteratorTriangle[t.length];
+		for (int i = 0; i < t.length; i++)
+			iterators[i] = new NeighbourIteratorTriangle(t[i]);
+		return new ChainIterator<Triangle>(iterators);
+	}
+	
+	/**
+	 * Return an iterator over incident half-edges.
+	 * Note: this method works also with non-manifold meshes.
+	 *
+	 * @return an iterator over incident half-edges.
+	 */
+	public Iterator<AbstractHalfEdge> getNeighbourIteratorAbstractHalfEdge()
+	{
+		//if the vertex has no link then we return empty list
+		if (link == null)
+			return new EmptyIterator<AbstractHalfEdge>();
+		if (link instanceof Triangle)
+			return new NeighbourIteratorAbstractHalfEdge((Triangle) link);
+		// Non-manifold vertex
+		logger.fine("Non-manifold vertex: "+this);
+		Triangle [] t = (Triangle []) link;
+		Iterator<AbstractHalfEdge> [] iterators = new NeighbourIteratorAbstractHalfEdge[t.length];
+		for (int i = 0; i < t.length; i++)
+			iterators[i] = new NeighbourIteratorAbstractHalfEdge(t[i]);
+		return new ChainIterator<AbstractHalfEdge>(iterators);
 	}
 	
 	/**

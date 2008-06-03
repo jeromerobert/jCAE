@@ -21,6 +21,7 @@
 package org.jcae.mesh.amibe.validation;
 
 import org.jcae.mesh.amibe.ds.Vertex;
+import java.util.Iterator;
 
 public class NodeConnectivity extends QualityProcedure
 {
@@ -37,7 +38,9 @@ public class NodeConnectivity extends QualityProcedure
 		if (!(o instanceof Vertex))
 			throw new IllegalArgumentException();
 		Vertex n = (Vertex) o;
-		int count = n.getNeighboursNodes().size();
+		int count = 0;
+		for (Iterator<Vertex> itnv = n.getNeighbourIteratorVertex(); itnv.hasNext(); itnv.next())
+			count++;
 		if (count <= 6)
 			return (count / 6.0f);
 		else if (count <= 11)

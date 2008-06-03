@@ -1,3 +1,10 @@
+Tue Jun  3 15:22:37 CEST 2008 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Vertex.java: Replace getNeighboursNodes()
+	by a new getNeighbourIteratorVertex() method which returns an
+	Iterator<Vertex>. Also provide methods to return incident edges
+	and triangles.
+
 Thu May 22 10:51:39 CEST 2008 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/oemm/MeshReader.java: Fix NullPointerException

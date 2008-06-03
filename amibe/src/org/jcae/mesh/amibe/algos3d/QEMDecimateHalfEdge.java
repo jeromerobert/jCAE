@@ -342,13 +342,15 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 			return false;
 		if (maxEdgeLength > 0.0)
 		{
-			for (Vertex n: v1.getNeighboursNodes())
+			for (Iterator<Vertex> itnv = v1.getNeighbourIteratorVertex(); itnv.hasNext(); )
 			{
+				Vertex n = itnv.next();
 				if (n != mesh.outerVertex && v3.distance3D(n) > maxEdgeLength)
 					return false;
 			}
-			for (Vertex n: v2.getNeighboursNodes())
+			for (Iterator<Vertex> itnv = v2.getNeighbourIteratorVertex(); itnv.hasNext(); )
 			{
+				Vertex n = itnv.next();
 				if (n != mesh.outerVertex && v3.distance3D(n) > maxEdgeLength)
 					return false;
 			}

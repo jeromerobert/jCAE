@@ -895,7 +895,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		//  Topology check.
 		//  See in AbstractHalfEdgeTest.buildMeshTopo() why this
 		//  check is needed.
-		//  When edge is non manifold, we do not use Vertex.getNeighboursNodes()
+		//  When edge is non manifold, we do not use Vertex.getNeighbourIteratorVertex()
 		//  because checks have to be performed by fans.
 		for (Iterator<AbstractHalfEdge> it = fanIterator(); it.hasNext(); )
 		{

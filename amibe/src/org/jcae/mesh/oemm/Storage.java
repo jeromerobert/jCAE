@@ -37,6 +37,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Comparator;
 import java.util.List;
 import gnu.trove.TIntArrayList;
@@ -375,8 +376,9 @@ public class Storage
 					
 					int neighbours = 0;
 					addedNeighbour.clear();
-					for (Vertex neighbour: vertex.getNeighboursNodes())
+					for (Iterator<Vertex> itnv = vertex.getNeighbourIteratorVertex(); itnv.hasNext(); )
 					{
+						Vertex neighbour = itnv.next();
 						if (neighbour == mesh.outerVertex)
 							continue;
 						int nodeNumber;
