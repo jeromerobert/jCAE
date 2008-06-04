@@ -56,7 +56,7 @@ public class Fuse
 	public Fuse(Mesh m, double eps)
 	{
 		mesh = m;
-		tolerance = eps;
+		tolerance = eps*eps;
 	}
 	
 	/**
@@ -107,7 +107,7 @@ public class Fuse
 			if (n.isMutable())
 				continue;
 			Vertex p = octree.getNearestVertex(mesh, n);
-			if (p == null || p.isMutable() || n.distance3D(p) > tolerance)
+			if (p == null || p.isMutable() || n.sqrDistance3D(p) > tolerance)
 				octree.add(n);
 			else
 			{

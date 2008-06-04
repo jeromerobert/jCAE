@@ -675,7 +675,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		Vertex d = destination();
 		Vertex a = apex();
 		Vertex n = work[0].apex();
-		if (maxLength > 0.0 && a.distance3D(n) > maxLength)
+		if (maxLength > 0.0 && a.sqrDistance3D(n) > maxLength)
 			return invalid;
 		// Check for inverted triangles
 		o.outer3D(n, a, tempD1, tempD2, n2);

@@ -179,6 +179,20 @@ public class Vertex implements Serializable
 	}
 	
 	/**
+	 * Returns the squared distance in 3D space.
+	 *
+	 * @param end  the node to which distance is computed.
+	 * @return the squared distance to <code>end</code>.
+	 **/
+	public double sqrDistance3D(Vertex end)
+	{
+		double x = param[0] - end.param[0];
+		double y = param[1] - end.param[1];
+		double z = param[2] - end.param[2];
+		return x*x+y*y+z*z;
+	}
+	
+	/**
 	 * Returns the distance in 3D space.
 	 *
 	 * @param end  the node to which distance is computed.

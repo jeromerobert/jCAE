@@ -65,6 +65,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			{
 				tolerance = Double.parseDouble(val);
 				logger.fine("Tolerance: "+tolerance);
+				tolerance = tolerance*tolerance;
 			}
 			else if ("maxtriangles".equals(key))
 			{
@@ -75,6 +76,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			{
 				maxEdgeLength = Double.parseDouble(val);
 				logger.fine("Max edge length: "+maxEdgeLength);
+				maxEdgeLength = maxEdgeLength*maxEdgeLength;
 			}
 			else if ("freeEdgeOnly".equals(key))
 			{
@@ -84,6 +86,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			else if ("freeEdgeTol".equals(key))
 			{
 				freeEdgeTol = Double.parseDouble(val);
+				freeEdgeTol = freeEdgeTol*freeEdgeTol;
 			}
 			else
 				throw new IllegalArgumentException("Unknown option: "+key);
@@ -111,9 +114,9 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 		//Ensure that boundary and non manifold edges are never processed
 		if (freeEdgeOnly && !e.hasAttributes(AbstractHalfEdge.BOUNDARY |
 			AbstractHalfEdge.NONMANIFOLD))
-			return 2.0 * tolerance;
+			return 4.0 * tolerance;
 		
-		double toReturn = e.origin().distance3D(e.destination());
+		double toReturn = e.origin().sqrDistance3D(e.destination());
 		
 		//Handle the case of specific tolerance for free edges
 		if(freeEdgeFactor != 1.0 &&
@@ -146,13 +149,13 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			for (Iterator<Vertex> itnv = v1.getNeighbourIteratorVertex(); itnv.hasNext(); )
 			{
 				Vertex n = itnv.next();
-				if (n != mesh.outerVertex && v3.distance3D(n) > maxEdgeLength)
+				if (n != mesh.outerVertex && v3.sqrDistance3D(n) > maxEdgeLength)
 					return false;
 			}
 			for (Iterator<Vertex> itnv = v2.getNeighbourIteratorVertex(); itnv.hasNext(); )
 			{
 				Vertex n = itnv.next();
-				if (n != mesh.outerVertex && v3.distance3D(n) > maxEdgeLength)
+				if (n != mesh.outerVertex && v3.sqrDistance3D(n) > maxEdgeLength)
 					return false;
 			}
 		}

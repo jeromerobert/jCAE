@@ -108,11 +108,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 	@Override
 	public double cost(final HalfEdge e)
 	{
-		double [] p0 = e.origin().getUV();
-		double [] p1 = e.destination().getUV();
-		double l2 = (p1[0] - p0[0]) * (p1[0] - p0[0]) +
-		            (p1[1] - p0[1]) * (p1[1] - p0[1]) +
-		            (p1[2] - p0[2]) * (p1[2] - p0[2]);
+		double l2 = e.origin().sqrDistance3D(e.destination());
 		if (l2 == 0.0)
 			return Double.MAX_VALUE;
 		return 1.0 / l2;
@@ -149,13 +145,13 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 
 		if (tolerance <= 0.0)
 			return true;
-		double dapex = insertedVertex.distance3D(current.apex());
+		double dapex2 = insertedVertex.sqrDistance3D(current.apex());
 		if (!current.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 		{
 			current = current.sym();
-			dapex = Math.min(dapex, insertedVertex.distance3D(current.apex()));
+			dapex2 = Math.min(dapex2, insertedVertex.sqrDistance3D(current.apex()));
 		}
-		if (dapex * dapex * tolerance * 16.0 > 1.0)
+		if (dapex2 * tolerance * 16.0 > 1.0)
 			return true;
 		if (logger.isLoggable(Level.FINE))
 			logger.fine("Point "+vm+" too near from apical vertex");

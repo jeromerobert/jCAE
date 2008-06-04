@@ -155,6 +155,7 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 			{
 				maxEdgeLength = new Double(val).doubleValue();
 				logger.fine("Max edge length: "+maxEdgeLength);
+				maxEdgeLength = maxEdgeLength*maxEdgeLength;
 			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
@@ -345,13 +346,13 @@ public class QEMDecimateHalfEdge extends AbstractAlgoHalfEdge
 			for (Iterator<Vertex> itnv = v1.getNeighbourIteratorVertex(); itnv.hasNext(); )
 			{
 				Vertex n = itnv.next();
-				if (n != mesh.outerVertex && v3.distance3D(n) > maxEdgeLength)
+				if (n != mesh.outerVertex && v3.sqrDistance3D(n) > maxEdgeLength)
 					return false;
 			}
 			for (Iterator<Vertex> itnv = v2.getNeighbourIteratorVertex(); itnv.hasNext(); )
 			{
 				Vertex n = itnv.next();
-				if (n != mesh.outerVertex && v3.distance3D(n) > maxEdgeLength)
+				if (n != mesh.outerVertex && v3.sqrDistance3D(n) > maxEdgeLength)
 					return false;
 			}
 		}

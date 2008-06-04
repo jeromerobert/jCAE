@@ -424,7 +424,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		Vertex d = destination();
 		Vertex a = apex();
 		Vertex n = sym.apex();
-		if (maxLength > 0.0 && a.distance3D(n) > maxLength)
+		if (maxLength > 0.0 && a.sqrDistance3D(n) > maxLength)
 			return invalid;
 		double s1 = Matrix3D.computeNormal3D(o.getUV(), d.getUV(), a.getUV(), temp[0], temp[1], temp[2]);
 		double s2 = Matrix3D.computeNormal3D(d.getUV(), o.getUV(), n.getUV(), temp[0], temp[1], temp[3]);

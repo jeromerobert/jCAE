@@ -1,3 +1,8 @@
+Wed Jun  4 17:47:59 CEST 2008 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Vertex.java: New sqrDistance3D() method
+	to eliminate calls to Math.sqrt when possible.
+
 Tue Jun  3 15:22:37 CEST 2008 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Vertex.java: Replace getNeighboursNodes()
