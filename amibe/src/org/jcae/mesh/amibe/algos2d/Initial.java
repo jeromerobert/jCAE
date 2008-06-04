@@ -28,6 +28,7 @@ import org.jcae.mesh.amibe.ds.MeshParameters;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
@@ -266,7 +267,6 @@ public class Initial
 	{
 		TriangleVH t;
 		VirtualHalfEdge2D ot;
-		Vertex2D v;
 
 		if (bNodes.length < 3)
 		{
@@ -276,9 +276,9 @@ public class Initial
 		logger.fine(" Unconstrained Delaunay triangulation");
 		double [] bbmin = { Double.MAX_VALUE, Double.MAX_VALUE };
 		double [] bbmax = { Double.MIN_VALUE, Double.MIN_VALUE };
-		for (int i = 0; i < bNodes.length; i++)
+		for (Vertex2D v: bNodes)
 		{
-			double [] uv = bNodes[i].getUV();
+			double [] uv = v.getUV();
 			for (int k = 0; k < 2; k++)
 			{
 				if (uv[k] > bbmax[k])
@@ -319,7 +319,7 @@ public class Initial
 			{
 				if (i == i3)
 					continue;
-				v = bNodes[i];
+				Vertex2D v = bNodes[i];
 				if (firstOnWire == v)
 					firstOnWire = null;
 				else
@@ -440,9 +440,8 @@ public class Initial
 			t = (TriangleVH) it.next();
 			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			for (int i = 0; i < 3; i++)
+			for (Vertex v: t.vertex)
 			{
-				v = (Vertex2D) t.vertex[i];
 				if (v.isManifold())
 					v.setLink(t);
 			}
@@ -454,7 +453,7 @@ public class Initial
 			mesh.pushCompGeom(2);
 			for (MNode1D p1: innerNodes)
 			{
-				v = Vertex2D.valueOf(p1, null, face);
+				Vertex2D v = Vertex2D.valueOf(p1, null, face);
 				ot = v.getSurroundingOTriangle(mesh);
 				ot.split3(mesh, v, null, true); 
 			}
