@@ -541,7 +541,7 @@ public class Mesh implements Serializable
 			if (bndNodes.contains(v))
 				continue;
 			int label = v.getRef();
-			if (v.getLink() instanceof Triangle[])
+			if (!v.isManifold())
 			{
 				nrJunctionPoints++;
 				if (label == 0)
@@ -965,7 +965,7 @@ public class Mesh implements Serializable
 				Vertex v = t.vertex[i];
 				if (v.getLink() == null)
 					continue;
-				if (v.getLink() instanceof Triangle)
+				if (v.isManifold())
 				{
 					Triangle t2 = (Triangle) v.getLink();
 					if (t2.vertex[0] != v && t2.vertex[1] != v && t2.vertex[2] != v)
@@ -1085,13 +1085,13 @@ public class Mesh implements Serializable
 			}
 			else if (ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 			{
-				if (!(v1.getLink() instanceof Triangle[]))
+				if (v1.isManifold())
 				{
 					logger.severe("Multiple edges: endpoint must be non-manifold: "+v1);
 					logger.severe(" "+ot);
 					return false;
 				}
-				if (!(v2.getLink() instanceof Triangle[]))
+				if (v2.isManifold())
 				{
 					logger.severe("Multiple edges: endpoint must be non-manifold: "+v2);
 					logger.severe(" "+ot);
@@ -1251,13 +1251,13 @@ public class Mesh implements Serializable
 			}
 			else if (e.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 			{
-				if (!(v1.getLink() instanceof Triangle[]))
+				if (v1.isManifold())
 				{
 					logger.severe("Multiple edges: endpoint must be non-manifold: "+v1);
 					logger.severe(" "+e);
 					return false;
 				}
-				if (!(v2.getLink() instanceof Triangle[]))
+				if (v2.isManifold())
 				{
 					logger.severe("Multiple edges: endpoint must be non-manifold: "+v2);
 					logger.severe(" "+e);
