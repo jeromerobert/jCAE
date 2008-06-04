@@ -45,16 +45,12 @@ public class ElementFactory implements ElementFactoryInterface
 
 	public Vertex createVertex(double x, double y, double z)
 	{
-		if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE | TriangleTraitsBuilder.VIRTUALHALFEDGE))
-			return new Vertex(vertexTraitsBuilder, x, y, z);
 		return new Vertex(vertexTraitsBuilder, x, y, z);
 	}
 
 	public Vertex createVertex(double [] x)
 	{
 		assert x.length == 3;
-		if (triangleTraitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE | TriangleTraitsBuilder.VIRTUALHALFEDGE))
-			return new Vertex(vertexTraitsBuilder, x[0], x[1], x[2]);
 		return new Vertex(vertexTraitsBuilder, x[0], x[1], x[2]);
 	}
 
