@@ -24,8 +24,6 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
-import org.jcae.viewer3d.fe.amibe.AmibeDomain;
-import org.jcae.viewer3d.fe.amibe.AmibeProvider;
 import org.xml.sax.SAXException;
 
 /**

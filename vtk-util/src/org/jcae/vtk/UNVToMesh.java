@@ -25,7 +25,6 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import org.jcae.viewer3d.fe.unv.UNVParser;
 
 /**
  *
