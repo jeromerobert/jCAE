@@ -63,7 +63,10 @@ See http://forrest.apache.org/docs/linking.html for more info
 			<amibe-api label="API" href="amibe-doc/index.html"/>
 			<amibe-faq label="FAQ" href="amibe-faq.html"/>
 		</amibe>
-		<developers label="Developers" href="developers.html"/>
+		<developers label="Developers">
+			<developers-faq label="FAQ" href="developers.html"/>
+			<developers-vtk label="VTK" href="vtk.html"/>
+		</developers>
 		<oldies label="Oldies">
 			<jcae06 label="jCAE 0.6" href="jcae-0.6.html"/>
 			<jcae07 label="jCAE 0.7" href="jcae-0.7.html"/>

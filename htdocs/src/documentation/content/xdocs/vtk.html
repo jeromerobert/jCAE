@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<title> jCAE - VTK </title>
+	</head>
+	<body>
+	<h1>Introduction</h1>
+<p>The jCAE project has started a migration process from Java3D to VTK. The main reason why
+we are giving up java3d is the lake of picking features. The <code>viewer3d</code> module will
+be replaced by a <code>vtk-util</code> module.</p>
+	<h1>Building VTK</h1>
+	<h2>Getting source</h2>
+<p>Kitware doesn't provide binary distributions with Java binding enabled so you have to build
+VTK by yourself. The current version of vtk-util require at least VTK 5.1 and is known to work
+with VTK 5.3 (current CVS HEAD). Both are unreleased CVS versions. See <a href="http://www.vtk.org">http://www.vtk.org</a>.</p>
+	<h2>Dependencies</h2>
+<p>Here are the requirements to build VTK with Java binding:</p>
+<ul>
+	<li><code>patch</code>. You have it in your Linux distro. There are also <a href="http://gnuwin32.sourceforge.net/packages/patch.htm">Windows binaries</a>.</li>
+	<li><a href="http://www.cmake.org"/>cmake</a></li>
+	<li>GNU make and gcc [Linux], or Visual Studio Express [Windows], or any other set of compilation tool supported by cmake.</li>
+	<li>OpenGL header and developer libraries</li>
+	<li>The Sun Java Development Kit</li>
+</ul>
+<p>On Debian/Ubuntu system just do:</p>
+<pre>apt-get install patch make cmake libgl1-mesa-dev sun-java6-jdk</pre>
+	<h2>Patching</h2>
+<p>Developing jCAE we fixed several problems in VTK and made some patches. Writting thoses lines,
+those patches are not yet integrated in the VTK CVS repository. You may find them here:
+<a href="https://jcae.svn.sourceforge.net/svnroot/jcae/trunk/vtk-util/patch">
+https://jcae.svn.sourceforge.net/svnroot/jcae/trunk/vtk-util/patch</a>. The patching commands will look like this:</p>
+<pre class="code">cd VTK
+patch -p0 &lt; /tmp/underscore.patch
+patch -p0 &lt; /tmp/displayList.patch
+patch -p0 &lt; /tmp/translucent.patch
+patch -p0 &lt; /tmp/offset.patch
+</pre>
+	<h2>Configuring and building</h2>
+<pre class="code">mkdir build-vtk
+cd build-vtk
+cmake ../VTK
+</pre>
+<p>This will create a default configuration file name <code>CMakeCache.txt</code>. To build the
+Java binding you have to modify it. Here is an example for Debian like distribution:</p>
+<pre class="code">
+VTK_WRAP_JAVA:BOOL=ON
+//Path to a program.
+JAVA_ARCHIVE:FILEPATH=/usr/bin/jar
+
+//Path to a file.
+JAVA_AWT_INCLUDE_PATH:PATH=/usr/lib/jvm/java-6-sun/include/
+
+//Path to a library.
+JAVA_AWT_LIBRARY:FILEPATH=/usr/lib/jvm/java-6-sun/jre/lib/i386/libjawt.so
+
+//Path to a program.
+JAVA_COMPILE:FILEPATH=/usr/bin/javac
+
+//Path to a file.
+JAVA_INCLUDE_PATH:PATH=/usr/lib/jvm/java-6-sun/include/
+
+//Path to a file.
+JAVA_INCLUDE_PATH2:PATH=/usr/lib/jvm/java-6-sun/include/linux
+
+//Path to a program.
+JAVA_RUNTIME:FILEPATH=/usr/bin/java
+</pre>
+<p>Then rerun <code>cmake ../VTK</code> to take the change into account.
+Finally run <code>make</code>.</p>
+<p>The building process on Windows is similar except that the CMakeCache.txt edition
+can be done through a GUI and that you will probably use Visual Studio instead
+of GNU Make/GCC.</p>
+	<h2>Other documentation</h2>
+<p>For more documentation see the <a href="http://www.vtk.org/Wiki/">VTK wiki</a>.</p>
+</body></html>
