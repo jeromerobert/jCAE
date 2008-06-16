@@ -49,24 +49,24 @@ public class MeshReader extends Storage
 {
 	private static Logger logger=Logger.getLogger(MeshReader.class.getName());	
 	
-	private final OEMM oemm;
+	protected final OEMM oemm;
 	// Map between octant index and Mesh instance.
 	private TIntObjectHashMap<Mesh> mapNodeToMesh = null;
 	// Map between octant index and a list of vertices from adjacent triangles so that all triangles are readable
-	private TIntObjectHashMap<List<FakeNonReadVertex>> mapNodeToNonReadVertexList = null;
+	protected TIntObjectHashMap<List<FakeNonReadVertex>> mapNodeToNonReadVertexList = null;
 
 	/**
 	 * Buffer size.  Vertices and triangles are read through buffers to improve
 	 * efficiency, buffer size must be a multiple of {@link #TRIANGLE_SIZE} and
 	 * {@link #VERTEX_SIZE}.
 	 */
-	private static final int bufferSize = 24 * VERTEX_SIZE * TRIANGLE_SIZE;
-	// bufferSize = 16128
+	protected static final int BUFFER_SIZE = 24 * VERTEX_SIZE * TRIANGLE_SIZE;
+	// BUFFER_SIZE = 16128
 	
 	/**
 	 * Buffer to improve I/O efficiency.
 	 */
-	private static ByteBuffer bb = ByteBuffer.allocate(bufferSize);
+	protected static ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
 	
 	/**
 	 * Constructor.
@@ -236,16 +236,16 @@ public class MeshReader extends Storage
 			double [] xyz = new double[3];
 			List<TIntArrayList> listAdjacentLeaves = readAdjacencyFile(oemm, current, leaves);
 			FileChannel fc = new FileInputStream(getVerticesFile(oemm, current)).getChannel();
-			bb.clear();
-			DoubleBuffer bbD = bb.asDoubleBuffer();
+			buffer.clear();
+			DoubleBuffer bbD = buffer.asDoubleBuffer();
 			int remaining = current.vn;
 			int index = 0;
-			for (int nblock = (remaining * VERTEX_SIZE) / bufferSize; nblock >= 0; --nblock)
+			for (int nblock = (remaining * VERTEX_SIZE) / BUFFER_SIZE; nblock >= 0; --nblock)
 			{
-				bb.rewind();
-				fc.read(bb);
+				buffer.rewind();
+				fc.read(buffer);
 				bbD.rewind();
-				int nf = bufferSize / VERTEX_SIZE;
+				int nf = BUFFER_SIZE / VERTEX_SIZE;
 				if (remaining < nf)
 					nf = remaining;
 				remaining -= nf;
@@ -288,14 +288,14 @@ public class MeshReader extends Storage
 			int [] pointIndex = new int[3];
 			mesh.ensureCapacity(current.tn);
 			int remaining = current.tn;
-			bb.clear();
-			IntBuffer bbI = bb.asIntBuffer();
-			for (int nblock = (remaining * TRIANGLE_SIZE) / bufferSize; nblock >= 0; --nblock)
+			buffer.clear();
+			IntBuffer bbI = buffer.asIntBuffer();
+			for (int nblock = (remaining * TRIANGLE_SIZE) / BUFFER_SIZE; nblock >= 0; --nblock)
 			{
-				bb.rewind();
-				fc.read(bb);
+				buffer.rewind();
+				fc.read(buffer);
 				bbI.rewind();
-				int nf = bufferSize / TRIANGLE_SIZE;
+				int nf = BUFFER_SIZE / TRIANGLE_SIZE;
 				if (remaining < nf)
 					nf = remaining;
 				remaining -= nf;
@@ -384,12 +384,12 @@ public class MeshReader extends Storage
 	private void loadVerticesFromUnloadedNodes()
 	{
 		assert mapNodeToNonReadVertexList != null;
-		int lastLimit = bb.limit();
+		int lastLimit = buffer.limit();
 		
 		try {
-			bb.limit(VERTEX_SIZE);
-			bb.rewind();
-			DoubleBuffer dbb = bb.asDoubleBuffer();
+			buffer.limit(VERTEX_SIZE);
+			buffer.rewind();
+			DoubleBuffer dbb = buffer.asDoubleBuffer();
 			
 			for (TIntObjectIterator<List<FakeNonReadVertex>> it = mapNodeToNonReadVertexList.iterator(); it.hasNext(); )
 			{
@@ -403,8 +403,8 @@ public class MeshReader extends Storage
 					for (FakeNonReadVertex vertex: list) {
 						
 						fch.position(VERTEX_SIZE * vertex.getLocalNumber());
-						bb.rewind();
-						fch.read(bb);
+						buffer.rewind();
+						fch.read(buffer);
 						dbb.rewind();
 						dbb.get(vertex.getUV());
 						vertex.setReadable(true);
@@ -426,7 +426,7 @@ public class MeshReader extends Storage
 				}
 			}
 		} finally {
-			bb.limit(lastLimit);
+			buffer.limit(lastLimit);
 		}
 	}
 	
