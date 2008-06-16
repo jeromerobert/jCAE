@@ -36,6 +36,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.opencascade.jni.BRepBndLib;
 import org.jcae.opencascade.jni.BRepBuilderAPI_MakeVertex;
+import org.jcae.opencascade.jni.BRepBuilderAPI_Sewing;
 import org.jcae.opencascade.jni.BRepTools;
 import org.jcae.opencascade.jni.BRep_Builder;
 import org.jcae.opencascade.jni.BRep_Tool;
@@ -244,6 +245,17 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		impl.reverse();
 		for(Shape s: parentSav)
 			s.add(this);
+	}
+		
+	//TODO remplace this by a "sew" method which keep track of attributes. See
+	// aseris-hf GUI for an example of that.
+	public T sewed(double tolerance, boolean option, boolean cutting, boolean manifold)
+	{
+		BRepBuilderAPI_Sewing sewer=new BRepBuilderAPI_Sewing();
+		sewer.init(tolerance, option, cutting, manifold);
+		sewer.add(impl);
+		sewer.perform();
+		return getFactory().create(sewer.sewedShape(), new HashMap(), NOPARENT);
 	}
 	
 	private void addParent(Shape parent)
