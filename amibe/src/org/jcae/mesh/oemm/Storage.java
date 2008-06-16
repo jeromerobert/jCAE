@@ -928,19 +928,25 @@ public class Storage
 		return searchNode(oemm, coords, positions);
 	}
 
-	private static int searchNode(OEMM oemm, double[] coords, int[] positions)
+	public static int searchNode(OEMM oemm, double[] coords, int[] positions)
 	{
 		oemm.double2int(coords, positions);
 		return oemm.search(positions).leafIndex;
 	}
 	
-	private static void writeIntArray(DataOutputStream fc, int[] pointIndex) throws IOException
+	public static void readIntArray(DataInputStream fc, int[] buffer) throws IOException
+	{
+		for(int i = 0 ; i < buffer.length ; ++i)
+			buffer[i] = fc.readInt();
+	}
+	
+	public static void writeIntArray(DataOutputStream fc, int[] pointIndex) throws IOException
 	{
 		for(int val: pointIndex)
 			fc.writeInt(val);
 	}
 	
-	private static void writeDoubleArray(DataOutputStream fc, double[] uv) throws IOException
+	public static void writeDoubleArray(DataOutputStream fc, double[] uv) throws IOException
 	{
 		for (double val: uv)
 			fc.writeDouble(val);

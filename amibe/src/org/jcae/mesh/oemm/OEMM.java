@@ -771,7 +771,7 @@ public class OEMM implements Serializable
 	 *
 	 * @param onlyLeaves  if set to <code>true</code>, only leaf cells are
 	 * considered, otherwise all cells are considered.
-	 * @return  an array containing corners coordinates
+	 * @return  an array containing 6 quads defined by the position of the corners for each cells (the 6 quads represents a cube).
 	 */
 	public double [] getCoords(boolean onlyLeaves)
 	{
