@@ -1,3 +1,5 @@
+This patch permits to pick translucent objects.
+
 Index: Rendering/vtkRenderer.cxx
 ===================================================================
 RCS file: /cvsroot/VTK/VTK/Rendering/vtkRenderer.cxx,v

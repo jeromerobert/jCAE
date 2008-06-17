@@ -1,3 +1,8 @@
+
+This patch corrects a bug on the java wrapper, additionnal informations here :
+
+http://www.vtk.org/Bug/view.php?id=6723
+
 Index: Wrapping/vtkWrapJava.c
 ===================================================================
 RCS file: /cvsroot/VTK/VTK/Wrapping/vtkWrapJava.c,v

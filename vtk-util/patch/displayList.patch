@@ -1,3 +1,8 @@
+
+This patch permits to gain many time in pick color. There is additionnal informations here :
+
+http://www.vtk.org/Bug/view.php?id=7111
+
 Index: Rendering/vtkOpenGLDisplayListPainter.cxx
 ===================================================================
 RCS file: /cvsroot/VTK/VTK/Rendering/vtkOpenGLDisplayListPainter.cxx,v

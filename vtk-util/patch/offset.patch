@@ -1,10 +1,12 @@
+This patch permits to make different polygon offset for each mappers (by default VTK use statics members so the offset parameters are shared by all the mappers).
+
 Index: Rendering/vtkMapper.cxx
 ===================================================================
 RCS file: /cvsroot/VTK/VTK/Rendering/vtkMapper.cxx,v
 retrieving revision 1.122
 diff -u -r1.122 vtkMapper.cxx
 --- Rendering/vtkMapper.cxx	23 Feb 2008 17:18:46 -0000	1.122
-+++ Rendering/vtkMapper.cxx	16 Jun 2008 08:51:59 -0000
++++ Rendering/vtkMapper.cxx	17 Jun 2008 10:09:34 -0000
 @@ -27,13 +27,6 @@
  // Initialize static member that controls global immediate mode rendering
  static int vtkMapperGlobalImmediateModeRendering = 0;
@@ -126,7 +128,7 @@ RCS file: /cvsroot/VTK/VTK/Rendering/vtkMapper.h,v
 retrieving revision 1.94
 diff -u -r1.94 vtkMapper.h
 --- Rendering/vtkMapper.h	27 Aug 2007 20:44:05 -0000	1.94
-+++ Rendering/vtkMapper.h	16 Jun 2008 08:51:59 -0000
++++ Rendering/vtkMapper.h	17 Jun 2008 10:09:34 -0000
 @@ -263,41 +263,26 @@
    // approach, you may also want to set the ResolveCoincidentTopologyZShift
    // value. (Note: not all mappers/graphics systems implement this 
@@ -229,7 +231,7 @@ RCS file: /cvsroot/VTK/VTK/Rendering/vtkOpenGLImageActor.cxx,v
 retrieving revision 1.37
 diff -u -r1.37 vtkOpenGLImageActor.cxx
 --- Rendering/vtkOpenGLImageActor.cxx	5 Mar 2008 19:01:46 -0000	1.37
-+++ Rendering/vtkOpenGLImageActor.cxx	16 Jun 2008 08:52:00 -0000
++++ Rendering/vtkOpenGLImageActor.cxx	17 Jun 2008 10:09:35 -0000
 @@ -319,6 +319,11 @@
    return res;
  }
@@ -262,3 +264,19 @@ diff -u -r1.37 vtkOpenGLImageActor.cxx
    glDisable(GL_COLOR_MATERIAL);
    glDisable (GL_CULL_FACE);
    glDisable( GL_LIGHTING );
+Index: Widgets/Testing/Cxx/TestOrientationMarkerWidget.cxx
+===================================================================
+RCS file: /cvsroot/VTK/VTK/Widgets/Testing/Cxx/TestOrientationMarkerWidget.cxx,v
+retrieving revision 1.2
+diff -u -r1.2 TestOrientationMarkerWidget.cxx
+--- Widgets/Testing/Cxx/TestOrientationMarkerWidget.cxx	7 Apr 2007 15:20:54 -0000	1.2
++++ Widgets/Testing/Cxx/TestOrientationMarkerWidget.cxx	17 Jun 2008 10:09:41 -0000
+@@ -461,7 +461,7 @@
+   // this static function improves the appearance of the text edges
+   // since they are overlaid on a surface rendering of the cube's faces
+   //
+-  vtkMapper::SetResolveCoincidentTopologyToPolygonOffset();
++  //vtkMapper::SetResolveCoincidentTopologyToPolygonOffset();
+ 
+   // anatomic labelling
+   //
