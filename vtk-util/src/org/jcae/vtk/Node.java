@@ -470,20 +470,29 @@ public class Node extends AbstractNode
 			}
 			else
 			{
+				boolean actorCreated = false;
+				
 				if (highLighter == null)
 				{
+					actorCreated = true;
 					highLighter = new vtkActor();
 					highLighter.PickableOff();
-					fireActorCreated(highLighter);
-					fireActorHighLighted(highLighter);
 				}
 
 				vtkPolyDataMapper mapperHighLighter = new vtkPolyDataMapper();
 				mapperHighLighter.ScalarVisibilityOff();
+				mapperHighLighter.SetResolveCoincidentTopologyToPolygonOffset();
+				mapperHighLighter.SetResolveCoincidentTopologyPolygonOffsetParameters(-Utils.getOffSetFactor(), -Utils.getOffSetValue());
 				mapperHighLighter.SetInput(selectInto(data, selection.toNativeArray()));
 				highLighter.SetMapper(mapperHighLighter);
+
+				if (actorCreated)
+				{
+					fireActorCreated(highLighter);
+					fireActorHighLighted(highLighter);
+				}
 			}
-			
+
 			if (lastUpdate <= selectionTime())
 				if (this.isSelected())
 				{
@@ -565,19 +574,27 @@ public class Node extends AbstractNode
 			return;
 		}
 
+		boolean actorCreated = false;
+		
 		if (selectionHighLighter == null)
 		{
+			actorCreated = true;
 			selectionHighLighter = new vtkActor();
 			selectionHighLighter.PickableOff();
-
-			fireActorCreated(selectionHighLighter);
-			fireActorHighLighted(selectionHighLighter);
 		}
 
 		vtkPolyDataMapper selectionMapper = new vtkPolyDataMapper();
 		selectionHighLighter.SetMapper(selectionMapper);
 		selectionMapper.ScalarVisibilityOff();
+		selectionMapper.SetResolveCoincidentTopologyToPolygonOffset();
+		selectionMapper.SetResolveCoincidentTopologyPolygonOffsetParameters(-Utils.getOffSetFactor(), -Utils.getOffSetValue());
 
+		if(actorCreated)
+		{
+			fireActorCreated(selectionHighLighter);
+			fireActorHighLighted(selectionHighLighter);			
+		}
+		
 		// Compute the list of cells to be selected
 		List<LeafNode> leaves = getLeaves();
 		TIntArrayList selection = new TIntArrayList();

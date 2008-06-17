@@ -29,6 +29,9 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 import javax.imageio.ImageIO;
+import javax.vecmath.Vector3d;
+import javax.vecmath.Vector4d;
+import org.jcae.geometry.BoundingPolytope;
 import vtk.vtkActor;
 import vtk.vtkAssembly;
 import vtk.vtkCanvas;
@@ -261,6 +264,72 @@ public class Utils
 	{
 		for(int i = 0 ; i < indices.length ; ++i)
 			indices[i] += offSet;
+	}
+	        // left plane =   frustumPlanes[0]
+        // right plane =  frustumPlanes[1]
+        // top plane =    frustumPlanes[2]
+        // bottom plane = frustumPlanes[3]
+        // front plane =  frustumPlanes[4]
+        // back plane =   frustumPlanes[5]
+	/**
+	 * Return the bouding polytope representing the frustum. The planes are created as follow :
+	 * left, right, top, bottom, front, back.
+	 * @param points
+	 * @return
+	 */
+	public static BoundingPolytope computePolytope(double[] points)
+	{
+		BoundingPolytope frustum = new BoundingPolytope();
+		
+		Vector3d a1 = new Vector3d(points[0],points[1],points[2]);
+		Vector3d a2 = new Vector3d(points[4],points[5],points[6]);
+		Vector3d b1 = new Vector3d(points[8],points[9],points[10]);
+		Vector3d b2 = new Vector3d(points[12],points[13],points[14]);
+		Vector3d c1 = new Vector3d(points[16],points[17],points[18]);
+		Vector3d c2 = new Vector3d(points[20],points[21],points[22]);
+		Vector3d d1 = new Vector3d(points[24],points[25],points[26]);
+		Vector3d d2 = new Vector3d(points[28],points[29],points[30]);
+		
+		
+		Vector4d[] planes = new Vector4d[] {
+		computePlane(a1,b1,a2),
+		computePlane(d1,c1,d2),
+		computePlane(b1,d1,b2),
+		computePlane(c1,a1,c2),
+		computePlane(c1,d1,a1),
+		computePlane(d2,c2,b2),
+		};
+		
+		frustum.setPlanes(planes);
+		
+		return frustum;
+	}
+	
+	/**
+	 * Compute the plane giving three points of the plane.
+	 * The normal is computed as follow : (b-a)^(c-a)
+	 * @param a
+	 * @param b
+	 * @param c
+	 * @return
+	 */
+	static Vector4d computePlane(Vector3d a, Vector3d b, Vector3d c)
+	{
+		Vector4d plane = new Vector4d();
+		
+		Vector3d ab = new Vector3d();
+		ab.sub(b, a);
+		
+		Vector3d ac = new Vector3d();
+		ac.sub(c, a);
+		
+		Vector3d n = new Vector3d();
+		n.cross(ab, ac);
+		
+		plane.set(n);
+		plane.w = - a.dot(n);
+		
+		return plane;
 	}
 	
 	public static double[] computeVerticesFrustum(double x0, double y0, double x1, double y1, vtkRenderer renderer)

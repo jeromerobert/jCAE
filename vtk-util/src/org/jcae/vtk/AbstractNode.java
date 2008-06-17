@@ -30,7 +30,13 @@ import vtk.vtkPolyDataMapper;
 import vtk.vtkPolyDataNormals;
 
 /**
- *
+ * This class is the interface of a Node. There is two type of nodes :
+ * _ the nodes (implemented by the class Node) that can have children of type Node or LeafNode ;
+ * _ the leaf nodes that are of type LeafNode.
+ * This structure is used because VTK can't have many actors so we regroup some of geometric
+ * entities that are represented by LeafNode in a one Node wich will merge all the geometry in one actor.
+ * The merge is made only if the Node is set as managing (using the method setManager).
+ * A node can be highlighted using the select method.
  * @author ibarz
  */
 public abstract class AbstractNode {

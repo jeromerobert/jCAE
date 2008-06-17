@@ -1145,7 +1145,7 @@ public class BoundingBox extends Bounds {
      * A protected intersect method that returns the point of intersection.
      * Used by Picking methods to sort or return closest picked item.
      */
-    boolean intersect(Point3d origin, Vector3d direction, Point3d intersect ) {
+    public boolean intersect(Point3d origin, Vector3d direction, Point3d intersect ) {
 	double theta=0.0;
 
         if( boundsIsEmpty ) {

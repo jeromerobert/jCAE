@@ -31,7 +31,8 @@ import vtk.vtkSelection;
 import vtk.vtkVisibleCellSelector;
 
 /**
- *
+ * This class is used to make picking on a tree node. It permit to keep the association
+ * between a node and his actor with a map (idActorToNode).
  * @author ibarz
  */
 public class Scene implements AbstractNode.ActorListener {
