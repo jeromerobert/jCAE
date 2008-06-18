@@ -26,6 +26,7 @@ import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import vtk.vtkActor;
+import vtk.vtkProp;
 import vtk.vtkRenderer;
 
 /**
@@ -34,7 +35,7 @@ import vtk.vtkRenderer;
  */
 public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreationListener {
 	protected final ArrayList<Canvas> listCanvas = new ArrayList<Canvas>();
-	private final ArrayList<vtkActor> actors = new ArrayList<vtkActor>();
+	private final ArrayList<vtkProp> props = new ArrayList<vtkProp>();
 	protected Color selectionColor = Color.RED;
 	
 	public MultiCanvas()
@@ -74,41 +75,41 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 		node.removeActorListener(this);
 	}
 
-	public void addActor(vtkActor actor)
+	public void addProp(vtkProp prop)
 	{
-		actors.add(actor);
+		props.add(prop);
 		for(Canvas canvas : listCanvas)
 		{
 			canvas.lock();
-			canvas.GetRenderer().AddViewProp(actor);
+			canvas.GetRenderer().AddViewProp(prop);
 			canvas.unlock();
 		}
 	}
 	
-	public void deleteActor(vtkActor actor)
+	public void deleteProp(vtkProp prop)
 	{
-		actors.remove(actor);
+		props.remove(prop);
 		
 		for(Canvas canvas : listCanvas)
 		{
 			canvas.lock();
-			canvas.GetRenderer().RemoveViewProp(actor);
+			canvas.GetRenderer().RemoveViewProp(prop);
 			canvas.unlock();
 		}
 	}
 	
 	public void actorCreated(AbstractNode node, vtkActor actor)
 	{
-		//System.out.println("ACTOR ADDED " + actor.GetVTKId());
+		//System.out.println("ACTOR ADDED " + prop.GetVTKId());
 		
-		addActor(actor);
+		addProp(actor);
 	}
 
 	public void actorDeleted(AbstractNode node, vtkActor actor)
 	{
-		//System.out.println("ACTOR DELETED " + actor.GetVTKId());
+		//System.out.println("ACTOR DELETED " + prop.GetVTKId());
 		
-		deleteActor(actor);
+		deleteProp(actor);
 	}
 
 	public void actorHighLighted(AbstractNode node, vtkActor actor)
@@ -126,7 +127,7 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 		listCanvas.add(canvas);
 		canvas.lock();
 		vtkRenderer renderer = canvas.GetRenderer();
-		for(vtkActor actor : actors)
+		for(vtkProp actor : props)
 		{
 			renderer.AddViewProp(actor);
 		}
@@ -147,7 +148,7 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 		
 		canvas.lock();
 		vtkRenderer renderer = canvas.GetRenderer();
-		for(vtkActor actor : actors)
+		for(vtkProp actor : props)
 		{
 			renderer.RemoveViewProp(actor);
 		}
