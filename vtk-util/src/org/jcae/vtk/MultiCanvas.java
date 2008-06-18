@@ -74,10 +74,8 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 		node.removeActorListener(this);
 	}
 
-	public void actorCreated(AbstractNode node, vtkActor actor)
+	public void addActor(vtkActor actor)
 	{
-		//System.out.println("ACTOR ADDED " + actor.GetVTKId());
-		
 		actors.add(actor);
 		for(Canvas canvas : listCanvas)
 		{
@@ -86,10 +84,9 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 			canvas.unlock();
 		}
 	}
-
-	public void actorDeleted(AbstractNode node, vtkActor actor)
+	
+	public void deleteActor(vtkActor actor)
 	{
-		//System.out.println("ACTOR DELETED " + actor.GetVTKId());
 		actors.remove(actor);
 		
 		for(Canvas canvas : listCanvas)
@@ -98,6 +95,20 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 			canvas.GetRenderer().RemoveViewProp(actor);
 			canvas.unlock();
 		}
+	}
+	
+	public void actorCreated(AbstractNode node, vtkActor actor)
+	{
+		//System.out.println("ACTOR ADDED " + actor.GetVTKId());
+		
+		addActor(actor);
+	}
+
+	public void actorDeleted(AbstractNode node, vtkActor actor)
+	{
+		//System.out.println("ACTOR DELETED " + actor.GetVTKId());
+		
+		deleteActor(actor);
 	}
 
 	public void actorHighLighted(AbstractNode node, vtkActor actor)
