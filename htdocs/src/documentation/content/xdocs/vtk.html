@@ -30,16 +30,16 @@ with VTK 5.3 (current CVS HEAD). Both are unreleased CVS versions. See <a href="
 those patches are not yet integrated in the VTK CVS repository. You may find them here:
 <a href="https://jcae.svn.sourceforge.net/svnroot/jcae/trunk/vtk-util/patch">
 https://jcae.svn.sourceforge.net/svnroot/jcae/trunk/vtk-util/patch</a>. The patching commands will look like this:</p>
-<pre class="code">cd VTK
+<pre class="code">cd /a/foo/path/VTK
 patch -p0 &lt; /tmp/underscore.patch
 patch -p0 &lt; /tmp/displayList.patch
 patch -p0 &lt; /tmp/translucent.patch
 patch -p0 &lt; /tmp/offset.patch
 </pre>
 	<h2>Configuring and building</h2>
-<pre class="code">mkdir build-vtk
-cd build-vtk
-cmake ../VTK
+<pre class="code">mkdir /a/bar/path/build-vtk
+cd /a/bar/path/build-vtk
+cmake /a/foo/path/VTK
 </pre>
 <p>This will create a default configuration file name <code>CMakeCache.txt</code>. To build the
 Java binding you have to modify it. Here is an example for Debian like distribution:</p>
