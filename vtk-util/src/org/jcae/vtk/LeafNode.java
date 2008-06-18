@@ -48,6 +48,8 @@ public class LeafNode extends AbstractNode
 		protected int nbrOfPolys = 0;
 		protected int nbrOfLines = 0;
 		protected int nbrOfVertice = 0;
+		
+		public static final DataProvider EMPTY = new DataProvider();
 
 		public void setVertice(int[] vertice)
 		{

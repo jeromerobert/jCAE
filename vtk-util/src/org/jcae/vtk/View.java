@@ -53,6 +53,11 @@ public class View extends Canvas {
 		CLIPPING_PLANE,
 		CHANGE_ROTATION_CENTER
 	}
+	
+	public View()
+	{
+		super();
+	}
 
 	@Override
 	public void keyPressed(KeyEvent e)
