@@ -89,8 +89,13 @@ public class TestViewableCAD implements SelectionListener, KeyListener {
 				
 		}
 	}
-
     public static void main(String[] args) {
+		if(args.length != 1)
+		{
+			System.err.println("This program receive one argument that is the path to the stp or brep file that will be used to construct the CAD model");
+			return;
+		}
+		
 		TestViewableCAD test = new TestViewableCAD();
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

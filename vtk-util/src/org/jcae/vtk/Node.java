@@ -59,7 +59,10 @@ public class Node extends AbstractNode
 		// Make it to not make a course...
 		super(null);
 		if(parent != null)
+		{
+			this.parent = parent;
 			parent.addChild(this);
+		}
 	}
 
 	public interface ChildCreationListener
@@ -120,6 +123,7 @@ public class Node extends AbstractNode
 		mapper.SetLookupTable(table);
 		mapper.UseLookupTableScalarRangeOn();
 		mapper.SetScalarModeToUseCellData();
+		getMapperCustomiser().customiseMapper(mapper);
 	}
 
 	private static class NodeData extends LeafNode.DataProvider
@@ -477,6 +481,8 @@ public class Node extends AbstractNode
 					actorCreated = true;
 					highLighter = new vtkActor();
 					highLighter.PickableOff();
+					
+					getActorHighLightedCustomiser().customiseActorHighLighted(highLighter);
 				}
 
 				vtkPolyDataMapper mapperHighLighter = new vtkPolyDataMapper();
@@ -486,6 +492,8 @@ public class Node extends AbstractNode
 				mapperHighLighter.SetInput(selectInto(data, selection.toNativeArray()));
 				highLighter.SetMapper(mapperHighLighter);
 
+				getMapperHighLightedCustomiser().customiseMapperHighLighted(mapperHighLighter);
+				
 				if (actorCreated)
 				{
 					fireActorCreated(highLighter);
@@ -581,6 +589,7 @@ public class Node extends AbstractNode
 			actorCreated = true;
 			selectionHighLighter = new vtkActor();
 			selectionHighLighter.PickableOff();
+			getActorSelectionCustomiser().customiseActorSelection(selectionHighLighter);
 		}
 
 		vtkPolyDataMapper selectionMapper = new vtkPolyDataMapper();
@@ -588,12 +597,6 @@ public class Node extends AbstractNode
 		selectionMapper.ScalarVisibilityOff();
 		selectionMapper.SetResolveCoincidentTopologyToPolygonOffset();
 		selectionMapper.SetResolveCoincidentTopologyPolygonOffsetParameters(-Utils.getOffSetFactor(), -Utils.getOffSetValue());
-
-		if(actorCreated)
-		{
-			fireActorCreated(selectionHighLighter);
-			fireActorHighLighted(selectionHighLighter);			
-		}
 		
 		// Compute the list of cells to be selected
 		List<LeafNode> leaves = getLeaves();
@@ -619,6 +622,14 @@ public class Node extends AbstractNode
 		}
 
 		selectionMapper.SetInput(selectInto(data, selection.toNativeArray()));
+		
+		getMapperSelectionCustomiser().customiseMapperSelection(selectionMapper);
+		
+		if(actorCreated)
+		{
+			fireActorCreated(selectionHighLighter);
+			fireActorHighLighted(selectionHighLighter);			
+		}		
 	}
 
 	public vtkPolyData temp()

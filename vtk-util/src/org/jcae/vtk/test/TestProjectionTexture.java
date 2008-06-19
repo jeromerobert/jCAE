@@ -46,6 +46,12 @@ public class TestProjectionTexture {
      */
     public static void main(String[] args)
 	{
+		if(args.length != 1)
+		{
+			System.err.println("This application receive one argument : the path to the image that will be used for the texture");
+			return;
+		}
+		
 		Utils.loadVTKLibraries();
 		JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

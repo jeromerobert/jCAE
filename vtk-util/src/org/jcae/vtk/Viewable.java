@@ -24,6 +24,7 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import vtk.vtkActor;
 import vtk.vtkPlane;
 import vtk.vtkPlaneCollection;
 import vtk.vtkRenderer;
@@ -78,6 +79,27 @@ public abstract class Viewable extends MultiCanvas
 
 		addNode(root);
 		root.addChildCreationListener(this);
+		root.setActorHighLightedCustomiser(new AbstractNode.ActorHighLightedCustomiser() {
+
+			@Override
+			public void customiseActorHighLighted(vtkActor actor)
+			{
+				super.customiseActorHighLighted(actor);
+				
+				Utils.vtkPropertySetColor(actor.GetProperty(), selectionColor);
+			}
+		});
+		root.setActorSelectionCustomiser(new AbstractNode.ActorSelectionCustomiser() {
+
+			@Override
+			public void customiseActorSelection(vtkActor actor)
+			{
+				super.customiseActorSelection(actor);
+				
+				Utils.vtkPropertySetColor(actor.GetProperty(), selectionColor);
+			}
+			
+		});
 	}
 
 	public void setSelectionType(SelectionType selectionType)

@@ -356,8 +356,9 @@ public class LeafNode extends AbstractNode
 		if (selectionHighLighter == null)
 		{
 			selectionHighLighter = new vtkActor();
-			selectionHighLighter.PickableOff();
 
+			getActorSelectionCustomiser().customiseActorSelection(selectionHighLighter);
+			
 			fireActorCreated(selectionHighLighter);
 			fireActorHighLighted(selectionHighLighter);
 		}
@@ -386,6 +387,8 @@ public class LeafNode extends AbstractNode
 		//System.out.println("Number of triangles selected : " + dataFiltered.GetNumberOfCells());
 
 		mapper.SetInput(dataFiltered);
+		
+		getMapperSelectionCustomiser().customiseMapperSelection(mapper);
 	}
 
 	public void unSelectAll()

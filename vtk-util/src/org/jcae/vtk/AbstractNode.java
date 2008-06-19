@@ -25,6 +25,7 @@ import java.util.List;
 import vtk.vtkActor;
 import vtk.vtkCanvas;
 import vtk.vtkFloatArray;
+import vtk.vtkMapper;
 import vtk.vtkPolyData;
 import vtk.vtkPolyDataMapper;
 import vtk.vtkPolyDataNormals;
@@ -41,7 +42,7 @@ import vtk.vtkPolyDataNormals;
  */
 public abstract class AbstractNode {
 // Datas
-	protected final AbstractNode parent;
+	protected AbstractNode parent;
 	private final ArrayList<ActorListener> actorListeners = new ArrayList<ActorListener>();
 	//private final ArrayList<DataListener> dataListeners = new ArrayList<DataListener>();
 	private boolean manager = false;
@@ -66,6 +67,65 @@ public abstract class AbstractNode {
 		void actorHighLighted(AbstractNode node, vtkActor actor);
 	}
 		
+	public static class ActorCustomiser
+	{
+		public void customiseActor(vtkActor actor)
+		{
+			
+		}
+	}
+	
+	public static class ActorHighLightedCustomiser
+	{
+		public void customiseActorHighLighted(vtkActor actor)
+		{
+			System.out.println("TEST");
+		}
+	}
+	
+	public static class MapperCustomiser
+	{
+		public void customiseMapper(vtkMapper mapper)
+		{
+		}
+	}
+	
+	public static class MapperHighLightedCustomiser
+	{
+		public void customiseMapperHighLighted(vtkMapper mapper)
+		{
+		}
+	}
+	
+	public static class ActorSelectionCustomiser
+	{
+		public void customiseActorSelection(vtkActor actor)
+		{
+			System.out.println("TEST2");
+		}
+	}
+	
+	public static class MapperSelectionCustomiser
+	{
+		public void customiseMapperSelection(vtkMapper mapper)
+		{
+		}
+	}
+	
+	public static ActorCustomiser DEFAULT_ACTOR_CUSTOMISER = new ActorCustomiser();
+	public static ActorHighLightedCustomiser DEFAULT_ACTOR_HIGHLIGHTED_CUSTOMISER = new ActorHighLightedCustomiser();
+	public static MapperCustomiser DEFAULT_MAPPER_CUSTOMISER = new MapperCustomiser();
+	public static MapperHighLightedCustomiser DEFAULT_MAPPER_HIGHLIGHTED_CUSTOMISER = new MapperHighLightedCustomiser();
+	public static ActorSelectionCustomiser DEFAULT_ACTOR_SELECTION_CUSTOMISER = new ActorSelectionCustomiser();
+	public static MapperSelectionCustomiser DEFAULT_MAPPER_SELECTION_CUSTOMISER = new MapperSelectionCustomiser();
+	
+	protected ActorCustomiser actorCustomiser = null;
+	protected ActorHighLightedCustomiser actorHighLightedCustomiser = null;
+	protected MapperCustomiser mapperCustomiser = null;
+	protected MapperHighLightedCustomiser mapperHighLightedCustomiser = null;
+	protected ActorSelectionCustomiser actorSelectionCustomiser = null;
+	protected MapperSelectionCustomiser mapperSelectionCustomiser = null;
+	
 	/*public static interface DataListener
 	{
 		void dataModified(AbstractNode node, vtkPolyData data);
@@ -124,6 +184,7 @@ public abstract class AbstractNode {
 			System.out.println("TYPE : " + listener.getClass().getSimpleName());
 		}*/
 		
+		
 		for (ActorListener listener : actorListeners)
 			listener.actorCreated(this, actor);
 	}
@@ -133,6 +194,119 @@ public abstract class AbstractNode {
 		for (ActorListener listener : actorListeners)
 			listener.actorDeleted(this, actor);
 	}
+
+	public void setActorCustomiser(ActorCustomiser actorCustomiser)
+	{
+		this.actorCustomiser = actorCustomiser;
+	}
+
+	public void setActorHighLightedCustomiser(ActorHighLightedCustomiser actorHighLightedCustomiser)
+	{
+		this.actorHighLightedCustomiser = actorHighLightedCustomiser;
+	}
+
+	public void setMapperCustomiser(MapperCustomiser mapperCustomiser)
+	{
+		this.mapperCustomiser = mapperCustomiser;
+	}
+
+	public void setMapperHighLightedCustomiser(MapperHighLightedCustomiser mapperHighLightedCustomiser)
+	{
+		this.mapperHighLightedCustomiser = mapperHighLightedCustomiser;
+	}
+
+	public ActorSelectionCustomiser getActorSelectionCustomiser()
+	{
+		if(actorSelectionCustomiser != null)
+			return actorSelectionCustomiser;
+		else if(parent != null)
+			actorSelectionCustomiser = parent.getActorSelectionCustomiser();
+		
+		if(actorSelectionCustomiser == null)
+			actorSelectionCustomiser = DEFAULT_ACTOR_SELECTION_CUSTOMISER;
+		
+		return actorSelectionCustomiser;
+	}
+
+	public void setActorSelectionCustomiser(ActorSelectionCustomiser actorSelectionCustomiser)
+	{
+		this.actorSelectionCustomiser = actorSelectionCustomiser;
+	}
+
+
+	public MapperSelectionCustomiser getMapperSelectionCustomiser()
+	{
+		if(mapperSelectionCustomiser != null)
+			return mapperSelectionCustomiser;
+		else if(parent != null)
+			mapperSelectionCustomiser = parent.getMapperSelectionCustomiser();
+		
+		if(mapperSelectionCustomiser == null)
+			mapperSelectionCustomiser = DEFAULT_MAPPER_SELECTION_CUSTOMISER;
+		
+		return mapperSelectionCustomiser;
+	}
+
+	public void setMapperSelectionCustomiser(MapperSelectionCustomiser mapperSelectionCustomiser)
+	{
+		this.mapperSelectionCustomiser = mapperSelectionCustomiser;
+	}
+
+	
+	
+	public ActorCustomiser getActorCustomiser()
+	{
+		if(actorCustomiser != null)
+			return actorCustomiser;
+		else if(parent != null)
+			actorCustomiser = parent.getActorCustomiser();
+		
+		if(actorCustomiser == null)
+			actorCustomiser = DEFAULT_ACTOR_CUSTOMISER;
+		
+		return actorCustomiser;
+	}
+
+	public ActorHighLightedCustomiser getActorHighLightedCustomiser()
+	{
+		if(actorHighLightedCustomiser != null)
+			return actorHighLightedCustomiser;
+		else if(parent != null)
+			actorHighLightedCustomiser = parent.getActorHighLightedCustomiser();
+		
+		if(actorHighLightedCustomiser == null)
+			actorHighLightedCustomiser = DEFAULT_ACTOR_HIGHLIGHTED_CUSTOMISER;
+		
+		return actorHighLightedCustomiser;
+	}
+
+	public MapperCustomiser getMapperCustomiser()
+	{
+		if(mapperCustomiser != null)
+			return mapperCustomiser;
+		else if(parent != null)
+			mapperCustomiser = parent.getMapperCustomiser();
+		
+		if(mapperCustomiser == null)
+			mapperCustomiser = DEFAULT_MAPPER_CUSTOMISER;
+			
+		return mapperCustomiser;
+	}
+
+	public MapperHighLightedCustomiser getMapperHighLightedCustomiser()
+	{
+		if(mapperHighLightedCustomiser != null)
+			return mapperHighLightedCustomiser;
+		else if(parent != null)
+			mapperHighLightedCustomiser = parent.getMapperHighLightedCustomiser();
+		
+		if(mapperHighLightedCustomiser == null)
+			mapperHighLightedCustomiser = DEFAULT_MAPPER_HIGHLIGHTED_CUSTOMISER;
+		
+		return mapperHighLightedCustomiser;
+	}
+	
+	
 	
 	/*protected void fireDataModified(vtkPolyData data)
 	{
@@ -140,8 +314,10 @@ public abstract class AbstractNode {
 			listener.dataModified(this, data);
 	}*/
 	
+	
+	
 	protected void fireActorHighLighted(vtkActor actor)
-	{
+	{		
 		for (ActorListener listener : actorListeners)
 			listener.actorHighLighted(this, actor);
 	}
@@ -346,12 +522,18 @@ public abstract class AbstractNode {
 	{
 		assert actor != null;
 		
+		getActorHighLightedCustomiser().customiseActorHighLighted(actor);
+		getMapperHighLightedCustomiser().customiseMapperHighLighted(mapper);
+		
 		fireActorHighLighted(actor);
 	}
 	
 	protected void unHighLight()
 	{
 		assert actor != null;
+		
+		getActorCustomiser().customiseActor(actor);
+		getMapperCustomiser().customiseMapper(mapper);
 	}
 	
 	protected long selectionTime()
