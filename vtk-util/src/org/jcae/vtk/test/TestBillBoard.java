@@ -19,21 +19,17 @@
  */
 package org.jcae.vtk.test;
 
+import java.awt.BorderLayout;
+import javax.swing.JFrame;
 import org.jcae.vtk.BillBoard;
-import java.util.Arrays;
 import org.jcae.vtk.Utils;
-import vtk.vtkCoordinate;
-import vtk.vtkFloatArray;
+import org.jcae.vtk.View;
 import vtk.vtkImageData;
 import vtk.vtkInteractorStyleTrackballCamera;
 import vtk.vtkPNGReader;
-import vtk.vtkPolyData;
-import vtk.vtkPolyDataMapper2D;
-import vtk.vtkRenderWindow;
 import vtk.vtkRenderWindowInteractor;
 import vtk.vtkRenderer;
 import vtk.vtkTexture;
-import vtk.vtkTexturedActor2D;
 
 /**
  *
@@ -55,10 +51,22 @@ public class TestBillBoard
 		image.Update();
 		int[] dimensions = image.GetDimensions();
 		
-		vtkRenderer ren1 = new vtkRenderer();
-
-		int c = 3;
+		
+		int c = 30;
 		int l = 30;
+		
+		JFrame frame = new JFrame();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		View canvas = new View();
+		frame.add(canvas, BorderLayout.CENTER);
+		frame.setSize(600, 600);
+		frame.setVisible(true);
+		
+		
+		vtkRenderer ren1 = canvas.GetRenderer();
+		ren1.GetActiveCamera().SetPosition(c/2, l/2, Math.max(c, l)*2);
+		ren1.GetActiveCamera().SetFocalPoint(c/2, l/2, 0.);
+		
 		for (int i = 0; i < c; ++i)
 			for (int j = 0; j < l; ++j)
 			{
@@ -67,19 +75,7 @@ public class TestBillBoard
 
 				ren1.AddViewProp(tag.getActor());
 			}
-		vtkRenderWindow renWin = new vtkRenderWindow();
-		renWin.AddRenderer(ren1);
-		ren1.GetActiveCamera().SetPosition(c/2, l/2, Math.max(c, l)*2);
-		ren1.GetActiveCamera().SetFocalPoint(c/2, l/2, 0.);
 
-		vtkRenderWindowInteractor iren = new vtkRenderWindowInteractor();
-		iren.SetRenderWindow(renWin);
-
-		vtkInteractorStyleTrackballCamera style =
-				new vtkInteractorStyleTrackballCamera();
-		iren.SetInteractorStyle(style);
-		iren.Initialize();
-		iren.Start();
 		
 	}
 }

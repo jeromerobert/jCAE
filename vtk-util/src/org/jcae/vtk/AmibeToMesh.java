@@ -75,7 +75,11 @@ public class AmibeToMesh
 		{
 			assert domain != null;
 			
-			return domain.getNodes();
+			float[] temp = super.getNodes();
+			if(temp == null || temp.length == 0)
+				super.setNodes(domain.getNodes());
+			
+			return super.getNodes();
 		}
 
 		@Override

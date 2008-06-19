@@ -25,20 +25,24 @@ import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
+import org.jcae.vtk.BillBoard;
 import org.jcae.vtk.Canvas;
 import org.jcae.vtk.SelectionListener;
 import org.jcae.vtk.Utils;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
 import org.jcae.vtk.ViewableCAD;
+import vtk.vtkImageData;
 import vtk.vtkInteractorStyleTrackballCamera;
+import vtk.vtkPNGReader;
 import vtk.vtkRenderer;
+import vtk.vtkTexture;
 
 /**
  *
  * @author Jerome Robert
  */
-public class TestRubberBand implements SelectionListener, KeyListener {
+public class TestViewableCAD implements SelectionListener, KeyListener {
 	public ViewableCAD viewable;
 	public Canvas canvas;
 
@@ -87,7 +91,7 @@ public class TestRubberBand implements SelectionListener, KeyListener {
 	}
 
     public static void main(String[] args) {
-		TestRubberBand test = new TestRubberBand();
+		TestViewableCAD test = new TestViewableCAD();
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         View canvas = new View();
@@ -105,6 +109,36 @@ public class TestRubberBand implements SelectionListener, KeyListener {
         canvas.getIren().SetInteractorStyle(style);
         renderer.ResetCamera();
 
+		
+		///home/ibarz/zebra/core/src/org/zebra/core/tag/tagError8.png
+		/*vtkPNGReader reader = new vtkPNGReader();
+		reader.SetFileName("/home/ibarz/zebra/core/src/org/zebra/core/tag/tagError8.png");
+		vtkImageData image = reader.GetOutput();
+		vtkTexture texture = new vtkTexture();
+		texture.SetInput(image);
+		image.Update();
+		int[] dimensions = image.GetDimensions();
+		
+		
+		int c = 30;
+		int l = 30;
+		
+		
+		
+		vtkRenderer ren1 = canvas.GetRenderer();
+		ren1.GetActiveCamera().SetPosition(c/2, l/2, Math.max(c, l)*2);
+		ren1.GetActiveCamera().SetFocalPoint(c/2, l/2, 0.);
+		
+		for (int i = 0; i < c; ++i)
+			for (int j = 0; j < l; ++j)
+			{
+				BillBoard tag = new BillBoard(texture, dimensions[0], dimensions[1]);
+				tag.setPosition(i, j, 0);
+
+				ren1.AddViewProp(tag.getActor());
+			}*/
+
+	
         frame.add(canvas, BorderLayout.CENTER);
         frame.setVisible(true);
         frame.setSize(800, 600);

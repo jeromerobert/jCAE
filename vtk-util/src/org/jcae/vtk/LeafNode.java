@@ -23,6 +23,8 @@ import gnu.trove.TIntArrayList;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import javax.vecmath.Point3f;
+import org.jcae.geometry.Transform3D;
 import vtk.vtkActor;
 import vtk.vtkExtractSelectedPolyDataIds;
 import vtk.vtkIdTypeArray;
@@ -40,7 +42,8 @@ public class LeafNode extends AbstractNode
 	public static class DataProvider
 	{
 		private long modifiedTime = System.nanoTime();
-		protected float[] nodes = new float[0];
+		private float[] nodes = new float[0];
+		private float[] nodesTransformed = new float[0];
 		protected float[] normals = null;
 		protected int[] vertice = new int[0];
 		protected int[] lines = new int[0];
@@ -48,6 +51,7 @@ public class LeafNode extends AbstractNode
 		protected int nbrOfPolys = 0;
 		protected int nbrOfLines = 0;
 		protected int nbrOfVertice = 0;
+		private Transform3D transform = null;
 		
 		public static final DataProvider EMPTY = new DataProvider();
 
@@ -66,6 +70,39 @@ public class LeafNode extends AbstractNode
 		public void setNodes(float[] nodes)
 		{
 			this.nodes = nodes;
+			
+			makeTransform();
+		}
+		
+		private void makeTransform()
+		{
+			if(transform != null)
+			{
+				this.nodesTransformed = new float[this.nodes.length];
+				
+				Point3f point = new Point3f();
+				int j = 0;
+				for(int i = 0 ; i < this.nodes.length ; )
+				{
+					point.x = this.nodes[i++];
+					point.y = this.nodes[i++];
+					point.z = this.nodes[i++];
+					
+					transform.transform(point);
+					
+					nodesTransformed[j++] = point.x;
+					nodesTransformed[j++] = point.y;
+					nodesTransformed[j++] = point.z;
+				}
+			}
+			else this.nodesTransformed = this.nodes;
+		}
+		
+		public void setTransform(Transform3D transform)
+		{
+			this.transform = transform;
+			
+			makeTransform();
 		}
 		
 		public void setPolys(int nbrOfPolys, int[] polys)
@@ -96,7 +133,7 @@ public class LeafNode extends AbstractNode
 
 		public float[] getNodes()
 		{
-			return nodes;
+			return nodesTransformed;
 		}
 
 		public int[] getPolys()
@@ -120,6 +157,7 @@ public class LeafNode extends AbstractNode
 		public void unLoad()
 		{
 			nodes = new float[0];
+			nodesTransformed = new float[0];
 			normals = null;
 			vertice = new int[0];
 			lines = new int[0];
@@ -140,7 +178,7 @@ public class LeafNode extends AbstractNode
 	private Color color;
 	private DataProvider dataProvider;
 	private long timeDataCreated = 0;
-
+	
 	public LeafNode(AbstractNode parent, DataProvider dataProvider, Color color)
 	{
 		super(parent);
@@ -167,6 +205,11 @@ public class LeafNode extends AbstractNode
 		lastUpdate = System.nanoTime();
 	}
 
+	public void setTransform(Transform3D transform)
+	{
+		dataProvider.setTransform(transform);
+	}
+	
 	protected LeafNode getNode(int cellID)
 	{
 		if(!isManager())
@@ -285,7 +328,7 @@ public class LeafNode extends AbstractNode
 	{
 		return dataProvider;
 	}
-	
+
 	public void select()
 	{
 		selection.clear();

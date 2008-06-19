@@ -27,6 +27,7 @@ import javax.swing.JFrame;
 import org.jcae.vtk.AmibeToMesh;
 import org.jcae.vtk.Canvas;
 import org.jcae.vtk.SelectionListener;
+import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
 import org.jcae.vtk.ViewableMesh;
 import vtk.vtkInteractorStyleTrackballCamera;
@@ -81,7 +82,7 @@ public class TestAmibe implements SelectionListener, KeyListener {
 			JFrame frame = new JFrame();
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			frame.setVisible(true);
-			Canvas canvas = new Canvas();
+			View canvas = new View();
 			frame.add(canvas, BorderLayout.CENTER);
 			vtkRenderer renderer = canvas.GetRenderer();
 			int[] groups = new int[33];

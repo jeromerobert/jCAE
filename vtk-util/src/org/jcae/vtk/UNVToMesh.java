@@ -35,33 +35,19 @@ public class UNVToMesh
 	private Mesh mesh;
 
 	private static class GroupData extends LeafNode.DataProvider {
-		private final float[] nodes;
-		private final int [] indices;
 		
 		GroupData(float[] nodes, int[] indices, int nbrOfCells)
 		{
-			this.nodes = nodes;
-			this.indices = indices;
-			this.nbrOfPolys = nbrOfCells;
+			setNodes(nodes);
+			setPolys(nbrOfPolys, indices);
 		}
 		
+		@Override
 		public float[] getNormals()
 		{
 			return null;
 		}
 		
-		@Override
-		public int[] getPolys()
-		{
-			return indices;
-		}
-
-		@Override
-		public float[] getNodes()
-		{
-			return nodes;
-		}
-
 		@Override
 		public void load()
 		{

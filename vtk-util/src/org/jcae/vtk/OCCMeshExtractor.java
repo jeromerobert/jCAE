@@ -67,12 +67,14 @@ public class OCCMeshExtractor
 		@Override
 		public void load()
 		{
-			nodes = new float[3];
+			float[] newNodes = new float[3];
 
 			double[] pnt = BRep_Tool.pnt(vertex);
-			nodes[0] = (float) pnt[0];
-			nodes[1] = (float) pnt[1];
-			nodes[2] = (float) pnt[2];
+			newNodes[0] = (float) pnt[0];
+			newNodes[1] = (float) pnt[1];
+			newNodes[2] = (float) pnt[2];
+			
+			setNodes(newNodes);
 
 			vertice = new int[2];
 			vertice[0] = 1;
@@ -104,7 +106,7 @@ public class OCCMeshExtractor
 			double boundingBoxDeflection = 0.0005 *
 					Math.max(Math.max(bbox[3] - bbox[0], bbox[4] - bbox[1]), bbox[5] -
 					bbox[2]);
-
+			float[] newNodes = null;
 			if (gc != null)
 			{
 				GeomAdaptor_Curve adaptator = new GeomAdaptor_Curve(gc);
@@ -116,27 +118,26 @@ public class OCCMeshExtractor
 				int npts = deflector.nbPoints();
 
 				// Allocate one additional point at each end  = parametric value 0, 1
-				nodes =
-						new float[(npts + 2) * 3];
+				newNodes = new float[(npts + 2) * 3];
 				int j = 0;
 				double[] values = adaptator.value(range[0]);
-				nodes[j++] = (float) values[0];
-				nodes[j++] = (float) values[1];
-				nodes[j++] = (float) values[2];
+				newNodes[j++] = (float) values[0];
+				newNodes[j++] = (float) values[1];
+				newNodes[j++] = (float) values[2];
 				// All intermediary points
 				for (int i = 0; i <
 						npts; ++i)
 				{
 					values = adaptator.value(deflector.parameter(i + 1));
-					nodes[j++] = (float) values[0];
-					nodes[j++] = (float) values[1];
-					nodes[j++] = (float) values[2];
+					newNodes[j++] = (float) values[0];
+					newNodes[j++] = (float) values[1];
+					newNodes[j++] = (float) values[2];
 				}
 // Add last point
 				values = adaptator.value(range[1]);
-				nodes[j++] = (float) values[0];
-				nodes[j++] = (float) values[1];
-				nodes[j++] = (float) values[2];
+				newNodes[j++] = (float) values[0];
+				newNodes[j++] = (float) values[1];
+				newNodes[j++] = (float) values[2];
 			} else if (!BRep_Tool.degenerated(edge))
 			{
 				// So, there is no curve, and the edge is not degenerated?
@@ -156,26 +157,31 @@ public class OCCMeshExtractor
 					aa.add(BRep_Tool.pnt(v));
 				}
 
-				nodes = new float[aa.size() * 3];
+				newNodes = new float[aa.size() * 3];
 				for (int i = 0, j = 0; i <
 						aa.size(); i++)
 				{
 					double[] f = aa.get(i);
-					nodes[j++] = (float) f[0];
-					nodes[j++] = (float) f[1];
-					nodes[j++] = (float) f[2];
+					newNodes[j++] = (float) f[0];
+					newNodes[j++] = (float) f[1];
+					newNodes[j++] = (float) f[2];
 				}
 
 			}
 
-			if (nodes == null || nodes.length == 0)
+			if(newNodes != null)
+			{
+				setNodes(newNodes);
+			}
+			
+			if (newNodes == null || newNodes.length == 0)
 			{
 				this.unLoad();
 				return;
 			}
 
 			// Construct the indices
-			nbrOfLines = nodes.length / 3 - 1;
+			nbrOfLines = newNodes.length / 3 - 1;
 			lines = new int[nbrOfLines * 3];
 			int offSet = 0;
 			for (int i = 0; i < nbrOfLines;)
@@ -269,6 +275,7 @@ public class OCCMeshExtractor
 
 			float error = 0.001f * getMaxBound(face) * 4;
 			int iter = 0;
+			float[] newNodes = null;
 			//try to mesh with error, if the geometry is too dirty try error/10
 			// and then error/100
 			while ((pt == null) & (iter < 3))
@@ -284,7 +291,7 @@ public class OCCMeshExtractor
 				System.err.println("Triangulation failed for face " + face +
 						". Trying other mesh parameters.");
 
-				nodes = new float[0];
+				newNodes = new float[0];
 				polys = new int[0];
 				normals = new float[0];
 
@@ -311,16 +318,16 @@ public class OCCMeshExtractor
 				polys[offSet++] = itriangles[i++];
 			}
 
-			nodes = new float[dnodes.length];
+			newNodes = new float[dnodes.length];
 
 			if (loc.isIdentity())
 				for (int j = 0; j <
 						dnodes.length; j++)
-					nodes[j] = (float) dnodes[j];
+					newNodes[j] = (float) dnodes[j];
 			else
-				transformMesh(loc, dnodes, nodes);
+				transformMesh(loc, dnodes, newNodes);
 
-
+			setNodes(newNodes);
 
 			// Compute the normals
 			Geom_Surface surf = BRep_Tool.surface(face);

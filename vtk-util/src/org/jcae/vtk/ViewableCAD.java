@@ -25,6 +25,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import org.jcae.geometry.Transform3D;
+import javax.vecmath.Vector3f;
 import org.jcae.opencascade.jni.TopoDS_Edge;
 import org.jcae.opencascade.jni.TopoDS_Face;
 import org.jcae.opencascade.jni.TopoDS_Shape;
@@ -151,6 +153,8 @@ public class ViewableCAD extends Viewable
 		edges.setManager(true);
 
 		faces = new Node(rootNode);
+		//Transform3D transform = new Transform3D();
+		//transform.setTranslation(new Vector3f(2.f,2.f,0.f));
 		
 		for(TopoDS_Face face : this.meshExtractor.getFaces())
 		{
@@ -160,6 +164,8 @@ public class ViewableCAD extends Viewable
 			LeafNode backFaceNode = new LeafNode(faces, new OCCMeshExtractor.FaceData(face, true), this.backFaceColor);
 			topoToNodeFaceBack.put(face, backFaceNode);
 			nodeToTopo.put(backFaceNode, face);
+			//faceNode.setTransform(transform);
+			//backFaceNode.setTransform(transform);
 			//faceNode.setManager(true);
 			//backFaceNode.setManager(true);
 		}
