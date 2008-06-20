@@ -779,7 +779,7 @@ public class BoundingBox extends Bounds {
      * @param position3 a point defining the location of the pick w= distance to pick
      * @return true or false indicating if an intersection occured 
      */
-    boolean intersect(Point3d origin, Vector3d direction, Point4d position ) {
+    public boolean intersect(Point3d origin, Vector3d direction, Point4d position ) {
         double t1,t2,tmp,tnear,tfar,invDir,invMag;
 	double dirx, diry, dirz;
 	

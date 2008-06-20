@@ -117,24 +117,24 @@ public class Canvas extends vtkCanvas
 	 * if the camera is moved by programming.
 	 * @see http://www.vtk.org/Bug/view.php?id=6913
 	 */
-	public synchronized void RenderSecured()
+	public void RenderSecured()
 	{
 		if(!isWindowSet())
 			return;
 		
-		if (creationWindowThread != null &&
-			creationWindowThread != Thread.currentThread())
+		if (!SwingUtilities.isEventDispatchThread())
 		{
-			System.err.println(
+			//Thread.dumpStack();
+			/*System.err.println(
 				"WARNING ! : you try to render on a different thread than the"+
 				"thread that creates the renderView. Making an invokeLater to"+
-				" render on the thread that creates the renderView");
+				" render on the thread that creates the renderView");*/
 			try{
 			SwingUtilities.invokeAndWait(new Runnable()
 			{
 				public void run()
 				{
-					RenderLater();
+					Render();
 				}
 			});
 			}catch(Exception e)
@@ -142,43 +142,7 @@ public class Canvas extends vtkCanvas
 				System.out.println("Exception invokeAndWait : " + e.getLocalizedMessage());
 			}
 		}
-		else RenderLater();
-	}
-
-	protected synchronized void RenderLater()
-	{
-		if (!rendering)
-		{
-			rendering = true;
-			if (ren.VisibleActorCount() == 0)
-			{
-				rendering = false;
-				return;
-			}
-			if (rw != null)
-			{
-				if (windowset == 0)
-				{
-					// set the window id and the active camera
-					if (lightingset == 0)
-					{
-						ren.AddLight(lgt);
-						lightingset = 1;
-					}
-					creationWindowThread = Thread.currentThread();
-					RenderCreate(rw);
-					Lock();
-					rw.SetSize(getWidth(), getHeight());
-					UnLock();
-					windowset = 1;
-				}
-				UpdateLight();
-				Lock();
-				rw.Render();
-				UnLock();
-				rendering = false;
-			}
-		}
+		else Render();
 	}
 
 	/**

@@ -910,7 +910,7 @@ public class BoundingPolytope extends Bounds {
      * @param position is a point defining the location  of the pick w= distance to pick
      * @return true or false indicating if an intersection occured 
      */
-    boolean intersect(Point3d origin, Vector3d direction, Point4d position ) {
+    public boolean intersect(Point3d origin, Vector3d direction, Point4d position ) {
 	double t,v0,vd,x,y,z,invMag;
 	double dx, dy, dz;
 	int i,j;

@@ -23,12 +23,14 @@ package org.jcae.vtk;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 import javax.imageio.ImageIO;
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector4d;
 import org.jcae.geometry.BoundingPolytope;
@@ -84,6 +86,25 @@ public class Utils
 		else
 			throw new NoSuchElementException("Found "+c.getClass()+
 				" when "+vtkCanvas.class+" expected.");
+	}
+	
+	public static void computeRay(vtkRenderer renderer, Point pickPosition, Point3d origin, Vector3d direction)
+	{
+		renderer.SetDisplayPoint(pickPosition.x, pickPosition.y, 0);
+		renderer.DisplayToWorld();
+		double[] vertice = renderer.GetWorldPoint();
+
+		origin.x = vertice[0];
+		origin.y = vertice[1];
+		origin.z = vertice[2];
+
+		renderer.SetDisplayPoint(pickPosition.x, pickPosition.y, 1);
+		renderer.DisplayToWorld();
+		vertice = renderer.GetWorldPoint();
+
+		direction.x = vertice[0] - origin.x;
+		direction.y = vertice[1] - origin.y;
+		direction.z = vertice[2] - origin.z;
 	}
 	
 	/**

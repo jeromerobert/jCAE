@@ -98,7 +98,7 @@ public abstract class Bounds extends Object implements Cloneable {
    * @param position is a point defining the location  of the pick w= distance to pick 
    * @return true or false indicating if an intersection occured
    */
-  abstract boolean intersect( Point3d origin, Vector3d direction, Point4d position );
+  public abstract boolean intersect( Point3d origin, Vector3d direction, Point4d position );
 
    /**
     * Test for intersection with a point

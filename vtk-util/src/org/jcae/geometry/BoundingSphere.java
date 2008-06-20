@@ -823,7 +823,7 @@ public class BoundingSphere extends Bounds {
      * @param position3 a point defining the location of the pick w= distance to pick
      * @return true or false indicating if an intersection occured 
      */
-    boolean intersect(Point3d origin, Vector3d direction, Point4d position ) {
+    public boolean intersect(Point3d origin, Vector3d direction, Point4d position ) {
  
 	if( boundsIsEmpty ) {
 	    return false;
