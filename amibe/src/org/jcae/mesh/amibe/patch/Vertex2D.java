@@ -303,72 +303,8 @@ public class Vertex2D extends Vertex
 		return x01 * y02 - x02 * y01;
 	}
 	
-	/* Unused
-	public long dot3(Vertex2D v1, Vertex2D v2)
-	{
-		mesh.getQuadTree().double2int(param, i0);
-		mesh.getQuadTree().double2int(v1.param, i1);
-		long x01 = i1[0] - i0[0];
-		long y01 = i1[1] - i0[1];
-		mesh.getQuadTree().double2int(v2.param, i1);
-		long x02 = i1[0] - i0[0];
-		long y02 = i1[1] - i0[1];
-		return x01 * x02 + y01 * y02;
-	}
-	
-	public final boolean inCircle(Vertex2D v1, Vertex2D v2, Vertex2D v3)
-	{
-		assert this != mesh.outerVertex;
-		assert v1 != mesh.outerVertex;
-		assert v2 != mesh.outerVertex;
-		assert v3 != mesh.outerVertex;
-		// v3.onLeft(v1, v2) >= 0 and onLeft(v1, v2) <= 0
-		long d1 = onLeft(v1, v2);
-		long d2 = onLeft(v2, v3);
-		long d3 = onLeft(v3, v1);
-		if (d1 >= 0L && d2 >= 0L && d3 >= 0L)
-			return false;
-		if (d1 <= 0L && d2 <= 0L && d3 <= 0L)
-			return true;
-		long o1 = distance2(v1);
-		long o2 = distance2cached(v2);
-		long o3 = distance2cached(v3);
-		LongLong l1 = new LongLong(o3, d1);
-		LongLong l2 = new LongLong(o1, d2);
-		LongLong l3 = new LongLong(o2, d3);
-		if (d1 >= 0L)
-		{
-			if (d2 >= 0L)
-			{
-				//  Then d3 < 0
-				l2.add(l3);
-				l2.add(l1);
-			}
-			else
-			{
-				l2.add(l1);
-				l2.add(l3);
-			}
-		}
-		else
-		{
-			if (d2 >= 0L)
-			{
-				l2.add(l1);
-				l2.add(l3);
-			}
-			else
-			{
-				l2.add(l3);
-				l2.add(l1);
-			}
-		}
-		return l2.isNegative();
-	}
-	*/
-	
 	//  Current vertex is symmetric apical vertex
-	public final boolean inCircleTest2(Mesh2D mesh, VirtualHalfEdge2D ot)
+	public final boolean inCircle2D(Mesh2D mesh, VirtualHalfEdge2D ot)
 	{
 		assert this != mesh.outerVertex;
 		Vertex2D v1 = (Vertex2D) ot.origin();
@@ -442,7 +378,7 @@ public class Vertex2D extends Vertex
 		throw new RuntimeException("Circumcenter cannot be computed");
 	}
 	
-	public final boolean inCircleTest3(Mesh2D mesh, VirtualHalfEdge2D ot)
+	public final boolean inCircle(Mesh2D mesh, VirtualHalfEdge2D ot)
 	{
 		//  vcX: vertices of current edge
 		//  vaX: apices
@@ -504,7 +440,7 @@ public class Vertex2D extends Vertex
 		}
 		catch (RuntimeException ex)
 		{
-			return inCircleTest2(mesh, ot);
+			return inCircle2D(mesh, ot);
 		}
 	}
 	

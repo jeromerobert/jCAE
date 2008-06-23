@@ -532,7 +532,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 			if (tp3 <= 0L || tp4 <= 0L)
 				return true;
 		}
-		return !apex2.inCircleTest2(mesh, this);
+		return !apex2.inCircle2D(mesh, this);
 	}
 	
 	private final boolean isDelaunay_anisotropic(Mesh2D mesh, Vertex2D apex2)
@@ -542,7 +542,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 		assert mesh.outerVertex != (Vertex2D) apex();
 		if (apex2 == mesh.outerVertex)
 			return true;
-		return !apex2.inCircleTest3(mesh, this);
+		return !apex2.inCircle(mesh, this);
 	}
 	
 }

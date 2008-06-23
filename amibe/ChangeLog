@@ -1,3 +1,8 @@
+Mon Jun 23 18:01:40 CEST 2008 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/patch/Vertex2D.java: Rename inCircleTest2()
+	into inCircle2D() and inCircleTest3() into inCircle().
+
 Wed Jun  4 17:47:59 CEST 2008 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Vertex.java: New sqrDistance3D() method
