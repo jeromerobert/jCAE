@@ -59,6 +59,7 @@ public abstract class AbstractNode {
 	protected boolean selected;
 	
 	protected vtkActor selectionHighLighter = null;
+	protected boolean pickable = true;
 	
 	public static interface ActorListener
 	{
@@ -154,6 +155,22 @@ public abstract class AbstractNode {
 	public void addActorListener(ActorListener listener)
 	{
 		actorListeners.add(listener);
+	}
+	
+	/**
+	 * Set pickable the actor of the node. If the node is not a manager,
+	 * set the parent to be pickable.
+	 * @param pickable
+	 */
+	public void setPickable(boolean pickable)
+	{
+		this.pickable = pickable;
+		
+		int pickableNative = (pickable) ? 1 : 0;
+		if(actor != null)
+			actor.SetPickable(pickableNative);
+		else if(parent != null)
+			parent.setPickable(pickable);
 	}
 	
 	public void removeActorListener(ActorListener listener)
@@ -447,6 +464,7 @@ public abstract class AbstractNode {
 			mapper = new vtkPolyDataMapper();
 			actor.SetMapper(mapper);
 			actor.SetVisibility((visible) ? 1 : 0);
+			actor.SetPickable((pickable) ? 1 : 0);
 		}
 		refreshMapper();
 

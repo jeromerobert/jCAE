@@ -183,8 +183,11 @@ public abstract class Viewable extends MultiCanvas
 
 	protected void selectNodeOnSurface(Canvas canvas, int[] firstPoint, int[] secondPoint)
 	{
+		long begin = System.currentTimeMillis();
 		scene.pick(canvas, firstPoint, secondPoint);
-
+		System.out.println("TEMPS DE PICK COLOR : " + (System.currentTimeMillis() - begin));
+		
+		begin = System.currentTimeMillis();
 		List<LeafNode> nodes = rootNode.getLeaves();
 
 		HashSet<LeafNode> newSelection;
@@ -215,6 +218,8 @@ public abstract class Viewable extends MultiCanvas
 		}
 
 		selectionNode = newSelection;
+		
+		System.out.println("TEMPS DE DISPATCH : " + (System.currentTimeMillis() - begin));
 	}
 
 	public boolean getAppendSelection()
@@ -460,6 +465,11 @@ public abstract class Viewable extends MultiCanvas
 		setClippingPlanes(planes);*/
 	}
 
+	public void setPickable(boolean pickable)
+	{
+		scene.setPickable(pickable);
+	}
+	
 	public void pointSelection(Canvas canvas, Point pickPosition)
 	{
 		if (!appendSelection)

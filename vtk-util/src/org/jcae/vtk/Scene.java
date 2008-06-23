@@ -20,10 +20,14 @@
 
 package org.jcae.vtk;
 
-import gnu.trove.TIntArrayList;
 import gnu.trove.TLongObjectHashMap;
-import java.util.ArrayList;
+import java.awt.Point;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+import org.jcae.geometry.BoundingBox;
+import org.jcae.geometry.Bounds;
 import vtk.vtkActor;
+import vtk.vtkActorCollection;
 import vtk.vtkCanvas;
 import vtk.vtkIdTypeArray;
 import vtk.vtkProp;
@@ -37,6 +41,7 @@ import vtk.vtkVisibleCellSelector;
  */
 public class Scene implements AbstractNode.ActorListener {
 	private TLongObjectHashMap<AbstractNode> idActorToNode = new TLongObjectHashMap<AbstractNode>();
+	private boolean actorFiltering = true  ;
 	
 	public Scene()
 	{
@@ -73,8 +78,22 @@ public class Scene implements AbstractNode.ActorListener {
 		// Do nothing
 	}
 	
+	public void setPickable(boolean pickable)
+	{
+		AbstractNode[] nodes = new AbstractNode[idActorToNode.size()];
+		idActorToNode.getValues(nodes);
+		
+		for(AbstractNode node : nodes)
+		{
+			node.setPickable(pickable);
+		}
+	}
 	
-	
+	public void setActorFiltering(boolean actorFiltering)
+	{
+		this.actorFiltering = actorFiltering;
+	}
+
 	public void pick(vtkCanvas canvas, int[] firstPoint, int []secondPoint)
 	{
 		vtkVisibleCellSelector selector = new vtkVisibleCellSelector();
@@ -83,14 +102,84 @@ public class Scene implements AbstractNode.ActorListener {
 				secondPoint[1]);
 		selector.SetRenderPasses(0, 1, 0, 0, 1, 0);
 
+		int[] pickBackup = null;
+		if(actorFiltering)
+		{
+			boolean pointPicking = false;
+			if(firstPoint[0] == secondPoint[0] && firstPoint[1] == secondPoint[1])
+				pointPicking = true;
+				
+			long begin = System.currentTimeMillis();
+			vtkActorCollection actors = canvas.GetRenderer().GetActors();
+			pickBackup = new int[actors.GetNumberOfItems()];
+			actors.InitTraversal();
+			
+			Point3d pickOrigin = new Point3d();
+			Vector3d pickDirection = new Vector3d();
+			Bounds frustum = null;
+			
+			if(pointPicking)
+				Utils.computeRay(canvas.GetRenderer(), new Point(firstPoint[0], firstPoint[1]), pickOrigin, pickDirection);
+			else
+				frustum = Utils.computePolytope(Utils.computeVerticesFrustum(firstPoint[0], firstPoint[1], secondPoint[0], secondPoint[1], canvas.GetRenderer()));
+			
+			int j = 0;
+			for(vtkActor actor ; (actor = actors.GetNextActor()) != null ; ++j)
+			{
+				if((pickBackup[j] = actor.GetPickable()) == 0)
+					continue;
+				
+				double[] bounds = actor.GetBounds();
+				BoundingBox box = new BoundingBox();
+				box.setLower(bounds[0], bounds[2], bounds[4]);
+				box.setUpper(bounds[1], bounds[3], bounds[5]);
+				
+				if(pointPicking)
+				{
+					if(!box.intersect(pickOrigin, pickDirection))
+						actor.PickableOff();
+					else
+						System.out.println("ONE NODE PICKED !");
+				}
+				else
+				{
+					if(!frustum.intersect(box))
+						actor.PickableOff();
+				}
+			}
+			actors.InitTraversal();
+			int nbrPick = 0;
+			int nbrPolys = 0;
+			for(vtkActor actor ; (actor = actors.GetNextActor()) != null ; ++j)
+			{
+				if(actor.GetPickable() == 1)
+					nbrPick++;
+				nbrPolys += actor.GetMapper().GetInputAsDataSet().GetNumberOfCells();
+			}
+			System.out.println("NBR OF PICKED ACTORS : " + nbrPick);
+			System.out.println("NBR OF ACTORS : " + actors.GetNumberOfItems());
+			System.out.println("NUMBER OF POLYS : " + nbrPolys);
+			System.out.println("TIME TO FILTER : " + (System.currentTimeMillis() - begin));
+			}
+		
 		canvas.lock();
+		canvas.GetRenderer().ClearDepthForSelectionOff();
 		selector.Select();
 		canvas.unlock();
-		
+
 		//long begin = System.currentTimeMillis();
 		vtkIdTypeArray idArray = new vtkIdTypeArray();
 		selector.GetSelectedIds(idArray);
 
+		if(actorFiltering)
+		{
+			vtkActorCollection actors = canvas.GetRenderer().GetActors();
+			actors.InitTraversal();
+			int j = 0;
+			for(vtkActor actor ; (actor = actors.GetNextActor()) != null ; ++j)
+				actor.SetPickable(pickBackup[j]);			
+		}
+		
 		// If no selection was made leave
 		if (idArray.GetDataSize() == 0)
 			return;

@@ -77,9 +77,13 @@ public class TestViewableCAD implements SelectionListener, KeyListener {
 				System.out.println("Capabilities : " + canvas.GetRenderWindow().ReportCapabilities());
 				canvas.unlock();
 				break;
-				case KeyEvent.VK_O:
-					//viewable.hideMesh();
-					break;
+			case KeyEvent.VK_E:
+				viewable.setShapeTypeSelection(ViewableCAD.ShapeType.EDGE);
+				break;
+	
+			case KeyEvent.VK_O:
+				//viewable.hideMesh();
+				break;
 			case KeyEvent.VK_I:
 				System.out.println("TEST DATA !");
 				viewable.surfaceSelection(Utils.retrieveCanvas(e), new Point(0,0), new Point(200,200));

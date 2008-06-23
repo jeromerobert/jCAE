@@ -356,7 +356,7 @@ public class LeafNode extends AbstractNode
 		if (selectionHighLighter == null)
 		{
 			selectionHighLighter = new vtkActor();
-
+			selectionHighLighter.PickableOff();
 			getActorSelectionCustomiser().customiseActorSelection(selectionHighLighter);
 			
 			fireActorCreated(selectionHighLighter);

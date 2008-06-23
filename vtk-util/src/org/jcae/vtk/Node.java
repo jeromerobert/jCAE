@@ -94,6 +94,19 @@ public class Node extends AbstractNode
 		}
 	}
 	
+	public void setPickableRecursive(boolean pickable)
+	{
+		super.setPickable(pickable);
+		
+		for(AbstractNode child : children)
+		{
+			if(child instanceof Node)
+				((Node)child).setPickableRecursive(pickable);
+			else
+				child.setPickable(pickable);
+		}
+	}
+	
 	public void addChildCreationListener(ChildCreationListener listener)
 	{
 		childCreationListeners.add(listener);

@@ -57,6 +57,8 @@ public class ViewableCAD extends Viewable
 	private final HashMap<TopoDS_Face, LeafNode> topoToNodeFaceBack = new HashMap<TopoDS_Face, LeafNode>();
 	private final HashMap<LeafNode, TopoDS_Shape> nodeToTopo = new HashMap<LeafNode, TopoDS_Shape>();
 	private Node faces = null;
+	private Node edges = null;
+	private Node vertice = null;
 	
 	
 	public enum ShapeType
@@ -70,6 +72,7 @@ public class ViewableCAD extends Viewable
 		this.meshExtractor = meshExtractor;
 		
 		computeNodes();
+		setShapeTypeSelection(shapeTypeSelection);
 	}
 
 
@@ -130,7 +133,7 @@ public class ViewableCAD extends Viewable
 	
 	private void computeNodes()
 	{
-		Node vertice = new Node(rootNode);
+		vertice = new Node(rootNode);
 		
 		for(TopoDS_Vertex vertex : this.meshExtractor.getVertice())
 		{
@@ -141,7 +144,7 @@ public class ViewableCAD extends Viewable
 		}
 		vertice.setManager(true);
 		
-		Node edges = new Node(rootNode);
+		edges = new Node(rootNode);
 		
 		for(TopoDS_Edge edge : this.meshExtractor.getEdges())
 		{
@@ -384,14 +387,22 @@ public class ViewableCAD extends Viewable
 	public void setShapeTypeSelection(ShapeType shapeTypeSelection)
 	{
 		this.shapeTypeSelection = shapeTypeSelection;
+
+		vertice.setPickableRecursive(false);
+		edges.setPickableRecursive(false);
+		faces.setPickableRecursive(false);
+		
 		switch(shapeTypeSelection)
 		{
 			case VERTEX:
+				vertice.setPickableRecursive(true);
 			case EDGE:
 				pixelTolerance = 3;
+				edges.setPickableRecursive(true);
 				break;
 			default:
 				pixelTolerance = 0;
+				faces.setPickableRecursive(true);
 		}
 	}
 	

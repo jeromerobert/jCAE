@@ -24,6 +24,7 @@ import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import vtk.vtkInteractorStyle;
 import vtk.vtkInteractorStyleRubberBand3D;
@@ -107,7 +108,12 @@ public class View extends Canvas {
 		{
 			case RECTANGLE_SELECTION:
 				if(currentViewable != null)
-					currentViewable.surfaceSelection(this, pressPosition, releasePosition);
+				{
+					if(pressPosition.equals(releasePosition))
+						currentViewable.pointSelection(this, pressPosition);
+					else
+						currentViewable.surfaceSelection(this, pressPosition, releasePosition);
+				}
 				setMouseMode(MouseMode.POINT_SELECTION);
 				break;
 			case CLIPPING_PLANE:
@@ -203,7 +209,11 @@ public class View extends Canvas {
 	 */
 	public void setCurrentViewable(Viewable viewable)
 	{
+		if(this.currentViewable != null)
+			this.currentViewable.setPickable(false);
+		
 		this.currentViewable = viewable;
+		this.currentViewable.setPickable(true);
 	}
 	
 	public Viewable getCurrentViewable()
