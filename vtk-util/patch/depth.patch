@@ -1,34 +1,31 @@
 This patch permits to not erase the depth buffer before a selection rendering. This permits to not have
 to draw all the scene to check the visibility of an element.
 
-diff --git a/Rendering/vtkOpenGLRenderer.cxx b/Rendering/vtkOpenGLRenderer.cxx
-index 1d4a151..1cb5f99 100644
---- a/Rendering/vtkOpenGLRenderer.cxx
-+++ b/Rendering/vtkOpenGLRenderer.cxx
-@@ -1090,7 +1090,7 @@ void vtkOpenGLRenderer::PrintSelf(ostream& os, vtkIndent indent)
- }
- 
- 
--void vtkOpenGLRenderer::Clear(void)
-+void vtkOpenGLRenderer::Clear()
- {
-   GLbitfield  clear_mask = 0;
- 
-@@ -1104,7 +1104,10 @@ void vtkOpenGLRenderer::Clear(void)
+Index: Rendering/vtkOpenGLRenderer.cxx
+===================================================================
+RCS file: /cvsroot/VTK/VTK/Rendering/vtkOpenGLRenderer.cxx,v
+retrieving revision 1.90
+diff -w -B -b -u -r1.90 vtkOpenGLRenderer.cxx
+--- Rendering/vtkOpenGLRenderer.cxx	23 Jun 2008 19:36:06 -0000	1.90
++++ Rendering/vtkOpenGLRenderer.cxx	24 Jun 2008 07:31:46 -0000
+@@ -1100,7 +1100,8 @@
+                   static_cast<GLclampf>(this->Background[1]),
+                   static_cast<GLclampf>(this->Background[2]),
+                   static_cast<GLclampf>(0.0));
+-    clear_mask |= GL_COLOR_BUFFER_BIT;
++    if(this->SelectMode == vtkRenderer::NOT_SELECTING || this->ClearDepthForSelection)
++      clear_mask |= GL_DEPTH_BUFFER_BIT;
      }
  
    glClearDepth(static_cast<GLclampf>(1.0));
--  clear_mask |= GL_DEPTH_BUFFER_BIT;
-+  if(this->SelectMode == vtkRenderer::NOT_SELECTING || this->ClearDepthForSelection)
-+    clear_mask |= GL_DEPTH_BUFFER_BIT;
- 
-   vtkDebugMacro(<< "glClear\n");
-   glClear(clear_mask);
-diff --git a/Rendering/vtkRenderer.cxx b/Rendering/vtkRenderer.cxx
-index cab64f5..81e7202 100644
---- a/Rendering/vtkRenderer.cxx
-+++ b/Rendering/vtkRenderer.cxx
-@@ -78,6 +78,8 @@ vtkRenderer::vtkRenderer()
+Index: Rendering/vtkRenderer.cxx
+===================================================================
+RCS file: /cvsroot/VTK/VTK/Rendering/vtkRenderer.cxx,v
+retrieving revision 1.240
+diff -w -B -b -u -r1.240 vtkRenderer.cxx
+--- Rendering/vtkRenderer.cxx	16 Apr 2008 18:46:05 -0000	1.240
++++ Rendering/vtkRenderer.cxx	24 Jun 2008 07:31:48 -0000
+@@ -78,6 +78,8 @@
  
    this->LightFollowCamera = 1;
  
@@ -37,25 +34,28 @@ index cab64f5..81e7202 100644
    this->NumberOfPropsRendered = 0;
  
    this->PropArray                = NULL;
-diff --git a/Rendering/vtkRenderer.h b/Rendering/vtkRenderer.h
-index 9bcf0ae..d367d55 100644
---- a/Rendering/vtkRenderer.h
-+++ b/Rendering/vtkRenderer.h
-@@ -131,6 +131,13 @@ public:
+Index: Rendering/vtkRenderer.h
+===================================================================
+RCS file: /cvsroot/VTK/VTK/Rendering/vtkRenderer.h,v
+retrieving revision 1.139
+diff -w -B -b -u -r1.139 vtkRenderer.h
+--- Rendering/vtkRenderer.h	10 Jan 2008 13:51:09 -0000	1.139
++++ Rendering/vtkRenderer.h	24 Jun 2008 07:31:48 -0000
+@@ -130,6 +130,13 @@
+   vtkSetMacro(AutomaticLightCreation,int);
    vtkBooleanMacro(AutomaticLightCreation,int);
  
++   // This is a flag that indicate if the depth buffer is erased or not
++   // before the pick selection. This permits to not draw all the components
++   // and only one that can be picked but checking anyway if they are visible or not.
++   // By default this flag is on.
++   vtkSetMacro(ClearDepthForSelection,int);
++   vtkBooleanMacro(ClearDepthForSelection,int);
++
    // Description:
-+  // This is a flag that indicate if the depth buffer is erased or not
-+  // before the pick selection. This permits to not draw all the components
-+  // and only one that can be picked but checking anyway if they are visible or not.
-+  // By default this flag is on.
-+  vtkSetMacro(ClearDepthForSelection,int);
-+  vtkBooleanMacro(ClearDepthForSelection,int);
-+  // Description:
    // Ask the lights in the scene that are not in world space
    // (for instance, Headlights or CameraLights that are attached to the 
-   // camera) to update their geometry to match the active camera.
-@@ -461,6 +468,8 @@ protected:
+@@ -461,6 +468,8 @@
    // Allocate the time for each prop
    void               AllocateTime();
  
