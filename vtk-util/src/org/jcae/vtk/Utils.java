@@ -174,8 +174,7 @@ public class Utils
 	}
 
 	public static void loadVTKLibraries()
-	{
-		System.out.println(System.getProperty("java.library.path"));
+	{		
 		System.loadLibrary("vtkCommonJava");
 		System.loadLibrary("vtkFilteringJava");
 		System.loadLibrary("vtkIOJava");
