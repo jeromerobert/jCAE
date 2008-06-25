@@ -362,7 +362,7 @@ public abstract class Viewable extends MultiCanvas
 
 	void setClippingPlanes(vtkPlaneCollection planes)
 	{
-		assert false;
+		scene.setClippingPlanes(planes);
 	}
 
 	protected boolean isSelectionEmpty()

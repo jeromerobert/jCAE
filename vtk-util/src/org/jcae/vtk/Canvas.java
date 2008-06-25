@@ -130,7 +130,7 @@ public class Canvas extends vtkCanvas
 				"thread that creates the renderView. Making an invokeLater to"+
 				" render on the thread that creates the renderView");*/
 			try{
-			SwingUtilities.invokeAndWait(new Runnable()
+			SwingUtilities.invokeLater(new Runnable()
 			{
 				public void run()
 				{

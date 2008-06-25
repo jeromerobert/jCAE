@@ -46,8 +46,8 @@ public class ViewableCAD extends Viewable
 	private final OCCMeshExtractor meshExtractor;
 	/** Specify which type of object is selectable */
 	private ShapeType shapeTypeSelection = ShapeType.FACE;
-	private final Color frontFaceColor = new Color(0,255,255,180);
-	private final Color backFaceColor = new Color(255,255,0,180);
+	private final Color frontFaceColor = new Color(0,255,255);
+	private final Color backFaceColor = new Color(255,255,0);
 	private final Color vertexColor = new Color(0,0,255);
 	private final Color edgeColor = new Color(0,255,0);
 	

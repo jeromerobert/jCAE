@@ -1,0 +1,30 @@
+Bug report : http://www.vtk.org/Bug/view.php?id=7236
+
+Index: Rendering/vtkOpenGLRenderWindow.cxx
+===================================================================
+RCS file: /cvsroot/VTK/VTK/Rendering/vtkOpenGLRenderWindow.cxx,v
+retrieving revision 1.97
+diff -u -r1.97 vtkOpenGLRenderWindow.cxx
+--- Rendering/vtkOpenGLRenderWindow.cxx	17 Jun 2008 15:53:12 -0000	1.97
++++ Rendering/vtkOpenGLRenderWindow.cxx	25 Jun 2008 08:13:30 -0000
+@@ -1209,6 +1209,9 @@
+   int     x_low, x_hi;
+   int     width, height;
+ 
++  // Disable writing on the z-buffer.
++  glDepthMask(GL_FALSE);
++  glDisable(GL_DEPTH_TEST);
+ 
+   // set the current window
+   this->MakeCurrent();
+@@ -1295,6 +1298,10 @@
+                   data);
+     }
+ 
++ // Disable writing on the z-buffer.
++  glDepthMask(GL_TRUE);
++  glEnable(GL_DEPTH_TEST);
++
+   // This seems to be necessary for the image to show up
+   glFlush();  
+ 

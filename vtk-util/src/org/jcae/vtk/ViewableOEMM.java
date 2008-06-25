@@ -546,12 +546,6 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 		canvas.GetRenderer().RemoveViewProp(freeEdgesActor);
 	}
 
-	@Override
-	protected void setClippingPlanes(vtkPlaneCollection planes)
-	{
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
 	public void mouseDragged(MouseEvent e)
 	{
 		if (!automaticSelection || rendering)

@@ -45,6 +45,8 @@ import vtk.vtkFloatArray;
 import vtk.vtkIdTypeArray;
 import vtk.vtkIntArray;
 import vtk.vtkPNGWriter;
+import vtk.vtkPlane;
+import vtk.vtkPlaneCollection;
 import vtk.vtkPoints;
 import vtk.vtkPolyData;
 import vtk.vtkPolyDataMapper;
@@ -138,6 +140,14 @@ public class Utils
 		return rep;
 	}
 
+	public static float[] CanvasGetZBuffer(vtkCanvas canvas, int[] firstPoint, int[] secondPoint)
+	{
+		vtkFloatArray zbuffer = new vtkFloatArray();
+		canvas.GetRenderWindow().GetZbufferData(firstPoint[0], firstPoint[1], secondPoint[0], secondPoint[1], zbuffer);
+		
+		return zbuffer.GetJavaArray();
+	}
+	
 	/**
 	 * Use vtkPropertySetColor instead
 	 * @param actor
@@ -267,6 +277,90 @@ public class Utils
 	public static double computeZDistanceFromCameraSpaceToScreenSpace(double distance, double delta, double n, double f)
 	{
 		return (2 * f * n * delta) / ((f + n) * distance * (distance + delta));
+	}
+	
+	public static vtkPlaneCollection computeClippingPlane(Canvas canvas, Point pressPosition, Point releasePosition)
+	{
+		// Compute the clipping planes
+		vtkRenderer render = canvas.GetRenderer();
+		vtkPlaneCollection planes = new vtkPlaneCollection();
+		vtkPlane plane = null;
+		double[] p1;
+		double[] p2;
+		double[] p3;
+
+		/**
+		 * These are the two points in the screen that define the different clipping planes
+		 */
+		int[][] pos1 =
+		{
+			{
+				pressPosition.x, pressPosition.y
+			}, // Left plane
+
+			{
+				releasePosition.x, pressPosition.y
+			}, // Top plane
+
+			{
+				releasePosition.x, releasePosition.y
+			}, // Right plane
+
+			{
+				pressPosition.x, releasePosition.y
+			} // Bottom plane
+
+		};
+		int[][] pos2 =
+		{
+			{
+				pressPosition.x, releasePosition.y
+			},
+			{
+				pressPosition.x, pressPosition.y
+			},
+			{
+				releasePosition.x, pressPosition.y
+			},
+			{
+				releasePosition.x, releasePosition.y
+			}
+		};
+
+		for (int i = 0; i < 4; ++i)
+		{
+			plane = new vtkPlane();
+			render.SetDisplayPoint(pos1[i][0], pos1[i][1], 0.);
+			render.DisplayToWorld();
+			p1 = render.GetWorldPoint();
+			render.SetDisplayPoint(pos1[i][0], pos1[i][1], 1.);
+			render.DisplayToWorld();
+			p2 = render.GetWorldPoint();
+			render.SetDisplayPoint(pos2[i][0], pos2[i][1], 1.);
+			render.DisplayToWorld();
+			p3 = render.GetWorldPoint();
+
+			// Compute two vectors of the plane
+			Vector3d v1 = new Vector3d();
+			Vector3d v2 = new Vector3d();
+			Vector3d n = new Vector3d();
+
+			v1.set(p2);
+			v2.set(p1);
+			n.set(p3);
+			v1.sub(v2);
+			v2.sub(n);
+
+			// Compute cross product (the normal of the plane) between p1 and p2
+			n.cross(v1, v2);
+			n.normalize();
+
+			plane.SetNormal(n.getX(), n.getY(), n.getZ());
+			plane.SetOrigin(p1);
+			planes.AddItem(plane);
+		}
+		
+		return planes;
 	}
 	
 	/**

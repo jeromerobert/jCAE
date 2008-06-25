@@ -98,12 +98,6 @@ public class ViewableMesh extends Viewable
 		this.viewMode = viewMode;
 	}
 
-	@Override
-	protected void setClippingPlanes(vtkPlaneCollection planes)
-	{
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
 	/**
 	 * Return the vtkPolyData representation of a mesh. The groups are stored in the scalars of the cell datas.
 	 * Also the polygons are stored like this :

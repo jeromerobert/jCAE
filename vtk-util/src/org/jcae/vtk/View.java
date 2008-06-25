@@ -29,6 +29,7 @@ import java.util.List;
 import vtk.vtkInteractorStyle;
 import vtk.vtkInteractorStyleRubberBand3D;
 import vtk.vtkInteractorStyleTrackballCamera;
+import vtk.vtkPlaneCollection;
 
 /**
  *
@@ -117,6 +118,9 @@ public class View extends Canvas {
 				setMouseMode(MouseMode.POINT_SELECTION);
 				break;
 			case CLIPPING_PLANE:
+				vtkPlaneCollection planes = Utils.computeClippingPlane(this, pressPosition, releasePosition);
+				for(Viewable viewable : getViewables())
+					viewable.setClippingPlanes(planes);
 				setMouseMode(MouseMode.POINT_SELECTION);
 		}
 		

@@ -22,6 +22,7 @@ package org.jcae.vtk;
 
 import gnu.trove.TLongObjectHashMap;
 import java.awt.Point;
+import javax.swing.SwingUtilities;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import org.jcae.geometry.BoundingBox;
@@ -29,7 +30,9 @@ import org.jcae.geometry.Bounds;
 import vtk.vtkActor;
 import vtk.vtkActorCollection;
 import vtk.vtkCanvas;
+import vtk.vtkFloatArray;
 import vtk.vtkIdTypeArray;
+import vtk.vtkPlaneCollection;
 import vtk.vtkProp;
 import vtk.vtkSelection;
 import vtk.vtkVisibleCellSelector;
@@ -42,6 +45,7 @@ import vtk.vtkVisibleCellSelector;
 public class Scene implements AbstractNode.ActorListener {
 	private TLongObjectHashMap<AbstractNode> idActorToNode = new TLongObjectHashMap<AbstractNode>();
 	private boolean actorFiltering = true  ;
+	private vtkPlaneCollection planes = null;
 	
 	public Scene()
 	{
@@ -61,6 +65,8 @@ public class Scene implements AbstractNode.ActorListener {
 	public void actorCreated(AbstractNode node, vtkActor actor)
 	{
 		idActorToNode.put(actor.GetVTKId(), node);
+		if(planes != null)
+			actor.GetMapper().SetClippingPlanes(planes);
 	}
 
 	public void actorDeleted(AbstractNode node, vtkActor actor)
@@ -96,6 +102,21 @@ public class Scene implements AbstractNode.ActorListener {
 
 	public void pick(vtkCanvas canvas, int[] firstPoint, int []secondPoint)
 	{
+		/*if(canvas instanceof Canvas)
+		/{
+			((Canvas)canvas).RenderSecured();
+		}
+		else throw new RuntimeException("PWET");   */
+		/*if (!SwingUtilities.isEventDispatchThread())
+			throw new RuntimeException("NOT IN THE GOOD THREAD");
+		vtkFloatArray beforeNative = new vtkFloatArray();
+		canvas.GetRenderWindow().GetZbufferData(firstPoint[0], firstPoint[1], secondPoint[0], secondPoint[1], beforeNative);
+		float[] before = beforeNative.GetJavaArray();*/
+		
+		/*if(canvas instanceof Canvas)
+		{
+			((Canvas)canvas).RenderSecured();
+		}*/
 		vtkVisibleCellSelector selector = new vtkVisibleCellSelector();
 		selector.SetRenderer(canvas.GetRenderer());
 		selector.SetArea(firstPoint[0], firstPoint[1], secondPoint[0],
@@ -166,7 +187,21 @@ public class Scene implements AbstractNode.ActorListener {
 		canvas.GetRenderer().ClearDepthForSelectionOff();
 		selector.Select();
 		canvas.unlock();
+		
+		/*vtkFloatArray afterNative = new vtkFloatArray();
+		canvas.GetRenderWindow().GetZbufferData(firstPoint[0], firstPoint[1], secondPoint[0], secondPoint[1], afterNative);
 
+		float[] after = afterNative.GetJavaArray();
+		
+		System.out.println("Z-BUFFER : ");
+		for(int i = 0 ; i < before.length ; ++i)
+		{
+			System.out.println(before[i] + " -> " + after[i]);
+		}
+		
+		System.out.println("after components " + afterNative.GetNumberOfComponents());
+		System.out.println("after tuples " + afterNative.GetNumberOfTuples());
+		*/
 		//long begin = System.currentTimeMillis();
 		vtkIdTypeArray idArray = new vtkIdTypeArray();
 		selector.GetSelectedIds(idArray);
@@ -227,5 +262,15 @@ public class Scene implements AbstractNode.ActorListener {
 			return new int[0];
 
 		return ids.toNativeArray();*/
+	}
+	
+	public void setClippingPlanes(vtkPlaneCollection planes)
+	{
+		AbstractNode[] nodes = new AbstractNode[idActorToNode.size()];
+		idActorToNode.getValues(nodes);
+		for(AbstractNode node : nodes)
+		{
+			node.getActor().GetMapper().SetClippingPlanes(planes);
+		}
 	}
 }
