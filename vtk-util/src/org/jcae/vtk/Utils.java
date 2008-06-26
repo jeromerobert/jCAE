@@ -510,12 +510,12 @@ public class Utils
 	
 	public static double getOffSetFactor()
 	{
-		return 2.;
+		return 1.;
 	}
 	
 	public static double getOffSetValue()
 	{
-		return 2.;
+		return 1.;
 	}
 	
 	/**

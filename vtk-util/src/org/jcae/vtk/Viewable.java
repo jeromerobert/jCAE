@@ -43,7 +43,7 @@ public abstract class Viewable extends MultiCanvas
 	protected final double tolerance = 0.002; // 0.2% of tolerance in function of the (far-near) distance
 
 	protected int pixelTolerance = 0; // pixel tolerance for point picking (0 by default)
-
+	protected static final int DEFAULT_PIXEL_TOLERANCE = 3;
 	protected final Scene scene;
 	protected final Node rootNode; // The rootNode node of the viewable
 
@@ -51,6 +51,7 @@ public abstract class Viewable extends MultiCanvas
 	protected HashSet<LeafNode> selectionNode = new HashSet<LeafNode>();
 	protected HashSet<LeafNode> selectionCell = new HashSet<LeafNode>();
 	protected boolean selectionChanged = false;
+	protected boolean surfaceSelection = true;
 
 	// Do not modify this member directly (use setMode instead)
 	private SelectionType selectionType = SelectionType.NODE;
@@ -112,6 +113,26 @@ public abstract class Viewable extends MultiCanvas
 		return this.selectionType;
 	}
 
+	/**
+	 * If true, the rectangle selection is on surface.
+	 * If false, the rectangle selection is in frustum.
+	 * @return
+	 */
+	public boolean getSurfaceSelection()
+	{
+		return surfaceSelection;
+	}
+	/**
+	 * Set the type of rectangle selection.
+	 * If true, the rectangle selection is on surface.
+	 * If false, the rectangle selection is in frustum.
+	 * @param surfaceSelection
+	 */
+	public void setSurfaceSelection(boolean surfaceSelection)
+	{
+		this.surfaceSelection = surfaceSelection;
+	}
+	
 	protected int[] selectPointOnSurface(Canvas canvas, int[] firstPoint, int[] secondPoint)
 	{
 		assert false;
