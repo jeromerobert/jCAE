@@ -31,11 +31,21 @@ public class UNVParser
 		return nodesCoordinates;
 	}
 
+	/**
+	 * @return
+	 * @deprecated use getGroupNames instead.
+	 */
+	@Deprecated 
 	public String[] getTria3GroupNames()
+	{
+		return getGroupNames();
+	}
+
+	public String[] getGroupNames()
 	{
 		return surfaceGroupNames.toArray(new String[0]);
 	}
-
+	
 	public int[] getTria3FromGroup(int groupId)
 	{
 		int[] elids=surfaceGroups.get(groupId);
@@ -83,6 +93,12 @@ public class UNVParser
 		return toReturn;
 	}
 	
+	/**
+	 * Access to the beams. The beams don't have really a group so we put them into the
+	 * group UNVProvider.OTHERS_GROUP.
+	 * @param groupId has to be equal to UNVProvider.OTHERS_GROUP
+	 * @return
+	 */
 	public int[] getBeam2FromGroup(int groupId)
 	{
 		if (groupId == UNVProvider.OTHERS_GROUP)
