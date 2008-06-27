@@ -68,57 +68,59 @@ public abstract class AbstractNode {
 		void actorHighLighted(AbstractNode node, vtkActor actor);
 	}
 		
-	public static class ActorCustomiser
+	public interface ActorCustomiser
 	{
-		public void customiseActor(vtkActor actor)
-		{
-			
-		}
+		void customiseActor(vtkActor actor);
 	}
 	
-	public static class ActorHighLightedCustomiser
+	public interface ActorHighLightedCustomiser
 	{
-		public void customiseActorHighLighted(vtkActor actor)
-		{
-			System.out.println("TEST");
-		}
+		void customiseActorHighLighted(vtkActor actor);
 	}
 	
-	public static class MapperCustomiser
+	public interface MapperCustomiser
 	{
-		public void customiseMapper(vtkMapper mapper)
-		{
-		}
+		void customiseMapper(vtkMapper mapper);
 	}
 	
-	public static class MapperHighLightedCustomiser
+	public interface MapperHighLightedCustomiser
 	{
-		public void customiseMapperHighLighted(vtkMapper mapper)
-		{
-		}
+		void customiseMapperHighLighted(vtkMapper mapper);
 	}
 	
-	public static class ActorSelectionCustomiser
+	public interface ActorSelectionCustomiser
 	{
-		public void customiseActorSelection(vtkActor actor)
-		{
-			System.out.println("TEST2");
-		}
+		void customiseActorSelection(vtkActor actor);
 	}
 	
-	public static class MapperSelectionCustomiser
+	public interface MapperSelectionCustomiser
 	{
-		public void customiseMapperSelection(vtkMapper mapper)
-		{
-		}
+		void customiseMapperSelection(vtkMapper mapper);
 	}
 	
-	public static ActorCustomiser DEFAULT_ACTOR_CUSTOMISER = new ActorCustomiser();
-	public static ActorHighLightedCustomiser DEFAULT_ACTOR_HIGHLIGHTED_CUSTOMISER = new ActorHighLightedCustomiser();
-	public static MapperCustomiser DEFAULT_MAPPER_CUSTOMISER = new MapperCustomiser();
-	public static MapperHighLightedCustomiser DEFAULT_MAPPER_HIGHLIGHTED_CUSTOMISER = new MapperHighLightedCustomiser();
-	public static ActorSelectionCustomiser DEFAULT_ACTOR_SELECTION_CUSTOMISER = new ActorSelectionCustomiser();
-	public static MapperSelectionCustomiser DEFAULT_MAPPER_SELECTION_CUSTOMISER = new MapperSelectionCustomiser();
+	public static ActorCustomiser DEFAULT_ACTOR_CUSTOMISER = new ActorCustomiser(){
+		public void customiseActor(vtkActor actor){}		
+	};
+	public static ActorHighLightedCustomiser DEFAULT_ACTOR_HIGHLIGHTED_CUSTOMISER =
+		new ActorHighLightedCustomiser(){
+			public void customiseActorHighLighted(vtkActor actor){}		
+		};
+	public static MapperCustomiser DEFAULT_MAPPER_CUSTOMISER = new MapperCustomiser(){
+		public void customiseMapper(vtkMapper mapper){}
+	};
+	public static MapperHighLightedCustomiser DEFAULT_MAPPER_HIGHLIGHTED_CUSTOMISER =
+		new MapperHighLightedCustomiser()
+		{
+			public void customiseMapperHighLighted(vtkMapper mapper){}
+		};
+	public static ActorSelectionCustomiser DEFAULT_ACTOR_SELECTION_CUSTOMISER =
+		new ActorSelectionCustomiser(){
+			public void customiseActorSelection(vtkActor actor){}
+		};
+	public static MapperSelectionCustomiser DEFAULT_MAPPER_SELECTION_CUSTOMISER =
+		new MapperSelectionCustomiser(){
+			public void customiseMapperSelection(vtkMapper mapper){}
+		};
 	
 	protected ActorCustomiser actorCustomiser = null;
 	protected ActorHighLightedCustomiser actorHighLightedCustomiser = null;

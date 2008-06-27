@@ -85,8 +85,6 @@ public abstract class Viewable extends MultiCanvas
 			@Override
 			public void customiseActorHighLighted(vtkActor actor)
 			{
-				super.customiseActorHighLighted(actor);
-				
 				Utils.vtkPropertySetColor(actor.GetProperty(), selectionColor);
 			}
 		});
@@ -95,11 +93,8 @@ public abstract class Viewable extends MultiCanvas
 			@Override
 			public void customiseActorSelection(vtkActor actor)
 			{
-				super.customiseActorSelection(actor);
-				
 				Utils.vtkPropertySetColor(actor.GetProperty(), selectionColor);
-			}
-			
+			}			
 		});
 	}
 
