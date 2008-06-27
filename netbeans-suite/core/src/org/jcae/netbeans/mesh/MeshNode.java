@@ -27,11 +27,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.Action;
+import javax.xml.parsers.ParserConfigurationException;
 import org.jcae.netbeans.BeanProperty;
 import org.jcae.netbeans.Utilities;
 import org.jcae.netbeans.cad.BrepNode;
-import org.jcae.netbeans.viewer3d.View3D;
-import org.jcae.netbeans.viewer3d.View3DManager;
+import org.jcae.netbeans.viewer3d.ViewManager;
+import org.jcae.vtk.View;
 import org.openide.ErrorManager;
 import org.openide.actions.*;
 import org.openide.cookies.ViewCookie;
@@ -44,9 +45,18 @@ import org.openide.nodes.Node;
 import org.openide.nodes.Node.Property;
 import org.openide.nodes.Node.PropertySet;
 import org.openide.nodes.NodeTransfer;
+import org.openide.util.Exceptions;
 import org.openide.util.actions.SystemAction;
 import org.openide.util.datatransfer.PasteType;
+import org.openide.util.lookup.Lookups;
+import org.xml.sax.SAXException;
 
+/**
+ * Contains only the geometric node and the groups node.
+ * Lookups :
+ * this.
+ * @author ibarz
+ */
 public class MeshNode extends DataNode implements ViewCookie
 {
 	private Groups groups;
@@ -59,6 +69,11 @@ public class MeshNode extends DataNode implements ViewCookie
 		getCookieSet().add(this);
 		updateGeomNode();
 		refreshGroups();
+	}
+
+	public AbstractNode getGroupsNode()
+	{
+		return groupsNode;
 	}
 
 	private AbstractNode createGeomNode(String geomFile)
@@ -168,12 +183,24 @@ public class MeshNode extends DataNode implements ViewCookie
 	{
 		if(groups!=null)
 		{
-			View3D view=View3DManager.getDefault().getView3D();
-			groups.displayGroups(
-				getName(),
-				Arrays.asList(groups.getGroups()),
-				view);
-			view.getView().fitAll();
+			View view=ViewManager.getDefault().getCurrentView();
+			try
+			{
+				groups.displayGroups(getName(),
+					Arrays.asList(groups.getGroups()), view);
+			}
+			catch (ParserConfigurationException ex)
+			{
+				Exceptions.printStackTrace(ex);
+			}
+			catch (SAXException ex)
+			{
+				Exceptions.printStackTrace(ex);
+			}
+			catch (IOException ex)
+			{
+				Exceptions.printStackTrace(ex);
+			}
 		}
 	}
 	
@@ -202,7 +229,8 @@ public class MeshNode extends DataNode implements ViewCookie
         
         if(groups!=null && groups.getGroups().length>0)
         {
-        	groupsNode=new AbstractNode(new GroupChildren(groups));
+			GroupChildren groupChildren = new GroupChildren(groups);
+        	groupsNode=new AbstractNode(groupChildren, Lookups.fixed(groupChildren));
         	groupsNode.setDisplayName("Groups");
         	getChildren().add(new Node[]{groupsNode});
         }
@@ -274,6 +302,15 @@ public class MeshNode extends DataNode implements ViewCookie
 			}
 		}
 	}*/
+	
+	/**
+	 * Indicate if groups is the same than has the groupNode
+	 * @param groups
+	 */
+	boolean hasThisGroupsNode(Groups groups)
+	{
+		return this.groups == groups;
+	}
 	
 	@Override
 	protected void createPasteTypes(Transferable t, List<PasteType> ls)

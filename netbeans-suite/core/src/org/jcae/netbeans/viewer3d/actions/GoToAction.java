@@ -22,11 +22,11 @@ package org.jcae.netbeans.viewer3d.actions;
 
 import javax.swing.Action;
 import javax.swing.ImageIcon;
-import org.jcae.netbeans.viewer3d.PositionManager;
-import org.jcae.viewer3d.View;
+import org.jcae.netbeans.viewer3d.ViewCameraList;
+import org.jcae.vtk.View;
 
 
-public class GoToAction extends AbstractViewAction
+public class GoToAction extends ViewAction
 {
 	private static ImageIcon icon = new ImageIcon(GoToAction.class.getResource("im-aim.png"));	
 	/**
@@ -39,12 +39,10 @@ public class GoToAction extends AbstractViewAction
 		putValue(Action.SMALL_ICON, icon);
 		setIcon(icon);
 	}
-	/* (non-Javadoc)
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
+	
 	public void actionPerformed(View view)
 	{
-		PositionManager.getDefault().goTo(view);	
+		new ViewCameraList(view.getCameraManager()).setVisible(true);
 	}
 
 	protected boolean asynchronous()

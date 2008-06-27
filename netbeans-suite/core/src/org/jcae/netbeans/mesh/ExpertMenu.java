@@ -26,6 +26,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
 import org.jcae.netbeans.mesh.smooth.Smooth;
+import org.jcae.netbeans.viewer3d.actions.BuildOEMMVisu;
 import org.openide.awt.Actions;
 import org.openide.awt.Mnemonics;
 import org.openide.util.HelpCtx;
@@ -66,6 +67,11 @@ public class ExpertMenu extends SystemAction implements Presenter.Popup
 		item = new JMenuItem();
 		Mnemonics.setLocalizedText(item, item.getText());
 		Actions.connect(item, (Action)SystemAction.get(BuidOEMMAction.class), true);
+		menu.add(item);
+		
+		item = new JMenuItem();
+		Mnemonics.setLocalizedText(item, item.getText());
+		Actions.connect(item, (Action)SystemAction.get(BuildOEMMVisu.class), true);
 		menu.add(item);
 
 		item = new JMenuItem();

@@ -25,25 +25,21 @@ import javax.swing.ImageIcon;
 import org.jcae.vtk.View;
 
 
-public class DownFrontClipDistance extends ViewAction
+public class SelectionRectangle extends ViewAction
 {
-	private static ImageIcon icon = new ImageIcon(DownFrontClipDistance.class.getResource("down.png"));
+	private static ImageIcon icon = new ImageIcon(SelectionRectangle.class.getResource("stock_crop.png"));
 	/**
 	 * 
 	 */
-	public DownFrontClipDistance()
+	public SelectionRectangle()
 	{						
-		putValue(Action.NAME, "Decrease front clip distance");
-		putValue(Action.SHORT_DESCRIPTION, "Decrease front clip distance");
+		putValue(Action.NAME, "Selection rectangle");
+		putValue(Action.SHORT_DESCRIPTION, "Selection rectangle");
 		putValue(Action.SMALL_ICON, icon);
 		setIcon(icon);
 	}
-	
-	/* (non-Javadoc)
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
 	public void actionPerformed(View view)
-	{		
-		throw new UnsupportedOperationException("Not supported yet.");
-	}				
+	{
+		view.setMouseMode(View.MouseMode.RECTANGLE_SELECTION);
+	}
 }

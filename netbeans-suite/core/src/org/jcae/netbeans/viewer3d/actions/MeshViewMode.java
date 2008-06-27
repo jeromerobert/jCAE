@@ -17,45 +17,65 @@
  *
  * (C) Copyright 2008, by EADS France
  */
-
 package org.jcae.netbeans.viewer3d.actions;
 
-import javax.swing.Action;
-import org.jcae.netbeans.viewer3d.ViewManager;
-import org.jcae.vtk.View;
+import org.jcae.vtk.ViewableMesh;
 import org.openide.util.HelpCtx;
-import org.openide.util.actions.CallableSystemAction;
+import org.openide.util.NbBundle;
 
-public abstract class ViewAction extends CallableSystemAction
-{	
-	public void performAction()
+public final class MeshViewMode extends MeshButton
+{
+@Override
+	public void actionPerformed(ViewableMesh viewable)
 	{
-		View v = ViewManager.getDefault().getCurrentView();
-		if(v!=null)
+		switch(viewable.getViewMode())
 		{
-			actionPerformed(v);
+			case FILLED:
+				viewable.setViewMode(ViewableMesh.ViewMode.WIRED);
+				break;
+			case WIRED:
+				viewable.setViewMode(ViewableMesh.ViewMode.FILLED);
+				break;
+			default:
+				throw new IllegalArgumentException("Mesh view mode not supported !");
 		}
+		viewable.Render();
+	}
+	
+	protected void updateButton(ViewableMesh viewer)
+	{
+		setBooleanState(viewer.getViewMode() == ViewableMesh.ViewMode.WIRED);
 	}
 
 	public String getName()
 	{
-		return getValue(Action.NAME).toString();
+		return NbBundle.getMessage(MeshViewMode.class, "CTL_MeshWired");
+	}
+
+	@Override
+	protected String iconResource()
+	{
+		return "org/jcae/netbeans/viewer3d/actions/wired.png";
 	}
 
 	public HelpCtx getHelpCtx()
 	{
 		return HelpCtx.DEFAULT_HELP;
 	}
+	/**
+	 * By default the action is not enabled
+	 */
+	@Override
+	protected void initialize()
+	{
+		setEnabled(false);
+		
+		super.initialize();
+	}
 	
-	protected boolean asynchronous() {
-        // performAction() should run in event thread for actions that need a rendering of canva
-        return false;
-    }
-	
-	// TODO : make it abstract when all the children will implement this method
-	public abstract void actionPerformed(View view);
-	/*{
-		throw new RuntimeException("The action" + toString() + " that is not yet implemented was called");
-	}*/
-	//public abstract void actionPerformedVTK(vtkCanvas view);
+	@Override
+	protected boolean asynchronous()
+	{
+		return false;
+	}
 }

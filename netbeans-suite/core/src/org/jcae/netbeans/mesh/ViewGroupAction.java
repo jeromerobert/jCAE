@@ -20,13 +20,17 @@
 
 package org.jcae.netbeans.mesh;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
-import org.jcae.netbeans.viewer3d.View3D;
-import org.jcae.netbeans.viewer3d.View3DManager;
+import javax.xml.parsers.ParserConfigurationException;
+import org.jcae.netbeans.viewer3d.ViewManager;
+import org.jcae.vtk.View;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CookieAction;
+import org.xml.sax.SAXException;
 
 public class ViewGroupAction extends CookieAction
 {
@@ -43,31 +47,46 @@ public class ViewGroupAction extends CookieAction
 
 	protected void performAction(Node[] arg0)
 	{
-		HashMap<Groups, Collection<Group>> groups2Group =
-			new HashMap<Groups, Collection<Group>>();
-		for(int i=0; i<arg0.length; i++)
+		try
 		{
-			GroupNode gn=arg0[i].getCookie(GroupNode.class);
-			Collection<Group> c=groups2Group.get(gn.getGroups());
-			if(c==null)
+			HashMap<Groups, Collection<Group>> groups2Group =
+				new HashMap<Groups, Collection<Group>>();
+			for(int i=0; i<arg0.length; i++)
 			{
-				c=new ArrayList<Group>();
-				groups2Group.put(gn.getGroups(), c);
+				GroupNode gn=arg0[i].getCookie(GroupNode.class);
+				Collection<Group> c=groups2Group.get(gn.getGroups());
+				if(c==null)
+				{
+					c=new ArrayList<Group>();
+					groups2Group.put(gn.getGroups(), c);
+				}
+				c.add(gn.getGroup());
 			}
-			c.add(gn.getGroup());
-		}
-	
-		View3D v = View3DManager.getDefault().getView3D();
-		Iterator<Entry<Groups, Collection<Group>>> it =
-			groups2Group.entrySet().iterator();
 
-		while(it.hasNext())
-		{
-			Entry<Groups, Collection<Group>> e=it.next();
-			e.getKey().displayGroups(
-				arg0[0].getParentNode().getParentNode().getName(),
-				e.getValue(), v);
+			View v = ViewManager.getDefault().getCurrentView();
+			Iterator<Entry<Groups, Collection<Group>>> it =
+				groups2Group.entrySet().iterator();
+
+			while(it.hasNext())
+			{
+				Entry<Groups, Collection<Group>> e=it.next();
+				e.getKey().displayGroups(
+					arg0[0].getParentNode().getParentNode().getName(),
+					e.getValue(), v);
+			}
 		}
+		catch(IOException ex)
+		{
+			Exceptions.printStackTrace(ex);
+		}
+		catch(ParserConfigurationException ex)
+		{
+			Exceptions.printStackTrace(ex);
+		}
+		catch(SAXException ex)
+		{
+			Exceptions.printStackTrace(ex);
+		}			
 	}
 
 	public String getName()

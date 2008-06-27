@@ -17,33 +17,43 @@
  *
  * (C) Copyright 2008, by EADS France
  */
-
 package org.jcae.netbeans.viewer3d.actions;
 
-import javax.swing.Action;
-import javax.swing.ImageIcon;
-import org.jcae.vtk.View;
+import org.jcae.netbeans.viewer3d.SelectionManager;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
+import org.openide.util.actions.BooleanStateAction;
 
-
-public class DownFrontClipDistance extends ViewAction
+public final class AppendSelection extends BooleanStateAction
 {
-	private static ImageIcon icon = new ImageIcon(DownFrontClipDistance.class.getResource("down.png"));
-	/**
-	 * 
-	 */
-	public DownFrontClipDistance()
-	{						
-		putValue(Action.NAME, "Decrease front clip distance");
-		putValue(Action.SHORT_DESCRIPTION, "Decrease front clip distance");
-		putValue(Action.SMALL_ICON, icon);
-		setIcon(icon);
+
+	public AppendSelection()
+	{
+		super();
+		super.setBooleanState(SelectionManager.getDefault().isAppendSelection());
 	}
 	
-	/* (non-Javadoc)
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	public void actionPerformed(View view)
-	{		
-		throw new UnsupportedOperationException("Not supported yet.");
-	}				
+	@Override
+	public void setBooleanState(boolean state)
+	{
+		super.setBooleanState(state);
+		
+		SelectionManager.getDefault().setAppendSelection(state);
+	}
+
+	public String getName()
+	{
+		return NbBundle.getMessage(AppendSelection.class, "CTL_AppendSelectionMode");
+	}
+
+	@Override
+	protected String iconResource()
+	{
+		return "org/jcae/netbeans/viewer3d/actions/appendmode.png";
+	}
+
+	public HelpCtx getHelpCtx()
+	{
+		return HelpCtx.DEFAULT_HELP;
+	}
 }

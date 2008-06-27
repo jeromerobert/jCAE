@@ -15,30 +15,16 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2004, by EADS CRC
- */
-
-/*
- * View3DListener.java
- *
- * Created on August 3, 2004, 9:28 AM
+ * (C) Copyright 2008, by EADS France
  */
 
 package org.jcae.netbeans.viewer3d;
 
-import java.awt.PopupMenu;
-
 /**
  *
- * @author  philavong
+ * @author ibarz
  */
-public interface View3DListener
-{
-    public void onPickSelection();
-    
-    public void setPopup(PopupMenu menu);
-    
-    public PopupMenu getPopup();
-    
-    public void displayPopup(int x, int y);
+public interface EntitySelection {
+	
+	public void unSelectAll();
 }

@@ -25,7 +25,6 @@ import java.util.Map;
 import org.jcae.opencascade.Shape;
 import org.jcae.opencascade.Utilities;
 import org.jcae.opencascade.jni.TopoDS_Shape;
-import org.jcae.viewer3d.cad.occ.OCCProvider;
 import org.openide.nodes.Node;
 import org.openide.nodes.Node.Cookie;
 
@@ -150,10 +149,5 @@ public class NbShape extends Shape<NbShape> implements Cookie
 	protected void createAttributes()
 	{
 		attributes = new NbAttributes();
-	}
-	
-	public OCCProvider getOCCProvider()
-	{
-		return new OCCProvider(impl);
 	}
 }

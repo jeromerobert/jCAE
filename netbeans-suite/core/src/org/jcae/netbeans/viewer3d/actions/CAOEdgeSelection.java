@@ -18,44 +18,56 @@
  * (C) Copyright 2008, by EADS France
  */
 
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package org.jcae.netbeans.viewer3d.actions;
 
-import javax.swing.Action;
-import org.jcae.netbeans.viewer3d.ViewManager;
-import org.jcae.vtk.View;
+import org.jcae.vtk.ViewableCAD;
+import org.jcae.vtk.ViewableCAD;
 import org.openide.util.HelpCtx;
-import org.openide.util.actions.CallableSystemAction;
+import org.openide.util.NbBundle;
 
-public abstract class ViewAction extends CallableSystemAction
-{	
+public final class CAOEdgeSelection extends CAOShapeSelection
+{
+	
+	@Override
+	public void actionPerformed(ViewableCAD interactor)
+	{
+		interactor.setShapeTypeSelection(ViewableCAD.ShapeType.EDGE);
+	}
+
 	public void performAction()
 	{
-		View v = ViewManager.getDefault().getCurrentView();
-		if(v!=null)
-		{
-			actionPerformed(v);
-		}
+		// TODO implement action body
 	}
 
 	public String getName()
 	{
-		return getValue(Action.NAME).toString();
+		return NbBundle.getMessage(CAOEdgeSelection.class, "CTL_CAOEdgeSelection");
 	}
+
+	@Override
+	protected String iconResource()
+	{
+		return "org/jcae/netbeans/viewer3d/actions/selectedge.png";
+	}
+	@Override
+	protected void updateButton(ViewableCAD viewer)
+	{
+		setBooleanState(viewer.getShapeTypeSelection() == ViewableCAD.ShapeType.EDGE);
+	}
+
 
 	public HelpCtx getHelpCtx()
 	{
 		return HelpCtx.DEFAULT_HELP;
 	}
-	
-	protected boolean asynchronous() {
-        // performAction() should run in event thread for actions that need a rendering of canva
-        return false;
-    }
-	
-	// TODO : make it abstract when all the children will implement this method
-	public abstract void actionPerformed(View view);
-	/*{
-		throw new RuntimeException("The action" + toString() + " that is not yet implemented was called");
-	}*/
-	//public abstract void actionPerformedVTK(vtkCanvas view);
+
+	@Override
+	protected boolean asynchronous()
+	{
+		return false;
+	}
 }

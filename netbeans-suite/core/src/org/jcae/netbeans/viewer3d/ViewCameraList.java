@@ -39,14 +39,14 @@ import javax.swing.JScrollPane;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
-import org.jcae.viewer3d.View;
+import org.jcae.vtk.CameraManager;
 import org.openide.windows.WindowManager;
 
 /**
  * Class to display View Position
- * @author Erwann Feat
+ * @author Erwann Feat and Julian Ibarz porting to VTK
  */
-public  class ViewList extends JDialog {
+public  class ViewCameraList extends JDialog {
 	
 	class ViewRenderer extends JLabel implements ListCellRenderer {
 
@@ -75,20 +75,19 @@ public  class ViewList extends JDialog {
 	     }
 	 }
 	
-	private PositionManager mgr;
+	 private CameraManager mgr;
 	private JButton goButton;
 	private JList viewList;
 	private ListModel model;
 	
-	private static ImageIcon goIcon=new ImageIcon(ViewList.class.getResource("1rightarrow.png"));
-	private static ImageIcon removeIcon=new ImageIcon(ViewList.class.getResource("button_cancel.png"));
-	private View view;
+	private static ImageIcon goIcon=new ImageIcon(ViewCameraList.class.getResource("1rightarrow.png"));
+	private static ImageIcon removeIcon=new ImageIcon(ViewCameraList.class.getResource("button_cancel.png"));
 	
-	public ViewList(PositionManager mgr, View view)
+	public ViewCameraList(CameraManager cameraManager)
 	{
 		super(WindowManager.getDefault().getMainWindow(),"Go To ...", true);
-		this.mgr=mgr;
-		this.view=view;
+		this.mgr = cameraManager;
+		
 		JPanel mainPanel=new JPanel();
 		mainPanel.setLayout(new BorderLayout());
 		mainPanel.add(createlist(),BorderLayout.CENTER);
@@ -103,9 +102,17 @@ public  class ViewList extends JDialog {
 
 	private JPanel createlist(){
 		JPanel toReturn=new JPanel();
-		model = new AbstractListModel() {
-			public int getSize() { return mgr.getPositionCount(); }
-			public Object getElementAt(int index) { return mgr.getPosition(index).getSnapShot(); }
+		model = new AbstractListModel()
+		{
+			public int getSize()
+			{
+				return mgr.getNumberOfCameras();
+			}
+			
+			public Object getElementAt(int index)
+			{
+				return mgr.getScreenShotCamera(index);
+			}
 		};
 		
 		viewList = new JList(model);
@@ -114,7 +121,7 @@ public  class ViewList extends JDialog {
 		viewList.setVisibleRowCount(5);
 		//viewList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 		
-		if( mgr.getPositionCount() > 0)
+		if( mgr.getNumberOfCameras() > 0)
 			viewList.setSelectedIndex(0);
 		
 		JScrollPane scroll=new JScrollPane(viewList);
@@ -166,7 +173,7 @@ public  class ViewList extends JDialog {
 		int index=viewList.getSelectedIndex();
 		if(index!=-1 && model.getSize()>0)
 		{
-			mgr.goToPosition(view, index);
+			mgr.setCamera(index);
 			setVisible(false);
 		}
 	}
@@ -176,9 +183,9 @@ public  class ViewList extends JDialog {
 		int index=viewList.getSelectedIndex();		
 		if(index!=-1 && model.getSize()>0)
 		{
-			mgr.removePosition(index);
+			mgr.removeCamera(index);
 			viewList.repaint();
-			if(mgr.getPositionCount()>0)
+			if(mgr.getNumberOfCameras()>0)
 				viewList.setSelectedIndex(0);
 		}
 	}	

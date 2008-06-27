@@ -26,8 +26,8 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.swing.*;
-import org.jcae.netbeans.viewer3d.View3D;
-import org.jcae.netbeans.viewer3d.View3DManager;
+import org.jcae.netbeans.viewer3d.ViewManager;
+import org.jcae.vtk.View;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
@@ -48,7 +48,7 @@ public class PanelView implements ActionListener
     protected Collection<Group> selectedGroups = new ArrayList<Group>();
     protected JLabel labelView = new JLabel("select a view");
     protected JComboBox comboboxView;
-    protected View3D selectedView;
+    protected View selectedView;
     protected JButton buttonSelectAllGroups=new JButton("Select All");
     
     /** 
@@ -80,8 +80,8 @@ public class PanelView implements ActionListener
         scrollpane.setBounds(10,30,270,460);
         
         labelView.setBounds(10,500,200,20);
-        comboboxView = new JComboBox(View3DManager.getDefault().getAllView3D());
-		comboboxView.setSelectedItem(View3DManager.getDefault().getSelectedView3D());
+        comboboxView = new JComboBox(ViewManager.getDefault().getAllView());
+		comboboxView.setSelectedItem(ViewManager.getDefault().getCurrentView());
         comboboxView.setBounds(10,530,200,20);
         
 	buttonSelectAllGroups.setBounds(10,500,100,20);
@@ -105,7 +105,7 @@ public class PanelView implements ActionListener
     /**
      *
      */
-    public View3D getSelectedView()
+    public View getSelectedView()
     {
         return selectedView;
     }
@@ -138,7 +138,7 @@ public class PanelView implements ActionListener
             {
                 for(Object o:listGroup.getSelectedValues())
 					selectedGroups.add((Group)o);
-                selectedView = (View3D)comboboxView.getSelectedItem();
+                selectedView =((View)comboboxView.getSelectedItem());
                 cancel = false;
             }
         }

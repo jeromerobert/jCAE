@@ -15,12 +15,12 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2004, by EADS CRC
+ * (C) Copyright 2004-2008, by EADS France
  */
 
 package org.jcae.netbeans.viewer3d.actions;
 
-import org.jcae.netbeans.viewer3d.View3DManager;
+import org.jcae.netbeans.viewer3d.ViewManager;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 import org.openide.util.actions.CallableSystemAction;
@@ -32,7 +32,7 @@ import org.openide.util.actions.CallableSystemAction;
 public class Action3DView extends CallableSystemAction {
     
     public void performAction() {
-    	View3DManager.getDefault().createView3D();
+    	ViewManager.getDefault().createView();
     }
     
     public String getName() {

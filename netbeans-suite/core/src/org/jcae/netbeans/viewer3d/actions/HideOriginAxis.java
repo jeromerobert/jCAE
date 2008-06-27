@@ -15,59 +15,70 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2004, by EADS CRC
+ * (C) Copyright 2004, by EADS France
  */
 
 package org.jcae.netbeans.viewer3d.actions;
 
-import org.jcae.netbeans.viewer3d.SelectionManager;
+import java.awt.event.ActionEvent;
+import org.jcae.netbeans.viewer3d.CurrentViewChangeListener;
+import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.View;
-import org.jcae.vtk.Viewable;
 import org.openide.util.HelpCtx;
-import org.openide.util.actions.SystemAction;
+import org.openide.util.actions.BooleanStateAction;
 
 /**
  * @author Jerome Robert
  *
  */
-public class ActionRemove  extends ViewAction
+public class HideOriginAxis extends BooleanStateAction implements CurrentViewChangeListener
 {
-	@Override
-	public void actionPerformed(View view)
+	HideOriginAxis()
 	{
-		if(view!=null)
-		{
-			Viewable viewable = view.getCurrentViewable();
-			view.remove(view.getCurrentViewable());
-			SelectionManager.getDefault().removeInteractor(viewable);
-			
-			SystemAction.get(SelectViewable.class).refresh();
-		}	
+		super();
+		ViewManager.getDefault().addViewListener(this);
+		setBooleanState(false);
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see org.openide.util.actions.BooleanStateAction#actionPerformed(java.awt.event.ActionEvent)
+	 */
+	public void actionPerformed(ActionEvent arg0)
+	{
+    	View v=ViewManager.getDefault().getCurrentView();
+		
+    	if(v!=null)
+		{
+    		v.getCameraManager().setOriginAxisVisible(!v.getCameraManager().isOriginAxisVisible());
+			setBooleanState(!v.getCameraManager().isRelativeAxisVisible());
+		}
+	}
+	
+	public void currentViewChanged(View view)
+	{
+		setBooleanState(!view.getCameraManager().isOriginAxisVisible());
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.openide.util.actions.SystemAction#getName()
 	 */
 	public String getName()
 	{
-		return "remove";
+		return "Hide axis";
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see org.openide.util.actions.SystemAction#getHelpCtx()
 	 */
 	public HelpCtx getHelpCtx()
 	{
-		return HelpCtx.DEFAULT_HELP;
+        return HelpCtx.DEFAULT_HELP;
+        // If you will provide context help then use:
+        // return new HelpCtx(MyAction.class);
 	}
-	
+    
 	protected String iconResource()
     {
-        return "org/jcae/netbeans/viewer3d/actions/removeViewable.gif";
+        return "org/jcae/netbeans/viewer3d/actions/hideaxis.gif";
     }
-
-	protected boolean asynchronous()
-	{
-		return false;
-	}
 }

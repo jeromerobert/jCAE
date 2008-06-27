@@ -17,33 +17,47 @@
  *
  * (C) Copyright 2008, by EADS France
  */
-
 package org.jcae.netbeans.viewer3d.actions;
 
-import javax.swing.Action;
-import javax.swing.ImageIcon;
-import org.jcae.vtk.View;
+import org.jcae.vtk.ViewableOEMM;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
+import org.openide.util.actions.CallableSystemAction;
 
-
-public class DownFrontClipDistance extends ViewAction
+public final class OctreeVisible extends OEMMButton
 {
-	private static ImageIcon icon = new ImageIcon(DownFrontClipDistance.class.getResource("down.png"));
-	/**
-	 * 
-	 */
-	public DownFrontClipDistance()
-	{						
-		putValue(Action.NAME, "Decrease front clip distance");
-		putValue(Action.SHORT_DESCRIPTION, "Decrease front clip distance");
-		putValue(Action.SMALL_ICON, icon);
-		setIcon(icon);
+	@Override
+	public void actionPerformed(ViewableOEMM viewable)
+	{
+		viewable.setOctreeVisible(!viewable.isOctreeVisible());
+		viewable.Render();
 	}
 	
-	/* (non-Javadoc)
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	public void actionPerformed(View view)
-	{		
-		throw new UnsupportedOperationException("Not supported yet.");
-	}				
+	protected void updateButton(ViewableOEMM viewer)
+	{
+		setBooleanState(viewer.isOctreeVisible());
+	}
+	
+
+	public String getName()
+	{
+		return NbBundle.getMessage(OctreeVisible.class, "CTL_OctreeVisible");
+	}
+
+	@Override
+	protected String iconResource()
+	{
+		return "org/jcae/netbeans/viewer3d/actions/octreeVisible.png";
+	}
+
+	public HelpCtx getHelpCtx()
+	{
+		return HelpCtx.DEFAULT_HELP;
+	}
+
+	@Override
+	protected boolean asynchronous()
+	{
+		return false;
+	}
 }

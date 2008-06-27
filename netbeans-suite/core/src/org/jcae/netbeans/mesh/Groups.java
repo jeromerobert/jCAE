@@ -36,18 +36,22 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import org.jcae.mesh.xmldata.MeshExporter;
-import org.jcae.netbeans.viewer3d.View3D;
-import org.jcae.viewer3d.SelectionListener;
-import org.jcae.viewer3d.fe.ViewableFE;
-import org.jcae.viewer3d.fe.amibe.AmibeProvider;
+import org.jcae.netbeans.viewer3d.SelectionManager;
+import org.jcae.netbeans.viewer3d.ViewManager;
+import org.jcae.vtk.AmibeToMesh;
+import org.jcae.vtk.ViewableMesh;
+import org.jcae.vtk.View;
 import org.openide.ErrorManager;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-
-public class Groups implements SelectionListener
+/**
+ * Manage all the groups of a MeshNode.
+ */
+public class Groups
 {
+	// TODO Create a table selection
 	private PropertyChangeListener groupPropertyChangeListener=new PropertyChangeListener()
 	{
 		public void propertyChange(PropertyChangeEvent evt)
@@ -58,21 +62,14 @@ public class Groups implements SelectionListener
 			}
 			else if(evt.getPropertyName().equals("visible"))
 			{
-				if(viewable!=null)
+				throw new RuntimeException("Not yet implemented");
+				/*if(viewable!=null)
 				{
 					Group g=(Group) evt.getSource();					
 					Map<Integer, Boolean> map=new HashMap<Integer, Boolean>();
 					map.put(g.getId(), (Boolean)evt.getNewValue());
 					viewable.setDomainVisible(map);
-				}
-			}
-			else if(evt.getPropertyName().equals("selected"))
-			{
-				if(viewable!=null && !breakhighLightingEvent)
-				{
-					Group g=(Group) evt.getSource();					
-					viewable.highlight(g.getId(), ((Boolean)evt.getNewValue()).booleanValue());
-				}
+				}*/
 			}
 		}	
 	};
@@ -82,8 +79,13 @@ public class Groups implements SelectionListener
 	/** The absolute path to the mesh directory */
 	protected String meshFile = null;
 	protected String meshName = null;
-	protected int indexColor = 0;
-	private ViewableFE viewable;
+	private final MeshSelection meshSelection;
+	
+	Groups()
+	{
+		meshSelection = new MeshSelection(this);
+		SelectionManager.getDefault().addEntitySelection(this, meshSelection);	
+	}
 	
 	private String getXmlDir()
 	{
@@ -136,57 +138,33 @@ public class Groups implements SelectionListener
 	 * @param the View3D in which the Groups are displayed.
 	 */
 	public void displayGroups(String meshName, Collection<Group> groupsToDisplay,
-		View3D view)
+		View view) throws ParserConfigurationException, SAXException, IOException
 	{
-		try
+		int[] idGroupsDisplayed = new int[groupsToDisplay.size()];
+		Iterator<Group> iter = groupsToDisplay.iterator();
+		String sb="";
+		boolean full=false;
+		for(int i = 0 ; i < idGroupsDisplayed.length ; ++i)
 		{
-			AmibeProvider provider = new AmibeProvider(new File(getXmlDir()));
-			viewable = new ViewableFE(provider);
-			viewable.addSelectionListener(this);
-						
-			Map<Integer, Boolean> map=new HashMap<Integer, Boolean>();
-			
-			for(Group g:groups)
-				map.put(g.getId(), false);
-			
-			Iterator<Group> it=groupsToDisplay.iterator();
-			String sb="";
-			boolean full=false;
-			while(it.hasNext())
-			{
-				Group g=it.next();
-				map.put(g.getId(), true);
-				
-				if(sb.length()<20)
-					sb=sb+" "+g.getName();
-				else
-					full=true;
-			}
-			
-			if(full)
-				sb=sb+"...";
-			
-			viewable.setName(meshName+" ["+sb+"]");
-			
-			viewable.setDomainVisible(map);
-			
-			if(!Arrays.asList(view.getView().getViewables()).contains(viewable))
-			{
-				view.add(viewable);	
-			}
+			Group g = iter.next();
+
+			idGroupsDisplayed[i] = g.getId();
+			if(sb.length()<20)
+				sb=sb+" "+g.getName();
+			else
+				full=true;
 		}
-		catch (ParserConfigurationException e)
-		{
-			ErrorManager.getDefault().notify(e);
-		}
-		catch (SAXException e)
-		{
-			ErrorManager.getDefault().notify(e);
-		}
-		catch (IOException e)
-		{
-			ErrorManager.getDefault().notify(e);
-		}
+
+		if(full)
+			sb=sb+"...";
+
+		AmibeToMesh reader = new AmibeToMesh(getXmlDir(), idGroupsDisplayed);
+		ViewableMesh interactor = new ViewableMesh(reader.getMesh());
+		interactor.setName(meshName+" ["+sb+"]");
+
+		SelectionManager.getDefault().addInteractor(interactor, this);
+
+		view.add(interactor);
 	}
 
 	/**
@@ -332,9 +310,9 @@ public class Groups implements SelectionListener
 			org.jcae.mesh.xmldata.XMLHelper.writeXML(xmlDoc, f);
 		}
 		 
-		if(viewable!=null)
+		if(meshSelection!=null)
 		{
-			viewable.domainsChanged(null);
+			meshSelection.unSelectAll();
 		}
 		
 		return fuseGroup;
@@ -522,35 +500,6 @@ public class Groups implements SelectionListener
 		sourceChannel.close();
 		destinationChannel.close();
 	}
-
-	private boolean breakhighLightingEvent=false;
-	private Object hightLightEventLock=new Object();
-	/* (non-Javadoc)
-	 * @see org.jcae.viewer3d.fe.FESelectionListener#elementsSelected(java.util.Map)
-	 */
-	public void elementsSelected(Map selection)
-	{
-		Set ids=selection.keySet();
-		ArrayList<Group> sg=new ArrayList<Group>();
-		for(int i=0; i<groups.size(); i++)
-		{
-			Group g=groups.get(i);
-			if(ids.contains(Integer.valueOf(g.getId())))
-				sg.add(g);
-		}
-		synchronized(hightLightEventLock)
-		{
-			breakhighLightingEvent=true;
-			//TODO
-			breakhighLightingEvent=false;
-		}
-	}
-	
-	private int[] getSelectedGroups()
-	{
-		//TODO
-		return new int[0];
-	}
 	
 	public void exportGroupsAsUNV() throws ParserConfigurationException, SAXException, IOException
 	{
@@ -581,30 +530,5 @@ public class Groups implements SelectionListener
 	public void setMeshName(String meshName)
 	{
 		this.meshName = meshName;
-	}
-
-	/**
-	 * Used by Mesh.notifyComputationFinished to reset groups
-	 * without removing all currently viewed viewables
-	 * @return Returns the viewable.
-	 */
-	ViewableFE getViewable()
-	{
-		return viewable;
-	}
-	
-	/**
-	 * Used by Mesh.notifyComputationFinished to reset groups
-	 * without removing all currently viewed viewables
-	 * @return Returns the viewable.
-	 */
-	void setViewable(ViewableFE viewable)
-	{
-		this.viewable = viewable;
-	}
-
-	public void selectionChanged() {
-		// TODO Auto-generated method stub
-		
 	}
 }

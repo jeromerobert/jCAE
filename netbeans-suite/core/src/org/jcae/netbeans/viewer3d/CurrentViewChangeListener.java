@@ -15,35 +15,24 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2008, by EADS France
+ * (C) Copyright 2004, by EADS CRC
  */
 
-package org.jcae.netbeans.viewer3d.actions;
+package org.jcae.netbeans.viewer3d;
 
-import javax.swing.Action;
-import javax.swing.ImageIcon;
+import org.jcae.netbeans.viewer3d.actions.SelectViewable;
 import org.jcae.vtk.View;
 
-
-public class DownFrontClipDistance extends ViewAction
+/**
+ * * All implemented class are informed when the user change the current view3d
+ * @see SelectViewable for an exemple of implementation
+ * @author Julian Ibarz
+ */
+public interface CurrentViewChangeListener
 {
-	private static ImageIcon icon = new ImageIcon(DownFrontClipDistance.class.getResource("down.png"));
 	/**
-	 * 
+	 * Send to all listener the new current View3D.
+	 * @param view
 	 */
-	public DownFrontClipDistance()
-	{						
-		putValue(Action.NAME, "Decrease front clip distance");
-		putValue(Action.SHORT_DESCRIPTION, "Decrease front clip distance");
-		putValue(Action.SMALL_ICON, icon);
-		setIcon(icon);
-	}
-	
-	/* (non-Javadoc)
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	public void actionPerformed(View view)
-	{		
-		throw new UnsupportedOperationException("Not supported yet.");
-	}				
+	public void currentViewChanged(View view);
 }

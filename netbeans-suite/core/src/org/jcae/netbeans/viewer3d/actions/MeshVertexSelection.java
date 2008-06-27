@@ -18,44 +18,60 @@
  * (C) Copyright 2008, by EADS France
  */
 
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package org.jcae.netbeans.viewer3d.actions;
 
-import javax.swing.Action;
-import org.jcae.netbeans.viewer3d.ViewManager;
-import org.jcae.vtk.View;
+import org.jcae.vtk.ViewableMesh;
+import org.jcae.vtk.ViewableMesh;
 import org.openide.util.HelpCtx;
-import org.openide.util.actions.CallableSystemAction;
+import org.openide.util.NbBundle;
 
-public abstract class ViewAction extends CallableSystemAction
-{	
-	public void performAction()
+public final class MeshVertexSelection extends MeshButton
+{
+	@Override
+	public void actionPerformed(ViewableMesh interactor)
 	{
-		View v = ViewManager.getDefault().getCurrentView();
-		if(v!=null)
-		{
-			actionPerformed(v);
-		}
+		interactor.setSelectionType(ViewableMesh.SelectionType.POINT);
 	}
-
+	
+	protected void updateButton(ViewableMesh viewer)
+	{
+		setBooleanState(viewer.getSelectionType() == ViewableMesh.SelectionType.POINT);
+	}
+	
+	/**
+	 * By default the action is not enabled
+	 */
+	@Override
+	protected void initialize()
+	{
+		setEnabled(false);
+		
+		super.initialize();
+	}
+	
 	public String getName()
 	{
-		return getValue(Action.NAME).toString();
+		return NbBundle.getMessage(MeshVertexSelection.class, "CTL_MeshVertexSelection");
+	}
+
+	@Override
+	protected String iconResource()
+	{
+		return "org/jcae/netbeans/viewer3d/actions/selectvertex.png";
 	}
 
 	public HelpCtx getHelpCtx()
 	{
 		return HelpCtx.DEFAULT_HELP;
 	}
-	
-	protected boolean asynchronous() {
-        // performAction() should run in event thread for actions that need a rendering of canva
-        return false;
-    }
-	
-	// TODO : make it abstract when all the children will implement this method
-	public abstract void actionPerformed(View view);
-	/*{
-		throw new RuntimeException("The action" + toString() + " that is not yet implemented was called");
-	}*/
-	//public abstract void actionPerformedVTK(vtkCanvas view);
+
+	@Override
+	protected boolean asynchronous()
+	{
+		return false;
+	}
 }

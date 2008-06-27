@@ -15,66 +15,63 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2004, by EADS CRC
+ * (C) Copyright 2008, by EADS France
  */
-
 package org.jcae.netbeans.viewer3d.actions;
 
 import java.awt.event.ActionEvent;
-import org.jcae.netbeans.viewer3d.View3D;
-import org.jcae.netbeans.viewer3d.View3DManager;
+import org.jcae.netbeans.viewer3d.CurrentViewChangeListener;
+import org.jcae.netbeans.viewer3d.ViewManager;
+import org.jcae.vtk.View;
 import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
 import org.openide.util.actions.BooleanStateAction;
 
-/**
- * @author Jerome Robert
- *
- */
-public class ActionAxis extends BooleanStateAction
+public final class HideRelativeAxis extends BooleanStateAction implements CurrentViewChangeListener
 {
-
+	
+	HideRelativeAxis()
+	{
+		super();
+		//View3D.addInteractorListener(this);
+		ViewManager.getDefault().addViewListener(this);
+		
+		setBooleanState(false);
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.openide.util.actions.BooleanStateAction#actionPerformed(java.awt.event.ActionEvent)
 	 */
 	public void actionPerformed(ActionEvent arg0)
 	{
-    	View3D v=View3DManager.getDefault().getSelectedView3D();
+    	View v=ViewManager.getDefault().getCurrentView();
+		
     	if(v!=null)
-    		v.getView().setOriginAxisVisible(!v.getView().isOriginAxisVisible());
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.openide.util.actions.SystemAction#getName()
-	 */
-	public String getName()
-	{
-		return "Hide axis";
+		{
+			v.getCameraManager().setRelativeAxisVisible(!v.getCameraManager().isRelativeAxisVisible());
+			setBooleanState(!v.getCameraManager().isRelativeAxisVisible());
+		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.openide.util.actions.SystemAction#getHelpCtx()
-	 */
+	public String getName()
+	{
+		return NbBundle.getMessage(HideRelativeAxis.class, "CTL_HideRelativeAxis");
+	}
+
+	@Override
+	protected String iconResource()
+	{
+		return "org/jcae/netbeans/viewer3d/actions/hide_relative_axis.gif";
+	}
+
+	public void currentViewChanged(View view)
+	{
+		setBooleanState(!view.getCameraManager().isRelativeAxisVisible());
+	}
+	
+
 	public HelpCtx getHelpCtx()
 	{
-        return HelpCtx.DEFAULT_HELP;
-        // If you will provide context help then use:
-        // return new HelpCtx(MyAction.class);
-	}
-    
-	protected String iconResource()
-    {
-        return "org/jcae/netbeans/viewer3d/actions/hideaxis.gif";
-    }
-	
-	/* (non-Javadoc)
-	 * @see org.openide.util.actions.BooleanStateAction#getBooleanState()
-	 */
-	public boolean getBooleanState()
-	{
-    	View3D v=View3DManager.getDefault().getSelectedView3D();
-    	if(v!=null)
-    		return !v.getView().isOriginAxisVisible();
-    	else
-    		return false;
+		return HelpCtx.DEFAULT_HELP;
 	}
 }

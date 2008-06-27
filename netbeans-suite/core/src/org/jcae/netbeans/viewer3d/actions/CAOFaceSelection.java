@@ -18,30 +18,50 @@
  * (C) Copyright 2008, by EADS France
  */
 
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package org.jcae.netbeans.viewer3d.actions;
 
-import javax.swing.Action;
-import javax.swing.ImageIcon;
-import org.jcae.vtk.View;
+import org.jcae.vtk.ViewableCAD;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
 
-
-public class ChangeCenterAction extends ViewAction
+public final class CAOFaceSelection extends CAOShapeSelection
 {
-	private static ImageIcon icon = new ImageIcon(ChangeCenterAction.class.getResource("reload.png"));
 	
-	/**
-	 *
-	 */
-	public ChangeCenterAction()
+	@Override
+	public void actionPerformed(ViewableCAD interactor)
 	{
-		putValue(Action.NAME, "Rotation center");
-		putValue(Action.SHORT_DESCRIPTION, "Set rotation center");
-		putValue(Action.SMALL_ICON, icon);
-		setIcon(icon);
+		interactor.setShapeTypeSelection(ViewableCAD.ShapeType.FACE);
 	}
 	
-	public void actionPerformed(View view)
+	public String getName()
 	{
-		view.setMouseMode(View.MouseMode.CHANGE_ROTATION_CENTER);
+		return NbBundle.getMessage(CAOFaceSelection.class, "CTL_CAOFaceSelection");
+	}
+
+	@Override
+	protected String iconResource()
+	{
+		return "org/jcae/netbeans/viewer3d/actions/selectface.png";
+	}
+
+	@Override
+	protected void updateButton(ViewableCAD viewer)
+	{
+		setBooleanState(viewer.getShapeTypeSelection() == ViewableCAD.ShapeType.FACE);
+	}
+
+	public HelpCtx getHelpCtx()
+	{
+		return HelpCtx.DEFAULT_HELP;
+	}
+
+	@Override
+	protected boolean asynchronous()
+	{
+		return false;
 	}
 }

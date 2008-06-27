@@ -21,29 +21,42 @@
 package org.jcae.netbeans.viewer3d.actions;
 
 import javax.swing.Action;
-import javax.swing.ImageIcon;
+import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.View;
+import org.jcae.vtk.Viewable;
+import org.openide.util.HelpCtx;
+import org.openide.util.actions.CallableSystemAction;
 
 
-public class DownFrontClipDistance extends ViewAction
-{
-	private static ImageIcon icon = new ImageIcon(DownFrontClipDistance.class.getResource("down.png"));
-	/**
-	 * 
-	 */
-	public DownFrontClipDistance()
-	{						
-		putValue(Action.NAME, "Decrease front clip distance");
-		putValue(Action.SHORT_DESCRIPTION, "Decrease front clip distance");
-		putValue(Action.SMALL_ICON, icon);
-		setIcon(icon);
+/**
+ *
+ * @author Julian Ibarz
+ */
+public abstract class ViewableAction extends CallableSystemAction
+{	
+	public void performAction()
+	{
+		View v = ViewManager.getDefault().getCurrentView();
+		if(v!=null)
+		{
+			actionPerformed(v.getCurrentViewable());
+		}
+	}
+
+	public String getName()
+	{
+		return getValue(Action.NAME).toString();
+	}
+
+	public HelpCtx getHelpCtx()
+	{
+		return HelpCtx.DEFAULT_HELP;
 	}
 	
-	/* (non-Javadoc)
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	public void actionPerformed(View view)
-	{		
-		throw new UnsupportedOperationException("Not supported yet.");
-	}				
+	protected boolean asynchronous() {
+        // performAction() should run in event thread for actions that need a rendering of canva
+        return false;
+    }
+	
+	public abstract void actionPerformed(Viewable viewable);
 }

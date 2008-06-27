@@ -49,6 +49,8 @@ public class Installer extends ModuleInstall
 				locate("etc/logging.properties", "org.jcae.netbeans", false).
 				getAbsolutePath();
 			System.setProperty("java.util.logging.config.file", logPath);
+			// We are using VTK
+			//System.setProperty("org.jcae.vtk.enable","true");
 		}
 		
 		//Set default project directory

@@ -20,20 +20,16 @@
 
 package org.jcae.netbeans.mesh;
 
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.util.Arrays;
-import javax.media.j3d.BranchGroup;
 import org.jcae.mesh.oemm.Storage;
 import org.jcae.mesh.oemm.OEMM;
-import org.jcae.mesh.oemm.MeshReader;
-import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.netbeans.Utilities;
-import org.jcae.netbeans.viewer3d.SelectViewableAction;
-import org.jcae.netbeans.viewer3d.View3DManager;
-import org.jcae.viewer3d.OEMMViewer;
-import org.jcae.viewer3d.View;
-import org.jcae.viewer3d.bg.ViewableBG;
+import org.jcae.netbeans.viewer3d.SelectionManager;
+import org.jcae.netbeans.viewer3d.ViewManager;
+import org.jcae.netbeans.viewer3d.actions.SelectViewable;
+import org.jcae.vtk.SelectionListener;
+import org.jcae.vtk.View;
+import org.jcae.vtk.Viewable;
+import org.jcae.vtk.ViewableOEMM;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
@@ -41,17 +37,16 @@ import org.openide.util.NbBundle;
 import org.openide.util.actions.CookieAction;
 import org.openide.util.actions.SystemAction;
 
-public final class OEMMViewAction extends CookieAction
+public final class OEMMViewAction extends CookieAction implements SelectionListener
 {
-	public static class OEMMKeyListener extends KeyAdapter
+	/*public static class OEMMKeyListener extends KeyAdapter
 	{
 		private ViewableBG femesh;
 		private View bgView;
 		private OEMM oemm;
-		private ViewableBG fe1;
 		private final MeshReader mr;
 		
-		public OEMMKeyListener(View view, OEMM oemm, ViewableBG viewable)
+		public OEMMKeyListener(View view, OEMM oemm, ViewableOEMM viewable)
 		{
 			bgView=view;
 			this.oemm=oemm;
@@ -83,9 +78,15 @@ public final class OEMMViewAction extends CookieAction
 					bgView.add(femesh);
 				}
 			}
-			SystemAction.get(SelectViewableAction.class).refresh();
+			SystemAction.get(SelectViewable.class).refresh();
 		}
 		
+	}*/
+	ViewableOEMM viewable = null;
+
+	public void selectionChanged(Viewable viewable)
+	{
+		viewable.highLight();
 	}
 	
 	protected void performAction(Node[] activatedNodes)
@@ -96,21 +97,31 @@ public final class OEMMViewAction extends CookieAction
 			c.getPrimaryFile().getParent()).getPath();
 		String oemmDir=Utilities.absoluteFileName(
 			activatedNodes[0].getName()+".oemm", reference);
-		view(oemmDir, activatedNodes[0].getName()+" OEMM");
+		view(c,oemmDir, activatedNodes[0].getName()+" OEMM");
 	}
 
-	public static void view(String dir, String viewableName)
+	public void view(MeshDataObject c, String dir, String viewableName)
 	{
 		OEMM oemm = Storage.readOEMMStructure(dir);
-		boolean onlyLeaves = true;
-		View bgView=View3DManager.getDefault().getView3D().getView();
-		BranchGroup octree = OEMMViewer.bgOEMM(oemm, onlyLeaves);
-		ViewableBG fe1 = new ViewableBG(octree);
-		fe1.setName(viewableName);
-		bgView.add(fe1);
-		bgView.addKeyListener(new OEMMKeyListener(bgView, oemm, fe1));
-		bgView.setCurrentViewable(fe1);
-		SystemAction.get(SelectViewableAction.class).refresh();
+		
+		View v = ViewManager.getDefault().getCurrentView();
+
+		if (viewable == null)
+		{
+			viewable = new ViewableOEMM(oemm);
+			viewable.setName(viewableName);
+			viewable.addSelectionListener(this);
+			SelectionManager.getDefault().addInteractor(viewable, c);
+
+			// Create a OEMMSelection ?
+			/*if (SelectionManager.getDefault().getEntitySelection(c) == null)
+			{
+				OEMMSelection oemmSelection = new OEMMSelection(c);
+				SelectionManager.getDefault().addEntitySelection(
+						c, oemmSelection);
+			}*/
+		}
+		v.add(viewable);	
 	}	
 	
 	protected int mode()

@@ -20,8 +20,8 @@
 
 package org.jcae.netbeans.viewer3d.actions;
 
-import org.jcae.netbeans.viewer3d.View3D;
-import org.jcae.netbeans.viewer3d.View3DManager;
+import org.jcae.netbeans.viewer3d.ViewManager;
+import org.jcae.vtk.View;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CallableSystemAction;
 
@@ -33,9 +33,10 @@ public class ActionFitAll extends CallableSystemAction
 {    
     public void performAction()
     {
-    	View3D v=View3DManager.getDefault().getSelectedView3D();
-    	if(v!=null)
-    		v.getView().fitAll();
+    	View v = ViewManager.getDefault().getCurrentView();
+			
+		if(v!=null)
+    		v.getCameraManager().fitAll();
     }
     
     public String getName()

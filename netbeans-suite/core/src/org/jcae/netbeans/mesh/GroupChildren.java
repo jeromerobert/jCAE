@@ -25,6 +25,10 @@ import java.util.Collection;
 import org.openide.nodes.Children.Array;
 import org.openide.nodes.Node;
 
+/**
+ * Children class. His associated node has a lookup to it.
+ * @author ibarz
+ */
 public class GroupChildren extends Array {
 
 	private final Groups groups;

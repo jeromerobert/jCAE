@@ -20,15 +20,10 @@
 
 package org.jcae.netbeans.cad;
 
-import java.awt.Color;
-import org.jcae.netbeans.viewer3d.View3D;
-import org.jcae.netbeans.viewer3d.View3DManager;
 import org.jcae.opencascade.jni.BRep_Builder;
 import org.jcae.opencascade.jni.ShapeAnalysis_FreeBounds;
 import org.jcae.opencascade.jni.TopoDS_Compound;
 import org.jcae.opencascade.jni.TopoDS_Shape;
-import org.jcae.viewer3d.cad.ViewableCAD;
-import org.jcae.viewer3d.cad.occ.OCCProvider;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CookieAction;
@@ -63,13 +58,19 @@ public class FreeBoundsAction extends CookieAction
 			if (openWires != null)
 				bb.add(tc, openWires);
 		}
-		View3D v=View3DManager.getDefault().getView3D();
+		
+		throw new UnsupportedOperationException("J3D feature not yet implemented");
+		
+		/*View v=ViewManager.getDefault().getCurrentView();
 		OCCProvider occp=new OCCProvider(tc);
 		occp.setEdgeColor(Color.GREEN);
+		
+		 TODO : J3D Version
 		ViewableCAD viewable = new ViewableCAD(occp);
 		viewable.setName(arg0[0].getName()+" free edges");
 		viewable.setLineWidth(3f);
 		v.add(viewable);
+		 */
 	}
 
 	public String getName()

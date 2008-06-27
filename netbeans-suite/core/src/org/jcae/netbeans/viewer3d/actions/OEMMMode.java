@@ -17,31 +17,56 @@
  *
  * (C) Copyright 2008, by EADS France
  */
-
 package org.jcae.netbeans.viewer3d.actions;
 
-import javax.swing.Action;
-import javax.swing.ImageIcon;
-import org.jcae.vtk.View;
+import org.jcae.vtk.ViewableMesh;
+import org.jcae.vtk.ViewableOEMM;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
 
-
-public class ChangeCenterAction extends ViewAction
+public final class OEMMMode extends OEMMButton
 {
-	private static ImageIcon icon = new ImageIcon(ChangeCenterAction.class.getResource("reload.png"));
-	
-	/**
-	 *
-	 */
-	public ChangeCenterAction()
+	@Override
+	public void actionPerformed(ViewableOEMM viewable)
 	{
-		putValue(Action.NAME, "Rotation center");
-		putValue(Action.SHORT_DESCRIPTION, "Set rotation center");
-		putValue(Action.SMALL_ICON, icon);
-		setIcon(icon);
+		viewable.setAutomaticSelection(!viewable.isAutomaticSelection());
 	}
 	
-	public void actionPerformed(View view)
+	protected void updateButton(ViewableOEMM viewer)
 	{
-		view.setMouseMode(View.MouseMode.CHANGE_ROTATION_CENTER);
+		setBooleanState(viewer.isAutomaticSelection());
+	}
+	
+	/**
+	 * By default the action is not enabled
+	 */
+	@Override
+	protected void initialize()
+	{
+		setEnabled(false);
+		
+		super.initialize();
+	}
+
+	public String getName()
+	{
+		return NbBundle.getMessage(OEMMMode.class, "CTL_OEMMMode");
+	}
+
+	@Override
+	protected String iconResource()
+	{
+		return "org/jcae/netbeans/viewer3d/actions/octreeSelection.png";
+	}
+
+	public HelpCtx getHelpCtx()
+	{
+		return HelpCtx.DEFAULT_HELP;
+	}
+
+	@Override
+	protected boolean asynchronous()
+	{
+		return false;
 	}
 }

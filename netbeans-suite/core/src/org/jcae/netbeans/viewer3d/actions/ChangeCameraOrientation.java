@@ -22,28 +22,28 @@ package org.jcae.netbeans.viewer3d.actions;
 
 import javax.swing.Action;
 import javax.swing.ImageIcon;
+import org.jcae.vtk.CameraManager;
 import org.jcae.vtk.View;
 
 
-public class DownFrontClipDistance extends ViewAction
+public abstract class ChangeCameraOrientation extends ViewAction
 {
-	private static ImageIcon icon = new ImageIcon(DownFrontClipDistance.class.getResource("down.png"));
-	/**
-	 * 
-	 */
-	public DownFrontClipDistance()
-	{						
-		putValue(Action.NAME, "Decrease front clip distance");
-		putValue(Action.SHORT_DESCRIPTION, "Decrease front clip distance");
-		putValue(Action.SMALL_ICON, icon);
-		setIcon(icon);
+	private CameraManager.Orientation orientation;
+
+	public ChangeCameraOrientation(String label, String icon, CameraManager.Orientation orientation)
+	{			
+		label=label+" view";
+		putValue(Action.NAME, label);
+		putValue(Action.SHORT_DESCRIPTION, label);
+		putValue(SMALL_ICON, new ImageIcon(ChangeCameraOrientation.class.getResource(icon)));
+		setIcon(new ImageIcon(ChangeCameraOrientation.class.getResource(icon)));
+		this.orientation=orientation;
 	}
-	
 	/* (non-Javadoc)
 	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
 	public void actionPerformed(View view)
-	{		
-		throw new UnsupportedOperationException("Not supported yet.");
-	}				
+	{
+		view.getCameraManager().setCameraOrientation(orientation);			
+	}
 }

@@ -17,33 +17,44 @@
  *
  * (C) Copyright 2008, by EADS France
  */
-
 package org.jcae.netbeans.viewer3d.actions;
 
-import javax.swing.Action;
-import javax.swing.ImageIcon;
-import org.jcae.vtk.View;
+import org.jcae.vtk.Viewable;
+import org.jcae.vtk.ViewableMesh;
+import org.openide.util.HelpCtx;
+import org.openide.util.NbBundle;
 
-
-public class DownFrontClipDistance extends ViewAction
+public final class MeshGroupSelection extends MeshButton
 {
-	private static ImageIcon icon = new ImageIcon(DownFrontClipDistance.class.getResource("down.png"));
-	/**
-	 * 
-	 */
-	public DownFrontClipDistance()
-	{						
-		putValue(Action.NAME, "Decrease front clip distance");
-		putValue(Action.SHORT_DESCRIPTION, "Decrease front clip distance");
-		putValue(Action.SMALL_ICON, icon);
-		setIcon(icon);
+	public void actionPerformed(ViewableMesh interactor)
+	{
+		interactor.setSelectionType(Viewable.SelectionType.NODE);
 	}
 	
-	/* (non-Javadoc)
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	public void actionPerformed(View view)
-	{		
-		throw new UnsupportedOperationException("Not supported yet.");
-	}				
+	protected void updateButton(ViewableMesh viewer)
+	{
+		setBooleanState(viewer.getSelectionType() == Viewable.SelectionType.NODE);
+	}
+
+	public String getName()
+	{
+		return NbBundle.getMessage(MeshGroupSelection.class, "CTL_MeshGroupSelection");
+	}
+
+	@Override
+	protected String iconResource()
+	{
+		return "org/jcae/netbeans/viewer3d/actions/selectgroup.png";
+	}
+
+	public HelpCtx getHelpCtx()
+	{
+		return HelpCtx.DEFAULT_HELP;
+	}
+
+	@Override
+	protected boolean asynchronous()
+	{
+		return false;
+	}
 }

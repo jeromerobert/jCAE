@@ -1,12 +1,8 @@
 package org.jcae.netbeans.mesh;
 
 import java.io.File;
-import java.io.IOException;
-import org.jcae.netbeans.viewer3d.View3D;
-import org.jcae.netbeans.viewer3d.View3DManager;
-import org.jcae.viewer3d.fe.ViewableFE;
-import org.jcae.viewer3d.fe.unv.UNVProvider;
-import org.openide.ErrorManager;
+import org.jcae.netbeans.viewer3d.ViewManager;
+import org.jcae.vtk.View;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
@@ -20,20 +16,25 @@ public final class ViewUNV extends CookieAction
 	{		
 		for(int i=0; i<activatedNodes.length; i++)
 		{
-			try
-			{
 				UNVDataObject c = activatedNodes[i].getCookie(UNVDataObject.class);
 				File file = FileUtil.toFile(c.getPrimaryFile());
-				View3D v=View3DManager.getDefault().getView3D();
-				UNVProvider unvp=new UNVProvider(file);
-				ViewableFE vfe=new ViewableFE(unvp);
-				vfe.setName(file.getName());
-				v.add(vfe);
-			}
-			catch(IOException ex)
-			{
-				ErrorManager.getDefault().notify(ex);
-			}
+				View v=ViewManager.getDefault().getCurrentView();
+				
+
+				throw new RuntimeException("J3D possibilty not VTK implemented");
+			/*		InteractorMesh interactor = new InteractorMesh(file.getAbsolutePath());
+					v.getCanvas().GetRenderer().ResetCamera();
+					System.out.println("TEST : " + file.getAbsolutePath());*/
+				/*} else
+				{
+					UNVProvider unvp=new UNVProvider(file);
+					ViewableFE vfe=new ViewableFE(unvp);
+					vfe.setName(file.getName());
+					v.add(vfe);
+				}*/
+				
+				
+			
 		}
 	}
 	

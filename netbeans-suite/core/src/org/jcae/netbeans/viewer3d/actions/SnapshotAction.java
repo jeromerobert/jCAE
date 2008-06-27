@@ -1,22 +1,37 @@
+/*
+ * Project Info:  http://jcae.sourceforge.net
+ * 
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * (C) Copyright 2008, by EADS France
+ */
+
 package org.jcae.netbeans.viewer3d.actions;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
-import org.jcae.netbeans.viewer3d.View3D;
-import org.jcae.netbeans.viewer3d.View3DManager;
-import org.jcae.netbeans.viewer3d.actions.AbstractViewAction;
-import org.jcae.viewer3d.ScreenshotListener;
-import org.jcae.viewer3d.View;
+import org.jcae.vtk.Utils;
+import org.jcae.vtk.View;
 import org.openide.windows.WindowManager;
 
 
-public class SnapshotAction extends AbstractViewAction
+public class SnapshotAction extends ViewAction
 {
 	private static final String LABEL = "Snapshot";
 	private static ImageIcon icon = new ImageIcon(SnapshotAction.class.getResource("snapshot.png"));	
@@ -43,37 +58,27 @@ public class SnapshotAction extends AbstractViewAction
 			return "Portable Network Graphics (*.png)";
 		}
 		};
+
+	@Override
+	protected boolean asynchronous()
+	{
+		return false;
+	}
 	
-	/* (non-Javadoc)
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
+	
 	public void actionPerformed(View view)
 	{
-		View3D v = View3DManager.getDefault().getSelectedView3D();
-		if (v!=null)
-		{
 			final JFileChooser fc = new JFileChooser();
 
 			if (fc.showSaveDialog(WindowManager.getDefault().getMainWindow())
 					 == JFileChooser.APPROVE_OPTION)
-			{				
-				ScreenshotListener ss = new ScreenshotListener()
-					{
-						public void shot(BufferedImage snapShot)
-						{
-							try
-							{					
-								ImageIO.write(snapShot, "png", fc.getSelectedFile());
-							}
-							catch (IOException e1)
-							{
-								e1.printStackTrace();
-							}				
-						}
-					};
-
-				v.getView().takeScreenshot(ss);		    	
-			}			
-		}
-	}		
+			{	
+				try {
+				ImageIO.write(Utils.takeScreenShot(view), "png", fc.getSelectedFile());
+				} catch(Exception e)
+				{
+					System.err.println("Exception : " + e.getLocalizedMessage());
+				}
+			}	
+	}
 }
