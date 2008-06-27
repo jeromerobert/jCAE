@@ -22,32 +22,100 @@
 
 -->
 <filesystem>
-	<folder name="Actions">
+	<attr name="Toolbars\File\position" intvalue="400"/>
+    <attr name="Toolbars\Memory\position" intvalue="500"/>
+    <folder name="Actions">
 		<folder name="JCAE3DViewer">
-			<file name="org-jcae-netbeans-viewer3d-actions-Action3DView.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-actions-ActionAxis.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-actions-ActionFitAll.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-actions-ActionRemove.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-actions-BackAction.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-actions-BottomAction.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-actions-ChangeCenterAction.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-actions-ClipBoxAction.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-actions-ClipRectangleAction.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-actions-DefaultModeAction.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-actions-FrontAction.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-actions-GoToAction.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-actions-LeftAction.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-actions-RemoveModelClipAction.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-actions-RightAction.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-actions-SavePositionAction.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-actions-SnapshotAction.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-actions-TopAction.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-SelectViewableAction.instance"/>			
-			<file name="org-jcae-netbeans-viewer3d-actions-DownFrontClipDistance.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-actions-MoreDownFrontClipDistance.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-actions-MoreUpFrontClipDistance.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-actions-RestoreFrontClipDistance.instance"/>
-			<file name="org-jcae-netbeans-viewer3d-actions-UpFrontClipDistance.instance"/>			
+			<file name="org-jcae-netbeans-viewer3d-actions-Action3DView.instance">
+                <attr name="position" intvalue="100"/>
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-AppendSelection.instance"/>
+            <file name="org-jcae-netbeans-viewer3d-actions-BuildOEMMVisu.instance"/>
+            <file name="org-jcae-netbeans-viewer3d-actions-HideOriginAxis.instance">
+                <attr name="position" intvalue="200"/>
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-ActionFitAll.instance">
+                <attr name="position" intvalue="300"/>
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-ActionRemove.instance">
+                <attr name="position" intvalue="400"/>
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-BackAction.instance">
+                <attr name="position" intvalue="500"/>
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-BottomAction.instance">
+                <attr name="position" intvalue="600"/>
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-CAOEdgeSelection.instance">
+                <attr name="position" intvalue="700"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-CAOFaceSelection.instance">
+                <attr name="position" intvalue="800"/>
+            </file>            
+			<file name="org-jcae-netbeans-viewer3d-actions-CAOVertexSelection.instance">
+                <attr name="position" intvalue="800"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-MeshViewMode.instance"/>
+            <file name="org-jcae-netbeans-viewer3d-actions-OEMMMode.instance"/>
+            <file name="org-jcae-netbeans-viewer3d-actions-OctreeVisible.instance"/>
+            <file name="org-jcae-netbeans-viewer3d-actions-SelectionRectangle.instance">
+                <attr name="position" intvalue="1100"/>
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-DefaultModeAction.instance">
+                <attr name="position" intvalue="1200"/>
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-FrontAction.instance">
+                <attr name="position" intvalue="1400"/>
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-GoToAction.instance">
+                <attr name="position" intvalue="1500"/>
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-HideRelativeAxis.instance"/>
+            <file name="org-jcae-netbeans-viewer3d-actions-LeftAction.instance">
+                <attr name="position" intvalue="1600"/>
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-MeshFaceSelection.instance">
+                <attr name="position" intvalue="1800"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-MeshGroupSelection.instance"/>
+            <file name="org-jcae-netbeans-viewer3d-actions-MeshVertexSelection.instance">
+                <attr name="position" intvalue="1900"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-RemoveModelClipAction.instance">
+                <attr name="position" intvalue="2200"/>
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-RightAction.instance">
+                <attr name="position" intvalue="2400"/>
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-SavePositionAction.instance">
+                <attr name="position" intvalue="2500"/>
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-SnapshotAction.instance">
+                <attr name="position" intvalue="2600"/>
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-TopAction.instance">
+                <attr name="position" intvalue="2700"/>
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-SelectViewable.instance">
+                <attr name="position" intvalue="650"/>
+            </file>			
+			<file name="org-jcae-netbeans-viewer3d-actions-DownFrontClipDistance.instance">
+                <attr name="position" intvalue="1300"/>
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-MoreDownFrontClipDistance.instance">
+                <attr name="position" intvalue="2000"/>
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-MoreUpFrontClipDistance.instance">
+                <attr name="position" intvalue="2100"/>
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-RestoreFrontClipDistance.instance">
+                <attr name="position" intvalue="2300"/>
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-UpFrontClipDistance.instance">
+                <attr name="position" intvalue="2800"/>
+            </file>				<file name="org-jcae-netbeans-viewer3d-actions-ChangeCenterAction.instance">
+                <attr name="position" intvalue="2800"/>
+            </file>			
 		</folder>
 		<folder name="jCAE">
 			<file name="org-jcae-netbeans-cad-ExplodeAction.instance"/>
@@ -77,7 +145,7 @@
 			<file name="org-jcae-netbeans-mesh-OEMMViewAction.instance">
 				<attr name="instanceClass" stringvalue="org.jcae.netbeans.mesh.OEMMViewAction"/>
 			</file>
-		</folder>
+		    </folder>
 	</folder>
 
 	<folder name="Loaders">
@@ -179,6 +247,7 @@
 	</folder>
 	<folder name="Toolbars">
 		<folder name="3DNavigation">
+			<attr name="position" intvalue="100"/>
             <file name="org-jcae-netbeans-viewer3d-actions-ChangeCenterAction.shadow">
                 <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-ChangeCenterAction.instance"/>
                 <attr name="position" intvalue="100"/>
@@ -215,10 +284,66 @@
                 <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-SavePositionAction.instance"/>
                 <attr name="position" intvalue="900"/>
             </file>
+
         </folder>
         <folder name="Build_hidden"/>
-		<folder name="ClipDistance">
-			<file name="org-jcae-netbeans-viewer3d-RestoreFrontClipDistance.shadow">
+
+        <folder name="Edit">
+            <attr name="position" intvalue="300"/>
+            <file name="org-openide-actions-FindAction.instance_hidden"/>
+            <file name="org-openide-actions-RedoAction.instance_hidden"/>
+            <file name="org-openide-actions-UndoAction.instance_hidden"/>
+        </folder>
+        <folder name="ShapeTypeCAO">
+            <attr name="position" intvalue="140"/>
+            <file name="org-jcae-netbeans-viewer3d-actions-CAOVertexSelection.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-CAOVertexSelection.instance"/>
+                <attr name="position" intvalue="100"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-CAOEdgeSelection.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-CAOEdgeSelection.instance"/>
+                <attr name="position" intvalue="200"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-CAOFaceSelection.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-CAOFaceSelection.instance"/>
+                <attr name="position" intvalue="300"/>
+            </file>
+                </folder>
+        <folder name="Mesh">
+            <attr name="position" intvalue="212"/>
+            <file name="org-jcae-netbeans-viewer3d-actions-MeshFaceSelection.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-MeshFaceSelection.instance"/>
+                <attr name="position" intvalue="200"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-MeshGroupSelection.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-MeshGroupSelection.instance"/>
+                <attr name="position" intvalue="0"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-MeshVertexSelection.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-MeshVertexSelection.instance"/>
+                <attr name="position" intvalue="100"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-MeshWired.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-MeshViewMode.instance"/>
+                <attr name="position" intvalue="300"/>
+            </file>
+        </folder>
+		<folder name="OEMM">
+			<attr name="org-jcae-netbeans-viewer3d-actions-OEMMMode.shadow/org-jcae-netbeans-viewer3d-actions-OctreeVisible.shadow" boolvalue="true"/>
+            <attr name="position" intvalue="300"/>
+		    <file name="org-jcae-netbeans-viewer3d-actions-OEMMMode.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-OEMMMode.instance"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-OctreeVisible.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-OctreeVisible.instance"/>
+            </file>
+        </folder>
+        <file name="Standard.xml" url="Standard.xml">
+            <attr name="position" intvalue="0"/>
+        </file>
+				<folder name="ClipDistance">
+			<attr name="position" intvalue="900"/>
+            <file name="org-jcae-netbeans-viewer3d-RestoreFrontClipDistance.shadow">
 				<attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-RestoreFrontClipDistance.instance"/>
 			    <attr name="position" intvalue="0"/>
             </file>
@@ -239,23 +364,29 @@
 			    <attr name="position" intvalue="500"/>
             </file>
         </folder>
-        <folder name="Edit">
-            <file name="org-openide-actions-FindAction.instance_hidden"/>
-            <file name="org-openide-actions-RedoAction.instance_hidden"/>
-            <file name="org-openide-actions-UndoAction.instance_hidden"/>
-        </folder>
-        <file name="Standard.xml" url="Standard.xml"/>
         <folder name="View">
-			<file name="org-jcae-netbeans-viewer3d-actions-Action3DView.shadow">
+			<attr name="position" intvalue="250"/>
+            <file name="org-jcae-netbeans-viewer3d-actions-Action3DView.shadow">
 				<attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-Action3DView.instance"/>
 			    <attr name="position" intvalue="100"/>
             </file>
-			<file name="org-jcae-netbeans-viewer3d-SelectViewableAction.shadow">
-				<attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-SelectViewableAction.instance"/>
+			<file name="org-jcae-netbeans-viewer3d-actions-AppendSelectionMode.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-AppendSelection.instance"/>
+                <attr name="position" intvalue="650"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-ClipBoxAction.instance" url="org-jcae-netbeans-viewer3d-actions-ClipBoxAction.instance">
+                <attr name="position" intvalue="500"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-HideRelativeAxis.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-HideRelativeAxis.instance"/>
+                <attr name="position" intvalue="350"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-SelectViewableAction.shadow">
+				<attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-SelectViewable.instance"/>
 			    <attr name="position" intvalue="200"/>
             </file>			
 			<file name="org-jcae-netbeans-viewer3d-actions-ActionAxis.shadow">
-				<attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-ActionAxis.instance"/>
+				<attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-HideOriginAxis.instance"/>
 			    <attr name="position" intvalue="300"/>
             </file>			
 			<file name="org-jcae-netbeans-viewer3d-actions-ActionFitAll.shadow">
@@ -267,7 +398,7 @@
 			    <attr name="position" intvalue="150"/>
             </file>						
 			<file name="org-jcae-netbeans-viewer3d-actions-ClipRectangleAction.shadow">
-				<attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-ClipRectangleAction.instance"/>
+				<attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-SelectionRectangle.instance"/>
 			    <attr name="position" intvalue="600"/>
             </file>			
 			<file name="org-jcae-netbeans-viewer3d-actions-DefaultModeAction.shadow">
@@ -283,7 +414,7 @@
 			    <attr name="position" intvalue="900"/>
             </file>
         </folder>
-	</folder>
+	    </folder>
 
 	<folder name="Menu">
 		<file name="Tools_hidden"/>
@@ -303,7 +434,15 @@
 				<attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-cad-ImportAction.instance"/>
 			    <attr name="position" intvalue="2150"/>
             </file>
-			<file name="org-openide-actions-PageSetupAction.instance_hidden"/>
+			<file name="org-jcae-netbeans-viewer3d-actions-HideRelativeAxis.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-HideRelativeAxis.instance"/>
+                <attr name="position" intvalue="-100"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-VertexSelectionMode.shadow">
+                <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-viewer3d-actions-CAOVertexSelection.instance"/>
+                <attr name="position" intvalue="0"/>
+            </file>
+            <file name="org-openide-actions-PageSetupAction.instance_hidden"/>
 			<file name="org-openide-actions-PrintAction.instance_hidden"/>
 		</folder>
 

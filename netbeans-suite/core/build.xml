@@ -7,9 +7,14 @@
     <import file="nbproject/build-impl.xml"/>
 	<!-- from http://wiki.netbeans.org/DevFaqWrapperModules -->
 	<property name="amibe.project.dir" value="../amibe"/>
+	<property name="vtk-util.project.dir" value="../../vtk-util"/>
 	<property name="viewer3d.project.dir" value="../viewer3d"/>
 	<property name="va.project.dir" value="../viewer3d-amibe"/>
 	<target name="-release.files">
+
+		<!-- external dependencies -->
+		<copy tofile="${cluster}/modules/ext/trove.jar" file="${libs.trove.classpath}"/>
+				
 		<!-- build amibe -->
 		<echo message="Building ${amibe.project.dir}"/>
 		<ant dir="${amibe.project.dir}" target="jar" inheritall="false" inheritrefs="false"/>
@@ -24,15 +29,19 @@
 		<echo message="Done building ${viewer3d.project.dir}"/>
 
 		<copy todir="${cluster}/modules/ext" file="${viewer3d.project.dir}/dist/jcae-viewer3d.jar"/>
+
+		<!-- build vtk-util -->
+		<echo message="Building ${vtk-util.project.dir}"/>
+		<ant dir="${vtk-util.project.dir}" target="jar" inheritall="false" inheritrefs="false"/>
+		<echo message="Done building ${vtk-util.project.dir}"/>
+		<copy file="${vtk-util.project.dir}/dist/vtk-util.jar" todir="${cluster}/modules/ext"/>
+		
 		<!-- build viewer3d-amibe -->
 		<echo message="Building ${va.project.dir}"/>
 		<ant dir="${va.project.dir}" target="jar" inheritall="false" inheritrefs="false"/>
 		<echo message="Done building ${va.project.dir}"/>
 
 		<copy todir="${cluster}/modules/ext" file="${va.project.dir}/dist/jcae-viewer3d-amibe.jar"/>
-		<!-- other libs -->
-		<copy file="${libs.trove.classpath}" tofile="build/tmp/trove.jar"/>
-		<copy file="${libs.trove.classpath}" tofile="${cluster}/modules/ext/trove.jar"/>
 
 		<copy file="../../amibe/logging.properties" tofile="${cluster}/etc/logging.properties"/>
 	</target>

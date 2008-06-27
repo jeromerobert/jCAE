@@ -1,0 +1,53 @@
+<!-- 
+    Document   : package
+    Created on : 14 mai 2008, 12:52:58
+    Author     : ibarz
+-->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  </head>
+  <body>
+      <p>
+	  This is a description of the hierarchy structure of the nodes in the explorer
+	  and the different lookups.
+      </p> 
+      <p>
+	  The expression in <code>[]</code> indicate the cardinality of the node
+	  in xml like.
+      </p>
+      <p>
+	  In each node, after ':' we list the different lookups.
+      </p>
+      <p>
+	  [1] Root
+	  <ul>
+	      <li>[*] Project : TODO
+		  <ul>
+		      <li>[1] Geometries : {@link org.jcae.netbeans.cad.ModuleNode}
+			  <ul>
+			      <li>TODO</li>
+			  </ul>
+		      </li>
+		      <li>[1] Meshes : {@link org.jcae.netbeans.mesh.ModuleNode}
+			  <ul>
+			      <li>[*] Mesh : {@link org.jcae.netbeans.mesh.MeshNode}
+				  <ul>
+				      <li>[1] Geometric Node : TODO</li>
+				      <li>[1] Groups Node : {@link org.jcae.netbeans.mesh.GroupChildren}
+					  <ul>
+					      <li>[*] GroupNode : @link org.jcae.netbeans.mesh.GroupNode</li>
+					  </ul>
+				      </li>
+				  </ul>
+			      </li>
+			  </ul>
+		      </li>
+		  </ul>
+	      </li>
+	  </ul>
+      </p>
+  </body>
+</html>
