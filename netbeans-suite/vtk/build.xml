@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See harness/README in the NetBeans platform -->
+<!-- for some information on what you could do (e.g. targets to override). -->
+<!-- If you delete this file and reopen the project it will be recreated. -->
+<project name="vtk" default="netbeans" basedir=".">
+    <description>Builds, tests, and runs the project vtk.</description>
+    <import file="nbproject/build-impl.xml"/>
+	<!-- from http://wiki.netbeans.org/DevFaqWrapperModules -->	
+
+	<patternset id="vtk.unix.files">
+		<include name="libvtk*Java.so"/>
+		<include name="libvtk*.so.?.?"/>				
+		<exclude name="libvtk*Java.so.?.?"/>
+	</patternset>
+
+	<target name="-release.files">
+		<copy file="${vtk.dir}/vtk.jar" todir="${cluster}/modules/ext" />
+		<copy todir="${cluster}/modules/lib">
+			<fileset dir="${vtk.dir}">
+				<patternset refid="vtk.unix.files"/>
+			</fileset>
+			<fileset dir="${vtk.dir}/Release" includes="vtk*.dll"/>
+		</copy>
+	</target>
+	
+	<target name="clean" depends="projectized-common.clean">
+		<delete>
+			<fileset dir="${cluster}/modules/lib">
+				<patternset refid="vtk.unix.files"/>
+			</fileset>
+			<fileset dir="${cluster}/modules/lib" includes="vtk*.dll"/>
+		</delete>
+	</target>
+	
+	<!-- Disable the module by default -->
+    <target name="module-xml-regular" if="is.regular">
+        <mkdir dir="${cluster}/config/Modules"/>
+        <createmodulexml xmldir="${cluster}/config/Modules">
+            <enabled dir="${cluster}">
+                <include name="${module.jar}"/>
+            </enabled>
+        </createmodulexml>	
+		<!--replaceregexp file="${cluster}/config/Modules/vtk.xml"
+			match='&lt;param name="enabled"&gt;true&lt;/param&gt;'
+			replace='&lt;param name="enabled"&gt;false&lt;/param&gt;'
+			byline="true"/-->		
+    </target>	
+</project>
