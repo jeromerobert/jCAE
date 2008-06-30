@@ -27,7 +27,6 @@ import java.awt.Point;
 import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.Arrays;
 import java.util.NoSuchElementException;
 import javax.imageio.ImageIO;
 import javax.vecmath.Point3d;
@@ -62,24 +61,7 @@ import vtk.vtkWindowToImageFilter;
  * @author Jerome Robert
  */
 public class Utils
-{
-
-	/**
-	 * Use instead Arrays.method of java library
-	 * @param tab
-	 * @return
-	 * @deprecated
-	 */
-	@Deprecated
-	public static String stringDoubleTab(double[] tab)
-	{
-		String rep = "";
-		for (double i : tab)
-			rep = rep + " " + i;
-
-		return rep;
-	}
-	
+{	
 	public static Canvas retrieveCanvas(ComponentEvent e)
 	{
 		Component c = e.getComponent();
@@ -108,37 +90,6 @@ public class Utils
 		direction.y = vertice[1] - origin.y;
 		direction.z = vertice[2] - origin.z;
 	}
-	
-	/**
-	 * Use instead Arrays.method of java library
-	 * @param tab
-	 * @return
-	 * @deprecated
-	 */
-	@Deprecated
-	public static String stringFloatTab(float[] tab)
-	{
-		String rep = "";
-		for (float i : tab)
-			rep = rep + " " + i;
-
-		return rep;
-	}
-		/**
-	 * Use instead Arrays.method of java library
-	 * @param tab
-	 * @return
-	 * @deprecated
-	 */
-	@Deprecated
-	public static String stringIntTab(int[] tab)
-	{
-		String rep = "";
-		for (int i : tab)
-			rep = rep + " " + i;
-
-		return rep;
-	}
 
 	public static float[] CanvasGetZBuffer(vtkCanvas canvas, int[] firstPoint, int[] secondPoint)
 	{
@@ -166,25 +117,9 @@ public class Utils
 		property.SetColor((double) color.getRed() / 255., (double) color.getGreen() / 255., (double) color.getBlue() / 255.);
 		property.SetOpacity((double) color.getAlpha() / 255.);
 	}
-			
-	/**
-	 * Use instead Arrays.method of java library
-	 * @param tab
-	 * @return
-	 * @deprecated
-	 */
-	@Deprecated
-	public static <T> String stringTab(T[] tab)
-	{
-		String rep = "";
-		for (T i : tab)
-			rep = rep + " " + i;
-
-		return rep;
-	}
-
+	
 	public static void loadVTKLibraries()
-	{		
+	{
 		System.loadLibrary("vtkCommonJava");
 		System.loadLibrary("vtkFilteringJava");
 		System.loadLibrary("vtkIOJava");
@@ -193,6 +128,11 @@ public class Utils
 		System.loadLibrary("vtkRenderingJava");
 	}
 
+	public static void main(final String[] args)
+	{
+		loadVTKLibraries();
+	}
+	
 	/** Create a dummy canvas with single actor */
 	public static vtkCanvas createDummyCanvas(vtkActor actor)
 	{
@@ -232,7 +172,7 @@ public class Utils
 	 * @param f far plane distance
 	 * @return
 	 */
-	public static double EyeZToNormalizedEyeZ(double ze, double n, double f)
+	public static double eyeZToNormalizedEyeZ(double ze, double n, double f)
 	{
 		return (f + n) / (f - n) - 2 * f * n / (f - n) / ze;
 	}
@@ -253,12 +193,12 @@ public class Utils
 		double distanceTolerance = tolerance * (f - n);
 
 		// Compute the z of the focal point (point of interest)
-		double d1 = EyeZToNormalizedEyeZ(distance, n, f);
+		double d1 = eyeZToNormalizedEyeZ(distance, n, f);
 
 		// Compute the z of the distance tolerance
 		// If we are before the far we take distance + distanceTolerance else we take -
 		double d2 = (distance + distanceTolerance < f) ? distance + distanceTolerance : distance - distanceTolerance;
-		d2 = EyeZToNormalizedEyeZ(d2, n, f);
+		d2 = eyeZToNormalizedEyeZ(d2, n, f);
 
 		// Compute the delta tolerance for the z-buffer value
 		return Math.abs(d1 - d2);
@@ -274,7 +214,7 @@ public class Utils
 	 * @return
 	 * @see Mathematics for 3D Game Programming and Compute Graphics book.
 	 */
-	public static double computeZDistanceFromCameraSpaceToScreenSpace(double distance, double delta, double n, double f)
+	public static double computeZDistance(double distance, double delta, double n, double f)
 	{
 		return (2 * f * n * delta) / ((f + n) * distance * (distance + delta));
 	}
@@ -446,18 +386,14 @@ public class Utils
 		return plane;
 	}
 	
-	public static double[] computeVerticesFrustum(double x0, double y0, double x1, double y1, vtkRenderer renderer)
+	public static double[] computeVerticesFrustum(double x0, double y0,
+		double x1, double y1, vtkRenderer renderer)
 	{
 		double X0 = Math.min(x0, x1);
 		double Y0 = Math.min(y0, y1);
 		double X1 = Math.max(x0, x1);
 		double Y1 = Math.max(y0, y1);
-		
-		System.out.println("X0 : " + X0);
-		System.out.println("Y0 : " + Y0);
-		System.out.println("X1 : " + X1);
-		System.out.println("Y1 : " + Y1);
-		
+				
 		//compute world coordinates of the pick volume 
 		double[] verts = new double[32];
 		double[] vertice = new double[4];
@@ -500,10 +436,6 @@ public class Utils
 		renderer.DisplayToWorld();
 		vertice = renderer.GetWorldPoint();
 		System.arraycopy(vertice, 0, verts, 28, 4);
-		
-		System.out.println("length vertice : " + vertice.length);
-		
-		System.out.println("verts : " + Arrays.toString(verts));
 		
 		return verts;
 	}
@@ -805,10 +737,6 @@ public class Utils
 		iarray.SetJavaArray(values);
 		vtkIdTypeArray array = new vtkIdTypeArray();
 		array.DeepCopy(iarray);
-
-		System.out.println("values : " + values.length);
-		System.out.println("iarray : " + array.GetNumberOfTuples());
-
 		return array;
 	}
 
