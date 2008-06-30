@@ -30,7 +30,7 @@ public final class OctreeVisible extends OEMMButton
 	public void actionPerformed(ViewableOEMM viewable)
 	{
 		viewable.setOctreeVisible(!viewable.isOctreeVisible());
-		viewable.Render();
+		viewable.render();
 	}
 	
 	protected void updateButton(ViewableOEMM viewer)

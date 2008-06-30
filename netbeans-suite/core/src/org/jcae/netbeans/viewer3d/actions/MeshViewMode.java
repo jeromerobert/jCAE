@@ -39,7 +39,7 @@ public final class MeshViewMode extends MeshButton
 			default:
 				throw new IllegalArgumentException("Mesh view mode not supported !");
 		}
-		viewable.Render();
+		viewable.render();
 	}
 	
 	protected void updateButton(ViewableMesh viewer)

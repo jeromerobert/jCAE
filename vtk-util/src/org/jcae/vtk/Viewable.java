@@ -346,7 +346,7 @@ public abstract class Viewable extends MultiCanvas
 		rootNode.refresh();
 		//System.out.println("APRES REFRESH");
 
-		Render();
+		render();
 	}
 
 	public void setName(String name)
@@ -373,7 +373,7 @@ public abstract class Viewable extends MultiCanvas
 		// Send empty plane collection to removeCanvas the older planes
 		setClippingPlanes(new vtkPlaneCollection());
 
-		Render();
+		render();
 	}
 
 	void setClippingPlanes(vtkPlaneCollection planes)

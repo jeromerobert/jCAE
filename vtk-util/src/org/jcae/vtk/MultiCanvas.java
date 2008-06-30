@@ -134,7 +134,7 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 		canvas.unlock();
 	}
 	
-	public void Render()
+	public void render()
 	{
 		for(Canvas canvas : listCanvas)
 			canvas.RenderSecured();
