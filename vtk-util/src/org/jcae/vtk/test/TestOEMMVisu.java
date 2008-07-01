@@ -104,8 +104,6 @@ public class TestOEMMVisu implements SelectionListener, KeyListener {
         style.AutoAdjustCameraClippingRangeOn();
         canvas.getIren().SetInteractorStyle(style);
 		
-       
-		
 		canvas.lock();
 		renderer.ResetCamera();
 		canvas.unlock();

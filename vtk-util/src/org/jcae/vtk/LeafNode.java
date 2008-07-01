@@ -194,7 +194,6 @@ public class LeafNode extends AbstractNode
 		if (isManager())
 		{
 			checkData();
-
 			if (lastUpdate <= modificationTime)
 			{
 				//System.out.println("REFRESH ACTOR !");
@@ -298,13 +297,13 @@ public class LeafNode extends AbstractNode
 	@Override
 	protected void refreshData()
 	{
-		//System.out.println("REFRESHING DATA !");
-		//System.out.println("DATA NODES : " + dataProvider.getNodes().length);
+		System.out.println("REFRESHING DATA !");
+		System.out.println("DATA NODES : " + dataProvider.getNodes().length);
 		dataProvider.load();
 		createData(dataProvider);
 		dataProvider.unLoad();
 		
-//		System.out.println("DATA NODES : " + dataProvider.getNodes().length);
+		System.out.println("DATA NODES : " + dataProvider.getNodes().length);
 
 		timeDataCreated = System.nanoTime();
 		modified();

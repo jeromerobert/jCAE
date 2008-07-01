@@ -454,7 +454,7 @@ public abstract class AbstractNode {
 	
 	protected void refreshActor()
 	{
-		refreshData();
+		//refreshData();
 		boolean actorCreated = false;
 		
 		//System.out.println("REFRESH ACTOR !");

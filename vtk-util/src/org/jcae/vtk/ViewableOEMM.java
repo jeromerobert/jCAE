@@ -195,6 +195,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 		}
 		octreeNode.setManager(true);
 		octreeNode.refresh();
+		octreeNode.setPickableRecursive(true);
 		octreeForPicking = octreeNode.getActor();
 		octreeForPicking.SetVisibility(0);
 
@@ -338,16 +339,17 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 					continue;
 
 				float[] meshNodes = meshes[i].nodes;
-				TIntHashSet nodesLoaded = new TIntHashSet(meshNodes.length / 3);
+				//TIntHashSet nodesLoaded = new TIntHashSet(meshNodes.length / 3);
 				System.out.println("mesh " + i + " contains " + meshNodes.length / 3 + " nodes");
 
-				for (int j = 0; j < meshNodes.length / 3; ++j)
-					nodesLoaded.add(oemm.leaves[leaves[i]].minIndex + j);
+				//for (int j = 0; j < meshNodes.length / 3; ++j)
+				//	nodesLoaded.add(oemm.leaves[leaves[i]].minIndex + j);
 
 				TIntArrayList[] allEdges = new TIntArrayList[]
 				{
 					new TIntArrayList(meshes[i].edges.length), new TIntArrayList(meshes[i].freeEdges.length)
 				};
+				
 				ArrayList<int[]> edgesMesh = new ArrayList<int[]>(2);
 				edgesMesh.add(meshes[i].edges);
 				edgesMesh.add(meshes[i].freeEdges);
@@ -356,6 +358,8 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 				{
 					int[] ones = edgesMesh.get(type);
 
+					System.out.println("TYPE " + type + " size : " + ones.length);
+					
 					for (int j = 0; j < ones.length;)
 					{
 
@@ -370,12 +374,19 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 						System.out.println("offSetMesh : " + offSets[i]);
 						}*/
 
-						if (nodesLoaded.contains(begin) && nodesLoaded.contains(end))
+						/*if (nodesLoaded.contains(begin) && nodesLoaded.contains(end))
 						{
 							allEdges[type].add(2);
 							allEdges[type].add(begin - oemm.leaves[leaves[i]].minIndex);
 							allEdges[type].add(end - oemm.leaves[leaves[i]].minIndex);
 						}
+						// If they aren't loaded it's a fake vertice so keep the index (it's already good)
+						else
+						{*/
+							allEdges[type].add(2);
+							allEdges[type].add(begin);
+							allEdges[type].add(end);
+						//}
 					}
 				}
 
@@ -386,7 +397,9 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 				edgeNode.setManager(true);
 				IDToEdgeNode.put(leaves[i], edgeNode);
 				lockCanvas();
+				System.out.println("REFRESHING EDGE NODE");
 				edgeNode.refresh();
+				System.out.println("END REFRESHING EDGE NODE");
 				unlockCanvas();
 
 				LeafNode.DataProvider dataFreeEdge = new LeafNode.DataProvider();
@@ -396,7 +409,9 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 				freeEdgeNode.setManager(true);
 				IDToFreeEdgeNode.put(leaves[i], freeEdgeNode);
 				lockCanvas();
+				System.out.println("REFRESHING FREE EDGE NODE");
 				freeEdgeNode.refresh();
+				System.out.println("END REFRESHING FREE EDGE NODE");
 				unlockCanvas();
 			}
 		}
@@ -564,6 +579,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 	public void pointSelection(Canvas canvas, Point pickPosition)
 	{
 		octreeForPicking.VisibilityOn();
+		octreeForPicking.SetPickable(1);
 		super.pointSelection(canvas, pickPosition);
 		octreeForPicking.VisibilityOff();
 		return;

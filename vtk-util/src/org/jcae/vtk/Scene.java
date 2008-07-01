@@ -168,7 +168,7 @@ public class Scene implements AbstractNode.ActorListener {
 						actor.PickableOff();
 				}
 			}
-			actors.InitTraversal();
+			/*actors.InitTraversal();
 			int nbrPick = 0;
 			int nbrPolys = 0;
 			for(vtkActor actor ; (actor = actors.GetNextActor()) != null ; ++j)
@@ -180,7 +180,7 @@ public class Scene implements AbstractNode.ActorListener {
 			System.out.println("NBR OF PICKED ACTORS : " + nbrPick);
 			System.out.println("NBR OF ACTORS : " + actors.GetNumberOfItems());
 			System.out.println("NUMBER OF POLYS : " + nbrPolys);
-			System.out.println("TIME TO FILTER : " + (System.currentTimeMillis() - begin));
+			System.out.println("TIME TO FILTER : " + (System.currentTimeMillis() - begin));*/
 			}
 		
 		canvas.lock();

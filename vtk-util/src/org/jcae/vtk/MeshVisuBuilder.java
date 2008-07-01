@@ -25,13 +25,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.oemm.OEMM;
-import org.jcae.mesh.oemm.OEMM.Node;
+import  org.jcae.mesh.oemm.OEMM.Node;
 import org.jcae.mesh.oemm.TraversalProcedure;
 
 /**
@@ -57,7 +58,9 @@ public class MeshVisuBuilder extends TraversalProcedure {
 		
 		MeshVisuReader reader = new MeshVisuReader(o);
 		
+		logger.info("Building leaf : " + c.leafIndex);
 		writeEdges(o, c, reader.buildPreparationMesh(c.leafIndex));
+		logger.info("End Building leaf : " + c.leafIndex);
 		
 		return TraversalProcedure.OK;
 	}
@@ -100,6 +103,23 @@ public class MeshVisuBuilder extends TraversalProcedure {
 				bb.rewind();
 				fc.write(bb);
 			}
+			
+			// Writing fake vertices
+			logger.info("Writing " + (mesh.nodes.length / 3) +" fake vertice.");
+			// Writing the size
+			ByteBuffer bb = ByteBuffer.allocate(Integer.SIZE / 8);
+			IntBuffer bufferInteger = bb.asIntBuffer();
+			bufferInteger.rewind();
+			bufferInteger.put(mesh.nodes.length);
+			bb.rewind();
+			fc.write(bb);
+			// Writing the vertice
+			bb = ByteBuffer.allocate((Float.SIZE / 8) * mesh.nodes.length);
+			FloatBuffer bufferFloat = bb.asFloatBuffer();
+			bufferFloat.rewind();
+			bufferFloat.put(mesh.nodes);
+			bb.rewind();
+			fc.write(bb);
 		} catch (IOException e)
 		{
 			logger.log(Level.SEVERE, "Error in saving to " + getEdgesFile(o, node), e);

@@ -665,6 +665,7 @@ public class Node extends AbstractNode
 			if (lastUpdate <= getModificationTime())
 			{
 				//System.out.println("REFRESH ACTOR");
+				refreshData();
 				refreshActor();
 			}
 			else
@@ -672,6 +673,7 @@ public class Node extends AbstractNode
 					if (lastUpdate <= leaf.getModificationTime())
 					{
 						//System.out.println("REFRESH ACTOR BECAUSE OF LEAF !");
+						refreshData();
 						refreshActor();
 						break;
 					}
