@@ -62,7 +62,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 	private vtkActor freeEdgesActor;
 	private boolean automaticSelection = false;
 	private boolean octreeVisible = true;
-	private final int leafVisibleMax = 20;
+	private final int leafVisibleMax = 10;
 	private TObjectIntHashMap<LeafNode> nodeToID = new TObjectIntHashMap<LeafNode>();
 	private TIntObjectHashMap<LeafNode> IDToEdgeNode = new TIntObjectHashMap<LeafNode>();
 	private TIntObjectHashMap<LeafNode> IDToFreeEdgeNode = new TIntObjectHashMap<LeafNode>();

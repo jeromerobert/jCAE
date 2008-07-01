@@ -38,7 +38,17 @@ import vtk.vtkPolyDataNormals;
  * entities that are represented by LeafNode in a one Node wich will merge all the geometry in one actor.
  * The merge is made only if the Node is set as managing (using the method setManager).
  * A node can be highlighted using the select method.
- * @author ibarz
+ * A node can be picked or not (this permit to make faster the picking ignoring non pickable nodes).
+ * You can give customisers to the nodes. This works as follow :
+ * If a leaf node does'nt have customiser it takes the first parent that have one and if nobody have
+ * customiser the DEFAULT customiser is taken. This permits to create a customiser for the parent node and this will
+ * be used pour all of it's children (unless if the child has a customiser).
+ * The customisers are created to permit to change and customiser the VTK objects easily.
+ * Actually only the color can be specified for the shading of the geometry. If you want
+ * to customise the nodes more you can use the VTK interface but if you merge the leafs in
+ * one node and they have different materials this will cause problems... The solution to this
+ * is that VTK permits to make materials data arrays like color array.
+ * @author Julian Ibarz
  */
 public abstract class AbstractNode {
 // Datas
