@@ -100,6 +100,17 @@ public class Scene implements AbstractNode.ActorListener {
 		this.actorFiltering = actorFiltering;
 	}
 
+	/**
+	 * Warning : If you are making highlight with offSet (by default this is down) then the selection will not take in
+	 * case the highlighted objects because the z-buffer is not cleaned and so the normal geometry
+	 * will not be drawned for selection because the highlighted geometry is nearest of the camera
+	 * due to the offset. If you want bypass this you have to take care of the highlighted objects :
+	 * _ draw them in rendering selection i.e. make them pickable.
+	 * _ find the initial geometry corresponding to the selected highlighted object.
+	 * @param canvas
+	 * @param firstPoint
+	 * @param secondPoint
+	 */
 	public void pick(vtkCanvas canvas, int[] firstPoint, int []secondPoint)
 	{
 		/*if(canvas instanceof Canvas)

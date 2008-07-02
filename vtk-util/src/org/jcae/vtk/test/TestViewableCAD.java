@@ -81,6 +81,9 @@ public class TestViewableCAD implements SelectionListener, KeyListener {
 				viewable.setShapeTypeSelection(ViewableCAD.ShapeType.EDGE);
 				break;
 	
+			case KeyEvent.VK_A:
+				viewable.setAppendSelection(!viewable.getAppendSelection());
+				
 			case KeyEvent.VK_O:
 				//viewable.hideMesh();
 				break;

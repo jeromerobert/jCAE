@@ -171,7 +171,7 @@ public abstract class Viewable extends MultiCanvas
 		HashSet<LeafNode> newSelection;
 
 		if (appendSelection)
-			newSelection = selectionCell;
+			newSelection = new HashSet<LeafNode>(selectionCell);
 		else
 			newSelection = new HashSet<LeafNode>();
 
@@ -181,19 +181,15 @@ public abstract class Viewable extends MultiCanvas
 
 			if (nodeSelection.size() != 0)
 			{
-				// Do not add if the group is already selected
-				if (selectionNode.contains(node))
-				{
-					selectionNode.clear();
-					continue;
-				}
-
-				if (newSelection.add(node))
-					selectionChanged = true;
-			} else if (newSelection.remove(node))
-				selectionChanged = true;
+				// Remove from the selection node if the node is present
+				selectionNode.remove(node);
+				newSelection.add(node);
+			}
 		}
 
+		if(!selectionCell.equals(newSelection))
+			selectionChanged = true;
+		
 		selectionCell = newSelection;
 	}
 
@@ -209,7 +205,7 @@ public abstract class Viewable extends MultiCanvas
 		HashSet<LeafNode> newSelection;
 
 		if (appendSelection)
-			newSelection = selectionNode;
+			newSelection = new HashSet(selectionNode);
 		else
 			newSelection = new HashSet<LeafNode>();
 
@@ -219,20 +215,18 @@ public abstract class Viewable extends MultiCanvas
 
 			if (nodeSelection.size() != 0)
 			{
-				if (newSelection.add(node))
-				{
-					selectionChanged = true;
+				newSelection.add(node);
+				// Clear the selectionNode because it's not a cell selectionNode
+				nodeSelection.clear();
 
-					// Clear the selectionNode because it's not a cell selectionNode
-					nodeSelection.clear();
-
-					// Remove the node from the selection cell
-					selectionCell.remove(node);
-				}
-			} else if (newSelection.remove(node))
-				selectionChanged = true;
+				// Remove the node from the selection cell
+				selectionCell.remove(node);
+			}
 		}
 
+		if(!selectionNode.equals(newSelection))
+			selectionChanged = true;
+		
 		selectionNode = newSelection;
 		
 		System.out.println("TEMPS DE DISPATCH : " + (System.currentTimeMillis() - begin));
@@ -261,8 +255,8 @@ public abstract class Viewable extends MultiCanvas
 
 	public void surfaceSelection(Canvas canvas, Point pressPosition_, Point releasePosition_)
 	{
-		if (!appendSelection)
-					unSelectAll();
+		//if (!appendSelection)
+		//			unSelectAll();
 		
 		int[] pressPosition = new int[2];
 		pressPosition[0] = pressPosition_.x;
@@ -488,8 +482,8 @@ public abstract class Viewable extends MultiCanvas
 	
 	public void pointSelection(Canvas canvas, Point pickPosition)
 	{
-		if (!appendSelection)
-					unSelectAll();
+		//if (!appendSelection)
+		//			unSelectAll();
 		
 		int[] firstPoint = new int[2];
 		int[] secondPoint = new int[2];

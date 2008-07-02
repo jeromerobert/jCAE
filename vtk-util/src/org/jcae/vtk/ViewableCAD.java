@@ -184,6 +184,9 @@ public class ViewableCAD extends Viewable
 		
 		super.selectNodeOnSurface(canvas, firstPoint, secondPoint);
 		
+		if(!selectionChanged)
+			return;
+		
 		HashSet<LeafNode> selectionNodeAfter = selectionNode;
 		selectionNode = new HashSet<LeafNode>(selectionNodeAfter.size());
 		
