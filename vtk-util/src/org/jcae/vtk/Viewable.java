@@ -107,7 +107,7 @@ public abstract class Viewable extends MultiCanvas
 	{
 		return this.selectionType;
 	}
-
+	
 	/**
 	 * If true, the rectangle selection is on surface.
 	 * If false, the rectangle selection is in frustum.

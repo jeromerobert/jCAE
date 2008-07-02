@@ -37,7 +37,7 @@ import vtk.vtkPlaneCollection;
  */
 public class View extends Canvas {
 	
-	protected final ArrayList<Viewable> interactors = new ArrayList<Viewable>();
+	protected final ArrayList<Viewable> viewables = new ArrayList<Viewable>();
 	protected Viewable currentViewable = null;
 	private final CameraManager cameraManager = new CameraManager(this);
 	private MouseMode mouseMode = MouseMode.POINT_SELECTION;
@@ -47,6 +47,7 @@ public class View extends Canvas {
 			new vtkInteractorStyleTrackballCamera();
 	private final vtkInteractorStyleRubberBand3D rectangleStyle =
 			new vtkInteractorStyleRubberBand3D();
+	private boolean interactive = true;
 	
 	public enum MouseMode
 	{
@@ -66,7 +67,10 @@ public class View extends Canvas {
 	{
 		super.keyPressed(e);
 		
-				switch (e.getKeyCode())
+		if(!interactive)
+			return;
+		
+		switch (e.getKeyCode())
 		{
 			case KeyEvent.VK_SPACE:
 				setMouseMode(MouseMode.RECTANGLE_SELECTION);
@@ -90,6 +94,9 @@ public class View extends Canvas {
 	{
 		super.mousePressed(e);
 		
+		if(!interactive)
+			return;
+		
 		pressPosition = new Point(e.getPoint());
 		pressPosition.y = e.getComponent().getHeight() - pressPosition.y;
 	}
@@ -98,6 +105,9 @@ public class View extends Canvas {
 	public void mouseReleased(MouseEvent e)
 	{
 		super.mouseReleased(e);
+		
+		if(!interactive)
+			return;
 		
 		if(e.getButton() != MouseEvent.BUTTON1)
 			return;
@@ -144,17 +154,27 @@ public class View extends Canvas {
 		return cameraManager;
 	}
 
+	public boolean isInteractive()
+	{
+		return interactive;
+	}
+
+	public void setInteractive(boolean interactive)
+	{
+		this.interactive = interactive;
+	}
+
 	public void remove(Viewable interactor)
 	{
-		interactors.remove(interactor);
+		viewables.remove(interactor);
 		interactor.removeCanvas(this);
 		
 		lock();
 		RenderSecured();
 		unlock();
 		
-		if(interactors.size() != 0)
-			setCurrentViewable(interactors.get(0));
+		if(viewables.size() != 0)
+			setCurrentViewable(viewables.get(0));
 		else
 			setCurrentViewable(null);
 	}
@@ -188,10 +208,10 @@ public class View extends Canvas {
 	public void add(Viewable interactor)
 	{
 		// If already added return
-		if(interactors.contains(interactor))
+		if(viewables.contains(interactor))
 			return;
 		
-		interactors.add(interactor);
+		viewables.add(interactor);
 		
 		interactor.addCanvas(this);
 		cameraManager.fitAll();
@@ -228,6 +248,6 @@ public class View extends Canvas {
 	
 	public List<Viewable> getViewables()
 	{
-		return interactors;
+		return viewables;
 	}
 }
