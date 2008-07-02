@@ -31,6 +31,7 @@ import vtk.vtkCamera;
 import vtk.vtkCellPicker;
 import vtk.vtkOrientationMarkerWidget;
 import vtk.vtkRenderer;
+import vtk.vtkTransform;
 
 /**
  * TODO : Integrate it directly in RubberBandHelper ?
@@ -74,7 +75,6 @@ public class CameraManager
 		}
 	}	
 	
-		
 	// Different classic cameras
 	private static final vtkCamera[] defaultCameras =
 		new vtkCamera[Orientation.values().length];
@@ -87,7 +87,7 @@ public class CameraManager
 	private boolean isVisibleRelativeAxis = true;
 	private vtkAxesActor relativeAxes;
 	private vtkOrientationMarkerWidget marker;
-	
+	private double originAxesFactor = 1. / 15.;
 	public enum Orientation
 	{
 		TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK
@@ -105,7 +105,6 @@ public class CameraManager
 		// A display orientation
 		relativeAxes = new vtkAxesActor();
 		relativeAxes.AxisLabelsOn();
-		renderer.AddActor(originAxes);
 		
 		marker = new vtkOrientationMarkerWidget();
 		marker.SetOrientationMarker(relativeAxes);
@@ -113,6 +112,9 @@ public class CameraManager
 		marker.SetInteractor(canvas.getIren());
 		marker.EnabledOn();
 		marker.InteractiveOff();
+		
+		// We connect the "RenderEvent" event to the renderEvent method of this 
+		canvas.getIren().AddObserver("RenderEvent", this, "renderEvent");
 		
 		/**
 		 * The camera orientation
@@ -146,6 +148,25 @@ public class CameraManager
 			defaultCameras[i].SetPosition(cameraOrientation[i * 2]);
 			defaultCameras[i].SetViewUp(cameraOrientation[i * 2 + 1]);
 		}
+	}
+	
+	private void renderEvent()
+	{
+		// Find the distance from the camera of the origin axes
+		vtkCamera camera = renderer.GetActiveCamera();
+		vtkTransform modelView = camera.GetViewTransformObject();
+		double[] point = modelView.TransformDoublePoint(0, 0, 0);
+		// The distance is multiplied by K
+		double zDistance = Math.abs(point[2]) * originAxesFactor;
+		
+		/*System.out.println("originAxesFactor " + originAxesFactor);
+		System.out.println("z : " + point[2]);
+		System.out.println("zDistance : " + zDistance);*/
+		
+		// If we are very close keep the original scale
+		if(zDistance < 1.)
+			zDistance = 1.;
+		originAxes.SetTotalLength(zDistance, zDistance, zDistance);
 	}
 	
 	public void setRelativeAxisVisible(boolean visibility)
@@ -193,7 +214,17 @@ public class CameraManager
 		return rep;
 	}
 
-	
+	/**
+	 * Set the factor of the size of the origin axes. When the axes is very far
+	 * it is scaled to the originAxesFactor where originAxesFactor define the size of
+	 * the actor in function of the size of the viewport. A value of 1 will make
+	 * the axes as large as the size of the viewport. By default this value is set to 1/15
+	 * @param originAxesSizeFactor
+	 */
+	public void setOriginAxesSizeFactor(double originAxesSizeFactor)
+	{
+		this.originAxesFactor = originAxesSizeFactor;
+	}
 	
 	private void refresh()
 	{
