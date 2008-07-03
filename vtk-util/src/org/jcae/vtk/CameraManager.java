@@ -171,12 +171,11 @@ public class CameraManager
 	
 	public void setRelativeAxisVisible(boolean visibility)
 	{
-		int iVisibilty = (visibility) ? 1 : 0;
 		this.isVisibleRelativeAxis = visibility;		
 		canvas.lock();
-		marker.SetEnabled(iVisibilty);
+		marker.SetEnabled(Utils.booleanToInt(visibility));
 		canvas.unlock();
-		relativeAxes.SetVisibility(iVisibilty);
+		relativeAxes.SetVisibility(Utils.booleanToInt(visibility));
 		canvas.RenderSecured();
 	}
 	

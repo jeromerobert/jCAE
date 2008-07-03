@@ -112,6 +112,16 @@ public class Utils
 		actor.GetProperty().SetOpacity((double) color.getAlpha() / 255.);
 	}
 	
+	public static boolean intToBoolean(int value)
+	{
+		return value != 0;
+	}
+	
+	public static int booleanToInt(boolean value)
+	{
+		return (value) ? 1 : 0;
+	}
+	
 	public static void vtkPropertySetColor(vtkProperty property, Color color)
 	{
 		property.SetColor((double) color.getRed() / 255., (double) color.getGreen() / 255., (double) color.getBlue() / 255.);

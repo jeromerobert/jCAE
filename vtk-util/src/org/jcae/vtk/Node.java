@@ -98,6 +98,9 @@ public class Node extends AbstractNode
 	{
 		super.setPickable(pickable);
 		
+		//if(highLighter != null)
+		//	highLighter.SetPickable(Utils.booleanToInt(pickable));
+		
 		for(AbstractNode child : children)
 		{
 			if(child instanceof Node)
@@ -500,8 +503,8 @@ public class Node extends AbstractNode
 
 				vtkPolyDataMapper mapperHighLighter = new vtkPolyDataMapper();
 				mapperHighLighter.ScalarVisibilityOff();
-				mapperHighLighter.SetResolveCoincidentTopologyToPolygonOffset();
-				mapperHighLighter.SetResolveCoincidentTopologyPolygonOffsetParameters(-Utils.getOffSetFactor(), -Utils.getOffSetValue());
+				//mapperHighLighter.SetResolveCoincidentTopologyToPolygonOffset();
+				//mapperHighLighter.SetResolveCoincidentTopologyPolygonOffsetParameters(-Utils.getOffSetFactor(), -Utils.getOffSetValue());
 				mapperHighLighter.SetInput(selectInto(data, selection.toNativeArray()));
 				highLighter.SetMapper(mapperHighLighter);
 
@@ -608,8 +611,8 @@ public class Node extends AbstractNode
 		vtkPolyDataMapper selectionMapper = new vtkPolyDataMapper();
 		selectionHighLighter.SetMapper(selectionMapper);
 		selectionMapper.ScalarVisibilityOff();
-		selectionMapper.SetResolveCoincidentTopologyToPolygonOffset();
-		selectionMapper.SetResolveCoincidentTopologyPolygonOffsetParameters(-Utils.getOffSetFactor(), -Utils.getOffSetValue());
+		//selectionMapper.SetResolveCoincidentTopologyToPolygonOffset();
+		//selectionMapper.SetResolveCoincidentTopologyPolygonOffsetParameters(-Utils.getOffSetFactor(), -Utils.getOffSetValue());
 		
 		// Compute the list of cells to be selected
 		List<LeafNode> leaves = getLeaves();

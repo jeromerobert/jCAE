@@ -165,7 +165,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 		octree.SetMapper(mapper);
 		octree.GetProperty().SetColor(0., 0., 1.);
 		octree.PickableOff();
-		octree.SetVisibility((octreeVisible) ? 1 : 0);
+		octree.SetVisibility(Utils.booleanToInt(octreeVisible));
 
 		int[] quadsLeaf = new int[5 * 6];
 
@@ -238,7 +238,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 	public void setOctreeVisible(boolean octreeVisible)
 	{
 		this.octreeVisible = octreeVisible;
-		octree.SetVisibility((octreeVisible) ? 1 : 0);
+		octree.SetVisibility(Utils.booleanToInt(octreeVisible));
 
 	}
 

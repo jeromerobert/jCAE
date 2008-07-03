@@ -48,6 +48,8 @@ import vtk.vtkPolyDataNormals;
  * to customise the nodes more you can use the VTK interface but if you merge the leafs in
  * one node and they have different materials this will cause problems... The solution to this
  * is that VTK permits to make materials data arrays like color array.
+ * The node by default take some characteristics of the parent node for example the pickability
+ * and the visibility.
  * @author Julian Ibarz
  */
 public abstract class AbstractNode {
@@ -116,12 +118,17 @@ public abstract class AbstractNode {
 			public void customiseActorHighLighted(vtkActor actor){}		
 		};
 	public static MapperCustomiser DEFAULT_MAPPER_CUSTOMISER = new MapperCustomiser(){
-		public void customiseMapper(vtkMapper mapper){}
+		public void customiseMapper(vtkMapper mapper) {
+			mapper.SetResolveCoincidentTopologyToPolygonOffset();
+			mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffSetFactor(), Utils.getOffSetValue());
+		}
 	};
 	public static MapperHighLightedCustomiser DEFAULT_MAPPER_HIGHLIGHTED_CUSTOMISER =
 		new MapperHighLightedCustomiser()
 		{
-			public void customiseMapperHighLighted(vtkMapper mapper){}
+			public void customiseMapperHighLighted(vtkMapper mapper)
+			{
+			}
 		};
 	public static ActorSelectionCustomiser DEFAULT_ACTOR_SELECTION_CUSTOMISER =
 		new ActorSelectionCustomiser(){
@@ -147,7 +154,12 @@ public abstract class AbstractNode {
 	public AbstractNode(AbstractNode parent)
 	{
 		this.parent = parent;
-		if(parent != null) parent.addChild(this);
+		if(parent != null)
+		{
+			parent.addChild(this);
+			setPickable(parent.isPickable());
+			setVisible(parent.isVisible());
+		}
 	}
 
 	public AbstractNode getRoot()
@@ -178,11 +190,19 @@ public abstract class AbstractNode {
 	{
 		this.pickable = pickable;
 		
-		int pickableNative = (pickable) ? 1 : 0;
 		if(actor != null)
-			actor.SetPickable(pickableNative);
+		{
+			actor.SetPickable(Utils.booleanToInt(pickable));
+			//if(selectionHighLighter != null)
+			//	selectionHighLighter.SetPickable(Utils.booleanToInt(pickable));
+		}
 		else if(parent != null)
 			parent.setPickable(pickable);
+	}
+
+	public boolean isPickable()
+	{
+		return pickable;
 	}
 	
 	public void removeActorListener(ActorListener listener)
@@ -380,7 +400,7 @@ public abstract class AbstractNode {
 		this.visible = visible;
 		
 		if(actor != null)
-			actor.SetVisibility((visible) ? 1 : 0);
+			actor.SetVisibility(Utils.booleanToInt(visible));
 		
 		modified();
 	}
@@ -473,10 +493,12 @@ public abstract class AbstractNode {
 			actorCreated = true;
 			//System.out.println("CREATING AN ACTOR !");
 			actor = new vtkActor();
+			getActorCustomiser().customiseActor(actor);
 			mapper = new vtkPolyDataMapper();
+			getMapperCustomiser().customiseMapper(mapper);
 			actor.SetMapper(mapper);
-			actor.SetVisibility((visible) ? 1 : 0);
-			actor.SetPickable((pickable) ? 1 : 0);
+			actor.SetVisibility(Utils.booleanToInt(visible));
+			actor.SetPickable(Utils.booleanToInt(pickable));
 		}
 		refreshMapper();
 
