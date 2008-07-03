@@ -17,7 +17,6 @@
  *
  * (C) Copyright 2008, by EADS France
  */
-
 package org.jcae.vtk;
 
 import gnu.trove.TIntArrayList;
@@ -26,9 +25,11 @@ import gnu.trove.TObjectIntHashMap;
 import java.awt.Color;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 import org.jcae.vtk.LeafNode;
 import vtk.vtkActor;
+import vtk.vtkMapper;
 import vtk.vtkPlaneCollection;
 
 /**
@@ -38,13 +39,14 @@ import vtk.vtkPlaneCollection;
  */
 public class ViewableMesh extends Viewable
 {
+
 	private boolean[] groupIsLoaded;
 	private int nbrOfGroupLoaded;
-	
 	private ViewMode viewMode = ViewMode.FILLED;
 	private ColorManager colorManager = new ColorManager();
 	private TIntObjectHashMap<LeafNode> groupIDToNode = new TIntObjectHashMap<LeafNode>();
 	private TObjectIntHashMap<LeafNode> groupNodeToID = new TObjectIntHashMap<LeafNode>();
+
 	/**
 	 * It explain how the mesh is displayed :
 	 * _ FILLED means the mesh is not in wired mode but the selection remains filled ;
@@ -52,6 +54,7 @@ public class ViewableMesh extends Viewable
 	 */
 	public enum ViewMode
 	{
+
 		FILLED,
 		WIRED
 	}
@@ -69,22 +72,59 @@ public class ViewableMesh extends Viewable
 	public ViewableMesh(Mesh mesh)
 	{
 		super(new Scene(), new Node(null));
-		
+
+		rootNode.setActorHighLightedCustomiser(new ActorHighLightedCustomiser()
+		{
+
+			@Override
+			public void customiseActorHighLighted(vtkActor actor)
+			{
+				super.customiseActorHighLighted(actor);
+				actor.GetProperty().EdgeVisibilityOn();
+			}
+		});
+		rootNode.setActorSelectionCustomiser(new ActorSelectionCustomiser()
+		{
+
+			@Override
+			public void customiseActorSelection(vtkActor actor)
+			{
+				super.customiseActorSelection(actor);
+				actor.GetProperty().EdgeVisibilityOn();
+			}
+		});
+		rootNode.setMapperCustomiser(new AbstractNode.MapperCustomiser() {
+
+			public void customiseMapper(vtkMapper mapper)
+			{
+				mapper.SetResolveCoincidentTopologyToPolygonOffset();
+				mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffSetFactor(), Utils.getOffSetValue()*2.);
+			}
+		});
+		rootNode.setMapperSelectionCustomiser(new AbstractNode.MapperSelectionCustomiser() {
+
+			public void customiseMapperSelection(vtkMapper mapper)
+			{
+				mapper.SetResolveCoincidentTopologyToPolygonOffset();
+				mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffSetFactor(), Utils.getOffSetValue());
+			}
+		});
+		setViewMode(viewMode);
 		int groupIDMax = 0;
-		for(Entry<Integer, LeafNode.DataProvider> entry : mesh.getGroupSet())
+		for (Entry<Integer, LeafNode.DataProvider> entry : mesh.getGroupSet())
 			groupIDMax = Math.max(groupIDMax, entry.getKey());
 
 		groupIsLoaded = new boolean[groupIDMax + 1];
 		int index = 0;
-		for(Entry<Integer, LeafNode.DataProvider> entry : mesh.getGroupSet())
+		for (Entry<Integer, LeafNode.DataProvider> entry : mesh.getGroupSet())
 		{
 			groupIsLoaded[entry.getKey()] = true;
 			++index;
 		}
 		nbrOfGroupLoaded = index;
-		
-		colorManager.setColor(new Color(255,0,0));
-		
+
+		colorManager.setColor(new Color(255, 0, 0));
+
 		computeNodes(mesh);
 	}
 
@@ -96,6 +136,18 @@ public class ViewableMesh extends Viewable
 	public void setViewMode(ViewMode viewMode)
 	{
 		this.viewMode = viewMode;
+		final int wired = (viewMode == ViewMode.WIRED) ? 1 : 0;
+
+		rootNode.setActorCustomiser(new AbstractNode.ActorCustomiser()
+		{
+
+			public void customiseActor(vtkActor actor)
+			{
+				actor.GetProperty().SetEdgeVisibility(wired);
+			}
+		});
+		rootNode.applyActorCustomiser();
+		render();
 	}
 
 	/**
@@ -111,11 +163,11 @@ public class ViewableMesh extends Viewable
 	private void computeNodes(Mesh mesh)
 	{
 		for (Entry<Integer, LeafNode.DataProvider> group : mesh.getGroupSet())
-		{			
-			LeafNode groupNode = new LeafNode(rootNode, group.getValue(),colorManager.getColor());
-			
+		{
+			LeafNode groupNode = new LeafNode(rootNode, group.getValue(), colorManager.getColor());
+
 			groupNode.setManager(true);
-			
+
 			groupIDToNode.put(group.getKey(), groupNode);
 			groupNodeToID.put(groupNode, group.getKey());
 		}
@@ -130,14 +182,14 @@ public class ViewableMesh extends Viewable
 	public int[] getSelection()
 	{
 		int[] selectionGroups = new int[selectionNode.size()];
-		
+
 		Iterator<LeafNode> iter = selectionNode.iterator();
-		for(int i = 0 ; i < selectionGroups.length ; ++i)
+		for (int i = 0; i < selectionGroups.length; ++i)
 		{
 			LeafNode leaf = iter.next();
 			selectionGroups[i] = groupNodeToID.get(leaf);
 		}
-		
+
 		return selectionGroups;
 	}
 

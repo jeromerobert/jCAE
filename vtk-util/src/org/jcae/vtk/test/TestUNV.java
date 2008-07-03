@@ -71,6 +71,9 @@ public class TestUNV implements SelectionListener, KeyListener
 			case KeyEvent.VK_F:
 				viewable.setSelectionType(Viewable.SelectionType.CELL);
 				break;
+			case KeyEvent.VK_A:
+				viewable.setAppendSelection(!viewable.getAppendSelection());
+				break;
 			case KeyEvent.VK_V:
 				viewable.setSelectionType(Viewable.SelectionType.POINT);
 				canvas.lock();
@@ -78,10 +81,10 @@ public class TestUNV implements SelectionListener, KeyListener
 				canvas.unlock();
 				break;
 				case KeyEvent.VK_O:
-					//viewable.hideMesh();
+					viewable.setViewMode(ViewableMesh.ViewMode.FILLED);
 					break;
 			case KeyEvent.VK_I:
-				//viewable.hideGroup();
+					viewable.setViewMode(ViewableMesh.ViewMode.WIRED);
 				break;
 				
 		}

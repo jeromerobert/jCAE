@@ -264,7 +264,8 @@ public class LeafNode extends AbstractNode
 	{
 		if (actor != null)
 		{
-			Utils.setColorActor(actor, color);
+			Utils.vtkPropertySetColor(actor.GetProperty(), color);
+			getActorCustomiser().customiseActor(actor);
 		}
 	}
 
@@ -276,7 +277,7 @@ public class LeafNode extends AbstractNode
 		this.color = color;
 		
 		if(actor != null)
-			Utils.setColorActor(actor, color);
+			Utils.vtkPropertySetColor(actor.GetProperty(), color);
 		else
 			modified();
 	}
@@ -313,6 +314,20 @@ public class LeafNode extends AbstractNode
 	protected vtkPolyData getData()
 	{
 		return data;
+	}
+
+	@Override
+	public void applyActorHighLightedCustomiser()
+	{
+		if(isSelected() && actor != null)
+			getActorHighLightedCustomiser().customiseActorHighLighted(actor);
+	}
+
+	@Override
+	public void applyMapperHighLightedCustomiser()
+	{
+		if(isSelected() && mapper != null)
+			getMapperHighLightedCustomiser().customiseMapperHighLighted(mapper);
 	}
 	
 	@Override
@@ -362,8 +377,9 @@ public class LeafNode extends AbstractNode
 			fireActorHighLighted(selectionHighLighter);
 		}
 
-		vtkPolyDataMapper mapper = new vtkPolyDataMapper();
-		selectionHighLighter.SetMapper(mapper);
+		selectionHighLighterMapper = new vtkPolyDataMapper();
+		selectionHighLighter.SetMapper(selectionHighLighterMapper);
+		getMapperSelectionCustomiser().customiseMapperSelection(selectionHighLighterMapper);
 
 		vtkSelection sel = new vtkSelection();
 		//sel.ReleaseDataFlagOn();
@@ -385,12 +401,12 @@ public class LeafNode extends AbstractNode
 
 		//System.out.println("Number of triangles selected : " + dataFiltered.GetNumberOfCells());
 
-		mapper.SetInput(dataFiltered);
+		selectionHighLighterMapper.SetInput(dataFiltered);
 		
-		getMapperSelectionCustomiser().customiseMapperSelection(mapper);
+		getMapperSelectionCustomiser().customiseMapperSelection(selectionHighLighterMapper);
 	}
 
-	public void unSelectAll()
+	public void unSelectCells()
 	{
 		selection.reset();
 	}

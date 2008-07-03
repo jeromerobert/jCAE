@@ -309,7 +309,7 @@
                 <attr name="position" intvalue="300"/>
             </file>
                 </folder>
-        <folder name="Mesh">
+        <folder name="ShapeTypeMesh">
             <attr name="position" intvalue="212"/>
             <file name="org-jcae-netbeans-viewer3d-actions-MeshFaceSelection.shadow">
                 <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-MeshFaceSelection.instance"/>

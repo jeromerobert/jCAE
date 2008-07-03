@@ -93,11 +93,18 @@ public class Scene implements AbstractNode.ActorListener
 		// Do nothing
 	}
 
-	public void setPickable(boolean pickable)
+	private AbstractNode[] getNodes()
 	{
 		AbstractNode[] nodes = new AbstractNode[idActorToNode.size()];
 		idActorToNode.getValues(nodes);
-
+		
+		return nodes;
+	}
+	
+	public void setPickable(boolean pickable)
+	{
+		AbstractNode[] nodes = getNodes();
+		
 		if (pickable)
 			for (AbstractNode node : nodes)
 			{

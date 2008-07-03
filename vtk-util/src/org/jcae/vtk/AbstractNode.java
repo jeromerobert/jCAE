@@ -50,6 +50,8 @@ import vtk.vtkPolyDataNormals;
  * is that VTK permits to make materials data arrays like color array.
  * The node by default take some characteristics of the parent node for example the pickability
  * and the visibility.
+ * When applying a customiser the actor customisation is refreshed and if we are in a Node,
+ * all the children inherit it.
  * @author Julian Ibarz
  */
 public abstract class AbstractNode {
@@ -71,6 +73,7 @@ public abstract class AbstractNode {
 	protected boolean selected;
 	
 	protected vtkActor selectionHighLighter = null;
+	protected vtkPolyDataMapper selectionHighLighterMapper = null;
 	protected boolean pickable = true;
 	
 	public static interface ActorListener
@@ -301,7 +304,32 @@ public abstract class AbstractNode {
 		this.mapperSelectionCustomiser = mapperSelectionCustomiser;
 	}
 
+	public void applyActorCustomiser()
+	{
+		if(!isSelected() && actor != null)
+			getActorCustomiser().customiseActor(actor);
+	}
+	public void applyMapperCustomiser()
+	{
+		if(!isSelected() && mapper != null)
+			getMapperCustomiser().customiseMapper(mapper);
+	}
 	
+	public abstract void applyActorHighLightedCustomiser();
+	
+	public abstract void applyMapperHighLightedCustomiser();
+	
+	public void applyActorSelectionCustomiser()
+	{
+		if(selectionHighLighter != null)
+			getActorSelectionCustomiser().customiseActorSelection(selectionHighLighter);
+	}
+	
+	public void applyMapperSelectionCustomiser()
+	{
+		if(selectionHighLighterMapper != null)
+			getMapperSelectionCustomiser().customiseMapperSelection(selectionHighLighterMapper);
+	}
 	
 	public ActorCustomiser getActorCustomiser()
 	{
@@ -473,6 +501,7 @@ public abstract class AbstractNode {
 		
 		fireActorDeleted(selectionHighLighter);
 		selectionHighLighter = null;
+		selectionHighLighterMapper = null;
 	}
 	protected void refreshMapper()
 	{

@@ -266,7 +266,7 @@ public class ViewableCAD extends Viewable
 	}
 
 	@Override
-	public void unSelectAll()
+	public void unSelectCells()
 	{
 		selection = Collections.EMPTY_LIST;
 	}*/

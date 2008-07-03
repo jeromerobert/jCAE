@@ -52,6 +52,7 @@ public class Node extends AbstractNode
 	private int nbrOfPolys;
 	private vtkLookupTable table = null;
 	private vtkActor highLighter = null;
+	private vtkPolyDataMapper highLighterMapper = null;
 	private ArrayList<ChildCreationListener> childCreationListeners = new ArrayList<ChildCreationListener>();
 
 	public Node(AbstractNode parent)
@@ -411,6 +412,7 @@ public class Node extends AbstractNode
 		{
 			fireActorDeleted(highLighter);
 			highLighter = null;
+			highLighterMapper = null;
 		}
 	}
 
@@ -439,8 +441,81 @@ public class Node extends AbstractNode
 		super.unHighLight();
 	}
 
+	@Override
+	public void applyActorCustomiser()
+	{
+		if(isManager())
+			super.applyActorCustomiser();
+		
+		for(AbstractNode child : children)
+		{
+			child.setActorCustomiser(actorCustomiser);
+			child.applyActorCustomiser();
+		}
+	}
+
+	@Override
+	public void applyActorSelectionCustomiser()
+	{
+		if(isManager())
+			super.applyActorSelectionCustomiser();
+		for(AbstractNode child : children)
+		{
+			child.setActorSelectionCustomiser(actorSelectionCustomiser);
+			child.applyActorSelectionCustomiser();
+		}
+	}
+
+	@Override
+	public void applyMapperCustomiser()
+	{
+		if(isManager())
+			super.applyMapperCustomiser();
+		for(AbstractNode child : children)
+		{
+			child.setMapperCustomiser(mapperCustomiser);
+			child.applyMapperCustomiser();
+		}
+	}
+
+	@Override
+	public void applyMapperSelectionCustomiser()
+	{
+		if(isManager())
+			super.applyMapperSelectionCustomiser();
+		for(AbstractNode child : children)
+		{
+			child.setMapperSelectionCustomiser(mapperSelectionCustomiser);
+			child.applyMapperSelectionCustomiser();
+		}
+	}
+
 	
 	
+	@Override
+	public void applyActorHighLightedCustomiser()
+	{
+		if(highLighter != null)
+			getActorHighLightedCustomiser().customiseActorHighLighted(highLighter);
+		for(AbstractNode child : children)
+		{
+			child.setActorHighLightedCustomiser(actorHighLightedCustomiser);
+			child.applyActorHighLightedCustomiser();
+		}
+	}
+
+	@Override
+	public void applyMapperHighLightedCustomiser()
+	{
+		if(highLighterMapper != null)
+			getMapperHighLightedCustomiser().customiseMapperHighLighted(highLighterMapper);
+		for(AbstractNode child : children)
+		{
+			child.setMapperHighLightedCustomiser(mapperHighLightedCustomiser);
+			child.applyMapperHighLightedCustomiser();
+		}
+	}
+
 	protected void manageHighLight()
 	{
 		// Make sure the leaves are refreshed...
@@ -501,14 +576,14 @@ public class Node extends AbstractNode
 					getActorHighLightedCustomiser().customiseActorHighLighted(highLighter);
 				}
 
-				vtkPolyDataMapper mapperHighLighter = new vtkPolyDataMapper();
-				mapperHighLighter.ScalarVisibilityOff();
-				//mapperHighLighter.SetResolveCoincidentTopologyToPolygonOffset();
-				//mapperHighLighter.SetResolveCoincidentTopologyPolygonOffsetParameters(-Utils.getOffSetFactor(), -Utils.getOffSetValue());
-				mapperHighLighter.SetInput(selectInto(data, selection.toNativeArray()));
-				highLighter.SetMapper(mapperHighLighter);
+				highLighterMapper = new vtkPolyDataMapper();
+				highLighterMapper.ScalarVisibilityOff();
+				//highLighterMapper.SetResolveCoincidentTopologyToPolygonOffset();
+				//highLighterMapper.SetResolveCoincidentTopologyPolygonOffsetParameters(-Utils.getOffSetFactor(), -Utils.getOffSetValue());
+				highLighterMapper.SetInput(selectInto(data, selection.toNativeArray()));
+				highLighter.SetMapper(highLighterMapper);
 
-				getMapperHighLightedCustomiser().customiseMapperHighLighted(mapperHighLighter);
+				getMapperHighLightedCustomiser().customiseMapperHighLighted(highLighterMapper);
 				
 				if (actorCreated)
 				{
@@ -608,11 +683,11 @@ public class Node extends AbstractNode
 			getActorSelectionCustomiser().customiseActorSelection(selectionHighLighter);
 		}
 
-		vtkPolyDataMapper selectionMapper = new vtkPolyDataMapper();
-		selectionHighLighter.SetMapper(selectionMapper);
-		selectionMapper.ScalarVisibilityOff();
-		//selectionMapper.SetResolveCoincidentTopologyToPolygonOffset();
-		//selectionMapper.SetResolveCoincidentTopologyPolygonOffsetParameters(-Utils.getOffSetFactor(), -Utils.getOffSetValue());
+		selectionHighLighterMapper = new vtkPolyDataMapper();
+		selectionHighLighter.SetMapper(selectionHighLighterMapper);
+		selectionHighLighterMapper.ScalarVisibilityOff();
+		//selectionHighLighterMapper.SetResolveCoincidentTopologyToPolygonOffset();
+		//selectionHighLighterMapper.SetResolveCoincidentTopologyPolygonOffsetParameters(-Utils.getOffSetFactor(), -Utils.getOffSetValue());
 		
 		// Compute the list of cells to be selected
 		List<LeafNode> leaves = getLeaves();
@@ -637,9 +712,9 @@ public class Node extends AbstractNode
 			return;
 		}
 
-		selectionMapper.SetInput(selectInto(data, selection.toNativeArray()));
+		selectionHighLighterMapper.SetInput(selectInto(data, selection.toNativeArray()));
 		
-		getMapperSelectionCustomiser().customiseMapperSelection(selectionMapper);
+		getMapperSelectionCustomiser().customiseMapperSelection(selectionHighLighterMapper);
 		
 		if(actorCreated)
 		{

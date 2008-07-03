@@ -43,10 +43,6 @@ public class View extends Canvas {
 	private MouseMode mouseMode = MouseMode.POINT_SELECTION;
 	private Point pressPosition = null;
 	private Point releasePosition = null;
-	private vtkInteractorStyle pickStyle =
-			new vtkInteractorStyleTrackballCamera();
-	private final vtkInteractorStyleRubberBand3D rectangleStyle =
-			new vtkInteractorStyleRubberBand3D();
 	private boolean interactive = true;
 	
 	public enum MouseMode
@@ -189,9 +185,15 @@ public class View extends Canvas {
 				mode == MouseMode.CHANGE_ROTATION_CENTER;
 
 		if (actualIsPoint && !futureIsPoint)
-			getIren().SetInteractorStyle(rectangleStyle);
+		{
+			//getIren().GetInteractorStyle().EnabledOff();
+			getIren().SetInteractorStyle(new vtkInteractorStyleRubberBand3D());
+		}
 		else if (!actualIsPoint && futureIsPoint)
-			getIren().SetInteractorStyle(pickStyle);
+		{
+			//getIren().GetInteractorStyle().EnabledOff();
+			getIren().SetInteractorStyle(new vtkInteractorStyleTrackballCamera());
+		}
 
 		this.mouseMode = mode;
 	}

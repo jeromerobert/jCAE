@@ -39,7 +39,7 @@ public class UNVToMesh
 		GroupData(float[] nodes, int[] indices, int nbrOfCells)
 		{
 			setNodes(nodes);
-			setPolys(nbrOfPolys, indices);
+			setPolys(nbrOfCells, indices);
 		}
 		
 		@Override
