@@ -21,6 +21,7 @@
 package org.jcae.netbeans.viewer3d;
 
 import java.util.HashMap;
+import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
 
 /**
@@ -83,9 +84,9 @@ public class SelectionManager {
 	{
 		this.appendSelection = appendSelection;
 		
-		for(Viewable interactor : interactors.keySet())
+		for(View view : ViewManager.getDefault().getAllView())
 		{
-			interactor.setAppendSelection(appendSelection);
+			view.setAppendSelection(appendSelection);
 		}
 	}
 	
