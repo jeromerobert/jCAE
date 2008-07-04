@@ -44,6 +44,7 @@ public class View extends Canvas {
 	private Point pressPosition = null;
 	private Point releasePosition = null;
 	private boolean interactive = true;
+	private boolean appendSelection = false;
 	
 	public enum MouseMode
 	{
@@ -144,6 +145,19 @@ public class View extends Canvas {
 				cameraManager.centerRotationSelection(releasePosition);
 		}
 	}
+
+	public boolean isAppendSelection()
+	{
+		return appendSelection;
+	}
+
+	public void setAppendSelection(boolean appendSelection)
+	{
+		this.appendSelection = appendSelection;
+		
+		for(Viewable viewable : viewables)
+			viewable.setAppendSelection(appendSelection);
+	}
 	
 	public CameraManager getCameraManager()
 	{
@@ -215,6 +229,7 @@ public class View extends Canvas {
 		
 		viewables.add(interactor);
 		
+		interactor.setAppendSelection(appendSelection);
 		interactor.addCanvas(this);
 		cameraManager.fitAll();
 		// Set it the current viewable
