@@ -1,0 +1,31 @@
+commit 02f0ecb520569fbacdb723d8c0a3c518c22a1dda
+Author: Dave Demarle <dave.demarle@kitware.com>
+Date:   Wed Jun 25 14:06:35 2008 +0000
+
+    BUG: Don't clear z buffer during an area pick for consistancy with point pick. See bug 7236. Thanks: Julian Ibarz for the patch.
+
+diff --git a/Rendering/vtkOpenGLRenderWindow.cxx b/Rendering/vtkOpenGLRenderWindow.cxx
+index 590fea3..08ac598 100644
+--- a/Rendering/vtkOpenGLRenderWindow.cxx
++++ b/Rendering/vtkOpenGLRenderWindow.cxx
+@@ -1247,6 +1247,9 @@ int vtkOpenGLRenderWindow::SetRGBACharPixelData(int x1, int y1, int x2,
+   glMatrixMode( GL_MODELVIEW );
+   glPopMatrix();
+ 
++  // Disable writing on the z-buffer.
++  glDepthMask(GL_FALSE);
++  glDisable(GL_DEPTH_TEST);
+ 
+   glDisable( GL_SCISSOR_TEST );
+   
+@@ -1267,6 +1270,10 @@ int vtkOpenGLRenderWindow::SetRGBACharPixelData(int x1, int y1, int x2,
+                   data);
+     }
+ 
++  // Renenable writing on the z-buffer.
++  glDepthMask(GL_TRUE);
++  glEnable(GL_DEPTH_TEST);
++
+   // This seems to be necessary for the image to show up
+   glFlush();  
+ 
