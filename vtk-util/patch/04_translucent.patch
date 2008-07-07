@@ -1,35 +1,42 @@
-This patch permits to pick translucent objects.
-
-Index: Rendering/vtkRenderer.cxx
-===================================================================
-RCS file: /cvsroot/VTK/VTK/Rendering/vtkRenderer.cxx,v
-retrieving revision 1.240
-diff -u -r1.240 vtkRenderer.cxx
---- Rendering/vtkRenderer.cxx	16 Apr 2008 18:46:05 -0000	1.240
-+++ Rendering/vtkRenderer.cxx	13 Jun 2008 12:45:18 -0000
-@@ -1758,6 +1758,21 @@
-       //should never get here
+diff --git a/Rendering/vtkRenderer.cxx b/Rendering/vtkRenderer.cxx
+index cab64f5..047165f 100644
+--- a/Rendering/vtkRenderer.cxx
++++ b/Rendering/vtkRenderer.cxx
+@@ -117,6 +117,7 @@ vtkRenderer::vtkRenderer()
+   this->OcclusionRatio=0.0;
+   this->MaximumNumberOfPeels=4;
+   this->LastRenderingUsedDepthPeeling=0;
++  this->PickTranslucent=0;
+ }
+ 
+ vtkRenderer::~vtkRenderer()
+@@ -1759,6 +1760,25 @@ int vtkRenderer::UpdateGeometryForSelection()
        return 0; 
      }        
+ 
 +  // Check if there is translucent geometry
 +  // do the render library specific stuff about translucent polygonal geometry.
 +  // As it can be expensive, do a quick check if we can skip this step
 +  int hasTranslucentPolygonalGeometry=0;
-+  for ( i = 0; !hasTranslucentPolygonalGeometry && i < this->PropArrayCount;
-+        i++ )
-+    { 
-+    hasTranslucentPolygonalGeometry=
-+      this->PropArray[i]->HasTranslucentPolygonalGeometry();
-+    }
-+  // Have to be set before a call to UpdateTranslucentPolygonalGeometry()
-+  // because UpdateTranslucentPolygonalGeometry() will eventually call
-+  // vtkOpenGLActor::Render() that uses this flag.
-+  if(hasTranslucentPolygonalGeometry)
-+    this->LastRenderingUsedDepthPeeling=0;
- 
++  if(PickTranslucent)
++  {
++    for ( i = 0; !hasTranslucentPolygonalGeometry && i < this->PropArrayCount;
++          i++ )
++      { 
++      hasTranslucentPolygonalGeometry=
++        this->PropArray[i]->HasTranslucentPolygonalGeometry();
++      }
++    // Have to be set before a call to UpdateTranslucentPolygonalGeometry()
++    // because UpdateTranslucentPolygonalGeometry() will eventually call
++    // vtkOpenGLActor::Render() that uses this flag.
++    if(hasTranslucentPolygonalGeometry)
++      this->LastRenderingUsedDepthPeeling=0;
++  }
++
    // loop through props and give them a chance to 
    // render themselves as opaque geometry
-@@ -1786,6 +1801,8 @@
+   for ( i = 0; i < this->PropArrayCount; i++ )
+@@ -1786,6 +1806,8 @@ int vtkRenderer::UpdateGeometryForSelection()
        {
        this->NumberOfPropsRendered += 
          this->PropArray[i]->RenderOpaqueGeometry(this);
@@ -38,3 +45,30 @@ diff -u -r1.240 vtkRenderer.cxx
        }
  
      //restore the prop's original settings
+diff --git a/Rendering/vtkRenderer.h b/Rendering/vtkRenderer.h
+index 9bcf0ae..3540c89 100644
+--- a/Rendering/vtkRenderer.h
++++ b/Rendering/vtkRenderer.h
+@@ -425,6 +425,12 @@ public:
+   // actually used depth peeling.
+   // Initial value is false.
+   vtkGetMacro(LastRenderingUsedDepthPeeling,int);
++
++  // Description:
++  // Turn on/off the selection of translucents actors.
++  vtkSetMacro(PickTranslucent,int);
++  vtkGetMacro(PickTranslucent,int);
++  vtkBooleanMacro(PickTranslucent,int);
+   
+ protected:
+   vtkRenderer();
+@@ -571,6 +577,9 @@ protected:
+   // actually used depth peeling.
+   // Initial value is false.
+   int LastRenderingUsedDepthPeeling;
++
++  // Tells if the translucent actors can be picked.
++  int PickTranslucent;
+   
+   // VISIBLE CELL SELECTION ----------------------------------------
+   //BTX  

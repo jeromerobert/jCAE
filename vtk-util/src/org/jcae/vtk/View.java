@@ -57,6 +57,9 @@ public class View extends Canvas {
 	public View()
 	{
 		super();
+		
+		// By default the translucent objects can be picked
+		GetRenderer().PickTranslucentOn();
 	}
 
 	@Override
