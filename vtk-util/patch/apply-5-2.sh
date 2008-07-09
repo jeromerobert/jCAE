@@ -3,13 +3,13 @@
 
 scriptDir=$(dirname $0)
 echo "Applying depth patch"
-patch -p0 < $scriptDir/01_depth.patch
+patch -p1 < $scriptDir/01_depth.patch
 echo "Applying display list patch"
 patch -p0 < $scriptDir/02_displayList.patch
 echo "Applying offset patch"
 patch -p0 < $scriptDir/03_offset.patch
 echo "Applying translucent patch"
-patch -p0 < $scriptDir/04_translucent.patch
+patch -p1 < $scriptDir/04_translucent.patch
 echo "Applying underscore patch"
 patch -p0 < $scriptDir/05_underscore.patch
 echo "Applying warning patch"
