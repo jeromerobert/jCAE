@@ -15,4 +15,4 @@ patch -p0 < $scriptDir/05_underscore.patch
 echo "Applying warning patch"
 patch -p0 < $scriptDir/06_warning.patch
 echo "Applying zbuffer patch"
-patch -p1 < $scriptDir/07_warning.patch
+patch -p1 < $scriptDir/07_zbuffer.patch
