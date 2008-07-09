@@ -39,8 +39,8 @@ public  class ViewBehavior extends OrbitBehavior
 	private final static Logger LOGGER=
 		Logger.getLogger(ViewBehavior.class.getName());
 	/** For debugging (display the selection polytope) */
-	private final static boolean DEBUG_SEL_POLYTOPE =
-		Boolean.getBoolean("org.jcae.viewer3d.showPolytope");
+	private final static boolean DEBUG_SEL_POLYTOPE = true;
+		//Boolean.getBoolean("org.jcae.viewer3d.showPolytope");
 
 	// dirty workaround for bug
 	// https://java3d.dev.java.net/issues/show_bug.cgi?id=179
@@ -244,8 +244,8 @@ public  class ViewBehavior extends OrbitBehavior
 			if (evt.getButton() == MouseEvent.BUTTON1
 					&& evt.getID() == MouseEvent.MOUSE_RELEASED)
 			{
-				endRectangleDrawing(evt);
 				pickRectangle(evt);
+				endRectangleDrawing(evt);
 			} else
 			{
 				selectionRectangle3D.setGeometry(anchor, evt.getPoint());
@@ -263,6 +263,7 @@ public  class ViewBehavior extends OrbitBehavior
 		// for clipBox
 		cancelClipBox();
 		mouseMode=DEFAULT_MODE;
+		endRectangleDrawing(null);
 		
 		view.println("> Default mode");
 	}
