@@ -52,6 +52,13 @@
  %}
 class XSControl_Reader
 {
+	%javamethodmodifiers ReadFile(const Standard_CString filename)"
+	/**
+	 * @deprecated May segfault if path name include none-ASCII caracters. Use
+	 * readFile(stringPath.getBytes()) instead.
+	 */
+	public";
+
 	XSControl_Reader()=0;
 	%rename(readFile) ReadFile;
 	%rename(transferRoots) TransferRoots;
