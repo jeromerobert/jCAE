@@ -46,6 +46,8 @@ public class ViewShapeCookie implements ViewCookie
 		// TODO PLACE IT
 		NbShape root = GeomUtils.getShape(node).getRootShape();
 
+		// Force garbage collection to be sure the weak reference is cleared if needed
+		System.gc();
 		ViewableCAD viewable = viewableRef.get();		
 		if(viewable == null)
 		{

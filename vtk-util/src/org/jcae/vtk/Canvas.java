@@ -53,8 +53,8 @@ public class Canvas extends vtkCanvas
 		@Override
 		public void run()
 		{
-			/*System.gc();
-			System.out.println("GC ! NUMBER OF VTK OBJECTS : " + vtkGlobalJavaHash.PointerToReference.size());
+			System.gc();
+			/*System.out.println("GC ! NUMBER OF VTK OBJECTS : " + vtkGlobalJavaHash.PointerToReference.size());
 			Map map = vtkGlobalJavaHash.PointerToReference;
 
 			TObjectIntHashMap<String> mapper = new TObjectIntHashMap<String>();
