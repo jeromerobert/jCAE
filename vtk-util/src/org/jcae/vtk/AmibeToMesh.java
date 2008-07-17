@@ -42,7 +42,6 @@ public class AmibeToMesh
 	private static class GroupData extends LeafNode.DataProvider {
 		private final AmibeProvider provider;
 		private final int id;
-		private AmibeDomain domain = null;
 		
 		GroupData(AmibeProvider provider, int id)
 		{
@@ -53,8 +52,9 @@ public class AmibeToMesh
 		@Override
 		public void load()
 		{
+			AmibeDomain domain = null;
 			try {
-			domain = new AmibeDomain(provider.getDirectory(), provider.getDocument(), id, Color.BLACK);
+			domain = new AmibeDomain(provider.getDirectory(), provider.getDocument(), id/*, Color.BLACK*/);
 			}
 			catch(IOException e)
 			{
@@ -62,43 +62,11 @@ public class AmibeToMesh
 					" from file " + provider.getDocument().getDocumentURI()
 					+ e.getLocalizedMessage());
 			}
+			// Nodes
+			super.setNodes(domain.getNodes());
 			
+			// Polys
 			nbrOfPolys = domain.getTria3().length / 3 + domain.getQuad4().length / 4;
-		}
-
-		public float[] getNormals()
-		{
-			return null;
-		}
-		
-		public float[] getNodes()
-		{
-			assert domain != null;
-			
-			float[] temp = super.getNodes();
-			if(temp == null || temp.length == 0)
-				super.setNodes(domain.getNodes());
-			
-			return super.getNodes();
-		}
-
-		@Override
-		public int[] getLines()
-		{
-			return new int[0];
-		}
-
-		@Override
-		public int[] getVertice()
-		{
-			return new int[0];
-		}
-		
-		
-		public int[] getPolys()
-		{
-			assert domain != null;
-			
 			int[] quads = domain.getQuad4();
 			int[] triangles = domain.getTria3();
 			
@@ -121,14 +89,6 @@ public class AmibeToMesh
 				indices[offSet++] = triangles[i++];
 				indices[offSet++] = triangles[i++];
 			}
-			
-			return indices;
-		}
-		
-		@Override
-		public void unLoad()
-		{
-			domain = null;
 		}
 	}
 	

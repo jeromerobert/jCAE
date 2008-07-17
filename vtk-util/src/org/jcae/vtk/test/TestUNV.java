@@ -26,6 +26,7 @@ import java.util.Collections;
 import javax.swing.JFrame;
 import org.jcae.vtk.Canvas;
 import org.jcae.vtk.SelectionListener;
+import org.jcae.vtk.UNVToMesh;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
 import org.jcae.vtk.ViewableMesh;
@@ -98,7 +99,7 @@ public class TestUNV implements SelectionListener, KeyListener
 		View canvas = new View();
 		frame.add(canvas, BorderLayout.CENTER);
 		vtkRenderer renderer = canvas.GetRenderer();
-		ViewableMesh rbh = new ViewableMesh(args[0], Collections.EMPTY_LIST);
+		ViewableMesh rbh = new ViewableMesh(new UNVToMesh(args[0], Collections.EMPTY_LIST).getMesh());
 		canvas.add(rbh);
 		frame.setSize(800, 600);
 		TestUNV test = new TestUNV(rbh);

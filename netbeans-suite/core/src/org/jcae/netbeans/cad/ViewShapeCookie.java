@@ -46,8 +46,6 @@ public class ViewShapeCookie implements ViewCookie
 		// TODO PLACE IT
 		NbShape root = GeomUtils.getShape(node).getRootShape();
 
-		// Force garbage collection to be sure the weak reference is cleared if needed
-		System.gc();
 		ViewableCAD viewable = viewableRef.get();		
 		if(viewable == null)
 		{
@@ -56,16 +54,7 @@ public class ViewShapeCookie implements ViewCookie
 			viewable.setName(node.getName());
 			
 			SelectionManager.getDefault().addInteractor(viewable, root);
-
-			// Create a CAOSelection ?
-			/*if (SelectionManager.getDefault().getEntitySelection(root) == null)
-			{
-				CADSelection caoSelection = new CADSelection(root);
-				SelectionManager.getDefault().addEntitySelection(
-						root, caoSelection);
-			}*/
-			
-			v.add(viewable);
 		}
+		v.add(viewable);
 	}
 }

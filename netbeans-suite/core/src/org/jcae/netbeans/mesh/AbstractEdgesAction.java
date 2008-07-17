@@ -1,15 +1,19 @@
 package org.jcae.netbeans.mesh;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 import org.jcae.mesh.xmldata.ComputeEdgesConnectivity;
 import org.jcae.netbeans.Utilities;
+import org.jcae.netbeans.viewer3d.SelectionManager;
 import org.jcae.netbeans.viewer3d.ViewManager;
-import org.jcae.viewer3d.View;
-import org.jcae.viewer3d.fe.ViewableFE;
-import org.jcae.viewer3d.fe.amibe.AmibeOverlayProvider;
+import org.jcae.vtk.AmibeOverlayProvider;
+import org.jcae.vtk.AmibeOverlayToMesh;
+import org.jcae.vtk.ColorManager;
+import org.jcae.vtk.View;
+import org.jcae.vtk.ViewableMesh;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
@@ -41,15 +45,34 @@ public abstract class AbstractEdgesAction extends CookieAction
 
 			computeEdgesConnectivity.compute();	
 			
-			throw new RuntimeException("J3D possibilty not yet implemented");
+			View view = ViewManager.getDefault().getCurrentView();
+			ViewableMesh mesh = new ViewableMesh(new AmibeOverlayToMesh(new AmibeOverlayProvider(new File(xmlDir), getBranchGroupLabel())).getMesh(), new ColorManager() {
+				String beanType = getBranchGroupLabel();
+				public void setColor(Color color)
+				{
+					// Do nothing
+				}
+
+				public Color getColor()
+				{
+					if(beanType.equals(AmibeOverlayProvider.FREE_EDGE))
+						return AmibeOverlayProvider.FREE_EDGE_COLOR;
+					else
+						return AmibeOverlayProvider.MULTI_EDGE_COLOR;
+				}
+			});
+			mesh.setName(activatedNodes[0].getName()+" "+getViewSuffix());
+			view.add(mesh);
 			
-				/*View bgView=ViewManager.getDefault().getView3D().getViewJ3D();			
+//			SelectionManager.getDefault().addInteractor(mesh, ac);
+			
+			/*				View bgView=ViewManager.getDefault().getView3D().getViewJ3D();			
 				ViewableFE fe1 = new ViewableFE(
 					new AmibeOverlayProvider(new File(xmlDir), getBranchGroupLabel()));
 				fe1.setName(activatedNodes[0].getName()+" "+getViewSuffix());
 				bgView.add(fe1);			
-				bgView.setCurrentViewable(fe1);*/
-			
+				bgView.setCurrentViewable(fe1);
+			*/
 		}
 		catch (XPathExpressionException ex)
 		{
@@ -86,6 +109,7 @@ public abstract class AbstractEdgesAction extends CookieAction
 		};
 	}
 	
+	@Override
 	protected void initialize()
 	{
 		super.initialize();
@@ -98,6 +122,7 @@ public abstract class AbstractEdgesAction extends CookieAction
 		return HelpCtx.DEFAULT_HELP;
 	}
 	
+	@Override
 	protected boolean asynchronous()
 	{
 		return false;

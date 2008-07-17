@@ -32,28 +32,27 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * A FEProvider which get data from the XML/binaries file of the amibe mesher
- * @author Jerome Robert
- * @todo implements, add constructors...
+ * @author Jerome Robert, Julian Ibarz
  */
 public class AmibeProvider
 {	
 	private File directory;
 	private Document document;
-	private int[] groupsID=new int[0];
-	private long lastUpdateTime;
 	private File jcae3d;
+	
 	public static Document parseXML(File file)
 		throws ParserConfigurationException, SAXException, IOException
 	{
 		DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
-		//factory.setValidating(true);
 		DocumentBuilder builder=factory.newDocumentBuilder();
+		
 		builder.setEntityResolver(new ClassPathEntityResolver());
 		Document document=builder.parse(file);
 		document.normalize();
+		
 		return document;
 	}
+	
 	/**
 	 * @param directory The directory containing the jcae3d file
 	 * @throws IOException
@@ -64,43 +63,7 @@ public class AmibeProvider
 	{
 		this.directory=directory;
 		jcae3d = new File(directory, "jcae3d");
-		load();
-	}
-	
-	private void load() throws ParserConfigurationException, SAXException, IOException
-	{				
-		lastUpdateTime=jcae3d.lastModified();
 		document = parseXML(jcae3d);
-		Element xmlGroups = (Element) document.getElementsByTagName(
-			"groups").item(0);
-		NodeList nodeList=xmlGroups.getElementsByTagName("group");
-		groupsID=new int[nodeList.getLength()];
-		for(int i=0; i<groupsID.length; i++)
-		{
-			Element e=(Element) nodeList.item(i);
-			groupsID[i]=Integer.parseInt(e.getAttribute("id"));
-		}
-	}
-	/* (non-Javadoc)
-	 * @see jcae.viewer3d.DomainProvider#getDomainIDs()
-	 */
-	public int[] getDomainIDs()
-	{
-		try
-		{
-			if(jcae3d.lastModified()!=lastUpdateTime)
-				load();
-		}catch(ParserConfigurationException ex)
-		{
-			ex.printStackTrace();
-		} catch (SAXException e)
-		{
-			e.printStackTrace();
-		} catch (IOException e)
-		{ 
-			e.printStackTrace();
-		}
-		return groupsID;
 	}
 	
 	public Document getDocument()

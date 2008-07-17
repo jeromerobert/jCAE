@@ -29,6 +29,7 @@ import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
 import org.jcae.vtk.ViewableCAD;
 import org.jcae.vtk.ViewableMesh;
+import org.jcae.vtk.ViewableOEMM;
 
 /**
  * Patterns : Singleton
@@ -123,6 +124,8 @@ public class SelectionManager {
 			else
 				throw new IllegalArgumentException("The entity associated with a ViewableMesh has to be a Groups");
 		}
+		else if(viewable instanceof ViewableOEMM)
+			return null;
 		else
 			throw new IllegalArgumentException("The type of the viewable is unknown !");
 	}

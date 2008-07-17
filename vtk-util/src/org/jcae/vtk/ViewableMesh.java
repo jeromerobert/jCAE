@@ -42,7 +42,7 @@ public class ViewableMesh extends Viewable
 	//private boolean[] groupIsLoaded;
 	//private int nbrOfGroupLoaded;
 	private ViewMode viewMode = ViewMode.FILLED;
-	private ColorManager colorManager = new ColorManager();
+	private ColorManager colorManager;
 	private TIntObjectHashMap<LeafNode> groupIDToNode = new TIntObjectHashMap<LeafNode>();
 	private TObjectIntHashMap<LeafNode> groupNodeToID = new TObjectIntHashMap<LeafNode>();
 	private TIntHashSet groupsLoaded;
@@ -60,16 +60,21 @@ public class ViewableMesh extends Viewable
 
 	public ViewableMesh(Mesh mesh)
 	{
+		this(mesh, new GroupColorManager());
+	}
+	
+	public ViewableMesh(Mesh mesh, ColorManager colorManager)
+	{
 		super(new Scene(), new Node(null));
-
-		rootNode.setActorHighLightedCustomiser(new ActorHighLightedCustomiser()
+		this.colorManager = colorManager;
+		/*rootNode.setActorHighLightedCustomiser(new ActorHighLightedCustomiser()
 		{
 
 			@Override
 			public void customiseActorHighLighted(vtkActor actor)
 			{
 				super.customiseActorHighLighted(actor);
-				actor.GetProperty().EdgeVisibilityOn();
+				//actor.GetProperty().EdgeVisibilityOn();
 			}
 		});
 		rootNode.setActorSelectionCustomiser(new ActorSelectionCustomiser()
@@ -79,7 +84,7 @@ public class ViewableMesh extends Viewable
 			public void customiseActorSelection(vtkActor actor)
 			{
 				super.customiseActorSelection(actor);
-				actor.GetProperty().EdgeVisibilityOn();
+				//actor.GetProperty().EdgeVisibilityOn();
 			}
 		});
 		rootNode.setMapperCustomiser(new AbstractNode.MapperCustomiser() {
@@ -97,8 +102,8 @@ public class ViewableMesh extends Viewable
 				mapper.SetResolveCoincidentTopologyToPolygonOffset();
 				mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffSetFactor(), Utils.getOffSetValue());
 			}
-		});
-		setViewMode(viewMode);
+		});*/
+		//setViewMode(viewMode);
 		
 		
 		Set<Entry<Integer, LeafNode.DataProvider>> groupSet = mesh.getGroupSet();
@@ -118,7 +123,7 @@ public class ViewableMesh extends Viewable
 
 	public void setViewMode(ViewMode viewMode)
 	{
-		this.viewMode = viewMode;
+		/*this.viewMode = viewMode;
 		final int wired = (viewMode == ViewMode.WIRED) ? 1 : 0;
 
 		rootNode.setActorCustomiser(new AbstractNode.ActorCustomiser()
@@ -126,19 +131,14 @@ public class ViewableMesh extends Viewable
 
 			public void customiseActor(vtkActor actor)
 			{
-				actor.GetProperty().SetEdgeVisibility(wired);
+				//actor.GetProperty().SetEdgeVisibility(wired);
 			}
 		});
 		rootNode.applyActorCustomiser();
-		render();
+		render();*/
 	}
 
 	/**
-	 * Return the vtkPolyData representation of a mesh. The groups are stored in the scalars of the cell datas.
-	 * Also the polygons are stored like this :
-	 * by order of the groups and in the groups :
-	 * first the cells
-	 * second the quads
 	 * @param mesh
 	 * @param fieldName
 	 * @return

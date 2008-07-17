@@ -17,17 +17,37 @@
  *
  * (C) Copyright 2008, by EADS France
  */
-
 package org.jcae.vtk;
 
 import java.awt.Color;
+import java.util.HashSet;
 
 /**
  *
  * @author ibarz
  */
-public interface ColorManager {
+public class GroupColorManager implements ColorManager
+{
+	private HashSet<Color> colors = new HashSet<Color>();
 
-	public void setColor(Color color);
-	public Color getColor();
+	public void setColor(Color color)
+	{
+		colors.add(color);
+	}
+	
+	public Color getColor()
+	{
+		Color color;
+		do
+		{
+			int r = (int) (255 * Math.random());
+			int g = (int) (255 * Math.random());
+			int b = (int) (255 * Math.random());
+			color = new Color(r, g, b);
+		} while (colors.contains(color));
+		
+		colors.add(color);
+		
+		return color;
+	}
 }
