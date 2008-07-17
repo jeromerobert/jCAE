@@ -47,6 +47,7 @@ public class Utilities
 				break;
 			default:
 		}
+		out.print(" "+shape.orientation());
 		out.println();
 		while(it.more())
 		{
