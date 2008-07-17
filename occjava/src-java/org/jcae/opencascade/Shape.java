@@ -123,7 +123,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		void fromXML(Element node);
 	}
 	
-	protected interface Factory<T>
+	public interface Factory<T>
 	{
 		T create(TopoDS_Shape shape, Map<TopoDS_Shape, Shape> map, Shape[] parents);
 	}
@@ -141,6 +141,11 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	private Shape[] parents;
 
 	protected final static Shape[] NOPARENT=new Shape[0];
+	
+	public Shape()
+	{
+		this(createCompound());
+	}
 
 	public Shape(String fileName)
 	{
@@ -180,6 +185,14 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		map.put(shape, this);
 	}
 
+	private static TopoDS_Compound createCompound()
+	{
+		TopoDS_Compound toReturn = new TopoDS_Compound();
+		BRep_Builder bb=new BRep_Builder();
+		bb.makeCompound(toReturn);	
+		return toReturn;
+	}
+	
 	protected Factory<T> getFactory()
 	{
 		return DEFAULT_FACTORY;
@@ -423,6 +436,8 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	 */
 	public T getShapeFromID(int id, int type)
 	{
+		if(id<1)
+			throw new IllegalArgumentException("Shape ID must be greater than 1");
 		return getShapeFromID(id, TYPE[type]);
 	}
 	
