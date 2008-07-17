@@ -439,7 +439,10 @@ public  class ViewBehavior extends OrbitBehavior
 	{
 		PickViewable result = basicPickPoint(evt);
 		if (result != null)
+		{
 			view.getCurrentViewable().pick(result);
+			view.getCurrentViewable().pick(result, view);
+		}
 	}
 
 	protected void startRectangleDrawing(MouseEvent evt, Color color)
@@ -513,6 +516,7 @@ public  class ViewBehavior extends OrbitBehavior
 		if (result != null && result.length > 0)
 		{
 			cv.pickArea(result, shape);
+			cv.pickArea(result, shape, view);
 			//Workaround for a bug in java3d. It does not fire all material
 			//attribute changes so we force it in the next frame
 			view.addPostRenderer(new Runnable()

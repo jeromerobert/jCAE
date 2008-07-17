@@ -1,10 +1,15 @@
 package org.jcae.netbeans.mesh;
 
+import java.io.File;
 import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 import org.jcae.mesh.xmldata.ComputeEdgesConnectivity;
 import org.jcae.netbeans.Utilities;
+import org.jcae.netbeans.viewer3d.ViewManager;
+import org.jcae.viewer3d.View;
+import org.jcae.viewer3d.fe.ViewableFE;
+import org.jcae.viewer3d.fe.amibe.AmibeOverlayProvider;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
@@ -37,14 +42,14 @@ public abstract class AbstractEdgesAction extends CookieAction
 			computeEdgesConnectivity.compute();	
 			
 			throw new RuntimeException("J3D possibilty not yet implemented");
-			/*
-				View bgView=ViewManager.getDefault().getView3D().getViewJ3D();			
+			
+				/*View bgView=ViewManager.getDefault().getView3D().getViewJ3D();			
 				ViewableFE fe1 = new ViewableFE(
 					new AmibeOverlayProvider(new File(xmlDir), getBranchGroupLabel()));
 				fe1.setName(activatedNodes[0].getName()+" "+getViewSuffix());
 				bgView.add(fe1);			
-				bgView.setCurrentViewable(fe1);
-			*/
+				bgView.setCurrentViewable(fe1);*/
+			
 		}
 		catch (XPathExpressionException ex)
 		{

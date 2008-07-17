@@ -24,9 +24,13 @@ package org.jcae.viewer3d;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.media.j3d.*;
 import javax.swing.JDialog;
 import javax.swing.JTextPane;
@@ -39,6 +43,9 @@ import com.sun.j3d.utils.universe.PlatformGeometry;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 import com.sun.j3d.utils.universe.Viewer;
 import com.sun.j3d.utils.universe.ViewingPlatform;
+import java.io.File;
+import javax.imageio.ImageIO;
+import javax.swing.SwingUtilities;
 
 /**
  * An AWT component wich display Viewable in a Java3D canvas.
@@ -52,7 +59,7 @@ public class View extends Canvas3D implements PositionListener
 {
 	private static final float zFactorAbs=Float.parseFloat(System.getProperty("javax.media.j3d.zFactorAbs", "1.0f"));
 	private static final float zFactorRel=Float.parseFloat(System.getProperty("javax.media.j3d.zFactorRel", "1.0f"));
-
+	
 	/** Cheat codes to change polygon offset on CAD */
 	private class PAKeyListener extends KeyAdapter
 	{
@@ -135,7 +142,21 @@ public class View extends Canvas3D implements PositionListener
 	private List<Runnable> postRenderers=new ArrayList<Runnable>();
 	private boolean locked;
 	private Cursor unlockedCursor;
-		
+	
+	// This is to manage screen buffer capture
+	private volatile Thread contextThread = null;
+	
+	// Color buffer
+	private volatile ImageComponent2D imageComponent = null;
+	private volatile Object waitScreenShot = new Object();
+	private volatile boolean takeScreenShot = false;
+	private volatile Point screenShotPosition = new Point();
+	
+	// Depth Buffer
+	private volatile DepthComponentFloat depthComponent = null;
+	private volatile Object waitDepthCapture = new Object();
+	private volatile boolean takeDepthBuffer = false;
+	private volatile Point depthCapturePosition = new Point();
     /**
      * From https://java3d.dev.java.net/issues/show_bug.cgi?id=89
      * Finds the preferred <code>GraphicsConfiguration</code> object
@@ -187,7 +208,7 @@ public class View extends Canvas3D implements PositionListener
 	{
 		this(null, false, true);
 	}
-
+	
     /** 
      * See https://java3d.dev.java.net/issues/show_bug.cgi?id=89
      * @deprecated Will cause a "java.lang.IllegalArgumentException: adding a
@@ -744,6 +765,27 @@ public class View extends Canvas3D implements PositionListener
 		zoomTo((float)c.x,(float)c.y,(float)c.z,(float)bs.getRadius());
 	}
 	
+	/**
+	 * This transforms from Normalized Eyes Coordinates (NEC) to Display Coordinates in AWT meanings (the z value is the same value of the zbuffer).
+	 * You can go from virtual world coordinates to NEC with getVWorldProjection method and using left projection.
+	 * @param point
+	 * @param pointTransformed
+	 */
+	public void normalizedEyeCoordinateToViewportCoordinate(Tuple4d point, Tuple3d pointTransformed) {
+		// Transform from [-1,1] to [0,1]
+		
+		if(point.y < -1. || point.y > 1.)
+			throw new RuntimeException("PWET : " + point);
+		
+		pointTransformed.x = (point.x + 1.) * .5;
+		pointTransformed.y = (point.y + 1.) * .5;
+		pointTransformed.z = (-point.z + 1.) * .5;
+		
+		pointTransformed.x *= getWidth();
+		pointTransformed.y *= getHeight();
+		pointTransformed.y = getHeight() - pointTransformed.y;
+	}
+		
 	/** restore the Front clip distance to see all the Viewable */
 	public void restoreFrontClipDistance(){
 		BoundingSphere bs=getBound();
@@ -867,6 +909,9 @@ public class View extends Canvas3D implements PositionListener
 	public void postSwap()
 	{
 		super.postSwap();
+		
+		contextThread = Thread.currentThread();
+		
 		try
 		{
 			if (takeSnapShot)
@@ -882,6 +927,26 @@ public class View extends Canvas3D implements PositionListener
 					screenshotListener.shot(snapShot);
 			}
 			
+			if(takeScreenShot)
+			{
+				captureColorBuffer();
+				takeScreenShot = false;
+				synchronized(waitScreenShot)
+				{
+					waitScreenShot.notifyAll();
+				}
+			}
+			
+			if(takeDepthBuffer)
+			{
+				captureDepth();
+				takeDepthBuffer = false;
+				synchronized (waitDepthCapture)
+				{
+					waitDepthCapture.notifyAll();
+				}				
+				//System.out.println("ZBUFFER : " + Arrays.toString(depth));
+			}
 		}
 		catch(Exception ex)
 		{
@@ -905,6 +970,227 @@ public class View extends Canvas3D implements PositionListener
 		ctx.readRaster(ras);		
 		// Now strip out the image info
 		return ras.getImage().getImage();					
+	}
+	
+	/**
+	 * This is the new and simpliest method to take screenshot.
+	 * Be careful : this method was not already tested.
+	 * Warning : This methods works in all thread except in J3D behaviour threads.
+	 * I don't know if it works in other J3D threads. I don't investigate much. Certainly
+	 * a mutex that lock all the threads...
+	 * @param x 
+	 * @param y 
+	 * @param width
+	 * @param height
+	 * @return
+	 */
+	public synchronized BufferedImage getScreenShot(int x, int y, int width, int height)
+	{
+		imageComponent = new ImageComponent2D(ImageComponent.FORMAT_RGB, width, height);
+		screenShotPosition.x = x;
+		screenShotPosition.y = y;
+		
+		if(Thread.currentThread().equals(contextThread))
+		{
+			captureColorBuffer();
+		}
+		else
+		{
+			takeScreenShot = true;
+			
+			// If we aren't in the swing thread go to it to send refresh event
+			if(!SwingUtilities.isEventDispatchThread())
+			{
+				try
+				{
+					SwingUtilities.invokeAndWait(new Runnable()
+					{
+
+						public void run()
+						{
+							getView().repaint();
+						}
+					});
+				} catch (InterruptedException ex)
+				{
+					Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
+				} catch (InvocationTargetException ex)
+				{
+					Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}
+			else
+				getView().repaint();
+			
+			try
+			{
+				// If the screenshot is not already done then wait
+				if(takeScreenShot)
+				{
+					synchronized (waitScreenShot)
+					{
+						waitScreenShot.wait();
+					}
+				}
+			} catch (InterruptedException ex)
+			{
+				Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}
+		
+		// Now strip out the image info
+		return imageComponent.getImage();	
+	
+	}
+	
+	private void captureColorBuffer()
+	{
+		GraphicsContext3D ctx = getGraphicsContext3D();
+		Raster ras=new Raster();
+		
+		ras.setSrcOffset(screenShotPosition);
+		ras.setSize(new Dimension(imageComponent.getWidth(), imageComponent.getHeight()));
+		ras.setImage(imageComponent);
+		ctx.readRaster(ras);
+		
+		imageComponent = ras.getImage();
+	}
+	
+	/**
+	 * This method create a png file in the tempory directory containing the depth buffer.
+	 * To see correctly the depth buffer a normalisation and scale color is maded.
+	 * @param buffer
+	 * @param width
+	 * @param height
+	 */
+	private void debugDepthBuffer(float[] buffer, int width, int height)
+	{
+		System.out.println("width : " + width);
+		System.out.println("height : " + height);
+		System.out.println("buffer length : " + buffer.length);
+		
+		assert buffer.length == width * height : "buffer with not good length";
+		//assert false;
+		float zmin =Float.MAX_VALUE, zmax = Float.MIN_VALUE;
+		
+		for(float z : buffer)
+		{
+			zmin = Math.min(z, zmin);
+			zmax = Math.max(z, zmax);
+		}
+		
+		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		
+		for(int i = 0 ; i < depthComponent.getWidth() ; ++i)
+		{
+			for(int j = 0 ; j < depthComponent.getHeight() ; ++j)
+			{//aZbuffer[(x - xMin)  + (xMax - xMin + 1) * (y - yMin)];
+				float z = buffer[i + j * depthComponent.getWidth()];
+				float zNormalized = (z-zmin) / (zmax - zmin);
+				int c = (int)( zNormalized * 255.);
+				assert c >=0;
+				assert c < 256;
+				int rgb = c << 8 | c << 16 | c;
+				//System.out.println("C : " + c);
+				//int rgb = c;
+				image.setRGB(i, j, rgb);
+			}
+		}
+		try
+		{
+
+			ImageIO.write(image, "PNG", File.createTempFile("pwet", "png"));
+		} catch (IOException ex)
+		{
+			Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
+		}		
+	}
+	/**
+	 * This function works only with a patched java3d version.
+	 * Contact a jCAE developper on the forum for more information.
+	 * Warning : see warning of getScreenShot
+	 * See RectangleSelection program for example of use.
+	 * @param x
+	 * @param y
+	 * @param width
+	 * @param height
+	 * @return
+	 */
+	public synchronized float[] getDepthBuffer(int x, int y, int width, int height)
+	{
+		depthComponent = new DepthComponentFloat(width, height);
+		depthCapturePosition.x = x;
+		depthCapturePosition.y = y;
+		
+		if(Thread.currentThread().equals(contextThread))
+		{
+			captureDepth();
+		}
+		else
+		{
+			takeDepthBuffer = true;
+			
+			// If we aren't in the swing thread go to it to send refresh event
+			if(!SwingUtilities.isEventDispatchThread())
+			{
+				try
+				{
+					SwingUtilities.invokeAndWait(new Runnable()
+					{
+
+						public void run()
+						{
+							getView().repaint();
+						}
+					});
+				} catch (InterruptedException ex)
+				{
+					Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
+				} catch (InvocationTargetException ex)
+				{
+					Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}
+			else
+				getView().repaint();
+			try
+			{
+				// If the screenshot is not already done then wait
+				if(takeDepthBuffer)
+				{
+					synchronized (waitDepthCapture)
+					{
+						waitDepthCapture.wait();
+					}
+				}
+			} catch (InterruptedException ex)
+			{
+				Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}
+		
+		float[] zbuffer = new float[depthComponent.getWidth() * depthComponent.getHeight()];
+		depthComponent.getDepthData(zbuffer);
+		
+		// UNCOMMENT FOR DEBUGGING
+		//debugDepthBuffer(zbuffer, depthComponent.getWidth() , depthComponent.getHeight());
+		
+		return zbuffer;
+	}
+	
+	private void captureDepth()
+	{
+		GraphicsContext3D ctx = getGraphicsContext3D();
+		depthComponent.setCapability(DepthComponent.ALLOW_DATA_READ);
+		Raster ras=new Raster(new Point3f(0.0f, 0.0f, 0.0f),
+        Raster.RASTER_DEPTH, depthCapturePosition.x, depthCapturePosition.y, depthComponent.getWidth(), depthComponent.getHeight(), null,
+        depthComponent);
+		ras.setCapability(Raster.ALLOW_DEPTH_COMPONENT_READ);
+		ras.setCapability(Raster.ALLOW_IMAGE_READ);
+		ras.setCapability(Raster.ALLOW_TYPE_READ);
+		//ras.setImage(new ImageComponent2D(ImageComponent.FORMAT_RGB,dim.width, dim.height));
+		
+		ctx.readRaster(ras);
 	}
 	
 	/** Remove a viewable from this view */
@@ -1053,7 +1339,7 @@ public class View extends Canvas3D implements PositionListener
 		takeSnapShot=true;
 		getView().repaint();		
 	}
-
+	
 	/**
 	 * Take a snapshot of the current view in Off-screen mode
 	 * Do not use this for on-screen rendering. See "On-screen Rendering vs. Off-screen Rendering" in

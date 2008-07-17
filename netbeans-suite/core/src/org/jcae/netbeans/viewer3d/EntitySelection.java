@@ -21,7 +21,7 @@
 package org.jcae.netbeans.viewer3d;
 
 /**
- *
+ * All subclasses manages the selection of an entity (CAO, mesh, etc.).
  * @author ibarz
  */
 public interface EntitySelection {

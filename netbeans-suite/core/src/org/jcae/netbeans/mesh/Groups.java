@@ -21,7 +21,6 @@
 package org.jcae.netbeans.mesh;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
@@ -29,15 +28,13 @@ import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.*;
-import javax.media.j3d.*;
 import javax.swing.*;
-import javax.vecmath.Color3f;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import org.jcae.mesh.xmldata.MeshExporter;
+import org.jcae.netbeans.viewer3d.EntitySelection;
 import org.jcae.netbeans.viewer3d.SelectionManager;
-import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.AmibeToMesh;
 import org.jcae.vtk.ViewableMesh;
 import org.jcae.vtk.View;
@@ -79,12 +76,12 @@ public class Groups
 	/** The absolute path to the mesh directory */
 	protected String meshFile = null;
 	protected String meshName = null;
-	private final MeshSelection meshSelection;
+	//private final MeshSelection meshSelection;
 	
 	Groups()
 	{
-		meshSelection = new MeshSelection(this);
-		SelectionManager.getDefault().addEntitySelection(this, meshSelection);	
+		//meshSelection = new MeshSelection(this);
+		//SelectionManager.getDefault().addEntitySelection(this, meshSelection);	
 	}
 	
 	private String getXmlDir()
@@ -96,38 +93,6 @@ public class Groups
 	{
 		groups.add(group);
 		group.addPropertyChangeListener(groupPropertyChangeListener);
-	}
-
-	/**
-	 * Creates a Java3D BranchGroup whcih represents a group.
-	 * It creates two Java3D Shapes3D : one for polygons, one for edges.
-	 * @param the Java3D geometry of a Group.
-	 */
-	public BranchGroup createBranchGroup(IndexedTriangleArray geom)
-	{
-		BranchGroup branchGroup = new BranchGroup();
-		Appearance shapeFillAppearance = new Appearance();
-		shapeFillAppearance.setPolygonAttributes(new PolygonAttributes(
-			PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE,
-			2.0f * Float.parseFloat(System.getProperty(
-				"javax.media.j3d.zFactorAbs", "20.0f")), false, Float
-				.parseFloat(System.getProperty("javax.media.j3d.zFactorRel",
-					"2.0f"))));
-		shapeFillAppearance.setColoringAttributes(new ColoringAttributes(
-			new Color3f(Color.GRAY), ColoringAttributes.SHADE_FLAT));
-		Shape3D shapeFill = new Shape3D(geom, shapeFillAppearance);
-		shapeFill.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-		branchGroup.addChild(shapeFill);
-		Appearance shapeLineAppearance = new Appearance();
-		shapeLineAppearance.setPolygonAttributes(new PolygonAttributes(
-			PolygonAttributes.POLYGON_LINE, PolygonAttributes.CULL_NONE, Float
-				.parseFloat(System.getProperty("javax.media.j3d.zFactorAbs",
-					"20.0f"))));
-		shapeLineAppearance.setColoringAttributes(new ColoringAttributes(
-			new Color3f(Color.BLUE), ColoringAttributes.SHADE_GOURAUD));
-		Shape3D shapeLine = new Shape3D(geom, shapeLineAppearance);
-		branchGroup.addChild(shapeLine);
-		return branchGroup;
 	}
 
 	/**
@@ -309,11 +274,10 @@ public class Groups
 			modifyXMLGroups(xmlDoc, groupsBin, xmlDir);
 			org.jcae.mesh.xmldata.XMLHelper.writeXML(xmlDoc, f);
 		}
-		 
+		
+		EntitySelection meshSelection = SelectionManager.getDefault().getEntitySelection(this);
 		if(meshSelection!=null)
-		{
 			meshSelection.unSelectAll();
-		}
 		
 		return fuseGroup;
 	}

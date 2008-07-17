@@ -20,13 +20,20 @@
 
 package org.jcae.netbeans.cad;
 
+import java.awt.Color;
+import org.jcae.netbeans.viewer3d.SelectionManager;
+import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.opencascade.jni.BRep_Builder;
 import org.jcae.opencascade.jni.ShapeAnalysis_FreeBounds;
 import org.jcae.opencascade.jni.TopoDS_Compound;
 import org.jcae.opencascade.jni.TopoDS_Shape;
+import org.jcae.vtk.AbstractNode.MapperCustomiser;
+import org.jcae.vtk.View;
+import org.jcae.vtk.ViewableCAD;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CookieAction;
+import vtk.vtkMapper;
 
 public class FreeBoundsAction extends CookieAction
 {
@@ -59,8 +66,27 @@ public class FreeBoundsAction extends CookieAction
 				bb.add(tc, openWires);
 		}
 		
-		throw new UnsupportedOperationException("J3D feature not yet implemented");
+		View v=ViewManager.getDefault().getCurrentView();
+		ViewableCAD viewable = new ViewableCAD(tc);
+		viewable.setName(arg0[0].getName() + " free edges");
+		viewable.setEdgeColor(Color.GREEN);
+		viewable.setEdgeSize(viewable.getEdgeSize() * 2);
+		viewable.getEdges().setMapperCustomiser(new MapperCustomiser() {
+
+			public void customiseMapper(vtkMapper mapper)
+			{
+				mapper.SetResolveCoincidentTopologyToPolygonOffset();
+				mapper.SetResolveCoincidentTopologyPolygonOffsetFaces(0);
+				mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(-10., -10.);
+			}
+		});
+		//viewable.setEdgeSize(10);
 		
+		// We cannot do this. Review the conception of the selection manager to
+		// manage this case...
+		//SelectionManager.getDefault().addInteractor(viewable, arg0[0]);
+
+		v.add(viewable);
 		/*View v=ViewManager.getDefault().getCurrentView();
 		OCCProvider occp=new OCCProvider(tc);
 		occp.setEdgeColor(Color.GREEN);

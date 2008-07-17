@@ -1,6 +1,5 @@
 package org.jcae.viewer3d;
 
-import com.sun.j3d.utils.picking.PickResult;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,8 +36,15 @@ public abstract class ViewableAdaptor implements Viewable {
 
 	public abstract Node getJ3DNode();
 
-	public abstract void pick(PickViewable result);
+	public void pick(PickViewable result)
+	{
+		
+	}	
 
+	public void pick(PickViewable result, View view)
+	{
+	}
+	
 	public abstract void unselectAll();
 
 	/* (non-Javadoc)
@@ -70,5 +76,9 @@ public abstract class ViewableAdaptor implements Viewable {
 	/** Default implementation which does nothing */
 	public void pickArea(PickInfo[] result, Bounds bound) {
 		
+	}
+
+	public void pickArea(PickInfo[] result, Bounds bound, View view)
+	{
 	}
 }

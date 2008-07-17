@@ -33,10 +33,11 @@ import org.jcae.opencascade.jni.TopoDS_Shape;
 import org.jcae.opencascade.jni.TopoDS_Vertex;
 import vtk.vtkActor;
 import vtk.vtkMapper;
+import vtk.vtkProperty;
 
 /**
  *
- * @author ibarz
+ * @author Julian Ibarz
  */
 public class ViewableCAD extends Viewable
 {
@@ -46,11 +47,10 @@ public class ViewableCAD extends Viewable
 	private final OCCMeshExtractor meshExtractor;
 	/** Specify which type of object is selectable */
 	private ShapeType shapeTypeSelection = ShapeType.FACE;
-	private final Color frontFaceColor = new Color(0,255,255);
-	private final Color backFaceColor = new Color(255,255,0);
-	private final Color vertexColor = new Color(0,0,255);
-	private final Color edgeColor = new Color(0,255,0);
-	
+	private final Color frontFaceColor = new Color(255 / 2, 255 / 2, 255);
+	private final Color backFaceColor = Color.LIGHT_GRAY;//new Color(255 / 2, 255, 255 / 2);
+	private final Color vertexColor = Color.ORANGE;
+	private Color edgeColor = Color.WHITE;
 	private final HashMap<TopoDS_Vertex, LeafNode> topoToNodeVertice = new HashMap<TopoDS_Vertex, LeafNode>();
 	private final HashMap<TopoDS_Edge, LeafNode> topoToNodeEdge = new HashMap<TopoDS_Edge, LeafNode>();
 	private final HashMap<TopoDS_Face, LeafNode> topoToNodeFaceFront = new HashMap<TopoDS_Face, LeafNode>();
@@ -59,7 +59,8 @@ public class ViewableCAD extends Viewable
 	private Node faces = null;
 	private Node edges = null;
 	private Node vertice = null;
-	
+	private int vertexSize = 8;
+	private int edgeSize = 2;
 	
 	public enum ShapeType
 	{
@@ -85,16 +86,42 @@ public class ViewableCAD extends Viewable
 	{
 		this(new OCCMeshExtractor(filename));
 	}
-		
-	@Override
-	public void actorCreated(AbstractNode node, vtkActor actor)
+
+	public Color getEdgeColor()
 	{
-		super.actorCreated(node, actor);
+		return edgeColor;
+	}
+
+	public void setEdgeColor(Color edgeColor)
+	{
+		this.edgeColor = edgeColor;
+		for(LeafNode edge : topoToNodeEdge.values())
+			edge.setColor(edgeColor);
 		
-		actor.GetProperty().SetPointSize(4);
-		actor.GetProperty().SetLineWidth(3);
+		edges.refresh();
+	}
+
+	public int getEdgeSize()
+	{
+		return edgeSize;
+	}
+
+	public void setEdgeSize(int edgeSize)
+	{
+		this.edgeSize = edgeSize;
 		
-		vtkMapper mapper = actor.GetMapper();
+		edges.applyActorCustomiser();
+	}
+	
+	//@Override
+	//public void actorCreated(AbstractNode node, vtkActor actor)
+	//{
+	//	super.actorCreated(node, actor);
+	///	
+	//	actor.GetProperty().SetPointSize(vertexSize);
+	//	actor.GetProperty().SetLineWidth(edgeSize);
+		
+	//	vtkMapper mapper = actor.GetMapper();
 		
 		//mapper.SetResolveCoincidentTopologyToPolygonOffset();
 		//mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffSetFactor(), Utils.getOffSetValue());
@@ -115,7 +142,7 @@ public class ViewableCAD extends Viewable
 			actor.SetBackfaceProperty(property);
 			actor.ApplyProperties();
 		}*/
-	}
+	//}
 	
 	public void testDataChange()
 	{
@@ -143,6 +170,13 @@ public class ViewableCAD extends Viewable
 			this.nodeToTopo.put(vertexNode, vertex);
 		}
 		vertice.setManager(true);
+		vertice.setActorCustomiser(new AbstractNode.ActorCustomiser() {
+
+			public void customiseActor(vtkActor actor)
+			{
+				actor.GetProperty().SetPointSize(vertexSize);
+			}
+		});
 		
 		edges = new Node(rootNode);
 		
@@ -154,17 +188,33 @@ public class ViewableCAD extends Viewable
 			//edgeNode.setManager(true);
 		}
 		edges.setManager(true);
+		edges.setActorCustomiser(new AbstractNode.ActorCustomiser() {
+
+			public void customiseActor(vtkActor actor)
+			{
+				actor.GetProperty().SetLineWidth(edgeSize);
+			}
+		});
 
 		faces = new Node(rootNode);
+		Node facesFront = new Node(faces);
+		Node facesBack = new Node(faces);
+		faces.setActorCustomiser(new AbstractNode.ActorCustomiser() {
+
+			public void customiseActor(vtkActor actor)
+			{
+				actor.GetProperty().BackfaceCullingOn();
+			}
+		});
 		//Transform3D transform = new Transform3D();
 		//transform.setTranslation(new Vector3f(2.f,2.f,0.f));
 		
 		for(TopoDS_Face face : this.meshExtractor.getFaces())
 		{
-			LeafNode faceNode = new LeafNode(faces, new OCCMeshExtractor.FaceData(face, false), this.frontFaceColor);
+			LeafNode faceNode = new LeafNode(facesFront, new OCCMeshExtractor.FaceData(face, false), this.frontFaceColor);
 			topoToNodeFaceFront.put(face, faceNode);
 			nodeToTopo.put(faceNode, face);
-			LeafNode backFaceNode = new LeafNode(faces, new OCCMeshExtractor.FaceData(face, true), this.backFaceColor);
+			LeafNode backFaceNode = new LeafNode(facesBack, new OCCMeshExtractor.FaceData(face, true), this.backFaceColor);
 			topoToNodeFaceBack.put(face, backFaceNode);
 			nodeToTopo.put(backFaceNode, face);
 			//faceNode.setTransform(transform);
@@ -172,9 +222,15 @@ public class ViewableCAD extends Viewable
 			//faceNode.setManager(true);
 			//backFaceNode.setManager(true);
 		}
-		faces.setManager(true);
+		facesFront.setManager(true);
+		facesBack.setManager(true);
 		//rootNode.setManager(true);
 		rootNode.refresh();
+	}
+
+	public Node getEdges()
+	{
+		return edges;
 	}
 	
 	@Override

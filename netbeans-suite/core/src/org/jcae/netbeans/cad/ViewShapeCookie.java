@@ -52,15 +52,17 @@ public class ViewShapeCookie implements ViewCookie
 			viewable = new ViewableCAD(nbShape.getImpl());
 			viewableRef = new WeakReference<ViewableCAD>(viewable);
 			viewable.setName(node.getName());
+			
+			
 			SelectionManager.getDefault().addInteractor(viewable, root);
 
 			// Create a CAOSelection ?
-			if (SelectionManager.getDefault().getEntitySelection(root) == null)
+			/*if (SelectionManager.getDefault().getEntitySelection(root) == null)
 			{
 				CADSelection caoSelection = new CADSelection(root);
 				SelectionManager.getDefault().addEntitySelection(
 						root, caoSelection);
-			}
+			}*/
 			
 			v.add(viewable);
 		}

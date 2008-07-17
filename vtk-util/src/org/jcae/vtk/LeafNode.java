@@ -33,8 +33,8 @@ import vtk.vtkPolyDataMapper;
 import vtk.vtkSelection;
 
 /**
- *
- * @author ibarz
+ * TODO replace Color by javax.vecmath.Color3f
+ * @author Julian Ibarz
  */
 public class LeafNode extends AbstractNode
 {

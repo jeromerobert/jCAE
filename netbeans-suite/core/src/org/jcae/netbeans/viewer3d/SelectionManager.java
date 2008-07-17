@@ -21,8 +21,14 @@
 package org.jcae.netbeans.viewer3d;
 
 import java.util.HashMap;
+import org.jcae.netbeans.cad.CADSelection;
+import org.jcae.netbeans.cad.NbShape;
+import org.jcae.netbeans.mesh.Groups;
+import org.jcae.netbeans.mesh.MeshSelection;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
+import org.jcae.vtk.ViewableCAD;
+import org.jcae.vtk.ViewableMesh;
 
 /**
  * Patterns : Singleton
@@ -98,15 +104,42 @@ public class SelectionManager {
 		return instance;
 	}
 	
-	public void addEntitySelection(Object entity, EntitySelection entitySelection)
+	/**
+	 * Construct the good entity selection un function of the type of the viewable
+	 * @param viewable
+	 * @param entity
+	 * @return
+	 */
+	private EntitySelection createEntitySelection(Viewable viewable, Object entity) {
+		if(viewable instanceof ViewableCAD) {
+			if(entity instanceof NbShape)
+				return new CADSelection((NbShape)entity);
+			else
+				throw new IllegalArgumentException("The entity associated wit ha ViewableCAD has to be a NbShape");
+		}
+		else if(viewable instanceof ViewableMesh) {
+			if(entity instanceof Groups)
+				return new MeshSelection((Groups)entity);
+			else
+				throw new IllegalArgumentException("The entity associated with a ViewableMesh has to be a Groups");
+		}
+		else
+			throw new IllegalArgumentException("The type of the viewable is unknown !");
+	}
+	
+	/*private void addEntitySelection(Object entity, EntitySelection entitySelection)
 	{
 		selections.put(entity, entitySelection);
-	}
+	}*/
 	
 	public void addInteractor(Viewable interactor, Object entity)
 	{
 		interactors.put(interactor, entity);
 		interactor.setAppendSelection(appendSelection);
+		
+		// If we don't have the EntitySelection create it
+		if(selections.get(entity) == null)
+			selections.put(entity, createEntitySelection(interactor, entity));
 	}
 	
 	public void removeInteractor(Viewable interactor)
