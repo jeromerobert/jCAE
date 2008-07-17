@@ -53,7 +53,6 @@ public class ViewShapeCookie implements ViewCookie
 			viewableRef = new WeakReference<ViewableCAD>(viewable);
 			viewable.setName(node.getName());
 			
-			
 			SelectionManager.getDefault().addInteractor(viewable, root);
 
 			// Create a CAOSelection ?

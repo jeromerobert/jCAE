@@ -51,6 +51,7 @@ public class ViewableCAD extends Viewable
 	private final Color backFaceColor = Color.LIGHT_GRAY;//new Color(255 / 2, 255, 255 / 2);
 	private final Color vertexColor = Color.ORANGE;
 	private Color edgeColor = Color.WHITE;
+	private Color freeEdgeColor = Color.GREEN;
 	private final HashMap<TopoDS_Vertex, LeafNode> topoToNodeVertice = new HashMap<TopoDS_Vertex, LeafNode>();
 	private final HashMap<TopoDS_Edge, LeafNode> topoToNodeEdge = new HashMap<TopoDS_Edge, LeafNode>();
 	private final HashMap<TopoDS_Face, LeafNode> topoToNodeFaceFront = new HashMap<TopoDS_Face, LeafNode>();
@@ -61,16 +62,18 @@ public class ViewableCAD extends Viewable
 	private Node vertice = null;
 	private int vertexSize = 8;
 	private int edgeSize = 2;
+	private boolean onlyFreeEdges = false;
 	
 	public enum ShapeType
 	{
 		VERTEX, EDGE, FACE
 	}
 			
-	private ViewableCAD(OCCMeshExtractor meshExtractor)
+	private ViewableCAD(OCCMeshExtractor meshExtractor, boolean onlyFreeEdges)
 	{
 		super(new Scene(), new Node(null));
 		this.meshExtractor = meshExtractor;
+		this.onlyFreeEdges = onlyFreeEdges;
 		
 		computeNodes();
 		setShapeTypeSelection(shapeTypeSelection);
@@ -79,12 +82,17 @@ public class ViewableCAD extends Viewable
 
 	public ViewableCAD(TopoDS_Shape shape)
 	{
-		this(new OCCMeshExtractor(shape));
+		this(new OCCMeshExtractor(shape), false);
+	}
+	
+	public ViewableCAD(TopoDS_Shape shape, boolean onlyFreeEdges)
+	{
+		this(new OCCMeshExtractor(shape), true);
 	}
 	
 	public ViewableCAD(String filename)
 	{
-		this(new OCCMeshExtractor(filename));
+		this(new OCCMeshExtractor(filename), false);
 	}
 
 	public Color getEdgeColor()
@@ -161,16 +169,9 @@ public class ViewableCAD extends Viewable
 	private void computeNodes()
 	{
 		vertice = new Node(rootNode);
-		
-		for(TopoDS_Vertex vertex : this.meshExtractor.getVertice())
-		{
-			LeafNode vertexNode = new LeafNode(vertice, new OCCMeshExtractor.VertexData(vertex), this.vertexColor);
-			//vertexNode.setManager(true);
-			topoToNodeVertice.put(vertex, vertexNode);
-			this.nodeToTopo.put(vertexNode, vertex);
-		}
 		vertice.setManager(true);
-		vertice.setActorCustomiser(new AbstractNode.ActorCustomiser() {
+		vertice.setActorCustomiser(new AbstractNode.ActorCustomiser()
+		{
 
 			public void customiseActor(vtkActor actor)
 			{
@@ -179,52 +180,69 @@ public class ViewableCAD extends Viewable
 		});
 		
 		edges = new Node(rootNode);
-		
-		for(TopoDS_Edge edge : this.meshExtractor.getEdges())
-		{
-			LeafNode edgeNode = new LeafNode(edges, new OCCMeshExtractor.EdgeData(edge), this.edgeColor);
-			topoToNodeEdge.put(edge, edgeNode);
-			nodeToTopo.put(edgeNode, edge);
-			//edgeNode.setManager(true);
-		}
 		edges.setManager(true);
-		edges.setActorCustomiser(new AbstractNode.ActorCustomiser() {
+		edges.setActorCustomiser(new AbstractNode.ActorCustomiser()
+		{
 
 			public void customiseActor(vtkActor actor)
 			{
 				actor.GetProperty().SetLineWidth(edgeSize);
 			}
 		});
-
+		
 		faces = new Node(rootNode);
-		Node facesFront = new Node(faces);
-		Node facesBack = new Node(faces);
-		faces.setActorCustomiser(new AbstractNode.ActorCustomiser() {
+		faces.setActorCustomiser(new AbstractNode.ActorCustomiser()
+		{
 
 			public void customiseActor(vtkActor actor)
 			{
 				actor.GetProperty().BackfaceCullingOn();
 			}
 		});
-		//Transform3D transform = new Transform3D();
-		//transform.setTranslation(new Vector3f(2.f,2.f,0.f));
 		
-		for(TopoDS_Face face : this.meshExtractor.getFaces())
-		{
-			LeafNode faceNode = new LeafNode(facesFront, new OCCMeshExtractor.FaceData(face, false), this.frontFaceColor);
-			topoToNodeFaceFront.put(face, faceNode);
-			nodeToTopo.put(faceNode, face);
-			LeafNode backFaceNode = new LeafNode(facesBack, new OCCMeshExtractor.FaceData(face, true), this.backFaceColor);
-			topoToNodeFaceBack.put(face, backFaceNode);
-			nodeToTopo.put(backFaceNode, face);
-			//faceNode.setTransform(transform);
-			//backFaceNode.setTransform(transform);
-			//faceNode.setManager(true);
-			//backFaceNode.setManager(true);
-		}
+		Node facesFront = new Node(faces);
+		Node facesBack = new Node(faces);
 		facesFront.setManager(true);
 		facesBack.setManager(true);
-		//rootNode.setManager(true);
+
+		// Add the edges
+		Collection freeEdges = meshExtractor.getFreeEdges();
+		for (TopoDS_Edge edge : this.meshExtractor.getEdges())
+		{
+			Color color = edgeColor;
+			if (freeEdges.contains(edge))
+				color = freeEdgeColor;
+			else if(onlyFreeEdges)
+				continue;
+
+			LeafNode edgeNode = new LeafNode(edges, new OCCMeshExtractor.EdgeData(edge), color);
+			topoToNodeEdge.put(edge, edgeNode);
+			nodeToTopo.put(edgeNode, edge);
+		}
+
+		if (!onlyFreeEdges)
+		{
+			// Add vertice
+			for (TopoDS_Vertex vertex : this.meshExtractor.getVertice())
+			{
+				LeafNode vertexNode = new LeafNode(vertice, new OCCMeshExtractor.VertexData(vertex), this.vertexColor);
+				topoToNodeVertice.put(vertex, vertexNode);
+				this.nodeToTopo.put(vertexNode, vertex);
+			}
+
+			// Add faces
+			for (TopoDS_Face face : this.meshExtractor.getFaces())
+			{
+				LeafNode faceNode = new LeafNode(facesFront, new OCCMeshExtractor.FaceData(face, false), this.frontFaceColor);
+				topoToNodeFaceFront.put(face, faceNode);
+				nodeToTopo.put(faceNode, face);
+				
+				LeafNode backFaceNode = new LeafNode(facesBack, new OCCMeshExtractor.FaceData(face, true), this.backFaceColor);
+				topoToNodeFaceBack.put(face, backFaceNode);
+				nodeToTopo.put(backFaceNode, face);
+			}
+		}
+		
 		rootNode.refresh();
 	}
 

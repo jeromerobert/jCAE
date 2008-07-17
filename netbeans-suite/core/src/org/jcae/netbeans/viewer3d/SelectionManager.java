@@ -144,7 +144,9 @@ public class SelectionManager {
 	
 	public void removeInteractor(Viewable interactor)
 	{
+		Object entity = interactors.get(interactor);
 		interactors.remove(interactor);
+		selections.remove(entity);
 	}
 	
 	public Object getEntity(Viewable interactor)

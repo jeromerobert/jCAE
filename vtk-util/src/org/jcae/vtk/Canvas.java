@@ -152,6 +152,10 @@ public class Canvas extends vtkCanvas
 	@Override
 	public void removeNotify()
 	{
+		// Do this workaround only for windows platforms
+		String osName = System.getProperty("os.name");
+		if(!osName.contains("Windows"));
+			super.removeNotify();
 		//Thread.dumpStack();
 		//System.out.println("REMOVE NOTIFY "+getParent());
 	}	

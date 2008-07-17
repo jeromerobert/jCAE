@@ -21,8 +21,8 @@ package org.jcae.vtk;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
 import org.jcae.opencascade.Utilities;
@@ -36,10 +36,12 @@ import org.jcae.opencascade.jni.GeomLProp_SLProps;
 import org.jcae.opencascade.jni.Geom_Curve;
 import org.jcae.opencascade.jni.Geom_Surface;
 import org.jcae.opencascade.jni.Poly_Triangulation;
+import org.jcae.opencascade.jni.ShapeAnalysis_FreeBounds;
 import org.jcae.opencascade.jni.TopAbs_Orientation;
 import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
 import org.jcae.opencascade.jni.TopExp_Explorer;
 import org.jcae.opencascade.jni.TopLoc_Location;
+import org.jcae.opencascade.jni.TopoDS_Compound;
 import org.jcae.opencascade.jni.TopoDS_Edge;
 import org.jcae.opencascade.jni.TopoDS_Face;
 import org.jcae.opencascade.jni.TopoDS_Shape;
@@ -411,6 +413,30 @@ public class OCCMeshExtractor
 		return faces;
 	}
 
+	/**
+	 * Get only free edges
+	 * @return
+	 */
+	public Collection<TopoDS_Edge> getFreeEdges() {
+			ShapeAnalysis_FreeBounds safb = new ShapeAnalysis_FreeBounds(shape);
+			TopoDS_Compound closedWires = safb.getClosedWires();
+			
+			if(closedWires == null)
+				return Collections.EMPTY_SET;
+			
+			TopExp_Explorer explorer = new TopExp_Explorer();
+			HashSet<TopoDS_Edge> freeEdges = new HashSet<TopoDS_Edge>();
+			
+			for(explorer.init(closedWires, TopAbs_ShapeEnum.EDGE); explorer.more() ; explorer.next())
+				freeEdges.add((TopoDS_Edge)explorer.current());
+			
+			return freeEdges;
+	}
+	
+	/**
+	 * Get all the edges (free edges or not)
+	 * @return
+	 */
 	public Collection<TopoDS_Edge> getEdges()
 	{
 		TopExp_Explorer explorer = new TopExp_Explorer();

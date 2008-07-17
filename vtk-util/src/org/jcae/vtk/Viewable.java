@@ -132,6 +132,14 @@ public abstract class Viewable extends MultiCanvas
 		this.surfaceSelection = surfaceSelection;
 	}
 
+	@Override
+	public void removeCanvas(Canvas canvas)
+	{
+		super.removeCanvas(canvas);
+	}
+
+	
+	
 	protected int[] selectPointOnSurface(Canvas canvas, int[] firstPoint, int[] secondPoint)
 	{
 		assert false;

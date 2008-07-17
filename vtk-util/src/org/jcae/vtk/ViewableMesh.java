@@ -20,17 +20,16 @@
 package org.jcae.vtk;
 
 import gnu.trove.TIntArrayList;
+import gnu.trove.TIntHashSet;
 import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TObjectIntHashMap;
 import java.awt.Color;
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import org.jcae.vtk.LeafNode;
 import vtk.vtkActor;
 import vtk.vtkMapper;
-import vtk.vtkPlaneCollection;
 
 /**
  * TODO : the beams are stored in the polydata with the scalar UNVProvider.OTHERS_GROUP wich can make a bug of color. It can make a bug for the selection in jcae
@@ -40,13 +39,13 @@ import vtk.vtkPlaneCollection;
 public class ViewableMesh extends Viewable
 {
 
-	private boolean[] groupIsLoaded;
-	private int nbrOfGroupLoaded;
+	//private boolean[] groupIsLoaded;
+	//private int nbrOfGroupLoaded;
 	private ViewMode viewMode = ViewMode.FILLED;
 	private ColorManager colorManager = new ColorManager();
 	private TIntObjectHashMap<LeafNode> groupIDToNode = new TIntObjectHashMap<LeafNode>();
 	private TObjectIntHashMap<LeafNode> groupNodeToID = new TObjectIntHashMap<LeafNode>();
-
+	private TIntHashSet groupsLoaded;
 	/**
 	 * It explain how the mesh is displayed :
 	 * _ FILLED means the mesh is not in wired mode but the selection remains filled ;
@@ -57,16 +56,6 @@ public class ViewableMesh extends Viewable
 
 		FILLED,
 		WIRED
-	}
-
-	/**
-	 * 
-	 * @param filename
-	 * @param groupExtraction @see UNVToMesh constructor
-	 */
-	public ViewableMesh(String filename, Collection<Integer> groupExtraction)
-	{
-		this(new UNVToMesh(filename, groupExtraction).getMesh());
 	}
 
 	public ViewableMesh(Mesh mesh)
@@ -110,18 +99,12 @@ public class ViewableMesh extends Viewable
 			}
 		});
 		setViewMode(viewMode);
-		int groupIDMax = 0;
-		for (Entry<Integer, LeafNode.DataProvider> entry : mesh.getGroupSet())
-			groupIDMax = Math.max(groupIDMax, entry.getKey());
-
-		groupIsLoaded = new boolean[groupIDMax + 1];
-		int index = 0;
-		for (Entry<Integer, LeafNode.DataProvider> entry : mesh.getGroupSet())
-		{
-			groupIsLoaded[entry.getKey()] = true;
-			++index;
-		}
-		nbrOfGroupLoaded = index;
+		
+		
+		Set<Entry<Integer, LeafNode.DataProvider>> groupSet = mesh.getGroupSet();
+		groupsLoaded = new TIntHashSet(groupSet.size());
+		for (Entry<Integer, LeafNode.DataProvider> entry : groupSet)
+			groupsLoaded.add(entry.getKey());
 
 		colorManager.setColor(new Color(255, 0, 0));
 
@@ -205,14 +188,14 @@ public class ViewableMesh extends Viewable
 	{
 		TIntArrayList cleanedSelection = new TIntArrayList(selection.length);
 		for (int id : selection)
-			if (id < nbrOfGroupLoaded && groupIsLoaded[id])
+			if (groupsLoaded.contains(id))
 				cleanedSelection.add(id);
 
-		if (selectionNode.size() != 0)
-			selectionChanged = true;
+		//if (selectionNode.size() != 0)
+			//selectionChanged = true;
 		selectionNode.clear();
 		for (int i = 0; i < cleanedSelection.size(); ++i)
-			if (selectionNode.add(groupIDToNode.get(cleanedSelection.get(i))))
-				this.selectionChanged = true;
+			if (selectionNode.add(groupIDToNode.get(cleanedSelection.get(i))));
+				//this.selectionChanged = true;
 	}
 }

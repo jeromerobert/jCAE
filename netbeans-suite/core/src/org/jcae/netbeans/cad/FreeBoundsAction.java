@@ -48,45 +48,15 @@ public class FreeBoundsAction extends CookieAction
 	}
 
 	protected void performAction(Node[] arg0)
-	{
-		BRep_Builder bb = new BRep_Builder();
-		TopoDS_Compound tc=new TopoDS_Compound();
-		bb.makeCompound(tc);
-		for (Node anArg0 : arg0)
-		{
-			TopoDS_Shape shape = GeomUtils.getShape(anArg0).getImpl();
-			ShapeAnalysis_FreeBounds safb = new ShapeAnalysis_FreeBounds(shape);
-			TopoDS_Compound closedWires = safb.getClosedWires();
-			TopoDS_Compound openWires = safb.getOpenWires();
-
-			if (closedWires != null)
-				bb.add(tc, closedWires);
-
-			if (openWires != null)
-				bb.add(tc, openWires);
-		}
-		
+	{	
 		View v=ViewManager.getDefault().getCurrentView();
-		ViewableCAD viewable = new ViewableCAD(tc);
-		viewable.setName(arg0[0].getName() + " free edges");
-		viewable.setEdgeColor(Color.GREEN);
-		viewable.setEdgeSize(viewable.getEdgeSize() * 2);
-		viewable.getEdges().setMapperCustomiser(new MapperCustomiser() {
-
-			public void customiseMapper(vtkMapper mapper)
-			{
-				mapper.SetResolveCoincidentTopologyToPolygonOffset();
-				mapper.SetResolveCoincidentTopologyPolygonOffsetFaces(0);
-				mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(-10., -10.);
-			}
-		});
-		//viewable.setEdgeSize(10);
-		
-		// We cannot do this. Review the conception of the selection manager to
-		// manage this case...
-		//SelectionManager.getDefault().addInteractor(viewable, arg0[0]);
-
-		v.add(viewable);
+		for(Node node : arg0) {
+			ViewableCAD viewable = new ViewableCAD(GeomUtils.getShape(node).getImpl(),true);
+			viewable.setName(node.getName() + " free edges");
+			viewable.setEdgeSize(viewable.getEdgeSize() * 2);
+			
+			v.add(viewable);
+		}
 		/*View v=ViewManager.getDefault().getCurrentView();
 		OCCProvider occp=new OCCProvider(tc);
 		occp.setEdgeColor(Color.GREEN);
