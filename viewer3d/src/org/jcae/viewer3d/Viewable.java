@@ -51,6 +51,7 @@ public interface Viewable
 	Node getJ3DNode();
 	
 	void pick(PickViewable result);
+	void pick(PickViewable result, View view);
 	
 	/**
 	 * Called when an area is picked
@@ -58,6 +59,7 @@ public interface Viewable
 	 * @param bound the volume used to do the picking
 	 */
 	void pickArea(PickInfo[] result, Bounds bound);
+	void pickArea(PickInfo[] result, Bounds bound, View view);
 	
 	void unselectAll();
 	
