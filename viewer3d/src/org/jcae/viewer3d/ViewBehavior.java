@@ -371,7 +371,8 @@ public  class ViewBehavior extends OrbitBehavior
 			invRot.invert();
 			invRot.transform(centerDelta);
 			trans.add(centerDelta);
-			setTranslation(trans);
+			//https://java3d.dev.java.net/issues/show_bug.cgi?id=179
+			//setTranslation(trans);
 			setRotationCenter(newCenter);
 		}
 		changeRotationCenter=false;
