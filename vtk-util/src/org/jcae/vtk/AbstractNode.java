@@ -453,8 +453,6 @@ public abstract class AbstractNode {
 		data.SetLines(Utils.createCells(dataProvider.getNbrOfLines(), dataProvider.getLines()));
 		data.SetPolys(Utils.createCells(dataProvider.getNbrOfPolys(), dataProvider.getPolys()));
 		
-		System.out.println("number of lines pwet pwet : " + data.GetNumberOfLines());
-		
 		//System.out.println("DATA RECREATED : " + data.GetNumberOfPoints());
 		
 		if(dataProvider.getNormals() == null)
