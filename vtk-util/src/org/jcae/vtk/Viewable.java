@@ -21,25 +21,23 @@ package org.jcae.vtk;
 
 import gnu.trove.TIntArrayList;
 import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIterator;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.logging.Logger;
 import vtk.vtkActor;
-import vtk.vtkPlane;
 import vtk.vtkPlaneCollection;
-import vtk.vtkRenderer;
 
 /**
  * @author Julian Ibarz
  */
 public abstract class Viewable extends MultiCanvas
 {
-
+	private final static Logger LOGGER = Logger.getLogger(Viewable.class.getName());
 	/** The position of the mouse when the press event occurs */
-	private String name = null;
+	private String name;
 	private ArrayList<SelectionListener> selectionListeners =
 			new ArrayList<SelectionListener>();
 	protected final double tolerance = 0.002; // 0.2% of tolerance in function of the (far-near) distance
@@ -47,10 +45,10 @@ public abstract class Viewable extends MultiCanvas
 	protected static final int DEFAULT_PIXEL_TOLERANCE = 3;
 	protected final Scene scene;
 	protected final Node rootNode; // The rootNode node of the viewable
-	protected boolean appendSelection = false;
+	protected boolean appendSelection;
 	protected HashSet<LeafNode> selectionNode = new HashSet<LeafNode>();
 	protected HashMap<LeafNode, TIntHashSet> selectionCell = new HashMap<LeafNode, TIntHashSet>();
-	protected boolean selectionChanged = false;
+	protected boolean selectionChanged;
 	protected boolean surfaceSelection = true;	// Do not modify this member directly (use setMode instead)
 	private SelectionType selectionType = SelectionType.NODE;
 
@@ -131,18 +129,9 @@ public abstract class Viewable extends MultiCanvas
 	{
 		this.surfaceSelection = surfaceSelection;
 	}
-
-	@Override
-	public void removeCanvas(Canvas canvas)
-	{
-		super.removeCanvas(canvas);
-	}
-
-	
 	
 	protected int[] selectPointOnSurface(Canvas canvas, int[] firstPoint, int[] secondPoint)
-	{
-		assert false;
+	{	
 		/*vtkSelectVisiblePoints selector = new vtkSelectVisiblePoints();
 		selector.ReleaseDataFlagOn();
 		
@@ -188,12 +177,13 @@ public abstract class Viewable extends MultiCanvas
 			TIntHashSet nodeCellSelection = selectionCell.get(node);
 			if (!appendSelection || nodeCellSelection == null)
 			{
-				/*				System.out.println("NODECELL : " + nodeCellSelection);
-				System.out.println("APPEND : " + appendSelection);*/
-				TIntHashSet newCellSelection = new TIntHashSet(node.getSelection().toNativeArray());
+				TIntHashSet newCellSelection =
+					new TIntHashSet(node.getSelection().toNativeArray());
+				
 				selectionCell.put(node, newCellSelection);
-
-				if (!selectionChanged && (nodeCellSelection == null || !nodeCellSelection.equals(newCellSelection)))
+				
+				if (!selectionChanged && (nodeCellSelection == null ||
+					!nodeCellSelection.equals(newCellSelection)))
 					selectionChanged = true;
 			} else
 			{
@@ -213,43 +203,21 @@ public abstract class Viewable extends MultiCanvas
 
 		for (LeafNode node : nodes)
 			if (node.getSelection().size() != 0)
-				System.out.println("ONE SELECTION NOT EMPTY ! GOOD ! ");
+				LOGGER.finest("One not empty selection found");
 
 		if (selectionChanged)
-			System.out.println("SELECTION CHANGED !");
+			LOGGER.finest("Selection changed");			
 		else
-			System.out.println("SELECTION NOT CHANGED ! WARNING !");
-
-	/*HashMap<LeafNode, TIntHashSet> newSelection;
-	
-	if (appendSelection)
-	newSelection = new HashSet<LeafNode>(selectionCell);
-	else
-	newSelection = new HashSet<LeafNode>();
-	
-	for (LeafNode node : nodes)
-	{
-	TIntArrayList nodeSelection = node.getSelection();
-	
-	if (nodeSelection.size() != 0)
-	{
-	// If already selected and in appending mode then deselect
-	if(!newSelection.add(node) && appendSelection)
-	newSelection.remove(node);
-	
-	// Remove from the selection node if the node is present
-	selectionNode.remove(node);
-	}
-	}*/
+			LOGGER.finest("Selection not changed");
 	}
 
 	protected void selectNodeOnSurface(Canvas canvas, int[] firstPoint, int[] secondPoint)
 	{
-		long begin = System.currentTimeMillis();
+		LOGGER.finest("Start pick color");
 		scene.pick(canvas, firstPoint, secondPoint);
-		System.out.println("TEMPS DE PICK COLOR : " + (System.currentTimeMillis() - begin));
-
-		begin = System.currentTimeMillis();
+		LOGGER.finest("End pick color");
+		
+		LOGGER.finest("Start dispatch");
 		List<LeafNode> nodes = rootNode.getLeaves();
 
 		HashSet<LeafNode> newSelection;
@@ -281,8 +249,7 @@ public abstract class Viewable extends MultiCanvas
 			selectionChanged = true;
 
 		selectionNode = newSelection;
-
-		System.out.println("TEMPS DE DISPATCH : " + (System.currentTimeMillis() - begin));
+		LOGGER.finest("End dispatch");
 	}
 
 	public boolean getAppendSelection()
@@ -329,8 +296,6 @@ public abstract class Viewable extends MultiCanvas
 			case NODE:
 				selectNodeOnSurface(canvas, pressPosition, releasePosition);
 				break;
-			default:
-				assert false : "Type of Selection unnknown";
 		}
 
 		manageSelection();
@@ -376,24 +341,13 @@ public abstract class Viewable extends MultiCanvas
 	private void highLightCells()
 	{
 		rootNode.highLightSelection();
-
-	/*List<LeafNode> leaves = rootNode.getLeaves();
-	
-	for (LeafNode leaf : leaves)
-	if (selectionCell.contains(leaf))
-	leaf.highLightSelection();
-	else
-	leaf.unHighLightSelection();*/
 	}
 
 	public void highLight()
 	{
 		highLightCells();
 		highLightNodes();
-		//System.out.println("AVANT REFRESH");
 		rootNode.refresh();
-		//System.out.println("APRES REFRESH");
-
 		render();
 	}
 
@@ -420,7 +374,6 @@ public abstract class Viewable extends MultiCanvas
 	{
 		// Send empty plane collection to removeCanvas the older planes
 		setClippingPlanes(new vtkPlaneCollection());
-
 		render();
 	}
 
@@ -431,7 +384,7 @@ public abstract class Viewable extends MultiCanvas
 
 	protected boolean isSelectionEmpty()
 	{
-		return selectionCell.size() == 0 && selectionNode.size() == 0;
+		return selectionCell.isEmpty() && selectionNode.isEmpty();
 	}
 
 	protected void manageSelection()
@@ -439,94 +392,6 @@ public abstract class Viewable extends MultiCanvas
 		if (selectionChanged)
 			fireSelectionChanged();
 		selectionChanged = false;
-	}
-
-	/**
-	 * Compute a vtkPlaneCollection when mouse is released then delegate to
-	 * manageClippingPlanes
-	 */
-	private void doClippingPlane(Canvas canvas, Point pressPosition, Point releasePosition)
-	{
-		// Compute the clipping planes
-		vtkRenderer render = canvas.GetRenderer();
-		vtkPlaneCollection planes = new vtkPlaneCollection();
-		vtkPlane plane = null;
-		double[] p1;
-		double[] p2;
-		double[] p3;
-
-	/**
-	 * These are the two points in the screen that define the different clipping planes
-	 */
-	/*int[][] pos1 =
-	{
-	{
-	pressPosition[0], pressPosition[1]
-	}, // Left plane
-	
-	{
-	releasePosition[0], pressPosition[1]
-	}, // Top plane
-	
-	{
-	releasePosition[0], releasePosition[1]
-	}, // Right plane
-	
-	{
-	pressPosition[0], releasePosition[1]
-	} // Bottom plane
-	
-	};
-	int[][] pos2 =
-	{
-	{
-	pressPosition[0], releasePosition[1]
-	},
-	{
-	pressPosition[0], pressPosition[1]
-	},
-	{
-	releasePosition[0], pressPosition[1]
-	},
-	{
-	releasePosition[0], releasePosition[1]
-	}
-	};
-	
-	for (int i = 0; i < 4; ++i)
-	{
-	plane = new vtkPlane();
-	render.SetDisplayPoint(pos1[i][0], pos1[i][1], 0.);
-	render.DisplayToWorld();
-	p1 = render.GetWorldPoint();
-	render.SetDisplayPoint(pos1[i][0], pos1[i][1], 1.);
-	render.DisplayToWorld();
-	p2 = render.GetWorldPoint();
-	render.SetDisplayPoint(pos2[i][0], pos2[i][1], 1.);
-	render.DisplayToWorld();
-	p3 = render.GetWorldPoint();
-	
-	// Compute two vectors of the plane
-	Vector3d v1 = new Vector3d();
-	Vector3d v2 = new Vector3d();
-	Vector3d n = new Vector3d();
-	
-	v1.set(p2);
-	v2.set(p1);
-	n.set(p3);
-	v1.sub(v2);
-	v2.sub(n);
-	
-	// Compute cross product (the normal of the plane) between p1 and p2
-	n.cross(v1, v2);
-	n.normalize();
-	
-	plane.SetNormal(n.getX(), n.getY(), n.getZ());
-	plane.SetOrigin(p1);
-	planes.AddItem(plane);
-	}
-	
-	setClippingPlanes(planes);*/
 	}
 
 	public void setPickable(boolean pickable)
@@ -558,8 +423,6 @@ public abstract class Viewable extends MultiCanvas
 			case NODE:
 				selectNodeOnSurface(canvas, firstPoint, secondPoint);
 				break;
-			default:
-				assert false : "Type of Selection unnknown";
 		}
 
 		manageSelection();

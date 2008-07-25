@@ -24,9 +24,7 @@ import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import vtk.vtkInteractorStyle;
 import vtk.vtkInteractorStyleRubberBand3D;
 import vtk.vtkInteractorStyleTrackballCamera;
 import vtk.vtkPlaneCollection;
@@ -38,13 +36,13 @@ import vtk.vtkPlaneCollection;
 public class View extends Canvas {
 	
 	protected final ArrayList<Viewable> viewables = new ArrayList<Viewable>();
-	protected Viewable currentViewable = null;
+	protected Viewable currentViewable;
 	private final CameraManager cameraManager = new CameraManager(this);
 	private MouseMode mouseMode = MouseMode.POINT_SELECTION;
-	private Point pressPosition = null;
-	private Point releasePosition = null;
+	private Point pressPosition;
+	private Point releasePosition;
 	private boolean interactive = true;
-	private boolean appendSelection = false;
+	private boolean appendSelection;
 	
 	public enum MouseMode
 	{

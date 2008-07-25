@@ -19,11 +19,10 @@
  */
 package org.jcae.vtk;
 
-import gnu.trove.TByteObjectHashMap;
 import gnu.trove.TLongObjectHashMap;
 import gnu.trove.TObjectByteHashMap;
 import java.awt.Point;
-import javax.swing.SwingUtilities;
+import java.util.logging.Logger;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import org.jcae.geometry.BoundingBox;
@@ -31,7 +30,6 @@ import org.jcae.geometry.Bounds;
 import vtk.vtkActor;
 import vtk.vtkActorCollection;
 import vtk.vtkCanvas;
-import vtk.vtkFloatArray;
 import vtk.vtkIdTypeArray;
 import vtk.vtkPlaneCollection;
 import vtk.vtkProp;
@@ -46,9 +44,11 @@ import vtk.vtkVisibleCellSelector;
 public class Scene implements AbstractNode.ActorListener
 {
 
-	private TLongObjectHashMap<AbstractNode> idActorToNode = new TLongObjectHashMap<AbstractNode>();
+	private TLongObjectHashMap<AbstractNode> idActorToNode =
+		new TLongObjectHashMap<AbstractNode>();
 	private boolean actorFiltering = true;
 	private vtkPlaneCollection planes = null;
+	private final static Logger LOGGER = Logger.getLogger(Scene.class.getName());
 	/**
 	 * Store the previous pickability of the scene.
 	 * 1 means the node is pickable
@@ -151,21 +151,6 @@ public class Scene implements AbstractNode.ActorListener
 	 */
 	public void pick(vtkCanvas canvas, int[] firstPoint, int[] secondPoint)
 	{
-		/*if(canvas instanceof Canvas)
-		/{
-		((Canvas)canvas).RenderSecured();
-		}
-		else throw new RuntimeException("PWET");   */
-		/*if (!SwingUtilities.isEventDispatchThread())
-		throw new RuntimeException("NOT IN THE GOOD THREAD");
-		vtkFloatArray beforeNative = new vtkFloatArray();
-		canvas.GetRenderWindow().GetZbufferData(firstPoint[0], firstPoint[1], secondPoint[0], secondPoint[1], beforeNative);
-		float[] before = beforeNative.GetJavaArray();*/
-
-		/*if(canvas instanceof Canvas)
-		{
-		((Canvas)canvas).RenderSecured();
-		}*/
 		vtkVisibleCellSelector selector = new vtkVisibleCellSelector();
 		selector.SetRenderer(canvas.GetRenderer());
 		selector.SetArea(firstPoint[0], firstPoint[1], secondPoint[0],
@@ -189,9 +174,13 @@ public class Scene implements AbstractNode.ActorListener
 			Bounds frustum = null;
 
 			if (pointPicking)
-				Utils.computeRay(canvas.GetRenderer(), new Point(firstPoint[0], firstPoint[1]), pickOrigin, pickDirection);
+				Utils.computeRay(canvas.GetRenderer(),
+					new Point(firstPoint[0], firstPoint[1]),
+					pickOrigin, pickDirection);
 			else
-				frustum = Utils.computePolytope(Utils.computeVerticesFrustum(firstPoint[0], firstPoint[1], secondPoint[0], secondPoint[1], canvas.GetRenderer()));
+				frustum = Utils.computePolytope(Utils.computeVerticesFrustum(
+					firstPoint[0], firstPoint[1], secondPoint[0], secondPoint[1],
+					canvas.GetRenderer()));
 
 			int j = 0;
 			for (vtkActor actor; (actor = actors.GetNextActor()) != null; ++j)
@@ -208,7 +197,7 @@ public class Scene implements AbstractNode.ActorListener
 					if (!box.intersect(pickOrigin, pickDirection))
 						actor.PickableOff();
 					else
-						System.out.println("ONE NODE PICKED !");
+						LOGGER.finest("One node picked");						
 				else
 					if (!frustum.intersect(box))
 						actor.PickableOff();
@@ -259,9 +248,8 @@ public class Scene implements AbstractNode.ActorListener
 			for (vtkActor actor; (actor = actors.GetNextActor()) != null; ++j)
 				actor.SetPickable(pickBackup[j]);
 		}
-
-		System.out.println("NUMBER OF ACTORS SELECTED : " + (idArray.GetDataSize() / 4));
-
+		
+		LOGGER.finest("Number of actors selected: "+ idArray.GetDataSize() / 4);
 		// If no selection was made leave
 		if (idArray.GetDataSize() == 0)
 			return;
@@ -286,31 +274,11 @@ public class Scene implements AbstractNode.ActorListener
 				{
 					vtkIdTypeArray ids = (vtkIdTypeArray) child.GetSelectionList();
 					node.manageSelection(Utils.getValues(ids));
-					System.out.println("ACTOR ID PICKED : " + prop.GetVTKId());
-					System.out.println("NODE PICKED : " + node);
+					LOGGER.finest("Actor picked id: "+prop.GetVTKId());
+					LOGGER.finest("Picked node: "+node);					
 				}
 			}
 		}
-	//long end = System.currentTimeMillis();
-	//System.out.println("TIME SELECTING DISPATCH : " + (begin - end));
-
-
-
-	/*int[] globalIDs = Utils.getValues(idArray);
-	TIntArrayList ids = new TIntArrayList(globalIDs.length / 4);
-	int nbOfSelection = 0;
-	for (int i = 0; i < globalIDs.length / 4; ++i)
-	if (globalIDs[i * 4 + 1] == IDActor)
-	{
-	ids.add(globalIDs[i * 4 + 3]);
-	++nbOfSelection;
-	}*/
-
-	// If no selection was maded leave
-		/*if (nbOfSelection == 0)
-	return new int[0];
-	
-	return ids.toNativeArray();*/
 	}
 
 	public void setClippingPlanes(vtkPlaneCollection planes)
