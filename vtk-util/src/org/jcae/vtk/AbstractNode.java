@@ -401,7 +401,7 @@ public abstract class AbstractNode {
 	
 	public void setManager(boolean manager)
 	{
-		if(this.manager = manager)
+		if(this.manager == manager)
 			return;
 		
 		this.manager = manager;
