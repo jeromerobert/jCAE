@@ -1,9 +1,0 @@
-Index: Common/vtkObject.cxx
-===================================================================
-RCS file: /cvsroot/VTK/VTK/Common/vtkObject.cxx,v
-retrieving revision 1.102
-diff -r1.102 vtkObject.cxx
-160c160
-<     vtkErrorMacro(<< "Trying to delete object with non-zero reference count.");
----
->     vtkWarningMacro(<< "Trying to delete object with non-zero reference count.");

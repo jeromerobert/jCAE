@@ -1,14 +1,19 @@
 commit 02f0ecb520569fbacdb723d8c0a3c518c22a1dda
-Author: Dave Demarle <dave.demarle@kitware.com>
-Date:   Wed Jun 25 14:06:35 2008 +0000
 
-    BUG: Don't clear z buffer during an area pick for consistancy with point pick. See bug 7236. Thanks: Julian Ibarz for the patch.
+From: Dave Demarle <dave.demarle@kitware.com>
+
+BUG: Don't clear z buffer during an area pick for consistancy with point pick. See bug 7236. Thanks: Julian Ibarz for the patch.
+---
+
+ Rendering/vtkOpenGLRenderWindow.cxx |    7 +++++++
+ 1 files changed, 7 insertions(+), 0 deletions(-)
+
 
 diff --git a/Rendering/vtkOpenGLRenderWindow.cxx b/Rendering/vtkOpenGLRenderWindow.cxx
-index 590fea3..08ac598 100644
+index be629f9..91d45c2 100644
 --- a/Rendering/vtkOpenGLRenderWindow.cxx
 +++ b/Rendering/vtkOpenGLRenderWindow.cxx
-@@ -1247,6 +1247,9 @@ int vtkOpenGLRenderWindow::SetRGBACharPixelData(int x1, int y1, int x2,
+@@ -1265,6 +1265,9 @@ int vtkOpenGLRenderWindow::SetRGBACharPixelData(int x1, int y1, int x2,
    glMatrixMode( GL_MODELVIEW );
    glPopMatrix();
  
@@ -18,7 +23,7 @@ index 590fea3..08ac598 100644
  
    glDisable( GL_SCISSOR_TEST );
    
-@@ -1267,6 +1270,10 @@ int vtkOpenGLRenderWindow::SetRGBACharPixelData(int x1, int y1, int x2,
+@@ -1285,6 +1288,10 @@ int vtkOpenGLRenderWindow::SetRGBACharPixelData(int x1, int y1, int x2,
                    data);
      }
  

@@ -1,1 +1,0 @@
-This directory contains all the patchs needed to use jCAE with VTK. You should use the script apply.sh if you have the last CVS version and apply-5-2.sh if you have the VTK-5-2 branch of CVS. See the scripts for more details.
