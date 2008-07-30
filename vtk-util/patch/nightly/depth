@@ -1,0 +1,67 @@
+This patch permits to not erase the depth buffer before a selection rendering. This permits to not have
+
+From:  <>
+
+to draw all the scene to check the visibility of an element.
+---
+
+ Rendering/vtkOpenGLRenderer.cxx |    3 ++-
+ Rendering/vtkRenderer.cxx       |    2 ++
+ Rendering/vtkRenderer.h         |    9 +++++++++
+ 3 files changed, 13 insertions(+), 1 deletions(-)
+
+
+diff --git a/Rendering/vtkOpenGLRenderer.cxx b/Rendering/vtkOpenGLRenderer.cxx
+index ca3793a..766068e 100644
+--- a/Rendering/vtkOpenGLRenderer.cxx
++++ b/Rendering/vtkOpenGLRenderer.cxx
+@@ -1104,7 +1104,8 @@ void vtkOpenGLRenderer::Clear(void)
+     }
+ 
+   glClearDepth(static_cast<GLclampf>(1.0));
+-  clear_mask |= GL_DEPTH_BUFFER_BIT;
++  if(this->SelectMode == vtkRenderer::NOT_SELECTING || this->ClearDepthForSelection)
++    clear_mask |= GL_DEPTH_BUFFER_BIT;
+ 
+   vtkDebugMacro(<< "glClear\n");
+   glClear(clear_mask);
+diff --git a/Rendering/vtkRenderer.cxx b/Rendering/vtkRenderer.cxx
+index d7c22e9..b47301f 100644
+--- a/Rendering/vtkRenderer.cxx
++++ b/Rendering/vtkRenderer.cxx
+@@ -78,6 +78,8 @@ vtkRenderer::vtkRenderer()
+ 
+   this->LightFollowCamera = 1;
+ 
++  this->ClearDepthForSelection = 1;
++
+   this->NumberOfPropsRendered = 0;
+ 
+   this->PropArray                = NULL;
+diff --git a/Rendering/vtkRenderer.h b/Rendering/vtkRenderer.h
+index a0aae36..866b7e3 100644
+--- a/Rendering/vtkRenderer.h
++++ b/Rendering/vtkRenderer.h
+@@ -131,6 +131,13 @@ public:
+   vtkBooleanMacro(AutomaticLightCreation,int);
+ 
+   // Description:
++  // This is a flag that indicate if the depth buffer is erased or not
++  // before the pick selection. This permits to not draw all the components
++  // and only one that can be picked but checking anyway if they are visible or not.
++  // By default this flag is on and is reset to on after each rendering selection.
++  vtkSetMacro(ClearDepthForSelection,int);
++  vtkBooleanMacro(ClearDepthForSelection,int);
++  // Description:
+   // Ask the lights in the scene that are not in world space
+   // (for instance, Headlights or CameraLights that are attached to the 
+   // camera) to update their geometry to match the active camera.
+@@ -461,6 +468,8 @@ protected:
+   // Allocate the time for each prop
+   void               AllocateTime();
+ 
++  int                ClearDepthForSelection;
++
+   // Internal variables indicating the number of props
+   // that have been or will be rendered in each category.
+   int                NumberOfPropsRendered;

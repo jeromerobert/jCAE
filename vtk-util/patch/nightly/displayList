@@ -1,0 +1,142 @@
+This patch permits to gain many time in pick color. There is additionnal informations here :
+
+From:  <>
+
+http://www.vtk.org/Bug/view.php?id=7111
+---
+
+ Rendering/vtkOpenGLDisplayListPainter.cxx |   17 +++++++++++------
+ Rendering/vtkPainter.cxx                  |    5 +++++
+ Rendering/vtkPainter.h                    |   17 +++++++++++++++++
+ Rendering/vtkRenderer.cxx                 |    2 ++
+ Rendering/vtkRenderer.h                   |    2 ++
+ 5 files changed, 37 insertions(+), 6 deletions(-)
+
+
+diff --git a/Rendering/vtkOpenGLDisplayListPainter.cxx b/Rendering/vtkOpenGLDisplayListPainter.cxx
+index 9b75ef5..9cf5d49 100644
+--- a/Rendering/vtkOpenGLDisplayListPainter.cxx
++++ b/Rendering/vtkOpenGLDisplayListPainter.cxx
+@@ -85,15 +85,21 @@ void vtkOpenGLDisplayListPainter::RenderInternal(vtkRenderer *renderer,
+     return;
+     }
+ 
++    long time = this->GetPreviousRenderingForSelection();
++    if(time == 0)
++        time = this->BuildTime;
++    else
++      time = renderer->GetRenderTime();
++
+   this->TimeToDraw = 0.0;
+ 
+   // if something has changed regenrate display lists.
+   if (!this->DisplayListId || 
+-    this->GetMTime() > this->BuildTime ||
+-    this->GetInput()->GetMTime() > this->BuildTime ||
+-    actor->GetProperty()->GetMTime() > this->BuildTime ||
++    (this->GetMTime() > time && time == this->BuildTime) ||
++    this->GetInput()->GetMTime() > time ||
++    actor->GetProperty()->GetMTime() > time ||
+     renderer->GetRenderWindow() != this->LastWindow.GetPointer() ||
+-    this->Information->GetMTime() > this->BuildTime || 
++    //this->Information->GetMTime() > this->BuildTime || 
+     this->LastUsedTypeFlags != typeflags)
+     {
+     this->ReleaseList();
+@@ -103,11 +109,10 @@ void vtkOpenGLDisplayListPainter::RenderInternal(vtkRenderer *renderer,
+     this->Superclass::RenderInternal(renderer, actor, typeflags,
+                                      forceCompileOnly);
+     glEndList();
+-
++    }
+     this->BuildTime.Modified();
+     this->LastWindow = renderer->GetRenderWindow();
+     this->LastUsedTypeFlags = typeflags;
+-    }
+ 
+   if(!forceCompileOnly)
+     {
+diff --git a/Rendering/vtkPainter.cxx b/Rendering/vtkPainter.cxx
+index 0e24142..d1cd945 100644
+--- a/Rendering/vtkPainter.cxx
++++ b/Rendering/vtkPainter.cxx
+@@ -85,6 +85,8 @@ vtkPainter::vtkPainter()
+   this->SetInformation(temp);
+   temp->Delete();
+ 
++  this->PreviousRenderingForSelection = 0;
++
+   vtkPainter::STATIC_DATA()->Set(this->Information, 0);
+   vtkPainter::CONSERVE_MEMORY()->Set(this->Information, 0);
+   vtkPainter::HIGH_QUALITY()->Set(this->Information, 1);
+@@ -211,6 +213,9 @@ void vtkPainter::Render(vtkRenderer* renderer, vtkActor* actor,
+ 
+   this->PrepareForRendering(renderer, actor);
+   this->RenderInternal(renderer, actor, typeflags,forceCompileOnly);
++
++  // If the previous rendering selection information exist remove it
++  SetPreviousRenderingForSelection(0);
+ }
+ 
+ //-----------------------------------------------------------------------------
+diff --git a/Rendering/vtkPainter.h b/Rendering/vtkPainter.h
+index f22a2de..859d86e 100644
+--- a/Rendering/vtkPainter.h
++++ b/Rendering/vtkPainter.h
+@@ -149,6 +149,21 @@ public:
+   virtual vtkDataObject* GetOutput()
+     { return this->Input; }
+ 
++  // Description:
++  // If you're making a selection rendering please add the TimeStamp time of the
++  // selection rendering.
++  // If the value is equal to zero then the previous rendering is not a selection rendering.
++  // If the value is different of zero then the previous rendering was a selection rendering.
++  void SetPreviousRenderingForSelection(int value)
++  {
++    this->PreviousRenderingForSelection = value;
++  }
++
++  int GetPreviousRenderingForSelection()
++  {
++    return this->PreviousRenderingForSelection;
++  }
++
+ //BTX
+ protected:
+   vtkPainter();
+@@ -236,6 +251,8 @@ protected:
+ 
+   double TimeToDraw;
+   vtkTimerLog* Timer;
++
++  int PreviousRenderingForSelection;
+   
+   vtkWeakPointer<vtkWindow> LastWindow; // Window used for previous render.
+                          // This is not reference counted.
+diff --git a/Rendering/vtkRenderer.cxx b/Rendering/vtkRenderer.cxx
+index b47301f..ef0fc01 100644
+--- a/Rendering/vtkRenderer.cxx
++++ b/Rendering/vtkRenderer.cxx
+@@ -1865,6 +1865,8 @@ void vtkRenderer::SwapOutSelectablePainter(
+       {
+       orig_mapper->SetPainter(orig_painter);
+       orig_painter->UnRegister(this);
++      // Inform the painters that this rendering is a selection rendering
++      orig_painter->SetPreviousRenderingForSelection(orig_mapper->GetMTime());
+       }
+     }
+   if (!orig_painter)
+diff --git a/Rendering/vtkRenderer.h b/Rendering/vtkRenderer.h
+index 866b7e3..4890776 100644
+--- a/Rendering/vtkRenderer.h
++++ b/Rendering/vtkRenderer.h
+@@ -433,6 +433,8 @@ public:
+   // Initial value is false.
+   vtkGetMacro(LastRenderingUsedDepthPeeling,int);
+   
++  vtkGetMacro(RenderTime,int);
++
+ protected:
+   vtkRenderer();
+   ~vtkRenderer();

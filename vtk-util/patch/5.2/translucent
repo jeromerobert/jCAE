@@ -1,0 +1,86 @@
+Allow picking translucent objects
+
+From:  <>
+
+
+---
+
+ Rendering/vtkRenderer.cxx |   22 ++++++++++++++++++++++
+ Rendering/vtkRenderer.h   |    9 +++++++++
+ 2 files changed, 31 insertions(+), 0 deletions(-)
+
+
+diff --git a/Rendering/vtkRenderer.cxx b/Rendering/vtkRenderer.cxx
+index ef0fc01..f4931d8 100644
+--- a/Rendering/vtkRenderer.cxx
++++ b/Rendering/vtkRenderer.cxx
+@@ -119,6 +119,7 @@ vtkRenderer::vtkRenderer()
+   this->OcclusionRatio=0.0;
+   this->MaximumNumberOfPeels=4;
+   this->LastRenderingUsedDepthPeeling=0;
++  this->PickTranslucent=0;
+ }
+ 
+ vtkRenderer::~vtkRenderer()
+@@ -1761,6 +1762,25 @@ int vtkRenderer::UpdateGeometryForSelection()
+       return 0; 
+     }        
+ 
++  // Check if there is translucent geometry
++  // do the render library specific stuff about translucent polygonal geometry.
++  // As it can be expensive, do a quick check if we can skip this step
++  int hasTranslucentPolygonalGeometry=0;
++  if(PickTranslucent)
++  {
++    for ( i = 0; !hasTranslucentPolygonalGeometry && i < this->PropArrayCount;
++          i++ )
++      { 
++      hasTranslucentPolygonalGeometry=
++        this->PropArray[i]->HasTranslucentPolygonalGeometry();
++      }
++    // Have to be set before a call to UpdateTranslucentPolygonalGeometry()
++    // because UpdateTranslucentPolygonalGeometry() will eventually call
++    // vtkOpenGLActor::Render() that uses this flag.
++    if(hasTranslucentPolygonalGeometry)
++      this->LastRenderingUsedDepthPeeling=0;
++  }
++
+   // loop through props and give them a chance to 
+   // render themselves as opaque geometry
+   for ( i = 0; i < this->PropArrayCount; i++ )
+@@ -1788,6 +1808,8 @@ int vtkRenderer::UpdateGeometryForSelection()
+       {
+       this->NumberOfPropsRendered += 
+         this->PropArray[i]->RenderOpaqueGeometry(this);
++      if(hasTranslucentPolygonalGeometry != 0 && this->PropArray[i]->HasTranslucentPolygonalGeometry())
++        this->PropArray[i]->RenderTranslucentPolygonalGeometry(this);
+       }
+ 
+     //restore the prop's original settings
+diff --git a/Rendering/vtkRenderer.h b/Rendering/vtkRenderer.h
+index 4890776..1f6bcf0 100644
+--- a/Rendering/vtkRenderer.h
++++ b/Rendering/vtkRenderer.h
+@@ -432,6 +432,12 @@ public:
+   // actually used depth peeling.
+   // Initial value is false.
+   vtkGetMacro(LastRenderingUsedDepthPeeling,int);
++
++  // Description:
++  // Turn on/off the selection of translucents actors.
++  vtkSetMacro(PickTranslucent,int);
++  vtkGetMacro(PickTranslucent,int);
++  vtkBooleanMacro(PickTranslucent,int);
+   
+   vtkGetMacro(RenderTime,int);
+ 
+@@ -582,6 +588,9 @@ protected:
+   // actually used depth peeling.
+   // Initial value is false.
+   int LastRenderingUsedDepthPeeling;
++
++  // Tells if the translucent actors can be picked.
++  int PickTranslucent;
+   
+   // VISIBLE CELL SELECTION ----------------------------------------
+   //BTX  
