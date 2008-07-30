@@ -1,8 +1,6 @@
-This patch corrects a bug on the java wrapper, additionnal informations here :
+Fix a bug on the java wrapper.
 
-From:  <>
-
-http://www.vtk.org/Bug/view.php?id=6723
+Additionnal information at http://www.vtk.org/Bug/view.php?id=6723
 ---
 
  Wrapping/vtkWrapJava.c |   79 +++++++++++++++++++++++++++++++++++++++++-------

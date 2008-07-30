@@ -1,8 +1,4 @@
 Allow picking translucent objects
-
-From:  <>
-
-
 ---
 
  Rendering/vtkRenderer.cxx |   22 ++++++++++++++++++++++

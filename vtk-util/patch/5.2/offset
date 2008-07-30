@@ -1,8 +1,6 @@
-This patch permits to make different polygon offset for each mappers (by default VTK use statics members so the offset parameters are shared by all the mappers).
+Make different polygon offset for each mappers.
 
-From:  <>
-
-
+By default VTK use statics members so the offset parameters are shared by all the mappers.
 ---
 
  Rendering/vtkMapper.cxx                            |   69 ++++----------------
