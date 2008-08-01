@@ -14,7 +14,6 @@ package org.jcae.geometry;
 
 import javax.vecmath.*;
 import java.lang.Math;
-import com.sun.j3d.internal.HashCodeUtil;
 
 /**
  * A BoundingPolytope defines a polyhedral bounding region using the

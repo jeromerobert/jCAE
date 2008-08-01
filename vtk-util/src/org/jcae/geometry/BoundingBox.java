@@ -13,7 +13,6 @@
 package org.jcae.geometry;
 
 import javax.vecmath.*;
-import com.sun.j3d.internal.HashCodeUtil;
 
 /**
  *  This class defines an axis aligned bounding box which is used for

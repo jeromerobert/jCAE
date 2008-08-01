@@ -14,7 +14,6 @@ package org.jcae.geometry;
 
 import javax.vecmath.*;
 import java.lang.Math;
-import com.sun.j3d.internal.HashCodeUtil;
 
 /**
  * This class defines a spherical bounding region which is defined by a
