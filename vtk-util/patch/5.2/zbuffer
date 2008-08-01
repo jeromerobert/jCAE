@@ -1,8 +1,5 @@
-commit 02f0ecb520569fbacdb723d8c0a3c518c22a1dda
-
-From: Dave Demarle <dave.demarle@kitware.com>
-
-BUG: Don't clear z buffer during an area pick for consistancy with point pick. See bug 7236. Thanks: Julian Ibarz for the patch.
+Don't clear z buffer during an area pick for consistancy with point pick. See bug 7236.
+This patch has been added to the cvs head.
 ---
 
  Rendering/vtkOpenGLRenderWindow.cxx |    7 +++++++

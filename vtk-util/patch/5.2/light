@@ -1,6 +1,5 @@
 Permit to disable lighting for an actor.
 
-
 ---
 
  Rendering/vtkActor.cxx                 |    1 +
@@ -46,18 +45,17 @@ index 48b0719..bf6a3ce 100644
    // Bounds are cached in an actor - the MapperBounds are also cache to
    // help know when the Bounds need to be recomputed.
 diff --git a/Rendering/vtkOpenGLLightingPainter.cxx b/Rendering/vtkOpenGLLightingPainter.cxx
-index d80a68c..d3a04f2 100644
+index 137c5e5..f48bdc1 100644
 --- a/Rendering/vtkOpenGLLightingPainter.cxx
 +++ b/Rendering/vtkOpenGLLightingPainter.cxx
-@@ -136,11 +136,17 @@ void vtkOpenGLLightingPainter::RenderInternal(vtkRenderer *renderer,
+@@ -133,10 +133,16 @@ void vtkOpenGLLightingPainter::RenderInternal(vtkRenderer* renderer, vtkActor* a
        enable_flags);
      this->ProgressScaleFactor = 
        static_cast<double>(enabled_cells) / total_cells;
 +    
 +    if(!actor->GetEnableLighting())
 +      glDisable(GL_LIGHTING);
-     this->Superclass::RenderInternal(renderer, actor, enable_flags,
-                                       forceCompileOnly);
+     this->Superclass::RenderInternal(renderer, actor, enable_flags);
  
      time_to_draw += this->DelegatePainter? 
        this->DelegatePainter->GetTimeToDraw() : 0;
