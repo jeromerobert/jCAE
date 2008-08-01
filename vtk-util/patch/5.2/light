@@ -1,0 +1,69 @@
+Permit to disable lighting for an actor.
+
+
+---
+
+ Rendering/vtkActor.cxx                 |    1 +
+ Rendering/vtkActor.h                   |    6 ++++++
+ Rendering/vtkOpenGLLightingPainter.cxx |    6 ++++++
+ 3 files changed, 13 insertions(+), 0 deletions(-)
+
+
+diff --git a/Rendering/vtkActor.cxx b/Rendering/vtkActor.cxx
+index 2e508aa..63fbfd6 100644
+--- a/Rendering/vtkActor.cxx
++++ b/Rendering/vtkActor.cxx
+@@ -52,6 +52,7 @@ vtkActor::vtkActor()
+   this->Property = NULL;
+   this->BackfaceProperty = NULL;
+   this->Texture = NULL;
++  this->EnableLighting = 1;
+   
+   // The mapper bounds are cache to know when the bounds must be recomputed
+   // from the mapper bounds.
+diff --git a/Rendering/vtkActor.h b/Rendering/vtkActor.h
+index 48b0719..bf6a3ce 100644
+--- a/Rendering/vtkActor.h
++++ b/Rendering/vtkActor.h
+@@ -124,6 +124,11 @@ public:
+   vtkGetObjectMacro(Mapper,vtkMapper);
+ 
+   // Description:
++  // Enable/Disable lighting for this actor.
++  vtkSetMacro(EnableLighting,int);
++  vtkGetMacro(EnableLighting,int);
++
++  // Description:
+   // Get the bounds for this Actor as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax). (The
+   // method GetBounds(double bounds[6]) is available from the superclass.)
+   void GetBounds(double bounds[6]) {this->vtkProp3D::GetBounds( bounds );}
+@@ -169,6 +174,7 @@ protected:
+ 
+   // is this actor opaque
+   int GetIsOpaque();
++  int EnableLighting;
+   
+   // Bounds are cached in an actor - the MapperBounds are also cache to
+   // help know when the Bounds need to be recomputed.
+diff --git a/Rendering/vtkOpenGLLightingPainter.cxx b/Rendering/vtkOpenGLLightingPainter.cxx
+index d80a68c..d3a04f2 100644
+--- a/Rendering/vtkOpenGLLightingPainter.cxx
++++ b/Rendering/vtkOpenGLLightingPainter.cxx
+@@ -136,11 +136,17 @@ void vtkOpenGLLightingPainter::RenderInternal(vtkRenderer *renderer,
+       enable_flags);
+     this->ProgressScaleFactor = 
+       static_cast<double>(enabled_cells) / total_cells;
++    
++    if(!actor->GetEnableLighting())
++      glDisable(GL_LIGHTING);
+     this->Superclass::RenderInternal(renderer, actor, enable_flags,
+                                       forceCompileOnly);
+ 
+     time_to_draw += this->DelegatePainter? 
+       this->DelegatePainter->GetTimeToDraw() : 0;
++
++    if(!actor->GetEnableLighting())
++      glEnable(GL_LIGHTING);
+     }
+ 
+   this->TimeToDraw = time_to_draw;
