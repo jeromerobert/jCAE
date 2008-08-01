@@ -25,6 +25,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import vtk.vtkInteractorStyleRubberBand3D;
 import vtk.vtkInteractorStyleTrackballCamera;
 import vtk.vtkPlaneCollection;
@@ -34,7 +35,7 @@ import vtk.vtkPlaneCollection;
  * @author Julian Ibarz
  */
 public class View extends Canvas {
-	
+	private final static Logger LOGGER = Logger.getLogger(View.class.getName());
 	protected final ArrayList<Viewable> viewables = new ArrayList<Viewable>();
 	protected Viewable currentViewable;
 	private final CameraManager cameraManager = new CameraManager(this);
@@ -177,12 +178,9 @@ public class View extends Canvas {
 
 	public void remove(Viewable interactor)
 	{
+		LOGGER.fine("Remove an interactor, left " + (viewables.size() - 1) + "viewables");
 		viewables.remove(interactor);
 		interactor.removeCanvas(this);
-		
-		lock();
-		RenderSecured();
-		unlock();
 		
 		if(viewables.size() != 0)
 			setCurrentViewable(viewables.get(0));
