@@ -25,7 +25,10 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Logger;
 import vtk.vtkActor;
 import vtk.vtkPlaneCollection;
@@ -169,7 +172,7 @@ public abstract class Viewable extends MultiCanvas
 		List<LeafNode> nodes = rootNode.getLeaves();
 		for (LeafNode leaf : selectionCell.keySet())
 			leaf.unSelectCells();
-
+		
 		scene.pick(canvas, firstPoint, secondPoint);
 
 		for (LeafNode node : nodes)
@@ -401,8 +404,7 @@ public abstract class Viewable extends MultiCanvas
 
 	public void pointSelection(Canvas canvas, Point pickPosition)
 	{
-		//if (!appendSelection)
-		//			unSelectCells();
+		LOGGER.fine("Making point selection");
 
 		int[] firstPoint = new int[2];
 		int[] secondPoint = new int[2];
@@ -419,9 +421,47 @@ public abstract class Viewable extends MultiCanvas
 				break;
 			case CELL:
 				selectCellOnSurface(canvas, firstPoint, secondPoint);
+				
+				// If multiple selection, select the first cell of the first leaf
+				Iterator< Entry<LeafNode, TIntHashSet>> iterEntries = selectionCell.entrySet().iterator();
+				Entry<LeafNode, TIntHashSet> entry = null;
+				
+				// Find the first leaf selection and clean it
+				while(iterEntries.hasNext())
+				{
+					entry = iterEntries.next();
+					TIntHashSet cells = entry.getValue();
+					if(cells.size() != 0)
+					{
+						if(cells.size() > 1)
+						{
+							int cell = cells.iterator().next();
+							cells.clear();
+							cells.add(cell);
+							entry.getKey().setSelection(new TIntArrayList(cells.toArray()));
+						}
+						break;
+					}
+				}
+				
+				// Clean the other selections
+				while(iterEntries.hasNext())
+				{
+					entry = iterEntries.next();
+					entry.getKey().unSelectCells();
+					entry.getValue().clear();
+				}
 				break;
 			case NODE:
 				selectNodeOnSurface(canvas, firstPoint, secondPoint);
+
+				// If multiple selection, select the first
+				if(selectionNode.size() > 1)
+				{
+					LeafNode firstLeaf = selectionNode.iterator().next();
+					selectionNode.clear();
+					selectionNode.add(firstLeaf);
+				}
 				break;
 		}
 
