@@ -723,12 +723,6 @@ public class Node extends AbstractNode
 		}		
 	}
 
-	public vtkPolyData temp()
-	{
-
-		return data;
-	}
-
 	@Override
 	public void refresh()
 	{
