@@ -111,7 +111,7 @@ public class ViewableMesh extends Viewable
 		for (Entry<Integer, LeafNode.DataProvider> entry : groupSet)
 			groupsLoaded.add(entry.getKey());
 
-		colorManager.setColor(new Color(255, 0, 0));
+		colorManager.setColor(this.selectionColor);
 
 		computeNodes(mesh);
 	}
@@ -123,7 +123,7 @@ public class ViewableMesh extends Viewable
 
 	public void setViewMode(ViewMode viewMode)
 	{
-		/*this.viewMode = viewMode;
+		this.viewMode = viewMode;
 		final int wired = (viewMode == ViewMode.WIRED) ? 1 : 0;
 
 		rootNode.setActorCustomiser(new AbstractNode.ActorCustomiser()
@@ -135,7 +135,7 @@ public class ViewableMesh extends Viewable
 			}
 		});
 		rootNode.applyActorCustomiser();
-		render();*/
+		render();
 	}
 
 	/**

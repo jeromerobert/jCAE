@@ -90,11 +90,11 @@ public class TestAmibe implements SelectionListener, KeyListener {
 				groups[i] = i;
 			AmibeToMesh reader = new AmibeToMesh(args[0], groups);
 			ViewableMesh rbh = new ViewableMesh(reader.getMesh());
-			//canvas.add(rbh);
+			canvas.add(rbh);
 			frame.setSize(800, 600);
 			TestAmibe test = new TestAmibe(rbh);
 			test.canvas = canvas;
-			rbh.addCanvas(canvas);
+			//rbh.addCanvas(canvas);
 			rbh.addSelectionListener(test);
 			vtkInteractorStyleTrackballCamera style = new vtkInteractorStyleTrackballCamera();
 			style.AutoAdjustCameraClippingRangeOn();
