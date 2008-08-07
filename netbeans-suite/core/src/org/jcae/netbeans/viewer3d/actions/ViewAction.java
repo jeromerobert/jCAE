@@ -47,6 +47,11 @@ public abstract class ViewAction extends CallableSystemAction
 		return HelpCtx.DEFAULT_HELP;
 	}
 	
+	@Override
+	protected boolean asynchronous() {
+        // performAction() should run in event thread for actions that need a rendering of canva
+        return false;
+    }
 	
 	public abstract void actionPerformed(View view);
 }

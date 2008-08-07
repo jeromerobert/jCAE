@@ -67,14 +67,15 @@ public class ViewableMesh extends Viewable
 	{
 		super(new Scene(), new Node(null));
 		this.colorManager = colorManager;
-		/*rootNode.setActorHighLightedCustomiser(new ActorHighLightedCustomiser()
+		rootNode.setActorHighLightedCustomiser(new ActorHighLightedCustomiser()
 		{
 
 			@Override
 			public void customiseActorHighLighted(vtkActor actor)
 			{
 				super.customiseActorHighLighted(actor);
-				//actor.GetProperty().EdgeVisibilityOn();
+				actor.GetProperty().EdgeVisibilityOn();
+				actor.SetEnableLighting(0);
 			}
 		});
 		rootNode.setActorSelectionCustomiser(new ActorSelectionCustomiser()
@@ -84,11 +85,13 @@ public class ViewableMesh extends Viewable
 			public void customiseActorSelection(vtkActor actor)
 			{
 				super.customiseActorSelection(actor);
-				//actor.GetProperty().EdgeVisibilityOn();
+				actor.GetProperty().EdgeVisibilityOn();
+				actor.SetEnableLighting(0);
 			}
 		});
 		rootNode.setMapperCustomiser(new AbstractNode.MapperCustomiser() {
 
+			@Override
 			public void customiseMapper(vtkMapper mapper)
 			{
 				mapper.SetResolveCoincidentTopologyToPolygonOffset();
@@ -97,13 +100,14 @@ public class ViewableMesh extends Viewable
 		});
 		rootNode.setMapperSelectionCustomiser(new AbstractNode.MapperSelectionCustomiser() {
 
+			@Override
 			public void customiseMapperSelection(vtkMapper mapper)
 			{
 				mapper.SetResolveCoincidentTopologyToPolygonOffset();
 				mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffSetFactor(), Utils.getOffSetValue());
 			}
-		});*/
-		//setViewMode(viewMode);
+		});
+		setViewMode(viewMode);
 		
 		
 		Set<Entry<Integer, LeafNode.DataProvider>> groupSet = mesh.getGroupSet();
@@ -112,7 +116,7 @@ public class ViewableMesh extends Viewable
 			groupsLoaded.add(entry.getKey());
 
 		colorManager.setColor(this.selectionColor);
-
+		
 		computeNodes(mesh);
 	}
 
@@ -129,9 +133,11 @@ public class ViewableMesh extends Viewable
 		rootNode.setActorCustomiser(new AbstractNode.ActorCustomiser()
 		{
 
+			@Override
 			public void customiseActor(vtkActor actor)
 			{
-				//actor.GetProperty().SetEdgeVisibility(wired);
+				actor.SetEnableLighting(0);
+				actor.GetProperty().SetEdgeVisibility(wired);
 			}
 		});
 		rootNode.applyActorCustomiser();
