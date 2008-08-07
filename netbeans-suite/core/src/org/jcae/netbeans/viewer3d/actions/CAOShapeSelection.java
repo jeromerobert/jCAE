@@ -86,10 +86,5 @@ public abstract class CAOShapeSelection extends BooleanStateAction implements Cu
 		SystemAction.get(CAOFaceSelection.class).updateButton(viewer);
 	}
 	
-	protected boolean asynchronous() {
-        // performAction() should run in event thread for actions that need a rendering of canva
-        return false;
-    }
-		
 	public abstract void actionPerformed(ViewableCAD interactor);
 }

@@ -43,7 +43,7 @@ public class SavePositionAction extends ViewAction
 	@Override
 	protected boolean asynchronous()
 	{
-		return false;
+		return true;
 	}
 	
 	public void actionPerformed(View view)

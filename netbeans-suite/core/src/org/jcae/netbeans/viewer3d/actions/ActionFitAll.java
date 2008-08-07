@@ -54,9 +54,4 @@ public class ActionFitAll extends CallableSystemAction
         // If you will provide context help then use:
         // return new HelpCtx(MyAction.class);
     }
-    
-    protected boolean asynchronous() {
-        // performAction() should run in event thread
-        return false;
-    }
 }

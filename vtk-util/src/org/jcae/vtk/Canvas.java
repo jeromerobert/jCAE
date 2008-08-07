@@ -48,50 +48,55 @@ import vtk.vtkInteractorStyleTrackballCamera;
 //the canvas. Beware to share vtkCamera. Beware of CameraClippingRange
 public class Canvas extends vtkCanvas
 {
+
 	private Thread creationWindowThread = null;
-	private static TimerTask garbageCall = new TimerTask() {
+	private static TimerTask garbageCall = new TimerTask()
+	{
+
 		@Override
 		public void run()
 		{
 			System.gc();
-			/*System.out.println("GC ! NUMBER OF VTK OBJECTS : " + vtkGlobalJavaHash.PointerToReference.size());
-			Map map = vtkGlobalJavaHash.PointerToReference;
-
-			TObjectIntHashMap<String> mapper = new TObjectIntHashMap<String>();
-			for(Object ob : map.values())
-			{
-				Object obj= ((WeakReference)ob).get();
-				
-				String name = "null";
-				if(obj != null)
-				{
-					name = obj.getClass().getSimpleName();		
-					int count = mapper.get(name);
-					mapper.put(name, ++count);
-				}
-				// If the object was removed remove its entry from the global hash
-				else map.remove(ob);
-			}
-			TObjectIntIterator<String> iter = mapper.iterator();
-			while(iter.hasNext())
-			{
-				iter.advance();
-				System.out.println(iter.key() + " : " + iter.value());
-			}*/
-		}
+		/*System.out.println("GC ! NUMBER OF VTK OBJECTS : " + vtkGlobalJavaHash.PointerToReference.size());
+		Map map = vtkGlobalJavaHash.PointerToReference;
 		
+		TObjectIntHashMap<String> mapper = new TObjectIntHashMap<String>();
+		for(Object ob : map.values())
+		{
+		Object obj= ((WeakReference)ob).get();
+		
+		String name = "null";
+		if(obj != null)
+		{
+		name = obj.getClass().getSimpleName();		
+		int count = mapper.get(name);
+		mapper.put(name, ++count);
+		}
+		// If the object was removed remove its entry from the global hash
+		else map.remove(ob);
+		}
+		TObjectIntIterator<String> iter = mapper.iterator();
+		while(iter.hasNext())
+		{
+		iter.advance();
+		System.out.println(iter.key() + " : " + iter.value());
+		}*/
+		}
 	};
 	private static Timer timerGC = new Timer();
 	
-	static {
+
+	static
+	{
 		timerGC.schedule(garbageCall, 1000, 30000);
 	}
+
 	public Canvas()
 	{
 		setMinimumSize(new Dimension(0, 0));
 		setPreferredSize(new Dimension(0, 0));
 		vtkInteractorStyleTrackballCamera style =
-			new vtkInteractorStyleTrackballCamera();
+				new vtkInteractorStyleTrackballCamera();
 		style.AutoAdjustCameraClippingRangeOn();
 		getIren().SetInteractorStyle(style);
 	}
@@ -119,30 +124,58 @@ public class Canvas extends vtkCanvas
 	 */
 	public void RenderSecured()
 	{
-		if(!isWindowSet())
+		if (!isWindowSet())
 			return;
-		
-		if (!SwingUtilities.isEventDispatchThread())
-		{
-			//Thread.dumpStack();
-			/*System.err.println(
-				"WARNING ! : you try to render on a different thread than the"+
-				"thread that creates the renderView. Making an invokeLater to"+
-				" render on the thread that creates the renderView");*/
-			try{
-			SwingUtilities.invokeLater(new Runnable()
-			{
-				public void run()
+
+		Utils.goToAWTThread(new Runnable()
 				{
-					Render();
-				}
-			});
-			}catch(Exception e)
+
+					public void run()
+					{
+						Render();
+					}
+				});
+	}
+
+	/**
+	 * Override to correct the bug of the UpdateLight (the light position is not updated
+	 * if the camera is moved by programming.
+	 * @see http://www.vtk.org/Bug/view.php?id=6913 [^]
+	 */
+	@Override
+	public synchronized void Render()
+	{
+		if (!rendering)
+		{
+			rendering = true;
+			if (ren.VisibleActorCount() == 0)
 			{
-				System.out.println("Exception invokeAndWait : " + e.getLocalizedMessage());
+				rendering = false;
+				return;
+			}
+			if (rw != null)
+			{
+				if (windowset == 0)
+				{
+					// set the window id and the active camera
+					if (lightingset == 0)
+					{
+						ren.AddLight(lgt);
+						lightingset = 1;
+					}
+					RenderCreate(rw);
+					Lock();
+					rw.SetSize(getWidth(), getHeight());
+					UnLock();
+					windowset = 1;
+				}
+				UpdateLight();
+				Lock();
+				rw.Render();
+				UnLock();
+				rendering = false;
 			}
 		}
-		else Render();
 	}
 
 	/**
@@ -154,11 +187,11 @@ public class Canvas extends vtkCanvas
 	{
 		// Do this workaround only for windows platforms
 		String osName = System.getProperty("os.name");
-		if(!osName.contains("Windows"));
-			super.removeNotify();
-		//Thread.dumpStack();
-		//System.out.println("REMOVE NOTIFY "+getParent());
-	}	
+		if (!osName.contains("Windows"));
+		super.removeNotify();
+	//Thread.dumpStack();
+	//System.out.println("REMOVE NOTIFY "+getParent());
+	}
 
 	/**
 	 * Workaround for http://www.vtk.org/Bug/view.php?id=6268
@@ -178,18 +211,18 @@ public class Canvas extends vtkCanvas
 		iren.ConfigureEvent();
 		UnLock();
 	}
-	
+
 	@Override
 	public void lock()
 	{
-		if(isWindowSet())
+		if (isWindowSet())
 			super.lock();
 	}
-	
+
 	@Override
 	public void unlock()
 	{
-		if(isWindowSet())
+		if (isWindowSet())
 			super.unlock();
 	}
 

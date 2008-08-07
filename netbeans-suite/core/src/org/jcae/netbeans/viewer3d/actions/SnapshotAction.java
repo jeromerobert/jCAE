@@ -70,6 +70,7 @@ public class SnapshotAction extends ViewAction
 	{
 			final JFileChooser fc = new JFileChooser();
 
+			fc.setFileFilter(PNG_FILE_FILTER);
 			if (fc.showSaveDialog(WindowManager.getDefault().getMainWindow())
 					 == JFileChooser.APPROVE_OPTION)
 			{	

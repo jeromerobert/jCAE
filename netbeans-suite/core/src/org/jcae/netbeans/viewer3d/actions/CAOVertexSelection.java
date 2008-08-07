@@ -63,10 +63,4 @@ public final class CAOVertexSelection extends CAOShapeSelection
 	{
 		return HelpCtx.DEFAULT_HELP;
 	}
-
-	@Override
-	protected boolean asynchronous()
-	{
-		return false;
-	}
 }

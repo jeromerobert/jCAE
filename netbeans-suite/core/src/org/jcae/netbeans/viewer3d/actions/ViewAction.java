@@ -47,15 +47,6 @@ public abstract class ViewAction extends CallableSystemAction
 		return HelpCtx.DEFAULT_HELP;
 	}
 	
-	protected boolean asynchronous() {
-        // performAction() should run in event thread for actions that need a rendering of canva
-        return false;
-    }
 	
-	// TODO : make it abstract when all the children will implement this method
 	public abstract void actionPerformed(View view);
-	/*{
-		throw new RuntimeException("The action" + toString() + " that is not yet implemented was called");
-	}*/
-	//public abstract void actionPerformedVTK(vtkCanvas view);
 }

@@ -70,10 +70,4 @@ public final class MeshFaceSelection extends MeshButton
 		
 		super.initialize();
 	}
-	
-	@Override
-	protected boolean asynchronous()
-	{
-		return false;
-	}
 }

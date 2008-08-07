@@ -22,7 +22,6 @@ package org.jcae.netbeans.viewer3d.actions;
 import org.jcae.vtk.ViewableOEMM;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
-import org.openide.util.actions.CallableSystemAction;
 
 public final class OctreeVisible extends OEMMButton
 {
@@ -55,9 +54,4 @@ public final class OctreeVisible extends OEMMButton
 		return HelpCtx.DEFAULT_HELP;
 	}
 
-	@Override
-	protected boolean asynchronous()
-	{
-		return false;
-	}
 }

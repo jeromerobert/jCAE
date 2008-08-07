@@ -29,6 +29,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.NoSuchElementException;
 import javax.imageio.ImageIO;
+import javax.swing.SwingUtilities;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector4d;
@@ -461,11 +462,10 @@ public class Utils
 	}
 	
 	/**
-	 * Take a screenshot of the canvas and use ScreenShotLister to get the BufferedImage
-	 * WARNING : Make sure the call of this function is made in the same thread than the
-	 * principal thread of AWT. If not you will have a black screenshot.
+	 * Take a screenshot of the canvas and use ScreenShotLister to get the BufferedImage.
 	 * @param canvas
 	 * @param listener
+	 * 
 	 */
 	public static BufferedImage takeScreenShot(final vtkCanvas canvas)
 	{
@@ -483,9 +483,15 @@ public class Utils
 		{
 			file = File.createTempFile("screen", "png");
 			writer.SetFileName(file.getAbsolutePath());
-			canvas.lock();
-			w2i.Update();
-			canvas.unlock();
+			Utils.goToAWTThread(new Runnable() {
+
+				public void run()
+				{
+					canvas.lock();
+					w2i.Update();
+					canvas.unlock();
+				}
+			});
 			writer.Write();
 			buffer = ImageIO.read(file);
 		} catch (Exception e)
@@ -496,6 +502,33 @@ public class Utils
 		return buffer;
 	}
 
+	/**
+	 * This methods permit to be sure the runnable is executed on the principal awt thread.
+	 * If we are already in, it just call run of runnable and if not it makes a
+	 * swing invoke and wait.
+	 * Warning : You can lock the canvas if you need in the run method of runnable.
+	 * Do not lock the canvas outside this because it can makes dead locks.
+	 * @param runnable
+	 */
+	public static void goToAWTThread(Runnable runnable)
+	{
+		if (!SwingUtilities.isEventDispatchThread())
+			//Thread.dumpStack();
+			/*System.err.println(
+			"WARNING ! : you try to render on a different thread than the"+
+			"thread that creates the renderView. Making an invokeLater to"+
+			" render on the thread that creates the renderView");*/
+			try
+			{
+				SwingUtilities.invokeAndWait(runnable);
+			} catch (Exception e)
+			{
+				System.out.println("Exception invokeAndWait : " + e.getLocalizedMessage());
+			}
+		else
+			runnable.run();
+	}
+	
 	/** Create a dummy cone actor
 	 * @return 
 	 */

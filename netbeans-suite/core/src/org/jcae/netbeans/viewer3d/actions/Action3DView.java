@@ -22,7 +22,6 @@ package org.jcae.netbeans.viewer3d.actions;
 
 import org.jcae.netbeans.viewer3d.ViewManager;
 import org.openide.util.HelpCtx;
-import org.openide.util.NbBundle;
 import org.openide.util.actions.CallableSystemAction;
 
 /**
@@ -39,6 +38,7 @@ public class Action3DView extends CallableSystemAction {
         return "New 3D view";
     }
     
+	@Override
     protected String iconResource() {
         return "org/jcae/netbeans/viewer3d/actions/Action3DViewIcon.gif";
     }
@@ -48,17 +48,4 @@ public class Action3DView extends CallableSystemAction {
         // If you will provide context help then use:
         // return new HelpCtx(MyAction.class);
     }
-    
-    protected boolean asynchronous() {
-        // performAction() should run in event thread
-        return false;
-    }
-    
-    /** Perform extra initialization of this action's singleton.
-     * PLEASE do not use constructors for this purpose!
-     * protected void initialize() {
-     * super.initialize();
-     * putProperty(Action.SHORT_DESCRIPTION, NbBundle.getMessage(MyAction.class, "HINT_Action"));
-     * }
-     */	
 }

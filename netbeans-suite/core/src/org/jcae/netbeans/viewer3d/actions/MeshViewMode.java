@@ -73,9 +73,4 @@ public final class MeshViewMode extends MeshButton
 		super.initialize();
 	}
 	
-	@Override
-	protected boolean asynchronous()
-	{
-		return false;
-	}
 }

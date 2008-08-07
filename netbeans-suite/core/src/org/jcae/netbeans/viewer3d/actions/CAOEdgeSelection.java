@@ -25,7 +25,6 @@
 package org.jcae.netbeans.viewer3d.actions;
 
 import org.jcae.vtk.ViewableCAD;
-import org.jcae.vtk.ViewableCAD;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 
@@ -63,11 +62,5 @@ public final class CAOEdgeSelection extends CAOShapeSelection
 	public HelpCtx getHelpCtx()
 	{
 		return HelpCtx.DEFAULT_HELP;
-	}
-
-	@Override
-	protected boolean asynchronous()
-	{
-		return false;
 	}
 }

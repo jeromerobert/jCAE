@@ -65,9 +65,4 @@ public class RemoveAction extends CookieAction
 		return HelpCtx.DEFAULT_HELP;
 	}
 	
-	@Override
-	protected boolean asynchronous()
-	{
-		return false;
-	}
 }

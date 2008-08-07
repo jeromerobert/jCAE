@@ -26,7 +26,6 @@ import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
 import org.jcae.vtk.ViewableMesh;
-import org.jcae.vtk.ViewableMesh;
 import org.openide.util.actions.BooleanStateAction;
 import org.openide.util.actions.SystemAction;
 
@@ -91,10 +90,5 @@ public abstract class MeshButton extends BooleanStateAction implements CurrentVi
 		SystemAction.get(MeshViewMode.class).updateButton(viewer);
 	}
 
-	protected boolean asynchronous() {
-        // performAction() should run in event thread for actions that need a rendering of canva
-        return false;
-    }
-		
 	public abstract void actionPerformed(ViewableMesh interactor);
 }

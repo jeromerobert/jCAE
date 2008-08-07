@@ -45,6 +45,7 @@ public class GoToAction extends ViewAction
 		new ViewCameraList(view.getCameraManager()).setVisible(true);
 	}
 
+	@Override
 	protected boolean asynchronous()
 	{
 		return false;

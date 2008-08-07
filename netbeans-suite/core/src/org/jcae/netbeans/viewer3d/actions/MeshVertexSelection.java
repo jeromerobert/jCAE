@@ -25,7 +25,6 @@
 package org.jcae.netbeans.viewer3d.actions;
 
 import org.jcae.vtk.ViewableMesh;
-import org.jcae.vtk.ViewableMesh;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 
@@ -69,9 +68,4 @@ public final class MeshVertexSelection extends MeshButton
 		return HelpCtx.DEFAULT_HELP;
 	}
 
-	@Override
-	protected boolean asynchronous()
-	{
-		return false;
-	}
 }

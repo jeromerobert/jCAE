@@ -66,8 +66,4 @@ public class ActionRemove  extends ViewAction
         return "org/jcae/netbeans/viewer3d/actions/removeViewable.gif";
     }
 
-	protected boolean asynchronous()
-	{
-		return false;
-	}
 }

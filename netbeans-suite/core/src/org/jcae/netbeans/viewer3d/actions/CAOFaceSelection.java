@@ -58,10 +58,4 @@ public final class CAOFaceSelection extends CAOShapeSelection
 	{
 		return HelpCtx.DEFAULT_HELP;
 	}
-
-	@Override
-	protected boolean asynchronous()
-	{
-		return false;
-	}
 }

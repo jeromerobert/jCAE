@@ -51,10 +51,4 @@ public final class MeshGroupSelection extends MeshButton
 	{
 		return HelpCtx.DEFAULT_HELP;
 	}
-
-	@Override
-	protected boolean asynchronous()
-	{
-		return false;
-	}
 }
