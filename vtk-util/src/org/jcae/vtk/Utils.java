@@ -20,6 +20,7 @@
 
 package org.jcae.vtk;
 
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -27,6 +28,7 @@ import java.awt.Point;
 import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Arrays;
 import java.util.NoSuchElementException;
 import javax.imageio.ImageIO;
 import javax.swing.SwingUtilities;
@@ -121,6 +123,38 @@ public class Utils
 	public static int booleanToInt(boolean value)
 	{
 		return (value) ? 1 : 0;
+	}
+	
+	public static boolean isMeshCoherent(float[] points, int[] indices)
+	{
+		boolean[] flags = new boolean[indices.length];
+
+		// Init
+		Arrays.fill(flags, false);
+
+		for (int i = 0; i < indices.length; ++i)
+		{
+			// The number of points of the polygon
+			int nb = indices[i];
+			// Check out of bound
+			if (i + nb >= indices.length)
+				return false;
+
+			// Explore the polygon
+			for (int j = i; j < i + nb; ++j)
+				// Check out of bound
+				if (indices[j] >= points.length)
+					return false;
+				else
+					flags[indices[j]] = true;
+		}
+
+		// Check if all the points are used
+		for (boolean flag : flags)
+			if (!flag)
+				return false;
+
+		return true;
 	}
 	
 	public static void vtkPropertySetColor(vtkProperty property, Color color)

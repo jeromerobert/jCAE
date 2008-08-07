@@ -25,6 +25,7 @@ import java.awt.Component;
 import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
+import java.util.logging.Logger;
 import vtk.vtkActor;
 import vtk.vtkProp;
 import vtk.vtkRenderer;
@@ -34,6 +35,7 @@ import vtk.vtkRenderer;
  * @author Julian Ibarz
  */
 public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreationListener {
+	private final static Logger LOGGER = Logger.getLogger(MultiCanvas.class.getName());
 	protected final ArrayList<Canvas> listCanvas = new ArrayList<Canvas>();
 	private final ArrayList<vtkProp> props = new ArrayList<vtkProp>();
 	protected Color selectionColor = Color.RED;
@@ -124,6 +126,9 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 	 */
 	public void addCanvas(Canvas canvas)
 	{
+		LOGGER.fine("Adding one canvas : " + canvas);
+		LOGGER.fine("Number of actors : " + canvas.GetRenderer().GetViewProps().GetNumberOfItems());
+		
 		listCanvas.add(canvas);
 		canvas.lock();
 		vtkRenderer renderer = canvas.GetRenderer();
@@ -132,6 +137,8 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 			renderer.AddViewProp(actor);
 		}
 		canvas.unlock();
+		
+		LOGGER.fine("Number of actors after : " + canvas.GetRenderer().GetViewProps().GetNumberOfItems());
 	}
 	
 	public void render()

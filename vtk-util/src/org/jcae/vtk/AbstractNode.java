@@ -22,6 +22,8 @@ package org.jcae.vtk;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import vtk.vtkActor;
 import vtk.vtkCanvas;
 import vtk.vtkFloatArray;
@@ -55,10 +57,9 @@ import vtk.vtkPolyDataNormals;
  * @author Julian Ibarz
  */
 public abstract class AbstractNode {
-// Datas
+	private final static Logger LOGGER = Logger.getLogger(AbstractNode.class.getName());
 	protected AbstractNode parent;
 	private final ArrayList<ActorListener> actorListeners = new ArrayList<ActorListener>();
-	//private final ArrayList<DataListener> dataListeners = new ArrayList<DataListener>();
 	private boolean manager = false;
 	protected vtkActor actor = null; // If actor != null the node is not a manager
 	protected vtkPolyDataMapper mapper = null;
@@ -148,11 +149,6 @@ public abstract class AbstractNode {
 	protected MapperHighLightedCustomiser mapperHighLightedCustomiser = null;
 	protected ActorSelectionCustomiser actorSelectionCustomiser = null;
 	protected MapperSelectionCustomiser mapperSelectionCustomiser = null;
-	
-	/*public static interface DataListener
-	{
-		void dataModified(AbstractNode node, vtkPolyData data);
-	}*/
 
 	public AbstractNode(AbstractNode parent)
 	{
@@ -196,8 +192,6 @@ public abstract class AbstractNode {
 		if(actor != null)
 		{
 			actor.SetPickable(Utils.booleanToInt(pickable));
-			//if(selectionHighLighter != null)
-			//	selectionHighLighter.SetPickable(Utils.booleanToInt(pickable));
 		}
 		else if(parent != null)
 			parent.setPickable(pickable);
@@ -213,16 +207,6 @@ public abstract class AbstractNode {
 		actorListeners.remove(listener);
 	}
 	
-	/*public void addDataListener(DataListener listener)
-	{
-		dataListeners.add(listener);
-	}
-	
-	public void removeDataListener(DataListener listener)
-	{
-		dataListeners.remove(listener);
-	}*/
-	
 	public vtkActor getActor()
 	{
 		return this.actor;
@@ -230,13 +214,6 @@ public abstract class AbstractNode {
 
 	protected void fireActorCreated(vtkActor actor)
 	{
-		/*System.out.println("NUMBER OF ACTOR LISTENERS : " + actorListeners.size());
-		for(ActorListener listener : actorListeners)
-		{
-			System.out.println("TYPE : " + listener.getClass().getSimpleName());
-		}*/
-		
-		
 		for (ActorListener listener : actorListeners)
 			listener.actorCreated(this, actor);
 	}
@@ -383,16 +360,6 @@ public abstract class AbstractNode {
 		return mapperHighLightedCustomiser;
 	}
 	
-	
-	
-	/*protected void fireDataModified(vtkPolyData data)
-	{
-		for(DataListener listener : dataListeners)
-			listener.dataModified(this, data);
-	}*/
-	
-	
-	
 	protected void fireActorHighLighted(vtkActor actor)
 	{		
 		for (ActorListener listener : actorListeners)
@@ -419,11 +386,8 @@ public abstract class AbstractNode {
 
 	public void setVisible(boolean visible)
 	{
-		//System.out.println("this.visible = " + this.visible);
 		if(this.visible == visible)
 			return;
-		
-		//System.out.println("CHANGE VISIIBLITY " + visible);
 		
 		this.visible = visible;
 		
@@ -453,7 +417,17 @@ public abstract class AbstractNode {
 		data.SetLines(Utils.createCells(dataProvider.getNbrOfLines(), dataProvider.getLines()));
 		data.SetPolys(Utils.createCells(dataProvider.getNbrOfPolys(), dataProvider.getPolys()));
 		
-		//System.out.println("DATA RECREATED : " + data.GetNumberOfPoints());
+		LOGGER.finest("Number of points : " + data.GetPoints().GetNumberOfPoints());
+		LOGGER.finest("Number of vertice : " + data.GetVerts().GetNumberOfCells());
+		LOGGER.finest("Number of lines : " + data.GetLines().GetNumberOfCells());
+		LOGGER.finest("Number of polys : " + data.GetPolys().GetNumberOfCells());
+				
+		if(LOGGER.isLoggable(Level.FINEST))
+		{
+			LOGGER.finest("vertice coherance : " + Utils.isMeshCoherent(dataProvider.getNodes(), dataProvider.getVertice()));
+			LOGGER.finest("line coherance : " + Utils.isMeshCoherent(dataProvider.getNodes(), dataProvider.getLines()));
+			LOGGER.finest("polys coherance : " + Utils.isMeshCoherent(dataProvider.getNodes(), dataProvider.getPolys()));
+		}
 		
 		if(dataProvider.getNormals() == null)
 			return;
@@ -497,8 +471,6 @@ public abstract class AbstractNode {
 		if(selectionHighLighter == null)
 			return;
 		
-		//System.out.println("DELETE HIGHLIGHT SELECTION");
-		
 		fireActorDeleted(selectionHighLighter);
 		selectionHighLighter = null;
 		selectionHighLighterMapper = null;
@@ -513,14 +485,11 @@ public abstract class AbstractNode {
 	
 	protected void refreshActor()
 	{
-		//refreshData();
 		boolean actorCreated = false;
 		
-		//System.out.println("REFRESH ACTOR !");
 		if(actor == null)
 		{
 			actorCreated = true;
-			//System.out.println("CREATING AN ACTOR !");
 			actor = new vtkActor();
 			getActorCustomiser().customiseActor(actor);
 			mapper = new vtkPolyDataMapper();
@@ -534,14 +503,6 @@ public abstract class AbstractNode {
 		// Call fire after the map creation
 		if(actorCreated)
 			fireActorCreated(actor);
-
-			
-		/*System.out.println("number of lines : " + data.GetNumberOfLines());
-		System.out.println("number of polys : " + data.GetNumberOfPolys());
-		System.out.println("number of nodes : " + data.GetNumberOfPoints());*/
-		/*mapper.SetColorModeToDefault();
-		mapper.ScalarVisibilityOff();
-		actor.GetProperty().SetColor(1, 0, 0);*/
 	}
 	
 	public boolean isSelected()

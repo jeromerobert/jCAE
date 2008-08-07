@@ -74,32 +74,40 @@ public class TestAmibe implements SelectionListener, KeyListener {
 				System.out.println("Capabilities : " +canvas.GetRenderWindow().ReportCapabilities());
 				canvas.unlock();
 				break;
+			case KeyEvent.VK_E:
+				// Check the number of actors
+				int nbrActor = canvas.GetRenderer().GetNumberOfPropsRendered();
+				System.out.println("Number of actors rendered : " + nbrActor);
+				System.out.println("Number of actors : " + canvas.GetRenderer().GetViewProps().GetNumberOfItems());
 		}
 	}
     public static void main(String[] args) {
         try
 		{
-			JFrame frame = new JFrame();
-			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			frame.setVisible(true);
-			View canvas = new View();
-			frame.add(canvas, BorderLayout.CENTER);
-			vtkRenderer renderer = canvas.GetRenderer();
-			int[] groups = new int[33];
+		JFrame frame = new JFrame();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setVisible(true);
+		View canvas = new View();
+		frame.add(canvas, BorderLayout.CENTER);
+		vtkRenderer renderer = canvas.GetRenderer();
+		int[] groups = new int[33];
 			for(int i = 0 ; i < 33 ; ++i)
 				groups[i] = i;
-			AmibeToMesh reader = new AmibeToMesh(args[0], groups);
-			ViewableMesh rbh = new ViewableMesh(reader.getMesh());
-			canvas.add(rbh);
-			frame.setSize(800, 600);
-			TestAmibe test = new TestAmibe(rbh);
-			test.canvas = canvas;
-			//rbh.addCanvas(canvas);
-			rbh.addSelectionListener(test);
-			vtkInteractorStyleTrackballCamera style = new vtkInteractorStyleTrackballCamera();
-			style.AutoAdjustCameraClippingRangeOn();
-			canvas.getIren().SetInteractorStyle(style);
-			renderer.ResetCamera();
+		AmibeToMesh reader = new AmibeToMesh(args[0], groups);	
+		ViewableMesh rbh = new ViewableMesh(reader.getMesh());
+		canvas.add(rbh);
+		frame.setSize(800, 600);
+		TestAmibe test = new TestAmibe(rbh);
+		canvas.addKeyListener(test);
+		//rbh.setViewMode(ViewableMesh.ViewMode.WIRED);
+		test.canvas = canvas;
+		//canvas.addKeyListener(test);
+		//rbh.addSelectionListener(test);
+		vtkInteractorStyleTrackballCamera style = new vtkInteractorStyleTrackballCamera();
+		//canvas.getIren().SetPicker(new vtkAreaPicker());
+		style.AutoAdjustCameraClippingRangeOn();
+		canvas.getIren().SetInteractorStyle(style);
+		renderer.ResetCamera();
 
 			
 		}

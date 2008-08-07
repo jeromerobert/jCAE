@@ -70,24 +70,23 @@ public class AmibeToMesh
 			int[] quads = domain.getQuad4();
 			int[] triangles = domain.getTria3();
 			
-			int[] indices = new int[4 * (triangles.length / 3) +  5 * (quads.length / 4)];
-			
+			this.polys = new int[4 * (triangles.length / 3) +  5 * (quads.length / 4)];
 			int offSet = 0;
 			for(int i = 0 ; i < triangles.length ; )
 			{
-				indices[offSet++] = 3;
-				indices[offSet++] = triangles[i++];
-				indices[offSet++] = triangles[i++];
-				indices[offSet++] = triangles[i++];
+				polys[offSet++] = 3;
+				polys[offSet++] = triangles[i++];
+				polys[offSet++] = triangles[i++];
+				polys[offSet++] = triangles[i++];
 			}
 			
 			for(int i = 0 ; i < quads.length ; )
 			{
-				indices[offSet++] = 4;
-				indices[offSet++] = triangles[i++];
-				indices[offSet++] = triangles[i++];
-				indices[offSet++] = triangles[i++];
-				indices[offSet++] = triangles[i++];
+				polys[offSet++] = 4;
+				polys[offSet++] = quads[i++];
+				polys[offSet++] = quads[i++];
+				polys[offSet++] = quads[i++];
+				polys[offSet++] = quads[i++];
 			}
 		}
 	}

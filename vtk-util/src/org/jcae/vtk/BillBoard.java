@@ -19,7 +19,7 @@
  */
 package org.jcae.vtk;
 
-import org.jcae.vtk.Utils;
+
 import vtk.vtkActor2D;
 import vtk.vtkCoordinate;
 import vtk.vtkFloatArray;
