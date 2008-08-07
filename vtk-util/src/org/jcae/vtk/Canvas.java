@@ -143,7 +143,7 @@ public class Canvas extends vtkCanvas
 	 * @see http://www.vtk.org/Bug/view.php?id=6913 [^]
 	 */
 	@Override
-	public synchronized void Render()
+	public void Render()
 	{
 		if (!rendering)
 		{
