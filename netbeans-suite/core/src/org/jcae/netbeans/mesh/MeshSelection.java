@@ -79,7 +79,6 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 	public void currentViewableChanged(Viewable newInteractor)
 	{
 		// Find if an interactor is becomed UnInteractive
-		System.out.println("Interactors :");
 		Collection<Viewable> currentViewables = ViewManager.getDefault().getCurrentViewables();
 		for (Viewable interactor : interactors)
 			if (!currentViewables.contains(interactor))
@@ -88,7 +87,6 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 				interactor.removeSelectionListener(this);
 				break;
 			}
-		System.out.println("End interactors");
 
 		if (newInteractor == null || !(newInteractor instanceof ViewableMesh))
 			return;
@@ -99,9 +97,7 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 			if (interactors.add((ViewableMesh) meshInteractor))
 			{
 				meshInteractor.addSelectionListener(this);
-				System.out.println("refresh Highlight begin");
 				//refreshHighLight();
-				System.out.println("refresh Highlight end");
 			}
 	}
 
@@ -183,8 +179,7 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 								}
 						}
 
-				selectionLock = false;
-				System.err.println("WARNING : Mesh Node not founded !");
+				selectionLock = false;				
 			}
 		});
 	}
@@ -195,17 +190,11 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 	 */
 	private void refreshHighLight()
 	{
-		/*SwingUtilities.invokeLater(new Runnable()
-		{
-		public void run()
-		{*/
 		for (ViewableMesh interactor : interactors)
 		{
 			interactor.setSelection(selection.toNativeArray());
 			interactor.highLight();
 		}
-	/*}
-	});*/
 	}
 
 	/** Return all ModuleNode
@@ -231,9 +220,7 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 	{
 		if (evt.getPropertyName().equals(ExplorerManager.PROP_SELECTED_NODES) && evt.getNewValue() instanceof Node[] && !selectionLock && !SelectionManager.getDefault().isDisableListeningProperty())
 		{
-			selectionLock = true;
-
-			System.out.println("PROPERTY CHANGED !");
+			selectionLock = true;		
 			Node[] nodes = (Node[]) evt.getNewValue();
 
 			selection = new TIntArrayList(nodes.length);
@@ -251,24 +238,6 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 			refreshHighLight();
 
 			selectionLock = false;
-		/*selection = new ArrayList<TopoDS_Shape>(nodes.length);
-		// Retrieve the shapes
-		if(!Arrays.asList(entity.getNode().getChildren().getNodes()).contains(n))
-		continue;
-		
-		NbShape nbShape = GeomUtils.getShape(n);
-		// If it's not a shape node
-		if(nbShape == null)
-		continue;
-		
-		TopoDS_Shape shape = nbShape.getImpl();
-		// Add only vertice, edges or faces others are ignored
-		if((shape instanceof TopoDS_Vertex) || (shape instanceof TopoDS_Edge) || (shape instanceof TopoDS_Face))
-		selection.add(shape);
-		}
-		
-		refreshHighLight();
-		selectionLock = false;*/
 		}
 	}
 }

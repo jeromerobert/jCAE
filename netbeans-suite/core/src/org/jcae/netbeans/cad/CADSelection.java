@@ -84,7 +84,6 @@ public class CADSelection implements EntitySelection, SelectionListener,
 	public void currentViewableChanged(Viewable newInteractor)
 	{
 		// Find if an interactor is becomed UnInteractive
-		System.out.println("Interactors :");
 		Collection<Viewable> currentViewables = ViewManager.getDefault().getCurrentViewables();
 		for (Viewable interactor : interactors)
 			if(!currentViewables.contains(interactor))
@@ -93,7 +92,6 @@ public class CADSelection implements EntitySelection, SelectionListener,
 				interactor.removeSelectionListener(this);
 				break;
 			}
-		System.out.println("End interactors");
 
 		if (newInteractor == null || !(newInteractor instanceof ViewableCAD))
 			return;
@@ -103,10 +101,8 @@ public class CADSelection implements EntitySelection, SelectionListener,
 		if (SelectionManager.getDefault().getEntity(caoInteractor) == entity)
 			if (interactors.add((ViewableCAD) caoInteractor))
 			{
-				caoInteractor.addSelectionListener(this);
-				System.out.println("refresh Highlight begin");
+				caoInteractor.addSelectionListener(this);			
 				refreshHighLight();
-				System.out.println("refresh Highlight end");
 			}
 	}
 
