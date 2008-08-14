@@ -22,11 +22,13 @@ package org.jcae.netbeans;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.prefs.Preferences;
 import org.jcae.opencascade.jni.BRep_Builder;
 import javax.swing.filechooser.FileSystemView;
 import org.openide.explorer.ExplorerManager;
 import org.openide.modules.InstalledFileLocator;
 import org.openide.modules.ModuleInstall;
+import org.openide.util.NbPreferences;
 import org.openide.windows.WindowManager;
 
 /**
@@ -70,5 +72,11 @@ public class Installer extends ModuleInstall
 				}				
 			}
 		});
+		
+		//hide the property panel description area by default
+		Preferences p = NbPreferences.root().node("org/openide/explorer");
+		if(p.get("showDescriptionArea", null) == null)
+			p.putBoolean("showDescriptionArea", false);
+		
 	}
 }
