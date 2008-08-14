@@ -6,8 +6,8 @@
 # Name of the Java directory in the final bundle
 JAVA_NAME=jre-6
 # Name of the Groovy directory in the final bundle
-GROOVY_NAME=groovy-1.1-beta-2
-VERSION=jcae-@JCAE_VERSION@
+GROOVY_NAME=groovy-1.5.6
+VERSION=jcae-0.16
 rm -rf $VERSION
 mkdir $VERSION
 cd $VERSION
