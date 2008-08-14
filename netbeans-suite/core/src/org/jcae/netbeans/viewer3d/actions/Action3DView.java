@@ -26,7 +26,7 @@ import org.openide.util.actions.CallableSystemAction;
 
 /**
  * Action that can always be invoked and work procedurally.
- * @author jerome
+ * @author Jerome Robert
  */
 public class Action3DView extends CallableSystemAction {
     
@@ -48,4 +48,10 @@ public class Action3DView extends CallableSystemAction {
         // If you will provide context help then use:
         // return new HelpCtx(MyAction.class);
     }
+
+	@Override
+	protected boolean asynchronous()
+	{
+		return false;
+	}
 }

@@ -38,16 +38,19 @@ public class ActionRemove  extends ViewAction
 		if(view!=null)
 		{
 			Viewable viewable = view.getCurrentViewable();
-			view.remove(view.getCurrentViewable());
-			SelectionManager.getDefault().removeInteractor(viewable);
-			
-			SystemAction.get(SelectViewable.class).refresh();
+			if(viewable != null)
+			{
+				view.remove(view.getCurrentViewable());
+				SelectionManager.getDefault().removeInteractor(viewable);
+				SystemAction.get(SelectViewable.class).refresh();
+			}
 		}	
 	}
 
 	/* (non-Javadoc)
 	 * @see org.openide.util.actions.SystemAction#getName()
 	 */
+	@Override
 	public String getName()
 	{
 		return "remove";
@@ -56,14 +59,15 @@ public class ActionRemove  extends ViewAction
 	/* (non-Javadoc)
 	 * @see org.openide.util.actions.SystemAction#getHelpCtx()
 	 */
+	@Override
 	public HelpCtx getHelpCtx()
 	{
 		return HelpCtx.DEFAULT_HELP;
 	}
 	
+	@Override
 	protected String iconResource()
     {
         return "org/jcae/netbeans/viewer3d/actions/removeViewable.gif";
     }
-
 }

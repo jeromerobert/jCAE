@@ -159,6 +159,7 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 		{
 			renderer.RemoveViewProp(actor);
 		}
+		canvas.RenderSecured();
 	}
 		
 	public void lockCanvas()
