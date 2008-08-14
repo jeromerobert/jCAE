@@ -76,6 +76,7 @@ public class ViewableMesh extends Viewable
 				super.customiseActorHighLighted(actor);
 				actor.GetProperty().EdgeVisibilityOn();
 				actor.SetEnableLighting(0);
+				actor.GetProperty().SetEdgeColor(0.4, 0.4, 0.4);
 			}
 		});
 		rootNode.setActorSelectionCustomiser(new ActorSelectionCustomiser()
@@ -87,6 +88,7 @@ public class ViewableMesh extends Viewable
 				super.customiseActorSelection(actor);
 				actor.GetProperty().EdgeVisibilityOn();
 				actor.SetEnableLighting(0);
+				actor.GetProperty().SetEdgeColor(0.4, 0.4, 0.4);
 			}
 		});
 		rootNode.setMapperCustomiser(new AbstractNode.MapperCustomiser() {
@@ -138,6 +140,7 @@ public class ViewableMesh extends Viewable
 			{
 				actor.SetEnableLighting(0);
 				actor.GetProperty().SetEdgeVisibility(wired);
+				actor.GetProperty().SetEdgeColor(0.2, 0.2, 0.2);
 			}
 		});
 		rootNode.applyActorCustomiser();
