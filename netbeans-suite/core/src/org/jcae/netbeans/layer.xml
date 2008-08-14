@@ -18,12 +18,10 @@
  along with this program; if not, write to the Free Software Foundation, Inc.,
  59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  
- (C) Copyright 2005, by EADS CRC
+ (C) Copyright 2005-2008, by EADS France
 
 -->
 <filesystem>
-	<attr name="Toolbars\File\position" intvalue="400"/>
-    <attr name="Toolbars\Memory\position" intvalue="500"/>
     <folder name="Actions">
 		<folder name="JCAE3DViewer">
 			<file name="org-jcae-netbeans-viewer3d-actions-Action3DView.instance">
@@ -295,6 +293,7 @@
             <file name="org-openide-actions-UndoAction.instance_hidden"/>
         </folder>
         <folder name="ShapeTypeCAO">
+            <attr name="SystemFileSystem.localizingBundle" stringvalue="org.jcae.netbeans.Bundle"/>
             <attr name="position" intvalue="140"/>
             <file name="org-jcae-netbeans-viewer3d-actions-CAOVertexSelection.shadow">
                 <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-CAOVertexSelection.instance"/>
@@ -310,6 +309,7 @@
             </file>
                 </folder>
         <folder name="ShapeTypeMesh">
+            <attr name="SystemFileSystem.localizingBundle" stringvalue="org.jcae.netbeans.Bundle"/>
             <attr name="position" intvalue="212"/>
             <file name="org-jcae-netbeans-viewer3d-actions-MeshFaceSelection.shadow">
                 <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-MeshFaceSelection.instance"/>
@@ -318,10 +318,6 @@
             <file name="org-jcae-netbeans-viewer3d-actions-MeshGroupSelection.shadow">
                 <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-MeshGroupSelection.instance"/>
                 <attr name="position" intvalue="0"/>
-            </file>
-            <file name="org-jcae-netbeans-viewer3d-actions-MeshVertexSelection.shadow">
-                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-MeshVertexSelection.instance"/>
-                <attr name="position" intvalue="100"/>
             </file>
             <file name="org-jcae-netbeans-viewer3d-actions-MeshWired.shadow">
                 <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-MeshViewMode.instance"/>
@@ -434,14 +430,6 @@
 				<attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-cad-ImportAction.instance"/>
 			    <attr name="position" intvalue="2150"/>
             </file>
-			<file name="org-jcae-netbeans-viewer3d-actions-HideRelativeAxis.shadow">
-                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-HideRelativeAxis.instance"/>
-                <attr name="position" intvalue="-100"/>
-            </file>
-            <file name="org-jcae-netbeans-viewer3d-actions-VertexSelectionMode.shadow">
-                <attr name="originalFile" stringvalue="Actions/jCAE/org-jcae-netbeans-viewer3d-actions-CAOVertexSelection.instance"/>
-                <attr name="position" intvalue="0"/>
-            </file>
             <file name="org-openide-actions-PageSetupAction.instance_hidden"/>
 			<file name="org-openide-actions-PrintAction.instance_hidden"/>
 		</folder>
@@ -525,21 +513,16 @@
 			</folder>
 		</folder>
 	</folder>
-
-	<folder name="Windows2">
-		<folder name="Modes">
-			<folder name="navigator">
-				<file name="navigatorTC.wstcref_hidden"/>
-				<file name="properties.wstcref" url="propertiesWstcref_1.xml"/>
-			</folder>
-			<folder name="explorer">
-				<file name="runtime.wstcref_hidden"/>
-				<file name="projectTab_tc.wstcref_hidden"/>
-			</folder>
-			<folder name="properties">
-				<file name="properties.wstcref_hidden"/>
-			</folder>
-		</folder>
-	    <file name="WindowManager.wswmgr" url="WindowManager.wswmgr"/>
+    <folder name="Windows2Local">
+        <folder name="Modes">
+            <folder name="explorer">
+                <file name="runtime.wstcref" url="runtimeWstcref.xml"/>
+            </folder>
+            <folder name="properties">
+                <file name="properties.wstcref" url="propertiesWstcref.xml"/>
+            </folder>
+            <file name="properties.wsmode" url="propertiesWsmode.xml"/>
+        </folder>
+        <file name="WindowManager.wswmgr" url="WindowManager.wswmgr"/>
     </folder>
 </filesystem>

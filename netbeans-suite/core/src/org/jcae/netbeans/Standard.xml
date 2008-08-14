@@ -3,16 +3,15 @@
 <!DOCTYPE Configuration PUBLIC "-//NetBeans IDE//DTD toolbar//EN" "http://www.netbeans.org/dtds/toolbar.dtd">
 
 <Configuration>
-  <Row>
-    <Toolbar name="Memory" position="0" visible="false" />
+  <Row>       
     <Toolbar name="File" />
     <Toolbar name="Edit" />
-	<Toolbar name="3DNavigation"/>    
-	<Toolbar name="ShapeTypeCAO"/>
-	<Tollbar name="ShapeTypeMesh"/>
-	<Toolbar name="View" />    
-    <Toolbar name="WorkspaceSwitcher" />
-    <Toolbar name="StatusLine" />
+    <Toolbar name="3DNavigation" />
+    <Toolbar name="ShapeTypeCAO" />
+    <Toolbar name="ShapeTypeMesh" position="600" />
+	<Toolbar name="OEMM" visible="false" />
+	<Toolbar name="Memory" visible="false" />	
+    <Toolbar name="View" />
     <Toolbar name="ClipDistance" position="3000" visible="false" />
   </Row>
 </Configuration>

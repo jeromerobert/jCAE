@@ -15,6 +15,7 @@
         <constraints>
             <path orientation="vertical" number="20" weight="0.7" />
             <path orientation="horizontal" number="40" weight="0.55" />
+            <path orientation="vertical" number="40" weight="0.7" />
         </constraints>
         <relative-bounds x="33" y="24" width="42" height="44"/>
     </editor-area>
