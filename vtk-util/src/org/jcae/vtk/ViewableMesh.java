@@ -23,13 +23,11 @@ import gnu.trove.TIntArrayList;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TObjectIntHashMap;
-import java.awt.Color;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.jcae.vtk.LeafNode;
-import vtk.vtkActor;
 import vtk.vtkMapper;
+import vtk.vtkActor;
 
 /**
  * TODO : the beams are stored in the polydata with the scalar UNVProvider.OTHERS_GROUP wich can make a bug of color. It can make a bug for the selection in jcae
@@ -41,7 +39,7 @@ public class ViewableMesh extends Viewable
 
 	//private boolean[] groupIsLoaded;
 	//private int nbrOfGroupLoaded;
-	private ViewMode viewMode = ViewMode.FILLED;
+	private ViewMode viewMode = ViewMode.WIRED;
 	private ColorManager colorManager;
 	private TIntObjectHashMap<LeafNode> groupIDToNode = new TIntObjectHashMap<LeafNode>();
 	private TObjectIntHashMap<LeafNode> groupNodeToID = new TObjectIntHashMap<LeafNode>();
