@@ -7,6 +7,8 @@ Version 0.16.0 (2008-08-18)
 * Close #1862985: Add occjava binding to import STEP labels
 * Close #1862983: Selection by rectangle on geometry
 * Close #1862980: Netbeans 6 migration
+* Close #1819310: Geometries node sometimes scans all jcae3d files
+* close #1430728: Picking on face
 
 Version 0.15.0 (2007-12-14)
 
