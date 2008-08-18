@@ -34,8 +34,8 @@ public class RemoveModelClipAction extends ViewableAction
 	 */
 	public RemoveModelClipAction()
 	{						
-		putValue(Action.NAME, "Remove clip rectangle or clip box");
-		putValue(Action.SHORT_DESCRIPTION, "Remove clip rectangle or clip box");
+		putValue(Action.NAME, "Remove clip box");
+		putValue(Action.SHORT_DESCRIPTION, "Remove clip box");
 		putValue(Action.SMALL_ICON, icon);
 		setIcon(icon);
 	}
