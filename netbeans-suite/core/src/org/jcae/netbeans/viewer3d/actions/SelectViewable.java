@@ -68,6 +68,7 @@ public class SelectViewable extends CallableSystemAction implements CurrentViewC
 		/* (non-Javadoc)
 		 * @see javax.swing.ComboBoxModel#getSelectedItem()
 		 */
+		@Override
 		public Object getSelectedItem()
 		{
 			if(ViewManager.getDefault().hasView())
@@ -78,9 +79,9 @@ public class SelectViewable extends CallableSystemAction implements CurrentViewC
 		/* (non-Javadoc)
 		 * @see javax.swing.ComboBoxModel#setSelectedItem(java.lang.Object)
 		 */
+		@Override
 		public void setSelectedItem(Object anItem)
 		{
-			System.out.println("PWET");
 			if(ViewManager.getDefault().hasView())
 				ViewManager.getDefault().getCurrentView().setCurrentViewable((Viewable) anItem);
 		}
@@ -88,6 +89,7 @@ public class SelectViewable extends CallableSystemAction implements CurrentViewC
 		/* (non-Javadoc)
 		 * @see javax.swing.ListModel#getSize()
 		 */
+		@Override
 		public int getSize()
 		{
 			if(ViewManager.getDefault().hasView())
@@ -99,6 +101,7 @@ public class SelectViewable extends CallableSystemAction implements CurrentViewC
 		/* (non-Javadoc)
 		 * @see javax.swing.ListModel#getElementAt(int)
 		 */
+		@Override
 		public Object getElementAt(int index)
 		{
 			if(ViewManager.getDefault().hasView())
@@ -137,6 +140,7 @@ public class SelectViewable extends CallableSystemAction implements CurrentViewC
 	/* (non-Javadoc)see
 	 * @see org.openide.util.actions.CallableSystemAction#getToolbarPresenter()
 	 */
+	@Override
 	public Component getToolbarPresenter()
 	{
 		box.setMaximumSize(new Dimension(200, Integer.MAX_VALUE));

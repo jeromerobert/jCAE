@@ -283,21 +283,10 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 			for (LeafNode leaf : selectionNode)
 				selection.add(nodeToID.get(leaf));
 
-
-			System.out.print("HIGH LIGHTING : ");
-			TIntIterator iter = selection.iterator();
-			while (iter.hasNext())
-			{
-				int val = iter.next();
-				System.out.print(val + " ");
-			}
-			System.out.println("");
-
 			// Delete the nodes not selected
 			for (int id : IDToEdgeNode.keys())
 				if (!selection.contains(id))
 				{
-					System.out.println("deleting : " + id);
 					LeafNode leaf = IDToEdgeNode.get(id);
 					leaf.deleteDatas();
 					removeNode(leaf);
@@ -324,8 +313,6 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 
 			vtkPolyData data = new vtkPolyData();
 			int[] leaves = reader.getLeavesLoaded();
-			System.out.println("selection : " + selection.toString());
-			System.out.println("leaves : " + Arrays.toString(leaves));
 			MeshVisuReader.MeshVisu[] meshes = reader.getMeshes();
 
 			// The choice of the preallocated size is an heuristic that works in the major of the cases (permits to not compute exactly the size of the tables
@@ -341,7 +328,6 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 
 				float[] meshNodes = meshes[i].nodes;
 				//TIntHashSet nodesLoaded = new TIntHashSet(meshNodes.length / 3);
-				System.out.println("mesh " + i + " contains " + meshNodes.length / 3 + " nodes");
 
 				//for (int j = 0; j < meshNodes.length / 3; ++j)
 				//	nodesLoaded.add(oemm.leaves[leaves[i]].minIndex + j);
@@ -358,8 +344,6 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 				for (int type = 0; type < 2; ++type)
 				{
 					int[] ones = edgesMesh.get(type);
-
-					System.out.println("TYPE " + type + " size : " + ones.length);
 					
 					for (int j = 0; j < ones.length;)
 					{
@@ -398,9 +382,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 				edgeNode.setManager(true);
 				IDToEdgeNode.put(leaves[i], edgeNode);
 				lockCanvas();
-				System.out.println("REFRESHING EDGE NODE");
 				edgeNode.refresh();
-				System.out.println("END REFRESHING EDGE NODE");
 				unlockCanvas();
 
 				LeafNode.DataProvider dataFreeEdge = new LeafNode.DataProvider();
@@ -410,9 +392,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 				freeEdgeNode.setManager(true);
 				IDToFreeEdgeNode.put(leaves[i], freeEdgeNode);
 				lockCanvas();
-				System.out.println("REFRESHING FREE EDGE NODE");
 				freeEdgeNode.refresh();
-				System.out.println("END REFRESHING FREE EDGE NODE");
 				unlockCanvas();
 			}
 		}
@@ -567,7 +547,6 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 		if (!automaticSelection || rendering)
 			return;
 
-		System.out.println("PWET !");
 		surfaceSelection(Utils.retrieveCanvas(e), new Point(), new Point());
 	}
 
@@ -644,8 +623,6 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 
 		//octreeForPicking.GetMapper().Update();
 		vtkDataSet dataSet = octreeForPicking.GetMapper().GetInputAsDataSet();
-		System.out.println("Number of points : " + dataSet.GetNumberOfPoints());
-		System.out.println("bounds : " + Arrays.toString(dataSet.GetBounds()));
 		selector.SetInput(dataSet);
 		//selector.SetInputConnection(octreeForPicking.GetMapper().GetInputConnection(0, 0));
 		//selector.PreserveTopologyOn();
@@ -662,7 +639,6 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 		unlockCanvas();
 		vtkDataSet data = (vtkDataSet) selector.GetOutput();
 		//octree.GetMapper().SetInputConnection(selector.GetOutputPort());
-		System.out.println("Number of points picked : " + data.GetNumberOfPoints());
 
 		vtkCellCenterDepthSort sorter = new vtkCellCenterDepthSort();
 		sorter.SetInput(data);
@@ -697,8 +673,6 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 
 				}
 			}
-
-			System.out.println("Number of nodes selected : " + selectionNode.size());
 		}
 		this.selectionChanged = true;
 
