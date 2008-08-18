@@ -1,3 +1,13 @@
+Version 0.16.0 (2008-08-18)
+
+* Replace Java3D by VTK
+* Selection in the tree will now highlight geometry shapes in the 3D view
+* Selection on geometry vertices and edges
+* Picking of mesh triangles
+* Close #1862985: Add occjava binding to import STEP labels
+* Close #1862983: Selection by rectangle on geometry
+* Close #1862980: Netbeans 6 migration
+
 Version 0.15.0 (2007-12-14)
 
 * Improved performance for cylindrical patches, meshing time is linear against the number of triangles.
