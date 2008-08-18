@@ -195,9 +195,20 @@ public class CADSelection implements EntitySelection, SelectionListener,
 		return toReturn;
 	}
 
+	private static boolean isChildren(Node parent, Node children)
+	{
+		Node p = children.getParentNode();
+		while(p != null && !p.equals(parent))
+			p = p.getParentNode();
+		return p != null;
+	}	
+	
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		if (evt.getPropertyName().equals(ExplorerManager.PROP_SELECTED_NODES) && evt.getNewValue() instanceof Node[] && !selectionLock && !SelectionManager.getDefault().isDisableListeningProperty())
+		if (evt.getPropertyName().equals(ExplorerManager.PROP_SELECTED_NODES)
+			&& evt.getNewValue() instanceof Node[]
+			&& !selectionLock
+			&& !SelectionManager.getDefault().isDisableListeningProperty())
 		{
 			selectionLock = true;
 			Node[] nodes = (Node[]) evt.getNewValue();
@@ -205,29 +216,19 @@ public class CADSelection implements EntitySelection, SelectionListener,
 			// Retrieve the shapes
 			for (Node n : nodes)
 			{
-				// Is the node in our CAO ?
-					/*Node root = entity.getNode();
-				boolean isChild = false;
-				for(Node child : root.getChildren().getNodes())
-				if(child == n)
-				{
-				isChild = true;
-				break;
-				}
-				
-				if(!isChild)
-				continue;*/
-				if (!Arrays.asList(entity.getNode().getChildren().getNodes()).contains(n))
+				if(!isChildren(entity.getNode(), n))
 					continue;
-
-				NbShape nbShape = GeomUtils.getShape(n);
+				
+				NbShape nbShape = GeomUtils.getShape(n);;
 				// If it's not a shape node
 				if (nbShape == null)
 					continue;
 
 				TopoDS_Shape shape = nbShape.getImpl();
 				// Add only vertice, edges or faces others are ignored
-				if ((shape instanceof TopoDS_Vertex) || (shape instanceof TopoDS_Edge) || (shape instanceof TopoDS_Face))
+				if ((shape instanceof TopoDS_Vertex)
+					|| (shape instanceof TopoDS_Edge)
+					|| (shape instanceof TopoDS_Face))
 					selection.add(shape);
 			}
 
