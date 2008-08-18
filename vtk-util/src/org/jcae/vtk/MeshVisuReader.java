@@ -110,8 +110,6 @@ public class MeshVisuReader extends MeshReader
 		for (int leaf : mapLeafToMeshVisu.keys())
 			if (sortedLeaves.binarySearch(leaf) < 0)
 				mapLeafToMeshVisu.remove(leaf);
-		System.out.println("SIZE MAP : " + mapLeafToMeshVisu.size());
-		System.out.println("SIZE GARBAGE MAP : " + vtkGlobalJavaHash.PointerToReference.size());
 
 		for (int i = 0, n = sortedLeaves.size(); i < n; i++)
 		{
@@ -193,7 +191,6 @@ public class MeshVisuReader extends MeshReader
 		try
 		{
 			FileChannel fc = new FileInputStream(MeshVisuBuilder.getEdgesFile(oemm, current)).getChannel();
-			System.out.println("MIN INDEX : " + current.minIndex);
 
 			for (int i = 0; i < 2; ++i)
 			{
