@@ -39,7 +39,7 @@ import org.openide.windows.WindowManager;
  * Patterns : Singleton, Factory
  * This class manage the views and the viewables. It creates the views and inform if the current view
  * or current viewable has changed.
- * @author Jérôme Robert and Julian Ibarz
+ * @author Jerome Robert and Julian Ibarz
  */
 public class ViewManager
 {
@@ -69,9 +69,8 @@ public class ViewManager
 		protected void componentClosed()
 		{
 			view.setVisible(false);
-
-			removeView(getView());
-
+			view.detachAllViewables();
+			currentView = null;
 			super.componentClosed();
 		}
 
@@ -201,11 +200,6 @@ public class ViewManager
 	public void removeViewListener(CurrentViewChangeListener listener)
 	{
 		viewChangeListeners.remove(listener);
-	}
-
-	public void removeView(View view)
-	{
-		currentView = null;
 	}
 
 	/**

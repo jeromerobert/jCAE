@@ -269,4 +269,14 @@ public class View extends Canvas {
 	{
 		return viewables;
 	}
+	
+	/**
+	 * Notify Viewables that they should no longer concider as being displayed
+	 * in this view. This must called before destroying a view.
+	 */
+	public void detachAllViewables()
+	{
+		for(Viewable v:viewables)
+			v.removeCanvas(this);		
+	}
 }
