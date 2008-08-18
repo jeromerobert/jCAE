@@ -128,10 +128,12 @@ public class View extends Canvas {
 				setMouseMode(MouseMode.POINT_SELECTION);
 				break;
 			case CLIPPING_PLANE:
-				vtkPlaneCollection planes = Utils.computeClippingPlane(this, pressPosition, releasePosition);
+				vtkPlaneCollection planes = Utils.computeClippingPlane(this,
+					pressPosition, releasePosition);
 				for(Viewable viewable : getViewables())
 					viewable.setClippingPlanes(planes);
 				setMouseMode(MouseMode.POINT_SELECTION);
+				RenderSecured();
 		}
 		
 		// Point events if the press and release positions are very closed

@@ -302,6 +302,7 @@ public class CameraManager
 		
 		canvas.lock();
 		canvas.GetRenderer().GetActiveCamera().SetFocalPoint(position);
+		canvas.RenderSecured();
 		canvas.unlock();
 	}
 
