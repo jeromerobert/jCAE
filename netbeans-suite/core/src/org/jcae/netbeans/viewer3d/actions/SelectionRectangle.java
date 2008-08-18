@@ -33,8 +33,8 @@ public class SelectionRectangle extends ViewAction
 	 */
 	public SelectionRectangle()
 	{						
-		putValue(Action.NAME, "Selection rectangle");
-		putValue(Action.SHORT_DESCRIPTION, "Selection rectangle");
+		putValue(Action.NAME, "Rectangle selection");
+		putValue(Action.SHORT_DESCRIPTION, "Rectangle selection");
 		putValue(Action.SMALL_ICON, icon);
 		setIcon(icon);
 	}
