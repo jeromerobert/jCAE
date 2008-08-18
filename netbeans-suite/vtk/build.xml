@@ -16,7 +16,7 @@
 
 	<target name="-release.files">
 		<copy file="${vtk.dir}/vtk.jar" todir="${cluster}/modules/ext" />
-		<copy todir="${cluster}/modules/lib">
+		<copy todir="${cluster}/modules/lib" failonerror="false">
 			<fileset dir="${vtk.dir}">
 				<patternset refid="vtk.unix.files"/>
 			</fileset>
