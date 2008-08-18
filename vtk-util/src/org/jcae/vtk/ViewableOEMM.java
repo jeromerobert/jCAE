@@ -394,6 +394,8 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 				lockCanvas();
 				freeEdgeNode.refresh();
 				unlockCanvas();
+				if(!automaticSelection)
+					render();
 			}
 		}
 		rendering = false;
