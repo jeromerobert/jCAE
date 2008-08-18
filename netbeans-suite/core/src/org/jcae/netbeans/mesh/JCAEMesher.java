@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2005-2008, by EADS France
  */
 
 package org.jcae.netbeans.mesh;
@@ -65,14 +65,12 @@ public class JCAEMesher implements Runnable, Cancellable
 		 */
 		public void run()
 		{
-			System.out.println("Starting "+reader+" "+ow);
 			try
 			{
 				String buffer=reader.readLine();
 				while(buffer!=null)
 				{
 					ow.println(buffer);
-					System.out.println(buffer);
 					buffer=reader.readLine();
 				}
 			}
