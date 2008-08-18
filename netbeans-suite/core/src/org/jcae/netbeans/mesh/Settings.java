@@ -41,7 +41,7 @@ public class Settings extends SystemOption
 		return Lookup.getDefault().lookup(Settings.class);
 	}
 	private String javaVirtualMachine;
-	private String maximumMemory="1500m";	
+	private String maximumMemory="1000m";	
 	private String mesherJar;
 	private String[] customJVMParameters=new String[0];
 	private String[] customMesherParameters=new String[0];
