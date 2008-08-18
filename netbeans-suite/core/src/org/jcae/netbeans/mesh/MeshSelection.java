@@ -94,7 +94,7 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 		ViewableMesh meshInteractor = (ViewableMesh) newInteractor;
 
 		if (SelectionManager.getDefault().getEntity(meshInteractor) == entity)
-			if (interactors.add((ViewableMesh) meshInteractor))
+			if (interactors.add(meshInteractor))
 			{
 				meshInteractor.addSelectionListener(this);
 				//refreshHighLight();

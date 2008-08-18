@@ -99,7 +99,7 @@ public class CADSelection implements EntitySelection, SelectionListener,
 		ViewableCAD caoInteractor = (ViewableCAD) newInteractor;
 
 		if (SelectionManager.getDefault().getEntity(caoInteractor) == entity)
-			if (interactors.add((ViewableCAD) caoInteractor))
+			if (interactors.add(caoInteractor))
 			{
 				caoInteractor.addSelectionListener(this);			
 				refreshHighLight();

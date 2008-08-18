@@ -36,7 +36,7 @@ public class ClipBoxAction extends ViewAction
 	public ClipBoxAction()
 	{						
 		putValue(Action.NAME, "Create a clip box");
-		putValue(Action.SHORT_DESCRIPTION, "Create a clip rectangle");
+		putValue(Action.SHORT_DESCRIPTION, "Create a clip box");
 		putValue(SMALL_ICON, icon);
 		setIcon(icon);
 	}				
