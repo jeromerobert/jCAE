@@ -12,7 +12,7 @@ be replaced by a <code>vtk-util</code> module.</p>
 	<h1>Building VTK</h1>
 	<h2>Getting source</h2>
 <p>Kitware doesn't provide binary distributions with Java binding enabled so you have to build
-VTK by yourself. The current version of vtk-util require at least VTK 5.1 and is known to work
+VTK by yourself. The current version of vtk-util require at least VTK 5.2 and is known to work
 with VTK 5.3 (current CVS HEAD). Both are unreleased CVS versions. See <a href="http://www.vtk.org">http://www.vtk.org</a>.</p>
 	<h2>Dependencies</h2>
 <p>Here are the requirements to build VTK with Java binding:</p>
@@ -36,6 +36,7 @@ patch -p0 &lt; /tmp/displayList.patch
 patch -p0 &lt; /tmp/translucent.patch
 patch -p0 &lt; /tmp/offset.patch
 </pre>
+<p>The patch directories also include an apply.sh script which will automatically apply all patches if you have <code>quilt</code> installed. Just call it from the VTK directory.</p>
 	<h2>Configuring and building</h2>
 <pre class="code">mkdir /a/bar/path/build-vtk
 cd /a/bar/path/build-vtk
