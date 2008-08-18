@@ -58,7 +58,7 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 
 	public void childDeleted(AbstractNode abstractNode)
 	{
-		addNode(abstractNode);
+		removeNode(abstractNode);
 		
 		if(abstractNode instanceof Node)
 		{
@@ -109,8 +109,6 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 
 	public void actorDeleted(AbstractNode node, vtkActor actor)
 	{
-		//System.out.println("ACTOR DELETED " + prop.GetVTKId());
-		
 		deleteProp(actor);
 	}
 

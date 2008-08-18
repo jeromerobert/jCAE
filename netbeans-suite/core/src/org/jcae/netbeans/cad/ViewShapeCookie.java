@@ -55,6 +55,8 @@ public class ViewShapeCookie implements ViewCookie
 			
 			SelectionManager.getDefault().addInteractor(viewable, root);
 		}
+		else
+			viewable.refresh();
 		v.add(viewable);
 	}
 }

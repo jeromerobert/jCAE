@@ -21,6 +21,7 @@
 package org.jcae.vtk;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,7 +50,7 @@ public class ViewableCAD extends Viewable
 	private ShapeType shapeTypeSelection = ShapeType.FACE;
 	private final Color frontFaceColor = new Color(255 / 2, 255 / 2, 255);
 	private final Color backFaceColor = Color.LIGHT_GRAY;//new Color(255 / 2, 255, 255 / 2);
-	private final Color vertexColor = Color.ORANGE;
+	private final Color vertexColor = Color.BLUE;
 	private Color edgeColor = Color.WHITE;
 	private Color freeEdgeColor = Color.GREEN;
 	private final HashMap<TopoDS_Vertex, LeafNode> topoToNodeVertice = new HashMap<TopoDS_Vertex, LeafNode>();
@@ -60,7 +61,7 @@ public class ViewableCAD extends Viewable
 	private Node faces = null;
 	private Node edges = null;
 	private Node vertice = null;
-	private int vertexSize = 8;
+	private int vertexSize = 4;
 	private int edgeSize = 2;
 	private boolean onlyFreeEdges = false;
 	
@@ -79,7 +80,15 @@ public class ViewableCAD extends Viewable
 		setShapeTypeSelection(shapeTypeSelection);
 	}
 
-
+	public void refresh()
+	{
+		for(AbstractNode n:new ArrayList<AbstractNode>(rootNode.getChildren()))
+			rootNode.removeChild(n);
+		computeNodes();
+		rootNode.refresh();
+		render();
+	}
+	
 	public ViewableCAD(TopoDS_Shape shape)
 	{
 		this(new OCCMeshExtractor(shape), false);
@@ -87,7 +96,7 @@ public class ViewableCAD extends Viewable
 	
 	public ViewableCAD(TopoDS_Shape shape, boolean onlyFreeEdges)
 	{
-		this(new OCCMeshExtractor(shape), true);
+		this(new OCCMeshExtractor(shape), onlyFreeEdges);
 	}
 	
 	public ViewableCAD(String filename)
@@ -175,7 +184,16 @@ public class ViewableCAD extends Viewable
 
 			public void customiseActor(vtkActor actor)
 			{
-				actor.GetProperty().SetPointSize(vertexSize);
+				actor.GetProperty().SetPointSize(vertexSize);			
+			}
+		});
+		
+		vertice.setActorHighLightedCustomiser(new AbstractNode.ActorHighLightedCustomiser() {
+
+			public void customiseActorHighLighted(vtkActor actor)
+			{
+				actor.GetProperty().SetPointSize(vertexSize*2);
+				actor.GetProperty().SetColor(1.0, 0, 0);
 			}
 		});
 		
@@ -225,7 +243,7 @@ public class ViewableCAD extends Viewable
 			// Add vertice
 			for (TopoDS_Vertex vertex : this.meshExtractor.getVertice())
 			{
-				LeafNode vertexNode = new LeafNode(vertice, new OCCMeshExtractor.VertexData(vertex), this.vertexColor);
+				LeafNode vertexNode = new LeafNode(vertice, new OCCMeshExtractor.VertexData(vertex), this.vertexColor);				
 				topoToNodeVertice.put(vertex, vertexNode);
 				this.nodeToTopo.put(vertexNode, vertex);
 			}

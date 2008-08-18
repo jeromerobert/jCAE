@@ -27,13 +27,11 @@ import java.util.Arrays;
 import java.util.List;
 import vtk.vtkActor;
 import vtk.vtkExtractSelectedPolyDataIds;
-import vtk.vtkFloatArray;
 import vtk.vtkIdTypeArray;
 import vtk.vtkIntArray;
 import vtk.vtkLookupTable;
 import vtk.vtkPolyData;
 import vtk.vtkPolyDataMapper;
-import vtk.vtkPolyDataNormals;
 import vtk.vtkSelection;
 
 /**
@@ -91,7 +89,8 @@ public class Node extends AbstractNode
 	{
 		if (children.remove(child))
 		{
-			fireChildDeletionListener(child);
+			child.deleteDatas();
+			fireChildDeletionListener(child);			
 			modified();
 		}
 	}
@@ -415,6 +414,8 @@ public class Node extends AbstractNode
 			highLighter = null;
 			highLighterMapper = null;
 		}
+		for(AbstractNode n:getChildren())
+			n.deleteDatas();
 	}
 
 	private int getNbrOfCells()
