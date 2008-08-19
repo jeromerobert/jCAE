@@ -63,8 +63,6 @@ public class MergeVTPAnd3D
 
 	private void loadThree(String path)
 	{
-		final int BEGIN_INDEX = 4;
-		
 		try
 		{
 			BufferedReader input = new BufferedReader(new FileReader(path));
@@ -81,19 +79,19 @@ public class MergeVTPAnd3D
 				if(firstLine[0].isEmpty())
 					firstLine = Arrays.copyOfRange(firstLine, 1, firstLine.length);
 				
+				int beginIndex = Arrays.asList(firstLine).indexOf("Z")+1;
 				//System.out.println("DEBUG firstLine : " + Arrays.toString(firstLine));
-				if(firstLine.length < (BEGIN_INDEX + 1) ||
-					(!firstLine[0].equals("LABEL") || !firstLine[1].equals("X") || !firstLine[2].equals("Y") || !firstLine[3].equals("Z")))
+				if(beginIndex == -1)
 				{
-					throw new IllegalArgumentException("The .3d file labels must start with LABEL X Y Z ...");
+					throw new IllegalArgumentException("The .3d file labels must start with LABEL X Y Z or X Y Z...");
 				}
 				
 				// Extract labels
-				labels = Arrays.copyOfRange(firstLine, BEGIN_INDEX, firstLine.length);
+				labels = Arrays.copyOfRange(firstLine, beginIndex, firstLine.length);
 				
 				// Prepare scalars
-				scalars.ensureCapacity(firstLine.length - BEGIN_INDEX);
-				for(int i = BEGIN_INDEX ; i < firstLine.length ; ++i)
+				scalars.ensureCapacity(firstLine.length - beginIndex);
+				for(int i = beginIndex ; i < firstLine.length ; ++i)
 					scalars.add(new TFloatArrayList(data.GetPoints().GetNumberOfPoints()));
 				
 				// Extract datas
@@ -103,7 +101,7 @@ public class MergeVTPAnd3D
 					
 					for(int i = 0 ; i < scalars.size() ; ++i)
 					{
-						scalars.get(i).add(Float.parseFloat(stringData[i + BEGIN_INDEX]));
+						scalars.get(i).add(Float.parseFloat(stringData[i + beginIndex]));
 					}
 				}
 				
@@ -157,7 +155,6 @@ public class MergeVTPAnd3D
 			return;
 		}
 		
-		MergeVTPAnd3D merger = new MergeVTPAnd3D(args[0], args[1], args[2]);
-		
+		new MergeVTPAnd3D(args[0], args[1], args[2]);		
 	}
 }
