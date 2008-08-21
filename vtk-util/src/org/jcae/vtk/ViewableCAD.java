@@ -188,12 +188,14 @@ public class ViewableCAD extends Viewable
 			}
 		});
 		
-		vertice.setActorHighLightedCustomiser(new AbstractNode.ActorHighLightedCustomiser() {
+		vertice.setActorHighLightedCustomiser(new Viewable.ActorHighLightedCustomiser() {
 
+			@Override
 			public void customiseActorHighLighted(vtkActor actor)
 			{
+				super.customiseActorHighLighted(actor);
+				
 				actor.GetProperty().SetPointSize(vertexSize*2);
-				actor.GetProperty().SetColor(1.0, 0, 0);
 			}
 		});
 		
