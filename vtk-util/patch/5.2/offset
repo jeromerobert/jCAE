@@ -1,4 +1,5 @@
 This patch permits to make different polygon offset for each mappers (by default VTK use statics members so the offset parameters are shared by all the mappers).
+See http://www.vtk.org/Bug/view.php?id=7294
 
 ---
 
