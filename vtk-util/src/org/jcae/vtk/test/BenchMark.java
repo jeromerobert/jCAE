@@ -30,25 +30,7 @@ import vtk.*;
 public class BenchMark
 {
 
-	/** Create a cone actor */
-	/*private static vtkActor createDummyActor()
-	{
-		vtkConeSource cone = new vtkConeSource();
-		cone.ReleaseDataFlagOn();
-		cone.SetHeight(3.0);
-		cone.SetRadius(1.0);
-		cone.SetResolution(4);	*/
-
-		
-		/*System.out.println("nombre de cells : " + map.GetInput().GetNumberOfCells());
-		System.out.println("nombre de polys : " + map.GetInput().GetNumberOfPolys());
-		System.out.println("nombre de polys : " + map.GetInput().GetNumberOfStrips());
-		vtkActor coneActor = new vtkActor();
-		coneActor.SetMapper(map);
-		return coneActor;
-	}*/
-
-	private static void addSpheres(int precision, int width, int height, vtkRenderer renderer)
+	private static int addSpheres(int precision, int width, int height, vtkRenderer renderer)
 	{
 		vtkSphereSource source = new vtkSphereSource();
 		source.SetRadius(1.);
@@ -57,6 +39,7 @@ public class BenchMark
 		
 		vtkPolyDataMapper mapper = new vtkPolyDataMapper();
 		mapper.SetInput(source.GetOutput());
+		mapper.Update();
 		
 		for (int i = 0; i < width; i++)
 			for (int j = 0; j < height; j++)
@@ -66,6 +49,8 @@ public class BenchMark
 				actor.SetMapper(mapper);
 				renderer.AddActor(actor);
 			}
+		
+		return mapper.GetInputAsDataSet().GetNumberOfCells() * width * height;
 	}
 	
 	public static void main(String[] args) throws Exception
@@ -79,12 +64,12 @@ public class BenchMark
 					"_ width : number of sphere in horizontal " +
 					"_ height : number of sphere in vertical.");
 		
-		int precision = Integer.parseInt("50");
-		int width = Integer.parseInt("20");
-		int height = Integer.parseInt("20");
+		int precision = Integer.parseInt(args[0]);
+		int width = Integer.parseInt(args[1]);
+		int height = Integer.parseInt(args[2]);
 		
 		vtkRenderer renderer = new vtkRenderer();
-		addSpheres(precision, width, height, renderer);
+		int nbrOfCells = addSpheres(precision, width, height, renderer);
 
 		vtkRenderWindow renWin = new vtkRenderWindow();
 		renWin.AddRenderer(renderer);
@@ -121,5 +106,8 @@ public class BenchMark
 			iren.Render();
 			renderTime += System.nanoTime() - begin;
 		}
+		
+		// Print the stats : nbr of actors + nbr of cells + average time to draw
+		System.out.println(precision + " " + nbrOfCells + " " + ((double)renderTime * 1e-9 / nbrOfRender));
 	}
 }
