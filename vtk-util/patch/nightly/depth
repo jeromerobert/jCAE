@@ -2,7 +2,6 @@ Do not erase the depth buffer before a selection rendering.
 
 This permits to not have to draw all the scene to check the visibility of an element.
 See http://www.vtk.org/Bug/view.php?id=7296
-
 ---
 
  Rendering/vtkOpenGLRenderer.cxx |    3 ++-
@@ -26,10 +25,10 @@ index ca3793a..766068e 100644
    vtkDebugMacro(<< "glClear\n");
    glClear(clear_mask);
 diff --git a/Rendering/vtkRenderer.cxx b/Rendering/vtkRenderer.cxx
-index d7c22e9..b47301f 100644
+index 0e74e0b..7822832 100644
 --- a/Rendering/vtkRenderer.cxx
 +++ b/Rendering/vtkRenderer.cxx
-@@ -78,6 +78,8 @@ vtkRenderer::vtkRenderer()
+@@ -80,6 +80,8 @@ vtkRenderer::vtkRenderer()
  
    this->LightFollowCamera = 1;
  
@@ -39,10 +38,10 @@ index d7c22e9..b47301f 100644
  
    this->PropArray                = NULL;
 diff --git a/Rendering/vtkRenderer.h b/Rendering/vtkRenderer.h
-index a0aae36..866b7e3 100644
+index ba25dc5..ee27770 100644
 --- a/Rendering/vtkRenderer.h
 +++ b/Rendering/vtkRenderer.h
-@@ -131,6 +131,13 @@ public:
+@@ -132,6 +132,13 @@ public:
    vtkBooleanMacro(AutomaticLightCreation,int);
  
    // Description:
@@ -56,7 +55,7 @@ index a0aae36..866b7e3 100644
    // Ask the lights in the scene that are not in world space
    // (for instance, Headlights or CameraLights that are attached to the 
    // camera) to update their geometry to match the active camera.
-@@ -461,6 +468,8 @@ protected:
+@@ -470,6 +477,8 @@ protected:
    // Allocate the time for each prop
    void               AllocateTime();
  

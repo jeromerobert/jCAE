@@ -1,4 +1,6 @@
 Work around a bug in object destructor
+
+
 ---
 
  Common/vtkObject.cxx |    2 +-

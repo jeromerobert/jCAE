@@ -113,10 +113,10 @@ index f22a2de..859d86e 100644
    vtkWeakPointer<vtkWindow> LastWindow; // Window used for previous render.
                           // This is not reference counted.
 diff --git a/Rendering/vtkRenderer.cxx b/Rendering/vtkRenderer.cxx
-index b47301f..ef0fc01 100644
+index 7822832..93ce1ee 100644
 --- a/Rendering/vtkRenderer.cxx
 +++ b/Rendering/vtkRenderer.cxx
-@@ -1865,6 +1865,8 @@ void vtkRenderer::SwapOutSelectablePainter(
+@@ -1885,6 +1885,8 @@ void vtkRenderer::SwapOutSelectablePainter(
        {
        orig_mapper->SetPainter(orig_painter);
        orig_painter->UnRegister(this);
@@ -126,13 +126,13 @@ index b47301f..ef0fc01 100644
      }
    if (!orig_painter)
 diff --git a/Rendering/vtkRenderer.h b/Rendering/vtkRenderer.h
-index 866b7e3..4890776 100644
+index ee27770..87c04be 100644
 --- a/Rendering/vtkRenderer.h
 +++ b/Rendering/vtkRenderer.h
-@@ -433,6 +433,8 @@ public:
-   // Initial value is false.
-   vtkGetMacro(LastRenderingUsedDepthPeeling,int);
-   
+@@ -442,6 +442,8 @@ public:
+   void SetDelegate(vtkRendererDelegate *d);
+   vtkGetObjectMacro(Delegate,vtkRendererDelegate);
+ 
 +  vtkGetMacro(RenderTime,int);
 +
  protected:

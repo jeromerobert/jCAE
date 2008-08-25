@@ -3,24 +3,25 @@ Allow picking translucent objects
 See http://www.vtk.org/Bug/view.php?id=7295
 ---
 
- Rendering/vtkRenderer.cxx |   22 ++++++++++++++++++++++
+ Rendering/vtkRenderer.cxx |   23 +++++++++++++++++++++++
  Rendering/vtkRenderer.h   |    9 +++++++++
- 2 files changed, 31 insertions(+), 0 deletions(-)
+ 2 files changed, 32 insertions(+), 0 deletions(-)
 
 
 diff --git a/Rendering/vtkRenderer.cxx b/Rendering/vtkRenderer.cxx
-index ef0fc01..f4931d8 100644
+index 93ce1ee..4c49745 100644
 --- a/Rendering/vtkRenderer.cxx
 +++ b/Rendering/vtkRenderer.cxx
-@@ -119,6 +119,7 @@ vtkRenderer::vtkRenderer()
-   this->OcclusionRatio=0.0;
-   this->MaximumNumberOfPeels=4;
+@@ -123,6 +123,8 @@ vtkRenderer::vtkRenderer()
    this->LastRenderingUsedDepthPeeling=0;
+ 
+   this->Delegate=0;
++
 +  this->PickTranslucent=0;
  }
  
  vtkRenderer::~vtkRenderer()
-@@ -1761,6 +1762,25 @@ int vtkRenderer::UpdateGeometryForSelection()
+@@ -1781,6 +1783,25 @@ int vtkRenderer::UpdateGeometryForSelection()
        return 0; 
      }        
  
@@ -46,7 +47,7 @@ index ef0fc01..f4931d8 100644
    // loop through props and give them a chance to 
    // render themselves as opaque geometry
    for ( i = 0; i < this->PropArrayCount; i++ )
-@@ -1788,6 +1808,8 @@ int vtkRenderer::UpdateGeometryForSelection()
+@@ -1808,6 +1829,8 @@ int vtkRenderer::UpdateGeometryForSelection()
        {
        this->NumberOfPropsRendered += 
          this->PropArray[i]->RenderOpaqueGeometry(this);
@@ -56,10 +57,10 @@ index ef0fc01..f4931d8 100644
  
      //restore the prop's original settings
 diff --git a/Rendering/vtkRenderer.h b/Rendering/vtkRenderer.h
-index 4890776..1f6bcf0 100644
+index 87c04be..060d508 100644
 --- a/Rendering/vtkRenderer.h
 +++ b/Rendering/vtkRenderer.h
-@@ -432,6 +432,12 @@ public:
+@@ -433,6 +433,12 @@ public:
    // actually used depth peeling.
    // Initial value is false.
    vtkGetMacro(LastRenderingUsedDepthPeeling,int);
@@ -70,9 +71,9 @@ index 4890776..1f6bcf0 100644
 +  vtkGetMacro(PickTranslucent,int);
 +  vtkBooleanMacro(PickTranslucent,int);
    
-   vtkGetMacro(RenderTime,int);
- 
-@@ -582,6 +588,9 @@ protected:
+   // Description:
+   // Set/Get a custom Render call. Allows to hook a Render call from an
+@@ -591,6 +597,9 @@ protected:
    // actually used depth peeling.
    // Initial value is false.
    int LastRenderingUsedDepthPeeling;

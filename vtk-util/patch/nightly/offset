@@ -2,7 +2,6 @@ Make different polygon offset for each mappers.
 
 By default VTK use statics members so the offset parameters are shared by all the mappers.
 See http://www.vtk.org/Bug/view.php?id=7294
-
 ---
 
  Rendering/vtkMapper.cxx                            |   69 ++++----------------
