@@ -1,6 +1,6 @@
 Permit to disable lighting for an actor.
-See http://www.vtk.org/Bug/view.php?id=7521
 
+See http://www.vtk.org/Bug/view.php?id=7521
 ---
 
  Rendering/vtkActor.cxx                 |    1 +
