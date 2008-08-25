@@ -1,5 +1,6 @@
-This patch permits to gain many time in pick color. There is additionnal informations here :
-http://www.vtk.org/Bug/view.php?id=7111
+Gain many time in pick color.
+
+Additionnal information at http://www.vtk.org/Bug/view.php?id=7111
 ---
 
  Rendering/vtkOpenGLDisplayListPainter.cxx |   17 +++++++++++------

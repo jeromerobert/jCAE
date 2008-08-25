@@ -1,7 +1,7 @@
-This patch permits to not erase the depth buffer before a selection rendering. This permits to not have
-to draw all the scene to check the visibility of an element.
-See http://www.vtk.org/Bug/view.php?id=7296
+Do not erase the depth buffer before a selection rendering.
 
+This permits to not have to draw all the scene to check the visibility of an element.
+See http://www.vtk.org/Bug/view.php?id=7296
 ---
 
  Rendering/vtkOpenGLRenderer.cxx |    3 ++-
