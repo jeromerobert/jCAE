@@ -12,8 +12,9 @@ be replaced by a <code>vtk-util</code> module.</p>
 	<h1>Building VTK</h1>
 	<h2>Getting source</h2>
 <p>Kitware doesn't provide binary distributions with Java binding enabled so you have to build
-VTK by yourself. The current version of vtk-util require at least VTK 5.2 and is known to work
-with VTK 5.3 (current CVS HEAD). Both are unreleased CVS versions. See <a href="http://www.vtk.org">http://www.vtk.org</a>.</p>
+VTK by yourself. The current version of vtk-util requires at least VTK 5.2, and is also known
+to work with VTK 5.3 (current CVS HEAD). The latter is an unreleased CVS version.
+See <a href="http://www.vtk.org">http://www.vtk.org</a>.</p>
 	<h2>Dependencies</h2>
 <p>Here are the requirements to build VTK with Java binding:</p>
 <ul>
@@ -26,17 +27,30 @@ with VTK 5.3 (current CVS HEAD). Both are unreleased CVS versions. See <a href="
 <p>On Debian/Ubuntu system just do:</p>
 <pre>apt-get install patch make cmake libgl1-mesa-dev sun-java6-jdk</pre>
 	<h2>Patching</h2>
-<p>Developing jCAE we fixed several problems in VTK and made some patches. Writting thoses lines,
-those patches are not yet integrated in the VTK CVS repository. You may find them here:
+<p>By developing jCAE we fixed several problems in VTK and sent our patches to VTK Bug Tracker. They
+are not yet integrated in the VTK CVS repository. You may find them here:
 <a href="https://jcae.svn.sourceforge.net/svnroot/jcae/trunk/vtk-util/patch">
 https://jcae.svn.sourceforge.net/svnroot/jcae/trunk/vtk-util/patch</a>. The patching commands will look like this:</p>
 <pre class="code">cd /a/foo/path/VTK
-patch -p0 &lt; /tmp/underscore.patch
-patch -p0 &lt; /tmp/displayList.patch
-patch -p0 &lt; /tmp/translucent.patch
-patch -p0 &lt; /tmp/offset.patch
+patch -p1 &lt; /tmp/depth
+patch -p1 &lt; /tmp/displayList
+patch -p1 &lt; /tmp/offset
+patch -p1 &lt; /tmp/translucent
+patch -p1 &lt; /tmp/underscore
+patch -p1 &lt; /tmp/warning
+patch -p1 &lt; /tmp/light
 </pre>
-<p>The patch directories also include an apply.sh script which will automatically apply all patches if you have <code>quilt</code> installed. Just call it from the VTK directory.</p>
+
+<p>We are maintaining our patches with the help of <a href="http://savannah.nongnu.org/projects/quilt">quilt</a>;
+the list of patches above may become outdated, but if you have <code>quilt</code> installed on
+your machine, you can run the <code>apply.sh</code> shell script under <code>vtk-util/patch/nightly/</code>
+or <code>vtk-util/patch/5.2/</code> like this:</p>
+<pre class="code">cd /a/foo/path/VTK
+sh /path/to/vtk-util/patch/nightly/apply.sh
+</pre>
+
+<p>This script calls <code>quilt</code> to apply patches listed in the <code>series</code> file. We maintain our own VTK tree this way, so this method should always work.</p>
+
 	<h2>Configuring and building</h2>
 <pre class="code">mkdir /a/bar/path/build-vtk
 cd /a/bar/path/build-vtk
@@ -67,7 +81,10 @@ JAVA_INCLUDE_PATH2:PATH=/usr/lib/jvm/java-6-sun/include/linux
 //Path to a program.
 JAVA_RUNTIME:FILEPATH=/usr/bin/java
 </pre>
-<p>Then rerun <code>cmake ../VTK</code> to take the change into account.
+<p>To speed up compilation, you can disable Python and Tcl wrappers, and always use
+system libraries (if headers and libraries are installed, of course) by setting all
+<code>VTK_USE_SYSTEM_*</code> variables to <code>ON</code>.
+Then rerun <code>cmake ../VTK</code> to take the change into account.
 Finally run <code>make</code>.</p>
 <p>The building process on Windows is similar except that the CMakeCache.txt edition
 can be done through a GUI and that you will probably use Visual Studio instead
