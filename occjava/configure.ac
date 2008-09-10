@@ -44,9 +44,26 @@ AC_LANG_PUSH(C++)
 AC_CHECK_HEADERS([limits.h] [iostream])
 
 # Configuring for Opencascade
-if test -z "$CASROOT" ; then AC_MSG_FAILURE("Opencascade not found"); fi
-occinc="$CASROOT/inc"
-occlib="$CASROOT/`uname -s`/lib"
+if test -z "$CASROOT";
+then
+	# CASROOT not set, this is not an official release.
+	# See if we can found includes and libs under /usr
+	if test -d "/usr/include/opencascade";
+	then
+		occinc="/usr/include/opencascade"
+	else
+		AC_MSG_FAILURE("Opencascade not found");
+	fi
+	if test -r "/usr/lib/libTKernel.so";
+	then
+		occlib="/usr/lib"
+	else
+		AC_MSG_FAILURE("Opencascade not found");
+	fi
+else
+	occinc="$CASROOT/inc"
+	occlib="$CASROOT/`uname -s`/lib"
+fi
 CPPFLAGS="${CPPFLAGS} -I$occinc -DLIN"
 LDFLAGS="${LDFLAGS} -L$occlib"
 # OpenCascade libraries have no -rpath information, set
