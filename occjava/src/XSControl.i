@@ -93,7 +93,7 @@ class STEPControl_Reader: public XSControl_Reader
 {
 //dirty quick implementation of label step reading
 //find how to generalize this to IGES
-	char * getLabel(TopoDS_Shape * theShape)
+	const char * getLabel(TopoDS_Shape * theShape)
 	{
 		const Handle(XSControl_WorkSession)& theSession = self->WS();
 		const Handle(XSControl_TransferReader)& aReader = theSession->TransferReader();
