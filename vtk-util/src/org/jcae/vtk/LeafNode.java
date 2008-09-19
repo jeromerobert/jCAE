@@ -255,7 +255,7 @@ public class LeafNode extends AbstractNode
 
 	TIntArrayList getSelection()
 	{
-		return this.selection;
+		return selection;
 	}
 
 	public Color getColor()
@@ -369,7 +369,7 @@ public class LeafNode extends AbstractNode
 			return;
 		}
 
-		if (selection.size() == 0)
+		if (selection.isEmpty())
 		{
 			if (selectionHighLighter != null)
 				unHighLightSelection();

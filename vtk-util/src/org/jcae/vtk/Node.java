@@ -524,89 +524,88 @@ public class Node extends AbstractNode
 
 	protected void manageHighLight()
 	{
+		if (!isManager())
+			return;
+
 		// Make sure the leaves are refreshed...
 		List<LeafNode> leaves = getLeaves();
 
-		if (isManager())
+		// If the nodes are selected select all cells of the node
+		TIntArrayList selection = new TIntArrayList(getNbrOfCells());
+		for (int i = 0; i < leaves.size(); ++i)
 		{
-			// If the nodes are selected select all cells of the node
-			TIntArrayList selection = new TIntArrayList(getNbrOfCells());
-			for (int i = 0; i < leaves.size(); ++i)
-			{
-				LeafNode leaf = leaves.get(i);
+			LeafNode leaf = leaves.get(i);
 
-				if (!leaf.isSelected())
-					continue;
+			if (!leaf.isSelected())
+				continue;
 
-				// Add vertice
-				int begin = offSetsVertice.get(i);
-				int end = (i + 1 < leaves.size()) ? offSetsVertice.get(i + 1) : nbrOfVertice;
-				for (int j = begin; j < end; ++j)
-					selection.add(j);
+			// Add vertice
+			int begin = offSetsVertice.get(i);
+			int end = (i + 1 < leaves.size()) ? offSetsVertice.get(i + 1) : nbrOfVertice;
+			for (int j = begin; j < end; ++j)
+				selection.add(j);
 
-				// Add lines
-				begin = nbrOfVertice;
-				end = nbrOfVertice;
-				begin += offSetsLines.get(i);
-				end += (i + 1 < leaves.size()) ? offSetsLines.get(i + 1) : nbrOfLines;
-				for (int j = begin; j < end; ++j)
-					selection.add(j);
+			// Add lines
+			begin = nbrOfVertice;
+			end = nbrOfVertice;
+			begin += offSetsLines.get(i);
+			end += (i + 1 < leaves.size()) ? offSetsLines.get(i + 1) : nbrOfLines;
+			for (int j = begin; j < end; ++j)
+				selection.add(j);
 
-				// Add polys
-				begin = nbrOfVertice + nbrOfLines;
-				end = nbrOfVertice + nbrOfLines;
-				begin += offSetsPolys.get(i);
-				end += (i + 1 < leaves.size()) ? offSetsPolys.get(i + 1) : nbrOfPolys;
-				for (int j = begin; j < end; ++j)
-					selection.add(j);
-			}
-
-			if (selection.size() == 0)
-			{
-				if (highLighter != null)
-				{
-					fireActorDeleted(highLighter);
-					highLighter = null;
-				}
-			}
-			else
-			{
-				boolean actorCreated = false;
-				
-				if (highLighter == null)
-				{
-					actorCreated = true;
-					highLighter = new vtkActor();
-					highLighter.PickableOff();
-					
-					getActorHighLightedCustomiser().customiseActorHighLighted(highLighter);
-				}
-
-				highLighterMapper = new vtkPolyDataMapper();
-				highLighterMapper.ScalarVisibilityOff();
-				//highLighterMapper.SetResolveCoincidentTopologyToPolygonOffset();
-				//highLighterMapper.SetResolveCoincidentTopologyPolygonOffsetParameters(-Utils.getOffSetFactor(), -Utils.getOffSetValue());
-				highLighterMapper.SetInput(selectInto(data, selection.toNativeArray()));
-				highLighter.SetMapper(highLighterMapper);
-
-				getMapperHighLightedCustomiser().customiseMapperHighLighted(highLighterMapper);
-				
-				if (actorCreated)
-				{
-					fireActorCreated(highLighter);
-					fireActorHighLighted(highLighter);
-				}
-			}
-
-			if (lastUpdate <= selectionTime())
-				if (this.isSelected())
-				{
-					highLight();
-				}
-				else
-					unHighLight();
+			// Add polys
+			begin = nbrOfVertice + nbrOfLines;
+			end = nbrOfVertice + nbrOfLines;
+			begin += offSetsPolys.get(i);
+			end += (i + 1 < leaves.size()) ? offSetsPolys.get(i + 1) : nbrOfPolys;
+			for (int j = begin; j < end; ++j)
+				selection.add(j);
 		}
-		
+
+		if (selection.isEmpty())
+		{
+			if (highLighter != null)
+			{
+				fireActorDeleted(highLighter);
+				highLighter = null;
+			}
+		}
+		else
+		{
+			boolean actorCreated = false;
+			
+			if (highLighter == null)
+			{
+				actorCreated = true;
+				highLighter = new vtkActor();
+				highLighter.PickableOff();
+				
+				getActorHighLightedCustomiser().customiseActorHighLighted(highLighter);
+			}
+
+			highLighterMapper = new vtkPolyDataMapper();
+			highLighterMapper.ScalarVisibilityOff();
+			//highLighterMapper.SetResolveCoincidentTopologyToPolygonOffset();
+			//highLighterMapper.SetResolveCoincidentTopologyPolygonOffsetParameters(-Utils.getOffSetFactor(), -Utils.getOffSetValue());
+			highLighterMapper.SetInput(selectInto(data, selection.toNativeArray()));
+			highLighter.SetMapper(highLighterMapper);
+
+			getMapperHighLightedCustomiser().customiseMapperHighLighted(highLighterMapper);
+			
+			if (actorCreated)
+			{
+				fireActorCreated(highLighter);
+				fireActorHighLighted(highLighter);
+			}
+		}
+
+		if (lastUpdate <= selectionTime())
+		{
+			if (this.isSelected())
+				highLight();
+			else
+				unHighLight();
+		}
 	}
 
 	private final int nodeIndiceToLeafIndice(int leaf, int indice)
@@ -712,7 +711,7 @@ public class Node extends AbstractNode
 				selection.setQuick(j, leafIndiceToNodeIndice(leaf, i, selection.getQuick(j)));
 		}
 
-		if (selection.size() == 0)
+		if (selection.isEmpty())
 		{
 			unHighLightSelection();
 			return;
@@ -732,38 +731,40 @@ public class Node extends AbstractNode
 	@Override
 	public void refresh()
 	{
-		//int size = 0 ;
 		for (AbstractNode child : children)
 			child.refresh();
-
-		List<LeafNode> leaves = getLeaves();
-		
-		if (isManager())
+		if (!isManager())
 		{
-			if (lastUpdate <= getModificationTime())
-			{
-				//System.out.println("REFRESH ACTOR");
-				refreshData();
-				refreshActor();
-			}
-			else
-				for (LeafNode leaf : leaves)
-					if (lastUpdate <= leaf.getModificationTime())
-					{
-						//System.out.println("REFRESH ACTOR BECAUSE OF LEAF !");
-						refreshData();
-						refreshActor();
-						break;
-					}
-			manageHighLight();
+			lastUpdate = System.nanoTime();
+			return;
 		}
+
+		if (lastUpdate <= getModificationTime())
+		{
+			refreshData();
+			refreshActor();
+		}
+		else
+		{
+			List<LeafNode> leaves = getLeaves();
+			for (LeafNode leaf : leaves)
+			{
+				if (lastUpdate <= leaf.getModificationTime())
+				{
+					refreshData();
+					refreshActor();
+					break;
+				}
+			}
+		}
+		manageHighLight();
 
 		lastUpdate = System.nanoTime();
 	}
 
 	public List<AbstractNode> getChildren()
 	{
-		return this.children;
+		return children;
 	}
 	
 	public List<LeafNode> getLeaves()

@@ -61,7 +61,7 @@ public abstract class AbstractNode {
 	protected AbstractNode parent;
 	private final ArrayList<ActorListener> actorListeners = new ArrayList<ActorListener>();
 	private boolean manager = false;
-	protected vtkActor actor = null; // If actor != null the node is not a manager
+	protected vtkActor actor = null; // If actor != null the node is a manager
 	protected vtkPolyDataMapper mapper = null;
 	protected vtkPolyData data = null;
 
@@ -209,7 +209,7 @@ public abstract class AbstractNode {
 	
 	public vtkActor getActor()
 	{
-		return this.actor;
+		return actor;
 	}
 
 	protected void fireActorCreated(vtkActor actor)
