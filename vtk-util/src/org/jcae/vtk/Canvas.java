@@ -180,18 +180,19 @@ public class Canvas extends vtkCanvas
 	}
 
 	/**
-	 * JSplitPane with not continous layout make the vtkPanel undrawable if
-	 * do not empty this method.
+	 * Workaround a bug with JSplitterPane on Windows.
+	 * On Windows, JSplitterPane with no continous layout makes
+	 * the vtkPanel undrawable when split bar is moved.
+	 * As a workaround, do not call super.removeNotify() on
+	 * Windows.  This method must be removed when vtk is fixed.
+	 * @see http://www.vtk.org/Bug/view.php?id=7107
 	 */
 	@Override
 	public void removeNotify()
 	{
-		// Do this workaround only for windows platforms
 		String osName = System.getProperty("os.name");
-		if (!osName.contains("Windows"));
-		super.removeNotify();
-	//Thread.dumpStack();
-	//System.out.println("REMOVE NOTIFY "+getParent());
+		if (!osName.contains("Windows"))
+			super.removeNotify();
 	}
 
 	/**
