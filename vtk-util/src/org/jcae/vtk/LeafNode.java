@@ -343,7 +343,7 @@ public class LeafNode extends AbstractNode
 		super.refreshActor();
 		if (LOGGER.isLoggable(Level.FINEST))
 			LOGGER.log(Level.FINEST, "Attach color "+color+" (opacity="+color.getAlpha()+") to actor "+actor);
-		Utils.setColorActor(actor, color);
+		Utils.vtkPropertySetColor(actor.GetProperty(), color);
 	}
 
 	public DataProvider getDataProvider()
