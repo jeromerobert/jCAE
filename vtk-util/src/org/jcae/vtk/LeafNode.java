@@ -23,6 +23,8 @@ import gnu.trove.TIntArrayList;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.vecmath.Point3f;
 import org.jcae.geometry.Transform3D;
 import vtk.vtkActor;
@@ -38,6 +40,7 @@ import vtk.vtkSelection;
  */
 public class LeafNode extends AbstractNode
 {
+	private final static Logger LOGGER = Logger.getLogger(LeafNode.class.getName());
 
 	public static class DataProvider
 	{
@@ -197,6 +200,7 @@ public class LeafNode extends AbstractNode
 			if (lastUpdate <= modificationTime)
 			{
 				//System.out.println("REFRESH ACTOR !");
+				LOGGER.finest("Refresh actor: "+lastUpdate+" <= "+modificationTime);
 				refreshActor();
 			}
 			manageHighLight();
@@ -264,6 +268,8 @@ public class LeafNode extends AbstractNode
 	{
 		if (actor != null)
 		{
+			if (LOGGER.isLoggable(Level.FINEST))
+				LOGGER.log(Level.FINEST, "Unhighlight actor "+actor);
 			Utils.vtkPropertySetColor(actor.GetProperty(), color);
 			getActorCustomiser().customiseActor(actor);
 		}
@@ -274,6 +280,8 @@ public class LeafNode extends AbstractNode
 		if(this.color.equals(color))
 			return;
 		
+		if (LOGGER.isLoggable(Level.FINEST))
+			LOGGER.log(Level.FINEST, "Change color of actor "+actor+" from "+this.color+" (opacity="+this.color.getAlpha()+") to "+color+" (opacity="+color.getAlpha()+")");
 		this.color = color;
 		
 		if(actor != null)
@@ -300,12 +308,11 @@ public class LeafNode extends AbstractNode
 	{
 		//System.out.println("REFRESHING DATA !");
 		//System.out.println("DATA NODES : " + dataProvider.getNodes().length);
+		LOGGER.finest("Refresh data, old creation date="+timeDataCreated);
 		dataProvider.load();
 		createData(dataProvider);
 		dataProvider.unLoad();
 		
-		//System.out.println("DATA NODES : " + dataProvider.getNodes().length);
-
 		modified();
 		timeDataCreated = System.nanoTime();
 	}
@@ -334,7 +341,8 @@ public class LeafNode extends AbstractNode
 	protected void refreshActor()
 	{
 		super.refreshActor();
-
+		if (LOGGER.isLoggable(Level.FINEST))
+			LOGGER.log(Level.FINEST, "Attach color "+color+" (opacity="+color.getAlpha()+") to actor "+actor);
 		Utils.setColorActor(actor, color);
 	}
 
@@ -343,6 +351,7 @@ public class LeafNode extends AbstractNode
 		return dataProvider;
 	}
 
+	@Override
 	public void select()
 	{
 		selection.clear();

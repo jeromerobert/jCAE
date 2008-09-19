@@ -30,6 +30,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.SwingUtilities;
 import javax.vecmath.Point3d;
@@ -65,6 +67,8 @@ import vtk.vtkWindowToImageFilter;
  */
 public class Utils
 {	
+	private final static Logger LOGGER = Logger.getLogger(Utils.class.getName());
+
 	public static Canvas retrieveCanvas(ComponentEvent e)
 	{
 		Component c = e.getComponent();
@@ -111,6 +115,8 @@ public class Utils
 	@Deprecated
 	public static void setColorActor(vtkActor actor, Color color)
 	{
+		if (LOGGER.isLoggable(Level.FINEST))
+			LOGGER.log(Level.FINEST, "Attach color "+color+" (opacity="+color.getAlpha()+" to actor "+actor);
 		actor.GetProperty().SetColor((double) color.getRed() / 255., (double) color.getGreen() / 255., (double) color.getBlue() / 255.);
 		actor.GetProperty().SetOpacity((double) color.getAlpha() / 255.);
 	}
@@ -159,6 +165,8 @@ public class Utils
 	
 	public static void vtkPropertySetColor(vtkProperty property, Color color)
 	{
+		if (LOGGER.isLoggable(Level.FINEST))
+			LOGGER.log(Level.FINEST, "Set property "+property+" to color "+color+" (opacity="+color.getAlpha()+")");
 		property.SetColor((double) color.getRed() / 255., (double) color.getGreen() / 255., (double) color.getBlue() / 255.);
 		property.SetOpacity((double) color.getAlpha() / 255.);
 	}

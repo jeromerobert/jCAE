@@ -25,6 +25,8 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import vtk.vtkActor;
 import vtk.vtkExtractSelectedPolyDataIds;
 import vtk.vtkIdTypeArray;
@@ -40,7 +42,8 @@ import vtk.vtkSelection;
  */
 public class Node extends AbstractNode
 {
-
+	private static final Logger LOGGER = Logger.getLogger(Node.class.getName());
+	
 	private ArrayList<AbstractNode> children = new ArrayList<AbstractNode>();
 	// Datas if the node manage
 	private TIntArrayList offSetsVertice = null;
@@ -225,7 +228,6 @@ public class Node extends AbstractNode
 	protected void refreshData()
 	{
 		List<LeafNode> leaves = getLeaves();
-
 		// Compute the sizes
 		int nodesSize = 0;
 		int verticeSize = 0;
@@ -351,6 +353,8 @@ public class Node extends AbstractNode
 			offSetPoly += polysNode.length;
 
 			Color color = leaf.getColor();
+			if (LOGGER.isLoggable(Level.FINEST))
+				LOGGER.finest("Compound: set color to "+color+" (opacity="+color.getAlpha()+")");
 			table.SetTableValue(i, (double) color.getRed() / 255., (double) color.getGreen() / 255., (double) color.getBlue() / 255., (double) color.getAlpha() / 255.);
 
 			dataProvider.unLoad();
