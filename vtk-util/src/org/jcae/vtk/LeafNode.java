@@ -306,8 +306,8 @@ public class LeafNode extends AbstractNode
 		
 		//System.out.println("DATA NODES : " + dataProvider.getNodes().length);
 
-		timeDataCreated = System.nanoTime();
 		modified();
+		timeDataCreated = System.nanoTime();
 	}
 
 	// TEMPORARY : remove it
