@@ -136,7 +136,8 @@ public class View extends Canvas {
 				RenderSecured();
 		}
 		
-		// Point events if the press and release positions are very closed
+		// If the press and release positions are not close, this is
+		// not a selection
 		if(pressPosition.distance(releasePosition) > 5.)
 			return;
 		
@@ -144,7 +145,11 @@ public class View extends Canvas {
 		{
 			case POINT_SELECTION:
 				if(currentViewable != null)
+				{
+					if (!e.isControlDown())
+						currentViewable.unselectAll();
 					currentViewable.pointSelection(this, releasePosition);
+				}
 				break;
 			case CHANGE_ROTATION_CENTER:
 				cameraManager.centerRotationSelection(releasePosition);

@@ -58,7 +58,6 @@ public abstract class Viewable extends MultiCanvas
 
 	public enum SelectionType
 	{
-
 		NODE,
 		CELL,
 		POINT
@@ -227,7 +226,7 @@ public abstract class Viewable extends MultiCanvas
 		HashSet<LeafNode> newSelection;
 
 		if (appendSelection)
-			newSelection = new HashSet(selectionNode);
+			newSelection = new HashSet<LeafNode>(selectionNode);
 		else
 			newSelection = new HashSet<LeafNode>();
 
@@ -308,7 +307,7 @@ public abstract class Viewable extends MultiCanvas
 	/**
 	 * If you want the highlight disappears call highlight...
 	 */
-	public void unSelectAll()
+	public void unselectAll()
 	{
 		for (LeafNode leaf : selectionCell.keySet())
 			leaf.unSelectCells();
