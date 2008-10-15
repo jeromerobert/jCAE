@@ -11,16 +11,20 @@ See http://www.vtk.org/Bug/view.php?id=7296
 
 
 diff --git a/Rendering/vtkOpenGLRenderer.cxx b/Rendering/vtkOpenGLRenderer.cxx
-index ca3793a..766068e 100644
+index ca3793a..442bf92 100644
 --- a/Rendering/vtkOpenGLRenderer.cxx
 +++ b/Rendering/vtkOpenGLRenderer.cxx
-@@ -1104,7 +1104,8 @@ void vtkOpenGLRenderer::Clear(void)
+@@ -1103,8 +1103,11 @@ void vtkOpenGLRenderer::Clear(void)
+     clear_mask |= GL_COLOR_BUFFER_BIT;
      }
  
-   glClearDepth(static_cast<GLclampf>(1.0));
+-  glClearDepth(static_cast<GLclampf>(1.0));
 -  clear_mask |= GL_DEPTH_BUFFER_BIT;
 +  if(this->SelectMode == vtkRenderer::NOT_SELECTING || this->ClearDepthForSelection)
++  {
++    glClearDepth(static_cast<GLclampf>(1.0));
 +    clear_mask |= GL_DEPTH_BUFFER_BIT;
++  }
  
    vtkDebugMacro(<< "glClear\n");
    glClear(clear_mask);
