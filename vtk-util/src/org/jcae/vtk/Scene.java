@@ -158,7 +158,7 @@ public class Scene implements AbstractNode.ActorListener
 				secondPoint[1]);
 		selector.SetRenderPasses(0, 1, 0, 0, 1, 0);
 
-		int[] pickBackup = null;
+		int[] pickableActorBackup = null;
 		if (actorFiltering)
 		{
 			boolean pointPicking = false;
@@ -167,8 +167,7 @@ public class Scene implements AbstractNode.ActorListener
 
 			long begin = System.currentTimeMillis();
 			vtkActorCollection actors = canvas.GetRenderer().GetActors();
-			pickBackup = new int[actors.GetNumberOfItems()];
-			actors.InitTraversal();
+			pickableActorBackup = new int[actors.GetNumberOfItems()];
 
 			Point3d pickOrigin = new Point3d();
 			Vector3d pickDirection = new Vector3d();
@@ -183,60 +182,37 @@ public class Scene implements AbstractNode.ActorListener
 					firstPoint[0], firstPoint[1], secondPoint[0], secondPoint[1],
 					canvas.GetRenderer()));
 
+			actors.InitTraversal();
 			int j = 0;
 			for (vtkActor actor; (actor = actors.GetNextActor()) != null; ++j)
 			{
-				if ((pickBackup[j] = actor.GetPickable()) == 0)
+				if ((pickableActorBackup[j] = actor.GetPickable()) == 0)
 					continue;
-
 				double[] bounds = actor.GetBounds();
 				BoundingBox box = new BoundingBox();
 				box.setLower(bounds[0], bounds[2], bounds[4]);
 				box.setUpper(bounds[1], bounds[3], bounds[5]);
 
 				if (pointPicking)
+				{
 					if (!box.intersect(pickOrigin, pickDirection))
 						actor.PickableOff();
 					else
-						LOGGER.finest("One node picked");						
+						LOGGER.finest("One node picked");
+				}
 				else
+				{
 					if (!frustum.intersect(box))
 						actor.PickableOff();
+				}
 			}
-		/*actors.InitTraversal();
-		int nbrPick = 0;
-		int nbrPolys = 0;
-		for(vtkActor actor ; (actor = actors.GetNextActor()) != null ; ++j)
-		{
-		if(actor.GetPickable() == 1)
-		nbrPick++;
-		nbrPolys += actor.GetMapper().GetInputAsDataSet().GetNumberOfCells();
-		}
-		System.out.println("NBR OF PICKED ACTORS : " + nbrPick);
-		System.out.println("NBR OF ACTORS : " + actors.GetNumberOfItems());
-		System.out.println("NUMBER OF POLYS : " + nbrPolys);
-		System.out.println("TIME TO FILTER : " + (System.currentTimeMillis() - begin));*/
 		}
 
 		canvas.lock();
 		canvas.GetRenderer().ClearDepthForSelectionOff();
 		selector.Select();
+		canvas.GetRenderer().ClearDepthForSelectionOn();
 		canvas.unlock();
-
-		/*vtkFloatArray afterNative = new vtkFloatArray();
-		canvas.GetRenderWindow().GetZbufferData(firstPoint[0], firstPoint[1], secondPoint[0], secondPoint[1], afterNative);
-		
-		float[] after = afterNative.GetJavaArray();
-		
-		System.out.println("Z-BUFFER : ");
-		for(int i = 0 ; i < before.length ; ++i)
-		{
-		System.out.println(before[i] + " -> " + after[i]);
-		}
-		
-		System.out.println("after components " + afterNative.GetNumberOfComponents());
-		System.out.println("after tuples " + afterNative.GetNumberOfTuples());
-		 */
 		//long begin = System.currentTimeMillis();
 		vtkIdTypeArray idArray = new vtkIdTypeArray();
 		selector.GetSelectedIds(idArray);
@@ -247,7 +223,7 @@ public class Scene implements AbstractNode.ActorListener
 			actors.InitTraversal();
 			int j = 0;
 			for (vtkActor actor; (actor = actors.GetNextActor()) != null; ++j)
-				actor.SetPickable(pickBackup[j]);
+				actor.SetPickable(pickableActorBackup[j]);
 		}
 		
 		LOGGER.finest("Number of actors selected: "+ idArray.GetDataSize() / 4);
