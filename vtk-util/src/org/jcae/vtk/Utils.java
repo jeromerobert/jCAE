@@ -844,6 +844,8 @@ public class Utils
 	 */
 	public static int[] stripCellArray(int[] indices)
 	{
+		if(indices.length == 0)
+			return new int[0];
 		//Compute the size of the ouput array
 		int t = indices[0];
 		int tp = t + 1;
