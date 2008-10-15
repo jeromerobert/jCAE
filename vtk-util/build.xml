@@ -2,7 +2,7 @@
 <!-- You may freely edit this file. See commented blocks below for -->
 <!-- some examples of how to customize the build. -->
 <!-- (If you delete it and reopen the project it will be recreated.) -->
-<project name="TestVTK" default="default" basedir=".">
+<project name="vtk-util" default="default" basedir=".">
     <description>Builds, tests, and runs the project TestVTK.</description>
     <import file="nbproject/build-impl.xml"/>
 
@@ -68,6 +68,24 @@
     nbproject/build-impl.xml file. 
 
     -->
+	
+	<!-- Netbeans update the manifest in the init target so we must write it before -->
+	<target name="-pre-init">
+		<exec executable="/bin/sh" failifexecutionfails="false"
+		outputproperty="tmprevision" errorproperty="dummy" logError="true">
+			<arg line="-c &quot;unset LANG;svnversion&quot;"/>
+		</exec>
+		<condition property="revision" value="exported" else="${tmprevision}">
+			<equals arg1="${tmprevision}" arg2=""/>
+		</condition>
+		<!-- default value if svnversion cannot be run -->
+		<property name="revision" value="exported"/>
+		<!-- from http://ant.apache.org/manual/CoreTasks/manifest.html -->
+		<manifest file="manifest.mf">
+			<attribute name="SCM-Revision" value="${revision}"/> 
+		</manifest>		
+	</target>
+	
     <target depends="init" name="deps-jar" unless="no.deps">
         <ant dir="${project.amibe}" inheritall="false" target="jar"/>
         <ant dir="${project.occjava}" inheritall="false" target="jar"/>
