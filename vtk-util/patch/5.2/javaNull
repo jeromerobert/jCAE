@@ -1,0 +1,24 @@
+Allow wrapping NULL objects in Java
+
+See http://www.vtk.org/Bug/view.php?id=7674
+---
+
+ vtkJavaUtil.cxx |    4 ++++
+ 1 file changed, 4 insertions(+)
+
+
+diff --git a/Common/vtkJavaUtil.cxx b/Common/vtkJavaUtil.cxx
+index 50dd06e..251a523 100644
+--- a/Common/vtkJavaUtil.cxx
++++ b/Common/vtkJavaUtil.cxx
+@@ -29,6 +29,10 @@ JNIEXPORT jlong vtkJavaGetId(JNIEnv *env,jobject obj)
+   jfieldID id;
+   jlong result;
+     
++  if( obj == NULL )
++    {
++    return 0L;
++    }
+   id = env->GetFieldID(env->GetObjectClass(obj),"vtkId","J");
+   
+   result = env->GetLongField(obj,id);
