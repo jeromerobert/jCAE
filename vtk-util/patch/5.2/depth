@@ -2,16 +2,21 @@ Do not erase the depth buffer before a selection rendering.
 
 This permits to not have to draw all the scene to check the visibility of an element.
 See http://www.vtk.org/Bug/view.php?id=7296
+
+A fix has been included in CVS HEAD, so this patch has been rewritten
+as a backport in VTK 5.2, maybe it will be accepted upstream.
+Unfortunately this means that ClearDepthForSelection has to be
+replaced by PreserveDepthBuffer (with inverse meaning) in Java sources.
 ---
 
- Rendering/vtkOpenGLRenderer.cxx |    3 ++-
- Rendering/vtkRenderer.cxx       |    2 ++
- Rendering/vtkRenderer.h         |    9 +++++++++
- 3 files changed, 13 insertions(+), 1 deletions(-)
+ vtkOpenGLRenderer.cxx |    7 +++++--
+ vtkRenderer.cxx       |    1 +
+ vtkRenderer.h         |    8 ++++++++
+ 3 files changed, 14 insertions(+), 2 deletions(-)
 
 
 diff --git a/Rendering/vtkOpenGLRenderer.cxx b/Rendering/vtkOpenGLRenderer.cxx
-index ca3793a..442bf92 100644
+index ca3793a..b9168f7 100644
 --- a/Rendering/vtkOpenGLRenderer.cxx
 +++ b/Rendering/vtkOpenGLRenderer.cxx
 @@ -1103,8 +1103,11 @@ void vtkOpenGLRenderer::Clear(void)
@@ -20,51 +25,49 @@ index ca3793a..442bf92 100644
  
 -  glClearDepth(static_cast<GLclampf>(1.0));
 -  clear_mask |= GL_DEPTH_BUFFER_BIT;
-+  if(this->SelectMode == vtkRenderer::NOT_SELECTING || this->ClearDepthForSelection)
-+  {
++  if (!this->GetPreserveDepthBuffer())
++    {
 +    glClearDepth(static_cast<GLclampf>(1.0));
 +    clear_mask |= GL_DEPTH_BUFFER_BIT;
-+  }
++    }
  
    vtkDebugMacro(<< "glClear\n");
    glClear(clear_mask);
 diff --git a/Rendering/vtkRenderer.cxx b/Rendering/vtkRenderer.cxx
-index d7c22e9..b47301f 100644
+index d7c22e9..642fa80 100644
 --- a/Rendering/vtkRenderer.cxx
 +++ b/Rendering/vtkRenderer.cxx
-@@ -78,6 +78,8 @@ vtkRenderer::vtkRenderer()
+@@ -87,6 +87,7 @@ vtkRenderer::vtkRenderer()
+   this->PathArrayCount = 0;
  
-   this->LightFollowCamera = 1;
+   this->Layer                    = 0;
++  this->PreserveDepthBuffer = 0;
  
-+  this->ClearDepthForSelection = 1;
-+
-   this->NumberOfPropsRendered = 0;
- 
-   this->PropArray                = NULL;
+   this->ComputedVisiblePropBounds[0] = VTK_DOUBLE_MAX;
+   this->ComputedVisiblePropBounds[1] = -VTK_DOUBLE_MAX;
 diff --git a/Rendering/vtkRenderer.h b/Rendering/vtkRenderer.h
-index a0aae36..866b7e3 100644
+index a0aae36..1c94e2c 100644
 --- a/Rendering/vtkRenderer.h
 +++ b/Rendering/vtkRenderer.h
-@@ -131,6 +131,13 @@ public:
-   vtkBooleanMacro(AutomaticLightCreation,int);
+@@ -319,6 +319,13 @@ public:
+   vtkGetMacro(Layer, int);
  
    // Description:
-+  // This is a flag that indicate if the depth buffer is erased or not
-+  // before the pick selection. This permits to not draw all the components
-+  // and only one that can be picked but checking anyway if they are visible or not.
-+  // By default this flag is on and is reset to on after each rendering selection.
-+  vtkSetMacro(ClearDepthForSelection,int);
-+  vtkBooleanMacro(ClearDepthForSelection,int);
-+  // Description:
-   // Ask the lights in the scene that are not in world space
-   // (for instance, Headlights or CameraLights that are attached to the 
-   // camera) to update their geometry to match the active camera.
-@@ -461,6 +468,8 @@ protected:
-   // Allocate the time for each prop
-   void               AllocateTime();
- 
-+  int                ClearDepthForSelection;
++  // Normally a renderer is treated as transparent if Layer > 0. To treat a
++  // renderer at Layer 0 as transparent, set this flag to true.
++  vtkSetMacro(PreserveDepthBuffer, int);
++  vtkGetMacro(PreserveDepthBuffer, int);
++  vtkBooleanMacro(PreserveDepthBuffer, int);
 +
-   // Internal variables indicating the number of props
-   // that have been or will be rendered in each category.
-   int                NumberOfPropsRendered;
++  // Description:
+   // Returns a boolean indicating if this renderer is transparent.  It is
+   // transparent if it is not in the deepest layer of its render window.
+   int  Transparent();
+@@ -481,6 +488,7 @@ protected:
+   // Shows what layer this renderer belongs to.  Only of interested when
+   // there are layered renderers.
+   int                Layer;
++  int                PreserveDepthBuffer;
+ 
+   // Holds the result of ComputeVisiblePropBounds so that it is visible from
+   // wrapped languages

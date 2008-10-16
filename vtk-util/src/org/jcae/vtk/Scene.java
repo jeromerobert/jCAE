@@ -209,9 +209,10 @@ public class Scene implements AbstractNode.ActorListener
 		}
 
 		canvas.lock();
-		canvas.GetRenderer().ClearDepthForSelectionOff();
+		int savePreserve = canvas.GetRenderer().GetPreserveDepthBuffer();
+		canvas.GetRenderer().PreserveDepthBufferOn();
 		selector.Select();
-		canvas.GetRenderer().ClearDepthForSelectionOn();
+		canvas.GetRenderer().SetPreserveDepthBuffer(savePreserve);
 		canvas.unlock();
 		//long begin = System.currentTimeMillis();
 
