@@ -214,9 +214,11 @@ public class Scene implements AbstractNode.ActorListener
 		canvas.GetRenderer().ClearDepthForSelectionOn();
 		canvas.unlock();
 		//long begin = System.currentTimeMillis();
-		vtkIdTypeArray idArray = new vtkIdTypeArray();
-		selector.GetSelectedIds(idArray);
 
+		vtkSelection selection = new vtkSelection();
+		selection.ReleaseDataFlagOn();
+		selector.GetSelectedIds(selection);
+		
 		if (actorFiltering)
 		{
 			vtkActorCollection actors = canvas.GetRenderer().GetActors();
@@ -226,21 +228,11 @@ public class Scene implements AbstractNode.ActorListener
 				actor.SetPickable(pickableActorBackup[j]);
 		}
 		
-		LOGGER.finest("Number of actors selected: "+ idArray.GetDataSize() / 4);
-		// If no selection was made leave
-		if (idArray.GetDataSize() == 0)
-			return;
-
-		vtkSelection selection = new vtkSelection();
-		selection.ReleaseDataFlagOn();
-		selector.GetSelectedIds(selection);
-
 		// Find the ID Selection of the actor
-		int IDActor = -1;
 		for (int i = 0; i < selection.GetNumberOfChildren(); ++i)
 		{
 			vtkSelection child = selection.GetChild(i);
-			IDActor = child.GetProperties().Get(selection.PROP_ID());
+			int IDActor = child.GetProperties().Get(selection.PROP_ID());
 			vtkProp prop = selector.GetActorFromId(IDActor);
 
 			if (prop != null)
@@ -255,6 +247,8 @@ public class Scene implements AbstractNode.ActorListener
 					LOGGER.finest("Picked node: "+node);					
 				}
 			}
+			else
+				LOGGER.warning("No selection found");
 		}
 	}
 
