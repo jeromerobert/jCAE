@@ -81,6 +81,25 @@ public class View extends Canvas {
 			case KeyEvent.VK_R:
 				setMouseMode(MouseMode.CHANGE_ROTATION_CENTER);
 				break;
+			case KeyEvent.VK_CONTROL:
+				currentViewable.appendSelection = true;
+				break;
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e)
+	{
+		super.keyReleased(e);
+		
+		if(!interactive)
+			return;
+		
+		switch (e.getKeyCode())
+		{
+			case KeyEvent.VK_CONTROL:
+				currentViewable.appendSelection = false;
+				break;
 		}
 	}
 
@@ -146,7 +165,7 @@ public class View extends Canvas {
 			case POINT_SELECTION:
 				if(currentViewable != null)
 				{
-					if (!e.isControlDown())
+					if (!currentViewable.appendSelection)
 						currentViewable.unselectAll();
 					currentViewable.pointSelection(this, releasePosition);
 				}
