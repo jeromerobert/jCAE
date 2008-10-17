@@ -26,10 +26,8 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import vtk.vtkActor;
 import vtk.vtkPlaneCollection;
@@ -112,27 +110,6 @@ public abstract class Viewable extends MultiCanvas
 	{
 		return this.selectionType;
 	}
-
-	/**
-	 * If true, the rectangle selection is on surface.
-	 * If false, the rectangle selection is in frustum.
-	 * @return
-	 */
-	public boolean getSurfaceSelection()
-	{
-		return surfaceSelection;
-	}
-
-	/**
-	 * Set the type of rectangle selection.
-	 * If true, the rectangle selection is on surface.
-	 * If false, the rectangle selection is in frustum.
-	 * @param surfaceSelection
-	 */
-	public void setSurfaceSelection(boolean surfaceSelection)
-	{
-		this.surfaceSelection = surfaceSelection;
-	}
 	
 	/**
 	 * Return current mode of selection.
@@ -158,9 +135,6 @@ public abstract class Viewable extends MultiCanvas
 
 	public void surfaceSelection(Canvas canvas, Point pressPosition_, Point releasePosition_)
 	{
-		//if (!appendSelection)
-		//			unSelectCells();
-
 		int[] pressPosition = new int[2];
 		pressPosition[0] = pressPosition_.x;
 		pressPosition[1] = pressPosition_.y;
@@ -185,61 +159,29 @@ public abstract class Viewable extends MultiCanvas
 	}
 
 	protected int[] selectPointOnSurface(Canvas canvas, int[] firstPoint, int[] secondPoint)
-	{	
-		/*vtkSelectVisiblePoints selector = new vtkSelectVisiblePoints();
-		selector.ReleaseDataFlagOn();
-		
-		meshData.Update();
-		selector.SetInput(meshData);
-		selector.SelectionWindowOn();
-		selector.SetTolerance(0.0001);
-		selector.SetSelection(firstPoint[0], secondPoint[0], secondPoint[1], firstPoint[1]);
-		selector.SetRenderer(canvas.GetRenderer());
-		
-		
-		selector.SetTolerance(Utils.computeTolerance(canvas, tolerance));
-		
-		// We have to render without the highlight and then update to have the points
-		highLight.SetVisibility(0);
-		canvas.lock();
-		canvas.GetRenderer().RenderSecured();
-		selector.Update();
-		canvas.unlock();
-		highLight.SetVisibility(1);
-		
-		// We have putted the ids in the field data of points on the creation of the vtkPolyData with vtkIdFilter
-		vtkPolyData data = selector.GetOutput();
-		data.ReleaseDataFlagOn();
-		vtkIdTypeArray ids = (vtkIdTypeArray) data.GetPointData().GetAbstractArray(fieldDataName);
-		
-		return Utils.getValues(ids);*/
-
+	{
 		return new int[0];
 	}
 
 	protected void selectCellOnSurface(Canvas canvas, int[] firstPoint, int[] secondPoint)
 	{
-		// Clear the cell selection before sending the new
-		List<LeafNode> nodes = rootNode.getLeaves();
-		for (LeafNode leaf : selectionCell.keySet())
-			leaf.unSelectCells();
-		
 		scene.pick(canvas, firstPoint, secondPoint);
 
+		List<LeafNode> nodes = rootNode.getLeaves();
 		for (LeafNode node : nodes)
 		{
 			TIntHashSet nodeCellSelection = selectionCell.get(node);
-			if (!appendSelection || nodeCellSelection == null)
+			if (nodeCellSelection == null)
 			{
 				TIntHashSet newCellSelection =
 					new TIntHashSet(node.getSelection().toNativeArray());
-				
-				selectionCell.put(node, newCellSelection);
-				
-				if (!selectionChanged && (nodeCellSelection == null ||
-					!nodeCellSelection.equals(newCellSelection)))
+				if (!newCellSelection.isEmpty())
+				{
+					selectionCell.put(node, newCellSelection);
 					selectionChanged = true;
-			} else
+				}
+			}
+			else
 			{
 				TIntArrayList selection = node.getSelection();
 				for (int i = 0; i < selection.size(); ++i)
@@ -255,14 +197,17 @@ public abstract class Viewable extends MultiCanvas
 			}
 		}
 
-		for (LeafNode node : nodes)
-			if (node.getSelection().size() != 0)
-				LOGGER.finest("One not empty selection found");
+		if (LOGGER.isLoggable(Level.FINEST))
+		{
+			for (LeafNode node : nodes)
+				if (node.getSelection().size() != 0)
+					LOGGER.finest("One not empty selection found");
 
-		if (selectionChanged)
-			LOGGER.finest("Selection changed");			
-		else
-			LOGGER.finest("Selection not changed");
+			if (selectionChanged)
+				LOGGER.finest("Selection changed");			
+			else
+				LOGGER.finest("Selection not changed");
+		}
 	}
 
 	protected void selectNodeOnSurface(Canvas canvas, int[] firstPoint, int[] secondPoint)
@@ -285,10 +230,10 @@ public abstract class Viewable extends MultiCanvas
 		{
 			TIntArrayList nodeSelection = node.getSelection();
 
-			if (nodeSelection.size() != 0)
+			if (!nodeSelection.isEmpty())
 			{
-				// If already selected and in append mode then delete
-				if (!newSelection.add(node) && appendSelection)
+				// If already selected, we are in append mode, then delete it
+				if (!newSelection.add(node))
 					newSelection.remove(node);
 
 				// Clear the selectionNode because it's not a cell selectionNode
@@ -310,66 +255,9 @@ public abstract class Viewable extends MultiCanvas
 	{
 		LOGGER.fine("Making point selection");
 
-		int[] firstPoint = new int[2];
-		int[] secondPoint = new int[2];
-
-		firstPoint[0] = pickPosition.x - pixelTolerance;
-		firstPoint[1] = pickPosition.y - pixelTolerance;
-		secondPoint[0] = pickPosition.x + pixelTolerance;
-		secondPoint[1] = pickPosition.y + pixelTolerance;
-
-		switch (selectionType)
-		{
-			case POINT:
-				selectPointOnSurface(canvas, firstPoint, secondPoint);
-				break;
-			case CELL:
-				selectCellOnSurface(canvas, firstPoint, secondPoint);
-				
-				// If multiple selection, select the first cell of the first leaf
-				Iterator< Entry<LeafNode, TIntHashSet>> iterEntries = selectionCell.entrySet().iterator();
-				Entry<LeafNode, TIntHashSet> entry = null;
-				
-				// Find the first leaf selection and clean it
-				while(iterEntries.hasNext())
-				{
-					entry = iterEntries.next();
-					TIntHashSet cells = entry.getValue();
-					if(cells.size() != 0)
-					{
-						if(cells.size() > 1)
-						{
-							int cell = cells.iterator().next();
-							cells.clear();
-							cells.add(cell);
-							entry.getKey().setSelection(new TIntArrayList(cells.toArray()));
-						}
-						break;
-					}
-				}
-				
-				// Clean the other selections
-				while(iterEntries.hasNext())
-				{
-					entry = iterEntries.next();
-					entry.getKey().unSelectCells();
-					entry.getValue().clear();
-				}
-				break;
-			case NODE:
-				selectNodeOnSurface(canvas, firstPoint, secondPoint);
-
-				// If multiple selection, select the first
-				if(selectionNode.size() > 1)
-				{
-					LeafNode firstLeaf = selectionNode.iterator().next();
-					selectionNode.clear();
-					selectionNode.add(firstLeaf);
-				}
-				break;
-		}
-
-		manageSelection();
+		Point pressPosition   = new Point(pickPosition.x - pixelTolerance, pickPosition.y - pixelTolerance);
+		Point releasePosition = new Point(pickPosition.x + pixelTolerance, pickPosition.y + pixelTolerance);
+		surfaceSelection(canvas, pressPosition, releasePosition);
 	}
 
 	protected void manageSelection()
