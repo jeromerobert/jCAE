@@ -75,7 +75,7 @@ public abstract class AbstractNode {
 	
 	protected vtkActor selectionHighLighter = null;
 	protected vtkPolyDataMapper selectionHighLighterMapper = null;
-	protected boolean pickable = true;
+	protected boolean pickable;
 	
 	public static interface ActorListener
 	{
