@@ -86,17 +86,14 @@ public class TestAmibe implements SelectionListener, KeyListener {
 		{
 		JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setVisible(true);
 		View canvas = new View();
 		frame.add(canvas, BorderLayout.CENTER);
 		vtkRenderer renderer = canvas.GetRenderer();
-		int[] groups = new int[33];
-			for(int i = 0 ; i < 33 ; ++i)
-				groups[i] = i;
-		AmibeToMesh reader = new AmibeToMesh(args[0], groups);	
+		AmibeToMesh reader = new AmibeToMesh(args[0]);
 		ViewableMesh rbh = new ViewableMesh(reader.getMesh());
 		canvas.add(rbh);
 		frame.setSize(800, 600);
+		frame.setVisible(true);
 		TestAmibe test = new TestAmibe(rbh);
 		canvas.addKeyListener(test);
 		//rbh.setViewMode(ViewableMesh.ViewMode.WIRED);

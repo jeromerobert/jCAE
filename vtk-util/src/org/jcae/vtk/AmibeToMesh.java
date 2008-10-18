@@ -24,6 +24,8 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
@@ -32,7 +34,7 @@ import org.xml.sax.SAXException;
  */
 public class AmibeToMesh
 {
-	private Mesh mesh;
+	private final Mesh mesh;
 
 	public Mesh getMesh()
 	{
@@ -91,6 +93,25 @@ public class AmibeToMesh
 		}
 	}
 	
+	public AmibeToMesh(String filePath)
+		throws ParserConfigurationException, SAXException, IOException
+	{
+		AmibeProvider provider = new AmibeProvider(new File(filePath));
+		Element xmlGroups = (Element) provider.getDocument().getElementsByTagName("groups").item(0);
+		NodeList nodeList=xmlGroups.getElementsByTagName("group");
+		int [] groupExtraction = new int[nodeList.getLength()];
+		for(int i=0; i<groupExtraction.length; i++)
+		{
+			Element e=(Element) nodeList.item(i);
+			groupExtraction[i]=Integer.parseInt(e.getAttribute("id"));
+		}
+
+		mesh = new Mesh(groupExtraction.length);
+
+		for(int id : groupExtraction)
+			mesh.setGroup(id, new GroupData(provider, id));
+	}
+
 	public AmibeToMesh(String filePath, int[] groupExtraction)
 		throws ParserConfigurationException, SAXException, IOException
 	{
