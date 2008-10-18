@@ -59,12 +59,6 @@ public class Node extends AbstractNode
 
 	private static class NodeData extends LeafNode.DataProvider
 	{
-		private final float[] nodes;
-		private final float[] normals;
-		private final int[] vertice;
-		private final int[] lines;
-		private final int[] polys;
-
 		NodeData(float[] nodes, float[] normals, int nbrOfVertice, int[] vertice, int nbrOfLines, int[] lines, int nbrOfPolys, int[] polys)
 		{
 			this.nodes = nodes;
@@ -176,7 +170,7 @@ public class Node extends AbstractNode
 
 	public interface ChildCreationListener
 	{
-		void childCreated(AbstractNode node);		
+		void childCreated(AbstractNode node);
 		void childDeleted(AbstractNode node);
 	}
 	
@@ -185,7 +179,7 @@ public class Node extends AbstractNode
 		if(children.add(child))
 		{
 			fireChildCreationListener(child);
-			modified();			
+			modified();
 		}
 	}
 
@@ -194,7 +188,7 @@ public class Node extends AbstractNode
 		if (children.remove(child))
 		{
 			child.deleteDatas();
-			fireChildDeletionListener(child);			
+			fireChildDeletionListener(child);
 			modified();
 		}
 	}
@@ -273,7 +267,7 @@ public class Node extends AbstractNode
 			child.setMapperSelectionCustomiser(mapperSelectionCustomiser);
 			child.applyMapperSelectionCustomiser();
 		}
-	}	
+	}
 	
 	@Override
 	public void applyActorHighLightedCustomiser()
@@ -529,7 +523,6 @@ public class Node extends AbstractNode
 		vtkIntArray idsNative = new vtkIntArray();
 		idsNative.SetJavaArray(ids);
 		data.GetCellData().SetScalars(idsNative);
-		//System.out.println("number of cells : " + data.GetNumberOfCells());
 	}
 
 	@Override
@@ -546,7 +539,7 @@ public class Node extends AbstractNode
 			highLighter = null;
 			highLighterMapper = null;
 		}
-		for(AbstractNode n:getChildren())
+		for(AbstractNode n : getChildren())
 			n.deleteDatas();
 	}
 
@@ -618,8 +611,6 @@ public class Node extends AbstractNode
 
 			highLighterMapper = new vtkPolyDataMapper();
 			highLighterMapper.ScalarVisibilityOff();
-			//highLighterMapper.SetResolveCoincidentTopologyToPolygonOffset();
-			//highLighterMapper.SetResolveCoincidentTopologyPolygonOffsetParameters(-Utils.getOffSetFactor(), -Utils.getOffSetValue());
 			highLighterMapper.SetInput(selectInto(data, selection.toNativeArray()));
 			highLighter.SetMapper(highLighterMapper);
 
@@ -716,8 +707,8 @@ public class Node extends AbstractNode
 		if(actorCreated)
 		{
 			fireActorCreated(selectionHighLighter);
-			fireActorHighLighted(selectionHighLighter);			
-		}		
+			fireActorHighLighted(selectionHighLighter);
+		}
 	}
 
 	private final int nodeIndiceToLeafIndice(int leaf, int indice)

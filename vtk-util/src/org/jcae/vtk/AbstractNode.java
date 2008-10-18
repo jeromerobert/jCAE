@@ -122,11 +122,11 @@ public abstract class AbstractNode {
 	}
 	
 	public static ActorCustomiser DEFAULT_ACTOR_CUSTOMISER = new ActorCustomiser(){
-		public void customiseActor(vtkActor actor){}		
+		public void customiseActor(vtkActor actor){}
 	};
 	public static ActorHighLightedCustomiser DEFAULT_ACTOR_HIGHLIGHTED_CUSTOMISER =
 		new ActorHighLightedCustomiser(){
-			public void customiseActorHighLighted(vtkActor actor){}		
+			public void customiseActorHighLighted(vtkActor actor){}
 		};
 	public static MapperCustomiser DEFAULT_MAPPER_CUSTOMISER = new MapperCustomiser(){
 		public void customiseMapper(vtkMapper mapper) {
@@ -419,7 +419,7 @@ public abstract class AbstractNode {
 	
 	protected void refreshMapper()
 	{
-		mapper.SetInput(data);		
+		mapper.SetInput(data);
 		mapper.Update();
 	}
 	

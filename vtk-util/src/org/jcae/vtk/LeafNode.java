@@ -45,8 +45,8 @@ public class LeafNode extends AbstractNode
 	public static class DataProvider
 	{
 		private long modifiedTime = System.nanoTime();
-		private float[] nodes = new float[0];
 		private float[] nodesTransformed = new float[0];
+		protected float[] nodes = new float[0];
 		protected float[] normals = null;
 		protected int[] vertice = new int[0];
 		protected int[] lines = new int[0];
@@ -259,17 +259,21 @@ public class LeafNode extends AbstractNode
 	
 	public void refresh()
 	{
-		if (isManager())
+		if (!isManager())
 		{
-			checkData();
-			if (lastUpdate <= modificationTime)
-			{
-				//System.out.println("REFRESH ACTOR !");
-				LOGGER.finest("Refresh actor: "+lastUpdate+" <= "+modificationTime);
-				refreshActor();
-			}
-			manageHighLight();
+			lastUpdate = System.nanoTime();
+			return;
 		}
+
+		checkData();
+		if (lastUpdate <= modificationTime)
+		{
+			//System.out.println("REFRESH ACTOR !");
+			LOGGER.finest("Refresh actor: "+lastUpdate+" <= "+modificationTime);
+			refreshActor();
+		}
+		manageHighLight();
+
 		lastUpdate = System.nanoTime();
 	}
 
