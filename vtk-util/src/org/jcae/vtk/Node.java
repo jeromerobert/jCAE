@@ -57,98 +57,8 @@ public class Node extends AbstractNode
 	private vtkPolyDataMapper highLighterMapper = null;
 	private ArrayList<ChildCreationListener> childCreationListeners = new ArrayList<ChildCreationListener>();
 
-	public Node(AbstractNode parent)
-	{
-		// Make it to not make a course...
-		super(null);
-		if(parent != null)
-		{
-			this.parent = parent;
-			parent.addChild(this);
-		}
-	}
-
-	public interface ChildCreationListener
-	{
-		void childCreated(AbstractNode node);		
-		void childDeleted(AbstractNode node);
-	}
-	
-	public void addChild(AbstractNode child)
-	{
-		if(children.add(child))
-		{
-			fireChildCreationListener(child);
-			modified();			
-		}
-	}
-
-	public int numChildren()
-	{
-		return children.size();
-	}
-
-	public void removeChild(AbstractNode child)
-	{
-		if (children.remove(child))
-		{
-			child.deleteDatas();
-			fireChildDeletionListener(child);			
-			modified();
-		}
-	}
-	
-	public void setPickableRecursive(boolean pickable)
-	{
-		super.setPickable(pickable);
-		
-		//if(highLighter != null)
-		//	highLighter.SetPickable(Utils.booleanToInt(pickable));
-		
-		for(AbstractNode child : children)
-		{
-			if(child instanceof Node)
-				((Node)child).setPickableRecursive(pickable);
-			else
-				child.setPickable(pickable);
-		}
-	}
-	
-	public void addChildCreationListener(ChildCreationListener listener)
-	{
-		childCreationListeners.add(listener);
-	}
-	
-	public void removeChildCreationListener(ChildCreationListener listener)
-	{
-		childCreationListeners.remove(listener);
-	}
-	
-	private void fireChildCreationListener(AbstractNode node)
-	{
-		for(ChildCreationListener listener : childCreationListeners)
-			listener.childCreated(node);
-	}
-	
-	private void fireChildDeletionListener(AbstractNode node)
-	{
-		for(ChildCreationListener listener : childCreationListeners)
-			listener.childDeleted(node);
-	}
-
-	@Override
-	protected void refreshMapper()
-	{
-		super.refreshMapper();
-		mapper.SetLookupTable(table);
-		mapper.UseLookupTableScalarRangeOn();
-		mapper.SetScalarModeToUseCellData();
-		getMapperCustomiser().customiseMapper(mapper);
-	}
-
 	private static class NodeData extends LeafNode.DataProvider
 	{
-
 		private final float[] nodes;
 		private final float[] normals;
 		private final int[] vertice;
@@ -210,6 +120,17 @@ public class Node extends AbstractNode
 		}
 	}
 
+	public Node(AbstractNode parent)
+	{
+		// Make it to not make a course...
+		super(null);
+		if(parent != null)
+		{
+			this.parent = parent;
+			parent.addChild(this);
+		}
+	}
+
 	protected LeafNode getNode(int cellID)
 	{
 		if (!isManager())
@@ -222,6 +143,213 @@ public class Node extends AbstractNode
 			return leaves.get(ID);
 		} else
 			throw new RuntimeException("cellID out of bounds");
+	}
+
+	public void setPickableRecursive(boolean pickable)
+	{
+		super.setPickable(pickable);
+		
+		for(AbstractNode child : children)
+		{
+			if(child instanceof Node)
+				((Node)child).setPickableRecursive(pickable);
+			else
+				child.setPickable(pickable);
+		}
+	}
+	
+	public List<AbstractNode> getChildren()
+	{
+		return children;
+	}
+	
+	public List<LeafNode> getLeaves()
+	{
+		// Do not keep the leaves, just compute
+		ArrayList<LeafNode> toReturn = new ArrayList<LeafNode>();
+
+		for (AbstractNode child : children)
+			toReturn.addAll(child.getLeaves());
+
+		return toReturn;
+	}
+
+	public interface ChildCreationListener
+	{
+		void childCreated(AbstractNode node);		
+		void childDeleted(AbstractNode node);
+	}
+	
+	public void addChild(AbstractNode child)
+	{
+		if(children.add(child))
+		{
+			fireChildCreationListener(child);
+			modified();			
+		}
+	}
+
+	public void removeChild(AbstractNode child)
+	{
+		if (children.remove(child))
+		{
+			child.deleteDatas();
+			fireChildDeletionListener(child);			
+			modified();
+		}
+	}
+	
+	public int numChildren()
+	{
+		return children.size();
+	}
+
+	public void addChildCreationListener(ChildCreationListener listener)
+	{
+		childCreationListeners.add(listener);
+	}
+	
+	public void removeChildCreationListener(ChildCreationListener listener)
+	{
+		childCreationListeners.remove(listener);
+	}
+	
+	private void fireChildCreationListener(AbstractNode node)
+	{
+		for(ChildCreationListener listener : childCreationListeners)
+			listener.childCreated(node);
+	}
+	
+	private void fireChildDeletionListener(AbstractNode node)
+	{
+		for(ChildCreationListener listener : childCreationListeners)
+			listener.childDeleted(node);
+	}
+
+	@Override
+	public void applyActorCustomiser()
+	{
+		if(isManager())
+			super.applyActorCustomiser();
+		
+		for(AbstractNode child : children)
+		{
+			child.setActorCustomiser(actorCustomiser);
+			child.applyActorCustomiser();
+		}
+	}
+
+	@Override
+	public void applyActorSelectionCustomiser()
+	{
+		if(isManager())
+			super.applyActorSelectionCustomiser();
+		for(AbstractNode child : children)
+		{
+			child.setActorSelectionCustomiser(actorSelectionCustomiser);
+			child.applyActorSelectionCustomiser();
+		}
+	}
+
+	@Override
+	public void applyMapperCustomiser()
+	{
+		if(isManager())
+			super.applyMapperCustomiser();
+		for(AbstractNode child : children)
+		{
+			child.setMapperCustomiser(mapperCustomiser);
+			child.applyMapperCustomiser();
+		}
+	}
+
+	@Override
+	public void applyMapperSelectionCustomiser()
+	{
+		if(isManager())
+			super.applyMapperSelectionCustomiser();
+		for(AbstractNode child : children)
+		{
+			child.setMapperSelectionCustomiser(mapperSelectionCustomiser);
+			child.applyMapperSelectionCustomiser();
+		}
+	}	
+	
+	@Override
+	public void applyActorHighLightedCustomiser()
+	{
+		if(highLighter != null)
+			getActorHighLightedCustomiser().customiseActorHighLighted(highLighter);
+		for(AbstractNode child : children)
+		{
+			child.setActorHighLightedCustomiser(actorHighLightedCustomiser);
+			child.applyActorHighLightedCustomiser();
+		}
+	}
+
+	@Override
+	public void applyMapperHighLightedCustomiser()
+	{
+		if(highLighterMapper != null)
+			getMapperHighLightedCustomiser().customiseMapperHighLighted(highLighterMapper);
+		for(AbstractNode child : children)
+		{
+			child.setMapperHighLightedCustomiser(mapperHighLightedCustomiser);
+			child.applyMapperHighLightedCustomiser();
+		}
+	}
+
+	@Override
+	public void setVisible(boolean visible)
+	{
+		for (AbstractNode child : children)
+			child.setVisible(visible);
+
+		super.setVisible(visible);
+	}
+
+	@Override
+	public void refresh()
+	{
+		for (AbstractNode child : children)
+			child.refresh();
+		if (!isManager())
+		{
+			lastUpdate = System.nanoTime();
+			return;
+		}
+
+		if (lastUpdate <= getModificationTime())
+		{
+			refreshData();
+			refreshActor();
+		}
+		else
+		{
+			List<LeafNode> leaves = getLeaves();
+			for (LeafNode leaf : leaves)
+			{
+				if (lastUpdate <= leaf.getModificationTime())
+				{
+					refreshData();
+					refreshActor();
+					break;
+				}
+			}
+		}
+		manageHighLight();
+
+		lastUpdate = System.nanoTime();
+	}
+
+	@Override
+	protected void refreshMapper()
+	{
+		super.refreshMapper();
+		mapper.SetLookupTable(table);
+		mapper.UseLookupTableScalarRangeOn();
+		mapper.SetScalarModeToUseCellData();
+		getMapperCustomiser().customiseMapper(mapper);
 	}
 
 	@Override
@@ -427,101 +555,6 @@ public class Node extends AbstractNode
 		return nbrOfVertice + nbrOfLines + nbrOfPolys;
 	}
 
-	@Override
-	protected void highLight()
-	{
-		mapper.ScalarVisibilityOff();
-		if(highLighter != null)
-			highLighter.VisibilityOff();
-
-		super.highLight();
-	}
-
-	@Override
-	protected void unHighLight()
-	{
-		mapper.ScalarVisibilityOn();
-		if(highLighter != null)
-			highLighter.VisibilityOn();
-		
-		super.unHighLight();
-	}
-
-	@Override
-	public void applyActorCustomiser()
-	{
-		if(isManager())
-			super.applyActorCustomiser();
-		
-		for(AbstractNode child : children)
-		{
-			child.setActorCustomiser(actorCustomiser);
-			child.applyActorCustomiser();
-		}
-	}
-
-	@Override
-	public void applyActorSelectionCustomiser()
-	{
-		if(isManager())
-			super.applyActorSelectionCustomiser();
-		for(AbstractNode child : children)
-		{
-			child.setActorSelectionCustomiser(actorSelectionCustomiser);
-			child.applyActorSelectionCustomiser();
-		}
-	}
-
-	@Override
-	public void applyMapperCustomiser()
-	{
-		if(isManager())
-			super.applyMapperCustomiser();
-		for(AbstractNode child : children)
-		{
-			child.setMapperCustomiser(mapperCustomiser);
-			child.applyMapperCustomiser();
-		}
-	}
-
-	@Override
-	public void applyMapperSelectionCustomiser()
-	{
-		if(isManager())
-			super.applyMapperSelectionCustomiser();
-		for(AbstractNode child : children)
-		{
-			child.setMapperSelectionCustomiser(mapperSelectionCustomiser);
-			child.applyMapperSelectionCustomiser();
-		}
-	}
-
-	
-	
-	@Override
-	public void applyActorHighLightedCustomiser()
-	{
-		if(highLighter != null)
-			getActorHighLightedCustomiser().customiseActorHighLighted(highLighter);
-		for(AbstractNode child : children)
-		{
-			child.setActorHighLightedCustomiser(actorHighLightedCustomiser);
-			child.applyActorHighLightedCustomiser();
-		}
-	}
-
-	@Override
-	public void applyMapperHighLightedCustomiser()
-	{
-		if(highLighterMapper != null)
-			getMapperHighLightedCustomiser().customiseMapperHighLighted(highLighterMapper);
-		for(AbstractNode child : children)
-		{
-			child.setMapperHighLightedCustomiser(mapperHighLightedCustomiser);
-			child.applyMapperHighLightedCustomiser();
-		}
-	}
-
 	protected void manageHighLight()
 	{
 		if (!isManager())
@@ -608,65 +641,24 @@ public class Node extends AbstractNode
 		}
 	}
 
-	private final int nodeIndiceToLeafIndice(int leaf, int indice)
+	@Override
+	protected void highLight()
 	{
-		if (0 <= indice && indice < nbrOfVertice)
-			return indice - offSetsVertice.getQuick(leaf);
+		mapper.ScalarVisibilityOff();
+		if(highLighter != null)
+			highLighter.VisibilityOff();
 
-		indice -= nbrOfVertice;
-		if (0 <= indice && indice < nbrOfLines)
-			return indice - offSetsLines.getQuick(leaf);
-
-		indice -= nbrOfLines;
-		if (0 <= indice && indice < nbrOfPolys)
-			return indice - offSetsPolys.getQuick(leaf);
-
-		throw new IllegalArgumentException("The indice is not good !");
+		super.highLight();
 	}
 
-	private final int leafIndiceToNodeIndice(LeafNode leaf, int leafIndice, int indice)
+	@Override
+	protected void unHighLight()
 	{
-		LeafNode.DataProvider dataProvider = leaf.getDataProvider();
-		int nbrOfVerticeLeaf = dataProvider.getNbrOfVertice();
-		int nbrOfLinesLeaf = dataProvider.getNbrOfLines();
-		int nbrOfPolysLeaf = dataProvider.getNbrOfPolys();
-
-		if (0 <= indice && indice < nbrOfVerticeLeaf)
-			return indice + offSetsVertice.getQuick(leafIndice);
-
-		indice -= nbrOfVerticeLeaf;
-
-		if (0 <= indice && indice < nbrOfLinesLeaf)
-			return indice + nbrOfVertice + offSetsLines.getQuick(leafIndice);
-
-		indice -= nbrOfLinesLeaf;
-		if (0 <= indice && indice < nbrOfPolysLeaf)
-			return indice + nbrOfVertice + nbrOfLines + offSetsPolys.getQuick(leafIndice);
-
-		throw new IllegalArgumentException("The indice is not good !");
-	}
-
-	private vtkPolyData selectInto(vtkPolyData input, int[] cellID)
-	{
-		vtkSelection sel = new vtkSelection();
-		//sel.ReleaseDataFlagOn();
-		sel.GetProperties().Set(sel.CONTENT_TYPE(), 4); // 4 MEANS INDICES (see the enumeration)
-
-		sel.GetProperties().Set(sel.FIELD_TYPE(), 0); // 0 MEANS CELLS
-
-		// list of cells to be selected
-		vtkIdTypeArray arr = Utils.setValues(cellID);
-		sel.SetSelectionList(arr);
-
-		vtkExtractSelectedPolyDataIds selFilter = new vtkExtractSelectedPolyDataIds();
-		selFilter.ReleaseDataFlagOn();
-		selFilter.SetInput(1, sel);
-		selFilter.SetInput(0, input);
-
-		vtkPolyData dataFiltered = selFilter.GetOutput();
-		selFilter.Update();
-
-		return dataFiltered;
+		mapper.ScalarVisibilityOn();
+		if(highLighter != null)
+			highLighter.VisibilityOn();
+		
+		super.unHighLight();
 	}
 
 	public void highLightSelection()
@@ -728,63 +720,65 @@ public class Node extends AbstractNode
 		}		
 	}
 
-	@Override
-	public void refresh()
+	private final int nodeIndiceToLeafIndice(int leaf, int indice)
 	{
-		for (AbstractNode child : children)
-			child.refresh();
-		if (!isManager())
-		{
-			lastUpdate = System.nanoTime();
-			return;
-		}
+		if (0 <= indice && indice < nbrOfVertice)
+			return indice - offSetsVertice.getQuick(leaf);
 
-		if (lastUpdate <= getModificationTime())
-		{
-			refreshData();
-			refreshActor();
-		}
-		else
-		{
-			List<LeafNode> leaves = getLeaves();
-			for (LeafNode leaf : leaves)
-			{
-				if (lastUpdate <= leaf.getModificationTime())
-				{
-					refreshData();
-					refreshActor();
-					break;
-				}
-			}
-		}
-		manageHighLight();
+		indice -= nbrOfVertice;
+		if (0 <= indice && indice < nbrOfLines)
+			return indice - offSetsLines.getQuick(leaf);
 
-		lastUpdate = System.nanoTime();
+		indice -= nbrOfLines;
+		if (0 <= indice && indice < nbrOfPolys)
+			return indice - offSetsPolys.getQuick(leaf);
+
+		throw new IllegalArgumentException("The indice is not good !");
 	}
 
-	public List<AbstractNode> getChildren()
+	private final int leafIndiceToNodeIndice(LeafNode leaf, int leafIndice, int indice)
 	{
-		return children;
+		LeafNode.DataProvider dataProvider = leaf.getDataProvider();
+		int nbrOfVerticeLeaf = dataProvider.getNbrOfVertice();
+		int nbrOfLinesLeaf = dataProvider.getNbrOfLines();
+		int nbrOfPolysLeaf = dataProvider.getNbrOfPolys();
+
+		if (0 <= indice && indice < nbrOfVerticeLeaf)
+			return indice + offSetsVertice.getQuick(leafIndice);
+
+		indice -= nbrOfVerticeLeaf;
+
+		if (0 <= indice && indice < nbrOfLinesLeaf)
+			return indice + nbrOfVertice + offSetsLines.getQuick(leafIndice);
+
+		indice -= nbrOfLinesLeaf;
+		if (0 <= indice && indice < nbrOfPolysLeaf)
+			return indice + nbrOfVertice + nbrOfLines + offSetsPolys.getQuick(leafIndice);
+
+		throw new IllegalArgumentException("The indice is not good !");
 	}
-	
-	public List<LeafNode> getLeaves()
+
+	private vtkPolyData selectInto(vtkPolyData input, int[] cellID)
 	{
-		// Do not keep the leaves, just compute
-		ArrayList<LeafNode> toReturn = new ArrayList<LeafNode>();
+		vtkSelection sel = new vtkSelection();
+		//sel.ReleaseDataFlagOn();
+		sel.GetProperties().Set(sel.CONTENT_TYPE(), 4); // 4 MEANS INDICES (see the enumeration)
 
-		for (AbstractNode child : children)
-			toReturn.addAll(child.getLeaves());
+		sel.GetProperties().Set(sel.FIELD_TYPE(), 0); // 0 MEANS CELLS
 
-		return toReturn;
-	}
+		// list of cells to be selected
+		vtkIdTypeArray arr = Utils.setValues(cellID);
+		sel.SetSelectionList(arr);
 
-	@Override
-	public void setVisible(boolean visible)
-	{
-		for (AbstractNode child : children)
-			child.setVisible(visible);
+		vtkExtractSelectedPolyDataIds selFilter = new vtkExtractSelectedPolyDataIds();
+		selFilter.ReleaseDataFlagOn();
+		selFilter.SetInput(1, sel);
+		selFilter.SetInput(0, input);
 
-		super.setVisible(visible);
+		vtkPolyData dataFiltered = selFilter.GetOutput();
+		selFilter.Update();
+
+		return dataFiltered;
 	}
 
 	protected void manageSelection(int[] cellSelection)

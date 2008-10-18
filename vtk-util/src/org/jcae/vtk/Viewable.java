@@ -295,17 +295,6 @@ public abstract class Viewable extends MultiCanvas
 		selectionNode.clear();
 	}
 
-	protected void highLightNodes()
-	{
-		List<LeafNode> leaves = rootNode.getLeaves();
-
-		for (LeafNode leaf : leaves)
-			if (selectionNode.contains(leaf))
-				leaf.select();
-			else
-				leaf.unSelect();
-	}
-
 	@Override
 	public void addNode(AbstractNode node)
 	{
@@ -318,6 +307,17 @@ public abstract class Viewable extends MultiCanvas
 	{
 		scene.removeNode(node);
 		super.removeNode(node);
+	}
+
+	protected void highLightNodes()
+	{
+		List<LeafNode> leaves = rootNode.getLeaves();
+
+		for (LeafNode leaf : leaves)
+			if (selectionNode.contains(leaf))
+				leaf.select();
+			else
+				leaf.unSelect();
 	}
 
 	private void highLightCells()

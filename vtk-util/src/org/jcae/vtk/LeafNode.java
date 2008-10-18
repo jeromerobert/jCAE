@@ -143,19 +143,21 @@ public class LeafNode extends AbstractNode
 		{
 			return polys;
 		}
+		
 		public int[] getLines()
 		{
 			return lines;
 		}
+		
 		public int[] getVertice()
 		{
 			return vertice;
 		}
+		
 		public float[] getNormals()
 		{
 			return normals;
 		}
-		
 		
 		public void unLoad()
 		{
@@ -177,6 +179,7 @@ public class LeafNode extends AbstractNode
 			return modifiedTime;
 		}
 	}
+	
 	private TIntArrayList selection = new TIntArrayList();
 	private Color color;
 	private DataProvider dataProvider;
@@ -188,31 +191,19 @@ public class LeafNode extends AbstractNode
 		this.dataProvider = dataProvider;
 		this.color = color;
 	}
+	
 	protected void addChild(AbstractNode parent)
-		{
-			throw new RuntimeException("A leaf cannot have a child !");
-		}
-	public void refresh()
 	{
-		if (isManager())
-		{
-			checkData();
-			if (lastUpdate <= modificationTime)
-			{
-				//System.out.println("REFRESH ACTOR !");
-				LOGGER.finest("Refresh actor: "+lastUpdate+" <= "+modificationTime);
-				refreshActor();
-			}
-			manageHighLight();
-		}
-		lastUpdate = System.nanoTime();
+		throw new RuntimeException("Leaves cannot have a child!");
 	}
 
-	public void setTransform(Transform3D transform)
+	public List<LeafNode> getLeaves()
 	{
-		dataProvider.setTransform(transform);
+		ArrayList<LeafNode> toReturn = new ArrayList<LeafNode>();
+		toReturn.add(this);
+		return toReturn;
 	}
-	
+
 	protected LeafNode getNode(int cellID)
 	{
 		if(!isManager())
@@ -224,55 +215,9 @@ public class LeafNode extends AbstractNode
 			throw new RuntimeException("cellID out of bounds");
 	}
 	
-	protected void manageHighLight()
-	{
-		if (selectionTime() <= lastUpdate)
-			return;
-
-		if (isSelected())
-			highLight();
-		else
-			unHighLight();
-	}
-
-	protected void checkData()
-	{
-		// The data was modified ?
-		if (timeDataCreated < dataProvider.getModifiedTime())
-			refreshData();
-	}
-
-	@Override
-	protected void manageSelection(int[] cellSelection)
-	{
-		selection = new TIntArrayList(cellSelection);
-	}
-
-	void setSelection(TIntArrayList selection)
-	{
-		this.selection = selection;
-	}
-
-	TIntArrayList getSelection()
-	{
-		return selection;
-	}
-
 	public Color getColor()
 	{
 		return color;
-	}
-
-	@Override
-	protected void unHighLight()
-	{
-		if (actor != null)
-		{
-			if (LOGGER.isLoggable(Level.FINEST))
-				LOGGER.log(Level.FINEST, "Unhighlight actor "+actor);
-			Utils.vtkPropertySetColor(actor.GetProperty(), color);
-			getActorCustomiser().customiseActor(actor);
-		}
 	}
 
 	public void setColor(Color color)
@@ -289,13 +234,6 @@ public class LeafNode extends AbstractNode
 		else
 			modified();
 	}
-
-	public List<LeafNode> getLeaves()
-	{
-		ArrayList<LeafNode> toReturn = new ArrayList<LeafNode>();
-		toReturn.add(this);
-		return toReturn;
-	}
 	
 	public void setData(LeafNode.DataProvider data)
 	{
@@ -303,11 +241,41 @@ public class LeafNode extends AbstractNode
 		modified();
 	}
 
+	// TEMPORARY : remove it
+	protected vtkPolyData getData()
+	{
+		return data;
+	}
+
+	public DataProvider getDataProvider()
+	{
+		return dataProvider;
+	}
+
+	public void setTransform(Transform3D transform)
+	{
+		dataProvider.setTransform(transform);
+	}
+	
+	public void refresh()
+	{
+		if (isManager())
+		{
+			checkData();
+			if (lastUpdate <= modificationTime)
+			{
+				//System.out.println("REFRESH ACTOR !");
+				LOGGER.finest("Refresh actor: "+lastUpdate+" <= "+modificationTime);
+				refreshActor();
+			}
+			manageHighLight();
+		}
+		lastUpdate = System.nanoTime();
+	}
+
 	@Override
 	protected void refreshData()
 	{
-		//System.out.println("REFRESHING DATA !");
-		//System.out.println("DATA NODES : " + dataProvider.getNodes().length);
 		LOGGER.finest("Refresh data, old creation date="+timeDataCreated);
 		dataProvider.load();
 		createData(dataProvider);
@@ -317,10 +285,20 @@ public class LeafNode extends AbstractNode
 		timeDataCreated = System.nanoTime();
 	}
 
-	// TEMPORARY : remove it
-	protected vtkPolyData getData()
+	@Override
+	protected void refreshActor()
 	{
-		return data;
+		super.refreshActor();
+		if (LOGGER.isLoggable(Level.FINEST))
+			LOGGER.log(Level.FINEST, "Attach color "+color+" (opacity="+color.getAlpha()+") to actor "+actor);
+		Utils.vtkPropertySetColor(actor.GetProperty(), color);
+	}
+
+	protected void checkData()
+	{
+		// The data was modified ?
+		if (timeDataCreated < dataProvider.getModifiedTime())
+			refreshData();
 	}
 
 	@Override
@@ -337,18 +315,43 @@ public class LeafNode extends AbstractNode
 			getMapperHighLightedCustomiser().customiseMapperHighLighted(mapper);
 	}
 	
-	@Override
-	protected void refreshActor()
+	protected void manageHighLight()
 	{
-		super.refreshActor();
-		if (LOGGER.isLoggable(Level.FINEST))
-			LOGGER.log(Level.FINEST, "Attach color "+color+" (opacity="+color.getAlpha()+") to actor "+actor);
-		Utils.vtkPropertySetColor(actor.GetProperty(), color);
+		if (selectionTime() <= lastUpdate)
+			return;
+
+		if (isSelected())
+			highLight();
+		else
+			unHighLight();
 	}
 
-	public DataProvider getDataProvider()
+	@Override
+	protected void unHighLight()
 	{
-		return dataProvider;
+		if (actor != null)
+		{
+			if (LOGGER.isLoggable(Level.FINEST))
+				LOGGER.log(Level.FINEST, "Unhighlight actor "+actor);
+			Utils.vtkPropertySetColor(actor.GetProperty(), color);
+			getActorCustomiser().customiseActor(actor);
+		}
+	}
+
+	@Override
+	protected void manageSelection(int[] cellSelection)
+	{
+		selection = new TIntArrayList(cellSelection);
+	}
+
+	void setSelection(TIntArrayList selection)
+	{
+		this.selection = selection;
+	}
+
+	TIntArrayList getSelection()
+	{
+		return selection;
 	}
 
 	@Override

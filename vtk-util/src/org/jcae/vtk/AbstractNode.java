@@ -33,19 +33,25 @@ import vtk.vtkPolyDataMapper;
 import vtk.vtkPolyDataNormals;
 
 /**
- * This class is the interface of a Node. There is two type of nodes :
- * _ the nodes (implemented by the class Node) that can have children of type Node or LeafNode ;
- * _ the leaf nodes that are of type LeafNode.
- * This structure is used because VTK can't have many actors so we regroup some of geometric
- * entities that are represented by LeafNode in a one Node wich will merge all the geometry in one actor.
- * The merge is made only if the Node is set as managing (using the method setManager).
+ * Nodes of scene graph. There are two types of nodes:
+ * <ul>
+ * <li>{@link Node}: containers, its children may be Node or LeafNode instances;</li>
+ * <li>{@link LeafNode}: leaf nodes contain geometric data.</li>
+ * </ul>
+ * 
+ * This structure is used because VTK becomes too slow when there are many actors,
+ * so we group together geometric entities into a Node wich will merge all shapes
+ * into a single actor.
+ * 
+ * This merge is performed only if the Node is set as managing (by using the 
+ * {@link #setManager()} method).
  * A node can be highlighted using the select method.
  * A node can be picked or not (this permit to make faster the picking ignoring non pickable nodes).
  * You can give customisers to the nodes. This works as follow :
- * If a leaf node does'nt have customiser it takes the first parent that have one and if nobody have
+ * If a leaf node has no customiser it takes the first parent that have one and if nobody have
  * customiser the DEFAULT customiser is taken. This permits to create a customiser for the parent node and this will
  * be used pour all of it's children (unless if the child has a customiser).
- * The customisers are created to permit to change and customiser the VTK objects easily.
+ * The customisers are created to permit to change and customise the VTK objects easily.
  * Actually only the color can be specified for the shading of the geometry. If you want
  * to customise the nodes more you can use the VTK interface but if you merge the leafs in
  * one node and they have different materials this will cause problems... The solution to this
@@ -54,6 +60,7 @@ import vtk.vtkPolyDataNormals;
  * and the visibility.
  * When applying a customiser the actor customisation is refreshed and if we are in a Node,
  * all the children inherit it.
+ * 
  * @author Julian Ibarz
  */
 public abstract class AbstractNode {
@@ -150,6 +157,11 @@ public abstract class AbstractNode {
 	protected ActorSelectionCustomiser actorSelectionCustomiser = null;
 	protected MapperSelectionCustomiser mapperSelectionCustomiser = null;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param parent parent node.  If <code>null</code>
+	 */
 	public AbstractNode(AbstractNode parent)
 	{
 		this.parent = parent;
@@ -175,11 +187,15 @@ public abstract class AbstractNode {
 	
 	protected abstract void addChild(AbstractNode parent);
 
-	public void addActorListener(ActorListener listener)
-	{
-		actorListeners.add(listener);
-	}
-	
+	public abstract List<LeafNode> getLeaves();
+
+	/**
+	 * Find the leaf node that contains the cellID
+	 * @param cellID
+	 * @return
+	 */
+	protected abstract LeafNode getNode(int cellID);
+
 	/**
 	 * Set pickable the actor of the node. If the node is not a manager,
 	 * set the parent to be pickable.
@@ -200,6 +216,11 @@ public abstract class AbstractNode {
 	public boolean isPickable()
 	{
 		return pickable;
+	}
+	
+	public void addActorListener(ActorListener listener)
+	{
+		actorListeners.add(listener);
 	}
 	
 	public void removeActorListener(ActorListener listener)
@@ -361,22 +382,9 @@ public abstract class AbstractNode {
 	}
 	
 	protected void fireActorHighLighted(vtkActor actor)
-	{		
+	{
 		for (ActorListener listener : actorListeners)
 			listener.actorHighLighted(this, actor);
-	}
-	
-	public void setManager(boolean manager)
-	{
-		if(this.manager == manager)
-			return;
-		
-		this.manager = manager;
-		
-		if(!this.manager)
-			deleteDatas();
-		
-		modified();
 	}
 
 	public boolean isVisible()
@@ -397,8 +405,6 @@ public abstract class AbstractNode {
 		modified();
 	}
 	
-	protected abstract void refresh();
-	
 	protected long getModificationTime()
 	{
 		return this.modificationTime;
@@ -407,6 +413,38 @@ public abstract class AbstractNode {
 	public void modified()
 	{
 		this.modificationTime = System.nanoTime();
+	}
+	
+	protected abstract void refresh();
+	
+	protected void refreshMapper()
+	{
+		mapper.SetInput(data);		
+		mapper.Update();
+	}
+	
+	protected abstract void refreshData();
+	
+	protected void refreshActor()
+	{
+		boolean actorCreated = false;
+		
+		if(actor == null)
+		{
+			actorCreated = true;
+			actor = new vtkActor();
+			getActorCustomiser().customiseActor(actor);
+			mapper = new vtkPolyDataMapper();
+			getMapperCustomiser().customiseMapper(mapper);
+			actor.SetMapper(mapper);
+			actor.SetVisibility(Utils.booleanToInt(visible));
+			actor.SetPickable(Utils.booleanToInt(pickable));
+		}
+		refreshMapper();
+
+		// Call fire after the map creation
+		if(actorCreated)
+			fireActorCreated(actor);
 	}
 	
 	protected void createData(LeafNode.DataProvider dataProvider)
@@ -466,50 +504,6 @@ public abstract class AbstractNode {
 		//fireDataModified(data);
 	}
 	
-	protected void unHighLightSelection()
-	{
-		if(selectionHighLighter == null)
-			return;
-		
-		fireActorDeleted(selectionHighLighter);
-		selectionHighLighter = null;
-		selectionHighLighterMapper = null;
-	}
-	protected void refreshMapper()
-	{
-		mapper.SetInput(data);		
-		mapper.Update();
-	}
-	protected abstract void refreshData();
-	public abstract void highLightSelection();
-	
-	protected void refreshActor()
-	{
-		boolean actorCreated = false;
-		
-		if(actor == null)
-		{
-			actorCreated = true;
-			actor = new vtkActor();
-			getActorCustomiser().customiseActor(actor);
-			mapper = new vtkPolyDataMapper();
-			getMapperCustomiser().customiseMapper(mapper);
-			actor.SetMapper(mapper);
-			actor.SetVisibility(Utils.booleanToInt(visible));
-			actor.SetPickable(Utils.booleanToInt(pickable));
-		}
-		refreshMapper();
-
-		// Call fire after the map creation
-		if(actorCreated)
-			fireActorCreated(actor);
-	}
-	
-	public boolean isSelected()
-	{
-		return selected;
-	}
-	
 	protected void deleteDatas()
 	{
 		data = null;
@@ -520,15 +514,6 @@ public abstract class AbstractNode {
 		}
 		mapper = null;
 	}
-
-	public abstract List<LeafNode> getLeaves();
-	
-	/**
-	 * Find the node that contains the cellID
-	 * @param cellID
-	 * @return
-	 */
-	protected abstract LeafNode getNode(int cellID);
 	
 	protected void pickPoint(vtkCanvas canvas, int[] firstPoint, int[] secondPoint, double tolerance)
 	{
@@ -578,6 +563,18 @@ public abstract class AbstractNode {
 		getMapperCustomiser().customiseMapper(mapper);
 	}
 	
+	public abstract void highLightSelection();
+
+	protected void unHighLightSelection()
+	{
+		if(selectionHighLighter == null)
+			return;
+		
+		fireActorDeleted(selectionHighLighter);
+		selectionHighLighter = null;
+		selectionHighLighterMapper = null;
+	}
+	
 	protected long selectionTime()
 	{
 		return selectionTime;
@@ -600,10 +597,30 @@ public abstract class AbstractNode {
 		selected = false;
 		selectionTime = System.nanoTime();
 	}
+	
+	public boolean isSelected()
+	{
+		return selected;
+	}
+	
 	protected abstract void manageSelection(int[] cellSelection);
 	
+	public void setManager(boolean manager)
+	{
+		if(this.manager == manager)
+			return;
+		
+		this.manager = manager;
+		
+		if(!this.manager)
+			deleteDatas();
+		
+		modified();
+	}
+
 	public boolean isManager()
 	{
 		return manager;
 	}
+	
 }
