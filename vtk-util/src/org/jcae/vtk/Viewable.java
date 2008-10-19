@@ -46,11 +46,14 @@ public abstract class Viewable extends MultiCanvas
 	protected int pixelTolerance = 0; // pixel tolerance for point picking (0 by default)
 	protected static final int DEFAULT_PIXEL_TOLERANCE = 3;
 	protected final Scene scene;
-	protected final Node rootNode; // The rootNode node of the viewable
+	/** The rootNode node of the viewable */
+	protected final Node rootNode;
+	/** Set of selected nodes */
 	protected HashSet<LeafNode> selectionNode = new HashSet<LeafNode>();
+	/** Map of selected cells */
 	protected HashMap<LeafNode, TIntHashSet> selectionCell = new HashMap<LeafNode, TIntHashSet>();
 	protected boolean selectionChanged;
-	/* Flag to set selection in append or replace mode */
+	/** Flag to set selection in append or replace mode */
 	protected boolean appendSelection;
 	/*
 	 * Type of rectangle selection.
@@ -85,7 +88,6 @@ public abstract class Viewable extends MultiCanvas
 
 	protected class ActorHighLightedCustomiser implements AbstractNode.ActorHighLightedCustomiser
 	{
-
 		public void customiseActorHighLighted(vtkActor actor)
 		{
 			Utils.vtkPropertySetColor(actor.GetProperty(), selectionColor);
@@ -217,16 +219,13 @@ public abstract class Viewable extends MultiCanvas
 		LOGGER.finest("End pick color");
 		
 		LOGGER.finest("Start dispatch");
-		List<LeafNode> nodes = rootNode.getLeaves();
-
 		HashSet<LeafNode> newSelection;
-
 		if (appendSelection)
 			newSelection = new HashSet<LeafNode>(selectionNode);
 		else
 			newSelection = new HashSet<LeafNode>();
 
-		for (LeafNode node : nodes)
+		for (LeafNode node : rootNode.getLeaves())
 		{
 			TIntArrayList nodeSelection = node.getSelection();
 
@@ -311,13 +310,13 @@ public abstract class Viewable extends MultiCanvas
 
 	protected void highLightNodes()
 	{
-		List<LeafNode> leaves = rootNode.getLeaves();
-
-		for (LeafNode leaf : leaves)
+		for (LeafNode leaf : rootNode.getLeaves())
+		{
 			if (selectionNode.contains(leaf))
 				leaf.select();
 			else
 				leaf.unSelect();
+		}
 	}
 
 	private void highLightCells()

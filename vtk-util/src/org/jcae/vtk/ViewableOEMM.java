@@ -23,27 +23,20 @@ package org.jcae.vtk;
 import gnu.trove.TFloatArrayList;
 import gnu.trove.TIntArrayList;
 import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIterator;
 import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TObjectIntHashMap;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Timer;
-import java.util.TimerTask;
 import org.jcae.mesh.oemm.OEMM;
 import vtk.vtkActor;
-import vtk.vtkCanvas;
 import vtk.vtkCellCenterDepthSort;
 import vtk.vtkDataSet;
 import vtk.vtkExtractSelectedFrustum;
 import vtk.vtkIdTypeArray;
-import vtk.vtkPlaneCollection;
 import vtk.vtkPoints;
 import vtk.vtkPolyData;
 import vtk.vtkPolyDataMapper;
@@ -192,7 +185,8 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 			dataLeaf.setNodes(leafNodes);
 			dataLeaf.setPolys(quadsLeaf.length / 5, quadsLeaf);
 			LeafNode leaf = new LeafNode(octreeNode, dataLeaf, Color.BLUE);
-			nodeToID.put(leaf, ID++);
+			nodeToID.put(leaf, ID);
+			ID++;
 		}
 		octreeNode.setManager(true);
 		octreeNode.refresh();
@@ -311,14 +305,9 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 
 			reader.buildMeshVisu(selection.toArray());
 
-			vtkPolyData data = new vtkPolyData();
 			int[] leaves = reader.getLeavesLoaded();
 			MeshVisuReader.MeshVisu[] meshes = reader.getMeshes();
 
-			// The choice of the preallocated size is an heuristic that works in the major of the cases (permits to not compute exactly the size of the tables
-			TFloatArrayList nodes = new TFloatArrayList(meshes.length * meshes[0].nodes.length);
-			// The offSet of the nodes of the edgesActor in the wall array node
-			int[] offSets = new int[leaves.length];
 			// Add all the nodes and compute the hash set node
 			for (int i = 0; i < leaves.length; ++i)
 			{
@@ -327,10 +316,6 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 					continue;
 
 				float[] meshNodes = meshes[i].nodes;
-				//TIntHashSet nodesLoaded = new TIntHashSet(meshNodes.length / 3);
-
-				//for (int j = 0; j < meshNodes.length / 3; ++j)
-				//	nodesLoaded.add(oemm.leaves[leaves[i]].minIndex + j);
 
 				TIntArrayList[] allEdges = new TIntArrayList[]
 				{
@@ -345,33 +330,14 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 				{
 					int[] ones = edgesMesh.get(type);
 					
-					for (int j = 0; j < ones.length;)
+					for (int j = 0; j < ones.length; j+=2)
 					{
-
-						int begin = ones[j++];
-						int end = ones[j++];
-
-						/*if(j % 100 == 0)
-						{
-						System.out.println("beginTime : " + beginTime);
-						System.out.println("endTime : " + endTime);
-						System.out.println("minde : " + minIndex);
-						System.out.println("offSetMesh : " + offSets[i]);
-						}*/
-
-						/*if (nodesLoaded.contains(begin) && nodesLoaded.contains(end))
-						{
-							allEdges[type].add(2);
-							allEdges[type].add(begin - oemm.leaves[leaves[i]].minIndex);
-							allEdges[type].add(end - oemm.leaves[leaves[i]].minIndex);
-						}
-						// If they aren't loaded it's a fake vertice so keep the index (it's already good)
-						else
-						{*/
-							allEdges[type].add(2);
-							allEdges[type].add(begin);
-							allEdges[type].add(end);
-						//}
+						int begin = ones[j];
+						int end = ones[j+1];
+						
+						allEdges[type].add(2);
+						allEdges[type].add(begin);
+						allEdges[type].add(end);
 					}
 				}
 
@@ -399,101 +365,6 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 			}
 		}
 		rendering = false;
-	}
-
-	public void highLightThreadedOld()
-	{
-		/*System.out.println("HighLighting : " + selection.toString());
-		
-		if (selection.isEmpty())
-		return;
-		
-		reader.buildMeshVisu(selection.toNativeArray());
-		
-		vtkPolyData data = new vtkPolyData();
-		int[] leaves = reader.getLeavesLoaded();
-		System.out.println("selection : " + selection.toString());
-		System.out.println("leaves : " + Arrays.toString(leaves));
-		MeshVisuReader.MeshVisu[] meshes = reader.getMeshes();
-		
-		// The choice of the preallocated size is an heuristic that works in the major of the cases (permits to not compute exactly the size of the tables
-		TFloatArrayList nodes = new TFloatArrayList(meshes.length * meshes[0].nodes.length);
-		TIntHashSet nodesLoaded = new TIntHashSet(meshes.length * meshes[0].nodes.length);
-		TIntArrayList edges = new TIntArrayList(meshes.length * meshes[0].edges.length);
-		TIntArrayList freeEdges = new TIntArrayList(meshes.length * meshes[0].freeEdges.length);
-		// The offSet of the nodes of the edgesActor in the wall array node
-		int[] offSets = new int[leaves.length];
-		// Add all the nodes and compute the hash set node
-		for (int i = 0; i < leaves.length; ++i)
-		{
-		float[] meshNodes = meshes[i].nodes;
-		System.out.println("mesh " + i + " contains " + meshNodes.length / 3 + " nodes");
-		
-		offSets[i] = nodes.size() / 3;
-		nodes.add(meshNodes);
-		
-		for (int j = 0; j < meshNodes.length / 3; ++j)
-		nodesLoaded.add(oemm.leaves[leaves[i]].minIndex + j);
-		}
-		
-		// Add the edges that have their nodes loaded
-		for (int i = 0; i < leaves.length; ++i)
-		{
-		TIntArrayList[] allEdges = new TIntArrayList[]
-		{
-		edges, freeEdges
-		};
-		ArrayList<int[]> edgesMesh = new ArrayList<int[]>(2);
-		edgesMesh.add(meshes[i].edges);
-		edgesMesh.add(meshes[i].freeEdges);
-		
-		for (int type = 0; type < 2; ++type)
-		{
-		int[] ones = edgesMesh.get(type);
-		
-		for (int j = 0; j < ones.length;)
-		{
-		
-		int begin = ones[j++];
-		int end = ones[j++];
-		
-		/*if(j % 100 == 0)
-		{
-		System.out.println("beginTime : " + beginTime);
-		System.out.println("endTime : " + endTime);
-		System.out.println("minde : " + minIndex);
-		System.out.println("offSetMesh : " + offSets[i]);
-		}*/
-
-		/*if (nodesLoaded.contains(begin) && nodesLoaded.contains(end))
-		{
-		allEdges[type].add(findVerticeIndex(leaves, i, begin, offSets));
-		allEdges[type].add(findVerticeIndex(leaves, i, end, offSets));
-		}
-		}
-		}
-		}
-		
-		vtkPoints points = Utils.createPoints(nodes.toNativeArray());
-		
-		lockCanvas();
-		data.SetPoints(points);
-		data.SetLines(Utils.createCells(edges.size() / 2, Utils.createBeamCells(edges.toNativeArray())));
-		
-		vtkPolyDataMapper mapper = new vtkPolyDataMapper();
-		mapper.SetInput(data);
-		edgesActor.SetMapper(mapper);
-		
-		data = new vtkPolyData();
-		data.SetPoints(points);
-		data.SetLines(Utils.createCells(freeEdges.size() / 2, Utils.createBeamCells(freeEdges.toNativeArray())));
-		
-		mapper = new vtkPolyDataMapper();
-		mapper.SetInput(data);
-		freeEdgesActor.SetMapper(mapper);
-		unlockCanvas();
-		
-		//super.highLight();*/
 	}
 
 	private int findVerticeIndex(int[] leaves, int currentLeaf, int index, int[] offSets)
@@ -565,50 +436,11 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 		super.pointSelection(canvas, pickPosition);
 		octreeForPicking.VisibilityOff();
 		return;
-
-	/*vtkCellPicker picker = new vtkCellPicker();
-	canvas.getIren().SetPicker(picker);
-	
-	vtkProp prop = null;
-	
-	// TODO : calculate the diagonal in pixel of the renderer
-	//octreeForPicking.VisibilityOn();
-	picker.SetTolerance(Utils.getTolerance(canvas.GetRenderer(), pixelTolerance));
-	canvas.lock();
-	picker.Pick(pickPosition.getX(), pickPosition.getY(), 0., canvas.GetRenderer());
-	canvas.unlock();
-	//octreeForPicking.VisibilityOff();
-	
-	// Verify if the picking is on the good prop
-	if (picker.GetViewProp() != null &&
-	prop.GetVTKId() == picker.GetViewProp().GetVTKId())
-	{
-	// This is the quad ID so the leave ID is the quadID / 6 (a cube contains 6 quads)
-	int leaveID = picker.GetCellId() / 6;
-	
-	actualSelection.add(leaveID);
-	/*vtkPolyData data= (vtkPolyData)octreeForPicking.GetMapper().GetInputAsDataSet();
-	System.out.println("NUMBER OF POLYS : " + data.GetNumberOfCells());
-	System.out.println("Type of cell : " + data.GetCell(leaveID).GetCellType());*/
-	/*} else if (picker.GetViewProp() != null)
-	System.out.println("picking on another viewprop... : " + picker.GetCellId());
-	
-	// TODO
-	this.selectionChanged = true;
-	//return -1;
-	
-	// Get the ID
-	//return picker.GetCellId();*/
 	}
 
 	@Override
 	public synchronized void surfaceSelection(Canvas canvas, Point releasePosition, Point pressPosition)
 	{
-		/*vtkVisibleCellSelector selector = new vtkVisibleCellSelector();
-		selector.SetRenderer(canvas.GetRenderer());
-		selector.SetArea(pressPosition[0], pressPosition[1], releasePosition[0],
-		releasePosition[1]);
-		selector.SetRenderPasses(0, 1, 0, 0, 1, 0);*/
 		if (automaticSelection)
 		{
 			// Set the surfaceSelection on all the canvas
@@ -620,27 +452,16 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 
 		vtkExtractSelectedFrustum selector = new vtkExtractSelectedFrustum();
 
-		//vtkPlanes planes = new vtkPlanes();
-		//selector.SetFrustum(planes);
-
-		//octreeForPicking.GetMapper().Update();
 		vtkDataSet dataSet = octreeForPicking.GetMapper().GetInputAsDataSet();
 		selector.SetInput(dataSet);
-		//selector.SetInputConnection(octreeForPicking.GetMapper().GetInputConnection(0, 0));
-		//selector.PreserveTopologyOn();
 		selector.CreateFrustum(Utils.computeVerticesFrustum(pressPosition.x, pressPosition.y, releasePosition.x,
 				releasePosition.y, canvas.GetRenderer()));
 
-		//selector.ShowBoundsOn();
-		//selector.Modified();
-		//selector.Update();
-		//selector.ShowBoundsOn();
 		selector.PreserveTopologyOff();
 		lockCanvas();
 		selector.Update();
 		unlockCanvas();
 		vtkDataSet data = (vtkDataSet) selector.GetOutput();
-		//octree.GetMapper().SetInputConnection(selector.GetOutputPort());
 
 		vtkCellCenterDepthSort sorter = new vtkCellCenterDepthSort();
 		sorter.SetInput(data);
@@ -650,7 +471,6 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 		lockCanvas();
 		sorter.InitTraversal();
 		unlockCanvas();
-
 
 		synchronized (selectionNode)
 		{
@@ -679,105 +499,6 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 		this.selectionChanged = true;
 
 		manageSelection();
-	//frustum extractor works on geometry and doesn't care about pickability
+	}
 
-	/*vtkExtractSelectedFrustum extractor = new vtkExtractSelectedFrustum();
-	extractor.CreateFrustum(computeVerticesFrustum(pressPosition[0], pressPosition[1], releasePosition[0],
-	releasePosition[1], canvas.GetRenderer()));
-	extractor.SetInput((vtkDataObject)octreeForPicking.GetMapper().GetInputAsDataSet());
-	extractor.PreserveTopologyOff();
-	extractor.InsideOutOn();
-	
-	vtkDataSetMapper eMap = new vtkDataSetMapper();
-	eMap.SetInput((vtkDataSet)extractor.GetOutput());
-	vtkActor bouding = new vtkActor();
-	/*vtkDataSetMapper mapper = new vtkDataSetMapper();
-	mapper.SetInput(data);*/
-	/*bouding.SetMapper(eMap);
-	canvas.GetRenderer().AddViewProp(bouding);*/
-
-	/*canvas.lock();
-	area.GetFrustum();
-	canvas.unlock();
-	
-	octreeForPicking.VisibilityOn();
-	canvas.lock();
-	selector.Select();
-	canvas.unlock();
-	octreeForPicking.VisibilityOff();
-	
-	vtkIdTypeArray idArray = new vtkIdTypeArray();
-	selector.GetSelectedIds(idArray);
-	
-	// If no selection was made leave
-	if (idArray.GetDataSize() == 0)
-	return;
-	
-	vtkSelection selection = new vtkSelection();
-	selector.GetSelectedIds(selection);
-	
-	// Find the ID Selection of the actor
-	int IDActor = -1;
-	for (int i = 0; i < selection.GetNumberOfChildren(); ++i)
-	{
-	IDActor = selection.GetChild(i).GetProperties().Get(selection.PROP_ID());
-	vtkProp prop = selector.GetActorFromId(IDActor);
-	if (prop != null && prop.GetVTKId() == this.octreeForPicking.GetVTKId())
-	break;
-	}
-	
-	int[] globalIDs = Utils.getValues(idArray);
-	int nbOfSelection = 0;
-	for (int i = 0; i < globalIDs.length / 4; ++i)
-	if (globalIDs[i * 4 + 1] == IDActor)
-	{
-	// This is the quad ID so the leave ID is the quadID / 6 (a cube contains 6 quads)
-	actualSelection.add(globalIDs[i * 4 + 3] / 6);
-	++nbOfSelection;
-	}		*/
-	}
-	/*public void surfaceSelectionOld(vtkCanvas canvas)
-	{
-	vtkVisibleCellSelector selector = new vtkVisibleCellSelector();
-	selector.SetRenderer(canvas.GetRenderer());
-	selector.SetArea(pressPosition[0], pressPosition[1], releasePosition[0],
-	releasePosition[1]);
-	selector.SetRenderPasses(0, 1, 0, 0, 1, 0);
-	
-	octreeForPicking.VisibilityOn();
-	canvas.lock();
-	selector.Select();
-	canvas.unlock();
-	octreeForPicking.VisibilityOff();
-	
-	vtkIdTypeArray idArray = new vtkIdTypeArray();
-	selector.GetSelectedIds(idArray);
-	
-	// If no selection was made leave
-	if (idArray.GetDataSize() == 0)
-	return;
-	
-	vtkSelection selection = new vtkSelection();
-	selector.GetSelectedIds(selection);
-	
-	// Find the ID Selection of the actor
-	int IDActor = -1;
-	for (int i = 0; i < selection.GetNumberOfChildren(); ++i)
-	{
-	IDActor = selection.GetChild(i).GetProperties().Get(selection.PROP_ID());
-	vtkProp prop = selector.GetActorFromId(IDActor);
-	if (prop != null && prop.GetVTKId() == this.octreeForPicking.GetVTKId())
-	break;
-	}
-	
-	int[] globalIDs = Utils.getValues(idArray);
-	int nbOfSelection = 0;
-	for (int i = 0; i < globalIDs.length / 4; ++i)
-	if (globalIDs[i * 4 + 1] == IDActor)
-	{
-	// This is the quad ID so the leave ID is the quadID / 6 (a cube contains 6 quads)
-	actualSelection.add(globalIDs[i * 4 + 3] / 6);
-	++nbOfSelection;
-	}
-	}*/
 }

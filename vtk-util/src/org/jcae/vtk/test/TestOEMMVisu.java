@@ -83,15 +83,14 @@ public class TestOEMMVisu implements SelectionListener, KeyListener {
 				break;*/
 		}
 	}
-    public static void main(String[] args) {
-        JFrame frame = new JFrame();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	public static void main(String[] args) {
+		JFrame frame = new JFrame();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
-        View canvas = new View();
+		View canvas = new View();
 		frame.add(canvas, BorderLayout.CENTER);
-        frame.setSize(800, 600);
-        vtkRenderer renderer = canvas.GetRenderer();
-		
+		frame.setSize(800, 600);
+		vtkRenderer renderer = canvas.GetRenderer();
 
 		final OEMM oemm = Storage.readOEMMStructure(args[0]);
 		ViewableOEMM viewable = new ViewableOEMM(oemm);
@@ -99,14 +98,14 @@ public class TestOEMMVisu implements SelectionListener, KeyListener {
 		TestOEMMVisu test = new TestOEMMVisu(viewable);
 		canvas.addKeyListener(test);
 		viewable.addSelectionListener(test);
-		
-        vtkInteractorStyleTrackballCamera style = new vtkInteractorStyleTrackballCamera();
-        style.AutoAdjustCameraClippingRangeOn();
-        canvas.getIren().SetInteractorStyle(style);
-		
+
+		vtkInteractorStyleTrackballCamera style = new vtkInteractorStyleTrackballCamera();
+		style.AutoAdjustCameraClippingRangeOn();
+		canvas.getIren().SetInteractorStyle(style);
+
 		canvas.lock();
 		renderer.ResetCamera();
 		canvas.unlock();
 
-    }
+	}
 }

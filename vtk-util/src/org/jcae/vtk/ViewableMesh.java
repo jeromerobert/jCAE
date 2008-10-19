@@ -19,11 +19,9 @@
  */
 package org.jcae.vtk;
 
-import gnu.trove.TIntArrayList;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TObjectIntHashMap;
-import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
 import vtk.vtkMapper;
@@ -36,9 +34,6 @@ import vtk.vtkActor;
  */
 public class ViewableMesh extends Viewable
 {
-
-	//private boolean[] groupIsLoaded;
-	//private int nbrOfGroupLoaded;
 	private ViewMode viewMode = ViewMode.WIRED;
 	private ColorManager colorManager;
 	private TIntObjectHashMap<LeafNode> groupIDToNode = new TIntObjectHashMap<LeafNode>();
@@ -47,11 +42,10 @@ public class ViewableMesh extends Viewable
 	/**
 	 * It explain how the mesh is displayed :
 	 * _ FILLED means the mesh is not in wired mode but the selection remains filled ;
-	 * _ wired means the mesh is wired.
+	 * _ WIRED means the mesh is wired.
 	 */
 	public enum ViewMode
 	{
-
 		FILLED,
 		WIRED
 	}
@@ -63,11 +57,11 @@ public class ViewableMesh extends Viewable
 	
 	public ViewableMesh(Mesh mesh, ColorManager colorManager)
 	{
-		super(new Scene(), new Node(null));
 		this.colorManager = colorManager;
+		this.colorManager.setColor(selectionColor);
+		
 		rootNode.setActorHighLightedCustomiser(new ActorHighLightedCustomiser()
 		{
-
 			@Override
 			public void customiseActorHighLighted(vtkActor actor)
 			{
@@ -108,16 +102,24 @@ public class ViewableMesh extends Viewable
 			}
 		});
 		setViewMode(viewMode);
-		
-		
+
 		Set<Entry<Integer, LeafNode.DataProvider>> groupSet = mesh.getGroupSet();
 		groupsLoaded = new TIntHashSet(groupSet.size());
 		for (Entry<Integer, LeafNode.DataProvider> entry : groupSet)
 			groupsLoaded.add(entry.getKey());
 
-		colorManager.setColor(this.selectionColor);
-		
-		computeNodes(mesh);
+		for (Entry<Integer, LeafNode.DataProvider> group : groupSet)
+		{
+			// Warning: Do *not* replace colorManager.getColor() by
+			// selectionColor here, some ColorManager may have a
+			// different behavior!
+			LeafNode groupNode = new LeafNode(rootNode, group.getValue(), colorManager.getColor());
+			groupNode.setManager(true);
+
+			groupIDToNode.put(group.getKey(), groupNode);
+			groupNodeToID.put(groupNode, group.getKey());
+		}
+		rootNode.refresh();
 	}
 
 	public ViewMode getViewMode()
@@ -144,27 +146,6 @@ public class ViewableMesh extends Viewable
 		rootNode.applyActorCustomiser();
 		render();
 	}
-
-	/**
-	 * @param mesh
-	 * @param fieldName
-	 * @return
-	 */
-	private void computeNodes(Mesh mesh)
-	{
-		for (Entry<Integer, LeafNode.DataProvider> group : mesh.getGroupSet())
-		{
-			LeafNode groupNode = new LeafNode(rootNode, group.getValue(), colorManager.getColor());
-
-			groupNode.setManager(true);
-
-			groupIDToNode.put(group.getKey(), groupNode);
-			groupNodeToID.put(groupNode, group.getKey());
-		}
-		//rootNode.setManager(true);
-		rootNode.refresh();
-	}
-
 	/**
 	 * Return the selection of the different ids groups
 	 * @return
@@ -173,18 +154,18 @@ public class ViewableMesh extends Viewable
 	{
 		int[] selectionGroups = new int[selectionNode.size()];
 
-		Iterator<LeafNode> iter = selectionNode.iterator();
-		for (int i = 0; i < selectionGroups.length; ++i)
+		int i = 0;
+		for (LeafNode leaf : selectionNode)
 		{
-			LeafNode leaf = iter.next();
 			selectionGroups[i] = groupNodeToID.get(leaf);
+			i++;
 		}
 
 		return selectionGroups;
 	}
 
 	/**
-	 * Set the new selection and highlight it.
+	 * Set the new selection.
 	 * Be careful, the listeners of change selection will not  be informed.
 	 * The function verify if the group is loaded or not. If the group is not loaded
 	 * it is removed from the selection.
@@ -193,16 +174,9 @@ public class ViewableMesh extends Viewable
 	 */
 	public void setSelection(int[] selection)
 	{
-		TIntArrayList cleanedSelection = new TIntArrayList(selection.length);
+		selectionNode.clear();
 		for (int id : selection)
 			if (groupsLoaded.contains(id))
-				cleanedSelection.add(id);
-
-		//if (selectionNode.size() != 0)
-			//selectionChanged = true;
-		selectionNode.clear();
-		for (int i = 0; i < cleanedSelection.size(); ++i)
-			if (selectionNode.add(groupIDToNode.get(cleanedSelection.get(i))));
-				//this.selectionChanged = true;
+				selectionNode.add(groupIDToNode.get(id));
 	}
 }
