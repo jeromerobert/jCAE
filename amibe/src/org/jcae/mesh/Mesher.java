@@ -468,6 +468,12 @@ public class Mesher
 		}
 		if (exportTriangleSoup)
 		{
+			if (shape == null)
+			{
+				mesh1D = MMesh1DReader.readObject(outputDir);
+				shape = mesh1D.getGeometry();
+			}
+
 			// Step 3bis: Read 2D meshes and compute raw 3D mesh
 			MeshToSoupConvert.meshToSoup(outputDir, shape);
 		}
