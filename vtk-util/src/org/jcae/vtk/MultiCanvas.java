@@ -25,6 +25,7 @@ import java.awt.Component;
 import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import vtk.vtkActor;
 import vtk.vtkProp;
@@ -102,13 +103,15 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 	
 	public void actorCreated(AbstractNode node, vtkActor actor)
 	{
-		//System.out.println("ACTOR ADDED " + prop.GetVTKId());
-		
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "Create actor id="+actor.GetVTKId()+" hashcode="+Integer.toHexString(actor.hashCode()));
 		addProp(actor);
 	}
 
 	public void actorDeleted(AbstractNode node, vtkActor actor)
 	{
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "Delete actor id="+actor.GetVTKId()+" hashcode="+Integer.toHexString(actor.hashCode()));
 		deleteProp(actor);
 	}
 
@@ -118,8 +121,11 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 	 */
 	public void addCanvas(Canvas canvas)
 	{
-		LOGGER.fine("Adding one canvas : " + canvas);
-		LOGGER.fine("Number of actors : " + canvas.GetRenderer().GetViewProps().GetNumberOfItems());
+		if (LOGGER.isLoggable(Level.FINE))
+		{
+			LOGGER.log(Level.FINE, "Adding one canvas : " + canvas);
+			LOGGER.log(Level.FINE, "Number of actors : " + canvas.GetRenderer().GetViewProps().GetNumberOfItems());
+		}
 		
 		listCanvas.add(canvas);
 		canvas.lock();
@@ -130,7 +136,8 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 		}
 		canvas.unlock();
 		
-		LOGGER.fine("Number of actors after : " + canvas.GetRenderer().GetViewProps().GetNumberOfItems());
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "Number of actors after : " + canvas.GetRenderer().GetViewProps().GetNumberOfItems());
 	}
 	
 	public void render()
@@ -142,6 +149,12 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 	
 	public void removeCanvas(Canvas canvas)
 	{
+		if (LOGGER.isLoggable(Level.FINE))
+		{
+			LOGGER.log(Level.FINE, "Removing one canvas : " + canvas);
+			LOGGER.log(Level.FINE, "Number of actors : " + canvas.GetRenderer().GetViewProps().GetNumberOfItems());
+		}
+
 		int index = listCanvas.indexOf(canvas);		
 		listCanvas.remove(index);
 		

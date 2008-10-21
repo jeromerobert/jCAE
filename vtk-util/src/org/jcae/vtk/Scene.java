@@ -23,6 +23,7 @@ package org.jcae.vtk;
 import gnu.trove.TLongObjectHashMap;
 import gnu.trove.TObjectByteHashMap;
 import java.awt.Point;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -74,6 +75,8 @@ public class Scene implements AbstractNode.ActorListener
 
 	public void actorCreated(AbstractNode node, vtkActor actor)
 	{
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "Create actor id="+actor.GetVTKId()+" hashcode="+Integer.toHexString(actor.hashCode()));
 		idActorToNode.put(actor.GetVTKId(), node);
 		if (planes != null)
 			actor.GetMapper().SetClippingPlanes(planes);
@@ -81,12 +84,9 @@ public class Scene implements AbstractNode.ActorListener
 
 	public void actorDeleted(AbstractNode node, vtkActor actor)
 	{
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "Delete actor id="+actor.GetVTKId()+" hashcode="+Integer.toHexString(actor.hashCode()));
 		idActorToNode.remove(actor.GetVTKId());
-	}
-
-	public void actorUnHighLighted(AbstractNode node, vtkActor actor)
-	{
-		// Do nothing
 	}
 
 	private AbstractNode[] getNodes()
