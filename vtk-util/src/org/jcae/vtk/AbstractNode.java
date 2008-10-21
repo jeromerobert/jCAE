@@ -509,34 +509,6 @@ public abstract class AbstractNode {
 		mapper = null;
 	}
 	
-	protected void pickPoint(vtkCanvas canvas, int[] firstPoint, int[] secondPoint, double tolerance)
-	{
-		/*vtkSelectVisiblePoints selector = new vtkSelectVisiblePoints();
-		selector.ReleaseDataFlagOn();
-
-		data.Update();
-		selector.SetInput(data);
-		selector.SelectionWindowOn();
-		selector.SetSelection(firstPoint[0], secondPoint[0], secondPoint[1], firstPoint[1]);
-		selector.SetRenderer(canvas.GetRenderer());
-		selector.
-		
-		selector.SetTolerance(Utils.computeTolerance(canvas, tolerance));
-		
-		// We have to render without the highlight and then update to have the points
-		canvas.lock();
-		canvas.GetRenderer().Render();
-		selector.Update();
-		canvas.unlock();
-		
-		// We have putted the ids in the field data of points on the creation of the vtkPolyData with vtkIdFilter
-		vtkPolyData data = selector.GetOutput();
-		data.ReleaseDataFlagOn();
-		vtkIdTypeArray ids = (vtkIdTypeArray) data.GetPointData().GetAbstractArray(fieldDataName);
-
-		Utils.getValues(ids);*/
-	}
-	
 	protected abstract void manageHighLight();
 			
 	protected void highLight()
