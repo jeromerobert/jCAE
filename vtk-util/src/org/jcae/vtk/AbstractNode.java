@@ -20,6 +20,7 @@
 
 package org.jcae.vtk;
 
+import gnu.trove.TIntArrayList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -594,7 +595,14 @@ public abstract class AbstractNode {
 		return selected;
 	}
 	
-	protected abstract void manageSelection(int[] cellSelection);
+	/**
+	 * Declare some cells as being selected.  This is called by
+	 * {@link Scene#pick(vtk.vtkCanvas, int[], int[])} to store the list
+	 * of selected cells in each node, and this result is used by renderer. 
+	 * 
+	 * @param cellSelection  list of cell ids being selected
+	 */
+	abstract void setCellSelection(TIntArrayList cellSelection);
 	
 	public void setManager(boolean manager)
 	{

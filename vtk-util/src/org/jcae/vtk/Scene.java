@@ -20,6 +20,7 @@
 package org.jcae.vtk;
 
 
+import gnu.trove.TIntArrayList;
 import gnu.trove.TLongObjectHashMap;
 import gnu.trove.TObjectByteHashMap;
 import java.awt.Point;
@@ -238,7 +239,7 @@ public class Scene implements AbstractNode.ActorListener
 				if (node != null)
 				{
 					vtkIdTypeArray ids = (vtkIdTypeArray) child.GetSelectionList();
-					node.manageSelection(Utils.getValues(ids));
+					node.setCellSelection(new TIntArrayList(Utils.getValues(ids)));
 					LOGGER.finest("Actor picked id: "+prop.GetVTKId());
 					LOGGER.finest("Picked node: "+node);					
 				}

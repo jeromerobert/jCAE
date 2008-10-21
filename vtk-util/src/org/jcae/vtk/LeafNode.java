@@ -342,15 +342,9 @@ public class LeafNode extends AbstractNode
 		}
 	}
 
-	@Override
-	protected void manageSelection(int[] cellSelection)
+	void setCellSelection(TIntArrayList cellSelection)
 	{
-		selection = new TIntArrayList(cellSelection);
-	}
-
-	void setSelection(TIntArrayList selection)
-	{
-		this.selection = selection;
+		selection = cellSelection;
 	}
 
 	TIntArrayList getSelection()

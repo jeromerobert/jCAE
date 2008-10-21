@@ -195,7 +195,7 @@ public abstract class Viewable extends MultiCanvas
 				}
 
 				// Send the new selection to the leaf
-				node.setSelection(new TIntArrayList(nodeCellSelection.toArray()));
+				node.setCellSelection(new TIntArrayList(nodeCellSelection.toArray()));
 			}
 		}
 

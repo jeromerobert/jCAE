@@ -753,7 +753,7 @@ public class Node extends AbstractNode
 		return dataFiltered;
 	}
 
-	protected void manageSelection(int[] cellSelection)
+	void setCellSelection(TIntArrayList cellSelection)
 	{
 		if (actor == null)
 			throw new RuntimeException("The Node has to be a manager to manage the selection");
@@ -764,10 +764,11 @@ public class Node extends AbstractNode
 		ArrayList<TIntArrayList> selectionChildren = new ArrayList<TIntArrayList>(leaves.size());
 		for (int i = 0; i < leaves.size(); ++i)
 			selectionChildren.add(new TIntArrayList());
-
 		// Compute the selections
-		for (int cellID : cellSelection)
+		
+		for (int i = 0, n = cellSelection.size(); i < n; i++)
 		{
+			int cellID = cellSelection.get(i);
 			int nodeID = ids[cellID];
 
 			selectionChildren.get(nodeID).add(nodeIndexToLeafIndex(nodeID, cellID));
@@ -775,6 +776,6 @@ public class Node extends AbstractNode
 
 		// Send the selections to the children
 		for (int i = 0; i < leaves.size(); ++i)
-			leaves.get(i).setSelection(selectionChildren.get(i));
+			leaves.get(i).setCellSelection(selectionChildren.get(i));
 	}
 }
