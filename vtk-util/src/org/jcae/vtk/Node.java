@@ -604,7 +604,6 @@ public class Node extends AbstractNode
 			if (actorCreated)
 			{
 				fireActorCreated(highLighter);
-				fireActorHighLighted(highLighter);
 			}
 		}
 
@@ -690,7 +689,6 @@ public class Node extends AbstractNode
 		if(actorCreated)
 		{
 			fireActorCreated(selectionHighLighter);
-			fireActorHighLighted(selectionHighLighter);
 		}
 	}
 

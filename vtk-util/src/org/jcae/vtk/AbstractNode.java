@@ -88,7 +88,6 @@ public abstract class AbstractNode {
 	{
 		void actorCreated(AbstractNode node, vtkActor actor);
 		void actorDeleted(AbstractNode node, vtkActor actor);
-		void actorHighLighted(AbstractNode node, vtkActor actor);
 	}
 		
 	public interface ActorCustomiser
@@ -380,12 +379,6 @@ public abstract class AbstractNode {
 		
 		return mapperHighLightedCustomiser;
 	}
-	
-	protected void fireActorHighLighted(vtkActor actor)
-	{
-		for (ActorListener listener : actorListeners)
-			listener.actorHighLighted(this, actor);
-	}
 
 	public boolean isVisible()
 	{
@@ -551,8 +544,6 @@ public abstract class AbstractNode {
 		
 		getActorHighLightedCustomiser().customiseActorHighLighted(actor);
 		getMapperHighLightedCustomiser().customiseMapperHighLighted(mapper);
-		
-		fireActorHighLighted(actor);
 	}
 	
 	protected void unHighLight()

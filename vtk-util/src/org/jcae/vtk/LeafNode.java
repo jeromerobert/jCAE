@@ -390,7 +390,6 @@ public class LeafNode extends AbstractNode
 			getActorSelectionCustomiser().customiseActorSelection(selectionHighLighter);
 			
 			fireActorCreated(selectionHighLighter);
-			fireActorHighLighted(selectionHighLighter);
 		}
 
 		selectionHighLighterMapper = new vtkPolyDataMapper();

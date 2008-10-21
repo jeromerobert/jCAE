@@ -84,11 +84,6 @@ public class Scene implements AbstractNode.ActorListener
 		idActorToNode.remove(actor.GetVTKId());
 	}
 
-	public void actorHighLighted(AbstractNode node, vtkActor actor)
-	{
-		// Do nothing
-	}
-
 	public void actorUnHighLighted(AbstractNode node, vtkActor actor)
 	{
 		// Do nothing

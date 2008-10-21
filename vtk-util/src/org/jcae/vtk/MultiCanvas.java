@@ -112,12 +112,6 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 		deleteProp(actor);
 	}
 
-	public void actorHighLighted(AbstractNode node, vtkActor actor)
-	{
-		//System.out.println("ACTOR HIGHLIGHTED !");
-		//Utils.setColorActor(actor, selectionColor);
-	}
-	
 	/**
 	 * 
 	 * @param canvas
