@@ -230,53 +230,6 @@ public class ViewableCAD extends Viewable
 	{
 		return edges;
 	}
-	
-	@Override
-	protected void selectNodeOnSurface(Canvas canvas, int[] firstPoint, int[] secondPoint)
-	{
-		HashSet<LeafNode> selectionNodeBefore = new HashSet<LeafNode>(this.selectionNode);
-		
-		super.selectNodeOnSurface(canvas, firstPoint, secondPoint);
-		
-		if(!selectionChanged)
-			return;
-		
-		HashSet<LeafNode> selectionNodeAfter = selectionNode;
-		selectionNode = new HashSet<LeafNode>(selectionNodeAfter.size());
-		
-		// Add only the nodes with the good type
-		for(LeafNode leaf : selectionNodeAfter)
-		{
-			// If in the previous selection and in the actual add always (appended mode...)
-			if(selectionNodeBefore.contains(leaf))
-			{
-				selectionNode.add(leaf);
-				continue;
-			}
-			
-			TopoDS_Shape shape = nodeToTopo.get(leaf);
-			if(shape == null)
-				continue;
-			
-			switch(this.shapeTypeSelection)
-			{
-				case VERTEX:
-					if(shape instanceof TopoDS_Vertex)
-						selectionNode.add(leaf);
-					break;
-				case EDGE:
-					if(shape instanceof TopoDS_Edge)
-						selectionNode.add(leaf);
-					break;
-				case FACE:
-					if(shape instanceof TopoDS_Face)
-						selectionNode.add(leaf);
-					break;
-				default:
-					throw new RuntimeException("Type of shape unknown !");
-			}
-		}
-	}
 
 	public Collection<TopoDS_Shape> getSelection()
 	{

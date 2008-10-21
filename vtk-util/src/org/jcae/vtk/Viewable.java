@@ -160,12 +160,12 @@ public abstract class Viewable extends MultiCanvas
 		manageSelection();
 	}
 
-	protected int[] selectPointOnSurface(Canvas canvas, int[] firstPoint, int[] secondPoint)
+	private int[] selectPointOnSurface(Canvas canvas, int[] firstPoint, int[] secondPoint)
 	{
 		return new int[0];
 	}
 
-	protected void selectCellOnSurface(Canvas canvas, int[] firstPoint, int[] secondPoint)
+	private void selectCellOnSurface(Canvas canvas, int[] firstPoint, int[] secondPoint)
 	{
 		scene.pick(canvas, firstPoint, secondPoint);
 
@@ -190,7 +190,7 @@ public abstract class Viewable extends MultiCanvas
 				{
 					selectionChanged = true;
 					int cell = selection.get(i);
-					if (!nodeCellSelection.add(cell))
+					if (!nodeCellSelection.add(cell) && !surfaceSelection)
 						nodeCellSelection.remove(cell);
 				}
 
@@ -212,7 +212,7 @@ public abstract class Viewable extends MultiCanvas
 		}
 	}
 
-	protected void selectNodeOnSurface(Canvas canvas, int[] firstPoint, int[] secondPoint)
+	private void selectNodeOnSurface(Canvas canvas, int[] firstPoint, int[] secondPoint)
 	{
 		LOGGER.finest("Start pick color");
 		scene.pick(canvas, firstPoint, secondPoint);
@@ -308,8 +308,12 @@ public abstract class Viewable extends MultiCanvas
 		super.removeNode(node);
 	}
 
-	protected void highLightNodes()
+	public void highLight()
 	{
+		// Highlight selected cells
+		rootNode.highLightSelection();
+		
+		// Tag nodes as being selected or not
 		for (LeafNode leaf : rootNode.getLeaves())
 		{
 			if (selectionNode.contains(leaf))
@@ -317,17 +321,8 @@ public abstract class Viewable extends MultiCanvas
 			else
 				leaf.unSelect();
 		}
-	}
 
-	private void highLightCells()
-	{
-		rootNode.highLightSelection();
-	}
-
-	public void highLight()
-	{
-		highLightCells();
-		highLightNodes();
+		// Refresh viewable
 		rootNode.refresh();
 		render();
 	}
