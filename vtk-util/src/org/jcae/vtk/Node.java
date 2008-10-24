@@ -673,7 +673,7 @@ public class Node extends AbstractNode
 			int offset = selection.size();
 			selection.ensureCapacity(offset+cellSelection.length);
 			for (int j = 0; j < cellSelection.length; ++j)
-				selection.setQuick(offset+j, leafIndexToNodeIndex(leaf, leafIndex, cellSelection[j]));
+				selection.add(leafIndexToNodeIndex(leaf, leafIndex, cellSelection[j]));
 		}
 
 		if (selection.isEmpty())
