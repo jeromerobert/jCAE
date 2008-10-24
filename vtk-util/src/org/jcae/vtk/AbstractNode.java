@@ -448,14 +448,13 @@ public abstract class AbstractNode {
 		data.SetVerts(Utils.createCells(dataProvider.getNbrOfVertice(), dataProvider.getVertice()));
 		data.SetLines(Utils.createCells(dataProvider.getNbrOfLines(), dataProvider.getLines()));
 		data.SetPolys(Utils.createCells(dataProvider.getNbrOfPolys(), dataProvider.getPolys()));
-		
-		LOGGER.finest("Number of points : " + data.GetPoints().GetNumberOfPoints());
-		LOGGER.finest("Number of vertice : " + data.GetVerts().GetNumberOfCells());
-		LOGGER.finest("Number of lines : " + data.GetLines().GetNumberOfCells());
-		LOGGER.finest("Number of polys : " + data.GetPolys().GetNumberOfCells());
 				
 		if(LOGGER.isLoggable(Level.FINEST))
 		{
+			LOGGER.finest("Number of points : " + data.GetPoints().GetNumberOfPoints());
+			LOGGER.finest("Number of vertices : " + data.GetVerts().GetNumberOfCells());
+			LOGGER.finest("Number of lines : " + data.GetLines().GetNumberOfCells());
+			LOGGER.finest("Number of polys : " + data.GetPolys().GetNumberOfCells());
 			LOGGER.finest("vertice coherance : " + Utils.isMeshCoherent(dataProvider.getNodes(), dataProvider.getVertice()));
 			LOGGER.finest("line coherance : " + Utils.isMeshCoherent(dataProvider.getNodes(), dataProvider.getLines()));
 			LOGGER.finest("polys coherance : " + Utils.isMeshCoherent(dataProvider.getNodes(), dataProvider.getPolys()));
