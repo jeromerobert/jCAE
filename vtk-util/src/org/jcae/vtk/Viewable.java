@@ -55,12 +55,6 @@ public abstract class Viewable extends MultiCanvas
 	protected boolean selectionChanged;
 	/** Flag to set selection in append or replace mode */
 	protected boolean appendSelection;
-	/*
-	 * Type of rectangle selection.
-	 * If true, the rectangle selection is on surface.
-	 * If false, the rectangle selection is in frustum.
-	 */
-	protected boolean surfaceSelection = true;
 	private SelectionType selectionType = SelectionType.NODE;
 
 	public enum SelectionType
@@ -190,7 +184,7 @@ public abstract class Viewable extends MultiCanvas
 				{
 					selectionChanged = true;
 					int cell = selection.get(i);
-					if (!nodeCellSelection.add(cell) && !surfaceSelection)
+					if (!nodeCellSelection.add(cell) && appendSelection)
 						nodeCellSelection.remove(cell);
 				}
 
