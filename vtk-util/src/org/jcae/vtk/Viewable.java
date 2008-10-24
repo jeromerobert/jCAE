@@ -161,6 +161,9 @@ public abstract class Viewable extends MultiCanvas
 
 	private void selectCellOnSurface(Canvas canvas, int[] firstPoint, int[] secondPoint)
 	{
+		if (!appendSelection)
+			selectionCell.clear();
+		
 		scene.pick(canvas, firstPoint, secondPoint);
 
 		List<LeafNode> nodes = rootNode.getLeaves();
