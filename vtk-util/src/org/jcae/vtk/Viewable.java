@@ -53,6 +53,9 @@ public abstract class Viewable extends MultiCanvas
 	/** Map of selected cells */
 	protected HashMap<LeafNode, TIntHashSet> selectionCell = new HashMap<LeafNode, TIntHashSet>();
 	protected boolean selectionChanged;
+	/** Kept for compatibility reason, but declared as final so that it cannot be modified */
+	@Deprecated
+	protected final boolean surfaceSelection = true;
 	/** Flag to set selection in append or replace mode */
 	protected boolean appendSelection;
 	private SelectionType selectionType = SelectionType.NODE;
