@@ -20,7 +20,6 @@
 package org.jcae.vtk;
 
 
-import gnu.trove.TFloatArrayList;
 import gnu.trove.TIntArrayList;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntObjectHashMap;
@@ -48,72 +47,22 @@ import vtk.vtkPolyDataMapper;
 public class ViewableOEMM extends Viewable implements MouseMotionListener
 {
 
-	private OEMM oemm;
-	private MeshVisuReader reader;
+	private final OEMM oemm;
+	private final MeshVisuReader reader;
 	private vtkActor octree;
-	private vtkActor octreeForPicking;
-	private vtkActor edgesActor;
-	private vtkActor freeEdgesActor;
+
 	private boolean automaticSelection = false;
-	private boolean octreeVisible = true;
 	private final int leafVisibleMax = 10;
-	private TObjectIntHashMap<LeafNode> nodeToID = new TObjectIntHashMap<LeafNode>();
-	private TIntObjectHashMap<LeafNode> IDToEdgeNode = new TIntObjectHashMap<LeafNode>();
-	private TIntObjectHashMap<LeafNode> IDToFreeEdgeNode = new TIntObjectHashMap<LeafNode>();
+	private final TObjectIntHashMap<LeafNode> nodeToID = new TObjectIntHashMap<LeafNode>();
+	private final TIntObjectHashMap<LeafNode> IDToEdgeNode = new TIntObjectHashMap<LeafNode>();
+	private final TIntObjectHashMap<LeafNode> IDToFreeEdgeNode = new TIntObjectHashMap<LeafNode>();
 	private Node edgesNode;
 	private Node freeEdgesNode;
 	private Node octreeNode;
 	volatile boolean rendering = false;
 
-	/*private static class DataLeaf extends  LeafNode.DataProvider
-	{
-	float[] nodes;
-	int[] lines;
-	int[] quads;
-	
-	DataLeaf(float[] nodes, int[] lines, int[] quads)
-	{
-	this.nodes = nodes;
-	this.lines = lines;
-	nbrOfLines = lines.length / 3;
-	this.quads = quads;
-	nbrOfPolys = quads.length / 5;
-	}
-	
-	@Override
-	public float[] getNodes()
-	{
-	return nodes;
-	}
-	
-	@Override
-	public void load()
-	{
-	// Do nothing
-	}
-	
-	@Override
-	public void unLoad()
-	{
-	// Do nothong
-	}
-	
-	@Override
-	public int[] getLines()
-	{
-	return lines;
-	}
-	
-	@Override
-	public int[] getPolys()
-	{
-	return quads;
-	}
-	
-	}*/
 	public ViewableOEMM(OEMM oemm)
 	{
-		super(new Scene(), new Node(null));
 		this.oemm = oemm;
 		reader = new MeshVisuReader(oemm);
 
@@ -159,7 +108,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 		octree.SetMapper(mapper);
 		octree.GetProperty().SetColor(0., 0., 1.);
 		octree.PickableOff();
-		octree.SetVisibility(Utils.booleanToInt(octreeVisible));
+		octree.VisibilityOn();
 
 		int[] quadsLeaf = new int[5 * 6];
 
@@ -175,6 +124,9 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 
 		int ID = 0;
 		octreeNode = new Node(rootNode);
+		octreeNode.setManager(true);
+		octreeNode.setPickableRecursive(true);
+		octreeNode.setVisible(false);
 		for (int i = 0; i < nodes.length;)
 		{
 			float[] leafNodes = new float[6 * 4 * 3];
@@ -188,51 +140,16 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 			nodeToID.put(leaf, ID);
 			ID++;
 		}
-		octreeNode.setManager(true);
 		octreeNode.refresh();
-		octreeNode.setPickableRecursive(true);
-		octreeForPicking = octreeNode.getActor();
-		octreeForPicking.SetVisibility(0);
-
-		/*octreeForPicking = new vtkActor();
-		data = new vtkPolyData();
-		int[] quads = new int[(nodes.length / (4 * 3)) * 5];
-		offSet = 0;
-		for (int i = 0; i < nodes.length / 3;)
-		{
-		quads[offSet++] = 4;
-		quads[offSet++] = i++;
-		quads[offSet++] = i++;
-		quads[offSet++] = i++;
-		quads[offSet++] = i++;
-		}
-		data.SetPoints(points);
-		data.SetPolys(Utils.createCells(quads.length / 5, quads));
-		mapper = new vtkPolyDataMapper();
-		mapper.SetInput(data);
-		octreeForPicking.SetMapper(mapper);
-		octreeForPicking.VisibilityOff();
-		octreeForPicking.PickableOn();*/
-
-		// Construct Mesh
-		edgesActor = new vtkActor();
-		edgesActor.GetProperty().SetColor(1., 1., 1.);
-		edgesActor.PickableOff();
-
-		// Construct the freeEdgesActor
-		freeEdgesActor = new vtkActor();
-		freeEdgesActor.GetProperty().SetColor(1., 0., 0.);
-		freeEdgesActor.PickableOff();
 	}
 
 	public boolean isOctreeVisible()
 	{
-		return octreeVisible;
+		return octree.GetVisibility() != 0;
 	}
 
 	public void setOctreeVisible(boolean octreeVisible)
 	{
-		this.octreeVisible = octreeVisible;
 		octree.SetVisibility(Utils.booleanToInt(octreeVisible));
 
 	}
@@ -250,16 +167,12 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 	@Override
 	public void highLight()
 	{
-		final ViewableOEMM me = this;
 		Thread run = new Thread()
 		{
-
-			public final ViewableOEMM viewable = me;
-
 			@Override
 			public void run()
 			{
-				viewable.highLightThreaded();
+				ViewableOEMM.this.highLightThreaded();
 			}
 		};
 		run.start();
@@ -395,11 +308,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 	{
 		super.addCanvas(canvas);
 		canvas.addMouseMotionListener(this);
-
 		canvas.GetRenderer().AddViewProp(octree);
-		//canvas.GetRenderer().AddViewProp(octreeForPicking);
-		canvas.GetRenderer().AddViewProp(edgesActor);
-		canvas.GetRenderer().AddViewProp(freeEdgesActor);
 	}
 
 	@Override
@@ -407,12 +316,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 	{
 		super.removeCanvas(canvas);
 		canvas.removeMouseMotionListener(this);
-
-
 		canvas.GetRenderer().RemoveViewProp(octree);
-		//canvas.GetRenderer().RemoveViewProp(octreeForPicking);
-		canvas.GetRenderer().RemoveViewProp(edgesActor);
-		canvas.GetRenderer().RemoveViewProp(freeEdgesActor);
 	}
 
 	public void mouseDragged(MouseEvent e)
@@ -431,11 +335,9 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 	@Override
 	public void pointSelection(Canvas canvas, Point pickPosition)
 	{
-		octreeForPicking.VisibilityOn();
-		octreeForPicking.SetPickable(1);
+		octreeNode.setPickable(true);
 		super.pointSelection(canvas, pickPosition);
-		octreeForPicking.VisibilityOff();
-		return;
+		octreeNode.setPickable(false);
 	}
 
 	@Override
@@ -452,7 +354,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 
 		vtkExtractSelectedFrustum selector = new vtkExtractSelectedFrustum();
 
-		vtkDataSet dataSet = octreeForPicking.GetMapper().GetInputAsDataSet();
+		vtkDataSet dataSet = octreeNode.getActor().GetMapper().GetInputAsDataSet();
 		selector.SetInput(dataSet);
 		selector.CreateFrustum(Utils.computeVerticesFrustum(pressPosition.x, pressPosition.y, releasePosition.x,
 				releasePosition.y, canvas.GetRenderer()));
