@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import vtk.vtkActor;
-import vtk.vtkCanvas;
 import vtk.vtkFloatArray;
 import vtk.vtkMapper;
 import vtk.vtkPolyData;
@@ -34,29 +33,63 @@ import vtk.vtkPolyDataMapper;
 import vtk.vtkPolyDataNormals;
 
 /**
- * Nodes of scene graph. There are two types of nodes:
+ * Nodes of scene graph.
+ * The aim of a viewer is of course to display graphical objects.  But a scene is
+ * not static, view has to be refreshed when properties change.  For instance
+ * when an object is selected, it is highlighted.  Color or material may also
+ * be edited by user, and scene has to be rebuild quickly.
+ * 
+ * With OpenGL, one can concatenate static objects into so-called display lists,
+ * and compile them so that rendering is very fast.  But if an object changes,
+ * display list has to be rebuilt, which can be slow.  This must be taken into
+ * account when designing a data structure, otherwise performance can become
+ * very poor.
+ *
+ * The same logic applies to VTK as well.  A vtkActor is an object which will
+ * be compiled and can be rendered efficiently.  Its geometry is defined by
+ * a vtkMapper, more exactly a vtkPolyDataMapper in our case.  It takes some
+ * time to build OpenGL primitives from this geometry, but when this is done,
+ * rendering is very fast when camera moves or vtkActor is highlighted.
+ * It is also possible to change only a subset of properties associated to
+ * geometric data, to highlight only some cells, but this may also take some
+ * time if dataset is very large.
+ * 
+ * VTK becomes too slow when there are many actors, but on the other hand
+ * interactive changes become also too slow if too many data are put into
+ * actors.  We implemented a tree graph to help merging geometric entities
+ * into single actors.  There are two types of nodes:
  * <ul>
  * <li>{@link Node}: containers, its children may be Node or LeafNode instances;</li>
  * <li>{@link LeafNode}: leaf nodes contain geometric data.</li>
  * </ul>
  * 
- * This structure is used because VTK becomes too slow when there are many actors,
- * so we group together geometric entities into a Node wich will merge all shapes
- * into a single actor.
- * 
  * This merge is performed only if the Node is set as managing (by using the 
- * {@link #setManager()} method).
- * A node can be highlighted using the select method.
- * A node can be picked or not (this permit to make faster the picking ignoring non pickable nodes).
- * You can give customisers to the nodes. This works as follow :
- * If a leaf node has no customiser it takes the first parent that have one and if nobody have
- * customiser the DEFAULT customiser is taken. This permits to create a customiser for the parent node and this will
- * be used pour all of it's children (unless if the child has a customiser).
- * The customisers are created to permit to change and customise the VTK objects easily.
- * Actually only the color can be specified for the shading of the geometry. If you want
- * to customise the nodes more you can use the VTK interface but if you merge the leafs in
- * one node and they have different materials this will cause problems... The solution to this
- * is that VTK permits to make materials data arrays like color array.
+ * {@link #setManager()} method). FIXME: a managing Node can currently contain
+ * either Node or LeafNode instances, but in practice it almost always contains
+ * LeafNode.  If we make this a rule, recursive behavior of these nodes will
+ * be much easier to implement and more efficient too.
+ *
+ * This is a general framework, only application developers can know how to
+ * organize their geometrical objects into Node and LeafNode.
+ *
+ * Nodes can be highlighted using the {@link #select} method.  A subset of
+ * their underlying geometry can be highlighted using the {@link #setCellSelection}
+ * method, which modifies {@link #selectionHighLighter} actor.
+ *
+ * Nodes can be declared as being not pickable to speed up picking, since non
+ * pickable nodes are ignored.
+ *
+ * You can give customisers to the nodes. This works as follows: if a leaf node
+ * has no customiser it takes the first parent that have one and if nobody have
+ * customiser the DEFAULT customiser is taken. This permits to create a
+ * customiser for the parent node and this will be used for all of its children
+ * (unless if the child has a customiser).  Customisers are created to permit
+ * to change and customise VTK objects easily.  Actually only color can be
+ * specified for shading of the geometry. If you want to customise the nodes
+ * more you can use the VTK interface but if you merge the leaves in one node
+ * and they have different materials this will cause problems.  The solution to
+ * this is that VTK permits to make materials data arrays like color array.
+ *
  * The node by default take some characteristics of the parent node for example the pickability
  * and the visibility.
  * When applying a customiser the actor customisation is refreshed and if we are in a Node,
@@ -64,25 +97,36 @@ import vtk.vtkPolyDataNormals;
  * 
  * @author Julian Ibarz
  */
-public abstract class AbstractNode {
+public abstract class AbstractNode
+{
 	private final static Logger LOGGER = Logger.getLogger(AbstractNode.class.getName());
+	/** Parent node */
 	protected AbstractNode parent;
 	private final ArrayList<ActorListener> actorListeners = new ArrayList<ActorListener>();
+	/** Flag to tell if this node is a manager */
 	private boolean manager = false;
-	protected vtkActor actor = null; // If actor != null the node is a manager
+	/** Actor of this node, if it is a manager */
+	protected vtkActor actor = null;
+	/** Geometry of this actor */
 	protected vtkPolyDataMapper mapper = null;
 	protected vtkPolyData data = null;
 
-	protected long lastUpdate = 0;
-	
-	protected long modificationTime = System.nanoTime();
-	protected boolean visible = true;
-	protected int[] selectionPoint = new int[0];
-	protected long selectionTime = 0   ;
-	protected boolean selected;
-	
+	/** Actor used for cell selection */
 	protected vtkActor selectionHighLighter = null;
 	protected vtkPolyDataMapper selectionHighLighterMapper = null;
+
+	/** Last time this actor had been updated */
+	protected long lastUpdate = 0;
+	/** Last time this actor had been modified (data, color, visibility) */
+	protected long modificationTime = 0;
+	/** Last time this node had been selected */
+	protected long selectionTime = 0   ;
+
+	@Deprecated
+	protected int[] selectionPoint = new int[0];
+
+	protected boolean visible = true;
+	protected boolean selected;
 	protected boolean pickable;
 	
 	public static interface ActorListener
@@ -121,33 +165,39 @@ public abstract class AbstractNode {
 		void customiseMapperSelection(vtkMapper mapper);
 	}
 	
-	public static ActorCustomiser DEFAULT_ACTOR_CUSTOMISER = new ActorCustomiser(){
-		public void customiseActor(vtkActor actor){}
-	};
-	public static ActorHighLightedCustomiser DEFAULT_ACTOR_HIGHLIGHTED_CUSTOMISER =
-		new ActorHighLightedCustomiser(){
-			public void customiseActorHighLighted(vtkActor actor){}
+	public static ActorCustomiser DEFAULT_ACTOR_CUSTOMISER =
+		new ActorCustomiser()
+		{
+			public void customiseActor(vtkActor actor) {}
 		};
-	public static MapperCustomiser DEFAULT_MAPPER_CUSTOMISER = new MapperCustomiser(){
-		public void customiseMapper(vtkMapper mapper) {
-			mapper.SetResolveCoincidentTopologyToPolygonOffset();
-			mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffSetFactor(), Utils.getOffSetValue());
-		}
-	};
+	public static ActorHighLightedCustomiser DEFAULT_ACTOR_HIGHLIGHTED_CUSTOMISER =
+		new ActorHighLightedCustomiser()
+		{
+			public void customiseActorHighLighted(vtkActor actor) {}
+		};
+	public static MapperCustomiser DEFAULT_MAPPER_CUSTOMISER =
+		new MapperCustomiser()
+		{
+			public void customiseMapper(vtkMapper mapper)
+			{
+				mapper.SetResolveCoincidentTopologyToPolygonOffset();
+				mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffSetFactor(), Utils.getOffSetValue());
+			}
+		};
 	public static MapperHighLightedCustomiser DEFAULT_MAPPER_HIGHLIGHTED_CUSTOMISER =
 		new MapperHighLightedCustomiser()
 		{
-			public void customiseMapperHighLighted(vtkMapper mapper)
-			{
-			}
+			public void customiseMapperHighLighted(vtkMapper mapper) {}
 		};
 	public static ActorSelectionCustomiser DEFAULT_ACTOR_SELECTION_CUSTOMISER =
-		new ActorSelectionCustomiser(){
-			public void customiseActorSelection(vtkActor actor){}
+		new ActorSelectionCustomiser()
+		{
+			public void customiseActorSelection(vtkActor actor) {}
 		};
 	public static MapperSelectionCustomiser DEFAULT_MAPPER_SELECTION_CUSTOMISER =
-		new MapperSelectionCustomiser(){
-			public void customiseMapperSelection(vtkMapper mapper){}
+		new MapperSelectionCustomiser()
+		{
+			public void customiseMapperSelection(vtkMapper mapper) {}
 		};
 	
 	protected ActorCustomiser actorCustomiser = null;
@@ -175,14 +225,14 @@ public abstract class AbstractNode {
 
 	public AbstractNode getRoot()
 	{
-		if(this.parent != null)
-			return this.parent.getRoot();
-		else return this;
+		if(parent != null)
+			return parent.getRoot();
+		return this;
 	}
 	
 	public AbstractNode getParent()
 	{
-		return this.parent;
+		return parent;
 	}
 	
 	protected abstract void addChild(AbstractNode parent);
@@ -288,7 +338,7 @@ public abstract class AbstractNode {
 	{
 		if(mapperSelectionCustomiser != null)
 			return mapperSelectionCustomiser;
-		else if(parent != null)
+		if(parent != null)
 			mapperSelectionCustomiser = parent.getMapperSelectionCustomiser();
 		
 		if(mapperSelectionCustomiser == null)
@@ -307,6 +357,7 @@ public abstract class AbstractNode {
 		if(!isSelected() && actor != null)
 			getActorCustomiser().customiseActor(actor);
 	}
+
 	public void applyMapperCustomiser()
 	{
 		if(!isSelected() && mapper != null)
@@ -333,7 +384,7 @@ public abstract class AbstractNode {
 	{
 		if(actorCustomiser != null)
 			return actorCustomiser;
-		else if(parent != null)
+		if(parent != null)
 			actorCustomiser = parent.getActorCustomiser();
 		
 		if(actorCustomiser == null)
@@ -346,7 +397,7 @@ public abstract class AbstractNode {
 	{
 		if(actorHighLightedCustomiser != null)
 			return actorHighLightedCustomiser;
-		else if(parent != null)
+		if(parent != null)
 			actorHighLightedCustomiser = parent.getActorHighLightedCustomiser();
 		
 		if(actorHighLightedCustomiser == null)
@@ -359,7 +410,7 @@ public abstract class AbstractNode {
 	{
 		if(mapperCustomiser != null)
 			return mapperCustomiser;
-		else if(parent != null)
+		if(parent != null)
 			mapperCustomiser = parent.getMapperCustomiser();
 		
 		if(mapperCustomiser == null)
@@ -372,7 +423,7 @@ public abstract class AbstractNode {
 	{
 		if(mapperHighLightedCustomiser != null)
 			return mapperHighLightedCustomiser;
-		else if(parent != null)
+		if(parent != null)
 			mapperHighLightedCustomiser = parent.getMapperHighLightedCustomiser();
 		
 		if(mapperHighLightedCustomiser == null)
@@ -401,12 +452,12 @@ public abstract class AbstractNode {
 	
 	protected long getModificationTime()
 	{
-		return this.modificationTime;
+		return modificationTime;
 	}
 	
 	public void modified()
 	{
-		this.modificationTime = System.nanoTime();
+		modificationTime = System.nanoTime();
 	}
 	
 	protected abstract void refresh();
