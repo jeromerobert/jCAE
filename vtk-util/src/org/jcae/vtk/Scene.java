@@ -34,6 +34,7 @@ import vtk.vtkActor;
 import vtk.vtkActorCollection;
 import vtk.vtkCanvas;
 import vtk.vtkIdTypeArray;
+import vtk.vtkIntArray;
 import vtk.vtkPlaneCollection;
 import vtk.vtkProp;
 import vtk.vtkSelection;
@@ -52,7 +53,7 @@ public class Scene implements AbstractNode.ActorListener
 		new TLongObjectHashMap<AbstractNode>();
 	private boolean actorFiltering = true;
 	private vtkPlaneCollection planes = null;
-	private final boolean checkColorDepth = Boolean.parseBoolean(
+	private boolean checkColorDepth = Boolean.parseBoolean(
 		System.getProperty("org.jcae.vtk.checkColorDepth", "true"));
 	
 	/**
