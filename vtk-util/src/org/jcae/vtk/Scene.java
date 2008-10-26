@@ -52,6 +52,9 @@ public class Scene implements AbstractNode.ActorListener
 	private boolean actorFiltering = true;
 	private vtkPlaneCollection planes = null;
 	private final static Logger LOGGER = Logger.getLogger(Scene.class.getName());
+	private final static boolean CHECK_COLOR_DEPTH = Boolean.parseBoolean(
+		System.getProperty("org.jcae.vtk.checkColorDepth", "true"));
+	
 	/**
 	 * Store the previous pickability of the scene.
 	 * 1 means the node is pickable
@@ -148,6 +151,9 @@ public class Scene implements AbstractNode.ActorListener
 	 */
 	public void pick(vtkCanvas canvas, int[] firstPoint, int[] secondPoint)
 	{
+		if (CHECK_COLOR_DEPTH && canvas.GetRenderWindow().GetDepthBufferSize() < 24)
+			throw new RuntimeException("Color depth is lower than 24 bits, picking does not work");
+
 		vtkVisibleCellSelector selector = new vtkVisibleCellSelector();
 		selector.SetRenderer(canvas.GetRenderer());
 		selector.SetArea(firstPoint[0], firstPoint[1], secondPoint[0],
