@@ -1,4 +1,5 @@
 # This series applies on GIT commit efbdefa3bfc89d2333be3e2ab569eddf9eb6bd7a
+getColorBufferSizes
 displayList
 offset
 translucent
