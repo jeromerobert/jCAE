@@ -208,11 +208,11 @@ public abstract class AbstractNode
 	protected MapperSelectionCustomiser mapperSelectionCustomiser;
 
 	/**
-	 * Constructor.
+	 * Constructor.  It must not be called directly, only by subclasses.
 	 * 
-	 * @param parent parent node.  If <code>null</code>
+	 * @param parent parent node
 	 */
-	public AbstractNode(AbstractNode parent)
+	protected AbstractNode(AbstractNode parent)
 	{
 		this.parent = parent;
 		if(parent != null)
