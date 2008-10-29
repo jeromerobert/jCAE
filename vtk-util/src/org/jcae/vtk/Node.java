@@ -778,4 +778,19 @@ public class Node extends AbstractNode
 		for (int i = 0; i < leaves.size(); ++i)
 			leaves.get(i).setCellSelection(selectionChildren.get(i));
 	}
+	
+	@Override
+	public String toString()
+	{
+		StringBuilder sb = new StringBuilder(super.toString());
+		if (highLighter != null)
+		{
+			sb.append(" highLighter@"+Integer.toHexString(highLighter.hashCode()));
+			if (highLighter.GetVisibility() != 0)
+				sb.append(" visible");
+			if (highLighter.GetPickable() != 0)
+				sb.append(" pickable");
+		}
+		return sb.toString();
+	}
 }

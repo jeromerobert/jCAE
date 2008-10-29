@@ -122,6 +122,9 @@ public abstract class AbstractNode
 	/** Last time this node had been selected */
 	protected long selectionTime;
 	
+	// Useful for debugging
+	private String debugName;
+
 	@Deprecated
 	protected int[] selectionPoint = new int[0];
 
@@ -644,4 +647,35 @@ public abstract class AbstractNode
 		return manager;
 	}
 	
+	public void setDebugName(String name)
+	{
+		debugName = name;
+	}
+	
+	@Override
+	public String toString()
+	{
+		StringBuilder sb = new StringBuilder(getClass().getName()+"@"+Integer.toHexString(hashCode()));
+		if (debugName != null)
+			sb.append(" "+debugName);
+		if (manager)
+			sb.append(" manager");
+		if (actor != null)
+		{
+			sb.append(" actor@"+Integer.toHexString(actor.hashCode()));
+			if (actor.GetVisibility() != 0)
+				sb.append(" visible");
+			if (actor.GetPickable() != 0)
+				sb.append(" pickable");
+		}
+		if (selectionHighLighter != null)
+		{
+			sb.append(" selectionHighLighter@"+Integer.toHexString(selectionHighLighter.hashCode()));
+			if (selectionHighLighter.GetVisibility() != 0)
+				sb.append(" visible");
+			if (selectionHighLighter.GetPickable() != 0)
+				sb.append(" pickable");
+		}
+		return sb.toString();
+	}
 }
