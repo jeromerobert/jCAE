@@ -46,15 +46,15 @@ public class Node extends AbstractNode
 	
 	private ArrayList<AbstractNode> children = new ArrayList<AbstractNode>();
 	// Datas if the node manage
-	private TIntArrayList offsetsVertices = null;
-	private TIntArrayList offsetsLines = null;
-	private TIntArrayList offsetsPolys = null;
+	private TIntArrayList offsetsVertices;
+	private TIntArrayList offsetsLines;
+	private TIntArrayList offsetsPolys;
 	private int nbrOfVertice;
 	private int nbrOfLines;
 	private int nbrOfPolys;
-	private vtkLookupTable table = null;
-	private vtkActor highLighter = null;
-	private vtkPolyDataMapper highLighterMapper = null;
+	private vtkLookupTable table;
+	private vtkActor highLighter;
+	private vtkPolyDataMapper highLighterMapper;
 	private ArrayList<ChildCreationListener> childCreationListeners = new ArrayList<ChildCreationListener>();
 
 	private static class NodeData extends LeafNode.DataProvider

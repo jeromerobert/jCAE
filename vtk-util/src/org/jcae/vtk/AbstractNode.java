@@ -104,24 +104,24 @@ public abstract class AbstractNode
 	protected AbstractNode parent;
 	private final ArrayList<ActorListener> actorListeners = new ArrayList<ActorListener>();
 	/** Flag to tell if this node is a manager */
-	private boolean manager = false;
+	private boolean manager;
 	/** Actor of this node, if it is a manager */
-	protected vtkActor actor = null;
+	protected vtkActor actor;
 	/** Geometry of this actor */
-	protected vtkPolyDataMapper mapper = null;
-	protected vtkPolyData data = null;
+	protected vtkPolyDataMapper mapper;
+	protected vtkPolyData data;
 
 	/** Actor used for cell selection */
-	protected vtkActor selectionHighLighter = null;
-	protected vtkPolyDataMapper selectionHighLighterMapper = null;
+	protected vtkActor selectionHighLighter;
+	protected vtkPolyDataMapper selectionHighLighterMapper;
 
 	/** Last time this actor had been updated */
-	protected long lastUpdate = 0;
+	protected long lastUpdate;
 	/** Last time this actor had been modified (data, color, visibility) */
-	protected long modificationTime = 0;
+	protected long modificationTime;
 	/** Last time this node had been selected */
-	protected long selectionTime = 0   ;
-
+	protected long selectionTime;
+	
 	@Deprecated
 	protected int[] selectionPoint = new int[0];
 
@@ -200,12 +200,12 @@ public abstract class AbstractNode
 			public void customiseMapperSelection(vtkMapper mapper) {}
 		};
 	
-	protected ActorCustomiser actorCustomiser = null;
-	protected ActorHighLightedCustomiser actorHighLightedCustomiser = null;
-	protected MapperCustomiser mapperCustomiser = null;
-	protected MapperHighLightedCustomiser mapperHighLightedCustomiser = null;
-	protected ActorSelectionCustomiser actorSelectionCustomiser = null;
-	protected MapperSelectionCustomiser mapperSelectionCustomiser = null;
+	protected ActorCustomiser actorCustomiser;
+	protected ActorHighLightedCustomiser actorHighLightedCustomiser;
+	protected MapperCustomiser mapperCustomiser;
+	protected MapperHighLightedCustomiser mapperHighLightedCustomiser;
+	protected ActorSelectionCustomiser actorSelectionCustomiser;
+	protected MapperSelectionCustomiser mapperSelectionCustomiser;
 
 	/**
 	 * Constructor.

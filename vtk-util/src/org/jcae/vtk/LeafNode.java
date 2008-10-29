@@ -183,7 +183,7 @@ public class LeafNode extends AbstractNode
 	private TIntArrayList selection = new TIntArrayList();
 	private Color color;
 	private DataProvider dataProvider;
-	private long timeDataCreated = 0;
+	private long timeDataCreated;
 	
 	public LeafNode(AbstractNode parent, DataProvider dataProvider, Color color)
 	{
@@ -407,8 +407,6 @@ public class LeafNode extends AbstractNode
 
 		vtkPolyData dataFiltered = selFilter.GetOutput();
 		selFilter.Update();
-
-		//System.out.println("Number of triangles selected : " + dataFiltered.GetNumberOfCells());
 
 		selectionHighLighterMapper.SetInput(dataFiltered);
 		
