@@ -31,6 +31,8 @@ import vtk.vtkAxesActor;
 import vtk.vtkCamera;
 import vtk.vtkCellPicker;
 import vtk.vtkOrientationMarkerWidget;
+import vtk.vtkProp;
+import vtk.vtkPropCollection;
 import vtk.vtkRenderer;
 import vtk.vtkTransform;
 
@@ -106,6 +108,16 @@ public class CameraManager
 		// A display orientation
 		relativeAxes = new vtkAxesActor();
 		relativeAxes.AxisLabelsOn();
+		
+		// FIXME: I do not know why, but originAxes has 6
+		// pickable actors whereas relativeAxes has none.
+		// As originAxes.PickableOff() does nothing, try
+		// another way.
+		vtkPropCollection actors = new vtkPropCollection();
+		originAxes.GetActors(actors);
+		actors.InitTraversal();
+		for (vtkProp prop; (prop = actors.GetNextProp()) != null; )
+			prop.PickableOff();
 		
 		marker = new vtkOrientationMarkerWidget();
 		marker.SetOrientationMarker(relativeAxes);
