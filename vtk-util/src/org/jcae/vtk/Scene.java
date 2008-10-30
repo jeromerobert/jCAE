@@ -256,7 +256,13 @@ public class Scene implements AbstractNode.ActorListener
 				}
 			}
 			else
-				LOGGER.warning("No selection found");
+			{
+				// FIXME: For unknown reason, garbage is sometimes
+				// appended to real data. Exit loop when an unknown
+				// actor is found, further processing is useless.
+				LOGGER.warning("No selection found for actor "+IDActor);
+				break;
+			}
 		}
 	}
 
