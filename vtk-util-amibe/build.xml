@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="jar" name="vtk-util-amibe">
+
+	<target name="init">
+		<property file="build.properties"/>
+		<tstamp/>
+		<property name="version" value="${DSTAMP}"/>
+	</target>
+	
+	<target name="compile" depends="init">
+		<mkdir dir="${classes.dir}"/>
+		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}">
+			<compilerarg line="${compiler.arg}"/>
+			<classpath>
+				<pathelement location="${jcae.jar}"/>
+				<pathelement location="${vtk-util.jar}"/>
+				<pathelement location="${vtk.jar}"/>
+				<pathelement location="${trove.jar}"/>
+			</classpath>
+		</javac>
+	</target>
+	
+	<target name="jar" depends="compile" description="Create the vtk-util-amibe jar">
+		<mkdir dir="${jar.dir}"/>
+		<jar compress="true" jarfile="${jar.dir}/${vtk-util-amibe.jar}">
+			<manifest>
+				<attribute name="Class-Path" value="${vtk-util-amibe.jar.dependencies}"/>
+			</manifest>
+			<fileset dir="${classes.dir}" includes="org/jcae/vtk/**"/>
+		</jar>
+	</target>
+
+	<target name="all" depends="dist-bin" description="Build everything."/>
+	
+	<target name="javadoc" description="Javadoc for my API." depends="init">
+		<mkdir dir="${javadoc.dir}"/>
+		<javadoc destdir="${javadoc.dir}" packagenames="org.jcae.*">
+			<sourcepath>
+				<pathelement location="${src.dir}"/>
+			</sourcepath>
+			<classpath>
+				<pathelement location="${jcae.jar}"/>
+			</classpath>
+		</javadoc>
+	</target>
+	
+	<target name="clean" description="Clean all build products." depends="init">
+		<delete dir="${classes.dir}"/>
+		<delete dir="${javadoc.dir}"/>
+		<delete file="${jar.dir}/${vtk-util-amibe.jar}"/>
+	</target>
+	
+	<target name="dist" description="build a tar.bz2 archive to distribute sources" depends="init">
+		<tar destfile="${project.name}-src-${version}.tar">
+			<tarfileset dir="." prefix="${project.name}-${version}" username="jcae" group="jcae">
+				<include name="*.xml" />
+				<include name="src/**"/>
+				<include name="INSTALL"/>
+				<include name="ChangeLog"/>
+				<include name="doc/*.*"/>
+			</tarfileset>
+		</tar>
+		<bzip2 src="${project.name}-src-${version}.tar" zipfile="${project.name}-src-${version}.tar.bz2"/>
+		<delete file="${project.name}-src-${version}.tar"/>
+	</target>
+
+	<target name="dist-bin" description="build a zip to distribute binaries" depends="jar">
+		<zip destfile="${project.name}-bin-${version}.zip">
+			<zipfileset prefix="${project.name}-${version}/api" dir="doc/api"/>
+			<zipfileset prefix="${project.name}-${version}" file="${jar.dir}/${vtk-util-amibe.jar}"/>
+			<zipfileset prefix="${project.name}-${version}" file="${jcae.jar}"/>
+			<zipfileset prefix="${project.name}-${version}" file="${trove.jar}"/>
+		</zip>
+	</target>
+
+</project>
