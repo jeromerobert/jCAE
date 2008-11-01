@@ -201,6 +201,10 @@
                 <binary-origin>../viewer3d-amibe/dist/jcae-viewer3d-amibe.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
+                <runtime-relative-path>ext/jcae-vtk-util-amibe.jar</runtime-relative-path>
+                <binary-origin>../vtk-util-amibe/dist/jcae-vtk-util-amibe.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
                 <runtime-relative-path>ext/vtk-util.jar</runtime-relative-path>
                 <binary-origin>../../vtk-util/dist/vtk-util.jar</binary-origin>
             </class-path-extension>

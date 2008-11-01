@@ -8,6 +8,7 @@
 	<!-- from http://wiki.netbeans.org/DevFaqWrapperModules -->
 	<property name="amibe.project.dir" value="../amibe"/>
 	<property name="vtk-util.project.dir" value="../../vtk-util"/>
+	<property name="vtk-util-amibe.project.dir" value="../vtk-util-amibe"/>
 	<property name="viewer3d.project.dir" value="../viewer3d"/>
 	<property name="va.project.dir" value="../viewer3d-amibe"/>
 	<target name="-release.files">
@@ -43,6 +44,13 @@
 
 		<copy todir="${cluster}/modules/ext" file="${va.project.dir}/dist/jcae-viewer3d-amibe.jar"/>
 
+		<!-- build vtk-util-amibe -->
+		<echo message="Building ${vtk-util-amibe.project.dir}"/>
+		<ant dir="${vtk-util-amibe.project.dir}" target="jar" inheritall="false" inheritrefs="false"/>
+		<echo message="Done building ${vtk-util-amibe.project.dir}"/>
+
+		<copy todir="${cluster}/modules/ext" file="${vtk-util-amibe.project.dir}/dist/jcae-vtk-util-amibe.jar"/>
+
 		<copy file="../../amibe/logging.properties" tofile="${cluster}/etc/logging.properties"/>
 	</target>
 	<target name="clean" depends="projectized-common.clean">
@@ -57,5 +65,9 @@
 		<echo message="Cleaning ${va.project.dir}"/>
 		<ant dir="${va.project.dir}" target="clean" inheritall="false" inheritrefs="false"/>
 		<echo message="Done cleaning ${va.project.dir}"/>
+
+		<echo message="Cleaning ${vtk-util-amibe.project.dir}"/>
+		<ant dir="${vtk-util-amibe.project.dir}" target="clean" inheritall="false" inheritrefs="false"/>
+		<echo message="Done cleaning ${vtk-util-amibe.project.dir}"/>
 	</target>
 </project>
