@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project basedir="." default="jar" name="vtk-util-amibe">
+<project basedir="." default="jar" name="jcae-vtk-amibe">
 
 	<target name="init">
 		<property file="build.properties"/>
@@ -20,11 +20,11 @@
 		</javac>
 	</target>
 	
-	<target name="jar" depends="compile" description="Create the vtk-util-amibe jar">
+	<target name="jar" depends="compile" description="Create the vtk-amibe jar">
 		<mkdir dir="${jar.dir}"/>
-		<jar compress="true" jarfile="${jar.dir}/${vtk-util-amibe.jar}">
+		<jar compress="true" jarfile="${jar.dir}/${vtk-amibe.jar}">
 			<manifest>
-				<attribute name="Class-Path" value="${vtk-util-amibe.jar.dependencies}"/>
+				<attribute name="Class-Path" value="${vtk-amibe.jar.dependencies}"/>
 			</manifest>
 			<fileset dir="${classes.dir}" includes="org/jcae/vtk/**"/>
 		</jar>
@@ -47,7 +47,7 @@
 	<target name="clean" description="Clean all build products." depends="init">
 		<delete dir="${classes.dir}"/>
 		<delete dir="${javadoc.dir}"/>
-		<delete file="${jar.dir}/${vtk-util-amibe.jar}"/>
+		<delete file="${jar.dir}/${vtk-amibe.jar}"/>
 	</target>
 	
 	<target name="dist" description="build a tar.bz2 archive to distribute sources" depends="init">
@@ -67,7 +67,7 @@
 	<target name="dist-bin" description="build a zip to distribute binaries" depends="jar">
 		<zip destfile="${project.name}-bin-${version}.zip">
 			<zipfileset prefix="${project.name}-${version}/api" dir="doc/api"/>
-			<zipfileset prefix="${project.name}-${version}" file="${jar.dir}/${vtk-util-amibe.jar}"/>
+			<zipfileset prefix="${project.name}-${version}" file="${jar.dir}/${vtk-amibe.jar}"/>
 			<zipfileset prefix="${project.name}-${version}" file="${jcae.jar}"/>
 			<zipfileset prefix="${project.name}-${version}" file="${trove.jar}"/>
 		</zip>
