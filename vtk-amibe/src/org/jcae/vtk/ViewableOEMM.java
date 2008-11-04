@@ -166,20 +166,20 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 	}
 
 	@Override
-	public void highLight()
+	public void highlight()
 	{
 		Thread run = new Thread()
 		{
 			@Override
 			public void run()
 			{
-				ViewableOEMM.this.highLightThreaded();
+				ViewableOEMM.this.highlightThreaded();
 			}
 		};
 		run.start();
 	}
 
-	public void highLightThreaded()
+	public void highlightThreaded()
 	{
 		TIntHashSet selection;
 		rendering = true;

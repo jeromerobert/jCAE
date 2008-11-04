@@ -60,12 +60,12 @@ public class ViewableMesh extends Viewable
 		this.colorManager = colorManager;
 		this.colorManager.setColor(selectionColor);
 		
-		rootNode.setActorHighLightedCustomiser(new ActorHighLightedCustomiser()
+		rootNode.setActorHighlightedCustomiser(new ActorHighlightedCustomiser()
 		{
 			@Override
-			public void customiseActorHighLighted(vtkActor actor)
+			public void customiseActorHighlighted(vtkActor actor)
 			{
-				super.customiseActorHighLighted(actor);
+				super.customiseActorHighlighted(actor);
 				actor.GetProperty().EdgeVisibilityOn();
 				actor.SetEnableLighting(0);
 				actor.GetProperty().SetEdgeColor(0.4, 0.4, 0.4);

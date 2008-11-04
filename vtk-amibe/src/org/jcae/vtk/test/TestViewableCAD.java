@@ -49,7 +49,7 @@ public class TestViewableCAD implements SelectionListener, KeyListener {
 	public void selectionChanged(Viewable viewable)
 	{
 		System.out.println("DEBUG SELECTION EFFECTUEE");
-		viewable.highLight();
+		viewable.highlight();
 	}
 	public void keyReleased(KeyEvent e)
 	{

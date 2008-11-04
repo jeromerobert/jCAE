@@ -66,13 +66,13 @@ public class CADSelection implements EntitySelection, SelectionListener,
 		NodeSelectionManager.getDefault().addPropertyChangeListener(this);
 	}
 
-	public void unSelectAll()
+	public void unselectAll()
 	{
 		if(!selectionLock)
 		{
 			selectionLock = true;
 			selection = Collections.EMPTY_SET;
-			refreshHighLight();
+			refreshHighlight();
 			selectionLock = false;
 		}
 	}
@@ -102,7 +102,7 @@ public class CADSelection implements EntitySelection, SelectionListener,
 			if (interactors.add(caoInteractor))
 			{
 				caoInteractor.addSelectionListener(this);			
-				refreshHighLight();
+				refreshHighlight();
 			}
 	}
 
@@ -123,7 +123,7 @@ public class CADSelection implements EntitySelection, SelectionListener,
 		for (TopoDS_Shape shape : selection)
 			nodes.add(entity.getShapeFromImpl(shape).getNode());
 
-		refreshHighLight();
+		refreshHighlight();
 
 		SwingUtilities.invokeLater(new Runnable()
 		{
@@ -161,7 +161,7 @@ public class CADSelection implements EntitySelection, SelectionListener,
 	/**
 	 * Refresh HighLigh on all views
 	 */
-	private void refreshHighLight()
+	private void refreshHighlight()
 	{
 		/*SwingUtilities.invokeLater(new Runnable()
 		{
@@ -170,7 +170,7 @@ public class CADSelection implements EntitySelection, SelectionListener,
 		for (ViewableCAD interactor : interactors)
 		{
 			interactor.setSelection(selection);
-			interactor.highLight();
+			interactor.highlight();
 		}
 	/*}
 	});*/
@@ -232,7 +232,7 @@ public class CADSelection implements EntitySelection, SelectionListener,
 					selection.add(shape);
 			}
 
-			refreshHighLight();
+			refreshHighlight();
 			selectionLock = false;
 		}
 	}

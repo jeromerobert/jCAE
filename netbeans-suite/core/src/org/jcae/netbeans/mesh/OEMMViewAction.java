@@ -86,7 +86,7 @@ public final class OEMMViewAction extends CookieAction implements SelectionListe
 
 	public void selectionChanged(Viewable viewable)
 	{
-		viewable.highLight();
+		viewable.highlight();
 	}
 	
 	protected void performAction(Node[] activatedNodes)

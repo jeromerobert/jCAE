@@ -53,8 +53,8 @@ public class Node extends AbstractNode
 	private int nbrOfLines;
 	private int nbrOfPolys;
 	private vtkLookupTable table;
-	private vtkActor highLighter;
-	private vtkPolyDataMapper highLighterMapper;
+	private vtkActor highlighter;
+	private vtkPolyDataMapper highlighterMapper;
 	private ArrayList<ChildCreationListener> childCreationListeners = new ArrayList<ChildCreationListener>();
 
 	private static class NodeData extends LeafNode.DataProvider
@@ -270,26 +270,26 @@ public class Node extends AbstractNode
 	}
 	
 	@Override
-	public void applyActorHighLightedCustomiser()
+	public void applyActorHighlightedCustomiser()
 	{
-		if(highLighter != null)
-			getActorHighLightedCustomiser().customiseActorHighLighted(highLighter);
+		if(highlighter != null)
+			getActorHighlightedCustomiser().customiseActorHighlighted(highlighter);
 		for(AbstractNode child : children)
 		{
-			child.setActorHighLightedCustomiser(actorHighLightedCustomiser);
-			child.applyActorHighLightedCustomiser();
+			child.setActorHighlightedCustomiser(actorHighlightedCustomiser);
+			child.applyActorHighlightedCustomiser();
 		}
 	}
 
 	@Override
-	public void applyMapperHighLightedCustomiser()
+	public void applyMapperHighlightedCustomiser()
 	{
-		if(highLighterMapper != null)
-			getMapperHighLightedCustomiser().customiseMapperHighLighted(highLighterMapper);
+		if(highlighterMapper != null)
+			getMapperHighlightedCustomiser().customiseMapperHighlighted(highlighterMapper);
 		for(AbstractNode child : children)
 		{
-			child.setMapperHighLightedCustomiser(mapperHighLightedCustomiser);
-			child.applyMapperHighLightedCustomiser();
+			child.setMapperHighlightedCustomiser(mapperHighlightedCustomiser);
+			child.applyMapperHighlightedCustomiser();
 		}
 	}
 
@@ -330,7 +330,7 @@ public class Node extends AbstractNode
 				}
 			}
 		}
-		manageHighLight();
+		manageHighlight();
 
 		lastUpdate = System.nanoTime();
 	}
@@ -521,11 +521,11 @@ public class Node extends AbstractNode
 		offsetsLines = null;
 		offsetsPolys = null;
 		table = null;
-		if (highLighter != null)
+		if (highlighter != null)
 		{
-			fireActorDeleted(highLighter);
-			highLighter = null;
-			highLighterMapper = null;
+			fireActorDeleted(highlighter);
+			highlighter = null;
+			highlighterMapper = null;
 		}
 		for(AbstractNode n : getChildren())
 			n.deleteDatas();
@@ -536,7 +536,7 @@ public class Node extends AbstractNode
 		return nbrOfVertice + nbrOfLines + nbrOfPolys;
 	}
 
-	protected void manageHighLight()
+	protected void manageHighlight()
 	{
 		if (!isManager())
 			return;
@@ -575,89 +575,89 @@ public class Node extends AbstractNode
 
 		if (selection.isEmpty())
 		{
-			if (highLighter != null)
+			if (highlighter != null)
 			{
-				fireActorDeleted(highLighter);
-				highLighter = null;
+				fireActorDeleted(highlighter);
+				highlighter = null;
 			}
 		}
 		else
 		{
 			boolean actorCreated = false;
 			
-			if (highLighter == null)
+			if (highlighter == null)
 			{
 				actorCreated = true;
-				highLighter = new vtkActor();
-				highLighter.PickableOff();
+				highlighter = new vtkActor();
+				highlighter.PickableOff();
 				
-				getActorHighLightedCustomiser().customiseActorHighLighted(highLighter);
+				getActorHighlightedCustomiser().customiseActorHighlighted(highlighter);
 			}
 
-			highLighterMapper = new vtkPolyDataMapper();
-			highLighterMapper.ScalarVisibilityOff();
-			highLighterMapper.SetInput(selectInto(data, selection.toNativeArray()));
-			highLighter.SetMapper(highLighterMapper);
+			highlighterMapper = new vtkPolyDataMapper();
+			highlighterMapper.ScalarVisibilityOff();
+			highlighterMapper.SetInput(selectInto(data, selection.toNativeArray()));
+			highlighter.SetMapper(highlighterMapper);
 
-			getMapperHighLightedCustomiser().customiseMapperHighLighted(highLighterMapper);
+			getMapperHighlightedCustomiser().customiseMapperHighlighted(highlighterMapper);
 			
 			if (actorCreated)
 			{
-				fireActorCreated(highLighter);
+				fireActorCreated(highlighter);
 			}
 		}
 
 		if (lastUpdate <= selectionTime())
 		{
 			if (this.isSelected())
-				highLight();
+				highlight();
 			else
-				unHighLight();
+				unHighlight();
 		}
 	}
 
 	@Override
-	protected void highLight()
+	protected void highlight()
 	{
 		mapper.ScalarVisibilityOff();
-		if(highLighter != null)
-			highLighter.VisibilityOff();
+		if(highlighter != null)
+			highlighter.VisibilityOff();
 
-		super.highLight();
+		super.highlight();
 	}
 
 	@Override
-	protected void unHighLight()
+	protected void unHighlight()
 	{
 		mapper.ScalarVisibilityOn();
-		if(highLighter != null)
-			highLighter.VisibilityOn();
+		if(highlighter != null)
+			highlighter.VisibilityOn();
 		
-		super.unHighLight();
+		super.unHighlight();
 	}
 
-	public void highLightSelection()
+	public void highlightSelection()
 	{
 		if (!isManager())
 		{
 			for (AbstractNode child : children)
-				child.highLightSelection();
+				child.highlightSelection();
 			return;
 		}
 
 		boolean actorCreated = false;
 		
-		if (selectionHighLighter == null)
+		if (selectionHighlighter == null)
 		{
 			actorCreated = true;
-			selectionHighLighter = new vtkActor();
-			selectionHighLighter.PickableOff();
-			getActorSelectionCustomiser().customiseActorSelection(selectionHighLighter);
+			selectionHighlighter = new vtkActor();
+			selectionHighlighter.PickableOff();
+			getActorSelectionCustomiser().customiseActorSelection(selectionHighlighter);
 		}
 
-		selectionHighLighterMapper = new vtkPolyDataMapper();
-		selectionHighLighter.SetMapper(selectionHighLighterMapper);
-		selectionHighLighterMapper.ScalarVisibilityOff();
+		selectionHighlighterMapper = new vtkPolyDataMapper();
+		selectionHighlighter.SetMapper(selectionHighlighterMapper);
+		selectionHighlighterMapper.ScalarVisibilityOff();
 		
 		// Compute the list of cells to be selected
 		TIntArrayList selection = new TIntArrayList();
@@ -678,17 +678,17 @@ public class Node extends AbstractNode
 
 		if (selection.isEmpty())
 		{
-			unHighLightSelection();
+			unHighlightSelection();
 			return;
 		}
 
-		selectionHighLighterMapper.SetInput(selectInto(data, selection.toNativeArray()));
+		selectionHighlighterMapper.SetInput(selectInto(data, selection.toNativeArray()));
 		
-		getMapperSelectionCustomiser().customiseMapperSelection(selectionHighLighterMapper);
+		getMapperSelectionCustomiser().customiseMapperSelection(selectionHighlighterMapper);
 		
 		if(actorCreated)
 		{
-			fireActorCreated(selectionHighLighter);
+			fireActorCreated(selectionHighlighter);
 		}
 	}
 
@@ -783,12 +783,12 @@ public class Node extends AbstractNode
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder(super.toString());
-		if (highLighter != null)
+		if (highlighter != null)
 		{
-			sb.append(" highLighter@"+Integer.toHexString(highLighter.hashCode()));
-			if (highLighter.GetVisibility() != 0)
+			sb.append(" highlighter@"+Integer.toHexString(highlighter.hashCode()));
+			if (highlighter.GetVisibility() != 0)
 				sb.append(" visible");
-			if (highLighter.GetPickable() != 0)
+			if (highlighter.GetPickable() != 0)
 				sb.append(" pickable");
 		}
 		return sb.toString();

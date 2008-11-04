@@ -79,13 +79,13 @@ public abstract class Viewable extends MultiCanvas
 
 		addNode(root);
 		root.addChildCreationListener(this);
-		root.setActorHighLightedCustomiser(new ActorHighLightedCustomiser());
+		root.setActorHighlightedCustomiser(new ActorHighlightedCustomiser());
 		root.setActorSelectionCustomiser(new ActorSelectionCustomiser());
 	}
 
-	protected class ActorHighLightedCustomiser implements AbstractNode.ActorHighLightedCustomiser
+	protected class ActorHighlightedCustomiser implements AbstractNode.ActorHighlightedCustomiser
 	{
-		public void customiseActorHighLighted(vtkActor actor)
+		public void customiseActorHighlighted(vtkActor actor)
 		{
 			Utils.vtkPropertySetColor(actor.GetProperty(), selectionColor);
 		}
@@ -288,7 +288,7 @@ public abstract class Viewable extends MultiCanvas
 	public void unselectAll()
 	{
 		for (LeafNode leaf : selectionCell.keySet())
-			leaf.unSelectCells();
+			leaf.unselectCells();
 
 		selectionCell.clear();
 		selectionNode.clear();
@@ -308,10 +308,10 @@ public abstract class Viewable extends MultiCanvas
 		super.removeNode(node);
 	}
 
-	public void highLight()
+	public void highlight()
 	{
 		// Highlight selected cells
-		rootNode.highLightSelection();
+		rootNode.highlightSelection();
 		
 		// Tag nodes as being selected or not
 		for (LeafNode leaf : rootNode.getLeaves())
@@ -319,7 +319,7 @@ public abstract class Viewable extends MultiCanvas
 			if (selectionNode.contains(leaf))
 				leaf.select();
 			else
-				leaf.unSelect();
+				leaf.unselect();
 		}
 
 		// Refresh viewable

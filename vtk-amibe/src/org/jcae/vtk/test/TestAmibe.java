@@ -48,7 +48,7 @@ public class TestAmibe implements SelectionListener, KeyListener {
 	
 	public void selectionChanged(Viewable viewable)
 	{
-		viewable.highLight();
+		viewable.highlight();
 	}
 
 	public void keyReleased(KeyEvent e)

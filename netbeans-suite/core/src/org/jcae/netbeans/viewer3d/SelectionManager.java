@@ -83,7 +83,7 @@ public class SelectionManager {
 	{
 		if(!appendSelection)
 		{
-			unSelectAll();
+			unselectAll();
 		}
 	}
 
@@ -162,11 +162,11 @@ public class SelectionManager {
 		return selections.get(entity);
 	}
 	
-	public void unSelectAll()
+	public void unselectAll()
 	{
 		for(EntitySelection entitySelection : selections.values())
 		{
-			entitySelection.unSelectAll();
+			entitySelection.unselectAll();
 		}
 	}
 }

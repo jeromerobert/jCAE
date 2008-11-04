@@ -26,5 +26,5 @@ package org.jcae.netbeans.viewer3d;
  */
 public interface EntitySelection {
 	
-	public void unSelectAll();
+	public void unselectAll();
 }

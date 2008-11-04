@@ -277,7 +277,7 @@ public class Groups
 		
 		EntitySelection meshSelection = SelectionManager.getDefault().getEntitySelection(this);
 		if(meshSelection!=null)
-			meshSelection.unSelectAll();
+			meshSelection.unselectAll();
 		
 		return fuseGroup;
 	}

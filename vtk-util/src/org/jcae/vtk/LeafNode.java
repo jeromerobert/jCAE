@@ -272,7 +272,7 @@ public class LeafNode extends AbstractNode
 			LOGGER.finest("Refresh actor: "+lastUpdate+" <= "+modificationTime);
 			refreshActor();
 		}
-		manageHighLight();
+		manageHighlight();
 
 		lastUpdate = System.nanoTime();
 	}
@@ -306,32 +306,32 @@ public class LeafNode extends AbstractNode
 	}
 
 	@Override
-	public void applyActorHighLightedCustomiser()
+	public void applyActorHighlightedCustomiser()
 	{
 		if(isSelected() && actor != null)
-			getActorHighLightedCustomiser().customiseActorHighLighted(actor);
+			getActorHighlightedCustomiser().customiseActorHighlighted(actor);
 	}
 
 	@Override
-	public void applyMapperHighLightedCustomiser()
+	public void applyMapperHighlightedCustomiser()
 	{
 		if(isSelected() && mapper != null)
-			getMapperHighLightedCustomiser().customiseMapperHighLighted(mapper);
+			getMapperHighlightedCustomiser().customiseMapperHighlighted(mapper);
 	}
 	
-	protected void manageHighLight()
+	protected void manageHighlight()
 	{
 		if (selectionTime() <= lastUpdate)
 			return;
 
 		if (isSelected())
-			highLight();
+			highlight();
 		else
-			unHighLight();
+			unHighlight();
 	}
 
 	@Override
-	protected void unHighLight()
+	protected void unHighlight()
 	{
 		if (actor != null)
 		{
@@ -360,35 +360,35 @@ public class LeafNode extends AbstractNode
 		super.select();
 	}
 
-	public void highLightSelection()
+	public void highlightSelection()
 	{
 		if (!isManager())
 		{
-			if (selectionHighLighter != null)
-				unHighLightSelection();
+			if (selectionHighlighter != null)
+				unHighlightSelection();
  
 			return;
 		}
 
 		if (selection.isEmpty())
 		{
-			if (selectionHighLighter != null)
-				unHighLightSelection();
+			if (selectionHighlighter != null)
+				unHighlightSelection();
 			return;
 		}
 
-		if (selectionHighLighter == null)
+		if (selectionHighlighter == null)
 		{
-			selectionHighLighter = new vtkActor();
-			selectionHighLighter.PickableOff();
-			getActorSelectionCustomiser().customiseActorSelection(selectionHighLighter);
+			selectionHighlighter = new vtkActor();
+			selectionHighlighter.PickableOff();
+			getActorSelectionCustomiser().customiseActorSelection(selectionHighlighter);
 			
-			fireActorCreated(selectionHighLighter);
+			fireActorCreated(selectionHighlighter);
 		}
 
-		selectionHighLighterMapper = new vtkPolyDataMapper();
-		selectionHighLighter.SetMapper(selectionHighLighterMapper);
-		getMapperSelectionCustomiser().customiseMapperSelection(selectionHighLighterMapper);
+		selectionHighlighterMapper = new vtkPolyDataMapper();
+		selectionHighlighter.SetMapper(selectionHighlighterMapper);
+		getMapperSelectionCustomiser().customiseMapperSelection(selectionHighlighterMapper);
 
 		vtkSelection sel = new vtkSelection();
 		//sel.ReleaseDataFlagOn();
@@ -408,12 +408,12 @@ public class LeafNode extends AbstractNode
 		vtkPolyData dataFiltered = selFilter.GetOutput();
 		selFilter.Update();
 
-		selectionHighLighterMapper.SetInput(dataFiltered);
+		selectionHighlighterMapper.SetInput(dataFiltered);
 		
-		getMapperSelectionCustomiser().customiseMapperSelection(selectionHighLighterMapper);
+		getMapperSelectionCustomiser().customiseMapperSelection(selectionHighlighterMapper);
 	}
 
-	public void unSelectCells()
+	public void unselectCells()
 	{
 		selection.reset();
 	}

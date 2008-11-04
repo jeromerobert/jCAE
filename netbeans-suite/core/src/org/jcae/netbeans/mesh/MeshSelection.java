@@ -61,13 +61,13 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 		NodeSelectionManager.getDefault().addPropertyChangeListener(this);
 	}
 
-	public void unSelectAll()
+	public void unselectAll()
 	{
 		if(!selectionLock)
 		{
 			selectionLock = true;
 			selection = new TIntArrayList();
-			refreshHighLight();
+			refreshHighlight();
 			selectionLock = false;
 		}
 	}
@@ -97,7 +97,7 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 			if (interactors.add(meshInteractor))
 			{
 				meshInteractor.addSelectionListener(this);
-				//refreshHighLight();
+				//refreshHighlight();
 			}
 	}
 
@@ -115,7 +115,7 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 		selection = new TIntArrayList(((ViewableMesh) interactor).getSelection());
 		SelectionManager.getDefault().prepareSelection();
 
-		refreshHighLight();
+		refreshHighlight();
 
 		SwingUtilities.invokeLater(new Runnable()
 		{
@@ -186,14 +186,14 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 	;
 
 	/**
-	 * Refresh HighLigh on all views
+	 * Refresh highlight on all views
 	 */
-	private void refreshHighLight()
+	private void refreshHighlight()
 	{
 		for (ViewableMesh interactor : interactors)
 		{
 			interactor.setSelection(selection.toNativeArray());
-			interactor.highLight();
+			interactor.highlight();
 		}
 	}
 
@@ -235,7 +235,7 @@ public class MeshSelection implements EntitySelection, SelectionListener, Curren
 					selection.add(groupNode.getGroup().getId());
 			}
 
-			refreshHighLight();
+			refreshHighlight();
 
 			selectionLock = false;
 		}

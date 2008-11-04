@@ -74,7 +74,7 @@ import vtk.vtkPolyDataNormals;
  *
  * Nodes can be highlighted using the {@link #select} method.  A subset of
  * their underlying geometry can be highlighted using the {@link #setCellSelection}
- * method, which modifies {@link #selectionHighLighter} actor.
+ * method, which modifies {@link #selectionHighlighter} actor.
  *
  * Nodes can be declared as being not pickable to speed up picking, since non
  * pickable nodes are ignored.
@@ -112,8 +112,8 @@ public abstract class AbstractNode
 	protected vtkPolyData data;
 
 	/** Actor used for cell selection */
-	protected vtkActor selectionHighLighter;
-	protected vtkPolyDataMapper selectionHighLighterMapper;
+	protected vtkActor selectionHighlighter;
+	protected vtkPolyDataMapper selectionHighlighterMapper;
 
 	/** Last time this actor had been updated */
 	protected long lastUpdate;
@@ -143,9 +143,9 @@ public abstract class AbstractNode
 		void customiseActor(vtkActor actor);
 	}
 	
-	public interface ActorHighLightedCustomiser
+	public interface ActorHighlightedCustomiser
 	{
-		void customiseActorHighLighted(vtkActor actor);
+		void customiseActorHighlighted(vtkActor actor);
 	}
 	
 	public interface MapperCustomiser
@@ -153,9 +153,9 @@ public abstract class AbstractNode
 		void customiseMapper(vtkMapper mapper);
 	}
 	
-	public interface MapperHighLightedCustomiser
+	public interface MapperHighlightedCustomiser
 	{
-		void customiseMapperHighLighted(vtkMapper mapper);
+		void customiseMapperHighlighted(vtkMapper mapper);
 	}
 	
 	public interface ActorSelectionCustomiser
@@ -173,10 +173,10 @@ public abstract class AbstractNode
 		{
 			public void customiseActor(vtkActor actor) {}
 		};
-	public static ActorHighLightedCustomiser DEFAULT_ACTOR_HIGHLIGHTED_CUSTOMISER =
-		new ActorHighLightedCustomiser()
+	public static ActorHighlightedCustomiser DEFAULT_ACTOR_HIGHLIGHTED_CUSTOMISER =
+		new ActorHighlightedCustomiser()
 		{
-			public void customiseActorHighLighted(vtkActor actor) {}
+			public void customiseActorHighlighted(vtkActor actor) {}
 		};
 	public static MapperCustomiser DEFAULT_MAPPER_CUSTOMISER =
 		new MapperCustomiser()
@@ -187,10 +187,10 @@ public abstract class AbstractNode
 				mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffSetFactor(), Utils.getOffSetValue());
 			}
 		};
-	public static MapperHighLightedCustomiser DEFAULT_MAPPER_HIGHLIGHTED_CUSTOMISER =
-		new MapperHighLightedCustomiser()
+	public static MapperHighlightedCustomiser DEFAULT_MAPPER_HIGHLIGHTED_CUSTOMISER =
+		new MapperHighlightedCustomiser()
 		{
-			public void customiseMapperHighLighted(vtkMapper mapper) {}
+			public void customiseMapperHighlighted(vtkMapper mapper) {}
 		};
 	public static ActorSelectionCustomiser DEFAULT_ACTOR_SELECTION_CUSTOMISER =
 		new ActorSelectionCustomiser()
@@ -204,9 +204,9 @@ public abstract class AbstractNode
 		};
 	
 	protected ActorCustomiser actorCustomiser;
-	protected ActorHighLightedCustomiser actorHighLightedCustomiser;
+	protected ActorHighlightedCustomiser actorHighlightedCustomiser;
 	protected MapperCustomiser mapperCustomiser;
-	protected MapperHighLightedCustomiser mapperHighLightedCustomiser;
+	protected MapperHighlightedCustomiser mapperHighlightedCustomiser;
 	protected ActorSelectionCustomiser actorSelectionCustomiser;
 	protected MapperSelectionCustomiser mapperSelectionCustomiser;
 
@@ -303,9 +303,9 @@ public abstract class AbstractNode
 		this.actorCustomiser = actorCustomiser;
 	}
 
-	public void setActorHighLightedCustomiser(ActorHighLightedCustomiser actorHighLightedCustomiser)
+	public void setActorHighlightedCustomiser(ActorHighlightedCustomiser actorHighlightedCustomiser)
 	{
-		this.actorHighLightedCustomiser = actorHighLightedCustomiser;
+		this.actorHighlightedCustomiser = actorHighlightedCustomiser;
 	}
 
 	public void setMapperCustomiser(MapperCustomiser mapperCustomiser)
@@ -313,9 +313,9 @@ public abstract class AbstractNode
 		this.mapperCustomiser = mapperCustomiser;
 	}
 
-	public void setMapperHighLightedCustomiser(MapperHighLightedCustomiser mapperHighLightedCustomiser)
+	public void setMapperHighlightedCustomiser(MapperHighlightedCustomiser mapperHighlightedCustomiser)
 	{
-		this.mapperHighLightedCustomiser = mapperHighLightedCustomiser;
+		this.mapperHighlightedCustomiser = mapperHighlightedCustomiser;
 	}
 
 	public ActorSelectionCustomiser getActorSelectionCustomiser()
@@ -367,20 +367,20 @@ public abstract class AbstractNode
 			getMapperCustomiser().customiseMapper(mapper);
 	}
 	
-	public abstract void applyActorHighLightedCustomiser();
+	public abstract void applyActorHighlightedCustomiser();
 	
-	public abstract void applyMapperHighLightedCustomiser();
+	public abstract void applyMapperHighlightedCustomiser();
 	
 	public void applyActorSelectionCustomiser()
 	{
-		if(selectionHighLighter != null)
-			getActorSelectionCustomiser().customiseActorSelection(selectionHighLighter);
+		if(selectionHighlighter != null)
+			getActorSelectionCustomiser().customiseActorSelection(selectionHighlighter);
 	}
 	
 	public void applyMapperSelectionCustomiser()
 	{
-		if(selectionHighLighterMapper != null)
-			getMapperSelectionCustomiser().customiseMapperSelection(selectionHighLighterMapper);
+		if(selectionHighlighterMapper != null)
+			getMapperSelectionCustomiser().customiseMapperSelection(selectionHighlighterMapper);
 	}
 	
 	public ActorCustomiser getActorCustomiser()
@@ -396,17 +396,17 @@ public abstract class AbstractNode
 		return actorCustomiser;
 	}
 
-	public ActorHighLightedCustomiser getActorHighLightedCustomiser()
+	public ActorHighlightedCustomiser getActorHighlightedCustomiser()
 	{
-		if(actorHighLightedCustomiser != null)
-			return actorHighLightedCustomiser;
+		if(actorHighlightedCustomiser != null)
+			return actorHighlightedCustomiser;
 		if(parent != null)
-			actorHighLightedCustomiser = parent.getActorHighLightedCustomiser();
+			actorHighlightedCustomiser = parent.getActorHighlightedCustomiser();
 		
-		if(actorHighLightedCustomiser == null)
-			actorHighLightedCustomiser = DEFAULT_ACTOR_HIGHLIGHTED_CUSTOMISER;
+		if(actorHighlightedCustomiser == null)
+			actorHighlightedCustomiser = DEFAULT_ACTOR_HIGHLIGHTED_CUSTOMISER;
 		
-		return actorHighLightedCustomiser;
+		return actorHighlightedCustomiser;
 	}
 
 	public MapperCustomiser getMapperCustomiser()
@@ -422,17 +422,17 @@ public abstract class AbstractNode
 		return mapperCustomiser;
 	}
 
-	public MapperHighLightedCustomiser getMapperHighLightedCustomiser()
+	public MapperHighlightedCustomiser getMapperHighlightedCustomiser()
 	{
-		if(mapperHighLightedCustomiser != null)
-			return mapperHighLightedCustomiser;
+		if(mapperHighlightedCustomiser != null)
+			return mapperHighlightedCustomiser;
 		if(parent != null)
-			mapperHighLightedCustomiser = parent.getMapperHighLightedCustomiser();
+			mapperHighlightedCustomiser = parent.getMapperHighlightedCustomiser();
 		
-		if(mapperHighLightedCustomiser == null)
-			mapperHighLightedCustomiser = DEFAULT_MAPPER_HIGHLIGHTED_CUSTOMISER;
+		if(mapperHighlightedCustomiser == null)
+			mapperHighlightedCustomiser = DEFAULT_MAPPER_HIGHLIGHTED_CUSTOMISER;
 		
-		return mapperHighLightedCustomiser;
+		return mapperHighlightedCustomiser;
 	}
 
 	public boolean isVisible()
@@ -562,17 +562,17 @@ public abstract class AbstractNode
 		mapper = null;
 	}
 	
-	protected abstract void manageHighLight();
+	protected abstract void manageHighlight();
 			
-	protected void highLight()
+	protected void highlight()
 	{
 		assert actor != null;
 		
-		getActorHighLightedCustomiser().customiseActorHighLighted(actor);
-		getMapperHighLightedCustomiser().customiseMapperHighLighted(mapper);
+		getActorHighlightedCustomiser().customiseActorHighlighted(actor);
+		getMapperHighlightedCustomiser().customiseMapperHighlighted(mapper);
 	}
 	
-	protected void unHighLight()
+	protected void unHighlight()
 	{
 		assert actor != null;
 		
@@ -580,16 +580,16 @@ public abstract class AbstractNode
 		getMapperCustomiser().customiseMapper(mapper);
 	}
 	
-	public abstract void highLightSelection();
+	public abstract void highlightSelection();
 
-	protected void unHighLightSelection()
+	protected void unHighlightSelection()
 	{
-		if(selectionHighLighter == null)
+		if(selectionHighlighter == null)
 			return;
 		
-		fireActorDeleted(selectionHighLighter);
-		selectionHighLighter = null;
-		selectionHighLighterMapper = null;
+		fireActorDeleted(selectionHighlighter);
+		selectionHighlighter = null;
+		selectionHighlighterMapper = null;
 	}
 	
 	protected long selectionTime()
@@ -606,7 +606,7 @@ public abstract class AbstractNode
 		selectionTime = System.nanoTime();
 	}
 
-	public void unSelect()
+	public void unselect()
 	{
 		if(!selected)
 			return;
@@ -668,12 +668,12 @@ public abstract class AbstractNode
 			if (actor.GetPickable() != 0)
 				sb.append(" pickable");
 		}
-		if (selectionHighLighter != null)
+		if (selectionHighlighter != null)
 		{
-			sb.append(" selectionHighLighter@"+Integer.toHexString(selectionHighLighter.hashCode()));
-			if (selectionHighLighter.GetVisibility() != 0)
+			sb.append(" selectionHighlighter@"+Integer.toHexString(selectionHighlighter.hashCode()));
+			if (selectionHighlighter.GetVisibility() != 0)
 				sb.append(" visible");
-			if (selectionHighLighter.GetPickable() != 0)
+			if (selectionHighlighter.GetPickable() != 0)
 				sb.append(" pickable");
 		}
 		return sb.toString();
