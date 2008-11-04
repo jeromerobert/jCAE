@@ -16,7 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
- * (C) Copyright 2007, by EADS France
+ * (C) Copyright 2007-2008, by EADS France
  */
 
 package org.jcae.vtk;
@@ -27,8 +27,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
@@ -36,9 +34,8 @@ import org.xml.sax.SAXException;
  */
 public class AmibeProvider
 {	
-	private File directory;
-	private Document document;
-	private File jcae3d;
+	private final File directory;
+	private final Document document;
 	
 	public static Document parseXML(File file)
 		throws ParserConfigurationException, SAXException, IOException
@@ -62,7 +59,7 @@ public class AmibeProvider
 	public AmibeProvider(File directory) throws ParserConfigurationException, SAXException, IOException
 	{
 		this.directory=directory;
-		jcae3d = new File(directory, "jcae3d");
+		File jcae3d = new File(directory, "jcae3d");
 		document = parseXML(jcae3d);
 	}
 	

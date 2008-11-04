@@ -133,7 +133,7 @@ public class OCCMeshExtractor
 					newNodes[j++] = (float) values[1];
 					newNodes[j++] = (float) values[2];
 				}
-// Add last point
+				// Add last point
 				values = adaptator.value(range[1]);
 				newNodes[j++] = (float) values[0];
 				newNodes[j++] = (float) values[1];
@@ -183,12 +183,12 @@ public class OCCMeshExtractor
 			// Construct the indices
 			nbrOfLines = newNodes.length / 3 - 1;
 			lines = new int[nbrOfLines * 3];
-			int offSet = 0;
+			int offset = 0;
 			for (int i = 0; i < nbrOfLines;)
 			{
-				lines[offSet++] = 2;
-				lines[offSet++] = i++;
-				lines[offSet++] = i;
+				lines[offset++] = 2;
+				lines[offset++] = i++;
+				lines[offset++] = i;
 			}
 		}
 	}
@@ -303,13 +303,13 @@ public class OCCMeshExtractor
 			// Compute the indices
 			nbrOfPolys = itriangles.length / 3;
 			polys = new int[4 * nbrOfPolys];
-			int offSet = 0;
+			int offset = 0;
 			for (int i = 0; i < itriangles.length;)
 			{
-				polys[offSet++] = 3;
-				polys[offSet++] = itriangles[i++];
-				polys[offSet++] = itriangles[i++];
-				polys[offSet++] = itriangles[i++];
+				polys[offset++] = 3;
+				polys[offset++] = itriangles[i++];
+				polys[offset++] = itriangles[i++];
+				polys[offset++] = itriangles[i++];
 			}
 
 			newNodes = new float[dnodes.length];

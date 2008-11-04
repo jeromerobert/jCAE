@@ -46,7 +46,6 @@ import vtk.vtkPolyDataMapper;
  */
 public class ViewableOEMM extends Viewable implements MouseMotionListener
 {
-
 	private final OEMM oemm;
 	private final MeshVisuReader reader;
 	private final vtkActor octree;
@@ -76,30 +75,30 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 		vtkPolyData data = new vtkPolyData();
 
 		int[] quadsFilled = new int[nodes.length * 3];
-		int offSet = 0;
+		int offset = 0;
 		for (int i = 0; i < nodes.length - 1;)
 		{
 			int first = i / 3;
 			// First
-			quadsFilled[offSet++] = 2;
-			quadsFilled[offSet++] = i / 3;
+			quadsFilled[offset++] = 2;
+			quadsFilled[offset++] = i / 3;
 			++i;
-			quadsFilled[offSet++] = i / 3;
+			quadsFilled[offset++] = i / 3;
 			// Second
-			quadsFilled[offSet++] = 2;
-			quadsFilled[offSet++] = i / 3;
+			quadsFilled[offset++] = 2;
+			quadsFilled[offset++] = i / 3;
 			++i;
-			quadsFilled[offSet++] = i / 3;
+			quadsFilled[offset++] = i / 3;
 			// Three
-			quadsFilled[offSet++] = 2;
-			quadsFilled[offSet++] = i / 3;
+			quadsFilled[offset++] = 2;
+			quadsFilled[offset++] = i / 3;
 			++i;
-			quadsFilled[offSet++] = i / 3;
+			quadsFilled[offset++] = i / 3;
 			// Four
-			quadsFilled[offSet++] = 2;
-			quadsFilled[offSet++] = i / 3;
+			quadsFilled[offset++] = 2;
+			quadsFilled[offset++] = i / 3;
 			++i;
-			quadsFilled[offSet++] = first;
+			quadsFilled[offset++] = first;
 		}
 		data.SetPoints(points);
 		data.SetLines(Utils.createCells(quadsFilled.length / 3, quadsFilled));
@@ -112,14 +111,14 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 
 		int[] quadsLeaf = new int[5 * 6];
 
-		int offSetLeaf = 0;
+		int offsetLeaf = 0;
 		for (int i = 0; i < quadsLeaf.length;)
 		{
 			quadsLeaf[i++] = 4;
-			quadsLeaf[i++] = offSetLeaf++;
-			quadsLeaf[i++] = offSetLeaf++;
-			quadsLeaf[i++] = offSetLeaf++;
-			quadsLeaf[i++] = offSetLeaf++;
+			quadsLeaf[i++] = offsetLeaf++;
+			quadsLeaf[i++] = offsetLeaf++;
+			quadsLeaf[i++] = offsetLeaf++;
+			quadsLeaf[i++] = offsetLeaf++;
 		}
 
 		int ID = 0;

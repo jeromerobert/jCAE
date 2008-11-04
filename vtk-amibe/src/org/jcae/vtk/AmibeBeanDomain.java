@@ -35,10 +35,13 @@ import org.w3c.dom.Element;
 
 public class AmibeBeanDomain
 {
-	private Color color;
-	private int[] beam2;
-	private float[] nodes;
+	private final static Logger LOGGER=Logger.getLogger(AmibeBeanDomain.class.getName());
 
+	private final Color color;
+	private final int[] beam2;
+	private final float[] nodes;
+
+	
 	public AmibeBeanDomain(File directory, Element subMesh, Color color)
 		throws IOException
 	{
@@ -46,8 +49,8 @@ public class AmibeBeanDomain
 		beam2=readBeam2(subMesh, directory);
 		int[] nodesID=makeNodeIDArray(beam2);
 		nodes=readNodes(nodesID, directory, subMesh);
-		Logger.getLogger(AmibeBeanDomain.class.getName()).finest( "number of nodes=" + nodes.length +
-			"," + "number of beams="+beam2.length/2.0);
+		LOGGER.finest( "number of nodes=" + nodes.length +", " +
+			"number of beams="+beam2.length/2.0);
 		renumberArray(beam2, nodesID);		
 	}
 	
@@ -71,10 +74,8 @@ public class AmibeBeanDomain
 	private int[] makeNodeIDArray(int[] beam)
 	{		
 		TIntHashSet set=new TIntHashSet(beam.length/2);
-		for(int i=0; i<beam.length; i++)
-		{
-			set.add(beam[i]);
-		}
+		for(int index : beam)
+			set.add(index);
 		return set.toArray();
 	}
 	
@@ -125,11 +126,10 @@ public class AmibeBeanDomain
 	{
 		File f=getNodeFile(directory, subMesh);
 		// Open the file and then get a channel from the stream
-        FileInputStream fis = new FileInputStream(f);
-        FileChannel fc = fis.getChannel();
- 
-        // Get the file's size and then map it into memory
-        
+		FileInputStream fis = new FileInputStream(f);
+		FileChannel fc = fis.getChannel();
+
+		// Get the file's size and then map it into memory
 		float[] toReturn=new float[nodesID.length*3];
 		double[] tmp=new double[3];
 		ByteBuffer tmpbb = ByteBuffer.allocateDirect(3 * 8);		

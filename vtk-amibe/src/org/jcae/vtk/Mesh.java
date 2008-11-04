@@ -30,7 +30,7 @@ import java.util.Set;
  */
 public class Mesh
 {
-	private HashMap<Integer, LeafNode.DataProvider> groups;
+	private final HashMap<Integer, LeafNode.DataProvider> groups;
 	
 	int getNbOfGroups()
 	{

@@ -15,15 +15,14 @@ import org.xml.sax.SAXException;
  */
 public class AmibeOverlayProvider
 {
+	public static final String FREE_EDGE = "FreeEdges";
+	public static final String MULTI_EDGE = "MultiEdges";
+	public static final Color FREE_EDGE_COLOR = Color.RED;
+	public static final Color MULTI_EDGE_COLOR = Color.MAGENTA;
 
-	private File directory;
-	private File jcae3d;
-	public static String FREE_EDGE = "FreeEdges";
-	public static String MULTI_EDGE = "MultiEdges";
-	public static Color FREE_EDGE_COLOR = Color.RED;
-	public static Color MULTI_EDGE_COLOR = Color.MAGENTA;
-	private String flag;
-	private Element subMesh;
+	private final File directory;
+	private final String flag;
+	private final Element subMesh;
 
 	/**
 	 * @param directory The directory containing the jcae3d file
@@ -37,8 +36,9 @@ public class AmibeOverlayProvider
 	{
 		this.directory = directory;
 		this.flag = flag;
-		jcae3d = new File(directory, "jcae3d");
-		load();
+		File jcae3d = new File(directory, "jcae3d");
+		Document document = AmibeProvider.parseXML(jcae3d);
+		subMesh = getSubMeshElement(document);
 	}
 
 	private Element getSubMeshElement(Document document)
@@ -56,13 +56,6 @@ public class AmibeOverlayProvider
 			}
 		}
 		return null;
-	}
-
-	private void load()
-			throws ParserConfigurationException, SAXException, IOException
-	{
-		Document document = AmibeProvider.parseXML(jcae3d);
-		subMesh = getSubMeshElement(document);
 	}
 
 	public File getDirectory()

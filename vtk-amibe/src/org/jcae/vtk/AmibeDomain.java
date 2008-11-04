@@ -44,12 +44,13 @@ import org.w3c.dom.NodeList;
  */
 public class AmibeDomain
 {
+	private final static Logger LOGGER=Logger.getLogger(AmibeDomain.class.getName());
 
-	private File directory;
-	private Document document;
-	private int id;
-	private float[] nodes;
-	private int[] tria3;
+	private final File directory;
+	private final Document document;
+	private final int id;
+	private final float[] nodes;
+	private final int[] tria3;
 
 	/**
 	 * @param directory 
@@ -65,7 +66,8 @@ public class AmibeDomain
 		tria3 = readTria3();
 		int[] nodesID = makeNodeIDArray(tria3);
 		nodes = readNodes(nodesID);
-		Logger.getLogger(AmibeDomain.class.getName()).finest("number of nodes=" + nodes.length + ", number of tria3=" + tria3.length / 3.0);
+		LOGGER.finest("number of nodes=" + nodes.length +
+			", number of tria3=" + tria3.length / 3.0);
 		renumberArray(tria3, nodesID);
 	}
 
@@ -153,8 +155,8 @@ public class AmibeDomain
 	private int[] makeNodeIDArray(int[] trias)
 	{
 		TIntHashSet set = new TIntHashSet(trias.length / 2);
-		for (int i = 0; i < trias.length; i++)
-			set.add(trias[i]);
+		for (int index : trias)
+			set.add(index);
 		return set.toArray();
 	}
 

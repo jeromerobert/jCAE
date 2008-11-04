@@ -23,6 +23,7 @@ package org.jcae.vtk;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  *
@@ -30,14 +31,23 @@ import java.io.IOException;
  */
 public class AmibeOverlayToMesh
 {
-	private Mesh mesh;
+	private final static Logger LOGGER=Logger.getLogger(AmibeOverlayToMesh.class.getName());
+
+	private final Mesh mesh;
+
+	public AmibeOverlayToMesh(AmibeOverlayProvider provider)
+	{
+		mesh = new Mesh(1);
+		mesh.setGroup(0, new BeamData(provider, 0));
+	}
 
 	public Mesh getMesh()
 	{
 		return mesh;
 	}
 	
-	private static class BeamData extends LeafNode.DataProvider {
+	private static class BeamData extends LeafNode.DataProvider
+	{
 		private final AmibeOverlayProvider provider;
 		private final int id;
 		
@@ -52,22 +62,16 @@ public class AmibeOverlayToMesh
 		{
 			AmibeBeanDomain domain = null;
 			try {
-			domain = new AmibeBeanDomain(provider.getDirectory(), provider.getSubMesh(), Color.BLACK);
+				domain = new AmibeBeanDomain(provider.getDirectory(), provider.getSubMesh(), Color.BLACK);
 			}
 			catch(IOException e)
 			{
-				System.err.println("Cannot load node " + id + 
+				LOGGER.severe("Cannot load node " + id + 
 					" from file " + provider.getDirectory()
 					+ e.getLocalizedMessage());
 			}
-			super.setNodes(domain.getNodes());
-			super.setLines(Utils.createBeamCells(domain.getBeam2()));
+			setNodes(domain.getNodes());
+			setLines(Utils.createBeamCells(domain.getBeam2()));
 		}
-	}
-	
-	public AmibeOverlayToMesh(AmibeOverlayProvider provider)
-	{
-		mesh = new Mesh(1);
-		mesh.setGroup(0, new BeamData(provider, 0));
 	}
 }

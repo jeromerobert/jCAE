@@ -22,6 +22,7 @@ package org.jcae.vtk;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -33,6 +34,8 @@ import org.xml.sax.SAXException;
  */
 public class AmibeToMesh
 {
+	private final static Logger LOGGER=Logger.getLogger(AmibeToMesh.class.getName());
+
 	private final Mesh mesh;
 
 	public Mesh getMesh()
@@ -40,7 +43,8 @@ public class AmibeToMesh
 		return mesh;
 	}
 	
-	private static class GroupData extends LeafNode.DataProvider {
+	private static class GroupData extends LeafNode.DataProvider
+	{
 		private final AmibeProvider provider;
 		private final int id;
 		
@@ -55,16 +59,16 @@ public class AmibeToMesh
 		{
 			AmibeDomain domain = null;
 			try {
-			domain = new AmibeDomain(provider.getDirectory(), provider.getDocument(), id/*, Color.BLACK*/);
+				domain = new AmibeDomain(provider.getDirectory(), provider.getDocument(), id/*, Color.BLACK*/);
 			}
 			catch(IOException e)
 			{
-				System.err.println("Cannot load node " + id + 
+				LOGGER.severe("Cannot load node " + id + 
 					" from file " + provider.getDocument().getDocumentURI()
 					+ e.getLocalizedMessage());
 			}
 			// Nodes
-			super.setNodes(domain.getNodes());
+			setNodes(domain.getNodes());
 			
 			// Polys
 			nbrOfPolys = domain.getTria3().length / 3 + domain.getQuad4().length / 4;
@@ -72,22 +76,22 @@ public class AmibeToMesh
 			int[] triangles = domain.getTria3();
 			
 			this.polys = new int[4 * (triangles.length / 3) +  5 * (quads.length / 4)];
-			int offSet = 0;
+			int offset = 0;
 			for(int i = 0 ; i < triangles.length ; )
 			{
-				polys[offSet++] = 3;
-				polys[offSet++] = triangles[i++];
-				polys[offSet++] = triangles[i++];
-				polys[offSet++] = triangles[i++];
+				polys[offset++] = 3;
+				polys[offset++] = triangles[i++];
+				polys[offset++] = triangles[i++];
+				polys[offset++] = triangles[i++];
 			}
 			
 			for(int i = 0 ; i < quads.length ; )
 			{
-				polys[offSet++] = 4;
-				polys[offSet++] = quads[i++];
-				polys[offSet++] = quads[i++];
-				polys[offSet++] = quads[i++];
-				polys[offSet++] = quads[i++];
+				polys[offset++] = 4;
+				polys[offset++] = quads[i++];
+				polys[offset++] = quads[i++];
+				polys[offset++] = quads[i++];
+				polys[offset++] = quads[i++];
 			}
 		}
 	}

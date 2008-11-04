@@ -99,22 +99,22 @@ public class UNVToMesh
 			
 			int[] indices = new int[4 * (triangles.length / 3) +  5 * (quads.length / 4)];
 			
-			int offSet = 0;
+			int offset = 0;
 			for(int i = 0 ; i < triangles.length ; )
 			{
-				indices[offSet++] = 3;
-				indices[offSet++] = triangles[i++];
-				indices[offSet++] = triangles[i++];
-				indices[offSet++] = triangles[i++];
+				indices[offset++] = 3;
+				indices[offset++] = triangles[i++];
+				indices[offset++] = triangles[i++];
+				indices[offset++] = triangles[i++];
 			}
 			
 			for(int i = 0 ; i < quads.length ; )
 			{
-				indices[offSet++] = 4;
-				indices[offSet++] = triangles[i++];
-				indices[offSet++] = triangles[i++];
-				indices[offSet++] = triangles[i++];
-				indices[offSet++] = triangles[i++];
+				indices[offset++] = 4;
+				indices[offset++] = triangles[i++];
+				indices[offset++] = triangles[i++];
+				indices[offset++] = triangles[i++];
+				indices[offset++] = triangles[i++];
 			}
 			
 			GroupData groupData = new GroupData(nodes, indices, triangles.length / 3 + quads.length / 4);

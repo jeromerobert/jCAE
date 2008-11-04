@@ -58,7 +58,6 @@ import org.jcae.mesh.oemm.FakeNonReadVertex;
  */
 public class MeshVisuReader extends MeshReader
 {
-
 	private static Logger LOGGER = Logger.getLogger(MeshVisuReader.class.getName());
 
 	/**
@@ -67,12 +66,12 @@ public class MeshVisuReader extends MeshReader
 	class MeshVisu
 	{
 
-		public int[] edges = null;
-		public int[] freeEdges = null;
-		public float[] nodes = null; // The nodes of the other leaves duplicated
+		public int[] edges;
+		public int[] freeEdges;
+		public float[] nodes; // The nodes of the other leaves duplicated
 	}
 	// This contains the coordinates for the quads of the octree
-	private float[] nodesQuads = null;
+	private float[] nodesQuads;
 	private TIntObjectHashMap<MeshVisu> mapLeafToMeshVisu = new TIntObjectHashMap<MeshVisu>();
 
 	public MeshVisuReader(OEMM o)
@@ -142,7 +141,7 @@ public class MeshVisuReader extends MeshReader
 			buffer.clear();
 			DoubleBuffer bbD = buffer.asDoubleBuffer();
 			int remaining = current.vn;
-			int offSet = 0;
+			int offset = 0;
 			for (int nblock = (remaining * VERTEX_SIZE) / BUFFER_SIZE; nblock >= 0; --nblock)
 			{
 				buffer.rewind();
@@ -155,9 +154,9 @@ public class MeshVisuReader extends MeshReader
 				for (int nr = 0; nr < nf; nr++)
 				{
 					bbD.get(xyz);
-					mesh.nodes[offSet++] = (float) xyz[0];
-					mesh.nodes[offSet++] = (float) xyz[1];
-					mesh.nodes[offSet++] = (float) xyz[2];
+					mesh.nodes[offset++] = (float) xyz[0];
+					mesh.nodes[offset++] = (float) xyz[1];
+					mesh.nodes[offset++] = (float) xyz[2];
 				}
 			}
 			fc.close();
@@ -209,7 +208,7 @@ public class MeshVisuReader extends MeshReader
 					mesh.freeEdges = temp;
 			}
 
-			// Read the number of fake vertice
+			// Read the number of fake vertices
 			ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.SIZE / 8);
 			IntBuffer bufferInteger = byteBuffer.asIntBuffer();
 			byteBuffer.rewind();
@@ -217,7 +216,7 @@ public class MeshVisuReader extends MeshReader
 			bufferInteger.rewind();
 			int nbrOfFakeVerticeComponent = bufferInteger.get(0);
 
-			// Read fake vertice				
+			// Read fake vertices				
 			if (LOGGER.isLoggable(Level.INFO))
 				LOGGER.log(Level.INFO, "Reading " + nbrOfFakeVerticeComponent / 3 + " fake vertice from " + MeshVisuBuilder.getEdgesFile(oemm, current));
 			byteBuffer = ByteBuffer.allocate((Float.SIZE / 8) * nbrOfFakeVerticeComponent);
@@ -225,16 +224,16 @@ public class MeshVisuReader extends MeshReader
 			byteBuffer.rewind();
 			fc.read(byteBuffer);
 			bufferFloat.rewind();
-			float[] fakeVertice = new float[nbrOfFakeVerticeComponent];
-			bufferFloat.get(fakeVertice);
+			float[] fakeVertices = new float[nbrOfFakeVerticeComponent];
+			bufferFloat.get(fakeVertices);
 			
-			// Merging vertice and fake vertice
-			float[] vertice = mesh.nodes;
+			// Merging vertices and fake vertices
+			float[] vertices = mesh.nodes;
 			if (LOGGER.isLoggable(Level.INFO))
-				LOGGER.log(Level.INFO, "Merging" + fakeVertice.length + " into " + vertice.length + " vertice.");
-			mesh.nodes = new float[vertice.length + fakeVertice.length];
-			System.arraycopy(vertice, 0, mesh.nodes, 0, vertice.length);
-			System.arraycopy(fakeVertice, 0, mesh.nodes, vertice.length, fakeVertice.length);
+				LOGGER.log(Level.INFO, "Merging" + fakeVertices.length + " into " + vertices.length + " vertice.");
+			mesh.nodes = new float[vertices.length + fakeVertices.length];
+			System.arraycopy(vertices, 0, mesh.nodes, 0, vertices.length);
+			System.arraycopy(fakeVertices, 0, mesh.nodes, vertices.length, fakeVertices.length);
 			
 		}
 		catch (IOException ex)
@@ -283,7 +282,7 @@ public class MeshVisuReader extends MeshReader
 		// offset is the number of non fake vertices
 		// (because we will append later real and fake vertices)
 		int offset = mesh.getNodes().size() - getNbrOfFakeVertices();
-		LOGGER.info("offSet of fake vertices " + offset);
+		LOGGER.info("offset of fake vertices " + offset);
 		
 		// Compute offset
 		for (Triangle tri : mesh.getTriangles())
