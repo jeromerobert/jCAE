@@ -19,12 +19,10 @@
  */
 package org.jcae.vtk;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
-import vtk.vtkPolyData;
 
 /**
  * Represent a mesh
@@ -32,8 +30,6 @@ import vtk.vtkPolyData;
  */
 public class Mesh
 {
-	/*private float[] nodes;
-	private int[] beams;*/
 	private HashMap<Integer, LeafNode.DataProvider> groups;
 	
 	int getNbOfGroups()
@@ -41,14 +37,13 @@ public class Mesh
 		return groups.size();
 	}
 
-	Mesh(/*float[] nodes*/)
+	Mesh()
 	{
 		this(0);
 	}
 	
-	Mesh(/*float[] nodes, */int nbOfGroups)
+	Mesh(int nbOfGroups)
 	{
-		//this.nodes = nodes;
 		groups = new HashMap<Integer, LeafNode.DataProvider>(nbOfGroups);
 	}
 
@@ -65,26 +60,6 @@ public class Mesh
 		}
 	}
 
-	/*public int[] getBeams()
-	{
-		return beams;
-	}
-
-	public void setBeams(int[] beams)
-	{
-		this.beams = beams;
-	}*/
-	
-	/*float[] getNodes()
-	{
-		return this.nodes;
-	}
-	
-	void setNodes(float[] nodes)
-	{
-		this.nodes = nodes;
-	}*/
-	
 	LeafNode.DataProvider getGroup(int id)
 	{
 		return groups.get(id);
@@ -104,54 +79,4 @@ public class Mesh
 	{
 		return groups.entrySet();
 	}
-
-	/*float[] getNode(int index)
-	{
-		float[] toReturn = new float[3];
-		int indexNode = index * 3;
-
-		toReturn[0] = nodes[indexNode++];
-		toReturn[1] = nodes[indexNode++];
-		toReturn[2] = nodes[indexNode];
-
-		return toReturn;
-	}*/
-
-	/**
-	 * Give the ID of the triangles which are in the group ID group
-	 * @param group
-	 * @return
-	 */
-	/*int[] getGroupTriangles(int group)
-	{
-		return groups.get(group).triangles;
-	}
-
-	int[] getTrianglesGroups(int[] groups)
-	{
-		// Get the different triangles by group
-		ArrayList<int[]> trianglesByGroup = new ArrayList<int[]>(groups.length);
-		int nbOfTriangles = 0;
-		for (int group : groups)
-		{
-			trianglesByGroup.add(getGroupTriangles(group));
-			nbOfTriangles += trianglesByGroup.get(trianglesByGroup.size() - 1).length;
-		}
-
-		int[] triangles = new int[nbOfTriangles];
-		// Insert the different triangles in one array
-		int offset = 0;
-		for (int[] tri : trianglesByGroup)
-		{
-			System.arraycopy(tri, 0, triangles, offset, tri.length);
-			offset += tri.length;
-		}
-
-		return triangles;
-	}
-
-	int getNbOfNodes()
-	{
-		return nodes.length / 3;
-	}*/
 }

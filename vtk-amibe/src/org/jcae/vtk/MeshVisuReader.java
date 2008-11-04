@@ -23,6 +23,7 @@ import gnu.trove.TFloatArrayList;
 import gnu.trove.TIntArrayList;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntObjectHashMap;
+import gnu.trove.TIntObjectIterator;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -31,6 +32,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
@@ -41,7 +43,6 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.oemm.FakeNonReadVertex;
-import vtk.vtkGlobalJavaHash;
 
 /**
  * This class serves to two things :
@@ -58,7 +59,7 @@ import vtk.vtkGlobalJavaHash;
 public class MeshVisuReader extends MeshReader
 {
 
-	private static Logger logger = Logger.getLogger(MeshVisuReader.class.getName());
+	private static Logger LOGGER = Logger.getLogger(MeshVisuReader.class.getName());
 
 	/**
 	 *  This is the structure of the mesh of a leaf
@@ -69,7 +70,8 @@ public class MeshVisuReader extends MeshReader
 		public int[] edges = null;
 		public int[] freeEdges = null;
 		public float[] nodes = null; // The nodes of the other leaves duplicated
-	}	// This contains the coordinates for the quads of the octree
+	}
+	// This contains the coordinates for the quads of the octree
 	private float[] nodesQuads = null;
 	private TIntObjectHashMap<MeshVisu> mapLeafToMeshVisu = new TIntObjectHashMap<MeshVisu>();
 
@@ -91,7 +93,7 @@ public class MeshVisuReader extends MeshReader
 		return mapLeafToMeshVisu.keys();
 	}
 
-	public MeshVisu[] getMeshes()
+	MeshVisu[] getMeshes()
 	{
 		MeshVisu[] values = new MeshVisu[mapLeafToMeshVisu.size()];
 		mapLeafToMeshVisu.getValues(values);
@@ -101,15 +103,17 @@ public class MeshVisuReader extends MeshReader
 
 	public void buildMeshVisu(int[] leaves)
 	{
-		logger.fine("Loading nodes");
+		LOGGER.fine("Loading nodes");
 
 		TIntArrayList sortedLeaves = new TIntArrayList(leaves);
 		sortedLeaves.sort();
 
 		// Unload the mesh not used
 		for (int leaf : mapLeafToMeshVisu.keys())
+		{
 			if (sortedLeaves.binarySearch(leaf) < 0)
 				mapLeafToMeshVisu.remove(leaf);
+		}
 
 		for (int i = 0, n = sortedLeaves.size(); i < n; i++)
 		{
@@ -123,33 +127,15 @@ public class MeshVisuReader extends MeshReader
 			readEdges(mesh, oemm.leaves[leaf]);
 			mapLeafToMeshVisu.put(leaf, mesh);
 		}
-
-	// Build the vertices arrays and edges arrays
-		/*nodes = new float[vertMap.size() * 3];
-	int indexNode = 0;
-	TIntIntHashMap mapIndexToNodeIndex = new TIntIntHashMap(vertMap.size());
-	
-	TIntObjectIterator<float[]> iter = vertMap.iterator();
-	for (int j = 0; iter.hasNext(); ++j)
-	{
-	iter.advance();
-	mapIndexToNodeIndex.put(iter.key(), j);
-	
-	float[] coords = iter.value();
-	nodes[indexNode] = coords[0];
-	++indexNode;
-	nodes[indexNode] = coords[1];
-	++indexNode;
-	nodes[indexNode] = coords[2];
-	++indexNode;
-	}*/
 	}
 
 	private void readVerticesForVisu(MeshVisu mesh, OEMM.Node current)
 	{
 		try
 		{
-			logger.info("Reading " + current.vn + " vertices from " + getVerticesFile(oemm, current));
+			if (LOGGER.isLoggable(Level.INFO))
+				LOGGER.log(Level.INFO, "Reading " + current.vn + " vertices from " + getVerticesFile(oemm, current));
+			
 			double[] xyz = new double[3];
 			mesh.nodes = new float[current.vn * 3];
 			FileChannel fc = new FileInputStream(getVerticesFile(oemm, current)).getChannel();
@@ -175,9 +161,10 @@ public class MeshVisuReader extends MeshReader
 				}
 			}
 			fc.close();
-		} catch (IOException ex)
+		}
+		catch (IOException ex)
 		{
-			logger.severe("I/O error when reading file " + getVerticesFile(oemm, current));
+			LOGGER.severe("I/O error when reading file " + getVerticesFile(oemm, current));
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
@@ -192,12 +179,10 @@ public class MeshVisuReader extends MeshReader
 		{
 			FileChannel fc = new FileInputStream(MeshVisuBuilder.getEdgesFile(oemm, current)).getChannel();
 
+			String [] label = new String[] { "Reading edges", "Reading free edges" };
 			for (int i = 0; i < 2; ++i)
 			{
-				if (i == 0)
-					logger.info("READING EDGES");
-				else
-					logger.info("READING FREE EDGES");
+				LOGGER.info(label[i]);
 				// Read the number of edges components
 				ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.SIZE / 8);
 				IntBuffer bufferInteger = byteBuffer.asIntBuffer();
@@ -206,7 +191,8 @@ public class MeshVisuReader extends MeshReader
 				bufferInteger.rewind();
 				int nbrOfEdgesComponents = bufferInteger.get(0);
 
-				logger.info("Reading " + nbrOfEdgesComponents / 2 + " edges from " + MeshVisuBuilder.getEdgesFile(oemm, current));
+				if (LOGGER.isLoggable(Level.INFO))
+					LOGGER.log(Level.INFO, "Reading " + nbrOfEdgesComponents / 2 + " edges from " + MeshVisuBuilder.getEdgesFile(oemm, current));
 
 				// Read the edges
 				byteBuffer = ByteBuffer.allocate((Integer.SIZE / 8) * nbrOfEdgesComponents);
@@ -216,24 +202,6 @@ public class MeshVisuReader extends MeshReader
 				bufferInteger.rewind();
 				int[] temp = new int[nbrOfEdgesComponents];
 				bufferInteger.get(temp);
-
-				/*TIntArrayList edgesCleaned = new TIntArrayList(leafEdges.size());
-				System.out.println("edges not cleaned : " + leafEdges.size() / 2);
-				// Build the edges arrays removing edges with vertices not loaded
-				for (int j = 0; j < leafEdges.size(); j += 2)
-				{
-				int begin = leafEdges.getQuick(j);
-				int end = leafEdges.getQuick(j + 1);
-				
-				// One vertice is not loaded -> remove the edge
-				if (vertMap.get(begin) == null || vertMap.get(end) == null)
-				{
-				continue;
-				}
-				edgesCleaned.add(mapIndexToNodeIndex.get(begin));
-				edgesCleaned.add(mapIndexToNodeIndex.get(end));
-				}
-				System.out.println("edges cleaned : " + edgesCleaned.size() / 2);*/
 
 				if (i == 0)
 					mesh.edges = temp;
@@ -250,7 +218,8 @@ public class MeshVisuReader extends MeshReader
 			int nbrOfFakeVerticeComponent = bufferInteger.get(0);
 
 			// Read fake vertice				
-			logger.info("Reading " + nbrOfFakeVerticeComponent / 3 + " fake vertice from " + MeshVisuBuilder.getEdgesFile(oemm, current));
+			if (LOGGER.isLoggable(Level.INFO))
+				LOGGER.log(Level.INFO, "Reading " + nbrOfFakeVerticeComponent / 3 + " fake vertice from " + MeshVisuBuilder.getEdgesFile(oemm, current));
 			byteBuffer = ByteBuffer.allocate((Float.SIZE / 8) * nbrOfFakeVerticeComponent);
 			FloatBuffer bufferFloat = byteBuffer.asFloatBuffer();
 			byteBuffer.rewind();
@@ -261,22 +230,23 @@ public class MeshVisuReader extends MeshReader
 			
 			// Merging vertice and fake vertice
 			float[] vertice = mesh.nodes;
-			logger.info("Merging" + fakeVertice.length + " into " + vertice.length + " vertice.");
+			if (LOGGER.isLoggable(Level.INFO))
+				LOGGER.log(Level.INFO, "Merging" + fakeVertice.length + " into " + vertice.length + " vertice.");
 			mesh.nodes = new float[vertice.length + fakeVertice.length];
 			System.arraycopy(vertice, 0, mesh.nodes, 0, vertice.length);
 			System.arraycopy(fakeVertice, 0, mesh.nodes, vertice.length, fakeVertice.length);
 			
-		} catch (IOException ex)
+		}
+		catch (IOException ex)
 		{
-			logger.severe("I/O error when reading indexed file " + getTrianglesFile(oemm, current));
+			LOGGER.severe("I/O error when reading indexed file " + getTrianglesFile(oemm, current));
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
 	}
 
-	public MeshVisu buildPreparationMesh(int leave)
+	MeshVisu buildMeshVisu(int leaf)
 	{
-		//buildMeshes(new MeshTraitsBuilder())
 		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
 		mtb.addNodeList();
 		mtb.addTriangleList();
@@ -285,24 +255,21 @@ public class MeshVisuReader extends MeshReader
 		ttb.addHalfEdge();
 
 		mapNodeToNonReadVertexList = new TIntObjectHashMap<List<FakeNonReadVertex>>();
-		Mesh mesh = buildMesh(mtb, new TIntHashSet(new int[]
-				{
-					leave
-				}));
+		Mesh mesh = buildMesh(mtb, new TIntHashSet(new int[]{ leaf  }));
 
-		return constructEdges(mesh, leave);
+		return constructEdges(mesh, leaf);
 	}
 
-	private int getNbrOfFakeVertice()
+	private int getNbrOfFakeVertices()
 	{
-		List<?>[] fakeArrayVertice = new List<?>[mapNodeToNonReadVertexList.size()];
-		mapNodeToNonReadVertexList.getValues(fakeArrayVertice);
-		int nbrOfFakeVertice = 0;
+		int nbrOfFakeVertices = 0;
+		for (TIntObjectIterator<List<FakeNonReadVertex>> it = mapNodeToNonReadVertexList.iterator(); it.hasNext(); )
+		{
+			it.advance();
+			nbrOfFakeVertices += it.value().size();
+		}
 
-		for (List<?> vertice : fakeArrayVertice)
-			nbrOfFakeVertice += vertice.size();
-
-		return nbrOfFakeVertice;
+		return nbrOfFakeVertices;
 	}
 
 	private MeshVisu constructEdges(Mesh mesh, int leave)
@@ -313,12 +280,12 @@ public class MeshVisuReader extends MeshReader
 		// This is empiric allocation, in general freeEdges dont are very numerous
 		TIntArrayList freeEdges = new TIntArrayList(mesh.getTriangles().size());
 		TFloatArrayList nodes = new TFloatArrayList();
-		// The offSet is the number of non fake vertice (because we will append later the vertice and the fake vertice)
-		int offSet = mesh.getNodes().size() - getNbrOfFakeVertice();
-		logger.info("offSet of fake vertice : " + offSet);
+		// offset is the number of non fake vertices
+		// (because we will append later real and fake vertices)
+		int offset = mesh.getNodes().size() - getNbrOfFakeVertices();
+		LOGGER.info("offSet of fake vertices " + offset);
 		
-		// Compute the offSet manually
-		
+		// Compute offset
 		for (Triangle tri : mesh.getTriangles())
 		{
 			if (!tri.isReadable())
@@ -361,13 +328,13 @@ public class MeshVisuReader extends MeshReader
 
 					if (vertex instanceof FakeNonReadVertex)
 					{
-						ID = offSet;
+						ID = offset;
 						double[] coords = vertex.getUV();
 						assert coords.length == 3;
 						nodes.add((float) coords[0]);
 						nodes.add((float) coords[1]);
 						nodes.add((float) coords[2]);
-						++offSet;
+						++offset;
 					} else
 						ID = vertex.getLabel() - oemm.leaves[leave].minIndex;
 					fakeEdges.add(ID);
@@ -381,45 +348,4 @@ public class MeshVisuReader extends MeshReader
 
 		return toReturn;
 	}
-	/*
-	 * 	private static final int [] meshFreeEdges(Mesh mesh)
-	{
-	Collection<Triangle> triList = mesh.getTriangles();
-	int nrt = 0;
-	for (Triangle t: triList)
-	{
-	if (!t.isReadable())
-	continue;
-	AbstractHalfEdge e = t.getAbstractHalfEdge();
-	for (int j = 0; j < 3; j++)
-	{
-	e = e.next();
-	if (!e.origin().isWritable() && !e.destination().isWritable())
-	continue;
-	if (e.hasAttributes(AbstractHalfEdge.BOUNDARY))
-	nrt++;
-	}
-	}
-	int [] ret = new int[2*nrt];
-	int i = 0;
-	for (Triangle t: triList)
-	{
-	if (!t.isReadable())
-	continue;
-	AbstractHalfEdge e = t.getAbstractHalfEdge();
-	for (int j = 0; j < 3; j++)
-	{
-	e = e.next();
-	if (!e.origin().isWritable() && !e.destination().isWritable())
-	continue;
-	if (e.hasAttributes(AbstractHalfEdge.BOUNDARY))
-	{
-	ret[2*i] = e.origin().getLabel();
-	ret[2*i+1] = e.destination().getLabel();
-	i++;
-	}
-	}
-	}
-	return ret;
-	}*/
 }

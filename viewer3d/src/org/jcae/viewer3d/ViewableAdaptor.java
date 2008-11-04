@@ -65,12 +65,8 @@ public abstract class ViewableAdaptor implements Viewable {
 	
 	protected void fireSelectionChanged()
 	{
-		Iterator<SelectionListener> it = listeners.iterator();
-		while (it.hasNext())
-		{
-			SelectionListener s = it.next();
+		for(SelectionListener s : listeners)
 			s.selectionChanged();
-		}
 	}
 
 	/** Default implementation which does nothing */

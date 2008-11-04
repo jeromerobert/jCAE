@@ -233,7 +233,8 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 
 				TIntArrayList[] allEdges = new TIntArrayList[]
 				{
-					new TIntArrayList(meshes[i].edges.length), new TIntArrayList(meshes[i].freeEdges.length)
+					new TIntArrayList(meshes[i].edges.length),
+					new TIntArrayList(meshes[i].freeEdges.length)
 				};
 				
 				ArrayList<int[]> edgesMesh = new ArrayList<int[]>(2);
@@ -279,29 +280,6 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 			}
 		}
 		rendering = false;
-	}
-
-	private int findVerticeIndex(int[] leaves, int currentLeaf, int index, int[] offSets)
-	{
-		int minIndex = oemm.leaves[leaves[currentLeaf]].minIndex;
-		int maxIndex = oemm.leaves[leaves[currentLeaf]].maxIndex;
-		int leaf = -1;
-
-		// If the node is in the current leave
-		if (index >= minIndex && index < maxIndex)
-			leaf = currentLeaf;
-		else
-			for (int search = 0; search < leaves.length; ++search)
-				if (index >= oemm.leaves[leaves[search]].minIndex && index < oemm.leaves[leaves[search]].maxIndex)
-				{
-					leaf = search;
-					break;
-				}
-
-		if (leaf == -1)
-			throw new RuntimeException("The leaf of the vertice was not found !");
-
-		return index - oemm.leaves[leaves[leaf]].minIndex + offSets[leaf];
 	}
 
 	@Override
@@ -379,7 +357,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 
 		synchronized (selectionNode)
 		{
-			selectionNode = new HashSet<LeafNode>(this.leafVisibleMax);
+			selectionNode = new HashSet<LeafNode>(leafVisibleMax);
 			vtkIdTypeArray ids = null;
 			boolean full = false;
 
@@ -392,16 +370,15 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 					int originalCell = originalCellIDs.GetValue(id);
 					// If we have the leaf max number leave
 					selectionNode.add(octreeNode.getNode(originalCell));
-					if (selectionNode.size() >= this.leafVisibleMax)
+					if (selectionNode.size() >= leafVisibleMax)
 					{
 						full = true;
 						break;
 					}
-
 				}
 			}
 		}
-		this.selectionChanged = true;
+		selectionChanged = true;
 
 		manageSelection();
 	}

@@ -499,7 +499,7 @@ public abstract class AbstractNode
 	{
 		data = new vtkPolyData();
 		data.SetPoints(Utils.createPoints(dataProvider.getNodes()));
-		data.SetVerts(Utils.createCells(dataProvider.getNbrOfVertice(), dataProvider.getVertice()));
+		data.SetVerts(Utils.createCells(dataProvider.getNbrOfVertices(), dataProvider.getVertices()));
 		data.SetLines(Utils.createCells(dataProvider.getNbrOfLines(), dataProvider.getLines()));
 		data.SetPolys(Utils.createCells(dataProvider.getNbrOfPolys(), dataProvider.getPolys()));
 				
@@ -509,7 +509,7 @@ public abstract class AbstractNode
 			LOGGER.finest("Number of vertices : " + data.GetVerts().GetNumberOfCells());
 			LOGGER.finest("Number of lines : " + data.GetLines().GetNumberOfCells());
 			LOGGER.finest("Number of polys : " + data.GetPolys().GetNumberOfCells());
-			LOGGER.finest("vertice coherance : " + Utils.isMeshCoherent(dataProvider.getNodes(), dataProvider.getVertice()));
+			LOGGER.finest("vertice coherance : " + Utils.isMeshCoherent(dataProvider.getNodes(), dataProvider.getVertices()));
 			LOGGER.finest("line coherance : " + Utils.isMeshCoherent(dataProvider.getNodes(), dataProvider.getLines()));
 			LOGGER.finest("polys coherance : " + Utils.isMeshCoherent(dataProvider.getNodes(), dataProvider.getPolys()));
 		}

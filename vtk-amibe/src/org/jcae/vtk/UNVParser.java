@@ -179,7 +179,10 @@ public class UNVParser
 					readLoadSets(rd);
 					break;					
 				default:
-					while (!(line = rd.readLine()).equals("    -1"));
+					while (!(line = rd.readLine()).equals("    -1"))
+					{
+						// Do nothing
+					}
 			}
 		}
 		
@@ -189,7 +192,7 @@ public class UNVParser
 			surfaceGroupNames.add("");
 			int[] group=new int[surfaceIndices.size()];
 			int i = 0;
-			for(int val: elementSurfaceIndicesMap.getValues())
+			for(int val : elementSurfaceIndicesMap.getValues())
 			{
 				group[i]=val;
 				i++;
@@ -489,7 +492,8 @@ public class UNVParser
 		this.nodesCoordinates=coords.toNativeArray();
 	}
 
-	private double readUnit(BufferedReader rd) {
+	private double readUnit(BufferedReader rd)
+	{
 		double unit = 1.0;
 		String line;
 		try {

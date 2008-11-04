@@ -34,8 +34,8 @@ public class UNVToMesh
 {
 	private Mesh mesh;
 
-	private static class GroupData extends LeafNode.DataProvider {
-		
+	private static class GroupData extends LeafNode.DataProvider
+	{
 		GroupData(float[] nodes, int[] indices, int nbrOfCells)
 		{
 			setNodes(nodes);

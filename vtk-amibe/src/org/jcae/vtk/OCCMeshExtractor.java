@@ -62,7 +62,6 @@ public class OCCMeshExtractor
 
 		public VertexData(final TopoDS_Vertex vertex)
 		{
-			super();
 			this.vertex = vertex;
 		}
 		
@@ -78,11 +77,11 @@ public class OCCMeshExtractor
 			
 			setNodes(newNodes);
 
-			vertice = new int[2];
-			vertice[0] = 1;
-			vertice[1] = 0;
+			vertices = new int[2];
+			vertices[0] = 1;
+			vertices[1] = 0;
 			
-			nbrOfVertice = 1;
+			nbrOfVertices = 1;
 		}
 	}
 
@@ -92,7 +91,6 @@ public class OCCMeshExtractor
 
 		public EdgeData(final TopoDS_Edge edge)
 		{
-			super();
 			this.edge = edge;
 		}
 		
@@ -140,7 +138,8 @@ public class OCCMeshExtractor
 				newNodes[j++] = (float) values[0];
 				newNodes[j++] = (float) values[1];
 				newNodes[j++] = (float) values[2];
-			} else if (!BRep_Tool.degenerated(edge))
+			}
+			else if (!BRep_Tool.degenerated(edge))
 			{
 				// So, there is no curve, and the edge is not degenerated?
 				// => draw lines between the vertices and ignore curvature  
@@ -168,7 +167,6 @@ public class OCCMeshExtractor
 					newNodes[j++] = (float) f[1];
 					newNodes[j++] = (float) f[2];
 				}
-
 			}
 
 			if(newNodes != null)
@@ -178,7 +176,7 @@ public class OCCMeshExtractor
 			
 			if (newNodes == null || newNodes.length == 0)
 			{
-				this.unLoad();
+				unLoad();
 				return;
 			}
 
@@ -220,9 +218,7 @@ public class OCCMeshExtractor
 			loc.transformation().getValues(matrix);
 			Matrix4d m4d = new Matrix4d(matrix);
 			Point3d p3d = new Point3d();
-			for (int i = 0; i <
-					src.length; i +=
-							3)
+			for (int i = 0; i < src.length; i += 3)
 			{
 				p3d.x = src[i + 0];
 				p3d.y = src[i + 1];
@@ -232,7 +228,6 @@ public class OCCMeshExtractor
 				dst[i + 1] = (float) p3d.y;
 				dst[i + 2] = (float) p3d.z;
 			}
-
 		}
 
 		/**
@@ -247,8 +242,8 @@ public class OCCMeshExtractor
 			BRepBndLib.add(shape, box);
 			double[] bbox = box.get();
 			double minBoundingBox =
-					Math.max(Math.max(bbox[3] - bbox[0], bbox[4] - bbox[1]), bbox[5] -
-					bbox[2]);
+					Math.max(Math.max(bbox[3] - bbox[0],bbox[4] - bbox[1]),
+						bbox[5] - bbox[2]);
 			return (float) minBoundingBox;
 		}
 
@@ -257,12 +252,9 @@ public class OCCMeshExtractor
 		 */
 		static private void reverseMesh(int[] itriangles)
 		{
-			int tmp;
-			for (int i = 0; i <
-					itriangles.length; i +=
-							3)
+			for (int i = 0; i < itriangles.length; i += 3)
 			{
-				tmp = itriangles[i];
+				int tmp = itriangles[i];
 				itriangles[i] = itriangles[i + 1];
 				itriangles[i + 1] = tmp;
 			}
@@ -280,7 +272,7 @@ public class OCCMeshExtractor
 			float[] newNodes = null;
 			//try to mesh with error, if the geometry is too dirty try error/10
 			// and then error/100
-			while ((pt == null) & (iter < 3))
+			while ((pt == null) && (iter < 3))
 			{
 				new BRepMesh_IncrementalMesh(face, error, false);
 				pt = BRep_Tool.triangulation(face, loc);
@@ -323,9 +315,10 @@ public class OCCMeshExtractor
 			newNodes = new float[dnodes.length];
 
 			if (loc.isIdentity())
-				for (int j = 0; j <
-						dnodes.length; j++)
+			{
+				for (int j = 0; j < dnodes.length; j++)
 					newNodes[j] = (float) dnodes[j];
+			}
 			else
 				transformMesh(loc, dnodes, newNodes);
 
@@ -370,6 +363,7 @@ public class OCCMeshExtractor
 				System.err.println("Can not compute the Geom_Surface of " + face);
 		}
 	}
+	
 	private final TopoDS_Shape shape;
 
 	/**
@@ -391,15 +385,15 @@ public class OCCMeshExtractor
 		this(Utilities.readFile(fileName));
 	}
 
-	public Collection<TopoDS_Vertex> getVertice()
+	public Collection<TopoDS_Vertex> getVertices()
 	{
 		TopExp_Explorer explorer = new TopExp_Explorer();
-		HashSet<TopoDS_Vertex> vertice = new HashSet<TopoDS_Vertex>();
+		HashSet<TopoDS_Vertex> vertices = new HashSet<TopoDS_Vertex>();
 
 		for (explorer.init(shape, TopAbs_ShapeEnum.VERTEX); explorer.more(); explorer.next())
-			vertice.add((TopoDS_Vertex) explorer.current());
+			vertices.add((TopoDS_Vertex) explorer.current());
 
-		return vertice;
+		return vertices;
 	}
 
 	public Collection<TopoDS_Face> getFaces()
@@ -417,20 +411,21 @@ public class OCCMeshExtractor
 	 * Get only free edges
 	 * @return
 	 */
-	public Collection<TopoDS_Edge> getFreeEdges() {
-			ShapeAnalysis_FreeBounds safb = new ShapeAnalysis_FreeBounds(shape);
-			TopoDS_Compound closedWires = safb.getClosedWires();
-			
-			if(closedWires == null)
-				return Collections.EMPTY_SET;
-			
-			TopExp_Explorer explorer = new TopExp_Explorer();
-			HashSet<TopoDS_Edge> freeEdges = new HashSet<TopoDS_Edge>();
-			
-			for(explorer.init(closedWires, TopAbs_ShapeEnum.EDGE); explorer.more() ; explorer.next())
-				freeEdges.add((TopoDS_Edge)explorer.current());
-			
-			return freeEdges;
+	public Collection<TopoDS_Edge> getFreeEdges()
+	{
+		ShapeAnalysis_FreeBounds safb = new ShapeAnalysis_FreeBounds(shape);
+		TopoDS_Compound closedWires = safb.getClosedWires();
+
+		if(closedWires == null)
+			return Collections.EMPTY_SET;
+
+		TopExp_Explorer explorer = new TopExp_Explorer();
+		HashSet<TopoDS_Edge> freeEdges = new HashSet<TopoDS_Edge>();
+
+		for(explorer.init(closedWires, TopAbs_ShapeEnum.EDGE); explorer.more() ; explorer.next())
+			freeEdges.add((TopoDS_Edge)explorer.current());
+
+		return freeEdges;
 	}
 	
 	/**

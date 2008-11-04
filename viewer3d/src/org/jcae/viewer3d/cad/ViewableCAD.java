@@ -291,7 +291,8 @@ public class ViewableCAD extends ViewableAdaptor
 	}
 	
 	public void setSelectionMode(short mode,boolean unselectAll){
-		if(unselectAll) unselectAll();
+		if(unselectAll)
+			unselectAll();
 		setSelectionMode(mode);
 	}
 	
@@ -337,19 +338,19 @@ public class ViewableCAD extends ViewableAdaptor
 			return false;
 		
 		Object o=geom.getUserData();
-		if((o instanceof FacePickingInfo)&(selectionMode==FACE_SELECTION))
+		if((o instanceof FacePickingInfo)&&(selectionMode==FACE_SELECTION))
 		{
 			FacePickingInfo fpi=(FacePickingInfo) o;
 			setFaceSelected(fpi, checkToSelect(selectedFaces, fpi, previousSel));
 			return true;
 		}
-		else if((o instanceof EdgePickingInfo)&(selectionMode==EDGE_SELECTION))
+		else if((o instanceof EdgePickingInfo)&&(selectionMode==EDGE_SELECTION))
 		{
 			EdgePickingInfo epi=(EdgePickingInfo) o;			
 			setEdgeSelected(epi, checkToSelect(selectedEdges, epi, previousSel));
 			return true;
 		}
-		else if((o instanceof VertexPickingInfo)&(selectionMode==VERTEX_SELECTION))
+		else if((o instanceof VertexPickingInfo)&&(selectionMode==VERTEX_SELECTION))
 		{
 			VertexPickingInfo epi=(VertexPickingInfo) o;
 			setVertexSelected(epi, checkToSelect(selectedVertices, epi, previousSel));
@@ -393,7 +394,7 @@ public class ViewableCAD extends ViewableAdaptor
 	@Override
 	public void pickArea(PickInfo[] result, Bounds bound) 
 	{
-		HashSet<Geometry> as = new HashSet();
+		HashSet<Geometry> as = new HashSet<Geometry>();
 		for(PickInfo pickInfo: result)
 		{
 			Node n = pickInfo.getNode();
@@ -407,13 +408,15 @@ public class ViewableCAD extends ViewableAdaptor
 		//like this it will only work for faces
 		if(selectionAction == SELECTION_INTERSECT)
 		{
-			previousSelection=new HashSet(selectedFaces);
+			previousSelection=new HashSet<Integer>(selectedFaces);
 			unselectAll();
 		}
 		boolean b = false;
 		for(Geometry a: as)
+		{
 			if(pick(a, previousSelection))
 				b = true;
+		}
 		
 		if(b)
 			fireSelectionChanged();
@@ -422,11 +425,9 @@ public class ViewableCAD extends ViewableAdaptor
 	static private int[] integerCollectionToArray(Collection<Integer> collection)
 	{
 		int[] toReturn=new int[collection.size()];
-		Iterator<Integer> it=collection.iterator();
 		int i=0;
-		while(it.hasNext())
+		for(Integer n : collection)
 		{
-			Integer n=it.next();
 			toReturn[i]=n.intValue();
 			i++;
 		}
@@ -449,10 +450,10 @@ public class ViewableCAD extends ViewableAdaptor
 	 */
 	public void highlightFace(int faceID, boolean status,boolean fireListeners)
 	{
-		
 		FacePickingInfo fpi=facesInfo.get(new Integer(faceID));
 		setFaceSelected(fpi, status);
-		if(fireListeners) fireSelectionChanged();
+		if(fireListeners)
+			fireSelectionChanged();
 		
 	}
 	
@@ -473,9 +474,10 @@ public class ViewableCAD extends ViewableAdaptor
 	 */
 	public void highlightEdge(int edgeID, boolean status,boolean fireListeners)
 	{
-			EdgePickingInfo epi=edgesInfo.get(new Integer(edgeID));
-			setEdgeSelected(epi, status);
-			if(fireListeners) fireSelectionChanged();
+		EdgePickingInfo epi=edgesInfo.get(new Integer(edgeID));
+		setEdgeSelected(epi, status);
+		if(fireListeners)
+			fireSelectionChanged();
 	}
 	
 	public void highlightVertex(int vertexID, boolean status)
@@ -487,7 +489,8 @@ public class ViewableCAD extends ViewableAdaptor
 	{
 		VertexPickingInfo epi=verticesInfo.get(new Integer(vertexID));
 		setVertexSelected(epi, status);
-		if(fireListeners) fireSelectionChanged();
+		if(fireListeners)
+			fireSelectionChanged();
 	}
 	
 	protected void setFaceSelected(FacePickingInfo fpi, boolean selected)
@@ -550,9 +553,8 @@ public class ViewableCAD extends ViewableAdaptor
 	protected void fireSelectionChanged()
 	{
 		
-			for(int i=0; i<selectionListeners.size(); i++)
+			for(Object alistener : selectionListeners)
 			{
-				Object alistener=selectionListeners.get(i);
 				if(alistener instanceof CADSelectionListener){
 					CADSelectionListener cadlistener=(CADSelectionListener) alistener;
 					CADSelection[] cs=new CADSelection[]{new CADSelection(0,
@@ -641,8 +643,8 @@ public class ViewableCAD extends ViewableAdaptor
 			gi.setCoordinates(fm.getNodes());
 			gi.setCoordinateIndices(fm.getMesh());			
 			NormalGenerator ng = new NormalGenerator();
-	        ng.generateNormals(gi);	        
-	        Stripifier st = new Stripifier();
+			ng.generateNormals(gi);	        
+			Stripifier st = new Stripifier();
 			st.stripify(gi);
 	        
 			GeometryArray g=gi.getGeometryArray();

@@ -176,7 +176,9 @@ public class ViewableMesh extends Viewable
 	{
 		selectionNode.clear();
 		for (int id : selection)
+		{
 			if (groupsLoaded.contains(id))
 				selectionNode.add(groupIDToNode.get(id));
+		}
 	}
 }

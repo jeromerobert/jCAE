@@ -44,9 +44,9 @@ import org.jcae.mesh.oemm.TraversalProcedure;
  * arrayFreeEdgesIndices
  * @author Julian Ibarz
  */
-public class MeshVisuBuilder extends TraversalProcedure {
-
-	private static Logger logger=Logger.getLogger(MeshVisuBuilder.class.getName());	
+public class MeshVisuBuilder extends TraversalProcedure
+{
+	private static Logger LOGGER=Logger.getLogger(MeshVisuBuilder.class.getName());	
 	
 	@Override
 	public int action(OEMM o, Node c, int octant, int visit)
@@ -54,13 +54,13 @@ public class MeshVisuBuilder extends TraversalProcedure {
 		if(visit != TraversalProcedure.LEAF)
 			return TraversalProcedure.OK;
 		
-		System.out.println("Making octant : " + octant);
+		LOGGER.config("Making octant " + octant);
 		
 		MeshVisuReader reader = new MeshVisuReader(o);
 		
-		logger.info("Building leaf : " + c.leafIndex);
-		writeEdges(o, c, reader.buildPreparationMesh(c.leafIndex));
-		logger.info("End Building leaf : " + c.leafIndex);
+		LOGGER.config("Building leaf " + c.leafIndex);
+		writeEdges(o, c, reader.buildMeshVisu(c.leafIndex));
+		LOGGER.config("End Building leaf " + c.leafIndex);
 		
 		return TraversalProcedure.OK;
 	}
@@ -77,7 +77,7 @@ public class MeshVisuBuilder extends TraversalProcedure {
 			fc = new FileOutputStream(getEdgesFile(o, node)).getChannel();
 		} catch (FileNotFoundException e1)
 		{
-			logger.severe("I/O error when reading indexed file " + getEdgesFile(o, node));
+			LOGGER.severe("I/O error when reading indexed file " + getEdgesFile(o, node));
 			e1.printStackTrace();
 			throw new RuntimeException(e1);
 		}
@@ -89,7 +89,7 @@ public class MeshVisuBuilder extends TraversalProcedure {
 
 			for (int[] edges : allEdges)
 			{
-				logger.info("Writing " + (edges.length/2) + "edges.");
+				LOGGER.info("Writing " + (edges.length/2) + "edges.");
 				ByteBuffer bb = ByteBuffer.allocate(Integer.SIZE / 8);
 				IntBuffer bufferInteger = bb.asIntBuffer();
 				bufferInteger.rewind();
@@ -105,7 +105,7 @@ public class MeshVisuBuilder extends TraversalProcedure {
 			}
 			
 			// Writing fake vertices
-			logger.info("Writing " + (mesh.nodes.length / 3) +" fake vertice.");
+			LOGGER.info("Writing " + (mesh.nodes.length / 3) +" fake vertice.");
 			// Writing the size
 			ByteBuffer bb = ByteBuffer.allocate(Integer.SIZE / 8);
 			IntBuffer bufferInteger = bb.asIntBuffer();
@@ -120,20 +120,23 @@ public class MeshVisuBuilder extends TraversalProcedure {
 			bufferFloat.put(mesh.nodes);
 			bb.rewind();
 			fc.write(bb);
-		} catch (IOException e)
+		}
+		catch (IOException e)
 		{
-			logger.log(Level.SEVERE, "Error in saving to " + getEdgesFile(o, node), e);
+			LOGGER.log(Level.SEVERE, "Error in saving to " + getEdgesFile(o, node), e);
 			e.printStackTrace();
 			throw new RuntimeException(e);
-		} finally
+		}
+		finally
 		{
 			try
 			{
 				fc.close();
-			} catch (IOException e)
+			}
+			catch (IOException e)
 			{
 				//ignore this
-				}
+			}
 		}
 	}
 }

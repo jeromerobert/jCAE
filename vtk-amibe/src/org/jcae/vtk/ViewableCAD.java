@@ -45,30 +45,32 @@ public class ViewableCAD extends Viewable
 	private final Color vertexColor = Color.BLUE;
 	private Color edgeColor = Color.WHITE;
 	private Color freeEdgeColor = Color.GREEN;
-	private final HashMap<TopoDS_Vertex, LeafNode> topoToNodeVertice = new HashMap<TopoDS_Vertex, LeafNode>();
+	private final HashMap<TopoDS_Vertex, LeafNode> topoToNodeVertex = new HashMap<TopoDS_Vertex, LeafNode>();
 	private final HashMap<TopoDS_Edge, LeafNode> topoToNodeEdge = new HashMap<TopoDS_Edge, LeafNode>();
 	private final HashMap<TopoDS_Face, LeafNode> topoToNodeFaceFront = new HashMap<TopoDS_Face, LeafNode>();
 	private final HashMap<TopoDS_Face, LeafNode> topoToNodeFaceBack = new HashMap<TopoDS_Face, LeafNode>();
 	private final HashMap<LeafNode, TopoDS_Shape> nodeToTopo = new HashMap<LeafNode, TopoDS_Shape>();
 	private Node faces = null;
 	private Node edges = null;
-	private Node vertice = null;
+	private Node vertices = null;
 	private int vertexSize = 4;
 	private int edgeSize = 2;
 	private boolean onlyFreeEdges = false;
 	
 	public enum ShapeType
 	{
-		VERTEX, EDGE, FACE
+		VERTEX,
+		EDGE,
+		FACE
 	}
 			
 	private ViewableCAD(OCCMeshExtractor meshExtractor, boolean onlyFreeEdges)
 	{
-		super(new Scene(), new Node(null));
 		this.meshExtractor = meshExtractor;
 		this.onlyFreeEdges = onlyFreeEdges;
 		
 		computeNodes();
+		rootNode.refresh();
 		setShapeTypeSelection(shapeTypeSelection);
 	}
 
@@ -138,18 +140,17 @@ public class ViewableCAD extends Viewable
 	
 	private void computeNodes()
 	{
-		vertice = new Node(rootNode);
-		vertice.setManager(true);
-		vertice.setActorCustomiser(new AbstractNode.ActorCustomiser()
+		vertices = new Node(rootNode);
+		vertices.setManager(true);
+		vertices.setActorCustomiser(new AbstractNode.ActorCustomiser()
 		{
-
 			public void customiseActor(vtkActor actor)
 			{
 				actor.GetProperty().SetPointSize(vertexSize);			
 			}
 		});
 		
-		vertice.setActorHighlightedCustomiser(new Viewable.ActorHighlightedCustomiser()
+		vertices.setActorHighlightedCustomiser(new Viewable.ActorHighlightedCustomiser()
 		{
 			@Override
 			public void customiseActorHighlighted(vtkActor actor)
@@ -173,7 +174,6 @@ public class ViewableCAD extends Viewable
 		faces = new Node(rootNode);
 		faces.setActorCustomiser(new AbstractNode.ActorCustomiser()
 		{
-
 			public void customiseActor(vtkActor actor)
 			{
 				actor.GetProperty().BackfaceCullingOn();
@@ -186,8 +186,8 @@ public class ViewableCAD extends Viewable
 		facesBack.setManager(true);
 
 		// Add the edges
-		Collection freeEdges = meshExtractor.getFreeEdges();
-		for (TopoDS_Edge edge : this.meshExtractor.getEdges())
+		Collection<TopoDS_Edge> freeEdges = meshExtractor.getFreeEdges();
+		for (TopoDS_Edge edge : meshExtractor.getEdges())
 		{
 			Color color = edgeColor;
 			if (freeEdges.contains(edge))
@@ -202,16 +202,16 @@ public class ViewableCAD extends Viewable
 
 		if (!onlyFreeEdges)
 		{
-			// Add vertice
-			for (TopoDS_Vertex vertex : this.meshExtractor.getVertice())
+			// Add vertices
+			for (TopoDS_Vertex vertex : meshExtractor.getVertices())
 			{
-				LeafNode vertexNode = new LeafNode(vertice, new OCCMeshExtractor.VertexData(vertex), this.vertexColor);				
-				topoToNodeVertice.put(vertex, vertexNode);
+				LeafNode vertexNode = new LeafNode(vertices, new OCCMeshExtractor.VertexData(vertex), this.vertexColor);				
+				topoToNodeVertex.put(vertex, vertexNode);
 				nodeToTopo.put(vertexNode, vertex);
 			}
 
 			// Add faces
-			for (TopoDS_Face face : this.meshExtractor.getFaces())
+			for (TopoDS_Face face : meshExtractor.getFaces())
 			{
 				LeafNode faceNode = new LeafNode(facesFront, new OCCMeshExtractor.FaceData(face, false), this.frontFaceColor);
 				topoToNodeFaceFront.put(face, faceNode);
@@ -222,8 +222,6 @@ public class ViewableCAD extends Viewable
 				nodeToTopo.put(backFaceNode, face);
 			}
 		}
-		
-		rootNode.refresh();
 	}
 
 	public Node getEdges()
@@ -256,7 +254,7 @@ public class ViewableCAD extends Viewable
 		{
 			if(shape instanceof TopoDS_Vertex)
 			{
-				selectionNode.add(topoToNodeVertice.get((TopoDS_Vertex)shape));
+				selectionNode.add(topoToNodeVertex.get((TopoDS_Vertex)shape));
 			}
 			else if(shape instanceof TopoDS_Edge)
 			{
@@ -275,12 +273,6 @@ public class ViewableCAD extends Viewable
 		return meshExtractor;
 	}
 
-	/*public vtkActor getVerticesActor()
-	{
-		return verticesActor;
-	}
-*/
-
 	public ShapeType getShapeTypeSelection()
 	{
 		return shapeTypeSelection;
@@ -290,7 +282,7 @@ public class ViewableCAD extends Viewable
 	{
 		this.shapeTypeSelection = shapeTypeSelection;
 
-		vertice.setPickableRecursive(false);
+		vertices.setPickableRecursive(false);
 		edges.setPickableRecursive(false);
 		faces.setPickableRecursive(false);
 		
@@ -298,7 +290,7 @@ public class ViewableCAD extends Viewable
 		{
 			case VERTEX:
 				pixelTolerance = 3;
-				vertice.setPickableRecursive(true);
+				vertices.setPickableRecursive(true);
 				break;
 			case EDGE:
 				pixelTolerance = 3;

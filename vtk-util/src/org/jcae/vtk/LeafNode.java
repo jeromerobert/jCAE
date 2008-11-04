@@ -48,20 +48,20 @@ public class LeafNode extends AbstractNode
 		private float[] nodesTransformed = new float[0];
 		protected float[] nodes = new float[0];
 		protected float[] normals = null;
-		protected int[] vertice = new int[0];
+		protected int[] vertices = new int[0];
 		protected int[] lines = new int[0];
 		protected int[] polys = new int[0];
-		protected int nbrOfPolys = 0;
-		protected int nbrOfLines = 0;
-		protected int nbrOfVertice = 0;
-		private Transform3D transform = null;
+		protected int nbrOfPolys;
+		protected int nbrOfLines;
+		protected int nbrOfVertices;
+		private Transform3D transform;
 		
 		public static final DataProvider EMPTY = new DataProvider();
 
-		public void setVertice(int[] vertice)
+		public void setVertices(int[] vertices)
 		{
-			this.vertice = vertice;
-			nbrOfVertice = vertice.length / 2;
+			this.vertices = vertices;
+			nbrOfVertices = vertices.length / 2;
 		}
 		
 		public void setLines(int[] lines)
@@ -124,9 +124,9 @@ public class LeafNode extends AbstractNode
 			return nbrOfLines;
 		}
 
-		public int getNbrOfVertice()
+		public int getNbrOfVertices()
 		{
-			return nbrOfVertice;
+			return nbrOfVertices;
 		}
 
 		public void load()
@@ -149,9 +149,9 @@ public class LeafNode extends AbstractNode
 			return lines;
 		}
 		
-		public int[] getVertice()
+		public int[] getVertices()
 		{
-			return vertice;
+			return vertices;
 		}
 		
 		public float[] getNormals()
@@ -164,7 +164,7 @@ public class LeafNode extends AbstractNode
 			nodes = new float[0];
 			nodesTransformed = new float[0];
 			normals = null;
-			vertice = new int[0];
+			vertices = new int[0];
 			lines = new int[0];
 			polys = new int[0];
 		}
@@ -239,12 +239,6 @@ public class LeafNode extends AbstractNode
 	{
 		this.dataProvider = data;
 		modified();
-	}
-
-	// TEMPORARY : remove it
-	protected vtkPolyData getData()
-	{
-		return data;
 	}
 
 	public DataProvider getDataProvider()

@@ -63,8 +63,8 @@ public class Node extends AbstractNode
 		{
 			this.nodes = nodes;
 			this.normals = normals;
-			this.nbrOfVertice = nbrOfVertice;
-			this.vertice = vertice;
+			this.nbrOfVertices = nbrOfVertice;
+			this.vertices = vertice;
 			this.nbrOfLines = nbrOfLines;
 			this.lines = lines;
 			this.nbrOfPolys = nbrOfPolys;
@@ -90,9 +90,9 @@ public class Node extends AbstractNode
 		}
 
 		@Override
-		public int[] getVertice()
+		public int[] getVertices()
 		{
-			return vertice;
+			return vertices;
 		}
 
 		@Override
@@ -378,12 +378,12 @@ public class Node extends AbstractNode
 			dataProvider.load();
 
 			nodesSize += dataProvider.getNodes().length;
-			verticeSize += dataProvider.getVertice().length;
+			verticeSize += dataProvider.getVertices().length;
 			linesSize += dataProvider.getLines().length;
 			polysSize += dataProvider.getPolys().length;
 
 
-			nbrOfVertice += dataProvider.getNbrOfVertice();
+			nbrOfVertice += dataProvider.getNbrOfVertices();
 
 			nbrOfLines += dataProvider.getNbrOfLines();
 
@@ -441,7 +441,7 @@ public class Node extends AbstractNode
 
 
 
-			int[] verticeNode = dataProvider.getVertice();
+			int[] verticeNode = dataProvider.getVertices();
 			System.arraycopy(verticeNode, 0, vertice, offSetVertice, verticeNode.length);
 
 			// Make an offset
@@ -550,7 +550,7 @@ public class Node extends AbstractNode
 			if (!leaf.isSelected())
 				continue;
 
-			// Add vertice
+			// Add vertices
 			int begin = offsetsVertices.get(i);
 			int end = offsetsVertices.get(i + 1);
 			for (int j = begin; j < end; ++j)
@@ -711,7 +711,7 @@ public class Node extends AbstractNode
 	private final int leafIndexToNodeIndex(LeafNode leaf, int leafIndex, int index)
 	{
 		LeafNode.DataProvider leafDataProvider = leaf.getDataProvider();
-		int numberOfVerticeLeaf = leafDataProvider.getNbrOfVertice();
+		int numberOfVerticeLeaf = leafDataProvider.getNbrOfVertices();
 		int numberOfLinesLeaf = leafDataProvider.getNbrOfLines();
 		int numberOfPolysLeaf = leafDataProvider.getNbrOfPolys();
 
