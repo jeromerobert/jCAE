@@ -105,7 +105,7 @@ public class MeshVisuBuilder extends TraversalProcedure
 			}
 			
 			// Writing fake vertices
-			LOGGER.info("Writing " + (mesh.nodes.length / 3) +" fake vertice.");
+			LOGGER.info("Writing " + (mesh.nodes.length / 3) +" fake vertices.");
 			// Writing the size
 			ByteBuffer bb = ByteBuffer.allocate(Integer.SIZE / 8);
 			IntBuffer bufferInteger = bb.asIntBuffer();

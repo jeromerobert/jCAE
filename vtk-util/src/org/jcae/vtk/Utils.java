@@ -83,19 +83,19 @@ public class Utils
 	{
 		renderer.SetDisplayPoint(pickPosition.x, pickPosition.y, 0);
 		renderer.DisplayToWorld();
-		double[] vertice = renderer.GetWorldPoint();
+		double[] vertex = renderer.GetWorldPoint();
 
-		origin.x = vertice[0];
-		origin.y = vertice[1];
-		origin.z = vertice[2];
+		origin.x = vertex[0];
+		origin.y = vertex[1];
+		origin.z = vertex[2];
 
 		renderer.SetDisplayPoint(pickPosition.x, pickPosition.y, 1);
 		renderer.DisplayToWorld();
-		vertice = renderer.GetWorldPoint();
+		vertex = renderer.GetWorldPoint();
 
-		direction.x = vertice[0] - origin.x;
-		direction.y = vertice[1] - origin.y;
-		direction.z = vertice[2] - origin.z;
+		direction.x = vertex[0] - origin.x;
+		direction.y = vertex[1] - origin.y;
+		direction.z = vertex[2] - origin.z;
 	}
 
 	public static float[] CanvasGetZBuffer(vtkCanvas canvas, int[] firstPoint, int[] secondPoint)
@@ -449,46 +449,46 @@ public class Utils
 				
 		//compute world coordinates of the pick volume 
 		double[] verts = new double[32];
-		double[] vertice = new double[4];
+		double[] vertex = new double[4];
 
 		renderer.SetDisplayPoint(X0, Y0, 0);
 		renderer.DisplayToWorld();
-		vertice = renderer.GetWorldPoint();
-		System.arraycopy(vertice, 0, verts, 0, 4);
+		vertex = renderer.GetWorldPoint();
+		System.arraycopy(vertex, 0, verts, 0, 4);
 		renderer.SetDisplayPoint(X0, Y0, 1);
 		renderer.DisplayToWorld();
-		vertice = renderer.GetWorldPoint();
-		System.arraycopy(vertice, 0, verts, 4, 4);
+		vertex = renderer.GetWorldPoint();
+		System.arraycopy(vertex, 0, verts, 4, 4);
 		
 		renderer.SetDisplayPoint(X0, Y1, 0);
 		renderer.DisplayToWorld();
-		vertice = renderer.GetWorldPoint();
-		System.arraycopy(vertice, 0, verts, 8, 4);
+		vertex = renderer.GetWorldPoint();
+		System.arraycopy(vertex, 0, verts, 8, 4);
 
 		renderer.SetDisplayPoint(X0, Y1, 1);
 		renderer.DisplayToWorld();
-		vertice = renderer.GetWorldPoint();
-		System.arraycopy(vertice, 0, verts, 12, 4);
+		vertex = renderer.GetWorldPoint();
+		System.arraycopy(vertex, 0, verts, 12, 4);
 
 		renderer.SetDisplayPoint(X1, Y0, 0);
 		renderer.DisplayToWorld();
-		vertice = renderer.GetWorldPoint();
-		System.arraycopy(vertice, 0, verts, 16, 4);
+		vertex = renderer.GetWorldPoint();
+		System.arraycopy(vertex, 0, verts, 16, 4);
 
 		renderer.SetDisplayPoint(X1, Y0, 1);
 		renderer.DisplayToWorld();
-		vertice = renderer.GetWorldPoint();
-		System.arraycopy(vertice, 0, verts, 20, 4);
+		vertex = renderer.GetWorldPoint();
+		System.arraycopy(vertex, 0, verts, 20, 4);
 
 		renderer.SetDisplayPoint(X1, Y1, 0);
 		renderer.DisplayToWorld();
-		vertice = renderer.GetWorldPoint();
-		System.arraycopy(vertice, 0, verts, 24, 4);		
+		vertex = renderer.GetWorldPoint();
+		System.arraycopy(vertex, 0, verts, 24, 4);		
 		
 		renderer.SetDisplayPoint(X1, Y1, 1);
 		renderer.DisplayToWorld();
-		vertice = renderer.GetWorldPoint();
-		System.arraycopy(vertice, 0, verts, 28, 4);
+		vertex = renderer.GetWorldPoint();
+		System.arraycopy(vertex, 0, verts, 28, 4);
 		
 		return verts;
 	}

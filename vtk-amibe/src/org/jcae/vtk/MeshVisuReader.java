@@ -214,23 +214,23 @@ public class MeshVisuReader extends MeshReader
 			byteBuffer.rewind();
 			fc.read(byteBuffer);
 			bufferInteger.rewind();
-			int nbrOfFakeVerticeComponent = bufferInteger.get(0);
+			int nbrOfFakeVerticesComponent = bufferInteger.get(0);
 
 			// Read fake vertices				
 			if (LOGGER.isLoggable(Level.INFO))
-				LOGGER.log(Level.INFO, "Reading " + nbrOfFakeVerticeComponent / 3 + " fake vertice from " + MeshVisuBuilder.getEdgesFile(oemm, current));
-			byteBuffer = ByteBuffer.allocate((Float.SIZE / 8) * nbrOfFakeVerticeComponent);
+				LOGGER.log(Level.INFO, "Reading " + nbrOfFakeVerticesComponent / 3 + " fake vertices from " + MeshVisuBuilder.getEdgesFile(oemm, current));
+			byteBuffer = ByteBuffer.allocate((Float.SIZE / 8) * nbrOfFakeVerticesComponent);
 			FloatBuffer bufferFloat = byteBuffer.asFloatBuffer();
 			byteBuffer.rewind();
 			fc.read(byteBuffer);
 			bufferFloat.rewind();
-			float[] fakeVertices = new float[nbrOfFakeVerticeComponent];
+			float[] fakeVertices = new float[nbrOfFakeVerticesComponent];
 			bufferFloat.get(fakeVertices);
 			
 			// Merging vertices and fake vertices
 			float[] vertices = mesh.nodes;
 			if (LOGGER.isLoggable(Level.INFO))
-				LOGGER.log(Level.INFO, "Merging" + fakeVertices.length + " into " + vertices.length + " vertice.");
+				LOGGER.log(Level.INFO, "Merging" + fakeVertices.length + " into " + vertices.length + " vertices.");
 			mesh.nodes = new float[vertices.length + fakeVertices.length];
 			System.arraycopy(vertices, 0, mesh.nodes, 0, vertices.length);
 			System.arraycopy(fakeVertices, 0, mesh.nodes, vertices.length, fakeVertices.length);

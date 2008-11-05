@@ -49,7 +49,7 @@ public class Node extends AbstractNode
 	private TIntArrayList offsetsVertices;
 	private TIntArrayList offsetsLines;
 	private TIntArrayList offsetsPolys;
-	private int nbrOfVertice;
+	private int nbrOfVertices;
 	private int nbrOfLines;
 	private int nbrOfPolys;
 	private vtkLookupTable table;
@@ -59,12 +59,12 @@ public class Node extends AbstractNode
 
 	private static class NodeData extends LeafNode.DataProvider
 	{
-		NodeData(float[] nodes, float[] normals, int nbrOfVertice, int[] vertice, int nbrOfLines, int[] lines, int nbrOfPolys, int[] polys)
+		NodeData(float[] nodes, float[] normals, int nbrOfVertices, int[] vertices, int nbrOfLines, int[] lines, int nbrOfPolys, int[] polys)
 		{
 			this.nodes = nodes;
 			this.normals = normals;
-			this.nbrOfVertices = nbrOfVertice;
-			this.vertices = vertice;
+			this.nbrOfVertices = nbrOfVertices;
+			this.vertices = vertices;
 			this.nbrOfLines = nbrOfLines;
 			this.lines = lines;
 			this.nbrOfPolys = nbrOfPolys;
@@ -353,7 +353,7 @@ public class Node extends AbstractNode
 		int verticeSize = 0;
 		int linesSize = 0;
 		int polysSize = 0;
-		nbrOfVertice = 0;
+		nbrOfVertices = 0;
 		nbrOfLines = 0;
 		nbrOfPolys = 0;
 		boolean buildNormals = true;
@@ -366,7 +366,7 @@ public class Node extends AbstractNode
 
 		for (LeafNode leaf : leaves)
 		{
-			offsetsVertices.add(nbrOfVertice);
+			offsetsVertices.add(nbrOfVertices);
 			offsetsLines.add(nbrOfLines);
 			offsetsPolys.add(nbrOfPolys);
 
@@ -383,7 +383,7 @@ public class Node extends AbstractNode
 			polysSize += dataProvider.getPolys().length;
 
 
-			nbrOfVertice += dataProvider.getNbrOfVertices();
+			nbrOfVertices += dataProvider.getNbrOfVertices();
 
 			nbrOfLines += dataProvider.getNbrOfLines();
 
@@ -392,7 +392,7 @@ public class Node extends AbstractNode
 			if (dataProvider.getNormals() == null)
 				buildNormals = false;
 		}
-		offsetsVertices.add(nbrOfVertice);
+		offsetsVertices.add(nbrOfVertices);
 		offsetsLines.add(nbrOfLines);
 		offsetsPolys.add(nbrOfPolys);
 
@@ -405,11 +405,11 @@ public class Node extends AbstractNode
 		float[] normals = null;
 		if (buildNormals)
 			normals = new float[nodesSize];
-		int[] vertice = new int[verticeSize];
+		int[] vertices = new int[verticeSize];
 		int[] lines = new int[linesSize];
 		int[] polys = new int[polysSize];
 		int offSetNode = 0;
-		int offSetVertice = 0;
+		int offSetVertex = 0;
 		int offSetLine = 0;
 		int offSetPoly = 0;
 
@@ -441,16 +441,16 @@ public class Node extends AbstractNode
 
 
 
-			int[] verticeNode = dataProvider.getVertices();
-			System.arraycopy(verticeNode, 0, vertice, offSetVertice, verticeNode.length);
+			int[] verticesNode = dataProvider.getVertices();
+			System.arraycopy(verticesNode, 0, vertices, offSetVertex, verticesNode.length);
 
 			// Make an offset
-			for (int j = offSetVertice; j < offSetVertice + verticeNode.length;)
+			for (int j = offSetVertex; j < offSetVertex + verticesNode.length;)
 			{
-				vertice[++j] += numberOfNode;
+				vertices[++j] += numberOfNode;
 				++j;
 			}
-			offSetVertice += verticeNode.length;
+			offSetVertex += verticesNode.length;
 
 			int[] linesNode = dataProvider.getLines();
 			System.arraycopy(linesNode, 0, lines, offSetLine, linesNode.length);
@@ -485,26 +485,26 @@ public class Node extends AbstractNode
 		}
 
 		// Compute the id association array
-		int[] ids = new int[nbrOfVertice + nbrOfLines + nbrOfPolys];
+		int[] ids = new int[nbrOfVertices + nbrOfLines + nbrOfPolys];
 		for (int leafIndex = 0; leafIndex < numberOfLeaves; ++leafIndex)
 		{
-			// Vertice part
+			// Vertex part
 			int begin = offsetsVertices.get(leafIndex);
 			int end = offsetsVertices.get(leafIndex + 1);
 			Arrays.fill(ids, begin, end, leafIndex);
 
 			// Line part
-			begin = nbrOfVertice + offsetsLines.get(leafIndex);
-			end = nbrOfVertice + offsetsLines.get(leafIndex + 1);
+			begin = nbrOfVertices + offsetsLines.get(leafIndex);
+			end = nbrOfVertices + offsetsLines.get(leafIndex + 1);
 			Arrays.fill(ids, begin, end, leafIndex);
 
 			// Poly part
-			begin = nbrOfVertice + nbrOfLines + offsetsPolys.get(leafIndex);
-			end = nbrOfVertice + nbrOfLines + offsetsPolys.get(leafIndex + 1);
+			begin = nbrOfVertices + nbrOfLines + offsetsPolys.get(leafIndex);
+			end = nbrOfVertices + nbrOfLines + offsetsPolys.get(leafIndex + 1);
 			Arrays.fill(ids, begin, end, leafIndex);
 		}
 
-		NodeData nodeData = new NodeData(nodes, normals, nbrOfVertice, vertice, nbrOfLines, lines, nbrOfPolys, polys);
+		NodeData nodeData = new NodeData(nodes, normals, nbrOfVertices, vertices, nbrOfLines, lines, nbrOfPolys, polys);
 
 		createData(nodeData);
 
@@ -533,7 +533,7 @@ public class Node extends AbstractNode
 
 	private int getNbrOfCells()
 	{
-		return nbrOfVertice + nbrOfLines + nbrOfPolys;
+		return nbrOfVertices + nbrOfLines + nbrOfPolys;
 	}
 
 	protected void manageHighlight()
@@ -557,16 +557,16 @@ public class Node extends AbstractNode
 				selection.add(j);
 
 			// Add lines
-			begin = nbrOfVertice;
-			end = nbrOfVertice;
+			begin = nbrOfVertices;
+			end = nbrOfVertices;
 			begin += offsetsLines.get(i);
 			end += offsetsLines.get(i + 1);
 			for (int j = begin; j < end; ++j)
 				selection.add(j);
 
 			// Add polys
-			begin = nbrOfVertice + nbrOfLines;
-			end = nbrOfVertice + nbrOfLines;
+			begin = nbrOfVertices + nbrOfLines;
+			end = nbrOfVertices + nbrOfLines;
 			begin += offsetsPolys.get(i);
 			end += offsetsPolys.get(i + 1);
 			for (int j = begin; j < end; ++j)
@@ -694,10 +694,10 @@ public class Node extends AbstractNode
 
 	private final int nodeIndexToLeafIndex(int leaf, int index)
 	{
-		if (0 <= index && index < nbrOfVertice)
+		if (0 <= index && index < nbrOfVertices)
 			return index - offsetsVertices.getQuick(leaf);
 
-		index -= nbrOfVertice;
+		index -= nbrOfVertices;
 		if (0 <= index && index < nbrOfLines)
 			return index - offsetsLines.getQuick(leaf);
 
@@ -721,11 +721,11 @@ public class Node extends AbstractNode
 		index -= numberOfVerticeLeaf;
 
 		if (0 <= index && index < numberOfLinesLeaf)
-			return index + nbrOfVertice + offsetsLines.getQuick(leafIndex);
+			return index + nbrOfVertices + offsetsLines.getQuick(leafIndex);
 
 		index -= numberOfLinesLeaf;
 		if (0 <= index && index < numberOfPolysLeaf)
-			return index + nbrOfVertice + nbrOfLines + offsetsPolys.getQuick(leafIndex);
+			return index + nbrOfVertices + nbrOfLines + offsetsPolys.getQuick(leafIndex);
 
 		throw new IllegalArgumentException("Wrong index: "+index);
 	}
