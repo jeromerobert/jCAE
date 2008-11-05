@@ -34,6 +34,7 @@ import javax.swing.JSplitPane;
 import javax.swing.ToolTipManager;
 
 import org.jcae.vtk.Canvas;
+import org.jcae.vtk.Utils;
 import org.jcae.vtk.ViewableCAD;
 import vtk.vtkActor;
 import vtk.vtkCanvas;
@@ -55,18 +56,7 @@ public class TestVTK
 {
 	static double[] tetraPoints = { 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1 };
 	static int[] tetraCells = { 4, 0, 1, 2, 3 };
-	// in the static contructor we load in the native code
-	// The libraries must be in your path to work
-	static
-	{
-		System.out.println(System.getProperty("java.library.path"));
-		System.loadLibrary("vtkCommonJava");
-		System.loadLibrary("vtkFilteringJava");
-		System.loadLibrary("vtkIOJava");
-		System.loadLibrary("vtkImagingJava");
-		System.loadLibrary("vtkGraphicsJava");
-		System.loadLibrary("vtkRenderingJava");
-	}
+
 
 	static Canvas createCanvas()
 	{
@@ -146,7 +136,8 @@ public class TestVTK
 
 	// the main function
 	public static void main(String[] args)
-	{		
+	{
+		Utils.loadVTKLibraries();
 		try
 		{			
 			JPopupMenu.setDefaultLightWeightPopupEnabled(false);
