@@ -89,7 +89,7 @@ public class ViewableMesh extends Viewable
 			public void customiseMapper(vtkMapper mapper)
 			{
 				mapper.SetResolveCoincidentTopologyToPolygonOffset();
-				mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffSetFactor(), Utils.getOffSetValue()*2.);
+				mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffsetFactor(), Utils.getOffsetValue()*2.);
 			}
 		});
 		rootNode.setMapperSelectionCustomiser(new AbstractNode.MapperSelectionCustomiser() {
@@ -98,7 +98,7 @@ public class ViewableMesh extends Viewable
 			public void customiseMapperSelection(vtkMapper mapper)
 			{
 				mapper.SetResolveCoincidentTopologyToPolygonOffset();
-				mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffSetFactor(), Utils.getOffSetValue());
+				mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffsetFactor(), Utils.getOffsetValue());
 			}
 		});
 		setViewMode(viewMode);

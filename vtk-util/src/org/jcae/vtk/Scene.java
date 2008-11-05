@@ -140,7 +140,7 @@ public class Scene implements AbstractNode.ActorListener
 	}
 
 	/**
-	 * Warning : If you are making highlight with offSet (by default this is down) then the selection will not take in
+	 * Warning : If you are making highlight with offset (by default this is down) then the selection will not take in
 	 * case the highlighted objects because the z-buffer is not cleaned and so the normal geometry
 	 * will not be drawned for selection because the highlighted geometry is nearest of the camera
 	 * due to the offset. If you want bypass this you have to take care of the highlighted objects :

@@ -408,10 +408,10 @@ public class Node extends AbstractNode
 		int[] vertices = new int[verticeSize];
 		int[] lines = new int[linesSize];
 		int[] polys = new int[polysSize];
-		int offSetNode = 0;
-		int offSetVertex = 0;
-		int offSetLine = 0;
-		int offSetPoly = 0;
+		int offsetNode = 0;
+		int offsetVertex = 0;
+		int offsetLine = 0;
+		int offsetPoly = 0;
 
 		table = new vtkLookupTable();
 		table.SetNumberOfTableValues(leaves.size());
@@ -426,55 +426,55 @@ public class Node extends AbstractNode
 
 			LeafNode.DataProvider dataProvider = leaf.getDataProvider();
 
-			final int numberOfNode = offSetNode / 3;
+			final int numberOfNode = offsetNode / 3;
 			float[] nodesNode = dataProvider.getNodes();
-			System.arraycopy(nodesNode, 0, nodes, offSetNode, nodesNode.length);
+			System.arraycopy(nodesNode, 0, nodes, offsetNode, nodesNode.length);
 			if (buildNormals)
 			{
 				float[] normalsNode = dataProvider.getNormals();
 				if (normalsNode == null)
-					Arrays.fill(normals, offSetNode, offSetNode + nodesNode.length, 0.f);
+					Arrays.fill(normals, offsetNode, offsetNode + nodesNode.length, 0.f);
 				else
-					System.arraycopy(normalsNode, 0, normals, offSetNode, normalsNode.length);
+					System.arraycopy(normalsNode, 0, normals, offsetNode, normalsNode.length);
 			}
-			offSetNode += nodesNode.length;
+			offsetNode += nodesNode.length;
 
 
 
 			int[] verticesNode = dataProvider.getVertices();
-			System.arraycopy(verticesNode, 0, vertices, offSetVertex, verticesNode.length);
+			System.arraycopy(verticesNode, 0, vertices, offsetVertex, verticesNode.length);
 
 			// Make an offset
-			for (int j = offSetVertex; j < offSetVertex + verticesNode.length;)
+			for (int j = offsetVertex; j < offsetVertex + verticesNode.length;)
 			{
 				vertices[++j] += numberOfNode;
 				++j;
 			}
-			offSetVertex += verticesNode.length;
+			offsetVertex += verticesNode.length;
 
 			int[] linesNode = dataProvider.getLines();
-			System.arraycopy(linesNode, 0, lines, offSetLine, linesNode.length);
+			System.arraycopy(linesNode, 0, lines, offsetLine, linesNode.length);
 
 			// Make an offset
-			for (int j = offSetLine; j < offSetLine + linesNode.length;)
+			for (int j = offsetLine; j < offsetLine + linesNode.length;)
 			{
 				lines[++j] += numberOfNode;
 				lines[++j] += numberOfNode;
 				++j;
 			}
-			offSetLine += linesNode.length;
+			offsetLine += linesNode.length;
 
 			int[] polysNode = dataProvider.getPolys();
-			System.arraycopy(polysNode, 0, polys, offSetPoly, polysNode.length);
+			System.arraycopy(polysNode, 0, polys, offsetPoly, polysNode.length);
 
 			// Make an offset
-			for (int j = offSetPoly; j < offSetPoly + polysNode.length;)
+			for (int j = offsetPoly; j < offsetPoly + polysNode.length;)
 			{
 				int size = polys[j++];
 				for (int c = 0; c < size; ++c)
 					polys[j++] += numberOfNode;
 			}
-			offSetPoly += polysNode.length;
+			offsetPoly += polysNode.length;
 
 			Color color = leaf.getColor();
 			if (LOGGER.isLoggable(Level.FINEST))

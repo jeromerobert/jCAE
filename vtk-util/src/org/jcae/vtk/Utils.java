@@ -367,10 +367,10 @@ public class Utils
 		return 1. / (Math.pow(2., (double)nbit) - 1.);
 	}
 	
-	public static void addOffSet(int[] indices, int offSet)
+	public static void addOffset(int[] indices, int offset)
 	{
 		for(int i = 0 ; i < indices.length ; ++i)
-			indices[i] += offSet;
+			indices[i] += offset;
 	}
 	        // left plane =   frustumPlanes[0]
         // right plane =  frustumPlanes[1]
@@ -493,12 +493,12 @@ public class Utils
 		return verts;
 	}
 	
-	public static double getOffSetFactor()
+	public static double getOffsetFactor()
 	{
 		return 1.;
 	}
 	
-	public static double getOffSetValue()
+	public static double getOffsetValue()
 	{
 		return 1.;
 	}
@@ -677,21 +677,21 @@ public class Utils
 	public static int[] createQuadsCells(int nbrOfCells)
 	{
 		int[] indices = new int[nbrOfCells * 5];
-		int offSet = 0;
+		int offset = 0;
 		for(int i = 0 ; i < indices.length ; )
 		{
 			indices[i++] = 4;
-			indices[i++] = offSet++;
-			indices[i++] = offSet++;
-			indices[i++] = offSet++;
-			indices[i++] = offSet++;
+			indices[i++] = offset++;
+			indices[i++] = offset++;
+			indices[i++] = offset++;
+			indices[i++] = offset++;
 		}
 		
 		return indices;
 	}
 	
 	/** Create an index array for quads to be used as input from createCells */
-	public static int[] createQuadsCells(int[] cells, int offSetID)
+	public static int[] createQuadsCells(int[] cells, int offsetID)
 	{
 		int k = 0;
 		int nCell = cells.length / 4;
@@ -699,10 +699,10 @@ public class Utils
 		for (int i = 0; i < nCell * 4;)
 		{
 			fCells[k++] = 4;
-			fCells[k++] = cells[i++] + offSetID;
-			fCells[k++] = cells[i++] + offSetID;
-			fCells[k++] = cells[i++] + offSetID;
-			fCells[k++] = cells[i++] + offSetID;
+			fCells[k++] = cells[i++] + offsetID;
+			fCells[k++] = cells[i++] + offsetID;
+			fCells[k++] = cells[i++] + offsetID;
+			fCells[k++] = cells[i++] + offsetID;
 		}
 		
 		return fCells;
@@ -724,19 +724,19 @@ public class Utils
 	public static int[] createTriangleCells(int nbrOfCells)
 	{
 		int[] indices = new int[nbrOfCells * 4];
-		int offSet = 0;
+		int offset = 0;
 		for(int i = 0 ; i < indices.length ; )
 		{
 			indices[i++] = 3;
-			indices[i++] = offSet++;
-			indices[i++] = offSet++;
-			indices[i++] = offSet++;
+			indices[i++] = offset++;
+			indices[i++] = offset++;
+			indices[i++] = offset++;
 		}
 		
 		return indices;
 	}
 	/** Create an index array for triangles to be used as input from createCells */
-	public static int[] createTriangleCells(int[] cells, int offSetID)
+	public static int[] createTriangleCells(int[] cells, int offsetID)
 	{
 		int k = 0;
 		int nCell = cells.length / 3;
@@ -744,9 +744,9 @@ public class Utils
 		for (int i = 0; i < nCell * 3; i += 3)
 		{
 			fCells[k++] = 3;
-			fCells[k++] = cells[i] + offSetID;
-			fCells[k++] = cells[i + 1] + offSetID;
-			fCells[k++] = cells[i + 2] + offSetID;
+			fCells[k++] = cells[i] + offsetID;
+			fCells[k++] = cells[i + 1] + offsetID;
+			fCells[k++] = cells[i + 2] + offsetID;
 		}
 		return fCells;
 	}
@@ -797,14 +797,14 @@ public class Utils
 	}
 
 	/** Create a vtkPolyLine from indexes */
-	public static vtkPolyLine createPolyLine(int nbOfPoints, int offSet)
+	public static vtkPolyLine createPolyLine(int nbOfPoints, int offset)
 	{
 		vtkPolyLine line = new vtkPolyLine();
 
 		// TODO: do not do it in java
 		line.GetPointIds().SetNumberOfIds(nbOfPoints);
 		for (int i = 0; i < nbOfPoints; ++i)
-			line.GetPointIds().SetId(i, i + offSet);
+			line.GetPointIds().SetId(i, i + offset);
 
 		return line;
 	}

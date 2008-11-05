@@ -42,20 +42,20 @@ public class ArrayUtils
 		}
 		
 		int[] toReturn = new int[length];
-		int offSet = 0;
+		int offset = 0;
 		for(int[] tab : collection)
 		{
-			System.arraycopy(tab, 0, toReturn, offSet, tab.length);
-			offSet += tab.length;
+			System.arraycopy(tab, 0, toReturn, offset, tab.length);
+			offset += tab.length;
 		}
 		
 		return toReturn;
 	}
 	
-	public static void setOffSet(int[] tab, int indexBegin, int indexEnd, int offSet)
+	public static void setOffset(int[] tab, int indexBegin, int indexEnd, int offset)
 	{
 		for(int i = indexBegin ; i < indexEnd ; ++i)
-			tab[i] += offSet;
+			tab[i] += offset;
 	}
 	
 	public static float[] doubleToFloat(double[] array)

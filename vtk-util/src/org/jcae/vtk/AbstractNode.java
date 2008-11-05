@@ -184,7 +184,7 @@ public abstract class AbstractNode
 			public void customiseMapper(vtkMapper mapper)
 			{
 				mapper.SetResolveCoincidentTopologyToPolygonOffset();
-				mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffSetFactor(), Utils.getOffSetValue());
+				mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffsetFactor(), Utils.getOffsetValue());
 			}
 		};
 	public static MapperHighlightedCustomiser DEFAULT_MAPPER_HIGHLIGHTED_CUSTOMISER =
