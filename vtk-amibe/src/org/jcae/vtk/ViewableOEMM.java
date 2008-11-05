@@ -311,7 +311,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 	}
 
 	@Override
-	public void pointSelection(Canvas canvas, Point pickPosition)
+	protected void pointSelection(Canvas canvas, Point pickPosition)
 	{
 		octreeForPicking.VisibilityOn();
 		octreeForPicking.PickableOn();
@@ -321,7 +321,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 	}
 
 	@Override
-	public synchronized void surfaceSelection(Canvas canvas, Point releasePosition, Point pressPosition)
+	protected synchronized void surfaceSelection(Canvas canvas, Point releasePosition, Point pressPosition)
 	{
 		if (automaticSelection)
 		{

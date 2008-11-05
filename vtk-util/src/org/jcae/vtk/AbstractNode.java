@@ -226,13 +226,6 @@ public abstract class AbstractNode
 		}
 	}
 
-	public AbstractNode getRoot()
-	{
-		if(parent != null)
-			return parent.getRoot();
-		return this;
-	}
-	
 	public AbstractNode getParent()
 	{
 		return parent;

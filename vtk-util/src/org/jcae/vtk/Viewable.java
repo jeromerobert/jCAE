@@ -69,18 +69,13 @@ public abstract class Viewable extends MultiCanvas
 
 	public Viewable()
 	{
-		this(new Scene(), new Node(null));
-	}
+		this.scene = new Scene();
+		this.rootNode = new Node(null);
 
-	public Viewable(Scene scene, Node root)
-	{
-		this.scene = scene;
-		this.rootNode = root;
-
-		addNode(root);
-		root.addChildCreationListener(this);
-		root.setActorHighlightedCustomiser(new ActorHighlightedCustomiser());
-		root.setActorSelectionCustomiser(new ActorSelectionCustomiser());
+		addNode(rootNode);
+		rootNode.addChildCreationListener(this);
+		rootNode.setActorHighlightedCustomiser(new ActorHighlightedCustomiser());
+		rootNode.setActorSelectionCustomiser(new ActorSelectionCustomiser());
 	}
 
 	protected class ActorHighlightedCustomiser implements AbstractNode.ActorHighlightedCustomiser
@@ -132,7 +127,7 @@ public abstract class Viewable extends MultiCanvas
 		this.appendSelection = appendSelection;
 	}
 
-	public void surfaceSelection(Canvas canvas, Point pressPosition_, Point releasePosition_)
+	protected void surfaceSelection(Canvas canvas, Point pressPosition_, Point releasePosition_)
 	{
 		int[] pressPosition = new int[2];
 		pressPosition[0] = pressPosition_.x;
@@ -250,7 +245,7 @@ public abstract class Viewable extends MultiCanvas
 		LOGGER.finest("End dispatch");
 	}
 
-	public void pointSelection(Canvas canvas, Point pickPosition)
+	protected void pointSelection(Canvas canvas, Point pickPosition)
 	{
 		LOGGER.fine("Making point selection");
 
@@ -285,7 +280,7 @@ public abstract class Viewable extends MultiCanvas
 	/**
 	 * If you want the highlight disappears call highlight...
 	 */
-	public void unselectAll()
+	void unselectAll()
 	{
 		for (LeafNode leaf : selectionCell.keySet())
 			leaf.unselectCells();
@@ -295,14 +290,14 @@ public abstract class Viewable extends MultiCanvas
 	}
 
 	@Override
-	public void addNode(AbstractNode node)
+	protected void addNode(AbstractNode node)
 	{
 		super.addNode(node);
 		scene.addNode(node);
 	}
 
 	@Override
-	public void removeNode(AbstractNode node)
+	protected void removeNode(AbstractNode node)
 	{
 		scene.removeNode(node);
 		super.removeNode(node);
@@ -358,12 +353,7 @@ public abstract class Viewable extends MultiCanvas
 		scene.setClippingPlanes(planes);
 	}
 
-	protected boolean isSelectionEmpty()
-	{
-		return selectionCell.isEmpty() && selectionNode.isEmpty();
-	}
-
-	public void setPickable(boolean pickable)
+	void setPickable(boolean pickable)
 	{
 		scene.setPickable(pickable);
 	}

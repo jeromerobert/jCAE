@@ -124,7 +124,7 @@ public class ViewableCAD extends Viewable
 		edges.applyActorCustomiser();
 	}
 
-	public void testDataChange()
+	protected void testDataChange()
 	{
 		int i = 0;
 		for(LeafNode leaf : rootNode.getLeaves())

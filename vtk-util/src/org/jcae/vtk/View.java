@@ -276,12 +276,12 @@ public class View extends Canvas {
 	 */
 	public void setCurrentViewable(Viewable viewable)
 	{
-		if(this.currentViewable != null)
-			this.currentViewable.setPickable(false);
+		if(currentViewable != null)
+			currentViewable.setPickable(false);
 		
-		this.currentViewable = viewable;
-		if(this.currentViewable != null)
-			this.currentViewable.setPickable(true);
+		currentViewable = viewable;
+		if(currentViewable != null)
+			currentViewable.setPickable(true);
 	}
 	
 	public Viewable getCurrentViewable()
