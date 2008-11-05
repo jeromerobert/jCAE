@@ -350,7 +350,7 @@ public class Node extends AbstractNode
 	{
 		// Compute the sizes
 		int nodesSize = 0;
-		int verticeSize = 0;
+		int verticesSize = 0;
 		int linesSize = 0;
 		int polysSize = 0;
 		nbrOfVertices = 0;
@@ -378,7 +378,7 @@ public class Node extends AbstractNode
 			dataProvider.load();
 
 			nodesSize += dataProvider.getNodes().length;
-			verticeSize += dataProvider.getVertices().length;
+			verticesSize += dataProvider.getVertices().length;
 			linesSize += dataProvider.getLines().length;
 			polysSize += dataProvider.getPolys().length;
 
@@ -405,7 +405,7 @@ public class Node extends AbstractNode
 		float[] normals = null;
 		if (buildNormals)
 			normals = new float[nodesSize];
-		int[] vertices = new int[verticeSize];
+		int[] vertices = new int[verticesSize];
 		int[] lines = new int[linesSize];
 		int[] polys = new int[polysSize];
 		int offsetNode = 0;
@@ -711,14 +711,14 @@ public class Node extends AbstractNode
 	private final int leafIndexToNodeIndex(LeafNode leaf, int leafIndex, int index)
 	{
 		LeafNode.DataProvider leafDataProvider = leaf.getDataProvider();
-		int numberOfVerticeLeaf = leafDataProvider.getNbrOfVertices();
+		int numberOfVerticesLeaf = leafDataProvider.getNbrOfVertices();
 		int numberOfLinesLeaf = leafDataProvider.getNbrOfLines();
 		int numberOfPolysLeaf = leafDataProvider.getNbrOfPolys();
 
-		if (0 <= index && index < numberOfVerticeLeaf)
+		if (0 <= index && index < numberOfVerticesLeaf)
 			return index + offsetsVertices.getQuick(leafIndex);
 
-		index -= numberOfVerticeLeaf;
+		index -= numberOfVerticesLeaf;
 
 		if (0 <= index && index < numberOfLinesLeaf)
 			return index + nbrOfVertices + offsetsLines.getQuick(leafIndex);
