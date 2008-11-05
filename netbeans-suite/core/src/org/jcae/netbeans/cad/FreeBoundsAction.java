@@ -33,7 +33,6 @@ import org.jcae.vtk.ViewableCAD;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.CookieAction;
-import vtk.vtkMapper;
 
 public class FreeBoundsAction extends CookieAction
 {
