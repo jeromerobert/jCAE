@@ -26,6 +26,7 @@ import java.awt.event.KeyListener;
 import javax.swing.JFrame;
 import org.jcae.vtk.AmibeToMesh;
 import org.jcae.vtk.Canvas;
+import org.jcae.vtk.Mesh;
 import org.jcae.vtk.SelectionListener;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
@@ -37,13 +38,13 @@ import vtk.vtkRenderer;
  *
  * @author Julian Ibarz
  */
-public class TestAmibe implements SelectionListener, KeyListener {
-	ViewableMesh viewable;
+public class TestAmibe extends ViewableMesh implements SelectionListener, KeyListener
+{
 	public Canvas canvas;
 
-	public TestAmibe(ViewableMesh viewable)
+	public TestAmibe(Mesh mesh)
 	{
-		this.viewable = viewable;
+		super(mesh);
 	}
 	
 	public void selectionChanged(Viewable viewable)
@@ -65,41 +66,62 @@ public class TestAmibe implements SelectionListener, KeyListener {
 	{
 		switch (e.getKeyCode())
 		{
-			case KeyEvent.VK_F:
-				viewable.setSelectionType(Viewable.SelectionType.CELL);
+			case KeyEvent.VK_G:
+				switch(getSelectionType())
+				{
+					case NODE:
+						setSelectionType(SelectionType.CELL);
+						break;
+					case CELL:
+						setSelectionType(SelectionType.POINT);
+						canvas.lock();
+						System.out.println("Capabilities : " + canvas.GetRenderWindow().ReportCapabilities());
+						canvas.unlock();
+						break;
+					case POINT:
+						setSelectionType(SelectionType.NODE);
+						break;
+				}
 				break;
-			case KeyEvent.VK_V:
-				viewable.setSelectionType(Viewable.SelectionType.POINT);
-				canvas.lock();
-				System.out.println("Capabilities : " +canvas.GetRenderWindow().ReportCapabilities());
-				canvas.unlock();
+
+			case KeyEvent.VK_M:
+				switch(getViewMode())
+				{
+					case WIRED:
+						setViewMode(ViewMode.FILLED);
+						break;
+					case FILLED:
+						setViewMode(ViewMode.WIRED);
+						break;
+				}
 				break;
+
 			case KeyEvent.VK_E:
 				// Check the number of actors
 				int nbrActor = canvas.GetRenderer().GetNumberOfPropsRendered();
 				System.out.println("Number of actors rendered : " + nbrActor);
 				System.out.println("Number of actors : " + canvas.GetRenderer().GetViewProps().GetNumberOfItems());
+				break;
 		}
 	}
-    public static void main(String[] args) {
-        try
+	public static void main(String[] args)
+	{
+	try
 		{
 		JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
 		View canvas = new View();
 		frame.add(canvas, BorderLayout.CENTER);
 		vtkRenderer renderer = canvas.GetRenderer();
 		AmibeToMesh reader = new AmibeToMesh(args[0]);
-		ViewableMesh rbh = new ViewableMesh(reader.getMesh());
-		canvas.add(rbh);
+		TestAmibe test = new TestAmibe(reader.getMesh());
+		canvas.add(test);
 		frame.setSize(800, 600);
 		frame.setVisible(true);
-		TestAmibe test = new TestAmibe(rbh);
 		canvas.addKeyListener(test);
-		//rbh.setViewMode(ViewableMesh.ViewMode.WIRED);
 		test.canvas = canvas;
-		//canvas.addKeyListener(test);
-		//rbh.addSelectionListener(test);
+		//test.addSelectionListener(test);
 		vtkInteractorStyleTrackballCamera style = new vtkInteractorStyleTrackballCamera();
 		//canvas.getIren().SetPicker(new vtkAreaPicker());
 		style.AutoAdjustCameraClippingRangeOn();
@@ -112,5 +134,5 @@ public class TestAmibe implements SelectionListener, KeyListener {
 		{
 			ex.printStackTrace();
 		}
-    }
+	}
 }

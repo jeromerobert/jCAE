@@ -25,27 +25,28 @@ import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
-import org.jcae.vtk.BillBoard;
 import org.jcae.vtk.Canvas;
 import org.jcae.vtk.SelectionListener;
 import org.jcae.vtk.Utils;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
 import org.jcae.vtk.ViewableCAD;
-import vtk.vtkImageData;
 import vtk.vtkInteractorStyleTrackballCamera;
-import vtk.vtkPNGReader;
 import vtk.vtkRenderer;
-import vtk.vtkTexture;
 
 /**
  *
  * @author Jerome Robert
  */
-public class TestViewableCAD implements SelectionListener, KeyListener {
-	public ViewableCAD viewable;
+public class TestViewableCAD extends ViewableCAD implements SelectionListener, KeyListener
+{
 	public Canvas canvas;
 
+	public TestViewableCAD(String filename)
+	{
+		super(filename);
+	}
+	
 	public void selectionChanged(Viewable viewable)
 	{
 		System.out.println("DEBUG SELECTION EFFECTUEE");
@@ -66,60 +67,75 @@ public class TestViewableCAD implements SelectionListener, KeyListener {
 		switch (e.getKeyCode())
 		{			
 			case KeyEvent.VK_G:
-				viewable.setSelectionType(Viewable.SelectionType.NODE);
-				break;
-			case KeyEvent.VK_F:
-				viewable.setSelectionType(Viewable.SelectionType.CELL);
-				break;
-			case KeyEvent.VK_V:
-				viewable.setSelectionType(Viewable.SelectionType.POINT);
-				canvas.lock();
-				System.out.println("Capabilities : " + canvas.GetRenderWindow().ReportCapabilities());
-				canvas.unlock();
+				switch(getSelectionType())
+				{
+					case NODE:
+						setSelectionType(SelectionType.CELL);
+						break;
+					case CELL:
+						setSelectionType(SelectionType.POINT);
+						canvas.lock();
+						System.out.println("Capabilities : " + canvas.GetRenderWindow().ReportCapabilities());
+						canvas.unlock();
+						break;
+					case POINT:
+						setSelectionType(SelectionType.NODE);
+						break;
+				}
 				break;
 			case KeyEvent.VK_E:
-				viewable.setShapeTypeSelection(ViewableCAD.ShapeType.EDGE);
+				switch(getShapeTypeSelection())
+				{
+					case VERTEX:
+						setShapeTypeSelection(ShapeType.EDGE);
+						break;
+					case EDGE:
+						setShapeTypeSelection(ShapeType.FACE);
+						break;
+					case FACE:
+						setShapeTypeSelection(ShapeType.VERTEX);
+						break;
+				}
 				break;
 	
 			case KeyEvent.VK_A:
-				viewable.setAppendSelection(!viewable.getAppendSelection());
-				
-			case KeyEvent.VK_O:
-				//viewable.hideMesh();
+				setAppendSelection(!getAppendSelection());
 				break;
+				
 			case KeyEvent.VK_I:
 				System.out.println("TEST DATA !");
-				viewable.surfaceSelection(Utils.retrieveCanvas(e), new Point(0,0), new Point(200,200));
+				surfaceSelection(Utils.retrieveCanvas(e), new Point(0,0), new Point(200,200));
 				//Utils.retrieveCanvas(e).Render();
-				viewable.testDataChange();
+				testDataChange();
 				break;
-				
 		}
 	}
-    public static void main(String[] args) {
+	
+	public static void main(String[] args)
+	{
+		Utils.loadVTKLibraries();
 		if(args.length != 1)
 		{
 			System.err.println("This program receive one argument that is the path to the stp or brep file that will be used to construct the CAD model");
 			return;
 		}
 		
-		TestViewableCAD test = new TestViewableCAD();
-        JFrame frame = new JFrame();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        View canvas = new View();
-        vtkRenderer renderer = canvas.GetRenderer();
-        ViewableCAD rbh = new ViewableCAD(args[0]);
+		TestViewableCAD test = new TestViewableCAD(args[0]);
+		JFrame frame = new JFrame();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		View canvas = new View();
+		vtkRenderer renderer = canvas.GetRenderer();
 		test.canvas = canvas;
-		test.viewable = rbh;
-		canvas.add(rbh);
+		canvas.add(test);
 		canvas.addKeyListener(test);
-		rbh.addCanvas(canvas);
-		rbh.addSelectionListener(test);
+		test.addCanvas(canvas);
+		test.addSelectionListener(test);
 		vtkInteractorStyleTrackballCamera style = new vtkInteractorStyleTrackballCamera();
-        //canvas.getIren().SetPicker(new vtkAreaPicker());
-        style.AutoAdjustCameraClippingRangeOn();
-        canvas.getIren().SetInteractorStyle(style);
-        renderer.ResetCamera();
+		//canvas.getIren().SetPicker(new vtkAreaPicker());
+		style.AutoAdjustCameraClippingRangeOn();
+		canvas.getIren().SetInteractorStyle(style);
+		renderer.ResetCamera();
 
 		
 		///home/ibarz/zebra/core/src/org/zebra/core/tag/tagError8.png
@@ -151,11 +167,11 @@ public class TestViewableCAD implements SelectionListener, KeyListener {
 			}*/
 
 	
-        frame.add(canvas, BorderLayout.CENTER);
-        frame.setVisible(true);
-        frame.setSize(800, 600);
+		frame.add(canvas, BorderLayout.CENTER);
+		frame.setVisible(true);
+		frame.setSize(800, 600);
 
-    // Delete all the java wrapped VTK objects
-    //vtkGlobalJavaHash.DeleteAll();
-    }
+		// Delete all the java wrapped VTK objects
+		//vtkGlobalJavaHash.DeleteAll();
+	}
 }

@@ -28,6 +28,7 @@ import javax.swing.JFrame;
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.Storage;
 import org.jcae.vtk.SelectionListener;
+import org.jcae.vtk.Utils;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
 import org.jcae.vtk.ViewableOEMM;
@@ -38,13 +39,12 @@ import vtk.vtkRenderer;
  *
  * @author ibarz
  */
-public class TestOEMMVisu implements SelectionListener, KeyListener {
-	ViewableOEMM viewable;
+public class TestOEMMVisu extends ViewableOEMM implements SelectionListener, KeyListener {
 	public Canvas canvas;
 
-	public TestOEMMVisu(ViewableOEMM viewable)
+	public TestOEMMVisu(OEMM oemm)
 	{
-		this.viewable = viewable;
+		super(oemm);
 	}
 	
 	public void selectionChanged(Viewable viewable)
@@ -68,22 +68,26 @@ public class TestOEMMVisu implements SelectionListener, KeyListener {
 		{
 			case KeyEvent.VK_A:
 				System.out.println("SWITCH APPEND SELECTION");
-				viewable.setAppendSelection(viewable.getAppendSelection());
+				setAppendSelection(!getAppendSelection());
 				break;
 			case KeyEvent.VK_E:
 				System.out.println("SWITCH AUTOMATIC SELECTION");
-				viewable.setAutomaticSelection(!viewable.isAutomaticSelection());
+				setAutomaticSelection(!isAutomaticSelection());
 				break;
 			default:
 			/*case KeyEvent.VK_V:
-				viewable.setSelectionType(ViewableMesh.SelectionType.POINT);
+				setSelectionType(SelectionType.POINT);
 				canvas.lock();
 				System.out.println("Capabilities : " +canvas.GetRenderWindow().ReportCapabilities());
 				canvas.unlock();
 				break;*/
 		}
 	}
-	public static void main(String[] args) {
+	
+	public static void main(String[] args)
+	{
+		Utils.loadVTKLibraries();
+
 		JFrame frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
@@ -93,11 +97,10 @@ public class TestOEMMVisu implements SelectionListener, KeyListener {
 		vtkRenderer renderer = canvas.GetRenderer();
 
 		final OEMM oemm = Storage.readOEMMStructure(args[0]);
-		ViewableOEMM viewable = new ViewableOEMM(oemm);
-		canvas.add(viewable);
-		TestOEMMVisu test = new TestOEMMVisu(viewable);
+		TestOEMMVisu test = new TestOEMMVisu(oemm);
+		canvas.add(test);
 		canvas.addKeyListener(test);
-		viewable.addSelectionListener(test);
+		test.addSelectionListener(test);
 
 		vtkInteractorStyleTrackballCamera style = new vtkInteractorStyleTrackballCamera();
 		style.AutoAdjustCameraClippingRangeOn();
