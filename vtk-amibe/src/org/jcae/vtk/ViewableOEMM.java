@@ -315,7 +315,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 	{
 		octreeForPicking.VisibilityOn();
 		octreeForPicking.PickableOn();
-		super.pointSelection(canvas, pickPosition);
+		super.surfaceSelection(canvas, pickPosition, pickPosition);
 		octreeForPicking.VisibilityOff();
 		return;
 	}
