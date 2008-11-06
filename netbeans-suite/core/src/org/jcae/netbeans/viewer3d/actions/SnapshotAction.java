@@ -75,7 +75,7 @@ public class SnapshotAction extends ViewAction
 					 == JFileChooser.APPROVE_OPTION)
 			{	
 				try {
-				ImageIO.write(Utils.takeScreenShot(view), "png", fc.getSelectedFile());
+				ImageIO.write(Utils.takeScreenshot(view), "png", fc.getSelectedFile());
 				} catch(Exception e)
 				{
 					System.err.println("Exception : " + e.getLocalizedMessage());

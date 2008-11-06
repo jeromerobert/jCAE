@@ -42,21 +42,21 @@ import vtk.vtkTransform;
  */
 public class CameraManager
 {
-	private static class ScreenShotCamera
+	private static class ScreenshotCamera
 	{
-		private ImageIcon snapShot;
+		private ImageIcon snapshot;
 		private final static int height = 100;
 		private final static int width = 100;
 
-		public ImageIcon getSnapShot()
+		public ImageIcon getSnapshot()
 		{
-			return snapShot;
+			return snapshot;
 		}
 
-		public void shot(BufferedImage aSnapShot)
+		public void shot(BufferedImage aSnapshot)
 		{
-			int h = aSnapShot.getHeight();
-			int w = aSnapShot.getWidth();
+			int h = aSnapshot.getHeight();
+			int w = aSnapshot.getWidth();
 
 			BufferedImage buffer = new BufferedImage(
 					width, height, BufferedImage.TYPE_INT_RGB);
@@ -73,8 +73,8 @@ public class CameraManager
 			t.concatenate(s);
 
 			Graphics2D g2D = buffer.createGraphics();
-			g2D.drawRenderedImage(aSnapShot, t);
-			snapShot = new ImageIcon(buffer);
+			g2D.drawRenderedImage(aSnapshot, t);
+			snapshot = new ImageIcon(buffer);
 		}
 	}	
 	
@@ -84,8 +84,8 @@ public class CameraManager
 	private Canvas canvas;
 	private vtkRenderer renderer;
 	private ArrayList<vtkCamera> cameras = new ArrayList<vtkCamera>();
-	private ArrayList<ScreenShotCamera> screenShots =
-		new ArrayList<ScreenShotCamera>();
+	private ArrayList<ScreenshotCamera> screenshots =
+		new ArrayList<ScreenshotCamera>();
 	private vtkAxesActor originAxes;
 	private boolean isVisibleRelativeAxis = true;
 	private vtkAxesActor relativeAxes;
@@ -254,21 +254,21 @@ public class CameraManager
 	public void saveCurrentCamera()
 	{
 		cameras.add(copy(renderer.GetActiveCamera()));
-		ScreenShotCamera screenShot = new ScreenShotCamera();
+		ScreenshotCamera screenshot = new ScreenshotCamera();
 		
-		screenShot.shot(Utils.takeScreenShot(canvas));
-		screenShots.add(screenShot);
+		screenshot.shot(Utils.takeScreenshot(canvas));
+		screenshots.add(screenshot);
 	}
 
-	public ImageIcon getScreenShotCamera(int index)
+	public ImageIcon getScreenshotCamera(int index)
 	{
-		return screenShots.get(index).getSnapShot();
+		return screenshots.get(index).getSnapshot();
 	}
 
 	public void removeCamera(int index)
 	{
 		cameras.remove(index);
-		screenShots.remove(index);
+		screenshots.remove(index);
 	}
 
 	public int getNumberOfCameras()

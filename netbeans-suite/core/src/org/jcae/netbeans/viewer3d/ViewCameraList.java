@@ -111,7 +111,7 @@ public  class ViewCameraList extends JDialog {
 			
 			public Object getElementAt(int index)
 			{
-				return mgr.getScreenShotCamera(index);
+				return mgr.getScreenshotCamera(index);
 			}
 		};
 		

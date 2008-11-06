@@ -59,7 +59,7 @@ public class TestScreenshot extends JFrame
 	}
 	
 	
-	public void shot(BufferedImage snapShot)
+	public void shot(BufferedImage snapshot)
 	{
 		try
 		{
@@ -80,7 +80,7 @@ public class TestScreenshot extends JFrame
 			System.out.println("take view snapshot finished");
 			
 			viewIm.createGraphics().drawRenderedImage(
-				snapShot, new AffineTransform());
+				snapshot, new AffineTransform());
 			
 			ImageIO.write(screenshot, "png",
 				File.createTempFile("jcae-viewer3d-snap",".png"));

@@ -504,12 +504,10 @@ public class Utils
 	}
 	
 	/**
-	 * Take a screenshot of the canvas and use ScreenShotLister to get the BufferedImage.
+	 * Take a screenshot of the canvas.
 	 * @param canvas
-	 * @param listener
-	 * 
 	 */
-	public static BufferedImage takeScreenShot(final vtkCanvas canvas)
+	public static BufferedImage takeScreenshot(final vtkCanvas canvas)
 	{
 		if (!canvas.isWindowSet())
 			System.err.println("Attention : Lors de la prise de screenshot le windows n'?tait pas set !");

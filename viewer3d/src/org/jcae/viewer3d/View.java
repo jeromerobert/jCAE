@@ -120,9 +120,9 @@ public class View extends Canvas3D implements PositionListener
 	private View navigationMaster;
 	private List<PositionListener> positionListeners=Collections.synchronizedList(new ArrayList<PositionListener>());
 	
-	private transient BufferedImage snapShot;
-	private transient Object snapShotLock=new Object();
-	private transient boolean takeSnapShot;
+	private transient BufferedImage snapshot;
+	private transient Object snapshotLock=new Object();
+	private transient boolean takeSnapshot;
 	private transient ScreenshotListener screenshotListener;
 	
 	static private SimpleUniverse sharedUniverse;
@@ -148,9 +148,9 @@ public class View extends Canvas3D implements PositionListener
 	
 	// Color buffer
 	private volatile ImageComponent2D imageComponent = null;
-	private volatile Object waitScreenShot = new Object();
-	private volatile boolean takeScreenShot = false;
-	private volatile Point screenShotPosition = new Point();
+	private volatile Object waitScreenshot = new Object();
+	private volatile boolean takeScreenshot = false;
+	private volatile Point screenshotPosition = new Point();
 	
 	// Depth Buffer
 	private volatile DepthComponentFloat depthComponent = null;
@@ -914,26 +914,26 @@ public class View extends Canvas3D implements PositionListener
 		
 		try
 		{
-			if (takeSnapShot)
+			if (takeSnapshot)
 			{
-				snapShot = getImage();			
-				takeSnapShot = false;
-				synchronized(snapShotLock)
+				snapshot = getImage();			
+				takeSnapshot = false;
+				synchronized(snapshotLock)
 				{
-					snapShotLock.notifyAll();
+					snapshotLock.notifyAll();
 				}
 				
 				if(screenshotListener!=null)
-					screenshotListener.shot(snapShot);
+					screenshotListener.shot(snapshot);
 			}
 			
-			if(takeScreenShot)
+			if(takeScreenshot)
 			{
 				captureColorBuffer();
-				takeScreenShot = false;
-				synchronized(waitScreenShot)
+				takeScreenshot = false;
+				synchronized(waitScreenshot)
 				{
-					waitScreenShot.notifyAll();
+					waitScreenshot.notifyAll();
 				}
 			}
 			
@@ -984,11 +984,11 @@ public class View extends Canvas3D implements PositionListener
 	 * @param height
 	 * @return
 	 */
-	public synchronized BufferedImage getScreenShot(int x, int y, int width, int height)
+	public synchronized BufferedImage getScreenshot(int x, int y, int width, int height)
 	{
 		imageComponent = new ImageComponent2D(ImageComponent.FORMAT_RGB, width, height);
-		screenShotPosition.x = x;
-		screenShotPosition.y = y;
+		screenshotPosition.x = x;
+		screenshotPosition.y = y;
 		
 		if(Thread.currentThread().equals(contextThread))
 		{
@@ -996,7 +996,7 @@ public class View extends Canvas3D implements PositionListener
 		}
 		else
 		{
-			takeScreenShot = true;
+			takeScreenshot = true;
 			
 			// If we aren't in the swing thread go to it to send refresh event
 			if(!SwingUtilities.isEventDispatchThread())
@@ -1025,11 +1025,11 @@ public class View extends Canvas3D implements PositionListener
 			try
 			{
 				// If the screenshot is not already done then wait
-				if(takeScreenShot)
+				if(takeScreenshot)
 				{
-					synchronized (waitScreenShot)
+					synchronized (waitScreenshot)
 					{
-						waitScreenShot.wait();
+						waitScreenshot.wait();
 					}
 				}
 			} catch (InterruptedException ex)
@@ -1048,7 +1048,7 @@ public class View extends Canvas3D implements PositionListener
 		GraphicsContext3D ctx = getGraphicsContext3D();
 		Raster ras=new Raster();
 		
-		ras.setSrcOffset(screenShotPosition);
+		ras.setSrcOffset(screenshotPosition);
 		ras.setSize(new Dimension(imageComponent.getWidth(), imageComponent.getHeight()));
 		ras.setImage(imageComponent);
 		ctx.readRaster(ras);
@@ -1108,7 +1108,7 @@ public class View extends Canvas3D implements PositionListener
 	/**
 	 * This function works only with a patched java3d version.
 	 * Contact a jCAE developper on the forum for more information.
-	 * Warning : see warning of getScreenShot
+	 * Warning : see warning of getScreenshot
 	 * See RectangleSelection program for example of use.
 	 * @param x
 	 * @param y
@@ -1306,26 +1306,26 @@ public class View extends Canvas3D implements PositionListener
 	 * @deprecated Use takeScreenshot Not thread safe. In some configuration a deadlock could
 	 * occure.
 	 */
-	// snapShotLock.wait(); must not be run in an AWT thread because
+	// snapshotLock.wait(); must not be run in an AWT thread because
 	// it would block the AWT event thread. Then AWT would never notify the
-	// J3D rendering thread and snapShotLock.wait() would never return
+	// J3D rendering thread and snapshotLock.wait() would never return
 	
 	@Deprecated
 	public BufferedImage takeSnapshot()
 	{
-		takeSnapShot=true;
-		synchronized(snapShotLock)
+		takeSnapshot=true;
+		synchronized(snapshotLock)
 		{
 			try
 			{
-				snapShotLock.wait();
+				snapshotLock.wait();
 			} catch(InterruptedException ex)
 			{
 				ex.printStackTrace();
 				return new BufferedImage(0, 0, BufferedImage.TYPE_BYTE_INDEXED);
 			}
 		}
-		return snapShot;
+		return snapshot;
 	}
 
 	/**
@@ -1336,7 +1336,7 @@ public class View extends Canvas3D implements PositionListener
 	public void takeScreenshot(ScreenshotListener listener)
 	{
 		screenshotListener=listener;
-		takeSnapShot=true;
+		takeSnapshot=true;
 		getView().repaint();		
 	}
 	

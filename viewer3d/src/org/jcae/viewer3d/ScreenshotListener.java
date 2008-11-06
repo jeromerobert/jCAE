@@ -5,6 +5,6 @@ import java.awt.image.BufferedImage;
 public interface ScreenshotListener
 {
 
-	void shot(BufferedImage snapShot);
+	void shot(BufferedImage snapshot);
 
 }

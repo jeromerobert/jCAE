@@ -179,7 +179,7 @@ public class TestGUI implements KeyListener
 
 		if (e.getKeyCode() == KeyEvent.VK_C)
 		{
-				Utils.takeScreenShot(canvas);
+				Utils.takeScreenshot(canvas);
 		}
 	}
 

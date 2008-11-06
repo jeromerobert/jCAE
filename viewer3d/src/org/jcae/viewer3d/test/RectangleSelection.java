@@ -83,7 +83,7 @@ public class RectangleSelection
 					}
 					if(e.getKeyChar()=='s')
 					{
-						BufferedImage imageBuffer = feView.getScreenShot(feView.getWidth() / 2, feView.getHeight() / 2, feView.getWidth() - (feView.getWidth() /2) , feView.getHeight() - feView.getHeight() / 2);
+						BufferedImage imageBuffer = feView.getScreenshot(feView.getWidth() / 2, feView.getHeight() / 2, feView.getWidth() - (feView.getWidth() /2) , feView.getHeight() - feView.getHeight() / 2);
 						try
 						{
 							ImageIO.write(imageBuffer, "PNG", File.createTempFile("screen", "png"));

@@ -208,11 +208,11 @@ public class Main
 		Thread.sleep(1000);
 		view.takeScreenshot(new ScreenshotListener()
 		{
-			public void shot(BufferedImage snapShot)
+			public void shot(BufferedImage snapshot)
 			{
 				try
 				{
-					ImageIO.write(snapShot, "png",
+					ImageIO.write(snapshot, "png",
 						File.createTempFile("jcae-viewer3d-snap",".png"));
 				} catch (IOException e)
 				{
