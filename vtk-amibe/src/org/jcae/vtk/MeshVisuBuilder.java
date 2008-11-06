@@ -54,13 +54,13 @@ public class MeshVisuBuilder extends TraversalProcedure
 		if(visit != TraversalProcedure.LEAF)
 			return TraversalProcedure.OK;
 		
-		LOGGER.config("Making octant " + octant);
+		LOGGER.fine("Making octant " + octant);
 		
 		MeshVisuReader reader = new MeshVisuReader(o);
 		
-		LOGGER.config("Building leaf " + c.leafIndex);
+		LOGGER.finer("Building leaf " + c.leafIndex);
 		writeEdges(o, c, reader.buildMeshVisu(c.leafIndex));
-		LOGGER.config("End Building leaf " + c.leafIndex);
+		LOGGER.finer("End Building leaf " + c.leafIndex);
 		
 		return TraversalProcedure.OK;
 	}
@@ -89,7 +89,7 @@ public class MeshVisuBuilder extends TraversalProcedure
 
 			for (int[] edges : allEdges)
 			{
-				LOGGER.info("Writing " + (edges.length/2) + "edges.");
+				LOGGER.config("Writing " + (edges.length/2) + " edges");
 				ByteBuffer bb = ByteBuffer.allocate(Integer.SIZE / 8);
 				IntBuffer bufferInteger = bb.asIntBuffer();
 				bufferInteger.rewind();
@@ -105,7 +105,7 @@ public class MeshVisuBuilder extends TraversalProcedure
 			}
 			
 			// Writing fake vertices
-			LOGGER.info("Writing " + (mesh.nodes.length / 3) +" fake vertices.");
+			LOGGER.config("Writing " + (mesh.nodes.length / 3) +" fake vertices");
 			// Writing the size
 			ByteBuffer bb = ByteBuffer.allocate(Integer.SIZE / 8);
 			IntBuffer bufferInteger = bb.asIntBuffer();

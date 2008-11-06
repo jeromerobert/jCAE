@@ -102,7 +102,8 @@ public class MeshVisuReader extends MeshReader
 
 	public void buildMeshVisu(int[] leaves)
 	{
-		LOGGER.fine("Loading nodes");
+		if (LOGGER.isLoggable(Level.CONFIG))
+			LOGGER.log(Level.CONFIG, "Loading nodes: "+leaves);
 
 		TIntArrayList sortedLeaves = new TIntArrayList(leaves);
 		sortedLeaves.sort();
@@ -132,8 +133,8 @@ public class MeshVisuReader extends MeshReader
 	{
 		try
 		{
-			if (LOGGER.isLoggable(Level.INFO))
-				LOGGER.log(Level.INFO, "Reading " + current.vn + " vertices from " + getVerticesFile(oemm, current));
+			if (LOGGER.isLoggable(Level.FINE))
+				LOGGER.log(Level.FINE, "Reading " + current.vn + " vertices from " + getVerticesFile(oemm, current));
 			
 			double[] xyz = new double[3];
 			mesh.nodes = new float[current.vn * 3];
@@ -181,7 +182,7 @@ public class MeshVisuReader extends MeshReader
 			String [] label = new String[] { "Reading edges", "Reading free edges" };
 			for (int i = 0; i < 2; ++i)
 			{
-				LOGGER.info(label[i]);
+				LOGGER.fine(label[i]);
 				// Read the number of edges components
 				ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.SIZE / 8);
 				IntBuffer bufferInteger = byteBuffer.asIntBuffer();
@@ -190,8 +191,8 @@ public class MeshVisuReader extends MeshReader
 				bufferInteger.rewind();
 				int nbrOfEdgesComponents = bufferInteger.get(0);
 
-				if (LOGGER.isLoggable(Level.INFO))
-					LOGGER.log(Level.INFO, "Reading " + nbrOfEdgesComponents / 2 + " edges from " + MeshVisuBuilder.getEdgesFile(oemm, current));
+				if (LOGGER.isLoggable(Level.FINE))
+					LOGGER.log(Level.FINE, "Reading " + (nbrOfEdgesComponents / 2) + " edges from " + MeshVisuBuilder.getEdgesFile(oemm, current));
 
 				// Read the edges
 				byteBuffer = ByteBuffer.allocate((Integer.SIZE / 8) * nbrOfEdgesComponents);
@@ -217,8 +218,8 @@ public class MeshVisuReader extends MeshReader
 			int nbrOfFakeVerticesComponent = bufferInteger.get(0);
 
 			// Read fake vertices				
-			if (LOGGER.isLoggable(Level.INFO))
-				LOGGER.log(Level.INFO, "Reading " + nbrOfFakeVerticesComponent / 3 + " fake vertices from " + MeshVisuBuilder.getEdgesFile(oemm, current));
+			if (LOGGER.isLoggable(Level.FINE))
+				LOGGER.log(Level.FINE, "Reading " + (nbrOfFakeVerticesComponent / 3) + " fake vertices from " + MeshVisuBuilder.getEdgesFile(oemm, current));
 			byteBuffer = ByteBuffer.allocate((Float.SIZE / 8) * nbrOfFakeVerticesComponent);
 			FloatBuffer bufferFloat = byteBuffer.asFloatBuffer();
 			byteBuffer.rewind();
@@ -229,8 +230,8 @@ public class MeshVisuReader extends MeshReader
 			
 			// Merging vertices and fake vertices
 			float[] vertices = mesh.nodes;
-			if (LOGGER.isLoggable(Level.INFO))
-				LOGGER.log(Level.INFO, "Merging" + fakeVertices.length + " into " + vertices.length + " vertices.");
+			if (LOGGER.isLoggable(Level.FINE))
+				LOGGER.log(Level.FINE, "Merging " + fakeVertices.length + " into " + vertices.length + " vertices.");
 			mesh.nodes = new float[vertices.length + fakeVertices.length];
 			System.arraycopy(vertices, 0, mesh.nodes, 0, vertices.length);
 			System.arraycopy(fakeVertices, 0, mesh.nodes, vertices.length, fakeVertices.length);
@@ -282,7 +283,7 @@ public class MeshVisuReader extends MeshReader
 		// offset is the number of non fake vertices
 		// (because we will append later real and fake vertices)
 		int offset = mesh.getNodes().size() - getNbrOfFakeVertices();
-		LOGGER.info("offset of fake vertices " + offset);
+		LOGGER.finer("offset of fake vertices " + offset);
 		
 		// Compute offset
 		for (Triangle tri : mesh.getTriangles())
