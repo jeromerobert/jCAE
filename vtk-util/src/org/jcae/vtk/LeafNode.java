@@ -187,6 +187,7 @@ public class LeafNode extends AbstractNode
 	public LeafNode(Node parent, DataProvider dataProvider, Color color)
 	{
 		super(parent);
+		parent.addChild(this);
 		this.dataProvider = dataProvider;
 		this.color = color;
 	}

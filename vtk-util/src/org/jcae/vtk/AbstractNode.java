@@ -100,7 +100,7 @@ public abstract class AbstractNode
 {
 	private final static Logger LOGGER = Logger.getLogger(AbstractNode.class.getName());
 	/** Parent node */
-	protected Node parent;
+	protected final Node parent;
 	private final ArrayList<ActorListener> actorListeners = new ArrayList<ActorListener>();
 	/** Flag to tell if this node is a manager */
 	private boolean manager;
@@ -219,9 +219,8 @@ public abstract class AbstractNode
 		this.parent = parent;
 		if(parent != null)
 		{
-			parent.addChild(this);
-			setPickable(parent.isPickable());
-			setVisible(parent.isVisible());
+			pickable = parent.pickable;
+			visible  = parent.visible;
 		}
 	}
 

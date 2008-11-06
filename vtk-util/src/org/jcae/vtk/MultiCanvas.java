@@ -46,26 +46,14 @@ public abstract class MultiCanvas implements Node.ActorListener, Node.ChildCreat
 		
 	}
 
-	public void childCreated(AbstractNode abstractNode)
+	public void childCreated(AbstractNode child)
 	{
-		addNode(abstractNode);
-		
-		if(abstractNode instanceof Node)
-		{
-			Node node = (Node)abstractNode;
-			node.addChildCreationListener(this);
-		}
+		addNode(child);
 	}
 
-	public void childDeleted(AbstractNode abstractNode)
+	public void childDeleted(AbstractNode child)
 	{
-		removeNode(abstractNode);
-		
-		if(abstractNode instanceof Node)
-		{
-			Node node = (Node)abstractNode;
-			node.removeChildCreationListener(this);
-		}
+		removeNode(child);
 	}
 	
 	protected void addNode(AbstractNode node)

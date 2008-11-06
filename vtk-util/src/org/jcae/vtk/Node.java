@@ -116,12 +116,13 @@ public class Node extends AbstractNode
 
 	public Node(Node parent)
 	{
-		// Make it to not make a course...
-		super(null);
+		super(parent);
+		
 		if(parent != null)
 		{
-			this.parent = parent;
 			parent.addChild(this);
+			// Inherits child creation listeners
+			childCreationListeners.addAll(parent.childCreationListeners);
 		}
 	}
 
@@ -178,7 +179,8 @@ public class Node extends AbstractNode
 	{
 		if(children.add(child))
 		{
-			fireChildCreationListener(child);
+			for(ChildCreationListener listener : childCreationListeners)
+				listener.childCreated(child);
 			modified();
 		}
 	}
@@ -188,11 +190,12 @@ public class Node extends AbstractNode
 		if (children.remove(child))
 		{
 			child.deleteDatas();
-			fireChildDeletionListener(child);
+			for(ChildCreationListener listener : childCreationListeners)
+				listener.childDeleted(child);
 			modified();
 		}
 	}
-	
+
 	public int numChildren()
 	{
 		return children.size();
@@ -206,18 +209,6 @@ public class Node extends AbstractNode
 	public void removeChildCreationListener(ChildCreationListener listener)
 	{
 		childCreationListeners.remove(listener);
-	}
-	
-	private void fireChildCreationListener(AbstractNode node)
-	{
-		for(ChildCreationListener listener : childCreationListeners)
-			listener.childCreated(node);
-	}
-	
-	private void fireChildDeletionListener(AbstractNode node)
-	{
-		for(ChildCreationListener listener : childCreationListeners)
-			listener.childDeleted(node);
 	}
 
 	@Override
