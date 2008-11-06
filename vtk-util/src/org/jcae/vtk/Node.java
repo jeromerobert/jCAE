@@ -153,11 +153,6 @@ public class Node extends AbstractNode
 		}
 	}
 	
-	public List<AbstractNode> getChildren()
-	{
-		return children;
-	}
-	
 	public List<LeafNode> getLeaves()
 	{
 		// Do not keep the leaves, just compute
@@ -194,6 +189,13 @@ public class Node extends AbstractNode
 				listener.childDeleted(child);
 			modified();
 		}
+	}
+
+	public void removeAllChildren()
+	{
+		ArrayList<AbstractNode> savedList = new ArrayList<AbstractNode>(children);
+		for (AbstractNode child : new ArrayList<AbstractNode>(children))
+			removeChild(child);
 	}
 
 	public int numChildren()
@@ -518,7 +520,7 @@ public class Node extends AbstractNode
 			highlighter = null;
 			highlighterMapper = null;
 		}
-		for(AbstractNode n : getChildren())
+		for(AbstractNode n : children)
 			n.deleteDatas();
 	}
 

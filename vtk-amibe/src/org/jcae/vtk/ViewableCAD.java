@@ -76,8 +76,7 @@ public class ViewableCAD extends Viewable
 
 	public void refresh()
 	{
-		for(AbstractNode n:new ArrayList<AbstractNode>(rootNode.getChildren()))
-			rootNode.removeChild(n);
+		rootNode.removeAllChildren();
 		computeNodes();
 		rootNode.refresh();
 		render();
