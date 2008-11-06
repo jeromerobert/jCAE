@@ -20,14 +20,12 @@
 package org.jcae.vtk;
 
 
-import gnu.trove.TIntArrayList;
 import gnu.trove.TIntHashSet;
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.logging.Level;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import vtk.vtkActor;
 import vtk.vtkPlaneCollection;
@@ -43,22 +41,19 @@ public abstract class Viewable extends MultiCanvas
 	private ArrayList<SelectionListener> selectionListeners =
 			new ArrayList<SelectionListener>();
 	protected final double tolerance = 0.002; // 0.2% of tolerance in function of the (far-near) distance
-	protected int pixelTolerance = 0; // pixel tolerance for point picking (0 by default)
-	protected static final int DEFAULT_PIXEL_TOLERANCE = 3;
 	protected final Scene scene;
 	/** The rootNode node of the viewable */
 	protected final Node rootNode;
 	/** Set of selected nodes */
-	protected HashSet<LeafNode> selectionNode = new HashSet<LeafNode>();
+	protected Set<LeafNode> selectionNode = new HashSet<LeafNode>();
 	/** Map of selected cells */
-	protected HashMap<LeafNode, TIntHashSet> selectionCell = new HashMap<LeafNode, TIntHashSet>();
+	protected final Map<LeafNode, TIntHashSet> selectionCell = new HashMap<LeafNode, TIntHashSet>();
+	/** Flag to know if selection has changed */
 	protected boolean selectionChanged;
-	/** Kept for compatibility reason, but declared as final so that it cannot be modified */
-	@Deprecated
-	protected final boolean surfaceSelection = true;
 	/** Flag to set selection in append or replace mode */
 	protected boolean appendSelection;
 	private SelectionType selectionType = SelectionType.NODE;
+	private int pixelTolerance = 0;
 
 	public enum SelectionType
 	{
@@ -69,8 +64,8 @@ public abstract class Viewable extends MultiCanvas
 
 	public Viewable()
 	{
-		this.scene = new Scene();
-		this.rootNode = new Node(null);
+		scene = new Scene();
+		rootNode = new Node(null);
 
 		addNode(rootNode);
 		rootNode.addChildCreationListener(this);
@@ -88,7 +83,6 @@ public abstract class Viewable extends MultiCanvas
 
 	protected class ActorSelectionCustomiser implements AbstractNode.ActorSelectionCustomiser
 	{
-
 		public void customiseActorSelection(vtkActor actor)
 		{
 			Utils.vtkPropertySetColor(actor.GetProperty(), selectionColor);
@@ -105,6 +99,16 @@ public abstract class Viewable extends MultiCanvas
 		return this.selectionType;
 	}
 	
+	public int getPixelTolerance()
+	{
+		return pixelTolerance;
+	}
+
+	public void setPixelTolerance(int pixelTolerance)
+	{
+		this.pixelTolerance = pixelTolerance;
+	}
+
 	/**
 	 * Return current mode of selection.
 	 * If true, selection is added to current selection.
@@ -127,138 +131,144 @@ public abstract class Viewable extends MultiCanvas
 		this.appendSelection = appendSelection;
 	}
 
-	protected void surfaceSelection(Canvas canvas, Point pressPosition_, Point releasePosition_)
+	/**
+	 * Pick and update informations about picked objects.
+	 * {@link Scene#select(org.jcae.vtk.PickContext)} is called
+	 * to perform picking and find selected nodes and cells,
+	 * then {@link #manageSelection(org.jcae.vtk.PickContext)}
+	 * updates selection state.
+	 * 
+	 * @param pickContext object carrying informations about picking context
+	 */
+	void performSelection(PickContext pickContext)
 	{
-		int[] pressPosition = new int[2];
-		pressPosition[0] = pressPosition_.x;
-		pressPosition[1] = pressPosition_.y;
-		int[] releasePosition = new int[2];
-		releasePosition[0] = releasePosition_.x;
-		releasePosition[1] = releasePosition_.y;
+		scene.select(pickContext);
+		manageSelection(pickContext);
+	}
 
+	/**
+	 * Update selection state.
+	 * <ol>
+	 *   <li>When {@link #selectionType} is NODE, {@link #selectionNode}
+	 *       set is updated to contain the new set of selected nodes,
+	 *       based on append mode, the set of previously selected nodes
+	 *       and the set of picked nodes.  The {@link #selectionChanged}
+	 *       member is set to <code>true</code> if selection has changed.
+	 *   </li>
+	 *   <li>When {@link #selectionType} is CELL, {@link #selectionCell}
+	 *       map is updated to contain the new map of selected nodes,
+	 *       based on append mode, the map of previously selected nodes
+	 *       and the set of picked cells.  Selected cells in leaves are
+	 *       also updated by calling
+	 *       {@link LeafNode#setCellSelection(org.jcae.vtk.PickContext, int[])}.
+	 *       The {@link #selectionChanged} member is set to <code>true</code>
+	 *       if anything has been picked.
+	 *   </li>
+	 * </ol>
+	 * 
+	 * @param pickContext object carrying informations about picking context
+	 */
+	protected void manageSelection(PickContext pickContext)
+	{
 		switch (selectionType)
 		{
-			case POINT:
-				selectPointOnSurface(canvas, pressPosition, releasePosition);
+			case NODE:
+				manageNodeSelection(pickContext);
 				break;
 			case CELL:
-				selectCellOnSurface(canvas, pressPosition, releasePosition);
+				manageCellSelection(pickContext);
 				break;
-			case NODE:
-				selectNodeOnSurface(canvas, pressPosition, releasePosition);
+			case POINT:
+				// No-op for now
 				break;
+			default:
+				throw new IllegalStateException();
 		}
 
-		manageSelection();
+		if (selectionChanged)
+			fireSelectionChanged();
+		selectionChanged = false;
 	}
 
-	private int[] selectPointOnSurface(Canvas canvas, int[] firstPoint, int[] secondPoint)
+	/**
+	 * Update selectionCell to take previous selection into account.
+	 * 
+	 * @param pickContext object carrying informations about picking context
+	 */
+	private void manageCellSelection(PickContext pickContext)
 	{
-		return new int[0];
-	}
-
-	private void selectCellOnSurface(Canvas canvas, int[] firstPoint, int[] secondPoint)
-	{
+		selectionNode.clear();
 		if (!appendSelection)
 			selectionCell.clear();
 		
-		scene.pick(canvas, firstPoint, secondPoint);
-
-		List<LeafNode> nodes = rootNode.getLeaves();
-		for (LeafNode node : nodes)
+		Set<LeafNode> oldSelection = new HashSet<LeafNode>(selectionCell.keySet());
+		Set<LeafNode> newSelection = pickContext.getSelectedNodes();
+		for (LeafNode node : newSelection)
 		{
+			selectionChanged = true;
 			TIntHashSet nodeCellSelection = selectionCell.get(node);
 			if (nodeCellSelection == null)
 			{
-				TIntHashSet newCellSelection =
-					new TIntHashSet(node.getSelection().toNativeArray());
-				if (!newCellSelection.isEmpty())
-				{
-					selectionCell.put(node, newCellSelection);
-					selectionChanged = true;
-				}
+				pickContext.addToSelectedNodes(node);
+				selectionCell.put(node, 
+					new TIntHashSet(node.getCellSelection()));
 			}
 			else
 			{
-				TIntArrayList selection = node.getSelection();
-				for (int i = 0; i < selection.size(); ++i)
+				for (int cell : node.getCellSelection())
 				{
-					selectionChanged = true;
-					int cell = selection.get(i);
-					if (!nodeCellSelection.add(cell) && appendSelection)
+					// If already selected, we are in append mode, then delete it
+					if (!nodeCellSelection.add(cell))
 						nodeCellSelection.remove(cell);
 				}
 
 				// Send the new selection to the leaf
-				node.setCellSelection(new TIntArrayList(nodeCellSelection.toArray()));
+				node.setCellSelection(pickContext, nodeCellSelection.toArray());
 			}
 		}
-
-		if (LOGGER.isLoggable(Level.FINEST))
+		
+		// Send old selection to leaves, it may have been reset by scene.select()
+		for (LeafNode leaf : oldSelection)
 		{
-			for (LeafNode node : nodes)
-				if (node.getSelection().size() != 0)
-					LOGGER.finest("One not empty selection found");
-
-			if (selectionChanged)
-				LOGGER.finest("Selection changed");			
-			else
-				LOGGER.finest("Selection not changed");
+			if (!newSelection.contains(leaf))
+				leaf.setCellSelection(pickContext, selectionCell.get(leaf).toArray());
 		}
+
+		if (selectionChanged)
+			LOGGER.finest("Selection changed");			
+		else
+			LOGGER.finest("Selection not changed");
 	}
 
-	private void selectNodeOnSurface(Canvas canvas, int[] firstPoint, int[] secondPoint)
-	{
-		LOGGER.finest("Start pick color");
-		scene.pick(canvas, firstPoint, secondPoint);
-		LOGGER.finest("End pick color");
+	/**
+	 * Update selectionNode to take previous selection into account.
+	 * 
+	 * @param pickContext object carrying informations about picking context
+	 */
+	private void manageNodeSelection(PickContext pickContext)
+	{		
+		selectionCell.clear();
 		
-		LOGGER.finest("Start dispatch");
 		HashSet<LeafNode> newSelection;
 		if (appendSelection)
 			newSelection = new HashSet<LeafNode>(selectionNode);
 		else
 			newSelection = new HashSet<LeafNode>();
 
-		for (LeafNode node : rootNode.getLeaves())
+		for (LeafNode node : pickContext.getSelectedNodes())
 		{
-			TIntArrayList nodeSelection = node.getSelection();
-
-			if (!nodeSelection.isEmpty())
-			{
-				// If already selected, we are in append mode, then delete it
-				if (!newSelection.add(node))
-					newSelection.remove(node);
-
-				// Clear the selectionNode because it's not a cell selectionNode
-				nodeSelection.clear();
-
-				// Remove the node from the selection cell
-				selectionCell.remove(node);
-			}
+			// If already selected, we are in append mode, then delete it
+			if (!newSelection.add(node))
+				newSelection.remove(node);
+			
+			// Clear cell selection
+			node.clearCellSelection();
 		}
 
 		if (!selectionNode.equals(newSelection))
 			selectionChanged = true;
 
 		selectionNode = newSelection;
-		LOGGER.finest("End dispatch");
-	}
-
-	protected void pointSelection(Canvas canvas, Point pickPosition)
-	{
-		LOGGER.fine("Making point selection");
-
-		Point pressPosition   = new Point(pickPosition.x - pixelTolerance, pickPosition.y - pixelTolerance);
-		Point releasePosition = new Point(pickPosition.x + pixelTolerance, pickPosition.y + pixelTolerance);
-		surfaceSelection(canvas, pressPosition, releasePosition);
-	}
-
-	protected void manageSelection()
-	{
-		if (selectionChanged)
-			fireSelectionChanged();
-		selectionChanged = false;
 	}
 
 	public void addSelectionListener(SelectionListener listener)
@@ -280,10 +290,10 @@ public abstract class Viewable extends MultiCanvas
 	/**
 	 * If you want the highlight disappears call highlight...
 	 */
-	void unselectAll()
+	protected void unselectAll()
 	{
 		for (LeafNode leaf : selectionCell.keySet())
-			leaf.unselectCells();
+			leaf.clearCellSelection();
 
 		selectionCell.clear();
 		selectionNode.clear();
@@ -302,7 +312,7 @@ public abstract class Viewable extends MultiCanvas
 		scene.removeNode(node);
 		super.removeNode(node);
 	}
-
+	
 	public void highlight()
 	{
 		// Highlight selected cells

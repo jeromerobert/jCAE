@@ -20,7 +20,6 @@
 
 package org.jcae.vtk;
 
-import gnu.trove.TIntArrayList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -618,7 +617,8 @@ public abstract class AbstractNode
 	 * 
 	 * @param cellSelection  list of cell ids being selected
 	 */
-	abstract void setCellSelection(TIntArrayList cellSelection);
+	abstract void setCellSelection(PickContext pickContext, int [] cellSelection);
+	abstract void clearCellSelection();
 	
 	public void setManager(boolean manager)
 	{

@@ -26,6 +26,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
 import org.jcae.vtk.Canvas;
+import org.jcae.vtk.FrustumPicker;
 import org.jcae.vtk.SelectionListener;
 import org.jcae.vtk.Utils;
 import org.jcae.vtk.View;
@@ -102,13 +103,14 @@ public class TestViewableCAD extends ViewableCAD implements SelectionListener, K
 				setAppendSelection(!getAppendSelection());
 				break;
 				
-			case KeyEvent.VK_I:
+/*			case KeyEvent.VK_I:
 				System.out.println("TEST DATA !");
-				surfaceSelection(Utils.retrieveCanvas(e), new Point(0,0), new Point(200,200));
+				performSelection(new FrustumPicker(Utils.retrieveCanvas(e), true,
+					new Point(0,0), new Point(200,200)));
 				//Utils.retrieveCanvas(e).Render();
 				testDataChange();
 				break;
-		}
+*/		}
 	}
 	
 	public static void main(String[] args)

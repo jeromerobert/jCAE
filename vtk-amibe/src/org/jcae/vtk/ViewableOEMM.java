@@ -302,7 +302,11 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 		if (!automaticSelection || rendering)
 			return;
 
-		surfaceSelection(Utils.retrieveCanvas(e), new Point(), new Point());
+		Canvas canvas = Utils.retrieveCanvas(e);
+		PickContext pickContext = new FrustumPicker(canvas, true,
+			new Point(0,0),
+			new Point(canvas.getWidth(), canvas.getHeight()));
+		performSelection(pickContext);
 	}
 
 	public void mouseMoved(MouseEvent e)
@@ -311,33 +315,37 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 	}
 
 	@Override
-	protected void pointSelection(Canvas canvas, Point pickPosition)
+	void performSelection(PickContext pickContext)
 	{
-		octreeForPicking.VisibilityOn();
-		octreeForPicking.PickableOn();
-		super.surfaceSelection(canvas, pickPosition, pickPosition);
-		octreeForPicking.VisibilityOff();
-		return;
-	}
+		int [] pressPosition = pickContext.getPressPosition();
+		int [] releasePosition = pickContext.getReleasePosition();
+		if (pressPosition[0] == releasePosition[0] && pressPosition[1] == releasePosition[1])
+		{
+			octreeForPicking.VisibilityOn();
+			octreeForPicking.PickableOn();
+			super.performSelection(pickContext);
+			octreeForPicking.VisibilityOff();
+			return;
+		}
 
-	@Override
-	protected synchronized void surfaceSelection(Canvas canvas, Point releasePosition, Point pressPosition)
-	{
+		Canvas canvas = pickContext.getCanvas();
 		if (automaticSelection)
 		{
 			// Set the surfaceSelection on all the canvas
-			pressPosition.x = 0;
-			pressPosition.y = 0;
-			releasePosition.x = canvas.getWidth();
-			releasePosition.y = canvas.getHeight();
+			pressPosition[0] = 0;
+			pressPosition[1] = 0;
+			releasePosition[0] = canvas.getWidth();
+			releasePosition[1] = canvas.getHeight();
 		}
 
 		vtkExtractSelectedFrustum selector = new vtkExtractSelectedFrustum();
 
 		vtkDataSet dataSet = octreeForPicking.GetMapper().GetInputAsDataSet();
 		selector.SetInput(dataSet);
-		selector.CreateFrustum(Utils.computeVerticesFrustum(pressPosition.x, pressPosition.y, releasePosition.x,
-				releasePosition.y, canvas.GetRenderer()));
+		selector.CreateFrustum(Utils.computeVerticesFrustum(
+			pressPosition[0], pressPosition[1],
+			releasePosition[0], releasePosition[1],
+			canvas.GetRenderer()));
 
 		selector.PreserveTopologyOff();
 		lockCanvas();
@@ -367,8 +375,10 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 				for (int id : idsSorted)
 				{
 					int originalCell = originalCellIDs.GetValue(id);
-					// If we have the leaf max number leave
-					selectionNode.add(octreeNode.getNode(originalCell));
+					LeafNode leaf = octreeNode.getNode(originalCell);
+					selectionNode.add(leaf);
+					pickContext.addToSelectedNodes(leaf);
+					// Stop if we reach the maximal number of leaves
 					if (selectionNode.size() >= leafVisibleMax)
 					{
 						full = true;
@@ -378,8 +388,8 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 			}
 		}
 		selectionChanged = true;
-
-		manageSelection();
+		
+		manageSelection(pickContext);
 	}
 
 }

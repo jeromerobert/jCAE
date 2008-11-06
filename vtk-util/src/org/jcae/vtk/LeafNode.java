@@ -19,9 +19,8 @@
  */
 package org.jcae.vtk;
 
-import gnu.trove.TIntArrayList;
 import java.awt.Color;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -180,7 +179,7 @@ public class LeafNode extends AbstractNode
 		}
 	}
 	
-	private TIntArrayList selection = new TIntArrayList();
+	private int [] selection = new int[0];
 	private Color color;
 	private DataProvider dataProvider;
 	private long timeDataCreated;
@@ -194,9 +193,7 @@ public class LeafNode extends AbstractNode
 	
 	public List<LeafNode> getLeaves()
 	{
-		ArrayList<LeafNode> toReturn = new ArrayList<LeafNode>();
-		toReturn.add(this);
-		return toReturn;
+		return Collections.singletonList(this);
 	}
 
 	protected LeafNode getNode(int cellID)
@@ -331,20 +328,32 @@ public class LeafNode extends AbstractNode
 		}
 	}
 
-	void setCellSelection(TIntArrayList cellSelection)
+	void setCellSelection(PickContext pickContext, int [] cellSelection)
 	{
-		selection = cellSelection;
+		selection = new int[cellSelection.length];
+		System.arraycopy(cellSelection, 0, selection, 0, cellSelection.length);
+		pickContext.addToSelectedNodes(this);
 	}
 
-	TIntArrayList getSelection()
+	int [] getCellSelection()
 	{
 		return selection;
 	}
 
+	public void clearCellSelection()
+	{
+		selection = new int[0];
+	}
+	
+	public boolean hasCellSelection()
+	{
+		return selection.length != 0;
+	}
+	
 	@Override
 	public void select()
 	{
-		selection.clear();
+		selection = new int[0];
 		
 		super.select();
 	}
@@ -359,7 +368,7 @@ public class LeafNode extends AbstractNode
 			return;
 		}
 
-		if (selection.isEmpty())
+		if (selection.length == 0)
 		{
 			if (selectionHighlighter != null)
 				unHighlightSelection();
@@ -386,7 +395,7 @@ public class LeafNode extends AbstractNode
 		sel.GetProperties().Set(sel.FIELD_TYPE(), 0); // 0 MEANS CELLS
 
 		// list of cells to be selected
-		vtkIdTypeArray arr = Utils.setValues(selection.toNativeArray());
+		vtkIdTypeArray arr = Utils.setValues(selection);
 		sel.SetSelectionList(arr);
 
 		vtkExtractSelectedPolyDataIds selFilter = new vtkExtractSelectedPolyDataIds();
@@ -400,10 +409,5 @@ public class LeafNode extends AbstractNode
 		selectionHighlighterMapper.SetInput(dataFiltered);
 		
 		getMapperSelectionCustomiser().customiseMapperSelection(selectionHighlighterMapper);
-	}
-
-	public void unselectCells()
-	{
-		selection.reset();
 	}
 }

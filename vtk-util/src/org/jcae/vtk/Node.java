@@ -666,7 +666,7 @@ public class Node extends AbstractNode
 		for (LeafNode leaf : getLeaves())
 		{
 			leafIndex++;
-			int[] cellSelection = leaf.getSelection().toNativeArray();
+			int[] cellSelection = leaf.getCellSelection();
 			if (cellSelection.length == 0)
 				continue;
 			
@@ -753,7 +753,7 @@ public class Node extends AbstractNode
 		return dataFiltered;
 	}
 
-	void setCellSelection(TIntArrayList cellSelection)
+	void setCellSelection(PickContext pickContext, int [] cellSelection)
 	{
 		if (actor == null)
 			throw new RuntimeException("The Node has to be a manager to manage the selection");
@@ -761,24 +761,33 @@ public class Node extends AbstractNode
 		int[] ids = ((vtkIntArray) data.GetCellData().GetScalars()).GetJavaArray();
 
 		List<LeafNode> leaves = getLeaves();
-		ArrayList<TIntArrayList> selectionChildren = new ArrayList<TIntArrayList>(leaves.size());
-		for (int i = 0; i < leaves.size(); ++i)
-			selectionChildren.add(new TIntArrayList());
-		// Compute the selections
-		
-		for (int i = 0, n = cellSelection.size(); i < n; i++)
-		{
-			int cellID = cellSelection.get(i);
-			int nodeID = ids[cellID];
+		for (LeafNode leaf : leaves)
+			leaf.clearCellSelection();
 
-			selectionChildren.get(nodeID).add(nodeIndexToLeafIndex(nodeID, cellID));
+		TIntArrayList [] selectionChildren = new TIntArrayList[leaves.size()];
+		for (int i = 0; i < leaves.size(); ++i)
+			selectionChildren[i] = new TIntArrayList();
+		// Compute the selections		
+		for (int cellID : cellSelection)
+		{
+			int nodeID = ids[cellID];
+			selectionChildren[nodeID].add(nodeIndexToLeafIndex(nodeID, cellID));
 		}
 
 		// Send the selections to the children
 		for (int i = 0; i < leaves.size(); ++i)
-			leaves.get(i).setCellSelection(selectionChildren.get(i));
+		{
+			if (!selectionChildren[i].isEmpty())
+				leaves.get(i).setCellSelection(pickContext, selectionChildren[i].toNativeArray());
+		}
 	}
 	
+	public void clearCellSelection()
+	{
+		for (LeafNode leaf : getLeaves())
+			leaf.clearCellSelection();
+	}
+
 	@Override
 	public String toString()
 	{

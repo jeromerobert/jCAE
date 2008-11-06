@@ -23,13 +23,9 @@ package org.jcae.vtk;
 import gnu.trove.TIntArrayList;
 import gnu.trove.TLongObjectHashMap;
 import gnu.trove.TObjectByteHashMap;
-import java.awt.Point;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 import org.jcae.geometry.BoundingBox;
-import org.jcae.geometry.Bounds;
 import vtk.vtkActor;
 import vtk.vtkActorCollection;
 import vtk.vtkCanvas;
@@ -150,44 +146,36 @@ public class Scene implements AbstractNode.ActorListener
 	 * @param firstPoint
 	 * @param secondPoint
 	 */
-	public void pick(vtkCanvas canvas, int[] firstPoint, int[] secondPoint)
+	public void select(PickContext pickContext)
 	{
+		if (pickContext.onlyVisible())
+			selectVisibleNodes(pickContext);
+		else
+			selectAllNodes(pickContext);
+	}
+	
+	private void selectVisibleNodes(PickContext pickContext)
+	{
+		vtkCanvas canvas = pickContext.getCanvas();
+		int [] firstPoint = pickContext.getPressPosition();
+		int [] secondPoint = pickContext.getReleasePosition();
 		if (checkColorDepth)
 		{
+			canvas.lock();
 			if (canvas.GetRenderWindow().GetColorBufferSizes(new vtkIntArray()) < 24)
+			{
+				canvas.unlock();
 				throw new RuntimeException("Color depth is lower than 24 bits, picking does not work");
+			}
+			canvas.unlock();
 			checkColorDepth = false;
 		}
-
-		vtkVisibleCellSelector selector = new vtkVisibleCellSelector();
-		selector.SetRenderer(canvas.GetRenderer());
-		selector.SetArea(firstPoint[0], firstPoint[1], secondPoint[0],
-				secondPoint[1]);
-		selector.SetRenderPasses(0, 1, 0, 0, 1, 0);
 
 		int[] pickableActorBackup = null;
 		if (actorFiltering)
 		{
-			boolean pointPicking = false;
-			if (firstPoint[0] == secondPoint[0] && firstPoint[1] == secondPoint[1])
-				pointPicking = true;
-
-			long begin = System.currentTimeMillis();
 			vtkActorCollection actors = canvas.GetRenderer().GetActors();
 			pickableActorBackup = new int[actors.GetNumberOfItems()];
-
-			Point3d pickOrigin = new Point3d();
-			Vector3d pickDirection = new Vector3d();
-			Bounds frustum = null;
-
-			if (pointPicking)
-				Utils.computeRay(canvas.GetRenderer(),
-					new Point(firstPoint[0], firstPoint[1]),
-					pickOrigin, pickDirection);
-			else
-				frustum = Utils.computePolytope(Utils.computeVerticesFrustum(
-					firstPoint[0], firstPoint[1], secondPoint[0], secondPoint[1],
-					canvas.GetRenderer()));
 
 			actors.InitTraversal();
 			int j = 0;
@@ -200,20 +188,16 @@ public class Scene implements AbstractNode.ActorListener
 				box.setLower(bounds[0], bounds[2], bounds[4]);
 				box.setUpper(bounds[1], bounds[3], bounds[5]);
 
-				if (pointPicking)
-				{
-					if (!box.intersect(pickOrigin, pickDirection))
-						actor.PickableOff();
-					else
-						LOGGER.finest("One node picked");
-				}
-				else
-				{
-					if (!frustum.intersect(box))
-						actor.PickableOff();
-				}
+				if (!pickContext.intersect(box))
+					actor.PickableOff();
 			}
 		}
+
+		vtkVisibleCellSelector selector = new vtkVisibleCellSelector();
+		selector.SetRenderer(canvas.GetRenderer());
+		selector.SetArea(firstPoint[0], firstPoint[1], secondPoint[0],
+				secondPoint[1]);
+		selector.SetRenderPasses(0, 1, 0, 0, 1, 0);
 
 		canvas.lock();
 		int savePreserve = canvas.GetRenderer().GetPreserveDepthBuffer();
@@ -221,7 +205,6 @@ public class Scene implements AbstractNode.ActorListener
 		selector.Select();
 		canvas.GetRenderer().SetPreserveDepthBuffer(savePreserve);
 		canvas.unlock();
-		//long begin = System.currentTimeMillis();
 
 		vtkSelection selection = new vtkSelection();
 		selection.ReleaseDataFlagOn();
@@ -250,7 +233,7 @@ public class Scene implements AbstractNode.ActorListener
 				if (node != null)
 				{
 					vtkIdTypeArray ids = (vtkIdTypeArray) child.GetSelectionList();
-					node.setCellSelection(new TIntArrayList(Utils.getValues(ids)));
+					node.setCellSelection(pickContext, Utils.getValues(ids));
 					LOGGER.finest("Actor picked id: "+prop.GetVTKId());
 					LOGGER.finest("Picked node: "+node);					
 				}
@@ -262,6 +245,45 @@ public class Scene implements AbstractNode.ActorListener
 				// actor is found, further processing is useless.
 				LOGGER.warning("No selection found for actor "+IDActor);
 				break;
+			}
+		}
+	}
+
+	private void selectAllNodes(PickContext pickContext)
+	{
+		vtkCanvas canvas = pickContext.getCanvas();
+		vtkActorCollection actors = canvas.GetRenderer().GetActors();
+		actors.InitTraversal();
+		for (vtkActor actor; (actor = actors.GetNextActor()) != null; )
+		{
+			if (actor.GetPickable() == 0)
+				continue;
+			double[] bounds = actor.GetBounds();
+			BoundingBox box = new BoundingBox();
+			box.setLower(bounds[0], bounds[2], bounds[4]);
+			box.setUpper(bounds[1], bounds[3], bounds[5]);
+			if (pickContext.intersect(box))
+			{
+				AbstractNode node = idActorToNode.get(actor.GetVTKId());
+				if (node instanceof LeafNode)
+					pickContext.addToSelectedNodes((LeafNode) node);
+				else
+				{
+					for (LeafNode leaf : node.getLeaves())
+					{
+						
+						LeafNode.DataProvider leafProvider = leaf.getDataProvider();
+						leafProvider.load();
+						leaf.createData(leafProvider);
+						bounds = leaf.data.GetBounds();
+						box.setLower(bounds[0], bounds[2], bounds[4]);
+						box.setUpper(bounds[1], bounds[3], bounds[5]);
+						leaf.deleteDatas();
+						leafProvider.unLoad();
+						if (pickContext.intersect(box))
+							pickContext.addToSelectedNodes(leaf);
+					}
+				}
 			}
 		}
 	}

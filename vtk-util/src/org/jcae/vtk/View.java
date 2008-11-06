@@ -139,10 +139,9 @@ public class View extends Canvas {
 			case RECTANGLE_SELECTION:
 				if(currentViewable != null)
 				{
-					if(pressPosition.equals(releasePosition))
-						currentViewable.pointSelection(this, pressPosition);
-					else
-						currentViewable.surfaceSelection(this, pressPosition, releasePosition);
+					PickContext context = new FrustumPicker(this,
+						true, pressPosition, releasePosition);
+					currentViewable.performSelection(context);
 				}
 				setMouseMode(MouseMode.POINT_SELECTION);
 				break;
@@ -153,25 +152,31 @@ public class View extends Canvas {
 					viewable.setClippingPlanes(planes);
 				setMouseMode(MouseMode.POINT_SELECTION);
 				RenderSecured();
-		}
-		
-		// If the press and release positions are not close, this is
-		// not a selection
-		if(pressPosition.distance(releasePosition) > 5.)
-			return;
-		
-		switch(mouseMode)
-		{
+				break;
 			case POINT_SELECTION:
+				// If the press and release positions are not close, this is
+				// not a selection
+				if(pressPosition.distance(releasePosition) > 5.)
+					return;
 				if(currentViewable != null)
 				{
 					if (!currentViewable.appendSelection)
 						currentViewable.unselectAll();
-					currentViewable.pointSelection(this, releasePosition);
+					PickContext context = new RayPicker(this,
+							true, pressPosition);
+					if (currentViewable.getPixelTolerance() != 0)
+						context = new FrustumPicker((RayPicker) context,
+							currentViewable.getPixelTolerance());
+					currentViewable.performSelection(context);
 				}
 				break;
 			case CHANGE_ROTATION_CENTER:
+				// If the press and release positions are not close, this is
+				// not a selection
+				if(pressPosition.distance(releasePosition) > 5.)
+					return;
 				cameraManager.centerRotationSelection(releasePosition);
+				break;
 		}
 	}
 
@@ -218,8 +223,8 @@ public class View extends Canvas {
 
 	public void setMouseMode(MouseMode mode)
 	{
-		boolean actualIsPoint = this.mouseMode == MouseMode.POINT_SELECTION ||
-				this.mouseMode == MouseMode.CHANGE_ROTATION_CENTER;
+		boolean actualIsPoint = mouseMode == MouseMode.POINT_SELECTION ||
+				mouseMode == MouseMode.CHANGE_ROTATION_CENTER;
 
 		boolean futureIsPoint = mode == MouseMode.POINT_SELECTION ||
 				mode == MouseMode.CHANGE_ROTATION_CENTER;
@@ -235,7 +240,7 @@ public class View extends Canvas {
 			getIren().SetInteractorStyle(new vtkInteractorStyleTrackballCamera());
 		}
 
-		this.mouseMode = mode;
+		mouseMode = mode;
 	}
 
 	
