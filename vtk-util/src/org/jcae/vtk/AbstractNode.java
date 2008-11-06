@@ -124,9 +124,6 @@ public abstract class AbstractNode
 	// Useful for debugging
 	private String debugName;
 
-	@Deprecated
-	protected int[] selectionPoint = new int[0];
-
 	protected boolean visible = true;
 	protected boolean selected;
 	protected boolean pickable;
