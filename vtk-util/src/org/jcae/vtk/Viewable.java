@@ -300,14 +300,14 @@ public abstract class Viewable extends MultiCanvas
 	}
 
 	@Override
-	protected void addNode(AbstractNode node)
+	void addNode(AbstractNode node)
 	{
 		super.addNode(node);
 		scene.addNode(node);
 	}
 
 	@Override
-	protected void removeNode(AbstractNode node)
+	void removeNode(AbstractNode node)
 	{
 		scene.removeNode(node);
 		super.removeNode(node);
