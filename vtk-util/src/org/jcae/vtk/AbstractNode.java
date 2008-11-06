@@ -101,7 +101,7 @@ public abstract class AbstractNode
 {
 	private final static Logger LOGGER = Logger.getLogger(AbstractNode.class.getName());
 	/** Parent node */
-	protected AbstractNode parent;
+	protected Node parent;
 	private final ArrayList<ActorListener> actorListeners = new ArrayList<ActorListener>();
 	/** Flag to tell if this node is a manager */
 	private boolean manager;
@@ -215,7 +215,7 @@ public abstract class AbstractNode
 	 * 
 	 * @param parent parent node
 	 */
-	protected AbstractNode(AbstractNode parent)
+	protected AbstractNode(Node parent)
 	{
 		this.parent = parent;
 		if(parent != null)
@@ -226,13 +226,11 @@ public abstract class AbstractNode
 		}
 	}
 
-	public AbstractNode getParent()
+	public Node getParent()
 	{
 		return parent;
 	}
 	
-	protected abstract void addChild(AbstractNode parent);
-
 	public abstract List<LeafNode> getLeaves();
 
 	/**

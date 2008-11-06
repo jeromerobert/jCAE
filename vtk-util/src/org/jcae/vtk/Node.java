@@ -114,7 +114,7 @@ public class Node extends AbstractNode
 		}
 	}
 
-	public Node(AbstractNode parent)
+	public Node(Node parent)
 	{
 		// Make it to not make a course...
 		super(null);

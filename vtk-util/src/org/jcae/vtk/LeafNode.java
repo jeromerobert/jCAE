@@ -185,18 +185,13 @@ public class LeafNode extends AbstractNode
 	private DataProvider dataProvider;
 	private long timeDataCreated;
 	
-	public LeafNode(AbstractNode parent, DataProvider dataProvider, Color color)
+	public LeafNode(Node parent, DataProvider dataProvider, Color color)
 	{
 		super(parent);
 		this.dataProvider = dataProvider;
 		this.color = color;
 	}
 	
-	protected void addChild(AbstractNode parent)
-	{
-		throw new RuntimeException("Leaves cannot have a child!");
-	}
-
 	public List<LeafNode> getLeaves()
 	{
 		ArrayList<LeafNode> toReturn = new ArrayList<LeafNode>();
