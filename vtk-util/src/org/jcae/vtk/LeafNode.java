@@ -197,17 +197,6 @@ public class LeafNode extends AbstractNode
 		return Collections.singletonList(this);
 	}
 
-	protected LeafNode getNode(int cellID)
-	{
-		if(!isManager())
-			return parent.getNode(cellID);
-		
-		else if(0 <= cellID && cellID < data.GetNumberOfCells())
-			return this;
-		else
-			throw new RuntimeException("cellID out of bounds");
-	}
-	
 	public Color getColor()
 	{
 		return color;

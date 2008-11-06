@@ -373,7 +373,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 				for (int id : idsSorted)
 				{
 					int originalCell = originalCellIDs.GetValue(id);
-					LeafNode leaf = octreeNode.getNode(originalCell);
+					LeafNode leaf = octreeNode.getLeafNodeFromCell(originalCell);
 					selectionNode.add(leaf);
 					pickContext.addToSelectedNodes(leaf);
 					// Stop if we reach the maximal number of leaves

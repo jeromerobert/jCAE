@@ -232,13 +232,6 @@ public abstract class AbstractNode
 	public abstract List<LeafNode> getLeaves();
 
 	/**
-	 * Find the leaf node that contains the cellID
-	 * @param cellID
-	 * @return
-	 */
-	protected abstract LeafNode getNode(int cellID);
-
-	/**
 	 * Set pickable the actor of the node. If the node is not a manager,
 	 * set the parent to be pickable.
 	 * @param pickable

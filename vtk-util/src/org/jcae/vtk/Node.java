@@ -126,18 +126,17 @@ public class Node extends AbstractNode
 		}
 	}
 
-	protected LeafNode getNode(int cellID)
+	LeafNode getLeafNodeFromCell(int cellID)
 	{
 		if (!isManager())
-			return parent.getNode(cellID);
-		else if (0 <= cellID && cellID < data.GetNumberOfCells())
-		{
-			List<LeafNode> leaves = getLeaves();
-			int ID = ((vtkIntArray) data.GetCellData().GetScalars()).GetValue(cellID);
-
-			return leaves.get(ID);
-		} else
+			throw new RuntimeException("Node is not a manager");
+		if (cellID < 0 || cellID >= data.GetNumberOfCells())
 			throw new RuntimeException("cellID out of bounds");
+		
+		List<LeafNode> leaves = getLeaves();
+		int ID = ((vtkIntArray) data.GetCellData().GetScalars()).GetValue(cellID);
+
+		return leaves.get(ID);
 	}
 
 	public void setPickableRecursive(boolean pickable)
@@ -748,7 +747,7 @@ public class Node extends AbstractNode
 
 	void setCellSelection(PickContext pickContext, int [] cellSelection)
 	{
-		if (actor == null)
+		if (!isManager())
 			throw new RuntimeException("The Node has to be a manager to manage the selection");
 
 		int[] ids = ((vtkIntArray) data.GetCellData().GetScalars()).GetJavaArray();
