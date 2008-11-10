@@ -223,7 +223,10 @@ public class Node extends AbstractNode
 	public void applyActorCustomiser()
 	{
 		if(isManager())
+		{
 			super.applyActorCustomiser();
+			return;
+		}
 		
 		for(AbstractNode child : children)
 		{
@@ -236,7 +239,10 @@ public class Node extends AbstractNode
 	public void applyMapperCustomiser()
 	{
 		if(isManager())
+		{
 			super.applyMapperCustomiser();
+			return;
+		}
 		
 		for(AbstractNode child : children)
 		{
@@ -252,6 +258,7 @@ public class Node extends AbstractNode
 		{
 			if(highlighter != null)
 				getActorHighlightedCustomiser().customiseActorHighlighted(highlighter);
+			return;
 		}
 		
 		for(AbstractNode child : children)
@@ -268,6 +275,7 @@ public class Node extends AbstractNode
 		{
 			if(highlighterMapper != null)
 				getMapperHighlightedCustomiser().customiseMapperHighlighted(highlighterMapper);
+			return;
 		}
 		
 		for(AbstractNode child : children)
@@ -281,7 +289,10 @@ public class Node extends AbstractNode
 	public void applyActorSelectionCustomiser()
 	{
 		if(isManager())
+		{
 			super.applyActorSelectionCustomiser();
+			return;
+		}
 		
 		for(AbstractNode child : children)
 		{
@@ -294,7 +305,10 @@ public class Node extends AbstractNode
 	public void applyMapperSelectionCustomiser()
 	{
 		if(isManager())
+		{
 			super.applyMapperSelectionCustomiser();
+			return;
+		}
 		
 		for(AbstractNode child : children)
 		{
