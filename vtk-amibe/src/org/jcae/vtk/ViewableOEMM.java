@@ -148,7 +148,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 			ID++;
 		}
 		octreeNode.refresh();
-		octreeNode.setPickableRecursive(true);
+		octreeNode.setPickable(true);
 		octreePickingActor = octreeNode.getActor();
 		octreePickingActor.VisibilityOff();
 	}

@@ -273,7 +273,7 @@ public abstract class AbstractNode
 
 	/**
 	 * Set pickable the actor of the node. If the node is not a manager,
-	 * set the parent to be pickable.
+	 * it does nothing.
 	 * @param pickable
 	 */
 	public void setPickable(boolean pickable)
@@ -281,11 +281,7 @@ public abstract class AbstractNode
 		this.pickable = pickable;
 		
 		if(actor != null)
-		{
 			actor.SetPickable(Utils.booleanToInt(pickable));
-		}
-		else if(parent != null)
-			parent.setPickable(pickable);
 	}
 
 	public boolean isPickable()

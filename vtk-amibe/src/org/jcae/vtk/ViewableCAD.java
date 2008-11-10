@@ -281,23 +281,23 @@ public class ViewableCAD extends Viewable
 	{
 		this.shapeTypeSelection = shapeTypeSelection;
 
-		vertices.setPickableRecursive(false);
-		edges.setPickableRecursive(false);
-		faces.setPickableRecursive(false);
+		vertices.setPickable(false);
+		edges.setPickable(false);
+		faces.setPickable(false);
 		setPixelTolerance(0);
 		
 		switch(shapeTypeSelection)
 		{
 			case VERTEX:
 				setPixelTolerance(3);
-				vertices.setPickableRecursive(true);
+				vertices.setPickable(true);
 				break;
 			case EDGE:
 				setPixelTolerance(3);
-				edges.setPickableRecursive(true);
+				edges.setPickable(true);
 				break;
 			case FACE:
-				faces.setPickableRecursive(true);
+				faces.setPickable(true);
 				break;
 			default:
 				throw new IllegalStateException();

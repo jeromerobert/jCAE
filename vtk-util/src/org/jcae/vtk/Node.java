@@ -146,17 +146,22 @@ public class Node extends AbstractNode
 		return leaves.get(ID);
 	}
 
-	public void setPickableRecursive(boolean pickable)
+	/**
+	 * Set pickable the actor of the node. If the node is not a manager,
+	 * it processes its children recursively.
+	 * @param pickable
+	 */
+	@Override
+	public void setPickable(boolean pickable)
 	{
-		super.setPickable(pickable);
-		
-		for(AbstractNode child : children)
+		if (isManager())
 		{
-			if(child instanceof Node)
-				((Node)child).setPickableRecursive(pickable);
-			else
-				child.setPickable(pickable);
+			super.setPickable(pickable);
+			return;
 		}
+
+		for(AbstractNode child : children)
+			child.setPickable(pickable);
 	}
 	
 	public List<LeafNode> getLeaves()
