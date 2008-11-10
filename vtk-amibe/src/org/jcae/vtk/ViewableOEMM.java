@@ -29,7 +29,6 @@ import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
-import java.util.HashSet;
 import org.jcae.mesh.oemm.OEMM;
 import vtk.vtkActor;
 import vtk.vtkCellCenterDepthSort;
@@ -49,7 +48,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 	private final OEMM oemm;
 	private final MeshVisuReader reader;
 	private final vtkActor octree;
-	private final vtkActor octreeForPicking;
+	private final vtkActor octreePickingActor;
 	private boolean automaticSelection = false;
 	private final int leafVisibleMax = 10;
 	private final TObjectIntHashMap<LeafNode> nodeToID = new TObjectIntHashMap<LeafNode>();
@@ -66,7 +65,9 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 		reader = new MeshVisuReader(oemm);
 
 		edgesNode = new Node(rootNode);
+		edgesNode.setDebugName("Edges");
 		freeEdgesNode = new Node(rootNode);
+		freeEdgesNode.setDebugName("Free edges");
 
 		// Construct octree
 		float[] nodes = reader.getNodesQuad();
@@ -123,6 +124,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 
 		int ID = 0;
 		octreeNode = new Node(rootNode);
+		octreeNode.setDebugName("Octree");
 		octreeNode.setManager(true);
 		for (int i = 0; i < nodes.length;)
 		{
@@ -130,7 +132,15 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 			System.arraycopy(nodes, i, leafNodes, 0, leafNodes.length);
 			i += leafNodes.length;
 
-			LeafNode.DataProvider dataLeaf = new LeafNode.DataProvider();
+			LeafNode.DataProvider dataLeaf = new LeafNode.DataProvider() {
+				@Override
+				public void unLoad()
+				{
+					// By default, unLoad delete datas, but
+					// we need them in Scene.selectAllNodes
+				}
+				
+			};
 			dataLeaf.setNodes(leafNodes);
 			dataLeaf.setPolys(quadsLeaf.length / 5, quadsLeaf);
 			LeafNode leaf = new LeafNode(octreeNode, dataLeaf, Color.BLUE);
@@ -139,8 +149,8 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 		}
 		octreeNode.refresh();
 		octreeNode.setPickableRecursive(true);
-		octreeForPicking = octreeNode.getActor();
-		octreeForPicking.VisibilityOff();
+		octreePickingActor = octreeNode.getActor();
+		octreePickingActor.VisibilityOff();
 	}
 
 	public boolean isOctreeVisible()
@@ -303,12 +313,12 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 	{
 		if (!automaticSelection || rendering)
 			return;
-
+		
 		Canvas canvas = Utils.retrieveCanvas(e);
 		PickContext pickContext = new FrustumPicker(canvas, true,
-			new Point(0,0),
+			new Point(0, 0),
 			new Point(canvas.getWidth(), canvas.getHeight()));
-		performSelection(pickContext);
+		performAutomaticSelection(pickContext);
 	}
 
 	public void mouseMoved(MouseEvent e)
@@ -316,33 +326,15 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 		// Do nothing
 	}
 
-	@Override
-	void performSelection(PickContext pickContext)
+	private void performAutomaticSelection(PickContext pickContext)
 	{
 		int [] pressPosition = pickContext.getPressPosition();
 		int [] releasePosition = pickContext.getReleasePosition();
-		if (pressPosition[0] == releasePosition[0] && pressPosition[1] == releasePosition[1])
-		{
-			octreeForPicking.VisibilityOn();
-			octreeForPicking.PickableOn();
-			super.performSelection(pickContext);
-			octreeForPicking.VisibilityOff();
-			return;
-		}
-
 		Canvas canvas = pickContext.getCanvas();
-		if (automaticSelection)
-		{
-			// Set the surfaceSelection on all the canvas
-			pressPosition[0] = 0;
-			pressPosition[1] = 0;
-			releasePosition[0] = canvas.getWidth();
-			releasePosition[1] = canvas.getHeight();
-		}
 
 		vtkExtractSelectedFrustum selector = new vtkExtractSelectedFrustum();
 
-		vtkDataSet dataSet = octreeForPicking.GetMapper().GetInputAsDataSet();
+		vtkDataSet dataSet = octreePickingActor.GetMapper().GetInputAsDataSet();
 		selector.SetInput(dataSet);
 		selector.CreateFrustum(Utils.computeVerticesFrustum(
 			pressPosition[0], pressPosition[1],
@@ -364,34 +356,62 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 		sorter.InitTraversal();
 		unlockCanvas();
 
-		synchronized (selectionNode)
+		vtkIdTypeArray ids = null;
+		boolean full = false;
+		while ((ids = sorter.GetNextCells()) != null && !full)
 		{
-			selectionNode = new HashSet<LeafNode>(leafVisibleMax);
-			vtkIdTypeArray ids = null;
-			boolean full = false;
-
-			while ((ids = sorter.GetNextCells()) != null && !full)
+			int[] idsSorted = Utils.getValues(ids);
+			vtkIdTypeArray originalCellIDs = (vtkIdTypeArray) data.GetCellData().GetArray("vtkOriginalCellIds");
+			for (int id : idsSorted)
 			{
-				int[] idsSorted = Utils.getValues(ids);
-				vtkIdTypeArray originalCellIDs = (vtkIdTypeArray) data.GetCellData().GetArray("vtkOriginalCellIds");
-				for (int id : idsSorted)
+				int originalCell = originalCellIDs.GetValue(id);
+				LeafNode leaf = octreeNode.getLeafNodeFromCell(originalCell);
+				pickContext.addToSelectedNodes(leaf);
+				// Stop if we reach the maximal number of leaves
+				if (pickContext.getSelectedNodes().size() >= leafVisibleMax)
 				{
-					int originalCell = originalCellIDs.GetValue(id);
-					LeafNode leaf = octreeNode.getLeafNodeFromCell(originalCell);
-					selectionNode.add(leaf);
-					pickContext.addToSelectedNodes(leaf);
-					// Stop if we reach the maximal number of leaves
-					if (selectionNode.size() >= leafVisibleMax)
-					{
-						full = true;
-						break;
-					}
+					full = true;
+					break;
 				}
 			}
 		}
 		selectionChanged = true;
-		
+		synchronized (selectionNode)
+		{
+			selectionNode = pickContext.getSelectedNodes();
+		}
 		manageSelection(pickContext);
 	}
+	
+	@Override
+	void performSelection(PickContext pickContext)
+	{
+		int [] pressPosition = pickContext.getPressPosition();
+		int [] releasePosition = pickContext.getReleasePosition();
+		if (pressPosition[0] != releasePosition[0] || pressPosition[1] != releasePosition[1])
+		{
+			// In this viewable, we want to select hidden nodes
+			pickContext = new FrustumPicker(pickContext.getCanvas(),
+				false,
+				new Point(pressPosition[0], pressPosition[1]),
+				new Point(releasePosition[0], releasePosition[1]));
+		}
+		
+		octreePickingActor.VisibilityOn();
+		octreePickingActor.PickableOn();
+		super.performSelection(pickContext);
+		octreePickingActor.VisibilityOff();
+		octreePickingActor.PickableOff();
+	}
+
+	@Override
+	protected void manageSelection(PickContext pickContext)
+	{
+		synchronized(selectionNode)
+		{
+			super.manageSelection(pickContext);
+		}
+	}
+	
 
 }
