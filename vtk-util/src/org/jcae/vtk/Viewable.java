@@ -258,8 +258,13 @@ public abstract class Viewable extends MultiCanvas
 		for (LeafNode node : pickContext.getSelectedNodes())
 		{
 			// If already selected, we are in append mode, then delete it
-			if (!newSelection.add(node))
+			if (newSelection.add(node))
+				node.select();
+			else
+			{
 				newSelection.remove(node);
+				node.unselect();
+			}
 			
 			// Clear cell selection
 			node.clearCellSelection();
@@ -294,8 +299,10 @@ public abstract class Viewable extends MultiCanvas
 	{
 		for (LeafNode leaf : selectionCell.keySet())
 			leaf.clearCellSelection();
-
 		selectionCell.clear();
+		
+		for (LeafNode leaf : selectionNode)
+			leaf.unselect();
 		selectionNode.clear();
 	}
 
@@ -318,15 +325,6 @@ public abstract class Viewable extends MultiCanvas
 		// Highlight selected cells
 		rootNode.highlightSelection();
 		
-		// Tag nodes as being selected or not
-		for (LeafNode leaf : rootNode.getLeaves())
-		{
-			if (selectionNode.contains(leaf))
-				leaf.select();
-			else
-				leaf.unselect();
-		}
-
 		// Refresh viewable
 		rootNode.refresh();
 		render();
