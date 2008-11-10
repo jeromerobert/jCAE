@@ -20,9 +20,9 @@
 package org.jcae.vtk;
 
 
-import gnu.trove.TIntArrayList;
 import gnu.trove.TLongObjectHashMap;
-import gnu.trove.TObjectByteHashMap;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.geometry.BoundingBox;
@@ -54,11 +54,10 @@ public class Scene implements AbstractNode.ActorListener
 	
 	/**
 	 * Store the previous pickability of the scene.
-	 * 1 means the node is pickable
-	 * -1 means the node is not pickable
-	 * other value means we don't know
+	 * Boolean.TRUE means the node is pickable
+	 * Boolean.FALSE means the node is not pickable
 	 */
-	private TObjectByteHashMap<AbstractNode> pickBackup = null;
+	private Map<AbstractNode, Boolean> pickBackup;
 
 	public Scene()
 	{
@@ -103,27 +102,22 @@ public class Scene implements AbstractNode.ActorListener
 		AbstractNode[] nodes = getNodes();
 		
 		if (pickable)
+		{
 			for (AbstractNode node : nodes)
 			{
 				boolean isPickable = pickable;
-				if (pickBackup != null)
-				{
-					byte pickability = pickBackup.get(node);
-					if (pickability == 1)
-						isPickable = true;
-					else if (pickability == -1)
-						isPickable = false;
-				}
+				if (pickBackup != null && pickBackup.containsKey(node))
+					isPickable = pickBackup.get(node).booleanValue();
 				node.setPickable(isPickable);
 			}
+		}
 		else
 		{
-			pickBackup = new TObjectByteHashMap<AbstractNode>(nodes.length);
+			pickBackup = new HashMap<AbstractNode, Boolean>(nodes.length);
 
 			for (AbstractNode node : nodes)
 			{
-				byte isPickable = (node.isPickable()) ? (byte) 1 : (byte) -1;
-				pickBackup.put(node, isPickable);
+				pickBackup.put(node, Boolean.valueOf(node.isPickable()));
 				node.setPickable(false);
 			}
 		}
