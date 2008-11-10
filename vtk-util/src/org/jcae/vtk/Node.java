@@ -543,14 +543,25 @@ public class Node extends AbstractNode
 	// Must always be called after refreshData
 	private void refreshActor()
 	{
-		if(actor != null)
-			return;
-		actor = new vtkActor();
-		getActorCustomiser().customiseActor(actor);
+		if (LOGGER.isLoggable(Level.FINEST))
+			LOGGER.finest("Refresh actor for "+this);
+
+		boolean actorCreated = (actor == null);
+		if(actorCreated)
+		{
+			actor = new vtkActor();
+			getActorCustomiser().customiseActor(actor);	
+		}
 		actor.SetMapper(mapper);
 		actor.SetVisibility(Utils.booleanToInt(visible));
 		actor.SetPickable(Utils.booleanToInt(pickable));
-		fireActorCreated(actor);
+		
+		if (actorCreated)
+		{
+			fireActorCreated(actor);
+			if (LOGGER.isLoggable(Level.FINEST))
+				LOGGER.log(Level.FINEST, "New actor created:  "+actor);
+		}
 	}
 
 	@Override
@@ -623,11 +634,10 @@ public class Node extends AbstractNode
 		}
 		else
 		{
-			boolean actorCreated = false;
+			boolean actorCreated = (highlighter == null);
 			
-			if (highlighter == null)
+			if (actorCreated)
 			{
-				actorCreated = true;
 				highlighter = new vtkActor();
 				highlighter.PickableOff();
 				

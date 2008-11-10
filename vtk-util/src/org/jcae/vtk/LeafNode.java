@@ -274,14 +274,24 @@ public class LeafNode extends AbstractNode
 	// Must always be called after refreshData
 	private void refreshActor()
 	{
-		if(actor == null)
+		if (LOGGER.isLoggable(Level.FINEST))
+			LOGGER.log(Level.FINEST, "Refresh actor for "+this);
+
+		boolean actorCreated = (actor == null);
+		if(actorCreated)
 		{
 			actor = new vtkActor();
 			getActorCustomiser().customiseActor(actor);
-			actor.SetMapper(mapper);
-			actor.SetVisibility(Utils.booleanToInt(visible));
-			actor.SetPickable(Utils.booleanToInt(pickable));
+		}
+		actor.SetMapper(mapper);
+		actor.SetVisibility(Utils.booleanToInt(visible));
+		actor.SetPickable(Utils.booleanToInt(pickable));
+
+		if (actorCreated)
+		{
 			fireActorCreated(actor);
+			if (LOGGER.isLoggable(Level.FINEST))
+				LOGGER.log(Level.FINEST, "New actor created:  "+actor);
 		}
 
 		if (LOGGER.isLoggable(Level.FINEST))
