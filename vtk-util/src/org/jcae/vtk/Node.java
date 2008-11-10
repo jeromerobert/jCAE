@@ -337,7 +337,7 @@ public class Node extends AbstractNode
 			return;
 		}
 
-		if (lastUpdate <= getModificationTime())
+		if (lastUpdate <= modificationTime)
 		{
 			refreshData();
 			refreshActor();
@@ -346,7 +346,7 @@ public class Node extends AbstractNode
 		{
 			for (LeafNode leaf : getLeaves())
 			{
-				if (lastUpdate <= leaf.getModificationTime())
+				if (lastUpdate <= leaf.modificationTime)
 				{
 					refreshData();
 					refreshActor();

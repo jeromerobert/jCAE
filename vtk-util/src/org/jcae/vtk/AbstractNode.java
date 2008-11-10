@@ -486,11 +486,6 @@ public abstract class AbstractNode
 		modified();
 	}
 	
-	protected long getModificationTime()
-	{
-		return modificationTime;
-	}
-	
 	public void modified()
 	{
 		modificationTime = System.nanoTime();
