@@ -52,9 +52,16 @@ public class Node extends AbstractNode
 	private int nbrOfVertices;
 	private int nbrOfLines;
 	private int nbrOfPolys;
-	private vtkLookupTable table;
+	
+	// When a Node is managing, geometry for all leaves is contained in
+	// AbstractNode.actor.  Thus it can not be used to highlight only some
+	// leaves, another vtkActor is needed for this purpose.
+	// FIXME: See how to use selectionHighlighter instead of a new vtkActor
 	private vtkActor highlighter;
 	private vtkPolyDataMapper highlighterMapper;
+	// Lookup table for color of leaves
+	private vtkLookupTable table;
+	
 	private ArrayList<ChildCreationListener> childCreationListeners = new ArrayList<ChildCreationListener>();
 
 	private static class NodeData extends LeafNode.DataProvider
@@ -226,22 +233,11 @@ public class Node extends AbstractNode
 	}
 
 	@Override
-	public void applyActorSelectionCustomiser()
-	{
-		if(isManager())
-			super.applyActorSelectionCustomiser();
-		for(AbstractNode child : children)
-		{
-			child.setActorSelectionCustomiser(actorSelectionCustomiser);
-			child.applyActorSelectionCustomiser();
-		}
-	}
-
-	@Override
 	public void applyMapperCustomiser()
 	{
 		if(isManager())
 			super.applyMapperCustomiser();
+		
 		for(AbstractNode child : children)
 		{
 			child.setMapperCustomiser(mapperCustomiser);
@@ -250,22 +246,14 @@ public class Node extends AbstractNode
 	}
 
 	@Override
-	public void applyMapperSelectionCustomiser()
-	{
-		if(isManager())
-			super.applyMapperSelectionCustomiser();
-		for(AbstractNode child : children)
-		{
-			child.setMapperSelectionCustomiser(mapperSelectionCustomiser);
-			child.applyMapperSelectionCustomiser();
-		}
-	}
-	
-	@Override
 	public void applyActorHighlightedCustomiser()
 	{
-		if(highlighter != null)
-			getActorHighlightedCustomiser().customiseActorHighlighted(highlighter);
+		if (isManager())
+		{
+			if(highlighter != null)
+				getActorHighlightedCustomiser().customiseActorHighlighted(highlighter);
+		}
+		
 		for(AbstractNode child : children)
 		{
 			child.setActorHighlightedCustomiser(actorHighlightedCustomiser);
@@ -276,8 +264,12 @@ public class Node extends AbstractNode
 	@Override
 	public void applyMapperHighlightedCustomiser()
 	{
-		if(highlighterMapper != null)
-			getMapperHighlightedCustomiser().customiseMapperHighlighted(highlighterMapper);
+		if (isManager())
+		{
+			if(highlighterMapper != null)
+				getMapperHighlightedCustomiser().customiseMapperHighlighted(highlighterMapper);
+		}
+		
 		for(AbstractNode child : children)
 		{
 			child.setMapperHighlightedCustomiser(mapperHighlightedCustomiser);
@@ -285,6 +277,32 @@ public class Node extends AbstractNode
 		}
 	}
 
+	@Override
+	public void applyActorSelectionCustomiser()
+	{
+		if(isManager())
+			super.applyActorSelectionCustomiser();
+		
+		for(AbstractNode child : children)
+		{
+			child.setActorSelectionCustomiser(actorSelectionCustomiser);
+			child.applyActorSelectionCustomiser();
+		}
+	}
+
+	@Override
+	public void applyMapperSelectionCustomiser()
+	{
+		if(isManager())
+			super.applyMapperSelectionCustomiser();
+		
+		for(AbstractNode child : children)
+		{
+			child.setMapperSelectionCustomiser(mapperSelectionCustomiser);
+			child.applyMapperSelectionCustomiser();
+		}
+	}
+	
 	@Override
 	public void setVisible(boolean visible)
 	{

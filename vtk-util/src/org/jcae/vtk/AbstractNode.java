@@ -133,47 +133,67 @@ public abstract class AbstractNode
 		void actorCreated(AbstractNode node, vtkActor actor);
 		void actorDeleted(AbstractNode node, vtkActor actor);
 	}
-		
+	
+	/**
+	 * Customise actor when node is not selected.
+	 */
 	public interface ActorCustomiser
 	{
 		void customiseActor(vtkActor actor);
 	}
 	
-	public interface ActorHighlightedCustomiser
-	{
-		void customiseActorHighlighted(vtkActor actor);
-	}
-	
+	/**
+	 * Customise mapper when node is not selected.
+	 */
 	public interface MapperCustomiser
 	{
 		void customiseMapper(vtkMapper mapper);
 	}
 	
+	/**
+	 * Customise actor when node is selected.
+	 */
+	public interface ActorHighlightedCustomiser
+	{
+		void customiseActorHighlighted(vtkActor actor);
+	}
+	
+	/**
+	 * Customise mapper when node is selected.
+	 */
 	public interface MapperHighlightedCustomiser
 	{
 		void customiseMapperHighlighted(vtkMapper mapper);
 	}
 	
+	/**
+	 * Customise actor when cells of this node are selected.
+	 */
 	public interface ActorSelectionCustomiser
 	{
 		void customiseActorSelection(vtkActor actor);
 	}
 	
+	/**
+	 * Customise mapper when cells of this node are selected.
+	 */
 	public interface MapperSelectionCustomiser
 	{
 		void customiseMapperSelection(vtkMapper mapper);
 	}
 	
+	/**
+	 * Default actor customiser, it does nothing.
+	 */
 	public static ActorCustomiser DEFAULT_ACTOR_CUSTOMISER =
 		new ActorCustomiser()
 		{
 			public void customiseActor(vtkActor actor) {}
 		};
-	public static ActorHighlightedCustomiser DEFAULT_ACTOR_HIGHLIGHTED_CUSTOMISER =
-		new ActorHighlightedCustomiser()
-		{
-			public void customiseActorHighlighted(vtkActor actor) {}
-		};
+		
+	/**
+	 * Default mapper customiser, it calls vtkMapper.SetResolveCoincidentTopologyToPolygonOffset.
+	 */
 	public static MapperCustomiser DEFAULT_MAPPER_CUSTOMISER =
 		new MapperCustomiser()
 		{
@@ -183,16 +203,37 @@ public abstract class AbstractNode
 				mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffsetFactor(), Utils.getOffsetValue());
 			}
 		};
+
+	/**
+	 * Default actor customiser when node is selected, it does nothing.
+	 */
+	public static ActorHighlightedCustomiser DEFAULT_ACTOR_HIGHLIGHTED_CUSTOMISER =
+		new ActorHighlightedCustomiser()
+		{
+			public void customiseActorHighlighted(vtkActor actor) {}
+		};
+	
+	/**
+	 * Default mapper customiser when node is selected, it does nothing.
+	 */
 	public static MapperHighlightedCustomiser DEFAULT_MAPPER_HIGHLIGHTED_CUSTOMISER =
 		new MapperHighlightedCustomiser()
 		{
 			public void customiseMapperHighlighted(vtkMapper mapper) {}
 		};
+
+	/**
+	 * Default actor customiser when cells of this node are selected, it does nothing.
+	 */
 	public static ActorSelectionCustomiser DEFAULT_ACTOR_SELECTION_CUSTOMISER =
 		new ActorSelectionCustomiser()
 		{
 			public void customiseActorSelection(vtkActor actor) {}
 		};
+	
+	/**
+	 * Default mapper customiser when cells of this node are selected, it does nothing.
+	 */
 	public static MapperSelectionCustomiser DEFAULT_MAPPER_SELECTION_CUSTOMISER =
 		new MapperSelectionCustomiser()
 		{
@@ -200,9 +241,11 @@ public abstract class AbstractNode
 		};
 	
 	protected ActorCustomiser actorCustomiser;
-	protected ActorHighlightedCustomiser actorHighlightedCustomiser;
 	protected MapperCustomiser mapperCustomiser;
+	
+	protected ActorHighlightedCustomiser actorHighlightedCustomiser;
 	protected MapperHighlightedCustomiser mapperHighlightedCustomiser;
+	
 	protected ActorSelectionCustomiser actorSelectionCustomiser;
 	protected MapperSelectionCustomiser mapperSelectionCustomiser;
 
@@ -334,6 +377,9 @@ public abstract class AbstractNode
 		this.mapperSelectionCustomiser = mapperSelectionCustomiser;
 	}
 
+	/**
+	 * Apply current ActorCustomiser to actor if this leaf is not selected.
+	 */
 	public void applyActorCustomiser()
 	{
 		if(!isSelected() && actor != null)
@@ -346,9 +392,17 @@ public abstract class AbstractNode
 			getMapperCustomiser().customiseMapper(mapper);
 	}
 	
-	public abstract void applyActorHighlightedCustomiser();
-	
-	public abstract void applyMapperHighlightedCustomiser();
+	public void applyActorHighlightedCustomiser()
+	{
+		if(isSelected() && actor != null)
+			getActorHighlightedCustomiser().customiseActorHighlighted(actor);
+	}
+
+	public void applyMapperHighlightedCustomiser()
+	{
+		if(isSelected() && mapper != null)
+			getMapperHighlightedCustomiser().customiseMapperHighlighted(mapper);
+	}
 	
 	public void applyActorSelectionCustomiser()
 	{

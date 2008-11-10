@@ -244,7 +244,6 @@ public class LeafNode extends AbstractNode
 		checkData();
 		if (lastUpdate <= modificationTime)
 		{
-			//System.out.println("REFRESH ACTOR !");
 			LOGGER.finest("Refresh actor: "+lastUpdate+" <= "+modificationTime);
 			refreshActor();
 		}
@@ -281,20 +280,6 @@ public class LeafNode extends AbstractNode
 			refreshData();
 	}
 
-	@Override
-	public void applyActorHighlightedCustomiser()
-	{
-		if(isSelected() && actor != null)
-			getActorHighlightedCustomiser().customiseActorHighlighted(actor);
-	}
-
-	@Override
-	public void applyMapperHighlightedCustomiser()
-	{
-		if(isSelected() && mapper != null)
-			getMapperHighlightedCustomiser().customiseMapperHighlighted(mapper);
-	}
-	
 	protected void manageHighlight()
 	{
 		if (selectionTime() <= lastUpdate)
