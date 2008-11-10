@@ -359,16 +359,6 @@ public class Node extends AbstractNode
 		lastUpdate = System.nanoTime();
 	}
 
-	@Override
-	protected void refreshMapper()
-	{
-		super.refreshMapper();
-		mapper.SetLookupTable(table);
-		mapper.UseLookupTableScalarRangeOn();
-		mapper.SetScalarModeToUseCellData();
-		getMapperCustomiser().customiseMapper(mapper);
-	}
-
 	private void refreshData()
 	{
 		// Compute the sizes
@@ -534,6 +524,28 @@ public class Node extends AbstractNode
 		vtkIntArray idsNative = new vtkIntArray();
 		idsNative.SetJavaArray(ids);
 		data.GetCellData().SetScalars(idsNative);
+
+		if(mapper == null)
+			mapper = new vtkPolyDataMapper();
+		getMapperCustomiser().customiseMapper(mapper);
+		mapper.SetInput(data);
+		mapper.Update();		
+		mapper.SetLookupTable(table);
+		mapper.UseLookupTableScalarRangeOn();
+		mapper.SetScalarModeToUseCellData();
+	}
+
+	// Must always be called after refreshData
+	private void refreshActor()
+	{
+		if(actor != null)
+			return;
+		actor = new vtkActor();
+		getActorCustomiser().customiseActor(actor);
+		actor.SetMapper(mapper);
+		actor.SetVisibility(Utils.booleanToInt(visible));
+		actor.SetPickable(Utils.booleanToInt(pickable));
+		fireActorCreated(actor);
 	}
 
 	@Override

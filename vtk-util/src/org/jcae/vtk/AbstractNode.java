@@ -498,34 +498,6 @@ public abstract class AbstractNode
 	
 	protected abstract void refresh();
 	
-	protected void refreshMapper()
-	{
-		mapper.SetInput(data);
-		mapper.Update();
-	}
-	
-	protected void refreshActor()
-	{
-		boolean actorCreated = false;
-		
-		if(actor == null)
-		{
-			actorCreated = true;
-			actor = new vtkActor();
-			getActorCustomiser().customiseActor(actor);
-			mapper = new vtkPolyDataMapper();
-			getMapperCustomiser().customiseMapper(mapper);
-			actor.SetMapper(mapper);
-			actor.SetVisibility(Utils.booleanToInt(visible));
-			actor.SetPickable(Utils.booleanToInt(pickable));
-		}
-		refreshMapper();
-
-		// Call fire after the map creation
-		if(actorCreated)
-			fireActorCreated(actor);
-	}
-	
 	protected void createData(LeafNode.DataProvider dataProvider)
 	{
 		data = new vtkPolyData();

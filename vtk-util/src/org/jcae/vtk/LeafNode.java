@@ -263,12 +263,27 @@ public class LeafNode extends AbstractNode
 		
 		modified();
 		timeDataCreated = System.nanoTime();
+
+		if(mapper == null)
+			mapper = new vtkPolyDataMapper();
+		getMapperCustomiser().customiseMapper(mapper);
+		mapper.SetInput(data);
+		mapper.Update();
 	}
 
-	@Override
-	protected void refreshActor()
+	// Must always be called after refreshData
+	private void refreshActor()
 	{
-		super.refreshActor();
+		if(actor == null)
+		{
+			actor = new vtkActor();
+			getActorCustomiser().customiseActor(actor);
+			actor.SetMapper(mapper);
+			actor.SetVisibility(Utils.booleanToInt(visible));
+			actor.SetPickable(Utils.booleanToInt(pickable));
+			fireActorCreated(actor);
+		}
+
 		if (LOGGER.isLoggable(Level.FINEST))
 			LOGGER.log(Level.FINEST, "Attach color "+color+" (opacity="+color.getAlpha()+") to actor "+actor);
 		Utils.vtkPropertySetColor(actor.GetProperty(), color);
