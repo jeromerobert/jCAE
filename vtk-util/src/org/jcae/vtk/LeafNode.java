@@ -241,12 +241,14 @@ public class LeafNode extends AbstractNode
 			return;
 		}
 
-		checkData();
+		// Were data modified?
+		if (timeDataCreated < dataProvider.getModifiedTime())
+			refreshData();
+
+		// Was actor modified?
 		if (lastUpdate <= modificationTime)
-		{
-			LOGGER.finest("Refresh actor: "+lastUpdate+" <= "+modificationTime);
 			refreshActor();
-		}
+
 		manageHighlight();
 
 		lastUpdate = System.nanoTime();
@@ -270,13 +272,6 @@ public class LeafNode extends AbstractNode
 		if (LOGGER.isLoggable(Level.FINEST))
 			LOGGER.log(Level.FINEST, "Attach color "+color+" (opacity="+color.getAlpha()+") to actor "+actor);
 		Utils.vtkPropertySetColor(actor.GetProperty(), color);
-	}
-
-	protected void checkData()
-	{
-		// The data was modified ?
-		if (timeDataCreated < dataProvider.getModifiedTime())
-			refreshData();
 	}
 
 	protected void manageHighlight()
