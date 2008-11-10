@@ -359,13 +359,30 @@ public class Node extends AbstractNode
 				}
 			}
 		}
-		manageHighlight();
+		
+		if (lastUpdate <= selectionTime)
+		{
+			refreshHighlight();
+		}
+		else
+		{
+			for (LeafNode leaf : getLeaves())
+			{
+				if (lastUpdate <= leaf.selectionTime)
+				{
+					refreshHighlight();
+					break;
+				}
+			}
+		}
 
 		lastUpdate = System.nanoTime();
 	}
 
 	private void refreshData()
 	{
+		if (LOGGER.isLoggable(Level.FINEST))
+			LOGGER.finest("Refresh data for "+this);
 		// Compute the sizes
 		int nodesSize = 0;
 		int verticesSize = 0;
@@ -587,10 +604,10 @@ public class Node extends AbstractNode
 		return nbrOfVertices + nbrOfLines + nbrOfPolys;
 	}
 
-	protected void manageHighlight()
+	private void refreshHighlight()
 	{
-		if (!isManager())
-			return;
+		if (LOGGER.isLoggable(Level.FINEST))
+			LOGGER.log(Level.FINEST, "Refresh highlight for "+this);
 
 		// If the nodes are selected select all cells of the node
 		TIntArrayList selection = new TIntArrayList(getNbrOfCells());
@@ -628,6 +645,7 @@ public class Node extends AbstractNode
 		{
 			if (highlighter != null)
 			{
+				LOGGER.finest("Clear out previous selection");
 				fireActorDeleted(highlighter);
 				highlighter = null;
 			}
@@ -652,34 +670,29 @@ public class Node extends AbstractNode
 			getMapperHighlightedCustomiser().customiseMapperHighlighted(highlighterMapper);
 			
 			if (actorCreated)
-			{
 				fireActorCreated(highlighter);
-			}
 		}
 
-		if (lastUpdate <= selectionTime)
+		if (selected)
 		{
-			if (selected)
-			{
-				// The whole actor is selected, so display it
-				// as highlighted.
-				mapper.ScalarVisibilityOff();
-				if(highlighter != null)
-					highlighter.VisibilityOff();
+			// The whole actor is selected, so display it
+			// as highlighted.
+			mapper.ScalarVisibilityOff();
+			if(highlighter != null)
+				highlighter.VisibilityOff();
 
-				getActorHighlightedCustomiser().customiseActorHighlighted(actor);
-				getMapperHighlightedCustomiser().customiseMapperHighlighted(mapper);
-			}
-			else
-			{
-				// Reset original actor colors
-				mapper.ScalarVisibilityOn();
-				getActorCustomiser().customiseActor(actor);
-				getMapperCustomiser().customiseMapper(mapper);
-				// If a part is selected, display it
-				if(highlighter != null)
-					highlighter.VisibilityOn();
-			}
+			getActorHighlightedCustomiser().customiseActorHighlighted(actor);
+			getMapperHighlightedCustomiser().customiseMapperHighlighted(mapper);
+		}
+		else
+		{
+			// Reset original actor colors
+			mapper.ScalarVisibilityOn();
+			getActorCustomiser().customiseActor(actor);
+			getMapperCustomiser().customiseMapper(mapper);
+			// If a part is selected, display it
+			if(highlighter != null)
+				highlighter.VisibilityOn();
 		}
 	}
 

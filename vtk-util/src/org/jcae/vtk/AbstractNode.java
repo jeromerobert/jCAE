@@ -556,8 +556,6 @@ public abstract class AbstractNode
 		mapper = null;
 	}
 	
-	protected abstract void manageHighlight();
-			
 	public abstract void highlightSelection();
 
 	protected void unHighlightSelection()

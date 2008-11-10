@@ -241,6 +241,9 @@ public class LeafNode extends AbstractNode
 			return;
 		}
 
+		if (LOGGER.isLoggable(Level.FINER))
+			LOGGER.log(Level.FINER, "Refreshing leaf: "+this);
+		
 		// Were data modified?
 		if (timeDataCreated < dataProvider.getModifiedTime())
 			refreshData();
@@ -249,14 +252,18 @@ public class LeafNode extends AbstractNode
 		if (lastUpdate <= modificationTime)
 			refreshActor();
 
-		manageHighlight();
+		// Did selection happen?
+		if (lastUpdate <= selectionTime)
+			refreshHighlight();
 
 		lastUpdate = System.nanoTime();
 	}
 
 	private void refreshData()
 	{
-		LOGGER.finest("Refresh data, old creation date="+timeDataCreated);
+		if (LOGGER.isLoggable(Level.FINEST))
+			LOGGER.log(Level.FINEST, "Refresh data for "+this);
+
 		dataProvider.load();
 		createData(dataProvider);
 		dataProvider.unLoad();
@@ -299,10 +306,10 @@ public class LeafNode extends AbstractNode
 		Utils.vtkPropertySetColor(actor.GetProperty(), color);
 	}
 
-	protected void manageHighlight()
+	private void refreshHighlight()
 	{
-		if (selectionTime <= lastUpdate)
-			return;
+		if (LOGGER.isLoggable(Level.FINEST))
+			LOGGER.log(Level.FINEST, "Refresh highlight for "+this);
 
 		if (selected)
 		{
