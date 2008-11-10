@@ -647,33 +647,30 @@ public class Node extends AbstractNode
 			}
 		}
 
-		if (lastUpdate <= selectionTime())
+		if (lastUpdate <= selectionTime)
 		{
-			if (this.isSelected())
-				highlight();
+			if (selected)
+			{
+				// The whole actor is selected, so display it
+				// as highlighted.
+				mapper.ScalarVisibilityOff();
+				if(highlighter != null)
+					highlighter.VisibilityOff();
+
+				getActorHighlightedCustomiser().customiseActorHighlighted(actor);
+				getMapperHighlightedCustomiser().customiseMapperHighlighted(mapper);
+			}
 			else
-				unHighlight();
+			{
+				// Reset original actor colors
+				mapper.ScalarVisibilityOn();
+				getActorCustomiser().customiseActor(actor);
+				getMapperCustomiser().customiseMapper(mapper);
+				// If a part is selected, display it
+				if(highlighter != null)
+					highlighter.VisibilityOn();
+			}
 		}
-	}
-
-	@Override
-	protected void highlight()
-	{
-		mapper.ScalarVisibilityOff();
-		if(highlighter != null)
-			highlighter.VisibilityOff();
-
-		super.highlight();
-	}
-
-	@Override
-	protected void unHighlight()
-	{
-		mapper.ScalarVisibilityOn();
-		if(highlighter != null)
-			highlighter.VisibilityOn();
-		
-		super.unHighlight();
 	}
 
 	public void highlightSelection()

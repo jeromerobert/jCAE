@@ -558,22 +558,6 @@ public abstract class AbstractNode
 	
 	protected abstract void manageHighlight();
 			
-	protected void highlight()
-	{
-		assert actor != null;
-		
-		getActorHighlightedCustomiser().customiseActorHighlighted(actor);
-		getMapperHighlightedCustomiser().customiseMapperHighlighted(mapper);
-	}
-	
-	protected void unHighlight()
-	{
-		assert actor != null;
-		
-		getActorCustomiser().customiseActor(actor);
-		getMapperCustomiser().customiseMapper(mapper);
-	}
-	
 	public abstract void highlightSelection();
 
 	protected void unHighlightSelection()

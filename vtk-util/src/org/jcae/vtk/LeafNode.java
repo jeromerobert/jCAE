@@ -291,24 +291,20 @@ public class LeafNode extends AbstractNode
 
 	protected void manageHighlight()
 	{
-		if (selectionTime() <= lastUpdate)
+		if (selectionTime <= lastUpdate)
 			return;
 
-		if (isSelected())
-			highlight();
-		else
-			unHighlight();
-	}
-
-	@Override
-	protected void unHighlight()
-	{
-		if (actor != null)
+		if (selected)
 		{
-			if (LOGGER.isLoggable(Level.FINEST))
-				LOGGER.log(Level.FINEST, "Unhighlight actor "+actor);
+			getActorHighlightedCustomiser().customiseActorHighlighted(actor);
+			getMapperHighlightedCustomiser().customiseMapperHighlighted(mapper);
+		}
+		else
+		{
+			// Reset original color
 			Utils.vtkPropertySetColor(actor.GetProperty(), color);
 			getActorCustomiser().customiseActor(actor);
+			getMapperCustomiser().customiseMapper(mapper);
 		}
 	}
 
