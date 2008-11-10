@@ -345,17 +345,11 @@ public class LeafNode extends AbstractNode
 	public void highlightSelection()
 	{
 		if (!isManager())
-		{
-			if (selectionHighlighter != null)
-				unHighlightSelection();
- 
 			return;
-		}
 
 		if (selection.length == 0)
 		{
-			if (selectionHighlighter != null)
-				unHighlightSelection();
+			unHighlightSelection();
 			return;
 		}
 
@@ -364,7 +358,8 @@ public class LeafNode extends AbstractNode
 			selectionHighlighter = new vtkActor();
 			selectionHighlighter.PickableOff();
 			getActorSelectionCustomiser().customiseActorSelection(selectionHighlighter);
-			
+			// fireActorCreated is called before creating its mapper
+			// to not take clipping planes into account
 			fireActorCreated(selectionHighlighter);
 		}
 

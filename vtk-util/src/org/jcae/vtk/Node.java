@@ -684,15 +684,15 @@ public class Node extends AbstractNode
 				child.highlightSelection();
 			return;
 		}
-
-		boolean actorCreated = false;
 		
 		if (selectionHighlighter == null)
 		{
-			actorCreated = true;
 			selectionHighlighter = new vtkActor();
 			selectionHighlighter.PickableOff();
 			getActorSelectionCustomiser().customiseActorSelection(selectionHighlighter);
+			// Call fireActorCreated before creating its mapper so
+			// that clipping planes are not taken into account
+			fireActorCreated(selectionHighlighter);
 		}
 
 		selectionHighlighterMapper = new vtkPolyDataMapper();
@@ -726,10 +726,6 @@ public class Node extends AbstractNode
 		
 		getMapperSelectionCustomiser().customiseMapperSelection(selectionHighlighterMapper);
 		
-		if(actorCreated)
-		{
-			fireActorCreated(selectionHighlighter);
-		}
 	}
 
 	private final int nodeIndexToLeafIndex(int leaf, int index)
