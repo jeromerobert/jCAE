@@ -504,8 +504,6 @@ public abstract class AbstractNode
 		mapper.Update();
 	}
 	
-	protected abstract void refreshData();
-	
 	protected void refreshActor()
 	{
 		boolean actorCreated = false;

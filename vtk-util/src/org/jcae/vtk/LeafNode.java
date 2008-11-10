@@ -252,8 +252,7 @@ public class LeafNode extends AbstractNode
 		lastUpdate = System.nanoTime();
 	}
 
-	@Override
-	protected void refreshData()
+	private void refreshData()
 	{
 		LOGGER.finest("Refresh data, old creation date="+timeDataCreated);
 		dataProvider.load();

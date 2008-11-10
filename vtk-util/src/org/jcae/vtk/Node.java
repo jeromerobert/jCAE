@@ -369,8 +369,7 @@ public class Node extends AbstractNode
 		getMapperCustomiser().customiseMapper(mapper);
 	}
 
-	@Override
-	protected void refreshData()
+	private void refreshData()
 	{
 		// Compute the sizes
 		int nodesSize = 0;
