@@ -212,7 +212,11 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 
 
 			if (selection.isEmpty())
+			{
+				if(!automaticSelection)
+					render();
 				return;
+			}
 
 			reader.buildMeshVisu(selection.toArray());
 
