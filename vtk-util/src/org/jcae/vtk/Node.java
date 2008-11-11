@@ -836,12 +836,16 @@ public class Node extends AbstractNode
 			if (!selectionChildren[i].isEmpty())
 				leaves.get(i).setCellSelection(pickContext, selectionChildren[i].toNativeArray());
 		}
+		
+		timestampSelected();
 	}
 	
 	public void clearCellSelection()
 	{
 		for (LeafNode leaf : getLeaves())
 			leaf.clearCellSelection();
+		
+		timestampSelected();
 	}
 
 	@Override

@@ -330,6 +330,7 @@ public class LeafNode extends AbstractNode
 		selection = new int[cellSelection.length];
 		System.arraycopy(cellSelection, 0, selection, 0, cellSelection.length);
 		pickContext.addToSelectedNodes(this);
+		timestampSelected();
 	}
 
 	int [] getCellSelection()
@@ -340,6 +341,7 @@ public class LeafNode extends AbstractNode
 	public void clearCellSelection()
 	{
 		selection = new int[0];
+		timestampSelected();
 	}
 	
 	public boolean hasCellSelection()
