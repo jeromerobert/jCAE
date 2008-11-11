@@ -132,7 +132,7 @@ public class ViewableMesh extends Viewable
 				actor.GetProperty().SetEdgeColor(0.2, 0.2, 0.2);
 			}
 		});
-		rootNode.applyActorCustomiser();
+		rootNode.refresh();
 		render();
 	}
 	/**

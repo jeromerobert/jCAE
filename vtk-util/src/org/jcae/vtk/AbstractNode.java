@@ -330,33 +330,6 @@ public abstract class AbstractNode
 		timestampSelected();
 	}
 
-	/**
-	 * Apply current ActorCustomiser to actor if this leaf is not selected.
-	 */
-	public void applyActorCustomiser()
-	{
-		if(!isSelected() && actor != null)
-			getActorCustomiser().customiseActor(actor);
-	}
-
-	public void applyMapperCustomiser()
-	{
-		if(!isSelected() && mapper != null)
-			getMapperCustomiser().customiseMapper(mapper);
-	}
-	
-	public void applyActorSelectionCustomiser()
-	{
-		if(selectionHighlighter != null)
-			getActorSelectionCustomiser().customiseActorSelection(selectionHighlighter);
-	}
-	
-	public void applyMapperSelectionCustomiser()
-	{
-		if(selectionHighlighterMapper != null)
-			getMapperSelectionCustomiser().customiseMapperSelection(selectionHighlighterMapper);
-	}
-	
 	public ActorCustomiser getActorCustomiser()
 	{
 		if(actorCustomiser != null)
