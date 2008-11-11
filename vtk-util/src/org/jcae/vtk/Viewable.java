@@ -69,16 +69,7 @@ public abstract class Viewable extends MultiCanvas
 
 		addNode(rootNode);
 		rootNode.addChildCreationListener(this);
-		rootNode.setActorHighlightedCustomiser(new ActorHighlightedCustomiser());
 		rootNode.setActorSelectionCustomiser(new ActorSelectionCustomiser());
-	}
-
-	protected class ActorHighlightedCustomiser implements AbstractNode.ActorHighlightedCustomiser
-	{
-		public void customiseActorHighlighted(vtkActor actor)
-		{
-			Utils.vtkPropertySetColor(actor.GetProperty(), selectionColor);
-		}
 	}
 
 	protected class ActorSelectionCustomiser implements AbstractNode.ActorSelectionCustomiser
@@ -293,7 +284,7 @@ public abstract class Viewable extends MultiCanvas
 	}
 
 	/**
-	 * If you want the highlight disappears call highlight...
+	 * If you want the highlight disappears call highlight() afterwards
 	 */
 	protected void unselectAll()
 	{
@@ -322,9 +313,6 @@ public abstract class Viewable extends MultiCanvas
 	
 	public void highlight()
 	{
-		// Highlight selected cells
-		rootNode.highlightSelection();
-		
 		// Refresh viewable
 		rootNode.refresh();
 		render();

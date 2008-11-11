@@ -313,8 +313,11 @@ public class LeafNode extends AbstractNode
 
 		if (selected)
 		{
-			getActorHighlightedCustomiser().customiseActorHighlighted(actor);
-			getMapperHighlightedCustomiser().customiseMapperHighlighted(mapper);
+			// Highlight actor
+			getActorSelectionCustomiser().customiseActorSelection(actor);
+			getMapperSelectionCustomiser().customiseMapperSelection(mapper);
+			
+			deleteSelectionHighlighter();
 		}
 		else
 		{
@@ -322,49 +325,16 @@ public class LeafNode extends AbstractNode
 			Utils.vtkPropertySetColor(actor.GetProperty(), color);
 			getActorCustomiser().customiseActor(actor);
 			getMapperCustomiser().customiseMapper(mapper);
+			
+			refreshSelectionHighlighter();
 		}
 	}
 
-	void setCellSelection(PickContext pickContext, int [] cellSelection)
+	private void refreshSelectionHighlighter()
 	{
-		selection = new int[cellSelection.length];
-		System.arraycopy(cellSelection, 0, selection, 0, cellSelection.length);
-		pickContext.addToSelectedNodes(this);
-		timestampSelected();
-	}
-
-	int [] getCellSelection()
-	{
-		return selection;
-	}
-
-	public void clearCellSelection()
-	{
-		selection = new int[0];
-		timestampSelected();
-	}
-	
-	public boolean hasCellSelection()
-	{
-		return selection.length != 0;
-	}
-	
-	@Override
-	public void select()
-	{
-		selection = new int[0];
-		
-		super.select();
-	}
-
-	public void highlightSelection()
-	{
-		if (!isManager())
-			return;
-
 		if (selection.length == 0)
 		{
-			unHighlightSelection();
+			deleteSelectionHighlighter();
 			return;
 		}
 
@@ -401,7 +371,38 @@ public class LeafNode extends AbstractNode
 		selFilter.Update();
 
 		selectionHighlighterMapper.SetInput(dataFiltered);
-		
-		getMapperSelectionCustomiser().customiseMapperSelection(selectionHighlighterMapper);
 	}
+
+	void setCellSelection(PickContext pickContext, int [] cellSelection)
+	{
+		selection = new int[cellSelection.length];
+		System.arraycopy(cellSelection, 0, selection, 0, cellSelection.length);
+		pickContext.addToSelectedNodes(this);
+		timestampSelected();
+	}
+
+	int [] getCellSelection()
+	{
+		return selection;
+	}
+
+	public void clearCellSelection()
+	{
+		selection = new int[0];
+		timestampSelected();
+	}
+	
+	public boolean hasCellSelection()
+	{
+		return selection.length != 0;
+	}
+	
+	@Override
+	public void select()
+	{
+		selection = new int[0];
+		
+		super.select();
+	}
+
 }

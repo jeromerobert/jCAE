@@ -53,12 +53,6 @@ public class Node extends AbstractNode
 	private int nbrOfLines;
 	private int nbrOfPolys;
 	
-	// When a Node is managing, geometry for all leaves is contained in
-	// AbstractNode.actor.  Thus it can not be used to highlight only some
-	// leaves, another vtkActor is needed for this purpose.
-	// FIXME: See how to use selectionHighlighter instead of a new vtkActor
-	private vtkActor highlighter;
-	private vtkPolyDataMapper highlighterMapper;
 	// Lookup table for color of leaves
 	private vtkLookupTable table;
 	
@@ -253,40 +247,6 @@ public class Node extends AbstractNode
 		{
 			child.setMapperCustomiser(mapperCustomiser);
 			child.applyMapperCustomiser();
-		}
-	}
-
-	@Override
-	public void applyActorHighlightedCustomiser()
-	{
-		if (isManager())
-		{
-			if(highlighter != null)
-				getActorHighlightedCustomiser().customiseActorHighlighted(highlighter);
-			return;
-		}
-		
-		for(AbstractNode child : children)
-		{
-			child.setActorHighlightedCustomiser(actorHighlightedCustomiser);
-			child.applyActorHighlightedCustomiser();
-		}
-	}
-
-	@Override
-	public void applyMapperHighlightedCustomiser()
-	{
-		if (isManager())
-		{
-			if(highlighterMapper != null)
-				getMapperHighlightedCustomiser().customiseMapperHighlighted(highlighterMapper);
-			return;
-		}
-		
-		for(AbstractNode child : children)
-		{
-			child.setMapperHighlightedCustomiser(mapperHighlightedCustomiser);
-			child.applyMapperHighlightedCustomiser();
 		}
 	}
 
@@ -589,12 +549,6 @@ public class Node extends AbstractNode
 		offsetsLines = null;
 		offsetsPolys = null;
 		table = null;
-		if (highlighter != null)
-		{
-			fireActorDeleted(highlighter);
-			highlighter = null;
-			highlighterMapper = null;
-		}
 		for(AbstractNode n : children)
 			n.deleteDatas();
 	}
@@ -609,80 +563,16 @@ public class Node extends AbstractNode
 		if (LOGGER.isLoggable(Level.FINEST))
 			LOGGER.log(Level.FINEST, "Refresh highlight for "+this);
 
-		// If the nodes are selected select all cells of the node
-		TIntArrayList selection = new TIntArrayList(getNbrOfCells());
-		int i = -1;
-		for (LeafNode leaf : getLeaves())
-		{
-			i++;
-			if (!leaf.isSelected())
-				continue;
-
-			// Add vertices
-			int begin = offsetsVertices.get(i);
-			int end = offsetsVertices.get(i + 1);
-			for (int j = begin; j < end; ++j)
-				selection.add(j);
-
-			// Add lines
-			begin = nbrOfVertices;
-			end = nbrOfVertices;
-			begin += offsetsLines.get(i);
-			end += offsetsLines.get(i + 1);
-			for (int j = begin; j < end; ++j)
-				selection.add(j);
-
-			// Add polys
-			begin = nbrOfVertices + nbrOfLines;
-			end = nbrOfVertices + nbrOfLines;
-			begin += offsetsPolys.get(i);
-			end += offsetsPolys.get(i + 1);
-			for (int j = begin; j < end; ++j)
-				selection.add(j);
-		}
-
-		if (selection.isEmpty())
-		{
-			if (highlighter != null)
-			{
-				LOGGER.finest("Clear out previous selection");
-				fireActorDeleted(highlighter);
-				highlighter = null;
-			}
-		}
-		else
-		{
-			boolean actorCreated = (highlighter == null);
-			
-			if (actorCreated)
-			{
-				highlighter = new vtkActor();
-				highlighter.PickableOff();
-				
-				getActorHighlightedCustomiser().customiseActorHighlighted(highlighter);
-			}
-
-			highlighterMapper = new vtkPolyDataMapper();
-			highlighterMapper.ScalarVisibilityOff();
-			highlighterMapper.SetInput(selectInto(data, selection.toNativeArray()));
-			highlighter.SetMapper(highlighterMapper);
-
-			getMapperHighlightedCustomiser().customiseMapperHighlighted(highlighterMapper);
-			
-			if (actorCreated)
-				fireActorCreated(highlighter);
-		}
 
 		if (selected)
 		{
 			// The whole actor is selected, so display it
 			// as highlighted.
 			mapper.ScalarVisibilityOff();
-			if(highlighter != null)
-				highlighter.VisibilityOff();
+			getActorSelectionCustomiser().customiseActorSelection(actor);
+			getMapperSelectionCustomiser().customiseMapperSelection(mapper);
 
-			getActorHighlightedCustomiser().customiseActorHighlighted(actor);
-			getMapperHighlightedCustomiser().customiseMapperHighlighted(mapper);
+			deleteSelectionHighlighter();
 		}
 		else
 		{
@@ -690,62 +580,79 @@ public class Node extends AbstractNode
 			mapper.ScalarVisibilityOn();
 			getActorCustomiser().customiseActor(actor);
 			getMapperCustomiser().customiseMapper(mapper);
-			// If a part is selected, display it
-			if(highlighter != null)
-				highlighter.VisibilityOn();
+
+			refreshSelectionHighlighter();
 		}
 	}
 
-	public void highlightSelection()
+	private void refreshSelectionHighlighter()
 	{
-		if (!isManager())
-		{
-			for (AbstractNode child : children)
-				child.highlightSelection();
-			return;
-		}
-		
-		if (selectionHighlighter == null)
-		{
-			selectionHighlighter = new vtkActor();
-			selectionHighlighter.PickableOff();
-			getActorSelectionCustomiser().customiseActorSelection(selectionHighlighter);
-			// Call fireActorCreated before creating its mapper so
-			// that clipping planes are not taken into account
-			fireActorCreated(selectionHighlighter);
-		}
-
-		selectionHighlighterMapper = new vtkPolyDataMapper();
-		selectionHighlighter.SetMapper(selectionHighlighterMapper);
-		selectionHighlighterMapper.ScalarVisibilityOff();
-		
-		// Compute the list of cells to be selected
-		TIntArrayList selection = new TIntArrayList();
-
+		TIntArrayList selection = new TIntArrayList(getNbrOfCells());
 		int leafIndex = -1;
 		for (LeafNode leaf : getLeaves())
 		{
 			leafIndex++;
-			int[] cellSelection = leaf.getCellSelection();
-			if (cellSelection.length == 0)
-				continue;
-			
-			int offset = selection.size();
-			selection.ensureCapacity(offset+cellSelection.length);
-			for (int j = 0; j < cellSelection.length; ++j)
-				selection.add(leafIndexToNodeIndex(leaf, leafIndex, cellSelection[j]));
+			if (leaf.selected)
+			{
+				// If a node is selected, select all cells
+
+				// Vertices
+				int vBegin = offsetsVertices.get(leafIndex);
+				int vEnd = offsetsVertices.get(leafIndex + 1);
+	
+				// Lines
+				int lBegin = offsetsLines.get(leafIndex) + nbrOfVertices;
+				int lEnd = offsetsLines.get(leafIndex + 1) + nbrOfVertices;
+	
+				// Polys
+				int pBegin = offsetsPolys.get(leafIndex) + nbrOfVertices + nbrOfLines;
+				int pEnd = offsetsPolys.get(leafIndex + 1) + nbrOfVertices + nbrOfLines;
+				selection.ensureCapacity(selection.size() +
+					(vEnd + 1 - vBegin) +
+					(lEnd + 1 - lBegin) +
+					(pEnd + 1 - pBegin));
+	
+				// Add vertices
+				for (int j = vBegin; j < vEnd; ++j)
+					selection.add(j);
+				// Add lines
+				for (int j = lBegin; j < lEnd; ++j)
+					selection.add(j);
+				// Add polys
+				for (int j = pBegin; j < pEnd; ++j)
+					selection.add(j);
+			}
+			else if (leaf.hasCellSelection())
+			{
+				int[] cellSelection = leaf.getCellSelection();
+				selection.ensureCapacity(selection.size()+cellSelection.length);
+				for (int j = 0; j < cellSelection.length; ++j)
+					selection.add(leafIndexToNodeIndex(leaf, leafIndex, cellSelection[j]));
+			}
 		}
 
 		if (selection.isEmpty())
 		{
-			unHighlightSelection();
+			deleteSelectionHighlighter();
 			return;
 		}
 
+		boolean actorCreated = (selectionHighlighter == null);
+		if (actorCreated)
+		{
+			selectionHighlighter = new vtkActor();
+			selectionHighlighter.PickableOff();
+			getActorSelectionCustomiser().customiseActorSelection(selectionHighlighter);
+		}
+
+		selectionHighlighterMapper = new vtkPolyDataMapper();
+		selectionHighlighterMapper.ScalarVisibilityOff();
 		selectionHighlighterMapper.SetInput(selectInto(data, selection.toNativeArray()));
-		
+		selectionHighlighter.SetMapper(selectionHighlighterMapper);
 		getMapperSelectionCustomiser().customiseMapperSelection(selectionHighlighterMapper);
 		
+		if (actorCreated)
+			fireActorCreated(selectionHighlighter);
 	}
 
 	private final int nodeIndexToLeafIndex(int leaf, int index)
@@ -848,18 +755,4 @@ public class Node extends AbstractNode
 		timestampSelected();
 	}
 
-	@Override
-	public String toString()
-	{
-		StringBuilder sb = new StringBuilder(super.toString());
-		if (highlighter != null)
-		{
-			sb.append(" highlighter@"+Integer.toHexString(highlighter.hashCode()));
-			if (highlighter.GetVisibility() != 0)
-				sb.append(" visible");
-			if (highlighter.GetPickable() != 0)
-				sb.append(" pickable");
-		}
-		return sb.toString();
-	}
 }

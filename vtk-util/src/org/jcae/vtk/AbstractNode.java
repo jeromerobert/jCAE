@@ -110,7 +110,7 @@ public abstract class AbstractNode
 	protected vtkPolyDataMapper mapper;
 	protected vtkPolyData data;
 
-	/** Actor used for cell selection */
+	/** Actor used for selection */
 	protected vtkActor selectionHighlighter;
 	protected vtkPolyDataMapper selectionHighlighterMapper;
 
@@ -151,23 +151,7 @@ public abstract class AbstractNode
 	}
 	
 	/**
-	 * Customise actor when node is selected.
-	 */
-	public interface ActorHighlightedCustomiser
-	{
-		void customiseActorHighlighted(vtkActor actor);
-	}
-	
-	/**
-	 * Customise mapper when node is selected.
-	 */
-	public interface MapperHighlightedCustomiser
-	{
-		void customiseMapperHighlighted(vtkMapper mapper);
-	}
-	
-	/**
-	 * Customise actor when cells of this node are selected.
+	 * Customise actor when this node is selected (partially or as a whole).
 	 */
 	public interface ActorSelectionCustomiser
 	{
@@ -175,7 +159,7 @@ public abstract class AbstractNode
 	}
 	
 	/**
-	 * Customise mapper when cells of this node are selected.
+	 * Customise mapper when this node is selected (partially or as a whole).
 	 */
 	public interface MapperSelectionCustomiser
 	{
@@ -205,24 +189,6 @@ public abstract class AbstractNode
 		};
 
 	/**
-	 * Default actor customiser when node is selected, it does nothing.
-	 */
-	public static ActorHighlightedCustomiser DEFAULT_ACTOR_HIGHLIGHTED_CUSTOMISER =
-		new ActorHighlightedCustomiser()
-		{
-			public void customiseActorHighlighted(vtkActor actor) {}
-		};
-	
-	/**
-	 * Default mapper customiser when node is selected, it does nothing.
-	 */
-	public static MapperHighlightedCustomiser DEFAULT_MAPPER_HIGHLIGHTED_CUSTOMISER =
-		new MapperHighlightedCustomiser()
-		{
-			public void customiseMapperHighlighted(vtkMapper mapper) {}
-		};
-
-	/**
 	 * Default actor customiser when cells of this node are selected, it does nothing.
 	 */
 	public static ActorSelectionCustomiser DEFAULT_ACTOR_SELECTION_CUSTOMISER =
@@ -242,9 +208,6 @@ public abstract class AbstractNode
 	
 	protected ActorCustomiser actorCustomiser;
 	protected MapperCustomiser mapperCustomiser;
-	
-	protected ActorHighlightedCustomiser actorHighlightedCustomiser;
-	protected MapperHighlightedCustomiser mapperHighlightedCustomiser;
 	
 	protected ActorSelectionCustomiser actorSelectionCustomiser;
 	protected MapperSelectionCustomiser mapperSelectionCustomiser;
@@ -321,19 +284,9 @@ public abstract class AbstractNode
 		this.actorCustomiser = actorCustomiser;
 	}
 
-	public void setActorHighlightedCustomiser(ActorHighlightedCustomiser actorHighlightedCustomiser)
-	{
-		this.actorHighlightedCustomiser = actorHighlightedCustomiser;
-	}
-
 	public void setMapperCustomiser(MapperCustomiser mapperCustomiser)
 	{
 		this.mapperCustomiser = mapperCustomiser;
-	}
-
-	public void setMapperHighlightedCustomiser(MapperHighlightedCustomiser mapperHighlightedCustomiser)
-	{
-		this.mapperHighlightedCustomiser = mapperHighlightedCustomiser;
 	}
 
 	public ActorSelectionCustomiser getActorSelectionCustomiser()
@@ -388,18 +341,6 @@ public abstract class AbstractNode
 			getMapperCustomiser().customiseMapper(mapper);
 	}
 	
-	public void applyActorHighlightedCustomiser()
-	{
-		if(isSelected() && actor != null)
-			getActorHighlightedCustomiser().customiseActorHighlighted(actor);
-	}
-
-	public void applyMapperHighlightedCustomiser()
-	{
-		if(isSelected() && mapper != null)
-			getMapperHighlightedCustomiser().customiseMapperHighlighted(mapper);
-	}
-	
 	public void applyActorSelectionCustomiser()
 	{
 		if(selectionHighlighter != null)
@@ -425,19 +366,6 @@ public abstract class AbstractNode
 		return actorCustomiser;
 	}
 
-	public ActorHighlightedCustomiser getActorHighlightedCustomiser()
-	{
-		if(actorHighlightedCustomiser != null)
-			return actorHighlightedCustomiser;
-		if(parent != null)
-			actorHighlightedCustomiser = parent.getActorHighlightedCustomiser();
-		
-		if(actorHighlightedCustomiser == null)
-			actorHighlightedCustomiser = DEFAULT_ACTOR_HIGHLIGHTED_CUSTOMISER;
-		
-		return actorHighlightedCustomiser;
-	}
-
 	public MapperCustomiser getMapperCustomiser()
 	{
 		if(mapperCustomiser != null)
@@ -449,19 +377,6 @@ public abstract class AbstractNode
 			mapperCustomiser = DEFAULT_MAPPER_CUSTOMISER;
 			
 		return mapperCustomiser;
-	}
-
-	public MapperHighlightedCustomiser getMapperHighlightedCustomiser()
-	{
-		if(mapperHighlightedCustomiser != null)
-			return mapperHighlightedCustomiser;
-		if(parent != null)
-			mapperHighlightedCustomiser = parent.getMapperHighlightedCustomiser();
-		
-		if(mapperHighlightedCustomiser == null)
-			mapperHighlightedCustomiser = DEFAULT_MAPPER_HIGHLIGHTED_CUSTOMISER;
-		
-		return mapperHighlightedCustomiser;
 	}
 
 	void timestampModified()
@@ -561,9 +476,7 @@ public abstract class AbstractNode
 		mapper = null;
 	}
 	
-	public abstract void highlightSelection();
-
-	protected void unHighlightSelection()
+	void deleteSelectionHighlighter()
 	{
 		if(selectionHighlighter == null)
 			return;

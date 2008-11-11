@@ -21,7 +21,6 @@
 package org.jcae.vtk;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -149,12 +148,12 @@ public class ViewableCAD extends Viewable
 			}
 		});
 		
-		vertices.setActorHighlightedCustomiser(new Viewable.ActorHighlightedCustomiser()
+		vertices.setActorSelectionCustomiser(new Viewable.ActorSelectionCustomiser()
 		{
 			@Override
-			public void customiseActorHighlighted(vtkActor actor)
+			public void customiseActorSelection(vtkActor actor)
 			{
-				super.customiseActorHighlighted(actor);
+				super.customiseActorSelection(actor);
 				
 				actor.GetProperty().SetPointSize(vertexSize*2);
 			}
