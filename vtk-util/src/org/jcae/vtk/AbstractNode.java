@@ -363,16 +363,22 @@ public abstract class AbstractNode
 		dataTime = System.nanoTime();
 		// When data are modified, actor must be updated
 		timestampModified();
+		if (!manager && parent != null)
+			parent.timestampData();
 	}
 	
 	void timestampModified()
 	{
 		modificationTime = System.nanoTime();
+		if (!manager && parent != null)
+			parent.timestampModified();
 	}
 	
 	void timestampSelected()
 	{
 		selectionTime = System.nanoTime();
+		if (!manager && parent != null)
+			parent.timestampSelected();
 	}
 	
 	public boolean isVisible()
@@ -391,6 +397,11 @@ public abstract class AbstractNode
 			actor.SetVisibility(Utils.booleanToInt(visible));
 		
 		timestampModified();
+		
+		// If node is not a manager, its manager have to update
+		// their data.
+		if (!manager && parent != null)
+			parent.timestampData();
 	}
 	
 	protected abstract void refresh();

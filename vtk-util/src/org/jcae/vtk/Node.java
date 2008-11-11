@@ -243,34 +243,9 @@ public class Node extends AbstractNode
 			refreshData();
 			refreshActor();
 		}
-		else
-		{
-			for (LeafNode leaf : getLeaves())
-			{
-				if (lastUpdate <= leaf.modificationTime)
-				{
-					refreshData();
-					refreshActor();
-					break;
-				}
-			}
-		}
 		
 		if (lastUpdate <= selectionTime)
-		{
 			refreshHighlight();
-		}
-		else
-		{
-			for (LeafNode leaf : getLeaves())
-			{
-				if (lastUpdate <= leaf.selectionTime)
-				{
-					refreshHighlight();
-					break;
-				}
-			}
-		}
 
 		lastUpdate = System.nanoTime();
 	}
