@@ -214,13 +214,13 @@ public class LeafNode extends AbstractNode
 		if(actor != null)
 			Utils.vtkPropertySetColor(actor.GetProperty(), color);
 		else
-			modified();
+			timestampModified();
 	}
 	
 	public void setData(LeafNode.DataProvider data)
 	{
 		this.dataProvider = data;
-		modified();
+		timestampModified();
 	}
 
 	public DataProvider getDataProvider()
@@ -268,7 +268,7 @@ public class LeafNode extends AbstractNode
 		createData(dataProvider);
 		dataProvider.unLoad();
 		
-		modified();
+		timestampModified();
 		timeDataCreated = System.nanoTime();
 
 		if(mapper == null)

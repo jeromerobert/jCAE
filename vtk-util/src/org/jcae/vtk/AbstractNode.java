@@ -464,6 +464,16 @@ public abstract class AbstractNode
 		return mapperHighlightedCustomiser;
 	}
 
+	void timestampModified()
+	{
+		modificationTime = System.nanoTime();
+	}
+	
+	void timestampSelected()
+	{
+		selectionTime = System.nanoTime();
+	}
+	
 	public boolean isVisible()
 	{
 		return visible;
@@ -479,12 +489,7 @@ public abstract class AbstractNode
 		if(actor != null)
 			actor.SetVisibility(Utils.booleanToInt(visible));
 		
-		modified();
-	}
-	
-	public void modified()
-	{
-		modificationTime = System.nanoTime();
+		timestampModified();
 	}
 	
 	protected abstract void refresh();
@@ -568,18 +573,13 @@ public abstract class AbstractNode
 		selectionHighlighterMapper = null;
 	}
 	
-	protected long selectionTime()
-	{
-		return selectionTime;
-	}
-	
 	public void select()
 	{
 		if(selected)
 			return;
 		
 		selected = true;
-		selectionTime = System.nanoTime();
+		timestampSelected();
 	}
 
 	public void unselect()
@@ -588,7 +588,7 @@ public abstract class AbstractNode
 			return;
 		
 		selected = false;
-		selectionTime = System.nanoTime();
+		timestampSelected();
 	}
 	
 	public boolean isSelected()
@@ -616,7 +616,7 @@ public abstract class AbstractNode
 		if(!this.manager)
 			deleteDatas();
 		
-		modified();
+		timestampModified();
 	}
 
 	public boolean isManager()
