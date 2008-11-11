@@ -282,11 +282,13 @@ public abstract class AbstractNode
 	public void setActorCustomiser(ActorCustomiser actorCustomiser)
 	{
 		this.actorCustomiser = actorCustomiser;
+		timestampModified();
 	}
 
 	public void setMapperCustomiser(MapperCustomiser mapperCustomiser)
 	{
 		this.mapperCustomiser = mapperCustomiser;
+		timestampModified();
 	}
 
 	public ActorSelectionCustomiser getActorSelectionCustomiser()
@@ -305,6 +307,7 @@ public abstract class AbstractNode
 	public void setActorSelectionCustomiser(ActorSelectionCustomiser actorSelectionCustomiser)
 	{
 		this.actorSelectionCustomiser = actorSelectionCustomiser;
+		timestampSelected();
 	}
 
 
@@ -324,6 +327,7 @@ public abstract class AbstractNode
 	public void setMapperSelectionCustomiser(MapperSelectionCustomiser mapperSelectionCustomiser)
 	{
 		this.mapperSelectionCustomiser = mapperSelectionCustomiser;
+		timestampSelected();
 	}
 
 	/**

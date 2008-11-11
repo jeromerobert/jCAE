@@ -286,10 +286,8 @@ public class LeafNode extends AbstractNode
 
 		boolean actorCreated = (actor == null);
 		if(actorCreated)
-		{
 			actor = new vtkActor();
-			getActorCustomiser().customiseActor(actor);
-		}
+		getActorCustomiser().customiseActor(actor);
 		actor.SetMapper(mapper);
 		actor.SetVisibility(Utils.booleanToInt(visible));
 		actor.SetPickable(Utils.booleanToInt(pickable));
@@ -342,11 +340,11 @@ public class LeafNode extends AbstractNode
 		{
 			selectionHighlighter = new vtkActor();
 			selectionHighlighter.PickableOff();
-			getActorSelectionCustomiser().customiseActorSelection(selectionHighlighter);
 			// fireActorCreated is called before creating its mapper
 			// to not take clipping planes into account
 			fireActorCreated(selectionHighlighter);
 		}
+		getActorSelectionCustomiser().customiseActorSelection(selectionHighlighter);
 
 		selectionHighlighterMapper = new vtkPolyDataMapper();
 		selectionHighlighter.SetMapper(selectionHighlighterMapper);

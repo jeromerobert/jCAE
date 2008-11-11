@@ -525,10 +525,8 @@ public class Node extends AbstractNode
 
 		boolean actorCreated = (actor == null);
 		if(actorCreated)
-		{
 			actor = new vtkActor();
-			getActorCustomiser().customiseActor(actor);	
-		}
+		getActorCustomiser().customiseActor(actor);	
 		actor.SetMapper(mapper);
 		actor.SetVisibility(Utils.booleanToInt(visible));
 		actor.SetPickable(Utils.booleanToInt(pickable));
@@ -642,8 +640,8 @@ public class Node extends AbstractNode
 		{
 			selectionHighlighter = new vtkActor();
 			selectionHighlighter.PickableOff();
-			getActorSelectionCustomiser().customiseActorSelection(selectionHighlighter);
 		}
+		getActorSelectionCustomiser().customiseActorSelection(selectionHighlighter);
 
 		selectionHighlighterMapper = new vtkPolyDataMapper();
 		selectionHighlighterMapper.ScalarVisibilityOff();
