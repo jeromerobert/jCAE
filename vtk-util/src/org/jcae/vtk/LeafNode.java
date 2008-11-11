@@ -61,12 +61,14 @@ public class LeafNode extends AbstractNode
 		{
 			this.vertices = vertices;
 			nbrOfVertices = vertices.length / 2;
+			modified();
 		}
 		
 		public void setLines(int[] lines)
 		{
 			this.lines = lines;
 			nbrOfLines = lines.length / 3;
+			modified();
 		}
 		
 		public void setNodes(float[] nodes)
@@ -74,6 +76,7 @@ public class LeafNode extends AbstractNode
 			this.nodes = nodes;
 			
 			makeTransform();
+			modified();
 		}
 		
 		private void makeTransform()
@@ -97,7 +100,8 @@ public class LeafNode extends AbstractNode
 					nodesTransformed[j++] = point.z;
 				}
 			}
-			else this.nodesTransformed = this.nodes;
+			else
+				this.nodesTransformed = this.nodes;
 		}
 		
 		public void setTransform(Transform3D transform)
@@ -111,6 +115,7 @@ public class LeafNode extends AbstractNode
 		{
 			this.nbrOfPolys = nbrOfPolys;
 			this.polys = polys;
+			modified();
 		}
 		
 		public int getNbrOfPolys()
@@ -166,6 +171,7 @@ public class LeafNode extends AbstractNode
 			vertices = new int[0];
 			lines = new int[0];
 			polys = new int[0];
+			modified();
 		}
 
 		protected void modified()
@@ -182,7 +188,6 @@ public class LeafNode extends AbstractNode
 	private int [] selection = new int[0];
 	private Color color;
 	private DataProvider dataProvider;
-	private long timeDataCreated;
 	
 	public LeafNode(Node parent, DataProvider dataProvider, Color color)
 	{
@@ -220,7 +225,7 @@ public class LeafNode extends AbstractNode
 	public void setData(LeafNode.DataProvider data)
 	{
 		this.dataProvider = data;
-		timestampModified();
+		timestampData();
 	}
 
 	public DataProvider getDataProvider()
@@ -245,7 +250,7 @@ public class LeafNode extends AbstractNode
 			LOGGER.log(Level.FINER, "Refreshing leaf: "+this);
 		
 		// Were data modified?
-		if (timeDataCreated < dataProvider.getModifiedTime())
+		if (dataTime < dataProvider.getModifiedTime())
 			refreshData();
 
 		// Was actor modified?
@@ -268,8 +273,7 @@ public class LeafNode extends AbstractNode
 		createData(dataProvider);
 		dataProvider.unLoad();
 		
-		timestampModified();
-		timeDataCreated = System.nanoTime();
+		timestampData();
 
 		if(mapper == null)
 			mapper = new vtkPolyDataMapper();

@@ -116,6 +116,8 @@ public abstract class AbstractNode
 
 	/** Last time this actor had been updated */
 	protected long lastUpdate;
+	/** Last time data of this actor had been modified */
+	protected long dataTime;
 	/** Last time this actor had been modified (data, color, visibility) */
 	protected long modificationTime;
 	/** Last time this node had been selected */
@@ -356,6 +358,13 @@ public abstract class AbstractNode
 		return mapperCustomiser;
 	}
 
+	void timestampData()
+	{
+		dataTime = System.nanoTime();
+		// When data are modified, actor must be updated
+		timestampModified();
+	}
+	
 	void timestampModified()
 	{
 		modificationTime = System.nanoTime();

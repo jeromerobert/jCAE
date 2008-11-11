@@ -442,6 +442,7 @@ public class Node extends AbstractNode
 		vtkIntArray idsNative = new vtkIntArray();
 		idsNative.SetJavaArray(ids);
 		data.GetCellData().SetScalars(idsNative);
+		timestampData();
 
 		if(mapper == null)
 			mapper = new vtkPolyDataMapper();
