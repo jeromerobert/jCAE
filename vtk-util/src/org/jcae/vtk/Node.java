@@ -238,12 +238,15 @@ public class Node extends AbstractNode
 			return;
 		}
 
-		if (lastUpdate <= modificationTime)
-		{
+		// Were data modified?
+		if (lastUpdate <= dataTime)
 			refreshData();
+
+		// Was actor modified?
+		if (lastUpdate <= modificationTime)
 			refreshActor();
-		}
-		
+
+		// Did selection happen?
 		if (lastUpdate <= selectionTime)
 			refreshHighlight();
 
