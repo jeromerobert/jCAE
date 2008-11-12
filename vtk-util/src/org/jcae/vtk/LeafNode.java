@@ -212,8 +212,6 @@ public class LeafNode extends AbstractNode
 		if(this.color.equals(color))
 			return;
 		
-		if (LOGGER.isLoggable(Level.FINEST))
-			LOGGER.log(Level.FINEST, "Change color of actor "+actor+" from "+this.color+" (opacity="+this.color.getAlpha()+") to "+color+" (opacity="+color.getAlpha()+")");
 		this.color = color;
 		
 		if(actor != null)
@@ -300,11 +298,12 @@ public class LeafNode extends AbstractNode
 		{
 			fireActorCreated(actor);
 			if (LOGGER.isLoggable(Level.FINEST))
-				LOGGER.log(Level.FINEST, "New actor created:  "+actor);
+				LOGGER.log(Level.FINEST, "New actor created: vtkActor@"+Integer.toHexString(actor.hashCode()));
 		}
 
 		if (LOGGER.isLoggable(Level.FINEST))
-			LOGGER.log(Level.FINEST, "Attach color "+color+" (opacity="+color.getAlpha()+") to actor "+actor);
+			LOGGER.log(Level.FINEST, "Attach color "+color+
+				" (opacity="+color.getAlpha()+") to actor @"+Integer.toHexString(actor.hashCode()));
 		Utils.vtkPropertySetColor(actor.GetProperty(), color);
 	}
 

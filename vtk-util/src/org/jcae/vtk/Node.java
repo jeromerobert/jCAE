@@ -450,7 +450,7 @@ public class Node extends AbstractNode
 		{
 			fireActorCreated(actor);
 			if (LOGGER.isLoggable(Level.FINEST))
-				LOGGER.log(Level.FINEST, "New actor created:  "+actor);
+				LOGGER.log(Level.FINEST, "New actor created: vtkActor@"+Integer.toHexString(actor.hashCode()));
 		}
 	}
 
