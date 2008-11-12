@@ -547,6 +547,8 @@ public abstract class AbstractNode
 			sb.append(" "+debugName);
 		if (manager)
 			sb.append(" manager");
+		if (selected)
+			sb.append(" selected");
 		if (actor != null)
 		{
 			sb.append(" actor@"+Integer.toHexString(actor.hashCode()));
