@@ -175,7 +175,8 @@ public class Scene implements AbstractNode.ActorListener
 			int j = 0;
 			for (vtkActor actor; (actor = actors.GetNextActor()) != null; ++j)
 			{
-				if ((pickableActorBackup[j] = actor.GetPickable()) == 0)
+				pickableActorBackup[j] = actor.GetPickable();
+				if (pickableActorBackup[j] == 0)
 					continue;
 				double[] bounds = actor.GetBounds();
 				BoundingBox box = new BoundingBox();
@@ -229,7 +230,7 @@ public class Scene implements AbstractNode.ActorListener
 					vtkIdTypeArray ids = (vtkIdTypeArray) child.GetSelectionList();
 					node.setCellSelection(pickContext, Utils.getValues(ids));
 					LOGGER.finest("Actor picked id: "+prop.GetVTKId());
-					LOGGER.finest("Picked node: "+node);					
+					LOGGER.finest("Picked node: "+node);
 				}
 			}
 			else
@@ -265,7 +266,6 @@ public class Scene implements AbstractNode.ActorListener
 				{
 					for (LeafNode leaf : node.getLeaves())
 					{
-						
 						LeafNode.DataProvider leafProvider = leaf.getDataProvider();
 						leafProvider.load();
 						leaf.createData(leafProvider);
