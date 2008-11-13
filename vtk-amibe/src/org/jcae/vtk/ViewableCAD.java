@@ -132,7 +132,7 @@ public class ViewableCAD extends Viewable
 			data.setNodes(new float[] {i,0,0,i+1,0,0} );
 			i+=2;
 			data.setLines(new int[]{2,0,1});
-			leaf.setData(data);
+			leaf.setDataProvider(data);
 		}
 		rootNode.refresh();
 	}
