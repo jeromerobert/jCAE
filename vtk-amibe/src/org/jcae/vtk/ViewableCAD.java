@@ -119,7 +119,7 @@ public class ViewableCAD extends Viewable
 	{
 		this.edgeSize = edgeSize;
 		
-		edges.timestampModified();
+		edges.timeStampModified();
 		edges.refresh();
 	}
 

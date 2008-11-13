@@ -181,7 +181,7 @@ public class Node extends AbstractNode
 		{
 			for(ChildCreationListener listener : childCreationListeners)
 				listener.childCreated(child);
-			timestampModified();
+			timeStampModified();
 		}
 	}
 
@@ -192,7 +192,7 @@ public class Node extends AbstractNode
 			child.deleteData();
 			for(ChildCreationListener listener : childCreationListeners)
 				listener.childDeleted(child);
-			timestampModified();
+			timeStampModified();
 		}
 	}
 
@@ -414,7 +414,7 @@ public class Node extends AbstractNode
 		vtkIntArray idsNative = new vtkIntArray();
 		idsNative.SetJavaArray(ids);
 		data.GetCellData().SetScalars(idsNative);
-		timestampData();
+		timeStampData();
 
 		if(mapper == null)
 			mapper = new vtkPolyDataMapper();
@@ -646,7 +646,7 @@ public class Node extends AbstractNode
 				leaves.get(i).setCellSelection(pickContext, selectionChildren[i].toNativeArray());
 		}
 		
-		timestampSelected();
+		timeStampSelected();
 	}
 	
 	public void clearCellSelection()
@@ -654,7 +654,7 @@ public class Node extends AbstractNode
 		for (LeafNode leaf : getLeaves())
 			leaf.clearCellSelection();
 		
-		timestampSelected();
+		timeStampSelected();
 	}
 
 }

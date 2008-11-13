@@ -284,13 +284,13 @@ public abstract class AbstractNode
 	public void setActorCustomiser(ActorCustomiser actorCustomiser)
 	{
 		this.actorCustomiser = actorCustomiser;
-		timestampModified();
+		timeStampModified();
 	}
 
 	public void setMapperCustomiser(MapperCustomiser mapperCustomiser)
 	{
 		this.mapperCustomiser = mapperCustomiser;
-		timestampModified();
+		timeStampModified();
 	}
 
 	public SelectionActorCustomiser getSelectionActorCustomiser()
@@ -309,7 +309,7 @@ public abstract class AbstractNode
 	public void setSelectionActorCustomiser(SelectionActorCustomiser selectionActorCustomiser)
 	{
 		this.selectionActorCustomiser = selectionActorCustomiser;
-		timestampSelected();
+		timeStampSelected();
 	}
 
 
@@ -329,7 +329,7 @@ public abstract class AbstractNode
 	public void setSelectionMapperCustomiser(SelectionMapperCustomiser selectionMapperCustomiser)
 	{
 		this.selectionMapperCustomiser = selectionMapperCustomiser;
-		timestampSelected();
+		timeStampSelected();
 	}
 
 	public ActorCustomiser getActorCustomiser()
@@ -358,27 +358,27 @@ public abstract class AbstractNode
 		return mapperCustomiser;
 	}
 
-	void timestampData()
+	public void timeStampData()
 	{
 		dataTime = System.nanoTime();
 		// When data are modified, actor must be updated
-		timestampModified();
+		timeStampModified();
 		if (!manager && parent != null)
-			parent.timestampData();
+			parent.timeStampData();
 	}
 	
-	void timestampModified()
+	public void timeStampModified()
 	{
 		modificationTime = System.nanoTime();
 		if (!manager && parent != null)
-			parent.timestampModified();
+			parent.timeStampModified();
 	}
 	
-	void timestampSelected()
+	public void timeStampSelected()
 	{
 		selectionTime = System.nanoTime();
 		if (!manager && parent != null)
-			parent.timestampSelected();
+			parent.timeStampSelected();
 	}
 	
 	public boolean isVisible()
@@ -396,12 +396,12 @@ public abstract class AbstractNode
 		if(actor != null)
 			actor.SetVisibility(Utils.booleanToInt(visible));
 		
-		timestampModified();
+		timeStampModified();
 		
 		// If node is not a manager, its manager have to update
 		// their data.
 		if (!manager && parent != null)
-			parent.timestampData();
+			parent.timeStampData();
 	}
 	
 	protected abstract void refresh();
@@ -489,7 +489,7 @@ public abstract class AbstractNode
 			return;
 		
 		selected = true;
-		timestampSelected();
+		timeStampSelected();
 	}
 
 	public void unselect()
@@ -498,7 +498,7 @@ public abstract class AbstractNode
 			return;
 		
 		selected = false;
-		timestampSelected();
+		timeStampSelected();
 	}
 	
 	public boolean isSelected()
@@ -526,7 +526,7 @@ public abstract class AbstractNode
 		if(!this.manager)
 			deleteData();
 		
-		timestampModified();
+		timeStampModified();
 	}
 
 	public boolean isManager()

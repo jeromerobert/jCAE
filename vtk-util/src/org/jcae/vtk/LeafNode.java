@@ -217,13 +217,13 @@ public class LeafNode extends AbstractNode
 		if(actor != null)
 			Utils.vtkPropertySetColor(actor.GetProperty(), color);
 		else
-			timestampModified();
+			timeStampModified();
 	}
 	
 	public void setDataProvider(LeafNode.DataProvider data)
 	{
 		this.dataProvider = data;
-		timestampData();
+		timeStampData();
 	}
 
 	public DataProvider getDataProvider()
@@ -271,7 +271,7 @@ public class LeafNode extends AbstractNode
 		createData(dataProvider);
 		dataProvider.unLoad();
 		
-		timestampData();
+		timeStampData();
 
 		if(mapper == null)
 			mapper = new vtkPolyDataMapper();
@@ -379,7 +379,7 @@ public class LeafNode extends AbstractNode
 		selection = new int[cellSelection.length];
 		System.arraycopy(cellSelection, 0, selection, 0, cellSelection.length);
 		pickContext.addToSelectedNodes(this);
-		timestampSelected();
+		timeStampSelected();
 	}
 
 	int [] getCellSelection()
@@ -390,7 +390,7 @@ public class LeafNode extends AbstractNode
 	public void clearCellSelection()
 	{
 		selection = new int[0];
-		timestampSelected();
+		timeStampSelected();
 	}
 	
 	public boolean hasCellSelection()
