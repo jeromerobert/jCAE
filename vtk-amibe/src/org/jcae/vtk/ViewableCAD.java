@@ -149,12 +149,12 @@ public class ViewableCAD extends Viewable
 			}
 		});
 		
-		vertices.setActorSelectionCustomiser(new Viewable.ActorSelectionCustomiser()
+		vertices.setSelectionActorCustomiser(new Viewable.SelectionActorCustomiser()
 		{
 			@Override
-			public void customiseActorSelection(vtkActor actor)
+			public void customiseSelectionActor(vtkActor actor)
 			{
-				super.customiseActorSelection(actor);
+				super.customiseSelectionActor(actor);
 				
 				actor.GetProperty().SetPointSize(vertexSize*2);
 			}

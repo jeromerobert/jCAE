@@ -73,7 +73,7 @@ import vtk.vtkPolyDataNormals;
  *
  * Nodes can be highlighted using the {@link #select} method.  A subset of
  * their underlying geometry can be highlighted using the {@link #setCellSelection}
- * method, which modifies {@link #selectionHighlighter} actor.
+ * method, which modifies {@link #selectionActor} actor.
  *
  * Nodes can be declared as being not pickable to speed up picking, since non
  * pickable nodes are ignored.
@@ -111,8 +111,8 @@ public abstract class AbstractNode
 	protected vtkPolyData data;
 
 	/** Actor used for selection */
-	protected vtkActor selectionHighlighter;
-	protected vtkPolyDataMapper selectionHighlighterMapper;
+	protected vtkActor selectionActor;
+	protected vtkPolyDataMapper selectionMapper;
 
 	/** Last time this actor had been updated */
 	protected long lastUpdate;
@@ -155,17 +155,17 @@ public abstract class AbstractNode
 	/**
 	 * Customise actor when this node is selected (partially or as a whole).
 	 */
-	public interface ActorSelectionCustomiser
+	public interface SelectionActorCustomiser
 	{
-		void customiseActorSelection(vtkActor actor);
+		void customiseSelectionActor(vtkActor actor);
 	}
 	
 	/**
 	 * Customise mapper when this node is selected (partially or as a whole).
 	 */
-	public interface MapperSelectionCustomiser
+	public interface SelectionMapperCustomiser
 	{
-		void customiseMapperSelection(vtkMapper mapper);
+		void customiseSelectionMapper(vtkMapper mapper);
 	}
 	
 	/**
@@ -193,26 +193,26 @@ public abstract class AbstractNode
 	/**
 	 * Default actor customiser when cells of this node are selected, it does nothing.
 	 */
-	public static ActorSelectionCustomiser DEFAULT_ACTOR_SELECTION_CUSTOMISER =
-		new ActorSelectionCustomiser()
+	public static SelectionActorCustomiser DEFAULT_SELECTION_ACTOR_CUSTOMISER =
+		new SelectionActorCustomiser()
 		{
-			public void customiseActorSelection(vtkActor actor) {}
+			public void customiseSelectionActor(vtkActor actor) {}
 		};
 	
 	/**
 	 * Default mapper customiser when cells of this node are selected, it does nothing.
 	 */
-	public static MapperSelectionCustomiser DEFAULT_MAPPER_SELECTION_CUSTOMISER =
-		new MapperSelectionCustomiser()
+	public static SelectionMapperCustomiser DEFAULT_SELECTION_MAPPER_CUSTOMISER =
+		new SelectionMapperCustomiser()
 		{
-			public void customiseMapperSelection(vtkMapper mapper) {}
+			public void customiseSelectionMapper(vtkMapper mapper) {}
 		};
 	
 	protected ActorCustomiser actorCustomiser;
 	protected MapperCustomiser mapperCustomiser;
 	
-	protected ActorSelectionCustomiser actorSelectionCustomiser;
-	protected MapperSelectionCustomiser mapperSelectionCustomiser;
+	protected SelectionActorCustomiser selectionActorCustomiser;
+	protected SelectionMapperCustomiser selectionMapperCustomiser;
 
 	/**
 	 * Constructor.  It must not be called directly, only by subclasses.
@@ -293,42 +293,42 @@ public abstract class AbstractNode
 		timestampModified();
 	}
 
-	public ActorSelectionCustomiser getActorSelectionCustomiser()
+	public SelectionActorCustomiser getSelectionActorCustomiser()
 	{
-		if(actorSelectionCustomiser != null)
-			return actorSelectionCustomiser;
+		if(selectionActorCustomiser != null)
+			return selectionActorCustomiser;
 		else if(parent != null)
-			actorSelectionCustomiser = parent.getActorSelectionCustomiser();
+			selectionActorCustomiser = parent.getSelectionActorCustomiser();
 		
-		if(actorSelectionCustomiser == null)
-			actorSelectionCustomiser = DEFAULT_ACTOR_SELECTION_CUSTOMISER;
+		if(selectionActorCustomiser == null)
+			selectionActorCustomiser = DEFAULT_SELECTION_ACTOR_CUSTOMISER;
 		
-		return actorSelectionCustomiser;
+		return selectionActorCustomiser;
 	}
 
-	public void setActorSelectionCustomiser(ActorSelectionCustomiser actorSelectionCustomiser)
+	public void setSelectionActorCustomiser(SelectionActorCustomiser selectionActorCustomiser)
 	{
-		this.actorSelectionCustomiser = actorSelectionCustomiser;
+		this.selectionActorCustomiser = selectionActorCustomiser;
 		timestampSelected();
 	}
 
 
-	public MapperSelectionCustomiser getMapperSelectionCustomiser()
+	public SelectionMapperCustomiser getSelectionMapperCustomiser()
 	{
-		if(mapperSelectionCustomiser != null)
-			return mapperSelectionCustomiser;
+		if(selectionMapperCustomiser != null)
+			return selectionMapperCustomiser;
 		if(parent != null)
-			mapperSelectionCustomiser = parent.getMapperSelectionCustomiser();
+			selectionMapperCustomiser = parent.getSelectionMapperCustomiser();
 		
-		if(mapperSelectionCustomiser == null)
-			mapperSelectionCustomiser = DEFAULT_MAPPER_SELECTION_CUSTOMISER;
+		if(selectionMapperCustomiser == null)
+			selectionMapperCustomiser = DEFAULT_SELECTION_MAPPER_CUSTOMISER;
 		
-		return mapperSelectionCustomiser;
+		return selectionMapperCustomiser;
 	}
 
-	public void setMapperSelectionCustomiser(MapperSelectionCustomiser mapperSelectionCustomiser)
+	public void setSelectionMapperCustomiser(SelectionMapperCustomiser selectionMapperCustomiser)
 	{
-		this.mapperSelectionCustomiser = mapperSelectionCustomiser;
+		this.selectionMapperCustomiser = selectionMapperCustomiser;
 		timestampSelected();
 	}
 
@@ -473,14 +473,14 @@ public abstract class AbstractNode
 		mapper = null;
 	}
 	
-	void deleteSelectionHighlighter()
+	void deleteSelectionActor()
 	{
-		if(selectionHighlighter == null)
+		if(selectionActor == null)
 			return;
 		
-		fireActorDeleted(selectionHighlighter);
-		selectionHighlighter = null;
-		selectionHighlighterMapper = null;
+		fireActorDeleted(selectionActor);
+		selectionActor = null;
+		selectionMapper = null;
 	}
 	
 	public void select()
@@ -557,12 +557,12 @@ public abstract class AbstractNode
 			if (actor.GetPickable() != 0)
 				sb.append(" pickable");
 		}
-		if (selectionHighlighter != null)
+		if (selectionActor != null)
 		{
-			sb.append(" selectionHighlighter@"+Integer.toHexString(selectionHighlighter.hashCode()));
-			if (selectionHighlighter.GetVisibility() != 0)
+			sb.append(" selectionActor@"+Integer.toHexString(selectionActor.hashCode()));
+			if (selectionActor.GetVisibility() != 0)
 				sb.append(" visible");
-			if (selectionHighlighter.GetPickable() != 0)
+			if (selectionActor.GetPickable() != 0)
 				sb.append(" pickable");
 		}
 		return sb.toString();

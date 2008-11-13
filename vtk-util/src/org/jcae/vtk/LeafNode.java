@@ -315,10 +315,10 @@ public class LeafNode extends AbstractNode
 		if (selected)
 		{
 			// Highlight actor
-			getActorSelectionCustomiser().customiseActorSelection(actor);
-			getMapperSelectionCustomiser().customiseMapperSelection(mapper);
+			getSelectionActorCustomiser().customiseSelectionActor(actor);
+			getSelectionMapperCustomiser().customiseSelectionMapper(mapper);
 			
-			deleteSelectionHighlighter();
+			deleteSelectionActor();
 		}
 		else
 		{
@@ -327,31 +327,31 @@ public class LeafNode extends AbstractNode
 			getActorCustomiser().customiseActor(actor);
 			getMapperCustomiser().customiseMapper(mapper);
 			
-			refreshSelectionHighlighter();
+			refreshSelectionActor();
 		}
 	}
 
-	private void refreshSelectionHighlighter()
+	private void refreshSelectionActor()
 	{
 		if (selection.length == 0)
 		{
-			deleteSelectionHighlighter();
+			deleteSelectionActor();
 			return;
 		}
 
-		if (selectionHighlighter == null)
+		if (selectionActor == null)
 		{
-			selectionHighlighter = new vtkActor();
-			selectionHighlighter.PickableOff();
+			selectionActor = new vtkActor();
+			selectionActor.PickableOff();
 			// fireActorCreated is called before creating its mapper
 			// to not take clipping planes into account
-			fireActorCreated(selectionHighlighter);
+			fireActorCreated(selectionActor);
 		}
-		getActorSelectionCustomiser().customiseActorSelection(selectionHighlighter);
+		getSelectionActorCustomiser().customiseSelectionActor(selectionActor);
 
-		selectionHighlighterMapper = new vtkPolyDataMapper();
-		selectionHighlighter.SetMapper(selectionHighlighterMapper);
-		getMapperSelectionCustomiser().customiseMapperSelection(selectionHighlighterMapper);
+		selectionMapper = new vtkPolyDataMapper();
+		selectionActor.SetMapper(selectionMapper);
+		getSelectionMapperCustomiser().customiseSelectionMapper(selectionMapper);
 
 		vtkSelection sel = new vtkSelection();
 		//sel.ReleaseDataFlagOn();
@@ -371,7 +371,7 @@ public class LeafNode extends AbstractNode
 		vtkPolyData dataFiltered = selFilter.GetOutput();
 		selFilter.Update();
 
-		selectionHighlighterMapper.SetInput(dataFiltered);
+		selectionMapper.SetInput(dataFiltered);
 	}
 
 	void setCellSelection(PickContext pickContext, int [] cellSelection)

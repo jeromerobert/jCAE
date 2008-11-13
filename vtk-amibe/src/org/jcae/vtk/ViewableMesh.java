@@ -60,13 +60,13 @@ public class ViewableMesh extends Viewable
 		this.colorManager = colorManager;
 		this.colorManager.setColor(selectionColor);
 		
-		rootNode.setActorSelectionCustomiser(new ActorSelectionCustomiser()
+		rootNode.setSelectionActorCustomiser(new SelectionActorCustomiser()
 		{
 
 			@Override
-			public void customiseActorSelection(vtkActor actor)
+			public void customiseSelectionActor(vtkActor actor)
 			{
-				super.customiseActorSelection(actor);
+				super.customiseSelectionActor(actor);
 				actor.GetProperty().EdgeVisibilityOn();
 				actor.SetEnableLighting(0);
 				actor.GetProperty().SetEdgeColor(0.4, 0.4, 0.4);
@@ -81,10 +81,10 @@ public class ViewableMesh extends Viewable
 				mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffsetFactor(), Utils.getOffsetValue()*2.);
 			}
 		});
-		rootNode.setMapperSelectionCustomiser(new AbstractNode.MapperSelectionCustomiser() {
+		rootNode.setSelectionMapperCustomiser(new AbstractNode.SelectionMapperCustomiser() {
 
 			@Override
-			public void customiseMapperSelection(vtkMapper mapper)
+			public void customiseSelectionMapper(vtkMapper mapper)
 			{
 				mapper.SetResolveCoincidentTopologyToPolygonOffset();
 				mapper.SetResolveCoincidentTopologyPolygonOffsetParameters(Utils.getOffsetFactor(), Utils.getOffsetValue());

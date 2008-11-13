@@ -471,10 +471,10 @@ public class Node extends AbstractNode
 			// The whole actor is selected, so display it
 			// as highlighted.
 			mapper.ScalarVisibilityOff();
-			getActorSelectionCustomiser().customiseActorSelection(actor);
-			getMapperSelectionCustomiser().customiseMapperSelection(mapper);
+			getSelectionActorCustomiser().customiseSelectionActor(actor);
+			getSelectionMapperCustomiser().customiseSelectionMapper(mapper);
 
-			deleteSelectionHighlighter();
+			deleteSelectionActor();
 		}
 		else
 		{
@@ -483,11 +483,11 @@ public class Node extends AbstractNode
 			getActorCustomiser().customiseActor(actor);
 			getMapperCustomiser().customiseMapper(mapper);
 
-			refreshSelectionHighlighter();
+			refreshSelectionActor();
 		}
 	}
 
-	private void refreshSelectionHighlighter()
+	private void refreshSelectionActor()
 	{
 		TIntArrayList selection = new TIntArrayList(nbrOfVertices + nbrOfLines + nbrOfPolys);
 		int leafIndex = -1;
@@ -535,26 +535,26 @@ public class Node extends AbstractNode
 
 		if (selection.isEmpty())
 		{
-			deleteSelectionHighlighter();
+			deleteSelectionActor();
 			return;
 		}
 
-		boolean actorCreated = (selectionHighlighter == null);
+		boolean actorCreated = (selectionActor == null);
 		if (actorCreated)
 		{
-			selectionHighlighter = new vtkActor();
-			selectionHighlighter.PickableOff();
+			selectionActor = new vtkActor();
+			selectionActor.PickableOff();
 		}
-		getActorSelectionCustomiser().customiseActorSelection(selectionHighlighter);
+		getSelectionActorCustomiser().customiseSelectionActor(selectionActor);
 
-		selectionHighlighterMapper = new vtkPolyDataMapper();
-		selectionHighlighterMapper.ScalarVisibilityOff();
-		selectionHighlighterMapper.SetInput(selectInto(data, selection.toNativeArray()));
-		selectionHighlighter.SetMapper(selectionHighlighterMapper);
-		getMapperSelectionCustomiser().customiseMapperSelection(selectionHighlighterMapper);
+		selectionMapper = new vtkPolyDataMapper();
+		selectionMapper.ScalarVisibilityOff();
+		selectionMapper.SetInput(selectInto(data, selection.toNativeArray()));
+		selectionActor.SetMapper(selectionMapper);
+		getSelectionMapperCustomiser().customiseSelectionMapper(selectionMapper);
 		
 		if (actorCreated)
-			fireActorCreated(selectionHighlighter);
+			fireActorCreated(selectionActor);
 	}
 
 	private final int nodeIndexToLeafIndex(int leaf, int index)
