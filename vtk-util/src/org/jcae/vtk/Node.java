@@ -198,14 +198,8 @@ public class Node extends AbstractNode
 
 	public void removeAllChildren()
 	{
-		ArrayList<AbstractNode> savedList = new ArrayList<AbstractNode>(children);
 		for (AbstractNode child : new ArrayList<AbstractNode>(children))
 			removeChild(child);
-	}
-
-	public int numChildren()
-	{
-		return children.size();
 	}
 
 	public void addChildCreationListener(ChildCreationListener listener)
@@ -466,11 +460,6 @@ public class Node extends AbstractNode
 			n.deleteDatas();
 	}
 
-	private int getNbrOfCells()
-	{
-		return nbrOfVertices + nbrOfLines + nbrOfPolys;
-	}
-
 	private void refreshHighlight()
 	{
 		if (LOGGER.isLoggable(Level.FINEST))
@@ -500,7 +489,7 @@ public class Node extends AbstractNode
 
 	private void refreshSelectionHighlighter()
 	{
-		TIntArrayList selection = new TIntArrayList(getNbrOfCells());
+		TIntArrayList selection = new TIntArrayList(nbrOfVertices + nbrOfLines + nbrOfPolys);
 		int leafIndex = -1;
 		for (LeafNode leaf : getLeaves())
 		{
