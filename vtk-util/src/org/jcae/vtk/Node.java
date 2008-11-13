@@ -189,7 +189,7 @@ public class Node extends AbstractNode
 	{
 		if (children.remove(child))
 		{
-			child.deleteDatas();
+			child.deleteData();
 			for(ChildCreationListener listener : childCreationListeners)
 				listener.childDeleted(child);
 			timestampModified();
@@ -449,15 +449,15 @@ public class Node extends AbstractNode
 	}
 
 	@Override
-	protected void deleteDatas()
+	protected void deleteData()
 	{
-		super.deleteDatas();
+		super.deleteData();
 		offsetsVertices = null;
 		offsetsLines = null;
 		offsetsPolys = null;
 		table = null;
 		for(AbstractNode n : children)
-			n.deleteDatas();
+			n.deleteData();
 	}
 
 	private void refreshHighlight()

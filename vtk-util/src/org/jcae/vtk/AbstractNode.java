@@ -462,7 +462,7 @@ public abstract class AbstractNode
 		//fireDataModified(data);
 	}
 	
-	protected void deleteDatas()
+	protected void deleteData()
 	{
 		data = null;
 		if(actor != null)
@@ -524,7 +524,7 @@ public abstract class AbstractNode
 		this.manager = manager;
 		
 		if(!this.manager)
-			deleteDatas();
+			deleteData();
 		
 		timestampModified();
 	}

@@ -205,7 +205,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 				if (!selection.contains(id))
 				{
 					LeafNode leaf = IDToEdgeNode.get(id);
-					leaf.deleteDatas();
+					leaf.deleteData();
 					edgesNode.removeChild(leaf);
 					IDToEdgeNode.remove(id);
 				}
@@ -215,7 +215,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 				if (!selection.contains(id))
 				{
 					LeafNode leaf = IDToFreeEdgeNode.get(id);
-					leaf.deleteDatas();
+					leaf.deleteData();
 					freeEdgesNode.removeChild(leaf);
 					IDToFreeEdgeNode.remove(id);
 				}

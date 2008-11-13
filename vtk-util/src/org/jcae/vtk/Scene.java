@@ -272,7 +272,7 @@ public class Scene implements AbstractNode.ActorListener
 						bounds = leaf.data.GetBounds();
 						box.setLower(bounds[0], bounds[2], bounds[4]);
 						box.setUpper(bounds[1], bounds[3], bounds[5]);
-						leaf.deleteDatas();
+						leaf.deleteData();
 						leafProvider.unLoad();
 						if (pickContext.intersect(box))
 							pickContext.addToSelectedNodes(leaf);
