@@ -88,10 +88,12 @@ public abstract class PickContext
 	 * Add a leaf to the set of selected nodes.
 	 * 
 	 * @param leaf  leaf to declare as being selected
+	 * @return <code>true</code> if leaf has been successfully added,
+	 * <code>false</code> if it were already present in this set.
 	 */
-	void addToSelectedNodes(LeafNode leaf)
+	boolean addToSelectedNodes(LeafNode leaf)
 	{
-		selectionNode.add(leaf);
+		return selectionNode.add(leaf);
 	}
 	
 	/**
