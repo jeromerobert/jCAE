@@ -25,7 +25,8 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.metrics.Matrix3D;
+import org.jcae.mesh.amibe.projection.QuadricProjection;
+import org.jcae.mesh.amibe.projection.LocalSurfaceProjection;
 import org.jcae.mesh.amibe.util.QSortedTree;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import org.jcae.mesh.xmldata.MeshReader;
@@ -67,7 +68,7 @@ public class SmoothNodes3D
 	int processed = 0;
 	int notProcessed = 0;
 	TObjectDoubleHashMap<Triangle> qualityMap;
-	Map<Vertex, QuadricProjection> nodeProjection;
+	Map<Vertex, LocalSurfaceProjection> nodeProjection;
 	Collection<Vertex> nodeset;
 	
 	/**
@@ -126,20 +127,6 @@ public class SmoothNodes3D
 		}
 	}
 	
-	private static class QuadricProjection
-	{
-		final Matrix3D localFrameTransform;
-		final double [] origin = new double[3];
-		final double [] quadric;
-		public QuadricProjection(double [] o, Matrix3D P, double [] q)
-		{
-			for (int i = 0; i < 3; i++)
-				origin[i] = o[i];
-			localFrameTransform = P;
-			quadric = q;
-		}
-	}
-
 	public void setProgressBarStatus(int n)
 	{
 		progressBarStatus = n;
@@ -170,7 +157,7 @@ public class SmoothNodes3D
 			computeTriangleQuality();
 	
 			nodeset = mesh.getNodes();
-			nodeProjection = new HashMap<Vertex, QuadricProjection>(mesh.getTriangles().size() / 2);
+			nodeProjection = new HashMap<Vertex, LocalSurfaceProjection>(mesh.getTriangles().size() / 2);
 			if (nodeset == null)
 			{
 				nodeset = new LinkedHashSet<Vertex>(mesh.getTriangles().size() / 2);
@@ -186,13 +173,10 @@ public class SmoothNodes3D
 			{
 				if (!v.isManifold() || !v.isMutable())
 					continue;
-				Matrix3D P = v.getMatrix3DLocalFrame();
-				if (P == null)
+				LocalSurfaceProjection qP = new QuadricProjection(v);
+				if (!qP.canProject())
 					continue;
-				double [] q = v.getLocalQuadric(P);
-				if (q == null)
-					continue;
-				nodeProjection.put(v, new QuadricProjection(v.getUV(), P, q));
+				nodeProjection.put(v, qP);
 			}
 			for (int i = 0; i < nloop; i++)
 				processAllNodes();
@@ -341,10 +325,10 @@ public class SmoothNodes3D
 			centroid3[i] = oldp3[i] + relaxation * (centroid3[i] - oldp3[i]);
 		if (!ot.checkNewRingNormals(centroid3))
 			return false;
-		QuadricProjection tr = nodeProjection.get(n);
-		if (tr == null)
+		LocalSurfaceProjection tr = nodeProjection.get(n);
+		if (tr == null || !tr.canProject())
 			return false;
-		c.projectQuadric(tr.origin, tr.localFrameTransform, tr.quadric);
+		tr.project(c);
 
 		double saveX = oldp3[0];
 		double saveY = oldp3[1];

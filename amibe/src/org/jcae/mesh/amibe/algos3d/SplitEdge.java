@@ -25,6 +25,7 @@ import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.HalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.projection.QuadricProjection;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;
 import java.io.File;
@@ -136,11 +137,16 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		Vertex vm = current.origin();
 		if (vm.getRef() != 0)
 			vm = current.destination();
-		if (vm.getRef() == 0 && !vm.discreteProject(insertedVertex))
+		if (vm.getRef() == 0)
 		{
-			if (logger.isLoggable(Level.FINE))
-				logger.fine("Point "+vm+" cannot be projected onto discrete surface!");
-			return false;
+			QuadricProjection qP = new QuadricProjection(vm);
+			if (!qP.canProject())
+			{
+				if (logger.isLoggable(Level.FINE))
+					logger.fine("Point "+vm+" cannot be projected onto discrete surface!");
+				return false;
+			}
+			qP.project(insertedVertex);
 		}
 
 		if (tolerance <= 0.0)

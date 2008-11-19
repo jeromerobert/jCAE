@@ -1,3 +1,13 @@
+Wed Nov 19 12:02:24 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/projection/LocalSurfaceProjection.java:
+	New interface to implement surface approximation.
+	* src/org/jcae/mesh/amibe/algos3d/SmoothNodes3D.java
+	  src/org/jcae/mesh/amibe/algos3d/SplitEdge.java
+	  src/org/jcae/mesh/amibe/ds/Vertex.java:  Move surface approximation
+	by quadrics from Vertex and SmoothNodes3D...
+	* src/org/jcae/mesh/amibe/projection/QuadricProjection.java: ...here.
+
 Wed Nov 19 11:47:37 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/algos3d/SmoothNodes3D.java: Fix centroid
