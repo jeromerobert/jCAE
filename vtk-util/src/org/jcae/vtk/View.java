@@ -176,6 +176,7 @@ public class View extends Canvas {
 				if(pressPosition.distance(releasePosition) > 5.)
 					return;
 				cameraManager.centerRotationSelection(releasePosition);
+				setMouseMode(MouseMode.POINT_SELECTION);
 				break;
 		}
 	}
