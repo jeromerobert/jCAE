@@ -323,7 +323,7 @@ public class SmoothNodes3D
 					else
 					{
 						for (int i = 0; i < 3; i++)
-							centroid3[i] += oldp3[i];
+							centroid3[i] += newp3[i];
 					}
 				}
 				else
