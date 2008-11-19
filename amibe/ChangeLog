@@ -1,5 +1,7 @@
 Wed Nov 19 12:02:24 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 
+	* src/org/jcae/mesh/amibe/metrics/Matrix3D.java: New distance2()
+	static method to compute squared distance between 2 points.
 	* src/org/jcae/mesh/amibe/projection/LocalSurfaceProjection.java:
 	New interface to implement surface approximation.
 	* src/org/jcae/mesh/amibe/algos3d/SmoothNodes3D.java

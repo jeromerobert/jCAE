@@ -193,6 +193,21 @@ public class Matrix3D implements Serializable
 	}
 	
 	/**
+	 * Return the squared Euclidian distance between two 3D vectors.
+	 *
+	 * @param A 3D vector.
+	 * @param B 3D vector.
+	 * @return the squared Euclidian norm of (A-B).
+	 */
+	public static double distance2(double [] A, double [] B)
+	{
+		double dx0 = A[0] - B[0];
+		double dx1 = A[1] - B[1];
+		double dx2 = A[2] - B[2];
+		return dx0*dx0 + dx1*dx1 + dx2*dx2;
+	}
+	
+	/**
 	 * Return the outer product of two 3D vectors.
 	 *
 	 * @param v1 first vector
