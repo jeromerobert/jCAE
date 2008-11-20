@@ -40,9 +40,14 @@ public class MeshLiaison
 	private final Mesh backgroundMesh;
 	private final Mesh currentMesh;
 	// Local surface definition on background mesh
-	Map<Vertex, LocalSurfaceProjection> localSurface;
+	private final Map<Vertex, LocalSurfaceProjection> localSurface;
 	// Map between vertices of currentMesh and their projection on backgroundMesh
 	private final Map<Vertex, LocalProjection> mapCurrentVertexProjection;
+	
+	private final static double [] work1 = new double[3];
+	private final static double [] work2 = new double[3];
+	private final static double [] work3 = new double[3];
+		
 	
 	public MeshLiaison(Mesh backgroundMesh)
 	{
@@ -69,15 +74,17 @@ public class MeshLiaison
 		
 		this.currentMesh = new Mesh();
 		// Create vertices of currentMesh
-		Map<Vertex, Vertex> mapVertexVertex = new HashMap<Vertex, Vertex>(backgroundNodeset.size()+1);
+		Map<Vertex, Vertex> mapBgToCurrent = new HashMap<Vertex, Vertex>(backgroundNodeset.size()+1);
 		for (Vertex v : backgroundNodeset)
 		{
 			Vertex currentV = this.currentMesh.createVertex(v.getUV());
-			mapVertexVertex.put(v, currentV);
+			currentV.setRef(v.getRef());
+			currentV.setLabel(v.getLabel());
+			mapBgToCurrent.put(v, currentV);
 			if (this.currentMesh.hasNodes())
 				this.currentMesh.add(currentV);
 		}
-		mapVertexVertex.put(this.backgroundMesh.outerVertex, this.currentMesh.outerVertex);
+		mapBgToCurrent.put(this.backgroundMesh.outerVertex, this.currentMesh.outerVertex);
 
 		// Create triangles of currentMesh
 		for (Triangle t : this.backgroundMesh.getTriangles())
@@ -85,35 +92,29 @@ public class MeshLiaison
 			if (t.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
 			this.currentMesh.add(this.currentMesh.createTriangle(
-				mapVertexVertex.get(t.vertex[0]),
-				mapVertexVertex.get(t.vertex[1]),
-				mapVertexVertex.get(t.vertex[2])));
+				mapBgToCurrent.get(t.vertex[0]),
+				mapBgToCurrent.get(t.vertex[1]),
+				mapBgToCurrent.get(t.vertex[2])));
 		}
 		this.currentMesh.buildAdjacency();
 
-		// Compute discrete surface on backgroundMesh
+		// Compute discrete surface on backgroundMesh.
+		// localSurface is computed on every point, canProject()
+		// is used during processing to check that surface
+		// approximation can really be performed.
 		this.localSurface = new HashMap<Vertex, LocalSurfaceProjection>(backgroundNodeset.size());
 		for (Vertex v: backgroundNodeset)
-		{
-			if (!v.isManifold() || !v.isMutable())
-				continue;
-			LocalSurfaceProjection P = new QuadricProjection(v);
-			if (!P.canProject())
-				continue;
-			this.localSurface.put(v, P);
-		}
+			this.localSurface.put(v, new QuadricProjection(v));
 		
 		// Compute projections of vertices from currentMesh
 		this.mapCurrentVertexProjection = new HashMap<Vertex, LocalProjection>(backgroundNodeset.size());
 		for (Vertex v: backgroundNodeset)
 		{
-			if (!v.isManifold() || !v.isMutable())
-				continue;
-			Vertex currentV = mapVertexVertex.get(v);
+			Vertex currentV = mapBgToCurrent.get(v);
 			this.mapCurrentVertexProjection.put(currentV,
 				new LocalProjection(currentV.getUV(), v.getNeighbourIteratorTriangle().next()));
 		}
-		mapVertexVertex.clear();
+		mapBgToCurrent.clear();
 	}
 	
 	public Mesh getMesh()
@@ -133,7 +134,8 @@ public class MeshLiaison
 			LOGGER.log(Level.FINER, "Trying to move vertex "+v+" to ("+target[0]+", "+target[1]+", "+target[2]+")");
 		Set<Triangle> visited = new HashSet<Triangle>();
 		LocalProjection proj = mapCurrentVertexProjection.get(v);
-		if (proj == null)
+		assert proj != null : "No projection found at vertex " + v;
+		if (!proj.quadric.canProject())
 			return false;
 		visited.add(proj.t);
 		int counter = 0;
@@ -184,6 +186,7 @@ public class MeshLiaison
 					LOGGER.finer("Loop detected when moving vertex");
 					return false;
 				}
+				visited.add(sym.getTri());
 				proj.updateTriangle(sym.getTri());
 				counter = 0;
 			}
@@ -195,12 +198,17 @@ public class MeshLiaison
 			}
 			// Compute barycentric coordinates in the new triangle
 			proj.computeBarycentricCoordinates(vPlane);
-			proj.updateQuadric(v.getUV());
+			if (proj.updateQuadric(v.getUV()))
+			{
+				// Quadric has changed, check if projection can still be performed
+				if (!proj.quadric.canProject())
+					return false;
+			}
 		}
 	}
 
 	
-	private static class LocalProjection
+	private class LocalProjection
 	{
 		LocalSurfaceProjection quadric;
 		// triangle where vertex is projected into
@@ -213,10 +221,6 @@ public class MeshLiaison
 		int vIndex = -1;
 		// barycentric coordinates
 		double [] b = new double[3];
-		
-		static double [] work1 = new double[3];
-		static double [] work2 = new double[3];
-		static double [] work3 = new double[3];
 		
 		public LocalProjection(double [] xyz, Triangle t)
 		{
@@ -269,7 +273,7 @@ public class MeshLiaison
 			
 			if (vIndex == oldIndex)
 				return false;
-			quadric = new QuadricProjection(t.vertex[vIndex]);
+			quadric = MeshLiaison.this.localSurface.get(t.vertex[vIndex]);
 			return true;
 		}
 		

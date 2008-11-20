@@ -103,6 +103,8 @@ public class QuadricProjection implements LocalSurfaceProjection
 
 	private Matrix3D getMatrix3DLocalFrame(Vertex o)
 	{
+		if (!o.isManifold() || !o.isMutable())
+			return null;
 		double [] normal = new double[3];
 		// TODO: Check why discreteCurvatures(normal) does not work well
 		if (!o.discreteAverageNormal(normal))

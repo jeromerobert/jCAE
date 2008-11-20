@@ -1,3 +1,12 @@
+Thu Nov 20 16:55:29 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/projection/MeshLiaison.java: New class to
+	start work on remeshing.  MeshLiaison takes a background mesh as
+	input and clones it.  The new mesh can then be modified while
+	vertices are projected onto background mesh.
+	* src/org/jcae/mesh/amibe/algos3d/SmoothNodes3DBg.java: 3D smoothing
+	based on MeshLiaison.
+
 Thu Nov 20 14:01:56 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Mesh.java: In buildAdjacency(), ensure
