@@ -466,6 +466,13 @@ public class Mesh implements Serializable
 			}
 		}
 
+		// Set reference on boundary nodes if missing
+		for (Vertex v : bndNodes)
+		{
+			if (0 == v.getRef())
+				setRefVertexOnboundary(v);
+		}
+
 		//  Build links for non-manifold vertices
 		logger.fine("Compute links for non-manifold vertices");
 		Vertex [] endpoints = new Vertex[2];
