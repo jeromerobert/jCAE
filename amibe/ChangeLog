@@ -1,3 +1,9 @@
+Mon Nov 24 11:27:21 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/projection/Sphere.java: New class to
+	generate a regular mesh on a sphere.  This geometry will be
+	needed to test surface projection.
+
 Thu Nov 20 16:55:29 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/projection/MeshLiaison.java: New class to
