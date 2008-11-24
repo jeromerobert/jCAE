@@ -42,7 +42,7 @@ import java.util.logging.Logger;
  */
 public class RandomLength
 {
-	private static Logger logger=Logger.getLogger(RandomLength.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(RandomLength.class.getName());
 	private final MMesh1D mesh1d;
 	private int divisions;
 	
@@ -94,9 +94,9 @@ public class RandomLength
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
 		}
-		logger.fine("TopoEdges discretisees "+nbTEdges);
-		logger.fine("Edges   "+nbEdges);
-		logger.fine("Nodes   "+nbNodes);
+		LOGGER.fine("TopoEdges discretisees "+nbTEdges);
+		LOGGER.fine("Edges   "+nbEdges);
+		LOGGER.fine("Nodes   "+nbNodes);
 		assert(mesh1d.isValid());
 	}
 

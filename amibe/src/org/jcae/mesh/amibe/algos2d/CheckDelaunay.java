@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  */
 public class CheckDelaunay
 {
-	private static Logger logger=Logger.getLogger(CheckDelaunay.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(CheckDelaunay.class.getName());
 	private final Mesh2D mesh;
 	
 	/**
@@ -78,7 +78,7 @@ public class CheckDelaunay
 		Vertex2D v;
 		int cnt = 0;
 		mesh.pushCompGeom(3);
-		logger.fine(" Checking Delaunay criterion");
+		LOGGER.fine(" Checking Delaunay criterion");
 		ot = new VirtualHalfEdge2D();
 		sym = new VirtualHalfEdge2D();
 
@@ -129,7 +129,7 @@ public class CheckDelaunay
 					}
 				}
 			}
-			logger.fine(" Found "+cnt+" non-Delaunay triangles");
+			LOGGER.fine(" Found "+cnt+" non-Delaunay triangles");
 			for (FakeEdge e: toSwap)
 			{
 				ot.bind(e.triangle);

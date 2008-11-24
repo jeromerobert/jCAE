@@ -53,7 +53,7 @@ import java.util.logging.Logger;
  */
 public class SmoothNodes3D
 {
-	private static Logger logger=Logger.getLogger(SmoothNodes3D.class.getName());
+	private static Logger LOGGER=Logger.getLogger(SmoothNodes3D.class.getName());
 	private Mesh mesh;
 	private double sizeTarget = -1.0;
 	private int nloop = 10;
@@ -78,8 +78,7 @@ public class SmoothNodes3D
 	 */
 	public SmoothNodes3D(Mesh m)
 	{
-		mesh = m;
-		c = mesh.createVertex(0.0, 0.0, 0.0);
+		this(m, new HashMap<String, String>());
 	}
 	
 	/**
@@ -115,15 +114,15 @@ public class SmoothNodes3D
 			else
 				throw new RuntimeException("Unknown option: "+key);
 		}
-		if (logger.isLoggable(Level.FINE))
+		if (LOGGER.isLoggable(Level.FINE))
 		{
 			if (sizeTarget > 0.0)
-				logger.fine("Size: "+sizeTarget);
-			logger.fine("Iterations: "+nloop);
-			logger.fine("Refresh: "+refresh);
-			logger.fine("Relaxation: "+relaxation);
-			logger.fine("Tolerance: "+tolerance);
-			logger.fine("Preserve boundaries: "+preserveBoundaries);
+				LOGGER.fine("Size: "+sizeTarget);
+			LOGGER.fine("Iterations: "+nloop);
+			LOGGER.fine("Refresh: "+refresh);
+			LOGGER.fine("Relaxation: "+relaxation);
+			LOGGER.fine("Tolerance: "+tolerance);
+			LOGGER.fine("Preserve boundaries: "+preserveBoundaries);
 		}
 	}
 	
@@ -149,7 +148,7 @@ public class SmoothNodes3D
 	}
 	public void compute()
 	{
-		logger.info("Run "+getClass().getName());
+		LOGGER.info("Run "+getClass().getName());
 		if (nloop > 0)
 		{
 			// First compute triangle quality
@@ -181,8 +180,8 @@ public class SmoothNodes3D
 			for (int i = 0; i < nloop; i++)
 				processAllNodes();
 		}
-		logger.info("Number of moved points: "+processed);
-		logger.info("Total number of points not moved during processing: "+notProcessed);
+		LOGGER.info("Number of moved points: "+processed);
+		LOGGER.info("Total number of points not moved during processing: "+notProcessed);
 	}
 	
 	/*
@@ -226,7 +225,7 @@ public class SmoothNodes3D
 			{
 				processed++;
 				if (processed > 0 && (processed % progressBarStatus) == 0)
-					logger.info("Vertices processed: "+processed);
+					LOGGER.info("Vertices processed: "+processed);
 				if (!refresh)
 					continue;
 				assert ot != null;

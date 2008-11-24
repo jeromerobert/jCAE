@@ -182,7 +182,7 @@ import java.util.logging.Logger;
  */
 public class Initial
 {
-	private final static Logger logger=Logger.getLogger(Initial.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(Initial.class.getName());
 	private Mesh2D mesh;
 	private final CADFace face;
 	private final MMesh1D mesh1D;
@@ -248,7 +248,7 @@ public class Initial
 				{
 					if (mp.getEpsilon() > 0.0)
 					{
-						logger.warning("Face cannot be triangulated, trying"+
+						LOGGER.warning("Face cannot be triangulated, trying"+
 							"again with a larger tolerance...");
 						mp.scaleTolerance(10.);
 						mesh = new Mesh2D(meshTraitsBuilder, mp, face);
@@ -270,10 +270,10 @@ public class Initial
 
 		if (bNodes.length < 3)
 		{
-			logger.warning("Boundary face contains less than 3 points, it is skipped...");
+			LOGGER.warning("Boundary face contains less than 3 points, it is skipped...");
 			throw new InvalidFaceException();
 		}
-		logger.fine(" Unconstrained Delaunay triangulation");
+		LOGGER.fine(" Unconstrained Delaunay triangulation");
 		double [] bbmin = { Double.MAX_VALUE, Double.MAX_VALUE };
 		double [] bbmax = { Double.MIN_VALUE, Double.MIN_VALUE };
 		for (Vertex2D v: bNodes)
@@ -336,7 +336,7 @@ public class Initial
 		mesh.popCompGeom(2);
 		
 		mesh.pushCompGeom(2);
-		logger.fine(" Rebuild boundary edges");
+		LOGGER.fine(" Rebuild boundary edges");
 		//  Boundary edges are first built, then they are collected.
 		//  This cannot be performed in a single loop because
 		//  triangles are modified within this loop.
@@ -360,7 +360,7 @@ public class Initial
 		assert firstOnWire == null;
 		mesh.popCompGeom(2);
 		
-		logger.fine(" Mark outer elements");
+		LOGGER.fine(" Mark outer elements");
 		t = (TriangleVH) mesh.outerVertex.getLink();
 		ot = new VirtualHalfEdge2D(t, 0);
 		if (ot.origin() == mesh.outerVertex)
@@ -384,7 +384,7 @@ public class Initial
 		}
 		while (ot.origin() != first);
 		
-		logger.fine(" Mark holes");
+		LOGGER.fine(" Mark holes");
 		VirtualHalfEdge2D sym = new VirtualHalfEdge2D();
 		// Dummy value to enter the loop
 		TriangleVH oldHead = t;
@@ -434,7 +434,7 @@ public class Initial
 		tList.clear();
 		assert (mesh.isValid());
 		
-		logger.fine(" Remove links to outer triangles");
+		LOGGER.fine(" Remove links to outer triangles");
 		for (Iterator<Triangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 		{
 			t = (TriangleVH) it.next();
@@ -449,7 +449,7 @@ public class Initial
 		
 		if (innerNodes != null && !innerNodes.isEmpty())
 		{
-			logger.fine(" Insert interior vertices");
+			LOGGER.fine(" Insert interior vertices");
 			mesh.pushCompGeom(2);
 			for (MNode1D p1: innerNodes)
 			{
@@ -460,7 +460,7 @@ public class Initial
 			mesh.popCompGeom(2);
 		}
 
-		logger.fine(" Select 3D smaller diagonals");
+		LOGGER.fine(" Select 3D smaller diagonals");
 		mesh.pushCompGeom(3);
 		boolean redo = true;
 		//  With Riemannian metrics, there may be infinite loops,

@@ -64,7 +64,7 @@ import java.util.logging.Logger;
  */
 public class SplitEdge extends AbstractAlgoHalfEdge
 {
-	private static Logger logger=Logger.getLogger(SplitEdge.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(SplitEdge.class.getName());
 	private double [] newXYZ = new double[3];
 	private Vertex insertedVertex = null;
 	
@@ -98,7 +98,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 	@Override
 	public Logger thisLogger()
 	{
-		return logger;
+		return LOGGER;
 	}
 
 	@Override
@@ -142,8 +142,8 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 			QuadricProjection qP = new QuadricProjection(vm);
 			if (!qP.canProject())
 			{
-				if (logger.isLoggable(Level.FINE))
-					logger.fine("Point "+vm+" cannot be projected onto discrete surface!");
+				if (LOGGER.isLoggable(Level.FINE))
+					LOGGER.fine("Point "+vm+" cannot be projected onto discrete surface!");
 				return false;
 			}
 			qP.project(insertedVertex);
@@ -159,8 +159,8 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		}
 		if (dapex2 * tolerance * 16.0 > 1.0)
 			return true;
-		if (logger.isLoggable(Level.FINE))
-			logger.fine("Point "+vm+" too near from apical vertex");
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.fine("Point "+vm+" too near from apical vertex");
 		return false;
 	}
 
@@ -185,14 +185,14 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 	public HalfEdge processEdge(HalfEdge current, double costCurrent)
 	{
 		current = uniqueOrientation(current);
-		if (logger.isLoggable(Level.FINE))
+		if (LOGGER.isLoggable(Level.FINE))
 		{
-			logger.fine("Split edge: "+current+" by "+insertedVertex+"  cost="+costCurrent);
+			LOGGER.fine("Split edge: "+current+" by "+insertedVertex+"  cost="+costCurrent);
 			if (current.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 			{
-				logger.fine("Non-manifold edge:");
+				LOGGER.fine("Non-manifold edge:");
 				for (Iterator<AbstractHalfEdge> it = current.fanIterator(); it.hasNext(); )
-					logger.fine(" --> "+it.next());
+					LOGGER.fine(" --> "+it.next());
 			}
 		}
 		if (current.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
@@ -246,11 +246,11 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 	@Override
 	public void postProcessAllHalfEdges()
 	{
-		logger.info("Number of splitted edges: "+processed);
-		logger.info("Total number of edges not splitted during processing: "+notProcessed);
-		logger.info("Total number of edges swapped to increase quality: "+swapped);
-		//logger.info("Number of edges which were not in the binary tree before being removed: "+notInTree);
-		logger.info("Number of edges still present in the binary tree: "+tree.size());
+		LOGGER.info("Number of splitted edges: "+processed);
+		LOGGER.info("Total number of edges not splitted during processing: "+notProcessed);
+		LOGGER.info("Total number of edges swapped to increase quality: "+swapped);
+		//LOGGER.info("Number of edges which were not in the binary tree before being removed: "+notInTree);
+		LOGGER.info("Number of edges still present in the binary tree: "+tree.size());
 	}
 
 	private final static String usageString = "<xmlDir> <-t maxLength | -n nrTriangles> <brepFile> <outputDir>";
@@ -276,7 +276,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 			System.out.println(usageString);
 			return;
 		}
-		logger.info("Load geometry file");
+		LOGGER.info("Load geometry file");
 		org.jcae.mesh.amibe.traits.MeshTraitsBuilder mtb = org.jcae.mesh.amibe.traits.MeshTraitsBuilder.getDefault3D();
 		mtb.addTriangleSet();
 		Mesh mesh = new Mesh(mtb);

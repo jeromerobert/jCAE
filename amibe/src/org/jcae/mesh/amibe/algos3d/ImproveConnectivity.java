@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 
 public class ImproveConnectivity extends AbstractAlgoHalfEdge
 {
-	private static Logger logger=Logger.getLogger(ImproveConnectivity.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(ImproveConnectivity.class.getName());
 	private double planarMin = 0.95;
 	private TObjectIntHashMap<Vertex> map;
 	
@@ -64,7 +64,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 			if (key.equals("coplanar"))
 			{
 				planarMin = new Double(val).doubleValue();
-				logger.fine("Coplanar value: "+planarMin);
+				LOGGER.fine("Coplanar value: "+planarMin);
 			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
@@ -77,7 +77,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 	@Override
 	public Logger thisLogger()
 	{
-		return logger;
+		return LOGGER;
 	}
 
 	@Override
@@ -175,10 +175,10 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 		Vertex a = current.apex();
 		Vertex n = current.sym().apex();
 
-		if (logger.isLoggable(Level.FINE))
+		if (LOGGER.isLoggable(Level.FINE))
 		{
-			logger.fine("Swap edge: "+current+"  cost="+costCurrent);
-			logger.fine(" Connections before swap: o="+map.get(o)+" d="+map.get(d)+" a="+map.get(a)+" n="+map.get(n));
+			LOGGER.fine("Swap edge: "+current+"  cost="+costCurrent);
+			LOGGER.fine(" Connections before swap: o="+map.get(o)+" d="+map.get(d)+" a="+map.get(a)+" n="+map.get(n));
 		}
 
 		assert costCurrent == cost(current) : costCurrent+" != "+cost(current);
@@ -270,9 +270,9 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 	@Override
 	public void postProcessAllHalfEdges()
 	{
-		logger.info("Number of swapped edges: "+processed);
-		//logger.info("Number of edges which were not in the binary tree before being removed: "+notInTree);
-		logger.info("Number of edges still present in the binary tree: "+tree.size());
+		LOGGER.info("Number of swapped edges: "+processed);
+		//LOGGER.info("Number of edges which were not in the binary tree before being removed: "+notInTree);
+		LOGGER.info("Number of edges still present in the binary tree: "+tree.size());
 	}
 
 	private static void usage(int rc)
@@ -305,7 +305,7 @@ public class ImproveConnectivity extends AbstractAlgoHalfEdge
 		}
 		if (argc + 2 != args.length)
 			usage(1);
-		logger.info("Load geometry file");
+		LOGGER.info("Load geometry file");
 		final Mesh mesh = new Mesh();
 		try
 		{

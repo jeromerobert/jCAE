@@ -79,11 +79,11 @@ import java.util.logging.Logger;
  */
 public class Insertion
 {
-	private static Logger logger=Logger.getLogger(Insertion.class.getName());
-	private Mesh2D mesh;
+	private static final Logger LOGGER=Logger.getLogger(Insertion.class.getName());
+	private final Mesh2D mesh;
 	
-	private double minlen = 1.0 / Math.sqrt(2.);
-	private double maxlen = 1.0 * Math.sqrt(2.);
+	private final double minlen;
+	private final double maxlen;
 	
 	/**
 	 * Creates a <code>Insertion</code> instance.
@@ -92,7 +92,7 @@ public class Insertion
 	 */
 	public Insertion(Mesh2D m)
 	{
-		mesh = m;
+		this(m, 1.0);
 	}
 	
 	public Insertion(Mesh2D m, double scale)
@@ -108,7 +108,7 @@ public class Insertion
 	public void compute()
 	{
 		int nrIter = 0;
-		logger.fine(" Insert inner nodes");
+		LOGGER.fine(" Insert inner nodes");
 		ArrayList<Vertex2D> nodes = new ArrayList<Vertex2D>();
 		ArrayList<Vertex2D> triNodes = new ArrayList<Vertex2D>();
 		VirtualHalfEdge2D sym = new VirtualHalfEdge2D();
@@ -159,7 +159,7 @@ public class Insertion
 			// Number of quadtree cells split
 			int kdtreeSplit = 0;
 			nodes.clear();
-			logger.fine("Check all edges");
+			LOGGER.fine("Check all edges");
 			for(Iterator<Triangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
 			{
 				TriangleVH t = (TriangleVH) it.next();
@@ -274,7 +274,7 @@ public class Insertion
 			//  modified by vertex insertion.
 			Vertex2D c = null;
 			trianglesToCheck.clear();
-			logger.fine("Check triangle centroids for "+oldTrianglesToCheck.size()+" triangles");
+			LOGGER.fine("Check triangle centroids for "+oldTrianglesToCheck.size()+" triangles");
 			for (Iterator<Triangle> it = oldTrianglesToCheck.iterator(); it.hasNext(); )
 			{
 				TriangleVH t = (TriangleVH) it.next();
@@ -327,7 +327,7 @@ public class Insertion
 				//  may return a null pointer.
 				mesh.getKdTree().remove(v);
 			}
-			logger.fine("Try to insert "+nodes.size()+" nodes");
+			LOGGER.fine("Try to insert "+nodes.size()+" nodes");
 			//  Process in pseudo-random order.  There is at most maxNodes nodes
 			//  on an edge, we choose an increment step greater than this value
 			//  to try to split all edges.
@@ -353,21 +353,21 @@ public class Insertion
 				if (index >= imax)
 					index -= imax;
 			}
-			if (logger.isLoggable(Level.FINE))
+			if (LOGGER.isLoggable(Level.FINE))
 			{
-				logger.fine("Mesh now contains "+mesh.getTriangles().size()+" triangles");
+				LOGGER.fine("Mesh now contains "+mesh.getTriangles().size()+" triangles");
 				if (checked > 0)
-					logger.fine(checked+" edges checked");
+					LOGGER.fine(checked+" edges checked");
 				if (imax - skippedNodes > 0)
-					logger.fine((imax-skippedNodes)+" nodes added");
+					LOGGER.fine((imax-skippedNodes)+" nodes added");
 				if (tooNearNodes > 0)
-					logger.fine(tooNearNodes+" nodes are too near from existing vertices and cannot be inserted");
+					LOGGER.fine(tooNearNodes+" nodes are too near from existing vertices and cannot be inserted");
 				if (skippedNodes > 0)
-					logger.fine(skippedNodes+" nodes cannot be inserted");
+					LOGGER.fine(skippedNodes+" nodes cannot be inserted");
 				if (totNrSwap > 0)
-					logger.fine(totNrSwap+" edges have been swapped during processing");
+					LOGGER.fine(totNrSwap+" edges have been swapped during processing");
 				if (kdtreeSplit > 0)
-					logger.fine(kdtreeSplit+" quadtree cells split");
+					LOGGER.fine(kdtreeSplit+" quadtree cells split");
 			}
 			if (skippedNodes == nodes.size())
 				break;
@@ -383,7 +383,7 @@ public class Insertion
 					oldTrianglesToCheck.add(t);
 			}
 		}
-		logger.fine("Number of iterations to insert all nodes: "+nrIter);
+		LOGGER.fine("Number of iterations to insert all nodes: "+nrIter);
 	}
 	
 	private final boolean checkNearestVertex(Vertex v, Vertex n)

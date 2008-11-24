@@ -40,8 +40,8 @@ import java.util.logging.Logger;
 
 public class Compat1D2D
 {
-	private static Logger logger=Logger.getLogger(Compat1D2D.class.getName());
-	private MMesh1D mesh1d;
+	private static final Logger LOGGER=Logger.getLogger(Compat1D2D.class.getName());
+	private final MMesh1D mesh1d;
 	private double deflection = 1.0;
 	private boolean relativeDeflection = false;
 	
@@ -92,9 +92,9 @@ public class Compat1D2D
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
 		}
-		logger.fine("Discretized TopoEdges: "+nbTEdges);
-		logger.fine("Edges   "+nbEdges);
-		logger.fine("Nodes   "+nbNodes);
+		LOGGER.fine("Discretized TopoEdges: "+nbTEdges);
+		LOGGER.fine("Edges   "+nbEdges);
+		LOGGER.fine("Nodes   "+nbNodes);
 		assert(mesh1d.isValid());
 	}
 
@@ -139,7 +139,7 @@ public class Compat1D2D
 				double cmax = Math.abs(surface.maxCurvature());
 				if (Double.isNaN(cmin) || Double.isNaN(cmax))
 				{
-					logger.fine("Undefined curvature");
+					LOGGER.fine("Undefined curvature");
 					//  Try with a near point
 					if (i == 0)
 						uv = curve2d.value(paramOnEdge[0] + 0.01 * (paramOnEdge[1] - paramOnEdge[0]));

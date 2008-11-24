@@ -64,8 +64,8 @@ import org.jcae.mesh.xmldata.MeshWriter;
  */
 public class SmoothNodes2D
 {
-	private static Logger logger=Logger.getLogger(SmoothNodes2D.class.getName());
-	private Mesh2D mesh;
+	private static final Logger LOGGER=Logger.getLogger(SmoothNodes2D.class.getName());
+	private final Mesh2D mesh;
 	private boolean modifiedLaplacian = false;
 	// If interpolate is false, distance(a,b) is computed with metric at point b.
 	// Otherwise, it is computed with an interpolation of both metrics.
@@ -90,8 +90,7 @@ public class SmoothNodes2D
 	 */
 	public SmoothNodes2D(Mesh2D m)
 	{
-		mesh = m;
-		c = (Vertex2D) mesh.createVertex(0.0, 0.0);
+		this(m, new HashMap<String, String>());
 	}
 	
 	/**
@@ -125,15 +124,15 @@ public class SmoothNodes2D
 			else
 				throw new RuntimeException("Unknown option: "+key);
 		}
-		if (logger.isLoggable(Level.FINE))
+		if (LOGGER.isLoggable(Level.FINE))
 		{
 			if (modifiedLaplacian)
-				logger.fine("Modified Laplacian smoothing");
-			logger.fine("Iterations: "+nloop);
-			logger.fine("Refresh: "+refresh);
-			logger.fine("Relaxation: "+relaxation);
-			logger.fine("Tolerance: "+tolerance);
-			logger.fine("Interpolate: "+interpolate);
+				LOGGER.fine("Modified Laplacian smoothing");
+			LOGGER.fine("Iterations: "+nloop);
+			LOGGER.fine("Refresh: "+refresh);
+			LOGGER.fine("Relaxation: "+relaxation);
+			LOGGER.fine("Tolerance: "+tolerance);
+			LOGGER.fine("Interpolate: "+interpolate);
 		}
 	}
 	
@@ -159,7 +158,7 @@ public class SmoothNodes2D
 	}
 	public void compute()
 	{
-		logger.fine("Run "+getClass().getName());
+		LOGGER.fine("Run "+getClass().getName());
 		if (nloop > 0)
 		{
 			mesh.pushCompGeom(3);
@@ -183,8 +182,8 @@ public class SmoothNodes2D
 				processAllNodes();
 			mesh.popCompGeom(3);
 		}
-		logger.fine("Number of moved points: "+processed);
-		logger.fine("Total number of points not moved during processing: "+notProcessed);
+		LOGGER.fine("Number of moved points: "+processed);
+		LOGGER.fine("Total number of points not moved during processing: "+notProcessed);
 	}
 	
 	/*
@@ -228,7 +227,7 @@ public class SmoothNodes2D
 			{
 				processed++;
 				if (processed > 0 && (processed % progressBarStatus) == 0)
-					logger.fine("Vertices processed: "+processed);
+					LOGGER.fine("Vertices processed: "+processed);
 				if (!refresh)
 					continue;
 				// Update triangle quality

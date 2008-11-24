@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 
 public class SwapEdge extends AbstractAlgoHalfEdge
 {
-	private static Logger logger=Logger.getLogger(SwapEdge.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(SwapEdge.class.getName());
 	private double planarMin = 0.95;
 	private int counter = 0;
 	
@@ -60,7 +60,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 			if (key.equals("angle"))
 			{
 				planarMin = new Double(val).doubleValue();
-				logger.fine("Planar angle: "+planarMin);
+				LOGGER.fine("Planar angle: "+planarMin);
 			}
 			else
 				throw new RuntimeException("Unknown option: "+key);
@@ -71,7 +71,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 	@Override
 	public Logger thisLogger()
 	{
-		return logger;
+		return LOGGER;
 	}
 
 	@Override
@@ -94,8 +94,8 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 	@Override
 	public HalfEdge processEdge(HalfEdge current, double costCurrent)
 	{
-		if (logger.isLoggable(Level.FINE))
-			logger.fine("Swap edge: "+current+"  cost="+costCurrent);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.fine("Swap edge: "+current+"  cost="+costCurrent);
 		counter --;
 		for (int i = 0; i < 3; i++)
 		{
@@ -134,9 +134,9 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 	@Override
 	public void postProcessAllHalfEdges()
 	{
-		logger.info("Number of swapped edges: "+processed);
-		//logger.info("Number of edges which were not in the binary tree before being removed: "+notInTree);
-		logger.info("Number of edges still present in the binary tree: "+tree.size());
+		LOGGER.info("Number of swapped edges: "+processed);
+		//LOGGER.info("Number of edges which were not in the binary tree before being removed: "+notInTree);
+		LOGGER.info("Number of edges still present in the binary tree: "+tree.size());
 	}
 
 	private final static String usageString = "<xmlDir> <brepFile> <outputDir>";
@@ -153,7 +153,7 @@ public class SwapEdge extends AbstractAlgoHalfEdge
 			System.out.println(usageString);
 			return;
 		}
-		logger.info("Load geometry file");
+		LOGGER.info("Load geometry file");
 		final Mesh mesh = new Mesh();
 		try
 		{

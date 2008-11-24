@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  */
 public class EnforceAbsDeflection
 {
-	private static Logger logger=Logger.getLogger(EnforceAbsDeflection.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(EnforceAbsDeflection.class.getName());
 	private final Mesh2D mesh;
 	
 	/**
@@ -62,7 +62,7 @@ public class EnforceAbsDeflection
 	public void compute()
 	{
 		mesh.pushCompGeom(3);
-		logger.fine(" Enforcing absolute deflection");
+		LOGGER.fine(" Enforcing absolute deflection");
 
 		Vertex [] p = new Vertex[4];
 		double [] v1 = new double[3];
@@ -125,8 +125,8 @@ public class EnforceAbsDeflection
 					redo = true;
 			}
 			niter--;
-			if (logger.isLoggable(Level.FINE))
-				logger.fine(" Found "+badTriangles.size()+" non-conforming triangles");
+			if (LOGGER.isLoggable(Level.FINE))
+				LOGGER.fine(" Found "+badTriangles.size()+" non-conforming triangles");
 		} while (redo && niter > 0);
 		mesh.popCompGeom(3);
 	}

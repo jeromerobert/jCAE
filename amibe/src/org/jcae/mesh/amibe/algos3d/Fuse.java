@@ -33,9 +33,9 @@ import java.util.logging.Logger;
  */
 public class Fuse
 {
-	private static Logger logger=Logger.getLogger(Fuse.class.getName());
-	private Mesh mesh;
-	private double tolerance = 0.0;
+	private static final Logger LOGGER=Logger.getLogger(Fuse.class.getName());
+	private final Mesh mesh;
+	private final double tolerance;
 	
 	/**
 	 * Creates a <code>Fuse</code> instance.
@@ -44,7 +44,7 @@ public class Fuse
 	 */
 	public Fuse(Mesh m)
 	{
-		mesh = m;
+		this(m, 0.0);
 	}
 	
 	/**
@@ -64,7 +64,7 @@ public class Fuse
 	 */
 	public void compute()
 	{
-		logger.fine("Running Fuse");
+		LOGGER.fine("Running Fuse");
 		double [] bmin = new double[3];
 		double [] bmax = new double[3];
 		for (int i = 0; i < 3; i++)
@@ -111,13 +111,13 @@ public class Fuse
 				octree.add(n);
 			else
 			{
-				logger.fine("Node "+n+" is removed, it is too close from "+p);
+				LOGGER.fine("Node "+n+" is removed, it is too close from "+p);
 				nSubst++;
 				map.put(n, p);
 				n.setRef(0);
 			}
 		}
-		logger.fine(""+nSubst+" node(s) are removed");
+		LOGGER.fine(""+nSubst+" node(s) are removed");
 		for (Triangle t: mesh.getTriangles())
 		{
 			for (int j = 0; j < 4; j++)

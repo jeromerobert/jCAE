@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 
 public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 {
-	private final static Logger logger=Logger.getLogger(LengthDecimateHalfEdge.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(LengthDecimateHalfEdge.class.getName());
 	private Vertex v3;
 	private boolean freeEdgeOnly = false;
 	private final double freeEdgeFactor;
@@ -64,24 +64,24 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			if ("size".equals(key))
 			{
 				tolerance = Double.parseDouble(val);
-				logger.fine("Tolerance: "+tolerance);
+				LOGGER.fine("Tolerance: "+tolerance);
 				tolerance = tolerance*tolerance;
 			}
 			else if ("maxtriangles".equals(key))
 			{
 				nrFinal = Integer.parseInt(val);
-				logger.fine("Nr max triangles: "+nrFinal);
+				LOGGER.fine("Nr max triangles: "+nrFinal);
 			}
 			else if ("maxlength".equals(key))
 			{
 				maxEdgeLength = Double.parseDouble(val);
-				logger.fine("Max edge length: "+maxEdgeLength);
+				LOGGER.fine("Max edge length: "+maxEdgeLength);
 				maxEdgeLength = maxEdgeLength*maxEdgeLength;
 			}
 			else if ("freeEdgeOnly".equals(key))
 			{
 				freeEdgeOnly = Boolean.parseBoolean(val);
-				logger.fine("freeEdgeOnly: "+freeEdgeOnly);
+				LOGGER.fine("freeEdgeOnly: "+freeEdgeOnly);
 			}
 			else if ("freeEdgeTol".equals(key))
 			{
@@ -100,7 +100,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	@Override
 	public Logger thisLogger()
 	{
-		return logger;
+		return LOGGER;
 	}
 
 	@Override
@@ -175,14 +175,14 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	public HalfEdge processEdge(HalfEdge current, double costCurrent)
 	{
 		current = uniqueOrientation(current);
-		if (logger.isLoggable(Level.FINE))
+		if (LOGGER.isLoggable(Level.FINE))
 		{
-			logger.fine("Contract edge: "+current+" into "+v3+"  cost="+costCurrent);
+			LOGGER.fine("Contract edge: "+current+" into "+v3+"  cost="+costCurrent);
 			if (current.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
 			{
-				logger.fine("Non-manifold edge:");
+				LOGGER.fine("Non-manifold edge:");
 				for (Iterator<AbstractHalfEdge> it = current.fanIterator(); it.hasNext(); )
-					logger.fine(" --> "+it.next());
+					LOGGER.fine(" --> "+it.next());
 			}
 		}
 		// HalfEdge instances on t1 and t2 will be deleted
@@ -287,11 +287,11 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 	@Override
 	public void postProcessAllHalfEdges()
 	{
-		logger.info("Number of contracted edges: "+processed);
-		logger.info("Total number of edges not contracted during processing: "+notProcessed);
-		logger.info("Total number of edges swapped to increase quality: "+swapped);
-		//logger.info("Number of edges which were not in the binary tree before being removed: "+notInTree);
-		logger.info("Number of edges still present in the binary tree: "+tree.size());
+		LOGGER.info("Number of contracted edges: "+processed);
+		LOGGER.info("Total number of edges not contracted during processing: "+notProcessed);
+		LOGGER.info("Total number of edges swapped to increase quality: "+swapped);
+		//LOGGER.info("Number of edges which were not in the binary tree before being removed: "+notInTree);
+		LOGGER.info("Number of edges still present in the binary tree: "+tree.size());
 	}
 
 	private final static String usageString = "<xmlDir> <-t tolerance | -n nrTriangles> <brepFile> <outputDir>";
@@ -317,7 +317,7 @@ public class LengthDecimateHalfEdge extends AbstractAlgoHalfEdge
 			System.out.println(usageString);
 			return;
 		}
-		logger.info("Load geometry file");
+		LOGGER.info("Load geometry file");
 		Mesh mesh = new Mesh();
 		try
 		{

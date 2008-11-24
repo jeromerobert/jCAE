@@ -37,8 +37,8 @@ import java.util.logging.Logger;
  */
 public class Refine
 {
-	private static Logger logger=Logger.getLogger(Refine.class.getName());
-	private MMesh1D mesh1d;
+	private static final Logger LOGGER=Logger.getLogger(Refine.class.getName());
+	private final MMesh1D mesh1d;
 	private int divisions = 2;
 	
 	/**
@@ -85,9 +85,9 @@ public class Refine
 			nbEdges += submesh1d.getEdges().size();
 		}
 
-		logger.fine("TopoEdges discretisees "+nbTEdges);
-		logger.fine("Edges   "+nbEdges);
-		logger.fine("Nodes   "+nbNodes);
+		LOGGER.fine("TopoEdges discretisees "+nbTEdges);
+		LOGGER.fine("Edges   "+nbEdges);
+		LOGGER.fine("Nodes   "+nbNodes);
 		assert(mesh1d.isValid());
 	}
 	
