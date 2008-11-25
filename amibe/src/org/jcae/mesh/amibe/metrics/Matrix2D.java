@@ -34,10 +34,7 @@ public class Matrix2D
 	 */
 	public Matrix2D()
 	{
-		data[0][0] = 1.0;
-		data[0][1] = 0.0;
-		data[1][0] = 0.0;
-		data[1][1] = 1.0;
+		this(1.0, 0.0, 0.0, 1.0);
 	}
 	
 	/**

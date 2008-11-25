@@ -81,11 +81,12 @@ public class Mesh2D extends Mesh
 
 	public Mesh2D(MeshTraitsBuilder mtb)
 	{
-		super(mtb);
-		factory = new ElementPatchFactory(traitsBuilder);
-		face = null;
-		surface = null;
-		init();
+		this(mtb, new MeshParameters(), null);
+	}
+
+	public Mesh2D(CADShape f)
+	{
+		this(MeshTraitsBuilder.getDefault2D(), new MeshParameters(), f);
 	}
 
 	/**
@@ -104,13 +105,11 @@ public class Mesh2D extends Mesh
 		super(mtb, mp);
 		factory = new ElementPatchFactory(traitsBuilder);
 		face = f;
-		surface = ((CADFace) face).getGeomSurface();
+		if (face == null)
+			surface = null;
+		else
+			surface = ((CADFace) face).getGeomSurface();
 		init();
-	}
-
-	public Mesh2D(CADShape f)
-	{
-		this(MeshTraitsBuilder.getDefault2D(), new MeshParameters(), f);
 	}
 
 	private final void init()

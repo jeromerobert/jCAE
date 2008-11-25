@@ -19,6 +19,7 @@
 
 package org.jcae.mesh.amibe.ds;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -37,6 +38,7 @@ public class MeshParameters
 
 	public MeshParameters()
 	{
+		this(new HashMap<String, String>());
 	}
 
 	public MeshParameters(final Map<String, String> options)

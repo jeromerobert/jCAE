@@ -248,12 +248,7 @@ public class KdTree
 	 */
 	public KdTree(double [] bbox)
 	{
-		BUCKETSIZE = 10;
-		dimension = bbox.length / 2;
-		nrSub = 1 << dimension;
-		x0 = new double[dimension+1];
-		root = new Cell();
-		setup(bbox);
+		this(bbox, 10);
 	}
 	
 	/**
