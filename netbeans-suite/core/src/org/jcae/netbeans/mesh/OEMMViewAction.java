@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2006, by EADS CRC
+ * (C) Copyright 2008, by EADS France
  */
 
 package org.jcae.netbeans.mesh;
@@ -25,7 +26,6 @@ import org.jcae.mesh.oemm.OEMM;
 import org.jcae.netbeans.Utilities;
 import org.jcae.netbeans.viewer3d.SelectionManager;
 import org.jcae.netbeans.viewer3d.ViewManager;
-import org.jcae.netbeans.viewer3d.actions.SelectViewable;
 import org.jcae.vtk.SelectionListener;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;
@@ -35,53 +35,9 @@ import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle;
 import org.openide.util.actions.CookieAction;
-import org.openide.util.actions.SystemAction;
 
 public final class OEMMViewAction extends CookieAction implements SelectionListener
 {
-	/*public static class OEMMKeyListener extends KeyAdapter
-	{
-		private ViewableBG femesh;
-		private View bgView;
-		private OEMM oemm;
-		private final MeshReader mr;
-		
-		public OEMMKeyListener(View view, OEMM oemm, ViewableOEMM viewable)
-		{
-			bgView=view;
-			this.oemm=oemm;
-			fe1=viewable;
-			mr = new MeshReader(oemm);
-		}
-		
-		public void keyPressed(KeyEvent event)
-		{
-			if(bgView.getCurrentViewable()!=fe1)
-			{			
-				if(!Arrays.asList(bgView.getViewables()).contains(fe1))
-				{
-					bgView.removeKeyListener(this);
-				}
-				return;
-			}
-			if(event.getKeyChar()=='n')
-			{
-				if (femesh != null)
-					bgView.remove(femesh);
-				if(fe1.getResultSet().size()>0)
-				{
-					// Adjacency relations are not needed, use an empty MeshTraitsBuilder instance
-					BranchGroup mesh = OEMMViewer.meshOEMM(mr.buildMesh(new MeshTraitsBuilder(), fe1.getResultSet()));
-					mesh.setPickable(false);
-					femesh=new ViewableBG(mesh);
-					fe1.unselectAll();
-					bgView.add(femesh);
-				}
-			}
-			SystemAction.get(SelectViewable.class).refresh();
-		}
-		
-	}*/
 	ViewableOEMM viewable = null;
 
 	public void selectionChanged(Viewable viewable)
@@ -146,6 +102,7 @@ public final class OEMMViewAction extends CookieAction implements SelectionListe
 		return HelpCtx.DEFAULT_HELP;
 	}
 	
+	@Override
 	protected boolean asynchronous()
 	{
 		return false;
