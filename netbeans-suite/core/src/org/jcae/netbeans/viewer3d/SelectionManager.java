@@ -166,7 +166,8 @@ public class SelectionManager {
 	{
 		for(EntitySelection entitySelection : selections.values())
 		{
-			entitySelection.unselectAll();
+			if (entitySelection != null)
+				entitySelection.unselectAll();
 		}
 	}
 }
