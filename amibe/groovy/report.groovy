@@ -44,13 +44,11 @@ options.addOption(
 		.withDescription("reports statistics by face")
 		.withLongOpt("detailed")
 		.create('d'));
-/*
 options.addOption(
-	OptionBuilder.withArgName("LIST").hasArg()
-		.withDescription("comma separated list of faces (default: all faces)")
-		.withLongOpt("faces")
+	OptionBuilder.withArgName("NUMBER").hasArg()
+		.withDescription("meshing had been started from this patch number")
+		.withLongOpt("from-face")
 		.create('f'));
-*/
 options.addOption(
 	OptionBuilder.withArgName("BASE").hasArg()
 		.withDescription("creates <BASE>.mesh and <BASE>.bb MEDIT files")
@@ -121,6 +119,7 @@ catch (IOException ex)
 }
 // Compute mesh quality
 int nrFaces = 1;
+int ifacemin = Integer.parseInt(cmd.getOptionValue('f', "0"))
 if (detailed)
 {
 	TIntHashSet groups = new TIntHashSet(mesh.getTriangles().size());
@@ -128,7 +127,7 @@ if (detailed)
 	{
 		if (f.isWritable())
 		{
-			int i = f.getGroupId();
+			int i = f.getGroupId() + 1 - ifacemin;
 			if (i >= 0)
 				groups.add(i);
 		}
@@ -147,7 +146,7 @@ for (Triangle f: mesh.getTriangles())
 {
 	if (f.isWritable())
 	{
-		int i = f.getGroupId();
+		int i = f.getGroupId() + 1 - ifacemin;
 		if (i < 0 || !detailed)
 			i = 0;
 		data[i].compute(f);
@@ -175,9 +174,9 @@ if (null != outBasename)
 		int [] ids = new int[1];
 		for (int i = 0; i < data.length; i++)
 		{
-			data[i].printMeshBB(outBasename+"-"+i+".bb");
-			ids[0] = i;
-			new MeshExporter.MESH(new File(xmlDir), ids).write(outBasename+"-"+i+".mesh");
+			ids[0] = i + ifacemin - 1;
+			data[i].printMeshBB(outBasename+"-"+ids[0]+".bb");
+			new MeshExporter.MESH(new File(xmlDir), ids).write(outBasename+"-"+ids[0]+".mesh");
 		}
 	}
 	else
