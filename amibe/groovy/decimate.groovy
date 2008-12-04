@@ -70,6 +70,13 @@ CommandLineParser parser = new GnuParser();
 CommandLine cmd = parser.parse(options, args, true);
 if (cmd.hasOption('h'))
 	usage(0, options);
+if (cmd.hasOption('A'))
+{
+	println("Available algorithms for decimation:")
+	println("    LengthDecimateHalfEdge")
+	println("    QEMDecimateHalfEdge")
+	System.exit(0);
+}
 
 String [] remaining = cmd.getArgs();
 if (remaining.length != 1)
