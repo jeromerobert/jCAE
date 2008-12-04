@@ -59,11 +59,11 @@ public class BasicMesh
 	public void compute()
 	{
 		mesh.pushCompGeom(3);
-		new Insertion(mesh, 16.0).compute();
+		new Insertion(mesh, 16.0 / Math.sqrt(2.0), 16.0 * Math.sqrt(2.0)).compute();
 		new ConstraintNormal3D(mesh).compute();
-		new Insertion(mesh, 4.0).compute();
+		new Insertion(mesh, 4.0 / Math.sqrt(2.0), 4.0 * Math.sqrt(2.0)).compute();
 		new ConstraintNormal3D(mesh).compute();
-		new Insertion(mesh).compute();
+		new Insertion(mesh, 1.0 / Math.sqrt(2.0), Math.sqrt(2.0)).compute();
 		mesh.popCompGeom(3);
 		
 		assert (mesh.isValid());

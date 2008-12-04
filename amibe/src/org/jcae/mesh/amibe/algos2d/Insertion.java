@@ -92,14 +92,14 @@ public class Insertion
 	 */
 	public Insertion(Mesh2D m)
 	{
-		this(m, 1.0);
+		this(m, 1.0 / Math.sqrt(2.0), Math.sqrt(2.0));
 	}
 	
-	public Insertion(Mesh2D m, double scale)
+	public Insertion(Mesh2D m, double minlen, double maxlen)
 	{
 		mesh = m;
-		minlen = scale / Math.sqrt(2.);
-		maxlen = scale * Math.sqrt(2.);
+		this.minlen = minlen;
+		this.maxlen = maxlen;
 	}
 	
 	/**

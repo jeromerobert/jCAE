@@ -221,11 +221,11 @@ public class Basic2d implements AlgoInterface
 		new Initial(m, mtb, bndV.toArray(new Vertex2D[bndV.size()]), innerV).compute();
 
 		m.pushCompGeom(3);
-		new Insertion(m, 16.0).compute();
+		new Insertion(m, 16.0 / Math.sqrt(2.0), 16.0 * Math.sqrt(2.0)).compute();
 		new ConstraintNormal3D(m).compute();
-		new Insertion(m, 4.0).compute();
+		new Insertion(m, 4.0 / Math.sqrt(2.0), 4.0 * Math.sqrt(2.0)).compute();
 		new ConstraintNormal3D(m).compute();
-		new Insertion(m).compute();
+		new Insertion(m, 1.0 / Math.sqrt(2.0), Math.sqrt(2.0)).compute();
 		m.popCompGeom(3);
 		
 		new ConstraintNormal3D(m).compute();
