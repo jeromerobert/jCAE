@@ -223,7 +223,6 @@ public class LeafNode extends AbstractNode
 	public void setDataProvider(LeafNode.DataProvider data)
 	{
 		this.dataProvider = data;
-		timeStampData();
 	}
 
 	public DataProvider getDataProvider()
