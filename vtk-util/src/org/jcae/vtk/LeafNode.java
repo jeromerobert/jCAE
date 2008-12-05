@@ -223,6 +223,7 @@ public class LeafNode extends AbstractNode
 	public void setDataProvider(LeafNode.DataProvider data)
 	{
 		this.dataProvider = data;
+		dataTime = Long.MIN_VALUE;
 	}
 
 	public DataProvider getDataProvider()
@@ -247,7 +248,7 @@ public class LeafNode extends AbstractNode
 			LOGGER.log(Level.FINER, "Refreshing leaf: "+this);
 		
 		// Were data modified?
-		if (dataTime < dataProvider.getModifiedTime())
+		if (dataTime <= dataProvider.getModifiedTime())
 			refreshData();
 
 		// Was actor modified?
