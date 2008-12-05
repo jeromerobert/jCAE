@@ -55,7 +55,14 @@ public class LeafNode extends AbstractNode
 		protected int nbrOfVertices;
 		private Transform3D transform;
 		
-		public static final DataProvider EMPTY = new DataProvider();
+		public static final DataProvider EMPTY = new DataProvider()
+		{
+			@Override
+			protected void modified()
+			{
+				// Do not change modifiedTime, this provider is never modified
+			}
+		};
 
 		public void setVertices(int[] vertices)
 		{
