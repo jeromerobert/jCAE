@@ -58,9 +58,33 @@ public class LeafNode extends AbstractNode
 		public static final DataProvider EMPTY = new DataProvider()
 		{
 			@Override
-			protected void modified()
+			public void setVertices(int[] vertices)
 			{
-				// Do not change modifiedTime, this provider is never modified
+				throw new RuntimeException("DataProvider.EMPTY is immutable");
+			}
+
+			@Override
+			public void setLines(int[] lines)
+			{
+				throw new RuntimeException("DataProvider.EMPTY is immutable");
+			}
+
+			@Override
+			public void setNodes(float[] nodes)
+			{
+				throw new RuntimeException("DataProvider.EMPTY is immutable");
+			}
+
+			@Override
+			public void setPolys(int nbrOfPolys, int[] polys)
+			{
+				throw new RuntimeException("DataProvider.EMPTY is immutable");
+			}
+
+			@Override
+			public void unLoad()
+			{
+				// Do not call modified()
 			}
 		};
 
