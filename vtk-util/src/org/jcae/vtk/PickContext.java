@@ -20,7 +20,9 @@
 package org.jcae.vtk;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import org.jcae.geometry.BoundingBox;
 
@@ -96,6 +98,28 @@ public abstract class PickContext
 		return selectionNode.add(leaf);
 	}
 	
+	/**
+	 * Get a map whose keys are selected nodes and values are the list of
+	 * selected cells in each node.
+	 * 
+	 * @return a Map<LeafNode, int[]> describing all selected cells
+	 */
+	public Map<LeafNode, int[]> getMapOfSelectedCells()
+	{
+		Map<LeafNode, int[]> toReturn = new HashMap<LeafNode, int[]>(selectionNode.size());
+		for (LeafNode leaf : selectionNode)
+		{
+			if (leaf.hasCellSelection())
+			{
+				int [] cells = leaf.getCellSelection();
+				int [] copy = new int[cells.length];
+				System.arraycopy(cells, 0, copy, 0, cells.length);
+				toReturn.put(leaf, copy);
+			}
+		}
+		return toReturn;
+	}
+
 	/**
 	 * Get the mouse position when button was pressed.
 	 * 
