@@ -119,7 +119,7 @@ catch (IOException ex)
 }
 // Compute mesh quality
 int nrFaces = 1;
-int ifacemin = Integer.parseInt(cmd.getOptionValue('f', "0"))
+int ifacemin = Integer.parseInt(cmd.getOptionValue('f', "1"))
 if (detailed)
 {
 	TIntHashSet groups = new TIntHashSet(mesh.getTriangles().size());
