@@ -32,6 +32,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.MeshOEMMIndex;
 import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.oemm.MeshReader;
 import org.jcae.mesh.oemm.OEMM;
@@ -175,6 +176,25 @@ public class Sphere
 		return true;
 	}
 	
+	// Move vertices
+	private static void shuffle(Mesh mesh)
+	{
+		for (Vertex v : mesh.getNodes())
+		{
+			if (!v.isMutable())
+				continue;
+			double [] coord = v.getUV();
+			double c = Math.cos(Math.PI * coord[2]);
+			if (coord[2] >= 0.0)
+				coord[2] = (1.0 - c*c*c*c*c) / 2.0;
+			else
+				coord[2] = - (1.0 - c*c*c*c*c) / 2.0;
+
+			double r = Math.sqrt(coord[0]*coord[0] + coord[1]*coord[1] + coord[2]*coord[2]);
+			v.moveTo(coord[0]/r, coord[1]/r, coord[2]/r);
+		}
+	}
+
 	public static void main(String [] args) throws IOException
 	{
 		// Default subdivision level
@@ -222,5 +242,8 @@ public class Sphere
 		Mesh mesh = mr.buildWholeMesh();
 		// Write mesh onto disk
 		MeshWriter.writeObject3D(mesh, output, null);
+		// Apply a deformation
+		shuffle(mesh);
+		MeshWriter.writeObject3D(mesh, "modifiedSphere", null);
 	}
 }
