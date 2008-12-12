@@ -33,8 +33,10 @@ parser.add_option("-t", "--tolerance", metavar="FLOAT", default=2.0,
 parser.add_option("-r", "--relaxation", metavar="FLOAT", default=0.6,
                   action="store", type="string", dest="relaxation",
                   help="new position = old + r * (new - old)")
-parser.add_option("-N", "--no-boundaries", action="store_false", dest="no_boundaries",
+parser.add_option("-N", "--no-boundaries", action="store_false", dest="boundaries",
                   help="do not try to preserve patch boundaries")
+parser.add_option("-C", "--no-check", action="store_false", dest="check",
+                  help="allow moving a vertex even if this decreases its quality")
 parser.add_option("-R", "--refresh",
                   action="store_true", dest="refresh",
                   help="update triangle quality within loop")
@@ -65,7 +67,8 @@ MeshReader.readObject3D(mesh, xmlDir)
 
 opts = HashMap()
 opts.put("iterations", str(options.iterations))
-opts.put("boundaries", str(options.no_boundaries))
+opts.put("boundaries", str(options.boundaries))
+opts.put("check", str(options.check))
 opts.put("size", str(options.size))
 opts.put("tolerance", str(options.tolerance))
 opts.put("relaxation", str(options.relaxation))
