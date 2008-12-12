@@ -178,7 +178,10 @@ public class SmoothNodes3D
 				nodeProjection.put(v, qP);
 			}
 			for (int i = 0; i < nloop; i++)
+			{
 				processAllNodes();
+				postProcessIteration(mesh, i);
+			}
 		}
 		LOGGER.info("Number of moved points: "+processed);
 		LOGGER.info("Total number of points not moved during processing: "+notProcessed);
@@ -265,6 +268,11 @@ public class SmoothNodes3D
 			else
 				notProcessed++;
 		}
+	}
+	
+	protected void postProcessIteration(Mesh mesh, int i)
+	{
+		// Can be overridden
 	}
 	
 	private boolean smoothNode(Vertex n, AbstractHalfEdge ot, double quality)

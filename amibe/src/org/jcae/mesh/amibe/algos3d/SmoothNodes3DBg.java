@@ -171,10 +171,18 @@ public class SmoothNodes3DBg
 				}
 			}
 			for (int i = 0; i < nloop; i++)
+			{
 				processAllNodes();
+				postProcessIteration(mesh, i);
+			}
 		}
 		LOGGER.info("Number of moved points: "+processed);
 		LOGGER.info("Total number of points not moved during processing: "+notProcessed);
+	}
+	
+	protected void postProcessIteration(Mesh mesh, int i)
+	{
+		// Can be overridden
 	}
 	
 	/*
