@@ -59,6 +59,7 @@ public class SmoothNodes3D
 	private int nloop = 10;
 	private double tolerance = Double.MAX_VALUE / 2.0;
 	private boolean preserveBoundaries = false;
+	private boolean checkQuality = true;
 	private int progressBarStatus = 10000;
 	private static final double scaleFactor = 12.0 * Math.sqrt(3.0);
 	private double relaxation = 0.6;
@@ -109,6 +110,8 @@ public class SmoothNodes3D
 				tolerance = Double.valueOf(val).doubleValue();
 			else if (key.equals("refresh"))
 				refresh = true;
+			else if (key.equals("check"))
+				checkQuality = Boolean.valueOf(val).booleanValue();
 			else if (key.equals("relaxation"))
 				relaxation = Double.valueOf(val).doubleValue();
 			else
@@ -341,11 +344,14 @@ public class SmoothNodes3D
 		double saveY = oldp3[1];
 		double saveZ = oldp3[2];
 		n.moveTo(centroid3[0], centroid3[1], centroid3[2]);
-		// Check that quality has not been degraded
-		if (vertexQuality(ot) < quality)
+		if (checkQuality)
 		{
-			n.moveTo(saveX, saveY, saveZ);
-			return false;
+			// Check that quality has not been degraded
+			if (vertexQuality(ot) < quality)
+			{
+				n.moveTo(saveX, saveY, saveZ);
+				return false;
+			}
 		}
 		return true;
 	}
