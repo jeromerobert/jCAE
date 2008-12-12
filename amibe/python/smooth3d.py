@@ -21,6 +21,9 @@ parser = OptionParser(usage="amibebatch smooth3d [OPTIONS] <inputDir> <outputDir
 parser.add_option("-i", "--iterations", metavar="NUMBER", default=1,
                   action="store", type="int", dest="iterations",
 		  help="number of iterations (default: 1)")
+parser.add_option("-P", "--prefix", metavar="DIR",
+                  action="store", type="string", dest="prefix",
+                  help="store mesh after each iteration into <DIR>0, <DIR>1, etc")
 parser.add_option("-s", "--size", metavar="FLOAT", default=-1.0,
                   action="store", type="float", dest="size",
                   help="target size")
@@ -42,6 +45,16 @@ if len(args) != 2:
 	parser.print_usage()
 	sys.exit(1)
 
+class MySmoothNodes3D(SmoothNodes3D):
+	prefix = None
+	def __init__(self, mesh, opts, prefix):
+		SmoothNodes3D.__init__(self, mesh, opts)
+		self.prefix = prefix
+		self.mesh = mesh
+	def postProcessIteration(self, mesh, counter, *args):
+		if self.prefix:
+			MeshWriter.writeObject3D(mesh, self.prefix + str(counter), None);
+
 xmlDir = args[0]
 outDir = args[1]
 
@@ -57,7 +70,7 @@ opts.put("size", str(options.size))
 opts.put("tolerance", str(options.tolerance))
 opts.put("relaxation", str(options.relaxation))
 opts.put("refresh", str(options.refresh))
-sm = SmoothNodes3D(mesh, opts)
+sm = MySmoothNodes3D(mesh, opts, options.prefix)
 sm.setProgressBarStatus(10000)
 sm.compute()
 
