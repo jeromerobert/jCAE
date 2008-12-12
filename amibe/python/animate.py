@@ -1,7 +1,7 @@
 
 # jCAE
 from org.jcae.mesh.oemm import OEMM, Storage
-from org.jcae.vtk import ColorManager, AmibeToMesh, Canvas, UNVToMesh, View, Viewable, ViewableCAD, ViewableMesh, ViewableOEMM
+from org.jcae.vtk import ColorManager, AmibeToMesh, Canvas, UNVToMesh, PickContext, View, Viewable, ViewableCAD, ViewableMesh, ViewableOEMM
 
 # Swing
 from java.awt import BorderLayout, Color
@@ -26,11 +26,33 @@ if (len(args) != 1):
 index = 0
 xmlDir = args[0]
 
+class MyViewableMesh(ViewableMesh):
+	def __init__(self, mesh):
+		ViewableMesh.__init__(self, mesh, MyColorManager(Color.BLUE))
+		self.setSelectionType(Viewable.SelectionType.CELL)
+	def manageSelection(self, pickContext):
+		self.super__manageSelection(pickContext)
+		self.highlight()
+		map = pickContext.getMapOfSelectedCells()
+		for k in map.keySet():
+			list = map.get(k)
+			data = k.getDataProvider()
+			data.load()
+			polys = data.getPolys()
+			nodes = data.getNodes()
+			data.unLoad()
+			for i in list:
+				assert polys[4*i] == 3
+				print "Triangle nr. %d" % i
+				for j in [1, 2, 3]:
+					pt = polys[4*i+j]
+					print "  Vertex nr. %d : %g %g %g" % (pt, nodes[3*pt], nodes[3*pt+1], nodes[3*pt+2])
+
 def load(dir):
 	if (os.path.isdir(dir) and os.path.exists(os.path.join(dir, "jcae3d"))):
 		reader = AmibeToMesh(dir)
 		print("Loading "+dir)
-		return ViewableMesh(reader.getMesh(), MyColorManager(Color.BLUE))
+		return MyViewableMesh(reader.getMesh())
 	return None
 
 class MyView(View):
@@ -42,7 +64,9 @@ class MyView(View):
 			if not(os.path.isdir(dir+str(i)) and os.path.exists(os.path.join(dir+str(i), "jcae3d"))):
 				break
 		self.max = i
-		self.add(load(self.dir+"0"))
+		newViewable = load(self.dir+"0")
+		if newViewable:
+			self.add(newViewable)
 	def getMaxIndex(self):
 		return self.max
 	def rawAdd(self, viewable):
@@ -56,7 +80,7 @@ class MyView(View):
 			index = 0
 		oldViewable = self.getCurrentViewable()
 		newViewable = load(self.dir+str(index))
-		if (newViewable):
+		if newViewable:
 			self.rawAdd(newViewable)
 			if (oldViewable):
 				self.remove(oldViewable)
@@ -94,24 +118,26 @@ frame.setSize(800,600)
 frame.setVisible(True)
 
 class MyKeyListener(KeyListener):
-	def __init__(self, slider):
+	def __init__(self, view, slider):
+		self.view   = view
 		self.slider = slider
 	def keyTyped(self, e):
 		pass
 	def keyReleased(self, e):
+		code = int(e.getKeyCode())
+		if (code == KeyEvent.VK_SHIFT):
+			self.view.setMouseMode(View.MouseMode.POINT_SELECTION)
 		pass
 	def keyPressed(self, e):
 		code = int(e.getKeyCode())
-		oldIndex = self.slider.getValue()
-		newIndex = oldIndex
 		if (code == KeyEvent.VK_ADD or code == KeyEvent.VK_PLUS):
-			newIndex = oldIndex + 1
+			self.slider.setValue(self.slider.getValue() + 1)
 		elif (code == KeyEvent.VK_SUBTRACT or code == KeyEvent.VK_MINUS):
-			newIndex = oldIndex - 1
-		if newIndex != oldIndex:
-			self.slider.setValue(newIndex)
+			self.slider.setValue(self.slider.getValue() - 1)
+		elif (code == KeyEvent.VK_SHIFT):
+			self.view.setMouseMode(View.MouseMode.RECTANGLE_SELECTION)
 
-canvas.addKeyListener(MyKeyListener(jSlider1))
+canvas.addKeyListener(MyKeyListener(canvas, jSlider1))
 
 style = vtkInteractorStyleTrackballCamera()
 style.AutoAdjustCameraClippingRangeOn()
