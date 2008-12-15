@@ -335,7 +335,11 @@ public class SmoothNodes3DBg
 		double saveX = oldp3[0];
 		double saveY = oldp3[1];
 		double saveZ = oldp3[2];
-		liaison.move(n, centroid3);
+		if (!liaison.move(n, centroid3))
+		{
+			LOGGER.finer("Point not moved, projection failed");
+			return false;
+		}
 		if (checkQuality)
 		{
 			// Check that quality has not been degraded
@@ -369,7 +373,7 @@ public class SmoothNodes3DBg
 			edge = edge.nextOriginLoop();
 			if (edge.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
-			double qt = triangleQuality(edge);
+			double qt = qualityMap.get(edge.getTri());
 			if (qt < ret)
 				ret = qt;
 		}

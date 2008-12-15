@@ -8,6 +8,8 @@ Mon Dec 15 16:49:57 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 	But this situation should be handled gracefully by SmoothNodes3DBg,
 	so QuadricProjection constructor has a new argument to enable these
 	checks if needed.  They are now disabled by default.
+	* src/org/jcae/mesh/amibe/algos3d/SmoothNodes3DBg.java: Fix return
+	value of smoothNode() when MeshLiaison.move() returns false.
 
 Tue Dec  9 12:27:54 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 
