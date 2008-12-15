@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE jcae SYSTEM "classpath:///org/jcae/mesh/xmldata/jcae.dtd">
+<jcae>
+<mesh>
+<submesh>
+<nodes>
+<number>713</number>
+<file format="doublestream" location="jcae3d.files/nodes3d.bin"/>
+</nodes>
+<triangles>
+<number>1426</number>
+<file format="integerstream" location="jcae3d.files/triangles3d.bin"/>
+<normals>
+<file format="doublestream" location="jcae3d.files/normals3d.bin"/>
+</normals>
+</triangles>
+<groups>
+<group id="0">
+<name>1</name>
+<number>1426</number>
+<file format="integerstream" location="jcae3d.files/groups.bin" offset="0"/>
+</group>
+</groups>
+</submesh>
+</mesh>
+</jcae>
