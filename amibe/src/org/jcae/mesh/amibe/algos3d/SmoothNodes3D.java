@@ -175,7 +175,7 @@ public class SmoothNodes3D
 			{
 				if (!v.isManifold() || !v.isMutable())
 					continue;
-				LocalSurfaceProjection qP = new QuadricProjection(v);
+				LocalSurfaceProjection qP = new QuadricProjection(v, true);
 				if (!qP.canProject())
 					continue;
 				nodeProjection.put(v, qP);

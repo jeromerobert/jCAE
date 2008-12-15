@@ -19,6 +19,7 @@
 
 package org.jcae.mesh.amibe.projection;
 
+import java.util.logging.Logger;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
@@ -49,12 +50,21 @@ import org.jcae.mesh.amibe.metrics.Metric3D;
  */
 public class QuadricProjection implements LocalSurfaceProjection
 {
+	private static final Logger LOGGER = Logger.getLogger(QuadricProjection.class.getName());
+	
 	final Matrix3D qP;
 	final double[] origin = new double[3];
 	final double[] qD;
+	final boolean discardHyperbolic;
 
 	public QuadricProjection(Vertex o)
 	{
+		this(o, false);
+	}
+
+	public QuadricProjection(Vertex o, boolean d)
+	{
+		discardHyperbolic = d;
 		double [] param = o.getUV();
 		for (int i = 0; i < 3; i++)
 			origin[i] = param[i];
@@ -108,11 +118,17 @@ public class QuadricProjection implements LocalSurfaceProjection
 		double [] normal = new double[3];
 		// TODO: Check why discreteCurvatures(normal) does not work well
 		if (!o.discreteAverageNormal(normal))
+		{
+			LOGGER.finer("Cannot compute mean normal");
 			return null;
+		}
 		double [] t1 = new double[3];
 		double [] t2 = new double[3];
 		if (!o.computeTangentPlane(normal, t1, t2))
+		{
+			LOGGER.finer("Cannot compute tangent plane");
 			return null;
+		}
 		// Transformation matrix
 		Matrix3D P = new Matrix3D(t1, t2, normal);
 		P.transp();
@@ -121,8 +137,6 @@ public class QuadricProjection implements LocalSurfaceProjection
 	
 	private double [] getLocalQuadric(Vertex o, Matrix3D P)
 	{
-		if (P == null)
-			return null;
 		// We search for the quadric
 		//   F(x,y) = a x^2 + b xy + c y^2 - z
 		// which fits best for all neighbour vertices.
@@ -198,7 +212,7 @@ public class QuadricProjection implements LocalSurfaceProjection
 			// We do not need to compute G, return value will be 0.
 			if (h[0] == 0.0 && h[1] == 0.0 && h[2] == 0.0)
 				return h;
-			if (h[1] * h[1] < 4.0 * h[0] * h[2])
+			if (!discardHyperbolic || h[1] * h[1] < 4.0 * h[0] * h[2])
 				break;
 			// We do not want F to be hyperbolic, projected point may
 			// be very far from other points.  Middle points are also
@@ -210,6 +224,7 @@ public class QuadricProjection implements LocalSurfaceProjection
 					g0[0] = g0[1] = g0[2] = 0.0;
 					return g0;
 				}
+				LOGGER.finer("Hyperbolic quadric found, projection is discarded");
 				return null;
 			}
 		}
@@ -220,7 +235,10 @@ public class QuadricProjection implements LocalSurfaceProjection
 		// G = tA A
 		Metric3D G = new Metric3D(g0, g1, g2);
 		if (!G.inv())
+		{
+			LOGGER.finer("Singular quadric");
 			return null;
+		}
 		// Reuse g0 to store our solution (a,b,c)
 		G.apply(h, g0);
 		return g0;

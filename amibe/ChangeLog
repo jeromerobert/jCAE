@@ -1,3 +1,14 @@
+Mon Dec 15 16:49:57 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/projection/QuadricProjection.java: When
+	QuadricProjection is used from SmoothNodes3D, projected vertices may
+	be moved very far from the real surface if local surface is an
+	hyperbolic surface.  In order to prevent large deformations,
+	projection is invalidated in such a case.
+	But this situation should be handled gracefully by SmoothNodes3DBg,
+	so QuadricProjection constructor has a new argument to enable these
+	checks if needed.  They are now disabled by default.
+
 Tue Dec  9 12:27:54 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/validation/QualityProcedureFactory.java:
