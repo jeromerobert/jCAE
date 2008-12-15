@@ -326,7 +326,10 @@ public class SmoothNodes3DBg
 		for (int i = 0; i < 3; i++)
 			centroid3[i] = oldp3[i] + relaxation * (centroid3[i] - oldp3[i]);
 		if (!ot.checkNewRingNormals(centroid3))
+		{
+			LOGGER.finer("Point not moved, some triangles would become inverted");
 			return false;
+		}
 
 		double saveX = oldp3[0];
 		double saveY = oldp3[1];
@@ -338,6 +341,7 @@ public class SmoothNodes3DBg
 			if (vertexQuality(ot) < quality)
 			{
 				n.moveTo(saveX, saveY, saveZ);
+				LOGGER.finer("Point not moved, quality decreases");
 				return false;
 			}
 		}

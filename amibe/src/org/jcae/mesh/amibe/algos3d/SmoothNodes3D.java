@@ -334,10 +334,16 @@ public class SmoothNodes3D
 		for (int i = 0; i < 3; i++)
 			centroid3[i] = oldp3[i] + relaxation * (centroid3[i] - oldp3[i]);
 		if (!ot.checkNewRingNormals(centroid3))
+		{
+			LOGGER.finer("Point not moved, some triangles would become inverted");
 			return false;
+		}
 		LocalSurfaceProjection tr = nodeProjection.get(n);
 		if (tr == null || !tr.canProject())
+		{
+			LOGGER.finer("Point cannot be projected into surface");
 			return false;
+		}
 		tr.project(c);
 
 		double saveX = oldp3[0];
@@ -350,6 +356,7 @@ public class SmoothNodes3D
 			if (vertexQuality(ot) < quality)
 			{
 				n.moveTo(saveX, saveY, saveZ);
+				LOGGER.finer("Point not moved, quality decreases");
 				return false;
 			}
 		}
