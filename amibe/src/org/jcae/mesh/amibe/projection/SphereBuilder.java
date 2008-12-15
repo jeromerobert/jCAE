@@ -49,7 +49,7 @@ import org.jcae.mesh.xmldata.MeshWriter;
  *
  * @author Denis Barbier
  */
-public class Sphere
+public class SphereBuilder
 {
 	private final static double TAU = 0.5 * (1.0 + Math.sqrt(5.0));
 	private final static double [] ICO = new double[] {
@@ -112,7 +112,7 @@ public class Sphere
 		
 	}
 	
-	public void createIcosahedron()
+	private void createIcosahedron()
 	{
 		for (int i = 0; i < 20; i++)
 		{
@@ -129,7 +129,7 @@ public class Sphere
 		}
 	}
 	
-	public void refine()
+	private void refine()
 	{
 		double [] x = new double[3];
 		double [][] vertex = new double[3][3];
@@ -158,7 +158,7 @@ public class Sphere
 		}
 	}
 	
-	public boolean writeSoup(String dirname) throws FileNotFoundException, IOException
+	private boolean writeSoup(String dirname) throws FileNotFoundException, IOException
 	{
 		File dir = new File(dirname);
 		if (!dir.isDirectory())
@@ -176,9 +176,49 @@ public class Sphere
 		return true;
 	}
 	
-	// Move vertices
-	private static void shuffle(Mesh mesh)
+	public static Mesh createSphereMesh(int level)
 	{
+		SphereBuilder sphere = new SphereBuilder();
+		// Create icosahedron
+		sphere.createIcosahedron();
+
+		// Refine icosahedron
+		for (int i = level; i > 0; i--)
+			sphere.refine();
+		
+		// Write triangle soup and oemm into the same temporary dir
+		String tmpdir;
+		try {
+			File tempFile = File.createTempFile("oemm", ".dir");
+			tmpdir = tempFile.getAbsolutePath();
+			tempFile.delete();
+			File tempDir = new File(tmpdir);
+			tempDir.mkdir();
+			sphere.writeSoup(tmpdir);
+		} catch (IOException ex) {
+			Logger.getLogger(SphereBuilder.class.getName()).log(Level.SEVERE, null, ex);
+			return null;
+		}
+		
+		// Build oemm
+		String [] mainArgs = new String[4];
+		mainArgs[0] = tmpdir;
+		mainArgs[1] = tmpdir;
+		mainArgs[2] = "4";
+		mainArgs[3] = "50000";
+		MeshOEMMIndex.main(mainArgs);
+		// Read oemm into a Mesh
+		OEMM oemm = Storage.readOEMMStructure(mainArgs[1]);
+		MeshReader mr = new MeshReader(oemm);
+		Mesh toReturn = mr.buildWholeMesh();
+		// Clean up
+		return toReturn;
+	}
+	
+	// Move vertices
+	public static Mesh createShuffledSphereMesh(int level)
+	{
+		Mesh mesh = createSphereMesh(level);
 		for (Vertex v : mesh.getNodes())
 		{
 			if (!v.isMutable())
@@ -193,57 +233,7 @@ public class Sphere
 			double r = Math.sqrt(coord[0]*coord[0] + coord[1]*coord[1] + coord[2]*coord[2]);
 			v.moveTo(coord[0]/r, coord[1]/r, coord[2]/r);
 		}
+		return mesh;
 	}
-
-	public static void main(String [] args) throws IOException
-	{
-		// Default subdivision level
-		int level = 4;
-		// Default output directory
-		String output = "sphere";
-		
-		// Command-line parsing
-		if (args.length > 0)
-			level = Integer.parseInt(args[0]);
-		if (args.length > 1)
-			output = args[1];
-
-		Sphere sphere = new Sphere();
-		// Create icosahedron
-		sphere.createIcosahedron();
-
-		// Refine icosahedron
-		for (int i = level; i > 0; i--)
-			sphere.refine();
-		
-		// Write triangle soup and oemm into the same temporary dir
-		File tempFile = File.createTempFile("oemm", ".dir");
-		String tmpdir = tempFile.getAbsolutePath();
-		tempFile.delete();
-		File tempDir = new File(tmpdir);
-		tempDir.mkdir();
-		
-		try {
-			sphere.writeSoup(tmpdir);
-		} catch (IOException ex) {
-			Logger.getLogger(Sphere.class.getName()).log(Level.SEVERE, null, ex);
-		}
-		
-		// Build oemm
-		String [] mainArgs = new String[4];
-		mainArgs[0] = tmpdir;
-		mainArgs[1] = tmpdir;
-		mainArgs[2] = "4";
-		mainArgs[3] = "50000";
-		MeshOEMMIndex.main(mainArgs);
-		// Read oemm into a Mesh
-		OEMM oemm = Storage.readOEMMStructure(mainArgs[1]);
-		MeshReader mr = new MeshReader(oemm);
-		Mesh mesh = mr.buildWholeMesh();
-		// Write mesh onto disk
-		MeshWriter.writeObject3D(mesh, output, null);
-		// Apply a deformation
-		shuffle(mesh);
-		MeshWriter.writeObject3D(mesh, "modifiedSphere", null);
-	}
+	
 }
