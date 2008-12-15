@@ -14,6 +14,7 @@ from vtk import vtkInteractorStyleTrackballCamera
 
 # Python
 import sys, os
+import math
 from optparse import OptionParser
 
 parser = OptionParser(usage="amibebatch animate [OPTIONS] <dir>\n\nDisplay meshes stored in <dir>0, <dir>1, etc)", prog="animate")
@@ -44,9 +45,15 @@ class MyViewableMesh(ViewableMesh):
 			for i in list:
 				assert polys[4*i] == 3
 				print "Triangle nr. %d" % i
+				v = []
 				for j in [1, 2, 3]:
 					pt = polys[4*i+j]
 					print "  Vertex nr. %d : %g %g %g" % (pt, nodes[3*pt], nodes[3*pt+1], nodes[3*pt+2])
+					v.append([nodes[3*pt], nodes[3*pt+1], nodes[3*pt+2]])
+				v[2] = [v[2][i] - v[0][i] for i in range(3)]
+				v[1] = [v[1][i] - v[0][i] for i in range(3)]
+				v[0] = [v[1][1]*v[2][2] - v[1][2]*v[2][1],v[1][2]*v[2][0] -v[1][0]*v[2][2],v[1][0]*v[2][1] -v[1][1]*v[2][0] ]
+				print "  Area: "+str(math.sqrt(v[0][0]*v[0][0] + v[0][1]*v[0][1] + v[0][2]*v[0][2]))
 
 def load(dir):
 	if (os.path.isdir(dir) and os.path.exists(os.path.join(dir, "jcae3d"))):
