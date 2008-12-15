@@ -10,6 +10,9 @@ Mon Dec 15 16:49:57 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 	checks if needed.  They are now disabled by default.
 	* src/org/jcae/mesh/amibe/algos3d/SmoothNodes3DBg.java: Fix return
 	value of smoothNode() when MeshLiaison.move() returns false.
+	* src/org/jcae/mesh/amibe/projection/MeshLiaison.java: In move(),
+	exit condition was missing and projection was always considered as
+	being invalid.
 
 Tue Dec  9 12:27:54 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 

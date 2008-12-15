@@ -126,7 +126,8 @@ public class MeshLiaison
 	 * Move Vertex on the desired location and update projection map.
 	 * @param v Vertex being moved
 	 * @param target  new location
-	 * @return <code>true</code> if point has been moved, <code>false</code> otherwise.
+	 * @return <code>true</code> if a projection has been found, <code>false</code> otherwise.  In the
+	 *  latter case, vertex could have been moved, but iterative scheme did not converge to a solution.
 	 */
 	public boolean move(Vertex v, double [] target)
 	{
@@ -136,7 +137,10 @@ public class MeshLiaison
 		LocalProjection proj = mapCurrentVertexProjection.get(v);
 		assert proj != null : "No projection found at vertex " + v;
 		if (!proj.quadric.canProject())
+		{
+			LOGGER.finer("Point can not be moved because of its quadric"+proj.quadric);
 			return false;
+		}
 		visited.add(proj.t);
 		int counter = 0;
 		// Coordinates of the projection of v on triangle plane
@@ -202,7 +206,15 @@ public class MeshLiaison
 			{
 				// Quadric has changed, check if projection can still be performed
 				if (!proj.quadric.canProject())
+				{
+					LOGGER.finer("Quadric does not allow vertex projection");
 					return false;
+				}
+			}
+			else
+			{
+				// Quadric has not changed, we found the projected point
+				return true;
 			}
 		}
 	}
