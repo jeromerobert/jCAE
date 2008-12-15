@@ -20,14 +20,20 @@
 
 package org.jcae.mesh.amibe.algos3d;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import java.util.Map;
 import java.util.HashMap;
 import org.jcae.mesh.amibe.projection.SphereBuilder;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.validation.MinAngleFace;
 import org.jcae.mesh.amibe.validation.QualityFloat;
+import org.jcae.mesh.xmldata.MeshReader;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -131,6 +137,63 @@ public class SmoothNodes3DTest
                 data.setTarget((float) Math.PI/3.0f);
 		double qmin = data.getValueByPercent(0.0);
 		assertTrue("Min. angle too small: "+(qmin*180.0 / Math.PI), qmin > 0.9);
+	}
+
+	static void shuffleTorus(Mesh mesh, double radiusIn, double radiusOut)
+	{
+		for (Vertex v : mesh.getNodes())
+		{
+			double [] coord = v.getUV();
+			// coord[0] = (radiusOut + radiusIn * cos(theta)) * cos(phi)
+			// coord[1] = (radiusOut + radiusIn * cos(theta)) * sin(phi)
+			// coord[2] = radiusIn * sin(theta)
+			double aux = Math.sqrt(coord[0]*coord[0] + coord[1]*coord[1]) - radiusOut;
+			if (Math.abs(aux*aux + coord[2]*coord[2] - radiusIn*radiusIn) > 0.01)
+					throw new IllegalArgumentException("Wrong radii parameters");
+
+			double phi = Math.atan2(coord[1], coord[0]);
+			double theta = Math.atan2(coord[2], coord[0]*Math.cos(phi) + coord[1]*Math.sin(phi) - radiusOut);
+			// Modify theta
+			double relax = 1.;
+			double newTheta = Math.PI * Math.sin(relax*theta / 2.0) / Math.sin(relax*Math.PI / 2.0);
+			// Recompute (x,y,z)
+			coord[0] = (radiusOut + radiusIn * Math.cos(newTheta)) * Math.cos(phi);
+			coord[1] = (radiusOut + radiusIn * Math.cos(newTheta)) * Math.sin(phi);
+			coord[2] = radiusIn * Math.sin(newTheta);
+			v.moveTo(coord[0], coord[1], coord[2]);
+		}
+	}
+ 
+	@Test public void testTorus()
+	{
+		MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
+		mtb.addNodeList();
+		mesh = new Mesh(mtb);
+		try {
+			MeshReader.readObject3D(mesh, "test"+File.separator+"input"+File.separator+"torus1426");
+		} catch (IOException ex) {
+			Logger.getLogger(SmoothNodes3DTest.class.getName()).log(Level.SEVERE, null, ex);
+			throw new RuntimeException();
+		}
+		assertTrue("Mesh is not valid", mesh.isValid());
+		shuffleTorus(mesh, 0.3, 1.0);
+
+		final Map<String, String> options = new HashMap<String, String>();
+		options.put("iterations", "200");
+		options.put("check", "false");
+		options.put("refresh", "true");
+		options.put("relaxation", "0.9");
+		new SmoothNodes3D(mesh, options).compute();
+		assertTrue("Mesh is not valid", mesh.isValid());
+		MinAngleFace qproc = new MinAngleFace();
+		QualityFloat data = new QualityFloat(1000);
+		data.setQualityProcedure(qproc);
+                for (Triangle f: mesh.getTriangles())
+                        data.compute(f);
+                data.finish();
+                data.setTarget((float) Math.PI/3.0f);
+		double qmin = data.getValueByPercent(0.0);
+		assertTrue("Min. angle too small: "+(qmin*180.0 / Math.PI), qmin > 0.25);
 	}
 
 }

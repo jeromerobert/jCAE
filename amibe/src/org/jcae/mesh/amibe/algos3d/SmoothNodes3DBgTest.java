@@ -20,14 +20,20 @@
 
 package org.jcae.mesh.amibe.algos3d;
 
+import java.io.File;
+import java.io.IOException;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jcae.mesh.amibe.projection.SphereBuilder;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.validation.MinAngleFace;
 import org.jcae.mesh.amibe.validation.QualityFloat;
+import org.jcae.mesh.xmldata.MeshReader;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -126,6 +132,38 @@ public class SmoothNodes3DBgTest
                 data.setTarget((float) Math.PI/3.0f);
 		double qmin = data.getValueByPercent(0.0);
 		assertTrue("Min. angle too small: "+(qmin*180.0 / Math.PI), qmin > 0.9);
+	}
+	
+	@Test public void testTorus()
+	{
+		MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
+		mtb.addNodeList();
+		mesh = new Mesh(mtb);
+		try {
+			MeshReader.readObject3D(mesh, "test"+File.separator+"input"+File.separator+"torus1426");
+		} catch (IOException ex) {
+			Logger.getLogger(SmoothNodes3DTest.class.getName()).log(Level.SEVERE, null, ex);
+			throw new RuntimeException();
+		}
+		assertTrue("Mesh is not valid", mesh.isValid());
+		SmoothNodes3DTest.shuffleTorus(mesh, 0.3, 1.0);
+
+		final Map<String, String> options = new HashMap<String, String>();
+		options.put("iterations", "50");
+		options.put("check", "false");
+		options.put("refresh", "true");
+		options.put("relaxation", "0.9");
+		new SmoothNodes3D(mesh, options).compute();
+		assertTrue("Mesh is not valid", mesh.isValid());
+		MinAngleFace qproc = new MinAngleFace();
+		QualityFloat data = new QualityFloat(1000);
+		data.setQualityProcedure(qproc);
+                for (Triangle f: mesh.getTriangles())
+                        data.compute(f);
+                data.finish();
+                data.setTarget((float) Math.PI/3.0f);
+		double qmin = data.getValueByPercent(0.0);
+		assertTrue("Min. angle too small: "+(qmin*180.0 / Math.PI), qmin > 0.25);
 	}
 
 }
