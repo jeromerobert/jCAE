@@ -153,12 +153,12 @@ public class SmoothNodes3DBgTest
 		options.put("check", "false");
 		options.put("refresh", "true");
 		options.put("relaxation", "0.9");
-		new SmoothNodes3D(mesh, options).compute();
-		assertTrue("Mesh is not valid", mesh.isValid());
+		Mesh smoothedMesh = new SmoothNodes3DBg(mesh, options).compute().getOutputMesh();
+		assertTrue("Mesh is not valid", smoothedMesh.isValid());
 		MinAngleFace qproc = new MinAngleFace();
 		QualityFloat data = new QualityFloat(1000);
 		data.setQualityProcedure(qproc);
-                for (Triangle f: mesh.getTriangles())
+                for (Triangle f: smoothedMesh.getTriangles())
                         data.compute(f);
                 data.finish();
                 data.setTarget((float) Math.PI/3.0f);
