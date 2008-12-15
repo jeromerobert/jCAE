@@ -152,7 +152,7 @@ public class SmoothNodes3DBg
 		}
 	}
 
-	public void compute()
+	public SmoothNodes3DBg compute()
 	{
 		LOGGER.info("Run "+getClass().getName());
 		if (nloop > 0)
@@ -181,6 +181,7 @@ public class SmoothNodes3DBg
 		}
 		LOGGER.info("Number of moved points: "+processed);
 		LOGGER.info("Total number of points not moved during processing: "+notProcessed);
+		return this;
 	}
 	
 	protected void postProcessIteration(Mesh mesh, int i)
