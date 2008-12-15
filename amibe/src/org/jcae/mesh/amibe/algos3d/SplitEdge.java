@@ -139,7 +139,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 			vm = current.destination();
 		if (vm.getRef() == 0)
 		{
-			QuadricProjection qP = new QuadricProjection(vm);
+			QuadricProjection qP = new QuadricProjection(vm, true);
 			if (!qP.canProject())
 			{
 				if (LOGGER.isLoggable(Level.FINE))
