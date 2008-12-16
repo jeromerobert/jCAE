@@ -114,19 +114,22 @@ public class QuadricProjection implements LocalSurfaceProjection
 	private Matrix3D getMatrix3DLocalFrame(Vertex o)
 	{
 		if (!o.isManifold() || !o.isMutable())
+		{
+			LOGGER.fine("Singular vertex: "+o);
 			return null;
+		}
 		double [] normal = new double[3];
 		// TODO: Check why discreteCurvatures(normal) does not work well
 		if (!o.discreteAverageNormal(normal))
 		{
-			LOGGER.finer("Cannot compute mean normal");
+			LOGGER.fine("Cannot compute mean normal");
 			return null;
 		}
 		double [] t1 = new double[3];
 		double [] t2 = new double[3];
 		if (!o.computeTangentPlane(normal, t1, t2))
 		{
-			LOGGER.finer("Cannot compute tangent plane");
+			LOGGER.fine("Cannot compute tangent plane");
 			return null;
 		}
 		// Transformation matrix
@@ -224,7 +227,7 @@ public class QuadricProjection implements LocalSurfaceProjection
 					g0[0] = g0[1] = g0[2] = 0.0;
 					return g0;
 				}
-				LOGGER.finer("Hyperbolic quadric found, projection is discarded");
+				LOGGER.fine("Hyperbolic quadric found, projection is discarded");
 				return null;
 			}
 		}
@@ -236,7 +239,7 @@ public class QuadricProjection implements LocalSurfaceProjection
 		Metric3D G = new Metric3D(g0, g1, g2);
 		if (!G.inv())
 		{
-			LOGGER.finer("Singular quadric");
+			LOGGER.fine("Singular quadric");
 			return null;
 		}
 		// Reuse g0 to store our solution (a,b,c)

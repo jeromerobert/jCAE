@@ -138,7 +138,8 @@ public class MeshLiaison
 		assert proj != null : "No projection found at vertex " + v;
 		if (!proj.quadric.canProject())
 		{
-			LOGGER.finer("Point can not be moved because of its quadric"+proj.quadric);
+			if (LOGGER.isLoggable(Level.FINE))
+				LOGGER.log(Level.FINE, "Point can not be moved because of its quadric: "+proj.quadric);
 			return false;
 		}
 		visited.add(proj.t);
@@ -181,13 +182,13 @@ public class MeshLiaison
 					edge = edge.next();
 				else if (proj.b[2] == 0.0)
 					edge = edge.prev();
-				if (LOGGER.isLoggable(Level.FINE))
-					LOGGER.log(Level.FINE, "Point is moved out of triangle by edge "+edge);
+				if (LOGGER.isLoggable(Level.FINER))
+					LOGGER.log(Level.FINER, "Point is moved out of triangle by edge "+edge);
 
 				sym = edge.sym(sym);
 				if (visited.contains(sym.getTri()))
 				{
-					LOGGER.finer("Loop detected when moving vertex");
+					LOGGER.fine("Loop detected when moving vertex");
 					return false;
 				}
 				visited.add(sym.getTri());
@@ -197,7 +198,7 @@ public class MeshLiaison
 			counter++;
 			if (counter > 2)
 			{
-				LOGGER.finer("Loop in triangle detected when moving vertex");
+				LOGGER.fine("Loop in triangle detected when moving vertex");
 				return false;				
 			}
 			// Compute barycentric coordinates in the new triangle
@@ -207,7 +208,7 @@ public class MeshLiaison
 				// Quadric has changed, check if projection can still be performed
 				if (!proj.quadric.canProject())
 				{
-					LOGGER.finer("Quadric does not allow vertex projection");
+					LOGGER.fine("Quadric does not allow vertex projection");
 					return false;
 				}
 			}
