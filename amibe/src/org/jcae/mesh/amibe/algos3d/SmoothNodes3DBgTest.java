@@ -62,12 +62,32 @@ public class SmoothNodes3DBgTest
 			double z = 2.0 * Math.PI * j / (n - 1.0);
 			for (int i = 0; i < m; i++)
 			{
-				v[m*j+i] = mesh.createVertex(i,j,0);
-				/*v[m*j+i] = mesh.createVertex(
+				v[m*j+i] = mesh.createVertex(
 					Math.cos(i*dtheta),
-					Math.sin(i*dtheta), z);*/
+					Math.sin(i*dtheta), z);
 			}
 		}
+		for (int i = 0; i < v.length; i++)
+			v[i].setLabel(i);
+		T = createMxNTriangles(m, n, v);
+	}
+	
+	// m Vertex on rows, n Vertex on columns
+	private void createMxNShell(int m, int n)
+	{
+		/*   v3       v4        v5 
+		 *   +---------+---------+
+		 *   | \       | \       |
+		 *   |   \  T1 |   \  T3 |
+		 *   |     \   |     \   |
+		 *   |  T0   \ |  T2   \ |
+		 *   +---------+---------+
+		 *   v0        v1       v2
+		 */
+		v = new Vertex[m*n];
+		for (int j = 0; j < n; j++)
+			for (int i = 0; i < m; i++)
+				v[m*j+i] = mesh.createVertex(i,j,0);
 		for (int i = 0; i < v.length; i++)
 			v[i].setLabel(i);
 		T = createMxNTriangles(m, n, v);
@@ -100,7 +120,7 @@ public class SmoothNodes3DBgTest
 		final Map<String, String> options = new HashMap<String, String>();
 		options.put("iterations", "10");
 		mesh = new Mesh();
-		createMxNCylinder(m, n);
+		createMxNShell(m, n);
 		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
 		Mesh smoothedMesh = new SmoothNodes3DBg(mesh, options).compute().getOutputMesh();
@@ -134,6 +154,45 @@ public class SmoothNodes3DBgTest
 		assertTrue("Min. angle too small: "+(qmin*60.0), qmin > 0.85);
 	}
 	
+	@Test public void test4Neighbors()
+	{
+		/*   v2       v3
+		 *   +---------+
+		 *   | \       |
+		 *   |   \  T1 |
+		 *   |     \   |
+		 *   |  T0   \ |
+		 *   +---------+
+		 *   v0        v1
+		 */
+		mesh = new Mesh();
+		createMxNShell(2, 2);
+		mesh.buildAdjacency();
+		// Add a middle point
+		Vertex mid = mesh.createVertex(0.3, 0.1, 0.0);
+		mesh.vertexSplit(T[0].getAbstractHalfEdge(), mid);
+		assertTrue("Mesh is not valid", mesh.isValid());
+
+		final Map<String, String> options = new HashMap<String, String>();
+		options.put("iterations", "1");
+		options.put("relaxation", "1.0");
+		Mesh smoothedMesh = new SmoothNodes3DBg(mesh, options).compute().getOutputMesh();
+		assertTrue("Mesh is not valid", mesh.isValid());
+
+		MinAngleFace qproc = new MinAngleFace();
+		QualityFloat data = new QualityFloat(10);
+		data.setQualityProcedure(qproc);
+		data.setTarget((float) Math.PI/4.0f);
+		for (Triangle f: smoothedMesh.getTriangles())
+		{
+			if (f.isWritable())
+				data.compute(f);
+		}
+		data.finish();
+		double qmin = data.getValueByPercent(0.0);
+		assertTrue("Min. angle too small: "+(qmin*45.0), qmin > 0.98);
+	}
+
 	@Test public void testTorus()
 	{
 		MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
