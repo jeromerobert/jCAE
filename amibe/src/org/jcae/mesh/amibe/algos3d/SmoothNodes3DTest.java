@@ -125,18 +125,18 @@ public class SmoothNodes3DTest
 		options.put("iterations", "20");
 		options.put("check", "false");
 		options.put("refresh", "true");
-		options.put("relaxation", "0.9");
+		options.put("relaxation", "1.0");
 		new SmoothNodes3D(mesh, options).compute();
 		assertTrue("Mesh is not valid", mesh.isValid());
 		MinAngleFace qproc = new MinAngleFace();
 		QualityFloat data = new QualityFloat(1000);
 		data.setQualityProcedure(qproc);
-                for (Triangle f: mesh.getTriangles())
-                        data.compute(f);
-                data.finish();
-                data.setTarget((float) Math.PI/3.0f);
+		data.setTarget((float) Math.PI/3.0f);
+		for (Triangle f: mesh.getTriangles())
+			data.compute(f);
+		data.finish();
 		double qmin = data.getValueByPercent(0.0);
-		assertTrue("Min. angle too small: "+(qmin*180.0 / Math.PI), qmin > 0.9);
+		assertTrue("Min. angle too small: "+(qmin*60.0), qmin > 0.85);
 	}
 
 	static void shuffleTorus(Mesh mesh, double radiusIn, double radiusOut)
@@ -188,14 +188,14 @@ public class SmoothNodes3DTest
 		MinAngleFace qproc = new MinAngleFace();
 		QualityFloat data = new QualityFloat(1000);
 		data.setQualityProcedure(qproc);
-                for (Triangle f: mesh.getTriangles())
-                        data.compute(f);
-                data.finish();
-                data.setTarget((float) Math.PI/3.0f);
+		data.setTarget((float) Math.PI/3.0f);
+		for (Triangle f: mesh.getTriangles())
+			data.compute(f);
+		data.finish();
 		double qmin = data.getValueByPercent(0.0);
 		// SmoothNodes3D can not move a vertex on an hyperbolic surface,
 		// so result is quite bad
-		assertTrue("Min. angle too small: "+(qmin*180.0 / Math.PI), qmin > 0.13);
+		assertTrue("Min. angle too small: "+(qmin*60.0), qmin > 0.12);
 	}
 
 }

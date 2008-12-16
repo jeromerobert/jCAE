@@ -103,8 +103,8 @@ public class SmoothNodes3DBgTest
 		createMxNCylinder(m, n);
 		mesh.buildAdjacency();
 		assertTrue("Mesh is not valid", mesh.isValid());
-		new SmoothNodes3D(mesh, options).compute();
-		assertTrue("Mesh is not valid", mesh.isValid());
+		Mesh smoothedMesh = new SmoothNodes3DBg(mesh, options).compute().getOutputMesh();
+		assertTrue("Mesh is not valid", smoothedMesh.isValid());
 	}
 
 	@Test public void testShellLarge()
@@ -120,18 +120,18 @@ public class SmoothNodes3DBgTest
 		options.put("iterations", "20");
 		options.put("check", "false");
 		options.put("refresh", "true");
-		options.put("relaxation", "0.9");
+		options.put("relaxation", "1.0");
 		Mesh smoothedMesh = new SmoothNodes3DBg(mesh, options).compute().getOutputMesh();
 		assertTrue("Mesh is not valid", smoothedMesh.isValid());
 		MinAngleFace qproc = new MinAngleFace();
 		QualityFloat data = new QualityFloat(1000);
 		data.setQualityProcedure(qproc);
-                for (Triangle f: smoothedMesh.getTriangles())
-                        data.compute(f);
-                data.finish();
-                data.setTarget((float) Math.PI/3.0f);
+		data.setTarget((float) Math.PI/3.0f);
+		for (Triangle f: smoothedMesh.getTriangles())
+			data.compute(f);
+		data.finish();
 		double qmin = data.getValueByPercent(0.0);
-		assertTrue("Min. angle too small: "+(qmin*180.0 / Math.PI), qmin > 0.9);
+		assertTrue("Min. angle too small: "+(qmin*60.0), qmin > 0.85);
 	}
 	
 	@Test public void testTorus()
@@ -158,12 +158,12 @@ public class SmoothNodes3DBgTest
 		MinAngleFace qproc = new MinAngleFace();
 		QualityFloat data = new QualityFloat(1000);
 		data.setQualityProcedure(qproc);
-                for (Triangle f: smoothedMesh.getTriangles())
-                        data.compute(f);
-                data.finish();
-                data.setTarget((float) Math.PI/3.0f);
+		data.setTarget((float) Math.PI/3.0f);
+		for (Triangle f: smoothedMesh.getTriangles())
+			data.compute(f);
+		data.finish();
 		double qmin = data.getValueByPercent(0.0);
-		assertTrue("Min. angle too small: "+(qmin*180.0 / Math.PI), qmin > 0.25);
+		assertTrue("Min. angle too small: "+(qmin*60.0), qmin > 0.25);
 	}
 
 }
