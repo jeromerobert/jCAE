@@ -1,3 +1,10 @@
+Tue Dec 16 16:57:49 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/projection/QuadricProjection.java: Make
+	getLocalQuadric() more robust.  Middle points were added to try
+	to avoid hyperbolic surfaces, they are now also added when linear
+	system is singular.
+
 Mon Dec 15 16:49:57 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/projection/QuadricProjection.java: When

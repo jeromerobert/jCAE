@@ -172,7 +172,48 @@ public class QuadricProjection implements LocalSurfaceProjection
 		double [] param = o.getUV();
 		AbstractHalfEdge ot = o.getIncidentAbstractHalfEdge(o.getNeighbourIteratorTriangle().next(), null);
 		Vertex d = ot.destination();
-		for (int pass = 0; pass < 2; pass++)
+		do
+		{
+			ot = ot.nextOriginLoop();
+			// TODO: Handle boundary nodes
+			if (ot.hasAttributes(AbstractHalfEdge.OUTER))
+				return null;
+			// Destination point
+			double [] p1 = ot.destination().getUV();
+			for (int i = 0; i < 3; i++)
+				vect1[i] = p1[i] - param[i];
+			// Find coordinates in the local frame (t1,t2,n)
+			P.apply(vect1, loc);
+			// Compute right hand side
+			h[0] += loc[2] * loc[0] * loc[0];
+			h[1] += loc[2] * loc[0] * loc[1];
+			h[2] += loc[2] * loc[1] * loc[1];
+			// Matrix assembly
+			g0[0] += loc[0] * loc[0] * loc[0] * loc[0];
+			g0[1] += loc[0] * loc[0] * loc[0] * loc[1];
+			g0[2] += loc[0] * loc[0] * loc[1] * loc[1];
+			g1[2] += loc[0] * loc[1] * loc[1] * loc[1];
+			g2[2] += loc[1] * loc[1] * loc[1] * loc[1];
+		}
+		while (ot.destination() != d);
+		// On a plane, h[0] = h[1] = h[2] = 0.
+		// We do not need to compute G, return value will be 0.
+		if (h[0] == 0.0 && h[1] == 0.0 && h[2] == 0.0)
+			return h;
+		boolean addMiddlePoints = discardHyperbolic && h[1] * h[1] >= 4.0 * h[0] * h[2];
+		Metric3D G = null;
+		if (!addMiddlePoints)
+		{
+			g1[1] = g0[2];
+			g1[0] = g0[1];
+			g2[0] = g0[2];
+			g2[1] = g1[2];
+			// G = tA A
+			G = new Metric3D(g0, g1, g2);
+			if (!G.inv())
+				addMiddlePoints = true;
+		}
+		if (addMiddlePoints)
 		{
 			boolean coplanar = true;
 			do
@@ -181,21 +222,11 @@ public class QuadricProjection implements LocalSurfaceProjection
 				// TODO: Handle boundary nodes
 				if (ot.hasAttributes(AbstractHalfEdge.OUTER))
 					return null;
-				if (pass == 0)
-				{
-					// Destination point
-					double [] p1 = ot.destination().getUV();
-					for (int i = 0; i < 3; i++)
-						vect1[i] = p1[i] - param[i];
-				}
-				else
-				{
-					// Middle point of opposite edge
-					double [] p1 = ot.destination().getUV();
-					double [] p2 = ot.apex().getUV();
-					for (int i = 0; i < 3; i++)
-						vect1[i] = 0.5*(p1[i] + p2[i])- param[i];
-				}
+				// Middle point of opposite edge
+				double [] p1 = ot.destination().getUV();
+				double [] p2 = ot.apex().getUV();
+				for (int i = 0; i < 3; i++)
+					vect1[i] = 0.5*(p1[i] + p2[i])- param[i];
 				// Find coordinates in the local frame (t1,t2,n)
 				P.apply(vect1, loc);
 				// Compute right hand side
@@ -217,12 +248,10 @@ public class QuadricProjection implements LocalSurfaceProjection
 			// We do not need to compute G, return value will be 0.
 			if (h[0] == 0.0 && h[1] == 0.0 && h[2] == 0.0)
 				return h;
-			if (!discardHyperbolic || h[1] * h[1] < 4.0 * h[0] * h[2])
-				break;
 			// We do not want F to be hyperbolic, projected point may
 			// be very far from other points.  Middle points are also
 			// added to find another approximation.
-			if (pass > 0)
+			if (discardHyperbolic && h[1] * h[1] >= 4.0 * h[0] * h[2])
 			{
 				if (coplanar)
 				{
@@ -238,7 +267,7 @@ public class QuadricProjection implements LocalSurfaceProjection
 		g2[0] = g0[2];
 		g2[1] = g1[2];
 		// G = tA A
-		Metric3D G = new Metric3D(g0, g1, g2);
+		G = new Metric3D(g0, g1, g2);
 		if (!G.inv())
 		{
 			if (LOGGER.isLoggable(Level.FINE))
