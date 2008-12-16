@@ -285,7 +285,10 @@ public class MeshLiaison
 			
 			if (vIndex == oldIndex)
 				return false;
-			quadric = MeshLiaison.this.localSurface.get(t.vertex[vIndex]);
+			LocalSurfaceProjection newQuadric = MeshLiaison.this.localSurface.get(t.vertex[vIndex]);
+			if (!newQuadric.canProject())
+				return false;
+			quadric = newQuadric;
 			return true;
 		}
 		

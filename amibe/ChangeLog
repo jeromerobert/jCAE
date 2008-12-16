@@ -8,6 +8,9 @@ Tue Dec 16 16:57:49 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 	value of move() when a loop is detected.  This does not imply that
 	projection fails, but that approximation is not accurate enough.
 	In these cases, vertex is moved, thus true is returned.
+	* src/org/jcae/mesh/amibe/projection/MeshLiaison.java: In
+	LocalProjection.updateQuadric(), do not update quadric if the new
+	quadric cannot perform projection.
 
 Mon Dec 15 16:49:57 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 
