@@ -177,7 +177,7 @@ public class SmoothNodes3DBgTest
 		options.put("iterations", "1");
 		options.put("relaxation", "1.0");
 		Mesh smoothedMesh = new SmoothNodes3DBg(mesh, options).compute().getOutputMesh();
-		assertTrue("Mesh is not valid", mesh.isValid());
+		assertTrue("Mesh is not valid", smoothedMesh.isValid());
 
 		MinAngleFace qproc = new MinAngleFace();
 		QualityFloat data = new QualityFloat(10);
@@ -191,6 +191,54 @@ public class SmoothNodes3DBgTest
 		data.finish();
 		double qmin = data.getValueByPercent(0.0);
 		assertTrue("Min. angle too small: "+(qmin*45.0), qmin > 0.98);
+	}
+
+	private static class CheckSmoothNodes3DBg extends SmoothNodes3DBg
+	{
+
+		public CheckSmoothNodes3DBg(Mesh bgMesh, Map<String, String> options)
+		{
+			super(bgMesh, options);
+		}
+		public boolean hasMoved()
+		{
+			return processed > 0;
+		}
+	}
+	@Test public void testSingularQuadric()
+	{
+		/*
+		 * This case was found in practice
+		 */
+		mesh = new Mesh();
+		v = new Vertex[5];
+		v[0] = mesh.createVertex(-0.62187508381251378, -0.34751501841852017,  0.085315828205300027);
+		v[1] = mesh.createVertex(-0.63117823882666904, -0.31365340768558072,  0.053534273359757991);
+		v[2] = mesh.createVertex(-0.61407841179235211, -0.34672837373181228,  0.055636259430818010);
+		v[3] = mesh.createVertex(-0.59344399181142545, -0.38181921866005472,  0.058020011330282950);
+		v[4] = mesh.createVertex(-0.60926256265657037, -0.34866382633430167,  0.034357448682585102);
+		T = new Triangle[4];
+		T[0] = mesh.createTriangle(v[0], v[1], v[2]);
+		T[1] = mesh.createTriangle(v[2], v[3], v[0]);
+		T[2] = mesh.createTriangle(v[3], v[2], v[4]);
+		T[3] = mesh.createTriangle(v[4], v[2], v[1]);
+		v[0].setLink(T[0]);
+		v[1].setLink(T[0]);
+		v[2].setLink(T[0]);
+		v[3].setLink(T[1]);
+		v[4].setLink(T[2]);
+		for (Triangle t : T)
+			mesh.add(t);
+		mesh.buildAdjacency();
+		assertTrue("Mesh is not valid", mesh.isValid());
+
+		final Map<String, String> options = new HashMap<String, String>();
+		options.put("iterations", "1");
+		options.put("relaxation", "1.0");
+		CheckSmoothNodes3DBg algo = new CheckSmoothNodes3DBg(mesh, options);
+		Mesh smoothedMesh = algo.compute().getOutputMesh();
+		assertTrue("Mesh is not valid", smoothedMesh.isValid());
+		assertTrue("Singular quadric detected", algo.hasMoved());
 	}
 
 	@Test public void testTorus()
