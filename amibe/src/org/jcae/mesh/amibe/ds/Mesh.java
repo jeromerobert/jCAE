@@ -470,7 +470,7 @@ public class Mesh implements Serializable
 		for (Vertex v : bndNodes)
 		{
 			if (0 == v.getRef())
-				setRefVertexOnboundary(v);
+				setRefVertexOnBoundary(v);
 		}
 
 		//  Build links for non-manifold vertices
@@ -852,7 +852,7 @@ public class Mesh implements Serializable
 	/**
 	 * Sets an unused boundary reference on a vertex.
 	 */
-	public void setRefVertexOnboundary(Vertex v)
+	public void setRefVertexOnBoundary(Vertex v)
 	{
 		maxLabel++;
 		v.setRef(maxLabel);

@@ -128,7 +128,7 @@ public class SplitEdge extends AbstractAlgoHalfEdge
 		if (current.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 		{
 			// FIXME: Check deflection
-			mesh.setRefVertexOnboundary(insertedVertex);
+			mesh.setRefVertexOnBoundary(insertedVertex);
 			return true;
 		}
 		// Discrete differential operators, and thus
