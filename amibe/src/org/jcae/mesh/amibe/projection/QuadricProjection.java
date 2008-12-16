@@ -19,6 +19,7 @@
 
 package org.jcae.mesh.amibe.projection;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
@@ -115,7 +116,8 @@ public class QuadricProjection implements LocalSurfaceProjection
 	{
 		if (!o.isManifold() || !o.isMutable())
 		{
-			LOGGER.fine("Singular vertex: "+o);
+			if (LOGGER.isLoggable(Level.FINER))
+				LOGGER.log(Level.FINER, "Skip boundary vertex: "+o);
 			return null;
 		}
 		double [] normal = new double[3];
@@ -239,7 +241,8 @@ public class QuadricProjection implements LocalSurfaceProjection
 		Metric3D G = new Metric3D(g0, g1, g2);
 		if (!G.inv())
 		{
-			LOGGER.fine("Singular quadric");
+			if (LOGGER.isLoggable(Level.FINE))
+				LOGGER.log(Level.FINE, "Singular quadric at vertex "+o);
 			return null;
 		}
 		// Reuse g0 to store our solution (a,b,c)
