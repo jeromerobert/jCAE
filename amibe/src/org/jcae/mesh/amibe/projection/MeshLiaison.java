@@ -47,7 +47,6 @@ public class MeshLiaison
 	private final static double [] work1 = new double[3];
 	private final static double [] work2 = new double[3];
 	private final static double [] work3 = new double[3];
-		
 	
 	public MeshLiaison(Mesh backgroundMesh)
 	{
@@ -189,7 +188,7 @@ public class MeshLiaison
 				if (visited.contains(sym.getTri()))
 				{
 					LOGGER.fine("Loop detected when moving vertex");
-					return false;
+					return true;
 				}
 				visited.add(sym.getTri());
 				proj.updateTriangle(sym.getTri());
@@ -199,7 +198,7 @@ public class MeshLiaison
 			if (counter > 2)
 			{
 				LOGGER.fine("Loop in triangle detected when moving vertex");
-				return false;				
+				return true;
 			}
 			// Compute barycentric coordinates in the new triangle
 			proj.computeBarycentricCoordinates(vPlane);
