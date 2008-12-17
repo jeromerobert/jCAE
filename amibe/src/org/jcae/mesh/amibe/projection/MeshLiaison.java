@@ -42,7 +42,7 @@ public class MeshLiaison
 	// Local surface definition on background mesh
 	private final Map<Vertex, LocalSurfaceProjection> localSurface;
 	// Map between vertices of currentMesh and their projection on backgroundMesh
-	private final Map<Vertex, LocalProjection> mapCurrentVertexProjection;
+	private final Map<Vertex, ProjectedLocation> mapCurrentVertexProjection;
 	
 	private final static double [] work1 = new double[3];
 	private final static double [] work2 = new double[3];
@@ -106,12 +106,12 @@ public class MeshLiaison
 			this.localSurface.put(v, new QuadricProjection(v));
 		
 		// Compute projections of vertices from currentMesh
-		this.mapCurrentVertexProjection = new HashMap<Vertex, LocalProjection>(backgroundNodeset.size());
+		this.mapCurrentVertexProjection = new HashMap<Vertex, ProjectedLocation>(backgroundNodeset.size());
 		for (Vertex v: backgroundNodeset)
 		{
 			Vertex currentV = mapBgToCurrent.get(v);
 			this.mapCurrentVertexProjection.put(currentV,
-				new LocalProjection(currentV.getUV(), v.getNeighbourIteratorTriangle().next()));
+				new ProjectedLocation(currentV.getUV(), v.getNeighbourIteratorTriangle().next()));
 		}
 		mapBgToCurrent.clear();
 	}
@@ -133,15 +133,15 @@ public class MeshLiaison
 		if (LOGGER.isLoggable(Level.FINER))
 			LOGGER.log(Level.FINER, "Trying to move vertex "+v+" to ("+target[0]+", "+target[1]+", "+target[2]+")");
 		Set<Triangle> visited = new HashSet<Triangle>();
-		LocalProjection proj = mapCurrentVertexProjection.get(v);
-		assert proj != null : "No projection found at vertex " + v;
-		if (!proj.quadric.canProject())
+		ProjectedLocation location = mapCurrentVertexProjection.get(v);
+		assert location != null : "No projection found at vertex " + v;
+		if (!location.projection.canProject())
 		{
 			if (LOGGER.isLoggable(Level.FINE))
-				LOGGER.log(Level.FINE, "Point can not be moved because of its quadric: "+proj.quadric);
+				LOGGER.log(Level.FINE, "Point can not be moved because of its quadric: "+location.projection);
 			return false;
 		}
-		visited.add(proj.t);
+		visited.add(location.t);
 		int counter = 0;
 		// Coordinates of the projection of v on triangle plane
 		double [] vPlane;
@@ -150,36 +150,36 @@ public class MeshLiaison
 			// Move v to desired location
 			v.moveTo(target[0], target[1], target[2]);
 			// Project v on surface
-			proj.quadric.project(v);
+			location.projection.project(v);
 			// Check if v crossed triangle boundary
-			vPlane = proj.projectOnTriangle(v.getUV());
-			boolean inside = proj.computeBarycentricCoordinates(vPlane);
+			vPlane = location.projectOnTriangle(v.getUV());
+			boolean inside = location.computeBarycentricCoordinates(vPlane);
 			
-			double [] p0 = proj.t.vertex[0].getUV();
-			double [] p1 = proj.t.vertex[1].getUV();
-			double [] p2 = proj.t.vertex[2].getUV();
+			double [] p0 = location.t.vertex[0].getUV();
+			double [] p1 = location.t.vertex[1].getUV();
+			double [] p2 = location.t.vertex[2].getUV();
 			// Constrain move within triangle boundary
 			if (!inside)
 			{
 				for (int i = 0; i < 3; i++)
 				{
-					if (proj.b[i] < 0.0)
-						proj.b[i] = 0.0;
+					if (location.b[i] < 0.0)
+						location.b[i] = 0.0;
 				}
 				// Values have been truncated
-				double invSum = 1.0 / (proj.b[0] + proj.b[1] + proj.b[2]);
+				double invSum = 1.0 / (location.b[0] + location.b[1] + location.b[2]);
 				for (int i = 0; i < 3; i++)
-					proj.b[i] *= invSum;
+					location.b[i] *= invSum;
 				// Move vertex on boundary
-				vPlane[0] = proj.b[0]*p0[0] + proj.b[1]*p1[0] + proj.b[2]*p2[0];
-				vPlane[1] = proj.b[0]*p0[1] + proj.b[1]*p1[1] + proj.b[2]*p2[1];
-				vPlane[2] = proj.b[0]*p0[2] + proj.b[1]*p1[2] + proj.b[2]*p2[2];
+				vPlane[0] = location.b[0]*p0[0] + location.b[1]*p1[0] + location.b[2]*p2[0];
+				vPlane[1] = location.b[0]*p0[1] + location.b[1]*p1[1] + location.b[2]*p2[1];
+				vPlane[2] = location.b[0]*p0[2] + location.b[1]*p1[2] + location.b[2]*p2[2];
 
-				AbstractHalfEdge edge = proj.t.getAbstractHalfEdge();
-				AbstractHalfEdge sym = proj.t.getAbstractHalfEdge();
-				if (proj.b[1] == 0.0)
+				AbstractHalfEdge edge = location.t.getAbstractHalfEdge();
+				AbstractHalfEdge sym = location.t.getAbstractHalfEdge();
+				if (location.b[1] == 0.0)
 					edge = edge.next();
-				else if (proj.b[2] == 0.0)
+				else if (location.b[2] == 0.0)
 					edge = edge.prev();
 				if (LOGGER.isLoggable(Level.FINER))
 					LOGGER.log(Level.FINER, "Point is moved out of triangle by edge "+edge);
@@ -191,7 +191,7 @@ public class MeshLiaison
 					return true;
 				}
 				visited.add(sym.getTri());
-				proj.updateTriangle(sym.getTri());
+				location.updateTriangle(sym.getTri());
 				counter = 0;
 			}
 			counter++;
@@ -201,11 +201,11 @@ public class MeshLiaison
 				return true;
 			}
 			// Compute barycentric coordinates in the new triangle
-			proj.computeBarycentricCoordinates(vPlane);
-			if (proj.updateQuadric(v.getUV()))
+			location.computeBarycentricCoordinates(vPlane);
+			if (location.updateProjection(v.getUV()))
 			{
-				// Quadric has changed, check if projection can still be performed
-				if (!proj.quadric.canProject())
+				// Projection has changed, check if projection can still be performed
+				if (!location.projection.canProject())
 				{
 					LOGGER.fine("Quadric does not allow vertex projection");
 					return false;
@@ -213,16 +213,16 @@ public class MeshLiaison
 			}
 			else
 			{
-				// Quadric has not changed, we found the projected point
+				// Projection has not changed, we found the projected point
 				return true;
 			}
 		}
 	}
 
 	
-	private class LocalProjection
+	private class ProjectedLocation
 	{
-		LocalSurfaceProjection quadric;
+		LocalSurfaceProjection projection;
 		// triangle where vertex is projected into
 		Triangle t;
 		// inverse of triangle area
@@ -234,11 +234,11 @@ public class MeshLiaison
 		// barycentric coordinates
 		double [] b = new double[3];
 		
-		public LocalProjection(double [] xyz, Triangle t)
+		public ProjectedLocation(double [] xyz, Triangle t)
 		{
 			updateTriangle(t);
 			computeBarycentricCoordinates(xyz);
-			updateQuadric(xyz);
+			updateProjection(xyz);
 		}
 		
 		private boolean updateTriangle(Triangle newT)
@@ -270,7 +270,7 @@ public class MeshLiaison
 			return b[0] >= 0.0 && b[1] >= 0.0 && b[2] >= 0.0;
 		}
 		
-		private boolean updateQuadric(double [] xyz)
+		private boolean updateProjection(double [] xyz)
 		{
 			int oldIndex = vIndex;
 			double d0 = Matrix3D.distance2(t.vertex[0].getUV(), xyz);
@@ -285,10 +285,10 @@ public class MeshLiaison
 			
 			if (vIndex == oldIndex)
 				return false;
-			LocalSurfaceProjection newQuadric = MeshLiaison.this.localSurface.get(t.vertex[vIndex]);
-			if (!newQuadric.canProject())
+			LocalSurfaceProjection newProjection = MeshLiaison.this.localSurface.get(t.vertex[vIndex]);
+			if (!newProjection.canProject())
 				return false;
-			quadric = newQuadric;
+			projection = newProjection;
 			return true;
 		}
 		
