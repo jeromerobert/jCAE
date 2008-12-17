@@ -1,3 +1,8 @@
+Wed Dec 17 14:29:39 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/projection/TangentPlaneProjection.java:
+	New class, this projection can be used instead of QuadricProjection.
+
 Tue Dec 16 16:57:49 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/projection/QuadricProjection.java: Make
