@@ -224,19 +224,6 @@ public class MeshReader
 	public static void readObject3D(Mesh mesh, String xmlDir)
 		throws IOException
 	{
-		readObject3D(mesh, xmlDir, 0.0);
-	}
-
-	/**
-	 * Loads an Amibe 3D XML file into an existing Mesh instance.
-	 *
-	 * @param mesh     data structure updated when reading files
-	 * @param xmlDir   directory containing XML files
-	 * @param ridgeAngle  an edge with a dihedral angle lower than this value is considered as a sharp edge which has to be preserved.
-	 */
-	public static void readObject3D(Mesh mesh, String xmlDir, double ridgeAngle)
-		throws IOException
-	{
 		logger.info("Read mesh from "+xmlDir+File.separator+JCAEXMLData.xml3dFilename);
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		Document document;
@@ -405,7 +392,9 @@ public class MeshReader
 			if (mesh.hasAdjacency())
 			{
 				logger.fine("Build mesh adjacency");
-				mesh.buildAdjacency(ridgeAngle);
+				mesh.buildAdjacency();
+				if (groupsList.getLength() > 1)
+					mesh.buildGroupBoundaries();
 			}
 		}
 		catch(XPathExpressionException ex)

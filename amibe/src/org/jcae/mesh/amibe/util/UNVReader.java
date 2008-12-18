@@ -49,15 +49,11 @@ public class UNVReader
 	
 	public static void readMesh(Mesh mesh, String file)
 	{
-		readMesh(mesh, file, -1.0);
-	}
-	
-	public static void readMesh(Mesh mesh, String file, double ridgeAngle)
-	{
 		TIntObjectHashMap<Vertex> nodesmap = null;
 		TIntObjectHashMap<Triangle> facesmap = null;
 		double unit = 1.0;
 		String line = "";
+		boolean hasGroups = false;
 		try
 		{
 			FileInputStream in = new FileInputStream(file);
@@ -85,7 +81,8 @@ public class UNVReader
 					else if ( (line.trim().equals("2430")) || (line.trim().equals("2435")) )
 					{
 						// read groups
-						readGroup(rd, line.trim(), mesh, facesmap);
+						int nrGroups = readGroup(rd, line.trim(), mesh, facesmap);
+						hasGroups = nrGroups > 1;
 					}
 					else if (line.trim().equals("2414"))
 					{
@@ -109,7 +106,9 @@ public class UNVReader
 		}
 		if (mesh.hasAdjacency())
 		{
-			mesh.buildAdjacency(ridgeAngle);
+			mesh.buildAdjacency();
+			if (hasGroups)
+				mesh.buildGroupBoundaries();
 		}
 	}
 
@@ -263,7 +262,7 @@ public class UNVReader
 		return facesmap;
 	}
 	
-	private static void readGroup(BufferedReader rd, String type, Mesh mesh, TIntObjectHashMap<Triangle> facesmap)
+	private static int readGroup(BufferedReader rd, String type, Mesh mesh, TIntObjectHashMap<Triangle> facesmap)
 	{
 		logger.fine("Reading groups");
 		String line = "";
@@ -324,6 +323,7 @@ public class UNVReader
 		{
 			e.printStackTrace();
 		}
+		return groupIdx;
 	}
 	
 }

@@ -71,9 +71,11 @@ public class Mesher3D
 		try
 		{
 			if (brepFile.endsWith(".unv"))
-				org.jcae.mesh.amibe.util.UNVReader.readMesh(mesh, brepFile, ridgeAngle);
+				org.jcae.mesh.amibe.util.UNVReader.readMesh(mesh, brepFile);
 			else
-				MeshReader.readObject3D(mesh, xmlDir, ridgeAngle);
+				MeshReader.readObject3D(mesh, xmlDir);
+			if (ridgeAngle > 0.0)
+				mesh.buildRidges(ridgeAngle);
 			HashMap<String, String> opts = new HashMap<String, String>();
 			opts.put("iterations", "5");
 			opts.put("boundaries", "true");

@@ -407,18 +407,6 @@ public class Mesh implements Serializable
 	 */
 	public void buildAdjacency()
 	{
-		buildAdjacency(-1.0);
-	}
-
-	/**
-	 * Build adjacency relations between triangles.
-	 * @param minAngle  when an edge has a dihedral angle greater than this value,
-	 *   it is considered as a ridge and its endpoints are treated as if they
-	 *   belong to a CAD edge.  By convention, a negative value means that this
-	 *   check is not performed.
-	 */
-	public void buildAdjacency(double minAngle)
-	{
 		Collection<Vertex> vertices;
 		if (nodeList == null)
 		{
@@ -431,11 +419,7 @@ public class Mesh implements Serializable
 		{
 			vertices = nodeList;
 		}
-		buildAdjacency(vertices, minAngle);
-	}
 
-	private void buildAdjacency(Collection<Vertex> vertices, double minAngle)
-	{
 		//  Connect all edges together
 		logger.fine("Connect triangles");
 		ArrayList<Triangle> newTri = new ArrayList<Triangle>();
@@ -533,58 +517,20 @@ public class Mesh implements Serializable
 			logger.fine("Found "+nrNME+" non manifold edges");
 		if (nrFE > 0)
 			logger.fine("Found "+nrFE+" free edges");
-		//  If vertices are on inner boundaries and there is
-		//  no ridge, change their label.
-		logger.fine("Set interior nodes mutable");
+
 		int nrJunctionPoints = 0;
-		/*
-		double cosMinAngle = Math.cos(Math.PI*minAngle/180.0);
-		if (minAngle < 0.0)
-			cosMinAngle = -2.0;
-		double [][] temp = new double[4][3];
-		*/
 		for (Vertex v: vertices)
 		{
 			if (bndNodes.contains(v))
 				continue;
-			int label = v.getRef();
 			if (!v.isManifold())
 			{
 				nrJunctionPoints++;
-				if (label == 0)
+				if (v.getRef() == 0)
 				{
 					maxLabel++;
 					v.setRef(maxLabel);
 				}
-			}
-			else if (0 != label)
-			{
-				/*
-				//  Check for ridges: DOES NOT WORK
-				Triangle t = (Triangle) v.getLink();
-				if (detectRidge(v, cosMinAngle, t, temp))
-					v.setRef(-label);
-				*/
-
-				/*
-				//  Negate references of vertices which are part of
-				//  inter-patch boundaries only so that they
-				//  become mutable.
-				Triangle t = (Triangle) v.getLink();
-				ot = v.getIncidentAbstractHalfEdge(t, ot);
-				Vertex first = ot.destination();
-				while (true)
-				{
-					if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.OUTER))
-						break;
-					ot = ot.nextOrigin();
-					if (ot.destination() == first)
-					{
-						v.setRef(-label);
-						break;
-					}
-				}
-				*/
 			}
 		}
 		if (nrJunctionPoints > 0)
@@ -797,59 +743,158 @@ public class Mesh implements Serializable
 		return sym;
 	}
 
-	private final boolean detectRidge(Vertex v, double cosMinAngle, Triangle t, double [][] temp)
+	/**
+	 * Replace sharp edges by non-manifold edges.
+	 *
+	 * @param minAngle  when an edge has a dihedral angle greater than this value,
+	 *   it is considered as a ridge and its endpoints are treated as if they
+	 *   belong to a CAD edge.
+	 */
+	public void buildRidges(double minAngle)
 	{
-		AbstractHalfEdge ot = v.getIncidentAbstractHalfEdge(t, null);
-		AbstractHalfEdge sym = t.getAbstractHalfEdge();
-		if (!sameGroup(ot, sym))
-			return false;
-		// Now check for coplanarity
-		if (cosMinAngle < -1.0)
-			return true;
-		Vertex first = ot.destination();
-		while (true)
-		{
-			Vertex d = ot.destination();
-			if (d != outerVertex && 0 != d.getRef())
-			{
-				sym = ot.sym(sym);
-				Matrix3D.computeNormal3D(v.getUV(), d.getUV(), ot.apex().getUV(), temp[0], temp[1], temp[2]);
-				Matrix3D.computeNormal3D(d.getUV(), v.getUV(), sym.apex().getUV(), temp[0], temp[1], temp[3]);
-				double angle = Matrix3D.prodSca(temp[2], temp[3]);
-				if (angle > -cosMinAngle)
-					return false;
-			}
-			ot = ot.nextOrigin();
-			if (ot.destination() == first)
-				break;
-		}
-		return true;
-	}
+		if (triangleList.isEmpty())
+			return;
 
-	// Check that all incident triangles belong to the same group
-	private final boolean sameGroup(AbstractHalfEdge ot, AbstractHalfEdge sym)
-	{
-		Vertex first = ot.destination();
-		int id = ot.getTri().getGroupId();
-		while (true)
+		double cosMinAngle = Math.cos(Math.PI*minAngle/180.0);
+		double [][] temp = new double[4][3];
+
+		ArrayList<Triangle> newTriangles = new ArrayList<Triangle>();
+		AbstractHalfEdge ot    = null;
+		AbstractHalfEdge sym   = triangleList.iterator().next().getAbstractHalfEdge();
+		AbstractHalfEdge temp0 = null;
+		AbstractHalfEdge temp1 = null;
+
+		for (Triangle t: triangleList)
 		{
-			Vertex d = ot.destination();
-			if (d != outerVertex && 0 != d.getRef())
+			ot = t.getAbstractHalfEdge(ot);
+			if (t.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+			for (int i = 0; i < 3; i++)
 			{
-				if (id != ot.getTri().getGroupId())
-					return false;
+				ot = ot.next();
+				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+					continue;
 				sym = ot.sym(sym);
-				if (id != sym.getTri().getGroupId())
-					return false;
+				double [] p0 = ot.origin().getUV();
+				double [] p1 = ot.destination().getUV();
+				Matrix3D.computeNormal3D(p0, p1, ot.apex().getUV(), temp[0], temp[1], temp[2]);
+				Matrix3D.computeNormal3D(p1, p0, sym.apex().getUV(), temp[0], temp[1], temp[3]);
+				if (Matrix3D.prodSca(temp[2], temp[3]) < cosMinAngle)
+					continue;
+				// Link ot to a virtual triangle
+				temp0 = bindToVirtualTriangle(ot, temp0);
+				newTriangles.add(temp0.getTri());
+				// Link sym to another virtual triangle
+				temp1 = bindToVirtualTriangle(sym, temp1);
+				newTriangles.add(temp1.getTri());
+				// Create a cycle
+				temp1 = temp1.next();
+				temp0 = temp0.prev();
+				temp0.glue(temp1);
+				temp1 = temp1.next();
+				temp0 = temp0.prev();
+				temp0.glue(temp1);
 			}
-			ot = ot.nextOrigin();
-			if (ot.destination() == first)
-				break;
 		}
-		return true;
+		triangleList.addAll(newTriangles);
 	}
 	
 	/**
+	 * Build group boundaries.
+	 */
+	public void buildGroupBoundaries()
+	{
+		if (triangleList.isEmpty())
+			return;
+		
+		ArrayList<Triangle> newTriangles = new ArrayList<Triangle>();
+		AbstractHalfEdge ot    = null;
+		AbstractHalfEdge sym   = triangleList.iterator().next().getAbstractHalfEdge();
+		AbstractHalfEdge temp0 = null;
+		AbstractHalfEdge temp1 = null;
+
+		for (Triangle t: triangleList)
+		{
+			ot = t.getAbstractHalfEdge(ot);
+			if (t.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+			int groupId = t.getGroupId();
+			for (int i = 0; i < 3; i++)
+			{
+				ot = ot.next();
+				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
+					continue;
+				sym = ot.sym(sym);
+				if (groupId == sym.getTri().getGroupId())
+					continue;
+				// Link ot to a virtual triangle
+				temp0 = bindToVirtualTriangle(ot, temp0);
+				newTriangles.add(temp0.getTri());
+				// Link sym to another virtual triangle
+				temp1 = bindToVirtualTriangle(sym, temp1);
+				newTriangles.add(temp1.getTri());
+				// Create a cycle
+				temp1 = temp1.next();
+				temp0 = temp0.prev();
+				temp0.glue(temp1);
+				temp1 = temp1.next();
+				temp0 = temp0.prev();
+				temp0.glue(temp1);
+			}
+		}
+		triangleList.addAll(newTriangles);
+	}
+	
+	public void scratchVirtualBoundaries()
+	{
+		if (triangleList.isEmpty())
+			return;
+		
+		ArrayList<Triangle> removedTriangles = new ArrayList<Triangle>();
+		AbstractHalfEdge ot    = null;
+		AbstractHalfEdge sym   = triangleList.iterator().next().getAbstractHalfEdge();
+		AbstractHalfEdge temp0 = null;
+		AbstractHalfEdge temp1 = null;
+
+		for (Triangle t: triangleList)
+		{
+			ot = t.getAbstractHalfEdge(ot);
+			if (t.hasAttributes(AbstractHalfEdge.OUTER))
+				continue;
+			for (int i = 0; i < 3; i++)
+			{
+				ot = ot.next();
+				if (!ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+					continue;
+
+				Iterator<AbstractHalfEdge> it = ot.fanIterator();
+				if (!it.hasNext())
+					continue;
+				temp0 = it.next();
+				if (!it.hasNext())
+					continue;
+				temp1 = it.next();
+				// If there are more than 2 fans, this edge is really
+				// non-manifold
+				if (it.hasNext())
+					continue;
+				if (temp0.origin() != temp1.destination() || temp0.destination() != temp1.origin())
+					continue;
+				// Remove inner boundary
+				sym = temp0.sym(sym);
+				removedTriangles.add(sym.getTri());
+				sym = temp1.sym(sym);
+				removedTriangles.add(sym.getTri());
+				temp0.glue(temp1);
+			}
+		}
+		triangleList.removeAll(removedTriangles);
+		if (logger.isLoggable(Level.FINE))
+			logger.log(Level.FINE, "Triangles removed when scratching virtual boundaries: "+removedTriangles.size());
+	}
+
+	/**
+	 * }
 	 * Sets an unused boundary reference on a vertex.
 	 */
 	public void setRefVertexOnBoundary(Vertex v)

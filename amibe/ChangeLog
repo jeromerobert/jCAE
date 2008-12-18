@@ -1,3 +1,14 @@
+Thu Dec 18 16:04:08 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Mesh.java: New buildGroupBoundaries()
+	and buildRidges() methods.  The former adds virtual boundaries between
+	triangles of different groups, and the latter adds virtual boundaries
+	between triangles when their dihedral angle is greater than a
+	parameter.  The new scratchVirtualBoundaries() method removes those
+	virtual boundaries.
+	These methods are meant to be explicitly called by algorithms,
+	they are not called by mesh readers.
+
 Wed Dec 17 14:29:39 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/projection/TangentPlaneProjection.java:
