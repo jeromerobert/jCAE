@@ -697,22 +697,8 @@ public class Mesh implements Serializable
 			// ot was already linked to another edge, but it is in fact a
 			// non-manifold edge.  Previous adjacency relation is removed
 			// and both triangles are linked to virtual triangles.
-			// First, store symmetric edge in work[0]
 			work[0] = ot.sym(work[0]);
-
-			// Link ot to a virtual triangle
-			work[1] = bindToVirtualTriangle(ot, work[1]);
-			newTri.add(work[1].getTri());
-			// Link work[0] to another virtual triangle
-			work[2] = bindToVirtualTriangle(work[0], work[2]);
-			newTri.add(work[2].getTri());
-			// Create an initial cycle
-			work[2] = work[2].next();
-			work[1] = work[1].prev();
-			work[1].glue(work[2]);
-			work[2] = work[2].next();
-			work[1] = work[1].prev();
-			work[1].glue(work[2]);
+			bindSymEdgesToVirtualTriangles(ot, work[0], work[1], work[2], newTri);
 		}
 
 		assert !ot2.hasSymmetricEdge();
@@ -741,6 +727,24 @@ public class Mesh implements Serializable
 		ot.setAttributes(AbstractHalfEdge.NONMANIFOLD);
 		sym.setAttributes(AbstractHalfEdge.NONMANIFOLD);
 		return sym;
+	}
+
+	private final void bindSymEdgesToVirtualTriangles(AbstractHalfEdge ot, AbstractHalfEdge sym,
+		AbstractHalfEdge temp0, AbstractHalfEdge temp1, ArrayList<Triangle> newTriangles)
+	{
+		// Link ot to a virtual triangle
+		temp0 = bindToVirtualTriangle(ot, temp0);
+		newTriangles.add(temp0.getTri());
+		// Link sym to another virtual triangle
+		temp1 = bindToVirtualTriangle(sym, temp1);
+		newTriangles.add(temp1.getTri());
+		// Create a cycle
+		temp1 = temp1.next();
+		temp0 = temp0.prev();
+		temp0.glue(temp1);
+		temp1 = temp1.next();
+		temp0 = temp0.prev();
+		temp0.glue(temp1);
 	}
 
 	/**
@@ -779,26 +783,13 @@ public class Mesh implements Serializable
 				double [] p1 = ot.destination().getUV();
 				Matrix3D.computeNormal3D(p0, p1, ot.apex().getUV(), temp[0], temp[1], temp[2]);
 				Matrix3D.computeNormal3D(p1, p0, sym.apex().getUV(), temp[0], temp[1], temp[3]);
-				if (Matrix3D.prodSca(temp[2], temp[3]) < cosMinAngle)
-					continue;
-				// Link ot to a virtual triangle
-				temp0 = bindToVirtualTriangle(ot, temp0);
-				newTriangles.add(temp0.getTri());
-				// Link sym to another virtual triangle
-				temp1 = bindToVirtualTriangle(sym, temp1);
-				newTriangles.add(temp1.getTri());
-				// Create a cycle
-				temp1 = temp1.next();
-				temp0 = temp0.prev();
-				temp0.glue(temp1);
-				temp1 = temp1.next();
-				temp0 = temp0.prev();
-				temp0.glue(temp1);
+				if (Matrix3D.prodSca(temp[2], temp[3]) > cosMinAngle)
+					bindSymEdgesToVirtualTriangles(ot, sym, temp0, temp1, newTriangles);
 			}
 		}
 		triangleList.addAll(newTriangles);
 	}
-	
+
 	/**
 	 * Build group boundaries.
 	 */
@@ -825,21 +816,8 @@ public class Mesh implements Serializable
 				if (ot.hasAttributes(AbstractHalfEdge.BOUNDARY | AbstractHalfEdge.NONMANIFOLD))
 					continue;
 				sym = ot.sym(sym);
-				if (groupId == sym.getTri().getGroupId())
-					continue;
-				// Link ot to a virtual triangle
-				temp0 = bindToVirtualTriangle(ot, temp0);
-				newTriangles.add(temp0.getTri());
-				// Link sym to another virtual triangle
-				temp1 = bindToVirtualTriangle(sym, temp1);
-				newTriangles.add(temp1.getTri());
-				// Create a cycle
-				temp1 = temp1.next();
-				temp0 = temp0.prev();
-				temp0.glue(temp1);
-				temp1 = temp1.next();
-				temp0 = temp0.prev();
-				temp0.glue(temp1);
+				if (groupId != sym.getTri().getGroupId())
+					bindSymEdgesToVirtualTriangles(ot, sym, temp0, temp1, newTriangles);
 			}
 		}
 		triangleList.addAll(newTriangles);
