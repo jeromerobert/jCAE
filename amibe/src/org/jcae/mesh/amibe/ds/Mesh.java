@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
 import java.io.Serializable;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -754,10 +755,10 @@ public class Mesh implements Serializable
 	 *   it is considered as a ridge and its endpoints are treated as if they
 	 *   belong to a CAD edge.
 	 */
-	public void buildRidges(double minAngle)
+	public int buildRidges(double minAngle)
 	{
 		if (triangleList.isEmpty())
-			return;
+			return 0;
 
 		double cosMinAngle = Math.cos(Math.PI*minAngle/180.0);
 		double [][] temp = new double[4][3];
@@ -787,16 +788,20 @@ public class Mesh implements Serializable
 					bindSymEdgesToVirtualTriangles(ot, sym, temp0, temp1, newTriangles);
 			}
 		}
+		int toReturn = newTriangles.size() / 2;
 		triangleList.addAll(newTriangles);
+		if (toReturn > 0 && logger.isLoggable(Level.CONFIG))
+			logger.log(Level.CONFIG, "Found "+toReturn+" sharp edges");
+		return toReturn;
 	}
 
 	/**
 	 * Build group boundaries.
 	 */
-	public void buildGroupBoundaries()
+	public int buildGroupBoundaries()
 	{
 		if (triangleList.isEmpty())
-			return;
+			return 0;
 		
 		ArrayList<Triangle> newTriangles = new ArrayList<Triangle>();
 		AbstractHalfEdge ot    = null;
@@ -820,13 +825,17 @@ public class Mesh implements Serializable
 					bindSymEdgesToVirtualTriangles(ot, sym, temp0, temp1, newTriangles);
 			}
 		}
+		int toReturn = newTriangles.size() / 2;
 		triangleList.addAll(newTriangles);
+		if (toReturn > 0 && logger.isLoggable(Level.CONFIG))
+			logger.log(Level.CONFIG, "Add virtual boundaries for "+toReturn+" edges");
+		return toReturn;
 	}
 	
-	public void scratchVirtualBoundaries()
+	public int scratchVirtualBoundaries()
 	{
 		if (triangleList.isEmpty())
-			return;
+			return 0;
 		
 		ArrayList<Triangle> removedTriangles = new ArrayList<Triangle>();
 		AbstractHalfEdge ot    = null;
@@ -866,9 +875,27 @@ public class Mesh implements Serializable
 				temp0.glue(temp1);
 			}
 		}
-		triangleList.removeAll(removedTriangles);
-		if (logger.isLoggable(Level.FINE))
-			logger.log(Level.FINE, "Triangles removed when scratching virtual boundaries: "+removedTriangles.size());
+		int toReturn = removedTriangles.size() / 2;
+		if (toReturn > 0)
+		{
+			if (triangleList instanceof Set)
+				triangleList.removeAll(removedTriangles);
+			else
+			{
+				// removeAll may be very slow on large lists
+				ArrayList<Triangle> savedList = new ArrayList<Triangle>(triangleList);
+				HashSet<Triangle> removedSet = new HashSet<Triangle>(removedTriangles);
+				triangleList.clear();
+				for (Triangle t : savedList)
+				{
+					if (!removedSet.contains(t))
+						triangleList.add(t);
+				}
+			}
+			if (logger.isLoggable(Level.CONFIG))
+				logger.log(Level.CONFIG, "Remove virtual boundaries for "+toReturn+" edges");
+		}
+		return toReturn;
 	}
 
 	/**

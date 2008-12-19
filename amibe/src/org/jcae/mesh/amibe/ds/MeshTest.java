@@ -21,7 +21,6 @@ package org.jcae.mesh.amibe.ds;
 
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
-import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -93,8 +92,8 @@ public class MeshTest
 			mesh.add(t);
 		return tt;
 	}
-	
-	@Before public void createMesh()
+
+	@Test public void groups()
 	{
 		TriangleTraitsBuilder ttb = new TriangleTraitsBuilder();
 		ttb.addHalfEdge();
@@ -102,20 +101,36 @@ public class MeshTest
 		mtb.addTriangleList();
 		mtb.add(ttb);
 		mesh = new Mesh(mtb);
-	}
-	
-	@Test public void groups()
-	{
 		createMxNShell(3, 3);
 		for (int i = 0; i < 8; i++)
 			T[i].setGroupId(i/4);
 		assertTrue("Wrong number of triangles: "+mesh.getTriangles().size(), 8 == mesh.getTriangles().size());
 		mesh.buildAdjacency();
 		assertTrue("Wrong number of triangles after buildAdjacency: "+mesh.getTriangles().size(), 16 == mesh.getTriangles().size());
-		mesh.buildGroupBoundaries();
-		assertTrue("Wrong number of triangles after buildGroupBoundaries: "+mesh.getTriangles().size(), 20 == mesh.getTriangles().size());
-		mesh.scratchVirtualBoundaries();
-		assertTrue("Wrong number of triangles after scratchVirtualBoundaries: "+mesh.getTriangles().size(), 16 == mesh.getTriangles().size());		
+		int nr = mesh.buildGroupBoundaries();
+		assertTrue("Wrong return value of buildGroupBoundaries (2 was expected): "+nr, 2 == nr);
+		nr = mesh.scratchVirtualBoundaries();
+		assertTrue("Wrong return value of scratchVirtualBoundaries (2 was expected): "+nr, 2 == nr);
+	}
+	
+	@Test public void groupsWithTriangleSet()
+	{
+		TriangleTraitsBuilder ttb = new TriangleTraitsBuilder();
+		ttb.addHalfEdge();
+		MeshTraitsBuilder mtb = new MeshTraitsBuilder();
+		mtb.addTriangleSet();
+		mtb.add(ttb);
+		mesh = new Mesh(mtb);
+		createMxNShell(3, 3);
+		for (int i = 0; i < 8; i++)
+			T[i].setGroupId(i/4);
+		assertTrue("Wrong number of triangles: "+mesh.getTriangles().size(), 8 == mesh.getTriangles().size());
+		mesh.buildAdjacency();
+		assertTrue("Wrong number of triangles after buildAdjacency: "+mesh.getTriangles().size(), 16 == mesh.getTriangles().size());
+		int nr = mesh.buildGroupBoundaries();
+		assertTrue("Wrong return value of buildGroupBoundaries (2 was expected): "+nr, 2 == nr);
+		nr = mesh.scratchVirtualBoundaries();
+		assertTrue("Wrong return value of scratchVirtualBoundaries (2 was expected): "+nr, 2 == nr);
 	}
 	
 }
