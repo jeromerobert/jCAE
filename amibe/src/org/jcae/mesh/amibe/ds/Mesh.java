@@ -873,6 +873,8 @@ public class Mesh implements Serializable
 				sym = temp1.sym(sym);
 				removedTriangles.add(sym.getTri());
 				temp0.glue(temp1);
+				ot.clearAttributes(AbstractHalfEdge.NONMANIFOLD);
+				sym.clearAttributes(AbstractHalfEdge.NONMANIFOLD);
 			}
 		}
 		int toReturn = removedTriangles.size() / 2;
