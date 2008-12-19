@@ -2,6 +2,9 @@ Fri Dec 19 14:17:57 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/AbstractHalfEdge.java: Make several
 	methods package private, public methods are available from Mesh.
+	* src/org/jcae/mesh/amibe/ds/Mesh.java: In buildGroupBoundaries()
+	and buildRidges(), make vertices non-manifold.  Make them manifold
+	in scratchVirtualBoundaries().
 
 Thu Dec 18 16:04:08 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 

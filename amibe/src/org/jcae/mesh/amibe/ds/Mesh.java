@@ -788,11 +788,41 @@ public class Mesh implements Serializable
 					bindSymEdgesToVirtualTriangles(ot, sym, temp0, temp1, newTriangles);
 			}
 		}
+		makeNonManifoldVertices(newTriangles);
 		int toReturn = newTriangles.size() / 2;
 		triangleList.addAll(newTriangles);
 		if (toReturn > 0 && logger.isLoggable(Level.CONFIG))
 			logger.log(Level.CONFIG, "Found "+toReturn+" sharp edges");
 		return toReturn;
+	}
+
+	private void makeNonManifoldVertices(Collection<Triangle> newTriangles)
+	{
+		if (newTriangles.isEmpty())
+			return;
+		AbstractHalfEdge ot = null;
+		AbstractHalfEdge sym = newTriangles.iterator().next().getAbstractHalfEdge();
+		Collection<Triangle> triangles = new ArrayList<Triangle>();
+		for (Triangle t : newTriangles)
+		{
+			ot = t.getAbstractHalfEdge(ot);
+			sym = ot.next(sym);
+			sym = sym.sym();
+			sym = sym.next();
+			// Move to non-outer triangles
+			sym = sym.sym();
+			ot = ot.sym();
+			Vertex o = ot.origin();
+			triangles.clear();
+			triangles.add(ot.getTri());
+			triangles.add(sym.getTri());
+			if (!o.isManifold())
+			{
+				for (Triangle other : (Triangle[]) o.getLink())
+					triangles.add(other);
+			}
+			o.setLinkFan(triangles);
+		}
 	}
 
 	/**
@@ -825,6 +855,7 @@ public class Mesh implements Serializable
 					bindSymEdgesToVirtualTriangles(ot, sym, temp0, temp1, newTriangles);
 			}
 		}
+		makeNonManifoldVertices(newTriangles);
 		int toReturn = newTriangles.size() / 2;
 		triangleList.addAll(newTriangles);
 		if (toReturn > 0 && logger.isLoggable(Level.CONFIG))
@@ -896,6 +927,36 @@ public class Mesh implements Serializable
 			}
 			if (logger.isLoggable(Level.CONFIG))
 				logger.log(Level.CONFIG, "Remove virtual boundaries for "+toReturn+" edges");
+			// Rebuild list of vertex links
+			makeNonManifoldVertices(removedTriangles);
+			// Make vertex manifold
+			for (Triangle t : removedTriangles)
+			{
+				ot = t.getAbstractHalfEdge(ot);
+				Vertex o = ot.origin();
+				if (o.isManifold())
+					continue;
+				Triangle [] list = (Triangle[]) o.getLink();
+				if (list.length == 1)
+				{
+					// Check that there is no non-manifold
+					// incident edge
+					Vertex d = ot.destination();
+					boolean manifold = true;
+					do
+					{
+						if (ot.hasAttributes(AbstractHalfEdge.NONMANIFOLD))
+						{
+							manifold = false;
+							break;
+						}
+						ot = ot.nextOriginLoop();
+					}
+					while (ot.destination() != d);
+					if (manifold)
+						o.setLink(list[0]);
+				}
+			}
 		}
 		return toReturn;
 	}
