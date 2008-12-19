@@ -462,7 +462,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @see Mesh#edgeSwap
 	 */
 	@Override
-	protected final HalfEdge swap()
+	final HalfEdge swap()
 	{
 		return HEswap();
 	}
@@ -572,7 +572,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @see Mesh#canCollapseEdge
 	 */
 	@Override
-	protected final boolean canCollapse(Vertex v)
+	final boolean canCollapse(Vertex v)
 	{
 		// Be consistent with collapse()
 		if (hasAttributes(OUTER))
@@ -773,7 +773,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @see Mesh#edgeCollapse
 	 */
 	@Override
-	protected final HalfEdge collapse(Mesh m, Vertex v)
+	final HalfEdge collapse(Mesh m, Vertex v)
 	{
 		if (hasAttributes(OUTER))
 			throw new IllegalArgumentException("Cannot contract "+this);
@@ -1064,7 +1064,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * @see Mesh#vertexSplit
 	 */
 	@Override
-	protected final HalfEdge split(Mesh m, Vertex v)
+	final HalfEdge split(Mesh m, Vertex v)
 	{
 		if (logger.isLoggable(Level.FINE))
 			logger.fine("split edge ("+origin()+" "+destination()+") by adding vertex "+v);

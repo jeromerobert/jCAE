@@ -570,7 +570,7 @@ public abstract class AbstractHalfEdge
 	 * to an outer triangle.
 	 * @see Mesh#edgeSwap
 	 */
-	protected abstract AbstractHalfEdge swap();
+	abstract AbstractHalfEdge swap();
 
 	/**
 	 * Checks that triangles are not inverted if origin vertex is moved.
@@ -588,7 +588,7 @@ public abstract class AbstractHalfEdge
 	 * @return <code>true</code> if this edge can be contracted into the single vertex n, <code>false</code> otherwise
 	 * @see Mesh#canCollapseEdge
 	 */
-	protected abstract boolean canCollapse(Vertex v);
+	abstract boolean canCollapse(Vertex v);
 
 	/**
 	 * Contracts an edge.
@@ -601,7 +601,7 @@ public abstract class AbstractHalfEdge
 	 * method against symmetric edge, this is not done automatically.
 	 * @see Mesh#edgeCollapse
 	 */
-	protected abstract AbstractHalfEdge collapse(Mesh m, Vertex v);
+	abstract AbstractHalfEdge collapse(Mesh m, Vertex v);
 
 	/**
 	 * Splits an edge.  This is the opposite of {@link #collapse}.
@@ -611,7 +611,7 @@ public abstract class AbstractHalfEdge
 	 * @return edge starting from <code>n</code> and pointing to original apex
 	 * @see Mesh#vertexSplit
 	 */
-	protected abstract AbstractHalfEdge split(Mesh m, Vertex v);
+	abstract AbstractHalfEdge split(Mesh m, Vertex v);
 
 	/**
 	 * Sets the edge tied to this object.

@@ -845,7 +845,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * Warning: this method uses work[0], work[1] and work[2] temporary arrays.
 	 */
 	@Override
-	protected final boolean canCollapse(Vertex n)
+	final boolean canCollapse(Vertex n)
 	{
 		// Be consistent with collapse()
 		if (hasAttributes(OUTER))
@@ -1008,7 +1008,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @see Mesh#edgeCollapse
 	 */
 	@Override
-	protected final VirtualHalfEdge collapse(Mesh m, Vertex v)
+	final VirtualHalfEdge collapse(Mesh m, Vertex v)
 	{
 		if (hasAttributes(OUTER))
 			throw new IllegalArgumentException("Cannot contract "+this);
@@ -1337,7 +1337,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @see Mesh#vertexSplit
 	 */
 	@Override
-	protected final VirtualHalfEdge split(Mesh m, Vertex v)
+	final VirtualHalfEdge split(Mesh m, Vertex v)
 	{
 		if (logger.isLoggable(Level.FINE))
 			logger.fine("split edge ("+origin()+" "+destination()+") by adding vertex "+v);
