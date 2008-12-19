@@ -333,7 +333,7 @@ public class SmoothNodes3D
 			centroid3[i] /= nn;
 		for (int i = 0; i < 3; i++)
 			centroid3[i] = oldp3[i] + relaxation * (centroid3[i] - oldp3[i]);
-		if (!ot.checkNewRingNormals(centroid3))
+		if (!mesh.checkNewRingNormals(ot, centroid3))
 		{
 			LOGGER.finer("Point not moved, some triangles would become inverted");
 			return false;

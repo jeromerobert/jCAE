@@ -787,7 +787,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * Warning: this method uses work[0] and work[1] temporary arrays.
 	 */
 	@Override
-	public final boolean checkNewRingNormals(double [] newpt)
+	final boolean checkNewRingNormals(double [] newpt)
 	{
 		Vertex o = origin();
 		if (o.isManifold())

@@ -579,7 +579,7 @@ public abstract class AbstractHalfEdge
 	 * @return <code>false</code> if the new position produces
 	 *    an inverted triangle, <code>true</code> otherwise.
 	 */
-	public abstract boolean checkNewRingNormals(double [] newpt);
+	abstract boolean checkNewRingNormals(double [] newpt);
 
 	/**
 	 * Checks whether an edge can be contracted into a given vertex.

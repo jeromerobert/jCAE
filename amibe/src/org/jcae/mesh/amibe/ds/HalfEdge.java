@@ -672,7 +672,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	 * Warning: this method uses temp[0], temp[1], temp[2] and temp[3] temporary arrays.
 	 */
 	@Override
-	public final boolean checkNewRingNormals(double [] newpt)
+	final boolean checkNewRingNormals(double [] newpt)
 	{
 		Vertex o = origin();
 		if (o.isManifold())

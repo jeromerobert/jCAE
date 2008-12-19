@@ -979,6 +979,19 @@ public class Mesh implements Serializable
 	}
 	
 	/**
+	 * Checks whether origin of an edge can be moved without inverting triangles.
+	 *
+	 * @param e   edge to be checked
+	 * @param pt  coordinates where edge origin is to be moved
+	 * @return <code>true</code> if edge origin can be moved without producing
+	 *         inverted triangles, <code>false</code> otherwise.
+	 */
+	public boolean checkNewRingNormals(AbstractHalfEdge e, double [] pt)
+	{
+		return e.checkNewRingNormals(pt);
+	}
+
+	/**
 	 * Checks whether this mesh is valid.
 	 * This routine returns <code>isValid(true)</code>.
 	 *
