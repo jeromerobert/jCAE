@@ -1,3 +1,10 @@
+Mon Jan  5 17:50:02 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/MeshReader.java (readObject3D): Do not
+	call Mesh.buildGroupBoundaries(). See comment below, this method
+	was not meant to be called by mesh readers, but by higher level
+	routines.
+
 Fri Dec 19 14:17:57 CET 2008 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/AbstractHalfEdge.java: Make several

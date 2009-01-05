@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2005,2006, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -393,8 +393,6 @@ public class MeshReader
 			{
 				logger.fine("Build mesh adjacency");
 				mesh.buildAdjacency();
-				if (groupsList.getLength() > 1)
-					mesh.buildGroupBoundaries();
 			}
 		}
 		catch(XPathExpressionException ex)
