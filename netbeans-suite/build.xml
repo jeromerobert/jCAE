@@ -5,15 +5,35 @@
 <project name="jcae-netbeans-suite" basedir=".">
     <description>Builds the module suite jcae-netbeans-suite.</description>
     <import file="nbproject/build-impl.xml"/>
-	<!-- We don't have any release dir so we can hack to use this target -->
-	<target name="-release.dir">
-		<!-- Get the ant.jar file from netbeans distrib, just to build the ant task required
-		for the project. It will not be part of the final distribution -->
-		<copy file="${netbeans.dest.dir}/java2/ant/lib/ant.jar" tofile="build/tmp/ant.jar"/>
-		<mkdir dir="build/tmp/classes"/>
-		<javac srcdir="ant/src" destdir="build/tmp/classes" includes="org/jcae/netbeans/ant/AntVersion.java"/>
-		<!-- set the version -->
-		<taskdef name="jcaeVersion" classname="org.jcae.netbeans.ant.AntVersion" classpath="build/tmp/classes"/>
-		<jcaeVersion version="0.16"/>
-	</target>
+
+	<!-- From http://blogs.kiyut.com/tonny/2007/08/06/netbeans-platform-branding-and-version-info/ -->
+    <!-- override build to add update branding -->
+    <target name="build" depends="build-brand,suite.build"/>
+	
+    <target name="build-brand" depends="-init">
+        <replaceregexp file="${basedir}/branding/core/core.jar/org/netbeans/core/startup/Bundle.properties"
+            match="currentVersion=(.*)"
+            replace="currentVersion=${app.version}"
+            byline="true"/>
+        <replaceregexp file="${basedir}/branding/modules/org-netbeans-core-windows.jar/org/netbeans/core/windows/view/ui/Bundle.properties"
+            match="CTL_MainWindow_Title=(.*)"
+            replace="CTL_MainWindow_Title=${app.title} ${app.version}"
+            byline="true"/>
+        <replaceregexp file="${basedir}/branding/modules/org-netbeans-core-windows.jar/org/netbeans/core/windows/view/ui/Bundle.properties"
+            match="CTL_MainWindow_Title_No_Project=(.*)"
+            replace="CTL_MainWindow_Title_No_Project=${app.title} ${app.version}"
+            byline="true"/>
+        <replaceregexp file="${basedir}/branding/modules/org-netbeans-core.jar/org/netbeans/core/ui/Bundle.properties"
+            match="LBL_ProductInformation=(.*)"
+            replace="LBL_ProductInformation=${app.title} ${app.version}"
+            byline="true"/>
+        <replaceregexp file="core/manifest.mf"
+            match="OpenIDE-Module-Specification-Version: (.*)"
+            replace="OpenIDE-Module-Specification-Version: ${app.version}"
+            byline="true"/>
+        <replaceregexp file="occjava-nb/manifest.mf"
+            match="OpenIDE-Module-Specification-Version: (.*)"
+            replace="OpenIDE-Module-Specification-Version: ${app.version}"
+            byline="true"/>
+    </target>
 </project>
