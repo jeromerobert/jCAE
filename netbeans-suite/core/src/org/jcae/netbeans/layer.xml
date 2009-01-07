@@ -111,13 +111,16 @@
             </file>
 			<file name="org-jcae-netbeans-viewer3d-actions-UpFrontClipDistance.instance">
                 <attr name="position" intvalue="2800"/>
-            </file>				<file name="org-jcae-netbeans-viewer3d-actions-ChangeCenterAction.instance">
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-ChangeCenterAction.instance">
                 <attr name="position" intvalue="2800"/>
             </file>			
 		</folder>
 		<folder name="jCAE">
 			<file name="org-jcae-netbeans-cad-ExplodeAction.instance"/>
-			<file name="org-jcae-netbeans-cad-ImportAction.instance"/>
+			<file name="org-jcae-netbeans-cad-ImportAction.instance">
+				<attr name="instanceCreate" methodvalue="org.jcae.netbeans.cad.ImportAction.action"/>
+			</file>
 			<file name="org-jcae-netbeans-cad-RemoveAction.instance"/>
 			<file name="org-jcae-netbeans-cad-RemoveHoles.instance"/>
             <file name="org-jcae-netbeans-cad-ReverseAction.instance"/>

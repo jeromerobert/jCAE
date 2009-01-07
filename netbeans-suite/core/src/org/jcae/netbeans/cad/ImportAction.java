@@ -15,12 +15,13 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2005-2008, by EADS France
  */
 
 package org.jcae.netbeans.cad;
 
 import java.io.File;
+import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
@@ -34,10 +35,8 @@ import org.netbeans.spi.project.ui.support.ProjectActionPerformer;
 import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.util.HelpCtx;
-import org.openide.util.actions.CallableSystemAction;
 
-public class ImportAction extends CallableSystemAction
+public class ImportAction
 {
 	private static final FileFilter brepFileFilter=new FileFilter()
 	{
@@ -85,7 +84,7 @@ public class ImportAction extends CallableSystemAction
 		}
 	};   
 	
-	public void importGeometry(FileObject outputDir)
+	private static void importGeometry(FileObject outputDir)
 	{
 		ProgressHandle h;
 		try
@@ -148,9 +147,9 @@ public class ImportAction extends CallableSystemAction
 		}
 	}
 
-	public void performAction()
+	public static Action action()
 	{
-		MainProjectSensitiveActions.mainProjectSensitiveAction(new ProjectActionPerformer()
+		return MainProjectSensitiveActions.mainProjectSensitiveAction(new ProjectActionPerformer()
 		{
 			public boolean enable(Project arg0)
 			{
@@ -161,22 +160,6 @@ public class ImportAction extends CallableSystemAction
 			{
 				importGeometry(arg0.getProjectDirectory());
 			}
-		}, null, null).actionPerformed(null);
-	}
-
-	public String getName()
-	{
-		return "Import geometry";
-	}
-
-	public HelpCtx getHelpCtx()
-	{
-		return null;
-	}
-
-	@Override
-	protected boolean asynchronous()
-	{
-		return true;
+		}, "Import geometry", null);
 	}
 }
