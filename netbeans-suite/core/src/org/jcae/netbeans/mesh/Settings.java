@@ -21,11 +21,9 @@
 package org.jcae.netbeans.mesh;
 
 import java.io.File;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import org.jcae.mesh.Mesher;
-import org.openide.ErrorManager;
+import org.openide.modules.InstalledFileLocator;
 import org.openide.options.SystemOption;
 import org.openide.util.Lookup;
 
@@ -48,17 +46,10 @@ public class Settings extends SystemOption
 	private boolean runInSameJVM=Boolean.getBoolean("jcae.netbeans.mesh.samejvm"); 
 	
 	public Settings()
-	{	
-		try
-		{
-			mesherJar=new File(
-				Mesher.class.getProtectionDomain().getCodeSource().
-				getLocation().toURI()).getPath();
-		}
-		catch (URISyntaxException e)
-		{
-			ErrorManager.getDefault().notify(e);
-		}
+	{
+		mesherJar = InstalledFileLocator.getDefault().
+			locate("modules/ext/amibe.jar", "org.jcae.netbeans", false).
+			getAbsolutePath();
 		javaVirtualMachine=System.getProperty("java.home");
 		
 	}
