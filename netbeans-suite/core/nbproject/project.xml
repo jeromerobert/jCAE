@@ -142,7 +142,7 @@
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
-                        <specification-version>6.2</specification-version>
+                        <specification-version>6.7</specification-version>
                     </run-dependency>
                 </dependency>
                 <dependency>
@@ -178,6 +178,23 @@
                     </run-dependency>
                 </dependency>
             </module-dependencies>
+            <public-packages>
+                <package>org.jcae.netbeans</package>
+                <package>org.jcae.netbeans.cad</package>
+                <package>org.jcae.netbeans.viewer3d</package>
+                <package>org.jcae.viewer3d</package>
+                <package>org.jcae.viewer3d.cad</package>
+                <package>org.jcae.viewer3d.cad.occ</package>
+                <package>org.jcae.viewer3d.fd</package>
+                <package>org.jcae.viewer3d.fd.pl02</package>
+                <package>org.jcae.viewer3d.fd.sd</package>
+                <package>org.jcae.viewer3d.fe</package>
+                <package>org.jcae.viewer3d.fe.amibe</package>
+                <package>org.jcae.viewer3d.fe.unv</package>
+                <package>org.jcae.viewer3d.post</package>
+                <package>org.jcae.viewer3d.test</package>
+                <package>org.jcae.vtk</package>
+            </public-packages>
             <class-path-extension>
                 <runtime-relative-path>ext/jcae-viewer3d-amibe.jar</runtime-relative-path>
                 <binary-origin>../viewer3d-amibe/dist/jcae-viewer3d-amibe.jar</binary-origin>
@@ -206,23 +223,6 @@
                 <runtime-relative-path>ext/trove.jar</runtime-relative-path>
                 <binary-origin>${libs.trove.classpath}</binary-origin>
             </class-path-extension>
-            <public-packages>
-                <package>org.jcae.netbeans</package>
-                <package>org.jcae.netbeans.cad</package>
-                <package>org.jcae.netbeans.viewer3d</package>
-                <package>org.jcae.viewer3d</package>
-                <package>org.jcae.viewer3d.cad</package>
-                <package>org.jcae.viewer3d.cad.occ</package>
-                <package>org.jcae.viewer3d.fd</package>
-                <package>org.jcae.viewer3d.fd.pl02</package>
-                <package>org.jcae.viewer3d.fd.sd</package>
-                <package>org.jcae.viewer3d.fe</package>
-                <package>org.jcae.viewer3d.fe.amibe</package>
-                <package>org.jcae.viewer3d.fe.unv</package>
-                <package>org.jcae.viewer3d.post</package>
-                <package>org.jcae.viewer3d.test</package>
-                <package>org.jcae.vtk</package>
-            </public-packages>
         </data>
     </configuration>
 </project>

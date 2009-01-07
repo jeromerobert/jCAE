@@ -244,54 +244,8 @@
 		</folder>
 	</folder>
 	<folder name="Toolbars">
-		<folder name="3DNavigation">
-			<attr name="position" intvalue="100"/>
-            <file name="org-jcae-netbeans-viewer3d-actions-ChangeCenterAction.shadow">
-                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-ChangeCenterAction.instance"/>
-                <attr name="position" intvalue="100"/>
-            </file>
-            <file name="org-jcae-netbeans-viewer3d-actions-TopAction.shadow">
-                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-TopAction.instance"/>
-                <attr name="position" intvalue="200"/>
-            </file>
-            <file name="org-jcae-netbeans-viewer3d-actions-BottomAction.shadow">
-                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-BottomAction.instance"/>
-                <attr name="position" intvalue="300"/>
-            </file>
-            <file name="org-jcae-netbeans-viewer3d-actions-LeftAction.shadow">
-                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-LeftAction.instance"/>
-                <attr name="position" intvalue="400"/>
-            </file>
-            <file name="org-jcae-netbeans-viewer3d-actions-RightAction.shadow">
-                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-RightAction.instance"/>
-                <attr name="position" intvalue="500"/>
-            </file>			
-            <file name="org-jcae-netbeans-viewer3d-actions-FrontAction.shadow">
-                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-FrontAction.instance"/>
-                <attr name="position" intvalue="600"/>
-            </file>
-			<file name="org-jcae-netbeans-viewer3d-actions-BackAction.shadow">
-                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-BackAction.instance"/>
-                <attr name="position" intvalue="700"/>
-            </file>
-            <file name="org-jcae-netbeans-viewer3d-actions-GoToAction.shadow">
-                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-GoToAction.instance"/>
-                <attr name="position" intvalue="800"/>
-            </file>
-            <file name="org-jcae-netbeans-viewer3d-actions-SavePositionAction.shadow">
-                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-SavePositionAction.instance"/>
-                <attr name="position" intvalue="900"/>
-            </file>
-
-        </folder>
+		<file name="Standard.xml" url="Standard.xml"/>
         <folder name="Build_hidden"/>
-
-        <folder name="Edit">
-            <attr name="position" intvalue="300"/>
-            <file name="org-openide-actions-FindAction.instance_hidden"/>
-            <file name="org-openide-actions-RedoAction.instance_hidden"/>
-            <file name="org-openide-actions-UndoAction.instance_hidden"/>
-        </folder>
         <folder name="ShapeTypeCAO">
             <attr name="SystemFileSystem.localizingBundle" stringvalue="org.jcae.netbeans.Bundle"/>
             <attr name="position" intvalue="140"/>
@@ -324,21 +278,9 @@
                 <attr name="position" intvalue="300"/>
             </file>
         </folder>
-		<folder name="OEMM">
-			<attr name="org-jcae-netbeans-viewer3d-actions-OEMMMode.shadow/org-jcae-netbeans-viewer3d-actions-OctreeVisible.shadow" boolvalue="true"/>
-            <attr name="position" intvalue="300"/>
-		    <file name="org-jcae-netbeans-viewer3d-actions-OEMMMode.shadow">
-                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-OEMMMode.instance"/>
-            </file>
-            <file name="org-jcae-netbeans-viewer3d-actions-OctreeVisible.shadow">
-                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-OctreeVisible.instance"/>
-            </file>
-        </folder>
-        <file name="Standard.xml" url="Standard.xml">
-            <attr name="position" intvalue="0"/>
-        </file>
-				<folder name="ClipDistance">
+		<folder name="ClipDistance">
 			<attr name="position" intvalue="900"/>
+			<attr name="visible" boolvalue="false"/>
             <file name="org-jcae-netbeans-viewer3d-RestoreFrontClipDistance.shadow">
 				<attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-RestoreFrontClipDistance.instance"/>
 			    <attr name="position" intvalue="0"/>
@@ -362,9 +304,9 @@
         </folder>
         <folder name="View">
 			<attr name="position" intvalue="250"/>
-            <file name="org-jcae-netbeans-viewer3d-actions-Action3DView.shadow">
-				<attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-Action3DView.instance"/>
-			    <attr name="position" intvalue="100"/>
+            <file name="org-jcae-netbeans-viewer3d-actions-ChangeCenterAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-ChangeCenterAction.instance"/>
+                <attr name="position" intvalue="100"/>
             </file>
 			<file name="org-jcae-netbeans-viewer3d-actions-AppendSelectionMode.shadow">
                 <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-AppendSelection.instance"/>
@@ -410,17 +352,64 @@
 			    <attr name="position" intvalue="900"/>
             </file>
         </folder>
-	    </folder>
+	</folder>
 
 	<folder name="Menu">
 		<file name="Tools_hidden"/>
 		<folder name="View">
-			<file name="Separator1.instance_hidden"/>
-			<file name="org-netbeans-core-actions-HTMLViewAction.instance_hidden"/>
+            <file name="org-netbeans-core-actions-HTMLViewAction.instance_hidden"/>
 			<file name="org-jcae-netbeans-viewer3d-actions-Action3DView.shadow">
 				<attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-Action3DView.instance"/>
 			    <attr name="position" intvalue="0"/>
-            </file>			
+            </file>
+			<file name="Separator1_1.instance" url="Separator1_1.instance">
+                <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
+				<attr name="position" intvalue="10"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-TopAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-TopAction.instance"/>
+                <attr name="position" intvalue="100"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-BottomAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-BottomAction.instance"/>
+                <attr name="position" intvalue="110"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-LeftAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-LeftAction.instance"/>
+                <attr name="position" intvalue="120"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-RightAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-RightAction.instance"/>
+                <attr name="position" intvalue="130"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-FrontAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-FrontAction.instance"/>
+                <attr name="position" intvalue="140"/>
+            </file>
+			<file name="org-jcae-netbeans-viewer3d-actions-BackAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-BackAction.instance"/>
+                <attr name="position" intvalue="150"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-GoToAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-GoToAction.instance"/>
+                <attr name="position" intvalue="160"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-SavePositionAction.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-SavePositionAction.instance"/>
+                <attr name="position" intvalue="170"/>
+            </file>
+			<file name="Separator1_1.instance" url="Separator1_1.instance">
+                <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
+				<attr name="position" intvalue="190"/>
+            </file>
+		    <file name="org-jcae-netbeans-viewer3d-actions-OEMMMode.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-OEMMMode.instance"/>
+				<attr name="position" intvalue="200"/>
+            </file>
+            <file name="org-jcae-netbeans-viewer3d-actions-OctreeVisible.shadow">
+                <attr name="originalFile" stringvalue="Actions/JCAE3DViewer/org-jcae-netbeans-viewer3d-actions-OctreeVisible.instance"/>
+				<attr name="position" intvalue="210"/>
+            </file>
 		</folder>
 		<folder name="BuildProject_hidden"/>
 		<folder name="RunProject_hidden"/>
@@ -523,6 +512,6 @@
             </folder>
             <file name="properties.wsmode" url="propertiesWsmode.xml"/>
         </folder>
-        <file name="WindowManager.wswmgr" url="WindowManager.wswmgr"/>
+        <file name="WindowManager.wswmgr" url="WindowManagerWswmgr.xml"/>
     </folder>
 </filesystem>
