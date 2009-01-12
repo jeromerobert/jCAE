@@ -10,7 +10,7 @@ See http://www.vtk.org/Bug/view.php?id=7521
 
 
 diff --git a/Rendering/vtkActor.cxx b/Rendering/vtkActor.cxx
-index 2e508aa..63fbfd6 100644
+index ad1537f..dbd71ab 100644
 --- a/Rendering/vtkActor.cxx
 +++ b/Rendering/vtkActor.cxx
 @@ -52,6 +52,7 @@ vtkActor::vtkActor()
@@ -22,7 +22,7 @@ index 2e508aa..63fbfd6 100644
    // The mapper bounds are cache to know when the bounds must be recomputed
    // from the mapper bounds.
 diff --git a/Rendering/vtkActor.h b/Rendering/vtkActor.h
-index 48b0719..bf6a3ce 100644
+index 39e0bfd..39f04b4 100644
 --- a/Rendering/vtkActor.h
 +++ b/Rendering/vtkActor.h
 @@ -124,6 +124,11 @@ public:
@@ -37,7 +37,7 @@ index 48b0719..bf6a3ce 100644
    // Get the bounds for this Actor as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax). (The
    // method GetBounds(double bounds[6]) is available from the superclass.)
    void GetBounds(double bounds[6]) {this->vtkProp3D::GetBounds( bounds );}
-@@ -169,6 +174,7 @@ protected:
+@@ -176,6 +181,7 @@ protected:
  
    // is this actor opaque
    int GetIsOpaque();

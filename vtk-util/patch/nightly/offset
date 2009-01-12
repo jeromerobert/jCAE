@@ -12,7 +12,7 @@ See http://www.vtk.org/Bug/view.php?id=7294
 
 
 diff --git a/Rendering/vtkMapper.cxx b/Rendering/vtkMapper.cxx
-index 28e1c1d..ec93c88 100644
+index 5d01b1d..5526284 100644
 --- a/Rendering/vtkMapper.cxx
 +++ b/Rendering/vtkMapper.cxx
 @@ -27,13 +27,6 @@ vtkCxxRevisionMacro(vtkMapper, "$Revision$");
@@ -116,7 +116,7 @@ index 28e1c1d..ec93c88 100644
  }
  
  // Overload standard modified time function. If lookup table is modified,
-@@ -714,11 +675,11 @@ void vtkMapper::PrintSelf(ostream& os, vtkIndent indent)
+@@ -719,11 +680,11 @@ void vtkMapper::PrintSelf(ostream& os, vtkIndent indent)
    os << indent << "RenderTime: " << this->RenderTime << endl;
  
    os << indent << "Resolve Coincident Topology: ";
@@ -131,7 +131,7 @@ index 28e1c1d..ec93c88 100644
      os << "Polygon Offset" << endl;
      }
 diff --git a/Rendering/vtkMapper.h b/Rendering/vtkMapper.h
-index 20abacc..2bf1041 100644
+index 264511d..3022e3e 100644
 --- a/Rendering/vtkMapper.h
 +++ b/Rendering/vtkMapper.h
 @@ -276,41 +276,26 @@ public:
@@ -216,7 +216,7 @@ index 20abacc..2bf1041 100644
    // Description:
    // Return the light-model color mode.
    const char *GetScalarMaterialModeAsString();
-@@ -388,6 +398,13 @@ protected:
+@@ -395,6 +405,13 @@ protected:
    int ScalarMode;
    int ScalarMaterialMode;
  
@@ -231,10 +231,10 @@ index 20abacc..2bf1041 100644
  
    // for coloring by a component of a field data array
 diff --git a/Rendering/vtkOpenGLImageActor.cxx b/Rendering/vtkOpenGLImageActor.cxx
-index 8ef1d4e..df46ebf 100644
+index ba6aaec..bc53fd1 100644
 --- a/Rendering/vtkOpenGLImageActor.cxx
 +++ b/Rendering/vtkOpenGLImageActor.cxx
-@@ -319,6 +319,11 @@ unsigned char *vtkOpenGLImageActor::MakeDataSuitable(int &xsize, int &ysize,
+@@ -314,6 +314,11 @@ unsigned char *vtkOpenGLImageActor::MakeDataSuitable(int &xsize, int &ysize,
    return res;
  }
  
@@ -246,7 +246,7 @@ index 8ef1d4e..df46ebf 100644
  // Implement base class method.
  void vtkOpenGLImageActor::Load(vtkRenderer *ren)
  {
-@@ -462,7 +467,9 @@ void vtkOpenGLImageActor::Load(vtkRenderer *ren)
+@@ -457,7 +462,9 @@ void vtkOpenGLImageActor::Load(vtkRenderer *ren)
  
    
    // draw the quad
@@ -257,7 +257,7 @@ index 8ef1d4e..df46ebf 100644
      {
      if ( vtkMapper::GetResolveCoincidentTopology() == 
           VTK_RESOLVE_SHIFT_ZBUFFER )
-@@ -477,7 +484,7 @@ void vtkOpenGLImageActor::Load(vtkRenderer *ren)
+@@ -472,7 +479,7 @@ void vtkOpenGLImageActor::Load(vtkRenderer *ren)
        glPolygonOffset(f,u);
  #endif      
        }

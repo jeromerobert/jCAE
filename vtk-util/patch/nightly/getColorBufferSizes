@@ -6,12 +6,20 @@ When color depth is lower than 24, vtkVisibleCellSelector::Select()
 silently fails.  We want to detect this case to provide
 a software alternative, or at least tell user why picking
 does not work.
+---
 
-Index: VTK/Rendering/vtkMesaRenderWindow.h
-===================================================================
---- VTK.orig/Rendering/vtkMesaRenderWindow.h
-+++ VTK/Rendering/vtkMesaRenderWindow.h
-@@ -108,6 +108,7 @@
+ Rendering/vtkMesaRenderWindow.h     |    1 +
+ Rendering/vtkOpenGLRenderWindow.cxx |   17 +++++++++++++++++
+ Rendering/vtkOpenGLRenderWindow.h   |    1 +
+ Rendering/vtkRenderWindow.h         |    2 ++
+ 4 files changed, 21 insertions(+), 0 deletions(-)
+
+
+diff --git a/Rendering/vtkMesaRenderWindow.h b/Rendering/vtkMesaRenderWindow.h
+index 6c5c9ad..790f570 100644
+--- a/Rendering/vtkMesaRenderWindow.h
++++ b/Rendering/vtkMesaRenderWindow.h
+@@ -108,6 +108,7 @@ public:
    // Get the size of the color buffer.
    // Returns 0 if not able to determine otherwise sets R G B and A into buffer.
    int GetColorBufferSizes(int *rgba);
@@ -19,10 +27,10 @@ Index: VTK/Rendering/vtkMesaRenderWindow.h
  
    // Description:
    // Initialize OpenGL for this window.
-Index: VTK/Rendering/vtkOpenGLRenderWindow.cxx
-===================================================================
---- VTK.orig/Rendering/vtkOpenGLRenderWindow.cxx
-+++ VTK/Rendering/vtkOpenGLRenderWindow.cxx
+diff --git a/Rendering/vtkOpenGLRenderWindow.cxx b/Rendering/vtkOpenGLRenderWindow.cxx
+index 5b494d7..a18a198 100644
+--- a/Rendering/vtkOpenGLRenderWindow.cxx
++++ b/Rendering/vtkOpenGLRenderWindow.cxx
 @@ -17,6 +17,7 @@
  #include "vtkFloatArray.h"
  #include "vtkgl.h"
@@ -31,7 +39,7 @@ Index: VTK/Rendering/vtkOpenGLRenderWindow.cxx
  #include "vtkObjectFactory.h"
  #include "vtkOpenGLActor.h"
  #include "vtkOpenGLCamera.h"
-@@ -353,6 +354,22 @@
+@@ -379,6 +380,22 @@ int vtkOpenGLRenderWindow::GetColorBufferSizes(int *rgba)
      }
  }
  
@@ -54,11 +62,11 @@ Index: VTK/Rendering/vtkOpenGLRenderWindow.cxx
  unsigned char* vtkOpenGLRenderWindow::GetPixelData(int x1, int y1, 
                                                     int x2, int y2,
                                                     int front)
-Index: VTK/Rendering/vtkOpenGLRenderWindow.h
-===================================================================
---- VTK.orig/Rendering/vtkOpenGLRenderWindow.h
-+++ VTK/Rendering/vtkOpenGLRenderWindow.h
-@@ -104,6 +104,7 @@
+diff --git a/Rendering/vtkOpenGLRenderWindow.h b/Rendering/vtkOpenGLRenderWindow.h
+index 69f1f6b..2ef8a9d 100644
+--- a/Rendering/vtkOpenGLRenderWindow.h
++++ b/Rendering/vtkOpenGLRenderWindow.h
+@@ -110,6 +110,7 @@ public:
    // Get the size of the color buffer.
    // Returns 0 if not able to determine otherwise sets R G B and A into buffer.
    int GetColorBufferSizes(int *rgba);
@@ -66,10 +74,10 @@ Index: VTK/Rendering/vtkOpenGLRenderWindow.h
    
    // Description:
    // Initialize OpenGL for this window.
-Index: VTK/Rendering/vtkRenderWindow.h
-===================================================================
---- VTK.orig/Rendering/vtkRenderWindow.h
-+++ VTK/Rendering/vtkRenderWindow.h
+diff --git a/Rendering/vtkRenderWindow.h b/Rendering/vtkRenderWindow.h
+index 20f1b75..1e344b3 100644
+--- a/Rendering/vtkRenderWindow.h
++++ b/Rendering/vtkRenderWindow.h
 @@ -41,6 +41,7 @@
  #include "vtkWindow.h"
  
@@ -78,7 +86,7 @@ Index: VTK/Rendering/vtkRenderWindow.h
  class vtkPainterDeviceAdapter;
  class vtkRenderWindowInteractor;
  class vtkRenderer;
-@@ -497,6 +498,7 @@
+@@ -501,6 +502,7 @@ public:
    // Get the size of the color buffer.
    // Returns 0 if not able to determine otherwise sets R G B and A into buffer.
    virtual int GetColorBufferSizes(int *rgba) = 0;

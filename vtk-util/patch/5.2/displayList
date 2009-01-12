@@ -113,10 +113,10 @@ index 69cbfe2..ac619c0 100644
    vtkWeakPointer<vtkWindow> LastWindow; // Window used for previous render.
                           // This is not reference counted.
 diff --git a/Rendering/vtkRenderer.cxx b/Rendering/vtkRenderer.cxx
-index b47301f..ef0fc01 100644
+index 642fa80..f51a0ad 100644
 --- a/Rendering/vtkRenderer.cxx
 +++ b/Rendering/vtkRenderer.cxx
-@@ -1865,6 +1865,8 @@ void vtkRenderer::SwapOutSelectablePainter(
+@@ -1864,6 +1864,8 @@ void vtkRenderer::SwapOutSelectablePainter(
        {
        orig_mapper->SetPainter(orig_painter);
        orig_painter->UnRegister(this);
@@ -126,7 +126,7 @@ index b47301f..ef0fc01 100644
      }
    if (!orig_painter)
 diff --git a/Rendering/vtkRenderer.h b/Rendering/vtkRenderer.h
-index 866b7e3..4890776 100644
+index 1c94e2c..b9fcc9c 100644
 --- a/Rendering/vtkRenderer.h
 +++ b/Rendering/vtkRenderer.h
 @@ -433,6 +433,8 @@ public:

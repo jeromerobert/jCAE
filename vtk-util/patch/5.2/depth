@@ -9,9 +9,9 @@ Unfortunately this means that ClearDepthForSelection has to be
 replaced by PreserveDepthBuffer (with inverse meaning) in Java sources.
 ---
 
- vtkOpenGLRenderer.cxx |    7 +++++--
- vtkRenderer.cxx       |    1 +
- vtkRenderer.h         |    8 ++++++++
+ Rendering/vtkOpenGLRenderer.cxx |    7 +++++--
+ Rendering/vtkRenderer.cxx       |    1 +
+ Rendering/vtkRenderer.h         |    8 ++++++++
  3 files changed, 14 insertions(+), 2 deletions(-)
 
 

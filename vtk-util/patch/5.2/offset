@@ -7,8 +7,9 @@ See http://www.vtk.org/Bug/view.php?id=7294
  Rendering/vtkMapper.cxx                            |   69 ++++----------------
  Rendering/vtkMapper.h                              |   63 ++++++++++++------
  Rendering/vtkOpenGLImageActor.cxx                  |   11 +++
+ Widgets/Testing/Cxx/TestImageTracerWidget.cxx      |    4 +
  .../Testing/Cxx/TestOrientationMarkerWidget.cxx    |    2 -
- 4 files changed, 65 insertions(+), 80 deletions(-)
+ 5 files changed, 67 insertions(+), 82 deletions(-)
 
 
 diff --git a/Rendering/vtkMapper.cxx b/Rendering/vtkMapper.cxx
@@ -231,10 +232,10 @@ index b277878..526fc55 100644
  
    // for coloring by a component of a field data array
 diff --git a/Rendering/vtkOpenGLImageActor.cxx b/Rendering/vtkOpenGLImageActor.cxx
-index 8ef1d4e..df46ebf 100644
+index ba6aaec..bc53fd1 100644
 --- a/Rendering/vtkOpenGLImageActor.cxx
 +++ b/Rendering/vtkOpenGLImageActor.cxx
-@@ -319,6 +319,11 @@ unsigned char *vtkOpenGLImageActor::MakeDataSuitable(int &xsize, int &ysize,
+@@ -314,6 +314,11 @@ unsigned char *vtkOpenGLImageActor::MakeDataSuitable(int &xsize, int &ysize,
    return res;
  }
  
@@ -246,7 +247,7 @@ index 8ef1d4e..df46ebf 100644
  // Implement base class method.
  void vtkOpenGLImageActor::Load(vtkRenderer *ren)
  {
-@@ -462,7 +467,9 @@ void vtkOpenGLImageActor::Load(vtkRenderer *ren)
+@@ -457,7 +462,9 @@ void vtkOpenGLImageActor::Load(vtkRenderer *ren)
  
    
    // draw the quad
@@ -257,7 +258,7 @@ index 8ef1d4e..df46ebf 100644
      {
      if ( vtkMapper::GetResolveCoincidentTopology() == 
           VTK_RESOLVE_SHIFT_ZBUFFER )
-@@ -477,7 +484,7 @@ void vtkOpenGLImageActor::Load(vtkRenderer *ren)
+@@ -472,7 +479,7 @@ void vtkOpenGLImageActor::Load(vtkRenderer *ren)
        glPolygonOffset(f,u);
  #endif      
        }
@@ -266,6 +267,21 @@ index 8ef1d4e..df46ebf 100644
    glDisable(GL_COLOR_MATERIAL);
    glDisable (GL_CULL_FACE);
    glDisable( GL_LIGHTING );
+diff --git a/Widgets/Testing/Cxx/TestImageTracerWidget.cxx b/Widgets/Testing/Cxx/TestImageTracerWidget.cxx
+index 25c41d5..2c9b03c 100644
+--- a/Widgets/Testing/Cxx/TestImageTracerWidget.cxx
++++ b/Widgets/Testing/Cxx/TestImageTracerWidget.cxx
+@@ -351,8 +351,8 @@ int TestImageTracerWidget( int argc, char *argv[] )
+   char* fname = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/headsq/quarter");
+ 
+  // Increase polygon offsets to support some OpenGL drivers
+-  vtkMapper::SetResolveCoincidentTopologyToPolygonOffset();
+-  vtkMapper::SetResolveCoincidentTopologyPolygonOffsetParameters(10,10);
++  //vtkMapper::SetResolveCoincidentTopologyToPolygonOffset();
++  //vtkMapper::SetResolveCoincidentTopologyPolygonOffsetParameters(10,10);
+ 
+ // Start by loading some data.
+ //
 diff --git a/Widgets/Testing/Cxx/TestOrientationMarkerWidget.cxx b/Widgets/Testing/Cxx/TestOrientationMarkerWidget.cxx
 index 628a587..9910e84 100644
 --- a/Widgets/Testing/Cxx/TestOrientationMarkerWidget.cxx

@@ -9,10 +9,10 @@ See http://www.vtk.org/Bug/view.php?id=7295
 
 
 diff --git a/Rendering/vtkRenderer.cxx b/Rendering/vtkRenderer.cxx
-index ef0fc01..f4931d8 100644
+index f51a0ad..25fa3f9 100644
 --- a/Rendering/vtkRenderer.cxx
 +++ b/Rendering/vtkRenderer.cxx
-@@ -119,6 +119,7 @@ vtkRenderer::vtkRenderer()
+@@ -118,6 +118,7 @@ vtkRenderer::vtkRenderer()
    this->OcclusionRatio=0.0;
    this->MaximumNumberOfPeels=4;
    this->LastRenderingUsedDepthPeeling=0;
@@ -20,7 +20,7 @@ index ef0fc01..f4931d8 100644
  }
  
  vtkRenderer::~vtkRenderer()
-@@ -1761,6 +1762,25 @@ int vtkRenderer::UpdateGeometryForSelection()
+@@ -1760,6 +1761,25 @@ int vtkRenderer::UpdateGeometryForSelection()
        return 0; 
      }        
  
@@ -46,7 +46,7 @@ index ef0fc01..f4931d8 100644
    // loop through props and give them a chance to 
    // render themselves as opaque geometry
    for ( i = 0; i < this->PropArrayCount; i++ )
-@@ -1788,6 +1808,8 @@ int vtkRenderer::UpdateGeometryForSelection()
+@@ -1787,6 +1807,8 @@ int vtkRenderer::UpdateGeometryForSelection()
        {
        this->NumberOfPropsRendered += 
          this->PropArray[i]->RenderOpaqueGeometry(this);
@@ -56,7 +56,7 @@ index ef0fc01..f4931d8 100644
  
      //restore the prop's original settings
 diff --git a/Rendering/vtkRenderer.h b/Rendering/vtkRenderer.h
-index 4890776..1f6bcf0 100644
+index b9fcc9c..5f96cd5 100644
 --- a/Rendering/vtkRenderer.h
 +++ b/Rendering/vtkRenderer.h
 @@ -432,6 +432,12 @@ public:
@@ -72,7 +72,7 @@ index 4890776..1f6bcf0 100644
    
    vtkGetMacro(RenderTime,int);
  
-@@ -582,6 +588,9 @@ protected:
+@@ -581,6 +587,9 @@ protected:
    // actually used depth peeling.
    // Initial value is false.
    int LastRenderingUsedDepthPeeling;
