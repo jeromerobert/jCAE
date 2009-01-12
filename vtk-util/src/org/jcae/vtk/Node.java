@@ -316,10 +316,6 @@ public class Node extends AbstractNode
 		int offsetLine = 0;
 		int offsetPoly = 0;
 
-		table = new vtkLookupTable();
-		table.SetNumberOfTableValues(leaves.size());
-		table.SetTableRange(0, leaves.size());
-
 		for (int i = 0; i < numberOfLeaves; ++i)
 		{
 			LeafNode leaf = leaves.get(i);
@@ -379,11 +375,6 @@ public class Node extends AbstractNode
 			}
 			offsetPoly += polysNode.length;
 
-			Color color = leaf.getColor();
-			if (LOGGER.isLoggable(Level.FINEST))
-				LOGGER.finest("Compound: set color to "+color+" (opacity="+color.getAlpha()+")");
-			table.SetTableValue(i, (double) color.getRed() / 255., (double) color.getGreen() / 255., (double) color.getBlue() / 255., (double) color.getAlpha() / 255.);
-
 			dataProvider.unLoad();
 		}
 
@@ -421,9 +412,6 @@ public class Node extends AbstractNode
 		getMapperCustomiser().customiseMapper(mapper);
 		mapper.SetInput(data);
 		mapper.Update();		
-		mapper.SetLookupTable(table);
-		mapper.UseLookupTableScalarRangeOn();
-		mapper.SetScalarModeToUseCellData();
 	}
 
 	// Must always be called after refreshData
@@ -440,6 +428,27 @@ public class Node extends AbstractNode
 		actor.SetVisibility(Utils.booleanToInt(visible));
 		actor.SetPickable(Utils.booleanToInt(pickable));
 		
+		// Update mapper, colors may have changed
+		List<LeafNode> leaves = getLeaves();
+		int numberOfLeaves = leaves.size();
+		table = new vtkLookupTable();
+		table.SetNumberOfTableValues(numberOfLeaves);
+		table.SetTableRange(0, numberOfLeaves);
+		for (int i = 0; i < numberOfLeaves; ++i)
+		{
+			LeafNode leaf = leaves.get(i);
+			if (!leaf.isVisible())
+				continue;
+
+			Color color = leaf.getColor();
+			if (LOGGER.isLoggable(Level.FINEST))
+				LOGGER.finest("Compound: set color to "+color+" (opacity="+color.getAlpha()+")");
+			table.SetTableValue(i, (double) color.getRed() / 255., (double) color.getGreen() / 255., (double) color.getBlue() / 255., (double) color.getAlpha() / 255.);
+		}
+		mapper.SetLookupTable(table);
+		mapper.UseLookupTableScalarRangeOn();
+		mapper.SetScalarModeToUseCellData();
+
 		if (actorCreated)
 		{
 			fireActorCreated(actor);
