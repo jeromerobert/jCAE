@@ -254,6 +254,10 @@ public class LeafNode extends AbstractNode
 	public void setDataProvider(LeafNode.DataProvider data)
 	{
 		this.dataProvider = data;
+		// When data provider is modified, we must ensure that
+		// dataTime <= data.getModifiedTime(), and parent
+		// has also to be notified.
+		timeStampData();
 		dataTime = Long.MIN_VALUE;
 	}
 
