@@ -70,6 +70,21 @@ public class Amibe2VTK
 	{
 		this.directory=directory;
 	}
+
+	private long computeNumberOfTriangle(File triaFile) throws IOException
+	{
+		DataInputStream in = new DataInputStream(
+			new BufferedInputStream(new FileInputStream(triaFile)));
+		long nbt = triaFile.length()/4/3;
+		long toReturn = 0;
+		for(int i=0; i<nbt; i++)
+		{
+			if(in.readInt()>=0)
+				toReturn++;
+			in.skipBytes(8);
+		}
+		return toReturn;
+	}
 	
 	private File getNodeFile()
 	{
@@ -104,7 +119,7 @@ public class Amibe2VTK
 		File nodeFile=getNodeFile();
 		File triaFile=getTriaFile();
 		long nbp=getNodeFile().length()/8/3;
-		long nbt=getTriaFile().length()/4/3;
+		long nbt=computeNumberOfTriangle(getTriaFile());
 		writeHeader(os, nbp, nbt);
 		os.flush();
 		DataOutputStream dos=new DataOutputStream(new BufferedOutputStream(out));
@@ -134,7 +149,10 @@ public class Amibe2VTK
 		
 		//Write the connectivity array
 		for(int i=0; i<nbt*3; i++)
-			dos.writeInt(in.readInt());
+		{	int v = in.readInt();
+			if(v>=0)
+				dos.writeInt(v);
+		}
 		
 		//Write the size of the array in octets
 		dos.writeInt((int) nbt*4);
