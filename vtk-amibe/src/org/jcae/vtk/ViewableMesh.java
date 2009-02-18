@@ -68,7 +68,7 @@ public class ViewableMesh extends Viewable
 			{
 				super.customiseSelectionActor(actor);
 				actor.GetProperty().EdgeVisibilityOn();
-				actor.SetEnableLighting(0);
+				actor.GetProperty().LightingOff();
 				actor.GetProperty().SetEdgeColor(0.4, 0.4, 0.4);
 			}
 		});
@@ -127,7 +127,7 @@ public class ViewableMesh extends Viewable
 			@Override
 			public void customiseActor(vtkActor actor)
 			{
-				actor.SetEnableLighting(0);
+				actor.GetProperty().LightingOff();
 				actor.GetProperty().SetEdgeVisibility(wired);
 				actor.GetProperty().SetEdgeColor(0.2, 0.2, 0.2);
 			}
