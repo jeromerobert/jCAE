@@ -1,68 +1,244 @@
 Permit to disable lighting for an actor.
 
 See http://www.vtk.org/Bug/view.php?id=7521
+
+A different patch has been committed upstream, it is
+here backported into 5.2 branch
+
+commit 555b94e5eff319c73f2022507c880399bf0e8208
+Author: Francois Bertel
+Date:   Wed Feb 4 16:43:17 2009 +0000
+
+    BUG:7521 Added lighting flag on vtkProperty.
 ---
 
- Rendering/vtkActor.cxx                 |    1 +
- Rendering/vtkActor.h                   |    6 ++++++
- Rendering/vtkOpenGLLightingPainter.cxx |    6 ++++++
- 3 files changed, 13 insertions(+), 0 deletions(-)
+ Rendering/Testing/Cxx/CMakeLists.txt            |    1 
+ Rendering/Testing/Cxx/TestActorLightingFlag.cxx |  109 +++++++++++++++++++++++
+ Rendering/vtkOpenGLLightingPainter.cxx          |    9 ++
+ Rendering/vtkOpenGLProperty.cxx                 |    9 ++
+ Rendering/vtkProperty.cxx                       |   10 ++
+ Rendering/vtkProperty.h                         |    7 +
+ 6 files changed, 145 insertions(+), 0 deletions(-)
+ create mode 100644 Rendering/Testing/Cxx/TestActorLightingFlag.cxx
 
 
-diff --git a/Rendering/vtkActor.cxx b/Rendering/vtkActor.cxx
-index 2e508aa..63fbfd6 100644
---- a/Rendering/vtkActor.cxx
-+++ b/Rendering/vtkActor.cxx
-@@ -52,6 +52,7 @@ vtkActor::vtkActor()
-   this->Property = NULL;
-   this->BackfaceProperty = NULL;
-   this->Texture = NULL;
-+  this->EnableLighting = 1;
-   
-   // The mapper bounds are cache to know when the bounds must be recomputed
-   // from the mapper bounds.
-diff --git a/Rendering/vtkActor.h b/Rendering/vtkActor.h
-index 48b0719..bf6a3ce 100644
---- a/Rendering/vtkActor.h
-+++ b/Rendering/vtkActor.h
-@@ -124,6 +124,11 @@ public:
-   vtkGetObjectMacro(Mapper,vtkMapper);
- 
-   // Description:
-+  // Enable/Disable lighting for this actor.
-+  vtkSetMacro(EnableLighting,int);
-+  vtkGetMacro(EnableLighting,int);
+diff --git a/Rendering/Testing/Cxx/CMakeLists.txt b/Rendering/Testing/Cxx/CMakeLists.txt
+index f876f8e..78fd005 100644
+--- a/Rendering/Testing/Cxx/CMakeLists.txt
++++ b/Rendering/Testing/Cxx/CMakeLists.txt
+@@ -17,6 +17,7 @@ IF(VTK_USE_DISPLAY)
+   SET(RenderingTestsWithArguments
+     ${RenderingTestsWithArguments}
+     LoadOpenGLExtension.cxx
++    TestActorLightingFlag.cxx
+     TestDynamic2DLabelMapper.cxx
+     TestFBO.cxx
+     TestGradientBackground.cxx
+diff --git a/Rendering/Testing/Cxx/TestActorLightingFlag.cxx b/Rendering/Testing/Cxx/TestActorLightingFlag.cxx
+new file mode 100644
+index 0000000..238eaf1
+--- /dev/null
++++ b/Rendering/Testing/Cxx/TestActorLightingFlag.cxx
+@@ -0,0 +1,109 @@
++/*=========================================================================
 +
-+  // Description:
-   // Get the bounds for this Actor as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax). (The
-   // method GetBounds(double bounds[6]) is available from the superclass.)
-   void GetBounds(double bounds[6]) {this->vtkProp3D::GetBounds( bounds );}
-@@ -169,6 +174,7 @@ protected:
- 
-   // is this actor opaque
-   int GetIsOpaque();
-+  int EnableLighting;
-   
-   // Bounds are cached in an actor - the MapperBounds are also cache to
-   // help know when the Bounds need to be recomputed.
++  Program:   Visualization Toolkit
++  Module:    $RCSfile$
++
++  Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
++  All rights reserved.
++  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
++
++     This software is distributed WITHOUT ANY WARRANTY; without even
++     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
++     PURPOSE.  See the above copyright notice for more information.
++
++=========================================================================*/
++// This test covers the lighting flag on a vtkProperty object of an vtkActor.
++// It draws a cone with lighting next to a cone with no lighting, next to a
++// third cone with lighting again.
++// 
++// The command line arguments are:
++// -I        => run in interactive mode; unless this is used, the program will
++//              not allow interaction and exit
++
++#include "vtkTestUtilities.h"
++#include "vtkRegressionTestImage.h"
++
++#include "vtkRenderWindowInteractor.h"
++#include "vtkRenderWindow.h"
++#include "vtkRenderer.h"
++#include "vtkActor.h"
++
++#include "vtkPolyDataMapper.h"
++#include "vtkCamera.h"
++
++#include "vtkConeSource.h"
++#include "vtkProperty.h"
++
++
++// For each spotlight, add a light frustum wireframe representation and a cone
++// wireframe representation, colored with the light color.
++void AddLightActors(vtkRenderer *r);
++
++int TestActorLightingFlag(int argc, char* argv[])
++{
++  vtkRenderWindowInteractor *iren=vtkRenderWindowInteractor::New();
++  vtkRenderWindow *renWin = vtkRenderWindow::New();
++  renWin->SetMultiSamples(0);
++  
++  renWin->SetAlphaBitPlanes(1);
++  iren->SetRenderWindow(renWin);
++  renWin->Delete();
++  
++  vtkRenderer *renderer = vtkRenderer::New();
++  renWin->AddRenderer(renderer);
++  renderer->Delete();
++
++  vtkConeSource *coneSource1=vtkConeSource::New();
++  vtkPolyDataMapper *coneMapper1=vtkPolyDataMapper::New();
++  coneMapper1->SetInputConnection(coneSource1->GetOutputPort());
++  coneSource1->Delete();
++  vtkActor *coneActor1=vtkActor::New();
++  coneActor1->SetMapper(coneMapper1);
++  coneMapper1->Delete();
++  coneActor1->SetPosition(-2.0,0.0,0.0);
++  renderer->AddActor(coneActor1);
++  coneActor1->Delete();
++  
++  vtkConeSource *coneSource2=vtkConeSource::New();
++  vtkPolyDataMapper *coneMapper2=vtkPolyDataMapper::New();
++  coneMapper2->SetInputConnection(coneSource2->GetOutputPort());
++  coneSource2->Delete();
++  vtkActor *coneActor2=vtkActor::New();
++  coneActor2->SetMapper(coneMapper2);
++  coneMapper2->Delete();
++  coneActor2->SetPosition(0.0,0.0,0.0);
++  coneActor2->GetProperty()->SetLighting(false);
++  renderer->AddActor(coneActor2);
++  coneActor2->Delete();
++  
++  vtkConeSource *coneSource3=vtkConeSource::New();
++  vtkPolyDataMapper *coneMapper3=vtkPolyDataMapper::New();
++  coneMapper3->SetInputConnection(coneSource3->GetOutputPort());
++  coneSource3->Delete();
++  vtkActor *coneActor3=vtkActor::New();
++  coneActor3->SetMapper(coneMapper3);
++  coneMapper3->Delete();
++  coneActor3->SetPosition(2.0,0.0,0.0);
++  renderer->AddActor(coneActor3);
++  coneActor3->Delete();
++  
++  renderer->SetBackground(0.1,0.3,0.0);
++  renWin->SetSize(200,200);
++  
++  renWin->Render();
++  
++  vtkCamera *camera=renderer->GetActiveCamera();
++  camera->Azimuth(-40.0);
++  camera->Elevation(20.0);
++  renderer->ResetCamera();
++  renWin->Render();
++  
++  int retVal = vtkRegressionTestImage( renWin );
++  if ( retVal == vtkRegressionTester::DO_INTERACTOR)
++    {
++    iren->Start();
++    }
++  iren->Delete();
++  
++  return !retVal;
++}
 diff --git a/Rendering/vtkOpenGLLightingPainter.cxx b/Rendering/vtkOpenGLLightingPainter.cxx
-index 137c5e5..f48bdc1 100644
+index 137c5e5..5949ecb 100644
 --- a/Rendering/vtkOpenGLLightingPainter.cxx
 +++ b/Rendering/vtkOpenGLLightingPainter.cxx
-@@ -133,10 +133,16 @@ void vtkOpenGLLightingPainter::RenderInternal(vtkRenderer* renderer, vtkActor* a
+@@ -133,6 +133,15 @@ void vtkOpenGLLightingPainter::RenderInternal(vtkRenderer* renderer, vtkActor* a
        enable_flags);
      this->ProgressScaleFactor = 
        static_cast<double>(enabled_cells) / total_cells;
 +    
-+    if(!actor->GetEnableLighting())
++    if(actor->GetProperty()->GetLighting()) // fixed-pipeline
++      {
++      glEnable(GL_LIGHTING);
++      }
++    else
++      {
 +      glDisable(GL_LIGHTING);
++      }
      this->Superclass::RenderInternal(renderer, actor, enable_flags);
  
      time_to_draw += this->DelegatePainter? 
-       this->DelegatePainter->GetTimeToDraw() : 0;
-+
-+    if(!actor->GetEnableLighting())
-+      glEnable(GL_LIGHTING);
+diff --git a/Rendering/vtkOpenGLProperty.cxx b/Rendering/vtkOpenGLProperty.cxx
+index 7637535..e98d5f2 100644
+--- a/Rendering/vtkOpenGLProperty.cxx
++++ b/Rendering/vtkOpenGLProperty.cxx
+@@ -179,6 +179,15 @@ void vtkOpenGLProperty::Render(vtkActor *anActor,
+ #endif // VTK_USE_GL2PS
      }
  
-   this->TimeToDraw = time_to_draw;
++  if(this->Lighting) // fixed-pipeline
++    {
++    glEnable(GL_LIGHTING);
++    }
++  else
++    {
++    glDisable(GL_LIGHTING);
++    }
++  
+   this->Superclass::Render(anActor, ren);
+ }
+ 
+diff --git a/Rendering/vtkProperty.cxx b/Rendering/vtkProperty.cxx
+index f39368c..5c7a09c 100644
+--- a/Rendering/vtkProperty.cxx
++++ b/Rendering/vtkProperty.cxx
+@@ -203,6 +203,7 @@ vtkProperty::vtkProperty()
+   this->LineWidth = 1.0;
+   this->LineStipplePattern = 0xFFFF;
+   this->LineStippleRepeatFactor = 1;
++  this->Lighting=true;
+ 
+   this->Shading = 0;
+   this->ShaderProgram = 0;
+@@ -934,6 +935,15 @@ void vtkProperty::PrintSelf(ostream& os, vtkIndent indent)
+   os << indent << "Line width: " << this->LineWidth << "\n";
+   os << indent << "Line stipple pattern: " << this->LineStipplePattern << "\n";
+   os << indent << "Line stipple repeat factor: " << this->LineStippleRepeatFactor << "\n";
++  os << indent << "Lighting: ";
++  if(this->Lighting)
++    {
++    os << "On" << endl;
++    }
++  else
++    {
++    os << "Off" << endl;
++    }
+ 
+   os << indent << "Shading: " 
+     << (this->Shading? "On" : "Off") << endl;
+diff --git a/Rendering/vtkProperty.h b/Rendering/vtkProperty.h
+index f3d8d63..00e89ed 100644
+--- a/Rendering/vtkProperty.h
++++ b/Rendering/vtkProperty.h
+@@ -91,6 +91,12 @@ public:
+   //ETX
+ 
+   // Description:
++  // Set/Get lighting flag for an object. Initial value is true.
++  vtkGetMacro(Lighting,bool);
++  vtkSetMacro(Lighting,bool);
++  vtkBooleanMacro(Lighting,bool);
++  
++  // Description:
+   // Set the shading interpolation method for an object.
+   vtkSetClampMacro(Interpolation,int,VTK_FLAT,VTK_PHONG);
+   vtkGetMacro(Interpolation,int);
+@@ -381,6 +387,7 @@ protected:
+   int   EdgeVisibility;
+   int   BackfaceCulling;
+   int   FrontfaceCulling;
++  bool Lighting;
+ 
+   int Shading;
+ 
