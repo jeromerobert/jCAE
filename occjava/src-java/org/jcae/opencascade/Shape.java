@@ -212,9 +212,8 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	 * Add a Vertex to this shape
 	 * @return the created vertex
 	 */
-	public T addVertex(double x, double y, double z)
+	public T addVertex(double[] coords)
 	{
-		double[] coords = new double[]{x, y, z};
 		TopoDS_Vertex v = (TopoDS_Vertex) new BRepBuilderAPI_MakeVertex(
 			coords).shape();
 		T vs = getFactory().create(v, new HashMap<TopoDS_Shape, Shape>(), NOPARENT);
@@ -223,15 +222,37 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		{
 			TopoDS_Face face = (TopoDS_Face) impl;
 			//Project p5 on surface
-			double [] uv = new double[2];
-			Geom_Surface surface = BRep_Tool.surface(face);
-			GeomAPI_ProjectPointOnSurf proj = new GeomAPI_ProjectPointOnSurf(coords, surface);
-			proj.lowerDistanceParameters(uv);
-			double tolerance = proj.lowerDistance();
-			new BRep_Builder().updateVertex(v, uv[0], uv[1], face, tolerance);
-		}
-		
+			double [] uvTol = new double[3];
+			projectPoint(coords, uvTol);
+			new BRep_Builder().updateVertex(v, uvTol[0], uvTol[1], face, uvTol[2]);
+		}		
 		return vs;
+	}
+
+	/**
+	 * Project a point on surface.
+	 * result[2] will contains Double.POSITIVE_INFINITY if no projection are
+	 * found.
+	 * @param result {u, v, distance, x, y, z}
+	 * @throw ClassCastException if this shape is not a surface
+	 */
+	public void projectPoint(double[] coords, double[] result)
+	{
+		TopoDS_Face face = (TopoDS_Face) impl;		
+		Geom_Surface surface = BRep_Tool.surface(face);
+		System.out.println("*");
+		GeomAPI_ProjectPointOnSurf proj = new GeomAPI_ProjectPointOnSurf(coords, surface);
+		if(proj.nbPoints()>0)
+		{
+			proj.lowerDistanceParameters(result);
+			double[] p = proj.nearestPoint();
+			result[2] = proj.lowerDistance();
+			System.arraycopy(p, 0, result, 3, 3);
+		}
+		else
+		{
+			result[2] = Double.POSITIVE_INFINITY;
+		}
 	}
 	
 	/** Remove this shape from its parents */

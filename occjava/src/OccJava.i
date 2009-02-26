@@ -356,6 +356,7 @@ class GeomAPI_ProjectPointOnSurf
 	%rename(lowerDistance) LowerDistance;
 	%rename(point) Point;
 	%rename(parameters) Parameters;
+	%rename(nearestPoint) NearestPoint;
 	public:
 	GeomAPI_ProjectPointOnSurf(const gp_Pnt& P,
 		const Handle_Geom_Surface & Surface);
@@ -364,7 +365,8 @@ class GeomAPI_ProjectPointOnSurf
 	Quantity_Length LowerDistance() const;
 	const gp_Pnt & Point(const Standard_Integer Index) const;	
 	void LowerDistanceParameters(Quantity_Parameter& U,Quantity_Parameter& V) const;
-	void Parameters(const Standard_Integer Index,Quantity_Parameter& U,Quantity_Parameter& V) const;	
+	void Parameters(const Standard_Integer Index,Quantity_Parameter& U,Quantity_Parameter& V) const;
+	gp_Pnt NearestPoint() const;
 };
 
 /**
