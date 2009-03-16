@@ -1,0 +1,22 @@
+Improve Print() to help debugging
+
+See http://www.vtk.org/Bug/view.php?id=7886
+---
+
+ Wrapping/vtkParseJava.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+
+diff --git a/Wrapping/vtkParseJava.c b/Wrapping/vtkParseJava.c
+index 9944ef1..f9b0235 100644
+--- a/Wrapping/vtkParseJava.c
++++ b/Wrapping/vtkParseJava.c
+@@ -708,7 +708,7 @@ void vtkParseOutput(FILE *fp, FileInfo *data)
+     /* Add the PrintRevisions method to vtkObject. */
+     fprintf(fp,"  public native String PrintRevisions();\n");
+     /* Add the default toString from java object */
+-    fprintf(fp,"  public String toString() { return Print(); }\n");
++    fprintf(fp,"  public String toString() { return getClass().getName()+\"@\"+Integer.toHexString(hashCode())+\" \"+Print(); }\n");
+     }
+ 
+   if (!strcmp("vtkObject",data->ClassName))

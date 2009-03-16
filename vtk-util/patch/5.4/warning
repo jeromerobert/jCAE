@@ -1,0 +1,22 @@
+Work around a bug in object destructor
+
+
+---
+
+ Common/vtkObject.cxx |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+
+diff --git a/Common/vtkObject.cxx b/Common/vtkObject.cxx
+index b70f786..d189536 100644
+--- a/Common/vtkObject.cxx
++++ b/Common/vtkObject.cxx
+@@ -157,7 +157,7 @@ vtkObject::~vtkObject()
+   // by another object
+   if ( this->ReferenceCount > 0)
+     {
+-    vtkErrorMacro(<< "Trying to delete object with non-zero reference count.");
++    vtkWarningMacro(<< "Trying to delete object with non-zero reference count.");
+     }
+   delete this->SubjectHelper;
+   this->SubjectHelper = NULL;

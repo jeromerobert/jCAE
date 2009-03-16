@@ -1,0 +1,281 @@
+Make different polygon offset for each mappers.
+
+By default VTK use statics members so the offset parameters are shared by all the mappers.
+See http://www.vtk.org/Bug/view.php?id=7294
+---
+
+ Rendering/vtkMapper.cxx                            |   69 ++++----------------
+ Rendering/vtkMapper.h                              |   63 ++++++++++++------
+ Rendering/vtkOpenGLImageActor.cxx                  |   11 +++
+ .../Testing/Cxx/TestOrientationMarkerWidget.cxx    |    2 -
+ 4 files changed, 65 insertions(+), 80 deletions(-)
+
+
+diff --git a/Rendering/vtkMapper.cxx b/Rendering/vtkMapper.cxx
+index 5d01b1d..5526284 100644
+--- a/Rendering/vtkMapper.cxx
++++ b/Rendering/vtkMapper.cxx
+@@ -27,13 +27,6 @@ vtkCxxRevisionMacro(vtkMapper, "$Revision$");
+ // Initialize static member that controls global immediate mode rendering
+ static int vtkMapperGlobalImmediateModeRendering = 0;
+ 
+-// Initialize static member that controls global coincidence resolution
+-static int vtkMapperGlobalResolveCoincidentTopology = VTK_RESOLVE_OFF;
+-static double vtkMapperGlobalResolveCoincidentTopologyZShift = 0.01;
+-static double vtkMapperGlobalResolveCoincidentTopologyPolygonOffsetFactor = 1.0;
+-static double vtkMapperGlobalResolveCoincidentTopologyPolygonOffsetUnits = 1.0;
+-static int vtkMapperGlobalResolveCoincidentTopologyPolygonOffsetFaces = 1;
+-
+ // Construct with initial range (0,1).            
+ vtkMapper::vtkMapper()
+ {
+@@ -66,6 +59,12 @@ vtkMapper::vtkMapper()
+   this->ColorTextureMap = 0;
+ 
+   this->ForceCompileOnly=0;
++
++  this->ResolveCoincidentTopology = VTK_RESOLVE_OFF;
++  this->ResolveCoincidentTopologyZShift = 0.01;
++  this->ResolveCoincidentTopologyPolygonOffsetFactor = 1.0;
++  this->ResolveCoincidentTopologyPolygonOffsetUnits = 1.0;
++  this->ResolveCoincidentTopologyPolygonOffsetFaces = 1;
+ }
+ 
+ vtkMapper::~vtkMapper()
+@@ -142,66 +141,28 @@ int vtkMapper::GetGlobalImmediateModeRendering()
+   return vtkMapperGlobalImmediateModeRendering;
+ }
+ 
+-void vtkMapper::SetResolveCoincidentTopology(int val)
+-{
+-  if (val == vtkMapperGlobalResolveCoincidentTopology)
+-    {
+-    return;
+-    }
+-  vtkMapperGlobalResolveCoincidentTopology = val;
+-}
+-
+-int vtkMapper::GetResolveCoincidentTopology()
+-{
+-  return vtkMapperGlobalResolveCoincidentTopology;
+-}
+-
+ void vtkMapper::SetResolveCoincidentTopologyToDefault()
+ {
+-  vtkMapperGlobalResolveCoincidentTopology = VTK_RESOLVE_OFF;
+-}
+-
+-void vtkMapper::SetResolveCoincidentTopologyZShift(double val)
+-{
+-  if (val == vtkMapperGlobalResolveCoincidentTopologyZShift)
+-    {
+-    return;
+-    }
+-  vtkMapperGlobalResolveCoincidentTopologyZShift = val;
+-}
+-
+-double vtkMapper::GetResolveCoincidentTopologyZShift()
+-{
+-  return vtkMapperGlobalResolveCoincidentTopologyZShift;
++  this->ResolveCoincidentTopology = VTK_RESOLVE_OFF;
+ }
+ 
+ void vtkMapper::SetResolveCoincidentTopologyPolygonOffsetParameters(
+                                             double factor, double units)
+ {
+-  if (factor == vtkMapperGlobalResolveCoincidentTopologyPolygonOffsetFactor &&
+-      units == vtkMapperGlobalResolveCoincidentTopologyPolygonOffsetUnits )
++  if (factor == this->ResolveCoincidentTopologyPolygonOffsetFactor &&
++      units == this->ResolveCoincidentTopologyPolygonOffsetUnits )
+     {
+     return;
+     }
+-  vtkMapperGlobalResolveCoincidentTopologyPolygonOffsetFactor = factor;
+-  vtkMapperGlobalResolveCoincidentTopologyPolygonOffsetUnits = units;
++  this->ResolveCoincidentTopologyPolygonOffsetFactor = factor;
++  this->ResolveCoincidentTopologyPolygonOffsetUnits = units;
+ }
+ 
+ void vtkMapper::GetResolveCoincidentTopologyPolygonOffsetParameters(
+                            double& factor, double& units)
+ {
+-  factor = vtkMapperGlobalResolveCoincidentTopologyPolygonOffsetFactor;
+-  units = vtkMapperGlobalResolveCoincidentTopologyPolygonOffsetUnits;
+-}
+-
+-void vtkMapper::SetResolveCoincidentTopologyPolygonOffsetFaces(int faces)
+-{
+-  vtkMapperGlobalResolveCoincidentTopologyPolygonOffsetFaces = faces;
+-}
+-
+-int vtkMapper::GetResolveCoincidentTopologyPolygonOffsetFaces()
+-{
+-  return vtkMapperGlobalResolveCoincidentTopologyPolygonOffsetFaces;
++  factor = this->ResolveCoincidentTopologyPolygonOffsetFactor;
++  units = this->ResolveCoincidentTopologyPolygonOffsetUnits;
+ }
+ 
+ // Overload standard modified time function. If lookup table is modified,
+@@ -719,11 +680,11 @@ void vtkMapper::PrintSelf(ostream& os, vtkIndent indent)
+   os << indent << "RenderTime: " << this->RenderTime << endl;
+ 
+   os << indent << "Resolve Coincident Topology: ";
+-  if ( vtkMapperGlobalResolveCoincidentTopology == VTK_RESOLVE_OFF )
++  if ( this->ResolveCoincidentTopology == VTK_RESOLVE_OFF )
+     {
+     os << "Off" << endl;
+     }
+-  else if ( vtkMapperGlobalResolveCoincidentTopology == VTK_RESOLVE_POLYGON_OFFSET )
++  else if (  this->ResolveCoincidentTopology == VTK_RESOLVE_POLYGON_OFFSET )
+     {
+     os << "Polygon Offset" << endl;
+     }
+diff --git a/Rendering/vtkMapper.h b/Rendering/vtkMapper.h
+index 264511d..3022e3e 100644
+--- a/Rendering/vtkMapper.h
++++ b/Rendering/vtkMapper.h
+@@ -276,41 +276,26 @@ public:
+   // approach, you may also want to set the ResolveCoincidentTopologyZShift
+   // value. (Note: not all mappers/graphics systems implement this 
+   // functionality.)
+-  static void SetResolveCoincidentTopology(int val);
+-  static int  GetResolveCoincidentTopology();
+-  static void SetResolveCoincidentTopologyToDefault();
+-  static void SetResolveCoincidentTopologyToOff() 
++  /*void SetResolveCoincidentTopology(int val);
++  int  GetResolveCoincidentTopology();*/
++  void SetResolveCoincidentTopologyToDefault();
++  void SetResolveCoincidentTopologyToOff() 
+     {SetResolveCoincidentTopology(VTK_RESOLVE_OFF);}
+-  static void SetResolveCoincidentTopologyToPolygonOffset() 
++  void SetResolveCoincidentTopologyToPolygonOffset()
+     {SetResolveCoincidentTopology(VTK_RESOLVE_POLYGON_OFFSET);}
+-  static void SetResolveCoincidentTopologyToShiftZBuffer() 
++  void SetResolveCoincidentTopologyToShiftZBuffer() 
+     {SetResolveCoincidentTopology(VTK_RESOLVE_SHIFT_ZBUFFER);}
+ 
+   // Description:
+   // Used to set the polygon offset scale factor and units.
+   // Used when ResolveCoincidentTopology is set to PolygonOffset. 
+   // These are global variables.
+-  static void SetResolveCoincidentTopologyPolygonOffsetParameters(
++  void SetResolveCoincidentTopologyPolygonOffsetParameters(
+     double factor, double units);
+-  static void GetResolveCoincidentTopologyPolygonOffsetParameters(
++  void GetResolveCoincidentTopologyPolygonOffsetParameters(
+     double& factor, double& units);
+ 
+   // Description:
+-  // Used when ResolveCoincidentTopology is set to PolygonOffset. The polygon
+-  // offset can be applied either to the solid polygonal faces or the
+-  // lines/vertices. When set (default), the offset is applied to the faces 
+-  // otherwise it is applied to lines and vertices.
+-  // This is a global variable.
+-  static void SetResolveCoincidentTopologyPolygonOffsetFaces(int faces);
+-  static int GetResolveCoincidentTopologyPolygonOffsetFaces();
+-
+-  // Description:
+-  // Used to set the z-shift if ResolveCoincidentTopology is set to
+-  // ShiftZBuffer. This is a global variable.
+-  static void SetResolveCoincidentTopologyZShift(double val);
+-  static double GetResolveCoincidentTopologyZShift();
+-
+-  // Description:
+   // Return bounding box (array of six doubles) of data expressed as
+   // (xmin,xmax, ymin,ymax, zmin,zmax).
+   virtual double *GetBounds();
+@@ -360,6 +345,31 @@ public:
+   void SetScalarMaterialModeToAmbientAndDiffuse() 
+     {this->SetScalarMaterialMode(VTK_MATERIALMODE_AMBIENT_AND_DIFFUSE);};
+ 
++  // controls coincidence resolution
++  vtkSetMacro(ResolveCoincidentTopology, int);
++  vtkGetMacro(ResolveCoincidentTopology, int);
++  
++  // Description:
++  // Used to set the z-shift if ResolveCoincidentTopology is set to
++  // ShiftZBuffer. This is a global variable.
++  vtkSetMacro(ResolveCoincidentTopologyZShift, double);
++  vtkGetMacro(ResolveCoincidentTopologyZShift, double);
++  
++  vtkSetMacro(ResolveCoincidentTopologyPolygonOffsetFactor, double);
++  vtkGetMacro(ResolveCoincidentTopologyPolygonOffsetFactor, double);
++  
++  vtkSetMacro(ResolveCoincidentTopologyPolygonOffsetUnits, double);
++  vtkGetMacro(ResolveCoincidentTopologyPolygonOffsetUnits, double);
++  
++  // Description:
++  // Used when ResolveCoincidentTopology is set to PolygonOffset. The polygon
++  // offset can be applied either to the solid polygonal faces or the
++  // lines/vertices. When set (default), the offset is applied to the faces 
++  // otherwise it is applied to lines and vertices.
++  // This is a global variable.
++  vtkSetMacro(ResolveCoincidentTopologyPolygonOffsetFaces, int);
++  vtkGetMacro(ResolveCoincidentTopologyPolygonOffsetFaces, int);
++
+   // Description:
+   // Return the light-model color mode.
+   const char *GetScalarMaterialModeAsString();
+@@ -395,6 +405,13 @@ protected:
+   int ScalarMode;
+   int ScalarMaterialMode;
+ 
++  // Controls coincidence resolution
++  int ResolveCoincidentTopology;
++  double ResolveCoincidentTopologyZShift;
++  double ResolveCoincidentTopologyPolygonOffsetFactor;
++  double ResolveCoincidentTopologyPolygonOffsetUnits;
++  int ResolveCoincidentTopologyPolygonOffsetFaces;
++
+   double RenderTime;
+ 
+   // for coloring by a component of a field data array
+diff --git a/Rendering/vtkOpenGLImageActor.cxx b/Rendering/vtkOpenGLImageActor.cxx
+index ba6aaec..bc53fd1 100644
+--- a/Rendering/vtkOpenGLImageActor.cxx
++++ b/Rendering/vtkOpenGLImageActor.cxx
+@@ -314,6 +314,11 @@ unsigned char *vtkOpenGLImageActor::MakeDataSuitable(int &xsize, int &ysize,
+   return res;
+ }
+ 
++#include <iostream>
++#include <cassert>
++
++using namespace std;
++
+ // Implement base class method.
+ void vtkOpenGLImageActor::Load(vtkRenderer *ren)
+ {
+@@ -457,7 +462,9 @@ void vtkOpenGLImageActor::Load(vtkRenderer *ren)
+ 
+   
+   // draw the quad
+-  if ( vtkMapper::GetResolveCoincidentTopology() )
++  cerr << "You should rewrite the polygon offSet of vtkOpenGLImageActor !" << endl;
++  assert(0);
++  /*if ( vtkMapper::GetResolveCoincidentTopology() )
+     {
+     if ( vtkMapper::GetResolveCoincidentTopology() == 
+          VTK_RESOLVE_SHIFT_ZBUFFER )
+@@ -472,7 +479,7 @@ void vtkOpenGLImageActor::Load(vtkRenderer *ren)
+       glPolygonOffset(f,u);
+ #endif      
+       }
+-    }
++    }*/
+   glDisable(GL_COLOR_MATERIAL);
+   glDisable (GL_CULL_FACE);
+   glDisable( GL_LIGHTING );
+diff --git a/Widgets/Testing/Cxx/TestOrientationMarkerWidget.cxx b/Widgets/Testing/Cxx/TestOrientationMarkerWidget.cxx
+index 628a587..9910e84 100644
+--- a/Widgets/Testing/Cxx/TestOrientationMarkerWidget.cxx
++++ b/Widgets/Testing/Cxx/TestOrientationMarkerWidget.cxx
+@@ -461,7 +461,7 @@ int TestOrientationMarkerWidget( int argc, char *argv[] )
+   // this static function improves the appearance of the text edges
+   // since they are overlaid on a surface rendering of the cube's faces
+   //
+-  vtkMapper::SetResolveCoincidentTopologyToPolygonOffset();
++  //vtkMapper::SetResolveCoincidentTopologyToPolygonOffset();
+ 
+   // anatomic labelling
+   //
