@@ -7,11 +7,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 import org.jcae.mesh.xmldata.ComputeEdgesConnectivity;
 import org.jcae.netbeans.Utilities;
-import org.jcae.netbeans.viewer3d.SelectionManager;
 import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.AmibeOverlayProvider;
 import org.jcae.vtk.AmibeOverlayToMesh;
-import org.jcae.vtk.ColorManager;
+import org.jcae.vtk.Palette;
 import org.jcae.vtk.View;
 import org.jcae.vtk.ViewableMesh;
 import org.openide.ErrorManager;
@@ -44,23 +43,18 @@ public abstract class AbstractEdgesAction extends CookieAction
 				new ComputeEdgesConnectivity(xmlDir, xmlFile);
 
 			computeEdgesConnectivity.compute();	
-			
-			View view = ViewManager.getDefault().getCurrentView();
-			ViewableMesh mesh = new ViewableMesh(new AmibeOverlayToMesh(new AmibeOverlayProvider(new File(xmlDir), getBranchGroupLabel())).getMesh(), new ColorManager() {
-				String beanType = getBranchGroupLabel();
-				public void setColor(Color color)
-				{
-					// Do nothing
-				}
 
-				public Color getColor()
-				{
-					if(beanType.equals(AmibeOverlayProvider.FREE_EDGE))
-						return AmibeOverlayProvider.FREE_EDGE_COLOR;
-					else
-						return AmibeOverlayProvider.MULTI_EDGE_COLOR;
-				}
-			});
+			Palette palette = new Palette();
+			String beanType = getBranchGroupLabel();
+			if(beanType.equals(AmibeOverlayProvider.FREE_EDGE))
+				palette.addColor(AmibeOverlayProvider.FREE_EDGE_COLOR);
+			else
+				palette.addColor(AmibeOverlayProvider.MULTI_EDGE_COLOR);
+
+			View view = ViewManager.getDefault().getCurrentView();
+			ViewableMesh mesh = new ViewableMesh(new AmibeOverlayToMesh(
+				new AmibeOverlayProvider(new File(xmlDir), getBranchGroupLabel())).getMesh(), palette);
+			
 			mesh.setName(activatedNodes[0].getName()+" "+getViewSuffix());
 			view.add(mesh);
 			

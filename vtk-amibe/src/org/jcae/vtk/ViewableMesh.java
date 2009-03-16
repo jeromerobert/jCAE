@@ -35,7 +35,6 @@ import vtk.vtkActor;
 public class ViewableMesh extends Viewable
 {
 	private ViewMode viewMode = ViewMode.WIRED;
-	private ColorManager colorManager;
 	private TIntObjectHashMap<LeafNode> groupIDToNode = new TIntObjectHashMap<LeafNode>();
 	private TObjectIntHashMap<LeafNode> groupNodeToID = new TObjectIntHashMap<LeafNode>();
 	private TIntHashSet groupsLoaded;
@@ -52,14 +51,11 @@ public class ViewableMesh extends Viewable
 
 	public ViewableMesh(Mesh mesh)
 	{
-		this(mesh, new GroupColorManager());
+		this(mesh, new Palette(Integer.MAX_VALUE));
 	}
 	
-	public ViewableMesh(Mesh mesh, ColorManager colorManager)
-	{
-		this.colorManager = colorManager;
-		this.colorManager.setColor(selectionColor);
-		
+	public ViewableMesh(Mesh mesh, Palette palette)
+	{		
 		rootNode.setSelectionActorCustomiser(new SelectionActorCustomiser()
 		{
 
@@ -97,12 +93,13 @@ public class ViewableMesh extends Viewable
 		for (Entry<Integer, LeafNode.DataProvider> entry : groupSet)
 			groupsLoaded.add(entry.getKey());
 
+		int cID = 0;
 		for (Entry<Integer, LeafNode.DataProvider> group : groupSet)
 		{
 			// Warning: Do *not* replace colorManager.getColor() by
 			// selectionColor here, some ColorManager may have a
 			// different behavior!
-			LeafNode groupNode = new LeafNode(rootNode, group.getValue(), colorManager.getColor());
+			LeafNode groupNode = new LeafNode(rootNode, group.getValue(), palette.getColor(cID++));
 			groupNode.setManager(true);
 
 			groupIDToNode.put(group.getKey(), groupNode);
