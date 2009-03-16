@@ -65,7 +65,8 @@ import org.w3c.dom.NodeList;
  * @author Jerome Robert
  */
 public class Shape<T extends Shape> implements Comparable< Shape<T> >
-{	
+{
+	protected static GeomAPI_ProjectPointOnSurf projectPointOnSurf;
 	/** map TopoDS_Compound.class to "co" */
 	protected final static Map<Class, String> TYPE_MAP_XML;
 	/** map "co" to TopoDS_Compound.class */
@@ -238,21 +239,21 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	 */
 	public void projectPoint(double[] coords, double[] result)
 	{
-		TopoDS_Face face = (TopoDS_Face) impl;		
+		TopoDS_Face face = (TopoDS_Face) impl;
 		Geom_Surface surface = BRep_Tool.surface(face);
-		System.out.println("*");
-		GeomAPI_ProjectPointOnSurf proj = new GeomAPI_ProjectPointOnSurf(coords, surface);
-		if(proj.nbPoints()>0)
+		if(projectPointOnSurf == null)
+			projectPointOnSurf = new GeomAPI_ProjectPointOnSurf(coords, surface);
+		else
+			projectPointOnSurf.init(coords, surface);
+		if(projectPointOnSurf.nbPoints()>0)
 		{
-			proj.lowerDistanceParameters(result);
-			double[] p = proj.nearestPoint();
-			result[2] = proj.lowerDistance();
+			projectPointOnSurf.lowerDistanceParameters(result);
+			double[] p = projectPointOnSurf.nearestPoint();
+			result[2] = projectPointOnSurf.lowerDistance();
 			System.arraycopy(p, 0, result, 3, 3);
 		}
 		else
-		{
 			result[2] = Double.POSITIVE_INFINITY;
-		}
 	}
 	
 	/** Remove this shape from its parents */
