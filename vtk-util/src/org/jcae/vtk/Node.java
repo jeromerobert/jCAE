@@ -181,7 +181,7 @@ public class Node extends AbstractNode
 		{
 			for(ChildCreationListener listener : childCreationListeners)
 				listener.childCreated(child);
-			timeStampModified();
+			timeStampData();
 		}
 	}
 
@@ -192,7 +192,7 @@ public class Node extends AbstractNode
 			child.deleteData();
 			for(ChildCreationListener listener : childCreationListeners)
 				listener.childDeleted(child);
-			timeStampModified();
+			timeStampData();
 		}
 	}
 
