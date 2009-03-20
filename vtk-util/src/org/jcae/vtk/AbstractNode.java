@@ -358,7 +358,7 @@ public abstract class AbstractNode
 		return mapperCustomiser;
 	}
 
-	public void timeStampData()
+	protected void timeStampData()
 	{
 		dataTime = System.nanoTime();
 		// When data are modified, actor must be updated
@@ -367,14 +367,14 @@ public abstract class AbstractNode
 			parent.timeStampData();
 	}
 	
-	public void timeStampModified()
+	protected void timeStampModified()
 	{
 		modificationTime = System.nanoTime();
 		if (!manager && parent != null)
 			parent.timeStampModified();
 	}
 	
-	public void timeStampSelected()
+	protected void timeStampSelected()
 	{
 		selectionTime = System.nanoTime();
 		if (!manager && parent != null)
