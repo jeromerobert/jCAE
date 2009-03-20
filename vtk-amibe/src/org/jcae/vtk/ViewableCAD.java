@@ -118,8 +118,14 @@ public class ViewableCAD extends Viewable
 	public void setEdgeSize(int edgeSize)
 	{
 		this.edgeSize = edgeSize;
-		
-		edges.timeStampModified();
+		// Calling setActorCustomiser() forces edges Node to be refreshed
+		edges.setActorCustomiser(new AbstractNode.ActorCustomiser()
+		{
+			public void customiseActor(vtkActor actor)
+			{
+				actor.GetProperty().SetLineWidth(ViewableCAD.this.edgeSize);
+			}
+		});
 		edges.refresh();
 	}
 
