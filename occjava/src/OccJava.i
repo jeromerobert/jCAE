@@ -314,12 +314,29 @@ class GCPnts_UniformDeflection
 	Standard_Real Parameter(const Standard_Integer Index) const;
 };
 
-%{#include <BRepMesh_IncrementalMesh.hxx>%}
-class BRepMesh_IncrementalMesh
+%{#include <BRepMesh_DiscretRoot.hxx>%}
+class BRepMesh_DiscretRoot
 {
 	%rename(setDeflection) SetDeflection;
 	%rename(setAngle) SetAngle;
-	%rename(setRatio) SetRatio;
+	%rename(deflection) Deflection;
+	%rename(angle) Angle;
+	%rename(perform) Perform;
+	
+	protected:
+	BRepMesh_DiscretRoot();
+	public:
+	void SetDeflection(const Standard_Real D) ;
+	void SetAngle(const Standard_Real Ang) ;
+	Standard_Real Deflection() const;
+	Standard_Real Angle() const;
+	virtual void Perform();
+};
+
+%{#include <BRepMesh_IncrementalMesh.hxx>%}
+class BRepMesh_IncrementalMesh : public BRepMesh_DiscretRoot
+{
+	%rename(perform) Perform;
 	%rename(update) Update;
 	%rename(isModified) IsModified;
 	
@@ -329,9 +346,7 @@ class BRepMesh_IncrementalMesh
 		const Standard_Boolean Relatif = Standard_False,
 		const Standard_Real Ang = 0.5);
 		
-	void SetDeflection(const Standard_Real D) ;
-	void SetAngle(const Standard_Real Ang) ;
-	void SetRatio(const Standard_Real R) ;
+	void Perform();
 	void Update(const TopoDS_Shape& S) ;
 	Standard_Boolean IsModified() const;
 };

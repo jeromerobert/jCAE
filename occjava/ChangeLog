@@ -1,7 +1,12 @@
+2008-10-14 09:56:03  Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/OccJava.i: Fix compilation with OpenCASCADE 6.3.0, BRepMesh
+	  API has changed.
+
 2008-01-31 15:33  Jerome Robert <jeromerobert@users.sourceforge.net>
 
 	* src/XSControl.i: Implement STEPControl_Reader.getLabel to
-	  retreive STEP labels
+	  retrieve STEP labels
 
 2007-11-13 12:50  Jerome Robert <jeromerobert@users.sourceforge.net>
 
