@@ -1,0 +1,126 @@
+diff --git a/ros/inc/Handle_Standard_Transient.hxx b/ros/inc/Handle_Standard_Transient.hxx
+index 5370d3c..059a747 100644
+--- a/ros/inc/Handle_Standard_Transient.hxx
++++ b/ros/inc/Handle_Standard_Transient.hxx
+@@ -13,7 +13,7 @@
+ #include <Standard_Transient_proto.hxx>
+ #endif
+ 
+-#ifdef _WIN32
++#ifdef _MSC_VER
+ // Disable the warning "conversion from 'unsigned int' to Standard_Transient *"
+ #pragma warning (push)
+ #pragma warning (disable:4312)
+@@ -224,7 +224,7 @@ private:
+   Standard_Transient *entity;
+ };
+ 
+-#ifdef _WIN32
++#ifdef _MSC_VER
+ #pragma warning (pop)
+ #endif
+ 
+diff --git a/ros/inc/Standard_Atomic.hxx b/ros/inc/Standard_Atomic.hxx
+index 93f80ec..111a333 100644
+--- a/ros/inc/Standard_Atomic.hxx
++++ b/ros/inc/Standard_Atomic.hxx
+@@ -24,7 +24,7 @@
+ //===================================================
+ // Windows NT, MSVC++ compiler
+ //===================================================
+-#if defined(WNT)
++#if defined(_MSC_VER)
+ 
+ extern "C" {
+ long _InterlockedIncrement(long volatile* lpAddend);
+@@ -51,7 +51,7 @@ inline int Standard_Atomic_DecrementTest (int volatile* var)
+ //       however these definitions involve specific type atomic_t
+ // Note: The same code probably would work for Intel compiler
+ //===================================================
+-#elif defined(LIN)
++#elif defined(__GNUC__)
+ 
+ inline void Standard_Atomic_Increment (int volatile* var)
+ {
+diff --git a/ros/inc/Standard_CString.hxx b/ros/inc/Standard_CString.hxx
+index ee3420e..b3f794c 100644
+--- a/ros/inc/Standard_CString.hxx
++++ b/ros/inc/Standard_CString.hxx
+@@ -13,7 +13,7 @@
+ #  include <Standard_TypeDef.hxx>
+ # endif
+ 
+-# ifdef WNT
++# ifdef _MSC_VER
+ #  define strcasecmp _stricmp
+ # endif
+ 
+diff --git a/ros/inc/Standard_values.h b/ros/inc/Standard_values.h
+index 917255b..5807d46 100644
+--- a/ros/inc/Standard_values.h
++++ b/ros/inc/Standard_values.h
+@@ -41,6 +41,10 @@ Facility : CAS-CADE V1.3A
+ # include <limits>
+ #endif
+ 
++#ifdef __MINGW32__
++# include <limits.h>
++#endif
++
+ #if defined (__hpux) || defined (HPUX)
+ # ifdef MAXINT
+ #  undef MAXINT
+diff --git a/ros/src/OSD/OSD.cxx b/ros/src/OSD/OSD.cxx
+index 4422f52..27ecf14 100644
+--- a/ros/src/OSD/OSD.cxx
++++ b/ros/src/OSD/OSD.cxx
+@@ -95,7 +95,7 @@ Standard_Boolean OSD::CStringToReal(const Standard_CString aString,
+ //=======================================================================
+ 
+ #ifdef WNT
+-# include <Windows.h>
++# include <windows.h>
+ #if !defined(__CYGWIN32__) && !defined(__MINGW32__)
+ # include <Mapiwin.h>
+ #endif
+diff --git a/ros/src/OSD/OSD_Process.cxx b/ros/src/OSD/OSD_Process.cxx
+index a63ff84..7393f5f 100644
+--- a/ros/src/OSD/OSD_Process.cxx
++++ b/ros/src/OSD/OSD_Process.cxx
+@@ -194,7 +194,7 @@ Standard_Integer OSD_Process::Error()const{
+ #undef NOUSER /* we need SW_HIDE from windows.h */
+ #endif
+ #include <OSD_WNT_1.hxx>
+-#include <LMCONS.H> /// pour UNLEN  ( see MSDN about GetUserName() )
++#include <lmcons.h> /// pour UNLEN  ( see MSDN about GetUserName() )
+ 
+ 
+ #pragma warning( disable : 4700 )
+diff --git a/ros/src/OSD/OSD_signal_WNT.cxx b/ros/src/OSD/OSD_signal_WNT.cxx
+index 89a67a1..a21df90 100644
+--- a/ros/src/OSD/OSD_signal_WNT.cxx
++++ b/ros/src/OSD/OSD_signal_WNT.cxx
+@@ -550,8 +550,10 @@ static LONG __fastcall _osd_raise ( DWORD dwCode, LPTSTR msg )
+   case EXCEPTION_FLT_INVALID_OPERATION:
+   case EXCEPTION_FLT_DENORMAL_OPERAND:
+   case EXCEPTION_FLT_INEXACT_RESULT:
++#ifdef _MSC_VER
+   case STATUS_FLOAT_MULTIPLE_TRAPS:
+   case STATUS_FLOAT_MULTIPLE_FAULTS:
++#endif
+        Standard_NumericError :: Raise ( msg );
+   default:
+     break;
+diff --git a/ros/src/Standard/Standard_MMgrOpt.cxx b/ros/src/Standard/Standard_MMgrOpt.cxx
+index 32a5963..048111a 100644
+--- a/ros/src/Standard/Standard_MMgrOpt.cxx
++++ b/ros/src/Standard/Standard_MMgrOpt.cxx
+@@ -670,7 +670,7 @@ void Standard_MMgrOpt::FreeMemory (Standard_Address aBlock,
+     // recover handle to the memory mapping stored just before the block
+     const HANDLE * aMBlock = (const HANDLE *)aBlock;
+     HANDLE hMap = *(--aMBlock);
+-    UnmapViewOfFile((LPCVOID)aMBlock);
++	UnmapViewOfFile(const_cast<void*>((LPCVOID)aMBlock));
+     CloseHandle (hMap);
+ #endif
+   }

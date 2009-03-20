@@ -1,0 +1,279 @@
+diff --git a/.gitignore b/.gitignore
+new file mode 100644
+index 0000000..6c46671
+--- /dev/null
++++ b/.gitignore
+@@ -0,0 +1,79 @@
++*.o
++*.class
++*.a
++*.dll
++ros/adm/mingw/FWOSPlugin/
++ros/adm/mingw/PTKernel/
++ros/adm/mingw/TKAdvTools/
++ros/adm/mingw/TKBO/
++ros/adm/mingw/TKBRep/
++ros/adm/mingw/TKBin/
++ros/adm/mingw/TKBinL/
++ros/adm/mingw/TKBinTObj/
++ros/adm/mingw/TKBinXCAF/
++ros/adm/mingw/TKBool/
++ros/adm/mingw/TKCAF/
++ros/adm/mingw/TKCDF/
++ros/adm/mingw/TKCDLFront/
++ros/adm/mingw/TKCPPClient/
++ros/adm/mingw/TKCPPExt/
++ros/adm/mingw/TKCPPIntExt/
++ros/adm/mingw/TKCPPJini/
++ros/adm/mingw/TKCSFDBSchema/
++ros/adm/mingw/TKDCAF/
++ros/adm/mingw/TKDraw/
++ros/adm/mingw/TKFeat/
++ros/adm/mingw/TKFillet/
++ros/adm/mingw/TKG2d/
++ros/adm/mingw/TKG3d/
++ros/adm/mingw/TKGeomAlgo/
++ros/adm/mingw/TKGeomBase/
++ros/adm/mingw/TKHLR/
++ros/adm/mingw/TKIDLFront/
++ros/adm/mingw/TKIGES/
++ros/adm/mingw/TKLCAF/
++ros/adm/mingw/TKMath/
++ros/adm/mingw/TKMesh/
++ros/adm/mingw/TKMeshVS/
++ros/adm/mingw/TKNIS/
++ros/adm/mingw/TKOffset/
++ros/adm/mingw/TKOpenGl/
++ros/adm/mingw/TKPCAF/
++ros/adm/mingw/TKPLCAF/
++ros/adm/mingw/TKPShape/
++ros/adm/mingw/TKPrim/
++ros/adm/mingw/TKSTEP/
++ros/adm/mingw/TKSTEP209/
++ros/adm/mingw/TKSTEPAttr/
++ros/adm/mingw/TKSTEPBase/
++ros/adm/mingw/TKSTL/
++ros/adm/mingw/TKService/
++ros/adm/mingw/TKShHealing/
++ros/adm/mingw/TKShapeSchema/
++ros/adm/mingw/TKStdLSchema/
++ros/adm/mingw/TKStdSchema/
++ros/adm/mingw/TKTCPPExt/
++ros/adm/mingw/TKTObj/
++ros/adm/mingw/TKTObjDRAW/
++ros/adm/mingw/TKTopAlgo/
++ros/adm/mingw/TKTopTest/
++ros/adm/mingw/TKV2d/
++ros/adm/mingw/TKV3d/
++ros/adm/mingw/TKVRML/
++ros/adm/mingw/TKViewerTest/
++ros/adm/mingw/TKWOK/
++ros/adm/mingw/TKWOKTcl/
++ros/adm/mingw/TKXCAF/
++ros/adm/mingw/TKXCAFSchema/
++ros/adm/mingw/TKXDEDRAW/
++ros/adm/mingw/TKXDEIGES/
++ros/adm/mingw/TKXDESTEP/
++ros/adm/mingw/TKXMesh/
++ros/adm/mingw/TKXSBase/
++ros/adm/mingw/TKXSDRAW/
++ros/adm/mingw/TKXml/
++ros/adm/mingw/TKXmlL/
++ros/adm/mingw/TKXmlTObj/
++ros/adm/mingw/TKXmlXCAF/
++ros/adm/mingw/TKjcas/
++ros/mingw/
+diff --git a/ros/adm/mingw/Makefile b/ros/adm/mingw/Makefile
+new file mode 100644
+index 0000000..7b5de67
+--- /dev/null
++++ b/ros/adm/mingw/Makefile
+@@ -0,0 +1,32 @@
++all:
++	javac OCCMingw.java
++	java OCCMingw
++	make -C TKernel
++	make -C TKMath
++	make -C TKAdvTools
++	make -C TKG2d
++	make -C TKG3d
++	make -C TKGeomBase
++	make -C TKBRep
++	make -C TKGeomAlgo
++	make -C TKTopAlgo
++	make -C TKPrim
++	make -C TKBO
++	make -C TKHLR
++	make -C TKMesh
++	make -C TKShHealing
++	make -C TKBool
++	make -C TKXMesh
++	make -C TKFillet
++	make -C TKFeat
++	make -C TKOffset
++	make -C TKXSBase
++	make -C TKSTEPBase
++	make -C TKSTEPAttr
++	make -C TKSTEP209
++	make -C TKSTEP
++	make -C TKIGES
++
++clean:
++	rm -rf OCCMingw*.class TKernel FWOSPlugin PTKernel TKAdvTools TKBO TKBRep TKBin TKBinL TKBinTObj TKBinXCAF TKBool TKCAF TKCDF TKCDLFront TKCPPClient TKCPPExt TKCPPIntExt TKCPPJini TKCSFDBSchema TKDCAF TKDraw TKFeat TKFillet TKG2d TKG3d TKGeomAlgo TKGeomBase TKHLR TKIDLFront TKIGES TKLCAF TKMath TKMesh TKMeshVS TKNIS TKOffset TKOpenGl TKPCAF TKPLCAF TKPShape TKPrim TKSTEP TKSTEP209 TKSTEPAttr TKSTEPBase TKSTL TKService TKShHealing TKShapeSchema TKStdLSchema TKStdSchema TKTCPPExt TKTObj TKTObjDRAW TKTopAlgo TKTopTest TKV2d TKV3d TKVRML TKViewerTest TKWOK TKWOKTcl TKXCAF TKXCAFSchema TKXDEDRAW TKXDEIGES TKXDESTEP TKXMesh TKXSBase TKXSDRAW TKXml TKXmlL TKXmlTObj TKXmlXCAF TKjcas 
++
+diff --git a/ros/adm/mingw/OCCMingw.java b/ros/adm/mingw/OCCMingw.java
+new file mode 100644
+index 0000000..5b9801a
+--- /dev/null
++++ b/ros/adm/mingw/OCCMingw.java
+@@ -0,0 +1,108 @@
++
++import java.io.File;
++import java.io.FileFilter;
++import java.io.FileNotFoundException;
++import java.io.PrintStream;
++import java.util.ArrayList;
++import java.util.List;
++import java.util.Scanner;
++import java.util.logging.Level;
++import java.util.logging.Logger;
++
++/**
++ *
++ * @author Jerome Robert
++ */
++public class OCCMingw {
++
++	private static List<String> createPList(File file)
++	{
++		ArrayList<String> toReturn = new ArrayList();
++		try
++		{
++			Scanner s = new Scanner(file);
++			while(s.hasNextLine())
++			{
++				String ss = s.nextLine().trim();
++				if(!ss.isEmpty())
++					toReturn.add(ss);
++			}
++		}
++		catch (FileNotFoundException ex)
++		{
++			Logger.getLogger(OCCMingw.class.getName()).log(Level.SEVERE, null,
++				ex);
++		}
++		return toReturn;
++	}
++	
++	private static class DirFilter implements FileFilter
++	{
++		public boolean accept(File pathname)
++		{
++			return pathname.isDirectory();
++		}
++	}
++
++	private static void createMakefile(String libName, List<String> packages)
++	{
++		PrintStream out = null;
++		try
++		{
++			File libDir = new File(libName);
++			libDir.mkdir();
++			out = new PrintStream(new File(libDir, "Makefile"));
++			out.println("include ../header.mk");
++			for(String p:packages)
++			{
++				out.println("objects += $(patsubst %.cxx,%.o,$(notdir $(wildcard $(SRC)/"+p+"/*.cxx)))");
++				out.println("objects += $(patsubst %.c,%.o,$(notdir $(wildcard $(SRC)/"+p+"/*.c)))");
++				out.println("objects += $(patsubst %.cxx,%.o,$(notdir $(wildcard $(DRV)/"+p+"/*.cxx)))");
++				out.println("objects += $(patsubst %.c,%.o,$(notdir $(wildcard $(DRV)/"+p+"/*.c)))");
++			}
++			for(String p:packages)
++			{
++				out.println("%.o : $(SRC)/"+p+"/%.cxx");
++				out.println("\t$(CXX) $(CPPFLAGS) -I$(DRV)/"+p+" -I$(SRC)/"+p+"  -c $(CXXFLAGS) -o $@ $<");
++				out.println("%.o : $(DRV)/"+p+"/%.cxx");
++				out.println("\t$(CXX) $(CPPFLAGS) -I$(DRV)/"+p+" -I$(SRC)/"+p+"  -c $(CXXFLAGS) -o $@ $<");
++				out.println("%.o : $(SRC)/"+p+"/%.c");
++				out.println("\t$(CC)  $(CPPFLAGS) -I$(DRV)/"+p+" -I$(SRC)/"+p+"  -c $(CFLAGS)   -o $@ $<");
++				out.println("%.o : $(DRV)/"+p+"/%.c");
++				out.println("\t$(CC)  $(CPPFLAGS) -I$(DRV)/"+p+" -I$(SRC)/"+p+"  -c $(CFLAGS)   -o $@ $<");
++			}
++
++			out.println("$(BIN)/"+libName+".dll : $(objects)");
++			out.println("\tmkdir -p $(LIB) $(BIN)");
++			out.println("\t$(CXX) $(LDFLAGS) -L$(LIB) -o $@ $^ $("+libName+"FLAGS) -Wl,--out-implib,$(LIB)/lib"+libName+".a");
++			out.close();
++		}
++		catch (FileNotFoundException ex)
++		{
++			Logger.getLogger(OCCMingw.class.getName()).log(Level.SEVERE, null, ex);
++		}
++		finally
++		{
++			if(out != null)
++				out.close();
++		}
++	}
++
++	public static void main(final String[] args)
++	{
++		for(File dir:new File("../../src").listFiles(new DirFilter()))
++		{
++			File[] packages = dir.listFiles(new FileFilter() {
++
++				public boolean accept(File pathname)
++				{
++					return "PACKAGES".equals(pathname.getName());
++				}
++			});
++			if(packages.length > 0)
++			{
++				createMakefile(packages[0].getParentFile().getName(), createPList(packages[0]));
++			}
++		}
++	}
++}
+diff --git a/ros/adm/mingw/header.mk b/ros/adm/mingw/header.mk
+new file mode 100644
+index 0000000..369ad86
+--- /dev/null
++++ b/ros/adm/mingw/header.mk
+@@ -0,0 +1,36 @@
++CC := i586-mingw32msvc-gcc
++CXX := i586-mingw32msvc-g++
++CASROOT := ../../..
++DRV := $(CASROOT)/drv
++SRC := $(CASROOT)/src
++BIN := $(CASROOT)/mingw/bin
++LIB := $(CASROOT)/mingw/lib
++CPPFLAGS := -I$(CASROOT)/inc/ -DWNT -D__MATH_WNT_H -DHAVE_NO_DLL
++CXXFLAGS := -O2 -g -march=pentium3
++LDFLAGS := -shared -Wl,--enable-auto-import -Wl,--enable-runtime-pseudo-reloc -Wl,-export-all-symbols
++TKernelFLAGS := -lwinspool -lws2_32 -lgdi32
++TKMathFLAGS := -lTKernel
++TKAdvToolsFLAGS := -lTKernel
++TKG2dFLAGS := -lTKernel -lTKMath
++TKG3dFLAGS := -lTKernel -lTKG2d -lTKMath
++TKGeomBaseFLAGS := -lTKernel -lTKG2d -lTKG3d -lTKMath
++TKBRepFLAGS := -lTKernel -lTKG2d -lTKG3d -lTKMath -lTKGeomBase
++TKGeomAlgoFLAGS := -lTKernel -lTKG2d -lTKG3d -lTKMath -lTKGeomBase -lTKBRep
++TKTopAlgoFLAGS := -lTKernel -lTKG2d -lTKG3d -lTKMath -lTKGeomBase -lTKGeomAlgo -lTKBRep
++TKPrimFLAGS := -lTKernel -lTKG2d -lTKG3d -lTKMath -lTKGeomBase -lTKTopAlgo -lTKBRep
++TKHLRFLAGS := -lTKernel -lTKGeomBase -lTKG3d -lTKTopAlgo -lTKMath -lTKGeomAlgo -lTKBRep -lTKG2d
++TKBOFLAGS := -lTKernel -lTKG2d -lTKG3d -lTKMath -lTKGeomBase -lTKTopAlgo -lTKBRep -lTKGeomAlgo
++TKMeshFLAGS := -lTKernel -lTKG2d -lTKG3d -lTKMath -lTKGeomBase -lTKTopAlgo -lTKBRep -lTKGeomAlgo
++TKShHealingFLAGS := -lTKernel -lTKG2d -lTKG3d -lTKMath -lTKGeomBase -lTKTopAlgo -lTKBRep -lTKGeomAlgo
++TKBoolFLAGS := -lTKernel -lTKGeomAlgo -lTKG3d -lTKGeomBase -lTKTopAlgo -lTKMath -lTKBO -lTKG2d -lTKBRep -lTKPrim
++TKXMeshFLAGS := -lTKernel -lTKG2d -lTKMath -lTKMesh
++TKFilletFLAGS := -lTKernel -lTKG2d -lTKG3d -lTKMath -lTKGeomBase -lTKTopAlgo -lTKBRep -lTKGeomAlgo -lTKBool
++TKFeatFLAGS := -lTKernel -lTKG2d -lTKG3d -lTKMath -lTKGeomBase -lTKTopAlgo -lTKBRep -lTKGeomAlgo -lTKBO -lTKPrim -lTKBool
++TKOffsetFLAGS := -lTKBool -lTKGeomAlgo -lTKernel -lTKGeomBase -lTKTopAlgo -lTKMath -lTKBO -lTKG2d -lTKG3d -lTKBRep -lTKShHealing -lTKFillet -lTKPrim
++TKXSBaseFLAGS := -lTKernel -lTKMath -lTKG2d -lTKG3d -lTKShHealing -lTKBRep -lTKGeomBase -lTKTopAlgo
++TKSTEPBaseFLAGS := -lTKernel -lTKXSBase -lTKMath
++TKSTEPFLAGS := -lTKernel -lTKXSBase -lTKSTEPBase -lTKSTEPAttr -lTKMath -lTKG3d -lTKG2d -lTKShHealing -lTKSTEP209 -lTKGeomBase -lTKBRep -lTKGeomAlgo -lTKTopAlgo -lws2_32
++TKIGESFLAGS := -lTKernel -lTKXSBase -lTKSTEPBase -lTKSTEPAttr -lTKMath -lTKG3d -lTKG2d -lTKShHealing -lTKSTEP209 -lTKGeomBase -lTKBRep -lTKGeomAlgo -lTKTopAlgo -lTKPrim -lTKBool
++TKSTEPAttrFLAGS := -lTKSTEPBase -lTKernel -lTKXSBase
++TKSTEP209FLAGS := -lTKSTEPBase -lTKernel -lTKXSBase
++

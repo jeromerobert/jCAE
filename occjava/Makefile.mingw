@@ -1,0 +1,33 @@
+# Makefile to build occjava for Windows on Linux.
+# Only tested on Debian Squeeze.
+#
+# - Install mingw packages:
+#   apt-get install mingw32 mingw32-binutils mingw32-runtime
+# - Edit set CASROOT and JAVA variables bellow.
+# - Run make -f Makefile.mingw
+#
+
+CASROOT := /home/jerome/occ6.3/opencascade-6.3.0.dfsg.1/ros/
+JAVA := /home/jerome/.wine/drive_c/Java/jdk1.6.0_12/
+
+
+LIBS := -L$(CASROOT)/mingw/lib -lTKBRep -lTKBool -lTKG2d -lTKG3d -lTKGeomBase -lTKIGES -lTKMath -lTKOffset -lTKXSBase -lTKernel -lTKSTEP -lTKPrim -lTKTopAlgo -lTKFillet -lTKMesh -lTKBO -lTKGeomAlgo -lTKShHealing -lTKSTEPBase
+CXX := i586-mingw32msvc-g++
+CC := i586-mingw32msvc-gcc
+CXXFLAGS := -O2 -g -march=pentium3
+LDFLAGS := -shared -Wl,--enable-auto-import -Wl,--enable-runtime-pseudo-reloc -Wl,-export-all-symbols
+CPPFLAGS := -I$(JAVA)/include -I$(JAVA)/include/win32 -I$(CASROOT)/inc -DWNT -D__MATH_WNT_H -DHAVE_NO_DLL
+JAVAGENSRCDIR := src-java/org/jcae/opencascade/jni/
+
+src/OccJava.dll : src/OccJava_wrap.o src/jnistream.o
+	$(CXX) $(LDFLAGS) -o $@ $^ $(LIBS) 
+
+src/jnistream.o : src/jnistream.cxx
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ $^
+	
+src/OccJava_wrap.o : src/OccJava_wrap.cxx
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ $^
+
+src/OccJava_wrap.cxx : $(wildcard src/*.i)
+	swig -c++ -v $(CPPFLAGS) -Wall -java -package org.jcae.opencascade.jni -outdir $(JAVAGENSRCDIR) OccJava.i
+	
