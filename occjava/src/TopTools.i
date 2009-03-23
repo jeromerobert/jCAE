@@ -62,6 +62,7 @@
 	n = l.Extent();
 	jlong * as=(jlong*) malloc (sizeof(jlong) * n * 2);
 	TopTools_ListIteratorOfListOfShape it(l);
+	j=0;
 	while(it.More())
 	{
 		const TopoDS_Shape & s=it.Value();
