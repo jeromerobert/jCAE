@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2005-2009, by EADS France
  */
 
 package org.jcae.netbeans.mesh;
@@ -27,6 +27,8 @@ import javax.swing.JOptionPane;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
+import org.jcae.netbeans.viewer3d.EntitySelection;
+import org.jcae.netbeans.viewer3d.SelectionManager;
 import org.openide.ErrorManager;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
@@ -68,6 +70,9 @@ public class FuseGroupAction extends CookieAction{
 			
 			Groups groups=(Groups) set.toArray()[0];
 			groups.fuse(list);
+			EntitySelection meshSelection = SelectionManager.getDefault().getEntitySelection(this);
+			if(meshSelection!=null)
+				meshSelection.unselectAll();
 			MeshNode mn=arg0[0].getParentNode().getParentNode().getCookie(MeshNode.class);
 			mn.refreshGroups();			
 		}

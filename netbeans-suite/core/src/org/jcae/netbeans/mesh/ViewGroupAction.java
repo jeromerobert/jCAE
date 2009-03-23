@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2005-2009, by EADS France
  */
 
 package org.jcae.netbeans.mesh;
@@ -70,7 +70,7 @@ public class ViewGroupAction extends CookieAction
 			while(it.hasNext())
 			{
 				Entry<Groups, Collection<Group>> e=it.next();
-				e.getKey().displayGroups(
+				MeshNode.displayGroups(e.getKey(),
 					arg0[0].getParentNode().getParentNode().getName(),
 					e.getValue(), v);
 			}
@@ -99,6 +99,7 @@ public class ViewGroupAction extends CookieAction
 		return null;
 	}
 
+	@Override
 	protected boolean asynchronous()
 	{
 		return false;

@@ -15,16 +15,17 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2005-2009, by EADS France
  */
 
 package org.jcae.netbeans.mesh;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import org.jcae.mesh.xmldata.XMLHelper;
-import org.openide.ErrorManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -111,15 +112,18 @@ public class GroupsReader
 		}
 		catch (ParserConfigurationException e)
 		{
-			ErrorManager.getDefault().notify(e);			
+			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(
+				Level.SEVERE, e.getMessage(), e);
 		}
 		catch (SAXException e)
 		{
-			ErrorManager.getDefault().notify(e);
+			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(
+				Level.SEVERE, e.getMessage(), e);
 		}
 		catch (IOException e)
 		{
-			ErrorManager.getDefault().notify(e);
+			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(
+				Level.SEVERE, e.getMessage(), e);
 		}
 		return groupList;
 	}

@@ -25,14 +25,19 @@ import java.beans.IntrospectionException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import javax.swing.Action;
 import javax.xml.parsers.ParserConfigurationException;
 import org.jcae.netbeans.BeanProperty;
 import org.jcae.netbeans.Utilities;
 import org.jcae.netbeans.cad.BrepNode;
+import org.jcae.netbeans.viewer3d.SelectionManager;
 import org.jcae.netbeans.viewer3d.ViewManager;
+import org.jcae.vtk.AmibeToMesh;
 import org.jcae.vtk.View;
+import org.jcae.vtk.ViewableMesh;
 import org.openide.ErrorManager;
 import org.openide.actions.*;
 import org.openide.cookies.ViewCookie;
@@ -179,6 +184,42 @@ public class MeshNode extends DataNode implements ViewCookie
 		};
 	}
 
+	/**
+	 * Display in a View3D a list of groups.
+	 * The xml Directory xmlDir must be setted. After having load a project, xmlDir may be null the first time.
+	 *
+	 * @param the list of groups to display.
+	 * @param the View3D in which the Groups are displayed.
+	 */
+	public static void displayGroups(Groups groups, String meshName,
+		Collection<Group> groupsToDisplay, View view)
+		throws ParserConfigurationException, SAXException, IOException
+	{
+		int[] idGroupsDisplayed = new int[groupsToDisplay.size()];
+		Iterator<Group> iter = groupsToDisplay.iterator();
+		String sb="";
+		boolean full=false;
+		for(int i = 0 ; i < idGroupsDisplayed.length ; ++i)
+		{
+			Group g = iter.next();
+
+			idGroupsDisplayed[i] = g.getId();
+			if(sb.length()<20)
+				sb=sb+" "+g.getName();
+			else
+				full=true;
+		}
+
+		if(full)
+			sb=sb+"...";
+
+		AmibeToMesh reader = new AmibeToMesh(groups.getMeshFile(), idGroupsDisplayed);
+		ViewableMesh interactor = new ViewableMesh(reader.getMesh());
+		interactor.setName(meshName+" ["+sb+"]");
+		SelectionManager.getDefault().addInteractor(interactor, groups);
+		view.add(interactor);
+	}
+	
 	public void view()
 	{
 		if(groups!=null)
@@ -186,7 +227,7 @@ public class MeshNode extends DataNode implements ViewCookie
 			View view=ViewManager.getDefault().getCurrentView();
 			try
 			{
-				groups.displayGroups(getName(),
+				displayGroups(groups, getName(),
 					Arrays.asList(groups.getGroups()), view);
 			}
 			catch (ParserConfigurationException ex)

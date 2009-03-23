@@ -15,13 +15,15 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2005-2009, by EADS France
  */
 
 package org.jcae.netbeans.mesh;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jcae.mesh.xmldata.XMLHelper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -154,12 +156,13 @@ public class Group
 			}
 			catch (Exception e)
 			{
-				org.openide.ErrorManager.getDefault().notify(e);
+				Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(
+					Level.SEVERE, e.getMessage(), e);
 			}
 		} else
 		{
-			org.openide.awt.StatusDisplayer.getDefault().setStatusText(
-				"Mesh (" + f.getPath() + ") not found.");
+			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(
+				Level.WARNING, "Mesh (" + f.getPath() + ") not found.");
 		}
 	}
 
@@ -185,22 +188,11 @@ public class Group
 				+ XMLHelper.canonicalize(baseDir, groupFile.toString())
 				+ "\" offset=\"" + offset + "\"/>" + "</group>");
 		}
-		catch (Exception e)
+		catch (Exception ex)
 		{
-			org.openide.ErrorManager.getDefault().notify(e);
+			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.SEVERE, ex.getMessage(), ex);
 		}
 		return newElt;
-	}
-
-	/**
-	 * It is called by jcae-netbeans-common when the bean is selected or not.
-	 * It highlights or not the group in all the views which display it.
-	 *
-	 *@param a boolean which indicates if the bean is selected or not.
-	 */
-	public void onSelection(boolean status)
-	{
-		setSelected(status);
 	}
 	
     /**

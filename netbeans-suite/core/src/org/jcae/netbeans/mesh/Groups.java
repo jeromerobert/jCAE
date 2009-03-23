@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2005-2009, by EADS France
  */
 
 package org.jcae.netbeans.mesh;
@@ -28,17 +28,13 @@ import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.*;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import org.jcae.mesh.xmldata.MeshExporter;
-import org.jcae.netbeans.viewer3d.EntitySelection;
-import org.jcae.netbeans.viewer3d.SelectionManager;
-import org.jcae.vtk.AmibeToMesh;
-import org.jcae.vtk.ViewableMesh;
-import org.jcae.vtk.View;
-import org.openide.ErrorManager;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -47,7 +43,7 @@ import org.xml.sax.SAXException;
  * Manage all the groups of a MeshNode.
  */
 public class Groups
-{
+{	
 	// TODO Create a table selection
 	private PropertyChangeListener groupPropertyChangeListener=new PropertyChangeListener()
 	{
@@ -83,71 +79,11 @@ public class Groups
 		//meshSelection = new MeshSelection(this);
 		//SelectionManager.getDefault().addEntitySelection(this, meshSelection);	
 	}
-	
-	private String getXmlDir()
-	{
-		return meshFile;
-	}
-	
+		
 	public void addGroup(Group group)
 	{
 		groups.add(group);
 		group.addPropertyChangeListener(groupPropertyChangeListener);
-	}
-
-	/**
-	 * Display in a View3D a list of groups.
-	 * The xml Directory xmlDir must be setted. After having load a project, xmlDir may be null the first time.
-	 * 
-	 * @param the list of groups to display.
-	 * @param the View3D in which the Groups are displayed.
-	 */
-	public void displayGroups(String meshName, Collection<Group> groupsToDisplay,
-		View view) throws ParserConfigurationException, SAXException, IOException
-	{
-		int[] idGroupsDisplayed = new int[groupsToDisplay.size()];
-		Iterator<Group> iter = groupsToDisplay.iterator();
-		String sb="";
-		boolean full=false;
-		for(int i = 0 ; i < idGroupsDisplayed.length ; ++i)
-		{
-			Group g = iter.next();
-
-			idGroupsDisplayed[i] = g.getId();
-			if(sb.length()<20)
-				sb=sb+" "+g.getName();
-			else
-				full=true;
-		}
-
-		if(full)
-			sb=sb+"...";
-
-		AmibeToMesh reader = new AmibeToMesh(getXmlDir(), idGroupsDisplayed);
-		ViewableMesh interactor = new ViewableMesh(reader.getMesh());
-		interactor.setName(meshName+" ["+sb+"]");
-
-		SelectionManager.getDefault().addInteractor(interactor, this);
-
-		view.add(interactor);
-	}
-
-	/**
-	 * Bean action which makes the fusion of groups.
-	 * It displays a dialog-box to select the groups to fuse.
-	 * @throws IOException 
-	 * @throws SAXException 
-	 * @throws ParserConfigurationException 
-	 * @throws TransformerException 
-	 * @throws TransformerConfigurationException 
-	 */
-	public void fuse() throws TransformerConfigurationException, TransformerException, ParserConfigurationException, SAXException, IOException
-	{
-		PanelFuse panel = new PanelFuse(this);
-		if (!panel.cancel())
-		{
-			fuse(panel.getSelectedGroups());
-		}
 	}
 
 	/**
@@ -162,7 +98,7 @@ public class Groups
 	 */
 	public Group fuse(Collection<Group> listGroup) throws TransformerConfigurationException, TransformerException, ParserConfigurationException, SAXException, IOException
 	{
-		String xmlDir=getXmlDir();
+		String xmlDir=meshFile;
 		System.err.println(Groups.class+": fusing groups");
 		Group fuseGroup = new Group();
 		int id = 0;
@@ -275,10 +211,6 @@ public class Groups
 			org.jcae.mesh.xmldata.XMLHelper.writeXML(xmlDoc, f);
 		}
 		
-		EntitySelection meshSelection = SelectionManager.getDefault().getEntitySelection(this);
-		if(meshSelection!=null)
-			meshSelection.unselectAll();
-		
 		return fuseGroup;
 	}
 
@@ -369,7 +301,7 @@ public class Groups
 	
 	void modifyXML()
 	{	
-		String xmlDir=getXmlDir();
+		String xmlDir=meshFile;
 		String xmlFile = "jcae3d";
 		java.io.File f = new java.io.File(xmlDir, xmlFile);
 		org.w3c.dom.Document xmlDoc = null;
@@ -399,17 +331,19 @@ public class Groups
 	 */
 	public int[] readTrianglesGroup(File fileGroup, Group g)
 	{		
-		int[] trianglesGroup=null;
+		int[] trianglesGroup = null;
+		// Open the file and then get a channel from the stream
+		FileInputStream fis = null;
 		try
 		{
-			// Open the file and then get a channel from the stream
-	        FileInputStream fis = new FileInputStream(fileGroup);
-	        FileChannel fc = fis.getChannel();
-	 
-	        // Get the file's size and then map it into memory
-	        int sz = (int)fc.size();
-	        MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, g.getOffset()*4, g.getNumberOfElements()*4);
-			IntBuffer inb=bb.asIntBuffer();			
+			fis = new FileInputStream(fileGroup);
+			FileChannel fc = fis.getChannel();
+			// Get the file's size and then map it into memory
+			int sz = (int) fc.size();
+			MappedByteBuffer bb =
+				fc.map(FileChannel.MapMode.READ_ONLY, g.getOffset() * 4,
+				g.getNumberOfElements() * 4);
+			IntBuffer inb = bb.asIntBuffer();
 			trianglesGroup = new int[g.getNumberOfElements()];
 			inb.get(trianglesGroup);
 			fc.close();
@@ -417,11 +351,22 @@ public class Groups
 			MeshExporter.clean(bb);
 			return trianglesGroup;
 		}
-		catch(IOException ex)
+		catch (IOException ex)
 		{
-			ErrorManager.getDefault().notify(ex);
-			return null;
-		}		
+			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.SEVERE, ex.getMessage(), ex);
+		}
+		finally
+		{
+			try
+			{
+				fis.close();
+			}
+			catch (IOException ex)
+			{
+				Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.SEVERE, ex.getMessage(), ex);
+			}
+		}
+		return trianglesGroup;
 	}
 
 	/**
@@ -437,6 +382,11 @@ public class Groups
 		}		
 	}
 
+	public String getMeshFile()
+	{
+		return meshFile;
+	}
+	
 	/**
 	 * @param the directory of the mesh of a jcae project.
 	 */
@@ -449,6 +399,7 @@ public class Groups
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString()
 	{
 		return "Groups";
