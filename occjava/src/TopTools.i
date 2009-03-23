@@ -24,7 +24,10 @@
 %typemap(jstype) const TopTools_ListOfShape& "TopoDS_Shape[]"
 
 %typemap(javain) const TopTools_ListOfShape& "TopoDS_Shape.cArrayUnwrap($javainput)"
-
+%typemap(javaout) const TopTools_ListOfShape& 
+{
+	return TopoDS_Shape.cArrayWrap($jnicall);
+}
 %typemap(in) const TopTools_ListOfShape& (jlong *jarr, jsize sz)
 {
 	int i;
@@ -51,3 +54,27 @@
 	delete $1;
 %}
 
+%{#include <TopTools_ListIteratorOfListOfShape.hxx>%}
+%typemap(out) const TopTools_ListOfShape&
+{
+	int j,n;
+	const TopTools_ListOfShape& l = *$1;
+	n = l.Extent();
+	jlong * as=(jlong*) malloc (sizeof(jlong) * n * 2);
+	TopTools_ListIteratorOfListOfShape it(l);
+	while(it.More())
+	{
+		const TopoDS_Shape & s=it.Value();
+		TopoDS_Shape * tsp=new TopoDS_Shape();
+		tsp->TShape(s.TShape());
+		tsp->Location(s.Location());
+		tsp->Orientation(s.Orientation());
+		as[j++]=(jlong)tsp;
+		as[j++]=s.ShapeType();
+		it.Next();
+	}
+	jlongArray jarray=JCALL1(NewLongArray, jenv, n*2);
+	JCALL4(SetLongArrayRegion, jenv, jarray, 0, n*2, as);
+	free(as);
+	$result=jarray;
+}

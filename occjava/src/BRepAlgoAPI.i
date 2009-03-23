@@ -26,7 +26,22 @@
 
 class BRepAlgoAPI_BooleanOperation: public BRepBuilderAPI_MakeShape
 {
+	%rename(modified) Modified;
+	%rename(isDeleted) IsDeleted;
+	%rename(modified2) Modified2;
+	%rename(generated) Generated;
+	%rename(hasModified) HasModified;
+	%rename(hasGenerated) HasGenerated;
+	%rename(hasDeleted) HasDeleted;
 	BRepAlgoAPI_BooleanOperation()=0;
+	public:
+	virtual const TopTools_ListOfShape& Modified(const TopoDS_Shape& aS) ;
+	virtual Standard_Boolean IsDeleted(const TopoDS_Shape& aS) ;
+	virtual const TopTools_ListOfShape& Modified2(const TopoDS_Shape& aS) ;
+	virtual const TopTools_ListOfShape& Generated(const TopoDS_Shape& S) ;
+	virtual Standard_Boolean HasModified() const;
+	virtual Standard_Boolean HasGenerated() const;
+	virtual Standard_Boolean HasDeleted() const;
 };
 
 class BRepAlgoAPI_Fuse: public BRepAlgoAPI_BooleanOperation
