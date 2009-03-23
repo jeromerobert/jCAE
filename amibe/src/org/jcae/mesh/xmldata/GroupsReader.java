@@ -18,14 +18,13 @@
  * (C) Copyright 2005-2009, by EADS France
  */
 
-package org.jcae.netbeans.mesh;
+package org.jcae.mesh.xmldata;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
-import org.jcae.mesh.xmldata.XMLHelper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

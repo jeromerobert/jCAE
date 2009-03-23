@@ -26,6 +26,8 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.swing.*;
+import org.jcae.mesh.xmldata.Group;
+import org.jcae.mesh.xmldata.Groups;
 import org.jcae.netbeans.viewer3d.ViewManager;
 import org.jcae.vtk.View;
 import org.openide.DialogDescriptor;

@@ -22,6 +22,8 @@ package org.jcae.netbeans.mesh;
 
 import java.lang.reflect.InvocationTargetException;
 import javax.swing.Action;
+import org.jcae.mesh.xmldata.Group;
+import org.jcae.mesh.xmldata.Groups;
 import org.openide.actions.PropertiesAction;
 import org.openide.actions.RenameAction;
 import org.openide.nodes.AbstractNode;

@@ -22,6 +22,8 @@ package org.jcae.netbeans.mesh;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import org.jcae.mesh.xmldata.Group;
+import org.jcae.mesh.xmldata.Groups;
 import org.openide.nodes.Children.Array;
 import org.openide.nodes.Node;
 

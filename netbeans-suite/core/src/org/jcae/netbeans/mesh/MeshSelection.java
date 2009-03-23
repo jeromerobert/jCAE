@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import javax.swing.SwingUtilities;
+import org.jcae.mesh.xmldata.Groups;
 import org.jcae.netbeans.NodeSelectionManager;
 import org.jcae.netbeans.Utilities;
 import org.jcae.netbeans.viewer3d.CurrentViewableChangeListener;

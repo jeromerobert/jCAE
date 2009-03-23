@@ -21,9 +21,9 @@
 package org.jcae.netbeans.viewer3d;
 
 import java.util.HashMap;
+import org.jcae.mesh.xmldata.Groups;
 import org.jcae.netbeans.cad.CADSelection;
 import org.jcae.netbeans.cad.NbShape;
-import org.jcae.netbeans.mesh.Groups;
 import org.jcae.netbeans.mesh.MeshSelection;
 import org.jcae.vtk.View;
 import org.jcae.vtk.Viewable;

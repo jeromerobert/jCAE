@@ -27,6 +27,8 @@ import javax.swing.JOptionPane;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
+import org.jcae.mesh.xmldata.Group;
+import org.jcae.mesh.xmldata.Groups;
 import org.jcae.netbeans.viewer3d.EntitySelection;
 import org.jcae.netbeans.viewer3d.SelectionManager;
 import org.openide.ErrorManager;

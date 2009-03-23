@@ -18,13 +18,12 @@
  * (C) Copyright 2005-2009, by EADS France
  */
 
-package org.jcae.netbeans.mesh;
+package org.jcae.mesh.xmldata;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jcae.mesh.xmldata.XMLHelper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

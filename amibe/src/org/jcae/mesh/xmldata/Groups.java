@@ -18,7 +18,7 @@
  * (C) Copyright 2005-2009, by EADS France
  */
 
-package org.jcae.netbeans.mesh;
+package org.jcae.mesh.xmldata;
 
 import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
@@ -34,7 +34,6 @@ import javax.swing.*;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
-import org.jcae.mesh.xmldata.MeshExporter;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
