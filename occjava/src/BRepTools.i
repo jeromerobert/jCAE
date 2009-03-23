@@ -36,7 +36,7 @@
 	{
 		TopoDS_Shape toReturn=new TopoDS_Shape();
 		if(read(toReturn, file, builder))
-			return TopoDS_Shape.downcast(toReturn);
+			return TopoDS_Shape.create(TopoDS_Shape.getCPtr(toReturn));
 		else
 			return null;
 	}

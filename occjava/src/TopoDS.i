@@ -72,49 +72,56 @@
 %typemap(javaout) TopoDS_Shape*, TopoDS_Shape, const TopoDS_Shape&, const TopoDS_Compound &
 {
     long cPtr = $jnicall;
-    return (cPtr == 0) ? null : ($javaclassname)TopoDS_Shape.downcast(new $javaclassname(cPtr, $owner));
+    return ($javaclassname)TopoDS_Shape.create(cPtr);
 }
 
 %typemap(javacode) TopoDS_Shape
 %{
 	private long myTShape;
-	public static TopoDS_Shape downcast(TopoDS_Shape in)
+	protected static TopoDS_Shape create(long in)
+	{
+		if(in==0)
+			return null;
+		//second argument is not use in swig
+		int type = OccJavaJNI.TopoDS_Shape_shapeType(in, null);
+		return create(in, type);
+	}
+
+	protected static TopoDS_Shape create(long in, int type)
 	{
 		TopoDS_Shape toReturn=null;
-		if(in==null)
+		if(in==0)
 			return null;
-		switch(in.shapeType())
+		switch(type)
 		{
 			case TopAbs_ShapeEnum.COMPOUND:
-				toReturn=new TopoDS_Compound(getCPtr(in), true);
+				toReturn=new TopoDS_Compound(in, true);
 				break;
 			case TopAbs_ShapeEnum.COMPSOLID:
-				toReturn=new TopoDS_CompSolid(getCPtr(in), true);
+				toReturn=new TopoDS_CompSolid(in, true);
 				break;
 			case TopAbs_ShapeEnum.SOLID:
-				toReturn=new TopoDS_Solid(getCPtr(in), true);
+				toReturn=new TopoDS_Solid(in, true);
 				break;
 			case TopAbs_ShapeEnum.SHELL:
-				toReturn=new TopoDS_Shell(getCPtr(in), true);
+				toReturn=new TopoDS_Shell(in, true);
 				break;
 			case TopAbs_ShapeEnum.FACE:
-				toReturn=new TopoDS_Face(getCPtr(in), true);
+				toReturn=new TopoDS_Face(in, true);
 				break;
 			case TopAbs_ShapeEnum.WIRE:
-				toReturn=new TopoDS_Wire(getCPtr(in), true);
+				toReturn=new TopoDS_Wire(in, true);
 				break;
 			case TopAbs_ShapeEnum.EDGE:
-				toReturn=new TopoDS_Edge(getCPtr(in), true);
+				toReturn=new TopoDS_Edge(in, true);
 				break;
 			case TopAbs_ShapeEnum.VERTEX:
-				toReturn=new TopoDS_Vertex(getCPtr(in), true);
+				toReturn=new TopoDS_Vertex(in, true);
 				break;
 		}
-		in.swigCMemOwn=false;
 		toReturn.myTShape=toReturn.getTShape();
 		return toReturn;
-	}
-	
+    }
     public boolean isSame(TopoDS_Shape s)
     {
         /*if(myTShape==0)
@@ -148,14 +155,28 @@
 	{
 		return hashCode(Integer.MAX_VALUE);
 	}
-	
+
+	protected static TopoDS_Shape[] cArrayWrap(long[] ptrs)
+	{
+		TopoDS_Shape[] toReturn = new TopoDS_Shape[ptrs.length/2];
+		long ptr;
+		int type;
+		for (int i=0, j=0; i<toReturn.length; i++)
+		{  
+			ptr = ptrs[j++];
+			type = (int)ptrs[j++];
+			toReturn[i] = create(ptr, type);
+		}
+		return toReturn;
+	}
+
 	protected static long[] cArrayUnwrap(TopoDS_Shape[] arrayWrapper)
 	{
 		long[] cArray = new long[arrayWrapper.length];
 		for (int i=0; i<arrayWrapper.length; i++)
 		cArray[i] = TopoDS_Shape.getCPtr(arrayWrapper[i]);
 		return cArray;
-	}	
+	}
 %}
 
 // Note that TopoDS_Shape is no longer abstract (it was in libOccJava)
