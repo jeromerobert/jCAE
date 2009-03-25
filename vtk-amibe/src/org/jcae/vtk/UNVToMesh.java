@@ -21,10 +21,13 @@
 package org.jcae.vtk;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.zip.GZIPInputStream;
 
 /**
  *
@@ -73,7 +76,12 @@ public class UNVToMesh
 		UNVParser parser = new UNVParser();
 		try
 		{
-			parser.parse(new BufferedReader(new FileReader(filePath)));
+			InputStream in;
+			if(filePath.endsWith(".gz") || filePath.endsWith(".GZ"))
+				in = new GZIPInputStream(new FileInputStream(filePath));
+			else
+				in = new FileInputStream(filePath);
+			parser.parse(new BufferedReader(new InputStreamReader(in)));
 		} catch (Exception e)
 		{
 			System.err.println(e.getMessage());
