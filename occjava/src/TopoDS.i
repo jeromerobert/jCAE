@@ -78,6 +78,13 @@
 %typemap(javacode) TopoDS_Shape
 %{
 	private long myTShape;
+	protected static TopoDS_Shape downcast(TopoDS_Shape in)
+	{
+		TopoDS_Shape toReturn = create(getCPtr(in));
+		in.swigCMemOwn=false;
+		return toReturn;
+	}
+
 	protected static TopoDS_Shape create(long in)
 	{
 		if(in==0)
