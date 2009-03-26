@@ -126,6 +126,8 @@ public class ComputeEdgesConnectivity
 			n1=in.readInt();
 			n2=in.readInt();
 			n3=in.readInt();
+			if(n1 < 0 || n2 < 0 || n3 < 0)
+				continue;
 			e1=new Edge(n1,n2);
 			e2=new Edge(n2,n3);
 			e3=new Edge(n3,n1);

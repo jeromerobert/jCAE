@@ -136,7 +136,10 @@ public class AmibeBeanDomain
 		
 		for(int i=0; i<nodesID.length; i++)
 		{
-			fc.read(tmpbb, nodesID[i]*3*8);
+			int pos = nodesID[i]*3*8;
+			if(pos < 0)
+				pos = -pos;
+			fc.read(tmpbb, pos);
 			tmpbb.rewind();
 			tmpbb.asDoubleBuffer().get(tmp, 0, 3);
 			toReturn[i*3]=(float) tmp[0];
