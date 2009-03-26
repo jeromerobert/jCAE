@@ -802,7 +802,7 @@ public class KdTree
 		if (root.nItems == 0)
 			return null;
 		Vertex near = getNearVertex(mesh, v);
-		if (v.isManifold())
+		/*if (v.isManifold())
 		{
 			// Triangle vertices may be better candidates
 			Triangle t = (Triangle) v.getLink();
@@ -817,7 +817,7 @@ public class KdTree
 					target = tdist;
 				}
 			}
-		}
+		}*/
 		return getNearestVertex(mesh, v, near);
 	}
 

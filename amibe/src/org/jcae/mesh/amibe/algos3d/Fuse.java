@@ -120,7 +120,7 @@ public class Fuse
 		LOGGER.fine(""+nSubst+" node(s) are removed");
 		for (Triangle t: mesh.getTriangles())
 		{
-			for (int j = 0; j < 4; j++)
+			for (int j = 0; j < 3; j++)
 			{
 				Vertex n = t.vertex[j];
 				Vertex p = map.get(n);
