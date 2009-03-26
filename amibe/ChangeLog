@@ -1,3 +1,9 @@
+Thu Mar 26 13:48:00 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/util/KdTree.java: Let getNearVertex,
+	getNearestVertex and getNearestVertexDebug return null when
+	no point has been inserted yet.
+
 Mon Jan  5 17:50:02 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/MeshReader.java (readObject3D): Do not

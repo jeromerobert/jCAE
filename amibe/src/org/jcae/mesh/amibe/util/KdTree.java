@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -626,9 +626,9 @@ public class KdTree
 	 */
 	public final Vertex getNearVertex(Mesh mesh, Vertex v)
 	{
-		Cell current = root;
-		if (current.nItems == 0)
+		if (root.nItems == 0)
 			return null;
+		Cell current = root;
 		Cell last = null;
 		int s = gridSize;
 		int [] ijk = new int[dimension];
@@ -799,6 +799,8 @@ public class KdTree
 	 */
 	public final Vertex getNearestVertex(Mesh mesh, Vertex v)
 	{
+		if (root.nItems == 0)
+			return null;
 		Vertex near = getNearVertex(mesh, v);
 		if (v.isManifold())
 		{
@@ -828,8 +830,6 @@ public class KdTree
 	 */
 	private final Vertex getNearestVertex(Mesh mesh, Vertex v, Vertex start)
 	{
-		if (start == null)
-			return null;
 		if (logger.isLoggable(Level.FINE))
 			logger.fine("Nearest point of "+v);
 		
@@ -890,6 +890,8 @@ public class KdTree
 	 */
 	public Vertex getNearestVertexDebug(Mesh mesh, Vertex v)
 	{
+		if (root.nItems == 0)
+			return null;
 		Vertex ret = getNearVertex(mesh, v);
 		assert ret != null;
 		if (logger.isLoggable(Level.FINE))
