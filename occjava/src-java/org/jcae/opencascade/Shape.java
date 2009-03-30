@@ -118,7 +118,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		TYPE_MAP_XML_INV=Collections.unmodifiableMap(mmi);
 	}
 	
-	protected interface Attributes
+	public interface Attributes
 	{
 		String toXML();
 		void fromXML(Element node);

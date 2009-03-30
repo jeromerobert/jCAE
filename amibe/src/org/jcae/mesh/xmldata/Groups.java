@@ -69,14 +69,11 @@ public class Groups
 	private final ArrayList<Group> groups = new ArrayList<Group>();
 	
 	/** The absolute path to the mesh directory */
-	protected String meshFile = null;
-	protected String meshName = null;
-	//private final MeshSelection meshSelection;
-	
-	Groups()
+	protected String meshFile = null;	
+
+	Groups(String xmlPath)
 	{
-		//meshSelection = new MeshSelection(this);
-		//SelectionManager.getDefault().addEntitySelection(this, meshSelection);	
+		meshFile = xmlPath;
 	}
 		
 	public void addGroup(Group group)
@@ -95,10 +92,11 @@ public class Groups
 	 * @throws SAXException
 	 * @throws ParserConfigurationException
 	 */
-	public Group fuse(Collection<Group> listGroup) throws TransformerConfigurationException, TransformerException, ParserConfigurationException, SAXException, IOException
+	public Group fuse(Collection<Group> listGroup, String name)
+		throws TransformerConfigurationException, TransformerException,
+		ParserConfigurationException, SAXException, IOException
 	{
 		String xmlDir=meshFile;
-		System.err.println(Groups.class+": fusing groups");
 		Group fuseGroup = new Group();
 		int id = 0;
 		int number = 0;
@@ -108,7 +106,6 @@ public class Groups
 		for (int k = 0; k < groups.size(); k++)
 		{
 			Group g = groups.get(k);
-			System.err.println("lecture initiale : " + g.getName());
 			trianglesNumber = trianglesNumber + g.getNumberOfElements();
 		}
 		
@@ -183,7 +180,7 @@ public class Groups
 		fuseGroup.setId(id + 1);
 		fuseGroup.setNumberOfElements(number);
 		fuseGroup.setOffset(offset);
-		fuseGroup.setName("fuse_group");
+		fuseGroup.setName(name);
 		fuseGroup.addPropertyChangeListener(groupPropertyChangeListener);
 		groups.add(fuseGroup);
 		out.close();
@@ -211,6 +208,13 @@ public class Groups
 		}
 		
 		return fuseGroup;
+	}
+
+	public void fuse(Collection<Group> toFuse)
+		throws TransformerConfigurationException, TransformerException,
+		ParserConfigurationException, SAXException, IOException
+	{
+		fuse(toFuse, "fused_groups");
 	}
 
 	/**
@@ -440,9 +444,5 @@ public class Groups
 			exporter.write(stream);
 			stream.close();
 		}
-	}
-	public void setMeshName(String meshName)
-	{
-		this.meshName = meshName;
 	}
 }

@@ -58,8 +58,8 @@ public class GroupsReader
 
 	public static Groups getGroups(String xmlPath)
 	{
-		File xmlFile = new File(xmlPath);		
-		Groups groupList = new Groups();
+		File xmlFile = new File(xmlPath, "jcae3d");
+		Groups groupList = new Groups(xmlPath);
 		/* parser le fichier et obtenir un Document */
 		try
 		{

@@ -261,10 +261,7 @@ public class MeshNode extends DataNode implements ViewCookie
 		String meshDir=getMeshDirectory();
 		File xmlFile=new File(meshDir, "jcae3d");
         if (xmlFile.exists())
-        {
-            groups = GroupsReader.getGroups(xmlFile.getPath());
-            groups.setMeshFile(meshDir);
-        }
+            groups = GroupsReader.getGroups(meshDir);
         
         if(groupsNode!=null)
         {
