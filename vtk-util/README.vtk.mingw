@@ -1,0 +1,93 @@
+Cross compiling vtk 5.4 for Windows on Debian
+---------------------------------------------
+
+Required packages:
+- wine-core
+- mingw32-binutils
+- mingw32-runtimes
+- A Sun Windows JDK installed in wine
+
+Build VTK for Linux to create the required VTKCompileToolsConfig.cmake file.
+
+Create the toolchain-mingw.cmake file:
+
+# the name of the target operating system
+SET(CMAKE_SYSTEM_NAME Windows)
+
+# which compilers to use for C and C++
+SET(CMAKE_C_COMPILER i586-mingw32msvc-gcc)
+SET(CMAKE_CXX_COMPILER i586-mingw32msvc-g++)
+
+# here is the target environment located
+SET(CMAKE_FIND_ROOT_PATH /usr/i586-mingw32msvc /home/jerome/kitware/vtk-mingw-install )
+
+# adjust the default behaviour of the FIND_XXX() commands:
+# search headers and libraries in the target environment, search
+# programs in the host environment
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+
+
+
+Patch CMake to do not build libFooBar.dll files but FooBar.dll. Edit /usr/share/cmake-2.6/Modules/Platform/Windows-gcc.cmake:
+SET(CMAKE_SHARED_MODULE_PREFIX "")
+SET(CMAKE_SHARED_MODULE_PREFIX "")
+
+
+
+Change the CMake default configuration:
+
+ //Build Verdict with shared libraries.
+-BUILD_SHARED_LIBS:BOOL=OFF
++BUILD_SHARED_LIBS:BOOL=ON
+ 
+ //Build the testing tree.
+-BUILD_TESTING:BOOL=ON
++BUILD_TESTING:BOOL=OFF
+ 
+ //Flags used by the linker during the creation of dll's.
+-CMAKE_SHARED_LINKER_FLAGS:STRING=
++CMAKE_SHARED_LINKER_FLAGS:STRING=-Wl,--kill-at
+ 
++//The CMake toolchain file
++CMAKE_TOOLCHAIN_FILE:FILEPATH=/home/jerome/kitware/vtk-git/toolchain-mingw.cmake
+
++//The directory containing a CMake configuration file for VTKCompileTools.
++VTKCompileTools_DIR:PATH=/home/jerome/kitware/vtk-5.4-build
+
++//Path to a program.
++JAVA_ARCHIVE:FILEPATH=/usr/bin/jar
++
++//Path to a file.
++JAVA_AWT_INCLUDE_PATH:PATH=/home/jerome/.wine/drive_c/Program Files/Java/jdk1.6.0_12/include
++
++//Path to a library.
++JAVA_AWT_LIBRARY:FILEPATH=/home/jerome/.wine/drive_c/Program Files/Java/jdk1.6.0_12/lib/jawt.lib
++
++//Path to a program.
++JAVA_COMPILE:FILEPATH=/usr/bin/javac
++
++//Path to a file.
++JAVA_INCLUDE_PATH:PATH=/home/jerome/.wine/drive_c/Program Files/Java/jdk1.6.0_12/include
++
++//Path to a file.
++JAVA_INCLUDE_PATH2:PATH=/home/jerome/.wine/drive_c/Program Files/Java/jdk1.6.0_12/include/win32
++
++//Path to a library.
++JAVA_JVM_LIBRARY:FILEPATH=/home/jerome/.wine/drive_c/Program Files/Java/jdk1.6.0_12/lib/jvm.lib
++
++//Path to a program.
++JAVA_RUNTIME:FILEPATH=/home/jerome/.wine/drive_c/Program Files/Java/jdk1.6.0_12/jre/bin/java
+
+ //Wrap VTK classes into the Java language.
+-VTK_WRAP_JAVA:BOOL=OFF
++VTK_WRAP_JAVA:BOOL=ON
+
+
+
+If you get an error about vtksysEncodeExecutable.exe while the build fix Utilities/kwsys/CMakeFiles/vtksys.dir/build.make to run it with wine:
+
+-    cd /home/jerome/kitware/vtk-5.4-build-mingw/Utilities/kwsys && wine ../../bin/vtksysEncodeExecutable.exe /home/jerome/kitware/vtk-5.4-build-mingw/bin/vtksysProcessFwd9x.exe /home/jerome/kitware/vtk-5.4-build-mingw/Utilities/kwsys/vtksysProcessFwd9xEnc.c vtksys ProcessFwd9x
+
++    cd /home/jerome/kitware/vtk-5.4-build-mingw/Utilities/kwsys && ../../bin/vtksysEncodeExecutable.exe /home/jerome/kitware/vtk-5.4-build-mingw/bin/vtksysProcessFwd9x.exe /home/jerome/kitware/vtk-5.4-build-mingw/Utilities/kwsys/vtksysProcessFwd9xEnc.c vtksys ProcessFwd9x 
