@@ -15,7 +15,7 @@ LIBS := -L$(CASROOT)/mingw/lib -lTKBRep -lTKBool -lTKG2d -lTKG3d -lTKGeomBase -l
 CXX := i586-mingw32msvc-g++
 CC := i586-mingw32msvc-gcc
 CXXFLAGS := -O2 -g -march=pentium3
-LDFLAGS := -shared -Wl,--enable-auto-import -Wl,--enable-runtime-pseudo-reloc -Wl,-export-all-symbols
+LDFLAGS := -shared -Wl,--enable-auto-import -Wl,--enable-runtime-pseudo-reloc -Wl,-export-all-symbols -Wl,--kill-at
 CPPFLAGS := -I$(JAVA)/include -I$(JAVA)/include/win32 -I$(CASROOT)/inc -DWNT -D__MATH_WNT_H -DHAVE_NO_DLL
 JAVAGENSRCDIR := src-java/org/jcae/opencascade/jni/
 
@@ -29,5 +29,5 @@ src/OccJava_wrap.o : src/OccJava_wrap.cxx
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -o $@ $^
 
 src/OccJava_wrap.cxx : $(wildcard src/*.i)
-	swig -c++ -v $(CPPFLAGS) -Wall -java -package org.jcae.opencascade.jni -outdir $(JAVAGENSRCDIR) OccJava.i
+	swig -c++ -v $(CPPFLAGS) -Wall -java -package org.jcae.opencascade.jni -outdir $(JAVAGENSRCDIR) -o $@ -Isrc src/OccJava.i 
 	
