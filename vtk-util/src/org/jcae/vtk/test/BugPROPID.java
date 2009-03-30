@@ -20,7 +20,7 @@
 
 package org.jcae.vtk.test;
 
-import vtk.vtkSelection;
+import vtk.vtkSelectionNode;
 
 public class BugPROPID
 {
@@ -36,8 +36,7 @@ public class BugPROPID
 	}
 	public static void main(String[] args)
 	{		
-            vtkSelection selection = new vtkSelection();
-            System.out.println("TEST : " + selection.PROP_ID());
-            
+		vtkSelectionNode selection = new vtkSelectionNode();
+		System.out.println("TEST : " + selection.PROP_ID());
 	}
 }

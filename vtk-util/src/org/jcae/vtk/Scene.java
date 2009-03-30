@@ -34,6 +34,7 @@ import vtk.vtkIntArray;
 import vtk.vtkPlaneCollection;
 import vtk.vtkProp;
 import vtk.vtkSelection;
+import vtk.vtkSelectionNode;
 import vtk.vtkVisibleCellSelector;
 
 /**
@@ -215,10 +216,10 @@ public class Scene implements AbstractNode.ActorListener
 		}
 		
 		// Find the ID Selection of the actor
-		for (int i = 0; i < selection.GetNumberOfChildren(); ++i)
+		for (int i = 0; i < selection.GetNumberOfNodes(); ++i)
 		{
-			vtkSelection child = selection.GetChild(i);
-			int IDActor = child.GetProperties().Get(selection.PROP_ID());
+			vtkSelectionNode child = selection.GetNode(i);
+			int IDActor = child.GetProperties().Get(child.PROP_ID());
 			vtkProp prop = selector.GetActorFromId(IDActor);
 
 			if (prop != null)

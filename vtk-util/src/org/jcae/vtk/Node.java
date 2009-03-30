@@ -35,6 +35,7 @@ import vtk.vtkLookupTable;
 import vtk.vtkPolyData;
 import vtk.vtkPolyDataMapper;
 import vtk.vtkSelection;
+import vtk.vtkSelectionNode;
 
 /**
  *
@@ -606,19 +607,23 @@ public class Node extends AbstractNode
 
 	private vtkPolyData selectInto(vtkPolyData input, int[] cellID)
 	{
-		vtkSelection sel = new vtkSelection();
+		vtkSelection selection = new vtkSelection();
+		vtkSelectionNode selectionNode = new vtkSelectionNode();
 		//sel.ReleaseDataFlagOn();
-		sel.GetProperties().Set(sel.CONTENT_TYPE(), 4); // 4 MEANS INDICES (see the enumeration)
+		// 4 MEANS INDICES (see the enumeration)
+		selectionNode.GetProperties().Set(selectionNode.CONTENT_TYPE(), 4);
 
-		sel.GetProperties().Set(sel.FIELD_TYPE(), 0); // 0 MEANS CELLS
+		// 0 MEANS CELLS
+		selectionNode.GetProperties().Set(selectionNode.FIELD_TYPE(), 0);
 
 		// list of cells to be selected
 		vtkIdTypeArray arr = Utils.setValues(cellID);
-		sel.SetSelectionList(arr);
+		selectionNode.SetSelectionList(arr);
 
+		selection.AddNode(selectionNode);
 		vtkExtractSelectedPolyDataIds selFilter = new vtkExtractSelectedPolyDataIds();
 		selFilter.ReleaseDataFlagOn();
-		selFilter.SetInput(1, sel);
+		selFilter.SetInput(1, selection);
 		selFilter.SetInput(0, input);
 
 		vtkPolyData dataFiltered = selFilter.GetOutput();

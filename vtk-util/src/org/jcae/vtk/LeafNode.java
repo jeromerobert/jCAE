@@ -32,6 +32,7 @@ import vtk.vtkIdTypeArray;
 import vtk.vtkPolyData;
 import vtk.vtkPolyDataMapper;
 import vtk.vtkSelection;
+import vtk.vtkSelectionNode;
 
 /**
  * TODO replace Color by javax.vecmath.Color3f
@@ -389,15 +390,19 @@ public class LeafNode extends AbstractNode
 		getSelectionMapperCustomiser().customiseSelectionMapper(selectionMapper);
 
 		vtkSelection sel = new vtkSelection();
+		vtkSelectionNode selectionNode = new vtkSelectionNode();
 		//sel.ReleaseDataFlagOn();
-		sel.GetProperties().Set(sel.CONTENT_TYPE(), 4); // 4 MEANS INDICES (see the enumeration)
+		// 4 MEANS INDICES (see the enumeration)
+		selectionNode.GetProperties().Set(selectionNode.CONTENT_TYPE(), 4);
 
-		sel.GetProperties().Set(sel.FIELD_TYPE(), 0); // 0 MEANS CELLS
+		// 0 MEANS CELLS
+		selectionNode.GetProperties().Set(selectionNode.FIELD_TYPE(), 0);
 
 		// list of cells to be selected
 		vtkIdTypeArray arr = Utils.setValues(selection);
-		sel.SetSelectionList(arr);
-
+		selectionNode.SetSelectionList(arr);
+		sel.AddNode(selectionNode);
+		
 		vtkExtractSelectedPolyDataIds selFilter = new vtkExtractSelectedPolyDataIds();
 		selFilter.ReleaseDataFlagOn();
 		selFilter.SetInput(1, sel);
