@@ -191,6 +191,15 @@ public class CameraManager
 		relativeAxes.SetVisibility(Utils.booleanToInt(visibility));
 		canvas.RenderSecured();
 	}
+
+	public void setRotationCenter(double x, double y, double z) 
+	{
+		double[] position = new double[]{x,y,z};
+		canvas.lock();
+		canvas.GetRenderer().GetActiveCamera().SetFocalPoint(position);
+		canvas.RenderSecured();
+		canvas.unlock();
+	}
 	
 	public void setOriginAxisVisible(boolean visibility)
 	{
