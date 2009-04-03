@@ -14,8 +14,10 @@ JAVA := /home/jerome/.wine/drive_c/Java/jdk1.6.0_12/
 LIBS := -L$(CASROOT)/mingw/lib -lTKBRep -lTKBool -lTKG2d -lTKG3d -lTKGeomBase -lTKIGES -lTKMath -lTKOffset -lTKXSBase -lTKernel -lTKSTEP -lTKPrim -lTKTopAlgo -lTKFillet -lTKMesh -lTKBO -lTKGeomAlgo -lTKShHealing -lTKSTEPBase
 CXX := i586-mingw32msvc-g++
 CC := i586-mingw32msvc-gcc
-CXXFLAGS := -O2 -g -march=pentium3
-LDFLAGS := -shared -Wl,--enable-auto-import -Wl,--enable-runtime-pseudo-reloc -Wl,-export-all-symbols -Wl,--kill-at
+
+#strict-aliasing optimization break all Upcast swig function. The return upcasted pointer is always NULL. So we disable this optimization.
+CXXFLAGS := -O2 -g -march=pentium3 -fno-strict-aliasing
+LDFLAGS := -shared -Wl,--enable-auto-import -Wl,--enable-runtime-pseudo-reloc -Wl,-export-all-symbols -Wl,--add-stdcall-alias
 CPPFLAGS := -I$(JAVA)/include -I$(JAVA)/include/win32 -I$(CASROOT)/inc -DWNT -D__MATH_WNT_H -DHAVE_NO_DLL
 JAVAGENSRCDIR := src-java/org/jcae/opencascade/jni/
 
