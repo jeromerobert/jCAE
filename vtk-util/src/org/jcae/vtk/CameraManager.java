@@ -201,6 +201,20 @@ public class CameraManager
 		canvas.unlock();
 	}
 	
+	public void zoomTo(float x, float y, float z, float r) 
+	{
+		double[] pos = new double[]{x,y,z};
+		canvas.lock();
+		canvas.GetRenderer().GetActiveCamera().SetFocalPoint(pos);
+		double[] n=canvas.GetRenderer().GetActiveCamera().GetDirectionOfProjection();
+		pos[0]-=r*n[0];
+		pos[1]-=r*n[1];
+		pos[2]-=r*n[2];
+		canvas.GetRenderer().GetActiveCamera().SetPosition(pos);
+		canvas.RenderSecured();
+		canvas.unlock();
+	}
+	
 	public void setOriginAxisVisible(boolean visibility)
 	{
 		int iVisibility = (visibility) ? 1 : 0;
