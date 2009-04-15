@@ -20,19 +20,14 @@
 package org.jcae.vtk;
 
 
-import gnu.trove.TObjectIntHashMap;
-import gnu.trove.TObjectIntIterator;
 import java.awt.Dimension;
 import java.awt.event.KeyEvent;
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import javax.swing.SwingUtilities;
+import vtk.vtkActorCollection;
 import vtk.vtkCanvas;
-import vtk.vtkGlobalJavaHash;
 import vtk.vtkInteractorStyleTrackballCamera;
+import vtk.vtkMapper;
 
 /**
  * This class is temporary. It permits to correct bugs on VTK.
@@ -232,5 +227,24 @@ public class Canvas extends vtkCanvas
 	@Override
 	public void keyPressed(KeyEvent e)
 	{
+	}
+
+	/**
+	 * Set the ImmediadeRenderingMode on the current view
+	 * @param mode
+	 */
+	public void setImmediateRenderingMode(boolean mode) {
+		
+		vtkMapper mapper;
+		vtkActorCollection listOfActors = GetRenderer().GetActors();
+		int nbActors = listOfActors.GetNumberOfItems();
+
+		listOfActors.InitTraversal();
+		for (int i = 0; i < nbActors; ++i)
+		{
+			//browsing the list of actors and getting their associated mappers
+			mapper = listOfActors.GetNextActor().GetMapper();
+			mapper.SetImmediateModeRendering(Utils.booleanToInt(mode));
+		}
 	}
 }
