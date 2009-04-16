@@ -1,3 +1,26 @@
+Thu Apr 16 18:08:11 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/DoubleFileReader.java
+	  src/org/jcae/mesh/xmldata/DoubleFileReaderByDirectBuffer.java
+	  src/org/jcae/mesh/xmldata/DoubleFileReaderByMmap.java
+	  src/org/jcae/mesh/xmldata/IntFileReader.java
+	  src/org/jcae/mesh/xmldata/IntFileReaderByDirectBuffer.java
+	  src/org/jcae/mesh/xmldata/IntFileReaderByMmap.java:  Helper classes
+	to read mesh binary files.  The current solution with MappedByteBuffer
+	is not very attractive since there is no unmap() method, see
+	  http://bugs.sun.com/bugdatabase/view_bug.do;:YfiG?bug_id=4724038
+	DoubleFileReaderByMmap and IntFileReaderByMmap are provided for now
+	to easily switch back to MappedByteBuffer if needed.
+	* src/org/jcae/mesh/xmldata/tests/BenchmarkReadLargeFiles.java:
+	Tests to check that IntFileReaderByDirectBuffer works as expected.
+	* src/org/jcae/mesh/bora/xmldata/Storage.java
+	  src/org/jcae/mesh/xmldata/Groups.java
+	  src/org/jcae/mesh/xmldata/MMesh1DReader.java
+	  src/org/jcae/mesh/xmldata/MeshExporter.java
+	  src/org/jcae/mesh/xmldata/MeshReader.java
+	  src/org/jcae/mesh/xmldata/MeshToMMesh3DConvert.java: Replaced
+	MappedByteBuffer by IntFileReader and DoubleFileReader.
+
 Thu Mar 26 13:48:00 CET 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/util/KdTree.java: Let getNearVertex,
