@@ -94,7 +94,7 @@ public class DoubleFileReaderByMmap implements DoubleFileReader
 		{
 			fc.close();
 		} catch (IOException ex) {/* Do not care */}
-		MeshExporter.clean(bb);
+		IntFileReaderByMmap.clean(bb);
 	}
 
 }

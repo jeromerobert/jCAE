@@ -30,13 +30,9 @@ import java.io.FileOutputStream;
 import java.io.DataOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.PrintStream;
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.text.FieldPosition;
 import java.text.ParsePosition;
 import java.text.DecimalFormatSymbols;
@@ -190,54 +186,6 @@ abstract public class MeshExporter
 	protected int[][] groups;
 	protected String[] names;
 	private int numberOfTriangles;
-	
-	/**
-	 * Workaround for Bug ID4724038.
-	 * see http://bugs.sun.com/bugdatabase/view_bug.do;:YfiG?bug_id=4724038
-	 */
-	public static void clean(final MappedByteBuffer buffer)
-	{
-		try
-		{
-			Class cleanerClass=Class.forName("sun.misc.Cleaner");
-			final Method cleanMethod=cleanerClass.getMethod("clean", null);
-			AccessController.doPrivileged(new PrivilegedAction()
-			{
-				public Object run()
-				{
-					try
-					{
-						Method getCleanerMethod = buffer.getClass().getMethod(
-							"cleaner", new Class[0]);
-						
-						getCleanerMethod.setAccessible(true);
-						Object cleaner = getCleanerMethod.invoke(buffer,new Object[0]);
-						if(cleaner!=null)
-						{
-							cleanMethod.invoke(cleaner, null);
-						}
-					}
-					catch(Exception e)
-					{
-						e.printStackTrace();
-					}
-					return null;
-				}
-			});
-		}		
-		catch(ClassNotFoundException ex)
-		{
-			//Not a Sun JVM so we exit.
-		}
-		catch (SecurityException e)
-		{
-			e.printStackTrace();
-		}
-		catch (NoSuchMethodException e)
-		{
-			e.printStackTrace();
-		}
-	}
 	
 	/**
 	 * @param directory The directory which contains 3d files
