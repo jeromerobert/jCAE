@@ -157,11 +157,13 @@ public class Scene implements AbstractNode.ActorListener
 		if (checkColorDepth)
 		{
 			canvas.lock();
-			if (canvas.GetRenderWindow().GetColorBufferSizes(new vtkIntArray()) < 24)
+			vtkIntArray tmp = new vtkIntArray();
+			if (canvas.GetRenderWindow().GetColorBufferSizes(tmp) < 24)
 			{
 				canvas.unlock();
 				throw new RuntimeException("Color depth is lower than 24 bits, picking does not work");
 			}
+			tmp.Delete();
 			canvas.unlock();
 			checkColorDepth = false;
 		}
@@ -243,6 +245,8 @@ public class Scene implements AbstractNode.ActorListener
 				break;
 			}
 		}
+		selection.Delete();
+		selector.Delete();
 	}
 
 	private void selectAllNodes(PickContext pickContext)

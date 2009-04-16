@@ -229,16 +229,19 @@ public class View extends Canvas {
 
 		boolean futureIsPoint = mode == MouseMode.POINT_SELECTION ||
 				mode == MouseMode.CHANGE_ROTATION_CENTER;
+		vtkInteractorStyleTrackballCamera i;
 
 		if (actualIsPoint && !futureIsPoint)
 		{
-			//getIren().GetInteractorStyle().EnabledOff();
-			getIren().SetInteractorStyle(new vtkInteractorStyleRubberBand3D());
+			vtkInteractorStyleRubberBand3D it = new vtkInteractorStyleRubberBand3D();
+			getIren().SetInteractorStyle(it);
+			it.Delete();
 		}
 		else if (!actualIsPoint && futureIsPoint)
 		{
-			//getIren().GetInteractorStyle().EnabledOff();
-			getIren().SetInteractorStyle(new vtkInteractorStyleTrackballCamera());
+			vtkInteractorStyleTrackballCamera it = new vtkInteractorStyleTrackballCamera();
+			getIren().SetInteractorStyle(it);
+			it.Delete();
 		}
 
 		mouseMode = mode;

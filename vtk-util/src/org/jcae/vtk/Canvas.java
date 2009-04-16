@@ -95,6 +95,7 @@ public class Canvas extends vtkCanvas
 				new vtkInteractorStyleTrackballCamera();
 		style.AutoAdjustCameraClippingRangeOn();
 		getIren().SetInteractorStyle(style);
+		style.Delete();
 	}
 
 	/**

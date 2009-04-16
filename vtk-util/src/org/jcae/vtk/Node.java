@@ -29,6 +29,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import vtk.vtkActor;
 import vtk.vtkExtractSelectedPolyDataIds;
+import vtk.vtkGlobalJavaHash;
 import vtk.vtkIdTypeArray;
 import vtk.vtkIntArray;
 import vtk.vtkLookupTable;
@@ -405,7 +406,11 @@ public class Node extends AbstractNode
 
 		vtkIntArray idsNative = new vtkIntArray();
 		idsNative.SetJavaArray(ids);
+		//the hashmap is not updated by .Delete()
+		vtkGlobalJavaHash.PointerToReference.clear();
 		data.GetCellData().SetScalars(idsNative);
+		idsNative.Delete();
+		idsNative = null;
 		timeStampData();
 
 		if(mapper == null)
@@ -447,6 +452,7 @@ public class Node extends AbstractNode
 			table.SetTableValue(i, (double) color.getRed() / 255., (double) color.getGreen() / 255., (double) color.getBlue() / 255., (double) color.getAlpha() / 255.);
 		}
 		mapper.SetLookupTable(table);
+		table.Delete();
 		mapper.UseLookupTableScalarRangeOn();
 		mapper.SetScalarModeToUseCellData();
 

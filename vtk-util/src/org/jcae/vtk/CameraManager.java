@@ -118,6 +118,8 @@ public class CameraManager
 		actors.InitTraversal();
 		for (vtkProp prop; (prop = actors.GetNextProp()) != null; )
 			prop.PickableOff();
+		actors.Delete();
+		actors = null;
 		
 		marker = new vtkOrientationMarkerWidget();
 		marker.SetOrientationMarker(relativeAxes);

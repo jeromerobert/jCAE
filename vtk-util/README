@@ -1,0 +1,33 @@
+About VTK and garbage collector
+-------------------------------
+
+Some VTK object manager X11 resource and must always be released between a 
+vtkRenderer.Lock and vtkRenderer.Unlock call. If not segfault (or other
+strange things may happen).
+
+List of object which must be carrefully collected (to be completed):
+- vtkPolyDataMapper
+
+To detect which object are collected at a given time you may change the
+vtkObjectBase class:
+
+	private StackTraceElement[] creationStack;
+
+	public vtkObjectBase()
+	{
+		creationStack = Thread.currentThread().getStackTrace();
+	}
+
+	@Override
+	protected void finalize() {
+		if (!vtkDeleted)
+		{
+			Exception e = new Exception();
+			e.setStackTrace(creationStack);
+			e.printStackTrace(System.err);
+			//Delete();
+		}
+	}
+
+Java writting is buffered so Delete must be commented. Else a segfault
+may occure before the stack has been displayed.

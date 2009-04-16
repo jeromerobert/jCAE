@@ -658,6 +658,8 @@ public class Utils
 		d.SetJavaArray(points);
 		d.SetNumberOfComponents(3);
 		vtkPoints.SetData(d);
+		d.Delete();
+		d = null;
 		return vtkPoints;
 	}
 
@@ -669,6 +671,8 @@ public class Utils
 		d.SetJavaArray(points);
 		d.SetNumberOfComponents(3);
 		vtkPoints.SetData(d);
+		d.Delete();
+		d = null;
 		return vtkPoints;
 	}
 	
@@ -791,6 +795,8 @@ public class Utils
 		intArray.SetJavaArray(cells);
 		array.DeepCopy(intArray);
 		vtkCells.SetCells(cellNumber, array);
+		array.Delete();
+		intArray.Delete();
 		return vtkCells;
 	}
 
@@ -811,7 +817,9 @@ public class Utils
 	{
 		vtkIntArray iarray = new vtkIntArray();
 		iarray.DeepCopy(idarray);
-		return iarray.GetJavaArray();
+		int[] toReturn = iarray.GetJavaArray();
+		iarray.Delete();
+		return toReturn;
 	}
 
 	public static vtkIdTypeArray setValues(int[] values)

@@ -25,8 +25,10 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import vtk.vtkActor;
+import vtk.vtkCellArray;
 import vtk.vtkFloatArray;
 import vtk.vtkMapper;
+import vtk.vtkPoints;
 import vtk.vtkPolyData;
 import vtk.vtkPolyDataMapper;
 import vtk.vtkPolyDataNormals;
@@ -408,11 +410,29 @@ public abstract class AbstractNode
 	
 	protected void createData(LeafNode.DataProvider dataProvider)
 	{
+		if(data != null)
+			data.Delete();
+		
 		data = new vtkPolyData();
-		data.SetPoints(Utils.createPoints(dataProvider.getNodes()));
-		data.SetVerts(Utils.createCells(dataProvider.getNbrOfVertices(), dataProvider.getVertices()));
-		data.SetLines(Utils.createCells(dataProvider.getNbrOfLines(), dataProvider.getLines()));
-		data.SetPolys(Utils.createCells(dataProvider.getNbrOfPolys(), dataProvider.getPolys()));
+
+		vtkPoints p = Utils.createPoints(dataProvider.getNodes());
+		data.SetPoints(p);
+		p.Delete();
+		p = null;
+
+		vtkCellArray cells = Utils.createCells(dataProvider.getNbrOfVertices(),
+			dataProvider.getVertices());
+		data.SetVerts(cells);		
+		cells.Delete();
+		
+		cells=Utils.createCells(dataProvider.getNbrOfLines(), dataProvider.getLines());
+		data.SetLines(cells);
+		cells.Delete();
+
+		cells=Utils.createCells(dataProvider.getNbrOfPolys(), dataProvider.getPolys());
+		data.SetPolys(cells);
+		cells.Delete();
+		cells = null;
 				
 		if(LOGGER.isLoggable(Level.FINEST))
 		{
