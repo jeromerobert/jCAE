@@ -24,8 +24,6 @@ import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
-import java.nio.IntBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.*;
 import java.util.logging.Level;
@@ -335,24 +333,12 @@ public class Groups
 	public int[] readTrianglesGroup(File fileGroup, Group g)
 	{		
 		int[] trianglesGroup = null;
-		// Open the file and then get a channel from the stream
-		FileInputStream fis = null;
+		IntFileReader ifr = null;
 		try
 		{
-			fis = new FileInputStream(fileGroup);
-			FileChannel fc = fis.getChannel();
-			// Get the file's size and then map it into memory
-			int sz = (int) fc.size();
-			MappedByteBuffer bb =
-				fc.map(FileChannel.MapMode.READ_ONLY, g.getOffset() * 4,
-				g.getNumberOfElements() * 4);
-			IntBuffer inb = bb.asIntBuffer();
+			ifr = new IntFileReaderByDirectBuffer(fileGroup);
 			trianglesGroup = new int[g.getNumberOfElements()];
-			inb.get(trianglesGroup);
-			fc.close();
-			fis.close();
-			MeshExporter.clean(bb);
-			return trianglesGroup;
+			ifr.get(g.getOffset(), trianglesGroup);
 		}
 		catch (IOException ex)
 		{
@@ -360,14 +346,7 @@ public class Groups
 		}
 		finally
 		{
-			try
-			{
-				fis.close();
-			}
-			catch (IOException ex)
-			{
-				Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.SEVERE, ex.getMessage(), ex);
-			}
+			ifr.close();
 		}
 		return trianglesGroup;
 	}

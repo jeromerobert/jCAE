@@ -116,16 +116,13 @@ public class MMesh1DReader
 				"/jcae/mesh/submesh/nodes/references/file/@location", document);
 			if (refFile.charAt(0) != File.separatorChar)
 				refFile = xmlDir+File.separator+refFile;
-			FileChannel fcR = new FileInputStream(refFile).getChannel();
-			MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L, fcR.size());
-			IntBuffer refsBuffer = bbR.asIntBuffer();
+			IntFileReader ifrR = new IntFileReaderByDirectBuffer(new File(refFile));
+
 			String edgesFile = xpath.evaluate(
 				"/jcae/mesh/submesh/beams/file/@location", document);
 			if (edgesFile.charAt(0) != File.separatorChar)
 				edgesFile = xmlDir+File.separator+edgesFile;
-			FileChannel fcE = new FileInputStream(edgesFile).getChannel();
-			MappedByteBuffer bbE = fcE.map(FileChannel.MapMode.READ_ONLY, 0L, fcE.size());
-			IntBuffer edgesBuffer = bbE.asIntBuffer();
+			IntFileReader ifrE = new IntFileReaderByDirectBuffer(new File(edgesFile));
 
 			NodeList submeshList = (NodeList) xpath.evaluate(
 				"/jcae/mesh/submesh", document.getDocumentElement(),
@@ -152,7 +149,7 @@ public class MMesh1DReader
 				Node submeshNodes = getChild(submeshElement, "nodes");				
 				int numberOfReferences =  getReferenceNumber(submeshNodes);
 				int [] refs = new int[2*numberOfReferences];
-				refsBuffer.get(refs);
+				ifrR.get(refs);
 				for (i=0; i < numberOfReferences; i++)
 					refs[2*i] -= offset;
 				
@@ -184,19 +181,17 @@ public class MMesh1DReader
 					
 				for (i=0; i < numberOfEdges; i++)
 				{
-					MNode1D pt1 = nodelist[edgesBuffer.get() - offset];
-					MNode1D pt2 = nodelist[edgesBuffer.get() - offset];
+					MNode1D pt1 = nodelist[ifrE.get() - offset];
+					MNode1D pt2 = nodelist[ifrE.get() - offset];
 					MEdge1D e = new MEdge1D(pt1, pt2);
 					submesh.getEdges().add(e);
 				}
 				offset += numberOfNodes;
 			}
-			fcE.close();
-			MeshExporter.clean(bbE);
+			ifrE.close();
 			fcN.close();
 			MeshExporter.clean(bbN);
-			fcR.close();
-			MeshExporter.clean(bbR);
+			ifrR.close();
 		}
 		catch(Exception ex)
 		{

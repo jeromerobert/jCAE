@@ -27,10 +27,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.channels.FileChannel.MapMode;
 import java.util.logging.Logger;
+import org.jcae.mesh.xmldata.IntFileReader;
+import org.jcae.mesh.xmldata.IntFileReaderByDirectBuffer;
 import org.w3c.dom.Element;
 
 public class AmibeBeanDomain
@@ -85,14 +85,10 @@ public class AmibeBeanDomain
 		Element beamE=(Element) subMesh.getElementsByTagName("beams").item(0);
 		Element fileE=(Element) beamE.getElementsByTagName("file").item(0);
 		File f=new File(directory, fileE.getAttribute("location"));
-		FileInputStream fis = new FileInputStream(f);
-		FileChannel fc=fis.getChannel();
-		MappedByteBuffer bb = fc.map(MapMode.READ_ONLY, 0, f.length());
+		IntFileReader irf = new IntFileReaderByDirectBuffer(f);
 		int[] toReturn=new int[(int) (f.length()/4)];
-		bb.asIntBuffer().get(toReturn);
-		AmibeDomain.clean(bb);
-		fc.close();
-		fis.close();
+		irf.get(toReturn);
+		irf.close();
 		return toReturn;
 	}
 

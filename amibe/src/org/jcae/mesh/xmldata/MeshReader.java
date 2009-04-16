@@ -36,7 +36,6 @@ import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.DoubleBuffer;
-import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Collection;
@@ -102,13 +101,9 @@ public class MeshReader
 			
 			if (refFile.charAt(0) != File.separatorChar)
 				refFile = xmlDir + File.separator + refFile;
-			
-			FileChannel fcR = new FileInputStream(refFile).getChannel();
-			
-			MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L,
-				fcR.size());
-			
-			IntBuffer refsBuffer = bbR.asIntBuffer();
+
+			IntFileReader ifrR = new IntFileReaderByDirectBuffer(new File(refFile));
+
 			String nodesFile = xpath.evaluate("file/@location", submeshNodes);
 			
 			if (nodesFile.charAt(0) != File.separatorChar) nodesFile = xmlDir
@@ -125,15 +120,13 @@ public class MeshReader
 				submeshTriangles);
 			if (trianglesFile.charAt(0) != File.separatorChar)
 				trianglesFile = xmlDir+File.separator+trianglesFile;
-			FileChannel fcT = new FileInputStream(trianglesFile).getChannel();
-			MappedByteBuffer bbT = fcT.map(FileChannel.MapMode.READ_ONLY, 0L, fcT.size());
-			IntBuffer trianglesBuffer = bbT.asIntBuffer();
+			IntFileReader ifrT = new IntFileReaderByDirectBuffer(new File(trianglesFile));
 
 			int numberOfReferences = Integer.parseInt(
 				xpath.evaluate("references/number/text()", submeshNodes));
 			logger.fine("Reading "+numberOfReferences+" references");
 			int [] refs = new int[numberOfReferences];
-			refsBuffer.get(refs);
+			ifrR.get(refs);
 			
 			int numberOfNodes = Integer.parseInt(
 				xpath.evaluate("number/text()", submeshNodes));
@@ -182,7 +175,7 @@ public class MeshReader
 				boolean outer = false;
 				for (int j = 0; j < 3; j++)
 				{
-					ind[j] = trianglesBuffer.get();
+					ind[j] = ifrT.get();
 					if (ind[j] < 0)
 					{
 						ind[j] = - ind[j];
@@ -199,12 +192,10 @@ public class MeshReader
 				}
 				mesh.add(facelist[i]);
 			}
-			fcT.close();
-			MeshExporter.clean(bbT);
+			ifrT.close();
 			fcN.close();
 			MeshExporter.clean(bbN);
-			fcR.close();
-			MeshExporter.clean(bbR);
+			ifrR.close();
 			//  Build adjacency relations
 			mesh.buildAdjacency();
 		}
@@ -257,16 +248,14 @@ public class MeshReader
 			{
 				if (refFile.charAt(0) != File.separatorChar)
 					refFile = xmlDir+File.separator+refFile;
-				FileChannel fcR = new FileInputStream(refFile).getChannel();
-				MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L, fcR.size());
-				IntBuffer refsBuffer = bbR.asIntBuffer();
+				IntFileReader ifrR = new IntFileReaderByDirectBuffer(new File(refFile));
+
 				numberOfReferences = Integer.parseInt(
 					xpath.evaluate("references/number/text()", submeshNodes));
 				logger.fine("Reading "+numberOfReferences+" references");
 				refs = new int[numberOfReferences];
-				refsBuffer.get(refs);
-				fcR.close();
-				MeshExporter.clean(bbR);
+				ifrR.get(refs);
+				ifrR.close();
 			}
 			
 			String nodesFile = xpath.evaluate("file/@location", submeshNodes);
@@ -327,9 +316,8 @@ public class MeshReader
 				submeshTriangles);
 			if (trianglesFile.charAt(0) != File.separatorChar)
 				trianglesFile = xmlDir+File.separator+trianglesFile;
-			FileChannel fcT = new FileInputStream(trianglesFile).getChannel();
-			MappedByteBuffer bbT = fcT.map(FileChannel.MapMode.READ_ONLY, 0L, fcT.size());
-			IntBuffer trianglesBuffer = bbT.asIntBuffer();
+			IntFileReader ifrT = new IntFileReaderByDirectBuffer(new File(trianglesFile));
+			
 			int numberOfTriangles = Integer.parseInt(
 				xpath.evaluate("number/text()", submeshTriangles));
 			logger.fine("Reading "+numberOfTriangles+" elements");
@@ -341,7 +329,7 @@ public class MeshReader
 				boolean outer = false;
 				for (int j = 0; j < 3; j++)
 				{
-					ind[j] = trianglesBuffer.get();
+					ind[j] = ifrT.get();
 					if (ind[j] < 0)
 					{
 						ind[j] = - ind[j];
@@ -355,8 +343,7 @@ public class MeshReader
 					mesh.add(facelist[i]);
 				}
 			}
-			fcT.close();
-			MeshExporter.clean(bbT);
+			ifrT.close();
 			
 			Node groupsElement = (Node) xpath.evaluate("groups", submeshElement,
 				XPathConstants.NODE);
@@ -365,9 +352,8 @@ public class MeshReader
 			String groupsFile = xpath.evaluate("file/@location", groupsList.item(0));
 			if (groupsFile.charAt(0) != File.separatorChar)
 				groupsFile = xmlDir+File.separator+groupsFile;
-			FileChannel fcG = new FileInputStream(groupsFile).getChannel();
-			MappedByteBuffer bbG = fcG.map(FileChannel.MapMode.READ_ONLY, 0L, fcG.size());
-			IntBuffer groupsBuffer = bbG.asIntBuffer();
+			IntFileReader ifrG = new IntFileReaderByDirectBuffer(new File(groupsFile));
+
 			// WARNING: xpath.evaluate() scans the whole XML document and not context
 			// node only, which is very counter-intuitive.  This will dramatically slow
 			// down processing if there are thousands of groups.
@@ -384,10 +370,9 @@ public class MeshReader
 				int id = Integer.parseInt(groupNode.getAttribute("id"));
 				logger.fine("Group "+id+": reading "+numberOfElements+" elements");
 				for (int j=0; j < numberOfElements; j++)
-					facelist[groupsBuffer.get(fileOffset+j)].setGroupId(id);
+					facelist[ifrG.get(fileOffset+j)].setGroupId(id);
 			}
-			fcG.close();
-			MeshExporter.clean(bbG);
+			ifrG.close();
 			//  Build adjacency relations
 			if (mesh.hasAdjacency())
 			{
@@ -457,9 +442,7 @@ public class MeshReader
 			if (groupsFileName.charAt(0) != File.separatorChar)
 				groupsFileDir = xmlDir;
 			File oldGroupsFile = new File(groupsFileDir, groupsFileName);
-			FileChannel fcG = new FileInputStream(oldGroupsFile).getChannel();
-			MappedByteBuffer bbG = fcG.map(FileChannel.MapMode.READ_ONLY, 0L, fcG.size());
-			IntBuffer groupsBuffer = bbG.asIntBuffer();
+			IntFileReader ifrG = new IntFileReaderByDirectBuffer(oldGroupsFile);
 			int maxId = -1;
 			MGroup3D [] groups = new MGroup3D[numberOfGroups];
 			TIntIntHashMap numGroups = new TIntIntHashMap(numberOfGroups);
@@ -475,11 +458,10 @@ public class MeshReader
 				maxId = Math.max(maxId, id);
 				Collection newfacelist = new ArrayList(numberOfElements);
 				for (int j=0; j < numberOfElements; j++)
-					newfacelist.add(Integer.valueOf(groupsBuffer.get(fileOffset+j)));
+					newfacelist.add(Integer.valueOf(ifrG.get(fileOffset+j)));
 				groups[i] = new MGroup3D(id, name, newfacelist);
 			}
-			fcG.close();
-			MeshExporter.clean(bbG);
+			ifrG.close();
 			// Now merge groups
 			Document documentGroup = XMLHelper.parseXML(new File(xmlDir, xmlGroupsFile));
 			Node newGroupsElement = (Node) xpath.evaluate("/mergegroups",

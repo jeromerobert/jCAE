@@ -364,22 +364,13 @@ abstract public class MeshExporter
 			String groupFileN=((Element)e.getElementsByTagName("file").item(0)).getAttribute("location");
 			String os=((Element)e.getElementsByTagName("file").item(0)).getAttribute("offset");
 			File groupFile=new File(directory, groupFileN);
-			long offset=Long.parseLong(os);
+			int offset=Integer.parseInt(os);
 			
 			try
 			{
-				// Open the file and then get a channel from the stream
-				FileInputStream fisG = new FileInputStream(groupFile);
-				FileChannel fcG = fisG.getChannel();
-				
-				// Map the file into memory
-				MappedByteBuffer bbG = fcG.map(FileChannel.MapMode.READ_ONLY, offset*4, number*4);
-				IntBuffer groupsBuffer = bbG.asIntBuffer();
-				
-				groupsBuffer.get(groups[i]);
-				fcG.close();
-				fisG.close();
-				clean(bbG);
+				IntFileReader ifrG = new IntFileReaderByDirectBuffer(groupFile);
+				ifrG.get(offset, groups[i]);
+				ifrG.close();
 			} catch(IOException ex)
 			{
 				ex.printStackTrace();

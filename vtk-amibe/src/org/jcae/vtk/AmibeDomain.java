@@ -26,12 +26,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.DoubleBuffer;
-import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.logging.Logger;
+import org.jcae.mesh.xmldata.IntFileReader;
+import org.jcae.mesh.xmldata.IntFileReaderByDirectBuffer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -198,39 +199,19 @@ public class AmibeDomain
 		String groupFileN = ((Element) e.getElementsByTagName("file").item(0)).getAttribute("location");
 		String os = ((Element) e.getElementsByTagName("file").item(0)).getAttribute("offset");
 		File groupFile = new File(directory, groupFileN);
-		long offset = Long.parseLong(os);
-
-		// Open the file and then get a channel from the stream
-		FileInputStream fisG = new FileInputStream(groupFile);
-		FileChannel fcG = fisG.getChannel();
-
-		// Get the file's size and then map it into memory
-		MappedByteBuffer bbG = fcG.map(FileChannel.MapMode.READ_ONLY, offset * 4, number * 4);
-		IntBuffer groups = bbG.asIntBuffer();
-
+		int offset = Integer.parseInt(os);
+		IntFileReader ifrG = new IntFileReaderByDirectBuffer(groupFile);
 
 		File f = getTriaFile();
-		// Open the file and then get a channel from the stream
-		FileInputStream fis = new FileInputStream(f);
-		FileChannel fc = fis.getChannel();
+		IntFileReader ifrT = new IntFileReaderByDirectBuffer(f);
 
-		// Get the file's size and then map it into memory
-		MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
-		IntBuffer trias = bb.asIntBuffer();
 		int[] toReturn = new int[number * 3];
 
 		for (int i = 0; i < number; i++)
-		{
-			trias.position(groups.get(i) * 3);
-			trias.get(toReturn, i * 3, 3);
-		}
+			ifrT.get(ifrG.get(offset+i) * 3, toReturn, i * 3, 3);
 
-		fc.close();
-		fis.close();
-		fcG.close();
-		fisG.close();
-		clean(bbG);
-		clean(bb);
+		ifrG.close();
+		ifrT.close();
 		return toReturn;
 	}
 

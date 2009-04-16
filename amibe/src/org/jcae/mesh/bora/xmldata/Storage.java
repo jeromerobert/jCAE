@@ -59,6 +59,8 @@ import java.util.Iterator;
 import gnu.trove.TObjectIntHashMap;
 import gnu.trove.TIntObjectHashMap;
 import java.util.logging.Logger;
+import org.jcae.mesh.xmldata.IntFileReader;
+import org.jcae.mesh.xmldata.IntFileReaderByDirectBuffer;
 
 public class Storage
 {
@@ -468,15 +470,11 @@ public class Storage
 		throws IOException, FileNotFoundException
 	{
 		File refFile = new File(dir, "r");
-		FileChannel fcR = new FileInputStream(refFile).getChannel();
-		MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L, fcR.size());
-		IntBuffer refsBuffer = bbR.asIntBuffer();
-
+		IntFileReader ifrR = new IntFileReaderByDirectBuffer(refFile);
 		int numberOfReferences = (int) refFile.length() / 4;
 		int [] refs = new int[numberOfReferences];
-		refsBuffer.get(refs);
-		fcR.close();
-		MeshExporter.clean(bbR);
+		ifrR.get(refs);
+		ifrR.close();
 		return refs;
 	}
 
@@ -525,9 +523,7 @@ public class Storage
 		throws IOException, FileNotFoundException
 	{
 		File trianglesFile = new File(dir, "f");
-		FileChannel fcT = new FileInputStream(trianglesFile).getChannel();
-		MappedByteBuffer bbT = fcT.map(FileChannel.MapMode.READ_ONLY, 0L, fcT.size());
-		IntBuffer trianglesBuffer = bbT.asIntBuffer();
+		IntFileReader ifr = new IntFileReaderByDirectBuffer(trianglesFile);
 
 		int numberOfTriangles = (int) trianglesFile.length() / (4*nr);
 		logger.fine("Reading "+numberOfTriangles+" elements");
@@ -537,7 +533,7 @@ public class Storage
 		for (int i = 0; i < numberOfTriangles; i++)
 		{
 			for (int j = 0; j < nr; j++)
-				pts[j] = nodelist[trianglesBuffer.get()-1];
+				pts[j] = nodelist[ifr.get()-1];
 			// Remove triangles incident to degenerated edges.
 			// These triangles are only useful in parameter space.
 			boolean degenerated = false;
@@ -567,8 +563,7 @@ public class Storage
 			mesh.add(face);
 			face.setGroupId(id);
 		}
-		fcT.close();
-		MeshExporter.clean(bbT);
+		ifr.close();
 	}
 }
 

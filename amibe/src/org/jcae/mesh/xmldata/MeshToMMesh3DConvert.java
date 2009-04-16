@@ -30,7 +30,6 @@ import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.nio.DoubleBuffer;
-import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import javax.xml.xpath.XPath;
@@ -256,17 +255,15 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			FileChannel fcN = new FileInputStream(xmlDir+File.separator+nodesFileInput).getChannel();
 			MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
 			DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
+
 			String refFileInput = xpath.evaluate(
 				"/jcae/mesh/submesh/nodes/references/file/@location",
 				documentIn);
-			FileChannel fcR = new FileInputStream(xmlDir+File.separator+refFileInput).getChannel();
-			MappedByteBuffer bbR = fcR.map(FileChannel.MapMode.READ_ONLY, 0L, fcR.size());
-			IntBuffer refsBuffer = bbR.asIntBuffer();
+			IntFileReader ifrR = new IntFileReaderByDirectBuffer(new File(xmlDir, refFileInput));
+
 			String trianglesFileInput = xpath.evaluate(
 				"/jcae/mesh/submesh/triangles/file/@location", documentIn);
-			FileChannel fcT = new FileInputStream(xmlDir+File.separator+trianglesFileInput).getChannel();
-			MappedByteBuffer bbT = fcT.map(FileChannel.MapMode.READ_ONLY, 0L, fcT.size());
-			IntBuffer trianglesBuffer = bbT.asIntBuffer();
+			IntFileReader ifrT = new IntFileReaderByDirectBuffer(new File(xmlDir, trianglesFileInput));
 			
 			Node submeshElement = (Node) xpath.evaluate("/jcae/mesh/submesh",
 				documentIn, XPathConstants.NODE);
@@ -297,7 +294,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 					normals[3*i+j] = p3[j];
 			}
 			//  Boundary nodes
-			refsBuffer.get(refs);
+			ifrR.get(refs);
 			for (int i = 0; i < numberOfReferences; i++)
 			{
 				double u = nodesBuffer.get();
@@ -330,7 +327,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				for (int j = 0; j < 3; j++)
 				{
 					// Local node number for this group
-					indLoc[j] = trianglesBuffer.get();
+					indLoc[j] = ifrT.get();
 				}
 				if (indLoc[0] < 0 || indLoc[1] < 0 || indLoc[2] < 0)
 				{
@@ -395,13 +392,10 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			
 			nodeOffset += numberOfNodes - numberOfReferences;
 			nrTriangles += cntTriangles;
-			fcT.close();
-			MeshExporter.clean(bbT);
+			ifrT.close();
 			fcN.close();
 			MeshExporter.clean(bbN);
-			fcR.close();
-			MeshExporter.clean(bbR);
-			
+			ifrR.close();
 		}
 		catch(Exception ex)
 		{
