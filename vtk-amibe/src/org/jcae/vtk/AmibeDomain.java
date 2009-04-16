@@ -22,15 +22,14 @@ package org.jcae.vtk;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntIntHashMap;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.nio.DoubleBuffer;
 import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.logging.Logger;
+import org.jcae.mesh.xmldata.DoubleFileReader;
+import org.jcae.mesh.xmldata.DoubleFileReaderByDirectBuffer;
 import org.jcae.mesh.xmldata.IntFileReader;
 import org.jcae.mesh.xmldata.IntFileReaderByDirectBuffer;
 import org.w3c.dom.Document;
@@ -164,27 +163,20 @@ public class AmibeDomain
 	private float[] readNodes(int[] nodesID) throws IOException
 	{
 		File f = getNodeFile();
-		// Open the file and then get a channel from the stream
-		FileInputStream fis = new FileInputStream(f);
-		FileChannel fc = fis.getChannel();
+		DoubleFileReader dfr = new DoubleFileReaderByDirectBuffer(f);
 
-		// Get the file's size and then map it into memory
-		MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
-		DoubleBuffer nodesBuffer = bb.asDoubleBuffer();
 		float[] toReturn = new float[nodesID.length * 3];
 
 		for (int i = 0; i < nodesID.length; i++)
 		{
 			int ii = i * 3;
 			int iid = nodesID[i] * 3;
-			toReturn[ii] = (float) nodesBuffer.get(iid);
-			toReturn[ii + 1] = (float) nodesBuffer.get(iid + 1);
-			toReturn[ii + 2] = (float) nodesBuffer.get(iid + 2);
+			toReturn[ii] = (float) dfr.get(iid);
+			toReturn[ii + 1] = (float) dfr.get(iid+1);
+			toReturn[ii + 2] = (float) dfr.get(iid+2);
 		}
+		dfr.close();
 
-		fc.close();
-		fis.close();
-		clean(bb);
 		return toReturn;
 	}
 

@@ -29,15 +29,11 @@ import org.jcae.mesh.amibe.ds.MGroup3D;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.nio.DoubleBuffer;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -108,11 +104,7 @@ public class MeshReader
 			
 			if (nodesFile.charAt(0) != File.separatorChar) nodesFile = xmlDir
 				+ File.separator + nodesFile;
-			
-			FileChannel fcN = new FileInputStream(nodesFile).getChannel();
-			MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L,
-				fcN.size());
-			DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
+			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(new File(nodesFile));
 			
 			Node submeshTriangles = (Node) xpath.evaluate("triangles",
 				submeshElement, XPathConstants.NODE);
@@ -139,7 +131,7 @@ public class MeshReader
 			double [] bbmax = { Double.MIN_VALUE, Double.MIN_VALUE };
 			for (int i=0; i < numberOfNodes; i++)
 			{
-				nodesBuffer.get(coord);
+				dfrN.get(coord);
 				nodelist[i] = (Vertex2D) mesh.createVertex(coord);
 				if (i < numberOfNodes - numberOfReferences)
 					label = 0;
@@ -193,8 +185,7 @@ public class MeshReader
 				mesh.add(facelist[i]);
 			}
 			ifrT.close();
-			fcN.close();
-			MeshExporter.clean(bbN);
+			dfrN.close();
 			ifrR.close();
 			//  Build adjacency relations
 			mesh.buildAdjacency();
@@ -261,9 +252,7 @@ public class MeshReader
 			String nodesFile = xpath.evaluate("file/@location", submeshNodes);
 			if (nodesFile.charAt(0) != File.separatorChar)
 				nodesFile = xmlDir+File.separator+nodesFile;
-			FileChannel fcN = new FileInputStream(nodesFile).getChannel();
-			MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
-			DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
+			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(new File(nodesFile));
 			
 			int numberOfNodes = Integer.parseInt(
 				xpath.evaluate("number/text()", submeshNodes));
@@ -283,7 +272,7 @@ public class MeshReader
 			mesh.ensureCapacity(2*numberOfNodes);
 			for (int i=0; i < numberOfNodes; i++)
 			{
-				nodesBuffer.get(coord);
+				dfrN.get(coord);
 				nodelist[i] = mesh.createVertex(coord);
 				if (i < numberOfNodes - numberOfReferences)
 					label = 0;
@@ -301,8 +290,7 @@ public class MeshReader
 						bbmin[j] = coord[j];
 				}
 			} 
-			fcN.close();
-			MeshExporter.clean(bbN);
+			dfrN.close();
 			
 			if (mesh.hasNodes())
 			{

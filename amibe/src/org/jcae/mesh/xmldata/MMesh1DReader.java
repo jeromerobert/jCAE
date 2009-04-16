@@ -22,11 +22,6 @@
 package org.jcae.mesh.xmldata;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.nio.DoubleBuffer;
-import java.nio.IntBuffer;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.HashMap;
 import java.util.HashSet;
 import javax.xml.xpath.XPath;
@@ -109,9 +104,8 @@ public class MMesh1DReader
 				"/jcae/mesh/submesh/nodes/file/@location", document);
 			if (nodesFile.charAt(0) != File.separatorChar)
 				nodesFile = xmlDir+File.separator+nodesFile;
-			FileChannel fcN = new FileInputStream(nodesFile).getChannel();
-			MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
-			DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
+			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(new File(nodesFile));
+
 			String refFile = xpath.evaluate(
 				"/jcae/mesh/submesh/nodes/references/file/@location", document);
 			if (refFile.charAt(0) != File.separatorChar)
@@ -162,7 +156,7 @@ public class MMesh1DReader
 					if (iref < 2*numberOfReferences && refs[iref] == i)
 					{
 						CADVertex V = m1d.getGeometricalVertex(refs[iref+1]);
-						nodelist[i] = new MNode1D(nodesBuffer.get(), V);
+						nodelist[i] = new MNode1D(dfrN.get(), V);
 						MNode1D master = map1DToMaster.get(V);
 						if (null == master)
 							map1DToMaster.put(V, nodelist[i]);
@@ -171,7 +165,7 @@ public class MMesh1DReader
 						iref += 2;
 					}
 					else
-						nodelist[i] = new MNode1D(nodesBuffer.get(), (CADVertex) null);
+						nodelist[i] = new MNode1D(dfrN.get(), (CADVertex) null);
 					submesh.getNodes().add(nodelist[i]);
 				}
 				
@@ -189,8 +183,7 @@ public class MMesh1DReader
 				offset += numberOfNodes;
 			}
 			ifrE.close();
-			fcN.close();
-			MeshExporter.clean(bbN);
+			dfrN.close();
 			ifrR.close();
 		}
 		catch(Exception ex)

@@ -24,14 +24,10 @@ package org.jcae.mesh.xmldata;
 import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.mesh.cad.CADFace;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
-import java.nio.DoubleBuffer;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
@@ -252,9 +248,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				throw new RuntimeException("File "+xmlFile2d+" has been written by a newer version of jCAE and cannot be re-read");
 			String nodesFileInput = xpath.evaluate(
 				"/jcae/mesh/submesh/nodes/file/@location", documentIn);
-			FileChannel fcN = new FileInputStream(xmlDir+File.separator+nodesFileInput).getChannel();
-			MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
-			DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
+			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(new File(nodesFileInput));
 
 			String refFileInput = xpath.evaluate(
 				"/jcae/mesh/submesh/nodes/references/file/@location",
@@ -281,8 +275,8 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			//  Interior nodes
 			for (int i = 0; i < numberOfNodes - numberOfReferences; i++)
 			{
-				double u = nodesBuffer.get();
-				double v = nodesBuffer.get();
+				double u = dfrN.get();
+				double v = dfrN.get();
 				double [] p3 = surface.value(u, v);
 				for (int j = 0; j < 3; j++)
 					nodesOut.writeDouble(p3[j]);
@@ -297,8 +291,8 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			ifrR.get(refs);
 			for (int i = 0; i < numberOfReferences; i++)
 			{
-				double u = nodesBuffer.get();
-				double v = nodesBuffer.get();
+				double u = dfrN.get();
+				double v = dfrN.get();
 				surface.setParameter(u, v);
 				double [] p3 = surface.normal();
 				for (int j = 0; j < 3; j++)
@@ -393,8 +387,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			nodeOffset += numberOfNodes - numberOfReferences;
 			nrTriangles += cntTriangles;
 			ifrT.close();
-			fcN.close();
-			MeshExporter.clean(bbN);
+			dfrN.close();
 			ifrR.close();
 		}
 		catch(Exception ex)

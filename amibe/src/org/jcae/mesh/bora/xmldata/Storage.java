@@ -41,24 +41,20 @@ import org.jcae.mesh.cad.CADGeomCurve3D;
 import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.mesh.cad.CADShapeFactory;
 import org.jcae.mesh.cad.CADShapeEnum;
-import org.jcae.mesh.xmldata.MeshExporter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.PrintStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
-import java.nio.DoubleBuffer;
-import java.nio.IntBuffer;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.Collection;
 import java.util.Iterator;
 import gnu.trove.TObjectIntHashMap;
 import gnu.trove.TIntObjectHashMap;
 import java.util.logging.Logger;
+import org.jcae.mesh.xmldata.DoubleFileReader;
+import org.jcae.mesh.xmldata.DoubleFileReaderByDirectBuffer;
 import org.jcae.mesh.xmldata.IntFileReader;
 import org.jcae.mesh.xmldata.IntFileReaderByDirectBuffer;
 
@@ -482,10 +478,8 @@ public class Storage
 		throws IOException, FileNotFoundException
 	{
 		File nodesFile = new File(dir, "n");
-		FileChannel fcN = new FileInputStream(nodesFile).getChannel();
-		MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
-		DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
-		
+		DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(nodesFile);
+
 		int numberOfNodes = (int) nodesFile.length() / 24;
 		int numberOfReferences = refs.length / 2;
 		Vertex [] nodelist = new Vertex[numberOfNodes];
@@ -494,7 +488,7 @@ public class Storage
 		mesh.ensureCapacity(2*numberOfNodes);
 		for (int i = 0; i < numberOfNodes; i++)
 		{
-			nodesBuffer.get(coord);
+			dfrN.get(coord);
 			nodelist[i] = mesh.createVertex(coord);
 		}
 		if (mesh.hasNodes())
@@ -513,8 +507,7 @@ public class Storage
 				nodelist[ind] = v;
 			nodelist[ind].setRef(label);
 		}
-		fcN.close();
-		MeshExporter.clean(bbN);
+		dfrN.close();
 		logger.fine("end reading "+dir+File.separator+"n");
 		return nodelist;
 	}

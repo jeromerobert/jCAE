@@ -32,7 +32,6 @@ import java.io.BufferedOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
-import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -580,31 +579,23 @@ abstract public class MeshExporter
 		public void writeNodes(PrintStream out, int[] nodesID, TIntIntHashMap amibeToUNV) throws IOException
 		{
 			File f=getNodeFile();
-			// Open the file and then get a channel from the stream
-			FileInputStream fis = new FileInputStream(f);
-			FileChannel fc = fis.getChannel();
-		
-			// Map the file into memory
-			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
-			DoubleBuffer nodesBuffer=bb.asDoubleBuffer();
-			
+			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(f);
+
 			out.println("    -1"+CR+"  2411");
 			int count =  0;
 			double x,y,z;
 			for(int i=0; i<nodesID.length; i++)
 			{
 				int iid=nodesID[i]*3;
-				x=nodesBuffer.get(iid);
-				y=nodesBuffer.get(iid+1);
-				z=nodesBuffer.get(iid+2);
+				x=dfrN.get(iid);
+				y=dfrN.get(iid+1);
+				z=dfrN.get(iid+2);
 				count++;
 				amibeToUNV.put(nodesID[i], count);
 				writeSingleNodeUNV(out, count, x, y, z);
 			}
 			out.println("    -1");
-			fc.close();
-			fis.close();
-			clean(bb);
+			dfrN.close();
 			logger.info("Total number of nodes: "+count);
 		}
 		
@@ -689,13 +680,7 @@ abstract public class MeshExporter
 			throws IOException
 		{
 			File f=getNodeFile();
-			// Open the file and then get a channel from the stream
-			FileInputStream fis = new FileInputStream(f);
-			FileChannel fc = fis.getChannel();
-		
-			// Map the file into memory
-			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
-			DoubleBuffer nodesBuffer=bb.asDoubleBuffer();
+			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(f);
 			
 			out.println("solid export");
 			int count=0;
@@ -709,9 +694,9 @@ abstract public class MeshExporter
 					for(int k=0; k < 3; k++)
 					{
 						int iid=triangles[count*3+k]*3;
-						x=nodesBuffer.get(iid);
-						y=nodesBuffer.get(iid+1);
-						z=nodesBuffer.get(iid+2);
+						x=dfrN.get(iid);
+						y=dfrN.get(iid+1);
+						z=dfrN.get(iid+2);
 						out.println("     vertex "+x+" "+y+" "+z);
 					}
 					out.println("   endloop");
@@ -719,9 +704,7 @@ abstract public class MeshExporter
 					count++;
 				}
 			}
-			fc.close();
-			fis.close();
-			clean(bb);
+			dfrN.close();
 			out.println("endsolid export");
 			logger.info("Total number of triangles: "+count);
 		}
@@ -761,13 +744,7 @@ abstract public class MeshExporter
 		public void writeNodes(PrintStream out, int[] nodesID, TIntIntHashMap amibeToUNV) throws IOException
 		{
 			File f=getNodeFile();
-			// Open the file and then get a channel from the stream
-			FileInputStream fis = new FileInputStream(f);
-			FileChannel fc = fis.getChannel();
-			
-			// Map the file into memory
-			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
-			DoubleBuffer nodesBuffer=bb.asDoubleBuffer();
+			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(f);
 			
 			int count =  0;
 			double x,y,z;
@@ -775,16 +752,14 @@ abstract public class MeshExporter
 			for(int i=0; i<nodesID.length; i++)
 			{
 				int iid=nodesID[i]*3;
-				x=nodesBuffer.get(iid);
-				y=nodesBuffer.get(iid+1);
-				z=nodesBuffer.get(iid+2);
+				x=dfrN.get(iid);
+				y=dfrN.get(iid+1);
+				z=dfrN.get(iid+2);
 				count++;
 				amibeToUNV.put(nodesID[i], count);
 				out.println(x+" "+y+" "+z+" 0");
 			}
-			fc.close();
-			fis.close();
-			clean(bb);
+			dfrN.close();
 			logger.info("Total number of nodes: "+count);
 		}
 		
@@ -824,19 +799,14 @@ abstract public class MeshExporter
 			File f=getNormalFile();
 			if (f == null)
 				throw new IOException();
-			FileInputStream fis = new FileInputStream(f);
-			FileChannel fc = fis.getChannel();
+			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(f);
 			
 			int count=0;
 			for(int i=0; i<groups.length; i++)
 				count += groups[i].length;
 			
 			out.println("\nNormals\n"+(3*count));
-			
-			// Map the file into memory
-			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
-			DoubleBuffer normalsBuffer=bb.asDoubleBuffer();
-			
+
 			double x,y,z;
 			for(int i=0; i<groups.length; i++)
 			{
@@ -845,17 +815,16 @@ abstract public class MeshExporter
 					int iid = (amibeTriaToUNVTria.get(groups[i][j]) - 1)* 9;
 					for (int k = 0; k < 3; k++)
 					{
-						x=normalsBuffer.get(iid);
-						y=normalsBuffer.get(iid+1);
-						z=normalsBuffer.get(iid+2);
+						x=dfrN.get(iid);
+						y=dfrN.get(iid+1);
+						z=dfrN.get(iid+2);
 						out.println(x+" "+y+" "+z);
 						iid += 3;
 					}
 				}
 			}
-			fc.close();
-			fis.close();
-			clean(bb);
+			dfrN.close();
+
 			out.println("\nNormalAtTriangleVertices\n"+(3*count));
 			for(int i=0; i<groups.length; i++)
 			{
@@ -895,13 +864,7 @@ abstract public class MeshExporter
 		public void writeNodes(PrintStream out, int[] nodesID, TIntIntHashMap amibeToUNV) throws IOException
 		{
 			File f=getNodeFile();
-			// Open the file and then get a channel from the stream
-			FileInputStream fis = new FileInputStream(f);
-			FileChannel fc = fis.getChannel();
-			
-			// Map the file into memory
-			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
-			DoubleBuffer nodesBuffer=bb.asDoubleBuffer();
+			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(f);
 			
 			int count =  0;
 			double x,y,z;
@@ -910,16 +873,14 @@ abstract public class MeshExporter
 			for(int i=0; i<nodesID.length; i++)
 			{
 				int iid=nodesID[i]*3;
-				x=nodesBuffer.get(iid);
-				y=nodesBuffer.get(iid+1);
-				z=nodesBuffer.get(iid+2);
+				x=dfrN.get(iid);
+				y=dfrN.get(iid+1);
+				z=dfrN.get(iid+2);
 				count++;
 				amibeToUNV.put(nodesID[i], count);
 				out.println("   "+count+" "+x+" "+y+" "+z);
 			}
-			fc.close();
-			fis.close();
-			clean(bb);
+			dfrN.close();
 			logger.info("Total number of nodes: "+count);
 		}
 		
@@ -1046,31 +1007,23 @@ abstract public class MeshExporter
 			//Write the size of the array in octets
 			dos.writeInt(nodesID.length*8*3);
 			File f=getNodeFile();
-			// Open the file and then get a channel from the stream
-			FileInputStream fis = new FileInputStream(f);
-			FileChannel fc = fis.getChannel();
-			
-			// Map the file into memory
-			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
-			DoubleBuffer nodesBuffer=bb.asDoubleBuffer();
+			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(f);
 			
 			int count =  0;
 			double x,y,z;
 			for(int i=0; i<nodesID.length; i++)
 			{
 				int iid=nodesID[i]*3;
-				x=nodesBuffer.get(iid);
-				y=nodesBuffer.get(iid+1);
-				z=nodesBuffer.get(iid+2);
+				x=dfrN.get(iid);
+				y=dfrN.get(iid+1);
+				z=dfrN.get(iid+2);
 				amibeToUNV.put(nodesID[i], count);
 				dos.writeDouble(x);
 				dos.writeDouble(y);
 				dos.writeDouble(z);
 				count++;
 			}
-			fc.close();
-			fis.close();
-			clean(bb);
+			dfrN.close();
 			logger.info("Total number of nodes: "+count);
 			dos.flush();
 			out.flush();
