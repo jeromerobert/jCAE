@@ -464,13 +464,22 @@ public abstract class AbstractNode
 	
 	protected void deleteData()
 	{
-		data = null;
+		if(data != null)
+		{
+			data.Delete();
+			data = null;
+		}
 		if(actor != null)
 		{
 			fireActorDeleted(actor);
+			actor.Delete();
 			actor = null;
 		}
-		mapper = null;
+		if(mapper != null)
+		{
+			mapper.Delete();
+			mapper = null;
+		}
 	}
 	
 	void deleteSelectionActor()
@@ -479,8 +488,16 @@ public abstract class AbstractNode
 			return;
 		
 		fireActorDeleted(selectionActor);
-		selectionActor = null;
-		selectionMapper = null;
+		if(selectionActor != null)
+		{
+			selectionActor.Delete();
+			selectionActor = null;
+		}
+		if(selectionMapper != null)
+		{
+			selectionMapper.Delete();
+			selectionMapper = null;
+		}
 	}
 	
 	public void select()
