@@ -25,14 +25,10 @@ import gnu.trove.TIntArrayList;
 import gnu.trove.TIntIntHashMap;
 import java.io.IOException;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.DataOutputStream;
 import java.io.BufferedOutputStream;
 import java.io.PrintStream;
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
-import java.nio.channels.FileChannel;
 import java.text.FieldPosition;
 import java.text.ParsePosition;
 import java.text.DecimalFormatSymbols;
@@ -327,22 +323,14 @@ abstract public class MeshExporter
 	
 	private int[] readTriangles() throws IOException
 	{
-		File f = getTriaFile();
-		// Open the file and then get a channel from the stream
-		FileInputStream fis = new FileInputStream(f);
-		FileChannel fc = fis.getChannel();
+		IntFileReader ifrT = new IntFileReaderByDirectBuffer(getTriaFile());
 		int[] toReturn = new int[numberOfTriangles * 3];
 		int count = 0;
-		ByteBuffer bb = ByteBuffer.allocateDirect(3 * 4);
-		IntBuffer tria = bb.asIntBuffer();
 		for (int i = 0; i < groups.length; i++)
 		{
 			for (int j = 0; j < groups[i].length; j++)
 			{
-				bb.clear();
-				fc.read(bb, groups[i][j] * 3 * 4);
-				tria.rewind();
-				tria.get(toReturn, count, 3);
+				ifrT.get(groups[i][j] * 3, toReturn, count, 3);
 				count += 3;
 			}
 		}
