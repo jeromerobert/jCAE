@@ -20,20 +20,53 @@
 
 package org.jcae.mesh.xmldata;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.Test;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import static org.junit.Assert.*;
 
 public class BenchmarkReadLargeFiles
 {	
+	private static File file;
+	private static int checkSum;
 
-	private File file = new File("/home/db/Projects/jcae/amibe/src-test/org/jcae/mesh/xmldata/triangles3d.bin");
-	private long checkSum = 1546946509L;
+	@BeforeClass public static void createBinaryFile() throws FileNotFoundException, IOException
+	{
+		file = new File("BenchmarkReadLargeFiles.bin");
+		byte[] data = new byte[100000];
+		ByteBuffer bb = ByteBuffer.wrap(data);
+		IntBuffer tb = bb.asIntBuffer();
+		Random rand = new Random();
+		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
+		for (int k = 0; k < 1000; k++)
+		{
+			for (int i = 0; i < data.length/4; i++)
+			{
+				int v = rand.nextInt();
+				tb.put(v);
+				checkSum += v;
+			}
+			out.write(data);
+			tb.clear();
+		}
+		out.close();
+	}
+
+	@AfterClass public static void deleteBinaryFile()
+	{
+		file.delete();
+	}
 
 	private static int computeSum(IntFileReader ifr)
 	{
