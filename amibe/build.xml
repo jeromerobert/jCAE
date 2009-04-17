@@ -29,22 +29,13 @@
 		</javac>
 	</target>
 
-	<target name="compile-test" depends="init,jar" description="Compile the tests">
+	<target name="compile-junit" depends="init,jar" description="Compile junit tests">
 		<mkdir dir="${classes.test.dir}"/>
 		<javac debug="true" deprecation="true" destdir="${classes.test.dir}" srcdir="${src.test.dir}">
 			<compilerarg line="${compiler.arg}"/>
 			<classpath>
 				<pathelement location="${jcae-viewer3d.jar}"/>
 				<pathelement location="${amibe.jar}"/>
-			</classpath>
-		</javac>
-	</target>
-
-	<target name="compile-junit" depends="init,jar" description="Compile junit tests">
-		<mkdir dir="${classes.dir}"/>
-		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}" includes="${jcae.junit.packages}">
-			<compilerarg line="${compiler.arg}"/>
-			<classpath>
 				<pathelement location="${junit.jar}"/>
 				<pathelement location="${trove.jar}"/>
 			</classpath>
@@ -68,11 +59,20 @@
 				<enable package="org.jcae.mesh.amibe"/>
 			</assertions>
 			<batchtest fork="yes" todir="${test.dir}/results" >
-				<fileset dir="${classes.dir}">
-					<include name="org/jcae/mesh/amibe/**/*Test.class" />
+				<fileset dir="${classes.test.dir}">
 					<!-- Exclude test classes which serve for inheritance purpose -->
 					<exclude name="org/jcae/mesh/amibe/util/QSortedTreeTest.class"/>
 					<exclude name="org/jcae/mesh/amibe/ds/AbstractHalfEdgeTest.class"/>
+					<!-- How to exclude inner classes automatically? -->
+					<exclude name="org/jcae/mesh/amibe/algos3d/SmoothNodes3DBgTest$CheckSmoothNodes3DBg.class"/>
+					<!-- Old tests, not yet converted to JUnit -->
+					<exclude name="org/jcae/mesh/amibe/patch/**"/>
+					<exclude name="org/jcae/mesh/amibe/util/**"/>
+					<exclude name="org/jcae/mesh/bora/**"/>
+					<!-- Not JUnit tests, used by test-large -->
+					<exclude name="org/jcae/mesh/MesherTest.class"/>
+					<exclude name="org/jcae/mesh/MesherTest$ComputeTriangleQuality.class"/>
+					<exclude name="org/jcae/mesh/MesherTest$FakeEntityResolver.class"/>
 				</fileset>
 			</batchtest>
 		</junit>
@@ -123,14 +123,9 @@
 		</jar>
 	</target>
 	
-	<target name="jar-test" depends="compile-test" description="jar">
-		<mkdir dir="lib"/>
-		<jar basedir="${classes.test.dir}" compress="true" jarfile="${test.jar}"/>
-	</target>
-	
 	<target name="jar-junit" depends="compile-junit" description="jar">
 		<mkdir dir="lib"/>
-		<jar basedir="${classes.dir}" includes="${jcae.junit.packages}" compress="true" jarfile="${jcae.junit.jar}"/>
+		<jar basedir="${classes.test.dir}" compress="true" jarfile="${jcae.junit.jar}"/>
 	</target>
 	
 	<target name="all" depends="dist-bin" description="Build everything."/>
