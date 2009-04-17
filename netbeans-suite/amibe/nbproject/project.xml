@@ -9,11 +9,21 @@
                 <root id="src.src.dir" name="src"/>
                 <root id="src.src-occ.dir" name="src-occ"/>
             </source-roots>
-            <test-roots/>
+            <test-roots>
+                <root id="test.src-test.dir" name="src-test"/>
+            </test-roots>
         </data>
         <references xmlns="http://www.netbeans.org/ns/ant-project-references/1">
             <reference>
                 <foreign-project>occjava</foreign-project>
+                <artifact-type>jar</artifact-type>
+                <script>build.xml</script>
+                <target>jar</target>
+                <clean-target>clean</clean-target>
+                <id>jar</id>
+            </reference>
+            <reference>
+                <foreign-project>viewer3d</foreign-project>
                 <artifact-type>jar</artifact-type>
                 <script>build.xml</script>
                 <target>jar</target>
