@@ -18,13 +18,12 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-package org.jcae.mesh.amibe.patch.tests;
+package org.jcae.mesh.amibe.patch;
 
-import java.util.logging.Logger;
 import org.jcae.mesh.amibe.util.KdTree;
-import org.jcae.mesh.amibe.patch.Vertex2D;
-import org.jcae.mesh.amibe.patch.Mesh2D;
+
 import java.util.Random;
+import java.util.logging.Logger;
 
 /**
  * Unit test to check detection of near vertices.

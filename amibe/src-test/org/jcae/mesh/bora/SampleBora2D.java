@@ -18,13 +18,19 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-package org.jcae.mesh.bora.tests;
+package org.jcae.mesh.bora;
 
 import org.jcae.mesh.bora.xmldata.BModelReader;
 import org.jcae.mesh.bora.ds.BModel;
 import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
+import org.jcae.mesh.cad.CADFace;
+import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.mesh.cad.CADShapeEnum;
+
+import org.jcae.viewer3d.bg.ViewableBG;
+import org.jcae.viewer3d.View;
+
 import javax.media.j3d.Appearance;
 import javax.media.j3d.IndexedGeometryArray;
 import javax.media.j3d.IndexedTriangleArray;
@@ -42,17 +48,14 @@ import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Iterator;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
-import org.jcae.viewer3d.bg.ViewableBG;
-import org.jcae.viewer3d.View;
 
-import java.util.Iterator;
-
-public class SampleBora3D
+public class SampleBora2D
 {
 	private final static float absOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorAbs", "20.0f"));
 	private final static float relOffsetStep = Float.parseFloat(System.getProperty("javax.media.j3d.zFactorRel", "2.0f"));
@@ -62,109 +65,117 @@ public class SampleBora3D
 		BCADGraphCell root = model.getGraph().getRootCell();
 		// Count faces
 		int nFaces = 0;
-		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
+		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 		{
-			BCADGraphCell solid = it.next();
-			if (solid.getOrientation() != 0)
+			BCADGraphCell face = it.next();
+			if (face.getOrientation() != 0)
 			{
-				if (solid.getReversed() != null)
-					solid = solid.getReversed();
+				if (face.getReversed() != null)
+					face = face.getReversed();
 			}
-			BDiscretization d = solid.discretizationIterator().next();
+			BDiscretization d = face.discretizationIterator().next();
 			if (null == d)
 				continue;
-			File nodesfile = new File(model.getOutputDir(d)+File.separator+"3d", "n"+solid.getId());
+			File nodesfile = new File(model.getOutputDir(d)+File.separator+"2d", "n"+face.getId());
 			if (!nodesfile.exists())
+				continue;
+			File parasfile = new File(model.getOutputDir(d)+File.separator+"2d", "p"+face.getId());
+			if (!parasfile.exists())
 				continue;
 			nFaces++;
 		}
-		// Count nodes and tetra
+		// Count nodes and trias on each face
 		int [] nrNodes = new int[nFaces+1];
-		int [] nrTetra = new int[nFaces+1];
+		int [] nrTria = new int[nFaces+1];
 		nrNodes[0] = 0;
-		nrTetra[0] = 0;
+		nrTria[0] = 0;
 		nFaces = 0;
-		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
+		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 		{
-			BCADGraphCell solid = it.next();
-			if (solid.getOrientation() != 0)
+			BCADGraphCell face = it.next();
+			if (face.getOrientation() != 0)
 			{
-				if (solid.getReversed() != null)
-					solid = solid.getReversed();
+				if (face.getReversed() != null)
+					face = face.getReversed();
 			}
-			BDiscretization d = solid.discretizationIterator().next();
+			BDiscretization d = face.discretizationIterator().next();
 			if (null == d)
 				continue;
-			File nodesfile = new File(model.getOutputDir(d)+File.separator+"3d", "n"+solid.getId());
+			File nodesfile = new File(model.getOutputDir(d)+File.separator+"2d", "n"+face.getId());
 			if (!nodesfile.exists())
 				continue;
+			File parasfile = new File(model.getOutputDir(d)+File.separator+"2d", "p"+face.getId());
+			if (!parasfile.exists())
+				continue;
 			nrNodes[nFaces+1] = nrNodes[nFaces] + (int) nodesfile.length() / 24;
-			File triasfile = new File(model.getOutputDir(d)+File.separator+"3d", "f"+solid.getId());
+			File triasfile = new File(model.getOutputDir(d)+File.separator+"2d", "f"+face.getId());
 			if (!triasfile.exists())
 				continue;
-			nrTetra[nFaces+1] = nrTetra[nFaces] + (int) triasfile.length() / 16;
+			nrTria[nFaces+1] = nrTria[nFaces] + (int) triasfile.length() / 12;
 			nFaces++;
 		}
 
 		int nVertices = nrNodes[nFaces];
-		int nTetra = nrTetra[nFaces];
+		int nTrias = nrTria[nFaces];
 
 		double [] xyz = new double[3*nVertices];
-		int [] temp = new int[4*nTetra];
-		int [] trias = new int[3*4*nTetra];
+		double [] x2 = new double[2*nVertices];
+		double [] x3d2 = new double[3*nVertices];
+		int [] trias = new int[3*nTrias];
 
 		nFaces = 0;
-		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
+		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 		{
-			BCADGraphCell solid = it.next();
-			if (solid.getOrientation() != 0)
+			BCADGraphCell face = it.next();
+			if (face.getOrientation() != 0)
 			{
-				if (solid.getReversed() != null)
-					solid = solid.getReversed();
+				if (face.getReversed() != null)
+					face = face.getReversed();
 			}
-			BDiscretization d = solid.discretizationIterator().next();
+			BDiscretization d = face.discretizationIterator().next();
 			if (null == d)
 				continue;
+			CADFace F = (CADFace) face.getShape();
 			try
 			{
-				File nodesfile = new File(model.getOutputDir(d)+File.separator+"3d", "n"+solid.getId());
+				File nodesfile = new File(model.getOutputDir(d)+File.separator+"2d", "n"+face.getId());
 				if (!nodesfile.exists())
 					continue;
-				File triasfile = new File(model.getOutputDir(d)+File.separator+"3d", "f"+solid.getId());
+				File parasfile = new File(model.getOutputDir(d)+File.separator+"2d", "p"+face.getId());
+				if (!parasfile.exists())
+					continue;
+				File triasfile = new File(model.getOutputDir(d)+File.separator+"2d", "f"+face.getId());
 				if (!triasfile.exists())
 					continue;
 
 				int nr = nrNodes[nFaces+1] - nrNodes[nFaces];
+				FileChannel fcP = new FileInputStream(parasfile).getChannel();
+				MappedByteBuffer bbP = fcP.map(FileChannel.MapMode.READ_ONLY, 0L, fcP.size());
+				DoubleBuffer parasBuffer = bbP.asDoubleBuffer();
+				parasBuffer.get(x2, 0, 2*nr);
+				fcP.close();
+				CADGeomSurface surface = F.getGeomSurface();
+				for (int i = 0; i < nr; i++)
+				{
+					double [] x3 = surface.value(x2[2*i], x2[2*i+1]);
+					x3d2[3*nrNodes[nFaces]+3*i]   = x3[0];
+					x3d2[3*nrNodes[nFaces]+3*i+1] = x3[1];
+					x3d2[3*nrNodes[nFaces]+3*i+2] = x3[2];
+				}
 				FileChannel fcN = new FileInputStream(nodesfile).getChannel();
 				MappedByteBuffer bbN = fcN.map(FileChannel.MapMode.READ_ONLY, 0L, fcN.size());
 				DoubleBuffer nodesBuffer = bbN.asDoubleBuffer();
 				nodesBuffer.get(xyz, 3*nrNodes[nFaces], 3*nr);
 				fcN.close();
 
-				nr = nrTetra[nFaces+1] - nrTetra[nFaces];
+				nr = nrTria[nFaces+1] - nrTria[nFaces];
 				FileChannel fcF = new FileInputStream(triasfile).getChannel();
 				MappedByteBuffer bbF = fcF.map(FileChannel.MapMode.READ_ONLY, 0L, fcF.size());
 				IntBuffer triasBuffer = bbF.asIntBuffer();
-				triasBuffer.get(temp, 0, 4*nr);
-				// Replace tetrahedra by triangles
-				int offset = 12*nrTetra[nFaces];
-				for (int i = 0; i < nr; i++)
-				{
-					// Tetrahedron 1: [012]
-					for (int j = 0; j < 3; j++)
-						trias[offset+12*i+j] = temp[4*i+j] + nrNodes[nFaces] - 1;
-					// Tetrahedron 2: [103]
-					// Tetrahedron 3: [023]
-					// Tetrahedron 4: [213]
-					for (int j = 0; j < 3; j++)
-						trias[offset+12*i+5+3*j] = temp[4*i+3] + nrNodes[nFaces] - 1;
-					trias[offset+12*i+3] = temp[4*i+1] + nrNodes[nFaces] - 1;
-					trias[offset+12*i+4] = temp[4*i] + nrNodes[nFaces] - 1;
-					trias[offset+12*i+6] = temp[4*i] + nrNodes[nFaces] - 1;
-					trias[offset+12*i+7] = temp[4*i+2] + nrNodes[nFaces] - 1;
-					trias[offset+12*i+9] = temp[4*i+2] + nrNodes[nFaces] - 1;
-					trias[offset+12*i+10] = temp[4*i+1] + nrNodes[nFaces] - 1;
-				}
+				triasBuffer.get(trias, 3*nrTria[nFaces], 3*nr);
+				// Add node offset
+				for (int i = 0; i < 3*nr; i++)
+					trias[3*nrTria[nFaces]+i] += nrNodes[nFaces] - 1;
 				fcF.close();
 				nFaces++;
 			}
@@ -174,7 +185,7 @@ public class SampleBora3D
 			}
 		}
 
-		BranchGroup [] ret = new BranchGroup[3];
+		BranchGroup [] ret = new BranchGroup[4];
 		PointAttributes pa = new PointAttributes();
 		pa.setPointSize(4.0f);
 		int iRet = -1;
@@ -185,7 +196,6 @@ public class SampleBora3D
 		IndexedTriangleArray l = new IndexedTriangleArray(nVertices,
 			GeometryArray.COORDINATES,
 			trias.length);
-
 		l.setCoordinateIndices(0, trias);
 		l.setCoordinates(0, xyz);
 		l.setCapability(GeometryArray.ALLOW_COUNT_READ);
@@ -213,6 +223,19 @@ public class SampleBora3D
 		hiddenTrias.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 		hiddenTrias.setPickable(false);
 		ret[iRet].addChild(hiddenTrias);
+
+		// 2D nodes
+		++iRet;
+		ret[iRet] = new BranchGroup();
+		PointArray p2 = new PointArray(nVertices, GeometryArray.COORDINATES);
+		p2.setCoordinates(0, x3d2);
+		Appearance vert2App = new Appearance();
+		vert2App.setPointAttributes(pa);
+		vert2App.setColoringAttributes(new ColoringAttributes(0,1,0,ColoringAttributes.SHADE_GOURAUD));
+		Shape3D shapePoint2=new Shape3D(p2, vert2App);
+		shapePoint2.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
+		shapePoint2.setPickable(false);
+		ret[iRet].addChild(shapePoint2);
 
 		// 3D nodes
 		++iRet;

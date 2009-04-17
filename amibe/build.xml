@@ -13,7 +13,7 @@
 		<propertyfile file="${classes.dir}/timestamp.properties">
 			<entry key="build.time" type="date" pattern="yyyy-MM-dd HH:mm:ss" value="now" />
 		</propertyfile>
-		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}" excludes="${test.packages} ${jcae.junit.packages}">
+		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}" excludes="${jcae.junit.packages}">
 			<compilerarg line="${compiler.arg}"/>
 			<classpath>
 				<pathelement location="${trove.jar}"/>
@@ -29,12 +29,13 @@
 		</javac>
 	</target>
 
-	<target name="compile-test" depends="init" description="Compile the tests">
-		<mkdir dir="${classes.dir}"/>
-		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}" includes="${test.packages}">
+	<target name="compile-test" depends="init,jar" description="Compile the tests">
+		<mkdir dir="${classes.test.dir}"/>
+		<javac debug="true" deprecation="true" destdir="${classes.test.dir}" srcdir="${src.test.dir}">
 			<compilerarg line="${compiler.arg}"/>
 			<classpath>
 				<pathelement location="${jcae-viewer3d.jar}"/>
+				<pathelement location="${amibe.jar}"/>
 			</classpath>
 		</javac>
 	</target>
@@ -107,7 +108,7 @@
 
 	<target name="jar" depends="compile" description="jar">
 		<mkdir dir="lib"/>
-		<jar basedir="${classes.dir}" excludes="${test.packages} ${jcae.junit.packages} **/occ/*" compress="true" jarfile="${amibe.jar}">
+		<jar basedir="${classes.dir}" excludes="${jcae.junit.packages} **/occ/*" compress="true" jarfile="${amibe.jar}">
 			<manifest>
 				<attribute name="Main-Class" value="org.jcae.mesh.Mesher"/>
 				<attribute name="Class-Path" value="${jar.dependencies}"/>
@@ -124,7 +125,7 @@
 	
 	<target name="jar-test" depends="compile-test" description="jar">
 		<mkdir dir="lib"/>
-		<jar basedir="${classes.dir}" includes="${test.packages}" compress="true" jarfile="${test.jar}"/>
+		<jar basedir="${classes.test.dir}" compress="true" jarfile="${test.jar}"/>
 	</target>
 	
 	<target name="jar-junit" depends="compile-junit" description="jar">
@@ -157,6 +158,7 @@
 	
 	<target name="clean" description="Clean all build products." depends="init">
 		<delete dir="${classes.dir}"/>
+		<delete dir="${classes.test.dir}"/>
 		<delete dir="${javadoc.dir}"/>
 		<delete dir="${test.dir}/results"/>
 		<delete dir="${test.dir}/output"/>

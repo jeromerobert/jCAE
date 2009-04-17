@@ -18,7 +18,7 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-package org.jcae.mesh.bora.tests;
+package org.jcae.mesh.bora;
 
 import org.jcae.mesh.bora.xmldata.BModelReader;
 import org.jcae.mesh.bora.ds.BModel;
@@ -28,6 +28,10 @@ import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADGeomCurve3D;
 import org.jcae.mesh.cad.CADShapeFactory;
 import org.jcae.mesh.cad.CADShapeEnum;
+
+import org.jcae.viewer3d.bg.ViewableBG;
+import org.jcae.viewer3d.View;
+
 import javax.media.j3d.Appearance;
 import javax.media.j3d.IndexedGeometryArray;
 import javax.media.j3d.IndexedLineArray;
@@ -45,15 +49,12 @@ import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Iterator;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
-import org.jcae.viewer3d.bg.ViewableBG;
-import org.jcae.viewer3d.View;
-
-import java.util.Iterator;
 
 public class SampleBora1D
 {

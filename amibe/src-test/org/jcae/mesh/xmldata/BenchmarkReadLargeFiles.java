@@ -18,11 +18,7 @@
  * (C) Copyright 2009, by EADS France
  */
 
-package org.jcae.mesh.xmldata.tests;
-
-import org.jcae.mesh.xmldata.IntFileReader;
-import org.jcae.mesh.xmldata.IntFileReaderByDirectBuffer;
-import org.jcae.mesh.xmldata.IntFileReaderByMmap;
+package org.jcae.mesh.xmldata;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -121,7 +117,7 @@ public class BenchmarkReadLargeFiles
 	public static void main(String []args)
 	{
 		try {
-			File file = new File("/home/db/Projects/jcae/amibe/src/org/jcae/mesh/xmldata/tests/triangles3d.bin");
+			File file = new File("/home/db/Projects/jcae/amibe/src-test/org/jcae/mesh/xmldata/triangles3d.bin");
 			int sum;
 
 			sum = computeSum(new IntFileReaderByMmap(file));

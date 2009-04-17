@@ -18,11 +18,10 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-package org.jcae.mesh.amibe.util.tests;
+package org.jcae.mesh.amibe.util;
 
-import org.jcae.mesh.amibe.util.KdTree;
-import org.jcae.mesh.amibe.util.KdTreeProcedure;
 import org.jcae.mesh.amibe.ds.Vertex;
+
 import javax.media.j3d.Appearance;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.QuadArray;

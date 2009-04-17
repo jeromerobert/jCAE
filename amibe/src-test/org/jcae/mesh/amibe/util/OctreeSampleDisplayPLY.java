@@ -18,16 +18,16 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-package org.jcae.mesh.amibe.util.tests;
+package org.jcae.mesh.amibe.util;
 
-import org.jcae.mesh.amibe.util.KdTree;
 import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.viewer3d.bg.ViewableBG;
+import org.jcae.viewer3d.View;
+
 import java.io.*;
 import java.util.StringTokenizer;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
-import org.jcae.viewer3d.bg.ViewableBG;
-import org.jcae.viewer3d.View;
 
 /**
  * Unit test to check the influence of <code>BUCKETSIZE</code>.

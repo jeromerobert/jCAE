@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005, by EADS CRC
-    Copyright (C) 2008, by EADS France
+    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -18,58 +18,53 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-package org.jcae.mesh.amibe.patch.tests;
+package org.jcae.mesh.amibe.util;
 
-import java.util.logging.Logger;
-import org.jcae.mesh.amibe.util.KdTree;
-import org.jcae.mesh.amibe.patch.Vertex2D;
-import org.jcae.mesh.amibe.patch.Mesh2D;
+import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.patch.Viewer;
+
 import java.util.Random;
 
 /**
- * Unit test to check insertion of vertices.
+ * Unit test to check removal of vertices.
  * Run
  * <pre>
- *   QuadTreeSampleAdd
+ *   OctreeSampleRemove
  * </pre>
- * to display an initial <code>QuadTree</code> with 500 vertices.
- * Click to add vertices.
+ * to display an initial <code>Octree</code> with 200 vertices.
+ * Click to remove vertices.
  */
-public class QuadTreeSampleAdd extends QuadTreeSample
+public class OctreeSampleRemove extends OctreeSample
 {
-	private static Logger logger=Logger.getLogger(QuadTreeSampleAdd.class.getName());	
-	
-	public QuadTreeSampleAdd(KdTree q)
+	public OctreeSampleRemove(KdTree o)
 	{
-		super (q);
+		super(o);
 	}
 	
-	public static void display(Viewer view, QuadTreeSample r)
+	public static void display(Viewer view, OctreeSample t)
 	{
-		view.addBranchGroup(r.bgQuadTree());
+		view.addBranchGroup(t.bgOctree());
 		view.setVisible(true);
-		view.addBranchGroup(r.bgVertices());
+		view.addBranchGroup(t.bgVertices());
 		view.setVisible(true);
 	}
 	
 	public static void main(String args[])
 	{
-		double u, v;
 		boolean visu = true;
 		Random rand = new Random(113L);
-		double [] bbmin = { 0.0, 0.0 };
-		double [] bbmax = { 1.0, 1.0 };
-		final Mesh2D m = new Mesh2D();
-		m.pushCompGeom(2);
-		m.resetKdTree(bbmin, bbmax);
-		final QuadTreeSampleAdd r = new QuadTreeSampleAdd(m.getKdTree());
-		logger.fine("Start insertion");
-		for (int i = 0; i < 500; i++)
+		double [] bbox = { 0.0, 0.0, 0.0, 1.0, 1.0, 1.0 };
+		final Mesh mesh = new Mesh();
+		final KdTree r = new KdTree(bbox);
+		final OctreeSample t = new OctreeSample(r);
+		double [] xyz = new double[3];
+		for (int i = 0; i < 200; i++)
 		{
-			u = rand.nextDouble();
-			v = rand.nextDouble();
-			Vertex2D pt = (Vertex2D) m.createVertex(u, v);
-			r.quadtree.add(pt);
+			xyz[0] = rand.nextDouble();
+			xyz[1] = rand.nextDouble();
+			xyz[2] = rand.nextDouble();
+			r.add(mesh.createVertex(xyz));
 		}
 		//CheckCoordProcedure checkproc = new CheckCoordProcedure();
 		//r.walk(checkproc);
@@ -77,19 +72,19 @@ public class QuadTreeSampleAdd extends QuadTreeSample
 		final Viewer view=new Viewer();
 		if (visu)
 		{
-			display(view, r);
+			display(view, t);
 			view.zoomTo(); 
 			view.callBack=new Runnable()
 			{
 				public void run()
 				{
-					double [] xyz = view.getLastClick();
-					if (null != xyz)
+					double [] xyzPick = view.getLastClick();
+					if (null != xyzPick)
 					{
-						Vertex2D vt = (Vertex2D) m.createVertex(xyz[0], xyz[1]);
-						r.quadtree.add(vt);
+						Vertex vt = r.getNearVertex(mesh, mesh.createVertex(xyzPick));
+						r.remove(vt);
 						view.removeAllBranchGroup();
-						display(view, r);
+						display(view, t);
 					}
 				}
 			};
