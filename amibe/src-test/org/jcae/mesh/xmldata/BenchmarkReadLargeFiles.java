@@ -26,9 +26,14 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class BenchmarkReadLargeFiles
 {	
+
+	private File file = new File("/home/db/Projects/jcae/amibe/src-test/org/jcae/mesh/xmldata/triangles3d.bin");
+	private long checkSum = 1546946509L;
 
 	private static int computeSum(IntFileReader ifr)
 	{
@@ -114,48 +119,43 @@ public class BenchmarkReadLargeFiles
 		return sum;
 	}
 
-	public static void main(String []args)
+	@Test public void mmap() throws FileNotFoundException, IOException
 	{
-		try {
-			File file = new File("/home/db/Projects/jcae/amibe/src-test/org/jcae/mesh/xmldata/triangles3d.bin");
-			int sum;
+		assertEquals(computeSum(new IntFileReaderByMmap(file)), checkSum);
+	}
 
-			sum = computeSum(new IntFileReaderByMmap(file));
-			assert sum == 1546946509;
-			System.out.println("mmap sum: "+sum);
+	@Test public void direct() throws FileNotFoundException, IOException
+	{
+		assertEquals(computeSum(new IntFileReaderByDirectBuffer(file)), checkSum);
+	}
 
-			sum = computeSum(new IntFileReaderByDirectBuffer(file));
-			assert sum == 1546946509;
-			System.out.println("direct sum: "+sum);
+	@Test public void blockMmap() throws FileNotFoundException, IOException
+	{
+		assertEquals(computeSumByBlock(new IntFileReaderByMmap(file)), checkSum);
+	}
 
-			sum = computeSumByBlock(new IntFileReaderByMmap(file));
-			assert sum == 1546946509;
-			System.out.println("mmap by block, sum: "+sum);
+	@Test public void blockdirect() throws FileNotFoundException, IOException
+	{
+		assertEquals(computeSumByBlock(new IntFileReaderByDirectBuffer(file)), checkSum);
+	}
 
-			sum = computeSumByBlock(new IntFileReaderByDirectBuffer(file));
-			assert sum == 1546946509;
-			System.out.println("direct by block, sum: "+sum);
+	@Test public void absoluteMmap() throws FileNotFoundException, IOException
+	{
+		assertEquals(absoluteComputeSum(new IntFileReaderByMmap(file)), checkSum);
+	}
 
-			sum = absoluteComputeSum(new IntFileReaderByDirectBuffer(file));
-			assert sum == 1546946509;
-			System.out.println("mmap (abs. get) sum: "+sum);
+	@Test public void absoluteDirect() throws FileNotFoundException, IOException
+	{
+		assertEquals(absoluteComputeSum(new IntFileReaderByDirectBuffer(file)), checkSum);
+	}
 
-			sum = absoluteComputeSum(new IntFileReaderByDirectBuffer(file));
-			assert sum == 1546946509;
-			System.out.println("direct (abs. get) sum: "+sum);
+	@Test public void absoluteBlockMmap() throws FileNotFoundException, IOException
+	{
+		assertEquals(absoluteComputeSumByBlock(new IntFileReaderByMmap(file)), checkSum);
+	}
 
-			sum = absoluteComputeSumByBlock(new IntFileReaderByMmap(file));
-			assert sum == 1546946509;
-			System.out.println("mmap by block (abs. get) sum: "+sum);
-
-			sum = absoluteComputeSumByBlock(new IntFileReaderByDirectBuffer(file));
-			assert sum == 1546946509;
-			System.out.println("direct by block (abs. get) sum: "+sum);
-
-		} catch (FileNotFoundException ex) {
-			ex.printStackTrace();
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
+	@Test public void absoluteBlockDirect() throws FileNotFoundException, IOException
+	{
+		assertEquals(absoluteComputeSumByBlock(new IntFileReaderByDirectBuffer(file)), checkSum);
 	}
 }
