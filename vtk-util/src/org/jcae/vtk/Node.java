@@ -626,16 +626,18 @@ public class Node extends AbstractNode
 		// list of cells to be selected
 		vtkIdTypeArray arr = Utils.setValues(cellID);
 		selectionNode.SetSelectionList(arr);
-
+		arr.Delete();
 		selection.AddNode(selectionNode);
+		selectionNode.Delete();
 		vtkExtractSelectedPolyDataIds selFilter = new vtkExtractSelectedPolyDataIds();
 		selFilter.ReleaseDataFlagOn();
 		selFilter.SetInput(1, selection);
+		selection.Delete();
 		selFilter.SetInput(0, input);
 
 		vtkPolyData dataFiltered = selFilter.GetOutput();
 		selFilter.Update();
-
+		selFilter.Delete();
 		return dataFiltered;
 	}
 

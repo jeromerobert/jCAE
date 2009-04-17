@@ -828,6 +828,7 @@ public class Utils
 		iarray.SetJavaArray(values);
 		vtkIdTypeArray array = new vtkIdTypeArray();
 		array.DeepCopy(iarray);
+		iarray.Delete();
 		return array;
 	}
 
