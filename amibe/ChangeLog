@@ -1,3 +1,11 @@
+Fri Apr 17 09:55:21 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* amibe/src/org/jcae/mesh/xmldata/DoubleFileReaderByDirectBuffer.java
+	  amibe/src/org/jcae/mesh/xmldata/IntFileReaderByDirectBuffer.java:
+	Performance was very poor when reading small files because of
+	allocations of buffer and array.  Buffer size is no longer larger
+	than file size, and the 'array' member is allocated only if needed.
+
 Thu Apr 16 18:08:11 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/DoubleFileReader.java

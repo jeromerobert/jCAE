@@ -37,9 +37,9 @@ public class DoubleFileReaderByDirectBuffer implements DoubleFileReader
 
 	private final FileChannel fc;
 	private final long numberOfElements;
-	private final ByteBuffer bb = ByteBuffer.allocateDirect(BUFFER_SIZE);
-	private final DoubleBuffer tb = bb.asDoubleBuffer();
-	private final double[] array = new double[ARRAY_SIZE];
+	private final ByteBuffer bb;
+	private final DoubleBuffer tb;
+	private double[] array;
 
 	private int startBufferIndex;
 	private int arrayIndex;
@@ -49,10 +49,14 @@ public class DoubleFileReaderByDirectBuffer implements DoubleFileReader
 	{
 		fc = new FileInputStream(file).getChannel();
 		numberOfElements = fc.size() / ELEMENT_SIZE;
+		if (fc.size() > BUFFER_SIZE)
+			bb = ByteBuffer.allocateDirect(BUFFER_SIZE);
+		else
+			bb = ByteBuffer.allocateDirect((int) fc.size());
+		tb = bb.asDoubleBuffer();
+
 		// Copy from file into buffer
 		copyFileIntoBuffer();
-		// Copy from buffer into array
-		copyBufferIntoArray();
 	}
 
 	public long size()
@@ -193,6 +197,8 @@ public class DoubleFileReaderByDirectBuffer implements DoubleFileReader
 			if (!copyFileIntoBuffer())
 				return;
 		}
+		if (array == null)
+			array = new double[Math.min((int) numberOfElements, ARRAY_SIZE)];
 
 		arrayIndex = 0;
 		remaining = Math.min(tb.remaining(), array.length);
