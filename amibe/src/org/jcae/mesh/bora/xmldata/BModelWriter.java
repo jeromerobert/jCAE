@@ -118,9 +118,8 @@ public class BModelWriter
 				modelElement.appendChild(constraintsElement);
 			}
 			Element graphElement=document.createElement("graph");
-			for (Iterator<CADShapeEnum> itcse = CADShapeEnum.iterator(CADShapeEnum.COMPOUND, CADShapeEnum.VERTEX); itcse.hasNext(); )
+			for (CADShapeEnum cse : CADShapeEnum.iterable(CADShapeEnum.COMPOUND, CADShapeEnum.VERTEX))
 			{
-				CADShapeEnum cse = itcse.next();
 				for (Iterator<BCADGraphCell> it = model.getGraph().getCellList(cse).iterator(); it.hasNext(); )
 				{
 					BCADGraphCell s = it.next();

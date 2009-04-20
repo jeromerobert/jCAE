@@ -119,9 +119,8 @@ public class BSubMesh
 		BCADGraphCell root = model.getGraph().getRootCell();
 		StringBuilder indent = new StringBuilder();
 
-		for (Iterator<CADShapeEnum> itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
+		for (CADShapeEnum cse : CADShapeEnum.iterable(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND))
 		{
-			CADShapeEnum cse = itcse.next();
 			String tab = indent.toString();
 			/* returns only one of the two shapes of the same orientation, but not
 			   necessarily the good one. */

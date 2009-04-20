@@ -51,9 +51,21 @@ public abstract class CADShapeEnum
 	public static final CADShapeEnum SOLID = CADShapeFactory.getFactory().getShapeEnumInstance("solid");
 	public static final CADShapeEnum COMPSOLID = CADShapeFactory.getFactory().getShapeEnumInstance("compsolid");
 	public static final CADShapeEnum COMPOUND = CADShapeFactory.getFactory().getShapeEnumInstance("compound");
+	
+	@Deprecated
 	public static Iterator<CADShapeEnum> iterator(CADShapeEnum start, CADShapeEnum end)
 	{
 		return CADShapeFactory.getFactory().newShapeEnumIterator(start, end);
+	}
+
+	public static Iterable<CADShapeEnum> iterable(final CADShapeEnum start, final CADShapeEnum end)
+	{
+		return new Iterable<CADShapeEnum>() {
+			public Iterator<CADShapeEnum> iterator()
+			{
+				return CADShapeFactory.getFactory().newShapeEnumIterator(start, end);
+			}
+		};
 	}
 
 }

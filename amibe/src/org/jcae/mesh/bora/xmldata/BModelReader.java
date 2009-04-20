@@ -126,9 +126,8 @@ public class BModelReader
 				return model;
 			// Check consistency
 			String errmsg = "Error when parsing XML file "+xmlDir+File.separator+xmlFile;
-			for (Iterator<CADShapeEnum> itcse = CADShapeEnum.iterator(CADShapeEnum.COMPOUND, CADShapeEnum.VERTEX); itcse.hasNext(); )
+			for (CADShapeEnum cse : CADShapeEnum.iterable(CADShapeEnum.COMPOUND, CADShapeEnum.VERTEX))
 			{
-				CADShapeEnum cse = itcse.next();
 				for (Iterator<BCADGraphCell> it = model.getGraph().getRootCell().shapesExplorer(cse); it.hasNext(); )
 				{
 					BCADGraphCell s = it.next();

@@ -1,3 +1,8 @@
+Mon Apr 20 11:50:19 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/cad/CADShapeEnum.java: Deprecate iterator() in
+	favor of a new iterable() method to help writing for-each loops.
+
 Fri Apr 17 09:55:21 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* amibe/src/org/jcae/mesh/xmldata/DoubleFileReaderByDirectBuffer.java

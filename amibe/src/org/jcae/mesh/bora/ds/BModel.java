@@ -338,9 +338,8 @@ public class BModel
 		System.out.println("List of discretizations");
 		BCADGraphCell root = cad.getRootCell();
 		StringBuilder indent = new StringBuilder();
-		for (Iterator<CADShapeEnum> itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
+		for (CADShapeEnum cse : CADShapeEnum.iterable(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND))
 		{
-			CADShapeEnum cse = itcse.next();
 			CADShapeEnum normalChildType;
 			if (cse == CADShapeEnum.EDGE)
 				normalChildType = CADShapeEnum.VERTEX;
@@ -394,9 +393,8 @@ public class BModel
 						boolean first = true;
  						if (cse != CADShapeEnum.EDGE)
 						{
-							for (Iterator<CADShapeEnum> itccse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, normalChildType); itccse.hasNext(); )
+							for (CADShapeEnum ccse : CADShapeEnum.iterable(CADShapeEnum.VERTEX, normalChildType))
 							{
-								CADShapeEnum ccse = itccse.next();
 								for (Iterator<BCADGraphCell> itc = pcell.shapesIterator(); itc.hasNext(); )
 								{
 									BCADGraphCell ccell = itc.next();
@@ -440,9 +438,8 @@ public class BModel
 		System.out.println("List of constraints");
 		BCADGraphCell root = cad.getRootCell();
 		StringBuilder indent = new StringBuilder();
-		for (Iterator<CADShapeEnum> itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
+		for (CADShapeEnum cse : CADShapeEnum.iterable(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND))
 		{
-			CADShapeEnum cse = itcse.next();
 			String tab = indent.toString();
 			for (Iterator<BCADGraphCell> it = root.shapesExplorer(cse); it.hasNext(); )
 			{
@@ -470,9 +467,8 @@ public class BModel
 		System.out.println("List of constraints applied on submesh "+sm.getId());
 		BCADGraphCell root = cad.getRootCell();
 		StringBuilder indent = new StringBuilder();
-		for (Iterator<CADShapeEnum> itcse = CADShapeEnum.iterator(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND); itcse.hasNext(); )
+		for (CADShapeEnum cse : CADShapeEnum.iterable(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND))
 		{
-			CADShapeEnum cse = itcse.next();
 			String tab = indent.toString();
 			for (Iterator<BCADGraphCell> it = root.shapesExplorer(cse); it.hasNext(); )
 			{
