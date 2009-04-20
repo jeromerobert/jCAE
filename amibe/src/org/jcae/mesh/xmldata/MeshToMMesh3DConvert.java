@@ -248,7 +248,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				throw new RuntimeException("File "+xmlFile2d+" has been written by a newer version of jCAE and cannot be re-read");
 			String nodesFileInput = xpath.evaluate(
 				"/jcae/mesh/submesh/nodes/file/@location", documentIn);
-			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(new File(nodesFileInput));
+			DoubleFileReader dfrN = new DoubleFileReaderByDirectBuffer(new File(xmlDir, nodesFileInput));
 
 			String refFileInput = xpath.evaluate(
 				"/jcae/mesh/submesh/nodes/references/file/@location",
