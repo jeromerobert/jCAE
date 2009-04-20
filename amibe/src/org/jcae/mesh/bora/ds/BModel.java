@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -40,23 +40,23 @@ import java.util.logging.Logger;
  */
 public class BModel
 {
-	private static Logger logger=Logger.getLogger(BModel.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(BModel.class.getName());
 	//   Next available index
 	private static int freeIndex = 1;
 	//   Model number
-	private int id;
+	private final int id;
 	//   CAD graph
-	private BCADGraph cad;
+	private final BCADGraph cad;
 	//   List of submeshes
-	private Collection<BSubMesh> submesh = new ArrayList<BSubMesh>();
+	private final Collection<BSubMesh> submesh = new ArrayList<BSubMesh>();
 	//   Geometry file
-	private String cadFile;
+	private final String cadFile;
 	//   Output variables
-	private String xmlDir;
-	private String xmlFile = "model";
-	private String xmlBrepDir;
+	private final String xmlDir;
+	private final String xmlFile = "model";
+	private final String xmlBrepDir;
 	//   List of all constraints
-	private Collection<Constraint> allConstraints = new LinkedHashSet<Constraint>();
+	private final Collection<Constraint> allConstraints = new LinkedHashSet<Constraint>();
 	//   Internal state
 	private int state = INPUT;
 	//   Valid state values
@@ -70,18 +70,15 @@ public class BModel
 	public BModel (String brep, String out)
 	{
 		id = freeIndex;
-		if (logger.isLoggable(Level.FINE))
-			logger.fine("Building model "+id+" from "+brep+" into "+out);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.fine("Building model "+id+" from "+brep+" into "+out);
 		freeIndex++;
 		CADShapeFactory factory = CADShapeFactory.getFactory();
 		xmlDir = out;
 		File xmlDirF = new File(xmlDir);
 		xmlDirF.mkdirs();
 		if(!xmlDirF.exists() || !xmlDirF.isDirectory())
-		{
-			System.out.println("Cannot write to "+xmlDir);
-			return;
-		}
+			throw new RuntimeException("Cannot write to "+xmlDir);
 
 		cadFile = (new File(brep)).getAbsoluteFile().getPath();
 		xmlBrepDir = relativize(new File(brep).getAbsoluteFile().getParentFile(), new File(xmlDir).getAbsoluteFile()).getPath();
@@ -206,7 +203,7 @@ public class BModel
 	 */
 	public void computeConstraints()
 	{
-		logger.info("Compute constraints");
+		LOGGER.info("Compute constraints");
 		BCADGraphCell root = cad.getRootCell();
 		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.SOLID); its.hasNext(); )
 		{
@@ -250,7 +247,7 @@ public class BModel
 				d.discretize();
 			}
 		}
-		logger.info("Discretize edges");
+		LOGGER.info("Discretize edges");
 		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.EDGE); its.hasNext(); )
 		{
 			BCADGraphCell cell = its.next();
@@ -261,7 +258,7 @@ public class BModel
 				Storage.writeEdge(d, getOutputDir(d));
 			}
 		}
-		logger.info("Discretize faces");
+		LOGGER.info("Discretize faces");
 		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.FACE); its.hasNext(); )
 		{
 			BCADGraphCell cell = its.next();
@@ -272,7 +269,7 @@ public class BModel
 				Storage.writeFace(d, getOutputDir(d));
 			}
 		}
-		logger.info("Discretize solids");
+		LOGGER.info("Discretize solids");
 		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.SOLID); its.hasNext(); )
 		{
 			BCADGraphCell cell = its.next();
@@ -284,7 +281,7 @@ public class BModel
 			}
 		}
 		state = TESSELLATION;
-		logger.info("Discretization finished");
+		LOGGER.info("Discretization finished");
 	}
 
 	/**

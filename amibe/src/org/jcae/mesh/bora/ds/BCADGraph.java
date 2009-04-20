@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -36,15 +36,15 @@ import java.util.logging.Logger;
  */
 public class BCADGraph
 {
-	private static Logger logger=Logger.getLogger(BCADGraph.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(BCADGraph.class.getName());
 	// Backward link to the model
-	private BModel model;
+	private final BModel model;
 	// Cell root
-	private BCADGraphCell root;
+	private final BCADGraphCell root;
 	// Map between topological elements and graph cells
-	private THashMap<CADShape, BCADGraphCell> cadShapeToGraphCell = new THashMap<CADShape, BCADGraphCell>(keepOrientation);
+	private final THashMap<CADShape, BCADGraphCell> cadShapeToGraphCell = new THashMap<CADShape, BCADGraphCell>(keepOrientation);
 	// Map between indices and graph cells or user-defined groups
-	private TIntObjectHashMap<BCADGraphCell> indexToCell = new TIntObjectHashMap<BCADGraphCell>();
+	private final TIntObjectHashMap<BCADGraphCell> indexToCell = new TIntObjectHashMap<BCADGraphCell>();
 	// First free index
 	private int freeIndex;
 
@@ -102,7 +102,7 @@ public class BCADGraph
 					rev.bindReversed(cell);
 				}
 				seen.put(sub, sub);
-				logger.fine("  Add submesh: "+sub+" "+cell);
+				LOGGER.fine("  Add submesh: "+sub+" "+cell);
 			}
 		}
 		// Add indices

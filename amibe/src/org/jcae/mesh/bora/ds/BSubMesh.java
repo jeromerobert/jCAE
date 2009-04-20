@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -62,13 +62,13 @@ import java.util.logging.Logger;
  */
 public class BSubMesh
 {
-	private static Logger logger=Logger.getLogger(BSubMesh.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(BSubMesh.class.getName());
 	//   Model
-	private BModel model;
+	private final BModel model;
 	//   Unique identitier
-	private int id = -1;
+	private final int id;
 	//   List of user defined constraints
-	private Collection<Constraint> constraints = new ArrayList<Constraint>();
+	private final Collection<Constraint> constraints = new ArrayList<Constraint>();
 
 	/**
 	 * Creates a root mesh.
@@ -96,8 +96,8 @@ public class BSubMesh
 	 */
 	public void add(Constraint cons)
 	{
-		if (logger.isLoggable(Level.FINE))
-			logger.fine("Add constraint "+cons+" to submesh "+id);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.fine("Add constraint "+cons+" to submesh "+id);
 		model.addConstraint(cons);
 		constraints.add(cons);
 		// Add this Constraint to the CAD cell

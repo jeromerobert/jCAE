@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005,2006, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -41,10 +41,10 @@ import java.util.logging.Logger;
  */
 public class UniformLengthDeflection1d implements AlgoInterface
 {
-	private static Logger logger=Logger.getLogger(UniformLengthDeflection1d.class.getName());
-	private double maxlen;
-	private double deflection;
-	private boolean relDefl;
+	private static final Logger LOGGER=Logger.getLogger(UniformLengthDeflection1d.class.getName());
+	private final double maxlen;
+	private final double deflection;
+	private final boolean relDefl;
 
 	/**
 	 * Discretizes a topological edge so that all edges have a uniform length.
@@ -91,7 +91,7 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		CADEdge E = (CADEdge) cell.getShape();
 		SubMesh1D submesh1d = new SubMesh1D(E);
 		d.setMesh(submesh1d);
-		logger.fine(""+this+"  shape: "+E);
+		LOGGER.fine(""+this+"  shape: "+E);
 		
 		ArrayList<MEdge1D> edgelist = submesh1d.getEdges();
 		ArrayList<MNode1D> nodelist = submesh1d.getNodes();
@@ -215,10 +215,10 @@ public class UniformLengthDeflection1d implements AlgoInterface
 			edgelist.add(e);
 			n1 = n2;
 		}
-		if (logger.isLoggable(Level.FINE))
+		if (LOGGER.isLoggable(Level.FINE))
 		{
-			logger.fine("  Edges   "+edgelist.size());
-			logger.fine("  Nodes   "+nodelist.size());
+			LOGGER.fine("  Edges   "+edgelist.size());
+			LOGGER.fine("  Nodes   "+nodelist.size());
 		}
 		return true;
 	}

@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 
 public class BModelReader
 {
-	private static Logger logger=Logger.getLogger(BModelReader.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(BModelReader.class.getName());
 
 	/** Return the first child element of with the given tag name */
 	private static Node getChild(Node e, String tagName)
@@ -135,12 +135,12 @@ public class BModelReader
 					Node id = (Node) xpath.evaluate("/jcae/model/graph/cad[@id="+s.getId()+"]", document, XPathConstants.NODE);
 					if (id == null)
 					{
-						logger.severe(errmsg+", shape id "+s.getId()+" not found");
+						LOGGER.severe(errmsg+", shape id "+s.getId()+" not found");
 						return null;
 					}
 					if (!id.getAttributes().getNamedItem("orientation").getNodeValue().equals(""+s.getOrientation()))
 					{
-						logger.severe(errmsg+", wrong orientation for shape id "+s.getId()+". Expected result was: orientation=\""+s.getOrientation()+"\"");
+						LOGGER.severe(errmsg+", wrong orientation for shape id "+s.getId()+". Expected result was: orientation=\""+s.getOrientation()+"\"");
 						return null;
 					}
 					Node children = getChild(id, "children");
@@ -157,7 +157,7 @@ public class BModelReader
 						String list = sblist.toString();
 						if (!children.getAttributes().getNamedItem("list").getNodeValue().equals(list))
 						{
-							logger.severe(errmsg+", wrong children for shape id "+s.getId()+". Expected result was: list=\""+list+"\"");
+							LOGGER.severe(errmsg+", wrong children for shape id "+s.getId()+". Expected result was: list=\""+list+"\"");
 							return null;
 						}
 					}

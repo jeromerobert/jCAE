@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -44,7 +44,7 @@ import java.util.logging.Logger;
  */
 public class TetGen implements AlgoInterface
 {
-	private static Logger logger=Logger.getLogger(TetGen.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(TetGen.class.getName());
 	private static final String tetgenCmd = "tetgen";
 	private double volume;
 	private static boolean available = true;
@@ -89,7 +89,7 @@ public class TetGen implements AlgoInterface
 
 	public boolean compute(BDiscretization d)
 	{
-		logger.info("Running TetGen "+banner);
+		LOGGER.info("Running TetGen "+banner);
 		BSubMesh s = d.getFirstSubMesh();
 		MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
 		mtb.addNodeList();

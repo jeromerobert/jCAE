@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2005, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
  
 	This library is free software; you can redistribute it and/or
 	modify it under the terms of the GNU Lesser General Public
@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 public class MESHReader
 {
 
-	private static Logger logger=Logger.getLogger(MESHReader.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(MESHReader.class.getName());
 	
 	public static void readMesh(Mesh mesh, String file)
 	{
@@ -62,7 +62,7 @@ public class MESHReader
 
 	private static TIntObjectHashMap<Vertex> readNodes(Mesh m, BufferedReader rd)
 	{
-		logger.fine("Reading nodes");
+		LOGGER.fine("Reading nodes");
 		TIntObjectHashMap<Vertex> nodesmap = null;
 		double x,y,z;
 		String line = "";
@@ -97,13 +97,13 @@ public class MESHReader
 		{
 			e.printStackTrace();
 		}
-		logger.fine("Found "+nrNodes+" nodes");
+		LOGGER.fine("Found "+nrNodes+" nodes");
 		return nodesmap;
 	}
 
 	private static void readFace(BufferedReader rd, Mesh mesh, TIntObjectHashMap<Vertex> nodesmap)
 	{
-		logger.fine("Reading tetrahedra");
+		LOGGER.fine("Reading tetrahedra");
 		String line = "";
 		int nrTetrahedra = 0;
 		Vertex [] v = new Vertex[4];
@@ -131,7 +131,7 @@ public class MESHReader
 		{
 			e.printStackTrace();
 		}
-		logger.fine("Found "+nrTetrahedra+" tetrahedra");
+		LOGGER.fine("Found "+nrTetrahedra+" tetrahedra");
 	}
 	
 }

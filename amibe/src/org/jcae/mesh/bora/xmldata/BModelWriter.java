@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -33,7 +33,7 @@ import java.util.logging.Logger;
 
 public class BModelWriter
 {
-	private static Logger logger=Logger.getLogger(BModelWriter.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(BModelWriter.class.getName());
 
 	/**
 	 * Write the current object to a XML file and binary files. The XML file
@@ -45,7 +45,7 @@ public class BModelWriter
 		try
 		{
 			File file = new File(model.getOutputDir(), model.getOutputFile());
-			logger.fine("Writing file "+file);
+			LOGGER.fine("Writing file "+file);
 
 			// Create and fill the DOM
 			Document document=JCAEXMLWriter.createJcaeBoraDocument();

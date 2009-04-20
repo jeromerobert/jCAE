@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -43,8 +43,8 @@ import java.util.logging.Logger;
  */
 public class Netgen implements AlgoInterface
 {
-	private static Logger logger=Logger.getLogger(Netgen.class.getName());
-	private double maxlen;
+	private static final Logger LOGGER=Logger.getLogger(Netgen.class.getName());
+	private final double maxlen;
 	private static boolean available = true;
 	private static String banner = null;
 
@@ -84,7 +84,7 @@ public class Netgen implements AlgoInterface
 
 	public boolean compute(BDiscretization d)
 	{
-		logger.info("Running Netgen "+banner);
+		LOGGER.info("Running Netgen "+banner);
 		BSubMesh s = d.getFirstSubMesh();
 		MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
 		mtb.addNodeList();

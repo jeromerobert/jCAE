@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 
 public class BDiscretization
 {
-	private static Logger logger=Logger.getLogger(BDiscretization.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(BDiscretization.class.getName());
 	private final BCADGraphCell graphCell;
 	// List of set of BSubMesh instances containing this BDiscretization.
 	private final Collection<BSubMesh> submesh = new LinkedHashSet<BSubMesh>();
@@ -218,7 +218,7 @@ public class BDiscretization
 		if (algo == null || !algo.isAvailable())
 			return;
 		if (!algo.compute(this))
-			logger.warning("Failed! "+algo);
+			LOGGER.warning("Failed! "+algo);
 		computed = true;
 	}
 

@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007, by EADS France
+    Copyright (C) 2007,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -46,15 +46,15 @@ public class BCADGraphCell
 	/**
 	 * Link to root graph.
 	 */
-	BCADGraph graph;
+	final BCADGraph graph;
 	/**
 	 * CAD shape.
 	 */
-	private CADShape shape;
+	private final CADShape shape;
 	/**
 	 * CAD shape type.
 	 */
-	private CADShapeEnum type;
+	private final CADShapeEnum type;
 	/**
 	 * Link to the reversed shape, if it does exist.
 	 */
@@ -62,7 +62,7 @@ public class BCADGraphCell
 	/**
 	 * List of parents.
 	 */
-	private Collection<BCADGraphCell> parents = new LinkedHashSet<BCADGraphCell>();
+	private final Collection<BCADGraphCell> parents = new LinkedHashSet<BCADGraphCell>();
 	/**
 	 * List of discretizations.
 	 */

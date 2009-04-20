@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005,2006, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -36,8 +36,8 @@ import java.util.logging.Logger;
  */
 public class AlgoMesh1d
 {
-	private static Logger logger=Logger.getLogger(AlgoMesh1d.class.getName());
-	private MMesh1D mesh1d;
+	private static final Logger LOGGER=Logger.getLogger(AlgoMesh1d.class.getName());
+	private final MMesh1D mesh1d;
 	
 	/**
 	 * Creates a <code>AlgoMesh1d</code> instance.
@@ -103,9 +103,9 @@ public class AlgoMesh1d
 			nbEdges += submesh1d.getEdges().size();
 			System.out.println(discrE+": nbNodes = "+submesh1d.getNodes().size()+" nbEdges = "+submesh1d.getEdges().size());
 		}
-		logger.fine("TopoEdges discretisees "+nbTEdges);
-		logger.fine("Edges   "+nbEdges);
-		logger.fine("Nodes   "+nbNodes);
+		LOGGER.fine("TopoEdges discretisees "+nbTEdges);
+		LOGGER.fine("Edges   "+nbEdges);
+		LOGGER.fine("Nodes   "+nbNodes);
 		assert(mesh1d.isValid());
 	}
 

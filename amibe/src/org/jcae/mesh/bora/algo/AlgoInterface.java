@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007, by EADS France
+    Copyright (C) 2007,2009, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,7 @@ import org.jcae.mesh.bora.ds.BDiscretization;
 
 public interface AlgoInterface
 {
-	public abstract boolean compute(BDiscretization d);
-	public abstract boolean isAvailable();
-	public abstract int getOrientation(int o);
+	public boolean compute(BDiscretization d);
+	public boolean isAvailable();
+	public int getOrientation(int o);
 }

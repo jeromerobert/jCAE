@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
  
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 
 public class Vertex0d implements AlgoInterface
 {
-	private static Logger logger=Logger.getLogger(Vertex0d.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(Vertex0d.class.getName());
 	
 	public boolean isAvailable()
 	{
@@ -42,7 +42,7 @@ public class Vertex0d implements AlgoInterface
 	{
 		BCADGraphCell cell = d.getGraphCell();
 		d.setMesh(cell.getShape());
-		logger.fine(""+this+"  shape: "+d.getMesh());
+		LOGGER.fine(""+this+"  shape: "+d.getMesh());
 		return true;
 	}
 	

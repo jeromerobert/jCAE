@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,7 @@ import java.lang.reflect.Constructor;
 
 public class Hypothesis
 {
-	private static Logger logger=Logger.getLogger(Hypothesis.class.getName());
+	private static final Logger LOGGER=Logger.getLogger(Hypothesis.class.getName());
 	protected HypInterface hyp = HypNoneInstance;
 	// Now, length is the target length and is the variable that is used;
 	// In the near future we will want to enforce a maximum length lengthMax 
@@ -39,7 +39,7 @@ public class Hypothesis
 	private boolean locked = false;
 
 	// Unique identitier
-	private int id = -1;
+	private final int id;
 	private static int nextId = -1;
 
 	private static Class<?> [] innerClasses = Hypothesis.class.getDeclaredClasses();
@@ -72,7 +72,7 @@ public class Hypothesis
 	{
 		checkLock();
 		hyp = getAlgo(e);
-		logger.fine("("+Integer.toHexString(this.hashCode())+") Setting element type to "+e+"  "+hyp.getClass().getName());
+		LOGGER.fine("("+Integer.toHexString(this.hashCode())+") Setting element type to "+e+"  "+hyp.getClass().getName());
 	}
 
 	/**
@@ -117,7 +117,7 @@ public class Hypothesis
 	public void setLength(double l, boolean b)
 	{
 		checkLock();
-		logger.fine("("+Integer.toHexString(this.hashCode())+") Setting length to "+l+"; strong constraint: "+b);
+		LOGGER.fine("("+Integer.toHexString(this.hashCode())+") Setting length to "+l+"; strong constraint: "+b);
 		length = l;
 		lengthBool = b;
 	}
@@ -153,7 +153,7 @@ public class Hypothesis
 	public void setLength(double l1, double l2, boolean b)
 	{
 		checkLock();
-		logger.fine("("+Integer.toHexString(this.hashCode())+") Setting length; min="+l1+" max="+l2+"; strong constraint: "+b);
+		LOGGER.fine("("+Integer.toHexString(this.hashCode())+") Setting length; min="+l1+" max="+l2+"; strong constraint: "+b);
 		lengthMin = l1;
 		lengthMax = l2;
 		lengthBool = b;
@@ -167,7 +167,7 @@ public class Hypothesis
 	public void setDeflection(double d)
 	{
 		checkLock();
-		logger.fine("("+Integer.toHexString(this.hashCode())+") Setting deflection to "+d);
+		LOGGER.fine("("+Integer.toHexString(this.hashCode())+") Setting deflection to "+d);
 		deflection = d;
 	}
 
@@ -190,7 +190,7 @@ public class Hypothesis
 	public void setNumber(int n, boolean b)
 	{
 		checkLock();
-		logger.fine("("+Integer.toHexString(this.hashCode())+") Setting number of discretized points to "+n+"; strong constraint: "+b);
+		LOGGER.fine("("+Integer.toHexString(this.hashCode())+") Setting number of discretized points to "+n+"; strong constraint: "+b);
 		numberMin = n;
 		numberMax = n;
 		numberBool = b;
@@ -217,7 +217,7 @@ public class Hypothesis
 	public void setNumber(int n1, int n2, boolean b)
 	{
 		checkLock();
-		logger.fine("("+Integer.toHexString(this.hashCode())+") Setting number of discretized points; min="+n1+" max="+n2+"; strong constraint: "+b);
+		LOGGER.fine("("+Integer.toHexString(this.hashCode())+") Setting number of discretized points; min="+n1+" max="+n2+"; strong constraint: "+b);
 		numberMin = n1;
 		numberMax = n2;
 		numberBool = b;
@@ -325,12 +325,12 @@ public class Hypothesis
 				Constructor<TetGen> cons = TetGen.class.getConstructor(double.class);
 				ret = cons.newInstance(length);
 				if (!ret.isAvailable())
-					logger.severe("TetGen not available!");
+					LOGGER.severe("TetGen not available!");
 				/*
 				Constructor cons = Netgen.class.getConstructor(double.class);
 				ret = (AlgoInterface) cons.newInstance(length);
 				if (!ret.isAvailable())
-					logger.severe("Netgen not available!");
+					LOGGER.severe("Netgen not available!");
 				*/
 			}
 		} catch (Exception ex)
