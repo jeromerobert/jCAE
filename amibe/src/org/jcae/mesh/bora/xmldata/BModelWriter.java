@@ -21,19 +21,27 @@
 
 package org.jcae.mesh.bora.xmldata;
 
-import org.jcae.mesh.bora.ds.*;
-import org.jcae.mesh.xmldata.*;
+import org.jcae.mesh.bora.ds.BCADGraphCell;
+import org.jcae.mesh.bora.ds.BDiscretization;
+import org.jcae.mesh.bora.ds.BModel;
+import org.jcae.mesh.bora.ds.BSubMesh;
+import org.jcae.mesh.bora.ds.Constraint;
+import org.jcae.mesh.bora.ds.Hypothesis;
+import org.jcae.mesh.xmldata.JCAEXMLWriter;
+import org.jcae.mesh.xmldata.XMLHelper;
 import org.jcae.mesh.cad.CADShapeEnum;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import java.io.File;
 import java.util.Iterator;
 import java.util.Collection;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class BModelWriter
 {
-	private static final Logger LOGGER=Logger.getLogger(BModelWriter.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(BModelWriter.class.getName());
 
 	/**
 	 * Write the current object to a XML file and binary files. The XML file
@@ -45,7 +53,8 @@ public class BModelWriter
 		try
 		{
 			File file = new File(model.getOutputDir(), model.getOutputFile());
-			LOGGER.fine("Writing file "+file);
+			if (LOGGER.isLoggable(Level.FINE))
+				LOGGER.log(Level.FINE, "Writing file "+file);
 
 			// Create and fill the DOM
 			Document document=JCAEXMLWriter.createJcaeBoraDocument();

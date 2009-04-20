@@ -26,7 +26,12 @@ import org.jcae.mesh.amibe.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.SubMesh1D;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
 import org.jcae.mesh.bora.ds.BDiscretization;
-import org.jcae.mesh.cad.*;
+import org.jcae.mesh.cad.CADEdge;
+import org.jcae.mesh.cad.CADGeomCurve3D;
+import org.jcae.mesh.cad.CADShapeEnum;
+import org.jcae.mesh.cad.CADShapeFactory;
+import org.jcae.mesh.cad.CADVertex;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -42,6 +47,7 @@ import java.util.logging.Logger;
 public class UniformLengthDeflection1d implements AlgoInterface
 {
 	private static final Logger LOGGER=Logger.getLogger(UniformLengthDeflection1d.class.getName());
+
 	private final double maxlen;
 	private final double deflection;
 	private final boolean relDefl;
@@ -91,14 +97,14 @@ public class UniformLengthDeflection1d implements AlgoInterface
 		CADEdge E = (CADEdge) cell.getShape();
 		SubMesh1D submesh1d = new SubMesh1D(E);
 		d.setMesh(submesh1d);
-		LOGGER.fine(""+this+"  shape: "+E);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, ""+this+"  shape: "+E);
 		
 		ArrayList<MEdge1D> edgelist = submesh1d.getEdges();
 		ArrayList<MNode1D> nodelist = submesh1d.getNodes();
-		if (edgelist.size() != 0 || nodelist.size() != 0)
+		if (!edgelist.isEmpty() || !nodelist.isEmpty())
 			return false;
-		edgelist.clear();
-		nodelist.clear();
+
 		BCADGraphCell [] child = new BCADGraphCell[2];
 		{
 			Iterator<BCADGraphCell> it = cell.shapesExplorer(CADShapeEnum.VERTEX);

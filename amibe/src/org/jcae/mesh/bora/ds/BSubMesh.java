@@ -62,7 +62,7 @@ import java.util.logging.Logger;
  */
 public class BSubMesh
 {
-	private static final Logger LOGGER=Logger.getLogger(BSubMesh.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(BSubMesh.class.getName());
 	//   Model
 	private final BModel model;
 	//   Unique identitier
@@ -97,7 +97,7 @@ public class BSubMesh
 	public void add(Constraint cons)
 	{
 		if (LOGGER.isLoggable(Level.FINE))
-			LOGGER.fine("Add constraint "+cons+" to submesh "+id);
+			LOGGER.log(Level.FINE, "Add constraint "+cons+" to submesh "+id);
 		model.addConstraint(cons);
 		constraints.add(cons);
 		// Add this Constraint to the CAD cell

@@ -22,7 +22,9 @@ package org.jcae.mesh.bora.algo;
 
 import org.jcae.mesh.bora.ds.BDiscretization;
 import org.jcae.mesh.bora.ds.BCADGraphCell;
+
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class Vertex0d implements AlgoInterface
 {
@@ -42,7 +44,8 @@ public class Vertex0d implements AlgoInterface
 	{
 		BCADGraphCell cell = d.getGraphCell();
 		d.setMesh(cell.getShape());
-		LOGGER.fine(""+this+"  shape: "+d.getMesh());
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, ""+this+"  shape: "+d.getMesh());
 		return true;
 	}
 	

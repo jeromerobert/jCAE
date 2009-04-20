@@ -40,7 +40,8 @@ import java.util.logging.Logger;
  */
 public class BModel
 {
-	private static final Logger LOGGER=Logger.getLogger(BModel.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(BModel.class.getName());
+
 	//   Next available index
 	private static int freeIndex = 1;
 	//   Model number
@@ -71,7 +72,7 @@ public class BModel
 	{
 		id = freeIndex;
 		if (LOGGER.isLoggable(Level.FINE))
-			LOGGER.fine("Building model "+id+" from "+brep+" into "+out);
+			LOGGER.log(Level.FINE, "Building model "+id+" from "+brep+" into "+out);
 		freeIndex++;
 		CADShapeFactory factory = CADShapeFactory.getFactory();
 		xmlDir = out;

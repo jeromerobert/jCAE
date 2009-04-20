@@ -21,13 +21,22 @@
 
 package org.jcae.mesh.bora.ds;
 
-import org.jcae.mesh.cad.*;
+import org.jcae.mesh.cad.CADEdge;
+import org.jcae.mesh.cad.CADExplorer;
+import org.jcae.mesh.cad.CADFace;
+import org.jcae.mesh.cad.CADShape;
+import org.jcae.mesh.cad.CADShapeEnum;
+import org.jcae.mesh.cad.CADShapeFactory;
+import org.jcae.mesh.cad.CADSolid;
+import org.jcae.mesh.cad.CADVertex;
+
 import java.util.LinkedHashSet;
 import java.util.Collection;
 import java.util.Iterator;
 import gnu.trove.THashMap;
 import gnu.trove.TIntObjectHashMap;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -85,7 +94,8 @@ public class BCADGraph
 					rev.bindReversed(cell);
 				}
 				seen.put(sub, sub);
-				LOGGER.fine("  Add submesh: "+sub+" "+cell);
+				if (LOGGER.isLoggable(Level.FINE))
+					LOGGER.log(Level.FINE, "  Add submesh: "+sub+" "+cell);
 			}
 		}
 		// Add indices

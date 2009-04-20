@@ -21,21 +21,22 @@
 
 package org.jcae.mesh.bora.xmldata;
 
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
-import java.util.StringTokenizer;
+
 import gnu.trove.TIntObjectHashMap;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.util.StringTokenizer;
 import java.util.logging.Logger;
 
 
 public class MESHReader
 {
 
-	private static final Logger LOGGER=Logger.getLogger(MESHReader.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(MESHReader.class.getName());
 	
 	public static void readMesh(Mesh mesh, String file)
 	{

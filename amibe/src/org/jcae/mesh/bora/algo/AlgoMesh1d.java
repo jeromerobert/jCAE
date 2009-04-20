@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 public class AlgoMesh1d
 {
 	private static final Logger LOGGER=Logger.getLogger(AlgoMesh1d.class.getName());
+
 	private final MMesh1D mesh1d;
 	
 	/**
@@ -63,7 +64,7 @@ public class AlgoMesh1d
 		/*  First compute current nbNodes and nbEdges  */
 		while (ite.hasNext())
 		{
-		        BDiscretization discrE = ite.next();
+			BDiscretization discrE = ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(discrE);
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
@@ -71,7 +72,7 @@ public class AlgoMesh1d
 		ite = mesh1d.getBEdgeIterator();
 		while (ite.hasNext())
 		{
-		        BDiscretization discrE = ite.next();
+			BDiscretization discrE = ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(discrE);
 			nbNodes -= submesh1d.getNodes().size();
 			nbEdges -= submesh1d.getEdges().size();

@@ -41,6 +41,11 @@ import org.jcae.mesh.cad.CADGeomCurve3D;
 import org.jcae.mesh.cad.CADGeomSurface;
 import org.jcae.mesh.cad.CADShapeFactory;
 import org.jcae.mesh.cad.CADShapeEnum;
+import org.jcae.mesh.xmldata.DoubleFileReader;
+import org.jcae.mesh.xmldata.DoubleFileReaderByDirectBuffer;
+import org.jcae.mesh.xmldata.IntFileReader;
+import org.jcae.mesh.xmldata.IntFileReaderByDirectBuffer;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
@@ -52,15 +57,12 @@ import java.util.Collection;
 import java.util.Iterator;
 import gnu.trove.TObjectIntHashMap;
 import gnu.trove.TIntObjectHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jcae.mesh.xmldata.DoubleFileReader;
-import org.jcae.mesh.xmldata.DoubleFileReaderByDirectBuffer;
-import org.jcae.mesh.xmldata.IntFileReader;
-import org.jcae.mesh.xmldata.IntFileReaderByDirectBuffer;
 
 public class Storage
 {
-	private static final Logger LOGGER=Logger.getLogger(Storage.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(Storage.class.getName());
 
 	public static void writeId(File dir, int id)
 	{
@@ -232,7 +234,8 @@ public class Storage
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
-		LOGGER.fine("end reading cell "+id);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "end reading cell "+id);
 	}
 
 	/**
@@ -291,7 +294,8 @@ public class Storage
 			ex.printStackTrace();
 			throw new RuntimeException(ex);
 		}
-		LOGGER.fine("end reading cell "+id);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "end reading cell "+id);
 	}
 
 	private static TObjectIntHashMap<MNode1D> write1dNodeReferences(File dir, Collection<MNode1D> nodelist, BCADGraphCell edge)
@@ -302,7 +306,8 @@ public class Storage
 			refFile.delete();
 		
 		// Save references
-		LOGGER.fine("begin writing "+refFile);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "begin writing "+refFile);
 		DataOutputStream refsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile, true)));
 		TObjectIntHashMap<MNode1D> localIdx = new TObjectIntHashMap<MNode1D>(nodelist.size());
 
@@ -335,7 +340,8 @@ public class Storage
 			refFile.delete();
 
 		// Save references
-		LOGGER.fine("begin writing "+refFile+" face "+id);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "begin writing "+refFile+" face "+id);
 		DataOutputStream refsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(refFile, true)));
 
 		TObjectIntHashMap<Vertex> localIdx = new TObjectIntHashMap<Vertex>(nodelist.size());
@@ -370,7 +376,8 @@ public class Storage
 		if(parasFile.exists())
 			parasFile.delete();
 		
-		LOGGER.fine("begin writing "+nodesFile+" and "+parasFile);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "begin writing "+nodesFile+" and "+parasFile);
 		DataOutputStream nodesout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile, true)));
 		DataOutputStream parasout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(parasFile, true)));
 		for (Iterator<MNode1D> itn = nodelist.iterator(); itn.hasNext(); )
@@ -397,7 +404,8 @@ public class Storage
 			parasFile.delete();
 
 		// Save nodes
-		LOGGER.fine("begin writing "+nodesFile+" and "+parasFile);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "begin writing "+nodesFile+" and "+parasFile);
 		DataOutputStream nodesout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(nodesFile, true)));
 		DataOutputStream parasout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(parasFile, true)));
 		double [] xyz;
@@ -429,7 +437,8 @@ public class Storage
 		if(beamsFile.exists())
 			beamsFile.delete();
 		
-		LOGGER.fine("begin writing "+beamsFile);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "begin writing "+beamsFile);
 		DataOutputStream beamsout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(beamsFile, true)));
 		for (Iterator<MEdge1D> ite = edgelist.iterator(); ite.hasNext(); )
 		{
@@ -450,7 +459,8 @@ public class Storage
 			facesFile.delete();
 
 		// Save faces
-		LOGGER.fine("begin writing "+facesFile);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "begin writing "+facesFile);
 		DataOutputStream facesout = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(facesFile, true)));
 		for (Triangle f: trianglelist)
 		{
@@ -484,7 +494,8 @@ public class Storage
 		int numberOfReferences = refs.length / 2;
 		Vertex [] nodelist = new Vertex[numberOfNodes];
 		double [] coord = new double[3];
-		LOGGER.fine("Reading "+numberOfNodes+" nodes");
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "Reading "+numberOfNodes+" nodes");
 		mesh.ensureCapacity(2*numberOfNodes);
 		for (int i = 0; i < numberOfNodes; i++)
 		{
@@ -508,7 +519,8 @@ public class Storage
 			nodelist[ind].setRef(label);
 		}
 		dfrN.close();
-		LOGGER.fine("end reading "+dir+File.separator+"n");
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "end reading "+dir+File.separator+"n");
 		return nodelist;
 	}
 
@@ -519,7 +531,8 @@ public class Storage
 		IntFileReader ifr = new IntFileReaderByDirectBuffer(trianglesFile);
 
 		int numberOfTriangles = (int) trianglesFile.length() / (4*nr);
-		LOGGER.fine("Reading "+numberOfTriangles+" elements");
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "Reading "+numberOfTriangles+" elements");
 		mesh.ensureCapacity(numberOfTriangles);
 		Triangle face;
 		Vertex [] pts = new Vertex[nr];

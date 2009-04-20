@@ -37,7 +37,11 @@ import org.jcae.mesh.cad.CADShapeFactory;
 import org.jcae.mesh.cad.CADWireExplorer;
 import org.jcae.mesh.cad.CADGeomCurve2D;
 import org.jcae.mesh.cad.CADGeomCurve3D;
-import org.jcae.mesh.amibe.algos2d.*;
+import org.jcae.mesh.amibe.algos2d.CheckDelaunay;
+import org.jcae.mesh.amibe.algos2d.ConstraintNormal3D;
+import org.jcae.mesh.amibe.algos2d.EnforceAbsDeflection;
+import org.jcae.mesh.amibe.algos2d.Initial;
+import org.jcae.mesh.amibe.algos2d.Insertion;
 import org.jcae.mesh.amibe.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.SubMesh1D;
 import org.jcae.mesh.amibe.ds.MeshParameters;
@@ -45,6 +49,7 @@ import org.jcae.mesh.amibe.ds.MeshParameters;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.HashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -53,6 +58,7 @@ import java.util.logging.Logger;
 public class Basic2d implements AlgoInterface
 {
 	private static final Logger LOGGER=Logger.getLogger(Basic2d.class.getName());
+
 	private final double maxlen;
 	private final double deflection;
 	private final boolean relDefl;
@@ -80,7 +86,8 @@ public class Basic2d implements AlgoInterface
 	{
 		BCADGraphCell cell = d.getGraphCell();
 		CADFace F = (CADFace) cell.getShape();
-		LOGGER.fine(""+this+"  shape: "+F);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, ""+this+"  shape: "+F);
 
 		TriangleTraitsBuilder ttb = new TriangleTraitsBuilder();
 		ttb.addVirtualHalfEdge();
@@ -132,10 +139,8 @@ public class Basic2d implements AlgoInterface
 
 				SubMesh1D submesh1d = (SubMesh1D) dc.getMesh();
 				ArrayList<MNode1D> nodelist = submesh1d.getNodes();
-				Iterator<MNode1D> itn = nodelist.iterator();
-				ArrayList<MNode1D> saveList = new ArrayList<MNode1D>();
-				while (itn.hasNext())
-					saveList.add(itn.next());
+				ArrayList<MNode1D> saveList = new ArrayList<MNode1D>(nodelist);
+
 				if (!te.isOrientationForward())
 				{
 					//  Sort in reverse order
@@ -147,7 +152,7 @@ public class Basic2d implements AlgoInterface
 						saveList.set(size - i - 1, o);
 					}
 				}
-				itn = saveList.iterator();
+				Iterator<MNode1D> itn = saveList.iterator();
 				//  Except for the very first edge, the first
 				//  vertex is constrained to be the last one
 				//  of the previous edge.

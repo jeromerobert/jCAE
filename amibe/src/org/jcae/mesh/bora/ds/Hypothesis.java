@@ -25,10 +25,12 @@ import org.jcae.mesh.bora.algo.*;
 import org.jcae.mesh.cad.CADShapeEnum;
 import java.util.logging.Logger;
 import java.lang.reflect.Constructor;
+import java.util.logging.Level;
 
 public class Hypothesis
 {
-	private static final Logger LOGGER=Logger.getLogger(Hypothesis.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(Hypothesis.class.getName());
+
 	protected HypInterface hyp = HypNoneInstance;
 	// Now, length is the target length and is the variable that is used;
 	// In the near future we will want to enforce a maximum length lengthMax 
@@ -72,7 +74,8 @@ public class Hypothesis
 	{
 		checkLock();
 		hyp = getAlgo(e);
-		LOGGER.fine("("+Integer.toHexString(this.hashCode())+") Setting element type to "+e+"  "+hyp.getClass().getName());
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "("+Integer.toHexString(this.hashCode())+") Setting element type to "+e+"  "+hyp.getClass().getName());
 	}
 
 	/**
@@ -117,7 +120,8 @@ public class Hypothesis
 	public void setLength(double l, boolean b)
 	{
 		checkLock();
-		LOGGER.fine("("+Integer.toHexString(this.hashCode())+") Setting length to "+l+"; strong constraint: "+b);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "("+Integer.toHexString(this.hashCode())+") Setting length to "+l+"; strong constraint: "+b);
 		length = l;
 		lengthBool = b;
 	}
@@ -153,7 +157,8 @@ public class Hypothesis
 	public void setLength(double l1, double l2, boolean b)
 	{
 		checkLock();
-		LOGGER.fine("("+Integer.toHexString(this.hashCode())+") Setting length; min="+l1+" max="+l2+"; strong constraint: "+b);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "("+Integer.toHexString(this.hashCode())+") Setting length; min="+l1+" max="+l2+"; strong constraint: "+b);
 		lengthMin = l1;
 		lengthMax = l2;
 		lengthBool = b;
@@ -167,7 +172,8 @@ public class Hypothesis
 	public void setDeflection(double d)
 	{
 		checkLock();
-		LOGGER.fine("("+Integer.toHexString(this.hashCode())+") Setting deflection to "+d);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "("+Integer.toHexString(this.hashCode())+") Setting deflection to "+d);
 		deflection = d;
 	}
 
@@ -190,7 +196,8 @@ public class Hypothesis
 	public void setNumber(int n, boolean b)
 	{
 		checkLock();
-		LOGGER.fine("("+Integer.toHexString(this.hashCode())+") Setting number of discretized points to "+n+"; strong constraint: "+b);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "("+Integer.toHexString(this.hashCode())+") Setting number of discretized points to "+n+"; strong constraint: "+b);
 		numberMin = n;
 		numberMax = n;
 		numberBool = b;
@@ -217,7 +224,8 @@ public class Hypothesis
 	public void setNumber(int n1, int n2, boolean b)
 	{
 		checkLock();
-		LOGGER.fine("("+Integer.toHexString(this.hashCode())+") Setting number of discretized points; min="+n1+" max="+n2+"; strong constraint: "+b);
+		if (LOGGER.isLoggable(Level.FINE))
+			LOGGER.log(Level.FINE, "("+Integer.toHexString(this.hashCode())+") Setting number of discretized points; min="+n1+" max="+n2+"; strong constraint: "+b);
 		numberMin = n1;
 		numberMax = n2;
 		numberBool = b;

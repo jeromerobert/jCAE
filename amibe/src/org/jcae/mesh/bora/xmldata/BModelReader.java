@@ -21,9 +21,15 @@
 
 package org.jcae.mesh.bora.xmldata;
 
-import org.jcae.mesh.bora.ds.*;
-import org.jcae.mesh.xmldata.*;
+
+import org.jcae.mesh.bora.ds.BCADGraphCell;
+import org.jcae.mesh.bora.ds.BModel;
+import org.jcae.mesh.bora.ds.BSubMesh;
+import org.jcae.mesh.bora.ds.Constraint;
+import org.jcae.mesh.bora.ds.Hypothesis;
+import org.jcae.mesh.xmldata.XMLHelper;
 import org.jcae.mesh.cad.CADShapeEnum;
+
 import java.io.File;
 import java.util.Iterator;
 import javax.xml.xpath.XPath;
@@ -38,7 +44,7 @@ import java.util.logging.Logger;
 
 public class BModelReader
 {
-	private static final Logger LOGGER=Logger.getLogger(BModelReader.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(BModelReader.class.getName());
 
 	/** Return the first child element of with the given tag name */
 	private static Node getChild(Node e, String tagName)

@@ -29,7 +29,8 @@ import java.util.logging.Logger;
 
 public class BDiscretization
 {
-	private static final Logger LOGGER=Logger.getLogger(BDiscretization.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(BDiscretization.class.getName());
+
 	private final BCADGraphCell graphCell;
 	// List of set of BSubMesh instances containing this BDiscretization.
 	private final Collection<BSubMesh> submesh = new LinkedHashSet<BSubMesh>();
