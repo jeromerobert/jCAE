@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Iterator;
 import gnu.trove.THashSet;
-import gnu.trove.TObjectHashingStrategy;
 
 /**
  * Graph cell.  This class is a decorator for the CAD graph.
@@ -67,22 +66,6 @@ public class BCADGraphCell
 	 * List of discretizations.
 	 */
 	private Collection<BDiscretization> discrete = new ArrayList<BDiscretization>();
-
-	// In OccJava, two CADShape instances can be equal with different
-	// orientations.  We sometimes need to keep track of shape orientation
-	// in our graph, hash sets and maps can then use the keepOrientation
-	// instance as hashing strategy.
-	private static TObjectHashingStrategy<CADShape> keepOrientation = new TObjectHashingStrategy<CADShape>()
-	{
-		public int computeHashCode(CADShape o)
-		{
-			return o.hashCode();
-		}
-		public boolean equals(CADShape s1, CADShape s2)
-		{
-			return s1 != null && s1.equals(s2) && s1.orientation() == s2.orientation();
-		}
-	};
 
 	/**
 	 * Constructor.
@@ -198,7 +181,7 @@ public class BCADGraphCell
 	 */
 	public Iterator<BCADGraphCell> shapesExplorer(CADShapeEnum cse)
 	{
-		return shapesExplorer(cse, new THashSet<CADShape>(keepOrientation));
+		return shapesExplorer(cse, new THashSet<CADShape>(KeepOrientationHashingStrategy.getInstance()));
 	}
 
 	/**
@@ -274,7 +257,7 @@ public class BCADGraphCell
 	 */
 	public Iterator<BCADGraphCell> shapesIterator()
 	{
-		return shapesIterator(new THashSet<CADShape>(keepOrientation));
+		return shapesIterator(new THashSet<CADShape>(KeepOrientationHashingStrategy.getInstance()));
 	}
 
 	/**

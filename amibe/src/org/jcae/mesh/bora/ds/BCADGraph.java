@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import gnu.trove.THashMap;
 import gnu.trove.TIntObjectHashMap;
-import gnu.trove.TObjectHashingStrategy;
 
 import java.util.logging.Logger;
 
@@ -42,27 +41,12 @@ public class BCADGraph
 	// Cell root
 	private final BCADGraphCell root;
 	// Map between topological elements and graph cells
-	private final THashMap<CADShape, BCADGraphCell> cadShapeToGraphCell = new THashMap<CADShape, BCADGraphCell>(keepOrientation);
+	private final THashMap<CADShape, BCADGraphCell> cadShapeToGraphCell =
+			new THashMap<CADShape, BCADGraphCell>(KeepOrientationHashingStrategy.getInstance());
 	// Map between indices and graph cells or user-defined groups
 	private final TIntObjectHashMap<BCADGraphCell> indexToCell = new TIntObjectHashMap<BCADGraphCell>();
 	// First free index
 	private int freeIndex;
-
-	// In OccJava, 2 CADShape instances can be equal with different orientations.
-	// We sometimes need to keep track of shape orientation in our graph, hash
-	// sets and maps can then use the keepOrientation instance as hashing
-	// strategy.
-	private static TObjectHashingStrategy<CADShape> keepOrientation = new TObjectHashingStrategy<CADShape>()
-	{
-		public int computeHashCode(CADShape o)
-		{
-			return o.hashCode();
-		}
-		public boolean equals(CADShape s1, CADShape s2)               
-		{
-			return s1 != null && s1.equals(s2) && s1.orientation() == s2.orientation();
-		}
-	};
 
 	/**
 	 * Creates a root mesh.
