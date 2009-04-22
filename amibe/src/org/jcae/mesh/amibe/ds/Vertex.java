@@ -414,6 +414,7 @@ public class Vertex implements Serializable
 		{
 			super(tri);
 		}
+		@Override
 		public final Vertex next()
 		{
 			return advance().destination();
@@ -426,6 +427,7 @@ public class Vertex implements Serializable
 		{
 			super(tri);
 		}
+		@Override
 		public final AbstractHalfEdge next()
 		{
 			return advance();
@@ -438,6 +440,7 @@ public class Vertex implements Serializable
 		{
 			super(tri);
 		}
+		@Override
 		public final Triangle next()
 		{
 			return advance().getTri();
