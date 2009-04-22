@@ -20,7 +20,6 @@
 
 package org.jcae.mesh.amibe.patch;
 
-import org.jcae.mesh.amibe.InvalidFaceException;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.VirtualHalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;

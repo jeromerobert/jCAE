@@ -26,7 +26,6 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
-import org.jcae.mesh.amibe.InitialTriangulationException;
 import org.jcae.mesh.amibe.util.KdTree;
 import org.jcae.mesh.amibe.util.KdTreeProcedure;
 import org.jcae.mesh.cad.*;

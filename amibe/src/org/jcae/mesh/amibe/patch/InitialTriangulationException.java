@@ -2,7 +2,6 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2003,2004,2005, by EADS CRC
-    Copyright (C) 2007, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -19,18 +18,9 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-package org.jcae.mesh.amibe;
+package org.jcae.mesh.amibe.patch;
 
-public class InvalidFaceException extends RuntimeException
+public class InitialTriangulationException extends RuntimeException
 {
-	private static final long serialVersionUID = -686411161526760366L;
-
-	public InvalidFaceException()
-	{
-	}
-	
-	protected InvalidFaceException(String reason)
-	{
-		super(reason);
-	}
+	private static final long serialVersionUID = -7709412720403777037L;
 }

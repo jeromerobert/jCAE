@@ -33,8 +33,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.text.SimpleDateFormat;
 
-import org.jcae.mesh.amibe.InitialTriangulationException;
-import org.jcae.mesh.amibe.InvalidFaceException;
+import org.jcae.mesh.amibe.patch.InitialTriangulationException;
+import org.jcae.mesh.amibe.patch.InvalidFaceException;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.algos1d.*;
