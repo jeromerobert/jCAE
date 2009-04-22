@@ -1,3 +1,5 @@
+package org.jcae.viewer3d.test;
+
 import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
