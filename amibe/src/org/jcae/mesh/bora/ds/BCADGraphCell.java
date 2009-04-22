@@ -146,7 +146,7 @@ public class BCADGraphCell
 
 	public Collection<BCADGraphCell> getParents()
 	{
-		return parents;
+		return Collections.unmodifiableCollection(parents);
 	}
 
 	public void addParent(BCADGraphCell that)
