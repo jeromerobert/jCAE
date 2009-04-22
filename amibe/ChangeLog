@@ -1,3 +1,8 @@
+Tue Apr 21 11:05:58 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/MMesh1D.java: Replace getTEdgeIterator()
+	by getTEdges() and getBEdgeIterator() by getBEdges().
+
 Mon Apr 20 11:50:19 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/cad/CADShapeEnum.java: Deprecate iterator() in

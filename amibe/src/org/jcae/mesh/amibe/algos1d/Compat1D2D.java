@@ -35,7 +35,6 @@ import org.jcae.mesh.cad.CADShapeFactory;
 import java.util.List;
 import java.util.Set;
 import java.util.Map;
-import java.util.Iterator;
 import java.util.logging.Logger;
 
 public class Compat1D2D
@@ -79,10 +78,8 @@ public class Compat1D2D
 	{
 		int nbTEdges = 0, nbNodes = 0, nbEdges = 0;
 		/* Explore the shape for each edge */
-		Iterator<CADEdge> ite = mesh1d.getTEdgeIterator();
-		while (ite.hasNext())
+		for (CADEdge E : mesh1d.getTEdges())
 		{
-			CADEdge E = ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(E);
 			if (null == submesh1d)
 				continue;
@@ -113,13 +110,13 @@ public class Compat1D2D
 		double [] coord = new double[3*curvmax.length];
 		double [] paramOnEdge = new double[curvmax.length];
 		int k = 0;
-		for (Iterator<MNode1D> itn = nodelist.iterator(); itn.hasNext(); k++)
+		for (MNode1D p1 : nodelist)
 		{
-			MNode1D p1 = itn.next();
 			paramOnEdge[k] = p1.getParameter();
 			double [] xyz = curve3d.value(paramOnEdge[k]);
 			for (int j = 0; j < 3; j++)
 				coord[3*k+j] = xyz[j];
+			k++;
 		}
 		curve3d.setDiscretization(paramOnEdge);
 		

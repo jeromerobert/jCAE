@@ -27,7 +27,6 @@ import org.jcae.mesh.amibe.ds.MMesh1D;
 import org.jcae.mesh.amibe.ds.SubMesh1D;
 import org.jcae.mesh.bora.ds.BDiscretization;
 
-import java.util.Iterator;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -60,20 +59,16 @@ public class AlgoMesh1d
 		int nbTEdges = 0, nbNodes = 0, nbEdges = 0;
 		double currentDiscrLength;
 		double currentDiscrDeflec;
-		/* Explore the shape for each edge */
-		Iterator<BDiscretization> ite = mesh1d.getBEdgeIterator();
 		/*  First compute current nbNodes and nbEdges  */
-		while (ite.hasNext())
+		for (BDiscretization discrE : mesh1d.getBEdges())
 		{
-			BDiscretization discrE = ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(discrE);
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
 		}
-		ite = mesh1d.getBEdgeIterator();
-		while (ite.hasNext())
+		/* Explore the shape for each edge */
+		for (BDiscretization discrE : mesh1d.getBEdges())
 		{
-			BDiscretization discrE = ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(discrE);
 			nbNodes -= submesh1d.getNodes().size();
 			nbEdges -= submesh1d.getEdges().size();

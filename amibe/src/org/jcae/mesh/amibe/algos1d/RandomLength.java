@@ -30,7 +30,6 @@ import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADShapeFactory;
 import java.util.List;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.logging.Logger;
@@ -72,20 +71,16 @@ public class RandomLength
 	public void compute()
 	{
 		int nbTEdges = 0, nbNodes = 0, nbEdges = 0;
-		/* Explore the shape for each edge */
-		Iterator<CADEdge> ite = mesh1d.getTEdgeIterator();
 		/*  First compute current nbNodes and nbEdges  */
-		while (ite.hasNext())
+		for (CADEdge E : mesh1d.getTEdges())
 		{
-			CADEdge E = ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(E);
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
 		}
-		ite = mesh1d.getTEdgeIterator();
-		while (ite.hasNext())
+		/* Explore the shape for each edge */
+		for (CADEdge E : mesh1d.getTEdges())
 		{
-			CADEdge E = ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(E);
 			nbNodes -= submesh1d.getNodes().size();
 			nbEdges -= submesh1d.getEdges().size();

@@ -29,8 +29,8 @@ import org.jcae.mesh.cad.CADGeomCurve3D;
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADEdge;
 import org.jcae.mesh.cad.CADShapeFactory;
+
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  */
 public class UniformLengthDeflection
 {
-	private static final Logger LOGGER=Logger.getLogger(UniformLengthDeflection.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(UniformLengthDeflection.class.getName());
 	private final MMesh1D mesh1d;
 	private double maxlen = -1.0;
 	private double deflection = 1.0;
@@ -80,20 +80,16 @@ public class UniformLengthDeflection
 	public void compute()
 	{
 		int nbTEdges = 0, nbNodes = 0, nbEdges = 0;
-		/* Explore the shape for each edge */
-		Iterator<CADEdge> ite = mesh1d.getTEdgeIterator();
 		/*  First compute current nbNodes and nbEdges  */
-		while (ite.hasNext())
+		for (CADEdge E : mesh1d.getTEdges())
 		{
-			CADEdge E = ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(E);
 			nbNodes += submesh1d.getNodes().size();
 			nbEdges += submesh1d.getEdges().size();
 		}
-		ite = mesh1d.getTEdgeIterator();
-		while (ite.hasNext())
+		/* Explore the shape for each edge */
+		for (CADEdge E : mesh1d.getTEdges())
 		{
-			CADEdge E = ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(E);
 			nbNodes -= submesh1d.getNodes().size();
 			nbEdges -= submesh1d.getEdges().size();

@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -24,6 +24,7 @@ package org.jcae.mesh.amibe.ds;
 import org.jcae.mesh.bora.ds.*;
 import org.jcae.mesh.cad.*;
 import org.jcae.mesh.amibe.patch.Vertex2D;
+
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +34,8 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.logging.Logger;
 
 /**
@@ -43,7 +46,7 @@ import java.util.logging.Logger;
 
 public class MMesh1D extends MMesh0D
 {
-	private final static Logger logger=Logger.getLogger(MMesh1D.class.getName());	
+	private final static Logger LOGGER = Logger.getLogger(MMesh1D.class.getName());
 
 	private String filename;
 	
@@ -223,7 +226,7 @@ public class MMesh1D extends MMesh0D
 	 */
 	public void updateNodeLabels()
 	{
-		logger.fine("Update node labels");
+		LOGGER.fine("Update node labels");
 		//  Resets all labels
 		CADExplorer expE = CADShapeFactory.getFactory().newExplorer();
 		for (expE.init(shape, CADShapeEnum.EDGE); expE.more(); expE.next())
@@ -258,7 +261,7 @@ public class MMesh1D extends MMesh0D
 	 */
 	public void duplicateEdges()
 	{
-		logger.fine("Compute vertex references");
+		LOGGER.fine("Compute vertex references");
 		CADExplorer expV = CADShapeFactory.getFactory().newExplorer();
 		//  For each topological vertex, compute the list of
 		//  MNode1D objects which are bound to this vertex.
@@ -311,9 +314,29 @@ public class MMesh1D extends MMesh0D
 		return mapTEdgeToSubMesh1D.keySet().iterator();
 	}
 	
+	/**
+	 * Returns an unmodifiable view of the list of topological edges.
+	 *
+	 * @return the list of topological edges.
+	 */
+	public Collection<CADEdge> getTEdges()
+	{
+		return Collections.unmodifiableCollection(mapTEdgeToSubMesh1D.keySet());
+	}
+	
 	public Iterator<BDiscretization> getBEdgeIterator()
 	{
 		return mapDiscrToSubMesh1D.keySet().iterator();
+	}
+
+	/**
+	 * Returns an unmodifiable view of the list of topological edges.
+	 *
+	 * @return the list of topological edges.
+	 */
+	public Collection<BDiscretization> getBEdges()
+	{
+		return Collections.unmodifiableCollection(mapDiscrToSubMesh1D.keySet());
 	}
 	
 	/**
@@ -548,14 +571,14 @@ public class MMesh1D extends MMesh0D
 	{
 		String cr=System.getProperty("line.separator");
 		StringBuilder r = new StringBuilder("MMesh1D"+cr);
-		logger.fine("Printing "+r.toString());
+		LOGGER.fine("Printing "+r.toString());
 		for(Iterator<SubMesh1D> it=mapTEdgeToSubMesh1D.values().iterator();it.hasNext();)
 		{
 			SubMesh1D submesh1d = it.next();
 			if (null != submesh1d)
 				r.append(submesh1d);
 		}
-		logger.fine("...done");
+		LOGGER.fine("...done");
 		return r.toString();
 	}
 }

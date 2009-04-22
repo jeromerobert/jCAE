@@ -28,7 +28,6 @@ import org.jcae.mesh.amibe.ds.SubMesh1D;
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADEdge;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -37,7 +36,7 @@ import java.util.logging.Logger;
  */
 public class Refine
 {
-	private static final Logger LOGGER=Logger.getLogger(Refine.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(Refine.class.getName());
 	private final MMesh1D mesh1d;
 	private int divisions = 2;
 	
@@ -72,10 +71,8 @@ public class Refine
 			throw new java.lang.IllegalArgumentException("Division number must be > 1");
 
 		/* Explore the shape for each edge */
-		Iterator<CADEdge> ite = mesh1d.getTEdgeIterator();
-		while (ite.hasNext())
+		for (CADEdge E : mesh1d.getTEdges())
 		{
-			CADEdge E = ite.next();
 			SubMesh1D submesh1d = mesh1d.getSubMesh1DFromMap(E);
 			nbNodes -= submesh1d.getNodes().size();
 			nbEdges -= submesh1d.getEdges().size();
@@ -116,11 +113,9 @@ public class Refine
 		//  Edges have to be sorted, not nodes
 		ArrayList<MEdge1D> oldedgelist = new ArrayList<MEdge1D>(edgelist);
 		edgelist.clear();
-		Iterator<MEdge1D> ite = oldedgelist.iterator();
-		while (ite.hasNext())
+		for (MEdge1D edge : oldedgelist)
 		{
-			//  Add intermeediate nodes
-			MEdge1D edge = ite.next();
+			//  Add intermediate nodes
 			MNode1D firstNode = edge.getNodes1();
 			MNode1D lastNode = edge.getNodes2();
 			MNode1D n1, n2;
