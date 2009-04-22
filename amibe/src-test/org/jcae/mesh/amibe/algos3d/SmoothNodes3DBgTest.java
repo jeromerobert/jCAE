@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jcae.mesh.amibe.projection.SphereBuilder;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.validation.MinAngleFace;
 import org.jcae.mesh.amibe.validation.QualityFloat;

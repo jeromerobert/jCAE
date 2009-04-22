@@ -29,7 +29,6 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import java.util.Map;
 import java.util.HashMap;
-import org.jcae.mesh.amibe.projection.SphereBuilder;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.validation.MinAngleFace;
 import org.jcae.mesh.amibe.validation.QualityFloat;
