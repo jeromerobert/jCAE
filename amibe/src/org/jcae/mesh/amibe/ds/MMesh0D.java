@@ -101,10 +101,7 @@ public class MMesh0D
 		for (Iterator<BCADGraphCell> itn = root.shapesExplorer(CADShapeEnum.VERTEX); itn.hasNext(); )
 		{
 			BCADGraphCell cell = itn.next();
-			for (Iterator<BDiscretization> itpd = cell.discretizationIterator(); itpd.hasNext(); itpd.next())
-			{
-				nodediscrs++;
-			}
+			nodediscrs += cell.getDiscretizations().size();
 		}
 
 		//  Merge nodes at the same discretization
@@ -113,25 +110,17 @@ public class MMesh0D
 		for (Iterator<BCADGraphCell> itn = root.shapesExplorer(CADShapeEnum.VERTEX); itn.hasNext();)
 		{
 			BCADGraphCell cell = itn.next();
-			for (Iterator<BDiscretization> itpd = cell.discretizationIterator(); itpd.hasNext(); )
+			for (BDiscretization d : cell.getDiscretizations())
 			{
-				addVertexDiscretization(itpd.next());
+				if (!vnodediscrset.contains(d))
+				{
+					vnodediscrset.put(d, vnodediscrsize);
+					vnodediscrlist[vnodediscrsize] = d;
+					vnodediscrsize++;
+				}
 			}
 		}
-                System.out.println("Number of Vertex discretizations created in MMesh0D: "+ vnodediscrsize);
-
-	}
-	
-	//  Add a vertex discretization if necessary
-	private void addVertexDiscretization(BDiscretization d)
-	{
-		// test to see if this discretization has already been processed
-		if (vnodediscrset.contains(d))
-			return;
-		// if not, create a node
-		vnodediscrset.put(d, vnodediscrsize);
-		vnodediscrlist[vnodediscrsize] = d;
-		vnodediscrsize++;
+		//System.out.println("Number of Vertex discretizations created in MMesh0D: "+ vnodediscrsize);
 	}
 
 	//  Add a geometrical vertex.
@@ -194,9 +183,8 @@ public class MMesh0D
 			if ( V.isSame(ccell.getShape()) )
 			{
 				// Selection of the child cell's discretization of parent pd
-				for (Iterator<BDiscretization> itcd = ccell.discretizationIterator(); itcd.hasNext(); )
+				for (BDiscretization cd : ccell.getDiscretizations())
 				{
-					BDiscretization cd = itcd.next();
 					if (pd.contained(cd))
 						return getVertexDiscretization(cd); // equivalent to return cd if everything went right
 				}

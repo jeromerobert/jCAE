@@ -129,9 +129,8 @@ public class BSubMesh
  		        for (Iterator<BCADGraphCell> its = root.shapesExplorer(cse); its.hasNext(); )
 			{
 				BCADGraphCell cell = its.next();
-				for (Iterator<BDiscretization> itd = cell.discretizationIterator(); itd.hasNext(); )
+				for (BDiscretization discr : cell.getDiscretizations())
 				{
-					BDiscretization discr = itd.next();
 					if (discr.contains(this) && discr.isSubmeshChild(this))
 					{
 						System.out.println(tab+"Shape "+cell);

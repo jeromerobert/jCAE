@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Iterator;
 import gnu.trove.THashSet;
+import java.util.Collections;
 
 /**
  * Graph cell.  This class is a decorator for the CAD graph.
@@ -327,9 +328,8 @@ public class BCADGraphCell
 	 */
 	public BDiscretization getDiscretizationSubMesh(BSubMesh sub)
 	{
-		for (Iterator<BDiscretization> it = discrete.iterator(); it.hasNext(); )
+		for (BDiscretization discr : discrete)
 		{
-			BDiscretization discr = it.next();
 			if (discr.contains(sub))
 				return discr;
 		}
@@ -338,13 +338,12 @@ public class BCADGraphCell
 
 	public void addSubMeshConstraint(BSubMesh sub, Constraint cons)
 	{
-		BDiscretization discr = getDiscretizationSubMesh(sub);
-		if (discr != null)
-			throw new RuntimeException("Constraint "+cons+" cannot be applied to shape "+shape+", another constraint "+discr.getConstraint()+" is already defined");
+		BDiscretization d = getDiscretizationSubMesh(sub);
+		if (d != null)
+			throw new RuntimeException("Constraint "+cons+" cannot be applied to shape "+shape+", another constraint "+d.getConstraint()+" is already defined");
 		BDiscretization found = null;
-		for (Iterator<BDiscretization> it = discrete.iterator(); it.hasNext(); )
+		for (BDiscretization discr : discrete)
 		{
-			discr = it.next();
 			if (discr.getConstraint() == cons)
 			{
 				found = discr;
@@ -360,18 +359,17 @@ public class BCADGraphCell
 	}
 
 	/**
-	 * Returns an iterator on BDiscretization instances bound to this cell.
+	 * Returns an immutable view of the list of BDiscretization instances bound to this cell.
 	 */
-	public Iterator<BDiscretization> discretizationIterator()
+	public Collection<BDiscretization> getDiscretizations()
 	{
-		return discrete.iterator();
+		return Collections.unmodifiableCollection(discrete);
 	}
 
 	public void addImplicitConstraints(CADShapeEnum cse, boolean recursive)
 	{
-		for (Iterator<BDiscretization> it = discrete.iterator(); it.hasNext(); )
+		for (BDiscretization discr : discrete)
 		{
-			BDiscretization discr = it.next();
 			Iterator<BCADGraphCell> itc;
 			if (recursive)
 				itc = shapesExplorer(cse);
@@ -385,12 +383,13 @@ public class BCADGraphCell
 					continue;
 				boolean allIntersectionsEmpty = false;
 				BDiscretization discrChild = null;
-				for (Iterator<BDiscretization> itd = child.discrete.iterator(); itd.hasNext(); )
+				for (BDiscretization dc : child.discrete)
 				{
-					discrChild = itd.next();
 					if (!discr.emptyIntersection(discrChild))
+					{
+						discrChild = dc;
 						break;
-					discrChild = null;
+					}
 				}
 				if (discrChild == null)
 				{

@@ -128,10 +128,7 @@ public class MMesh1D extends MMesh0D
 		for (Iterator<BCADGraphCell> itn = root.shapesExplorer(CADShapeEnum.EDGE); itn.hasNext(); )
 		{
 			BCADGraphCell cell = itn.next();
-			for (Iterator<BDiscretization> itpd = cell.discretizationIterator(); itpd.hasNext(); itpd.next())
-			{
-				edgediscrs++;
-			}
+			edgediscrs += cell.getDiscretizations().size();
 		}
 		if (edgediscrs == 0)
 			return;
@@ -141,9 +138,8 @@ public class MMesh1D extends MMesh0D
 		for (Iterator<BCADGraphCell> itn = root.shapesExplorer(CADShapeEnum.EDGE); itn.hasNext(); )
 		{
 			BCADGraphCell cell = itn.next();
-			for (Iterator<BDiscretization> itpd = cell.discretizationIterator(); itpd.hasNext(); )
+			for (BDiscretization discr : cell.getDiscretizations())
 			{
-				BDiscretization discr = itpd.next();
 				//  Edges may get connected to several faces
 				if (mapDiscrToSubMesh1D.containsKey(discr))
 					continue;
@@ -156,23 +152,21 @@ public class MMesh1D extends MMesh0D
 
 		Map<BDiscretization, LinkedHashSet<BDiscretization>> mapDiscrToFaces =
 			new HashMap<BDiscretization, LinkedHashSet<BDiscretization>>(edgediscrs);
-		for (Iterator<BDiscretization> it = mapDiscrToSubMesh1D.keySet().iterator(); it.hasNext(); )
+		for (BDiscretization d : mapDiscrToSubMesh1D.keySet())
 		{
-			mapDiscrToFaces.put(it.next(), new LinkedHashSet<BDiscretization>());
+			mapDiscrToFaces.put(d, new LinkedHashSet<BDiscretization>());
 		}
 
 		for (Iterator<BCADGraphCell> itp = root.shapesExplorer(CADShapeEnum.FACE); itp.hasNext(); )
 		{
 			BCADGraphCell pcell = itp.next();
-			for (Iterator<BDiscretization> itpd = pcell.discretizationIterator(); itpd.hasNext(); )
+			for (BDiscretization pd : pcell.getDiscretizations())
 			{
-				BDiscretization pd = itpd.next();
 				for (Iterator<BCADGraphCell> itc = pcell.shapesExplorer(CADShapeEnum.EDGE); itc.hasNext(); )
 				{
 					BCADGraphCell ccell = itc.next();
-					for (Iterator<BDiscretization> itcd = ccell.discretizationIterator(); itcd.hasNext(); )
+					for (BDiscretization cd : ccell.getDiscretizations())
 					{
-						BDiscretization cd = itcd.next();
 						if (pd.contained(cd))
 						{
 							// here mapDiscrToFaces maps the parent discretizations on 

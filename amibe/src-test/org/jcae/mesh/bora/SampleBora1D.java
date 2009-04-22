@@ -71,7 +71,7 @@ public class SampleBora1D
 				if (edge.getReversed() != null)
 					edge = edge.getReversed();
 			}
-			BDiscretization d = edge.discretizationIterator().next();
+			BDiscretization d = edge.getDiscretizations().iterator().next();
 			if (null == d)
 				continue;
 			File nodesfile = new File(model.getOutputDir(d)+File.separator+"1d", "n"+edge.getId());
@@ -96,7 +96,7 @@ public class SampleBora1D
 				if (edge.getReversed() != null)
 					edge = edge.getReversed();
 			}
-			BDiscretization d = edge.discretizationIterator().next();
+			BDiscretization d = edge.getDiscretizations().iterator().next();
 			if (null == d)
 				continue;
 			File nodesfile = new File(model.getOutputDir(d)+File.separator+"1d", "n"+edge.getId());
@@ -131,7 +131,7 @@ public class SampleBora1D
 				if (edge.getReversed() != null)
 					edge = edge.getReversed();
 			}
-			BDiscretization d = edge.discretizationIterator().next();
+			BDiscretization d = edge.getDiscretizations().iterator().next();
 			if (null == d)
 				continue;
 			try

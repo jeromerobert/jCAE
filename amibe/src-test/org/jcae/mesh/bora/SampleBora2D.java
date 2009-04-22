@@ -73,7 +73,7 @@ public class SampleBora2D
 				if (face.getReversed() != null)
 					face = face.getReversed();
 			}
-			BDiscretization d = face.discretizationIterator().next();
+			BDiscretization d = face.getDiscretizations().iterator().next();
 			if (null == d)
 				continue;
 			File nodesfile = new File(model.getOutputDir(d)+File.separator+"2d", "n"+face.getId());
@@ -98,7 +98,7 @@ public class SampleBora2D
 				if (face.getReversed() != null)
 					face = face.getReversed();
 			}
-			BDiscretization d = face.discretizationIterator().next();
+			BDiscretization d = face.getDiscretizations().iterator().next();
 			if (null == d)
 				continue;
 			File nodesfile = new File(model.getOutputDir(d)+File.separator+"2d", "n"+face.getId());
@@ -132,7 +132,7 @@ public class SampleBora2D
 				if (face.getReversed() != null)
 					face = face.getReversed();
 			}
-			BDiscretization d = face.discretizationIterator().next();
+			BDiscretization d = face.getDiscretizations().iterator().next();
 			if (null == d)
 				continue;
 			CADFace F = (CADFace) face.getShape();

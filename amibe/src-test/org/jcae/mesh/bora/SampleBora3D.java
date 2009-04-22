@@ -71,7 +71,7 @@ public class SampleBora3D
 				if (solid.getReversed() != null)
 					solid = solid.getReversed();
 			}
-			BDiscretization d = solid.discretizationIterator().next();
+			BDiscretization d = solid.getDiscretizations().iterator().next();
 			if (null == d)
 				continue;
 			File nodesfile = new File(model.getOutputDir(d)+File.separator+"3d", "n"+solid.getId());
@@ -93,7 +93,7 @@ public class SampleBora3D
 				if (solid.getReversed() != null)
 					solid = solid.getReversed();
 			}
-			BDiscretization d = solid.discretizationIterator().next();
+			BDiscretization d = solid.getDiscretizations().iterator().next();
 			if (null == d)
 				continue;
 			File nodesfile = new File(model.getOutputDir(d)+File.separator+"3d", "n"+solid.getId());
@@ -123,7 +123,7 @@ public class SampleBora3D
 				if (solid.getReversed() != null)
 					solid = solid.getReversed();
 			}
-			BDiscretization d = solid.discretizationIterator().next();
+			BDiscretization d = solid.getDiscretizations().iterator().next();
 			if (null == d)
 				continue;
 			try

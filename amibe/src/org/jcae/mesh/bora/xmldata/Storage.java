@@ -170,9 +170,8 @@ public class Storage
 	public static void readAllFaces(Mesh m, BCADGraphCell root)
 	{
 		TIntObjectHashMap<Vertex> vertMap = new TIntObjectHashMap<Vertex>();
-		for (Iterator<BSubMesh> its = root.getGraph().getModel().getSubMeshIterator(); its.hasNext(); )
+		for (BSubMesh s : root.getGraph().getModel().getSubMeshes())
 		{
-			BSubMesh s = its.next();
 			for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.FACE); it.hasNext(); )
 				readFace(m, it.next(), s, vertMap);
 		}

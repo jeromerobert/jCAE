@@ -32,6 +32,7 @@ import java.util.LinkedHashSet;
 import java.util.Stack;
 import java.util.Iterator;
 import java.io.File;
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -179,9 +180,13 @@ public class BModel
 		return ret;
 	}
 
-	public Iterator<BSubMesh> getSubMeshIterator()
+	/**
+	 * Get an immutable view of the list of submeshes.
+	 * @return the list of submeshes.
+	 */
+	public Collection<BSubMesh> getSubMeshes()
 	{
-		return submesh.iterator();
+		return Collections.unmodifiableCollection(submesh);
 	}
 
 	/**
@@ -242,19 +247,15 @@ public class BModel
 		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.VERTEX); its.hasNext(); )
 		{
 			BCADGraphCell cell = its.next();
-			for (Iterator<BDiscretization> itd = cell.discretizationIterator(); itd.hasNext(); )
-			{
-				BDiscretization d = itd.next();
+			for (BDiscretization d : cell.getDiscretizations())
 				d.discretize();
-			}
 		}
 		LOGGER.info("Discretize edges");
 		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.EDGE); its.hasNext(); )
 		{
 			BCADGraphCell cell = its.next();
-			for (Iterator<BDiscretization> itd = cell.discretizationIterator(); itd.hasNext(); )
+			for (BDiscretization d : cell.getDiscretizations())
 			{
-				BDiscretization d = itd.next();
 				d.discretize();
 				Storage.writeEdge(d, getOutputDir(d));
 			}
@@ -263,9 +264,8 @@ public class BModel
 		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.FACE); its.hasNext(); )
 		{
 			BCADGraphCell cell = its.next();
-			for (Iterator<BDiscretization> itd = cell.discretizationIterator(); itd.hasNext(); )
+			for (BDiscretization d : cell.getDiscretizations())
 			{
-				BDiscretization d = itd.next();
 				d.discretize();
 				Storage.writeFace(d, getOutputDir(d));
 			}
@@ -274,9 +274,8 @@ public class BModel
 		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.SOLID); its.hasNext(); )
 		{
 			BCADGraphCell cell = its.next();
-			for (Iterator<BDiscretization> itd = cell.discretizationIterator(); itd.hasNext(); )
+			for (BDiscretization d : cell.getDiscretizations())
 			{
-				BDiscretization d = itd.next();
 				d.discretize();
 				Storage.writeSolid(d, getOutputDir(d));
 			}
@@ -291,9 +290,8 @@ public class BModel
 	public void printAllHypothesis()
 	{
 		System.out.println("List of hypothesis");
-		for (Iterator<Constraint> it = allConstraints.iterator(); it.hasNext(); )
+		for (Constraint cons : allConstraints)
 		{
-			Constraint cons = it.next();
 			Hypothesis h = cons.getHypothesis();
 			System.out.println(" + ("+Integer.toHexString(h.hashCode())+") "+h);
 		}
@@ -306,12 +304,11 @@ public class BModel
 	public void printSubmeshesConstraints()
 	{
 		System.out.println("List of submeshes");
-		for (Iterator<BSubMesh> it = submesh.iterator(); it.hasNext(); )
+		for (BSubMesh subm : submesh)
 		{
-			BSubMesh subm = it.next();
 			System.out.println(" Submesh ("+subm.getId()+") ");
-			for (Iterator<Constraint> itc = subm.getConstraints().iterator(); itc.hasNext(); )
-				System.out.println("    "+itc.next());
+			for (Constraint c : subm.getConstraints())
+				System.out.println("    "+c);
 		}
 		System.out.println("End list");
 	}
@@ -322,9 +319,8 @@ public class BModel
 	public void printSubmeshesDiscretizations()
 	{
 		System.out.println("List of discretizations on submeshes");
-		for (Iterator<BSubMesh> it = submesh.iterator(); it.hasNext(); )
+		for (BSubMesh subm : submesh)
 		{
-			BSubMesh subm = it.next();
 			System.out.println(" Discretizations used on submesh ("+subm.getId()+") ");
 			subm.printSubmeshDiscretizations();
 		}
@@ -360,9 +356,8 @@ public class BModel
 			{
 				BCADGraphCell pcell = itp.next();
 				System.out.println(tab+"Discretizations of shape "+pcell);
-				for (Iterator<BDiscretization> itpd = pcell.discretizationIterator(); itpd.hasNext(); )
+				for (BDiscretization pd : pcell.getDiscretizations())
 				{
-					BDiscretization pd = itpd.next();
 					if (pcell == pd.getGraphCell())
 						System.out.println(tab+"    + "+"Used discretization: "+pd.getId()+" with orientation: forward;  element type : "+pd.getConstraint().getHypothesis().getElement()+" constraint : "+pd.getConstraint().getId()+" submesh list : "+pd.getSubmesh());
 					else if (pcell == pd.getGraphCell().getReversed() )
@@ -376,9 +371,8 @@ public class BModel
 						for (Iterator<BCADGraphCell> itc = pcell.shapesExplorer(normalChildType); itc.hasNext(); )
 						{
 							BCADGraphCell ccell = itc.next();
-							for (Iterator<BDiscretization> itcd = ccell.discretizationIterator(); itcd.hasNext(); )
+							for (BDiscretization cd : ccell.getDiscretizations())
 							{
-								BDiscretization cd = itcd.next();
 								if (pd.contained(cd))
 								{
 									if (ccell == cd.getGraphCell())
@@ -401,9 +395,8 @@ public class BModel
 									BCADGraphCell ccell = itc.next();
 									if (ccell.getType() == ccse)
 									{
-										for (Iterator<BDiscretization> itcd = ccell.discretizationIterator(); itcd.hasNext(); )
+										for (BDiscretization cd : ccell.getDiscretizations())
 										{
-											BDiscretization cd = itcd.next();
 											if (pd.contained(cd))
 											{
 												if (first)
@@ -446,9 +439,8 @@ public class BModel
 			{
 				BCADGraphCell cell = it.next();
 				boolean first = true;
-				for (Iterator<BDiscretization> itd = cell.discretizationIterator(); itd.hasNext(); )
+				for (BDiscretization d : cell.getDiscretizations())
 				{
-					BDiscretization d = itd.next();
 					if (first)
 						System.out.println(tab+"Shape "+cell);
 					first = false;
@@ -474,9 +466,8 @@ public class BModel
 			for (Iterator<BCADGraphCell> it = root.shapesExplorer(cse); it.hasNext(); )
 			{
 				BCADGraphCell cell = it.next();
-				for (Iterator<BDiscretization> itd = cell.discretizationIterator(); itd.hasNext(); )
+				for (BDiscretization d : cell.getDiscretizations())
 				{
-					BDiscretization d = itd.next();
 					if (d.contains(sm))
 					{
 						System.out.println(tab+"Shape "+cell);

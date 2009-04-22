@@ -133,16 +133,15 @@ public class BDiscretization
 	}
 
 	/**
-	 * Test of inclusion of the submesh list in the submesh list of that
+	 * Test of inclusion of the submesh list in the submesh list of that.
 	 * Check whether a <code>BDiscretization</code> has all of its
 	 * submesh list contained in the parameter's submesh list
 	 * @param that  object being checked.
 	 */
 	public boolean contained(BDiscretization that)
 	{
-		for (Iterator<BSubMesh> it = submesh.iterator(); it.hasNext(); )
+		for (BSubMesh s : submesh)
 		{
-			BSubMesh s = it.next();
 			if (!(that.submesh.contains(s)))
 				return false;
 		}
@@ -158,9 +157,8 @@ public class BDiscretization
 	 */
 	public boolean emptyIntersection(BDiscretization that)
 	{
-		for (Iterator<BSubMesh> it = that.submesh.iterator(); it.hasNext(); )
+		for (BSubMesh s : that.submesh)
 		{
-			BSubMesh s = it.next();
 			if (submesh.contains(s))
 				return false;
 		}
@@ -178,19 +176,16 @@ public class BDiscretization
 		if (!submesh.contains(that))
 			return false;
 		// loop on the constraints of the submesh
-		for (Iterator<Constraint> itc = that.getConstraints().iterator(); itc.hasNext(); )
+		for (Constraint cons : that.getConstraints())
 		{
-			Constraint cons = itc.next();
 			BCADGraphCell cell = cons.getGraphCell();
 			// loop on the childs of the graphcell of the constraint of the same type
 			for (Iterator<BCADGraphCell> it = cell.shapesExplorer(graphCell.getType()); it.hasNext(); )
 			{
 				BCADGraphCell child = it.next();
 				// loop on the discretizations of the child
-				for (Iterator<BDiscretization> itd = child.discretizationIterator(); itd.hasNext(); )
+				for (BDiscretization discr : child.getDiscretizations())
 				{
-					BDiscretization discr = itd.next();
-
 					if (discr == this)
 					    return true;
 				}
