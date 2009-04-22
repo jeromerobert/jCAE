@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007, by EADS France
+    Copyright (C) 2007,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -28,19 +28,12 @@ public class Traits
 	protected final Object [] array;
 
 	/**
-	 * User-defined capabilities.
-	 */
-	protected final int capabilities;
-
-	/**
 	 * Creates a new <code>Traits</code> instance.
 	 *
 	 * @param n  number of objects stored in this instance
-	 * @param c  capabilities
 	 */
-	public Traits(int n, int c)
+	public Traits(int n)
 	{
 		array = new Object[n];
-		capabilities = c;
 	}
 }

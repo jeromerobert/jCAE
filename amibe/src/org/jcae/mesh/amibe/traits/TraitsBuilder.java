@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007, by EADS France
+    Copyright (C) 2007,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -116,7 +116,7 @@ public class TraitsBuilder
 				index[i] = -1;
 			k <<= 1;
 		}
-		Traits t = new Traits(n, attributes);
+		Traits t = new Traits(n);
 		if ((attributes & NORMAL) != 0)
 			t.array[index[BITNORMAL]] = new double[3];
 		if ((attributes & COLOR) != 0)

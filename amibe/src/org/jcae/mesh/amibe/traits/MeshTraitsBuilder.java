@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007, by EADS France
+    Copyright (C) 2007,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -199,17 +199,6 @@ public class MeshTraitsBuilder extends TraitsBuilder
 		if ((attributes & KDTREE) != 0)
 			return (KdTree) t.array[index[BITKDTREE]];
 		return null;
-	}
-
-	/**
-	 * Tells whether mesh traits stores a {@link KdTree} instance.
-	 *
-	 * @return <code>true</code> if {@link #addKdTree} was called,
-	 * <code>false</code> otherwise.
-	 */
-	public boolean hasKdTree()
-	{
-		return hasCapability(KDTREE);
 	}
 
 	@Override
