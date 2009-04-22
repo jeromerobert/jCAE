@@ -57,7 +57,7 @@ import java.util.logging.Logger;
  */
 public class Basic2d implements AlgoInterface
 {
-	private static final Logger LOGGER=Logger.getLogger(Basic2d.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(Basic2d.class.getName());
 
 	private final double maxlen;
 	private final double deflection;
@@ -97,10 +97,10 @@ public class Basic2d implements AlgoInterface
 		mtb.add(ttb);
 
 		HashMap<String, String> options = new HashMap<String, String>();
-		options.put("size", ""+maxlen);
-		options.put("deflection", ""+deflection);
-		options.put("relativeDeflection", ""+relDefl);
-		options.put("isotropic", ""+isotropic);
+		options.put("size", Double.toString(maxlen));
+		options.put("deflection", Double.toString(deflection));
+		options.put("relativeDeflection", Boolean.toString(relDefl));
+		options.put("isotropic", Boolean.toString(isotropic));
 		MeshParameters mp = new MeshParameters(options);
 		Mesh2D m = new Mesh2D(mtb, mp, F);
 		d.setMesh(m);

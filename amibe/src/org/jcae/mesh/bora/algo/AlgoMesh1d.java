@@ -26,6 +26,7 @@ import org.jcae.mesh.amibe.algos1d.UniformLengthDeflection;
 import org.jcae.mesh.amibe.ds.MMesh1D;
 import org.jcae.mesh.amibe.ds.SubMesh1D;
 import org.jcae.mesh.bora.ds.BDiscretization;
+
 import java.util.Iterator;
 import java.util.HashMap;
 import java.util.logging.Logger;
@@ -36,7 +37,7 @@ import java.util.logging.Logger;
  */
 public class AlgoMesh1d
 {
-	private static final Logger LOGGER=Logger.getLogger(AlgoMesh1d.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(AlgoMesh1d.class.getName());
 
 	private final MMesh1D mesh1d;
 	
@@ -80,9 +81,9 @@ public class AlgoMesh1d
 			currentDiscrLength = discrE.getConstraint().getHypothesis().getLength();
 			currentDiscrDeflec = discrE.getConstraint().getHypothesis().getDeflection();
 			HashMap<String, String> options1d = new HashMap<String, String>();
-			options1d.put("size", ""+currentDiscrLength);
-			options1d.put("deflection", ""+currentDiscrDeflec);
-			options1d.put("relativeDeflection", ""+relDefl);
+			options1d.put("size", Double.toString(currentDiscrLength));
+			options1d.put("deflection", Double.toString(currentDiscrDeflec));
+			options1d.put("relativeDeflection", Boolean.toString(relDefl));
 
 			if (currentDiscrDeflec <= 0.0)
 			{
