@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005, by EADS CRC
-    Copyright (C) 2007,2008, by EADS CRC
+    Copyright (C) 2007,2008,2009, by EADS CRC
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -34,6 +34,10 @@ import org.jcae.opencascade.jni.BRepAlgoAPI_Cut;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
+/*
+ * Note: this class is used only by reflection, see CADShapeFactory#factory
+ * initialization.
+ */
 public class OCCShapeFactory extends CADShapeFactory
 {
 	private static Logger logger=Logger.getLogger(OCCShapeFactory.class.getName());
@@ -84,7 +88,7 @@ public class OCCShapeFactory extends CADShapeFactory
 		{
 			logger.fine("Read STEP file: "+fileName);
 			STEPControl_Reader aReader = new STEPControl_Reader();
-			aReader.readFile(fileName);
+			aReader.readFile(fileName.getBytes());
 			logger.fine("Transfer roots into shape...");
 			aReader.nbRootsForTransfer();
 			aReader.transferRoots();
@@ -95,7 +99,7 @@ public class OCCShapeFactory extends CADShapeFactory
 		{
 			logger.fine("Read IGES file: "+fileName);
 			IGESControl_Reader aReader = new IGESControl_Reader();
-			aReader.readFile(fileName);
+			aReader.readFile(fileName.getBytes());
 			logger.fine("Transfer roots into shape...");
 			aReader.nbRootsForTransfer();
 			aReader.transferRoots();
