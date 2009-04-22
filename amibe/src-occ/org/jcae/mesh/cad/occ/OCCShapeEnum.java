@@ -41,49 +41,49 @@ public abstract class OCCShapeEnum extends CADShapeEnum
 		return occExplorerEnum;
 	}
 
-	@SuppressWarnings("hiding")
-	static final OCCShapeEnum VERTEX = new OCCShapeEnum("vertex", 7) {
+	private static final OCCShapeEnum OCC_VERTEX = new OCCShapeEnum("vertex", 7) {
 		@Override
 		public Class<CADVertex> asClass() { return CADVertex.class; }
 	};
-	@SuppressWarnings("hiding")
-	static final OCCShapeEnum EDGE = new OCCShapeEnum("edge", 6) {
+	private static final OCCShapeEnum OCC_EDGE = new OCCShapeEnum("edge", 6) {
 		@Override
 		public Class<CADEdge> asClass() { return CADEdge.class; }
 	};
-	@SuppressWarnings("hiding")
-	static final OCCShapeEnum WIRE = new OCCShapeEnum("wire", 5) {
+	private static final OCCShapeEnum OCC_WIRE = new OCCShapeEnum("wire", 5) {
 		@Override
 		public Class<CADWire> asClass() { return CADWire.class; }
 	};
-	@SuppressWarnings("hiding")
-	static final OCCShapeEnum FACE = new OCCShapeEnum("face", 4) {
+	private static final OCCShapeEnum OCC_FACE = new OCCShapeEnum("face", 4) {
 		@Override
 		public Class<CADFace> asClass() { return CADFace.class; }
 	};
-	@SuppressWarnings("hiding")
-	static final OCCShapeEnum SHELL = new OCCShapeEnum("shell", 3) {
+	private static final OCCShapeEnum OCC_SHELL = new OCCShapeEnum("shell", 3) {
 		@Override
 		public Class<CADShell> asClass() { return CADShell.class; }
 	};
-	@SuppressWarnings("hiding")
-	static final OCCShapeEnum SOLID = new OCCShapeEnum("solid", 2) {
+	private static final OCCShapeEnum OCC_SOLID = new OCCShapeEnum("solid", 2) {
 		@Override
 		public Class<CADSolid> asClass() { return CADSolid.class; }
 	};
-	@SuppressWarnings("hiding")
-	static final OCCShapeEnum COMPSOLID = new OCCShapeEnum("compsolid", 1) {
+	private static final OCCShapeEnum OCC_COMPSOLID = new OCCShapeEnum("compsolid", 1) {
 		@Override
 		public Class<CADCompSolid> asClass() { return CADCompSolid.class; }
 	};
-	@SuppressWarnings("hiding")
-	static final OCCShapeEnum COMPOUND = new OCCShapeEnum("compound", 0) {
+	private static final OCCShapeEnum OCC_COMPOUND = new OCCShapeEnum("compound", 0) {
 		@Override
 		public Class<CADCompound> asClass() { return CADCompound.class; }
 	};
 	// Note: VALUES must contain items in the same order as they
 	// have been declared in this file!
-	static final OCCShapeEnum [] VALUES = { VERTEX, EDGE, WIRE, FACE, SHELL, SOLID, COMPSOLID, COMPOUND };
+	static final OCCShapeEnum [] VALUES = {
+		OCC_VERTEX,
+		OCC_EDGE,
+		OCC_WIRE,
+		OCC_FACE,
+		OCC_SHELL,
+		OCC_SOLID,
+		OCC_COMPSOLID,
+		OCC_COMPOUND };
 
 	// Export ordinal to newShapeEnumIterator
 	int getOrdinal()
