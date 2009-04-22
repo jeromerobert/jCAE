@@ -167,8 +167,7 @@ public class Storage
 	 * @param root    root shape
 	 * @throws  RuntimeException if an error occurred
 	 */
-	@SuppressWarnings("unused")
-	private static void readAllFaces(Mesh m, BCADGraphCell root)
+	public static void readAllFaces(Mesh m, BCADGraphCell root)
 	{
 		TIntObjectHashMap<Vertex> vertMap = new TIntObjectHashMap<Vertex>();
 		for (BSubMesh s : root.getGraph().getModel().getSubMeshes())
