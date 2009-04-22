@@ -81,7 +81,7 @@ public class UNVReader
 					else if ( (line.trim().equals("2430")) || (line.trim().equals("2435")) )
 					{
 						// read groups
-						int nrGroups = readGroup(rd, line.trim(), mesh, facesmap);
+						int nrGroups = readGroup(rd, line.trim(), facesmap);
 						hasGroups = nrGroups > 1;
 					}
 					else if (line.trim().equals("2414"))
@@ -262,7 +262,7 @@ public class UNVReader
 		return facesmap;
 	}
 	
-	private static int readGroup(BufferedReader rd, String type, Mesh mesh, TIntObjectHashMap<Triangle> facesmap)
+	private static int readGroup(BufferedReader rd, String type, TIntObjectHashMap<Triangle> facesmap)
 	{
 		logger.fine("Reading groups");
 		String line = "";

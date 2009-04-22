@@ -33,10 +33,13 @@ import java.util.logging.Logger;
  */
 public class PAVLSortedTree<E> extends QSortedTree<E>
 {
+	private static final long serialVersionUID = -8379296110137732906L;
 	private static Logger logger=Logger.getLogger(PAVLSortedTree.class.getName());	
 	
 	private static class Node<E> extends QSortedTree.Node<E>
 	{
+		private static final long serialVersionUID = -5135595610942086763L;
+
 		//  balanceFactor = height(rightSubTree) - height(leftSubTree)
 		int balanceFactor = 0;
 		
@@ -66,7 +69,6 @@ public class PAVLSortedTree<E> extends QSortedTree<E>
 		     / \              / \
 		    T2 T3            T1 T2
 		*/
-		@SuppressWarnings("unchecked")
 		@Override
 		public Node<E> rotateL()
 		{
@@ -94,7 +96,6 @@ public class PAVLSortedTree<E> extends QSortedTree<E>
 		       / \                      / \
 		      T1 T2                    T2 T3
 		*/
-		@SuppressWarnings("unchecked")
 		@Override
 		public Node<E> rotateR()
 		{
@@ -124,7 +125,6 @@ public class PAVLSortedTree<E> extends QSortedTree<E>
 		    / \                        / \
 		   T2 T3                      T3 T4
 		*/
-		@SuppressWarnings("unchecked")
 		@Override
 		public Node<E> rotateRL()
 		{
@@ -162,7 +162,6 @@ public class PAVLSortedTree<E> extends QSortedTree<E>
 		     / \            / \
 		    T2 T3          T1 T2
 		*/
-		@SuppressWarnings("unchecked")
 		@Override
 		public Node<E> rotateLR()
 		{

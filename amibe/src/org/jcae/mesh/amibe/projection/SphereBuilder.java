@@ -37,7 +37,6 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.oemm.MeshReader;
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.Storage;
-import org.jcae.mesh.xmldata.MeshWriter;
 
 /**
  * Create a regular mesh of a sphere.  We first generate an icosahedron,

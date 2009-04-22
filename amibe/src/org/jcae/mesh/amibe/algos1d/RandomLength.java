@@ -98,7 +98,6 @@ public class RandomLength
 	private boolean computeEdge(SubMesh1D submesh1d)
 	{
 		int nbPoints;
-		boolean isCircular = false;
 		boolean isDegenerated = false;
 		double[] paramOnEdge;
 		double range[];
@@ -115,8 +114,8 @@ public class RandomLength
 		edgelist.clear();
 		nodelist.clear();
 		CADVertex[] V = E.vertices();
-		if (V[0].isSame(V[1]))
-			isCircular=true;
+		//if (V[0].isSame(V[1]))
+		//	isCircular=true;
 		
 		CADGeomCurve3D curve = CADShapeFactory.getFactory().newCurve3D(E);
 		if (curve == null)

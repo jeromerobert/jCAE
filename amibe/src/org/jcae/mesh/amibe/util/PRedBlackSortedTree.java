@@ -43,9 +43,12 @@ import java.util.logging.Logger;
  */
 public class PRedBlackSortedTree<E> extends QSortedTree<E>
 {
-	private static Logger logger=Logger.getLogger(PRedBlackSortedTree.class.getName());	
+	private static final long serialVersionUID = 4767412412814775447L;
+	private static final Logger logger=Logger.getLogger(PRedBlackSortedTree.class.getName());	
 	private static class Node<E> extends QSortedTree.Node<E>
 	{
+		private static final long serialVersionUID = -2091456009137794229L;
+
 		boolean isRed;
 		
 		@SuppressWarnings("unchecked")
@@ -416,19 +419,12 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 			return false;
 		if (current == null)
 			return true;
-		int blackNodes = 0;
 		while (current.child[0] != null)
-		{
-			if (!isRedNode(current))
-				blackNodes++;
 			current = (Node<E>) current.child[0];
-		}
 		// Now traverse the tree
 		while (current != root)
 		{
-			if (!isRedNode(current))
-				blackNodes--;
-			else if (isRedNode(current.child[0]) || isRedNode(current.child[1]))
+			if (isRedNode(current) && (isRedNode(current.child[0]) || isRedNode(current.child[1])))
 				return false;
 			if (current.child[0] != null && current.child[0].compareTo(current) > 0)
 				return false;
@@ -437,16 +433,12 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 			if (current.child[1] != null)
 			{
 				current = (Node<E>) current.child[1];
-				if (!isRedNode(current))
-					blackNodes++;
-				else if (isRedNode(current.child[0]) || isRedNode(current.child[1]))
+				if (isRedNode(current) && (isRedNode(current.child[0]) || isRedNode(current.child[1])))
 					return false;
 				while (current.child[0] != null)
 				{
 					current = (Node<E>) current.child[0];
-					if (!isRedNode(current))
-						blackNodes++;
-					else if (isRedNode(current.child[0]) || isRedNode(current.child[1]))
+					if (isRedNode(current) && (isRedNode(current.child[0]) || isRedNode(current.child[1])))
 						return false;
 				}
 			}
@@ -455,9 +447,7 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 				// Walk upwards
 				while (current.parent.child[0] != current)
 				{
-					if (!isRedNode(current))
-						blackNodes--;
-					else if (isRedNode(current.child[0]) || isRedNode(current.child[1]))
+					if (isRedNode(current) && (isRedNode(current.child[0]) || isRedNode(current.child[1])))
 						return false;
 					current = (Node<E>) current.parent;
 				}

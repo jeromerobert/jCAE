@@ -56,7 +56,8 @@ import java.io.Serializable;
  */
 public class Vertex implements Serializable
 {
-	private static Logger logger=Logger.getLogger(Vertex.class.getName());
+	private static final long serialVersionUID = 8049983674054731722L;
+	private static final Logger logger=Logger.getLogger(Vertex.class.getName());
 	
 	//  User-defined traits
 	protected final VertexTraitsBuilder traitsBuilder;

@@ -22,4 +22,5 @@ package org.jcae.mesh.amibe;
 
 public class InitialTriangulationException extends RuntimeException
 {
+	private static final long serialVersionUID = -7709412720403777037L;
 }

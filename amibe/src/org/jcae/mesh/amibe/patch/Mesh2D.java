@@ -42,7 +42,8 @@ import java.util.logging.Logger;
  */
 public class Mesh2D extends Mesh
 {
-	private static Logger logger=Logger.getLogger(Mesh2D.class.getName());
+	private static final long serialVersionUID = 8462198630066460996L;
+	private static final Logger logger=Logger.getLogger(Mesh2D.class.getName());
 	
 	//  Topological face on which mesh is applied
 	private transient final CADShape face;
@@ -60,6 +61,8 @@ public class Mesh2D extends Mesh
 	// Utility class to improve debugging output
 	private static class OuterVertex2D extends Vertex2D
 	{
+		private static final long serialVersionUID = -6354019740666648945L;
+
 		public OuterVertex2D(double u, double v)
 		{
 			super(null, u, v);

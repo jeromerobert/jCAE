@@ -40,7 +40,8 @@ import java.util.logging.Logger;
  */
 public class HalfEdge extends AbstractHalfEdge implements Serializable
 {
-	private static Logger logger=Logger.getLogger(HalfEdge.class.getName());
+	private static final long serialVersionUID = -2460993797089718106L;
+	private static final Logger logger=Logger.getLogger(HalfEdge.class.getName());
 	private TriangleHE tri;
 	private byte localNumber;
 	private byte attributes;

@@ -76,7 +76,8 @@ import java.util.logging.Logger;
  */
 public class Metric3D extends Matrix3D
 {
-	private static Logger logger=Logger.getLogger(Metric3D.class.getName());
+	private static final long serialVersionUID = -659154249138223468L;
+	private static final Logger logger=Logger.getLogger(Metric3D.class.getName());
 	
 	//  Cached variables to improve performance
 	private static CADGeomSurface cacheSurf = null;

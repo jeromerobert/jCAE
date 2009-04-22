@@ -45,7 +45,8 @@ import java.util.logging.Logger;
  */
 public class Vertex2D extends Vertex
 {
-	private static Logger logger=Logger.getLogger(Vertex2D.class.getName());
+	private static final long serialVersionUID = -6099275818186028566L;
+	private static final Logger logger=Logger.getLogger(Vertex2D.class.getName());
 	private static final Random rand = new Random(139L);
 	private static Vertex2D circumcenter = new Vertex2D(null, 0.0, 0.0);
 	

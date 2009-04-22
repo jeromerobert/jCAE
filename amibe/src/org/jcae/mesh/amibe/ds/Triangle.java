@@ -32,6 +32,7 @@ import java.io.Serializable;
  */
 public class Triangle implements Serializable
 {
+	private static final long serialVersionUID = 3698940897637489316L;
 	//  User-defined traits
 	protected final TriangleTraitsBuilder traitsBuilder;
 	protected final Traits traits;

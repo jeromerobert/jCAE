@@ -28,6 +28,7 @@ import java.io.Serializable;
  */
 public class Matrix3D implements Serializable
 {
+	private static final long serialVersionUID = 5152378290075279828L;
 	protected double [] data = new double[9];
 	
 	/**

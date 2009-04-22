@@ -86,7 +86,8 @@ import java.util.logging.Logger;
 
 public class Mesh implements Serializable
 {
-	private static Logger logger=Logger.getLogger(Mesh.class.getName());
+	private static final long serialVersionUID = 7130909528217390687L;
+	private static final Logger logger=Logger.getLogger(Mesh.class.getName());
 	
 	/**
 	 * User-defined traits builder.
@@ -125,7 +126,8 @@ public class Mesh implements Serializable
 	// Utility class to improve debugging output
 	private static class OuterVertex extends Vertex
 	{
-		
+		private static final long serialVersionUID = -6535592611308767946L;
+
 		public OuterVertex()
 		{
 			super(null);
@@ -138,16 +140,6 @@ public class Mesh implements Serializable
 		{
 			return "outer";
 		}
-	}
-
-	/**
-	 * Stores Integer(0..2) into an array to reuse these immutable objects.
-	 */
-	private static final Integer [] int3 = new Integer[3];
-	static {
-		int3[0] = Integer.valueOf(0);
-		int3[1] = Integer.valueOf(1);
-		int3[2] = Integer.valueOf(2);
 	}
 
 	/**
@@ -1135,7 +1127,6 @@ public class Mesh implements Serializable
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	private boolean checkVirtualHalfEdges(Triangle t)
 	{
 		if (!t.traitsBuilder.hasCapability(TriangleTraitsBuilder.VIRTUALHALFEDGE))
@@ -1306,7 +1297,6 @@ public class Mesh implements Serializable
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
 	private boolean checkHalfEdges(Triangle t)
 	{
 		if (!t.traitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE))

@@ -66,6 +66,8 @@ import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
  */
 public class TriangleVH extends Triangle
 {
+	private static final long serialVersionUID = 1023860512255791477L;
+
 	/**
 	 * Pointers to adjacent elements through edges.
 	 */

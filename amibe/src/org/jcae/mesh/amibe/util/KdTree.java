@@ -21,7 +21,6 @@
 package org.jcae.mesh.amibe.util;
 
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Mesh;
 import java.util.ArrayList;
 import java.util.Collection;

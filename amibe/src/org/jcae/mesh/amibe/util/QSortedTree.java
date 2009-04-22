@@ -38,7 +38,8 @@ import java.util.logging.Logger;
  */
 public abstract class QSortedTree<E> implements Serializable
 {
-	private static Logger logger=Logger.getLogger(QSortedTree.class.getName());	
+	private static final long serialVersionUID = -2194224744257185278L;
+	private static final Logger logger=Logger.getLogger(QSortedTree.class.getName());	
 	protected final Node<E> root = newNode(null, Double.MAX_VALUE);
 	// Mapping between objects and tree nodes
 	private transient Map<E, Node<E>> map = new THashMap<E, Node<E>>();

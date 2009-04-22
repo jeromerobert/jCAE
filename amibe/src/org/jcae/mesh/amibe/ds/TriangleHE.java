@@ -24,9 +24,9 @@ import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 
 public class TriangleHE extends Triangle
 {
+	private static final long serialVersionUID = 3364148266246993225L;
 	// In this class, adjacency relations are supported by an HalfEdge instance,
 	// which is created by ElementFactory.createTriangle.
-	
 	private HalfEdge e0;
 
 	/**

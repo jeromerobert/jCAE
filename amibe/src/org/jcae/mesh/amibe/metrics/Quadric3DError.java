@@ -60,6 +60,8 @@ import java.io.Serializable;
  */
 public class Quadric3DError implements Serializable
 {
+	private static final long serialVersionUID = -586146425203079853L;
+
 	private final double [] A = new double[6];
 	private final double [] b = new double[3];
 	private double c;
