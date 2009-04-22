@@ -222,17 +222,17 @@ public class MeshLiaison
 	
 	private class ProjectedLocation
 	{
-		LocalSurfaceProjection projection;
+		private LocalSurfaceProjection projection;
 		// triangle where vertex is projected into
-		Triangle t;
+		private Triangle t;
 		// inverse of triangle area
-		double invArea;
+		private double invArea;
 		// normal to triangle plane
-		double [] normal = new double[3];
+		private final double [] normal = new double[3];
 		// local index of origin
-		int vIndex = -1;
+		private int vIndex = -1;
 		// barycentric coordinates
-		double [] b = new double[3];
+		private final double [] b = new double[3];
 		
 		public ProjectedLocation(double [] xyz, Triangle t)
 		{

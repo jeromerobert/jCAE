@@ -66,11 +66,11 @@ public class SmoothNodes3D
 	private final Vertex c;
 	private QSortedTree<Vertex> tree = new PAVLSortedTree<Vertex>();
 	private boolean refresh = false;
-	int processed = 0;
-	int notProcessed = 0;
-	TObjectDoubleHashMap<Triangle> qualityMap;
-	Map<Vertex, LocalSurfaceProjection> nodeProjection;
-	Collection<Vertex> nodeset;
+	private int processed = 0;
+	private int notProcessed = 0;
+	private TObjectDoubleHashMap<Triangle> qualityMap;
+	private Map<Vertex, LocalSurfaceProjection> nodeProjection;
+	private Collection<Vertex> nodeset;
 	
 	/**
 	 * Creates a <code>SmoothNodes3D</code> instance.

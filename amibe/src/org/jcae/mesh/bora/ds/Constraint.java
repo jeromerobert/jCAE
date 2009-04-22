@@ -55,7 +55,7 @@ public class Constraint
 	 * constraint of a user constraint on g, or the resultant of the 
 	 * user constraint on g
 	 */
-	public Constraint originConstraint(BCADGraphCell g)
+	protected Constraint originConstraint(BCADGraphCell g)
 	{
 		Constraint baseOrigCons = null;
 		if (origin == null)
@@ -69,7 +69,7 @@ public class Constraint
 		return baseOrigCons;
 	}
 
-	public Constraint createInheritedConstraint(BCADGraphCell g, Constraint old)
+	protected Constraint createInheritedConstraint(BCADGraphCell g, Constraint old)
 	{
 		Constraint ret = new Constraint(g, hypothesis.createInheritedHypothesis(g.getType()));
 
@@ -113,7 +113,8 @@ public class Constraint
 		return origin;
 	}
 
-	public void addSubMesh(BSubMesh s)
+	@SuppressWarnings("unused")
+	private void addSubMesh(BSubMesh s)
 	{
 		submesh.add(s);
 	}

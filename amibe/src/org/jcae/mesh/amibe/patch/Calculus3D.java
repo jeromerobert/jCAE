@@ -27,7 +27,7 @@ import java.util.Stack;
 /**
  * Distance computations in 2D parameter space by using 3D metrics.
  */
-public class Calculus3D implements Calculus
+class Calculus3D implements Calculus
 {
 	//  The Mesh2D instance on which methods are applied
 	private Mesh2D mesh;

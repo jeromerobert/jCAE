@@ -61,9 +61,9 @@ public class Mesh2D extends Mesh
 	// Utility class to improve debugging output
 	private static class OuterVertex2D extends Vertex2D
 	{
-		private static final long serialVersionUID = -6354019740666648945L;
+		private static final long serialVersionUID = 3873055411695847841L;
 
-		public OuterVertex2D(double u, double v)
+		private OuterVertex2D(double u, double v)
 		{
 			super(null, u, v);
 		}
@@ -82,7 +82,7 @@ public class Mesh2D extends Mesh
 		this(MeshTraitsBuilder.getDefault2D());
 	}
 
-	public Mesh2D(MeshTraitsBuilder mtb)
+	private Mesh2D(MeshTraitsBuilder mtb)
 	{
 		this(mtb, new MeshParameters(), null);
 	}
@@ -341,7 +341,8 @@ public class Mesh2D extends Mesh
 	 * @throws IllegalArgumentException  If argument is neither 2 nor 3,
 	 *         this exception is raised.
 	 */
-	public Calculus popCompGeom()
+	@SuppressWarnings("unused")
+	private Calculus popCompGeom()
 	{
 		//  Metrics are always reset by pushCompGeom.
 		//  Only reset them here when there is a change.

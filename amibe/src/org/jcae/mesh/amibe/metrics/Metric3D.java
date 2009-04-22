@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005,2006, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -76,7 +76,7 @@ import java.util.logging.Logger;
  */
 public class Metric3D extends Matrix3D
 {
-	private static final long serialVersionUID = -659154249138223468L;
+	private static final long serialVersionUID = -5921524911267268608L;
 	private static final Logger logger=Logger.getLogger(Metric3D.class.getName());
 	
 	//  Cached variables to improve performance
@@ -96,9 +96,8 @@ public class Metric3D extends Matrix3D
 	 * @param surf  geometrical surface
 	 * @param pt  node where metrics is computed.
 	 */
-	public Metric3D(CADGeomSurface surf, Vertex pt)
+	protected Metric3D(CADGeomSurface surf, Vertex pt)
 	{
-		super();
 		if (!surf.equals(cacheSurf))
 		{
 			surf.dinit(2);
@@ -128,32 +127,7 @@ public class Metric3D extends Matrix3D
 	{
 		super(e1, e2, e3);
 	}
-	
-	/**
-	 * Copy another instance.
-	 *
-	 * @param that  instance being copied.
-	 */
-	public void copy(Metric3D that)
-	{
-		System.arraycopy(that.data, 0, data, 0, 9);
-	}
-	
-	/**
-	 * Compute matrix determinant.
-	 *
-	 * @return the matrix determinant.
-	 */
-	public final double det()
-	{
-		// adjoint matrix
-		copyColumn(1, c1);
-		copyColumn(2, c2);
-		prodVect3D(c1, c2, c0);
-		copyColumn(0, c1);
-		return prodSca(c0, c1);
-	}
-	
+
 	/**
 	 * Replace current metrics by its inverse.
 	 *
@@ -191,7 +165,7 @@ public class Metric3D extends Matrix3D
 	 * @return <code>true</code> if this metrics has been successfully
 	 * computed, <code>false</code> otherwise.
 	 */
-	public boolean iso(double l)
+	protected boolean iso(double l)
 	{
 		if (l <= 0)
 			return false;
@@ -209,7 +183,7 @@ public class Metric3D extends Matrix3D
 	 * @return <code>true</code> if this metrics has been successfully
 	 * computed, <code>false</code> otherwise.
 	 */
-	public boolean deflection(MeshParameters mp)
+	protected boolean deflection(MeshParameters mp)
 	{
 		if (mp.hasRelativeDeflection())
 			return relDeflection(mp.isIsotropic(), mp.getDeflection(), mp.getLength());
@@ -342,7 +316,7 @@ public class Metric3D extends Matrix3D
 	/**
 	 * Compute the matrics induced to the tangent plane.
 	 */
-	public double[][] restrict2D()
+	protected double[][] restrict2D()
 	{
 		double d1U[] = cacheSurf.d1U();
 		double d1V[] = cacheSurf.d1V();

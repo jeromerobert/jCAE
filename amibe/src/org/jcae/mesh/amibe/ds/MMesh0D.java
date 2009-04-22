@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005, by EADS CRC
-    Copyright (C) 2007, by EADS France
+    Copyright (C) 2007,2009, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -38,16 +38,16 @@ import gnu.trove.TObjectIntHashMap;
 
 public class MMesh0D
 {
-	protected CADShape shape;
+	protected final CADShape shape;
 	//  Array of distinct geometric nodes
-	private CADVertex[] vnodelist;
-	private int vnodesize = 0;
-	private TObjectIntHashMap<CADVertex> vnodeset;
+	private final CADVertex[] vnodelist;
+	private final TObjectIntHashMap<CADVertex> vnodeset;
+	private int vnodesize;
 
 	//  Array of distinct discretizations of geometric nodes
-	private BDiscretization[] vnodediscrlist;
-	private int vnodediscrsize = 0;
-	private TObjectIntHashMap<BDiscretization> vnodediscrset;
+	private final BDiscretization[] vnodediscrlist;
+	private final TObjectIntHashMap<BDiscretization> vnodediscrset;
+	private int vnodediscrsize;
 	
 	/**
 	 * Creates a <code>MMesh0D</code> instance by merging all topological
@@ -55,7 +55,7 @@ public class MMesh0D
 	 *
 	 * @param s  topological shape
 	 */
-	public MMesh0D(CADShape s)
+	MMesh0D(CADShape s)
 	{
 		shape = s;
 		CADExplorer expV = CADShapeFactory.getFactory().newExplorer();
@@ -68,6 +68,9 @@ public class MMesh0D
 		vnodeset = new TObjectIntHashMap<CADVertex>(nodes);
 		for (expV.init(shape, CADShapeEnum.VERTEX); expV.more(); expV.next())
 			addGeometricalVertex((CADVertex) expV.current());
+
+		vnodediscrlist = null;
+		vnodediscrset = null;
 	}
 	
 	/**
@@ -78,7 +81,7 @@ public class MMesh0D
 	 * However, as we need the method public MMesh1D(BModel model) we have
 	 * to define a method public MMesh0D(BModel model)
 	 */
-	public MMesh0D(BModel model)
+	MMesh0D(BModel model)
 	{
 		BCADGraphCell root = model.getGraph().getRootCell();
 
@@ -173,7 +176,7 @@ public class MMesh0D
 	 * @param pd  discretization of cell, parent discretization 
 	 * @return child discretization on V
 	 */
-	public BDiscretization getChildDiscretization(CADVertex V, BCADGraphCell pcell, BDiscretization pd)
+	BDiscretization getChildDiscretization(CADVertex V, BCADGraphCell pcell, BDiscretization pd)
 	{
 		// Selection of the cell's child that has the same shape as V. The orientation of ccell
 		// is of no importance because both orientations share the same discretizations

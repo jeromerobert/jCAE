@@ -28,14 +28,14 @@ import org.jcae.mesh.amibe.metrics.Metric2D;
  * This class is called from {@link org.jcae.mesh.amibe.algos2d.BasicMesh}
  * but may also be used if amibe is extended to mesh 2D surfaces.
  */
-public class Calculus2D implements Calculus
+class Calculus2D implements Calculus
 {
 	/**
 	 * Constructor.
 	 *
 	 * @param  m   the <code>Mesh2D</code> being modified.
 	 */
-	public Calculus2D(Mesh2D m)
+	Calculus2D(Mesh2D m)
 	{
 	}
 

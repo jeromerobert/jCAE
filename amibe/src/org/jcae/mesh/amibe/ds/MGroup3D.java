@@ -43,14 +43,10 @@ public class MGroup3D
 	/**
 	 * Creates a group.
 	 *
+	 * @param i  group number.
 	 * @param n  group name.
 	 * @param faces  set of faces.
 	 */
-	public MGroup3D(String n, Collection<Triangle> faces)
-	{
-		this(0, n, faces);
-	}
-	
 	public MGroup3D(int i, String n, Collection<Triangle> faces)
 	{
 		id = i;

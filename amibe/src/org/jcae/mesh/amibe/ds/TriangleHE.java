@@ -32,7 +32,7 @@ public class TriangleHE extends Triangle
 	/**
 	 * Constructor.
 	 */
-	public TriangleHE(TriangleTraitsBuilder ttb)
+	protected TriangleHE(TriangleTraitsBuilder ttb)
 	{
 		super(ttb);
 		// This constructor is called by ElementFactory.createTriangle,

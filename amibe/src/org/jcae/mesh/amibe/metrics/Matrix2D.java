@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005, by EADS CRC
-    Copyright (C) 2007, by EADS France
+    Copyright (C) 2007,2009, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -24,9 +24,9 @@ package org.jcae.mesh.amibe.metrics;
 /**
  * General 2D matrix.
  */
-public class Matrix2D
+class Matrix2D
 {
-	public double[][] data = new double[2][2];
+	protected double[][] data = new double[2][2];
 	
 	/**
 	 * Create a <code>Matrix2D</code> instance and set it to the identity
@@ -45,7 +45,7 @@ public class Matrix2D
 	 * @param Ayx  Ayx coefficient
 	 * @param Ayy  Ayy coefficient
 	 */
-	public Matrix2D(double Axx, double Axy, double Ayx, double Ayy)
+	protected Matrix2D(double Axx, double Axy, double Ayx, double Ayy)
 	{
 		data[0][0] = Axx;
 		data[0][1] = Axy;
@@ -58,7 +58,7 @@ public class Matrix2D
 	 *
 	 * @return the determinant of this matrix.
 	 */
-	public double det()
+	double det()
 	{
 		return data[0][0] * data[1][1] - data[0][1] * data[1][0];
 	}

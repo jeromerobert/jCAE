@@ -192,12 +192,13 @@ public class BModel
 	/**
 	 * Prints the list of geometrical elements.
 	 */
-	public void printShapes()
+	@SuppressWarnings("unused")
+	private void printShapes()
 	{
 		cad.printShapes();
 	}
 
-	public void addConstraint(Constraint cons)
+	protected void addConstraint(Constraint cons)
 	{
 		if (state != INPUT)
 			throw new RuntimeException("Constraints cannot be added after model has been computed");
@@ -237,7 +238,7 @@ public class BModel
 	/**
 	 * Combines all hypothesis and computes meshes.
 	 */
-	public void compute()
+	protected void compute()
 	{
 		if (state == INPUT)
 			computeConstraints();
@@ -287,7 +288,7 @@ public class BModel
 	/**
 	 * Prints all hypothesis applied to any submesh.
 	 */
-	public void printAllHypothesis()
+	protected void printAllHypothesis()
 	{
 		System.out.println("List of hypothesis");
 		for (Constraint cons : allConstraints)
@@ -301,7 +302,8 @@ public class BModel
 	/**
 	 * Prints user defined constraints on the submeshes.
 	 */
-	public void printSubmeshesConstraints()
+	@SuppressWarnings("unused")
+	private void printSubmeshesConstraints()
 	{
 		System.out.println("List of submeshes");
 		for (BSubMesh subm : submesh)
@@ -316,7 +318,8 @@ public class BModel
 	/**
 	 * Prints used discretizations on the submeshes.
 	 */
-	public void printSubmeshesDiscretizations()
+	@SuppressWarnings("unused")
+	private void printSubmeshesDiscretizations()
 	{
 		System.out.println("List of discretizations on submeshes");
 		for (BSubMesh subm : submesh)
@@ -330,7 +333,8 @@ public class BModel
 	/**
 	 * Print all discretizations.
 	 */
-	public void printDiscretizations()
+	@SuppressWarnings("unused")
+	private void printDiscretizations()
 	{
 		System.out.println("List of discretizations");
 		BCADGraphCell root = cad.getRootCell();
@@ -427,7 +431,7 @@ public class BModel
 	/**
 	 * Prints the constraints applied to geometrical elements of the current mesh.
 	 */
-	public void printConstraints()
+	protected void printConstraints()
 	{
 		System.out.println("List of constraints");
 		BCADGraphCell root = cad.getRootCell();
@@ -455,7 +459,7 @@ public class BModel
 	/**
 	 * Prints the constraints applied to a given submesh.
 	 */
-	public void printConstraints(BSubMesh sm)
+	protected void printConstraints(BSubMesh sm)
 	{
 		System.out.println("List of constraints applied on submesh "+sm.getId());
 		BCADGraphCell root = cad.getRootCell();

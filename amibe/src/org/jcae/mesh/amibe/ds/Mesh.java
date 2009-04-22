@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005,2006, by EADS CRC
-    Copyright (C) 2007,2008 by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -121,7 +121,7 @@ public class Mesh implements Serializable
 	//  Set to true by Mesh2D, this subclass connects outer triangles
 	protected boolean outerTrianglesAreConnected = false;
 	
-	protected int maxLabel = 0;
+	private int maxLabel = 0;
 	
 	// Utility class to improve debugging output
 	private static class OuterVertex extends Vertex
@@ -195,7 +195,7 @@ public class Mesh implements Serializable
 	 *
 	 * @param t  triangle being removed.
 	 */
-	public void remove(Triangle t)
+	protected void remove(Triangle t)
 	{
 		triangleList.remove(t);
 		if (!(t instanceof TriangleHE))
@@ -854,8 +854,9 @@ public class Mesh implements Serializable
 			logger.log(Level.CONFIG, "Add virtual boundaries for "+toReturn+" edges");
 		return toReturn;
 	}
-	
-	public int scratchVirtualBoundaries()
+
+	// This routine can be called when inverting triangles to have consistent normals
+	int scratchVirtualBoundaries()
 	{
 		if (triangleList.isEmpty())
 			return 0;
@@ -1129,7 +1130,7 @@ public class Mesh implements Serializable
 
 	private boolean checkVirtualHalfEdges(Triangle t)
 	{
-		if (!t.traitsBuilder.hasCapability(TriangleTraitsBuilder.VIRTUALHALFEDGE))
+		if (!traitsBuilder.getTriangleTraitsBuilder().hasCapability(TriangleTraitsBuilder.VIRTUALHALFEDGE))
 			return true;
 		VirtualHalfEdge ot = new VirtualHalfEdge();
 		VirtualHalfEdge sym = new VirtualHalfEdge();
@@ -1299,7 +1300,7 @@ public class Mesh implements Serializable
 
 	private boolean checkHalfEdges(Triangle t)
 	{
-		if (!t.traitsBuilder.hasCapability(TriangleTraitsBuilder.HALFEDGE))
+		if (!traitsBuilder.getTriangleTraitsBuilder().hasCapability(TriangleTraitsBuilder.HALFEDGE))
 			return true;
 		HalfEdge e = (HalfEdge) t.getAbstractHalfEdge();
 		boolean isOuter = e.hasAttributes(AbstractHalfEdge.OUTER);

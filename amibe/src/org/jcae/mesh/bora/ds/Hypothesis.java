@@ -31,13 +31,13 @@ public class Hypothesis
 {
 	private static final Logger LOGGER = Logger.getLogger(Hypothesis.class.getName());
 
-	protected HypInterface hyp = HypNoneInstance;
+	private HypInterface hyp = HypNoneInstance;
 	// Now, length is the target length and is the variable that is used;
 	// In the near future we will want to enforce a maximum length lengthMax 
-	protected double length = -1.0, lengthMin = -1.0, lengthMax = -1.0;
-	protected double deflection = -1.0;
-	protected boolean lengthBool = false, numberBool = false;
-	protected int numberMin = -1, numberMax = -1;
+	private double length = -1.0, lengthMin = -1.0, lengthMax = -1.0;
+	private double deflection = -1.0;
+	private boolean lengthBool = false, numberBool = false;
+	private int numberMin = -1, numberMax = -1;
 	private boolean locked = false;
 
 	// Unique identitier
@@ -96,7 +96,7 @@ public class Hypothesis
 	 * geometrical objects of a given type, and <code>false</code>
 	 * otherwise.
 	 */
-	public boolean checkCompatibility(CADShapeEnum cse)
+	protected boolean checkCompatibility(CADShapeEnum cse)
 	{
 		return hyp == null || hyp.getType() == null || hyp.dim() == cse;
 	}
@@ -117,7 +117,7 @@ public class Hypothesis
 	 * @param l  length
 	 * @param b  hard constraint
 	 */
-	public void setLength(double l, boolean b)
+	private void setLength(double l, boolean b)
 	{
 		checkLock();
 		if (LOGGER.isLoggable(Level.FINE))
@@ -142,7 +142,8 @@ public class Hypothesis
 	 * @param l1  length min
 	 * @param l2  length max
 	 */
-	public void setLength(double l1, double l2)
+	@SuppressWarnings("unused")
+	private void setLength(double l1, double l2)
 	{
 		setLength(l1, l2,false);
 	}
@@ -154,7 +155,7 @@ public class Hypothesis
 	 * @param l2  length max
 	 * @param b  hard constraint
 	 */
-	public void setLength(double l1, double l2, boolean b)
+	private void setLength(double l1, double l2, boolean b)
 	{
 		checkLock();
 		if (LOGGER.isLoggable(Level.FINE))
@@ -193,7 +194,7 @@ public class Hypothesis
 	 * @param n  number of segments.
 	 * @param b  hard constraint
 	 */
-	public void setNumber(int n, boolean b)
+	private void setNumber(int n, boolean b)
 	{
 		checkLock();
 		if (LOGGER.isLoggable(Level.FINE))
@@ -209,7 +210,8 @@ public class Hypothesis
 	 * @param n1  minimal number of segments
 	 * @param n2  maximal number of segments
 	 */
-	public void setNumber(int n1, int n2)
+	@SuppressWarnings("unused")
+	private void setNumber(int n1, int n2)
 	{
 		setNumber(n1, n2, false);
 	}
@@ -221,7 +223,7 @@ public class Hypothesis
 	 * @param n2  maximal number of segments
 	 * @param b  hard constraint
 	 */
-	public void setNumber(int n1, int n2, boolean b)
+	private void setNumber(int n1, int n2, boolean b)
 	{
 		checkLock();
 		if (LOGGER.isLoggable(Level.FINE))
@@ -260,7 +262,7 @@ public class Hypothesis
 	 *
 	 * @return <code>true</code> if hypothesis have been successfully combined, <code>false</code> otherwise.
 	 */
-	public boolean combine(Hypothesis that)
+	protected boolean combine(Hypothesis that)
 	{
 		String elt = getElement();
 		if (elt != null && that.getElement() != null && !elt.equals(that.getElement()))
@@ -297,7 +299,7 @@ public class Hypothesis
 		return ret;
 	}
 
-	public Hypothesis createInheritedHypothesis(CADShapeEnum cse)
+	protected Hypothesis createInheritedHypothesis(CADShapeEnum cse)
 	{
 		Hypothesis ret = new Hypothesis();
 		ret.length      = length;
@@ -309,7 +311,7 @@ public class Hypothesis
 		return ret;
 	}
 
-	public AlgoInterface findAlgorithm(CADShapeEnum cse)
+	protected AlgoInterface findAlgorithm(CADShapeEnum cse)
 	{
 		AlgoInterface ret = null;
 		try {
@@ -349,7 +351,7 @@ public class Hypothesis
 		return ret;
 	}
 
-	public static interface HypInterface
+	private static interface HypInterface
 	{
 		public String impliedType(CADShapeEnum d);
 		public String getType();
@@ -374,7 +376,7 @@ public class Hypothesis
 		return h;
 	}
 
-	public static class HypNone implements HypInterface
+	private static class HypNone implements HypInterface
 	{
 		public CADShapeEnum dim()
 		{
@@ -389,7 +391,8 @@ public class Hypothesis
 			return null;
 		}
 	}
-	public static class HypV1 implements HypInterface
+	@SuppressWarnings("unused")
+	private static class HypV1 implements HypInterface
 	{
 		public CADShapeEnum dim()
 		{
@@ -406,7 +409,8 @@ public class Hypothesis
 			return null;
 		}
 	}
-	public static class HypE2 implements HypInterface
+	@SuppressWarnings("unused")
+	private static class HypE2 implements HypInterface
 	{
 		public CADShapeEnum dim()
 		{
@@ -426,7 +430,8 @@ public class Hypothesis
 				return null;
 		}
 	}
-	public static class HypT3 implements HypInterface
+	@SuppressWarnings("unused")
+	private static class HypT3 implements HypInterface
 	{
 		public CADShapeEnum dim()
 		{
@@ -448,7 +453,8 @@ public class Hypothesis
 				return null;
 		}
 	}
-	public static class HypQ4 implements HypInterface
+	@SuppressWarnings("unused")
+	private static class HypQ4 implements HypInterface
 	{
 		public CADShapeEnum dim()
 		{
@@ -470,7 +476,8 @@ public class Hypothesis
 				return null;
 		}
 	}
-	public static class HypT4 implements HypInterface
+	@SuppressWarnings("unused")
+	private static class HypT4 implements HypInterface
 	{
 		public CADShapeEnum dim()
 		{

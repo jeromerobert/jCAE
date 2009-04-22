@@ -53,10 +53,10 @@ public class QuadricProjection implements LocalSurfaceProjection
 {
 	private static final Logger LOGGER = Logger.getLogger(QuadricProjection.class.getName());
 	
-	final Matrix3D qP;
-	final double[] origin = new double[3];
-	final double[] qD;
-	final boolean discardHyperbolic;
+	private final Matrix3D qP;
+	private final double[] origin = new double[3];
+	private final double[] qD;
+	private final boolean discardHyperbolic;
 
 	public QuadricProjection(Vertex o)
 	{

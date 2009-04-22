@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -271,17 +271,7 @@ public class Metric2D
 			temp = 0.0;
 		return temp;
 	}
-	
-	public String stringCoefs()
-	{
-		return ""+E+" "+F+" "+G;
-	}
-	
-	public String stringCoefs(double scaleX, double scaleY)
-	{
-		return ""+(E/scaleX/scaleX)+" "+(F/scaleX/scaleY)+" "+(G/scaleY/scaleY);
-	}
-	
+
 	@Override
 	public String toString()
 	{

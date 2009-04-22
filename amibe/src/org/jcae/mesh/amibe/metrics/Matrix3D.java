@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2005,2006 by EADS CRC
-    Copyright (C) 2007 by EADS France
+    Copyright (C) 2007,2009, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,7 @@ import java.io.Serializable;
  */
 public class Matrix3D implements Serializable
 {
-	private static final long serialVersionUID = 5152378290075279828L;
+	private static final long serialVersionUID = 5729957735771428280L;
 	protected double [] data = new double[9];
 	
 	/**
@@ -60,7 +60,7 @@ public class Matrix3D implements Serializable
 	/**
 	 * Reset all coefficients to zero.
 	 */
-	public void reset()
+	protected void reset()
 	{
 		for (int i = 0; i < 9; i++)
 			data[i] = 0.0;
@@ -83,7 +83,7 @@ public class Matrix3D implements Serializable
 	 * @param A  another Matrix3D
 	 * @return a new Matrix3D containing the multiplication this*A
 	 */
-	public Matrix3D multR(Matrix3D A)
+	protected Matrix3D multR(Matrix3D A)
 	{
 		Matrix3D ret = new Matrix3D();
 		for (int i = 0; i < 3; i++)
@@ -103,7 +103,7 @@ public class Matrix3D implements Serializable
 	 * @param A  another Matrix3D
 	 * @return a new Matrix3D containing the multiplication A*this
 	 */
-	public Matrix3D multL(Matrix3D A)
+	protected Matrix3D multL(Matrix3D A)
 	{
 		Matrix3D ret = new Matrix3D();
 		for (int i = 0; i < 3; i++)
@@ -148,13 +148,7 @@ public class Matrix3D implements Serializable
 		data[4] = d2;
 		data[8] = d3;
 	}
-	
-	public void saxpby0(double l1, Matrix3D a, double l2, Matrix3D b)
-	{
-		for (int i = 0; i < 9; i++)
-			data[i] = l1 * a.data[i] + l2 * b.data[i];
-	}
-	
+
 	protected final void swap(int i, int j)
 	{
 		double temp = data[i+3*j];

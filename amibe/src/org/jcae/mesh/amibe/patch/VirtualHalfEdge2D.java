@@ -415,7 +415,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 	 * @param end  end point of the boundary edge.
 	 * @return the number of intersected edges.
 	 */
-	public final int forceBoundaryEdge(Mesh2D mesh, Vertex2D end)
+	protected final int forceBoundaryEdge(Mesh2D mesh, Vertex2D end)
 	{
 		long newl, oldl;
 		int count = 0;

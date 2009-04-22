@@ -64,7 +64,7 @@ public class Storage
 {
 	private static final Logger LOGGER = Logger.getLogger(Storage.class.getName());
 
-	public static void writeId(File dir, int id)
+	private static void writeId(File dir, int id)
 	{
 		// Create the output directory if it does not exist
 		if(!dir.exists())
@@ -167,7 +167,8 @@ public class Storage
 	 * @param root    root shape
 	 * @throws  RuntimeException if an error occurred
 	 */
-	public static void readAllFaces(Mesh m, BCADGraphCell root)
+	@SuppressWarnings("unused")
+	private static void readAllFaces(Mesh m, BCADGraphCell root)
 	{
 		TIntObjectHashMap<Vertex> vertMap = new TIntObjectHashMap<Vertex>();
 		for (BSubMesh s : root.getGraph().getModel().getSubMeshes())
@@ -199,7 +200,7 @@ public class Storage
 	 * @param mapRefVertex    map between references and Vertex instances
 	 * @throws  RuntimeException if an error occurred
 	 */
-	public static void readFace(Mesh mesh, BCADGraphCell face, BSubMesh s, TIntObjectHashMap<Vertex> mapRefVertex)
+	private static void readFace(Mesh mesh, BCADGraphCell face, BSubMesh s, TIntObjectHashMap<Vertex> mapRefVertex)
 	{
 		assert face.getShape() instanceof CADFace;
 		BModel model = face.getGraph().getModel();
@@ -243,7 +244,8 @@ public class Storage
 	 * @param root    root shape
 	 * @throws  RuntimeException if an error occurred
 	 */
-	public static void readAllVolumes(Mesh m, BCADGraphCell root, BSubMesh s)
+	@SuppressWarnings("unused")
+	private static void readAllVolumes(Mesh m, BCADGraphCell root, BSubMesh s)
 	{
 		TIntObjectHashMap<Vertex> vertMap = new TIntObjectHashMap<Vertex>();
 		for (Iterator<BCADGraphCell> it = root.uniqueShapesExplorer(CADShapeEnum.SOLID); it.hasNext(); )
@@ -257,7 +259,7 @@ public class Storage
 	 * @param mapRefVertex    map between references and Vertex instances
 	 * @throws  RuntimeException if an error occurred
 	 */
-	public static void readVolume(Mesh mesh, BCADGraphCell volume, BSubMesh s, TIntObjectHashMap<Vertex> mapRefVertex)
+	private static void readVolume(Mesh mesh, BCADGraphCell volume, BSubMesh s, TIntObjectHashMap<Vertex> mapRefVertex)
 	{
 		assert volume.getShape() instanceof CADSolid;
 		BModel model = volume.getGraph().getModel();

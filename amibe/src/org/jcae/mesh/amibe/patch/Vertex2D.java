@@ -56,11 +56,6 @@ public class Vertex2D extends Vertex
 	
 	//  Metrics at this location
 	private transient Metric2D m2 = null;
-	
-	protected Vertex2D(VertexTraitsBuilder vtb)
-	{
-		super(vtb);
-	}
 
 	/**
 	 * Create a Vertex for a 2D mesh.
@@ -69,7 +64,7 @@ public class Vertex2D extends Vertex
 	 * @param u  first coordinate.
 	 * @param v  second coordinate.
 	 */
-	public Vertex2D(VertexTraitsBuilder vtb, double u, double v)
+	protected Vertex2D(VertexTraitsBuilder vtb, double u, double v)
 	{
 		super(vtb);
 		param[0] = u;
@@ -82,7 +77,7 @@ public class Vertex2D extends Vertex
 	 * @param pt1  first node.
 	 * @param pt2  second node.
 	 */
-	public static Vertex2D middle(Vertex2D pt1, Vertex2D pt2)
+	protected static Vertex2D middle(Vertex2D pt1, Vertex2D pt2)
 	{
 		return new Vertex2D(null,
 			0.5 * (pt1.param[0] + pt2.param[0]),
@@ -137,7 +132,8 @@ public class Vertex2D extends Vertex
 	 *
 	 * @return the normal to the surface at this location.
 	 */
-	public double [] getNormal(Mesh2D mesh)
+	@SuppressWarnings("unused")
+	private double [] getNormal(Mesh2D mesh)
 	{
 		CADGeomSurface surface = mesh.getGeomSurface();
 		surface.setParameter(param[0], param[1]);
@@ -305,7 +301,7 @@ public class Vertex2D extends Vertex
 	}
 	
 	//  Current vertex is symmetric apical vertex
-	public final boolean inCircle2D(Mesh2D mesh, VirtualHalfEdge2D ot)
+	protected final boolean inCircle2D(Mesh2D mesh, VirtualHalfEdge2D ot)
 	{
 		assert this != mesh.outerVertex;
 		Vertex2D v1 = (Vertex2D) ot.origin();
@@ -379,7 +375,7 @@ public class Vertex2D extends Vertex
 		throw new RuntimeException("Circumcenter cannot be computed");
 	}
 	
-	public final boolean inCircle(Mesh2D mesh, VirtualHalfEdge2D ot)
+	protected final boolean inCircle(Mesh2D mesh, VirtualHalfEdge2D ot)
 	{
 		//  vcX: vertices of current edge
 		//  vaX: apices
@@ -445,7 +441,7 @@ public class Vertex2D extends Vertex
 		}
 	}
 	
-	public final boolean isSmallerDiagonale(Mesh2D mesh, VirtualHalfEdge2D ot)
+	protected final boolean isSmallerDiagonale(Mesh2D mesh, VirtualHalfEdge2D ot)
 	{
 		//  vcX: vertices of current edge
 		//  vaX: apices
@@ -473,13 +469,13 @@ public class Vertex2D extends Vertex
 		        Math.sqrt(mesh.compGeom().distance2(vc1, vc2, m0))));
 	}
 	
-	public boolean isPseudoIsotropic(Mesh2D mesh)
+	protected boolean isPseudoIsotropic(Mesh2D mesh)
 	{
 		Metric2D m2d = getMetrics(mesh);
 		return m2d.isPseudoIsotropic();
 	}
 	
-	public final long distance2(Mesh2D mesh, Vertex2D that)
+	private final long distance2(Mesh2D mesh, Vertex2D that)
 	{
 		mesh.getKdTree().double2int(param, i0);
 		mesh.getKdTree().double2int(that.param, i1);
@@ -519,7 +515,7 @@ public class Vertex2D extends Vertex
 	/**
 	 * Clear the 2D Riemannian metrics at this point.
 	 */
-	public void clearMetrics()
+	protected void clearMetrics()
 	{
 		m2 = null;
 	}

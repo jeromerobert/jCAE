@@ -28,12 +28,12 @@ import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 
-public class ElementPatchFactory implements ElementFactoryInterface
+class ElementPatchFactory implements ElementFactoryInterface
 {
 	private final VertexTraitsBuilder vertexTraitsBuilder;
 	private final TriangleTraitsBuilder triangleTraitsBuilder;
 
-	public ElementPatchFactory(MeshTraitsBuilder mtb)
+	protected ElementPatchFactory(MeshTraitsBuilder mtb)
 	{
 		vertexTraitsBuilder   = mtb.getVertexTraitsBuilder();
 		triangleTraitsBuilder = mtb.getTriangleTraitsBuilder();

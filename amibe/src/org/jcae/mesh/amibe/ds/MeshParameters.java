@@ -29,12 +29,12 @@ public class MeshParameters
 {
 	// By convention, Mesh2D.init() will set edgeLength to patch diagonal
 	// if size has not been set.
-	public double edgeLength = 0.0;
-	public double deflection = -1.0;
-	public boolean relativeDeflection;
-	public boolean isotropic;
-	public double epsilon;
-	public boolean cumulativeEpsilon;
+	private double edgeLength = 0.0;
+	private double deflection = -1.0;
+	private boolean relativeDeflection;
+	private boolean isotropic;
+	private double epsilon;
+	private boolean cumulativeEpsilon;
 
 	public MeshParameters()
 	{

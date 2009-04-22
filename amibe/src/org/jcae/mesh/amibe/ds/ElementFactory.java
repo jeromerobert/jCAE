@@ -25,13 +25,13 @@ import org.jcae.mesh.amibe.traits.HalfEdgeTraitsBuilder;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 
-public class ElementFactory implements ElementFactoryInterface
+class ElementFactory implements ElementFactoryInterface
 {
 	private final VertexTraitsBuilder vertexTraitsBuilder;
 	private final HalfEdgeTraitsBuilder halfedgeTraitsBuilder;
 	private final TriangleTraitsBuilder triangleTraitsBuilder;
 
-	public ElementFactory(MeshTraitsBuilder mtb)
+	protected ElementFactory(MeshTraitsBuilder mtb)
 	{
 		vertexTraitsBuilder   = mtb.getVertexTraitsBuilder();
 		halfedgeTraitsBuilder = mtb.getHalfEdgeTraitsBuilder();
@@ -54,7 +54,7 @@ public class ElementFactory implements ElementFactoryInterface
 		return new Vertex(vertexTraitsBuilder, x[0], x[1], x[2]);
 	}
 
-	public AbstractHalfEdge createHalfEdge(TriangleHE t, byte orientation, byte attributes)
+	private AbstractHalfEdge createHalfEdge(TriangleHE t, byte orientation, byte attributes)
 	{
 		return new HalfEdge(halfedgeTraitsBuilder, t, orientation, attributes);
 	}

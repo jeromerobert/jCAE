@@ -44,7 +44,7 @@ import java.util.logging.Logger;
  */
 public class VirtualHalfEdge extends AbstractHalfEdge
 {
-	private static Logger logger=Logger.getLogger(VirtualHalfEdge.class.getName());
+	private static final Logger logger=Logger.getLogger(VirtualHalfEdge.class.getName());
 	
 	private static final int [] next3 = { 1, 2, 0 };
 	private static final int [] prev3 = { 2, 0, 1 };
@@ -76,7 +76,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	/**
 	 * Local number of this edge in this triangle.
 	 */
-	protected int localNumber;
+	private int localNumber;
 	/**
 	 * Attributes of this edge.
 	 */
@@ -201,7 +201,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	}
 	
 	// Adjust attributes after tri.adjPos is modified.
-	protected final void pullAttributes()
+	private final void pullAttributes()
 	{
 		attributes = tri.getEdgeAttributes(localNumber);
 	}
@@ -559,7 +559,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @return  triangle area
 	 * Warning: this method uses tempD, tempD1 and tempD2 temporary arrays.
 	 */
-	public double computeNormal3DT()
+	private double computeNormal3DT()
 	{
 		double [] p0 = origin().getUV();
 		double [] p1 = destination().getUV();
@@ -652,11 +652,12 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 	 * @return the minimum quality of the two trianglles generated
 	 *    by swapping this edge.
 	 */
-	public final double checkSwap3D(double minCos)
+	@SuppressWarnings("unused")
+	private final double checkSwap3D(double minCos)
 	{
 		return checkSwap3D(minCos, 0.0);
 	}
-	public final double checkSwap3D(double minCos, double maxLength)
+	private final double checkSwap3D(double minCos, double maxLength)
 	{
 		double invalid = -1.0;
 		// Check if there is an adjacent edge
@@ -1142,7 +1143,7 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		m.remove(tri);
 		// By convention, edge is moved into (dV4V1), but this may change.
 		// If vh4 is null, edge is outer and return value does not matter
-		return (vh4 == null ? null : (VirtualHalfEdge) vh4.next());
+		return (vh4 == null ? null : vh4.next());
 	}
 	
 	private void replaceEndpointsSameFan(Vertex n)
@@ -1560,10 +1561,10 @@ public class VirtualHalfEdge extends AbstractHalfEdge
 		logger.fine("Non manifold fan iterator");
 		return new Iterator<AbstractHalfEdge>()
 		{
-			private TriangleVH last = tri.getAdj(localNumber);
-			private int lastNumber = tri.getAdjLocalNumber(localNumber);
-			VirtualHalfEdge ret = new VirtualHalfEdge();
-			VirtualHalfEdge current = new VirtualHalfEdge();
+			private final TriangleVH last = tri.getAdj(localNumber);
+			private final int lastNumber = tri.getAdjLocalNumber(localNumber);
+			private final VirtualHalfEdge ret = new VirtualHalfEdge();
+			private final VirtualHalfEdge current = new VirtualHalfEdge();
 			public boolean hasNext()
 			{
 				return last != current.tri;

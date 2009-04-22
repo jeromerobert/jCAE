@@ -76,7 +76,7 @@ public class MMesh1D extends MMesh0D
 	 *
 	 * @param cadFile  file containing CAD shape
 	 */
-	public MMesh1D(CADShape shape)
+	private MMesh1D(CADShape shape)
 	{
 		super(shape);
 		CADExplorer expE = CADShapeFactory.getFactory().newExplorer();
@@ -121,7 +121,6 @@ public class MMesh1D extends MMesh0D
 	{
 		super(model);
 		BCADGraphCell root = model.getGraph().getRootCell();
-		shape = root.getShape();
 
 		int edgediscrs = 0;
 		// estimation of the maximum number of nodes created on the vertices of the CAD
@@ -339,7 +338,7 @@ public class MMesh1D extends MMesh0D
 	 * @param E  a topological edge.
 	 * @return the list of nodes inserted on this edge.
 	 */
-	public ArrayList<MNode1D> getNodelistFromMap(CADEdge E)
+	private ArrayList<MNode1D> getNodelistFromMap(CADEdge E)
 		throws NoSuchElementException
 	{
 		SubMesh1D submesh1d = mapTEdgeToSubMesh1D.get(E);
@@ -354,7 +353,8 @@ public class MMesh1D extends MMesh0D
 	 * @param E  a topological edge.
 	 * @return the list of edges inserted on this edge.
 	 */
-	public ArrayList<MEdge1D> getEdgelistFromMap(CADEdge E)
+	@SuppressWarnings("unused")
+	private ArrayList<MEdge1D> getEdgelistFromMap(CADEdge E)
 	       throws NoSuchElementException
 	{
 		SubMesh1D submesh1d = mapTEdgeToSubMesh1D.get(E);
@@ -368,7 +368,7 @@ public class MMesh1D extends MMesh0D
 	 *
 	 * @return an upper limit of the total number of nodes
 	 */
-	public int maximalNumberOfNodes()
+	private int maximalNumberOfNodes()
 	{
 		int result = 0;
 		for(Iterator<SubMesh1D> it=mapTEdgeToSubMesh1D.values().iterator();it.hasNext();)
@@ -550,7 +550,8 @@ public class MMesh1D extends MMesh0D
 	/**
 	 * Prints edge lengths of a <code>MMesh1D</code> instance.
 	 */
-	public void printInfos()
+	@SuppressWarnings("unused")
+	private void printInfos()
 	{
 		for(Iterator<SubMesh1D> it=mapTEdgeToSubMesh1D.values().iterator();it.hasNext();)
 		{

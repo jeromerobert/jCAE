@@ -21,7 +21,6 @@
 package org.jcae.mesh.amibe.ds;
 
 import java.util.logging.Logger;
-import org.jcae.mesh.amibe.traits.Traits;
 import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
 import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
@@ -59,9 +58,8 @@ public class Vertex implements Serializable
 	private static final long serialVersionUID = 8049983674054731722L;
 	private static final Logger logger=Logger.getLogger(Vertex.class.getName());
 	
-	//  User-defined traits
-	protected final VertexTraitsBuilder traitsBuilder;
-	protected final Traits traits;
+	//  User-defined traits.  They are currently unused.
+	//protected final Traits traits;
 	/**
 	 * 2D or 3D coordinates.
 	 */
@@ -69,17 +67,17 @@ public class Vertex implements Serializable
 	//  ref1d > 0: link to the geometrical node
 	//  ref1d = 0: inner node
 	//  ref1d < 0: node on an inner boundary  (FIXME: unused for now)
-	protected int ref1d = 0;
+	protected int ref1d;
 
 	//  link can be either:
 	//    1. an Triangle, for manifold vertices
 	//    2. an Object[2] array, zhere
 	//         0: list of head triangles
 	//         1: list of incident wires
-	protected Object link = null;
+	protected Object link;
 	
 	// Used in OEMM
-	protected int label = 0;
+	private int label;
 	private boolean readable = true;
 	private boolean writable = true;
 	
@@ -88,11 +86,10 @@ public class Vertex implements Serializable
 	 */
 	protected Vertex(VertexTraitsBuilder vtb)
 	{
-		traitsBuilder = vtb;
-		if (traitsBuilder != null)
-			traits = traitsBuilder.createTraits();
+		/*if (vtb != null)
+			traits = vtb.createTraits();
 		else
-			traits = null;
+			traits = null;*/
 		param = new double[2];
 	}
 
@@ -106,11 +103,10 @@ public class Vertex implements Serializable
 	 */
 	public Vertex(VertexTraitsBuilder vtb, double x, double y, double z)
 	{
-		traitsBuilder = vtb;
-		if (traitsBuilder != null)
-			traits = traitsBuilder.createTraits();
+		/*if (vtb != null)
+			traits = vtb.createTraits();
 		else
-			traits = null;
+			traits = null;*/
 		param = new double[3];
 		param[0] = x;
 		param[1] = y;
@@ -250,7 +246,7 @@ public class Vertex implements Serializable
 	 * @param work2  double[3] temporary array
 	 * @param ret array which will store the outer product of the two vectors
 	 */
-	public void outer3D(Vertex n1, Vertex n2, double [] work1, double [] work2, double [] ret)
+	protected void outer3D(Vertex n1, Vertex n2, double [] work1, double [] work2, double [] ret)
 	{
 		for (int i = 0; i < 3; i++)
 		{
@@ -383,21 +379,22 @@ public class Vertex implements Serializable
 		return link instanceof Triangle;
 	}
 	
-	private class NeighbourIterator
+	private abstract class NeighbourIterator<T> implements Iterator<T>
 	{
-		protected AbstractHalfEdge next;
-		protected final Vertex start;
-		protected boolean started;
-		NeighbourIterator(Triangle tri)
+		private AbstractHalfEdge next;
+		private final Vertex start;
+		private boolean started;
+		private NeighbourIterator(Triangle tri)
 		{
 			next = getIncidentAbstractHalfEdge(tri, null);
 			start = next.destination();
 		}
+		public abstract T next();
 		public final boolean hasNext()
 		{
 			return !started || next.apex() != start;
 		}
-		protected final AbstractHalfEdge advance()
+		final AbstractHalfEdge advance()
 		{
 			if (started)
 				next = next.nextOriginLoop();
@@ -411,9 +408,9 @@ public class Vertex implements Serializable
 		}
 	}
 
-	private final class NeighbourIteratorVertex extends NeighbourIterator implements Iterator<Vertex>
+	private final class NeighbourIteratorVertex extends NeighbourIterator<Vertex>
 	{
-		NeighbourIteratorVertex(Triangle tri)
+		private NeighbourIteratorVertex(Triangle tri)
 		{
 			super(tri);
 		}
@@ -423,9 +420,9 @@ public class Vertex implements Serializable
 		}
 	}
 
-	private final class NeighbourIteratorAbstractHalfEdge extends NeighbourIterator implements Iterator<AbstractHalfEdge>
+	private final class NeighbourIteratorAbstractHalfEdge extends NeighbourIterator<AbstractHalfEdge>
 	{
-		NeighbourIteratorAbstractHalfEdge(Triangle tri)
+		private NeighbourIteratorAbstractHalfEdge(Triangle tri)
 		{
 			super(tri);
 		}
@@ -435,9 +432,9 @@ public class Vertex implements Serializable
 		}
 	}
 
-	private final class NeighbourIteratorTriangle extends NeighbourIterator implements Iterator<Triangle>
+	private final class NeighbourIteratorTriangle extends NeighbourIterator<Triangle>
 	{
-		NeighbourIteratorTriangle(Triangle tri)
+		private NeighbourIteratorTriangle(Triangle tri)
 		{
 			super(tri);
 		}
@@ -468,7 +465,7 @@ public class Vertex implements Serializable
 		private int index;
 		private Iterator<E> current;
 		private Iterator<E>[] iterators;
-		ChainIterator(Iterator<E>[] it)
+		private ChainIterator(Iterator<E>[] it)
 		{
 			iterators = it;
 			// Backward processing to avoid comparison with iterators.length
@@ -584,7 +581,7 @@ public class Vertex implements Serializable
 	 *       Guoliang Xu suggests improvements in his papers
 	 *           http://lsec.cc.ac.cn/~xuguo/xuguo3.htm
 	 */
-	public double discreteCurvatures(double [] meanNormal)
+	private double discreteCurvatures(double [] meanNormal)
 	{
 		for (int i = 0; i < 3; i++)
 			meanNormal[i] = 0.0;
@@ -656,7 +653,8 @@ public class Vertex implements Serializable
 	 * and Alan H. Barr.
 	 *   http://www.cs.caltech.edu/~mmeyer/Publications/diffGeomOps.pdf
 	 */
-	public boolean discreteCurvatureDirections(double [] normal, double[] t1, double [] t2)
+	@SuppressWarnings("unused")
+	private boolean discreteCurvatureDirections(double [] normal, double[] t1, double [] t2)
 	{
 		if (!computeUnitNormal(normal))
 			return false;

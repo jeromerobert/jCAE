@@ -47,9 +47,9 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 	private static final Logger logger=Logger.getLogger(PRedBlackSortedTree.class.getName());	
 	private static class Node<E> extends QSortedTree.Node<E>
 	{
-		private static final long serialVersionUID = -2091456009137794229L;
+		private static final long serialVersionUID = 4887055383474718211L;
 
-		boolean isRed;
+		private boolean isRed;
 		
 		@SuppressWarnings("unchecked")
 		@Override
@@ -58,7 +58,7 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 			return new Node[2];
 		}
 
-		public Node(E o, double v)
+		private Node(E o, double v)
 		{
 			super(o, v);
 			isRed = true;
@@ -79,7 +79,7 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 	}
 
 	@Override
-	public final QSortedTree.Node<E> newNode(E o, double v)
+	final QSortedTree.Node<E> newNode(E o, double v)
 	{
 		return new Node<E>(o, v);
 	}
@@ -91,7 +91,7 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 	}
 	
 	@Override
-	public final boolean insertNode(QSortedTree.Node<E> o)
+	final boolean insertNode(QSortedTree.Node<E> o)
 	{
 		Node<E> p = (Node<E>) o;
 		Node<E> current = (Node<E>) root.child[0];
@@ -220,7 +220,7 @@ public class PRedBlackSortedTree<E> extends QSortedTree<E>
 	}
 	
 	@Override
-	public final QSortedTree.Node<E> removeNode(QSortedTree.Node<E> o)
+	final QSortedTree.Node<E> removeNode(QSortedTree.Node<E> o)
 	{
 		Node<E> p = (Node<E>) o;
 		Node<E> ret = p;

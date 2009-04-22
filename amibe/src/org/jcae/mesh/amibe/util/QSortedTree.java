@@ -48,25 +48,25 @@ public abstract class QSortedTree<E> implements Serializable
 	/**
 	 * Constructor to cast new nodes into subclass type.
 	 */
-	protected abstract Node<E> newNode(E o, double v);
+	abstract Node<E> newNode(E o, double v);
 
 	/**
 	 * Insert a new note into the binary tree.  This method always returns
 	 * <code>true</code>.
 	 */
-	protected abstract boolean insertNode(Node<E> node);
+	abstract boolean insertNode(Node<E> node);
 
 	/**
 	 * Remove a note from the binary tree.  Some algorithms may remove
 	 * another node (for instance PRedBlackSortedTree), this method
 	 * returns the node which has been removed.
 	 */
-	protected abstract Node<E> removeNode(Node<E> p);
+	abstract Node<E> removeNode(Node<E> p);
 
 	@SuppressWarnings("serial")
 	public static class Node<E> implements Comparable<Node<E>>, Serializable
 	{
-		protected E data;
+		private E data;
 		private double value;
 		protected final Node<E> [] child = newChilds();
 		protected Node<E> parent = null;
@@ -77,7 +77,7 @@ public abstract class QSortedTree<E> implements Serializable
 			return new Node[2];
 		}
 	
-		public Node(final E o, final double v)
+		protected Node(final E o, final double v)
 		{
 			data = o;
 			value = v;
@@ -96,7 +96,7 @@ public abstract class QSortedTree<E> implements Serializable
 			value = v;
 		}
 		
-		public void swap(final Node<E> that)
+		protected void swap(final Node<E> that)
 		{
 			final E temp = that.data;
 			that.data = data;
@@ -231,7 +231,7 @@ public abstract class QSortedTree<E> implements Serializable
 	
 		// The following 4 methods are useful for tree traversal.
 		// A NullPointerException is raised if they are used on an empty tree!
-		Node<E> firstNode()
+		private Node<E> firstNode()
 		{
 			Node<E> current = this;
 			while (current.child[0] != null)
@@ -239,7 +239,7 @@ public abstract class QSortedTree<E> implements Serializable
 			return current;
 		}
 	
-		Node<E> lastNode()
+		private Node<E> lastNode()
 		{
 			Node<E> current = this;
 			while (current.child[1] != null)
@@ -247,7 +247,7 @@ public abstract class QSortedTree<E> implements Serializable
 			return current;
 		}
 	
-		public Node<E> previousNode()
+		protected Node<E> previousNode()
 		{
 			Node<E> current = this;
 			if (current.child[0] != null)
@@ -262,7 +262,7 @@ public abstract class QSortedTree<E> implements Serializable
 			return current.parent;
 		}
 	
-		public Node<E> nextNode()
+		protected Node<E> nextNode()
 		{
 			Node<E> current = this;
 			if (current.child[1] != null)
@@ -397,7 +397,8 @@ public abstract class QSortedTree<E> implements Serializable
 	/**
 	 * Pretty-print this tree.
 	 */
-	public void show()
+	@SuppressWarnings("unused")
+	private void show()
 	{
 		if (isEmpty())
 		{
@@ -433,7 +434,8 @@ public abstract class QSortedTree<E> implements Serializable
 	/**
 	 * Pretty-print this tree.
 	 */
-	public void showValues()
+	@SuppressWarnings("unused")
+	private void showValues()
 	{
 		if (isEmpty())
 		{

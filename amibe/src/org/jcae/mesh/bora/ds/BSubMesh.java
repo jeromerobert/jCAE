@@ -73,7 +73,7 @@ public class BSubMesh
 	/**
 	 * Creates a root mesh.
 	 */
-	public BSubMesh(BModel m, int id)
+	protected BSubMesh(BModel m, int id)
 	{
 		model = m;
 		this.id = id;
@@ -114,7 +114,7 @@ public class BSubMesh
 	 * is printed, but CAD objects related to more than one constraint on this submesh 
 	 * would appear that many times.
 	 */
-	public void printSubmeshDiscretizations()
+	protected void printSubmeshDiscretizations()
 	{
 		BCADGraphCell root = model.getGraph().getRootCell();
 		StringBuilder indent = new StringBuilder();

@@ -45,14 +45,14 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 	private TriangleHE tri;
 	private byte localNumber;
 	private byte attributes;
-	HalfEdge sym;
-	HalfEdge next;
+	private HalfEdge sym;
+	private HalfEdge next;
 
 	private static final int [] next3 = { 1, 2, 0 };
 	private static final int [] prev3 = { 2, 0, 1 };
 	private static final double [][] temp = new double[4][3];
 	
-	public HalfEdge (HalfEdgeTraitsBuilder htb, TriangleHE tri, byte localNumber, byte attributes)
+	protected HalfEdge (HalfEdgeTraitsBuilder htb, TriangleHE tri, byte localNumber, byte attributes)
 	{
 		super(htb);
 		this.tri = tri;
@@ -103,14 +103,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		if (s != null)
 			s.sym = this;
 	}
-	
-	public final HalfEdge notOriented()
-	{
-		if (sym != null && sym.hashCode() < hashCode())
-			return sym;
-		return this;
-	}
-	
+
 	/**
 	 * Tells whether edge is connected to a symmetric edge.
 	 *
@@ -1329,7 +1322,7 @@ public class HalfEdge extends AbstractHalfEdge implements Serializable
 		sym = src.sym;
 	}
 	
-	public final void copy(HalfEdge that)
+	protected final void copy(HalfEdge that)
 	{
 		HalfEdge to = this;
 		for (int i = 0; i < 3; i++)

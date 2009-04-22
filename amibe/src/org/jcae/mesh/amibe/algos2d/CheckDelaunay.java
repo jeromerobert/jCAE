@@ -58,10 +58,10 @@ public class CheckDelaunay
 	
 	private static final class FakeEdge
 	{
-		final TriangleVH triangle;
-		final int localNumber;
+		private final TriangleVH triangle;
+		private final int localNumber;
 
-		FakeEdge(TriangleVH t, int l)
+		private FakeEdge(TriangleVH t, int l)
 		{
 			triangle = t;
 			localNumber = l;

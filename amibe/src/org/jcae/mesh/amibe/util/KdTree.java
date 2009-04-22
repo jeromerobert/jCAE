@@ -167,7 +167,7 @@ public class KdTree
 		 * Otherwise, it contains the number of vertices which are stored
 		 * in the {@link #subCell} array.
 		 */
-		int nItems = 0;
+		private int nItems;
 		
 		/**
 		 * References to bound objects.  This variable either contains
@@ -176,12 +176,7 @@ public class KdTree
 		 * yo vertices.  This compact storage is needed to reduce memory
 		 * usage.
 		 */
-		Object [] subCell = null;
-
-		public Cell getSubCell(int [] ijk, int size)
-		{
-			return (Cell) subCell[indexSubCell(ijk, size)];
-		}
+		private Object [] subCell;
 
 		public boolean isLeaf()
 		{
@@ -202,7 +197,7 @@ public class KdTree
 		}
 	}
 	
-	final int dimension;
+	private final int dimension;
 	private final int nrSub;
 
 	// Integer coordinates (like gridSize) must be long if MAXLEVEL > 30
@@ -213,17 +208,17 @@ public class KdTree
 	/**
 	 * Root of the kd-tree.
 	 */
-	protected final Cell root;
+	private final Cell root;
 	
 	/**
 	 * Number of cells.
 	 */
-	public int nCells = 0;
+	public int nCells;
 	
 	/**
 	 * Conversion between double and integer coordinates.
 	 */
-	public final double [] x0;
+	private final double [] x0;
 	
 	/**
 	 * Dummy constructor.  This instance must be properly initialised by calling
@@ -256,7 +251,7 @@ public class KdTree
 	 * @param bbox   coordinates of bottom-left vertex and upper-right vertices
 	 * @param bucketsize  bucket size
 	 */
-	public KdTree(double [] bbox, int bucketsize)
+	KdTree(double [] bbox, int bucketsize)
 	{
 		BUCKETSIZE = bucketsize;
 		dimension = bbox.length / 2;
@@ -335,7 +330,8 @@ public class KdTree
 	 * Return the coordinates of the center of the grid.
 	 * @return the coordinates of the center of the grid.
 	 */
-	public double [] center()
+	@SuppressWarnings("unused")
+	private double [] center()
 	{
 		double [] p = new double[dimension];
 		for (int k = 0; k < dimension; k++)
@@ -360,7 +356,7 @@ public class KdTree
 	 * @param size  cell size of children nodes.
 	 * @return the index of the child node containing this vertex.
 	 */
-	int indexSubCell(int [] ijk, int size)
+	private int indexSubCell(int [] ijk, int size)
 	{
 		int ret = 0;
 		if (size == 0)
@@ -501,8 +497,8 @@ public class KdTree
 
 	private static final class GetAllVerticesProcedure implements KdTreeProcedure
 	{
-		public Collection<Vertex> nodelist = null;
-		public GetAllVerticesProcedure(int capacity)
+		private final Collection<Vertex> nodelist;
+		private GetAllVerticesProcedure(int capacity)
 		{
 			nodelist = new ArrayList<Vertex>(capacity);
 		}
@@ -733,13 +729,13 @@ public class KdTree
 	{
 		private final int [] ijk = new int[dimension];
 		private final Mesh mesh;
-		public final Vertex fromVertex;
-		public Vertex nearestVertex;
+		private final Vertex fromVertex;
+		private Vertex nearestVertex;
 		private final double [] i2d = new double[dimension];
 		private final int [] idist = new int[dimension];
 		private double dist;
-		public int searchedCells = 0;
-		public GetNearestVertexProcedure(Mesh m, Vertex from, Vertex v)
+		private int searchedCells;
+		private GetNearestVertexProcedure(Mesh m, Vertex from, Vertex v)
 		{
 			mesh = m;
 			double2int(from.getUV(), ijk);
@@ -847,11 +843,11 @@ public class KdTree
 	{
 		private final int [] ij = new int[dimension];
 		private double dist;
-		public final Vertex fromVertex;
-		public Vertex nearestVertex;
-		public final Mesh mesh;
-		public int searchedCells = 0;
-		public GetNearestVertexDebugProcedure(Mesh m, Vertex from, Vertex v)
+		private final Vertex fromVertex;
+		private Vertex nearestVertex;
+		private final Mesh mesh;
+		private int searchedCells;
+		private GetNearestVertexDebugProcedure(Mesh m, Vertex from, Vertex v)
 		{
 			double2int(from.getUV(), ij);
 			nearestVertex = v;
@@ -909,8 +905,8 @@ public class KdTree
 	
 	private static final class GetMinSizeProcedure implements KdTreeProcedure
 	{
-		public int searchedCells = 0;
-		public int minSize = gridSize;
+		private int searchedCells;
+		private int minSize = gridSize;
 		public GetMinSizeProcedure()
 		{
 		}

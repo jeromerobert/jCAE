@@ -83,7 +83,7 @@ public class MNode1D
 	 * @param t  curvilinear abscissa on current edge
 	 * @param d  if not null, the vertex discretization used
 	 */
-	public MNode1D(double t, BDiscretization d)
+	protected MNode1D(double t, BDiscretization d)
 	{
 		param = t;
 		discr = d;

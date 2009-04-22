@@ -34,7 +34,7 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
  * is set to the minimal value.  This is very useful to detect
  * inverted triangles in 3D on smooth surfaces.
  */
-public class DihedralAngle extends QualityProcedure
+class DihedralAngle extends QualityProcedure
 {
 	private VirtualHalfEdge ot = new VirtualHalfEdge();
 	private VirtualHalfEdge sym = new VirtualHalfEdge();

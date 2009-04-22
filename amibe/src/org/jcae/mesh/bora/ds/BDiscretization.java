@@ -43,7 +43,7 @@ public class BDiscretization
 	private int id = -1;
 	protected static int nextId = -1;
 
-	public BDiscretization(BCADGraphCell g, Constraint c)
+	protected BDiscretization(BCADGraphCell g, Constraint c)
 	{
 		// Store forward oriented cell
 		if (g.getOrientation() != 0 && g.getReversed() != null)
@@ -80,7 +80,7 @@ public class BDiscretization
 		return submesh;
 	}
 
-	public void addSubMesh(BSubMesh s)
+	protected void addSubMesh(BSubMesh s)
 	{
 		submesh.add(s);
 	}
@@ -96,7 +96,7 @@ public class BDiscretization
 	 * ensure that those two constraints are not both "original" constraints
 	 * set by the user on the same object of the CAD.
 	 */
-	public void combineConstraint(BDiscretization baseDiscr)
+	protected void combineConstraint(BDiscretization baseDiscr)
 	{
 		Constraint newCons = baseDiscr.constraint.createInheritedConstraint(graphCell, constraint);
 		if (constraint != null)
@@ -116,7 +116,7 @@ public class BDiscretization
 		constraint = newCons;
 	}
 
-	public void addAllSubMeshes(BDiscretization parent)
+	protected void addAllSubMeshes(BDiscretization parent)
 	{
 		submesh.addAll(parent.submesh);
 	}
@@ -127,7 +127,7 @@ public class BDiscretization
 	 * @return <code>true</code> if <code>BSubMesh</code> is already
 	 * found, <code>false</code> otherwise.
 	 */
-	public boolean contains(BSubMesh s)
+	protected boolean contains(BSubMesh s)
 	{
 		return submesh.contains(s);
 	}
@@ -155,7 +155,7 @@ public class BDiscretization
 	 * @return <code>false</code> if a <code>BSubMesh</code> is common to
 	 * both sets, <code>true</code> otherwise.
 	 */
-	public boolean emptyIntersection(BDiscretization that)
+	protected boolean emptyIntersection(BDiscretization that)
 	{
 		for (BSubMesh s : that.submesh)
 		{
@@ -205,7 +205,7 @@ public class BDiscretization
 		mesh = m;
 	}
 
-	public void discretize()
+	protected void discretize()
 	{
 		if (computed)
 			return;

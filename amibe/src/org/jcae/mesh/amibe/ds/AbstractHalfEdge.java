@@ -20,7 +20,6 @@
 
 package org.jcae.mesh.amibe.ds;
 
-import org.jcae.mesh.amibe.traits.Traits;
 import org.jcae.mesh.amibe.traits.HalfEdgeTraitsBuilder;
 import java.util.Iterator;
 
@@ -337,13 +336,9 @@ import java.util.Iterator;
 public abstract class AbstractHalfEdge
 {
 	/**
-	 * User-defined traits builder.
+	 * User-defined traits.  There are currently no traits for half-edges.
 	 */
-	protected final HalfEdgeTraitsBuilder traitsBuilder;
-	/**
-	 * User-defined traits.
-	 */
-	protected final Traits traits;
+	//protected final Traits traits;
 
 	/**
 	 * Numeric constants for edge attributes.  Set if edge is on
@@ -384,7 +379,7 @@ public abstract class AbstractHalfEdge
 	 * @see #hasAttributes
 	 * @see #clearAttributes
 	 */
-	public static final int QUAD     = 1 << 4;
+	//public static final int QUAD     = 1 << 4;
 	/**
 	 * Numeric constants for edge attributes.  Set if edge is non
 	 * manifold.
@@ -410,13 +405,12 @@ public abstract class AbstractHalfEdge
 	 * Constructor.  Creates a new instance, and creates traits by
 	 * @param builder   half-edge traits builder
 	 */
-	public AbstractHalfEdge(HalfEdgeTraitsBuilder builder)
+	protected AbstractHalfEdge(HalfEdgeTraitsBuilder builder)
 	{
-		traitsBuilder = builder;
-		if (builder != null)
+		/*if (builder != null)
 			traits = builder.createTraits();
 		else
-			traits = null;
+			traits = null;*/
 	}
 
 	/**

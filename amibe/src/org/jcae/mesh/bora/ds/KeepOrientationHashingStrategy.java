@@ -35,7 +35,7 @@ class KeepOrientationHashingStrategy implements TObjectHashingStrategy<CADShape>
 
 	private KeepOrientationHashingStrategy() {}
 
-	public static KeepOrientationHashingStrategy getInstance()
+	protected static KeepOrientationHashingStrategy getInstance()
 	{
 		return INSTANCE;
 	}

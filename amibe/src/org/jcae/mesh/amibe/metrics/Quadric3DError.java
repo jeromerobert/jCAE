@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2003,2006 by EADS CRC
-    Copyright (C) 2007 by EADS France
+    Copyright (C) 2007,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -60,7 +60,7 @@ import java.io.Serializable;
  */
 public class Quadric3DError implements Serializable
 {
-	private static final long serialVersionUID = -586146425203079853L;
+	private static final long serialVersionUID = -9198789443096689948L;
 
 	private final double [] A = new double[6];
 	private final double [] b = new double[3];
@@ -78,8 +78,8 @@ public class Quadric3DError implements Serializable
 		EDGE("EDGE"),
 		// Optimal point
 		OPTIMAL("OPTIMAL");
-		private String name;
-		Placement(String str)
+		private final String name;
+		private Placement(String str)
 		{
 			this.name = str;
 		}
@@ -147,7 +147,7 @@ public class Quadric3DError implements Serializable
 		cachedDet = false;
 	}
 
-	public double detA()
+	private double detA()
 	{
 		if (!cachedDet)
 		{

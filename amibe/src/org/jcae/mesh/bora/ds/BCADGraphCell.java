@@ -46,7 +46,7 @@ public class BCADGraphCell
 	/**
 	 * Link to root graph.
 	 */
-	final BCADGraph graph;
+	private final BCADGraph graph;
 	/**
 	 * CAD shape.
 	 */
@@ -74,7 +74,7 @@ public class BCADGraphCell
 	 * @param s  CAD shape contained in this cell
 	 * @param t  CAD shape type
 	 */
-	public BCADGraphCell (BCADGraph g, CADShape s, CADShapeEnum t)
+	protected BCADGraphCell (BCADGraph g, CADShape s, CADShapeEnum t)
 	{
 		graph = g;
 		shape = s;
@@ -149,7 +149,7 @@ public class BCADGraphCell
 		return Collections.unmodifiableCollection(parents);
 	}
 
-	public void addParent(BCADGraphCell that)
+	protected void addParent(BCADGraphCell that)
 	{
 		assert that != null;
 		parents.add(that);
@@ -159,7 +159,7 @@ public class BCADGraphCell
 	 * Binds two cells containing reversed shapes together.  These shapes then
 	 * contain the same discretizations.
 	 */
-	public void bindReversed(BCADGraphCell that)
+	protected void bindReversed(BCADGraphCell that)
 	{
 		assert shape.equals(that.shape);
 		assert shape.orientation() != that.shape.orientation();
@@ -336,7 +336,7 @@ public class BCADGraphCell
 		return null;
 	}
 
-	public void addSubMeshConstraint(BSubMesh sub, Constraint cons)
+	protected void addSubMeshConstraint(BSubMesh sub, Constraint cons)
 	{
 		BDiscretization d = getDiscretizationSubMesh(sub);
 		if (d != null)
@@ -366,7 +366,7 @@ public class BCADGraphCell
 		return Collections.unmodifiableCollection(discrete);
 	}
 
-	public void addImplicitConstraints(CADShapeEnum cse, boolean recursive)
+	protected void addImplicitConstraints(CADShapeEnum cse, boolean recursive)
 	{
 		for (BDiscretization discr : discrete)
 		{

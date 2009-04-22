@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 
 public class SubMesh1D
 {
-	private static Logger logger=Logger.getLogger(SubMesh1D.class.getName());	
+	private static final Logger logger=Logger.getLogger(SubMesh1D.class.getName());	
 
 	//  Topological edge being discretized
 	private CADEdge edge;
@@ -63,7 +63,7 @@ public class SubMesh1D
 	 * @param E  the topological edge being disretized,
 	 * @param m0d  the mesh containing all vertices
 	 */
-	public SubMesh1D(CADEdge E, MMesh0D m0d)
+	protected SubMesh1D(CADEdge E, MMesh0D m0d)
 	{
 		edge = E;
 		double range[] = edge.range();
@@ -90,7 +90,7 @@ public class SubMesh1D
 	 * @param d  container for the requested discretization
 	 * @param m0d  the mesh containing all vertices
 	 */
-	public SubMesh1D(BDiscretization d, MMesh0D m0d)
+	protected SubMesh1D(BDiscretization d, MMesh0D m0d)
 	{
 		discr = d;
 		BCADGraphCell cell = discr.getGraphCell();
@@ -199,7 +199,7 @@ public class SubMesh1D
 	/**
 	 * Prints edge lengths.
 	 */
-	public void printInfos()
+	protected void printInfos()
 	{
 		int n = 0;
 		double minlen = -1.0, maxlen = 0.0,  avglen = 0.0;

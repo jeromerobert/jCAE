@@ -41,9 +41,9 @@ public class PAVLSortedTree<E> extends QSortedTree<E>
 		private static final long serialVersionUID = -5135595610942086763L;
 
 		//  balanceFactor = height(rightSubTree) - height(leftSubTree)
-		int balanceFactor = 0;
+		private int balanceFactor = 0;
 		
-		public Node(E o, double v)
+		private Node(E o, double v)
 		{
 			super(o, v);
 		}
@@ -200,13 +200,13 @@ public class PAVLSortedTree<E> extends QSortedTree<E>
 	}
 	
 	@Override
-	public final Node<E> newNode(E o, double v)
+	final Node<E> newNode(E o, double v)
 	{
 		return new Node<E>(o, v);
 	}
 
 	@Override
-	public final boolean insertNode(QSortedTree.Node<E> o)
+	final boolean insertNode(QSortedTree.Node<E> o)
 	{
 		Node<E> node = (Node<E>) o;
 		Node<E> current = (Node<E>) root.child[0];
@@ -268,7 +268,7 @@ public class PAVLSortedTree<E> extends QSortedTree<E>
 	}
 	
 	@Override
-	public final Node<E> removeNode(QSortedTree.Node<E> o)
+	final Node<E> removeNode(QSortedTree.Node<E> o)
 	{
 		assert o != null;
 		Node<E> p = (Node<E>) o;

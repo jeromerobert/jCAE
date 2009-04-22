@@ -202,13 +202,6 @@ public class Initial
 		this(m, mtb, m1d, null, null);
 	}
 
-	/** A constructor to insert constrain some points in the mesh */
-	public Initial(Mesh2D m, MeshTraitsBuilder mtb, MMesh1D m1d,
-		Collection<MNode1D> innerNodes)
-	{
-		this(m, mtb, m1d, null, innerNodes);
-	}
-
 	/** A constructor for Bora, which use it's own Mesh1D */
 	public Initial(Mesh2D m, MeshTraitsBuilder mtb,
 		Vertex2D[] boundaryNodes, Collection<MNode1D> innerNodes)

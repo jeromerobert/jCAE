@@ -89,12 +89,7 @@ public class Insertion
 	 * Creates a <code>Insertion</code> instance.
 	 *
 	 * @param m  the <code>Mesh2D</code> instance to refine.
-	 */
-	public Insertion(Mesh2D m)
-	{
-		this(m, 1.0 / Math.sqrt(2.0), Math.sqrt(2.0));
-	}
-	
+	 */	
 	public Insertion(Mesh2D m, double minlen, double maxlen)
 	{
 		mesh = m;

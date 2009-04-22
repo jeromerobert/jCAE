@@ -28,7 +28,7 @@ import org.jcae.mesh.amibe.metrics.Matrix3D;
  * This class implements the {@link QualityProcedure#quality(Object)}
  * method to compute triangle area.
  */
-public class Area extends QualityProcedure
+class Area extends QualityProcedure
 {
 	private static final double [] v1 = new double[3];
 	private static final double [] v2 = new double[3];

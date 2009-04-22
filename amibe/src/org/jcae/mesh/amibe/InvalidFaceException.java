@@ -23,13 +23,13 @@ package org.jcae.mesh.amibe;
 
 public class InvalidFaceException extends RuntimeException
 {
-	private static final long serialVersionUID = -1341962576849749406L;
+	private static final long serialVersionUID = -686411161526760366L;
 
 	public InvalidFaceException()
 	{
 	}
 	
-	public InvalidFaceException(String reason)
+	protected InvalidFaceException(String reason)
 	{
 		super(reason);
 	}

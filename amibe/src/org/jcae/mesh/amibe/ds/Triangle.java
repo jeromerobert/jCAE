@@ -20,7 +20,6 @@
 
 package org.jcae.mesh.amibe.ds;
 
-import org.jcae.mesh.amibe.traits.Traits;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
 import java.util.Iterator;
 import java.util.ConcurrentModificationException;
@@ -34,8 +33,7 @@ public class Triangle implements Serializable
 {
 	private static final long serialVersionUID = 3698940897637489316L;
 	//  User-defined traits
-	protected final TriangleTraitsBuilder traitsBuilder;
-	protected final Traits traits;
+	//protected final Traits traits;
 
 	/**
 	 * Three vertices.
@@ -45,22 +43,21 @@ public class Triangle implements Serializable
 	// Group id
 	private int groupId = -1;
 	
-	protected boolean readable = true;
-	protected boolean writable = true;
+	private boolean readable = true;
+	private boolean writable = true;
 
 	// We sometimes need to process lists of triangles before mesh
 	// connectivity has been set up.  This can be achieved efficiently
 	// with a singly linked list.
 	// Reference to the next element in the singly linked list.
-	Triangle listNext = null;
+	private Triangle listNext;
 	
 	public Triangle(TriangleTraitsBuilder builder)
 	{
-		traitsBuilder = builder;
-		if (builder != null)
+		/*if (builder != null)
 			traits = builder.createTraits();
 		else
-			traits = null;
+			traits = null;*/
 		vertex = new Vertex[3];
 	}
 
@@ -223,9 +220,9 @@ public class Triangle implements Serializable
 	public static class List
 	{
 		//   Head of the list.  Triangles are linked from this instance.
-		final Triangle listHead = new Triangle(null);
+		private final Triangle listHead = new Triangle(null);
 		//   Sentinel.  This triangle is always the last triangle of the list.
-		final Triangle listSentinel = new Triangle(null);
+		private final Triangle listSentinel = new Triangle(null);
 		//   Reference to the last collected triangle.
 		private Triangle listTail = listHead;
 		//   Number of collected items (for debugging purpose, can be removed).
@@ -279,7 +276,8 @@ public class Triangle implements Serializable
 		 * Add the current triangle to the end of the list.  This method
 		 * does nothing if this element is already linked.
 		 */
-		public final void addAllowDuplicates(Triangle o)
+		@SuppressWarnings("unused")
+		private final void addAllowDuplicates(Triangle o)
 		{
 			assert listTail != null;
 			assert listTail.listNext == listSentinel : listTail;
@@ -298,14 +296,6 @@ public class Triangle implements Serializable
 		public boolean contains(Triangle o)
 		{
 			return o.listNext != null;
-		}
-	
-		/**
-		 * Return list size.
-		 */
-		public int size()
-		{
-			return listSize;
 		}
 	
 		/**
