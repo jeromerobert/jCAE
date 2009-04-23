@@ -304,7 +304,9 @@ public class CameraManager
 	public void setCameraOrientation(CameraManager.Orientation orientation)
 	{
 		canvas.lock();
-		renderer.SetActiveCamera(copy(defaultCameras[orientation.ordinal()]));
+		vtkCamera c = copy(defaultCameras[orientation.ordinal()]);
+		renderer.SetActiveCamera(c);
+		c.Delete();
 		canvas.unlock();
 		
 		refresh();

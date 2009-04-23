@@ -28,7 +28,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import vtk.vtkActor;
+import vtk.vtkGlobalJavaHash;
 import vtk.vtkPlaneCollection;
+import vtk.vtkProperty;
 
 /**
  * @author Julian Ibarz
@@ -76,7 +78,10 @@ public abstract class Viewable extends MultiCanvas
 	{
 		public void customiseSelectionActor(vtkActor actor)
 		{
-			Utils.vtkPropertySetColor(actor.GetProperty(), selectionColor);
+			vtkGlobalJavaHash.PointerToReference.clear();
+			vtkProperty p = actor.GetProperty();
+			Utils.vtkPropertySetColor(p, selectionColor);
+			p.Delete();
 		}
 	}
 
@@ -308,6 +313,8 @@ public abstract class Viewable extends MultiCanvas
 	void removeNode(AbstractNode node)
 	{
 		scene.removeNode(node);
+		if(selectionNode.remove(node))
+			selectionChanged = true;
 		super.removeNode(node);
 	}
 	
