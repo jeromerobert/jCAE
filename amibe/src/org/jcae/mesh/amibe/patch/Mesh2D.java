@@ -26,11 +26,16 @@ import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
-import org.jcae.mesh.amibe.util.KdTree;
-import org.jcae.mesh.amibe.util.KdTreeProcedure;
-import org.jcae.mesh.cad.*;
+import org.jcae.mesh.amibe.metrics.KdTree;
+import org.jcae.mesh.amibe.metrics.Location;
+import org.jcae.mesh.cad.CADFace;
+import org.jcae.mesh.cad.CADGeomSurface;
+import org.jcae.mesh.cad.CADShape;
+
 import java.util.Stack;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -52,11 +57,33 @@ public class Mesh2D extends Mesh
 	private transient final CADGeomSurface surface;
 	
 	//  Stack of methods to compute geometrical values
-	private transient final Stack<Calculus> compGeomStack = new Stack<Calculus>();
+	private transient final Stack<Integer> compGeomStack = new Stack<Integer>();
 	
 	//  Current top value of compGeomStack
-	private transient Calculus compGeomCurrent = null;
-	
+	private transient int compGeomCurrent;
+
+	// 2D euclidian metric
+	private transient final EuclidianMetric2D euclidian_metric2d = new EuclidianMetric2D();
+
+	private transient final Map<Location, Metric2D> metricsMap = new HashMap<Location, Metric2D>();
+
+	private static final double delta_max = 0.5;
+	private static final int level_max = 10;
+	private static final Integer [] intArray = new Integer[level_max+1];
+	private static final boolean accurateDistance;
+
+	static {
+		String accurateDistanceProp = System.getProperty("org.jcae.mesh.amibe.patch.Mesh2D.accurateDistance");
+		if (accurateDistanceProp == null)
+		{
+			accurateDistanceProp = "false";
+			System.setProperty("org.jcae.mesh.amibe.patch.Mesh2D.accurateDistance", accurateDistanceProp);
+		}
+		accurateDistance = accurateDistanceProp.equals("true");
+		for (int i = 0; i <= level_max; i++)
+			intArray[i] = Integer.valueOf(i);
+	}
+
 	// Utility class to improve debugging output
 	private static class OuterVertex2D extends Vertex2D
 	{
@@ -110,7 +137,11 @@ public class Mesh2D extends Mesh
 		if (face == null)
 			surface = null;
 		else
+		{
 			surface = ((CADFace) face).getGeomSurface();
+			surface.dinit(2);
+
+		}
 		init();
 	}
 
@@ -168,7 +199,7 @@ public class Mesh2D extends Mesh
 	@Override
 	public Collection<Vertex> getNodes()
 	{
-		KdTree quadtree = traitsBuilder.getKdTree(traits);
+		KdTree<Vertex> quadtree = traitsBuilder.getKdTree(traits);
 		if (quadtree == null)
 			return null;
 		return quadtree.getAllVertices(getTriangles().size() / 2);
@@ -184,7 +215,7 @@ public class Mesh2D extends Mesh
 	 */
 	public void bootstrap(Vertex2D v0, Vertex2D v1, Vertex2D v2)
 	{
-		KdTree quadtree = traitsBuilder.getKdTree(traits);
+		KdTree<Vertex2D> quadtree = traitsBuilder.getKdTree(traits);
 		assert quadtree != null;
 		assert v0.onLeft(this, v1, v2) != 0L;
 		if (v0.onLeft(this, v1, v2) < 0L)
@@ -323,36 +354,10 @@ public class Mesh2D extends Mesh
 	 */
 	public void pushCompGeom(int i)
 	{
-		if (i == 2)
-			compGeomCurrent = new Calculus2D(this);
-		else if (i == 3)
-			compGeomCurrent = new Calculus3D(this);
-		else
+		if (i != 2 && i != 3)
 			throw new java.lang.IllegalArgumentException("pushCompGeom argument must be either 2 or 3, current value is: "+i);
-		compGeomStack.push(compGeomCurrent);
-		clearAllMetrics();
-	}
-	
-	/**
-	 * Resets metrics dimension.
-	 *
-	 * @return metrics dimension.
-	 * @throws IllegalArgumentException  If argument is neither 2 nor 3,
-	 *         this exception is raised.
-	 */
-	@SuppressWarnings("unused")
-	private Calculus popCompGeom()
-	{
-		//  Metrics are always reset by pushCompGeom.
-		//  Only reset them here when there is a change.
-		Calculus ret = compGeomStack.pop();
-		if (!compGeomStack.empty() && !ret.getClass().equals(compGeomStack.peek().getClass()))
-			clearAllMetrics();
-		if (compGeomStack.empty())
-			compGeomCurrent = null;
-		else
-			compGeomCurrent = compGeomStack.peek();
-		return ret;
+		compGeomStack.push(Integer.valueOf(i));
+		metricsMap.clear();
 	}
 	
 	/**
@@ -365,98 +370,132 @@ public class Mesh2D extends Mesh
 	 * @throws RuntimeException  If argument is different from
 	 *         metrics dimension.
 	 */
-	public Calculus popCompGeom(int i)
+	public void popCompGeom(int i)
 		throws RuntimeException
 	{
-		Calculus ret = compGeomStack.pop();
-		if (!compGeomStack.empty() && !ret.getClass().equals(compGeomStack.peek().getClass()))
-			clearAllMetrics();
-		if (i == 2)
-		{
-			if (!(ret instanceof Calculus2D))
-				throw new java.lang.RuntimeException("Internal error.  Expected value: 2, found: 3");
-		}
-		else if (i == 3)
-		{
-			if (!(ret instanceof Calculus3D))
-				throw new java.lang.RuntimeException("Internal error.  Expected value: 3, found: 2");
-		}
-		else
-			throw new java.lang.IllegalArgumentException("pushCompGeom argument must be either 2 or 3, current value is: "+i);
+		Integer ret = compGeomStack.pop();
+		if (!compGeomStack.empty() && !ret.equals(compGeomStack.peek()))
+			metricsMap.clear();
+		if (ret.intValue() != i)
+			throw new java.lang.RuntimeException("Internal error.  Expected value: "+i+", found: "+ret);
 		if (compGeomStack.empty())
-			compGeomCurrent = null;
+			compGeomCurrent = 0;
 		else
-			compGeomCurrent = compGeomStack.peek();
-		return ret;
+			compGeomCurrent = compGeomStack.peek().intValue();
 	}
 	
-	/**
-	 * Returns metrics dimension.
-	 *
-	 * @return metrics dimension.
-	 */
-	public Calculus compGeom()
+	@Override
+	public Metric2D getMetric(Location pt)
 	{
-		return compGeomCurrent;
-	}
-	
-	private static class ClearAllMetricsProcedure implements KdTreeProcedure
-	{
-		// Add a public constructor to avoid synthetic access
-		public ClearAllMetricsProcedure()
+		Metric2D m2 = metricsMap.get(pt);
+		if (null == m2)
 		{
-		}
-		public final int action(Object o, int s, final int [] i0)
-		{
-			KdTree.Cell self = (KdTree.Cell) o;
-			if (self.isLeaf())
+			if (compGeomCurrent == 2)
+				m2 = euclidian_metric2d;
+			else
 			{
-				for (int i = 0, n = self.count(); i < n; i++)
-					((Vertex2D) self.getVertex(i)).clearMetrics();
+				double uv[] = pt.getUV();
+				surface.setParameter(uv[0], uv[1]);
+				m2 = new MetricOnSurface(surface, meshParameters);
 			}
-			return KdTreeProcedure.OK;
+			metricsMap.put(pt, m2);
 		}
+		return m2;
 	}
-	
-	/**
-	 * Remove all metrics of vertices stored in this <code>KdTree</code>.
-	 */
-	private void clearAllMetrics()
+
+	public void moveVertex(Vertex2D vertex, double u, double v)
 	{
-		KdTree quadtree = traitsBuilder.getKdTree(traits);
-		if (quadtree == null)
-			return;
-		ClearAllMetricsProcedure gproc = new ClearAllMetricsProcedure();
-		quadtree.walk(gproc);
+		vertex.moveTo(u, v);
+		metricsMap.remove(vertex);
 	}
 
 	/**
-	 * Returns Riemannian square distance between nodes.
+	 * Move to the 2D centroid of a list of vertices.
+	 *
+	 * @param pt array
+	 */
+	public void moveVertexToCentroid(Vertex2D vertex, Triangle t)
+	{
+		double x = 0.0, y = 0.0;
+		for (Vertex v : t.vertex)
+		{
+			double [] p = v.getUV();
+			x += p[0];
+			y += p[1];
+		}
+		x /= t.vertex.length;
+		y /= t.vertex.length;
+		moveVertex(vertex, x, y);
+	}
+
+	@Override
+	public void resetMetric(Location pt)
+	{
+		metricsMap.remove(pt);
+	}
+
+	/**
+	 * Returns the Riemannian distance between nodes.
+	 * This distance is computed with metrics on start and end points,
+	 * and the maximal distance is returned.
 	 *
 	 * @param start  the start node
 	 * @param end  the end node
-	 * @param vm  the vertex on which metrics is evaluated
-	 * @return square distance between nodes
-	 */
-	@Override
-	public double distance2(Vertex start, Vertex end, Vertex vm)
+	 * @return the distance between nodes
+	 **/
+	public double interpolatedDistance(Vertex2D start, Vertex2D end)
 	{
-		return compGeomCurrent.distance2((Vertex2D) start, (Vertex2D) end, ((Vertex2D) vm).getMetrics(this));
-	}
-	
-	/**
-	 * Returns the 2D radius of the 3D unit ball centered at a point.
-	 * This routine returns a radius such that the 2D circle centered
-	 * at a given vertex will have a distance lower than 1 in 3D.
-	 * This method is used by {@link KdTree#getNearestVertex}
-	 *
-	 * @param v  the vertex on which metrics is evaluated
-	 * @return the radius in 2D space.
-	 */
-	@Override
-	public double [] getBounds(Vertex v)
-	{
-		return compGeomCurrent.getBounds2D((Vertex2D) v);
+		if (compGeomCurrent == 2)
+			return Math.sqrt(getMetric(start).distance2(start.getUV(), end.getUV()));
+
+		Metric2D ms = getMetric(start);
+		Metric2D me = getMetric(end);
+		double [] ps = start.getUV();
+		double [] pe = end.getUV();
+		double l1 = Math.sqrt(ms.distance2(ps, pe));
+		double l2 = Math.sqrt(me.distance2(ps, pe));
+		double lmax = Math.max(l1, l2);
+		if (!accurateDistance || Math.abs(l1 - l2) < delta_max * lmax)
+			return lmax;
+
+		Stack<Vertex2D> v = new Stack<Vertex2D>();
+		Stack<Integer> l = new Stack<Integer>();
+		Vertex2D mid = Vertex2D.middle(start, end);
+		l.push(intArray[level_max]);
+		v.push(end);
+		v.push(mid);
+		l.push(intArray[level_max]);
+		v.push(mid);
+		v.push(start);
+		double ret = 0.0;
+		int level = level_max;
+		while (v.size() > 0)
+		{
+			Vertex2D pt1 = v.pop();
+			Vertex2D pt2 = v.pop();
+			level = l.pop().intValue();
+			ms = getMetric(pt1);
+			me = getMetric(pt2);
+			ps = pt1.getUV();
+			pe = pt2.getUV();
+			l1 = Math.sqrt(ms.distance2(ps, pe));
+			l2 = Math.sqrt(me.distance2(ps, pe));
+			lmax = Math.max(l1, l2);
+			if (Math.abs(l1 - l2) < delta_max * lmax || level == 0)
+				ret += lmax;
+			else
+			{
+				level--;
+				mid = Vertex2D.middle(pt1, pt2);
+				l.push(intArray[level]);
+				v.push(pt2);
+				v.push(mid);
+				l.push(intArray[level]);
+				v.push(mid);
+				v.push(pt1);
+			}
+		}
+		return ret;
 	}
 	
 	@Override

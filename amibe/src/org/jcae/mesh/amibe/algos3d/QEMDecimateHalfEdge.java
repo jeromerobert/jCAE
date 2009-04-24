@@ -26,7 +26,6 @@ import org.jcae.mesh.amibe.ds.HalfEdge;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
-import org.jcae.mesh.amibe.metrics.Quadric3DError;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.xmldata.MeshReader;
 import org.jcae.mesh.xmldata.MeshWriter;

@@ -1,3 +1,39 @@
+Fri Apr 24 17:14:30 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/metrics/Location.java
+	  src/org/jcae/mesh/amibe/ds/Vertex.java: New Location interface,
+	which is implemented by Vertex.
+	* src/org/jcae/mesh/amibe/util/KdTree.java: KdTree was meant as a
+	generic locator to find near vertices in a quadtree or an octree.
+	With this new Location interface, it does no more have to depend
+	on org.jcae.mesh.amibe.ds package.  It uses generics to let
+	getNearVertex() and getNearestVertex() return an instance of the
+	expected class without casting.
+
+	* src/org/jcae/mesh/amibe/{util,metrics,patch}: Major redesign of
+	these packages to group classes by their semantic.
+	  + metrics: contains everything related to compute distances
+	    between vertices and to find neighbours.  This package does
+	    not depend on any other jCAE component.
+	  + patch: contains derived classes of ds and metrics to deal
+	    with CAD patches.
+	  + util: contains classes which have not yet been sorted out.
+	The handling of metrics has been fully reworked.  A new
+	org.jcae.mesh.amibe.metrics.Metric interface is provided to
+	compute distances between vertices, and metrics.EuclidianMetric3D
+	is an implementation in 3D Euclidian space.
+	
+	org.jcae.mesh.amibe.patch.Metric2D is an extended interface for
+	parametrized CAD surfaces.  It is implemented by
+	patch.EuclidianMetric2D when computing distances in 2D
+	parameter space, and by patch.MetricOnSurface when computing
+	distances in Riemann space induced by parameterized surface.
+	Theses classes replace the old Metric2D and Metric3D classes
+	which were misnamed.  Old Calculs, Calculus2D and Calculus3D
+	are also removed, distance computations are now performed by
+	Metric instances.  A new patch.MetricBuilder class helps
+	building MetricOnSurface instances.
+
 Fri Apr 24 15:04:56 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/metrics/Metric3D.java: When absolute

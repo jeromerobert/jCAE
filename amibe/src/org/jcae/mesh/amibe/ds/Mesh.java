@@ -20,11 +20,15 @@
 
 package org.jcae.mesh.amibe.ds;
 
-import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.traits.Traits;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.traits.TriangleTraitsBuilder;
-import org.jcae.mesh.amibe.util.KdTree;
+import org.jcae.mesh.amibe.metrics.KdTree;
+import org.jcae.mesh.amibe.metrics.Matrix3D;
+import org.jcae.mesh.amibe.metrics.Metric;
+import org.jcae.mesh.amibe.metrics.EuclidianMetric3D;
+import org.jcae.mesh.amibe.metrics.Location;
+
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -122,7 +126,10 @@ public class Mesh implements Serializable
 	protected boolean outerTrianglesAreConnected = false;
 	
 	private int maxLabel = 0;
-	
+
+	// 3D euclidian metric
+	private final Metric euclidian_metric3d = new EuclidianMetric3D();
+
 	// Utility class to improve debugging output
 	private static class OuterVertex extends Vertex
 	{
@@ -277,7 +284,7 @@ public class Mesh implements Serializable
 	 *
 	 * @return the Kd-tree associated with this mesh.
 	 */
-	public KdTree getKdTree()
+	public KdTree<Vertex> getKdTree()
 	{
 		return traitsBuilder.getKdTree(traits);
 	}
@@ -963,27 +970,28 @@ public class Mesh implements Serializable
 		maxLabel++;
 		v.setRef(maxLabel);
 	}
-	
+
+	public Metric getMetric(Location pt)
+	{
+		return euclidian_metric3d;
+	}
+
+	public void resetMetric(Location pt)
+	{
+	}
+
 	/**
 	 * Returns square distance between 2 vertices.
 	 */
-	public double distance2(Vertex start, Vertex end, Vertex vm)
+	public double distance2(double [] x1, double [] x2)
 	{
-		double [] x1 = start.getUV();
-		double [] x2 = end.getUV();
 		assert x1.length == 3;
 		double dx = x1[0] - x2[0];
 		double dy = x1[1] - x2[1];
 		double dz = x1[2] - x2[2];
 		return dx*dx + dy*dy + dz*dz;
 	}
-	
-	public double [] getBounds(Vertex v)
-	{
-		double [] ret = new double[]{1.0, 1.0, 1.0};
-		return ret;
-	}
-	
+
 	/**
 	 * Checks whether an edge can be contracted.
 	 *

@@ -273,9 +273,9 @@ public class MeshLiaison
 		private boolean updateProjection(double [] xyz)
 		{
 			int oldIndex = vIndex;
-			double d0 = Matrix3D.distance2(t.vertex[0].getUV(), xyz);
-			double d1 = Matrix3D.distance2(t.vertex[1].getUV(), xyz);
-			double d2 = Matrix3D.distance2(t.vertex[2].getUV(), xyz);
+			double d0 = backgroundMesh.distance2(t.vertex[0].getUV(), xyz);
+			double d1 = backgroundMesh.distance2(t.vertex[1].getUV(), xyz);
+			double d2 = backgroundMesh.distance2(t.vertex[2].getUV(), xyz);
 			if (d0 <= d1 && d0 <= d2)
 				vIndex = 0;
 			else if (d1 <= d0 && d1 <= d2)

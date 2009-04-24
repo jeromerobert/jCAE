@@ -28,6 +28,7 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
+import org.jcae.mesh.amibe.metrics.Metric;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -179,7 +180,7 @@ public class Insertion
 						// This edge has already been checked and cannot be split
 						continue;
 					}
-					double l = mesh.compGeom().length(ot);
+					double l = mesh.interpolatedDistance((Vertex2D) ot.origin(), (Vertex2D) ot.destination());
 					if (l < maxlen)
 					{
 						// This edge is smaller than target size and is not split
@@ -208,13 +209,14 @@ public class Insertion
 					l = 0.0;
 					for (int ns = 0; ns < segments-1; ns++)
 					{
-						l = mesh.compGeom().distance(last, (Vertex2D) np[ns]);
+						l = mesh.interpolatedDistance(last, (Vertex2D) np[ns]);
 						if (l > lcrit)
 						{
 							last = (Vertex2D) np[ns];
+							Metric metric = mesh.getMetric(last);
 							// Link to surrounding triangle to speed up
 							// mesh.getKdTree().getNearestVertex()
-							if (mesh.distance2(last, sym.apex(), last) < mesh.distance2(last, ot.apex(), last))
+							if (metric.distance2(last.getUV(), sym.apex().getUV()) < metric.distance2(last.getUV(), ot.apex().getUV()))
 								last.setLink(sym.getTri());
 							else
 								last.setLink(t);
@@ -248,9 +250,9 @@ public class Insertion
 					for (int i = 0; i < imax; i++)
 					{
 						Vertex2D v = triNodes.get(index);
-						Vertex2D n = (Vertex2D) mesh.getKdTree().getNearestVertex(mesh, v);
+						Vertex2D n = (Vertex2D) mesh.getKdTree().getNearestVertex(mesh.getMetric(v), v);
 						assert checkNearestVertex(v, n);
-						if (mesh.compGeom().distance(v, n) > minlen)
+						if (mesh.interpolatedDistance(v, n) > minlen)
 						{
 							mesh.getKdTree().add(v);
 							nodes.add(v);
@@ -295,14 +297,14 @@ public class Insertion
 					continue;
 				if (c == null)
 					c = (Vertex2D) mesh.createVertex(0.0, 0.0);
-				c.centroid((Vertex2D[]) t.vertex);
+				mesh.moveVertexToCentroid(c, t);
 				// Link to surrounding triangle to speed up
 				// mesh.getKdTree().getNearestVertex() and thus
 				// v.getSurroundingOTriangle() below.
 				c.setLink(t);
-				Vertex2D n = (Vertex2D) mesh.getKdTree().getNearestVertex(mesh, c);
+				Vertex2D n = (Vertex2D) mesh.getKdTree().getNearestVertex(mesh.getMetric(c), c);
 				assert checkNearestVertex(c, n);
-				if (mesh.compGeom().distance(c, n) > minlen)
+				if (mesh.interpolatedDistance(c, n) > minlen)
 				{
 					mesh.getKdTree().add(c);
 					nodes.add(c);
@@ -383,10 +385,11 @@ public class Insertion
 	
 	private final boolean checkNearestVertex(Vertex v, Vertex n)
 	{
-		double d1 = mesh.distance2(v, n, v);
-		Vertex debug = mesh.getKdTree().getNearestVertexDebug(mesh, v);
-		double d2 = mesh.distance2(v, debug, v);
-		assert d1 == d2 : ""+n+" is at a distance "+mesh.distance2(v, n, v)+" but nearest point is "+debug+" at distance "+mesh.distance2(v, debug, v);
+		Metric metric = mesh.getMetric(v);
+		double d1 = metric.distance2(v.getUV(), n.getUV());
+		Vertex debug = mesh.getKdTree().getNearestVertexDebug(metric, v);
+		double d2 = metric.distance2(v.getUV(), debug.getUV());
+		assert d1 == d2 : ""+n+" is at a distance "+d1+" but nearest point is "+debug+" at distance "+d2;
 		return true;
 	}
 }

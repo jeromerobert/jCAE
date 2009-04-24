@@ -36,7 +36,9 @@ public class Matrix2DTest
 		Matrix2D A = new Matrix2D(4.0, 0.0, 0.0, 2.0);
 		Matrix2D B = new Matrix2D(2.0, 0.0, 0.0, 1.0);
 		Matrix2D C = B.intersection(A);
-		assertTrue(C.data[0][0] == 4.0 && C.data[0][1] == 0.0 && C.data[1][0] == 0.0 && C.data[1][1] == 2.0);
+		double [][] c = new double[2][2];
+		C.getValues(c);
+		assertTrue(c[0][0] == 4.0 && c[0][1] == 0.0 && c[1][0] == 0.0 && c[1][1] == 2.0);
 	}
 
 }

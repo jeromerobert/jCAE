@@ -22,7 +22,7 @@ package org.jcae.mesh.amibe.traits;
 
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.util.KdTree;
+import org.jcae.mesh.amibe.metrics.KdTree;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Collection;

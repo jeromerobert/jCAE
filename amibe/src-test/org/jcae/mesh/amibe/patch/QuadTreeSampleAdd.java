@@ -20,7 +20,7 @@
 
 package org.jcae.mesh.amibe.patch;
 
-import org.jcae.mesh.amibe.util.KdTree;
+import org.jcae.mesh.amibe.metrics.KdTree;
 
 import java.util.Random;
 import java.util.logging.Logger;

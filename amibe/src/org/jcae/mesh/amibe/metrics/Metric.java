@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2008, by EADS France
+    Copyright (C) 2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -17,32 +17,28 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-package org.jcae.mesh.amibe.projection;
+package org.jcae.mesh.amibe.metrics;
 
-import org.jcae.mesh.amibe.metrics.Location;
-
-/**
- * Interface to project vertices on a local surface.
- * 
- * @author Denis Barbier
- */
-public interface LocalSurfaceProjection
+public interface Metric
 {
 	/**
-	 * Flag to tell whether projection can be performed.
-	 * 
-	 * @return  <code>true</code> if local surface was successfully computed
-	 *          and projection can be performed on it, <code>false</code>
-	 *          otherwise.
-	 */
-	boolean canProject();
-	
-	/**
-	 * Project a point on local surface.
+	 * Return square distance between two points with this metric.
 	 *
-	 * @param pt   point to project on the approximated surface.
-	 * @return     <code>true</code> if projection has been performed
-	 *             successfully, <code>false</code> otherwise.
+	 * @param p1  coordinates of the first node
+	 * @param p2  coordinates of the second node
+	 * @return square distance between two points with this metric.
 	 */
-	boolean project(Location v);
+	double distance2(double [] p1, double [] p2);
+
+	/**
+	 * Return dimensions of the unit ball transformed by this metric.
+	 * For instance, when this method returns <code>{a, b, c}</code>
+	 * in 3D, this means that unit ball in this metric is enclosed in
+	 * [-a,a]x[-b,b]x[-c,c] region.  This is needed by
+	 * KdTree to eliminate octants which are too for away when looking
+	 * for nearest neighbours.
+	 *
+	 * @return dimensions of the unit ball transformed by this metric.
+	 */
+	double [] getUnitBallBBox();
 }

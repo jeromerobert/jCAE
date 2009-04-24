@@ -18,7 +18,7 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-package org.jcae.mesh.amibe.util;
+package org.jcae.mesh.amibe.patch;
 
 /**
  * This class implements a 'long long' type for exact geometrical
@@ -28,7 +28,7 @@ package org.jcae.mesh.amibe.util;
  * added, they must be of opposite sign so that this range is not
  * bypassed.
  */
-public class LongLong
+class LongLong
 {
 	private long hi, lo;
 	// 2^31 - 1
@@ -36,7 +36,7 @@ public class LongLong
 	// 2^62 - 1
 	private static final long pow62m1 = 0x3fffffffffffffffL;
 	
-	public LongLong(long l1, long l2)
+	protected LongLong(long l1, long l2)
 	{
 		assert l1 >= 0L : l1;
 		assert l1 <= 1L << 61 : l1;
@@ -78,7 +78,7 @@ public class LongLong
 		assert (lo >= 0L && lo < (1L << 62)) : lo;
 	}
 	
-	public void add(LongLong that)
+	protected void add(LongLong that)
 	{
 		hi += that.hi;
 		lo += that.lo;

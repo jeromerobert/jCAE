@@ -20,10 +20,11 @@
 
 package org.jcae.mesh.amibe.patch;
 
-import org.jcae.mesh.amibe.util.KdTree;
+import org.jcae.mesh.amibe.metrics.KdTree;
 
 import java.util.Random;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.metrics.Metric;
 
 /**
  * Unit test to check detection of near vertices.
@@ -34,8 +35,8 @@ import java.util.logging.Logger;
  * to display an initial <code>QuadTree</code> with 500 vertices.
  * When clicking at a point, a yellow segment is displayed between this point
  * and the nearest point found in the same cell, returned by
- * {@link org.jcae.mesh.amibe.util.KdTree#getNearVertex(Mesh, Vertex)}.
- * If {@link org.jcae.mesh.amibe.util.KdTree#getNearestVertex(Mesh, Vertex)}
+ * {@link org.jcae.metric.amibe.util.KdTree#getNearVertex(Mesh, Vertex)}.
+ * If {@link org.jcae.metric.amibe.util.KdTree#getNearestVertex(Mesh, Vertex)}
  * finds a nearest point, a blue segment is displayed.
  */
 public class QuadTreeSampleNearest extends QuadTreeSample
@@ -47,14 +48,14 @@ public class QuadTreeSampleNearest extends QuadTreeSample
 		super (q);
 	}
 	
-	public Vertex2D getNearVertex(Mesh2D mesh, Vertex2D n)
+	public Vertex2D getNearVertex(Metric metric, Vertex2D n)
 	{
-		return (Vertex2D) quadtree.getNearVertex(mesh, n);
+		return (Vertex2D) quadtree.getNearVertex(metric, n);
 	}
 
-	public Vertex2D getNearestVertex(Mesh2D mesh, Vertex2D n)
+	public Vertex2D getNearestVertex(Metric metric, Vertex2D n)
 	{
-		return (Vertex2D) quadtree.getNearestVertex(mesh, n);
+		return (Vertex2D) quadtree.getNearestVertex(metric, n);
 	}
 
 	public static void main(String args[])
@@ -94,17 +95,18 @@ public class QuadTreeSampleNearest extends QuadTreeSample
 			u = rand.nextDouble();
 			v = rand.nextDouble();
 			Vertex2D vt = (Vertex2D) m.createVertex(u, v);
+			Metric metric = m.getMetric(vt);
 			if (visu)
 			{
-				view.addBranchGroup(r.segment(vt, r.getNearVertex(m, vt), 5.0f, 1, 1, 0));
+				view.addBranchGroup(r.segment(vt, r.getNearVertex(metric, vt), 5.0f, 1, 1, 0));
 				view.setVisible(true);
-				view.addBranchGroup(r.segment(vt, r.getNearestVertex(m, vt), 0.0f, 0, 1, 1));
+				view.addBranchGroup(r.segment(vt, r.getNearestVertex(metric, vt), 0.0f, 0, 1, 1));
 				view.setVisible(true);
 			}
 			else
 			{
-				r.getNearVertex(m, vt);
-				r.getNearestVertex(m, vt);
+				r.getNearVertex(metric, vt);
+				r.getNearestVertex(metric, vt);
 			}
 		}
 		if (visu)
@@ -117,9 +119,10 @@ public class QuadTreeSampleNearest extends QuadTreeSample
 					if (null != xyz)
 					{
 						Vertex2D vt = (Vertex2D) m.createVertex(xyz[0], xyz[1]);
-						view.addBranchGroup(r.segment(vt, r.getNearVertex(m, vt), 5.0f, 1, 1, 0));
+						Metric metric = m.getMetric(vt);
+						view.addBranchGroup(r.segment(vt, r.getNearVertex(metric, vt), 5.0f, 1, 1, 0));
 						view.setVisible(true);
-						view.addBranchGroup(r.segment(vt, r.getNearestVertex(m, vt), 0.0f, 0, 1, 1));
+						view.addBranchGroup(r.segment(vt, r.getNearestVertex(metric, vt), 0.0f, 0, 1, 1));
 						view.setVisible(true);
 					}
 				}

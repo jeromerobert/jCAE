@@ -19,8 +19,9 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-package org.jcae.mesh.amibe.metrics;
+package org.jcae.mesh.amibe.algos3d;
 
+import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.ds.Vertex;
 import java.io.Serializable;
 

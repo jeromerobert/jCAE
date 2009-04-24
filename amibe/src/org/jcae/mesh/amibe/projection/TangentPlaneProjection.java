@@ -20,6 +20,7 @@
 package org.jcae.mesh.amibe.projection;
 
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.metrics.Location;
 
 public class TangentPlaneProjection implements LocalSurfaceProjection
 {
@@ -52,7 +53,7 @@ public class TangentPlaneProjection implements LocalSurfaceProjection
 	 * @return <code>true</code> if projection has been performed
 	 * successfully, <code>false</code> otherwise.
 	 */
-	public boolean project(Vertex pt)
+	public boolean project(Location pt)
 	{
 		double [] loc = new double[3];
 		double [] param = pt.getUV();

@@ -24,12 +24,12 @@ import org.jcae.mesh.amibe.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
-import org.jcae.mesh.amibe.util.LongLong;
-import org.jcae.mesh.amibe.metrics.Metric2D;
+
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADFace;
 import org.jcae.mesh.cad.CADGeomCurve2D;
 import org.jcae.mesh.cad.CADGeomSurface;
+
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,9 +53,6 @@ public class Vertex2D extends Vertex
 	//  These 2 integer arrays are temporary workspaces
 	private static final int [] i0 = new int[2];
 	private static final int [] i1 = new int[2];
-	
-	//  Metrics at this location
-	private transient Metric2D m2 = null;
 
 	/**
 	 * Create a Vertex for a 2D mesh.
@@ -120,13 +117,19 @@ public class Vertex2D extends Vertex
 	 * @param u  first coordinate of the new position
 	 * @param v  second coordinate of the new position
 	 */
+	@Override
 	public void moveTo(double u, double v)
 	{
 		param[0] = u;
 		param[1] = v;
-		m2 = null;
 	}
-	
+
+	@Override
+	public void moveTo(double x, double y, double z)
+	{
+		throw new RuntimeException();
+	}
+
 	/**
 	 * Get the normal to the surface at this location.
 	 *
@@ -138,27 +141,6 @@ public class Vertex2D extends Vertex
 		CADGeomSurface surface = mesh.getGeomSurface();
 		surface.setParameter(param[0], param[1]);
 		return surface.normal();
-	}
-	
-	/**
-	 * Move to the 2D centroid of a list of vertices.
-	 *
-	 * @param v array
-	 */
-	public void centroid(Vertex2D [] v)
-	{
-		double x = 0.0, y = 0.0;
-		if (v.length == 0)
-			return;
-		for (int i = 0; i < v.length; i++)
-		{
-			double [] p = v[i].getUV();
-			x += p[0];
-			y += p[1];
-		}
-		x /= v.length;
-		y /= v.length;
-		moveTo(x, y);
 	}
 	
 	/**
@@ -184,7 +166,7 @@ public class Vertex2D extends Vertex
 	{
 		if (logger.isLoggable(Level.FINE))
 			logger.fine("Searching for the triangle surrounding "+this);
-		TriangleVH t = (TriangleVH) mesh.getKdTree().getNearVertex(mesh, this).getLink();
+		TriangleVH t = (TriangleVH) mesh.getKdTree().getNearVertex(mesh.getMetric(this), this).getLink();
 		VirtualHalfEdge2D current = new VirtualHalfEdge2D(t, 0);
 		boolean redo = false;
 		Vertex2D o = (Vertex2D) current.origin();
@@ -343,14 +325,13 @@ public class Vertex2D extends Vertex
 	     ==> x orth(M,V12) - y orth(M,V13) = 0.5 V23
 	         x = <V23, V13> / (2 <orth(M,V12), V13>)
 	*/
-	private Vertex2D circumcenter(Mesh2D mesh, Vertex2D v1, Vertex2D v2, Vertex2D v3)
+	private Vertex2D circumcenter(Metric2D m2d, Vertex2D v1, Vertex2D v2, Vertex2D v3, double[] po)
 		throws RuntimeException
 	{
 		double [] p1 = v1.getUV();
 		double [] p2 = v2.getUV();
 		double [] p3 = v3.getUV();
 		//  Metrics on current vertex
-		Metric2D m2d = getMetrics(mesh);
 		double x12 = p2[0] - p1[0];
 		double y12 = p2[1] - p1[1];
 		double x23 = p3[0] - p2[0];
@@ -359,7 +340,7 @@ public class Vertex2D extends Vertex
 		double y31 = p1[1] - p3[1];
 		
 		double num = m2d.dot(x23, y23, x31, y31);
-		double [] po = m2d.orth(x12, y12);
+		m2d.computeOrthogonalVector(x12, y12, po);
 		double den = 2.0 * m2d.dot(po[0], po[1], x31, y31);
 		//  Flat triangles cannot be computed accurately, we
 		//  consider arbitrarily that C is returned if
@@ -403,18 +384,19 @@ public class Vertex2D extends Vertex
 		// Do not swap if triangles are inverted in 2d space
 		if (vc1.onLeft(mesh, va3, this) >= 0L || vc2.onLeft(mesh, va3, this) <= 0L)
 			return false;
-		
+
+		double [] orth = new double[2];
 		try {
-			Vertex2D C3 = va3.circumcenter(mesh, vc1, vc2, va3);
-			Metric2D mA = getMetrics(mesh);
-			Metric2D mB = va3.getMetrics(mesh);
+			Metric2D mA = mesh.getMetric(this);
+			Metric2D mB = mesh.getMetric(va3);
+			Vertex2D C3 = va3.circumcenter(mB, vc1, vc2, va3, orth);
 			double ret = Math.sqrt(
-				mesh.compGeom().distance2(C3, this, mB) /
-				mesh.compGeom().distance2(C3, va3, mB));
-			Vertex2D C0 = circumcenter(mesh, vc1, vc2, va3);
+				mB.distance2(C3.param, param) /
+				mB.distance2(C3.param, va3.param));
+			Vertex2D C0 = circumcenter(mA, vc1, vc2, va3, orth);
 			ret += Math.sqrt(
-				mesh.compGeom().distance2(C0, this, mA) /
-				mesh.compGeom().distance2(C0, va3, mA));
+				mA.distance2(C0.param, param) /
+				mA.distance2(C0.param, va3.param));
 			return (ret < 2.0);
 		}
 		catch (RuntimeException ex)
@@ -423,16 +405,16 @@ public class Vertex2D extends Vertex
 		try {
 			// Test the swapped edge
 			// this -> vc2   vc1 -> this   vc2 -> va3  va3 -> vc1
-			Vertex2D C3 = vc1.circumcenter(mesh, this, va3, vc1);
-			Metric2D mA = vc2.getMetrics(mesh);
-			Metric2D mB = vc1.getMetrics(mesh);
+			Metric2D mA = mesh.getMetric(vc2);
+			Metric2D mB = mesh.getMetric(vc1);
+			Vertex2D C3 = vc1.circumcenter(mB, this, va3, vc1, orth);
 			double ret = Math.sqrt(
-				mesh.compGeom().distance2(C3, vc2, mB) /
-				mesh.compGeom().distance2(C3, vc1, mB));
-			Vertex2D C0 = circumcenter(mesh, this, va3, vc1);
+				mB.distance2(C3.param, vc2.param) /
+				mB.distance2(C3.param, vc1.param));
+			Vertex2D C0 = vc2.circumcenter(mA, this, va3, vc1, orth);
 			ret += Math.sqrt(
-				mesh.compGeom().distance2(C0, vc2, mA) /
-				mesh.compGeom().distance2(C0, vc1, mA));
+				mA.distance2(C0.param, vc2.param) /
+				mA.distance2(C0.param, vc1.param));
 			return (ret > 2.0);
 		}
 		catch (RuntimeException ex)
@@ -459,20 +441,19 @@ public class Vertex2D extends Vertex
 		
 		//  Add a 0.5 factor so that edges are swapped only if
 		//  there is a significant gain.
-		Metric2D mc1 = vc1.getMetrics(mesh);
-		Metric2D mc2 = vc2.getMetrics(mesh);
-		Metric2D ma3 = va3.getMetrics(mesh);
-		Metric2D m0 = getMetrics(mesh);
-		return (Math.sqrt(mesh.compGeom().distance2(va3, this, mc1)) +
-		        Math.sqrt(mesh.compGeom().distance2(va3, this, mc2)) > 0.5 * (
-		        Math.sqrt(mesh.compGeom().distance2(vc1, vc2, ma3)) +
-		        Math.sqrt(mesh.compGeom().distance2(vc1, vc2, m0))));
+		Metric2D mc1 = mesh.getMetric(vc1);
+		Metric2D mc2 = mesh.getMetric(vc2);
+		Metric2D ma3 = mesh.getMetric(va3);
+		Metric2D m0 = mesh.getMetric(this);
+		return (Math.sqrt(mc1.distance2(va3.param, param)) +
+		        Math.sqrt(mc2.distance2(va3.param, param)) > 0.5 * (
+		        Math.sqrt(ma3.distance2(vc1.param, vc2.param)) +
+		        Math.sqrt(m0.distance2(vc1.param, vc2.param))));
 	}
 	
 	protected boolean isPseudoIsotropic(Mesh2D mesh)
 	{
-		Metric2D m2d = getMetrics(mesh);
-		return m2d.isPseudoIsotropic();
+		return mesh.getMetric(this).isPseudoIsotropic();
 	}
 	
 	private final long distance2(Mesh2D mesh, Vertex2D that)
@@ -489,35 +470,6 @@ public class Vertex2D extends Vertex
 		long dx = i0[0] - i1[0];
 		long dy = i0[1] - i1[1];
 		return dx * dx + dy * dy;
-	}
-	
-	/**
-	 * Get the 2D Riemannian metrics at this point.  This metrics
-	 * is computed and then stored into a private instance member.
-	 * This cached value can be discarded by calling {@link #clearMetrics}.
-	 *
-	 * @param mesh  underlying Mesh2D instance
-	 * @return the 2D Riemannian metrics at this point.
-	 */
-	public Metric2D getMetrics(Mesh2D mesh)
-	{
-		if (null == m2)
-		{
-			Calculus curr = mesh.compGeom();
-			if (curr instanceof Calculus2D)
-				m2 = new Metric2D();
-			else
-				m2 = new Metric2D(mesh.getGeomSurface(), this, mesh.getMeshParameters());
-		}
-		return m2;
-	}
-	
-	/**
-	 * Clear the 2D Riemannian metrics at this point.
-	 */
-	protected void clearMetrics()
-	{
-		m2 = null;
 	}
 	
 	@Override

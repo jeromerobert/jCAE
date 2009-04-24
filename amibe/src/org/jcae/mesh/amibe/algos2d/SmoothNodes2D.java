@@ -24,33 +24,35 @@ import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.ds.MMesh1D;
+import org.jcae.mesh.amibe.ds.MeshParameters;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
-import org.jcae.mesh.amibe.metrics.Metric2D;
+import org.jcae.mesh.amibe.patch.MetricOnSurface;
+import org.jcae.mesh.amibe.patch.Metric2D;
 import org.jcae.mesh.amibe.util.QSortedTree;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
-import java.util.Map;
-import java.util.HashSet;
-import java.util.Collection;
-import java.util.Iterator;
-import gnu.trove.TObjectDoubleHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
+import org.jcae.mesh.cad.*;
+import org.jcae.mesh.xmldata.MMesh1DReader;
+import org.jcae.mesh.xmldata.MeshReader;
+import org.jcae.mesh.xmldata.MeshWriter;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.channels.FileChannel;
+
+import java.util.Map;
+import java.util.HashSet;
 import java.util.HashMap;
-import org.jcae.mesh.amibe.ds.MMesh1D;
-import org.jcae.mesh.amibe.ds.MeshParameters;
-import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
-import org.jcae.mesh.cad.*;
-import org.jcae.mesh.xmldata.MMesh1DReader;
-import org.jcae.mesh.xmldata.MeshReader;
-import org.jcae.mesh.xmldata.MeshWriter;
+import java.util.Collection;
+import java.util.Iterator;
+import gnu.trove.TObjectDoubleHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Node smoothing.  Triangle quality is computed for all triangles,
@@ -285,8 +287,8 @@ public class SmoothNodes2D
 		double [] centroid2 = c.getUV();
 		centroid2[0] = centroid2[1] = 0.0;
 		Vertex2D d = (Vertex2D) ot.destination();
-		Metric2D m0 = n.getMetrics(mesh);
-		Metric2D mInterpolate = null;
+		Metric2D m0 = mesh.getMetric(n);
+		MetricOnSurface mInterpolate = null;
 		Metric2D mInv0 = null;
 		if (interpolate)
 		{
@@ -295,9 +297,9 @@ public class SmoothNodes2D
 			// otherwise
 			//    M = metric(d)
 			// First, compute mInv0 = inv(metric(n))
-			mInv0 = new Metric2D();
-			if (m0.inv(mInv0))
-				mInterpolate = new Metric2D();
+			mInv0 = m0.getInverse();
+			if (mInv0 != null)
+				mInterpolate = new MetricOnSurface();
 		}
 		do
 		{
@@ -305,10 +307,10 @@ public class SmoothNodes2D
 			assert !ot.hasAttributes(AbstractHalfEdge.OUTER);
 			Metric2D m1;
 			Vertex2D v = (Vertex2D) ot.destination();
-			Metric2D m2 = v.getMetrics(mesh);
+			Metric2D m2 = mesh.getMetric(v);
 			if (mInterpolate != null)
 			{
-				if (Metric2D.interpolateSpecial(mInv0, m2, mInterpolate))
+				if (mInterpolate.interpolateSpecial(mInv0, m2))
 					m1 = mInterpolate;
 				else
 					m1 = m2;
@@ -316,8 +318,8 @@ public class SmoothNodes2D
 			else
 				m1 = m2;
 			nn++;
-			double l = mesh.compGeom().distance2(n, v, m1);
 			double[] newp2 = v.getUV();
+			double l = m1.distance2(oldp2, newp2);
 			if (modifiedLaplacian)
 			{
 				if (l > 1.0)
@@ -356,12 +358,12 @@ public class SmoothNodes2D
 
 		double saveX = oldp2[0];
 		double saveY = oldp2[1];
-		n.moveTo(centroid2[0], centroid2[1]);
+		mesh.moveVertex(n, centroid2[0], centroid2[1]);
 		// Check that quality has not been degraded
 		double newQuality = vertexQuality(ot);
 		if (newQuality < quality)
 		{
-			n.moveTo(saveX, saveY);
+			mesh.moveVertex(n, saveX, saveY);
 			return false;
 		}
 		return true;
@@ -374,13 +376,12 @@ public class SmoothNodes2D
 		Vertex2D v0 = (Vertex2D) f.vertex[0];
 		Vertex2D v1 = (Vertex2D) f.vertex[1];
 		Vertex2D v2 = (Vertex2D) f.vertex[2];
-		Metric2D m0 = v0.getMetrics(mesh);
-		Metric2D m1 = v1.getMetrics(mesh);
-		Metric2D m2 = v2.getMetrics(mesh);
-
-		double l01 = mesh.compGeom().distance2(v0, v1, m0);
-		double l12 = mesh.compGeom().distance2(v1, v2, m1);
-		double l20 = mesh.compGeom().distance2(v2, v0, m2);
+		double [] p0 = v0.getUV();
+		double [] p1 = v1.getUV();
+		double [] p2 = v2.getUV();
+		double l01 = mesh.getMetric(v0).distance2(p0, p1);
+		double l12 = mesh.getMetric(v1).distance2(p1, p2);
+		double l20 = mesh.getMetric(v2).distance2(p2, p0);
 
 		double lmin, lmax;
 		if (l01 > l12)

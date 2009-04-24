@@ -20,10 +20,11 @@
 
 package org.jcae.mesh.amibe.patch;
 
-import org.jcae.mesh.amibe.util.KdTree;
+import org.jcae.mesh.amibe.metrics.KdTree;
 
 import java.util.Random;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.metrics.Metric;
 
 /**
  * Unit test to check removal of vertices.
@@ -43,14 +44,14 @@ public class QuadTreeSampleRemove extends QuadTreeSample
 		super (q);
 	}
 	
-	public Vertex2D getNearVertex(Mesh2D mesh, Vertex2D n)
+	public Vertex2D getNearVertex(Metric metric, Vertex2D n)
 	{
-		return (Vertex2D) quadtree.getNearVertex(mesh, n);
+		return (Vertex2D) quadtree.getNearVertex(metric, n);
 	}
 
-	public Vertex2D getNearestVertex(Mesh2D mesh, Vertex2D n)
+	public Vertex2D getNearestVertex(Metric metric, Vertex2D n)
 	{
-		return (Vertex2D) quadtree.getNearestVertex(mesh, n);
+		return (Vertex2D) quadtree.getNearestVertex(metric, n);
 	}
 
 	public static void display(Viewer view, QuadTreeSample r)
@@ -95,7 +96,9 @@ public class QuadTreeSampleRemove extends QuadTreeSample
 					double [] xyz = view.getLastClick();
 					if (null != xyz)
 					{
-						Vertex2D vt = r.getNearVertex(m, (Vertex2D) m.createVertex(xyz[0], xyz[1]));
+						Vertex2D picked = (Vertex2D) m.createVertex(xyz[0], xyz[1]);
+						Metric metric = m.getMetric(picked);
+						Vertex2D vt = r.getNearVertex(metric, picked);
 						r.quadtree.remove(vt);
 						view.removeAllBranchGroup();
 						display(view, r);

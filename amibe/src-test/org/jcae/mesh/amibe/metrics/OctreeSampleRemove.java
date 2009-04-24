@@ -18,7 +18,7 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-package org.jcae.mesh.amibe.util;
+package org.jcae.mesh.amibe.metrics;
 
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.Mesh;
@@ -56,7 +56,7 @@ public class OctreeSampleRemove extends OctreeSample
 		Random rand = new Random(113L);
 		double [] bbox = { 0.0, 0.0, 0.0, 1.0, 1.0, 1.0 };
 		final Mesh mesh = new Mesh();
-		final KdTree r = new KdTree(bbox);
+		final KdTree<Vertex> r = new KdTree<Vertex>(bbox);
 		final OctreeSample t = new OctreeSample(r);
 		double [] xyz = new double[3];
 		for (int i = 0; i < 200; i++)
@@ -81,7 +81,8 @@ public class OctreeSampleRemove extends OctreeSample
 					double [] xyzPick = view.getLastClick();
 					if (null != xyzPick)
 					{
-						Vertex vt = r.getNearVertex(mesh, mesh.createVertex(xyzPick));
+						Vertex picked = mesh.createVertex(xyzPick);
+						Vertex vt = r.getNearVertex(mesh.getMetric(picked), picked);
 						r.remove(vt);
 						view.removeAllBranchGroup();
 						display(view, t);

@@ -18,10 +18,8 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-package org.jcae.mesh.amibe.util;
+package org.jcae.mesh.amibe.metrics;
 
-import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.ds.Mesh;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Level;
@@ -90,11 +88,11 @@ import java.util.logging.Logger;
  * <p>
  * Distances between vertices can be computed either in Euclidian 2D space, or
  * with a Riemannian metrics.  This is controlled by the
- * {@link org.jcae.mesh.amibe.patch.Mesh2D#pushCompGeom(int)} method.
+ * {@link org.jcae.metric.amibe.patch.Mesh2D#pushCompGeom(int)} method.
  * Distances are computed in Euclidian 2D space when its argument is
- * an instance of {@link org.jcae.mesh.amibe.patch.Calculus2D}, and in
- * Riemannian metrics (see {@link org.jcae.mesh.amibe.metrics.Metric2D}) when
- * it is an instance of {@link org.jcae.mesh.amibe.patch.Calculus3D}.
+ * an instance of {@link org.jcae.metric.amibe.patch.Calculus2D}, and in
+ * Riemannian metrics (see {@link org.jcae.metric.amibe.metrics.Metric2D}) when
+ * it is an instance of {@link org.jcae.metric.amibe.patch.Calculus3D}.
  * By default, distances are computed in Euclidian 2D space.
  * </p>
  *
@@ -140,7 +138,7 @@ import java.util.logging.Logger;
  *       also speed up this processing.</li>
  * </ul>
  */
-public class KdTree
+public class KdTree<T extends Location>
 {
 	private static Logger logger=Logger.getLogger(KdTree.class.getName());	
 	/**
@@ -190,10 +188,11 @@ public class KdTree
 			return -nItems;
 		}
 
-		public Vertex getVertex(int i)
+		@SuppressWarnings("unchecked")
+		public T getVertex(int i)
 		{
 			assert nItems > 0 && i < nItems;
-			return (Vertex) subCell[i];
+			return (T) subCell[i];
 		}
 	}
 	
@@ -375,7 +374,7 @@ public class KdTree
 	 * @param v  the vertex being added.
 	 * @return <code>true</code> if cell was full and had to be split, <code>false</code> otherwise.
 	 */
-	public boolean add(Vertex v)
+	public boolean add(T v)
 	{
 		if (nCells == 0)
 			throw new RuntimeException("KdTree.setup() must be called before KdTree.add()");
@@ -408,20 +407,21 @@ public class KdTree
 			s >>= 1;
 			assert s > 0;
 			ret = true;
-			Cell [] newSubQuads = new Cell[nrSub];
+			Object[] newSubQuads = new Object[nrSub];
 			//  Move points to their respective subcells.
 			for (int i = 0; i < BUCKETSIZE; i++)
 			{
-				Vertex p = (Vertex) current.subCell[i];
+				T p = current.getVertex(i);
 				double2int(p.getUV(), oldij);
 				int ind = indexSubCell(oldij, s);
-				if (null == newSubQuads[ind])
+				Cell target = (Cell) newSubQuads[ind];
+				if (null == target)
 				{
-					newSubQuads[ind] = new Cell();
+					target = new Cell();
+					newSubQuads[ind] = target;
 					nCells++;
-					newSubQuads[ind].subCell = new Vertex[BUCKETSIZE];
+					target.subCell = new Object[BUCKETSIZE];
 				}
-				Cell target = newSubQuads[ind];
 				target.subCell[target.nItems] = current.subCell[i];
 				target.nItems++;
 			}
@@ -438,7 +438,7 @@ public class KdTree
 		}
 		//  Eventually insert the new point
 		if (current.nItems == 0)
-			current.subCell = new Vertex[BUCKETSIZE];
+			current.subCell = new Object[BUCKETSIZE];
 		current.subCell[current.nItems] = v;
 		current.nItems++;
 		return ret;
@@ -449,7 +449,7 @@ public class KdTree
 	 *
 	 * @param v  the vertex being removed.
 	 */
-	public void remove(Vertex v)
+	public void remove(T v)
 	{
 		if (nCells == 0)
 			throw new RuntimeException("KdTree.setup() must be called before KdTree.remove()");
@@ -495,12 +495,12 @@ public class KdTree
 			last.subCell[lastPos] = null;
 	}
 
-	private static final class GetAllVerticesProcedure implements KdTreeProcedure
+	private final class GetAllVerticesProcedure implements KdTreeProcedure
 	{
-		private final Collection<Vertex> nodelist;
+		private final Collection<T> nodelist;
 		private GetAllVerticesProcedure(int capacity)
 		{
-			nodelist = new ArrayList<Vertex>(capacity);
+			nodelist = new ArrayList<T>(capacity);
 		}
 		public int action(Object o, int s, final int [] i0)
 		{
@@ -508,7 +508,7 @@ public class KdTree
 			if (self.nItems > 0)
 			{
 				for (int i = 0; i < self.nItems; i++)
-					nodelist.add((Vertex) self.subCell[i]);
+					nodelist.add(self.getVertex(i));
 			}
 			return KdTreeProcedure.OK;
 		}
@@ -520,7 +520,7 @@ public class KdTree
 	 * @param capacity  initial capacity of the <code>Collection</code>.
 	 * @return a collection containing all vertices.
 	 */
-	public Collection<Vertex> getAllVertices(int capacity)
+	public Collection<T> getAllVertices(int capacity)
 	{
 		GetAllVerticesProcedure gproc = new GetAllVerticesProcedure(capacity);
 		walk(gproc);
@@ -546,14 +546,15 @@ public class KdTree
 		int [] i0 = new int[dimension];
 		int [] posStack = new int[MAXLEVEL];
 		posStack[l] = 0;
-		Cell [] cellStack = new Cell[MAXLEVEL];
+		Object [] cellStack = new Object[MAXLEVEL];
 		cellStack[l] = root;
 		while (true)
 		{
 			int res = proc.action(cellStack[l], s, i0);
 			if (res == KdTreeProcedure.ABORT)
 				return false;
-			if (cellStack[l].nItems < 0 && res == KdTreeProcedure.OK)
+			Cell current = (Cell) cellStack[l];
+			if (current.nItems < 0 && res == KdTreeProcedure.OK)
 			{
 				s >>= 1;
 				assert s > 0;
@@ -561,9 +562,10 @@ public class KdTree
 				assert l <= MAXLEVEL;
 				for (int i = 0; i < nrSub; i++)
 				{
-					if (null != cellStack[l-1].subCell[i])
+					Object target = current.subCell[i];
+					if (null != target)
 					{
-						cellStack[l] = (Cell) cellStack[l-1].subCell[i];
+						cellStack[l] = target;
 						posStack[l] = i;
 						break;
 					}
@@ -595,13 +597,13 @@ public class KdTree
 							}
 							i0[k] -= s;
 						}
-						if (null != cellStack[l-1].subCell[posStack[l]])
+						if (null != ((Cell) cellStack[l-1]).subCell[posStack[l]])
 							break;
 					}
 				}
 				if (l == 0)
 					break;
-				cellStack[l] = (Cell) cellStack[l-1].subCell[posStack[l]];
+				cellStack[l] = ((Cell) cellStack[l-1]).subCell[posStack[l]];
 			}
 		}
 		return true;
@@ -619,7 +621,7 @@ public class KdTree
 	 * @param v  the node to check.
 	 * @return a near vertex.
 	 */
-	public final Vertex getNearVertex(Mesh mesh, Vertex v)
+	public final T getNearVertex(Metric metric, T v)
 	{
 		if (root.nItems == 0)
 			return null;
@@ -627,7 +629,8 @@ public class KdTree
 		Cell last = null;
 		int s = gridSize;
 		int [] ijk = new int[dimension];
-		double2int(v.getUV(), ijk);
+		double [] uv = v.getUV();
+		double2int(uv, ijk);
 		int searchedCells = 0;
 		if (logger.isLoggable(Level.FINE))
 			logger.fine("Near point: "+v);
@@ -640,15 +643,15 @@ public class KdTree
 			current = (Cell) current.subCell[indexSubCell(ijk, s)];
 		}
 		if (null == current)
-			return getNearVertexInSubCells(last, mesh, v, searchedCells);
+			return getNearVertexInSubCells(last, metric, v, searchedCells);
 		
-		Vertex vQ = (Vertex) current.subCell[0];
-		Vertex ret = vQ;
-		double retdist = mesh.distance2(v, vQ, v);
+		T vQ = current.getVertex(0);
+		T ret = vQ;
+		double retdist = metric.distance2(uv, vQ.getUV());
 		for (int i = 1; i < current.nItems; i++)
 		{
-			vQ = (Vertex) current.subCell[i];
-			double d = mesh.distance2(v, vQ, v);
+			vQ = current.getVertex(i);
+			double d = metric.distance2(uv, vQ.getUV());
 			if (d < retdist)
 			{
 				retdist = d;
@@ -660,31 +663,33 @@ public class KdTree
 		return ret;
 	}
 	
-	private final Vertex getNearVertexInSubCells(Cell current, Mesh mesh, Vertex v, int searchedCells)
+	private final T getNearVertexInSubCells(Cell current, Metric metric, T v, int searchedCells)
 	{
-		Vertex ret = null;
+		T ret = null;
 		int [] ijk = new int[dimension];
+		double [] uv = v.getUV();
 		double dist = -1.0;
-		double2int(v.getUV(), ijk);
+		double2int(uv, ijk);
 		if (logger.isLoggable(Level.FINE))
 			logger.fine("Near point in suboctrees: "+v);
 		int l = 0;
 		int [] posStack = new int[MAXLEVEL];
 		posStack[l] = 0;
-		Cell [] cellStack = new Cell[MAXLEVEL];
+		Object [] cellStack = new Object[MAXLEVEL];
 		cellStack[l] = current;
 		while (true)
 		{
 			searchedCells++;
-			if (cellStack[l].nItems < 0)
+			Cell s = (Cell) cellStack[l];
+			if (s.nItems < 0)
 			{
 				l++;
 				assert l <= MAXLEVEL;
 				for (int i = 0; i < 8; i++)
 				{
-					if (null != cellStack[l-1].subCell[i])
+					if (null != s.subCell[i])
 					{
-						cellStack[l] = (Cell) cellStack[l-1].subCell[i];
+						cellStack[l] = s.subCell[i];
 						posStack[l] = i;
 						break;
 					}
@@ -692,10 +697,10 @@ public class KdTree
 			}
 			else
 			{
-				for (int i = 0; i < cellStack[l].nItems; i++)
+				for (int i = 0; i < s.nItems; i++)
 				{
-					Vertex vQ = (Vertex) cellStack[l].subCell[i];
-					double d = mesh.distance2(v, vQ, v);
+					T vQ = s.getVertex(i);
+					double d = metric.distance2(uv, vQ.getUV());
 					if (d < dist || dist < 0.0)
 					{
 						dist = d;
@@ -714,12 +719,12 @@ public class KdTree
 					posStack[l]++;
 					if (posStack[l] == 8)
 						l--;
-					else if (null != cellStack[l-1].subCell[posStack[l]])
+					else if (null != ((Cell) cellStack[l-1]).subCell[posStack[l]])
 						break;
 				}
 				if (l == 0)
 					break;
-				cellStack[l] = (Cell) cellStack[l-1].subCell[posStack[l]];
+				cellStack[l] = ((Cell) cellStack[l-1]).subCell[posStack[l]];
 			}
 		}
 		throw new RuntimeException("Near vertex not found");
@@ -728,21 +733,21 @@ public class KdTree
 	private final class GetNearestVertexProcedure implements KdTreeProcedure
 	{
 		private final int [] ijk = new int[dimension];
-		private final Mesh mesh;
-		private final Vertex fromVertex;
-		private Vertex nearestVertex;
+		private final T fromVertex;
+		private final Metric metric;
+		private T nearestVertex;
 		private final double [] i2d = new double[dimension];
 		private final int [] idist = new int[dimension];
 		private double dist;
 		private int searchedCells;
-		private GetNearestVertexProcedure(Mesh m, Vertex from, Vertex v)
+		private GetNearestVertexProcedure(Metric m, T from, T v)
 		{
-			mesh = m;
 			double2int(from.getUV(), ijk);
 			nearestVertex = v;
 			fromVertex = from;
-			dist = mesh.distance2(fromVertex, nearestVertex, fromVertex);
-			double [] r = mesh.getBounds(fromVertex);
+			metric = m;
+			dist = metric.distance2(fromVertex.getUV(), nearestVertex.getUV());
+			double [] r = metric.getUnitBallBBox();
 			for (int k = 0; k < dimension; k++)
 			{
 				i2d[k] = 1.005 * x0[dimension] * r[k];
@@ -763,8 +768,8 @@ public class KdTree
 				boolean updated = false;
 				for (int i = 0; i < self.nItems; i++)
 				{
-					Vertex vtest = (Vertex) self.subCell[i];
-					double retdist = mesh.distance2(fromVertex, vtest, fromVertex);
+					T vtest = self.getVertex(i);
+					double retdist = metric.distance2(fromVertex.getUV(), vtest.getUV());
 					if (retdist < dist)
 					{
 						dist = retdist;
@@ -792,20 +797,20 @@ public class KdTree
 	 * @param v  the node to check.
 	 * @return the nearest vertex.
 	 */
-	public final Vertex getNearestVertex(Mesh mesh, Vertex v)
+	public final T getNearestVertex(Metric metric, T v)
 	{
 		if (root.nItems == 0)
 			return null;
-		Vertex near = getNearVertex(mesh, v);
+		T near = getNearVertex(metric, v);
 		/*if (v.isManifold())
 		{
 			// Triangle vertices may be better candidates
 			Triangle t = (Triangle) v.getLink();
-			double target = mesh.distance2(v, near, v);
+			double target = metric.distance2(v, near, v);
 			for (int j = 0; j < 3; j++)
 			{
 				Vertex testVertex = t.vertex[j];
-				double tdist = mesh.distance2(v, testVertex, v);
+				double tdist = metric.distance2(v, testVertex, v);
 				if (tdist < target)
 				{
 					near = testVertex;
@@ -813,7 +818,7 @@ public class KdTree
 				}
 			}
 		}*/
-		return getNearestVertex(mesh, v, near);
+		return getNearestVertex(metric, v, near);
 	}
 
 	/**
@@ -823,14 +828,14 @@ public class KdTree
 	 * @param start  initial start point near to expected vertex.
 	 * @return the nearest vertex.
 	 */
-	private final Vertex getNearestVertex(Mesh mesh, Vertex v, Vertex start)
+	private final T getNearestVertex(Metric metric, T v, T start)
 	{
 		if (logger.isLoggable(Level.FINE))
 			logger.fine("Nearest point of "+v);
 		
-		GetNearestVertexProcedure gproc = new GetNearestVertexProcedure(mesh, v, start);
+		GetNearestVertexProcedure gproc = new GetNearestVertexProcedure(metric, v, start);
 		walk(gproc);
-		Vertex ret = gproc.nearestVertex;
+		T ret = gproc.nearestVertex;
 		if (logger.isLoggable(Level.FINE))
 		{
 			logger.fine("  search in "+gproc.searchedCells+"/"+nCells+" cells");
@@ -843,17 +848,17 @@ public class KdTree
 	{
 		private final int [] ij = new int[dimension];
 		private double dist;
-		private final Vertex fromVertex;
-		private Vertex nearestVertex;
-		private final Mesh mesh;
+		private final T fromVertex;
+		private T nearestVertex;
+		private final Metric metric;
 		private int searchedCells;
-		private GetNearestVertexDebugProcedure(Mesh m, Vertex from, Vertex v)
+		private GetNearestVertexDebugProcedure(Metric m, T from, T v)
 		{
 			double2int(from.getUV(), ij);
 			nearestVertex = v;
 			fromVertex = from;
-			mesh = m;
-			dist = mesh.distance2(fromVertex, v, fromVertex);
+			metric = m;
+			dist = metric.distance2(fromVertex.getUV(), v.getUV());
 		}
 		public int action(Object o, int s, final int [] i0)
 		{
@@ -863,8 +868,8 @@ public class KdTree
 			{
 				for (int i = 0; i < self.nItems; i++)
 				{
-					Vertex vtest = (Vertex) self.subCell[i];
-					double retdist = mesh.distance2(fromVertex, vtest, fromVertex);
+					T vtest = self.getVertex(i);
+					double retdist = metric.distance2(fromVertex.getUV(), vtest.getUV());
 					if (retdist < dist)
 					{
 						dist = retdist;
@@ -883,16 +888,16 @@ public class KdTree
 	 * @param v  the vertex to check.
 	 * @return the nearest vertex.
 	 */
-	public Vertex getNearestVertexDebug(Mesh mesh, Vertex v)
+	public T getNearestVertexDebug(Metric metric, T v)
 	{
 		if (root.nItems == 0)
 			return null;
-		Vertex ret = getNearVertex(mesh, v);
+		T ret = getNearVertex(metric, v);
 		assert ret != null;
 		if (logger.isLoggable(Level.FINE))
 			logger.fine("(debug) Nearest point of "+v);
 		
-		GetNearestVertexDebugProcedure gproc = new GetNearestVertexDebugProcedure(mesh, v, ret);
+		GetNearestVertexDebugProcedure gproc = new GetNearestVertexDebugProcedure(metric, v, ret);
 		walk(gproc);
 		ret = gproc.nearestVertex;
 		if (logger.isLoggable(Level.FINE))

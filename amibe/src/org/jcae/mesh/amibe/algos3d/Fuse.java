@@ -24,7 +24,7 @@ package org.jcae.mesh.amibe.algos3d;
 import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
-import org.jcae.mesh.amibe.util.KdTree;
+import org.jcae.mesh.amibe.metrics.KdTree;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -99,14 +99,14 @@ public class Fuse
 			bbox[i] = bmin[i];
 			bbox[i+3] = bmax[i];
 		}
-		KdTree octree = new KdTree(bbox);
+		KdTree<Vertex> octree = new KdTree<Vertex>(bbox);
 		HashMap<Vertex, Vertex> map = new HashMap<Vertex, Vertex>();
 		int nSubst = 0;
 		for (Vertex n: mesh.getNodes())
 		{
 			if (n.isMutable())
 				continue;
-			Vertex p = octree.getNearestVertex(mesh, n);
+			Vertex p = octree.getNearestVertex(mesh.getMetric(n), n);
 			if (p == null || p.isMutable() || n.sqrDistance3D(p) > tolerance)
 				octree.add(n);
 			else

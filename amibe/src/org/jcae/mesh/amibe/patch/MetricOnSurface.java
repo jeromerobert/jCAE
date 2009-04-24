@@ -19,21 +19,15 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-package org.jcae.mesh.amibe.metrics;
+package org.jcae.mesh.amibe.patch;
 
 import org.jcae.mesh.cad.CADGeomSurface;
-import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.MeshParameters;
+import org.jcae.mesh.amibe.metrics.Matrix2D;
 import java.util.logging.Logger;
 
 /**
  * 2D metrics.  This class provides metrics on the tangent plane.
- * A {@link Metric3D} is computed and projected onto the tangent plane.
- * This metric is then attached to the {@link Vertex} at which it is
- * computed, and is used to compute distance to other vertices in
- * {@link org.jcae.mesh.amibe.patch.Calculus3D}.
- * It can be shown that vertices at a distance <code>D</code> of a point
- * lies on an ellipsis centered at <code>P</code>.
  *
  * <p>
  * If multiple constraints are combined, ellipsis are intersected so that the
@@ -48,63 +42,43 @@ import java.util.logging.Logger;
  * defines an ellipsis which is interior to both ellipsis.
  * </p>
  */
-public class Metric2D
+public class MetricOnSurface implements Metric2D
 {
-	private static Logger logger=Logger.getLogger(Metric2D.class.getName());
+	private static Logger logger=Logger.getLogger(MetricOnSurface.class.getName());
 	
 	//  First fundamental form
 	private double E, F, G;
-	private static CADGeomSurface cacheSurf = null;
-	// Static array to speed up orth() method
-	private static final double [] orthRes = new double[2];
 
 	/**
-	 * Creates a <code>Metric2D</code> instance at a given point.
+	 * Creates a <code>MetricOnSurface</code> instance at a given point.
 	 *
 	 * @param surf  geometrical surface
 	 * @param pt  node where metrics is computed.
 	 */
-	public Metric2D(CADGeomSurface surf, Vertex pt, MeshParameters mp)
+	protected MetricOnSurface(CADGeomSurface surf, MeshParameters mp)
 	{
-		if (!surf.equals(cacheSurf))
-		{
-			surf.dinit(2);
-			cacheSurf = surf;
-		}
-		double [][] temp = { { 0.0, 0.0 }, { 0.0, 0.0 } };
-		double sym = 0.0;
-		Metric3D m3dbis = null;
-		Metric3D m3d = new Metric3D(surf, pt);
 		double discr = mp.getLength();
-		m3d.iso(discr);
-		if (mp.hasDeflection())
+		assert discr > 0;
+		Matrix2D m2d0 = MetricBuilder.computeIsotropic(surf, discr);
+		Matrix2D m2d1 = MetricBuilder.computeGeometric(surf, mp);
+		double [][] temp = new double[2][2];
+		if (m2d1 != null)
 		{
-			m3dbis = new Metric3D(surf, pt);
-			if (!m3dbis.deflection(mp))
-				m3dbis = null;
+			//  The curvature metric is defined, so we can compute
+			//  its intersection with isotropic m2d0.
+			m2d0.makeSymmetric();
+			m2d1.makeSymmetric();
+			m2d0.intersection(m2d1).getValues(temp);
 		}
-		//  For efficiency reasons, restrict2D returns a static array
-		temp = m3d.restrict2D();
-		sym = 0.5 * (temp[0][1] + temp[1][0]);
- 		if (m3dbis != null)
-		{
-			//  The curvature metrics is defined, so we can compute
-			//  its intersection with m3d.
-			Matrix2D m2d0 = new Matrix2D(temp[0][0], sym, sym, temp[1][1]);
-			temp = m3dbis.restrict2D();
-			sym = 0.5 * (temp[0][1] + temp[1][0]);
-			Matrix2D m2d1 = new Matrix2D(temp[0][0], sym, sym, temp[1][1]);
-			Matrix2D res = m2d0.intersection(m2d1);
-			temp[0][0] = res.data[0][0];
-			temp[1][1] = res.data[1][1];
-			sym = 0.5 * (res.data[0][1] + res.data[1][0]);
-		}
+		else
+			m2d0.getValues(temp);
+
 		E = temp[0][0];
-		F = sym;
+		F = 0.5 * (temp[0][1] + temp[1][0]);
 		G = temp[1][1];
 	}
 	
-	public Metric2D()
+	public MetricOnSurface()
 	{
 		E = 1.0;
 		F = 0.0;
@@ -130,24 +104,22 @@ public class Metric2D
 	}
 	
 	/**
-	 * Compute inverse matrix and stores result into its argument.
+	 * Compute inverse matrix.
 	 *
-	 * @return <code>false</code> if metric is singular, <code>true</code> otherwise.
+	 * @return inverse matrix, or <code>null</code> if matrix is singular.
 	 */
-	public boolean inv(Metric2D ret)
+	public MetricOnSurface getInverse()
 	{
 		double d = det();
 		if (d == 0.0)
-		{
-			ret = null;
-			return false;
-		}
+			return null;
+		MetricOnSurface ret = new MetricOnSurface();
 		ret.E = G / d;
 		ret.G = E / d;
 		ret.F = - F / d;
-		return true;
+		return ret;
 	}
-	
+
 	/**
 	 * Compute interpolation between two metrics.  If M(A) and M(B) are metrics at point
 	 * a and b, we want to compute inv((inv(M(A)) + inv(M(B)))/2).  This method is called
@@ -155,24 +127,51 @@ public class Metric2D
 	 *
 	 * @param mFirstInv  inverse metric at first point
 	 * @param mSecond  metric at second point
-	 * @param mRet  allocated metric to store result
 	 * @return <code>true</code> if interpolated metric can be computed, <code>false</code> otherwise
 	 */
-	public static boolean interpolateSpecial(Metric2D mFirstInv, Metric2D mSecond, Metric2D mRet)
+	public boolean interpolateSpecial(Metric2D mFirstInv, Metric2D mSecond)
 	{
 		double d = mSecond.det();
 		if (d == 0.0)
 			return false;
-		mRet.E = 0.5 * (mSecond.G / d + mFirstInv.E);
-		mRet.G = 0.5 * (mSecond.E / d + mFirstInv.G);
-		mRet.F = 0.5 * (- mSecond.F / d + mFirstInv.F);
-		d = mRet.det();
+		if (mSecond instanceof MetricOnSurface)
+		{
+			MetricOnSurface m2 = (MetricOnSurface) mSecond;
+			E = 0.5 * m2.G / d;
+			G = 0.5 * m2.E / d;
+			F = - 0.5 * m2.F / d;
+		}
+		else if (mSecond instanceof EuclidianMetric2D)
+		{
+			E = 0.5;
+			G = 0.5;
+			F = 0.0;
+		}
+		else
+			throw new IllegalArgumentException();
+
+		if (mFirstInv instanceof MetricOnSurface)
+		{
+			MetricOnSurface m1 = (MetricOnSurface) mFirstInv;
+			E += 0.5 * m1.E;
+			G += 0.5 * m1.G;
+			F += 0.5 * m1.F;
+		}
+		else if (mFirstInv instanceof EuclidianMetric2D)
+		{
+			E += 0.5;
+			G += 0.5;
+		}
+		else
+			throw new IllegalArgumentException();
+
+		d = det();
 		if (d == 0.0)
 			return false;
-		double temp = mRet.G / d;
-		mRet.G = mRet.E / d;
-		mRet.F = - mRet.F / d;
-		mRet.E = temp;
+		double temp = G / d;
+		G = E / d;
+		F = - F / d;
+		E = temp;
 		return true;
 	}
 	
@@ -181,7 +180,7 @@ public class Metric2D
 	 *
 	 * @return width and height of surrounding bounding box.
 	 */
-	public double [] getBounds2D()
+	public double [] getUnitBallBBox()
 	{
 		double [] ret = new double[2];
 		double d = det();
@@ -234,13 +233,11 @@ public class Metric2D
 	 *
 	 * @param x0 first coordinate
 	 * @param y0 second coordinate
-	 * @return a static array containing the orthogal vector.
 	 */
-	public double [] orth(double x0, double y0)
+	public void computeOrthogonalVector(double x0, double y0, double[] result)
 	{
-		orthRes[0] = - F * x0 - G * y0;
-		orthRes[1] = E * x0 + F * y0;
-		return orthRes;
+		result[0] = - F * x0 - G * y0;
+		result[1] = E * x0 + F * y0;
 	}
 	
 	/**

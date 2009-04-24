@@ -55,7 +55,7 @@ public class AbsoluteDeflection2D extends QualityProcedure
 		if (!(o instanceof Triangle))
 			throw new IllegalArgumentException();
 		Triangle t = (Triangle) o;
-		c.centroid((Vertex2D[]) t.vertex);
+		mesh.moveVertexToCentroid(c, t);
 		double [] uv = c.getUV();
 		double [] xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
 		p[3] = mesh.createVertex(xyz);

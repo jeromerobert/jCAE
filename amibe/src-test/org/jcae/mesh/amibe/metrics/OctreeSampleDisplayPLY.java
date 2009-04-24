@@ -18,9 +18,10 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-package org.jcae.mesh.amibe.util;
+package org.jcae.mesh.amibe.metrics;
 
 import org.jcae.mesh.amibe.ds.Mesh;
+import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.viewer3d.bg.ViewableBG;
 import org.jcae.viewer3d.View;
 
@@ -38,7 +39,7 @@ import javax.swing.WindowConstants;
  */
 public class OctreeSampleDisplayPLY extends OctreeSample
 {
-	public OctreeSampleDisplayPLY(KdTree o)
+	public OctreeSampleDisplayPLY(KdTree<Vertex> o)
 	{
 		super(o);
 	}
@@ -109,7 +110,7 @@ public class OctreeSampleDisplayPLY extends OctreeSample
 			bbox[i] = umin[i];
 			bbox[i+3] = umax[i];
 		}
-		final KdTree r = new KdTree(bbox, bucketSize);
+		final KdTree<Vertex> r = new KdTree<Vertex>(bbox, bucketSize);
 		final OctreeSample t = new OctreeSample(r);
 		double [] xyz = new double[3];
 		for (int i = 0; i < nrNodes - nrDuplicates; i++)

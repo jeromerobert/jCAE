@@ -18,9 +18,7 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-package org.jcae.mesh.amibe.util;
-
-import org.jcae.mesh.amibe.ds.Vertex;
+package org.jcae.mesh.amibe.metrics;
 
 import javax.media.j3d.Appearance;
 import javax.media.j3d.GeometryArray;
@@ -178,8 +176,7 @@ public class OctreeSample
 				return KdTreeProcedure.OK;
 			for (int i = 0, n = self.count(); i < n; i++)
 			{
-				Vertex v = self.getVertex(i);
-				double [] param = v.getUV();
+				double [] param = self.getVertex(i).getUV();
 				coord[index]   = param[0];
 				coord[index+1] = param[1];
 				coord[index+2] = param[2];

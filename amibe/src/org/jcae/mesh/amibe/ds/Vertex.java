@@ -22,8 +22,8 @@ package org.jcae.mesh.amibe.ds;
 
 import java.util.logging.Logger;
 import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
-import org.jcae.mesh.amibe.metrics.Metric3D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
+import org.jcae.mesh.amibe.metrics.Location;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ import java.io.Serializable;
  * all incident triangles through their adjacency relations.
  * </p>
  */
-public class Vertex implements Serializable
+public class Vertex implements Location, Serializable
 {
 	private static final long serialVersionUID = 8049983674054731722L;
 	private static final Logger logger=Logger.getLogger(Vertex.class.getName());
@@ -161,6 +161,11 @@ public class Vertex implements Serializable
 		return param;
 	}
 	
+	public void moveTo(double u, double v)
+	{
+		throw new RuntimeException();
+	}
+
 	/**
 	 * Sets 3D coordinates of this vertex.
 	 *
@@ -174,7 +179,7 @@ public class Vertex implements Serializable
 		param[1] = y;
 		param[2] = z;
 	}
-	
+
 	/**
 	 * Returns the squared distance in 3D space.
 	 *
@@ -796,7 +801,7 @@ public class Vertex implements Serializable
 		g1[0] = g0[1];
 		g2[0] = g0[2];
 		g2[1] = g1[2];
-		Metric3D G = new Metric3D(g0, g1, g2);
+		Matrix3D G = new Matrix3D(g0, g1, g2);
 		if (!G.inv())
 			return false;
 		G.apply(h, ret);

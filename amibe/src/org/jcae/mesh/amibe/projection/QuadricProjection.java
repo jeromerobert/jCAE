@@ -19,12 +19,13 @@
 
 package org.jcae.mesh.amibe.projection;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jcae.mesh.amibe.ds.AbstractHalfEdge;
 import org.jcae.mesh.amibe.ds.Vertex;
+import org.jcae.mesh.amibe.metrics.Location;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
-import org.jcae.mesh.amibe.metrics.Metric3D;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Project a point on the approximated surface.  This algorithm is
@@ -87,7 +88,7 @@ public class QuadricProjection implements LocalSurfaceProjection
 	 * @return <code>true</code> if projection has been performed
 	 * successfully, <code>false</code> otherwise.
 	 */
-	public boolean project(Vertex pt)
+	public boolean project(Location pt)
 	{
 		double [] glob = new double[3];
 		double [] param = pt.getUV();
@@ -201,7 +202,7 @@ public class QuadricProjection implements LocalSurfaceProjection
 		if (h[0] == 0.0 && h[1] == 0.0 && h[2] == 0.0)
 			return h;
 		boolean addMiddlePoints = discardHyperbolic && h[1] * h[1] >= 4.0 * h[0] * h[2];
-		Metric3D G = null;
+		Matrix3D G = null;
 		if (!addMiddlePoints)
 		{
 			g1[1] = g0[2];
@@ -209,7 +210,7 @@ public class QuadricProjection implements LocalSurfaceProjection
 			g2[0] = g0[2];
 			g2[1] = g1[2];
 			// G = tA A
-			G = new Metric3D(g0, g1, g2);
+			G = new Matrix3D(g0, g1, g2);
 			if (!G.inv())
 				addMiddlePoints = true;
 		}
@@ -267,7 +268,7 @@ public class QuadricProjection implements LocalSurfaceProjection
 		g2[0] = g0[2];
 		g2[1] = g1[2];
 		// G = tA A
-		G = new Metric3D(g0, g1, g2);
+		G = new Matrix3D(g0, g1, g2);
 		if (!G.inv())
 		{
 			if (LOGGER.isLoggable(Level.FINE))

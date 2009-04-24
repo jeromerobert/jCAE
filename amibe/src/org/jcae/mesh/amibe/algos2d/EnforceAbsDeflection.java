@@ -81,7 +81,7 @@ public class EnforceAbsDeflection
 			{
 				if (t.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
-				c.centroid((Vertex2D[]) t.vertex);
+				mesh.moveVertexToCentroid(c, t);
 				double uv[] = c.getUV();
 				double [] xyz = mesh.getGeomSurface().value(uv[0], uv[1]);
 				// mesh.createVertex() cannot be used because mesh is a
@@ -117,7 +117,7 @@ public class EnforceAbsDeflection
 			{
 				if (!mesh.getTriangles().contains(t) || t.hasAttributes(AbstractHalfEdge.BOUNDARY))
 					continue;
-				c.centroid((Vertex2D[]) t.vertex);
+				mesh.moveVertexToCentroid(c, t);
 				double uv[] = c.getUV();
 				Vertex2D v = (Vertex2D) mesh.createVertex(uv[0], uv[1]);
 				VirtualHalfEdge2D vt = v.getSurroundingOTriangle(mesh);

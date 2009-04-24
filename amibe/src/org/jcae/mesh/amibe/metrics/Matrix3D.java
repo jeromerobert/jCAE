@@ -29,8 +29,14 @@ import java.io.Serializable;
 public class Matrix3D implements Serializable
 {
 	private static final long serialVersionUID = 5729957735771428280L;
-	protected double [] data = new double[9];
+	private double [] data = new double[9];
 	
+	private static double [] c0 = new double[3];
+	private static double [] c1 = new double[3];
+	private static double [] c2 = new double[3];
+	private static double [] c3 = new double[3];
+	private static double [] c4 = new double[3];
+
 	/**
 	 * Create a <code>Matrix3D</code> instance and set it to the identity
 	 * matrix.
@@ -58,14 +64,19 @@ public class Matrix3D implements Serializable
 	}
 	
 	/**
-	 * Reset all coefficients to zero.
+	 * Create a diagonal <code>Matrix3D</code> instance from three values.
+	 *
+	 * @param d1  first diagonal value.
+	 * @param d2  second diagonal value.
+	 * @param d3  third diagonal value.
 	 */
-	protected void reset()
+	public Matrix3D(double d1, double d2, double d3)
 	{
-		for (int i = 0; i < 9; i++)
-			data[i] = 0.0;
+		data[0] = d1;
+		data[4] = d2;
+		data[8] = d3;
 	}
-	
+
 	/**
 	 * Transpose current matrix.
 	 */
@@ -83,7 +94,7 @@ public class Matrix3D implements Serializable
 	 * @param A  another Matrix3D
 	 * @return a new Matrix3D containing the multiplication this*A
 	 */
-	protected Matrix3D multR(Matrix3D A)
+	public Matrix3D multR(Matrix3D A)
 	{
 		Matrix3D ret = new Matrix3D();
 		for (int i = 0; i < 3; i++)
@@ -103,7 +114,7 @@ public class Matrix3D implements Serializable
 	 * @param A  another Matrix3D
 	 * @return a new Matrix3D containing the multiplication A*this
 	 */
-	protected Matrix3D multL(Matrix3D A)
+	public Matrix3D multL(Matrix3D A)
 	{
 		Matrix3D ret = new Matrix3D();
 		for (int i = 0; i < 3; i++)
@@ -124,39 +135,19 @@ public class Matrix3D implements Serializable
 			out[i] = data[i] * in[0] + data[i+3] * in[1] + data[i+6] * in[2];
 	}
 	
-	/**
-	 * Multiply all matrix coefficients by a factor.
-	 *
-	 * @param f  scale factor
-	 */
-	protected void scale(double f)
+	public void getValues(double [] temp)
 	{
-		for (int i = 0; i < 9; i++)
-			data[i] *= f;
-	}
-	
-	/**
-	 * Set diagonal coefficients.
-	 *
-	 * @param d1  first diagonal coefficient
-	 * @param d2  second diagonal coefficient
-	 * @param d3  third diagonal coefficient
-	 */
-	protected void setDiagonal(double d1, double d2, double d3)
-	{
-		data[0] = d1;
-		data[4] = d2;
-		data[8] = d3;
+		System.arraycopy(data, 0, temp, 0, 9);
 	}
 
-	protected final void swap(int i, int j)
+	private final void swap(int i, int j)
 	{
 		double temp = data[i+3*j];
 		data[i+3*j] = data[j+3*i];
 		data[j+3*i] = temp;
 	}
 	
-	protected final void copyColumn(int i, double [] dest)
+	private final void copyColumn(int i, double [] dest)
 	{
 		System.arraycopy(data, 3*i, dest, 0, 3);
 	}
@@ -185,21 +176,6 @@ public class Matrix3D implements Serializable
 	public static double norm(double [] A)
 	{
 		return Math.sqrt((A[0]*A[0])+(A[1]*A[1])+(A[2]*A[2]));
-	}
-	
-	/**
-	 * Return the squared Euclidian distance between two 3D vectors.
-	 *
-	 * @param A 3D vector.
-	 * @param B 3D vector.
-	 * @return the squared Euclidian norm of (A-B).
-	 */
-	public static double distance2(double [] A, double [] B)
-	{
-		double dx0 = A[0] - B[0];
-		double dx1 = A[1] - B[1];
-		double dx2 = A[2] - B[2];
-		return dx0*dx0 + dx1*dx1 + dx2*dx2;
 	}
 	
 	/**
@@ -253,6 +229,34 @@ public class Matrix3D implements Serializable
 		}
 		prodVect3D(tempD1, tempD2, ret);
 		return 0.5*norm;
+	}
+	/**
+	 * Replace current metrics by its inverse.
+	 *
+	 * @return <code>true</code> if it is not singular, <code>false</code>
+	 * otherwise.
+	 */
+	public final boolean inv()
+	{
+		// adjoint matrix
+		copyColumn(0, c0);
+		copyColumn(1, c1);
+		copyColumn(2, c2);
+		prodVect3D(c1, c2, c3);
+		double det = prodSca(c0, c3);
+		if (det < 1.e-20)
+			return false;
+		prodVect3D(c2, c0, c4);
+		prodVect3D(c0, c1, c2);
+		// Metric3D adj = new Metric3D(c3, c4, c2);
+		System.arraycopy(c3, 0, data, 0, 3);
+		System.arraycopy(c4, 0, data, 3, 3);
+		System.arraycopy(c2, 0, data, 6, 3);
+		transp();
+		det = 1.0 / det;
+		for (int i = 0; i < 9; i++)
+			data[i] *= det;
+		return true;
 	}
 	
 	@Override

@@ -24,9 +24,9 @@ package org.jcae.mesh.amibe.metrics;
 /**
  * General 2D matrix.
  */
-class Matrix2D
+public class Matrix2D
 {
-	protected double[][] data = new double[2][2];
+	private double[][] data = new double[2][2];
 	
 	/**
 	 * Create a <code>Matrix2D</code> instance and set it to the identity
@@ -45,7 +45,7 @@ class Matrix2D
 	 * @param Ayx  Ayx coefficient
 	 * @param Ayy  Ayy coefficient
 	 */
-	protected Matrix2D(double Axx, double Axy, double Ayx, double Ayy)
+	public Matrix2D(double Axx, double Axy, double Ayx, double Ayy)
 	{
 		data[0][0] = Axx;
 		data[0][1] = Axy;
@@ -79,11 +79,21 @@ class Matrix2D
 		ret.scale(1.0 / detA);
 		return ret;
 	}
-	
+
+	/**
+	 * Make this matrix symmetric by averaging non-diagonal coefficients.
+	 */
+	public void makeSymmetric()
+	{
+		double sym = 0.5 *(data[0][1] + data[1][0]);
+		data[0][1] = sym;
+		data[1][0] = sym;
+	}
+
 	/**
 	 *  Computes the intersection of 2 metrics.
 	 */
-	protected Matrix2D intersection(Matrix2D B)
+	public Matrix2D intersection(Matrix2D B)
 	{
 		Matrix2D res = simultaneousReduction(B);
 		Matrix2D resInv = res.inv();
@@ -208,7 +218,15 @@ class Matrix2D
 		
 		return AinvB.eigenvectors();
 	}
-	
+
+	public void getValues(double [][] v)
+	{
+		v[0][0] = data[0][0];
+		v[0][1] = data[0][1];
+		v[1][0] = data[1][0];
+		v[1][1] = data[1][1];
+	}
+
 	@Override
 	public String toString()
 	{

@@ -20,8 +20,8 @@
 
 package org.jcae.mesh.amibe.patch;
 
-import org.jcae.mesh.amibe.util.KdTree;
-import org.jcae.mesh.amibe.util.KdTreeProcedure;
+import org.jcae.mesh.amibe.metrics.KdTree;
+import org.jcae.mesh.amibe.metrics.KdTreeProcedure;
 
 import java.io.FileOutputStream;
 import java.io.PrintWriter;

@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2008, by EADS France
+    Copyright (C) 2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -17,32 +17,34 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-package org.jcae.mesh.amibe.projection;
+package org.jcae.mesh.amibe.metrics;
 
-import org.jcae.mesh.amibe.metrics.Location;
-
-/**
- * Interface to project vertices on a local surface.
- * 
- * @author Denis Barbier
- */
-public interface LocalSurfaceProjection
+public final class EuclidianMetric3D implements Metric
 {
+	private final double [] unit_bounds = new double[]{1.0, 1.0, 1.0};
+
 	/**
-	 * Flag to tell whether projection can be performed.
-	 * 
-	 * @return  <code>true</code> if local surface was successfully computed
-	 *          and projection can be performed on it, <code>false</code>
-	 *          otherwise.
-	 */
-	boolean canProject();
-	
-	/**
-	 * Project a point on local surface.
+	 * Return 3D Euclidian square distance between two points.
 	 *
-	 * @param pt   point to project on the approximated surface.
-	 * @return     <code>true</code> if projection has been performed
-	 *             successfully, <code>false</code> otherwise.
+	 * @param p1  coordinates of the first node
+	 * @param p2  coordinates of the second node
+	 * @return 3D Euclidian square distance between these two points.
 	 */
-	boolean project(Location v);
+	public double distance2(double[] p1, double[] p2)
+	{
+		return (p1[0] - p2[0]) * (p1[0] - p2[0]) +
+		       (p1[1] - p2[1]) * (p1[1] - p2[1]) +
+			   (p1[2] - p2[2]) * (p1[2] - p2[2]);
+	}
+
+	/**
+	 * Return triplet <code>(1, 1, 1)</code>.
+	 *
+	 * @return a double[3] array with values <code>(1, 1, 1)</code>
+	 */
+	public double [] getUnitBallBBox()
+	{
+		return unit_bounds;
+	}
+
 }
