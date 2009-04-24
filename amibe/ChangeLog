@@ -1,3 +1,10 @@
+Fri Apr 24 15:04:56 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/metrics/Metric3D.java: When absolute
+	deflection is too large, let deflection() return false.  Deflection
+	can be ignored if it is too large in order to speed up Metric2D
+	constructor.
+
 Tue Apr 21 11:05:58 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/MMesh1D.java: Replace getTEdgeIterator()

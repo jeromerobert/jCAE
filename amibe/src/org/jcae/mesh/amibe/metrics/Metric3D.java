@@ -265,8 +265,7 @@ public class Metric3D extends Matrix3D
 		if (deflection * cmax >= 1.0 || deflection * cmin >= 1.0)
 		{
 			logger.fine("Curvature too large");
-			iso(deflection);
-			return true;
+			return false;
 		}
 		double [] dcurv = cacheSurf.curvatureDirections();
 		double [] dcurvmax = c0;
