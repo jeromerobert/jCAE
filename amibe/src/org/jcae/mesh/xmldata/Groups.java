@@ -40,7 +40,8 @@ import org.xml.sax.SAXException;
  * Manage all the groups of a MeshNode.
  */
 public class Groups
-{	
+{
+	private static final Logger LOGGER = Logger.getLogger(Groups.class.getCanonicalName());
 	// TODO Create a table selection
 	private PropertyChangeListener groupPropertyChangeListener=new PropertyChangeListener()
 	{
@@ -342,7 +343,7 @@ public class Groups
 		}
 		catch (IOException ex)
 		{
-			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.SEVERE, ex.getMessage(), ex);
+			LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 		}
 		finally
 		{

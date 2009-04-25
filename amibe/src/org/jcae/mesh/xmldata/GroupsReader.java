@@ -33,6 +33,8 @@ import org.xml.sax.SAXException;
 
 public class GroupsReader
 {
+	private static final Logger LOGGER = Logger.getLogger(GroupsReader.class.getCanonicalName());
+
 	/**
 	 * Le texte contenu dans le premier fils. du premier element accessible
 	 * depuis l'element racine qui a le tag voulu.
@@ -111,18 +113,15 @@ public class GroupsReader
 		}
 		catch (ParserConfigurationException e)
 		{
-			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(
-				Level.SEVERE, e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 		}
 		catch (SAXException e)
 		{
-			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(
-				Level.SEVERE, e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 		}
 		catch (IOException e)
 		{
-			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(
-				Level.SEVERE, e.getMessage(), e);
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 		}
 		return groupList;
 	}

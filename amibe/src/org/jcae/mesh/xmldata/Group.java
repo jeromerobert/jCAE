@@ -28,7 +28,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class Group
-{	
+{
+	private static final Logger LOGGER = Logger.getLogger(Group.class.getCanonicalName());
 	private int id;
 	private String name;
 	private int number;
@@ -156,13 +157,11 @@ public class Group
 			}
 			catch (Exception e)
 			{
-				Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(
-					Level.SEVERE, e.getMessage(), e);
+				LOGGER.log(Level.SEVERE, e.getMessage(), e);
 			}
 		} else
 		{
-			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(
-				Level.WARNING, "Mesh (" + f.getPath() + ") not found.");
+			LOGGER.warning("Mesh (" + f.getPath() + ") not found.");
 		}
 	}
 
@@ -190,7 +189,7 @@ public class Group
 		}
 		catch (Exception ex)
 		{
-			Logger.getLogger(Logger.GLOBAL_LOGGER_NAME).log(Level.SEVERE, ex.getMessage(), ex);
+			LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 		}
 		return newElt;
 	}
