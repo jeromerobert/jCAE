@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2003,2004,2005,2006, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -28,8 +28,9 @@ import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
+import org.jcae.mesh.amibe.metrics.KdTree;
 import org.jcae.mesh.amibe.metrics.Metric;
-import java.util.Iterator;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.HashSet;
@@ -82,6 +83,7 @@ public class Insertion
 {
 	private static final Logger LOGGER=Logger.getLogger(Insertion.class.getName());
 	private final Mesh2D mesh;
+	private final KdTree<Vertex> kdTree;
 	
 	private final double minlen;
 	private final double maxlen;
@@ -94,6 +96,7 @@ public class Insertion
 	public Insertion(Mesh2D m, double minlen, double maxlen)
 	{
 		mesh = m;
+		kdTree = mesh.getKdTree();
 		this.minlen = minlen;
 		this.maxlen = maxlen;
 	}
@@ -114,11 +117,11 @@ public class Insertion
 		// We use a LinkedHashSet instance below to keep triangle order
 		LinkedHashSet<Triangle> oldTrianglesToCheck = new LinkedHashSet<Triangle>(mesh.getTriangles().size());
 		// We do not want to split boundary edges.
-		for(Iterator<Triangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
+		for(Triangle gt : mesh.getTriangles())
 		{
-			TriangleVH t = (TriangleVH) it.next();
-			if (t.hasAttributes(AbstractHalfEdge.OUTER))
+			if (gt.hasAttributes(AbstractHalfEdge.OUTER))
 				continue;
+			TriangleVH t = (TriangleVH) gt;
 			ot.bind(t);
 			oldTrianglesToCheck.add(t);
 			for (int i = 0; i < 3; i++)
@@ -157,11 +160,11 @@ public class Insertion
 			int kdtreeSplit = 0;
 			nodes.clear();
 			LOGGER.fine("Check all edges");
-			for(Iterator<Triangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
+			for(Triangle gt : mesh.getTriangles())
 			{
-				TriangleVH t = (TriangleVH) it.next();
-				if (t.hasAttributes(AbstractHalfEdge.OUTER))
+				if (gt.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
+				TriangleVH t = (TriangleVH) gt;
 				ot.bind(t);
 				triNodes.clear();
 				// Maximal number of nodes which are inserted on edges of this triangle
@@ -216,7 +219,7 @@ public class Insertion
 							last = (Vertex2D) np[ns];
 							Metric metric = mesh.getMetric(last);
 							// Link to surrounding triangle to speed up
-							// mesh.getKdTree().getNearestVertex()
+							// kdTree.getNearestVertex()
 							if (metric.distance2(last.getUV(), sym.apex().getUV()) < metric.distance2(last.getUV(), ot.apex().getUV()))
 								last.setLink(sym.getTri());
 							else
@@ -253,11 +256,11 @@ public class Insertion
 						Vertex2D v = triNodes.get(index);
 						Metric metric = mesh.getMetric(v);
 						double[] uv = v.getUV();
-						Vertex2D n = (Vertex2D) mesh.getKdTree().getNearestVertex(metric, uv);
+						Vertex2D n = (Vertex2D) kdTree.getNearestVertex(metric, uv);
 						assert checkNearestVertex(metric, uv, n);
 						if (mesh.interpolatedDistance(v, n) > minlen)
 						{
-							mesh.getKdTree().add(v);
+							kdTree.add(v);
 							nodes.add(v);
 						}
 						else
@@ -275,11 +278,11 @@ public class Insertion
 			Vertex2D c = null;
 			trianglesToCheck.clear();
 			LOGGER.fine("Check triangle centroids for "+oldTrianglesToCheck.size()+" triangles");
-			for (Iterator<Triangle> it = oldTrianglesToCheck.iterator(); it.hasNext(); )
+			for (Triangle gt : oldTrianglesToCheck)
 			{
-				TriangleVH t = (TriangleVH) it.next();
-				if (t.hasAttributes(AbstractHalfEdge.OUTER))
+				if (gt.hasAttributes(AbstractHalfEdge.OUTER))
 					continue;
+				TriangleVH t = (TriangleVH) gt;
 				// Check triangle centroid only if at least one edge is large
 				boolean tooSmall = true;
 				ot.bind(t);
@@ -302,15 +305,15 @@ public class Insertion
 					c = (Vertex2D) mesh.createVertex(0.0, 0.0);
 				mesh.moveVertexToCentroid(c, t);
 				// Link to surrounding triangle to speed up
-				// mesh.getKdTree().getNearestVertex() and thus
+				// kdTree.getNearestVertex() and thus
 				// v.getSurroundingOTriangle() below.
 				c.setLink(t);
 				Metric metric = mesh.getMetric(c);
-				Vertex2D n = (Vertex2D) mesh.getKdTree().getNearestVertex(metric, c.getUV());
+				Vertex2D n = (Vertex2D) kdTree.getNearestVertex(metric, c.getUV());
 				assert checkNearestVertex(metric, c.getUV(), n);
 				if (mesh.interpolatedDistance(c, n) > minlen)
 				{
-					mesh.getKdTree().add(c);
+					kdTree.add(c);
 					nodes.add(c);
 					trianglesToCheck.add(t);
 					c = null;
@@ -320,13 +323,12 @@ public class Insertion
 			}
 			if (nodes.isEmpty())
 				break;
-			for (Iterator<Vertex2D> it = nodes.iterator(); it.hasNext(); )
+			for (Vertex2D v : nodes)
 			{
-				Vertex2D v = it.next();
 				//  These vertices are not bound to any triangles, so
 				//  they must be removed, otherwise getSurroundingOTriangle
 				//  may return a null pointer.
-				mesh.getKdTree().remove(v);
+				kdTree.remove(v);
 			}
 			LOGGER.fine("Try to insert "+nodes.size()+" nodes");
 			//  Process in pseudo-random order.  There is at most maxNodes nodes
@@ -377,9 +379,8 @@ public class Insertion
 			// order from mesh.getTriangles().  This is to make sure that this
 			// use of trianglesToCheck does not modify result.
 			oldTrianglesToCheck.clear();
-			for(Iterator<Triangle> it = mesh.getTriangles().iterator(); it.hasNext(); )
+			for(Triangle t : mesh.getTriangles())
 			{
-				Triangle t = it.next();
 				if (trianglesToCheck.contains(t))
 					oldTrianglesToCheck.add(t);
 			}
@@ -391,7 +392,7 @@ public class Insertion
 	private final boolean checkNearestVertex(Metric metric, double[] uv, Vertex n)
 	{
 		double d1 = metric.distance2(uv, n.getUV());
-		Vertex debug = mesh.getKdTree().getNearestVertexDebug(metric, uv);
+		Vertex debug = kdTree.getNearestVertexDebug(metric, uv);
 		double d2 = metric.distance2(uv, debug.getUV());
 		assert d1 == d2 : ""+n+" is at a distance "+d1+" but nearest point is "+debug+" at distance "+d2;
 		return true;

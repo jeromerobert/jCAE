@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005,2006, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -24,6 +24,7 @@ import org.jcae.mesh.amibe.ds.MNode1D;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.traits.VertexTraitsBuilder;
+import org.jcae.mesh.amibe.metrics.KdTree;
 
 import org.jcae.mesh.cad.CADVertex;
 import org.jcae.mesh.cad.CADFace;
@@ -277,11 +278,12 @@ public class Vertex2D extends Vertex
 		assert this != mesh.outerVertex;
 		assert v1 != mesh.outerVertex;
 		assert v2 != mesh.outerVertex;
-		mesh.getKdTree().double2int(param, i0);
-		mesh.getKdTree().double2int(v1.param, i1);
+		KdTree kdTree = mesh.getKdTree();
+		kdTree.double2int(param, i0);
+		kdTree.double2int(v1.param, i1);
 		long x01 = i1[0] - i0[0];
 		long y01 = i1[1] - i0[1];
-		mesh.getKdTree().double2int(v2.param, i1);
+		kdTree.double2int(v2.param, i1);
 		long x02 = i1[0] - i0[0];
 		long y02 = i1[1] - i0[1];
 		return x01 * y02 - x02 * y01;
@@ -307,9 +309,10 @@ public class Vertex2D extends Vertex
 		if (d2 <= 0L && d3 <= 0L)
 			return true;
 		//  Here, d1 < 0, d2 >= 0 and d3 >= 0
-		long o1 = v1.distance2(mesh, v2);
-		long o2 = v1.distance2cached(mesh, this);
-		long o3 = v1.distance2cached(mesh, v3);
+		KdTree kdTree = mesh.getKdTree();
+		long o1 = v1.distance2(kdTree, v2);
+		long o2 = v1.distance2cached(kdTree, this);
+		long o3 = v1.distance2cached(kdTree, v3);
 		LongLong l1 = new LongLong(o1, d1);
 		LongLong l2 = new LongLong(o2, d2);
 		LongLong l3 = new LongLong(o3, d3);
@@ -376,15 +379,16 @@ public class Vertex2D extends Vertex
 		// Special case when vc1, vc2 and va3 are aligned
 		if (va3.onLeft(mesh, vc1, vc2) == 0L)
 		{
+			KdTree kdTree = mesh.getKdTree();
 			if (onLeft(mesh, vc1, vc2) == 0L)
 			{
-				long l1 = vc1.distance2(mesh, vc2);
-				return (distance2(mesh, vc1) < l1 && distance2(mesh, vc2) < l1 && va3.distance2(mesh, vc1) < l1 && va3.distance2(mesh, vc2) < l1);
+				long l1 = vc1.distance2(kdTree, vc2);
+				return (distance2(kdTree, vc1) < l1 && distance2(kdTree, vc2) < l1 && va3.distance2(kdTree, vc1) < l1 && va3.distance2(kdTree, vc2) < l1);
 			}
 			if (vc1.onLeft(mesh, va3, this) >= 0L || vc2.onLeft(mesh, va3, this) <= 0L)
 				return false;
-			long l1 = vc1.distance2(mesh, vc2);
-			return (va3.distance2(mesh, vc1) < l1 && va3.distance2(mesh, vc2) < l1);
+			long l1 = vc1.distance2(kdTree, vc2);
+			return (va3.distance2(kdTree, vc1) < l1 && va3.distance2(kdTree, vc2) < l1);
 		}
 		// Do not swap if triangles are inverted in 2d space
 		if (vc1.onLeft(mesh, va3, this) >= 0L || vc2.onLeft(mesh, va3, this) <= 0L)
@@ -464,17 +468,17 @@ public class Vertex2D extends Vertex
 		return mesh.getMetric(this).isPseudoIsotropic();
 	}
 	
-	private final long distance2(Mesh2D mesh, Vertex2D that)
+	private final long distance2(KdTree kdTree, Vertex2D that)
 	{
-		mesh.getKdTree().double2int(param, i0);
-		mesh.getKdTree().double2int(that.param, i1);
+		kdTree.double2int(param, i0);
+		kdTree.double2int(that.param, i1);
 		long dx = i0[0] - i1[0];
 		long dy = i0[1] - i1[1];
 		return dx * dx + dy * dy;
 	}
-	private final long distance2cached(Mesh2D mesh, Vertex2D that)
+	private final long distance2cached(KdTree kdTree, Vertex2D that)
 	{
-		mesh.getKdTree().double2int(that.param, i1);
+		kdTree.double2int(that.param, i1);
 		long dx = i0[0] - i1[0];
 		long dy = i0[1] - i1[1];
 		return dx * dx + dy * dy;
