@@ -330,7 +330,7 @@ public class Vertex2D extends Vertex
 	     ==> x orth(M,V12) - y orth(M,V13) = 0.5 V23
 	         x = <V23, V13> / (2 <orth(M,V12), V13>)
 	*/
-	private Vertex2D circumcenter(Metric2D m2d, Vertex2D v1, Vertex2D v2, Vertex2D v3, double[] po)
+	private static Vertex2D circumcenter(Metric2D m2d, Vertex2D v1, Vertex2D v2, Vertex2D v3, double[] po)
 		throws RuntimeException
 	{
 		double [] p1 = v1.getUV();
@@ -394,7 +394,7 @@ public class Vertex2D extends Vertex
 		try {
 			Metric2D mA = mesh.getMetric(this);
 			Metric2D mB = mesh.getMetric(va3);
-			Vertex2D C3 = va3.circumcenter(mB, vc1, vc2, va3, orth);
+			Vertex2D C3 = circumcenter(mB, vc1, vc2, va3, orth);
 			double ret = Math.sqrt(
 				mB.distance2(C3.param, param) /
 				mB.distance2(C3.param, va3.param));
@@ -412,11 +412,11 @@ public class Vertex2D extends Vertex
 			// this -> vc2   vc1 -> this   vc2 -> va3  va3 -> vc1
 			Metric2D mA = mesh.getMetric(vc2);
 			Metric2D mB = mesh.getMetric(vc1);
-			Vertex2D C3 = vc1.circumcenter(mB, this, va3, vc1, orth);
+			Vertex2D C3 = circumcenter(mB, this, va3, vc1, orth);
 			double ret = Math.sqrt(
 				mB.distance2(C3.param, vc2.param) /
 				mB.distance2(C3.param, vc1.param));
-			Vertex2D C0 = vc2.circumcenter(mA, this, va3, vc1, orth);
+			Vertex2D C0 = circumcenter(mA, this, va3, vc1, orth);
 			ret += Math.sqrt(
 				mA.distance2(C0.param, vc2.param) /
 				mA.distance2(C0.param, vc1.param));
