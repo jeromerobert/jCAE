@@ -416,7 +416,10 @@ public class Vertex2D extends Vertex
 			double ret = Math.sqrt(
 				mB.distance2(C3.param, vc2.param) /
 				mB.distance2(C3.param, vc1.param));
-			Vertex2D C0 = circumcenter(mA, this, va3, vc1, orth);
+			// FIXME: mesh.getMetric(this) gives better results than mA,
+			// see for instance sphere.brep with an edge length of 0.005
+			// That sounds wrong, it needs to be investigated.
+			Vertex2D C0 = circumcenter(mesh.getMetric(this), this, va3, vc1, orth);
 			ret += Math.sqrt(
 				mA.distance2(C0.param, vc2.param) /
 				mA.distance2(C0.param, vc1.param));
