@@ -55,6 +55,11 @@ public class Vertex2D extends Vertex
 	private static final int [] i1 = new int[2];
 
 	/**
+	 * Metric at this Vertex.  It is managed by Mesh2D.
+	 */
+	Metric2D metric;
+
+	/**
 	 * Create a Vertex for a 2D mesh.
 	 *
 	 * @param vtb  traits builder

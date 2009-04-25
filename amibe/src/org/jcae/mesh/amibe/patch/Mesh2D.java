@@ -27,6 +27,7 @@ import org.jcae.mesh.amibe.ds.TriangleVH;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.metrics.KdTree;
+import org.jcae.mesh.amibe.metrics.KdTreeProcedure;
 import org.jcae.mesh.amibe.metrics.Location;
 import org.jcae.mesh.cad.CADFace;
 import org.jcae.mesh.cad.CADGeomSurface;
@@ -34,8 +35,6 @@ import org.jcae.mesh.cad.CADShape;
 
 import java.util.Stack;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -64,8 +63,6 @@ public class Mesh2D extends Mesh
 
 	// 2D euclidian metric
 	private transient final EuclidianMetric2D euclidian_metric2d = new EuclidianMetric2D();
-
-	private transient final Map<Location, Metric2D> metricsMap = new HashMap<Location, Metric2D>();
 
 	private static final double delta_max = 0.5;
 	private static final int level_max = 10;
@@ -357,7 +354,7 @@ public class Mesh2D extends Mesh
 		if (i != 2 && i != 3)
 			throw new java.lang.IllegalArgumentException("pushCompGeom argument must be either 2 or 3, current value is: "+i);
 		compGeomStack.push(Integer.valueOf(i));
-		metricsMap.clear();
+		clearAllMetrics();
 	}
 	
 	/**
@@ -375,7 +372,7 @@ public class Mesh2D extends Mesh
 	{
 		Integer ret = compGeomStack.pop();
 		if (!compGeomStack.empty() && !ret.equals(compGeomStack.peek()))
-			metricsMap.clear();
+			clearAllMetrics();
 		if (ret.intValue() != i)
 			throw new java.lang.RuntimeException("Internal error.  Expected value: "+i+", found: "+ret);
 		if (compGeomStack.empty())
@@ -384,10 +381,41 @@ public class Mesh2D extends Mesh
 			compGeomCurrent = compGeomStack.peek().intValue();
 	}
 	
+	private static class ClearAllMetricsProcedure implements KdTreeProcedure
+	{
+		// Add a public constructor to avoid synthetic access
+		public ClearAllMetricsProcedure()
+		{
+		}
+		public final int action(Object o, int s, final int [] i0)
+		{
+			KdTree<Vertex2D>.Cell self = (KdTree.Cell) o;
+			if (self.isLeaf())
+			{
+				for (int i = 0, n = self.count(); i < n; i++)
+					self.getVertex(i).metric = null;
+			}
+			return KdTreeProcedure.OK;
+		}
+	}
+	
+	/**
+	 * Remove all metrics of vertices stored in this <code>KdTree</code>.
+	 */
+	private void clearAllMetrics()
+	{
+		KdTree quadtree = traitsBuilder.getKdTree(traits);
+		if (quadtree == null)
+			return;
+		ClearAllMetricsProcedure gproc = new ClearAllMetricsProcedure();
+		quadtree.walk(gproc);
+	}
+
 	@Override
 	public Metric2D getMetric(Location pt)
 	{
-		Metric2D m2 = metricsMap.get(pt);
+		Vertex2D v2 = (Vertex2D) pt;
+		Metric2D m2 = v2.metric;
 		if (null == m2)
 		{
 			if (compGeomCurrent == 2)
@@ -398,15 +426,15 @@ public class Mesh2D extends Mesh
 				surface.setParameter(uv[0], uv[1]);
 				m2 = new MetricOnSurface(surface, meshParameters);
 			}
-			metricsMap.put(pt, m2);
+			v2.metric = m2;
 		}
 		return m2;
 	}
 
 	public void moveVertex(Vertex2D vertex, double u, double v)
 	{
+		vertex.metric = null;
 		vertex.moveTo(u, v);
-		metricsMap.remove(vertex);
 	}
 
 	/**
