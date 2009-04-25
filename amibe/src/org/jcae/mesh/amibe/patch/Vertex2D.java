@@ -171,7 +171,7 @@ public class Vertex2D extends Vertex
 	{
 		if (logger.isLoggable(Level.FINE))
 			logger.fine("Searching for the triangle surrounding "+this);
-		TriangleVH t = (TriangleVH) mesh.getKdTree().getNearVertex(mesh.getMetric(this), this).getLink();
+		TriangleVH t = (TriangleVH) mesh.getKdTree().getNearVertex(mesh.getMetric(this), param).getLink();
 		VirtualHalfEdge2D current = new VirtualHalfEdge2D(t, 0);
 		boolean redo = false;
 		Vertex2D o = (Vertex2D) current.origin();

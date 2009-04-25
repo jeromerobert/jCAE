@@ -44,14 +44,14 @@ public class QuadTreeSampleRemove extends QuadTreeSample
 		super (q);
 	}
 	
-	public Vertex2D getNearVertex(Metric metric, Vertex2D n)
+	public Vertex2D getNearVertex(Metric metric, double[] uv)
 	{
-		return (Vertex2D) quadtree.getNearVertex(metric, n);
+		return (Vertex2D) quadtree.getNearVertex(metric, uv);
 	}
 
-	public Vertex2D getNearestVertex(Metric metric, Vertex2D n)
+	public Vertex2D getNearestVertex(Metric metric, double[] uv)
 	{
-		return (Vertex2D) quadtree.getNearestVertex(metric, n);
+		return (Vertex2D) quadtree.getNearestVertex(metric, uv);
 	}
 
 	public static void display(Viewer view, QuadTreeSample r)
@@ -98,7 +98,7 @@ public class QuadTreeSampleRemove extends QuadTreeSample
 					{
 						Vertex2D picked = (Vertex2D) m.createVertex(xyz[0], xyz[1]);
 						Metric metric = m.getMetric(picked);
-						Vertex2D vt = r.getNearVertex(metric, picked);
+						Vertex2D vt = r.getNearVertex(metric, xyz);
 						r.quadtree.remove(vt);
 						view.removeAllBranchGroup();
 						display(view, r);

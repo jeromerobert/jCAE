@@ -259,13 +259,11 @@ public class QuadTreeSample
 		return bg;
 	}
 	
-	public BranchGroup segment(Vertex2D vt, Vertex2D vn, float depth, float r, float g, float b)
+	public BranchGroup segment(double[] pvt, double[] pvn, float depth, float r, float g, float b)
 	{
 		BranchGroup bg = new BranchGroup();
 		LineArray line = new LineArray(2, GeometryArray.COORDINATES | GeometryArray.COLOR_3);
 		double [] xcoord = new double[6];
-		double [] pvt = vt.getUV();
-		double [] pvn = vn.getUV();
 		for (int i = 0; i < 2; i++)
 		{
 			xcoord[i]   = pvt[i];

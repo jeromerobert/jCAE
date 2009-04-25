@@ -57,6 +57,7 @@ public class OctreeSampleRemove extends OctreeSample
 		double [] bbox = { 0.0, 0.0, 0.0, 1.0, 1.0, 1.0 };
 		final Mesh mesh = new Mesh();
 		final KdTree<Vertex> r = new KdTree<Vertex>(bbox);
+		final EuclidianMetric3D metric = new EuclidianMetric3D();
 		final OctreeSample t = new OctreeSample(r);
 		double [] xyz = new double[3];
 		for (int i = 0; i < 200; i++)
@@ -81,8 +82,7 @@ public class OctreeSampleRemove extends OctreeSample
 					double [] xyzPick = view.getLastClick();
 					if (null != xyzPick)
 					{
-						Vertex picked = mesh.createVertex(xyzPick);
-						Vertex vt = r.getNearVertex(mesh.getMetric(picked), picked);
+						Vertex vt = r.getNearVertex(metric, xyzPick);
 						r.remove(vt);
 						view.removeAllBranchGroup();
 						display(view, t);

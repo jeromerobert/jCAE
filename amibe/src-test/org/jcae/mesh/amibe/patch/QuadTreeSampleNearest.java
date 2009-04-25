@@ -36,7 +36,7 @@ import org.jcae.mesh.amibe.metrics.Metric;
  * When clicking at a point, a yellow segment is displayed between this point
  * and the nearest point found in the same cell, returned by
  * {@link org.jcae.metric.amibe.util.KdTree#getNearVertex(Mesh, Vertex)}.
- * If {@link org.jcae.metric.amibe.util.KdTree#getNearestVertex(Mesh, Vertex)}
+ * If {@link org.jcae.metric.amibe.util.KdTree#getNearestVertex(Metric, double[])}
  * finds a nearest point, a blue segment is displayed.
  */
 public class QuadTreeSampleNearest extends QuadTreeSample
@@ -48,33 +48,34 @@ public class QuadTreeSampleNearest extends QuadTreeSample
 		super (q);
 	}
 	
-	public Vertex2D getNearVertex(Metric metric, Vertex2D n)
+	public Vertex2D getNearVertex(Metric metric, double[] uv)
 	{
-		return (Vertex2D) quadtree.getNearVertex(metric, n);
+		return (Vertex2D) quadtree.getNearVertex(metric, uv);
 	}
 
-	public Vertex2D getNearestVertex(Metric metric, Vertex2D n)
+	public Vertex2D getNearestVertex(Metric metric, double[] uv)
 	{
-		return (Vertex2D) quadtree.getNearestVertex(metric, n);
+		return (Vertex2D) quadtree.getNearestVertex(metric, uv);
 	}
 
 	public static void main(String args[])
 	{
-		double u, v;
 		boolean visu = true;
 		Random rand = new Random(113L);
 		double [] bbmin = { 0.0, 0.0 };
 		double [] bbmax = { 1.0, 1.0 };
+		double [] uv = new double[2];
 		final Mesh2D m = new Mesh2D();
+		final EuclidianMetric2D metric = new EuclidianMetric2D();
 		m.pushCompGeom(2);
 		m.resetKdTree(bbmin, bbmax);
 		final QuadTreeSampleNearest r = new QuadTreeSampleNearest(m.getKdTree());
 		logger.fine("Start insertion");
 		for (int i = 0; i < 500; i++)
 		{
-			u = rand.nextDouble();
-			v = rand.nextDouble();
-			Vertex2D pt = (Vertex2D) m.createVertex(u, v);
+			uv[0] = rand.nextDouble();
+			uv[1] = rand.nextDouble();
+			Vertex2D pt = (Vertex2D) m.createVertex(uv);
 			r.quadtree.add(pt);
 		}
 		//CheckCoordProcedure checkproc = new CheckCoordProcedure();
@@ -92,21 +93,19 @@ public class QuadTreeSampleNearest extends QuadTreeSample
 		
 		for (int i = 0; i < 10; i++)
 		{
-			u = rand.nextDouble();
-			v = rand.nextDouble();
-			Vertex2D vt = (Vertex2D) m.createVertex(u, v);
-			Metric metric = m.getMetric(vt);
+			uv[0] = rand.nextDouble();
+			uv[1] = rand.nextDouble();
 			if (visu)
 			{
-				view.addBranchGroup(r.segment(vt, r.getNearVertex(metric, vt), 5.0f, 1, 1, 0));
+				view.addBranchGroup(r.segment(uv, r.getNearVertex(metric, uv).getUV(), 5.0f, 1, 1, 0));
 				view.setVisible(true);
-				view.addBranchGroup(r.segment(vt, r.getNearestVertex(metric, vt), 0.0f, 0, 1, 1));
+				view.addBranchGroup(r.segment(uv, r.getNearestVertex(metric, uv).getUV(), 0.0f, 0, 1, 1));
 				view.setVisible(true);
 			}
 			else
 			{
-				r.getNearVertex(metric, vt);
-				r.getNearestVertex(metric, vt);
+				r.getNearVertex(metric, uv);
+				r.getNearestVertex(metric, uv);
 			}
 		}
 		if (visu)
@@ -118,11 +117,9 @@ public class QuadTreeSampleNearest extends QuadTreeSample
 					double [] xyz = view.getLastClick();
 					if (null != xyz)
 					{
-						Vertex2D vt = (Vertex2D) m.createVertex(xyz[0], xyz[1]);
-						Metric metric = m.getMetric(vt);
-						view.addBranchGroup(r.segment(vt, r.getNearVertex(metric, vt), 5.0f, 1, 1, 0));
+						view.addBranchGroup(r.segment(xyz, r.getNearVertex(metric, xyz).getUV(), 5.0f, 1, 1, 0));
 						view.setVisible(true);
-						view.addBranchGroup(r.segment(vt, r.getNearestVertex(metric, vt), 0.0f, 0, 1, 1));
+						view.addBranchGroup(r.segment(xyz, r.getNearestVertex(metric, xyz).getUV(), 0.0f, 0, 1, 1));
 						view.setVisible(true);
 					}
 				}

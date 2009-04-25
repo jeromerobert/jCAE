@@ -106,7 +106,7 @@ public class Fuse
 		{
 			if (n.isMutable())
 				continue;
-			Vertex p = octree.getNearestVertex(mesh.getMetric(n), n);
+			Vertex p = octree.getNearestVertex(mesh.getMetric(n), n.getUV());
 			if (p == null || p.isMutable() || n.sqrDistance3D(p) > tolerance)
 				octree.add(n);
 			else

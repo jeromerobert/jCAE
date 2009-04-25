@@ -608,20 +608,29 @@ public class KdTree<T extends Location>
 		}
 		return true;
 	}
-	
+
+	// Called in log messages
+	private final String coordinatesToString(double[] uv)
+	{
+		if (uv.length == 2)
+			return "("+uv[0]+", "+uv[1]+")";
+		else
+			return "("+uv[0]+", "+uv[1]+", "+uv[2]+")";
+	}
+
 	/**
-	 * Return a stored element of the <code>Octree</code> which is
-	 * near from a given vertex.  The algorithm is simplistic: the leaf
+	 * Return a stored element of the <code>KdTree</code> which is
+	 * near from a given position.  The algorithm is simplistic: the leaf
 	 * which would contains this node is retrieved.  If it contains
 	 * vertices, the nearest one is returned (vertices in other leaves may
 	 * of course be nearer).  Otherwise the nearest vertex from sibling
 	 * children is returned.  The returned vertex is a good starting point
-	 * for {@link #getNearestVertex(Mesh, Vertex)}.
+	 * for {@link #getNearestVertex(Metric, double[])}.
 	 *
-	 * @param v  the node to check.
+	 * @param uv  coordinates.
 	 * @return a near vertex.
 	 */
-	public final T getNearVertex(Metric metric, T v)
+	public final T getNearVertex(Metric metric, double[] uv)
 	{
 		if (root.nItems == 0)
 			return null;
@@ -629,11 +638,10 @@ public class KdTree<T extends Location>
 		Cell last = null;
 		int s = gridSize;
 		int [] ijk = new int[dimension];
-		double [] uv = v.getUV();
 		double2int(uv, ijk);
 		int searchedCells = 0;
 		if (logger.isLoggable(Level.FINE))
-			logger.fine("Near point: "+v);
+			logger.fine("Near point: "+coordinatesToString(uv));
 		while (null != current && current.nItems < 0)
 		{
 			last = current;
@@ -643,7 +651,7 @@ public class KdTree<T extends Location>
 			current = (Cell) current.subCell[indexSubCell(ijk, s)];
 		}
 		if (null == current)
-			return getNearVertexInSubCells(last, metric, v, searchedCells);
+			return getNearVertexInSubCells(last, metric, uv, searchedCells);
 		
 		T vQ = current.getVertex(0);
 		T ret = vQ;
@@ -663,15 +671,12 @@ public class KdTree<T extends Location>
 		return ret;
 	}
 	
-	private final T getNearVertexInSubCells(Cell current, Metric metric, T v, int searchedCells)
+	private final T getNearVertexInSubCells(Cell current, Metric metric, double [] uv, int searchedCells)
 	{
 		T ret = null;
 		int [] ijk = new int[dimension];
-		double [] uv = v.getUV();
 		double dist = -1.0;
 		double2int(uv, ijk);
-		if (logger.isLoggable(Level.FINE))
-			logger.fine("Near point in suboctrees: "+v);
 		int l = 0;
 		int [] posStack = new int[MAXLEVEL];
 		posStack[l] = 0;
@@ -733,20 +738,20 @@ public class KdTree<T extends Location>
 	private final class GetNearestVertexProcedure implements KdTreeProcedure
 	{
 		private final int [] ijk = new int[dimension];
-		private final T fromVertex;
+		private final double [] fromPosition;
 		private final Metric metric;
 		private T nearestVertex;
 		private final double [] i2d = new double[dimension];
 		private final int [] idist = new int[dimension];
 		private double dist;
 		private int searchedCells;
-		private GetNearestVertexProcedure(Metric m, T from, T v)
+		private GetNearestVertexProcedure(Metric m, double[] from, T v)
 		{
-			double2int(from.getUV(), ijk);
+			double2int(from, ijk);
 			nearestVertex = v;
-			fromVertex = from;
+			fromPosition = from;
 			metric = m;
-			dist = metric.distance2(fromVertex.getUV(), nearestVertex.getUV());
+			dist = metric.distance2(fromPosition, nearestVertex.getUV());
 			double [] r = metric.getUnitBallBBox();
 			for (int k = 0; k < dimension; k++)
 			{
@@ -769,7 +774,7 @@ public class KdTree<T extends Location>
 				for (int i = 0; i < self.nItems; i++)
 				{
 					T vtest = self.getVertex(i);
-					double retdist = metric.distance2(fromVertex.getUV(), vtest.getUV());
+					double retdist = metric.distance2(fromPosition, vtest.getUV());
 					if (retdist < dist)
 					{
 						dist = retdist;
@@ -790,50 +795,22 @@ public class KdTree<T extends Location>
 			return KdTreeProcedure.OK;
 		}
 	}
-	
+
 	/**
-	 * Return the nearest vertex stored in this <code>Octree</code>.
+	 * Return the nearest vertex stored in this <code>KdTree</code>.
 	 *
-	 * @param v  the node to check.
+	 * @param uv  coordinates.
 	 * @return the nearest vertex.
 	 */
-	public final T getNearestVertex(Metric metric, T v)
+	public final T getNearestVertex(Metric metric, double[] uv)
 	{
 		if (root.nItems == 0)
 			return null;
-		T near = getNearVertex(metric, v);
-		/*if (v.isManifold())
-		{
-			// Triangle vertices may be better candidates
-			Triangle t = (Triangle) v.getLink();
-			double target = metric.distance2(v, near, v);
-			for (int j = 0; j < 3; j++)
-			{
-				Vertex testVertex = t.vertex[j];
-				double tdist = metric.distance2(v, testVertex, v);
-				if (tdist < target)
-				{
-					near = testVertex;
-					target = tdist;
-				}
-			}
-		}*/
-		return getNearestVertex(metric, v, near);
-	}
-
-	/**
-	 * Return the nearest vertex stored in this <code>Octree</code>.
-	 *
-	 * @param v  the node to check.
-	 * @param start  initial start point near to expected vertex.
-	 * @return the nearest vertex.
-	 */
-	private final T getNearestVertex(Metric metric, T v, T start)
-	{
+		T near = getNearVertex(metric, uv);
 		if (logger.isLoggable(Level.FINE))
-			logger.fine("Nearest point of "+v);
+			logger.fine("Nearest point of "+coordinatesToString(uv));
 		
-		GetNearestVertexProcedure gproc = new GetNearestVertexProcedure(metric, v, start);
+		GetNearestVertexProcedure gproc = new GetNearestVertexProcedure(metric, uv, near);
 		walk(gproc);
 		T ret = gproc.nearestVertex;
 		if (logger.isLoggable(Level.FINE))
@@ -848,17 +825,17 @@ public class KdTree<T extends Location>
 	{
 		private final int [] ij = new int[dimension];
 		private double dist;
-		private final T fromVertex;
+		private final double[] fromPosition;
 		private T nearestVertex;
 		private final Metric metric;
 		private int searchedCells;
-		private GetNearestVertexDebugProcedure(Metric m, T from, T v)
+		private GetNearestVertexDebugProcedure(Metric m, double[] from, T v)
 		{
-			double2int(from.getUV(), ij);
+			double2int(from, ij);
 			nearestVertex = v;
-			fromVertex = from;
+			fromPosition = from;
 			metric = m;
-			dist = metric.distance2(fromVertex.getUV(), v.getUV());
+			dist = metric.distance2(fromPosition, v.getUV());
 		}
 		public int action(Object o, int s, final int [] i0)
 		{
@@ -869,7 +846,7 @@ public class KdTree<T extends Location>
 				for (int i = 0; i < self.nItems; i++)
 				{
 					T vtest = self.getVertex(i);
-					double retdist = metric.distance2(fromVertex.getUV(), vtest.getUV());
+					double retdist = metric.distance2(fromPosition, vtest.getUV());
 					if (retdist < dist)
 					{
 						dist = retdist;
@@ -882,22 +859,22 @@ public class KdTree<T extends Location>
 	}
 	
 	/**
-	 * Slow implementation of {@link #getNearestVertex(Mesh, Vertex)}.
+	 * Slow implementation of {@link #getNearestVertex(Metric, double[])}.
 	 * This method should be called only for debugging purpose.
 	 *
-	 * @param v  the vertex to check.
+	 * @param uv  coordinates.
 	 * @return the nearest vertex.
 	 */
-	public T getNearestVertexDebug(Metric metric, T v)
+	public T getNearestVertexDebug(Metric metric, double[] uv)
 	{
 		if (root.nItems == 0)
 			return null;
-		T ret = getNearVertex(metric, v);
+		T ret = getNearVertex(metric, uv);
 		assert ret != null;
 		if (logger.isLoggable(Level.FINE))
-			logger.fine("(debug) Nearest point of "+v);
+			logger.fine("(debug) Nearest point of "+coordinatesToString(uv));
 		
-		GetNearestVertexDebugProcedure gproc = new GetNearestVertexDebugProcedure(metric, v, ret);
+		GetNearestVertexDebugProcedure gproc = new GetNearestVertexDebugProcedure(metric, uv, ret);
 		walk(gproc);
 		ret = gproc.nearestVertex;
 		if (logger.isLoggable(Level.FINE))
