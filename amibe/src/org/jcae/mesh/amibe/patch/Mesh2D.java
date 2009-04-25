@@ -353,7 +353,8 @@ public class Mesh2D extends Mesh
 	{
 		if (i != 2 && i != 3)
 			throw new java.lang.IllegalArgumentException("pushCompGeom argument must be either 2 or 3, current value is: "+i);
-		compGeomStack.push(Integer.valueOf(i));
+		compGeomCurrent = Integer.valueOf(i);
+		compGeomStack.push(compGeomCurrent);
 		clearAllMetrics();
 	}
 	
