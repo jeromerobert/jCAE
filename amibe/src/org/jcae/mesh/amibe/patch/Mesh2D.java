@@ -428,12 +428,6 @@ public class Mesh2D extends Mesh
 		moveVertex(vertex, x, y);
 	}
 
-	@Override
-	public void resetMetric(Location pt)
-	{
-		metricsMap.remove(pt);
-	}
-
 	/**
 	 * Returns the Riemannian distance between nodes.
 	 * This distance is computed with metrics on start and end points,

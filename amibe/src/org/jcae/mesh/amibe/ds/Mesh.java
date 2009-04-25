@@ -976,10 +976,6 @@ public class Mesh implements Serializable
 		return euclidian_metric3d;
 	}
 
-	public void resetMetric(Location pt)
-	{
-	}
-
 	/**
 	 * Returns square distance between 2 vertices.
 	 */
