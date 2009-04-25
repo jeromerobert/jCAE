@@ -72,6 +72,7 @@ public class ConstraintNormal3D
 		TriangleVH t;
 		VirtualHalfEdge2D ot, sym;
 		int cnt = 0;
+		LOGGER.config("Enter compute()");
 		mesh.pushCompGeom(3);
 		LOGGER.fine(" Checking inverted triangles");
 		ot = new VirtualHalfEdge2D();
@@ -192,6 +193,7 @@ public class ConstraintNormal3D
 				redo = true;
 		} while (redo && niter > 0);
 		mesh.popCompGeom(3);
+		LOGGER.config("Leave compute()");
 	}
 	
 }

@@ -226,6 +226,7 @@ public class Initial
 	 */
 	public void compute()
 	{
+		LOGGER.config("Enter compute()");
 		if(boundaryNodes==null)
 		{
 			MeshParameters mp = mesh.getMeshParameters();
@@ -235,6 +236,7 @@ public class Initial
 				{
 					Vertex2D [] bNodes = mesh1D.boundaryNodes(face, mp);
 					computeFromBoundaryNodes(bNodes);
+					LOGGER.config("Leave compute()");
 					return;
 				}
 				catch(InitialTriangulationException ex)
@@ -254,6 +256,7 @@ public class Initial
 		}
 		else
 			computeFromBoundaryNodes(boundaryNodes);
+		LOGGER.config("Leave compute()");
 	}
 
 	private void computeFromBoundaryNodes(Vertex2D [] bNodes)

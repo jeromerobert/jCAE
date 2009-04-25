@@ -160,7 +160,7 @@ public class SmoothNodes2D
 	}
 	public void compute()
 	{
-		LOGGER.fine("Run "+getClass().getName());
+		LOGGER.config("Enter compute()");
 		if (nloop > 0)
 		{
 			mesh.pushCompGeom(3);
@@ -186,6 +186,7 @@ public class SmoothNodes2D
 		}
 		LOGGER.fine("Number of moved points: "+processed);
 		LOGGER.fine("Total number of points not moved during processing: "+notProcessed);
+		LOGGER.config("Leave compute()");
 	}
 	
 	/*

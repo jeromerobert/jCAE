@@ -104,6 +104,7 @@ public class Insertion
 	public void compute()
 	{
 		int nrIter = 0;
+		LOGGER.config("Enter compute()");
 		LOGGER.fine(" Insert inner nodes");
 		ArrayList<Vertex2D> nodes = new ArrayList<Vertex2D>();
 		ArrayList<Vertex2D> triNodes = new ArrayList<Vertex2D>();
@@ -381,6 +382,7 @@ public class Insertion
 			}
 		}
 		LOGGER.fine("Number of iterations to insert all nodes: "+nrIter);
+		LOGGER.config("Leave compute()");
 	}
 	
 	private final boolean checkNearestVertex(Vertex v, Vertex n)
