@@ -63,11 +63,13 @@
 					<!-- Exclude test classes which serve for inheritance purpose -->
 					<exclude name="org/jcae/mesh/amibe/util/QSortedTreeTest.class"/>
 					<exclude name="org/jcae/mesh/amibe/ds/AbstractHalfEdgeTest.class"/>
+					<exclude name="org/jcae/mesh/amibe/algos3d/SphereBuilder**"/>
 					<!-- How to exclude inner classes automatically? -->
 					<exclude name="org/jcae/mesh/amibe/algos3d/SmoothNodes3DBgTest$CheckSmoothNodes3DBg.class"/>
 					<!-- Old tests, not yet converted to JUnit -->
 					<exclude name="org/jcae/mesh/amibe/patch/**"/>
 					<exclude name="org/jcae/mesh/amibe/util/**"/>
+					<exclude name="org/jcae/mesh/amibe/metrics/OctreeSample**"/>
 					<exclude name="org/jcae/mesh/bora/**"/>
 					<!-- Not JUnit tests, used by test-large -->
 					<exclude name="org/jcae/mesh/MesherTest.class"/>
