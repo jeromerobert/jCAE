@@ -251,8 +251,9 @@ public class Insertion
 					for (int i = 0; i < imax; i++)
 					{
 						Vertex2D v = triNodes.get(index);
-						Vertex2D n = (Vertex2D) mesh.getKdTree().getNearestVertex(mesh.getMetric(v), v);
-						assert checkNearestVertex(v, n);
+						Metric metric = mesh.getMetric(v);
+						Vertex2D n = (Vertex2D) mesh.getKdTree().getNearestVertex(metric, v);
+						assert checkNearestVertex(metric, v, n);
 						if (mesh.interpolatedDistance(v, n) > minlen)
 						{
 							mesh.getKdTree().add(v);
@@ -303,8 +304,9 @@ public class Insertion
 				// mesh.getKdTree().getNearestVertex() and thus
 				// v.getSurroundingOTriangle() below.
 				c.setLink(t);
-				Vertex2D n = (Vertex2D) mesh.getKdTree().getNearestVertex(mesh.getMetric(c), c);
-				assert checkNearestVertex(c, n);
+				Metric metric = mesh.getMetric(c);
+				Vertex2D n = (Vertex2D) mesh.getKdTree().getNearestVertex(metric, c);
+				assert checkNearestVertex(metric, c, n);
 				if (mesh.interpolatedDistance(c, n) > minlen)
 				{
 					mesh.getKdTree().add(c);
@@ -385,9 +387,8 @@ public class Insertion
 		LOGGER.config("Leave compute()");
 	}
 	
-	private final boolean checkNearestVertex(Vertex v, Vertex n)
+	private final boolean checkNearestVertex(Metric metric, Vertex v, Vertex n)
 	{
-		Metric metric = mesh.getMetric(v);
 		double d1 = metric.distance2(v.getUV(), n.getUV());
 		Vertex debug = mesh.getKdTree().getNearestVertexDebug(metric, v);
 		double d2 = metric.distance2(v.getUV(), debug.getUV());

@@ -469,7 +469,7 @@ public class Mesh2D extends Mesh
 	public double interpolatedDistance(Vertex2D start, Vertex2D end)
 	{
 		if (compGeomCurrent == 2)
-			return Math.sqrt(getMetric(start).distance2(start.getUV(), end.getUV()));
+			return Math.sqrt(euclidian_metric2d.distance2(start.getUV(), end.getUV()));
 
 		Metric2D ms = getMetric(start);
 		Metric2D me = getMetric(end);
