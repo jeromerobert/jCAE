@@ -35,6 +35,7 @@ import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.patch.InvalidFaceException;
 import org.jcae.mesh.amibe.patch.InitialTriangulationException;
+import org.jcae.mesh.amibe.metrics.KdTree;
 import org.jcae.mesh.cad.CADFace;
 import java.util.Iterator;
 import java.util.ArrayList;
@@ -289,6 +290,7 @@ public class Initial
 		//  Initial point insertion sometimes fail on 2D,
 		//  this needs to be investigated.
 		mesh.pushCompGeom(2);
+		KdTree kdTree = mesh.getKdTree();
 		Vertex2D firstOnWire = null;
 		{
 			//  Initializes mesh
@@ -305,7 +307,7 @@ public class Initial
 				v3 = bNodes[i];
 				if (firstOnWire == v3)
 					throw new InitialTriangulationException();
-				if (v3.onLeft(mesh, v1, v2) != 0L)
+				if (v3.onLeft(kdTree, v1, v2) != 0L)
 					break;
 			}
 			assert i < bNodes.length;

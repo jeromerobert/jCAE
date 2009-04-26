@@ -172,7 +172,8 @@ public class Vertex2D extends Vertex
 	{
 		if (logger.isLoggable(Level.FINE))
 			logger.fine("Searching for the triangle surrounding "+this);
-		TriangleVH t = (TriangleVH) mesh.getKdTree().getNearVertex(mesh.getMetric(this), param).getLink();
+		KdTree<Vertex> kdTree = mesh.getKdTree();
+		TriangleVH t = (TriangleVH) kdTree.getNearVertex(mesh.getMetric(this), param).getLink();
 		VirtualHalfEdge2D current = new VirtualHalfEdge2D(t, 0);
 		boolean redo = false;
 		Vertex2D o = (Vertex2D) current.origin();
@@ -207,7 +208,7 @@ public class Vertex2D extends Vertex
 		}
 		//  Orient triangle so that point is to the left.  Apex may
 		//  be outerVertex again, but this is case 3 above.
-		if (onLeft(mesh, (Vertex2D) current.origin(), (Vertex2D) current.destination()) < 0L)
+		if (onLeft(kdTree, (Vertex2D) current.origin(), (Vertex2D) current.destination()) < 0L)
 		{
 			current.sym();
 			redo = true;
@@ -224,8 +225,8 @@ public class Vertex2D extends Vertex
 			assert d != mesh.outerVertex;
 			if (a == mesh.outerVertex)
 				break;
-			long d1 = onLeft(mesh, d, a);
-			long d2 = onLeft(mesh, a, o);
+			long d1 = onLeft(kdTree, d, a);
+			long d2 = onLeft(kdTree, a, o);
 			//  Note that for all cases, new origin and destination
 			//  points cannot be outerVertex.
 			if (d1 < 0L && d2 < 0L)
@@ -266,19 +267,15 @@ public class Vertex2D extends Vertex
 	 * {@link VirtualHalfEdge2D#forceBoundaryEdge(Mesh2D,Vertex2D)} to compute
 	 * segment intersection.
 	 *
-	 * @param mesh  underlying Mesh2D instance
+	 * @param kdTree  underlying KdTree instance
 	 * @param v1   first vertex of the segment
 	 * @param v2   second vertex of the segment
 	 * @return the signed area of the triangle composed of these three
 	 * vertices. It is positive if the vertex is on the left of this
 	 * segment, and negative otherwise.
 	 */
-	public long onLeft(Mesh2D mesh, Vertex2D v1, Vertex2D v2)
+	public long onLeft(KdTree kdTree, Vertex2D v1, Vertex2D v2)
 	{
-		assert this != mesh.outerVertex;
-		assert v1 != mesh.outerVertex;
-		assert v2 != mesh.outerVertex;
-		KdTree kdTree = mesh.getKdTree();
 		kdTree.double2int(param, i0);
 		kdTree.double2int(v1.param, i1);
 		long x01 = i1[0] - i0[0];
@@ -299,17 +296,17 @@ public class Vertex2D extends Vertex
 		assert v1 != mesh.outerVertex;
 		assert v2 != mesh.outerVertex;
 		assert v3 != mesh.outerVertex;
-		assert v1.onLeft(mesh, v2, v3) >= 0L : ot+" "+v1.onLeft(mesh, v2, v3);
-		assert v1.onLeft(mesh, this, v2) >= 0L : ot+" "+v1.onLeft(mesh, this, v2);
-		long d1 = v1.onLeft(mesh, v3, this);
+		KdTree<Vertex> kdTree = mesh.getKdTree();
+		assert v1.onLeft(kdTree, v2, v3) >= 0L : ot+" "+v1.onLeft(kdTree, v2, v3);
+		assert v1.onLeft(kdTree, this, v2) >= 0L : ot+" "+v1.onLeft(kdTree, this, v2);
+		long d1 = v1.onLeft(kdTree, v3, this);
 		if (d1 >= 0L)
 			return false;
-		long d2 = v1.onLeft(mesh, v2, v3);
-		long d3 = v1.onLeft(mesh, this, v2);
+		long d2 = v1.onLeft(kdTree, v2, v3);
+		long d3 = v1.onLeft(kdTree, this, v2);
 		if (d2 <= 0L && d3 <= 0L)
 			return true;
 		//  Here, d1 < 0, d2 >= 0 and d3 >= 0
-		KdTree kdTree = mesh.getKdTree();
 		long o1 = v1.distance2(kdTree, v2);
 		long o2 = v1.distance2cached(kdTree, this);
 		long o3 = v1.distance2cached(kdTree, v3);
@@ -377,21 +374,21 @@ public class Vertex2D extends Vertex
 		assert vc2 != mesh.outerVertex;
 		assert va3 != mesh.outerVertex;
 		// Special case when vc1, vc2 and va3 are aligned
-		if (va3.onLeft(mesh, vc1, vc2) == 0L)
+		KdTree kdTree = mesh.getKdTree();
+		if (va3.onLeft(kdTree, vc1, vc2) == 0L)
 		{
-			KdTree kdTree = mesh.getKdTree();
-			if (onLeft(mesh, vc1, vc2) == 0L)
+			if (onLeft(kdTree, vc1, vc2) == 0L)
 			{
 				long l1 = vc1.distance2(kdTree, vc2);
 				return (distance2(kdTree, vc1) < l1 && distance2(kdTree, vc2) < l1 && va3.distance2(kdTree, vc1) < l1 && va3.distance2(kdTree, vc2) < l1);
 			}
-			if (vc1.onLeft(mesh, va3, this) >= 0L || vc2.onLeft(mesh, va3, this) <= 0L)
+			if (vc1.onLeft(kdTree, va3, this) >= 0L || vc2.onLeft(kdTree, va3, this) <= 0L)
 				return false;
 			long l1 = vc1.distance2(kdTree, vc2);
 			return (va3.distance2(kdTree, vc1) < l1 && va3.distance2(kdTree, vc2) < l1);
 		}
 		// Do not swap if triangles are inverted in 2d space
-		if (vc1.onLeft(mesh, va3, this) >= 0L || vc2.onLeft(mesh, va3, this) <= 0L)
+		if (vc1.onLeft(kdTree, va3, this) >= 0L || vc2.onLeft(kdTree, va3, this) <= 0L)
 			return false;
 
 		double [] orth = new double[2];
@@ -447,8 +444,9 @@ public class Vertex2D extends Vertex
 		assert vc1 != mesh.outerVertex;
 		assert vc2 != mesh.outerVertex;
 		assert va3 != mesh.outerVertex;
+		KdTree kdTree = mesh.getKdTree();
 		// Do not swap if triangles are reversed in 2d space
-		if (vc1.onLeft(mesh, va3, this) >= 0L || vc2.onLeft(mesh, va3, this) <= 0L)
+		if (vc1.onLeft(kdTree, va3, this) >= 0L || vc2.onLeft(kdTree, va3, this) <= 0L)
 			return true;
 		
 		//  Add a 0.5 factor so that edges are swapped only if

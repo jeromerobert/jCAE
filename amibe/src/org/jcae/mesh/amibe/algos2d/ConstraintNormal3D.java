@@ -28,6 +28,8 @@ import org.jcae.mesh.amibe.patch.Mesh2D;
 import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
+import org.jcae.mesh.amibe.metrics.KdTree;
+import org.jcae.mesh.cad.CADGeomSurface;
 import java.util.logging.Logger;
 
 /**
@@ -83,6 +85,8 @@ public class ConstraintNormal3D
 		double [] vect4 = new double[3];
 
 		boolean redo = false;
+		KdTree kdTree = mesh.getKdTree();
+		CADGeomSurface surface = mesh.getGeomSurface();
 		int niter = mesh.getTriangles().size();
 		do {
 			redo = false;
@@ -118,19 +122,19 @@ public class ConstraintNormal3D
 					// inverted in 2D space
 					Vertex2D sa = (Vertex2D) sym.apex();
 					Vertex2D oa = (Vertex2D) ot.apex();
-					if (sa.onLeft(mesh, (Vertex2D) ot.destination(), (Vertex2D) ot.apex()) <= 0L || oa.onLeft(mesh, (Vertex2D) ot.origin(), (Vertex2D) sym.apex()) <= 0L)
+					if (sa.onLeft(kdTree, (Vertex2D) ot.destination(), (Vertex2D) ot.apex()) <= 0L || oa.onLeft(kdTree, (Vertex2D) ot.origin(), (Vertex2D) sym.apex()) <= 0L)
 						continue;
 					// 3D coordinates of vertices
 					double p1[] = ot.origin().getUV();
 					double p2[] = ot.destination().getUV();
 					double apex1[] = ot.apex().getUV();
 					double apex2[] = sym.apex().getUV();
-					double [] xo = mesh.getGeomSurface().value(p1[0], p1[1]);
-					double [] xd = mesh.getGeomSurface().value(p2[0], p2[1]);
-					double [] xa = mesh.getGeomSurface().value(apex1[0], apex1[1]);
-					double [] xn = mesh.getGeomSurface().value(apex2[0], apex2[1]);
-					mesh.getGeomSurface().setParameter(0.5*(p1[0]+p2[0]), 0.5*(p1[1]+p2[1]));
-					double [] normal = mesh.getGeomSurface().normal();
+					double [] xo = surface.value(p1[0], p1[1]);
+					double [] xd = surface.value(p2[0], p2[1]);
+					double [] xa = surface.value(apex1[0], apex1[1]);
+					double [] xn = surface.value(apex2[0], apex2[1]);
+					surface.setParameter(0.5*(p1[0]+p2[0]), 0.5*(p1[1]+p2[1]));
+					double [] normal = surface.normal();
 					for (int k = 0; k < 3; k++)
 					{
 						vect1[k] = xd[k] - xo[k];

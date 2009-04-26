@@ -31,6 +31,7 @@ import org.jcae.mesh.amibe.patch.VirtualHalfEdge2D;
 import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.patch.MetricOnSurface;
 import org.jcae.mesh.amibe.patch.Metric2D;
+import org.jcae.mesh.amibe.metrics.KdTree;
 import org.jcae.mesh.amibe.util.QSortedTree;
 import org.jcae.mesh.amibe.util.PAVLSortedTree;
 import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
@@ -349,10 +350,11 @@ public class SmoothNodes2D
 			centroid2[i] /= nn;
 		for (int i = 0; i < 2; i++)
 			centroid2[i] = oldp2[i] + relaxation * (centroid2[i] - oldp2[i]);
+		KdTree kdTree = mesh.getKdTree();
 		do
 		{
 			ot.nextOrigin();
-			if (c.onLeft(mesh, (Vertex2D) ot.destination(), (Vertex2D) ot.apex()) < 0L)
+			if (c.onLeft(kdTree, (Vertex2D) ot.destination(), (Vertex2D) ot.apex()) < 0L)
 				return false;
 		}
 		while (ot.destination() != d);

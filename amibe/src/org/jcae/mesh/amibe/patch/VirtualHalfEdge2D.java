@@ -27,6 +27,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jcae.mesh.amibe.metrics.KdTree;
 
 /**
  * A handle to abstract edge objects for initial 2D mesh.
@@ -370,11 +371,11 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 		symOTri(this, sym);
 		Vertex2D a = (Vertex2D) sym.apex();
 		if (o == mesh.outerVertex)
-			return (v.onLeft(mesh, d, a) < 0L);
+			return (v.onLeft(mesh.getKdTree(), d, a) < 0L);
 		if (d == mesh.outerVertex)
-			return (v.onLeft(mesh, a, o) < 0L);
+			return (v.onLeft(mesh.getKdTree(), a, o) < 0L);
 		if (a == mesh.outerVertex)
-			return (v.onLeft(mesh, o, d) == 0L);
+			return (v.onLeft(mesh.getKdTree(), o, d) == 0L);
 		if (!smallerDiag)
 			return !isDelaunay(mesh, a);
 		return !a.isSmallerDiagonale(mesh, this);
@@ -422,6 +423,7 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 		Vertex2D start = (Vertex2D) origin();
 		assert start != mesh.outerVertex;
 		assert end != mesh.outerVertex;
+		KdTree kdTree = mesh.getKdTree();
 
 		next();
 		while (true)
@@ -435,9 +437,9 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 			work[0].next();
 			Vertex2D n = (Vertex2D) work[0].destination();
 			assert n != mesh.outerVertex : ""+work[0];
-			newl = n.onLeft(mesh, start, end);
-			oldl = a.onLeft(mesh, start, end);
-			boolean toSwap = (n != mesh.outerVertex) && (a.onLeft(mesh, n, d) > 0L) && (a.onLeft(mesh, o, n) > 0L) && !hasAttributes(BOUNDARY);
+			newl = n.onLeft(kdTree, start, end);
+			oldl = a.onLeft(kdTree, start, end);
+			boolean toSwap = (n != mesh.outerVertex) && (a.onLeft(kdTree, n, d) > 0L) && (a.onLeft(kdTree, o, n) > 0L) && !hasAttributes(BOUNDARY);
 			if (newl > 0L)
 			{
 				//  o stands to the right of (start,end), d and n to the left.
@@ -520,10 +522,11 @@ public class VirtualHalfEdge2D extends VirtualHalfEdge
 		Vertex2D vA = (Vertex2D) origin();
 		Vertex2D vB = (Vertex2D) destination();
 		Vertex2D v1 = (Vertex2D) apex();
-		long tp1 = vA.onLeft(mesh, vB, v1);
-		long tp2 = vB.onLeft(mesh, vA, apex2);
-		long tp3 = apex2.onLeft(mesh, vB, v1);
-		long tp4 = v1.onLeft(mesh, vA, apex2);
+		KdTree kdTree = mesh.getKdTree();
+		long tp1 = vA.onLeft(kdTree, vB, v1);
+		long tp2 = vB.onLeft(kdTree, vA, apex2);
+		long tp3 = apex2.onLeft(kdTree, vB, v1);
+		long tp4 = v1.onLeft(kdTree, vA, apex2);
 		if (Math.abs(tp3) + Math.abs(tp4) < Math.abs(tp1)+Math.abs(tp2) )
 			return true;
 		if (tp1 > 0L && tp2 > 0L)

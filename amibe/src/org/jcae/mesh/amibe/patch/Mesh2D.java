@@ -214,8 +214,8 @@ public class Mesh2D extends Mesh
 	{
 		KdTree<Vertex2D> quadtree = traitsBuilder.getKdTree(traits);
 		assert quadtree != null;
-		assert v0.onLeft(this, v1, v2) != 0L;
-		if (v0.onLeft(this, v1, v2) < 0L)
+		assert v0.onLeft(quadtree, v1, v2) != 0L;
+		if (v0.onLeft(quadtree, v1, v2) < 0L)
 		{
 			Vertex2D temp = v2;
 			v2 = v1;
@@ -284,13 +284,14 @@ public class Mesh2D extends Mesh
 			s.next();
 		assert s.origin() == start : ""+start+" does not belong to "+t;
 		Vertex2D dest = (Vertex2D) s.destination();
+		KdTree<Vertex2D> quadtree = traitsBuilder.getKdTree(traits);
 		int i = 0;
 		while (true)
 		{
 			Vertex2D d = (Vertex2D) s.destination();
 			if (d == end)
 				return s;
-			else if (d != outerVertex && start.onLeft(this, end, d) > 0L)
+			else if (d != outerVertex && start.onLeft(quadtree, end, d) > 0L)
 				break;
 			s.nextOrigin();
 			i++;
@@ -306,7 +307,7 @@ public class Mesh2D extends Mesh
 			Vertex2D d = (Vertex2D) s.destination();
 			if (d == end)
 				return s;
-			else if (d != outerVertex && start.onLeft(this, end, d) < 0L)
+			else if (d != outerVertex && start.onLeft(quadtree, end, d) < 0L)
 				break;
 			s.sym();
 			s.next();
@@ -526,6 +527,8 @@ public class Mesh2D extends Mesh
 	{
 		if (!super.isValid(constrained))
 			return false;
+		KdTree<Vertex2D> quadtree = traitsBuilder.getKdTree(traits);
+
 		for (Triangle t: getTriangles())
 		{
 			// We can not rely on t.hasAttributes(AbstractHalfEdge.OUTER) here,
@@ -535,7 +538,7 @@ public class Mesh2D extends Mesh
 			Vertex2D tv0 = (Vertex2D) t.vertex[0];
 			Vertex2D tv1 = (Vertex2D) t.vertex[1];
 			Vertex2D tv2 = (Vertex2D) t.vertex[2];
-			double l = tv0.onLeft(this, tv1, tv2);
+			double l = tv0.onLeft(quadtree, tv1, tv2);
 			if (l <= 0L)
 			{
 				logger.severe("Wrong orientation: "+l+" "+t);
