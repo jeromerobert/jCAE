@@ -77,8 +77,8 @@ public class CheckDelaunay
 		VirtualHalfEdge2D ot, sym;
 		Vertex2D v;
 		int cnt = 0;
+		LOGGER.config("Enter compute()");
 		mesh.pushCompGeom(3);
-		LOGGER.fine(" Checking Delaunay criterion");
 		ot = new VirtualHalfEdge2D();
 		sym = new VirtualHalfEdge2D();
 
@@ -153,6 +153,7 @@ public class CheckDelaunay
 			oldList = newList;
 		} while (redo && niter > 0);
 		mesh.popCompGeom(3);
+		LOGGER.config("Leave compute()");
 	}
 	
 }
