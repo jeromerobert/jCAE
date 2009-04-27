@@ -230,6 +230,7 @@ public class Scene implements AbstractNode.ActorListener
 
 				if (node != null)
 				{
+					vtkGlobalJavaHash.PointerToReference.clear();
 					vtkIdTypeArray ids = (vtkIdTypeArray) child.GetSelectionList();
 					node.setCellSelection(pickContext, Utils.getValues(ids));
 					LOGGER.finest("Actor picked id: "+prop.GetVTKId());
