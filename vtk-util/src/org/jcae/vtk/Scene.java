@@ -29,6 +29,7 @@ import org.jcae.geometry.BoundingBox;
 import vtk.vtkActor;
 import vtk.vtkActorCollection;
 import vtk.vtkCanvas;
+import vtk.vtkGlobalJavaHash;
 import vtk.vtkIdTypeArray;
 import vtk.vtkIntArray;
 import vtk.vtkPlaneCollection;
