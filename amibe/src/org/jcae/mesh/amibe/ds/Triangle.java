@@ -276,8 +276,7 @@ public class Triangle implements Serializable
 		 * Add the current triangle to the end of the list.  This method
 		 * does nothing if this element is already linked.
 		 */
-		@SuppressWarnings("unused")
-		private final void addAllowDuplicates(Triangle o)
+		public final void addAllowDuplicates(Triangle o)
 		{
 			assert listTail != null;
 			assert listTail.listNext == listSentinel : listTail;
@@ -297,7 +296,23 @@ public class Triangle implements Serializable
 		{
 			return o.listNext != null;
 		}
-	
+
+		/**
+		 * Get list size.
+		 */
+		public int size()
+		{
+			return listSize;
+		}
+
+		/**
+		 * Check whether this list is empty.
+		 */
+		public boolean isEmpty()
+		{
+			return listTail == listHead && listTail.listNext == listSentinel;
+		}
+
 		/**
 		 * Create an iterator over linked triangles.  Note that the list
 		 * can be extended while iterating over elements.
@@ -307,6 +322,7 @@ public class Triangle implements Serializable
 			return new Iterator<Triangle>()
 			{
 				private Triangle curr = listHead;
+				private Triangle prev = listHead;
 				public boolean hasNext()
 				{
 					return curr.listNext != listSentinel;
@@ -316,11 +332,18 @@ public class Triangle implements Serializable
 				{
 					if (!hasNext())
 						throw new NoSuchElementException();
+					prev = curr;
 					curr = curr.listNext;
 					return curr;
 				}
 				public void remove()
 				{
+					if (listTail == curr)
+						listTail = prev;
+					prev.listNext = curr.listNext;
+					curr.listNext = null;
+					curr = prev;
+					listSize--;
 				}
 			};
 		}

@@ -1,3 +1,14 @@
+Mon Apr 27 15:28:27 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/amibe/ds/Triangle.java: New methods in
+	Triangle.List class: size(), isEmpty().
+	Let Triangle.List.iterator.remove() method remove triangle from
+	this list.
+	* src/org/jcae/mesh/amibe/algos2d/ConstraintNormal3D.java: After
+	the first pass, only edges near swapped edges have to be checked.
+	Speed up is noticeable with large meshes if several passes are
+	needed.
+
 Fri Apr 24 17:14:30 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/metrics/Location.java

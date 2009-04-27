@@ -30,6 +30,10 @@ import org.jcae.mesh.amibe.patch.Vertex2D;
 import org.jcae.mesh.amibe.metrics.Matrix3D;
 import org.jcae.mesh.amibe.metrics.KdTree;
 import org.jcae.mesh.cad.CADGeomSurface;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.logging.Logger;
 
 /**
@@ -71,7 +75,6 @@ public class ConstraintNormal3D
 	 */
 	public void compute()
 	{
-		TriangleVH t;
 		VirtualHalfEdge2D ot, sym;
 		int cnt = 0;
 		LOGGER.config("Enter compute()");
@@ -88,24 +91,27 @@ public class ConstraintNormal3D
 		KdTree kdTree = mesh.getKdTree();
 		CADGeomSurface surface = mesh.getGeomSurface();
 		int niter = mesh.getTriangles().size();
+		Triangle.List newList = new Triangle.List();
+		Collection<Triangle> oldList = new ArrayList<Triangle>(mesh.getTriangles());
+		// Edges may have been marked by previous algorithms
+		for (Triangle gt : oldList)
+		{
+			TriangleVH t = (TriangleVH) gt;
+			ot.bind(t);
+			for (int i = 0; i < 3; i++)
+			{
+				ot.next();
+				ot.clearAttributes(AbstractHalfEdge.SWAPPED);
+			}
+		}
+
 		do {
 			redo = false;
 			cnt = 0;
 			niter--;
-			for (Triangle at: mesh.getTriangles())
+			for (Triangle gt : oldList)
 			{
-				t = (TriangleVH) at;
-				ot.bind(t);
-				for (int i = 0; i < 3; i++)
-				{
-					ot.next();
-					ot.clearAttributes(AbstractHalfEdge.SWAPPED);
-				}
-			}
-			
-			for (Triangle at: mesh.getTriangles())
-			{
-				t = (TriangleVH) at;
+				TriangleVH t = (TriangleVH) gt;
 				ot.bind(t);
 				int l = -1;
 				double best = 0.0;
@@ -183,10 +189,41 @@ public class ConstraintNormal3D
 					ot.bind(t);
 					for (int i = 0; i <= l; i++)
 						ot.next();
+					// Add adjacent triangles to newList
+					for (int i = 0; i < 3; i++)
+					{
+						ot.next();
+						ot.sym(sym);
+						newList.addAllowDuplicates(sym.getTri());
+					}
+					ot.sym();
+					for (int i = 0; i < 3; i++)
+					{
+						ot.next();
+						ot.sym(sym);
+						newList.addAllowDuplicates(sym.getTri());
+					}
+					ot.sym();
 					mesh.edgeSwap(ot);
+
 					cnt++;
 				}
 			}
+			// Copy newList into oldList and clear SWAPPED attributes
+			oldList.clear();
+			for (Iterator<Triangle> it = newList.iterator(); it.hasNext(); )
+			{
+				TriangleVH t = (TriangleVH) it.next();
+				ot.bind(t);
+				for (int i = 0; i < 3; i++)
+				{
+					ot.next();
+					ot.clearAttributes(AbstractHalfEdge.SWAPPED);
+				}
+				oldList.add(t);
+				it.remove();
+			}
+			assert newList.isEmpty() : "Triangles still in list: "+newList.size();
 			LOGGER.fine(" Found "+cnt+" inverted triangles");
 			//  The niter variable is introduced to prevent loops.
 			//  With large meshes. its initial value may be too large,
