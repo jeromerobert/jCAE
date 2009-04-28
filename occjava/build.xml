@@ -19,9 +19,6 @@
         <mkdir dir="lib"/>
         <jar compress="true" jarfile="${jar}">
 			<fileset dir="classes" excludes="org/jcae/opencascade/test/**" />
-			<manifest>
-				<attribute name="Class-Path" value="jcae-viewer3d.jar"/>
-			</manifest>
 		</jar>
     </target>
 
