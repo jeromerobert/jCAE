@@ -12,22 +12,28 @@ To detect which object are collected at a given time you may change the
 vtkObjectBase class:
 
 	private StackTraceElement[] creationStack;
-
+	private final static boolean LOG_FINALIZE=Boolean.getBoolean("vtk.log.finalize");
+	private final static boolean DIS_FINALIZE=Boolean.getBoolean("vtk.disable.finalize");
 	public vtkObjectBase()
 	{
-		creationStack = Thread.currentThread().getStackTrace();
+		if(LOG_FINALIZE)
+			creationStack = Thread.currentThread().getStackTrace();
 	}
 
 	@Override
 	protected void finalize() {
 		if (!vtkDeleted)
 		{
-			Exception e = new Exception();
-			e.setStackTrace(creationStack);
-			e.printStackTrace(System.err);
-			//Delete();
+			if(LOG_FINALIZE)
+			{
+				Exception e = new Exception();
+				e.setStackTrace(creationStack);
+				e.printStackTrace(System.err);
+			}
+			if(!DIS_FINALIZE)
+				Delete();
 		}
 	}
 
-Java writting is buffered so Delete must be commented. Else a segfault
+Java writting is buffered so Delete must be disabled else a segfault
 may occure before the stack has been displayed.
