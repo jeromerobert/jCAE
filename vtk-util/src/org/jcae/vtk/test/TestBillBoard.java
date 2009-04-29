@@ -70,10 +70,9 @@ public class TestBillBoard
 		for (int i = 0; i < c; ++i)
 			for (int j = 0; j < l; ++j)
 			{
-				BillBoard tag = new BillBoard(texture, dimensions[0], dimensions[1]);
-				tag.setPosition(i, j, 0);
+				BillBoard tag = new BillBoard(texture, dimensions[0], dimensions[1], i, j, 0);
 
-				ren1.AddViewProp(tag.getActor());
+				ren1.AddViewProp(tag);
 			}
 
 		

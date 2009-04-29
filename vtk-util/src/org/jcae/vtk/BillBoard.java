@@ -20,11 +20,12 @@
 package org.jcae.vtk;
 
 
-import vtk.vtkActor2D;
+import vtk.vtkCellArray;
 import vtk.vtkCoordinate;
 import vtk.vtkFloatArray;
 import vtk.vtkImageData;
 import vtk.vtkPNGReader;
+import vtk.vtkPoints;
 import vtk.vtkPolyData;
 import vtk.vtkPolyDataMapper2D;
 import vtk.vtkTexture;
@@ -34,30 +35,33 @@ import vtk.vtkTexturedActor2D;
  *
  * @author ibarz
  */
-public class BillBoard
+public class BillBoard extends vtkTexturedActor2D
 {
-	vtkTexturedActor2D actor;
-	vtkCoordinate pos;
 
-	public BillBoard(String texturePath)
+	public BillBoard(String texturePath, float posX, float posY, float posZ)
 	{
 		vtkPNGReader reader = new vtkPNGReader();
 		reader.SetFileName(texturePath);
 		vtkImageData image = reader.GetOutput();
+		reader.Delete();
 		vtkTexture texture = new vtkTexture();
 		texture.SetInput(image);
 		image.Update();
 		int[] dimensions = image.GetDimensions();
+		image.Delete();
 
-		construct(texture, dimensions[0], dimensions[1]);
+		this.SetTexture(texture);
+		texture.Delete();
+		construct(dimensions[0], dimensions[1], posX, posY, posZ);
 	}
 
-	public BillBoard(vtkTexture texture, int width, int height)
+	public BillBoard(vtkTexture texture, int width, int height, float posX, float posY, float posZ)
 	{
-		construct(texture, width, height);
+		this.SetTexture(texture);
+		construct(width, height, posX, posY, posZ);
 	}
 
-	private void construct(vtkTexture texture, int width, int height)
+	private void construct(int width, int height, float posX, float posY, float posZ)
 	{
 		float[] points =
 		{
@@ -73,9 +77,14 @@ public class BillBoard
 		};
 
 		vtkPolyData data = new vtkPolyData();
-		data.SetPoints(Utils.createPoints(points));
-		data.SetPolys(Utils.createCells(1, cells));
+		vtkPoints p = Utils.createPoints(points);
+		data.SetPoints(p);
+		p.Delete();
 
+		vtkCellArray polys = Utils.createCells(1, cells);
+		data.SetPolys(polys);
+		polys.Delete();
+		
 		float[] tCoords =
 		{
 			0.f, 0.f, // A - 0
@@ -90,30 +99,27 @@ public class BillBoard
 		nativeCoords.SetName("TextureCoordinates");
 
 		data.GetPointData().SetTCoords(nativeCoords);
+		nativeCoords.Delete();
 
-		pos = new vtkCoordinate();
+		vtkCoordinate pos = new vtkCoordinate();
 		pos.SetCoordinateSystemToWorld();
+		pos.SetValue(posX, posY, posZ);
 		vtkCoordinate coordView = new vtkCoordinate();
 		coordView.SetReferenceCoordinate(pos);
+		pos.Delete();
 		coordView.SetCoordinateSystemToViewport();
 
 		vtkPolyDataMapper2D mapper = new vtkPolyDataMapper2D();
 		mapper.SetInput(data);
+		data.Delete();
 		mapper.SetTransformCoordinate(coordView);
 
-		actor = new vtkTexturedActor2D();
-		actor.SetMapper(mapper);
-		actor.SetTexture(texture);
+		coordView.Delete();
+
+		this.SetMapper(mapper);
+		mapper.Delete();
+
 	}
 
-	public void setPosition(float x, float y, float z)
-	{
-		pos.SetValue(x, y, z);
-	}
-
-	public vtkTexturedActor2D getActor()
-	{
-		return actor;
-	}
 }
 
