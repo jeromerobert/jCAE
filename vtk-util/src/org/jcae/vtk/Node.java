@@ -406,8 +406,6 @@ public class Node extends AbstractNode
 
 		vtkIntArray idsNative = new vtkIntArray();
 		idsNative.SetJavaArray(ids);
-		//the hashmap is not updated by .Delete()
-		vtkGlobalJavaHash.PointerToReference.clear();
 		data.GetCellData().SetScalars(idsNative);
 		idsNative.Delete();
 		idsNative = null;

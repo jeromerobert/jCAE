@@ -78,7 +78,6 @@ public abstract class Viewable extends MultiCanvas
 	{
 		public void customiseSelectionActor(vtkActor actor)
 		{
-			vtkGlobalJavaHash.PointerToReference.clear();
 			vtkProperty p = actor.GetProperty();
 			Utils.vtkPropertySetColor(p, selectionColor);
 			p.Delete();
