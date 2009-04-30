@@ -19,9 +19,12 @@
 
 package org.jcae.mesh.amibe.ds;
 
-import static org.junit.Assert.*;
 import java.util.Iterator;
 
+import static org.junit.Assert.*;
+import org.junit.Ignore;
+
+@Ignore("Utility class")
 public class AbstractHalfEdgeTest
 {
 	protected Mesh mesh;

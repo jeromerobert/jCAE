@@ -38,6 +38,8 @@ import org.jcae.mesh.oemm.MeshReader;
 import org.jcae.mesh.oemm.OEMM;
 import org.jcae.mesh.oemm.Storage;
 
+import org.junit.Ignore;
+
 /**
  * Create a regular mesh of a sphere.  We first generate an icosahedron,
  * this is the Platonic solid which is the best approximation of a sphere
@@ -48,6 +50,7 @@ import org.jcae.mesh.oemm.Storage;
  *
  * @author Denis Barbier
  */
+@Ignore("Utility class")
 public class SphereBuilder
 {
 	private final static double TAU = 0.5 * (1.0 + Math.sqrt(5.0));
@@ -92,7 +95,8 @@ public class SphereBuilder
 		 4, 10,  2
 	};
 	private final Set<UnindexedTriangle> triangles = new HashSet<UnindexedTriangle>();
-	
+
+	@Ignore("Inner class")
 	private static class UnindexedTriangle
 	{
 		double [] coord = new double[9];

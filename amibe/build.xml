@@ -13,7 +13,7 @@
 		<propertyfile file="${classes.dir}/timestamp.properties">
 			<entry key="build.time" type="date" pattern="yyyy-MM-dd HH:mm:ss" value="now" />
 		</propertyfile>
-		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}" excludes="${jcae.junit.packages}">
+		<javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}">
 			<compilerarg line="${compiler.arg}"/>
 			<classpath>
 				<pathelement location="${trove.jar}"/>
@@ -60,12 +60,6 @@
 			</assertions>
 			<batchtest fork="yes" todir="${test.dir}/results" >
 				<fileset dir="${classes.test.dir}">
-					<!-- Exclude test classes which serve for inheritance purpose -->
-					<exclude name="org/jcae/mesh/amibe/util/QSortedTreeTest.class"/>
-					<exclude name="org/jcae/mesh/amibe/ds/AbstractHalfEdgeTest.class"/>
-					<exclude name="org/jcae/mesh/amibe/algos3d/SphereBuilder**"/>
-					<!-- How to exclude inner classes automatically? -->
-					<exclude name="org/jcae/mesh/amibe/algos3d/SmoothNodes3DBgTest$CheckSmoothNodes3DBg.class"/>
 					<!-- Old tests, not yet converted to JUnit -->
 					<exclude name="org/jcae/mesh/amibe/patch/**"/>
 					<exclude name="org/jcae/mesh/amibe/util/**"/>
@@ -110,7 +104,7 @@
 
 	<target name="jar" depends="compile" description="jar">
 		<mkdir dir="lib"/>
-		<jar basedir="${classes.dir}" excludes="${jcae.junit.packages} **/occ/*" compress="true" jarfile="${amibe.jar}">
+		<jar basedir="${classes.dir}" excludes="**/occ/*" compress="true" jarfile="${amibe.jar}">
 			<manifest>
 				<attribute name="Main-Class" value="org.jcae.mesh.Mesher"/>
 				<attribute name="Class-Path" value="${jar.dependencies}"/>

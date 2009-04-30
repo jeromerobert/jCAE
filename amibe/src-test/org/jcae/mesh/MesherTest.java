@@ -1,7 +1,7 @@
 /* jCAE stand for Java Computer Aided Engineering. Features are : Small CAD
    modeler, Finite element mesher, Plugin architecture.
 
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -30,8 +30,7 @@ import org.jcae.mesh.amibe.ds.Mesh;
 import org.jcae.mesh.amibe.ds.Triangle;
 import org.jcae.mesh.amibe.ds.Vertex;
 import org.jcae.mesh.oemm.RawStorage;
-import org.junit.Test;
-import static org.junit.Assert.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.FileNotFoundException;
@@ -57,6 +56,10 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.FileHandler;
 import java.util.logging.XMLFormatter;
+
+import org.junit.Test;
+import static org.junit.Assert.*;
+import org.junit.BeforeClass;
 
 public class MesherTest
 {
@@ -297,6 +300,13 @@ public class MesherTest
 				checkLargeMeshQuality(outDir, minAngleDeg, 4.0*length);
 		}
 		return outDir;
+	}
+
+	@BeforeClass
+	public static void checkEnv()
+	{
+		if (!Boolean.getBoolean("run.test.large"))
+			throw new RuntimeException("MesherTest takes too much time, re-run with -Drun.test.large=true if you really want to run this file");
 	}
 
 	private void runSingleTestTimer(String type, long seconds)

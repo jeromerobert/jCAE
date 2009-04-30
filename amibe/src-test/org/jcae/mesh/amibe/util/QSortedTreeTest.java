@@ -20,9 +20,12 @@
 
 package org.jcae.mesh.amibe.util;
 
-import static org.junit.Assert.*;
 import java.util.Iterator;
 
+import static org.junit.Assert.*;
+import org.junit.Ignore;
+
+@Ignore("Utility class")
 public class QSortedTreeTest
 {
 	protected QSortedTree<Integer> tree;

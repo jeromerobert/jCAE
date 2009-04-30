@@ -33,8 +33,10 @@ import org.jcae.mesh.amibe.traits.MeshTraitsBuilder;
 import org.jcae.mesh.amibe.validation.MinAngleFace;
 import org.jcae.mesh.amibe.validation.QualityFloat;
 import org.jcae.mesh.xmldata.MeshReader;
+
 import static org.junit.Assert.*;
 import org.junit.Test;
+import org.junit.Ignore;
 
 public class SmoothNodes3DBgTest
 {
@@ -192,6 +194,7 @@ public class SmoothNodes3DBgTest
 		assertTrue("Min. angle too small: "+(qmin*45.0), qmin > 0.98);
 	}
 
+	@Ignore("Inner class")
 	private static class CheckSmoothNodes3DBg extends SmoothNodes3DBg
 	{
 
