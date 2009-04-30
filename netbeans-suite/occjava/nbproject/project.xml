@@ -8,7 +8,9 @@
             <source-roots>
                 <root id="src.src-java.dir" name="src-java"/>
             </source-roots>
-            <test-roots/>
+            <test-roots>
+                <root id="test.src-java-test.dir" name="src-java-test"/>
+            </test-roots>
         </data>
     </configuration>
 </project>
