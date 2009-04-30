@@ -1,14 +1,11 @@
-package org.jcae.opencascade.test;
+package org.jcae.opencascade.jni;
 
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
+import static org.junit.Assert.*;
+import org.junit.Test;
+
 import java.io.File;
 import java.util.ArrayList;
-import javax.swing.AbstractAction;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.WindowConstants;
-import org.jcae.opencascade.jni.*;
+
 /*import org.jcae.viewer3d.View;
 import org.jcae.viewer3d.cad.ViewableCAD;
 import org.jcae.viewer3d.cad.occ.OCCProvider;*/
@@ -101,7 +98,7 @@ public class CircleExtrudeQuilt
 		return (TopoDS_Wire) new BRepBuilderAPI_MakeWire(edge).shape();
 	}
 	
-	public static void main(String[] args)
+	@Test public void sample()
 	{
 		try
 		{

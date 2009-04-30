@@ -1,9 +1,12 @@
-package org.jcae.opencascade.test;
+package org.jcae.opencascade.jni;
+
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 import java.util.HashSet;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
-import org.jcae.opencascade.jni.*;
+
 /*import org.jcae.viewer3d.View;
 import org.jcae.viewer3d.cad.ViewableCAD;
 import org.jcae.viewer3d.cad.occ.OCCProvider;*/
@@ -39,7 +42,7 @@ public class SplitFace
 		return new BRepAlgoAPI_Cut(box1, box2).shape();		
 	}
 	
-	public static void main(String[] args)
+	@Test public void sample()
 	{
 		TopoDS_Shape cuttedBox=createCuttedBox();
 		BRepFilletAPI_MakeFillet fillet = new BRepFilletAPI_MakeFillet(cuttedBox);

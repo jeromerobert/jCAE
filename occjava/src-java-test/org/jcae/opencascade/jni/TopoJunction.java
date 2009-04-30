@@ -1,6 +1,9 @@
-package org.jcae.opencascade.test;
+package org.jcae.opencascade.jni;
+
+import static org.junit.Assert.*;
+import org.junit.Test;
+
 import org.jcae.opencascade.Utilities;
-import org.jcae.opencascade.jni.*;
 
 /**
  * Create a square with an attached free edge
@@ -8,7 +11,7 @@ import org.jcae.opencascade.jni.*;
  */
 public class TopoJunction
 {
-	public static void main(String[] args)
+	@Test public void sample()
 	{
 		// The plate
 		double[] p1=new double[]{0, 0, 0};
@@ -47,7 +50,8 @@ public class TopoJunction
 		
 		//Check that the vertex is on the face
 		double[] coords=BRep_Tool.parameters(vertex1, face);
-		System.out.println("x="+coords[0]+" y="+coords[1]);
+		assertEquals(coords[0], 0.5, 1.e-7);
+		assertEquals(coords[1], 0.5, 1.e-7);
 		
 		//Put everything in a compound
 		TopoDS_Compound compound=new TopoDS_Compound();

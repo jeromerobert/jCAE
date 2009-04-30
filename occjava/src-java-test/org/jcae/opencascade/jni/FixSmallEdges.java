@@ -18,21 +18,16 @@
  * (C) Copyright 2007, by EADS France
  */
 
-package org.jcae.opencascade.test;
+package org.jcae.opencascade.jni;
+
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jcae.opencascade.Utilities;
-import org.jcae.opencascade.jni.BRepGProp;
-import org.jcae.opencascade.jni.BRepTools;
-import org.jcae.opencascade.jni.GProp_GProps;
-import org.jcae.opencascade.jni.ShapeFix_Wireframe;
-import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
-import org.jcae.opencascade.jni.TopExp_Explorer;
-import org.jcae.opencascade.jni.TopoDS_Edge;
-import org.jcae.opencascade.jni.TopoDS_Shape;
 
 /**
  *

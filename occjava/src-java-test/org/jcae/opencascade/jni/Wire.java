@@ -1,7 +1,9 @@
-package org.jcae.opencascade.test;
+package org.jcae.opencascade.jni;
+
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 import org.jcae.opencascade.Utilities;
-import org.jcae.opencascade.jni.*;
 
 /**
  * Create a square with an attached free edge
@@ -9,7 +11,7 @@ import org.jcae.opencascade.jni.*;
  */
 public class Wire
 {
-	public static void main(String[] args)
+	@Test public void sample()
 	{
 		// The plate
 		double[] p1=new double[]{0, 0, 0};
@@ -28,7 +30,7 @@ public class Wire
 		BRepBuilderAPI_MakeWire bb=new BRepBuilderAPI_MakeWire();
 		bb.add(new TopoDS_Shape[]{edge1, edge2, edge3, freeEdge});
 		TopoDS_Shape result=bb.shape();
-		System.out.println(BRepAlgo.isValid(result));
+		assertTrue(BRepAlgo.isValid(result));
 		Utilities.dumpTopology(result, System.out);
 	}
 }

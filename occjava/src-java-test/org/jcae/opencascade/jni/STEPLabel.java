@@ -18,12 +18,10 @@
  * (C) Copyright 2008, by EADS France
  */
 
-package org.jcae.opencascade.test;
+package org.jcae.opencascade.jni;
 
-import org.jcae.opencascade.jni.STEPControl_Reader;
-import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
-import org.jcae.opencascade.jni.TopExp_Explorer;
-import org.jcae.opencascade.jni.TopoDS_Shape;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  * Example which dump the label from the edges of a STEP file
@@ -31,7 +29,7 @@ import org.jcae.opencascade.jni.TopoDS_Shape;
  */
 public class STEPLabel
 {
-	public static void main(final String[] args)
+	@Test public void reader()
 	{
 		STEPControl_Reader aReader = new STEPControl_Reader();
 		aReader.readFile("/tmp/Un_autre_essai.stp".getBytes());

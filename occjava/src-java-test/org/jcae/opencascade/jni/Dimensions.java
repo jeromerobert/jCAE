@@ -1,6 +1,7 @@
-package org.jcae.opencascade.test;
+package org.jcae.opencascade.jni;
 
-import org.jcae.opencascade.jni.*;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  * Example of BRepGProp and BRepBndLib
@@ -8,13 +9,15 @@ import org.jcae.opencascade.jni.*;
  */
 public class Dimensions
 {
-	public static void main(String[] args)
+	@Test public void torus()
 	{
 		// Create a shape for the example (a torus)
 		double[] axis=new double[]{
 			0,0,0,  // position
 			0,0,1}; // direction
-		TopoDS_Shape torus=new BRepPrimAPI_MakeTorus(axis, 3, 1).shape();
+		double R = 3.0;
+		double r = 1.0;
+		TopoDS_Shape torus=new BRepPrimAPI_MakeTorus(axis, R, r).shape();
 
 		// Compute the bounding box of the shape
 		Bnd_Box bbox = new Bnd_Box(); 			
@@ -28,17 +31,21 @@ public class Dimensions
 		System.out.println("Xmax="+bboxValues[3]);
 		System.out.println("Ymax="+bboxValues[4]);
 		System.out.println("Zmax="+bboxValues[5]);
-		
+
 		// Display various other properties
 		GProp_GProps property=new GProp_GProps();
 		BRepGProp.linearProperties(torus, property);
 		System.out.println("length="+property.mass());
-		
-		BRepGProp.surfaceProperties(torus, property);
+		assertEquals(property.mass(), 4.0*Math.PI*(R+2.0*r), 1.e-6);
+
+		// If Eps is argument is absent, precision is quite poor
+		BRepGProp.surfaceProperties(torus, property, 1.e-2);
 		System.out.println("surface="+property.mass());
-		
+		assertEquals(property.mass(), 4.0*Math.PI*Math.PI*R*r, 1.e-6);
+
 		BRepGProp.volumeProperties(torus, property);
 		System.out.println("volume="+property.mass());
+		assertEquals(property.mass(), 2.0*Math.PI*Math.PI*R*r*r, 1.e-6);
 
 	}
 }

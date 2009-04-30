@@ -1,7 +1,9 @@
-package org.jcae.opencascade.test;
+package org.jcae.opencascade.jni;
+
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 import java.util.HashMap;
-import org.jcae.opencascade.jni.*;
 
 /**
  * Workshop JINA 2006, Finite tilted Grid in front of a cavity
@@ -31,13 +33,17 @@ public class Jina2006
 
 		}
 		
+		@Override
 		public boolean equals(Object obj)
 		{
+			if (!(obj instanceof IntEdge))
+				return false;
 			IntEdge other=(IntEdge)obj;			
 			return (i==other.i)&&(j==other.j)&&(k==other.k)
 				&&(i2==other.i2)&&(j2==other.j2)&&(k2==other.k2);
 		}
 		
+		@Override
 		public int hashCode()
 		{
 			return i+j+k+i2+j2+k2;
@@ -85,7 +91,7 @@ public class Jina2006
 		return (TopoDS_Face) new BRepBuilderAPI_MakeFace((TopoDS_Wire)wire, true).shape();
 	}
 	
-	public static void main(String[] args)
+	@Test public void sample()
 	{
 		HashMap int2edges=new HashMap();
 		TopoDS_Vertex[][][] vertices=new TopoDS_Vertex[I_MAX+2][J_MAX+2][K_MAX+2];

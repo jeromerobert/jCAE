@@ -1,11 +1,12 @@
-package org.jcae.opencascade.test;
+package org.jcae.opencascade.jni;
 
-import org.jcae.opencascade.jni.*;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 public class Curvature
 {
 	/** Example to show how to get the curvature of a surface */
-	public static void main(String[] args)
+	@Test public void sample()
 	{
 		//Create an cone for the example
 		double[] axis=new double[]{

@@ -1,9 +1,11 @@
-package org.jcae.opencascade.test;
+package org.jcae.opencascade.jni;
+
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import org.jcae.opencascade.jni.*;
 
 // Packages for 3D display
 /*import java.awt.Container;
@@ -86,7 +88,7 @@ public class HoleFilletChamfer
 		return toReturn;
 	}
 	
-	public static void main(String[] args)
+	@Test public void sample()
 	{
 		TopoDS_Shape cuttedBox=createCuttedBox();
 		BRepFilletAPI_MakeFillet fillet = new BRepFilletAPI_MakeFillet(cuttedBox);

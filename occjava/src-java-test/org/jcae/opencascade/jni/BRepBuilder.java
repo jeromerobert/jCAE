@@ -1,6 +1,9 @@
-package org.jcae.opencascade.test;
+package org.jcae.opencascade.jni;
 
 import org.jcae.opencascade.jni.*;
+
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  * Show how to use brep builder
@@ -8,7 +11,7 @@ import org.jcae.opencascade.jni.*;
  */
 public class BRepBuilder
 {
-	public static void main(String[] args)
+	@Test public void sample()
 	{
 		// Create a shape for the example (an half cone)
 		double[] axis=new double[]{
