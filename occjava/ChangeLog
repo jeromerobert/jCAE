@@ -1,3 +1,8 @@
+2009-04-30 12:17:58 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/OccJava.i: In BRepGProp, add SurfaceProperties and
+	VolumeProperties variants with an epsilon parameter.
+
 2008-10-14 09:56:03  Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/OccJava.i: Fix compilation with OpenCASCADE 6.3.0, BRepMesh

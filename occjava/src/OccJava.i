@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2008, 2009, by EADS France
  */
 
 %module OccJava
@@ -266,8 +267,10 @@ class BRepGProp
 	%rename(surfaceProperties) SurfaceProperties;
 	%rename(volumeProperties) VolumeProperties;
 	static void LinearProperties(const TopoDS_Shape& shape, GProp_GProps& properties);
-    static void VolumeProperties(const TopoDS_Shape& shape, GProp_GProps& properties, const Standard_Boolean onlyClosed = Standard_False) ;
-    static void SurfaceProperties(const TopoDS_Shape& shape, GProp_GProps& properties) ;
+        static void VolumeProperties(const TopoDS_Shape& shape, GProp_GProps& properties, const Standard_Boolean onlyClosed = Standard_False) ;
+        static Standard_Real VolumeProperties(const TopoDS_Shape& shape, GProp_GProps& properties, const Standard_Real Eps, const Standard_Boolean onlyClosed = Standard_False) ;
+        static void SurfaceProperties(const TopoDS_Shape& shape, GProp_GProps& properties) ;
+        static Standard_Real SurfaceProperties(const TopoDS_Shape& shape, GProp_GProps& properties, const Standard_Real Eps) ;
 };
 
 /**
