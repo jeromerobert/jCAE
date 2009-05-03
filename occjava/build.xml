@@ -44,6 +44,7 @@
         <junit printsummary="withOutAndErr" fork="yes" failureProperty="test.failure">
             <env key="MMGT_OPT" value="0"/>
             <env key="LD_LIBRARY_PATH" path="lib:${env.LD_LIBRARY_PATH}" />
+            <sysproperty key="test.dir" value="${test.dir}"/>
             <formatter type="xml"/>
             <classpath>
                 <pathelement location="${junit.jar}"/>
@@ -71,7 +72,7 @@
     <target name="clean" depends="init" description="Clean all build products." >
         <delete dir="${classes.dir}"/>
         <delete dir="${classes.test.dir}"/>
-        <delete dir="${test.dir}"/>
+        <delete dir="${test.dir}/results"/>
         <delete dir="${javadoc.dir}"/>
         <delete file="${occjava.jar}"/>
         <delete file="${test.jar}"/>

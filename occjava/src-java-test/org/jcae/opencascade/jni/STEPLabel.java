@@ -20,6 +20,8 @@
 
 package org.jcae.opencascade.jni;
 
+import java.io.File;
+
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -31,8 +33,10 @@ public class STEPLabel
 {
 	@Test public void reader()
 	{
+		String testDir = System.getProperty("test.dir", "test");
+		String file = testDir + File.separator + "input" + File.separator + "cube.stp";
 		STEPControl_Reader aReader = new STEPControl_Reader();
-		aReader.readFile("/tmp/Un_autre_essai.stp".getBytes());
+		aReader.readFile(file.getBytes());
 		aReader.nbRootsForTransfer();
 		aReader.transferRoots();
 		TopoDS_Shape s = aReader.oneShape();
