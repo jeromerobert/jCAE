@@ -79,6 +79,7 @@
 		<mkdir dir="${test.dir}/results"/>
 		<junit printsummary="withOutAndErr" fork="yes" failureProperty="test.failure">
 			<jvmarg value="-Xmx800m"/>
+			<jvmarg value="-Drun.test.large=true"/>
 			<env key="MMGT_OPT" value="0"/>
 			<env key="LD_LIBRARY_PATH" path="lib:${env.LD_LIBRARY_PATH}" />
 			<sysproperty key="test.dir" value="${test.dir}"/>
