@@ -66,6 +66,8 @@ import org.w3c.dom.NodeList;
  */
 public class Shape<T extends Shape> implements Comparable< Shape<T> >
 {
+	private static final Logger LOGGER = Logger.getLogger(Shape.class.getCanonicalName());
+
 	protected static GeomAPI_ProjectPointOnSurf projectPointOnSurf;
 	/** map TopoDS_Compound.class to "co" */
 	protected final static Map<Class, String> TYPE_MAP_XML;
@@ -484,7 +486,9 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	{
 		Collection<T> dummy = new AbstractList<T>()
 		{
-			public void add(int index, T element) {}			
+			@Override
+			public void add(int index, T element) {}
+
 			@Override
 			public T get(int index)
 			{
@@ -581,24 +585,23 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	{
 		try
 		{
-			Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 			long t1 = System.nanoTime();
 			TopoDS_Shape rootShape = Utilities.readFile("/home/jerome/Models/F1.brep");
 			long t2 = System.nanoTime();
-			logger.info("Time to load brep: " + (t2 - t1) / 1E9);
+			LOGGER.info("Time to load brep: " + (t2 - t1) / 1E9);
 			System.gc();
-			logger.info("Used memory :" +
+			LOGGER.info("Used memory :" +
 				(Runtime.getRuntime().totalMemory() -
 				Runtime.getRuntime().freeMemory()) / 1E6 + " Mb");			
 			t1 = System.nanoTime();
 			Shape rootShapeJ = new Shape(rootShape);
 			t2 = System.nanoTime();
-			logger.info("Time to create dual graph: " + (t2 - t1) / 1E9);
+			LOGGER.info("Time to create dual graph: " + (t2 - t1) / 1E9);
 			System.gc();
-			logger.info("Used memory :" +
+			LOGGER.info("Used memory :" +
 				(Runtime.getRuntime().totalMemory() -
 				Runtime.getRuntime().freeMemory()) / 1E6 + " Mb");
-			logger.info(rootShapeJ.toString());
+			LOGGER.info(rootShapeJ.toString());
 			t1 = System.nanoTime();
 			Shape s = rootShapeJ.getShapeFromID(330, TopAbs_ShapeEnum.EDGE);
 			t2 = System.nanoTime();
@@ -612,7 +615,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		}
 		catch (Exception ex)
 		{
-			Logger.getLogger(Shape.class.getName()).log(Level.SEVERE, null, ex);
+			LOGGER.log(Level.SEVERE, null, ex);
 		}	
 	}
 }
