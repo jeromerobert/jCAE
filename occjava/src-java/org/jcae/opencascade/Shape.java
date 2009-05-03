@@ -235,7 +235,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	 * result[2] will contains Double.POSITIVE_INFINITY if no projection are
 	 * found.
 	 * @param result {u, v, distance, x, y, z}
-	 * @throw ClassCastException if this shape is not a surface
+	 * @throws ClassCastException if this shape is not a surface
 	 */
 	public void projectPoint(double[] coords, double[] result)
 	{
@@ -453,8 +453,8 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	
 	/**
 	 * @param id from 1 to n
-	 * @param type
-	 * @return
+	 * @param type shape type
+	 * @return the shape of the given type with this id
 	 */
 	public T getShapeFromID(int id, int type)
 	{
@@ -465,8 +465,8 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	
 	/**
 	 * @param id from 1 to n
-	 * @param type
-	 * @return
+	 * @param type shape type
+	 * @return the shape of the given type with this id
 	 */
 	private T getShapeFromID(int id, Class type)
 	{		
@@ -502,8 +502,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	
 	/**
 	 * Return the closest parent shape which is a Compound
-	 * @param n
-	 * @return
+	 * @return the closest parent shape which is a Compound
 	 */
 	public T getCompound()
 	{

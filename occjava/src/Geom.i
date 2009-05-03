@@ -85,7 +85,7 @@ class Handle_Geom_Surface: public Handle_Geom_Geometry
 	%javamethodmodifiers bounds(double bounds[4]) const "
 	/**
 	 * Return the bounds of the parameters of the surface.
-	 * @param an array of size 4 which will receive {Umin, Umax, Vmin, Vmax}
+	 * @param bounds  an array of size 4 which will receive {Umin, Umax, Vmin, Vmax}
 	 */
 	public";
 	void bounds(double bounds[4]) const
