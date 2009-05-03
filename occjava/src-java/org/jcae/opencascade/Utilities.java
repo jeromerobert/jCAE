@@ -27,7 +27,7 @@ public class Utilities
 	}
 
 	private static void dumpTopology(TopoDS_Shape shape, PrintStream out, int level)
-	{		
+	{
 		TopoDS_Iterator it=new TopoDS_Iterator(shape);
 		char[] dots=new char[level*TAB];
 		Arrays.fill(dots, '-');
@@ -59,28 +59,21 @@ public class Utilities
 	/** Return the number of shapes in one shape */
 	public static int numberOfShape(TopoDS_Shape shape, int type)
 	{
-		TopExp_Explorer exp=new TopExp_Explorer(shape, type);
 		int n=0;
-		while(exp.more())
-		{
+		for(TopExp_Explorer exp=new TopExp_Explorer(shape, type); exp.more(); exp.next())
 			n++;
-			exp.next();
-		}
 		return n;
 	}
 	
 	/** Test if a shape is part of another one  */
 	public static boolean isShapeInShape(TopoDS_Shape parent, TopoDS_Shape child)
 	{
-		TopExp_Explorer exp=new TopExp_Explorer(parent, child.shapeType());
-		int n=0;
-		while(exp.more())
+		for(TopExp_Explorer exp=new TopExp_Explorer(parent, child.shapeType()); exp.more(); exp.next())
 		{
 			if(exp.current().equals(child))
 				return true;
-			exp.next();
 		}
-		return false;		
+		return false;
 	}
 	
 	/**
@@ -89,28 +82,27 @@ public class Utilities
 	 */
 	public static TopoDS_Shape readFile(String fileName)
 	{
-        TopoDS_Shape brepShape;
-        if (fileName.endsWith(".stp") || fileName.endsWith(".STP") ||
-        	fileName.endsWith(".step") || fileName.endsWith(".STEP"))
-        {
-            STEPControl_Reader aReader = new STEPControl_Reader();
-            aReader.readFile(fileName.getBytes());
-            aReader.nbRootsForTransfer();
-            aReader.transferRoots();
-            brepShape = aReader.oneShape();
-        }
-        else if (fileName.endsWith(".igs") || fileName.endsWith(".IGS") ||
-        	fileName.endsWith(".iges") || fileName.endsWith(".IGES"))
-        {
-            IGESControl_Reader aReader = new IGESControl_Reader();
-            aReader.readFile(fileName.getBytes());
-            aReader.nbRootsForTransfer();
-            aReader.transferRoots();
-            brepShape = aReader.oneShape();
-        }
-        else
-            brepShape = BRepTools.read(fileName, new BRep_Builder());
-        return brepShape;
+		if (fileName.endsWith(".stp") || fileName.endsWith(".STP") ||
+			fileName.endsWith(".step") || fileName.endsWith(".STEP"))
+		{
+			STEPControl_Reader aReader = new STEPControl_Reader();
+			aReader.readFile(fileName.getBytes());
+			aReader.nbRootsForTransfer();
+			aReader.transferRoots();
+			return aReader.oneShape();
+		}
+
+		if (fileName.endsWith(".igs") || fileName.endsWith(".IGS") ||
+			fileName.endsWith(".iges") || fileName.endsWith(".IGES"))
+		{
+			IGESControl_Reader aReader = new IGESControl_Reader();
+			aReader.readFile(fileName.getBytes());
+			aReader.nbRootsForTransfer();
+			aReader.transferRoots();
+			return aReader.oneShape();
+		}
+
+		return BRepTools.read(fileName, new BRep_Builder());
 	}
 	
 	/**
@@ -118,7 +110,7 @@ public class Utilities
 	 */
 	public static TopoDS_Face getFace(TopoDS_Shape shape, int id)
 	{
-		TopExp_Explorer exp=new TopExp_Explorer(shape, TopAbs_ShapeEnum.FACE);		
+		TopExp_Explorer exp=new TopExp_Explorer(shape, TopAbs_ShapeEnum.FACE);
 		int i=0;
 		while(exp.more())
 		{
@@ -127,7 +119,7 @@ public class Utilities
 			exp.next();
 			i++;
 		}
-		throw new IndexOutOfBoundsException("Face "+id+" not found");		
+		throw new IndexOutOfBoundsException("Face "+id+" not found");
 	}
 
 	/**
@@ -135,7 +127,7 @@ public class Utilities
 	 */
 	public static TopoDS_Vertex getVertex(TopoDS_Shape shape, int id)
 	{
-		TopExp_Explorer exp=new TopExp_Explorer(shape, TopAbs_ShapeEnum.VERTEX);		
+		TopExp_Explorer exp=new TopExp_Explorer(shape, TopAbs_ShapeEnum.VERTEX);
 		int i=0;
 		while(exp.more())
 		{
@@ -144,7 +136,7 @@ public class Utilities
 			exp.next();
 			i++;
 		}
-		throw new IndexOutOfBoundsException("Vertex "+id+" not found");		
+		throw new IndexOutOfBoundsException("Vertex "+id+" not found");
 	}
 	
 	/**
