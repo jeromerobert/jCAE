@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.util.HashSet;
-import org.hamcrest.core.IsInstanceOf;
 
 public class Explorer
 {
@@ -16,7 +15,7 @@ public class Explorer
 		TopoDS_Shape box = new BRepPrimAPI_MakeBox(pt1, pt2).shape();
 		
 		// The created shape is a solid.
-		assertThat(box, new IsInstanceOf(TopoDS_Solid.class));
+		assertTrue(box instanceof TopoDS_Solid);
 		
 		// Display the child of our box
 		TopoDS_Iterator it=new TopoDS_Iterator(box);
@@ -30,7 +29,7 @@ public class Explorer
 		it=new TopoDS_Iterator(shell);
 		while(it.more())
 		{
-			assertThat(it.value(), new IsInstanceOf(TopoDS_Face.class));
+			assertTrue(it.value() instanceof TopoDS_Face);
 			it.next();
 		}
 		
@@ -42,7 +41,7 @@ public class Explorer
 		while(exp.more())
 		{
 			//Just to show that the type is TopoDS_Edge
-			assertThat(exp.current(), new IsInstanceOf(TopoDS_Edge.class));
+			assertTrue(exp.current() instanceof TopoDS_Edge);
 			set.add(exp.current());
 			
 			counter++;
