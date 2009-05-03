@@ -257,3 +257,40 @@ enum STEPControl_StepModelType {
  STEPControl_Hybrid
 };
 
+/**
+ * IGESControl_Writer
+ * Usage:
+ *   new IGESControl_Controller().init()
+ *   IGESControl_Writer aWriter = new IGESControl_Writer("MM", 0)
+ *   aWriter.addShape(shape)
+ *   aWriter.computeModel()
+ *   aWriter.write("foo.igs")
+ */
+ %{
+#include <IGESControl_Writer.hxx>
+ %}
+class IGESControl_Writer
+{
+	%rename(write) Write;
+	%rename(addShape) AddShape;
+	%rename(computeModel) ComputeModel;
+	public:
+	IGESControl_Writer();
+	IGESControl_Writer(const Standard_CString unit, const Standard_Integer modecr = 0);
+	Standard_Boolean Write(const Standard_CString filename);
+	Standard_Boolean AddShape(const TopoDS_Shape& sh);
+	void ComputeModel();
+};
+
+ %{
+#include <IGESControl_Controller.hxx>
+ %}
+class IGESControl_Controller
+{
+	%rename(init) Init;
+	public:
+	IGESControl_Controller();
+	void Init();
+};
+
+
