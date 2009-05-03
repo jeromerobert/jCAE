@@ -1,44 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project basedir="." default="jar" name="occjava">
     <target name="init">
-        <property location="classes" name="classes.dir"/>
-        <property location="src-java" name="src.dir"/>
-        <property location="doc/api" name="javadoc.dir"/>
-        <property name="project.name" value="${ant.project.name}"/>
-        <property location="lib/${project.name}.jar" name="jar"/>
+        <property file="build.private.properties"/>
+        <property file="build.properties"/>
+        <property environment="env"/>
     </target>
 
     <target name="compile" depends="init" description="Compile">
         <mkdir dir="${classes.dir}"/>
-        <javac source="1.5" target="1.5" debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}">
-			<include name="org/jcae/opencascade/**"/>
-		</javac>
+        <javac debug="true" deprecation="true" destdir="${classes.dir}" srcdir="${src.dir}">
+            <compilerarg line="${compiler.arg}"/>
+            <include name="org/jcae/opencascade/**"/>
+        </javac>
     </target>
 
     <target name="jar" depends="init,compile" description="Create a jar file" >
         <mkdir dir="lib"/>
-        <jar compress="true" jarfile="${jar}">
-			<fileset dir="classes" excludes="org/jcae/opencascade/test/**" />
-		</jar>
+        <jar basedir="${classes.dir}" compress="true" jarfile="${occjava.jar}" />
     </target>
 
-    <target name="jar-test" depends="init,compile" description="Create a jar file" >
+    <target name="compile-junit" depends="init,jar" description="Compile junit tests">
+        <mkdir dir="${classes.test.dir}"/>
+        <javac debug="true" deprecation="true" destdir="${classes.test.dir}" srcdir="${src.test.dir}">
+            <compilerarg line="${compiler.arg}"/>
+            <classpath>
+                <pathelement location="${junit.jar}"/>
+                <pathelement location="${occjava.jar}"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="jar-junit" depends="compile-junit" description="Create a jar file for JUnit tests" >
         <mkdir dir="lib"/>
-        <jar compress="true" jarfile="lib/occjava-test.jar">
-			<fileset dir="classes" includes="org/jcae/opencascade/test/**" />
-			<manifest>
-				<attribute name="Main-Class" value="org.jcae.opencascade.test.All"/>
-				<attribute name="Class-Path" value="occjava.jar jcae-viewer3d.jar"/>
-			</manifest>
-		</jar>
+        <jar basedir="${classes.test.dir}" compress="true" jarfile="${test.jar}">
+            <manifest>
+                <attribute name="Class-Path" value="${test.jar.dependencies}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="junit" depends="jar-junit" description="Run JUnit tests">
+        <mkdir dir="${test.dir}/results"/>
+        <junit printsummary="withOutAndErr" fork="yes" failureProperty="test.failure">
+            <env key="MMGT_OPT" value="0"/>
+            <env key="LD_LIBRARY_PATH" path="lib:${env.LD_LIBRARY_PATH}" />
+            <formatter type="xml"/>
+            <classpath>
+                <pathelement location="${junit.jar}"/>
+                <pathelement location="${test.jar}"/>
+            </classpath>
+            <batchtest fork="yes" todir="${test.dir}/results" >
+                <fileset dir="${classes.test.dir}" />
+            </batchtest>
+        </junit>
+        <fail message="test failed" if="test.failure"/>
     </target>
 
     <target depends="init" description="Javadoc" name="javadoc">
         <mkdir dir="${javadoc.dir}"/>
         <javadoc destdir="${javadoc.dir}" access="public">
-			<packageset dir="src" defaultexcludes="yes">
+			<packageset dir="${src.dir}" defaultexcludes="yes">
 				<include name="org/jcae/opencascade/**"/>
-				<exclude name="org/jcae/opencascade/test/**"/>
 			</packageset>
             <sourcepath>
                 <pathelement location="${src.dir}"/>
@@ -46,14 +68,13 @@
         </javadoc>
     </target>
 	
-	<target name="test" description="Run tests" depends="jar-test">
-		<java jar="lib/occjava-test.jar" fork="true"/>
-	</target>
-
     <target name="clean" depends="init" description="Clean all build products." >
-		<delete dir="${classes.dir}"/>
+        <delete dir="${classes.dir}"/>
+        <delete dir="${classes.test.dir}"/>
+        <delete dir="${test.dir}"/>
         <delete dir="${javadoc.dir}"/>
-        <delete file="${jar}"/>
+        <delete file="${occjava.jar}"/>
+        <delete file="${test.jar}"/>
 		<delete>
 			<fileset dir="src-java/org/jcae/opencascade/jni" excludes="BRepOffsetAPI_Sewing.java"/>
 		</delete>
