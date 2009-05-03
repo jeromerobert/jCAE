@@ -216,3 +216,44 @@ class IGESControl_Reader: public XSControl_Reader
 		}
 	}
 };
+
+/**
+ * STEPControl_Writer
+ * Usage:
+ *    STEPControl_Writer aWriter = new STEPControl_Writer()
+ *    aWriter.transfer(shape, STEPControl_StepModelType.AsIs)
+ *    aWriter.write("foo.stp")
+ */
+ %{
+#include <STEPControl_Writer.hxx>
+ %}
+class STEPControl_Writer
+{
+	%rename(write) Write;
+	%rename(transfer) Transfer;
+	public:
+	STEPControl_Writer();
+	IFSelect_ReturnStatus Write(const Standard_CString filename);
+	IFSelect_ReturnStatus Transfer(TopoDS_Shape theShape, STEPControl_StepModelType mode);
+};
+
+
+%rename(AsIs) STEPControl_AsIs;
+%rename(ManifoldSolidBrep) STEPControl_ManifoldSolidBrep;
+%rename(BrepWithVoids) STEPControl_BrepWithVoids;
+%rename(FacetedBrep) STEPControl_FacetedBrep;
+%rename(FacetedBrepAndBrepWithVoids) STEPControl_FacetedBrepAndBrepWithVoids;
+%rename(ShellBasedSurfaceModel) STEPControl_ShellBasedSurfaceModel;
+%rename(GeometricCurveSet) STEPControl_GeometricCurveSet;
+%rename(Hybrid) STEPControl_Hybrid;
+enum STEPControl_StepModelType {
+ STEPControl_AsIs,
+ STEPControl_ManifoldSolidBrep,
+ STEPControl_BrepWithVoids,
+ STEPControl_FacetedBrep,
+ STEPControl_FacetedBrepAndBrepWithVoids,
+ STEPControl_ShellBasedSurfaceModel,
+ STEPControl_GeometricCurveSet,
+ STEPControl_Hybrid
+};
+
