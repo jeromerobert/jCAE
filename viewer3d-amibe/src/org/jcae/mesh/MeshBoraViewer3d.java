@@ -44,12 +44,11 @@ public class MeshBoraViewer3d
 		if (args.length != 2)
 		{
 			System.out.println("Usage : MeshBoraView boraDir tempDir");
-			System.exit(0);
+			System.exit(1);
 		}
 		String boraDir = args[0];
 		String tmpDir = args[1];
 		BModel model = BModelReader.readObject(boraDir);
-		model = BModelReader.readObject(boraDir);
 		MeshTraitsBuilder mtb = MeshTraitsBuilder.getDefault3D();
 		mtb.addNodeList();
 		Mesh m = new Mesh(mtb);
