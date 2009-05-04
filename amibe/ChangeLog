@@ -1,3 +1,8 @@
+Mon May  4 14:04:40 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/IntFileReaderByDirectBuffer.java: Fix
+	infinite loop in copyFileIntoBuffer() when reading empty files.
+
 Mon Apr 27 15:28:27 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/amibe/ds/Triangle.java: New methods in

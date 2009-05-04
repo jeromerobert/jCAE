@@ -171,6 +171,12 @@ public class IntFileReaderByDirectBuffer implements IntFileReader
 		bb.clear();
 		int nr;
 
+		if (fc.position() == fc.size())
+		{
+			remaining = -1;
+			return false;
+		}
+
 		startBufferIndex = (int) (fc.position() / ELEMENT_SIZE);
 		do
 		{
