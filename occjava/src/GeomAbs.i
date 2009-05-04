@@ -31,25 +31,6 @@
 %rename(C3) GeomAbs_C3;
 %rename(CN) GeomAbs_CN;
 
-//add deprecated field to ensure backward compatibility.
-%typemap(javacode) GeomAbs_Shape
-%{
-    /** @deprecated */
-    public final static GeomAbs_Shape GeomAbs_C0=C0;
-    /** @deprecated */
-    public final static GeomAbs_Shape GeomAbs_G1=G1;
-    /** @deprecated */
-    public final static GeomAbs_Shape GeomAbs_C1=C1;
-    /** @deprecated */
-    public final static GeomAbs_Shape GeomAbs_G2=G2;
-    /** @deprecated */
-    public final static GeomAbs_Shape GeomAbs_C2=C2;
-    /** @deprecated */
-    public final static GeomAbs_Shape GeomAbs_C3=C3;
-    /** @deprecated */
-    public final static GeomAbs_Shape GeomAbs_CN=CN;
-%}
-
 enum GeomAbs_Shape
 {
     GeomAbs_C0,

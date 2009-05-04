@@ -1,3 +1,9 @@
+2009-05-04 23:31:56 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/GeomAbs.i: Drop GeomAbs_C0, GeomAbs_C1, etc.
+	These members have been obsoleted a long time ago and are
+	no more used.
+
 2009-05-04 21:22:49 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/OccJava.i: Replace %include "enumtypeunsafe.swg" by
