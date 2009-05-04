@@ -156,7 +156,7 @@ public class View extends Canvas {
 			case POINT_SELECTION:
 				// If the press and release positions are not close, this is
 				// not a selection
-				if(pressPosition.distance(releasePosition) > 5.)
+				if(pressPosition == null || pressPosition.distance(releasePosition) > 5.)
 					return;
 				if(currentViewable != null)
 				{
