@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2009, by EADS France
  */
 
 package org.jcae.netbeans.cad;
@@ -66,7 +67,7 @@ public class PrimitiveNewType extends NewType
 	
 	public static NewType[] getNewType(Node node)
 	{
-		if(GeomUtils.getShape(node).getType()<=TopAbs_ShapeEnum.COMPSOLID)
+		if(GeomUtils.getShape(node).getType().ordinal() <= TopAbs_ShapeEnum.COMPSOLID.ordinal())
 		{
 			return new NewType[]{
 				new PrimitiveNewType(node, Cone.class),

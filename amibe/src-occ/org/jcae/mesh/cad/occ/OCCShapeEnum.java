@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
    (C) Copyright 2006, by EADS CRC
+   (C) Copyright 2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -21,6 +22,8 @@
 package org.jcae.mesh.cad.occ;
 
 import org.jcae.mesh.cad.*;
+import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -30,13 +33,13 @@ import java.util.NoSuchElementException;
 public abstract class OCCShapeEnum extends CADShapeEnum
 {
 	// occExplorerEnum must be identical to TopAbs_ShapeEnum.
-	private final int occExplorerEnum;
+	private final TopAbs_ShapeEnum occExplorerEnum;
 	OCCShapeEnum(String name, int t)
 	{
 		super(name);
-		occExplorerEnum = t;
+		occExplorerEnum = TopAbs_ShapeEnum.swigToEnum(t);
 	}
-	int asType()
+	TopAbs_ShapeEnum asType()
 	{
 		return occExplorerEnum;
 	}

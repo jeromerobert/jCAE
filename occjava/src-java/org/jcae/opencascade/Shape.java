@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2008, by EADS France
+ * (C) Copyright 2008,2009, by EADS France
  */
 package org.jcae.opencascade;
 
@@ -305,7 +305,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	
 	public void dump(PrintWriter writer)
 	{
-		int[] ids = new int[TopAbs_ShapeEnum.SHAPE];
+		int[] ids = new int[TopAbs_ShapeEnum.values().length - 1];
 		Arrays.fill(ids, 1);
 		writer.println("<geometry>");
 		dump(writer, new HashSet<Shape>(), ids);
@@ -316,7 +316,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	{
 		if (!shapeSet.contains(this))
 		{
-			int type = getType();
+			int type = getType().ordinal();
 			shapeSet.add(this);
 			if(getAttributes()!=null)
 			{
@@ -458,11 +458,11 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	 * @param type shape type
 	 * @return the shape of the given type with this id
 	 */
-	public T getShapeFromID(int id, int type)
+	public T getShapeFromID(int id, TopAbs_ShapeEnum type)
 	{
 		if(id<1)
 			throw new IllegalArgumentException("Shape ID must be greater than 1");
-		return getShapeFromID(id, TYPE[type]);
+		return getShapeFromID(id, TYPE[type.ordinal()]);
 	}
 	
 	/**
@@ -523,7 +523,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		return Utilities.tolerance(impl);
 	}
 
-	public int getType()
+	public TopAbs_ShapeEnum getType()
 	{
 		return impl.shapeType();
 	}
@@ -560,7 +560,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	
 	public int compareTo(Shape<T> o)
 	{
-		int r = getType()-o.getType();
+		int r = getType().ordinal() - o.getType().ordinal();
 		if( r == 0 )
 			r = getID() - o.getID();
 		return r;
@@ -569,9 +569,11 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	/** For debugging */
 	private static void dumpTopExp(TopoDS_Shape shape)
 	{
-		for (int i = TopAbs_ShapeEnum.COMPOUND; i < TopAbs_ShapeEnum.SHAPE; i++)
+		for (TopAbs_ShapeEnum type : TopAbs_ShapeEnum.values())
 		{
-			TopExp_Explorer ex = new TopExp_Explorer(shape, i);
+			if (type.equals(TopAbs_ShapeEnum.SHAPE))
+				continue;
+			TopExp_Explorer ex = new TopExp_Explorer(shape, type);
 			while (ex.more())
 			{
 				System.out.println(ex.current());

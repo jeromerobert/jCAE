@@ -1,3 +1,22 @@
+/*
+ * Project Info:  http://jcae.sourceforge.net
+ * 
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation, Inc.,
+ * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * (C) Copyright 2008,2009, by EADS France
+ */
 package org.jcae.opencascade;
 
 import java.io.PrintStream;
@@ -8,7 +27,7 @@ import org.jcae.opencascade.jni.*;
  * Useful toolbox.
  * Note that this methods are not Open CASCADE binding and should probably
  * not be used outside of the jCAE project, as compatibility between versions
- * won't be garanty.
+ * won't be warranted.
  */
 public class Utilities
 {
@@ -36,13 +55,13 @@ public class Utilities
 		System.out.print("+"+dotss+label);
 		switch(shape.shapeType())
 		{
-			case TopAbs_ShapeEnum.FACE:
+			case FACE:
 				out.print(" "+BRep_Tool.tolerance((TopoDS_Face)shape));
 				break;
-			case TopAbs_ShapeEnum.EDGE:
+			case EDGE:
 				out.print(" "+BRep_Tool.tolerance((TopoDS_Edge)shape));
 				break;
-			case TopAbs_ShapeEnum.VERTEX:
+			case VERTEX:
 				out.print(" "+BRep_Tool.tolerance((TopoDS_Vertex)shape));
 				break;
 			default:
@@ -57,7 +76,7 @@ public class Utilities
 	}
 	
 	/** Return the number of shapes in one shape */
-	public static int numberOfShape(TopoDS_Shape shape, int type)
+	public static int numberOfShape(TopoDS_Shape shape, TopAbs_ShapeEnum type)
 	{
 		int n=0;
 		for(TopExp_Explorer exp=new TopExp_Explorer(shape, type); exp.more(); exp.next())

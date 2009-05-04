@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2009, by EADS France
  */
 
 /**
@@ -34,19 +35,19 @@
 %typemap(javacode) GeomAbs_Shape
 %{
     /** @deprecated */
-    public final static int GeomAbs_C0=C0;
+    public final static GeomAbs_Shape GeomAbs_C0=C0;
     /** @deprecated */
-    public final static int GeomAbs_G1=G1;
+    public final static GeomAbs_Shape GeomAbs_G1=G1;
     /** @deprecated */
-    public final static int GeomAbs_C1=C1;
+    public final static GeomAbs_Shape GeomAbs_C1=C1;
     /** @deprecated */
-    public final static int GeomAbs_G2=G2;
+    public final static GeomAbs_Shape GeomAbs_G2=G2;
     /** @deprecated */
-    public final static int GeomAbs_C2=C2;
+    public final static GeomAbs_Shape GeomAbs_C2=C2;
     /** @deprecated */
-    public final static int GeomAbs_C3=C3;
+    public final static GeomAbs_Shape GeomAbs_C3=C3;
     /** @deprecated */
-    public final static int GeomAbs_CN=CN;
+    public final static GeomAbs_Shape GeomAbs_CN=CN;
 %}
 
 enum GeomAbs_Shape

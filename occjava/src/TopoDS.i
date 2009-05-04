@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2009, by EADS France
  */
 
 %{
@@ -90,39 +91,39 @@
 		if(in==0)
 			return null;
 		//second argument is not use in swig
-		int type = OccJavaJNI.TopoDS_Shape_shapeType(in, null);
+		TopAbs_ShapeEnum type = TopAbs_ShapeEnum.swigToEnum(OccJavaJNI.TopoDS_Shape_shapeType(in, null));
 		return create(in, type);
 	}
 
-	protected static TopoDS_Shape create(long in, int type)
+	protected static TopoDS_Shape create(long in, TopAbs_ShapeEnum type)
 	{
 		TopoDS_Shape toReturn=null;
 		if(in==0)
 			return null;
 		switch(type)
 		{
-			case TopAbs_ShapeEnum.COMPOUND:
+			case COMPOUND:
 				toReturn=new TopoDS_Compound(in, true);
 				break;
-			case TopAbs_ShapeEnum.COMPSOLID:
+			case COMPSOLID:
 				toReturn=new TopoDS_CompSolid(in, true);
 				break;
-			case TopAbs_ShapeEnum.SOLID:
+			case SOLID:
 				toReturn=new TopoDS_Solid(in, true);
 				break;
-			case TopAbs_ShapeEnum.SHELL:
+			case SHELL:
 				toReturn=new TopoDS_Shell(in, true);
 				break;
-			case TopAbs_ShapeEnum.FACE:
+			case FACE:
 				toReturn=new TopoDS_Face(in, true);
 				break;
-			case TopAbs_ShapeEnum.WIRE:
+			case WIRE:
 				toReturn=new TopoDS_Wire(in, true);
 				break;
-			case TopAbs_ShapeEnum.EDGE:
+			case EDGE:
 				toReturn=new TopoDS_Edge(in, true);
 				break;
-			case TopAbs_ShapeEnum.VERTEX:
+			case VERTEX:
 				toReturn=new TopoDS_Vertex(in, true);
 				break;
 		}
@@ -172,7 +173,7 @@
 		{  
 			ptr = ptrs[j++];
 			type = (int)ptrs[j++];
-			toReturn[i] = create(ptr, type);
+			toReturn[i] = create(ptr, TopAbs_ShapeEnum.swigToEnum(type));
 		}
 		return toReturn;
 	}

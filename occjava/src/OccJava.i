@@ -31,9 +31,9 @@
 #include <Poly_Triangulation.hxx>
 %}
 
-// Handle enums with int
+// Handle enums with Java enums
 %javaconst(1);
-%include "enumtypeunsafe.swg";
+%include "enums.swg"
 
 // Handle C arrays as Java arrays
 %include "arrays_java.i";

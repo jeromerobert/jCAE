@@ -1,3 +1,11 @@
+2009-05-04 21:22:49 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/OccJava.i: Replace %include "enumtypeunsafe.swg" by
+	%include "enums.swg" to use Java 1.5 enums.  The following
+	classes are thus modified: ChFi3d_FilletShape, GeomAbs_Shape,
+	IFSelect_ReturnStatus, TopAbs_ShapeEnum, TopAbs_Orientation
+	and STEPControl_StepModelType.
+
 2009-04-30 12:17:58 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/OccJava.i: In BRepGProp, add SurfaceProperties and

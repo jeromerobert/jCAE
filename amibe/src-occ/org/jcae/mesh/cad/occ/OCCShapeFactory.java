@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005, by EADS CRC
-    Copyright (C) 2007,2008,2009, by EADS CRC
+    Copyright (C) 2007,2008,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -51,25 +51,25 @@ public class OCCShapeFactory extends CADShapeFactory
 		OCCShape shape;
 		switch (ts.shapeType())
 		{
-			case TopAbs_ShapeEnum.COMPOUND:
+			case COMPOUND:
 				shape = new OCCCompound();
 				break;
-			case TopAbs_ShapeEnum.SOLID:
+			case SOLID:
 				shape = new OCCSolid();
 				break;
-			case TopAbs_ShapeEnum.SHELL:
+			case SHELL:
 				shape = new OCCShell();
 				break;
-			case TopAbs_ShapeEnum.FACE:
+			case FACE:
 				shape = new OCCFace();
 				break;
-			case TopAbs_ShapeEnum.WIRE:
+			case WIRE:
 				shape = new OCCWire();
 				break;
-			case TopAbs_ShapeEnum.EDGE:
+			case EDGE:
 				shape = new OCCEdge();
 				break;
-			case TopAbs_ShapeEnum.VERTEX:
+			case VERTEX:
 				shape = new OCCVertex();
 				break;
 			default:

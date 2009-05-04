@@ -16,6 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
+ * (C) Copyright 2009, by EADS France
  */
 
 package org.jcae.netbeans.cad;
@@ -69,11 +70,8 @@ public class ExplodeAction extends CookieAction
 	
 	private static JComboBox createCombo(int type)
 	{
-		Object[] toReturn=new Object[TopAbs_ShapeEnum.SHAPE-type+1];
-		for(int i=type; i<=TopAbs_ShapeEnum.SHAPE; i++)
-		{
-			toReturn[i-type]=Shape.TYPE_LABEL[i];
-		}
+		Object[] toReturn=new Object[TopAbs_ShapeEnum.values().length - type];
+		System.arraycopy(Shape.TYPE_LABEL, type, toReturn, 0, toReturn.length);
 		return new JComboBox(toReturn);
 	}
 	
@@ -82,7 +80,7 @@ public class ExplodeAction extends CookieAction
 		int maxType=0;
 		for (Node aNode : node)
 		{
-			int type = GeomUtils.getShape(aNode).getType();
+			int type = GeomUtils.getShape(aNode).getType().ordinal();
 			if (type > maxType)
 				maxType = type;
 		}

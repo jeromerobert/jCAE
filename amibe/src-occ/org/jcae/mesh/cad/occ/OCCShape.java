@@ -2,6 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2004,2005, by EADS CRC
+    Copyright (C) 2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -74,7 +75,7 @@ public class OCCShape implements CADShape
 	
 	public int orientation()
 	{
-		return myShape.orientation();
+		return myShape.orientation().swigValue();
 	}
 	
 	public boolean isOrientationForward()
