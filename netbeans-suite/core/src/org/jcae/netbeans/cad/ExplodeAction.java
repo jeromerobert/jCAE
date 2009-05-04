@@ -70,7 +70,7 @@ public class ExplodeAction extends CookieAction
 	
 	private static JComboBox createCombo(int type)
 	{
-		Object[] toReturn=new Object[TopAbs_ShapeEnum.values().length - type];
+		Object[] toReturn=new Object[TopAbs_ShapeEnum.values().length - type - 1];
 		System.arraycopy(Shape.TYPE_LABEL, type, toReturn, 0, toReturn.length);
 		return new JComboBox(toReturn);
 	}
