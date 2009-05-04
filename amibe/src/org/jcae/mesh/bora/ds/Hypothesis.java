@@ -394,6 +394,9 @@ public class Hypothesis
 	@SuppressWarnings("unused")
 	private static class HypV1 implements HypInterface
 	{
+		// Hypothesis.getAlgo() needs access to this constructor
+		HypV1() {}
+
 		public CADShapeEnum dim()
 		{
 			return CADShapeEnum.VERTEX;
@@ -412,6 +415,9 @@ public class Hypothesis
 	@SuppressWarnings("unused")
 	private static class HypE2 implements HypInterface
 	{
+		// Hypothesis.getAlgo() needs access to this constructor
+		HypE2() {}
+
 		public CADShapeEnum dim()
 		{
 			return CADShapeEnum.EDGE;
@@ -433,6 +439,9 @@ public class Hypothesis
 	@SuppressWarnings("unused")
 	private static class HypT3 implements HypInterface
 	{
+		// Hypothesis.getAlgo() needs access to this constructor
+		HypT3() {}
+
 		public CADShapeEnum dim()
 		{
 			return CADShapeEnum.FACE;
@@ -456,6 +465,9 @@ public class Hypothesis
 	@SuppressWarnings("unused")
 	private static class HypQ4 implements HypInterface
 	{
+		// Hypothesis.getAlgo() needs access to this constructor
+		HypQ4() {}
+
 		public CADShapeEnum dim()
 		{
 			return CADShapeEnum.FACE;
@@ -479,6 +491,9 @@ public class Hypothesis
 	@SuppressWarnings("unused")
 	private static class HypT4 implements HypInterface
 	{
+		// Hypothesis.getAlgo() needs access to this constructor
+		HypT4() {}
+
 		public CADShapeEnum dim()
 		{
 			return CADShapeEnum.SOLID;
