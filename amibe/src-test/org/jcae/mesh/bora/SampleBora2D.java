@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007, by EADS France
+    Copyright (C) 2007,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -76,10 +76,10 @@ public class SampleBora2D
 			BDiscretization d = face.getDiscretizations().iterator().next();
 			if (null == d)
 				continue;
-			File nodesfile = new File(model.getOutputDir(d)+File.separator+"2d", "n"+face.getId());
+			File nodesfile = new File(model.getOutputDir(d), "n");
 			if (!nodesfile.exists())
 				continue;
-			File parasfile = new File(model.getOutputDir(d)+File.separator+"2d", "p"+face.getId());
+			File parasfile = new File(model.getOutputDir(d), "p");
 			if (!parasfile.exists())
 				continue;
 			nFaces++;
@@ -101,14 +101,14 @@ public class SampleBora2D
 			BDiscretization d = face.getDiscretizations().iterator().next();
 			if (null == d)
 				continue;
-			File nodesfile = new File(model.getOutputDir(d)+File.separator+"2d", "n"+face.getId());
+			File nodesfile = new File(model.getOutputDir(d), "n");
 			if (!nodesfile.exists())
 				continue;
-			File parasfile = new File(model.getOutputDir(d)+File.separator+"2d", "p"+face.getId());
+			File parasfile = new File(model.getOutputDir(d), "p");
 			if (!parasfile.exists())
 				continue;
 			nrNodes[nFaces+1] = nrNodes[nFaces] + (int) nodesfile.length() / 24;
-			File triasfile = new File(model.getOutputDir(d)+File.separator+"2d", "f"+face.getId());
+			File triasfile = new File(model.getOutputDir(d), "f");
 			if (!triasfile.exists())
 				continue;
 			nrTria[nFaces+1] = nrTria[nFaces] + (int) triasfile.length() / 12;
@@ -138,13 +138,13 @@ public class SampleBora2D
 			CADFace F = (CADFace) face.getShape();
 			try
 			{
-				File nodesfile = new File(model.getOutputDir(d)+File.separator+"2d", "n"+face.getId());
+				File nodesfile = new File(model.getOutputDir(d), "n");
 				if (!nodesfile.exists())
 					continue;
-				File parasfile = new File(model.getOutputDir(d)+File.separator+"2d", "p"+face.getId());
+				File parasfile = new File(model.getOutputDir(d), "p");
 				if (!parasfile.exists())
 					continue;
-				File triasfile = new File(model.getOutputDir(d)+File.separator+"2d", "f"+face.getId());
+				File triasfile = new File(model.getOutputDir(d), "f");
 				if (!triasfile.exists())
 					continue;
 

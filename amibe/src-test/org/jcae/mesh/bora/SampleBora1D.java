@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
 
     Copyright (C) 2006, by EADS CRC
-    Copyright (C) 2007, by EADS France
+    Copyright (C) 2007,2009, by EADS France
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -74,10 +74,10 @@ public class SampleBora1D
 			BDiscretization d = edge.getDiscretizations().iterator().next();
 			if (null == d)
 				continue;
-			File nodesfile = new File(model.getOutputDir(d)+File.separator+"1d", "n"+edge.getId());
+			File nodesfile = new File(model.getOutputDir(d), "n");
 			if (!nodesfile.exists())
 				continue;
-			File parasfile = new File(model.getOutputDir(d)+File.separator+"1d", "p"+edge.getId());
+			File parasfile = new File(model.getOutputDir(d), "p");
 			if (!parasfile.exists())
 				continue;
 			nEdges++;
@@ -99,14 +99,14 @@ public class SampleBora1D
 			BDiscretization d = edge.getDiscretizations().iterator().next();
 			if (null == d)
 				continue;
-			File nodesfile = new File(model.getOutputDir(d)+File.separator+"1d", "n"+edge.getId());
+			File nodesfile = new File(model.getOutputDir(d), "n");
 			if (!nodesfile.exists())
 				continue;
-			File parasfile = new File(model.getOutputDir(d)+File.separator+"1d", "p"+edge.getId());
+			File parasfile = new File(model.getOutputDir(d), "p");
 			if (!parasfile.exists())
 				continue;
 			nrNodes[nEdges+1] = nrNodes[nEdges] + (int) nodesfile.length() / 24;
-			File beamsfile = new File(model.getOutputDir(d)+File.separator+"1d", "b"+edge.getId());
+			File beamsfile = new File(model.getOutputDir(d), "b");
 			if (!beamsfile.exists())
 				continue;
 			nrBeams[nEdges+1] = nrBeams[nEdges] + (int) beamsfile.length() / 8;
@@ -136,13 +136,13 @@ public class SampleBora1D
 				continue;
 			try
 			{
-				File nodesfile = new File(model.getOutputDir(d)+File.separator+"1d", "n"+edge.getId());
+				File nodesfile = new File(model.getOutputDir(d), "n");
 				if (!nodesfile.exists())
 					continue;
-				File parasfile = new File(model.getOutputDir(d)+File.separator+"1d", "p"+edge.getId());
+				File parasfile = new File(model.getOutputDir(d), "p");
 				if (!parasfile.exists())
 					continue;
-				File beamsfile = new File(model.getOutputDir(d)+File.separator+"1d", "b"+edge.getId());
+				File beamsfile = new File(model.getOutputDir(d), "b");
 				if (!beamsfile.exists())
 					continue;
 
