@@ -385,7 +385,7 @@ public class BCADGraphCell
 				BDiscretization discrChild = null;
 				for (BDiscretization dc : child.discrete)
 				{
-					if (!discr.emptyIntersection(discrChild))
+					if (!discr.emptyIntersection(dc))
 					{
 						discrChild = dc;
 						break;
