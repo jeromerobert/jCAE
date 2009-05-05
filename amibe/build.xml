@@ -49,6 +49,7 @@
 		<mkdir dir="${test.dir}/results"/>
 		<junit printsummary="withOutAndErr" fork="yes" failureProperty="test.failure">
 			<sysproperty key="java.util.logging.config.file" value="${logging.configuration.present}"/>
+			<env key="LD_LIBRARY_PATH" path="lib:${env.LD_LIBRARY_PATH}" />
 			<formatter type="xml"/>
 			<classpath>
 				<pathelement location="${amibe.jar}"/>
@@ -64,7 +65,7 @@
 					<exclude name="org/jcae/mesh/amibe/patch/**"/>
 					<exclude name="org/jcae/mesh/amibe/util/**"/>
 					<exclude name="org/jcae/mesh/amibe/metrics/OctreeSample**"/>
-					<exclude name="org/jcae/mesh/bora/**"/>
+					<exclude name="org/jcae/mesh/bora/SampleBora*"/>
 					<!-- Not JUnit tests, used by test-large -->
 					<exclude name="org/jcae/mesh/MesherTest.class"/>
 					<exclude name="org/jcae/mesh/MesherTest$ComputeTriangleQuality.class"/>
