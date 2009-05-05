@@ -24,6 +24,7 @@ package org.jcae.mesh.bora.ds;
 import org.jcae.mesh.cad.CADShapeEnum;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -71,9 +72,9 @@ public class BSubMesh
 	private final Collection<Constraint> constraints = new ArrayList<Constraint>();
 
 	/**
-	 * Creates a root mesh.
+	 * Creates a root mesh.  This constructor is called only by BModel.newMesh().
 	 */
-	protected BSubMesh(BModel m, int id)
+	BSubMesh(BModel m, int id)
 	{
 		model = m;
 		this.id = id;
@@ -86,7 +87,7 @@ public class BSubMesh
 
 	public Collection<Constraint> getConstraints()
 	{
-		return constraints;
+		return Collections.unmodifiableCollection(constraints);
 	}
 
 	/**
@@ -106,7 +107,7 @@ public class BSubMesh
 	}
 
 	/**
-	 * Prints discretizations to a submesh.
+	 * Prints discretizations of a submesh.
 	 * Some cells may appear twice with opposite orientations but the same discretization.
 	 * This is due to the use of shapesExplorer on the root of the CAD. Another solution 
 	 * would have been to use the CADGraphCell in the user constraints related to the 
@@ -122,11 +123,7 @@ public class BSubMesh
 		for (CADShapeEnum cse : CADShapeEnum.iterable(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND))
 		{
 			String tab = indent.toString();
-			/* returns only one of the two shapes of the same orientation, but not
-			   necessarily the good one. */
-			// for (Iterator its = root.uniqueShapesExplorer(cse); its.hasNext(); )
-			/* may returns the two shapes of the same orientation */
- 		        for (Iterator<BCADGraphCell> its = root.shapesExplorer(cse); its.hasNext(); )
+			for (Iterator<BCADGraphCell> its = root.shapesExplorer(cse); its.hasNext(); )
 			{
 				BCADGraphCell cell = its.next();
 				for (BDiscretization discr : cell.getDiscretizations())
@@ -142,44 +139,4 @@ public class BSubMesh
 		}
 	}
 
-	// Sample test
-	public static void main(String args[])
-	{
-		String file = "brep/2cubes.brep";
-
-		BModel model = new BModel(file, "out");
-		BCADGraphCell root = model.getGraph().getRootCell();
-		Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.SOLID);
-		BCADGraphCell [] solids = new BCADGraphCell[2];
-		solids[0] = its.next();
-		solids[1] = its.next();
-		BCADGraphCell f0 = model.getGraph().getById(7);
-
-		Hypothesis h1 = new Hypothesis();
-		h1.setElement("T4");
-		h1.setLength(0.3);
-
-		Hypothesis h2 = new Hypothesis();
-		h2.setElement("T4");
-		h2.setLength(0.1);
-
-		Hypothesis h3 = new Hypothesis();
-		h3.setElement("T3");
-
-		Constraint c0 = new Constraint(f0, h3);
-		Constraint c1 = new Constraint(solids[0], h1);
-		Constraint c2 = new Constraint(solids[1], h2);
-
-		BSubMesh submesh0 = model.newMesh();
-		submesh0.add(c1);
-		submesh0.add(c0);
-		BSubMesh submesh1 = model.newMesh();
-		submesh1.add(c2);
-		submesh1.add(c0);
-
-		model.printAllHypothesis();
-		model.compute();
-		model.printConstraints();
-		model.printConstraints(submesh0);
-	}
 }
