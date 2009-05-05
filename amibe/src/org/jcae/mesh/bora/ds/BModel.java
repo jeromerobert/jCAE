@@ -238,7 +238,12 @@ public class BModel
 	/**
 	 * Combines all hypothesis and computes meshes.
 	 */
-	protected void compute()
+	public void compute()
+	{
+		discretizeSolids();
+	}
+
+	public void discretizeVertices()
 	{
 		if (state == INPUT)
 			computeConstraints();
@@ -251,7 +256,12 @@ public class BModel
 			for (BDiscretization d : cell.getDiscretizations())
 				d.discretize();
 		}
-		LOGGER.info("Discretize edges");
+	}
+	public void discretizeEdges()
+	{
+		discretizeVertices();
+		LOGGER.config("Discretize edges");
+		BCADGraphCell root = cad.getRootCell();
 		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.EDGE); its.hasNext(); )
 		{
 			BCADGraphCell cell = its.next();
@@ -261,7 +271,12 @@ public class BModel
 				Storage.writeEdge(d, getOutputDir(d));
 			}
 		}
-		LOGGER.info("Discretize faces");
+	}
+	public void discretizeFaces()
+	{
+		discretizeEdges();
+		LOGGER.config("Discretize faces");
+		BCADGraphCell root = cad.getRootCell();
 		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.FACE); its.hasNext(); )
 		{
 			BCADGraphCell cell = its.next();
@@ -271,7 +286,12 @@ public class BModel
 				Storage.writeFace(d, getOutputDir(d));
 			}
 		}
-		LOGGER.info("Discretize solids");
+	}
+	public void discretizeSolids()
+	{
+		discretizeFaces();
+		LOGGER.config("Discretize solids");
+		BCADGraphCell root = cad.getRootCell();
 		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.SOLID); its.hasNext(); )
 		{
 			BCADGraphCell cell = its.next();
@@ -282,7 +302,6 @@ public class BModel
 			}
 		}
 		state = TESSELLATION;
-		LOGGER.info("Discretization finished");
 	}
 
 	/**
@@ -484,13 +503,4 @@ public class BModel
 		System.out.println("End list");
 	}
 
-	// Sample test
-	public static void main(String args[])
-	{
-		String file = "brep/2cubes.brep";
-
-		BModel model = new BModel(file, "out");
-		model.cad.printShapes();
-		BModelWriter.writeObject(model);
-	}
 }
