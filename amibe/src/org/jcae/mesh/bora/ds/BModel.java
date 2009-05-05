@@ -60,11 +60,15 @@ public class BModel
 	//   List of all constraints
 	private final Collection<Constraint> allConstraints = new LinkedHashSet<Constraint>();
 	//   Internal state
-	private int state = INPUT;
-	//   Valid state values
-	private static final int INPUT         = 0;
-	private static final int CONSTRAINTS   = 1;
-	private static final int TESSELLATION  = 2;
+	private static enum State {
+		INPUT,
+		CONSTRAINTS,
+		TESSELLATION_0,
+		TESSELLATION_1,
+		TESSELLATION_2,
+		TESSELLATION_3
+	}
+	private State state = State.INPUT;
 
 	/**
 	 * Bind a CAD representation to a disk directory.
@@ -173,7 +177,7 @@ public class BModel
 
 	public BSubMesh newMesh()
 	{
-		if (state != INPUT)
+		if (state != State.INPUT)
 			throw new RuntimeException("BModel.newMesh() cannot be called after model has been computed");
 		BSubMesh ret = new BSubMesh(this, cad.getFreeIndex());
 		submesh.add(ret);
@@ -200,7 +204,7 @@ public class BModel
 
 	protected void addConstraint(Constraint cons)
 	{
-		if (state != INPUT)
+		if (state != State.INPUT)
 			throw new RuntimeException("Constraints cannot be added after model has been computed");
 		allConstraints.add(cons);
 	}
@@ -230,7 +234,7 @@ public class BModel
 			BCADGraphCell cell = its.next();
 			cell.addImplicitConstraints(CADShapeEnum.VERTEX, true);
 		}
-		state = CONSTRAINTS;
+		state = State.CONSTRAINTS;
 		// Update constraints
 		BModelWriter.writeObject(this);
 	}
@@ -245,10 +249,11 @@ public class BModel
 
 	public void discretizeVertices()
 	{
-		if (state == INPUT)
+		if (state.ordinal() >= State.TESSELLATION_0.ordinal())
+			return;
+		if (state == State.INPUT)
 			computeConstraints();
-		else if (state != CONSTRAINTS)
-			throw new RuntimeException("Invalid state: "+state);
+
 		BCADGraphCell root = cad.getRootCell();
 		for (Iterator<BCADGraphCell> its = root.shapesExplorer(CADShapeEnum.VERTEX); its.hasNext(); )
 		{
@@ -256,9 +261,13 @@ public class BModel
 			for (BDiscretization d : cell.getDiscretizations())
 				d.discretize();
 		}
+		state = State.TESSELLATION_0;
 	}
+
 	public void discretizeEdges()
 	{
+		if (state.ordinal() >= State.TESSELLATION_1.ordinal())
+			return;
 		discretizeVertices();
 		LOGGER.config("Discretize edges");
 		BCADGraphCell root = cad.getRootCell();
@@ -271,9 +280,13 @@ public class BModel
 				Storage.writeEdge(d, getOutputDir(d));
 			}
 		}
+		state = State.TESSELLATION_1;
 	}
+
 	public void discretizeFaces()
 	{
+		if (state.ordinal() >= State.TESSELLATION_2.ordinal())
+			return;
 		discretizeEdges();
 		LOGGER.config("Discretize faces");
 		BCADGraphCell root = cad.getRootCell();
@@ -286,9 +299,13 @@ public class BModel
 				Storage.writeFace(d, getOutputDir(d));
 			}
 		}
+		state = State.TESSELLATION_2;
 	}
+
 	public void discretizeSolids()
 	{
+		if (state.ordinal() >= State.TESSELLATION_3.ordinal())
+			return;
 		discretizeFaces();
 		LOGGER.config("Discretize solids");
 		BCADGraphCell root = cad.getRootCell();
@@ -301,7 +318,7 @@ public class BModel
 				Storage.writeSolid(d, getOutputDir(d));
 			}
 		}
-		state = TESSELLATION;
+		state = State.TESSELLATION_3;
 	}
 
 	/**
