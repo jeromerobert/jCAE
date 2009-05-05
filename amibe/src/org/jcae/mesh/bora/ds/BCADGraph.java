@@ -60,7 +60,7 @@ public class BCADGraph
 	/**
 	 * Creates a root mesh.
 	 */
-	protected BCADGraph (BModel m, CADShape shape)
+	BCADGraph (BModel m, CADShape shape)
 	{
 		model = m;
 		if (shape instanceof CADSolid)
@@ -199,7 +199,7 @@ public class BCADGraph
 	/**
 	 * Prints the list of geometrical elements.
 	 */
-	protected void printShapes()
+	void printShapes()
 	{
 		System.out.println("List of geometrical entities");
 		for (CADShapeEnum cse : CADShapeEnum.iterable(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND))

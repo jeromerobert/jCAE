@@ -55,7 +55,7 @@ public class Constraint
 	 * constraint of a user constraint on g, or the resultant of the 
 	 * user constraint on g
 	 */
-	protected Constraint originConstraint(BCADGraphCell g)
+	Constraint originConstraint(BCADGraphCell g)
 	{
 		Constraint baseOrigCons = null;
 		if (origin == null)
@@ -69,7 +69,7 @@ public class Constraint
 		return baseOrigCons;
 	}
 
-	protected Constraint createInheritedConstraint(BCADGraphCell g, Constraint old)
+	Constraint createInheritedConstraint(BCADGraphCell g, Constraint old)
 	{
 		Constraint ret = new Constraint(g, hypothesis.createInheritedHypothesis(g.getType()));
 

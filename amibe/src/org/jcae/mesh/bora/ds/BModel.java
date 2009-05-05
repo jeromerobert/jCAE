@@ -193,16 +193,7 @@ public class BModel
 		return Collections.unmodifiableCollection(submesh);
 	}
 
-	/**
-	 * Prints the list of geometrical elements.
-	 */
-	@SuppressWarnings("unused")
-	private void printShapes()
-	{
-		cad.printShapes();
-	}
-
-	protected void addConstraint(Constraint cons)
+	void addConstraint(Constraint cons)
 	{
 		if (state != State.INPUT)
 			throw new RuntimeException("Constraints cannot be added after model has been computed");
@@ -324,7 +315,7 @@ public class BModel
 	/**
 	 * Prints all hypothesis applied to any submesh.
 	 */
-	protected void printAllHypothesis()
+	public void printAllHypothesis()
 	{
 		System.out.println("List of hypothesis");
 		for (Constraint cons : allConstraints)
@@ -336,32 +327,57 @@ public class BModel
 	}
 
 	/**
-	 * Prints user defined constraints on the submeshes.
+	 * Prints the constraints applied to geometrical elements of the current mesh.
 	 */
-	@SuppressWarnings("unused")
-	private void printSubmeshesConstraints()
+	public void printConstraints()
 	{
-		System.out.println("List of submeshes");
-		for (BSubMesh subm : submesh)
+		System.out.println("List of constraints");
+		BCADGraphCell root = cad.getRootCell();
+		StringBuilder indent = new StringBuilder();
+		for (CADShapeEnum cse : CADShapeEnum.iterable(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND))
 		{
-			System.out.println(" Submesh ("+subm.getId()+") ");
-			for (Constraint c : subm.getConstraints())
-				System.out.println("    "+c);
+			String tab = indent.toString();
+			for (Iterator<BCADGraphCell> it = root.shapesExplorer(cse); it.hasNext(); )
+			{
+				BCADGraphCell cell = it.next();
+				boolean first = true;
+				for (BDiscretization d : cell.getDiscretizations())
+				{
+					if (first)
+						System.out.println(tab+"Shape "+cell);
+					first = false;
+					System.out.println(tab+"    + "+d);
+				}
+			}
+			indent.append("  ");
 		}
 		System.out.println("End list");
 	}
 
 	/**
-	 * Prints used discretizations on the submeshes.
+	 * Prints the constraints applied to a given submesh.
 	 */
-	@SuppressWarnings("unused")
-	private void printSubmeshesDiscretizations()
+	public void printConstraints(BSubMesh sm)
 	{
-		System.out.println("List of discretizations on submeshes");
-		for (BSubMesh subm : submesh)
+		System.out.println("List of constraints applied on submesh "+sm.getId());
+		BCADGraphCell root = cad.getRootCell();
+		StringBuilder indent = new StringBuilder();
+		for (CADShapeEnum cse : CADShapeEnum.iterable(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND))
 		{
-			System.out.println(" Discretizations used on submesh ("+subm.getId()+") ");
-			subm.printSubmeshDiscretizations();
+			String tab = indent.toString();
+			for (Iterator<BCADGraphCell> it = root.shapesExplorer(cse); it.hasNext(); )
+			{
+				BCADGraphCell cell = it.next();
+				for (BDiscretization d : cell.getDiscretizations())
+				{
+					if (d.contains(sm))
+					{
+						System.out.println(tab+"Shape "+cell);
+						System.out.println(tab+"    + "+d);
+					}
+				}
+			}
+			indent.append("  ");
 		}
 		System.out.println("End list");
 	}
@@ -384,7 +400,7 @@ public class BModel
 				normalChildType = CADShapeEnum.EDGE;
 			else if (cse == CADShapeEnum.SOLID)
 				normalChildType = CADShapeEnum.FACE;
-			else 
+			else
 				normalChildType = CADShapeEnum.VERTEX;
 
 			if ((cse == CADShapeEnum.WIRE) || (cse == CADShapeEnum.SHELL) ||
@@ -465,59 +481,12 @@ public class BModel
 	}
 
 	/**
-	 * Prints the constraints applied to geometrical elements of the current mesh.
+	 * Prints the list of geometrical elements.
 	 */
-	protected void printConstraints()
+	@SuppressWarnings("unused")
+	private void printShapes()
 	{
-		System.out.println("List of constraints");
-		BCADGraphCell root = cad.getRootCell();
-		StringBuilder indent = new StringBuilder();
-		for (CADShapeEnum cse : CADShapeEnum.iterable(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND))
-		{
-			String tab = indent.toString();
-			for (Iterator<BCADGraphCell> it = root.shapesExplorer(cse); it.hasNext(); )
-			{
-				BCADGraphCell cell = it.next();
-				boolean first = true;
-				for (BDiscretization d : cell.getDiscretizations())
-				{
-					if (first)
-						System.out.println(tab+"Shape "+cell);
-					first = false;
-					System.out.println(tab+"    + "+d);
-				}
-			}
-			indent.append("  ");
-		}
-		System.out.println("End list");
-	}
-
-	/**
-	 * Prints the constraints applied to a given submesh.
-	 */
-	protected void printConstraints(BSubMesh sm)
-	{
-		System.out.println("List of constraints applied on submesh "+sm.getId());
-		BCADGraphCell root = cad.getRootCell();
-		StringBuilder indent = new StringBuilder();
-		for (CADShapeEnum cse : CADShapeEnum.iterable(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND))
-		{
-			String tab = indent.toString();
-			for (Iterator<BCADGraphCell> it = root.shapesExplorer(cse); it.hasNext(); )
-			{
-				BCADGraphCell cell = it.next();
-				for (BDiscretization d : cell.getDiscretizations())
-				{
-					if (d.contains(sm))
-					{
-						System.out.println(tab+"Shape "+cell);
-						System.out.println(tab+"    + "+d);
-					}
-				}
-			}
-			indent.append("  ");
-		}
-		System.out.println("End list");
+		cad.printShapes();
 	}
 
 }

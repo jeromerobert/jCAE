@@ -149,7 +149,7 @@ public class BCADGraphCell
 		return Collections.unmodifiableCollection(parents);
 	}
 
-	protected void addParent(BCADGraphCell that)
+	void addParent(BCADGraphCell that)
 	{
 		assert that != null;
 		parents.add(that);
@@ -159,7 +159,7 @@ public class BCADGraphCell
 	 * Binds two cells containing reversed shapes together.  These shapes then
 	 * contain the same discretizations.
 	 */
-	protected void bindReversed(BCADGraphCell that)
+	void bindReversed(BCADGraphCell that)
 	{
 		assert shape.equals(that.shape);
 		assert shape.orientation() != that.shape.orientation();
@@ -336,7 +336,7 @@ public class BCADGraphCell
 		return null;
 	}
 
-	protected void addSubMeshConstraint(BSubMesh sub, Constraint cons)
+	void addSubMeshConstraint(BSubMesh sub, Constraint cons)
 	{
 		BDiscretization d = getDiscretizationSubMesh(sub);
 		if (d != null)
@@ -366,7 +366,7 @@ public class BCADGraphCell
 		return Collections.unmodifiableCollection(discrete);
 	}
 
-	protected void addImplicitConstraints(CADShapeEnum cse, boolean recursive)
+	void addImplicitConstraints(CADShapeEnum cse, boolean recursive)
 	{
 		for (BDiscretization discr : discrete)
 		{

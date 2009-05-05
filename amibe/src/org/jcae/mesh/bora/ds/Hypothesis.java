@@ -96,7 +96,7 @@ public class Hypothesis
 	 * geometrical objects of a given type, and <code>false</code>
 	 * otherwise.
 	 */
-	protected boolean checkCompatibility(CADShapeEnum cse)
+	boolean checkCompatibility(CADShapeEnum cse)
 	{
 		return hyp == null || hyp.getType() == null || hyp.dim() == cse;
 	}
@@ -262,7 +262,7 @@ public class Hypothesis
 	 *
 	 * @return <code>true</code> if hypothesis have been successfully combined, <code>false</code> otherwise.
 	 */
-	protected boolean combine(Hypothesis that)
+	boolean combine(Hypothesis that)
 	{
 		String elt = getElement();
 		if (elt != null && that.getElement() != null && !elt.equals(that.getElement()))
@@ -299,7 +299,7 @@ public class Hypothesis
 		return ret;
 	}
 
-	protected Hypothesis createInheritedHypothesis(CADShapeEnum cse)
+	Hypothesis createInheritedHypothesis(CADShapeEnum cse)
 	{
 		Hypothesis ret = new Hypothesis();
 		ret.length      = length;
@@ -311,7 +311,7 @@ public class Hypothesis
 		return ret;
 	}
 
-	protected AlgoInterface findAlgorithm(CADShapeEnum cse)
+	AlgoInterface findAlgorithm(CADShapeEnum cse)
 	{
 		AlgoInterface ret = null;
 		try {
