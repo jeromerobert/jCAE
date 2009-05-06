@@ -25,11 +25,11 @@
 		<copy todir="${cluster}/modules/ext" file="${amibe.project.dir}/dist/jcae-mesherocc.jar"/>
 
 		<!-- build viewer3d -->
-		<echo message="Building ${viewer3d.project.dir}"/>
+		<!-- echo message="Building ${viewer3d.project.dir}"/>
 		<ant dir="${viewer3d.project.dir}" target="jar" inheritall="false" inheritrefs="false"/>
 		<echo message="Done building ${viewer3d.project.dir}"/>
 
-		<copy todir="${cluster}/modules/ext" file="${viewer3d.project.dir}/dist/jcae-viewer3d.jar"/>
+		<copy todir="${cluster}/modules/ext" file="${viewer3d.project.dir}/dist/jcae-viewer3d.jar"/ -->
 
 		<!-- build vtk-util -->
 		<echo message="Building ${vtk-util.project.dir}"/>
@@ -38,11 +38,11 @@
 		<copy file="${vtk-util.project.dir}/dist/vtk-util.jar" todir="${cluster}/modules/ext"/>
 		
 		<!-- build viewer3d-amibe -->
-		<echo message="Building ${va.project.dir}"/>
+		<!-- echo message="Building ${va.project.dir}"/>
 		<ant dir="${va.project.dir}" target="jar" inheritall="false" inheritrefs="false"/>
 		<echo message="Done building ${va.project.dir}"/>
 
-		<copy todir="${cluster}/modules/ext" file="${va.project.dir}/dist/jcae-viewer3d-amibe.jar"/>
+		<copy todir="${cluster}/modules/ext" file="${va.project.dir}/dist/jcae-viewer3d-amibe.jar"/ -->
 
 		<!-- build vtk-amibe -->
 		<echo message="Building ${vtk-amibe.project.dir}"/>
