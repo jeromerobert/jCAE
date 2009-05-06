@@ -144,21 +144,6 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 
 	protected final static Shape[] NOPARENT=new Shape[0];
 	
-	public Shape()
-	{
-		this(createCompound());
-	}
-
-	public Shape(String fileName)
-	{
-		this(Utilities.readFile(fileName));
-	}
-
-	public Shape(TopoDS_Shape shape)
-	{
-		this(shape, new HashMap<TopoDS_Shape, Shape>(), NOPARENT);
-	}
-	
 	protected Shape(TopoDS_Shape shape, Map<TopoDS_Shape, Shape> map,
 		Shape[] parents)
 	{
@@ -599,7 +584,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 				(Runtime.getRuntime().totalMemory() -
 				Runtime.getRuntime().freeMemory()) / 1E6 + " Mb");			
 			t1 = System.nanoTime();
-			Shape rootShapeJ = new Shape(rootShape);
+			Shape rootShapeJ = new Shape<Shape>(rootShape, new HashMap<TopoDS_Shape, Shape>(), NOPARENT);
 			t2 = System.nanoTime();
 			LOGGER.info("Time to create dual graph: " + (t2 - t1) / 1E9);
 			System.gc();
