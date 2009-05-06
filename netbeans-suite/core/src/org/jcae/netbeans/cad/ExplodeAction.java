@@ -49,7 +49,7 @@ public class ExplodeAction extends CookieAction
 	{
 		JPanel panel=new JPanel();
 		panel.add(new JLabel("Shape type"));
-		int maxType=getMaxType(nodes);
+		TopAbs_ShapeEnum maxType=getMaxType(nodes);
 		JComboBox box=new JComboBox(Shape.getLabels(maxType));
 		panel.add(box);
 		
@@ -58,7 +58,7 @@ public class ExplodeAction extends CookieAction
 				
 		if(dd.getValue()==NotifyDescriptor.OK_OPTION)
 		{			
-			int type = box.getSelectedIndex()+maxType;
+			TopAbs_ShapeEnum type = TopAbs_ShapeEnum.swigToEnum(box.getSelectedIndex()+maxType.ordinal());
 			for(Node n:nodes)
 			{				
 				NbShape shape = GeomUtils.getShape(n);
@@ -68,13 +68,13 @@ public class ExplodeAction extends CookieAction
 		}
 	}
 
-	private static int getMaxType(Node[] node)
+	private static TopAbs_ShapeEnum getMaxType(Node[] node)
 	{
-		int maxType=0;
+		TopAbs_ShapeEnum maxType=TopAbs_ShapeEnum.COMPOUND;
 		for (Node aNode : node)
 		{
-			int type = GeomUtils.getShape(aNode).getType().ordinal();
-			if (type > maxType)
+			TopAbs_ShapeEnum type = GeomUtils.getShape(aNode).getType();
+			if (type.ordinal() > maxType.ordinal())
 				maxType = type;
 		}
 		return maxType;

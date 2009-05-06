@@ -44,16 +44,11 @@ import org.jcae.opencascade.jni.GeomAPI_ProjectPointOnSurf;
 import org.jcae.opencascade.jni.Geom_Surface;
 import org.jcae.opencascade.jni.TopAbs_ShapeEnum;
 import org.jcae.opencascade.jni.TopExp_Explorer;
-import org.jcae.opencascade.jni.TopoDS_CompSolid;
 import org.jcae.opencascade.jni.TopoDS_Compound;
-import org.jcae.opencascade.jni.TopoDS_Edge;
 import org.jcae.opencascade.jni.TopoDS_Face;
 import org.jcae.opencascade.jni.TopoDS_Iterator;
 import org.jcae.opencascade.jni.TopoDS_Shape;
-import org.jcae.opencascade.jni.TopoDS_Shell;
-import org.jcae.opencascade.jni.TopoDS_Solid;
 import org.jcae.opencascade.jni.TopoDS_Vertex;
-import org.jcae.opencascade.jni.TopoDS_Wire;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -68,54 +63,54 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	private static final Logger LOGGER = Logger.getLogger(Shape.class.getCanonicalName());
 
 	private static enum ListOfShapes {
-		COMPOUND (TopoDS_Compound.class,  "Compound",  "co"),
-		COMPSOLID(TopoDS_CompSolid.class, "CompSolid", "cs"),
-		SOLID    (TopoDS_Solid.class,     "Solid",     "so"),
-		SHELL    (TopoDS_Shell.class,     "Shell",     "sh"),
-		FACE     (TopoDS_Face.class,      "Face",      "f"),
-		WIRE     (TopoDS_Wire.class,      "Wire",      "w"),
-		EDGE     (TopoDS_Edge.class,      "Edge",      "e"),
-		VERTEX   (TopoDS_Vertex.class,    "Vertex",    "v"),
-		SHAPE    (TopoDS_Shape.class,     "Shape",     "v");
+		COMPOUND (TopAbs_ShapeEnum.COMPOUND,  "Compound",  "co"),
+		COMPSOLID(TopAbs_ShapeEnum.COMPSOLID, "CompSolid", "cs"),
+		SOLID    (TopAbs_ShapeEnum.SOLID,     "Solid",     "so"),
+		SHELL    (TopAbs_ShapeEnum.SHELL,     "Shell",     "sh"),
+		FACE     (TopAbs_ShapeEnum.FACE,      "Face",      "f"),
+		WIRE     (TopAbs_ShapeEnum.WIRE,      "Wire",      "w"),
+		EDGE     (TopAbs_ShapeEnum.EDGE,      "Edge",      "e"),
+		VERTEX   (TopAbs_ShapeEnum.VERTEX,    "Vertex",    "v"),
+		SHAPE    (TopAbs_ShapeEnum.SHAPE,     "Shape",     "v");
 
-		Class klass;
+		TopAbs_ShapeEnum type;
 		String label;
 		String xmlName;
-		private ListOfShapes(Class klass, String label, String xmlName)
+		private ListOfShapes(TopAbs_ShapeEnum type, String label, String xmlName)
 		{
-			this.klass = klass;
+			this.type = type;
 			this.label = label;
 			this.xmlName = xmlName;
 		}
 	};
 	protected static GeomAPI_ProjectPointOnSurf projectPointOnSurf;
 	/** map TopoDS_Compound.class to "co" */
-	private final static Map<Class, String> TYPE_MAP_XML;
+	private final static Map<TopAbs_ShapeEnum, String> TYPE_MAP_XML;
 	/** map "co" to TopoDS_Compound.class */
-	private final static Map<String, Class> TYPE_MAP_XML_INV;
+	private final static Map<String, TopAbs_ShapeEnum> TYPE_MAP_XML_INV;
 	/** map TopoDS_Compound.class to "Compound" */
-	private final static Map<Class, String> TYPE_MAP_NAME;
-	private final static Class[] TYPE;
+	private final static Map<TopAbs_ShapeEnum, String> TYPE_MAP_NAME;
+	private final static TopAbs_ShapeEnum[] TYPE;
 	private final static String[] TYPE_LABEL;
 	
 	static
 	{
-		HashMap<Class, String> m = new HashMap<Class, String>();
-		HashMap<Class, String> mm = new HashMap<Class, String>();
-		HashMap<String, Class> mi = new HashMap<String, Class>();
+		HashMap<TopAbs_ShapeEnum, String> m = new HashMap<TopAbs_ShapeEnum, String>();
+		HashMap<TopAbs_ShapeEnum, String> mm = new HashMap<TopAbs_ShapeEnum, String>();
+		HashMap<String, TopAbs_ShapeEnum> mi = new HashMap<String, TopAbs_ShapeEnum>();
 		ListOfShapes[] shapes = ListOfShapes.values();
-		TYPE = new Class[shapes.length];
+		TYPE = new TopAbs_ShapeEnum[shapes.length];
 		TYPE_LABEL = new String[shapes.length];
 		int i = 0;
 		for(ListOfShapes s : shapes)
 		{
 			if (s != ListOfShapes.SHAPE)
 			{
-				m.put(s.klass, s.xmlName);
-				mi.put(s.xmlName, s.klass);
+				m.put(s.type, s.xmlName);
+				mi.put(s.xmlName, s.type);
 			}
-			mm.put(s.klass, s.label);
-			TYPE[i] = s.klass;
+			mm.put(s.type, s.label);
+			TYPE[i] = s.type;
 			TYPE_LABEL[i] = s.label;
 			i++;
 		}
@@ -200,10 +195,11 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		return toReturn;
 	}
 
-	public static String[] getLabels(int type)
+	public static String[] getLabels(TopAbs_ShapeEnum from)
 	{
-		String[] toReturn = new String[TopAbs_ShapeEnum.values().length - type - 1];
-		System.arraycopy(TYPE_LABEL, type, toReturn, 0, toReturn.length);
+		int startIndex = from.ordinal();
+		String[] toReturn = new String[TopAbs_ShapeEnum.values().length - 1 - startIndex];
+		System.arraycopy(TYPE_LABEL, startIndex, toReturn, 0, toReturn.length);
 		return toReturn;
 	}
 
@@ -331,7 +327,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 			shapeSet.add(this);
 			if(getAttributes()!=null)
 			{
-				String e = TYPE_MAP_XML.get(impl.getClass());
+				String e = TYPE_MAP_XML.get(impl.shapeType());
 				writer.println("<" + e + " id=\"" + id[type] + "\">");
 				writer.println(getAttributes().toXML());
 				writer.println("</"+e+">");
@@ -350,7 +346,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 			Node n = nodes.item(i);
 			if(n.getNodeType() == Node.ELEMENT_NODE)
 			{
-				Class type = TYPE_MAP_XML_INV.get(n.getNodeName());
+				TopAbs_ShapeEnum type = TYPE_MAP_XML_INV.get(n.getNodeName());
 				Element e = (Element)n;
 				int id = Integer.parseInt(e.getAttribute("id"));
 				Shape s = getShapeFromID(id, type);
@@ -369,7 +365,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	public int getID(Shape rootShape)
 	{
 		int[] ids = new int[]{0};
-		if (getID(rootShape, new HashSet<Shape>(), ids, impl.getClass()))
+		if (getID(rootShape, new HashSet<Shape>(), ids, impl.shapeType()))
 			return ids[0];
 		else
 			return -1;
@@ -385,14 +381,14 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	}	
 	
 	private boolean getID(Shape rootShape, Set<Shape> shapeSet, int[] number,
-		Class wantedType)
+		TopAbs_ShapeEnum wantedType)
 	{	
 		if (!shapeSet.contains(rootShape))
 		{
 			shapeSet.add(rootShape);
 			
 			//check if the root shape have the good type
-			if (rootShape.impl.getClass().equals(wantedType))
+			if (rootShape.impl.shapeType().equals(wantedType))
 			{
 				number[0]++;	
 				if(this.equals(rootShape))
@@ -424,10 +420,10 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	 * @param maxsize the maximum number of returned shapes
 	 * @param shape exploration will end when this shape will be found
 	 */
-	private T explore(Collection<T> result, Class wantedType, int maxsize,
+	private T explore(Collection<T> result, TopAbs_ShapeEnum wantedType, int maxsize,
 		TopoDS_Shape shape)
 	{
-		if(impl.getClass().equals(wantedType))
+		if(impl.shapeType().equals(wantedType))
 		{
 			result.add((T)this);
 			if(result.size()>=maxsize)
@@ -449,10 +445,10 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	/**
 	 * Return the children of this shape whose type is type
 	 */
-	public Collection<T> explore(int type)
+	public Collection<T> explore(TopAbs_ShapeEnum type)
 	{
 		ArrayList<T> toReturn = new ArrayList<T>();
-		explore(toReturn, TYPE[type], Integer.MAX_VALUE, null);
+		explore(toReturn, type, Integer.MAX_VALUE, null);
 		return toReturn;
 	}
 	
@@ -473,16 +469,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	{
 		if(id<1)
 			throw new IllegalArgumentException("Shape ID must be greater than 1");
-		return getShapeFromID(id, TYPE[type.ordinal()]);
-	}
-	
-	/**
-	 * @param id from 1 to n
-	 * @param type shape type
-	 * @return the shape of the given type with this id
-	 */
-	private T getShapeFromID(int id, Class type)
-	{		
+
 		Collection<T> result = new HashSet<T>();
 		T toReturn = explore(result, type, id, null);
 		if(toReturn == null)
@@ -512,7 +499,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 				return 0;
 			}
 		};
-		return explore(dummy, shape.getClass(), Integer.MAX_VALUE, shape);
+		return explore(dummy, shape.shapeType(), Integer.MAX_VALUE, shape);
 	}
 	
 	/**
@@ -566,7 +553,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 
 	public String getName()
 	{
-		return TYPE_MAP_NAME.get(impl.getClass());
+		return TYPE_MAP_NAME.get(impl.shapeType());
 	}
 
 	public void saveImpl(String fileName)
