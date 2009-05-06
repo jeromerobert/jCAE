@@ -131,11 +131,11 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		T create(TopoDS_Shape shape, Map<TopoDS_Shape, Shape> map, Shape[] parents);
 	}
 	
-	protected final static Factory DEFAULT_FACTORY=new Factory<Shape>()
+	private final static Factory DEFAULT_FACTORY=new Factory<Shape>()
 	{
 		public Shape create(TopoDS_Shape shape, Map<TopoDS_Shape, Shape> map, Shape[] parents)
 		{
-			return new Shape(shape, map, parents);
+			return new Shape<Shape>(shape, map, parents);
 		}
 	};
 	
@@ -292,7 +292,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		sewer.init(tolerance, option, cutting, manifold);
 		sewer.add(impl);
 		sewer.perform();
-		return getFactory().create(sewer.sewedShape(), new HashMap(), NOPARENT);
+		return getFactory().create(sewer.sewedShape(), new HashMap<TopoDS_Shape, Shape>(), NOPARENT);
 	}
 	
 	private void addParent(Shape parent)

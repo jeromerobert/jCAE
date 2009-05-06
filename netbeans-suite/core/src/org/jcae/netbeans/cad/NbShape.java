@@ -53,7 +53,7 @@ public class NbShape extends Shape<NbShape> implements Cookie
 		}
 	}
 	
-	private final static Factory FACTORY=new Factory<NbShape>()
+	private final static Factory<NbShape> FACTORY=new Factory<NbShape>()
 	{
 		public NbShape create(TopoDS_Shape shape,
 			Map<TopoDS_Shape, Shape> map, Shape[] parents)
