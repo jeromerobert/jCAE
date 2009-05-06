@@ -92,7 +92,7 @@ public class CameraManager
 	private boolean isVisibleRelativeAxis = true;
 	private vtkAxesActor relativeAxes;
 	private vtkOrientationMarkerWidget marker;
-	private double originAxesFactor = 1. / 15.;
+	private double originAxesFactor = 0.2;
 	public enum Orientation
 	{
 		TOP, BOTTOM, LEFT, RIGHT, FRONT, BACK
@@ -166,8 +166,15 @@ public class CameraManager
 			defaultCameras[i].SetViewUp(cameraOrientation[i * 2 + 1]);
 		}
 	}
-	
+
+	/** This method is called by the VTK JNI code. Do not remove. */
 	private void renderEvent()
+	{
+		scaleOriginaAxis();
+	}
+	
+	/** scale the origin axis to make his screen size constant */
+	private void scaleOriginaAxis()
 	{
 		// Find the distance from the camera of the origin axes
 		vtkCamera camera = renderer.GetActiveCamera();
@@ -175,17 +182,9 @@ public class CameraManager
 		double[] point = modelView.TransformDoublePoint(0, 0, 0);
 		// The distance is multiplied by K
 		double zDistance = Math.abs(point[2]) * originAxesFactor;
-		
-		/*System.out.println("originAxesFactor " + originAxesFactor);
-		System.out.println("z : " + point[2]);
-		System.out.println("zDistance : " + zDistance);*/
-		
-		// If we are very close keep the original scale
-		if(zDistance < 1.)
-			zDistance = 1.;
 		originAxes.SetTotalLength(zDistance, zDistance, zDistance);
 	}
-	
+
 	public void setRelativeAxisVisible(boolean visibility)
 	{
 		this.isVisibleRelativeAxis = visibility;		
@@ -316,11 +315,24 @@ public class CameraManager
 		
 	public void fitAll()
 	{
-		canvas.lock();
-		canvas.GetRenderer().ResetCamera();
+		canvas.lock();		
+		int visibility = originAxes.GetVisibility();
+		originAxes.SetVisibility(0);
+		double[] bounds = canvas.GetRenderer().ComputeVisiblePropBounds();
+		if(visibility != 0)
+			for(int i = 0; i<3; i++)
+			{
+				if(bounds[i*2]>0)
+					bounds[i*2] = 0;
+				if(bounds[i*2+1]<0)
+					bounds[i*2+1] = 0;
+			}
+		canvas.GetRenderer().ResetCamera(bounds);
+		originAxes.SetVisibility(visibility);
+		scaleOriginaAxis();
+		canvas.GetRenderer().ResetCameraClippingRange();
+		canvas.RenderSecured();
 		canvas.unlock();
-		if(canvas.isWindowSet())
-			canvas.RenderSecured();
 	}
 	
 	/**
