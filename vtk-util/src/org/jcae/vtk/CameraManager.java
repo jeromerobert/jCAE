@@ -329,20 +329,34 @@ public class CameraManager
 	 */
 	public void centerRotationSelection(Point pickPosition)
 	{
+		//backup actors pickable status and set it to true
+		vtkActorCollection vtkActors = canvas.GetRenderer().GetActors();
+		vtkActors.InitTraversal();
+		int n = vtkActors.GetNumberOfItems();
+		vtkActor[] actors = new vtkActor[n];
+		int[] pickableBackup = new int[n];
+		int k = 0;
+		while(k < n)
+		{
+			actors[k] = vtkActors.GetNextActor();
+			pickableBackup[k] = actors[k].GetPickable();
+			actors[k].SetPickable(1);
+			k++;
+		}
+
 		vtkCellPicker picker = new vtkCellPicker();
-		canvas.getIren().SetPicker(picker);
-		
-		// TODO : calculate the diagonal in pixel of the renderer
-		picker.SetTolerance(0.005);
 		canvas.lock();
 		picker.Pick(pickPosition.getX(), pickPosition.getY(), 0., canvas.GetRenderer());
-		canvas.unlock();
 		double[] position = picker.GetPickPosition();
-		
-		canvas.lock();
+		picker.Delete();
 		canvas.GetRenderer().GetActiveCamera().SetFocalPoint(position);
+		canvas.getIren().GetInteractorStyle();
 		canvas.RenderSecured();
 		canvas.unlock();
+
+		//restore actor pickable status
+		for(int i = 0; i<n; i++)
+			actors[i].SetPickable(pickableBackup[i]);
 	}
 
 	public Canvas getCanvas()
