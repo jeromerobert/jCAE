@@ -58,7 +58,7 @@ public class NbShape extends Shape<NbShape> implements Cookie
 		public NbShape create(TopoDS_Shape shape,
 			Map<TopoDS_Shape, Shape> map, Shape[] parents)
 		{
-			return new NbShape(shape, map, parents, this);
+			return new NbShape(shape, map, parents);
 		}
 	};
 
@@ -72,8 +72,7 @@ public class NbShape extends Shape<NbShape> implements Cookie
 
 	public NbShape(TopoDS_Shape shape)
 	{
-		this(shape, new HashMap<TopoDS_Shape, Shape>(),
-			NOPARENT, FACTORY);
+		this(shape, new HashMap<TopoDS_Shape, Shape>(), NOPARENT);
 	}
 
 	@Override
@@ -82,8 +81,7 @@ public class NbShape extends Shape<NbShape> implements Cookie
 		return FACTORY;
 	}
 		
-	protected NbShape(TopoDS_Shape shape, Map<TopoDS_Shape, Shape> map,
-		Shape[] parents, Factory<NbShape> f)
+	protected NbShape(TopoDS_Shape shape, Map<TopoDS_Shape, Shape> map, Shape[] parents)
 	{
 		super(shape, map, parents);
 	}
