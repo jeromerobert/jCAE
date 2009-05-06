@@ -21,6 +21,7 @@
 package org.jcae.mesh.xmldata;
 
 import java.io.*;
+import java.io.FileOutputStream;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -102,7 +103,14 @@ public class Amibe2VTK
 		String a=((Element)fn).getAttribute("location");
 		return new File(directory, a);
 	}	
-		
+
+	public void write(String fileName) throws IOException, SAXException, ParserConfigurationException
+	{
+		FileOutputStream out= new FileOutputStream(fileName);
+		write(out);
+		out.close();
+	}
+	
 	/**
 	 * Write the VTK file
 	 * @param out The stream to write on 
