@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.logging.Level;
@@ -68,56 +67,61 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 {
 	private static final Logger LOGGER = Logger.getLogger(Shape.class.getCanonicalName());
 
+	private static enum ListOfShapes {
+		COMPOUND (TopoDS_Compound.class,  "Compound",  "co"),
+		COMPSOLID(TopoDS_CompSolid.class, "CompSolid", "cs"),
+		SOLID    (TopoDS_Solid.class,     "Solid",     "so"),
+		SHELL    (TopoDS_Shell.class,     "Shell",     "sh"),
+		FACE     (TopoDS_Face.class,      "Face",      "f"),
+		WIRE     (TopoDS_Wire.class,      "Wire",      "w"),
+		EDGE     (TopoDS_Edge.class,      "Edge",      "e"),
+		VERTEX   (TopoDS_Vertex.class,    "Vertex",    "v"),
+		SHAPE    (TopoDS_Shape.class,     "Shape",     "v");
+
+		Class klass;
+		String label;
+		String xmlName;
+		private ListOfShapes(Class klass, String label, String xmlName)
+		{
+			this.klass = klass;
+			this.label = label;
+			this.xmlName = xmlName;
+		}
+	};
 	protected static GeomAPI_ProjectPointOnSurf projectPointOnSurf;
 	/** map TopoDS_Compound.class to "co" */
-	protected final static Map<Class, String> TYPE_MAP_XML;
+	private final static Map<Class, String> TYPE_MAP_XML;
 	/** map "co" to TopoDS_Compound.class */
-	protected final static Map<String, Class> TYPE_MAP_XML_INV;
+	private final static Map<String, Class> TYPE_MAP_XML_INV;
 	/** map TopoDS_Compound.class to "Compound" */
-	protected final static Map<Class, String> TYPE_MAP_NAME;
-	protected final static Class[] TYPE= new Class[]{
-		TopoDS_Compound.class,
-		TopoDS_CompSolid.class,
-		TopoDS_Solid.class,
-		TopoDS_Shell.class,
-		TopoDS_Face.class,
-		TopoDS_Wire.class,
-		TopoDS_Edge.class,
-		TopoDS_Vertex.class,
-		TopoDS_Shape.class};
-
-	public final static String[] TYPE_LABEL= new String[]{
-		"Compound",
-		"CompSolid",
-		"Solid",
-		"Shell",
-		"Face",
-		"Wire",
-		"Edge",
-		"Vertex",
-		"Shape"};
+	private final static Map<Class, String> TYPE_MAP_NAME;
+	private final static Class[] TYPE;
+	private final static String[] TYPE_LABEL;
 	
 	static
 	{
 		HashMap<Class, String> m = new HashMap<Class, String>();
-		m.put(TopoDS_Compound.class, "co");
-		m.put(TopoDS_CompSolid.class, "cs");
-		m.put(TopoDS_Solid.class, "so");
-		m.put(TopoDS_Shell.class, "sh");
-		m.put(TopoDS_Face.class, "f");
-		m.put(TopoDS_Wire.class, "w");
-		m.put(TopoDS_Edge.class, "e");
-		m.put(TopoDS_Vertex.class, "v");
-		TYPE_MAP_XML=Collections.unmodifiableMap(m);
 		HashMap<Class, String> mm = new HashMap<Class, String>();
-		for(int i=0; i<TYPE.length; i++)
-			mm.put(TYPE[i], TYPE_LABEL[i]);
+		HashMap<String, Class> mi = new HashMap<String, Class>();
+		ListOfShapes[] shapes = ListOfShapes.values();
+		TYPE = new Class[shapes.length];
+		TYPE_LABEL = new String[shapes.length];
+		int i = 0;
+		for(ListOfShapes s : shapes)
+		{
+			if (s != ListOfShapes.SHAPE)
+			{
+				m.put(s.klass, s.xmlName);
+				mi.put(s.xmlName, s.klass);
+			}
+			mm.put(s.klass, s.label);
+			TYPE[i] = s.klass;
+			TYPE_LABEL[i] = s.label;
+			i++;
+		}
+		TYPE_MAP_XML=Collections.unmodifiableMap(m);
 		TYPE_MAP_NAME=Collections.unmodifiableMap(mm);
-		
-		HashMap<String, Class> mmi = new HashMap<String, Class>();
-		for(Entry<Class, String> e:TYPE_MAP_XML.entrySet())
-			mmi.put(e.getValue(), e.getKey());
-		TYPE_MAP_XML_INV=Collections.unmodifiableMap(mmi);
+		TYPE_MAP_XML_INV=Collections.unmodifiableMap(mi);
 	}
 	
 	public interface Attributes
@@ -195,7 +199,14 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		bb.makeCompound(toReturn);	
 		return toReturn;
 	}
-	
+
+	public static String[] getLabels(int type)
+	{
+		String[] toReturn = new String[TopAbs_ShapeEnum.values().length - type - 1];
+		System.arraycopy(TYPE_LABEL, type, toReturn, 0, toReturn.length);
+		return toReturn;
+	}
+
 	protected Factory<T> getFactory()
 	{
 		return DEFAULT_FACTORY;
@@ -551,6 +562,11 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	 */
 	protected void createAttributes()
 	{
+	}
+
+	public String getName()
+	{
+		return TYPE_MAP_NAME.get(impl.getClass());
 	}
 
 	public void saveImpl(String fileName)

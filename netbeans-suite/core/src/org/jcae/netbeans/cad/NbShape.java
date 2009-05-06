@@ -108,10 +108,11 @@ public class NbShape extends Shape<NbShape> implements Cookie
 		return impl;
 	}
 	
+	@Override
 	public String getName()
 	{
 		if(attributes == null || attributes.name.length()==0)
-			return TYPE_MAP_NAME.get(impl.getClass())+getID();
+			return super.getName()+getID();
 		else
 			return attributes.name+getID();
 	}

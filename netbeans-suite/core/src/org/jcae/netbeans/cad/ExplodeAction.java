@@ -50,7 +50,7 @@ public class ExplodeAction extends CookieAction
 		JPanel panel=new JPanel();
 		panel.add(new JLabel("Shape type"));
 		int maxType=getMaxType(nodes);
-		JComboBox box=createCombo(maxType);
+		JComboBox box=new JComboBox(Shape.getLabels(maxType));
 		panel.add(box);
 		
 		DialogDescriptor dd=new DialogDescriptor(panel, "Explode");
@@ -67,14 +67,7 @@ public class ExplodeAction extends CookieAction
 			}
 		}
 	}
-	
-	private static JComboBox createCombo(int type)
-	{
-		Object[] toReturn=new Object[TopAbs_ShapeEnum.values().length - type - 1];
-		System.arraycopy(Shape.TYPE_LABEL, type, toReturn, 0, toReturn.length);
-		return new JComboBox(toReturn);
-	}
-	
+
 	private static int getMaxType(Node[] node)
 	{
 		int maxType=0;
