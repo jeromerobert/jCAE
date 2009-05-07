@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2008, by EADS France
+ * (C) Copyright 2008,2009, by EADS France
  */
 package org.jcae.netbeans.cad;
 
@@ -53,7 +53,7 @@ import org.openide.nodes.Node;
 public class CADSelection implements EntitySelection, SelectionListener,
 	CurrentViewableChangeListener, PropertyChangeListener
 {
-	private Collection<TopoDS_Shape> selection = Collections.EMPTY_SET;
+	private Collection<TopoDS_Shape> selection = Collections.emptySet();
 	private boolean selectionLock = false;
 	private NbShape entity = null;
 	private Set<ViewableCAD> interactors = new HashSet<ViewableCAD>();
@@ -71,7 +71,7 @@ public class CADSelection implements EntitySelection, SelectionListener,
 		if(!selectionLock)
 		{
 			selectionLock = true;
-			selection = Collections.EMPTY_SET;
+			selection = Collections.emptySet();
 			refreshHighlight();
 			selectionLock = false;
 		}
@@ -219,7 +219,7 @@ public class CADSelection implements EntitySelection, SelectionListener,
 				if(!isChildren(entity.getNode(), n))
 					continue;
 				
-				NbShape nbShape = GeomUtils.getShape(n);;
+				NbShape nbShape = GeomUtils.getShape(n);
 				// If it's not a shape node
 				if (nbShape == null)
 					continue;

@@ -81,6 +81,7 @@ public class PrimitiveNewType extends NewType
 			return new NewType[0];
 	}
 	
+	@Override
 	public String getName()
 	{
 		try

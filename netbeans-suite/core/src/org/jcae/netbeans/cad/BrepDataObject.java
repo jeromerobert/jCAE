@@ -16,7 +16,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
  * (C) Copyright 2005, by EADS CRC
- * (C) Copyright 2008, by EADS France
+ * (C) Copyright 2008,2009, by EADS France
  */
 
 package org.jcae.netbeans.cad;
@@ -27,7 +27,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Set;
-import org.jcae.opencascade.jni.*;
 import org.openide.ErrorManager;
 import org.openide.cookies.SaveCookie;
 import org.openide.filesystems.FileLock;
