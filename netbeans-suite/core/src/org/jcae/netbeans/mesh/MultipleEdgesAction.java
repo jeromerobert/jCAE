@@ -20,7 +20,7 @@
 
 package org.jcae.netbeans.mesh;
 
-import org.jcae.viewer3d.fe.amibe.AmibeOverlayProvider;
+import org.jcae.vtk.AmibeOverlayProvider;
 
 public final class MultipleEdgesAction extends AbstractEdgesAction
 {
