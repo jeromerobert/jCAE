@@ -240,7 +240,7 @@ public class BModel
 
 	public void discretizeVertices()
 	{
-		if (state.ordinal() >= State.TESSELLATION_0.ordinal())
+		if (state.compareTo(State.TESSELLATION_0) >= 0)
 			return;
 		if (state == State.INPUT)
 			computeConstraints();
@@ -257,7 +257,7 @@ public class BModel
 
 	public void discretizeEdges()
 	{
-		if (state.ordinal() >= State.TESSELLATION_1.ordinal())
+		if (state.compareTo(State.TESSELLATION_1) >= 0)
 			return;
 		discretizeVertices();
 		LOGGER.config("Discretize edges");
@@ -276,7 +276,7 @@ public class BModel
 
 	public void discretizeFaces()
 	{
-		if (state.ordinal() >= State.TESSELLATION_2.ordinal())
+		if (state.compareTo(State.TESSELLATION_2) >= 0)
 			return;
 		discretizeEdges();
 		LOGGER.config("Discretize faces");
@@ -295,7 +295,7 @@ public class BModel
 
 	public void discretizeSolids()
 	{
-		if (state.ordinal() >= State.TESSELLATION_3.ordinal())
+		if (state.compareTo(State.TESSELLATION_3) >= 0)
 			return;
 		discretizeFaces();
 		LOGGER.config("Discretize solids");

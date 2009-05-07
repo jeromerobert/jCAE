@@ -548,7 +548,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	
 	public int compareTo(Shape<T> o)
 	{
-		int r = getType().ordinal() - o.getType().ordinal();
+		int r = getType().compareTo(o.getType());
 		if( r == 0 )
 			r = getID() - o.getID();
 		return r;

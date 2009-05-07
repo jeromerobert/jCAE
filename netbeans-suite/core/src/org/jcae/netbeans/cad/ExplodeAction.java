@@ -74,7 +74,7 @@ public class ExplodeAction extends CookieAction
 		for (Node aNode : node)
 		{
 			TopAbs_ShapeEnum type = GeomUtils.getShape(aNode).getType();
-			if (type.ordinal() > maxType.ordinal())
+			if (type.compareTo(maxType) > 0)
 				maxType = type;
 		}
 		return maxType;

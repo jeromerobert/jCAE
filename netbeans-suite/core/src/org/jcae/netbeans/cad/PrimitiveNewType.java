@@ -67,7 +67,7 @@ public class PrimitiveNewType extends NewType
 	
 	public static NewType[] getNewType(Node node)
 	{
-		if(GeomUtils.getShape(node).getType().ordinal() <= TopAbs_ShapeEnum.COMPSOLID.ordinal())
+		if(GeomUtils.getShape(node).getType().compareTo(TopAbs_ShapeEnum.COMPSOLID) <= 0)
 		{
 			return new NewType[]{
 				new PrimitiveNewType(node, Cone.class),
