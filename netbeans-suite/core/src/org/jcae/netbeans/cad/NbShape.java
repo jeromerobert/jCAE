@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2008, by EADS France
+ * (C) Copyright 2008,2009, by EADS France
  */
 
 package org.jcae.netbeans.cad;
@@ -56,9 +56,14 @@ public class NbShape extends Shape<NbShape> implements Cookie
 	private final static Factory<NbShape> FACTORY=new Factory<NbShape>()
 	{
 		public NbShape create(TopoDS_Shape shape,
-			Map<TopoDS_Shape, Shape> map, Shape[] parents)
+			Map<TopoDS_Shape, NbShape> map, NbShape[] parents)
 		{
 			return new NbShape(shape, map, parents);
+		}
+
+		public NbShape[] createArray(int length)
+		{
+			return new NbShape[length];
 		}
 	};
 
@@ -72,16 +77,20 @@ public class NbShape extends Shape<NbShape> implements Cookie
 
 	public NbShape(TopoDS_Shape shape)
 	{
-		this(shape, new HashMap<TopoDS_Shape, Shape>(), NOPARENT);
+		this(shape, new HashMap<TopoDS_Shape, NbShape>(), new NbShape[0]);
 	}
 
-	@Override
 	protected Factory<NbShape> getFactory()
 	{
 		return FACTORY;
 	}
+	
+	protected NbShape getDerived()
+	{
+		return this;
+	}
 		
-	protected NbShape(TopoDS_Shape shape, Map<TopoDS_Shape, Shape> map, Shape[] parents)
+	protected NbShape(TopoDS_Shape shape, Map<TopoDS_Shape, NbShape> map, NbShape[] parents)
 	{
 		super(shape, map, parents);
 	}

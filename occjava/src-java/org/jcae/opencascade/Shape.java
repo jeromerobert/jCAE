@@ -54,11 +54,48 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * A abstraction level over TopoDS_Shape to easily decorate and serialize the
+ * An abstraction level over TopoDS_Shape to easily decorate and serialize the
  * Opencascade shape graph.
+ *
+ * This class use the <a href="http://en.wikipedia.org/wiki/Curiously_Recurring_Template_Pattern">curiously
+ * recurring template pattern</a> to enforce type safety; static polymorphism is
+ * checked when compiling, there is no cast at run time.  In short, this recursive
+ * definition <code>class Shape&lt;T extends Shape&lt;T>></code> means that derived
+ * classes must be declared as <code>class Foo extends Shape&lt;Foo></code>,
+ * one cannot declare <code>class Foo extends Shape&lt;Bar></code>.
+ *
+ * <p>
+ * In this graph, we want parent and children nodes to be of the same class as
+ * the current node.
+ * Moreover, this class is a general framework and is meant to be subclassed,
+ * so parent and children must be arrays of <code>T</code>.  Likewise, the map
+ * used in Shape constructor must be of type <code>Map&lt;TopoDS_Shape, T></code>.
+ * In order to build a node with the right type, it is obvious that a factory
+ * is needed.  This factory is parameterized, and the parameter is the derived
+ * class of the node being created.  Under some circumstances, we sometimes
+ * need to downcast the current instance.  This could be achieved by a method like
+ * </p>
+ * <pre>
+ *   public T downcast()
+ *   {
+ *       return (T) this;
+ *   }
+ * </pre>
+ *
+ * But there is a better alternative, declare
+ * <pre>
+ *   protected abstract T getDerived();
+ * </pre>
+ * in Shape, and let all derived classes declare
+ * <pre>
+ *   protected T getDerived()
+ *   {
+ *       return this;
+ *   }
+ * </pre>
  * @author Jerome Robert
  */
-public class Shape<T extends Shape> implements Comparable< Shape<T> >
+public abstract class Shape<T extends Shape<T>> implements Comparable<T>
 {
 	private static final Logger LOGGER = Logger.getLogger(Shape.class.getCanonicalName());
 
@@ -127,25 +164,15 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	
 	public interface Factory<T>
 	{
-		T create(TopoDS_Shape shape, Map<TopoDS_Shape, Shape> map, Shape[] parents);
+		T create(TopoDS_Shape shape, Map<TopoDS_Shape, T> map, T[] parents);
+		T[] createArray(int length);
 	}
 	
-	private final static Factory DEFAULT_FACTORY=new Factory<Shape>()
-	{
-		public Shape create(TopoDS_Shape shape, Map<TopoDS_Shape, Shape> map, Shape[] parents)
-		{
-			return new Shape<Shape>(shape, map, parents);
-		}
-	};
-	
 	protected TopoDS_Shape impl;
-	private Shape[] children;
-	private Shape[] parents;
+	private T[] children;
+	private T[] parents;
 
-	protected final static Shape[] NOPARENT=new Shape[0];
-	
-	protected Shape(TopoDS_Shape shape, Map<TopoDS_Shape, Shape> map,
-		Shape[] parents)
+	protected Shape(TopoDS_Shape shape, Map<TopoDS_Shape, T> map, T[] parents)
 	{
 		if(shape == null)
 		{
@@ -156,20 +183,24 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		else
 			this.impl = shape;
 		this.parents = parents;
-		List<Shape> cs = new ArrayList<Shape>();
+		List<T> cs = new ArrayList<T>();
 		TopoDS_Iterator it = new TopoDS_Iterator(impl);
 		while (it.more())
 		{
 			TopoDS_Shape tds = it.value();
-			Shape css = map.get(tds);
+			T css = map.get(tds);
 			if (css == null)
-				css = getFactory().create(tds, map, new Shape[]{this});
+			{
+				T[] pArray = getFactory().createArray(1);
+				pArray[0] = getDerived();
+				css = getFactory().create(tds, map, pArray);
+			}
 
 			cs.add(css);
 			it.next();
 		}
-		children = cs.toArray(new Shape[cs.size()]);
-		map.put(shape, this);
+		children = cs.toArray(getFactory().createArray(cs.size()));
+		map.put(shape, getDerived());
 	}
 
 	private static TopoDS_Compound createCompound()
@@ -188,19 +219,17 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		return toReturn;
 	}
 
-	protected Factory<T> getFactory()
-	{
-		return DEFAULT_FACTORY;
-	}
+	protected abstract Factory<T> getFactory();
+	protected abstract T getDerived();
 	
-	public void add(Shape newShape)
+	public void add(T newShape)
 	{
 		new BRep_Builder().add(impl, newShape.impl);
-		Shape[] nc = new Shape[children.length + 1];
+		T[] nc = getFactory().createArray(children.length + 1);
 		System.arraycopy(children, 0, nc, 0, children.length);
 		nc[nc.length - 1] = newShape;
-		children = nc;		
-		newShape.addParent(this);
+		children = nc;
+		newShape.addParent(getDerived());
 	}
 	
 	/**
@@ -211,7 +240,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	{
 		TopoDS_Vertex v = (TopoDS_Vertex) new BRepBuilderAPI_MakeVertex(
 			coords).shape();
-		T vs = getFactory().create(v, new HashMap<TopoDS_Shape, Shape>(), NOPARENT);
+		T vs = getFactory().create(v, new HashMap<TopoDS_Shape, T>(), getFactory().createArray(0));
 		add(vs);
 		if(impl instanceof TopoDS_Face)
 		{
@@ -254,26 +283,27 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	public void remove()
 	{
 		BRep_Builder bb = new BRep_Builder();
-		for(Shape parent:parents)
+		T shape = getDerived();
+		for(T parent : parents)
 		{
-			ArrayList<Shape> set = new ArrayList<Shape>(Arrays.asList(parent.children));
-			if(set.contains(this))
+			ArrayList<T> set = new ArrayList<T>(Arrays.asList(parent.children));
+			if(set.contains(shape))
 			{						
 				bb.remove(parent.impl, impl);
-				set.remove(this);
-				parent.children = set.toArray(new Shape[set.size()]);
+				set.remove(shape);
+				parent.children = set.toArray(getFactory().createArray(set.size()));
 			}
 		}
-		parents=NOPARENT;
+		parents = getFactory().createArray(0);
 	}
 	
 	public void reverse()
 	{
-		Shape[] parentSav = parents.clone();
+		T[] parentSav = parents.clone();
 		remove();
 		impl.reverse();
-		for(Shape s: parentSav)
-			s.add(this);
+		for(T s : parentSav)
+			s.add(getDerived());
 	}
 		
 	//TODO remplace this by a "sew" method which keep track of attributes. See
@@ -284,12 +314,12 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		sewer.init(tolerance, option, cutting, manifold);
 		sewer.add(impl);
 		sewer.perform();
-		return getFactory().create(sewer.sewedShape(), new HashMap<TopoDS_Shape, Shape>(), NOPARENT);
+		return getFactory().create(sewer.sewedShape(), new HashMap<TopoDS_Shape, T>(), getFactory().createArray(0));
 	}
 	
-	private void addParent(Shape parent)
+	private void addParent(T parent)
 	{
-		Shape[] n = new Shape[parents.length+1];
+		T[] n = getFactory().createArray(parents.length+1);
 		System.arraycopy(parents, 0, n, 0, parents.length);
 		n[parents.length]=parent;
 		parents = n;
@@ -300,16 +330,17 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		int[] ids = new int[TopAbs_ShapeEnum.values().length - 1];
 		Arrays.fill(ids, 1);
 		writer.println("<geometry>");
-		dump(writer, new HashSet<Shape>(), ids);
+		dump(writer, new HashSet<T>(), ids);
 		writer.println("</geometry>");
 	}
 
-	private void dump(PrintWriter writer, Set<Shape> shapeSet, int[] id)
+	private void dump(PrintWriter writer, Set<T> shapeSet, int[] id)
 	{
-		if (!shapeSet.contains(this))
+		T shape = getDerived();
+		if (!shapeSet.contains(shape))
 		{
 			int type = getType().ordinal();
-			shapeSet.add(this);
+			shapeSet.add(shape);
 			if(getAttributes()!=null)
 			{
 				String e = TYPE_MAP_XML.get(impl.shapeType());
@@ -318,7 +349,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 				writer.println("</"+e+">");
 			}
 			id[type]++;
-			for (Shape s : children)
+			for (T s : children)
 				s.dump(writer, shapeSet, id);
 		}
 	}
@@ -347,10 +378,10 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	 * @return the ID of this shape or -1 if this shape is not a child of
 	 * rootShape
 	 */
-	public int getID(Shape rootShape)
+	public int getID(T rootShape)
 	{
 		int[] ids = new int[]{0};
-		if (getID(rootShape, new HashSet<Shape>(), ids, impl.shapeType()))
+		if (getID(rootShape, new HashSet<T>(), ids, impl.shapeType()))
 			return ids[0];
 		else
 			return -1;
@@ -358,14 +389,14 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	
 	public int getID()
 	{
-		Shape r = getRootShape();
+		T r = getRootShape();
 		int id = getID(r);
 		if(id<0)
 			throw new NoSuchElementException("Cannot find " + impl + " in " + r);
 		return id;
 	}	
 	
-	private boolean getID(Shape rootShape, Set<Shape> shapeSet, int[] number,
+	private boolean getID(T rootShape, Set<T> shapeSet, int[] number,
 		TopAbs_ShapeEnum wantedType)
 	{	
 		if (!shapeSet.contains(rootShape))
@@ -382,7 +413,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 				else if(rootShape.impl instanceof TopoDS_Compound)
 				{
 					//So we don't give up but iterate on children
-					for (Shape s : rootShape.children)
+					for (T s : rootShape.children)
 						//only on TopoDS_Compound children
 						if (s.impl instanceof TopoDS_Compound &&
 							getID(s, shapeSet, number, wantedType))
@@ -391,7 +422,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 			}
 			else
 			//look for this shape in children
-				for (Shape s : rootShape.children)
+				for (T s : rootShape.children)
 					if (getID(s, shapeSet, number, wantedType))
 						return true;
 		}
@@ -410,16 +441,16 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	{
 		if(impl.shapeType().equals(wantedType))
 		{
-			result.add((T)this);
+			result.add(getDerived());
 			if(result.size()>=maxsize)
-				return (T)this;
+				return getDerived();
 			if(impl.equals(shape))
-				return (T)this;
+				return getDerived();
 		}
 		
-		for(Shape s:children)
+		for(T s : children)
 		{
-			T toReturn = (T) s.explore(result, wantedType, maxsize, shape);
+			T toReturn = s.explore(result, wantedType, maxsize, shape);
 			if(toReturn != null)
 				return toReturn;
 		}
@@ -439,10 +470,10 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	
 	public T getRootShape()
 	{
-		Shape aparent = this;
+		T aparent = getDerived();
 		while(aparent.parents.length!=0)
 			aparent = aparent.parents[0];
-		return (T)aparent;
+		return aparent;
 	}
 	
 	/**
@@ -494,9 +525,9 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 	public T getCompound()
 	{
 		if(impl instanceof TopoDS_Compound)
-			return (T)this;
+			return getDerived();
 		else if(parents.length>0)
-			return (T)parents[0].getCompound();
+			return parents[0].getCompound();
 		else
 			return null;
 	}
@@ -546,11 +577,12 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		BRepTools.write(impl, fileName);
 	}
 	
-	public int compareTo(Shape<T> o)
+	public int compareTo(T o)
 	{
 		int r = getType().compareTo(o.getType());
 		if( r == 0 )
 			r = getID() - o.getID();
+
 		return r;
 	}	
 	
@@ -584,7 +616,7 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 				(Runtime.getRuntime().totalMemory() -
 				Runtime.getRuntime().freeMemory()) / 1E6 + " Mb");			
 			t1 = System.nanoTime();
-			Shape rootShapeJ = new Shape<Shape>(rootShape, new HashMap<TopoDS_Shape, Shape>(), NOPARENT);
+			ShapeImpl rootShapeJ = new ShapeImpl(rootShape, new HashMap<TopoDS_Shape, ShapeImpl>(), new ShapeImpl[0]);
 			t2 = System.nanoTime();
 			LOGGER.info("Time to create dual graph: " + (t2 - t1) / 1E9);
 			System.gc();
@@ -593,9 +625,9 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 				Runtime.getRuntime().freeMemory()) / 1E6 + " Mb");
 			LOGGER.info(rootShapeJ.toString());
 			t1 = System.nanoTime();
-			Shape s = rootShapeJ.getShapeFromID(330, TopAbs_ShapeEnum.EDGE);
+			ShapeImpl s = rootShapeJ.getShapeFromID(330, TopAbs_ShapeEnum.EDGE);
 			t2 = System.nanoTime();
-			Shape ss = rootShapeJ.getShapeFromImpl(s.impl);
+			ShapeImpl ss = rootShapeJ.getShapeFromImpl(s.impl);
 			long t3 = System.nanoTime();
 			int id = ss.getID();
 			long t4 = System.nanoTime();
@@ -607,5 +639,36 @@ public class Shape<T extends Shape> implements Comparable< Shape<T> >
 		{
 			LOGGER.log(Level.SEVERE, null, ex);
 		}	
+	}
+
+	private static final Factory<ShapeImpl> DEFAULT_FACTORY=new Factory<ShapeImpl>()
+	{
+		public ShapeImpl create(TopoDS_Shape shape, Map<TopoDS_Shape, ShapeImpl> map, ShapeImpl[] parents)
+		{
+			return new ShapeImpl(shape, map, parents);
+		}
+
+		public ShapeImpl[] createArray(int length)
+		{
+			return new ShapeImpl[length];
+		}
+	};
+
+	private static class ShapeImpl extends Shape<ShapeImpl>
+	{
+		public ShapeImpl(TopoDS_Shape shape, Map<TopoDS_Shape, ShapeImpl> map, ShapeImpl[] parents)
+		{
+			super(shape, map, parents);
+		}
+
+		protected Factory<ShapeImpl> getFactory()
+		{
+			return DEFAULT_FACTORY;
+		}
+
+		protected ShapeImpl getDerived()
+		{
+			return this;
+		}
 	}
 }
