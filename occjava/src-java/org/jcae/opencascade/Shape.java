@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -65,10 +64,10 @@ import org.w3c.dom.NodeList;
  * one cannot declare <code>class Foo extends Shape&lt;Bar></code>.
  *
  * <p>
- * In this graph, we want parent and children nodes to be of the same class as
- * the current node.
- * Moreover, this class is a general framework and is meant to be subclassed,
- * so parent and children must be arrays of <code>T</code>.  Likewise, the map
+ * When a class is declared like <code>class Foo extends Shape&lt;Foo></code>,
+ * this means that all nodes of this graph are of class <code>Foo</code>.
+ * Thus {@link #children} and {@link #parents} members are declared as
+ * <code>T</code> arrays and not <code>Shape</code> arrays.  Likewise, the map
  * used in Shape constructor must be of type <code>Map&lt;TopoDS_Shape, T></code>.
  * In order to build a node with the right type, it is obvious that a factory
  * is needed.  This factory is parameterized, and the parameter is the derived
@@ -108,7 +107,7 @@ public abstract class Shape<T extends Shape<T>> implements Comparable<T>
 		WIRE     (TopAbs_ShapeEnum.WIRE,      "Wire",      "w"),
 		EDGE     (TopAbs_ShapeEnum.EDGE,      "Edge",      "e"),
 		VERTEX   (TopAbs_ShapeEnum.VERTEX,    "Vertex",    "v"),
-		SHAPE    (TopAbs_ShapeEnum.SHAPE,     "Shape",     "v");
+		SHAPE    (TopAbs_ShapeEnum.SHAPE,     "Shape",     null);
 
 		TopAbs_ShapeEnum type;
 		String label;
@@ -162,7 +161,7 @@ public abstract class Shape<T extends Shape<T>> implements Comparable<T>
 		void fromXML(Element node);
 	}
 	
-	public interface Factory<T>
+	protected interface Factory<T>
 	{
 		T create(TopoDS_Shape shape, Map<TopoDS_Shape, T> map, T[] parents);
 		T[] createArray(int length);
@@ -183,9 +182,12 @@ public abstract class Shape<T extends Shape<T>> implements Comparable<T>
 		else
 			this.impl = shape;
 		this.parents = parents;
-		List<T> cs = new ArrayList<T>();
-		TopoDS_Iterator it = new TopoDS_Iterator(impl);
-		while (it.more())
+		int cntChildren = 0;
+		for (TopoDS_Iterator it = new TopoDS_Iterator(impl); it.more(); it.next())
+			cntChildren++;
+		this.children = getFactory().createArray(cntChildren);
+		cntChildren = 0;
+		for (TopoDS_Iterator it = new TopoDS_Iterator(impl); it.more(); it.next())
 		{
 			TopoDS_Shape tds = it.value();
 			T css = map.get(tds);
@@ -196,10 +198,9 @@ public abstract class Shape<T extends Shape<T>> implements Comparable<T>
 				css = getFactory().create(tds, map, pArray);
 			}
 
-			cs.add(css);
-			it.next();
+			children[cntChildren] = css;
+			cntChildren++;
 		}
-		children = cs.toArray(getFactory().createArray(cs.size()));
 		map.put(shape, getDerived());
 	}
 
@@ -229,7 +230,11 @@ public abstract class Shape<T extends Shape<T>> implements Comparable<T>
 		System.arraycopy(children, 0, nc, 0, children.length);
 		nc[nc.length - 1] = newShape;
 		children = nc;
-		newShape.addParent(getDerived());
+
+		T[] np = newShape.getFactory().createArray(newShape.parents.length+1);
+		System.arraycopy(newShape.parents, 0, np, 0, np.length - 1);
+		np[np.length - 1]=getDerived();
+		newShape.parents = np;
 	}
 	
 	/**
@@ -317,14 +322,6 @@ public abstract class Shape<T extends Shape<T>> implements Comparable<T>
 		return getFactory().create(sewer.sewedShape(), new HashMap<TopoDS_Shape, T>(), getFactory().createArray(0));
 	}
 	
-	private void addParent(T parent)
-	{
-		T[] n = getFactory().createArray(parents.length+1);
-		System.arraycopy(parents, 0, n, 0, parents.length);
-		n[parents.length]=parent;
-		parents = n;
-	}
-	
 	public void dump(PrintWriter writer)
 	{
 		int[] ids = new int[TopAbs_ShapeEnum.values().length - 1];
@@ -357,7 +354,7 @@ public abstract class Shape<T extends Shape<T>> implements Comparable<T>
 	public void load(Node node)
 	{
 		NodeList nodes = node.getChildNodes();
-		for(int i = 0; i<nodes.getLength(); i++)
+		for(int i = 0, imax = nodes.getLength(); i < imax; i++)
 		{
 			Node n = nodes.item(i);
 			if(n.getNodeType() == Node.ELEMENT_NODE)
@@ -374,7 +371,7 @@ public abstract class Shape<T extends Shape<T>> implements Comparable<T>
 	}
 	
 	/**
-	 * Return the ID of this shape, concidering it's in a given root shape
+	 * Return the ID of this shape, considering it's in a given root shape
 	 * @return the ID of this shape or -1 if this shape is not a child of
 	 * rootShape
 	 */
@@ -399,32 +396,34 @@ public abstract class Shape<T extends Shape<T>> implements Comparable<T>
 	private boolean getID(T rootShape, Set<T> shapeSet, int[] number,
 		TopAbs_ShapeEnum wantedType)
 	{	
-		if (!shapeSet.contains(rootShape))
+		if (shapeSet.contains(rootShape))
+			return false;
+		
+		shapeSet.add(rootShape);
+		//check if the root shape have the right type
+		int compare = rootShape.impl.shapeType().compareTo(wantedType);
+		if (compare == 0)
 		{
-			shapeSet.add(rootShape);
-			
-			//check if the root shape have the good type
-			if (rootShape.impl.shapeType().equals(wantedType))
+			number[0]++;	
+			if(this.equals(rootShape))
+				return true;
+			//A compound can include another compound
+			else if(rootShape.impl instanceof TopoDS_Compound)
 			{
-				number[0]++;	
-				if(this.equals(rootShape))
-					return true;
-				//A compound can include another compound
-				else if(rootShape.impl instanceof TopoDS_Compound)
-				{
-					//So we don't give up but iterate on children
-					for (T s : rootShape.children)
-						//only on TopoDS_Compound children
-						if (s.impl instanceof TopoDS_Compound &&
-							getID(s, shapeSet, number, wantedType))
-							return true;					
-				}
-			}
-			else
-			//look for this shape in children
+				//So we don't give up but iterate on children
 				for (T s : rootShape.children)
-					if (getID(s, shapeSet, number, wantedType))
-						return true;
+					//only on TopoDS_Compound children
+					if (s.impl instanceof TopoDS_Compound &&
+					    getID(s, shapeSet, number, wantedType))
+						return true;					
+			}
+		}
+		else if (compare < 0)
+		{
+			//look for this shape in children
+			for (T s : rootShape.children)
+				if (getID(s, shapeSet, number, wantedType))
+					return true;
 		}
 		return false;
 	}	
