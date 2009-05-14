@@ -93,7 +93,7 @@ public abstract class PickContext
 	 * @return <code>true</code> if leaf has been successfully added,
 	 * <code>false</code> if it were already present in this set.
 	 */
-	boolean addToSelectedNodes(LeafNode leaf)
+	public boolean addToSelectedNodes(LeafNode leaf)
 	{
 		return selectionNode.add(leaf);
 	}

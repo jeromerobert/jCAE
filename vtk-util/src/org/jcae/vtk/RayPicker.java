@@ -106,4 +106,10 @@ public class RayPicker extends PickContext
 	{
 		return bbox.intersect(rayOrigin, rayDirection);
 	}
+
+	public Point3d getIntersect(BoundingBox bbox) {
+		Point3d p=new Point3d();
+		bbox.intersect(rayOrigin, rayDirection,p);
+		return p;
+	}
 }

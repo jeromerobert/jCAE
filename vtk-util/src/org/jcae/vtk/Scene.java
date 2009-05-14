@@ -29,7 +29,6 @@ import org.jcae.geometry.BoundingBox;
 import vtk.vtkActor;
 import vtk.vtkActorCollection;
 import vtk.vtkCanvas;
-import vtk.vtkGlobalJavaHash;
 import vtk.vtkIdTypeArray;
 import vtk.vtkIntArray;
 import vtk.vtkPlaneCollection;
@@ -138,9 +137,7 @@ public class Scene implements AbstractNode.ActorListener
 	 * due to the offset. If you want bypass this you have to take care of the highlighted objects :
 	 * _ draw them in rendering selection i.e. make them pickable.
 	 * _ find the initial geometry corresponding to the selected highlighted object.
-	 * @param canvas
-	 * @param firstPoint
-	 * @param secondPoint
+	 * @param pickContext
 	 */
 	public void select(PickContext pickContext)
 	{
@@ -149,7 +146,23 @@ public class Scene implements AbstractNode.ActorListener
 		else
 			selectAllNodes(pickContext);
 	}
-	
+
+	/**
+	 * Fast selection based on bounding box intersection.
+	 *
+	 * @param <T> LeafNode derived class which implements BoundedNode
+	 * @param pickContext
+	 * @param candidates  list of T instances to check
+	 */
+	public static <T extends LeafNode & BoundedNode> void selectIntersectedNodes(PickContext pickContext, Iterable<T> candidates)
+	{
+		for (T leaf : candidates)
+		{
+			if (pickContext.intersect(leaf.getBoundingBox()))
+				pickContext.addToSelectedNodes(leaf);
+		}
+	}
+
 	private void selectVisibleNodes(PickContext pickContext)
 	{
 		vtkCanvas canvas = pickContext.getCanvas();

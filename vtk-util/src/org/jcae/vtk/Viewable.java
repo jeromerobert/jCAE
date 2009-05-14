@@ -135,7 +135,7 @@ public abstract class Viewable extends MultiCanvas
 	 * 
 	 * @param pickContext object carrying informations about picking context
 	 */
-	void performSelection(PickContext pickContext)
+	public void performSelection(PickContext pickContext)
 	{
 		scene.select(pickContext);
 		manageSelection(pickContext);
@@ -359,5 +359,4 @@ public abstract class Viewable extends MultiCanvas
 	{
 		scene.setPickable(pickable);
 	}
-
 }
