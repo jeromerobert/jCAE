@@ -171,6 +171,21 @@ public abstract class Shape<T extends Shape<T>> implements Comparable<T>
 	private T[] children;
 	private T[] parents;
 
+	protected Shape()
+	{
+		this((TopoDS_Shape)null);
+	}
+
+	protected Shape(TopoDS_Shape shape)
+	{
+		this(shape, new HashMap<TopoDS_Shape, T>(), null);
+	}
+
+	protected Shape(String fileName)
+	{
+		this(Utilities.readFile(fileName));
+	}
+
 	protected Shape(TopoDS_Shape shape, Map<TopoDS_Shape, T> map, T[] parents)
 	{
 		if(shape == null)
@@ -181,6 +196,9 @@ public abstract class Shape<T extends Shape<T>> implements Comparable<T>
 		}
 		else
 			this.impl = shape;
+		if(parents == null)
+			parents = getFactory().createArray(0);
+		
 		this.parents = parents;
 		int cntChildren = 0;
 		for (TopoDS_Iterator it = new TopoDS_Iterator(impl); it.more(); it.next())
@@ -202,14 +220,6 @@ public abstract class Shape<T extends Shape<T>> implements Comparable<T>
 			cntChildren++;
 		}
 		map.put(shape, getDerived());
-	}
-
-	private static TopoDS_Compound createCompound()
-	{
-		TopoDS_Compound toReturn = new TopoDS_Compound();
-		BRep_Builder bb=new BRep_Builder();
-		bb.makeCompound(toReturn);	
-		return toReturn;
 	}
 
 	public static String[] getLabels(TopAbs_ShapeEnum from)
