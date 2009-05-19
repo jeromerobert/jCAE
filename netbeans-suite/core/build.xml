@@ -14,7 +14,8 @@
 	<target name="-release.files">
 
 		<!-- external dependencies -->
-		<copy tofile="${cluster}/modules/ext/trove.jar" file="${libs.trove.classpath}"/>
+		<copy file="${libs.trove.classpath}" tofile="${cluster}/modules/ext/trove.jar"/>
+		<copy file="${libs.vecmath.classpath}" tofile="${cluster}/modules/ext/vecmath.jar"/>
 				
 		<!-- build amibe -->
 		<echo message="Building ${amibe.project.dir}"/>
