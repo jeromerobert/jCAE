@@ -386,7 +386,7 @@ public class ViewableOEMM extends Viewable implements MouseMotionListener
 	}
 	
 	@Override
-	void performSelection(PickContext pickContext)
+	public void performSelection(PickContext pickContext)
 	{
 		int [] pressPosition = pickContext.getPressPosition();
 		int [] releasePosition = pickContext.getReleasePosition();
