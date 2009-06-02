@@ -351,6 +351,7 @@ public class Utils
 			plane.SetNormal(n.getX(), n.getY(), n.getZ());
 			plane.SetOrigin(p1);
 			planes.AddItem(plane);
+			plane.Delete();
 		}
 		
 		return planes;
