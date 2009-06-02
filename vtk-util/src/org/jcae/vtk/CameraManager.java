@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2008, by EADS France
+ * (C) Copyright 2008-2009, by EADS France
  */
 
 package org.jcae.vtk;
@@ -33,8 +33,6 @@ import vtk.vtkAxesActor;
 import vtk.vtkCamera;
 import vtk.vtkCellPicker;
 import vtk.vtkOrientationMarkerWidget;
-import vtk.vtkProp;
-import vtk.vtkPropCollection;
 import vtk.vtkRenderer;
 import vtk.vtkTransform;
 
@@ -105,23 +103,13 @@ public class CameraManager
 		
 		originAxes = new vtkAxesActor();
 		originAxes.AxisLabelsOff();
+		originAxes.PickableOff();
 		renderer.AddActor(originAxes);
 		
 		// A display orientation
 		relativeAxes = new vtkAxesActor();
 		relativeAxes.AxisLabelsOn();
-		
-		// FIXME: I do not know why, but originAxes has 6
-		// pickable actors whereas relativeAxes has none.
-		// As originAxes.PickableOff() does nothing, try
-		// another way.
-		vtkPropCollection actors = new vtkPropCollection();
-		originAxes.GetActors(actors);
-		actors.InitTraversal();
-		for (vtkProp prop; (prop = actors.GetNextProp()) != null; )
-			prop.PickableOff();
-		actors.Delete();
-		actors = null;
+		relativeAxes.PickableOff();
 		
 		marker = new vtkOrientationMarkerWidget();
 		marker.SetOrientationMarker(relativeAxes);
@@ -141,23 +129,23 @@ public class CameraManager
 		 */
 		double[][] cameraOrientation = {
 			// TOP
+			{0., 0., 1.},
 			{0., 1., 0.},
-			{0., 0., -1.},
 			// BOTTOM
+			{0., 0., -1.},
+			{0., 1., 0.},
+			// LEFT
 			{0., -1., 0.},
 			{0., 0., 1.},
-			// LEFT
-			{-1., 0., 0.},
-			{0., 1., 0.},
 			// RIGHT
-			{1., 0., 0.},
 			{0., 1., 0.},
-			// FRONT
 			{0., 0., 1.},
-			{0., 1., 0.},
+			// FRONT
+			{-1., 0., 0.},
+			{0., 0., 1.},
 			// BACK
-			{0., 0., -1.},
-			{0., 1., 0.}};
+			{1., 0., 0.},
+			{0., 0., 1.}};
 
 		for (int i = 0; i < Orientation.values().length; ++i)
 		{
@@ -177,11 +165,16 @@ public class CameraManager
 	private void scaleOriginaAxis()
 	{
 		// Find the distance from the camera of the origin axes
-		vtkCamera camera = renderer.GetActiveCamera();
-		vtkTransform modelView = camera.GetViewTransformObject();
-		double[] point = modelView.TransformDoublePoint(0, 0, 0);
-		// The distance is multiplied by K
-		double zDistance = Math.abs(point[2]) * originAxesFactor;
+		vtkCamera camera = renderer.GetActiveCamera();				
+		double zDistance;
+		if(camera.GetParallelProjection()!=0)
+			zDistance = camera.GetParallelScale()/2;
+		else
+		{
+			vtkTransform modelView = camera.GetViewTransformObject();
+			double[] point = modelView.TransformDoublePoint(0, 0, 0);
+			zDistance = Math.abs(point[2]) * originAxesFactor;
+		}
 		originAxes.SetTotalLength(zDistance, zDistance, zDistance);
 	}
 
@@ -305,11 +298,14 @@ public class CameraManager
 	public void setCameraOrientation(CameraManager.Orientation orientation)
 	{
 		canvas.lock();
+		vtkCamera current = renderer.GetActiveCamera();
+		int parallel = current.GetParallelProjection();
+		current.Delete();
 		vtkCamera c = copy(defaultCameras[orientation.ordinal()]);
+		c.SetParallelProjection(parallel);
 		renderer.SetActiveCamera(c);
 		c.Delete();
-		canvas.unlock();
-		
+		canvas.unlock();		
 		refresh();
 	}
 		
@@ -384,5 +380,20 @@ public class CameraManager
 		renderer.SetActiveCamera(copy(cameras.get(index)));
 		canvas.unlock();
 		refresh();
+	}
+
+	public boolean isParallelProjection()
+	{
+		vtkCamera c = renderer.GetActiveCamera();
+		boolean toReturn = c.GetParallelProjection() != 0;
+		c.Delete();
+		return toReturn;
+	}
+
+	public void setParallelProjection(boolean b)
+	{
+		vtkCamera c = renderer.GetActiveCamera();
+		c.SetParallelProjection(b ? 1 : 0);
+		c.Delete();
 	}
 }
