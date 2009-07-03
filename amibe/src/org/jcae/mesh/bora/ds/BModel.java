@@ -230,6 +230,24 @@ public class BModel
 		BModelWriter.writeObject(this);
 	}
 
+	public void resetConstraints()
+	{
+		if (state == State.INPUT)
+			return;
+		LOGGER.info("Reset constraints");
+		BCADGraphCell root = cad.getRootCell();
+		for (CADShapeEnum cse : CADShapeEnum.iterable(CADShapeEnum.VERTEX, CADShapeEnum.COMPOUND))
+		{
+			for (Iterator<BCADGraphCell> it = root.shapesExplorer(cse); it.hasNext(); )
+			{
+				BCADGraphCell cell = it.next();
+				for (BDiscretization discr : cell.getDiscretizations())
+					discr.resetConstraint();
+			}
+		}
+		state = State.INPUT;
+	}
+
 	/**
 	 * Combines all hypothesis and computes meshes.
 	 */

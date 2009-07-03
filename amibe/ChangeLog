@@ -1,3 +1,9 @@
+Fri Jul  3 10:43:09 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/bora/ds/BModel.java: New resetConstraints()
+	method.  This method will be called by jCAE when modifying
+	constraints.
+
 Mon May  4 14:04:40 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/IntFileReaderByDirectBuffer.java: Fix

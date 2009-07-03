@@ -116,6 +116,16 @@ public class BDiscretization
 		constraint = newCons;
 	}
 
+	/**
+	 * Remove all constraints.
+	 */
+	void resetConstraint()
+	{
+		constraint = null;
+		computed = false;
+		mesh = null;
+	}
+
 	void addAllSubMeshes(BDiscretization parent)
 	{
 		submesh.addAll(parent.submesh);
