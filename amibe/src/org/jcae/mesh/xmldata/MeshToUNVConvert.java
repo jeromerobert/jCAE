@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2005, by EADS CRC
-    Copyright (C) 2008, by EADS France
+    Copyright (C) 2008,2009, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -34,11 +34,11 @@ import java.util.zip.GZIPOutputStream;
 import java.util.logging.Logger;
 
 
-public class MeshToUNVConvert extends JCAEXMLData
+public class MeshToUNVConvert
 {
 	private static Logger logger=Logger.getLogger(MeshToUNVConvert.class.getName());
 	private String unvFile;
-	private PrintStream streamN, streamT, streamG;
+	private PrintStream streamN, streamE, streamG;
 	private final static String CR=System.getProperty("line.separator");
 	private final static int BUFFER_SIZE = 16 * 1024;
 	
@@ -47,24 +47,24 @@ public class MeshToUNVConvert extends JCAEXMLData
 		this.unvFile = unvFile;
 		try
 		{
-			BufferedOutputStream bosN, bosT, bosG;
+			BufferedOutputStream bosN, bosE, bosG;
 			bosN=new BufferedOutputStream(new FileOutputStream(unvFile));
-			bosT=new BufferedOutputStream(new FileOutputStream(unvFile+"T"));
+			bosE=new BufferedOutputStream(new FileOutputStream(unvFile+"E"));
 			bosG=new BufferedOutputStream(new FileOutputStream(unvFile+"G"));
 			if(unvFile.endsWith(".gz"))
 			{
 				streamN = new PrintStream(new GZIPOutputStream(bosN));
-				streamT = new PrintStream(new GZIPOutputStream(bosT));
+				streamE = new PrintStream(new GZIPOutputStream(bosE));
 				streamG = new PrintStream(new GZIPOutputStream(bosG));
 			}
 			else
 			{
 				streamN = new PrintStream(bosN);
-				streamT = new PrintStream(bosT);
+				streamE = new PrintStream(bosE);
 				streamG = new PrintStream(bosG);
 			}
 			streamN.println("    -1"+CR+"  2411");
-			streamT.println("    -1"+CR+"  2412");
+			streamE.println("    -1"+CR+"  2412");
 			streamG.println("    -1"+CR+"  2430");
 		}
 		catch(FileNotFoundException ex)
@@ -79,12 +79,12 @@ public class MeshToUNVConvert extends JCAEXMLData
 	
 	public void writeNode(int label, double [] coord)
 	{
-		MeshExporter.writeSingleNodeUNV(streamN, label+1, coord[0], coord[1], coord[2]);
+		MeshExporter.writeSingleNodeUNV(streamN, label, coord[0], coord[1], coord[2]);
 	}
 	
 	public void writeTriangle(int label, int [] ind)
 	{
-		MeshExporter.writeSingleTriangleUNV(streamT, label+1, ind[0]+1, ind[1]+1, ind[2]+1);
+		MeshExporter.writeSingleTriangleUNV(streamE, label, ind[0], ind[1], ind[2]);
 	}
 	
 	public void writeGroup(String name, int first, int count)
@@ -92,7 +92,7 @@ public class MeshToUNVConvert extends JCAEXMLData
 		MeshExporter.writeSingleGroupUNV(streamG, name, first+1, count);
 	}
 	
-	public void finish(int nr, int nrIntNodes, int nrTriangles, double [] coordRefs)
+	public void finish(int nr, int nrIntNodes, int nrElements, double [] coordRefs)
 	{
 		int nrNodes = nrIntNodes + nr;
 		logger.fine("Append coordinates of "+nr+" nodes");
@@ -101,10 +101,10 @@ public class MeshToUNVConvert extends JCAEXMLData
 		try
 		{
 			streamN.println("    -1");
-			streamT.println("    -1");
+			streamE.println("    -1");
 			streamG.println("    -1");
 			streamN.close();
-			streamT.close();
+			streamE.close();
 			streamG.close();
 			// Now concatenate all files
 			FileChannel fc = new FileOutputStream(unvFile, true).getChannel();
@@ -116,7 +116,7 @@ public class MeshToUNVConvert extends JCAEXMLData
 			new File(unvFile+"T").delete();
 			new File(unvFile+"G").delete();
 			logger.info("Total number of nodes: "+nrNodes);
-			logger.info("Total number of triangles: "+nrTriangles);
+			logger.info("Total number of triangles: "+nrElements);
 		}
 		catch(Exception ex)
 		{

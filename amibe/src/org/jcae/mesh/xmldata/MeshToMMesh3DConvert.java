@@ -2,7 +2,7 @@
    modeler, Finite element mesher, Plugin architecture.
  
     Copyright (C) 2003,2004,2005, by EADS CRC
-    Copyright (C) 2007,2008, by EADS France
+    Copyright (C) 2007,2008,2009, by EADS France
  
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -281,7 +281,7 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				for (int j = 0; j < 3; j++)
 					nodesOut.writeDouble(p3[j]);
 				if (unv != null)
-					unv.writeNode(i+nodeOffset, p3);
+					unv.writeNode(i+nodeOffset+1, p3);
 				surface.setParameter(u, v);
 				p3 = surface.normal();
 				for (int j = 0; j < 3; j++)
@@ -367,7 +367,11 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 				for (int j = 0; j < 3; j++)
 					trianglesOut.writeInt(ind[j]);
 				if (unv != null)
-					unv.writeTriangle(cntTriangles+nrTriangles, ind);
+				{
+					for (int j = 0; j < 3; j++)
+						ind[j]++;
+					unv.writeTriangle(cntTriangles+nrTriangles+1, ind);
+				}
 				cntTriangles++;
 			}
 			logger.fine("End reading");
