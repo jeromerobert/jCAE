@@ -379,7 +379,12 @@ public class MeshToMMesh3DConvert extends JCAEXMLData
 			for (int i=0; i < cntTriangles; i++)
 				groupsOut.writeInt(i+nrTriangles);
 			if (unv != null)
-				unv.writeGroup(""+groupId, nrTriangles, cntTriangles);
+			{
+				int [] ids = new int[cntTriangles];
+				for (int i = 0; i < cntTriangles; i++)
+					ids[i] = i + nrTriangles + 1;
+				unv.writeGroup(groupId, ""+groupId, ids);
+			}
 			groupsElement.appendChild(XMLHelper.parseXMLString(documentOut,
 				"<group id=\""+(groupId-1)+"\">"+
 				"<name>"+groupId+"</name>"+

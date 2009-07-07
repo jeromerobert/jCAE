@@ -65,7 +65,7 @@ public class MeshToUNVConvert
 			}
 			streamN.println("    -1"+CR+"  2411");
 			streamE.println("    -1"+CR+"  2412");
-			streamG.println("    -1"+CR+"  2430");
+			streamG.println("    -1"+CR+"  2435");
 		}
 		catch(FileNotFoundException ex)
 		{
@@ -87,9 +87,9 @@ public class MeshToUNVConvert
 		MeshExporter.writeSingleTriangleUNV(streamE, label, ind[0], ind[1], ind[2]);
 	}
 	
-	public void writeGroup(String name, int first, int count)
+	public void writeGroup(int groupId, String name, int [] ids)
 	{
-		MeshExporter.writeSingleGroupUNV(streamG, name, first+1, count);
+		MeshExporter.writeSingleGroupUNV(streamG, groupId, name, ids);
 	}
 	
 	public void finish(int nr, int nrIntNodes, int nrElements, double [] coordRefs)

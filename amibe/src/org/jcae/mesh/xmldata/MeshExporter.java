@@ -470,25 +470,22 @@ abstract public class MeshExporter
 		out.println(FORMAT_I10.format(n0)+FORMAT_I10.format(n1)+FORMAT_I10.format(n2));
 	}
 	
-	public static void writeSingleGroupUNV(PrintStream out, String name, int first, int count)
+	public static void writeSingleGroupUNV(PrintStream out, int groupId, String name, int[] ids)
 	{
-		out.println("1      0         0         0         0         0         0      "+count);
+		out.println(FORMAT_I10.format(groupId)+"        0         0         0         0         0         0"+FORMAT_I10.format(ids.length));
 		out.println(name);
-		int countg=0;
-		for(int j=0; j<count; j++)
+		boolean newline = true;
+		for(int j : ids)
 		{
-			out.print("         8"+FORMAT_I10.format(j+first));
-			countg++;
-			if (countg == 4)
-			{
+			out.print(FORMAT_I10.format(8)+FORMAT_I10.format(j)+FORMAT_I10.format(0)+FORMAT_I10.format(0));
+			newline = !newline;
+			if (newline)
 				out.println("");
-				countg = 0;
-			}
 		}
-		if (countg != 0)
+		if (!newline)
 			out.println();
 	}
-	
+
 	public static class UNV extends MeshExporter
 	{
 		public static enum Unit

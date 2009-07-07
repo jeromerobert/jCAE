@@ -1,3 +1,12 @@
+Tue Jul  7 15:54:17 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/MeshExporter.java: Fix UNV export of
+	groups.  A 2435-block is written, but writeSingleGroupUNV() used
+	a 2430-block syntax, which is different.  Fix it to comply with
+	2435 syntax.
+	* src/org/jcae/mesh/amibe/util/UNVWriter.java: Write a 2435-block
+	for groups, 2430 is obsolete.
+
 Tue Jul  7 12:09:45 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/xmldata/MeshExporter.java: Use an enum for units.
