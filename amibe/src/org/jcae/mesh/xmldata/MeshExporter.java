@@ -43,6 +43,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Extract groups from the full mesh and write them to a UNV file.
@@ -176,9 +177,9 @@ abstract public class MeshExporter
 	private final static NumberFormat FORMAT_D25_16=new FormatD25_16();
 	final static NumberFormat FORMAT_I10=new FormatI10();
 	
-	private File directory;
-	private Document document;
-	private int[] groupIds;
+	private final File directory;
+	private final Document document;
+	private final int[] groupIds;
 	protected int[][] groups;
 	protected String[] names;
 	private int numberOfTriangles;
@@ -190,11 +191,23 @@ abstract public class MeshExporter
 	protected MeshExporter(File directory, int[] groupIds)
 	{
 		this.directory=directory;
+		Document d = null;
+		try {
+			d = XMLHelper.parseXML(new File(directory, JCAEXMLData.xml3dFilename));
+		} catch (SAXException ex) {
+			logger.log(Level.SEVERE, null, ex);
+		} catch (IOException ex) {
+			logger.log(Level.SEVERE, null, ex);
+		} catch (ParserConfigurationException ex)	{
+			logger.log(Level.SEVERE, null, ex);
+		}
+		document = d;
 		if(groupIds!=null)
 		{
 			this.groupIds=new int[groupIds.length];
 			System.arraycopy(groupIds, 0, this.groupIds, 0, groupIds.length);
-		}
+		} else
+			this.groupIds=getAllGroupIDs();
 	}
 
 	/**
@@ -348,9 +361,6 @@ abstract public class MeshExporter
 	
 	public void write(PrintStream out) throws ParserConfigurationException, SAXException, IOException
 	{
-		document=XMLHelper.parseXML(new File(directory, JCAEXMLData.xml3dFilename));
-		if(groupIds==null)
-			groupIds=getAllGroupIDs();
 		readGroups();
 		int[] nodeIDs=readTriangles();
 		TIntIntHashMap amibeNodeToUNVNode=new TIntIntHashMap();
