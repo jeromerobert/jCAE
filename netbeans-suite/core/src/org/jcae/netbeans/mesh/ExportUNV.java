@@ -41,9 +41,9 @@ public final class ExportUNV extends CookieAction
 				Amibe2UNV amibe2unv=new Amibe2UNV(meshDir);
 
 				if(unitPanel.isMeters())
-					amibe2unv.setUnit(MeshExporter.UNV.UNIT_METER);
+					amibe2unv.setUnit(MeshExporter.UNV.Unit.METER);
 				else
-					amibe2unv.setUnit(MeshExporter.UNV.UNIT_MM);				
+					amibe2unv.setUnit(MeshExporter.UNV.Unit.MM);
 				amibe2unv.write(stream);				
 				stream.close();				
 			}

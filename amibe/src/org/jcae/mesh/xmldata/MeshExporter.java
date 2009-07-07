@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2007,2008, by EADS France
+ * (C) Copyright 2007,2008,2009, by EADS France
  */
 
 package org.jcae.mesh.xmldata;
@@ -472,9 +472,13 @@ abstract public class MeshExporter
 	
 	public static class UNV extends MeshExporter
 	{
-		public final static int UNIT_METER=1;
-		public final static int UNIT_MM=5;
-		private int unit=1;
+		public static enum Unit
+		{
+			METER,
+			MM,
+			Unknown
+		};
+		private Unit unit = Unit.METER;
 		
 		public UNV(File directory, int[] groupIds)
 		{
@@ -486,7 +490,7 @@ abstract public class MeshExporter
 			super(file);
 		}
 
-		public void setUnit(int unit)
+		public void setUnit(Unit unit)
 		{
 			this.unit=unit;
 		}
@@ -495,9 +499,12 @@ abstract public class MeshExporter
 		public void writeInit(PrintStream arg0)
 			throws IOException
 		{
+			if(unit.equals(Unit.Unknown))
+				return;
+
 			arg0.println("    -1");
 			arg0.println("   164");
-			if(unit==UNIT_MM)
+			if(unit.equals(Unit.MM))
 			{
 				arg0.println("         5mm (milli-newton)            2");
 				arg0.println("  1.00000000000000000D+03  1.00000000000000000D+03  1.00000000000000000D+00");

@@ -15,11 +15,12 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
  *
- * (C) Copyright 2007,2008, by EADS France
+ * (C) Copyright 2007,2008,2009, by EADS France
  */
 
 package org.jcae.mesh.xmldata;
 
+import org.jcae.mesh.xmldata.MeshExporter.UNV.Unit;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -43,10 +44,8 @@ public class Amibe2UNV
 {
 	private final static String CR=System.getProperty("line.separator");			
 	private final static NumberFormat FORMAT_I10=new MeshExporter.FormatI10();	
-	private static Logger logger=Logger.getLogger(MeshExporter.class.getName());
-	public final static int UNIT_METER=1;
-	public final static int UNIT_MM=5;
-	
+	private static Logger logger=Logger.getLogger(Amibe2UNV.class.getName());
+
 	/**
 	 * A main method for debugging
 	 * @param args
@@ -71,7 +70,7 @@ public class Amibe2UNV
 	private Document document;
 	private int[] groupIds;
 	protected String[] names;			
-	private int unit=1;
+	private Unit unit = Unit.METER;
 
 	private long[] groupOffsets;
 	private int[] groupSize;
@@ -182,7 +181,7 @@ public class Amibe2UNV
 		}
 	}
 		
-	public void setUnit(int unit)
+	public void setUnit(Unit unit)
 	{
 		this.unit=unit;
 	}
@@ -277,9 +276,12 @@ public class Amibe2UNV
 	
 	private void writeInit(PrintStream arg0)
 	{
+		if (unit.equals(Unit.Unknown))
+			return;
+
 		arg0.println("    -1");
 		arg0.println("   164");
-		if(unit==UNIT_MM)
+		if(unit.equals(Unit.MM))
 		{
 			arg0.println("         5mm (milli-newton)            2");
 			arg0.println("  1.00000000000000000D+03  1.00000000000000000D+03  1.00000000000000000D+00");

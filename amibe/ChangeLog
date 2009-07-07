@@ -1,3 +1,7 @@
+Tue Jul  7 12:09:45 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
+
+	* src/org/jcae/mesh/xmldata/MeshExporter.java: Use an enum for units.
+
 Fri Jul  3 10:43:09 CEST 2009 Denis Barbier <barbier@users.sourceforge.net>
 
 	* src/org/jcae/mesh/bora/ds/BModel.java: New resetConstraints()
