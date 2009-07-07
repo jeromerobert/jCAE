@@ -244,7 +244,16 @@ abstract public class MeshExporter
 		String a=((Element)xmlNormals.getElementsByTagName("file").item(0)).getAttribute("location");
 		return new File(directory, a);
 	}
-	
+
+	protected File getGroupFile()
+	{
+		Element xmlGroups = (Element) document.getElementsByTagName("group").item(0);
+		if (xmlGroups == null)
+			return null;
+		String a=((Element)xmlGroups.getElementsByTagName("file").item(0)).getAttribute("location");
+		return new File(directory, a);
+	}
+
 	/**
 	 * @param the xml element of DOM tree corresponding to the tag "groups".
 	 * @param a group.

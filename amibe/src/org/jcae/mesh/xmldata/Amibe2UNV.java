@@ -21,16 +21,19 @@
 package org.jcae.mesh.xmldata;
 
 import org.jcae.mesh.xmldata.MeshExporter.UNV.Unit;
-import java.io.*;
+import java.io.File;
+import java.io.PrintStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.text.NumberFormat;
-import java.util.zip.GZIPOutputStream;
 import javax.xml.parsers.ParserConfigurationException;
 import java.util.logging.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -66,185 +69,60 @@ public class Amibe2UNV
 			e.printStackTrace();
 		}
 	}
-	private File directory;
-	private Document document;
-	private int[] groupIds;
-	protected String[] names;			
-	private Unit unit = Unit.METER;
-
-	private long[] groupOffsets;
-	private int[] groupSize;
-	private File groupFile;
+	private final File directory;
+	private final MeshExporter.UNV unvWriter;
 	
-	/** @param directory The directory which contain 3d files */
+	/**
+	 * @param directory The directory which contain 3d files
+	 * @param unvFile The name of the generated UNV file
+	 */
 	public Amibe2UNV(File directory)
 	{
 		this.directory=directory;
+		this.unvWriter = new MeshExporter.UNV(directory.getPath());
 	}
 	
-	private int[] getAllGroupIDs()
-	{
-		Element xmlGroups=(Element) document.getElementsByTagName("groups").item(0);
-		NodeList nl=xmlGroups.getElementsByTagName("group");
-		int[] toReturn=new int[nl.getLength()];
-		for(int i=0; i<toReturn.length; i++)
-		{
-			Element e=(Element) nl.item(i);
-			toReturn[i]=Integer.parseInt(e.getAttribute("id"));
-		}
-		return toReturn;
-	}
-	
-	protected File getNodeFile()
-	{
-		Element xmlNodes = (Element) document.getElementsByTagName(
-			"nodes").item(0);
-		String a=((Element)xmlNodes.getElementsByTagName("file").item(0)).getAttribute("location");
-		return new File(directory, a);
-	}
-	
-	protected File getNormalFile()
-	{
-		Element xmlNormals = (Element) document.getElementsByTagName(
-			"normals").item(0);
-		String a=((Element)xmlNormals.getElementsByTagName("file").item(0)).getAttribute("location");
-		return new File(directory, a);
-	}
-	
-	private File getTriaFile()
-	{
-		Element xmlNodes = (Element) document.getElementsByTagName(
-			"triangles").item(0);
-		Node fn = xmlNodes.getElementsByTagName("file").item(0);
-		String a=((Element)fn).getAttribute("location");
-		return new File(directory, a);
-	}	
-	
-	/**
-	 * @param the xml element of DOM tree corresponding to the tag "groups".
-	 * @param a group.
-	 * @return the xml element of DOM tree corresponding to the group.
-	 */
-	private Element getXmlGroup(Element xmlGroups, int id)
-	{
-		NodeList list = xmlGroups.getElementsByTagName("group");
-		Element elt = null;
-		int i = 0;
-		boolean found = false;
-		int length=list.getLength();
-		while (!found && i < length)
-		{
-			elt = (Element) list.item(i);
-			int aId = -1;
-			try
-			{
-				aId = Integer.parseInt(elt.getAttribute("id"));
-			} catch (Exception e)
-			{
-				e.printStackTrace(System.out);
-			}
-			if (id == aId)
-			{
-				found = true;
-			} else
-			{
-				i++;
-			}
-		}
-		if (found)
-		{
-			return elt;
-		}
-		return null;
-	}
-	
-	private void readGroups()
-	{
-		Element xmlGroups=(Element) document.getElementsByTagName("groups").item(0);
-		names=new String[groupIds.length];
-		groupOffsets=new long[groupIds.length];
-		groupSize=new int[groupIds.length];
-		for(int i=0; i<groupIds.length; i++)
-		{
-			Element e=getXmlGroup(xmlGroups, groupIds[i]);
-			
-			Element nameNode=(Element)e.getElementsByTagName("name").item(0);
-			names[i]=nameNode.getChildNodes().item(0).getNodeValue();			
-			
-			Element numberNode=(Element)e.getElementsByTagName("number").item(0);
-			String v=numberNode.getChildNodes().item(0).getNodeValue();
-			groupSize[i]=Integer.parseInt(v);
-			String groupFileN=((Element)e.getElementsByTagName("file").item(0)).getAttribute("location");
-			String os=((Element)e.getElementsByTagName("file").item(0)).getAttribute("offset");
-			groupFile=new File(directory, groupFileN);
-			groupOffsets[i]=Long.parseLong(os);
-		}
-	}
-		
 	public void setUnit(Unit unit)
 	{
-		this.unit=unit;
+		unvWriter.setUnit(unit);
 	}
+
 	public void write(PrintStream out) throws ParserConfigurationException, SAXException, IOException
 	{
-		document=XMLHelper.parseXML(new File(directory, JCAEXMLData.xml3dFilename));
-		if(groupIds==null)
-			groupIds=getAllGroupIDs();		
-		readGroups();
-		writeInit(out);
+		unvWriter.writeInit(out);
 		writeNodes(out);	
 		writeTriangles(out);
 		writeGroups(out);
 	}
 	
 	/**
-	 * @param fileName The UNV filename. If the name ends with ".gz" it will
-	 * be zlib compressed.
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 */
-	public void write(String fileName)
-	{
-		logger.info("Export into file "+fileName+" (format "+getClass().getSimpleName()+")");
-		try
-		{
-			FileOutputStream fos=new FileOutputStream(fileName);
-			BufferedOutputStream bos=new BufferedOutputStream(fos);
-			PrintStream pstream;
-
-			if(fileName.endsWith(".gz"))
-				pstream=new PrintStream(new GZIPOutputStream(bos));
-			else
-				pstream=new PrintStream(bos);
-
-			write(pstream);
-			pstream.close();
-		}
-		catch(IOException e)
-		{
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		}
-		catch (ParserConfigurationException e)
-		{
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		}
-		catch (SAXException e)
-		{
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		}
-	}
-	
-	/**
 	 * @param out
-	 * @param amibeTriaToUNVTria
 	 * @throws IOException 
 	 */
-	private void writeGroups(PrintStream out) throws IOException
+	private void writeGroups(PrintStream out)
+			throws ParserConfigurationException, SAXException, IOException
 	{
+		Document document=XMLHelper.parseXML(new File(directory, JCAEXMLData.xml3dFilename));
+		Element xmlGroups=(Element) document.getElementsByTagName("groups").item(0);
+		NodeList nl=xmlGroups.getElementsByTagName("group");
+		int[] groupIds=new int[nl.getLength()];
+		String[] names=new String[groupIds.length];
+		long[] groupOffsets=new long[groupIds.length];
+		int[] groupSize=new int[groupIds.length];
+		File groupFile=unvWriter.getGroupFile();
+		for(int i=0; i<groupIds.length; i++)
+		{
+			Element e=(Element) nl.item(i);
+			groupIds[i]=Integer.parseInt(e.getAttribute("id"));
+			Element nameNode=(Element)e.getElementsByTagName("name").item(0);
+			names[i]=nameNode.getChildNodes().item(0).getNodeValue();
+
+			Element numberNode=(Element)e.getElementsByTagName("number").item(0);
+			String v=numberNode.getChildNodes().item(0).getNodeValue();
+			groupSize[i]=Integer.parseInt(v);
+			String os=((Element)e.getElementsByTagName("file").item(0)).getAttribute("offset");
+			groupOffsets[i]=Long.parseLong(os);
+		}
 		FileChannel fc = new FileInputStream(groupFile).getChannel();	
 		ByteBuffer bb=ByteBuffer.allocate(4);
 		out.println("    -1"+CR+"  2435");
@@ -274,30 +152,9 @@ public class Amibe2UNV
 		out.println("    -1");
 	}	
 	
-	private void writeInit(PrintStream arg0)
-	{
-		if (unit.equals(Unit.Unknown))
-			return;
-
-		arg0.println("    -1");
-		arg0.println("   164");
-		if(unit.equals(Unit.MM))
-		{
-			arg0.println("         5mm (milli-newton)            2");
-			arg0.println("  1.00000000000000000D+03  1.00000000000000000D+03  1.00000000000000000D+00");
-		}
-		else
-		{
-			arg0.println("         1Meter (newton)               2");
-			arg0.println("  1.00000000000000000D+00  1.00000000000000000D+00  1.00000000000000000D+00");				
-		}
-		arg0.println("  2.73149999999999977D+02");
-		arg0.println("    -1");
-	}
-	
 	private void writeNodes(PrintStream out) throws IOException
 	{
-		File f=getNodeFile();
+		File f=unvWriter.getNodeFile();
 		// Open the file and then get a channel from the stream
 		FileInputStream fis = new FileInputStream(f);
 		FileChannel fc = fis.getChannel();
@@ -328,7 +185,7 @@ public class Amibe2UNV
 	 */
 	private void writeTriangles(PrintStream out) throws IOException
 	{
-		FileChannel fc = new FileInputStream(getTriaFile()).getChannel();
+		FileChannel fc = new FileInputStream(unvWriter.getTriaFile()).getChannel();
 		ByteBuffer bb=ByteBuffer.allocate(3*4);
 		int count = 1;
 		out.println("    -1"+CR+"  2412");
