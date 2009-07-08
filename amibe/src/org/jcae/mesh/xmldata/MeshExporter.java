@@ -305,8 +305,9 @@ abstract public class MeshExporter
 		return null;
 	}
 	
-	private void readGroups()
+	private void readGroups() throws IOException
 	{
+		IntFileReader ifrG = new IntFileReaderByDirectBuffer(getGroupFile());
 		Element xmlGroups=(Element) document.getElementsByTagName("groups").item(0);
 		groups=new int[groupIds.length][];
 		numberOfTriangles=0;
@@ -326,20 +327,10 @@ abstract public class MeshExporter
 			if(number==0)
 				continue;
 			
-			String groupFileN=((Element)e.getElementsByTagName("file").item(0)).getAttribute("location");
 			String os=((Element)e.getElementsByTagName("file").item(0)).getAttribute("offset");
-			File groupFile=new File(directory, groupFileN);
 			int offset=Integer.parseInt(os);
 			
-			try
-			{
-				IntFileReader ifrG = new IntFileReaderByDirectBuffer(groupFile);
-				ifrG.get(offset, groups[i]);
-				ifrG.close();
-			} catch(IOException ex)
-			{
-				ex.printStackTrace();
-			}
+			ifrG.get(offset, groups[i]);
 		}
 	}
 	
