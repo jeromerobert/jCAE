@@ -166,7 +166,7 @@ public class Amibe2UNV
 		while(fc.read(bb)!=-1)
 		{
 			bb.rewind();
-			MeshExporter.writeSingleNodeUNV(out, count,
+			MeshExporter.UNV.writeSingleNode(out, count,
 				bb.getDouble(), bb.getDouble(), bb.getDouble());
 			bb.rewind();
 			count ++;
@@ -193,7 +193,7 @@ public class Amibe2UNV
 		while(fc.read(bb)!=-1)
 		{
 			bb.rewind();
-			MeshExporter.writeSingleTriangleUNV(out, count,
+			MeshExporter.UNV.writeSingleTriangle(out, count,
 				bb.getInt()+1, bb.getInt()+1, bb.getInt()+1);
 			bb.rewind();
 			count ++;

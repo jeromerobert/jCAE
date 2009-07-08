@@ -449,34 +449,6 @@ abstract public class MeshExporter
 		//To be implemented by instanciating class
 	}
 	
-	public static void writeSingleNodeUNV(PrintStream out, int count, double x, double y, double z)
-	{
-		out.println(FORMAT_I10.format(count)+"         1         1         1");
-		out.println(FORMAT_D25_16.format(x)+FORMAT_D25_16.format(y)+FORMAT_D25_16.format(z));
-	}
-	
-	public static void writeSingleTriangleUNV(PrintStream out, int count, int n0, int n1, int n2)
-	{
-		out.println(FORMAT_I10.format(count)+"        91         1         1         1         3");
-		out.println(FORMAT_I10.format(n0)+FORMAT_I10.format(n1)+FORMAT_I10.format(n2));
-	}
-	
-	public static void writeSingleGroupUNV(PrintStream out, int groupId, String name, int[] ids)
-	{
-		out.println(FORMAT_I10.format(groupId)+"        0         0         0         0         0         0"+FORMAT_I10.format(ids.length));
-		out.println(name);
-		boolean newline = true;
-		for(int j : ids)
-		{
-			out.print(FORMAT_I10.format(8)+FORMAT_I10.format(j)+FORMAT_I10.format(0)+FORMAT_I10.format(0));
-			newline = !newline;
-			if (newline)
-				out.println("");
-		}
-		if (!newline)
-			out.println();
-	}
-
 	public static class UNV extends MeshExporter
 	{
 		public static enum Unit
@@ -502,6 +474,34 @@ abstract public class MeshExporter
 			this.unit=unit;
 		}
 		
+		public static void writeSingleNode(PrintStream out, int count, double x, double y, double z)
+		{
+			out.println(FORMAT_I10.format(count)+"         1         1         1");
+			out.println(FORMAT_D25_16.format(x)+FORMAT_D25_16.format(y)+FORMAT_D25_16.format(z));
+		}
+
+		public static void writeSingleTriangle(PrintStream out, int count, int n0, int n1, int n2)
+		{
+			out.println(FORMAT_I10.format(count)+"        91         1         1         1         3");
+			out.println(FORMAT_I10.format(n0)+FORMAT_I10.format(n1)+FORMAT_I10.format(n2));
+		}
+
+		public static void writeSingleGroup(PrintStream out, int groupId, String name, int[] ids)
+		{
+			out.println(FORMAT_I10.format(groupId)+"        0         0         0         0         0         0"+FORMAT_I10.format(ids.length));
+			out.println(name);
+			boolean newline = true;
+			for(int j : ids)
+			{
+				out.print(FORMAT_I10.format(8)+FORMAT_I10.format(j)+FORMAT_I10.format(0)+FORMAT_I10.format(0));
+				newline = !newline;
+				if (newline)
+					out.println("");
+			}
+			if (!newline)
+				out.println();
+		}
+
 		@Override
 		public void writeInit(PrintStream arg0)
 			throws IOException
@@ -542,7 +542,7 @@ abstract public class MeshExporter
 				z=dfrN.get(iid+2);
 				count++;
 				amibeToUNV.put(nodesID[i], count);
-				writeSingleNodeUNV(out, count, x, y, z);
+				writeSingleNode(out, count, x, y, z);
 			}
 			out.println("    -1");
 			dfrN.close();
@@ -566,7 +566,7 @@ abstract public class MeshExporter
 				{
 					count++;
 					amibeTriaToUNVTria.put(groups[i][j], count);
-					writeSingleTriangleUNV(out, count,
+					writeSingleTriangle(out, count,
 						amibeNodeToUNVNode.get(triangles[triaIndex++]),
 						amibeNodeToUNVNode.get(triangles[triaIndex++]),
 						amibeNodeToUNVNode.get(triangles[triaIndex++]));

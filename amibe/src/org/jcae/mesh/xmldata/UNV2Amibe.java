@@ -302,7 +302,7 @@ public class UNV2Amibe
 		{
 			nodeChannel.read(bb, 3*8*(nodes[i]-1));
 			bb.rewind();
-			MeshExporter.writeSingleNodeUNV(stripedUnv, nodes[i],
+			MeshExporter.UNV.writeSingleNode(stripedUnv, nodes[i],
 				bb.getDouble(), bb.getDouble(), bb.getDouble());
 			bb.rewind();
 		}

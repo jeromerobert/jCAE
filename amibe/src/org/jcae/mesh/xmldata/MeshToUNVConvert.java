@@ -79,17 +79,17 @@ public class MeshToUNVConvert
 	
 	public void writeNode(int label, double [] coord)
 	{
-		MeshExporter.writeSingleNodeUNV(streamN, label, coord[0], coord[1], coord[2]);
+		MeshExporter.UNV.writeSingleNode(streamN, label, coord[0], coord[1], coord[2]);
 	}
 	
 	public void writeTriangle(int label, int [] ind)
 	{
-		MeshExporter.writeSingleTriangleUNV(streamE, label, ind[0], ind[1], ind[2]);
+		MeshExporter.UNV.writeSingleTriangle(streamE, label, ind[0], ind[1], ind[2]);
 	}
 	
 	public void writeGroup(int groupId, String name, int [] ids)
 	{
-		MeshExporter.writeSingleGroupUNV(streamG, groupId, name, ids);
+		MeshExporter.UNV.writeSingleGroup(streamG, groupId, name, ids);
 	}
 	
 	public void finish(int nr, int nrIntNodes, int nrElements, double [] coordRefs)
@@ -97,7 +97,7 @@ public class MeshToUNVConvert
 		int nrNodes = nrIntNodes + nr;
 		logger.fine("Append coordinates of "+nr+" nodes");
 		for (int i = 0; i < nr; i++)
-			MeshExporter.writeSingleNodeUNV(streamN, i+nrIntNodes+1, coordRefs[3*i], coordRefs[3*i+1], coordRefs[3*i+2]);
+			MeshExporter.UNV.writeSingleNode(streamN, i+nrIntNodes+1, coordRefs[3*i], coordRefs[3*i+1], coordRefs[3*i+2]);
 		try
 		{
 			streamN.println("    -1");
