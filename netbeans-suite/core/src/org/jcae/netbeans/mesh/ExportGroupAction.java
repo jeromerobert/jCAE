@@ -119,9 +119,9 @@ public class ExportGroupAction extends CookieAction
 					new FileOutputStream(unvFile)));				
 				MeshExporter.UNV exporter=new MeshExporter.UNV(new File(meshDir), ids);				
 				if(unitPanel.isMeters())
-					exporter.setUnit(MeshExporter.UNV.UNIT_METER);
+					exporter.setUnit(MeshExporter.UNV.Unit.METER);
 				else
-					exporter.setUnit(MeshExporter.UNV.UNIT_MM);				
+					exporter.setUnit(MeshExporter.UNV.Unit.MM);
 				exporter.write(stream);				
 				stream.close();				
 			}
