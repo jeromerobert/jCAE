@@ -10,6 +10,11 @@ OpenIDE-Module-Class: Loader
 Install-Before: org.openide.loaders.XMLDataObject, org.netbeans.module
  s.xml.core.XMLDataObject
 
+Name: org/jcae/netbeans/mesh/OldAmibeMeshDataLoader.class
+OpenIDE-Module-Class: Loader
+Install-Before: org.openide.loaders.XMLDataObject, org.netbeans.module
+ s.xml.core.XMLDataObject
+
 Name: org/jcae/netbeans/cad/BrepDataLoader.class
 OpenIDE-Module-Class: Loader
 Install-Before: org.openide.loaders.XMLDataObject, org.netbeans.module
