@@ -114,7 +114,7 @@ public class MeshDataObject extends MultiDataObject implements SaveCookie, Prope
 			encoder = new XMLEncoder(out.getOutputStream(l));
 			encoder.writeObject(mesh);
 			if (mesh.getBoraModel() != null) {
-				mesh.getBoraModel().computeConstraints(); // saving the file
+				mesh.getBoraModel().save(); // saving the file
 			}
 			setModified(false);
 		}

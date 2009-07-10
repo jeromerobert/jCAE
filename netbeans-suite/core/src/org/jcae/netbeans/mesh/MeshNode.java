@@ -359,8 +359,15 @@ public class MeshNode extends DataNode implements ViewCookie
 	
 	private void updateGeomNode()
 	{
-		if(geomNode!=null)
+		if(geomNode!=null) {
 			getChildren().remove(new Node[]{geomNode});
+			try {
+				geomNode.destroy();
+			}
+			catch (IOException io) {
+				io.printStackTrace();
+			}
+		}
 		if (getMesh().getBoraModel() != null) {
 			geomNode = new SubmeshNode(getMesh().getGeometryFile().substring(
 					0, getMesh().getGeometryFile().lastIndexOf(".")), getMesh().getBoraModel());
